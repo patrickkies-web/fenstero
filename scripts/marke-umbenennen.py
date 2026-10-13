@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Fenstero umbenennen: ersetzt den sichtbaren Namen in Website, KI-Funktion und Doku.
+"""Zamma umbenennen: ersetzt den sichtbaren Namen in Website, KI-Funktion, Doku und Hilfsskripten.
 
     python3 scripts/marke-umbenennen.py NeuerName
 
 Den bisherigen Namen liest das Skript aus web/config.js (marke: '…'), es lässt sich also
-mehrfach verwenden. Interne Schlüssel bleiben gleich (Browser-Speicher „fenstero.…“,
-Code-Kürzel FE1, Variablen wie FENSTERO), damit gespeicherte Daten und Codes gültig bleiben.
+mehrfach verwenden. Interne Schlüssel bleiben gleich (Browser-Speicher „zamma.…“,
+Code-Kürzel ZF1, Variablen wie ZAMMA), damit gespeicherte Daten und Codes gültig bleiben.
 Danach: Änderungen prüfen (git diff), committen, pushen; Cloudflare veröffentlicht automatisch.
 """
 import pathlib
@@ -27,8 +27,8 @@ if alt == neu:
     sys.exit('Der Name ist schon ' + neu + '.')
 
 muster = re.compile(r'(?<!\w)' + re.escape(alt) + r'(?!\w)')
-ziele = [ROOT / 'README.md'] + [p for d in ('web', 'functions', 'docs') for p in (ROOT / d).rglob('*')
-                                if p.suffix in ('.html', '.js', '.css', '.md', '.txt') and 'vendor' not in p.parts and 'fonts' not in p.parts]
+ziele = [ROOT / 'README.md'] + [p for d in ('web', 'functions', 'docs', 'scripts') for p in (ROOT / d).rglob('*')
+                                if p.suffix in ('.html', '.js', '.mjs', '.css', '.md', '.txt') and 'vendor' not in p.parts and 'fonts' not in p.parts]
 geaendert = 0
 for p in ziele:
     if not p.is_file():
@@ -40,4 +40,4 @@ for p in ziele:
         geaendert += 1
         print('%4d× %s' % (n, p.relative_to(ROOT)))
 print('Fertig: „%s“ heißt jetzt „%s“ (%d Dateien).' % (alt, neu, geaendert))
-print('Hinweis: Domain-Angaben (z. B. fenstero.de) in der Doku bitte selbst anpassen.')
+print('Hinweis: Domain-Angaben (z. B. zamma.de) in der Doku und der Spruch in web/config.js bitte selbst anpassen.')
