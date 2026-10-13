@@ -1,0 +1,28 @@
+/* Fenstero: Ergänzungen für die eigenständige Website (Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
+a.btn { text-decoration: none }
+.foot .foot-links a { padding: 6px 0; color: var(--fg2); font-size: 14px; font-weight: 600; text-decoration: none }
+.foot .foot-links a:hover { color: var(--accent) }
+.foot-links.recht { padding-top: 0 }
+.foot-links.recht .link { font-size: 15px; color: var(--muted) }
+.share-way.soon { opacity: .78 }
+.send-row .btn { flex: 1 1 200px }
+
+/* Pilot-Hinweis oben im Portal */
+.fx-pilot { display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px; background: var(--accent-soft); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.45; border-bottom: 1px solid var(--line) }
+.fx-pilot p { flex: 1; min-width: 0; max-width: 1040px; margin: 0 auto }
+.fx-pilot button { flex: 0 0 auto; width: 32px; height: 32px; margin: -5px -6px -5px 0; border: 0; border-radius: 50%; background: transparent; color: var(--fg2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer }
+.fx-pilot button:hover { background: var(--surface) }
+
+/* KI-Einwilligung */
+.fx-bg { position: fixed; inset: 0; z-index: 200; background: rgba(0, 0, 0, .42) }
+.fx-dialog { position: fixed; z-index: 201; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px 22px 18px; border-radius: 24px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow2); font-family: var(--body); animation: fx-in .28s cubic-bezier(.2, .7, .2, 1) both }
+@keyframes fx-in { from { opacity: 0; transform: translate(-50%, -46%) } to { opacity: 1; transform: translate(-50%, -50%) } }
+.fx-dialog h2 { margin: 0 0 10px; font-family: var(--display); font-size: 24px; line-height: 1.12; font-weight: 900; letter-spacing: -.02em }
+.fx-dialog p { margin: 0 0 10px; font-size: 16px; line-height: 1.5; color: var(--fg2) }
+.fx-dialog .fx-klein { font-size: 14px; color: var(--muted) }
+.fx-dialog a { color: var(--accent) }
+.fx-knoepfe { display: flex; flex-direction: column; gap: 8px; margin-top: 16px }
+.fx-knoepfe button { min-height: 50px; border: 0; border-radius: 999px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer }
+.fx-ja { background: var(--accent); color: var(--on-accent) }
+.fx-nein { background: var(--chip); color: var(--fg) }
+@media (prefers-reduced-motion: reduce) { .fx-dialog { animation: none } }

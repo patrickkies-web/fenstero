@@ -1,0 +1,5 @@
+# Pilotphase: bitte nicht durchsuchen. Zum öffentlichen Start ersetzen durch:
+# User-agent: *
+# Allow: /
+User-agent: *
+Disallow: /

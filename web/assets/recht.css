@@ -1,0 +1,41 @@
+/* Fenstero · Rechtsseiten (Impressum, Datenschutz, 404) */
+:root {
+  --bg: #f5f5f7; --surface: #ffffff; --fg: #1d1d1f; --fg2: #3a3a3c; --muted: #6e6e73; --line: rgba(0,0,0,.1);
+  --accent: #0071e3; --ph-bg: #fff4e5; --ph-fg: #a85a00;
+  --body: 'Maven Pro', ui-rounded, system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #000000; --surface: #1c1c1e; --fg: #f5f5f7; --fg2: #d1d1d6; --muted: #a1a1a6; --line: rgba(255,255,255,.14);
+  --accent: #2997ff; --ph-bg: rgba(255,159,10,.18); --ph-fg: #ffb340; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #000000; --surface: #1c1c1e; --fg: #f5f5f7; --fg2: #d1d1d6; --muted: #a1a1a6; --line: rgba(255,255,255,.14);
+  --accent: #2997ff; --ph-bg: rgba(255,159,10,.18); --ph-fg: #ffb340; color-scheme: dark }
+* { box-sizing: border-box }
+html { -webkit-text-size-adjust: 100% }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased }
+a { color: var(--accent) }
+.kopf { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); border-bottom: 1px solid var(--line) }
+.kopf div { max-width: 760px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.marke { display: inline-flex; align-items: center; gap: 9px; color: var(--fg); text-decoration: none; font-weight: 900; font-size: 19px; letter-spacing: -.02em }
+.marke svg { width: 30px; height: 30px; flex: 0 0 auto }
+.kopf nav { display: flex; gap: 16px; font-size: 15px; font-weight: 600 }
+.kopf nav a { text-decoration: none }
+main { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px }
+h1 { margin: 6px 0 18px; font-size: clamp(32px, 7vw, 44px); line-height: 1.05; font-weight: 900; letter-spacing: -.03em }
+h2 { margin: 34px 0 8px; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -.015em }
+h3 { margin: 22px 0 6px; font-size: 18px; font-weight: 800 }
+p, li { color: var(--fg2) }
+p { margin: 0 0 12px }
+ul { margin: 0 0 12px; padding-left: 22px }
+li { margin-bottom: 4px }
+.karte { background: var(--surface); border-radius: 20px; padding: 18px 20px; margin: 0 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 0 0 1px var(--line) }
+.karte p:last-child { margin-bottom: 0 }
+.klein { font-size: 15px; color: var(--muted) }
+mark.ph { background: var(--ph-bg); color: var(--ph-fg); padding: 1px 6px; border-radius: 6px; font-weight: 700 }
+address { font-style: normal }
+.fuss { max-width: 760px; margin: 0 auto; padding: 0 16px 40px; font-size: 14px; color: var(--muted); display: flex; gap: 18px; flex-wrap: wrap }
+.fuss a { color: var(--muted) }
+.mitte { text-align: center; padding-top: 12vh }
+.knopf { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; text-decoration: none; margin: 6px }
+.knopf.leise { background: var(--surface); color: var(--fg); box-shadow: inset 0 0 0 1.5px var(--line) }
