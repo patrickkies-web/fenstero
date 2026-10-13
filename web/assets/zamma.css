@@ -1,4 +1,4 @@
-/* Fenstero: Ergänzungen für die eigenständige Website (Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
+/* Zamma: Ergänzungen für die eigenständige Website (Marke mit Spruch, Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
 a.btn { text-decoration: none }
 .foot .foot-links a { padding: 6px 0; color: var(--fg2); font-size: 14px; font-weight: 600; text-decoration: none }
 .foot .foot-links a:hover { color: var(--accent) }
@@ -26,3 +26,15 @@ a.btn { text-decoration: none }
 .fx-ja { background: var(--accent); color: var(--on-accent) }
 .fx-nein { background: var(--chip); color: var(--fg) }
 @media (prefers-reduced-motion: reduce) { .fx-dialog { animation: none } }
+
+/* Marke: Name mit Spruch */
+.hdr-name { display: flex; flex-direction: column; line-height: 1 }
+.hdr-name small { margin-top: 4px; font-size: 11.5px; font-weight: 700; letter-spacing: 0; color: var(--muted) }
+.spruch-fuss { margin: 6px 0 0; text-align: center; font-size: 15px; color: var(--muted) }
+.spruch-fuss b { color: var(--fg); font-weight: 900; letter-spacing: -.02em }
+.lm-foot .spruch { margin-left: 2px; font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--muted) }
+
+/* Portal: der Spruch als eigener Abschnitt auf der Startseite */
+.zamm { text-align: center; padding: clamp(30px, 6vw, 60px) 20px; border-radius: 28px; background: radial-gradient(120% 90% at 50% 0%, var(--accent-soft), transparent 70%), var(--surface); box-shadow: var(--shadow) }
+.zamm-spruch { margin: 0; font-family: var(--display); font-size: clamp(36px, 6.4vw, 64px); line-height: 1; font-weight: 900; letter-spacing: -.04em; text-wrap: balance }
+.zamm-text { margin: 14px auto 0; max-width: 44ch; font-size: 17px; line-height: 1.5; color: var(--fg2); text-wrap: pretty }

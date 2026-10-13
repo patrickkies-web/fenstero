@@ -1,10 +1,10 @@
-/* Fenstero · gemeinsame Bausteine für App und Portal
+/* Zamma · gemeinsame Bausteine für App und Portal
    - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung
    - Pilot-Hinweis im Portal
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
-  var C = window.FENSTERO = Object.assign({ marke: 'Fenstero', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/' }, window.FENSTERO || {});
+  var C = window.ZAMMA = Object.assign({ marke: 'Zamma', spruch: 'Hier kommen wa zamm.', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/' }, window.ZAMMA || {});
   var mem = {};
   function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return mem[k] || null; } }
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
@@ -24,7 +24,7 @@
   }
 
   /* Einwilligung: „Ja“ bleibt gespeichert, „Nein“ gilt bis zum Neuladen */
-  var KEY = 'fenstero.ki.einwilligung', sitzung = null, frageP = null;
+  var KEY = 'zamma.ki.einwilligung', sitzung = null, frageP = null;
   function einwilligung() {
     if (get(KEY) === 'ja') return Promise.resolve(true);
     if (sitzung !== null) return Promise.resolve(sitzung);
@@ -36,7 +36,7 @@
       var bg = el('div', 'fx-bg');
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
-        '<p>Die KI erkennt auf deinen Fotos Rahmen, Glas, Material und mehr und trägt es fürs Aufmaß ein. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. Fenstero speichert deine Fotos nicht.</p>' +
+        '<p>Die KI erkennt auf deinen Fotos Rahmen, Glas, Material und mehr und trägt es fürs Aufmaß ein. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. Zamma speichert deine Fotos nicht.</p>' +
         '<p class="fx-klein">Ohne KI geht es auch, dann fehlen nur die Zusatzinfos aus den Fotos. Mehr dazu in der <a href="' + C.datenschutz + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>' +
         '<div class="fx-knoepfe"><button type="button" class="fx-ja">Ja, auswerten</button><button type="button" class="fx-nein">Ohne KI weiter</button></div>');
       box.setAttribute('role', 'dialog');
@@ -99,15 +99,15 @@
       });
     }
   };
-  window.FensteroKI = { verbinden: function () { return bereit().then(function (ok) { return ok ? sample : null; }); } };
+  window.ZammaKI = { verbinden: function () { return bereit().then(function (ok) { return ok ? sample : null; }); } };
 
   /* ---------- Pilot-Hinweis im Portal ---------- */
   function pilotHinweis() {
-    if (!C.pilot || document.body.getAttribute('data-seite') !== 'portal' || get('fenstero.pilot.zu') === '1') return;
+    if (!C.pilot || document.body.getAttribute('data-seite') !== 'portal' || get('zamma.pilot.zu') === '1') return;
     var bar = el('div', 'fx-pilot', '<p><b>Pilotphase:</b> Das Portal zeigt Beispieldaten, nichts wird berechnet, alles bleibt in Ihrem Browser. Echt funktionieren schon Kundenlinks, Code-Eingang und PDF-Export.</p>' +
       '<button type="button" aria-label="Hinweis schließen"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>');
     bar.setAttribute('role', 'note');
-    bar.querySelector('button').addEventListener('click', function () { put('fenstero.pilot.zu', '1'); bar.remove(); });
+    bar.querySelector('button').addEventListener('click', function () { put('zamma.pilot.zu', '1'); bar.remove(); });
     document.body.insertBefore(bar, document.body.firstChild);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pilotHinweis); else pilotHinweis();

@@ -1,6 +1,8 @@
-# Fenstero online stellen
+# Zamma online stellen
 
-Diese Anleitung bringt die Fenstero-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…pages.dev`), später unter deiner eigenen Domain.
+**Zamma – Hier kommen wa zamm.** Zamma bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
+
+Diese Anleitung bringt die Zamma-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…pages.dev`), später unter deiner eigenen Domain.
 
 ## Zwei Stufen
 
@@ -22,7 +24,7 @@ Diese Anleitung bringt die Fenstero-Website ins Netz: erst unter einer kostenlos
 
 | | Kosten |
 |---|---|
-| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos |
+| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `zamma` ist möglich, siehe unten) |
 | Cloudflare-Konto (Pages) | kostenlos |
 | Eigene Domain | später, beim Anbieter deiner Wahl |
 | Anthropic-API-Schlüssel für die KI | optional, nach Verbrauch; Ausgabenlimit setzen |
@@ -42,13 +44,13 @@ Diese Anleitung bringt die Fenstero-Website ins Netz: erst unter einer kostenlos
 
    | Feld | Wert |
    |---|---|
-   | Projektname | `fenstero` (ergibt `fenstero.pages.dev`, falls frei) |
+   | Projektname | `zamma` (ergibt `zamma.pages.dev`, falls frei) |
    | Production branch | `main` |
    | Framework preset | `None` |
    | Build command | leer lassen |
    | Build output directory | `web` |
 
-5. **Speichern und bereitstellen** (Save and Deploy). Nach etwa einer Minute ist die Seite unter `https://fenstero.pages.dev` erreichbar (oder unter dem Namen, den Cloudflare anzeigt).
+5. **Speichern und bereitstellen** (Save and Deploy). Nach etwa einer Minute ist die Seite unter `https://zamma.pages.dev` erreichbar (oder unter dem Namen, den Cloudflare anzeigt).
 
 Die Menünamen bei Cloudflare ändern sich ab und zu; die Werte in der Tabelle bleiben gleich.
 
@@ -78,8 +80,8 @@ Beide Texte sind Entwürfe für die Pilotphase. Lass sie vor dem öffentlichen S
 ## Schritt 5: KI-Fotoauswertung einschalten (optional)
 
 1. In der [Anthropic Console](https://console.anthropic.com) anmelden, unter **Billing** ein Zahlungsmittel oder Guthaben hinterlegen und unter **Limits** ein monatliches Ausgabenlimit setzen.
-2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `fenstero-pages`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
-3. Cloudflare: **Workers & Pages → fenstero → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets)**, Umgebung **Production**, **Hinzufügen**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, speichern.
+2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `zamma-pages`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
+3. Cloudflare: **Workers & Pages → zamma → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets)**, Umgebung **Production**, **Hinzufügen**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, speichern.
 4. Neu bereitstellen, denn Secrets wirken erst ab dem nächsten Deployment: **Deployments**, beim letzten Eintrag **Erneut versuchen** (Retry deployment).
 5. Prüfen: `https://…pages.dev/api/ki` zeigt `{"bereit":true}`.
 
@@ -93,15 +95,17 @@ Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass
 
 ## Schritt 6: Eigene Domain (wenn der Name feststeht)
 
-Vorher den Namen prüfen: Es gibt bereits einen Fensterbaubetrieb mit diesem Namen in Berlin-Spandau. Gleiche Branche heißt Risiko beim Namens- und Markenrecht. Ein Blick ins Markenregister ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)) und notfalls eine kurze anwaltliche Einschätzung sind günstiger als ein späterer Wechsel. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
+Vorher den Namen prüfen: Einen Betrieb namens Zamma aus dem Bau- oder Handwerksbereich in Deutschland habe ich nicht gefunden. In Nordamerika gibt es aber eine Marke „Zamma“ für Fußboden-Übergangsleisten. Ein Blick ins Markenregister ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)) lohnt sich, vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42), und notfalls eine kurze anwaltliche Einschätzung. Eine eigene Marke anzumelden schützt dich später, wenn weitere Gewerke dazukommen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
 
-1. Domain kaufen (zum Beispiel `fenstero.de`) bei einem Anbieter deiner Wahl.
+1. Domain kaufen (zum Beispiel `zamma.de`) bei einem Anbieter deiner Wahl.
 2. In Cloudflare **Domain hinzufügen** (Add a domain), kostenlosen Tarif wählen. Cloudflare nennt zwei Nameserver. Diese beim Domain-Anbieter eintragen; das wirkt nach Minuten bis Stunden.
-3. **Workers & Pages → fenstero → Benutzerdefinierte Domains (Custom domains) → Domain einrichten**: `fenstero.de` und `www.fenstero.de` eintragen. Cloudflare legt die DNS-Einträge an, HTTPS kommt automatisch.
+3. **Workers & Pages → zamma → Benutzerdefinierte Domains (Custom domains) → Domain einrichten**: `zamma.de` und `www.zamma.de` eintragen. Cloudflare legt die DNS-Einträge an, HTTPS kommt automatisch.
 
 Für die Domain ohne `www` verlangt Cloudflare Pages, dass sie über die Cloudflare-Nameserver läuft. Nur `www.` ginge auch per CNAME-Eintrag beim bisherigen Anbieter.
 
 Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter der das Portal geöffnet wurde.
+
+**Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `zamma`. GitHub leitet die alte Adresse weiter.
 
 ## Später: öffentlicher Start
 

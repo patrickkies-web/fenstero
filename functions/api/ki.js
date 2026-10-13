@@ -1,4 +1,4 @@
-/* Fenstero · KI-Auswertung der Fotos (Cloudflare Pages Function, Adresse /api/ki)
+/* Zamma · KI-Auswertung der Fotos (Cloudflare Pages Function, Adresse /api/ki)
 
    GET  /api/ki                                          -> { bereit: true | false }
    POST /api/ki?aufgabe=struktur|fakten&seite=in|out     Inhalt: das Foto als Base64-Text (JPEG)
