@@ -1592,7 +1592,6 @@ function act(name, el) {
     case 'bareven': { ['v', 'h'].forEach((d) => { const cur = barsDir(w, d); setDir(w, d, evenP(cur.length).map((p, k) => ({ id: cur[k].id, p: p }))); }); return render(); }
     case 'clearbars': { w.bars = []; w.preset = 'keine'; S.selBar = null; return render(); }
     case 'side': { S.side = v; return render(); }
-    case 'sash-tap': { const i = +v; S.selSash = i; S.selBar = null; S.openSash = S.openSash === i ? -1 : i; return render(); }
     case 'color': { const side = el.getAttribute('data-side') || S.side; if (side === 'innen') { w.fi = v; w.gleich = false; } else w.fa = v; return render(); }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); return render(); }
     case 'save': return saveWin();
