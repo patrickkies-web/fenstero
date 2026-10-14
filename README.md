@@ -16,7 +16,7 @@ Fenster-Aufmaß, geführt. Hauseigentümer messen ihre Fenster selbst, Schritt f
 | `web/impressum/`, `web/datenschutz/` | Rechtsseiten (Entwürfe mit Platzhaltern) |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
 | `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weiße Faust auf schwarzer Kachel, die anklopft |
-| `web/fonts/`, `web/vendor/` | Maven Pro (OFL) und jsPDF (MIT), lokal statt von fremden Servern |
+| `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT) und qrcode-generator (MIT), lokal statt von fremden Servern |
 | `functions/api/ki.js` | KI-Auswertung der Fotos (Cloudflare Pages Function), Schlüssel als Secret `ANTHROPIC_API_KEY` |
 | `scripts/` | lokaler Testserver, Browser-Prüfung, Umbenennen |
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung |
@@ -40,4 +40,4 @@ python3 scripts/marke-umbenennen.py NeuerName
 
 ## Lizenzen
 
-Schrift Maven Pro: SIL Open Font License 1.1 (`web/fonts/OFL.txt`). jsPDF 2.5.1: MIT (`web/vendor/jspdf.LICENSE.txt`).
+Schrift Maven Pro: SIL Open Font License 1.1 (`web/fonts/OFL.txt`). jsPDF 2.5.1: MIT (`web/vendor/jspdf.LICENSE.txt`). qrcode-generator 2.0.4: MIT (`web/vendor/qrcode.LICENSE.txt`).

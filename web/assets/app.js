@@ -345,7 +345,7 @@ function packProject(windows, proj, betrieb) {
 }
 function unpackProject(code) {
   try {
-    const m = /(?:AM1|ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').trim());
+    const m = /(?:AM1|ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').replace(/\s+/g, ''));
     if (!m) return null;
     let b64 = m[1].replace(/-/g, '+').replace(/_/g, '/'); while (b64.length % 4) b64 += '=';
     const bin = atob(b64), bytes = new Uint8Array(bin.length);
@@ -761,6 +761,7 @@ const AI = (function () {
 const APP_URL = location.href.split('#')[0].split('?')[0];
 const PORTAL_URL = new URL('../', APP_URL).href;
 const PORTAL_OPEN = PORTAL_URL;
+const PORTAL_KURZ = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const STORE = 'aufmass.v1';
 const PROJ0 = { gebaeude: 'efh', baujahr: '', total: 9, zeit: '3m', budget: 'b0', foerd: false, name: '', ort: '', tel: '', mail: '', erreich: 'nm' };
 const S = {
@@ -1174,7 +1175,7 @@ SCREENS.teilen = () => {
     : t.portal && !t.betrieb ? 'Im Portal. Schick es auch deinem Fensterbauer des Vertrauens, dann hast du sein Angebot zum Vergleich.'
     : 'Dein Aufmaß gehört dir. Beide Wege sind kostenlos, und du kannst beide gehen.';
   const html = hd('Fertig gemessen', 'Ein Aufmaß, zwei Wege.', stand) +
-    '<div class="card share-way' + (t.betrieb ? ' done' : '') + '"><div class="way-head">' + tick(t.betrieb) + '<div><p class="eyebrow">' + (t.betrieb ? 'Erledigt' : 'Weg 1 · kostenlos') + '</p><h2>An deinen Fensterbauer</h2></div></div><p class="sub" style="color: var(--fg2)">Schick ihm den Code. Er setzt ihn bei Klopfan ein und hat das komplette Aufmaßblatt, ohne Anfahrt. Hat er noch kein Klopfan? Die Anmeldung ist kostenlos, der Hinweis steht in der Nachricht.</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="betrieb">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '" data-act="teil-mark" data-v="betrieb">E-Mail</a><button type="button" class="pill" data-act="teil-copy" data-v="betrieb">Code kopieren</button></div></div>' +
+    '<div class="card share-way' + (t.betrieb ? ' done' : '') + '"><div class="way-head">' + tick(t.betrieb) + '<div><p class="eyebrow">' + (t.betrieb ? 'Erledigt' : 'Weg 1 · kostenlos') + '</p><h2>An deinen Fensterbauer</h2></div></div><p class="sub" style="color: var(--fg2)">Schick ihm das Aufmaßblatt als PDF: alle Maße, die Auswertung der Fotos, deine Wünsche. Dafür braucht er kein Klopfan. Auf der letzten Seite steht, wie er es in Klopfan öffnet, mit 3-D-Ansicht und Nachbesserung per Link.</p><div class="pill-row"><button type="button" class="btn primary" style="flex: 0 0 auto; padding: 0 22px" data-act="teil-pdf">PDF schicken</button></div><p class="sub" style="color: var(--muted); margin-top: 8px">Oder nur den Code, falls er Klopfan schon nutzt:</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="betrieb">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '" data-act="teil-mark" data-v="betrieb">E-Mail</a><button type="button" class="pill" data-act="teil-copy" data-v="betrieb">Code kopieren</button></div></div>' +
     (PILOT ? '<div class="card share-way soon"><div class="way-head">' + tick(false) + '<div><p class="eyebrow">Weg 2 · bald, nach der Pilotphase</p><h2>Vergleichsangebote aus dem Portal</h2></div></div><p class="sub" style="color: var(--fg2)">Anonym: Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an, und du entscheidest, wer deine Kontaktdaten bekommt. Dein Code bleibt dafür gültig.</p></div>'
       : '<div class="card share-way' + (t.portal ? ' done' : '') + '"><div class="way-head">' + tick(t.portal) + '<div><p class="eyebrow">' + (t.portal ? 'Erledigt' : 'Weg 2 · kostenlos, anonym') + '</p><h2>Vergleichsangebote aus dem Portal</h2></div></div><p class="sub" style="color: var(--fg2)">Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an. Du entscheidest, wer deine Kontaktdaten bekommt, höchstens drei.</p>' +
       '<ol class="way-steps"><li><span class="n">1</span><span><b>Code kopieren</b></span><button type="button" class="pill" data-act="teil-copy" data-v="portal">Kopieren</button></li><li><span class="n">2</span><span><b>Portal öffnen</b><small>Konto anlegen oder anmelden</small></span><a class="pill" href="' + PORTAL_OPEN + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="portal">Öffnen ›</a></li><li><span class="n">3</span><span><b>„Aufmaß-Code einfügen“</b><small>Dann ist es online, ohne deinen Namen.</small></span></li></ol></div>') +
@@ -1236,7 +1237,7 @@ function blattPDF() {
   const doc = new J({ unit: 'mm', format: 'a4' }), W = 210, M = 16, pr = S.proj;
   let y = 18, page = 1;
   const t = (s) => String(s == null ? '' : s).replace(/ /g, ' ');
-  const foot = () => { doc.setFontSize(8); doc.setTextColor(120); doc.text('Erfasst mit Klopfan. Vor der Fertigung Feinaufmaß vor Ort.', M, 289); doc.text('Seite ' + page, W - M, 289, { align: 'right' }); doc.setTextColor(20); };
+  const foot = () => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120); doc.text(t('Erstellt mit Klopfan · ' + PORTAL_KURZ + ' · Vor der Fertigung Feinaufmaß vor Ort.'), M, 289); doc.text('Seite ' + page, W - M, 289, { align: 'right' }); doc.setTextColor(20); };
   const need = (h) => { if (y + h > 280) { foot(); doc.addPage(); page++; y = 18; } };
   doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text('Aufmaßblatt', M, y);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text(t(new Date().toLocaleDateString('de-DE')), W - M, y - 5, { align: 'right' }); doc.text(t(S.betrieb ? 'Für ' + (S.betrieb.name || 'Fensterbauer') : 'Klopfan'), W - M, y, { align: 'right' }); doc.setTextColor(20);
@@ -1259,9 +1260,61 @@ function blattPDF() {
     if (bestand.length) { need(12); y += 2; doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.text('Bestand laut Fotos', M, y); doc.setFont('helvetica', 'normal'); y += 5; bestand.forEach(put); }
     y += 4; doc.setDrawColor(210); doc.setLineWidth(0.2); doc.line(M, y - 2, W - M, y - 2); y += 4;
   });
+  if (!S.betrieb) pdfKlopfanBlock(doc, { W: W, M: M, y: y, need: need, t: t, getY: () => y, setY: (v) => { y = v; } });
   foot();
   return doc.output('blob');
 }
+/* Letzter Block im Aufmaßblatt eines Eigen-Kunden: so kommt das Aufmaß zum Fensterbauer in Klopfan (QR und Code), dazu der Hinweis für den Kunden */
+function pdfKlopfanBlock(doc, o) {
+  const W = o.W, M = o.M, t = o.t, url = PORTAL_URL + '?von=pdf', code = packProject(S.windows, S.proj, null);
+  o.need(62); let y = o.getY() + 4;
+  doc.setDrawColor(30); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 9;
+  const qrS = 30, qrX = W - M - qrS, textW = W - 2 * M - qrS - 10;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(20); doc.text(t('Für den Fensterbauer: dieses Aufmaß in Klopfan öffnen'), M, y);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(60);
+  const absatz = doc.splitTextToSize(t('Ihr Kunde hat dieses Aufmaß mit Klopfan erstellt: acht Handmaße je Fenster, Fotos mit Auswertung, Wünsche. Mit dem Code unten holen Sie es in Ihr Klopfan-Konto: Positionen zum Bearbeiten, 3-D-Ansicht, Nachbesserung per Link, PDF mit Ihrem Logo. Dazu schicken Sie eigenen Kunden einen Aufmaß-Link statt hinzufahren; was aus Ihren Links kommt, bleibt bei Ihnen. Kostenlos, die ersten 3 Aufmaße sind frei: ' + PORTAL_KURZ), textW);
+  doc.text(absatz, M, y + 6);
+  /* QR-Code zur Anmeldung */
+  try {
+    if (window.qrcode) {
+      const q = window.qrcode(0, 'M'); q.addData(url); q.make();
+      const n = q.getModuleCount(), cell = qrS / (n + 4), x0 = qrX + 2 * cell, y0 = y - 4 + 2 * cell;
+      doc.setFillColor(255, 255, 255); doc.rect(qrX, y - 4, qrS, qrS, 'F'); doc.setFillColor(0, 0, 0);
+      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) doc.rect(x0 + c * cell, y0 + r * cell, cell + 0.02, cell + 0.02, 'F');
+      doc.link(qrX, y - 4, qrS, qrS, { url: url });
+      doc.setFontSize(7.5); doc.setTextColor(110); doc.text(t('Scannen: Anmeldung'), qrX + qrS / 2, y - 4 + qrS + 3.5, { align: 'center' });
+    }
+  } catch (e) { /* ohne QR weiter */ }
+  y = Math.max(y + 6 + absatz.length * 4.2 + 4, y - 4 + qrS + 9);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110);
+  const kunde = doc.splitTextToSize(t('Für Sie als Eigentümer: Dasselbe Aufmaß können Sie anonym ins Klopfan-Portal stellen und Vergleichsangebote von Betrieben aus Ihrer Nähe bekommen. Sie entscheiden, wer Ihre Kontaktdaten erhält.'), W - 2 * M);
+  doc.text(kunde, M, y); y += kunde.length * 4 + 3;
+  /* Der Code, umbrochen; Leerzeichen und Zeilenumbrüche stören beim Einfügen nicht */
+  doc.setFont('courier', 'normal'); doc.setFontSize(6.6); doc.setTextColor(60);
+  const zeilen = doc.splitTextToSize(code, W - 2 * M);
+  o.setY(y); o.need(8); y = o.getY();
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(20); doc.text(t('Aufmaß-Code für Klopfan („Code vom Kunden einfügen“)'), M, y); y += 4.5;
+  doc.setFont('courier', 'normal'); doc.setFontSize(6.6); doc.setTextColor(60);
+  for (let i = 0; i < zeilen.length; i += 12) { const teil = zeilen.slice(i, i + 12); o.setY(y); o.need(teil.length * 2.9 + 2); y = o.getY(); doc.text(teil, M, y); y += teil.length * 2.9; }
+  doc.setFont('helvetica', 'normal'); doc.setTextColor(20); o.setY(y);
+}
+/* PDF direkt weitergeben: auf dem Telefon per Teilen-Menü (WhatsApp, Mail), sonst herunterladen */
+async function pdfTeilen() {
+  const pdf = blattPDF();
+  if (pdf && navigator.canShare && typeof File === 'function') {
+    try {
+      const file = new File([pdf], fileBase() + '.pdf', { type: 'application/pdf' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Mein Fenster-Aufmaß', text: 'Hallo, hier ist mein Fenster-Aufmaß aus Klopfan als PDF: alle Maße, die Auswertung der Fotos und meine Wünsche. Auf der letzten Seite steht, wie du es in Klopfan öffnest.' });
+        teilMark('betrieb'); return;
+      }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  await saveDatei();
+  toast('PDF gespeichert. Häng sie an deine Nachricht an deinen Fensterbauer.');
+  teilMark('betrieb');
+}
+function teilMark(k) { const t = teilStand(); if (!t[k]) { t[k] = Date.now(); if (t.betrieb && t.portal) S._feier = 'loop'; persist(); setTimeout(() => render(), 150); } }
 function blattFile() {
   const css = 'body{font:14px/1.45 -apple-system,system-ui,sans-serif;color:#1d1d1f;margin:32px auto;max-width:760px;padding:0 20px}h1{font-size:28px;margin:0 0 4px}.m{color:#6e6e73}.p{border-top:2px solid #1d1d1f;margin-top:20px;padding-top:12px}.p h2{font-size:17px;margin:0 0 6px}.g{display:grid;grid-template-columns:150px 1fr;gap:4px 12px}.g span:nth-child(odd){color:#6e6e73}h3{font-size:14px;margin:14px 0 6px}@media print{body{margin:0}}';
   const pr = S.proj, g = (rs) => '<div class="g">' + rs.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div>', rowsH = (x) => g(specRows(x)) + (x.ki && x.ki.rows && x.ki.rows.length ? '<h3>Bestand laut Fotos</h3>' + g(x.ki.rows.map((r) => ({ k: r[0], v: r[1] }))) : '');
@@ -1636,7 +1689,8 @@ function act(name, el) {
     case 'send': { if (S.betrieb && S.sent) return go('gesendet'); if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'teil-copy': { copyText(curCode(), 'code-box', 'Code kopiert'); return act('teil-mark', el); }
-    case 'teil-mark': { const t = teilStand(), k = v === 'portal' ? 'portal' : 'betrieb'; if (!t[k]) { t[k] = Date.now(); if (t.betrieb && t.portal) S._feier = 'loop'; persist(); setTimeout(() => render(), 150); } return; }
+    case 'teil-mark': return teilMark(v === 'portal' ? 'portal' : 'betrieb');
+    case 'teil-pdf': return pdfTeilen();
     case 'k-next': { const k = kauf(); k.err = {}; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(k.mail || '').trim())) k.err.mail = 'Bitte eine gültige E-Mail-Adresse eingeben.'; if (String(k.pw || '').length < 8) k.err.pw = 'Mindestens 8 Zeichen.'; if (!k.agb) k.err.agb = 'Bitte zustimmen, sonst können wir kein Konto anlegen.'; if (Object.keys(k.err).length) return render(); k.mail = k.mail.trim(); persist(); return go('kasse'); }
     case 'k-pay': { const k = kauf(); k.pay = v; if (k.err) delete k.err.pay; return render(); }
     case 'k-buy': { const k = kauf(); k.err = {}; if (!k.pay) k.err.pay = 'Bitte eine Zahlungsart wählen.'; if (!k.widerruf) k.err.widerruf = 'Für die sofortige Lieferung brauchen wir deine Zustimmung.'; if (Object.keys(k.err).length) return render(); k.paid = true; k.when = Date.now(); k.pw = ''; persist(); return go('gekauft'); }

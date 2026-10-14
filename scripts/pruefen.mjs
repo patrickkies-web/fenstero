@@ -141,12 +141,16 @@ const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, i
   ok(/Ein Aufmaß, zwei Wege/.test(t3) && /An deinen Fensterbauer/.test(t3) && /Vergleichsangebote aus dem Portal/.test(t3) && /Für dich · kostenlos/.test(t3), 'Eigen-Kunde sieht beide Wege und die kostenlose PDF');
   const wa3 = await page.getAttribute('.share-way a[href^="https://wa.me/"]', 'href');
   ok(/Code vom Kunden einfügen/.test(decodeURIComponent(wa3)) && /Kostenlos anmelden/.test(decodeURIComponent(wa3)) && /AM1\./.test(decodeURIComponent(wa3)), 'Nachricht an den Fensterbauer enthält Code und Einladung zu Klopfan');
-  await page.click('[data-act="teil-copy"][data-v="betrieb"]'); await page.waitForTimeout(400);
-  ok(await page.evaluate(() => S.teil && S.teil.betrieb > 0) && /Unterwegs zu deinem Fensterbauer/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('.share-way.done').count() === 1, 'Weg 1 wird als erledigt gemerkt und der nächste Schritt angestoßen');
-  const [dl3] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
-  ok(/\.pdf$/.test(dl3.suggestedFilename()), 'Eigen-Kunde lädt seine PDF kostenlos: ' + dl3.suggestedFilename());
-  const kopf3 = (await import('node:fs')).readFileSync(await dl3.path()).subarray(0, 5).toString();
-  ok(kopf3 === '%PDF-', 'Datei ist ein echtes PDF');
+  // Weg 1: PDF schicken (ohne Teilen-Menü im Testbrowser: Download) → erledigt, nächster Schritt wird angestoßen
+  const [dl3] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="teil-pdf"]')]);
+  await page.waitForTimeout(500);
+  ok(/\.pdf$/.test(dl3.suggestedFilename()) && await page.evaluate(() => S.teil && S.teil.betrieb > 0) && /Unterwegs zu deinem Fensterbauer/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('.share-way.done').count() === 1, 'PDF an den Fensterbauer: Weg 1 erledigt, nächster Schritt angestoßen');
+  const pdfBytes = (await import('node:fs')).readFileSync(await dl3.path());
+  ok(pdfBytes.subarray(0, 5).toString() === '%PDF-', 'Datei ist ein echtes PDF');
+  const pdfTxt = pdfBytes.toString('latin1');
+  ok(/Code vom Kunden/.test(pdfTxt) && /Scannen: Anmeldung/.test(pdfTxt) && pdfTxt.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(pdfTxt), 'PDF trägt den Klopfan-Block: Einladung, QR-Link und Aufmaß-Code');
+  const [dl4] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
+  ok(/\.pdf$/.test(dl4.suggestedFilename()), 'Eigen-Kunde lädt seine PDF kostenlos: ' + dl4.suggestedFilename());
   await foto(page, 'app-zwei-wege');
   sauber(page, 'Messablauf ohne Fehler');
 
@@ -324,6 +328,14 @@ console.log('6. Logik, Übersichten und Belohnungen');
   await tun('sheet', 'import'); await page.waitForSelector('#code-in'); await page.fill('#code-in', linkCode); await tun('import'); await page.waitForTimeout(400);
   ok(/gehört zum Auftrag deines Fensterbauers/.test(await toastText()), 'Aufmaß aus einem Betriebs-Link lässt sich nicht ins Portal stellen');
   await page.evaluate(() => { S.sheet = null; render(); });
+  ok(await page.evaluate((c) => { const gebrochen = c.replace(/(.{60})/g, '$1\n   '); const o = unpack(gebrochen); return !!o && o.w.length === 1; }, eigenCode), 'Code mit Zeilenumbrüchen (aus der PDF kopiert) bleibt lesbar');
+  await tun('logout'); await page.waitForTimeout(300);
+  await page.goto(BASE + '/?von=pdf', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
+  ok(await page.locator('.banner.vonpdf [data-act="reg"]').count() === 1 && /Klopfan-Aufmaß in der Hand/.test(await page.evaluate(() => document.body.textContent)), 'Wer über die PDF kommt, sieht den Weg zum Konto');
+  await tun('demo-as', 'c7'); await page.waitForTimeout(500);
+  ok(await page.locator('.banner.vonpdf [data-v="linkimport"]').count() === 1, 'Angemeldeter Betrieb bekommt direkt „Code vom Kunden einfügen“');
+  await tun('vonpdf-zu'); await page.waitForTimeout(200);
+  ok(await page.locator('.banner.vonpdf').count() === 0, 'Hinweis lässt sich schließen');
   await foto(page, 'portal-eigentuemer');
   const vor = await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i1'); x.knocks.unshift({ c: 'c1', when: 'heute', status: 'offen' }); return S.acc.c1.guthaben; });
   await tun('release', '', 'i1', 'c1'); await page.waitForTimeout(500);
