@@ -25,6 +25,7 @@ Die Aufmaß-App für Fenster. Hauseigentümer messen ihre Fenster selbst, Schrit
 | `scripts/` | lokaler Testserver (mit Attrappen für Datenbank und Kasse), Browser-Prüfung in 8 Abschnitten, Umbenennen |
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung |
 | `docs/ABRECHNUNG.md` | Preise und Abrechnungsregeln: was gezählt wird, wo die Paywalls sitzen, Nachbesserung, Schranken, was der Server erzwingt |
+| `docs/GESTALTUNG.md` | Gestaltungsregeln: Tokens, Schriftrollen, Bedienelemente mit Zuständen, Bewegungskatalog, Rückmeldungen, Entscheidungen, Nachweis |
 
 ## Kurz: online stellen
 

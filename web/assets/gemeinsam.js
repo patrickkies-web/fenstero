@@ -2,7 +2,7 @@
    - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung
    - Pilot-Hinweis im Portal
    - Logo (weißes Fenster auf Schwarz, der Flügel kippt kurz)
-   - Feier (Konfetti, Puls) und Scroll-Reveal
+   - Rückmeldungen (Markieren, Einrasten, Haken, Maßlinien, Puls) und Scroll-Reveal
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
@@ -125,37 +125,26 @@
   document.addEventListener('pointerdown', beiBeruehrung, true);
   document.addEventListener('mouseover', beiBeruehrung, true);
 
-  /* ---------- Feier: kleine Belohnungen nach erledigten Schritten ----------
-     Feier.konfetti(el)  bunte Schnipsel aus einem Element heraus (oder aus der Bildmitte)
-     Feier.puls(el)      ein kurzer Puls um ein Element
-     Ruhig, wenn das Gerät „weniger Bewegung“ eingestellt hat. */
+  /* ---------- Rückmeldung: was sich gerade geändert hat, zeigt sich am Objekt ----------
+     Feier.markieren(el)   ein Ring läuft kurz um das Element, das neu ist (Karte, Eintrag, Projekt)
+     Feier.einrasten(el)   eine Zahl oder Überschrift setzt sich (kurzes Nachfedern aus 1,06)
+     Feier.haken(el)       ein Haken wird gezogen (SVG-Pfad mit Klasse .tick oder Element mit .fx-haken)
+     Feier.linien(stage)   die Maßlinien am 3-D-Modell zeichnen sich nacheinander
+     Feier.puls(el)        ein Ring läuft aus dem Element heraus
+     Ruhig, wenn das Gerät „weniger Bewegung“ eingestellt hat. Mehr gibt es nicht. */
   function ruhig() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
-  var FARBEN = ['#0071e3', '#d4502b', '#1f7a3d', '#f5b942', '#5e5ce6', '#ff7a59'];
+  function neu(el, cls, ms) { if (!el || ruhig()) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(function () { el.classList.remove(cls); }, ms || 1200); }
   window.Feier = {
-    konfetti: function (ziel, o) {
-      o = o || {};
-      if (ruhig()) return;
-      var r = ziel && ziel.getBoundingClientRect ? ziel.getBoundingClientRect() : null;
-      var x = r ? r.left + r.width / 2 : window.innerWidth / 2, y = r ? r.top + r.height / 2 : window.innerHeight * 0.35;
-      if (r && (r.width === 0 || r.bottom < 0 || r.top > window.innerHeight)) { x = window.innerWidth / 2; y = window.innerHeight * 0.35; }
-      var n = o.n || 28, wrap = el('div', 'fx-konfetti');
-      wrap.setAttribute('aria-hidden', 'true');
-      for (var i = 0; i < n; i++) {
-        var p = document.createElement('i');
-        var winkel = -Math.PI / 2 + (Math.random() - 0.5) * (o.breit ? 2.6 : 1.9), kraft = 60 + Math.random() * (o.kraft || 120);
-        var dx = Math.cos(winkel) * kraft, dyu = Math.sin(winkel) * kraft, dyd = dyu + 90 + Math.random() * 110;
-        var w = 5 + Math.random() * 6, h = 4 + Math.random() * 7, rund = Math.random() < 0.35;
-        p.style.cssText = 'left:' + x.toFixed(0) + 'px;top:' + y.toFixed(0) + 'px;--dx:' + dx.toFixed(0) + 'px;--dyu:' + dyu.toFixed(0) + 'px;--dyd:' + dyd.toFixed(0) + 'px;--rot:' + (Math.random() * 720 - 360).toFixed(0) + 'deg;--dur:' + (900 + Math.random() * 500).toFixed(0) + 'ms;--delay:' + (Math.random() * 120).toFixed(0) + 'ms;background:' + FARBEN[i % FARBEN.length] + ';width:' + w.toFixed(1) + 'px;height:' + (rund ? w : h).toFixed(1) + 'px;border-radius:' + (rund ? '50%' : '2px');
-        wrap.appendChild(p);
-      }
-      document.body.appendChild(wrap);
-      setTimeout(function () { wrap.remove(); }, 1700);
+    markieren: function (ziel) { neu(ziel, 'fx-mark', 1200); },
+    einrasten: function (ziel) { neu(ziel, 'fx-einrasten', 400); },
+    haken: function (ziel) { if (!ziel) return; var svg = ziel.tagName === 'svg' ? ziel : ziel.querySelector('svg'); if (svg) neu(svg, 'fx-haken', 900); },
+    linien: function (stage) {
+      if (!stage || ruhig()) return;
+      var dims = Array.prototype.slice.call(stage.querySelectorAll('.w3d-dim'));
+      dims.forEach(function (d, i) { d.style.setProperty('--dd', (i * 90) + 'ms'); d.classList.remove('is-drawing'); void d.offsetWidth; d.classList.add('is-drawing'); });
+      setTimeout(function () { dims.forEach(function (d) { d.classList.remove('is-drawing'); d.style.removeProperty('--dd'); }); }, 900 + dims.length * 90);
     },
-    puls: function (ziel) {
-      if (!ziel || ruhig()) return;
-      ziel.classList.remove('fx-puls'); void ziel.offsetWidth; ziel.classList.add('fx-puls');
-      setTimeout(function () { ziel.classList.remove('fx-puls'); }, 1000);
-    }
+    puls: function (ziel) { neu(ziel, 'fx-puls', 1000); }
   };
 
   /* ---------- Scroll-Reveal: Blöcke erscheinen, wenn sie ins Bild kommen ----------

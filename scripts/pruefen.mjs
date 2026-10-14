@@ -162,7 +162,7 @@ if (teil(3)) {
   ok(await page.locator('.kerr').count() === 2 && await page.evaluate(() => !(S.kauf && S.kauf.paid) && S.screen === 'kasse'), 'Ohne Zahlungsart und Widerrufs-Zustimmung kein Kauf');
   await page.click('[data-act="k-pay"][data-v="PayPal"]'); await page.click('[data-in="kc"][data-f="widerruf"]');
   await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gekauft"]'); await page.waitForTimeout(400);
-  ok(/Freigeschaltet\./.test(await page.evaluate(() => document.body.textContent)) && await page.evaluate(() => S.kauf.paid === true && S.kauf.test === true && !S.kauf.token) && await page.locator('.fx-konfetti i').count() > 10, 'Testkauf: freigeschaltet und gefeiert, als Test gekennzeichnet, ohne Nachweis');
+  ok(/Freigeschaltet\./.test(await page.evaluate(() => document.body.textContent)) && await page.evaluate(() => S.kauf.paid === true && S.kauf.test === true && !S.kauf.token) && await page.locator('.okmark.fx-puls').count() === 1, 'Testkauf: freigeschaltet, Ring läuft vom Haken aus, als Test gekennzeichnet, ohne Nachweis');
   await foto(page, 'app-gekauft');
   await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   ok(await page.evaluate(() => FREI() && !!document.querySelector('.datei-card.bought [data-act="k-dl"]')), 'Freischaltung bleibt nach dem Neuladen, Startseite zeigt die Datei');
@@ -318,13 +318,13 @@ if (teil(6)) {
   ok(await page.locator('.pcard.st-eingegangen .winstack svg').count() >= 1 && await page.locator('.pcard.st-arbeit .pring').count() === 1, 'Eingegangenes Aufmaß als Fensterstapel, laufendes als Ring');
   await foto(page, 'portal-projekte');
 
-  // Neues Projekt anlegen: Karte „Projekt angelegt“ und Konfetti
+  // Neues Projekt anlegen: Karte „Projekt angelegt“ mit Ring um das Neue
   await page.evaluate(() => { S.nl = { step: 1, kunde: 'Familie Testmann', kontakt: '0171 000 00 00', adresse: 'Teststraße 1, 50667 Köln', geb: 'efh', fz: '3 bis 5', plan: ['Fenster'], note: '', days: 14, du: false, err: {} }; });
   await tun('nl-create'); await page.waitForTimeout(500);
-  ok(await page.locator('.created').count() === 1 && await page.locator('.fx-konfetti i').count() > 10, 'Projekt angelegt: Bestätigung und Konfetti');
+  ok(await page.locator('.created').count() === 1 && await page.locator('.created.fx-mark').count() === 1, 'Projekt angelegt: Bestätigung, Ring um die neue Karte');
   await foto(page, 'portal-projekt-neu');
   await page.waitForTimeout(1400);
-  ok(await page.locator('.fx-konfetti').count() === 0, 'Konfetti räumt sich selbst auf');
+  ok(await page.locator('.fx-mark').count() === 0, 'Markierung räumt sich selbst auf');
 
   // Link verschickt → Puls am Status; Enter im Formular springt nicht über Schritt 2
   await tun('l-share', 'Text', await page.evaluate(() => A().links[0].id)); await page.waitForTimeout(700);
@@ -352,7 +352,7 @@ if (teil(6)) {
   await tun('liste-create'); await page.waitForTimeout(600);
   const nachListe = await page.evaluate(() => ({ n: A().links.length, neu: A().links.slice(0, 3).map((l) => [l.kunde, l.kontakt, l.status]) }));
   ok(nachListe.n === vorListe + 3 && nachListe.neu.some((x) => x[0] === 'Familie Listig' && x[1] === '0171 111 22 33') && nachListe.neu.some((x) => x[0] === 'Herr Mailer' && x[1] === 'mailer@beispiel.de') && nachListe.neu.every((x) => x[2] === 'erstellt'), 'Einladungsliste legt je Zeile ein Projekt an, ungültige Zeilen werden übersprungen');
-  ok(/3 Projekte angelegt/.test(await toastText()) && await page.locator('.fx-konfetti i').count() > 10, 'Liste angelegt: Hinweis und Konfetti');
+  ok(/3 Projekte angelegt/.test(await toastText()) && await page.locator('.pcard').count() >= 3 , 'Liste angelegt: Hinweis, Projekte stehen in der Liste');
   await foto(page, 'portal-liste');
 
   // Code vom Kunden ohne Projekt (Eigen-Kunde): neues Projekt, zählt wie jedes andere
@@ -392,19 +392,19 @@ if (teil(6)) {
   ok(await p2.locator('.bb .btn.primary[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
   await p2.click('.bb .btn.primary'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
   const code1 = await p2.inputValue('#code-box');
-  ok(await p2.locator('.fx-konfetti i').count() > 10, 'Abschicken wird gefeiert');
+  ok(await p2.locator('.okmark.fx-puls').count() === 1, 'Abschicken: Ring läuft vom Haken aus');
   await p2.evaluate(() => { S.windows[0].name = 'Nachträglich geändert'; S.proj.notiz = 'anders'; render(true); }); await p2.waitForTimeout(200);
   ok(await p2.inputValue('#code-box') === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
   // Scroll-Reveal: Blöcke tragen .rev und sind sichtbar
   ok(await p2.evaluate(() => { const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv)');
-  // Alle Maße da: Konfetti
+  // Alle Maße da: die Maßlinien zeichnen sich nacheinander
   await p2.evaluate(() => { S.betrieb = null; });
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await p2.click('[data-act="new"]'); await p2.waitForTimeout(200);
   await p2.evaluate(() => { S.win.mo = { hm: 1480, wm: 1370, hl: '', hr: '', wt: '', wb: '' }; go('rest'); });
   for (let i = 0; i < 4; i++) { await p2.waitForSelector('[data-act="rest-same"]'); await p2.click('[data-act="rest-same"]'); await p2.waitForTimeout(150); }
   await p2.waitForTimeout(400);
-  ok(/Alle Maße da/.test(await p2.evaluate(() => document.body.textContent)) && await p2.locator('.fx-konfetti i').count() > 10, '„Alle Maße da“ wird gefeiert');
+  ok(/Alle Maße da/.test(await p2.evaluate(() => document.body.textContent)) && await p2.locator('.w3d-dim.is-drawing').count() >= 2, '„Alle Maße da“: Maßlinien zeichnen sich nacheinander');
   await foto(p2, 'app-masse-da');
   sauber(p2, 'App-Logik ohne Fehler');
   await ctx2.close();
@@ -562,8 +562,8 @@ if (teil(8)) {
   await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="anfrage"]'); await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="anfrage2"]'); await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="blatt"]');
   ok(/mit allen Maßen und Wünschen, dazu die Auswertung der Fotos/.test(await kp.evaluate(() => document.body.innerText)), 'Prüfen-Seite verspricht Maße, Wünsche und Fotoauswertung');
   await kp.click('.bb .btn.primary'); await kp.waitForSelector('[data-screen="gesendet"]'); await kp.waitForTimeout(500);
-  const ges = await kp.evaluate(() => ({ txt: document.body.innerText, sent: S.sent, code: !!document.getElementById('code-box'), feier: document.querySelectorAll('.fx-konfetti i').length }));
-  ok(/Gesendet\./.test(ges.txt) && !/Jetzt abschicken/.test(ges.txt) && !/Nur im Prototyp/.test(ges.txt) && ges.sent && ges.sent.uebertragen === true && !ges.code && ges.feier > 10, 'Aufmaß direkt übertragen: „Gesendet“, kein Code-Umweg, kein Prototyp-Hinweis, gefeiert');
+  const ges = await kp.evaluate(() => ({ txt: document.body.innerText, sent: S.sent, code: !!document.getElementById('code-box'), feier: document.querySelectorAll('.okmark.fx-puls').length }));
+  ok(/Gesendet\./.test(ges.txt) && !/Jetzt abschicken/.test(ges.txt) && !/Nur im Prototyp/.test(ges.txt) && ges.sent && ges.sent.uebertragen === true && !ges.code && ges.feier === 1, 'Aufmaß direkt übertragen: „Gesendet“, kein Code-Umweg, kein Prototyp-Hinweis, gefeiert');
   await foto(kp, 'srv-app-gesendet');
   const o1 = await kp.evaluate((code) => unpackProject(packProject(S.windows, S.proj, { code: code })), l1.code);
   const dopp = await api('/api/aufmass', o1);
@@ -657,8 +657,8 @@ if (teil(8)) {
   await kp2.click('[data-in="kc"][data-f="widerruf"]');
   await kp2.click('.bb .btn.primary');
   await kp2.waitForFunction(() => typeof S !== 'undefined' && S.screen === 'gekauft' && S.kauf && S.kauf.paid, null, { timeout: 12000 }); await kp2.waitForTimeout(500);
-  const kauf = await kp2.evaluate(() => ({ token: S.kauf.token, session: S.kauf.session, kennung: S.kauf.kennung, test: !!S.kauf.test, url: location.search, txt: document.body.innerText, feier: document.querySelectorAll('.fx-konfetti i').length }));
-  ok(/Freigeschaltet\./.test(kauf.txt) && /^test_/.test(kauf.session || '') && (kauf.token || '').length === 32 && !kauf.test && kauf.url === '' && kauf.feier > 10, 'Zurück von der Kasse: freigeschaltet mit Nachweis vom Server, Adresse bereinigt');
+  const kauf = await kp2.evaluate(() => ({ token: S.kauf.token, session: S.kauf.session, kennung: S.kauf.kennung, test: !!S.kauf.test, url: location.search, txt: document.body.innerText, feier: document.querySelectorAll('.okmark.fx-puls').length }));
+  ok(/Freigeschaltet\./.test(kauf.txt) && /^test_/.test(kauf.session || '') && (kauf.token || '').length === 32 && !kauf.test && kauf.url === '' && kauf.feier === 1, 'Zurück von der Kasse: freigeschaltet mit Nachweis vom Server, Adresse bereinigt');
   const nw = await api('/api/zahlung/nachweis?kennung=' + encodeURIComponent(kauf.kennung) + '&session=' + encodeURIComponent(kauf.session) + '&token=' + encodeURIComponent(kauf.token));
   const nwFalsch = await api('/api/zahlung/nachweis?kennung=' + encodeURIComponent(kauf.kennung) + '&session=' + encodeURIComponent(kauf.session) + '&token=' + encodeURIComponent('x'.repeat(32)));
   const unbez = await api('/api/zahlung/pruefen?session=' + encodeURIComponent('cs_offen_' + stempel) + '&kennung=' + encodeURIComponent(kauf.kennung));
