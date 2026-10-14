@@ -1,7 +1,7 @@
 /* Klopfan · gemeinsame Bausteine für App und Portal
    - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung
    - Pilot-Hinweis im Portal
-   - Logo (Hand, die anklopft) mit Klopf-Bewegung
+   - Logo (weiße Faust auf Schwarz, die anklopft) mit Klopf-Bewegung
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
@@ -102,10 +102,10 @@
   };
   window.FotoKI = { verbinden: function () { return bereit().then(function (ok) { return ok ? sample : null; }); } };
 
-  /* ---------- Logo: eine Hand klopft an ----------
-     Logo.svg(px) liefert das Zeichen. Beim Laden klopft die Hand einmal (zweimal tock), die Tür zittert,
+  /* ---------- Logo: die Faust klopft an ----------
+     Logo.svg(px) liefert das Zeichen. Beim Laden klopft die Faust einmal (zweimal tock), die Kachel zittert,
      danach bei Berührung oder Mauszeiger erneut. Wer weniger Bewegung eingestellt hat, sieht es ruhig. */
-  var LOGO_INNEN = '<rect width="64" height="64" rx="16" fill="#E4572E"/><g class="kl-hand"><path d="M8 27C14 23 22 21 29 21.5C31 17.5 38 17 39.5 21.5C44 22 46 26 43 29.5C46.5 30.5 46.5 36 43 38C45.5 39.5 44.5 44.5 40 45.5C32 48 20 46.5 8 41.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 21.5C31 24 35 25 39 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><path class="kl-tuer" d="M50 14v36" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/><g class="kl-welle" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".6"><path d="M53.5 25.5a9 9 0 0 1 0 13"/><path d="M57 22a14 14 0 0 1 0 20"/></g>';
+  var LOGO_INNEN = '<rect class="kl-kachel" width="64" height="64" rx="16" fill="#000"/><clipPath id="kl-clip"><rect width="64" height="64" rx="16"/></clipPath><g clip-path="url(#kl-clip)"><g class="kl-hand"><path fill="#fff" d="M23 64V52C23 49 19.5 46.5 16 43.5C10.5 39 9 32 12 27C14 23.5 19 23.5 20.5 26.5C22.5 21 29 19 32 22.5C34 18.5 41 18 43 22C46 18.5 52 19.5 53 24C57.5 22 61.5 26.5 60 31C60.5 36 58.5 41 55.5 44.5C53 48 49 50 45 52V64Z"/><path d="M15 31c6 1 10 6 10 13" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round"/></g></g><path class="kl-welle" d="M43 5l2.5 8.5M55 5l-3 8M61 15l-7 3.5M62 26l-7-1" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x=".75" y=".75" width="62.5" height="62.5" rx="15.4" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.5"/>';
   window.Logo = {
     svg: function (px) { var s = String(px || 32); return '<svg class="kl-logo" viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true" focusable="false">' + LOGO_INNEN + '</svg>'; },
     klopfen: function (ziel) {

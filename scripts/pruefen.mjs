@@ -7,7 +7,7 @@
 // Geprüft wird: alle Seiten laden ohne Fehler, ohne Verstoß gegen die Content-Security-Policy und ohne
 // Anfragen an fremde Server; kein alter Name mehr; Pilot-Hinweis; Kundenlink von Portal zu App und zurück;
 // ehrlicher Versand mit AM1-Code; kostenlose PDF-Datei; KI mit Einwilligung; ältere ZF1-, FE1- und LM1-Codes bleiben lesbar;
-// Name und Logo (Hand, die anklopft) an den richtigen Stellen, kein Spruch mehr.
+// Name und Logo (weiße Faust auf Schwarz, die anklopft) an den richtigen Stellen, kein Spruch mehr.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -47,7 +47,7 @@ console.log('1. Seiten laden');
     const text = await page.evaluate(() => document.body.innerText);
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
     ok(!/Lichtma|Fenstero|Zamma/.test(text) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
-    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .kl-hand').count() > 0 && await page.locator('svg .kl-tuer').count() > 0, pfad + ': Logo mit klopfender Hand und Tür da');
+    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .kl-hand').count() > 0 && await page.locator('svg .kl-welle').count() > 0, pfad + ': Logo mit klopfender Faust da');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
   }

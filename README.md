@@ -15,7 +15,7 @@ Fenster-Aufmaß, geführt. Hauseigentümer messen ihre Fenster selbst, Schritt f
 | `web/config.js` | Einstellungen ohne Geheimnisse (Name, Pilotmodus, KI-Adresse) |
 | `web/impressum/`, `web/datenschutz/` | Rechtsseiten (Entwürfe mit Platzhaltern) |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
-| `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: eine Hand klopft an, filigrane weiße Linie auf oranger Kachel |
+| `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weiße Faust auf schwarzer Kachel, die anklopft |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL) und jsPDF (MIT), lokal statt von fremden Servern |
 | `functions/api/ki.js` | KI-Auswertung der Fotos (Cloudflare Pages Function), Schlüssel als Secret `ANTHROPIC_API_KEY` |
 | `scripts/` | lokaler Testserver, Browser-Prüfung, Umbenennen |
