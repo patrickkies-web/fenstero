@@ -708,3 +708,5 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 @media (max-width: 520px) { .rt-m { display: flex } }
 /* Nachbesserung */
 .sharecard.nbcard { box-shadow: inset 0 0 0 1.5px var(--warn), var(--shadow) } .sharecard.nbcard > .row .eyebrow { color: var(--warn) } .nbhint { margin: -4px 0 2px; line-height: 1.5 }
+/* Eigentümer: Aufmaß auch an den eigenen Fensterbauer */
+.card.eigen { display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 0 0 1.5px var(--accent-soft), var(--shadow) } .card.eigen > b { font-size: 17px } .card.eigen .kt { margin: 0 }

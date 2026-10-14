@@ -88,7 +88,7 @@ console.log('2. Portal');
 console.log('3. App: messen und KI');
 const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' };
 {
-  const ctx = await browser.newContext(telefon);
+  const ctx = await browser.newContext({ ...telefon, acceptDownloads: true });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
@@ -135,6 +135,19 @@ const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, i
   const erg = await page.evaluate(() => { const d = derive(S.win); return [d.moW, d.moH, d.elW, d.elH].join('×'); });
   ok(erg === '1370×1480×1230×1410', 'Ergebnis stimmt: ' + erg);
   await foto(page, 'app-ergebnis');
+  // Eigenes Aufmaß: speichern, dann „Ein Aufmaß, zwei Wege“ mit kostenloser PDF
+  await page.evaluate(() => { saveWin(); S.screen = 'teilen'; render(true); }); await page.waitForTimeout(400);
+  let t3 = await page.evaluate(() => document.body.textContent);
+  ok(/Ein Aufmaß, zwei Wege/.test(t3) && /An deinen Fensterbauer/.test(t3) && /Vergleichsangebote aus dem Portal/.test(t3) && /Für dich · kostenlos/.test(t3), 'Eigen-Kunde sieht beide Wege und die kostenlose PDF');
+  const wa3 = await page.getAttribute('.share-way a[href^="https://wa.me/"]', 'href');
+  ok(/Code vom Kunden einfügen/.test(decodeURIComponent(wa3)) && /Kostenlos anmelden/.test(decodeURIComponent(wa3)) && /AM1\./.test(decodeURIComponent(wa3)), 'Nachricht an den Fensterbauer enthält Code und Einladung zu Klopfan');
+  await page.click('[data-act="teil-copy"][data-v="betrieb"]'); await page.waitForTimeout(400);
+  ok(await page.evaluate(() => S.teil && S.teil.betrieb > 0) && /Unterwegs zu deinem Fensterbauer/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('.share-way.done').count() === 1, 'Weg 1 wird als erledigt gemerkt und der nächste Schritt angestoßen');
+  const [dl3] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
+  ok(/\.pdf$/.test(dl3.suggestedFilename()), 'Eigen-Kunde lädt seine PDF kostenlos: ' + dl3.suggestedFilename());
+  const kopf3 = (await import('node:fs')).readFileSync(await dl3.path()).subarray(0, 5).toString();
+  ok(kopf3 === '%PDF-', 'Datei ist ein echtes PDF');
+  await foto(page, 'app-zwei-wege');
   sauber(page, 'Messablauf ohne Fehler');
 
   // Ablehnen: neue Sitzung fragt erneut, „Ohne KI“ schickt nichts
@@ -193,12 +206,8 @@ console.log('4. Kundenlink von Anfang bis Ende');
   ok(decodeURIComponent(wa).includes(code) && decodeURIComponent(wa).includes('Code vom Kunden einfügen'), 'WhatsApp-Nachricht enthält Code und Anleitung');
   await foto(page, 'app-senden');
 
-  // kostenlose Datei
-  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.datei-card [data-act="k-dl"]')]);
-  ok(/\.pdf$/.test(dl.suggestedFilename()), 'PDF wird kostenlos heruntergeladen: ' + dl.suggestedFilename());
-  const pdfPfad = await dl.path();
-  const kopf = (await import('node:fs')).readFileSync(pdfPfad).subarray(0, 5).toString();
-  ok(kopf === '%PDF-', 'Datei ist ein echtes PDF');
+  // Link-Kunde: keine Kopie mit Maßen, die gibt der Betrieb weiter (Zusage „Ihr Kunde bleibt Ihr Kunde“)
+  ok(await page.locator('.datei-card [data-act="k-dl"]').count() === 0 && /Frag Fensterbau Brandt/.test(text), 'Link-Kunde bekommt keine PDF, sondern den Hinweis auf seinen Betrieb');
 
   await page.click('.bb .btn.primary'); // Fertig
   await page.waitForTimeout(300);
@@ -307,6 +316,14 @@ console.log('6. Logik, Übersichten und Belohnungen');
   // Eigentümer: Freigabe berechnet, Rückzug schreibt gut
   await tun('demo-as', 'max'); await page.waitForTimeout(500);
   ok(await page.locator('.stat.tone-lead').count() === 1 && await page.locator('.lcard.st-lead').count() === 1, 'Eigentümer-Übersicht: Anklopfer farbig hervorgehoben');
+  // Eigener Code ins Portal: Inserat plus Weg zum eigenen Fensterbauer
+  const eigenCode = await page.evaluate(() => { const w = [{ name: 'Küche', w: 1230, h: 1410, el: { w: 1230, h: 1410 }, mo: { hm: 1440, hl: 1440, hr: 1440, wm: 1260, wt: 1260, wb: 1260 }, fotos: 2 }]; const o = { v: 1, b: '', w: w, p: { ort: '50823 Köln', gebaeude: 'efh', budget: 'b2', zeit: '3m' }, t: Date.now() }; return 'AM1.' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); });
+  await tun('sheet', 'import'); await page.waitForSelector('#code-in'); await page.fill('#code-in', eigenCode); await tun('import'); await page.waitForTimeout(500);
+  ok(await page.locator('.card.eigen a[href^="https://wa.me/"]').count() === 1 && /Fensterbauer des Vertrauens/.test(await page.evaluate(() => document.body.textContent)), 'Inserat bietet den zweiten Weg zum eigenen Fensterbauer');
+  const linkCode = await page.evaluate(() => { const o = { v: 1, b: 'k2m8q', w: [{ name: 'X', w: 1000, h: 1000 }], p: {}, t: Date.now() }; return 'AM1.' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); });
+  await tun('sheet', 'import'); await page.waitForSelector('#code-in'); await page.fill('#code-in', linkCode); await tun('import'); await page.waitForTimeout(400);
+  ok(/gehört zum Auftrag deines Fensterbauers/.test(await toastText()), 'Aufmaß aus einem Betriebs-Link lässt sich nicht ins Portal stellen');
+  await page.evaluate(() => { S.sheet = null; render(); });
   await foto(page, 'portal-eigentuemer');
   const vor = await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i1'); x.knocks.unshift({ c: 'c1', when: 'heute', status: 'offen' }); return S.acc.c1.guthaben; });
   await tun('release', '', 'i1', 'c1'); await page.waitForTimeout(500);

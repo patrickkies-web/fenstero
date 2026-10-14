@@ -12,7 +12,8 @@ Stand: Pilotphase. Dieses Dokument ist die Vorgabe für die spätere Server-Umse
 | Betrieb Plus | Position `plus`, Schlüssel = Monat | 79 € je Monat | beim Aktivieren und dann am Monatsanfang; Wechsel zurück gilt zum Monatsende |
 | Eigentümer gibt Kontakt frei (Portal) | `charge`, Schlüssel = Anfrage | 29 / 59 / 89 / 129 € nach Fensterzahl, Plus −30 % | beim Freigeben; zuerst aus dem Startguthaben, der Rest auf die Sammelrechnung |
 | Freigabe zurückgezogen oder Fair-Regel | `charge` → `gutschrift` | verrechnetes Guthaben kommt zurück, der Rest wird nicht berechnet | sofort bzw. frühestens 7 Tage nach der Freigabe |
-| Kunde: PDF des eigenen Aufmaßes | – | im Pilot kostenlos (später 19,90 €) | – |
+| Eigen-Kunde: PDF des eigenen Aufmaßes | – | kostenlos (umschaltbar über `kundeDatei`) | – |
+| Link-Kunde: Kopie des Aufmaßes | – | keine von Klopfan, der Betrieb gibt sie weiter | – |
 
 Nicht berechnet werden: Projekte anlegen, Links verschicken, anklopfen, Beispieldaten (`demo`), gesperrte Aufmaße ohne Zahlungsart (sie warten).
 
@@ -39,7 +40,19 @@ Schranken gegen Missbrauch (ein Projekt als Sammelstelle für viele Kunden):
 - ein Aufmaß **ohne jede Überschneidung** mit dem bisherigen (keine Position mit gleichem Namen oder gleichen Maßen) gilt als anderes Aufmaß und wird gebucht; der Betrieb sieht das vorher im Anfrage-Fenster und hinterher als Hinweis;
 - Projektname und Kunde stecken im Link; ein Nachbesserungs-Link funktioniert nur für genau dieses Projekt.
 
-## 4. Was heute umgangen werden kann, und was der Server später erzwingt
+## 4. Zwei Arten von Kunden, ein Kreislauf
+
+**Link-Kunde** (misst über den Link eines Betriebs): Der Betrieb hat ihn eingeladen und zahlt das Aufmaß. Zusage an den Betrieb: *Ihr Kunde bleibt Ihr Kunde.* Deshalb bekommt dieser Kunde von Klopfan keine Kopie mit Maßen zum Weiterschicken, der Betrieb gibt ihm das Aufmaßblatt mit dem Angebot; nach dem Senden zeigt die App ihm seine Positionen ohne Maßliste; sein Code lässt sich nicht ins Portal stellen (`b` im Code). Das ist eine Bremse, kein Schloss: Vor dem Senden kann er Bildschirmfotos machen, und ein eigenes Projekt neu zu messen, steht ihm immer frei. Mehr Schutz wäre gegen die Daten des Kunden selbst gerichtet und nicht durchzuhalten.
+
+**Eigen-Kunde** (misst von sich aus, ohne Link): Niemand hat für ihn bezahlt, das Aufmaß gehört ihm. Er soll *beides* tun, und beides ist kostenlos:
+1. den Code an seinen Fensterbauer des Vertrauens schicken. Die Nachricht lädt den Betrieb ein: kostenlos anmelden, „Code vom Kunden einfügen“, die ersten 3 Aufmaße frei. Jeder Eigen-Kunde ist damit ein Werber für neue Betriebe;
+2. dasselbe Aufmaß anonym ins Portal stellen und Vergleichsangebote holen. Hier entsteht der Umsatz: 29 bis 129 € je freigegebenem Kontakt, bis zu dreimal je Inserat.
+
+Die App führt ihn als „Ein Aufmaß, zwei Wege“ mit Haken je Weg und stößt nach dem ersten Weg den zweiten an; das Inserat im Portal bietet den Weg zum eigenen Fensterbauer noch einmal an. Seine PDF ist kostenlos (`kundeDatei: 0` in `config.js`). Eine Gebühr dafür würde den Kreislauf bremsen und ließe sich ohnehin nicht schützen (Bildschirmfoto, Code ist lesbar); ein einziger verkaufter Kontakt bringt mehr als die 19,90 €. Wer die Gebühr trotzdem will, setzt `kundeDatei` auf den Preis, dann gilt wieder Konto plus Kauf.
+
+Grenze gegen Missbrauch des kostenlosen Kundenkontos: höchstens 3 Inserate je Konto in 12 Monaten (`KUNDE_MAX`); ein Konto ist für das eigene Zuhause, nicht für Vermittler.
+
+## 5. Was heute umgangen werden kann, und was der Server später erzwingt
 
 Im Pilot liegt alles im Browser des Betriebs. Wer will, löscht seine Website-Daten und hat wieder drei kostenlose Aufmaße. Das ist bekannt und in der Pilotphase in Ordnung, weil nichts berechnet wird. Für den echten Betrieb gehört jede Zählung auf den Server:
 
@@ -54,7 +67,7 @@ Im Pilot liegt alles im Browser des Betriebs. Wer will, löscht seine Website-Da
 
 Was auch heute schon nicht geht, weil es die Regeln selbst verhindern: zweimal für dasselbe Projekt zahlen, ein Aufmaß nach dem Senden still verändern (der Code ist eingefroren), ohne vollständiges Fenster senden, einen Code doppelt einlesen, nach einer Absage erneut anklopfen, bei pausierten oder zurückgezogenen Aufmaßen anklopfen, eine Gutschrift vor dem siebten Tag, einen bezahlten Kontakt durch Löschen des Aufmaßes verlieren.
 
-## 5. Anreize, so wie sie gebaut sind
+## 6. Anreize, so wie sie gebaut sind
 
 **Betrieb**
 - Einstieg ohne Risiko: kein Konto-Zwang mit Zahlungsart, drei echte Aufmaße gratis, der erste Nutzen (eingesparte Anfahrt) kommt vor der ersten Rechnung.
@@ -67,4 +80,4 @@ Was auch heute schon nicht geht, weil es die Regeln selbst verhindern: zweimal f
 - Alles kostenlos, kein Konto, Daten bleiben anonym bis zur Freigabe, höchstens drei Betriebe bekommen den Kontakt, Freigabe jederzeit zurückziehbar.
 - Kleine Erfolgsmomente beim Messen (Alle Maße da, Fenster gespeichert, abgeschickt) und ein PDF für die eigenen Unterlagen.
 
-**Offene Fragen für später** (bewusst noch nicht gebaut): Staffelpreise ab vielen Aufmaßen im Monat ohne Plus, ein Teamkonto mit mehreren Mitarbeitern, Rabatt für Jahreszahlung, und ob die 19,90 € für die Kunden-PDF nach dem Pilot bleiben.
+**Offene Fragen für später** (bewusst noch nicht gebaut): Staffelpreise ab vielen Aufmaßen im Monat ohne Plus, ein Teamkonto mit mehreren Mitarbeitern, Rabatt für Jahreszahlung, und ob Plus-Betriebe ihren Link-Kunden eine PDF mit eigenem Logo freigeben dürfen (ein Argument mehr für Plus).

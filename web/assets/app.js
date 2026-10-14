@@ -780,7 +780,7 @@ function kaufSicher() { return S.kauf ? Object.assign({}, S.kauf, { pw: '' }) : 
 function persist() {
   try {
     if (S.betrieb) localStorage.setItem(linkKey(), JSON.stringify({ windows: S.windows, proj: S.proj, sent: S.sent, nb: S.nb || null, kauf: kaufSicher(), name: S.betrieb.name }));
-    else localStorage.setItem(STORE, JSON.stringify({ windows: S.windows, proj: S.proj, admin: S.admin, portal: S.portal, kauf: kaufSicher() }));
+    else localStorage.setItem(STORE, JSON.stringify({ windows: S.windows, proj: S.proj, admin: S.admin, portal: S.portal, kauf: kaufSicher(), teil: S.teil || null }));
   } catch (e) { /* ohne Speicher weiter */ }
 }
 function normProj(p) { if (p.zeit === 'sofort') p.zeit = 'asap'; if (p.zeit === 'offen') p.zeit = '12m'; if (p.gebaeude === 'altbau') p.gebaeude = 'efh'; return p; }
@@ -804,6 +804,7 @@ function restore() {
     if (o && o.admin) Object.assign(S.admin, o.admin);
     if (o && o.portal) Object.assign(S.portal, o.portal);
     if (o && o.kauf) S.kauf = o.kauf;
+    S.teil = o && o.teil ? o.teil : null;
   } catch (e) { /* ok */ }
 }
 function readHash() {
@@ -863,7 +864,7 @@ function render(fresh) {
 function feiern(root) {
   if (!S._feier || !window.Feier) return;
   const art = S._feier; S._feier = null;
-  const sel = { masse: '.mess-in .eyebrow', fertig: '.scr .center .eyebrow, .scr h1', gesendet: '.okmark, .scr .center svg, .scr h1', pdf: '.datei-card .dc-ic, .datei-card, .scr h1' }[art] || '.scr h1';
+  const sel = { masse: '.mess-in .eyebrow', fertig: '.scr .center .eyebrow, .scr h1', gesendet: '.okmark, .scr .center svg, .scr h1', pdf: '.datei-card .dc-ic, .datei-card, .scr h1', loop: '.scr h1' }[art] || '.scr h1';
   const ziel = root.querySelector(sel);
   setTimeout(() => { if (ziel && document.body.contains(ziel)) window.Feier.konfetti(ziel, { n: art === 'gesendet' ? 38 : art === 'pdf' ? 18 : 26, kraft: art === 'gesendet' ? 170 : 120, breit: art === 'gesendet' }); }, art === 'fertig' ? 380 : 220);
 }
@@ -1161,15 +1162,24 @@ SCREENS.gesendet = () => {
   return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home' } };
 };
 /* Ohne Kundenlink: ins Portal stellen oder direkt an einen Betrieb schicken */
+/* Eigenes Projekt, fertig gemessen: ein Aufmaß, zwei Wege. Beide kostenlos, beide zählen als erledigt. */
+const teilStand = () => S.teil || (S.teil = { betrieb: 0, portal: 0 });
 SCREENS.teilen = () => {
-  const code = packProject(S.windows, S.proj, null), n = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0);
-  const msg = 'Hallo, hier ist mein Fenster-Aufmaß aus Klopfan (' + n + ' Fenster). Den Code bitte im Klopfan-Portal unter „Aufmaß-Code einfügen“ einsetzen:\n' + code;
-  const html = hd('Fertig gemessen', 'Wohin damit?', 'Dein Aufmaß ist komplett. Zwei Wege, du kannst auch beide gehen.') +
-    (PILOT ? '<div class="card share-way soon"><p class="eyebrow">Bald · nach der Pilotphase</p><h2>Im Fensterportal anbieten</h2><p class="sub" style="color: var(--fg2)">Anonym: Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an. Das startet nach der Pilotphase. Bis dahin schickst du dein Aufmaß direkt an einen Fensterbauer.</p></div>' : '<div class="card share-way"><p class="eyebrow">Empfohlen · kostenlos</p><h2>Im Fensterportal anbieten</h2><p class="sub" style="color: var(--fg2)">Anonym: Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an. Du entscheidest, wer deine Kontaktdaten bekommt.</p>' +
-    '<ol class="way-steps"><li><span class="n">1</span><span><b>Code kopieren</b></span><button type="button" class="pill" data-act="copyblatt">Kopieren</button></li><li><span class="n">2</span><span><b>Portal öffnen</b><small>Konto anlegen oder anmelden</small></span><a class="pill" href="' + PORTAL_OPEN + '" target="_blank" rel="noopener">Öffnen ›</a></li><li><span class="n">3</span><span><b>„Aufmaß-Code einfügen“</b><small>Dann ist es online, ohne deinen Namen.</small></span></li></ol></div>') +
-    '<div class="card share-way"><p class="eyebrow">Du hast schon einen Betrieb?</p><h2>Direkt an deinen Fensterbauer</h2><p class="sub" style="color: var(--fg2)">Schick ihm den Code. Er setzt ihn in seinem Klopfan-Bereich ein und hat das komplette Aufmaßblatt.</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '">E-Mail</a><button type="button" class="pill" data-act="copyblatt">Code kopieren</button></div></div>' +
-    (PILOT ? '<div class="card share-way"><p class="eyebrow">Für dich · in der Pilotphase kostenlos</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen.</p><div class="pill-row"><button type="button" class="pill" data-act="k-dl">Herunterladen</button></div></div>' : '<div class="card share-way"><p class="eyebrow">Für dich · ' + euro(DATEI_PREIS) + '</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen. Mit Klopfan-Konto, einmalig.</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="datei">' + (S.kauf && S.kauf.paid ? 'Herunterladen' : 'Ansehen') + '</button></div></div>') +
-    '<div class="sec">' + secHead('Dein Aufmaß-Code', null, 'Für Portal und Fensterbauer. Falls Kopieren nicht klappt: Text markieren und kopieren.') + '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea></div>';
+  const code = packProject(S.windows, S.proj, null), n = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), t = teilStand(), frei = KUNDE_FREI();
+  const msg = 'Hallo, hier ist mein Fenster-Aufmaß aus Klopfan (' + n + ' Fenster): alle Maße, die Auswertung der Fotos und meine Wünsche. Den Code bitte bei Klopfan unter „Code vom Kunden einfügen“ einsetzen. Noch kein Zugang? Kostenlos anmelden, die ersten 3 Aufmaße sind frei: ' + PORTAL_URL + '\n\n' + code;
+  const beide = t.betrieb && t.portal;
+  const tick = (on) => '<span class="way-tick' + (on ? ' on' : '') + '">' + (on ? CHECK : '') + '</span>';
+  const stand = beide ? 'Beides erledigt. Jetzt heißt es: Angebote vergleichen und in Ruhe entscheiden.'
+    : t.betrieb && !t.portal ? (PILOT ? 'Unterwegs zu deinem Fensterbauer. Vergleichsangebote aus dem Portal kommen nach der Pilotphase, dein Code bleibt gültig.' : 'Unterwegs zu deinem Fensterbauer. Hol dir dazu zwei, drei Vergleichsangebote: anonym, kostenlos, du entscheidest, wer dich kontaktiert.')
+    : t.portal && !t.betrieb ? 'Im Portal. Schick es auch deinem Fensterbauer des Vertrauens, dann hast du sein Angebot zum Vergleich.'
+    : 'Dein Aufmaß gehört dir. Beide Wege sind kostenlos, und du kannst beide gehen.';
+  const html = hd('Fertig gemessen', 'Ein Aufmaß, zwei Wege.', stand) +
+    '<div class="card share-way' + (t.betrieb ? ' done' : '') + '"><div class="way-head">' + tick(t.betrieb) + '<div><p class="eyebrow">' + (t.betrieb ? 'Erledigt' : 'Weg 1 · kostenlos') + '</p><h2>An deinen Fensterbauer</h2></div></div><p class="sub" style="color: var(--fg2)">Schick ihm den Code. Er setzt ihn bei Klopfan ein und hat das komplette Aufmaßblatt, ohne Anfahrt. Hat er noch kein Klopfan? Die Anmeldung ist kostenlos, der Hinweis steht in der Nachricht.</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="betrieb">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '" data-act="teil-mark" data-v="betrieb">E-Mail</a><button type="button" class="pill" data-act="teil-copy" data-v="betrieb">Code kopieren</button></div></div>' +
+    (PILOT ? '<div class="card share-way soon"><div class="way-head">' + tick(false) + '<div><p class="eyebrow">Weg 2 · bald, nach der Pilotphase</p><h2>Vergleichsangebote aus dem Portal</h2></div></div><p class="sub" style="color: var(--fg2)">Anonym: Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an, und du entscheidest, wer deine Kontaktdaten bekommt. Dein Code bleibt dafür gültig.</p></div>'
+      : '<div class="card share-way' + (t.portal ? ' done' : '') + '"><div class="way-head">' + tick(t.portal) + '<div><p class="eyebrow">' + (t.portal ? 'Erledigt' : 'Weg 2 · kostenlos, anonym') + '</p><h2>Vergleichsangebote aus dem Portal</h2></div></div><p class="sub" style="color: var(--fg2)">Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an. Du entscheidest, wer deine Kontaktdaten bekommt, höchstens drei.</p>' +
+      '<ol class="way-steps"><li><span class="n">1</span><span><b>Code kopieren</b></span><button type="button" class="pill" data-act="teil-copy" data-v="portal">Kopieren</button></li><li><span class="n">2</span><span><b>Portal öffnen</b><small>Konto anlegen oder anmelden</small></span><a class="pill" href="' + PORTAL_OPEN + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="portal">Öffnen ›</a></li><li><span class="n">3</span><span><b>„Aufmaß-Code einfügen“</b><small>Dann ist es online, ohne deinen Namen.</small></span></li></ol></div>') +
+    (frei ? '<div class="card share-way"><p class="eyebrow">Für dich · kostenlos</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen. Dein Aufmaß gehört dir.</p><div class="pill-row"><button type="button" class="pill" data-act="k-dl">Herunterladen</button></div></div>' : '<div class="card share-way"><p class="eyebrow">Für dich · ' + euro(DATEI_PREIS) + '</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen. Mit Klopfan-Konto, einmalig.</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="datei">' + (S.kauf && S.kauf.paid ? 'Herunterladen' : 'Ansehen') + '</button></div></div>') +
+    '<div class="sec">' + secHead('Dein Aufmaß-Code', null, 'Für Fensterbauer und Portal. Falls Kopieren nicht klappt: Text markieren und kopieren.') + '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea></div>';
   return { html: html, back: ['Zurück', 'anfrage3'], bar: { label: 'Zurück zum Projekt', act: 'go', v: 'home' } };
 };
 
@@ -1259,7 +1269,8 @@ function blattFile() {
     S.windows.map((x, i) => { const d = derive(x); return '<div class="p"><h2>Pos. ' + (i + 1) + ' · ' + esc(x.name || 'Fenster') + '</h2><p class="m">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p>' + rowsH(x) + '</div>'; }).join('') + '<p class="m" style="margin-top:24px">Erfasst mit Klopfan. Vor der Fertigung Feinaufmaß vor Ort.</p></body></html>';
 }
 async function saveDatei() {
-  if (!kauf().paid && !PILOT) return go('datei');
+  if (S.betrieb && !kauf().paid) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
+  if (!kauf().paid && !KUNDE_FREI()) return go('datei');
   const pdf = blattPDF(), name = fileBase() + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
   if (!DL && DLP) await DLP;
   if (DL) {
@@ -1624,6 +1635,8 @@ function act(name, el) {
     case 'save': return saveWin();
     case 'send': { if (S.betrieb && S.sent) return go('gesendet'); if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
+    case 'teil-copy': { copyText(curCode(), 'code-box', 'Code kopiert'); return act('teil-mark', el); }
+    case 'teil-mark': { const t = teilStand(), k = v === 'portal' ? 'portal' : 'betrieb'; if (!t[k]) { t[k] = Date.now(); if (t.betrieb && t.portal) S._feier = 'loop'; persist(); setTimeout(() => render(), 150); } return; }
     case 'k-next': { const k = kauf(); k.err = {}; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(k.mail || '').trim())) k.err.mail = 'Bitte eine gültige E-Mail-Adresse eingeben.'; if (String(k.pw || '').length < 8) k.err.pw = 'Mindestens 8 Zeichen.'; if (!k.agb) k.err.agb = 'Bitte zustimmen, sonst können wir kein Konto anlegen.'; if (Object.keys(k.err).length) return render(); k.mail = k.mail.trim(); persist(); return go('kasse'); }
     case 'k-pay': { const k = kauf(); k.pay = v; if (k.err) delete k.err.pay; return render(); }
     case 'k-buy': { const k = kauf(); k.err = {}; if (!k.pay) k.err.pay = 'Bitte eine Zahlungsart wählen.'; if (!k.widerruf) k.err.widerruf = 'Für die sofortige Lieferung brauchen wir deine Zustimmung.'; if (Object.keys(k.err).length) return render(); k.paid = true; k.when = Date.now(); k.pw = ''; persist(); return go('gekauft'); }
@@ -1694,7 +1707,7 @@ function boot() {
   if (S.betrieb) loadLink();
   window.addEventListener('hashchange', () => { const b = readHash(), was = S.betrieb ? S.betrieb.code : '', now = b ? b.code : ''; if (was === now) { if (b) S.betrieb = b; return render(); } S.betrieb = b; if (b) loadLink(); else loadOwn(); S.screen = 'home'; render(true); });
   const root = $app();
-  root.addEventListener('click', (e) => { const el = e.target.closest ? e.target.closest('[data-act]') : null; if (!el || el.disabled) return; const name = el.getAttribute('data-act'); if (name === 'none') return; e.preventDefault(); act(name, el); });
+  root.addEventListener('click', (e) => { const el = e.target.closest ? e.target.closest('[data-act]') : null; if (!el || el.disabled) return; const name = el.getAttribute('data-act'); if (name === 'none') return; if (el.tagName !== 'A') e.preventDefault(); act(name, el); });
   root.addEventListener('input', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
   root.addEventListener('change', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
   document.addEventListener('keydown', (e) => {
@@ -1737,19 +1750,22 @@ SCREENS.gesendet = () => {
     dateiCard();
   return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home' } };
 };
-/* Datei: in der Pilotphase kostenlos und ohne Konto */
+/* Datei: Wer ohne Link selbst misst, dem gehört sein Aufmaß, die PDF ist kostenlos (KONFIG.kundeDatei > 0 schaltet den Verkauf ein).
+   Wer über den Link eines Betriebs misst, bekommt keine Kopie mit Maßen zum Weiterschicken; das ist die Zusage an den Betrieb, der gibt sie weiter. */
+function KUNDE_FREI() { const C = window.KONFIG || {}; return PILOT || !(C.kundeDatei > 0); }
 const dateiCardOrig = dateiCard;
 dateiCard = function () {
-  if (!PILOT) return dateiCardOrig();
   const n = S.windows.length;
-  return '<div class="card datei-card bought"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Für dich · in der Pilotphase kostenlos</p><b>Dein Aufmaßblatt als PDF</b><small>' + n + ' Fenster, alle Maße und Angaben, für deine Unterlagen.</small></div></div><button type="button" class="btn primary" style="flex: 0 0 auto" data-act="k-dl">Herunterladen</button></div>';
+  if (S.betrieb) { const bn = S.betrieb.name || 'dein Fensterbauer'; return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich?</p><b>Frag ' + esc(bn) + '</b><small>Dein Aufmaß gehört zu diesem Auftrag. ' + esc(bn) + ' hat das komplette Aufmaßblatt als PDF und gibt es dir gern mit dem Angebot.</small></div></div></div>'; }
+  if (!KUNDE_FREI()) return dateiCardOrig();
+  return '<div class="card datei-card bought"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Für dich · kostenlos</p><b>Dein Aufmaßblatt als PDF</b><small>' + n + ' Fenster, alle Maße und Angaben, für deine Unterlagen. Dein Aufmaß gehört dir.</small></div></div><button type="button" class="btn primary" style="flex: 0 0 auto" data-act="k-dl">Herunterladen</button></div>';
 };
 const dateiScreenOrig = SCREENS.datei;
 SCREENS.datei = () => {
   const v = dateiScreenOrig();
-  if (!PILOT) return v;
+  if (!KUNDE_FREI()) return v;
   v.html = v.html.replace('Dauerhaft in deinem Klopfan-Konto', 'Sofort als PDF auf deinem Gerät')
-    .replace('<b>' + euro(DATEI_PREIS) + '</b><small>einmalig, inkl. MwSt.</small>', '<b>0,00 €</b><small>in der Pilotphase kostenlos, später ' + euro(DATEI_PREIS) + '</small>');
+    .replace('<b>' + euro(DATEI_PREIS) + '</b><small>einmalig, inkl. MwSt.</small>', '<b>0,00 €</b><small>kostenlos, dein Aufmaß gehört dir</small>');
   v.bar = { label: 'Kostenlos herunterladen', act: 'k-dl' };
   return v;
 };

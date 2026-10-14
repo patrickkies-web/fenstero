@@ -6,5 +6,6 @@ window.KONFIG = {
   pilot: true,                 // Pilotphase: kein Server, Code-Versand per WhatsApp/E-Mail, Datei kostenlos, nichts wird berechnet
   ki: '/api/ki',               // KI-Auswertung der Fotos; '' schaltet sie ganz ab
   impressum: '/impressum/',
-  datenschutz: '/datenschutz/'
+  datenschutz: '/datenschutz/',
+  kundeDatei: 0                // PDF für Hauseigentümer, die ohne Link selbst messen: 0 = kostenlos (empfohlen), z. B. 19.9 = Verkauf mit Konto
 };
