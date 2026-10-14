@@ -1,21 +1,21 @@
-# Klopfan
+# Fensterino
 
-Fenster-Aufmaß, geführt. Hauseigentümer messen ihre Fenster selbst, Schritt für Schritt erklärt, mit Fotos, 3-D-Modell und allen Wünschen. Fensterbauer bekommen ein vollständiges Aufmaß fürs Angebot, ohne Anfahrt.
+Die Aufmaß-App für Fenster. Hauseigentümer messen ihre Fenster selbst, Schritt für Schritt erklärt, mit Fotos, 3-D-Modell und allen Wünschen, und bekommen ihr Aufmaßblatt kostenlos als PDF. Fensterbauer laden Kunden per Aufmaß-Link ein und bekommen ein vollständiges Aufmaß fürs Angebot, ohne Anfahrt; daran verdient Fensterino.
 
-**Stand: Pilotphase.** Statische Website ohne eigenen Server: Kundenlinks, Messen, PDF und Code-Übergabe an den Betrieb funktionieren; der Marktplatz im Portal ist eine Vorschau mit Beispieldaten, es wird nichts berechnet. Details und nächste Schritte: [docs/ONLINE-STELLEN.md](docs/ONLINE-STELLEN.md).
+**Stand: Pilotphase.** Statische Website ohne eigenen Server: Kundenlinks, Messen, PDF und Code-Übergabe an den Betrieb funktionieren; der Bereich für Betriebe zeigt Beispielprojekte, es wird nichts berechnet. Details und nächste Schritte: [docs/ONLINE-STELLEN.md](docs/ONLINE-STELLEN.md).
 
 ## Aufbau
 
 | Pfad | Inhalt |
 |---|---|
 | `web/` | die Website, so wie sie ausgeliefert wird (Cloudflare Pages: Ausgabeverzeichnis `web`, kein Build-Befehl) |
-| `web/index.html` | Portal für Fensterbauer und Hauseigentümer |
+| `web/index.html` | Startseite und Bereich für Fensterbauer (Projekte, Aufmaß-Links, Einladungslisten, Abrechnung) |
 | `web/app/` | Mess-App für Kunden, Kundenlinks: `/app/#k-…` |
 | `web/assets/` | Programmcode und Gestaltung (`app.*`, `portal.*`, gemeinsam `gemeinsam.*` mit Logo und KI-Anbindung, Rechtsseiten `recht.css`) |
 | `web/config.js` | Einstellungen ohne Geheimnisse (Name, Pilotmodus, KI-Adresse) |
 | `web/impressum/`, `web/datenschutz/` | Rechtsseiten (Entwürfe mit Platzhaltern) |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
-| `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weiße Faust auf schwarzer Kachel, die anklopft |
+| `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weißes Fenster auf schwarzer Kachel, der Flügel kippt kurz |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT) und qrcode-generator (MIT), lokal statt von fremden Servern |
 | `functions/api/ki.js` | KI-Auswertung der Fotos (Cloudflare Pages Function), Schlüssel als Secret `ANTHROPIC_API_KEY` |
 | `scripts/` | lokaler Testserver, Browser-Prüfung, Umbenennen |

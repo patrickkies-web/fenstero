@@ -1,5 +1,5 @@
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
-/* Klopfan Portal: Marktplatz für Fenster-Aufmaße. Zwei Rollen, eine Oberfläche. Seitenleiste ab 880 px, darunter Tableiste. */
+/* Fensterino Portal: Marktplatz für Fenster-Aufmaße. Zwei Rollen, eine Oberfläche. Seitenleiste ab 880 px, darunter Tableiste. */
 :root {
   --bg: #f5f5f7; --surface: #ffffff; --surface2: #f2f2f6; --fg: #1d1d1f; --fg2: #3a3a3c; --muted: #6e6e73; --line: rgba(0,0,0,.08); --line2: rgba(0,0,0,.14); --chip: #e8e8ed; --seg: #e3e3e8;
   --accent: #0071e3; --accent-soft: rgba(0,113,227,.12); --on-accent: #ffffff;
@@ -712,3 +712,17 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 .card.eigen { display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 0 0 1.5px var(--accent-soft), var(--shadow) } .card.eigen > b { font-size: 17px } .card.eigen .kt { margin: 0 }
 /* Betrieb kommt über die PDF eines Kunden */
 .banner.vonpdf { background: var(--accent-soft); align-items: center } .banner.vonpdf > .row { gap: 8px; flex: 0 0 auto }
+/* ---------- Fensterino: Startseite für Hauseigentümer ---------- */
+.hero.b2c { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); padding-bottom: 18px }
+.hero.b2b { padding-top: clamp(28px, 6vw, 56px); border-top: 1px solid var(--line) }
+.b2c-visual { display: flex; justify-content: center }
+.b2c-card { width: min(100%, 380px); padding: 20px 20px 18px; border-radius: 28px; background: var(--surface); box-shadow: var(--shadow2); display: flex; flex-direction: column; gap: 14px; transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)); transition: transform .25s ease-out }
+.b2c-win { position: relative; display: flex; justify-content: center; padding: 26px 52px 32px; border-radius: 20px; background: linear-gradient(180deg, var(--surface2), transparent) }
+.b2c-win svg { width: 220px; height: 220px; filter: drop-shadow(0 10px 20px rgba(0,0,0,.12)) }
+.b2c-win .dim { position: absolute; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; color: #fff; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.18); opacity: 0; animation: dimin .5s cubic-bezier(.2,.8,.2,1.2) forwards }
+.b2c-win .dim-h { left: 4px; top: 46%; background: var(--lead); animation-delay: .9s } .b2c-win .dim-w { left: 50%; bottom: 6px; transform: translateX(-50%); background: var(--lead); animation-delay: 1.2s }
+.b2c-win .dim-eh { right: 4px; top: 56%; background: var(--accent); animation-delay: 1.5s } .b2c-win .dim-ew { left: 50%; top: 4px; transform: translateX(-50%); background: var(--accent); animation-delay: 1.8s }
+@keyframes dimin { from { opacity: 0; translate: 0 6px } to { opacity: 1; translate: 0 0 } }
+.b2c-chips { display: flex; flex-wrap: wrap; gap: 6px } .b2c-chips .badge { opacity: 0; animation: wordin .5s forwards } .b2c-chips .badge:nth-child(1) { animation-delay: 2.1s } .b2c-chips .badge:nth-child(2) { animation-delay: 2.25s } .b2c-chips .badge:nth-child(3) { animation-delay: 2.4s } .b2c-chips .badge:nth-child(4) { animation-delay: 2.7s }
+@media (max-width: 879px) { .hero.b2c { grid-template-columns: minmax(0, 1fr) } .b2c-win svg { width: 180px; height: 180px } }
+@media (prefers-reduced-motion: reduce) { .b2c-win .dim, .b2c-chips .badge { animation: none; opacity: 1 } .b2c-card { transform: none } }

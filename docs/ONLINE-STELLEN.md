@@ -1,8 +1,8 @@
-# Klopfan online stellen
+# Fensterino online stellen
 
-**Klopfan.** Das Logo ist eine weiße Faust auf Schwarz, die anklopft, so wie Betriebe im Portal bei Projekten anklopfen. Klopfan bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
+**Fensterino.** Die Aufmaß-App für Fenster: kostenlos für Hauseigentümer, bezahlt von Fensterbauern je Projekt. Das Logo ist ein weißes Fenster auf Schwarz, dessen Flügel kurz kippt. Fensterino bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
 
-Diese Anleitung bringt die Klopfan-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…pages.dev`), später unter deiner eigenen Domain.
+Diese Anleitung bringt die Fensterino-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…pages.dev`), später unter deiner eigenen Domain.
 
 ## Zwei Stufen
 
@@ -12,19 +12,19 @@ Diese Anleitung bringt die Klopfan-Website ins Netz: erst unter einer kostenlose
 |---|---|
 | App: Fotos, vier Maße, Ränder, 3-D-Modell, Wünsche, Glossar | funktioniert vollständig |
 | Kundenlink vom Betrieb zur App | funktioniert |
-| Aufmaß zum Betrieb | Kunde schickt einen Aufmaß-Code per WhatsApp oder E-Mail, der Betrieb fügt ihn im Portal ein |
+| Aufmaß zum Betrieb | Kunde schickt das Aufmaßblatt als PDF oder den Aufmaß-Code, der Betrieb fügt den Code in seinem Bereich ein |
 | PDF fürs Aufmaß (Kunde und Betrieb) | funktioniert, für Kunden in der Pilotphase kostenlos |
 | KI-Auswertung der Fotos | funktioniert, sobald du einen Anthropic-Schlüssel hinterlegst (Schritt 5), sonst ohne KI |
-| Portal: Marktplatz, Anklopfen, Bewertungen, Abrechnung | Vorschau mit Beispieldaten, nichts wird berechnet |
+| Bereich für Betriebe: Projekte, Einladungslisten, Nachbesserung, Abrechnung | funktioniert im Browser, Abrechnung als Vorschau, nichts wird berechnet |
 | Speicherort | nur im Browser des jeweiligen Geräts |
 
-**Stufe 2, danach: echtes Backend.** Konten, automatische Übertragung samt Fotos, echte Anfragen im Marktplatz, Abrechnung. Siehe Abschnitt „Stufe 2“ unten.
+**Stufe 2, danach: echtes Backend.** Konten, automatische Übertragung samt Fotos, Abrechnung. Siehe Abschnitt „Stufe 2“ unten.
 
 ## Was du brauchst
 
 | | Kosten |
 |---|---|
-| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `klopfan` ist möglich, siehe unten) |
+| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `fensterino` ist möglich, siehe unten) |
 | Cloudflare-Konto (Pages) | kostenlos |
 | Eigene Domain | später, beim Anbieter deiner Wahl |
 | Anthropic-API-Schlüssel für die KI | optional, nach Verbrauch; Ausgabenlimit setzen |
@@ -44,13 +44,13 @@ Diese Anleitung bringt die Klopfan-Website ins Netz: erst unter einer kostenlose
 
    | Feld | Wert |
    |---|---|
-   | Projektname | `klopfan` (ergibt `klopfan.pages.dev`, falls frei) |
+   | Projektname | `fensterino` (ergibt `fensterino.pages.dev`, falls frei) |
    | Production branch | `main` |
    | Framework preset | `None` |
    | Build command | leer lassen |
    | Build output directory | `web` |
 
-5. **Speichern und bereitstellen** (Save and Deploy). Nach etwa einer Minute ist die Seite unter `https://klopfan.pages.dev` erreichbar (oder unter dem Namen, den Cloudflare anzeigt).
+5. **Speichern und bereitstellen** (Save and Deploy). Nach etwa einer Minute ist die Seite unter `https://fensterino.pages.dev` erreichbar (oder unter dem Namen, den Cloudflare anzeigt).
 
 Die Menünamen bei Cloudflare ändern sich ab und zu; die Werte in der Tabelle bleiben gleich.
 
@@ -60,12 +60,12 @@ Ab jetzt gilt: Jede Änderung im Branch `main` geht automatisch online. Andere B
 
 ## Schritt 3: Testen
 
-- `https://…pages.dev/` zeigt das Portal mit dem Pilot-Hinweis oben.
+- `https://…pages.dev/` zeigt die Startseite mit dem Pilot-Hinweis oben.
 - `https://…pages.dev/app/` zeigt die App.
-- Kompletter Weg: Im Portal **Demo ansehen** wählen (Fensterbau Brandt), ein Projekt öffnen, den Kundenlink kopieren und dir selbst per WhatsApp schicken. Auf dem Handy öffnen, ein Fenster messen (oder „Beispielfotos nutzen“), absenden, den Aufmaß-Code an dich zurückschicken. Im Portal **Code vom Kunden einfügen**: Das Aufmaß erscheint beim Projekt.
+- Kompletter Weg: Auf der Startseite **Demo ansehen** wählen (Fensterbau Brandt), ein Projekt öffnen, den Kundenlink kopieren und dir selbst per WhatsApp schicken. Auf dem Handy öffnen, ein Fenster messen (oder „Beispielfotos nutzen“), absenden, den Aufmaß-Code an dich zurückschicken. Im Portal **Code vom Kunden einfügen**: Das Aufmaß erscheint beim Projekt.
 - `…/impressum/` und `…/datenschutz/` laden.
 
-**Wichtig im Pilot:** Das Portal speichert alles im Browser des Geräts. Kundenlinks anlegen und Codes einfügen deshalb immer im selben Browser auf demselben Gerät, zum Beispiel am Büro-PC.
+**Wichtig im Pilot:** Der Bereich für Betriebe speichert alles im Browser des Geräts. Kundenlinks anlegen und Codes einfügen deshalb immer im selben Browser auf demselben Gerät, zum Beispiel am Büro-PC.
 
 ## Schritt 4: Impressum und Datenschutz ausfüllen
 
@@ -80,8 +80,8 @@ Beide Texte sind Entwürfe für die Pilotphase. Lass sie vor dem öffentlichen S
 ## Schritt 5: KI-Fotoauswertung einschalten (optional)
 
 1. In der [Anthropic Console](https://console.anthropic.com) anmelden, unter **Billing** ein Zahlungsmittel oder Guthaben hinterlegen und unter **Limits** ein monatliches Ausgabenlimit setzen.
-2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `klopfan-pages`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
-3. Cloudflare: **Workers & Pages → klopfan → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets)**, Umgebung **Production**, **Hinzufügen**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, speichern.
+2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `fensterino-pages`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
+3. Cloudflare: **Workers & Pages → fensterino → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets)**, Umgebung **Production**, **Hinzufügen**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, speichern.
 4. Neu bereitstellen, denn Secrets wirken erst ab dem nächsten Deployment: **Deployments**, beim letzten Eintrag **Erneut versuchen** (Retry deployment).
 5. Prüfen: `https://…pages.dev/api/ki` zeigt `{"bereit":true}`.
 
@@ -95,17 +95,17 @@ Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass
 
 ## Schritt 6: Eigene Domain (wenn der Name feststeht)
 
-Vorher den Namen prüfen: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „Klopfan“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke dazukommen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
+Vorher den Namen prüfen: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „Fensterino“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke dazukommen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
 
-1. Domain kaufen (zum Beispiel `klopfan.de`) bei einem Anbieter deiner Wahl.
+1. Domain kaufen (zum Beispiel `fensterino.de`) bei einem Anbieter deiner Wahl.
 2. In Cloudflare **Domain hinzufügen** (Add a domain), kostenlosen Tarif wählen. Cloudflare nennt zwei Nameserver. Diese beim Domain-Anbieter eintragen; das wirkt nach Minuten bis Stunden.
-3. **Workers & Pages → klopfan → Benutzerdefinierte Domains (Custom domains) → Domain einrichten**: `klopfan.de` und `www.klopfan.de` eintragen. Cloudflare legt die DNS-Einträge an, HTTPS kommt automatisch.
+3. **Workers & Pages → fensterino → Benutzerdefinierte Domains (Custom domains) → Domain einrichten**: `fensterino.de` und `www.fensterino.de` eintragen. Cloudflare legt die DNS-Einträge an, HTTPS kommt automatisch.
 
 Für die Domain ohne `www` verlangt Cloudflare Pages, dass sie über die Cloudflare-Nameserver läuft. Nur `www.` ginge auch per CNAME-Eintrag beim bisherigen Anbieter.
 
-Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter der das Portal geöffnet wurde.
+Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter der der Betriebsbereich geöffnet wurde.
 
-**Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `klopfan`. GitHub leitet die alte Adresse weiter.
+**Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `fensterino`. GitHub leitet die alte Adresse weiter.
 
 ## Später: öffentlicher Start
 
@@ -114,11 +114,11 @@ Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter d
 
 ## Stufe 2: echtes Backend (Überblick)
 
-- **Supabase**, Region Frankfurt: Konten für Betriebe und Hauseigentümer, Projekte, Kundenlinks, Aufmaße samt Fotos, Marktplatz, Freigaben, Prüfung der Betriebe (Admin).
+- **Supabase**, Region Frankfurt: Konten für Betriebe, Projekte, Kundenlinks, Aufmaße samt Fotos.
 - **Automatische Übertragung**: Die App schickt das Aufmaß direkt an den Betrieb, der Code-Umweg entfällt.
-- **Stripe**: SEPA-Lastschrift und Karte für Betriebe, Checkout für die Kundendatei. Zuerst im Testmodus.
+- **Stripe**: SEPA-Lastschrift und Karte für Betriebe. Zuerst im Testmodus.
 - **E-Mails** für Benachrichtigungen.
-- **Recht**: Nutzungsbedingungen, erweiterte Datenschutzerklärung, Auftragsverarbeitungsverträge (Supabase, Stripe), Widerrufsbelehrung für die Kundendatei.
+- **Recht**: Nutzungsbedingungen für Betriebe, erweiterte Datenschutzerklärung, Auftragsverarbeitungsverträge (Supabase, Stripe).
 
 ## Sicherheit
 

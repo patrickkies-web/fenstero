@@ -1,4 +1,4 @@
-/* Klopfan: Ergänzungen für die eigenständige Website (Logo, Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
+/* Fensterino: Ergänzungen für die eigenständige Website (Logo, Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
 a.btn { text-decoration: none }
 .foot .foot-links a { padding: 6px 0; color: var(--fg2); font-size: 14px; font-weight: 600; text-decoration: none }
 .foot .foot-links a:hover { color: var(--accent) }
@@ -27,48 +27,25 @@ a.btn { text-decoration: none }
 .fx-nein { background: var(--chip); color: var(--fg) }
 @media (prefers-reduced-motion: reduce) { .fx-dialog { animation: none } }
 
-/* Logo: die Faust klopft an; die Kachel (das Angeklopfte) zittert beim Aufprall */
-.kl-logo { display: block; flex: 0 0 auto; overflow: visible }
+/* Logo: ein Fenster; der rechte untere Flügel kippt kurz auf (Kippstellung) und schließt wieder */
+.fi-logo { display: block; flex: 0 0 auto; overflow: visible }
 .lm, .logo .lm { width: auto; height: auto; border-radius: 0; background: none; box-shadow: none }
 .hdr-logo { gap: 10px }
-.kl-logo .kl-hand { transform-box: fill-box; transform-origin: 50% 100% }
-.kl-logo .kl-welle { transform-box: fill-box; transform-origin: 0% 100% }
-.kl-logo .kl-kachel { transform-box: fill-box; transform-origin: 50% 50% }
-.kl-logo.klopft .kl-hand { animation: kl-hand 1.3s cubic-bezier(.4, .1, .3, 1) both }
-.kl-logo.klopft .kl-welle { animation: kl-welle 1.3s ease-out both }
-.kl-logo.klopft .kl-kachel { animation: kl-kachel 1.3s linear both }
-@keyframes kl-hand {
-  0% { transform: none }
-  12% { transform: translate(-1.5px, 4px) rotate(-7deg) }
-  18% { transform: translate(1.2px, -2.2px) rotate(3deg) }
-  26% { transform: translate(0, .6px) rotate(-1deg) }
-  34% { transform: translate(-1.5px, 4px) rotate(-7deg) }
-  40% { transform: translate(1.2px, -2.2px) rotate(3deg) }
-  52%, 100% { transform: none }
+.fi-logo .fi-fluegel { transform-box: fill-box; transform-origin: 50% 100% }
+.fi-logo .fi-kachel { transform-box: fill-box; transform-origin: 50% 50% }
+.fi-logo.kippt .fi-fluegel { animation: fi-kipp 1.8s cubic-bezier(.4, 0, .2, 1) both }
+.fi-logo.kippt .fi-kachel { animation: fi-kachel 1.8s linear both }
+@keyframes fi-kipp {
+  0% { transform: none; opacity: 0 }
+  10% { opacity: 1 }
+  28% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) }
+  60% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) }
+  85% { transform: none; opacity: 1 }
+  100% { transform: none; opacity: 0 }
 }
-@keyframes kl-welle {
-  0%, 11% { opacity: 1; transform: none }
-  12%, 17% { opacity: 0; transform: scale(.3) }
-  20% { opacity: 1; transform: scale(1.3) }
-  28% { opacity: 1; transform: none }
-  34%, 39% { opacity: 0; transform: scale(.3) }
-  42% { opacity: 1; transform: scale(1.3) }
-  52%, 100% { opacity: 1; transform: none }
-}
-@keyframes kl-kachel {
-  0%, 17% { transform: none }
-  19% { transform: translate(1.6px, -1.2px) rotate(1.4deg) }
-  21% { transform: translate(-1.2px, .9px) rotate(-1.1deg) }
-  23% { transform: translate(.8px, -.5px) rotate(.6deg) }
-  25% { transform: translate(-.4px, .3px) rotate(-.3deg) }
-  27%, 39% { transform: none }
-  41% { transform: translate(1.6px, -1.2px) rotate(1.4deg) }
-  43% { transform: translate(-1.2px, .9px) rotate(-1.1deg) }
-  45% { transform: translate(.8px, -.5px) rotate(.6deg) }
-  47% { transform: translate(-.4px, .3px) rotate(-.3deg) }
-  49%, 100% { transform: none }
-}
-@media (prefers-reduced-motion: reduce) { .kl-logo .kl-hand, .kl-logo .kl-welle, .kl-logo .kl-kachel { animation: none !important } }
+@keyframes fi-kachel { 0%, 82% { transform: none } 86% { transform: translate(.6px, -.4px) } 90% { transform: translate(-.4px, .3px) } 94%, 100% { transform: none } }
+.fi-logo .fi-fluegel { opacity: 0 }
+@media (prefers-reduced-motion: reduce) { .fi-logo .fi-fluegel, .fi-logo .fi-kachel { animation: none !important } }
 
 /* Feier: Konfetti und Puls */
 .fx-konfetti { position: fixed; inset: 0; z-index: 300; pointer-events: none; overflow: hidden }

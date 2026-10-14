@@ -1,4 +1,4 @@
-// Klopfan · automatische Prüfung im Browser (Chromium über Playwright)
+// Fensterino · automatische Prüfung im Browser (Chromium über Playwright)
 //
 //   1. Testserver starten:   KI_ATTRAPPE=1 node scripts/dev-server.mjs
 //   2. Prüfung starten:      node scripts/pruefen.mjs
@@ -7,8 +7,8 @@
 // Geprüft wird: alle Seiten laden ohne Fehler, ohne Verstoß gegen die Content-Security-Policy und ohne
 // Anfragen an fremde Server; kein alter Name mehr; Pilot-Hinweis; Kundenlink von Portal zu App und zurück;
 // ehrlicher Versand mit AM1-Code; kostenlose PDF-Datei; KI mit Einwilligung; ältere ZF1-, FE1- und LM1-Codes bleiben lesbar;
-// Logik (Anklopfen, Freigabe, Gutschrift, Ablauf, doppelte Codes, Sende-Sperre), Übersichten und kleine Belohnungen;
-// Name und Logo (weiße Faust auf Schwarz, die anklopft) an den richtigen Stellen, kein Spruch mehr.
+// Logik (Ablauf, doppelte Codes, Sende-Sperre, Einladungsliste), Übersichten und kleine Belohnungen;
+// Name und Logo (weißes Fenster auf Schwarz) an den richtigen Stellen.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -42,13 +42,13 @@ console.log('1. Seiten laden');
 {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
-  for (const [pfad, titel] of [['/', 'Klopfan'], ['/app/', 'Klopfan'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/gibtsnicht', 'nicht gefunden']]) {
+  for (const [pfad, titel] of [['/', 'Fensterino'], ['/app/', 'Fensterino'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/gibtsnicht', 'nicht gefunden']]) {
     const r = await page.goto(BASE + pfad, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
     const text = await page.evaluate(() => document.body.innerText);
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
     ok(!/Lichtma|Fenstero|Zamma/.test(text) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
-    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .kl-hand').count() > 0 && await page.locator('svg .kl-welle').count() > 0, pfad + ': Logo mit klopfender Faust da');
+    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .fi-fluegel').count() > 0 && await page.locator('svg .fi-kachel').count() > 0, pfad + ': Logo mit klopfender Faust da');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
   }
@@ -138,9 +138,9 @@ const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, i
   // Eigenes Aufmaß: speichern, dann „Ein Aufmaß, zwei Wege“ mit kostenloser PDF
   await page.evaluate(() => { saveWin(); S.screen = 'teilen'; render(true); }); await page.waitForTimeout(400);
   let t3 = await page.evaluate(() => document.body.textContent);
-  ok(/Ein Aufmaß, zwei Wege/.test(t3) && /An deinen Fensterbauer/.test(t3) && /Vergleichsangebote aus dem Portal/.test(t3) && /Für dich · kostenlos/.test(t3), 'Eigen-Kunde sieht beide Wege und die kostenlose PDF');
+  ok(/Dein Aufmaß, dein Blatt/.test(t3) && /An deinen Fensterbauer/.test(t3) && !/Portal/.test(t3) && /Für dich · kostenlos/.test(t3), 'Eigen-Kunde sieht den Weg zum Fensterbauer und die kostenlose PDF, kein Portal');
   const wa3 = await page.getAttribute('.share-way a[href^="https://wa.me/"]', 'href');
-  ok(/Code vom Kunden einfügen/.test(decodeURIComponent(wa3)) && /Kostenlos anmelden/.test(decodeURIComponent(wa3)) && /AM1\./.test(decodeURIComponent(wa3)), 'Nachricht an den Fensterbauer enthält Code und Einladung zu Klopfan');
+  ok(/Code vom Kunden einfügen/.test(decodeURIComponent(wa3)) && /Kostenlos anmelden/.test(decodeURIComponent(wa3)) && /AM1\./.test(decodeURIComponent(wa3)), 'Nachricht an den Fensterbauer enthält Code und Einladung zu Fensterino');
   // Weg 1: PDF schicken (ohne Teilen-Menü im Testbrowser: Download) → erledigt, nächster Schritt wird angestoßen
   const [dl3] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="teil-pdf"]')]);
   await page.waitForTimeout(500);
@@ -148,7 +148,7 @@ const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, i
   const pdfBytes = (await import('node:fs')).readFileSync(await dl3.path());
   ok(pdfBytes.subarray(0, 5).toString() === '%PDF-', 'Datei ist ein echtes PDF');
   const pdfTxt = pdfBytes.toString('latin1');
-  ok(/Code vom Kunden/.test(pdfTxt) && /Scannen: Anmeldung/.test(pdfTxt) && pdfTxt.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(pdfTxt), 'PDF trägt den Klopfan-Block: Einladung, QR-Link und Aufmaß-Code');
+  ok(/Code vom Kunden/.test(pdfTxt) && /Scannen: Anmeldung/.test(pdfTxt) && pdfTxt.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(pdfTxt), 'PDF trägt den Fensterino-Block: Einladung, QR-Link und Aufmaß-Code');
   const [dl4] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
   ok(/\.pdf$/.test(dl4.suggestedFilename()), 'Eigen-Kunde lädt seine PDF kostenlos: ' + dl4.suggestedFilename());
   await foto(page, 'app-zwei-wege');
@@ -302,60 +302,37 @@ console.log('6. Logik, Übersichten und Belohnungen');
   ok(nachher === dup.vorher && /schon|bereits|gleich/i.test(await toastText()), 'Derselbe Aufmaß-Code wird nicht doppelt angelegt');
   await page.evaluate(() => { S.sheet = null; render(); });
 
-  // Anfragen: Karten mit Fensterzahl, Fensterreihe und Budgetstufen; Anklopfen-Regeln
-  await tun('nav', 'markt'); await page.waitForTimeout(600);
-  ok(await page.locator('.lcard .lcnt b').count() >= 5 && await page.locator('.lcard .winrow i').count() >= 5 && await page.locator('.lcard .bbar i.on').count() >= 5, 'Anfragen: Fensterzahl, Fensterreihe und Budgetstufen sichtbar');
-  await foto(page, 'portal-anfragen');
-  await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i3'); x.status = 'pause'; });
-  await tun('knock', '', 'i3'); await page.waitForTimeout(900);
-  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i3'), 'c1') === null) && /pausiert/.test(await toastText()), 'Anklopfen bei pausierter Anfrage wird abgelehnt');
-  await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i3'); x.status = 'offen'; x.knocks = [{ c: 'c1', when: 'gestern', status: 'abgelehnt' }]; });
-  await tun('knock', '', 'i3'); await page.waitForTimeout(900);
-  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i3'), 'c1') === 'abgelehnt') && /abgelehnt/.test(await toastText()), 'Nach einer Absage geht kein erneutes Anklopfen');
-  // Fair-Regel erst nach sieben Tagen
-  await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i2'); const k = x.knocks.find((kk) => kk.c === 'c1'); k.freiAt = Date.now(); });
-  await tun('fair', '', 'i2'); await page.waitForTimeout(300);
-  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i2'), 'c1') === 'frei') && /7 Tage/.test(await toastText()), 'Gutschrift erst sieben Tage nach der Freigabe');
+  // Einladungsliste: mehrere Projekte auf einmal
+  const vorListe = await page.evaluate(() => A().links.length);
+  await tun('sheet', 'liste'); await page.waitForSelector('#liste-in');
+  await page.fill('#liste-in', 'Familie Listig, 0171 111 22 33\nHerr Mailer; mailer@beispiel.de\nx\nFrau Ohne');
+  await tun('liste-create'); await page.waitForTimeout(600);
+  const nachListe = await page.evaluate(() => ({ n: A().links.length, neu: A().links.slice(0, 3).map((l) => [l.kunde, l.kontakt, l.status]) }));
+  ok(nachListe.n === vorListe + 3 && nachListe.neu.some((x) => x[0] === 'Familie Listig' && x[1] === '0171 111 22 33') && nachListe.neu.some((x) => x[0] === 'Herr Mailer' && x[1] === 'mailer@beispiel.de') && nachListe.neu.every((x) => x[2] === 'erstellt'), 'Einladungsliste legt je Zeile ein Projekt an, ungültige Zeilen werden übersprungen');
+  ok(/3 Projekte angelegt/.test(await toastText()) && await page.locator('.fx-konfetti i').count() > 10, 'Liste angelegt: Hinweis und Konfetti');
+  await foto(page, 'portal-liste');
 
-  // Eigentümer: Freigabe berechnet, Rückzug schreibt gut
-  await tun('demo-as', 'max'); await page.waitForTimeout(500);
-  ok(await page.locator('.stat.tone-lead').count() === 1 && await page.locator('.lcard.st-lead').count() === 1, 'Eigentümer-Übersicht: Anklopfer farbig hervorgehoben');
-  // Eigener Code ins Portal: Inserat plus Weg zum eigenen Fensterbauer
-  const eigenCode = await page.evaluate(() => { const w = [{ name: 'Küche', w: 1230, h: 1410, el: { w: 1230, h: 1410 }, mo: { hm: 1440, hl: 1440, hr: 1440, wm: 1260, wt: 1260, wb: 1260 }, fotos: 2 }]; const o = { v: 1, b: '', w: w, p: { ort: '50823 Köln', gebaeude: 'efh', budget: 'b2', zeit: '3m' }, t: Date.now() }; return 'AM1.' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); });
-  await tun('sheet', 'import'); await page.waitForSelector('#code-in'); await page.fill('#code-in', eigenCode); await tun('import'); await page.waitForTimeout(500);
-  ok(await page.locator('.card.eigen a[href^="https://wa.me/"]').count() === 1 && /Fensterbauer des Vertrauens/.test(await page.evaluate(() => document.body.textContent)), 'Inserat bietet den zweiten Weg zum eigenen Fensterbauer');
-  const linkCode = await page.evaluate(() => { const o = { v: 1, b: 'k2m8q', w: [{ name: 'X', w: 1000, h: 1000 }], p: {}, t: Date.now() }; return 'AM1.' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); });
-  await tun('sheet', 'import'); await page.waitForSelector('#code-in'); await page.fill('#code-in', linkCode); await tun('import'); await page.waitForTimeout(400);
-  ok(/gehört zum Auftrag deines Fensterbauers/.test(await toastText()), 'Aufmaß aus einem Betriebs-Link lässt sich nicht ins Portal stellen');
-  await page.evaluate(() => { S.sheet = null; render(); });
+  // Code vom Kunden ohne Projekt (Eigen-Kunde): neues Projekt, zählt wie jedes andere
+  const eigenCode = await page.evaluate(() => { const w = [{ name: 'Küche', w: 1230, h: 1410, el: { w: 1230, h: 1410 }, mo: { hm: 1440, hl: 1440, hr: 1440, wm: 1260, wt: 1260, wb: 1260 }, fotos: 2 }]; const o = { v: 1, b: '', w: w, p: { ort: '50823 Köln', gebaeude: 'efh', budget: 'b2', zeit: '3m', name: 'Lisa Berger', tel: '0221 444 55 66' }, t: Date.now() }; return 'AM1.' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); });
+  const vorEigen = await page.evaluate(() => ({ n: A().links.length, book: ledger(A()).filter((b) => b.kind === 'aufmass').length }));
+  await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', eigenCode); await tun('linkimport'); await page.waitForTimeout(500);
+  const nachEigen = await page.evaluate(() => ({ n: A().links.length, book: ledger(A()).filter((b) => b.kind === 'aufmass').length, l: A().links.find((x) => x.kunde === 'Lisa Berger') }));
+  ok(nachEigen.n === vorEigen.n + 1 && nachEigen.l && nachEigen.l.status === 'eingegangen' && nachEigen.l.kontakt === '0221 444 55 66' && nachEigen.book === vorEigen.book + 1, 'Code eines Eigen-Kunden wird zum Projekt und gebucht');
   ok(await page.evaluate((c) => { const gebrochen = c.replace(/(.{60})/g, '$1\n   '); const o = unpack(gebrochen); return !!o && o.w.length === 1; }, eigenCode), 'Code mit Zeilenumbrüchen (aus der PDF kopiert) bleibt lesbar');
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/?von=pdf', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
-  ok(await page.locator('.banner.vonpdf [data-act="reg"]').count() === 1 && /Klopfan-Aufmaß in der Hand/.test(await page.evaluate(() => document.body.textContent)), 'Wer über die PDF kommt, sieht den Weg zum Konto');
+  ok(await page.locator('.banner.vonpdf [data-act="reg"]').count() === 1 && /Fensterino-Aufmaß in der Hand/.test(await page.evaluate(() => document.body.textContent)), 'Wer über die PDF kommt, sieht den Weg zum Konto');
   await tun('demo-as', 'c7'); await page.waitForTimeout(500);
   ok(await page.locator('.banner.vonpdf [data-v="linkimport"]').count() === 1, 'Angemeldeter Betrieb bekommt direkt „Code vom Kunden einfügen“');
   await tun('vonpdf-zu'); await page.waitForTimeout(200);
   ok(await page.locator('.banner.vonpdf').count() === 0, 'Hinweis lässt sich schließen');
-  await foto(page, 'portal-eigentuemer');
-  const vor = await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i1'); x.knocks.unshift({ c: 'c1', when: 'heute', status: 'offen' }); return S.acc.c1.guthaben; });
-  await tun('release', '', 'i1', 'c1'); await page.waitForTimeout(500);
-  const mitte = await page.evaluate(() => ({ g: S.acc.c1.guthaben, c: (S.acc.c1.charges || []).find((c) => c.id === 'i1'), k: knockStatus(S.inq.find((i) => i.id === 'i1'), 'c1'), feier: document.querySelectorAll('.fx-konfetti i').length }));
-  ok(mitte.k === 'frei' && mitte.c && mitte.c.status === 'offen' && mitte.g === vor - mitte.c.credit, 'Freigabe berechnet den Kontakt (Guthaben zuerst)');
-  ok(mitte.feier > 10, 'Freigabe wird gefeiert');
-  await tun('revoke', '', 'i1', 'c1'); await page.waitForTimeout(400);
-  const nach = await page.evaluate(() => ({ g: S.acc.c1.guthaben, c: (S.acc.c1.charges || []).find((c) => c.id === 'i1'), k: knockStatus(S.inq.find((i) => i.id === 'i1'), 'c1') }));
-  ok(nach.k === 'abgelehnt' && nach.c.status === 'gutschrift' && nach.g === vor, 'Rückzug der Freigabe: Gutschrift, Guthaben wieder wie vorher');
-  // Absage zurücknehmen, dann löschen: der Betrieb behält den bezahlten Kontakt
-  await tun('go', 'inquiry', 'i1'); await page.waitForTimeout(400);
-  ok(await page.locator('.note button[data-act="release"]').count() >= 1, 'Abgelehnte Betriebe lassen sich doch noch freigeben');
-  await tun('release', '', 'i1', 'c1'); await page.waitForTimeout(500);
-  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i1'), 'c1') === 'frei' && (S.acc.c1.charges || []).filter((c) => c.id === 'i1').length === 2), '„Doch freigeben“ gibt frei und bucht neu');
-  await tun('delete', '', 'i1'); await page.waitForTimeout(400);
-  ok(await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i1'); return !!x && x.status === 'geloescht' && !myInq().some((i) => i.id === 'i1'); }), 'Gelöschtes Aufmaß mit Freigabe bleibt gespeichert, Eigentümer sieht es nicht mehr');
-  await tun('demo-as', 'c1'); await page.waitForTimeout(400); await tun('nav', 'kontakte'); await page.waitForTimeout(500);
-  ok(await page.locator('.kcard-i').count() === 2 && /Aufmaß zurückgezogen/.test(await page.evaluate(() => document.body.textContent)), 'Betrieb behält den Kontakt, gekennzeichnet als zurückgezogen');
-  await tun('nav', 'markt'); await page.waitForTimeout(500);
-  ok(await page.evaluate(() => !Array.from(document.querySelectorAll('.lcard')).some((c) => c.getAttribute('data-id') === 'i1')), 'Zurückgezogenes Aufmaß steht nicht mehr im Markt');
+  // Startseite: beide Zielgruppen, kein Marktplatz
+  await tun('logout'); await page.waitForTimeout(300);
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
+  const start = await page.evaluate(() => document.body.textContent);
+  ok(/Fenster aufmessen\. Selbst\. Richtig\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href*="/app/"]').count() === 1, 'Startseite: Hauseigentümer zuerst, Fensterbauer darunter');
+  ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start), 'Kein Marktplatz mehr auf der Startseite');
+  await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
   await ctx.close();
 
