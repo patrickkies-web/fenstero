@@ -316,6 +316,17 @@ console.log('6. Logik, Übersichten und Belohnungen');
   await tun('revoke', '', 'i1', 'c1'); await page.waitForTimeout(400);
   const nach = await page.evaluate(() => ({ g: S.acc.c1.guthaben, c: (S.acc.c1.charges || []).find((c) => c.id === 'i1'), k: knockStatus(S.inq.find((i) => i.id === 'i1'), 'c1') }));
   ok(nach.k === 'abgelehnt' && nach.c.status === 'gutschrift' && nach.g === vor, 'Rückzug der Freigabe: Gutschrift, Guthaben wieder wie vorher');
+  // Absage zurücknehmen, dann löschen: der Betrieb behält den bezahlten Kontakt
+  await tun('go', 'inquiry', 'i1'); await page.waitForTimeout(400);
+  ok(await page.locator('.note button[data-act="release"]').count() >= 1, 'Abgelehnte Betriebe lassen sich doch noch freigeben');
+  await tun('release', '', 'i1', 'c1'); await page.waitForTimeout(500);
+  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i1'), 'c1') === 'frei' && (S.acc.c1.charges || []).filter((c) => c.id === 'i1').length === 2), '„Doch freigeben“ gibt frei und bucht neu');
+  await tun('delete', '', 'i1'); await page.waitForTimeout(400);
+  ok(await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i1'); return !!x && x.status === 'geloescht' && !myInq().some((i) => i.id === 'i1'); }), 'Gelöschtes Aufmaß mit Freigabe bleibt gespeichert, Eigentümer sieht es nicht mehr');
+  await tun('demo-as', 'c1'); await page.waitForTimeout(400); await tun('nav', 'kontakte'); await page.waitForTimeout(500);
+  ok(await page.locator('.kcard-i').count() === 2 && /Aufmaß zurückgezogen/.test(await page.evaluate(() => document.body.textContent)), 'Betrieb behält den Kontakt, gekennzeichnet als zurückgezogen');
+  await tun('nav', 'markt'); await page.waitForTimeout(500);
+  ok(await page.evaluate(() => !Array.from(document.querySelectorAll('.lcard')).some((c) => c.getAttribute('data-id') === 'i1')), 'Zurückgezogenes Aufmaß steht nicht mehr im Markt');
   sauber(page, 'Logik und Übersichten ohne Fehler');
   await ctx.close();
 
