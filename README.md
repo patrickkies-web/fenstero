@@ -19,7 +19,8 @@ Die Aufmaß-App für Fenster. Hauseigentümer messen ihre Fenster selbst, Schrit
 | `web/impressum/`, `web/datenschutz/` | Rechtsseiten (Entwürfe mit Platzhaltern) |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
 | `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weißes Fenster auf schwarzer Kachel, der Flügel kippt kurz |
-| `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT) und qrcode-generator (MIT), lokal statt von fremden Servern |
+| `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT), qrcode-generator (MIT) und lottie-web light (MIT), lokal statt von fremden Servern |
+| `web/assets/lottie/`, `scripts/lottie-erzeugen.py` | fünf gezeichnete Bewegtbilder, aus Code erzeugt (`python3 scripts/lottie-erzeugen.py web/assets/lottie`) |
 | `functions/api/` | der Server: `router.js` (Verteiler), `ki.js` (KI-Auswertung), `zahlung.js` (Kauf des Aufmaßblatts, Nachweis, Webhook), `konten.js` (Betriebe, Projekte, Eingang, Tarif, Sammelrechnung), `stripe.js`, `auth.js` (E-Mail-Code über Supabase Auth), `speicher.js` (Supabase oder Attrappe), `umgebung.js` (alle Variablen) |
 | `supabase/schema.sql` | die drei Tabellen, einmal im Supabase-Projekt ausführen |
 | `scripts/` | lokaler Testserver (mit Attrappen für Datenbank und Kasse), Browser-Prüfung in 8 Abschnitten, Umbenennen |
@@ -48,4 +49,4 @@ python3 scripts/marke-umbenennen.py NeuerName
 
 ## Lizenzen
 
-Schrift Maven Pro: SIL Open Font License 1.1 (`web/fonts/OFL.txt`). jsPDF 2.5.1: MIT (`web/vendor/jspdf.LICENSE.txt`). qrcode-generator 2.0.4: MIT (`web/vendor/qrcode.LICENSE.txt`).
+Schrift Maven Pro: SIL Open Font License 1.1 (`web/fonts/OFL.txt`). jsPDF 2.5.1: MIT (`web/vendor/jspdf.LICENSE.txt`). qrcode-generator 2.0.4: MIT (`web/vendor/qrcode.LICENSE.txt`). lottie-web 5.12.2 (light): MIT (`web/vendor/lottie.LICENSE.txt`).

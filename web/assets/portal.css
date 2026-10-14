@@ -53,6 +53,7 @@ a { color: var(--ink) }
 .h h2 { margin: 0; font-size: clamp(26px, 3.4vw, 30px); line-height: 1.1; font-weight: 900; letter-spacing: -.03em; text-wrap: balance }
 .h p { margin: 0; font-size: 17px; line-height: 1.5; color: var(--ink2); max-width: 62ch; text-wrap: pretty }
 .h.hrow { flex-direction: row; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap }
+.h.hbild { flex-direction: row; align-items: center; justify-content: space-between; gap: 24px } .h.hbild > div { display: flex; flex-direction: column; gap: 6px; min-width: 0 } .hbild-l { flex: 0 0 168px; width: 168px; height: 168px; border-radius: var(--r4); background: var(--surface); box-shadow: var(--ring); padding: 8px; box-sizing: border-box }
 .hrow > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 340px }
 .sec { display: flex; flex-direction: column; gap: 12px }
 .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap }
@@ -108,6 +109,7 @@ button.item:active { transform: scale(.995) }
 .kv > span:nth-child(odd) { color: var(--muted) } .kv > span:nth-child(even) { font-weight: 600 }
 .empty { padding: 32px 20px; text-align: center; color: var(--muted); border-radius: var(--r3); border: 1.5px dashed var(--line2); font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: 6px; line-height: 1.45 }
 .empty b { color: var(--ink); font-size: 17px } .empty span { max-width: 46ch } .empty .btn { margin-top: 8px }
+.empty-l { width: 128px; height: 128px; margin: -8px auto 2px }
 .banner { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 14px 16px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); font-size: 15px; line-height: 1.45 }
 .banner > span { flex: 1 1 260px; min-width: 0 }
 .banner.warn { background: var(--warn-soft); box-shadow: none } .banner.warn b { color: var(--warn) }
@@ -205,7 +207,8 @@ button.item:active { transform: scale(.995) }
 .hero.b2b { padding-top: clamp(28px, 6vw, 56px); border-top: 1px solid var(--line) }
 .b2c-visual { display: flex; justify-content: center }
 .b2c-card { width: min(100%, 380px); padding: 20px 20px 18px; border-radius: var(--r4); background: var(--surface); box-shadow: var(--ring); display: flex; flex-direction: column; gap: 14px }
-.b2c-win { position: relative; display: flex; justify-content: center; padding: 26px 52px 32px; border-radius: var(--r3); background: var(--surface2) }
+.b2c-win { position: relative; display: flex; justify-content: center; padding: 26px 52px 32px; border-radius: var(--r3); background: var(--surface2); perspective: 900px }
+.b2c-win svg { transform: rotateY(calc((0.5 - var(--sp, 0.5)) * 14deg)) translateY(calc((var(--sp, 0.5) - 0.5) * -14px)); transform-origin: 50% 50%; will-change: transform }
 .b2c-win svg { width: 220px; height: 220px }
 .b2c-win .dim { position: absolute; padding: 3px 9px; border-radius: var(--r1); font-size: 13px; font-weight: 800; color: var(--on-accent); white-space: nowrap; opacity: 0; animation: dimin var(--t3) var(--e-out) forwards }
 .b2c-win .dim-h { left: 4px; top: 46%; background: var(--mo); animation-delay: .9s } .b2c-win .dim-w { left: 50%; bottom: 6px; transform: translateX(-50%); background: var(--mo); animation-delay: 1.2s }
@@ -238,7 +241,7 @@ button.item:active { transform: scale(.995) }
 .ph-note b { display: block; font-size: 13px } .ph-note small { font-size: 13px; color: var(--muted) }
 .ph-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); flex: 0 0 auto }
 .hero-ph .b1, .hero-ph .b2, .hero-ph .b3 { opacity: 0; transform: translateY(10px) }
-.hero-ph .b1 { animation: bubin .45s 1s var(--e-out) forwards } .hero-ph .b2 { animation: bubin .45s 2.2s var(--e-out) forwards } .hero-ph .b3 { animation: bubin .5s 3.4s var(--e-out) forwards }
+.hero.in .hero-ph .b1, .scr:not(.anim) .hero:not(.rv) .hero-ph .b1 { animation: bubin var(--t3) .6s var(--e-out) forwards } .hero.in .hero-ph .b2, .scr:not(.anim) .hero:not(.rv) .hero-ph .b2 { animation: bubin var(--t3) 1.6s var(--e-out) forwards } .hero.in .hero-ph .b3, .scr:not(.anim) .hero:not(.rv) .hero-ph .b3 { animation: bubin var(--t3) 2.6s var(--e-out) forwards }
 @keyframes bubin { to { opacity: 1; transform: none } }
 .bub.show { opacity: 1; transform: none }
 /* So läuft es: Schritte links, klebende Bühne rechts */
@@ -373,8 +376,8 @@ button.item:active { transform: scale(.995) }
 .sbtn.wa svg { color: var(--wa) }
 @media (hover: hover) { .sbtn:hover { background: var(--surface3) } }
 .created { display: flex; gap: 14px; align-items: center; background: var(--ok-soft); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ok) 35%, transparent) }
-.burst-ok { width: 48px; height: 48px; border-radius: 50%; background: var(--ok); color: var(--on-accent); display: flex; align-items: center; justify-content: center; flex: 0 0 auto }
-.burst-ok svg { width: 26px; height: 26px } .burst-ok svg path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: fx-haken .5s var(--e-out) .2s forwards }
+.burst-ok { width: 56px; height: 56px; flex: 0 0 auto; margin: -4px 0 -4px -4px } .burst-ok .lottie-still { display: flex; width: 48px; height: 48px; margin: 4px; border-radius: 50%; background: var(--ok); color: var(--on-accent); align-items: center; justify-content: center }
+.burst-ok .lottie-still svg { width: 26px; height: 26px } .burst-ok .lottie-still svg path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: fx-haken .5s var(--e-out) .2s forwards }
 .created b { display: block; font-size: 17px } .created div span { display: block; color: var(--ink2); font-size: 15px }
 .okcard { background: var(--ok-soft); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ok) 35%, transparent); display: flex; flex-direction: column; gap: 12px }
 .okcard .eyebrow { color: var(--ok) }
@@ -441,11 +444,15 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 @media (max-width: 879px) {
   .app { grid-template-columns: minmax(0, 1fr) } .side { display: none } .tabs { display: flex }
   .hero, .hero.b2c, .hero.b2b { grid-template-columns: minmax(0, 1fr) } .grid.c3, .grid.c4 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  /* Telefon: Titel, Knöpfe, dann das Bild, dann der Text; so steht das Fenster auf dem ersten Bildschirm */
+  .hero.b2c > div:not(.b2c-visual) { display: contents } .hero.b2c .eyebrow { order: 1 } .hero.b2c h2 { order: 2 } .hero.b2c .cta { order: 3; margin-top: 18px } .hero.b2c .b2c-visual { order: 4; margin-top: 4px } .hero.b2c .lead { order: 5; margin-top: 6px } .hero.b2c .hint { order: 6 }
+  .hero.b2c { gap: 10px }
   .kv { grid-template-columns: 110px minmax(0, 1fr) } .f2 { grid-template-columns: minmax(0, 1fr) }
   .caps { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .roi { grid-template-columns: minmax(0, 1fr) }
   .nl-grid { grid-template-columns: minmax(0, 1fr) } .pv { position: static } .nl-grid .pv { display: none }
   .hl-steps { grid-template-columns: minmax(0, 1fr) }
+  .h.hbild { flex-direction: column; align-items: flex-start } .hbild-l { align-self: center; flex-basis: auto; width: 150px; height: 150px }
   .b2c-win svg { width: 180px; height: 180px }
   .story { grid-template-columns: minmax(0, 1fr); gap: 0 } .story-stage { order: -1; top: 62px; height: 330px; z-index: 5 } .story-stage .sc { gap: 8px; padding: 46px 14px 14px } .story-stage .cap { display: none }
   .story-stage .form-mini, .story-stage .in-mini { padding: 12px 14px; gap: 7px } .story-stage .fm { padding: 6px 10px } .story-stage .in-row { padding: 5px 8px } .story-stage .in-mini .mf { display: none }
@@ -477,7 +484,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 }
 @media (prefers-reduced-motion: reduce) {
   .hero h2 .w, .hero .lead, .hero .cta, .hero p.hint, .hero-ph .b1, .hero-ph .b2, .hero-ph .b3, .sc-msg .bub, .in-row, .fm-chips .badge, .fm-btn, .b2c-win .dim, .b2c-chips .badge { animation: none !important; opacity: 1; transform: none }
-  .scr, .sheet, .sheet-bg, .scr.anim .list > *, .scr.anim .grid > *, .scr.anim .form > *, .form.shake, .burst-ok svg path, .tlh li.fresh .dot, .pop, .ibtn.ring { animation: none !important }
-  .fm .ty { clip-path: none; animation: none !important } .sc-mess .dim { stroke-dashoffset: 0 } .sc-mess .lab { opacity: 1 } .burst-ok svg path { stroke-dashoffset: 0 }
+  .scr, .sheet, .sheet-bg, .scr.anim .list > *, .scr.anim .grid > *, .scr.anim .form > *, .form.shake, .burst-ok .lottie-still svg path, .tlh li.fresh .dot, .pop, .ibtn.ring { animation: none !important }
+  .fm .ty { clip-path: none; animation: none !important } .sc-mess .dim { stroke-dashoffset: 0 } .sc-mess .lab { opacity: 1 } .burst-ok .lottie-still svg path { stroke-dashoffset: 0 }
   .toast { transition: opacity .2s } .winstack i { transition: none }
 }

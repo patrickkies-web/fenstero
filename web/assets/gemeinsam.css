@@ -114,7 +114,11 @@ a.link { text-decoration: underline }
 .fx-pilot p { flex: 1; min-width: 0; max-width: 1040px; margin: 0 auto }
 .fx-pilot b { font-weight: 800 }
 .fx-pilot button { flex: 0 0 auto; width: 44px; height: 44px; margin: -10px -8px -10px 0; border: 0; border-radius: var(--r1); background: transparent; color: inherit; display: inline-flex; align-items: center; justify-content: center; cursor: pointer }
-@media (max-width: 520px) { .fx-pilot { font-size: 13px; line-height: 1.4; padding: 8px 8px 8px 14px } .fx-pilot button { margin: -6px -4px -6px 0 } }
+.fx-pilot button.mehr { display: none; width: auto; padding: 0 10px; font: inherit; font-size: 13px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px }
+@media (max-width: 520px) {
+  .fx-pilot { font-size: 13px; line-height: 1.4; padding: 8px 8px 8px 14px; align-items: center } .fx-pilot button { margin: -6px -4px -6px 0 }
+  .fx-pilot:not(.offen) p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden } .fx-pilot:not(.offen) button.mehr { display: inline-flex }
+}
 .fx-pilot button:hover { background: rgba(255, 255, 255, .14) }
 
 /* ---------- Dialog (KI-Einwilligung) ---------- */
@@ -163,6 +167,9 @@ a.link { text-decoration: underline }
 .fx-haken path, .okmark .tick { stroke-dasharray: 60; stroke-dashoffset: 60; animation: fx-haken .5s var(--e-out) .15s forwards }
 @keyframes fx-haken { to { stroke-dashoffset: 0 } }
 .okmark { display: block; margin: 0 auto; overflow: visible; color: var(--ok) } .okmark.send { color: var(--accent) }
+/* Bewegtbilder (Lottie): der Behälter gibt die Größe vor, das SVG füllt ihn; .lottie-still ist das Standbild, bis der Spieler da ist */
+[data-lottie] { display: block; position: relative } [data-lottie] > svg, [data-lottie] .lottie-still > svg { display: block; width: 100%; height: 100% } .lottie-still { display: block; width: 100%; height: 100% }
+.okmark-l { width: 112px; height: 112px; margin: 0 auto } .okmark-l[data-lottie="senden"] { width: 176px; height: 110px }
 /* Der Ring am SVG-Zeichen: Pseudoelemente gibt es dort nicht, also wächst ein Kreisrand nach außen */
 .okmark.fx-puls > circle:first-child { stroke: currentColor; animation: fx-puls-svg .9s var(--e-out) both }
 @keyframes fx-puls-svg { 0% { stroke-width: 0; stroke-opacity: .7 } 100% { stroke-width: 10; stroke-opacity: 0 } }
