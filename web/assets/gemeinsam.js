@@ -167,7 +167,9 @@
       if (!arr.length) return;
       if (ruhig() || !('IntersectionObserver' in window)) { arr.forEach(function (e) { e.classList.add('rev', 'in'); }); return; }
       if (!io || (wurzel && io.root !== wurzel)) { if (io) io.disconnect(); io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { root: wurzel || null, rootMargin: '0px 0px 40px 0px', threshold: 0.05 }); }
-      arr.forEach(function (e, i) { e.classList.add('rev'); e.style.setProperty('--rv', String(Math.min(i, 8))); io.observe(e); });
+      /* gestaffelt nur, was jetzt schon im Bild ist; was erst beim Scrollen kommt, erscheint ohne Wartezeit */
+      var grenze = wurzel ? wurzel.getBoundingClientRect().bottom : window.innerHeight, k = 0;
+      arr.forEach(function (e) { var sichtbar = e.getBoundingClientRect().top < grenze; e.classList.add('rev'); e.style.setProperty('--rv', String(sichtbar ? Math.min(k++, 8) : 0)); io.observe(e); });
     }
   };
 

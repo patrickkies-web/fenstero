@@ -302,8 +302,9 @@ function afterRender(anim) {
   const scr = document.querySelector('.scr');
   if (!scr) return;
   ['.list', '.grid', '.flow', '.form', '.share'].forEach((sel) => scr.querySelectorAll(sel).forEach((p) => Array.from(p.children).forEach((c, i) => c.style.setProperty('--i', String(Math.min(i, 12))))));
+  /* Blöcke erscheinen nacheinander: gestaffelt nur, was beim Aufbau schon im Bild ist; was erst beim Scrollen kommt, erscheint sofort */
   const wrap = scr.querySelector('.wrap');
-  if (wrap) Array.from(wrap.children).forEach((c, i) => { c.classList.add('rv'); c.style.setProperty('--i', String(Math.min(i, 8))); });
+  if (wrap) { let k = 0; Array.from(wrap.children).forEach((c) => { const sichtbar = c.getBoundingClientRect().top < window.innerHeight; c.classList.add('rv'); c.style.setProperty('--i', String(sichtbar ? Math.min(k++, 8) : 0)); }); }
   if (!io && 'IntersectionObserver' in window) io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px 48px 0px' });
   scr.querySelectorAll('.rv').forEach((el) => { if (io && anim) io.observe(el); else el.classList.add('in'); });
   scr.querySelectorAll('[data-count]').forEach((el, i) => {
@@ -313,12 +314,25 @@ function afterRender(anim) {
     if (anim && io) { el.textContent = fmt === 'eur' ? eur(0) : '0'; const o = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { countUp(el, 0, to, fmt); o.disconnect(); } })); o.observe(el); return; }
     countUp(el, anim ? 0 : from, to, fmt);
   });
+  /* „So läuft es“: Die Bühne zeigt den Schritt, der gerade neben ihr steht (zwei Spalten: der Schritt auf Höhe der Bühnenmitte;
+     gestapelt auf dem Telefon: der erste Schritt unter der klebenden Bühne). Wird beim Scrollen nachgeführt, mit etwas Spiel gegen Flackern. */
   const stage = document.getElementById('stage');
+  storyTick = null;
   if (stage) {
     const steps = Array.from(scr.querySelectorAll('.story-step'));
-    const setStep = (i) => { if (stage.getAttribute('data-step') === String(i)) return; stage.setAttribute('data-step', String(i)); steps.forEach((st) => st.classList.toggle('on', +st.getAttribute('data-i') === i)); };
-    stage.setAttribute('data-step', '-1'); setStep(0);
-    if ('IntersectionObserver' in window) { const so = new IntersectionObserver((es) => { es.forEach((e) => { if (e.isIntersecting) setStep(+e.target.getAttribute('data-i')); }); }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 }); steps.forEach((st) => so.observe(st)); }
+    let aktiv = -1;
+    const setStep = (i) => { if (aktiv === i) return; aktiv = i; stage.setAttribute('data-step', String(i)); steps.forEach((st) => st.classList.toggle('on', +st.getAttribute('data-i') === i)); };
+    storyTick = () => {
+      if (!document.body.contains(stage)) { storyTick = null; return; }
+      const st = stage.getBoundingClientRect(), gestapelt = matchMedia('(max-width: 879px)').matches;
+      const linie = gestapelt ? st.bottom + 60 : st.top + st.height / 2;
+      const abstand = steps.map((s) => { const r = s.getBoundingClientRect(); return Math.abs((r.top + r.bottom) / 2 - linie); });
+      let best = 0; abstand.forEach((d, i) => { if (d < abstand[best]) best = i; });
+      if (aktiv >= 0 && best !== aktiv && abstand[best] > abstand[aktiv] - 16) best = aktiv;
+      setStep(best);
+    };
+    storyTick();
+    setTimeout(() => { if (storyTick) storyTick(); }, 400);
   }
   if (matchMedia('(hover: hover)').matches) scr.querySelectorAll('.hero .cta .btn, .rolecard .btn.primary, .svc .btn.primary').forEach((b) => { b.classList.add('magnet'); b.addEventListener('mousemove', (e) => { const r = b.getBoundingClientRect(); b.style.transform = 'translate(' + ((e.clientX - r.left - r.width / 2) * 0.18).toFixed(1) + 'px, ' + ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + 'px)'; }); b.addEventListener('mouseleave', () => { b.style.transform = ''; }); });
   let prog = document.querySelector('.progress'); if (!prog) { prog = document.createElement('div'); prog.className = 'progress'; document.body.appendChild(prog); } prog.style.width = '0';
@@ -349,7 +363,10 @@ function bindTilt(card) {
   host.addEventListener('mousemove', (e) => { const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; card.style.setProperty('--ty', (x * 9).toFixed(2) + 'deg'); card.style.setProperty('--tx', (-y * 7).toFixed(2) + 'deg'); });
   host.addEventListener('mouseleave', () => { card.style.setProperty('--tx', '0deg'); card.style.setProperty('--ty', '0deg'); });
 }
+let storyTick = null;
+window.addEventListener('resize', () => { if (storyTick) storyTick(); });
 window.addEventListener('scroll', () => {
+  if (storyTick) storyTick();
   const t = document.querySelector('.top'); if (t) t.classList.toggle('scrolled', window.scrollY > 6);
   const prog = document.querySelector('.progress'); if (prog) { const max = document.documentElement.scrollHeight - window.innerHeight; prog.style.width = (max > 200 ? Math.min(100, window.scrollY / max * 100) : 0).toFixed(1) + '%'; }
   const hr = document.querySelector('.hero .tilt'); if (hr) { const k = Math.min(1, window.scrollY / 600); hr.style.opacity = String(1 - k * 0.5); hr.style.setProperty('--tx', (-k * 10).toFixed(1) + 'deg'); }
