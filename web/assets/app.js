@@ -845,11 +845,22 @@ function render(fresh) {
   /* Gleiche Modellstruktur wie zuvor: die alte Bühne bleibt, alles Weitere morpht mit Übergängen */
   const ph = root.querySelector('#w3d');
   if (ph && prevStage && prevSig && ph.getAttribute('data-sig') === prevSig && ph.getAttribute('data-keep') !== '0') { prevStage.className = ph.className; prevStage.style.height = ph.style.height; ph.replaceWith(prevStage); prevStage.setAttribute('data-reused', '1'); } else if (prevStage) prevStage.removeAttribute('data-reused');
-  const sc = root.querySelector('.scroll');
-  if (fresh || lastScreen !== S.screen) { if (sc) sc.scrollTop = 0; } else if (sc) sc.scrollTop = keep;
-  if (lastScreen === S.screen && !fresh) { const scr = root.querySelector('.scr'); if (scr) scr.style.animation = 'none'; }
+  const sc = root.querySelector('.scroll'), neu = fresh || lastScreen !== S.screen;
+  if (neu) { if (sc) sc.scrollTop = 0; } else if (sc) sc.scrollTop = keep;
+  if (!neu) { const scr = root.querySelector('.scr'); if (scr) scr.style.animation = 'none'; }
   lastScreen = S.screen;
   bindAfterRender();
+  /* Blöcke erscheinen nacheinander bzw. beim Scrollen; die wiederverwendete 3-D-Bühne bleibt, wie sie ist */
+  if (neu && !view.fit && window.Reveal) { const scr = root.querySelector('.scr'); if (scr) window.Reveal.auf(Array.from(scr.children).filter((c) => !(c.classList.contains('w3d-stage') && c.getAttribute('data-reused') === '1')), sc); }
+  feiern(root);
+}
+/* Kleine Belohnungen: Konfetti aus dem passenden Element, einmal je Anlass */
+function feiern(root) {
+  if (!S._feier || !window.Feier) return;
+  const art = S._feier; S._feier = null;
+  const sel = { masse: '.mess-in .eyebrow', fertig: '.scr .center .eyebrow, .scr h1', gesendet: '.okmark, .scr .center svg, .scr h1', pdf: '.datei-card .dc-ic, .datei-card, .scr h1' }[art] || '.scr h1';
+  const ziel = root.querySelector(sel);
+  setTimeout(() => { if (ziel && document.body.contains(ziel)) window.Feier.konfetti(ziel, { n: art === 'gesendet' ? 38 : art === 'pdf' ? 18 : 26, kraft: art === 'gesendet' ? 170 : 120, breit: art === 'gesendet' }); }, art === 'fertig' ? 380 : 220);
 }
 /* ---------- Bausteine ---------- */
 const ICON_I = '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="9.5" fill="var(--surface)" stroke="currentColor" stroke-width="1.7"></circle><path d="M11 10v5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path><circle cx="11" cy="6.8" r="1.3" fill="currentColor"></circle></svg>';
@@ -896,6 +907,8 @@ SCREENS.home = () => {
   return { html: html, bar: S.windows.length ? { label: 'Anfrage vorbereiten', act: 'go', v: 'anfrage' } : null };
 };
 const PLUS = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M2 9h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>';
+/* Nach dem Senden bleibt der Code, wie er abgeschickt wurde */
+const curCode = () => (S.sent && S.sent.code) || packProject(S.windows, S.proj, S.betrieb);
 const sentWhen = () => { try { const d = new Date(S.sent.when); return d.toLocaleDateString('de-DE') + ' um ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'; } catch (e) { return ''; } };
 /* Startseite für Kunden, die über einen Kundenlink kommen */
 function linkHome() {
@@ -1015,6 +1028,7 @@ function restNext(ack) {
   if (!chk.ok) { r.msg = { cls: 'bad', text: chk.msg, cm: chk.cm }; render(); return; }
   if (chk.warn && !ack) { r.msg = { cls: 'warn', text: chk.warn }; render(); return; }
   S.win.mo[rest.k] = num(r.cur); r.cur = ''; r.msg = null; r.i++;
+  if (r.i >= 4) S._feier = 'masse';
   render();
 }
 /* ---------- Ergebnis ---------- */
@@ -1113,11 +1127,13 @@ SCREENS.blatt = () => {
   if (S.sent && PILOT) return SCREENS.gesendet();
   if (S.sent) return { html: hd('Gesendet', 'Schon unterwegs.', esc(bn) + ' hat dein Aufmaß seit ' + esc(sentWhen()) + '.') + dateiCard(), back: ['Start', 'home'], bar: null };
   const pr = S.proj, items = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)]].concat(pr.notiz ? [['Nachricht', pr.notiz]] : []);
+  const voll = S.windows.filter((x) => derive(x).complete).length, fehlt = S.windows.length - voll;
   const html = hd('Prüfen', 'Alles vollständig?', esc(bn) + (PILOT ? ' bekommt deine Fenster mit allen Maßen und Wünschen.' : ' bekommt deine Fenster mit allen Maßen, Fotos und Wünschen.') + ' Tipp ein Fenster an, um es zu prüfen oder zu ändern.') +
+    (fehlt ? '<div class="msg ' + (voll ? 'warn' : 'bad') + '">' + (voll ? fehlt + (fehlt === 1 ? ' Fenster hat' : ' Fenster haben') + ' noch keine vollständigen Maße. Du kannst trotzdem senden, ' + esc(bn) + ' sieht dann, was fehlt.' : (S.windows.length ? 'Noch kein Fenster ist vollständig gemessen. Tipp ein Fenster an und trag die fehlenden Maße nach.' : 'Noch kein Fenster erfasst.')) + '</div>' : '') +
     '<div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => checkCard(x, i)).join('') + '</div>' +
     '<div class="kv">' + items.map((r) => '<div><span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>').join('') + '</div>' +
     '<p class="sub" style="padding: 0 6px">Nach dem Absenden ist der Link erledigt. Ändern kannst du danach nur noch über ' + esc(bn) + '.</p>';
-  return { html: html, back: ['Zurück', 'anfrage2'], bar: { label: 'An ' + bn + ' senden', act: 'send' } };
+  return { html: html, back: ['Zurück', 'anfrage2'], bar: { label: 'An ' + bn + ' senden', act: 'send', dis: !voll } };
 };
 /* Übersicht vor dem Senden: vollständig oder nicht, aber keine Maßliste zum Abfotografieren */
 function checkCard(x, i) {
@@ -1125,7 +1141,7 @@ function checkCard(x, i) {
   return '<button type="button" class="wincard" data-act="open" data-i="' + i + '"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di"' + (d.complete ? '' : ' style="color: var(--bad)"') + '>' + (d.complete ? 'Vollständig: 8 Maße' : 'Maße fehlen noch') + (x.fotos ? ', ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : ', ohne Fotos') + '</span><span class="me">' + esc([typ, lab('material', x.material), n > 1 ? n + ' Stück' : ''].filter(Boolean).join(' · ')) + '</span></span>' + CHEV + '</button>';
 }
 SCREENS.gesendet = () => {
-  const name = S.betrieb ? (S.betrieb.name || 'Dein Fensterbauer') : 'Dein Fensterbauer', code = packProject(S.windows, S.proj, S.betrieb);
+  const name = S.betrieb ? (S.betrieb.name || 'Dein Fensterbauer') : 'Dein Fensterbauer', code = curCode();
   const wa = 'https://wa.me/?text=' + encodeURIComponent('Hallo ' + name + ', hier ist mein Übermittlungscode aus Klopfan:\n' + code);
   const html = '<div class="center" style="padding-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px"><svg class="okmark" viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><h1 style="margin: 4px 0 0; font-family: var(--display); font-size: 42px; line-height: 1; font-weight: 900; letter-spacing: -.035em">Gesendet.</h1><p style="margin: 0; font-size: 17px; line-height: 1.5; color: var(--fg2)">' + esc(name) + ' hat jetzt Maße, Fotos und Wünsche und meldet sich mit einem Angebot.</p></div>' +
     '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(name) + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
@@ -1236,12 +1252,12 @@ async function saveDatei() {
   const pdf = blattPDF(), name = fileBase() + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
   if (!DL && DLP) await DLP;
   if (DL) {
-    try { await DL.save({ filename: name, data: data }); toast('Gespeichert'); }
+    try { await DL.save({ filename: name, data: data }); S._feier = 'pdf'; toast('Gespeichert'); }
     catch (e) { if (e && e.code === 'declined') return; if (e && (e.code === 'rejected_extension' || e.code === 'extension_not_enabled') && pdf) { try { await DL.save({ filename: fileBase() + '.txt', data: blattMarkdown(S.windows, S.proj) }); toast('Als Text gespeichert'); } catch (e2) { toast('Speichern hat nicht geklappt'); } return; } toast('Speichern hat nicht geklappt'); }
     return;
   }
   if (window.claude) return toast('Speichern ist in dieser Ansicht nicht möglich');
-  try { const blob = data instanceof Blob ? data : new Blob([data], { type: 'text/html' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); toast('Download gestartet'); }
+  try { const blob = data instanceof Blob ? data : new Blob([data], { type: 'text/html' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); S._feier = 'pdf'; toast('Download gestartet'); }
   catch (e) { toast('Speichern geht hier nicht'); }
 }
 
@@ -1544,7 +1560,7 @@ function newWin() {
 }
 function saveWin() {
   const w = Object.assign({}, S.win, { name: S.win.name || 'Fenster ' + (S.editIdx >= 0 ? S.editIdx + 1 : S.windows.length + 1) });
-  if (S.editIdx >= 0) S.windows[S.editIdx] = w; else { S.windows.push(w); S.editIdx = S.windows.length - 1; }
+  if (S.editIdx >= 0) S.windows[S.editIdx] = w; else { S.windows.push(w); S.editIdx = S.windows.length - 1; S._feier = 'fertig'; }
   S.win = w; persist(); go('fertig');
 }
 /* ---------- Sprossen: Einrasten auf Viertel, Drittel, Hälfte ---------- */
@@ -1595,13 +1611,13 @@ function act(name, el) {
     case 'color': { const side = el.getAttribute('data-side') || S.side; if (side === 'innen') { w.fi = v; w.gleich = false; } else w.fa = v; return render(); }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); return render(); }
     case 'save': return saveWin();
-    case 'send': { if (S.betrieb && S.sent) return go('gesendet'); S.sent = { when: Date.now() }; persist(); return go('gesendet'); }
-    case 'copyblatt': return copyText(packProject(S.windows, S.proj, S.betrieb), 'code-box', 'Code kopiert');
+    case 'send': { if (S.betrieb && S.sent) return go('gesendet'); if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb) }; S._feier = 'gesendet'; persist(); return go('gesendet'); }
+    case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'k-next': { const k = kauf(); k.err = {}; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(k.mail || '').trim())) k.err.mail = 'Bitte eine gültige E-Mail-Adresse eingeben.'; if (String(k.pw || '').length < 8) k.err.pw = 'Mindestens 8 Zeichen.'; if (!k.agb) k.err.agb = 'Bitte zustimmen, sonst können wir kein Konto anlegen.'; if (Object.keys(k.err).length) return render(); k.mail = k.mail.trim(); persist(); return go('kasse'); }
     case 'k-pay': { const k = kauf(); k.pay = v; if (k.err) delete k.err.pay; return render(); }
     case 'k-buy': { const k = kauf(); k.err = {}; if (!k.pay) k.err.pay = 'Bitte eine Zahlungsart wählen.'; if (!k.widerruf) k.err.widerruf = 'Für die sofortige Lieferung brauchen wir deine Zustimmung.'; if (Object.keys(k.err).length) return render(); k.paid = true; k.when = Date.now(); k.pw = ''; persist(); return go('gekauft'); }
     case 'k-dl': return saveDatei();
-    case 'copycode': return copyText(packProject(S.windows, S.proj, S.betrieb), 'code-box', 'Code kopiert');
+    case 'copycode': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'download': return saveDatei();
     case 'admin-link': { const code = Math.random().toString(36).slice(2, 7); S.admin.links.unshift({ code: code, name: S.admin.newname || '', when: new Date().toLocaleDateString('de-DE') }); S.admin.newname = ''; persist(); toast('Kundenlink erstellt'); return render(); }
     case 'admin-copy': { const l = S.admin.links.find((x) => x.code === v); return copyText(l ? kundenlink(l) : '', 'link-' + v, 'Link kopiert'); }
@@ -1697,7 +1713,7 @@ const gesendetOrig = SCREENS.gesendet;
 SCREENS.gesendet = () => {
   if (!PILOT) return gesendetOrig();
   const bn = S.betrieb && S.betrieb.name ? S.betrieb.name : '', dat = bn || 'deinem Fensterbauer', nom = bn || 'dein Fensterbauer';
-  const n = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), code = packProject(S.windows, S.proj, S.betrieb);
+  const n = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), code = curCode();
   const text = 'Hallo' + (bn ? ' ' + bn : '') + ', hier ist mein Fenster-Aufmaß aus Klopfan (' + n + ' Fenster). Bitte im Klopfan-Portal unter „Code vom Kunden einfügen“ einsetzen:\n' + code;
   const wa = 'https://wa.me/?text=' + encodeURIComponent(text), mail = 'mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(text);
   const html = '<div class="center" style="padding-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px">' + SEND_IC +

@@ -69,3 +69,20 @@ a.btn { text-decoration: none }
   49%, 100% { transform: none }
 }
 @media (prefers-reduced-motion: reduce) { .kl-logo .kl-hand, .kl-logo .kl-welle, .kl-logo .kl-kachel { animation: none !important } }
+
+/* Feier: Konfetti und Puls */
+.fx-konfetti { position: fixed; inset: 0; z-index: 300; pointer-events: none; overflow: hidden }
+.fx-konfetti i { position: absolute; display: block; transform: translate(-50%, -50%) scale(.5); opacity: 0; animation: fx-konfetti var(--dur) cubic-bezier(.2, .7, .3, 1) var(--delay) both }
+@keyframes fx-konfetti {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(.5) rotate(0) }
+  38% { opacity: 1; transform: translate(calc(-50% + var(--dx) * .8), calc(-50% + var(--dyu))) scale(1) rotate(calc(var(--rot) * .5)) }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dyd))) scale(.9) rotate(var(--rot)) }
+}
+.fx-puls { position: relative }
+.fx-puls::after { content: ''; position: absolute; inset: -6px; border-radius: inherit; border: 2px solid var(--ok, #1f7a3d); animation: fx-puls 1s ease-out both; pointer-events: none }
+@keyframes fx-puls { 0% { opacity: .9; transform: scale(.96) } 100% { opacity: 0; transform: scale(1.12) } }
+
+/* Scroll-Reveal */
+.rev { opacity: 0; transform: translateY(16px); transition: opacity .6s cubic-bezier(.2, .7, .2, 1), transform .6s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--rv, 0) * 60ms) }
+.rev.in { opacity: 1; transform: none }
+@media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; transition: none } .fx-konfetti, .fx-puls::after { display: none } }

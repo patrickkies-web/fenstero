@@ -2,6 +2,7 @@
    - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung
    - Pilot-Hinweis im Portal
    - Logo (weiße Faust auf Schwarz, die anklopft) mit Klopf-Bewegung
+   - Feier (Konfetti, Puls) und Scroll-Reveal
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
@@ -122,6 +123,52 @@
   function klopfBeiBeruehrung(e) { var l = e.target && e.target.closest ? e.target.closest('.kl-logo') : null; if (l) window.Logo.klopfen(l); }
   document.addEventListener('pointerdown', klopfBeiBeruehrung, true);
   document.addEventListener('mouseover', klopfBeiBeruehrung, true);
+
+  /* ---------- Feier: kleine Belohnungen nach erledigten Schritten ----------
+     Feier.konfetti(el)  bunte Schnipsel aus einem Element heraus (oder aus der Bildmitte)
+     Feier.puls(el)      ein kurzer Puls um ein Element
+     Ruhig, wenn das Gerät „weniger Bewegung“ eingestellt hat. */
+  function ruhig() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  var FARBEN = ['#0071e3', '#d4502b', '#1f7a3d', '#f5b942', '#5e5ce6', '#ff7a59'];
+  window.Feier = {
+    konfetti: function (ziel, o) {
+      o = o || {};
+      if (ruhig()) return;
+      var r = ziel && ziel.getBoundingClientRect ? ziel.getBoundingClientRect() : null;
+      var x = r ? r.left + r.width / 2 : window.innerWidth / 2, y = r ? r.top + r.height / 2 : window.innerHeight * 0.35;
+      if (r && (r.width === 0 || r.bottom < 0 || r.top > window.innerHeight)) { x = window.innerWidth / 2; y = window.innerHeight * 0.35; }
+      var n = o.n || 28, wrap = el('div', 'fx-konfetti');
+      wrap.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < n; i++) {
+        var p = document.createElement('i');
+        var winkel = -Math.PI / 2 + (Math.random() - 0.5) * (o.breit ? 2.6 : 1.9), kraft = 60 + Math.random() * (o.kraft || 120);
+        var dx = Math.cos(winkel) * kraft, dyu = Math.sin(winkel) * kraft, dyd = dyu + 90 + Math.random() * 110;
+        var w = 5 + Math.random() * 6, h = 4 + Math.random() * 7, rund = Math.random() < 0.35;
+        p.style.cssText = 'left:' + x.toFixed(0) + 'px;top:' + y.toFixed(0) + 'px;--dx:' + dx.toFixed(0) + 'px;--dyu:' + dyu.toFixed(0) + 'px;--dyd:' + dyd.toFixed(0) + 'px;--rot:' + (Math.random() * 720 - 360).toFixed(0) + 'deg;--dur:' + (900 + Math.random() * 500).toFixed(0) + 'ms;--delay:' + (Math.random() * 120).toFixed(0) + 'ms;background:' + FARBEN[i % FARBEN.length] + ';width:' + w.toFixed(1) + 'px;height:' + (rund ? w : h).toFixed(1) + 'px;border-radius:' + (rund ? '50%' : '2px');
+        wrap.appendChild(p);
+      }
+      document.body.appendChild(wrap);
+      setTimeout(function () { wrap.remove(); }, 1700);
+    },
+    puls: function (ziel) {
+      if (!ziel || ruhig()) return;
+      ziel.classList.remove('fx-puls'); void ziel.offsetWidth; ziel.classList.add('fx-puls');
+      setTimeout(function () { ziel.classList.remove('fx-puls'); }, 1000);
+    }
+  };
+
+  /* ---------- Scroll-Reveal: Blöcke erscheinen, wenn sie ins Bild kommen ----------
+     Reveal.auf(elemente, wurzel): setzt .rev und beobachtet; ohne Beobachter oder bei „weniger Bewegung“ sofort sichtbar. */
+  var io = null;
+  window.Reveal = {
+    auf: function (liste, wurzel) {
+      var arr = Array.prototype.slice.call(liste || []);
+      if (!arr.length) return;
+      if (ruhig() || !('IntersectionObserver' in window)) { arr.forEach(function (e) { e.classList.add('rev', 'in'); }); return; }
+      if (!io || (wurzel && io.root !== wurzel)) { if (io) io.disconnect(); io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { root: wurzel || null, rootMargin: '0px 0px 40px 0px', threshold: 0.05 }); }
+      arr.forEach(function (e, i) { e.classList.add('rev'); e.style.setProperty('--rv', String(Math.min(i, 8))); io.observe(e); });
+    }
+  };
 
   /* ---------- Pilot-Hinweis im Portal ---------- */
   function pilotHinweis() {

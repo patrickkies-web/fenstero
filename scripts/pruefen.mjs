@@ -7,6 +7,7 @@
 // Geprüft wird: alle Seiten laden ohne Fehler, ohne Verstoß gegen die Content-Security-Policy und ohne
 // Anfragen an fremde Server; kein alter Name mehr; Pilot-Hinweis; Kundenlink von Portal zu App und zurück;
 // ehrlicher Versand mit AM1-Code; kostenlose PDF-Datei; KI mit Einwilligung; ältere ZF1-, FE1- und LM1-Codes bleiben lesbar;
+// Logik (Anklopfen, Freigabe, Gutschrift, Ablauf, doppelte Codes, Sende-Sperre), Übersichten und kleine Belohnungen;
 // Name und Logo (weiße Faust auf Schwarz, die anklopft) an den richtigen Stellen, kein Spruch mehr.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
@@ -242,6 +243,111 @@ console.log('5. Rechtsseiten');
   await foto(page, 'impressum');
   sauber(page, 'Rechtsseiten ohne Fehler');
   await ctx.close();
+}
+
+/* ---------- 6. Logik, Übersichten und kleine Belohnungen ---------- */
+console.log('6. Logik, Übersichten und Belohnungen');
+{
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' });
+  const page = await neueSeite(ctx);
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  const tun = (act, v, id, c) => page.evaluate(([act, v, id, c]) => { const b = document.createElement('button'); b.setAttribute('data-act', act); if (v) b.setAttribute('data-v', v); if (id) b.setAttribute('data-id', id); if (c) b.setAttribute('data-c', c); document.getElementById('app').appendChild(b); b.click(); }, [act, v || '', id || '', c || '']);
+  const toastText = () => page.evaluate(() => { const t = document.getElementById('toast'); return t ? t.textContent : ''; });
+  await tun('demo-as', 'c1'); await page.waitForTimeout(500);
+
+  // Übersicht Projekte: Kacheln mit Farbton und Symbol, Karten mit Schrittpunkten, Fensterstapel und Ring
+  ok(await page.locator('.stat.tone-warn .stat-ic svg').count() === 1 && await page.locator('.stat.tone-ok').count() === 1, 'Projekte: Kennzahlen mit Farbe und Symbol');
+  const nProj = await page.evaluate(() => A().links.length);
+  ok(await page.locator('.pcard .pstep').count() === nProj, 'Jedes Projekt zeigt seine vier Schrittpunkte');
+  ok(await page.locator('.pcard.st-eingegangen .winstack svg').count() >= 1 && await page.locator('.pcard.st-arbeit .pring').count() === 1, 'Eingegangenes Aufmaß als Fensterstapel, laufendes als Ring');
+  await foto(page, 'portal-projekte');
+
+  // Neues Projekt anlegen: Karte „Projekt angelegt“ und Konfetti
+  await page.evaluate(() => { S.nl = { step: 1, kunde: 'Familie Testmann', kontakt: '0171 000 00 00', adresse: 'Teststraße 1, 50667 Köln', geb: 'efh', fz: '3 bis 5', plan: ['Fenster'], note: '', days: 14, du: false, err: {} }; });
+  await tun('nl-create'); await page.waitForTimeout(500);
+  ok(await page.locator('.created').count() === 1 && await page.locator('.fx-konfetti i').count() > 10, 'Projekt angelegt: Bestätigung und Konfetti');
+  await foto(page, 'portal-projekt-neu');
+  await page.waitForTimeout(1400);
+  ok(await page.locator('.fx-konfetti').count() === 0, 'Konfetti räumt sich selbst auf');
+
+  // Link verschickt → Puls am Status; Enter im Formular springt nicht über Schritt 2
+  await tun('l-share', 'Text', await page.evaluate(() => A().links[0].id)); await page.waitForTimeout(700);
+  ok(await page.evaluate(() => A().links[0].status === 'gesendet'), 'Erstes Teilen setzt den Status auf „Link gesendet“');
+  await tun('go', 'newlink'); await page.waitForTimeout(300);
+  await page.fill('#nl-kunde', 'Herr Enter'); await page.press('#nl-kunde', 'Enter'); await page.waitForTimeout(300);
+  ok(await page.locator('#nl-adresse').count() === 1 && await page.evaluate(() => !A().links.some((l) => l.kunde === 'Herr Enter')), 'Enter im ersten Schritt führt zu Schritt 2, legt noch nichts an');
+  await page.press('#nl-adresse', 'Enter'); await page.waitForTimeout(400);
+  ok(await page.evaluate(() => A().links.some((l) => l.kunde === 'Herr Enter')), 'Enter im zweiten Schritt legt das Projekt an');
+
+  // Links laufen ab
+  await page.evaluate(() => { const l = A().links.find((x) => x.status === 'gesendet' || x.status === 'geoeffnet'); l.expires = '01.01.2020'; tick(); });
+  ok(await page.evaluate(() => A().links.some((l) => l.status === 'abgelaufen')), 'Abgelaufener Link wird als abgelaufen geführt');
+  // Zweiter Code-Import desselben Aufmaßes wird erkannt
+  const dup = await page.evaluate(() => { const l = A().links.find((x) => x.status === 'eingegangen' && x.aufmass); const vorher = A().links.length; const o = { v: 1, b: l.code, w: l.aufmass.windows, p: l.aufmass.proj }; const code = 'AM1.' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); return { code, vorher }; });
+  await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', dup.code); await tun('linkimport'); await page.waitForTimeout(400);
+  const nachher = await page.evaluate(() => A().links.length);
+  ok(nachher === dup.vorher && /schon|bereits|gleich/i.test(await toastText()), 'Derselbe Aufmaß-Code wird nicht doppelt angelegt');
+  await page.evaluate(() => { S.sheet = null; render(); });
+
+  // Anfragen: Karten mit Fensterzahl, Fensterreihe und Budgetstufen; Anklopfen-Regeln
+  await tun('nav', 'markt'); await page.waitForTimeout(600);
+  ok(await page.locator('.lcard .lcnt b').count() >= 5 && await page.locator('.lcard .winrow i').count() >= 5 && await page.locator('.lcard .bbar i.on').count() >= 5, 'Anfragen: Fensterzahl, Fensterreihe und Budgetstufen sichtbar');
+  await foto(page, 'portal-anfragen');
+  await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i3'); x.status = 'pause'; });
+  await tun('knock', '', 'i3'); await page.waitForTimeout(900);
+  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i3'), 'c1') === null) && /pausiert/.test(await toastText()), 'Anklopfen bei pausierter Anfrage wird abgelehnt');
+  await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i3'); x.status = 'offen'; x.knocks = [{ c: 'c1', when: 'gestern', status: 'abgelehnt' }]; });
+  await tun('knock', '', 'i3'); await page.waitForTimeout(900);
+  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i3'), 'c1') === 'abgelehnt') && /abgelehnt/.test(await toastText()), 'Nach einer Absage geht kein erneutes Anklopfen');
+  // Fair-Regel erst nach sieben Tagen
+  await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i2'); const k = x.knocks.find((kk) => kk.c === 'c1'); k.freiAt = Date.now(); });
+  await tun('fair', '', 'i2'); await page.waitForTimeout(300);
+  ok(await page.evaluate(() => knockStatus(S.inq.find((i) => i.id === 'i2'), 'c1') === 'frei') && /7 Tage/.test(await toastText()), 'Gutschrift erst sieben Tage nach der Freigabe');
+
+  // Eigentümer: Freigabe berechnet, Rückzug schreibt gut
+  await tun('demo-as', 'max'); await page.waitForTimeout(500);
+  ok(await page.locator('.stat.tone-lead').count() === 1 && await page.locator('.lcard.st-lead').count() === 1, 'Eigentümer-Übersicht: Anklopfer farbig hervorgehoben');
+  await foto(page, 'portal-eigentuemer');
+  const vor = await page.evaluate(() => { const x = S.inq.find((i) => i.id === 'i1'); x.knocks.unshift({ c: 'c1', when: 'heute', status: 'offen' }); return S.acc.c1.guthaben; });
+  await tun('release', '', 'i1', 'c1'); await page.waitForTimeout(500);
+  const mitte = await page.evaluate(() => ({ g: S.acc.c1.guthaben, c: (S.acc.c1.charges || []).find((c) => c.id === 'i1'), k: knockStatus(S.inq.find((i) => i.id === 'i1'), 'c1'), feier: document.querySelectorAll('.fx-konfetti i').length }));
+  ok(mitte.k === 'frei' && mitte.c && mitte.c.status === 'offen' && mitte.g === vor - mitte.c.credit, 'Freigabe berechnet den Kontakt (Guthaben zuerst)');
+  ok(mitte.feier > 10, 'Freigabe wird gefeiert');
+  await tun('revoke', '', 'i1', 'c1'); await page.waitForTimeout(400);
+  const nach = await page.evaluate(() => ({ g: S.acc.c1.guthaben, c: (S.acc.c1.charges || []).find((c) => c.id === 'i1'), k: knockStatus(S.inq.find((i) => i.id === 'i1'), 'c1') }));
+  ok(nach.k === 'abgelehnt' && nach.c.status === 'gutschrift' && nach.g === vor, 'Rückzug der Freigabe: Gutschrift, Guthaben wieder wie vorher');
+  sauber(page, 'Logik und Übersichten ohne Fehler');
+  await ctx.close();
+
+  // App: Sende-Sperre ohne vollständiges Fenster, Feier bei „Alle Maße da“, Code bleibt nach dem Senden gleich
+  const ctx2 = await browser.newContext(telefon);
+  const p2 = await neueSeite(ctx2);
+  await p2.goto(BASE + '/app/#k-pruef1-Test_Betrieb.VGVzdCBCZXRyaWVi', { waitUntil: 'networkidle' });
+  await p2.evaluate(() => { const w = demoProject(); const halb = Object.assign({}, w[0], { name: 'Halb gemessen', w: '', h: '', el: { h: '', w: '' }, mo: { hm: 1200, wm: 1000, hl: '', hr: '', wt: '', wb: '' } }); localStorage.setItem('aufmass.k.pruef1', JSON.stringify({ windows: [halb], proj: {}, name: 'Test Betrieb' })); });
+  await p2.reload({ waitUntil: 'networkidle' });
+  await p2.evaluate(() => { S.screen = 'blatt'; render(true); }); await p2.waitForTimeout(300);
+  ok(await p2.locator('.bb .btn.primary[disabled]').count() === 1 && /kein Fenster ist vollständig/.test(await p2.evaluate(() => document.body.innerText)), 'Senden gesperrt, solange kein Fenster vollständig ist');
+  await foto(p2, 'app-senden-gesperrt');
+  await p2.evaluate(() => { S.windows.push(Object.assign({}, demoProject()[1], { name: 'Komplett' })); persist(); render(true); }); await p2.waitForTimeout(300);
+  ok(await p2.locator('.bb .btn.primary[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
+  await p2.click('.bb .btn.primary'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
+  const code1 = await p2.inputValue('#code-box');
+  ok(await p2.locator('.fx-konfetti i').count() > 10, 'Abschicken wird gefeiert');
+  await p2.evaluate(() => { S.windows[0].name = 'Nachträglich geändert'; S.proj.notiz = 'anders'; render(true); }); await p2.waitForTimeout(200);
+  ok(await p2.inputValue('#code-box') === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
+  // Scroll-Reveal: Blöcke tragen .rev und sind sichtbar
+  ok(await p2.evaluate(() => { const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv)');
+  // Alle Maße da: Konfetti
+  await p2.evaluate(() => { S.betrieb = null; });
+  await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await p2.click('[data-act="new"]'); await p2.waitForTimeout(200);
+  await p2.evaluate(() => { S.win.mo = { hm: 1480, wm: 1370, hl: '', hr: '', wt: '', wb: '' }; go('rest'); });
+  for (let i = 0; i < 4; i++) { await p2.waitForSelector('[data-act="rest-same"]'); await p2.click('[data-act="rest-same"]'); await p2.waitForTimeout(150); }
+  await p2.waitForTimeout(400);
+  ok(/Alle Maße da/.test(await p2.evaluate(() => document.body.textContent)) && await p2.locator('.fx-konfetti i').count() > 10, '„Alle Maße da“ wird gefeiert');
+  await foto(p2, 'app-masse-da');
+  sauber(p2, 'App-Logik ohne Fehler');
+  await ctx2.close();
 }
 
 await browser.close();

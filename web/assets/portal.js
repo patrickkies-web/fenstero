@@ -154,6 +154,9 @@ const two = (n) => String(n).padStart(2, '0');
 function stamp() { const d = new Date(); return 'heute, ' + two(d.getHours()) + ':' + two(d.getMinutes()); }
 function dateIn(days) { const d = new Date(); d.setDate(d.getDate() + days); return two(d.getDate()) + '.' + two(d.getMonth() + 1) + '.' + d.getFullYear(); }
 const seit = (d) => (d <= 0 ? 'Heute online' : d === 1 ? 'Online seit 1 Tag' : 'Online seit ' + d + ' Tagen');
+const tage = (x) => (x.createdAt ? Math.floor((Date.now() - x.createdAt) / 864e5) : (x.created || 0));
+const parseDE = (s) => { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(s || '').trim()); return m ? new Date(+m[3], +m[2] - 1, +m[1], 23, 59, 59) : null; };
+const datumDE = (ts) => { const d = new Date(ts); return two(d.getDate()) + '.' + two(d.getMonth() + 1) + '.' + d.getFullYear(); };
 const tierName = (n) => (n <= 2 ? 'S · 1 bis 2 Fenster' : n <= 6 ? 'M · 3 bis 6 Fenster' : n <= 12 ? 'L · 7 bis 12 Fenster' : 'XL · ab 13 Fenster');
 const hashN = (s) => String(s).split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 /* ---------- Beispieldaten ---------- */
@@ -232,7 +235,7 @@ function seed() {
 
 let S = seed();
 try { const raw = localStorage.getItem(STORE); if (raw) { const o = JSON.parse(raw); if (o && o.v === 4 && o.acc && o.kunden) S = Object.assign(seed(), o, { sheet: null }); } } catch (e) { /* ohne Speicher weiter */ }
-function save() { try { const o = Object.assign({}, S, { sheet: null }); ['justCreated', '_pop', '_focusErr', 'animNext'].forEach((k) => delete o[k]); localStorage.setItem(STORE, JSON.stringify(o)); } catch (e) { /* ok */ } }
+function save() { try { const o = Object.assign({}, S, { sheet: null }); ['justCreated', '_pop', '_focusErr', 'animNext', '_feier'].forEach((k) => delete o[k]); localStorage.setItem(STORE, JSON.stringify(o)); } catch (e) { /* ok */ } }
 /* ---------- Konten ---------- */
 function allCompanies() { return BASE_COMPANIES.concat(S.myCompanies || []); }
 function comp(id) { return allCompanies().find((c) => c.id === id) || BASE_COMPANIES[0]; }
@@ -255,6 +258,7 @@ function charge(a, x) {
   a.guthaben -= cr;
   (a.charges = a.charges || []).unshift({ id: x.id, when: stamp(), text: 'Portal-Kontakt · ' + GEB[x.geb] + ' ' + ort(x.plz), umfang: tierName(x.fenster), betrag: p, credit: cr, status: 'offen' });
 }
+const fairAb = (x) => { const k = (x.knocks || []).find((kk) => kk.c === S.cur); return k && k.freiAt && Date.now() - k.freiAt < 7 * 864e5 ? datumDE(k.freiAt + 7 * 864e5) : ''; };
 const chargeOf = (a, id) => ((a && a.charges) || []).find((c) => c.id === id);
 const paidPrice = (x) => { const c = chargeOf(A(), x.id); return c ? c.betrag : leadPrice(x); };
 const dot = (t) => (/[.!?]$/.test(t) ? t : t + '.');
@@ -296,6 +300,15 @@ const ICONS = {
   filelock: I('<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><rect x="9" y="13" width="6" height="5" rx="1"/><path d="M10.5 13v-1.5a1.5 1.5 0 0 1 3 0V13"/>'),
   euro: I('<path d="M17.5 6.5a7 7 0 1 0 0 11M4.5 10.5h9M4.5 13.5h9"/>'),
   logout: I('<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/>'),
+  send: I('<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>'),
+  inbox: I('<path d="M4 4h16v16H4z"/><path d="M4 14h4l2 3h4l2-3h4"/>'),
+  gift: I('<rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M3 13h18M12 9v12"/><path d="M12 9c-3 0-5-1.2-5-3a2 2 0 0 1 4-.6C11.5 6.5 12 9 12 9zm0 0c3 0 5-1.2 5-3a2 2 0 0 0-4-.6C12.5 6.5 12 9 12 9z"/>'),
+  coin: I('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 11h18"/><circle cx="16.5" cy="15.5" r="1.3"/><path d="M6 7V5.5A1.5 1.5 0 0 1 7.5 4H18"/>'),
+  pin: I('<path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/>'),
+  hand: I('<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8.5a5.5 5.5 0 0 1-5.5 5.5H11a5 5 0 0 1-4.3-2.4L4.3 13.4A1.4 1.4 0 0 1 6.6 12L8 14"/>'),
+  spark: I('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>'),
+  clock: I('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+  flag: I('<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>'),
   win: '<svg viewBox="0 0 48 56" aria-hidden="true"><rect x="4" y="4" width="40" height="48" rx="2" fill="#fbfbfa" stroke="#1d1d1f" stroke-width="1.5"/><rect x="9" y="9" width="13" height="38" fill="#d9e8f7" stroke="#1d1d1f" stroke-width="1"/><rect x="26" y="9" width="13" height="38" fill="#d9e8f7" stroke="#1d1d1f" stroke-width="1"/></svg>'
 };
 const icon = (k, w) => ICONS[k].replace(/width="22" height="22"/, 'width="' + w + '" height="' + w + '"');
@@ -319,6 +332,38 @@ function radarSVG(center, pts, o) {
 function sw(label, sub, on, act, v) { return '<div class="sw-row"><span class="t"><b>' + esc(label) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span><button type="button" class="switch" role="switch" aria-checked="' + !!on + '" aria-label="' + esc(label) + '" data-act="' + act + '" data-v="' + (v || '') + '"><span></span></button></div>'; }
 const seg = (opts, cur, act) => '<div class="seg" role="tablist">' + opts.map((o) => '<button type="button" role="tab" data-act="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + esc(o[1]) + (o[2] ? ' <span class="n">' + o[2] + '</span>' : '') + '</button>').join('') + '</div>';
 const empty = (title, text, btn) => '<div class="empty"><b>' + title + '</b><span>' + text + '</span>' + (btn || '') + '</div>';
+/* Kennzahl-Kachel mit Farbton und Symbol; Zahlen zählen hoch, Text (z. B. ∞) steht einfach da */
+function stat(tone, ico, label, value, sub, fmt) {
+  const num = typeof value === 'number';
+  return '<div class="stat tone-' + tone + '"><span class="stat-ic">' + icon(ico, 20) + '</span><small>' + esc(label) + '</small><b' + (num ? ' data-count="' + value + '" data-fmt="' + (fmt || 'int') + '"' : '') + '>' + (num ? (fmt === 'eur' ? eur(value) : String(value)) : esc(String(value))) + '</b><span>' + sub + '</span></div>';
+}
+/* Bis zu drei gezeichnete Fenster, leicht gefächert, der Rest als Zahl */
+function winStack(wins, size) {
+  const show = wins.slice(0, 3);
+  return '<span class="winstack n' + show.length + '">' + show.map((w, i) => '<i style="--k: ' + i + '">' + AW.svg(w, size || 40) + '</i>').join('') + (wins.length > 3 ? '<em>+' + (wins.length - 3) + '</em>' : '') + '</span>';
+}
+/* Fortschrittsring: k von n */
+function ring(k, n) {
+  const r = 17, c = 2 * Math.PI * r, p = n ? Math.min(1, k / n) : 0;
+  return '<span class="pring"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="' + r + '"/><circle class="val" cx="22" cy="22" r="' + r + '" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - p)).toFixed(1) + '"/></svg><b>' + k + '<small>/' + n + '</small></b></span>';
+}
+/* Vier Schrittpunkte: gesendet, geöffnet, misst, eingegangen */
+function stepDots(l) {
+  const idx = LORDER.indexOf(l.status), done = l.status === 'eingegangen', dead = ['abgelaufen', 'deaktiviert'].includes(l.status);
+  return '<span class="pstep' + (dead ? ' dead' : '') + '">' + LORDER.slice(1).map((st, i) => { const j = i + 1; return '<i class="' + (done || j < idx ? 'done' : j === idx ? 'now' : '') + '" title="' + TLS[st] + '"></i>'; }).join('') + '</span>';
+}
+const KSTAGES = ['kontakt', 'termin', 'angebot', 'auftrag'];
+function kstep(stage) {
+  const i = KSTAGES.indexOf(stage || 'kontakt'), lost = stage === 'verloren';
+  return '<span class="pstep kstep' + (lost ? ' dead' : '') + '">' + KSTAGES.map((st, j) => '<i class="' + (lost ? '' : j < i || (j === i && i === 3) ? 'done' : j === i ? 'now' : '') + '" title="' + st + '"></i>').join('') + '</span>';
+}
+/* Fensterreihe einer Anfrage: Rechtecke im richtigen Seitenverhältnis */
+function winRow(wins, total) {
+  const show = (wins || []).slice(0, 5);
+  return '<span class="winrow">' + show.map((w) => { const a = (w.w || 1000) / (w.h || 1200), hh = 22, ww = Math.max(7, Math.min(40, hh * a)); return '<i style="width: ' + ww.toFixed(0) + 'px; height: ' + hh + 'px" title="' + esc(w.name + ' · ' + mm(w.w) + ' × ' + mm(w.h) + ' mm') + '"></i>'; }).join('') + (total > show.length ? '<em>+' + (total - show.length) + '</em>' : '') + '</span>';
+}
+/* Budget als vier Stufen */
+function budgetBar(b) { const n = { b1: 1, b2: 2, b3: 3, b4: 4 }[b] || 0; return '<span class="bbar" title="' + esc(BUDGET[b] || '') + '">' + [1, 2, 3, 4].map((i) => '<i' + (i <= n ? ' class="on"' : '') + '></i>').join('') + '</span>'; }
 /* ---------- Navigation ---------- */
 function go(screen, sel) { if (S.screen !== screen || S.sel !== sel) { S.hist.push([S.screen, S.sel]); if (S.hist.length > 25) S.hist.shift(); } S.screen = screen; if (sel !== undefined) S.sel = sel; S.sheet = null; render(); window.scrollTo(0, 0); }
 function nav(screen, sel) { S.hist = []; S.screen = screen; if (sel !== undefined) S.sel = sel; S.sheet = null; render(); window.scrollTo(0, 0); }
@@ -409,6 +454,11 @@ function afterRender(anim) {
   const n = newNotif(), bell = document.querySelector('.top .ibtn:last-child');
   if (bell && n > lastNew) { bell.classList.add('ring'); const d = bell.querySelector('.dot'); if (d) d.classList.add('pop'); }
   lastNew = n;
+  if (S._feier && window.Feier) {
+    const art = S._feier; S._feier = null;
+    const ziel = art === 'projekt' ? scr.querySelector('.created .burst-ok, .created') : art === 'willkommen' ? scr.querySelector('.h h2') : art === 'eingang' ? scr.querySelector('.amhead, .h .badge, .h h2') : art === 'frei' ? scr.querySelector('.note.ok, .h h2') : art === 'kontakt' ? scr.querySelector('.okcard .eyebrow, .okcard') : art === 'gesendet' ? scr.querySelector('.h .badge, .tlh li.now') : scr.querySelector('.h h2');
+    if (ziel) setTimeout(() => { if (!document.body.contains(ziel)) return; if (art === 'gesendet') window.Feier.puls(ziel); else window.Feier.konfetti(ziel, { n: art === 'willkommen' || art === 'eingang' ? 36 : 24, kraft: art === 'willkommen' ? 170 : 120, breit: art === 'willkommen' }); }, 180);
+  }
   if (S._pop) { const q = S._pop; const el = Array.from(document.querySelectorAll('[data-act="' + q.act + '"]')).find((x) => (x.getAttribute('data-v') || '') === q.v && (x.getAttribute('data-k') || '') === q.k); if (el) el.classList.add(el.classList.contains('switch') ? 'just' : 'pop'); S._pop = null; }
   scr.querySelectorAll('.scrollchips').forEach((row) => { const on = row.querySelector('[aria-pressed="true"]'); if (!on) return; const rr = row.getBoundingClientRect(), ro = on.getBoundingClientRect(); if (ro.left < rr.left + 8 || ro.right > rr.right - 8) row.scrollLeft += ro.left - rr.left - 24; });
   if (anim && matchMedia('(max-width: 520px)').matches) scr.querySelectorAll('.sample details').forEach((d) => { d.open = false; });
@@ -577,7 +627,7 @@ function regFinish() {
     S.kunden[id] = { id: id, name: d.name.trim(), plz: d.plz.trim(), tel: d.tel || '', mail: mail, erreich: (d.erreich || []).join(', ') || 'keine Angabe', prefs: { push: d.push !== false, addr: !!d.addr, review: true } };
     S.logins[mail] = { role: 'kunde', id: id };
     S.notif[id] = [{ t: 'Willkommen bei Klopfan', s: 'Mach dein erstes Aufmaß mit der App oder probier es mit einem Beispiel.', when: stamp(), new: true, to: ['dash'] }];
-    S.reg = null; return login('kunde', id, 'Willkommen, ' + d.name.trim().split(' ')[0]);
+    S.reg = null; S._feier = 'willkommen'; return login('kunde', id, 'Willkommen, ' + d.name.trim().split(' ')[0]);
   }
   const id = 'u' + Date.now().toString(36), portal = r.path === 'portal', plz = String(d.plz || '50667').trim();
   S.myCompanies.push({ id: id, plan: r.path, name: d.firma.trim(), plz: plz, rating: d.google ? 4.7 : null, reviews: d.google ? 63 : 0, since: new Date().getFullYear(), team: 1, antwort: 'neu', leist: d.leist || ['Kunststoff'], verified: !portal, col: d.col || '#0071e3', text: d.firma.trim() + ' aus ' + ort(plz) + '. Neu bei Klopfan.' });
@@ -587,16 +637,23 @@ function regFinish() {
   if (portal) { S.acc[id].pay = { type: d.pay || 'SEPA-Lastschrift', label: 'bei der Registrierung angegeben', when: stamp() }; if (d.konto === 'plus') activatePlus(S.acc[id]); }
   S.logins[mail] = { role: 'betrieb', id: id };
   S.notif[id] = [{ t: 'Willkommen bei Klopfan', s: dup ? 'Für ' + dup + ' gibt es schon ein Konto, die kostenlosen Aufmaße wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : portal ? 'Ihr Nachweis wird geprüft. Projekte und Anfragen sehen Sie schon.' : 'Legen Sie Ihr erstes Projekt an. Die ersten 3 Aufmaße sind kostenlos.', when: stamp(), new: true, to: ['links'] }];
-  S.reg = null; S.filt.km = d.km || 35;
+  S.reg = null; S.filt.km = d.km || 35; S._feier = 'willkommen';
   return login('betrieb', id, 'Willkommen, ' + d.ap.trim().split(' ')[0]);
 }
 
 /* ---------- Bildschirme: Hauseigentümer ---------- */
 function inqCard(x, forKunde) {
   const open = (x.knocks || []).filter((k) => k.status === 'offen').length, frei = (x.knocks || []).filter((k) => k.status === 'frei').length, st = knockStatus(x, S.cur);
-  return '<button type="button" class="item" data-act="go" data-v="' + (forKunde ? 'inquiry' : 'lead') + '" data-id="' + x.id + '"><span class="ic">' + ICONS.win.replace('<svg', '<svg width="30" height="36"') + '</span><span class="tx"><span class="ti">' + esc(GEB[x.geb]) + ' in ' + esc(lage(x.plz)) + '</span><span class="di">' + x.fenster + ' Fenster · ' + esc(x.material) + ' · ' + esc(BUDGET[x.budget]) + '</span><span class="me">' + (forKunde ? '' : km(BC().plz, x.plz) + ' km · ') + esc(ZEIT[x.zeit]) + ' · ' + x.fotos + ' Fotos' + (x.foerd ? ' · Förderung' : '') + (x.denkmal ? ' · Denkmal' : '') + (x.status === 'pause' ? ' · pausiert' : '') + '</span>' +
-    (forKunde ? '<span class="row" style="margin-top: 4px">' + (open ? '<span class="badge lead pulse">' + open + (open === 1 ? ' Betrieb klopft an' : ' Betriebe klopfen an') + '</span>' : '') + (frei ? '<span class="badge ok">' + frei + ' freigegeben</span>' : '') + (!open && !frei ? '<span class="badge">online, wartet</span>' : '') + '</span>' : '') + '</span>' +
-    (forKunde ? '' : '<span class="rt"><b>' + eur(leadPrice(x)) + '</b><span class="badge ' + ({ frei: 'ok', offen: 'warn', abgelehnt: 'bad' }[st] || '') + '">' + ({ frei: 'Kontakt frei', offen: 'angeklopft', abgelehnt: 'abgelehnt' }[st] || 'bei Freigabe') + '</span></span>') + CHEV + '</button>';
+  const tone = forKunde ? (open ? 'lead' : frei ? 'ok' : 'acc') : ({ frei: 'ok', offen: 'warn', abgelehnt: 'bad' }[st] || 'acc');
+  const tags = [esc(x.material), esc(ZEIT[x.zeit]), x.fotos + ' Fotos'].concat(x.foerd ? ['Förderung'] : [], x.denkmal ? ['Denkmal'] : [], x.status === 'pause' ? ['pausiert'] : []);
+  return '<button type="button" class="item lcard st-' + tone + (x.status === 'pause' ? ' paused' : '') + '" data-act="go" data-v="' + (forKunde ? 'inquiry' : 'lead') + '" data-id="' + x.id + '">' +
+    '<span class="lcnt"><b>' + x.fenster + '</b><small>' + (x.fenster === 1 ? 'Fenster' : 'Fenster') + '</small></span>' +
+    '<span class="tx"><span class="ti">' + esc(GEB[x.geb]) + ' in ' + esc(lage(x.plz)) + '</span>' +
+    '<span class="row lmeta">' + winRow(x.windows, x.fenster) + '<span class="bud">' + budgetBar(x.budget) + '<small>' + esc(BUDGET[x.budget]) + '</small></span></span>' +
+    '<span class="di">' + tags.join(' · ') + '</span>' +
+    (forKunde ? '' : '<span class="rt-m"><span class="kmp">' + icon('pin', 12) + km(BC().plz, x.plz) + ' km</span><b>' + eur(leadPrice(x)) + '</b><span class="badge ' + ({ frei: 'ok', offen: 'warn', abgelehnt: 'bad' }[st] || '') + '">' + ({ frei: 'Kontakt frei', offen: 'angeklopft', abgelehnt: 'abgelehnt' }[st] || 'bei Freigabe') + '</span></span>') +
+    (forKunde ? '<span class="row" style="margin-top: 2px">' + (open ? '<span class="badge lead pulse">' + icon('hand', 13) + open + (open === 1 ? ' Betrieb klopft an' : ' Betriebe klopfen an') + '</span>' : '') + (frei ? '<span class="badge ok">' + frei + ' freigegeben</span>' : '') + (!open && !frei ? '<span class="badge">online, wartet</span>' : '') + '</span>' : '') + '</span>' +
+    (forKunde ? '' : '<span class="rt"><span class="kmp">' + icon('pin', 12) + km(BC().plz, x.plz) + ' km</span><b>' + eur(leadPrice(x)) + '</b><span class="badge ' + ({ frei: 'ok', offen: 'warn', abgelehnt: 'bad' }[st] || '') + '">' + ({ frei: 'Kontakt frei', offen: 'angeklopft', abgelehnt: 'abgelehnt' }[st] || 'bei Freigabe') + '</span></span>') + CHEV + '</button>';
 }
 function compCard(c) {
   return '<button type="button" class="item" data-act="go" data-v="firma" data-id="' + c.id + '"><span class="ic av" style="background: ' + c.col + '; color: #fff; border-radius: 16px">' + esc(c.name.slice(0, 1)) + '</span><span class="tx"><span class="ti">' + esc(c.name) + (c.verified ? ' <span class="badge ok">geprüft</span>' : '') + '</span><span class="di">' + stars(c) + ' · ' + esc(ort(c.plz)) + ' · ' + km(K().plz, c.plz) + ' km</span><span class="me">' + esc(c.leist.slice(0, 4).join(' · ')) + (c.antwort !== 'neu' ? ' · antwortet ' + esc(c.antwort) : '') + '</span></span>' + CHEV + '</button>';
@@ -608,7 +665,7 @@ SCREENS.dash = () => {
     '<div class="card tryit"><div><p class="eyebrow">Nur ausprobieren?</p><p style="margin: 6px 0 0; color: var(--fg2)">Stell ein Beispiel-Aufmaß ein. Nach ein paar Sekunden klopfen die ersten Betriebe an, und du kannst alles einmal durchspielen.</p></div><button type="button" class="btn primary" data-act="demo-inquiry">Beispiel-Aufmaß inserieren</button></div></div>' };
   const frei = mine.reduce((a, x) => a + (x.knocks || []).filter((k) => k.status === 'frei').length, 0);
   return { html: '<div class="wrap"><div class="h"><p class="eyebrow">Hallo ' + esc(first) + '</p><h2>' + (open ? (open === 1 ? 'Ein Betrieb klopft an.' : open + ' Betriebe klopfen an.') : 'Dein Aufmaß ist online.') + '</h2><p>' + (open ? 'Schau dir Bewertungen und Profile an und entscheide, wer deine Kontaktdaten bekommt. Bis dahin weiß niemand, wer du bist.' : 'Sobald ein Betrieb Interesse hat, siehst du es hier und per E-Mail.') + '</p></div>' +
-    '<div class="grid c3 stats"><div class="stat"><small>Aufmaße online</small><b data-count="' + mine.length + '" data-fmt="int">' + mine.length + '</b><span>' + mine.reduce((a, x) => a + x.fenster, 0) + ' Fenster insgesamt</span></div><div class="stat"><small>Anklopfer</small><b data-count="' + open + '" data-fmt="int">' + open + '</b><span>warten auf deine Antwort</span></div><div class="stat"><small>Freigegeben</small><b data-count="' + frei + '" data-fmt="int">' + frei + '</b><span>höchstens 3 je Projekt</span></div></div>' +
+    '<div class="grid c3 stats">' + stat('acc', 'frame', 'Aufmaße online', mine.length, mine.reduce((a, x) => a + x.fenster, 0) + ' Fenster insgesamt') + stat('lead', 'hand', 'Anklopfer', open, open ? 'warten auf deine Antwort' : 'noch niemand, Betriebe schauen') + stat('ok', 'check', 'Freigegeben', frei, 'höchstens 3 je Projekt') + '</div>' +
     '<section class="sec"><div class="sec-head"><h3>Meine Aufmaße</h3><button type="button" class="btn small soft" data-act="sheet" data-v="import">Aufmaß-Code einfügen</button></div><div class="list">' + mine.map((x) => inqCard(x, true)).join('') + '<a class="item dashed" href="' + APP_OPEN + '" target="_blank" rel="noopener"><span class="ic plusic">' + icon('plus', 24) + '</span><span class="tx"><span class="ti">Weitere Fenster aufmessen</span><span class="di">Öffnet die Klopfan-App. Den Aufmaß-Code fügst du danach hier ein.</span></span>' + icon('ext', 18) + '</a></div></section>' +
     '<section class="sec"><div class="sec-head"><h3>Anbieter in deiner Nähe</h3><button type="button" class="btn small soft" data-act="nav" data-v="anbieter">Alle ansehen</button></div><div class="grid c2 split"><div class="card">' + radarSVG(K().plz, marketCompanies().map((c) => ({ plz: c.plz, col: c.col, ini: c.name.slice(0, 1), title: c.name + ' · ' + km(K().plz, c.plz) + ' km', act: 'go', v: 'firma', id: c.id }))) + '<p class="cap-s">Dein Zuhause in der Mitte, Betriebe im richtigen Abstand. Antippen öffnet das Profil.</p></div><div class="list">' + marketCompanies().sort((a, b) => km(K().plz, a.plz) - km(K().plz, b.plz)).slice(0, 3).map(compCard).join('') + '</div></div></section></div>' };
 };
@@ -617,7 +674,7 @@ SCREENS.inquiry = () => {
   const knocks = x.knocks || [], frei = knocks.filter((k) => k.status === 'frei'), offen = knocks.filter((k) => k.status === 'offen'), abg = knocks.filter((k) => k.status === 'abgelehnt');
   const kcard = (k) => { const c = comp(k.c); return '<div class="card kcard"><div class="row between"><button type="button" class="who" data-act="go" data-v="firma" data-id="' + c.id + '"><span class="av" style="background: ' + c.col + '">' + esc(c.name.slice(0, 1)) + '</span><span><b>' + esc(c.name) + '</b><small>' + esc(ort(c.plz)) + ' · ' + km(x.plz, c.plz) + ' km · seit ' + c.since + '</small></span></button>' + stars(c) + '</div><p class="kt">' + esc(c.text) + '</p><div class="chips">' + c.leist.map((l) => '<span class="badge">' + esc(l) + '</span>').join('') + '</div><p class="km-s">Angeklopft ' + esc(k.when) + (c.antwort !== 'neu' ? ' · antwortet ' + esc(c.antwort) : '') + (c.verified ? ' · Gewerbe geprüft' : '') + '</p>' +
     (k.status === 'offen' ? '<div class="row"><button type="button" class="btn ok" data-act="release" data-id="' + x.id + '" data-c="' + c.id + '"' + (frei.length >= 3 ? ' disabled' : '') + '>' + icon('check', 18) + 'Kontakt freigeben</button><button type="button" class="btn danger" data-act="decline" data-id="' + x.id + '" data-c="' + c.id + '">Nein danke</button><button type="button" class="btn small ghost" data-act="go" data-v="firma" data-id="' + c.id + '">Profil ansehen</button></div>' : k.status === 'frei' ? '<div class="note ok row between"><span>Freigegeben. ' + esc(c.name) + ' hat deine Nummer und E-Mail und meldet sich ' + esc(dot(c.antwort !== 'neu' ? c.antwort : 'bald')) + '</span><button type="button" class="btn small ghost" data-act="revoke" data-id="' + x.id + '" data-c="' + c.id + '">Freigabe zurückziehen</button></div>' : '<div class="note">Abgelehnt. Der Betrieb sieht deine Daten nicht.</div>') + '</div>'; };
-  return { title: 'Mein Aufmaß', html: '<div class="wrap narrow"><div class="h"><p class="eyebrow">' + seit(x.created) + ' · anonym' + (x.status === 'pause' ? ' · pausiert' : '') + '</p><h2>' + esc(GEB[x.geb]) + ' in ' + esc(ort(x.plz)) + '</h2><p>' + x.fenster + ' Fenster · ' + esc(x.material) + ' · ' + esc(BUDGET[x.budget]) + ' · ' + esc(ZEIT[x.zeit]) + '</p></div>' +
+  return { title: 'Mein Aufmaß', html: '<div class="wrap narrow"><div class="h"><p class="eyebrow">' + seit(tage(x)) + ' · anonym' + (x.status === 'pause' ? ' · pausiert' : '') + '</p><h2>' + esc(GEB[x.geb]) + ' in ' + esc(ort(x.plz)) + '</h2><p>' + x.fenster + ' Fenster · ' + esc(x.material) + ' · ' + esc(BUDGET[x.budget]) + ' · ' + esc(ZEIT[x.zeit]) + '</p></div>' +
     (x.status === 'pause' ? '<div class="note warn row between"><span>Pausiert. Betriebe sehen dein Aufmaß gerade nicht.</span><button type="button" class="btn small ghost" data-act="pause" data-id="' + x.id + '">Wieder online stellen</button></div>' : '') +
     (frei.length >= 3 ? '<div class="note warn">Drei Betriebe sind freigegeben, mehr geht nicht. Zieh eine Freigabe zurück, wenn du jemand anderen zulassen willst.</div>' : '') +
     (knocks.length ? '<div class="card knockmap"><div>' + radarSVG(x.plz, knocks.map((k) => { const c = comp(k.c); return { plz: c.plz, col: k.status === 'abgelehnt' ? 'var(--line2)' : c.col, ini: c.name.slice(0, 1), title: c.name, act: 'go', v: 'firma', id: c.id }; }), { min: 8 }) + '</div><div><p class="eyebrow">Wer anklopft</p><p class="kt">' + knocks.filter((k) => k.status !== 'abgelehnt').map((k) => esc(comp(k.c).name) + ' (' + km(x.plz, comp(k.c).plz) + ' km)').join(', ') + '.</p><p class="km-s">Dein Haus ist die Mitte. Bis zur Freigabe sieht keiner deinen Namen.</p></div></div>' : '') +
@@ -669,20 +726,21 @@ SCREENS.markt = () => {
   if (!isPortal()) return SCREENS.links();
   const me = BC(), f = S.filt;
   let list = S.inq.filter((x) => x.status !== 'pause' && x.owner !== '__' && km(me.plz, x.plz) <= f.km && (!f.budget || x.budget === f.budget) && x.fenster >= (+f.minF || 0) && (!f.zeit || x.zeit === f.zeit) && (!f.q || (lage(x.plz) + ' ' + x.plz + ' ' + x.material).toLowerCase().indexOf(f.q.toLowerCase()) >= 0));
-  list = list.sort((a, b) => (f.sort === 'km' ? km(me.plz, a.plz) - km(me.plz, b.plz) : f.sort === 'gross' ? b.fenster - a.fenster : a.created - b.created));
+  list = list.sort((a, b) => (f.sort === 'km' ? km(me.plz, a.plz) - km(me.plz, b.plz) : f.sort === 'gross' ? b.fenster - a.fenster : tage(a) - tage(b)));
   const mineK = S.inq.filter((x) => knockStatus(x, me.id) === 'offen').length, frei = S.inq.filter((x) => knockStatus(x, me.id) === 'frei').length, all = S.inq.filter((x) => x.status !== 'pause');
   return { html: '<div class="wrap">' + banners() + '<div class="h"><p class="eyebrow">' + esc(me.name) + ' · Umkreis ' + f.km + ' km</p><h2>' + list.length + (list.length === 1 ? ' Anfrage' : ' Anfragen') + ' mit fertigem Aufmaß.</h2><p>Jede Anfrage enthält acht Maße je Fenster, Fotos und KI-Auswertung. Anklopfen ist kostenlos, bezahlt wird nur ein freigegebener Kontakt.</p></div>' +
     '<div class="grid markt-top"><div class="card" style="padding: 14px">' + radarSVG(me.plz, all.map((x) => ({ plz: x.plz, col: knockStatus(x, me.id) === 'frei' ? 'var(--ok)' : knockStatus(x, me.id) === 'offen' ? 'var(--warn)' : 'var(--lead)', ini: String(x.fenster), title: GEB[x.geb] + ' ' + ort(x.plz) + ' · ' + x.fenster + ' Fenster · ' + km(me.plz, x.plz) + ' km', act: 'go', v: 'lead', id: x.id })), { km: f.km }) + '<p class="cap-s">Die Zahl ist die Fensterzahl. Grün: freigegeben, gelb: angeklopft. Den Umkreis ändern Sie unten im Filter.</p></div>' +
-    '<div class="col-stack"><div class="ticker"><span class="live"></span><span class="msg" id="ticker"></span></div><div class="grid c2 stats"><div class="stat"><small>Im Umkreis</small><b data-count="' + list.length + '" data-fmt="int">' + list.length + '</b><span>' + list.reduce((a, x) => a + x.fenster, 0) + ' Fenster</span></div><div class="stat"><small>Angeklopft</small><b data-count="' + mineK + '" data-fmt="int">' + mineK + '</b><span>warten auf Freigabe</span></div><div class="stat"><small>Kontakte</small><b data-count="' + frei + '" data-fmt="int">' + frei + '</b><span>freigegeben</span></div><div class="stat"><small>Guthaben</small><b data-count="' + A().guthaben + '" data-fmt="eur">' + eur(A().guthaben) + '</b><span>' + (A().konto === 'plus' ? 'Betrieb Plus, −30 %' : 'pro Kontakt') + '</span></div></div></div></div>' +
+    '<div class="col-stack"><div class="ticker"><span class="live"></span><span class="msg" id="ticker"></span></div><div class="grid c2 stats">' + stat('acc', 'pin', 'Im Umkreis', list.length, list.reduce((a, x) => a + x.fenster, 0) + ' Fenster') + stat('warn', 'hand', 'Angeklopft', mineK, 'warten auf Freigabe') + stat('ok', 'people', 'Kontakte', frei, 'freigegeben') + stat('gold', 'coin', 'Guthaben', A().guthaben, A().konto === 'plus' ? 'Betrieb Plus, −30 %' : 'pro Kontakt', 'eur') + '</div></div></div>' +
     '<div class="filters fgrid"><label>Ort oder PLZ<input data-in="f-q" value="' + esc(f.q) + '" placeholder="z. B. Bonn, 53111" type="search"></label><label>Umkreis<span class="range"><input type="range" min="10" max="100" step="5" value="' + f.km + '" data-in="f-km" aria-label="Umkreis in Kilometern"><span id="km-lab">' + f.km + ' km</span></span></label><label>Budget<select data-in="f-budget"><option value="">alle</option>' + Object.keys(BUDGET).map((k) => '<option value="' + k + '"' + (f.budget === k ? ' selected' : '') + '>' + BUDGET[k] + '</option>').join('') + '</select></label><label>Mindestens<select data-in="f-minF">' + [0, 3, 6, 10].map((n) => '<option value="' + n + '"' + (+f.minF === n ? ' selected' : '') + '>' + (n ? 'ab ' + n + ' Fenster' : 'alle Größen') + '</option>').join('') + '</select></label><label>Zeitraum<select data-in="f-zeit"><option value="">alle</option>' + Object.keys(ZEIT).map((k) => '<option value="' + k + '"' + (f.zeit === k ? ' selected' : '') + '>' + ZEIT[k] + '</option>').join('') + '</select></label><label>Sortierung<select data-in="f-sort"><option value="neu"' + (f.sort === 'neu' ? ' selected' : '') + '>Neueste</option><option value="km"' + (f.sort === 'km' ? ' selected' : '') + '>Entfernung</option><option value="gross"' + (f.sort === 'gross' ? ' selected' : '') + '>Größte Projekte</option></select></label></div>' +
     '<div class="list">' + (list.length ? list.map((x) => inqCard(x, false)).join('') : empty('Keine Anfrage passt zu den Filtern.', 'Umkreis vergrößern oder Filter lockern.', '<button type="button" class="btn small ghost" data-act="f-reset">Filter zurücksetzen</button>')) + '</div></div>' };
 };
 SCREENS.lead = () => {
-  const x = S.inq.find((i) => i.id === S.sel) || S.inq[1], me = BC(), st = knockStatus(x, me.id), price = leadPrice(x), others = (x.knocks || []).filter((k) => k.c !== me.id).length, ct = contactOf(x), kon = A().kontakte[x.id] || {};
-  if (st === 'frei' && !kon.seen) { A().kontakte[x.id] = Object.assign(kon, { seen: true }); }
-  const contact = st === 'frei' ? '<div class="card okcard"><p class="eyebrow">Kontakt freigegeben</p><div class="kv"><span>Name</span><span>' + esc(ct.name) + '</span><span>Telefon</span><span class="sel">' + esc(ct.tel) + '</span><span>E-Mail</span><span class="sel">' + esc(ct.mail) + '</span><span>Erreichbar</span><span>' + esc(ct.erreich) + '</span><span>Adresse</span><span>teilt der Kunde beim Termin</span></div><div class="row"><button type="button" class="btn small ghost" data-act="copy" data-v="' + esc(ct.name + ', ' + ct.tel + ', ' + ct.mail) + '">' + icon('copy', 16) + 'Kontakt kopieren</button><span class="km-s">Berechnet: ' + eur(paidPrice(x)) + ' netto. Nicht erreichbar? </span><button type="button" class="ulink" data-act="sheet" data-v="fair" data-id="' + x.id + '">Gutschrift anfragen</button></div></div>' : '';
+  const x = S.inq.find((i) => i.id === S.sel) || S.inq.find((i) => i.status !== 'pause'); if (!x) return SCREENS.markt();
+  const me = BC(), st = knockStatus(x, me.id), price = leadPrice(x), others = (x.knocks || []).filter((k) => k.c !== me.id).length, ct = contactOf(x), kon = A().kontakte[x.id] || {};
+  if (st === 'frei' && !kon.seen) { A().kontakte[x.id] = Object.assign(kon, { seen: true }); S._feier = 'kontakt'; }
+  const contact = st === 'frei' ? '<div class="card okcard"><p class="eyebrow">Kontakt freigegeben</p><div class="kv"><span>Name</span><span>' + esc(ct.name) + '</span><span>Telefon</span><span class="sel">' + esc(ct.tel) + '</span><span>E-Mail</span><span class="sel">' + esc(ct.mail) + '</span><span>Erreichbar</span><span>' + esc(ct.erreich) + '</span><span>Adresse</span><span>teilt der Kunde beim Termin</span></div><div class="row"><button type="button" class="btn small ghost" data-act="copy" data-v="' + esc(ct.name + ', ' + ct.tel + ', ' + ct.mail) + '">' + icon('copy', 16) + 'Kontakt kopieren</button><span class="km-s">Berechnet: ' + eur(paidPrice(x)) + ' netto. Nicht erreichbar? </span>' + (fairAb(x) ? '<span class="km-s">Gutschrift ab dem ' + fairAb(x) + ' möglich.</span>' : '<button type="button" class="ulink" data-act="sheet" data-v="fair" data-id="' + x.id + '">Gutschrift anfragen</button>') + '</div></div>' : '';
   const knockBtn = !A().verified ? '<button type="button" class="btn lead big" disabled>Anklopfen</button>' : '<button type="button" class="btn lead big" data-act="knock" data-id="' + x.id + '">Anklopfen<span class="knockwaves"></span></button>';
-  return { title: 'Anfrage', html: '<div class="wrap narrow">' + banners() + '<div class="h"><p class="eyebrow">' + km(me.plz, x.plz) + ' km · ' + seit(x.created) + ' · ' + (others ? others + ' weitere angeklopft' : 'noch niemand angeklopft') + '</p><h2>' + esc(GEB[x.geb]) + ' in ' + esc(lage(x.plz)) + '</h2><p>' + x.fenster + ' Fenster · ' + esc(x.material) + ' · ' + esc(BUDGET[x.budget]) + ' · ' + esc(ZEIT[x.zeit]) + '</p></div>' + contact +
+  return { title: 'Anfrage', html: '<div class="wrap narrow">' + banners() + '<div class="h"><p class="eyebrow">' + km(me.plz, x.plz) + ' km · ' + seit(tage(x)) + ' · ' + (others ? others + ' weitere angeklopft' : 'noch niemand angeklopft') + '</p><h2>' + esc(GEB[x.geb]) + ' in ' + esc(lage(x.plz)) + '</h2><p>' + x.fenster + ' Fenster · ' + esc(x.material) + ' · ' + esc(BUDGET[x.budget]) + ' · ' + esc(ZEIT[x.zeit]) + '</p></div>' + contact +
     '<div class="card pricecard"><div class="row between"><div><p class="eyebrow">Kontaktpreis</p><p class="pc">' + eur(price) + ' <small>netto · ' + tierName(x.fenster) + (A().konto === 'plus' ? ' · Plus-Rabatt' : '') + '</small></p></div>' + (st === null ? knockBtn : st === 'offen' ? '<span class="badge warn">Angeklopft, wartet auf Freigabe</span>' : st === 'abgelehnt' ? '<span class="badge bad">Der Kunde hat abgelehnt</span>' : '<span class="badge ok">Freigegeben</span>') + '</div><div class="lock">' + ICONS.lock + '<span>' + (st === 'frei' ? 'Nutzen Sie die Kontaktdaten nur für dieses Projekt.' : !A().verified ? 'Anklopfen geht, sobald Ihr Gewerbenachweis geprüft ist.' : 'Anklopfen ist kostenlos. Berechnet wird nur, wenn der Eigentümer Sie freigibt. Höchstens drei Betriebe bekommen den Kontakt.') + '</span></div>' + (st === 'offen' ? '<button type="button" class="btn small ghost" style="align-self: flex-start" data-act="unknock" data-id="' + x.id + '">Anklopfen zurücknehmen</button>' : '') + '</div>' +
     '<section class="sec"><div class="sec-head"><h3>Aufmaßblatt</h3><span class="sub">Handmaß, 8 Werte je Fenster</span></div><div class="card">' + blatt(x, st === 'frei') + '</div></section>' +
     (st === 'frei' ? '<section class="sec"><div class="sec-head"><h3>Stand</h3></div><div class="card"><div class="pipe">' + [['kontakt', 'Kontakt'], ['termin', 'Termin'], ['angebot', 'Angebot'], ['auftrag', 'Auftrag'], ['verloren', 'Verloren']].map((s) => '<button type="button" data-act="stage" data-id="' + x.id + '" data-v="' + s[0] + '" aria-pressed="' + ((kon.stage || 'kontakt') === s[0]) + '">' + s[1] + '</button>').join('') + '</div><div class="f" style="margin-top: 12px"><label for="note-' + x.id + '">Notiz</label><textarea id="note-' + x.id + '" data-in="note:' + x.id + '" placeholder="z. B. Termin am 21.10. um 10 Uhr">' + esc(kon.note || '') + '</textarea></div></div></section>' : '') + '</div>' };
@@ -692,7 +750,8 @@ SCREENS.kontakte = () => {
   const me = BC(), frei = S.inq.filter((x) => knockStatus(x, me.id) === 'frei'), offen = S.inq.filter((x) => knockStatus(x, me.id) === 'offen'), stageL = { kontakt: 'Kontakt', termin: 'Termin vereinbart', angebot: 'Angebot gesendet', auftrag: 'Auftrag', verloren: 'Verloren' };
   frei.forEach((x) => { A().kontakte[x.id] = Object.assign(A().kontakte[x.id] || { stage: 'kontakt', note: '' }, { seen: true }); });
   return { html: '<div class="wrap"><div class="h"><h2>Ihre Kontakte.</h2><p>Freigegebene Kunden aus dem Portal mit Kontaktdaten und Stand. Aufmaße Ihrer eigenen Kunden finden Sie unter Projekte.</p></div>' +
-    '<section class="sec"><div class="sec-head"><h3>Freigegeben</h3><span class="sub">' + frei.length + '</span></div><div class="list">' + (frei.length ? frei.map((x) => { const ct = contactOf(x), k = A().kontakte[x.id] || {}; return '<button type="button" class="item" data-act="go" data-v="lead" data-id="' + x.id + '"><span class="ic av" style="background: var(--ok); color: #fff">' + esc(ct.name.slice(0, 1)) + '</span><span class="tx"><span class="ti">' + esc(ct.name) + ' · ' + esc(ort(x.plz)) + '</span><span class="di">' + x.fenster + ' Fenster · ' + esc(BUDGET[x.budget]) + ' · ' + esc(ct.tel) + '</span><span class="me">Stand: ' + esc(stageL[k.stage || 'kontakt']) + (k.note ? ' · ' + esc(k.note) : '') + '</span></span><span class="rt"><b>' + eur(paidPrice(x)) + '</b><span class="badge ok">berechnet</span></span>' + CHEV + '</button>'; }).join('') : empty('Noch keine Freigabe.', 'Klopfen Sie bei passenden Anfragen an. Sobald Sie ein Eigentümer zulässt, steht er hier.', '<button type="button" class="btn small primary" data-act="nav" data-v="markt">Zu den Anfragen</button>')) + '</div></section>' +
+    '<div class="grid c3 stats">' + stat('ok', 'people', 'Kontakte', frei.length, 'freigegeben, mit Nummer') + stat('warn', 'hand', 'Angeklopft', offen.length, 'warten auf Freigabe') + stat('gold', 'flag', 'Aufträge', frei.filter((x) => (A().kontakte[x.id] || {}).stage === 'auftrag').length, 'aus dem Portal') + '</div>' +
+    '<section class="sec"><div class="sec-head"><h3>Freigegeben</h3><span class="sub">' + frei.length + '</span></div><div class="list">' + (frei.length ? frei.map((x) => { const ct = contactOf(x), k = A().kontakte[x.id] || {}, stg = k.stage || 'kontakt'; return '<button type="button" class="item kcard-i st-' + (stg === 'auftrag' ? 'ok' : stg === 'verloren' ? 'bad' : 'acc') + '" data-act="go" data-v="lead" data-id="' + x.id + '"><span class="ic av" style="background: ' + (stg === 'verloren' ? 'var(--line2)' : 'var(--ok)') + '; color: #fff">' + esc(ct.name.slice(0, 1)) + '</span><span class="tx"><span class="ti">' + esc(ct.name) + ' · ' + esc(ort(x.plz)) + '</span><span class="di">' + x.fenster + ' Fenster · ' + esc(BUDGET[x.budget]) + ' · <span class="sel">' + esc(ct.tel) + '</span></span><span class="row lst">' + kstep(stg) + '<span class="badge ' + (stg === 'auftrag' ? 'ok' : stg === 'verloren' ? 'bad' : stg === 'kontakt' ? '' : 'acc') + '">' + esc(stageL[stg]) + '</span>' + (k.note ? '<small class="me">' + esc(k.note) + '</small>' : '') + '</span></span><span class="rt"><b>' + eur(paidPrice(x)) + '</b><span class="badge ok">berechnet</span></span>' + CHEV + '</button>'; }).join('') : empty('Noch keine Freigabe.', 'Klopfen Sie bei passenden Anfragen an. Sobald Sie ein Eigentümer zulässt, steht er hier.', '<button type="button" class="btn small primary" data-act="nav" data-v="markt">Zu den Anfragen</button>')) + '</div></section>' +
     '<section class="sec"><div class="sec-head"><h3>Angeklopft, wartet</h3><span class="sub">' + offen.length + '</span></div><div class="list">' + (offen.length ? offen.map((x) => inqCard(x, false)).join('') : empty('Nichts offen.', 'Alle Anklopfer sind beantwortet.')) + '</div></section></div>' };
 };
 /* ---------- Bildschirme: Projekte und Aufmaß-Links ---------- */
@@ -717,6 +776,14 @@ const isPhone = (s) => !/@/.test(s || '') && String(s || '').replace(/\D/g, '').
 const intl = (s) => { let d = String(s || '').replace(/\D/g, ''); if (d.startsWith('00')) d = d.slice(2); else if (d.startsWith('0')) d = '49' + d.slice(1); return d; };
 const placeOf = (l) => { const t = String(l.adresse || ''), m = /\d{5}\s+(.+)$/.exec(t); return m ? m[1] : t.split(',').pop().trim(); };
 const projFacts = (l) => [PGEB[l.geb], l.fz ? 'ca. ' + l.fz + ' Fenster' : '', (l.plan || []).join(', ')].filter(Boolean).join(' · ');
+function projCard(l) {
+  const dead = ['abgelaufen', 'deaktiviert'].includes(l.status), done = l.status === 'eingegangen', m = l.locked ? ['Aufmaß da · gesperrt', 'warn'] : (LST[l.status] || LST.erstellt), wins = done && l.aufmass ? l.aufmass.windows : [];
+  const bis = parseDE(l.expires), restT = bis ? Math.max(0, Math.ceil((bis - Date.now()) / 864e5)) : 0;
+  const vis = done && wins.length ? winStack(wins, 40) : l.status === 'arbeit' ? ring(l.progress, 4) : '<span class="pini ' + l.status + '">' + icon(dead ? 'lock' : l.status === 'erstellt' ? 'link' : l.status === 'geoeffnet' ? 'open' : 'send', 26) + (['gesendet', 'geoeffnet'].includes(l.status) ? '<i class="live"></i>' : '') + '</span>';
+  const small = l.status === 'arbeit' ? l.progress + ' von 4 Maßen' : done ? (l.log || {}).eingegangen || '' : dead ? '' : ['gesendet', 'geoeffnet'].includes(l.status) && l.via ? 'über ' + esc(l.via) : 'Link noch nicht verschickt';
+  const right = done ? '<span class="rt"><b>' + nW(wins.length || (l.aufmass ? l.aufmass.windows.length : 0), 'Position', 'Positionen') + '</b><span class="badge ' + (l.locked ? 'warn' : 'ok') + '">' + (l.locked ? 'freischalten' : 'ansehen') + '</span></span>' : dead ? '<span class="rt"><span class="badge bad">' + m[0] + '</span></span>' : '<span class="rt"><b>' + (restT ? nW(restT, 'Tag', 'Tage') : 'heute') + '</b><small>Link gültig</small></span>';
+  return '<button type="button" class="item pcard st-' + (l.locked ? 'locked' : l.status) + (done && !l.seen ? ' is-new' : '') + '" data-act="go" data-v="link" data-id="' + l.id + '">' + (done && !l.seen ? '<span class="neu">Neu</span>' : '') + '<span class="pvis">' + vis + '</span><span class="tx"><span class="ti">' + esc(l.kunde) + (l.demo ? ' <span class="badge">Beispiel</span>' : '') + '</span><span class="di">' + esc([placeOf(l), l.fz ? 'ca. ' + l.fz + ' Fenster' : '', l.nr].filter(Boolean).join(' · ')) + '</span><span class="row lst">' + stepDots(l) + '<span class="badge ' + m[1] + '">' + m[0] + '</span>' + (small ? '<small class="me">' + small + '</small>' : '') + '</span>' + (done ? '<span class="rt-m"><b>' + nW(wins.length || (l.aufmass ? l.aufmass.windows.length : 0), 'Position', 'Positionen') + '</b><span class="badge ' + (l.locked ? 'warn' : 'ok') + '">' + (l.locked ? 'freischalten' : 'ansehen') + '</span></span>' : dead ? '' : '<span class="rt-m"><small class="me">Link noch ' + (restT ? nW(restT, 'Tag', 'Tage') : 'heute') + ' gültig</small></span>') + '</span>' + right + CHEV + '</button>';
+}
 function linkItem(l) {
   const m = l.locked ? ['Aufmaß da · gesperrt', 'warn'] : (LST[l.status] || LST.erstellt), prog = l.status === 'arbeit' ? '<span class="mprog"><span style="width: ' + (l.progress / 4 * 100) + '%"></span></span><small>' + l.progress + ' von 4 Maßen</small>' : '';
   const right = l.status === 'eingegangen' && l.aufmass ? '<span class="rt"><b>' + nW(l.aufmass.windows.length, 'Position', 'Positionen') + '</b><span class="badge ' + (l.locked ? 'warn' : 'ok') + '">' + (l.locked ? 'freischalten' : 'ansehen') + '</span></span>' : ['gesendet', 'geoeffnet'].includes(l.status) && l.via ? '<span class="rt"><span class="badge">' + esc(l.via) + '</span></span>' : '';
@@ -729,9 +796,9 @@ SCREENS.links = () => {
   if (!L.length) return { html: '<div class="wrap narrow">' + banners() + payBanner() + '<div class="h"><p class="eyebrow">' + esc(BC().name) + '</p><h2>Ihr erstes Projekt.</h2><p>Für einen Kunden, den Sie schon haben: Projekt anlegen, Aufmaß-Link schicken, und das Aufmaß kommt zu Ihnen zurück.</p></div>' +
     '<div class="card hero-link"><div class="hl-steps"><div><span class="n">1</span><b>Projekt anlegen</b><small>Kunde und ein paar Eckdaten.</small></div><div><span class="n">2</span><b>Link schicken</b><small>WhatsApp, SMS oder E-Mail.</small></div><div><span class="n">3</span><b>Aufmaß bekommen</b><small>Maße, Fotos und Wünsche je Fenster.</small></div></div><div class="row"><button type="button" class="btn primary big" data-act="go" data-v="newlink">' + icon('plus', 20) + 'Erstes Projekt anlegen</button><button type="button" class="btn ghost big" data-act="demo-project">Beispiel ansehen</button></div><p class="km-s">' + (a.konto === 'plus' ? 'Mit Betrieb Plus unbegrenzt.' : 'Die ersten 3 Aufmaße sind kostenlos, danach 9 € netto je eingegangenem Aufmaß. Ihr Kunde zahlt nichts.') + '</p></div></div>' };
   return { html: '<div class="wrap">' + banners() + payBanner() + '<div class="h hrow"><div><p class="eyebrow">' + esc(BC().name) + '</p><h2>Projekte.</h2><p>Ein Projekt je Kunde. Den Aufmaß-Link schicken Sie direkt aus dem Projekt.</p></div><button type="button" class="btn primary big" data-act="go" data-v="newlink">' + icon('plus', 20) + 'Neues Projekt</button></div>' +
-    '<div class="grid c3 stats"><div class="stat"><small>Offen</small><b data-count="' + open.length + '" data-fmt="int">' + open.length + '</b><span>Link verschickt, Kunde misst noch</span></div><div class="stat"><small>Eingegangen</small><b data-count="' + rec.length + '" data-fmt="int">' + rec.length + '</b><span>' + rec.reduce((s, l) => s + (l.aufmass ? l.aufmass.windows.length : 0), 0) + ' Positionen mit Fotos</span></div><div class="stat"><small>Noch kostenlos</small><b>' + fl + '</b><span>' + (a.konto === 'plus' ? 'Betrieb Plus' : a.pay ? 'danach 9 € je Aufmaß' : 'danach mit Zahlungsart') + '</span></div></div>' +
+    '<div class="grid c3 stats">' + stat('warn', 'send', 'Offen', open.length, open.length ? 'Link verschickt, Kunde misst noch' : 'alle Links sind erledigt') + stat('ok', 'inbox', 'Eingegangen', rec.length, rec.reduce((s, l) => s + (l.aufmass ? l.aufmass.windows.length : 0), 0) + ' Positionen mit Fotos') + stat('acc', 'gift', 'Noch kostenlos', fl, a.konto === 'plus' ? 'Betrieb Plus' : a.pay ? 'danach 9 € je Aufmaß' : 'danach mit Zahlungsart') + '</div>' +
     '<div class="row between">' + seg([['alle', 'Alle', L.length], ['offen', 'Offen', open.length], ['eingegangen', 'Eingegangen', rec.length]], S.lfilt, 'lfilt') + '<button type="button" class="btn small ghost" data-act="sheet" data-v="linkimport">Code vom Kunden einfügen</button></div>' +
-    '<div class="list">' + (shown.length ? shown.slice().sort((x, y) => order(x) - order(y)).map(linkItem).join('') : empty(S.lfilt === 'eingegangen' ? 'Noch nichts eingegangen.' : 'Keine offenen Projekte.', S.lfilt === 'eingegangen' ? 'Sobald ein Kunde sein Aufmaß abschickt, steht es hier.' : 'Alle verschickten Links sind erledigt.')) + '</div></div>' };
+    '<div class="list plist">' + (shown.length ? shown.slice().sort((x, y) => order(x) - order(y)).map(projCard).join('') : empty(S.lfilt === 'eingegangen' ? 'Noch nichts eingegangen.' : 'Keine offenen Projekte.', S.lfilt === 'eingegangen' ? 'Sobald ein Kunde sein Aufmaß abschickt, steht es hier.' : 'Alle verschickten Links sind erledigt.')) + '</div></div>' };
 };
 SCREENS.newlink = () => {
   const n = S.nl || (S.nl = { step: 0, kunde: '', kontakt: '', adresse: '', geb: '', fz: '', plan: ['Fenster'], note: '', days: 14, du: false, err: {} }), e = n.err || {}, c = BC(), a = A(), st = n.step || 0;
@@ -815,12 +882,12 @@ SCREENS.abrechnung = () => {
   const payCard = '<div class="card paycard"><div class="row between" style="align-items: center; flex-wrap: nowrap"><span style="min-width: 0"><p class="eyebrow">Zahlungsart</p><b>' + (a.pay ? esc(a.pay.type) + ' · ' + esc(a.pay.label) : 'Noch keine hinterlegt') + '</b><small>' + (a.pay ? 'Abbuchung alle zwei Wochen als Sammelrechnung.' : 'Nötig ab dem ersten kostenpflichtigen Aufmaß. Bis dahin wird nichts abgebucht.') + '</small></span><button type="button" class="btn small ' + (a.pay ? 'ghost' : 'primary') + '" data-act="sheet" data-v="pay">' + (a.pay ? 'Ändern' : 'Hinterlegen') + '</button></div></div>';
   const freeStat = a.konto === 'plus' ? '∞' : (a.freeUsed || 0) + ' / ' + q;
   return { html: '<div class="wrap">' + payBanner() + '<div class="h"><h2>Abrechnung.</h2><p>' + (portal ? 'Sie zahlen eingegangene Aufmaße und freigegebene Portal-Kontakte, netto, alle zwei Wochen als Sammelrechnung. Das Startguthaben wird zuerst verrechnet.' : 'Keine Grundgebühr, kein Abo. Die ersten 3 Aufmaße sind kostenlos, danach 9 € netto je eingegangenem Aufmaß. Ihr Kunde zahlt nichts.') + (a.dupOf ? ' Die kostenlosen Aufmaße für Ihren Betrieb wurden schon über das Konto ' + esc(a.dupOf) + ' genutzt.' : '') + '</p></div>' +
-    '<div class="grid c3 stats">' + (portal ? '<div class="stat"><small>Guthaben</small><b data-count="' + a.guthaben + '" data-fmt="eur">' + eur(a.guthaben) + '</b><span>vom Startguthaben</span></div><div class="stat"><small>Aufmaße</small><b data-count="' + rec.length + '" data-fmt="int">' + rec.length + '</b><span>eingegangen</span></div>' : '<div class="stat"><small>Aufmaße</small><b data-count="' + rec.length + '" data-fmt="int">' + rec.length + '</b><span>eingegangen</span></div><div class="stat"><small>Kostenlos</small><b>' + freeStat + '</b><span>' + (a.konto === 'plus' ? 'Betrieb Plus' : 'genutzt') + '</span></div>') + '<div class="stat"><small>Nächste Rechnung</small><b data-count="' + nextInv + '" data-fmt="eur">' + eur(nextInv) + '</b><span>netto, bisher</span></div></div>' + payCard +
+    '<div class="grid c3 stats">' + (portal ? stat('gold', 'coin', 'Guthaben', a.guthaben, 'vom Startguthaben', 'eur') + stat('ok', 'inbox', 'Aufmaße', rec.length, 'eingegangen') : stat('ok', 'inbox', 'Aufmaße', rec.length, 'eingegangen') + stat('acc', 'gift', 'Kostenlos', freeStat, a.konto === 'plus' ? 'Betrieb Plus' : 'genutzt')) + stat(nextInv ? 'warn' : 'acc', 'euro', 'Nächste Rechnung', nextInv, nextInv ? 'netto, bisher' : 'nichts offen', 'eur') + '</div>' + payCard +
     '<section class="sec"><div class="sec-head"><h3>Kontomodell</h3><button type="button" class="linkbtn" data-act="go" data-v="preise">Alle Preise ›</button></div><div class="grid c2">' + plans.map((o) => '<button type="button" class="opt" data-act="konto" data-v="' + o[0] + '" aria-pressed="' + ((a.konto === 'plus' ? 'plus' : portal ? 'ppk' : 'service') === o[0]) + '"><span><b>' + o[1] + '</b><small>' + o[2] + '</small></span></button>').join('') + '</div>' +
     (a.downgrade ? '<p class="km-s">Wechsel zu ' + (a.downgrade.to === 'ppk' ? 'Pro Kontakt' : 'Start') + ' zum ' + esc(a.downgrade.at) + ' vorgemerkt. Bis dahin bleibt Betrieb Plus aktiv. <button type="button" class="linkbtn" data-act="konto" data-v="plus">Plus behalten</button></p>' : a.konto === 'plus' ? '<p class="km-s">Betrieb Plus ist für ' + esc(monthLabel()) + ' gebucht. Ein Wechsel gilt zum Monatsende; gebuchte Positionen bleiben, wie sie sind.</p>' : '') + '</section>' +
     (portal ? '' : '<div class="card upsell"><div><p class="eyebrow">Zusätzlich: Portal</p><p style="margin: 6px 0 0; color: var(--fg2)">Anonyme Aufmaße von Hauseigentümern aus Ihrer Region. Anklopfen ist kostenlos, ein Kontakt kostet 29 bis 129 €, nur wenn der Eigentümer Sie freigibt.</p></div><button type="button" class="btn primary" data-act="sheet" data-v="upgrade">Portal freischalten</button></div>') +
     '<section class="sec"><div class="sec-head"><h3>Positionen</h3></div>' + (all.length ? '<div class="card ledger">' + all.join('') + '</div><p class="km-s">Gebucht wird beim Eingang eines Aufmaßes, zum dann gültigen Tarif. Projekte löschen oder den Tarif wechseln ändert gebuchte Positionen nicht.</p>' : empty('Noch keine Positionen.', 'Sobald ein Aufmaß eingeht' + (portal ? ' oder ein Eigentümer Sie freigibt' : '') + ', steht es hier.')) + '</section>' +
-    (portal ? '<div class="note">Fair-Regel: Ist ein freigegebener Kunde sieben Tage lang nicht erreichbar, fragen Sie in der Anfrage eine Gutschrift an. Der Betrag geht zurück auf Ihr Guthaben.</div>' : '') + '</div>' };
+    (portal ? '<div class="note">Fair-Regel: Ist ein freigegebener Kunde sieben Tage lang nicht erreichbar, fragen Sie in der Anfrage eine Gutschrift an. Der Kontakt wird dann nicht berechnet, verrechnetes Guthaben kommt zurück.</div>' : '') + '</div>' };
 };
 const abEx = (ab) => 'Beispiel: Öffnung 1.260 × 1.440 mm ergibt ' + AW.th(1260 - 2 * ab.seite) + ' × ' + AW.th(1440 - ab.oben) + ' mm.';
 SCREENS.bprofil = () => {
@@ -863,6 +930,8 @@ const SHEETS = {
 function unpack(code) { try { const m = /(?:AM1|ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').trim()); if (!m) return null; const b = m[1].replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); const o = JSON.parse(new TextDecoder().decode(bytes)); return o && Array.isArray(o.w) ? o : null; } catch (e) { return null; } }
 /* Fenster aus der App vollständig übernehmen: gleiche Felder, fehlende Werte sind App-Standard */
 const fromApp = (w) => AW.mk(Object.assign({}, w, { name: w.name || 'Fenster' }));
+/* Kennung eines Codes ohne Zeitstempel: gleiches Aufmaß, gleiche Kennung */
+function fingerprint(o) { try { return hashN(JSON.stringify([o.w, o.p])); } catch (e) { return 0; } }
 function fromAppProj(p) { p = p || {}; return { gebaeude: p.gebaeude || '', baujahr: p.baujahr || '', total: AW.num(p.total) || 0, zeit: p.zeit || '', budget: p.budget || '', foerd: !!p.foerd, notiz: String(p.notiz || '').replace(/\s+/g, ' ').trim().slice(0, 600) }; }
 function nextNr(a) { const y = new Date().getFullYear(), mx = (a || A()).links.reduce((m, l) => { const k = /-(\d+)$/.exec(l.nr || ''); return k ? Math.max(m, +k[1]) : m; }, 0); return 'P-' + y + '-' + String(mx + 1).padStart(3, '0'); }
 /* ---------- Simulationen ---------- */
@@ -870,7 +939,7 @@ function simDecision(x, cid) {
   later(4800, () => {
     const k = (x.knocks || []).find((kk) => kk.c === cid); if (!k || k.status !== 'offen') return;
     const yes = hashN(x.id + cid) % 4 !== 0, a = S.acc[cid];
-    k.status = yes ? 'frei' : 'abgelehnt'; k.when = stamp();
+    k.status = yes ? 'frei' : 'abgelehnt'; k.when = stamp(); if (yes) k.freiAt = Date.now();
     if (yes) { if (a) { charge(a, x); a.kontakte[x.id] = a.kontakte[x.id] || { stage: 'kontakt', note: '' }; } notify(cid, { t: 'Kontakt freigegeben: ' + GEB[x.geb] + ' ' + ort(x.plz), s: contactOf(x).name + ' hat Sie zugelassen. Kontaktdaten jetzt sichtbar. Berechnet: ' + eur(leadPrice(x, a && a.konto)) + ' netto.', to: ['lead', x.id] }); }
     else notify(cid, { t: 'Abgelehnt: ' + GEB[x.geb] + ' ' + ort(x.plz), s: 'Der Eigentümer hat sich für andere Betriebe entschieden. Nichts berechnet.', to: ['lead', x.id] });
     if (S.role === 'betrieb' && S.cur === cid) toast(yes ? 'Freigegeben: ' + contactOf(x).name + ' hat Sie zugelassen' : 'Ein Eigentümer hat abgelehnt, nichts berechnet');
@@ -896,6 +965,7 @@ function simLink(l, cid) {
       const wins = demoWins('weber').slice(0, 2 + (hashN(l.id) % 3));
       const ok = receiveAufmass(S.acc[cid], cid, l, aufmassOf(wins, projOf({ baujahr: '1984', total: 8, foerd: false, notiz: 'Am besten nach 17 Uhr anrufen.' })), l.via);
       l.seen = S.screen === 'link' && S.sel === l.id;
+      if (l.seen && ok) S._feier = 'eingang';
       if (S.role === 'betrieb' && S.cur === cid) toast(ok ? 'Aufmaß eingegangen: ' + l.kunde : 'Aufmaß eingegangen. Zum Ansehen Zahlungsart hinterlegen');
     }
   }));
@@ -1005,11 +1075,25 @@ function unlockWaiting(a) {
   lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l)) { l.locked = false; n++; } });
   return n;
 }
-function activatePlus(a) {
-  a.konto = 'plus'; a.downgrade = null;
+function bookPlus(a) {
   const key = monthKey();
   if (!ledger(a).some((b) => b.kind === 'plus' && b.month === key)) a.book.unshift({ id: 'p' + Date.now().toString(36), kind: 'plus', month: key, when: stamp(), text: 'Betrieb Plus · ' + monthLabel(), sub: 'monatlich, bis ' + monthEnd() + ', danach monatlich kündbar', betrag: PLUS_PRICE, badge: 'nächste Rechnung', status: 'offen' });
+}
+function activatePlus(a) {
+  a.konto = 'plus'; a.downgrade = null;
+  bookPlus(a);
   return unlockWaiting(a);
+}
+/* Beim Start und einmal pro Minute: was die Zeit erledigt */
+function tick() {
+  const now = Date.now(); let dirty = false;
+  Object.keys(S.acc).forEach((id) => {
+    const a = S.acc[id];
+    if (a.downgrade) { const d = parseDE(a.downgrade.at); if (d && now > d.getTime()) { a.konto = a.downgrade.to; a.downgrade = null; dirty = true; notify(id, { t: 'Kontomodell gewechselt', s: 'Betrieb Plus ist ausgelaufen, wie vorgemerkt.', to: ['abrechnung'] }); } }
+    if (a.konto === 'plus' && a.pay && !ledger(a).some((b) => b.kind === 'plus' && b.month === monthKey())) { bookPlus(a); dirty = true; }
+    (a.links || []).forEach((l) => { if (['erstellt', 'gesendet', 'geoeffnet', 'arbeit'].includes(l.status)) { const d = parseDE(l.expires); if (d && now > d.getTime()) { l.status = 'abgelaufen'; l.log = l.log || {}; l.log.abgelaufen = l.expires; dirty = true; } } });
+  });
+  if (dirty) { save(); if (document.getElementById('app')) refresh(); }
 }
 /* Gleicher Betrieb schon da? Telefonnummer oder Firmenname mit gleicher PLZ-Region */
 const normTel = (t) => { let d = String(t || '').replace(/\D/g, ''); if (d.startsWith('0049')) d = '0' + d.slice(4); else if (d.startsWith('49') && d.length > 10) d = '0' + d.slice(2); return d; };
@@ -1106,9 +1190,9 @@ function act(name, el) {
     case 'notif-open': { const n = notifs()[+el.getAttribute('data-i')]; if (!n) return; n.new = false; if (n.to) return go(n.to[0], n.to[1]); return render(); }
     case 'read-all': { notifs().forEach((n) => { n.new = false; }); return render(); }
     /* Hauseigentümer */
-    case 'release': { const x = findInq(), k = x && (x.knocks || []).find((kk) => kk.c === cid); if (!k) return; if ((x.knocks || []).filter((kk) => kk.status === 'frei').length >= 3) return toast('Höchstens drei Freigaben je Aufmaß'); k.status = 'frei'; k.when = stamp(); const a = S.acc[cid]; if (a) { charge(a, x); a.kontakte[x.id] = a.kontakte[x.id] || { stage: 'kontakt', note: '' }; } notify(cid, { t: 'Kontakt freigegeben: ' + GEB[x.geb] + ' ' + ort(x.plz), s: contactOf(x).name + ' hat Sie zugelassen. ' + x.fenster + ' Fenster, Kontaktdaten jetzt sichtbar.', to: ['lead', x.id] }); render(); return toast(comp(cid).name + ' bekommt deine Kontaktdaten'); }
+    case 'release': { const x = findInq(), k = x && (x.knocks || []).find((kk) => kk.c === cid); if (!k) return; if ((x.knocks || []).filter((kk) => kk.status === 'frei').length >= 3) return toast('Höchstens drei Freigaben je Aufmaß'); k.status = 'frei'; k.when = stamp(); k.freiAt = Date.now(); const a = S.acc[cid]; if (a) { charge(a, x); a.kontakte[x.id] = a.kontakte[x.id] || { stage: 'kontakt', note: '' }; } notify(cid, { t: 'Kontakt freigegeben: ' + GEB[x.geb] + ' ' + ort(x.plz), s: contactOf(x).name + ' hat Sie zugelassen. ' + x.fenster + ' Fenster, Kontaktdaten jetzt sichtbar.', to: ['lead', x.id] }); S._feier = 'frei'; render(); return toast(comp(cid).name + ' bekommt deine Kontaktdaten'); }
     case 'decline': { const x = findInq(), k = x && (x.knocks || []).find((kk) => kk.c === cid); if (!k) return; k.status = 'abgelehnt'; notify(cid, { t: 'Abgelehnt: ' + GEB[x.geb] + ' ' + ort(x.plz), s: 'Der Eigentümer hat sich für andere Betriebe entschieden. Nichts berechnet.', to: ['lead', x.id] }); render(); return toast('Abgelehnt, nichts weitergegeben'); }
-    case 'revoke': { const x = findInq(), k = x && (x.knocks || []).find((kk) => kk.c === cid); if (k) k.status = 'abgelehnt'; render(); return toast('Freigabe zurückgezogen'); }
+    case 'revoke': { const x = findInq(), k = x && (x.knocks || []).find((kk) => kk.c === cid); if (!k) return; k.status = 'abgelehnt'; k.when = stamp(); const a = S.acc[cid], c = chargeOf(a, x.id); if (a && c && c.status !== 'gutschrift') { c.status = 'gutschrift'; a.guthaben += c.credit || 0; notify(cid, { t: 'Freigabe zurückgezogen: ' + GEB[x.geb] + ' ' + ort(x.plz), s: 'Der Eigentümer hat die Freigabe zurückgezogen. ' + (c.credit ? eur(c.credit) + ' sind zurück auf Ihrem Guthaben' + (c.credit < c.betrag ? ', der Rest wird nicht berechnet' : '') : 'Der Kontakt wird nicht berechnet') + '.', to: ['lead', x.id] }); } render(); return toast('Freigabe zurückgezogen. Dem Betrieb wird nichts berechnet.'); }
     case 'invite': { const x = findInq(); if (!x) return; x.knocks = (x.knocks || []).filter((k) => k.c !== cid); x.knocks.unshift({ c: cid, when: 'eingeladen, ' + stamp(), status: 'offen' }); notify(cid, { t: 'Einladung: ' + GEB[x.geb] + ' ' + ort(x.plz), s: 'Ein Eigentümer möchte, dass Sie sein Aufmaß ansehen.', to: ['lead', x.id] }); toast(comp(cid).name + ' eingeladen'); return go('inquiry', id); }
     case 'pause': { const x = findInq(); if (!x) return; x.status = x.status === 'pause' ? 'offen' : 'pause'; S.sheet = null; render(); return toast(x.status === 'pause' ? 'Pausiert' : 'Wieder online'); }
     case 'delete': { S.inq = S.inq.filter((i) => i.id !== id); S.sheet = null; nav('dash'); return toast('Aufmaß gelöscht'); }
@@ -1119,16 +1203,17 @@ function act(name, el) {
     case 'import': {
       const ta = document.getElementById('code-in'), o = unpack(ta ? ta.value : '');
       if (!o) { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Code nicht lesbar. Bitte komplett kopieren, er beginnt mit AM1.'); } if (o.b) { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Dieses Aufmaß gehört zum Auftrag deines Fensterbauers und kann nicht ins Portal.'); } if ((K().imports || 0) >= KUNDE_MAX) { S.sheet = null; render(); return toast('Ein Konto ist für das eigene Zuhause: höchstens ' + KUNDE_MAX + ' Aufmaße in 12 Monaten.'); }
-      const ws = (o.w || []).map(fromApp), p = o.p || {}, n = ws.reduce((s, w) => s + w.anzahl, 0) || 1, plz = (String(p.ort || '').match(/\d{5}/) || [K().plz])[0];
-      const x = { id: 'i' + Date.now().toString(36), owner: S.kcur, plz: plz, geb: GEB[p.gebaeude] ? p.gebaeude : 'efh', baujahr: p.baujahr || '', fenster: n, elemente: n, budget: BUDGET[p.budget] ? p.budget : 'b0', zeit: ZEIT[p.zeit] ? p.zeit : ({ sofort: 'asap', offen: '12m' }[p.zeit] || '3m'), material: ws[0] ? MATL[ws[0].material] || 'Kunststoff' : 'Kunststoff', fotos: (o.w || []).reduce((s, w) => s + (w.fotos || 0), 0), created: 0, status: 'offen', windows: ws.slice(0, 8).map((w) => ({ name: w.name, w: w.elW || 1000, h: w.elH || 1200, typ: w.typ })), ki: ws[0] ? ws[0].ki : [], foerd: !!p.foerd, knocks: [] };
+      const ws = (o.w || []).map(fromApp), p = o.p || {}, n = ws.reduce((s, w) => s + w.anzahl, 0) || 1, plz = (String(p.ort || '').match(/\d{5}/) || [K().plz])[0], fp = fingerprint(o);
+      const schon = myInq().find((x) => x.fp === fp); if (schon) { S.sheet = null; go('inquiry', schon.id); return toast('Dieses Aufmaß ist schon online.'); }
+      const x = { id: 'i' + Date.now().toString(36), owner: S.kcur, plz: plz, geb: GEB[p.gebaeude] ? p.gebaeude : 'efh', baujahr: p.baujahr || '', fenster: n, elemente: n, budget: BUDGET[p.budget] ? p.budget : 'b0', zeit: ZEIT[p.zeit] ? p.zeit : ({ sofort: 'asap', offen: '12m' }[p.zeit] || '3m'), material: ws[0] ? MATL[ws[0].material] || 'Kunststoff' : 'Kunststoff', fotos: (o.w || []).reduce((s, w) => s + (w.fotos || 0), 0), created: 0, createdAt: Date.now(), fp: fp, status: 'offen', windows: ws.slice(0, 8).map((w) => ({ name: w.name, w: w.elW || 1000, h: w.elH || 1200, typ: w.typ })), ki: ws[0] ? ws[0].ki : [], foerd: !!p.foerd, knocks: [] };
       K().imports = (K().imports || 0) + 1; S.inq.unshift(x); S.sheet = null; notify(S.kcur, { t: 'Dein Aufmaß ist online', s: n + ' Fenster, anonym sichtbar für Betriebe im Umkreis.', to: ['inquiry', x.id] }); simKnocks(x); go('inquiry', x.id); return toast('Aufmaß inseriert');
     }
     case 'demo-inquiry': {
-      const x = { id: 'i' + Date.now().toString(36), owner: S.kcur, plz: K().plz, geb: 'efh', baujahr: 1984, fenster: 3, elemente: 3, budget: 'b3', zeit: '3m', material: 'Kunststoff', fotos: 6, created: 0, status: 'offen', windows: [{ name: 'Wohnzimmer', w: 1760, h: 1385, typ: '3 Flügel, Mitte fest' }, { name: 'Küche', w: 1230, h: 1410, typ: '2 Flügel Dreh-Kipp' }, { name: 'Bad', w: 880, h: 1010, typ: '1 Flügel Dreh-Kipp' }], ki: ['Kunststoff, weiß', '2-fach, vor 2000', 'Rollladenkasten innen'], foerd: false, knocks: [] };
+      const x = { id: 'i' + Date.now().toString(36), owner: S.kcur, plz: K().plz, geb: 'efh', baujahr: 1984, fenster: 3, elemente: 3, budget: 'b3', zeit: '3m', material: 'Kunststoff', fotos: 6, created: 0, createdAt: Date.now(), status: 'offen', windows: [{ name: 'Wohnzimmer', w: 1760, h: 1385, typ: '3 Flügel, Mitte fest' }, { name: 'Küche', w: 1230, h: 1410, typ: '2 Flügel Dreh-Kipp' }, { name: 'Bad', w: 880, h: 1010, typ: '1 Flügel Dreh-Kipp' }], ki: ['Kunststoff, weiß', '2-fach, vor 2000', 'Rollladenkasten innen'], foerd: false, knocks: [] };
       S.inq.unshift(x); notify(S.kcur, { t: 'Dein Aufmaß ist online', s: '3 Fenster, anonym sichtbar für Betriebe im Umkreis.', to: ['inquiry', x.id] }); simKnocks(x); go('inquiry', x.id); return toast('Beispiel inseriert. Gleich klopft jemand an.');
     }
     /* Fensterbauer: Portal */
-    case 'knock': { const x = findInq(); if (!x || !A().verified) return; x.knocks = (x.knocks || []).filter((k) => k.c !== S.cur); x.knocks.unshift({ c: S.cur, when: stamp(), status: 'offen' }); if (x.owner) notify(x.owner, { t: BC().name + ' hat angeklopft', s: ort(BC().plz) + '. Du entscheidest, ob sie deine Kontaktdaten bekommen.', to: ['inquiry', x.id] }); else simDecision(x, S.cur); S.sheet = { k: 'knocked', price: leadPrice(x), owner: x.owner || null, id: x.id }; return render(); }
+    case 'knock': { const x = findInq(); if (!x || !A().verified) return; if (x.status === 'pause') return toast('Dieses Aufmaß ist gerade pausiert.'); const prev = knockStatus(x, S.cur); if (prev === 'abgelehnt') return toast('Der Eigentümer hat abgelehnt. Erneut anklopfen geht nicht.'); if (prev === 'frei') return go('lead', x.id); x.knocks = (x.knocks || []).filter((k) => k.c !== S.cur); x.knocks.unshift({ c: S.cur, when: stamp(), status: 'offen' }); if (x.owner) notify(x.owner, { t: BC().name + ' hat angeklopft', s: ort(BC().plz) + '. Du entscheidest, ob sie deine Kontaktdaten bekommen.', to: ['inquiry', x.id] }); else simDecision(x, S.cur); S.sheet = { k: 'knocked', price: leadPrice(x), owner: x.owner || null, id: x.id }; return render(); }
     case 'unknock': { const x = findInq(); if (x) x.knocks = (x.knocks || []).filter((k) => k.c !== S.cur); render(); return toast('Anklopfen zurückgenommen'); }
     case 'stage': { A().kontakte[id] = Object.assign(A().kontakte[id] || { note: '' }, { stage: v }); S._pop = { act: name, v: v, k: '' }; return render(); }
     case 'konto': {
@@ -1142,7 +1227,7 @@ function act(name, el) {
       if (a.konto === 'plus') { a.downgrade = { to: v, at: monthEnd() }; S._pop = { act: name, v: v, k: '' }; save(); render(); return toast('Vorgemerkt: Betrieb Plus läuft bis ' + monthEnd()); }
       a.konto = v; S._pop = { act: name, v: v, k: '' }; render(); return toast(v === 'service' ? 'Start: 3 Aufmaße frei, danach 9\u00a0€ je Aufmaß' : 'Pro Kontakt, keine Grundgebühr');
     }
-    case 'fair': { const x = findInq(); if (x) { const k = x.knocks.find((kk) => kk.c === S.cur); if (k) k.status = 'abgelehnt'; const c = chargeOf(A(), x.id); if (c && c.status !== 'gutschrift') { c.status = 'gutschrift'; A().guthaben += c.betrag; } } S.sheet = null; render(); return toast('Gutschrift erteilt. Der Betrag ist zurück in Ihrem Guthaben.'); }
+    case 'fair': { const x = findInq(); if (x) { const k = x.knocks.find((kk) => kk.c === S.cur); if (k && k.freiAt && Date.now() - k.freiAt < 7 * 864e5) { S.sheet = null; render(); return toast('Gutschrift frühestens 7 Tage nach der Freigabe, ab dem ' + datumDE(k.freiAt + 7 * 864e5) + '.'); } if (k) k.status = 'abgelehnt'; const c = chargeOf(A(), x.id); let zurueck = 0; if (c && c.status !== 'gutschrift') { c.status = 'gutschrift'; zurueck = c.credit || 0; A().guthaben += zurueck; } S.sheet = null; render(); return toast(zurueck ? 'Gutschrift erteilt. ' + eur(zurueck) + ' sind zurück auf Ihrem Guthaben.' : 'Gutschrift erteilt. Der Kontakt wird nicht berechnet.'); } S.sheet = null; return render(); }
     case 'verify-demo': { A().verified = true; const c = (S.myCompanies || []).find((x) => x.id === S.cur); if (c) c.verified = true; notify(S.cur, { t: 'Nachweis geprüft', s: 'Sie können jetzt bei Anfragen anklopfen.', to: ['markt'] }); render(); return toast('Nachweis geprüft. Sie können jetzt anklopfen.'); }
     case 'bpref': { const p = A().prefs = A().prefs || {}; p[v] = !(p[v] !== undefined ? p[v] : v !== 'urlaub'); S._pop = { act: name, v: v, k: '' }; render(); return toast(v === 'urlaub' ? (p.urlaub ? 'Urlaubsmodus an' : 'Urlaubsmodus aus') : 'Gespeichert'); }
     case 'plan-upgrade': { A().plan = 'portal'; A().konto = 'ppk'; A().guthaben = Math.max(A().guthaben, 100); const own = (S.myCompanies || []).find((x) => x.id === S.cur); if (own) { own.plan = 'portal'; A().verified = false; own.verified = false; } else { A().verified = true; } S.sheet = null; nav('markt'); return toast('Portal freigeschaltet'); }
@@ -1157,12 +1242,12 @@ function act(name, el) {
       const n = S.nl; n.err = {};
       if (String(n.kunde || '').trim().length < 2) { n.err.kunde = 'Bitte einen Namen eingeben, zum Beispiel „Familie Weber“.'; S._focusErr = true; render(); const f = document.querySelector('.form'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); } return; }
       const l = { id: 'l' + Date.now().toString(36), code: newCode(), nr: nextNr(), kunde: n.kunde.trim(), kontakt: String(n.kontakt || '').trim(), adresse: String(n.adresse || '').trim(), geb: n.geb || '', fz: n.fz || '', plan: (n.plan || []).slice(), note: String(n.note || '').trim(), created: 'heute', days: n.days || 14, expires: dateIn(n.days || 14), status: 'erstellt', progress: 0, via: '', du: !!n.du, log: { erstellt: stamp() } };
-      A().links.unshift(l); S.nl = null; S.justCreated = l.id; S.hist = S.hist.filter((h) => h[0] !== 'newlink'); S.screen = 'links'; go('link', l.id); setTimeout(() => { if (S.justCreated === l.id) { S.justCreated = null; } }, 6000); return;
+      A().links.unshift(l); S.nl = null; S.justCreated = l.id; S._feier = 'projekt'; S.hist = S.hist.filter((h) => h[0] !== 'newlink'); S.screen = 'links'; go('link', l.id); setTimeout(() => { if (S.justCreated === l.id) { S.justCreated = null; } }, 6000); return;
     }
     case 'l-share': {
       const l = findLink(); if (!l) return;
       if (v === 'link' || v === 'Text') { copyText(v === 'link' ? linkURL(l) : linkMsg(l), v === 'link' ? 'Link kopiert' : 'Nachricht kopiert'); }
-      if (l.status === 'erstellt') { l.status = 'gesendet'; l.via = v === 'link' ? 'Link kopiert' : v === 'Text' ? 'Text kopiert' : v; l.log.gesendet = stamp(); setTimeout(() => refresh(), 400); }
+      if (l.status === 'erstellt') { l.status = 'gesendet'; l.via = v === 'link' ? 'Link kopiert' : v === 'Text' ? 'Text kopiert' : v; l.log.gesendet = stamp(); S._feier = 'gesendet'; setTimeout(() => refresh(), 400); }
       return;
     }
     case 'l-du': { const l = A().links.find((x) => x.id === S.sel); if (!l) return; l.du = v === 'du'; l.msg = ''; return render(); }
@@ -1199,11 +1284,16 @@ function act(name, el) {
       let l = o.b ? A().links.find((x) => x.code === o.b) : null;
       if (o.b && !l) { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Dieser Code gehört zu keinem Ihrer Projekte.'); }
       if (l && l.status === 'eingegangen') { S.sheet = null; go('link', l.id); return toast('Dieses Aufmaß ist schon eingegangen.'); }
+      if (l && l.status === 'deaktiviert') { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Dieser Link wurde deaktiviert. Für ein neues Aufmaß legen Sie ein neues Projekt an.'); }
+      const fp = fingerprint(o), schon = A().links.find((x) => x.aufmass && x.aufmass.fp === fp);
+      if (schon) { S.sheet = null; go('link', schon.id); return toast('Dieses Aufmaß ist schon da: ' + schon.kunde); }
+      const war = l && l.status === 'abgelaufen';
       const wins = (o.w || []).map(fromApp), p = o.p || {};
       if (!l) { l = { id: 'l' + Date.now().toString(36), code: newCode(), nr: nextNr(), kunde: p.name || 'Kunde ohne Projekt', kontakt: p.tel || p.mail || '', adresse: p.ort || '', geb: '', fz: '', plan: [], note: 'direkt vom Kunden, per Code übernommen', created: 'heute', expires: dateIn(14), status: 'gesendet', progress: 0, via: 'Code', du: false, log: { erstellt: stamp(), gesendet: stamp() } }; A().links.unshift(l); }
       l.seen = true; S.justCreated = null; l.log.gesendet = l.log.gesendet || stamp(); l.log.geoeffnet = l.log.geoeffnet || stamp(); l.log.arbeit = l.log.arbeit || stamp();
-      const ok = receiveAufmass(A(), S.cur, l, aufmassOf(wins, fromAppProj(p)), 'Code');
-      S.sheet = null; go('link', l.id); return toast(ok ? 'Aufmaß übernommen: ' + l.kunde : 'Aufmaß übernommen. Zum Ansehen Zahlungsart hinterlegen');
+      const am = aufmassOf(wins, fromAppProj(p)); am.fp = fp;
+      const ok = receiveAufmass(A(), S.cur, l, am, 'Code');
+      S.sheet = null; S._feier = ok ? 'eingang' : ''; go('link', l.id); return toast(ok ? (war ? 'Link war abgelaufen, Aufmaß trotzdem übernommen: ' : 'Aufmaß übernommen: ') + l.kunde : 'Aufmaß übernommen. Zum Ansehen Zahlungsart hinterlegen');
     }
     case 'copy': return copyText(v, 'Kopiert');
     default: return;
@@ -1253,13 +1343,15 @@ root.addEventListener('click', (e) => {
   if (name === 'decline') { const card = el.closest('.card'); if (card && !card.classList.contains('is-leaving')) { card.classList.add('is-leaving'); setTimeout(() => act(name, el), 380); return; } }
   act(name, el);
 });
-root.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target.getAttribute('data-form'); if (f === 'login') act('login-submit', e.target); if (f === 'reg') act('reg-next', e.target); if (f === 'nl') act('nl-create', e.target); });
+root.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target.getAttribute('data-form'); if (f === 'login') act('login-submit', e.target); if (f === 'reg') act('reg-next', e.target); if (f === 'nl') act(S.nl && S.nl.step ? 'nl-create' : 'nl-next', e.target); });
 root.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(); }
-  if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { const form = e.target.closest('form'); if (form) { e.preventDefault(); const f = form.getAttribute('data-form'); if (f === 'login') act('login-submit', form); else if (f === 'reg') act('reg-next', form); else if (f === 'nl') act('nl-create', form); } }
+  if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { const form = e.target.closest('form'); if (form) { e.preventDefault(); const f = form.getAttribute('data-form'); if (f === 'login') act('login-submit', form); else if (f === 'reg') act('reg-next', form); else if (f === 'nl') act(S.nl && S.nl.step ? 'nl-create' : 'nl-next', form); } }
   if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('pt')) { e.preventDefault(); act(e.target.getAttribute('data-act'), e.target); }
 });
 root.addEventListener('input', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
 root.addEventListener('change', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
+tick();
+setInterval(tick, 60000);
 render();
 
