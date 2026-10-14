@@ -40,4 +40,4 @@ for p in ziele:
         geaendert += 1
         print('%4d× %s' % (n, p.relative_to(ROOT)))
 print('Fertig: „%s“ heißt jetzt „%s“ (%d Dateien).' % (alt, neu, geaendert))
-print('Hinweis: Domain-Angaben (z. B. klopfan.de) in der Doku und der Spruch in web/config.js bitte selbst anpassen.')
+print('Hinweis: Domain-Angaben (z. B. klopfan.de) in der Doku bitte selbst anpassen.')

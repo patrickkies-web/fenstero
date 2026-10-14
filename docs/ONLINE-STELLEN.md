@@ -1,6 +1,6 @@
 # Klopfan online stellen
 
-**Klopfan – Hier kommen wa zamm.** Das Logo ist eine Faust, die anklopft, so wie Betriebe im Portal bei Projekten anklopfen. Klopfan bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
+**Klopfan.** Das Logo ist eine Hand, die anklopft, so wie Betriebe im Portal bei Projekten anklopfen. Klopfan bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
 
 Diese Anleitung bringt die Klopfan-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…pages.dev`), später unter deiner eigenen Domain.
 
