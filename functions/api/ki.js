@@ -1,4 +1,4 @@
-/* Fensterino · KI-Auswertung der Fotos (Cloudflare Pages Function, Adresse /api/ki)
+/* Fensterino · KI-Auswertung der Fotos, Adresse /api/ki (auf Cloudflare Workers über worker.js, läuft auch als Pages Function)
 
    GET  /api/ki                                          -> { bereit: true | false }
    POST /api/ki?aufgabe=struktur|fakten&seite=in|out     Inhalt: das Foto als Base64-Text (JPEG)

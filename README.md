@@ -8,7 +8,8 @@ Die Aufmaß-App für Fenster. Hauseigentümer messen ihre Fenster selbst, Schrit
 
 | Pfad | Inhalt |
 |---|---|
-| `web/` | die Website, so wie sie ausgeliefert wird (Cloudflare Pages: Ausgabeverzeichnis `web`, kein Build-Befehl) |
+| `web/` | die Website, so wie sie ausgeliefert wird (statische Dateien, kein Build-Schritt) |
+| `wrangler.jsonc`, `worker.js` | Cloudflare Workers: liefert `web/` aus und beantwortet `/api/ki`; `"name"` muss zum Worker im Dashboard passen |
 | `web/index.html` | Startseite und Bereich für Fensterbauer (Projekte, Aufmaß-Links, Einladungslisten, Abrechnung) |
 | `web/app/` | Mess-App für Kunden, Kundenlinks: `/app/#k-…` |
 | `web/assets/` | Programmcode und Gestaltung (`app.*`, `portal.*`, gemeinsam `gemeinsam.*` mit Logo und KI-Anbindung, Rechtsseiten `recht.css`) |
@@ -17,19 +18,20 @@ Die Aufmaß-App für Fenster. Hauseigentümer messen ihre Fenster selbst, Schrit
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
 | `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weißes Fenster auf schwarzer Kachel, der Flügel kippt kurz |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT) und qrcode-generator (MIT), lokal statt von fremden Servern |
-| `functions/api/ki.js` | KI-Auswertung der Fotos (Cloudflare Pages Function), Schlüssel als Secret `ANTHROPIC_API_KEY` |
+| `functions/api/ki.js` | KI-Auswertung der Fotos (eingebunden über `worker.js`, läuft auch als Pages Function), Schlüssel als Secret `ANTHROPIC_API_KEY` |
 | `scripts/` | lokaler Testserver, Browser-Prüfung, Umbenennen |
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung |
 | `docs/ABRECHNUNG.md` | Abrechnungsregeln: was gezählt wird, wo die Zahlung einsetzt, Nachbesserung, Schranken, was der Server später erzwingt |
 
 ## Kurz: online stellen
 
-Cloudflare → Workers & Pages → Pages mit GitHub verbinden → dieses Repo, Branch `main`, Framework `None`, Build-Befehl leer, Ausgabeverzeichnis `web`. Alles Weitere in der [Anleitung](docs/ONLINE-STELLEN.md).
+Cloudflare → Workers & Pages → Repository importieren → dieses Repo, Worker-Name `fenstero`, Bereitstellungsbefehl `npx wrangler deploy`, Pfad `/`, Branch `main`. Die Domain hängt am Worker unter Einstellungen → Domains & Routen. Alles Weitere in der [Anleitung](docs/ONLINE-STELLEN.md).
 
 ## Lokal testen
 
 ```bash
 KI_ATTRAPPE=1 node scripts/dev-server.mjs   # http://localhost:8788
+npx wrangler dev                            # wie bei Cloudflare, http://localhost:8787
 ```
 
 ## Name ändern
