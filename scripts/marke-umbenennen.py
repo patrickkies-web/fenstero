@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Zamma umbenennen: ersetzt den sichtbaren Namen in Website, KI-Funktion, Doku und Hilfsskripten.
+"""Marke umbenennen: ersetzt den sichtbaren Namen in Website, KI-Funktion, Doku und Hilfsskripten.
 
     python3 scripts/marke-umbenennen.py NeuerName
 
 Den bisherigen Namen liest das Skript aus web/config.js (marke: '…'), es lässt sich also
-mehrfach verwenden. Interne Schlüssel bleiben gleich (Browser-Speicher „zamma.…“,
-Code-Kürzel ZF1, Variablen wie ZAMMA), damit gespeicherte Daten und Codes gültig bleiben.
+mehrfach verwenden. Interne Namen sind markenneutral und bleiben gleich (Browser-Speicher „aufmass.…“,
+Code-Kürzel AM1, Variablen wie KONFIG), damit gespeicherte Daten und Codes gültig bleiben.
 Danach: Änderungen prüfen (git diff), committen, pushen; Cloudflare veröffentlicht automatisch.
 """
 import pathlib
@@ -40,4 +40,4 @@ for p in ziele:
         geaendert += 1
         print('%4d× %s' % (n, p.relative_to(ROOT)))
 print('Fertig: „%s“ heißt jetzt „%s“ (%d Dateien).' % (alt, neu, geaendert))
-print('Hinweis: Domain-Angaben (z. B. zamma.de) in der Doku und der Spruch in web/config.js bitte selbst anpassen.')
+print('Hinweis: Domain-Angaben (z. B. klopfan.de) in der Doku bitte selbst anpassen.')

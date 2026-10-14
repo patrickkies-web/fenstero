@@ -1,4 +1,4 @@
-/* Zamma: Ergänzungen für die eigenständige Website (Marke mit Spruch, Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
+/* Klopfan: Ergänzungen für die eigenständige Website (Logo, Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
 a.btn { text-decoration: none }
 .foot .foot-links a { padding: 6px 0; color: var(--fg2); font-size: 14px; font-weight: 600; text-decoration: none }
 .foot .foot-links a:hover { color: var(--accent) }
@@ -27,14 +27,45 @@ a.btn { text-decoration: none }
 .fx-nein { background: var(--chip); color: var(--fg) }
 @media (prefers-reduced-motion: reduce) { .fx-dialog { animation: none } }
 
-/* Marke: Name mit Spruch */
-.hdr-name { display: flex; flex-direction: column; line-height: 1 }
-.hdr-name small { margin-top: 4px; font-size: 11.5px; font-weight: 700; letter-spacing: 0; color: var(--muted) }
-.spruch-fuss { margin: 6px 0 0; text-align: center; font-size: 15px; color: var(--muted) }
-.spruch-fuss b { color: var(--fg); font-weight: 900; letter-spacing: -.02em }
-.lm-foot .spruch { margin-left: 2px; font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--muted) }
-
-/* Portal: der Spruch als eigener Abschnitt auf der Startseite */
-.zamm { text-align: center; padding: clamp(30px, 6vw, 60px) 20px; border-radius: 28px; background: radial-gradient(120% 90% at 50% 0%, var(--accent-soft), transparent 70%), var(--surface); box-shadow: var(--shadow) }
-.zamm-spruch { margin: 0; font-family: var(--display); font-size: clamp(36px, 6.4vw, 64px); line-height: 1; font-weight: 900; letter-spacing: -.04em; text-wrap: balance }
-.zamm-text { margin: 14px auto 0; max-width: 44ch; font-size: 17px; line-height: 1.5; color: var(--fg2); text-wrap: pretty }
+/* Logo: die Faust klopft an; die Kachel (das Angeklopfte) zittert beim Aufprall */
+.kl-logo { display: block; flex: 0 0 auto; overflow: visible }
+.lm, .logo .lm { width: auto; height: auto; border-radius: 0; background: none; box-shadow: none }
+.hdr-logo { gap: 10px }
+.kl-logo .kl-hand { transform-box: fill-box; transform-origin: 50% 100% }
+.kl-logo .kl-welle { transform-box: fill-box; transform-origin: 0% 100% }
+.kl-logo .kl-kachel { transform-box: fill-box; transform-origin: 50% 50% }
+.kl-logo.klopft .kl-hand { animation: kl-hand 1.3s cubic-bezier(.4, .1, .3, 1) both }
+.kl-logo.klopft .kl-welle { animation: kl-welle 1.3s ease-out both }
+.kl-logo.klopft .kl-kachel { animation: kl-kachel 1.3s linear both }
+@keyframes kl-hand {
+  0% { transform: none }
+  12% { transform: translate(-1.5px, 4px) rotate(-7deg) }
+  18% { transform: translate(1.2px, -2.2px) rotate(3deg) }
+  26% { transform: translate(0, .6px) rotate(-1deg) }
+  34% { transform: translate(-1.5px, 4px) rotate(-7deg) }
+  40% { transform: translate(1.2px, -2.2px) rotate(3deg) }
+  52%, 100% { transform: none }
+}
+@keyframes kl-welle {
+  0%, 11% { opacity: 1; transform: none }
+  12%, 17% { opacity: 0; transform: scale(.3) }
+  20% { opacity: 1; transform: scale(1.3) }
+  28% { opacity: 1; transform: none }
+  34%, 39% { opacity: 0; transform: scale(.3) }
+  42% { opacity: 1; transform: scale(1.3) }
+  52%, 100% { opacity: 1; transform: none }
+}
+@keyframes kl-kachel {
+  0%, 17% { transform: none }
+  19% { transform: translate(1.6px, -1.2px) rotate(1.4deg) }
+  21% { transform: translate(-1.2px, .9px) rotate(-1.1deg) }
+  23% { transform: translate(.8px, -.5px) rotate(.6deg) }
+  25% { transform: translate(-.4px, .3px) rotate(-.3deg) }
+  27%, 39% { transform: none }
+  41% { transform: translate(1.6px, -1.2px) rotate(1.4deg) }
+  43% { transform: translate(-1.2px, .9px) rotate(-1.1deg) }
+  45% { transform: translate(.8px, -.5px) rotate(.6deg) }
+  47% { transform: translate(-.4px, .3px) rotate(-.3deg) }
+  49%, 100% { transform: none }
+}
+@media (prefers-reduced-motion: reduce) { .kl-logo .kl-hand, .kl-logo .kl-welle, .kl-logo .kl-kachel { animation: none !important } }

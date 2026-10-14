@@ -340,11 +340,11 @@ function packProject(windows, proj, betrieb) {
   const json = JSON.stringify({ v: 1, b: betrieb ? betrieb.code : '', p: proj, w: ws, t: Date.now() });
   const bytes = new TextEncoder().encode(json);
   let bin = ''; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return 'ZF1.' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return 'AM1.' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 function unpackProject(code) {
   try {
-    const m = /(?:ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').trim());
+    const m = /(?:AM1|ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').trim());
     if (!m) return null;
     let b64 = m[1].replace(/-/g, '+').replace(/_/g, '/'); while (b64.length % 4) b64 += '=';
     const bin = atob(b64), bytes = new Uint8Array(bin.length);
@@ -671,7 +671,7 @@ const AI = (function () {
   function init() {
     if (!initP) initP = (async () => {
       try {
-        sample = window.ZammaKI ? await window.ZammaKI.verbinden() : (window.claude && window.claude.use ? await window.claude.use('sample') : null);
+        sample = window.FotoKI ? await window.FotoKI.verbinden() : (window.claude && window.claude.use ? await window.claude.use('sample') : null);
         if (sample) { try { limits = await sample.limits(); } catch (e) { limits = null; } }
       } catch (e) { sample = null; }
       return available();
@@ -760,7 +760,7 @@ const AI = (function () {
 const APP_URL = location.href.split('#')[0].split('?')[0];
 const PORTAL_URL = new URL('../', APP_URL).href;
 const PORTAL_OPEN = PORTAL_URL;
-const STORE = 'zamma.v1';
+const STORE = 'aufmass.v1';
 const PROJ0 = { gebaeude: 'efh', baujahr: '', total: 9, zeit: '3m', budget: 'b0', foerd: false, name: '', ort: '', tel: '', mail: '', erreich: 'nm' };
 const S = {
   screen: 'home', dir: 'fwd', betrieb: null, windows: [], win: baseWin(), editIdx: -1,
@@ -773,7 +773,7 @@ const S = {
   sent: null, inboxView: null
 };
 /* Kundenlink: eigenes Projekt je Code, getrennt vom eigenen Projekt; Senden geht einmal */
-const linkKey = () => 'zamma.k.' + (S.betrieb ? S.betrieb.code : '');
+const linkKey = () => 'aufmass.k.' + (S.betrieb ? S.betrieb.code : '');
 /* Passwörter nie im Browser speichern */
 function kaufSicher() { return S.kauf ? Object.assign({}, S.kauf, { pw: '' }) : S.kauf; }
 function persist() {
@@ -831,7 +831,7 @@ function render(fresh) {
   const prevStage = root.querySelector('#w3d'), prevSig = prevStage ? prevStage.getAttribute('data-sig') : null;
   const backLabel = view.back ? view.back[0] : '';
   let h = '<header class="hdr"><div class="hdr-row">';
-  h += S.screen === 'home' ? '<div class="hdr-logo"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="1.5" y="1.5" width="19" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"></rect><path d="M11 1.5v19M1.5 9h19" fill="none" stroke="currentColor" stroke-width="2.2"></path></svg><span class="hdr-name">Zamma<small>' + esc(SPRUCH) + '</small></span></div>'
+  h += S.screen === 'home' ? '<div class="hdr-logo">' + LOGO(30) + '<span class="hdr-name">Klopfan</span></div>'
     : (view.back ? '<button type="button" class="hdr-btn" data-act="back"><svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>' + esc(backLabel) + '</span></button>' : '<span></span>');
   h += '<span class="hdr-title">' + esc(title) + '</span>';
   h += '<button type="button" class="hdr-btn" data-act="gindex"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v16H4.5c-.8 0-1.5.5-1.5 1.2zM19 4.5c0-.8-.7-1.5-1.5-1.5H11v16h6.5c.8 0 1.5.5 1.5 1.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg><span>Begriffe</span></button></div>';
@@ -1078,7 +1078,7 @@ function blattHTML(windows, pr, opts) {
   let today = ''; try { today = new Date(opts.date || Date.now()).toLocaleDateString('de-DE'); } catch (e) { today = ''; }
   const replaced = windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0);
   const proj = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Förderung', pr.foerd ? 'gewünscht' : 'nein'], ['Lüftung', replaced > (num(pr.total) || 0) / 3 ? 'Lüftungskonzept prüfen (' + replaced + ' von ' + pr.total + ' Fenstern)' : replaced + ' von ' + pr.total + ' Fenstern']];
-  let h = '<div class="sheet-paper"><div class="paper-head"><div style="min-width: 0"><p class="eyebrow" style="font-size: 11px">Aufmaßblatt</p><p style="margin: 4px 0 0; font-size: 20px; font-weight: 900; letter-spacing: -.02em">' + esc(pr.name || 'Ohne Namen') + '</p>' + ([pr.ort, pr.tel].filter(Boolean).length ? '<p style="margin: 2px 0 0; font-size: 13px; color: var(--muted)">' + esc([pr.ort, pr.tel].filter(Boolean).join(' · ')) + '</p>' : '') + '</div><div style="text-align: right; flex: 0 0 auto"><p style="margin: 0; font-size: 12px; color: var(--muted)">' + (opts.betrieb ? 'An ' + esc(opts.betrieb) : 'Erfasst mit Zamma') + '</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">' + esc(today) + '</p></div></div>';
+  let h = '<div class="sheet-paper"><div class="paper-head"><div style="min-width: 0"><p class="eyebrow" style="font-size: 11px">Aufmaßblatt</p><p style="margin: 4px 0 0; font-size: 20px; font-weight: 900; letter-spacing: -.02em">' + esc(pr.name || 'Ohne Namen') + '</p>' + ([pr.ort, pr.tel].filter(Boolean).length ? '<p style="margin: 2px 0 0; font-size: 13px; color: var(--muted)">' + esc([pr.ort, pr.tel].filter(Boolean).join(' · ')) + '</p>' : '') + '</div><div style="text-align: right; flex: 0 0 auto"><p style="margin: 0; font-size: 12px; color: var(--muted)">' + (opts.betrieb ? 'An ' + esc(opts.betrieb) : 'Erfasst mit Klopfan') + '</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">' + esc(today) + '</p></div></div>';
   h += '<div class="paper-grid">' + proj.map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>';
   windows.forEach((x, i) => {
     const d = derive(x), rows = specRows(x), ki = x.ki;
@@ -1100,7 +1100,7 @@ function blattMarkdown(windows, pr) {
     if (x.ki && x.ki.rows && x.ki.rows.length) { lines.push('', '### Aus den Fotos (KI)'); x.ki.rows.forEach((r) => lines.push('- **' + r[0] + ':** ' + r[1])); (x.ki.hints || []).forEach((t) => lines.push('- Hinweis: ' + t)); }
     lines.push('');
   });
-  lines.push('Erfasst mit Zamma. Vor der Fertigung Feinaufmaß vor Ort.');
+  lines.push('Erfasst mit Klopfan. Vor der Fertigung Feinaufmaß vor Ort.');
   return lines.join('\n');
 }
 SCREENS.blatt = () => {
@@ -1126,22 +1126,22 @@ function checkCard(x, i) {
 }
 SCREENS.gesendet = () => {
   const name = S.betrieb ? (S.betrieb.name || 'Dein Fensterbauer') : 'Dein Fensterbauer', code = packProject(S.windows, S.proj, S.betrieb);
-  const wa = 'https://wa.me/?text=' + encodeURIComponent('Hallo ' + name + ', hier ist mein Übermittlungscode aus Zamma:\n' + code);
+  const wa = 'https://wa.me/?text=' + encodeURIComponent('Hallo ' + name + ', hier ist mein Übermittlungscode aus Klopfan:\n' + code);
   const html = '<div class="center" style="padding-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px"><svg class="okmark" viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><h1 style="margin: 4px 0 0; font-family: var(--display); font-size: 42px; line-height: 1; font-weight: 900; letter-spacing: -.035em">Gesendet.</h1><p style="margin: 0; font-size: 17px; line-height: 1.5; color: var(--fg2)">' + esc(name) + ' hat jetzt Maße, Fotos und Wünsche und meldet sich mit einem Angebot.</p></div>' +
     '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(name) + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
     dateiCard() +
-    '<details class="card proto"><summary><span><b>Nur im Prototyp: Übermittlung</b><small>Ohne Server kommt dein Aufmaß hier noch nicht von selbst an.</small></span></summary><p class="sub" style="color: var(--fg2)">Bitte schick ' + esc(name) + ' diesen Übermittlungscode, am einfachsten als Antwort in WhatsApp. Er funktioniert nur in diesem Projekt bei ' + esc(name) + '. Im fertigen Zamma entfällt dieser Schritt.</p><textarea class="copybox" id="code-box" readonly rows="3" aria-label="Übermittlungscode">' + esc(code) + '</textarea><div class="pill-row"><button type="button" class="pill" data-act="copyblatt">Code kopieren</button><a class="pill" href="' + wa + '" target="_blank" rel="noopener">Per WhatsApp antworten ›</a></div></details>';
+    '<details class="card proto"><summary><span><b>Nur im Prototyp: Übermittlung</b><small>Ohne Server kommt dein Aufmaß hier noch nicht von selbst an.</small></span></summary><p class="sub" style="color: var(--fg2)">Bitte schick ' + esc(name) + ' diesen Übermittlungscode, am einfachsten als Antwort in WhatsApp. Er funktioniert nur in diesem Projekt bei ' + esc(name) + '. Im fertigen Klopfan entfällt dieser Schritt.</p><textarea class="copybox" id="code-box" readonly rows="3" aria-label="Übermittlungscode">' + esc(code) + '</textarea><div class="pill-row"><button type="button" class="pill" data-act="copyblatt">Code kopieren</button><a class="pill" href="' + wa + '" target="_blank" rel="noopener">Per WhatsApp antworten ›</a></div></details>';
   return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home' } };
 };
 /* Ohne Kundenlink: ins Portal stellen oder direkt an einen Betrieb schicken */
 SCREENS.teilen = () => {
   const code = packProject(S.windows, S.proj, null), n = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0);
-  const msg = 'Hallo, hier ist mein Fenster-Aufmaß aus Zamma (' + n + ' Fenster). Den Code bitte im Zamma-Portal unter „Aufmaß-Code einfügen“ einsetzen:\n' + code;
+  const msg = 'Hallo, hier ist mein Fenster-Aufmaß aus Klopfan (' + n + ' Fenster). Den Code bitte im Klopfan-Portal unter „Aufmaß-Code einfügen“ einsetzen:\n' + code;
   const html = hd('Fertig gemessen', 'Wohin damit?', 'Dein Aufmaß ist komplett. Zwei Wege, du kannst auch beide gehen.') +
     (PILOT ? '<div class="card share-way soon"><p class="eyebrow">Bald · nach der Pilotphase</p><h2>Im Fensterportal anbieten</h2><p class="sub" style="color: var(--fg2)">Anonym: Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an. Das startet nach der Pilotphase. Bis dahin schickst du dein Aufmaß direkt an einen Fensterbauer.</p></div>' : '<div class="card share-way"><p class="eyebrow">Empfohlen · kostenlos</p><h2>Im Fensterportal anbieten</h2><p class="sub" style="color: var(--fg2)">Anonym: Fensterbauer aus deiner Nähe sehen Maße und Fotos, aber nicht dich. Wer Interesse hat, klopft an. Du entscheidest, wer deine Kontaktdaten bekommt.</p>' +
     '<ol class="way-steps"><li><span class="n">1</span><span><b>Code kopieren</b></span><button type="button" class="pill" data-act="copyblatt">Kopieren</button></li><li><span class="n">2</span><span><b>Portal öffnen</b><small>Konto anlegen oder anmelden</small></span><a class="pill" href="' + PORTAL_OPEN + '" target="_blank" rel="noopener">Öffnen ›</a></li><li><span class="n">3</span><span><b>„Aufmaß-Code einfügen“</b><small>Dann ist es online, ohne deinen Namen.</small></span></li></ol></div>') +
-    '<div class="card share-way"><p class="eyebrow">Du hast schon einen Betrieb?</p><h2>Direkt an deinen Fensterbauer</h2><p class="sub" style="color: var(--fg2)">Schick ihm den Code. Er setzt ihn in seinem Zamma-Bereich ein und hat das komplette Aufmaßblatt.</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '">E-Mail</a><button type="button" class="pill" data-act="copyblatt">Code kopieren</button></div></div>' +
-    (PILOT ? '<div class="card share-way"><p class="eyebrow">Für dich · in der Pilotphase kostenlos</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen.</p><div class="pill-row"><button type="button" class="pill" data-act="k-dl">Herunterladen</button></div></div>' : '<div class="card share-way"><p class="eyebrow">Für dich · ' + euro(DATEI_PREIS) + '</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen. Mit Zamma-Konto, einmalig.</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="datei">' + (S.kauf && S.kauf.paid ? 'Herunterladen' : 'Ansehen') + '</button></div></div>') +
+    '<div class="card share-way"><p class="eyebrow">Du hast schon einen Betrieb?</p><h2>Direkt an deinen Fensterbauer</h2><p class="sub" style="color: var(--fg2)">Schick ihm den Code. Er setzt ihn in seinem Klopfan-Bereich ein und hat das komplette Aufmaßblatt.</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '">E-Mail</a><button type="button" class="pill" data-act="copyblatt">Code kopieren</button></div></div>' +
+    (PILOT ? '<div class="card share-way"><p class="eyebrow">Für dich · in der Pilotphase kostenlos</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen.</p><div class="pill-row"><button type="button" class="pill" data-act="k-dl">Herunterladen</button></div></div>' : '<div class="card share-way"><p class="eyebrow">Für dich · ' + euro(DATEI_PREIS) + '</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen. Mit Klopfan-Konto, einmalig.</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="datei">' + (S.kauf && S.kauf.paid ? 'Herunterladen' : 'Ansehen') + '</button></div></div>') +
     '<div class="sec">' + secHead('Dein Aufmaß-Code', null, 'Für Portal und Fensterbauer. Falls Kopieren nicht klappt: Text markieren und kopieren.') + '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea></div>';
   return { html: html, back: ['Zurück', 'anfrage3'], bar: { label: 'Zurück zum Projekt', act: 'go', v: 'home' } };
 };
@@ -1157,13 +1157,13 @@ const FILE_IC = '<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="tr
 function dateiCard() {
   const k = kauf(), n = S.windows.length;
   if (k.paid) return '<div class="card datei-card bought"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Gekauft</p><b>Dein Aufmaßblatt als PDF</b><small>' + n + (n === 1 ? ' Fenster' : ' Fenster') + ' · im Konto ' + esc(k.mail) + '</small></div></div><button type="button" class="btn primary" style="flex: 0 0 auto" data-act="k-dl">Herunterladen</button></div>';
-  return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Für dich</p><b>Dein Aufmaß als Datei</b><small>Alle Maße, die Auswertung der Fotos und deine Wünsche als PDF, für deine Unterlagen oder weitere Angebote. Mit Zamma-Konto, einmalig ' + euro(DATEI_PREIS) + '.</small></div></div><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="go" data-v="datei">Ansehen</button></div>';
+  return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Für dich</p><b>Dein Aufmaß als Datei</b><small>Alle Maße, die Auswertung der Fotos und deine Wünsche als PDF, für deine Unterlagen oder weitere Angebote. Mit Klopfan-Konto, einmalig ' + euro(DATEI_PREIS) + '.</small></div></div><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="go" data-v="datei">Ansehen</button></div>';
 }
 SCREENS.datei = () => {
   const k = kauf(), n = S.windows.length;
   const preview = '<div class="dv"><div class="dv-paper" aria-hidden="true"><p class="dv-h">Aufmaßblatt</p><p class="dv-s">' + n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + esc(lab('gebaeude', S.proj.gebaeude)) + '</p>' + S.windows.slice(0, 3).map((x, i) => '<div class="dv-pos">' + svgIcon(miniWin(x), 30) + '<span><b>Pos. ' + (i + 1) + ' · ' + esc(x.name || 'Fenster') + '</b><i></i><i class="s"></i></span></div>').join('') + '<div class="dv-lines"><i></i><i></i><i class="s"></i><i></i></div></div><span class="dv-lock">' + LOCK + 'Vorschau</span></div>';
   const html = hd('Für dich', 'Dein Aufmaß als Datei.', 'Das komplette Aufmaßblatt als PDF, für deine Unterlagen oder weitere Angebote.') + preview +
-    '<div class="card"><div class="incl">' + [(n === 1 ? 'Dein Fenster mit allen acht Handmaßen' : 'Alle ' + n + ' Positionen mit acht Handmaßen je Fenster'), 'Auswertung der Fotos und deine Wünsche', 'Dauerhaft in deinem Zamma-Konto'].map((t) => '<p>' + CHECK + '<span>' + esc(t) + '</span></p>').join('') + '</div>' +
+    '<div class="card"><div class="incl">' + [(n === 1 ? 'Dein Fenster mit allen acht Handmaßen' : 'Alle ' + n + ' Positionen mit acht Handmaßen je Fenster'), 'Auswertung der Fotos und deine Wünsche', 'Dauerhaft in deinem Klopfan-Konto'].map((t) => '<p>' + CHECK + '<span>' + esc(t) + '</span></p>').join('') + '</div>' +
     '<div class="price-row"><span><b>' + euro(DATEI_PREIS) + '</b><small>einmalig, inkl. MwSt.</small></span>' + '<small class="sub">' + n + ' Fenster, alle Maße und Angaben</small>' + '</div></div>' +
     '<p class="sub" style="padding: 0 6px">' + (S.betrieb ? 'Dein Aufmaß an ' + esc(S.betrieb.name || 'deinen Fensterbauer') + ' bleibt davon unberührt und kostenlos.' : 'Ins Portal stellen und an einen Fensterbauer schicken bleibt kostenlos.') + '</p>';
   return { html: html, back: ['Zurück', S.betrieb ? 'home' : 'teilen'], cls: 'tight', bar: k.paid ? { label: 'Herunterladen', act: 'k-dl' } : { label: k.mail && k.agb ? 'Weiter zur Zahlung' : 'Weiter: Konto anlegen', act: 'go', v: k.mail && k.agb ? 'kasse' : 'konto' } };
@@ -1171,9 +1171,9 @@ SCREENS.datei = () => {
 SCREENS.konto = () => {
   const k = kauf(), e = k.err || {};
   const field = (label, f, type, ph, auto) => '<label class="kf' + (e[f] ? ' bad' : '') + '"><span>' + label + '</span><input type="' + type + '" id="k-' + f + '" data-in="k" data-f="' + f + '" value="' + esc(f === 'pw' ? '' : k[f] || '') + '" placeholder="' + ph + '" autocomplete="' + auto + '">' + (e[f] ? '<small>' + esc(e[f]) + '</small>' : '') + '</label>';
-  const html = hd('Schritt 1 von 2', 'Dein Zamma-Konto.', 'Damit dein Aufmaß bei dir bleibt und du es jederzeit wieder herunterladen kannst.') +
+  const html = hd('Schritt 1 von 2', 'Dein Klopfan-Konto.', 'Damit dein Aufmaß bei dir bleibt und du es jederzeit wieder herunterladen kannst.') +
     '<div class="card kform">' + field('E-Mail', 'mail', 'email', 'name@beispiel.de', 'email') + field('Passwort', 'pw', 'password', 'mindestens 8 Zeichen', 'new-password') +
-    '<label class="kcheck' + (e.agb ? ' bad' : '') + '"><input type="checkbox" data-in="kc" data-f="agb"' + (k.agb ? ' checked' : '') + '><span>Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung von Zamma.</span></label>' + (e.agb ? '<small class="kerr">' + esc(e.agb) + '</small>' : '') + '</div>' +
+    '<label class="kcheck' + (e.agb ? ' bad' : '') + '"><input type="checkbox" data-in="kc" data-f="agb"' + (k.agb ? ' checked' : '') + '><span>Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung von Klopfan.</span></label>' + (e.agb ? '<small class="kerr">' + esc(e.agb) + '</small>' : '') + '</div>' +
     '<p class="sub" style="padding: 0 6px">Kein Newsletter, keine Weitergabe. ' + (S.betrieb ? esc(S.betrieb.name || 'Dein Fensterbauer') + ' sieht dein Konto nicht.' : '') + '</p>';
   return { html: html, back: ['Zurück', 'datei'], bar: { label: 'Weiter zur Zahlung', act: 'k-next' } };
 };
@@ -1193,16 +1193,16 @@ SCREENS.gekauft = () => {
   return { html: html, bar: { label: 'Fertig', act: 'go', v: 'home' } };
 };
 /* ---------- Die Datei: PDF mit jsPDF, sonst eine HTML-Datei ---------- */
-const fileBase = () => 'Aufmass-' + (slug(S.proj.name || (S.betrieb && S.betrieb.kunde) || '') || 'Zamma');
+const fileBase = () => 'Aufmass-' + (slug(S.proj.name || (S.betrieb && S.betrieb.kunde) || '') || 'Klopfan');
 function blattPDF() {
   const J = window.jspdf && window.jspdf.jsPDF; if (!J) return null;
   const doc = new J({ unit: 'mm', format: 'a4' }), W = 210, M = 16, pr = S.proj;
   let y = 18, page = 1;
   const t = (s) => String(s == null ? '' : s).replace(/ /g, ' ');
-  const foot = () => { doc.setFontSize(8); doc.setTextColor(120); doc.text('Erfasst mit Zamma. Vor der Fertigung Feinaufmaß vor Ort.', M, 289); doc.text('Seite ' + page, W - M, 289, { align: 'right' }); doc.setTextColor(20); };
+  const foot = () => { doc.setFontSize(8); doc.setTextColor(120); doc.text('Erfasst mit Klopfan. Vor der Fertigung Feinaufmaß vor Ort.', M, 289); doc.text('Seite ' + page, W - M, 289, { align: 'right' }); doc.setTextColor(20); };
   const need = (h) => { if (y + h > 280) { foot(); doc.addPage(); page++; y = 18; } };
   doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text('Aufmaßblatt', M, y);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text(t(new Date().toLocaleDateString('de-DE')), W - M, y - 5, { align: 'right' }); doc.text(t(S.betrieb ? 'Für ' + (S.betrieb.name || 'Fensterbauer') : 'Zamma'), W - M, y, { align: 'right' }); doc.setTextColor(20);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text(t(new Date().toLocaleDateString('de-DE')), W - M, y - 5, { align: 'right' }); doc.text(t(S.betrieb ? 'Für ' + (S.betrieb.name || 'Fensterbauer') : 'Klopfan'), W - M, y, { align: 'right' }); doc.setTextColor(20);
   y += 8; doc.setFontSize(10.5);
   const nP = S.windows.length, nE = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0);
   const head = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Fenster', nP + (nP === 1 ? ' Position, ' : ' Positionen, ') + nE + (nE === 1 ? ' Element' : ' Elemente')]];
@@ -1229,7 +1229,7 @@ function blattFile() {
   const css = 'body{font:14px/1.45 -apple-system,system-ui,sans-serif;color:#1d1d1f;margin:32px auto;max-width:760px;padding:0 20px}h1{font-size:28px;margin:0 0 4px}.m{color:#6e6e73}.p{border-top:2px solid #1d1d1f;margin-top:20px;padding-top:12px}.p h2{font-size:17px;margin:0 0 6px}.g{display:grid;grid-template-columns:150px 1fr;gap:4px 12px}.g span:nth-child(odd){color:#6e6e73}h3{font-size:14px;margin:14px 0 6px}@media print{body{margin:0}}';
   const pr = S.proj, g = (rs) => '<div class="g">' + rs.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div>', rowsH = (x) => g(specRows(x)) + (x.ki && x.ki.rows && x.ki.rows.length ? '<h3>Bestand laut Fotos</h3>' + g(x.ki.rows.map((r) => ({ k: r[0], v: r[1] }))) : '');
   return '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Aufmaßblatt</title><style>' + css + '</style></head><body><h1>Aufmaßblatt</h1><p class="m">' + esc([lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : ''), lab('zeit', pr.zeit), new Date().toLocaleDateString('de-DE')].join(' · ')) + '</p>' +
-    S.windows.map((x, i) => { const d = derive(x); return '<div class="p"><h2>Pos. ' + (i + 1) + ' · ' + esc(x.name || 'Fenster') + '</h2><p class="m">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p>' + rowsH(x) + '</div>'; }).join('') + '<p class="m" style="margin-top:24px">Erfasst mit Zamma. Vor der Fertigung Feinaufmaß vor Ort.</p></body></html>';
+    S.windows.map((x, i) => { const d = derive(x); return '<div class="p"><h2>Pos. ' + (i + 1) + ' · ' + esc(x.name || 'Fenster') + '</h2><p class="m">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p>' + rowsH(x) + '</div>'; }).join('') + '<p class="m" style="margin-top:24px">Erfasst mit Klopfan. Vor der Fertigung Feinaufmaß vor Ort.</p></body></html>';
 }
 async function saveDatei() {
   if (!kauf().paid && !PILOT) return go('datei');
@@ -1417,7 +1417,7 @@ SCREENS.admin = () => {
     (a.links.length ? a.links.map((l) => '<div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--line)"><div style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><b>' + esc(l.name || 'Kunde ' + l.code.toUpperCase()) + '</b><small style="color: var(--muted)">' + esc(l.when) + '</small></div><textarea class="copybox" readonly rows="2" id="link-' + l.code + '" aria-label="Kundenlink">' + esc(kundenlink(l)) + '</textarea><div class="pill-row"><button type="button" class="pill" data-act="admin-copy" data-v="' + l.code + '">Link kopieren</button><button type="button" class="pill" data-act="admin-test" data-v="' + l.code + '">Als Kunde öffnen</button></div></div>').join('') : '<p class="sub">Noch kein Link erstellt.</p>') +
     '<div class="rows"><div class="trow"><span>Name des Kunden (optional)</span><input type="text" id="a-newname" data-in="a" data-f="newname" value="' + esc(a.newname || '') + '" placeholder="z. B. Familie Weber"></div></div><button type="button" class="btn primary" style="flex: 0 0 auto" data-act="admin-link">Neuen Kundenlink erstellen</button></div></div>';
   html += '<div class="sec">' + secHead('Eingang', null, inbox.length + ' Aufmaße') + '<div class="rows">' + inbox.map((it, i) => '<button type="button" class="inbox-item" data-act="admin-open" data-i="' + i + '"><span class="t"><b>' + esc(it.kunde) + '</b><small>' + esc(it.ort + ' · ' + it.windows.length + (it.windows.length === 1 ? ' Fenster' : ' Fenster') + ' · ' + it.when) + (it.demo ? ' · Beispiel' : '') + '</small></span><span class="status ' + it.status + '">' + ({ neu: 'Neu', offen: 'Angebot offen', fertig: 'Angebot raus' }[it.status] || it.status) + '</span>' + CHEV + '</button>').join('') + '</div>' +
-    '<div class="card"><p class="eyebrow">Aufmaß-Code einfügen</p><p class="sub">Hat dir ein Kunde seinen Code geschickt, füge ihn hier ein.</p><textarea class="copybox" id="a-code" rows="3" data-in="a" data-f="code" placeholder="ZF1.…" aria-label="Aufmaß-Code">' + esc(a.code || '') + '</textarea><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="admin-import">Aufmaß einlesen</button></div></div>';
+    '<div class="card"><p class="eyebrow">Aufmaß-Code einfügen</p><p class="sub">Hat dir ein Kunde seinen Code geschickt, füge ihn hier ein.</p><textarea class="copybox" id="a-code" rows="3" data-in="a" data-f="code" placeholder="AM1.…" aria-label="Aufmaß-Code">' + esc(a.code || '') + '</textarea><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="admin-import">Aufmaß einlesen</button></div></div>';
   html += noteBox('Im Prototyp laufen Links und Eingang auf diesem Gerät. In der fertigen App landen Aufmaße automatisch in deinem Konto, mit Fotos.', null, '');
   return { html: html, back: ['Start', 'home'], bar: null };
 };
@@ -1632,7 +1632,7 @@ function copyText(text, id, okMsg) {
 }
 async function downloadBlatt() {
   if (!DL) return;
-  try { await DL.save({ filename: 'Aufmass-' + (slug(S.proj.name) || 'Zamma') + '.md', data: blattMarkdown(S.windows, S.proj) }); toast('Gespeichert'); }
+  try { await DL.save({ filename: 'Aufmass-' + (slug(S.proj.name) || 'Klopfan') + '.md', data: blattMarkdown(S.windows, S.proj) }); toast('Gespeichert'); }
   catch (e) { if (e && e.code !== 'declined') toast('Speichern hat nicht geklappt'); }
 }
 function onInput(el, ev) {
@@ -1681,15 +1681,15 @@ function boot() {
   AI.init().then((ok) => { S.aiOk = ok; if (S.screen === 'fotos') render(); });
   DLP = (async () => { try { DL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { DL = null; } return DL; })();
 }
-/* ---------- Zamma im Netz: Pilotphase ohne Server ----------
+/* ---------- Klopfan im Netz: Pilotphase ohne Server ----------
    Solange kein Backend läuft, zeigt die App nur, was wirklich passiert:
    „Gesendet“ erst mit dem Code, keine Scheinzahlung, die Datei ist kostenlos.
-   Schalter: window.ZAMMA.pilot in /config.js */
-const PILOT = !!(window.ZAMMA && window.ZAMMA.pilot);
-const SPRUCH = (window.ZAMMA && window.ZAMMA.spruch) || 'Hier kommen wa zamm.';
+   Schalter: window.KONFIG.pilot in /config.js */
+const PILOT = !!(window.KONFIG && window.KONFIG.pilot);
+const LOGO = (px) => (window.Logo ? window.Logo.svg(px) : '');
 function rechtLinks() {
-  const C = window.ZAMMA || {};
-  return '<p class="spruch-fuss"><b>Zamma</b> · ' + esc(SPRUCH) + '</p><div class="foot-links recht"><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a></div>';
+  const C = window.KONFIG || {};
+  return '<div class="foot-links recht"><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a></div>';
 }
 const SEND_IC = '<svg viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--accent-soft)"></circle><path d="M17 31l29-12-9 28-7-10z" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linejoin="round"></path><path d="M30 37l16-18" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round"></path></svg>';
 /* Versand im Kundenlink: der Code geht per WhatsApp oder E-Mail an den Betrieb */
@@ -1698,14 +1698,14 @@ SCREENS.gesendet = () => {
   if (!PILOT) return gesendetOrig();
   const bn = S.betrieb && S.betrieb.name ? S.betrieb.name : '', dat = bn || 'deinem Fensterbauer', nom = bn || 'dein Fensterbauer';
   const n = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), code = packProject(S.windows, S.proj, S.betrieb);
-  const text = 'Hallo' + (bn ? ' ' + bn : '') + ', hier ist mein Fenster-Aufmaß aus Zamma (' + n + ' Fenster). Bitte im Zamma-Portal unter „Code vom Kunden einfügen“ einsetzen:\n' + code;
+  const text = 'Hallo' + (bn ? ' ' + bn : '') + ', hier ist mein Fenster-Aufmaß aus Klopfan (' + n + ' Fenster). Bitte im Klopfan-Portal unter „Code vom Kunden einfügen“ einsetzen:\n' + code;
   const wa = 'https://wa.me/?text=' + encodeURIComponent(text), mail = 'mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(text);
   const html = '<div class="center" style="padding-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px">' + SEND_IC +
     '<h1 style="margin: 4px 0 0; font-family: var(--display); font-size: 40px; line-height: 1.02; font-weight: 900; letter-spacing: -.035em">Jetzt abschicken.</h1>' +
     '<p style="margin: 0; font-size: 17px; line-height: 1.5; color: var(--fg2)">Dein Aufmaß ist fertig. Schick ' + esc(dat) + ' jetzt den Aufmaß-Code, am einfachsten per WhatsApp. Erst damit hat ' + esc(nom) + ' deine Maße und Wünsche.</p></div>' +
     '<div class="card send-card" style="gap: 12px"><p class="eyebrow">Senden</p><div class="pill-row send-row"><a class="btn primary" href="' + wa + '" target="_blank" rel="noopener">Per WhatsApp senden</a><a class="btn ghost" href="' + mail + '">Per E-Mail senden</a></div>' +
     '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea><div class="pill-row"><button type="button" class="pill" data-act="copyblatt">Code kopieren</button></div>' +
-    '<p class="sub">Pilotphase: Zamma überträgt dein Aufmaß noch nicht von selbst. Der Code enthält alle Maße, deine Wünsche und die Auswertung der Fotos, die Fotos selbst nicht.</p></div>' +
+    '<p class="sub">Pilotphase: Klopfan überträgt dein Aufmaß noch nicht von selbst. Der Code enthält alle Maße, deine Wünsche und die Auswertung der Fotos, die Fotos selbst nicht.</p></div>' +
     '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(bn || 'deinem Fensterbauer') + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
     dateiCard();
   return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home' } };
@@ -1721,7 +1721,7 @@ const dateiScreenOrig = SCREENS.datei;
 SCREENS.datei = () => {
   const v = dateiScreenOrig();
   if (!PILOT) return v;
-  v.html = v.html.replace('Dauerhaft in deinem Zamma-Konto', 'Sofort als PDF auf deinem Gerät')
+  v.html = v.html.replace('Dauerhaft in deinem Klopfan-Konto', 'Sofort als PDF auf deinem Gerät')
     .replace('<b>' + euro(DATEI_PREIS) + '</b><small>einmalig, inkl. MwSt.</small>', '<b>0,00 €</b><small>in der Pilotphase kostenlos, später ' + euro(DATEI_PREIS) + '</small>');
   v.bar = { label: 'Kostenlos herunterladen', act: 'k-dl' };
   return v;
