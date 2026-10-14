@@ -706,3 +706,5 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 @media (prefers-reduced-motion: reduce) { .pstep i.now, .pini .live, .pcard .neu { animation: none !important } .winstack i { transition: none } }
 .rt-m { display: none; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap } .rt-m b { font-size: 14.5px; font-weight: 800 }
 @media (max-width: 520px) { .rt-m { display: flex } }
+/* Nachbesserung */
+.sharecard.nbcard { box-shadow: inset 0 0 0 1.5px var(--warn), var(--shadow) } .sharecard.nbcard > .row .eyebrow { color: var(--warn) } .nbhint { margin: -4px 0 2px; line-height: 1.5 }

@@ -20,6 +20,7 @@ Fenster-Aufmaß, geführt. Hauseigentümer messen ihre Fenster selbst, Schritt f
 | `functions/api/ki.js` | KI-Auswertung der Fotos (Cloudflare Pages Function), Schlüssel als Secret `ANTHROPIC_API_KEY` |
 | `scripts/` | lokaler Testserver, Browser-Prüfung, Umbenennen |
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung |
+| `docs/ABRECHNUNG.md` | Abrechnungsregeln: was gezählt wird, wo die Zahlung einsetzt, Nachbesserung, Schranken, was der Server später erzwingt |
 
 ## Kurz: online stellen
 
