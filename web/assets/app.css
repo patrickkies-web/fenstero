@@ -247,7 +247,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes dimdraw { from { transform: scaleX(0) } to { transform: none } }
 @keyframes dimdraw-v { from { transform: scaleY(0) } to { transform: none } }
 @keyframes dimlab { from { opacity: 0 } to { opacity: 1 } }
-.w3d-dim-lab { position: absolute; padding: 3px 8px; border-radius: var(--r1); color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .01em; line-height: 1.2; white-space: nowrap; box-shadow: 0 1px 3px rgba(0, 0, 0, .28), 0 0 0 1.5px rgba(255, 255, 255, .55); transform-style: preserve-3d; font-variant-numeric: tabular-nums; transition: padding .25s; background: var(--dc) }
+.w3d-dim-lab { position: absolute; padding: 3px 8px; border-radius: var(--r1); color: var(--on-accent); font-size: 13px; font-weight: 800; letter-spacing: .01em; line-height: 1.2; white-space: nowrap; box-shadow: 0 1px 3px rgba(0, 0, 0, .28), 0 0 0 1.5px rgba(255, 255, 255, .55); transform-style: preserve-3d; font-variant-numeric: tabular-nums; transition: padding .25s; background: var(--dc) }
 .w3d-dim.v .w3d-dim-lab { left: 0; top: 50%; transform: translate(-50%, -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
 .w3d-dim.h .w3d-dim-lab { left: 50%; top: 0; transform: translate(-50%, -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
 .w3d-dim.is-active .w3d-dim-lab { padding: 4px 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, .3), 0 0 0 2px rgba(255, 255, 255, .7) }
