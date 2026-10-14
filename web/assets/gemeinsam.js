@@ -1,11 +1,12 @@
-/* Klopfan · gemeinsame Bausteine für App und Portal
+/* Fensterino · gemeinsame Bausteine für App und Portal
    - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung
    - Pilot-Hinweis im Portal
-   - Logo (weiße Faust auf Schwarz, die anklopft) mit Klopf-Bewegung
+   - Logo (weißes Fenster auf Schwarz, der Flügel kippt kurz)
+   - Feier (Konfetti, Puls) und Scroll-Reveal
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
-  var C = window.KONFIG = Object.assign({ marke: 'Klopfan', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/' }, window.KONFIG || {});
+  var C = window.KONFIG = Object.assign({ marke: 'Fensterino', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/' }, window.KONFIG || {});
   var mem = {};
   function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return mem[k] || null; } }
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
@@ -37,7 +38,7 @@
       var bg = el('div', 'fx-bg');
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
-        '<p>Die KI erkennt auf deinen Fotos Rahmen, Glas, Material und mehr und trägt es fürs Aufmaß ein. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. Klopfan speichert deine Fotos nicht.</p>' +
+        '<p>Die KI erkennt auf deinen Fotos Rahmen, Glas, Material und mehr und trägt es fürs Aufmaß ein. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. Fensterino speichert deine Fotos nicht.</p>' +
         '<p class="fx-klein">Ohne KI geht es auch, dann fehlen nur die Zusatzinfos aus den Fotos. Mehr dazu in der <a href="' + C.datenschutz + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>' +
         '<div class="fx-knoepfe"><button type="button" class="fx-ja">Ja, auswerten</button><button type="button" class="fx-nein">Ohne KI weiter</button></div>');
       box.setAttribute('role', 'dialog');
@@ -102,31 +103,78 @@
   };
   window.FotoKI = { verbinden: function () { return bereit().then(function (ok) { return ok ? sample : null; }); } };
 
-  /* ---------- Logo: die Faust klopft an ----------
-     Logo.svg(px) liefert das Zeichen. Beim Laden klopft die Faust einmal (zweimal tock), die Kachel zittert,
+  /* ---------- Logo: ein Fenster, dessen Flügel kurz kippt ----------
+     Logo.svg(px) liefert das Zeichen. Beim Laden kippt der rechte untere Flügel einmal auf und wieder zu,
      danach bei Berührung oder Mauszeiger erneut. Wer weniger Bewegung eingestellt hat, sieht es ruhig. */
-  var LOGO_INNEN = '<rect class="kl-kachel" width="64" height="64" rx="16" fill="#000"/><clipPath id="kl-clip"><rect width="64" height="64" rx="16"/></clipPath><g clip-path="url(#kl-clip)"><g class="kl-hand"><path fill="#fff" d="M23 64V52C23 49 19.5 46.5 16 43.5C10.5 39 9 32 12 27C14 23.5 19 23.5 20.5 26.5C22.5 21 29 19 32 22.5C34 18.5 41 18 43 22C46 18.5 52 19.5 53 24C57.5 22 61.5 26.5 60 31C60.5 36 58.5 41 55.5 44.5C53 48 49 50 45 52V64Z"/><path d="M15 31c6 1 10 6 10 13" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round"/></g></g><path class="kl-welle" d="M43 5l2.5 8.5M55 5l-3 8M61 15l-7 3.5M62 26l-7-1" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x=".75" y=".75" width="62.5" height="62.5" rx="15.4" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.5"/>';
+  var LOGO_INNEN = '<rect class="fi-kachel" width="64" height="64" rx="16" fill="#000"/><rect x="13" y="8" width="38" height="46" rx="3" fill="#fff"/><rect x="17.5" y="12.5" width="13" height="16" rx="1.2" fill="#000"/><rect x="33.5" y="12.5" width="13" height="16" rx="1.2" fill="#000"/><rect x="17.5" y="32" width="13" height="17.5" rx="1.2" fill="#000"/><rect x="33.5" y="32" width="13" height="17.5" rx="1.2" fill="#000"/><g class="fi-fluegel"><rect x="34.5" y="33" width="11" height="15.5" rx="1" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M36 35.5v3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></g><rect x="9" y="55" width="46" height="3.5" rx="1.75" fill="#fff"/><rect x=".75" y=".75" width="62.5" height="62.5" rx="15.4" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.5"/>';
   window.Logo = {
-    svg: function (px) { var s = String(px || 32); return '<svg class="kl-logo" viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true" focusable="false">' + LOGO_INNEN + '</svg>'; },
-    klopfen: function (ziel) {
-      var liste = ziel && ziel.classList && ziel.classList.contains('kl-logo') ? [ziel] : (ziel || document).querySelectorAll('.kl-logo');
+    svg: function (px) { var s = String(px || 32); return '<svg class="fi-logo" viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true" focusable="false">' + LOGO_INNEN + '</svg>'; },
+    bewegen: function (ziel) {
+      var liste = ziel && ziel.classList && ziel.classList.contains('fi-logo') ? [ziel] : (ziel || document).querySelectorAll('.fi-logo');
       Array.prototype.forEach.call(liste, function (l) {
-        if (l.classList.contains('klopft')) return;
-        l.classList.add('klopft');
-        setTimeout(function () { l.classList.remove('klopft'); }, 1500);
+        if (l.classList.contains('kippt')) return;
+        l.classList.add('kippt');
+        setTimeout(function () { l.classList.remove('kippt'); }, 1900);
       });
     }
   };
-  function ersterKlopfer() { setTimeout(function () { window.Logo.klopfen(document.querySelector('.hdr, .top, .side, .kopf') || document); }, 700); }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ersterKlopfer); else ersterKlopfer();
-  function klopfBeiBeruehrung(e) { var l = e.target && e.target.closest ? e.target.closest('.kl-logo') : null; if (l) window.Logo.klopfen(l); }
-  document.addEventListener('pointerdown', klopfBeiBeruehrung, true);
-  document.addEventListener('mouseover', klopfBeiBeruehrung, true);
+  window.Logo.klopfen = window.Logo.bewegen;
+  function ersteBewegung() { setTimeout(function () { window.Logo.bewegen(document.querySelector('.hdr, .top, .side, .kopf') || document); }, 700); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ersteBewegung); else ersteBewegung();
+  function beiBeruehrung(e) { var l = e.target && e.target.closest ? e.target.closest('.fi-logo') : null; if (l) window.Logo.bewegen(l); }
+  document.addEventListener('pointerdown', beiBeruehrung, true);
+  document.addEventListener('mouseover', beiBeruehrung, true);
+
+  /* ---------- Feier: kleine Belohnungen nach erledigten Schritten ----------
+     Feier.konfetti(el)  bunte Schnipsel aus einem Element heraus (oder aus der Bildmitte)
+     Feier.puls(el)      ein kurzer Puls um ein Element
+     Ruhig, wenn das Gerät „weniger Bewegung“ eingestellt hat. */
+  function ruhig() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  var FARBEN = ['#0071e3', '#d4502b', '#1f7a3d', '#f5b942', '#5e5ce6', '#ff7a59'];
+  window.Feier = {
+    konfetti: function (ziel, o) {
+      o = o || {};
+      if (ruhig()) return;
+      var r = ziel && ziel.getBoundingClientRect ? ziel.getBoundingClientRect() : null;
+      var x = r ? r.left + r.width / 2 : window.innerWidth / 2, y = r ? r.top + r.height / 2 : window.innerHeight * 0.35;
+      if (r && (r.width === 0 || r.bottom < 0 || r.top > window.innerHeight)) { x = window.innerWidth / 2; y = window.innerHeight * 0.35; }
+      var n = o.n || 28, wrap = el('div', 'fx-konfetti');
+      wrap.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < n; i++) {
+        var p = document.createElement('i');
+        var winkel = -Math.PI / 2 + (Math.random() - 0.5) * (o.breit ? 2.6 : 1.9), kraft = 60 + Math.random() * (o.kraft || 120);
+        var dx = Math.cos(winkel) * kraft, dyu = Math.sin(winkel) * kraft, dyd = dyu + 90 + Math.random() * 110;
+        var w = 5 + Math.random() * 6, h = 4 + Math.random() * 7, rund = Math.random() < 0.35;
+        p.style.cssText = 'left:' + x.toFixed(0) + 'px;top:' + y.toFixed(0) + 'px;--dx:' + dx.toFixed(0) + 'px;--dyu:' + dyu.toFixed(0) + 'px;--dyd:' + dyd.toFixed(0) + 'px;--rot:' + (Math.random() * 720 - 360).toFixed(0) + 'deg;--dur:' + (900 + Math.random() * 500).toFixed(0) + 'ms;--delay:' + (Math.random() * 120).toFixed(0) + 'ms;background:' + FARBEN[i % FARBEN.length] + ';width:' + w.toFixed(1) + 'px;height:' + (rund ? w : h).toFixed(1) + 'px;border-radius:' + (rund ? '50%' : '2px');
+        wrap.appendChild(p);
+      }
+      document.body.appendChild(wrap);
+      setTimeout(function () { wrap.remove(); }, 1700);
+    },
+    puls: function (ziel) {
+      if (!ziel || ruhig()) return;
+      ziel.classList.remove('fx-puls'); void ziel.offsetWidth; ziel.classList.add('fx-puls');
+      setTimeout(function () { ziel.classList.remove('fx-puls'); }, 1000);
+    }
+  };
+
+  /* ---------- Scroll-Reveal: Blöcke erscheinen, wenn sie ins Bild kommen ----------
+     Reveal.auf(elemente, wurzel): setzt .rev und beobachtet; ohne Beobachter oder bei „weniger Bewegung“ sofort sichtbar. */
+  var io = null;
+  window.Reveal = {
+    auf: function (liste, wurzel) {
+      var arr = Array.prototype.slice.call(liste || []);
+      if (!arr.length) return;
+      if (ruhig() || !('IntersectionObserver' in window)) { arr.forEach(function (e) { e.classList.add('rev', 'in'); }); return; }
+      if (!io || (wurzel && io.root !== wurzel)) { if (io) io.disconnect(); io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { root: wurzel || null, rootMargin: '0px 0px 40px 0px', threshold: 0.05 }); }
+      arr.forEach(function (e, i) { e.classList.add('rev'); e.style.setProperty('--rv', String(Math.min(i, 8))); io.observe(e); });
+    }
+  };
 
   /* ---------- Pilot-Hinweis im Portal ---------- */
   function pilotHinweis() {
     if (!C.pilot || document.body.getAttribute('data-seite') !== 'portal' || get('aufmass.pilot.zu') === '1') return;
-    var bar = el('div', 'fx-pilot', '<p><b>Pilotphase:</b> Das Portal zeigt Beispieldaten, nichts wird berechnet, alles bleibt in Ihrem Browser. Echt funktionieren schon Kundenlinks, Code-Eingang und PDF-Export.</p>' +
+    var bar = el('div', 'fx-pilot', '<p><b>Pilotphase:</b> Der Bereich für Betriebe zeigt Beispieldaten, nichts wird berechnet, alles bleibt in Ihrem Browser. Echt funktionieren schon Aufmaß-Links, Code-Eingang, Nachbesserung und PDF-Export.</p>' +
       '<button type="button" aria-label="Hinweis schließen"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>');
     bar.setAttribute('role', 'note');
     bar.querySelector('button').addEventListener('click', function () { put('aufmass.pilot.zu', '1'); bar.remove(); });

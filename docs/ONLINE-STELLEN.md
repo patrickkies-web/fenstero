@@ -1,8 +1,8 @@
-# Klopfan online stellen
+# Fensterino online stellen
 
-**Klopfan.** Das Logo ist eine weiße Faust auf Schwarz, die anklopft, so wie Betriebe im Portal bei Projekten anklopfen. Klopfan bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
+**Fensterino.** Die Aufmaß-App für Fenster: kostenlos für Hauseigentümer, bezahlt von Fensterbauern je Projekt. Das Logo ist ein weißes Fenster auf Schwarz, dessen Flügel kurz kippt. Fensterino bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
 
-Diese Anleitung bringt die Klopfan-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…pages.dev`), später unter deiner eigenen Domain.
+Diese Anleitung bringt die Fensterino-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…workers.dev`), dann unter deiner eigenen Domain (`fensterino.com`).
 
 ## Zwei Stufen
 
@@ -12,21 +12,21 @@ Diese Anleitung bringt die Klopfan-Website ins Netz: erst unter einer kostenlose
 |---|---|
 | App: Fotos, vier Maße, Ränder, 3-D-Modell, Wünsche, Glossar | funktioniert vollständig |
 | Kundenlink vom Betrieb zur App | funktioniert |
-| Aufmaß zum Betrieb | Kunde schickt einen Aufmaß-Code per WhatsApp oder E-Mail, der Betrieb fügt ihn im Portal ein |
+| Aufmaß zum Betrieb | Kunde schickt das Aufmaßblatt als PDF oder den Aufmaß-Code, der Betrieb fügt den Code in seinem Bereich ein |
 | PDF fürs Aufmaß (Kunde und Betrieb) | funktioniert, für Kunden in der Pilotphase kostenlos |
 | KI-Auswertung der Fotos | funktioniert, sobald du einen Anthropic-Schlüssel hinterlegst (Schritt 5), sonst ohne KI |
-| Portal: Marktplatz, Anklopfen, Bewertungen, Abrechnung | Vorschau mit Beispieldaten, nichts wird berechnet |
+| Bereich für Betriebe: Projekte, Einladungslisten, Nachbesserung, Abrechnung | funktioniert im Browser, Abrechnung als Vorschau, nichts wird berechnet |
 | Speicherort | nur im Browser des jeweiligen Geräts |
 
-**Stufe 2, danach: echtes Backend.** Konten, automatische Übertragung samt Fotos, echte Anfragen im Marktplatz, Abrechnung. Siehe Abschnitt „Stufe 2“ unten.
+**Stufe 2, danach: echtes Backend.** Konten, automatische Übertragung samt Fotos, Abrechnung. Siehe Abschnitt „Stufe 2“ unten.
 
 ## Was du brauchst
 
 | | Kosten |
 |---|---|
-| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `klopfan` ist möglich, siehe unten) |
-| Cloudflare-Konto (Pages) | kostenlos |
-| Eigene Domain | später, beim Anbieter deiner Wahl |
+| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `fensterino` ist möglich, siehe unten) |
+| Cloudflare-Konto (Workers) | kostenlos |
+| Eigene Domain | `fensterino.com`, liegt schon bei Cloudflare |
 | Anthropic-API-Schlüssel für die KI | optional, nach Verbrauch; Ausgabenlimit setzen |
 
 ---
@@ -35,37 +35,38 @@ Diese Anleitung bringt die Klopfan-Website ins Netz: erst unter einer kostenlose
 
 [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up) öffnen, mit E-Mail und Passwort registrieren und die E-Mail bestätigen. Der kostenlose Tarif reicht.
 
-## Schritt 2: Pages-Projekt mit GitHub verbinden
+## Schritt 2: Worker mit GitHub verbinden
 
-1. Im Cloudflare-Dashboard links **Workers & Pages** öffnen, dann **Erstellen** (Create).
-2. Den Bereich **Pages** wählen und **Mit Git verbinden** (Connect to Git). Falls Cloudflare zuerst nur „Workers“ anbietet: unten auf den Hinweis zu **Pages** klicken.
-3. GitHub verbinden und Cloudflare den Zugriff auf das Repo **fenstero** erlauben.
-4. Repo `patrickkies-web/fenstero` auswählen und so einstellen:
+Cloudflare legt neue Projekte als **Worker** an. Das Repo bringt dafür alles mit: `wrangler.jsonc` sagt Cloudflare, dass die Website im Ordner `web/` liegt, und `worker.js` beantwortet `/api/ki` (KI-Auswertung der Fotos).
+
+1. Im Cloudflare-Dashboard **Workers & Pages → Erstellen (Create) → Repository importieren (Import a repository)**, GitHub verbinden und das Repo `patrickkies-web/fenstero` wählen.
+2. So einstellen (bei einem bestehenden Worker unter **Einstellungen → Build** prüfen):
 
    | Feld | Wert |
    |---|---|
-   | Projektname | `klopfan` (ergibt `klopfan.pages.dev`, falls frei) |
-   | Production branch | `main` |
-   | Framework preset | `None` |
-   | Build command | leer lassen |
-   | Build output directory | `web` |
+   | Projektname | `fenstero`, genau wie `"name"` in `wrangler.jsonc` |
+   | Build-Befehl (Build command) | leer |
+   | Bereitstellungsbefehl (Deploy command) | `npx wrangler deploy` |
+   | Befehl für andere Branches (Non-production branch deploy command) | `npx wrangler versions upload` |
+   | Pfad (Path, unter „Erweitert“) | `/`, also das ganze Repo, **nicht** `web` |
+   | Produktions-Branch | `main` |
 
-5. **Speichern und bereitstellen** (Save and Deploy). Nach etwa einer Minute ist die Seite unter `https://klopfan.pages.dev` erreichbar (oder unter dem Namen, den Cloudflare anzeigt).
+3. **Erstellen und bereitstellen.** Nach etwa einer Minute ist die Seite unter `https://fenstero.<dein-konto>.workers.dev` erreichbar; die genaue Adresse steht oben im Worker.
+
+Ab jetzt gilt: Jede Änderung in `main` geht automatisch online. Pull Requests bekommen eine Vorschau; ob der Build geklappt hat, zeigt Cloudflare direkt im Pull Request auf GitHub („Workers Builds: fenstero“).
 
 Die Menünamen bei Cloudflare ändern sich ab und zu; die Werte in der Tabelle bleiben gleich.
 
-Ab jetzt gilt: Jede Änderung im Branch `main` geht automatisch online. Andere Branches bekommen eine eigene Vorschau-Adresse.
-
-> Es gibt auch „Direct Upload“ per Drag-and-drop. Davon rate ich ab: Die KI-Funktion läuft dort nicht, jedes Update muss von Hand hochgeladen werden, und ein solches Projekt lässt sich später nicht auf GitHub umstellen.
+> Ein Pages-Projekt geht weiterhin: **Workers & Pages → Erstellen → Pages → Mit Git verbinden**, Framework `None`, Build-Befehl leer, Ausgabeverzeichnis `web`. Pages nutzt `functions/api/ki.js` direkt und ignoriert `wrangler.jsonc`. Beides gleichzeitig mit derselben Domain geht nicht. Von „Direct Upload“ per Drag-and-drop rate ich ab: Die KI-Funktion läuft dort nicht, und jedes Update muss von Hand hochgeladen werden.
 
 ## Schritt 3: Testen
 
-- `https://…pages.dev/` zeigt das Portal mit dem Pilot-Hinweis oben.
-- `https://…pages.dev/app/` zeigt die App.
-- Kompletter Weg: Im Portal **Demo ansehen** wählen (Fensterbau Brandt), ein Projekt öffnen, den Kundenlink kopieren und dir selbst per WhatsApp schicken. Auf dem Handy öffnen, ein Fenster messen (oder „Beispielfotos nutzen“), absenden, den Aufmaß-Code an dich zurückschicken. Im Portal **Code vom Kunden einfügen**: Das Aufmaß erscheint beim Projekt.
+- `https://fensterino.com/` (oder die `…workers.dev`-Adresse) zeigt die Startseite mit dem Pilot-Hinweis oben.
+- `https://fensterino.com/app/` zeigt die App.
+- Kompletter Weg: Auf der Startseite **Demo ansehen** wählen (Fensterbau Brandt), ein Projekt öffnen, den Kundenlink kopieren und dir selbst per WhatsApp schicken. Auf dem Handy öffnen, ein Fenster messen (oder „Beispielfotos nutzen“), absenden, den Aufmaß-Code an dich zurückschicken. Im Portal **Code vom Kunden einfügen**: Das Aufmaß erscheint beim Projekt.
 - `…/impressum/` und `…/datenschutz/` laden.
 
-**Wichtig im Pilot:** Das Portal speichert alles im Browser des Geräts. Kundenlinks anlegen und Codes einfügen deshalb immer im selben Browser auf demselben Gerät, zum Beispiel am Büro-PC.
+**Wichtig im Pilot:** Der Bereich für Betriebe speichert alles im Browser des Geräts. Kundenlinks anlegen und Codes einfügen deshalb immer im selben Browser auf demselben Gerät, zum Beispiel am Büro-PC.
 
 ## Schritt 4: Impressum und Datenschutz ausfüllen
 
@@ -80,10 +81,9 @@ Beide Texte sind Entwürfe für die Pilotphase. Lass sie vor dem öffentlichen S
 ## Schritt 5: KI-Fotoauswertung einschalten (optional)
 
 1. In der [Anthropic Console](https://console.anthropic.com) anmelden, unter **Billing** ein Zahlungsmittel oder Guthaben hinterlegen und unter **Limits** ein monatliches Ausgabenlimit setzen.
-2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `klopfan-pages`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
-3. Cloudflare: **Workers & Pages → klopfan → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets)**, Umgebung **Production**, **Hinzufügen**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, speichern.
-4. Neu bereitstellen, denn Secrets wirken erst ab dem nächsten Deployment: **Deployments**, beim letzten Eintrag **Erneut versuchen** (Retry deployment).
-5. Prüfen: `https://…pages.dev/api/ki` zeigt `{"bereit":true}`.
+2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `fensterino-pages`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
+3. Cloudflare: **Workers & Pages → fenstero → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets) → Hinzufügen (Add)**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, **Bereitstellen** (Deploy). Secrets bleiben bei allen weiteren Deployments erhalten.
+4. Prüfen: `https://fensterino.com/api/ki` zeigt `{"bereit":true}`.
 
 Was dann passiert: Vor dem ersten Foto fragt die App um Einwilligung. Erst danach geht eine verkleinerte Kopie des Fotos über `/api/ki` an Anthropic. Pro Foto sind es zwei Anfragen (Aufbau des Fensters, Fakten fürs Angebot). Die Aufträge an die KI liegen auf dem Server (`functions/api/ki.js`), der Zugang wertet also nur Fensterfotos aus. Eine eingebaute Bremse erlaubt 40 Anfragen je 10 Minuten und IP-Adresse.
 
@@ -95,17 +95,17 @@ Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass
 
 ## Schritt 6: Eigene Domain (wenn der Name feststeht)
 
-Vorher den Namen prüfen: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „Klopfan“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke dazukommen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
+Vorher den Namen prüfen: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „Fensterino“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke dazukommen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
 
-1. Domain kaufen (zum Beispiel `klopfan.de`) bei einem Anbieter deiner Wahl.
-2. In Cloudflare **Domain hinzufügen** (Add a domain), kostenlosen Tarif wählen. Cloudflare nennt zwei Nameserver. Diese beim Domain-Anbieter eintragen; das wirkt nach Minuten bis Stunden.
-3. **Workers & Pages → klopfan → Benutzerdefinierte Domains (Custom domains) → Domain einrichten**: `klopfan.de` und `www.klopfan.de` eintragen. Cloudflare legt die DNS-Einträge an, HTTPS kommt automatisch.
+1. Die Domain muss bei Cloudflare liegen. Für `fensterino.com` ist das erledigt (Nameserver `may.ns.cloudflare.com` und `coen.ns.cloudflare.com`). Bei einer neuen Domain: **Domain hinzufügen** (Add a domain), kostenlosen Tarif wählen und die zwei genannten Nameserver beim Domain-Anbieter eintragen.
+2. **Workers & Pages → fenstero → Einstellungen → Domains & Routen (Domains & Routes) → Hinzufügen (Add) → Benutzerdefinierte Domain (Custom domain)**: `fensterino.com` eintragen, hinzufügen. Dasselbe noch einmal für `www.fensterino.com`. Cloudflare legt DNS-Eintrag und Zertifikat selbst an; nach ein paar Minuten lädt die Seite.
+3. Meldet Cloudflare, dass es für den Namen schon einen DNS-Eintrag gibt: unter **DNS → Einträge (Records)** den A-, AAAA- oder CNAME-Eintrag für genau diesen Namen löschen und Schritt 2 wiederholen. Eigene A-Einträge braucht die Website nicht.
 
-Für die Domain ohne `www` verlangt Cloudflare Pages, dass sie über die Cloudflare-Nameserver läuft. Nur `www.` ginge auch per CNAME-Eintrag beim bisherigen Anbieter.
+So erkennst du, wo es hakt: **Fehler 522** heißt, die Domain zeigt noch nicht auf den Worker (Punkt 2 und 3 oben). **„Server nicht gefunden“** heißt, für diesen Namen gibt es gar keinen Eintrag (häufig bei `www.`). Eine **leere oder 404-Seite** heißt, der letzte Build in `main` hat die Website nicht gefunden (Einstellungen aus Schritt 2 prüfen).
 
-Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter der das Portal geöffnet wurde.
+Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter der der Betriebsbereich geöffnet wurde.
 
-**Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `klopfan`. GitHub leitet die alte Adresse weiter.
+**Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `fensterino`. GitHub leitet die alte Adresse weiter.
 
 ## Später: öffentlicher Start
 
@@ -114,16 +114,16 @@ Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter d
 
 ## Stufe 2: echtes Backend (Überblick)
 
-- **Supabase**, Region Frankfurt: Konten für Betriebe und Hauseigentümer, Projekte, Kundenlinks, Aufmaße samt Fotos, Marktplatz, Freigaben, Prüfung der Betriebe (Admin).
+- **Supabase**, Region Frankfurt: Konten für Betriebe, Projekte, Kundenlinks, Aufmaße samt Fotos.
 - **Automatische Übertragung**: Die App schickt das Aufmaß direkt an den Betrieb, der Code-Umweg entfällt.
-- **Stripe**: SEPA-Lastschrift und Karte für Betriebe, Checkout für die Kundendatei. Zuerst im Testmodus.
+- **Stripe**: SEPA-Lastschrift und Karte für Betriebe. Zuerst im Testmodus.
 - **E-Mails** für Benachrichtigungen.
-- **Recht**: Nutzungsbedingungen, erweiterte Datenschutzerklärung, Auftragsverarbeitungsverträge (Supabase, Stripe), Widerrufsbelehrung für die Kundendatei.
+- **Recht**: Nutzungsbedingungen für Betriebe, erweiterte Datenschutzerklärung, Auftragsverarbeitungsverträge (Supabase, Stripe).
 
 ## Sicherheit
 
 - Geheime Schlüssel nur als **Secret** bei Cloudflare, niemals in Dateien im Repo.
-- Das Repo ist öffentlich. Das ist in Ordnung, weil keine Geheimnisse darin stehen und der Code einer Website ohnehin im Browser sichtbar ist. Lieber privat: GitHub → Settings → Change visibility; Cloudflare Pages funktioniert auch mit privaten Repos.
+- Das Repo ist öffentlich. Das ist in Ordnung, weil keine Geheimnisse darin stehen und der Code einer Website ohnehin im Browser sichtbar ist. Lieber privat: GitHub → Settings → Change visibility; Cloudflare funktioniert auch mit privaten Repos.
 - Die Website lädt nichts von fremden Servern (Schriften und Bibliotheken liegen in `web/`) und setzt strenge Sicherheits-Kopfzeilen (`web/_headers`).
 
 ## Lokal ausprobieren (für Entwickler)
@@ -131,4 +131,5 @@ Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter d
 ```bash
 KI_ATTRAPPE=1 node scripts/dev-server.mjs     # http://localhost:8788, KI mit festen Testantworten
 node scripts/pruefen.mjs                      # Browser-Prüfung, braucht das Paket playwright-core
+npx wrangler dev                              # wie bei Cloudflare (Worker-Laufzeit), http://localhost:8787
 ```

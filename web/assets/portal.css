@@ -1,5 +1,5 @@
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
-/* Klopfan Portal: Marktplatz für Fenster-Aufmaße. Zwei Rollen, eine Oberfläche. Seitenleiste ab 880 px, darunter Tableiste. */
+/* Fensterino Portal: Marktplatz für Fenster-Aufmaße. Zwei Rollen, eine Oberfläche. Seitenleiste ab 880 px, darunter Tableiste. */
 :root {
   --bg: #f5f5f7; --surface: #ffffff; --surface2: #f2f2f6; --fg: #1d1d1f; --fg2: #3a3a3c; --muted: #6e6e73; --line: rgba(0,0,0,.08); --line2: rgba(0,0,0,.14); --chip: #e8e8ed; --seg: #e3e3e8;
   --accent: #0071e3; --accent-soft: rgba(0,113,227,.12); --on-accent: #ffffff;
@@ -637,3 +637,92 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 @media (max-width: 520px) { .lockcard { grid-template-columns: minmax(0, 1fr) } .lockcard .row .btn { flex: 1 1 auto; justify-content: center } }
 .paycard b { display: block; font-size: 16px; overflow-wrap: anywhere } .paycard small { display: block; color: var(--muted); margin-top: 2px; font-size: 13px } .paycard .eyebrow { margin: 0 0 4px }
 .paycard .row { gap: 12px } .paycard .row > span { flex: 1 1 auto; min-width: 0 } .paycard .row > .btn { flex: 0 0 auto; white-space: nowrap }
+/* ---------- Übersichten: Kacheln mit Farbton, Projekt-, Anfrage- und Kontaktkarten ---------- */
+.stat { position: relative; overflow: hidden; --t: var(--accent); --ts: var(--accent-soft) }
+.stat.tone-acc { --t: var(--accent); --ts: var(--accent-soft) } .stat.tone-ok { --t: var(--ok); --ts: var(--ok-soft) } .stat.tone-warn { --t: var(--warn); --ts: var(--warn-soft) } .stat.tone-lead { --t: var(--lead); --ts: var(--lead-soft) } .stat.tone-gold { --t: var(--gold); --ts: rgba(217,154,6,.14) } .stat.tone-bad { --t: var(--bad); --ts: var(--bad-soft) }
+.stat::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--t); border-radius: 4px 0 0 4px }
+.stat::after { content: ""; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: var(--ts); opacity: .9; pointer-events: none }
+.stat .stat-ic { position: absolute; right: 14px; top: 14px; width: 36px; height: 36px; border-radius: 12px; background: var(--surface); color: var(--t); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); z-index: 1 }
+.stat > small, .stat > b, .stat > span:not(.stat-ic) { position: relative; z-index: 1; padding-right: 44px } .stat > b { color: var(--fg) } .stat .stat-ic svg { width: 20px; height: 20px; flex: 0 0 auto }
+@media (max-width: 520px) {
+  .grid.c3.stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px } .grid.c2.stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+  .stats .stat { padding: 12px 10px 10px 12px; border-radius: 14px } .stats .stat .stat-ic { display: none } .stats .stat::after { width: 70px; height: 70px; right: -24px; top: -24px }
+  .stats .stat > small { font-size: 11.5px; padding-right: 0 } .stats .stat > b { font-size: 21px; padding-right: 0 } .stats .stat > span:not(.stat-ic) { font-size: 11px; padding-right: 0; line-height: 1.3 }
+}
+/* Projektkarte */
+.item { position: relative }
+.pcard { --t: var(--muted); --ts: var(--surface2); box-shadow: inset 4px 0 0 var(--t), var(--shadow); padding-left: 18px }
+.pcard.st-eingegangen { --t: var(--ok); --ts: var(--ok-soft) } .pcard.st-locked { --t: var(--warn); --ts: var(--warn-soft) } .pcard.st-arbeit { --t: var(--warn); --ts: var(--warn-soft) } .pcard.st-gesendet, .pcard.st-geoeffnet { --t: var(--accent); --ts: var(--accent-soft) } .pcard.st-abgelaufen, .pcard.st-deaktiviert { --t: var(--line2); --ts: var(--surface2); opacity: .78 }
+.pcard.is-new { box-shadow: inset 4px 0 0 var(--t), 0 0 0 1.5px var(--ok), var(--shadow) }
+.pcard .neu { position: absolute; top: -8px; right: 16px; padding: 2px 9px; border-radius: 999px; background: var(--ok); color: #fff; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; animation: pop .5s cubic-bezier(.2,.9,.3,1.4) }
+.pvis { width: 64px; height: 64px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; position: relative }
+.pcard .lst { gap: 8px; margin-top: 4px; align-items: center; flex-wrap: wrap } .pcard .lst .me { font-size: 12.5px }
+.pcard .rt small { font-size: 12px; color: var(--muted) }
+/* Gefächerter Fensterstapel */
+.winstack { position: relative; width: 64px; height: 60px; display: block }
+.winstack i { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; transform: translate(calc((var(--k) - 1) * 9px), calc((1 - var(--k)) * 2px)) rotate(calc((var(--k) - 1) * 8deg)); z-index: calc(3 - var(--k)); transition: transform .25s cubic-bezier(.2,.7,.2,1) }
+.winstack.n1 i { transform: none } .winstack.n2 i { transform: translate(calc(var(--k) * 10px - 5px), 0) rotate(calc(var(--k) * 8deg - 4deg)) }
+.winstack svg { width: 34px; height: 34px }
+.winstack em { position: absolute; right: -2px; bottom: -2px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--fg); color: var(--surface); font: 800 11px/20px var(--body); font-style: normal; text-align: center; z-index: 4 }
+@media (hover: hover) { .pcard:hover .winstack i { transform: translate(calc((var(--k) - 1) * 14px), calc((1 - var(--k)) * 3px)) rotate(calc((var(--k) - 1) * 11deg)) } .pcard:hover .winstack.n1 i { transform: scale(1.06) } .pcard:hover .winstack.n2 i { transform: translate(calc(var(--k) * 14px - 7px), 0) rotate(calc(var(--k) * 10deg - 5deg)) } }
+/* Fortschrittsring */
+.pring { position: relative; width: 56px; height: 56px; display: block } .pring svg { width: 56px; height: 56px; transform: rotate(-90deg) }
+.pring circle { fill: none; stroke: var(--line); stroke-width: 4.5 } .pring circle.val { stroke: var(--warn); stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.2,.7,.2,1) }
+.pring b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; letter-spacing: -.02em } .pring b small { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 3px }
+/* Zustandskachel ohne Fenster: angelegt, gesendet, geöffnet, abgelaufen */
+.pini { width: 52px; height: 52px; border-radius: 16px; background: var(--ts); color: var(--t); display: flex; align-items: center; justify-content: center; position: relative }
+.pini.erstellt { background: none; box-shadow: inset 0 0 0 2px var(--line2); color: var(--muted) }
+.pini .live { position: absolute; right: -3px; top: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--t); box-shadow: 0 0 0 2px var(--surface); animation: live 1.8s ease-out infinite }
+.pcard.st-geoeffnet .pini .live { background: var(--warn) }
+/* Schrittpunkte */
+.pstep { display: inline-flex; align-items: center; flex: 0 0 auto }
+.pstep i { width: 10px; height: 10px; border-radius: 50%; background: var(--line2); position: relative; display: block }
+.pstep i + i { margin-left: 14px } .pstep i + i::before { content: ""; position: absolute; right: 100%; top: 4px; width: 14px; height: 2px; background: var(--line2) }
+.pstep i.done { background: var(--ok) } .pstep i.done + i::before, .pstep i.now::before { background: var(--ok) }
+.pstep i.now { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-soft); animation: stepnow 1.8s ease-in-out infinite }
+.pcard.st-gesendet .pstep i.now, .pcard.st-geoeffnet .pstep i.now { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft) }
+.pstep.dead i, .pstep.dead i + i::before { background: var(--line) }
+@keyframes stepnow { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.25) } }
+.kstep i.now { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft) }
+/* Anfragekarte */
+.lcard { --t: var(--accent); --ts: var(--accent-soft) }
+.lcard.st-lead { --t: var(--lead); --ts: var(--lead-soft) } .lcard.st-ok { --t: var(--ok); --ts: var(--ok-soft) } .lcard.st-warn { --t: var(--warn); --ts: var(--warn-soft) } .lcard.st-bad { --t: var(--bad); --ts: var(--bad-soft) }
+.lcard.paused { opacity: .7 }
+.lcnt { width: 60px; height: 64px; flex: 0 0 auto; border-radius: 16px; background: linear-gradient(160deg, var(--ts), transparent 120%), var(--surface2); color: var(--t); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1 }
+.lcnt b { font-size: 26px; font-weight: 900; letter-spacing: -.03em; font-variant-numeric: tabular-nums } .lcnt small { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-top: 3px; opacity: .85 }
+.lmeta { gap: 12px; align-items: center; margin: 2px 0 1px; flex-wrap: wrap }
+.winrow { display: inline-flex; align-items: flex-end; gap: 4px; height: 22px }
+.winrow i { display: block; border-radius: 3px; background: linear-gradient(180deg, rgba(0,113,227,.18), rgba(0,113,227,.06)); box-shadow: inset 0 0 0 1.5px var(--t); opacity: .9 }
+.winrow em { font: 800 11px/1 var(--body); font-style: normal; color: var(--muted); margin-left: 2px; align-self: center }
+.bud { display: inline-flex; align-items: center; gap: 7px } .bud small { font-size: 12.5px; color: var(--muted); font-weight: 600 }
+.bbar { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px }
+.bbar i { width: 5px; border-radius: 2px; background: var(--line2); display: block } .bbar i:nth-child(1) { height: 6px } .bbar i:nth-child(2) { height: 9px } .bbar i:nth-child(3) { height: 12px } .bbar i:nth-child(4) { height: 16px } .bbar i.on { background: var(--t) }
+.kmp { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 999px; background: var(--surface2); color: var(--fg2); font-size: 12px; font-weight: 800 }
+.lcard .badge.lead.pulse svg { margin-right: 1px }
+/* Kontaktkarte */
+.kcard-i { --t: var(--accent) } .kcard-i.st-ok { --t: var(--ok) } .kcard-i.st-bad { --t: var(--bad) }
+.kcard-i .lst { gap: 8px; margin-top: 4px; align-items: center; flex-wrap: wrap } .kcard-i .lst .me { font-size: 12.5px }
+@media (max-width: 520px) { .pcard .neu { top: -6px; right: 12px } .lcnt { width: 54px; height: 58px } .lcnt b { font-size: 22px } .pvis { width: 56px } .winstack { width: 56px } }
+@media (prefers-reduced-motion: reduce) { .pstep i.now, .pini .live, .pcard .neu { animation: none !important } .winstack i { transition: none } }
+.rt-m { display: none; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap } .rt-m b { font-size: 14.5px; font-weight: 800 }
+@media (max-width: 520px) { .rt-m { display: flex } }
+/* Nachbesserung */
+.sharecard.nbcard { box-shadow: inset 0 0 0 1.5px var(--warn), var(--shadow) } .sharecard.nbcard > .row .eyebrow { color: var(--warn) } .nbhint { margin: -4px 0 2px; line-height: 1.5 }
+/* Eigentümer: Aufmaß auch an den eigenen Fensterbauer */
+.card.eigen { display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 0 0 1.5px var(--accent-soft), var(--shadow) } .card.eigen > b { font-size: 17px } .card.eigen .kt { margin: 0 }
+/* Betrieb kommt über die PDF eines Kunden */
+.banner.vonpdf { background: var(--accent-soft); align-items: center } .banner.vonpdf > .row { gap: 8px; flex: 0 0 auto }
+/* ---------- Fensterino: Startseite für Hauseigentümer ---------- */
+.hero.b2c { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); padding-bottom: 18px }
+.hero.b2b { padding-top: clamp(28px, 6vw, 56px); border-top: 1px solid var(--line) }
+.b2c-visual { display: flex; justify-content: center }
+.b2c-card { width: min(100%, 380px); padding: 20px 20px 18px; border-radius: 28px; background: var(--surface); box-shadow: var(--shadow2); display: flex; flex-direction: column; gap: 14px; transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)); transition: transform .25s ease-out }
+.b2c-win { position: relative; display: flex; justify-content: center; padding: 26px 52px 32px; border-radius: 20px; background: linear-gradient(180deg, var(--surface2), transparent) }
+.b2c-win svg { width: 220px; height: 220px; filter: drop-shadow(0 10px 20px rgba(0,0,0,.12)) }
+.b2c-win .dim { position: absolute; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; color: #fff; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.18); opacity: 0; animation: dimin .5s cubic-bezier(.2,.8,.2,1.2) forwards }
+.b2c-win .dim-h { left: 4px; top: 46%; background: var(--lead); animation-delay: .9s } .b2c-win .dim-w { left: 50%; bottom: 6px; transform: translateX(-50%); background: var(--lead); animation-delay: 1.2s }
+.b2c-win .dim-eh { right: 4px; top: 56%; background: var(--accent); animation-delay: 1.5s } .b2c-win .dim-ew { left: 50%; top: 4px; transform: translateX(-50%); background: var(--accent); animation-delay: 1.8s }
+@keyframes dimin { from { opacity: 0; translate: 0 6px } to { opacity: 1; translate: 0 0 } }
+.b2c-chips { display: flex; flex-wrap: wrap; gap: 6px } .b2c-chips .badge { opacity: 0; animation: wordin .5s forwards } .b2c-chips .badge:nth-child(1) { animation-delay: 2.1s } .b2c-chips .badge:nth-child(2) { animation-delay: 2.25s } .b2c-chips .badge:nth-child(3) { animation-delay: 2.4s } .b2c-chips .badge:nth-child(4) { animation-delay: 2.7s }
+@media (max-width: 879px) { .hero.b2c { grid-template-columns: minmax(0, 1fr) } .b2c-win svg { width: 180px; height: 180px } }
+@media (prefers-reduced-motion: reduce) { .b2c-win .dim, .b2c-chips .badge { animation: none; opacity: 1 } .b2c-card { transform: none } }

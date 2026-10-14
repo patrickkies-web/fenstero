@@ -1,4 +1,4 @@
-# Cloudflare Pages: Kopfzeilen für alle Seiten
+# Cloudflare (Workers und Pages): Kopfzeilen für alle Seiten
 # Pilotphase: nicht in Suchmaschinen (X-Robots-Tag). Zum öffentlichen Start die Zeile X-Robots-Tag entfernen.
 /*
   X-Robots-Tag: noindex, nofollow
