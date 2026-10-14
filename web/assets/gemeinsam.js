@@ -6,7 +6,7 @@
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
-  var C = window.KONFIG = Object.assign({ marke: 'Fensterino', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/' }, window.KONFIG || {});
+  var C = window.KONFIG = Object.assign({ marke: 'Fensterino', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
   var mem = {};
   function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return mem[k] || null; } }
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }

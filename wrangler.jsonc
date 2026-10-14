@@ -1,8 +1,10 @@
 /* Fensterino auf Cloudflare Workers: was gebaut und wie es ausgeliefert wird.
    - Die Website liegt in web/: statische Dateien, Kopfzeilen aus web/_headers, Fehlerseite web/404.html.
-   - Nur /api/… läuft durch worker.js: die KI-Auswertung der Fotos aus functions/api/ki.js.
+   - Nur /api/… läuft durch worker.js (functions/api/router.js): KI-Auswertung, Kauf des Aufmaßblatts (Stripe),
+     Konten der Betriebe (Supabase), Eingang von Aufmaßen aus der App.
    - "name" muss genau so heißen wie der Worker im Cloudflare-Dashboard (Workers & Pages).
-   Der Schlüssel ANTHROPIC_API_KEY gehört nur ins Dashboard (Einstellungen → Variablen und Geheimnisse, Typ Secret), nie hierher. */
+   Schlüssel (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_ANON_KEY, FREISCHALT_GEHEIMNIS)
+   gehören nur ins Dashboard (Einstellungen → Variablen und Geheimnisse, Typ Secret), nie hierher. Liste aller Variablen: functions/api/umgebung.js */
 {
   "name": "fenstero",
   "main": "worker.js",
@@ -13,7 +15,9 @@
     "not_found_handling": "404-page",
     "run_worker_first": ["/api/*"]
   },
-  // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU) bei jedem Deployment behalten
+  // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU, PREIS_AUFMASS_CENT, MWST) bei jedem Deployment behalten
   "keep_vars": true,
+  // Sammelrechnungen für Betriebe: am 1. und 15. jeden Monats um 3 Uhr UTC (worker.js → scheduled → Abrechnungslauf)
+  "triggers": { "crons": ["0 3 1,15 * *"] },
   "observability": { "enabled": true }
 }

@@ -472,3 +472,17 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line, 
 .way-tick svg { width: 16px; height: 16px }
 .share-way.done { box-shadow: inset 0 0 0 1.5px var(--ok), var(--shadow) } .share-way.done .eyebrow { color: var(--ok) }
 @media (prefers-reduced-motion: reduce) { .way-tick.on { animation: none } }
+
+/* Paywall: Vorschau des Aufmaßblatts, Kopf und Übersicht echt, der Rest verschwommen */
+.dv.pw { padding: 22px 18px 0; align-items: flex-end; min-height: 300px }
+.dv-paper.pw { filter: none; transform: none; width: min(100%, 330px); border-radius: 8px 8px 0 0; padding: 0; overflow: hidden; box-shadow: 0 -10px 30px rgba(0,0,0,.12) }
+.dv-band { display: flex; align-items: center; gap: 8px; background: #000; color: #fff; padding: 10px 14px; font-size: 13px } .dv-band b { font-weight: 800 } .dv-band span { margin-left: auto; opacity: .7; font-size: 10px; letter-spacing: .1em; text-transform: uppercase }
+.dv-band .fi-logo .fi-kachel { fill: #fff } .dv-band .fi-logo rect[fill="#fff"] { fill: #000 } .dv-band .fi-logo rect[fill="#000"]:not(.fi-kachel) { fill: #fff } .dv-band .fi-logo .fi-fluegel { display: none }
+.dv-in { padding: 12px 14px 4px } .dv-paper.pw .dv-h { font-size: 18px } .dv-paper.pw .dv-s { margin-bottom: 6px }
+.dv-tab { width: 100%; border-collapse: collapse; font-size: 11px; color: #1d1d1f } .dv-tab th { text-align: left; font-size: 8.5px; letter-spacing: .06em; text-transform: uppercase; color: #6e6e73; padding: 5px 0 4px; border-bottom: 1.5px solid #1d1d1f } .dv-tab td { padding: 4px 4px 4px 0; border-bottom: 1px solid #e5e5ea; white-space: nowrap } .dv-tab td b { font-weight: 800 }
+.dv-blur { filter: blur(2.4px); padding: 12px 14px 0; display: grid; grid-template-columns: 110px 1fr; gap: 12px; opacity: .85; height: 96px; overflow: hidden }
+.dv-sk { position: relative; border: 1px solid #1d1d1f; border-radius: 3px; background: #efece6 } .dv-sk::after { content: ''; position: absolute; inset: 12px 16px; background: #d6e6f4; border: 1px solid #1d1d1f } .dv-sk .dh { position: absolute; left: 4px; top: 10px; bottom: 10px; width: 2px; background: #d4502b } .dv-sk .dw { position: absolute; left: 14px; right: 14px; top: 4px; height: 2px; background: #0071e3 }
+.dv-paper.pw .dv-lines { padding: 0; border: 0; display: flex; flex-direction: column; gap: 7px } .dv-paper.pw .dv-lines i { margin: 0; width: 100% } .dv-paper.pw .dv-lines i.s { width: 60% }
+.dv-lock.bottom { top: auto; bottom: 22px; transform: translateX(-50%); border: 0; cursor: pointer; font: inherit; font-weight: 800; font-size: 16px; min-height: 48px; padding: 0 20px; gap: 10px; white-space: nowrap }
+.dv-lock.bottom:active { transform: translateX(-50%) scale(.97) }
+.datei-card .row { flex-wrap: wrap }
