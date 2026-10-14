@@ -335,6 +335,7 @@ function footer() {
 }
 /* ---------- Nach dem Rendern: Bewegung ---------- */
 function afterRender(anim) {
+  if (S.screen === 'link' && window.Blatt) window.Blatt.schrift();
   const scr = document.querySelector('.scr');
   if (!scr) return;
   ['.list', '.grid', '.flow', '.form', '.share'].forEach((sel) => scr.querySelectorAll(sel).forEach((p) => Array.from(p.children).forEach((c, i) => c.style.setProperty('--i', String(Math.min(i, 12))))));
@@ -698,7 +699,7 @@ const SHEETS = {
 };
 
 /* ---------- Aufmaß-Code aus der App lesen ---------- */
-function unpack(code) { try { const m = /(?:AM1|ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').replace(/\s+/g, '')); if (!m) return null; const b = m[1].replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); const o = JSON.parse(new TextDecoder().decode(bytes)); return o && Array.isArray(o.w) ? o : null; } catch (e) { return null; } }
+function unpack(code) { try { const m = /(?:AM1|ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').replace(/\s+/g, '')); if (!m) return null; const b = m[1].replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); const text = new TextDecoder().decode(bytes), ende = text.lastIndexOf('}'); const o = JSON.parse(ende > 0 ? text.slice(0, ende + 1) : text); return o && Array.isArray(o.w) ? o : null; } catch (e) { return null; } }
 /* Fenster aus der App vollständig übernehmen: gleiche Felder, fehlende Werte sind App-Standard */
 const fromApp = (w) => AW.mk(Object.assign({}, w, { name: w.name || 'Fenster' }));
 /* Kennung eines Codes ohne Zeitstempel: gleiches Aufmaß, gleiche Kennung */
@@ -726,45 +727,16 @@ function simLink(l, cid) {
 /* ---------- Aufmaßblatt als PDF für den Betrieb ---------- */
 let PDL = null;
 const PDLP = (async () => { try { PDL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { PDL = null; } return PDL; })();
+/* Die PDF zeichnet /assets/blatt.js (gemeinsam mit der App): Ausgabe 'betrieb' in den Farben des Betriebs, mit Bestellmaß-Vorschlag */
+const BLATT_H = { derive: AW.derive, lab: AW.lab, num: AW.num, th: AW.th, col: AW.col, orn: (k) => AW.lab('orn', k) };
 function amPDF(l) {
-  const J = window.jspdf && window.jspdf.jsPDF; if (!J || !l.aufmass) return null;
-  const am = l.aufmass, pr = am.proj || {}, wins = am.windows || [], ab = A().abzug || { seite: 15, oben: 15 }, c = BC();
-  const doc = new J({ unit: 'mm', format: 'a4' }), W = 210, M = 16;
-  const t = (s) => String(s == null ? '' : s).replace(/[  ]/g, ' ');
-  let y = 18, page = 1;
-  const foot = () => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120); doc.text(t('Erfasst vom Kunden mit Fensterino. Vor der Fertigung Feinaufmaß vor Ort.'), M, 289); doc.text('Seite ' + page, W - M, 289, { align: 'right' }); doc.setTextColor(20); };
-  const need = (h) => { if (y + h > 280) { foot(); doc.addPage(); page++; y = 18; } };
-  const put = (k, v) => { doc.setFontSize(9.5); const vl = doc.splitTextToSize(t(v), W - 2 * M - 42), kl = doc.splitTextToSize(t(k), 39), h = Math.max(vl.length, kl.length) * 4.4; need(h + 1.5); doc.setTextColor(110); doc.text(kl, M, y); doc.setTextColor(20); doc.text(vl, M + 42, y); y += h + 1.2; };
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text(t('Aufmaßblatt'), M, y);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text(t(c.name), W - M, y - 5, { align: 'right' }); doc.text(t([l.nr, (l.log || {}).eingegangen ? 'eingegangen ' + l.log.eingegangen : ''].filter(Boolean).join(' · ')), W - M, y, { align: 'right' }); doc.setTextColor(20);
-  y += 9;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text(t(l.kunde), M, y); doc.setFont('helvetica', 'normal'); y += 6;
-  put('Kontakt', l.kontakt || '–'); put('Objekt', l.adresse || '–');
-  put('Gebäude', (AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : ''));
-  put('Zeitraum', AW.lab('zeit', pr.zeit) || '–'); put('Budget', (AW.lab('budget', pr.budget) || '–') + (pr.foerd ? ', Förderung gewünscht' : ''));
-  put('Umfang', nW(wins.length, 'Position', 'Positionen') + ', ' + nW(am.elemente || wins.length, 'Element', 'Elemente') + ', ' + nW(am.fotos || 0, 'Foto', 'Fotos'));
-  if (pr.notiz) put('Nachricht', '„' + pr.notiz + '“');
-  y += 2; doc.setDrawColor(30); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 8;
-  wins.forEach((w, i) => {
-    const d = AW.derive(w);
-    need(34);
-    const bw = 18, bh = Math.max(10, Math.min(26, bw * (d.elH || 1200) / (d.elW || 1000))), bx = W - M - bw, by = y - 4, ns = (w.sashes || []).length || 1;
-    doc.setLineWidth(0.4); doc.setDrawColor(30); doc.setFillColor(214, 230, 244); doc.rect(bx, by, bw, bh); for (let s = 0; s < ns; s++) doc.rect(bx + 1.2 + s * (bw - 2.4) / ns, by + 1.2, (bw - 2.4) / ns - 0.6, bh - 2.4, 'FD');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.text(t('Pos. ' + (i + 1) + ' · ' + (w.name || 'Fenster') + ((AW.num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stück' : '')), M, y);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); y += 5.5;
-    doc.text(t('Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' mm · Element ' + AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm'), M, y); y += 5.5;
-    if (d.moW && d.moH) { doc.setFont('helvetica', 'bold'); doc.text(t('Bestellmaß-Vorschlag ' + AW.th(d.moW - 2 * ab.seite) + ' × ' + AW.th(d.moH - ab.oben) + ' mm'), M, y); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(110); doc.text(t('(Öffnung minus ' + ab.seite + ' mm je Seite und ' + ab.oben + ' mm oben)'), M + 72, y); doc.setTextColor(20); }
-    y = Math.max(y + 6, by + bh + 4);
-    AW.rows(w).forEach((r) => put(r[0], r[1]));
-    const ki = AW.kiRows(w);
-    if (ki.length) { need(12); y += 2; doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.text(t('Bestand laut Fotos (KI)'), M, y); doc.setFont('helvetica', 'normal'); y += 5; ki.forEach((r) => put(r[0], r[1])); }
-    y += 3; doc.setDrawColor(210); doc.setLineWidth(0.2); doc.line(M, y - 2, W - M, y - 2); y += 5;
-  });
-  foot();
-  return doc.output('blob');
+  if (!window.Blatt || !l.aufmass) return null;
+  const am = l.aufmass, c = BC(), a = A();
+  return window.Blatt.pdf({ variante: 'betrieb', fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse }, betrieb: { name: c.name, col: c.col, abzug: a.abzug || { seite: 15, oben: 15 }, nr: l.nr, eingegangen: (l.log || {}).eingegangen }, portalKurz: location.host, h: BLATT_H });
 }
 async function saveAm(l) {
   if (!l || !l.aufmass) return;
+  if (window.Blatt) await window.Blatt.schrift();
   const pdf = amPDF(l), base = 'Aufmass-' + [l.nr, slug(l.kunde.replace(/^Beispiel:\s*/, ''))].filter(Boolean).join('-').replace(/[^A-Za-z0-9_-]+/g, '-');
   const name = base + (pdf ? '.pdf' : '.txt'), data = pdf || aufmassText(l);
   if (!PDL) await PDLP;

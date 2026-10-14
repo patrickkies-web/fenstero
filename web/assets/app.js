@@ -350,7 +350,8 @@ function unpackProject(code) {
     let b64 = m[1].replace(/-/g, '+').replace(/_/g, '/'); while (b64.length % 4) b64 += '=';
     const bin = atob(b64), bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    const o = JSON.parse(new TextDecoder().decode(bytes));
+    const text = new TextDecoder().decode(bytes), ende = text.lastIndexOf('}');
+    const o = JSON.parse(ende > 0 ? text.slice(0, ende + 1) : text);
     if (!o || o.v !== 1 || !Array.isArray(o.w)) return null;
     o.w = o.w.map((x) => Object.assign(baseWin(), x));
     return o;
@@ -853,6 +854,7 @@ function render(fresh) {
   if (!neu) { const scr = root.querySelector('.scr'); if (scr) scr.style.animation = 'none'; }
   lastScreen = S.screen;
   bindAfterRender();
+  if (['teilen', 'blatt', 'gesendet', 'datei', 'gekauft'].includes(S.screen)) blattSchrift();
   /* Blöcke erscheinen nacheinander bzw. beim Scrollen; die wiederverwendete 3-D-Bühne bleibt, wie sie ist */
   if (neu && !view.fit && window.Reveal) { const scr = root.querySelector('.scr'); if (scr) window.Reveal.auf(Array.from(scr.children).filter((c) => !(c.classList.contains('w3d-stage') && c.getAttribute('data-reused') === '1')), sc); }
   feiern(root);
@@ -1221,75 +1223,18 @@ SCREENS.gekauft = () => {
 };
 /* ---------- Die Datei: PDF mit jsPDF, sonst eine HTML-Datei ---------- */
 const fileBase = () => 'Aufmass-' + (slug(S.proj.name || (S.betrieb && S.betrieb.kunde) || '') || 'Fensterino');
-function blattPDF() {
-  const J = window.jspdf && window.jspdf.jsPDF; if (!J) return null;
-  const doc = new J({ unit: 'mm', format: 'a4' }), W = 210, M = 16, pr = S.proj;
-  let y = 18, page = 1;
-  const t = (s) => String(s == null ? '' : s).replace(/ /g, ' ');
-  const foot = () => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120); doc.text(t('Erstellt mit Fensterino · ' + PORTAL_KURZ + ' · Vor der Fertigung Feinaufmaß vor Ort.'), M, 289); doc.text('Seite ' + page, W - M, 289, { align: 'right' }); doc.setTextColor(20); };
-  const need = (h) => { if (y + h > 280) { foot(); doc.addPage(); page++; y = 18; } };
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text('Aufmaßblatt', M, y);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text(t(new Date().toLocaleDateString('de-DE')), W - M, y - 5, { align: 'right' }); doc.text(t(S.betrieb ? 'Für ' + (S.betrieb.name || 'Fensterbauer') : 'Fensterino'), W - M, y, { align: 'right' }); doc.setTextColor(20);
-  y += 8; doc.setFontSize(10.5);
-  const nP = S.windows.length, nE = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0);
-  const head = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Fenster', nP + (nP === 1 ? ' Position, ' : ' Positionen, ') + nE + (nE === 1 ? ' Element' : ' Elemente')]];
-  head.forEach((r) => { doc.setTextColor(110); doc.text(t(r[0]), M, y); doc.setTextColor(20); doc.text(t(r[1]), M + 30, y); y += 5.5; });
-  y += 3; doc.setDrawColor(30); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 8;
-  S.windows.forEach((x, i) => {
-    const d = derive(x), rows = specRows(x), bestand = x.ki && x.ki.rows ? x.ki.rows.map((r) => ({ k: r[0], v: r[1] })) : [];
-    need(30);
-    /* kleine Zeichnung: Rahmen und Flügel */
-    const bw = 18, bh = Math.max(10, Math.min(26, bw * (d.elH || 1200) / (d.elW || 1000))), bx = W - M - bw, by = y - 4;
-    doc.setLineWidth(0.4); doc.setFillColor(214, 230, 244); doc.rect(bx, by, bw, bh); const ns = x.sashes.length; for (let s = 0; s < ns; s++) doc.rect(bx + 1.2 + s * (bw - 2.4) / ns, by + 1.2, (bw - 2.4) / ns - 0.6, bh - 2.4, 'FD');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.text(t('Pos. ' + (i + 1) + ' · ' + (x.name || 'Fenster') + ((num(x.anzahl) || 1) > 1 ? ' · ' + x.anzahl + ' Stück' : '')), M, y);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); y += 5.5; doc.text(t('Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm'), M, y); y += Math.max(6, bh - 5);
-    doc.setFontSize(9.5);
-    const put = (r) => { const lines = doc.splitTextToSize(t(r.v), W - 2 * M - 40), kl = doc.splitTextToSize(t(r.k), 37), h = Math.max(lines.length, kl.length) * 4.4; need(h + 1.5); doc.setTextColor(110); doc.text(kl, M, y); doc.setTextColor(20); doc.text(lines, M + 40, y); y += h + 1.2; };
-    rows.forEach(put);
-    if (bestand.length) { need(12); y += 2; doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.text('Bestand laut Fotos', M, y); doc.setFont('helvetica', 'normal'); y += 5; bestand.forEach(put); }
-    y += 4; doc.setDrawColor(210); doc.setLineWidth(0.2); doc.line(M, y - 2, W - M, y - 2); y += 4;
-  });
-  if (!S.betrieb) pdfFensterinoBlock(doc, { W: W, M: M, y: y, need: need, t: t, getY: () => y, setY: (v) => { y = v; } });
-  foot();
-  return doc.output('blob');
+/* Die PDF zeichnet /assets/blatt.js (gemeinsam mit dem Betriebsbereich). Zwei Ausgaben aus der App:
+   'kunde' für die eigenen Unterlagen (Du), 'fensterbauer' so, wie es an einen Betrieb geht (Sie); beide mit der Seite für den Fensterbauer am Ende. */
+const BLATT_H = { derive: derive, lab: lab, num: num, th: thousand, col: (k) => { const c = colorOf(k); return [c.name, c.code, c.solid || c.bg]; }, orn: (k) => (ORN.find((o) => o.k === k) || ORN[0]).label };
+function blattPDF(variante) {
+  if (!window.Blatt) return null;
+  return window.Blatt.pdf({ variante: S.betrieb ? 'fensterbauer' : (variante || 'kunde'), fenster: S.windows, projekt: S.proj, code: packProject(S.windows, S.proj, null), portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
 }
-/* Letzter Block im Aufmaßblatt eines Eigen-Kunden: so kommt das Aufmaß zum Fensterbauer in Fensterino (QR und Code), dazu der Hinweis für den Kunden */
-function pdfFensterinoBlock(doc, o) {
-  const W = o.W, M = o.M, t = o.t, url = PORTAL_URL + '?von=pdf', code = packProject(S.windows, S.proj, null);
-  o.need(62); let y = o.getY() + 4;
-  doc.setDrawColor(30); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 9;
-  const qrS = 30, qrX = W - M - qrS, textW = W - 2 * M - qrS - 10;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(20); doc.text(t('Für den Fensterbauer: dieses Aufmaß in Fensterino öffnen'), M, y);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(60);
-  const absatz = doc.splitTextToSize(t('Ihr Kunde hat dieses Aufmaß mit Fensterino erstellt: acht Handmaße je Fenster, Fotos mit Auswertung, Wünsche. Mit dem Code unten holen Sie es in Ihr Fensterino-Konto: Positionen zum Bearbeiten, 3-D-Ansicht, Nachbesserung per Link, PDF mit Ihrem Logo. Und für Ihre nächsten Kunden: Laden Sie sie mit einem Aufmaß-Link ein, einzeln oder als Liste, statt zum Erstaufmaß hinzufahren. Das Aufmaß kommt fertig sortiert bei Ihnen an. Kostenlos, die ersten 3 Projekte sind frei: ' + PORTAL_KURZ), textW);
-  doc.text(absatz, M, y + 6);
-  /* QR-Code zur Anmeldung */
-  try {
-    if (window.qrcode) {
-      const q = window.qrcode(0, 'M'); q.addData(url); q.make();
-      const n = q.getModuleCount(), cell = qrS / (n + 4), x0 = qrX + 2 * cell, y0 = y - 4 + 2 * cell;
-      doc.setFillColor(255, 255, 255); doc.rect(qrX, y - 4, qrS, qrS, 'F'); doc.setFillColor(0, 0, 0);
-      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) doc.rect(x0 + c * cell, y0 + r * cell, cell + 0.02, cell + 0.02, 'F');
-      doc.link(qrX, y - 4, qrS, qrS, { url: url });
-      doc.setFontSize(7.5); doc.setTextColor(110); doc.text(t('Scannen: Anmeldung'), qrX + qrS / 2, y - 4 + qrS + 3.5, { align: 'center' });
-    }
-  } catch (e) { /* ohne QR weiter */ }
-  y = Math.max(y + 6 + absatz.length * 4.2 + 4, y - 4 + qrS + 9);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110);
-  const kunde = doc.splitTextToSize(t('Für Sie als Eigentümer: Dieses Blatt ist vollständig und gehört Ihnen. Geben Sie es jedem Fensterbauer, von dem Sie ein Angebot möchten. Fensterino: ' + PORTAL_KURZ + '/app/'), W - 2 * M);
-  doc.text(kunde, M, y); y += kunde.length * 4 + 3;
-  /* Der Code, umbrochen; Leerzeichen und Zeilenumbrüche stören beim Einfügen nicht */
-  doc.setFont('courier', 'normal'); doc.setFontSize(6.6); doc.setTextColor(60);
-  const zeilen = doc.splitTextToSize(code, W - 2 * M);
-  o.setY(y); o.need(8); y = o.getY();
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(20); doc.text(t('Aufmaß-Code für Fensterino („Code vom Kunden einfügen“)'), M, y); y += 4.5;
-  doc.setFont('courier', 'normal'); doc.setFontSize(6.6); doc.setTextColor(60);
-  for (let i = 0; i < zeilen.length; i += 12) { const teil = zeilen.slice(i, i + 12); o.setY(y); o.need(teil.length * 2.9 + 2); y = o.getY(); doc.text(teil, M, y); y += teil.length * 2.9; }
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(20); o.setY(y);
-}
+const blattSchrift = () => (window.Blatt ? window.Blatt.schrift() : Promise.resolve(false));
 /* PDF direkt weitergeben: auf dem Telefon per Teilen-Menü (WhatsApp, Mail), sonst herunterladen */
 async function pdfTeilen() {
-  const pdf = blattPDF();
+  await blattSchrift();
+  const pdf = blattPDF('fensterbauer');
   if (pdf && navigator.canShare && typeof File === 'function') {
     try {
       const file = new File([pdf], fileBase() + '.pdf', { type: 'application/pdf' });
@@ -1299,7 +1244,7 @@ async function pdfTeilen() {
       }
     } catch (e) { if (e && e.name === 'AbortError') return; }
   }
-  await saveDatei();
+  await saveDatei('fensterbauer');
   toast('PDF gespeichert. Häng sie an deine Nachricht an deinen Fensterbauer.');
   teilMark('betrieb');
 }
@@ -1310,10 +1255,12 @@ function blattFile() {
   return '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Aufmaßblatt</title><style>' + css + '</style></head><body><h1>Aufmaßblatt</h1><p class="m">' + esc([lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : ''), lab('zeit', pr.zeit), new Date().toLocaleDateString('de-DE')].join(' · ')) + '</p>' +
     S.windows.map((x, i) => { const d = derive(x); return '<div class="p"><h2>Pos. ' + (i + 1) + ' · ' + esc(x.name || 'Fenster') + '</h2><p class="m">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p>' + rowsH(x) + '</div>'; }).join('') + '<p class="m" style="margin-top:24px">Erfasst mit Fensterino. Vor der Fertigung Feinaufmaß vor Ort.</p></body></html>';
 }
-async function saveDatei() {
+/* variante 'kunde' (Standard, für die eigenen Unterlagen) oder 'fensterbauer' (so, wie es an einen Betrieb geht) */
+async function saveDatei(variante) {
   if (S.betrieb && !kauf().paid) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
   if (!kauf().paid && !KUNDE_FREI()) return go('datei');
-  const pdf = blattPDF(), name = fileBase() + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
+  await blattSchrift();
+  const fb = variante === 'fensterbauer', pdf = blattPDF(fb ? 'fensterbauer' : 'kunde'), name = fileBase() + (fb ? '-fuer-Fensterbauer' : '') + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
   if (!DL && DLP) await DLP;
   if (DL) {
     try { await DL.save({ filename: name, data: data }); S._feier = 'pdf'; toast('Gespeichert'); }

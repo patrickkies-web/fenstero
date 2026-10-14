@@ -13,6 +13,7 @@ Die Aufmaß-App für Fenster. Hauseigentümer messen ihre Fenster selbst, Schrit
 | `web/index.html` | Startseite und Bereich für Fensterbauer (Projekte, Aufmaß-Links, Einladungslisten, Abrechnung) |
 | `web/app/` | Mess-App für Kunden, Kundenlinks: `/app/#k-…` |
 | `web/assets/` | Programmcode und Gestaltung (`app.*`, `portal.*`, gemeinsam `gemeinsam.*` mit Logo und KI-Anbindung, Rechtsseiten `recht.css`) |
+| `web/assets/blatt.js`, `blatt-schrift.js` | das Aufmaßblatt als PDF: ein Zeichner für drei Ausgaben (für den Kunden, für den Fensterbauer, im Betriebsbereich in dessen Farben), Maven Pro eingebettet (OFL), wird erst beim Erzeugen geladen |
 | `web/config.js` | Einstellungen ohne Geheimnisse (Name, Pilotmodus, KI-Adresse) |
 | `web/impressum/`, `web/datenschutz/` | Rechtsseiten (Entwürfe mit Platzhaltern) |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
