@@ -1,4 +1,4 @@
-// Zamma · automatische Prüfung im Browser (Chromium über Playwright)
+// Klopfan · automatische Prüfung im Browser (Chromium über Playwright)
 //
 //   1. Testserver starten:   KI_ATTRAPPE=1 node scripts/dev-server.mjs
 //   2. Prüfung starten:      node scripts/pruefen.mjs
@@ -6,8 +6,8 @@
 //
 // Geprüft wird: alle Seiten laden ohne Fehler, ohne Verstoß gegen die Content-Security-Policy und ohne
 // Anfragen an fremde Server; kein alter Name mehr; Pilot-Hinweis; Kundenlink von Portal zu App und zurück;
-// ehrlicher Versand mit ZF1-Code; kostenlose PDF-Datei; KI mit Einwilligung; ältere FE1- und LM1-Codes bleiben lesbar;
-// Name und Spruch „Hier kommen wa zamm.“ an den richtigen Stellen.
+// ehrlicher Versand mit AM1-Code; kostenlose PDF-Datei; KI mit Einwilligung; ältere ZF1-, FE1- und LM1-Codes bleiben lesbar;
+// Name, Logo (Faust, die anklopft) und Spruch „Hier kommen wa zamm.“ an den richtigen Stellen.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -41,12 +41,13 @@ console.log('1. Seiten laden');
 {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
-  for (const [pfad, titel] of [['/', 'Zamma'], ['/app/', 'Zamma'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/gibtsnicht', 'nicht gefunden']]) {
+  for (const [pfad, titel] of [['/', 'Klopfan'], ['/app/', 'Klopfan'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/gibtsnicht', 'nicht gefunden']]) {
     const r = await page.goto(BASE + pfad, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
     const text = await page.evaluate(() => document.body.innerText);
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
-    ok(!/Lichtma|Fenstero/i.test(text) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
+    ok(!/Lichtma|Fenstero|Zamma/.test(text) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
+    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .klopf-faust, svg path[fill="#1E5BB8"]').count() > 0, pfad + ': Logo mit klopfender Faust da');
     if (pfad !== '/gibtsnicht') ok(text.includes('Hier kommen wa zamm.'), pfad + ': Spruch sichtbar');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
   }
@@ -171,7 +172,7 @@ console.log('4. Kundenlink von Anfang bis Ende');
   let text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Persönliche Anfrage von') && text.includes(link.betrieb), 'App zeigt „Persönliche Anfrage von ' + link.betrieb + '“');
   // zwei fertige Fenster in den Link legen (wie nach dem Messen)
-  await page.evaluate((code) => { localStorage.setItem('zamma.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, link.code);
+  await page.evaluate((code) => { localStorage.setItem('aufmass.k.' + code, JSON.stringify({ windows: demoProject(), proj: {}, name: '' })); }, link.code);
   await page.reload({ waitUntil: 'networkidle' });
   await page.click('.bb .btn.primary'); // Weiter zum Absenden
   await page.waitForSelector('[data-screen="anfrage"]');
@@ -186,7 +187,7 @@ console.log('4. Kundenlink von Anfang bis Ende');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Jetzt abschicken.') && !text.includes('Gesendet.'), 'Pilot: „Jetzt abschicken“ statt „Gesendet“');
   const code = await page.inputValue('#code-box');
-  ok(code.startsWith('ZF1.'), 'Aufmaß-Code beginnt mit ZF1.');
+  ok(code.startsWith('AM1.'), 'Aufmaß-Code beginnt mit AM1.');
   const wa = await page.getAttribute('a[href^="https://wa.me/"]', 'href');
   ok(decodeURIComponent(wa).includes(code) && decodeURIComponent(wa).includes('Code vom Kunden einfügen'), 'WhatsApp-Nachricht enthält Code und Anleitung');
   await foto(page, 'app-senden');
@@ -215,7 +216,7 @@ console.log('4. Kundenlink von Anfang bis Ende');
   await page.waitForTimeout(500);
   const ein = await page.evaluate((c) => { const l = A().links.find((x) => x.code === c); return l ? l.status : null; }, link.code);
   ok(ein === 'eingegangen', 'Portal: Aufmaß beim richtigen Projekt eingegangen (' + ein + ')');
-  ok(await page.evaluate((c) => !!unpack(c.replace(/^ZF1\./, 'FE1.')) && !!unpack(c.replace(/^ZF1\./, 'LM1.')), code), 'Ältere FE1- und LM1-Codes bleiben lesbar');
+  ok(await page.evaluate((c) => ['ZF1.', 'FE1.', 'LM1.'].every((alt) => !!unpack(c.replace(/^AM1\./, alt))), code), 'Ältere ZF1-, FE1- und LM1-Codes bleiben lesbar');
   await foto(page, 'portal-eingang');
   sauber(page, 'Code-Eingang ohne Fehler');
 

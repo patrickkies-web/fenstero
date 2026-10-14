@@ -1,4 +1,4 @@
-// Zamma · lokaler Testserver, verhält sich wie Cloudflare Pages:
+// Klopfan · lokaler Testserver, verhält sich wie Cloudflare Pages:
 // statische Dateien aus web/, Kopfzeilen aus web/_headers, /api/ki aus functions/api/ki.js.
 //
 //   node scripts/dev-server.mjs                  ohne KI
@@ -88,4 +88,4 @@ http.createServer(async (req, res) => {
     console.error(e);
     res.writeHead(500); res.end('Fehler');
   }
-}).listen(PORT, () => console.log('Zamma lokal: http://localhost:' + PORT + (ATTRAPPE ? '  (KI-Attrappe)' : env.ANTHROPIC_API_KEY ? '  (echte KI)' : '  (ohne KI)')));
+}).listen(PORT, () => console.log('Klopfan lokal: http://localhost:' + PORT + (ATTRAPPE ? '  (KI-Attrappe)' : env.ANTHROPIC_API_KEY ? '  (echte KI)' : '  (ohne KI)')));

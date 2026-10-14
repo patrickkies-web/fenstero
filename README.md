@@ -1,6 +1,6 @@
-# Zamma
+# Klopfan
 
-**Hier kommen wa zamm.** Zamma bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Zum Start: Fenster.
+**Hier kommen wa zamm.** Klopfan bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Zum Start: Fenster.
 
 Fenster-Aufmaß, geführt. Hauseigentümer messen ihre Fenster selbst, Schritt für Schritt erklärt, mit Fotos, 3-D-Modell und allen Wünschen. Fensterbauer bekommen ein vollständiges Aufmaß fürs Angebot, ohne Anfahrt.
 
@@ -13,10 +13,11 @@ Fenster-Aufmaß, geführt. Hauseigentümer messen ihre Fenster selbst, Schritt f
 | `web/` | die Website, so wie sie ausgeliefert wird (Cloudflare Pages: Ausgabeverzeichnis `web`, kein Build-Befehl) |
 | `web/index.html` | Portal für Fensterbauer und Hauseigentümer |
 | `web/app/` | Mess-App für Kunden, Kundenlinks: `/app/#k-…` |
-| `web/assets/` | Programmcode und Gestaltung (`app.*`, `portal.*`, gemeinsam `zamma.*`, Rechtsseiten `recht.css`) |
+| `web/assets/` | Programmcode und Gestaltung (`app.*`, `portal.*`, gemeinsam `gemeinsam.*` mit Logo und KI-Anbindung, Rechtsseiten `recht.css`) |
 | `web/config.js` | Einstellungen ohne Geheimnisse (Name, Spruch, Pilotmodus, KI-Adresse) |
 | `web/impressum/`, `web/datenschutz/` | Rechtsseiten (Entwürfe mit Platzhaltern) |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
+| `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: Faust, die anklopft (orange Kachel, blauer Ärmel) |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL) und jsPDF (MIT), lokal statt von fremden Servern |
 | `functions/api/ki.js` | KI-Auswertung der Fotos (Cloudflare Pages Function), Schlüssel als Secret `ANTHROPIC_API_KEY` |
 | `scripts/` | lokaler Testserver, Browser-Prüfung, Umbenennen |

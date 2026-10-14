@@ -1,8 +1,8 @@
-/* Zamma · Einstellungen der Website
+/* Klopfan · Einstellungen der Website
    Hier stehen KEINE geheimen Schlüssel. Der KI-Schlüssel liegt nur bei Cloudflare
    (Umgebungsvariable ANTHROPIC_API_KEY, siehe docs/ONLINE-STELLEN.md). */
-window.ZAMMA = {
-  marke: 'Zamma',
+window.KONFIG = {
+  marke: 'Klopfan',
   spruch: 'Hier kommen wa zamm.',
   pilot: true,                 // Pilotphase: kein Server, Code-Versand per WhatsApp/E-Mail, Datei kostenlos, nichts wird berechnet
   ki: '/api/ki',               // KI-Auswertung der Fotos; '' schaltet sie ganz ab
