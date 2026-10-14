@@ -147,11 +147,13 @@ const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, i
   ok(/\.pdf$/.test(dl3.suggestedFilename()) && await page.evaluate(() => S.teil && S.teil.betrieb > 0) && /Unterwegs zu deinem Fensterbauer/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('.share-way.done').count() === 1, 'PDF an den Fensterbauer: Weg 1 erledigt, nächster Schritt angestoßen');
   const fs = await import('node:fs'), cp = await import('node:child_process');
   const pdfText = (pfad) => { try { return cp.execFileSync('pdftotext', ['-layout', pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
-  const pdfBytes = fs.readFileSync(await dl3.path());
+  const dl3Pfad = await dl3.path(), pdfBytes = fs.readFileSync(dl3Pfad);
   ok(pdfBytes.subarray(0, 5).toString() === '%PDF-', 'Datei ist ein echtes PDF');
   const roh3 = pdfBytes.toString('latin1'), txt3 = pdfText(await dl3.path());
   ok(/MavenBlack/.test(roh3) && /MavenMedium/.test(roh3), 'PDF trägt die eingebettete Marken-Schrift');
-  ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /Dieses Aufmaß in Ihrem Fensterino-Konto/.test(txt3), 'PDF an den Fensterbauer: Einladungsseite mit QR-Link und Aufmaß-Code');
+  ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /dieses Aufmaß in Ihr Fensterino-Konto/.test(txt3), 'PDF an den Fensterbauer: Einladung mit QR-Link und Aufmaß-Code in der Übersicht');
+  const seite3 = (() => { try { return cp.execFileSync('pdftotext', ['-f', '3', '-l', '3', dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /FENSTERINO/.test(seite3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite');
   ok(/IHRES KUNDEN/.test(txt3) && /SO ERREICHEN SIE DEN KUNDEN/.test(txt3) && /Übersicht/.test(txt3) && /Maueröffnung/.test(txt3), 'Ausgabe für den Fensterbauer: Sie-Ansprache, Übersicht, Positionsseite');
   const m3 = /AM1\.[A-Za-z0-9_\-\s]+/.exec(txt3), code3 = m3 ? m3[0].replace(/\s+/g, '') : '';
   const dekod3 = await page.evaluate((c) => { const o = unpackProject(c); return o ? o.w.length : 0; }, code3);
@@ -159,7 +161,7 @@ const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, i
   const [dl4] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
   ok(/\.pdf$/.test(dl4.suggestedFilename()), 'Eigen-Kunde lädt seine PDF kostenlos: ' + dl4.suggestedFilename());
   const txt4 = pdfText(await dl4.path());
-  ok(/DEIN FENSTER-AUFMASS/.test(txt4) && /Deine Wünsche/.test(txt4) && /Für dich:/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache');
+  ok(/DEIN FENSTER-AUFMASS/.test(txt4) && /Deine Wünsche/.test(txt4) && /DEINE KONTAKTDATEN/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache');
   await foto(page, 'app-zwei-wege');
   sauber(page, 'Messablauf ohne Fehler');
 

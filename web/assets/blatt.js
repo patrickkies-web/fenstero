@@ -14,7 +14,7 @@
      h: { derive(w), lab(gruppe, key), col(key) -> [Name, Code, Hex], orn(key), th(mm), num(v) }
    } */
 window.Blatt = (() => {
-  const W = 210, H = 297, M = 14, CW = W - 2 * M, BOTTOM = H - 16;
+  const W = 210, H = 297, M = 14, RM = 18, XR = W - RM, CW = XR - M, BOTTOM = H - 16, STREIFEN = 8;
   const INK = '#1d1d1f', GREY = '#6e6e73', LINE = '#d9d9de', PAPER = '#f5f5f7', ACC = '#0071e3', MO = '#d4502b', EL = '#0071e3', OK = '#1f7a3d', WARN = '#a85a00', GLASS = '#d6e6f4', WALL = '#efece6', LAIB = '#ddd7cc', LAIB2 = '#cfc8bb';
   const rgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16, (n >> 8) & 255, n & 255]; };
   const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[  ]/g, ' '));
@@ -85,14 +85,14 @@ window.Blatt = (() => {
         fill('#ffffff'); doc.circle(cx, cy, r, 'F');
         font('black', gross ? 13 : 6, BRAND); txt(initial(bt.name), cx, cy + (gross ? 4.6 : 2.1), { align: 'center' });
         font('bold', gross ? 15 : 8, '#ffffff'); txt(bt.name || 'Betrieb', cx + r + (gross ? 5 : 2.5), cy + (gross ? 5.2 : 2.8));
-        font('normal', gross ? 8 : 6.5, '#ffffff'); alpha(0.8); txt(gross ? 'Aufmaß · erfasst vom Kunden mit Fensterino' : laufTitel, W - M, cy + (gross ? 1 : 2.3), { align: 'right' }); alpha(1);
-        if (gross) { font('normal', 8, '#ffffff'); alpha(0.8); txt([bt.nr, bt.eingegangen ? 'eingegangen ' + bt.eingegangen : heute].filter(Boolean).join(' · '), W - M, cy + 6, { align: 'right' }); alpha(1); }
+        font('normal', gross ? 8 : 6.5, '#ffffff'); alpha(0.8); txt(gross ? 'Aufmaß · erfasst vom Kunden mit Fensterino' : laufTitel, XR, cy + (gross ? 1 : 2.3), { align: 'right' }); alpha(1);
+        if (gross) { font('normal', 8, '#ffffff'); alpha(0.8); txt([bt.nr, bt.eingegangen ? 'eingegangen ' + bt.eingegangen : heute].filter(Boolean).join(' · '), XR, cy + 6, { align: 'right' }); alpha(1); }
       } else {
         marke(M, gross ? 5 : 1.6, gross ? 14 : 5.8, true);
         font('black', gross ? 16 : 8, '#ffffff'); txt('Fensterino', M + (gross ? 19 : 7.8), gross ? 17.2 : 6.6);
         font('normal', gross ? 8 : 6.5, '#ffffff'); alpha(0.78);
-        if (gross) { txt('AUFMASSBLATT', W - M, 10, { align: 'right', charSpace: 0.6 }); txt(heute, W - M, 15.5, { align: 'right' }); }
-        else txt(laufTitel, W - M, 6.3, { align: 'right' });
+        if (gross) { txt('AUFMASSBLATT', XR, 10, { align: 'right', charSpace: 0.6 }); txt(heute, XR, 15.5, { align: 'right' }); }
+        else txt(laufTitel, XR, 6.3, { align: 'right' });
         alpha(1);
       }
       doc.setTextColor.apply(doc, rgb(INK));
@@ -100,16 +100,54 @@ window.Blatt = (() => {
     };
     const neueSeite = () => { doc.addPage(); y = kopfband(false) + 10; };
     const platz = (h2) => { if (y + h2 > BOTTOM) neueSeite(); };
+    let codeSeite = 2, deckKarte = null;
+    /* Senkrechter Markenstreifen am rechten Rand jeder Seite: Werbung, die nicht abtrennbar ist */
+    const streifen = (bandH) => {
+      const x0 = W - STREIFEN, y0 = bandH, y1 = H - 12, len = y1 - y0;
+      fill(BRAND); doc.rect(x0, y0, STREIFEN, len, 'F');
+      const text = V === 'betrieb'
+        ? String(bt.name || 'Betrieb').toUpperCase() + '  ·  Aufmaß Ihres Kunden  ·  erstellt mit Fensterino  ·  ' + (e.portalKurz || 'fensterino.com')
+        : 'FENSTERINO  ·  Fenster aufmessen. Selbst. Richtig.  ·  ' + (e.portalKurz || 'fensterino.com') + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen, Seite ' + codeSeite + '  ·  3 Projekte kostenlos';
+      let size = 6.8; font('bold', size, '#ffffff');
+      while (tw(text) > len - 16 && size > 5.2) { size -= 0.2; font('bold', size, '#ffffff'); }
+      const tl = tw(text), ty = y1 - 9 - (len - 16 - tl) / 2;
+      txt(text, x0 + STREIFEN / 2 + size * 0.12, ty, { angle: 90 });
+      marke(x0 + 1.2, y1 - 7.2, STREIFEN - 2.4, true);
+    };
     const fuss = () => {
       const n = doc.getNumberOfPages();
       for (let i = 1; i <= n; i++) {
         doc.setPage(i);
-        stroke(LINE); doc.setLineWidth(0.25); doc.line(M, H - 11.5, W - M, H - 11.5);
+        stroke(LINE); doc.setLineWidth(0.25); doc.line(M, H - 11.5, XR, H - 11.5);
         font('normal', 7.2, GREY);
         txt(V === 'betrieb' ? 'Erstellt mit Fensterino für ' + (bt.name || 'Ihren Betrieb') + ' · ' + (e.portalKurz || 'fensterino.com') + ' · Vor der Fertigung Feinaufmaß vor Ort.' : 'Erstellt mit Fensterino · ' + (e.portalKurz || 'fensterino.com') + ' · Vor der Fertigung Feinaufmaß vor Ort.', M, H - 7.2);
-        txt('Seite ' + i + ' von ' + n, W - M, H - 7.2, { align: 'right' });
+        txt('Seite ' + i + ' von ' + n, XR, H - 7.2, { align: 'right' });
+        streifen(i === 1 ? 24 : 9);
       }
+      if (deckKarte) { doc.setPage(1); fbKarte(deckKarte.x, deckKarte.y, deckKarte.w, deckKarte.h); }
     };
+    /* QR-Code zur Anmeldung (?von=pdf), weiß hinterlegt und anklickbar */
+    const QR_URL = (e.portalUrl || '') + '?von=pdf';
+    function qr(x, y0, size) {
+      try {
+        if (!e.qr) return false;
+        const q = e.qr(0, 'M'); q.addData(QR_URL); q.make();
+        const nq = q.getModuleCount(), cell = (size - 2) / nq, x0 = x + 1, yy = y0 + 1;
+        fill('#ffffff'); rr(x, y0, size, size, 1.5); fill('#000000');
+        for (let r = 0; r < nq; r++) for (let c = 0; c < nq; c++) if (q.isDark(r, c)) doc.rect(x0 + c * cell, yy + r * cell, cell + 0.02, cell + 0.02, 'F');
+        doc.link(x, y0, size, size, { url: QR_URL });
+        return true;
+      } catch (err) { return false; }
+    }
+    /* Dunkle Karte für den Fensterbauer: QR links, Text rechts (Deckblatt) */
+    function fbKarte(x, y0, w, hh) {
+      fill(INK); rr(x, y0, w, hh, 4);
+      const qs = hh - 8; qr(x + 4, y0 + 4, qs);
+      const tx = x + qs + 9, tw2 = w - qs - 13;
+      font('bold', 6.2, ACC); txt('FÜR DEN FENSTERBAUER', tx, y0 + 7, { charSpace: 0.4 });
+      font('black', 9.6, '#ffffff'); const hl = wrap('Dieses Aufmaß in Ihr Fensterino-Konto holen.', tw2); txt(hl, tx, y0 + 12.4, { lineHeightFactor: 1.1 });
+      font('normal', 6.6, '#ffffff'); alpha(0.85); txt(wrap('Scannen, kostenlos registrieren, Code von Seite ' + codeSeite + ' einfügen. Die ersten 3 Projekte sind frei.', tw2), tx, y0 + 12.4 + hl.length * 3.8 + 2.2, { lineHeightFactor: 1.25 }); alpha(1);
+    }
 
     /* ---------- Bausteine ---------- */
     const eyebrow = (s, x, y0, color) => { font('bold', 7, color || ACC); txt(String(s).toUpperCase(), x, y0, { charSpace: 0.5 }); };
@@ -241,7 +279,7 @@ window.Blatt = (() => {
       else zeilen(rows, x + 4, yy, w - 8, opt);
       return hh;
     }
-    function sektion(titel, sub) { platz(16); font('black', 16, INK); txt(titel, M, y); if (sub) { font('normal', 8.5, GREY); txt(sub, W - M, y, { align: 'right' }); } stroke(INK); doc.setLineWidth(0.5); doc.line(M, y + 3, W - M, y + 3); y += 10; }
+    function sektion(titel, sub) { platz(16); font('black', 16, INK); txt(titel, M, y); if (sub) { font('normal', 8.5, GREY); txt(sub, XR, y, { align: 'right' }); } stroke(INK); doc.setLineWidth(0.5); doc.line(M, y + 3, XR, y + 3); y += 10; }
     /* Kachel mit Symbol, Titel und Text */
     const kachel = (x, y0, w, hh, titel, text, ico, col) => {
       fill('#ffffff'); stroke(LINE); doc.setLineWidth(0.3); rr(x, y0, w, hh, 3, 'FD');
@@ -275,7 +313,7 @@ window.Blatt = (() => {
     [[wins.length + (wins.length === 1 ? ' Position' : ' Positionen'), INK, '#ffffff'], [nE + (nE === 1 ? ' Element' : ' Elemente'), PAPER, INK], [nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' ausgewertet' : 'ohne Fotos', PAPER, INK], [komplett ? '8 Handmaße je Fenster' : 'Maße teilweise offen', komplett ? '#e8f5ec' : '#fff4e5', komplett ? OK : WARN]].forEach((c) => { cx += chip(c[0], cx, y, c[1], c[2], 8) + 2.5; });
     y += 11;
     /* Großes Bild links, daneben drei Kacheln: was drinsteckt */
-    const heroW = 116, heroH = 112, kx = M + heroW + 5, kw0 = CW - heroW - 5;
+    const heroW = 112, heroH = 112, kx = M + heroW + 5, kw0 = CW - heroW - 5;
     fill(PAPER); rr(M, y, heroW, heroH, 5);
     if (wins.length) {
       const w0 = wins[0]; zeichnung(w0, M + 2, y + 5, heroW - 4, heroH - 16, false);
@@ -297,18 +335,21 @@ window.Blatt = (() => {
     const hk = kontakt.length ? karte(M, y, halb, sie ? (V === 'betrieb' ? 'Ihr Kunde' : 'So erreichen Sie den Kunden') : 'Deine Kontaktdaten fürs Angebot', kontakt, V === 'fensterbauer' ? { lw: 24, rand: ACC, titelCol: ACC } : { lw: 24 }) : 0;
     const he = karte(M + halb + 5, y, halb, 'Eckdaten zum Projekt', eck, { lw: 26 });
     y += Math.max(hk, he) + 6;
-    if (V !== 'betrieb' && y + 18 <= BOTTOM) {
-      eyebrow('So geht es weiter', M, y, GREY); y += 5;
-      schritte(M, y, CW, sie ? [['Angebot', 'auf Grundlage dieses Blatts'], ['Feinaufmaß', 'ein Termin vor Ort, vor der Fertigung'], ['Fertigung und Einbau', 'nach Absprache']] : [['Angebot', 'dein Fensterbauer rechnet mit diesem Blatt'], ['Feinaufmaß', 'ein Termin vor Ort, vor der Fertigung'], ['Fertigung und Einbau', 'Termin nach Absprache']]);
-      y += 16;
+    if (V !== 'betrieb') {
+      const kh2 = 36, kwq = 86, sw0 = CW - kwq - 6;
+      if (y + kh2 > BOTTOM) y = BOTTOM - kh2;
+      eyebrow('So geht es weiter', M, y + 1, GREY);
+      schritte(M, y + 6, sw0, sie ? [['Angebot', 'auf Grundlage dieses Blatts'], ['Feinaufmaß', 'vor Ort, vor der Fertigung'], ['Einbau', 'nach Absprache']] : [['Angebot', 'mit diesem Blatt'], ['Feinaufmaß', 'vor Ort, vor der Fertigung'], ['Einbau', 'nach Absprache']]);
+      deckKarte = { x: M + sw0 + 6, y: y, w: kwq, h: kh2 };
+      y += kh2;
     }
 
     /* ---------- Übersicht ---------- */
     neueSeite();
     sektion('Übersicht', wins.length + (wins.length === 1 ? ' Position' : ' Positionen') + ' · ' + nE + (nE === 1 ? ' Element' : ' Elemente') + (V === 'betrieb' ? ' · Bestellmaß = Öffnung minus Abzug' : ' · alle Maße in mm'));
-    const cols = V === 'betrieb' ? [['Pos.', 9], ['Fenster', 40], ['Öffnung', 23], ['Element', 23], ['Bestellmaß', 24], ['Öffnungsart', 27], ['Material · Farbe', 26], ['Stk.', 10]] : [['Pos.', 9], ['Fenster', 44], ['Öffnung', 25], ['Element', 25], ['Öffnungsart', 29], ['Material · Farbe', 29], ['Glas', 13], ['Stk.', 8]];
+    const cols = V === 'betrieb' ? [['Pos.', 9], ['Fenster', 38], ['Öffnung', 23], ['Element', 23], ['Bestellmaß', 24], ['Öffnungsart', 27], ['Material · Farbe', 24], ['Stk.', 10]] : [['Pos.', 9], ['Fenster', 42], ['Öffnung', 25], ['Element', 25], ['Öffnungsart', 28], ['Material · Farbe', 28], ['Glas', 13], ['Stk.', 8]];
     const colX = []; let ax = M; cols.forEach((c) => { colX.push(ax); ax += c[1]; });
-    const tabKopf = () => { font('bold', 6.8, GREY); cols.forEach((c, i) => txt(c[0].toUpperCase(), colX[i] + (i === cols.length - 1 ? c[1] - 1 : 0), y, { align: i === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 })); y += 2; stroke(INK); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 1; };
+    const tabKopf = () => { font('bold', 6.8, GREY); cols.forEach((c, i) => txt(c[0].toUpperCase(), colX[i] + (i === cols.length - 1 ? c[1] - 1 : 0), y, { align: i === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 })); y += 2; stroke(INK); doc.setLineWidth(0.5); doc.line(M, y, XR, y); y += 1; };
     tabKopf();
     wins.forEach((w, i) => {
       const d = h.derive(w), fa = farbe(w.fa), fIdx = V === 'betrieb' ? 6 : 5;
@@ -332,7 +373,7 @@ window.Blatt = (() => {
         if (k === fIdx) { swatch(fa[2], colX[k] + 1.6, ty - 1, 1.5); txt(lines[k], colX[k] + 4.4, ly); }
         else txt(lines[k], colX[k] + (last ? cols[k][1] - 1 : 0), ly, { align: last ? 'right' : 'left' });
       });
-      y += rh; stroke(LINE); doc.setLineWidth(0.2); doc.line(M, y, W - M, y);
+      y += rh; stroke(LINE); doc.setLineWidth(0.2); doc.line(M, y, XR, y);
     });
     y += 4;
     font('normal', 6.9, GREY); const legende = wrap('Maueröffnung: von drei Breiten und drei Höhen zählt das kleinste Maß; Abweichungen stehen bei der Position. Element: das sichtbare Fenster mit Rahmen. Öffnungssymbole: Linien beginnen an der Bandseite, die Spitze zeigt zum Griff; Dreieck mit Spitze oben = Kipp. ' + (V === 'betrieb' ? 'Bestellmaß: Vorschlag aus Ihrem Abzug, verbindlich bleibt Ihr Feinaufmaß.' : 'Das Bestellmaß legt der Fensterbauer beim Feinaufmaß fest.'), CW); txt(legende, M, y + 2.5); y += legende.length * 3.1 + 8;
@@ -347,22 +388,55 @@ window.Blatt = (() => {
     platz(Math.max(ha, hz));
     karte(M, y, halb, 'Ausstattung im Überblick', ausst, { lw: 26 }); karte(M + halb + 5, y, halb, 'Zahlen', zahlen, { lw: 28 });
     y += Math.max(ha, hz) + 6;
-    /* Alle Fenster im selben Maßstab */
+    /* Für den Fensterbauer: Einladung mit QR und der Code, mitten im Blatt statt auf einer abtrennbaren letzten Seite */
+    if (V !== 'betrieb') {
+      platz(68);
+      fill(INK); rr(M, y, CW, 23, 4);
+      marke(M + 5, y + 5.5, 12, true);
+      font('black', 13, '#ffffff'); txt('Für den Fensterbauer: dieses Aufmaß in Ihr Fensterino-Konto.', M + 21, y + 9);
+      font('normal', 7.2, '#ffffff'); alpha(0.85); txt(wrap('Projekt mit Positionen zum Bearbeiten, 3-D-Ansicht, Bestellmaß nach Ihrem Abzug, Nachbesserung per Link, PDF mit Ihrem Logo. Die ersten 3 Projekte sind frei.', CW - 26), M + 21, y + 14.2, { lineHeightFactor: 1.25 }); alpha(1);
+      y += 28;
+      const qs = 30, qx = XR - qs - 2;
+      [['Kostenlos registrieren', (e.portalKurz || 'fensterino.com') + ' oder den QR-Code scannen'], ['„Code vom Kunden einfügen“', 'den Aufmaß-Code einsetzen, Leerzeichen und Umbrüche stören nicht'], ['Projekt ist da', 'danach eigene Kunden per Aufmaß-Link einladen statt hinzufahren']].forEach((st, k) => { fill(INK); doc.circle(M + 4, y + 4 + k * 10.5, 4, 'F'); font('black', 9, '#ffffff'); txt(String(k + 1), M + 4, y + 5.4 + k * 10.5, { align: 'center' }); font('bold', 9, INK); txt(st[0], M + 11, y + 3.4 + k * 10.5); font('normal', 7.2, GREY); txt(st[1], M + 11, y + 7.4 + k * 10.5); });
+      fill('#ffffff'); stroke(LINE); doc.setLineWidth(0.3); rr(qx - 2, y - 3, qs + 4, qs + 9, 2, 'FD');
+      qr(qx, y - 1, qs); font('normal', 6.4, GREY); txt('Scannen: Anmeldung', qx + qs / 2, y + qs + 3.6, { align: 'center' });
+      y += 41;
+      font('bold', 7.8, INK); txt('3 Projekte kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß. Nachbesserungen inklusive. Keine Grundgebühr.', M, y); y += 7;
+      if (e.code) {
+        /* Courier, damit sich der Code aus jedem PDF-Programm sauber kopieren lässt */
+        font('mono', 5.8); const zeilen2 = doc.splitTextToSize(e.code, CW - 8), zh2 = 2.5;
+        let k = 0, erster = true;
+        while (k < zeilen2.length) {
+          const frei = Math.floor((BOTTOM - y - (erster ? 12 : 8)) / zh2);
+          if (frei < 6 || (erster && frei < Math.min(zeilen2.length, 12))) { neueSeite(); continue; }
+          const teil = zeilen2.slice(k, k + frei), hh = teil.length * zh2 + (erster ? 12 : 8);
+          if (erster) codeSeite = doc.getNumberOfPages();
+          fill(PAPER); rr(M, y, CW, hh, 3);
+          if (erster) { eyebrow('Aufmaß-Code für Fensterino', M + 4, y + 5.2, INK); font('normal', 6.6, GREY); txt('Enthält Maße, Wünsche und Fotoauswertung aller Positionen. Als Text markieren und kopieren.', XR - 4, y + 5.2, { align: 'right' }); }
+          font('mono', 5.8, '#3a3a3f'); let cy2 = y + (erster ? 10.4 : 6);
+          teil.forEach((z) => { txt(z, M + 4, cy2); cy2 += zh2; });
+          y += hh + 3; k += teil.length; erster = false;
+        }
+      }
+      y += 3;
+    }
+    /* Alle Fenster im selben Maßstab, wenn noch Platz auf der Seite ist */
     if (wins.length > 1) {
       const maxH = wins.reduce((a, x) => Math.max(a, h.derive(x).elH || 1200), 0), maxW = wins.reduce((a, x) => Math.max(a, h.derive(x).elW || 1000), 0);
-      const perRow = Math.min(wins.length, 6), slot = (CW - 8) / perRow, zeilenN = Math.ceil(wins.length / perRow), sc = Math.min(34 / maxH, (slot - 10) / maxW), rowH = maxH * sc + 16;
+      const perRow = Math.min(wins.length, 6), slot = (CW - 8) / perRow, zeilenN = Math.ceil(wins.length / perRow), sc = Math.min(30 / maxH, (slot - 10) / maxW), rowH = maxH * sc + 16;
       const gh = 12 + zeilenN * rowH + 2;
-      platz(gh);
-      fill('#ffffff'); stroke(LINE); doc.setLineWidth(0.3); rr(M, y, CW, gh, 3, 'FD');
-      eyebrow('Alle Fenster im selben Maßstab', M + 4, y + 5.2, GREY);
-      wins.forEach((w, i) => {
-        const d = h.derive(w), ww = (d.elW || 1000) * sc, wh = (d.elH || 1200) * sc, r = Math.floor(i / perRow), c = i % perRow;
-        const cx0 = M + 4 + c * slot + slot / 2, base = y + 10 + r * rowH + maxH * sc;
-        ansicht(w, cx0 - ww / 2, base - wh, ww, wh);
-        font('bold', 7, INK); txt(wrap((i + 1) + ' · ' + (w.name || 'Fenster'), slot - 4)[0], cx0, base + 4.2, { align: 'center' });
-        font('normal', 6.4, GREY); txt(d.elW ? th(d.elW) + ' × ' + th(d.elH) + ((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stk.' : '') : 'Maße offen', cx0, base + 7.6, { align: 'center' });
-      });
-      y += gh + 6;
+      if (y + gh <= BOTTOM) {
+        fill('#ffffff'); stroke(LINE); doc.setLineWidth(0.3); rr(M, y, CW, gh, 3, 'FD');
+        eyebrow('Alle Fenster im selben Maßstab', M + 4, y + 5.2, GREY);
+        wins.forEach((w, i) => {
+          const d = h.derive(w), ww = (d.elW || 1000) * sc, wh = (d.elH || 1200) * sc, r = Math.floor(i / perRow), c = i % perRow;
+          const cx0 = M + 4 + c * slot + slot / 2, base = y + 10 + r * rowH + maxH * sc;
+          ansicht(w, cx0 - ww / 2, base - wh, ww, wh);
+          font('bold', 7, INK); txt(wrap((i + 1) + ' · ' + (w.name || 'Fenster'), slot - 4)[0], cx0, base + 4.2, { align: 'center' });
+          font('normal', 6.4, GREY); txt(d.elW ? th(d.elW) + ' × ' + th(d.elH) + ((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stk.' : '') : 'Maße offen', cx0, base + 7.6, { align: 'center' });
+        });
+        y += gh + 6;
+      }
     }
 
     /* ---------- Je Position eine Seite ---------- */
@@ -374,11 +448,11 @@ window.Blatt = (() => {
       font('black', 21, INK); txt(w.name || 'Fenster ' + (i + 1), M + 17, y + 0.5);
       font('normal', 8.8, GREY); txt([h.lab('etage', w.etage) || 'EG', n > 1 ? n + ' Stück' : '1 Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos', d.moW && d.elW ? 'alle 8 Handmaße' : 'Maße unvollständig'].join(' · '), M + 17, y + 6.5);
       if (V === 'betrieb') {
-        fill(BRAND); rr(W - M - 64, y - 8, 64, 17, 3); font('bold', 6.3, '#ffffff'); alpha(0.85); txt('BESTELLMASS-VORSCHLAG', W - M - 60, y - 3.4, { charSpace: 0.4 }); alpha(1); font('black', 12.5, '#ffffff'); txt(bestell(w), W - M - 60, y + 3.2);
-        font('normal', 6.2, '#ffffff'); alpha(0.85); txt('Öffnung minus ' + ab.seite + ' mm je Seite, minus ' + ab.oben + ' mm oben', W - M - 60, y + 7); alpha(1);
+        fill(BRAND); rr(XR - 64, y - 8, 64, 17, 3); font('bold', 6.3, '#ffffff'); alpha(0.85); txt('BESTELLMASS-VORSCHLAG', XR - 60, y - 3.4, { charSpace: 0.4 }); alpha(1); font('black', 12.5, '#ffffff'); txt(bestell(w), XR - 60, y + 3.2);
+        font('normal', 6.2, '#ffffff'); alpha(0.85); txt('Öffnung minus ' + ab.seite + ' mm je Seite, minus ' + ab.oben + ' mm oben', XR - 60, y + 7); alpha(1);
       } else if (d.moW && d.moH) {
-        font('bold', 6.3, GREY); txt('MAUERÖFFNUNG', W - M, y - 3.4, { align: 'right', charSpace: 0.4 }); font('black', 12.5, MO); txt(th(d.moW) + ' × ' + th(d.moH) + ' mm', W - M, y + 3.2, { align: 'right' });
-        font('normal', 6.6, GREY); txt('Element ' + th(d.elW) + ' × ' + th(d.elH) + ' mm', W - M, y + 7.4, { align: 'right' });
+        font('bold', 6.3, GREY); txt('MAUERÖFFNUNG', XR, y - 3.4, { align: 'right', charSpace: 0.4 }); font('black', 12.5, MO); txt(th(d.moW) + ' × ' + th(d.moH) + ' mm', XR, y + 3.2, { align: 'right' });
+        font('normal', 6.6, GREY); txt('Element ' + th(d.elW) + ' × ' + th(d.elH) + ' mm', XR, y + 7.4, { align: 'right' });
       }
       y += 13;
       /* Zeichnung über die volle Breite */
@@ -386,7 +460,7 @@ window.Blatt = (() => {
       zeichnung(w, M + 2, y + 1, CW - 4, zh - 8, true);
       font('normal', 6.6, GREY); swatch(MO, M + 6, y + zh - 4.4, 1.4); txt('Maueröffnung, von Hand, in mm', M + 9, y + zh - 3.4); swatch(EL, M + 52, y + zh - 4.4, 1.4); txt('Fensterelement mit Rahmen', M + 55, y + zh - 3.4);
       const hinweise = [w.richtung === 'aussen' ? 'gestrichelt: öffnet nach außen' : '', num(w.laib) ? 'Laibung innen ' + th(w.laib) + ' mm' : '', h.lab('anschlag', w.anschlag) && w.anschlag !== 'ohne' ? h.lab('anschlag', w.anschlag) : ''].filter(Boolean).join(' · ');
-      if (hinweise) txt(hinweise, W - M - 6, y + zh - 3.4, { align: 'right' });
+      if (hinweise) txt(hinweise, XR - 6, y + zh - 3.4, { align: 'right' });
       if (d.devW > 5 || d.devH > 5) { font('bold', 6.6, WARN); txt('bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel, das kleinste Maß zählt', M + 96, y + zh - 3.4); }
       y += zh + 5;
       /* Drei Karten nebeneinander */
@@ -415,51 +489,6 @@ window.Blatt = (() => {
       if (w.notiz) { const rows = [[sie ? 'Notiz des Kunden' : 'Deine Notiz', '„' + w.notiz + '“']]; platz(karteH(rows, CW, '', { lw: 26 })); karte(M, y, CW, '', rows, { lw: 26, bg: '#fffbe8', rand: '#f2e2a4' }); y += karteH(rows, CW, '', { lw: 26 }) + 4; }
     });
 
-    /* ---------- Letzte Seite: für den Fensterbauer (nicht im Betriebsbereich) ---------- */
-    if (V !== 'betrieb') {
-      neueSeite();
-      const url = (e.portalUrl || '') + '?von=pdf';
-      fill(INK); rr(M, y - 4, CW, 40, 5);
-      marke(M + 6, y + 1, 12, true);
-      font('black', 18, '#ffffff'); txt('Dieses Aufmaß in Ihrem Fensterino-Konto.', M + 22, y + 6.5);
-      font('normal', 8.6, '#ffffff'); alpha(0.85); txt(wrap('Für Fensterbauer: Mit dem Code auf dieser Seite holen Sie das Aufmaß in Ihr Konto, als Projekt mit Positionen zum Bearbeiten, 3-D-Ansicht, Bestellmaß-Vorschlag und PDF mit Ihrem Logo. Dauert eine Minute und kostet nichts: Die ersten 3 Projekte sind frei.', CW - 30), M + 22, y + 13, { lineHeightFactor: 1.3 });
-      font('bold', 7.2, '#ffffff'); txt('Fensterino · Fenster aufmessen. Selbst. Richtig. · ' + (e.portalKurz || 'fensterino.com'), M + 22, y + 31.5); alpha(1);
-      y += 43;
-      kachel(M, y, kw, 32, 'Link statt Anfahrt', 'Schicken Sie Ihren nächsten Kunden einen Aufmaß-Link, einzeln oder als Liste. Er misst selbst, Sie bekommen alles fürs Angebot.', icoLink(ACC), ACC);
-      kachel(M + kw + 4, y, kw, 32, 'Alles sortiert, mit 3-D', 'Positionen zum Bearbeiten, Bestellmaß nach Ihrem Abzug, Fotoauswertung, PDF mit Ihrem Logo.', icoCube(ACC), ACC);
-      kachel(M + 2 * (kw + 4), y, kw, 32, 'Nachbesserung kostenlos', 'Stimmt ein Maß nicht, fragen Sie nach. Ihr Kunde ändert nur das Nötige, ohne neue Kosten.', icoLoop(ACC), ACC);
-      y += 40;
-      const qrS = 34, qrX = W - M - qrS;
-      [['Kostenlos registrieren', e.portalKurz || 'fensterino.com'], ['„Code vom Kunden einfügen“', 'den Code unten einsetzen, Leerzeichen und Umbrüche stören nicht'], ['Projekt ist da', 'Positionen, 3-D, Bestellmaß, Nachbesserung per Link']].forEach((st, k) => { fill(INK); doc.circle(M + 4, y + 4 + k * 12, 4, 'F'); font('black', 9, '#ffffff'); txt(String(k + 1), M + 4, y + 5.4 + k * 12, { align: 'center' }); font('bold', 9.5, INK); txt(st[0], M + 11, y + 3.6 + k * 12); font('normal', 7.6, GREY); txt(st[1], M + 11, y + 7.8 + k * 12); });
-      try {
-        if (e.qr) {
-          const q = e.qr(0, 'M'); q.addData(url); q.make();
-          const nq = q.getModuleCount(), cell = qrS / (nq + 2), x0 = qrX + cell, y0 = y - 2 + cell;
-          fill('#ffffff'); stroke(LINE); doc.setLineWidth(0.3); rr(qrX - 2, y - 4, qrS + 4, qrS + 4, 2, 'FD'); fill('#000000');
-          for (let r = 0; r < nq; r++) for (let c = 0; c < nq; c++) if (q.isDark(r, c)) doc.rect(x0 + c * cell, y0 + r * cell, cell + 0.02, cell + 0.02, 'F');
-          doc.link(qrX - 2, y - 4, qrS + 4, qrS + 4, { url: url });
-          font('normal', 6.8, GREY); txt('Scannen: Anmeldung', qrX + qrS / 2, y + qrS + 4.5, { align: 'center' });
-        }
-      } catch (err) { /* ohne QR weiter */ }
-      y += 42;
-      font('bold', 8.5, INK); txt('3 Projekte kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß. Nachbesserungen inklusive. Keine Grundgebühr.', M, y); y += 6;
-      font('normal', 7.4, GREY); const eig = wrap(V === 'kunde' ? 'Für dich: Dieses Blatt ist vollständig und gehört dir. Gib es jedem Fensterbauer, von dem du ein Angebot möchtest. Fensterino für Hauseigentümer: ' + (e.appKurz || '') : 'Für den Eigentümer: Dieses Blatt ist vollständig und gehört Ihnen. Geben Sie es jedem Fensterbauer, von dem Sie ein Angebot möchten. Fensterino für Hauseigentümer: ' + (e.appKurz || ''), CW); txt(eig, M, y); y += eig.length * 3.2 + 5;
-      /* Der Code: Courier, damit er sich aus jedem PDF-Programm sauber kopieren lässt */
-      if (e.code) {
-        font('mono', 6.6); const zeilen2 = doc.splitTextToSize(e.code, CW - 8);
-        let k = 0, erster = true;
-        while (k < zeilen2.length) {
-          const frei = Math.floor((BOTTOM - y - (erster ? 12 : 8)) / 2.85);
-          if (frei < 4) { neueSeite(); continue; }
-          const teil = zeilen2.slice(k, k + frei), hh = teil.length * 2.85 + (erster ? 12 : 8);
-          fill(PAPER); rr(M, y, CW, hh, 3);
-          if (erster) eyebrow('Aufmaß-Code für Fensterino', M + 4, y + 5.2, INK);
-          font('mono', 6.6, '#3a3a3f'); let cy2 = y + (erster ? 10.4 : 6);
-          teil.forEach((z) => { txt(z, M + 4, cy2); cy2 += 2.85; });
-          y += hh + 3; k += teil.length; erster = false;
-        }
-      }
-    }
     fuss();
     return doc.output('blob');
   }
