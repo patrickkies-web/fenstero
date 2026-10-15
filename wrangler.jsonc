@@ -4,7 +4,7 @@
      Konten der Betriebe (Supabase), Eingang von Aufmaßen aus der App. Die Seiten selbst, robots.txt und sitemap.xml
      ebenfalls (functions/seo.js): Freigabe für Suchmaschinen über die Variable INDEXIERUNG, Canonical über KANONISCH.
    - "name" muss genau so heißen wie der Worker im Cloudflare-Dashboard (Workers & Pages).
-   Schlüssel (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_ANON_KEY, FREISCHALT_GEHEIMNIS)
+   Schlüssel (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SECRET_KEY, FREISCHALT_GEHEIMNIS)
    gehören nur ins Dashboard (Einstellungen → Variablen und Geheimnisse, Typ Secret), nie hierher. Liste aller Variablen: functions/api/umgebung.js */
 {
   "name": "fenstero",

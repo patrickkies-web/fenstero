@@ -1,7 +1,7 @@
-/* eeziframes · Speicher: Supabase (PostgREST über fetch, mit dem service_role-Schlüssel, nur vom Server aus) oder eine Attrappe im Arbeitsspeicher zum Testen.
+/* eeziframes · Speicher: Supabase (PostgREST über fetch, mit dem geheimen Schlüssel sb_secret_… bzw. früher service_role, nur vom Server aus) oder eine Attrappe im Arbeitsspeicher zum Testen.
    Tabellen: siehe supabase/schema.sql. Je Betrieb liegt das Konto als ein JSON-Dokument (daten) mit Projekten, Buchungen und Nachrichten;
    Änderungen laufen über betriebAendern(id, fn) mit Versionszähler, damit zwei gleichzeitige Eingänge sich nicht überschreiben. */
-import { ApiFehler } from './umgebung.js';
+import { ApiFehler, sbNeu } from './umgebung.js';
 
 const attrappe = { betriebe: new Map(), zahlungen: new Map(), ereignisse: new Set(), codes: new Map() };
 const kopie = (o) => (o == null ? o : JSON.parse(JSON.stringify(o)));
@@ -42,9 +42,11 @@ function supabaseSpeicher(k) {
   const basis = k.supabase.url + '/rest/v1/';
   async function sb(pfad, init) {
     init = init || {};
-    const r = await fetch(basis + pfad, { method: init.method || 'GET', headers: Object.assign({ apikey: k.supabase.service, Authorization: 'Bearer ' + k.supabase.service, 'content-type': 'application/json', Prefer: init.prefer || 'return=representation' }, init.headers || {}), body: init.body ? JSON.stringify(init.body) : undefined });
+    const kopf = { apikey: k.supabase.service, 'content-type': 'application/json', Prefer: init.prefer || 'return=representation' };
+    if (!sbNeu(k.supabase.service)) kopf.Authorization = 'Bearer ' + k.supabase.service; // früherer service_role-Schlüssel (JWT)
+    const r = await fetch(basis + pfad, { method: init.method || 'GET', headers: Object.assign(kopf, init.headers || {}), body: init.body ? JSON.stringify(init.body) : undefined });
     if (r.status === 409) return { konflikt: true };
-    if (!r.ok) throw new ApiFehler('Datenbank antwortet nicht (' + r.status + ')', 502);
+    if (!r.ok) { console.log('Supabase-Fehler', r.status, pfad.split('?')[0], (await r.text().catch(() => '')).slice(0, 200)); throw new ApiFehler('Datenbank antwortet nicht (' + r.status + ')', 502); }
     if (r.status === 204) return null;
     const text = await r.text(); return text ? JSON.parse(text) : null;
   }

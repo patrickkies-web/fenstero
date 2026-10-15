@@ -4,7 +4,7 @@
 //   node scripts/dev-server.mjs                   Pilotmodus: ohne KI, ohne Zahlung, ohne Datenbank
 //   KI_ATTRAPPE=1                                  KI mit festen Beispielantworten (kein Schlüssel nötig)
 //   ZAHLUNG_ATTRAPPE=1 DATEN_ATTRAPPE=1            Stripe und Datenbank nachgestellt: Anmeldecode 123456, Kassen kehren sofort als bezahlt zurück
-//   ANTHROPIC_API_KEY=… STRIPE_SECRET_KEY=… SUPABASE_URL=… SUPABASE_SERVICE_KEY=… SUPABASE_ANON_KEY=…   echte Dienste (Schlüssel nie ins Repo schreiben)
+//   ANTHROPIC_API_KEY=… STRIPE_SECRET_KEY=… SUPABASE_URL=… SUPABASE_SECRET_KEY=…   echte Dienste (Schlüssel nie ins Repo schreiben)
 //
 // Danach im Browser: http://localhost:8788
 import http from 'node:http';

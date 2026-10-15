@@ -126,24 +126,24 @@ Was danach hilft (Erwähnungen, Bewertungen, Aktualität) und warum: [docs/SEO.m
 
 ## Stufe 2: Supabase und Stripe anschließen
 
-Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kasse, Webhook, Sammelrechnung), `web/assets/modell.js` (die Abrechnungsregeln, im Browser und auf dem Server dieselben) und `supabase/schema.sql` (die Tabellen). Du legst zwei Konten an und trägst die Schlüssel bei Cloudflare ein (Supabase drei, Stripe zwei, dazu ein Zufallstext), fertig. Die Website merkt über `/api/status`, was da ist: Der Pilot-Hinweis verschwindet, die App schickt Aufmaße direkt, die Kasse geht zu Stripe.
+Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kasse, Webhook, Sammelrechnung), `web/assets/modell.js` (die Abrechnungsregeln, im Browser und auf dem Server dieselben) und `supabase/schema.sql` (die Tabellen). Du legst zwei Konten an und trägst die Schlüssel bei Cloudflare ein (Supabase zwei, Stripe zwei, dazu ein Zufallstext), fertig. Die Website merkt über `/api/status`, was da ist: Der Pilot-Hinweis verschwindet, die App schickt Aufmaße direkt, die Kasse geht zu Stripe.
 
 Stripe geht auch allein, ohne Supabase: Dann kaufen Hauseigentümer das Aufmaßblatt über Stripe (im Testmodus mit Testkarte), alles für Betriebe bleibt im Pilotmodus, bis Supabase da ist.
 
 ### A. Supabase (Datenbank und Anmeldung), etwa 20 Minuten
 
-1. [supabase.com](https://supabase.com) → **New project**: Name `eeziframes`, Region **Central EU (Frankfurt)**, ein starkes Datenbank-Passwort (in den Passwort-Manager, du brauchst es sonst nicht).
-2. **SQL Editor → New query**: den Inhalt von `supabase/schema.sql` einfügen, **Run**. Das legt die Tabellen `betriebe`, `zahlungen`, `ereignisse` an und sperrt sie für Browser (nur der Server kommt mit dem Service-Schlüssel dran).
-3. **Project Settings → API**: notiere **Project URL** (`https://….supabase.co`), den **anon**-Schlüssel und den **service_role**-Schlüssel. Beide sind lange Texte, die mit `eyJ` beginnen; Supabase zeigt sie inzwischen unter „Legacy API keys“. Der service_role-Schlüssel darf nur bei Cloudflare liegen, nie im Browser, nie im Repo, nie in einem Chat.
+1. [supabase.com](https://supabase.com) → **New project**: Name `eeziframes`, Region **Central EU (Frankfurt)**, Datenbank-Passwort über **Generate a password** (in den Passwort-Manager, du brauchst es sonst nicht). Fragt Supabase nach Sicherheitsoptionen, die Vorgaben lassen („Data API + Connection String“, „public schema“): Der Server spricht über die Data API mit der Datenbank.
+2. **SQL Editor → New query**: den Inhalt von `supabase/schema.sql` einfügen, **Run**. Das legt die Tabellen `betriebe`, `zahlungen`, `ereignisse` an und sperrt sie für Browser (nur der Server kommt mit dem geheimen Schlüssel dran).
+3. **Project Settings → API Keys**: den **Secret key** (`sb_secret_…`) anzeigen und kopieren, gleich bei Cloudflare als Secret `SUPABASE_SECRET_KEY` eintragen (C). Die **Project URL** (`https://….supabase.co`) steht oben unter **Connect**. Der geheime Schlüssel darf nur bei Cloudflare liegen, nie im Browser, nie im Repo, nie in einem Chat. Den Publishable key (`sb_publishable_…`) braucht der Server nicht; ohne ihn nimmt die Anmeldung den geheimen. Ältere Projekte mit den früheren Schlüsseln (`eyJ…`, „Legacy API keys“: service_role und anon) gehen weiter unter `SUPABASE_SERVICE_KEY` und `SUPABASE_ANON_KEY`; Supabase schafft sie bis Ende 2026 ab, also besser die neuen nehmen.
 4. **Authentication → Sign In / Providers → Email**: eingeschaltet lassen, „Confirm email“ ist egal (wir nutzen den Code), **„Allow new users to sign up“ muss an sein**.
-5. **Authentication → Email Templates → Magic Link**: Betreff zum Beispiel `Ihr eeziframes-Anmeldecode`, Text zum Beispiel:
+5. **Authentication → Emails → Templates → Magic Link**: Betreff zum Beispiel `Ihr eeziframes-Anmeldecode`, Text zum Beispiel:
    ```
    Guten Tag,
    Ihr Anmeldecode für eeziframes lautet: {{ .Token }}
    Er gilt eine Stunde. Wenn Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail.
    ```
    Wichtig ist `{{ .Token }}`: Das ist der sechsstellige Code. Die Vorlage „Confirm signup“ genauso anpassen (sie wird beim allerersten Anmelden einer Adresse verschickt).
-6. **Authentication → SMTP Settings**: Supabase verschickt mit dem eingebauten Versand nur **etwa 2 E-Mails pro Stunde**, das reicht nicht für echte Betriebe. Trag einen eigenen Versand ein (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@eeziframes.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen). Bis dahin testest du mit deiner eigenen Adresse.
+6. **Authentication → Emails → SMTP Settings**: Der eingebaute Versand von Supabase schickt nur an Adressen aus deinem Supabase-Team und höchstens **2 E-Mails pro Stunde**; andere Adressen bekommen „Email address not authorized“. Zum Testen reicht deine eigene Adresse, für echte Betriebe trag einen eigenen Versand ein (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@eeziframes.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen).
 7. Optional, **Authentication → Rate Limits**: Codes pro Stunde und Adresse begrenzen (die Website bremst zusätzlich: 8 Codes je 10 Minuten und IP).
 
 ### B. Stripe (Zahlungen), etwa 15 Minuten, erst im Testmodus
@@ -171,9 +171,8 @@ Umsatzsteuer: Ohne Variable `MWST` rechnet der Server mit 19 % (Betriebspreise n
 
 | Name | Wert |
 |---|---|
-| `SUPABASE_URL` | Project URL aus A3 |
-| `SUPABASE_SERVICE_KEY` | service_role-Schlüssel aus A3 |
-| `SUPABASE_ANON_KEY` | anon-Schlüssel aus A3 |
+| `SUPABASE_URL` | Project URL aus A3 (`https://….supabase.co`) |
+| `SUPABASE_SECRET_KEY` | Secret key aus A3 (`sb_secret_…`); bei älteren Projekten stattdessen `SUPABASE_SERVICE_KEY` (service_role) und `SUPABASE_ANON_KEY` (anon) |
 | `STRIPE_SECRET_KEY` | `sk_test_…` aus B3, später `sk_live_…` |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` aus B4 (Test- und Live-Modus haben je ein eigenes) |
 | `FREISCHALT_GEHEIMNIS` | ein langer Zufallstext (z. B. aus dem Passwort-Manager); unterschreibt die Freischalt-Nachweise der gekauften Aufmaßblätter. Einmal setzen und nie ändern, sonst gelten alte Nachweise nicht mehr |
@@ -185,7 +184,7 @@ Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrang
 
 ### D. Prüfen
 
-- `https://eeziframes.com/api/status` zeigt `"zahlung":true`, `"testmodus":true` (Sandbox-Schlüssel) und `"webhook":true`, mit Supabase auch `"daten":true`, dazu die Preise.
+- `https://eeziframes.com/api/status` zeigt `"zahlung":true`, `"testmodus":true` (Sandbox-Schlüssel) und `"webhook":true`, mit Supabase auch `"daten":true`, dazu die Preise. Ist ein Schlüssel verwechselt oder fehlt einer, steht dort `"hinweise"` mit dem Namen der Variablen (nie mit ihrem Wert).
 - App ohne Link: ein Fenster messen, **Freischalten · 7,99 €**, E-Mail, weiter zu Stripe. Die Kasse sagt „Testbetrieb“ und nennt die Testkarte `4242 4242 4242 4242` (Datum in der Zukunft, beliebige Prüfziffer). Zurück in der App ist das Blatt frei, PDF und Code sind da, Stripe schickt den Beleg.
 - Stripe → **Workbench → Webhooks** → dein Ziel: Zustellungen mit Antwort `200`. Ein `503` bei `invoice.paid` kurz nach einer Sammelrechnung ist gewollt: Die Rechnung wird gerade eingetragen, Stripe stellt später erneut zu.
 - Mit Supabase, Betriebe: **Kostenlos starten** → deine E-Mail → Code aus der Mail → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code. Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder die Testkarte hinterlegt ist (das Blatt nennt beide im Testmodus). Nach dem ersten Abo stehen in Stripe unter **Produktkatalog** „eeziframes Abo 10“ und die Steuersätze.
@@ -226,4 +225,4 @@ node scripts/pruefen.mjs                                                    # Br
 npx wrangler dev                                                            # wie bei Cloudflare (Worker-Laufzeit), http://localhost:8787
 ```
 
-Mit echten Schlüsseln lokal: `SUPABASE_URL=… SUPABASE_SERVICE_KEY=… SUPABASE_ANON_KEY=… STRIPE_SECRET_KEY=sk_test_… node scripts/dev-server.mjs` (Schlüssel nur in der Shell, nie in eine Datei im Repo).
+Mit echten Schlüsseln lokal: `SUPABASE_URL=… SUPABASE_SECRET_KEY=sb_secret_… STRIPE_SECRET_KEY=sk_test_… node scripts/dev-server.mjs` (Schlüssel nur in der Shell, nie in eine Datei im Repo).
