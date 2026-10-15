@@ -1,4 +1,4 @@
-/* Fensterino · Stripe über die REST-Schnittstelle (ohne SDK, läuft im Cloudflare Worker).
+/* eeziframes · Stripe über die REST-Schnittstelle (ohne SDK, läuft im Cloudflare Worker).
    Alles, was Karten oder Kontodaten berührt, passiert auf von Stripe gehosteten Seiten (Checkout): Bezahlen des Aufmaßblatts,
    Zahlungsart hinterlegen (mode=setup), Abo abschließen (mode=subscription). Unsere Seiten sehen nie eine Kartennummer.
    Attrappe (ZAHLUNG_ATTRAPPE=1): Rückkehr-Adressen mit test_-Kennungen, ohne Stripe. */
@@ -58,9 +58,9 @@ export function zahlungsdienst(k) {
     /* Aufmaßblatt kaufen: Rückkehr nach /app/?bezahlt=<session> */
     async aufmassKasse(o) {
       if (!s) return { id: testId('test'), url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt=' + testId('test') + '&kennung=' + encodeURIComponent(o.kennung) };
-      const posten = k.stripe.preisAufmass ? { price: k.stripe.preisAufmass, quantity: 1 } : { quantity: 1, price_data: { currency: 'eur', unit_amount: Math.round(k.preise.aufmass * 100), tax_behavior: k.stripe.steuerInkl ? 'inclusive' : undefined, product_data: { name: 'Fensterino Aufmaßblatt', description: 'Ihr Fenster-Aufmaß als PDF: alle Maße, Fotoauswertung, Wünsche, mit Code für den Fensterbauer' } } };
+      const posten = k.stripe.preisAufmass ? { price: k.stripe.preisAufmass, quantity: 1 } : { quantity: 1, price_data: { currency: 'eur', unit_amount: Math.round(k.preise.aufmass * 100), tax_behavior: k.stripe.steuerInkl ? 'inclusive' : undefined, product_data: { name: 'eeziframes Aufmaßblatt', description: 'Ihr Fenster-Aufmaß als PDF: alle Maße, Fotoauswertung, Wünsche, mit Code für den Fensterbauer' } } };
       if (k.stripe.steuerInkl) posten.tax_rates = [k.stripe.steuerInkl];
-      const sess = await s.post('/checkout/sessions', { mode: 'payment', locale: 'de', customer_email: o.mail, client_reference_id: o.kennung, success_url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, line_items: [posten], invoice_creation: { enabled: true }, payment_intent_data: { description: 'Fensterino Aufmaßblatt ' + o.kennung }, metadata: { art: 'aufmass', kennung: o.kennung } });
+      const sess = await s.post('/checkout/sessions', { mode: 'payment', locale: 'de', customer_email: o.mail, client_reference_id: o.kennung, success_url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, line_items: [posten], invoice_creation: { enabled: true }, payment_intent_data: { description: 'eeziframes Aufmaßblatt ' + o.kennung }, metadata: { art: 'aufmass', kennung: o.kennung } });
       return { id: sess.id, url: sess.url };
     },
     /* Ist die Kasse bezahlt? Liefert Kennung und E-Mail zurück */
@@ -71,7 +71,7 @@ export function zahlungsdienst(k) {
     },
     async kundeAnlegen(o) {
       if (!s) return 'cus_test_' + zufall(6);
-      const c = await s.post('/customers', { email: o.mail, name: o.name, description: 'Fensterino Betrieb ' + o.id, metadata: { betrieb: o.id }, preferred_locales: ['de'] });
+      const c = await s.post('/customers', { email: o.mail, name: o.name, description: 'eeziframes Betrieb ' + o.id, metadata: { betrieb: o.id }, preferred_locales: ['de'] });
       return c.id;
     },
     /* Zahlungsart hinterlegen (SEPA oder Karte) auf der Stripe-Seite; Rückkehr nach /?zahlungsart=<session> */
@@ -124,7 +124,7 @@ export function zahlungsdienst(k) {
     async rechnung(o) {
       if (!s) return { nr: 'RE-TEST-' + zufall(3).toUpperCase(), id: 'in_test_' + zufall(6) };
       for (const p of o.posten) await s.post('/invoiceitems', { customer: o.customer, amount: Math.round(p.betrag * 100), currency: 'eur', description: p.text, tax_rates: k.stripe.steuer ? [k.stripe.steuer] : undefined });
-      const inv = await s.post('/invoices', { customer: o.customer, collection_method: 'charge_automatically', auto_advance: true, description: 'Fensterino: Projekte mit eingegangenem Aufmaß', metadata: { betrieb: o.id } });
+      const inv = await s.post('/invoices', { customer: o.customer, collection_method: 'charge_automatically', auto_advance: true, description: 'eeziframes: Projekte mit eingegangenem Aufmaß', metadata: { betrieb: o.id } });
       const fin = await s.post('/invoices/' + inv.id + '/finalize');
       return { nr: fin.number || fin.id, id: fin.id, betrag: (fin.total || 0) / 100 };
     }

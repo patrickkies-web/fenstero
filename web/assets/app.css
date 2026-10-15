@@ -1,4 +1,4 @@
-/* Fensterino App · Gestaltung. Tokens und gemeinsame Bausteine kommen aus gemeinsam.css (lädt davor).
+/* eeziframes App · Gestaltung. Tokens und gemeinsame Bausteine kommen aus gemeinsam.css (lädt davor).
    Telefon zuerst (390 px), eine Spalte bis 640 px, fester Kopf und feste Aktionsleiste, Bildschirme gleiten ein.
    Rollen der Schrift: 40 Zahl/Hero · 32 Titel · 24 Zwischentitel · 17 Text · 15 Nebentext · 13 Label. */
 :root { --wall: #e9e3da; --wall2: #d8d0c4; --frame: #fbfbfa; --frame2: #c9c3ba; --sill: #fdfdfc; --sill2: #cfc9c0 }
@@ -551,7 +551,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 /* Paywall: Vorschau des Aufmaßblatts, Kopf und Übersicht echt, der Rest verschwommen */
 .dv.pw { padding: 22px 18px 0; align-items: flex-end; min-height: 300px }
 .dv-paper.pw { filter: none; transform: none; width: min(100%, 330px); border-radius: 8px 8px 0 0; padding: 0; overflow: hidden; box-shadow: 0 -10px 30px rgba(0, 0, 0, .12) }
-.dv-band { display: flex; align-items: center; gap: 8px; background: #000; color: #fff; padding: 10px 14px; font-size: 13px } .dv-band b { font-weight: 800 } .dv-band span { margin-left: auto; opacity: .75; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; transform: scale(.85); transform-origin: right center }
+.dv-band { display: flex; align-items: center; gap: 8px; background: #000; color: #fff; padding: 10px 14px; font-size: 13px } .dv-band > span:last-child { margin-left: auto; opacity: .75; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; transform: scale(.85); transform-origin: right center }
 .dv-band .fi-logo .fi-kachel { fill: #fff } .dv-band .fi-logo rect[fill="#fff"] { fill: #000 } .dv-band .fi-logo rect[fill="#000"]:not(.fi-kachel) { fill: #fff } .dv-band .fi-logo .fi-fluegel { display: none }
 .dv-in { padding: 12px 14px 4px } .dv-paper.pw .dv-h { font-size: 17px } .dv-paper.pw .dv-s { margin-bottom: 6px }
 .dv-tab { width: 100%; border-collapse: collapse; font-size: 13px; color: #1d1d1f } .dv-tab th { text-align: left; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: #6e6e73; padding: 5px 0 4px; border-bottom: 1.5px solid #1d1d1f; transform-origin: left; font-weight: 700 } .dv-tab td { padding: 4px 4px 4px 0; border-bottom: 1px solid #e5e5ea; white-space: nowrap } .dv-tab td b { font-weight: 800 }
@@ -616,7 +616,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .tb-blatt { position: relative; background: #fff; color: #1d1d1f; border-radius: 6px; box-shadow: var(--lift); overflow: hidden }
 .tb-hinten { position: absolute; inset: 0; transform: translate(10px, 10px) rotate(2.5deg); background: #f7f7f5; box-shadow: var(--ring) }
 .tb-band { display: flex; align-items: center; gap: 8px; background: #000; color: #fff; padding: 10px 14px; font-size: 13px }
-.tb-band b { font-weight: 800 } .tb-band span { margin-left: auto; opacity: .8; letter-spacing: .04em }
+.tb-band > span:last-child { margin-left: auto; opacity: .8; letter-spacing: .04em }
 .tb-band .fi-logo .fi-kachel { fill: #fff } .tb-band .fi-logo rect[fill="#fff"] { fill: #000 } .tb-band .fi-logo rect[fill="#000"]:not(.fi-kachel) { fill: #fff } .tb-band .fi-logo .fi-fluegel { display: none }
 .tb-in { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 10px }
 .tb-eb { margin: 0; font-size: 13px; line-height: 1.25; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #3a3a3f }

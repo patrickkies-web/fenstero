@@ -1,4 +1,4 @@
-/* Fensterino · Verteiler für /api/… (Cloudflare Worker und lokaler Testserver nutzen denselben Code)
+/* eeziframes · Verteiler für /api/… (Cloudflare Worker und lokaler Testserver nutzen denselben Code)
    GET  /api/status                 was eingerichtet ist (KI, Zahlung, Daten) und die Preise
    GET/POST /api/ki                 KI-Auswertung der Fotos (ki.js)
    /api/zahlung/…                   Aufmaßblatt kaufen (zahlung.js)

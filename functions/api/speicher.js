@@ -1,4 +1,4 @@
-/* Fensterino · Speicher: Supabase (PostgREST über fetch, mit dem service_role-Schlüssel, nur vom Server aus) oder eine Attrappe im Arbeitsspeicher zum Testen.
+/* eeziframes · Speicher: Supabase (PostgREST über fetch, mit dem service_role-Schlüssel, nur vom Server aus) oder eine Attrappe im Arbeitsspeicher zum Testen.
    Tabellen: siehe supabase/schema.sql. Je Betrieb liegt das Konto als ein JSON-Dokument (daten) mit Projekten, Buchungen und Nachrichten;
    Änderungen laufen über betriebAendern(id, fn) mit Versionszähler, damit zwei gleichzeitige Eingänge sich nicht überschreiben. */
 import { ApiFehler } from './umgebung.js';

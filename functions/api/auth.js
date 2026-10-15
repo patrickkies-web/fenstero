@@ -1,4 +1,4 @@
-/* Fensterino · Anmeldung für Betriebe ohne Passwort: ein sechsstelliger Code per E-Mail (Supabase Auth, „Email OTP“).
+/* eeziframes · Anmeldung für Betriebe ohne Passwort: ein sechsstelliger Code per E-Mail (Supabase Auth, „Email OTP“).
    Supabase-Einstellung: Authentication → Email Templates → „Magic Link“ muss den Code {{ .Token }} enthalten (siehe docs/ONLINE-STELLEN.md).
    Attrappe (DATEN_ATTRAPPE=1): der Code ist immer 123456. */
 import { ApiFehler } from './umgebung.js';

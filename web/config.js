@@ -1,8 +1,8 @@
-/* Fensterino · Einstellungen der Website
+/* eeziframes · Einstellungen der Website
    Hier stehen KEINE geheimen Schlüssel. Der KI-Schlüssel liegt nur bei Cloudflare
    (Umgebungsvariable ANTHROPIC_API_KEY, siehe docs/ONLINE-STELLEN.md). */
 window.KONFIG = {
-  marke: 'Fensterino',
+  marke: 'eeziframes',
   pilot: true,                 // ohne Server: Code-Versand per WhatsApp/E-Mail, Kauf als Testkauf; mit Server (/api/status) schaltet die App selbst um
   ki: '/api/ki',               // KI-Auswertung der Fotos; '' schaltet sie ganz ab
   impressum: '/impressum/',

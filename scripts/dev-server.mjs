@@ -1,4 +1,4 @@
-// Fensterino · lokaler Testserver, verhält sich wie der Cloudflare Worker:
+// eeziframes · lokaler Testserver, verhält sich wie der Cloudflare Worker:
 // statische Dateien aus web/, Kopfzeilen aus web/_headers, alles unter /api/ aus functions/api/router.js.
 //
 //   node scripts/dev-server.mjs                   Pilotmodus: ohne KI, ohne Zahlung, ohne Datenbank
@@ -88,4 +88,4 @@ http.createServer(async (req, res) => {
     console.error(e);
     res.writeHead(500); res.end('Fehler');
   }
-}).listen(PORT, () => console.log('Fensterino lokal: http://localhost:' + PORT + (ATTRAPPE ? '  (KI-Attrappe)' : env.ANTHROPIC_API_KEY ? '  (echte KI)' : '  (ohne KI)') + (env.DATEN_ATTRAPPE === '1' ? '  (Daten-Attrappe, Anmeldecode 123456)' : env.SUPABASE_URL ? '  (Supabase)' : '') + (env.ZAHLUNG_ATTRAPPE === '1' ? '  (Zahlungs-Attrappe)' : env.STRIPE_SECRET_KEY ? '  (Stripe)' : '')));
+}).listen(PORT, () => console.log('eeziframes lokal: http://localhost:' + PORT + (ATTRAPPE ? '  (KI-Attrappe)' : env.ANTHROPIC_API_KEY ? '  (echte KI)' : '  (ohne KI)') + (env.DATEN_ATTRAPPE === '1' ? '  (Daten-Attrappe, Anmeldecode 123456)' : env.SUPABASE_URL ? '  (Supabase)' : '') + (env.ZAHLUNG_ATTRAPPE === '1' ? '  (Zahlungs-Attrappe)' : env.STRIPE_SECRET_KEY ? '  (Stripe)' : '')));

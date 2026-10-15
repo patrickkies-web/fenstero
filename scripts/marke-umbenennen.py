@@ -27,8 +27,8 @@ if alt == neu:
     sys.exit('Der Name ist schon ' + neu + '.')
 
 muster = re.compile(r'(?<!\w)' + re.escape(alt) + r'(?!\w)')
-ziele = [ROOT / 'README.md'] + [p for d in ('web', 'functions', 'docs', 'scripts') for p in (ROOT / d).rglob('*')
-                                if p.suffix in ('.html', '.js', '.mjs', '.css', '.md', '.txt') and 'vendor' not in p.parts and 'fonts' not in p.parts]
+ziele = [ROOT / 'README.md', ROOT / 'worker.js', ROOT / 'wrangler.jsonc'] + [p for d in ('web', 'functions', 'docs', 'scripts', 'supabase') for p in (ROOT / d).rglob('*')
+                                if p.suffix in ('.html', '.js', '.mjs', '.css', '.md', '.txt', '.sql', '.py') and 'vendor' not in p.parts and 'fonts' not in p.parts]
 geaendert = 0
 for p in ziele:
     if not p.is_file():
@@ -40,4 +40,5 @@ for p in ziele:
         geaendert += 1
         print('%4d× %s' % (n, p.relative_to(ROOT)))
 print('Fertig: „%s“ heißt jetzt „%s“ (%d Dateien).' % (alt, neu, geaendert))
-print('Hinweis: Domain-Angaben (z. B. fensterino.de) in der Doku bitte selbst anpassen.')
+print('Von Hand prüfen: Wortmarke (Marke.wort() in gemeinsam.js, wortmarke() in blatt.js), Versalzeilen (Eyebrows, PDF-Streifen),')
+print('Wortspiele und Domain-Angaben in der Doku.')

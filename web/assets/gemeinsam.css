@@ -1,4 +1,4 @@
-/* Fensterino · Grundlage für App und Betriebsbereich: Tokens, Bausteine, Bewegung.
+/* eeziframes · Grundlage für App und Betriebsbereich: Tokens, Bausteine, Bewegung.
    Lädt vor app.css bzw. portal.css. Alles, was beide Oberflächen teilen, steht hier einmal;
    die Regeln dazu in docs/GESTALTUNG.md. Keine Geheimnisse, keine fremden Server. */
 
@@ -58,6 +58,9 @@ svg { shape-rendering: geometricPrecision }
 /* ---------- Schrift: Rollen statt Zufallsgrößen ---------- */
 .eyebrow { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
 .num { font-variant-numeric: tabular-nums }
+/* Marke: eeziframes steht immer klein, auch in Versalzeilen; Wortmarke „eezi“ Black, „frames“ Medium */
+.mk, .wm { text-transform: none }
+.wm { font-weight: 500; white-space: nowrap } .wm b { font-weight: 900 }
 
 /* ---------- Knöpfe: eine Familie, zwei Höhen ---------- */
 .btn { position: relative; min-height: var(--h2); padding: 0 22px; border: 0; border-radius: 14px; background: var(--surface2); color: var(--ink); font: inherit; font-size: 17px; font-weight: 700; letter-spacing: -.005em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; white-space: nowrap; text-decoration: none; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), box-shadow var(--t2) var(--e-out), transform var(--t1) var(--e-out), opacity var(--t2) }

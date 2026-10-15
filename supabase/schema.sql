@@ -1,4 +1,4 @@
--- Fensterino · Datenbank (Supabase/Postgres)
+-- eeziframes · Datenbank (Supabase/Postgres)
 -- Einmal im SQL-Editor des Supabase-Projekts ausführen (docs/ONLINE-STELLEN.md, Stufe 2).
 -- Der Server greift ausschließlich mit dem service_role-Schlüssel zu (functions/api/speicher.js);
 -- Browser haben keinen direkten Zugriff: Row Level Security ist an, ohne Regeln für anon/authenticated.

@@ -1,4 +1,4 @@
-/* Fensterino · Einstellungen des Servers aus den Umgebungsvariablen (Cloudflare: Einstellungen → Variablen und Geheimnisse)
+/* eeziframes · Einstellungen des Servers aus den Umgebungsvariablen (Cloudflare: Einstellungen → Variablen und Geheimnisse)
 
    Geheimnisse (Typ Secret):
      ANTHROPIC_API_KEY        KI-Auswertung der Fotos

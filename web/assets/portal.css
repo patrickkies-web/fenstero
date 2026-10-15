@@ -1,4 +1,4 @@
-/* Fensterino Betriebsbereich · Gestaltung. Tokens und gemeinsame Bausteine kommen aus gemeinsam.css (lädt davor).
+/* eeziframes Betriebsbereich · Gestaltung. Tokens und gemeinsame Bausteine kommen aus gemeinsam.css (lädt davor).
    Seitenleiste ab 880 px, darunter Tableiste. Sie-Tonlage, dieselbe Werkzeug-Familie wie die App.
    Rollen der Schrift: 44 Hero · 30 Titel · 22 Zwischentitel · 17 Text · 15 Nebentext · 13 Label. */
 :root { --bezel: #1d1d1f; --chat: #efeae2; --bub-out: #d9fdd3; --bub-in: #ffffff; --bub-fg: #1d1d1f; --bub-fg2: #6e6e73; --wa: #1faa59 }
