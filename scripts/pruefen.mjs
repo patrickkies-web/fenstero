@@ -16,6 +16,8 @@
 // Abschnitt 10 prüft die Auffindbarkeit (docs/SEO.md): jede Seite ohne JavaScript lesbar, ein h1, Titel, Beschreibung, gültige
 // strukturierte Daten, Pilotphase per Kopfzeile gesperrt, Freigabe mit INDEXIERUNG=1 auf einem dritten Testserver, Gleichstand
 // von Kopfzeilen, Sitemap, Worker-Routen und Preisen; www zählt als Hauptdomain, …workers.dev bleibt gesperrt.
+// Abschnitt 11 prüft die Stripe-Anbindung gegen ein nachgestelltes Stripe (scripts/stripe-attrappe.mjs): Kassen, selbst angelegte Preise
+// und Steuersätze, Webhook in beiden Formen der API, Sammelrechnung ohne leere oder doppelte Rechnungen, Fehler je Betrieb.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -859,6 +861,7 @@ if (teil(8)) {
   // Zahlungsart über Stripe (nachgestellt): hin und zurück, gesperrtes Aufmaß frei, 9 € gebucht
   await tun('sheet', 'pay'); await page.waitForSelector('[data-act="srv-zahlungsart"]');
   ok(/1 Aufmaß wartet auf Freischaltung/.test(await page.evaluate(() => document.querySelector('.sheet').textContent)) && await page.locator('#pay-iban').count() === 0, 'Zahlungsart-Blatt: Weg zu Stripe, keine IBAN im Browser');
+  ok(await page.evaluate(() => { const alt = Server.status; Server.status = Object.assign({}, alt, { testmodus: true }); const mit = paySheet({}); Server.status = alt; const ohne = paySheet({}); return /Testbetrieb:/.test(mit) && /DE89 3704 0044 0532 0130 00/.test(mit) && /4242 4242 4242 4242/.test(mit) && !/Testbetrieb:/.test(ohne); }), 'Zahlungsart-Blatt nennt im Stripe-Testmodus Test-IBAN und Testkarte, sonst nicht');
   await page.click('[data-act="srv-zahlungsart"]');
   await page.waitForFunction(() => typeof Server !== 'undefined' && Server.online() && !!A().pay && S.screen === 'abrechnung', null, { timeout: 12000 }); await page.waitForTimeout(500);
   const pay = await page.evaluate((id) => { const b = ledger(A()).find((x) => x.kind === 'aufmass' && x.ref === id), l = A().links.find((x) => x.id === id); return { type: A().pay.type, gesperrt: lockedLinks(A()).length, betrag: b ? b.betrag : -1, badge: b ? b.badge : '', locked: !!l.locked, masse: l.aufmass.windows.some((w) => AW.num(w.mo && w.mo.wm) === 2222), url: location.search, toast: (document.getElementById('toast') || {}).textContent || '', notif: (notifs()[0] || {}).t || '' }; }, weitere[2].id);
@@ -925,6 +928,32 @@ if (teil(8)) {
   await foto(kp2, 'srv-app-gekauft');
   sauber(kp2, 'Kauf im Servermodus ohne Fehler');
   await kctx2.close();
+
+  // Zahlung noch unterwegs (etwa eine Lastschrift): nicht freigeschaltet, Hinweis statt „abgebrochen“, beim nächsten Öffnen von selbst frei
+  const kctx3 = await browser.newContext({ ...telefon }), kp3 = await neueSeite(kctx3, BASE2);
+  await kp3.goto(BASE2 + '/app/', { waitUntil: 'networkidle' }); await kp3.waitForTimeout(300);
+  await kp3.evaluate(() => { S.windows = demoProject(); Object.assign(S.proj, { name: 'Haus Warten', ort: '50667 Köln' }); kauf().mail = 'warten@beispiel.de'; kennung(); persist(); });
+  await kp3.goto(BASE2 + '/app/?bezahlt=wartet_' + stempel, { waitUntil: 'networkidle' }); await kp3.waitForTimeout(500);
+  const w1 = await kp3.evaluate(() => ({ paid: !!(S.kauf && S.kauf.paid), wartet: (S.kauf && S.kauf.wartet) || '', screen: S.screen, txt: document.body.innerText, toast: S.toast || '', url: location.search }));
+  ok(!w1.paid && /^wartet_/.test(w1.wartet) && w1.screen === 'teilen' && /Deine Zahlung ist unterwegs/.test(w1.txt) && /Bitte nicht noch einmal bezahlen/.test(w1.txt) && /unterwegs/.test(w1.toast) && w1.url === '', 'Zahlung noch unterwegs: nicht freigeschaltet, Hinweis „nicht noch einmal bezahlen“ statt „abgebrochen“');
+  await foto(kp3, 'srv-app-zahlung-unterwegs');
+  await kp3.click('.bb .btn.primary'); await kp3.waitForTimeout(400);
+  ok(await kp3.evaluate(() => S.screen === 'teilen' && /unterwegs/.test(S.toast || '') && !!S.kauf.wartet), 'Freischalten, während die Zahlung unterwegs ist: keine zweite Kasse, nur der Hinweis');
+  await kp3.evaluate(() => { S.kauf.wartet = 'test_spaeter'; persist(); });
+  await kp3.reload({ waitUntil: 'networkidle' }); await kp3.waitForTimeout(600);
+  ok(await kp3.evaluate(() => !!S.kauf.paid && !S.kauf.wartet && S.screen === 'gekauft' && (S.kauf.token || '').length === 32), 'Beim nächsten Öffnen: Zahlung bestätigt, Blatt von selbst freigeschaltet');
+  sauber(kp3, 'Zahlung unterwegs ohne Fehler');
+  await kctx3.close();
+  // Stripe im Testmodus (Schlüssel sk_test_…): die Kasse sagt es und nennt die Testkarte
+  const kctx4 = await browser.newContext({ ...telefon }), kp4 = await neueSeite(kctx4, BASE2);
+  await kctx4.route('**/api/status', async (route) => { const r = await route.fetch(); const j = await r.json(); j.attrappe = false; j.testmodus = true; await route.fulfill({ response: r, json: j }); });
+  await kp4.goto(BASE2 + '/app/', { waitUntil: 'networkidle' }); await kp4.waitForTimeout(300);
+  await kp4.evaluate(() => { S.windows = demoProject(); const k = kauf(); k.mail = 'test@beispiel.de'; k.agb = true; persist(); go('kasse'); }); await kp4.waitForTimeout(300);
+  const t4 = await kp4.evaluate(() => ({ txt: document.body.innerText, test: SERVER.testmodus }));
+  ok(t4.test && /Testbetrieb:/.test(t4.txt) && /4242 4242 4242 4242/.test(t4.txt) && !/nachgestellt/.test(t4.txt) && /Weiter zu Stripe/.test(t4.txt), 'Stripe im Testmodus: Kasse nennt Testbetrieb und Testkarte');
+  await foto(kp4, 'srv-app-kasse-testmodus');
+  sauber(kp4, 'Kasse im Testmodus ohne Fehler');
+  await kctx4.close();
 
   // Abrechnungslauf (Cron) mit Attrappen im selben Prozess: offene Projektbuchungen werden zur Sammelrechnung, nichts doppelt
   {
@@ -1174,6 +1203,186 @@ if (teil(10)) {
   ok(!www.robots && www.link === '<https://eeziframes.com/ratgeber/>; rel="canonical"' && www.text.includes('content="https://eeziframes.com/og.png"') && rbWww.includes('Sitemap: https://eeziframes.com/sitemap.xml'), 'Domain: www.eeziframes.com zählt als eeziframes.com (Canonical, Vorschaubild, Sitemap)');
   ok(wdev.robots === seo.SPERRE && /User-agent: \*\nDisallow: \/\n/.test(rbDev), 'Domain: die Cloudflare-Testadresse (…workers.dev) bleibt auch mit Freigabe gesperrt');
 
+}
+
+/* ---------- 11. Stripe-Anbindung: gegen ein nachgestelltes Stripe im selben Prozess (scripts/stripe-attrappe.mjs) ---------- */
+if (teil(11)) {
+  console.log('11. Stripe-Anbindung (Stripe nachgestellt)');
+  const { stripeNachstellen } = await import('./stripe-attrappe.mjs');
+  const st = stripeNachstellen();
+  try {
+    const { api } = await import('../functions/api/router.js'), ko = await import('../functions/api/konten.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js');
+    const X = globalThis.Abrechnung, W = 'whsec_pruefung', B = 'https://eeziframes.com';
+    const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung' };
+    const k = umg.konfig(env), sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
+    const rufe = async (pfad, body, token, e) => { const h = { accept: 'application/json', origin: B }; if (body) h['content-type'] = 'application/json'; if (token) h.authorization = 'Bearer ' + token; const r = await api(new Request(B + pfad, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined }), e || env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
+    const senden = async (w) => { const r = await api(new Request(B + '/api/zahlung/webhook', { method: 'POST', headers: { 'stripe-signature': w.kopf, 'content-type': 'application/json' }, body: w.roh }), env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
+    const hook = (typ, obj, id) => senden(st.webhook(W, typ, obj, id)), thin = (typ, art, objektId) => senden(st.thin(W, typ, art, objektId));
+    const kassenSeit = (n) => st.log.slice(n).filter((e) => e.method === 'POST' && e.pfad === '/checkout/sessions');
+    const tok = (m) => 'test.' + Buffer.from(m, 'utf8').toString('base64').replace(/=+$/, '');
+    const monat = X.monthKey(), jetzt = Math.floor(Date.now() / 1000), sitzung = (r) => r.url.split('/').pop();
+    const registrieren = async (mail, firma, tel) => (await rufe('/api/konto/registrieren', { firma: firma, ap: 'Sina Stripe', tel: tel, plz: '50667', agb: true }, tok(mail))).konto.id;
+
+    // a) Status: Testmodus am Schlüssel erkannt
+    const s1 = await rufe('/api/status'), s2 = await rufe('/api/status', null, null, { STRIPE_SECRET_KEY: ' sk_live_beispiel ' });
+    ok(s1.zahlung && s1.testmodus === true && s1.webhook === true && s2.zahlung && s2.testmodus === false && s2.webhook === false, '/api/status: Testmodus am Schlüssel erkannt (sk_test_… ja, sk_live_… nein), Webhook-Geheimnis eingetragen');
+
+    // b) Aufmaßblatt: Steuersatz legt der Server selbst an, SEPA bleibt draußen, Nachweis erst nach der Zahlung, Zahlung unterwegs
+    let n0 = st.log.length;
+    const k1 = await rufe('/api/zahlung/start', { mail: 'kauf@beispiel.de', kennung: 'pruef11abc' });
+    const kasse = kassenSeit(n0)[0], inkl = st.db.steuern.find((t) => t.metadata.eeziframes === 'mwst19-inkl');
+    ok(k1.ok && /^https:\/\/checkout\.stripe\.com\//.test(k1.url) && kasse.version === '2026-09-30.endive' && kasse.p.excluded_payment_method_types.includes('sepa_debit') && kasse.p.line_items[0].price_data.unit_amount === '799' && !!inkl && inkl.inclusive && inkl.percentage === 19 && kasse.p.line_items[0].tax_rates[0] === inkl.id && kasse.p.invoice_creation.enabled === 'true', 'Aufmaßblatt: Kasse über 7,99 € mit selbst angelegtem Steuersatz 19 % inklusive, mit Rechnung, ohne SEPA-Lastschrift (bestätigt erst nach Tagen)');
+    ok(st.log.slice(n0).every((e) => e.auth === 'Basic ' + Buffer.from('sk_test_pruefung11:').toString('base64')) && st.log.slice(n0).filter((e) => e.pfad !== '/checkout/sessions').every((e) => e.version === '2024-06-20'), 'Anfragen an Stripe mit dem Geheimschlüssel und fester API-Version 2024-06-20 (nur die Kasse des Aufmaßblatts neuer)');
+    const cs1 = sitzung(k1), vor = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11abc');
+    st.abschliessen(cs1);
+    const bez = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11abc'), fremdK = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11zzz');
+    ok(vor.bezahlt === false && !vor.wartet && bez.bezahlt === true && (bez.token || '').length === 32 && bez.mail === 'kauf@beispiel.de' && fremdK.bezahlt === false && !fremdK.token, 'Aufmaßblatt: vor der Zahlung kein Nachweis, danach Nachweis vom Server, aber nur für das Projekt, das bezahlt hat');
+    const k2 = await rufe('/api/zahlung/start', { mail: 'kauf@beispiel.de', kennung: 'pruef11def' }), cs2 = sitzung(k2);
+    st.abschliessen(cs2, { zahlung: 'processing' });
+    const unterwegs = await rufe('/api/zahlung/pruefen?session=' + cs2 + '&kennung=pruef11def');
+    ok(unterwegs.bezahlt === false && unterwegs.wartet === true && st.db.steuern.filter((t) => t.metadata.eeziframes === 'mwst19-inkl').length === 1, 'Zahlung noch unterwegs: kein Nachweis, aber „wartet“ statt „abgebrochen“; der Steuersatz wird nicht doppelt angelegt');
+    n0 = st.log.length;
+    await rufe('/api/zahlung/start', { mail: 'kauf@beispiel.de', kennung: 'pruef11ghi' }, null, Object.assign({}, env, { MWST: '0', STRIPE_SECRET_KEY: 'sk_test_kleinunternehmer' }));
+    const kasse0 = kassenSeit(n0)[0];
+    ok(!kasse0.p.line_items[0].tax_rates && !kasse0.p.line_items[0].price_data.tax_behavior && /§ 19 UStG/.test((kasse0.p.invoice_creation.invoice_data || {}).footer || '') && !st.log.slice(n0).some((e) => e.pfad === '/tax_rates'), 'Kleinunternehmer (MWST=0): kein Steuersatz, Hinweis nach § 19 UStG auf der Rechnung');
+
+    // c) Betrieb: Zahlungsart per Webhook (der Betrieb schließt das Fenster), danach die Rückkehr; fremde und alte Kassen
+    const T = tok('stripe11@beispiel.de'), bid = await registrieren('stripe11@beispiel.de', 'Fensterbau Stripe', '0221 5551111');
+    const T2 = tok('fremd11@beispiel.de'), bid2 = await registrieren('fremd11@beispiel.de', 'Glaserei Fremd', '0221 5552222');
+    await sp.betriebAendern(bid, (a) => { a.freeUsed = 3; const l = { id: 'lS1', code: 'st11a', nr: 'P-2026-001', kunde: 'Familie Stripe', status: 'gesendet', log: {} }; a.links.push(l); X.receiveAufmass(a, l, { windows: [X.fromApp({ name: 'Küche' })], proj: {}, fotos: 2, elemente: 1 }); });
+    ok(X.lockedLinks((await sp.betriebHolen(bid)).daten).length === 1, 'Betrieb ohne Zahlungsart: das vierte Aufmaß wartet gesperrt');
+    n0 = st.log.length;
+    const z = await rufe('/api/konto/zahlungsart', {}, T), csZ = sitzung(z), zk = kassenSeit(n0)[0], kunde = st.db.kunden.get(zk.p.customer);
+    ok(zk.p.mode === 'setup' && zk.p.payment_method_types.join() === 'sepa_debit,card' && zk.p.metadata.betrieb === bid && !!kunde && kunde.metadata.betrieb === bid && kunde.preferred_locales[0] === 'de' && !kunde.invoice_settings.footer, 'Zahlungsart: ein Stripe-Kunde je Betrieb, Kasse für SEPA-Lastschrift oder Karte');
+    st.abschliessen(csZ);
+    const fremdZ = await rufe('/api/konto/zahlungsart/pruefen?session=' + csZ, null, T2);
+    ok(fremdZ._status === 403 && !(await sp.betriebHolen(bid2)).daten.pay, 'Die Kasse eines anderen Betriebs schaltet nichts frei (403)');
+    const h1 = await hook('checkout.session.completed', st.db.kassen.get(csZ)), nachH = await sp.betriebHolen(bid);
+    ok(h1._status === 200 && nachH.daten.pay && nachH.daten.pay.type === 'SEPA-Lastschrift' && nachH.daten.pay.session === csZ && nachH.daten.pay.frei === 1 && !X.lockedLinks(nachH.daten).length && !!st.db.kunden.get(kunde.id).invoice_settings.default_payment_method, 'Webhook „Kasse abgeschlossen“: Zahlungsart übernommen, wartendes Aufmaß frei, Standard für Rechnungen gesetzt, auch ohne Rückkehr');
+    const zur = await rufe('/api/konto/zahlungsart/pruefen?session=' + csZ, null, T), nachZ = await sp.betriebHolen(bid);
+    ok(zur.ok && zur.n === 1 && nachZ.daten.book.filter((b) => b.kind === 'aufmass' && b.betrag === 9).length === 1, 'Rückkehr danach: meldet dieselbe Freischaltung, bucht nichts doppelt');
+    // Eine ältere Kasse kommt nach einer neueren an (Stripe stellt nach einem Fehler erneut zu): ändert nichts
+    const za = await rufe('/api/konto/zahlungsart', {}, T), csAlt = sitzung(za), zn = await rufe('/api/konto/zahlungsart', {}, T), csNeu = sitzung(zn);
+    st.abschliessen(csAlt); st.abschliessen(csNeu, { art: 'card' });
+    await rufe('/api/konto/zahlungsart/pruefen?session=' + csNeu, null, T);
+    const pmNeu = st.db.kunden.get(kunde.id).invoice_settings.default_payment_method, hAlt = await hook('checkout.session.completed', st.db.kassen.get(csAlt)), nachAlt = await sp.betriebHolen(bid);
+    ok(hAlt._status === 200 && nachAlt.daten.pay.type === 'Karte' && nachAlt.daten.pay.session === csNeu && st.db.kunden.get(kunde.id).invoice_settings.default_payment_method === pmNeu, 'Spät zugestellte ältere Kasse überschreibt weder die neuere Zahlungsart noch den Standard bei Stripe');
+
+    // d) Abo 10 und Plus: Preise legt der Server selbst an (lookup_key mit Betrag), Steuersatz 19 % exklusiv
+    n0 = st.log.length;
+    const pl = await rufe('/api/konto/plan', { plan: 'abo' }, T), csA = sitzung(pl), ak = kassenSeit(n0)[0];
+    const preisAbo = st.db.preise.find((x) => x.lookup_key === 'eeziframes_abo_4900_eur_monat'), exkl = st.db.steuern.find((t) => t.metadata.eeziframes === 'mwst19');
+    ok(ak.p.mode === 'subscription' && !!preisAbo && preisAbo.unit_amount === 4900 && preisAbo.recurring.interval === 'month' && preisAbo.tax_behavior === 'exclusive' && ak.p.line_items[0].price === preisAbo.id && !!exkl && !exkl.inclusive && ak.p.subscription_data.default_tax_rates[0] === exkl.id && ak.p.subscription_data.metadata.betrieb === bid, 'Abo 10: Monatspreis 49 € und Steuersatz 19 % exklusiv legt der Server selbst an');
+    const pl2 = await rufe('/api/konto/plan', { plan: 'abo' }, T), csA2 = sitzung(pl2);
+    ok(st.db.kassen.get(csA).status === 'expired' && st.db.kassen.get(csA2).status === 'open', 'Neue Abo-Kasse: die ältere offene verfällt (zwei bezahlte Kassen ergäben zwei Abos)');
+    const fertigA = st.abschliessen(csA2), sub = st.db.abos.get(fertigA.subscription);
+    // Stripe meldet die bezahlte Abo-Rechnung vor dem Abschluss der Kasse (die Reihenfolge ist nicht garantiert)
+    const neuForm = (id) => ({ id: id, object: 'invoice', number: 'EEZI-' + id, created: jetzt, metadata: {}, parent: { type: 'subscription_details', quote_details: null, subscription_details: { metadata: { betrieb: bid, plan: 'abo' }, subscription: sub.id } } });
+    const hFrueh = await hook('invoice.paid', neuForm('in_frueh'));
+    const fremdA = await rufe('/api/konto/plan/pruefen?session=' + csA2 + '&plan=abo', null, T2);
+    const h2 = await hook('checkout.session.completed', st.db.kassen.get(csA2)), nachA = await sp.betriebHolen(bid), aboB = nachA.daten.book.filter((b) => b.kind === 'abo');
+    ok(fremdA._status === 403 && X.konto((await sp.betriebHolen(bid2)).daten) === 'service' && !(await sp.betriebHolen(bid2)).stripe_subscription, 'Das Abo eines anderen Betriebs lässt sich nicht übernehmen (403)');
+    ok(hFrueh._status === 200 && h2._status === 200 && X.konto(nachA.daten) === 'abo' && nachA.stripe_subscription === sub.id && aboB.length === 1 && aboB[0].status === 'bezahlt', 'Webhook: Abo aktiv, auch wenn der Betrieb das Fenster schließt; die vorher gemeldete Zahlung zählt, der Monat steht als bezahlt da');
+    const zurA = await rufe('/api/konto/plan/pruefen?session=' + csA2 + '&plan=abo', null, T);
+    ok(zurA.ok && zurA.ergebnis.msg === 'Abo 10 aktiv' && (await sp.betriebHolen(bid)).daten.book.filter((b) => b.kind === 'abo').length === 1, 'Rückkehr danach: „Abo 10 aktiv“, kein zweiter Monatsbetrag');
+    await rufe('/api/konto/plan', { plan: 'plus' }, T);
+    const preisPlus = st.db.preise.find((x) => x.lookup_key === 'eeziframes_plus_7900_eur_monat'), aendern = st.log.filter((e) => e.method === 'POST' && e.pfad === '/subscriptions/' + sub.id).pop();
+    ok(!!preisPlus && sub.items.data[0].price.id === preisPlus.id && sub.metadata.plan === 'plus' && aendern.p.default_tax_rates[0] === exkl.id && st.db.preise.filter((x) => x.lookup_key === 'eeziframes_abo_4900_eur_monat').length === 1 && st.db.steuern.filter((t) => t.metadata.eeziframes === 'mwst19').length === 1, 'Wechsel auf Plus: Preis 79 € angelegt, dasselbe Abo bei Stripe umgestellt (mit Steuersatz), nichts doppelt');
+
+    // e) Abo-Rechnung bezahlt: Ereignis in beiden Formen (bis 2025-02 subscription_details, seit 2025-03-31 parent.subscription_details)
+    const altForm = { id: 'in_alt', object: 'invoice', number: 'EEZI-ALT', created: jetzt, metadata: {}, subscription: sub.id, subscription_details: { metadata: { betrieb: bid, plan: 'plus' } } };
+    ok(ko.betriebVon(altForm) === bid && ko.aboVon(altForm) === sub.id && ko.betriebVon(neuForm('x')) === bid && ko.aboVon(neuForm('x')) === sub.id, 'Webhook liest Betrieb und Abo aus beiden Formen einer Abo-Rechnung');
+    const h3 = await hook('invoice.paid', neuForm('in_neu')), nachP = await sp.betriebHolen(bid), monatlich = nachP.daten.book.filter((b) => (b.kind === 'abo' || b.kind === 'plus') && b.month === monat);
+    ok(h3._status === 200 && monatlich.length === 2 && monatlich.every((b) => b.status === 'bezahlt'), 'Abo-Rechnung bezahlt (neue Form): Monatsbetrag und Aufpreis als bezahlt markiert');
+
+    // f) Webhook: Unterschrift, altes Abo, Fehler beim Verarbeiten, doppelte Zustellung
+    const falsch = await api(new Request(B + '/api/zahlung/webhook', { method: 'POST', headers: { 'stripe-signature': 't=1,v1=00' }, body: '{}' }), env, null);
+    const alt1 = await hook('customer.subscription.deleted', { id: 'sub_alt', object: 'subscription', metadata: { betrieb: bid } });
+    ok(falsch.status === 400 && alt1._status === 200 && X.konto((await sp.betriebHolen(bid)).daten) === 'plus', 'Webhook: falsche Unterschrift abgewiesen; ein altes Abo endet, der Tarif bleibt');
+    const z2 = await rufe('/api/konto/zahlungsart', {}, T), csZ2 = sitzung(z2); st.abschliessen(csZ2, { art: 'card' });
+    st.fehlerBei((e) => e.method === 'GET' && e.pfad === '/checkout/sessions/' + csZ2);
+    const h6 = await hook('checkout.session.completed', st.db.kassen.get(csZ2), 'evt_pruef_wieder');
+    st.fehlerBei(null);
+    const h7 = await hook('checkout.session.completed', st.db.kassen.get(csZ2), 'evt_pruef_wieder'), h8 = await hook('checkout.session.completed', st.db.kassen.get(csZ2), 'evt_pruef_wieder');
+    ok(h6._status >= 500 && h7._status === 200 && !h7.doppelt && h8.doppelt === true && (await sp.betriebHolen(bid)).daten.pay.session === csZ2, 'Webhook: schlägt die Verarbeitung fehl, kommt die erneute Zustellung durch; danach zählt dasselbe Ereignis als doppelt');
+    const pmKarte = st.db.kunden.get(kunde.id).invoice_settings.default_payment_method;
+    ok(sub.default_payment_method.id === pmKarte && st.db.zahlarten.get(pmKarte).type === 'card', 'Neue Zahlungsart gilt auch für das laufende Abo (Stripe zieht Abos von der Zahlungsart des Abos ein)');
+    const spaetA = await hook('checkout.session.completed', st.db.kassen.get(csA2), 'evt_spaet_abo_laufend'), nachSA = await sp.betriebHolen(bid);
+    ok(spaetA._status === 200 && st.db.kunden.get(kunde.id).invoice_settings.default_payment_method === pmKarte && nachSA.daten.pay.session === csZ2 && X.konto(nachSA.daten) === 'plus', 'Spät erneut zugestellte Abo-Kasse: ändert weder Tarif noch Zahlungsart (Standard bei Stripe bleibt die neuere Karte)');
+
+    // g) Sammelrechnung: Entwurf, Posten daran, abschließen; ein Fehler bei einem Betrieb hält die anderen nicht auf
+    X.setPreise(k.preise);
+    const buchung = (id, text) => ({ id: id, kind: 'aufmass', ref: id, when: 'heute', month: monat, text: text || 'Aufmaß · Test', sub: '', betrag: 9, badge: 'nächste Rechnung', status: 'offen' });
+    await sp.betriebAendern(bid, (a) => { a.book.unshift(Object.assign(buchung('bS1', 'Aufmaß · Familie Eins'), { sub: 'P-2026-011' }), buchung('bS2', 'Aufmaß · Familie Zwei')); });
+    const kaputt = await sp.betriebAnlegen({ auth_user: 'u-kaputt11', mail: 'kaputt11@beispiel.de', name: 'Kaputt GmbH', plz: '50667', tel_norm: '', name_norm: 'kaputt11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bK1')], rechnungen: [], notif: [] } });
+    await sp.betriebFelder(kaputt.id, { stripe_customer: 'cus_gibtsnicht' });
+    const abbruch = await sp.betriebAnlegen({ auth_user: 'u-abbruch11', mail: 'abbruch11@beispiel.de', name: 'Abbruch GmbH', plz: '50667', tel_norm: '', name_norm: 'abbruch11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bA1'), buchung('bA2')], rechnungen: [], notif: [] } });
+    const cusAb = await zd.kundeAnlegen({ id: abbruch.id, mail: 'abbruch11@beispiel.de', name: 'Abbruch GmbH' }); await sp.betriebFelder(abbruch.id, { stripe_customer: cusAb });
+    st.fehlerBei((e) => e.method === 'POST' && /\/finalize$/.test(e.pfad) && (st.db.rechnungen.get(e.pfad.split('/')[2]) || {}).customer === cusAb);
+    const lauf = await ko.abrechnungslauf(k, sp, zd);
+    st.fehlerBei(null);
+    const cus = nachP.stripe_customer, rech = [...st.db.rechnungen.values()].filter((r) => r.customer === cus), re = rech[0] || {};
+    const posten = [...st.db.posten.values()].filter((it) => it.invoice === re.id), anlegen = st.log.find((e) => e.method === 'POST' && e.pfad === '/invoices' && e.p.customer === cus) || { p: {} };
+    ok(lauf.rechnungen === 1 && lauf.fehler === 2 && rech.length === 1 && re.status === 'open' && posten.length === 3 && posten.every((it) => it.metadata.buchung && it.tax_rates[0].id === exkl.id) && anlegen.p.pending_invoice_items_behavior === 'exclude' && anlegen.p.auto_advance === 'false', 'Sammelrechnung bei Stripe: Entwurf ohne fremde offene Posten, drei Posten mit Buchungs-Kennung und 19 % daran, abgeschlossen');
+    const meine = await sp.betriebHolen(bid), reDb = meine.daten.rechnungen[0] || {};
+    ok(reDb.nr === re.number && reDb.betrag === 32.13 && reDb.pos === 3 && /^https:/.test(reDb.url) && meine.daten.book.filter((b) => ['bS1', 'bS2'].includes(b.id)).every((b) => b.status === 'berechnet' && b.rechnung === re.number) && /Sammelrechnung/.test(meine.daten.notif[0].t), 'Sammelrechnung im Konto: Nummer von Stripe, 32,13 € (27 € netto zzgl. 19 %), Buchungen als berechnet, Meldung');
+    const k2r = await sp.betriebHolen(kaputt.id), abr = await sp.betriebHolen(abbruch.id);
+    ok(k2r.daten.book[0].status === 'offen' && abr.daten.book.every((b) => b.status === 'offen') && ![...st.db.rechnungen.values()].some((r) => r.customer === cusAb) && ![...st.db.posten.values()].some((it) => it.customer === cusAb), 'Fehler bei zwei Betrieben halten den dritten nicht auf; Entwurf und Posten des abgebrochenen sind gelöscht (auch keine offenen Posten übrig), seine Buchungen bleiben offen');
+    // Schon bei Stripe berechnet, aber nicht gespeichert (z. B. Datenbank kurz weg): Zahlung kommt zu früh, der nächste Lauf trägt nur nach
+    await sp.betriebAendern(bid, (a) => { a.book.unshift(buchung('bS3', 'Aufmaß · Familie Drei')); });
+    const nurStripe = await zd.rechnung({ id: bid, customer: cus, posten: [{ buchung: 'bS3', betrag: 9, text: 'Aufmaß · Familie Drei' }] });
+    const zuFrueh = await hook('invoice.paid', { id: nurStripe.neu.id, object: 'invoice', number: nurStripe.neu.nr, created: jetzt, metadata: { betrieb: bid, art: 'sammelrechnung' }, parent: null }, 'evt_zu_frueh');
+    /* liegengebliebener offener Posten aus einem früheren Aufräumen: wird gelöscht, nicht berechnet */
+    await fetch('https://api.stripe.com/v1/invoiceitems', { method: 'POST', headers: { 'Stripe-Version': '2024-06-20' }, body: 'customer=' + cusAb + '&amount=900&currency=eur&metadata[betrieb]=' + abbruch.id + '&metadata[buchung]=bA1' });
+    const vorher = [...st.db.rechnungen.values()].filter((r) => r.customer === cus).length;
+    await ko.abrechnungslauf(k, sp, zd);
+    const meine2 = await sp.betriebHolen(bid), b3 = meine2.daten.book.find((b) => b.id === 'bS3');
+    ok(zuFrueh._status === 503 && !!nurStripe.neu && [...st.db.rechnungen.values()].filter((r) => r.customer === cus).length === vorher && b3.status === 'berechnet' && b3.rechnung === nurStripe.neu.nr && meine2.daten.rechnungen.some((r) => r.id === nurStripe.neu.id), 'Schon bei Stripe, aber nicht gespeichert: die zu frühe Zahlungsmeldung wird später erneut zugestellt (503), der nächste Lauf legt keine zweite Rechnung an, sondern trägt nach');
+    const abRech = [...st.db.rechnungen.values()].filter((r) => r.customer === cusAb), abPosten = [...st.db.posten.values()].filter((it) => it.customer === cusAb);
+    ok(abRech.length === 1 && abPosten.length === 2 && abPosten.every((it) => it.invoice === abRech[0].id) && (await sp.betriebHolen(abbruch.id)).daten.book.every((b) => b.status === 'berechnet'), 'Nächster Lauf für den abgebrochenen Betrieb: genau eine Rechnung mit zwei Posten, der liegengebliebene offene Posten ist gelöscht');
+    const zuFrueh2 = await hook('invoice.paid', { id: nurStripe.neu.id, object: 'invoice', number: nurStripe.neu.nr, created: jetzt, metadata: { betrieb: bid, art: 'sammelrechnung' }, parent: null }, 'evt_zu_frueh');
+    ok(zuFrueh2._status === 200 && (await sp.betriebHolen(bid)).daten.book.find((b) => b.id === 'bS3').status === 'bezahlt', 'Erneute Zustellung der Zahlungsmeldung nach dem Eintragen: bezahlt');
+    // Guthaben deckt die Rechnung (etwa nach einer anteiligen Gutschrift): sofort bezahlt
+    const guthaben = await sp.betriebAnlegen({ auth_user: 'u-guthaben11', mail: 'guthaben11@beispiel.de', name: 'Guthaben GmbH', plz: '50667', tel_norm: '', name_norm: 'guthaben11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bG1')], rechnungen: [], notif: [] } });
+    const cusG = await zd.kundeAnlegen({ id: guthaben.id, mail: 'guthaben11@beispiel.de', name: 'Guthaben GmbH' }); await sp.betriebFelder(guthaben.id, { stripe_customer: cusG }); st.guthaben(cusG, 5000);
+    await ko.abrechnungslauf(k, sp, zd);
+    const g = await sp.betriebHolen(guthaben.id);
+    ok(g.daten.rechnungen[0].status === 'bezahlt' && g.daten.book[0].status === 'bezahlt', 'Rechnung beim Abschließen schon bezahlt (Guthaben): steht gleich als bezahlt da');
+    const h9 = await hook('invoice.paid', { id: re.id, object: 'invoice', number: re.number, created: jetzt, metadata: { betrieb: bid, art: 'sammelrechnung' }, parent: null });
+    const meine3 = await sp.betriebHolen(bid);
+    ok(h9._status === 200 && meine3.daten.rechnungen.find((r) => r.id === re.id).status === 'bezahlt' && meine3.daten.book.filter((b) => b.rechnung === re.number).every((b) => b.status === 'bezahlt'), 'Sammelrechnung bezahlt: Rechnung und ihre Buchungen als bezahlt markiert');
+
+    // h) Thin-Ereignisse (von Stripe für neue Ziele empfohlen): der Server holt das Objekt selbst
+    n0 = st.log.length;
+    const t1 = await thin('invoice.paid', 'invoice', re.id);
+    ok(t1._status === 200 && st.log.slice(n0).some((e) => e.method === 'GET' && e.pfad === '/invoices/' + re.id && e.version === '2024-06-20'), 'Thin-Ereignis „v1.invoice.paid“: Rechnung bei Stripe in der festen Version nachgeschlagen');
+    const z3 = await rufe('/api/konto/zahlungsart', {}, T), csZ3 = sitzung(z3); st.abschliessen(csZ3);
+    const t4 = await thin('checkout.session.completed', 'checkout.session', csZ3), nachT = await sp.betriebHolen(bid);
+    ok(t4._status === 200 && nachT.daten.pay.session === csZ3 && nachT.daten.pay.type === 'SEPA-Lastschrift', 'Thin-Ereignis „v1.checkout.session.completed“: neue Zahlungsart übernommen');
+    const t3 = await senden({ roh: '{"id":"evt_x","object":"v2.core.event","type":"v1.invoice.paid","related_object":{"id":"in_x","type":"invoice","url":"/v1/invoices/in_x"}}', kopf: 't=' + jetzt + ',v1=' + 'ab'.repeat(32) });
+    ok(t3._status === 400, 'Thin-Ereignis ohne gültige Unterschrift wird abgewiesen');
+
+    // i) Abo endet; eine spät zugestellte Kasse des beendeten Abos ändert nichts; ein bei Stripe laufendes Abo wird übernommen statt verdoppelt
+    st.aboBeenden(sub.id);
+    const t2 = await thin('customer.subscription.deleted', 'subscription', sub.id), nachE = await sp.betriebHolen(bid);
+    ok(t2._status === 200 && X.konto(nachE.daten) === 'service' && !nachE.stripe_subscription, 'Thin-Ereignis „v1.customer.subscription.deleted“ für das aktuelle Abo: zurück auf Start');
+    const spaet = await hook('checkout.session.completed', st.db.kassen.get(csA2), 'evt_spaet_abo'), nachS = await sp.betriebHolen(bid);
+    ok(spaet._status === 200 && X.konto(nachS.daten) === 'service' && !nachS.stripe_subscription, 'Spät zugestellte Kasse eines beendeten Abos: Tarif bleibt Start, kein totes Abo im Konto');
+    const laufend = st.abschliessen(sitzung(await (async () => { const r = await zd.aboKasse({ id: bid, customer: cus, plan: 'abo', zurueck: B + '/' }); return r; })()));
+    n0 = st.log.length;
+    const ueber = await rufe('/api/konto/plan', { plan: 'plus' }, T), nachU = await sp.betriebHolen(bid);
+    ok(ueber.ok && !ueber.url && kassenSeit(n0).length === 0 && nachU.stripe_subscription === laufend.subscription && X.konto(nachU.daten) === 'plus' && st.db.abos.get(laufend.subscription).metadata.plan === 'plus', 'Läuft bei Stripe schon ein Abo (Rückmeldung verloren): wird übernommen und umgestellt, keine zweite Kasse');
+    /* Wettlauf zweier Kassen: ein zweites Abo läuft an; das erste bleibt im Konto, der Betrieb bekommt einen Hinweis */
+    const zweite = await (await fetch('https://api.stripe.com/v1/checkout/sessions', { method: 'POST', headers: { 'Stripe-Version': '2024-06-20' }, body: 'mode=subscription&customer=' + cus + '&line_items[0][price]=' + preisAbo.id + '&line_items[0][quantity]=1&metadata[art]=abo&metadata[betrieb]=' + bid + '&metadata[plan]=abo&subscription_data[metadata][betrieb]=' + bid + '&subscription_data[metadata][plan]=abo' })).json();
+    st.abschliessen(zweite.id);
+    const hZ = await hook('checkout.session.completed', st.db.kassen.get(zweite.id)), nachZw = await sp.betriebHolen(bid);
+    ok(hZ._status === 200 && nachZw.stripe_subscription === laufend.subscription && X.konto(nachZw.daten) === 'plus' && /Zweites Abo/.test(nachZw.daten.notif[0].t), 'Zweites laufendes Abo (Wettlauf zweier Kassen): das erste bleibt im Konto, Hinweis an den Betrieb');
+    if (process.env.STRIPE_PROTOKOLL) (await import('node:fs')).writeFileSync(process.env.STRIPE_PROTOKOLL, JSON.stringify(st.log, null, 1));
+  } catch (e) {
+    ok(false, 'Stripe-Anbindung ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
+  } finally {
+    st.aus();
+  }
 }
 
 await browser.close();

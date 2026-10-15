@@ -2,25 +2,28 @@
 
    Geheimnisse (Typ Secret):
      ANTHROPIC_API_KEY        KI-Auswertung der Fotos
-     STRIPE_SECRET_KEY        Zahlungen (sk_test_… zum Testen, sk_live_… für echtes Geld)
-     STRIPE_WEBHOOK_SECRET    Unterschrift der Stripe-Webhooks (whsec_…)
+     STRIPE_SECRET_KEY        Zahlungen (sk_test_… zum Testen, sk_live_… für echtes Geld; eingeschränkte Schlüssel rk_… gehen auch)
+     STRIPE_WEBHOOK_SECRET    Unterschrift der Stripe-Webhooks (whsec_…), je Modus ein eigenes
      SUPABASE_URL             https://<projekt>.supabase.co
      SUPABASE_SERVICE_KEY     service_role-Schlüssel (nur hier, nie im Browser)
      SUPABASE_ANON_KEY        anon-Schlüssel (für die Anmeldung per E-Mail-Code)
      FREISCHALT_GEHEIMNIS     beliebiger langer Zufallstext; unterschreibt die Freischalt-Nachweise für bezahlte Aufmaßblätter
 
    Variablen (Typ Text, alle optional):
+     MWST                     0 = Kleinunternehmerregelung (§ 19 UStG): keine Umsatzsteuer, Hinweis auf jeder Rechnung; sonst 19 %
+     PREIS_AUFMASS_CENT 799 · PREIS_PROJEKT 9 · FREI_PROJEKTE 3 · PREIS_ABO 49 · ABO_INKL 10 · PREIS_ABO_EXTRA 5 · PREIS_PLUS 79
+     Nur falls eigene Objekte in Stripe genutzt werden sollen; sonst legt der Server Preise und Steuersätze selbst an (stripe.js):
      STRIPE_PRICE_AUFMASS     Preis-ID des Aufmaßblatts (sonst wird der Betrag je Kauf gesetzt, PREIS_AUFMASS_CENT)
-     STRIPE_PRICE_ABO         Preis-ID „Abo 10“ (monatlich), Pflicht für Abos
-     STRIPE_PRICE_PLUS        Preis-ID „Plus“ (monatlich), Pflicht für Plus
-     STRIPE_TAX_RATE          Steuersatz-ID 19 % (exklusiv) für Rechnungen an Betriebe; leer bei Kleinunternehmerregelung
-     STRIPE_TAX_RATE_INKL     Steuersatz-ID 19 % (inklusiv) für das Aufmaßblatt; leer bei Kleinunternehmerregelung
-     PREIS_AUFMASS_CENT 799 · PREIS_PROJEKT 9 · FREI_PROJEKTE 3 · PREIS_ABO 49 · ABO_INKL 10 · PREIS_ABO_EXTRA 5 · PREIS_PLUS 79 · MWST 1
+     STRIPE_PRICE_ABO         Preis-ID „Abo 10“ (monatlich)
+     STRIPE_PRICE_PLUS        Preis-ID „Plus“ (monatlich)
+     STRIPE_TAX_RATE          Steuersatz-ID 19 % exklusiv (Rechnungen an Betriebe)
+     STRIPE_TAX_RATE_INKL     Steuersatz-ID 19 % inklusiv (Aufmaßblatt)
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1   nur lokal zum Testen: Stripe bzw. Datenbank werden nachgestellt */
 const num = (v, d) => { const n = Number(v); return v !== undefined && v !== '' && !isNaN(n) ? n : d; };
 export function konfig(env) {
   env = env || {};
-  const stripe = env.STRIPE_SECRET_KEY ? { key: env.STRIPE_SECRET_KEY, webhook: env.STRIPE_WEBHOOK_SECRET || '', preisAufmass: env.STRIPE_PRICE_AUFMASS || '', preisAbo: env.STRIPE_PRICE_ABO || '', preisPlus: env.STRIPE_PRICE_PLUS || '', steuer: env.STRIPE_TAX_RATE || '', steuerInkl: env.STRIPE_TAX_RATE_INKL || '' } : null;
+  const schluessel = String(env.STRIPE_SECRET_KEY || '').trim();
+  const stripe = schluessel ? { key: schluessel, test: /^(sk|rk)_test_/.test(schluessel), webhook: String(env.STRIPE_WEBHOOK_SECRET || '').trim(), preisAufmass: env.STRIPE_PRICE_AUFMASS || '', preisAbo: env.STRIPE_PRICE_ABO || '', preisPlus: env.STRIPE_PRICE_PLUS || '', steuer: env.STRIPE_TAX_RATE || '', steuerInkl: env.STRIPE_TAX_RATE_INKL || '' } : null;
   const supabase = env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY ? { url: String(env.SUPABASE_URL).replace(/\/+$/, ''), service: env.SUPABASE_SERVICE_KEY, anon: env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_KEY } : null;
   const zahlungAttrappe = env.ZAHLUNG_ATTRAPPE === '1', datenAttrappe = env.DATEN_ATTRAPPE === '1';
   return {

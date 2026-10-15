@@ -1,5 +1,5 @@
 /* eeziframes · Verteiler für /api/… (Cloudflare Worker und lokaler Testserver nutzen denselben Code)
-   GET  /api/status                 was eingerichtet ist (KI, Zahlung, Daten) und die Preise
+   GET  /api/status                 was eingerichtet ist (KI, Zahlung, Daten, Stripe im Testmodus, Webhook) und die Preise
    GET/POST /api/ki                 KI-Auswertung der Fotos (ki.js)
    /api/zahlung/…                   Aufmaßblatt kaufen (zahlung.js)
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js) */
@@ -32,7 +32,7 @@ export async function api(request, env, ctx0) {
   const k = konfig(env);
   globalThis.Abrechnung.setPreise(k.preise);
   try {
-    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe });
+    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook) });
     if (pfad === '/api/ki') { if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env }); if (request.method === 'POST') return kiPost({ request, env }); return new Response(null, { status: 405, headers: { allow: 'GET, POST' } }); }
     const treffer = finde(request.method, pfad);
     if (!treffer) return json({ ok: false, fehler: 'not_found' }, 404);

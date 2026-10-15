@@ -41,6 +41,52 @@ async function stripeKunde(ctx) {
   await ctx.sp.betriebFelder(ctx.row.id, { stripe_customer: id }); ctx.row.stripe_customer = id; return id;
 }
 const zurueck = (ctx) => ctx.url.origin + '/';
+/* Kassen von Stripe übernehmen. Rückkehr des Betriebs und Webhook können in beliebiger Reihenfolge und auch gleichzeitig ankommen,
+   Stripe stellt Webhooks nach Fehlern erneut zu, auch Stunden später. Darum:
+   - Eine Kasse gehört zu genau einem Betrieb (Metadaten) und zählt je Betrieb nur einmal.
+   - Eine ältere Kasse überschreibt keine neuere (Zeitpunkt der Kasse), auch nicht die Standard-Zahlungsart bei Stripe.
+   - Gezählt und geschrieben wird erst nach der Prüfung, mit erneuter Prüfung im Speichervorgang (betriebAendern liest frisch). */
+const gehoert = (r, row) => r.betrieb === null || r.betrieb === row.id; // null: Attrappe ohne Metadaten
+const neuer = (merk, session, created) => !merk || (merk.session !== session && (!merk.at || !created || created >= merk.at));
+function zahlungsartMerken(a, r, session) {
+  const merk = a.pay ? { session: a.pay.session, at: a.pay.sessionAt } : null;
+  if (a.pay && a.pay.session === session) return { n: a.pay.frei || 0 };
+  if (!neuer(merk, session, r.created)) return { n: 0, alt: true };
+  a.pay = Object.assign({ when: X().stamp(), session: session, sessionAt: r.created || 0 }, r.pay);
+  const n = X().unlockWaiting(a); a.pay.frei = n;
+  if (n) melden(a, { t: X().nW(n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet', s: 'Zahlungsart hinterlegt, die wartenden Aufmaße sind jetzt sichtbar.', to: ['links'] });
+  return { n: n };
+}
+const payMerk = (a) => (a.pay ? { session: a.pay.session, at: a.pay.sessionAt } : null);
+async function zahlungsartUebernehmen(sp, zd, row, r, session) {
+  if (neuer(payMerk(row.daten || {}), session, r.created)) await zd.standardZahlungsart(r.customer, r.pm, row.stripe_subscription || '');
+  return sp.betriebAendern(row.id, (a) => zahlungsartMerken(a, r, session));
+}
+/* Die bei der Abo-Kasse angegebene Zahlungsart wird auch Standard für Sammelrechnungen, wenn sie die neueste ist */
+function aboMerken(a, r) {
+  const fertig = { art: 'aktiv', msg: X().planName(r.plan) + ' aktiv' };
+  if (a.aboSitzung && a.aboSitzung.id === r.session) return fertig;
+  if (r.pay && neuer(payMerk(a), r.session, r.created)) a.pay = Object.assign({ when: X().stamp(), session: r.session, sessionAt: r.created || 0 }, r.pay);
+  if (!a.pay) a.pay = Object.assign({ when: X().stamp() }, r.pay || { type: 'Zahlungsart', label: 'bei Stripe hinterlegt' });
+  if (r.bezahlt && !(a.aboBezahlt >= X().monthKey())) a.aboBezahlt = X().monthKey(); // erste Monatszahlung schon da: Buchung entsteht als bezahlt
+  a.aboSitzung = { id: r.session, at: r.created || 0 };
+  const w = X().planWechsel(a, r.plan);
+  if (w.art === 'aktiv') melden(a, { t: X().planName(r.plan) + ' aktiv', s: w.msg, to: ['abrechnung'] });
+  return w.art === 'gleich' ? Object.assign({}, w, fertig) : w;
+}
+async function aboUebernehmen(sp, zd, row, r) {
+  const a0 = row.daten || {};
+  if (a0.aboSitzung && a0.aboSitzung.id === r.session) return { art: 'aktiv', msg: X().planName(r.plan) + ' aktiv' }; // schon übernommen
+  /* Ein anderes, noch laufendes Abo im Konto wird nicht stillschweigend ersetzt (zwei Abos zugleich: nur bei einem Wettlauf zweier Kassen) */
+  if (row.stripe_subscription && row.stripe_subscription !== r.subscription && (await zd.aboLaeuft(row.stripe_subscription))) {
+    console.log('Zweites laufendes Abo', row.id, r.subscription, 'neben', row.stripe_subscription);
+    await sp.betriebAendern(row.id, (a) => { melden(a, { t: 'Zweites Abo bei Stripe', s: 'Für Ihren Betrieb laufen zwei Abos. Bitte melden Sie sich bei uns, wir erstatten das doppelte.', to: ['abrechnung'] }); });
+    return { art: 'doppelt', msg: 'Für Ihren Betrieb läuft schon ein Abo. Bitte melden Sie sich bei uns.' };
+  }
+  if (row.stripe_subscription !== r.subscription) await sp.betriebFelder(row.id, { stripe_subscription: r.subscription });
+  if (r.pay && neuer(payMerk(a0), r.session, r.created)) await zd.standardZahlungsart(r.customer, r.pm);
+  return sp.betriebAendern(row.id, (a) => aboMerken(a, r));
+}
 
 export const KONTO = {
   /* --- Anmeldung --- */
@@ -112,6 +158,10 @@ export const KONTO = {
       if (ctx.row.stripe_subscription) { await ctx.zd.aboAendern(ctx.row.stripe_subscription, plan); return aendern(ctx, (a) => ({ ergebnis: X().planWechsel(a, plan) })); }
       const customer = await stripeKunde(ctx);
       const kasse = await ctx.zd.aboKasse({ id: ctx.row.id, customer: customer, plan: plan, zurueck: zurueck(ctx) });
+      if (kasse.vorhanden) { // bei Stripe läuft schon ein Abo dieses Betriebs: übernehmen und umstellen, kein zweites
+        await ctx.sp.betriebFelder(ctx.row.id, { stripe_subscription: kasse.vorhanden }); await ctx.zd.aboAendern(kasse.vorhanden, plan);
+        return aendern(ctx, (a) => { if (!a.pay) a.pay = { when: X().stamp(), type: 'Zahlungsart', label: 'bei Stripe hinterlegt' }; return { ergebnis: X().planWechsel(a, plan) }; });
+      }
       return { ok: true, url: kasse.url };
     }
     if (plan === 'service' && ctx.row.stripe_subscription) await ctx.zd.aboKuendigen(ctx.row.stripe_subscription, false);
@@ -121,9 +171,10 @@ export const KONTO = {
   },
   'GET /api/konto/plan/pruefen': async (ctx) => {
     await mitBetrieb(ctx); const session = str(ctx.url.searchParams.get('session'), 120), planA = str(ctx.url.searchParams.get('plan'), 10);
-    const r = await ctx.zd.aboUebernehmen(session, planA); if (!r) throw new ApiFehler('Das Abo wurde nicht abgeschlossen.', 402);
-    await ctx.sp.betriebFelder(ctx.row.id, { stripe_subscription: r.subscription });
-    return aendern(ctx, (a) => { if (r.pay && !a.pay) a.pay = Object.assign({ when: X().stamp() }, r.pay); const w = X().planWechsel(a, r.plan); melden(a, { t: X().planName(r.plan) + ' aktiv', s: w.msg, to: ['abrechnung'] }); return { ergebnis: w }; });
+    const r = await ctx.zd.aboLesen(session, planA); if (!r) throw new ApiFehler('Das Abo wurde nicht abgeschlossen.', 402);
+    if (!gehoert(r, ctx.row)) throw new ApiFehler('Dieses Abo gehört zu einem anderen Konto.', 403);
+    const ergebnis = await aboUebernehmen(ctx.sp, ctx.zd, ctx.row, r);
+    return aendern(ctx, () => ({ ergebnis: ergebnis }));
   },
   /* --- Zahlungsart --- */
   'POST /api/konto/zahlungsart': async (ctx) => {
@@ -133,8 +184,10 @@ export const KONTO = {
   },
   'GET /api/konto/zahlungsart/pruefen': async (ctx) => {
     await mitBetrieb(ctx); const session = str(ctx.url.searchParams.get('session'), 120);
-    const pay = await ctx.zd.zahlungsartUebernehmen(session); if (!pay) throw new ApiFehler('Keine Zahlungsart hinterlegt.', 402);
-    return aendern(ctx, (a) => { a.pay = Object.assign({ when: X().stamp() }, pay); const n = X().unlockWaiting(a); if (n) melden(a, { t: X().nW(n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet', s: 'Zahlungsart hinterlegt, die wartenden Aufmaße sind jetzt sichtbar.', to: ['links'] }); return { n: n }; });
+    const r = await ctx.zd.zahlungsartLesen(session); if (!r) throw new ApiFehler('Keine Zahlungsart hinterlegt.', 402);
+    if (!gehoert(r, ctx.row)) throw new ApiFehler('Diese Zahlungsart gehört zu einem anderen Konto.', 403);
+    const out = await zahlungsartUebernehmen(ctx.sp, ctx.zd, ctx.row, r, session);
+    return aendern(ctx, () => out);
   },
   /* --- Aus der App: Link prüfen, Fortschritt melden, Aufmaß direkt senden (ohne Anmeldung, der Link-Code ist der Schlüssel) --- */
   'GET /api/link/:code': async (ctx) => {
@@ -161,44 +214,79 @@ export const KONTO = {
   }
 };
 
-/* Alle zwei Wochen (Cron): offene Projektbuchungen je Betrieb als Sammelrechnung bei Stripe anlegen; Abos rechnet Stripe selbst ab */
+/* Alle zwei Wochen (Cron): offene Projektbuchungen je Betrieb als Sammelrechnung bei Stripe anlegen; Abos rechnet Stripe selbst ab.
+   Ein Fehler bei einem Betrieb hält die anderen nicht auf. Was Stripe schon berechnet hat (Speichern danach fehlgeschlagen), wird nur nachgetragen. */
 export async function abrechnungslauf(k, sp, zd) {
   if (!sp || !zd) return { ok: false, grund: 'kein Speicher oder Zahlungsdienst' };
-  const rows = await sp.betriebeMitKunde(); let n = 0;
+  const rows = await sp.betriebeMitKunde(); let n = 0, fehler = 0;
   for (const row of rows) {
     const offen = ((row.daten || {}).book || []).filter((b) => b.kind === 'aufmass' && b.status === 'offen' && b.betrag > 0);
     if (!offen.length || !(row.daten || {}).pay) continue;
-    const re = await zd.rechnung({ id: row.id, customer: row.stripe_customer, posten: offen.map((b) => ({ betrag: b.betrag, text: b.text + ' · ' + (b.sub || '') })) });
-    await sp.betriebAendern(row.id, (a) => {
-      (a.book || []).forEach((b) => { if (offen.some((o) => o.id === b.id)) { b.status = 'berechnet'; b.rechnung = re.nr; } });
-      (a.rechnungen = a.rechnungen || []).unshift({ nr: re.nr, id: re.id, datum: X().datum(), betrag: re.betrag != null ? re.betrag : offen.reduce((s, b) => s + b.betrag, 0), pos: offen.length, status: 'offen' });
-      melden(a, { t: 'Sammelrechnung ' + re.nr, s: X().nW(offen.length, 'Projekt', 'Projekte') + ', wird von Ihrer Zahlungsart eingezogen.', to: ['abrechnung'] });
-    });
-    n++;
+    try {
+      const re = await zd.rechnung({ id: row.id, customer: row.stripe_customer, posten: offen.map((b) => ({ buchung: b.id, betrag: b.betrag, text: b.text + (b.sub ? ' · ' + b.sub : '') })) });
+      const alle = (re.schon || []).concat(re.neu ? [Object.assign({ neu: true, status: 'offen' }, re.neu)] : []);
+      if (!alle.length) continue;
+      await sp.betriebAendern(row.id, (a) => {
+        alle.forEach((r) => {
+          const teil = (a.book || []).filter((b) => r.buchungen.includes(b.id) && b.status === 'offen');
+          teil.forEach((b) => { b.status = r.status === 'bezahlt' ? 'bezahlt' : 'berechnet'; b.rechnung = r.nr; });
+          if ((a.rechnungen || []).some((x) => x.id === r.id)) return;
+          (a.rechnungen = a.rechnungen || []).unshift({ nr: r.nr, id: r.id, datum: X().datum(), betrag: r.betrag != null ? r.betrag : teil.reduce((s, b) => s + b.betrag, 0), pos: r.buchungen.length, status: r.status, url: r.url || '' });
+          if (r.neu) melden(a, { t: 'Sammelrechnung ' + r.nr, s: X().nW(r.buchungen.length, 'Projekt', 'Projekte') + ', wird von Ihrer Zahlungsart eingezogen.', to: ['abrechnung'] });
+        });
+      });
+      if (re.neu) n++;
+    } catch (e) {
+      fehler++; console.log('Sammelrechnung fehlgeschlagen', row.id, String(e && e.message ? e.message : e).slice(0, 200));
+    }
   }
-  return { ok: true, rechnungen: n };
+  return { ok: !fehler, rechnungen: n, fehler: fehler };
 }
-/* Stripe meldet: Rechnung bezahlt (Sammelrechnung oder Abo), Zahlung fehlgeschlagen, Abo beendet.
-   Der Betrieb steht in den Metadaten: bei Sammelrechnungen auf der Rechnung, bei Abo-Rechnungen auf dem Abo (subscription_details). */
-const betriebVon = (obj) => (obj.metadata && obj.metadata.betrieb) || (obj.subscription_details && obj.subscription_details.metadata && obj.subscription_details.metadata.betrieb) || '';
-export async function stripeEreignis(sp, ev) {
+/* Stripe meldet: Kasse abgeschlossen (Zahlungsart, Abo), Rechnung bezahlt (Sammelrechnung oder Abo), Zahlung fehlgeschlagen, Abo beendet.
+   Der Betrieb steht in den Metadaten: bei Kassen und Sammelrechnungen auf dem Objekt selbst, bei Abo-Rechnungen auf dem Abo.
+   Webhooks kommen in der API-Version, die beim Ziel in Stripe eingestellt ist: Bis 2025-02 stehen die Abo-Angaben einer Rechnung in
+   subscription und subscription_details, seit 2025-03-31 unter parent.subscription_details. Beide Formen werden gelesen. */
+const aboAngaben = (obj) => obj.subscription_details || (obj.parent && obj.parent.subscription_details) || null;
+const idVon = (v) => (v && typeof v === 'object' ? v.id : v) || '';
+export const aboVon = (obj) => idVon(obj.subscription) || idVon((aboAngaben(obj) || {}).subscription);
+export const betriebVon = (obj) => (obj.metadata && obj.metadata.betrieb) || ((aboAngaben(obj) || {}).metadata || {}).betrieb || '';
+export async function stripeEreignis(sp, ev, zd) {
   const typ = ev.type, obj = ev.data && ev.data.object ? ev.data.object : {}, id = betriebVon(obj);
   if (!id) return false;
+  const row = await sp.betriebHolen(id); if (!row) return false; // z. B. ein gelöschtes Testkonto: nichts zu tun, Stripe bekommt trotzdem 200
+  /* Kasse abgeschlossen, auch wenn der Betrieb danach das Fenster schließt, statt zurückzukehren (gleiche Wege wie die Rückkehr) */
+  if (typ === 'checkout.session.completed' && obj.mode === 'setup' && zd) {
+    const r = await zd.zahlungsartLesen(obj.id); if (!r || !gehoert(r, row)) return false;
+    await zahlungsartUebernehmen(sp, zd, row, r, obj.id);
+    return true;
+  }
+  if (typ === 'checkout.session.completed' && obj.mode === 'subscription' && zd) {
+    const r = await zd.aboLesen(obj.id); if (!r || !gehoert(r, row)) return false;
+    await aboUebernehmen(sp, zd, row, r);
+    return true;
+  }
   if (typ === 'invoice.paid') {
-    const abo = !!obj.subscription, monat = X().monthKey(obj.created ? obj.created * 1000 : Date.now());
+    const abo = !!aboVon(obj), monat = X().monthKey(obj.created ? obj.created * 1000 : Date.now());
+    /* Eine Sammelrechnung, die bei uns noch nicht eingetragen ist (der Lauf speichert gerade): 503, Stripe stellt später erneut zu */
+    if (!abo && obj.metadata && obj.metadata.art === 'sammelrechnung' && !((row.daten || {}).rechnungen || []).some((r) => r.id === obj.id)) throw new ApiFehler('Sammelrechnung noch nicht eingetragen, bitte später erneut.', 503);
     await sp.betriebAendern(id, (a) => {
+      if (abo && !(a.aboBezahlt >= monat)) a.aboBezahlt = monat; // Monatsbeträge bis hierhin bezahlt, auch solche, die erst danach gebucht werden
       (a.rechnungen || []).forEach((r) => { if (r.id === obj.id || r.nr === obj.number) r.status = 'bezahlt'; });
-      (a.book || []).forEach((b) => { if (b.rechnung && b.rechnung === obj.number) b.status = 'bezahlt'; if (abo && (b.kind === 'abo' || b.kind === 'plus') && b.month === monat) b.status = 'bezahlt'; });
+      (a.book || []).forEach((b) => { if (b.rechnung && b.rechnung === obj.number) b.status = 'bezahlt'; if (abo && (b.kind === 'abo' || b.kind === 'plus') && b.month <= monat) b.status = 'bezahlt'; });
     });
     return true;
   }
   if (typ === 'customer.subscription.deleted') {
+    if (row.stripe_subscription && row.stripe_subscription !== obj.id) return false; // ein altes Abo; das aktuelle läuft weiter
     await sp.betriebAendern(id, (a) => { if (X().konto(a) !== 'service') { a.konto = 'service'; a.downgrade = null; melden(a, { t: 'Abo beendet', s: 'Ihr Tarif ist jetzt Start: ' + X().preise().projekt + ' € je Projekt mit eingegangenem Aufmaß.', to: ['abrechnung'] }); } });
     await sp.betriebFelder(id, { stripe_subscription: null });
     return true;
   }
   if (typ === 'invoice.payment_failed') {
-    await sp.betriebAendern(id, (a) => { melden(a, { t: 'Zahlung fehlgeschlagen', s: 'Eine Rechnung konnte nicht eingezogen werden. Bitte prüfen Sie Ihre Zahlungsart.', to: ['abrechnung'] }); });
+    await sp.betriebAendern(id, (a) => {
+      (a.rechnungen || []).forEach((r) => { if ((r.id === obj.id || r.nr === obj.number) && r.status !== 'bezahlt') r.status = 'fehlgeschlagen'; });
+      melden(a, { t: 'Zahlung fehlgeschlagen', s: 'Eine Rechnung konnte nicht eingezogen werden. Bitte prüfen Sie Ihre Zahlungsart.', to: ['abrechnung'] });
+    });
     return true;
   }
   return false;

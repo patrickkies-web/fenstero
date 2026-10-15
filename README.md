@@ -2,7 +2,7 @@
 
 Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer kleingeschrieben (Regeln zur Marke und zum Wortspiel mit „eezi“: [docs/GESTALTUNG.md](docs/GESTALTUNG.md)). Hauseigentümer messen ihre Fenster selbst, Schritt für Schritt erklärt, mit Fotos, 3-D-Modell und allen Wünschen – Fenster mit Ober- und Unterlicht, Festverglasungen, Hebe-Schiebe-Türen und Faltschiebewände, Rollladen, Raffstore und Screen, Rollo, Plissee und Jalousie; wo noch kein Fenster ist, zeichnen sie die neue Öffnung auf dem Foto ein; das fertige Aufmaßblatt als PDF kostet einmal 7,99 €. Fensterbauer laden Kunden per Aufmaß-Link ein und bekommen ein vollständiges Aufmaß fürs Angebot, ohne Anfahrt: 3 Projekte frei, dann 9 € je Projekt, Abo 10 für 49 € oder Plus für 79 € im Monat.
 
-**Stand: Pilotphase, Stufe 2 vorbereitet.** Ohne Schlüssel läuft die Website im Browser: Kundenlinks, Messen, PDF und Code-Übergabe an den Betrieb funktionieren, der Kauf ist ein gekennzeichneter Testkauf, Konten von Betrieben liegen im Browser. Zum Kennenlernen ohne Konto gibt es die Führung in der App (`/app/#fuehrung`) und die Tour für Fensterbauer. Sobald Supabase und Stripe eingetragen sind (`functions/api/`, `supabase/schema.sql`), gibt es echte Konten, direkte Übertragung, Zahlungen und Abrechnung. Anleitung: [docs/ONLINE-STELLEN.md](docs/ONLINE-STELLEN.md), Regeln: [docs/ABRECHNUNG.md](docs/ABRECHNUNG.md). Für Suchmaschinen und KI-Assistenten ist alles vorbereitet (Ratgeber, Textfassung, strukturierte Daten, Sitemap, `llms.txt`), aber noch gesperrt, bis Impressum und Datenschutz fertig sind: [docs/SEO.md](docs/SEO.md).
+**Stand: Pilotphase, Stufe 2 vorbereitet.** Ohne Schlüssel läuft die Website im Browser: Kundenlinks, Messen, PDF und Code-Übergabe an den Betrieb funktionieren, der Kauf ist ein gekennzeichneter Testkauf, Konten von Betrieben liegen im Browser. Zum Kennenlernen ohne Konto gibt es die Führung in der App (`/app/#fuehrung`) und die Tour für Fensterbauer. Sobald Supabase und Stripe eingetragen sind (`functions/api/`, `supabase/schema.sql`), gibt es echte Konten, direkte Übertragung, Zahlungen und Abrechnung; für Stripe genügen Geheimschlüssel und Webhook-Geheimnis, Preise und Steuersätze legt der Server selbst an. Anleitung: [docs/ONLINE-STELLEN.md](docs/ONLINE-STELLEN.md), Regeln: [docs/ABRECHNUNG.md](docs/ABRECHNUNG.md). Für Suchmaschinen und KI-Assistenten ist alles vorbereitet (Ratgeber, Textfassung, strukturierte Daten, Sitemap, `llms.txt`), aber noch gesperrt, bis Impressum und Datenschutz fertig sind: [docs/SEO.md](docs/SEO.md).
 
 ## Aufbau
 
@@ -25,7 +25,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `web/assets/lottie/`, `scripts/lottie-erzeugen.py` | fünf gezeichnete Bewegtbilder, aus Code erzeugt (`python3 scripts/lottie-erzeugen.py web/assets/lottie`) |
 | `functions/api/` | der Server: `router.js` (Verteiler), `ki.js` (KI-Auswertung der Einbausituation), `zahlung.js` (Kauf des Aufmaßblatts, Nachweis, Webhook), `konten.js` (Betriebe, Projekte, Eingang, Tarif, Sammelrechnung), `stripe.js`, `auth.js` (E-Mail-Code über Supabase Auth), `speicher.js` (Supabase oder Attrappe), `umgebung.js` (alle Variablen) |
 | `supabase/schema.sql` | die drei Tabellen, einmal im Supabase-Projekt ausführen |
-| `scripts/` | lokaler Testserver (mit Attrappen für Datenbank und Kasse), Browser-Prüfung in 10 Abschnitten, Umbenennen |
+| `scripts/` | lokaler Testserver (mit Attrappen für Datenbank und Kasse), Browser-Prüfung in 11 Abschnitten (Abschnitt 11 gegen ein nachgestelltes Stripe, `stripe-attrappe.mjs`), Umbenennen |
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung |
 | `docs/ABRECHNUNG.md` | Preise und Abrechnungsregeln: was gezählt wird, wo die Paywalls sitzen, Nachbesserung, Schranken, was der Server erzwingt |
 | `docs/KI.md` | Die KI-Auswertung: was sie aus den Fotos liest (Einbausituation, nicht das alte Fenster), in welcher Reihenfolge, warum (mit Quellen), Modell und Kosten |
@@ -41,7 +41,7 @@ Cloudflare → Workers & Pages → Repository importieren → dieses Repo, Worke
 ```bash
 KI_ATTRAPPE=1 node scripts/dev-server.mjs                                       # Pilot, http://localhost:8788
 KI_ATTRAPPE=1 DATEN_ATTRAPPE=1 ZAHLUNG_ATTRAPPE=1 PORT=8789 node scripts/dev-server.mjs   # Stufe 2 nachgestellt: Anmeldecode 123456, Kassen ohne Stripe
-node scripts/pruefen.mjs                                                        # Browser-Prüfung (NUR=8 nur den Servermodus)
+node scripts/pruefen.mjs                                                        # Browser-Prüfung (NUR=8 nur den Servermodus, NUR=11 nur die Stripe-Anbindung)
 npx wrangler dev                                                                # wie bei Cloudflare, http://localhost:8787
 ```
 

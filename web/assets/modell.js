@@ -254,7 +254,8 @@
     function bookPlan(a, k, now) {
       const key = monthKey(now), preis = k === 'plus' ? PREISE.plus : PREISE.abo.grund;
       const schon = ledger(a).filter((b) => (b.kind === 'plus' || b.kind === 'abo') && b.month === key);
-      if (!schon.length) { a.book.unshift({ id: newId('p'), kind: k, month: key, when: stamp(now), text: planName(k) + ' · ' + monthLabel(now), sub: 'monatlich, bis ' + monthEnd(now) + ', monatlich kündbar', betrag: preis, badge: 'nächste Rechnung', status: 'offen' }); return; }
+      /* aboBezahlt (nur auf dem Server): bis zu diesem Monat hat Stripe das Abo bezahlt gemeldet, auch wenn die Meldung vor der Buchung kam */
+      if (!schon.length) { const bez = !!a.aboBezahlt && key <= a.aboBezahlt; a.book.unshift({ id: newId('p'), kind: k, month: key, when: stamp(now), text: planName(k) + ' · ' + monthLabel(now), sub: 'monatlich, bis ' + monthEnd(now) + ', monatlich kündbar', betrag: preis, badge: bez ? 'bezahlt' : 'nächste Rechnung', status: bez ? 'bezahlt' : 'offen' }); return; }
       /* im selben Monat von Abo 10 auf Plus: nur der Aufpreis */
       if (k === 'plus' && !schon.some((b) => b.kind === 'plus')) a.book.unshift({ id: newId('p'), kind: 'plus', month: key, when: stamp(now), text: 'Plus · ' + monthLabel(now) + ', Aufpreis', sub: 'Wechsel von Abo 10, bis ' + monthEnd(now), betrag: Math.max(0, PREISE.plus - PREISE.abo.grund), badge: 'nächste Rechnung', status: 'offen' });
     }
