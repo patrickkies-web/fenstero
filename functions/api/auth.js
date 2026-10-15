@@ -1,5 +1,7 @@
-/* eeziframes · Anmeldung für Betriebe ohne Passwort: ein sechsstelliger Code per E-Mail (Supabase Auth, „Email OTP“).
-   Supabase-Einstellung: Authentication → Email Templates → „Magic Link“ muss den Code {{ .Token }} enthalten (siehe docs/ONLINE-STELLEN.md).
+/* eeziframes · Anmeldung für Betriebe ohne Passwort: eine E-Mail mit Anmeldelink oder sechsstelligem Code (Supabase Auth).
+   Der Link führt mit #access_token=… zurück auf die Startseite (portal.js → /api/konto/sitzung); der Code geht über /api/konto/bestaetigen.
+   Welche E-Mail Supabase schickt, bestimmt die Vorlage „Magic Link“: Ohne eigenen Mailversand (SMTP) ist es die Standardvorlage mit Link,
+   mit eigenem Mailversand lässt sich {{ .Token }} (Code) eintragen; beides funktioniert (docs/ONLINE-STELLEN.md, Stufe 2 A).
    Attrappe (DATEN_ATTRAPPE=1): der Code ist immer 123456. */
 import { ApiFehler, sbNeu } from './umgebung.js';
 
@@ -16,11 +18,12 @@ async function gotrue(k, pfad, init, token) {
   return { ok: r.ok, status: r.status, data: data };
 }
 
-export async function codeSenden(k, sp, mail) {
+/* zurueck: Adresse, auf die der Anmeldelink führt (muss bei Supabase unter Redirect URLs erlaubt sein, sonst nimmt Supabase die Site URL) */
+export async function codeSenden(k, sp, mail, zurueck) {
   mail = String(mail || '').trim().toLowerCase();
   if (!mailOk(mail)) throw new ApiFehler('Bitte eine gültige E-Mail-Adresse eingeben.');
   if (k.supabase) {
-    const r = await gotrue(k, 'otp', { body: { email: mail, create_user: true } });
+    const r = await gotrue(k, 'otp' + (zurueck ? '?redirect_to=' + encodeURIComponent(zurueck) : ''), { body: { email: mail, create_user: true } });
     if (!r.ok) { console.log('Supabase Auth', r.status, JSON.stringify(r.data || {}).slice(0, 200)); throw new ApiFehler(r.status === 429 ? 'Zu viele Versuche. Bitte in einer Minute noch einmal.' : 'Der Code konnte nicht verschickt werden.', 502); }
     return { ok: true, mail: mail };
   }
