@@ -51,7 +51,7 @@ Regeln für Texte: Suchbegriff vorn im Titel und im h1, Marke am Ende des Titels
 
 Aufbau jeder Seite: zuerst „Kurz gesagt“ mit der Antwort, dann Schritte, Tabellen (am Telefon als Karten) und Fragen; jede Zahl mit nummerierter Quelle, Quellenliste mit Datum, „Stand“ am Ende. Strukturierte Daten enthalten nur, was sichtbar ist; keine Bewertungen, solange es keine echten gibt.
 
-**Startseite und App:** Im HTML steht innerhalb von `#app` eine Textfassung (`.vorab`) mit h1, Erklärung, Fakten „auf einen Blick“, Preisen, Fragen und Links. `gemeinsam.js` setzt sofort die Klasse `js` auf `<html>`, `.js .vorab` ist verborgen, und beim ersten `render()` ersetzt die App den Inhalt. Wer kein JavaScript ausführt (KI-Crawler), liest die Textfassung; Google rendert und sieht die App, deren Inhalt derselbe ist. Titel und Beschreibungen beginnen mit dem Suchbegriff. Auf der Startseite ist „Fenster ausmessen. Selbst. eezi.“ das einzige h1 (die Kopfzeile hat dort kein h1).
+**Startseite und App:** Im HTML steht innerhalb von `#app` eine Textfassung (`.vorab`) mit h1, Erklärung, Fakten „auf einen Blick“, Preisen, Fragen und Links. `gemeinsam.js` setzt sofort die Klasse `js` auf `<html>`, `.js .vorab` ist verborgen, und beim ersten `render()` ersetzt die App den Inhalt. Wer kein JavaScript ausführt (KI-Crawler), liest die Textfassung; Google rendert und sieht die App, deren Inhalt derselbe ist. Titel und Beschreibungen beginnen mit dem Suchbegriff. Die Startseite hat zwei Ansichten (Umschalter oben, docs/GESTALTUNG.md); Google rendert die Standardansicht für Hauseigentümer, dort ist „Fenster ausmessen. Selbst. eezi.“ das einzige h1, in der Ansicht für Fensterbauer „Aufmaß ohne Anfahrt.“.
 
 **Technik** (`functions/seo.js`, läuft im Worker und im lokalen Testserver):
 - `robots.txt` aus dem Worker: Pilotphase `Disallow: /`; mit Freigabe alles erlaubt außer `/api/`, die KI-Suchen namentlich, Verweis auf die Sitemap. Trainings-Crawler (GPTBot, ClaudeBot, Google-Extended) sind über `User-agent: *` erlaubt, damit künftige Modelle eeziframes kennen; wer das nicht will, sperrt sie in `robots()` einzeln.
@@ -59,7 +59,7 @@ Aufbau jeder Seite: zuerst „Kurz gesagt“ mit der Antwort, dann Schritte, Tab
 - `llms.txt` mit Kurzfassung, Fakten, Preisen aus den Variablen und Links.
 - Kopfzeilen jeder Seite: Canonical als `Link`-Kopfzeile (Hauptadresse aus `KANONISCH`, sonst die aufgerufene Domain ohne `www.`; unter `…workers.dev` gilt immer die Sperre der Pilotphase), Sicherheitskopfzeilen wie in `web/_headers` (der Worker setzt sie selbst, weil Cloudflare `_headers` auf Antworten des Workers nicht verlässlich anwendet), `X-Robots-Tag: noindex` nur in der Pilotphase. Die Meta-Tags `robots` in den Seiten sind entfernt (sie hätten die Freigabe blockiert); die Fehlerseite behält ihres.
 - Logo und Icon ohne `noindex` (`! X-Robots-Tag` in `_headers`), damit Google das Logo aus den strukturierten Daten zeigen darf; Skripte und Schriften bleiben `noindex`.
-- Interne Links: Fußzeile des Portals („Aufmaß-App für Fensterbauer“, „Ratgeber“), Startseite der App („Anleitung: Fenster ausmessen“), Direktlink `/#tour` für die Tour.
+- Interne Links: Kopfzeile und Ratgeber-Karten der Startseite (Ansicht Hauseigentümer), Fußzeile des Portals („Aufmaß-App für Fensterbauer“, „Ratgeber“), Startseite der App („Anleitung: Fenster ausmessen“), Anker `/#fensterbauer` und `/#tour` für Fensterbauer.
 
 ## Freigabe
 

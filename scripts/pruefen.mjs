@@ -112,11 +112,46 @@ if (teil(2)) {
   sauber(page, 'Portal ohne Fehler');
   await ctx.close();
 
+  // Ansicht: Umschalter oben, Anker, Knöpfe nur für die gewählte Zielgruppe
+  const ctxA = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
+  const pa = await neueSeite(ctxA);
+  const zustand = () => pa.evaluate(() => ({ a: ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()), b2c: !!document.querySelector('.hero.b2c'), b2b: !!document.querySelector('.hero.b2b'), top: [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }));
+  await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
+  let z = await zustand();
+  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && z.h1.length === 1 && /Fenster ausmessen/.test(z.h1[0]) && z.top.includes('Fenster ausmessen') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Umschalter oben, nur Inhalte für Hauseigentümer, Knopf „Fenster ausmessen“, kein Anmelden oder Starten für Betriebe');
+  ok(await pa.locator('.top a.btn.primary[href$="/app/"]').count() === 1 && await pa.locator('.wechsel [data-act="ansicht"][data-v="betrieb"]').count() === 1 && await pa.locator('a.tcard[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Fenster ausmessen“ führt in die App, Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
+  await pa.click('.top .ansicht [data-v="betrieb"]'); await pa.waitForTimeout(400);
+  z = await zustand();
+  ok(z.a === 'Fensterbauer' && z.b2b && !z.b2c && z.h1.length === 1 && /Aufmaß ohne Anfahrt/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen'), 'Ansicht Fensterbauer: Anker #fensterbauer, nur Inhalte für Betriebe, „Anmelden“ und „Kostenlos starten“');
+  ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
+  await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
+  ok((await zustand()).a === 'Fensterbauer', 'Gewählte Ansicht bleibt nach dem Neuladen');
+  await pa.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
+  z = await zustand();
+  ok(z.a === 'Hauseigentümer' && z.b2c, 'Anker /#hauseigentuemer öffnet die Ansicht für Hauseigentümer');
+  await pa.goto(BASE + '/#betriebe', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
+  z = await zustand();
+  ok(z.a === 'Fensterbauer' && z.b2b && z.hash === '#fensterbauer', 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
+  await pa.click('.top [data-act="go"][data-v="preise"]'); await pa.waitForTimeout(300);
+  z = await zustand();
+  ok(z.screen === 'preise' && z.a === 'Fensterbauer', 'Preise gehören zur Ansicht Fensterbauer, der Umschalter zeigt es');
+  await pa.click('.top .ansicht [data-v="kunde"]'); await pa.waitForTimeout(300);
+  z = await zustand();
+  ok(z.screen === 'landing' && z.a === 'Hauseigentümer' && z.b2c && z.hash === '#hauseigentuemer', 'Von den Preisen per Umschalter zur Startseite der Hauseigentümer');
+  await pa.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await pa.goto(BASE + '/?von=pdf', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
+  z = await zustand();
+  ok(z.a === 'Fensterbauer' && await pa.locator('.banner.vonpdf').count() === 1, 'Über den QR-Code eines Aufmaßblatts: Ansicht Fensterbauer mit Hinweis zum Code');
+  sauber(pa, 'Ansichten ohne Fehler');
+  await ctxA.close();
+
   const mob = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' });
   const mp = await neueSeite(mob);
   await mp.goto(BASE + '/', { waitUntil: 'networkidle' });
   await mp.waitForTimeout(800);
   ok(await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'Portal: kein seitliches Scrollen bei 390 px');
+  const kopf = await mp.evaluate(() => { const t = document.querySelector('.top'), u = t.querySelector('.ansicht'), r = u.getBoundingClientRect(), k = [...u.querySelectorAll('button')]; return { breit: Math.round(r.width), zeile: r.top > t.querySelector('.logo-s').getBoundingClientRect().bottom - 2, voll: k.every((b) => b.scrollWidth <= b.clientWidth + 1 && b.getBoundingClientRect().height >= 44), passt: t.scrollWidth <= t.clientWidth + 1, hoehe: Math.round(t.getBoundingClientRect().height) }; });
+  ok(kopf.zeile && kopf.breit >= 340 && kopf.voll && kopf.passt && kopf.hoehe <= 124, 'Telefon: Umschalter als eigene Zeile der Kopfzeile, volle Breite, beide Wörter ganz lesbar, Ziele ab 44 px (Kopf ' + kopf.hoehe + ' px)');
   await foto(mp, 'portal-telefon');
   sauber(mp, 'Portal (Telefon) ohne Fehler');
   await mob.close();
@@ -420,10 +455,13 @@ if (teil(6)) {
   ok(await page.locator('.banner.vonpdf').count() === 0, 'Hinweis lässt sich schließen');
   // Startseite: beide Zielgruppen, kein Marktplatz
   await tun('logout'); await page.waitForTimeout(300);
-  await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
+  await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite: Hauseigentümer zuerst (aufmessen oder Führung), Fensterbauer darunter');
-  ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start), 'Kein Marktplatz mehr auf der Startseite');
+  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen oder Führung, nichts für Betriebe');
+  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForTimeout(400);
+  const startB = await page.evaluate(() => document.body.textContent);
+  ok(/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c').count() === 0, 'Startseite, Ansicht Fensterbauer: Aufmaß ohne Anfahrt, nichts für Hauseigentümer');
+  ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start + startB), 'Kein Marktplatz mehr auf der Startseite');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
   await ctx.close();
@@ -910,7 +948,9 @@ if (teil(9)) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
-  ok(await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1 && await page.locator('#betriebe [data-act="tour"]').count() === 1, 'Startseite: „Führung starten“ für Hauseigentümer, „Tour starten“ für Fensterbauer');
+  const fuehrungDa = await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1;
+  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForTimeout(300);
+  ok(fuehrungDa && await page.locator('.hero.b2b [data-act="tour"]').count() === 1, 'Startseite: „Führung starten“ in der Ansicht für Hauseigentümer, „Tour starten“ in der für Fensterbauer');
   const ohneDemo = async (wo) => { const t = await page.evaluate(() => document.body.innerText); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
   ok(await ohneDemo('Startseite') === true, 'Startseite ohne Demo-Konten und Beispiel-Registrierung');
   await page.click('.top [data-act="sheet"][data-v="login"]'); await page.waitForTimeout(300);
@@ -921,7 +961,7 @@ if (teil(9)) {
   // Tour für Fensterbauer: acht Schritte, je ein Fakt mit Quelle, Vorgegebenes gesperrt, nichts wird gespeichert
   await page.evaluate(() => { S.reg = null; nav('landing'); }); await page.waitForTimeout(300);
   const vorTour = await page.evaluate(() => JSON.stringify({ acc: S.acc, logins: S.logins }));
-  await page.click('#betriebe [data-act="tour"]'); await page.waitForSelector('.tourw'); await page.waitForTimeout(300);
+  await page.click('.hero.b2b [data-act="tour"]'); await page.waitForSelector('.tourw'); await page.waitForTimeout(300);
   const ids = [];
   for (let i = 0; i < 8; i++) {
     const st = await page.evaluate(() => ({ id: TOUR[S.tour.i], fakt: !!document.querySelector('.tour-fakt .tf-q'), merk: document.querySelectorAll('.tour-merk li').length, schritte: document.querySelectorAll('.tour-schritte button').length }));
@@ -1056,11 +1096,11 @@ if (teil(10)) {
   ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
   await page.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
   await page.click('.rg-cta a[href="/#tour"]'); await page.waitForLoadState('networkidle'); await page.waitForTimeout(600);
-  const tour1 = await page.evaluate(() => S.screen === 'tour' && location.hash === '');
+  const tour1 = await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour');
   await page.evaluate(() => { tourEnde(); location.hash = 'tour'; }); await page.waitForTimeout(400);
-  ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash === ''), 'Link „Tour“ auf der Seite für Fensterbauer öffnet die Tour (/#tour), auch als Sprungmarke auf der Startseite');
+  ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Link „Tour“ auf der Seite für Fensterbauer öffnet die Tour (/#tour), auch als Sprungmarke auf der Startseite');
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/fuer-fensterbauer/"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung und Seite für Fensterbauer verlinkt');
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/#fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
   sauber(page, 'Startseite und App mit Textfassung ohne Fehler');
   await ctx.close();
   const nojs = await browser.newContext(Object.assign({}, telefon, { javaScriptEnabled: false })), np = await nojs.newPage();
