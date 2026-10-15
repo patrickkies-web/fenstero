@@ -191,7 +191,7 @@ const OPT = {
   anschlag: [{ k: 'ohne', label: 'Ohne Anschlag', sub: 'Laibung glatt' }, { k: 'innen', label: 'Innenanschlag', sub: 'Mauer innen vor dem Rahmen' }, { k: 'aussen', label: 'Außenanschlag', sub: 'Mauer außen vor dem Rahmen' }],
   fassade: [{ k: 'putz', label: 'Putz' }, { k: 'klinker', label: 'Klinker' }, { k: 'wdvs', label: 'Gedämmt (WDVS)' }, { k: 'holz', label: 'Holz' }],
   etage: [{ k: 'kg', label: 'Keller' }, { k: 'eg', label: 'EG' }, { k: 'og', label: 'OG' }, { k: 'dg', label: 'DG' }],
-  form: [{ k: 'rechteck', label: 'Rechteck' }, { k: 'rundbogen', label: 'Rundbogen' }, { k: 'segment', label: 'Segmentbogen' }, { k: 'schraeg', label: 'Schräg' }, { k: 'rund', label: 'Rund' }],
+  form: [{ k: 'rechteck', label: 'Rechteck', sub: 'der Standard' }, { k: 'rundbogen', label: 'Rundbogen', sub: 'Halbkreis oben' }, { k: 'segment', label: 'Segmentbogen', sub: 'flacher Bogen oben' }, { k: 'schraeg', label: 'Schräg', sub: 'eine Seite höher' }, { k: 'rund', label: 'Rund', sub: 'fest verglast, ohne Flügel' }],
   teilung: [{ k: '1', label: '1 Flügel', sub: 'einteilig' }, { k: '2p', label: '2 Flügel', sub: 'mit Pfosten', g: 'pfosten' }, { k: '2s', label: '2 Flügel', sub: 'Stulp, ohne Pfosten', g: 'stulp' }, { k: '3', label: '3 Flügel', sub: 'Mitte fest' }],
   typ: [{ k: 'F', label: 'Fest', g: 'fest' }, { k: 'D', label: 'Dreh', g: 'symbol' }, { k: 'K', label: 'Kipp', g: 'kipp' }, { k: 'DK', label: 'Dreh-Kipp', g: 'dk' }],
   din: [{ k: 'L', label: 'DIN links' }, { k: 'R', label: 'DIN rechts' }],
@@ -203,7 +203,10 @@ const OPT = {
   breite: [{ k: 18, label: '18 mm, fein' }, { k: 26, label: '26 mm' }, { k: 45, label: '45 mm, kräftig' }],
   aufseite: [{ k: 'beide', label: 'Innen und außen' }, { k: 'aussen', label: 'Nur außen' }, { k: 'innen', label: 'Nur innen' }],
   glas: [{ k: '2', label: '2-fach', sub: 'Ug ≈ 1,1' }, { k: '3', label: '3-fach', sub: 'Ug ≈ 0,5 bis 0,7' }],
-  glasfn: [{ k: 'schall', label: 'Schallschutz', g: 'schall' }, { k: 'vsg', label: 'Sicherheitsglas', g: 'vsg' }, { k: 'sicht', label: 'Sichtschutz', g: 'ornament' }, { k: 'sonne', label: 'Sonnenschutz' }],
+  glasfn: [{ k: 'schall', label: 'Schallschutz', g: 'schall', ico: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L11 18V6L7.2 9.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14.6 9.6a3.4 3.4 0 0 1 0 4.8M17.2 7a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+    { k: 'vsg', label: 'Sicherheitsglas', g: 'vsg', ico: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l7 2.8v5.2c0 4.3-2.9 7.6-7 9.6-4.1-2-7-5.3-7-9.6V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12.2l2.1 2.1 4-4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+    { k: 'sicht', label: 'Sichtschutz', g: 'ornament', ico: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-5.8 9.5-5.8 9.5 5.8 9.5 5.8-3.4 5.8-9.5 5.8S2.5 12 2.5 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 4.5l15 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+    { k: 'sonne', label: 'Sonnenschutz', ico: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' }],
   griff: [{ k: 'standard', label: 'Standard' }, { k: 'abschliessbar', label: 'Abschließbar' }, { k: 'druckknopf', label: 'Druckknopf' }],
   gf: [{ k: 'weiss', label: 'Weiß', bg: '#f4f4f2' }, { k: 'silber', label: 'Silber', bg: '#c9ccd0' }, { k: 'edelstahl', label: 'Edelstahl', bg: 'linear-gradient(135deg, #eceef0, #a7abb0)' }, { k: 'titan', label: 'Titan', bg: '#8b8d8f' }, { k: 'schwarz', label: 'Schwarz', bg: '#1d1d1f' }],
   rc: [{ k: 'basis', label: 'Basis' }, { k: 'rc1', label: 'RC1 N' }, { k: 'rc2', label: 'RC2' }],
@@ -422,7 +425,7 @@ const DEMO_QUADS = { in: { inner: [[248, 192], [952, 192], [952, 1008], [248, 10
    und um diese Kante gedreht wird. Alle Maße kommen aus w3dCalc, w3dLayout schreibt sie in die Flächen; so verformt
    sich das Modell mit Übergängen, wenn eine Zahl getippt wird. */
 const W3D = { FD: 70, PF: 62, SF: 46, MUL: 72, OUTD: 110, SILL: 30, MARGIN_W: 3200, MARGIN_H: 2600 };
-const VIEWS = { inside: [-9, -27], front: [0, 0], outside: [-8, 152], three: [-10, -34], result: [-7, -20] };
+const VIEWS = { inside: [-9, -27], front: [0, 0], outside: [-8, 152], three: [-10, -34], result: [-7, -20], bankInnen: [-24, -24], bankAussen: [-22, 156] };
 /* Kamera für einen geöffneten Flügel: von der Griffseite aus sieht man ihn aufschwingen */
 function openView(x, base) { if (!x) return base; if (x.t === 'K') return [base[0] - 6, base[1]]; return [base[0], x.din === 'L' ? -30 : 30]; }
 function w3dCalc(w, o) {
@@ -433,12 +436,60 @@ function w3dCalc(w, o) {
   const sw = o.stageW || 358, sh = o.stageH || 360;
   const s = o.s || Math.min(sw * (o.fitW || 0.64) / moW, sh * (o.fitH || 0.7) / moH);
   const n = Math.max(1, w.sashes.length), pf = W3D.PF, sf = W3D.SF, mul = w.teilung === '2s' ? 8 : W3D.MUL;
-  const innerW = elW - 2 * pf, innerH = elH - 2 * pf, olH = w.ol ? Math.round(innerH * 0.26) : 0, sashH = innerH - (olH ? olH + mul : 0), sashW = (innerW - mul * (n - 1)) / n;
+  const innerW = elW - 2 * pf, innerH = elH - 2 * pf, olH = w.ol ? Math.round(Math.min(innerH * 0.6, Math.max(innerH * 0.26, formSenke(w.form, innerW, innerH)))) : 0, sashH = innerH - (olH ? olH + mul : 0), sashW = (innerW - mul * (n - 1)) / n;
   return { s: s, moW: moW, moH: moH, elW: elW, elH: elH, laib: laib, T: T, n: n, pf: pf, sf: sf, mul: mul, innerW: innerW, innerH: innerH, olH: olH, sashH: sashH, sashW: sashW, haveMo: haveMo, haveEl: !!(d.elW && d.elH),
     x0: -elW / 2, y0: moH / 2 - elH, wallW: moW + W3D.MARGIN_W, wallH: moH + W3D.MARGIN_H, showEl: o.showEl !== false, dims: o.dims || [], active: o.active || '' };
 }
 const px = (v) => (Math.round(v * 100) / 100) + 'px';
 const hole = (W, H, x1, y1, x2, y2) => 'polygon(evenodd, 0 0, ' + px(W) + ' 0, ' + px(W) + ' ' + px(H) + ', 0 ' + px(H) + ', 0 0, ' + px(x1) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y1) + ')';
+/* ---------- Formen im Modell ----------
+   formGeo(form, x, y, b, h): Ober- und Unterkante als Funktion von x, waagerechte Ausdehnung [xl, xr] und ein Umriss mit fester
+   Punktzahl (oben 21, unten 11, im Uhrzeigersinn ab der linken Kämpferlinie). Alle Formen haben gleich viele Punkte, deshalb
+   morphen Wandöffnung, Laibung, Rahmen und Flügel beim Wechsel der Form, statt zu springen. */
+const FORM_O = 20, FORM_U = 10;
+function formSenke(form, b, h) { return form === 'rundbogen' ? Math.min(b / 2, h * 0.8) : form === 'segment' ? Math.min(b * 0.15, h * 0.35) : form === 'schraeg' ? h * 0.42 : 0; }
+function formGeo(form, bx, by, bw, bh) {
+  const cx = bx + bw / 2, pts = [];
+  if (form === 'rund') {
+    const r = Math.max(0, Math.min(bw, bh) / 2), cy = by + bh / 2, hh = (x) => Math.sqrt(Math.max(0, r * r - (x - cx) * (x - cx)));
+    const n = FORM_O + FORM_U + 2, st = 2 * Math.PI / n, a0 = Math.PI / 2 + st * FORM_O / 2;
+    for (let k = 0; k < n; k++) { const a = a0 - k * st; pts.push([cx + r * Math.cos(a), cy - r * Math.sin(a)]); }
+    return { xl: cx - r, xr: cx + r, top: (x) => cy - hh(x), bot: (x) => cy + hh(x), pts: pts, rund: true };
+  }
+  const sk = formSenke(form, bw, bh);
+  let top = () => by;
+  if (form === 'rundbogen' && sk > 0.5) { const a = bw / 2; top = (x) => by + sk - sk * Math.sqrt(Math.max(0, 1 - ((x - cx) / a) * ((x - cx) / a))); }
+  else if (form === 'segment' && sk > 0.5) { const hb = bw / 2, R = (hb * hb + sk * sk) / (2 * sk), cyc = by + R; top = (x) => cyc - Math.sqrt(Math.max(0, R * R - (x - cx) * (x - cx))); }
+  else if (form === 'schraeg') top = (x) => by + sk * (1 - (x - bx) / bw);
+  for (let k = 0; k <= FORM_O; k++) { const x = form === 'rundbogen' ? cx - (bw / 2) * Math.cos(Math.PI * k / FORM_O) : bx + bw * k / FORM_O; pts.push([x, top(x)]); }
+  for (let k = 0; k <= FORM_U; k++) pts.push([bx + bw - bw * k / FORM_U, by + bh]);
+  return { xl: bx, xr: bx + bw, top: top, bot: () => by + bh, pts: pts, rund: false };
+}
+/* Rechteck (x, y, b, h) geschnitten mit einer Form: oben J Punkte (links nach rechts), unten J Punkte (zurück). x ist kosinusverteilt,
+   so liegen die Punkte dort dicht, wo ein Bogen steil wird; beim Kreis ergibt das genau gleiche Winkelschritte. */
+function formSchnitt(g, x, y, b, h, J) {
+  const xa = Math.max(x, g.xl), xb = Math.min(x + b, g.xr), o = [], u = [];
+  for (let j = 0; j < J; j++) {
+    const xx = xa + (xb - xa) * (1 - Math.cos(Math.PI * j / (J - 1))) / 2, yt = Math.min(y + h, Math.max(y, g.top(xx))), yb = Math.max(yt, Math.min(y + h, g.bot(xx)));
+    o.push([xx, yt]); u.unshift([xx, yb]);
+  }
+  return o.concat(u);
+}
+/* Punktlisten (Weltkoordinaten) als clip-path relativ zur Fläche bei (ox, oy) der Größe B × H; mit W gespiegelt für Rückseiten (rotateY 180°).
+   Chrome legt in 3-D-Szenen die Ebene auf den Umriss des Clips und verschiebt dabei den Inhalt: beginnt ein Clip nicht oben links, fehlt
+   unten ein Stück. Zwei Spitzen ohne Fläche zu den Ecken (0 0) und (B H) halten den Umriss so groß wie die Fläche. */
+const polyPts = (pts, ox, oy, W) => pts.map((p) => px(W != null ? W - (p[0] - ox) : p[0] - ox) + ' ' + px(p[1] - oy)).join(', ');
+const eckSpitzen = (B, H) => '0px 0px, ' + px(B) + ' ' + px(H) + ', 0px 0px';
+const ringClip = (aus, inn, ox, oy, B, H, W) => 'polygon(evenodd, 0px 0px, ' + polyPts(aus.concat([aus[0]]), ox, oy, W) + ', ' + eckSpitzen(B, H) + ', ' + polyPts(inn.concat([inn[0]]), ox, oy, W) + ')';
+const polyClip = (pts, ox, oy, B, H, W) => 'polygon(0px 0px, ' + polyPts(pts.concat([pts[0]]), ox, oy, W) + ', ' + eckSpitzen(B, H) + ')';
+/* Laibung: Farbe nach der Richtung, in die ein Streifen schaut (Licht von links oben), wie bei den vier Flächen des Rechtecks */
+const REV_FARBEN = [[0, [233, 226, 214]], [90, [201, 191, 176]], [180, [205, 196, 181]], [270, [221, 214, 202]], [360, [233, 226, 214]]];
+function revFarbe(deg) {
+  deg = ((deg % 360) + 360) % 360;
+  for (let k = 0; k < REV_FARBEN.length - 1; k++) { const a = REV_FARBEN[k], b = REV_FARBEN[k + 1]; if (deg <= b[0]) { const t = (deg - a[0]) / (b[0] - a[0]); return 'rgb(' + a[1].map((c, i) => Math.round(c + (b[1][i] - c) * t)).join(', ') + ')'; } }
+  return 'rgb(233, 226, 214)';
+}
+const w3dGeformt = (w, o) => !!(w.form && w.form !== 'rechteck') || !!(o && o.formen);
 /* Fläche: Größe in Weltpixeln, Lage der linken oberen Ecke, Drehung um diese Kante */
 function face(el, W, H, x, y, z, rot, origin, clip) {
   if (!el) return;
@@ -453,14 +504,20 @@ function facadeBg(k) {
   if (k === 'wdvs') return 'linear-gradient(160deg, #f4f2ee, #e4e0d8)';
   return 'linear-gradient(160deg, #e9e2d6, #d7cfc0)';
 }
-function sillBg(k, side) {
-  if (k === 'stein') return 'linear-gradient(90deg, #d9d6d0, #bfbab2 40%, #d2cec6 70%, #c4bfb6)';
-  if (k === 'holz') return 'repeating-linear-gradient(90deg, #c9a46b 0 9px, #b8935c 9px 12px)';
-  if (k === 'werzalit') return 'linear-gradient(180deg, #fafaf8, #ececea)';
-  if (k === 'alu') return 'linear-gradient(90deg, #d6d9dc, #b9bdc2 50%, #cfd3d7)';
-  return side === 'aussen' ? 'linear-gradient(90deg, #cdd1d5, #b5b9be)' : 'linear-gradient(180deg, #f1ede6, #e2dcd2)';
-}
-function sillSolid(k, side) { return k === 'stein' ? '#c9c4bb' : k === 'holz' ? '#c2a06a' : k === 'werzalit' ? '#f2f2f0' : k === 'alu' ? '#c5c9ce' : side === 'aussen' ? '#bfc3c8' : '#e9e4dc'; }
+/* Fensterbänke: Oberseite (oben), Stirnseite (stirn), Vollton (voll) je Material; innen und außen */
+const GRANIT = 'radial-gradient(circle at 30% 40%, rgba(40, 38, 35, .38) 0 1px, transparent 1.6px) 0 0 / 6px 6px, radial-gradient(circle at 70% 25%, rgba(255, 255, 255, .6) 0 .8px, transparent 1.4px) 0 0 / 5px 5px, radial-gradient(circle at 45% 80%, rgba(90, 84, 76, .32) 0 1.2px, transparent 2px) 0 0 / 9px 9px, ';
+const BANK = {
+  behalten: { oben: 'linear-gradient(180deg, #eee9e0, #e2dbd0)', stirn: 'linear-gradient(180deg, #e2dbd0, #d3cbbe)', voll: '#e9e4dc' },
+  werzalit: { oben: 'linear-gradient(180deg, #fdfdfb, #f0f0ed)', stirn: 'linear-gradient(180deg, #ffffff, #dcdcd8)', voll: '#f6f6f4' },
+  stein: { oben: GRANIT + 'linear-gradient(90deg, #bdb7ae, #aca69d 40%, #c2bcb3 70%, #b1aba2)', stirn: GRANIT + 'linear-gradient(180deg, #aaa49b, #938d84)', voll: '#b7b1a8' },
+  holz: { oben: 'repeating-linear-gradient(180deg, rgba(110, 66, 28, .2) 0 1.5px, transparent 1.5px 7px, rgba(110, 66, 28, .12) 7px 8px, transparent 8px 13px), linear-gradient(90deg, #d6ae74, #c69a5e 50%, #d2a76b)', stirn: 'linear-gradient(180deg, #b98a50, #9c7240)', voll: '#c99f64' },
+  alu: { oben: 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .22) 0 1px, transparent 1px 3px), linear-gradient(180deg, #e3e6e9, #b9bec4)', stirn: 'linear-gradient(180deg, #d9dde1, #9da3aa)', voll: '#c8ccd1' },
+  aussen: { oben: 'linear-gradient(180deg, #cdd1d5, #b5b9be)', stirn: 'linear-gradient(180deg, #c0c4c9, #a3a8ae)', voll: '#bfc3c8' }
+};
+const bank = (k, seite) => BANK[k === 'behalten' && seite === 'aussen' ? 'aussen' : k] || BANK.behalten;
+/* Auswahl: jedes Material als Musterpunkt im Chip */
+OPT.fbi.forEach((o) => { o.bg = bank(o.k, 'innen').oben; });
+OPT.fba.forEach((o) => { o.bg = bank(o.k, 'aussen').oben; });
 function barBg(w, fcol, side) {
   if (w.spross === 'szr') return 'linear-gradient(180deg, #d9d9d6, #bdbdb9)';
   if (w.spross === 'echt') return fcol.bg;
@@ -472,21 +529,27 @@ function w3dHTML(w, o) {
   o = o || {};
   const V = w3dCalc(w, o), view = VIEWS[o.view || 'inside'], fin = colorOf(w.gleich ? w.fa : w.fi), fout = colorOf(w.fa), hcol = (OPT.gf.find((g) => g.k === w.gf) || OPT.gf[0]).bg;
   const faceEl = (role, cls, extra) => '<div class="w3d-f ' + cls + '" data-r="' + role + '"' + (extra || '') + '></div>';
-  let h = '<div class="w3d-stage' + (o.sway ? ' is-live' : '') + (o.symbols ? ' show-sym' : '') + (o.cls ? ' ' + o.cls : '') + '" id="' + (o.id || 'w3d') + '" data-sig="' + esc(w3dSig(w, o)) + '" style="' + (o.stageH === 'auto' ? '' : 'height: ' + (o.stageH || 360) + 'px; ') + '--rx: ' + view[0] + 'deg; --ry: ' + view[1] + 'deg" data-view="' + (o.view || 'inside') + '">' + (o.bg ? '<div class="w3d-bg" style="background-image: url(' + o.bg + ')"></div>' : '') + '<div class="w3d-cam"><div class="w3d-sway"><div class="w3d-world">';
+  const G = w3dGeformt(w, o);
+  let h = '<div class="w3d-stage' + (o.sway ? ' is-live' : '') + (o.symbols ? ' show-sym' : '') + (o.cls ? ' ' + o.cls : '') + '" id="' + (o.id || 'w3d') + '" data-struct="' + (G ? 'g' : 'e') + '" data-sig="' + esc(w3dSig(w, o)) + '" style="' + (o.stageH === 'auto' ? '' : 'height: ' + (o.stageH || 360) + 'px; ') + '--rx: ' + view[0] + 'deg; --ry: ' + view[1] + 'deg" data-view="' + (o.view || 'inside') + '">' + (o.bg ? '<div class="w3d-bg" style="background-image: url(' + o.bg + ')"></div>' : '') + '<div class="w3d-cam"><div class="w3d-sway"><div class="w3d-world">';
   h += faceEl('wall-in', 'w3d-wall-in'); h += faceEl('wall-out', 'w3d-wall-out', ' style="background: ' + facadeBg(w.fassade) + '"');
-  h += faceEl('rev-t', 'w3d-rev w3d-rev-t') + faceEl('rev-b', 'w3d-rev w3d-rev-b') + faceEl('rev-l', 'w3d-rev w3d-rev-l') + faceEl('rev-r', 'w3d-rev w3d-rev-r');
-  h += faceEl('sill-f', 'w3d-sill', ' style="background: ' + sillBg(w.fbi, 'innen') + '"') + faceEl('sill-t', 'w3d-sill', ' style="background: ' + sillBg(w.fbi, 'innen') + '"');
+  if (G) { for (let k = 0; k < FORM_O + FORM_U + 2; k++) h += faceEl('rs-' + k, 'w3d-rev w3d-rs'); }
+  else h += faceEl('rev-t', 'w3d-rev w3d-rev-t') + faceEl('rev-b', 'w3d-rev w3d-rev-b') + faceEl('rev-l', 'w3d-rev w3d-rev-l') + faceEl('rev-r', 'w3d-rev w3d-rev-r');
+  const bi = bank(w.fbi, 'innen'), ba = bank(w.fba, 'aussen');
+  h += faceEl('sill-t', 'w3d-sill', ' style="background: ' + bi.oben + '"') + faceEl('sill-f', 'w3d-sill w3d-sill-f', ' style="background: ' + bi.stirn + '"') + faceEl('sill-l', 'w3d-sill w3d-sill-e', ' style="background: ' + bi.stirn + '"') + faceEl('sill-r', 'w3d-sill w3d-sill-e', ' style="background: ' + bi.stirn + '"');
+  h += faceEl('sa-t1', 'w3d-sill', ' style="background: ' + ba.oben + '"') + faceEl('sa-t2', 'w3d-sill', ' style="background: ' + ba.oben + '"') + faceEl('sa-f', 'w3d-sill w3d-sill-f', ' style="background: ' + ba.stirn + '"');
   h += '<div class="w3d-el' + (V.showEl ? '' : ' is-hidden') + '" data-r="el">';
   h += faceEl('el-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('el-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
-  ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('el-side-' + k, 'w3d-frame w3d-side', ' style="background: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
-  if (w.ol) h += faceEl('ol-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('ol-glass', 'w3d-glass') + faceEl('ol-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
+  if (G) h += faceEl('fuge', 'w3d-fuge');
+  else ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('el-side-' + k, 'w3d-frame w3d-side', ' style="background: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
+  if (w.ol) h += faceEl('ol-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('ol-glass', 'w3d-glass') + faceEl('ol-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"') + faceEl('kf', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('kfb', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
   for (let i = 0; i < V.n - 1; i++) h += faceEl('mul-' + i, 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('mulb-' + i, 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
   w.sashes.forEach((x, i) => {
     const fixed = x.t === 'F', symSvg = '<svg class="w3d-sym" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" data-r="sym-' + i + '">' + symPaths(w, x) + '</svg>';
     const bars = w.bars.filter((b) => b.s === i).map((b) => '<span class="w3d-bar' + (o.editBars ? ' is-edit' : '') + (o.selBar === b.id ? ' is-sel' : '') + '" data-bar="' + b.id + '" data-dir="' + b.d + '" data-r="bar-' + b.id + '" style="--bi: ' + barBg(w, fin, 'innen') + '; --bo: ' + barBg(w, fout, 'aussen') + '; background: var(--bi)"></span>').join('');
     h += '<div class="w3d-sash' + (fixed ? ' is-fixed' : '') + (o.selSash === i && o.selectable ? ' is-sel' : '') + '" data-r="sash-' + i + '" data-sash="' + i + '" data-t="' + x.t + '" data-din="' + x.din + '">';
     h += faceEl('sf-in-' + i, 'w3d-frame w3d-sf', ' style="background: ' + fin.bg + '"');
-    h += '<div class="w3d-f w3d-glass" data-r="glass-' + i + '" data-glass="' + i + '">' + symSvg + bars + '</div>';
+    h += '<div class="w3d-f w3d-glass" data-r="glass-' + i + '" data-glass="' + i + '">' + symSvg + bars + '</div>' + faceEl('pane-a-' + i, 'w3d-scheibe') + faceEl('pane-b-' + i, 'w3d-scheibe');
+    for (let k = 0; k < 8; k++) h += '<span class="w3d-f w3d-pilz" data-r="pz-' + i + '-' + k + '" style="--i: ' + k + '"></span>';
     h += faceEl('sf-out-' + i, 'w3d-frame w3d-sf w3d-back', ' style="background: ' + fout.bg + '"');
     ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('sfe-' + k + '-' + i, 'w3d-frame w3d-side w3d-sfe', ' style="background: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
     h += '<div class="w3d-handle" data-r="handle-' + i + '" style="background: ' + hcol + '"></div>';
@@ -499,20 +562,60 @@ function w3dHTML(w, o) {
   (V.dims || []).forEach((k) => { h += dimHTML(k, V.active === k); });
   h += '</div></div></div>';
   h += '<span class="w3d-hint" data-r="hint"' + (o.hint ? '' : ' hidden') + '>' + esc(o.hint || '') + '</span>';
+  if (o.lupe) h += '<div class="w3d-lupe" data-r="lupe" data-k="' + esc(glasLupeKey(w)) + '">' + glasLupe(w) + '</div>';
   h += '<div class="rail rail-h" data-rail="v" hidden></div><div class="rail rail-v" data-rail="h" hidden></div>';
   return h + '</div>';
 }
 const dimHTML = (k, active) => '<div class="w3d-dim ' + (k[0] === 'e' ? 'el' : 'mo') + (active ? ' is-active' : '') + '" data-r="dim-' + k + '" data-dim="' + k + '"><span class="w3d-dim-line"></span><span class="w3d-dim-cap a"></span><span class="w3d-dim-cap b"></span><span class="w3d-dim-lab" data-r="lab-' + k + '"></span></div>';
 function symPaths(w, x) { return sym(0, 0, 100, 100, x.t, x.din, w.richtung === 'aussen' ? '5 4' : undefined, 'rgba(29,29,31,.45)', 1).map((p) => '<path d="' + p.d + '" fill="none" stroke="' + p.s + '" stroke-width="1.2"' + (p.da ? ' stroke-dasharray="' + p.da + '"' : '') + ' vector-effect="non-scaling-stroke"></path>').join(''); }
+/* Lupe: Schnitt durch die Unterkante des Flügels, groß genug zum Lesen. Links Raum, rechts außen. Zeigt Scheibenzahl,
+   Abstandhalter, Gasfüllung, Glasleiste und Dichtungen; Schallschutz (dickere Außenscheibe), Sicherheitsglas (Folie im Verbund),
+   Sonnenschutz (Beschichtung innen auf der Außenscheibe), Sichtschutz (raue Raumseite). */
+function glasLupe(w) {
+  const fn = w.glasfn || [], drei = w.glas !== '2', vsg = fn.indexOf('vsg') >= 0 || w.rc === 'rc2', schall = fn.indexOf('schall') >= 0, sonne = fn.indexOf('sonne') >= 0, sicht = fn.indexOf('sicht') >= 0;
+  const sch = [{ d: schall ? 8 : 5, schicht: sonne }]; if (drei) sch.push({ d: 5 }); sch.push({ d: vsg ? 8 : 5, folie: vsg, matt: sicht });
+  const zw = drei ? 12 : 17, breit = sch.reduce((a, x) => a + x.d, 0) + zw * (sch.length - 1), xr = 52 + breit / 2;
+  const R = (x, y, b, h, f, extra) => '<rect x="' + n1(x) + '" y="' + n1(y) + '" width="' + n1(b) + '" height="' + n1(h) + '" fill="' + f + '"' + (extra || '') + '/>';
+  let h = '<svg viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="lupe-k"><circle cx="50" cy="50" r="46"/></clipPath>' +
+    '<pattern id="lupe-m" width="2.2" height="2.2" patternUnits="userSpaceOnUse"><circle cx="1.1" cy="1.1" r=".55" fill="#ffffff"/></pattern></defs><g clip-path="url(#lupe-k)">';
+  h += R(0, 0, 100, 100, '#f5f2ec') + R(52, 0, 48, 100, '#e6eef6');
+  /* Glaspaket von außen (rechts) nach innen */
+  let x = xr; const lagen = [];
+  sch.forEach((g, k) => { x -= g.d; lagen.push([x, g]); if (k < sch.length - 1) { x -= zw; lagen.push([x, null]); } });
+  lagen.forEach((l) => {
+    const gx = l[0], g = l[1];
+    if (!g) { h += R(gx, -2, zw, 72, 'rgba(150, 196, 236, .32)') + R(gx + 1.2, 60, zw - 2.4, 8, '#4d545c', ' rx="1"') + R(gx + 2.6, 61.6, zw - 5.2, 1.4, 'rgba(255, 255, 255, .45)') + R(gx + 0.6, 68, zw - 1.2, 3.4, '#1f2226'); return; }
+    h += R(gx, -2, g.d, 73, '#cfe2f4', ' stroke="#4f7fae" stroke-width="1"');
+    if (g.folie) h += R(gx + g.d / 2 - 0.9, -2, 1.8, 73, '#2fa57f');
+    if (g.schicht) h += R(gx - 1.1, -2, 1.4, 73, '#c9962e');
+    if (g.matt) h += R(gx, -2, 2.4, 73, 'url(#lupe-m)');
+  });
+  const xi = lagen[lagen.length - 1][0];
+  /* Flügelprofil mit Kammern, Glasleiste innen, Dichtungen innen und außen */
+  h += '<path d="M8 110V70q0-4 4-4h76q4 0 4 4v40z" fill="#ffffff" stroke="#6a7178" stroke-width="1.3"/>';
+  [24, 38, 62, 76].forEach((cx) => { h += '<path d="M' + cx + ' 72v40" stroke="#c4c8cc" stroke-width="1.1"/>'; });
+  h += '<path d="M14 84h72" stroke="#c4c8cc" stroke-width="1.1"/>';
+  h += R(xi - 10, 54, 10, 14, '#ffffff', ' rx="1.4" stroke="#6a7178" stroke-width="1.1"') + R(xi - 2.6, 50, 2.6, 6, '#1f2226', ' rx="1"') + R(xr, 50, 2.6, 6, '#1f2226', ' rx="1"');
+  if (schall) h += '<path d="M83 33c3.4 3.4 3.4 10.6 0 14M79 36c1.8 1.8 1.8 6.2 0 8" fill="none" stroke="#4f7fae" stroke-width="1.8" stroke-linecap="round"/>';
+  if (sonne) h += '<circle cx="77" cy="20" r="4" fill="#e2a93b"/><path d="M77 12.8v1.8M77 25.4v1.8M69.8 20h1.8M82.4 20h1.8M71.9 14.9l1.2 1.2M80.9 23.9l1.2 1.2M71.9 25.1l1.2-1.2M80.9 16.1l1.2-1.2" stroke="#e2a93b" stroke-width="1.3" stroke-linecap="round"/>';
+  h += '</g><circle cx="50" cy="50" r="46" fill="none" stroke="#141414" stroke-width="1.6"/></svg>';
+  return h;
+}
+const glasLupeKey = (w) => [w.glas, (w.glasfn || []).join(','), w.rc].join('|');
+const glasText = (w) => (w.glas === '2' ? '2 Scheiben · Ug ≈ 1,1' : '3 Scheiben · Ug ≈ 0,5 bis 0,7');
 /* Struktur-Signatur: solange sie gleich bleibt, wird die Bühne weiterverwendet und alles morpht mit Übergängen */
-function w3dSig(w, o) { o = o || {}; return [o.id || 'w3d', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0].join('|'); }
+function w3dSig(w, o) { o = o || {}; return [o.id || 'w3d', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0].join('|'); }
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
   const q = (r) => stage.querySelector('[data-r="' + r + '"]'), bg = (r, v) => { const el = q(r); if (el && el.style.background !== v) el.style.background = v; };
   const fin = colorOf(w.gleich ? w.fa : w.fi), fout = colorOf(w.fa), hcol = (OPT.gf.find((g) => g.k === w.gf) || OPT.gf[0]).bg;
-  bg('wall-out', facadeBg(w.fassade)); bg('sill-f', sillBg(w.fbi, 'innen')); bg('sill-t', sillBg(w.fbi, 'innen'));
+  stage.classList.toggle('glas-sonne', w.glasfn.indexOf('sonne') >= 0); stage.classList.toggle('glas-sicht', w.glasfn.indexOf('sicht') >= 0);
+  stage.style.setProperty('--orn', (ORN.find((o) => o.k === w.orn) || ORN[0]).bg); stage.setAttribute('data-scheiben', w.glas === '2' ? '2' : '3');
+  stage.classList.toggle('mit-schloss', w.rc === 'rc2' || w.griff === 'abschliessbar');
+  const bi = bank(w.fbi, 'innen'), ba = bank(w.fba, 'aussen');
+  bg('wall-out', facadeBg(w.fassade)); bg('sill-t', bi.oben); bg('sill-f', bi.stirn); bg('sill-l', bi.stirn); bg('sill-r', bi.stirn); bg('sa-t1', ba.oben); bg('sa-t2', ba.oben); bg('sa-f', ba.stirn);
   bg('el-front', fin.bg); bg('el-back', fout.bg); bg('el-side-l', fout.solid); bg('el-side-r', fout.solid); bg('el-side-t', fin.solid); bg('el-side-b', fin.solid);
-  bg('ol-front', fin.bg); bg('ol-back', fout.bg);
+  bg('ol-front', fin.bg); bg('ol-back', fout.bg); bg('kf', fin.bg); bg('kfb', fout.bg);
   w.sashes.forEach((x, i) => {
     bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol);
     bg('sfe-l-' + i, fout.solid); bg('sfe-r-' + i, fout.solid); bg('sfe-t-' + i, fin.solid); bg('sfe-b-' + i, fin.solid);
@@ -534,68 +637,169 @@ function w3dApply(stage, w, o) {
   stage.classList.toggle('is-live', !!o.sway); stage.classList.toggle('show-sym', !!o.symbols); stage.classList.toggle('dims-all', !!(o.cls && o.cls.indexOf('dims-all') >= 0));
   stage.setAttribute('data-view', o.view || 'inside');
   const hint = stage.querySelector('[data-r="hint"]'); if (hint) { hint.textContent = o.hint || ''; hint.hidden = !o.hint; }
+  let lupe = stage.querySelector('[data-r="lupe"]');
+  if (o.lupe) { const key = glasLupeKey(w); if (!lupe) { stage.insertAdjacentHTML('beforeend', '<div class="w3d-lupe" data-r="lupe"></div>'); lupe = stage.querySelector('[data-r="lupe"]'); } if (lupe.getAttribute('data-k') !== key) { lupe.innerHTML = glasLupe(w); lupe.setAttribute('data-k', key); if (window.Feier) window.Feier.einrasten(lupe); } }
+  else if (lupe) lupe.remove();
   stage.querySelectorAll('.w3d-sash').forEach((sa) => { sa.classList.toggle('is-sel', !!o.selectable && +sa.getAttribute('data-sash') === o.selSash); });
   stage.querySelectorAll('.w3d-bar').forEach((b) => { b.classList.toggle('is-edit', !!o.editBars); b.classList.toggle('is-sel', !!o.editBars && b.getAttribute('data-bar') === o.selBar); });
   ensureDims(stage, o); w3dPaint(stage, w); w3dLayout(stage, w, o); layoutRails(stage, w, o); stage._s = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360 })).s;
   const openIdx = o.openSash != null && o.openSash >= 0 ? o.openSash : -1, base = VIEWS[o.view || 'inside'];
   w3dView(stage, openIdx >= 0 && w.sashes[openIdx] ? openView(w.sashes[openIdx], base) : base);
 }
-/* Geometrie in die Flächen schreiben. dimVals: Beschriftungen je Maßlinie */
+/* Geometrie in die Flächen schreiben. dimVals: Beschriftungen je Maßlinie.
+   Zwei Bauarten: 'e' (Rechteck: vier Laibungsflächen, rechteckige Löcher) und 'g' (Formen: Laibung aus Streifen entlang des Umrisses,
+   Löcher und Flügel als Polygone mit fester Punktzahl, damit der Wechsel der Form morpht). */
 function w3dLayout(stage, w, o) {
   if (!stage) return;
   o = o || {};
   const V = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360 })), s = V.s;
-  const q = (r) => stage.querySelector('[data-r="' + r + '"]');
+  const q = (r) => stage.querySelector('[data-r="' + r + '"]'), G = stage.getAttribute('data-struct') === 'g', form = G ? (w.form || 'rechteck') : 'rechteck';
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s;
-  face(q('wall-in'), wallW, wallH, -wallW / 2, -wallH / 2, 0, '', '0 0', hole(wallW, wallH, (wallW - moW) / 2, (wallH - moH) / 2, (wallW + moW) / 2, (wallH + moH) / 2));
-  face(q('wall-out'), wallW, wallH, -wallW / 2, -wallH / 2, -T, 'rotateY(180deg)', '50% 50%', hole(wallW, wallH, (wallW - moW) / 2, (wallH - moH) / 2, (wallW + moW) / 2, (wallH + moH) / 2));
-  face(q('rev-t'), moW, T, -moW / 2, -moH / 2, 0, 'rotateX(-90deg)', '0 0');
-  const rb = q('rev-b'); face(rb, moW, T, -moW / 2, moH / 2, 0, 'rotateX(-90deg)', '0 0');
-  if (rb) rb.style.background = 'linear-gradient(180deg, ' + sillSolid(w.fbi, 'innen') + ' 0 ' + px(d + fd) + ', #8e9398 ' + px(d + fd) + ' ' + px(d + fd + 2) + ', ' + sillSolid(w.fba, 'aussen') + ' ' + px(d + fd + 2) + ')';
-  face(q('rev-l'), T, moH, -moW / 2, -moH / 2, 0, 'rotateY(90deg)', '0 0');
-  face(q('rev-r'), T, moH, moW / 2, -moH / 2, 0, 'rotateY(90deg)', '0 0');
-  const sl = W3D.SILL * s, sx = 40 * s;
-  face(q('sill-f'), moW + 2 * sx, sl, -moW / 2 - sx, moH / 2, sl, '', '0 0');
-  face(q('sill-t'), moW + 2 * sx, sl, -moW / 2 - sx, moH / 2, sl, 'rotateX(-90deg)', '0 0');
+  const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
+  const wandLoch = (spiegel) => G ? 'polygon(evenodd, 0 0, ' + px(wallW) + ' 0, ' + px(wallW) + ' ' + px(wallH) + ', 0 ' + px(wallH) + ', 0 0, ' + polyPts(gO.pts.concat([gO.pts[0]]), -wallW / 2, -wallH / 2, spiegel ? wallW : null) + ')'
+    : hole(wallW, wallH, (wallW - moW) / 2, (wallH - moH) / 2, (wallW + moW) / 2, (wallH + moH) / 2);
+  face(q('wall-in'), wallW, wallH, -wallW / 2, -wallH / 2, 0, '', '0 0', wandLoch(false));
+  face(q('wall-out'), wallW, wallH, -wallW / 2, -wallH / 2, -T, 'rotateY(180deg)', '50% 50%', wandLoch(true));
+  const bankZone = 'linear-gradient(180deg, transparent 0 ' + px(d) + ', #9a9fa4 ' + px(d) + ' ' + px(d + fd) + ', transparent ' + px(d + fd) + ')';
+  if (G) {
+    /* Laibung als Streifen: je Umrisskante eine Fläche, die in die Wand hineinreicht; Farbe nach Blickrichtung, unten die Bank */
+    const P = gO.pts, n = P.length;
+    let vor = null;
+    for (let k = 0; k < n; k++) {
+      const a = P[k], b = P[(k + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy), el = q('rs-' + k);
+      let ang = len > 0.01 ? Math.atan2(dy, dx) * 180 / Math.PI : (vor == null ? 0 : vor);
+      if (vor != null) { while (ang - vor > 180) ang -= 360; while (ang - vor < -180) ang += 360; }
+      vor = ang;
+      if (!el) continue;
+      if (el._ang != null) { while (ang - el._ang > 180) ang -= 360; while (ang - el._ang < -180) ang += 360; }
+      el._ang = ang;
+      face(el, len > 0.01 ? len + 0.8 : 0, T, a[0], a[1], 0, 'rotateZ(' + n1(ang) + 'deg) rotateX(-90deg)', '0 0');
+      const unten = !gO.rund && k > FORM_O && k < n - 1;
+      el.style.backgroundColor = unten ? 'transparent' : revFarbe(Math.atan2(dx, -dy) * 180 / Math.PI);
+      el.style.backgroundImage = unten ? bankZone : '';
+    }
+  } else {
+    face(q('rev-t'), moW, T, -moW / 2, -moH / 2, 0, 'rotateX(-90deg)', '0 0');
+    const rb = q('rev-b'); face(rb, moW, T, -moW / 2, moH / 2, 0, 'rotateX(-90deg)', '0 0');
+    if (rb) rb.style.background = bankZone;
+    face(q('rev-l'), T, moH, -moW / 2, -moH / 2, 0, 'rotateY(90deg)', '0 0');
+    face(q('rev-r'), T, moH, moW / 2, -moH / 2, 0, 'rotateY(90deg)', '0 0');
+  }
+  /* Fensterbank innen: vom Rahmen bis 45 mm vor die Wand, 40 mm seitlich über, 26 mm dick.
+     Außen: in der Öffnung waagerecht bis zur Fassade, davor 50 mm Überstand mit 7° Gefälle und Tropfkante. Runde Fenster haben keine. */
+  const yB = moH / 2, ohneBank = G && form === 'rund';
+  const OV = 45 * s, SX = 40 * s, TH = 26 * s, bwI = moW + 2 * SX, bxI = -moW / 2 - SX;
+  face(q('sill-t'), bwI, OV + d, bxI, yB, OV, 'rotateX(-90deg)', '0 0');
+  face(q('sill-f'), bwI, TH, bxI, yB, OV, '', '0 0');
+  face(q('sill-l'), OV, TH, bxI, yB, OV, 'rotateY(90deg)', '0 0'); face(q('sill-r'), OV, TH, bxI + bwI, yB, OV, 'rotateY(90deg)', '0 0');
+  const OVA = 50 * s, SXA = 30 * s, LIP = (w.fba === 'alu' ? 40 : 30) * s, NG = 7 * Math.PI / 180, bwA = moW + 2 * SXA, bxA = -moW / 2 - SXA;
+  face(q('sa-t1'), moW, Math.max(0, T - d - fd), -moW / 2, yB, -d - fd, 'rotateX(-90deg)', '0 0');
+  face(q('sa-t2'), bwA, OVA / Math.cos(NG), bxA, yB, -T, 'rotateX(' + n1(-90 + 7) + 'deg)', '0 0');
+  face(q('sa-f'), bwA, LIP, bxA, yB + OVA * Math.tan(NG), -T - OVA, 'rotateY(180deg)', '50% 50%');
+  ['sill-t', 'sill-f', 'sill-l', 'sill-r', 'sa-t1', 'sa-t2', 'sa-f'].forEach((r) => { const e = q(r); if (e) e.style.opacity = ohneBank ? '0' : ''; });
   const el = q('el'); if (el) el.classList.toggle('is-hidden', !V.showEl);
   const elW = V.elW * s, elH = V.elH * s, x0 = V.x0 * s, y0 = V.y0 * s, pf = V.pf * s, sf = V.sf * s, mul = V.mul * s, z0 = -d;
-  face(q('el-front'), elW, elH, x0, y0, z0, '', '0 0', hole(elW, elH, pf, pf, elW - pf, elH - pf));
-  face(q('el-back'), elW, elH, x0, y0, z0 - fd, 'rotateY(180deg)', '50% 50%', hole(elW, elH, pf, pf, elW - pf, elH - pf));
-  face(q('el-side-l'), fd, elH, x0, y0, z0, 'rotateY(90deg)', '0 0');
-  face(q('el-side-r'), fd, elH, x0 + elW, y0, z0, 'rotateY(90deg)', '0 0');
-  face(q('el-side-t'), elW, fd, x0, y0, z0, 'rotateX(-90deg)', '0 0');
-  face(q('el-side-b'), elW, fd, x0, y0 + elH, z0, 'rotateX(-90deg)', '0 0');
-  const olH = V.olH * s, sashTop = y0 + pf + (olH ? olH + mul : 0), sashH = V.sashH * s, sashW = V.sashW * s;
+  const iw = V.innerW * s, ih = V.innerH * s, ix = x0 + pf, iy = y0 + pf;
+  const gE = G ? formGeo(form, x0, y0, elW, elH) : null, gI = G ? formGeo(form, ix, iy, iw, ih) : null;
+  face(q('el-front'), elW, elH, x0, y0, z0, '', '0 0', G ? ringClip(gE.pts, gI.pts, x0, y0, elW, elH) : hole(elW, elH, pf, pf, elW - pf, elH - pf));
+  face(q('el-back'), elW, elH, x0, y0, z0 - fd, 'rotateY(180deg)', '50% 50%', G ? ringClip(gE.pts, gI.pts, x0, y0, elW, elH, elW) : hole(elW, elH, pf, pf, elW - pf, elH - pf));
+  if (G) face(q('fuge'), moW, moH, -moW / 2, -moH / 2, z0 - 1, '', '0 0', ringClip(gO.pts, gE.pts, -moW / 2, -moH / 2, moW, moH));
+  else {
+    face(q('el-side-l'), fd, elH, x0, y0, z0, 'rotateY(90deg)', '0 0');
+    face(q('el-side-r'), fd, elH, x0 + elW, y0, z0, 'rotateY(90deg)', '0 0');
+    face(q('el-side-t'), elW, fd, x0, y0, z0, 'rotateX(-90deg)', '0 0');
+    face(q('el-side-b'), elW, fd, x0, y0 + elH, z0, 'rotateX(-90deg)', '0 0');
+  }
+  const olH = V.olH * s, sashTop = iy + (olH ? olH + mul : 0), sashH = V.sashH * s, sashW = V.sashW * s;
   if (olH) {
     const osf = w.olT === 'K' ? sf : 3;
-    face(q('ol-front'), V.innerW * s, olH, x0 + pf, y0 + pf, z0, '', '0 0', hole(V.innerW * s, olH, osf, osf, V.innerW * s - osf, olH - osf));
-    face(q('ol-back'), V.innerW * s, olH, x0 + pf, y0 + pf, z0 - fd, 'rotateY(180deg)', '50% 50%', hole(V.innerW * s, olH, osf, osf, V.innerW * s - osf, olH - osf));
-    face(q('ol-glass'), V.innerW * s - 2 * osf, olH - 2 * osf, x0 + pf + osf, y0 + pf + osf, z0 - fd / 2, '', '0 0');
+    if (G) {
+      const gIo = formGeo(form, ix + osf, iy + osf, iw - 2 * osf, ih - 2 * osf), aus = formSchnitt(gI, ix, iy, iw, olH, 24), inn = formSchnitt(gIo, ix + osf, iy + osf, iw - 2 * osf, olH - 2 * osf, 24);
+      face(q('ol-front'), iw, olH, ix, iy, z0, '', '0 0', ringClip(aus, inn, ix, iy, iw, olH));
+      face(q('ol-back'), iw, olH, ix, iy, z0 - fd, 'rotateY(180deg)', '50% 50%', ringClip(aus, inn, ix, iy, iw, olH, iw));
+      face(q('ol-glass'), iw - 2 * osf, olH - 2 * osf, ix + osf, iy + osf, z0 - fd / 2, '', '0 0', polyClip(inn, ix + osf, iy + osf, iw - 2 * osf, olH - 2 * osf));
+    } else {
+      face(q('ol-front'), iw, olH, ix, iy, z0, '', '0 0', hole(iw, olH, osf, osf, iw - osf, olH - osf));
+      face(q('ol-back'), iw, olH, ix, iy, z0 - fd, 'rotateY(180deg)', '50% 50%', hole(iw, olH, osf, osf, iw - osf, olH - osf));
+      face(q('ol-glass'), iw - 2 * osf, olH - 2 * osf, ix + osf, iy + osf, z0 - fd / 2, '', '0 0');
+    }
+    /* Kämpfer: der Riegel zwischen Oberlicht und Flügeln (fehlte bisher, man sah durch einen Spalt) */
+    face(q('kf'), iw, mul, ix, iy + olH, z0, '', '0 0');
+    face(q('kfb'), iw, mul, ix, iy + olH, z0 - fd, 'rotateY(180deg)', '50% 50%');
   }
   for (let i = 0; i < V.n - 1; i++) {
-    const mx = x0 + pf + (i + 1) * sashW + i * mul;
-    face(q('mul-' + i), mul, sashH, mx, sashTop, z0, '', '0 0');
-    face(q('mulb-' + i), mul, sashH, mx, sashTop, z0 - fd, 'rotateY(180deg)', '50% 50%');
+    const mx = ix + (i + 1) * sashW + i * mul, c = G ? formSchnitt(gI, mx, sashTop, mul, sashH, 3) : null;
+    face(q('mul-' + i), mul, sashH, mx, sashTop, z0, '', '0 0', c ? polyClip(c, mx, sashTop, mul, sashH) : null);
+    face(q('mulb-' + i), mul, sashH, mx, sashTop, z0 - fd, 'rotateY(180deg)', '50% 50%', c ? polyClip(c, mx, sashTop, mul, sashH, mul) : null);
   }
   w.sashes.forEach((x, i) => {
-    const sash = q('sash-' + i), fixed = x.t === 'F', ssf = fixed ? 3 : sf, left = x0 + pf + i * (sashW + mul);
+    const sash = q('sash-' + i), fixed = x.t === 'F', ssf = fixed ? 3 : sf, left = ix + i * (sashW + mul);
     if (!sash) return;
     sash.style.width = px(sashW); sash.style.height = px(sashH);
     sash.style.transformOrigin = x.t === 'K' ? '50% 100%' : (x.din === 'L' ? '0 50%' : '100% 50%');
-    const open = o.openSash === i ? (x.t === 'K' ? 'rotateX(-16deg)' : x.t === 'DK' ? (x.din === 'L' ? 'rotateY(-34deg)' : 'rotateY(34deg)') : x.t === 'D' ? (x.din === 'L' ? 'rotateY(-46deg)' : 'rotateY(46deg)') : '') : '';
-    sash.style.transform = 'translate3d(' + px(left) + ', ' + px(sashTop) + ', ' + px(z0) + ')' + (open ? ' ' + open : '');
-    face(q('sf-in-' + i), sashW, sashH, 0, 0, 0, '', '0 0', hole(sashW, sashH, ssf, ssf, sashW - ssf, sashH - ssf));
-    face(q('sf-out-' + i), sashW, sashH, 0, 0, -fd, 'rotateY(180deg)', '50% 50%', hole(sashW, sashH, ssf, ssf, sashW - ssf, sashH - ssf));
-    face(q('glass-' + i), sashW - 2 * ssf, sashH - 2 * ssf, ssf, ssf, -fd / 2, '', '0 0');
-    face(q('sfe-l-' + i), fd, sashH, 0, 0, 0, 'rotateY(90deg)', '0 0'); face(q('sfe-r-' + i), fd, sashH, sashW, 0, 0, 'rotateY(90deg)', '0 0');
+    /* Lage über translate, Drehung über transform: so kann die Vorführung (oeffnungZeigen) frei um das Band drehen */
+    sash.style.setProperty('--hinge', x.din === 'L' ? '0 50%' : '100% 50%'); sash.style.setProperty('--sgn', x.din === 'L' ? '-1' : '1'); sash.style.setProperty('--hsgn', x.din === 'L' ? '1' : '-1');
+    sash.style.translate = px(left) + ' ' + px(sashTop) + ' ' + px(z0);
+    sash.style.transform = 'none';
+    let aus = null, inn = null;
+    if (G) {
+      const gS = formGeo(form, ix + ssf, iy + ssf, iw - 2 * ssf, ih - 2 * ssf);
+      aus = formSchnitt(gI, left, sashTop, sashW, sashH, 16); inn = formSchnitt(gS, left + ssf, sashTop + ssf, sashW - 2 * ssf, sashH - 2 * ssf, 16);
+    }
+    face(q('sf-in-' + i), sashW, sashH, 0, 0, 0, '', '0 0', G ? ringClip(aus, inn, left, sashTop, sashW, sashH) : hole(sashW, sashH, ssf, ssf, sashW - ssf, sashH - ssf));
+    face(q('sf-out-' + i), sashW, sashH, 0, 0, -fd, 'rotateY(180deg)', '50% 50%', G ? ringClip(aus, inn, left, sashTop, sashW, sashH, sashW) : hole(sashW, sashH, ssf, ssf, sashW - ssf, sashH - ssf));
+    /* Verglasung: 2 oder 3 Scheiben, gleichmäßig in der Profiltiefe; die erste trägt Sprossen und Symbole */
+    const drei = w.glas !== '2', gc = G ? polyClip(inn, left + ssf, sashTop + ssf, sashW - 2 * ssf, sashH - 2 * ssf) : null, gw = sashW - 2 * ssf, gh = sashH - 2 * ssf;
+    face(q('glass-' + i), gw, gh, ssf, ssf, -fd * (drei ? 0.3 : 0.38), '', '0 0', gc);
+    face(q('pane-a-' + i), gw, gh, ssf, ssf, -fd * (drei ? 0.5 : 0.62), '', '0 0', gc);
+    face(q('pane-b-' + i), gw, gh, ssf, ssf, -fd * 0.7, '', '0 0', gc);
+    const pb = q('pane-b-' + i); if (pb) pb.style.opacity = drei ? '' : '0';
+    /* Einbruchschutz: Pilzköpfe auf dem Flügelrahmen (sonst unsichtbar im Falz, hier gezeigt). RC1 N an den Seiten, RC2 rundum */
+    const pz = fixed ? 0 : w.rc === 'rc2' ? 8 : w.rc === 'rc1' ? 4 : 0, dm = Math.max(6, 34 * s), c = sf / 2;
+    const yob = (xx) => (G ? Math.max(0, gI.top(left + xx) - sashTop) : 0) + c, yun = (xx) => (G ? Math.min(sashH, gI.bot(left + xx) - sashTop) : sashH) - c;
+    const PZ = [[c, 0.24], [c, 0.76], [sashW - c, 0.24], [sashW - c, 0.76], [sashW * 0.3, 'o'], [sashW * 0.7, 'o'], [sashW * 0.3, 'u'], [sashW * 0.7, 'u']];
+    PZ.forEach((pp, k) => {
+      const e = q('pz-' + i + '-' + k); if (!e) return;
+      const yy = pp[1] === 'o' ? yob(pp[0]) : pp[1] === 'u' ? yun(pp[0]) : yob(pp[0]) + (yun(pp[0]) - yob(pp[0])) * pp[1];
+      face(e, dm, dm, pp[0] - dm / 2, yy - dm / 2, 3, '', '50% 50%');
+      e.classList.toggle('is-on', k < pz);
+    });
+    /* Kanten: gerade Kanten bleiben Flächen, eine gebogene Oberkante zeigt keine Kantenfläche */
+    let ytL = 0, ybL = sashH, ytR = 0, ybR = sashH, obenGerade = true, untenGerade = true;
+    if (G) {
+      ytL = Math.max(0, gI.top(left) - sashTop); ybL = Math.min(sashH, gI.bot(left) - sashTop); ytR = Math.max(0, gI.top(left + sashW) - sashTop); ybR = Math.min(sashH, gI.bot(left + sashW) - sashTop);
+      obenGerade = aus.slice(0, 16).every((p) => p[1] - sashTop < 0.5); untenGerade = aus.slice(16).every((p) => sashTop + sashH - p[1] < 0.5);
+    }
+    face(q('sfe-l-' + i), fd, Math.max(0, ybL - ytL), 0, ytL, 0, 'rotateY(90deg)', '0 0'); face(q('sfe-r-' + i), fd, Math.max(0, ybR - ytR), sashW, ytR, 0, 'rotateY(90deg)', '0 0');
     face(q('sfe-t-' + i), sashW, fd, 0, 0, 0, 'rotateX(-90deg)', '0 0'); face(q('sfe-b-' + i), sashW, fd, 0, sashH, 0, 'rotateX(-90deg)', '0 0');
-    face(q('ring-' + i), sashW, sashH, 0, 0, 1, '', '0 0');
+    const et = q('sfe-t-' + i), eb = q('sfe-b-' + i); if (et) et.style.opacity = obenGerade ? '' : '0'; if (eb) eb.style.opacity = untenGerade ? '' : '0';
+    const ring = q('ring-' + i);
+    face(ring, sashW, sashH, 0, 0, 1, '', '0 0');
+    if (ring) {
+      if (G) { ring.classList.add('is-form'); ring.innerHTML = '<svg viewBox="0 0 ' + n1(sashW) + ' ' + n1(sashH) + '" preserveAspectRatio="none" aria-hidden="true"><polygon points="' + aus.map((p) => n1(p[0] - left) + ',' + n1(p[1] - sashTop)).join(' ') + '"></polygon></svg>'; }
+      else if (ring.classList.contains('is-form')) { ring.classList.remove('is-form'); ring.innerHTML = ''; }
+    }
+    /* Griff: der Drehpunkt sitzt auf halber Höhe, der Hebel hängt nach unten; bei Formen innerhalb der Glasfläche */
     const hd = q('handle-' + i);
-    if (hd) { const hl = 135 * s, hw = Math.max(5, 22 * s); if (x.t === 'K') { hd.style.width = px(hl); hd.style.height = px(hw); hd.style.transform = 'translate3d(' + px(sashW / 2 - hl / 2) + ', ' + px(Math.max(2, sf / 2 - hw / 2)) + ', 5px)'; } else { hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transform = 'translate3d(' + px(x.din === 'L' ? sashW - sf / 2 - hw / 2 : sf / 2 - hw / 2) + ', ' + px(sashH / 2 - hl / 2) + ', 5px)'; } }
+    if (hd) {
+      const hl = 135 * s, hw = Math.max(5, 22 * s);
+      hd.style.transform = 'none';
+      if (x.t === 'K') {
+        const yt = G ? Math.max(0, gI.top(left + sashW / 2) - sashTop) : 0;
+        hd.style.width = px(hl); hd.style.height = px(hw); hd.style.transformOrigin = '50% 50%';
+        hd.style.translate = px(sashW / 2 - hl / 2) + ' ' + px(yt + Math.max(2, sf / 2 - hw / 2)) + ' 5px';
+      } else {
+        const hx = x.din === 'L' ? sashW - sf / 2 - hw / 2 : sf / 2 - hw / 2, xw = left + hx + hw / 2;
+        const yt = G ? Math.max(0, gI.top(xw) - sashTop) : 0, yb = G ? Math.min(sashH, gI.bot(xw) - sashTop) : sashH;
+        const ym = Math.max(yt + hw, Math.min(sashH / 2, yb - hl - sf / 2));
+        hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transformOrigin = '50% ' + px(hw / 2);
+        hd.style.translate = px(hx) + ' ' + px(ym - hw / 2) + ' 5px';
+      }
+    }
     w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
   });
   if (q('roll-f')) { const rh = 180 * s, rz = w.roll === 'vorbau' ? -T - 140 * s : -T, bw = moW + 80 * s, bx = -moW / 2 - 40 * s, by = -moH / 2 - rh, dp = -rz - T + 1; face(q('roll-f'), bw, rh, bx, by, rz, 'rotateY(180deg)', '50% 50%'); face(q('roll-b'), bw, dp, bx, -moH / 2, -T, 'rotateX(-90deg)', '0 0'); face(q('roll-t'), bw, dp, bx, by, -T, 'rotateX(-90deg)', '0 0'); face(q('roll-l'), dp, rh, bx, by, -T, 'rotateY(90deg)', '0 0'); face(q('roll-r'), dp, rh, bx + bw, by, -T, 'rotateY(90deg)', '0 0'); }
-  if (q('mesh')) face(q('mesh'), elW - 2 * pf, elH - 2 * pf, x0 + pf, y0 + pf, z0 - fd - 6 * s, '', '0 0');
+  if (q('mesh')) face(q('mesh'), iw, ih, ix, iy, z0 - fd - 6 * s, '', '0 0', G ? polyClip(gI.pts, ix, iy, iw, ih) : null);
   /* Maßlinien in der Wandebene (Öffnung) oder Fensterebene (Element) */
   const DIM = { hm: ['v', 0, -moH / 2, moH, 4, 24], hl: ['v', -moW / 2 + 40 * s, -moH / 2, moH, 4, 78], hr: ['v', moW / 2 - 40 * s, -moH / 2, moH, 4, 78], wm: ['h', -moW / 2, 0, moW, 4, 22], wt: ['h', -moW / 2, -moH / 2 + 40 * s, moW, 4, 76], wb: ['h', -moW / 2, moH / 2 - 40 * s, moW, 4, 24], eh: ['v', x0 + elW * 0.72, y0, elH, z0 + 6, 58], ew: ['h', x0, y0 + elH * 0.4, elW, z0 + 6, 76] };
   (V.dims || []).forEach((k) => {
@@ -1318,14 +1522,16 @@ const QSEC = { lage: 'Lage', teilung: 'Fenster', typ: 'Fenster', din: 'Fenster',
 function qList(w) {
   const L = [], d = derive(w), n = w.sashes.length;
   L.push({ id: 'lage', title: 'Wo ist das Fenster?', sub: 'Damit der Fensterbauer die Position zuordnen kann.', kind: 'lage', view: 'three' });
-  L.push({ id: 'teilung', title: 'Wie viele Flügel?', sub: w.e_teilung ? '' : 'Vorschlag nach deiner Breite von ' + thousand(d.elW) + ' mm.', kind: 'cards', group: 'teilung', val: w.teilung, act: 'teilung', ico: ICO.layout, view: 'inside', g: 'pfosten', hint: 'Zum Drehen ziehen' });
-  w.sashes.forEach((x, i) => {
+  /* Runde Fenster sind fest verglast: keine Fragen nach Flügeln, Öffnung, Scharnieren und Oberlicht */
+  const rund = w.form === 'rund';
+  if (!rund) L.push({ id: 'teilung', title: 'Wie viele Flügel?', sub: w.e_teilung ? '' : 'Vorschlag nach deiner Breite von ' + thousand(d.elW) + ' mm.', kind: 'cards', group: 'teilung', val: w.teilung, act: 'teilung', ico: ICO.layout, view: 'inside', g: 'pfosten', hint: 'Zum Drehen ziehen' });
+  if (!rund) w.sashes.forEach((x, i) => {
     L.push({ id: 'typ-' + i, title: n > 1 ? 'Wie öffnet Flügel ' + (i + 1) + '?' : 'Wie soll es aufgehen?', sub: n > 1 ? 'Der markierte Flügel. Antippen wechselt.' : '', kind: 'cards', group: 'typ', val: x.t, act: 'sash', f: 't', sash: i, ico: ICO.typ, view: 'inside', g: 'symbol', hint: n > 1 ? 'Flügel ' + (i + 1) + ' von ' + n : 'Er schwingt so auf' });
     if (x.t === 'D' || x.t === 'DK') L.push({ id: 'din-' + i, title: n > 1 ? 'Scharniere von Flügel ' + (i + 1) + '?' : 'Scharniere links oder rechts?', sub: 'Von innen gesehen. Der Griff sitzt gegenüber.', kind: 'chips', group: 'din', val: x.din, act: 'sash', f: 'din', sash: i, view: 'inside', g: 'dinlr', hint: 'Der Griff wandert mit' });
   });
   L.push({ id: 'material', title: 'Welches Material?', sub: 'Bestimmt Preis, Pflege und Profilbreite.', kind: 'cards', group: 'material', val: w.material, act: 'setw', f: 'material', ico: ICO.material, view: 'inside' });
-  L.push({ id: 'ol', title: 'Ein Oberlicht?', sub: 'Ein extra Feld über dem Fenster.', kind: 'chips', group: 'ol', val: w.ol ? w.olT : 'nein', act: 'ol-set', view: 'inside', g: 'oberlicht' });
-  L.push({ id: 'form', title: 'Welche Form?', sub: 'Sonderformen zeigt das Modell vereinfacht.', kind: 'cards', group: 'form', val: w.form, act: 'form', ico: ICO.form, view: 'inside' });
+  if (!rund) L.push({ id: 'ol', title: 'Ein Oberlicht?', sub: 'Ein extra Feld über dem Fenster.', kind: 'chips', group: 'ol', val: w.ol ? w.olT : 'nein', act: 'ol-set', view: 'inside', g: 'oberlicht' });
+  L.push({ id: 'form', title: 'Welche Form?', sub: 'Antippen zeigt die Form am Modell.', kind: 'formen', group: 'form', val: w.form, act: 'form', ico: ICO.form, view: 'inside' });
   L.push({ id: 'richtung', title: 'Öffnet nach innen oder außen?', kind: 'chips', group: 'richtung', val: w.richtung, act: 'setw', f: 'richtung', view: 'inside', g: 'symbol' });
   L.push({ id: 'sprossen', title: 'Sprossen?', sub: 'Mit + und − dazu, an den Reglern verschieben.', kind: 'bars', view: 'front' });
   if (w.bars.length) {
@@ -1335,17 +1541,19 @@ function qList(w) {
   }
   L.push({ id: 'fa', title: 'Welche Farbe außen?', kind: 'color', side: 'aussen', view: 'outside', g: 'ral', hint: 'Ansicht von außen' });
   L.push({ id: 'fi', title: 'Und innen?', kind: 'color', side: 'innen', view: 'inside', g: 'ral', hint: 'Ansicht von innen' });
-  L.push({ id: 'glas', title: 'Welche Verglasung?', sub: 'Je kleiner der U-Wert, desto weniger Wärme geht verloren.', kind: 'cards', group: 'glas', val: w.glas, act: 'setw', f: 'glas', ico: ICO.glas, view: 'inside', g: 'uwert' });
-  L.push({ id: 'glasfn', title: 'Extras fürs Glas?', sub: 'Mehrfachauswahl möglich.', kind: 'multi', group: 'glasfn', vals: w.glasfn, act: 'glasfn', view: 'inside' });
-  if (w.glasfn.indexOf('sicht') >= 0) L.push({ id: 'orn', title: 'Welches Ornamentglas?', kind: 'orn', view: 'inside', g: 'ornament' });
+  L.push({ id: 'glas', title: 'Welche Verglasung?', sub: 'Je kleiner der U-Wert, desto weniger Wärme geht verloren.', kind: 'cards', group: 'glas', val: w.glas, act: 'setw', f: 'glas', ico: ICO.glas, view: 'inside', g: 'uwert', lupe: true, hint: glasText(w) });
+  L.push({ id: 'glasfn', title: 'Extras fürs Glas?', sub: 'Mehrfachauswahl möglich.', kind: 'multi', group: 'glasfn', vals: w.glasfn, act: 'glasfn', view: 'inside', lupe: true, hint: w.glasfn.length ? w.glasfn.map((g) => lab('glasfn', g)).join(' · ') : 'Ohne Extras' });
+  if (w.glasfn.indexOf('sicht') >= 0) L.push({ id: 'orn', title: 'Welches Ornamentglas?', kind: 'orn', view: 'inside', g: 'ornament', hint: 'Sichtschutz: ' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label });
   L.push({ id: 'griff', title: 'Welcher Griff?', kind: 'cards', group: 'griff', val: w.griff, act: 'setw', f: 'griff', ico: ICO.griff, view: 'inside' });
   L.push({ id: 'gf', title: 'Welche Griff-Farbe?', kind: 'chips', group: 'gf', val: w.gf, act: 'setw', f: 'gf', view: 'inside', hint: 'Der Griff wechselt mit' });
-  L.push({ id: 'rc', title: 'Einbruchschutz?', kind: 'chips', group: 'rc', val: w.rc, act: 'setw', f: 'rc', view: 'inside', g: 'rc2' });
+  L.push({ id: 'rc', title: 'Einbruchschutz?', kind: 'chips', group: 'rc', val: w.rc, act: 'setw', f: 'rc', view: 'inside', g: 'rc2', lupe: w.rc === 'rc2', hint: { basis: 'Basis: normaler Beschlag', rc1: 'RC1 N: Pilzköpfe an den Seiten', rc2: 'RC2: Pilzköpfe rundum, Griff abschließbar, Sicherheitsglas' }[w.rc] || '' });
   L.push({ id: 'roll', title: 'Rollladen?', kind: 'cards', group: 'roll', val: w.roll, act: 'setw', f: 'roll', ico: ICO.roll, view: 'outside', hint: 'Ansicht von außen' });
   if (w.roll === 'aufsatz' || w.roll === 'vorbau') L.push({ id: 'antrieb', title: 'Wie wird er bedient?', kind: 'chips', group: 'antrieb', val: w.antrieb, act: 'setw', f: 'antrieb', view: 'outside', hint: 'Ansicht von außen' });
   L.push({ id: 'insekt', title: 'Insektenschutz?', kind: 'cards', group: 'insekt', val: w.insekt, act: 'setw', f: 'insekt', ico: ICO.insekt, view: 'outside', g: 'insekt', hint: 'Ansicht von außen' });
-  L.push({ id: 'fbi', title: 'Fensterbank innen?', kind: 'chips', group: 'fbi', val: w.fbi, act: 'setw', f: 'fbi', view: 'inside', g: 'fensterbank' });
-  L.push({ id: 'fba', title: 'Fensterbank außen?', kind: 'chips', group: 'fba', val: w.fba, act: 'setw', f: 'fba', view: 'outside', hint: 'Ansicht von außen' });
+  if (!rund) {
+    L.push({ id: 'fbi', title: 'Fensterbank innen?', kind: 'chips', group: 'fbi', val: w.fbi, act: 'setw', f: 'fbi', view: 'bankInnen', g: 'fensterbank', hint: 'Fensterbank: ' + lab('fbi', w.fbi) });
+    L.push({ id: 'fba', title: 'Fensterbank außen?', kind: 'chips', group: 'fba', val: w.fba, act: 'setw', f: 'fba', view: 'bankAussen', hint: 'Von außen · ' + lab('fba', w.fba) });
+  }
   L.push({ id: 'montage', title: 'Was soll der Fensterbauer übernehmen?', kind: 'switches', view: 'three' });
   L.push({ id: 'notiz', title: 'Noch etwas für den Fensterbauer?', kind: 'text', view: 'three' });
   return L;
@@ -1357,11 +1565,12 @@ function qStep(delta) {
   S.q = nx.id; S.dir = delta < 0 ? 'back' : 'fwd'; S.selBar = null; S.qWunsch = false;
   S.openSash = nx.sash != null ? nx.sash : -1; if (nx.sash != null) S.selSash = nx.sash;
   render(true);
+  if (nx.sash != null && nx.id.indexOf('typ-') === 0) setTimeout(() => { if (S.q === nx.id) oeffnungZeigen(nx.sash); }, 480);
 }
 function qOpt(q, o, pressed, inner) { return '<button type="button" class="qopt" data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : '') + ' data-v="' + o.k + '" aria-pressed="' + pressed + '">' + inner + '</button>'; }
 function qCards(q) {
   const opts = OPT[q.group], scroll = opts.length > 4;
-  return '<div class="qcards' + (scroll ? ' row' : opts.length === 4 ? ' quad' : '') + '">' + opts.map((o) => '<div class="qo">' + qOpt(q, o, String(o.k) === String(q.val), (q.ico ? svgIcon(q.ico(o.k), 44) : '') + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + (o.price ? '<span class="pr">' + esc(o.price) + '</span>' : '') + '</span>') + (o.g ? '<button type="button" class="qinfo" aria-label="Erklärung" data-act="gloss" data-k="' + o.g + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
+  return '<div class="qcards' + (scroll ? ' reihe' : opts.length === 4 ? ' quad' : '') + '">' + opts.map((o) => '<div class="qo">' + qOpt(q, o, String(o.k) === String(q.val), (q.ico ? svgIcon(q.ico(o.k), 44) : '') + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + (o.price ? '<span class="pr">' + esc(o.price) + '</span>' : '') + '</span>') + (o.g ? '<button type="button" class="qinfo" aria-label="Erklärung" data-act="gloss" data-k="' + o.g + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
 }
 /* Auswahl aus wenigen Optionen, eine Familie: 2–3 kurze Beschriftungen als Segmente, bis 4 kürzere als Raster gleich breiter Chips,
    sonst Zeilen mit Haken. Das Gewicht wechselt beim Auswählen nicht, damit nichts springt. */
@@ -1369,10 +1578,15 @@ const CHECK_S = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3
 function auswahl(opts, attrs, istGewaehlt) {
   const lang = Math.max.apply(null, opts.map((o) => o.label.length)), dots = opts.some((o) => o.bg);
   const knopf = (o, cls, inner) => '<button type="button" class="' + cls + '" ' + attrs + ' data-v="' + o.k + '" aria-pressed="' + istGewaehlt(o) + '">' + inner + '</button>';
-  const punkt = (o) => (o.bg ? '<span class="dot" style="background: ' + o.bg + '"></span>' : '');
+  const punkt = (o) => (o.bg ? '<span class="dot" style="background: ' + o.bg + '"></span>' : o.ico ? '<span class="ci">' + o.ico + '</span>' : '');
   if (opts.length <= 3 && lang <= 11 && !dots) return '<div class="seg qseg">' + opts.map((o) => knopf(o, '', esc(o.label))).join('') + '</div>';
   if (opts.length <= 6 && lang <= 16) return '<div class="qchips grid2">' + opts.map((o) => knopf(o, 'chip', punkt(o) + esc(o.label))).join('') + '</div>';
   return '<div class="qlist">' + opts.map((o) => knopf(o, '', '<span class="tx">' + punkt(o) + esc(o.label) + '</span><span class="mark">' + CHECK_S + '</span>')).join('') + '</div>';
+}
+/* Formen: fünf Symbolkacheln in einer Reihe; Name und Kurzbeschreibung der gewählten Form darunter */
+function qFormen(q) {
+  const opts = OPT.form, cur = opts.find((o) => o.k === q.val) || opts[0];
+  return '<div class="qformen" role="group" aria-label="Form">' + opts.map((o) => '<button type="button" class="qf" data-act="form" data-v="' + o.k + '" aria-pressed="' + (o.k === cur.k) + '" aria-label="' + esc(o.label) + '" title="' + esc(o.label) + '">' + svgIcon(ICO.form(o.k), 54) + '</button>').join('') + '</div><p class="qcur"><b>' + esc(cur.label) + '</b> · ' + esc(cur.sub) + '</p>';
 }
 function qChips(q) {
   const opts = q.group === 'ol' ? [{ k: 'nein', label: 'Kein Oberlicht' }, { k: 'K', label: 'Oberlicht, kippbar' }, { k: 'F', label: 'Oberlicht, fest' }] : OPT[q.group];
@@ -1419,23 +1633,41 @@ SCREENS.frage = () => {
   const c = qCurrent(), q = c.q, w = S.win, n = c.list.length, last = c.i === n - 1;
   const sec = QSEC[q.id.split('-')[0]] || 'Fenster';
   let panel;
-  if (q.kind === 'cards') panel = qCards(q); else if (q.kind === 'chips') panel = qChips(q); else if (q.kind === 'multi') panel = qMulti(q); else if (q.kind === 'color') panel = qColor(q);
+  if (q.kind === 'cards') panel = qCards(q); else if (q.kind === 'formen') panel = qFormen(q); else if (q.kind === 'chips') panel = qChips(q); else if (q.kind === 'multi') panel = qMulti(q); else if (q.kind === 'color') panel = qColor(q);
   else if (q.kind === 'orn') panel = qOrn(); else if (q.kind === 'bars') panel = qBars(); else if (q.kind === 'switches') panel = qSwitches(); else if (q.kind === 'lage') panel = qLage(); else panel = qText();
   const isSash = q.sash != null, selIdx = isSash ? q.sash : Math.min(S.selSash, w.sashes.length - 1);
   const view = q.id === 'sprossen' || q.kind === 'bars' ? 'front' : q.view;
-  const stage = model(w, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, stageH: 'auto', fitW: q.kind === 'bars' ? 0.72 : view === 'front' ? 0.88 : 0.66, fitH: q.kind === 'bars' ? 0.66 : view === 'front' ? 0.82 : 0.72, hint: q.kind === 'bars' ? '' : (q.hint || '') });
+  const stage = model(w, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, formen: q.id === 'form', lupe: !!q.lupe, stageH: 'auto', fitW: q.kind === 'bars' ? 0.72 : view === 'front' ? 0.88 : 0.66, fitH: q.kind === 'bars' ? 0.66 : view === 'front' ? 0.82 : 0.72, hint: q.kind === 'bars' ? '' : (q.hint || '') });
   const title = hd('Frage ' + (c.i + 1) + ' von ' + n + ' · ' + sec, esc(q.title) + (q.g ? ' <button type="button" class="qg" aria-label="Erklärung" data-act="gloss" data-k="' + q.g + '">' + ICON_I + '</button>' : ''), q.sub ? esc(q.sub) : '', 'compact');
   const html = title + stage + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div>' + '<div class="qnav"><button type="button" class="btn ghost" data-act="qprev" aria-label="Zurück">' + '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button type="button" class="btn primary" data-act="qnext">' + (last ? 'Fenster speichern' : 'Weiter') + '</button></div>';
   return { html: html, back: [c.i ? 'Zurück' : 'Ergebnis', 'qprev'], fit: true, qpos: (c.i + 1) / n };
 };
+/* Merkzettel für den Wechsel auf „Rund“: was vorher eingestellt war, kommt beim Wechsel zurück wieder (nur in dieser Sitzung) */
+const VOR_RUND = new WeakMap();
+/* Öffnung vorführen: der Flügel geht kurz auf und wieder zu, der Griff dreht mit; „Fest“ zeigt einen Glanz übers Glas.
+   nur = 'D' zeigt nur das Drehen (bei der Frage nach den Scharnieren). Ruhig bei „weniger Bewegung“. */
+const DEMO_MS = { D: 1700, K: 1500, DK: 2900, F: 1000 };
+let demoTimer = null;
+function oeffnungZeigen(i, nur) {
+  const stage = document.getElementById('w3d'), sa = stage ? stage.querySelector('[data-r="sash-' + i + '"]') : null;
+  if (!sa) return;
+  try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) { /* ok */ }
+  const t = nur || sa.getAttribute('data-t') || 'F';
+  stage.querySelectorAll('.w3d-sash').forEach((x) => x.classList.remove('demo-D', 'demo-K', 'demo-DK', 'demo-F'));
+  void sa.offsetWidth;
+  sa.classList.add('demo-' + t);
+  clearTimeout(demoTimer);
+  demoTimer = setTimeout(() => { sa.classList.remove('demo-' + t); if (t !== 'F' && window.Haptik) window.Haptik.tick(); }, DEMO_MS[t] || 1500);
+}
 /* Flügel im Modell antippen: springt zur Frage dieses Flügels */
 function onSashTap(i) {
   if (S.screen !== 'frage') return;
   const c = qCurrent();
   S.selSash = i;
   if (c.q.sash != null && c.q.sash !== i) { const nx = c.list.find((q) => q.id === 'typ-' + i); if (nx) { S.q = nx.id; S.dir = i > c.q.sash ? 'fwd' : 'back'; } }
-  S.openSash = S.openSash === i ? -1 : i;
+  S.openSash = i;
   render(true);
+  setTimeout(() => oeffnungZeigen(i), 120);
 }
 /* Regler ziehen: live am Modell, beim Loslassen gespeichert; über das Ende hinaus gezogen löscht */
 function bindRails(stage) {
@@ -1593,10 +1825,22 @@ function act(name, el) {
     case 'qprev': return qStep(-1);
     case 'qwunsch': { S.qWunsch = !S.qWunsch; render(); const t = document.getElementById('t-wunsch'); if (t && S.qWunsch) t.focus(); return; }
     case 'ol-set': { w.ol = v !== 'nein'; if (v !== 'nein') w.olT = v; return render(); }
-    case 'sash': { const i = Math.min(S.selSash, w.sashes.length - 1); w.sashes = w.sashes.map((s, j) => (j === i ? Object.assign({}, s, { [f]: v }) : s)); S.openSash = i; return render(); }
+    case 'sash': { const i = Math.min(S.selSash, w.sashes.length - 1); w.sashes = w.sashes.map((s, j) => (j === i ? Object.assign({}, s, { [f]: v }) : s)); S.openSash = i; render(); requestAnimationFrame(() => oeffnungZeigen(i, f === 'din' ? 'D' : null)); return; }
     case 'sash-tap': return onSashTap(+v);
     case 'teilung': { w.e_teilung = true; const sashes = sashesFor(v); w.teilung = v; w.sashes = sashes; mirrorBars(w); S.selSash = 0; S.selBar = null; S.openSash = -1; return render(); }
-    case 'form': { if (v === 'rund') { w.form = v; w.teilung = '1'; w.sashes = [{ t: 'F', din: 'L' }]; w.ol = false; mirrorBars(w); S.selSash = 0; } else w.form = v; return render(); }
+    case 'form': {
+      if (v === w.form) return render();
+      if (v === 'rund') {
+        VOR_RUND.set(w, { teilung: w.teilung, sashes: w.sashes, ol: w.ol, olT: w.olT, bars: w.bars, preset: w.preset });
+        const hatte = w.sashes.length > 1 || w.sashes[0].t !== 'F' || w.ol;
+        w.form = v; w.teilung = '1'; w.sashes = [{ t: 'F', din: 'L' }]; w.ol = false; mirrorBars(w); S.selSash = 0;
+        return hatte ? toast('Runde Fenster sind fest verglast, ohne Flügel und Oberlicht') : render();
+      }
+      const vor = w.form === 'rund' ? VOR_RUND.get(w) : null;
+      w.form = v;
+      if (vor) { Object.assign(w, { teilung: vor.teilung, sashes: vor.sashes, ol: vor.ol, olT: vor.olT, bars: vor.bars, preset: vor.preset }); VOR_RUND.delete(w); S.selSash = 0; return toast('Deine Flügel sind wieder da'); }
+      return render();
+    }
     case 'preset': { w.preset = v; w.bars = presetBars(v, w.sashes.length); mirrorBars(w); S.selBar = null; return render(); }
     case 'barcnt': { barCount(w, el.getAttribute('data-d'), +v); S.selBar = null; return render(); }
     case 'bareven': { ['v', 'h'].forEach((d) => { const cur = barsDir(w, d); setDir(w, d, evenP(cur.length).map((p, k) => ({ id: cur[k].id, p: p }))); }); return render(); }
