@@ -338,7 +338,7 @@ const GLOSS = {
   ralmontage: { t: 'Was ist RAL-Montage?', x: ['Einbau nach dem Montageleitfaden der RAL-Gütegemeinschaft in drei Ebenen: innen luftdicht, in der Mitte gedämmt, außen schlagregendicht und trotzdem dampfdurchlässig.', 'Das schützt die Fuge um das Fenster vor Zugluft, Feuchtigkeit und Schimmel.'], ico: () => [P(R(4, 10, 18, 44), WALL, INK, 0.8), P(R(42, 10, 18, 44), WALL, INK, 0.8), P(R(22, 18, 20, 4), '#5b9bd5'), P(R(22, 22, 20, 18), '#f2d27a'), P(R(22, 40, 20, 4), '#8e8e93'), P(R(26, 26, 12, 10, 1), FR, INK, 1.1)], see: ['lueftung'] },
   fensterbank: { t: 'Fensterbank innen und außen', x: ['Innen zum Beispiel Werzalit (pflegeleichte Kunststoffplatte), Naturstein oder Holz. Außen meist Aluminium, alternativ Naturstein.', 'Die äußere Fensterbank leitet Regenwasser von der Fassade weg.'], ico: () => ICO.bank('aussen'), see: [] },
   ral: { t: 'Was bedeutet RAL?', x: ['RAL ist ein Farbsystem mit festen Nummern. So sieht Anthrazitgrau bei jedem Hersteller gleich aus: RAL 7016.', 'Holzdekore sind Folien mit Holzmaserung auf Kunststoffprofilen. Farben am Bildschirm weichen ab, ein Farbmuster zeigt das echte Ergebnis.'], ico: () => [P(C(20, 24, 11), '#383e42'), P(C(40, 24, 11), '#f1f0ea', INK, 0.8), P(C(30, 42, 11), '#b5732f')], see: [] },
-  lueftung: { t: 'Brauche ich ein Lüftungskonzept?', x: ['Neue Fenster sind sehr dicht. Wird mehr als ein Drittel der Fenster getauscht, verlangt die Norm DIN 1946-6 ein Lüftungskonzept, damit kein Schimmel entsteht.', 'Oft reichen kleine Lüfter im Fensterfalz. Dein Fensterbauer berät dich dazu.'], ico: () => [P(R(16, 8, 32, 48, 1.2), FR, INK, 1.3), P(R(20, 12, 24, 40), GL, INK, 0.6), P('M4 20c4-3 8 3 12 0M4 30c4-3 8 3 12 0M48 34c4-3 8 3 12 0M48 44c4-3 8 3 12 0', 'none', '#5b9bd5', 1.8)], see: ['ralmontage'] },
+  lueftung: { t: 'Brauche ich ein Lüftungskonzept?', x: ['Neue Fenster sind sehr dicht. Wird mehr als ein Drittel der Fenster getauscht, muss eine Fachperson nach der Norm DIN 1946-6 prüfen, ob ein Lüftungskonzept nötig ist, damit kein Schimmel entsteht. Nötig ist es nur in manchen Fällen.', 'Oft reichen kleine Lüfter im Fensterfalz. Dein Fensterbauer berät dich dazu.'], ico: () => [P(R(16, 8, 32, 48, 1.2), FR, INK, 1.3), P(R(20, 12, 24, 40), GL, INK, 0.6), P('M4 20c4-3 8 3 12 0M4 30c4-3 8 3 12 0M48 34c4-3 8 3 12 0M48 44c4-3 8 3 12 0', 'none', '#5b9bd5', 1.8)], see: ['ralmontage'] },
   referenz: { lottie: 'messen', t: 'Wie genau ist das Aufmaß?', x: ['Du misst mit dem Zollstock, die App führt dich: erst die Maueröffnung, dann das Fensterelement, jeweils senkrecht und waagerecht in der Mitte. Danach legt die KI beide Rechtecke auf dein Foto und fragt die restlichen Maße ab.', 'Das kleinste von drei Maßen zählt, so wie es der Fensterbauer auch macht. Die Fotos liefern ihm dazu Material, Zustand, Rollladen und Fensterbank.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['feinaufmass', 'rahmenmass'] },
   feinaufmass: { t: 'Was ist ein Feinaufmaß?', x: ['Bevor dein Fenster produziert wird, misst der Fensterbauer vor Ort noch einmal genau nach. Dein Aufmaß ersetzt den ersten Termin und reicht fürs Angebot, nicht aber diese Endkontrolle.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['referenz', 'rahmenmass'] },
   unterlicht: { t: 'Was ist ein Unterlicht?', x: ['Ein festes Feld unter den Flügeln, als Glas oder als gedämmtes Paneel. Typisch in Küchen: Die Arbeitsplatte steht vor dem Fenster, der Flügel beginnt erst darüber und lässt sich trotzdem öffnen.', 'Die Höhe richtet sich nach Arbeitsplatte oder Brüstung, meist 30 bis 60 cm.'], ico: () => ICO.ul('glas'), see: ['oberlicht', 'fest'] },
@@ -1314,20 +1314,23 @@ function render(fresh) {
   const view = SCREENS[S.screen] ? SCREENS[S.screen]() : SCREENS.home();
   const STEPS = stepsFor(S.win), si = STEPS.indexOf(S.screen), wiz = si >= 0;
   const qShare = S.screen === 'frage' && view.qpos ? view.qpos : 1;
-  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: 'Fenster', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse' }[S.screen] || '');
+  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: 'Fenster', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', tour: 'Führung' }[S.screen] || '');
+  const tourP = S.screen === 'tour' && S.tour ? (S.tour.i + 1) / TOUR.length : 0;
   const prevStage = root.querySelector('#w3d'), prevSig = prevStage ? prevStage.getAttribute('data-sig') : null;
   const backLabel = view.back ? view.back[0] : '';
   let h = '<header class="hdr"><div class="hdr-row">';
   h += S.screen === 'home' ? '<div class="hdr-logo">' + LOGO(30) + '<span class="hdr-name">Fensterino</span></div>'
-    : (view.back ? '<button type="button" class="hdr-btn" data-act="back"><svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>' + esc(backLabel) + '</span></button>' : '<span></span>');
+    : (view.back ? '<button type="button" class="hdr-btn" data-act="back">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : '<span></span>');
   h += '<span class="hdr-title">' + esc(title) + '</span>';
   h += '<button type="button" class="hdr-btn" data-act="gindex"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v16H4.5c-.8 0-1.5.5-1.5 1.2zM19 4.5c0-.8-.7-1.5-1.5-1.5H11v16h6.5c.8 0 1.5.5 1.5 1.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg><span>Begriffe</span></button></div>';
   if (wiz) h += '<div class="prog"><div style="width: ' + ((si + qShare) / STEPS.length * 100) + '%"></div></div>';
+  else if (tourP) h += '<div class="prog" role="progressbar" aria-label="Führung" aria-valuemin="1" aria-valuemax="' + TOUR.length + '" aria-valuenow="' + (S.tour.i + 1) + '"><div style="width: ' + (tourP * 100) + '%"></div></div>';
   h += '</header>';
-  h += '<div class="scroll' + (view.fit ? ' fit' : '') + '" style="padding-top: ' + (wiz ? 56 : 52) + 'px"><div class="scr' + (view.fit ? ' fit' : '') + (view.cls ? ' ' + view.cls : '') + (S.dir === 'back' ? ' is-back' : '') + '" data-screen="' + S.screen + '">' + view.html + '</div></div>';
+  h += '<div class="scroll' + (view.fit ? ' fit' : '') + '" style="padding-top: ' + (wiz || tourP ? 56 : 52) + 'px"><div class="scr' + (view.fit ? ' fit' : '') + (view.cls ? ' ' + view.cls : '') + (S.dir === 'back' ? ' is-back' : '') + '" data-screen="' + S.screen + '">' + view.html + '</div></div>';
   if (view.bar) h += '<div class="bb">' + (view.bar.sec ? '<button type="button" class="btn ghost" data-act="' + view.bar.secAct + '">' + esc(view.bar.sec) + '</button>' : '') + '<button type="button" class="btn primary" data-act="' + view.bar.act + '"' + (view.bar.v ? ' data-v="' + view.bar.v + '"' : '') + (view.bar.dis ? ' disabled' : '') + '>' + view.bar.label + '</button></div>';
   h += sheetsHTML();
   if (S.toast) h += '<div class="toast" role="status">' + esc(S.toast) + '</div>';
+  const reihenX = Array.from(root.querySelectorAll('.qswatches, .qcards.reihe')).map((r) => r.scrollLeft);
   root.innerHTML = h;
   /* Gleiche Modellstruktur wie zuvor: die alte Bühne bleibt, alles Weitere morpht mit Übergängen */
   const ph = root.querySelector('#w3d');
@@ -1336,6 +1339,11 @@ function render(fresh) {
   const sc = root.querySelector('.scroll'), neu = fresh || lastScreen !== S.screen;
   if (neu) { if (sc) sc.scrollTop = 0; } else if (sc) sc.scrollTop = keep;
   if (!neu) { const scr = root.querySelector('.scr'); if (scr) scr.style.animation = 'none'; }
+  root.querySelectorAll('.qswatches, .qcards.reihe').forEach((r, i) => {
+    if (!neu && reihenX[i] != null) { r.scrollLeft = reihenX[i]; return; }
+    const on = r.querySelector('[aria-pressed="true"]'); if (!on) return;
+    const rr = r.getBoundingClientRect(), ro = on.getBoundingClientRect(); if (ro.right > rr.right - 24 || ro.left < rr.left + 8) r.scrollLeft += ro.left - rr.left - (rr.width - ro.width) / 2;
+  });
   lastScreen = S.screen;
   bindAfterRender();
   if (['teilen', 'blatt', 'gesendet', 'datei', 'gekauft'].includes(S.screen)) blattSchrift();
@@ -1401,7 +1409,7 @@ SCREENS.home = () => {
   const cardsH = S.windows.map((x, i) => winCard(x, i, true)).join('');
   const betrieb = S.betrieb ? '<div class="betrieb"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="3" width="22" height="22" rx="5" fill="var(--accent)"></rect><path d="M9 14.5l3.5 3.5 7-8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dein Aufmaß geht an<b>' + esc(S.betrieb.name || 'deinen Fensterbauer') + '</b></span></div>' : '';
   const html = '<section class="hero"><p class="eyebrow">Fenster-Aufmaß, geführt</p><h1>Fotografieren.<br>Messen.<br>Wünschen.</h1><p>Zwei Fotos, vier Maße mit dem Zollstock, und aus deinen Zahlen wächst dein Fenster als 3-D-Modell. Dein Fensterbauer bekommt alles fürs Angebot.</p>' +
-    '<div class="cta"><button type="button" class="btn primary" data-act="new">Fenster aufmessen</button><button type="button" class="link" data-act="gloss" data-k="referenz">Wie genau ist das? ›</button></div>' +
+    '<div class="cta stapel"><button type="button" class="btn primary" data-act="new">Fenster aufmessen</button><button type="button" class="btn ghost" data-act="tour-start">Führung starten</button><p class="cta-zeile">Zwei Minuten, ohne eigene Maße · <button type="button" class="ulink" data-act="gloss" data-k="referenz">Wie genau ist das?</button></p></div>' +
     '<div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 340, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div></section>' + betrieb +
     '<section class="sec"><div class="sec-head"><h2 class="sec-title">Dein Projekt.</h2><span class="sub">' + S.windows.length + ' Fenster erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + cardsH + '<button type="button" class="dashed" data-act="new"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M2 9h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>' + (S.windows.length ? 'Weiteres Fenster' : 'Erstes Fenster aufmessen') + '</button></div></section>' + (S.windows.length ? dateiCard() : '') +
     '<section class="card erklaert"><p class="eyebrow">So funktioniert\'s</p><h2 class="sec-title">Zollstock statt Rätselraten.</h2><div class="steps">' +
@@ -1478,7 +1486,7 @@ SCREENS.fotos = () => {
   const kiNote = S.aiOk === false ? noteBox('Die KI-Auswertung der Fotos ist hier gerade nicht eingeschaltet. Das Aufmaß funktioniert trotzdem komplett, nur die Zusatzinfos aus den Fotos fehlen.', null, 'warn') : '';
   const html = hd('Schritt 2 von 6 · Fotos', neu ? 'Fotografiere die Stelle.' : 'Fotografiere ' + ding + '.', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll, mit etwas Platz drumherum. Danach zeichnest du es auf dem Foto ein.' : 'Einmal von innen, einmal von außen. Die KI liest daraus Material, Glas, Rollladen und mehr, du musst nichts eintippen.') +
     '<div class="tiles">' + photoTile('in') + photoTile('out') + '</div>' + level + kiNote +
-    (!p ? '<button type="button" class="link" style="align-self: center" data-act="demo">Keine Kamera zur Hand? Beispielfotos nutzen</button>' : '');
+    (!p && !S.photos.out && !S.betrieb ? '<button type="button" class="link" style="align-self: center" data-act="tour-start">Nur mal ansehen? Führung mit Beispielfotos</button>' : '');
   return { html: html, back: ['Start', 'start'], bar: { label: neu ? 'Weiter zum Einzeichnen' : 'Weiter zum Messen', act: 'go', v: neu ? 'zeichnen' : 'messen', dis: !p } };
 };
 /* ---------- Neue Öffnung, Schritt 3: das Element auf dem Foto einzeichnen ----------
@@ -1736,7 +1744,7 @@ SCREENS.anfrage = () => {
   if (pr.gebaeude === 'denkmal') html += noteBox('Bei Denkmalschutz brauchst du meist eine Genehmigung. Material und Sprossen können vorgeschrieben sein.', 'echt', 'warn');
   html += '<div class="sec">' + secHead('Baujahr des Hauses') + chips('baujahr', pr.baujahr, 'baujahr', 'setp') + '</div>';
   html += '<div class="sec">' + secHead('Fenster im ganzen Haus', null, 'Du tauschst ' + replaced + ' davon.') + '<div class="rows"><div class="row"><label><span class="lbl">Insgesamt</span><span class="val"><input type="text" inputmode="numeric" id="p-total" data-in="p" data-f="total" value="' + esc(pr.total) + '"><span class="unit">Stück</span></span></label><button type="button" class="rnd" aria-label="Weniger" data-act="bumpp" data-v="-1">−</button><button type="button" class="rnd" aria-label="Mehr" data-act="bumpp" data-v="1">+</button></div></div></div>';
-  if (replaced > (num(pr.total) || 0) / 3) html += noteBox('Du tauschst mehr als ein Drittel der Fenster. Dann verlangt die DIN 1946-6 ein Lüftungskonzept.', 'lueftung', 'warn');
+  if (replaced > (num(pr.total) || 0) / 3) html += noteBox('Du tauschst mehr als ein Drittel der Fenster. Dann muss geprüft werden, ob nach DIN 1946-6 ein Lüftungskonzept nötig ist.', 'lueftung', 'warn');
   return { html: html, back: ['Projekt', 'home'], cls: 'tight', bar: { label: 'Weiter', act: 'go', v: 'anfrage2' } };
 };
 SCREENS.anfrage2 = () => {
@@ -2297,27 +2305,29 @@ async function onPhoto(which, file) {
   startAI(which, file);
 }
 async function startAI(which, file) {
+  const z = { ai: S.ai, win: S.win, photos: S.photos };
   const ok = await AI.init();
   S.aiOk = ok;
-  if (!ok) { S.ai[which] = { status: 'error', code: 'unavailable' }; render(); return; }
+  if (!ok) { z.ai[which] = { status: 'error', code: 'unavailable' }; render(); return; }
   if (ctrls[which]) ctrls[which].abort();
   const ctrl = new AbortController(); ctrls[which] = ctrl;
-  S.ai[which] = { status: 'running' }; render();
+  z.ai[which] = { status: 'running' }; render();
   try {
-    const res = await AI.analyze(file, which, ctrl.signal, (part, r) => { if (ctrl.signal.aborted) return; S.ai[which] = Object.assign({ status: 'running' }, r); mergeKI(); render(); }, !!S.win.neu);
+    const res = await AI.analyze(file, which, ctrl.signal, (part, r) => { if (ctrl.signal.aborted) return; z.ai[which] = Object.assign({ status: 'running' }, r); mergeKI(z); render(); }, !!z.win.neu);
     if (ctrl.signal.aborted) return;
-    S.ai[which] = Object.assign({ status: 'done' }, res);
-    if (res.errs.struct && res.errs.facts) { S.ai[which].status = 'error'; S.ai[which].code = res.errs.struct; }
-    mergeKI();
+    z.ai[which] = Object.assign({ status: 'done' }, res);
+    if (res.errs.struct && res.errs.facts) { z.ai[which].status = 'error'; z.ai[which].code = res.errs.struct; }
+    mergeKI(z);
     render();
   } catch (e) {
     if (e && e.code === 'cancelled') return;
-    S.ai[which] = { status: 'error', code: e && e.code || 'error' }; render();
+    z.ai[which] = { status: 'error', code: e && e.code || 'error' }; render();
   }
 }
 /* KI-Ergebnisse beider Fotos zu einer Sicht fürs Fenster zusammenführen */
-function mergeKI() {
-  const a = S.ai.in, b = S.ai.out, w = S.win, ki = w.ki && w.ki.auto !== false ? w.ki : {};
+function mergeKI(z) {
+  z = z || { ai: S.ai, win: S.win, photos: S.photos };
+  const a = z.ai.in, b = z.ai.out, w = z.win, ki = w.ki && w.ki.auto !== false ? w.ki : {};
   const chips = [], rows = [], hints = [];
   [a, b].forEach((x, i) => { if (!x || !x.facts) return; x.facts.chips.forEach((c) => { if (chips.length < 6 && chips.indexOf(c) < 0) chips.push(c); }); x.facts.rows.forEach((r) => rows.push([(i ? 'Außen: ' : '') + r[0], r[1]])); x.facts.hints.forEach((t) => hints.push(t)); });
   /* Neue Öffnung: die Fotos zeigen kein Fenster, also keine Übernahme von Material, Flügeln oder Laibung */
@@ -2326,8 +2336,9 @@ function mergeKI() {
   if (st && st.laib && !w.e_laib && !num(w.laib)) w.laib = st.laib;
   if (st && st.material && !w.e_material && OPT.material.some((o) => o.k === st.material)) w.material = st.material;
   if (st && st.fluegel && !w.e_teilung) { const t = st.fluegel === 1 ? '1' : st.fluegel === 3 ? '3' : '2p'; if (w.teilung !== t) { w.teilung = t; w.sashes = sashesFor(t); w.bars = w.preset !== 'keine' && w.preset !== 'eigene' ? presetBars(w.preset, w.sashes.length) : []; } }
-  w.fotos = (S.photos.in ? 1 : 0) + (S.photos.out ? 1 : 0);
+  w.fotos = (z.photos.in ? 1 : 0) + (z.photos.out ? 1 : 0);
 }
+/* Beispielfotos mit festen KI-Ergebnissen: nur noch für Prüfungen; im echten Aufmaß gibt es sie nicht (die Führung hat eigene) */
 async function useDemo() {
   const [u1, u2] = await Promise.all([demoPhotoUrl('in'), demoPhotoUrl('out')]);
   S.photos.in = { url: u1, file: null, w: 1200, h: 1400, demo: true }; S.photos.out = { url: u2, file: null, w: 1200, h: 1400, demo: true };
@@ -2355,8 +2366,22 @@ const NUMF = { w: 1, h: 1, bru: 1, laib: 1, anzahl: 1, breite: 1 };
 function act(name, el) {
   const v = el.getAttribute('data-v'), f = el.getAttribute('data-f'), w = S.win;
   const n = (x) => { const k = parseInt(x, 10); return isNaN(k) ? x : k; };
+  /* In der Führung: Gesperrtes erklärt sich, alles, was das eigene Projekt verändern würde, bleibt aus */
+  if (S.tour && S.screen === 'tour') {
+    if (el.getAttribute && el.getAttribute('aria-disabled') === 'true') return tourSchloss();
+    if (!TOUR_DARF.test(name)) return;
+  }
   switch (name) {
     case 'none': return;
+    case 'tour-start': return tourStart();
+    case 'tour-weiter': return tourGehe(S.tour ? S.tour.i + 1 : 0);
+    case 'tour-zurueck': return tourGehe(S.tour ? S.tour.i - 1 : 0);
+    case 'tour-ende': return tourEnde();
+    case 'tour-eigen': return tourEnde(true);
+    case 'tour-schloss': return tourSchloss();
+    case 'tour-pdf': return tourPDF();
+    case 'tour-nochmal': { const t = S.tour; if (!t) return; tourStopp(); t.mess = { k: 0, cur: '', fertig: false }; render(); nachBild(tourMessen, 300); return; }
+    case 'tour-art': { if (!S.tour) return; if (v === S.win.art) return render(); const alt = S.win, nw = tourWin(v); ['fa', 'fi', 'material', 'glas', 'glasfn', 'sart', 'sfarbe', 'roll', 'ki'].forEach((k) => { nw[k] = alt[k]; }); S.win = nw; S.selSash = 0; S.openSash = -1; render(); if (tourArtTuer(v)) nachBild(tuerZeigen, 360); return; }
     case 'situation': { const neu = v === 'neu'; if (neu === !!w.neu) return render(); w.neu = neu; w.plan = null; if (neu) { w.demontage = false; if (w.sart === 'behalten') { w.sart = 'keiner'; w.roll = 'keiner'; } if (w.fbi === 'behalten') w.fbi = 'werzalit'; if (w.fba === 'behalten') w.fba = 'alu'; } else w.demontage = true; return render(); }
     case 'art': { if (v === w.art) return render(); artSetzen(w, v); S.selSash = 0; S.openSash = -1; return render(); }
     case 'felder': { w.e_teilung = true; w.teilung = v; w.sashes = festFelder(v === '2p' ? 2 : num(v)); mirrorBars(w); S.selSash = 0; S.selBar = null; return render(); }
@@ -2370,7 +2395,7 @@ function act(name, el) {
     case 'plan-bump': { const d = derive(w), cur = f === 'w' ? d.moW : f === 'h' ? d.moH : num(w[f]); planMasse(w, f, cur + n(v)); return render(); }
     case 'sart': { w.sart = v; if (v === 'keiner' || v === 'behalten') w.roll = v; else if (w.roll !== 'vorbau') w.roll = 'aufsatz'; return render(); }
     case 'go': return go(v);
-    case 'back': { const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'mess-prev') return messPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } return go(b, 'back'); }
+    case 'back': { const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } return go(b, 'back'); }
     case 'copywin': { if (S.windows.length >= MAXPOS) return toast(maxMsg()); const c = Object.assign(baseWin(), JSON.parse(JSON.stringify(w)), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki }); S.windows.push(c); S.win = c; S.editIdx = S.windows.length - 1; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (S.windows.length >= MAXPOS) return toast(maxMsg()); return newWin();
     case 'open': { if (S.betrieb && S.sent) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), JSON.parse(JSON.stringify(S.windows[i])))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; return go('fertig'); }
@@ -2384,7 +2409,6 @@ function act(name, el) {
     case 'togglep': { S.proj[f] = !S.proj[f]; persist(); return render(); }
     case 'bump': { const cur = num(w[f]) + n(v); w[f] = clamp(cur, f === 'anzahl' ? 1 : 0, 9999); if (f === 'laib') w.e_laib = true; return render(); }
     case 'bumpp': { S.proj.total = clamp(num(S.proj.total) + n(v), 1, 999); persist(); return render(); }
-    case 'demo': return useDemo();
     case 'mess-next': return messNext(!!el.getAttribute('data-ack'));
     case 'mess-cm': { messInput(v); S.mess.msg = null; return render(); }
     case 'rest-next': return restNext(!!el.getAttribute('data-ack'));
@@ -2436,6 +2460,7 @@ function act(name, el) {
     default: return;
   }
 }
+const TOUR_DARF = /^(tour-[a-z]+|gloss|gindex|gclose|back|teilung|sash|felder|hst|fsw|setw|color|sart|glasfn|situation|none)$/;
 /* Zifferntasten und Tastatur fürs Messen: kein Eingabefeld, keine Systemtastatur, nichts springt */
 /* Haptik (gemeinsam.js): Tasten, Auswahl und Schalter tippen kurz; Fehler und fertige Schritte melden sich in feiern()/messNext() */
 const TIPPT = /^(key|rest-same|qnext|qprev|new|send|gloss|q-|chip|seg|opt|sw|tile|pos|share|copy|k-pay|k-buy|situation|art|felder|ul|hst|fsw|sart|farbe)/;
@@ -2480,17 +2505,278 @@ function bindAfterRender() {
       stage.classList.add('no-anim'); w3dApply(stage, reg.w, openIdx >= 0 ? Object.assign({}, reg.o, { openSash: -1 }) : reg.o); void stage.offsetWidth; stage.classList.remove('no-anim');
       if (openIdx >= 0) requestAnimationFrame(() => { const r = W3DS[stage.id]; if (r && document.body.contains(stage)) w3dApply(stage, r.w, r.o); });
     }
-    bindW3D(stage, () => { const r = W3DS[stage.id]; return r ? Object.assign({}, r.o, { onSash: r.o.selectable ? (i) => { if (S.screen === 'frage') onSashTap(i); else { S.selSash = i; S.selBar = null; render(); } } : null }) : {}; });
+    bindW3D(stage, () => { const r = W3DS[stage.id]; return r ? Object.assign({}, r.o, { onSash: r.o.selectable ? (i) => { if (S.screen === 'frage') onSashTap(i); else if (S.screen === 'tour') { S.selSash = i; S.openSash = i; render(); nachBild(() => { if (S.screen === 'tour') oeffnungZeigen(i); }, 60); } else { S.selSash = i; S.selBar = null; render(); } } : null }) : {}; });
   });
   document.querySelectorAll('.w3d-stage').forEach(bindRails);
   bindZeichnen();
+  if (S.screen === 'tour') tourSperren();
 }
 function relayoutAll() { document.querySelectorAll('.w3d-stage').forEach((stage) => { const reg = W3DS[stage.id]; if (reg) w3dLayout(stage, reg.w, reg.o); }); zeichnenLayout(); }
+/* ---------- Führung: ausprobieren, ohne eigene Maße ----------
+   Start über „Führung starten“ auf der Startseite der App oder über #fuehrung (Startseite des Portals).
+   Die Führung arbeitet an einer Kopie: Fenster, Fotos und Auswahl werden beim Start beiseitegelegt und beim Beenden
+   zurückgelegt, das eigene Projekt bleibt unberührt und wird nie gespeichert. Maße sind vorgegeben, einige Optionen
+   tragen ein Schloss; Antippen erklärt kurz, warum. Je Schritt ein Fakt mit Quelle (Belege: docs/GESTALTUNG.md, Führung). */
+const TOUR = ['start', 'fotos', 'messen', 'oeffnung', 'material', 'farbe', 'glas', 'sonne', 'blatt'];
+const TOUR_NAME = { start: 'Element', fotos: 'Fotos', messen: 'Messen', oeffnung: 'Öffnung', material: 'Material', farbe: 'Farbe', glas: 'Glas', sonne: 'Sonnenschutz', blatt: 'Aufmaßblatt' };
+const TOUR_MASS = { fenster: [1230, 1410, 620], fest: [1800, 1400, 620], hst: [2600, 2200, 0], fsw: [3600, 2200, 0] };
+/* Gesperrt je Schritt: Aktion → Werte. Das Übliche bleibt frei, gesperrt ist, was ein Fenster individuell macht. */
+const TOUR_SPERRE = {
+  start: { situation: ['neu'] },
+  oeffnung: { teilung: ['3'], felder: ['3', '4'], hst: ['A3', 'D'], fsw: ['2', '6', '7'] },
+  material: { setw: ['holzalu', 'alu'] },
+  farbe: { color: ['9001', '7035', '7012', '8022', '6005', '5011', '3005', 'nuss', 'mahag'] },
+  glas: { glasfn: ['schall', 'sonne'] },
+  sonne: { sart: ['behalten', 'screen'], setw: ['hellgrau', 'braun', 'bronze', 'schwarz'] }
+};
+/* Gut zu wissen: z = Zahl, t = Satz dazu, mit = was das mit Fensterino heißt, q = Quelle (Langfassung mit Link in der Doku) */
+const TOUR_FAKT = {
+  start: { z: '2 bis 3', t: 'vergleichbare Angebote rät die Verbraucherzentrale vor einem Fenstertausch einzuholen.', mit: 'Du misst einmal und schickst dasselbe Aufmaßblatt an jeden Betrieb. So werden die Angebote vergleichbar.', q: 'Verbraucherzentrale NRW, Broschüre „Fenster“, 02/2025' },
+  fotos: { z: '36 %', t: 'der Eigentümer finden es schwer, passende Handwerker zu finden.', mit: 'Mit Fotos, Maßen und Wünschen ist deine Anfrage für jeden Betrieb sofort kalkulierbar.', q: 'ImmoScout24, Umfrage unter 501 Eigentümern, 08/2025' },
+  messen: { z: '9,9 Wochen', t: 'reichen die Aufträge im Ausbauhandwerk im Schnitt, zu dem Glaser, Tischler und Rollladenbauer gehören.', mit: 'Mit deinem Aufmaß rechnet ein Betrieb das erste Angebot ohne Termin vor Ort. Gemessen wird bei dir, wann es dir passt.', q: 'ZDH-Konjunkturbericht 1/2026' },
+  oeffnung: { z: 'Mehr als 1/3', t: 'der Fenster getauscht? Dann muss eine Fachperson prüfen, ob ein Lüftungskonzept nach DIN 1946-6 nötig ist.', mit: 'Fensterino zählt mit und vermerkt es auf dem Aufmaßblatt, damit dein Fensterbauer es gleich einplant.', q: 'Verbraucherzentrale NRW, Broschüre „Fenster“, 02/2025' },
+  material: { z: '598 bis 1.153 €', t: 'kostete ein 3-fach verglastes Fenster (1,3 × 1,3 m) mit Montage im Schnitt, von Kunststoff bis Aluminium, netto, Stand Herbst 2023.', mit: 'Du legst das Material fest, jeder Betrieb kalkuliert dasselbe.', q: 'VFF und Bundesverband Flachglas, Studie 01/2024' },
+  farbe: { z: '87 %', t: 'der Handwerksbetriebe sagen: Kunden erwarten individuelle Angebote.', mit: 'Farbe nach RAL oder Dekor, Glas, Griff: Dein Fensterbauer weiß genau, was er anbieten soll.', q: 'Bitkom, Studie Digitalisierung des Handwerks, 01/2026' },
+  glas: { z: '10 bis 20 %', t: 'Heizkosten sparen neue Fenster typischerweise; 3-fach-Glas statt alter Isolierverglasung lässt bis zu 60 % weniger Wärme durchs Fenster.', mit: 'Das Glas wählst du am Modell, mit dem U-Wert erklärt. Es steht genau so im Aufmaß.', q: 'Verbraucherzentrale Energieberatung, „Fenstertausch“, 03/2026' },
+  sonne: { z: '15 %', t: 'Zuschuss zahlt das BAFA für neue Fenster; ein Energieeffizienz-Experte muss den Antrag begleiten.', mit: 'Im eigenen Aufmaß gibst du an, dass du Förderung nutzen willst. Dein Fensterbauer klärt die Voraussetzungen.', q: 'BAFA, BEG Einzelmaßnahmen, Stand 10/2026' },
+  blatt: { z: '68 %', t: 'der Handwerksbetriebe verschicken Angebote schon digital.', mit: 'Dein Aufmaß kommt als PDF mit Code: Ein Betrieb mit Fensterino übernimmt es mit einem Klick, jeder andere liest es wie ein Aufmaßblatt vom Termin.', q: 'Bitkom, Studie Digitalisierung des Handwerks, 01/2026' }
+};
+const LOCK_S = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="currentColor"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"></path></svg>';
+const KI_OK = '<svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+const tourArtTuer = (art) => art === 'hst' || art === 'fsw';
+/* Das Element der Führung: plausible Maße je Art, alle acht Handmaße da, eine Farbe, die im Modell gut zu sehen ist */
+function tourWin(art) {
+  const m = TOUR_MASS[art] || TOUR_MASS.fenster, oH = m[1] + 70, oW = m[0] + 140;
+  const w = Object.assign(baseWin(), { name: tourArtTuer(art) ? 'Terrasse' : 'Wohnzimmer', w: m[0], h: m[1], mo: { hm: oH, hl: oH, hr: oH, wm: oW, wt: oW, wb: oW }, el: { w: m[0], h: m[1] }, bru: m[2], laib: 150, fotos: 2, e_material: true, fa: '7016', fi: '9016', fbi: 'werzalit', quelle: 'fuehrung' });
+  artSetzen(w, art); w.e_teilung = true;
+  return w;
+}
+function tourStart() {
+  if (S.betrieb) return;
+  if (S.tour) return go('tour');
+  S.tour = { i: 0, von: S.screen && S.screen !== 'tour' ? S.screen : 'home', alt: { win: S.win, editIdx: S.editIdx, photos: S.photos, ai: S.ai, selSash: S.selSash, openSash: S.openSash, selBar: S.selBar, side: S.side }, mess: null };
+  S.tour.fotoP = Promise.all([demoPhotoUrl('in'), demoPhotoUrl('out')]);
+  S.win = tourWin('fenster'); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.selSash = 0; S.openSash = -1; S.selBar = null;
+  go('tour');
+}
+function tourStopp() { const t = S.tour; if (t) clearTimeout(t.timer); }
+/* weiter = danach gleich ein eigenes Fenster; still = ohne neu zu zeichnen (der Aufrufer übernimmt) */
+function tourEnde(weiter, still) {
+  const t = S.tour; if (!t) return;
+  tourStopp();
+  Object.assign(S, t.alt); S.tour = null; S.gloss = null; S.glossIndex = false;
+  if (location.hash === '#fuehrung') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
+  if (still) return;
+  if (weiter) return act('new', document.body);
+  go(SCREENS[t.von] && t.von !== 'tour' ? t.von : 'home', 'back');
+}
+function tourGehe(i) {
+  const t = S.tour; if (!t) return;
+  tourStopp();
+  if (i < 0) return tourEnde();
+  if (i >= TOUR.length) return tourEnde(true);
+  const vor = t.i, id = TOUR[i]; t.i = i;
+  S.openSash = -1; S.selBar = null; S.gloss = null; S.glossIndex = false;
+  if (id === 'messen') t.mess = { k: 0, cur: '', fertig: !!t.messGesehen || ruhig() };
+  /* Beim ersten Besuch steht der Raffstore schon da, mit Farbe: so ist zu sehen, was die Wahl bewirkt */
+  if (id === 'sonne' && !t.sonne) { t.sonne = 1; if (S.win.sart === 'keiner') Object.assign(S.win, { sart: 'raffstore', roll: 'aufsatz', sfarbe: 'anthrazit' }); }
+  if (id === 'blatt') blattSchrift();
+  S.dir = i < vor ? 'back' : 'fwd';
+  render(true);
+  if (id === 'fotos') tourFotos();
+  if (id === 'messen' && !t.mess.fertig) nachBild(tourMessen, 450);
+  if (id === 'oeffnung') nachBild(tourVorfuehren, 320);
+}
+/* Fotos: die Beispielbilder, dann liest die KI (nachgestellt, mit festen Ergebnissen) */
+function tourFotos() {
+  const t = S.tour; if (!t || t.fotoLauf) return; t.fotoLauf = 1;
+  t.fotoP.then((u) => {
+    if (S.tour !== t) return;
+    S.photos = { in: { url: u[0], file: null, w: 1200, h: 1400, demo: true }, out: { url: u[1], file: null, w: 1200, h: 1400, demo: true } };
+    S.ai = { in: { status: 'running' }, out: { status: 'running' } };
+    if (S.screen === 'tour') render();
+    setTimeout(() => {
+      if (S.tour !== t) return;
+      S.ai = { in: Object.assign({ status: 'done' }, AI.DEMO.in), out: Object.assign({ status: 'done' }, AI.DEMO.out) }; mergeKI();
+      if (S.screen === 'tour') render();
+    }, ruhig() ? 0 : 1600);
+  });
+}
+/* Messen: die vier Maße tippen sich selbst ein, Maßlinie für Maßlinie; die Tasten sind gesperrt */
+function tourMessen() {
+  const t = S.tour; if (!t || TOUR[t.i] !== 'messen' || !t.mess || t.mess.fertig) return;
+  const m = t.mess;
+  const schritt = () => {
+    if (S.tour !== t || TOUR[t.i] !== 'messen' || S.screen !== 'tour') return;
+    const st = MESS[m.k];
+    if (!st) { m.fertig = true; t.messGesehen = true; S._feier = 'masse'; return render(); }
+    const ziel = String(st.who === 'mo' ? num(S.win.mo[st.k]) : num(S.win.el[st.k]));
+    if (m.cur.length < ziel.length) {
+      m.cur = ziel.slice(0, m.cur.length + 1); setNum('tour-num', m.cur);
+      const lb = document.querySelector('#w3d [data-r="lab-' + dimKey(st) + '"]'); if (lb) lb.textContent = thousand(m.cur) + ' mm';
+      t.timer = setTimeout(schritt, 115); return;
+    }
+    t.timer = setTimeout(() => { m.k++; m.cur = ''; if (MESS[m.k]) render(); t.timer = setTimeout(schritt, 240); }, 620);
+  };
+  schritt();
+}
+function tourVorfuehren() {
+  const t = S.tour; if (!t || TOUR[t.i] !== 'oeffnung') return;
+  const art = S.win.art || 'fenster';
+  if (art === 'hst' || art === 'fsw') tuerZeigen(); else oeffnungZeigen(Math.min(S.selSash, S.win.sashes.length - 1));
+}
+function tourSchloss() { toast('In der Führung gesperrt. Im eigenen Aufmaß wählst du frei.'); }
+/* Gesperrtes kennzeichnen: grau, mit Schloss, für Screenreader benannt; das Eingabefeld für eigene Farben ist aus */
+function tourSperren() {
+  const t = S.tour, scr = document.querySelector('.scr[data-screen="tour"]'); if (!t || !scr) return;
+  const sp = TOUR_SPERRE[TOUR[t.i]] || {};
+  scr.querySelectorAll('[data-act]').forEach((el) => {
+    const a = el.getAttribute('data-act'), v = el.getAttribute('data-v');
+    if (!sp[a] || sp[a].indexOf(v) < 0 || el.classList.contains('gesperrt')) return;
+    el.classList.add('gesperrt'); el.setAttribute('aria-disabled', 'true'); el.setAttribute('aria-pressed', 'false');
+    el.setAttribute('aria-label', (el.getAttribute('aria-label') || el.textContent.replace(/\s+/g, ' ').trim()) + ', in der Führung gesperrt');
+    el.insertAdjacentHTML('beforeend', '<span class="schloss" aria-hidden="true">' + LOCK_S + '</span>');
+  });
+  scr.querySelectorAll('.farbfeld').forEach((box) => {
+    const inp = box.querySelector('input'); if (!inp || inp.disabled) return;
+    inp.disabled = true; inp.value = ''; inp.placeholder = 'Eigene Farbe: im eigenen Aufmaß frei'; inp.setAttribute('aria-label', 'Eigene Farbe, in der Führung gesperrt');
+    box.classList.add('gesperrt'); box.querySelector('.ff-tupf').innerHTML = LOCK_S;
+  });
+  scr.querySelectorAll('.tour-sperre .keypad button').forEach((b) => { b.disabled = true; b.tabIndex = -1; });
+}
+/* Gut zu wissen: eine Zahl, ein Satz, was das mit Fensterino heißt, die Quelle */
+function tourFakt(id) {
+  const f = TOUR_FAKT[id]; if (!f) return '';
+  return '<aside class="tour-fakt" aria-label="Gut zu wissen"><p class="eyebrow">Gut zu wissen</p><p class="tf-satz"><b>' + esc(f.z) + '</b> ' + esc(f.t).replace(/ %/g, '&nbsp;%') + '</p><p class="tf-mit"><span>Mit Fensterino:</span> ' + esc(f.mit).replace(/ %/g, '&nbsp;%') + '</p><p class="tf-q">Quelle: ' + esc(f.q) + '</p></aside>';
+}
+/* Kleine Zeichnung fürs Vorschaublatt: Ansicht von innen, Breite × Höhe in mm */
+function tourZeichnung(w) {
+  const d = derive(w), a = (d.elW || 1) / (d.elH || 1), mw = 54, mh = 46, bw = a >= mw / mh ? mw : mh * a, bh = a >= mw / mh ? mw / a : mh, bx = 30 + (mw - bw) / 2, by = 6 + (mh - bh) / 2;
+  const fc = rahmenFarbe(w, 'innen').solid, ink = '#1d1d1f';
+  const vk = n1(bx - 8), hy = n1(by + bh + 9);
+  return '<svg viewBox="0 0 100 70" aria-hidden="true">' + svgPaths(winIco(w, bx, by, bw, bh, fc)) +
+    '<path d="M' + vk + ' ' + n1(by) + 'V' + n1(by + bh) + 'M' + n1(bx - 10) + ' ' + n1(by) + 'H' + n1(bx - 6) + 'M' + n1(bx - 10) + ' ' + n1(by + bh) + 'H' + n1(bx - 6) + '" stroke="' + ink + '" stroke-width=".5" fill="none"></path>' +
+    '<path d="M' + n1(bx) + ' ' + hy + 'H' + n1(bx + bw) + 'M' + n1(bx) + ' ' + n1(by + bh + 7) + 'V' + n1(by + bh + 11) + 'M' + n1(bx + bw) + ' ' + n1(by + bh + 7) + 'V' + n1(by + bh + 11) + '" stroke="' + ink + '" stroke-width=".5" fill="none"></path>' +
+    '<text x="' + n1(bx + bw / 2) + '" y="' + n1(by + bh + 7.6) + '" text-anchor="middle" font-size="4.6" font-weight="800" fill="' + ink + '">' + thousand(d.elW) + '</text>' +
+    '<text x="' + vk + '" y="' + n1(by + bh / 2) + '" text-anchor="middle" font-size="4.6" font-weight="800" fill="' + ink + '" transform="rotate(-90 ' + n1(bx - 9.6) + ' ' + n1(by + bh / 2) + ')">' + thousand(d.elH) + '</text></svg>';
+}
+/* Das Aufmaßblatt in klein: Seite 1 so aufgebaut wie die PDF (Weg, Eckdaten, Box für den Fensterbauer, Position 1), Seite 2 dahinter */
+function tourBlatt() {
+  const w = S.win, ok = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.4l2.6 2.6 5.4-6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+  const weg = [['Fotos', 1], ['Maße', 1], ['Wünsche', 1], ['Blatt', 1], ['Senden', 0]];
+  return '<div class="tb" role="img" aria-label="Vorschau: Seite 1 des Aufmaßblatts. Oben der Weg, vier von fünf Schritten erledigt, daneben die Box für den Fensterbauer, darunter beginnt Position 1 mit Zeichnung. Dahinter Seite 2.">' +
+    '<div class="tb-stapel"><div class="tb-blatt tb-hinten" aria-hidden="true"></div><div class="tb-blatt" aria-hidden="true">' +
+    '<div class="tb-band">' + LOGO(18) + '<b>Fensterino</b><span>AM-BEISPIEL</span></div><div class="tb-in">' +
+    '<p class="tb-eb">Dein Fenster-Aufmaß</p><p class="tb-t">Familie Muster.</p>' +
+    '<p class="tb-eb">Dein Weg · 4 von 5 erledigt</p><ol class="tb-weg">' + weg.map((s) => '<li class="' + (s[1] ? 'ok' : 'jetzt') + '"><i>' + (s[1] ? ok : '') + '</i><span>' + s[0] + '</span></li>').join('') + '</ol>' +
+    '<div class="tb-boxen"><div class="tb-box"><p class="tb-eb">Eckdaten</p><p>Einfamilienhaus</p><p>Förderung gewünscht</p></div><div class="tb-box fb"><p class="tb-eb">Für den Fensterbauer</p><p>Maße in mm</p><p>Code auf Seite 2</p></div></div>' +
+    '<div class="tb-pos"><p class="tb-eb">Pos. 1 · ' + esc(w.name || 'Fenster') + '</p><div class="tb-zeich">' + tourZeichnung(w) + '</div><p class="tb-m">' + esc(lab('art', w.art || 'fenster') + ' · ' + lab('material', w.material) + ' · ' + rahmenFarbe(w, 'aussen').name) + '</p></div>' +
+    '</div><span class="tb-stempel">Beispiel</span></div></div></div>';
+}
+SCREENS.tour = () => {
+  const t = S.tour; if (!t) return SCREENS.home();
+  const id = TOUR[t.i], n = TOUR.length, w = S.win, art = w.art || 'fenster', letzte = t.i === n - 1;
+  const kopf = (titel, sub) => hd('Führung · ' + (t.i + 1) + ' von ' + n + ' · ' + TOUR_NAME[id], titel, sub, 'compact');
+  const modell = (o) => model(w, Object.assign({ id: 'w3d', view: 'inside', sway: true, stageH: 270, fitW: 0.66, fitH: 0.72 }, o));
+  let html = '';
+  if (id === 'start') {
+    const o = OPT.art.find((x) => x.k === art) || OPT.art[0];
+    html = kopf('Was möchtest du planen?', 'Such dir ein Element aus. Die Maße sind vorgegeben, manches ist gesperrt: So siehst du in zwei Minuten jeden Schritt.') +
+      modell({ view: 'three', stageH: 250, fitW: 0.76, fitH: 0.7, hint: o.label + (tourArtTuer(art) ? ' · bodentief' : '') }) +
+      '<div class="qpanel"><div class="qcards quad" role="group" aria-label="Element">' + OPT.art.map((x) => '<div class="qo"><button type="button" class="qopt" data-act="tour-art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '">' + svgIcon(ICO.art(x.k), 44) + '<span class="tx"><span class="lbl">' + esc(x.label) + '</span><span class="sb">' + esc(x.sub) + '</span></span></button></div>').join('') + '</div>' +
+      auswahl(OPT.situation, 'data-act="situation"', (x) => x.k === 'ersatz') + '</div>';
+  } else if (id === 'fotos') {
+    const kachel = (k, label) => { const p = S.photos[k], a = S.ai[k]; return '<div class="tile">' + (p ? '<img src="' + p.url + '" alt="' + label + ', Beispielfoto">' : '<span class="empty"><span class="spin dark"></span>' + label + '</span>') + (a && a.status === 'running' ? '<span class="ai-scan" data-lottie="fotos" data-loop="1" aria-hidden="true"></span><span class="ai"><span class="spin"></span>KI liest</span>' : a && a.status === 'done' ? '<span class="ai">' + KI_OK + 'KI fertig</span>' : '') + (p ? '<span class="tag">' + CHECK + esc(label) + '</span>' : '') + '</div>'; };
+    const ki = w.ki && w.ki.chips && w.ki.chips.length && S.ai.in && S.ai.in.status === 'done';
+    html = kopf('Zwei Fotos, die KI liest mit.', 'Einmal innen, einmal außen. Die KI erkennt Material, Glas, Rollladen und Fensterbank. Hier mit Beispielfotos, die Kamera bleibt aus.') +
+      '<div class="tiles">' + kachel('in', 'Von innen') + kachel('out', 'Von außen') + '</div>' +
+      (ki ? '<div class="teaser"><p class="eyebrow">Aus den Fotos gelesen · ' + w.ki.rows.length + ' Angaben fürs Aufmaßblatt</p><div class="chips">' + w.ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
+        : '<div class="teaser"><p class="eyebrow">Aus den Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest Material, Zustand und Umgebung.</p></div>');
+  } else if (id === 'messen') {
+    const m = t.mess || (t.mess = { k: 0, cur: '', fertig: true }), d = derive(w);
+    if (m.fertig) {
+      html = kopf('Vier Maße, das Modell wächst mit.', 'So misst du später selbst, Schritt für Schritt erklärt. In der Führung sind die Werte vorgegeben.') +
+        modell({ view: 'three', dims: ['hm', 'wm', 'eh', 'ew'], labels: messLabels(), cls: 'dims-all', hint: 'Rot: Maueröffnung · Blau: ' + elName() }) +
+        '<div class="mess-in"><p class="eyebrow" style="color: var(--ok)">Alle Maße da</p><div class="done-list"><div><small>Öffnung Breite</small><b>' + thousand(d.moW) + ' mm</b></div><div><small>Öffnung Höhe</small><b>' + thousand(d.moH) + ' mm</b></div><div><small>' + esc(artName(w)) + ' Breite</small><b>' + thousand(d.elW) + ' mm</b></div><div><small>' + esc(artName(w)) + ' Höhe</small><b>' + thousand(d.elH) + ' mm</b></div></div>' +
+        '<div class="msg ok">' + CHECK + '<span>Danach misst du die Ränder der Öffnung. Von drei Breiten und drei Höhen zählt das kleinste Maß, wie beim Fensterbauer.</span></div></div>' +
+        '<div class="qrow"><button type="button" class="chip" data-act="tour-nochmal">Nochmal zeigen</button></div>';
+    } else {
+      const st = MESS[m.k], k = dimKey(st), labels = messLabels();
+      labels[k] = num(m.cur) ? thousand(m.cur) + ' mm' : '?';
+      html = kopf('Maß ' + (m.k + 1) + ' von 4 · ' + (st.who === 'mo' ? 'Maueröffnung' : elName()), 'Zollstock anlegen, Zahl eintippen, das Modell zieht die Maßlinie. Hier tippt sich das Maß selbst ein.') +
+        modell({ view: 'three', showEl: m.k >= 1, dims: MESS.slice(0, m.k + 1).map(dimKey), active: k, labels: labels, hint: st.who === 'mo' ? 'Rot: Maueröffnung' : 'Blau: ' + elName() }) +
+        '<div class="ask ' + st.who + '"><p class="q"><span>' + esc(tuerText(st.short)) + '</span><span class="badge">' + LOCK_S + 'vorgegeben</span></p><p class="how">' + esc(tuerText(st.text)) + '</p>' + numDisplay(m.cur, 'tour-num') + '</div>' +
+        '<div class="tour-sperre">' + keypad('Weiter') + '<button type="button" class="ts-deckel" data-act="tour-schloss"><span>' + LOCK_S + 'Maße sind in der Führung vorgegeben</span></button></div>';
+    }
+  } else if (id === 'oeffnung') {
+    if (art === 'fenster') {
+      const i = Math.min(S.selSash, w.sashes.length - 1), x = w.sashes[i], k = w.sashes.length;
+      html = kopf(k > 1 ? 'Wie öffnet Flügel ' + (i + 1) + '?' : 'Wie soll es aufgehen?', k > 1 ? 'Flügel im Modell antippen, dann die Öffnungsart wählen. Der Flügel zeigt sie sofort.' : 'Öffnungsart wählen, der Flügel zeigt sie sofort.') +
+        modell({ selectable: k > 1, selSash: i, openSash: S.openSash, symbols: true, sway: false, hint: k > 1 ? 'Flügel ' + (i + 1) + ' von ' + k + ' · antippen wechselt' : 'Er schwingt so auf' }) +
+        '<div class="qpanel">' + auswahl([{ k: '1', label: '1 Flügel' }, { k: '2p', label: '2 Flügel' }, { k: '3', label: '3 Flügel' }], 'data-act="teilung"', (o) => o.k === w.teilung) + qCards({ group: 'typ', act: 'sash', f: 't', val: x.t, ico: ICO.typ }) + '</div>';
+    } else if (art === 'fest') {
+      html = kopf('Wie viele Felder?', 'Große Scheiben werden geteilt, ab etwa 2,5 m² je Feld.') + modell({ hint: w.sashes.length + (w.sashes.length === 1 ? ' Feld' : ' Felder') + ' · fest verglast' }) +
+        '<div class="qpanel">' + qCards({ group: 'felder', act: 'felder', val: w.teilung, ico: ICO.felder }) + '</div>';
+    } else if (art === 'hst') {
+      html = kopf('Welches Schema?', 'Welche Flügel schieben und welche fest stehen. Antippen zeigt, wie sie öffnet.') + modell({ hint: lab('hstSchema', w.hst.schema) + ' · antippen schiebt' }) +
+        '<div class="qpanel">' + qCards({ group: 'hstSchema', act: 'hst', f: 'schema', val: w.hst.schema, ico: ICO.hst }) + '</div>';
+    } else {
+      html = kopf('Wie viele Flügel?', 'Mehr Flügel heißt schmalere Flügel und ein größeres Paket. Antippen faltet sie.') + modell({ hint: w.fsw.n + ' Flügel · ' + lab('fswSchema', w.fsw.schema) }) +
+        '<div class="qpanel">' + qChips({ group: 'fswN', act: 'fsw', f: 'n', val: String(w.fsw.n) }) + '</div>';
+    }
+  } else if (id === 'material') {
+    html = kopf('Welches Material?', 'Bestimmt Preis, Pflege und Profilbreite.') + modell({ hint: lab('material', w.material) }) +
+      '<div class="qpanel">' + qCards({ group: 'material', act: 'setw', f: 'material', val: w.material, ico: ICO.material }) + '</div>';
+  } else if (id === 'farbe') {
+    html = kopf('Welche Farbe außen?', 'Nach RAL oder als Holzdekor; im eigenen Aufmaß auch als freie Angabe.') + modell({ view: 'outside', hint: 'Ansicht von außen · ' + rahmenFarbe(w, 'aussen').name }) +
+      '<div class="qpanel">' + qColor({ side: 'aussen' }) + '</div>';
+  } else if (id === 'glas') {
+    html = kopf('Welche Verglasung?', 'Je kleiner der U-Wert, desto weniger Wärme geht verloren.') + modell({ lupe: true, hint: glasText(w) }) +
+      '<div class="qpanel">' + qCards({ group: 'glas', act: 'setw', f: 'glas', val: w.glas, ico: ICO.glas }) + qMulti({ group: 'glasfn', act: 'glasfn', vals: w.glasfn }) + '</div>';
+  } else if (id === 'sonne') {
+    const kasten = w.sart === 'rollladen' || w.sart === 'raffstore';
+    html = kopf('Sonnenschutz außen?', 'Rollladen oder Raffstore gleich mitbestellen, in deiner Farbe.') + modell({ view: 'outside', hint: 'Ansicht von außen · ' + lab('sart', w.sart) + (kasten ? ' · ' + sonneName(w) : '') }) +
+      '<div class="qpanel">' + qCards({ group: 'sart', act: 'sart', val: w.sart, ico: ICO.sonne }) + (kasten ? qSwatch({ group: 'sfarbe', f: 'sfarbe', val: w.sfarbe }) : '') + '</div>';
+  } else {
+    const preis = KUNDE_FREI() ? 'Messen, Fotos und das Aufmaßblatt sind kostenlos.' : 'Messen, Fotos und 3-D-Modell sind kostenlos. Das fertige Aufmaßblatt kostet einmalig ' + euro(PREIS()) + (MWST() ? ' inkl. MwSt.' : '') + ', egal an wie viele Fensterbauer es geht.';
+    const av = (x) => '<span class="av" aria-hidden="true">' + x + '</span>';
+    html = kopf('Dein Aufmaßblatt.', 'So sieht das Dokument aus, das an Fensterbauer geht. Seite 1 beginnt schon mit deinem Fenster.') + tourBlatt() +
+      '<div class="card tour-senden"><p class="eyebrow">Und dann</p><h2 class="sec-title">An beliebig viele Fensterbauer.</h2><p class="sub">Ein Aufmaß, so viele Angebote, wie du möchtest. Du schickst das Blatt per WhatsApp oder E-Mail. Jeder Betrieb kann es lesen; mit Fensterino übernimmt er alles per Code.</p>' +
+      '<ul class="ts-ziele">' + [['A', 'Fensterbauer im Ort'], ['B', 'Empfehlung von Nachbarn'], ['C', 'Betrieb mit Fensterino']].map((x) => '<li>' + av(x[0]) + '<span><b>' + esc(x[1]) + '</b><small>Aufmaßblatt geschickt</small></span>' + CHECK + '</li>').join('') + '<li class="mehr">' + av('+') + '<span><b>So viele, wie du möchtest</b><small>ein Aufmaß, beliebig viele Angebote</small></span></li></ul>' +
+      '<p class="sub">' + esc(preis) + '</p><div class="pill-row"><button type="button" class="pill" data-act="tour-pdf">Beispiel als PDF ansehen</button></div></div>';
+  }
+  html += tourFakt(id);
+  return { html: html, back: ['Beenden', 'tour-ende'], cls: 'tour', bar: { label: letzte ? 'Eigenes Fenster aufmessen' : 'Weiter', act: letzte ? 'tour-eigen' : 'tour-weiter', sec: t.i ? 'Zurück' : null, secAct: 'tour-zurueck' } };
+};
+/* Die echte PDF fürs Beispiel: Wasserzeichen „Beispiel“, ohne Aufmaß-Code */
+async function tourPDF() {
+  if (!S.tour) return;
+  if (!window.Blatt) return toast('Die PDF lädt noch, gleich noch einmal.');
+  await blattSchrift();
+  const pdf = window.Blatt.pdf({ variante: 'kunde', beispiel: true, fenster: [S.win], projekt: Object.assign({}, PROJ0, { name: 'Familie Muster', ort: '12345 Musterstadt', total: 9, foerd: true }), code: '', portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
+  if (!pdf) return toast('Die PDF lässt sich hier gerade nicht erzeugen.');
+  return dateiSpeichern(pdf, 'Fensterino-Beispiel-Aufmass.pdf');
+}
+/* Eine fertige Datei weitergeben: über die Downloads-Schnittstelle der Vorschau, sonst als Download im Browser */
+async function dateiSpeichern(data, name) {
+  if (!DL && DLP) await DLP;
+  if (DL) { try { await DL.save({ filename: name, data: data }); toast('Gespeichert'); return true; } catch (e) { if (!(e && e.code === 'declined')) toast('Speichern hat nicht geklappt'); return false; } }
+  if (window.claude) { toast('Speichern ist in dieser Ansicht nicht möglich'); return false; }
+  try { const blob = data instanceof Blob ? data : new Blob([data], { type: 'application/pdf' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); toast('Download gestartet'); return true; }
+  catch (e) { toast('Speichern geht hier nicht'); return false; }
+}
 function boot() {
   restore();
   S.betrieb = readHash();
   if (S.betrieb) loadLink();
-  window.addEventListener('hashchange', () => { const b = readHash(), was = S.betrieb ? S.betrieb.code : '', now = b ? b.code : ''; if (was === now) { if (b) S.betrieb = b; return render(); } S.betrieb = b; if (b) loadLink(); else loadOwn(); S.screen = 'home'; render(true); });
+  window.addEventListener('hashchange', () => {
+    const fuehrung = location.hash === '#fuehrung';
+    if (S.tour && !fuehrung) tourEnde(false, true);
+    const b = readHash(), was = S.betrieb ? S.betrieb.code : '', now = b ? b.code : '';
+    if (was === now) { if (b) S.betrieb = b; if (fuehrung) return tourStart(); return render(); }
+    S.betrieb = b; if (b) loadLink(); else loadOwn(); S.screen = 'home'; render(true);
+    if (fuehrung) tourStart();
+  });
   const root = $app();
   root.addEventListener('click', (e) => { const el = e.target.closest ? e.target.closest('[data-act]') : null; if (!el || el.disabled) return; const name = el.getAttribute('data-act'); if (name === 'none') return; if (el.tagName !== 'A') e.preventDefault(); tippen(name, el); act(name, el); });
   root.addEventListener('input', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
@@ -2503,6 +2789,7 @@ function boot() {
   });
   window.addEventListener('resize', relayoutAll);
   render(true);
+  if (location.hash === '#fuehrung' && !S.betrieb) tourStart();
   serverStart();
   AI.init().then((ok) => { S.aiOk = ok; if (S.screen === 'fotos') render(); });
   DLP = (async () => { try { DL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { DL = null; } return DL; })();

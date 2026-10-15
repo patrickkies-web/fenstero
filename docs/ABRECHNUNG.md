@@ -30,7 +30,7 @@ Einstellbar ohne Code: `web/config.js → preise` (Pilot) bzw. die Variablen `PR
 | Abo 10 / Plus | Position `abo` / `plus`, Schlüssel = Monat | 49 € / 79 € je Monat; Wechsel von Abo 10 auf Plus im selben Monat: nur der Aufpreis 30 € | beim Aktivieren und dann am Monatsanfang; Wechsel nach unten gilt zum Monatsende |
 | Hauseigentümer: Aufmaßblatt | Zeile in `zahlungen` (Stufe 2) | 7,99 € | beim Kauf, Stripe ist das Buch |
 
-Nicht berechnet werden: Projekte anlegen, Links und Einladungslisten verschicken, Beispieldaten (`demo`), gesperrte Aufmaße ohne Zahlungsart (sie warten).
+Nicht berechnet werden: Projekte anlegen, Links und Einladungslisten verschicken, frühere Beispielprojekte (`demo`, werden nicht mehr angelegt), gesperrte Aufmaße ohne Zahlungsart (sie warten).
 
 **Eine Buchung wird nie geändert oder gelöscht.** Projekte löschen oder den Tarif wechseln ändert gebuchte Positionen nicht; Korrekturen laufen über eine Gutschrift.
 

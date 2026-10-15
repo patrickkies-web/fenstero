@@ -302,7 +302,7 @@
   /* ---------- Pilot-Hinweis im Portal ---------- */
   function pilotHinweis() {
     if (!C.pilot || document.body.getAttribute('data-seite') !== 'portal' || get('aufmass.pilot.zu') === '1') return;
-    var bar = el('div', 'fx-pilot', '<p><b>Pilotphase:</b> Der Bereich für Betriebe zeigt Beispieldaten, nichts wird berechnet, alles bleibt in Ihrem Browser. Echt funktionieren schon Aufmaß-Links, Code-Eingang, Nachbesserung und PDF-Export.</p>' +
+    var bar = el('div', 'fx-pilot', '<p><b>Pilotphase:</b> Im Bereich für Betriebe wird nichts berechnet, Konto und Projekte bleiben in Ihrem Browser. Echt funktionieren schon Aufmaß-Links, Code-Eingang, Nachbesserung und PDF-Export. Zum Kennenlernen gibt es die Tour.</p>' +
       '<button type="button" class="mehr">Mehr</button><button type="button" class="zu" aria-label="Hinweis schließen"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>');
     bar.setAttribute('role', 'note');
     bar.querySelector('button.zu').addEventListener('click', function () { put('aufmass.pilot.zu', '1'); bar.remove(); });
