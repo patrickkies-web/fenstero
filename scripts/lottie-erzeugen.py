@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fensterino · Bewegtbilder (Lottie), aus Code erzeugt. Bodymovin-Format 5.7, nur Formen und Keyframes, keine Ausdrücke,
+"""eeziframes · Bewegtbilder (Lottie), aus Code erzeugt. Bodymovin-Format 5.7, nur Formen und Keyframes, keine Ausdrücke,
 damit der leichte Spieler (web/vendor/lottie_light.min.js) sie ohne eval unter der strengen CSP abspielt.
 Farben sind Marker (die hellen Tokens); gemeinsam.js tauscht sie beim Laden gegen die aktuellen Tokens, auch im dunklen Modus.
    python3 scripts/lottie-erzeugen.py web/assets/lottie

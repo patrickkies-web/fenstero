@@ -1,5 +1,5 @@
 'use strict';
-/* Fensterino · Aufmaßblatt als PDF: ein Zeichner für drei Ausgaben
+/* eeziframes · Aufmaßblatt als PDF: ein Zeichner für drei Ausgaben
    Blatt.pdf(e)      -> Blob (null, wenn jsPDF fehlt)
    Blatt.schrift()   -> Promise; lädt die eingebettete Schrift (blatt-schrift.js) einmal nach, danach sofort
 
@@ -41,6 +41,8 @@ window.Blatt = (() => {
     const h = e.h, V = e.variante || 'kunde', wins = e.fenster || [], pr = e.projekt || {}, kd = e.kunde || {}, bt = e.betrieb || {}, ab = bt.abzug || { seite: 15, oben: 15 };
     const BRAND = V === 'betrieb' ? (bt.col || ACC) : '#000000';
     const sie = V !== 'kunde';
+    /* Adresse der Website: die, unter der eeziframes gerade läuft (nach einem Domainwechsel stimmt sie von selbst) */
+    const HOST = e.portalKurz || (typeof location !== 'undefined' && location.host) || 'eeziframes';
     /* Schrift: Maven Pro, wenn geladen, sonst Helvetica */
     const F = window.BlattSchrift ? (() => {
       try {
@@ -56,6 +58,9 @@ window.Blatt = (() => {
     const tw = (s) => doc.getTextWidth(t(s));
     const wrap = (s, w) => doc.splitTextToSize(t(s), w);
     const txt = (s, x, y, o) => doc.text(t(s), x, y, o);
+    /* Marke: immer klein, auch in Versalzeilen; Wortmarke „eezi“ in Black, „frames“ in Medium */
+    const VERSAL = (s) => String(s).split(/(eeziframes|eezi)/).map((x, i) => (i % 2 ? x : x.toUpperCase())).join('');
+    const wortmarke = (x, y0, size, col) => { font('black', size, col); txt('eezi', x, y0); const w1 = tw('eezi'); font('normal', size, col); txt('frames', x + w1, y0); return w1 + tw('frames'); };
     const alpha = (a) => { try { doc.setGState(new doc.GState({ opacity: a })); } catch (err) { /* ohne Transparenz */ } };
     const rr = (x, y, w, h2, r, mode) => doc.roundedRect(x, y, w, h2, r, r, mode || 'F');
     const dash = (on) => { try { doc.setLineDashPattern(on ? [1.1, 0.9] : [], 0); } catch (err) { /* ok */ } };
@@ -68,7 +73,7 @@ window.Blatt = (() => {
     const initial = (name) => (String(name || 'F').replace(/^(Fensterbau|Glaserei|Schreinerei|Tischlerei)\s+/i, '').slice(0, 1).toUpperCase() || 'F');
     /* Kennung des Aufmaßes: kurz, aus dem Code gebildet, steht auf jeder Seite (eine einzelne Seite bleibt zuordenbar) */
     const kennung = e.beispiel ? 'AM-BEISPIEL' : V === 'betrieb' && bt.nr ? String(bt.nr) : (() => { const q = String(e.code || (pr.name || '') + heute + wins.length); let a = 2166136261; for (let i = 0; i < q.length; i++) { a ^= q.charCodeAt(i); a = Math.imul(a, 16777619); } const Z = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o = ''; for (let i = 0; i < 6; i++) o += Z[(a >>> (i * 5)) & 31]; return 'AM-' + o; })();
-    try { doc.setDocumentProperties({ title: laufTitel, subject: 'Fenster-Aufmaß ' + kennung + (titelName ? ' · ' + titelName : ''), author: V === 'betrieb' ? (bt.name || 'Fensterino') : 'Fensterino', keywords: 'Aufmaß, Fenster, Maße in mm, ' + kennung, creator: 'Fensterino' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
+    try { doc.setDocumentProperties({ title: laufTitel, subject: 'Fenster-Aufmaß ' + kennung + (titelName ? ' · ' + titelName : ''), author: V === 'betrieb' ? (bt.name || 'eeziframes') : 'eeziframes', keywords: 'Aufmaß, Fenster, Maße in mm, ' + kennung, creator: 'eeziframes' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
 
     /* ---------- Seitenrahmen ---------- */
     let y = 0;
@@ -90,11 +95,11 @@ window.Blatt = (() => {
         fill('#ffffff'); doc.circle(cx, cy, r, 'F');
         font('black', gross ? 13 : 6, BRAND); txt(initial(bt.name), cx, cy + (gross ? 4.6 : 2.1), { align: 'center' });
         font('bold', gross ? 15 : 8, '#ffffff'); txt(bt.name || 'Betrieb', cx + r + (gross ? 5 : 2.5), cy + (gross ? 5.2 : 2.8));
-        font('normal', gross ? 8 : 6.8, '#ffffff'); alpha(0.85); txt(gross ? 'Aufmaß · erfasst vom Kunden mit Fensterino' : laufTitel + ' · ' + kennung, XR, cy + (gross ? 1 : 2.3), { align: 'right' }); alpha(1);
+        font('normal', gross ? 8 : 6.8, '#ffffff'); alpha(0.85); txt(gross ? 'Aufmaß · erfasst vom Kunden mit eeziframes' : laufTitel + ' · ' + kennung, XR, cy + (gross ? 1 : 2.3), { align: 'right' }); alpha(1);
         if (gross) { font('normal', 8, '#ffffff'); alpha(0.8); txt([bt.nr, bt.eingegangen ? 'eingegangen ' + bt.eingegangen : heute].filter(Boolean).join(' · '), XR, cy + 6, { align: 'right' }); alpha(1); }
       } else {
         marke(M, gross ? 5 : 1.6, gross ? 14 : 5.8, true);
-        font('black', gross ? 16 : 8, '#ffffff'); txt('Fensterino', M + (gross ? 19 : 7.8), gross ? 17.2 : 6.6);
+        wortmarke(M + (gross ? 19 : 7.8), gross ? 17.2 : 6.6, gross ? 16 : 8, '#ffffff');
         font('normal', gross ? 8 : 6.5, '#ffffff'); alpha(0.78);
         if (gross) { txt('AUFMASSBLATT · ' + kennung, XR, 10, { align: 'right', charSpace: 0.6 }); txt(heute, XR, 15.5, { align: 'right' }); }
         else txt(laufTitel + ' · ' + heute + ' · ' + kennung, XR, 6.3, { align: 'right' });
@@ -114,8 +119,8 @@ window.Blatt = (() => {
       const x0 = W - STREIFEN, y0 = bandH, y1 = H - 12, len = y1 - y0;
       fill(BRAND); doc.rect(x0, y0, STREIFEN, len, 'F');
       const text = V === 'betrieb'
-        ? String(bt.name || 'Betrieb').toUpperCase() + '  ·  Aufmaß Ihres Kunden  ·  erstellt mit Fensterino  ·  ' + (e.portalKurz || 'fensterino.com')
-        : 'FENSTERINO  ·  Fenster aufmessen. Selbst. Richtig.  ·  ' + (e.portalKurz || 'fensterino.com') + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen, Seite ' + codeSeite + '  ·  3 Projekte kostenlos';
+        ? String(bt.name || 'Betrieb').toUpperCase() + '  ·  Aufmaß Ihres Kunden  ·  erstellt mit eeziframes  ·  ' + HOST
+        : 'eeziframes  ·  Fenster aufmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen, Seite ' + codeSeite + '  ·  3 Projekte kostenlos';
       let size = 6.8; font('bold', size, '#ffffff');
       while (tw(text) > len - 16 && size > 5.2) { size -= 0.2; font('bold', size, '#ffffff'); }
       const tl = tw(text), ty = y1 - 9 - (len - 16 - tl) / 2;
@@ -136,7 +141,7 @@ window.Blatt = (() => {
         doc.setPage(i);
         stroke(LINE); doc.setLineWidth(0.25); doc.line(M, H - 11.5, XR, H - 11.5);
         font('normal', 7.2, GREY);
-        txt(V === 'betrieb' ? 'Erstellt mit Fensterino für ' + (bt.name || 'Ihren Betrieb') + ' · ' + (e.portalKurz || 'fensterino.com') + ' · Vor der Fertigung Feinaufmaß vor Ort.' : 'Erstellt mit Fensterino · ' + (e.portalKurz || 'fensterino.com') + ' · Vor der Fertigung Feinaufmaß vor Ort.', M, H - 7.2);
+        txt(V === 'betrieb' ? 'Erstellt mit eeziframes für ' + (bt.name || 'Ihren Betrieb') + ' · ' + HOST + ' · Vor der Fertigung Feinaufmaß vor Ort.' : 'Erstellt mit eeziframes · ' + HOST + ' · Vor der Fertigung Feinaufmaß vor Ort.', M, H - 7.2);
         txt(kennung + ' · Seite ' + i + ' von ' + n, XR, H - 7.2, { align: 'right' });
         streifen(i === 1 ? 24 : 9);
         if (i === 2 && EIGENE) eigeneKunden(BOTTOM - EIGENE_H);
@@ -158,7 +163,7 @@ window.Blatt = (() => {
       } catch (err) { return false; }
     }
     /* ---------- Bausteine ---------- */
-    const eyebrow = (s, x, y0, color) => { font('bold', 7, color || ACC); txt(String(s).toUpperCase(), x, y0, { charSpace: 0.5 }); };
+    const eyebrow = (s, x, y0, color) => { font('bold', 7, color || ACC); txt(VERSAL(s), x, y0, { charSpace: 0.5 }); };
     const pille = (s, cx, cy, color, size) => { font('bold', size || 6.6); const w = tw(s) + 3.4, hh = (size || 6.6) * 0.62; fill(color); rr(cx - w / 2, cy - hh / 2, w, hh, hh / 2); doc.setTextColor(255, 255, 255); txt(s, cx, cy + hh * 0.33, { align: 'center' }); return w; };
     const chip = (s, x, y0, bg, fg, size) => { font('bold', size || 7.5); const w = tw(s) + 5, hh = (size || 7.5) * 0.8; fill(bg); rr(x, y0, w, hh, hh / 2); doc.setTextColor.apply(doc, rgb(fg)); txt(s, x + 2.5, y0 + hh * 0.7); return w; };
     const swatch = (hex, x, cy, r) => { fill(hex); stroke(LINE); doc.setLineWidth(0.25); doc.circle(x, cy, r || 1.6, 'FD'); };
@@ -331,7 +336,7 @@ window.Blatt = (() => {
     /* ---------- Aufbau nach Leserichtung (Begründung und Quellen: docs/GESTALTUNG.md, Abschnitt Aufmaßblatt) ----------
        Seite 1: Kopf mit Kennung, eine Zeile Zusammenfassung, der Weg (was schon erledigt ist, der eine nächste Schritt),
        daran angeschlossen die Box für den Fensterbauer, dann beginnt Position 1 – Seite 1 lässt sich nicht weglassen.
-       Seite 2 unten: Fensterino für die eigenen Kunden des Fensterbauers. Danach je Position eine Seite, am Ende Überblick und Code. */
+       Seite 2 unten: eeziframes für die eigenen Kunden des Fensterbauers. Danach je Position eine Seite, am Ende Überblick und Code. */
     const FS = 8.4;
     y = kopfband(true) + 11;
     const gebText = [h.lab('gebaeude', pr.gebaeude), pr.baujahr ? 'Baujahr ' + pr.baujahr : ''].filter(Boolean).join(', ');
@@ -385,7 +390,7 @@ window.Blatt = (() => {
       y = wy + 22;
       /* Links Eckdaten, rechts die Box für den Fensterbauer, mit einer Spitze am letzten Schritt angeschlossen */
       const fbW = 82, ekW = CW - fbW - 5, fbX = XR - fbW, oFb = { lw: 19, fs: 8 }, oEk = { lw: 25, fs: FS };
-      const fbZeilen = (seite) => kontaktZ.concat([['Maße', 'in mm, Breite × Höhe, Ansicht von innen; Maueröffnung: kleinstes von drei Maßen'], ['Digital', '„Code vom Kunden einfügen“ in Fensterino, Code auf Seite ' + seite + '; die ersten 3 Projekte sind frei'], ['Danach', 'Angebot, vor der Fertigung Feinaufmaß vor Ort']]);
+      const fbZeilen = (seite) => kontaktZ.concat([['Maße', 'in mm, Breite × Höhe, Ansicht von innen; Maueröffnung: kleinstes von drei Maßen'], ['Digital', '„Code vom Kunden einfügen“ in eeziframes, Code auf Seite ' + seite + '; die ersten 3 Projekte sind frei'], ['Danach', 'Angebot, vor der Fertigung Feinaufmaß vor Ort']]);
       const fbTitel = V === 'kunde' ? 'Für deinen Fensterbauer' : 'Für Sie als Fensterbauer';
       const hFb = karteH(fbZeilen(99), fbW, fbTitel, oFb), hEk = karteH(eck, ekW, 'x', oEk), hb = Math.max(hFb, hEk);
       karte(M, y, ekW, 'Eckdaten zum Projekt', eck, Object.assign({ minH: hb }, oEk));
@@ -548,17 +553,17 @@ window.Blatt = (() => {
       });
       y += gh + 6;
     }
-    /* Aufmaß-Code mit der Anleitung zum Übernehmen (für Fensterbauer, die Fensterino nutzen möchten) */
+    /* Aufmaß-Code mit der Anleitung zum Übernehmen (für Fensterbauer, die eeziframes nutzen möchten) */
     function codeTeil() {
       if (!e.code && !e.beispiel) return;
       platz(70);
       codeSeite = seiteNr();
       sektion('Aufmaß digital übernehmen', 'für Fensterbauer, kostenlos bis 3 Projekte');
       const qs = 28, qx = XR - qs;
-      [['Kostenlos registrieren', (e.portalKurz || 'fensterino.com') + ' oder den QR-Code scannen'], ['„Code vom Kunden einfügen“', 'den Aufmaß-Code unten einsetzen, Leerzeichen und Umbrüche stören nicht'], ['Projekt ist da', 'mit Positionen, 3-D-Ansicht und Bestellmaß nach Ihrem Abzug']].forEach((st, k) => { fill(INK); doc.circle(M + 4, y + 4 + k * 10.5, 4, 'F'); font('black', 9, '#ffffff'); txt(String(k + 1), M + 4, y + 5.4 + k * 10.5, { align: 'center' }); font('bold', 9.2, INK); txt(st[0], M + 11, y + 3.4 + k * 10.5); font('normal', 8, INK2); txt(st[1], M + 11, y + 7.6 + k * 10.5); });
+      [['Kostenlos registrieren', HOST + ' oder den QR-Code scannen'], ['„Code vom Kunden einfügen“', 'den Aufmaß-Code unten einsetzen, Leerzeichen und Umbrüche stören nicht'], ['Projekt ist da', 'mit Positionen, 3-D-Ansicht und Bestellmaß nach Ihrem Abzug']].forEach((st, k) => { fill(INK); doc.circle(M + 4, y + 4 + k * 10.5, 4, 'F'); font('black', 9, '#ffffff'); txt(String(k + 1), M + 4, y + 5.4 + k * 10.5, { align: 'center' }); font('bold', 9.2, INK); txt(st[0], M + 11, y + 3.4 + k * 10.5); font('normal', 8, INK2); txt(st[1], M + 11, y + 7.6 + k * 10.5); });
       qr(qx, y - 2, qs); font('normal', 7.2, INK2); txt('Scannen: Anmeldung', qx + qs / 2, y + qs + 2, { align: 'center' });
       y += 36;
-      if (!e.code) { fill(PAPER); rr(M, y, CW, 17, 3); eyebrow('Aufmaß-Code für Fensterino', M + 4, y + 5.6, INK); font('normal', 8.2, INK2); txt('Im echten Aufmaßblatt steht hier der Aufmaß-Code. In diesem Beispiel bleibt er leer.', M + 4, y + 11.6); y += 20; return; }
+      if (!e.code) { fill(PAPER); rr(M, y, CW, 17, 3); eyebrow('Aufmaß-Code für eeziframes', M + 4, y + 5.6, INK); font('normal', 8.2, INK2); txt('Im echten Aufmaßblatt steht hier der Aufmaß-Code. In diesem Beispiel bleibt er leer.', M + 4, y + 11.6); y += 20; return; }
       /* Courier, damit sich der Code aus jedem PDF-Programm sauber kopieren lässt */
       font('mono', 6.2); const zeilen2 = doc.splitTextToSize(e.code, CW - 8), zh2 = 2.7;
       let k = 0, erster = true;
@@ -567,23 +572,23 @@ window.Blatt = (() => {
         if (frei < 6) { neueSeite(); continue; }
         const teil = zeilen2.slice(k, k + frei), hh = teil.length * zh2 + (erster ? 12 : 8);
         fill(PAPER); rr(M, y, CW, hh, 3);
-        if (erster) { eyebrow('Aufmaß-Code für Fensterino', M + 4, y + 5.2, INK); font('normal', 7.2, INK2); txt('Enthält Maße, Wünsche und Fotoauswertung aller Positionen. Als Text markieren und kopieren.', XR - 4, y + 5.2, { align: 'right' }); }
+        if (erster) { eyebrow('Aufmaß-Code für eeziframes', M + 4, y + 5.2, INK); font('normal', 7.2, INK2); txt('Enthält Maße, Wünsche und Fotoauswertung aller Positionen. Als Text markieren und kopieren.', XR - 4, y + 5.2, { align: 'right' }); }
         font('mono', 6.2, '#3a3a3f'); let cy2 = y + (erster ? 10.6 : 6);
         teil.forEach((z) => { txt(z, M + 4, cy2); cy2 += zh2; });
         y += hh + 3; k += teil.length; erster = false;
       }
     }
-    /* Seite 2 unten, für Fensterbauer: Fensterino für die eigenen Kunden. Gestaltet wie normaler Inhalt, nicht wie Werbung. */
+    /* Seite 2 unten, für Fensterbauer: eeziframes für die eigenen Kunden. Gestaltet wie normaler Inhalt, nicht wie Werbung. */
     function eigeneKunden(y0) {
       fill(PAPER); stroke(LINE); doc.setLineWidth(0.3); rr(M, y0, CW, EIGENE_H, 3.5, 'FD');
       const qs = 25, qx = XR - qs - 5, qy = y0 + 5, tx = M + 5, tw2 = qx - tx - 6;
       eyebrow('Für Fensterbauer · Aufmaße Ihrer eigenen Kunden', tx, y0 + 6.6, INK);
       font('black', 11.5, INK); const t1 = wrap('Ihre Kunden messen selbst. Sie fahren erst zum Feinaufmaß.', tw2); txt(t1, tx, y0 + 12.8, { lineHeightFactor: 1.1 });
       let yy = y0 + 12.8 + t1.length * 4.6 + 0.6;
-      font('normal', 8, INK2); const t2 = wrap('Projekt in Fensterino anlegen, Aufmaß-Link per WhatsApp oder E-Mail schicken. Zurück kommt ein Aufmaß wie dieses: 8 Maße je Fenster, Fotos mit Auswertung, alle Wünsche, Bestellmaß nach Ihrem Abzug, das Blatt mit Ihrem Logo.', tw2); txt(t2, tx, yy, { lineHeightFactor: 1.22 }); yy += t2.length * 3.45 + 1.6;
+      font('normal', 8, INK2); const t2 = wrap('Projekt in eeziframes anlegen, Aufmaß-Link per WhatsApp oder E-Mail schicken. Zurück kommt ein Aufmaß wie dieses: 8 Maße je Fenster, Fotos mit Auswertung, alle Wünsche, Bestellmaß nach Ihrem Abzug, das Blatt mit Ihrem Logo.', tw2); txt(t2, tx, yy, { lineHeightFactor: 1.22 }); yy += t2.length * 3.45 + 1.6;
       font('bold', 8, INK); txt('3 Projekte kostenlos · danach 9 € netto je Projekt mit eingegangenem Aufmaß · keine Grundgebühr', tx, yy); yy += 4.2;
       font('normal', 7, GREY); txt(wrap('Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).', tw2)[0], tx, yy);
-      qr(qx, qy, qs); font('normal', 7, INK2); txt('Scannen: Projekt anlegen', qx + qs / 2, qy + qs + 3.4, { align: 'center' }); font('bold', 7, INK); txt(e.portalKurz || 'fensterino.com', qx + qs / 2, qy + qs + 6.8, { align: 'center' });
+      qr(qx, qy, qs); font('normal', 7, INK2); txt('Scannen: Projekt anlegen', qx + qs / 2, qy + qs + 3.4, { align: 'center' }); font('bold', 7, INK); txt(HOST, qx + qs / 2, qy + qs + 6.8, { align: 'center' });
     }
 
     if (wins.length) position(wins[0], 0);

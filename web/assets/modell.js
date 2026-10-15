@@ -1,4 +1,4 @@
-/* Fensterino · Modell und Abrechnung, gemeinsam für Betriebsbereich (Browser) und Server (Cloudflare Worker)
+/* eeziframes · Modell und Abrechnung, gemeinsam für Betriebsbereich (Browser) und Server (Cloudflare Worker)
    window.AW          Fenster-Modell: Felder, Beschriftungen, Ableitungen, Zeichnung als SVG
    window.Abrechnung  Regeln: Tarife, Buchung je Projekt, Kontingente, Nachbesserung, Code-Eingang, Projekte anlegen
    Keine Oberfläche, kein Speicher: Alle Funktionen arbeiten auf einem Konto-Objekt a = { konto, pay, freeUsed, freeQuota, dupOf, downgrade, book, links, notif, abzug, ... }

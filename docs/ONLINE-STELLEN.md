@@ -1,8 +1,8 @@
-# Fensterino online stellen
+# eeziframes online stellen
 
-**Fensterino.** Die Aufmaß-App für Fenster: kostenlos für Hauseigentümer, bezahlt von Fensterbauern je Projekt. Das Logo ist ein weißes Fenster auf Schwarz, dessen Flügel kurz kippt. Fensterino bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
+**eeziframes** (immer kleingeschrieben, „eezi“ wie „easy“). Die Aufmaß-App für Fenster: kostenlos für Hauseigentümer, bezahlt von Fensterbauern je Projekt. Das Logo ist ein weißes Fenster auf Schwarz, dessen Flügel kurz kippt. eeziframes bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
 
-Diese Anleitung bringt die Fensterino-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…workers.dev`), dann unter deiner eigenen Domain (`fensterino.com`).
+Diese Anleitung bringt die eeziframes-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…workers.dev`), dann unter deiner eigenen Domain (heute `fensterino.com`; für die Marke eeziframes eine neue, siehe Schritt 6).
 
 ## Zwei Stufen
 
@@ -25,9 +25,9 @@ Diese Anleitung bringt die Fensterino-Website ins Netz: erst unter einer kostenl
 
 | | Kosten |
 |---|---|
-| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `fensterino` ist möglich, siehe unten) |
+| GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `eeziframes` ist möglich, siehe unten) |
 | Cloudflare-Konto (Workers) | kostenlos |
-| Eigene Domain | `fensterino.com`, liegt schon bei Cloudflare |
+| Eigene Domain | `fensterino.com` liegt schon bei Cloudflare; für die Marke eeziframes eine neue Domain, zum Beispiel `eeziframes.com` (Jahresgebühr beim Anbieter) |
 | Anthropic-API-Schlüssel für die KI | optional, nach Verbrauch; Ausgabenlimit setzen |
 | Supabase-Projekt (Stufe 2) | kostenloser Tarif reicht für den Start |
 | Stripe-Konto (Stufe 2) | keine Grundgebühr, Gebühr je Zahlung (Karte ca. 1,5 % + 0,25 €, SEPA 0,35 €) |
@@ -99,7 +99,7 @@ Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass
 
 ## Schritt 6: Eigene Domain (wenn der Name feststeht)
 
-Vorher den Namen prüfen: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „Fensterino“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke dazukommen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
+Vorher den Namen prüfen: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „eeziframes“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke oder Länder dazukommen; für mehrere Länder gibt es die Unionsmarke beim EUIPO oder eine internationale Registrierung über die WIPO. Ähnlich klingende Namen gibt es schon, etwa „EzyFrame“ von Manfrotto und „EZ Frames“ von Durkee; vor der Anmeldung deshalb auf Verwechslungsgefahr prüfen lassen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
 
 1. Die Domain muss bei Cloudflare liegen. Für `fensterino.com` ist das erledigt (Nameserver `may.ns.cloudflare.com` und `coen.ns.cloudflare.com`). Bei einer neuen Domain: **Domain hinzufügen** (Add a domain), kostenlosen Tarif wählen und die zwei genannten Nameserver beim Domain-Anbieter eintragen.
 2. **Workers & Pages → fenstero → Einstellungen → Domains & Routen (Domains & Routes) → Hinzufügen (Add) → Benutzerdefinierte Domain (Custom domain)**: `fensterino.com` eintragen, hinzufügen. Dasselbe noch einmal für `www.fensterino.com`. Cloudflare legt DNS-Eintrag und Zertifikat selbst an; nach ein paar Minuten lädt die Seite.
@@ -109,7 +109,14 @@ So erkennst du, wo es hakt: **Fehler 522** heißt, die Domain zeigt noch nicht a
 
 Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter der der Betriebsbereich geöffnet wurde.
 
-**Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `fensterino`. GitHub leitet die alte Adresse weiter.
+**Neue Domain für eeziframes, ohne etwas zu verlieren:**
+
+1. Domain registrieren, zum Beispiel `eeziframes.com` (bei Cloudflare unter **Domain-Registrierung** oder bei einem anderen Anbieter, dann wie in Punkt 1 zu Cloudflare holen).
+2. Wie in Punkt 2 als benutzerdefinierte Domain am Worker `fenstero` eintragen, dazu `www.`. Die Website zeigt dann unter beiden Domains dasselbe; Kundenlinks, QR-Codes und die Adresse im Aufmaßblatt nehmen von selbst die Domain, unter der gerade gearbeitet wird.
+3. `fensterino.com` vorerst angeschlossen lassen: Aufmaßblätter, QR-Codes und Kundenlinks, die schon unterwegs sind, zeigen dorthin. In der Pilotphase liegen Konten und Aufmaße außerdem im Browser, und zwar getrennt je Domain: Was jemand unter `fensterino.com` angelegt hat, sieht er unter `eeziframes.com` nicht. Umleiten (301, mit Pfad) also erst, wenn Stufe 2 läuft oder es noch kaum Pilotnutzer gibt. Kundenlinks behalten bei einer Umleitung ihren Teil nach `#`.
+4. In Stufe 2 die Adressen mitziehen: Webhook bei Stripe, Website-Adresse und Weiterleitungen bei Supabase.
+
+**Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `eeziframes`. GitHub leitet die alte Adresse weiter. Den Worker-Namen `fenstero` nicht ändern, sonst findet Cloudflare die Bereitstellung nicht mehr.
 
 ## Stufe 2: Supabase und Stripe anschließen
 
@@ -121,10 +128,10 @@ Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kass
 2. **SQL Editor → New query**: den Inhalt von `supabase/schema.sql` einfügen, **Run**. Das legt die Tabellen `betriebe`, `zahlungen`, `ereignisse` an und sperrt sie für Browser (nur der Server kommt mit dem Service-Schlüssel dran).
 3. **Project Settings → API**: notiere **Project URL** (`https://….supabase.co`), den **anon**-Schlüssel und den **service_role**-Schlüssel. Beide sind lange Texte, die mit `eyJ` beginnen; Supabase zeigt sie inzwischen unter „Legacy API keys“. Der service_role-Schlüssel darf nur bei Cloudflare liegen, nie im Browser, nie im Repo, nie in einem Chat.
 4. **Authentication → Sign In / Providers → Email**: eingeschaltet lassen, „Confirm email“ ist egal (wir nutzen den Code), **„Allow new users to sign up“ muss an sein**.
-5. **Authentication → Email Templates → Magic Link**: Betreff zum Beispiel `Ihr Fensterino-Anmeldecode`, Text zum Beispiel:
+5. **Authentication → Email Templates → Magic Link**: Betreff zum Beispiel `Ihr eeziframes-Anmeldecode`, Text zum Beispiel:
    ```
    Guten Tag,
-   Ihr Anmeldecode für Fensterino lautet: {{ .Token }}
+   Ihr Anmeldecode für eeziframes lautet: {{ .Token }}
    Er gilt eine Stunde. Wenn Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail.
    ```
    Wichtig ist `{{ .Token }}`: Das ist der sechsstellige Code. Die Vorlage „Confirm signup“ genauso anpassen (sie wird beim allerersten Anmelden einer Adresse verschickt).
@@ -138,9 +145,9 @@ Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kass
 
    | Produkt | Preis | Art | Steuer | Variable bei Cloudflare |
    |---|---|---|---|---|
-   | Fensterino Abo 10 | 49,00 € | wiederkehrend, monatlich | exklusiv (netto) | `STRIPE_PRICE_ABO` |
-   | Fensterino Plus | 79,00 € | wiederkehrend, monatlich | exklusiv (netto) | `STRIPE_PRICE_PLUS` |
-   | Fensterino Aufmaßblatt (optional) | 7,99 € | einmalig | inklusiv (brutto) | `STRIPE_PRICE_AUFMASS`; ohne diese Variable setzt der Server den Betrag aus `PREIS_AUFMASS_CENT` je Kauf selbst |
+   | eeziframes Abo 10 | 49,00 € | wiederkehrend, monatlich | exklusiv (netto) | `STRIPE_PRICE_ABO` |
+   | eeziframes Plus | 79,00 € | wiederkehrend, monatlich | exklusiv (netto) | `STRIPE_PRICE_PLUS` |
+   | eeziframes Aufmaßblatt (optional) | 7,99 € | einmalig | inklusiv (brutto) | `STRIPE_PRICE_AUFMASS`; ohne diese Variable setzt der Server den Betrag aus `PREIS_AUFMASS_CENT` je Kauf selbst |
 
 3. **Steuersätze** (Produktkatalog → Steuersätze): „MwSt. 19 %“ als **exklusiv** → `STRIPE_TAX_RATE`, und noch einmal „MwSt. 19 % inkl.“ als **inklusiv** → `STRIPE_TAX_RATE_INKL`. Bei Kleinunternehmerregelung (§ 19 UStG) beide weglassen und bei Cloudflare `MWST` = `0` setzen; dann steht auf der Kasse „umsatzsteuerfrei nach § 19 UStG“ und die Betriebspreise gelten ohne Zusatz.
 4. **Einstellungen → Zahlungsmethoden**: Karten, PayPal, Apple Pay und Google Pay einschalten (Hauseigentümer), **SEPA-Lastschrift** einschalten (Betriebe; Stripe schaltet sie nach Prüfung frei).

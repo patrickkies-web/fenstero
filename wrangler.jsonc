@@ -1,4 +1,4 @@
-/* Fensterino auf Cloudflare Workers: was gebaut und wie es ausgeliefert wird.
+/* eeziframes auf Cloudflare Workers: was gebaut und wie es ausgeliefert wird.
    - Die Website liegt in web/: statische Dateien, Kopfzeilen aus web/_headers, Fehlerseite web/404.html.
    - Nur /api/… läuft durch worker.js (functions/api/router.js): KI-Auswertung, Kauf des Aufmaßblatts (Stripe),
      Konten der Betriebe (Supabase), Eingang von Aufmaßen aus der App.

@@ -4,7 +4,7 @@ Stand: Preise und Paywalls sind eingebaut, die Regeln laufen im Browser (Pilot, 
 
 ## 1. Das Modell in einem Satz
 
-Hauseigentümer messen mit Fensterino kostenlos; ihr fertiges Aufmaßblatt kostet einmal 7,99 €. Fensterbauer zahlen je **Projekt mit eingegangenem Aufmaß**, weil ihnen die Anfahrt zum Erstaufmaß erspart bleibt. Das Aufmaßblatt des Eigentümers trägt die Einladung an den Fensterbauer; so finden Betriebe zu Fensterino, ohne dass wir sie einzeln anschreiben.
+Hauseigentümer messen mit eeziframes kostenlos; ihr fertiges Aufmaßblatt kostet einmal 7,99 €. Fensterbauer zahlen je **Projekt mit eingegangenem Aufmaß**, weil ihnen die Anfahrt zum Erstaufmaß erspart bleibt. Das Aufmaßblatt des Eigentümers trägt die Einladung an den Fensterbauer; so finden Betriebe zu eeziframes, ohne dass wir sie einzeln anschreiben.
 
 ## 2. Preise
 
@@ -62,7 +62,7 @@ Schranken gegen Missbrauch (ein Projekt als Sammelstelle für viele Kunden): hö
 
 **Über den Link des Betriebs** (einzeln oder aus einer Einladungsliste): Der Betrieb hat den Kunden eingeladen. Zusage an den Betrieb: *Ihr Kunde bleibt Ihr Kunde.* Der Kunde sieht im Link nur diesen Betrieb, keine anderen Anbieter, keine Werbung, und zahlt nichts. Eine Kopie mit Maßen bekommt er vom Betrieb (PDF mit dem Angebot), nicht von uns; nach dem Senden zeigt die App ihm seine Positionen ohne Maßliste. Das ist eine Bremse, kein Schloss, und mehr wäre gegen die Daten des Kunden selbst gerichtet.
 
-**Vom Kunden selbst** (ohne Link): Der Kunde misst von sich aus, kauft sein Aufmaßblatt für 7,99 € und gibt es weiter, an so viele Fensterbauer, wie er will. Auf jeder Seite der PDF läuft der senkrechte Fensterino-Streifen mit, auf der Übersichtsseite stehen Einladung, QR-Code zur kostenlosen Anmeldung (`?von=pdf`) und der Aufmaß-Code zum Einfügen. Holt der Betrieb das Aufmaß in sein Konto, entsteht ein Projekt und zählt wie jedes andere. Kein Anmeldezwang zum Lesen: Wer die PDF nur lesen will, braucht kein Fensterino; wer sie weiterverarbeiten will, meldet sich an, weil es ihm etwas bringt. So erreicht jedes Kunden-Aufmaß einen Betrieb, den wir nie angeschrieben haben.
+**Vom Kunden selbst** (ohne Link): Der Kunde misst von sich aus, kauft sein Aufmaßblatt für 7,99 € und gibt es weiter, an so viele Fensterbauer, wie er will. Auf jeder Seite der PDF läuft der senkrechte eeziframes-Streifen mit, auf der Übersichtsseite stehen Einladung, QR-Code zur kostenlosen Anmeldung (`?von=pdf`) und der Aufmaß-Code zum Einfügen. Holt der Betrieb das Aufmaß in sein Konto, entsteht ein Projekt und zählt wie jedes andere. Kein Anmeldezwang zum Lesen: Wer die PDF nur lesen will, braucht kein eeziframes; wer sie weiterverarbeiten will, meldet sich an, weil es ihm etwas bringt. So erreicht jedes Kunden-Aufmaß einen Betrieb, den wir nie angeschrieben haben.
 
 ## 7. Technik in Kürze (Stufe 2)
 

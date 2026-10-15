@@ -1,4 +1,4 @@
-/* Fensterino · Konten der Betriebe auf dem Server: Anmeldung, Registrierung, Projekte, Eingang von Aufmaßen, Tarif, Zahlungsart, Sammelrechnung.
+/* eeziframes · Konten der Betriebe auf dem Server: Anmeldung, Registrierung, Projekte, Eingang von Aufmaßen, Tarif, Zahlungsart, Sammelrechnung.
    Die Regeln (Zählung, Buchung, Nachbesserung) stehen in web/assets/modell.js und sind dieselben wie im Browser; hier führt sie der Server aus,
    deshalb kann ein Browser sie nicht umgehen. Das Konto eines Betriebs ist ein JSON-Dokument (siehe speicher.js). */
 import '../../web/assets/modell.js';
@@ -70,7 +70,7 @@ export const KONTO = {
     const dup = dups && dups.length ? dups[0] : null;
     const a = { name: firma, plz: plz, col: col, since: jahr(), konto: 'service', pay: null, ap: ap, mail: n.mail, tel: tel, abzug: { seite: 15, oben: 15 }, prefs: { mail: true, remind: true }, rechnungen: [], links: [], book: [], freeUsed: 0, notif: [] };
     if (dup) { a.freeQuota = 0; a.dupOf = dup.name; }
-    melden(a, { t: 'Willkommen bei Fensterino', s: dup ? 'Für ' + dup.name + ' gibt es schon ein Konto, die kostenlosen Projekte wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Die ersten ' + X().preise().frei + ' Projekte sind kostenlos.', to: ['links'] });
+    melden(a, { t: 'Willkommen bei eeziframes', s: dup ? 'Für ' + dup.name + ' gibt es schon ein Konto, die kostenlosen Projekte wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Die ersten ' + X().preise().frei + ' Projekte sind kostenlos.', to: ['links'] });
     const row = await ctx.sp.betriebAnlegen({ auth_user: n.id, mail: n.mail, name: firma, plz: plz, tel_norm: telN, name_norm: nameN, daten: a });
     return { ok: true, konto: sicht(row) };
   },

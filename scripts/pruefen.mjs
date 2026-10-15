@@ -1,4 +1,4 @@
-// Fensterino · automatische Prüfung im Browser (Chromium über Playwright)
+// eeziframes · automatische Prüfung im Browser (Chromium über Playwright)
 //
 //   1. Testserver starten:   KI_ATTRAPPE=1 node scripts/dev-server.mjs
 //   2. Prüfung starten:      node scripts/pruefen.mjs
@@ -76,13 +76,14 @@ if (teil(1)) {
   console.log('1. Seiten laden');
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
-  for (const [pfad, titel] of [['/', 'Fensterino'], ['/app/', 'Fensterino'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/gibtsnicht', 'nicht gefunden']]) {
+  for (const [pfad, titel] of [['/', 'eeziframes'], ['/app/', 'eeziframes'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/gibtsnicht', 'nicht gefunden']]) {
     const r = await page.goto(BASE + pfad, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
     const text = await page.evaluate(() => document.body.innerText);
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
-    ok(!/Lichtma|Fenstero|Zamma/.test(text) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
-    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .fi-fluegel').count() > 0 && await page.locator('svg .fi-kachel').count() > 0, pfad + ': Logo mit klopfender Faust da');
+    ok(!/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(text) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
+    ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
+    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .fi-fluegel').count() > 0 && await page.locator('svg .fi-kachel').count() > 0, pfad + ': Logo (Fenster auf der Kachel) da');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
   }
@@ -200,7 +201,7 @@ if (teil(3)) {
   t3 = await page.evaluate(() => document.body.textContent);
   ok(/Dein Aufmaß, dein Blatt/.test(t3) && /An deinen Fensterbauer/.test(t3) && !/Portal/.test(t3) && /Freigeschaltet, für dieses Projekt/.test(t3) && /Rechnung ist an kunde@beispiel\.de unterwegs/.test(t3) && await page.locator('#code-box').count() === 1, 'Nach dem Kauf: Weg zum Fensterbauer, eigene PDF, Aufmaß-Code und Rechnungshinweis');
   const wa3 = await page.getAttribute('.share-way a[href^="https://wa.me/"]', 'href');
-  ok(/Code vom Kunden einfügen/.test(decodeURIComponent(wa3)) && /Kostenlos anmelden/.test(decodeURIComponent(wa3)) && /AM1\./.test(decodeURIComponent(wa3)), 'Nachricht an den Fensterbauer enthält Code und Einladung zu Fensterino');
+  ok(/Code vom Kunden einfügen/.test(decodeURIComponent(wa3)) && /Kostenlos anmelden/.test(decodeURIComponent(wa3)) && /AM1\./.test(decodeURIComponent(wa3)), 'Nachricht an den Fensterbauer enthält Code und Einladung zu eeziframes');
   // Weg 1: PDF schicken (ohne Teilen-Menü im Testbrowser: Download) → erledigt, nächster Schritt wird angestoßen
   const [dl3] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="teil-pdf"]')]);
   await page.waitForTimeout(500);
@@ -212,15 +213,15 @@ if (teil(3)) {
   const roh3 = pdfBytes.toString('latin1'), txt3 = pdfText(await dl3.path());
   ok(/MavenBlack/.test(roh3) && /MavenMedium/.test(roh3), 'PDF trägt die eingebettete Marken-Schrift');
   ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /Aufmaß digital übernehmen/.test(txt3), 'PDF an den Fensterbauer: Anleitung mit QR-Link und Aufmaß-Code');
-  /* Aufbau nach Leserichtung: Seite 1 mit Weg, Box für den Fensterbauer und Position 1; Seite 2 unten Fensterino für eigene Kunden; Kennung auf jeder Seite */
+  /* Aufbau nach Leserichtung: Seite 1 mit Weg, Box für den Fensterbauer und Position 1; Seite 2 unten eeziframes für eigene Kunden; Kennung auf jeder Seite */
   const seiteTxt = (n) => { try { return cp.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
   const s1 = seiteTxt(1), s2 = seiteTxt(2), info3 = (() => { try { return cp.execFileSync('pdfinfo', [dl3Pfad]).toString('utf8'); } catch (e) { return ''; } })();
   const kenn = (/AM-[A-Z2-9]{6}/.exec(s1) || [''])[0], nSeiten = +((/Pages:\s+(\d+)/.exec(info3) || [0, 0])[1]);
   ok(/4 von 5 Schritten erledigt/i.test(s1) && /Ihr Schritt: Angebot/.test(s1) && /FÜR SIE ALS FENSTERBAUER/.test(s1) && /MAUERÖFFNUNG/.test(s1) && /Alle Maße in mm/.test(s1), 'Aufmaßblatt Seite 1: der Weg (4 von 5 erledigt), Box für den Fensterbauer, Position 1 beginnt schon hier');
-  ok(/AUFMASSE IHRER EIGENEN KUNDEN/.test(s2) && /Ihre Kunden messen selbst/.test(s2) && /Scannen: Projekt anlegen/.test(s2) && /3 Projekte kostenlos/.test(s2), 'Aufmaßblatt Seite 2 unten: Fensterino für die eigenen Kunden des Fensterbauers');
+  ok(/AUFMASSE IHRER EIGENEN KUNDEN/.test(s2) && /Ihre Kunden messen selbst/.test(s2) && /Scannen: Projekt anlegen/.test(s2) && /3 Projekte kostenlos/.test(s2), 'Aufmaßblatt Seite 2 unten: eeziframes für die eigenen Kunden des Fensterbauers');
   ok(!!kenn && nSeiten >= 3 && seiteTxt(nSeiten).includes(kenn) && seiteTxt(2).includes(kenn) && /Seite 1 von/.test(s1) && /Title:\s+Aufmaßblatt/.test(info3), 'Kennung ' + kenn + ', Datum und „Seite x von y“ auf jeder Seite, Dokumenttitel gesetzt');
   const seite3 = (() => { try { return cp.execFileSync('pdftotext', ['-f', '3', '-l', '3', dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })();
-  ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /FENSTERINO/.test(seite3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite');
+  ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /eeziframes/.test(seite3) && !/EEZI/.test(txt3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite; Marke im PDF überall klein');
   ok(/IHRES KUNDEN/.test(txt3) && /FÜR SIE ALS FENSTERBAUER/.test(txt3) && /Maueröffnung/.test(txt3) && !/Übersicht/.test(txt3), 'Ausgabe für den Fensterbauer: Sie-Ansprache, Position mit Maßen; bei einer Position keine doppelte Übersicht');
   const m3 = /AM1\.[A-Za-z0-9_\-\s]+/.exec(txt3), code3 = m3 ? m3[0].replace(/\s+/g, '') : '';
   const dekod3 = await page.evaluate((c) => { const o = unpackProject(c); return o ? o.w.length : 0; }, code3);
@@ -318,7 +319,7 @@ if (teil(4)) {
     const [d2] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), pdfKnopf.click()]);
     ok(/\.pdf$/.test(d2.suggestedFilename()), 'Portal-PDF: ' + d2.suggestedFilename());
     let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await d2.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
-    ok(/BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/Fensterino-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
+    ok(/BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
   } else ok(false, 'Portal-PDF-Knopf gefunden');
   sauber(page, 'Portal-PDF ohne Fehler');
   await ctx.close();
@@ -401,7 +402,7 @@ if (teil(6)) {
   ok(await page.evaluate((c) => { const gebrochen = c.replace(/(.{60})/g, '$1\n   '); const o = unpack(gebrochen); return !!o && o.w.length === 1; }, eigenCode), 'Code mit Zeilenumbrüchen (aus der PDF kopiert) bleibt lesbar');
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/?von=pdf', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
-  ok(await page.locator('.banner.vonpdf [data-act="reg"]').count() === 1 && /Fensterino-Aufmaß in der Hand/.test(await page.evaluate(() => document.body.textContent)), 'Wer über die PDF kommt, sieht den Weg zum Konto');
+  ok(await page.locator('.banner.vonpdf [data-act="reg"]').count() === 1 && /eeziframes-Aufmaß in der Hand/.test(await page.evaluate(() => document.body.textContent)), 'Wer über die PDF kommt, sieht den Weg zum Konto');
   await betrieb(page, 'c7'); await page.waitForTimeout(500);
   ok(await page.locator('.banner.vonpdf [data-v="linkimport"]').count() === 1, 'Angemeldeter Betrieb bekommt direkt „Code vom Kunden einfügen“');
   await tun('vonpdf-zu'); await page.waitForTimeout(200);
@@ -410,7 +411,7 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster aufmessen\. Selbst\. Richtig\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite: Hauseigentümer zuerst (aufmessen oder Führung), Fensterbauer darunter');
+  ok(/Fenster aufmessen\. Selbst\. eezi\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite: Hauseigentümer zuerst (aufmessen oder Führung), Fensterbauer darunter');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start), 'Kein Marktplatz mehr auf der Startseite');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
@@ -987,7 +988,7 @@ if (teil(9)) {
       await blattSchrift(); const blob = await blattPDF('kunde');
       const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s);
     }, [extra, eins]);
-    const pfad = path9.join(os9.tmpdir(), 'fensterino-pruefung-' + name + '.pdf'); fs9.writeFileSync(pfad, Buffer.from(b64, 'base64')); return pfad;
+    const pfad = path9.join(os9.tmpdir(), 'eeziframes-pruefung-' + name + '.pdf'); fs9.writeFileSync(pfad, Buffer.from(b64, 'base64')); return pfad;
   };
   const seiteT = (pfad, n) => { try { return cp9.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
   const alleT = (pfad) => { try { return cp9.execFileSync('pdftotext', ['-layout', pfad, '-']).toString('utf8'); } catch (e) { return ''; } };

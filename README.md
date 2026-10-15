@@ -1,6 +1,6 @@
-# Fensterino
+# eeziframes
 
-Die Aufmaß-App für Fenster. Hauseigentümer messen ihre Fenster selbst, Schritt für Schritt erklärt, mit Fotos, 3-D-Modell und allen Wünschen – Fenster mit Ober- und Unterlicht, Festverglasungen, Hebe-Schiebe-Türen und Faltschiebewände, Rollladen, Raffstore und Screen, Rollo, Plissee und Jalousie; wo noch kein Fenster ist, zeichnen sie die neue Öffnung auf dem Foto ein; das fertige Aufmaßblatt als PDF kostet einmal 7,99 €. Fensterbauer laden Kunden per Aufmaß-Link ein und bekommen ein vollständiges Aufmaß fürs Angebot, ohne Anfahrt: 3 Projekte frei, dann 9 € je Projekt, Abo 10 für 49 € oder Plus für 79 € im Monat.
+Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer kleingeschrieben (Regeln zur Marke und zum Wortspiel mit „eezi“: [docs/GESTALTUNG.md](docs/GESTALTUNG.md)). Hauseigentümer messen ihre Fenster selbst, Schritt für Schritt erklärt, mit Fotos, 3-D-Modell und allen Wünschen – Fenster mit Ober- und Unterlicht, Festverglasungen, Hebe-Schiebe-Türen und Faltschiebewände, Rollladen, Raffstore und Screen, Rollo, Plissee und Jalousie; wo noch kein Fenster ist, zeichnen sie die neue Öffnung auf dem Foto ein; das fertige Aufmaßblatt als PDF kostet einmal 7,99 €. Fensterbauer laden Kunden per Aufmaß-Link ein und bekommen ein vollständiges Aufmaß fürs Angebot, ohne Anfahrt: 3 Projekte frei, dann 9 € je Projekt, Abo 10 für 49 € oder Plus für 79 € im Monat.
 
 **Stand: Pilotphase, Stufe 2 vorbereitet.** Ohne Schlüssel läuft die Website im Browser: Kundenlinks, Messen, PDF und Code-Übergabe an den Betrieb funktionieren, der Kauf ist ein gekennzeichneter Testkauf, Konten von Betrieben liegen im Browser. Zum Kennenlernen ohne Konto gibt es die Führung in der App (`/app/#fuehrung`) und die Tour für Fensterbauer. Sobald Supabase und Stripe eingetragen sind (`functions/api/`, `supabase/schema.sql`), gibt es echte Konten, direkte Übertragung, Zahlungen und Abrechnung. Anleitung: [docs/ONLINE-STELLEN.md](docs/ONLINE-STELLEN.md), Regeln: [docs/ABRECHNUNG.md](docs/ABRECHNUNG.md).
 
@@ -46,6 +46,8 @@ npx wrangler dev                                                                
 ```bash
 python3 scripts/marke-umbenennen.py NeuerName
 ```
+
+Das Skript tauscht den Namen in derselben Schreibweise aus. Von Hand bleiben: die Wortmarke (`Marke.wort()` in `web/assets/gemeinsam.js`, `wortmarke()` in `web/assets/blatt.js`), Wortspiele und Versalzeilen (siehe Abschnitt Marke in [docs/GESTALTUNG.md](docs/GESTALTUNG.md)) und die Domain.
 
 ## Lizenzen
 

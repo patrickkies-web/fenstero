@@ -1,4 +1,4 @@
-/* Fensterino · gemeinsame Bausteine für App und Portal
+/* eeziframes · gemeinsame Bausteine für App und Portal
    - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung
    - Pilot-Hinweis im Portal
    - Logo (weißes Fenster auf Schwarz, der Flügel kippt kurz)
@@ -7,7 +7,7 @@
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
-  var C = window.KONFIG = Object.assign({ marke: 'Fensterino', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
+  var C = window.KONFIG = Object.assign({ marke: 'eeziframes', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
   var mem = {};
   function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return mem[k] || null; } }
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
@@ -39,7 +39,7 @@
       var bg = el('div', 'fx-bg');
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
-        '<p>Die KI erkennt auf deinen Fotos Rahmen, Glas, Material und mehr und trägt es fürs Aufmaß ein. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. Fensterino speichert deine Fotos nicht.</p>' +
+        '<p>Die KI erkennt auf deinen Fotos Rahmen, Glas, Material und mehr und trägt es fürs Aufmaß ein. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. eeziframes speichert deine Fotos nicht.</p>' +
         '<p class="fx-klein">Ohne KI geht es auch, dann fehlen nur die Zusatzinfos aus den Fotos. Mehr dazu in der <a href="' + C.datenschutz + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>' +
         '<div class="fx-knoepfe"><button type="button" class="fx-ja">Ja, auswerten</button><button type="button" class="fx-nein">Ohne KI weiter</button></div>');
       box.setAttribute('role', 'dialog');
@@ -120,6 +120,15 @@
     }
   };
   window.Logo.klopfen = window.Logo.bewegen;
+  /* ---------- Marke: eeziframes, immer klein ----------
+     Marke.wort()     Wortmarke: „eezi“ in Black, „frames“ in Medium, gleiche Farbe, kein Abstand
+     Marke.klein(s)   für HTML, das in Versalien stehen kann (Eyebrows): die Marke und „eezi“ bleiben klein
+     translate="no", damit automatische Übersetzer den Namen nicht anfassen. */
+  window.Marke = {
+    name: 'eeziframes',
+    wort: function () { return '<span class="wm" translate="no"><b>eezi</b>frames</span>'; },
+    klein: function (s) { return String(s).replace(/eeziframes|eezi/g, function (m) { return '<span class="mk" translate="no">' + m + '</span>'; }); }
+  };
   function ersteBewegung() { setTimeout(function () { window.Logo.bewegen(document.querySelector('.hdr, .top, .side, .kopf') || document); }, 700); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ersteBewegung); else ersteBewegung();
   function beiBeruehrung(e) { var l = e.target && e.target.closest ? e.target.closest('.fi-logo') : null; if (l) window.Logo.bewegen(l); }

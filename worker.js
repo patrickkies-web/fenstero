@@ -1,4 +1,4 @@
-/* Fensterino auf Cloudflare Workers (Einstellungen in wrangler.jsonc)
+/* eeziframes auf Cloudflare Workers (Einstellungen in wrangler.jsonc)
    Die Website kommt als statische Dateien aus web/. Alles unter /api/… beantwortet functions/api/router.js:
    KI-Auswertung, Kauf des Aufmaßblatts (Stripe), Konten der Betriebe (Supabase), Eingang von Aufmaßen.
    Ohne eingerichtete Schlüssel läuft die Website im Pilotmodus weiter; /api/status sagt der App, was da ist. */
