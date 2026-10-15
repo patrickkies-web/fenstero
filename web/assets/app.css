@@ -264,6 +264,20 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-bar { position: absolute; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 1px 3px rgba(0, 0, 0, .2); z-index: 2; touch-action: none; transition: left .25s, top .25s, width .3s, height .3s, background .5s }
 .w3d-bar.is-sel { box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 0 0 2.5px var(--accent) }
 .w3d-roll { background: linear-gradient(180deg, #ededeb, #d2d2cf); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2) } .w3d-roll-b { background: #c9c9c6 } .w3d-roll-t { background: #f1f1ef } .w3d-roll-s { background: #d9d9d6 }
+/* Sonnenschutz: Behang außen mit Endleiste, Sichtschutz innen mit Kassette und Endleiste (Farben inline, Muster aus behangBg/innenBg) */
+.w3d-behang { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 2px 6px rgba(0, 0, 0, .18) } .w3d-behang-u { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25), 0 1px 3px rgba(0, 0, 0, .3); border-radius: 0 0 2px 2px }
+.w3d-innen { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .1), 0 2px 8px rgba(0, 0, 0, .12) } .w3d-innen-k { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); border-radius: 2px 2px 0 0 } .w3d-innen-u { box-shadow: 0 1px 3px rgba(0, 0, 0, .25) }
+/* Unterlicht als Paneel, Schwelle, Böden bei Türen */
+.w3d-paneel { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), inset 0 0 30px rgba(0, 0, 0, .06) }
+.w3d-schw { background: linear-gradient(180deg, #d9dde1, #aeb4ba); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-schw-t { background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .18) 0 1px, transparent 1px 4px), linear-gradient(180deg, #e3e6e9, #c3c8cd) }
+.w3d-floor-in { background: repeating-linear-gradient(90deg, rgba(90, 60, 30, .08) 0 1px, transparent 1px 34px), linear-gradient(180deg, #e2d6c3, #d2c2a8) }
+.w3d-floor-out { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px 48px), linear-gradient(180deg, #cfcac2, #bdb7ad) }
+/* Hebe-Schiebe: Griff dreht, der Flügel hebt sich 7 px aus der Dichtung, schiebt vor das Festteil und zurück */
+.w3d-sash.demo-S { animation: w3d-schieben 3.2s var(--e-io) both }
+@keyframes w3d-schieben { 0%, 9% { transform: none } 18%, 26% { transform: translate3d(0, -7px, 0) } 54%, 68% { transform: translate3d(calc(var(--sdir, -1) * 82%), -7px, 0) } 90% { transform: translate3d(0, -7px, 0) } 100% { transform: none } }
+.w3d-sash.demo-S .w3d-handle { animation: w3d-griff-hebe 3.2s var(--e-io) both }
+@keyframes w3d-griff-hebe { 0% { transform: none } 9%, 90% { transform: rotate(180deg) } 100% { transform: none } }
+.w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
 .w3d-mesh { background: repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1.5px #55585c }
 .w3d-dim { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s; pointer-events: none }
 .w3d-dim.mo { --dc: color-mix(in srgb, var(--mo) 62%, #fff) } .w3d-dim.el { --dc: color-mix(in srgb, var(--el) 62%, #fff) }
@@ -352,13 +366,20 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @media (hover: hover) { .qf:not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1.5px var(--line2) } }
 .qformen + .qcur { margin-top: 10px; text-align: center }
 /* vier Optionen: zwei Reihen, Symbol links, Text rechts */
+/* Vier Karten: zwei Spalten, Symbol oben, Name bis zu zwei Zeilen; so passt auch „Festverglasung“ ohne Abschneiden */
 .qcards.quad { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)) }
-.qcards.quad .qopt { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 10px; min-height: 76px; padding: 10px 34px 10px 12px }
-.qcards.quad .qopt svg { width: 40px; height: 40px; flex: 0 0 auto }
-.qcards.quad .qopt .tx { flex: 1 1 auto; width: auto; align-items: flex-start; gap: 2px }
-.qcards.quad .qopt .lbl { font-size: 17px; line-height: 1.15; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-overflow: clip; hyphens: auto }
+.qcards.quad .qopt { min-height: 104px; padding: 12px 12px 10px; gap: 8px }
+.qcards.quad .qopt svg { width: 44px; height: 44px }
+.qcards.quad .qopt .tx { gap: 3px }
+.qcards.quad .qopt .lbl { font-size: 15px; line-height: 1.15; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-overflow: clip }
 .qcards.quad .qopt .sb { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-overflow: clip; line-height: 1.2 }
-.qcards.quad .qinfo { top: 50%; right: 0; transform: translateY(-50%); width: 40px; height: 40px; align-items: center; justify-content: center; padding: 0 }
+/* Liste: eine Karte je Zeile, Symbol links, Name und Erklärung rechts (Elementart am Start) */
+.qcards.liste { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) }
+.qcards.liste .qopt { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 14px; min-height: 68px; padding: 10px 14px }
+.qcards.liste .qopt svg { width: 44px; height: 44px; flex: 0 0 auto }
+.qcards.liste .qopt .tx { flex: 1 1 auto; width: auto; align-items: flex-start; gap: 2px }
+.qcards.liste .qopt .lbl { font-size: 17px; line-height: 1.2; white-space: normal }
+.qcards.liste .qopt .sb { white-space: normal; line-height: 1.25 }
 .qcards.small .qo { flex-basis: 96px } .qcards.small .lbl { white-space: nowrap }
 .qo { position: relative; min-width: 0; display: flex }
 .qopt { width: 100%; min-height: 108px; padding: 12px 6px 10px; overflow: hidden; border-radius: var(--r3); border: 2px solid transparent; background: var(--surface); box-shadow: var(--ring); font: inherit; color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; text-align: center; transition: transform var(--t1), border-color var(--t2), background var(--t2) }
@@ -431,6 +452,26 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .stepper button { width: 44px; height: 40px; border: 0; border-radius: var(--r1); background: var(--surface); font: inherit; font-size: 24px; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: center; transition: transform var(--t1); box-shadow: var(--ring) }
 .stepper button:active { transform: scale(.94) } .stepper button[disabled] { opacity: .35 }
 .stepper b { width: 36px; text-align: center; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums }
+.stepper.weit b { width: 84px; white-space: nowrap }
+/* Einzeichnen: Foto eingepasst, darüber die Ebene mit Abdunklung, Raster, Rahmen und vier Griffen; Lupe beim Ziehen */
+.zeich { position: relative; flex: 1 1 auto; min-height: 240px; border-radius: var(--r4); overflow: hidden; background: #141414; box-shadow: var(--ring); touch-action: none; user-select: none; -webkit-user-select: none }
+.zeich-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none }
+.zeich-ov { position: absolute; left: 0; top: 0 } .zeich-svg { display: block; overflow: visible }
+.zdim { fill: rgba(0, 0, 0, .46) }
+.zgrid line { stroke: rgba(255, 255, 255, .55); stroke-width: 1; vector-effect: non-scaling-stroke }
+.zframe-halo { fill: none; stroke: rgba(255, 255, 255, .95); stroke-width: 6; stroke-linejoin: round; vector-effect: non-scaling-stroke }
+.zframe { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; vector-effect: non-scaling-stroke }
+.zcorner { cursor: grab } .zcorner .hit { fill: transparent; pointer-events: all } .zcorner .dot { fill: #fff; stroke: var(--accent); stroke-width: 3; transition: r .15s var(--e-out), stroke-width .15s }
+.zcorner.is-drag { cursor: grabbing } .zcorner.is-drag .dot { r: 14; stroke-width: 4 }
+.zlupe { position: absolute; width: 96px; height: 96px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 8px 24px rgba(0, 0, 0, .4), 0 0 0 1px rgba(0, 0, 0, .25); background-repeat: no-repeat; background-color: #111; pointer-events: none; z-index: 3 }
+.zlupe::before, .zlupe::after { content: ''; position: absolute; left: 50%; top: 50%; background: var(--accent); translate: -50% -50% } .zlupe::before { width: 2px; height: 26px } .zlupe::after { width: 26px; height: 2px }
+.zhint { z-index: 2 } .zrow { flex: 0 0 auto }
+.plan-card { gap: 10px } .plan-bild { display: block; width: 100%; max-height: 260px; object-fit: contain; border-radius: var(--r2); background: #141414 }
+.row .lbl .sb { flex-basis: 100%; font-size: 13px; font-weight: 500; color: var(--muted) }
+/* Start: zwei Gruppen aus Karten mit Vorspann, darunter die Vorschau */
+.qgroup { display: flex; flex-direction: column; gap: 10px }
+.qgroup > .eyebrow { padding: 0 6px }
+.qgroup > .note { margin-top: 2px }
 
 /* ---------- Kundenlink: Begrüßung durch den Betrieb, einmaliges Senden ---------- */
 .hero.lk { padding-top: 18px; align-items: flex-start }
