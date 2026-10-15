@@ -35,7 +35,7 @@ a { color: var(--ink) }
 .app.is-out .main { padding-bottom: 0 }
 .top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 20px; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); border-bottom: 1px solid var(--line); transition: box-shadow var(--t3) }
 .top.scrolled { box-shadow: 0 8px 24px rgba(20, 20, 20, .06) }
-.top h1 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.02em; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.top h1, .top .top-h { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.02em; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .top .back { display: inline-flex; min-height: 44px; border: 0; background: none; color: var(--ink); font-weight: 700; padding: 0 8px 0 2px; font-size: 15px; align-items: center; gap: 6px; flex: 0 0 auto; border-radius: var(--r1) }
 .top .btn.small { min-height: 40px }
 .ibtn { width: 44px; height: 44px; border: 0; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring); color: var(--ink2); display: inline-flex; align-items: center; justify-content: center; position: relative }
@@ -194,11 +194,11 @@ button.item:active { transform: scale(.995) }
 
 /* ---------- Startseite ---------- */
 .hero { position: relative; padding: clamp(28px, 6vw, 56px) 0 10px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 32px; align-items: center }
-.hero h2 { margin: 0; font-size: clamp(36px, 5vw, 44px); line-height: 1; font-weight: 900; letter-spacing: -.04em }
+.hero h1, .hero h2 { margin: 0; font-size: clamp(36px, 5vw, 44px); line-height: 1; font-weight: 900; letter-spacing: -.04em }
 .hero p { margin: 14px 0 0; font-size: 17px; line-height: 1.5; color: var(--ink2); max-width: 54ch }
 .hero .cta { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap }
 .hero p.hint { margin: 14px 0 0; font-size: 15px; color: var(--muted) }
-.hero h2 .w { display: inline-block; opacity: 0; transform: translateY(8px); animation: wordin var(--t3) var(--e-out) forwards; animation-delay: calc(var(--i) * 50ms + 50ms) }
+.hero h1 .w, .hero h2 .w { display: inline-block; opacity: 0; transform: translateY(8px); animation: wordin var(--t3) var(--e-out) forwards; animation-delay: calc(var(--i) * 50ms + 50ms) }
 @keyframes wordin { to { opacity: 1; transform: none } }
 .hero .lead { opacity: 0; animation: wordin var(--t3) .3s var(--e-out) forwards } .hero .cta { opacity: 0; animation: wordin var(--t3) .4s var(--e-out) forwards } .hero p.hint { opacity: 0; animation: wordin var(--t3) .5s var(--e-out) forwards }
 .hero-visual { display: flex; justify-content: center }
@@ -444,7 +444,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .app { grid-template-columns: minmax(0, 1fr) } .side { display: none } .tabs { display: flex }
   .hero, .hero.b2c, .hero.b2b { grid-template-columns: minmax(0, 1fr) } .grid.c3, .grid.c4 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   /* Telefon: Titel, Knöpfe, dann das Bild, dann der Text; so steht das Fenster auf dem ersten Bildschirm */
-  .hero.b2c > div:not(.b2c-visual) { display: contents } .hero.b2c .eyebrow { order: 1 } .hero.b2c h2 { order: 2 } .hero.b2c .cta { order: 3; margin-top: 18px } .hero.b2c .b2c-visual { order: 4; margin-top: 4px } .hero.b2c .lead { order: 5; margin-top: 6px } .hero.b2c .hint { order: 6 }
+  .hero.b2c > div:not(.b2c-visual) { display: contents } .hero.b2c .eyebrow { order: 1 } .hero.b2c h1 { order: 2 } .hero.b2c .cta { order: 3; margin-top: 18px } .hero.b2c .b2c-visual { order: 4; margin-top: 4px } .hero.b2c .lead { order: 5; margin-top: 6px } .hero.b2c .hint { order: 6 }
   .hero.b2c { gap: 10px }
   .kv { grid-template-columns: 110px minmax(0, 1fr) } .f2 { grid-template-columns: minmax(0, 1fr) }
   .caps { grid-template-columns: repeat(2, minmax(0, 1fr)) }
@@ -461,7 +461,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 }
 @media (max-width: 520px) {
   .grid.c2, .grid.c3, .grid.c4 { grid-template-columns: minmax(0, 1fr) } .item .rt { display: none } .rt-m { display: flex }
-  .wrap { padding: 16px 16px; gap: 18px } .top { padding: 8px 14px } .top h1 { font-size: 15px } .app.is-out .top h1 { visibility: hidden }
+  .wrap { padding: 16px 16px; gap: 18px } .top { padding: 8px 14px } .top h1, .top .top-h { font-size: 15px } .app.is-out .top h1, .app.is-out .top .top-h { visibility: hidden }
   .card { padding: 16px }
   .hero .cta { flex-direction: column; align-items: stretch } .hero .cta .btn { width: 100% } .scrollchips { margin: 0 -16px; padding: 2px 16px }
   .share { grid-template-columns: repeat(2, minmax(0, 1fr)) }
@@ -587,7 +587,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .tbm { flex-direction: column; align-items: flex-start; gap: 2px } .tbm-pfeil { transform: rotate(90deg); line-height: 1 }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero h2 .w, .hero .lead, .hero .cta, .hero p.hint, .hero-ph .b1, .hero-ph .b2, .hero-ph .b3, .sc-msg .bub, .in-row, .fm-chips .badge, .fm-btn, .b2c-win .dim, .b2c-chips .badge { animation: none !important; opacity: 1; transform: none }
+  .hero h1 .w, .hero h2 .w, .hero .lead, .hero .cta, .hero p.hint, .hero-ph .b1, .hero-ph .b2, .hero-ph .b3, .sc-msg .bub, .in-row, .fm-chips .badge, .fm-btn, .b2c-win .dim, .b2c-chips .badge { animation: none !important; opacity: 1; transform: none }
   .scr, .sheet, .sheet-bg, .scr.anim .list > *, .scr.anim .grid > *, .scr.anim .form > *, .form.shake, .burst-ok .lottie-still svg path, .tlh li.fresh .dot, .pop, .ibtn.ring { animation: none !important }
   .fm .ty { clip-path: none; animation: none !important } .sc-mess .dim { stroke-dashoffset: 0 } .sc-mess .lab { opacity: 1 } .burst-ok .lottie-still svg path { stroke-dashoffset: 0 }
   .toast { transition: opacity .2s } .winstack i { transition: none }

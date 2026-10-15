@@ -59,6 +59,8 @@ svg { shape-rendering: geometricPrecision }
 .eyebrow { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
 .num { font-variant-numeric: tabular-nums }
 /* Marke: eeziframes steht immer klein, auch in Versalzeilen; Wortmarke „eezi“ Black, „frames“ Medium */
+/* Textfassung von Startseite und App für Leser ohne JavaScript (Suchmaschinen, KI-Assistenten); mit JavaScript rendert die App */
+.js .vorab { display: none }
 .mk, .wm { text-transform: none }
 .wm { font-weight: 500; white-space: nowrap } .wm b { font-weight: 900 }
 

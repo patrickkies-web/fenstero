@@ -120,7 +120,7 @@ window.Blatt = (() => {
       fill(BRAND); doc.rect(x0, y0, STREIFEN, len, 'F');
       const text = V === 'betrieb'
         ? String(bt.name || 'Betrieb').toUpperCase() + '  ·  Aufmaß Ihres Kunden  ·  erstellt mit eeziframes  ·  ' + HOST
-        : 'eeziframes  ·  Fenster aufmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen, Seite ' + codeSeite + '  ·  3 Projekte kostenlos';
+        : 'eeziframes  ·  Fenster ausmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen, Seite ' + codeSeite + '  ·  3 Projekte kostenlos';
       let size = 6.8; font('bold', size, '#ffffff');
       while (tw(text) > len - 16 && size > 5.2) { size -= 0.2; font('bold', size, '#ffffff'); }
       const tl = tw(text), ty = y1 - 9 - (len - 16 - tl) / 2;

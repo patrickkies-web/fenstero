@@ -13,6 +13,9 @@
 // Abschnitt 8 startet dazu einen zweiten Testserver mit nachgestellter Datenbank und Kasse (DATEN_ATTRAPPE, ZAHLUNG_ATTRAPPE)
 // und prüft den Servermodus: Anmeldung per Code, Registrierung, Aufmaß direkt aus der App, Freikontingent und Sperre,
 // Zahlungsart und Abo über die (nachgestellte) Stripe-Rückkehr, Kauf des Aufmaßblatts mit Nachweis. BASE2=… nutzt einen laufenden Server.
+// Abschnitt 10 prüft die Auffindbarkeit (docs/SEO.md): jede Seite ohne JavaScript lesbar, ein h1, Titel, Beschreibung, gültige
+// strukturierte Daten, Pilotphase per Kopfzeile gesperrt, Freigabe mit INDEXIERUNG=1 auf einem dritten Testserver, Gleichstand
+// von Kopfzeilen, Sitemap, Worker-Routen und Preisen.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -127,7 +130,7 @@ if (teil(3)) {
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
   const start = await page.evaluate(() => document.body.innerText);
-  ok(/Erstes Fenster aufmessen/.test(start), 'Eigenes Projekt startet leer');
+  ok(/Erstes Fenster ausmessen/.test(start), 'Eigenes Projekt startet leer');
   ok(await page.locator('.foot-links.recht a[href="/impressum/"]').count() === 1, 'App-Start verlinkt Impressum');
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'App: kein seitliches Scrollen bei 390 px');
   await foto(page, 'app-start');
@@ -419,7 +422,7 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster aufmessen\. Selbst\. eezi\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite: Hauseigentümer zuerst (aufmessen oder Führung), Fensterbauer darunter');
+  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite: Hauseigentümer zuerst (aufmessen oder Führung), Fensterbauer darunter');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start), 'Kein Marktplatz mehr auf der Startseite');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
@@ -958,7 +961,7 @@ if (teil(9)) {
   await ap.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await ap.evaluate(() => { S.windows = demoProject().slice(0, 1); persist(); render(true); });
   const vorher = await ap.evaluate(() => localStorage.getItem('aufmass.v1'));
-  ok(await ap.locator('.hero [data-act="tour-start"]').count() === 1, 'App-Startseite: „Führung starten“ neben „Fenster aufmessen“');
+  ok(await ap.locator('.hero [data-act="tour-start"]').count() === 1, 'App-Startseite: „Führung starten“ neben „Fenster ausmessen“');
   await ap.click('.hero [data-act="tour-start"]'); await ap.waitForSelector('.scr[data-screen="tour"]');
   const schritte = [];
   for (let i = 0; i < 9; i++) {
@@ -1014,6 +1017,116 @@ if (teil(9)) {
   ok(!/fortsetzung/i.test(alleT(pZwei)) && /Bad/.test(seiteT(pZwei, 3)) && /EINBAUSITUATION AUS DEN FOTOS/.test(seiteT(pZwei, 3)) && /Vor Ort prüfen/.test(seiteT(pZwei, 3)), 'Aufmaßblatt: Position 2 steht samt Fotoauswertung auf einer Seite (Zeichnung etwas kleiner statt Rest auf neuer Seite)');
   sauber(bp, 'Aufmaßblatt-Prüfung ohne Fehler');
   await ctx3.close();
+}
+
+/* ---------- 10. Auffindbarkeit: Suchmaschinen und KI-Assistenten (docs/SEO.md) ---------- */
+if (teil(10)) {
+  console.log('10. Auffindbarkeit (Suchmaschinen und KI-Assistenten)');
+  const seo = await import(new URL('../functions/seo.js', import.meta.url).href);
+  const fs10 = await import('node:fs'), path10 = await import('node:path'), url10 = await import('node:url'), cp10 = await import('node:child_process');
+  const WURZEL = path10.join(path10.dirname(url10.fileURLToPath(import.meta.url)), '..');
+  const roh = async (p, base) => { const r = await fetch((base || BASE) + p, { redirect: 'manual' }); return { status: r.status, h: r.headers, text: await r.text() }; };
+  const ldjson = (html) => [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => { try { return JSON.parse(m[1]); } catch (e) { return null; } });
+  const eur = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')) + ' €';
+
+  /* a) Jede Seite der Sitemap ohne JavaScript: ein h1, Titel, Beschreibung, strukturierte Daten; Pilotphase per Kopfzeile */
+  const intern = new Set();
+  for (const s of seo.SEITEN) {
+    const r = await roh(s.pfad);
+    const titel = (r.text.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
+    const rechts = s.pfad === '/impressum/' || s.pfad === '/datenschutz/', ld = ldjson(r.text);
+    ok(r.status === 200 && (r.text.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
+    ok(!/<meta name="robots"/.test(r.text) && r.h.get('x-robots-tag') === seo.SPERRE && !!r.h.get('content-security-policy') && r.h.get('link') === '<' + BASE + s.pfad + '>; rel="canonical"', s.pfad + ': Pilotphase per Kopfzeile noindex (kein Meta-Tag), CSP und Canonical vom Worker');
+    if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + '/og.png', s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut');
+    for (const m of r.text.matchAll(/href="(\/[^"#]*)/g)) intern.add(m[1]);
+  }
+  const tot = [];
+  for (const p of intern) { const r = await fetch(BASE + p, { redirect: 'manual' }); if (r.status !== 200) tot.push(p + ' (' + r.status + ')'); }
+  ok(tot.length === 0, 'Alle internen Links und Dateien der Seiten erreichbar (' + intern.size + ')' + (tot.length ? ': ' + tot.join(', ') : ''));
+
+  /* b) Startseite und App: Textfassung für Leser ohne JavaScript, mit JavaScript übernimmt die App */
+  const start = await roh('/'), app = await roh('/app/');
+  ok(/<div class="vorab">/.test(start.text) && /<h1>Fenster ausmessen\. Selbst\. eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
+  ok(/<div class="vorab">/.test(app.text) && /<h1>Fenster ausmessen: kostenlose Aufmaß-App im Browser<\/h1>/.test(app.text), 'App ohne JavaScript: Textfassung mit h1');
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
+  const page = await neueSeite(ctx);
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fenster ausmessen\. Selbst\. eezi\./.test(await page.locator('h1').first().textContent()), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero)');
+  const fuss = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
+  ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
+  await page.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
+  await page.click('.rg-cta a[href="/#tour"]'); await page.waitForLoadState('networkidle'); await page.waitForTimeout(600);
+  const tour1 = await page.evaluate(() => S.screen === 'tour' && location.hash === '');
+  await page.evaluate(() => { tourEnde(); location.hash = 'tour'; }); await page.waitForTimeout(400);
+  ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash === ''), 'Link „Tour“ auf der Seite für Fensterbauer öffnet die Tour (/#tour), auch als Sprungmarke auf der Startseite');
+  await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/fuer-fensterbauer/"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung und Seite für Fensterbauer verlinkt');
+  sauber(page, 'Startseite und App mit Textfassung ohne Fehler');
+  await ctx.close();
+  const nojs = await browser.newContext(Object.assign({}, telefon, { javaScriptEnabled: false })), np = await nojs.newPage();
+  for (const p of ['/', '/app/']) { await np.goto(BASE + p, { waitUntil: 'load' }); ok(await np.locator('.vorab h1').isVisible() && await np.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), p + ' ohne JavaScript (Telefon): Textfassung sichtbar, kein Querscrollen'); }
+  await nojs.close();
+
+  /* c) Ratgeber und Seite für Fensterbauer im Browser: Schriftrollen, Zielflächen, Marke, kein Querscrollen */
+  for (const [gname, opts] of [['Telefon', telefon], ['Desktop', { viewport: { width: 1280, height: 860 }, locale: 'de-DE' }]]) {
+    const c = await browser.newContext(opts), sp = await neueSeite(c);
+    for (const s of seo.SEITEN.filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x.pfad))) {
+      await sp.goto(BASE + s.pfad, { waitUntil: 'networkidle' });
+      const m = await sp.evaluate(() => {
+        const groessen = new Set(), klein = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n;
+        while ((n = w.nextNode())) { if (!n.textContent.trim()) continue; const el = n.parentElement; if (el.closest('script, style')) continue; groessen.add(parseFloat(getComputedStyle(el).fontSize)); }
+        document.querySelectorAll('.rg-kopf a, .rg-fuss a, .rg-cta a, .rg-karte, .rg-frage summary').forEach((a) => { const r = a.getBoundingClientRect(); if (r.width && r.height && (r.height < 44 || r.width < 44)) klein.push((a.textContent || '').trim().slice(0, 24) + ' ' + Math.round(r.width) + '×' + Math.round(r.height)); });
+        const t = document.body.innerText;
+        return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm') };
+      });
+      const erlaubt = gname === 'Telefon' ? [13, 15, 17, 24, 32] : [13, 15, 17, 24, 40];
+      ok(m.groessen.every((g) => erlaubt.includes(g)) && !m.klein.length && !m.quer && m.marke, gname + ' ' + s.pfad + ': Schriftgrößen ' + m.groessen.join('/') + ', Ziele ab 44 px, Marke klein' + (m.klein.length ? ' (zu klein: ' + m.klein.join('; ') + ')' : '') + (m.quer ? ', Querscrollen!' : ''));
+    }
+    sauber(sp, gname + ': Ratgeber und Seite für Fensterbauer ohne Fehler, ohne CSP-Verstöße, ohne fremde Server');
+    await c.close();
+  }
+
+  /* d) Pilotphase: alles gesperrt */
+  const rb1 = await roh('/robots.txt'), sm1 = await roh('/sitemap.xml'), ll1 = await roh('/llms.txt');
+  ok(/User-agent: \*\nDisallow: \/\n/.test(rb1.text) && sm1.status === 404 && ll1.status === 200 && ll1.h.get('x-robots-tag') === seo.SPERRE, 'Pilotphase: robots.txt sperrt alles, keine Sitemap, llms.txt mit noindex');
+
+  /* e) Freigabe: dritter Testserver mit INDEXIERUNG=1 und KANONISCH */
+  const port = 8890 + Math.floor(Math.random() * 100), B3 = 'http://localhost:' + port, KAN = 'https://eeziframes.example';
+  const kind = cp10.spawn(process.execPath, [path10.join(WURZEL, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', INDEXIERUNG: '1', KANONISCH: KAN }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind.stderr.on('data', (d) => process.stderr.write('  [Server 3] ' + d));
+  const aus = () => { try { kind.kill(); } catch (e) { /* schon weg */ } };
+  process.on('exit', aus);
+  let bereit = false;
+  for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B3 + '/robots.txt')).ok; } catch (e) { /* noch nicht */ } }
+  ok(bereit, 'Testserver mit Freigabe (INDEXIERUNG=1, KANONISCH) läuft: ' + B3);
+  const rb = await roh('/robots.txt', B3), sm = await roh('/sitemap.xml', B3), ll = await roh('/llms.txt', B3);
+  ok(/User-agent: \*\nAllow: \/\nDisallow: \/api\//.test(rb.text) && rb.text.includes('Sitemap: ' + KAN + '/sitemap.xml') && ['OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot'].every((b) => rb.text.includes('User-agent: ' + b + '\n')), 'Freigabe: robots.txt erlaubt alles außer /api/, nennt die KI-Suchen und die Sitemap');
+  ok(sm.status === 200 && seo.SEITEN.every((s) => sm.text.includes('<loc>' + KAN + s.pfad + '</loc>')) && (sm.text.match(/<url>/g) || []).length === seo.SEITEN.length, 'Freigabe: sitemap.xml mit allen ' + seo.SEITEN.length + ' Seiten und absoluten Adressen');
+  ok(ll.status === 200 && ll.text.startsWith('# eeziframes\n\n> ') && ll.text.includes('(' + KAN + '/ratgeber/fenster-ausmessen/)') && ll.text.includes(eur(7.99)) && !ll.h.get('x-robots-tag'), 'Freigabe: llms.txt mit Kurzfassung, Preisen und absoluten Links');
+  const fehlt = [];
+  for (const s of seo.SEITEN) { const r = await fetch(B3 + s.pfad); if (r.headers.get('x-robots-tag') || r.headers.get('link') !== '<' + KAN + s.pfad + '>; rel="canonical"' || !r.headers.get('content-security-policy')) fehlt.push(s.pfad); }
+  ok(!fehlt.length, 'Freigabe: alle Seiten ohne noindex, mit CSP und Canonical auf die Hauptadresse' + (fehlt.length ? ' (fehlt: ' + fehlt.join(', ') + ')' : ''));
+  const fb3 = await roh('/fuer-fensterbauer/', B3);
+  ok(fb3.text.includes('<meta property="og:image" content="' + KAN + '/og.png">') && fb3.text.includes('"url":"' + KAN + '/fuer-fensterbauer/"'), 'Freigabe: Vorschaubild und strukturierte Daten zeigen auf die Hauptadresse');
+  const js3 = await fetch(B3 + '/assets/app.js'), logo3 = await fetch(B3 + '/apple-touch-icon.png'), weg3 = await fetch(B3 + '/ratgeber/gibtsnicht/');
+  ok(js3.headers.get('x-robots-tag') === seo.SPERRE && !logo3.headers.get('x-robots-tag') && weg3.status === 404, 'Freigabe: Skripte bleiben noindex, das Logo darf in die Suche, Unbekanntes bleibt 404');
+  aus();
+
+  /* f) Gleichstand: Kopfzeilen, Sitemap, Worker-Routen, Preise */
+  const block = fs10.readFileSync(path10.join(WURZEL, 'web/_headers'), 'utf8').split(/\n(?=\S)/).find((b) => b.startsWith('/*\n')) || '';
+  const ausDatei = Object.fromEntries(block.split('\n').slice(1).map((z) => z.trim()).filter((z) => z && z.includes(':')).map((z) => [z.slice(0, z.indexOf(':')).trim(), z.slice(z.indexOf(':') + 1).trim()]));
+  ok(ausDatei['X-Robots-Tag'] === seo.SPERRE && Object.entries(seo.SICHERHEIT).every(([k, v]) => ausDatei[k] === v) && Object.keys(ausDatei).every((k) => k === 'X-Robots-Tag' || k in seo.SICHERHEIT), 'Kopfzeilen in functions/seo.js und web/_headers stimmen überein');
+  const dateien = [], such = (d, rel) => { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) such(path10.join(d, e.name), rel + e.name + '/'); else if (e.name === 'index.html') dateien.push(rel); } };
+  such(path10.join(WURZEL, 'web'), '/');
+  ok(dateien.length === seo.SEITEN.length && dateien.every((p) => seo.SEITEN.some((s) => s.pfad === p)), 'Sitemap kennt jede Seite in web/ (' + dateien.length + ')');
+  const routen = JSON.parse((fs10.readFileSync(path10.join(WURZEL, 'wrangler.jsonc'), 'utf8').match(/"run_worker_first":\s*(\[[^\]]*\])/) || [])[1] || '[]');
+  const passt = (r, p) => (r.endsWith('*') ? p.startsWith(r.slice(0, -1)) : p === r);
+  ok(seo.SEITEN.every((s) => seo.istSeite(s.pfad) && routen.some((r) => passt(r, s.pfad))) && ['/robots.txt', '/sitemap.xml', '/llms.txt'].every((p) => routen.includes(p)), 'Worker übernimmt alle Seiten, robots.txt, sitemap.xml und llms.txt (run_worker_first in wrangler.jsonc)');
+  const og = fs10.readFileSync(path10.join(WURZEL, 'web/og.png'));
+  ok(og.readUInt32BE(16) === 1200 && og.readUInt32BE(20) === 630 && og.length < 200000, 'Vorschaubild zum Teilen: 1200 × 630, ' + Math.round(og.length / 1024) + ' KB');
+  const konf = {}; new Function('window', fs10.readFileSync(path10.join(WURZEL, 'web/config.js'), 'utf8'))(konf);
+  const pr = konf.KONFIG.preise, fb = (await roh('/fuer-fensterbauer/')).text, ab = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
+  ok([eur(pr.projekt) + ' netto', eur(pr.abo.grund) + ' im Monat', 'jedes weitere ' + eur(pr.abo.extra), eur(pr.plus) + ' im Monat', 'ersten ' + pr.frei + ' Projekte'].every((t) => fb.includes(t)) && [start.text, app.text, ab, fb].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten wie in config.js (' + [pr.aufmass, pr.projekt, pr.abo.grund, pr.plus].map(eur).join(', ') + ')');
 }
 
 await browser.close();
