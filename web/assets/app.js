@@ -416,7 +416,7 @@ const MO_LABEL = { hm: 'Höhe Mitte', hl: 'Höhe links', hr: 'Höhe rechts', wm:
 function baseWin() {
   return { name: '', etage: 'eg', anzahl: 1, w: '', h: '', mo: { hm: '', hl: '', hr: '', wm: '', wt: '', wb: '' }, el: { h: '', w: '' }, bru: '', laib: '', anschlag: 'ohne', fassade: 'putz',
     form: 'rechteck', teilung: '2p', ol: false, olT: 'K', sashes: sashesFor('2p'), richtung: 'innen', material: 'kunststoff', bars: [], preset: 'keine', spross: 'wiener', breite: 26,
-    fa: '7016', fi: '9016', gleich: false, muster: false, wunschA: '', wunschI: '', aufSeite: 'beide', glas: '3', glasfn: [], orn: 'satinato', griff: 'standard', gf: 'weiss', rc: 'basis', roll: 'keiner', antrieb: 'gurt', insekt: 'keiner', fbi: 'behalten', fba: 'alu',
+    fa: '7016', fi: '9016', gleich: false, muster: false, wunschA: '', wunschI: '', wunschGf: '', wunschSf: '', wunschIf: '', aufSeite: 'beide', glas: '3', glasfn: [], orn: 'satinato', griff: 'standard', gf: 'weiss', rc: 'basis', roll: 'keiner', antrieb: 'gurt', insekt: 'keiner', fbi: 'behalten', fba: 'alu',
     /* Elementart, Lage, Unterlicht, Türen, Sonnenschutz */
     art: 'fenster', neu: false, plan: null, wand: '', ul: false, ulH: 400, ulA: 'glas', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, fsw: { n: 3, schema: 'links', geh: true, schwelle: 'flach' },
     sart: 'keiner', sfarbe: 'silber', iart: 'keiner', ifarbe: 'weiss',
@@ -444,6 +444,25 @@ const cmTxt = (v) => (num(v) ? (num(v) / 10).toFixed(1).replace('.', ',') + ' cm
 const LEGACY = { altbau: 'Altbau', sofort: 'So bald wie möglich', offen: 'Noch offen' };
 const lab = (g, k) => { const o = (OPT[g] || []).find((x) => x.k === k); return o ? o.label : (LEGACY[k] || ''); };
 const colorOf = (k) => COLORS.find((c) => c.k === k) || COLORS[0];
+/* Eigene Farben: eingetippt und erkannt (gemeinsam.js, Farbtext) → so im Modell, in der Zeichnung und im Aufmaßblatt.
+   Nicht erkannt → die gewählte Farbe aus der Liste bleibt, der Text geht als Wunsch an den Fensterbauer. */
+const farbLesen = (t) => (t && window.Farbtext ? window.Farbtext.lesen(t) : null);
+const mischHex = (hex, ziel, t) => (window.Farbtext ? window.Farbtext.mischen(hex, ziel, t) : hex);
+function rahmenFarbe(w, seite) {
+  const innen = seite === 'innen', t = innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, k = innen ? (w.gleich ? w.fa : w.fi) : w.fa, f = farbLesen(t);
+  if (!f) return colorOf(k);
+  return COLORS.find((x) => x.k === f.key) || { k: 'eigen', name: f.name, code: f.code ? 'RAL ' + f.code : f.holz ? 'Holzdekor' : 'eigene Farbe', bg: f.bg, solid: f.hex, eigen: true };
+}
+function farbZeile(w, seite) {
+  const innen = seite === 'innen', t = (innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA) || '', c = rahmenFarbe(w, seite);
+  if (t && farbLesen(t)) return c.name + (c.code && c.name.indexOf(c.code) < 0 ? ' (' + c.code + ')' : '') + ', eigene Angabe';
+  return c.name + ' (' + c.code + ')' + (t ? ', Wunsch: ' + t : '');
+}
+function griffFarbe(w) { const f = farbLesen(w.wunschGf); if (f) return { bg: f.hex, name: f.name, eigen: true }; const o = OPT.gf.find((g) => g.k === w.gf) || OPT.gf[0]; return { bg: o.bg, name: o.label + (w.wunschGf ? ', Wunsch: ' + w.wunschGf : '') }; }
+function sonneFarbeW(w) { const f = farbLesen(w.wunschSf); return f ? [f.hex, mischHex(f.hex, '#000000', 0.32), mischHex(f.hex, '#ffffff', 0.28)] : sonneFarbe(w.sfarbe); }
+function innenFarbeW(w) { const f = farbLesen(w.wunschIf); return f ? [f.hex, mischHex(f.hex, '#000000', 0.22), mischHex(f.hex, '#ffffff', 0.3)] : innenFarbe(w.ifarbe); }
+const sonneName = (w) => { const f = farbLesen(w.wunschSf); return f ? f.name : (lab('sfarbe', w.sfarbe) || '') + (w.wunschSf ? ', Wunsch: ' + w.wunschSf : ''); };
+const innenName = (w) => { const f = farbLesen(w.wunschIf); return f ? f.name : (lab('ifarbe', w.ifarbe) || '') + (w.wunschIf ? ', Wunsch: ' + w.wunschIf : ''); };
 const istTuer = (w) => w.art === 'hst' || w.art === 'fsw';
 const schwelleText = (k) => ({ flach: 'flache Schwelle', null: 'barrierefrei ohne Schwelle', standard: 'Standardschwelle' }[k] || 'flache Schwelle');
 function openingText(w) {
@@ -458,11 +477,11 @@ function sonneText(w) {
   const a = w.sart && w.sart !== 'keiner' ? w.sart : (w.roll === 'aufsatz' || w.roll === 'vorbau' ? 'rollladen' : w.roll === 'behalten' ? 'behalten' : 'keiner');
   if (a === 'keiner') return 'Keiner';
   if (a === 'behalten') return 'Bestehender bleibt';
-  return lab('sart', a) + (a === 'screen' ? '' : ', ' + lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz')) + ', ' + (lab('sfarbe', w.sfarbe) || '') + ', ' + lab('antrieb', w.antrieb);
+  return lab('sart', a) + (a === 'screen' ? '' : ', ' + lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz')) + ', ' + sonneName(w) + ', ' + lab('antrieb', w.antrieb);
 }
-const innenText = (w) => (!w.iart || w.iart === 'keiner' ? 'Keiner' : lab('iart', w.iart) + ', ' + (lab('ifarbe', w.ifarbe) || ''));
+const innenText = (w) => (!w.iart || w.iart === 'keiner' ? 'Keiner' : lab('iart', w.iart) + ', ' + innenName(w));
 function specRows(w) {
-  const d = derive(w), fa = colorOf(w.fa), fi = colorOf(w.gleich ? w.fa : w.fi), mo = w.mo || {};
+  const d = derive(w), mo = w.mo || {};
   const rows = [
     { k: 'Maueröffnung', v: d.moW && d.moH ? thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm (kleinstes Maß)' + (d.devW > 5 || d.devH > 5 ? ', bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel' : '') : 'noch nicht gemessen' },
     { k: 'Breiten', v: ['wt', 'wm', 'wb'].map((k) => MO_LABEL[k].replace('Breite ', '') + ' ' + thousand(num(mo[k]))).join(' · ') },
@@ -473,10 +492,10 @@ function specRows(w) {
     { k: 'Element', v: lab('art', w.art || 'fenster') },
     { k: 'Öffnung', v: openingText(w) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ', öffnet nach außen' : '') },
     { k: 'Form', v: lab('form', w.form) + ', ' + lab('material', w.material) },
-    { k: 'Farbe', v: 'außen ' + fa.name + ' (' + fa.code + ')' + (w.wunschA ? ', Wunsch: ' + w.wunschA : '') + ', innen ' + fi.name + (w.wunschI && !w.gleich ? ', Wunsch: ' + w.wunschI : '') },
+    { k: 'Farbe', v: 'außen ' + farbZeile(w, 'aussen') + ', innen ' + (w.gleich ? 'wie außen' : farbZeile(w, 'innen')) },
     { k: 'Glas', v: lab('glas', w.glas) + (w.glasfn.length ? ', ' + w.glasfn.map((g) => lab('glasfn', g) + (g === 'sicht' ? ' (' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label + ')' : '')).join(', ') : '') },
     { k: 'Sprossen', v: w.bars.length ? lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite).toLowerCase() + ')' : '') + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'Keine' },
-    { k: 'Griff', v: (w.art === 'fest' ? 'Ohne Griff' : w.art === 'hst' ? lab('hstGriff', w.griff) || 'Hebegriff' : lab('griff', w.griff)) + (w.art === 'fest' || w.griff === 'ohne' ? '' : ', ' + lab('gf', w.gf)) + ', Schutz ' + lab('rc', w.rc) },
+    { k: 'Griff', v: (w.art === 'fest' ? 'Ohne Griff' : w.art === 'hst' ? lab('hstGriff', w.griff) || 'Hebegriff' : lab('griff', w.griff)) + (w.art === 'fest' || w.griff === 'ohne' ? '' : ', ' + griffFarbe(w).name) + ', Schutz ' + lab('rc', w.rc) },
     { k: 'Sonnenschutz', v: 'außen: ' + sonneText(w) + ' · innen: ' + innenText(w) + ' · Insektenschutz: ' + lab('insekt', w.insekt) },
     istTuer(w) ? { k: 'Schwelle', v: lab('schwelle', (w.art === 'hst' ? w.hst : w.fsw).schwelle) } : { k: 'Fensterbank', v: 'innen ' + lab('fbi', w.fbi) + ', außen ' + lab('fba', w.fba) },
     { k: 'Montage', v: [w.neu ? (w.durchbruch ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'Nur Lieferung' }
@@ -551,7 +570,7 @@ function checkRest(mm, ref) {
 const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const svgPaths = (list) => list.map((p) => '<path d="' + p.d + '" fill="' + p.f + '" stroke="' + p.s + '" stroke-width="' + p.w + '"' + (p.da ? ' stroke-dasharray="' + p.da + '"' : '') + (p.o !== 1 ? ' opacity="' + p.o + '"' : '') + ' stroke-linecap="round" stroke-linejoin="round"></path>').join('');
 const svgIcon = (list, size, cls) => '<svg viewBox="0 0 64 64" width="' + size + '" height="' + size + '" aria-hidden="true"' + (cls ? ' class="' + cls + '"' : '') + '>' + svgPaths(list) + '</svg>';
-const miniWin = (x) => { const a = (num(x.w) || 1) / (num(x.h) || 1), bw = a >= 1 ? 50 : 50 * a, bh = a >= 1 ? 50 / a : 50; return winIco(x, (64 - bw) / 2, (64 - bh) / 2, bw, bh, colorOf(x.fa).solid); };
+const miniWin = (x) => { const a = (num(x.w) || 1) / (num(x.h) || 1), bw = a >= 1 ? 50 : 50 * a, bh = a >= 1 ? 50 / a : 50; return winIco(x, (64 - bw) / 2, (64 - bh) / 2, bw, bh, rahmenFarbe(x, 'aussen').solid); };
 
 /* Beispielfotos als Bild (1200 × 1400), damit Abgleich und Rechtecke wie bei echten Fotos laufen */
 function demoPhotoSvg(side) {
@@ -648,10 +667,11 @@ const w3dGeformt = (w, o) => !!(w.form && w.form !== 'rechteck') || !!(o && o.fo
 /* Fläche: Größe in Weltpixeln, Lage der linken oberen Ecke, Drehung um diese Kante */
 function face(el, W, H, x, y, z, rot, origin, clip) {
   if (!el) return;
-  el.style.width = px(W); el.style.height = px(H);
-  el.style.transform = 'translate3d(' + px(x) + ', ' + px(y) + ', ' + px(z) + ')' + (rot ? ' ' + rot : '');
-  el.style.transformOrigin = origin || '0 0';
-  el.style.clipPath = clip || 'none';
+  const bw = px(W), bh = px(H), tf = 'translate3d(' + px(x) + ', ' + px(y) + ', ' + px(z) + ')' + (rot ? ' ' + rot : ''), og = origin || '0 0', cp = clip || 'none';
+  const k = bw + '|' + bh + '|' + tf + '|' + og + '|' + cp;
+  if (el._k === k) return;
+  el._k = k;
+  el.style.width = bw; el.style.height = bh; el.style.transform = tf; el.style.transformOrigin = og; el.style.clipPath = cp;
 }
 function facadeBg(k) {
   if (k === 'klinker') return 'repeating-linear-gradient(0deg, #b85c42 0 18px, #d9cfc2 18px 21px), repeating-linear-gradient(90deg, transparent 0 38px, #d9cfc2 38px 41px)';
@@ -681,14 +701,14 @@ const sonneAktiv = (w) => (w.sart === 'rollladen' || w.sart === 'raffstore' || w
 const innenAktiv = (w) => !!w.iart && w.iart !== 'keiner';
 /* Behang außen: Rollladenpanzer (Lamellen 40 mm), Raffstore (gekantete Lamellen 80 mm), Screen (Gewebe, durchscheinend) */
 function behangBg(w, s) {
-  const c = sonneFarbe(w.sfarbe), F = c[0], D = c[1], L = c[2];
+  const c = sonneFarbeW(w), F = c[0], D = c[1], L = c[2];
   if (w.sart === 'raffstore') return 'repeating-linear-gradient(180deg, ' + D + ' 0 ' + px(14 * s) + ', ' + F + ' ' + px(14 * s) + ' ' + px(50 * s) + ', ' + L + ' ' + px(50 * s) + ' ' + px(62 * s) + ', ' + F + ' ' + px(62 * s) + ' ' + px(80 * s) + ')';
   if (w.sart === 'screen') return 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), repeating-linear-gradient(180deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), ' + F;
   return 'repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(2 * s + 0.6) + ', ' + F + ' ' + px(2 * s + 0.6) + ' ' + px(34 * s) + ', ' + D + ' ' + px(34 * s) + ' ' + px(40 * s) + ')';
 }
 /* Innen: Rollo (Stoff), Plissee (Falten 20 mm), Jalousie (Lamellen 25 mm mit Lichtspalt) */
 function innenBg(w, s) {
-  const c = innenFarbe(w.ifarbe), F = c[0], D = c[1], L = c[2];
+  const c = innenFarbeW(w), F = c[0], D = c[1], L = c[2];
   if (w.iart === 'plissee') return 'repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(10 * s) + ', ' + D + ' ' + px(10 * s) + ' ' + px(20 * s) + ')';
   if (w.iart === 'jalousie') return 'repeating-linear-gradient(180deg, ' + D + ' 0 ' + px(3 * s) + ', ' + F + ' ' + px(3 * s) + ' ' + px(19 * s) + ', transparent ' + px(19 * s) + ' ' + px(25 * s) + ')';
   return 'linear-gradient(90deg, ' + F + ', ' + L + ' 50%, ' + F + ')';
@@ -699,13 +719,18 @@ function barBg(w, fcol, side) {
   if (w.spross === 'auf' && w.aufSeite && w.aufSeite !== 'beide' && w.aufSeite !== side) return 'transparent';
   return fcol.bg;
 }
+/* Öffnendes Element der Bühne: Klassen, Signatur, Höhe, Blickwinkel */
+function w3dHuelle(w, o) {
+  const view = VIEWS[o.view || 'inside'], G = w3dGeformt(w, o);
+  return '<div class="w3d-stage' + (o.sway ? ' is-live' : '') + (o.symbols ? ' show-sym' : '') + (o.cls ? ' ' + o.cls : '') + '" id="' + (o.id || 'w3d') + '" data-struct="' + (G ? 'g' : 'e') + '" data-sig="' + esc(w3dSig(w, o)) + '" style="' + (o.stageH === 'auto' ? '' : 'height: ' + (o.stageH || 360) + 'px; ') + '--rx: ' + view[0] + 'deg; --ry: ' + view[1] + 'deg" data-view="' + (o.view || 'inside') + '">';
+}
 /* Struktur einmal bauen; die Geometrie setzt w3dLayout */
 function w3dHTML(w, o) {
   o = o || {};
-  const V = w3dCalc(w, o), view = VIEWS[o.view || 'inside'], fin = colorOf(w.gleich ? w.fa : w.fi), fout = colorOf(w.fa), hcol = (OPT.gf.find((g) => g.k === w.gf) || OPT.gf[0]).bg;
+  const V = w3dCalc(w, o), view = VIEWS[o.view || 'inside'], fin = rahmenFarbe(w, 'innen'), fout = rahmenFarbe(w, 'aussen'), hcol = griffFarbe(w).bg;
   const faceEl = (role, cls, extra) => '<div class="w3d-f ' + cls + '" data-r="' + role + '"' + (extra || '') + '></div>';
   const G = w3dGeformt(w, o);
-  let h = '<div class="w3d-stage' + (o.sway ? ' is-live' : '') + (o.symbols ? ' show-sym' : '') + (o.cls ? ' ' + o.cls : '') + '" id="' + (o.id || 'w3d') + '" data-struct="' + (G ? 'g' : 'e') + '" data-sig="' + esc(w3dSig(w, o)) + '" style="' + (o.stageH === 'auto' ? '' : 'height: ' + (o.stageH || 360) + 'px; ') + '--rx: ' + view[0] + 'deg; --ry: ' + view[1] + 'deg" data-view="' + (o.view || 'inside') + '">' + (o.bg ? '<div class="w3d-bg" style="background-image: url(' + o.bg + ')"></div>' : '') + '<div class="w3d-cam"><div class="w3d-sway"><div class="w3d-world">';
+  let h = w3dHuelle(w, o) + (o.bg ? '<div class="w3d-bg" style="background-image: url(' + o.bg + ')"></div>' : '') + '<div class="w3d-cam"><div class="w3d-sway"><div class="w3d-world">';
   h += faceEl('wall-in', 'w3d-wall-in'); h += faceEl('wall-out', 'w3d-wall-out', ' style="background: ' + facadeBg(w.fassade) + '"');
   if (G) { for (let k = 0; k < FORM_O + FORM_U + 2; k++) h += faceEl('rs-' + k, 'w3d-rev w3d-rs'); }
   else h += faceEl('rev-t', 'w3d-rev w3d-rev-t') + faceEl('rev-b', 'w3d-rev w3d-rev-b') + faceEl('rev-l', 'w3d-rev w3d-rev-l') + faceEl('rev-r', 'w3d-rev w3d-rev-r');
@@ -717,7 +742,7 @@ function w3dHTML(w, o) {
   h += '<div class="w3d-el' + (V.showEl ? '' : ' is-hidden') + '" data-r="el">';
   h += faceEl('el-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('el-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
   if (G) h += faceEl('fuge', 'w3d-fuge');
-  else ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('el-side-' + k, 'w3d-frame w3d-side', ' style="background: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
+  else ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('el-side-' + k, 'w3d-frame w3d-side', ' style="background-color: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
   if (w.ol) h += faceEl('ol-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('ol-glass', 'w3d-glass') + faceEl('ol-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"') + faceEl('kf', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('kfb', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
   /* Unterlicht: festes Feld unter den Flügeln, Glas oder Paneel, darüber der Kämpfer */
   if (V.ulH) h += faceEl('ul-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('ul-glass', 'w3d-glass w3d-ul') + faceEl('ul-pan-b', 'w3d-paneel w3d-back') + faceEl('ul-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"') + faceEl('kfu', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('kfub', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
@@ -732,7 +757,7 @@ function w3dHTML(w, o) {
     h += '<div class="w3d-f w3d-glass" data-r="glass-' + i + '" data-glass="' + i + '">' + symSvg + bars + '</div>' + faceEl('pane-a-' + i, 'w3d-scheibe') + faceEl('pane-b-' + i, 'w3d-scheibe');
     for (let k = 0; k < 8; k++) h += '<span class="w3d-f w3d-pilz" data-r="pz-' + i + '-' + k + '" style="--i: ' + k + '"></span>';
     h += faceEl('sf-out-' + i, 'w3d-frame w3d-sf w3d-back', ' style="background: ' + fout.bg + '"');
-    ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('sfe-' + k + '-' + i, 'w3d-frame w3d-side w3d-sfe', ' style="background: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
+    ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('sfe-' + k + '-' + i, 'w3d-frame w3d-side w3d-sfe', ' style="background-color: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
     h += '<div class="w3d-handle" data-r="handle-' + i + '" style="background: ' + hcol + '"></div>';
     h += '<div class="w3d-selring" data-r="ring-' + i + '"></div>';
     h += '</div>';
@@ -794,24 +819,25 @@ const glasText = (w) => (w.glas === '2' ? '2 Scheiben · Ug ≈ 1,1' : '3 Scheib
 function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? 1 : 0, innenAktiv(w) ? 1 : 0].join('|'); }
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
-  const q = (r) => stage.querySelector('[data-r="' + r + '"]'), bg = (r, v) => { const el = q(r); if (el && el.style.background !== v) el.style.background = v; };
-  const fin = colorOf(w.gleich ? w.fa : w.fi), fout = colorOf(w.fa), hcol = (OPT.gf.find((g) => g.k === w.gf) || OPT.gf[0]).bg;
+  /* Nur schreiben, was sich geändert hat (der Vergleich mit dem gelesenen Stil schlägt bei Verläufen immer fehl) */
+  const q = (r) => stage.querySelector('[data-r="' + r + '"]'), bg = (r, v) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.background = v; } }, bgc = (r, v) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.backgroundColor = v; } };
+  const fin = rahmenFarbe(w, 'innen'), fout = rahmenFarbe(w, 'aussen'), hcol = griffFarbe(w).bg;
   stage.classList.toggle('glas-sonne', w.glasfn.indexOf('sonne') >= 0); stage.classList.toggle('glas-sicht', w.glasfn.indexOf('sicht') >= 0);
   stage.style.setProperty('--orn', (ORN.find((o) => o.k === w.orn) || ORN[0]).bg); stage.setAttribute('data-scheiben', w.glas === '2' ? '2' : '3');
   stage.classList.toggle('mit-schloss', w.rc === 'rc2' || w.griff === 'abschliessbar');
   const bi = bank(w.fbi, 'innen'), ba = bank(w.fba, 'aussen');
   bg('wall-out', facadeBg(w.fassade)); bg('sill-t', bi.oben); bg('sill-f', bi.stirn); bg('sill-l', bi.stirn); bg('sill-r', bi.stirn); bg('sa-t1', ba.oben); bg('sa-t2', ba.oben); bg('sa-f', ba.stirn);
-  bg('el-front', fin.bg); bg('el-back', fout.bg); bg('el-side-l', fout.solid); bg('el-side-r', fout.solid); bg('el-side-t', fin.solid); bg('el-side-b', fin.solid);
+  bg('el-front', fin.bg); bg('el-back', fout.bg); bgc('el-side-l', fout.solid); bgc('el-side-r', fout.solid); bgc('el-side-t', fin.solid); bgc('el-side-b', fin.solid);
   bg('ol-front', fin.bg); bg('ol-back', fout.bg); bg('kf', fin.bg); bg('kfb', fout.bg);
   bg('ul-front', fin.bg); bg('ul-back', fout.bg); bg('kfu', fin.bg); bg('kfub', fout.bg);
   const paneel = w.ul && w.ulA === 'paneel', ug = q('ul-glass'), upb = q('ul-pan-b');
   if (ug) { ug.classList.toggle('w3d-glass', !paneel); ug.classList.toggle('w3d-paneel', paneel); ug.style.background = paneel ? fin.solid : ''; }
   if (upb) { upb.style.background = fout.solid; upb.style.opacity = paneel ? '' : '0'; }
-  if (sonneAktiv(w)) { const c = sonneFarbe(w.sfarbe); bg('roll-f', 'linear-gradient(180deg, ' + c[2] + ', ' + c[0] + ' 30%, ' + c[1] + ')'); bg('roll-b', c[1]); bg('roll-t', c[2]); bg('roll-l', c[0]); bg('roll-r', c[0]); }
+  if (sonneAktiv(w)) { const c = sonneFarbeW(w); bg('roll-f', 'linear-gradient(180deg, ' + c[2] + ', ' + c[0] + ' 30%, ' + c[1] + ')'); bg('roll-b', c[1]); bg('roll-t', c[2]); bg('roll-l', c[0]); bg('roll-r', c[0]); }
   else { bg('roll-f', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
     bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol);
-    bg('sfe-l-' + i, fout.solid); bg('sfe-r-' + i, fout.solid); bg('sfe-t-' + i, fin.solid); bg('sfe-b-' + i, fin.solid);
+    bgc('sfe-l-' + i, fout.solid); bgc('sfe-r-' + i, fout.solid); bgc('sfe-t-' + i, fin.solid); bgc('sfe-b-' + i, fin.solid);
     const sash = q('sash-' + i); if (sash) { sash.classList.toggle('is-fixed', x.t === 'F' || x.t === 'X'); sash.classList.toggle('is-schiebe', x.t === 'S'); sash.setAttribute('data-t', x.t); sash.setAttribute('data-din', x.din); sash.style.setProperty('--sdir', x.din === 'L' ? '1' : '-1'); }
     const sv = q('sym-' + i); if (sv) { const p = symPaths(w, x); if (sv.getAttribute('data-k') !== x.t + x.din + w.richtung) { sv.innerHTML = p; sv.setAttribute('data-k', x.t + x.din + w.richtung); } }
   });
@@ -827,6 +853,7 @@ function ensureDims(stage, o) {
 function w3dApply(stage, w, o) {
   if (!stage) return;
   o = o || {};
+  const gr = [stage.clientWidth || 358, stage.clientHeight || 360];
   stage.classList.toggle('is-live', !!o.sway); stage.classList.toggle('show-sym', !!o.symbols); stage.classList.toggle('dims-all', !!(o.cls && o.cls.indexOf('dims-all') >= 0));
   stage.setAttribute('data-view', o.view || 'inside');
   const hint = stage.querySelector('[data-r="hint"]'); if (hint) { hint.textContent = o.hint || ''; hint.hidden = !o.hint; }
@@ -835,17 +862,22 @@ function w3dApply(stage, w, o) {
   else if (lupe) lupe.remove();
   stage.querySelectorAll('.w3d-sash').forEach((sa) => { sa.classList.toggle('is-sel', !!o.selectable && +sa.getAttribute('data-sash') === o.selSash); });
   stage.querySelectorAll('.w3d-bar').forEach((b) => { b.classList.toggle('is-edit', !!o.editBars); b.classList.toggle('is-sel', !!o.editBars && b.getAttribute('data-bar') === o.selBar); });
-  ensureDims(stage, o); w3dPaint(stage, w); w3dLayout(stage, w, o); layoutRails(stage, w, o); stage._s = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360 })).s;
+  ensureDims(stage, o); w3dPaint(stage, w);
+  const V = w3dLayout(stage, w, o, gr); layoutRails(stage, w, o, gr); stage._s = V ? V.s : 0.15;
+  /* Solange sich die Geometrie verwandelt, steht das sanfte Schwingen still: eine Bewegung zur Zeit */
+  const geo = V ? [V.moW, V.moH, V.elW, V.elH, V.olH, V.ulH, V.n, w.form, w.art].join('|') : '';
+  if (stage._geo && stage._geo !== geo) { stage.classList.add('is-busy'); clearTimeout(stage._busy); stage._busy = setTimeout(() => stage.classList.remove('is-busy'), 820); }
+  stage._geo = geo;
   const openIdx = o.openSash != null && o.openSash >= 0 ? o.openSash : -1, base = VIEWS[o.view || 'inside'];
   w3dView(stage, openIdx >= 0 && w.sashes[openIdx] ? openView(w.sashes[openIdx], base) : base);
 }
 /* Geometrie in die Flächen schreiben. dimVals: Beschriftungen je Maßlinie.
    Zwei Bauarten: 'e' (Rechteck: vier Laibungsflächen, rechteckige Löcher) und 'g' (Formen: Laibung aus Streifen entlang des Umrisses,
    Löcher und Flügel als Polygone mit fester Punktzahl, damit der Wechsel der Form morpht). */
-function w3dLayout(stage, w, o) {
-  if (!stage) return;
+function w3dLayout(stage, w, o, gr) {
+  if (!stage) return null;
   o = o || {};
-  const V = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360 })), s = V.s;
+  const V = w3dCalc(w, Object.assign({}, o, { stageW: gr ? gr[0] : stage.clientWidth || 358, stageH: gr ? gr[1] : stage.clientHeight || 360 })), s = V.s;
   const q = (r) => stage.querySelector('[data-r="' + r + '"]'), G = stage.getAttribute('data-struct') === 'g', form = G ? (w.form || 'rechteck') : 'rechteck';
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, sd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s, tuer = V.tuer;
   const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
@@ -1017,14 +1049,14 @@ function w3dLayout(stage, w, o) {
   /* Sonnenschutz außen: Behang zu 42 % herabgelassen, in der Ebene vor dem Rahmen (Aufsatz) bzw. vor der Fassade (Vorbau) */
   const bh = q('behang');
   if (bh) {
-    const zb = w.roll === 'vorbau' ? -T - 70 * s : -T + 2, bwB = moW + 20 * s, bxB = -moW / 2 - 10 * s, hB = moH * 0.42, uH = Math.max(3, 36 * s), c = sonneFarbe(w.sfarbe);
+    const zb = w.roll === 'vorbau' ? -T - 70 * s : -T + 2, bwB = moW + 20 * s, bxB = -moW / 2 - 10 * s, hB = moH * 0.42, uH = Math.max(3, 36 * s), c = sonneFarbeW(w);
     face(bh, bwB, hB, bxB, -moH / 2, zb, '', '0 0'); bh.style.background = behangBg(w, s); bh.style.opacity = w.sart === 'screen' ? '.86' : '';
     face(q('behang-u'), bwB, uH, bxB, -moH / 2 + hB, zb + 0.4, '', '0 0'); const bu = q('behang-u'); if (bu) bu.style.background = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')';
   }
   /* Sichtschutz innen: Kassette oben, Behang zu 38 % herab, Endleiste; vor dem Rahmen auf der Raumseite */
   const inn = q('innen');
   if (inn) {
-    const zi = z0 + 24 * s, bwI2 = iw + 12 * s, bxI2 = ix - 6 * s, kH = Math.max(3, (w.iart === 'rollo' ? 58 : 36) * s), hI = ih * 0.38, c = innenFarbe(w.ifarbe);
+    const zi = z0 + 24 * s, bwI2 = iw + 12 * s, bxI2 = ix - 6 * s, kH = Math.max(3, (w.iart === 'rollo' ? 58 : 36) * s), hI = ih * 0.38, c = innenFarbeW(w);
     face(q('innen-k'), bwI2, kH, bxI2, iy - kH, zi, '', '0 0'); const ik = q('innen-k'); if (ik) ik.style.background = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')';
     face(inn, bwI2, hI, bxI2, iy, zi - 0.4, '', '0 0'); inn.style.background = innenBg(w, s); inn.style.boxShadow = w.iart === 'jalousie' ? 'none' : '';
     face(q('innen-u'), bwI2, Math.max(2, 14 * s), bxI2, iy + hI, zi, '', '0 0'); const iu = q('innen-u'); if (iu) iu.style.background = c[1];
@@ -1039,6 +1071,7 @@ function w3dLayout(stage, w, o) {
     de.classList.toggle('v', vert); de.classList.toggle('h', !vert);
     const lab = q('lab-' + k); if (lab) { lab.textContent = (o.labels && o.labels[k]) || '?'; if (vert) { lab.style.top = D[5] + '%'; lab.style.left = '0'; } else { lab.style.left = D[5] + '%'; lab.style.top = '0'; } }
   });
+  return V;
 }
 function w3dBarPos(be, b, bw) {
   if (!be) return;
@@ -1047,21 +1080,21 @@ function w3dBarPos(be, b, bw) {
 }
 /* Glasflächen in Bühnenkoordinaten (Frontansicht), gerechnet statt gemessen, damit Übergänge nicht stören */
 const W3D_PERSP = 1300;
-function w3dGlassRects(stage, w, o) {
-  const V = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360 })), s = V.s;
-  const W = stage.clientWidth || 358, H = stage.clientHeight || 360, cx = W / 2, cy = H / 2, oy = H * 0.46;
+function w3dGlassRects(stage, w, o, gr) {
+  const W = gr ? gr[0] : stage.clientWidth || 358, H = gr ? gr[1] : stage.clientHeight || 360, cx = W / 2, cy = H / 2, oy = H * 0.46;
+  const V = w3dCalc(w, Object.assign({}, o, { stageW: W, stageH: H })), s = V.s;
   const d = V.laib * s, fd = W3D.FD * s, z = -d - fd / 2, f = W3D_PERSP / (W3D_PERSP - z);
   const x0 = V.x0 * s, y0 = V.y0 * s, pf = V.pf * s, sf = V.sf * s, mul = V.mul * s, olH = V.olH * s, sashTop = y0 + pf + (olH ? olH + mul : 0), sashW = V.sashW * s, sashH = V.sashH * s;
   const proj = (x, y) => [cx + x * f, oy + (cy + y - oy) * f];
   return { s: s, sashes: w.sashes.map((x, i) => { const ssf = x.t === 'F' ? 3 : sf, left = x0 + pf + i * (sashW + mul) + ssf, top = sashTop + ssf, a = proj(left, top), b = proj(left + sashW - 2 * ssf, top + sashH - 2 * ssf); return { x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] }; }) };
 }
 /* Schieberegler neben dem Modell: waagerechte Leiste für senkrechte Sprossen, senkrechte Leiste für waagerechte */
-function layoutRails(stage, w, o) {
+function layoutRails(stage, w, o, gr) {
   const rh = stage.querySelector('[data-rail="v"]'), rv = stage.querySelector('[data-rail="h"]');
   if (!rh || !rv) return;
   if (!o.rails) { rh.hidden = true; rv.hidden = true; return; }
   rh.hidden = false; rv.hidden = false;
-  const G = w3dGlassRects(stage, w, o), gs = G.sashes;
+  const G = w3dGlassRects(stage, w, o, gr), gs = G.sashes;
   const left = Math.min.apply(null, gs.map((g) => g.x)), right = Math.max.apply(null, gs.map((g) => g.x + g.w)), top = gs[0].y, bottom = gs[0].y + gs[0].h;
   rh.style.left = px(left); rh.style.width = px(right - left); rh.style.top = px(bottom + 40);
   rv.style.top = px(top); rv.style.height = px(bottom - top); rv.style.left = px(left - 42);
@@ -1298,7 +1331,8 @@ function render(fresh) {
   root.innerHTML = h;
   /* Gleiche Modellstruktur wie zuvor: die alte Bühne bleibt, alles Weitere morpht mit Übergängen */
   const ph = root.querySelector('#w3d');
-  if (ph && prevStage && prevSig && ph.getAttribute('data-sig') === prevSig && ph.getAttribute('data-keep') !== '0') { prevStage.className = ph.className; prevStage.style.height = ph.style.height; ph.replaceWith(prevStage); prevStage.setAttribute('data-reused', '1'); } else if (prevStage) prevStage.removeAttribute('data-reused');
+  if (ph && prevStage && prevSig && ph.getAttribute('data-sig') === prevSig && ph.getAttribute('data-keep') !== '0') { prevStage.className = ph.className; prevStage.style.height = ph.style.height; ph.replaceWith(prevStage); prevStage.setAttribute('data-reused', '1'); }
+  else { if (prevStage) prevStage.removeAttribute('data-reused'); if (ph && !ph.firstChild && W3DS.w3d) ph.outerHTML = w3dHTML(W3DS.w3d.w, W3DS.w3d.o); }
   const sc = root.querySelector('.scroll'), neu = fresh || lastScreen !== S.screen;
   if (neu) { if (sc) sc.scrollTop = 0; } else if (sc) sc.scrollTop = keep;
   if (!neu) { const scr = root.querySelector('.scr'); if (scr) scr.style.animation = 'none'; }
@@ -1351,11 +1385,17 @@ function noteBox(text, g, cls) { return '<div class="note' + (cls ? ' ' + cls : 
 const SCREENS = {};
 const HERO_WIN = Object.assign(baseWin(), { w: 1230, h: 1410, mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { h: 1410, w: 1230 }, laib: 140, fa: '7016', fi: '9016' });
 const W3DS = {};
-function model(w, o) { W3DS[o.id || 'w3d'] = { w: w, o: o }; return w3dHTML(w, o); }
+/* Steht die Bühne mit gleicher Struktur schon da, geht nur die leere Hülle in den neuen Bildschirm; render() setzt die alte Bühne
+   wieder ein. Das spart je Tippen das Zerlegen und Gestalten von einigen hundert Elementen. */
+function model(w, o) {
+  const id = o.id || 'w3d'; W3DS[id] = { w: w, o: o };
+  if (id === 'w3d') { const alt = document.getElementById('w3d'); if (alt && alt.getAttribute('data-sig') === w3dSig(w, o)) return w3dHuelle(w, o) + '</div>'; }
+  return w3dHTML(w, o);
+}
 function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' : 'div';
   /* nach dem Senden im Link: keine Maße mehr, die stehen im Aufmaßblatt */
   if (hide) return '<div class="wincard sent"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (PILOT ? 'Abgeschlossen' : 'Übermittelt') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + '</span><span class="me">Maße und Angaben stehen im Aufmaßblatt</span></span></div>';
-  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (d.elW && d.elH ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : 'Maße offen') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + ' · ' + x.sashes.map((z) => TYPNAME[z.t]).join(' · ') + '</span><span class="me">' + esc(colorOf(x.fa).name + ' · ' + lab('glas', x.glas) + '-Glas' + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
+  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (d.elW && d.elH ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : 'Maße offen') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + ' · ' + x.sashes.map((z) => TYPNAME[z.t]).join(' · ') + '</span><span class="me">' + esc(rahmenFarbe(x, 'aussen').name + ' · ' + lab('glas', x.glas) + '-Glas' + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
 SCREENS.home = () => {
   if (S.betrieb) return linkHome();
   const cardsH = S.windows.map((x, i) => winCard(x, i, true)).join('');
@@ -1679,7 +1719,7 @@ SCREENS.ergebnis = () => {
 /* ---------- Zusammenfassung, Anfrage, Aufmaßblatt ---------- */
 SCREENS.fertig = () => {
   const w = S.win, d = derive(w), lk = !!S.betrieb;
-  const facts = [thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), lab('material', w.material), colorOf(w.fa).name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
+  const facts = [thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), lab('material', w.material), rahmenFarbe(w, 'aussen').name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
   const html = model(w, { id: 'w3d', view: 'three', sway: true, stageH: 210, hint: 'Pos. ' + (S.editIdx + 1) }) + '<div class="center"><p class="eyebrow" style="color: var(--ok)">' + CHECK + ' Gespeichert · Position ' + (S.editIdx + 1) + '</p><h1 style="margin: 10px 0 0">' + esc(w.name || 'Fenster') + '</h1><p style="margin: 8px 0 0">' + esc(facts.join(' · ')) + '</p></div>' +
     '<details class="card fold"><summary><span>Alle Angaben<small>' + specRows(w).length + ' Zeilen' + (w.ki && w.ki.rows && w.ki.rows.length ? ', dazu ' + w.ki.rows.length + ' aus den Fotos' : '') + '</small></span></summary><div class="fold-body"><div class="kv">' + specRows(w).map((r) => '<div><span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span></div>').join('') + '</div>' +
     (w.ki && w.ki.rows && w.ki.rows.length ? '<p class="eyebrow">Aus den Fotos gelesen</p><dl class="facts">' + w.ki.rows.map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>' +
@@ -1872,7 +1912,7 @@ async function kaufPruefen(session) {
 const fileBase = () => 'Aufmass-' + (slug(S.proj.name || (S.betrieb && S.betrieb.kunde) || '') || 'Fensterino');
 /* Die PDF zeichnet /assets/blatt.js (gemeinsam mit dem Betriebsbereich). Zwei Ausgaben aus der App:
    'kunde' für die eigenen Unterlagen (Du), 'fensterbauer' so, wie es an einen Betrieb geht (Sie); beide mit der Seite für den Fensterbauer am Ende. */
-const BLATT_H = { derive: derive, lab: lab, num: num, th: thousand, col: (k) => { const c = colorOf(k); return [c.name, c.code, c.solid || c.bg]; }, orn: (k) => (ORN.find((o) => o.k === k) || ORN[0]).label, opening: openingText, sonne: sonneText, innen: innenText };
+const BLATT_H = { derive: derive, lab: lab, num: num, th: thousand, col: (k) => { const c = colorOf(k); return [c.name, c.code, c.solid || c.bg]; }, farbe: (w, seite) => { const c = rahmenFarbe(w, seite); return [c.name, c.code, c.solid || c.bg]; }, farbeZeile: farbZeile, griffFarbe: (w) => griffFarbe(w).name, orn: (k) => (ORN.find((o) => o.k === k) || ORN[0]).label, opening: openingText, sonne: sonneText, innen: innenText };
 function blattPDF(variante) {
   if (!window.Blatt) return null;
   return window.Blatt.pdf({ variante: S.betrieb ? 'fensterbauer' : (variante || 'kunde'), fenster: S.windows, projekt: S.proj, code: packProject(S.windows, S.proj, null), portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
@@ -1980,12 +2020,12 @@ function qList(w) {
   L.push({ id: 'sart', title: 'Sonnenschutz außen?', sub: 'Hält die Hitze draußen, bevor sie ans Glas kommt.', kind: 'cards', group: 'sart', opts: ohne('sart'), val: w.sart, act: 'sart', ico: ICO.sonne, view: 'outside', g: 'raffstore', hint: 'Ansicht von außen · ' + lab('sart', w.sart) });
   if (w.sart === 'rollladen' || w.sart === 'raffstore' || w.sart === 'screen') {
     L.push({ id: 'einbau', title: 'Wo sitzt der Kasten?', kind: 'cards', group: 'einbau', val: w.roll, act: 'setw', f: 'roll', ico: ICO.einbau, view: 'outside', g: w.roll === 'vorbau' ? 'vorbau' : 'aufsatz', hint: 'Ansicht von außen' });
-    L.push({ id: 'sfarbe', title: 'Welche Farbe?', sub: w.sart === 'raffstore' ? 'Lamellen, Kasten und Schienen.' : w.sart === 'screen' ? 'Gewebe und Kasten.' : 'Panzer, Kasten und Führungsschienen.', kind: 'swatch', group: 'sfarbe', f: 'sfarbe', val: w.sfarbe, view: 'outside', hint: 'Ansicht von außen · ' + lab('sfarbe', w.sfarbe) });
+    L.push({ id: 'sfarbe', title: 'Welche Farbe?', sub: w.sart === 'raffstore' ? 'Lamellen, Kasten und Schienen.' : w.sart === 'screen' ? 'Gewebe und Kasten.' : 'Panzer, Kasten und Führungsschienen.', kind: 'swatch', group: 'sfarbe', f: 'sfarbe', val: w.sfarbe, view: 'outside', hint: 'Ansicht von außen · ' + sonneName(w) });
     L.push({ id: 'antrieb', title: 'Wie wird er bedient?', kind: 'chips', group: 'antrieb', val: w.antrieb, act: 'setw', f: 'antrieb', view: 'outside', hint: 'Ansicht von außen' });
   }
   L.push({ id: 'insekt', title: 'Insektenschutz?', kind: 'cards', group: 'insekt', val: w.insekt, act: 'setw', f: 'insekt', ico: ICO.insekt, view: 'outside', g: 'insekt', hint: 'Ansicht von außen' });
   L.push({ id: 'iart', title: 'Sicht- und Blendschutz innen?', sub: 'Rollo, Plissee oder Jalousie, gleich mitbestellt.', kind: 'cards', group: 'iart', val: w.iart, act: 'setw', f: 'iart', ico: ICO.innen, view: 'inside', g: 'innenschutz', hint: 'Ansicht von innen' });
-  if (w.iart && w.iart !== 'keiner') L.push({ id: 'ifarbe', title: 'Welche Farbe innen?', kind: 'swatch', group: 'ifarbe', f: 'ifarbe', val: w.ifarbe, view: 'inside', hint: lab('iart', w.iart) + ' · ' + lab('ifarbe', w.ifarbe) });
+  if (w.iart && w.iart !== 'keiner') L.push({ id: 'ifarbe', title: 'Welche Farbe innen?', kind: 'swatch', group: 'ifarbe', f: 'ifarbe', val: w.ifarbe, view: 'inside', hint: lab('iart', w.iart) + ' · ' + innenName(w) });
   if (!tuer && !rund) {
     L.push({ id: 'fbi', title: 'Fensterbank innen?', kind: 'chips', group: 'fbi', opts: ohne('fbi'), val: w.fbi, act: 'setw', f: 'fbi', view: 'bankInnen', g: 'fensterbank', hint: 'Fensterbank: ' + lab('fbi', w.fbi) });
     L.push({ id: 'fba', title: 'Fensterbank außen?', kind: 'chips', group: 'fba', opts: ohne('fba'), val: w.fba, act: 'setw', f: 'fba', view: 'bankAussen', hint: 'Von außen · ' + lab('fba', w.fba) });
@@ -2001,9 +2041,9 @@ function qStep(delta) {
   S.q = nx.id; S.dir = delta < 0 ? 'back' : 'fwd'; S.selBar = null; S.qWunsch = false;
   S.openSash = nx.sash != null ? nx.sash : -1; if (nx.sash != null) S.selSash = nx.sash;
   render(true);
-  if (nx.sash != null && nx.id.indexOf('typ-') === 0) setTimeout(() => { if (S.q === nx.id) oeffnungZeigen(nx.sash); }, 480);
-  if (nx.id === 'hsts' || nx.id === 'hstr' || nx.id === 'fswn' || nx.id === 'fsws') setTimeout(() => { if (S.q === nx.id) tuerZeigen(); }, 520);
-  if (nx.id === 'fswg') setTimeout(() => { if (S.q !== nx.id) return; const i = S.win.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 520);
+  if (nx.sash != null && nx.id.indexOf('typ-') === 0) nachBild(() => { if (S.q === nx.id) oeffnungZeigen(nx.sash); }, 200);
+  if (nx.id === 'hsts' || nx.id === 'hstr' || nx.id === 'fswn' || nx.id === 'fsws') nachBild(() => { if (S.q === nx.id) tuerZeigen(); }, 240);
+  if (nx.id === 'fswg') nachBild(() => { if (S.q !== nx.id) return; const i = S.win.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 240);
 }
 function qOpt(q, o, pressed, inner) { return '<button type="button" class="qopt" data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : '') + ' data-v="' + o.k + '" aria-pressed="' + pressed + '">' + inner + '</button>'; }
 function qCards(q) {
@@ -2028,18 +2068,19 @@ function qFormen(q) {
 }
 function qChips(q) {
   const opts = q.opts || (q.group === 'ol' ? [{ k: 'nein', label: 'Kein Oberlicht' }, { k: 'K', label: 'Oberlicht, kippbar' }, { k: 'F', label: 'Oberlicht, fest' }] : OPT[q.group]);
-  return auswahl(opts, 'data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : ''), (o) => String(o.k) === String(q.val));
+  const eigen = q.group === 'gf' && farbLesen(S.win.wunschGf);
+  return auswahl(opts, 'data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : ''), (o) => !eigen && String(o.k) === String(q.val)) + (q.group === 'gf' ? farbFeld('wunschGf') : '');
 }
 function qMulti(q) {
   return auswahl(OPT[q.group], 'data-act="' + q.act + '"', (o) => q.vals.indexOf(o.k) >= 0) + (q.vals.length ? '' : '<p class="sub center">Nichts davon? Einfach weiter.</p>');
 }
 function qColor(q) {
-  const w = S.win, side = q.side, cur = side === 'innen' ? (w.gleich ? w.fa : w.fi) : w.fa, curC = colorOf(cur), wunsch = side === 'innen' ? w.wunschI : w.wunschA;
-  let h = '<div class="qswatches">' + COLORS.map((c) => '<button type="button" class="qsw" data-act="color" data-side="' + side + '" data-v="' + c.k + '" aria-pressed="' + (c.k === cur) + '" aria-label="' + esc(c.name) + '"><span class="c" style="background: ' + c.bg + '"></span><span class="n">' + esc(c.name).replace(/^(Verkehrs|Anthrazit|Schwarz|Basalt)(weiß|grau|braun)$/, '$1&shy;$2') + '</span></button>').join('') + '</div>';
-  h += '<p class="qcur"><b>' + esc(curC.name) + '</b> · ' + esc(curC.code) + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>';
-  h += '<div class="qrow">' + (side === 'innen' ? '<button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button>' : '') + '<button type="button" class="chip" data-act="qwunsch" aria-pressed="' + (S.qWunsch || !!wunsch) + '">Andere Farbe …</button></div>';
-  if (S.qWunsch || wunsch) h += '<div class="qwunsch"><input type="text" id="t-wunsch" data-in="w" data-f="' + (side === 'innen' ? 'wunschI' : 'wunschA') + '" value="' + esc(wunsch || '') + '" placeholder="z. B. RAL 7021, Schwarzgrau"><small>Gibt es den Ton nicht, schlägt dein Fensterbauer den nächstliegenden vor.</small></div>';
-  return h;
+  const w = S.win, side = q.side, cur = side === 'innen' ? (w.gleich ? w.fa : w.fi) : w.fa, wunsch = side === 'innen' ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, eigen = farbLesen(wunsch), c = rahmenFarbe(w, side);
+  const aktiv = eigen ? (COLORS.some((x) => x.k === eigen.key) ? eigen.key : '') : cur;
+  let h = '<div class="qswatches">' + COLORS.map((x) => '<button type="button" class="qsw" data-act="color" data-side="' + side + '" data-v="' + x.k + '" aria-pressed="' + (x.k === aktiv) + '" aria-label="' + esc(x.name) + '"><span class="c" style="background: ' + x.bg + '"></span><span class="n">' + esc(x.name).replace(/^(Verkehrs|Anthrazit|Schwarz|Basalt)(weiß|grau|braun)$/, '$1&shy;$2') + '</span></button>').join('') + '</div>';
+  h += '<p class="qcur"><b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code) + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>';
+  if (side === 'innen') h += '<div class="qrow"><button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button></div>';
+  return h + farbFeld(side === 'innen' ? 'wunschI' : 'wunschA');
 }
 /* Unterlicht: Art als Chips, Höhe als Stufenregler in 5-cm-Schritten */
 function qUnterlicht() {
@@ -2051,8 +2092,30 @@ function qUnterlicht() {
 function qGeh() { const w = S.win; return '<div class="rows">' + switchRow('Gehflügel', 'Ein Flügel geht wie eine Tür auf', !!w.fsw.geh, 'geh', 'fsw', 'fsw') + '</div>'; }
 /* Farbfelder für Sonnenschutz außen und innen */
 function qSwatch(q) {
-  const opts = OPT[q.group], cur = opts.find((o) => o.k === q.val) || opts[0];
-  return '<div class="qswatches">' + opts.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="' + q.f + '" data-v="' + o.k + '" aria-pressed="' + (o.k === cur.k) + '" aria-label="' + esc(o.label) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div><p class="qcur"><b>' + esc(cur.label) + '</b></p>';
+  const opts = OPT[q.group], cur = opts.find((o) => o.k === q.val) || opts[0], ff = q.f === 'sfarbe' ? 'wunschSf' : 'wunschIf', eigen = farbLesen(S.win[ff]);
+  return '<div class="qswatches">' + opts.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="' + q.f + '" data-v="' + o.k + '" aria-pressed="' + (!eigen && o.k === cur.k) + '" aria-label="' + esc(o.label) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div><p class="qcur"><b>' + esc(eigen ? eigen.name : cur.label) + '</b>' + (eigen ? ' · eigene Farbe' : '') + '</p>' + farbFeld(ff);
+}
+/* Eigene Farbe: ein Textfeld unter jeder Farbwahl. Erkennt RAL (z. B. 7021), DB 703, Holzdekore, Farbwörter und #hex;
+   der Tupfen zeigt die erkannte Farbe, das Modell färbt sich schon beim Tippen. */
+const FARBFELD = { wunschA: 'z. B. RAL 7021 oder DB 703', wunschI: 'z. B. RAL 9001 oder Eiche', wunschGf: 'z. B. Messing oder RAL 9005', wunschSf: 'z. B. RAL 7016 oder DB 703', wunschIf: 'z. B. Sand, Taupe oder RAL 1015' };
+function farbInfo(t) { if (!String(t || '').trim()) return ''; const f = farbLesen(t); return f ? 'Erkannt: ' + f.name + '. So im Modell, der Fensterbauer bekommt genau diese Angabe.' : 'Nicht in der Farbliste. Dein Fensterbauer bekommt den Text und schlägt den nächstliegenden Ton vor.'; }
+const FF_X = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
+function farbFeld(f) {
+  const v = S.win[f] || '', fx = farbLesen(v);
+  return '<div class="farbfeld' + (v ? ' hat' : '') + (fx ? ' ok' : '') + '"><span class="ff-tupf" style="' + (fx ? 'background: ' + fx.bg : '') + '" aria-hidden="true"></span><input type="text" id="t-' + f + '" data-in="farbe" data-f="' + f + '" value="' + esc(v) + '" maxlength="60" placeholder="Eigene Farbe, ' + esc(FARBFELD[f] || '') + '" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" aria-label="Eigene Farbe eingeben" aria-describedby="ffi-' + f + '">' +
+    '<button type="button" class="ff-x" data-act="farbe-weg" data-f="' + f + '" aria-label="Eigene Farbe löschen"' + (v ? '' : ' hidden') + '>' + FF_X + '</button></div><p class="ff-info" id="ffi-' + f + '" aria-live="polite">' + esc(farbInfo(v)) + '</p>';
+}
+/* Beim Tippen: Tupfen, Hinweis und Modell nachziehen, ohne neu aufzubauen (Fokus und Cursor bleiben) */
+function farbeLive(el, f) {
+  const box = el.closest('.farbfeld'), fx = farbLesen(el.value);
+  if (box) { box.classList.toggle('hat', !!el.value); box.classList.toggle('ok', !!fx); const t = box.querySelector('.ff-tupf'); if (t) t.style.background = fx ? fx.bg : ''; const x = box.querySelector('.ff-x'); if (x) x.hidden = !el.value; }
+  const info = document.getElementById('ffi-' + f); if (info) info.textContent = farbInfo(el.value);
+  /* Name der aktuellen Farbe und Auswahl in der Liste gleich mitziehen */
+  const w = S.win, cur = document.querySelector('.qpanel .qcur');
+  if (cur && (f === 'wunschA' || f === 'wunschI')) { const c = rahmenFarbe(w, f === 'wunschI' ? 'innen' : 'aussen'); cur.innerHTML = '<b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code); }
+  else if (cur && (f === 'wunschSf' || f === 'wunschIf')) cur.innerHTML = '<b>' + esc(f === 'wunschSf' ? sonneName(w) : innenName(w)) + '</b>' + (fx ? ' · eigene Farbe' : '');
+  if (fx) document.querySelectorAll('.qpanel .qsw[aria-pressed="true"], .qpanel .chip[data-f="gf"][aria-pressed="true"]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+  const st = document.getElementById('w3d'), reg = W3DS.w3d; if (st && reg) { w3dPaint(st, w); w3dLayout(st, w, reg.o); }
 }
 function qOrn() { const w = S.win; return '<div class="qswatches">' + ORN.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="orn" data-v="' + o.k + '" aria-pressed="' + (w.orn === o.k) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div>'; }
 /* Sprossen: in allen Flügeln gleich, Flügel 1 ist das Muster */
@@ -2098,7 +2161,9 @@ SCREENS.frage = () => {
 const VOR_RUND = new WeakMap();
 /* Öffnung vorführen: der Flügel geht kurz auf und wieder zu, der Griff dreht mit; „Fest“ zeigt einen Glanz übers Glas.
    nur = 'D' zeigt nur das Drehen (bei der Frage nach den Scharnieren). Ruhig bei „weniger Bewegung“. */
-const DEMO_MS = { D: 1700, K: 1500, DK: 2900, F: 1000, S: 3200, P: 1700 };
+const DEMO_MS = { D: 1600, K: 1400, DK: 2700, F: 1000, S: 3000, P: 1600 };
+/* Erst wenn das neue Bild gezeichnet ist (zwei Bildwechsel), dann nach kurzer Pause: so beginnt die Vorführung nie mitten im Aufbau */
+function nachBild(fn, ms) { requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(fn, ms || 0))); }
 let demoTimer = null;
 const ruhig = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 function oeffnungZeigen(i, nur) {
@@ -2110,35 +2175,41 @@ function oeffnungZeigen(i, nur) {
   if (t === 'P') t = 'D';
   stage.querySelectorAll('.w3d-sash').forEach((x) => x.classList.remove('demo-D', 'demo-K', 'demo-DK', 'demo-F', 'demo-S'));
   void sa.offsetWidth;
-  sa.classList.add('demo-' + t);
+  sa.classList.add('demo-' + t); stage.classList.add('is-vorf');
   clearTimeout(demoTimer);
-  demoTimer = setTimeout(() => { sa.classList.remove('demo-' + t); if (t !== 'F' && window.Haptik) window.Haptik.tick(); }, DEMO_MS[t] || 1500);
+  demoTimer = setTimeout(() => { sa.classList.remove('demo-' + t); stage.classList.remove('is-vorf'); if (t !== 'F' && window.Haptik) window.Haptik.tick(); }, DEMO_MS[t] || 1500);
 }
 /* Faltschiebewand vorführen: die Flügel falten sich wie eine Ziehharmonika zum Paket, Flügel für Flügel abwechselnd zum Raum
    und zurück zur Ebene; Position und Drehung je Bild gerechnet, danach stellt w3dLayout die Ruhelage wieder her. */
-let faltRAF = 0;
+let faltTimer = 0;
 function faltenZeigen() {
   const stage = document.getElementById('w3d'), reg = stage ? W3DS[stage.id] : null;
   if (!reg || reg.w.art !== 'fsw' || ruhig()) return;
   const w = reg.w, o = reg.o, q = (r) => stage.querySelector('[data-r="' + r + '"]');
   const V = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360 })), s = V.s;
-  const sashW = V.sashW * s, ix = (V.x0 + V.pf) * s, iw = V.innerW * s, n = w.sashes.length, schema = (w.fsw || {}).schema || 'links';
+  const sashW = V.sashW * s, n = w.sashes.length, schema = (w.fsw || {}).schema || 'links';
   const nl = schema === 'links' ? n : schema === 'rechts' ? 0 : Math.ceil(n / 2);
-  const D = 3000, t0 = performance.now(), ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  cancelAnimationFrame(faltRAF); stage.classList.add('is-demo');
-  const bild = (now) => {
-    const t = Math.min(1, (now - t0) / D), ph = t < 0.42 ? ease(t / 0.42) : t < 0.58 ? 1 : ease((1 - t) / 0.42);
-    const a = ph * 78 * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
-    w.sashes.forEach((x, i) => {
-      const el = q('sash-' + i); if (!el) return;
-      const tr = el.style.translate.split(' '), y = tr[1] || '0px', z = parseFloat(tr[2]) || 0;
-      if (i < nl) { const k = i; el.style.transformOrigin = '0 50%'; el.style.translate = px(ix + k * sashW * ca) + ' ' + y + ' ' + px(z + (k % 2 ? sashW * sa : 0)); el.style.transform = 'rotateY(' + n1((k % 2 ? 1 : -1) * a * 180 / Math.PI) + 'deg)'; }
-      else { const k = n - 1 - i; el.style.transformOrigin = '100% 50%'; el.style.translate = px(ix + iw - k * sashW * ca - sashW) + ' ' + y + ' ' + px(z + (k % 2 ? sashW * sa : 0)); el.style.transform = 'rotateY(' + n1((k % 2 ? -1 : 1) * a * 180 / Math.PI) + 'deg)'; }
-    });
-    if (t < 1) faltRAF = requestAnimationFrame(bild);
-    else { w3dLayout(stage, w, o); requestAnimationFrame(() => stage.classList.remove('is-demo')); if (window.Haptik) window.Haptik.tick(); }
-  };
-  faltRAF = requestAnimationFrame(bild);
+  /* Je Flügel eine Keyframe-Folge aus 27 Stützstellen der Scharnierbewegung (gerechnet, nicht geschätzt): Abstand zur Ruhelage
+     in x, Tiefe für jeden zweiten Flügel, Drehung um die Kante zum Paket. Die Animation läuft im Compositor, nicht je Bild im Skript. */
+  const D = 2600, N = 26, ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), phase = (t) => (t < 0.42 ? ease(t / 0.42) : t < 0.58 ? 1 : ease((1 - t) / 0.42));
+  const els = w.sashes.map((x, i) => q('sash-' + i));
+  let css = '';
+  els.forEach((el, i) => {
+    const links = i < nl, k = links ? i : n - 1 - i;
+    let kf = '';
+    for (let j = 0; j <= N; j++) {
+      const t = j / N, a = phase(t) * 78 * Math.PI / 180, dx = (links ? 1 : -1) * k * sashW * (Math.cos(a) - 1), dz = k % 2 ? sashW * Math.sin(a) : 0, dreh = (links ? (k % 2 ? 1 : -1) : (k % 2 ? -1 : 1)) * a * 180 / Math.PI;
+      kf += n1(t * 100) + '% { transform: translate3d(' + px(dx) + ', 0px, ' + px(dz) + ') rotateY(' + n1(dreh) + 'deg) } ';
+    }
+    css += '@keyframes falt-' + i + ' { ' + kf + '} ';
+  });
+  let st = document.getElementById('falt-css'); if (!st) { st = document.createElement('style'); st.id = 'falt-css'; document.head.appendChild(st); }
+  clearTimeout(faltTimer);
+  els.forEach((el) => { if (el) el.style.animation = 'none'; });
+  st.textContent = css;
+  stage.classList.add('is-demo'); void stage.offsetWidth;
+  els.forEach((el, i) => { if (!el) return; el.style.transformOrigin = i < nl ? '0 50%' : '100% 50%'; el.style.animation = 'falt-' + i + ' ' + D + 'ms linear both'; });
+  faltTimer = setTimeout(() => { els.forEach((el) => { if (el) el.style.animation = ''; }); w3dLayout(stage, w, o); requestAnimationFrame(() => stage.classList.remove('is-demo')); if (window.Haptik) window.Haptik.tick(); }, D + 40);
 }
 /* Tür vorführen: Hebe-Schiebe schiebt den (ersten) Schiebeflügel, die Faltwand faltet */
 function tuerZeigen() {
@@ -2154,7 +2225,7 @@ function onSashTap(i) {
   if (c.q.sash != null && c.q.sash !== i) { const nx = c.list.find((q) => q.id === 'typ-' + i); if (nx) { S.q = nx.id; S.dir = i > c.q.sash ? 'fwd' : 'back'; } }
   S.openSash = i;
   render(true);
-  setTimeout(() => oeffnungZeigen(i), 120);
+  nachBild(() => oeffnungZeigen(i), 60);
 }
 /* Regler ziehen: live am Modell, beim Loslassen gespeichert; über das Ende hinaus gezogen löscht */
 function bindRails(stage) {
@@ -2291,8 +2362,8 @@ function act(name, el) {
     case 'felder': { w.e_teilung = true; w.teilung = v; w.sashes = festFelder(v === '2p' ? 2 : num(v)); mirrorBars(w); S.selSash = 0; S.selBar = null; return render(); }
     case 'ul-set': { w.ul = v !== 'nein'; if (v !== 'nein') w.ulA = v; return render(); }
     case 'ulh': { w.ulH = clamp(num(w.ulH) + n(v), 200, 1200); return render(); }
-    case 'hst': { w.hst = Object.assign({}, w.hst, { [f]: v }); if (f !== 'schwelle') { w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f !== 'schwelle') setTimeout(tuerZeigen, 420); return; }
-    case 'fsw': { const o = Object.assign({}, w.fsw); if (f === 'geh') o.geh = !o.geh; else if (f === 'n') o.n = clamp(num(v), 2, 7); else o[f] = v; w.fsw = o; if (f !== 'schwelle') { w.sashes = fswFluegel(o.n, o.schema, o.geh); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f === 'geh' && o.geh) { setTimeout(() => { const i = w.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 420); } else if (f !== 'schwelle') setTimeout(tuerZeigen, 420); return; }
+    case 'hst': { w.hst = Object.assign({}, w.hst, { [f]: v }); if (f !== 'schwelle') { w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
+    case 'fsw': { const o = Object.assign({}, w.fsw); if (f === 'geh') o.geh = !o.geh; else if (f === 'n') o.n = clamp(num(v), 2, 7); else o[f] = v; w.fsw = o; if (f !== 'schwelle') { w.sashes = fswFluegel(o.n, o.schema, o.geh); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f === 'geh' && o.geh) { nachBild(() => { const i = w.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 120); } else if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
     case 'plan-rect': { planRechteck(w); const box = document.querySelector('[data-r="zeich"]'); if (box && box._geo) zeichnenUpdate(box); if (window.Haptik) window.Haptik.ok(); return; }
     case 'plan-reset': { w.plan = planStart(w); const box = document.querySelector('[data-r="zeich"]'); if (box && box._geo) zeichnenUpdate(box); return; }
     case 'plan-seite': { const pl = planSicher(w); pl.seite = pl.seite === 'in' && S.photos.out ? 'out' : 'in'; pl.bild = ''; return render(true); }
@@ -2307,7 +2378,7 @@ function act(name, el) {
     case 'gloss': { S.gloss = el.getAttribute('data-k'); S.glossIndex = false; return render(); }
     case 'gindex': { S.gloss = null; S.glossIndex = true; return render(); }
     case 'gclose': { S.gloss = null; S.glossIndex = false; return render(); }
-    case 'setw': { if (f === 'material') w.e_material = true; if (NUMF[f]) w[f] = n(v); else w[f] = v; return render(); }
+    case 'setw': { if (f === 'material') w.e_material = true; if (f === 'gf') w.wunschGf = ''; else if (f === 'sfarbe') w.wunschSf = ''; else if (f === 'ifarbe') w.wunschIf = ''; if (NUMF[f]) w[f] = n(v); else w[f] = v; return render(); }
     case 'setp': { S.proj[f] = v; persist(); return render(); }
     case 'togglew': { w[f] = !w[f]; return render(); }
     case 'togglep': { S.proj[f] = !S.proj[f]; persist(); return render(); }
@@ -2325,7 +2396,7 @@ function act(name, el) {
     case 'qprev': return qStep(-1);
     case 'qwunsch': { S.qWunsch = !S.qWunsch; render(); const t = document.getElementById('t-wunsch'); if (t && S.qWunsch) t.focus(); return; }
     case 'ol-set': { w.ol = v !== 'nein'; if (v !== 'nein') w.olT = v; return render(); }
-    case 'sash': { const i = Math.min(S.selSash, w.sashes.length - 1); w.sashes = w.sashes.map((s, j) => (j === i ? Object.assign({}, s, { [f]: v }) : s)); S.openSash = i; render(); requestAnimationFrame(() => oeffnungZeigen(i, f === 'din' ? 'D' : null)); return; }
+    case 'sash': { const i = Math.min(S.selSash, w.sashes.length - 1); w.sashes = w.sashes.map((s, j) => (j === i ? Object.assign({}, s, { [f]: v }) : s)); S.openSash = i; render(); nachBild(() => oeffnungZeigen(i, f === 'din' ? 'D' : null)); return; }
     case 'sash-tap': return onSashTap(+v);
     case 'teilung': { w.e_teilung = true; const sashes = sashesFor(v); w.teilung = v; w.sashes = sashes; mirrorBars(w); S.selSash = 0; S.selBar = null; S.openSash = -1; return render(); }
     case 'form': {
@@ -2346,7 +2417,8 @@ function act(name, el) {
     case 'bareven': { ['v', 'h'].forEach((d) => { const cur = barsDir(w, d); setDir(w, d, evenP(cur.length).map((p, k) => ({ id: cur[k].id, p: p }))); }); return render(); }
     case 'clearbars': { w.bars = []; w.preset = 'keine'; S.selBar = null; return render(); }
     case 'side': { S.side = v; return render(); }
-    case 'color': { const side = el.getAttribute('data-side') || S.side; if (side === 'innen') { w.fi = v; w.gleich = false; } else w.fa = v; return render(); }
+    case 'color': { const side = el.getAttribute('data-side') || S.side; if (side === 'innen') { w.fi = v; w.gleich = false; w.wunschI = ''; } else { w.fa = v; w.wunschA = ''; } return render(); }
+    case 'farbe-weg': { w[f] = ''; render(); const i = document.getElementById('t-' + f); if (i) i.focus(); return; }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); return render(); }
     case 'save': return saveWin();
     case 'send': { if (S.betrieb && S.sent) return go('gesendet'); if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
@@ -2366,7 +2438,7 @@ function act(name, el) {
 }
 /* Zifferntasten und Tastatur fürs Messen: kein Eingabefeld, keine Systemtastatur, nichts springt */
 /* Haptik (gemeinsam.js): Tasten, Auswahl und Schalter tippen kurz; Fehler und fertige Schritte melden sich in feiern()/messNext() */
-const TIPPT = /^(key|rest-same|qnext|qprev|new|send|gloss|q-|chip|seg|opt|sw|tile|pos|share|copy|k-pay|k-buy|situation|art|felder|ul|hst|fsw|sart)/;
+const TIPPT = /^(key|rest-same|qnext|qprev|new|send|gloss|q-|chip|seg|opt|sw|tile|pos|share|copy|k-pay|k-buy|situation|art|felder|ul|hst|fsw|sart|farbe)/;
 function tippen(name, el) { if (!window.Haptik) return; if (TIPPT.test(name) || el.matches('.chip, .seg > button, .qopt, .qlist > button, .qsw, .pill, .switch, .keypad button, .stepper button, .colors button')) window.Haptik.tick(); }
 function keyIn(k) {
   const rest = S.screen === 'rest', st = rest ? S.rest : S.mess;
@@ -2392,6 +2464,7 @@ function onInput(el, ev) {
   if (kind === 'k') { const k = kauf(); k[f] = el.value; if (k.err && k.err[f]) { delete k.err[f]; const box = el.closest('.kf'); if (box) { box.classList.remove('bad'); const sm = box.querySelector('small'); if (sm) sm.remove(); } } return; }
   if (kind === 'kc') { const k = kauf(); k[f] = el.checked; if (k.err && k.err[f]) { delete k.err[f]; render(); } persist(); return; }
   if (kind === 'rest') return restInput(el.value);
+  if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; farbeLive(el, f); if (ev.type === 'change') render(); return; }
   if (kind === 'plan') { if (ev.type !== 'change') return; planMasse(S.win, f, String(el.value).replace(/\D/g, '')); return render(); }
   if (ev.type !== 'change') return;
   if (kind === 'photo') return onPhoto(f, el.files && el.files[0]);

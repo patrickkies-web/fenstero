@@ -49,6 +49,21 @@
     const istTuer = (w) => w.art === 'hst' || w.art === 'fsw';
     const lab = (g, k) => (OPT[g] && OPT[g][k]) || '';
     const col = (k) => COL[k] || COL['9016'];
+    /* Eigene Farben: im Browser erkennt Farbtext (gemeinsam.js) RAL, DB, Dekore und Farbwörter; auf dem Server bleibt der Text als Wunsch */
+    const leser = () => (typeof globalThis !== 'undefined' && globalThis.Farbtext) || null;
+    const erkannt = (t) => { const ft = leser(); return t && ft ? ft.lesen(t) : null; };
+    function farbe(w, seite) {
+      const innen = seite === 'innen', t = innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, k = innen ? (w.gleich ? w.fa : w.fi) : w.fa, f = erkannt(t);
+      if (!f) return col(k);
+      return COL[f.key] || [f.name, f.code ? 'RAL ' + f.code : 'eigene Farbe', f.hex];
+    }
+    function farbZeile(w, seite) {
+      const innen = seite === 'innen', t = (innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA) || '', c = farbe(w, seite);
+      if (t && erkannt(t)) return c[0] + (c[1] && c[0].indexOf(c[1]) < 0 ? ' (' + c[1] + ')' : '') + ', eigene Angabe';
+      return c[0] + ' (' + c[1] + ')' + (t ? ', Wunsch: ' + t : '');
+    }
+    const nameMitWunsch = (t, basis) => { const f = erkannt(t); return f ? f.name : basis + (t ? ', Wunsch: ' + t : ''); };
+    const griffName = (w) => nameMitWunsch(w.wunschGf, lab('gf', w.gf) || 'weiß');
     const num = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
     const th = (v) => (!num(v) ? '–' : String(Math.round(num(v))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
     function sashesFor(k) {
@@ -59,7 +74,7 @@
     }
     function base() {
       return { name: '', etage: 'eg', anzahl: 1, mo: { hm: '', hl: '', hr: '', wm: '', wt: '', wb: '' }, el: { h: '', w: '' }, bru: '', laib: '', form: 'rechteck', teilung: '2p', ol: false, olT: 'K', sashes: sashesFor('2p'), richtung: 'innen', material: 'kunststoff', bars: [], spross: 'wiener', breite: 26, aufSeite: 'beide',
-        fa: '7016', fi: '9016', gleich: false, wunschA: '', wunschI: '', glas: '3', glasfn: [], orn: 'satinato', griff: 'standard', gf: 'weiss', rc: 'basis', roll: 'keiner', antrieb: 'gurt', insekt: 'keiner', fbi: 'behalten', fba: 'alu',
+        fa: '7016', fi: '9016', gleich: false, wunschA: '', wunschI: '', wunschGf: '', wunschSf: '', wunschIf: '', glas: '3', glasfn: [], orn: 'satinato', griff: 'standard', gf: 'weiss', rc: 'basis', roll: 'keiner', antrieb: 'gurt', insekt: 'keiner', fbi: 'behalten', fba: 'alu',
         art: 'fenster', neu: false, plan: null, wand: '', ul: false, ulH: 400, ulA: 'glas', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, fsw: { n: 3, schema: 'links', geh: true, schwelle: 'flach' }, sart: 'keiner', sfarbe: 'silber', iart: 'keiner', ifarbe: 'weiss', durchbruch: true,
         demontage: true, ralm: true, putz: true, notiz: '', ki: null, fotos: 0 };
     }
@@ -81,11 +96,11 @@
       const a = w.sart && w.sart !== 'keiner' ? w.sart : (w.roll === 'aufsatz' || w.roll === 'vorbau' ? 'rollladen' : w.roll === 'behalten' ? 'behalten' : 'keiner');
       if (a === 'keiner') return 'keiner';
       if (a === 'behalten') return 'bestehender bleibt';
-      return lab('sart', a) + ', ' + lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz') + ', ' + (lab('sfarbe', w.sfarbe) || 'silber') + ', ' + lab('antrieb', w.antrieb);
+      return lab('sart', a) + ', ' + lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz') + ', ' + nameMitWunsch(w.wunschSf, lab('sfarbe', w.sfarbe) || 'silber') + ', ' + lab('antrieb', w.antrieb);
     }
-    const innen = (w) => (!w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + (lab('ifarbe', w.ifarbe) || 'weiß'));
+    const innen = (w) => (!w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + nameMitWunsch(w.wunschIf, lab('ifarbe', w.ifarbe) || 'weiß'));
     function rows(w) {
-      const d = derive(w), mo = w.mo || {}, fa = col(w.fa), fi = col(w.gleich ? w.fa : w.fi);
+      const d = derive(w), mo = w.mo || {};
       const r = [
         ['Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm, kleinstes Maß' + (d.devW > 5 || d.devH > 5 ? ', bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel' : '') : 'nicht gemessen'],
         ['Breiten', 'oben ' + th(mo.wt) + ' · Mitte ' + th(mo.wm) + ' · unten ' + th(mo.wb)],
@@ -96,10 +111,10 @@
         ['Element', lab('art', w.art || 'fenster') || 'Fenster'],
         ['Öffnung', opening(w) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ', öffnet nach außen' : '')],
         ['Form, Material', (lab('form', w.form) || 'Rechteck') + ', ' + (lab('material', w.material) || 'Kunststoff')],
-        ['Farbe', 'außen ' + fa[0] + ' (' + fa[1] + ')' + (w.wunschA ? ', Wunsch: ' + w.wunschA : '') + ', innen ' + fi[0] + (w.wunschI && !w.gleich ? ', Wunsch: ' + w.wunschI : '')],
+        ['Farbe', 'außen ' + farbZeile(w, 'aussen') + ', innen ' + (w.gleich ? 'wie außen' : farbZeile(w, 'innen'))],
         ['Glas', (lab('glas', w.glas) || '3-fach') + ((w.glasfn || []).length ? ', ' + w.glasfn.map((g) => lab('glasfn', g) + (g === 'sicht' ? ' (' + lab('orn', w.orn) + ')' : '')).join(', ') : '')],
         ['Sprossen', (w.bars || []).length ? lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite) + ')' : '') + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'keine'],
-        ['Griff', w.art === 'fest' ? 'ohne Griff' : (w.art === 'hst' ? (lab('hstGriff', w.griff) || 'Hebegriff') : (lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + (lab('gf', w.gf) || 'weiß'))],
+        ['Griff', w.art === 'fest' ? 'ohne Griff' : (w.art === 'hst' ? (lab('hstGriff', w.griff) || 'Hebegriff') : (lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + griffName(w))],
         ['Einbruchschutz', lab('rc', w.rc) || 'Basisschutz'],
         ['Sonnenschutz außen', sonne(w)],
         ['Sonnenschutz innen', innen(w)],
@@ -127,7 +142,7 @@
     }
     function svg(w, size) {
       const d = derive(w), a = (d.elW || 1000) / (d.elH || 1200), bw = a >= 1 ? 50 : 50 * a, bh = a >= 1 ? 50 / a : 50, bx = (64 - bw) / 2, by = (64 - bh) / 2;
-      const fc = col(w.fa)[2], gl = '#d6e6f4', da = w.richtung === 'aussen' ? '3 2' : '';
+      const fc = farbe(w, 'aussen')[2], gl = '#d6e6f4', da = w.richtung === 'aussen' ? '3 2' : '';
       let o = path(R(bx, by, bw, bh), fc, '#1d1d1f', 1.2);
       const f = Math.max(2, bw * 0.06); let ix = bx + f, iy = by + f; const iw = bw - 2 * f; let ih = bh - 2 * f;
       if (w.ol) { const oh = ih * 0.27; o += path(R(ix, iy, iw, oh), gl, '#1d1d1f', 0.6) + sym(ix, iy, iw, oh, w.olT || 'K', 'L', da); iy += oh + f * 0.7; ih -= oh + f * 0.7; }
@@ -145,7 +160,7 @@
       if (tuer) o += path(R(bx - 1, by + bh - 0.6, bw + 2, 1.6), '#ddd6cb', '#1d1d1f', 0.5);
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
-    return { OPT: OPT, TYP: TYP, lab: lab, col: col, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, sashesFor: sashesFor };
+    return { OPT: OPT, TYP: TYP, lab: lab, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, sashesFor: sashesFor };
   })();
 
   /* ---------- Abrechnung ---------- */

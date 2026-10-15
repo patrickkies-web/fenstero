@@ -215,11 +215,11 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes w3dsway { from { transform: rotateY(-3deg) rotateX(1deg) } to { transform: rotateY(3deg) rotateX(-1deg) } }
 .w3d-f { position: absolute; left: 0; top: 0; backface-visibility: visible; pointer-events: none; transition: width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), transform .7s cubic-bezier(.3, .7, .2, 1), clip-path .7s cubic-bezier(.3, .7, .2, 1), opacity .4s, background .5s }
 .no-anim .w3d-f, .no-anim .w3d-sash, .no-anim .w3d-dim, .no-anim .w3d-handle, .no-anim .w3d-el, .no-anim .w3d-cam, .no-anim .w3d-bar { transition: none !important }
-.w3d-wall-in { background: linear-gradient(180deg, #f4f0e9, #e8e2d8); box-shadow: inset 0 0 160px rgba(0, 0, 0, .07) }
+.w3d-wall-in { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .06) 100%), linear-gradient(180deg, #f4f0e9, #e8e2d8) }
 .w3d-rev-t { background: linear-gradient(180deg, #c9bfb0, #b7ac9b) } .w3d-rev-l { background: linear-gradient(90deg, #e9e2d6, #d9d1c3) } .w3d-rev-r { background: linear-gradient(90deg, #cdc4b5, #c0b6a6) }
 .w3d-sill { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08) }
 .w3d-el { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: opacity .6s } .w3d-el.is-hidden { opacity: 0 }
-.w3d-frame { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16) } .w3d-side { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22), inset 0 0 40px rgba(0, 0, 0, .12) }
+.w3d-frame { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16) } .w3d-side { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22); background-image: linear-gradient(90deg, rgba(0, 0, 0, .13), rgba(0, 0, 0, .05) 35%, rgba(0, 0, 0, .05) 65%, rgba(0, 0, 0, .13)) }
 .w3d-glass { background: linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .42) 34%, transparent 50%), linear-gradient(135deg, rgba(205, 225, 245, .6) 0%, rgba(160, 196, 230, .5) 48%, rgba(226, 238, 250, .66) 100%); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) }
 /* Weitere Scheiben (2- oder 3-fach): fast klar, mit dunkler Randverbund-Kante; in der Schräge sieht man die Schichten */
 .w3d-scheibe { background: linear-gradient(135deg, rgba(225, 238, 250, .16), rgba(195, 218, 240, .1)); box-shadow: inset 0 0 0 1.5px rgba(55, 62, 70, .42); pointer-events: none }
@@ -228,35 +228,39 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-stage.glas-sicht .w3d-glass { background: var(--orn) }
 .w3d-stage.glas-sicht .w3d-scheibe { background: rgba(225, 235, 245, .3) }
 /* Einbruchschutz: Pilzköpfe rasten nacheinander ein; abschließbarer Griff mit Schließzylinder */
-.w3d-pilz { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff 0 18%, #c9ced3 40%, #7d838a 78%); box-shadow: 0 0 0 1px rgba(20, 20, 20, .45), 0 1px 2px rgba(0, 0, 0, .35); opacity: 0; scale: .2; transition: opacity .2s, scale .32s cubic-bezier(.3, 1.5, .5, 1); transition-delay: calc(var(--i, 0) * 45ms); pointer-events: none }
-.w3d-pilz.is-on { opacity: 1; scale: 1 }
+/* Pilzköpfe gibt es nur, wenn sie an sind (keine unsichtbaren Ebenen in der Szene); beim Einschalten rasten sie nacheinander ein */
+.w3d-pilz { display: none; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff 0 18%, #c9ced3 40%, #7d838a 78%); box-shadow: 0 0 0 1px rgba(20, 20, 20, .45), 0 1px 2px rgba(0, 0, 0, .35); pointer-events: none }
+.w3d-pilz.is-on { display: block; animation: pilz-ein .32s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: calc(var(--i, 0) * 45ms) }
+@keyframes pilz-ein { from { opacity: 0; scale: .2 } to { opacity: 1; scale: 1 } }
+.no-anim .w3d-pilz { animation: none }
 .w3d-stage.mit-schloss .w3d-handle::after { content: ''; position: absolute; left: 50%; top: 0; width: 120%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #e9ecef 0 22%, #3a3e43 26%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) }
 .w3d-sym { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity .35s } .w3d-stage.show-sym .w3d-sym { opacity: 1 }
 .w3d-sash.is-fixed .w3d-handle { opacity: 0; transform: scale(.5) !important }
 .w3d-sash .w3d-f, .w3d-glass, .w3d-bar { pointer-events: auto }
 .w3d-sash { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .7, .2, 1), translate .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1) }
-.w3d-selring { position: absolute; left: 0; top: 0; box-sizing: border-box; border: 3px solid var(--accent); border-radius: 2px; opacity: 0; transition: opacity .25s; pointer-events: none }
-.w3d-sash.is-sel .w3d-selring { opacity: 1 }
+.w3d-selring { display: none; position: absolute; left: 0; top: 0; box-sizing: border-box; border: 3px solid var(--accent); border-radius: 2px; pointer-events: none }
+.w3d-sash.is-sel .w3d-selring { display: block; animation: ring-ein .25s var(--e-out) both }
+@keyframes ring-ein { from { opacity: 0 } to { opacity: 1 } }
 .w3d-selring.is-form { border: 0; border-radius: 0 } .w3d-selring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible } .w3d-selring polygon { fill: none; stroke: var(--accent); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke }
 /* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler) und die Fuge zwischen Wand und Rahmen */
 .w3d-rs { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(0, 0, 0, .07)) }
 .w3d-fuge { background: #c6bcab }
 /* Öffnung vorführen (oeffnungZeigen): der Flügel geht kurz auf und zu, der Griff dreht vorher mit. Fest: ein Glanz läuft übers Glas */
-.w3d-sash.demo-D { animation: w3d-dreh 1.7s var(--e-io) both }
-.w3d-sash.demo-K { animation: w3d-kipp 1.5s var(--e-io) both }
-.w3d-sash.demo-DK { animation: w3d-dk 2.9s var(--e-io) both }
-@keyframes w3d-dreh { 0%, 14% { transform: none } 46%, 62% { transform: rotateY(calc(var(--sgn, -1) * 44deg)) } 92%, 100% { transform: none } }
-@keyframes w3d-kipp { 0%, 12% { transform: none } 42%, 60% { transform: rotateX(-15deg) } 92%, 100% { transform: none } }
+.w3d-sash.demo-D { animation: w3d-dreh 1.6s var(--e-io) both }
+.w3d-sash.demo-K { animation: w3d-kipp 1.4s var(--e-io) both }
+.w3d-sash.demo-DK { animation: w3d-dk 2.7s var(--e-io) both }
+@keyframes w3d-dreh { 0%, 7% { transform: none } 40%, 58% { transform: rotateY(calc(var(--sgn, -1) * 44deg)) } 92%, 100% { transform: none } }
+@keyframes w3d-kipp { 0%, 7% { transform: none } 38%, 58% { transform: rotateX(-15deg) } 92%, 100% { transform: none } }
 @keyframes w3d-dk {
-  0%, 8% { transform-origin: 50% 100%; transform: none } 22%, 32% { transform-origin: 50% 100%; transform: rotateX(-15deg) } 44% { transform-origin: 50% 100%; transform: none }
+  0%, 4% { transform-origin: 50% 100%; transform: none } 19%, 31% { transform-origin: 50% 100%; transform: rotateX(-15deg) } 44% { transform-origin: 50% 100%; transform: none }
   47%, 52% { transform-origin: var(--hinge, 0 50%); transform: none } 70%, 80% { transform-origin: var(--hinge, 0 50%); transform: rotateY(calc(var(--sgn, -1) * 44deg)) } 96%, 100% { transform-origin: var(--hinge, 0 50%); transform: none }
 }
-.w3d-sash.demo-D .w3d-handle { animation: w3d-griff-d 1.7s var(--e-io) both }
-.w3d-sash.demo-DK .w3d-handle { animation: w3d-griff-dk 2.9s var(--e-io) both }
-.w3d-sash.demo-K .w3d-handle { animation: w3d-griff-k 1.5s var(--e-io) both }
-@keyframes w3d-griff-d { 0% { transform: none } 12%, 90% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
-@keyframes w3d-griff-dk { 0% { transform: none } 7%, 42% { transform: rotate(calc(var(--hsgn, 1) * 180deg)) } 48%, 94% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
-@keyframes w3d-griff-k { 0% { transform: none } 12%, 90% { transform: rotate(90deg) } 100% { transform: none } }
+.w3d-sash.demo-D .w3d-handle { animation: w3d-griff-d 1.6s var(--e-io) both }
+.w3d-sash.demo-DK .w3d-handle { animation: w3d-griff-dk 2.7s var(--e-io) both }
+.w3d-sash.demo-K .w3d-handle { animation: w3d-griff-k 1.4s var(--e-io) both }
+@keyframes w3d-griff-d { 0% { transform: none } 6%, 90% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
+@keyframes w3d-griff-dk { 0% { transform: none } 4%, 42% { transform: rotate(calc(var(--hsgn, 1) * 180deg)) } 48%, 94% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
+@keyframes w3d-griff-k { 0% { transform: none } 6%, 90% { transform: rotate(90deg) } 100% { transform: none } }
 .w3d-glass::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 26%, rgba(255, 255, 255, .55) 38%, #fff 46%, rgba(255, 255, 255, .7) 52%, transparent 66%) no-repeat; background-size: 260% 100%; background-position: 130% 0 }
 .w3d-sash.demo-F .w3d-glass::after { animation: w3d-glanz 1s var(--e-out) both }
 @keyframes w3d-glanz { 0% { opacity: 0; background-position: 130% 0 } 12%, 82% { opacity: .95 } 100% { opacity: 0; background-position: -30% 0 } }
@@ -273,10 +277,12 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-floor-in { background: repeating-linear-gradient(90deg, rgba(90, 60, 30, .08) 0 1px, transparent 1px 34px), linear-gradient(180deg, #e2d6c3, #d2c2a8) }
 .w3d-floor-out { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px 48px), linear-gradient(180deg, #cfcac2, #bdb7ad) }
 /* Hebe-Schiebe: Griff dreht, der Flügel hebt sich 7 px aus der Dichtung, schiebt vor das Festteil und zurück */
-.w3d-sash.demo-S { animation: w3d-schieben 3.2s var(--e-io) both }
-@keyframes w3d-schieben { 0%, 9% { transform: none } 18%, 26% { transform: translate3d(0, -7px, 0) } 54%, 68% { transform: translate3d(calc(var(--sdir, -1) * 82%), -7px, 0) } 90% { transform: translate3d(0, -7px, 0) } 100% { transform: none } }
-.w3d-sash.demo-S .w3d-handle { animation: w3d-griff-hebe 3.2s var(--e-io) both }
-@keyframes w3d-griff-hebe { 0% { transform: none } 9%, 90% { transform: rotate(180deg) } 100% { transform: none } }
+.w3d-sash.demo-S { animation: w3d-schieben 3s var(--e-io) both }
+@keyframes w3d-schieben { 0%, 5% { transform: none } 13%, 20% { transform: translate3d(0, -7px, 0) } 50%, 66% { transform: translate3d(calc(var(--sdir, -1) * 82%), -7px, 0) } 90% { transform: translate3d(0, -7px, 0) } 100% { transform: none } }
+.w3d-sash.demo-S .w3d-handle { animation: w3d-griff-hebe 3s var(--e-io) both }
+@keyframes w3d-griff-hebe { 0% { transform: none } 5%, 90% { transform: rotate(180deg) } 100% { transform: none } }
+/* Eine Bewegung zur Zeit: solange vorgeführt oder verwandelt wird, steht das sanfte Schwingen still */
+.w3d-stage.is-busy .w3d-sway, .w3d-stage.is-vorf .w3d-sway, .w3d-stage.is-demo .w3d-sway { animation-play-state: paused }
 .w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
 .w3d-mesh { background: repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1.5px #55585c }
 .w3d-dim { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s; pointer-events: none }
@@ -306,7 +312,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-lupe { position: absolute; right: 12px; bottom: 12px; width: 108px; height: 108px; border-radius: 50%; background: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, .18), 0 0 0 1px rgba(0, 0, 0, .06); pointer-events: none; z-index: 3 }
 .w3d-lupe svg { display: block; width: 100%; height: 100% }
 @media (max-height: 700px) { .w3d-lupe { width: 88px; height: 88px; right: 8px; bottom: 8px } }
-.w3d-hint { position: absolute; left: 12px; bottom: 10px; padding: 6px 10px; border-radius: var(--r1); background: rgba(20, 20, 20, .72); color: #fff; font-size: 13px; font-weight: 700; pointer-events: none; backdrop-filter: blur(6px) }
+.w3d-hint { position: absolute; left: 12px; bottom: 10px; padding: 6px 10px; border-radius: var(--r1); background: rgba(20, 20, 20, .8); color: #fff; font-size: 13px; font-weight: 700; pointer-events: none }
 /* Neben der Lupe bleibt der Hinweis links und bricht notfalls um */
 .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 148px); line-height: 1.3 }
 @media (max-height: 700px) { .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 120px) } }
@@ -453,6 +459,17 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .stepper button:active { transform: scale(.94) } .stepper button[disabled] { opacity: .35 }
 .stepper b { width: 36px; text-align: center; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums }
 .stepper.weit b { width: 84px; white-space: nowrap }
+/* Eigene Farbe: Textfeld unter jeder Farbwahl, links ein Tupfen in der erkannten Farbe (kariert, solange nichts erkannt ist) */
+.farbfeld { position: relative; flex: 0 0 auto; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 2px 0 12px; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring) }
+.farbfeld:focus-within { box-shadow: inset 0 0 0 2px var(--ink) }
+.ff-tupf { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; background: repeating-conic-gradient(var(--surface3) 0 25%, var(--surface) 0 50%) 0 0 / 8px 8px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16); transition: background var(--t2) }
+.farbfeld input { flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0; border: 0; background: transparent; font: inherit; font-size: 17px; color: var(--ink); outline: none }
+.farbfeld input::placeholder { color: var(--muted); opacity: 1 }
+.ff-x { flex: 0 0 44px; height: 44px; border: 0; padding: 0; border-radius: var(--r1); background: none; color: var(--muted); display: flex; align-items: center; justify-content: center }
+.ff-x[hidden] { display: none }
+.ff-info { margin: -2px 0 0; padding: 0 6px; font-size: 13px; line-height: 1.35; color: var(--muted) }
+.ff-info:empty { display: none }
+.farbfeld.ok + .ff-info { color: var(--ink2) }
 /* Einzeichnen: Foto eingepasst, darüber die Ebene mit Abdunklung, Raster, Rahmen und vier Griffen; Lupe beim Ziehen */
 .zeich { position: relative; flex: 1 1 auto; min-height: 240px; border-radius: var(--r4); overflow: hidden; background: #141414; box-shadow: var(--ring); touch-action: none; user-select: none; -webkit-user-select: none }
 .zeich-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none }
