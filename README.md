@@ -10,7 +10,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 |---|---|
 | `web/` | die Website, so wie sie ausgeliefert wird (statische Dateien, kein Build-Schritt) |
 | `wrangler.jsonc`, `worker.js` | Cloudflare Workers: liefert `web/` aus, beantwortet `/api/…` und startet den Abrechnungslauf (Cron); `"name"` muss zum Worker im Dashboard passen |
-| `web/index.html` | Startseite und Bereich für Fensterbauer (Projekte, Aufmaß-Links, Einladungslisten, Abrechnung) |
+| `web/index.html` | Startseite in zwei Ansichten (Hauseigentümer und Fensterbauer, Umschalter oben, Anker `/#hauseigentuemer` und `/#fensterbauer`) und Bereich für Fensterbauer (Projekte, Aufmaß-Links, Einladungslisten, Abrechnung) |
 | `web/app/` | Mess-App für Kunden, Kundenlinks: `/app/#k-…` |
 | `web/ratgeber/`, `web/fuer-fensterbauer/` | Ratgeber (Fenster ausmessen, Aufmaßblatt mit Vorlage, Fenster austauschen) und die Seite für Fensterbauer, reines HTML für Menschen, Suchmaschinen und KI-Assistenten (`ratgeber.css`); Startseite und App tragen dieselbe Art Textfassung für Leser ohne JavaScript |
 | `web/assets/` | Programmcode und Gestaltung (`app.*`, `portal.*`, gemeinsam `gemeinsam.*` mit Logo und KI-Anbindung, Rechtsseiten `recht.css`) |
