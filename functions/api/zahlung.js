@@ -18,6 +18,7 @@ export const ZAHLUNG = {
     const zurueck = ctx.url.origin + '/app/';
     const kasse = await ctx.zd.aufmassKasse({ mail: mail, kennung: kennung, zurueck: zurueck });
     if (ctx.sp) { try { await ctx.sp.zahlungAnlegen({ stripe_session: kasse.id, art: 'aufmass', kennung: kennung, mail: mail, betrag_cent: Math.round(ctx.k.preise.aufmass * 100), status: 'offen' }); } catch (e) { console.log('Zahlung nicht vorgemerkt', String(e).slice(0, 120)); } }
+    if (ctx.zaehlen) ctx.zaehlen('ereignis:kasse');
     return { ok: true, url: kasse.url };
   },
   'GET /api/zahlung/pruefen': async (ctx) => {
@@ -28,7 +29,7 @@ export const ZAHLUNG = {
     if (r.kennung && kennungApp && r.kennung !== kennungApp) return { ok: false, bezahlt: false }; // bezahlt, aber für ein anderes Projekt
     const kennung = r.kennung || kennungApp; if (!kennungOk(kennung)) throw new ApiFehler('Zahlung gehört zu keinem Aufmaß.');
     const token = await nachweis(ctx.k, kennung, session);
-    if (ctx.sp) { try { const vorher = await ctx.sp.zahlungHolen(session); if (vorher) await ctx.sp.zahlungAendern(session, { status: 'bezahlt', token: token, mail: r.mail || vorher.mail }); else await ctx.sp.zahlungAnlegen({ stripe_session: session, art: 'aufmass', kennung: kennung, mail: r.mail || '', betrag_cent: r.betragCent || 0, status: 'bezahlt', token: token }); } catch (e) { console.log('Zahlung nicht festgehalten', String(e).slice(0, 120)); } }
+    if (ctx.sp) { try { const vorher = await ctx.sp.zahlungHolen(session); if (vorher) await ctx.sp.zahlungAendern(session, { status: 'bezahlt', token: token, mail: r.mail || vorher.mail }); else await ctx.sp.zahlungAnlegen({ stripe_session: session, art: 'aufmass', kennung: kennung, mail: r.mail || '', betrag_cent: r.betragCent || 0, status: 'bezahlt', token: token }); if (ctx.zaehlen && (!vorher || vorher.status !== 'bezahlt')) ctx.zaehlen('ereignis:kauf'); } catch (e) { console.log('Zahlung nicht festgehalten', String(e).slice(0, 120)); } }
     return { ok: true, bezahlt: true, kennung: kennung, token: token, mail: r.mail || '' };
   },
   /* Nachweis prüfen (z. B. auf einem anderen Gerät): Kennung + Sitzung + Nachweis */
@@ -55,7 +56,7 @@ export const ZAHLUNG = {
     const obj = ev.data && ev.data.object ? ev.data.object : {};
     if ((ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') && obj.mode === 'payment') {
       const kennung = (obj.metadata && obj.metadata.kennung) || obj.client_reference_id || '';
-      if (ctx.sp && kennungOk(kennung) && obj.payment_status === 'paid' && obj.metadata && obj.metadata.art === 'aufmass') { const token = await nachweis(ctx.k, kennung, obj.id); const vorher = await ctx.sp.zahlungHolen(obj.id); if (vorher) await ctx.sp.zahlungAendern(obj.id, { status: 'bezahlt', token: token }); else await ctx.sp.zahlungAnlegen({ stripe_session: obj.id, art: 'aufmass', kennung: kennung, mail: (obj.customer_details && obj.customer_details.email) || '', betrag_cent: obj.amount_total || 0, status: 'bezahlt', token: token }); }
+      if (ctx.sp && kennungOk(kennung) && obj.payment_status === 'paid' && obj.metadata && obj.metadata.art === 'aufmass') { const token = await nachweis(ctx.k, kennung, obj.id); const vorher = await ctx.sp.zahlungHolen(obj.id); if (vorher) await ctx.sp.zahlungAendern(obj.id, { status: 'bezahlt', token: token }); else await ctx.sp.zahlungAnlegen({ stripe_session: obj.id, art: 'aufmass', kennung: kennung, mail: (obj.customer_details && obj.customer_details.email) || '', betrag_cent: obj.amount_total || 0, status: 'bezahlt', token: token }); if (ctx.zaehlen && (!vorher || vorher.status !== 'bezahlt')) ctx.zaehlen('ereignis:kauf'); }
     } else if (ctx.sp) await stripeEreignis(ctx.sp, ev, ctx.zd);
     if (ctx.sp) await ctx.sp.ereignisNeu(ev.id);
     return { ok: true };

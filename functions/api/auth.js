@@ -52,6 +52,43 @@ export async function erneuern(k, refresh) {
   return { token: r.data.access_token, refresh: r.data.refresh_token || refresh, nutzer: { id: r.data.user.id, mail: String(r.data.user.email || '').toLowerCase() } };
 }
 
+/* Verwaltung der Anmeldungen für die Zentrale (Supabase Auth, Admin-Schnittstelle, nur mit dem geheimen Schlüssel).
+   Ohne Supabase (Attrappe) gibt es keine eigenen Anmeldedaten: die Funktionen melden Erfolg bzw. eine leere Liste. */
+async function admin(k, pfad, method) {
+  const kopf = { apikey: k.supabase.service, 'content-type': 'application/json' };
+  if (!sbNeu(k.supabase.service)) kopf.Authorization = 'Bearer ' + k.supabase.service; // früherer service_role-Schlüssel (JWT)
+  const r = await fetch(k.supabase.url + '/auth/v1/admin/' + pfad, { method: method || 'GET', headers: kopf });
+  const text = await r.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
+  if (!r.ok && r.status !== 404) console.log('Supabase Auth (Verwaltung)', r.status, pfad.split('?')[0].replace(/[0-9a-f-]{36}/, '…'), JSON.stringify(data || {}).slice(0, 160));
+  return { ok: r.ok, status: r.status, data: data };
+}
+const nutzerKurz = (u) => ({ id: u.id, mail: String(u.email || '').toLowerCase(), erstellt: u.created_at || '', zuletzt: u.last_sign_in_at || '', bestaetigt: u.email_confirmed_at || u.confirmed_at || '' });
+/* Eine Anmeldung löschen (DSGVO-Löschung eines Kontos); schon gelöscht zählt als erledigt */
+export async function anmeldungLoeschen(k, uid) {
+  if (!k.supabase || !uid) return { ok: true, attrappe: !k.supabase };
+  const r = await admin(k, 'users/' + encodeURIComponent(uid), 'DELETE');
+  return { ok: r.ok || r.status === 404, status: r.status };
+}
+export async function anmeldungLesen(k, uid) {
+  if (!k.supabase || !uid) return null;
+  const r = await admin(k, 'users/' + encodeURIComponent(uid));
+  return r.ok && r.data && r.data.id ? nutzerKurz(r.data) : null;
+}
+/* Alle Anmeldungen (seitenweise); null, wenn Supabase nicht antwortet */
+export async function anmeldungenAlle(k) {
+  if (!k.supabase) return [];
+  const out = [];
+  for (let seite = 1; seite <= 50; seite++) {
+    const r = await admin(k, 'users?page=' + seite + '&per_page=500');
+    if (!r.ok) return null;
+    const liste = (r.data && (r.data.users || r.data)) || [];
+    if (!Array.isArray(liste)) return null;
+    out.push.apply(out, liste.map(nutzerKurz));
+    if (liste.length < 500) break;
+  }
+  return out;
+}
+
 /* Wer steckt hinter dem Token? Kurz zwischengespeichert, damit nicht jeder Aufruf bei Supabase nachfragt. */
 export async function nutzer(k, token) {
   token = String(token || '');

@@ -110,7 +110,7 @@ export function zahlungsdienst(k) {
     art: s ? 'stripe' : 'attrappe',
     /* Aufmaßblatt kaufen: Rückkehr nach /app/?bezahlt=<session> */
     async aufmassKasse(o) {
-      if (!s) return { id: testId('test'), url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt=' + testId('test') + '&kennung=' + encodeURIComponent(o.kennung) };
+      if (!s) { const id = testId('test'); return { id: id, url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt=' + id + '&kennung=' + encodeURIComponent(o.kennung) }; }
       const steuer = await steuersatz(true);
       const posten = k.stripe.preisAufmass ? { price: k.stripe.preisAufmass, quantity: 1 } : { quantity: 1, price_data: { currency: 'eur', unit_amount: Math.round(k.preise.aufmass * 100), tax_behavior: steuer ? 'inclusive' : undefined, product_data: { name: 'eeziframes Aufmaßblatt', description: 'Ihr Fenster-Aufmaß als PDF: alle Maße, Fotoauswertung, Wünsche, mit Code für den Fensterbauer' } } };
       if (steuer) posten.tax_rates = [steuer];
@@ -198,6 +198,12 @@ export function zahlungsdienst(k) {
     async aboKuendigen(subscription, zurueck) {
       if (!s) return true;
       await s.post('/subscriptions/' + subscription, { cancel_at_period_end: !zurueck });
+      return true;
+    },
+    /* Abo sofort beenden (Zentrale: Konto löschen oder „sofort beenden“); ein schon beendetes Abo zählt als erledigt */
+    async aboBeenden(subscription) {
+      if (!s || !subscription) return true;
+      try { await s.del('/subscriptions/' + encodeURIComponent(subscription)); } catch (e) { if (/no such subscription|already (been )?cancel|canceled subscription/i.test(String(e && e.message))) return true; throw e; }
       return true;
     },
     /* Objekt zu einem Thin-Ereignis holen: related_object.url aus dem unterschriebenen Ereignis, nur die Arten, die der Webhook braucht */

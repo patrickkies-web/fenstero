@@ -42,6 +42,7 @@ if (ATTRAPPE) {
 
 const { api } = await import(pathToFileURL(path.join(ROOT, 'functions/api/router.js')).href);
 const { behandeln } = await import(pathToFileURL(path.join(ROOT, 'functions/seo.js')).href);
+const { seitenaufruf } = await import(pathToFileURL(path.join(ROOT, 'functions/api/statistik.js')).href);
 
 /* _headers lesen: Zeile ohne Einzug = Pfad (mit * am Ende), eingerückt = Kopfzeile, „! Name“ nimmt eine Kopfzeile wieder weg */
 const regeln = [];
@@ -95,7 +96,9 @@ http.createServer(async (req, res) => {
     }
     /* Seiten, robots.txt, sitemap.xml wie beim Worker (functions/seo.js), sonst die Datei aus web/ */
     const request = new Request(url.href, { method: req.method, headers: req.headers });
-    const antwort = (await behandeln(request, env, () => statisch(url))) || (await statisch(url));
+    const seite = await behandeln(request, env, () => statisch(url));
+    if (seite && seite.status === 200) seitenaufruf(request, env).catch(() => false); // eigene Statistik wie im Worker
+    const antwort = seite || (await statisch(url));
     res.writeHead(antwort.status, Object.fromEntries(antwort.headers));
     res.end(Buffer.from(await antwort.arrayBuffer()));
   } catch (e) {

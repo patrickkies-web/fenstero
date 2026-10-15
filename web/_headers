@@ -14,6 +14,11 @@
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Zentrale des Inhabers: nie zwischenspeichern, nie in Suchmaschinen (X-Robots-Tag oben gilt hier immer, auch mit INDEXIERUNG=1,
+# weil die Zentrale nicht durch functions/seo.js läuft)
+/zentrale/*
+  Cache-Control: no-store
+
 # Logo und Icon dürfen in Suchmaschinen (Logo in den strukturierten Daten); in der Pilotphase sperrt robots.txt ohnehin alles
 /apple-touch-icon.png
   ! X-Robots-Tag
