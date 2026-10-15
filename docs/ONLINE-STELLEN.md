@@ -109,7 +109,7 @@ So erkennst du, wo es hakt: **Fehler 522** heißt, die Domain zeigt noch nicht a
 
 Kundenlinks, QR-Codes und die Adresse im Aufmaßblatt nehmen von selbst die Domain, unter der der Betriebsbereich geöffnet wurde; im Code steht keine Domain. Für Suchmaschinen zählt `www.eeziframes.com` als `eeziframes.com`, und die `…workers.dev`-Adresse wird nie freigegeben (`functions/seo.js`). Hängen weitere Domains am Worker, etwa `eeziframes.de`, leite sie bei Cloudflare per Weiterleitungsregel (Rules → Redirect Rules, 301, Pfad behalten) auf `eeziframes.com` um oder setze `KANONISCH` (Schritt 7).
 
-**Die frühere Adresse `fensterino.com` gibt es nicht mehr.** Kundenlinks, QR-Codes und Aufmaßblätter, die noch darauf zeigen, laufen ins Leere; in der Pilotphase lagen Konten und Aufmaße ohnehin nur im Browser der jeweiligen Domain. Wurde Stufe 2 schon unter der alten Adresse eingerichtet, die Adressen nachziehen: Webhook bei Stripe (Stufe 2, B.7) und bei Supabase unter **Authentication → URL Configuration** die Site URL `https://eeziframes.com`.
+**Die frühere Adresse `fensterino.com` gibt es nicht mehr.** Kundenlinks, QR-Codes und Aufmaßblätter, die noch darauf zeigen, laufen ins Leere; in der Pilotphase lagen Konten und Aufmaße ohnehin nur im Browser der jeweiligen Domain. Wurde Stufe 2 schon unter der alten Adresse eingerichtet, die Adressen nachziehen: Webhook bei Stripe (Stufe 2, B.4) und bei Supabase unter **Authentication → URL Configuration** die Site URL `https://eeziframes.com`.
 
 **Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `eeziframes`. GitHub leitet die alte Adresse weiter. Den Worker-Namen `fenstero` nicht ändern, sonst findet Cloudflare die Bereitstellung nicht mehr.
 
@@ -126,7 +126,9 @@ Was danach hilft (Erwähnungen, Bewertungen, Aktualität) und warum: [docs/SEO.m
 
 ## Stufe 2: Supabase und Stripe anschließen
 
-Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kasse, Webhook, Sammelrechnung), `web/assets/modell.js` (die Abrechnungsregeln, im Browser und auf dem Server dieselben) und `supabase/schema.sql` (die Tabellen). Du legst zwei Konten an, trägst sieben Schlüssel bei Cloudflare ein, fertig. Die Website merkt über `/api/status`, was da ist: Der Pilot-Hinweis verschwindet, die App schickt Aufmaße direkt, die Kasse geht zu Stripe.
+Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kasse, Webhook, Sammelrechnung), `web/assets/modell.js` (die Abrechnungsregeln, im Browser und auf dem Server dieselben) und `supabase/schema.sql` (die Tabellen). Du legst zwei Konten an und trägst die Schlüssel bei Cloudflare ein (Supabase drei, Stripe zwei, dazu ein Zufallstext), fertig. Die Website merkt über `/api/status`, was da ist: Der Pilot-Hinweis verschwindet, die App schickt Aufmaße direkt, die Kasse geht zu Stripe.
+
+Stripe geht auch allein, ohne Supabase: Dann kaufen Hauseigentümer das Aufmaßblatt über Stripe (im Testmodus mit Testkarte), alles für Betriebe bleibt im Pilotmodus, bis Supabase da ist.
 
 ### A. Supabase (Datenbank und Anmeldung), etwa 20 Minuten
 
@@ -144,22 +146,24 @@ Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kass
 6. **Authentication → SMTP Settings**: Supabase verschickt mit dem eingebauten Versand nur **etwa 2 E-Mails pro Stunde**, das reicht nicht für echte Betriebe. Trag einen eigenen Versand ein (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@eeziframes.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen). Bis dahin testest du mit deiner eigenen Adresse.
 7. Optional, **Authentication → Rate Limits**: Codes pro Stunde und Adresse begrenzen (die Website bremst zusätzlich: 8 Codes je 10 Minuten und IP).
 
-### B. Stripe (Zahlungen), etwa 30 Minuten, erst im Testmodus
+### B. Stripe (Zahlungen), etwa 15 Minuten, erst im Testmodus
 
-1. [dashboard.stripe.com](https://dashboard.stripe.com) → Konto anlegen. Oben rechts bleibt der **Testmodus** (Sandbox) an, bis alles läuft; Firmendaten und Bankkonto für die Freischaltung kannst du parallel eintragen.
-2. **Produktkatalog → Produkt hinzufügen**, je Produkt die **Preis-ID** (`price_…`) notieren:
+Produkte, Preise und Steuersätze legst du nicht an: Das macht der Server beim ersten Bedarf selbst und findet sie danach wieder (`functions/api/stripe.js`). In Stripe heißen sie „eeziframes Abo 10“ (49 € im Monat), „eeziframes Plus“ (79 € im Monat) und „MwSt.“ (19 %, einmal inklusive fürs Aufmaßblatt, einmal zuzüglich für Betriebe). Ändert sich ein Preis über die Variablen (`PREIS_ABO`, `PREIS_PLUS`), legt er einen neuen Preis an; laufende Abos behalten ihren bis zum nächsten Tarifwechsel.
 
-   | Produkt | Preis | Art | Steuer | Variable bei Cloudflare |
-   |---|---|---|---|---|
-   | eeziframes Abo 10 | 49,00 € | wiederkehrend, monatlich | exklusiv (netto) | `STRIPE_PRICE_ABO` |
-   | eeziframes Plus | 79,00 € | wiederkehrend, monatlich | exklusiv (netto) | `STRIPE_PRICE_PLUS` |
-   | eeziframes Aufmaßblatt (optional) | 7,99 € | einmalig | inklusiv (brutto) | `STRIPE_PRICE_AUFMASS`; ohne diese Variable setzt der Server den Betrag aus `PREIS_AUFMASS_CENT` je Kauf selbst |
+1. [dashboard.stripe.com](https://dashboard.stripe.com) → Konto anlegen. Gearbeitet wird zuerst in der **Sandbox** (Testumgebung, im Dashboard so beschriftet): Dort fließt kein echtes Geld. Firmendaten und Bankkonto kommen erst für echtes Geld dazu (E).
+2. **Einstellungen → Zahlungen → Zahlungsmethoden**: Karten sind an; **Apple Pay**, **Google Pay** und **PayPal** einschalten (Hauseigentümer), **SEPA-Lastschrift** einschalten (Betriebe). Die Kasse fürs Aufmaßblatt zeigt SEPA bewusst nicht: Lastschriften bestätigen erst nach Tagen, das Blatt kommt aber sofort.
+3. **Entwickler → API-Schlüssel** ([dashboard.stripe.com/apikeys](https://dashboard.stripe.com/apikeys)): den **Geheimschlüssel** (`sk_test_…`) anzeigen, kopieren und gleich bei Cloudflare als Secret `STRIPE_SECRET_KEY` eintragen (C). Nicht per E-Mail oder Chat weitergeben. Ein eingeschränkter Schlüssel (`rk_test_…`) geht auch; er braucht Schreibrechte für Checkout Sessions, Customers, Invoices, Invoice Items, Prices, Products, Subscriptions und Tax Rates sowie Leserechte für Payment Intents, Setup Intents und Payment Methods.
+4. **Workbench → Webhooks** ([dashboard.stripe.com/webhooks](https://dashboard.stripe.com/webhooks)) → **Erstellen Sie ein Ereignisziel** → **Ihr Konto** → Payload-Format **Thin**, wie vorgeschlagen (Snapshot geht genauso, dann die vorgeschlagene API-Version lassen) → diese vier Ereignisse auswählen:
+   - `checkout.session.completed` (Kasse abgeschlossen)
+   - `invoice.paid` (Rechnung bezahlt)
+   - `invoice.payment_failed` (Zahlung fehlgeschlagen)
+   - `customer.subscription.deleted` (Abo beendet)
 
-3. **Steuersätze** (Produktkatalog → Steuersätze): „MwSt. 19 %“ als **exklusiv** → `STRIPE_TAX_RATE`, und noch einmal „MwSt. 19 % inkl.“ als **inklusiv** → `STRIPE_TAX_RATE_INKL`. Bei Kleinunternehmerregelung (§ 19 UStG) beide weglassen und bei Cloudflare `MWST` = `0` setzen; dann steht auf der Kasse „umsatzsteuerfrei nach § 19 UStG“ und die Betriebspreise gelten ohne Zusatz.
-4. **Einstellungen → Zahlungsmethoden**: Karten, PayPal, Apple Pay und Google Pay einschalten (Hauseigentümer), **SEPA-Lastschrift** einschalten (Betriebe; Stripe schaltet sie nach Prüfung frei).
-5. **Einstellungen → Kunden-E-Mails**: „Zahlungsbelege per E-Mail“ an (der Hauseigentümer bekommt so seine Rechnung an die Adresse aus der Kasse). **Einstellungen → Branding** und **Öffentliche Angaben**: Name, Support-Adresse, Logo; das steht auf Belegen und Rechnungen.
-6. **Entwickler → API-Schlüssel**: den **Geheimschlüssel** (`sk_test_…`) notieren → `STRIPE_SECRET_KEY`.
-7. **Entwickler → Webhooks → Endpunkt hinzufügen**: URL `https://eeziframes.com/api/zahlung/webhook`, Ereignisse `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`. Den **Signaturschlüssel** (`whsec_…`) notieren → `STRIPE_WEBHOOK_SECRET`. (Für die `…workers.dev`-Adresse einen zweiten Endpunkt anlegen, falls du dort testest.)
+   Bei Thin steht davor ein `v1.`. **Weiter** → **Webhook-Endpoint** → **Weiter** → Endpoint-URL `https://eeziframes.com/api/zahlung/webhook` (hängt die Domain noch nicht am Worker: die `…workers.dev`-Adresse mit `/api/zahlung/webhook`) → erstellen. Auf der Seite des Ziels **Geheimschlüssel anzeigen** (`whsec_…`) und bei Cloudflare als Secret `STRIPE_WEBHOOK_SECRET` eintragen. Der Server prüft damit jede Zustellung; ohne passendes Geheimnis lehnt er sie ab.
+5. **Einstellungen → Kunden-E-Mails**: Belege für erfolgreiche Zahlungen an (Hauseigentümer bekommen so ihre Rechnung), für Betriebe auch abgeschlossene Rechnungen. **Einstellungen → Öffentliche Unternehmensangaben** und **Branding**: Name, Anschrift, Support-Adresse, Logo; das steht auf Belegen und Rechnungen.
+6. Für Abos der Betriebe, **Billing → Umsatzsicherung → Wiederholungsversuche**: Wenn alle Versuche scheitern, **Abo kündigen**. Dann endet ein unbezahltes Abo bei Stripe, und der Betrieb ist bei uns von selbst wieder im Tarif Start.
+
+Umsatzsteuer: Ohne Variable `MWST` rechnet der Server mit 19 % (Betriebspreise netto zuzüglich 19 %, Aufmaßblatt brutto mit 19 % darin). Bei Kleinunternehmerregelung (§ 19 UStG) `MWST` = `0`: keine Steuersätze, auf jeder Rechnung steht „Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.“, die Kasse zeigt „umsatzsteuerfrei nach § 19 UStG“.
 
 ### C. Schlüssel bei Cloudflare eintragen
 
@@ -170,29 +174,31 @@ Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kass
 | `SUPABASE_URL` | Project URL aus A3 |
 | `SUPABASE_SERVICE_KEY` | service_role-Schlüssel aus A3 |
 | `SUPABASE_ANON_KEY` | anon-Schlüssel aus A3 |
-| `STRIPE_SECRET_KEY` | `sk_test_…` aus B6, später `sk_live_…` |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_…` aus B7 |
-| `FREISCHALT_GEHEIMNIS` | ein langer Zufallstext (z. B. aus `openssl rand -base64 32` oder dem Passwort-Manager); unterschreibt die Freischalt-Nachweise der gekauften Aufmaßblätter. Einmal setzen und nie ändern, sonst gelten alte Nachweise nicht mehr |
+| `STRIPE_SECRET_KEY` | `sk_test_…` aus B3, später `sk_live_…` |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` aus B4 (Test- und Live-Modus haben je ein eigenes) |
+| `FREISCHALT_GEHEIMNIS` | ein langer Zufallstext (z. B. aus dem Passwort-Manager); unterschreibt die Freischalt-Nachweise der gekauften Aufmaßblätter. Einmal setzen und nie ändern, sonst gelten alte Nachweise nicht mehr |
 | `ANTHROPIC_API_KEY` | aus Schritt 5, falls noch nicht da |
 
-Als normale Variablen (Typ Text): `STRIPE_PRICE_ABO`, `STRIPE_PRICE_PLUS`, optional `STRIPE_PRICE_AUFMASS`, `STRIPE_TAX_RATE`, `STRIPE_TAX_RATE_INKL`, `MWST`. Preise lassen sich ohne Code ändern: `PREIS_AUFMASS_CENT` (799), `PREIS_PROJEKT` (9), `FREI_PROJEKTE` (3), `PREIS_ABO` (49), `ABO_INKL` (10), `PREIS_ABO_EXTRA` (5), `PREIS_PLUS` (79). Die Abo-Preise bei Stripe musst du dann ebenfalls anpassen; die Website zeigt, was in den Variablen steht.
+Als normale Variablen (Typ Text), alle optional: `MWST` (`0` bei Kleinunternehmerregelung), die Preise `PREIS_AUFMASS_CENT` (799), `PREIS_PROJEKT` (9), `FREI_PROJEKTE` (3), `PREIS_ABO` (49), `ABO_INKL` (10), `PREIS_ABO_EXTRA` (5), `PREIS_PLUS` (79). Variablen aus dem Dashboard bleiben bei jedem Deployment erhalten (`keep_vars` in `wrangler.jsonc`). Nur wer eigene Objekte in Stripe nutzen will: `STRIPE_PRICE_ABO`, `STRIPE_PRICE_PLUS`, `STRIPE_PRICE_AUFMASS`, `STRIPE_TAX_RATE`, `STRIPE_TAX_RATE_INKL` (IDs aus Stripe; sie haben Vorrang).
 
 Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrangler.jsonc`, Cloudflare richtet den Zeitplan beim Deployment ein; sichtbar unter **Einstellungen → Trigger**). Du musst nichts weiter tun.
 
 ### D. Prüfen
 
-- `https://eeziframes.com/api/status` zeigt `"daten":true` und `"zahlung":true` sowie die Preise.
-- Startseite: Der Pilot-Hinweis ist weg. **Kostenlos starten** → deine E-Mail → Code aus der Mail → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code.
-- Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder Testkarte (`4242 4242 4242 4242`, beliebiges Datum in der Zukunft, beliebige drei Ziffern) hinterlegt ist.
-- App ohne Link: ein Fenster messen, **Freischalten · 7,99 €**, E-Mail, Testkarte. Zurück in der App ist das Blatt frei, PDF und Code sind da, Stripe schickt den Beleg.
-- Im Stripe-Dashboard unter **Webhooks** stehen die Ereignisse mit Antwort `200`.
+- `https://eeziframes.com/api/status` zeigt `"zahlung":true`, `"testmodus":true` (Sandbox-Schlüssel) und `"webhook":true`, mit Supabase auch `"daten":true`, dazu die Preise.
+- App ohne Link: ein Fenster messen, **Freischalten · 7,99 €**, E-Mail, weiter zu Stripe. Die Kasse sagt „Testbetrieb“ und nennt die Testkarte `4242 4242 4242 4242` (Datum in der Zukunft, beliebige Prüfziffer). Zurück in der App ist das Blatt frei, PDF und Code sind da, Stripe schickt den Beleg.
+- Stripe → **Workbench → Webhooks** → dein Ziel: Zustellungen mit Antwort `200`. Ein `503` bei `invoice.paid` kurz nach einer Sammelrechnung ist gewollt: Die Rechnung wird gerade eingetragen, Stripe stellt später erneut zu.
+- Mit Supabase, Betriebe: **Kostenlos starten** → deine E-Mail → Code aus der Mail → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code. Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder die Testkarte hinterlegt ist (das Blatt nennt beide im Testmodus). Nach dem ersten Abo stehen in Stripe unter **Produktkatalog** „eeziframes Abo 10“ und die Steuersätze.
 
 ### E. Echtes Geld
 
-1. Stripe-Konto aktivieren (Firmendaten, Bankkonto, Identität).
-2. Im **Live-Modus** Produkte, Steuersätze und den Webhook noch einmal anlegen (Test- und Live-Modus sind getrennt) und bei Cloudflare `STRIPE_SECRET_KEY` (`sk_live_…`), `STRIPE_WEBHOOK_SECRET` und die Preis-IDs austauschen.
-3. Rechtliches vor der ersten echten Zahlung: Impressum (Schritt 4), Datenschutzerklärung um Supabase und Stripe als Auftragsverarbeiter ergänzen (AV-Verträge sind bei beiden Teil der Nutzungsbedingungen, in deren Kontoeinstellungen bestätigen), **Nutzungsbedingungen für Betriebe** und für den Kauf des Aufmaßblatts samt **Widerrufsbelehrung** (digitaler Inhalt: der Kunde stimmt in der Kasse zu, dass die Lieferung sofort beginnt und das Widerrufsrecht erlischt; dieser Satz steht schon in der Kasse). Lass die Texte prüfen.
-4. Suchmaschinen freigeben: in `web/_headers` die Zeile `X-Robots-Tag` entfernen, `web/robots.txt` auf `Allow: /` stellen und in den HTML-Dateien `<meta name="robots" …>` löschen.
+1. Stripe-Konto aktivieren (Firmendaten, Bankkonto, Identität). Steuernummer bzw. USt-IdNr. in den Rechnungseinstellungen eintragen, damit sie auf jeder Rechnung steht.
+2. Im **Live-Modus** einen Geheimschlüssel (`sk_live_…`) und ein neues Ereignisziel anlegen (gleiche Adresse, gleiche Ereignisse; Test- und Live-Modus sind getrennt), bei Cloudflare `STRIPE_SECRET_KEY` und `STRIPE_WEBHOOK_SECRET` austauschen. Preise und Steuersätze legt der Server im Live-Modus selbst neu an.
+3. Stripe-Kennungen aus dem Testmodus gelten live nicht: In Supabase (Tabelle `betriebe`) die Spalten `stripe_customer` und `stripe_subscription` der Testkonten leeren oder die Testkonten löschen.
+4. Rechtliches vor der ersten echten Zahlung: Impressum (Schritt 4), Datenschutzerklärung um Supabase und Stripe als Auftragsverarbeiter ergänzen (AV-Verträge sind bei beiden Teil der Nutzungsbedingungen, in deren Kontoeinstellungen bestätigen), **Nutzungsbedingungen für Betriebe** und für den Kauf des Aufmaßblatts samt **Widerrufsbelehrung** (digitaler Inhalt: der Kunde stimmt in der Kasse zu, dass die Lieferung sofort beginnt und das Widerrufsrecht erlischt; dieser Satz steht schon in der Kasse). Lass die Texte prüfen.
+5. Suchmaschinen freigeben: Schritt 7 (Variable `INDEXIERUNG`).
+
+Erstattungen, Kündigungen und Rechnungen siehst und erledigst du im Stripe-Dashboard (**Zahlungen** → Zahlung → **⋯** → **Zahlung erstatten**; **Kunden**; **Rechnungen**). Eine Erstattung des Aufmaßblatts sperrt das Blatt nicht nachträglich; es liegt auf dem Gerät des Käufers.
 
 ### Was wo gespeichert ist
 
@@ -216,7 +222,7 @@ Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrang
 ```bash
 KI_ATTRAPPE=1 node scripts/dev-server.mjs                                   # http://localhost:8788, Pilot, KI mit festen Testantworten
 KI_ATTRAPPE=1 DATEN_ATTRAPPE=1 ZAHLUNG_ATTRAPPE=1 PORT=8789 node scripts/dev-server.mjs   # Stufe 2 nachgestellt: Anmeldecode 123456, Kassen kehren sofort als bezahlt zurück
-node scripts/pruefen.mjs                                                    # Browser-Prüfung (Abschnitt 8 startet den zweiten Server selbst), braucht playwright-core
+node scripts/pruefen.mjs                                                    # Browser-Prüfung (Abschnitt 8 startet den zweiten Server selbst, Abschnitt 11 prüft die Stripe-Anbindung gegen ein nachgestelltes Stripe), braucht playwright-core
 npx wrangler dev                                                            # wie bei Cloudflare (Worker-Laufzeit), http://localhost:8787
 ```
 

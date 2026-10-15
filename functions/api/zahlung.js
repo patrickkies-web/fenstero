@@ -24,7 +24,8 @@ export const ZAHLUNG = {
     const session = str(ctx.url.searchParams.get('session'), 120), kennungApp = str(ctx.url.searchParams.get('kennung'), 40);
     if (!session) throw new ApiFehler('Keine Zahlung angegeben.');
     const r = await ctx.zd.kasseGeprueft(session);
-    if (!r.bezahlt) return { ok: false, bezahlt: false };
+    if (!r.bezahlt) return { ok: false, bezahlt: false, wartet: !!r.wartet };
+    if (r.kennung && kennungApp && r.kennung !== kennungApp) return { ok: false, bezahlt: false }; // bezahlt, aber für ein anderes Projekt
     const kennung = r.kennung || kennungApp; if (!kennungOk(kennung)) throw new ApiFehler('Zahlung gehört zu keinem Aufmaß.');
     const token = await nachweis(ctx.k, kennung, session);
     if (ctx.sp) { try { const vorher = await ctx.sp.zahlungHolen(session); if (vorher) await ctx.sp.zahlungAendern(session, { status: 'bezahlt', token: token, mail: r.mail || vorher.mail }); else await ctx.sp.zahlungAnlegen({ stripe_session: session, art: 'aufmass', kennung: kennung, mail: r.mail || '', betrag_cent: r.betragCent || 0, status: 'bezahlt', token: token }); } catch (e) { console.log('Zahlung nicht festgehalten', String(e).slice(0, 120)); } }
@@ -36,19 +37,27 @@ export const ZAHLUNG = {
     if (!kennungOk(kennung) || !session || !token) return { ok: false };
     return { ok: (await nachweis(ctx.k, kennung, session)) === token };
   },
+  /* Webhook: Unterschrift prüfen, jedes Ereignis nur einmal verarbeiten. Als erledigt vermerkt wird es erst nach der Verarbeitung:
+     Schlägt sie fehl (Datenbank kurz weg, Worker abgebrochen), antwortet der Server mit einem Fehler und Stripe stellt später erneut zu.
+     Doppelt verarbeitet richtet keinen Schaden an, weil jeder Schritt wiederholbar ist (Kasse je Betrieb nur einmal, Status setzen).
+     Beide Formate eines Ereignisziels bei Stripe gehen: Snapshot (das Objekt steckt im Ereignis) und Thin (Typ v1.… und ein Verweis;
+     dann holt der Server das Objekt selbst und verarbeitet es wie ein Snapshot-Ereignis). */
   'POST /api/zahlung/webhook': async (ctx) => {
     const roh = ctx.roh || '';
     if (!(await webhookEcht(ctx.k, roh, ctx.request.headers.get('stripe-signature')))) throw new ApiFehler('Unterschrift ungültig.', 400);
     let ev = null; try { ev = JSON.parse(roh); } catch (e) { throw new ApiFehler('Kein Ereignis.'); }
     if (!ev || !ev.id || !ev.type) throw new ApiFehler('Kein Ereignis.');
-    if (ctx.sp && !(await ctx.sp.ereignisNeu(ev.id))) return { ok: true, doppelt: true };
-    const obj = ev.data && ev.data.object ? ev.data.object : {};
-    if (ev.type === 'checkout.session.completed' && obj.mode === 'payment' && ctx.sp) {
-      const kennung = (obj.metadata && obj.metadata.kennung) || obj.client_reference_id || '';
-      if (kennungOk(kennung) && obj.payment_status === 'paid') { const token = await nachweis(ctx.k, kennung, obj.id); const vorher = await ctx.sp.zahlungHolen(obj.id); if (vorher) await ctx.sp.zahlungAendern(obj.id, { status: 'bezahlt', token: token }); else await ctx.sp.zahlungAnlegen({ stripe_session: obj.id, art: 'aufmass', kennung: kennung, mail: (obj.customer_details && obj.customer_details.email) || '', betrag_cent: obj.amount_total || 0, status: 'bezahlt', token: token }); }
-      return { ok: true };
+    if (ctx.sp && (await ctx.sp.ereignisBekannt(ev.id))) return { ok: true, doppelt: true };
+    if (ev.object === 'v2.core.event') {
+      const ref = ev.related_object, voll = ref && ref.url ? await ctx.zd.objekt(ref.url) : null;
+      ev = { id: ev.id, type: String(ev.type).replace(/^v1\./, ''), data: { object: voll || {} } };
     }
-    if (ctx.sp) await stripeEreignis(ctx.sp, ev);
+    const obj = ev.data && ev.data.object ? ev.data.object : {};
+    if ((ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') && obj.mode === 'payment') {
+      const kennung = (obj.metadata && obj.metadata.kennung) || obj.client_reference_id || '';
+      if (ctx.sp && kennungOk(kennung) && obj.payment_status === 'paid' && obj.metadata && obj.metadata.art === 'aufmass') { const token = await nachweis(ctx.k, kennung, obj.id); const vorher = await ctx.sp.zahlungHolen(obj.id); if (vorher) await ctx.sp.zahlungAendern(obj.id, { status: 'bezahlt', token: token }); else await ctx.sp.zahlungAnlegen({ stripe_session: obj.id, art: 'aufmass', kennung: kennung, mail: (obj.customer_details && obj.customer_details.email) || '', betrag_cent: obj.amount_total || 0, status: 'bezahlt', token: token }); }
+    } else if (ctx.sp) await stripeEreignis(ctx.sp, ev, ctx.zd);
+    if (ctx.sp) await ctx.sp.ereignisNeu(ev.id);
     return { ok: true };
   }
 };
