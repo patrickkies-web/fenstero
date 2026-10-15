@@ -28,8 +28,7 @@ a { color: var(--ink) }
 .me-t { min-width: 0; flex: 1 } .me-t b, .me-t small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .me .ibtn.out { width: 40px; height: 40px; flex: 0 0 auto; box-shadow: none; background: transparent; color: var(--muted); border-radius: var(--r1) }
 @media (hover: hover) { .me .ibtn.out:hover { background: var(--surface3); color: var(--ink) } }
-.demo-side { width: 100%; margin-top: 8px; gap: 8px; color: var(--ink2) }
-.demo-top { gap: 6px; padding: 0 12px; min-height: 40px; color: var(--ink2) }
+.tour-side { width: 100%; margin-top: 8px; gap: 8px; color: var(--ink2) }
 
 /* ---------- Inhalt ---------- */
 .main { min-width: 0; padding: 0 0 calc(90px + env(safe-area-inset-bottom, 0px)) }
@@ -315,7 +314,7 @@ button.item:active { transform: scale(.995) }
 .foot .wrap { gap: 10px; padding-top: 22px; padding-bottom: calc(26px + env(safe-area-inset-bottom, 0px)) }
 .lm-foot { display: inline-flex; gap: 8px; align-items: center; font-weight: 900; letter-spacing: -.02em }
 .foot-links { gap: 2px 16px }
-.foot-links button, .foot .foot-links a { border: 0; background: none; padding: 10px 0; color: var(--ink2); font-size: 15px; font-weight: 600; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center }
+.foot-links button, .foot .foot-links a { border: 0; background: none; padding: 10px 0; color: var(--ink2); font-size: 15px; font-weight: 600; text-decoration: none; min-height: 44px; min-width: 44px; justify-content: center; display: inline-flex; align-items: center }
 .foot-links button:hover, .foot .foot-links a:hover { color: var(--ink) }
 .foot p { margin: 0; font-size: 13px; color: var(--muted); max-width: 72ch }
 
@@ -481,6 +480,111 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .lockcard { grid-template-columns: minmax(0, 1fr) } .lockcard .row .btn { flex: 1 1 auto; justify-content: center }
   .pcard .neu { top: -7px; right: 12px } .pvis { width: 56px } .winstack { width: 56px }
   .tlh small.ts { display: none }
+}
+
+/* ---------- Tour für Fensterbauer: der Ablauf in acht Schritten ---------- */
+.tourw { gap: 20px; padding-bottom: 0 }
+.tour-kopf { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px }
+.tour-kopf .tk-t { display: flex; flex-direction: column; gap: 6px; min-width: 0 }
+.tour-kopf h2 { margin: 0; font-size: clamp(26px, 3.4vw, 30px); line-height: 1.1; font-weight: 900; letter-spacing: -.03em; text-wrap: balance }
+.tour-schritte { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px }
+.tour-schritte button { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 0; border-radius: var(--r2); background: var(--surface2); color: var(--ink2); font: inherit; font-size: 13px; font-weight: 700; text-align: left; line-height: 1.2 }
+.tour-schritte .n { flex: 0 0 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 900; box-shadow: var(--ring) }
+.tour-schritte .n svg { width: 14px; height: 14px }
+.tour-schritte .tx { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis }
+.tour-schritte button.fertig .n { background: var(--ok); color: #fff; box-shadow: none }
+.tour-schritte button[aria-current="step"] { background: var(--ink); color: var(--paper) }
+.tour-schritte button[aria-current="step"] .n { background: var(--paper); color: var(--ink); box-shadow: none }
+@media (hover: hover) { .tour-schritte button:not([aria-current="step"]):hover { background: var(--surface3) } }
+.tour-raster { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); grid-template-areas: 'buehne oben' 'buehne unten'; grid-template-rows: auto 1fr; gap: 16px 36px; align-items: start }
+.tour-oben { grid-area: oben; display: flex; flex-direction: column; gap: 8px; padding-top: 8px }
+.tour-oben h3 { margin: 0; font-size: 30px; line-height: 1.1; font-weight: 900; letter-spacing: -.03em }
+.tour-oben .lead { margin: 0; font-size: 17px; line-height: 1.5; color: var(--ink2); text-wrap: pretty }
+.tour-unten { grid-area: unten; display: flex; flex-direction: column; gap: 14px }
+.tour-buehne { grid-area: buehne; position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px 24px; border-radius: var(--r4); background: var(--surface2); min-height: 460px; justify-content: center }
+.tour-buehne > .card { width: min(100%, 460px) }
+.tour-merk { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px }
+.tour-merk li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.45; color: var(--ink2) }
+.tour-merk li svg { flex: 0 0 auto; margin-top: 3px; color: var(--ok) }
+/* Gut zu wissen */
+.tour-fakt { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 13px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); border-left: 3px solid var(--ok) }
+.tour-fakt .eyebrow { color: var(--ok) }
+.tf-satz { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ink2); text-wrap: pretty }
+.tf-satz b { display: block; margin-bottom: 2px; font-size: 22px; line-height: 1.1; font-weight: 900; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums }
+.tf-mit { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ink) } .tf-mit span { font-weight: 800 }
+.tf-q { margin: 0; font-size: 13px; line-height: 1.35; color: var(--muted) }
+/* Weiter und Zurück: bleiben beim Scrollen erreichbar */
+.tour-nav { position: sticky; bottom: 0; z-index: 15; display: flex; gap: 10px; justify-content: flex-end; margin: 0 -20px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); border-top: 1px solid var(--line) }
+.tour-nav .btn { min-width: 140px }
+/* Vorgegeben: Schloss, gedämpft, antippen erklärt */
+.schloss { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--muted) }
+.tf-feld { position: relative; display: flex; flex-direction: column; gap: 1px; padding: 8px 36px 8px 11px; border-radius: 10px; background: var(--surface2); text-align: left }
+.tf-feld small { font-size: 13px; font-weight: 700; color: var(--muted) }
+.tf-feld > span:not(.schloss) { font-size: 15px; font-weight: 700; color: var(--ink2); overflow-wrap: anywhere }
+.tf-feld.mono > span:not(.schloss) { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 500 }
+.tf-feld .schloss { position: absolute; top: 10px; right: 11px }
+.chip.gesperrt { color: var(--muted); background: var(--surface2); border-style: dashed; gap: 6px; cursor: not-allowed }
+.seg > button.gesperrt { color: var(--muted); gap: 6px; cursor: not-allowed }
+.tf-zeile { display: flex; flex-direction: column; gap: 6px; align-items: flex-start }
+.tf-zeile small { font-size: 13px; font-weight: 700; color: var(--muted) }
+.tour-formular { width: min(100%, 380px); gap: 10px; background: var(--surface); box-shadow: var(--lift) }
+.tour-formular .btn { align-self: stretch; margin-top: 4px }
+.tour-regler { width: min(100%, 380px); display: flex; flex-direction: column; gap: 12px }
+.tour-regler .seg { width: 100% }
+/* Kundenansicht im Telefon */
+.phone.app-ansicht .ph-body { background: var(--paper) }
+.tour-kunde { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center }
+.tour-kunde b { font-size: 17px; font-weight: 900 }
+.tour-mess { width: 100%; max-width: 240px; height: auto; margin: 6px 0 2px }
+.tk-stand { display: flex; align-items: center; gap: 10px } .tk-stand .mprog.fertig span { background: var(--ok) } .tk-stand small { font-size: 13px; font-weight: 700; color: var(--ink2) }
+.tour-verlauf { width: min(100%, 460px) }
+.tour-note { width: min(100%, 360px) }
+.tour-nochmal { gap: 6px }
+.tour-eingang { width: min(100%, 520px) !important }
+/* Bestellmaß und PDF */
+.tour-bestell { display: flex; flex-direction: column; gap: 12px }
+.tbm { display: flex; align-items: center; gap: 12px; flex-wrap: wrap }
+.tbm > span:not(.tbm-pfeil) { display: flex; flex-direction: column; gap: 2px }
+.tbm small { font-size: 13px; font-weight: 700; color: var(--muted) } .tbm b { font-size: 22px; font-weight: 900; letter-spacing: -.02em; font-variant-numeric: tabular-nums }
+.tbm-pfeil { font-size: 22px; color: var(--muted) }
+.tour-pdfkarte { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: center }
+.tpk-papier { aspect-ratio: 1 / 1.414; border-radius: 4px; background: #fff; box-shadow: var(--lift); overflow: hidden; display: flex; flex-direction: column }
+.tpk-band { display: flex; align-items: center; gap: 6px; padding: 7px 8px; color: #fff; font-size: 13px; font-weight: 800; line-height: 1.1 }
+.tpk-band span { width: 18px; height: 18px; border-radius: 50%; background: #fff; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex: 0 0 auto }
+.tpk-in { padding: 8px; display: flex; flex-direction: column; gap: 5px; color: #1d1d1f }
+.tpk-in small { font-size: 13px; font-weight: 700; color: #5f5f64 } .tpk-in b { font-size: 13px; font-weight: 900 }
+.tpk-in i { display: block; height: 5px; border-radius: 3px; background: #e6e6ea } .tpk-in i.s { width: 60% }
+.tpk-tx { display: flex; flex-direction: column; gap: 8px; align-items: flex-start }
+.tpk-tx b { font-size: 17px }
+.tour-nb, .tour-code { display: flex; flex-direction: column; gap: 12px; align-items: flex-start }
+.tour-nb .tf-feld, .tour-code .tf-feld { align-self: stretch }
+.tour-ergebnis { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r2); background: var(--ok-soft); color: var(--ok); align-self: stretch }
+.tour-ergebnis b { display: block; font-size: 15px; color: var(--ink) } .tour-ergebnis small { display: block; font-size: 13px; color: var(--ink2) } .tour-ergebnis svg { flex: 0 0 auto; margin-top: 1px }
+.tbi { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px }
+.tbi li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; font-size: 15px; line-height: 1.4 } .tbi b { font-size: 15px } .tbi span { color: var(--ink2) }
+/* Preise */
+.tour-preise { width: min(100%, 460px); display: flex; flex-direction: column; gap: 10px }
+.tpr { display: grid; grid-template-columns: 90px auto minmax(0, 1fr); gap: 4px 14px; align-items: baseline; padding: 14px 16px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring) }
+.tpr.hi { box-shadow: inset 0 0 0 2px var(--ink) }
+.tpr b { font-size: 22px; font-weight: 900; letter-spacing: -.02em; white-space: nowrap } .tpr b small { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 0 }
+.tpr span { font-size: 15px; line-height: 1.4; color: var(--ink2) }
+@media (max-width: 879px) {
+  .tour-schritte { display: flex; overflow-x: auto; margin: 0 -20px; padding: 0 20px 2px; scrollbar-width: none } .tour-schritte::-webkit-scrollbar { display: none }
+  .tour-schritte li { flex: 0 0 auto } .tour-schritte button { width: auto } .tour-schritte button:not([aria-current="step"]) .tx { display: none }
+  .tour-raster { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'oben' 'buehne' 'unten'; gap: 16px }
+  .tour-oben { padding-top: 0 } .tour-oben h3 { font-size: 26px }
+  .tour-buehne { min-height: 0; padding: 22px 16px }
+  .app:not(.is-out) .tour-nav { bottom: calc(66px + env(safe-area-inset-bottom, 0px)) }
+}
+@media (max-width: 520px) {
+  .tour-kopf { align-items: flex-start; flex-direction: column; gap: 10px }
+  .tour-schritte { margin: 0 -16px; padding: 0 16px 2px }
+  .tour-nav { margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) } .tour-nav .btn { flex: 1 1 0; min-width: 0 }
+  .tour-buehne { padding: 18px 12px; border-radius: var(--r3) }
+  .tour-pdfkarte { grid-template-columns: 88px minmax(0, 1fr); gap: 12px }
+  .tpr { grid-template-columns: minmax(0, 1fr) auto; } .tpr span { grid-column: 1 / -1 }
+  .tbi li { grid-template-columns: 84px minmax(0, 1fr) }
+  .tbm { flex-direction: column; align-items: flex-start; gap: 2px } .tbm-pfeil { transform: rotate(90deg); line-height: 1 }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero h2 .w, .hero .lead, .hero .cta, .hero p.hint, .hero-ph .b1, .hero-ph .b2, .hero-ph .b3, .sc-msg .bub, .in-row, .fm-chips .badge, .fm-btn, .b2c-win .dim, .b2c-chips .badge { animation: none !important; opacity: 1; transform: none }

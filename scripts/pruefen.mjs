@@ -43,6 +43,33 @@ const sauber = (page, text) => { ok(page.probleme.length === 0, text + (page.pro
 const foto = async (page, name) => { if (BILDER) await page.screenshot({ path: BILDER + '/' + name + '.png' }); };
 const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' };
 const b64u = (s) => Buffer.from(s, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+/* Betriebe für die Prüfung: die früheren Beispielkonten Fensterbau Brandt (c1) und Glaserei Vogt (c7). Die Website hat keine
+   Demo-Konten mehr; hier entstehen sie im Browser als eigene Betriebe (myCompanies) und werden angemeldet. */
+const betrieb = (page, id) => page.evaluate((id) => {
+  const firmen = { c1: { id: 'c1', plan: 'service', name: 'Fensterbau Brandt', plz: '50668', since: 1998, col: '#0071e3' }, c7: { id: 'c7', plan: 'service', name: 'Glaserei Vogt', plz: '50259', since: 1989, col: '#8a5a2b' } };
+  const projekte = {
+    c1: () => [
+      { id: 'l1', code: '7f3a9', nr: 'P-2026-031', kunde: 'Familie Weber', kontakt: '0171 234 56 78', adresse: 'Lindenstraße 14, 50823 Köln', geb: 'efh', fz: '3 bis 5', plan: ['Fenster', 'Rollläden'], note: 'Rollladen elektrisch gewünscht', created: '10.10.2026', expires: '24.10.2026', status: 'eingegangen', progress: 4, via: 'WhatsApp', du: false, log: { erstellt: '10.10., 09:12', gesendet: '10.10., 09:13', geoeffnet: '10.10., 18:40', arbeit: '10.10., 18:41', eingegangen: '10.10., 19:05' }, aufmass: aufmassOf(demoWins('weber'), projOf({ total: 11, foerd: true, notiz: 'Der Rollladen im Bad klemmt, bitte mit anschauen.' })), stage: 'angebot', memo: 'Angebot bis Freitag', seen: false },
+      { id: 'l2', code: 'k2m8q', nr: 'P-2026-032', kunde: 'Herr Kaya', kontakt: 'kaya@beispiel.de', adresse: '51063 Köln-Mülheim', geb: 'etw', fz: '1 bis 2', plan: ['Fenster'], note: 'Wohnzimmer, vor dem Mieterwechsel', created: '12.10.2026', expires: '26.10.2026', status: 'arbeit', progress: 2, via: 'E-Mail', du: false, log: { erstellt: '12.10., 14:02', gesendet: '12.10., 14:03', geoeffnet: 'gestern, 19:20', arbeit: 'gestern, 19:22' } },
+      { id: 'l3', code: 'p9x4t', nr: 'P-2026-033', kunde: 'Frau Schulze', kontakt: '0160 998 77 66', adresse: '50939 Köln-Sülz', geb: 'rh', fz: '6 bis 10', plan: ['Fenster', 'Haustür'], note: 'ganzes Haus, Rückruf nach 17 Uhr', created: 'heute', expires: dateIn(14), status: 'gesendet', progress: 0, via: 'SMS', du: false, log: { erstellt: 'heute, 08:30', gesendet: 'heute, 08:31' } }
+    ],
+    c7: () => [
+      { id: 'l4', code: 'v3n7r', nr: 'P-2026-007', kunde: 'Bäckerei Lindner', kontakt: '02238 12 34', adresse: 'Venloer Straße 3, 50259 Pulheim', geb: 'gewerbe', fz: '3 bis 5', plan: ['Fenster', 'Insektenschutz'], note: 'Ladenfront und Backstube', created: '08.10.2026', expires: '22.10.2026', status: 'eingegangen', progress: 4, via: 'WhatsApp', du: false, log: { erstellt: '08.10., 10:00', gesendet: '08.10., 10:01', geoeffnet: '08.10., 15:30', arbeit: '08.10., 15:31', eingegangen: '08.10., 16:02' }, aufmass: aufmassOf(demoWins('lindner'), projOf({ gebaeude: 'gewerbe', baujahr: '1965', total: 3, zeit: 'asap', budget: 'b2' })), stage: 'termin', memo: 'Feinaufmaß Dienstag 9 Uhr', seen: true },
+      { id: 'l5', code: 'h6c2w', nr: 'P-2026-008', kunde: 'Familie Roth', kontakt: '0172 333 44 55', adresse: '50259 Pulheim', geb: 'dh', fz: '1 bis 2', plan: ['Fenster'], note: 'Kinderzimmer', created: 'gestern', expires: dateIn(13), status: 'geoeffnet', progress: 0, via: 'WhatsApp', du: true, log: { erstellt: 'gestern, 17:45', gesendet: 'gestern, 17:46', geoeffnet: 'heute, 07:58' } }
+    ]
+  };
+  const konten = {
+    c1: () => ({ plan: 'service', konto: 'service', pay: { type: 'SEPA-Firmenlastschrift', label: 'DE12 •••• •••• 4521', inhaber: 'Fensterbau Brandt', when: '01.09.2026' }, ap: 'Jens Brandt', mail: 'info@fensterbau-brandt.de', tel: '0221 123456', abzug: { seite: 15, oben: 15 }, prefs: { mail: true, remind: true }, rechnungen: [{ nr: 'RE-2026-0912', datum: '30.09.2026', betrag: 27, pos: 3, status: 'bezahlt' }], links: projekte.c1(), book: null, freeUsed: 0 }),
+    c7: () => ({ plan: 'service', konto: 'service', ap: 'Petra Vogt', mail: 'info@glaserei-vogt.de', tel: '02238 4711', abzug: { seite: 10, oben: 10 }, prefs: { mail: true, remind: true }, rechnungen: [], links: projekte.c7(), book: null, freeUsed: 0 })
+  };
+  const nachrichten = {
+    c1: [{ t: 'Herr Kaya misst gerade', s: 'Projekt P-2026-032: 2 von 4 Maßen eingetragen.', when: 'gestern, 19:22', new: true, to: ['link', 'l2'] }, { t: 'Aufmaß eingegangen: Familie Weber', s: '4 Positionen, 5 Elemente, 8 Fotos.', when: '10.10., 19:05', new: false, to: ['link', 'l1'] }],
+    c7: [{ t: 'Familie Roth hat den Link geöffnet', s: 'Projekt P-2026-008, noch keine Maße eingetragen.', when: 'heute, 07:58', new: true, to: ['link', 'l5'] }, { t: 'Aufmaß eingegangen: Bäckerei Lindner', s: '3 Positionen mit 6 Fotos.', when: '08.10., 16:02', new: false, to: ['link', 'l4'] }]
+  };
+  if (!S.myCompanies.some((c) => c.id === id)) S.myCompanies.push(firmen[id]);
+  if (!S.acc[id]) { S.acc[id] = konten[id](); S.notif[id] = nachrichten[id]; S.logins[S.acc[id].mail] = { role: 'betrieb', id: id }; }
+  login('betrieb', id);
+}, id);
 
 /* ---------- 1. Alle Seiten laden ---------- */
 if (teil(1)) {
@@ -184,17 +211,24 @@ if (teil(3)) {
   ok(pdfBytes.subarray(0, 5).toString() === '%PDF-', 'Datei ist ein echtes PDF');
   const roh3 = pdfBytes.toString('latin1'), txt3 = pdfText(await dl3.path());
   ok(/MavenBlack/.test(roh3) && /MavenMedium/.test(roh3), 'PDF trägt die eingebettete Marken-Schrift');
-  ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /dieses Aufmaß in Ihr Fensterino-Konto/.test(txt3), 'PDF an den Fensterbauer: Einladung mit QR-Link und Aufmaß-Code in der Übersicht');
+  ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /Aufmaß digital übernehmen/.test(txt3), 'PDF an den Fensterbauer: Anleitung mit QR-Link und Aufmaß-Code');
+  /* Aufbau nach Leserichtung: Seite 1 mit Weg, Box für den Fensterbauer und Position 1; Seite 2 unten Fensterino für eigene Kunden; Kennung auf jeder Seite */
+  const seiteTxt = (n) => { try { return cp.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
+  const s1 = seiteTxt(1), s2 = seiteTxt(2), info3 = (() => { try { return cp.execFileSync('pdfinfo', [dl3Pfad]).toString('utf8'); } catch (e) { return ''; } })();
+  const kenn = (/AM-[A-Z2-9]{6}/.exec(s1) || [''])[0], nSeiten = +((/Pages:\s+(\d+)/.exec(info3) || [0, 0])[1]);
+  ok(/4 von 5 Schritten erledigt/i.test(s1) && /Ihr Schritt: Angebot/.test(s1) && /FÜR SIE ALS FENSTERBAUER/.test(s1) && /MAUERÖFFNUNG/.test(s1) && /Alle Maße in mm/.test(s1), 'Aufmaßblatt Seite 1: der Weg (4 von 5 erledigt), Box für den Fensterbauer, Position 1 beginnt schon hier');
+  ok(/AUFMASSE IHRER EIGENEN KUNDEN/.test(s2) && /Ihre Kunden messen selbst/.test(s2) && /Scannen: Projekt anlegen/.test(s2) && /3 Projekte kostenlos/.test(s2), 'Aufmaßblatt Seite 2 unten: Fensterino für die eigenen Kunden des Fensterbauers');
+  ok(!!kenn && nSeiten >= 3 && seiteTxt(nSeiten).includes(kenn) && seiteTxt(2).includes(kenn) && /Seite 1 von/.test(s1) && /Title:\s+Aufmaßblatt/.test(info3), 'Kennung ' + kenn + ', Datum und „Seite x von y“ auf jeder Seite, Dokumenttitel gesetzt');
   const seite3 = (() => { try { return cp.execFileSync('pdftotext', ['-f', '3', '-l', '3', dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })();
   ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /FENSTERINO/.test(seite3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite');
-  ok(/IHRES KUNDEN/.test(txt3) && /SO ERREICHEN SIE DEN KUNDEN/.test(txt3) && /Übersicht/.test(txt3) && /Maueröffnung/.test(txt3), 'Ausgabe für den Fensterbauer: Sie-Ansprache, Übersicht, Positionsseite');
+  ok(/IHRES KUNDEN/.test(txt3) && /FÜR SIE ALS FENSTERBAUER/.test(txt3) && /Maueröffnung/.test(txt3) && !/Übersicht/.test(txt3), 'Ausgabe für den Fensterbauer: Sie-Ansprache, Position mit Maßen; bei einer Position keine doppelte Übersicht');
   const m3 = /AM1\.[A-Za-z0-9_\-\s]+/.exec(txt3), code3 = m3 ? m3[0].replace(/\s+/g, '') : '';
   const dekod3 = await page.evaluate((c) => { const o = unpackProject(c); return o ? o.w.length : 0; }, code3);
   ok(dekod3 === 1, 'Aufmaß-Code aus dem PDF-Text ist wieder lesbar (' + code3.length + ' Zeichen)');
   const [dl4] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
   ok(/\.pdf$/.test(dl4.suggestedFilename()), 'Eigen-Kunde lädt seine freigeschaltete PDF: ' + dl4.suggestedFilename());
   const txt4 = pdfText(await dl4.path());
-  ok(/DEIN FENSTER-AUFMASS/.test(txt4) && /Deine Wünsche/.test(txt4) && /DEINE KONTAKTDATEN/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache');
+  ok(/DEIN FENSTER-AUFMASS/.test(txt4) && /DEIN WEG ZU NEUEN FENSTERN/.test(txt4) && /FÜR DEINEN FENSTERBAUER/.test(txt4) && /Jetzt senden/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache, der nächste Schritt ist das Senden');
   await foto(page, 'app-zwei-wege');
   sauber(page, 'Messablauf ohne Fehler');
 
@@ -222,8 +256,8 @@ if (teil(4)) {
   const ctx = await browser.newContext({ ...telefon, acceptDownloads: true });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  // Login als Demo-Betrieb über den vorgesehenen Knopf
-  await page.evaluate(() => { const b = document.createElement('button'); b.setAttribute('data-act', 'demo-as'); b.setAttribute('data-v', 'c1'); document.getElementById('app').appendChild(b); b.click(); });
+  // Anmelden als Betrieb (Prüfkonto, siehe betrieb())
+  await betrieb(page, 'c1');
   await page.waitForTimeout(400);
   const link = await page.evaluate(() => { const l = A().links.find((x) => x.status !== 'eingegangen' && x.status !== 'abgelaufen'); return l ? { url: linkURL(l), code: l.code, kunde: l.kunde, betrieb: BC().name } : null; });
   ok(!!link && link.url.startsWith(BASE + '/app/#k-'), 'Portal erzeugt Kundenlink auf die eigene Domain: ' + (link && link.url.slice(0, 60)) + '…');
@@ -312,7 +346,7 @@ if (teil(6)) {
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   const tun = (act, v, id, c) => page.evaluate(([act, v, id, c]) => { const b = document.createElement('button'); b.setAttribute('data-act', act); if (v) b.setAttribute('data-v', v); if (id) b.setAttribute('data-id', id); if (c) b.setAttribute('data-c', c); document.getElementById('app').appendChild(b); b.click(); }, [act, v || '', id || '', c || '']);
   const toastText = () => page.evaluate(() => { const t = document.getElementById('toast'); return t ? t.textContent : ''; });
-  await tun('demo-as', 'c1'); await page.waitForTimeout(500);
+  await betrieb(page, 'c1'); await page.waitForTimeout(500);
 
   // Übersicht Projekte: Kacheln mit Farbton und Symbol, Karten mit Schrittpunkten, Fensterstapel und Ring
   ok(await page.locator('.stat.tone-warn .stat-ic svg').count() === 1 && await page.locator('.stat.tone-ok').count() === 1, 'Projekte: Kennzahlen mit Farbe und Symbol');
@@ -368,7 +402,7 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/?von=pdf', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
   ok(await page.locator('.banner.vonpdf [data-act="reg"]').count() === 1 && /Fensterino-Aufmaß in der Hand/.test(await page.evaluate(() => document.body.textContent)), 'Wer über die PDF kommt, sieht den Weg zum Konto');
-  await tun('demo-as', 'c7'); await page.waitForTimeout(500);
+  await betrieb(page, 'c7'); await page.waitForTimeout(500);
   ok(await page.locator('.banner.vonpdf [data-v="linkimport"]').count() === 1, 'Angemeldeter Betrieb bekommt direkt „Code vom Kunden einfügen“');
   await tun('vonpdf-zu'); await page.waitForTimeout(200);
   ok(await page.locator('.banner.vonpdf').count() === 0, 'Hinweis lässt sich schließen');
@@ -376,7 +410,7 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster aufmessen\. Selbst\. Richtig\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href*="/app/"]').count() === 1, 'Startseite: Hauseigentümer zuerst, Fensterbauer darunter');
+  ok(/Fenster aufmessen\. Selbst\. Richtig\./.test(start) && /Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite: Hauseigentümer zuerst (aufmessen oder Führung), Fensterbauer darunter');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start), 'Kein Marktplatz mehr auf der Startseite');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
@@ -555,7 +589,7 @@ if (teil(6)) {
   const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.qgroup .note'), bar: document.querySelector('.bb .btn.primary').textContent }));
   await p5.click('.bb .btn.primary'); await p5.waitForTimeout(300);
   const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: document.querySelector('.bb .btn.primary').textContent, steps: stepsFor(S.win).join(',') }));
-  await p5.click('[data-act="demo"]'); await p5.waitForTimeout(1800);
+  await p5.evaluate(() => useDemo()); await p5.waitForTimeout(1800);
   await p5.click('.bb .btn.primary'); await p5.waitForTimeout(700);
   const z0 = await p5.evaluate(() => ({ screen: S.screen, ecken: document.querySelectorAll('.zcorner').length, raster: document.querySelectorAll('.zgrid line').length, dim: !!document.querySelector('.zdim'), e: JSON.stringify(S.win.plan.ecken[2]) }));
   const dot = await p5.$('[data-r="zc-2"] .dot'); const bb = await dot.boundingBox();
@@ -589,7 +623,7 @@ if (teil(7)) {
   const tun = (act, v, id) => page.evaluate(([act, v, id]) => { const b = document.createElement('button'); b.setAttribute('data-act', act); if (v) b.setAttribute('data-v', v); if (id) b.setAttribute('data-id', id); document.getElementById('app').appendChild(b); b.click(); }, [act, v || '', id || '']);
   const toastText = () => page.evaluate(() => { const t = document.getElementById('toast'); return t ? t.textContent : ''; });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await tun('demo-as', 'c1'); await page.waitForTimeout(400);
+  await betrieb(page, 'c1'); await page.waitForTimeout(400);
   const vorher = await page.evaluate(() => ({ book: ledger(A()).filter((b) => b.kind === 'aufmass').length, frei: freeLeft(A()), url: linkURL(A().links.find((l) => l.id === 'l1')) }));
   // Runde 2 anfragen
   await tun('go', 'link', 'l1'); await page.waitForTimeout(300);
@@ -639,7 +673,7 @@ if (teil(7)) {
   sauber(page, 'Nachbesserung Betrieb ohne Fehler');
 
   // Anderes Gerät: Kunde hat keine gespeicherten Angaben, misst nur das eine Fenster neu → wird ergänzt
-  await tun('demo-as', 'c7'); await page.waitForTimeout(400);
+  await betrieb(page, 'c7'); await page.waitForTimeout(400);
   await tun('sheet', 'nachbesserung', 'l4'); await page.waitForSelector('#nb-hinweis'); await tun('nb-send', '', 'l4'); await page.waitForTimeout(300);
   const url4 = await page.evaluate(() => linkURL(A().links.find((x) => x.id === 'l4')));
   const alt4 = await page.evaluate(() => A().links.find((x) => x.id === 'l4').aufmass.windows.length);
@@ -855,6 +889,122 @@ if (teil(8)) {
     ok(r2.rechnungen === 0, 'Zweiter Lauf berechnet nichts doppelt');
   }
   if (kind) kind.kill();
+}
+
+/* ---------- 9. Führung (Hauseigentümer) und Tour (Fensterbauer) statt Demo-Konten ---------- */
+if (teil(9)) {
+  console.log('9. Führung und Tour');
+  // Startseite des Portals: Führung starten führt in die App, Tour für Fensterbauer statt Demo
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true });
+  const page = await neueSeite(ctx);
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
+  ok(await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1 && await page.locator('#betriebe [data-act="tour"]').count() === 1, 'Startseite: „Führung starten“ für Hauseigentümer, „Tour starten“ für Fensterbauer');
+  const ohneDemo = async (wo) => { const t = await page.evaluate(() => document.body.innerText); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
+  ok(await ohneDemo('Startseite') === true, 'Startseite ohne Demo-Konten und Beispiel-Registrierung');
+  await page.click('.top [data-act="sheet"][data-v="login"]'); await page.waitForTimeout(300);
+  ok(await ohneDemo('Anmelden') === true && await page.locator('.sheet [data-act="tour"]').count() === 1, 'Anmelden: keine Demo-Zugänge mehr, dafür der Weg in die Tour');
+  await page.evaluate(() => { S.sheet = null; render(); });
+  await page.click('.top [data-act="reg"]'); await page.waitForTimeout(300);
+  ok(await ohneDemo('Registrieren') === true && await page.locator('.fillbtn').count() === 0, 'Registrieren ohne „Beispieldaten einsetzen“');
+  // Tour für Fensterbauer: acht Schritte, je ein Fakt mit Quelle, Vorgegebenes gesperrt, nichts wird gespeichert
+  await page.evaluate(() => { S.reg = null; nav('landing'); }); await page.waitForTimeout(300);
+  const vorTour = await page.evaluate(() => JSON.stringify({ acc: S.acc, logins: S.logins }));
+  await page.click('#betriebe [data-act="tour"]'); await page.waitForSelector('.tourw'); await page.waitForTimeout(300);
+  const ids = [];
+  for (let i = 0; i < 8; i++) {
+    const st = await page.evaluate(() => ({ id: TOUR[S.tour.i], fakt: !!document.querySelector('.tour-fakt .tf-q'), merk: document.querySelectorAll('.tour-merk li').length, schritte: document.querySelectorAll('.tour-schritte button').length }));
+    ids.push(st.id + (st.fakt && st.merk >= 2 && st.schritte === 8 ? '' : '!'));
+    if (st.id === 'misst') await page.waitForTimeout(5500);
+    if (i < 7) { await page.click('.tour-nav .btn.primary'); await page.waitForTimeout(250); }
+  }
+  ok(ids.join(',') === 'projekt,link,misst,eingang,bestell,nachbes,code,start', 'Tour: acht Schritte, jeder mit Fakt und Quelle (' + ids.join(',') + ')');
+  ok(await page.locator('.tour-nav [data-act="reg"]').count() === 1 && /3 Projekte kostenlos/.test(await page.evaluate(() => document.body.innerText)), 'Letzter Schritt: Preise und „Kostenlos starten“');
+  await page.click('.tour-schritte [data-v="0"]'); await page.waitForTimeout(250);
+  ok(await page.locator('.tf-feld.gesperrt').count() === 3 && await page.locator('.chip.gesperrt[aria-disabled="true"]').count() >= 2, 'Schritt 1: Kundendaten vorgegeben, mit Schloss');
+  await page.click('.chip.gesperrt', { force: true }); await page.waitForTimeout(200);
+  ok(/In der Tour vorgegeben/.test(await page.evaluate(() => (document.getElementById('toast') || {}).textContent || '')), 'Gesperrtes erklärt sich beim Antippen');
+  await page.click('[data-act="tour-du"][data-v="du"]'); await page.click('.tour-schritte [data-v="1"]'); await page.waitForTimeout(250);
+  ok(/Hallo Familie Weber, für euer Fensterangebot/.test(await page.evaluate(() => document.querySelector('.bub.out').textContent)), 'Anrede Du ändert die Nachricht im Telefon');
+  await page.click('.tour-schritte [data-v="4"]'); await page.waitForTimeout(250);
+  await page.click('[data-act="tour-abzug"][data-v="20"]'); await page.waitForTimeout(200);
+  ok(/1\.219 × 1\.419 mm/.test(await page.evaluate(() => document.querySelector('.tbm').textContent)), 'Abzug 20 mm rechnet das Bestellmaß neu');
+  const [dlB] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="tour-pdf"]')]);
+  let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlB.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
+  ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Bestellmaß, gekennzeichnet als Beispiel');
+  await page.click('.tour-schritte [data-v="5"]'); await page.click('[data-act="tour-nb"]'); await page.waitForTimeout(200);
+  await page.click('.tour-schritte [data-v="6"]'); await page.click('[data-act="tour-code"]'); await page.waitForTimeout(200);
+  ok(await page.locator('.tour-ergebnis').count() === 1, 'Code übernehmen zeigt das neue Projekt');
+  await page.click('.tour-kopf [data-act="tour-ende"]'); await page.waitForTimeout(300);
+  ok(await page.evaluate((v) => S.screen === 'landing' && !S.tour && !S.role && JSON.stringify({ acc: S.acc, logins: S.logins }) === v, vorTour), 'Tour beenden: zurück zur Startseite, kein Konto, nichts gespeichert');
+  // Frühere Demo-Sitzung: Konten verschwinden, die Anmeldung endet; eigene Betriebe bleiben
+  await page.evaluate(() => { localStorage.setItem('aufmass.portal.v1', JSON.stringify({ v: 5, role: 'betrieb', cur: 'c1', screen: 'links', hist: [], acc: { c1: { links: [], book: [] }, c7: { links: [] }, u1: { links: [], book: [], ap: 'Eva Eigen', mail: 'eva@beispiel.de' } }, myCompanies: [{ id: 'u1', name: 'Eigenbau Eva', plz: '50667', col: '#0071e3' }], logins: { 'info@fensterbau-brandt.de': { role: 'betrieb', id: 'c1' }, 'eva@beispiel.de': { role: 'betrieb', id: 'u1' } }, notif: { c1: [], u1: [] } })); });
+  await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+  ok(await page.evaluate(() => !S.role && S.screen === 'landing' && !S.acc.c1 && !S.acc.c7 && !!S.acc.u1 && !S.logins['info@fensterbau-brandt.de'] && !!S.logins['eva@beispiel.de']), 'Alte Demo-Sitzung: abgemeldet, Demo-Konten entfernt, eigener Betrieb bleibt');
+  sauber(page, 'Tour für Fensterbauer ohne Fehler');
+  await ctx.close();
+
+  // Führung in der App: gesperrte Optionen, Fakten, Beispiel-PDF, eigenes Projekt bleibt unberührt
+  const ctx2 = await browser.newContext({ ...telefon, acceptDownloads: true });
+  const ap = await neueSeite(ctx2);
+  await ap.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await ap.evaluate(() => { S.windows = demoProject().slice(0, 1); persist(); render(true); });
+  const vorher = await ap.evaluate(() => localStorage.getItem('aufmass.v1'));
+  ok(await ap.locator('.hero [data-act="tour-start"]').count() === 1, 'App-Startseite: „Führung starten“ neben „Fenster aufmessen“');
+  await ap.click('.hero [data-act="tour-start"]'); await ap.waitForSelector('.scr[data-screen="tour"]');
+  const schritte = [];
+  for (let i = 0; i < 9; i++) {
+    const st = await ap.evaluate(() => ({ id: TOUR[S.tour.i], fakt: !!document.querySelector('.tour-fakt .tf-q'), gesperrt: document.querySelectorAll('.gesperrt[aria-disabled="true"], .farbfeld.gesperrt').length }));
+    schritte.push(st);
+    if (st.id === 'fotos') await ap.waitForTimeout(1900);
+    if (i < 8) { await ap.click('.bb .btn.primary'); await ap.waitForTimeout(350); }
+  }
+  ok(schritte.map((x) => x.id).join(',') === 'start,fotos,messen,oeffnung,material,farbe,glas,sonne,blatt' && schritte.every((x) => x.fakt), 'Führung: neun Schritte, in jedem ein Fakt mit Quelle');
+  ok(['start', 'oeffnung', 'material', 'farbe', 'glas', 'sonne'].every((id) => schritte.find((x) => x.id === id).gesperrt > 0), 'Führung: einige Optionen tragen ein Schloss (Element, Öffnung, Material, Farbe, Glas, Sonnenschutz)');
+  ok(/An beliebig viele Fensterbauer/.test(await ap.evaluate(() => document.body.innerText)) && await ap.locator('.tb .tb-weg li').count() === 5, 'Am Ende: Vorschau des Aufmaßblatts und „An beliebig viele Fensterbauer“');
+  const [dlA] = await Promise.all([ap.waitForEvent('download', { timeout: 10000 }), ap.click('[data-act="tour-pdf"]')]);
+  let txtA = ''; try { txtA = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlA.path(), '-']).toString('utf8'); } catch (e) { txtA = ''; }
+  ok(/AM-BEISPIEL/.test(txtA) && /BEISPIEL/.test(txtA) && !/AM1\./.test(txtA) && /DEIN WEG ZU NEUEN FENSTERN/.test(txtA), 'Beispiel-PDF der Führung: Wasserzeichen, ohne Aufmaß-Code, Seite 1 mit dem Weg');
+  await ap.click('.hdr-btn[data-act="back"]'); await ap.waitForTimeout(300);
+  ok(await ap.evaluate(() => !S.tour && S.screen === 'home' && S.windows.length === 1) && await ap.evaluate(() => localStorage.getItem('aufmass.v1')) === vorher, 'Führung beenden: eigenes Projekt unverändert');
+  await ap.goto(BASE + '/app/#fuehrung', { waitUntil: 'networkidle' }); await ap.waitForTimeout(300);
+  ok(await ap.evaluate(() => S.screen === 'tour' && TOUR[S.tour.i] === 'start'), '#fuehrung (von der Startseite) öffnet die Führung');
+  await ap.click('[data-act="situation"][data-v="neu"]', { force: true }); await ap.waitForTimeout(150);
+  ok(await ap.evaluate(() => !S.win.neu && /gesperrt/.test(S.toast)), 'Gesperrt antippen: Hinweis, keine Änderung');
+  await ap.click('[data-act="tour-art"][data-v="fsw"]'); await ap.waitForTimeout(300);
+  ok(await ap.evaluate(() => S.win.art === 'fsw' && derive(S.win).elW === 3600 && derive(S.win).complete), 'Element frei wählbar, Maße passend vorgegeben');
+  sauber(ap, 'Führung ohne Fehler');
+  await ctx2.close();
+
+  // Aufmaßblatt: Seite 1 hält auch mit langer Nachricht und allen Kontaktdaten, eine Position bleibt beisammen
+  const ctx3 = await browser.newContext({ ...telefon });
+  const bp = await neueSeite(ctx3);
+  await bp.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const cp9 = await import('node:child_process'), fs9 = await import('node:fs'), os9 = await import('node:os'), path9 = await import('node:path');
+  const blattDatei = async (name, extra, eins) => {
+    const b64 = await bp.evaluate(async ([extra, eins]) => {
+      S.windows = eins ? demoProject().slice(0, 1) : demoProject();
+      S.proj = Object.assign({}, S.proj, { name: 'Familie Weber', ort: '50823 Köln', total: 11, foerd: true }, extra);
+      await blattSchrift(); const blob = await blattPDF('kunde');
+      const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s);
+    }, [extra, eins]);
+    const pfad = path9.join(os9.tmpdir(), 'fensterino-pruefung-' + name + '.pdf'); fs9.writeFileSync(pfad, Buffer.from(b64, 'base64')); return pfad;
+  };
+  const seiteT = (pfad, n) => { try { return cp9.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
+  const alleT = (pfad) => { try { return cp9.execFileSync('pdftotext', ['-layout', pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
+  /* Lage eines Wortes auf Seite 1 in pt von oben (pdftotext -bbox): tiefste Unterkante bzw. höchste Oberkante */
+  const woerter = (pfad, wort) => { try { const html = cp9.execFileSync('pdftotext', ['-bbox', '-f', '1', '-l', '1', pfad, '-']).toString('utf8'); return [...html.matchAll(/<word xMin="[\d.]+" yMin="([\d.]+)" xMax="[\d.]+" yMax="([\d.]+)">([^<]*)<\/word>/g)].filter((x) => x[3] === wort).map((x) => [+x[1], +x[2]]); } catch (e) { return []; } };
+  const zeichnungUeberFuss = (pfad) => { const leg = woerter(pfad, 'Hand'), fuss = woerter(pfad, 'Erstellt'); return leg.length > 0 && fuss.length > 0 && Math.max(...leg.map((x) => x[1])) < Math.min(...fuss.map((x) => x[0])) - 4; };
+  const LANG = 'Bitte beachten: Der Rollladen im Bad klemmt seit dem Winter und lässt sich nur noch halb herunterlassen. Im Wohnzimmer zieht es unten links, vermutlich ist die Dichtung porös. Wir möchten gern Angebote für beide Fenster, am liebsten mit elektrischem Rollladen, und eine Einschätzung, ob sich ein Austausch der Fensterbänke lohnt. Parken bitte in der Einfahrt, der Hund ist freundlich.';
+  const pLang = await blattDatei('lang', { notiz: LANG, tel: '0171 2345678', mail: 'familie.weber-schmidt@beispiel-mail.de', erreich: 'ab' }, false);
+  const l1 = seiteT(pLang, 1), lRest = alleT(pLang).split(l1).join('');
+  ok(/MAUERÖFFNUNG/.test(l1) && /vollständig nach Pos\. 1/.test(l1) && !/Hund ist freundlich/.test(l1) && /Hund ist freundlich/.test(lRest) && /Deine Nachricht/.test(lRest), 'Aufmaßblatt, lange Nachricht: auf Seite 1 dreizeilig, danach vollständig; Position 1 bleibt auf Seite 1');
+  ok(zeichnungUeberFuss(pLang), 'Aufmaßblatt, lange Nachricht und alle Kontaktdaten: die Zeichnung auf Seite 1 endet über dem Fuß');
+  const pVoll = await blattDatei('voll', { notiz: 'Rollladen im Bad klemmt.', tel: '0171 2345678', mail: 'weber@beispiel.de', erreich: 'ab', baujahr: '1965' }, false);
+  ok(zeichnungUeberFuss(pVoll) && !/vollständig nach Pos/.test(alleT(pVoll)), 'Aufmaßblatt mit allen Kontaktdaten und kurzer Nachricht: Seite 1 passt, Nachricht ungekürzt');
+  const pZwei = await blattDatei('zwei', {}, false);
+  ok(!/fortsetzung/i.test(alleT(pZwei)) && /Bad/.test(seiteT(pZwei, 3)) && /AUS DEN FOTOS/.test(seiteT(pZwei, 3)), 'Aufmaßblatt: Position 2 steht samt Fotoauswertung auf einer Seite (Zeichnung etwas kleiner statt Rest auf neuer Seite)');
+  sauber(bp, 'Aufmaßblatt-Prüfung ohne Fehler');
+  await ctx3.close();
 }
 
 await browser.close();
