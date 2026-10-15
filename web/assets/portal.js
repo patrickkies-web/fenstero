@@ -116,6 +116,7 @@ const Server = {
     this.lesen();
     if (this.sitzung) { try { await this.laden(); if (!S.role || S.cur === this.id) { S.role = 'betrieb'; S.cur = this.id; } } catch (e) { /* Sitzung abgelaufen: Startseite */ } }
     else if (S.cur === this.id) { S.role = null; S.cur = null; }
+    await this.linkAnmeldung();
     await this.rueckkehr();
     return true;
   },
@@ -131,8 +132,26 @@ const Server = {
     } catch (e) { toast(e.message); }
   },
   async tu(fn) { if (this.laeuft) return; this.laeuft = true; try { return await fn(); } catch (e) { toast(e.message || 'Das hat nicht geklappt.'); } finally { this.laeuft = false; } },
-  codeSenden(mail) { return this.tu(async () => { const sh = S.sheet; if (VAL.mail(mail) !== true) { sh.err = 'Bitte eine gültige E-Mail-Adresse eingeben.'; return render(); } await this.api('/api/konto/anmelden', { mail: mail }); sh.schritt = 'code'; sh.mail = mail; sh.err = ''; sh.code = ''; render(); toast('Code ist unterwegs an ' + mail); }); },
-  codePruefen(mail, code) { return this.tu(async () => { const sh = S.sheet; let r; try { r = await this.api('/api/konto/bestaetigen', { mail: mail, code: code }); } catch (e) { sh.err = e.message; return render(); } this.merken({ token: r.token, refresh: r.refresh, mail: r.mail }); if (r.konto) { this.uebernehmen(r.konto); S.sheet = null; S.reg = null; login('betrieb', this.id, 'Willkommen zurück, ' + String(r.konto.acc.ap || '').split(' ')[0]); } else { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: r.mail }, err: {}, server: true }; go('reg'); toast('Fast geschafft: noch Ihren Betrieb eintragen.'); } }); },
+  codeSenden(mail) { return this.tu(async () => { const sh = S.sheet; if (VAL.mail(mail) !== true) { sh.err = 'Bitte eine gültige E-Mail-Adresse eingeben.'; return render(); } await this.api('/api/konto/anmelden', { mail: mail }); sh.schritt = 'code'; sh.mail = mail; sh.err = ''; sh.code = ''; render(); toast('E-Mail ist unterwegs an ' + mail); }); },
+  codePruefen(mail, code) { return this.tu(async () => { const sh = S.sheet; let r; try { r = await this.api('/api/konto/bestaetigen', { mail: mail, code: code }); } catch (e) { sh.err = e.message; return render(); } this.nachAnmeldung(r); }); },
+  /* Nach Code oder Anmeldelink: Sitzung merken, ins Konto oder (neue Adresse) den Betrieb eintragen */
+  nachAnmeldung(r) {
+    this.merken({ token: r.token, refresh: r.refresh, mail: r.mail });
+    if (r.konto) { this.uebernehmen(r.konto); S.sheet = null; S.reg = null; login('betrieb', this.id, 'Willkommen zurück, ' + String(r.konto.acc.ap || '').split(' ')[0]); }
+    else { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: r.mail }, err: {}, server: true }; go('reg'); toast('Fast geschafft: noch Ihren Betrieb eintragen.'); }
+  },
+  /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… hierher zurück, bei Fehlern mit #error=…;
+     die Werte verschwinden sofort aus der Adresszeile */
+  async linkAnmeldung() {
+    const h = new URLSearchParams(location.hash.replace(/^#/, '')), token = h.get('access_token'), fehler = h.get('error_code') || h.get('error');
+    if (!token && !fehler) return false;
+    history.replaceState(null, '', location.pathname + location.search);
+    if (!token) { toast(fehler === 'otp_expired' ? 'Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.' : 'Die Anmeldung über den Link hat nicht geklappt. Bitte noch einmal.'); return true; }
+    const r = await fetch('/api/konto/sitzung', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ token: token, refresh: h.get('refresh_token') || '' }) }).then((x) => x.json()).catch(() => null);
+    if (!r || !r.ok) { toast((r && r.fehler) || 'Die Anmeldung über den Link hat nicht geklappt. Bitte noch einmal.'); return true; }
+    this.nachAnmeldung(r);
+    return true;
+  },
   registrieren(d) { return this.tu(async () => { const r = await this.api('/api/konto/registrieren', { firma: d.firma, ap: d.ap, tel: d.tel, plz: d.plz, col: d.col, agb: !!d.agb }); this.uebernehmen(r.konto); S.reg = null; S._feier = 'willkommen'; login('betrieb', this.id, 'Willkommen, ' + String(d.ap || '').trim().split(' ')[0]); }); },
   abmelden() { this.merken(null); delete S.acc[this.id]; delete S.notif[this.id]; S.myCompanies = (S.myCompanies || []).filter((c) => c.id !== this.id); S.cur = null; },
   projektAnlegen(n) { return this.tu(async () => { const r = await this.api('/api/konto/projekte', n); this.uebernehmen(r.konto); S.nl = null; S.justCreated = r.id; S._feier = 'projekt'; S.hist = S.hist.filter((h) => h[0] !== 'newlink'); S.screen = 'links'; go('link', r.id); setTimeout(() => { if (S.justCreated === r.id) S.justCreated = null; }, 6000); }); },
@@ -833,10 +852,10 @@ const LEGAL = { impressum: ['Impressum', 'Anbieter und Kontakt nach § 5 DDG.', 
 function loginServer(s) {
   const schritt = s.schritt || 'mail', reg = s.zweck === 'reg';
   const feld = schritt === 'mail'
-    ? '<div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email" inputmode="email">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Kein Passwort: Sie bekommen einen sechsstelligen Code per E-Mail.</small>') + '</div>'
-    : '<div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-code">Code aus der E-Mail</label><input id="lg-code" data-in="lg:code" value="' + esc(s.code || '') + '" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Geschickt an ' + esc(s.mail) + '. Kein Code? Auch im Spam-Ordner nachsehen.</small>') + '</div>';
+    ? '<div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email" inputmode="email">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Kein Passwort: Sie bekommen eine E-Mail mit Anmeldelink oder Code.</small>') + '</div>'
+    : '<div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-code">Code aus der E-Mail</label><input id="lg-code" data-in="lg:code" value="' + esc(s.code || '') + '" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Geschickt an ' + esc(s.mail) + '. Steht in der E-Mail ein Link statt eines Codes, klicken Sie einfach darauf. Nichts angekommen? Auch im Spam-Ordner nachsehen.</small>') + '</div>';
   return '<h3>' + (reg ? 'Konto für Ihren Betrieb' : 'Anmelden für Fensterbauer') + '</h3><p class="sub" style="margin: -4px 0 12px">' + (reg ? 'Zuerst Ihre E-Mail bestätigen, dann Ihren Betrieb eintragen. Die ersten ' + P().frei + ' Projekte sind kostenlos.' : 'Ein Kunde hat Ihnen ein eeziframes-Aufmaß geschickt? Mit dem Code von der Übersichtsseite holen Sie es nach der Anmeldung in Ihr Konto.') + '</p>' +
-    '<form class="form" data-form="srvlogin" novalidate>' + feld + '<div class="row between">' + (schritt === 'code' ? '<button type="button" class="linkbtn" data-act="srv-mail">Andere E-Mail</button>' : '<span></span>') + '<button type="submit" class="btn primary">' + (schritt === 'mail' ? 'Code schicken' : (reg ? 'Weiter' : 'Anmelden')) + '</button></div></form>' +
+    '<form class="form" data-form="srvlogin" novalidate>' + feld + '<div class="row between">' + (schritt === 'code' ? '<button type="button" class="linkbtn" data-act="srv-mail">Andere E-Mail</button>' : '<span></span>') + '<button type="submit" class="btn primary">' + (schritt === 'mail' ? 'E-Mail schicken' : (reg ? 'Weiter' : 'Anmelden')) + '</button></div></form>' +
     '<p class="sub center" style="margin-top: 14px">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p>';
 }
 const SHEETS = {

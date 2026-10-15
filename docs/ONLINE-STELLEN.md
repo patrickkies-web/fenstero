@@ -15,7 +15,7 @@ Diese Anleitung bringt die eeziframes-Website ins Netz: erst unter einer kostenl
 | Aufmaß zum Betrieb | Kunde schickt den Aufmaß-Code (WhatsApp/E-Mail), der Betrieb fügt ihn ein | geht beim Absenden direkt an den Betrieb, kein Code-Umweg |
 | Aufmaßblatt für Hauseigentümer ohne Link (7,99 € inkl. MwSt.) | Paywall ist da, Kauf ist ein gekennzeichneter **Testkauf** ohne Abbuchung | echte Zahlung über Stripe (Karte, PayPal, Apple/Google Pay), Rechnung per E-Mail |
 | KI-Auswertung der Fotos | funktioniert mit Anthropic-Schlüssel (Schritt 5), sonst ohne KI | gleich |
-| Bereich für Betriebe: Projekte, Einladungslisten, Nachbesserung | funktioniert im Browser mit Beispieldaten | echte Konten, Anmeldung per E-Mail-Code, alles auf dem Server |
+| Bereich für Betriebe: Projekte, Einladungslisten, Nachbesserung | funktioniert im Browser mit Beispieldaten | echte Konten, Anmeldung per E-Mail (Link oder Code), alles auf dem Server |
 | Abrechnung Betriebe (3 Projekte frei, dann 9 € · Abo 10 · Plus) | nur angezeigt, nichts wird berechnet, Zähler im Browser | Zählung und Sperre auf dem Server, Zahlungsart und Abos bei Stripe, Sammelrechnung alle zwei Wochen |
 | Speicherort | nur im Browser des jeweiligen Geräts | Supabase (Frankfurt), das Aufmaß des Hauseigentümers bleibt weiter auf seinem Gerät |
 
@@ -135,16 +135,18 @@ Stripe geht auch allein, ohne Supabase: Dann kaufen Hauseigentümer das Aufmaßb
 1. [supabase.com](https://supabase.com) → **New project**: Name `eeziframes`, Region **Central EU (Frankfurt)**, Datenbank-Passwort über **Generate a password** (in den Passwort-Manager, du brauchst es sonst nicht). Fragt Supabase nach Sicherheitsoptionen, die Vorgaben lassen („Data API + Connection String“, „public schema“): Der Server spricht über die Data API mit der Datenbank.
 2. **SQL Editor → New query**: den Inhalt von `supabase/schema.sql` einfügen, **Run**. Das legt die Tabellen `betriebe`, `zahlungen`, `ereignisse` an und sperrt sie für Browser (nur der Server kommt mit dem geheimen Schlüssel dran).
 3. **Project Settings → API Keys**: den **Secret key** (`sb_secret_…`) anzeigen und kopieren, gleich bei Cloudflare als Secret `SUPABASE_SECRET_KEY` eintragen (C). Die **Project URL** (`https://….supabase.co`) steht oben unter **Connect**. Der geheime Schlüssel darf nur bei Cloudflare liegen, nie im Browser, nie im Repo, nie in einem Chat. Den Publishable key (`sb_publishable_…`) braucht der Server nicht; ohne ihn nimmt die Anmeldung den geheimen. Ältere Projekte mit den früheren Schlüsseln (`eyJ…`, „Legacy API keys“: service_role und anon) gehen weiter unter `SUPABASE_SERVICE_KEY` und `SUPABASE_ANON_KEY`; Supabase schafft sie bis Ende 2026 ab, also besser die neuen nehmen.
-4. **Authentication → Sign In / Providers → Email**: eingeschaltet lassen, „Confirm email“ ist egal (wir nutzen den Code), **„Allow new users to sign up“ muss an sein**.
-5. **Authentication → Emails → Templates → Magic Link**: Betreff zum Beispiel `Ihr eeziframes-Anmeldecode`, Text zum Beispiel:
+4. **Authentication → Sign In / Providers → Email**: eingeschaltet lassen, „Confirm email“ ist egal, **„Allow new users to sign up“ muss an sein**.
+5. **Authentication → URL Configuration**: **Site URL** `https://eeziframes.com` (statt `http://localhost:3000`), bei **Redirect URLs** `https://eeziframes.com/**` hinzufügen (und die `…workers.dev`-Adresse mit `/**`, falls du dort testest). Dorthin führt der Anmeldelink aus der E-Mail zurück.
+6. **Die Anmelde-E-Mail.** Betriebe melden sich ohne Passwort an: Sie bekommen eine E-Mail mit Anmeldelink oder sechsstelligem Code, die Website nimmt beides an. Ohne eigenen Mailversand verschickt Supabase seine Standardmail mit Link, die Vorlagen lassen sich dann nicht ändern, und der eingebaute Versand schickt nur an Adressen aus deinem Supabase-Team, höchstens **2 E-Mails pro Stunde** (andere Adressen bekommen „Email address not authorized“). Zum Testen reicht das mit deiner eigenen Adresse.
+7. Für echte Betriebe, **Authentication → Emails → SMTP Settings** (bzw. „Set up SMTP“): einen eigenen Versand eintragen (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@eeziframes.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen). Danach unter **Authentication → Emails → Templates** die Vorlage **Magic Link** anpassen, Betreff zum Beispiel `Ihr eeziframes-Anmeldecode`, Text zum Beispiel:
    ```
-   Guten Tag,
-   Ihr Anmeldecode für eeziframes lautet: {{ .Token }}
-   Er gilt eine Stunde. Wenn Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail.
+   <p>Guten Tag,</p>
+   <p>Ihr Anmeldecode für eeziframes lautet: <strong>{{ .Token }}</strong></p>
+   <p>Oder melden Sie sich direkt an: <a href="{{ .ConfirmationURL }}">Anmelden</a></p>
+   <p>Code und Link gelten eine Stunde. Wenn Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail.</p>
    ```
-   Wichtig ist `{{ .Token }}`: Das ist der sechsstellige Code. Die Vorlage „Confirm signup“ genauso anpassen (sie wird beim allerersten Anmelden einer Adresse verschickt).
-6. **Authentication → Emails → SMTP Settings**: Der eingebaute Versand von Supabase schickt nur an Adressen aus deinem Supabase-Team und höchstens **2 E-Mails pro Stunde**; andere Adressen bekommen „Email address not authorized“. Zum Testen reicht deine eigene Adresse, für echte Betriebe trag einen eigenen Versand ein (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@eeziframes.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen).
-7. Optional, **Authentication → Rate Limits**: Codes pro Stunde und Adresse begrenzen (die Website bremst zusätzlich: 8 Codes je 10 Minuten und IP).
+   `{{ .Token }}` ist der Code, `{{ .ConfirmationURL }}` der Link. Die Vorlage **Confirm signup** genauso anpassen (sie geht beim allerersten Anmelden einer Adresse raus).
+8. Optional, **Authentication → Rate Limits**: Anmelde-E-Mails pro Stunde begrenzen (die Website bremst zusätzlich: 8 je 10 Minuten und IP).
 
 ### B. Stripe (Zahlungen), etwa 15 Minuten, erst im Testmodus
 
@@ -187,7 +189,7 @@ Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrang
 - `https://eeziframes.com/api/status` zeigt `"zahlung":true`, `"testmodus":true` (Sandbox-Schlüssel) und `"webhook":true`, mit Supabase auch `"daten":true`, dazu die Preise. Ist ein Schlüssel verwechselt oder fehlt einer, steht dort `"hinweise"` mit dem Namen der Variablen (nie mit ihrem Wert).
 - App ohne Link: ein Fenster messen, **Freischalten · 7,99 €**, E-Mail, weiter zu Stripe. Die Kasse sagt „Testbetrieb“ und nennt die Testkarte `4242 4242 4242 4242` (Datum in der Zukunft, beliebige Prüfziffer). Zurück in der App ist das Blatt frei, PDF und Code sind da, Stripe schickt den Beleg.
 - Stripe → **Workbench → Webhooks** → dein Ziel: Zustellungen mit Antwort `200`. Ein `503` bei `invoice.paid` kurz nach einer Sammelrechnung ist gewollt: Die Rechnung wird gerade eingetragen, Stripe stellt später erneut zu.
-- Mit Supabase, Betriebe: **Kostenlos starten** → deine E-Mail → Code aus der Mail → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code. Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder die Testkarte hinterlegt ist (das Blatt nennt beide im Testmodus). Nach dem ersten Abo stehen in Stripe unter **Produktkatalog** „eeziframes Abo 10“ und die Steuersätze.
+- Mit Supabase, Betriebe: **Kostenlos starten** → deine E-Mail → in der Mail auf den Anmeldelink klicken (oder den Code eingeben) → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code. Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder die Testkarte hinterlegt ist (das Blatt nennt beide im Testmodus). Nach dem ersten Abo stehen in Stripe unter **Produktkatalog** „eeziframes Abo 10“ und die Steuersätze.
 
 ### E. Echtes Geld
 

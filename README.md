@@ -23,7 +23,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weißes Fenster auf schwarzer Kachel, der Flügel kippt kurz |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT), qrcode-generator (MIT) und lottie-web light (MIT), lokal statt von fremden Servern |
 | `web/assets/lottie/`, `scripts/lottie-erzeugen.py` | fünf gezeichnete Bewegtbilder, aus Code erzeugt (`python3 scripts/lottie-erzeugen.py web/assets/lottie`) |
-| `functions/api/` | der Server: `router.js` (Verteiler), `ki.js` (KI-Auswertung der Einbausituation), `zahlung.js` (Kauf des Aufmaßblatts, Nachweis, Webhook), `konten.js` (Betriebe, Projekte, Eingang, Tarif, Sammelrechnung), `stripe.js`, `auth.js` (E-Mail-Code über Supabase Auth), `speicher.js` (Supabase oder Attrappe), `umgebung.js` (alle Variablen) |
+| `functions/api/` | der Server: `router.js` (Verteiler), `ki.js` (KI-Auswertung der Einbausituation), `zahlung.js` (Kauf des Aufmaßblatts, Nachweis, Webhook), `konten.js` (Betriebe, Projekte, Eingang, Tarif, Sammelrechnung), `stripe.js`, `auth.js` (Anmeldung per E-Mail mit Link oder Code über Supabase Auth), `speicher.js` (Supabase oder Attrappe), `umgebung.js` (alle Variablen) |
 | `supabase/schema.sql` | die drei Tabellen, einmal im Supabase-Projekt ausführen |
 | `scripts/` | lokaler Testserver (mit Attrappen für Datenbank und Kasse), Browser-Prüfung in 11 Abschnitten (Abschnitt 11 gegen ein nachgestelltes Stripe, `stripe-attrappe.mjs`), Umbenennen |
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung |

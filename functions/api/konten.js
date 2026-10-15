@@ -92,7 +92,17 @@ export const KONTO = {
   /* --- Anmeldung --- */
   'POST /api/konto/anmelden': async (ctx) => {
     if (!erlaubt('otp:' + ip(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
-    return codeSenden(ctx.k, ctx.sp, ctx.body.mail);
+    return codeSenden(ctx.k, ctx.sp, ctx.body.mail, zurueck(ctx));
+  },
+  /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… auf die Startseite, portal.js schickt beides her */
+  'POST /api/konto/sitzung': async (ctx) => {
+    if (!erlaubt('otpv:' + ip(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
+    const b = ctx.body || {}, token = str(b.token, 4000), refresh = str(b.refresh, 400);
+    const n = await nutzer(ctx.k, token); if (!n) throw new ApiFehler('Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.', 401);
+    const row = await ctx.sp.betriebNachAuth(n.id);
+    if (row) { const t = X().tickKonto(row.daten || {}); if (t.dirty) await ctx.sp.betriebAendern(row.id, (a) => { X().tickKonto(a).notifs.forEach((m) => melden(a, m)); }); }
+    const frisch = row ? await ctx.sp.betriebHolen(row.id) : null;
+    return { ok: true, token: token, refresh: refresh, mail: n.mail, konto: frisch ? sicht(frisch) : null };
   },
   'POST /api/konto/bestaetigen': async (ctx) => {
     if (!erlaubt('otpv:' + ip(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);

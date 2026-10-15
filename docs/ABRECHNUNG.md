@@ -70,7 +70,7 @@ Schranken gegen Missbrauch (ein Projekt als Sammelstelle für viele Kunden): hö
 | Baustein | Datei | Aufgabe |
 |---|---|---|
 | Regeln | `web/assets/modell.js` | Zählung, Buchung, Sperre, Tarifwechsel, Nachbesserung, Import; im Browser und auf dem Server identisch |
-| Konten | `functions/api/konten.js` | Anmeldung per E-Mail-Code (Supabase Auth), Registrierung mit Doppelkonto-Prüfung, Projekte, Import, Tarif, Zahlungsart, Eingang aus der App, Sammelrechnung, Stripe-Ereignisse |
+| Konten | `functions/api/konten.js` | Anmeldung per E-Mail mit Link oder Code (Supabase Auth), Registrierung mit Doppelkonto-Prüfung, Projekte, Import, Tarif, Zahlungsart, Eingang aus der App, Sammelrechnung, Stripe-Ereignisse |
 | Kasse Hauseigentümer | `functions/api/zahlung.js` | Stripe Checkout, Prüfung nach der Rückkehr, Freischalt-Nachweis, Webhook |
 | Stripe | `functions/api/stripe.js` | Kassen (Zahlung, Zahlungsart, Abo), Abo ändern/kündigen, Sammelrechnung; legt Preise (über `lookup_key`, der Betrag steckt darin) und Steuersätze (über Metadaten) beim ersten Bedarf selbst an; feste API-Version 2024-06-20 |
 | Speicher | `functions/api/speicher.js`, `supabase/schema.sql` | Supabase über PostgREST mit Versionszähler gegen gleichzeitiges Überschreiben; Attrappe für Tests |

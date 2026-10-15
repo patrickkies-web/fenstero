@@ -901,6 +901,22 @@ if (teil(8)) {
   ok(await page.evaluate((f) => BC().name === f && X.konto(A()) === 'plus' && A().links.length === 5 && !!A().pay, firma), 'Wieder angemeldet: Betrieb, Tarif, 5 Projekte und Zahlungsart kommen vom Server');
   ok(/Willkommen zurück, Petra/.test(await toastText()), 'Begrüßung mit Namen');
   sauber(page, 'Ab- und Anmeldung ohne Fehler');
+  // Anmeldung über den Link aus der E-Mail (Supabase-Standardmail ohne eigenen Mailversand): #access_token=… auf der Startseite
+  const ungueltig = await api('/api/konto/sitzung', { token: 'kaputt', refresh: '' });
+  ok(ungueltig._status === 401 && /abgelaufen/.test(ungueltig.fehler || ''), 'Anmeldelink mit ungültigem Token wird abgewiesen');
+  const linkSeite = async (hash) => { const c = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), p = await neueSeite(c, BASE2); await p.goto(BASE2 + '/' + hash, { waitUntil: 'networkidle' }); return { c: c, p: p }; };
+  const neuMail = 'link-' + stempel + '@beispiel.de';
+  const l1s = await linkSeite('#access_token=' + testToken(neuMail) + '&expires_in=3600&refresh_token=test-refresh&token_type=bearer&type=signup');
+  await l1s.p.waitForSelector('#r-firma', { timeout: 8000 });
+  ok(await l1s.p.evaluate((m) => !/access_token|refresh_token/.test(location.href) && S.reg && S.reg.server === true && S.reg.d.mail === m && !!Server.sitzung && Server.sitzung.refresh === 'test-refresh', neuMail), 'Anmeldelink einer neuen Adresse: weiter zum Eintragen des Betriebs, Sitzung gemerkt, Token aus der Adresszeile entfernt');
+  sauber(l1s.p, 'Anmeldelink (neu) ohne Fehler'); await l1s.c.close();
+  const l2s = await linkSeite('#access_token=' + testToken(mail) + '&expires_in=3600&refresh_token=test-refresh&token_type=bearer&type=magiclink');
+  await l2s.p.waitForFunction(() => typeof Server !== 'undefined' && Server.online(), null, { timeout: 8000 }); await l2s.p.waitForTimeout(300);
+  ok(await l2s.p.evaluate((f) => BC().name === f && !/access_token|refresh_token/.test(location.href) && X.konto(A()) === 'plus', firma) && /Willkommen zurück/.test(await l2s.p.evaluate(() => (document.getElementById('toast') || {}).textContent || '')), 'Anmeldelink eines bestehenden Betriebs: direkt im Konto, mit Begrüßung');
+  sauber(l2s.p, 'Anmeldelink (bestehend) ohne Fehler'); await l2s.c.close();
+  const l3s = await linkSeite('#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired'); await l3s.p.waitForTimeout(600);
+  ok(/abgelaufen/.test(await l3s.p.evaluate(() => (document.getElementById('toast') || {}).textContent || '')) && await l3s.p.evaluate(() => !/error_code/.test(location.href) && !Server.sitzung), 'Abgelaufener Anmeldelink: Hinweis, keine Sitzung, Adresszeile bereinigt');
+  await l3s.c.close();
   await kctx.close(); await ctx.close();
 
   // Hauseigentümer kauft das Aufmaßblatt über die (nachgestellte) Kasse: Nachweis vom Server
@@ -1409,6 +1425,8 @@ if (teil(12)) {
     const kPub = umg.konfig({ SUPABASE_URL: 'https://abc.supabase.co', SUPABASE_SECRET_KEY: 'sb_secret_pruef', SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_pruef' });
     await au.codeSenden(kPub, null, 'chef@beispiel.de'); const a3 = anfragen.pop();
     const n = await au.nutzer(kPub, 'nutzer-jwt-pruef'); const a4 = anfragen.pop();
+    await au.codeSenden(kPub, null, 'chef@beispiel.de', 'https://eeziframes.com/'); const aZ = anfragen.pop();
+    ok(aZ.pfad === '/auth/v1/otp?redirect_to=' + encodeURIComponent('https://eeziframes.com/'), 'Anmeldelink führt auf die Seite zurück, von der aus angefordert wurde (redirect_to)');
     ok(a2.pfad === '/auth/v1/otp' && a2.kopf.apikey === 'sb_secret_pruef' && !a2.kopf.Authorization && a3.kopf.apikey === 'sb_publishable_pruef' && !a3.kopf.Authorization && a4.pfad === '/auth/v1/user' && a4.kopf.apikey === 'sb_publishable_pruef' && a4.kopf.Authorization === 'Bearer nutzer-jwt-pruef' && n.mail === 'chef@beispiel.de', 'Anmeldung mit neuen Schlüsseln: Code anfordern nur mit apikey (Publishable Key, sonst der geheime), Sitzung prüfen mit dem Token des Betriebs');
     // frühere Schlüssel (JWT) unter den alten Namen: wie bisher auch als Authorization
     const kAlt = umg.konfig({ SUPABASE_URL: 'https://abc.supabase.co', SUPABASE_SERVICE_KEY: jwt('service_role'), SUPABASE_ANON_KEY: jwt('anon') });
