@@ -19,7 +19,19 @@
       aufseite: { beide: 'innen und außen', aussen: 'nur außen', innen: 'nur innen' },
       glas: { '2': '2-fach', '3': '3-fach' },
       glasfn: { schall: 'Schallschutz', vsg: 'Sicherheitsglas', sicht: 'Sichtschutz', sonne: 'Sonnenschutz' },
-      griff: { standard: 'Standard', abschliessbar: 'abschließbar', druckknopf: 'mit Druckknopf' },
+      griff: { standard: 'Standard', abschliessbar: 'abschließbar', druckknopf: 'mit Druckknopf', ohne: 'ohne Griff (verdeckt oder elektrisch)', motor: 'elektrisch' },
+      hstGriff: { standard: 'Hebegriff', abschliessbar: 'Hebegriff, abschließbar', motor: 'elektrisch (Taster oder App)' },
+      art: { fenster: 'Fenster', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', fsw: 'Faltschiebewand' },
+      ul: { nein: 'kein Unterlicht', glas: 'Unterlicht aus Glas, fest', paneel: 'Unterlicht als Paneel, gedämmt' },
+      hstSchema: { A: 'Schema A (1 Schiebeflügel vor 1 Festteil)', A3: '3-teilig (1 Schiebeflügel vor 2 Festteilen)', C: 'Schema C (2 Schiebeflügel mittig vor 2 Festteilen)', D: 'Schema D (2 Schiebeflügel, Mitte zu)' },
+      hstRichtung: { L: 'Schiebeflügel links', R: 'Schiebeflügel rechts' },
+      schwelle: { flach: 'flache Schwelle (ca. 20 mm)', null: 'barrierefrei ohne Schwelle (DIN 18040)', standard: 'Standardschwelle mit Anschlag' },
+      fswSchema: { links: 'Paket links', rechts: 'Paket rechts', geteilt: 'Paket beidseitig' },
+      sart: { keiner: 'keiner', behalten: 'bestehender bleibt', rollladen: 'Rollladen', raffstore: 'Raffstore', screen: 'Screen (Textil)' },
+      einbau: { aufsatz: 'Aufsatzkasten', vorbau: 'Vorbaukasten' },
+      sfarbe: { silber: 'silber', weiss: 'weiß', hellgrau: 'hellgrau', anthrazit: 'anthrazit', braun: 'braun', bronze: 'bronze', schwarz: 'schwarz' },
+      iart: { keiner: 'keiner', rollo: 'Rollo', plissee: 'Plissee', jalousie: 'Jalousie' },
+      ifarbe: { weiss: 'weiß', creme: 'creme', grau: 'grau', anthrazit: 'anthrazit', blau: 'blau', gruen: 'salbei', terra: 'terracotta' },
       gf: { weiss: 'weiß', silber: 'silber', edelstahl: 'Edelstahl', titan: 'titan', schwarz: 'schwarz' },
       rc: { basis: 'Basisschutz', rc1: 'RC1 N', rc2: 'RC2' },
       roll: { keiner: 'keiner', behalten: 'bestehender bleibt', aufsatz: 'Aufsatzrollladen neu', vorbau: 'Vorbaurollladen neu' },
@@ -33,7 +45,8 @@
       orn: { satinato: 'Satinato', chinchilla: 'Chinchilla', master: 'Mastercarré' }
     };
     const COL = { '9016': ['Verkehrsweiß', 'RAL 9016', '#f1f0ea'], '9001': ['Cremeweiß', 'RAL 9001', '#e9e0cf'], '7035': ['Lichtgrau', 'RAL 7035', '#cbd0cc'], '7039': ['Quarzgrau', 'RAL 7039', '#6c6960'], '7012': ['Basaltgrau', 'RAL 7012', '#575d5e'], '7016': ['Anthrazitgrau', 'RAL 7016', '#383e42'], '9005': ['Tiefschwarz', 'RAL 9005', '#141516'], '8022': ['Schwarzbraun', 'RAL 8022', '#2b2522'], '6005': ['Moosgrün', 'RAL 6005', '#1f4436'], '5011': ['Stahlblau', 'RAL 5011', '#1e2b3a'], '3005': ['Weinrot', 'RAL 3005', '#5e2129'], goak: ['Golden Oak', 'Holzdekor', '#b5732f'], nuss: ['Nussbaum', 'Holzdekor', '#6b4428'], eiche: ['Eiche hell', 'Holzdekor', '#c9a46b'], mahag: ['Mahagoni', 'Holzdekor', '#6f2f22'] };
-    const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp' };
+    const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp', S: 'Schiebeflügel', X: 'Faltflügel', P: 'Gehflügel' };
+    const istTuer = (w) => w.art === 'hst' || w.art === 'fsw';
     const lab = (g, k) => (OPT[g] && OPT[g][k]) || '';
     const col = (k) => COL[k] || COL['9016'];
     const num = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
@@ -46,7 +59,9 @@
     }
     function base() {
       return { name: '', etage: 'eg', anzahl: 1, mo: { hm: '', hl: '', hr: '', wm: '', wt: '', wb: '' }, el: { h: '', w: '' }, bru: '', laib: '', form: 'rechteck', teilung: '2p', ol: false, olT: 'K', sashes: sashesFor('2p'), richtung: 'innen', material: 'kunststoff', bars: [], spross: 'wiener', breite: 26, aufSeite: 'beide',
-        fa: '7016', fi: '9016', gleich: false, wunschA: '', wunschI: '', glas: '3', glasfn: [], orn: 'satinato', griff: 'standard', gf: 'weiss', rc: 'basis', roll: 'keiner', antrieb: 'gurt', insekt: 'keiner', fbi: 'behalten', fba: 'alu', demontage: true, ralm: true, putz: true, notiz: '', ki: null, fotos: 0 };
+        fa: '7016', fi: '9016', gleich: false, wunschA: '', wunschI: '', glas: '3', glasfn: [], orn: 'satinato', griff: 'standard', gf: 'weiss', rc: 'basis', roll: 'keiner', antrieb: 'gurt', insekt: 'keiner', fbi: 'behalten', fba: 'alu',
+        art: 'fenster', neu: false, plan: null, wand: '', ul: false, ulH: 400, ulA: 'glas', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, fsw: { n: 3, schema: 'links', geh: true, schwelle: 'flach' }, sart: 'keiner', sfarbe: 'silber', iart: 'keiner', ifarbe: 'weiss', durchbruch: true,
+        demontage: true, ralm: true, putz: true, notiz: '', ki: null, fotos: 0 };
     }
     const mk = (o) => { const w = Object.assign(base(), o); if (!o.sashes) w.sashes = sashesFor(w.teilung); return w; };
     function derive(w) {
@@ -54,26 +69,43 @@
       const moH = hs.length ? Math.min.apply(null, hs) : 0, moW = ws.length ? Math.min.apply(null, ws) : 0;
       return { moH: moH, moW: moW, devH: hs.length > 1 ? Math.max.apply(null, hs) - moH : 0, devW: ws.length > 1 ? Math.max.apply(null, ws) - moW : 0, elH: num(w.el && w.el.h) || num(w.h), elW: num(w.el && w.el.w) || num(w.w) };
     }
-    const opening = (w) => (w.ol ? lab('olT', w.olT) + ' · ' : '') + (w.sashes || []).map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
+    function opening(w) {
+      const S = w.sashes || [];
+      if (w.art === 'fest') return S.length + (S.length === 1 ? ' Feld' : ' Felder') + ', fest verglast, ohne Griff';
+      if (w.art === 'hst') { const h = w.hst || {}; return lab('hstSchema', h.schema) + (h.schema === 'A' || h.schema === 'A3' ? ', ' + lab('hstRichtung', h.richtung) : '') + ', ' + lab('schwelle', h.schwelle); }
+      if (w.art === 'fsw') { const f = w.fsw || {}; return S.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + ', ' + lab('schwelle', f.schwelle); }
+      return (w.ol ? lab('olT', w.olT) + ' · ' : '') + S.map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ') + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + th(w.ulH) + ' mm' : '');
+    }
+    /* Sonnenschutz außen in Worten; ältere Aufmaße kennen nur roll */
+    function sonne(w) {
+      const a = w.sart && w.sart !== 'keiner' ? w.sart : (w.roll === 'aufsatz' || w.roll === 'vorbau' ? 'rollladen' : w.roll === 'behalten' ? 'behalten' : 'keiner');
+      if (a === 'keiner') return 'keiner';
+      if (a === 'behalten') return 'bestehender bleibt';
+      return lab('sart', a) + ', ' + lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz') + ', ' + (lab('sfarbe', w.sfarbe) || 'silber') + ', ' + lab('antrieb', w.antrieb);
+    }
+    const innen = (w) => (!w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + (lab('ifarbe', w.ifarbe) || 'weiß'));
     function rows(w) {
       const d = derive(w), mo = w.mo || {}, fa = col(w.fa), fi = col(w.gleich ? w.fa : w.fi);
       const r = [
         ['Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm, kleinstes Maß' + (d.devW > 5 || d.devH > 5 ? ', bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel' : '') : 'nicht gemessen'],
         ['Breiten', 'oben ' + th(mo.wt) + ' · Mitte ' + th(mo.wm) + ' · unten ' + th(mo.wb)],
         ['Höhen', 'links ' + th(mo.hl) + ' · Mitte ' + th(mo.hm) + ' · rechts ' + th(mo.hr)],
-        ['Fensterelement', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' : 'nicht gemessen'],
-        ['Lage', (w.name || 'ohne Raum') + ', ' + (lab('etage', w.etage) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '')],
-        ['Öffnung', opening(w) + (w.richtung === 'aussen' ? ', öffnet nach außen' : '')],
+        [istTuer(w) ? 'Türelement' : 'Fensterelement', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' + (w.neu ? ' (Wunschmaß)' : '') : 'nicht gemessen'],
+        ['Lage', (w.name || 'ohne Raum') + ', ' + (lab('etage', w.etage) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
+        ['Einbau', w.neu ? 'Neue Öffnung: Lage vom Kunden auf dem Foto eingezeichnet, Maße sind Wunschmaße. Sturz und Statik vor dem Durchbruch prüfen.' : 'Austausch, Feinaufmaß vor Ort'],
+        ['Element', lab('art', w.art || 'fenster') || 'Fenster'],
+        ['Öffnung', opening(w) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ', öffnet nach außen' : '')],
         ['Form, Material', (lab('form', w.form) || 'Rechteck') + ', ' + (lab('material', w.material) || 'Kunststoff')],
         ['Farbe', 'außen ' + fa[0] + ' (' + fa[1] + ')' + (w.wunschA ? ', Wunsch: ' + w.wunschA : '') + ', innen ' + fi[0] + (w.wunschI && !w.gleich ? ', Wunsch: ' + w.wunschI : '')],
         ['Glas', (lab('glas', w.glas) || '3-fach') + ((w.glasfn || []).length ? ', ' + w.glasfn.map((g) => lab('glasfn', g) + (g === 'sicht' ? ' (' + lab('orn', w.orn) + ')' : '')).join(', ') : '')],
         ['Sprossen', (w.bars || []).length ? lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite) + ')' : '') + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'keine'],
-        ['Griff', (lab('griff', w.griff) || 'Standard') + ', ' + (lab('gf', w.gf) || 'weiß')],
+        ['Griff', w.art === 'fest' ? 'ohne Griff' : (w.art === 'hst' ? (lab('hstGriff', w.griff) || 'Hebegriff') : (lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + (lab('gf', w.gf) || 'weiß'))],
         ['Einbruchschutz', lab('rc', w.rc) || 'Basisschutz'],
-        ['Rollladen', (lab('roll', w.roll) || 'keiner') + (w.roll === 'aufsatz' || w.roll === 'vorbau' ? ', ' + lab('antrieb', w.antrieb) : '')],
+        ['Sonnenschutz außen', sonne(w)],
+        ['Sonnenschutz innen', innen(w)],
         ['Insektenschutz', lab('insekt', w.insekt) || 'keiner'],
-        ['Fensterbank', 'innen ' + (lab('fbi', w.fbi) || 'behalten') + ', außen ' + (lab('fba', w.fba) || 'behalten')],
-        ['Montage', [w.demontage ? 'Altfenster ausbauen und entsorgen' : '', w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung']
+        istTuer(w) ? ['Schwelle', lab('schwelle', ((w.art === 'hst' ? w.hst : w.fsw) || {}).schwelle) || 'flache Schwelle'] : ['Fensterbank', 'innen ' + (lab('fbi', w.fbi) || 'behalten') + ', außen ' + (lab('fba', w.fba) || 'behalten')],
+        ['Montage', [w.neu ? (w.durchbruch !== false ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung']
       ];
       if (w.notiz) r.push(['Notiz des Kunden', w.notiz]);
       return r;
@@ -87,6 +119,8 @@
     const path = (d, f, s, sw, da) => '<path d="' + d + '" fill="' + (f || 'none') + '" stroke="' + (s || 'none') + '" stroke-width="' + sw + '"' + (da ? ' stroke-dasharray="' + da + '"' : '') + ' stroke-linejoin="round"></path>';
     function sym(x, y, w, h, t, din, da) {
       let o = '';
+      if (t === 'P') t = 'D';
+      if (t === 'S') { const d = din === 'L' ? 1 : -1, cx = x + w / 2, cy = y + h * 0.62; return path(Ln([cx - d * w * 0.25, cy], [cx + d * w * 0.25, cy]) + Ln([cx + d * w * 0.25 - d * 2, cy - 2], [cx + d * w * 0.25, cy], [cx + d * w * 0.25 - d * 2, cy + 2]), 'none', '#1d1d1f', 0.9) + path(R(din === 'L' ? x + 1 : x + w - 2.6, y + h * 0.38, 1.6, h * 0.24), '#1d1d1f', 'none', 0); }
       if (t === 'D' || t === 'DK') o += path(din === 'L' ? Ln([x, y], [x + w, y + h / 2], [x, y + h]) : Ln([x + w, y], [x, y + h / 2], [x + w, y + h]), 'none', '#1d1d1f', 0.7, da);
       if (t === 'K' || t === 'DK') o += path(Ln([x, y + h], [x + w / 2, y], [x + w, y + h]), 'none', '#1d1d1f', 0.7, da);
       return o;
@@ -97,18 +131,21 @@
       let o = path(R(bx, by, bw, bh), fc, '#1d1d1f', 1.2);
       const f = Math.max(2, bw * 0.06); let ix = bx + f, iy = by + f; const iw = bw - 2 * f; let ih = bh - 2 * f;
       if (w.ol) { const oh = ih * 0.27; o += path(R(ix, iy, iw, oh), gl, '#1d1d1f', 0.6) + sym(ix, iy, iw, oh, w.olT || 'K', 'L', da); iy += oh + f * 0.7; ih -= oh + f * 0.7; }
-      const S = w.sashes || sashesFor(w.teilung), n = S.length, gap = w.teilung === '2s' ? f * 0.25 : f * 0.8, sw = (iw - gap * (n - 1)) / n;
+      const art = w.art || 'fenster', tuer = istTuer(w);
+      if (w.ul && art === 'fenster') { const uh = Math.min(ih * 0.5, Math.max(ih * 0.18, ih * (num(w.ulH) || 400) / (d.elH || 1400))); o += path(R(ix, iy + ih - uh, iw, uh), w.ulA === 'paneel' ? '#c9c9c6' : gl, '#1d1d1f', 0.6); ih -= uh + f * 0.7; }
+      const S = w.sashes || sashesFor(w.teilung), n = S.length, gap = tuer ? f * 0.2 : w.teilung === '2s' ? f * 0.25 : f * 0.8, sw = (iw - gap * (n - 1)) / n;
       S.forEach((s, i) => {
-        const sx = ix + i * (sw + gap), g = s.t === 'F' ? 0 : Math.max(1.5, sw * 0.09);
-        if (s.t !== 'F') o += path(R(sx, iy, sw, ih), fc, '#1d1d1f', 0.7);
+        const sx = ix + i * (sw + gap), fest = s.t === 'F' || art === 'fest', g = fest ? 0 : Math.max(1.5, sw * 0.09);
+        if (!fest) o += path(R(sx, iy, sw, ih), fc, '#1d1d1f', 0.7);
         const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ih - 2 * g;
         o += path(R(gx, gy, gw, gh), gl, '#1d1d1f', 0.5);
         (w.bars || []).filter((b) => b.s === i).forEach((b) => { o += path(b.d === 'v' ? Ln([gx + gw * b.p, gy], [gx + gw * b.p, gy + gh]) : Ln([gx, gy + gh * b.p], [gx + gw, gy + gh * b.p]), 'none', fc === '#f1f0ea' ? '#b9b4a8' : fc, 1.2); });
-        o += sym(gx, gy, gw, gh, s.t, s.din, da);
+        if (s.t !== 'X') o += sym(gx, gy, gw, gh, s.t, s.din, da);
       });
+      if (tuer) o += path(R(bx - 1, by + bh - 0.6, bw + 2, 1.6), '#ddd6cb', '#1d1d1f', 0.5);
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
-    return { OPT: OPT, lab: lab, col: col, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sashesFor: sashesFor };
+    return { OPT: OPT, TYP: TYP, lab: lab, col: col, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, sashesFor: sashesFor };
   })();
 
   /* ---------- Abrechnung ---------- */

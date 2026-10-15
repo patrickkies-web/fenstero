@@ -18,7 +18,9 @@ window.Blatt = (() => {
   const INK = '#1d1d1f', GREY = '#6e6e73', LINE = '#d9d9de', PAPER = '#f5f5f7', ACC = '#0071e3', MO = '#d4502b', EL = '#0071e3', OK = '#1f7a3d', WARN = '#a85a00', GLASS = '#d6e6f4', WALL = '#efece6', LAIB = '#ddd7cc', LAIB2 = '#cfc8bb';
   const rgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16, (n >> 8) & 255, n & 255]; };
   const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[  ]/g, ' '));
-  const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp' };
+  const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp', S: 'Schiebeflügel', X: 'Faltflügel', P: 'Gehflügel' };
+  const istTuer = (w) => w.art === 'hst' || w.art === 'fsw';
+  const ARTNAME = { fenster: 'Fenster', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', fsw: 'Faltschiebewand' };
   const ERREICH = { vm: 'vormittags', nm: 'nachmittags', ab: 'abends' };
   const BASIS = document.currentScript && document.currentScript.src ? document.currentScript.src.replace(/[^/]*$/, '') : '/assets/';
   let ladePromise = null;
@@ -167,7 +169,7 @@ window.Blatt = (() => {
     function zeichnung(w, bx, by, bw, bh, alle) {
       const d = h.derive(w), mo = w.mo || {};
       const moW = d.moW || (d.elW ? d.elW + 80 : 1200), moH = d.moH || (d.elH ? d.elH + 70 : 1400);
-      const elW = d.elW || moW - 80, elH = d.elH || moH - 70, bru = num(w.bru);
+      const elW = d.elW || moW - 80, elH = d.elH || moH - 70, tuer = istTuer(w), art = w.art || 'fenster', bru = tuer ? 0 : num(w.bru);
       const randL = alle ? (bru ? 27 : 17) : 16, randR = alle ? 27 : 17, randO = alle ? 16 : 13, randU = alle ? (bru ? 25 : 13) : 14;
       const innenW = bw - randL - randR, innenH = bh - randO - randU;
       const s = Math.min(innenW / moW, innenH / moH);
@@ -191,19 +193,31 @@ window.Blatt = (() => {
         dash(false); alpha(1);
       };
       if (w.ol) { const oh2 = ih * 0.26; glas(ix, iy, iw, oh2); symbol(ix, iy, iw, oh2, w.olT || 'K', 'L'); iy += oh2 + f * 0.7; ih -= oh2 + f * 0.7; }
-      const S = w.sashes && w.sashes.length ? w.sashes : [{ t: 'DK', din: 'L' }], n = S.length, gap = w.teilung === '2s' ? f * 0.3 : f * 0.85, sw = (iw - gap * (n - 1)) / n;
+      /* Unterlicht: festes Feld unten, Glas oder Paneel */
+      if (w.ul && art === 'fenster') { const uh = Math.min(ih * 0.5, Math.max(ih * 0.18, ih * (num(w.ulH) || 400) / (elH || 1400))); if (w.ulA === 'paneel') { fill('#c9c9c6'); stroke(INK); doc.setLineWidth(0.25); doc.rect(ix, iy + ih - uh, iw, uh, 'FD'); } else glas(ix, iy + ih - uh, iw, uh); ih -= uh + f * 0.7; }
+      const S = w.sashes && w.sashes.length ? w.sashes : [{ t: 'DK', din: 'L' }], n = S.length, gap = tuer ? f * 0.2 : w.teilung === '2s' ? f * 0.3 : f * 0.85, sw = (iw - gap * (n - 1)) / n;
       S.forEach((sa, i) => {
-        const sx = ix + i * (sw + gap), g = sa.t === 'F' ? 0 : Math.max(0.9, sw * 0.085);
-        if (sa.t !== 'F') { fill(fc); stroke(INK); doc.setLineWidth(0.3); doc.rect(sx, iy, sw, ih, 'FD'); }
+        const fest = sa.t === 'F' || art === 'fest', sx = ix + i * (sw + gap), g = fest && art !== 'hst' ? 0 : Math.max(0.9, sw * (fest ? 0.06 : 0.085));
+        if (!fest || art === 'hst') { fill(fc); stroke(INK); doc.setLineWidth(0.3); doc.rect(sx, iy, sw, ih, 'FD'); }
         const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ih - 2 * g;
         glas(gx, gy, gw, gh);
         (w.bars || []).filter((b) => b.s === i).forEach((b) => { stroke(fc === '#f1f0ea' ? '#b9b4a8' : fc); doc.setLineWidth(Math.max(0.5, gw * 0.035)); if (b.d === 'v') doc.line(gx + gw * b.p, gy, gx + gw * b.p, gy + gh); else doc.line(gx, gy + gh * b.p, gx + gw, gy + gh * b.p); });
-        symbol(gx, gy, gw, gh, sa.t, sa.din);
-        if (sa.t === 'D' || sa.t === 'DK') { const hx = sa.din === 'L' ? sx + sw - g * 0.5 : sx + g * 0.5, hl = Math.min(ih * 0.16, 9), hw = Math.max(0.8, g * 0.7); fill('#4a4a4f'); rr(hx - hw / 2, iy + ih / 2 - hl / 2, hw, hl, hw / 2); }
+        if (sa.t === 'S') { const dir = sa.din === 'L' ? 1 : -1, cx = gx + gw / 2, cy = gy + gh * 0.6, al = gw * 0.22; stroke(INK); doc.setLineWidth(0.35); alpha(0.6); doc.line(cx - dir * al, cy, cx + dir * al, cy); doc.line(cx + dir * al, cy, cx + dir * al - dir * 1.6, cy - 1.4); doc.line(cx + dir * al, cy, cx + dir * al - dir * 1.6, cy + 1.4); alpha(1); }
+        else if (sa.t !== 'X') symbol(gx, gy, gw, gh, sa.t === 'P' ? 'D' : sa.t, sa.din);
+        if (sa.t === 'D' || sa.t === 'DK' || sa.t === 'P') { const hx = sa.din === 'L' ? sx + sw - g * 0.5 : sx + g * 0.5, hl = Math.min(ih * 0.16, 9), hw = Math.max(0.8, g * 0.7); fill('#4a4a4f'); rr(hx - hw / 2, iy + ih / 2 - hl / 2, hw, hl, hw / 2); }
+        if (sa.t === 'S') { const hx = sa.din === 'L' ? sx + g * 0.5 : sx + sw - g * 0.5, hl = Math.min(ih * 0.2, 12), hw = Math.max(0.9, g * 0.8); fill('#4a4a4f'); rr(hx - hw / 2, iy + ih * 0.52 - hl / 2, hw, hl, hw / 2); }
         if (sa.t === 'K') { const hl = Math.min(sw * 0.16, 9), hw = Math.max(0.8, g * 0.7); fill('#4a4a4f'); rr(sx + sw / 2 - hl / 2, iy + g * 0.2, hl, hw, hw / 2); }
       });
-      /* Fensterbank */
-      const fb = h.lab('fba', w.fba); fill(fb === 'Naturstein' ? '#cfc8bb' : '#c9ccd0'); stroke(INK); doc.setLineWidth(0.3); doc.rect(ox - ow * 0.025, oy + oh - lt * 0.5, ow * 1.05, lt * 0.5 + 1, 'FD');
+      if (tuer) {
+        /* Schwelle und Fußboden statt Fensterbank */
+        fill('#c9ccd0'); stroke(INK); doc.setLineWidth(0.3); doc.rect(ex, ey + eh - Math.max(0.8, f * 0.5), ew, Math.max(0.8, f * 0.5), 'FD');
+        stroke(INK); doc.setLineWidth(0.6); doc.line(ox - wr - 4, oy + oh, ox + ow + wr + 4, oy + oh);
+        stroke(GREY); doc.setLineWidth(0.3); for (let hx = ox - wr - 2; hx < ox + ow + wr + 4; hx += 4) doc.line(hx, oy + oh, hx - 2, oy + oh + 2);
+        font('normal', 6, GREY); txt('Fußboden', ox + ow + wr + 3, oy + oh + 4.4, { align: 'right' });
+      } else {
+        /* Fensterbank */
+        const fb = h.lab('fba', w.fba); fill(fb === 'Naturstein' ? '#cfc8bb' : '#c9ccd0'); stroke(INK); doc.setLineWidth(0.3); doc.rect(ox - ow * 0.025, oy + oh - lt * 0.5, ow * 1.05, lt * 0.5 + 1, 'FD');
+      }
       if (!alle) {
         /* Vier Maße wie im Startbild der App */
         if (d.moH) mass(ox - 7, oy, ox - 7, oy + oh, th(d.moH) + ' mm', MO);
@@ -244,8 +258,18 @@ window.Blatt = (() => {
       const S = w.sashes && w.sashes.length ? w.sashes : [{ t: 'DK' }], n = S.length, gap = w.teilung === '2s' ? f * 0.25 : f * 0.8, sw = (iw - gap * (n - 1)) / n;
       S.forEach((sa, i) => { fill(GLASS); doc.setLineWidth(0.2); doc.rect(ix + i * (sw + gap), iy, sw, ih, 'FD'); });
     }
-    const teilungText = (w) => { const n = (w.sashes || []).length || 1; return n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : w.teilung === '3' ? ', Mitte fest' : '') + (w.ol ? ', ' + (h.lab('olT', w.olT) || 'Oberlicht') : ''); };
-    const oeffnungText = (w) => (w.sashes || []).map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ') + (w.richtung === 'aussen' ? ' · nach außen' : '');
+    const teilungText = (w) => {
+      const n = (w.sashes || []).length || 1, art = w.art || 'fenster';
+      if (art === 'fest') return n + (n === 1 ? ' Feld' : ' Felder') + ', fest verglast';
+      if (art === 'hst') return 'Hebe-Schiebe-Tür, ' + n + (n === 1 ? ' Teil' : ' Teile') + ', ' + (h.lab('hstSchema', (w.hst || {}).schema) || 'Schema A').split(' (')[0];
+      if (art === 'fsw') return 'Faltschiebewand, ' + n + ' Flügel, ' + (h.lab('fswSchema', (w.fsw || {}).schema) || 'Paket links');
+      return n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : w.teilung === '3' ? ', Mitte fest' : '') + (w.ol ? ', ' + (h.lab('olT', w.olT) || 'Oberlicht') : '') + (w.ul ? ', ' + (h.lab('ul', w.ulA) || 'Unterlicht') + ' ' + th(w.ulH) + ' mm' : '');
+    };
+    const oeffnungText = (w) => (h.opening ? h.opening(w) : (w.sashes || []).map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ')) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ' · nach außen' : '');
+    const sonneText = (w) => (h.sonne ? h.sonne(w) : (h.lab('roll', w.roll) || 'keiner') + (w.roll === 'aufsatz' || w.roll === 'vorbau' ? ', ' + h.lab('antrieb', w.antrieb) : ''));
+    const innenText = (w) => (h.innen ? h.innen(w) : (!w.iart || w.iart === 'keiner' ? 'keiner' : (h.lab('iart', w.iart) || w.iart) + ', ' + (h.lab('ifarbe', w.ifarbe) || '')));
+    const griffText = (w) => (w.art === 'fest' ? 'ohne Griff' : (w.art === 'hst' ? (h.lab('hstGriff', w.griff) || 'Hebegriff') : (h.lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + (h.lab('gf', w.gf) || 'weiß')));
+    const montageText = (w) => [w.neu ? (w.durchbruch !== false ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung';
     const bestell = (w) => { const d = h.derive(w); return d.moW && d.moH ? th(d.moW - 2 * ab.seite) + ' × ' + th(d.moH - ab.oben) + ' mm' : '–'; };
     const farbe = (k) => h.col(k);
     /* Karte mit Titel und Zeilen [Begriff, Wert, { swatch, bold, col }]; opt.lw = Breite der Begriffsspalte, opt.spalten = 2 für zwei Spalten */
@@ -382,7 +406,7 @@ window.Blatt = (() => {
     const flaeche = wins.reduce((a, x) => { const d = h.derive(x); return a + (d.elW && d.elH ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
     const groesste = wins.reduce((best, x) => { const d = h.derive(x); return !best || d.elW * d.elH > best.a ? { a: d.elW * d.elH, n: x.name || 'Fenster', d: d } : best; }, null);
     const etagen = wins.map((x) => h.lab('etage', x.etage) || 'EG').filter((v, i, a) => a.indexOf(v) === i).join(', ');
-    const ausst = [['Material', gleich((x) => h.lab('material', x.material) || 'Kunststoff')], ['Farbe außen', gleich((x) => farbe(x.fa)[0] + ' (' + farbe(x.fa)[1] + ')')], ['Farbe innen', gleich((x) => farbe(x.gleich ? x.fa : x.fi)[0])], ['Glas', gleich((x) => (h.lab('glas', x.glas) || '3-fach') + ((x.glasfn || []).length ? ', ' + x.glasfn.map((g) => h.lab('glasfn', g)).join(', ') : ''))], ['Sprossen', gleich((x) => ((x.bars || []).length ? h.lab('spross', x.spross) : 'keine'))], ['Rollladen', gleich((x) => (h.lab('roll', x.roll) || 'keiner') + (x.roll === 'aufsatz' || x.roll === 'vorbau' ? ', ' + h.lab('antrieb', x.antrieb) : ''))], ['Insektenschutz', gleich((x) => h.lab('insekt', x.insekt) || 'keiner')], ['Fensterbank', gleich((x) => 'innen ' + (h.lab('fbi', x.fbi) || 'behalten') + ', außen ' + (h.lab('fba', x.fba) || 'behalten'))], ['Montage', gleich((x) => [x.demontage ? 'Ausbau und Entsorgung' : '', x.ralm ? 'RAL-Montage' : '', x.putz ? 'Laibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung')]];
+    const ausst = [['Material', gleich((x) => h.lab('material', x.material) || 'Kunststoff')], ['Farbe außen', gleich((x) => farbe(x.fa)[0] + ' (' + farbe(x.fa)[1] + ')')], ['Farbe innen', gleich((x) => farbe(x.gleich ? x.fa : x.fi)[0])], ['Glas', gleich((x) => (h.lab('glas', x.glas) || '3-fach') + ((x.glasfn || []).length ? ', ' + x.glasfn.map((g) => h.lab('glasfn', g)).join(', ') : ''))], ['Sprossen', gleich((x) => ((x.bars || []).length ? h.lab('spross', x.spross) : 'keine'))], ['Sonnenschutz außen', gleich((x) => sonneText(x))], ['Sonnenschutz innen', gleich((x) => innenText(x))], ['Insektenschutz', gleich((x) => h.lab('insekt', x.insekt) || 'keiner')], ['Fensterbank', gleich((x) => (istTuer(x) ? 'Tür, Schwelle ' + (h.lab('schwelle', ((x.art === 'hst' ? x.hst : x.fsw) || {}).schwelle) || 'flach') : 'innen ' + (h.lab('fbi', x.fbi) || 'behalten') + ', außen ' + (h.lab('fba', x.fba) || 'behalten')))], ['Montage', gleich((x) => montageText(x))]];
     const zahlen = [['Positionen', String(wins.length)], ['Elemente', String(nE)], ['Fensterfläche', flaeche ? 'etwa ' + flaeche.toFixed(1).replace('.', ',') + ' m² (Element, alle Stück)' : '–'], ['Größtes Fenster', groesste && groesste.d.elW ? groesste.n + ', ' + th(groesste.d.elW) + ' × ' + th(groesste.d.elH) + ' mm' : '–'], ['Geschosse', etagen || '–'], ['Fotos', nF ? nF + ', von der KI ausgewertet' : 'keine'], ['Maße', komplett ? 'alle 8 Handmaße je Fenster' : wins.filter((x) => { const d = h.derive(x); return !(d.moW && d.elW); }).length + ' Position(en) ohne vollständige Maße', { col: komplett ? OK : WARN, bold: true }]].concat(V === 'betrieb' ? [['Ihr Abzug', ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben']] : []);
     const ha = karteH(ausst, halb, 'x', { lw: 26 }), hz = karteH(zahlen, halb, 'x', { lw: 28 });
     platz(Math.max(ha, hz));
@@ -445,8 +469,8 @@ window.Blatt = (() => {
       const d = h.derive(w), fa = farbe(w.fa), fi = farbe(w.gleich ? w.fa : w.fi), n = num(w.anzahl) || 1;
       /* Kopf */
       fill(INK); rr(M, y - 7, 13, 13, 3); font('black', 11, '#ffffff'); txt(String(i + 1), M + 6.5, y + 0.6, { align: 'center' });
-      font('black', 21, INK); txt(w.name || 'Fenster ' + (i + 1), M + 17, y + 0.5);
-      font('normal', 8.8, GREY); txt([h.lab('etage', w.etage) || 'EG', n > 1 ? n + ' Stück' : '1 Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos', d.moW && d.elW ? 'alle 8 Handmaße' : 'Maße unvollständig'].join(' · '), M + 17, y + 6.5);
+      font('black', 21, INK); txt(w.name || (ARTNAME[w.art] || 'Fenster') + ' ' + (i + 1), M + 17, y + 0.5);
+      font('normal', 8.8, GREY); txt([ARTNAME[w.art] || 'Fenster', h.lab('etage', w.etage) || 'EG', n > 1 ? n + ' Stück' : '1 Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos', w.neu ? 'Neue Öffnung, Wunschmaße' : d.moW && d.elW ? 'alle 8 Handmaße' : 'Maße unvollständig'].join(' · '), M + 17, y + 6.5);
       if (V === 'betrieb') {
         fill(BRAND); rr(XR - 64, y - 8, 64, 17, 3); font('bold', 6.3, '#ffffff'); alpha(0.85); txt('BESTELLMASS-VORSCHLAG', XR - 60, y - 3.4, { charSpace: 0.4 }); alpha(1); font('black', 12.5, '#ffffff'); txt(bestell(w), XR - 60, y + 3.2);
         font('normal', 6.2, '#ffffff'); alpha(0.85); txt('Öffnung minus ' + ab.seite + ' mm je Seite, minus ' + ab.oben + ' mm oben', XR - 60, y + 7); alpha(1);
@@ -458,20 +482,30 @@ window.Blatt = (() => {
       /* Zeichnung über die volle Breite */
       const zh = 100; fill(PAPER); rr(M, y, CW, zh, 4);
       zeichnung(w, M + 2, y + 1, CW - 4, zh - 8, true);
-      font('normal', 6.6, GREY); swatch(MO, M + 6, y + zh - 4.4, 1.4); txt('Maueröffnung, von Hand, in mm', M + 9, y + zh - 3.4); swatch(EL, M + 52, y + zh - 4.4, 1.4); txt('Fensterelement mit Rahmen', M + 55, y + zh - 3.4);
-      const hinweise = [w.richtung === 'aussen' ? 'gestrichelt: öffnet nach außen' : '', num(w.laib) ? 'Laibung innen ' + th(w.laib) + ' mm' : '', h.lab('anschlag', w.anschlag) && w.anschlag !== 'ohne' ? h.lab('anschlag', w.anschlag) : ''].filter(Boolean).join(' · ');
+      font('normal', 6.6, GREY); swatch(MO, M + 6, y + zh - 4.4, 1.4); txt(w.neu ? 'Rohbauöffnung, Wunschmaß, in mm' : 'Maueröffnung, von Hand, in mm', M + 9, y + zh - 3.4); swatch(EL, M + 52, y + zh - 4.4, 1.4); txt((istTuer(w) ? 'Türelement' : 'Element') + ' mit Rahmen', M + 55, y + zh - 3.4);
+      const hinweise = [w.neu ? 'Neue Öffnung: Sturz und Statik prüfen' : '', w.richtung === 'aussen' && !istTuer(w) ? 'gestrichelt: öffnet nach außen' : '', num(w.laib) ? 'Laibung innen ' + th(w.laib) + ' mm' : '', num(w.wand) ? 'Wand ' + th(w.wand) + ' mm' : '', h.lab('anschlag', w.anschlag) && w.anschlag !== 'ohne' ? h.lab('anschlag', w.anschlag) : ''].filter(Boolean).join(' · ');
       if (hinweise) txt(hinweise, XR - 6, y + zh - 3.4, { align: 'right' });
       if (d.devW > 5 || d.devH > 5) { font('bold', 6.6, WARN); txt('bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel, das kleinste Maß zählt', M + 96, y + zh - 3.4); }
       y += zh + 5;
       /* Drei Karten nebeneinander */
-      const masse = [['Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' : 'noch nicht gemessen', { bold: true, col: MO }], ['Breiten', 'oben ' + th(w.mo && w.mo.wt) + ' · Mitte ' + th(w.mo && w.mo.wm) + ' · unten ' + th(w.mo && w.mo.wb)], ['Höhen', 'links ' + th(w.mo && w.mo.hl) + ' · Mitte ' + th(w.mo && w.mo.hm) + ' · rechts ' + th(w.mo && w.mo.hr)], ['Außer Winkel', d.devW > 5 || d.devH > 5 ? 'bis ' + Math.max(d.devW, d.devH) + ' mm, kleinstes zählt' : 'unter 5 mm'], ['Element', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm, mit Rahmen' : 'noch nicht gemessen', { bold: true, col: EL }], ['Brüstung', num(w.bru) ? th(w.bru) + ' mm' : '–'], ['Laibung innen', num(w.laib) ? th(w.laib) + ' mm' : '–']].concat(V === 'betrieb' ? [['Bestellmaß', bestell(w), { bold: true, col: BRAND }]] : []);
-      const ausf = [['Teilung', teilungText(w)], ['Öffnung', oeffnungText(w)], ['Form', h.lab('form', w.form) || 'Rechteck'], ['Material', h.lab('material', w.material) || 'Kunststoff'], ['Farbe außen', fa[0] + ' (' + fa[1] + ')' + (w.wunschA ? ', Wunsch: ' + w.wunschA : ''), { swatch: fa[2] }], ['Farbe innen', fi[0] + ' (' + fi[1] + ')' + (w.wunschI && !w.gleich ? ', Wunsch: ' + w.wunschI : ''), { swatch: fi[2] }], ['Glas', (h.lab('glas', w.glas) || '3-fach') + ((w.glasfn || []).length ? ', ' + w.glasfn.map((g) => h.lab('glasfn', g) + (g === 'sicht' ? ' (' + h.orn(w.orn) + ')' : '')).join(', ') : '')], ['Sprossen', (w.bars || []).length ? h.lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + h.lab('aufseite', w.aufSeite) + ')' : '') + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'keine'], ['Griff', (h.lab('griff', w.griff) || 'Standard') + ', ' + (h.lab('gf', w.gf) || 'weiß')], ['Einbruchschutz', h.lab('rc', w.rc) || 'Basisschutz']];
-      const extras = [['Rollladen', (h.lab('roll', w.roll) || 'keiner') + (w.roll === 'aufsatz' || w.roll === 'vorbau' ? ', ' + h.lab('antrieb', w.antrieb) : '')], ['Insektenschutz', h.lab('insekt', w.insekt) || 'keiner'], ['Fensterbank innen', h.lab('fbi', w.fbi) || 'behalten'], ['Fensterbank außen', h.lab('fba', w.fba) || 'behalten'], ['Montage', [w.demontage ? 'Altfenster ausbauen und entsorgen' : '', w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung']];
+      const masse = [[w.neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' + (w.neu ? ' (Wunsch)' : '') : 'noch nicht gemessen', { bold: true, col: MO }], ['Breiten', 'oben ' + th(w.mo && w.mo.wt) + ' · Mitte ' + th(w.mo && w.mo.wm) + ' · unten ' + th(w.mo && w.mo.wb)], ['Höhen', 'links ' + th(w.mo && w.mo.hl) + ' · Mitte ' + th(w.mo && w.mo.hm) + ' · rechts ' + th(w.mo && w.mo.hr)], w.neu ? ['Maßart', 'Wunschmaß des Kunden, Rohbau nach Statik'] : ['Außer Winkel', d.devW > 5 || d.devH > 5 ? 'bis ' + Math.max(d.devW, d.devH) + ' mm, kleinstes zählt' : 'unter 5 mm'], ['Element', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm, mit Rahmen' : 'noch nicht gemessen', { bold: true, col: EL }], ['Brüstung', num(w.bru) ? th(w.bru) + ' mm' : '–'], ['Laibung innen', num(w.laib) ? th(w.laib) + ' mm' : '–']].concat(V === 'betrieb' ? [['Bestellmaß', bestell(w), { bold: true, col: BRAND }]] : []);
+      const ausf = [['Teilung', teilungText(w)], ['Öffnung', oeffnungText(w)], ['Form', h.lab('form', w.form) || 'Rechteck'], ['Material', h.lab('material', w.material) || 'Kunststoff'], ['Farbe außen', fa[0] + ' (' + fa[1] + ')' + (w.wunschA ? ', Wunsch: ' + w.wunschA : ''), { swatch: fa[2] }], ['Farbe innen', fi[0] + ' (' + fi[1] + ')' + (w.wunschI && !w.gleich ? ', Wunsch: ' + w.wunschI : ''), { swatch: fi[2] }], ['Glas', (h.lab('glas', w.glas) || '3-fach') + ((w.glasfn || []).length ? ', ' + w.glasfn.map((g) => h.lab('glasfn', g) + (g === 'sicht' ? ' (' + h.orn(w.orn) + ')' : '')).join(', ') : '')], ['Sprossen', (w.bars || []).length ? h.lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + h.lab('aufseite', w.aufSeite) + ')' : '') + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'keine'], ['Griff', griffText(w)], ['Einbruchschutz', h.lab('rc', w.rc) || 'Basisschutz']];
+      ausf.unshift(['Element', ARTNAME[w.art] || 'Fenster']);
+      const extras = [['Sonnenschutz außen', sonneText(w)], ['Sonnenschutz innen', innenText(w)], ['Insektenschutz', h.lab('insekt', w.insekt) || 'keiner']].concat(istTuer(w) ? [['Schwelle', h.lab('schwelle', ((w.art === 'hst' ? w.hst : w.fsw) || {}).schwelle) || 'flache Schwelle']] : [['Fensterbank innen', h.lab('fbi', w.fbi) || 'behalten'], ['Fensterbank außen', h.lab('fba', w.fba) || 'behalten']]).concat([['Montage', montageText(w)]]);
       const cw3 = (CW - 8) / 3, o3 = { lw: 20, fs: 7.6 }, karten = [['Maße', masse], ['Ausführung', ausf], ['Extras', extras]];
       const hs = karten.map((k) => karteH(k[1], cw3, k[0], o3)), hmax = Math.max.apply(null, hs);
       platz(Math.min(hmax, 40));
       karten.forEach((k, j) => { const x = M + j * (cw3 + 4); karte(x, y, cw3, k[0], k[1], o3); });
       y += hmax + 5;
+      /* Neue Öffnung: das Foto mit der eingezeichneten Lage (bleibt beim Kunden, steht nur im Blatt) */
+      if (w.neu && w.plan && w.plan.bild && /^data:image\/jpeg/.test(w.plan.bild)) {
+        const bw0 = w.plan.bw || 3, bh0 = w.plan.bh || 4, maxH = 78, iw2 = Math.min(CW - 8, maxH * bw0 / bh0), ih2 = iw2 * bh0 / bw0, kh = ih2 + 14;
+        platz(kh + 2);
+        fill(PAPER); rr(M, y, CW, kh, 4);
+        font('bold', 6.3, GREY); txt('LAGE AUF DEM FOTO', M + 5, y + 5.2, { charSpace: 0.4 }); font('normal', 6.6, GREY); txt((sie ? 'vom Kunden' : 'von dir') + ' eingezeichnet, Foto ' + (w.plan.seite === 'out' ? 'von außen' : 'von innen'), XR - 5, y + 5.2, { align: 'right' });
+        try { doc.addImage(w.plan.bild, 'JPEG', M + (CW - iw2) / 2, y + 8.5, iw2, ih2); } catch (e) { /* ohne Bild weiter */ }
+        y += kh + 4;
+      }
       /* Aus den Fotos */
       const ki = w.ki && w.ki.rows ? w.ki.rows : [], hints = w.ki && w.ki.hints ? w.ki.hints : [];
       if (ki.length || hints.length) {
