@@ -5,8 +5,9 @@
      STRIPE_SECRET_KEY        Zahlungen (sk_test_… zum Testen, sk_live_… für echtes Geld; eingeschränkte Schlüssel rk_… gehen auch)
      STRIPE_WEBHOOK_SECRET    Unterschrift der Stripe-Webhooks (whsec_…), je Modus ein eigenes
      SUPABASE_URL             https://<projekt>.supabase.co
-     SUPABASE_SERVICE_KEY     service_role-Schlüssel (nur hier, nie im Browser)
-     SUPABASE_ANON_KEY        anon-Schlüssel (für die Anmeldung per E-Mail-Code)
+     SUPABASE_SECRET_KEY      geheimer Schlüssel sb_secret_… (nur hier, nie im Browser); alter Name SUPABASE_SERVICE_KEY,
+                              dort geht auch noch der frühere service_role-Schlüssel (eyJ…, Supabase schafft ihn bis Ende 2026 ab)
+     SUPABASE_PUBLISHABLE_KEY optional, sb_publishable_… (alter Name SUPABASE_ANON_KEY); ohne ihn nimmt die Anmeldung den geheimen
      FREISCHALT_GEHEIMNIS     beliebiger langer Zufallstext; unterschreibt die Freischalt-Nachweise für bezahlte Aufmaßblätter
 
    Variablen (Typ Text, alle optional):
@@ -20,17 +21,32 @@
      STRIPE_TAX_RATE_INKL     Steuersatz-ID 19 % inklusiv (Aufmaßblatt)
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1   nur lokal zum Testen: Stripe bzw. Datenbank werden nachgestellt */
 const num = (v, d) => { const n = Number(v); return v !== undefined && v !== '' && !isNaN(n) ? n : d; };
+/* Rolle aus einem früheren Supabase-Schlüssel (JWT, eyJ…) lesen, ohne ihn zu prüfen: nur um anon und service_role zu unterscheiden */
+function jwtRolle(t) { try { if (!/^eyJ/.test(t)) return ''; const m = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(atob(m + '==='.slice((m.length + 3) % 4))).role || ''; } catch (e) { return ''; } }
+/* Neue Supabase-Schlüssel gehören nur in den Kopf apikey, nicht in Authorization (sie sind kein JWT) */
+export const sbNeu = (schluessel) => /^sb_(secret|publishable)_/.test(String(schluessel || ''));
 export function konfig(env) {
   env = env || {};
+  const hinweise = []; // häufige Verwechslungen beim Eintragen, /api/status zeigt sie an (ohne Werte)
   const schluessel = String(env.STRIPE_SECRET_KEY || '').trim();
-  const stripe = schluessel ? { key: schluessel, test: /^(sk|rk)_test_/.test(schluessel), webhook: String(env.STRIPE_WEBHOOK_SECRET || '').trim(), preisAufmass: env.STRIPE_PRICE_AUFMASS || '', preisAbo: env.STRIPE_PRICE_ABO || '', preisPlus: env.STRIPE_PRICE_PLUS || '', steuer: env.STRIPE_TAX_RATE || '', steuerInkl: env.STRIPE_TAX_RATE_INKL || '' } : null;
-  const supabase = env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY ? { url: String(env.SUPABASE_URL).replace(/\/+$/, ''), service: env.SUPABASE_SERVICE_KEY, anon: env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_KEY } : null;
+  if (/^pk_/.test(schluessel)) hinweise.push('STRIPE_SECRET_KEY: Das ist der veröffentlichbare Schlüssel (pk_…). Gebraucht wird der Geheimschlüssel (sk_… oder rk_…).');
+  const stripe = schluessel && !/^pk_/.test(schluessel) ? { key: schluessel, test: /^(sk|rk)_test_/.test(schluessel), webhook: String(env.STRIPE_WEBHOOK_SECRET || '').trim(), preisAufmass: env.STRIPE_PRICE_AUFMASS || '', preisAbo: env.STRIPE_PRICE_ABO || '', preisPlus: env.STRIPE_PRICE_PLUS || '', steuer: env.STRIPE_TAX_RATE || '', steuerInkl: env.STRIPE_TAX_RATE_INKL || '' } : null;
+  if (stripe && stripe.webhook && !/^whsec_/.test(stripe.webhook)) hinweise.push('STRIPE_WEBHOOK_SECRET: beginnt nicht mit whsec_. Eingetragen gehört der Signatur-Geheimschlüssel des Ereignisziels.');
+  /* Supabase: neue Schlüssel (sb_secret_…, sb_publishable_…) oder die früheren (eyJ…, service_role bzw. anon); die Adresse auch mit /rest/v1 am Ende */
+  const sbUrl = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+  const sbGeheim = String(env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_KEY || '').trim(), sbOffen = String(env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY || '').trim();
+  let sbOk = !!(sbUrl && sbGeheim);
+  if (sbUrl && !sbGeheim) hinweise.push('Supabase: SUPABASE_SECRET_KEY fehlt noch.');
+  if (sbGeheim && !sbUrl) hinweise.push('Supabase: SUPABASE_URL fehlt noch.');
+  if (sbUrl && !/^https:\/\//.test(sbUrl)) hinweise.push('SUPABASE_URL: Erwartet wird die Adresse https://<projekt>.supabase.co.');
+  if (/^sb_publishable_/.test(sbGeheim) || jwtRolle(sbGeheim) === 'anon') { hinweise.push('SUPABASE_SECRET_KEY: Das ist der öffentliche Schlüssel (sb_publishable_… bzw. anon). Gebraucht wird der geheime (sb_secret_… bzw. service_role).'); sbOk = false; }
+  const supabase = sbOk ? { url: sbUrl, service: sbGeheim, anon: sbOffen || sbGeheim } : null;
   const zahlungAttrappe = env.ZAHLUNG_ATTRAPPE === '1', datenAttrappe = env.DATEN_ATTRAPPE === '1';
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
     ki: !!env.ANTHROPIC_API_KEY,
-    geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot',
+    geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
     preise: { aufmass: num(env.PREIS_AUFMASS_CENT, 799) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, 49), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, 79), mwst: env.MWST !== '0' }
   };
 }

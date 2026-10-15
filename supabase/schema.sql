@@ -1,6 +1,6 @@
 -- eeziframes · Datenbank (Supabase/Postgres)
 -- Einmal im SQL-Editor des Supabase-Projekts ausführen (docs/ONLINE-STELLEN.md, Stufe 2).
--- Der Server greift ausschließlich mit dem service_role-Schlüssel zu (functions/api/speicher.js);
+-- Der Server greift ausschließlich mit dem geheimen Schlüssel zu (sb_secret_… bzw. früher service_role, functions/api/speicher.js);
 -- Browser haben keinen direkten Zugriff: Row Level Security ist an, ohne Regeln für anon/authenticated.
 
 create extension if not exists pgcrypto;
@@ -48,14 +48,18 @@ create table if not exists public.ereignisse (
   created_at  timestamptz not null default now()
 );
 
--- Kein direkter Zugriff aus dem Browser: RLS an, keine Regeln → nur der service_role-Schlüssel kommt durch
+-- Kein direkter Zugriff aus dem Browser: RLS an, keine Regeln → nur der geheime Schlüssel des Servers kommt durch
 alter table public.betriebe   enable row level security;
 alter table public.zahlungen  enable row level security;
 alter table public.ereignisse enable row level security;
 revoke all on public.betriebe, public.zahlungen, public.ereignisse from anon, authenticated;
+-- Der Server (geheimer Schlüssel sb_secret_… bzw. service_role) darf lesen und schreiben; ausdrücklich gewährt, auch wenn neue
+-- Tabellen im Projekt nicht mehr von selbst für die Data API freigegeben werden
+grant usage on schema public to service_role;
+grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse to service_role;
 
 -- updated_at pflegt der Server selbst (speicher.js); dieser Auslöser ist nur ein Netz für Änderungen von Hand
-create or replace function public.eeziframes_touch() returns trigger language plpgsql as $$
+create or replace function public.eeziframes_touch() returns trigger language plpgsql set search_path = '' as $$
 begin new.updated_at = now(); return new; end $$;
 drop trigger if exists betriebe_touch on public.betriebe;
 create trigger betriebe_touch before update on public.betriebe for each row execute function public.eeziframes_touch();

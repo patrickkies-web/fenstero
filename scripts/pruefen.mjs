@@ -18,6 +18,7 @@
 // von Kopfzeilen, Sitemap, Worker-Routen und Preisen; www zählt als Hauptdomain, …workers.dev bleibt gesperrt.
 // Abschnitt 11 prüft die Stripe-Anbindung gegen ein nachgestelltes Stripe (scripts/stripe-attrappe.mjs): Kassen, selbst angelegte Preise
 // und Steuersätze, Webhook in beiden Formen der API, Sammelrechnung ohne leere oder doppelte Rechnungen, Fehler je Betrieb.
+// Abschnitt 12 prüft die Supabase-Schlüssel (neue sb_secret_…/sb_publishable_… und frühere JWT) und die Hinweise in /api/status.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -1382,6 +1383,48 @@ if (teil(11)) {
     ok(false, 'Stripe-Anbindung ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
   } finally {
     st.aus();
+  }
+}
+
+/* ---------- 12. Supabase-Schlüssel: neue (sb_secret_…, sb_publishable_…) und frühere (JWT), Verwechslungen ---------- */
+if (teil(12)) {
+  console.log('12. Supabase-Schlüssel und Hinweise in /api/status');
+  const umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), au = await import('../functions/api/auth.js'), { api } = await import('../functions/api/router.js');
+  const echt = globalThis.fetch, anfragen = [];
+  globalThis.fetch = async (url, init) => {
+    const u = new URL(typeof url === 'string' ? url : url.url);
+    if (!u.hostname.endsWith('.supabase.co')) return echt(url, init);
+    anfragen.push({ pfad: u.pathname + u.search, kopf: Object.assign({}, (init && init.headers) || {}) });
+    if (u.pathname === '/auth/v1/user') return new Response(JSON.stringify({ id: 'u-1', email: 'Chef@Beispiel.de' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (u.pathname === '/auth/v1/otp') return new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
+    return new Response('[{"id":"b-1","daten":{}}]', { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+  try {
+    const jwt = (rolle) => 'eyJhbGciOiJIUzI1NiJ9.' + Buffer.from(JSON.stringify({ role: rolle, iss: 'supabase' })).toString('base64url') + '.signatur';
+    // neue Schlüssel: nur apikey, Adresse bereinigt, Anmeldung ohne Publishable Key nimmt den geheimen
+    const kNeu = umg.konfig({ SUPABASE_URL: ' https://abc.supabase.co/rest/v1/ ', SUPABASE_SECRET_KEY: ' sb_secret_pruef ' });
+    const row = await spM.speicher(kNeu).betriebHolen('b-1'); const a1 = anfragen.pop();
+    ok(kNeu.daten && kNeu.supabase.url === 'https://abc.supabase.co' && row.id === 'b-1' && a1.pfad.startsWith('/rest/v1/betriebe?id=eq.b-1') && a1.kopf.apikey === 'sb_secret_pruef' && !a1.kopf.Authorization, 'Neuer geheimer Schlüssel (sb_secret_…): Datenbank-Anfragen nur mit apikey, ohne Authorization; Adresse mit /rest/v1 und Leerzeichen bereinigt');
+    await au.codeSenden(kNeu, null, 'chef@beispiel.de'); const a2 = anfragen.pop();
+    const kPub = umg.konfig({ SUPABASE_URL: 'https://abc.supabase.co', SUPABASE_SECRET_KEY: 'sb_secret_pruef', SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_pruef' });
+    await au.codeSenden(kPub, null, 'chef@beispiel.de'); const a3 = anfragen.pop();
+    const n = await au.nutzer(kPub, 'nutzer-jwt-pruef'); const a4 = anfragen.pop();
+    ok(a2.pfad === '/auth/v1/otp' && a2.kopf.apikey === 'sb_secret_pruef' && !a2.kopf.Authorization && a3.kopf.apikey === 'sb_publishable_pruef' && !a3.kopf.Authorization && a4.pfad === '/auth/v1/user' && a4.kopf.apikey === 'sb_publishable_pruef' && a4.kopf.Authorization === 'Bearer nutzer-jwt-pruef' && n.mail === 'chef@beispiel.de', 'Anmeldung mit neuen Schlüsseln: Code anfordern nur mit apikey (Publishable Key, sonst der geheime), Sitzung prüfen mit dem Token des Betriebs');
+    // frühere Schlüssel (JWT) unter den alten Namen: wie bisher auch als Authorization
+    const kAlt = umg.konfig({ SUPABASE_URL: 'https://abc.supabase.co', SUPABASE_SERVICE_KEY: jwt('service_role'), SUPABASE_ANON_KEY: jwt('anon') });
+    await spM.speicher(kAlt).betriebHolen('b-1'); const a5 = anfragen.pop();
+    await au.codeSenden(kAlt, null, 'chef@beispiel.de'); const a6 = anfragen.pop();
+    ok(kAlt.daten && a5.kopf.apikey === jwt('service_role') && a5.kopf.Authorization === 'Bearer ' + jwt('service_role') && a6.kopf.apikey === jwt('anon') && a6.kopf.Authorization === 'Bearer ' + jwt('anon'), 'Frühere Schlüssel (service_role und anon als JWT, alte Variablennamen) gehen weiter wie bisher');
+    // Verwechslungen: abgelehnt und in /api/status benannt, ohne Werte
+    const st = async (env) => (await (await api(new Request('https://eeziframes.com/api/status'), env, null)).json());
+    const v1 = await st({ SUPABASE_URL: 'https://abc.supabase.co', SUPABASE_SECRET_KEY: 'sb_publishable_pruef' }), v2 = await st({ SUPABASE_URL: 'https://abc.supabase.co', SUPABASE_SERVICE_KEY: jwt('anon') });
+    const v3 = await st({ STRIPE_SECRET_KEY: 'pk_test_pruef', STRIPE_WEBHOOK_SECRET: 'sk_test_falsch' }), v4 = await st({ STRIPE_SECRET_KEY: 'sk_test_pruef', STRIPE_WEBHOOK_SECRET: 'pruef' }), v5 = await st({ SUPABASE_URL: 'abc.supabase.co' }), v6 = await st({});
+    const alle = JSON.stringify([v1, v2, v3, v4, v5]);
+    ok(!v1.daten && /SUPABASE_SECRET_KEY/.test(v1.hinweise.join()) && !v2.daten && /öffentliche Schlüssel/.test(v2.hinweise.join()) && !v3.zahlung && /veröffentlichbare/.test(v3.hinweise.join()) && v4.zahlung && /whsec_/.test(v4.hinweise.join()) && /SUPABASE_SECRET_KEY fehlt/.test(v5.hinweise.join()) && /https:/.test(v5.hinweise.join()) && v6.hinweise === undefined && !/sb_publishable_pruef|pk_test_pruef|sk_test_pruef/.test(alle), '/api/status benennt verwechselte oder fehlende Schlüssel, ohne einen Wert zu zeigen; öffentliche Schlüssel am falschen Platz werden nicht benutzt');
+  } catch (e) {
+    ok(false, 'Supabase-Schlüssel ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
+  } finally {
+    globalThis.fetch = echt;
   }
 }
 

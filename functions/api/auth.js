@@ -1,14 +1,17 @@
 /* eeziframes · Anmeldung für Betriebe ohne Passwort: ein sechsstelliger Code per E-Mail (Supabase Auth, „Email OTP“).
    Supabase-Einstellung: Authentication → Email Templates → „Magic Link“ muss den Code {{ .Token }} enthalten (siehe docs/ONLINE-STELLEN.md).
    Attrappe (DATEN_ATTRAPPE=1): der Code ist immer 123456. */
-import { ApiFehler } from './umgebung.js';
+import { ApiFehler, sbNeu } from './umgebung.js';
 
 const cache = new Map();
 const hashN = (s) => String(s).split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7);
 const mailOk = (m) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m);
 
 async function gotrue(k, pfad, init, token) {
-  const r = await fetch(k.supabase.url + '/auth/v1/' + pfad, { method: init && init.body ? 'POST' : 'GET', headers: { apikey: k.supabase.anon, Authorization: 'Bearer ' + (token || k.supabase.anon), 'content-type': 'application/json' }, body: init && init.body ? JSON.stringify(init.body) : undefined });
+  const kopf = { apikey: k.supabase.anon, 'content-type': 'application/json' };
+  if (token) kopf.Authorization = 'Bearer ' + token; // Sitzung des Betriebs
+  else if (!sbNeu(k.supabase.anon)) kopf.Authorization = 'Bearer ' + k.supabase.anon; // früherer anon-Schlüssel (JWT); neue Schlüssel nur im Kopf apikey
+  const r = await fetch(k.supabase.url + '/auth/v1/' + pfad, { method: init && init.body ? 'POST' : 'GET', headers: kopf, body: init && init.body ? JSON.stringify(init.body) : undefined });
   const text = await r.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
   return { ok: r.ok, status: r.status, data: data };
 }
@@ -18,7 +21,7 @@ export async function codeSenden(k, sp, mail) {
   if (!mailOk(mail)) throw new ApiFehler('Bitte eine gültige E-Mail-Adresse eingeben.');
   if (k.supabase) {
     const r = await gotrue(k, 'otp', { body: { email: mail, create_user: true } });
-    if (!r.ok) throw new ApiFehler(r.status === 429 ? 'Zu viele Versuche. Bitte in einer Minute noch einmal.' : 'Der Code konnte nicht verschickt werden.', 502);
+    if (!r.ok) { console.log('Supabase Auth', r.status, JSON.stringify(r.data || {}).slice(0, 200)); throw new ApiFehler(r.status === 429 ? 'Zu viele Versuche. Bitte in einer Minute noch einmal.' : 'Der Code konnte nicht verschickt werden.', 502); }
     return { ok: true, mail: mail };
   }
   sp.codeMerken(mail, '123456');

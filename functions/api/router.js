@@ -32,13 +32,13 @@ export async function api(request, env, ctx0) {
   const k = konfig(env);
   globalThis.Abrechnung.setPreise(k.preise);
   try {
-    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook) });
+    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), hinweise: k.hinweise.length ? k.hinweise : undefined });
     if (pfad === '/api/ki') { if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env }); if (request.method === 'POST') return kiPost({ request, env }); return new Response(null, { status: 405, headers: { allow: 'GET, POST' } }); }
     const treffer = finde(request.method, pfad);
     if (!treffer) return json({ ok: false, fehler: 'not_found' }, 404);
     const sp = speicher(k), zd = zahlungsdienst(k);
     const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad === '/api/aufmass';
-    if (brauchtDaten && !sp) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Die Datenbank fehlt (SUPABASE_URL, SUPABASE_SERVICE_KEY).' }, 503);
+    if (brauchtDaten && !sp) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Die Datenbank fehlt (SUPABASE_URL, SUPABASE_SECRET_KEY).' }, 503);
     if (pfad.startsWith('/api/zahlung') && !zd) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Zahlungen fehlen (STRIPE_SECRET_KEY).' }, 503);
     let body = null, roh = '';
     if (request.method === 'POST' || request.method === 'PATCH') {
