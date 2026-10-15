@@ -7,7 +7,9 @@
    Hier stehen keine geheimen Schlüssel. */
 (function () {
   'use strict';
-  var C = window.KONFIG = Object.assign({ marke: 'eeziframes', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
+  /* Mit JavaScript übernimmt die App; die Textfassung für Suchmaschinen und KI-Assistenten (.vorab) bleibt verborgen */
+  document.documentElement.classList.add('js');
+  var C = window.KONFIG =Object.assign({ marke: 'eeziframes', pilot: true, ki: '/api/ki', impressum: '/impressum/', datenschutz: '/datenschutz/', preise: { aufmass: 7.99, projekt: 9, frei: 3, abo: { grund: 49, inkl: 10, extra: 5 }, plus: 79, mwst: true } }, window.KONFIG || {});
   var mem = {};
   function get(k) { try { return window.localStorage.getItem(k); } catch (e) { return mem[k] || null; } }
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }

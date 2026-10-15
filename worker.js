@@ -3,6 +3,7 @@
    KI-Auswertung, Kauf des Aufmaßblatts (Stripe), Konten der Betriebe (Supabase), Eingang von Aufmaßen.
    Ohne eingerichtete Schlüssel läuft die Website im Pilotmodus weiter; /api/status sagt der App, was da ist. */
 import { api, geplant } from './functions/api/router.js';
+import { behandeln } from './functions/seo.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -11,6 +12,9 @@ export default {
       const antwort = await api(request, env, ctx);
       if (antwort) return antwort;
     }
+    /* Seiten, robots.txt, sitemap.xml: Freigabe für Suchmaschinen (Variable INDEXIERUNG) und Canonical, siehe functions/seo.js */
+    const seo = await behandeln(request, env, (r) => env.ASSETS.fetch(r));
+    if (seo) return seo;
     /* alles andere: Datei aus web/, sonst die Fehlerseite */
     return env.ASSETS.fetch(request);
   },

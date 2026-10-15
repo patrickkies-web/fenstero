@@ -115,8 +115,20 @@ Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter d
 2. Wie in Punkt 2 als benutzerdefinierte Domain am Worker `fenstero` eintragen, dazu `www.`. Die Website zeigt dann unter beiden Domains dasselbe; Kundenlinks, QR-Codes und die Adresse im Aufmaßblatt nehmen von selbst die Domain, unter der gerade gearbeitet wird.
 3. `fensterino.com` vorerst angeschlossen lassen: Aufmaßblätter, QR-Codes und Kundenlinks, die schon unterwegs sind, zeigen dorthin. In der Pilotphase liegen Konten und Aufmaße außerdem im Browser, und zwar getrennt je Domain: Was jemand unter `fensterino.com` angelegt hat, sieht er unter `eeziframes.com` nicht. Umleiten (301, mit Pfad) also erst, wenn Stufe 2 läuft oder es noch kaum Pilotnutzer gibt. Kundenlinks behalten bei einer Umleitung ihren Teil nach `#`.
 4. In Stufe 2 die Adressen mitziehen: Webhook bei Stripe, Website-Adresse und Weiterleitungen bei Supabase.
+5. Ist die Website für Suchmaschinen freigegeben (Schritt 7), die Hauptadresse festlegen: Variable `KANONISCH` = `https://eeziframes.com`. Dann zeigen Canonical, Sitemap und `llms.txt` unter beiden Domains auf die neue.
 
 **Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `eeziframes`. GitHub leitet die alte Adresse weiter. Den Worker-Namen `fenstero` nicht ändern, sonst findet Cloudflare die Bereitstellung nicht mehr.
+
+## Schritt 7: Für Suchmaschinen und KI-Assistenten freigeben (wenn Impressum und Datenschutz fertig sind)
+
+In der Pilotphase ist die Website für Google, Bing, ChatGPT, Claude und Perplexity gesperrt (`robots.txt` sperrt alles, jede Seite meldet `noindex`). Freigegeben wird ohne Code-Änderung:
+
+1. Schritt 4 erledigt? Ohne vollständiges Impressum keine Freigabe.
+2. Cloudflare: **Workers & Pages → fenstero → Einstellungen → Variablen und Geheimnisse → Hinzufügen**: Typ **Text**, Name `INDEXIERUNG`, Wert `1`, **Bereitstellen**. Bei mehreren Domains zusätzlich `KANONISCH` = `https://<hauptdomain>`.
+3. Prüfen: `https://fensterino.com/robots.txt` zeigt `Allow: /` und eine Zeile `Sitemap:`, `https://fensterino.com/sitemap.xml` listet 9 Seiten, `https://fensterino.com/llms.txt` die Kurzfassung für KI-Assistenten.
+4. [Google Search Console](https://search.google.com/search-console) und [Bing Webmaster Tools](https://www.bing.com/webmasters): Domain bestätigen (DNS-Eintrag bei Cloudflare), Sitemap einreichen.
+
+Was danach hilft (Erwähnungen, Bewertungen, Aktualität) und warum: [docs/SEO.md](SEO.md). Zurück in die Pilotphase: Variable `INDEXIERUNG` löschen.
 
 ## Stufe 2: Supabase und Stripe anschließen
 

@@ -41,14 +41,16 @@ if (ATTRAPPE) {
 }
 
 const { api } = await import(pathToFileURL(path.join(ROOT, 'functions/api/router.js')).href);
+const { behandeln } = await import(pathToFileURL(path.join(ROOT, 'functions/seo.js')).href);
 
-/* _headers lesen: Zeile ohne Einzug = Pfad (mit * am Ende), eingerückt = Kopfzeile */
+/* _headers lesen: Zeile ohne Einzug = Pfad (mit * am Ende), eingerückt = Kopfzeile, „! Name“ nimmt eine Kopfzeile wieder weg */
 const regeln = [];
 try {
   let cur = null;
   for (const zeile of (await readFile(path.join(WEB, '_headers'), 'utf8')).split('\n')) {
     if (!zeile.trim() || zeile.trim().startsWith('#')) continue;
     if (!/^\s/.test(zeile)) { cur = { muster: zeile.trim(), kopf: [] }; regeln.push(cur); continue; }
+    if (cur && zeile.trim().startsWith('! ')) { cur.kopf.push(['!', zeile.trim().slice(2).trim()]); continue; }
     const i = zeile.indexOf(':');
     if (cur && i > 0) cur.kopf.push([zeile.slice(0, i).trim(), zeile.slice(i + 1).trim()]);
   }
@@ -56,10 +58,27 @@ try {
 const passt = (muster, p) => (muster.endsWith('*') ? p.startsWith(muster.slice(0, -1)) : p === muster);
 const kopfzeilen = (p) => regeln.filter((r) => passt(r.muster, p)).flatMap((r) => r.kopf);
 
-const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
+const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
 
 async function datei(p) {
   try { const s = await stat(p); return s.isFile() ? p : s.isDirectory() ? 'dir' : null; } catch (e) { return null; }
+}
+
+/* Datei aus web/ als Response, mit Kopfzeilen aus _headers; Ordner ohne Schrägstrich leiten weiter, Unbekanntes bekommt 404.html */
+async function statisch(url) {
+  const p = decodeURIComponent(url.pathname);
+  if (p.includes('..')) return new Response('', { status: 400 });
+  let ziel = path.join(WEB, p);
+  let gefunden = await datei(ziel);
+  if (gefunden === 'dir') {
+    if (!p.endsWith('/')) return new Response('', { status: 308, headers: { location: p + '/' + url.search } });
+    ziel = path.join(ziel, 'index.html'); gefunden = await datei(ziel);
+  }
+  let status = 200;
+  if (!gefunden || path.basename(ziel).startsWith('_')) { ziel = path.join(WEB, '404.html'); status = 404; }
+  const kopf = new Headers({ 'content-type': TYPEN[path.extname(ziel)] || 'application/octet-stream' });
+  for (const [k, v] of kopfzeilen(p)) { if (k === '!') kopf.delete(v); else kopf.set(k, v); }
+  return new Response(await readFile(ziel), { status: status, headers: kopf });
 }
 
 http.createServer(async (req, res) => {
@@ -74,21 +93,11 @@ http.createServer(async (req, res) => {
       res.end(Buffer.from(await antwort.arrayBuffer()));
       return;
     }
-    let p = decodeURIComponent(url.pathname);
-    if (p.includes('..')) { res.writeHead(400); res.end(); return; }
-    let ziel = path.join(WEB, p);
-    let gefunden = await datei(ziel);
-    if (gefunden === 'dir') {
-      if (!p.endsWith('/')) { res.writeHead(308, { location: p + '/' + url.search }); res.end(); return; }
-      ziel = path.join(ziel, 'index.html'); gefunden = await datei(ziel);
-    }
-    let status = 200;
-    if (!gefunden || path.basename(ziel).startsWith('_')) { ziel = path.join(WEB, '404.html'); status = 404; }
-    const inhalt = await readFile(ziel);
-    const kopf = { 'content-type': TYPEN[path.extname(ziel)] || 'application/octet-stream' };
-    for (const [k, v] of kopfzeilen(p)) kopf[k] = v;
-    res.writeHead(status, kopf);
-    res.end(inhalt);
+    /* Seiten, robots.txt, sitemap.xml wie beim Worker (functions/seo.js), sonst die Datei aus web/ */
+    const request = new Request(url.href, { method: req.method, headers: req.headers });
+    const antwort = (await behandeln(request, env, () => statisch(url))) || (await statisch(url));
+    res.writeHead(antwort.status, Object.fromEntries(antwort.headers));
+    res.end(Buffer.from(await antwort.arrayBuffer()));
   } catch (e) {
     console.error(e);
     res.writeHead(500); res.end('Fehler');

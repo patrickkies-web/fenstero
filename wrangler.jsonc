@@ -1,7 +1,8 @@
 /* eeziframes auf Cloudflare Workers: was gebaut und wie es ausgeliefert wird.
    - Die Website liegt in web/: statische Dateien, Kopfzeilen aus web/_headers, Fehlerseite web/404.html.
-   - Nur /api/… läuft durch worker.js (functions/api/router.js): KI-Auswertung, Kauf des Aufmaßblatts (Stripe),
-     Konten der Betriebe (Supabase), Eingang von Aufmaßen aus der App.
+   - /api/… läuft durch worker.js (functions/api/router.js): KI-Auswertung, Kauf des Aufmaßblatts (Stripe),
+     Konten der Betriebe (Supabase), Eingang von Aufmaßen aus der App. Die Seiten selbst, robots.txt und sitemap.xml
+     ebenfalls (functions/seo.js): Freigabe für Suchmaschinen über die Variable INDEXIERUNG, Canonical über KANONISCH.
    - "name" muss genau so heißen wie der Worker im Cloudflare-Dashboard (Workers & Pages).
    Schlüssel (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_ANON_KEY, FREISCHALT_GEHEIMNIS)
    gehören nur ins Dashboard (Einstellungen → Variablen und Geheimnisse, Typ Secret), nie hierher. Liste aller Variablen: functions/api/umgebung.js */
@@ -13,7 +14,8 @@
     "directory": "./web",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    // /api/… und die Seiten selbst laufen durch worker.js (Freigabe für Suchmaschinen, robots.txt, sitemap.xml, llms.txt); Skripte, Bilder und Schriften kommen direkt
+    "run_worker_first": ["/api/*", "/", "/index.html", "/app/*", "/ratgeber/*", "/fuer-fensterbauer/*", "/impressum/*", "/datenschutz/*", "/robots.txt", "/sitemap.xml", "/llms.txt"]
   },
   // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU, PREIS_AUFMASS_CENT, MWST) bei jedem Deployment behalten
   "keep_vars": true,

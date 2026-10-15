@@ -1,5 +1,4 @@
-# Pilotphase: bitte nicht durchsuchen. Zum öffentlichen Start ersetzen durch:
-# User-agent: *
-# Allow: /
+# Ersatz, falls die Website ohne worker.js ausgeliefert wird. Sonst beantwortet functions/seo.js /robots.txt:
+# in der Pilotphase wie hier, mit INDEXIERUNG=1 mit Freigabe und Sitemap (docs/SEO.md).
 User-agent: *
 Disallow: /
