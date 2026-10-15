@@ -59,7 +59,7 @@ grant usage on schema public to service_role;
 grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse to service_role;
 
 -- updated_at pflegt der Server selbst (speicher.js); dieser Auslöser ist nur ein Netz für Änderungen von Hand
-create or replace function public.eeziframes_touch() returns trigger language plpgsql as $$
+create or replace function public.eeziframes_touch() returns trigger language plpgsql set search_path = '' as $$
 begin new.updated_at = now(); return new; end $$;
 drop trigger if exists betriebe_touch on public.betriebe;
 create trigger betriebe_touch before update on public.betriebe for each row execute function public.eeziframes_touch();
