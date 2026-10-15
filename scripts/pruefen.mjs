@@ -505,10 +505,12 @@ if (teil(6)) {
   await p5.click('.qpanel [data-act="fsw"][data-v="6"]'); await p5.waitForTimeout(300);
   const fsw = await p5.evaluate(() => ({ n: S.win.sashes.length, t: S.win.sashes.map((x) => x.t).join(''), geh: S.win.sashes[5].t === 'P' && S.win.sashes[5].din === 'L' }));
   /* Die Vorführung startet kurz nach der Wahl; gezählt wird, sobald die Flügel weit gefaltet sind, danach die Ruhelage */
-  const gefaltet = () => p5.evaluate(() => { const st = document.getElementById('w3d'); return st.classList.contains('is-demo') && Array.from(st.querySelectorAll('.w3d-sash')).filter((sa) => /rotateY\((-?[\d.]+)deg\)/.test(sa.style.transform) && Math.abs(parseFloat(sa.style.transform.match(/rotateY\((-?[\d.]+)deg/)[1])) > 20).length >= 5; });
+  /* Gefaltet wird per CSS-Animation je Flügel (läuft im Compositor): auf dem Höhepunkt sind mindestens fünf Flügel räumlich gedreht */
+  const gefaltet = () => p5.evaluate(() => { const st = document.getElementById('w3d'); return st.classList.contains('is-demo') && Array.from(st.querySelectorAll('.w3d-sash')).filter((sa) => sa.getAnimations().some((a) => /^falt-/.test(a.animationName)) && /^matrix3d/.test(getComputedStyle(sa).transform) && Math.abs(new DOMMatrix(getComputedStyle(sa).transform).m13) > 0.35).length >= 5; });
   let falt = false; for (let k = 0; k < 40 && !falt; k++) { await p5.waitForTimeout(100); falt = await gefaltet(); }
-  await p5.waitForFunction(() => { const st = document.getElementById('w3d'); return !st.classList.contains('is-demo') && Array.from(st.querySelectorAll('.w3d-sash')).every((sa) => sa.style.transform === 'none'); }, null, { timeout: 6000 }).catch(() => {});
-  const ruhe = await p5.evaluate(() => { const st = document.getElementById('w3d'); return !st.classList.contains('is-demo') && Array.from(st.querySelectorAll('.w3d-sash')).every((sa) => sa.style.transform === 'none'); });
+  const ruhig = () => { const st = document.getElementById('w3d'); return !st.classList.contains('is-demo') && Array.from(st.querySelectorAll('.w3d-sash')).every((sa) => sa.style.transform === 'none' && !sa.getAnimations().some((a) => /^falt-/.test(a.animationName))); };
+  await p5.waitForFunction(ruhig, null, { timeout: 6000 }).catch(() => {});
+  const ruhe = await p5.evaluate(ruhig);
   ok(fsw.n === 6 && fsw.t === 'XXXXXP' && fsw.geh && falt && ruhe, 'Faltschiebewand: 6 Flügel mit Gehflügel am Ende, die Wand faltet sich zum Paket und kommt zurück');
   await frage5('sart', { sart: 'keiner', roll: 'keiner' });
   await p5.click('.qpanel [data-act="sart"][data-v="raffstore"]'); await p5.waitForTimeout(600);
@@ -521,6 +523,30 @@ if (teil(6)) {
   await p5.click('.qpanel [data-act="setw"][data-f="iart"][data-v="jalousie"]'); await p5.waitForTimeout(600);
   const inn = await p5.evaluate(() => ({ da: !!document.querySelector('[data-r="innen"]'), bg: document.querySelector('[data-r="innen"]').style.background, k: !!document.querySelector('[data-r="innen-k"]'), fragen: qList(S.win).map((q) => q.id) }));
   ok(inn.da && inn.k && /repeating-linear-gradient/.test(inn.bg) && inn.fragen.includes('ifarbe'), 'Sichtschutz innen: Jalousie mit Kassette vor dem Glas, die Farbfrage folgt');
+  // Eigene Farbe: Textfeld bei jeder Farbwahl, erkannte Farben färben das Modell schon beim Tippen
+  await frage5('fa');
+  await p5.click('#t-wunschA'); await p5.keyboard.type('RAL 7021'); await p5.waitForTimeout(300);
+  const fa1 = await p5.evaluate(() => ({ bg: document.querySelector('[data-r="el-back"]').style.background, info: document.getElementById('ffi-wunschA').textContent, fokus: document.activeElement.id, cur: document.querySelector('.qpanel .qcur').textContent }));
+  await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
+  const fa2 = await p5.evaluate(() => ({ zeile: specRows(S.win).find((r) => r.k === 'Farbe').v, gewaehlt: document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]').length }));
+  await p5.click('.qpanel .qsw[data-v="9016"]'); await p5.waitForTimeout(300);
+  const fa3 = await p5.evaluate(() => ({ wunsch: S.win.wunschA, fa: S.win.fa }));
+  ok(/rgb\(47, 50, 52\)/.test(fa1.bg) && /Erkannt: RAL 7021 Schwarzgrau/.test(fa1.info) && fa1.fokus === 't-wunschA' && /RAL 7021 Schwarzgrau/.test(fa1.cur) && /RAL 7021 Schwarzgrau, eigene Angabe/.test(fa2.zeile) && fa2.gewaehlt === 0 && fa3.wunsch === '' && fa3.fa === '9016', 'Eigene Farbe außen: RAL-Nummer wird erkannt, das Modell färbt sich beim Tippen, eine Farbe aus der Liste hebt sie wieder auf');
+  await frage5('gf');
+  await p5.click('#t-wunschGf'); await p5.keyboard.type('Messing'); await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
+  const gf1 = await p5.evaluate(() => ({ griff: document.querySelector('[data-r="handle-0"]').style.background, zeile: specRows(S.win).find((r) => r.k === 'Griff').v }));
+  await frage5('sfarbe', { sart: 'raffstore', roll: 'aufsatz' });
+  await p5.click('#t-wunschSf'); await p5.keyboard.type('DB 703'); await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
+  const sf1 = await p5.evaluate(() => ({ hint: document.querySelector('.w3d-hint').textContent, zeile: specRows(S.win).find((r) => r.k === 'Sonnenschutz').v }));
+  await frage5('ifarbe', { iart: 'rollo' });
+  await p5.click('#t-wunschIf'); await p5.keyboard.type('Sonnenuntergang'); await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
+  const if1 = await p5.evaluate(() => ({ info: document.getElementById('ffi-wunschIf').textContent, zeile: specRows(S.win).find((r) => r.k === 'Sonnenschutz').v }));
+  ok(/rgb\(181, 162, 106\)/.test(gf1.griff) && /Messing/.test(gf1.zeile) && /DB 703 Eisenglimmer dunkel/.test(sf1.hint) && /DB 703/.test(sf1.zeile) && /Nicht in der Farbliste/.test(if1.info) && /Wunsch: Sonnenuntergang/.test(if1.zeile), 'Eigene Farbe auch für Griff, Sonnenschutz und Innenschutz: Messing, DB 703 erkannt, Unbekanntes geht als Wunsch mit');
+  // Flüssig: gleiche Struktur → dieselbe Bühne bleibt, der Hinweis am Modell ohne Weichzeichner
+  await frage5('glas');
+  const buehne = await p5.evaluate(() => { window.__b = document.getElementById('w3d'); return true; });
+  await p5.click('.qpanel [data-act="setw"][data-v="2"]'); await p5.waitForTimeout(200);
+  ok(buehne && await p5.evaluate(() => window.__b === document.getElementById('w3d') && getComputedStyle(document.querySelector('.w3d-hint')).backdropFilter === 'none'), 'Flüssig: bei gleicher Struktur bleibt die Bühne stehen, der Hinweis am Modell rechnet keinen Weichzeichner');
   // Neue Öffnung: Start → Fotos → Einzeichnen (Ecke ziehen, Lupe) → Maße → Ergebnis mit Lage
   await p5.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await p5.click('[data-act="new"]'); await p5.waitForSelector('.scr[data-screen="start"]');

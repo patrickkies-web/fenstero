@@ -723,7 +723,7 @@ function simLink(l, cid) {
 let PDL = null;
 const PDLP = (async () => { try { PDL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { PDL = null; } return PDL; })();
 /* Die PDF zeichnet /assets/blatt.js (gemeinsam mit der App): Ausgabe 'betrieb' in den Farben des Betriebs, mit Bestellmaß-Vorschlag */
-const BLATT_H = { derive: AW.derive, lab: AW.lab, num: AW.num, th: AW.th, col: AW.col, orn: (k) => AW.lab('orn', k), opening: AW.opening, sonne: AW.sonne, innen: AW.innen };
+const BLATT_H = { derive: AW.derive, lab: AW.lab, num: AW.num, th: AW.th, col: AW.col, orn: (k) => AW.lab('orn', k), opening: AW.opening, sonne: AW.sonne, innen: AW.innen, farbe: AW.farbe, farbeZeile: AW.farbZeile, griffFarbe: AW.griffName };
 function amPDF(l) {
   if (!window.Blatt || !l.aufmass) return null;
   const am = l.aufmass, c = BC(), a = A();

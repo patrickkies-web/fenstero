@@ -312,3 +312,62 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pilotHinweis); else pilotHinweis();
 })();
+
+/* ---------- Farbtext: eine eingetippte Farbe verstehen ----------
+   Erkennt RAL-Classic-Nummern (mit oder ohne „RAL“), RAL-Namen („Schwarzgrau“), DB 701 bis 703, Eloxal, Holzdekore,
+   Farbwörter („Messing“, „Sand“) und Hex-Werte (#383E42). Liefert { hex, bg, name, code, key, holz } oder null.
+   Die Farbwerte sind Bildschirm-Näherungen; das echte Ergebnis zeigt ein Farbmuster. */
+(function () {
+  'use strict';
+  var RAL = ('1000 Grünbeige CDBA88|1001 Beige D0B084|1002 Sandgelb D2AA6D|1003 Signalgelb F9A800|1004 Goldgelb E49E00|1005 Honiggelb CB8E00|1006 Maisgelb E29000|1007 Narzissengelb E88C00|1011 Braunbeige AF804F|1012 Zitronengelb DDAF27|1013 Perlweiß E3D9C6|1014 Elfenbein DDC49A|1015 Hellelfenbein E6D2B5|1016 Schwefelgelb F1DD38|1017 Safrangelb F6A950|1018 Zinkgelb FACA30|1019 Graubeige A48F7A|1020 Olivgelb A08F65|1021 Rapsgelb F6B600|1023 Verkehrsgelb F7B500|1024 Ockergelb BA8F4C|1026 Leuchtgelb FFFF00|1027 Currygelb A77F0E|1028 Melonengelb FF9B00|1032 Ginstergelb E2A300|1033 Dahliengelb F99A1C|1034 Pastellgelb EB9C52|1035 Perlbeige 908370|1036 Perlgold 80643F|1037 Sonnengelb F09200|' +
+    '2000 Gelborange DA6E00|2001 Rotorange BA481B|2002 Blutorange BF3922|2003 Pastellorange F67828|2004 Reinorange E25303|2005 Leuchtorange FF4D06|2007 Leuchthellorange FFB200|2008 Hellrotorange ED6B21|2009 Verkehrsorange DE5307|2010 Signalorange D05D28|2011 Tieforange E26E0E|2012 Lachsorange D5654D|2013 Perlorange 923E25|2017 RAL Orange FC5500|' +
+    '3000 Feuerrot A72920|3001 Signalrot 9B2423|3002 Karminrot 9B2321|3003 Rubinrot 861A22|3004 Purpurrot 6B1C23|3005 Weinrot 59191F|3007 Schwarzrot 3E2022|3009 Oxidrot 6D342D|3011 Braunrot 782423|3012 Beigerot C5856D|3013 Tomatenrot 972E25|3014 Altrosa CB7375|3015 Hellrosa D8A0A6|3016 Korallenrot A63D30|3017 Rosé CA555D|3018 Erdbeerrot C63F4A|3020 Verkehrsrot BB1E10|3022 Lachsrot CF6955|3024 Leuchtrot FF2D21|3026 Leuchthellrot FF2A1B|3027 Himbeerrot AB273C|3028 Reinrot CC2C24|3031 Orientrot A63437|3032 Perlrubinrot 701D24|3033 Perlrosa A53A2E|' +
+    '4001 Rotlila 816183|4002 Rotviolett 8D3C4B|4003 Erikaviolett C4618C|4004 Bordeauxviolett 651E38|4005 Blaulila 76689A|4006 Verkehrspurpur 903373|4007 Purpurviolett 47243C|4008 Signalviolett 844C82|4009 Pastellviolett 9D8692|4010 Telemagenta BC4077|4011 Perlviolett 6E6387|4012 Perlbrombeer 6B6B7F|' +
+    '5000 Violettblau 2A4362|5001 Grünblau 1F4764|5002 Ultramarinblau 2B2C7C|5003 Saphirblau 2A3756|5004 Schwarzblau 1D1F2A|5005 Signalblau 154889|5007 Brillantblau 41678D|5008 Graublau 313C48|5009 Azurblau 2E5978|5010 Enzianblau 13447C|5011 Stahlblau 232C3F|5012 Lichtblau 3481B8|5013 Kobaltblau 232D53|5014 Taubenblau 6C7C98|5015 Himmelblau 2874B2|5017 Verkehrsblau 0E518D|5018 Türkisblau 21888F|5019 Capriblau 1A5784|5020 Ozeanblau 0B4151|5021 Wasserblau 07737A|5022 Nachtblau 2F2A5A|5023 Fernblau 4D668E|5024 Pastellblau 6A93B0|5025 Perlenzian 296478|5026 Perlnachtblau 102C54|' +
+    '6000 Patinagrün 3C7460|6001 Smaragdgrün 366735|6002 Laubgrün 325928|6003 Olivgrün 50533C|6004 Blaugrün 024442|6005 Moosgrün 114232|6006 Grauoliv 3C392E|6007 Flaschengrün 2C3222|6008 Braungrün 37342A|6009 Tannengrün 27352A|6010 Grasgrün 4D6F39|6011 Resedagrün 6C7C59|6012 Schwarzgrün 303D3A|6013 Schilfgrün 7D765A|6014 Gelboliv 474135|6015 Schwarzoliv 3D3D36|6016 Türkisgrün 00694C|6017 Maigrün 587F40|6018 Gelbgrün 61993B|6019 Weißgrün B9CEAC|6020 Chromoxidgrün 37422F|6021 Blassgrün 8A9977|6022 Braunoliv 3A3327|6024 Verkehrsgrün 008351|6025 Farngrün 5E6E3B|6026 Opalgrün 005F4E|6027 Lichtgrün 7EBAB5|6028 Kieferngrün 315442|6029 Minzgrün 006F3D|6032 Signalgrün 237F52|6033 Minttürkis 46877F|6034 Pastelltürkis 7AACAC|6035 Perlgrün 194D25|6036 Perlopalgrün 04574B|6037 Reingrün 008B29|6038 Leuchtgrün 00B51A|6039 Fasergrün B3C43E|' +
+    '7000 Fehgrau 7A888E|7001 Silbergrau 8C969D|7002 Olivgrau 817863|7003 Moosgrau 7A7669|7004 Signalgrau 9B9B9B|7005 Mausgrau 6C6E6B|7006 Beigegrau 766A5E|7008 Khakigrau 745E3D|7009 Grüngrau 5D6058|7010 Zeltgrau 585C56|7011 Eisengrau 52595D|7012 Basaltgrau 575D5E|7013 Braungrau 575044|7015 Schiefergrau 4F5358|7016 Anthrazitgrau 383E42|7021 Schwarzgrau 2F3234|7022 Umbragrau 4C4A44|7023 Betongrau 808076|7024 Graphitgrau 45494E|7026 Granitgrau 374345|7030 Steingrau 928E85|7031 Blaugrau 5B686D|7032 Kieselgrau B5B0A1|7033 Zementgrau 7F8274|7034 Gelbgrau 92886F|7035 Lichtgrau C5C7C4|7036 Platingrau 979392|7037 Staubgrau 7A7B7A|7038 Achatgrau B0B0A9|7039 Quarzgrau 6B665E|7040 Fenstergrau 989EA1|7042 Verkehrsgrau A 8E9291|7043 Verkehrsgrau B 4F5250|7044 Seidengrau B7B3A8|7045 Telegrau 1 8D9295|7046 Telegrau 2 7E868A|7047 Telegrau 4 C8C8C7|7048 Perlmausgrau 817B73|' +
+    '8000 Grünbraun 89693F|8001 Ockerbraun 9D622B|8002 Signalbraun 794D3E|8003 Lehmbraun 7E4B27|8004 Kupferbraun 8D4931|8007 Rehbraun 70462B|8008 Olivbraun 724A25|8011 Nussbraun 5A3826|8012 Rotbraun 66332B|8014 Sepiabraun 4A3526|8015 Kastanienbraun 5E2F26|8016 Mahagonibraun 4C2B20|8017 Schokoladenbraun 442F29|8019 Graubraun 3D3635|8022 Schwarzbraun 1A1718|8023 Orangebraun A45729|8024 Beigebraun 795038|8025 Blassbraun 755847|8028 Terrabraun 513A2A|8029 Perlkupfer 7F4031|' +
+    '9001 Cremeweiß E9E0D2|9002 Grauweiß D7D5CB|9003 Signalweiß ECECE7|9004 Signalschwarz 2B2B2C|9005 Tiefschwarz 0E0E10|9006 Weißaluminium A1A1A0|9007 Graualuminium 878581|9010 Reinweiß F1ECE1|9011 Graphitschwarz 27292B|9012 Reinraumweiß F8F2E1|9016 Verkehrsweiß F1F0EA|9017 Verkehrsschwarz 2A292A|9018 Papyrusweiß C8CBC4|9022 Perlhellgrau 858583|9023 Perldunkelgrau 797B7A').split('|');
+  /* Weitere Angaben aus dem Fensterbau: [Suchwörter, Anzeigename, Farbe, Schlüssel der App, Holz] */
+  var EXTRA = [
+    [['db 701', 'db701'], 'DB 701 Eisenglimmer hell', '8E9192'], [['db 702', 'db702'], 'DB 702 Eisenglimmer', '7C8083'], [['db 703', 'db703', 'eisenglimmer'], 'DB 703 Eisenglimmer dunkel', '545A5E'],
+    [['eloxal', 'eloxiert', 'e6 ev1', 'ev1', 'alu natur'], 'Aluminium natur eloxiert (E6/EV1)', 'B8BABA'],
+    [['golden oak', 'goldeneiche', 'golden eiche'], 'Golden Oak', 'B5732F', 'goak', 1], [['nussbaum', 'nuss'], 'Nussbaum', '6B4428', 'nuss', 1], [['eiche hell', 'eiche'], 'Eiche hell', 'C9A46B', 'eiche', 1], [['mahagoni'], 'Mahagoni', '6F2F22', 'mahag', 1],
+    [['winchester'], 'Winchester', 'A8774C', '', 1], [['sheffield oak', 'sheffield'], 'Sheffield Oak', 'B9AB95', '', 1], [['douglasie'], 'Douglasie', 'B8834F', '', 1], [['siena noce', 'siena'], 'Siena Noce', '6F4B2E', '', 1], [['macore'], 'Macoré', '7B3F2B', '', 1], [['bergkiefer', 'kiefer'], 'Bergkiefer', 'C99A62', '', 1], [['eiche dunkel'], 'Eiche dunkel', '6B4A2C', '', 1], [['teak'], 'Teak', '8B5A2B', '', 1], [['oregon'], 'Oregon', 'B77C45', '', 1], [['holz'], 'Holzton', '9C6B3E', '', 1],
+    [['weiss', 'weis'], 'Weiß', 'F3F2EE'], [['schwarz'], 'Schwarz', '151617'], [['grau'], 'Grau', '8A8D8F'], [['hellgrau'], 'Hellgrau', 'C5C7C4'], [['dunkelgrau'], 'Dunkelgrau', '45494E'], [['anthrazit'], 'Anthrazit', '383E42'],
+    [['silber', 'silbern'], 'Silber', 'C9CCD0'], [['alu', 'aluminium'], 'Aluminium', 'A1A1A0'], [['edelstahl', 'inox'], 'Edelstahl', 'B4B8BC'], [['titan'], 'Titan', '8B8D8F'], [['gold', 'golden'], 'Gold', 'C8A24A'], [['messing'], 'Messing', 'B5A26A'],
+    [['bronze'], 'Bronze', '8A6A48'], [['kupfer'], 'Kupfer', 'B87333'], [['champagner'], 'Champagner', 'D3C3A3'], [['creme', 'cremeweiss'], 'Creme', 'E9E0D2'], [['beige'], 'Beige', 'D0B084'], [['sand'], 'Sand', 'D2BC94'], [['taupe'], 'Taupe', '8B7D6B'],
+    [['braun'], 'Braun', '5A4030'], [['dunkelbraun'], 'Dunkelbraun', '3B2A20'], [['rot'], 'Rot', 'A72920'], [['bordeaux'], 'Bordeaux', '651E38'], [['gruen'], 'Grün', '114232'], [['oliv'], 'Oliv', '50533C'], [['salbei'], 'Salbei', '7F9A7C'],
+    [['blau'], 'Blau', '232C3F'], [['petrol'], 'Petrol', '1F5F6A'], [['tuerkis'], 'Türkis', '21888F'], [['gelb'], 'Gelb', 'F7B500'], [['orange'], 'Orange', 'E25303'], [['rosa'], 'Rosa', 'D8A0A6'], [['lila', 'violett'], 'Violett', '76689A'], [['terracotta', 'terrakotta'], 'Terracotta', 'B56A48']
+  ];
+  var falt = function (t) { return String(t || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/é/g, 'e').replace(/[^a-z0-9#]+/g, ' ').trim(); };
+  var tab = {}, namen = [];
+  RAL.forEach(function (z) { var m = /^(\d{4}) (.+) ([0-9A-F]{6})$/.exec(z); if (!m) return; tab[m[1]] = { code: m[1], name: m[2], hex: '#' + m[3] }; namen.push([falt(m[2]), m[1]]); });
+  function mischen(hex, ziel, t) {
+    var a = parseInt(hex.slice(1), 16), b = parseInt(ziel.slice(1), 16), k = function (sh) { return Math.round(((a >> sh) & 255) + ((((b >> sh) & 255) - ((a >> sh) & 255)) * t)); };
+    return '#' + [16, 8, 0].map(function (sh) { return ('0' + k(sh).toString(16)).slice(-2); }).join('');
+  }
+  function holzBg(hex) { var h1 = mischen(hex, '#ffffff', 0.1), d = mischen(hex, '#000000', 0.12), m = mischen(hex, '#ffffff', 0.04); return 'repeating-linear-gradient(100deg, ' + hex + ' 0px, ' + h1 + ' 3px, ' + d + ' 6px, ' + m + ' 9px)'; }
+  function aus(hex, name, code, key, holz) { hex = hex.toLowerCase(); return { hex: hex, bg: holz ? holzBg(hex) : hex, name: name, code: code || '', key: key || code || '', holz: !!holz }; }
+  function lesen(text) {
+    var roh = String(text || '').trim(); if (!roh) return null;
+    var f = falt(roh), m;
+    /* Hex: mit # oder mit Buchstaben a–f, 3 oder 6 Stellen */
+    m = /(^|\s)#?([0-9a-f]{6}|[0-9a-f]{3})(\s|$)/.exec(f);
+    if (m && (/#/.test(f) || (/[a-f]/.test(m[2]) && /\d/.test(m[2]))) && !/^db\b/.test(f)) { var hx = m[2].length === 3 ? m[2].replace(/(.)/g, '$1$1') : m[2]; return aus('#' + hx, 'Farbe #' + hx.toUpperCase(), ''); }
+    /* DB 701–703 */
+    m = /\bdb ?(70[123])\b/.exec(f); if (m) { var e = EXTRA[+m[1] - 701]; return aus('#' + e[2], e[1], ''); }
+    /* RAL-Nummer, auch ohne „RAL“ */
+    m = /(?:^|[^0-9])([1-9]\d{3})(?![0-9])/.exec(f); if (m && tab[m[1]]) { var r = tab[m[1]]; return aus(r.hex, 'RAL ' + r.code + ' ' + r.name, r.code); }
+    /* Namen: genau, dann enthalten (das längste passende Wort gewinnt) */
+    var best = null, len = 0, gut = function (wort, treffer) { if (wort.length > len) { best = treffer; len = wort.length; } };
+    namen.forEach(function (n) { if (n[0] === f) gut(n[0] + '    ', function () { var r = tab[n[1]]; return aus(r.hex, 'RAL ' + r.code + ' ' + r.name, r.code); }); });
+    EXTRA.forEach(function (e) { e[0].forEach(function (w) { if (w === f) gut(w + '   ', function () { return aus('#' + e[2], e[1], '', e[3], e[4]); }); }); });
+    if (!best) {
+      namen.forEach(function (n) { if (n[0].length >= 5 && (f.indexOf(n[0]) >= 0)) gut(n[0], function () { var r = tab[n[1]]; return aus(r.hex, 'RAL ' + r.code + ' ' + r.name, r.code); }); });
+      EXTRA.forEach(function (e) { e[0].forEach(function (w) { if (w.length >= 3 && new RegExp('(^| )' + w + '( |$)').test(f)) gut(w, function () { return aus('#' + e[2], e[1], '', e[3], e[4]); }); }); });
+    }
+    return best ? best() : null;
+  }
+  window.Farbtext = { lesen: lesen, mischen: mischen, ral: tab };
+})();
