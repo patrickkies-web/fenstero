@@ -15,7 +15,7 @@
 // Zahlungsart und Abo über die (nachgestellte) Stripe-Rückkehr, Kauf des Aufmaßblatts mit Nachweis. BASE2=… nutzt einen laufenden Server.
 // Abschnitt 10 prüft die Auffindbarkeit (docs/SEO.md): jede Seite ohne JavaScript lesbar, ein h1, Titel, Beschreibung, gültige
 // strukturierte Daten, Pilotphase per Kopfzeile gesperrt, Freigabe mit INDEXIERUNG=1 auf einem dritten Testserver, Gleichstand
-// von Kopfzeilen, Sitemap, Worker-Routen und Preisen.
+// von Kopfzeilen, Sitemap, Worker-Routen und Preisen; www zählt als Hauptdomain, …workers.dev bleibt gesperrt.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -1127,6 +1127,13 @@ if (teil(10)) {
   const konf = {}; new Function('window', fs10.readFileSync(path10.join(WURZEL, 'web/config.js'), 'utf8'))(konf);
   const pr = konf.KONFIG.preise, fb = (await roh('/fuer-fensterbauer/')).text, ab = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
   ok([eur(pr.projekt) + ' netto', eur(pr.abo.grund) + ' im Monat', 'jedes weitere ' + eur(pr.abo.extra), eur(pr.plus) + ' im Monat', 'ersten ' + pr.frei + ' Projekte'].every((t) => fb.includes(t)) && [start.text, app.text, ab, fb].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten wie in config.js (' + [pr.aufmass, pr.projekt, pr.abo.grund, pr.plus].map(eur).join(', ') + ')');
+  /* g) Domains: www zählt als Hauptdomain, die Cloudflare-Testadresse bleibt gesperrt (functions/seo.js direkt geprüft) */
+  const probe = async (adresse, env) => { const r = await seo.behandeln(new Request(adresse), env, async () => new Response('<!doctype html><title>x</title><meta property="og:image" content="/og.png">', { headers: { 'content-type': 'text/html; charset=utf-8' } })); return { robots: r.headers.get('x-robots-tag'), link: r.headers.get('link'), text: await r.text() }; };
+  const www = await probe('https://www.eeziframes.com/ratgeber/', { INDEXIERUNG: '1' }), wdev = await probe('https://fenstero.beispiel.workers.dev/ratgeber/', { INDEXIERUNG: '1' });
+  const rbWww = await (await seo.behandeln(new Request('https://www.eeziframes.com/robots.txt'), { INDEXIERUNG: '1' }, null)).text(), rbDev = await (await seo.behandeln(new Request('https://fenstero.beispiel.workers.dev/robots.txt'), { INDEXIERUNG: '1' }, null)).text();
+  ok(!www.robots && www.link === '<https://eeziframes.com/ratgeber/>; rel="canonical"' && www.text.includes('content="https://eeziframes.com/og.png"') && rbWww.includes('Sitemap: https://eeziframes.com/sitemap.xml'), 'Domain: www.eeziframes.com zählt als eeziframes.com (Canonical, Vorschaubild, Sitemap)');
+  ok(wdev.robots === seo.SPERRE && /User-agent: \*\nDisallow: \/\n/.test(rbDev), 'Domain: die Cloudflare-Testadresse (…workers.dev) bleibt auch mit Freigabe gesperrt');
+
 }
 
 await browser.close();

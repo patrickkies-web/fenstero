@@ -27,7 +27,7 @@ export function konfig(env) {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
     ki: !!env.ANTHROPIC_API_KEY,
-    geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'fensterino-pilot',
+    geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot',
     preise: { aufmass: num(env.PREIS_AUFMASS_CENT, 799) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, 49), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, 79), mwst: env.MWST !== '0' }
   };
 }

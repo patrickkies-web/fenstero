@@ -2,7 +2,7 @@
 
 **eeziframes** (immer kleingeschrieben, „eezi“ wie „easy“). Die Aufmaß-App für Fenster: kostenlos für Hauseigentümer, bezahlt von Fensterbauern je Projekt. Das Logo ist ein weißes Fenster auf Schwarz, dessen Flügel kurz kippt. eeziframes bringt Leute, die am Haus etwas vorhaben, mit den Betrieben aus ihrer Gegend zusammen. Später kommen weitere Gewerke dazu, zum Start geht es nur um Fenster.
 
-Diese Anleitung bringt die eeziframes-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…workers.dev`), dann unter deiner eigenen Domain (heute `fensterino.com`; für die Marke eeziframes eine neue, siehe Schritt 6).
+Diese Anleitung bringt die eeziframes-Website ins Netz: erst unter einer kostenlosen Cloudflare-Adresse (`…workers.dev`), dann unter der eigenen Domain `eeziframes.com` (Schritt 6).
 
 ## Zwei Stufen
 
@@ -27,7 +27,7 @@ Diese Anleitung bringt die eeziframes-Website ins Netz: erst unter einer kostenl
 |---|---|
 | GitHub-Repo `patrickkies-web/fenstero` | hast du schon, kostenlos (Umbenennen in `eeziframes` ist möglich, siehe unten) |
 | Cloudflare-Konto (Workers) | kostenlos |
-| Eigene Domain | `fensterino.com` liegt schon bei Cloudflare; für die Marke eeziframes eine neue Domain, zum Beispiel `eeziframes.com` (Jahresgebühr beim Anbieter) |
+| Eigene Domain | `eeziframes.com`, verwaltet bei Cloudflare (Jahresgebühr beim Anbieter) |
 | Anthropic-API-Schlüssel für die KI | optional, nach Verbrauch; Ausgabenlimit setzen |
 | Supabase-Projekt (Stufe 2) | kostenloser Tarif reicht für den Start |
 | Stripe-Konto (Stufe 2) | keine Grundgebühr, Gebühr je Zahlung (Karte ca. 1,5 % + 0,25 €, SEPA 0,35 €) |
@@ -64,8 +64,8 @@ Die Menünamen bei Cloudflare ändern sich ab und zu; die Werte in der Tabelle b
 
 ## Schritt 3: Testen
 
-- `https://fensterino.com/` (oder die `…workers.dev`-Adresse) zeigt die Startseite mit dem Pilot-Hinweis oben.
-- `https://fensterino.com/app/` zeigt die App.
+- `https://eeziframes.com/` (oder die `…workers.dev`-Adresse) zeigt die Startseite mit dem Pilot-Hinweis oben.
+- `https://eeziframes.com/app/` zeigt die App.
 - Ohne Konto: Auf der Startseite **Führung starten** (App, ein Fenster in neun Schritten) und **Tour starten** (Fensterbauer, acht Schritte). Beide speichern nichts.
 - Kompletter Weg: Auf der Startseite **Für Betriebe starten** wählen und ein Konto anlegen (in der Pilotphase liegt es im Browser), ein Projekt anlegen, den Kundenlink kopieren und dir selbst per WhatsApp schicken. Auf dem Handy öffnen, ein Fenster messen (zwei Fotos, vier Maße), absenden, den Aufmaß-Code an dich zurückschicken. Im Portal **Code vom Kunden einfügen**: Das Aufmaß erscheint beim Projekt.
 - `…/impressum/` und `…/datenschutz/` laden.
@@ -85,9 +85,9 @@ Beide Texte sind Entwürfe für die Pilotphase. Lass sie vor dem öffentlichen S
 ## Schritt 5: KI-Fotoauswertung einschalten (optional)
 
 1. In der [Anthropic Console](https://console.anthropic.com) anmelden, unter **Billing** ein Zahlungsmittel oder Guthaben hinterlegen und unter **Limits** ein monatliches Ausgabenlimit setzen.
-2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `fensterino-pages`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
+2. Unter **API Keys** einen Schlüssel anlegen, Name zum Beispiel `eeziframes`. Der Schlüssel wird nur einmal angezeigt. Er gehört **nicht** ins Repo und nicht in einen Chat.
 3. Cloudflare: **Workers & Pages → fenstero → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets) → Hinzufügen (Add)**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, **Bereitstellen** (Deploy). Secrets bleiben bei allen weiteren Deployments erhalten.
-4. Prüfen: `https://fensterino.com/api/ki` zeigt `{"bereit":true}`.
+4. Prüfen: `https://eeziframes.com/api/ki` zeigt `{"bereit":true}`.
 
 Was dann passiert: Vor dem ersten Foto fragt die App um Einwilligung. Erst danach geht eine verkleinerte Kopie des Fotos über `/api/ki` an Anthropic, **eine Anfrage je Foto**. Die KI liest die Einbausituation rund um die Maueröffnung (Rollladenkasten, Anschlag, Laibung, Fensterbänke, Wandaufbau, Anschlüsse, Zugang, Schäden), nicht das alte Fenster; Checkliste, Quellen und Kosten in [docs/KI.md](KI.md). Die Aufträge liegen auf dem Server (`functions/api/ki.js`), der Zugang wertet also nur Fotos fürs Aufmaß aus. Eine eingebaute Bremse erlaubt 40 Anfragen je 10 Minuten und IP-Adresse; sie zählt je Server-Instanz, deshalb unbedingt das Ausgabenlimit bei Anthropic setzen.
 
@@ -97,25 +97,19 @@ Optional:
 
 Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass der Auftragsverarbeitungsvertrag (DPA) von Anthropic für dein Konto gilt; Abschnitt 4 der Datenschutzerklärung beschreibt die Verarbeitung.
 
-## Schritt 6: Eigene Domain (wenn der Name feststeht)
+## Schritt 6: Eigene Domain eeziframes.com
 
-Vorher den Namen prüfen: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „eeziframes“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke oder Länder dazukommen; für mehrere Länder gibt es die Unionsmarke beim EUIPO oder eine internationale Registrierung über die WIPO. Ähnlich klingende Namen gibt es schon, etwa „EzyFrame“ von Manfrotto und „EZ Frames“ von Durkee; vor der Anmeldung deshalb auf Verwechslungsgefahr prüfen lassen. Ein neuer Name ist technisch schnell gemacht: `python3 scripts/marke-umbenennen.py NeuerName`.
+Die Hauptdomain ist `eeziframes.com`. Markenschutz: kurz ins Markenregister schauen ([DPMA](https://register.dpma.de), [EUIPO](https://euipo.europa.eu/eSearch/)), vor allem für Software, Vermittlung und Handwerksleistungen (Klassen 9, 35, 37 und 42). Eine eigene Marke „eeziframes“ samt Logo anzumelden schützt dich, wenn später weitere Gewerke oder Länder dazukommen; für mehrere Länder gibt es die Unionsmarke beim EUIPO oder eine internationale Registrierung über die WIPO. Ähnlich klingende Namen gibt es schon, etwa „EzyFrame“ von Manfrotto und „EZ Frames“ von Durkee; vor der Anmeldung deshalb auf Verwechslungsgefahr prüfen lassen.
 
-1. Die Domain muss bei Cloudflare liegen. Für `fensterino.com` ist das erledigt (Nameserver `may.ns.cloudflare.com` und `coen.ns.cloudflare.com`). Bei einer neuen Domain: **Domain hinzufügen** (Add a domain), kostenlosen Tarif wählen und die zwei genannten Nameserver beim Domain-Anbieter eintragen.
-2. **Workers & Pages → fenstero → Einstellungen → Domains & Routen (Domains & Routes) → Hinzufügen (Add) → Benutzerdefinierte Domain (Custom domain)**: `fensterino.com` eintragen, hinzufügen. Dasselbe noch einmal für `www.fensterino.com`. Cloudflare legt DNS-Eintrag und Zertifikat selbst an; nach ein paar Minuten lädt die Seite.
+1. Die Domain muss bei Cloudflare liegen: **Domain hinzufügen** (Add a domain), kostenlosen Tarif wählen und die zwei genannten Nameserver beim Domain-Anbieter eintragen. Bei einer Registrierung direkt über Cloudflare entfällt das.
+2. **Workers & Pages → fenstero → Einstellungen → Domains & Routen (Domains & Routes) → Hinzufügen (Add) → Benutzerdefinierte Domain (Custom domain)**: `eeziframes.com` eintragen, hinzufügen. Dasselbe noch einmal für `www.eeziframes.com`. Cloudflare legt DNS-Eintrag und Zertifikat selbst an; nach ein paar Minuten lädt die Seite.
 3. Meldet Cloudflare, dass es für den Namen schon einen DNS-Eintrag gibt: unter **DNS → Einträge (Records)** den A-, AAAA- oder CNAME-Eintrag für genau diesen Namen löschen und Schritt 2 wiederholen. Eigene A-Einträge braucht die Website nicht.
 
 So erkennst du, wo es hakt: **Fehler 522** heißt, die Domain zeigt noch nicht auf den Worker (Punkt 2 und 3 oben). **„Server nicht gefunden“** heißt, für diesen Namen gibt es gar keinen Eintrag (häufig bei `www.`). Eine **leere oder 404-Seite** heißt, der letzte Build in `main` hat die Website nicht gefunden (Einstellungen aus Schritt 2 prüfen).
 
-Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter der der Betriebsbereich geöffnet wurde.
+Kundenlinks, QR-Codes und die Adresse im Aufmaßblatt nehmen von selbst die Domain, unter der der Betriebsbereich geöffnet wurde; im Code steht keine Domain. Für Suchmaschinen zählt `www.eeziframes.com` als `eeziframes.com`, und die `…workers.dev`-Adresse wird nie freigegeben (`functions/seo.js`). Hängen weitere Domains am Worker, etwa `eeziframes.de`, leite sie bei Cloudflare per Weiterleitungsregel (Rules → Redirect Rules, 301, Pfad behalten) auf `eeziframes.com` um oder setze `KANONISCH` (Schritt 7).
 
-**Neue Domain für eeziframes, ohne etwas zu verlieren:**
-
-1. Domain registrieren, zum Beispiel `eeziframes.com` (bei Cloudflare unter **Domain-Registrierung** oder bei einem anderen Anbieter, dann wie in Punkt 1 zu Cloudflare holen).
-2. Wie in Punkt 2 als benutzerdefinierte Domain am Worker `fenstero` eintragen, dazu `www.`. Die Website zeigt dann unter beiden Domains dasselbe; Kundenlinks, QR-Codes und die Adresse im Aufmaßblatt nehmen von selbst die Domain, unter der gerade gearbeitet wird.
-3. `fensterino.com` vorerst angeschlossen lassen: Aufmaßblätter, QR-Codes und Kundenlinks, die schon unterwegs sind, zeigen dorthin. In der Pilotphase liegen Konten und Aufmaße außerdem im Browser, und zwar getrennt je Domain: Was jemand unter `fensterino.com` angelegt hat, sieht er unter `eeziframes.com` nicht. Umleiten (301, mit Pfad) also erst, wenn Stufe 2 läuft oder es noch kaum Pilotnutzer gibt. Kundenlinks behalten bei einer Umleitung ihren Teil nach `#`.
-4. In Stufe 2 die Adressen mitziehen: Webhook bei Stripe, Website-Adresse und Weiterleitungen bei Supabase.
-5. Ist die Website für Suchmaschinen freigegeben (Schritt 7), die Hauptadresse festlegen: Variable `KANONISCH` = `https://eeziframes.com`. Dann zeigen Canonical, Sitemap und `llms.txt` unter beiden Domains auf die neue.
+**Die frühere Adresse `fensterino.com` gibt es nicht mehr.** Kundenlinks, QR-Codes und Aufmaßblätter, die noch darauf zeigen, laufen ins Leere; in der Pilotphase lagen Konten und Aufmaße ohnehin nur im Browser der jeweiligen Domain. Wurde Stufe 2 schon unter der alten Adresse eingerichtet, die Adressen nachziehen: Webhook bei Stripe (Stufe 2, B.7) und bei Supabase unter **Authentication → URL Configuration** die Site URL `https://eeziframes.com`.
 
 **Repo umbenennen (optional, am besten vor Schritt 2):** GitHub → Repo `fenstero` → Settings → Repository name `eeziframes`. GitHub leitet die alte Adresse weiter. Den Worker-Namen `fenstero` nicht ändern, sonst findet Cloudflare die Bereitstellung nicht mehr.
 
@@ -124,8 +118,8 @@ Kundenlinks passen sich von selbst an: Sie zeigen immer auf die Adresse, unter d
 In der Pilotphase ist die Website für Google, Bing, ChatGPT, Claude und Perplexity gesperrt (`robots.txt` sperrt alles, jede Seite meldet `noindex`). Freigegeben wird ohne Code-Änderung:
 
 1. Schritt 4 erledigt? Ohne vollständiges Impressum keine Freigabe.
-2. Cloudflare: **Workers & Pages → fenstero → Einstellungen → Variablen und Geheimnisse → Hinzufügen**: Typ **Text**, Name `INDEXIERUNG`, Wert `1`, **Bereitstellen**. Bei mehreren Domains zusätzlich `KANONISCH` = `https://<hauptdomain>`.
-3. Prüfen: `https://fensterino.com/robots.txt` zeigt `Allow: /` und eine Zeile `Sitemap:`, `https://fensterino.com/sitemap.xml` listet 9 Seiten, `https://fensterino.com/llms.txt` die Kurzfassung für KI-Assistenten.
+2. Cloudflare: **Workers & Pages → fenstero → Einstellungen → Variablen und Geheimnisse → Hinzufügen**: Typ **Text**, Name `INDEXIERUNG`, Wert `1`, **Bereitstellen**. Hängen außer `eeziframes.com` und `www.` weitere Domains am Worker, zusätzlich `KANONISCH` = `https://eeziframes.com`.
+3. Prüfen: `https://eeziframes.com/robots.txt` zeigt `Allow: /` und eine Zeile `Sitemap:`, `https://eeziframes.com/sitemap.xml` listet 9 Seiten, `https://eeziframes.com/llms.txt` die Kurzfassung für KI-Assistenten.
 4. [Google Search Console](https://search.google.com/search-console) und [Bing Webmaster Tools](https://www.bing.com/webmasters): Domain bestätigen (DNS-Eintrag bei Cloudflare), Sitemap einreichen.
 
 Was danach hilft (Erwähnungen, Bewertungen, Aktualität) und warum: [docs/SEO.md](SEO.md). Zurück in die Pilotphase: Variable `INDEXIERUNG` löschen.
@@ -136,7 +130,7 @@ Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kass
 
 ### A. Supabase (Datenbank und Anmeldung), etwa 20 Minuten
 
-1. [supabase.com](https://supabase.com) → **New project**: Name `fensterino`, Region **Central EU (Frankfurt)**, ein starkes Datenbank-Passwort (in den Passwort-Manager, du brauchst es sonst nicht).
+1. [supabase.com](https://supabase.com) → **New project**: Name `eeziframes`, Region **Central EU (Frankfurt)**, ein starkes Datenbank-Passwort (in den Passwort-Manager, du brauchst es sonst nicht).
 2. **SQL Editor → New query**: den Inhalt von `supabase/schema.sql` einfügen, **Run**. Das legt die Tabellen `betriebe`, `zahlungen`, `ereignisse` an und sperrt sie für Browser (nur der Server kommt mit dem Service-Schlüssel dran).
 3. **Project Settings → API**: notiere **Project URL** (`https://….supabase.co`), den **anon**-Schlüssel und den **service_role**-Schlüssel. Beide sind lange Texte, die mit `eyJ` beginnen; Supabase zeigt sie inzwischen unter „Legacy API keys“. Der service_role-Schlüssel darf nur bei Cloudflare liegen, nie im Browser, nie im Repo, nie in einem Chat.
 4. **Authentication → Sign In / Providers → Email**: eingeschaltet lassen, „Confirm email“ ist egal (wir nutzen den Code), **„Allow new users to sign up“ muss an sein**.
@@ -147,7 +141,7 @@ Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kass
    Er gilt eine Stunde. Wenn Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail.
    ```
    Wichtig ist `{{ .Token }}`: Das ist der sechsstellige Code. Die Vorlage „Confirm signup“ genauso anpassen (sie wird beim allerersten Anmelden einer Adresse verschickt).
-6. **Authentication → SMTP Settings**: Supabase verschickt mit dem eingebauten Versand nur **etwa 2 E-Mails pro Stunde**, das reicht nicht für echte Betriebe. Trag einen eigenen Versand ein (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@fensterino.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen). Bis dahin testest du mit deiner eigenen Adresse.
+6. **Authentication → SMTP Settings**: Supabase verschickt mit dem eingebauten Versand nur **etwa 2 E-Mails pro Stunde**, das reicht nicht für echte Betriebe. Trag einen eigenen Versand ein (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@eeziframes.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen). Bis dahin testest du mit deiner eigenen Adresse.
 7. Optional, **Authentication → Rate Limits**: Codes pro Stunde und Adresse begrenzen (die Website bremst zusätzlich: 8 Codes je 10 Minuten und IP).
 
 ### B. Stripe (Zahlungen), etwa 30 Minuten, erst im Testmodus
@@ -165,7 +159,7 @@ Alles für Stufe 2 steckt schon im Repo: `functions/api/` (Konten, Eingang, Kass
 4. **Einstellungen → Zahlungsmethoden**: Karten, PayPal, Apple Pay und Google Pay einschalten (Hauseigentümer), **SEPA-Lastschrift** einschalten (Betriebe; Stripe schaltet sie nach Prüfung frei).
 5. **Einstellungen → Kunden-E-Mails**: „Zahlungsbelege per E-Mail“ an (der Hauseigentümer bekommt so seine Rechnung an die Adresse aus der Kasse). **Einstellungen → Branding** und **Öffentliche Angaben**: Name, Support-Adresse, Logo; das steht auf Belegen und Rechnungen.
 6. **Entwickler → API-Schlüssel**: den **Geheimschlüssel** (`sk_test_…`) notieren → `STRIPE_SECRET_KEY`.
-7. **Entwickler → Webhooks → Endpunkt hinzufügen**: URL `https://fensterino.com/api/zahlung/webhook`, Ereignisse `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`. Den **Signaturschlüssel** (`whsec_…`) notieren → `STRIPE_WEBHOOK_SECRET`. (Für die `…workers.dev`-Adresse einen zweiten Endpunkt anlegen, falls du dort testest.)
+7. **Entwickler → Webhooks → Endpunkt hinzufügen**: URL `https://eeziframes.com/api/zahlung/webhook`, Ereignisse `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`. Den **Signaturschlüssel** (`whsec_…`) notieren → `STRIPE_WEBHOOK_SECRET`. (Für die `…workers.dev`-Adresse einen zweiten Endpunkt anlegen, falls du dort testest.)
 
 ### C. Schlüssel bei Cloudflare eintragen
 
@@ -187,7 +181,7 @@ Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrang
 
 ### D. Prüfen
 
-- `https://fensterino.com/api/status` zeigt `"daten":true` und `"zahlung":true` sowie die Preise.
+- `https://eeziframes.com/api/status` zeigt `"daten":true` und `"zahlung":true` sowie die Preise.
 - Startseite: Der Pilot-Hinweis ist weg. **Kostenlos starten** → deine E-Mail → Code aus der Mail → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code.
 - Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder Testkarte (`4242 4242 4242 4242`, beliebiges Datum in der Zukunft, beliebige drei Ziffern) hinterlegt ist.
 - App ohne Link: ein Fenster messen, **Freischalten · 7,99 €**, E-Mail, Testkarte. Zurück in der App ist das Blatt frei, PDF und Code sind da, Stripe schickt den Beleg.
