@@ -1,24 +1,20 @@
 /* Fensterino auf Cloudflare Workers (Einstellungen in wrangler.jsonc)
-   Die Website kommt als statische Dateien aus web/. Hier läuft nur /api/… durch:
-   /api/ki ist die KI-Auswertung der Fotos aus functions/api/ki.js, dieselbe Datei wie für Cloudflare Pages und den lokalen Testserver. */
-import * as ki from './functions/api/ki.js';
-
-const json = (obj, status) => new Response(JSON.stringify(obj), {
-  status: status,
-  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }
-});
+   Die Website kommt als statische Dateien aus web/. Alles unter /api/… beantwortet functions/api/router.js:
+   KI-Auswertung, Kauf des Aufmaßblatts (Stripe), Konten der Betriebe (Supabase), Eingang von Aufmaßen.
+   Ohne eingerichtete Schlüssel läuft die Website im Pilotmodus weiter; /api/status sagt der App, was da ist. */
+import { api, geplant } from './functions/api/router.js';
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/ki') {
-      const m = request.method;
-      const fn = m === 'GET' || m === 'HEAD' ? ki.onRequestGet : m === 'POST' ? ki.onRequestPost : null;
-      if (!fn) return new Response(null, { status: 405, headers: { allow: 'GET, POST' } });
-      return fn({ request, env, params: {}, data: {}, waitUntil: (p) => ctx.waitUntil(p) });
+    if (url.pathname.startsWith('/api/')) {
+      const antwort = await api(request, env, ctx);
+      if (antwort) return antwort;
     }
-    if (url.pathname.startsWith('/api/')) return json({ ok: false, fehler: 'not_found' }, 404);
     /* alles andere: Datei aus web/, sonst die Fehlerseite */
     return env.ASSETS.fetch(request);
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(geplant(env));
   }
 };

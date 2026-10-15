@@ -1,107 +1,8 @@
 'use strict';
-/* ---------- Aufmaß-Modell wie in der App: Felder, Beschriftungen, Fensterzeichnung ---------- */
-const AW = (() => {
-  const OPT = {
-    etage: { kg: 'Keller', eg: 'EG', og: 'OG', dg: 'DG' },
-    form: { rechteck: 'Rechteck', rundbogen: 'Rundbogen', segment: 'Segmentbogen', schraeg: 'Schräg', rund: 'Rund' },
-    olT: { F: 'Oberlicht fest', K: 'Oberlicht kippbar' },
-    material: { kunststoff: 'Kunststoff', holz: 'Holz', holzalu: 'Holz-Alu', alu: 'Aluminium' },
-    spross: { wiener: 'Wiener Sprosse', szr: 'Innenliegende Sprossen', auf: 'Aufgesetzte Sprossen', echt: 'Glasteilende Sprossen' },
-    aufseite: { beide: 'innen und außen', aussen: 'nur außen', innen: 'nur innen' },
-    glas: { '2': '2-fach', '3': '3-fach' },
-    glasfn: { schall: 'Schallschutz', vsg: 'Sicherheitsglas', sicht: 'Sichtschutz', sonne: 'Sonnenschutz' },
-    griff: { standard: 'Standard', abschliessbar: 'abschließbar', druckknopf: 'mit Druckknopf' },
-    gf: { weiss: 'weiß', silber: 'silber', edelstahl: 'Edelstahl', titan: 'titan', schwarz: 'schwarz' },
-    rc: { basis: 'Basisschutz', rc1: 'RC1 N', rc2: 'RC2' },
-    roll: { keiner: 'keiner', behalten: 'bestehender bleibt', aufsatz: 'Aufsatzrollladen neu', vorbau: 'Vorbaurollladen neu' },
-    antrieb: { gurt: 'Gurt', kurbel: 'Kurbel', motor: 'elektrisch', smart: 'Smart Home' },
-    insekt: { keiner: 'keiner', spann: 'Spannrahmen', dreh: 'Drehrahmen', plissee: 'Plissee' },
-    fbi: { behalten: 'behalten', werzalit: 'Werzalit', stein: 'Naturstein', holz: 'Holz' },
-    fba: { behalten: 'behalten', alu: 'Aluminium', stein: 'Naturstein' },
-    gebaeude: { efh: 'Einfamilienhaus', dh: 'Doppelhaushälfte', rh: 'Reihenhaus', mfh: 'Mehrfamilienhaus', etw: 'Eigentumswohnung', denkmal: 'Denkmalschutz', altbau: 'Altbau', gewerbe: 'Gewerbe' },
-    zeit: { asap: 'so bald wie möglich', '3m': 'in 1 bis 3 Monaten', '6m': 'in 3 bis 6 Monaten', '12m': 'später, erst Angebote', sofort: 'so bald wie möglich', offen: 'noch offen' },
-    budget: { b0: 'noch offen', b1: 'bis 5.000 €', b2: '5.000 bis 10.000 €', b3: '10.000 bis 20.000 €', b4: 'über 20.000 €' },
-    orn: { satinato: 'Satinato', chinchilla: 'Chinchilla', master: 'Mastercarré' }
-  };
-  const COL = { '9016': ['Verkehrsweiß', 'RAL 9016', '#f1f0ea'], '9001': ['Cremeweiß', 'RAL 9001', '#e9e0cf'], '7035': ['Lichtgrau', 'RAL 7035', '#cbd0cc'], '7039': ['Quarzgrau', 'RAL 7039', '#6c6960'], '7012': ['Basaltgrau', 'RAL 7012', '#575d5e'], '7016': ['Anthrazitgrau', 'RAL 7016', '#383e42'], '9005': ['Tiefschwarz', 'RAL 9005', '#141516'], '8022': ['Schwarzbraun', 'RAL 8022', '#2b2522'], '6005': ['Moosgrün', 'RAL 6005', '#1f4436'], '5011': ['Stahlblau', 'RAL 5011', '#1e2b3a'], '3005': ['Weinrot', 'RAL 3005', '#5e2129'], goak: ['Golden Oak', 'Holzdekor', '#b5732f'], nuss: ['Nussbaum', 'Holzdekor', '#6b4428'], eiche: ['Eiche hell', 'Holzdekor', '#c9a46b'], mahag: ['Mahagoni', 'Holzdekor', '#6f2f22'] };
-  const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp' };
-  const lab = (g, k) => (OPT[g] && OPT[g][k]) || '';
-  const col = (k) => COL[k] || COL['9016'];
-  const num = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
-  const th = (v) => (!num(v) ? '–' : String(Math.round(num(v))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-  function sashesFor(k) {
-    if (k === '1') return [{ t: 'DK', din: 'L' }];
-    if (k === '2s') return [{ t: 'D', din: 'L' }, { t: 'DK', din: 'R' }];
-    if (k === '3') return [{ t: 'DK', din: 'L' }, { t: 'F', din: 'L' }, { t: 'DK', din: 'R' }];
-    return [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }];
-  }
-  function base() {
-    return { name: '', etage: 'eg', anzahl: 1, mo: { hm: '', hl: '', hr: '', wm: '', wt: '', wb: '' }, el: { h: '', w: '' }, bru: '', laib: '', form: 'rechteck', teilung: '2p', ol: false, olT: 'K', sashes: sashesFor('2p'), richtung: 'innen', material: 'kunststoff', bars: [], spross: 'wiener', breite: 26, aufSeite: 'beide',
-      fa: '7016', fi: '9016', gleich: false, wunschA: '', wunschI: '', glas: '3', glasfn: [], orn: 'satinato', griff: 'standard', gf: 'weiss', rc: 'basis', roll: 'keiner', antrieb: 'gurt', insekt: 'keiner', fbi: 'behalten', fba: 'alu', demontage: true, ralm: true, putz: true, notiz: '', ki: null, fotos: 0 };
-  }
-  const mk = (o) => { const w = Object.assign(base(), o); if (!o.sashes) w.sashes = sashesFor(w.teilung); return w; };
-  function derive(w) {
-    const mo = w.mo || {}, hs = ['hm', 'hl', 'hr'].map((k) => num(mo[k])).filter(Boolean), ws = ['wm', 'wt', 'wb'].map((k) => num(mo[k])).filter(Boolean);
-    const moH = hs.length ? Math.min.apply(null, hs) : 0, moW = ws.length ? Math.min.apply(null, ws) : 0;
-    return { moH: moH, moW: moW, devH: hs.length > 1 ? Math.max.apply(null, hs) - moH : 0, devW: ws.length > 1 ? Math.max.apply(null, ws) - moW : 0, elH: num(w.el && w.el.h) || num(w.h), elW: num(w.el && w.el.w) || num(w.w) };
-  }
-  const opening = (w) => (w.ol ? lab('olT', w.olT) + ' · ' : '') + (w.sashes || []).map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
-  function rows(w) {
-    const d = derive(w), mo = w.mo || {}, fa = col(w.fa), fi = col(w.gleich ? w.fa : w.fi);
-    const r = [
-      ['Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm, kleinstes Maß' + (d.devW > 5 || d.devH > 5 ? ', bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel' : '') : 'nicht gemessen'],
-      ['Breiten', 'oben ' + th(mo.wt) + ' · Mitte ' + th(mo.wm) + ' · unten ' + th(mo.wb)],
-      ['Höhen', 'links ' + th(mo.hl) + ' · Mitte ' + th(mo.hm) + ' · rechts ' + th(mo.hr)],
-      ['Fensterelement', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' : 'nicht gemessen'],
-      ['Lage', (w.name || 'ohne Raum') + ', ' + (lab('etage', w.etage) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '')],
-      ['Öffnung', opening(w) + (w.richtung === 'aussen' ? ', öffnet nach außen' : '')],
-      ['Form, Material', (lab('form', w.form) || 'Rechteck') + ', ' + (lab('material', w.material) || 'Kunststoff')],
-      ['Farbe', 'außen ' + fa[0] + ' (' + fa[1] + ')' + (w.wunschA ? ', Wunsch: ' + w.wunschA : '') + ', innen ' + fi[0] + (w.wunschI && !w.gleich ? ', Wunsch: ' + w.wunschI : '')],
-      ['Glas', (lab('glas', w.glas) || '3-fach') + ((w.glasfn || []).length ? ', ' + w.glasfn.map((g) => lab('glasfn', g) + (g === 'sicht' ? ' (' + lab('orn', w.orn) + ')' : '')).join(', ') : '')],
-      ['Sprossen', (w.bars || []).length ? lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite) + ')' : '') + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'keine'],
-      ['Griff', (lab('griff', w.griff) || 'Standard') + ', ' + (lab('gf', w.gf) || 'weiß')],
-      ['Einbruchschutz', lab('rc', w.rc) || 'Basisschutz'],
-      ['Rollladen', (lab('roll', w.roll) || 'keiner') + (w.roll === 'aufsatz' || w.roll === 'vorbau' ? ', ' + lab('antrieb', w.antrieb) : '')],
-      ['Insektenschutz', lab('insekt', w.insekt) || 'keiner'],
-      ['Fensterbank', 'innen ' + (lab('fbi', w.fbi) || 'behalten') + ', außen ' + (lab('fba', w.fba) || 'behalten')],
-      ['Montage', [w.demontage ? 'Altfenster ausbauen und entsorgen' : '', w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung']
-    ];
-    if (w.notiz) r.push(['Notiz des Kunden', w.notiz]);
-    return r;
-  }
-  const kiRows = (w) => (w.ki && w.ki.rows ? w.ki.rows : []);
-  const kiChips = (w) => (w.ki ? (w.ki.chips || (w.ki.rows || []).map((r) => r[1])).filter(Boolean).slice(0, 6) : []);
-  /* Fensterzeichnung: Rahmen, Flügel, Öffnungssymbole, Sprossen, Oberlicht; Farbe außen als Rahmenfarbe */
-  const n1 = (v) => Math.round(v * 10) / 10;
-  const R = (x, y, w, h) => 'M' + n1(x) + ' ' + n1(y) + 'h' + n1(w) + 'v' + n1(h) + 'h' + n1(-w) + 'Z';
-  const Ln = (...p) => 'M' + p.map((q) => n1(q[0]) + ' ' + n1(q[1])).join('L');
-  const path = (d, f, s, sw, da) => '<path d="' + d + '" fill="' + (f || 'none') + '" stroke="' + (s || 'none') + '" stroke-width="' + sw + '"' + (da ? ' stroke-dasharray="' + da + '"' : '') + ' stroke-linejoin="round"></path>';
-  function sym(x, y, w, h, t, din, da) {
-    let o = '';
-    if (t === 'D' || t === 'DK') o += path(din === 'L' ? Ln([x, y], [x + w, y + h / 2], [x, y + h]) : Ln([x + w, y], [x, y + h / 2], [x + w, y + h]), 'none', '#1d1d1f', 0.7, da);
-    if (t === 'K' || t === 'DK') o += path(Ln([x, y + h], [x + w / 2, y], [x + w, y + h]), 'none', '#1d1d1f', 0.7, da);
-    return o;
-  }
-  function svg(w, size) {
-    const d = derive(w), a = (d.elW || 1000) / (d.elH || 1200), bw = a >= 1 ? 50 : 50 * a, bh = a >= 1 ? 50 / a : 50, bx = (64 - bw) / 2, by = (64 - bh) / 2;
-    const fc = col(w.fa)[2], gl = '#d6e6f4', da = w.richtung === 'aussen' ? '3 2' : '';
-    let o = path(R(bx, by, bw, bh), fc, '#1d1d1f', 1.2);
-    const f = Math.max(2, bw * 0.06); let ix = bx + f, iy = by + f; const iw = bw - 2 * f; let ih = bh - 2 * f;
-    if (w.ol) { const oh = ih * 0.27; o += path(R(ix, iy, iw, oh), gl, '#1d1d1f', 0.6) + sym(ix, iy, iw, oh, w.olT || 'K', 'L', da); iy += oh + f * 0.7; ih -= oh + f * 0.7; }
-    const S = w.sashes || sashesFor(w.teilung), n = S.length, gap = w.teilung === '2s' ? f * 0.25 : f * 0.8, sw = (iw - gap * (n - 1)) / n;
-    S.forEach((s, i) => {
-      const sx = ix + i * (sw + gap), g = s.t === 'F' ? 0 : Math.max(1.5, sw * 0.09);
-      if (s.t !== 'F') o += path(R(sx, iy, sw, ih), fc, '#1d1d1f', 0.7);
-      const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ih - 2 * g;
-      o += path(R(gx, gy, gw, gh), gl, '#1d1d1f', 0.5);
-      (w.bars || []).filter((b) => b.s === i).forEach((b) => { o += path(b.d === 'v' ? Ln([gx + gw * b.p, gy], [gx + gw * b.p, gy + gh]) : Ln([gx, gy + gh * b.p], [gx + gw, gy + gh * b.p]), 'none', fc === '#f1f0ea' ? '#b9b4a8' : fc, 1.2); });
-      o += sym(gx, gy, gw, gh, s.t, s.din, da);
-    });
-    return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
-  }
-  return { OPT: OPT, lab: lab, col: col, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sashesFor: sashesFor };
-})();
-
+/* Fenster-Modell (AW) und Abrechnungsregeln (X) kommen aus /assets/modell.js, gemeinsam mit dem Server */
+const AW = window.AW, X = window.Abrechnung;
+const P = () => X.preise();
+const eur2 = (n) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
 /* ---------- Grundlagen ---------- */
 /* Adressen aus der aktuellen Seite: läuft so auf pages.dev und auf der eigenen Domain */
 const APP_URL = new URL('/app/', location.href).href;
@@ -114,7 +15,6 @@ const BASE_COMPANIES = [
   { id: 'c1', plan: 'service', name: 'Fensterbau Brandt', plz: '50668', since: 1998, col: '#0071e3' },
   { id: 'c7', plan: 'service', name: 'Glaserei Vogt', plz: '50259', since: 1989, col: '#8a5a2b' }
 ];
-const LINK_PRICE = 9, LINK_FREE = 3;
 /* ---------- Helfer ---------- */
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const eur = (n) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
@@ -137,7 +37,7 @@ function stamp() { const d = new Date(); return 'heute, ' + two(d.getHours()) + 
 function dateIn(days) { const d = new Date(); d.setDate(d.getDate() + days); return two(d.getDate()) + '.' + two(d.getMonth() + 1) + '.' + d.getFullYear(); }
 const parseDE = (s) => { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(s || '').trim()); return m ? new Date(+m[3], +m[2] - 1, +m[1], 23, 59, 59) : null; };
 const datumDE = (ts) => { const d = new Date(ts); return two(d.getDate()) + '.' + two(d.getMonth() + 1) + '.' + d.getFullYear(); };
-const hashN = (s) => String(s).split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+const hashN = X.hashN;
 /* ---------- Beispieldaten ---------- */
 const nW = (n, one, many) => n + ' ' + (n === 1 ? one : many);
 const KI = {
@@ -163,7 +63,7 @@ function demoWins(set) {
   ];
 }
 const projOf = (o) => Object.assign({ gebaeude: 'efh', baujahr: '1978', total: 9, zeit: '3m', budget: 'b3', foerd: false }, o);
-const aufmassOf = (wins, proj) => ({ windows: wins, proj: proj, fotos: wins.reduce((s, w) => s + (w.fotos || 0), 0), elemente: wins.reduce((s, w) => s + (AW.num(w.anzahl) || 1), 0) });
+const aufmassOf = X.aufmassOf;
 function demoProjects(id) {
   if (id === 'c1') return [
     { id: 'l1', code: '7f3a9', nr: 'P-2026-031', kunde: 'Familie Weber', kontakt: '0171 234 56 78', adresse: 'Lindenstraße 14, 50823 Köln', geb: 'efh', fz: '3 bis 5', plan: ['Fenster', 'Rollläden'], note: 'Rollladen elektrisch gewünscht', created: '10.10.2026', expires: '24.10.2026', status: 'eingegangen', progress: 4, via: 'WhatsApp', du: false, log: { erstellt: '10.10., 09:12', gesendet: '10.10., 09:13', geoeffnet: '10.10., 18:40', arbeit: '10.10., 18:41', eingegangen: '10.10., 19:05' }, aufmass: aufmassOf(demoWins('weber'), projOf({ total: 11, foerd: true, notiz: 'Der Rollladen im Bad klemmt, bitte mit anschauen.' })), stage: 'angebot', memo: 'Angebot bis Freitag', seen: false },
@@ -196,6 +96,69 @@ function seed() {
 let S = seed();
 try { const raw = localStorage.getItem(STORE); if (raw) { const o = JSON.parse(raw); if (o && o.v === 5 && o.acc) S = Object.assign(seed(), o, { sheet: null }); } } catch (e) { /* ohne Speicher weiter */ }
 function save() { try { const o = Object.assign({}, S, { sheet: null }); ['justCreated', '_pop', '_focusErr', 'animNext', '_feier'].forEach((k) => delete o[k]); localStorage.setItem(STORE, JSON.stringify(o)); } catch (e) { /* ok */ } }
+/* ---------- Server (Stufe 2) ----------
+   Meldet /api/status „daten“, liegt das Konto des Betriebs auf dem Server (Supabase) und Zahlungen laufen über Stripe.
+   Die Demo-Betriebe bleiben lokal im Browser; das Server-Konto heißt hier 'srv'. Jede Änderung geht an die API, der Server rechnet und zählt. */
+const Server = {
+  id: 'srv', status: null, sitzung: null, laeuft: false, stripe: null,
+  get an() { return !!(this.status && this.status.daten); },
+  online() { return this.an && S.role === 'betrieb' && S.cur === this.id && !!this.sitzung; },
+  lesen() { try { this.sitzung = JSON.parse(localStorage.getItem('aufmass.sitzung') || 'null'); } catch (e) { this.sitzung = null; } },
+  merken(x) { this.sitzung = x; try { if (x) localStorage.setItem('aufmass.sitzung', JSON.stringify(x)); else localStorage.removeItem('aufmass.sitzung'); } catch (e) { /* ok */ } },
+  async api(pfad, body, method) {
+    const init = { method: method || (body ? 'POST' : 'GET'), headers: { accept: 'application/json' } };
+    if (body) { init.headers['content-type'] = 'application/json'; init.body = JSON.stringify(body); }
+    if (this.sitzung && this.sitzung.token) init.headers.authorization = 'Bearer ' + this.sitzung.token;
+    let r = await fetch(pfad, init), j = await r.json().catch(() => null);
+    if (r.status === 401 && this.sitzung && this.sitzung.refresh) {
+      const e = await fetch('/api/konto/erneuern', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ refresh: this.sitzung.refresh }) }).then((x) => x.json()).catch(() => null);
+      if (e && e.ok) { this.merken(Object.assign({}, this.sitzung, { token: e.token, refresh: e.refresh })); init.headers.authorization = 'Bearer ' + e.token; r = await fetch(pfad, init); j = await r.json().catch(() => null); }
+    }
+    if (r.status === 401) { this.merken(null); if (S.cur === this.id) { S.role = null; nav('landing'); } }
+    if (!r.ok || !j || j.ok === false) { const err = new Error(j && j.fehler ? j.fehler : 'Der Server antwortet gerade nicht.'); err.status = r.status; throw err; }
+    return j;
+  },
+  uebernehmen(konto) {
+    if (!konto || !konto.acc) return;
+    S.acc[this.id] = konto.acc; S.notif[this.id] = konto.acc.notif || [];
+    S.myCompanies = (S.myCompanies || []).filter((c) => c.id !== this.id).concat([konto.company]); this.stripe = konto.stripe || null;
+  },
+  async laden() { const r = await this.api('/api/konto'); this.uebernehmen(r.konto); return r.konto; },
+  async start() {
+    try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); this.status = r.ok ? await r.json() : null; } catch (e) { this.status = null; }
+    if (this.status && this.status.preise) X.setPreise(this.status.preise);
+    if (!this.an) { if (S.cur === this.id) { S.cur = 'c1'; if (S.role) S.role = null; } return false; }
+    this.lesen();
+    if (this.sitzung) { try { await this.laden(); if (!S.role || S.cur === this.id) { S.role = 'betrieb'; S.cur = this.id; } } catch (e) { /* Sitzung abgelaufen: Startseite */ } }
+    else if (S.cur === this.id) { S.role = null; S.cur = 'c1'; }
+    await this.rueckkehr();
+    return true;
+  },
+  /* Rückkehr von Stripe: ?zahlungsart=<Sitzung> oder ?abo=<Sitzung> */
+  async rueckkehr() {
+    const q = new URLSearchParams(location.search), z = q.get('zahlungsart'), ab = q.get('abo');
+    if (!z && !ab) return;
+    history.replaceState(null, '', location.pathname + location.hash);
+    if (!this.sitzung) { toast('Bitte zuerst anmelden, dann wird die Zahlung zugeordnet.'); return; }
+    try {
+      if (z) { const r = await this.api('/api/konto/zahlungsart/pruefen?session=' + encodeURIComponent(z)); this.uebernehmen(r.konto); S.role = 'betrieb'; S.cur = this.id; S._feier = r.n ? 'frei' : ''; nav('abrechnung'); toast(r.n ? nW(r.n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet' : 'Zahlungsart hinterlegt'); }
+      if (ab) { const r = await this.api('/api/konto/plan/pruefen?session=' + encodeURIComponent(ab) + '&plan=' + encodeURIComponent(q.get('plan') || '')); this.uebernehmen(r.konto); S.role = 'betrieb'; S.cur = this.id; S._feier = 'willkommen'; nav('abrechnung'); toast(r.ergebnis.msg); }
+    } catch (e) { toast(e.message); }
+  },
+  async tu(fn) { if (this.laeuft) return; this.laeuft = true; try { return await fn(); } catch (e) { toast(e.message || 'Das hat nicht geklappt.'); } finally { this.laeuft = false; } },
+  codeSenden(mail) { return this.tu(async () => { const sh = S.sheet; if (VAL.mail(mail) !== true) { sh.err = 'Bitte eine gültige E-Mail-Adresse eingeben.'; return render(); } await this.api('/api/konto/anmelden', { mail: mail }); sh.schritt = 'code'; sh.mail = mail; sh.err = ''; sh.code = ''; render(); toast('Code ist unterwegs an ' + mail); }); },
+  codePruefen(mail, code) { return this.tu(async () => { const sh = S.sheet; let r; try { r = await this.api('/api/konto/bestaetigen', { mail: mail, code: code }); } catch (e) { sh.err = e.message; return render(); } this.merken({ token: r.token, refresh: r.refresh, mail: r.mail }); if (r.konto) { this.uebernehmen(r.konto); S.sheet = null; S.reg = null; login('betrieb', this.id, 'Willkommen zurück, ' + String(r.konto.acc.ap || '').split(' ')[0]); } else { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: r.mail }, err: {}, server: true }; go('reg'); toast('Fast geschafft: noch Ihren Betrieb eintragen.'); } }); },
+  registrieren(d) { return this.tu(async () => { const r = await this.api('/api/konto/registrieren', { firma: d.firma, ap: d.ap, tel: d.tel, plz: d.plz, col: d.col, agb: !!d.agb }); this.uebernehmen(r.konto); S.reg = null; S._feier = 'willkommen'; login('betrieb', this.id, 'Willkommen, ' + String(d.ap || '').trim().split(' ')[0]); }); },
+  abmelden() { this.merken(null); delete S.acc[this.id]; delete S.notif[this.id]; S.myCompanies = (S.myCompanies || []).filter((c) => c.id !== this.id); S.cur = 'c1'; },
+  projektAnlegen(n) { return this.tu(async () => { const r = await this.api('/api/konto/projekte', n); this.uebernehmen(r.konto); S.nl = null; S.justCreated = r.id; S._feier = 'projekt'; S.hist = S.hist.filter((h) => h[0] !== 'newlink'); S.screen = 'links'; go('link', r.id); setTimeout(() => { if (S.justCreated === r.id) S.justCreated = null; }, 6000); }); },
+  listeAnlegen(text, du) { return this.tu(async () => { const r = await this.api('/api/konto/projekte/liste', { text: text, du: du }); this.uebernehmen(r.konto); S.sheet = null; S.lfilt = 'offen'; S._feier = 'willkommen'; nav('links'); toast(nW(r.n, 'Projekt angelegt', 'Projekte angelegt') + '. Jetzt die Links verschicken.'); }); },
+  projekt(id, p) { if (!this.online()) return; this.api('/api/konto/projekte/' + encodeURIComponent(id), p, 'PATCH').then((r) => { this.uebernehmen(r.konto); }).catch((e) => toast(e.message)); },
+  konto(p) { if (!this.online()) return; this.api('/api/konto', p, 'PATCH').then((r) => { this.uebernehmen(r.konto); }).catch((e) => toast(e.message)); },
+  importieren(code) { return this.tu(async () => { const r = await this.api('/api/konto/import', { code: code }); this.uebernehmen(r.konto); const e = r.eingang; if (!e.ok) { if (e.id) { S.sheet = null; go('link', e.id); } else { const ta = document.getElementById('code-in'); if (ta) { ta.classList.add('bad'); ta.focus(); } } return toast(e.msg); } S.sheet = null; S.justCreated = null; S._feier = e.feier; go('link', e.id); toast(e.msg); }); },
+  plan(k) { return this.tu(async () => { const r = await this.api('/api/konto/plan', { plan: k }); if (r.url) { toast('Weiter zu Stripe …'); location.href = r.url; return; } this.uebernehmen(r.konto); render(); toast(r.ergebnis.msg); }); },
+  zahlungsart() { return this.tu(async () => { const r = await this.api('/api/konto/zahlungsart', {}); if (r.url) { toast('Weiter zu Stripe …'); location.href = r.url; } }); },
+  async aktualisieren() { if (!this.online() || this.laeuft || S.sheet) return; try { const vorher = JSON.stringify(S.acc[this.id]); await this.laden(); if (JSON.stringify(S.acc[this.id]) !== vorher) refresh(); } catch (e) { /* ruhig */ } }
+};
 /* ---------- Konten ---------- */
 function allCompanies() { return BASE_COMPANIES.concat(S.myCompanies || []); }
 function comp(id) { return allCompanies().find((c) => c.id === id) || BASE_COMPANIES[0]; }
@@ -256,8 +219,8 @@ const ICONS = {
 const icon = (k, w) => ICONS[k].replace(/width="22" height="22"/, 'width="' + w + '" height="' + w + '"');
 /* Radar: ein Mittelpunkt, Punkte drumherum im richtigen Abstand, optional ein Umkreis */
 function sw(label, sub, on, act, v) { return '<div class="sw-row"><span class="t"><b>' + esc(label) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span><button type="button" class="switch" role="switch" aria-checked="' + !!on + '" aria-label="' + esc(label) + '" data-act="' + act + '" data-v="' + (v || '') + '"><span></span></button></div>'; }
-const seg = (opts, cur, act) => '<div class="seg" role="tablist">' + opts.map((o) => '<button type="button" role="tab" data-act="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + esc(o[1]) + (o[2] ? ' <span class="n">' + o[2] + '</span>' : '') + '</button>').join('') + '</div>';
-const empty = (title, text, btn) => '<div class="empty"><b>' + title + '</b><span>' + text + '</span>' + (btn || '') + '</div>';
+const seg = (opts, cur, act, cls) => '<div class="seg' + (cls ? ' ' + cls : '') + '" role="tablist">' + opts.map((o) => '<button type="button" role="tab" data-act="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + esc(o[1]) + (o[2] ? ' <span class="n">' + o[2] + '</span>' : '') + '</button>').join('') + '</div>';
+const empty = (title, text, btn, bild) => '<div class="empty">' + (bild ? '<span class="empty-l" data-lottie="' + bild + '" data-loop="1" aria-hidden="true"></span>' : '') + '<b>' + title + '</b><span>' + text + '</span>' + (btn || '') + '</div>';
 /* Kennzahl-Kachel mit Farbton und Symbol; Zahlen zählen hoch, Text (z. B. ∞) steht einfach da */
 function stat(tone, ico, label, value, sub, fmt) {
   const num = typeof value === 'number';
@@ -325,21 +288,26 @@ function render() {
   save();
 }
 function sidebar() {
-  const me = { n: BC().name, s: A().konto === 'plus' ? 'Betrieb Plus' : 'Start', col: BC().col };
+  const me = { n: BC().name, s: X.planName(X.konto(A())) + (Server.online() ? '' : ' · Demo'), col: BC().col };
   return '<aside class="side"><button type="button" class="logo" data-act="nav" data-v="' + home() + '"><span class="lm">' + LOGO(36) + '</span><span>Fensterino<small>für Betriebe</small></span></button><nav class="nav">' +
     navItems().map((n) => { const c = navCount(n[0]); return '<button type="button" data-act="nav" data-v="' + n[0] + '" aria-current="' + (activeNav(n[0]) ? 'page' : 'false') + '">' + ICONS[n[2]] + esc(n[1]) + (c ? '<span class="cnt">' + c + '</span>' : '') + '</button>'; }).join('') + '</nav>' +
     '<div class="me"><span class="av" style="background: ' + me.col + '">' + esc(me.n.slice(0, 1)) + '</span><span class="me-t"><b>' + esc(me.n) + '</b><small>' + esc(me.s) + '</small></span><button type="button" class="ibtn out" data-act="logout" aria-label="Abmelden" title="Abmelden">' + icon('logout', 19) + '</button></div><button type="button" class="btn small soft demo-side" data-act="sheet" data-v="demo">' + icon('swap', 17) + 'Demo-Ansicht wechseln</button></aside>';
 }
 function footer() {
-  return '<footer class="foot"><div class="wrap"><div class="row between"><span class="lm-foot">' + LOGO(22) + ' Fensterino</span><div class="row foot-links"><button type="button" data-act="go" data-v="wie">So funktioniert es</button><button type="button" data-act="go" data-v="preise">Preise</button><a href="/impressum/">Impressum</a><a href="/datenschutz/">Datenschutz</a><button type="button" data-act="sheet" data-v="legal" data-id="agb">AGB</button></div></div><p>Pilotphase. Die Betriebe und Projekte hier sind Beispiele, es wird nichts berechnet. Echt funktionieren schon Aufmaß-Links, der Code-Eingang, Nachbesserungen und der PDF-Export; alles bleibt in Ihrem Browser.</p></div></footer>';
+  return '<footer class="foot"><div class="wrap"><div class="row between"><span class="lm-foot">' + LOGO(22) + ' Fensterino</span><div class="row foot-links"><button type="button" data-act="go" data-v="wie">So funktioniert es</button><button type="button" data-act="go" data-v="preise">Preise</button><a href="/impressum/">Impressum</a><a href="/datenschutz/">Datenschutz</a><button type="button" data-act="sheet" data-v="legal" data-id="agb">AGB</button></div></div>' + (Server.an ? '<p>Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe. Die Demo-Betriebe sind Beispiele im Browser.</p>' : '<p>Pilotphase. Die Betriebe und Projekte hier sind Beispiele, es wird nichts berechnet. Echt funktionieren schon Aufmaß-Links, der Code-Eingang, Nachbesserungen und der PDF-Export; alles bleibt in Ihrem Browser.</p>') + '</div></footer>';
 }
 /* ---------- Nach dem Rendern: Bewegung ---------- */
 function afterRender(anim) {
+  if (S.screen === 'link' && window.Blatt) window.Blatt.schrift();
+  if (window.Lottie) window.Lottie.auf(document.body);
+  /* Startseitenkarte dreht sich leicht mit dem Scrollen */
+  const b2c = document.querySelector('.b2c-win'); if (b2c && window.Scroll) window.Scroll.binden(b2c, (p) => b2c.style.setProperty('--sp', p.toFixed(3)));
   const scr = document.querySelector('.scr');
   if (!scr) return;
   ['.list', '.grid', '.flow', '.form', '.share'].forEach((sel) => scr.querySelectorAll(sel).forEach((p) => Array.from(p.children).forEach((c, i) => c.style.setProperty('--i', String(Math.min(i, 12))))));
+  /* Blöcke erscheinen nacheinander: gestaffelt nur, was beim Aufbau schon im Bild ist; was erst beim Scrollen kommt, erscheint sofort */
   const wrap = scr.querySelector('.wrap');
-  if (wrap) Array.from(wrap.children).forEach((c, i) => { c.classList.add('rv'); c.style.setProperty('--i', String(Math.min(i, 8))); });
+  if (wrap) { let k = 0; Array.from(wrap.children).forEach((c) => { const sichtbar = c.getBoundingClientRect().top < window.innerHeight; c.classList.add('rv'); c.style.setProperty('--i', String(sichtbar ? Math.min(k++, 8) : 0)); }); }
   if (!io && 'IntersectionObserver' in window) io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px 48px 0px' });
   scr.querySelectorAll('.rv').forEach((el) => { if (io && anim) io.observe(el); else el.classList.add('in'); });
   scr.querySelectorAll('[data-count]').forEach((el, i) => {
@@ -349,28 +317,39 @@ function afterRender(anim) {
     if (anim && io) { el.textContent = fmt === 'eur' ? eur(0) : '0'; const o = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { countUp(el, 0, to, fmt); o.disconnect(); } })); o.observe(el); return; }
     countUp(el, anim ? 0 : from, to, fmt);
   });
+  /* „So läuft es“: Die Bühne zeigt den Schritt, der gerade neben ihr steht (zwei Spalten: der Schritt auf Höhe der Bühnenmitte;
+     gestapelt auf dem Telefon: der erste Schritt unter der klebenden Bühne). Wird beim Scrollen nachgeführt, mit etwas Spiel gegen Flackern. */
   const stage = document.getElementById('stage');
+  storyTick = null;
   if (stage) {
     const steps = Array.from(scr.querySelectorAll('.story-step'));
-    const setStep = (i) => { if (stage.getAttribute('data-step') === String(i)) return; stage.setAttribute('data-step', String(i)); steps.forEach((st) => st.classList.toggle('on', +st.getAttribute('data-i') === i)); };
-    stage.setAttribute('data-step', '-1'); setStep(0);
-    if ('IntersectionObserver' in window) { const so = new IntersectionObserver((es) => { es.forEach((e) => { if (e.isIntersecting) setStep(+e.target.getAttribute('data-i')); }); }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 }); steps.forEach((st) => so.observe(st)); }
+    let aktiv = -1;
+    const setStep = (i) => { if (aktiv === i) return; aktiv = i; stage.setAttribute('data-step', String(i)); steps.forEach((st) => st.classList.toggle('on', +st.getAttribute('data-i') === i)); };
+    storyTick = () => {
+      if (!document.body.contains(stage)) { storyTick = null; return; }
+      const st = stage.getBoundingClientRect(), gestapelt = matchMedia('(max-width: 879px)').matches;
+      const linie = gestapelt ? st.bottom + 60 : st.top + st.height / 2;
+      const abstand = steps.map((s) => { const r = s.getBoundingClientRect(); return Math.abs((r.top + r.bottom) / 2 - linie); });
+      let best = 0; abstand.forEach((d, i) => { if (d < abstand[best]) best = i; });
+      if (aktiv >= 0 && best !== aktiv && abstand[best] > abstand[aktiv] - 16) best = aktiv;
+      setStep(best);
+    };
+    storyTick();
+    setTimeout(() => { if (storyTick) storyTick(); }, 400);
   }
-  if (matchMedia('(hover: hover)').matches) scr.querySelectorAll('.hero .cta .btn, .rolecard .btn.primary, .svc .btn.primary').forEach((b) => { b.classList.add('magnet'); b.addEventListener('mousemove', (e) => { const r = b.getBoundingClientRect(); b.style.transform = 'translate(' + ((e.clientX - r.left - r.width / 2) * 0.18).toFixed(1) + 'px, ' + ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + 'px)'; }); b.addEventListener('mouseleave', () => { b.style.transform = ''; }); });
-  let prog = document.querySelector('.progress'); if (!prog) { prog = document.createElement('div'); prog.className = 'progress'; document.body.appendChild(prog); } prog.style.width = '0';
-  scr.querySelectorAll('.stars .fill').forEach((f) => { const w = f.getAttribute('data-w'); if (anim) requestAnimationFrame(() => requestAnimationFrame(() => f.style.setProperty('--w', w))); else f.style.setProperty('--w', w); });
   const n = newNotif(), bell = document.querySelector('.top .ibtn:last-child');
   if (bell && n > lastNew) { bell.classList.add('ring'); const d = bell.querySelector('.dot'); if (d) d.classList.add('pop'); }
   lastNew = n;
+  /* Rückmeldung am Gegenstand statt Feier: ein Ring um das, was neu ist (Projektkarte, eingegangenes Aufmaß); „gesendet“ lässt einen Ring vom Status auslaufen */
   if (S._feier && window.Feier) {
     const art = S._feier; S._feier = null;
-    const ziel = art === 'projekt' ? scr.querySelector('.created .burst-ok, .created') : art === 'willkommen' ? scr.querySelector('.h h2') : art === 'eingang' ? scr.querySelector('.amhead, .h .badge, .h h2') : art === 'frei' ? scr.querySelector('.note.ok, .h h2') : art === 'kontakt' ? scr.querySelector('.okcard .eyebrow, .okcard') : art === 'gesendet' ? scr.querySelector('.h .badge, .tlh li.now') : scr.querySelector('.h h2');
-    if (ziel) setTimeout(() => { if (!document.body.contains(ziel)) return; if (art === 'gesendet') window.Feier.puls(ziel); else window.Feier.konfetti(ziel, { n: art === 'willkommen' || art === 'eingang' ? 36 : 24, kraft: art === 'willkommen' ? 170 : 120, breit: art === 'willkommen' }); }, 180);
+    if (window.Haptik && (art === 'projekt' || art === 'eingang' || art === 'willkommen')) window.Haptik.ok();
+    const ziel = art === 'projekt' ? scr.querySelector('.created') : art === 'eingang' ? scr.querySelector('.amhead, .lockcard, .h .badge') : art === 'gesendet' ? scr.querySelector('.h .badge, .tlh li.now') : null;
+    if (ziel) setTimeout(() => { if (!document.body.contains(ziel)) return; if (art === 'gesendet') window.Feier.puls(ziel); else window.Feier.markieren(ziel); }, 180);
   }
   if (S._pop) { const q = S._pop; const el = Array.from(document.querySelectorAll('[data-act="' + q.act + '"]')).find((x) => (x.getAttribute('data-v') || '') === q.v && (x.getAttribute('data-k') || '') === q.k); if (el) el.classList.add(el.classList.contains('switch') ? 'just' : 'pop'); S._pop = null; }
   scr.querySelectorAll('.scrollchips').forEach((row) => { const on = row.querySelector('[aria-pressed="true"]'); if (!on) return; const rr = row.getBoundingClientRect(), ro = on.getBoundingClientRect(); if (ro.left < rr.left + 8 || ro.right > rr.right - 8) row.scrollLeft += ro.left - rr.left - 24; });
   if (anim && matchMedia('(max-width: 520px)').matches) scr.querySelectorAll('.sample details').forEach((d) => { d.open = false; });
-  document.querySelectorAll('.tilt').forEach(bindTilt);
   if (S.sheet && matchMedia('(hover: hover) and (pointer: fine)').matches) { const f = document.querySelector('.sheet input, .sheet textarea'); if (f && S.sheet.k !== 'demo') setTimeout(() => { try { f.focus({ preventScroll: true }); } catch (e) { /* ok */ } }, 80); }
   if (S._focusErr) { const f = document.querySelector('.f.has-err input, .f.has-err select, .f.has-err .chips button, .agree.has-err input'); if (f) { try { f.focus({ preventScroll: false }); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { /* ok */ } } S._focusErr = false; }
 }
@@ -379,18 +358,12 @@ function countUp(el, from, to, fmt) {
   const step = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = f(from + (to - from) * e); if (k < 1 && document.body.contains(el)) requestAnimationFrame(step); else el.textContent = f(to); };
   requestAnimationFrame(step);
 }
-function bindTilt(card) {
-  if (card.getAttribute('data-tilt')) return; card.setAttribute('data-tilt', '1');
-  const host = card.closest('.hero') || card;
-  host.addEventListener('mousemove', (e) => { const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; card.style.setProperty('--ty', (x * 9).toFixed(2) + 'deg'); card.style.setProperty('--tx', (-y * 7).toFixed(2) + 'deg'); });
-  host.addEventListener('mouseleave', () => { card.style.setProperty('--tx', '0deg'); card.style.setProperty('--ty', '0deg'); });
-}
+let storyTick = null;
+window.addEventListener('resize', () => { if (storyTick) storyTick(); });
 window.addEventListener('scroll', () => {
+  if (storyTick) storyTick();
   const t = document.querySelector('.top'); if (t) t.classList.toggle('scrolled', window.scrollY > 6);
-  const prog = document.querySelector('.progress'); if (prog) { const max = document.documentElement.scrollHeight - window.innerHeight; prog.style.width = (max > 200 ? Math.min(100, window.scrollY / max * 100) : 0).toFixed(1) + '%'; }
-  const hr = document.querySelector('.hero .tilt'); if (hr) { const k = Math.min(1, window.scrollY / 600); hr.style.opacity = String(1 - k * 0.5); hr.style.setProperty('--tx', (-k * 10).toFixed(1) + 'deg'); }
   document.querySelectorAll('.rv:not(.in)').forEach((el) => { if (el.getBoundingClientRect().top < window.innerHeight * 0.94) el.classList.add('in'); });
-  const bg = document.querySelector('.hero-bg'); if (bg) bg.style.transform = 'translateY(' + (window.scrollY * 0.25).toFixed(1) + 'px)';
 }, { passive: true });
 /* ---------- Bildschirme: Besucher ---------- */
 const SCREENS = {};
@@ -407,7 +380,7 @@ const CAPS = [
 function heroPhone() {
   return '<div class="phone hero-ph" aria-hidden="true"><div class="ph-top"><span class="ph-av">B</span><span><b>Fensterbau Brandt</b><small>WhatsApp</small></span></div><div class="ph-body">' +
     '<div class="bub out b1">Guten Tag Familie Weber, für Ihr Fensterangebot brauchen wir die Maße Ihrer Fenster. Mit diesem Link messen Sie selbst, Schritt für Schritt erklärt:<span class="lp"><b>Fensterino · Aufmaß für Fensterbau Brandt</b><small>Ohne Konto, etwa 5 Minuten pro Fenster</small></span><i>09:13 ✓✓</i></div>' +
-    '<div class="bub in b2">Super, machen wir heute Abend 👍<i>09:20</i></div>' +
+    '<div class="bub in b2">Super, machen wir heute Abend.<i>09:20</i></div>' +
     '<div class="ph-note b3"><span class="ph-dot"></span><span><b>Aufmaß eingegangen</b><small>Familie Weber · 4 Positionen, 8 Fotos</small></span></div></div></div>';
 }
 function storyScenes() {
@@ -431,49 +404,56 @@ function roiCalc() {
   const n = S.roi ? S.roi.n : 12, t = S.roi ? S.roi.t : 75, r = S.roi ? S.roi.r : 65, v = roiVals(n, t, r);
   const rng = (k, label, min, max, step, val, out) => '<label class="roi-r"><span>' + label + '<b id="roi-' + k + '-l">' + out + '</b></span><input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '" data-in="roi-' + k + '" aria-label="' + label + '"></label>';
   return '<section class="card roi"><div class="roi-in"><p class="eyebrow">Rechnen Sie nach</p><h3>Was ein Erstaufmaß vor Ort kostet.</h3>' + rng('n', 'Erstaufmaße im Monat', 2, 40, 1, n, String(n)) + rng('t', 'Zeit je Termin mit Fahrt', 30, 150, 5, t, t + ' Min.') + rng('r', 'Kosten je Stunde', 40, 120, 5, r, r + ' €') + '</div>' +
-    '<div class="roi-out"><div class="ro"><small>Vor Ort im Monat</small><b id="roi-c">' + eur(v.cost) + '</b><span id="roi-h">' + v.hours + ' Stunden unterwegs und beim Kunden</span></div><div class="ro hi"><small>Mit Fensterino</small><b id="roi-l">' + eur(v.lm) + '</b><span id="roi-lp">' + v.plan + '</span></div><p class="roi-note">Annahme: Jedes Erstaufmaß ersetzt einen Termin fürs erste Angebot. Das Feinaufmaß vor der Fertigung bleibt.</p></div></section>';
+    '<div class="roi-out"><div class="ro"><small>Vor Ort im Monat</small><b id="roi-c" data-count="' + v.cost + '" data-fmt="eur">' + eur(v.cost) + '</b><span id="roi-h">' + v.hours + ' Stunden unterwegs und beim Kunden</span></div><div class="ro hi"><small>Mit Fensterino</small><b id="roi-l" data-count="' + v.lm + '" data-fmt="eur">' + eur(v.lm) + '</b><span id="roi-lp">' + v.plan + '</span></div><p class="roi-note">Annahme: Jedes Erstaufmaß ersetzt einen Termin fürs erste Angebot. Das Feinaufmaß vor der Fertigung bleibt.</p></div></section>';
 }
-function roiVals(n, t, r) { const hours = Math.round(n * t / 60 * 10) / 10, cost = Math.round(n * t / 60 * r), per = n * LINK_PRICE, plus = per > 79; return { hours: String(hours).replace('.', ','), cost: cost, lm: plus ? 79 : per, plan: plus ? 'Betrieb Plus, Aufmaße unbegrenzt' : n + ' Aufmaße × 9 € netto' }; }
+/* Günstigster Tarif für n Projekte im Monat: Start je Projekt, Abo 10 mit Kontingent, Plus unbegrenzt */
+function roiVals(n, t, r) {
+  const p = P(), hours = Math.round(n * t / 60 * 10) / 10, cost = Math.round(n * t / 60 * r);
+  const start = n * p.projekt, abo = p.abo.grund + Math.max(0, n - p.abo.inkl) * p.abo.extra, plus = p.plus;
+  const best = Math.min(start, abo, plus);
+  return { hours: String(hours).replace('.', ','), cost: cost, lm: best, plan: best === start ? n + ' Projekte × ' + p.projekt + ' € netto (Start)' : best === abo ? 'Abo 10: ' + p.abo.grund + ' € für ' + p.abo.inkl + ' Projekte' + (n > p.abo.inkl ? ' + ' + (n - p.abo.inkl) + ' × ' + p.abo.extra + ' €' : '') : 'Plus, Projekte unbegrenzt' };
+}
 SCREENS.landing = () => ({ title: 'Fensterino', html: '<div class="wrap">' + (vonPdf() ? '<div class="banner vonpdf"><span><b>Sie halten ein Fensterino-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small primary" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div>' : '') +
-  '<section class="hero b2c"><div class="hero-bg"></div><div><p class="eyebrow">Für Hauseigentümer · kostenlos</p><h2>' + 'Fenster aufmessen. Selbst. Richtig.'.split(' ').map((w, i) => '<span class="w" style="--i: ' + i + '">' + w + '</span>').join(' ') + '</h2><p class="lead">Zwei Fotos, vier Maße mit dem Zollstock, jeder Schritt erklärt. Aus Ihren Zahlen wächst Ihr Fenster als 3-D-Modell, dazu Ihre Wünsche zu Material, Farbe, Glas und Rollladen. Am Ende ein vollständiges Aufmaßblatt als PDF, kostenlos und ohne Konto, für jeden Fensterbauer lesbar.</p><div class="cta"><a class="btn big primary" href="' + APP_OPEN + '">Jetzt aufmessen</a><button type="button" class="btn big ghost" data-act="go" data-v="wie">So funktioniert es</button></div><p class="hint">Kein Konto · keine App aus dem Store · Ihr Aufmaß gehört Ihnen</p></div>' +
+  '<section class="hero b2c"><div><p class="eyebrow">Für Hauseigentümer · Messen kostenlos</p><h2>' + 'Fenster aufmessen. Selbst. Richtig.'.split(' ').map((w, i) => '<span class="w" style="--i: ' + i + '">' + w + '</span>').join(' ') + '</h2><p class="lead">Zwei Fotos, vier Maße mit dem Zollstock, jeder Schritt erklärt. Aus Ihren Zahlen wächst Ihr Fenster als 3-D-Modell, dazu Ihre Wünsche zu Material, Farbe, Glas und Rollladen. Messen, Fotos und 3-D-Modell sind kostenlos. Am Ende Ihr vollständiges Aufmaßblatt als PDF für ' + eur2(P().aufmass) + ', für jeden Fensterbauer lesbar.</p><div class="cta"><a class="btn big primary" href="' + APP_OPEN + '">Jetzt aufmessen</a><button type="button" class="btn big ghost" data-act="go" data-v="wie">So funktioniert es</button></div><p class="hint">Kein Konto zum Messen · keine App aus dem Store · Ihr Aufmaß gehört Ihnen</p></div>' +
   '<div class="hero-visual b2c-visual">' + b2cVisual() + '</div></section>' +
-  '<section class="strip"><div class="st"><b><span data-count="5" data-fmt="int">0</span><small> Min.</small></b><span>je Fenster, Fotos und Wünsche inklusive</span></div><div class="st"><b><span data-count="8" data-fmt="int">0</span><small> Maße</small></b><span>je Fenster von Hand, das kleinste zählt, Abweichungen werden markiert</span></div><div class="st"><b><span data-count="0" data-fmt="int">0</span><small> € </small></b><span>für Hauseigentümer. Das Aufmaßblatt als PDF ist kostenlos</span></div></section>' +
+  '<section class="strip"><div class="st"><b><span data-count="5" data-fmt="int">5</span><small> Min.</small></b><span>je Fenster, Fotos und Wünsche inklusive</span></div><div class="st"><b><span data-count="8" data-fmt="int">8</span><small> Maße</small></b><span>je Fenster von Hand, das kleinste zählt, Abweichungen werden markiert</span></div><div class="st"><b>' + eur2(P().aufmass) + '</b><span>für das fertige Aufmaßblatt als PDF. Messen, Fotos und 3-D-Modell sind kostenlos</span></div></section>' +
   '<section class="sec"><div class="sec-head"><h3>Was im Aufmaß steckt</h3><span class="sub">je Fenster, wie beim Termin vor Ort</span></div><div class="caps">' + CAPS.map((c) => '<div class="cap"><span class="ci">' + icon(c[0], 22) + '</span><b>' + c[1] + '</b><span>' + c[2] + '</span></div>').join('') + '</div></section>' +
-  '<section class="hero b2b" id="betriebe"><div><p class="eyebrow">Für Fensterbauer</p><h2>' + 'Aufmaß ohne Anfahrt.'.split(' ').map((w, i) => '<span class="w" style="--i: ' + i + '">' + w + '</span>').join(' ') + '</h2><p class="lead">Schicken Sie Ihren Kunden einen Aufmaß-Link statt hinzufahren. Ihr Kunde misst selbst, Schritt für Schritt geführt, und Sie bekommen alles, was Sie für ein erstes Angebot brauchen: Maße, Fotos, Öffnungsarten, Farben und Ausstattung, für jedes Fenster, sortiert nach Positionen.</p><div class="cta"><button type="button" class="btn big primary" data-act="reg" data-v="betrieb">Kostenlos starten</button><button type="button" class="btn big ghost" data-act="demo-as" data-v="c1">Demo ansehen</button></div><p class="hint">3 Aufmaße kostenlos · danach 9 € je Projekt · Ihr Kunde braucht kein Konto</p></div>' +
-  '<div class="tilt hero-visual">' + heroPhone() + '</div></section>' +
+  '<section class="hero b2b" id="betriebe"><div><p class="eyebrow">Für Fensterbauer</p><h2>' + 'Aufmaß ohne Anfahrt.'.split(' ').map((w, i) => '<span class="w" style="--i: ' + i + '">' + w + '</span>').join(' ') + '</h2><p class="lead">Schicken Sie Ihren Kunden einen Aufmaß-Link statt hinzufahren. Ihr Kunde misst selbst, Schritt für Schritt geführt, und Sie bekommen alles, was Sie für ein erstes Angebot brauchen: Maße, Fotos, Öffnungsarten, Farben und Ausstattung, für jedes Fenster, sortiert nach Positionen.</p><div class="cta"><button type="button" class="btn big primary" data-act="reg" data-v="betrieb">Kostenlos starten</button><button type="button" class="btn big ghost" data-act="demo-as" data-v="c1">Demo ansehen</button></div><p class="hint">' + P().frei + ' Projekte kostenlos · danach ' + P().projekt + ' € je Projekt oder im Abo · Ihr Kunde braucht kein Konto</p></div>' +
+  '<div class="hero-visual">' + heroPhone() + '</div></section>' +
   '<section class="sec"><div class="sec-head"><h3>So läuft es</h3><button type="button" class="linkbtn" data-act="go" data-v="wie">Alle Details ›</button></div><div class="story"><div class="story-steps">' + [['Projekt anlegen', 'Kunde, Adresse und ein paar Eckdaten. Mehr braucht es nicht, in einer Minute erledigt. Oder gleich eine ganze Liste von Kunden einladen.'], ['Link schicken', 'Per WhatsApp, SMS oder E-Mail, mit Ihrem Namen als Absender. Die Nachricht ist vorformuliert.'], ['Ihr Kunde misst', 'Im Browser, ohne Konto und ohne Installation. Zwei Fotos und vier Maße je Fenster, jeder Schritt erklärt.'], ['Aufmaß kommt an', 'Sortiert nach Positionen, mit Bestellmaß-Vorschlag und den Hinweisen aus den Fotos. Passt etwas nicht, fragen Sie eine Nachbesserung an, kostenlos.']].map((st, i) => '<div class="story-step" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><h3>' + st[0] + '</h3><p>' + st[1] + '</p></div>').join('') + '</div><div class="story-stage" data-step="0" id="stage">' + storyScenes() + '</div></div></section>' +
   '<section class="sec"><div class="sec-head"><h3>So kommt es bei Ihnen an</h3><span class="sub">Beispiel, Positionen zum Aufklappen</span></div><div class="card sample"><div class="sample-h"><span class="badge ok">' + icon('check', 12) + 'Aufmaß eingegangen</span><b>Familie Weber · Lindenstraße 14, Köln</b><span class="km-s">4 Positionen · 5 Elemente · 8 Fotos · Einfamilienhaus, Baujahr 1978</span></div>' + demoWins('weber').slice(0, 2).map((w, i) => posCard(w, i, null, i === 0)).join('') + '<p class="km-s">Vor der Fertigung messen Sie einmal nach. Fürs erste Angebot sparen Sie die Anfahrt.</p></div></section>' +
-  '<section class="grid c3 trust"><div class="tcard"><span class="ci">' + icon('nouser', 22) + '</span><b>Für Ihren Kunden ohne Hürde</b><p>Er öffnet den Link im Browser und legt los. Kein Konto, keine App aus dem Store, keine Kosten. Seine Angaben gehen nur an Sie.</p></div><div class="tcard"><span class="ci">' + icon('filelock', 22) + '</span><b>Ihr Kunde bleibt Ihr Kunde</b><p>Aufmaße aus Ihren Links landen nur bei Ihnen. Ihr Kunde sieht im Link nur Ihren Betrieb. Eine Kopie mit Maßen bekommt er von Ihnen, mit Ihrem Angebot.</p></div><div class="tcard"><span class="ci">' + icon('euro', 22) + '</span><b>Abgerechnet wird je Projekt</b><p>3 Aufmaße kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß. Nachbesserungen kosten nichts. Unbegrenzt mit Betrieb Plus für 79 € im Monat.</p></div></section>' +
+  '<section class="grid c3 trust"><div class="tcard"><span class="ci">' + icon('nouser', 22) + '</span><b>Für Ihren Kunden ohne Hürde</b><p>Er öffnet den Link im Browser und legt los. Kein Konto, keine App aus dem Store, keine Kosten. Seine Angaben gehen nur an Sie.</p></div><div class="tcard"><span class="ci">' + icon('filelock', 22) + '</span><b>Ihr Kunde bleibt Ihr Kunde</b><p>Aufmaße aus Ihren Links landen nur bei Ihnen. Ihr Kunde sieht im Link nur Ihren Betrieb. Eine Kopie mit Maßen bekommt er von Ihnen, mit Ihrem Angebot.</p></div><div class="tcard"><span class="ci">' + icon('euro', 22) + '</span><b>Abgerechnet wird je Projekt</b><p>' + P().frei + ' Projekte kostenlos, danach ' + P().projekt + ' € netto je Projekt mit eingegangenem Aufmaß. Oder im Abo: ' + P().abo.inkl + ' Projekte für ' + P().abo.grund + ' € im Monat, unbegrenzt mit Plus für ' + P().plus + ' €. Nachbesserungen kosten nichts.</p></div></section>' +
   roiCalc() +
   '<section class="owner"><div><p class="eyebrow">Ein Kunde hat Ihnen ein Fensterino-Aufmaß geschickt?</p><h3>Holen Sie es in Ihr Konto.</h3><p>Auf der letzten Seite des Aufmaßblatts steht ein Code. Kostenlos registrieren, „Code vom Kunden einfügen“, und das Aufmaß liegt als Projekt bei Ihnen: mit 3-D-Ansicht, Positionen zum Bearbeiten und Nachbesserung per Link.</p></div><div class="row"><button type="button" class="btn primary" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn ghost" data-act="sheet" data-v="login">Anmelden</button></div></section></div>' });
 /* Startbild für Hauseigentümer: ein Fenster mit den vier Maßen, wie in der App */
 function b2cVisual() {
   const w = AW.mk({ name: 'Wohnzimmer', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, teilung: '2p', fa: '7016', fi: '9016' });
-  return '<div class="b2c-card tilt"><div class="b2c-win">' + AW.svg(w, 220) + '<span class="dim dim-h">1.480 mm</span><span class="dim dim-w">1.370 mm</span><span class="dim dim-eh">1.410 mm</span><span class="dim dim-ew">1.230 mm</span></div><div class="b2c-chips"><span class="badge">Kunststoff, anthrazit</span><span class="badge">2 Flügel Dreh-Kipp</span><span class="badge">3-fach-Glas</span><span class="badge ok">' + icon('check', 12) + 'Alle Maße da</span></div></div>';
+  return '<div class="b2c-card"><div class="b2c-win">' + AW.svg(w, 220) + '<span class="dim dim-h">1.480 mm</span><span class="dim dim-w">1.370 mm</span><span class="dim dim-eh">1.410 mm</span><span class="dim dim-ew">1.230 mm</span></div><div class="b2c-chips"><span class="badge">Kunststoff, anthrazit</span><span class="badge">2 Flügel Dreh-Kipp</span><span class="badge">3-fach-Glas</span><span class="badge ok">' + icon('check', 12) + 'Alle Maße da</span></div></div>';
 }
 const FAQ = [
   ['Wie genau ist das Aufmaß?', 'Die App führt durch acht Handmaße je Fenster mit dem Zollstock. Von drei Breiten und drei Höhen zählt das kleinste Maß, Abweichungen außer Winkel werden markiert. Für ein erstes Angebot reicht das; vor der Fertigung misst der Fensterbauer einmal nach.'],
   ['Was braucht mein Kunde?', 'Ein Smartphone mit Kamera und einen Zollstock. Kein Konto, keine App aus dem Store, keine Kosten. Der Link öffnet die App direkt im Browser.'],
   ['Was, wenn der Kunde nicht klarkommt?', 'Jeder Schritt hat eine Erklärung mit Bild, jeder Fachbegriff ein Glossar. Im Projekt sehen Sie, ob der Link geöffnet wurde und wie weit Ihr Kunde ist, und können gezielt nachhaken. Und ist ein Maß falsch, fragen Sie eine Nachbesserung an: Ihr Kunde ändert nur das Nötige und schickt erneut, ohne neue Kosten.'],
   ['Wer sieht die Daten?', 'Nur Sie. Aufmaße aus Ihren Links gehen an keinen anderen Betrieb, und Ihr Kunde sieht im Link nur Ihren Betrieb. Eine Kopie mit Maßen bekommt er von Ihnen, nicht von uns.'],
-  ['Was ist mit Kunden, die selbst mit Fensterino messen?', 'Hauseigentümer können die App auch ohne Ihren Link nutzen, kostenlos. Ihr Aufmaßblatt enthält dann einen Code; schickt ein Kunde es Ihnen, holen Sie es mit „Code vom Kunden einfügen“ in Ihr Konto. Das zählt wie ein eigenes Projekt.'],
-  ['Wann zahle ich, und wofür?', 'Nur für Projekte mit eingegangenem Aufmaß, nie für verschickte Links. Die ersten 3 sind kostenlos und brauchen keine Zahlungsart. Ab dem vierten hinterlegen Sie eine SEPA-Firmenlastschrift oder eine Karte; vorher bleibt ein neues Aufmaß gesperrt. Abgebucht wird alle zwei Wochen als Sammelrechnung. Nachbesserungen im selben Projekt kosten nichts.'],
+  ['Was ist mit Kunden, die selbst mit Fensterino messen?', 'Hauseigentümer können die App auch ohne Ihren Link nutzen; das Messen ist kostenlos, ihr Aufmaßblatt kaufen sie für 7,99 €. Es enthält einen Code; schickt ein Kunde es Ihnen, holen Sie es mit „Code vom Kunden einfügen“ in Ihr Konto. Das zählt wie ein eigenes Projekt.'],
+  ['Wann zahle ich, und wofür?', 'Nur für Projekte mit eingegangenem Aufmaß, nie für verschickte Links. Die ersten 3 sind kostenlos und brauchen keine Zahlungsart. Danach 9 € netto je Projekt, oder Sie nehmen Abo 10 (49 € im Monat, 10 Projekte inklusive, jedes weitere 5 €) oder Plus (79 €, unbegrenzt). Ohne Zahlungsart bleibt ein neues Aufmaß gesperrt. Abgebucht wird alle zwei Wochen als Sammelrechnung, Abos monatlich. Nachbesserungen im selben Projekt kosten nichts.'],
   ['Kann ich die Daten weiterverarbeiten?', 'Ja: als PDF-Aufmaßblatt mit Bestellmaß-Vorschlag je Position und als Text zum Kopieren. Geplant sind Schnittstellen zu gängiger Fensterbau-Software.']
 ];
-SCREENS.wie = () => ({ html: '<div class="wrap narrow"><div class="h"><p class="eyebrow">So funktioniert es</p><h2>Aufmaß ohne Anfahrt, abgerechnet mit Ihnen.</h2><p>Für Fensterbauer, die ihren Kunden ein sauberes Erstaufmaß ermöglichen wollen, ohne selbst hinzufahren.</p></div>' +
-  '<div class="card"><p class="eyebrow">Projekt und Aufmaß-Link</p><div class="kv" style="margin-top: 10px"><span>1 · Projekt</span><span>Sie legen ein Projekt an: Kunde, Adresse und grobe Eckdaten wie Gebäude und ungefähre Fensterzahl. Oder Sie laden eine ganze Liste von Kunden auf einmal ein.</span><span>2 · Link</span><span>Sie schicken den Aufmaß-Link per WhatsApp, SMS oder E-Mail. Er gilt für ein Aufmaß und läuft nach 7, 14 oder 30 Tagen ab.</span><span>3 · Aufmaß</span><span>Ihr Kunde öffnet den Link im Browser, ohne Konto und ohne Installation, und misst geführt: Fotos, Maße, Wünsche am 3-D-Modell.</span><span>4 · Eingang</span><span>Das Aufmaß landet in Ihrem Projekt. Kein anderer Betrieb sieht es.</span><span>5 · Nachbesserung</span><span>Fehlt etwas oder stimmt ein Maß nicht, fragen Sie eine Nachbesserung an. Ihr Kunde ändert nur das Nötige und schickt erneut. Kostenlos, bis zu zweimal je Projekt.</span><span>6 · Abrechnung</span><span>Mit Ihnen: 3 Projekte kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß, mit Betrieb Plus unbegrenzt. Ihr Kunde zahlt nichts.</span><span>7 · Datei</span><span>Ihr Kunde bekommt keine Kopie mit Maßen zum Weiterschicken; möchte er eine, geben Sie ihm das Aufmaßblatt als PDF mit dem Angebot.</span></div></div>' +
-  '<div class="card"><p class="eyebrow">Für Hauseigentümer</p><div class="kv" style="margin-top: 10px"><span>Kostenlos</span><span>Die App ist für Hauseigentümer kostenlos, mit oder ohne Link eines Betriebs. Das vollständige Aufmaßblatt gibt es als PDF.</span><span>Ohne Konto</span><span>Nichts installieren, nichts anmelden. Alles bleibt auf dem eigenen Gerät, Fotos verlassen es nur für die freiwillige KI-Auswertung.</span><span>Zum Fensterbauer</span><span>Das Aufmaßblatt lässt sich direkt teilen. Auf der letzten Seite steht, wie ein Fensterbauer es in sein Fensterino-Konto holt.</span></div></div>' +
+SCREENS.wie = () => ({ html: '<div class="wrap narrow"><div class="h hbild"><div><p class="eyebrow">So funktioniert es</p><h2>Aufmaß ohne Anfahrt, abgerechnet mit Ihnen.</h2><p>Für Fensterbauer, die ihren Kunden ein sauberes Erstaufmaß ermöglichen wollen, ohne selbst hinzufahren.</p></div><span class="hbild-l" data-lottie="messen" data-loop="1" aria-hidden="true"></span></div>' +
+  '<div class="card"><p class="eyebrow">Projekt und Aufmaß-Link</p><div class="kv" style="margin-top: 10px"><span>1 · Projekt</span><span>Sie legen ein Projekt an: Kunde, Adresse und grobe Eckdaten wie Gebäude und ungefähre Fensterzahl. Oder Sie laden eine ganze Liste von Kunden auf einmal ein.</span><span>2 · Link</span><span>Sie schicken den Aufmaß-Link per WhatsApp, SMS oder E-Mail. Er gilt für ein Aufmaß und läuft nach 7, 14 oder 30 Tagen ab.</span><span>3 · Aufmaß</span><span>Ihr Kunde öffnet den Link im Browser, ohne Konto und ohne Installation, und misst geführt: Fotos, Maße, Wünsche am 3-D-Modell.</span><span>4 · Eingang</span><span>Das Aufmaß landet in Ihrem Projekt. Kein anderer Betrieb sieht es.</span><span>5 · Nachbesserung</span><span>Fehlt etwas oder stimmt ein Maß nicht, fragen Sie eine Nachbesserung an. Ihr Kunde ändert nur das Nötige und schickt erneut. Kostenlos, bis zu zweimal je Projekt.</span><span>6 · Abrechnung</span><span>Mit Ihnen: 3 Projekte kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß, im Abo 10 Projekte für 49 € im Monat, mit Plus unbegrenzt. Ihr Kunde zahlt nichts.</span><span>7 · Datei</span><span>Ihr Kunde bekommt keine Kopie mit Maßen zum Weiterschicken; möchte er eine, geben Sie ihm das Aufmaßblatt als PDF mit dem Angebot.</span></div></div>' +
+  '<div class="card"><p class="eyebrow">Für Hauseigentümer</p><div class="kv" style="margin-top: 10px"><span>Kostenlos messen</span><span>Messen, Fotos, 3-D-Modell und Wünsche sind kostenlos, mit oder ohne Link eines Betriebs. Wer ohne Link misst, kauft sein Aufmaßblatt als PDF für 7,99 €; wer über Ihren Link kommt, zahlt nichts, Sie bekommen das Aufmaß.</span><span>Ohne Konto</span><span>Nichts installieren, nichts anmelden. Alles bleibt auf dem eigenen Gerät, Fotos verlassen es nur für die freiwillige KI-Auswertung.</span><span>Zum Fensterbauer</span><span>Das Aufmaßblatt lässt sich direkt teilen. Auf der letzten Seite steht, wie ein Fensterbauer es in sein Fensterino-Konto holt.</span></div></div>' +
   '<section class="sec"><div class="sec-head"><h3>Häufige Fragen</h3></div><div class="faq">' + FAQ.map((f) => '<details class="fq"><summary>' + esc(f[0]) + '<span class="pchev" aria-hidden="true"></span></summary><p>' + esc(f[1]) + '</p></details>').join('') + '</div></section>' +
   '<div class="row"><button type="button" class="btn primary" data-act="reg" data-v="betrieb">Kostenlos starten</button><button type="button" class="btn ghost" data-act="go" data-v="preise">Preise</button><a class="btn ghost" href="' + APP_OPEN + '">Zur App</a></div></div>' });
 SCREENS.preise = () => {
-  const cur = S.role === 'betrieb' ? (A().konto === 'plus' ? 'plus' : 'start') : '';
-  const card = (k, eb, p, sm, items, btn) => '<div class="price' + (cur === k ? ' hi' : k === 'plus' && !cur ? ' hi' : '') + '"><p class="eyebrow">' + eb + (cur === k ? ' · Ihr Plan' : '') + '</p><span class="p">' + p + '<small>' + sm + '</small></span><ul>' + items.map((t) => '<li>' + t + '</li>').join('') + '</ul>' + btn + '</div>';
-  const regBtn = (l) => (S.role ? '' : '<button type="button" class="btn primary" data-act="reg" data-v="betrieb">' + l + '</button>');
-  return { html: '<div class="wrap"><div class="h"><p class="eyebrow">Für Fensterbauer</p><h2>Sie zahlen für Aufmaße, die ankommen.</h2><p>Keine Grundgebühr im Start. Ihr Kunde zahlt nichts und braucht kein Konto. Kündbar jederzeit, alle Preise netto.</p></div>' +
-    '<div class="grid c3 pricegrid">' + card('start', 'Start', '0 €', ' Grundgebühr', ['Projekte, Aufmaß-Links und Einladungslisten', '3 Projekte kostenlos', 'danach 9 € je Projekt mit eingegangenem Aufmaß', 'Nachbesserungen inklusive', 'in einer Minute startklar'], regBtn('Kostenlos starten')) +
-    card('plus', 'Betrieb Plus', '79 €', ' im Monat', ['Aufmaße unbegrenzt', 'Ihr Logo und Ihre Farbe beim Kunden', 'Team mit Rollen und Statistik', 'monatlich kündbar'], regBtn('Mit Plus starten')) +
-    '<div class="price"><p class="eyebrow">Hauseigentümer</p><span class="p">0 €<small> immer</small></span><ul><li>Aufmaß-App ohne Konto</li><li>Fotos, 3-D-Modell, Wünsche</li><li>vollständiges Aufmaßblatt als PDF</li><li>mit oder ohne Link eines Betriebs</li></ul><a class="btn ghost" href="' + APP_OPEN + '">Zur App</a></div></div>' +
-    '<div class="card kcost"><span class="ci">' + icon('nouser', 22) + '</span><div><b>Für Ihren Kunden: kostenlos und ohne Konto.</b><p>Er misst und schickt das Aufmaß an Sie. Eine Kopie mit allen Maßen bekommt er von Ihnen: ein Klick im Projekt, PDF mit dem Angebot. Ihr Kunde bleibt Ihr Kunde.</p></div></div>' +
+  const p = P(), cur = S.role === 'betrieb' ? X.konto(A()) : '';
+  const card = (k, eb, pr, sm, items, btn, hi) => '<div class="price' + (cur === k || (!cur && hi) ? ' hi' : '') + '"><p class="eyebrow">' + eb + (cur === k ? ' · Ihr Tarif' : '') + '</p><span class="p">' + pr + '<small>' + sm + '</small></span><ul>' + items.map((t) => '<li>' + t + '</li>').join('') + '</ul>' + btn + '</div>';
+  const btn = (k, l) => (S.role ? (cur === k ? '' : '<button type="button" class="btn ' + (k === 'service' ? 'ghost' : 'primary') + '" data-act="konto" data-v="' + k + '">' + l + '</button>') : '<button type="button" class="btn ' + (k === 'service' ? 'ghost' : 'primary') + '" data-act="reg" data-v="betrieb">' + (k === 'service' ? 'Kostenlos starten' : 'Starten') + '</button>');
+  return { html: '<div class="wrap"><div class="h"><p class="eyebrow">Für Fensterbauer</p><h2>Sie zahlen für Projekte, in denen ein Aufmaß ankommt.</h2><p>Einzeln, im Abo oder unbegrenzt. Ihr Kunde zahlt nichts und braucht kein Konto. Monatlich kündbar, alle Preise netto' + (p.mwst ? ' zzgl. MwSt.' : '') + '</p></div>' +
+    '<div class="grid c3 pricegrid">' + card('service', 'Start', '0 €', ' Grundgebühr', [p.frei + ' Projekte kostenlos', 'danach ' + p.projekt + ' € je Projekt mit eingegangenem Aufmaß', 'Projekte, Aufmaß-Links, Einladungslisten', 'Nachbesserungen inklusive', 'Zahlungsart erst ab dem ' + (p.frei + 1) + '. Projekt'], btn('service', 'Zu Start wechseln')) +
+    card('abo', 'Abo 10', p.abo.grund + ' €', ' im Monat', [p.abo.inkl + ' Projekte im Monat inklusive', 'jedes weitere ' + p.abo.extra + ' €', 'günstiger ab ' + Math.ceil(p.abo.grund / p.projekt) + ' Projekten im Monat', 'Nachbesserungen inklusive', 'monatlich kündbar'], btn('abo', 'Abo 10 starten'), true) +
+    card('plus', 'Plus', p.plus + ' €', ' im Monat', ['Projekte unbegrenzt', 'günstiger ab ' + (p.abo.inkl + Math.ceil((p.plus - p.abo.grund) / p.abo.extra)) + ' Projekten im Monat', 'Ihr Logo und Ihre Farbe beim Kunden', 'Team mit Rollen und Statistik', 'monatlich kündbar'], btn('plus', 'Plus starten')) + '</div>' +
+    '<div class="grid c2"><div class="card kcost"><span class="ci">' + icon('nouser', 22) + '</span><div><b>Für Ihren Kunden: kostenlos und ohne Konto.</b><p>Er misst über Ihren Link und schickt das Aufmaß an Sie. Eine Kopie mit allen Maßen bekommt er von Ihnen: ein Klick im Projekt, PDF mit dem Angebot. Ihr Kunde bleibt Ihr Kunde.</p></div></div>' +
+    '<div class="card kcost"><span class="ci">' + icon('euro', 22) + '</span><div><b>Hauseigentümer ohne Link: ' + eur2(p.aufmass) + ' je Aufmaßblatt.</b><p>Messen, Fotos, 3-D-Modell und Wünsche sind kostenlos. Das fertige Aufmaßblatt als PDF kostet einmalig ' + eur2(p.aufmass) + (p.mwst ? ' inkl. MwSt.' : '') + ', für das ganze Projekt, auch wenn später Fenster dazukommen. Darin steht der Code, mit dem jeder Fensterbauer das Aufmaß in sein Konto holt.</p><a class="btn ghost" href="' + APP_OPEN + '">Zur App</a></div></div></div>' +
     roiCalc() + '</div>' };
 };
 /* ---------- Registrierung ---------- */
@@ -493,7 +473,8 @@ function regKey(r) { return (r.step <= 1 ? 'betrieb' : 'service') + ':' + r.step
 const REQ = { 'betrieb:1': { firma: 'name', ap: 'name', mail: 'mailfree', tel: 'tel', pw: 'pw' }, 'service:2': { plz: 'plz', agb: 'agb' } };
 const SAMPLE = { 'betrieb:1': { firma: 'Fensterbau Sommer', ap: 'Jonas Sommer', mail: 'info@fensterbau-sommer.de', tel: '0221 777 88 99', pw: 'fenster2026' }, 'service:2': { plz: '51063', col: '#0b7285', agb: true } };
 function regValidate(r) {
-  const req = REQ[regKey(r)] || {}, err = {};
+  const req = Object.assign({}, REQ[regKey(r)] || {}), err = {};
+  if (r.server) { delete req.mail; delete req.pw; }
   Object.keys(req).forEach((f) => { const ok = VAL[req[f]](r.d[f]); if (ok !== true) err[f] = ok; });
   r.err = err; return !Object.keys(err).length;
 }
@@ -504,27 +485,28 @@ SCREENS.reg = () => {
   const agree = (text) => '<label class="agree' + (e.agb ? ' has-err' : '') + '"><input type="checkbox" data-in="r:agb"' + (d.agb ? ' checked' : '') + '><span>' + text + '</span></label>' + (e.agb ? '<small class="err">' + esc(e.agb) + '</small>' : '');
   const firmaName = d.firma || 'Ihr Betrieb', col = d.col || '#0071e3';
   let body = '', title = '';
-  if (r.step === 1) { title = 'Ihr Betrieb.'; body = inp('Firma', 'firma', 'z. B. Fensterbau Muster GmbH', 'text', 'Steht als Absender in Ihren Aufmaß-Links.', 'organization') + inp('Ansprechpartner', 'ap', 'Vor- und Nachname', 'text', '', 'name') + '<div class="f2">' + inp('E-Mail', 'mail', 'buero@beispiel.de', 'email', '', 'email') + inp('Telefon', 'tel', 'z. B. 0221 123456', 'tel', '', 'tel') + '</div>' + inp('Passwort', 'pw', 'mindestens 8 Zeichen', 'password', 'Mindestens 8 Zeichen.', 'new-password'); }
+  if (r.step === 1) { title = 'Ihr Betrieb.'; body = inp('Firma', 'firma', 'z. B. Fensterbau Muster GmbH', 'text', 'Steht als Absender in Ihren Aufmaß-Links.', 'organization') + inp('Ansprechpartner', 'ap', 'Vor- und Nachname', 'text', '', 'name') + (r.server ? '<div class="f2"><div class="f"><label>E-Mail</label><input value="' + esc(d.mail || '') + '" disabled><small>Bestätigt. Darüber melden Sie sich an.</small></div>' + inp('Telefon', 'tel', 'z. B. 0221 123456', 'tel', 'Für Rückfragen und als Schutz vor Doppelkonten.', 'tel') + '</div>' : '<div class="f2">' + inp('E-Mail', 'mail', 'buero@beispiel.de', 'email', '', 'email') + inp('Telefon', 'tel', 'z. B. 0221 123456', 'tel', '', 'tel') + '</div>' + inp('Passwort', 'pw', 'mindestens 8 Zeichen', 'password', 'Mindestens 8 Zeichen.', 'new-password')); }
   if (r.step === 2) { title = 'So sieht Ihr Kunde den Link.'; body = dupNote(d) + '<div class="f2">' + inp('Postleitzahl des Betriebs', 'plz', 'z. B. 51063', 'text', 'Für die Rechnung.', 'postal-code') + '<div class="f"><label>Ihre Farbe</label><div class="colors">' + ['#0071e3', '#1f7a3d', '#a85a00', '#6e3fc2', '#0b7285', '#b3261e'].map((c) => '<button type="button" class="col" data-act="reg-set" data-k="col" data-v="' + c + '" style="background: ' + c + '" aria-label="Farbe ' + c + '" aria-pressed="' + (col === c) + '"></button>').join('') + '</div></div></div><div class="preview"><p class="eyebrow">Erster Bildschirm beim Kunden</p><div class="pv-card"><span class="av" style="background: ' + col + '">' + esc(firmaName.replace(/^(Fensterbau|Glaserei|Schreinerei|Tischlerei)\s+/i, '').slice(0, 1).toUpperCase() || 'F') + '</span><span><small>Persönliche Anfrage von</small><b>' + esc(firmaName) + '</b></span></div><p class="pv-t">Deine Fenster. Deine Maße.</p><small class="pv-s">' + esc(firmaName) + ' braucht für dein Angebot die Maße deiner Fenster. Etwa fünf Minuten pro Fenster, jeder Schritt erklärt.</small></div>' + agree('Ich akzeptiere die <button type="button" class="ulink" data-act="sheet" data-v="legal" data-id="agb">Nutzungsbedingungen für Betriebe</button>. Aufmaße meiner Kunden nutze ich nur für deren Projekt.'); }
   const total = steps.length - f0, pos = r.step - f0 + 1, last = r.step === steps.length - 1, canFill = !!SAMPLE[regKey(r)];
   return { title: 'Konto für Fensterbauer', html: '<div class="wrap narrow"><div class="stepbar"><span style="width: ' + (pos / total * 100) + '%"></span></div><div class="h"><p class="eyebrow">Schritt ' + pos + ' von ' + total + ' · ' + steps[r.step] + '</p><h2>' + title + '</h2>' + (canFill ? '<button type="button" class="fillbtn" data-act="reg-fill">' + icon('play', 13) + 'Nur testen? Beispieldaten einsetzen</button>' : '') + '</div><form class="form" data-form="reg" novalidate>' + body + '</form>' + (Object.keys(e).length ? '<p class="err-sum" role="alert">Bitte die markierten Felder prüfen.</p>' : '') + '<div class="row between formnav"><button type="button" class="btn ghost" data-act="reg-prev">' + (r.step > f0 ? 'Zurück' : 'Abbrechen') + '</button><button type="button" class="btn primary" data-act="reg-next">' + (last ? 'Konto anlegen' : 'Weiter') + '</button></div>' + (r.step === f0 ? '<p class="sub center">Schon ein Konto? <button type="button" class="ulink" data-act="sheet" data-v="login">Anmelden</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>' : '') + '</div>' };
 };
 function regFinish() {
   const r = S.reg, d = r.d, mail = String(d.mail).trim().toLowerCase();
+  if (r.server) return Server.registrieren(d);
   const id = 'u' + Date.now().toString(36), plz = String(d.plz || '50667').trim();
   S.myCompanies.push({ id: id, plan: 'service', name: d.firma.trim(), plz: plz, since: new Date().getFullYear(), col: d.col || '#0071e3' });
   const dup = sameCompany(d);
   S.acc[id] = { plan: 'service', konto: 'service', ap: d.ap.trim(), mail: mail, tel: d.tel, abzug: { seite: 15, oben: 15 }, prefs: { mail: true, remind: true }, rechnungen: [], links: [], book: [], freeUsed: 0 };
   if (dup) { S.acc[id].freeQuota = 0; S.acc[id].dupOf = dup; }
   S.logins[mail] = { role: 'betrieb', id: id };
-  S.notif[id] = [{ t: 'Willkommen bei Fensterino', s: dup ? 'Für ' + dup + ' gibt es schon ein Konto, die kostenlosen Projekte wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Die ersten 3 Projekte sind kostenlos.', when: stamp(), new: true, to: ['links'] }];
+  S.notif[id] = [{ t: 'Willkommen bei Fensterino', s: dup ? 'Für ' + dup + ' gibt es schon ein Konto, die kostenlosen Projekte wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Die ersten ' + P().frei + ' Projekte sind kostenlos.', when: stamp(), new: true, to: ['links'] }];
   S.reg = null; S._feier = 'willkommen';
   return login('betrieb', id, 'Willkommen, ' + d.ap.trim().split(' ')[0]);
 }
 
 SCREENS.notif = () => {
   const list = notifs();
-  return { html: '<div class="wrap narrow"><div class="h"><h2>Nachrichten.</h2></div><div class="list">' + (list.length ? list.map((n, i) => '<button type="button" class="item nitem' + (n.new ? ' is-new' : '') + '" data-act="notif-open" data-i="' + i + '"><span class="ic">' + icon('bell', 22) + '</span><span class="tx"><span class="ti">' + esc(n.t) + '</span><span class="di">' + esc(n.s) + '</span><span class="me">' + esc(n.when) + '</span></span>' + (n.new ? '<span class="badge lead">neu</span>' : '') + (n.to ? CHEV : '') + '</button>').join('') : empty('Keine Nachrichten.', 'Hier landet alles, was passiert: geöffnete Links, eingegangene Aufmaße, Nachbesserungen.')) + '</div>' + (list.some((n) => n.new) ? '<div><button type="button" class="btn ghost" data-act="read-all">Alle als gelesen markieren</button></div>' : '') + '</div>' };
+  return { html: '<div class="wrap narrow"><div class="h"><h2>Nachrichten.</h2></div><div class="list">' + (list.length ? list.map((n, i) => '<button type="button" class="item nitem' + (n.new ? ' is-new' : '') + '" data-act="notif-open" data-i="' + i + '"><span class="ic">' + icon('bell', 22) + '</span><span class="tx"><span class="ti">' + esc(n.t) + '</span><span class="di">' + esc(n.s) + '</span><span class="me">' + esc(n.when) + '</span></span>' + (n.new ? '<span class="badge lead">neu</span>' : '') + (n.to ? CHEV : '') + '</button>').join('') : empty('Keine Nachrichten.', 'Hier landet alles, was passiert: geöffnete Links, eingegangene Aufmaße, Nachbesserungen.', '', 'eingang')) + '</div>' + (list.some((n) => n.new) ? '<div><button type="button" class="btn ghost" data-act="read-all">Alle als gelesen markieren</button></div>' : '') + '</div>' };
 };
 /* ---------- Bildschirme: Fensterbauer ---------- */
 /* Jemand kommt über die PDF eines Kunden (QR-Code): ein Hinweis, der direkt zum Ziel führt */
@@ -575,13 +557,12 @@ function linkItem(l) {
 SCREENS.links = () => {
   const a = A(), L = a.links, open = L.filter((l) => ['erstellt', 'gesendet', 'geoeffnet', 'arbeit'].includes(l.status)), rec = L.filter((l) => l.status === 'eingegangen');
   const shown = S.lfilt === 'offen' ? open : S.lfilt === 'eingegangen' ? rec : L, order = (l) => ({ eingegangen: l.seen ? 2 : 0, arbeit: 1, geoeffnet: 1, gesendet: 3, erstellt: 3 }[l.status] || 4);
-  const fl = a.konto === 'plus' ? '∞' : String(freeLeft(a));
   if (!L.length) return { html: '<div class="wrap narrow">' + banners() + payBanner() + '<div class="h"><p class="eyebrow">' + esc(BC().name) + '</p><h2>Ihr erstes Projekt.</h2><p>Für einen Kunden, den Sie schon haben: Projekt anlegen, Aufmaß-Link schicken, und das Aufmaß kommt zu Ihnen zurück.</p></div>' +
-    '<div class="card hero-link"><div class="hl-steps"><div><span class="n">1</span><b>Projekt anlegen</b><small>Kunde und ein paar Eckdaten.</small></div><div><span class="n">2</span><b>Link schicken</b><small>WhatsApp, SMS oder E-Mail.</small></div><div><span class="n">3</span><b>Aufmaß bekommen</b><small>Maße, Fotos und Wünsche je Fenster.</small></div></div><div class="row"><button type="button" class="btn primary big" data-act="go" data-v="newlink">' + icon('plus', 20) + 'Erstes Projekt anlegen</button><button type="button" class="btn ghost big" data-act="sheet" data-v="liste">Mehrere Kunden einladen</button><button type="button" class="btn ghost big" data-act="demo-project">Beispiel ansehen</button></div><p class="km-s">' + (a.konto === 'plus' ? 'Mit Betrieb Plus unbegrenzt.' : 'Die ersten 3 Aufmaße sind kostenlos, danach 9 € netto je eingegangenem Aufmaß. Ihr Kunde zahlt nichts.') + '</p></div></div>' };
+    '<div class="card hero-link"><div class="hl-steps"><div><span class="n">1</span><b>Projekt anlegen</b><small>Kunde und ein paar Eckdaten.</small></div><div><span class="n">2</span><b>Link schicken</b><small>WhatsApp, SMS oder E-Mail.</small></div><div><span class="n">3</span><b>Aufmaß bekommen</b><small>Maße, Fotos und Wünsche je Fenster.</small></div></div><div class="row"><button type="button" class="btn primary big" data-act="go" data-v="newlink">' + icon('plus', 20) + 'Erstes Projekt anlegen</button><button type="button" class="btn ghost big" data-act="sheet" data-v="liste">Mehrere Kunden einladen</button><button type="button" class="btn ghost big" data-act="demo-project">Beispiel ansehen</button></div><p class="km-s">' + kontingentText(a) + ' Ihr Kunde zahlt nichts.</p></div></div>' };
   return { html: '<div class="wrap">' + banners() + payBanner() + '<div class="h hrow"><div><p class="eyebrow">' + esc(BC().name) + '</p><h2>Projekte.</h2><p>Ein Projekt je Kunde. Den Aufmaß-Link schicken Sie direkt aus dem Projekt.</p></div><span class="row"><button type="button" class="btn ghost big" data-act="sheet" data-v="liste">' + icon('people', 18) + 'Liste einladen</button><button type="button" class="btn primary big" data-act="go" data-v="newlink">' + icon('plus', 20) + 'Neues Projekt</button></span></div>' +
-    '<div class="grid c3 stats">' + stat('warn', 'send', 'Offen', open.length, open.length ? 'Link verschickt, Kunde misst noch' : 'alle Links sind erledigt') + stat('ok', 'inbox', 'Eingegangen', rec.length, rec.reduce((s, l) => s + (l.aufmass ? l.aufmass.windows.length : 0), 0) + ' Positionen mit Fotos') + stat('acc', 'gift', 'Noch kostenlos', fl, a.konto === 'plus' ? 'Betrieb Plus' : a.pay ? 'danach 9 € je Projekt' : 'danach mit Zahlungsart') + '</div>' +
-    '<div class="row between">' + seg([['alle', 'Alle', L.length], ['offen', 'Offen', open.length], ['eingegangen', 'Eingegangen', rec.length]], S.lfilt, 'lfilt') + '<button type="button" class="btn small ghost" data-act="sheet" data-v="linkimport">Code vom Kunden einfügen</button></div>' +
-    '<div class="list plist">' + (shown.length ? shown.slice().sort((x, y) => order(x) - order(y)).map(projCard).join('') : empty(S.lfilt === 'eingegangen' ? 'Noch nichts eingegangen.' : 'Keine offenen Projekte.', S.lfilt === 'eingegangen' ? 'Sobald ein Kunde sein Aufmaß abschickt, steht es hier.' : 'Alle verschickten Links sind erledigt.')) + '</div></div>' };
+    '<div class="grid c3 stats">' + stat('warn', 'send', 'Offen', open.length, open.length ? 'Link verschickt, Kunde misst noch' : 'alle Links sind erledigt') + stat('ok', 'inbox', 'Eingegangen', rec.length, rec.reduce((s, l) => s + (l.aufmass ? l.aufmass.windows.length : 0), 0) + ' Positionen mit Fotos') + kontingentStat(a) + '</div>' +
+    '<div class="row between">' + seg([['alle', 'Alle', L.length], ['offen', 'Offen', open.length], ['eingegangen', 'Eingegangen', rec.length]], S.lfilt, 'lfilt', 'fit') + '<button type="button" class="btn ghost" data-act="sheet" data-v="linkimport">Code vom Kunden einfügen</button></div>' +
+    '<div class="list plist">' + (shown.length ? shown.slice().sort((x, y) => order(x) - order(y)).map(projCard).join('') : empty(S.lfilt === 'eingegangen' ? 'Noch nichts eingegangen.' : 'Keine offenen Projekte.', S.lfilt === 'eingegangen' ? 'Sobald ein Kunde sein Aufmaß abschickt, steht es hier.' : 'Alle verschickten Links sind erledigt.', '', 'eingang')) + '</div></div>' };
 };
 SCREENS.newlink = () => {
   const n = S.nl || (S.nl = { step: 0, kunde: '', kontakt: '', adresse: '', geb: '', fz: '', plan: ['Fenster'], note: '', days: 14, du: false, err: {} }), e = n.err || {}, c = BC(), a = A(), st = n.step || 0;
@@ -598,7 +579,7 @@ SCREENS.newlink = () => {
       '<div class="f"><label>Gebäude</label><div class="chips">' + Object.keys(PGEB).map((k) => one('geb', k, PGEB[k])).join('') + '</div></div>' +
       '<div class="f"><label>Wie viele Fenster ungefähr?</label><div class="chips">' + PFZ.map((v) => one('fz', v, v)).join('') + '</div></div>' +
       '<div class="f"><label>Was ist geplant?</label><div class="chips">' + PPLAN.map((v) => '<button type="button" class="chip small" data-act="nl-plan" data-v="' + v + '" aria-pressed="' + ((n.plan || []).indexOf(v) >= 0) + '">' + v + '</button>').join('') + '</div></div>';
-    nav = '<div class="row between formnav"><button type="button" class="btn ghost" data-act="nl-prev">Zurück</button><button type="button" class="btn primary" data-act="nl-create">' + icon('link', 18) + 'Projekt anlegen</button></div><p class="km-s">' + (a.konto === 'plus' ? 'Betrieb Plus: Aufmaße unbegrenzt.' : 'Bezahlt wird nur ein eingegangenes Aufmaß. Noch ' + freeLeft(a) + ' kostenlos.') + '</p>';
+    nav = '<div class="row between formnav"><button type="button" class="btn ghost" data-act="nl-prev">Zurück</button><button type="button" class="btn primary" data-act="nl-create">' + icon('link', 18) + 'Projekt anlegen</button></div><p class="km-s">Bezahlt wird nur ein eingegangenes Aufmaß. ' + kontingentText(a) + '</p>';
   }
   return { title: 'Neues Projekt', html: '<div class="wrap"><div class="nl-grid"><div><div class="stepbar"><span style="width: ' + (st ? 100 : 50) + '%"></span></div><div class="h"><p class="eyebrow">Schritt ' + (st + 1) + ' von 2 · ' + (st ? 'Eckdaten' : 'Kunde') + '</p><h2>' + (st ? 'Ein paar Eckdaten.' : 'Für wen ist das Projekt?') + '</h2><p>' + (st ? 'Alles freiwillig, hilft beim Angebot. Später im Projekt änderbar.' : 'Ein Projekt je Kunde. Der Aufmaß-Link kommt im nächsten Schritt.') + '</p></div><div class="card"><form class="form" data-form="nl" novalidate>' + body + nav + '</form></div></div>' +
     '<div class="pv"><p class="eyebrow">So kommt die Nachricht an</p><div class="phone small"><div class="ph-top"><span class="ph-av" style="background: ' + c.col + '">' + esc(c.name.slice(0, 1)) + '</span><span><b>' + esc(c.name) + '</b><small>Nachricht</small></span></div><div class="ph-body"><div class="bub out show" id="pv-msg">' + pvHTML(fake) + '</div></div></div><p class="km-s">Den Text können Sie nach dem Anlegen noch ändern.</p><p class="km-s">Ihr Kunde sieht im Link nur Ihren Betrieb: keine anderen Anbieter, keine Werbung. Sein Aufmaß bleibt in diesem Projekt.</p></div></div></div>' };
@@ -645,29 +626,41 @@ SCREENS.link = () => {
   }
   const pdata = '<details class="card fold"><summary><span>Projektdaten<small>' + esc([l.kontakt, placeOf(l), projFacts(l)].filter(Boolean).join(' · ') || 'Kontakt, Objekt, Eckdaten, interne Notiz') + '</small></span></summary><div class="fold-body"><div class="kv"><span>Kunde</span><span>' + esc(l.kunde) + '</span><span>Kontakt</span><span>' + (l.kontakt ? '<span class="sel">' + esc(l.kontakt) + '</span>' : '–') + '</span><span>Objekt</span><span>' + esc(l.adresse || '–') + '</span><span>Eckdaten</span><span>' + esc(projFacts(l) || '–') + '</span><span>Link</span><span>' + (dead ? esc(m[0]) : 'gültig bis ' + esc(l.expires)) + ', Anrede ' + (l.du ? 'Du' : 'Sie') + '</span></div><div class="f" style="margin-top: 12px"><label for="pnote">Interne Notiz</label><textarea id="pnote" data-in="pnote:' + l.id + '" placeholder="Sieht nur Ihr Team">' + esc(l.note || '') + '</textarea></div></div></details>';
   return { title: l.kunde, html: '<div class="wrap narrow"><div class="h"><p class="eyebrow">' + (l.demo ? 'Beispielprojekt' : 'Projekt ' + esc(l.nr || '')) + ' · angelegt ' + esc(l.created) + '</p><h2>' + esc(l.kunde) + '</h2><p>' + esc([placeOf(l), projFacts(l)].filter(Boolean).join(' · ') || 'Ohne Eckdaten') + '</p><div class="row"><span class="badge ' + m[1] + (fresh ? ' pop' : '') + '">' + m[0] + '</span>' + (l.via ? '<span class="badge">über ' + esc(l.via) + '</span>' : '') + (nbOffen ? '<span class="badge warn">Nachbesserung angefragt</span>' : (l.runde || 1) > 1 ? '<span class="badge acc">Nachgebessert · Runde ' + l.runde + '</span>' : '') + '</div></div>' +
-    (S.justCreated === l.id ? '<div class="card created"><span class="burst-ok">' + icon('check', 30) + '</span><div><b>Projekt angelegt.</b><span>Jetzt den Aufmaß-Link an ' + esc(l.kunde) + ' schicken.</span></div></div>' : '') +
+    (S.justCreated === l.id ? '<div class="card created"><span class="burst-ok" data-lottie="fertig"><span class="lottie-still">' + icon('check', 30) + '</span></span><div><b>Projekt angelegt.</b><span>Jetzt den Aufmaß-Link an ' + esc(l.kunde) + ' schicken.</span></div></div>' : '') +
     (done && nbOffen ? share : '') + (done ? (l.locked ? lockCard(l, a) : result) : '') + (!done && !dead ? share : '') +
     '<section class="sec"><div class="sec-head"><h3>Verlauf</h3></div><div class="card tlcard">' + tl + '</div></section>' + pdata +
     '<div class="row">' + (!done && !dead ? '<button type="button" class="btn ghost" data-act="l-sim" data-id="' + l.id + '">' + icon('play', 16) + 'Demo: Kunde füllt aus</button>' : '') + (!dead ? '<a class="btn ghost" href="' + linkOpen(l) + '" target="_blank" rel="noopener">Als Kunde öffnen ' + icon('ext', 15) + '</a>' : '') + (!done && !dead ? '<button type="button" class="btn danger" data-act="sheet" data-v="deact" data-id="' + l.id + '">Link deaktivieren</button>' : '') + (done && !nbOffen && nbOk === 'ok' ? '<button type="button" class="btn ghost" data-act="sheet" data-v="nachbesserung" data-id="' + l.id + '">' + icon('swap', 16) + 'Nachbesserung anfragen</button>' : '') + (done || dead ? '<button type="button" class="btn ghost" data-act="l-again" data-id="' + l.id + '">' + (dead ? 'Neuen Link für ' : 'Weiteres Projekt für ') + esc(l.kunde.replace(/^Beispiel:\s*/, '')) + '</button>' : '') + '</div>' + (done && !nbOffen && nbOk && nbOk !== 'ok' ? '<p class="km-s">' + esc(nbOk) + '</p>' : '') +
-    '<p class="km-s">„Als Kunde öffnen“ zeigt die Fensterino-App so, wie Ihr Kunde sie sieht' + (LOCAL ? ' (die Datei Fensterino-App.html muss im selben Ordner liegen)' : '') + '. Im Prototyp ohne Server schickt Ihr Kunde nach dem Absenden einen Übermittlungscode, den Sie über „Code vom Kunden einfügen“ übernehmen.</p></div>' };
+    '<p class="km-s">„Als Kunde öffnen“ zeigt die Fensterino-App so, wie Ihr Kunde sie sieht. ' + (Server.online() ? 'Schickt Ihr Kunde sein Aufmaß ab, erscheint es hier von selbst.' : 'In der Demo schickt Ihr Kunde nach dem Absenden einen Aufmaß-Code, den Sie über „Code vom Kunden einfügen“ übernehmen.') + '</p></div>' };
 };
 
 /* ---------- Bildschirme: Abrechnung und Betrieb ---------- */
+/* Kontingent in Worten und als Kachel: Start zählt freie Projekte, Abo 10 das Monatskontingent, Plus ist offen */
+function kontingentText(a) {
+  const k = X.konto(a), p = P();
+  if (k === 'plus') return 'Plus: Projekte unbegrenzt.';
+  if (k === 'abo') { const f = X.aboFrei(a); return f ? 'Abo 10: noch ' + f + ' von ' + p.abo.inkl + ' Projekten in ' + monthLabel() + ' inklusive.' : 'Abo 10: Kontingent für ' + monthLabel() + ' verbraucht, jedes weitere Projekt ' + p.abo.extra + ' €.'; }
+  const f = freeLeft(a); return f ? 'Noch ' + f + ' von ' + freeQuota(a) + ' Projekten kostenlos, danach ' + p.projekt + ' € je Projekt.' : 'Kostenlose Projekte verbraucht, ' + p.projekt + ' € je Projekt' + (a.pay ? '.' : ', dafür eine Zahlungsart hinterlegen.');
+}
+function kontingentStat(a) {
+  const k = X.konto(a), p = P();
+  if (k === 'plus') return stat('acc', 'gift', 'Projekte', '∞', 'Plus, unbegrenzt');
+  if (k === 'abo') return stat('acc', 'gift', 'Inklusive', X.aboFrei(a) + ' / ' + p.abo.inkl, 'Abo 10, ' + monthLabel());
+  return stat('acc', 'gift', 'Noch kostenlos', freeLeft(a), a.pay ? 'danach ' + p.projekt + ' € je Projekt' : 'danach mit Zahlungsart');
+}
 SCREENS.abrechnung = () => {
-  const a = A(), book = ledger(a), rec = receivedLinks(), wait = lockedLinks(a);
+  const a = A(), book = ledger(a), rec = receivedLinks(), wait = lockedLinks(a), p = P(), k = X.konto(a);
   const nextInv = book.filter((b) => b.status === 'offen').reduce((s, b) => s + b.betrag, 0);
   const row = (t, sub, amount, badge, cls) => '<div class="lrow"><span class="lt"><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span><span class="la"><b>' + amount + '</b><span class="badge ' + (cls || '') + '">' + esc(badge) + '</span></span></div>';
-  const waitRows = wait.map((l) => row('Aufmaß · ' + l.kunde, ((l.log || {}).eingegangen || '') + ' · wartet auf Zahlungsart', eur(LINK_PRICE), 'gesperrt', 'bad'));
-  const bookRows = book.map((b) => row(b.text, b.sub || b.when, eur(b.betrag), b.badge, b.betrag ? 'warn' : 'ok'));
-  const inv = a.rechnungen.map((r) => row('Sammelrechnung ' + r.nr, r.datum + ' · ' + r.pos + ' Positionen', eur(r.betrag), r.status, 'ok'));
-  const all = waitRows.concat(bookRows, inv), q = freeQuota(a);
-  const plans = [['service', 'Start · keine Grundgebühr', '3 Projekte frei, danach 9 € netto je Projekt mit eingegangenem Aufmaß. Nachbesserungen inklusive.'], ['plus', 'Betrieb Plus · 79 € im Monat', 'Aufmaße unbegrenzt, Ihr Logo und Ihre Farbe beim Kunden, Team und Statistik. Monatlich kündbar.']];
-  const payCard = '<div class="card paycard"><div class="row between" style="align-items: center; flex-wrap: nowrap"><span style="min-width: 0"><p class="eyebrow">Zahlungsart</p><b>' + (a.pay ? esc(a.pay.type) + ' · ' + esc(a.pay.label) : 'Noch keine hinterlegt') + '</b><small>' + (a.pay ? 'Abbuchung alle zwei Wochen als Sammelrechnung.' : 'Nötig ab dem ersten kostenpflichtigen Aufmaß. Bis dahin wird nichts abgebucht.') + '</small></span><button type="button" class="btn small ' + (a.pay ? 'ghost' : 'primary') + '" data-act="sheet" data-v="pay">' + (a.pay ? 'Ändern' : 'Hinterlegen') + '</button></div></div>';
-  const freeStat = a.konto === 'plus' ? '∞' : (a.freeUsed || 0) + ' / ' + q;
-  return { html: '<div class="wrap">' + payBanner() + '<div class="h"><h2>Abrechnung.</h2><p>Keine Grundgebühr, kein Abo. Die ersten 3 Projekte sind kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß. Nachbesserungen kosten nichts, Ihr Kunde zahlt nichts.' + (a.dupOf ? ' Die kostenlosen Projekte für Ihren Betrieb wurden schon über das Konto ' + esc(a.dupOf) + ' genutzt.' : '') + '</p></div>' +
-    '<div class="grid c3 stats">' + stat('ok', 'inbox', 'Aufmaße', rec.length, 'eingegangen') + stat('acc', 'gift', 'Kostenlos', freeStat, a.konto === 'plus' ? 'Betrieb Plus' : 'genutzt') + stat(nextInv ? 'warn' : 'acc', 'euro', 'Nächste Rechnung', nextInv, nextInv ? 'netto, bisher' : 'nichts offen', 'eur') + '</div>' + payCard +
-    '<section class="sec"><div class="sec-head"><h3>Kontomodell</h3><button type="button" class="linkbtn" data-act="go" data-v="preise">Alle Preise ›</button></div><div class="grid c2">' + plans.map((o) => '<button type="button" class="opt" data-act="konto" data-v="' + o[0] + '" aria-pressed="' + ((a.konto === 'plus' ? 'plus' : 'service') === o[0]) + '"><span><b>' + o[1] + '</b><small>' + o[2] + '</small></span></button>').join('') + '</div>' +
-    (a.downgrade ? '<p class="km-s">Wechsel zu Start zum ' + esc(a.downgrade.at) + ' vorgemerkt. Bis dahin bleibt Betrieb Plus aktiv. <button type="button" class="linkbtn" data-act="konto" data-v="plus">Plus behalten</button></p>' : a.konto === 'plus' ? '<p class="km-s">Betrieb Plus ist für ' + esc(monthLabel()) + ' gebucht. Ein Wechsel gilt zum Monatsende; gebuchte Positionen bleiben, wie sie sind.</p>' : '') + '</section>' +
+  const waitRows = wait.map((l) => row('Aufmaß · ' + l.kunde, ((l.log || {}).eingegangen || '') + ' · wartet auf Zahlungsart', eur(k === 'abo' ? p.abo.extra : p.projekt), 'gesperrt', 'bad'));
+  const bookRows = book.map((b) => row(b.text, b.sub || b.when, eur(b.betrag), b.badge + (b.status === 'berechnet' ? ' · Rechnung ' + (b.rechnung || '') : b.status === 'bezahlt' ? ' · bezahlt' : ''), b.betrag ? (b.status === 'bezahlt' ? 'ok' : 'warn') : 'ok'));
+  const inv = (a.rechnungen || []).map((r) => row('Sammelrechnung ' + r.nr, r.datum + ' · ' + r.pos + ' Positionen', eur(r.betrag), r.status, r.status === 'bezahlt' ? 'ok' : 'warn'));
+  const all = waitRows.concat(bookRows, inv);
+  const plans = [['service', 'Start · keine Grundgebühr', p.frei + ' Projekte frei, danach ' + p.projekt + ' € netto je Projekt mit eingegangenem Aufmaß.'], ['abo', 'Abo 10 · ' + p.abo.grund + ' € im Monat', p.abo.inkl + ' Projekte im Monat inklusive, jedes weitere ' + p.abo.extra + ' €. Monatlich kündbar.'], ['plus', 'Plus · ' + p.plus + ' € im Monat', 'Projekte unbegrenzt, Ihr Logo und Ihre Farbe beim Kunden, Team und Statistik. Monatlich kündbar.']];
+  const payCard = '<div class="card paycard"><div class="row between" style="align-items: center; flex-wrap: nowrap"><span style="min-width: 0"><p class="eyebrow">Zahlungsart</p><b>' + (a.pay ? esc(a.pay.type) + ' · ' + esc(a.pay.label) : 'Noch keine hinterlegt') + '</b><small>' + (a.pay ? 'Projekte werden alle zwei Wochen als Sammelrechnung eingezogen, Abos monatlich.' : 'Nötig ab dem ersten kostenpflichtigen Projekt. Bis dahin wird nichts abgebucht.') + '</small></span><button type="button" class="btn small ' + (a.pay ? 'ghost' : 'primary') + '" data-act="sheet" data-v="pay">' + (a.pay ? 'Ändern' : 'Hinterlegen') + '</button></div></div>';
+  return { html: '<div class="wrap">' + payBanner() + '<div class="h"><h2>Abrechnung.</h2><p>' + kontingentText(a) + ' Nachbesserungen kosten nichts, Ihr Kunde zahlt nichts.' + (a.dupOf ? ' Die kostenlosen Projekte für Ihren Betrieb wurden schon über das Konto ' + esc(a.dupOf) + ' genutzt.' : '') + '</p></div>' +
+    '<div class="grid c3 stats">' + stat('ok', 'inbox', 'Aufmaße', rec.length, 'eingegangen') + kontingentStat(a) + stat(nextInv ? 'warn' : 'acc', 'euro', 'Nächste Rechnung', nextInv, nextInv ? 'netto, bisher' : 'nichts offen', 'eur') + '</div>' + payCard +
+    '<section class="sec"><div class="sec-head"><h3>Tarif</h3><button type="button" class="linkbtn" data-act="go" data-v="preise">Alle Preise ›</button></div><div class="grid c3">' + plans.map((o) => '<button type="button" class="opt" data-act="konto" data-v="' + o[0] + '" aria-pressed="' + (k === o[0]) + '"><span><b>' + o[1] + '</b><small>' + o[2] + '</small></span></button>').join('') + '</div>' +
+    (a.downgrade ? '<p class="km-s">Wechsel zu ' + X.planName(a.downgrade.to) + ' zum ' + esc(a.downgrade.at) + ' vorgemerkt. Bis dahin bleibt ' + X.planName(k) + ' aktiv. <button type="button" class="linkbtn" data-act="konto" data-v="' + k + '">' + X.planName(k) + ' behalten</button></p>' : k !== 'service' ? '<p class="km-s">' + X.planName(k) + ' ist für ' + esc(monthLabel()) + ' gebucht. Ein Wechsel nach unten gilt zum Monatsende; gebuchte Positionen bleiben, wie sie sind.</p>' : '') + '</section>' +
     '<section class="sec"><div class="sec-head"><h3>Positionen</h3></div>' + (all.length ? '<div class="card ledger">' + all.join('') + '</div><p class="km-s">Gebucht wird beim ersten Eingang je Projekt, zum dann gültigen Tarif. Nachbesserungen im selben Projekt kosten nichts. Projekte löschen oder den Tarif wechseln ändert gebuchte Positionen nicht.</p>' : empty('Noch keine Positionen.', 'Sobald ein Aufmaß eingeht, steht es hier.')) + '</section></div>' };
 };
 const abEx = (ab) => 'Beispiel: Öffnung 1.260 × 1.440 mm ergibt ' + AW.th(1260 - 2 * ab.seite) + ' × ' + AW.th(1440 - ab.oben) + ' mm.';
@@ -683,28 +676,31 @@ SCREENS.bprofil = () => {
 };
 
 /* ---------- Blätter ---------- */
-const LEGAL = { impressum: ['Impressum', 'Anbieter und Kontakt nach § 5 DDG.', '/impressum/'], datenschutz: ['Datenschutz', 'Welche Daten Fensterino verarbeitet, wofür, mit welchen Dienstleistern und welche Rechte Sie haben. In der Pilotphase bleiben Konten, Projekte und Aufmaße in Ihrem Browser.', '/datenschutz/'], agb: ['Nutzungsbedingungen', 'Fensterino ist in der kostenlosen Pilotphase: Es gibt noch keine kostenpflichtigen Leistungen, alle Preise sind eine Vorschau. Die Nutzungsbedingungen für Betriebe folgen vor dem Start der Bezahlfunktionen. Bis dahin gilt: Aufmaße Ihrer Kunden nur für deren Projekt nutzen; Aufmaße aus Ihren Links gehen an keinen anderen Betrieb.'] };
+const LEGAL = { impressum: ['Impressum', 'Anbieter und Kontakt nach § 5 DDG.', '/impressum/'], datenschutz: ['Datenschutz', 'Welche Daten Fensterino verarbeitet, wofür, mit welchen Dienstleistern und welche Rechte Sie haben. In der Pilotphase bleiben Konten, Projekte und Aufmaße in Ihrem Browser.', '/datenschutz/'], agb: ['Nutzungsbedingungen', 'Die ausformulierten Nutzungsbedingungen für Betriebe folgen vor dem öffentlichen Start. Bis dahin gilt: Die ersten 3 Projekte mit eingegangenem Aufmaß sind kostenlos, danach gelten die Preise unter „Preise“ (netto, monatlich kündbar). Aufmaße Ihrer Kunden nutzen Sie nur für deren Projekt; Aufmaße aus Ihren Links gehen an keinen anderen Betrieb.'] };
 const DEMOS = [['betrieb', 'c1', 'Fensterbau Brandt', 'Fensterbauer mit drei Projekten', '#0071e3'], ['betrieb', 'c7', 'Glaserei Vogt', 'Fensterbauer mit zwei Projekten', '#8a5a2b']];
+function loginServer(s) {
+  const schritt = s.schritt || 'mail', reg = s.zweck === 'reg';
+  const feld = schritt === 'mail'
+    ? '<div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email" inputmode="email">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Kein Passwort: Sie bekommen einen sechsstelligen Code per E-Mail.</small>') + '</div>'
+    : '<div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-code">Code aus der E-Mail</label><input id="lg-code" data-in="lg:code" value="' + esc(s.code || '') + '" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Geschickt an ' + esc(s.mail) + '. Kein Code? Auch im Spam-Ordner nachsehen.</small>') + '</div>';
+  return '<h3>' + (reg ? 'Konto für Ihren Betrieb' : 'Anmelden') + '</h3><p class="sub" style="margin: -4px 0 12px">' + (reg ? 'Zuerst Ihre E-Mail bestätigen, dann Ihren Betrieb eintragen. Die ersten ' + P().frei + ' Projekte sind kostenlos.' : 'Ein Kunde hat Ihnen ein Fensterino-Aufmaß geschickt? Mit dem Code von der Übersichtsseite holen Sie es nach der Anmeldung in Ihr Konto.') + '</p>' +
+    '<form class="form" data-form="srvlogin" novalidate>' + feld + '<div class="row between">' + (schritt === 'code' ? '<button type="button" class="linkbtn" data-act="srv-mail">Andere E-Mail</button>' : '<span></span>') + '<button type="submit" class="btn primary">' + (schritt === 'mail' ? 'Code schicken' : (reg ? 'Weiter' : 'Anmelden')) + '</button></div></form>' +
+    '<p class="eyebrow" style="margin-top: 14px">Oder erst einmal ansehen</p><div class="list">' + DEMOS.map((d) => '<button type="button" class="item" data-act="demo-as" data-v="' + d[1] + '"><span class="ic av" style="background: ' + d[4] + '; color: #fff">' + d[2].slice(0, 1) + '</span><span class="tx"><span class="ti">Demo: ' + d[2] + '</span><span class="di">' + d[3] + ', Beispieldaten im Browser</span></span>' + CHEV + '</button>').join('') + '</div>';
+}
 const SHEETS = {
-  login: (s) => '<h3>Anmelden</h3><p class="sub" style="margin: -4px 0 12px">Ein Kunde hat Ihnen ein Fensterino-Aufmaß geschickt? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button>, dann „Code vom Kunden einfügen“. Die ersten 3 Projekte sind frei.</p><form class="form" data-form="login" novalidate><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email"></div><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-pw">Passwort</label><input id="lg-pw" type="password" data-in="lg:pw" value="" autocomplete="current-password">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Demo: jedes Passwort ab 8 Zeichen.</small>') + '</div><div class="row between"><button type="button" class="linkbtn" data-act="toast" data-v="Ein Link zum Zurücksetzen ist unterwegs (Demo).">Passwort vergessen?</button><button type="submit" class="btn primary">Anmelden</button></div></form>' +
-    '<p class="eyebrow" style="margin-top: 6px">Oder Demo-Zugang</p><div class="list">' + DEMOS.map((d) => '<button type="button" class="item" data-act="demo-as" data-v="' + d[1] + '"><span class="ic av" style="background: ' + d[4] + '; color: #fff">' + d[2].slice(0, 1) + '</span><span class="tx"><span class="ti">' + d[2] + '</span><span class="di">' + d[3] + '</span></span>' + CHEV + '</button>').join('') + '</div><p class="sub center">Noch kein Konto? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>',
-  demo: () => { const own = (S.myCompanies || []).map((c) => ['betrieb', c.id, c.name, 'Ihr Betrieb']); return '<h3>Demo-Ansicht</h3><p class="sub">Alles bleibt in diesem Browser gespeichert. Freier Wechsel zwischen den Sichten.</p><div class="list">' + [['', 'visitor', 'Startseite', 'wie ein neuer Besucher']].concat(DEMOS.map((d) => [d[0], d[1], d[2], d[3]]), own).map((d) => '<button type="button" class="item' + ((d[1] === 'visitor' && !S.role) || (S.role === 'betrieb' && S.cur === d[1]) ? ' cur' : '') + '" data-act="demo-as" data-v="' + d[1] + '"><span class="tx"><span class="ti">' + esc(d[2]) + '</span><span class="di">' + esc(d[3]) + '</span></span>' + CHEV + '</button>').join('') + '</div><button type="button" class="btn danger" data-act="reset">Demo zurücksetzen</button>'; },
+  login: (s) => (Server.an ? loginServer(s) : '<h3>Anmelden</h3><p class="sub" style="margin: -4px 0 12px">Ein Kunde hat Ihnen ein Fensterino-Aufmaß geschickt? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button>, dann „Code vom Kunden einfügen“. Die ersten 3 Projekte sind frei.</p><form class="form" data-form="login" novalidate><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email"></div><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-pw">Passwort</label><input id="lg-pw" type="password" data-in="lg:pw" value="" autocomplete="current-password">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Demo: jedes Passwort ab 8 Zeichen.</small>') + '</div><div class="row between"><button type="button" class="linkbtn" data-act="toast" data-v="Ein Link zum Zurücksetzen ist unterwegs (Demo).">Passwort vergessen?</button><button type="submit" class="btn primary">Anmelden</button></div></form>' +
+    '<p class="eyebrow" style="margin-top: 6px">Oder Demo-Zugang</p><div class="list">' + DEMOS.map((d) => '<button type="button" class="item" data-act="demo-as" data-v="' + d[1] + '"><span class="ic av" style="background: ' + d[4] + '; color: #fff">' + d[2].slice(0, 1) + '</span><span class="tx"><span class="ti">' + d[2] + '</span><span class="di">' + d[3] + '</span></span>' + CHEV + '</button>').join('') + '</div><p class="sub center">Noch kein Konto? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>'),
+  demo: () => { const own = (S.myCompanies || []).map((c) => ['betrieb', c.id, c.name, c.id === Server.id ? 'Ihr Konto auf dem Server' : 'Ihr Betrieb (Demo im Browser)']); return '<h3>Demo-Ansicht</h3><p class="sub">Alles bleibt in diesem Browser gespeichert. Freier Wechsel zwischen den Sichten.</p><div class="list">' + [['', 'visitor', 'Startseite', 'wie ein neuer Besucher']].concat(DEMOS.map((d) => [d[0], d[1], d[2], d[3]]), own).map((d) => '<button type="button" class="item' + ((d[1] === 'visitor' && !S.role) || (S.role === 'betrieb' && S.cur === d[1]) ? ' cur' : '') + '" data-act="demo-as" data-v="' + d[1] + '"><span class="tx"><span class="ti">' + esc(d[2]) + '</span><span class="di">' + esc(d[3]) + '</span></span>' + CHEV + '</button>').join('') + '</div><button type="button" class="btn danger" data-act="reset">Demo zurücksetzen</button>'; },
   linkimport: () => '<h3>Code vom Kunden einfügen</h3><p class="sub">Ihr Kunde schickt nach dem Absenden einen Aufmaß-Code, zum Beispiel als Antwort in WhatsApp; bei einem Fensterino-Aufmaßblatt steht er auf der letzten Seite. Fügen Sie ihn hier ein: Gehört er zu einem Ihrer Projekte, landet das Aufmaß dort, sonst entsteht ein neues Projekt.</p><div class="f"><textarea id="code-in" rows="4" placeholder="AM1.…"></textarea></div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="linkimport">Übernehmen</button></div>',
   liste: (s) => '<h3>Mehrere Kunden einladen</h3><p class="sub">Eine Zeile je Kunde: Name, dann Handynummer oder E-Mail, durch Komma oder Semikolon getrennt. Für jeden entsteht ein Projekt mit eigenem Aufmaß-Link; verschickt wird aus dem Projekt, die Nachricht ist vorformuliert. Kosten entstehen erst, wenn ein Aufmaß eingeht.</p><div class="f"><textarea id="liste-in" rows="6" data-in="liste" placeholder="Familie Weber, 0171 2345678\nHerr Kaya, kaya@beispiel.de\nFrau Schulze">' + esc(s.text || '') + '</textarea><small>Ohne Kontakt geht es auch, dann kopieren Sie den Link später aus dem Projekt.</small></div><div class="f"><label>Anrede in der Nachricht</label>' + seg([['sie', 'Sie'], ['du', 'Du']], s.du ? 'du' : 'sie', 'liste-du') + '</div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="liste-create">' + icon('people', 18) + 'Projekte anlegen</button></div>',
   nachbesserung: (s) => { const l = A().links.find((x) => x.id === s.id) || {}; return '<h3>Nachbesserung anfragen</h3><p class="sub">' + esc(l.kunde || 'Der Kunde') + ' bekommt den Link noch einmal, sieht alle bisherigen Angaben und kann sie ändern. Das neue Aufmaß ersetzt das alte im selben Projekt, <b>berechnet wird nichts</b>. Höchstens ' + NB_MAX + ' Runden je Projekt, bis ' + NB_TAGE + ' Tage nach dem Eingang. Hat das neue Aufmaß keine Position mit dem alten gemeinsam, ist es ein anderes Aufmaß und wird wie ein neues gebucht.</p><div class="f"><label for="nb-hinweis">Was soll der Kunde prüfen?</label><textarea id="nb-hinweis" rows="3" data-in="nb-hinweis" placeholder="z. B. Beim Küchenfenster fehlt die Brüstungshöhe, und die Breite unten scheint vertauscht.">' + esc(s.hinweis || '') + '</textarea><small>Steht so in der Nachricht an den Kunden.</small></div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="nb-send" data-id="' + s.id + '">Link erneut öffnen</button></div>'; },
   pay: (s) => paySheet(s),
   deact: (s) => '<h3>Link deaktivieren?</h3><p class="sub">Ihr Kunde kann über diesen Link dann kein Aufmaß mehr schicken. Das kostet nichts. Einen neuen Link können Sie jederzeit erstellen.</p><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn danger" data-act="l-deact" data-id="' + s.id + '">Deaktivieren</button></div>',
-  legal: (s) => { const L = LEGAL[s.id] || LEGAL.agb; return '<h3>' + esc(L[0]) + '</h3><p class="sub">' + esc(L[1]) + '</p><div class="row">' + (L[2] ? '<a class="btn primary" href="' + L[2] + '" target="_blank" rel="noopener">Seite öffnen</a><button type="button" class="btn ghost" data-act="sheet-close">Schließen</button>' : '<button type="button" class="btn primary" data-act="sheet-close">Schließen</button>') + '</div>'; }
+  legal: (s) => { const L = LEGAL[s.id] || LEGAL.agb, pilot = L === LEGAL.agb && !Server.an ? 'Fensterino ist in der Pilotphase: Solange kein Server angeschlossen ist, wird nichts berechnet, alle Preise sind eine Vorschau. ' : ''; return '<h3>' + esc(L[0]) + '</h3><p class="sub">' + esc(pilot + L[1]) + '</p><div class="row">' + (L[2] ? '<a class="btn primary" href="' + L[2] + '" target="_blank" rel="noopener">Seite öffnen</a><button type="button" class="btn ghost" data-act="sheet-close">Schließen</button>' : '<button type="button" class="btn primary" data-act="sheet-close">Schließen</button>') + '</div>'; }
 };
 
-/* ---------- Aufmaß-Code aus der App lesen ---------- */
-function unpack(code) { try { const m = /(?:AM1|ZF1|FE1|LM1)\.([A-Za-z0-9_-]+)/.exec(String(code || '').replace(/\s+/g, '')); if (!m) return null; const b = m[1].replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); const o = JSON.parse(new TextDecoder().decode(bytes)); return o && Array.isArray(o.w) ? o : null; } catch (e) { return null; } }
-/* Fenster aus der App vollständig übernehmen: gleiche Felder, fehlende Werte sind App-Standard */
-const fromApp = (w) => AW.mk(Object.assign({}, w, { name: w.name || 'Fenster' }));
-/* Kennung eines Codes ohne Zeitstempel: gleiches Aufmaß, gleiche Kennung */
-function fingerprint(o) { try { return hashN(JSON.stringify([o.w, o.p])); } catch (e) { return 0; } }
-function fromAppProj(p) { p = p || {}; return { gebaeude: p.gebaeude || '', baujahr: p.baujahr || '', total: AW.num(p.total) || 0, zeit: p.zeit || '', budget: p.budget || '', foerd: !!p.foerd, notiz: String(p.notiz || '').replace(/\s+/g, ' ').trim().slice(0, 600) }; }
-function nextNr(a) { const y = new Date().getFullYear(), mx = (a || A()).links.reduce((m, l) => { const k = /-(\d+)$/.exec(l.nr || ''); return k ? Math.max(m, +k[1]) : m; }, 0); return 'P-' + y + '-' + String(mx + 1).padStart(3, '0'); }
+const unpack = X.unpack, fingerprint = X.fingerprint, fromApp = X.fromApp, fromAppProj = X.fromAppProj;
+const nextNr = (a) => X.nextNr(a || A());
 /* ---------- Demo: der Kunde füllt den Link aus ---------- */
 function simLink(l, cid) {
   const steps = [['geoeffnet', 900], ['arbeit', 1700], ['p2', 2500], ['p3', 3200], ['p4', 3900], ['eingegangen', 4800]];
@@ -726,45 +722,16 @@ function simLink(l, cid) {
 /* ---------- Aufmaßblatt als PDF für den Betrieb ---------- */
 let PDL = null;
 const PDLP = (async () => { try { PDL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { PDL = null; } return PDL; })();
+/* Die PDF zeichnet /assets/blatt.js (gemeinsam mit der App): Ausgabe 'betrieb' in den Farben des Betriebs, mit Bestellmaß-Vorschlag */
+const BLATT_H = { derive: AW.derive, lab: AW.lab, num: AW.num, th: AW.th, col: AW.col, orn: (k) => AW.lab('orn', k) };
 function amPDF(l) {
-  const J = window.jspdf && window.jspdf.jsPDF; if (!J || !l.aufmass) return null;
-  const am = l.aufmass, pr = am.proj || {}, wins = am.windows || [], ab = A().abzug || { seite: 15, oben: 15 }, c = BC();
-  const doc = new J({ unit: 'mm', format: 'a4' }), W = 210, M = 16;
-  const t = (s) => String(s == null ? '' : s).replace(/[  ]/g, ' ');
-  let y = 18, page = 1;
-  const foot = () => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120); doc.text(t('Erfasst vom Kunden mit Fensterino. Vor der Fertigung Feinaufmaß vor Ort.'), M, 289); doc.text('Seite ' + page, W - M, 289, { align: 'right' }); doc.setTextColor(20); };
-  const need = (h) => { if (y + h > 280) { foot(); doc.addPage(); page++; y = 18; } };
-  const put = (k, v) => { doc.setFontSize(9.5); const vl = doc.splitTextToSize(t(v), W - 2 * M - 42), kl = doc.splitTextToSize(t(k), 39), h = Math.max(vl.length, kl.length) * 4.4; need(h + 1.5); doc.setTextColor(110); doc.text(kl, M, y); doc.setTextColor(20); doc.text(vl, M + 42, y); y += h + 1.2; };
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.text(t('Aufmaßblatt'), M, y);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text(t(c.name), W - M, y - 5, { align: 'right' }); doc.text(t([l.nr, (l.log || {}).eingegangen ? 'eingegangen ' + l.log.eingegangen : ''].filter(Boolean).join(' · ')), W - M, y, { align: 'right' }); doc.setTextColor(20);
-  y += 9;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text(t(l.kunde), M, y); doc.setFont('helvetica', 'normal'); y += 6;
-  put('Kontakt', l.kontakt || '–'); put('Objekt', l.adresse || '–');
-  put('Gebäude', (AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : ''));
-  put('Zeitraum', AW.lab('zeit', pr.zeit) || '–'); put('Budget', (AW.lab('budget', pr.budget) || '–') + (pr.foerd ? ', Förderung gewünscht' : ''));
-  put('Umfang', nW(wins.length, 'Position', 'Positionen') + ', ' + nW(am.elemente || wins.length, 'Element', 'Elemente') + ', ' + nW(am.fotos || 0, 'Foto', 'Fotos'));
-  if (pr.notiz) put('Nachricht', '„' + pr.notiz + '“');
-  y += 2; doc.setDrawColor(30); doc.setLineWidth(0.5); doc.line(M, y, W - M, y); y += 8;
-  wins.forEach((w, i) => {
-    const d = AW.derive(w);
-    need(34);
-    const bw = 18, bh = Math.max(10, Math.min(26, bw * (d.elH || 1200) / (d.elW || 1000))), bx = W - M - bw, by = y - 4, ns = (w.sashes || []).length || 1;
-    doc.setLineWidth(0.4); doc.setDrawColor(30); doc.setFillColor(214, 230, 244); doc.rect(bx, by, bw, bh); for (let s = 0; s < ns; s++) doc.rect(bx + 1.2 + s * (bw - 2.4) / ns, by + 1.2, (bw - 2.4) / ns - 0.6, bh - 2.4, 'FD');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.text(t('Pos. ' + (i + 1) + ' · ' + (w.name || 'Fenster') + ((AW.num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stück' : '')), M, y);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); y += 5.5;
-    doc.text(t('Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' mm · Element ' + AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm'), M, y); y += 5.5;
-    if (d.moW && d.moH) { doc.setFont('helvetica', 'bold'); doc.text(t('Bestellmaß-Vorschlag ' + AW.th(d.moW - 2 * ab.seite) + ' × ' + AW.th(d.moH - ab.oben) + ' mm'), M, y); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(110); doc.text(t('(Öffnung minus ' + ab.seite + ' mm je Seite und ' + ab.oben + ' mm oben)'), M + 72, y); doc.setTextColor(20); }
-    y = Math.max(y + 6, by + bh + 4);
-    AW.rows(w).forEach((r) => put(r[0], r[1]));
-    const ki = AW.kiRows(w);
-    if (ki.length) { need(12); y += 2; doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.text(t('Bestand laut Fotos (KI)'), M, y); doc.setFont('helvetica', 'normal'); y += 5; ki.forEach((r) => put(r[0], r[1])); }
-    y += 3; doc.setDrawColor(210); doc.setLineWidth(0.2); doc.line(M, y - 2, W - M, y - 2); y += 5;
-  });
-  foot();
-  return doc.output('blob');
+  if (!window.Blatt || !l.aufmass) return null;
+  const am = l.aufmass, c = BC(), a = A();
+  return window.Blatt.pdf({ variante: 'betrieb', fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse }, betrieb: { name: c.name, col: c.col, abzug: a.abzug || { seite: 15, oben: 15 }, nr: l.nr, eingegangen: (l.log || {}).eingegangen }, portalKurz: location.host, h: BLATT_H });
 }
 async function saveAm(l) {
   if (!l || !l.aufmass) return;
+  if (window.Blatt) await window.Blatt.schrift();
   const pdf = amPDF(l), base = 'Aufmass-' + [l.nr, slug(l.kunde.replace(/^Beispiel:\s*/, ''))].filter(Boolean).join('-').replace(/[^A-Za-z0-9_-]+/g, '-');
   const name = base + (pdf ? '.pdf' : '.txt'), data = pdf || aufmassText(l);
   if (!PDL) await PDLP;
@@ -778,88 +745,14 @@ async function saveAm(l) {
   catch (e) { toast('Speichern geht hier nicht. Bitte als Text kopieren.'); }
 }
 
-/* ---------- Abrechnung: Buchungen, kostenlose Aufmaße, Sperre ohne Zahlungsart ----------
-   Regeln, die im echten Betrieb der Server durchsetzt:
-   1. Gebucht wird beim ersten Eingang je Projekt, zum Tarif, der in diesem Moment gilt; Nachbesserungen im selben Projekt kosten nichts. Eine Buchung wird nie geändert oder gelöscht.
-   2. Kostenlose Aufmaße zählen je Betrieb über die Buchungen, nicht über die Projekte. Projekte löschen oder deaktivieren ändert nichts.
-   3. Ohne Zahlungsart wird ab dem ersten kostenpflichtigen Aufmaß nichts mehr gezeigt: es kommt an, bleibt aber gesperrt, bis eine Zahlungsart da ist.
-   4. Betrieb Plus braucht eine Zahlungsart, wird für den laufenden Monat sofort gebucht und endet beim Wechsel erst zum Monatsende. */
-const PLUS_PRICE = 79;
-const monthKey = () => { const d = new Date(); return d.getFullYear() + '-' + two(d.getMonth() + 1); };
-const monthLabel = () => new Date().toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-const monthEnd = () => { const d = new Date(), e = new Date(d.getFullYear(), d.getMonth() + 1, 0); return two(e.getDate()) + '.' + two(e.getMonth() + 1) + '.' + e.getFullYear(); };
-const freeQuota = (a) => (a.freeQuota != null ? a.freeQuota : LINK_FREE);
-function ledger(a) {
-  a = a || A();
-  if (!a.book) {
-    /* Altbestand: eingegangene Projekte in der Reihenfolge des Eingangs nachbuchen */
-    a.book = []; a.freeUsed = 0;
-    a.links.slice().reverse().filter((l) => l.status === 'eingegangen' && !l.demo).forEach((l) => { l.locked = !bookAufmass(a, l); });
-  }
-  return a.book;
-}
-const freeLeft = (a) => { a = a || A(); ledger(a); return Math.max(0, freeQuota(a) - (a.freeUsed || 0)); };
-const lockedLinks = (a) => (a || A()).links.filter((l) => l.status === 'eingegangen' && l.locked && !l.demo);
-function bookAufmass(a, l, extra) {
-  const book = a.book || (a.book = []), ref = extra ? l.id + '#' + extra : l.id;
-  if (book.some((b) => b.kind === 'aufmass' && b.ref === ref)) return true;
-  const am = l.aufmass || {}, sub = [((l.log || {}).eingegangen || stamp()), l.nr, am.windows ? nW(am.windows.length, 'Position', 'Positionen') : '', extra ? 'anderes Aufmaß in Runde ' + extra : ''].filter(Boolean).join(' · ');
-  let betrag = 0, badge;
-  if (a.konto === 'plus') badge = 'inklusive (Plus)';
-  else if (freeQuota(a) - (a.freeUsed || 0) > 0) { a.freeUsed = (a.freeUsed || 0) + 1; badge = 'kostenlos, ' + a.freeUsed + ' von ' + freeQuota(a); }
-  else if (a.pay) { betrag = LINK_PRICE; badge = 'nächste Rechnung'; }
-  else return false;
-  book.unshift({ id: 'b' + Date.now().toString(36) + book.length, kind: 'aufmass', ref: ref, when: stamp(), text: 'Aufmaß · ' + l.kunde, sub: sub, betrag: betrag, badge: badge, status: 'offen' });
-  return true;
-}
-/* Ein Aufmaß kommt an: speichern, buchen oder sperren, melden */
-function receiveAufmass(a, cid, l, aufmass, via) {
-  ledger(a);
-  l.status = 'eingegangen'; l.progress = 4; l.via = l.via || via || 'Code'; l.log = l.log || {}; l.log.eingegangen = stamp(); l.eingegangenAt = Date.now(); l.aufmass = aufmass; l.stage = 'neu'; l.runde = l.runde || 1;
-  l.locked = l.demo ? false : !bookAufmass(a, l);
-  const size = nW(aufmass.windows.length, 'Position', 'Positionen') + ' mit ' + nW(aufmass.fotos || 0, 'Foto', 'Fotos');
-  notify(cid, l.locked ? { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. Zum Ansehen eine Zahlungsart hinterlegen; Ihre kostenlosen Aufmaße sind verbraucht.', to: ['link', l.id] } : { t: 'Aufmaß eingegangen: ' + l.kunde, s: size + '. ' + (l.nr || ''), to: ['link', l.id] });
-  return !l.locked;
-}
-/* Nachbesserung: gleiche Position = gleicher Name oder gleiche Maße (±3 %). Ohne jede Überschneidung ist es ein anderes Aufmaß. */
-const NB_MAX = 2, NB_TAGE = 30;
-const nahMm = (a, b) => a && b && Math.abs(a - b) <= Math.max(30, 0.03 * Math.max(a, b));
-function passt(a, n) { const da = AW.derive(a), dn = AW.derive(n); return (!!n.name && !!a.name && n.name.trim().toLowerCase() === a.name.trim().toLowerCase()) || (nahMm(dn.elW || dn.moW, da.elW || da.moW) && nahMm(dn.elH || dn.moH, da.elH || da.moH)); }
-function ueberschneidung(alt, neu) {
-  const A0 = (alt && alt.windows) || [], N0 = (neu && neu.windows) || [];
-  if (!A0.length || !N0.length) return 1;
-  return N0.filter((n) => A0.some((a) => passt(a, n))).length / N0.length;
-}
-function nbMoeglich(l) {
-  if (!l || l.status !== 'eingegangen' || l.locked || l.demo) return '';
-  if ((l.runde || 1) > NB_MAX) return 'Zwei Nachbesserungen sind das Maximum. Für mehr legen Sie ein neues Projekt an.';
-  if (l.eingegangenAt && Date.now() - l.eingegangenAt > NB_TAGE * 864e5) return 'Eine Nachbesserung ist bis ' + NB_TAGE + ' Tage nach dem Eingang möglich.';
-  return 'ok';
-}
-/* Nach Zahlungsart oder Plus: wartende Aufmaße freischalten, ältestes zuerst */
-function unlockWaiting(a) {
-  let n = 0;
-  lockedLinks(a).slice().reverse().forEach((l) => { if (bookAufmass(a, l)) { l.locked = false; n++; } });
-  return n;
-}
-function bookPlus(a) {
-  const key = monthKey();
-  if (!ledger(a).some((b) => b.kind === 'plus' && b.month === key)) a.book.unshift({ id: 'p' + Date.now().toString(36), kind: 'plus', month: key, when: stamp(), text: 'Betrieb Plus · ' + monthLabel(), sub: 'monatlich, bis ' + monthEnd() + ', danach monatlich kündbar', betrag: PLUS_PRICE, badge: 'nächste Rechnung', status: 'offen' });
-}
-function activatePlus(a) {
-  a.konto = 'plus'; a.downgrade = null;
-  bookPlus(a);
-  return unlockWaiting(a);
-}
-/* Beim Start und einmal pro Minute: was die Zeit erledigt */
+/* ---------- Abrechnung: die Regeln stehen in modell.js (Abrechnung = X) und gelten im Browser wie auf dem Server ---------- */
+const monthKey = X.monthKey, monthLabel = X.monthLabel, monthEnd = X.monthEnd, freeQuota = X.freeQuota, ledger = X.ledger, freeLeft = X.freeLeft, lockedLinks = X.lockedLinks, nbMoeglich = X.nbMoeglich, NB_MAX = X.NB_MAX, NB_TAGE = X.NB_TAGE;
+/* Ein Aufmaß kommt an (Demo-Simulation): speichern, buchen oder sperren, melden */
+function receiveAufmass(a, cid, l, aufmass, via) { const r = X.receiveAufmass(a, l, aufmass, via); notify(cid, r.notif); return r.ok; }
+/* Beim Start und einmal pro Minute: was die Zeit erledigt (Tarifwechsel zum Monatsende, Monatsbuchung, abgelaufene Links) */
 function tick() {
-  const now = Date.now(); let dirty = false;
-  Object.keys(S.acc).forEach((id) => {
-    const a = S.acc[id];
-    if (a.downgrade) { const d = parseDE(a.downgrade.at); if (d && now > d.getTime()) { a.konto = a.downgrade.to; a.downgrade = null; dirty = true; notify(id, { t: 'Kontomodell gewechselt', s: 'Betrieb Plus ist ausgelaufen, wie vorgemerkt.', to: ['abrechnung'] }); } }
-    if (a.konto === 'plus' && a.pay && !ledger(a).some((b) => b.kind === 'plus' && b.month === monthKey())) { bookPlus(a); dirty = true; }
-    (a.links || []).forEach((l) => { if (['erstellt', 'gesendet', 'geoeffnet', 'arbeit'].includes(l.status)) { const d = parseDE(l.expires); if (d && now > d.getTime()) { l.status = 'abgelaufen'; l.log = l.log || {}; l.log.abgelaufen = l.expires; dirty = true; } } });
-  });
+  let dirty = false;
+  Object.keys(S.acc).forEach((id) => { if (id === Server.id && Server.an) return; const r = X.tickKonto(S.acc[id]); if (r.dirty) dirty = true; r.notifs.forEach((n) => notify(id, n)); });
   if (dirty) { save(); if (document.getElementById('app')) refresh(); }
 }
 /* Gleicher Betrieb schon da? Telefonnummer oder Firmenname mit gleicher PLZ-Region */
@@ -889,23 +782,24 @@ function payBanner() {
   if (S.role !== 'betrieb') return '';
   const a = A(), w = lockedLinks(a).length;
   if (w) return '<div class="banner warn"><span><b>' + nW(w, 'Aufmaß wartet', 'Aufmaße warten') + ' auf Freischaltung.</b> Mit einer Zahlungsart sehen Sie ' + (w === 1 ? 'es' : 'sie') + ' sofort.</span><button type="button" class="btn small primary" data-act="sheet" data-v="pay">Zahlungsart hinterlegen</button></div>';
-  if (!a.pay && a.konto !== 'plus' && freeLeft(a) === 0) return '<div class="banner"><span><b>Keine kostenlosen Aufmaße mehr.</b> Mit einer Zahlungsart ist das nächste Aufmaß sofort sichtbar.</span><button type="button" class="btn small ghost" data-act="sheet" data-v="pay">Zahlungsart hinterlegen</button></div>';
+  if (!a.pay && X.konto(a) === 'service' && freeLeft(a) === 0) return '<div class="banner"><span><b>Keine kostenlosen Projekte mehr.</b> Mit einer Zahlungsart ist das nächste Aufmaß sofort sichtbar.</span><button type="button" class="btn small ghost" data-act="sheet" data-v="pay">Zahlungsart hinterlegen</button></div>';
   return '';
 }
 function lockCard(l, a) {
   const am = l.aufmass || {}, n = (am.windows || []).length;
-  return '<section class="sec"><div class="sec-head"><h3>Aufmaß</h3><span class="sub">' + nW(n, 'Position', 'Positionen') + ' · ' + nW(am.fotos || 0, 'Foto', 'Fotos') + '</span></div><div class="card lockcard"><span class="lk-ic">' + icon('lock', 26) + '</span><div><p class="eyebrow">Eingegangen · gesperrt</p><h3>Zum Ansehen eine Zahlungsart hinterlegen.</h3><p>' + (a.dupOf ? 'Die kostenlosen Aufmaße für Ihren Betrieb wurden schon über das Konto ' + esc(a.dupOf) + ' genutzt.' : 'Ihre ' + freeQuota(a) + ' kostenlosen Aufmaße sind verbraucht.') + ' Dieses Aufmaß kostet ' + eur(LINK_PRICE) + ' netto und kommt auf die nächste Sammelrechnung. Mit Betrieb Plus sind alle Aufmaße inklusive.</p><div class="row"><button type="button" class="btn primary" data-act="sheet" data-v="pay">Zahlungsart hinterlegen</button><button type="button" class="btn ghost" data-act="konto" data-v="plus">Betrieb Plus, ' + eur(PLUS_PRICE) + ' im Monat</button></div></div></div></section>';
+  return '<section class="sec"><div class="sec-head"><h3>Aufmaß</h3><span class="sub">' + nW(n, 'Position', 'Positionen') + ' · ' + nW(am.fotos || 0, 'Foto', 'Fotos') + '</span></div><div class="card lockcard"><span class="lk-ic">' + icon('lock', 26) + '</span><div><p class="eyebrow">Eingegangen · gesperrt</p><h3>Zum Ansehen eine Zahlungsart hinterlegen.</h3><p>' + (a.dupOf ? 'Die kostenlosen Aufmaße für Ihren Betrieb wurden schon über das Konto ' + esc(a.dupOf) + ' genutzt.' : 'Ihre ' + freeQuota(a) + ' kostenlosen Aufmaße sind verbraucht.') + ' Dieses Aufmaß kostet ' + eur(P().projekt) + ' netto und kommt auf die nächste Sammelrechnung. Im Abo 10 sind ' + P().abo.inkl + ' Projekte im Monat inklusive, mit Plus alle.</p><div class="row"><button type="button" class="btn primary" data-act="sheet" data-v="pay">Zahlungsart hinterlegen</button><button type="button" class="btn ghost" data-act="konto" data-v="abo">Abo 10, ' + eur(P().abo.grund) + ' im Monat</button></div></div></div></section>';
 }
 function paySheet(s) {
-  const e = s.err || {}, t = s.type || 'sepa', w = lockedLinks().length;
+  const e = s.err || {}, t = s.type || 'sepa', w = lockedLinks(A()).length;
   const fe = (f) => (e[f] ? '<small class="err">' + esc(e[f]) + '</small>' : '');
   const inp = (label, f, ph, auto) => '<div class="f' + (e[f] ? ' has-err' : '') + '"><label for="pay-' + f + '">' + label + '</label><input id="pay-' + f + '" data-in="pay:' + f + '" value="' + esc(s[f] || '') + '" placeholder="' + esc(ph) + '" autocomplete="' + auto + '">' + fe(f) + '</div>';
-  const why = s.then === 'plus' ? 'Für Betrieb Plus brauchen wir eine Zahlungsart. Gebucht wird ab heute für den laufenden Monat.' : w ? nW(w, 'Aufmaß wartet', 'Aufmaße warten') + ' auf Freischaltung und ' + (w === 1 ? 'ist' : 'sind') + ' danach sofort sichtbar.' : 'Nötig ab dem ersten kostenpflichtigen Aufmaß. Bis dahin wird nichts abgebucht.';
+  const why = s.then && s.then !== 'service' ? 'Für ' + X.planName(s.then) + ' brauchen wir eine Zahlungsart. Gebucht wird ab heute für den laufenden Monat.' : w ? nW(w, 'Aufmaß wartet', 'Aufmaße warten') + ' auf Freischaltung und ' + (w === 1 ? 'ist' : 'sind') + ' danach sofort sichtbar.' : 'Nötig ab dem ersten kostenpflichtigen Aufmaß. Bis dahin wird nichts abgebucht.';
+  if (Server.online()) return '<h3>Zahlungsart hinterlegen</h3><p class="sub">' + why + ' Sie hinterlegen SEPA-Lastschrift oder Karte auf der sicheren Seite unseres Zahlungsdienstleisters Stripe; Fensterino sieht keine Kontodaten. Abgebucht wird alle zwei Wochen als Sammelrechnung, Abos monatlich.</p><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Später</button><button type="button" class="btn primary" data-act="srv-zahlungsart">Weiter zu Stripe ' + icon('ext', 15) + '</button></div>';
   return '<h3>Zahlungsart hinterlegen</h3><p class="sub">' + why + ' Abgebucht wird alle zwei Wochen als Sammelrechnung, nur für eingegangene Aufmaße.</p>' + seg([['sepa', 'SEPA-Lastschrift'], ['karte', 'Kreditkarte']], t, 'pay-type') +
     '<form class="form" data-form="pay" novalidate style="margin-top: 12px">' + (t === 'sepa' ? '<button type="button" class="fillbtn" data-act="pay-fill">' + icon('play', 13) + 'Nur testen? Beispiel-IBAN einsetzen</button>' + inp('Kontoinhaber', 'inhaber', 'wie auf dem Kontoauszug', 'name') + inp('IBAN', 'iban', 'DE00 0000 0000 0000 0000 00', 'off') +
       '<label class="agree' + (e.mandat ? ' has-err' : '') + '"><input type="checkbox" data-in="pay:mandat"' + (s.mandat ? ' checked' : '') + '><span>Ich erteile Fensterino ein SEPA-Firmenlastschrift-Mandat für dieses Geschäftskonto.</span></label>' + fe('mandat')
       : inp('Karteninhaber', 'inhaber', 'Name auf der Karte', 'cc-name') + '<div class="note">Die Kartennummer geben Sie im sicheren Feld des Zahlungsdienstleisters ein. Fensterino sieht sie nie.</div>') +
-    '</form><p class="km-s">Prototyp: Es wird nichts gespeichert oder abgebucht.</p><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Später</button><button type="button" class="btn primary" data-act="pay-save">' + (s.then === 'plus' ? 'Speichern und Plus starten' : w ? 'Speichern und freischalten' : 'Speichern') + '</button></div>';
+    '</form><p class="km-s">Demo: Es wird nichts gespeichert oder abgebucht.</p><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Später</button><button type="button" class="btn primary" data-act="pay-save">' + (s.then && s.then !== 'service' ? 'Speichern und ' + X.planName(s.then) + ' starten' : w ? 'Speichern und freischalten' : 'Speichern') + '</button></div>';
 }
 
 /* ---------- Aktionen ---------- */
@@ -920,11 +814,14 @@ function act(name, el) {
     case 'sheet': { S.sheet = { k: v, id: id }; return render(); }
     case 'sheet-close': { S.sheet = null; return render(); }
     case 'toast': return toast(v);
-    case 'reg': { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: {}, err: {} }; if (S.screen === 'reg') { S.animNext = true; render(); window.scrollTo(0, 0); return; } return go('reg'); }
+    case 'reg': {
+      if (Server.an) { if (S.acc[Server.id] && Server.sitzung) return login('betrieb', Server.id); if (Server.sitzung) { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: Server.sitzung.mail }, err: {}, server: true }; return go('reg'); } S.sheet = { k: 'login', zweck: 'reg' }; return render(); }
+      S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: {}, err: {} }; if (S.screen === 'reg') { S.animNext = true; render(); window.scrollTo(0, 0); return; } return go('reg');
+    }
     case 'reg-prev': { const r = S.reg; r.err = {}; if (r.step > firstStep(r)) { r.step--; S.animNext = true; render(); window.scrollTo(0, 0); return; } return back(); }
     case 'reg-next': {
       const r = S.reg, steps = regSteps(r);
-      if (!regValidate(r)) { S._focusErr = true; render(); const f = document.querySelector('.form'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); } return; }
+      if (!regValidate(r)) { S._focusErr = true; render(); const f = document.querySelector('.form'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); if (window.Haptik) window.Haptik.fehler(); } return; }
       if (r.step < steps.length - 1) { r.step++; S.animNext = true; render(); window.scrollTo(0, 0); return; }
       return regFinish();
     }
@@ -939,27 +836,26 @@ function act(name, el) {
       if (String(s.pw || '').length < 8) { s.err = 'Das Passwort ist zu kurz. Demo: jedes Passwort ab 8 Zeichen.'; return render(); }
       return login(u.role, u.id);
     }
+    case 'srv-code': { const sh = S.sheet; if (!sh) return; return Server.codeSenden(String(sh.mail || '').trim().toLowerCase()); }
+    case 'srv-login': { const sh = S.sheet; if (!sh) return; return Server.codePruefen(sh.mail, String(sh.code || '').replace(/\s+/g, '')); }
+    case 'srv-mail': { if (S.sheet) { S.sheet.schritt = 'mail'; S.sheet.err = ''; } return render(); }
+    case 'srv-zahlungsart': return Server.zahlungsart();
     case 'demo-as': {
       if (v === 'visitor') { S.role = null; S.sheet = null; nav('landing'); return toast('Startseite wie ein neuer Besucher'); }
       if (S.acc[v]) return login('betrieb', v, 'Ansicht: ' + comp(v).name);
       return;
     }
     case 'reset': { try { localStorage.removeItem(STORE); } catch (e) { /* ok */ } S = seed(); nav('landing'); return toast('Demo zurückgesetzt'); }
-    case 'logout': { S.role = null; S.sheet = null; nav('landing'); return toast('Abgemeldet'); }
-    case 'notif-open': { const n = notifs()[+el.getAttribute('data-i')]; if (!n) return; n.new = false; if (n.to) return go(n.to[0], n.to[1]); return render(); }
-    case 'read-all': { notifs().forEach((n) => { n.new = false; }); return render(); }
+    case 'logout': { if (Server.online()) Server.abmelden(); S.role = null; S.sheet = null; nav('landing'); return toast('Abgemeldet'); }
+    case 'notif-open': { const i = +el.getAttribute('data-i'), n = notifs()[i]; if (!n) return; n.new = false; Server.konto({ gelesenIndex: i }); if (n.to) return go(n.to[0], n.to[1]); return render(); }
+    case 'read-all': { notifs().forEach((n) => { n.new = false; }); Server.konto({ gelesen: true }); return render(); }
     case 'konto': {
-      const a = A();
-      if (v === 'plus') {
-        if (a.konto === 'plus') { if (a.downgrade) { a.downgrade = null; render(); return toast('Betrieb Plus läuft weiter'); } return; }
-        if (!a.pay) { S.sheet = { k: 'pay', then: 'plus', type: 'sepa' }; return render(); }
-        const n = activatePlus(a); S._pop = { act: name, v: v, k: '' }; save(); render();
-        return toast('Betrieb Plus aktiv, ' + eur(PLUS_PRICE) + ' für ' + monthLabel() + (n ? '. ' + nW(n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet' : ''));
-      }
-      if (a.konto === 'plus') { a.downgrade = { to: v, at: monthEnd() }; S._pop = { act: name, v: v, k: '' }; save(); render(); return toast('Vorgemerkt: Betrieb Plus läuft bis ' + monthEnd()); }
-      a.konto = 'service'; S._pop = { act: name, v: v, k: '' }; render(); return toast('Start: 3 Projekte frei, danach 9\u00a0€ je Projekt');
+      const a = A(), k = ['service', 'abo', 'plus'].includes(v) ? v : 'service';
+      if (Server.online()) return Server.plan(k);
+      if (X.RANG[k] > X.RANG[X.konto(a)] && !a.pay) { S.sheet = { k: 'pay', then: k, type: 'sepa' }; return render(); }
+      const r = X.planWechsel(a, k); S._pop = { act: name, v: v, k: '' }; save(); render(); return toast(r.msg);
     }
-    case 'bpref': { const p = A().prefs = A().prefs || {}; p[v] = !(p[v] !== undefined ? p[v] : true); S._pop = { act: name, v: v, k: '' }; render(); return toast('Gespeichert'); }
+    case 'bpref': { const p = A().prefs = A().prefs || {}; p[v] = !(p[v] !== undefined ? p[v] : true); Server.konto({ prefs: p }); S._pop = { act: name, v: v, k: '' }; render(); return toast('Gespeichert'); }
     /* Fensterbauer: Kundenlinks */
     case 'lfilt': { S.lfilt = v; return render(); }
     case 'nl-set': { const n = S.nl; if (!n) return; const k = el.getAttribute('data-k'); n[k] = n[k] === v ? '' : v; S._pop = { act: name, v: v, k: k }; return render(); }
@@ -968,40 +864,40 @@ function act(name, el) {
     case 'nl-du': { S.nl.du = v === 'du'; return render(); }
     case 'nl-create': {
       const n = S.nl; n.err = {};
-      if (String(n.kunde || '').trim().length < 2) { n.err.kunde = 'Bitte einen Namen eingeben, zum Beispiel „Familie Weber“.'; S._focusErr = true; render(); const f = document.querySelector('.form'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); } return; }
-      const l = { id: 'l' + Date.now().toString(36), code: newCode(), nr: nextNr(), kunde: n.kunde.trim(), kontakt: String(n.kontakt || '').trim(), adresse: String(n.adresse || '').trim(), geb: n.geb || '', fz: n.fz || '', plan: (n.plan || []).slice(), note: String(n.note || '').trim(), created: 'heute', days: n.days || 14, expires: dateIn(n.days || 14), status: 'erstellt', progress: 0, via: '', du: !!n.du, log: { erstellt: stamp() } };
-      A().links.unshift(l); S.nl = null; S.justCreated = l.id; S._feier = 'projekt'; S.hist = S.hist.filter((h) => h[0] !== 'newlink'); S.screen = 'links'; go('link', l.id); setTimeout(() => { if (S.justCreated === l.id) { S.justCreated = null; } }, 6000); return;
+      if (String(n.kunde || '').trim().length < 2) { n.err.kunde = 'Bitte einen Namen eingeben, zum Beispiel „Familie Weber“.'; S._focusErr = true; render(); const f = document.querySelector('.form'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); if (window.Haptik) window.Haptik.fehler(); } return; }
+      if (Server.online()) return Server.projektAnlegen(n);
+      const l = X.neuesProjekt(A(), n).l;
+      S.nl = null; S.justCreated = l.id; S._feier = 'projekt'; S.hist = S.hist.filter((h) => h[0] !== 'newlink'); S.screen = 'links'; go('link', l.id); setTimeout(() => { if (S.justCreated === l.id) { S.justCreated = null; } }, 6000); return;
     }
     case 'l-share': {
       const l = findLink(); if (!l) return;
       if (v === 'link' || v === 'Text') { copyText(v === 'link' ? linkURL(l) : linkMsg(l), v === 'link' ? 'Link kopiert' : 'Nachricht kopiert'); }
-      if (l.status === 'erstellt') { l.status = 'gesendet'; l.via = v === 'link' ? 'Link kopiert' : v === 'Text' ? 'Text kopiert' : v; l.log.gesendet = stamp(); S._feier = 'gesendet'; setTimeout(() => refresh(), 400); }
+      if (l.status === 'erstellt') { l.status = 'gesendet'; l.via = v === 'link' ? 'Link kopiert' : v === 'Text' ? 'Text kopiert' : v; l.log.gesendet = stamp(); S._feier = 'gesendet'; Server.projekt(l.id, { gesendet: true, via: l.via }); setTimeout(() => refresh(), 400); }
       return;
     }
-    case 'l-du': { const l = A().links.find((x) => x.id === S.sel); if (!l) return; l.du = v === 'du'; l.msg = ''; return render(); }
+    case 'l-du': { const l = A().links.find((x) => x.id === S.sel); if (!l) return; l.du = v === 'du'; l.msg = ''; Server.projekt(l.id, { du: l.du }); return render(); }
     case 'l-reset-msg': { const l = findLink(); if (l) l.msg = ''; return render(); }
-    case 'l-sim': { const l = findLink(); if (!l) return; if (l.status === 'erstellt') { l.status = 'gesendet'; l.via = l.via || 'WhatsApp'; l.log.gesendet = stamp(); } simLink(l, S.cur); render(); return toast('Demo: Der Kunde öffnet den Link'); }
-    case 'l-deact': { const l = findLink(); if (l && l.status === 'eingegangen') { S.sheet = null; render(); return toast('Ein eingegangenes Aufmaß bleibt im Projekt und in der Abrechnung'); } if (l) l.status = 'deaktiviert'; S.sheet = null; render(); return toast('Link deaktiviert'); }
-    case 'l-stage': { const l = findLink(); if (l) l.stage = v; S._pop = { act: name, v: v, k: '' }; return render(); }
-    case 'nl-next': { const n = S.nl; if (!n) return; n.err = {}; if (String(n.kunde || '').trim().length < 2) { n.err.kunde = 'Bitte einen Namen eingeben, zum Beispiel „Familie Weber“.'; S._focusErr = true; render(); const f = document.querySelector('.form'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); } return; } n.step = 1; S.dir = 'fwd'; return render(); }
+    case 'l-sim': { if (Server.online()) return toast('In Ihrem echten Konto gibt es keine Simulation: Öffnen Sie den Link als Kunde und messen Sie.'); const l = findLink(); if (!l) return; if (l.status === 'erstellt') { l.status = 'gesendet'; l.via = l.via || 'WhatsApp'; l.log.gesendet = stamp(); } simLink(l, S.cur); render(); return toast('Demo: Der Kunde öffnet den Link'); }
+    case 'l-deact': { const l = findLink(); if (l && l.status === 'eingegangen') { S.sheet = null; render(); return toast('Ein eingegangenes Aufmaß bleibt im Projekt und in der Abrechnung'); } if (l) { l.status = 'deaktiviert'; Server.projekt(l.id, { deaktivieren: true }); } S.sheet = null; render(); return toast('Link deaktiviert'); }
+    case 'l-stage': { const l = findLink(); if (l) { l.stage = v; Server.projekt(l.id, { stage: v }); } S._pop = { act: name, v: v, k: '' }; return render(); }
+    case 'nl-next': { const n = S.nl; if (!n) return; n.err = {}; if (String(n.kunde || '').trim().length < 2) { n.err.kunde = 'Bitte einen Namen eingeben, zum Beispiel „Familie Weber“.'; S._focusErr = true; render(); const f = document.querySelector('.form'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); if (window.Haptik) window.Haptik.fehler(); } return; } n.step = 1; S.dir = 'fwd'; return render(); }
     case 'nl-prev': { if (S.nl) { S.nl.step = 0; S.dir = 'back'; } return render(); }
-    case 'l-days': { const l = findLink(); if (l) { l.days = +v; l.expires = dateIn(+v); } S._pop = { act: name, v: v, k: '' }; render(); return toast('Link gilt ' + v + ' Tage'); }
+    case 'l-days': { const l = findLink(); if (l) { l.days = +v; l.expires = dateIn(+v); Server.projekt(l.id, { days: +v }); } S._pop = { act: name, v: v, k: '' }; render(); return toast('Link gilt ' + v + ' Tage'); }
     case 'nb-send': {
       const l = findLink(); if (!l) return; const ok = nbMoeglich(l); if (ok !== 'ok') { S.sheet = null; render(); return toast(ok || 'Keine Nachbesserung möglich.'); }
-      l.nb = { runde: (l.runde || 1) + 1, hinweis: String((S.sheet && S.sheet.hinweis) || '').trim().slice(0, 300), when: stamp(), offen: true };
-      l.msg = ''; l.expires = dateIn(14); l.log = l.log || {}; l.log.nbangefragt = stamp();
-      S.sheet = null; S._feier = ''; render(); return toast('Nachbesserung angefragt. Jetzt den Link noch einmal an ' + l.kunde + ' schicken.');
+      const hinweis = String((S.sheet && S.sheet.hinweis) || '').trim().slice(0, 300), r = X.nbAnfragen(l, hinweis);
+      Server.projekt(l.id, { nb: { hinweis: hinweis } });
+      S.sheet = null; S._feier = ''; render(); return toast(r.msg);
     }
-    case 'nb-cancel': { const l = findLink(); if (l && l.nb) { l.nb.offen = false; l.msg = ''; } render(); return toast('Nachbesserung zurückgezogen. Das bisherige Aufmaß bleibt.'); }
+    case 'nb-cancel': { const l = findLink(); X.nbZurueck(l); if (l) Server.projekt(l.id, { nbZurueck: true }); render(); return toast('Nachbesserung zurückgezogen. Das bisherige Aufmaß bleibt.'); }
     case 'liste-du': { if (S.sheet) S.sheet.du = v === 'du'; return render(); }
     case 'liste-create': {
       const s = S.sheet; if (!s) return; const ta = document.getElementById('liste-in'); if (ta) s.text = ta.value;
       const zeilen = String(s.text || '').split(/\n+/).map((z) => z.trim()).filter(Boolean).slice(0, 50);
       if (!zeilen.length) { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Bitte mindestens einen Kunden eintragen, eine Zeile je Kunde.'); }
-      const neu = [];
-      zeilen.forEach((z) => { const teile = z.split(/[;,\t]/).map((t) => t.trim()).filter(Boolean); const kunde = teile[0] || '', kontakt = teile.slice(1).find((t) => /@/.test(t) || t.replace(/\D/g, '').length >= 6) || ''; if (kunde.length < 2) return; const l = { id: 'l' + Date.now().toString(36) + neu.length, code: newCode(), nr: nextNr({ links: A().links.concat(neu) }), kunde: kunde.slice(0, 60), kontakt: kontakt.slice(0, 80), adresse: '', geb: '', fz: '', plan: ['Fenster'], note: 'aus Einladungsliste', created: 'heute', days: 14, expires: dateIn(14), status: 'erstellt', progress: 0, via: '', du: !!s.du, log: { erstellt: stamp() } }; neu.push(l); });
+      if (Server.online()) return Server.listeAnlegen(s.text, !!s.du);
+      const neu = X.listeProjekte(A(), s.text, !!s.du);
       if (!neu.length) { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Keine gültige Zeile gefunden. Beispiel: Familie Weber, 0171 2345678'); }
-      neu.reverse().forEach((l) => A().links.unshift(l));
       S.sheet = null; S.lfilt = 'offen'; S._feier = 'willkommen'; nav('links');
       return toast(nW(neu.length, 'Projekt angelegt', 'Projekte angelegt') + '. Jetzt die Links verschicken.');
     }
@@ -1021,38 +917,19 @@ function act(name, el) {
       const a = A(), then = s.then;
       a.pay = t === 'sepa' ? { type: 'SEPA-Firmenlastschrift', label: ibanMask(s.iban), inhaber: String(s.inhaber).trim(), when: stamp() } : { type: 'Kreditkarte', label: 'über Zahlungsdienstleister', inhaber: String(s.inhaber).trim(), when: stamp() };
       S.sheet = null;
-      const n = then === 'plus' ? activatePlus(a) : unlockWaiting(a);
+      const r = then && then !== 'service' ? X.planWechsel(a, then) : { n: X.unlockWaiting(a) };
       save(); render();
-      return toast(then === 'plus' ? 'Betrieb Plus aktiv' + (n ? ', ' + nW(n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet' : '') : n ? nW(n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet' : 'Zahlungsart gespeichert');
+      return toast(then && then !== 'service' ? r.msg : r.n ? nW(r.n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet' : 'Zahlungsart gespeichert');
     }
     case 'pos-all': { const ds = Array.from(document.querySelectorAll('.poslist details')), open = ds.some((d) => !d.open); ds.forEach((d) => { d.open = open; }); el.textContent = open ? 'Alle zuklappen' : 'Alle aufklappen'; return; }
     case 'linkimport': {
-      const ta = document.getElementById('code-in'), o = unpack(ta ? ta.value : '');
+      const ta = document.getElementById('code-in'), code = ta ? ta.value : '', o = unpack(code);
       if (!o) { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Code nicht lesbar. Bitte komplett kopieren, er beginnt mit AM1.'); }
-      let l = o.b ? A().links.find((x) => x.code === o.b) : null;
-      if (o.b && !l) { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Dieser Code gehört zu keinem Ihrer Projekte.'); }
-      if (l && l.status === 'eingegangen' && !(l.nb && l.nb.offen && (o.r || 1) >= l.nb.runde)) { S.sheet = null; go('link', l.id); return toast(l.nb && l.nb.offen ? 'Dieser Code ist noch die alte Fassung. Der Kunde muss das Aufmaß über den Nachbesserungs-Link erneut abschicken.' : 'Dieses Aufmaß ist schon eingegangen. Für eine Korrektur fragen Sie im Projekt eine Nachbesserung an.'); }
-      if (l && l.status === 'eingegangen') {
-        const fp2 = fingerprint(o), wins2 = (o.w || []).map(fromApp), am2 = aufmassOf(wins2, fromAppProj(o.p || {})); am2.fp = fp2;
-        const q = ueberschneidung(l.aufmass, am2), neu = q === 0, gleich = !!(l.aufmass && l.aufmass.fp === fp2);
-        (l.vorher = l.vorher || []).push({ runde: l.runde || 1, when: (l.log || {}).eingegangen || '', aufmass: l.aufmass });
-        /* Kunde ohne gespeicherte Angaben (anderes Gerät) schickt nur die betroffenen Fenster: passende Positionen ersetzen, übrige behalten */
-        if (o.m && !neu && l.aufmass && l.aufmass.windows) { const alt = l.aufmass.windows, rest = alt.filter((a) => !wins2.some((w) => passt(a, w))); am2.windows = rest.concat(wins2); am2.fotos = am2.windows.reduce((s2, w) => s2 + (w.fotos || 0), 0); am2.elemente = am2.windows.reduce((s2, w) => s2 + (AW.num(w.anzahl) || 1), 0); am2.proj = Object.assign({}, l.aufmass.proj || {}, am2.proj || {}); }
-        l.aufmass = am2; l.runde = l.nb.runde; l.nb.offen = false; l.nb.fertig = stamp(); l.log.nachbesserung = stamp(); l.seen = true; l.stage = l.stage === 'verloren' ? 'neu' : l.stage;
-        if (neu) { l.locked = !bookAufmass(A(), l, l.runde); notify(S.cur, { t: 'Anderes Aufmaß in Projekt ' + (l.nr || ''), s: 'Die Nachbesserung hat keine Position mit dem bisherigen Aufmaß gemeinsam und wurde wie ein neues Aufmaß gebucht.', to: ['link', l.id] }); }
-        else notify(S.cur, { t: 'Nachbesserung eingegangen: ' + l.kunde, s: nW(wins2.length, 'Position', 'Positionen') + ', Runde ' + l.runde + '. Nichts berechnet.', to: ['link', l.id] });
-        S.sheet = null; S._feier = 'eingang'; go('link', l.id); return toast(neu ? 'Übernommen. Das ist ein anderes Aufmaß, es wurde als neues gebucht.' : gleich ? 'Nachbesserung übernommen, der Kunde hat nichts geändert. Nichts berechnet.' : (o.m ? 'Nachbesserung ergänzt, nichts berechnet: ' : 'Nachbesserung übernommen, nichts berechnet: ') + l.kunde);
-      }
-      if (l && l.status === 'deaktiviert') { if (ta) { ta.classList.add('bad'); ta.focus(); } return toast('Dieser Link wurde deaktiviert. Für ein neues Aufmaß legen Sie ein neues Projekt an.'); }
-      const fp = fingerprint(o), schon = A().links.find((x) => x.aufmass && x.aufmass.fp === fp);
-      if (schon) { S.sheet = null; go('link', schon.id); return toast('Dieses Aufmaß ist schon da: ' + schon.kunde); }
-      const war = l && l.status === 'abgelaufen';
-      const wins = (o.w || []).map(fromApp), p = o.p || {};
-      if (!l) { l = { id: 'l' + Date.now().toString(36), code: newCode(), nr: nextNr(), kunde: p.name || 'Kunde ohne Projekt', kontakt: p.tel || p.mail || '', adresse: p.ort || '', geb: '', fz: '', plan: [], note: 'direkt vom Kunden, per Code übernommen', created: 'heute', expires: dateIn(14), status: 'gesendet', progress: 0, via: 'Code', du: false, log: { erstellt: stamp(), gesendet: stamp() } }; A().links.unshift(l); }
-      l.seen = true; S.justCreated = null; l.log.gesendet = l.log.gesendet || stamp(); l.log.geoeffnet = l.log.geoeffnet || stamp(); l.log.arbeit = l.log.arbeit || stamp();
-      const am = aufmassOf(wins, fromAppProj(p)); am.fp = fp;
-      const ok = receiveAufmass(A(), S.cur, l, am, 'Code');
-      S.sheet = null; S._feier = ok ? 'eingang' : ''; go('link', l.id); return toast(ok ? (war ? 'Link war abgelaufen, Aufmaß trotzdem übernommen: ' : 'Aufmaß übernommen: ') + l.kunde : 'Aufmaß übernommen. Zum Ansehen Zahlungsart hinterlegen');
+      if (Server.online()) return Server.importieren(code);
+      const r = X.importCode(A(), o);
+      if (!r.ok) { if (r.l && (r.art === 'schon' || r.art === 'doppelt')) { S.sheet = null; go('link', r.l.id); } else if (ta) { ta.classList.add('bad'); ta.focus(); } return toast(r.msg); }
+      if (r.notif) notify(S.cur, r.notif);
+      S.sheet = null; S.justCreated = null; S._feier = r.feier || ''; go('link', r.l.id); return toast(r.msg);
     }
     case 'copy': return copyText(v, 'Kopiert');
     default: return;
@@ -1074,27 +951,28 @@ function onInput(el, ev) {
   if (ns === 'r') { const r = S.reg; if (!r) return; r.d[f] = v; if (r.err && r.err[f]) { delete r.err[f]; const box = el.closest('.f, .agree'); if (box) { box.classList.remove('has-err'); const er = box.querySelector('.err'); if (er) er.remove(); } } if (f === 'agb' && ev.type === 'change') { const er = document.querySelector('.agree + .err'); if (er && v) er.remove(); } return; }
   if (ns === 'lg') { if (S.sheet) S.sheet[f] = v; return; }
   if (ns === 'nl') { if (!S.nl) return; S.nl[f] = v; if (S.nl.err && S.nl.err[f]) { delete S.nl.err[f]; const box = el.closest('.f'); if (box) { box.classList.remove('has-err'); const er = box.querySelector('.err'); if (er) er.remove(); } } if (f === 'kunde') pvUpdate(); return; }
-  if (ns === 'lmsg') { const l = A().links.find((x) => x.id === f); if (l) l.msg = v; return; }
+  if (ns === 'lmsg') { const l = A().links.find((x) => x.id === f); if (l) { l.msg = v; if (ev.type === 'change') Server.projekt(l.id, { msg: v }); } return; }
   if (ns === 'pay') { if (!S.sheet) return; S.sheet[f] = v; if (S.sheet.err && S.sheet.err[f]) { delete S.sheet.err[f]; const box = el.closest('.f, .agree'); if (box) { box.classList.remove('has-err'); const er = box.nextElementSibling && box.nextElementSibling.classList.contains('err') ? box.nextElementSibling : box.querySelector('.err'); if (er) er.remove(); } } return; }
-  if (ns === 'pnote') { if (ev.type !== 'change') return; const l = A().links.find((x) => x.id === f); if (l) { l.note = v; save(); toast('Notiz gespeichert'); } return; }
-  if (ns === 'ab') { const ab = A().abzug || (A().abzug = { seite: 15, oben: 15 }); ab[f] = Math.max(0, Math.min(60, parseInt(v, 10) || 0)); const ex = document.getElementById('ab-ex'); if (ex) ex.textContent = abEx(ab); if (ev.type === 'change') { save(); toast('Gespeichert'); } return; }
-  if (k.indexOf('roi-') === 0) { S.roi = S.roi || { n: 12, t: 75, r: 65 }; S.roi[k.slice(4)] = +v; const r = S.roi, vv = roiVals(r.n, r.t, r.r), put = (i, t) => { const e2 = document.getElementById(i); if (e2) e2.textContent = t; }; put('roi-n-l', String(r.n)); put('roi-t-l', r.t + ' Min.'); put('roi-r-l', r.r + '\u00a0€'); put('roi-c', eur(vv.cost)); put('roi-h', vv.hours + ' Stunden unterwegs und beim Kunden'); put('roi-l', eur(vv.lm)); put('roi-lp', vv.plan); return; }
-  if (ns === 'lmemo') { if (ev.type !== 'change') return; const l = A().links.find((x) => x.id === f); if (l) { l.memo = v; save(); toast('Notiz gespeichert'); } return; }
-  if (ns === 'b') { if (ev.type !== 'change') return; A()[f] = String(v).trim(); save(); return toast('Gespeichert'); }
+  if (ns === 'pnote') { if (ev.type !== 'change') return; const l = A().links.find((x) => x.id === f); if (l) { l.note = v; Server.projekt(l.id, { note: v }); save(); toast('Notiz gespeichert'); } return; }
+  if (ns === 'ab') { const ab = A().abzug || (A().abzug = { seite: 15, oben: 15 }); ab[f] = Math.max(0, Math.min(60, parseInt(v, 10) || 0)); const ex = document.getElementById('ab-ex'); if (ex) ex.textContent = abEx(ab); if (ev.type === 'change') { Server.konto({ abzug: ab }); save(); toast('Gespeichert'); } return; }
+  if (k.indexOf('roi-') === 0) { S.roi = S.roi || { n: 12, t: 75, r: 65 }; S.roi[k.slice(4)] = +v; const r = S.roi, vv = roiVals(r.n, r.t, r.r), put = (i, t) => { const e2 = document.getElementById(i); if (e2) e2.textContent = t; }, lauf = (i, zu) => { const e2 = document.getElementById(i); if (!e2) return; const von = +(e2.getAttribute('data-count') || 0); e2.setAttribute('data-count', String(zu)); if (matchMedia('(prefers-reduced-motion: reduce)').matches) e2.textContent = eur(zu); else countUp(e2, von, zu, 'eur'); }; put('roi-n-l', String(r.n)); put('roi-t-l', r.t + ' Min.'); put('roi-r-l', r.r + '\u00a0€'); lauf('roi-c', vv.cost); put('roi-h', vv.hours + ' Stunden unterwegs und beim Kunden'); lauf('roi-l', vv.lm); put('roi-lp', vv.plan); return; }
+  if (ns === 'lmemo') { if (ev.type !== 'change') return; const l = A().links.find((x) => x.id === f); if (l) { l.memo = v; Server.projekt(l.id, { memo: v }); save(); toast('Notiz gespeichert'); } return; }
+  if (ns === 'b') { if (ev.type !== 'change') return; A()[f] = String(v).trim(); const o = {}; o[f] = A()[f]; Server.konto(o); save(); return toast('Gespeichert'); }
 }
 const root = document.getElementById('app');
 root.addEventListener('click', (e) => {
   const el = e.target.closest ? e.target.closest('[data-act]') : null; if (!el || el.disabled) return;
   if (el.tagName !== 'A') e.preventDefault();
   const name = el.getAttribute('data-act');
+  if (window.Haptik && el.matches('.seg > button, .chip, .opt, .pipe > button, .switch, .tabs button, .colors button, .col')) window.Haptik.tick();
   if (el.classList.contains('btn')) { const r = el.getBoundingClientRect(); el.style.setProperty('--px', ((e.clientX - r.left) / r.width * 100).toFixed(0) + '%'); el.style.setProperty('--py', ((e.clientY - r.top) / r.height * 100).toFixed(0) + '%'); }
   if (name === 'l-share' && el.tagName === 'A') { const l = A().links.find((x) => x.id === el.getAttribute('data-id')); if (l) { const v = el.getAttribute('data-v'), msg = encodeURIComponent(linkMsg(l)); el.href = v === 'WhatsApp' ? 'https://wa.me/' + (isPhone(l.kontakt) ? intl(l.kontakt) : '') + '?text=' + msg : v === 'SMS' ? 'sms:' + (isPhone(l.kontakt) ? String(l.kontakt).replace(/\s/g, '') : '') + '?body=' + msg : 'mailto:' + (/@/.test(l.kontakt || '') ? l.kontakt : '') + '?subject=' + encodeURIComponent('Ihr Fenster-Aufmaß für ' + BC().name) + '&body=' + msg; } }
   act(name, el);
 });
-root.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target.getAttribute('data-form'); if (f === 'login') act('login-submit', e.target); if (f === 'reg') act('reg-next', e.target); if (f === 'nl') act(S.nl && S.nl.step ? 'nl-create' : 'nl-next', e.target); });
+root.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target.getAttribute('data-form'); if (f === 'srvlogin') act(S.sheet && S.sheet.schritt === 'code' ? 'srv-login' : 'srv-code', e.target); if (f === 'login') act('login-submit', e.target); if (f === 'reg') act('reg-next', e.target); if (f === 'nl') act(S.nl && S.nl.step ? 'nl-create' : 'nl-next', e.target); });
 root.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(); }
-  if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { const form = e.target.closest('form'); if (form) { e.preventDefault(); const f = form.getAttribute('data-form'); if (f === 'login') act('login-submit', form); else if (f === 'reg') act('reg-next', form); else if (f === 'nl') act(S.nl && S.nl.step ? 'nl-create' : 'nl-next', form); } }
+  if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { const form = e.target.closest('form'); if (form) { e.preventDefault(); const f = form.getAttribute('data-form'); if (f === 'srvlogin') act(S.sheet && S.sheet.schritt === 'code' ? 'srv-login' : 'srv-code', form); else if (f === 'login') act('login-submit', form); else if (f === 'reg') act('reg-next', form); else if (f === 'nl') act(S.nl && S.nl.step ? 'nl-create' : 'nl-next', form); } }
   if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('pt')) { e.preventDefault(); act(e.target.getAttribute('data-act'), e.target); }
 });
 root.addEventListener('input', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
@@ -1102,4 +980,5 @@ root.addEventListener('change', (e) => { const el = e.target; if (el && el.getAt
 tick();
 setInterval(tick, 60000);
 render();
+Server.start().then((an) => { if (an) { document.querySelectorAll('.fx-pilot').forEach((e) => e.remove()); render(); setInterval(() => Server.aktualisieren(), 30000); } else if (Server.status) render(); });
 

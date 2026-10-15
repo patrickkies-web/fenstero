@@ -22,7 +22,7 @@
   <h1>Datenschutz</h1>
 
   <div class="karte">
-    <p><strong>Kurz gesagt:</strong> Fensterino ist in der Pilotphase. Was Sie in der App und im Bereich für Betriebe eingeben, bleibt im Browser Ihres Geräts. Wir betreiben noch keine Datenbank und bekommen diese Daten nicht. Es gibt keine Cookies, kein Tracking, keine Werbung und keine Analyse-Werkzeuge. Fotos verlassen Ihr Gerät nur, wenn Sie der KI-Auswertung ausdrücklich zustimmen.</p>
+    <p><strong>Kurz gesagt:</strong> Was Sie in der App eingeben, bleibt auf Ihrem Gerät; an einen Fensterbauer geht es nur, wenn Sie auf „Senden“ tippen oder Ihr Aufmaßblatt weitergeben. In der Pilotphase gilt das auch für den Bereich für Betriebe; mit Konten und Zahlungen (Abschnitt 7) speichern wir die Daten der Betriebe bei Supabase in Frankfurt und wickeln Zahlungen über Stripe ab. Es gibt keine Cookies, kein Tracking, keine Werbung und keine Analyse-Werkzeuge. Fotos verlassen Ihr Gerät nur, wenn Sie der KI-Auswertung ausdrücklich zustimmen.</p>
   </div>
 
   <h2>1. Verantwortlicher</h2>
@@ -30,7 +30,7 @@
   E-Mail: <mark class="ph">[E-Mail-Adresse]</mark></p>
 
   <h2>2. Aufruf der Website (Hosting)</h2>
-  <p>Die Website wird über Cloudflare Pages ausgeliefert, einen Dienst der Cloudflare, Inc., San Francisco (USA). Beim Aufruf verarbeitet Cloudflare technisch notwendige Daten wie IP-Adresse, Zeitpunkt, aufgerufene Adresse und Browser-Kennung, um die Seiten auszuliefern und vor Angriffen zu schützen. Wir selbst werten diese Daten nicht aus und führen keine eigenen Zugriffsprotokolle.</p>
+  <p>Die Website wird über Cloudflare Workers ausgeliefert, einen Dienst der Cloudflare, Inc., San Francisco (USA). Beim Aufruf verarbeitet Cloudflare technisch notwendige Daten wie IP-Adresse, Zeitpunkt, aufgerufene Adresse und Browser-Kennung, um die Seiten auszuliefern und vor Angriffen zu schützen. Wir selbst werten diese Daten nicht aus und führen keine eigenen Zugriffsprotokolle.</p>
   <p>Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren und schnellen Auslieferung (Art. 6 Abs. 1 lit. f DSGVO). Cloudflare verarbeitet die Daten in unserem Auftrag (Art. 28 DSGVO). Cloudflare ist nach dem EU-US Data Privacy Framework zertifiziert, für das ein Angemessenheitsbeschluss der EU-Kommission besteht (Art. 45 DSGVO); ergänzend gelten EU-Standardvertragsklauseln.</p>
   <p>Schriften und Programmbibliotheken liefern wir selbst aus. Es werden keine Inhalte von Drittanbietern wie Google Fonts oder externen Servern nachgeladen.</p>
 
@@ -50,8 +50,16 @@
   <h2>6. Kontakt per E-Mail</h2>
   <p>Wenn Sie uns schreiben, verarbeiten wir Ihre Angaben, um Ihre Anfrage zu beantworten (Art. 6 Abs. 1 lit. b oder f DSGVO), und löschen sie, sobald sie dafür nicht mehr gebraucht werden und keine gesetzlichen Aufbewahrungspflichten bestehen.</p>
 
-  <h2>7. Ihre Rechte</h2>
-  <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21). Eine Einwilligung können Sie jederzeit widerrufen (Art. 7 Abs. 3). Da Ihre Eingaben nur in Ihrem Browser liegen, können Sie die meisten dieser Rechte direkt selbst ausüben; schreiben Sie uns gern, wenn Sie Fragen haben.</p>
+  <h2>7. Konten für Betriebe, direkte Übertragung und Zahlungen (sobald freigeschaltet)</h2>
+  <p>Die folgenden Abschnitte gelten, sobald Fensterino mit Datenbank und Zahlungsdienst läuft. Ob das der Fall ist, zeigt die Startseite: Dann fehlt der Hinweis auf die Pilotphase, und die App überträgt Aufmaße direkt.</p>
+  <p><strong>Konten für Betriebe.</strong> Fensterbauer melden sich mit ihrer E-Mail-Adresse an und erhalten dafür einen Code per E-Mail; ein Passwort gibt es nicht. Wir speichern Firma, Ansprechpartner, Telefon, Postleitzahl, die angelegten Projekte (Name und Kontakt des eingeladenen Kunden, Adresse des Objekts, falls eingetragen), die eingegangenen Aufmaße sowie Buchungen, Rechnungen und Nachrichten des Kontos. Gespeichert wird bei Supabase (Supabase Inc., USA) auf Servern in Frankfurt am Main; Supabase verarbeitet die Daten in unserem Auftrag (Art. 28 DSGVO). Rechtsgrundlage ist der Vertrag mit dem Betrieb (Art. 6 Abs. 1 lit. b DSGVO). Zur Verhinderung von Mehrfachkonten gleichen wir Telefonnummer und Firmenname mit bestehenden Konten ab (Art. 6 Abs. 1 lit. f DSGVO). Der Betrieb ist für die Daten seiner Kunden selbst verantwortlich; wir verarbeiten sie nur in seinem Auftrag.</p>
+  <p><strong>Direkte Übertragung aus der App.</strong> Wenn Sie als Kunde über den Link eines Betriebs messen und auf „Senden“ tippen, geht Ihr Aufmaß (Fenster, Maße, Wünsche, Auswertung der Fotos, Ihre Kontaktangaben, nicht die Fotos selbst) über unseren Server in das Konto dieses Betriebs. Beim Öffnen des Links erfährt der Betrieb außerdem, dass Sie ihn geöffnet haben und wie weit Sie sind. Rechtsgrundlage ist die Anbahnung des Vertrags zwischen Ihnen und dem Betrieb (Art. 6 Abs. 1 lit. b DSGVO). Ohne Link bleibt Ihr Aufmaß auf Ihrem Gerät.</p>
+  <p><strong>Kauf des Aufmaßblatts.</strong> Wenn Sie Ihr Aufmaßblatt freischalten, geben Sie Ihre E-Mail-Adresse an und zahlen über Stripe (Stripe Payments Europe, Ltd., Dublin, Irland). Stripe verarbeitet Ihre Zahlungsdaten als eigener Verantwortlicher; wir sehen keine Kartendaten. Wir speichern E-Mail-Adresse, Betrag, Zeitpunkt, eine zufällige Kennung Ihres Projekts und den Freischalt-Nachweis, nicht Ihr Aufmaß. Rechtsgrundlagen sind der Kaufvertrag (Art. 6 Abs. 1 lit. b DSGVO) und die steuerlichen Aufbewahrungspflichten (Art. 6 Abs. 1 lit. c DSGVO, in der Regel zehn Jahre). Die Rechnung erhalten Sie von Stripe per E-Mail.</p>
+  <p><strong>Zahlungsarten und Abrechnung der Betriebe.</strong> SEPA-Lastschrift oder Karte hinterlegt der Betrieb bei Stripe; bei uns liegen nur Stripe-Kennungen, Rechnungsnummern und Beträge. Stripe meldet uns bezahlte oder fehlgeschlagene Rechnungen und beendete Abos, damit das Konto den richtigen Stand zeigt. Weitere Informationen: <a href="https://stripe.com/de/privacy" target="_blank" rel="noopener">stripe.com/de/privacy</a>.</p>
+  <p><strong>Speicherdauer.</strong> Kontodaten und Projekte, solange das Konto besteht, danach löschen wir sie binnen 30 Tagen; Buchungs- und Rechnungsdaten so lange, wie das Steuerrecht es verlangt. Betriebe können ihr Konto per E-Mail an uns löschen lassen.</p>
+
+  <h2>8. Ihre Rechte</h2>
+  <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21). Eine Einwilligung können Sie jederzeit widerrufen (Art. 7 Abs. 3). Solange Ihre Eingaben nur in Ihrem Browser liegen, können Sie die meisten dieser Rechte direkt selbst ausüben; für Konten und Käufe schreiben Sie uns, wir kümmern uns darum.</p>
   <p>Sie können sich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO), insbesondere in dem Mitgliedstaat, in dem Sie wohnen oder arbeiten. Für uns zuständig ist <mark class="ph">[Landesdatenschutzbehörde Ihres Bundeslands]</mark>.</p>
 </main>
 <footer class="fuss"><a href="/">Für Betriebe</a><a href="/app/">App</a><a href="/impressum/">Impressum</a></footer>

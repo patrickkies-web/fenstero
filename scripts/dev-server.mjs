@@ -1,9 +1,10 @@
-// Fensterino · lokaler Testserver, verhält sich wie Cloudflare Pages:
-// statische Dateien aus web/, Kopfzeilen aus web/_headers, /api/ki aus functions/api/ki.js.
+// Fensterino · lokaler Testserver, verhält sich wie der Cloudflare Worker:
+// statische Dateien aus web/, Kopfzeilen aus web/_headers, alles unter /api/ aus functions/api/router.js.
 //
-//   node scripts/dev-server.mjs                  ohne KI
-//   KI_ATTRAPPE=1 node scripts/dev-server.mjs    KI mit festen Beispielantworten (kein Schlüssel nötig)
-//   ANTHROPIC_API_KEY=... node scripts/dev-server.mjs   echte KI (Schlüssel nie ins Repo schreiben)
+//   node scripts/dev-server.mjs                   Pilotmodus: ohne KI, ohne Zahlung, ohne Datenbank
+//   KI_ATTRAPPE=1                                  KI mit festen Beispielantworten (kein Schlüssel nötig)
+//   ZAHLUNG_ATTRAPPE=1 DATEN_ATTRAPPE=1            Stripe und Datenbank nachgestellt: Anmeldecode 123456, Kassen kehren sofort als bezahlt zurück
+//   ANTHROPIC_API_KEY=… STRIPE_SECRET_KEY=… SUPABASE_URL=… SUPABASE_SERVICE_KEY=… SUPABASE_ANON_KEY=…   echte Dienste (Schlüssel nie ins Repo schreiben)
 //
 // Danach im Browser: http://localhost:8788
 import http from 'node:http';
@@ -15,11 +16,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WEB = path.join(ROOT, 'web');
 const PORT = Number(process.env.PORT || 8788);
 const ATTRAPPE = process.env.KI_ATTRAPPE === '1';
-const env = {
+const env = Object.assign({}, process.env, {
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || (ATTRAPPE ? 'attrappe' : ''),
   KI_MODELL_GENAU: process.env.KI_MODELL_GENAU || '',
   KI_MODELL_SCHNELL: process.env.KI_MODELL_SCHNELL || ''
-};
+});
 
 if (ATTRAPPE) {
   const echt = globalThis.fetch;
@@ -34,7 +35,7 @@ if (ATTRAPPE) {
   };
 }
 
-const ki = await import(pathToFileURL(path.join(ROOT, 'functions/api/ki.js')).href);
+const { api } = await import(pathToFileURL(path.join(ROOT, 'functions/api/router.js')).href);
 
 /* _headers lesen: Zeile ohne Einzug = Pfad (mit * am Ende), eingerückt = Kopfzeile */
 const regeln = [];
@@ -59,12 +60,11 @@ async function datei(p) {
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost:' + PORT);
   try {
-    if (url.pathname === '/api/ki') {
+    if (url.pathname.startsWith('/api/')) {
       const teile = [];
       for await (const t of req) teile.push(t);
-      const request = new Request(url.href, { method: req.method, headers: req.headers, body: req.method === 'POST' ? Buffer.concat(teile) : undefined });
-      const fn = req.method === 'GET' ? ki.onRequestGet : req.method === 'POST' ? ki.onRequestPost : null;
-      const antwort = fn ? await fn({ request, env }) : new Response('Method Not Allowed', { status: 405 });
+      const request = new Request(url.href, { method: req.method, headers: req.headers, body: ['POST', 'PATCH', 'PUT'].includes(req.method) ? Buffer.concat(teile) : undefined });
+      const antwort = (await api(request, env, { waitUntil() {} })) || new Response('Not Found', { status: 404 });
       res.writeHead(antwort.status, Object.fromEntries(antwort.headers));
       res.end(Buffer.from(await antwort.arrayBuffer()));
       return;
@@ -88,4 +88,4 @@ http.createServer(async (req, res) => {
     console.error(e);
     res.writeHead(500); res.end('Fehler');
   }
-}).listen(PORT, () => console.log('Fensterino lokal: http://localhost:' + PORT + (ATTRAPPE ? '  (KI-Attrappe)' : env.ANTHROPIC_API_KEY ? '  (echte KI)' : '  (ohne KI)')));
+}).listen(PORT, () => console.log('Fensterino lokal: http://localhost:' + PORT + (ATTRAPPE ? '  (KI-Attrappe)' : env.ANTHROPIC_API_KEY ? '  (echte KI)' : '  (ohne KI)') + (env.DATEN_ATTRAPPE === '1' ? '  (Daten-Attrappe, Anmeldecode 123456)' : env.SUPABASE_URL ? '  (Supabase)' : '') + (env.ZAHLUNG_ATTRAPPE === '1' ? '  (Zahlungs-Attrappe)' : env.STRIPE_SECRET_KEY ? '  (Stripe)' : '')));

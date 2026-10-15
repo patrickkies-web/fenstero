@@ -1,65 +1,187 @@
-/* Fensterino: Ergänzungen für die eigenständige Website (Logo, Pilot-Hinweis, KI-Einwilligung, Rechtslinks) */
+/* Fensterino · Grundlage für App und Betriebsbereich: Tokens, Bausteine, Bewegung.
+   Lädt vor app.css bzw. portal.css. Alles, was beide Oberflächen teilen, steht hier einmal;
+   die Regeln dazu in docs/GESTALTUNG.md. Keine Geheimnisse, keine fremden Server. */
+
+/* ---------- Tokens ---------- */
+:root {
+  /* Farbe: Papier, Fläche, Linie, Tinte. Ein Akzent (Blau) für Links, Fokus und das Fensterelement; Orange für die Maueröffnung. */
+  --paper: #f3f2ee; --surface: #ffffff; --surface2: #ecebe6; --surface3: #e1e0da;
+  --ink: #141414; --ink2: #3d3d3a; --muted: #63635e;
+  --line: rgba(20, 20, 20, .09); --line2: rgba(20, 20, 20, .17);
+  --accent: #1d4ed8; --accent-soft: rgba(29, 78, 216, .1); --on-accent: #ffffff;
+  --primary: #141414; --primary-hover: #2a2a28; --on-primary: #ffffff;
+  --ok: #15733a; --ok-soft: #e3f3e8; --warn: #9a5b00; --warn-soft: #fdf1dc; --bad: #b42318; --bad-soft: #fbe9e7;
+  --mo: #c2410c; --mo-soft: rgba(194, 65, 12, .12); --el: #1d4ed8; --el-soft: rgba(29, 78, 216, .12);
+  /* bisherige Namen bleiben gültig */
+  --bg: var(--paper); --fg: var(--ink); --fg2: var(--ink2); --chip: var(--surface2); --seg: var(--surface2);
+  /* Schatten: Flächen liegen auf dem Papier (Ring), nur Schwebendes wirft Schatten */
+  --ring: 0 0 0 1px var(--line); --lift: 0 1px 2px rgba(20, 20, 20, .05), 0 10px 30px rgba(20, 20, 20, .08); --float: 0 24px 60px rgba(20, 20, 20, .2);
+  --shadow: var(--ring); --shadow2: var(--lift);
+  /* Form: Radien und Kontrollhöhen */
+  --r1: 8px; --r2: 12px; --r3: 18px; --r4: 24px; --h1: 44px; --h2: 52px;
+  /* Schrift */
+  --font: 'Maven Pro', ui-rounded, system-ui, -apple-system, sans-serif; --display: var(--font); --body: var(--font);
+  /* Bewegung: drei Dauern, zwei Kurven */
+  --t1: 150ms; --t2: 220ms; --t3: 320ms; --e-out: cubic-bezier(.2, .7, .2, 1); --e-io: cubic-bezier(.45, 0, .2, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #111110; --surface: #1c1c1b; --surface2: #272725; --surface3: #323230;
+  --ink: #f2f1ed; --ink2: #cfcdc6; --muted: #a3a19a;
+  --line: rgba(255, 255, 255, .1); --line2: rgba(255, 255, 255, .2);
+  --accent: #7aa2ff; --accent-soft: rgba(122, 162, 255, .16); --on-accent: #0b0b0b;
+  --primary: #f2f1ed; --primary-hover: #ffffff; --on-primary: #111110;
+  --ok: #5fd38a; --ok-soft: rgba(95, 211, 138, .14); --warn: #f0b35a; --warn-soft: rgba(240, 179, 90, .14); --bad: #ff7b72; --bad-soft: rgba(255, 123, 114, .14);
+  --mo: #ff8a5b; --mo-soft: rgba(255, 138, 91, .18); --el: #7aa2ff; --el-soft: rgba(122, 162, 255, .18);
+  --ring: 0 0 0 1px rgba(255, 255, 255, .08); --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px rgba(0, 0, 0, .4); --float: 0 24px 60px rgba(0, 0, 0, .6);
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #111110; --surface: #1c1c1b; --surface2: #272725; --surface3: #323230;
+  --ink: #f2f1ed; --ink2: #cfcdc6; --muted: #a3a19a;
+  --line: rgba(255, 255, 255, .1); --line2: rgba(255, 255, 255, .2);
+  --accent: #7aa2ff; --accent-soft: rgba(122, 162, 255, .16); --on-accent: #0b0b0b;
+  --primary: #f2f1ed; --primary-hover: #ffffff; --on-primary: #111110;
+  --ok: #5fd38a; --ok-soft: rgba(95, 211, 138, .14); --warn: #f0b35a; --warn-soft: rgba(240, 179, 90, .14); --bad: #ff7b72; --bad-soft: rgba(255, 123, 114, .14);
+  --mo: #ff8a5b; --mo-soft: rgba(255, 138, 91, .18); --el: #7aa2ff; --el-soft: rgba(122, 162, 255, .18);
+  --ring: 0 0 0 1px rgba(255, 255, 255, .08); --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px rgba(0, 0, 0, .4); --float: 0 24px 60px rgba(0, 0, 0, .6);
+  color-scheme: dark }
+
+/* ---------- Grundlagen ---------- */
+*, *::before, *::after { box-sizing: border-box }
+button, input, select, textarea { font-family: inherit }
+button { cursor: pointer; color: inherit }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--r1) }
+::selection { background: var(--ink); color: var(--paper) }
 a.btn { text-decoration: none }
-.foot .foot-links a { padding: 6px 0; color: var(--fg2); font-size: 14px; font-weight: 600; text-decoration: none }
-.foot .foot-links a:hover { color: var(--accent) }
-.foot-links.recht { padding-top: 0 }
-.foot-links.recht .link { font-size: 15px; color: var(--muted) }
-.share-way.soon { opacity: .78 }
-.send-row .btn { flex: 1 1 200px }
+svg { shape-rendering: geometricPrecision }
 
-/* Pilot-Hinweis oben im Portal */
-.fx-pilot { display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px; background: var(--accent-soft); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.45; border-bottom: 1px solid var(--line) }
+/* ---------- Schrift: Rollen statt Zufallsgrößen ---------- */
+.eyebrow { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+.num { font-variant-numeric: tabular-nums }
+
+/* ---------- Knöpfe: eine Familie, zwei Höhen ---------- */
+.btn { position: relative; min-height: var(--h2); padding: 0 22px; border: 0; border-radius: 14px; background: var(--surface2); color: var(--ink); font: inherit; font-size: 17px; font-weight: 700; letter-spacing: -.005em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; white-space: nowrap; text-decoration: none; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), box-shadow var(--t2) var(--e-out), transform var(--t1) var(--e-out), opacity var(--t2) }
+.btn.primary { background: var(--primary); color: var(--on-primary) }
+.btn.ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line2) }
+.btn.soft { background: var(--surface2); color: var(--ink) }
+.btn.danger { background: var(--bad-soft); color: var(--bad) }
+.btn.ok { background: var(--ok); color: #fff }
+.btn.small { min-height: var(--h1); padding: 0 16px; font-size: 15px; border-radius: var(--r2) }
+.btn.big { min-height: 56px; padding: 0 26px }
+.btn[disabled] { opacity: .4; cursor: default }
+.btn:active:not([disabled]) { transform: scale(.98) }
+@media (hover: hover) { .btn.primary:hover:not([disabled]) { background: var(--primary-hover) } .btn.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink) } .btn.soft:hover, .btn:not([class*="primary"]):not(.ghost):not(.danger):not(.ok):hover { background: var(--surface3) } }
+.link { border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-decoration-thickness: 1.5px; text-underline-offset: 4px; min-height: var(--h1); display: inline-flex; align-items: center; gap: 4px; transition: text-decoration-color var(--t2) }
+.link:hover { text-decoration-color: var(--ink) }
+a.link { text-decoration: underline }
+.ulink { border: 0; background: none; padding: 0; font: inherit; font-weight: 800; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; text-decoration-color: var(--line2) }
+.ulink:hover { text-decoration-color: var(--ink) }
+
+/* ---------- Auswahl: Segmente, Chips, Marken ----------
+   Ein Prinzip: gewählt = Tinte gefüllt, helle Schrift. Das Gewicht wechselt nicht, damit nichts springt. */
+.seg { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface2) }
+.seg > button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--ink2); font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), box-shadow var(--t2) }
+.seg > button[aria-pressed="true"] { background: var(--ink); color: var(--paper); box-shadow: 0 1px 2px rgba(0, 0, 0, .12) }
+.seg > button:active { transform: scale(.98) }
+@media (hover: hover) { .seg > button:not([aria-pressed="true"]):hover { color: var(--ink); background: var(--surface3) } }
+.chips { display: flex; flex-wrap: wrap; gap: 8px }
+.chips.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
+.chips.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.chip { min-height: var(--h1); padding: 0 16px; border-radius: var(--r2); border: 1.5px solid var(--line2); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; font-weight: 600; line-height: 1.2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; text-decoration: none; min-width: 0; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), border-color var(--t2) var(--e-out), transform var(--t1) }
+.chips.grid2 .chip, .chips.grid3 .chip { width: 100%; padding: 0 10px; overflow: hidden; text-overflow: ellipsis }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper) }
+.chip:active { transform: scale(.98) }
+.chip .dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); flex: 0 0 auto }
+.chip[aria-pressed="true"] .dot { box-shadow: 0 0 0 1.5px var(--paper) }
+@media (hover: hover) { .chip:not([aria-pressed="true"]):hover { border-color: var(--ink) } }
+.badge { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 2px 9px; border-radius: var(--r1); background: var(--surface2); color: var(--ink2); font-size: 13px; font-weight: 700; line-height: 1.2; white-space: nowrap }
+/* Status als Wort mit Punkt in der Statusfarbe, die Fläche bleibt ruhig; ein Symbol übernimmt die Farbe statt des Punkts */
+.badge.ok, .badge.warn, .badge.bad, .badge.acc, .badge.lead { color: var(--ink); --tone: var(--ink) }
+.badge.ok { --tone: var(--ok) } .badge.warn { --tone: var(--warn) } .badge.bad { --tone: var(--bad) } .badge.acc { --tone: var(--accent) } .badge.lead { --tone: var(--mo) }
+.badge.ok::before, .badge.warn::before, .badge.bad::before, .badge.acc::before, .badge.lead::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--tone); flex: 0 0 auto }
+.badge:has(> svg)::before { display: none } .badge svg { color: var(--tone, currentColor) }
+.badge svg { width: 12px; height: 12px }
+
+/* ---------- Schalter ---------- */
+.switch { position: relative; flex: 0 0 auto; width: 52px; height: 32px; border-radius: 16px; border: 0; padding: 0; background: var(--surface3); transition: background var(--t2) var(--e-out) }
+.switch::before { content: ''; position: absolute; inset: -8px }
+.switch > span { position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform var(--t2) var(--e-out) }
+.switch[aria-pressed="true"], .switch[aria-checked="true"] { background: var(--ink) }
+.switch[aria-pressed="true"] > span, .switch[aria-checked="true"] > span { transform: translateX(20px) }
+
+/* ---------- Pilot-Hinweis oben im Betriebsbereich ---------- */
+.fx-pilot { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px 10px 16px; background: var(--ink); color: var(--paper); font-family: var(--font); font-size: 15px; line-height: 1.45 }
 .fx-pilot p { flex: 1; min-width: 0; max-width: 1040px; margin: 0 auto }
-.fx-pilot button { flex: 0 0 auto; width: 32px; height: 32px; margin: -5px -6px -5px 0; border: 0; border-radius: 50%; background: transparent; color: var(--fg2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer }
-.fx-pilot button:hover { background: var(--surface) }
+.fx-pilot b { font-weight: 800 }
+.fx-pilot button { flex: 0 0 auto; width: 44px; height: 44px; margin: -10px -8px -10px 0; border: 0; border-radius: var(--r1); background: transparent; color: inherit; display: inline-flex; align-items: center; justify-content: center; cursor: pointer }
+.fx-pilot button.mehr { display: none; width: auto; padding: 0 10px; font: inherit; font-size: 13px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px }
+@media (max-width: 520px) {
+  .fx-pilot { font-size: 13px; line-height: 1.4; padding: 8px 8px 8px 14px; align-items: center } .fx-pilot button { margin: -6px -4px -6px 0 }
+  .fx-pilot:not(.offen) p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden } .fx-pilot:not(.offen) button.mehr { display: inline-flex }
+}
+.fx-pilot button:hover { background: rgba(255, 255, 255, .14) }
 
-/* KI-Einwilligung */
-.fx-bg { position: fixed; inset: 0; z-index: 200; background: rgba(0, 0, 0, .42) }
-.fx-dialog { position: fixed; z-index: 201; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px 22px 18px; border-radius: 24px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow2); font-family: var(--body); animation: fx-in .28s cubic-bezier(.2, .7, .2, 1) both }
-@keyframes fx-in { from { opacity: 0; transform: translate(-50%, -46%) } to { opacity: 1; transform: translate(-50%, -50%) } }
-.fx-dialog h2 { margin: 0 0 10px; font-family: var(--display); font-size: 24px; line-height: 1.12; font-weight: 900; letter-spacing: -.02em }
-.fx-dialog p { margin: 0 0 10px; font-size: 16px; line-height: 1.5; color: var(--fg2) }
-.fx-dialog .fx-klein { font-size: 14px; color: var(--muted) }
-.fx-dialog a { color: var(--accent) }
+/* ---------- Dialog (KI-Einwilligung) ---------- */
+.fx-bg { position: fixed; inset: 0; z-index: 200; background: rgba(20, 20, 20, .44); animation: fx-fade var(--t2) var(--e-out) both }
+.fx-dialog { position: fixed; z-index: 201; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px 22px 18px; border-radius: var(--r4); background: var(--surface); color: var(--ink); box-shadow: var(--float); font-family: var(--font); animation: fx-in var(--t3) var(--e-out) both }
+@keyframes fx-in { from { opacity: 0; transform: translate(-50%, -48%) scale(.98) } to { opacity: 1; transform: translate(-50%, -50%) } }
+@keyframes fx-fade { from { opacity: 0 } to { opacity: 1 } }
+.fx-dialog h2 { margin: 0 0 10px; font-size: 24px; line-height: 1.12; font-weight: 900; letter-spacing: -.02em }
+.fx-dialog p { margin: 0 0 10px; font-size: 17px; line-height: 1.5; color: var(--ink2) }
+.fx-dialog .fx-klein { font-size: 15px; color: var(--muted) }
+.fx-dialog a { color: var(--ink); font-weight: 700 }
 .fx-knoepfe { display: flex; flex-direction: column; gap: 8px; margin-top: 16px }
-.fx-knoepfe button { min-height: 50px; border: 0; border-radius: 999px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer }
-.fx-ja { background: var(--accent); color: var(--on-accent) }
-.fx-nein { background: var(--chip); color: var(--fg) }
-@media (prefers-reduced-motion: reduce) { .fx-dialog { animation: none } }
+.fx-knoepfe button { min-height: var(--h2); border: 0; border-radius: 14px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer }
+.fx-ja { background: var(--primary); color: var(--on-primary) }
+.fx-nein { background: var(--surface2); color: var(--ink) }
 
-/* Logo: ein Fenster; der rechte untere Flügel kippt kurz auf (Kippstellung) und schließt wieder */
+/* ---------- Logo: ein Fenster; der rechte untere Flügel kippt kurz auf und schließt wieder ---------- */
 .fi-logo { display: block; flex: 0 0 auto; overflow: visible }
 .lm, .logo .lm { width: auto; height: auto; border-radius: 0; background: none; box-shadow: none }
-.hdr-logo { gap: 10px }
-.fi-logo .fi-fluegel { transform-box: fill-box; transform-origin: 50% 100% }
+.fi-logo .fi-fluegel { transform-box: fill-box; transform-origin: 50% 100%; opacity: 0 }
 .fi-logo .fi-kachel { transform-box: fill-box; transform-origin: 50% 50% }
 .fi-logo.kippt .fi-fluegel { animation: fi-kipp 1.8s cubic-bezier(.4, 0, .2, 1) both }
 .fi-logo.kippt .fi-kachel { animation: fi-kachel 1.8s linear both }
-@keyframes fi-kipp {
-  0% { transform: none; opacity: 0 }
-  10% { opacity: 1 }
-  28% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) }
-  60% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) }
-  85% { transform: none; opacity: 1 }
-  100% { transform: none; opacity: 0 }
-}
+@keyframes fi-kipp { 0% { transform: none; opacity: 0 } 10% { opacity: 1 } 28% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) } 60% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) } 85% { transform: none; opacity: 1 } 100% { transform: none; opacity: 0 } }
 @keyframes fi-kachel { 0%, 82% { transform: none } 86% { transform: translate(.6px, -.4px) } 90% { transform: translate(-.4px, .3px) } 94%, 100% { transform: none } }
-.fi-logo .fi-fluegel { opacity: 0 }
-@media (prefers-reduced-motion: reduce) { .fi-logo .fi-fluegel, .fi-logo .fi-kachel { animation: none !important } }
 
-/* Feier: Konfetti und Puls */
-.fx-konfetti { position: fixed; inset: 0; z-index: 300; pointer-events: none; overflow: hidden }
-.fx-konfetti i { position: absolute; display: block; transform: translate(-50%, -50%) scale(.5); opacity: 0; animation: fx-konfetti var(--dur) cubic-bezier(.2, .7, .3, 1) var(--delay) both }
-@keyframes fx-konfetti {
-  0% { opacity: 1; transform: translate(-50%, -50%) scale(.5) rotate(0) }
-  38% { opacity: 1; transform: translate(calc(-50% + var(--dx) * .8), calc(-50% + var(--dyu))) scale(1) rotate(calc(var(--rot) * .5)) }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dyd))) scale(.9) rotate(var(--rot)) }
-}
+/* ---------- Bewegungskatalog ----------
+   1 Erscheinen (.rev/.rv): 8 px aufwärts, 320 ms, gestaffelt nur beim Aufbau
+   2 Wechsel: Bildschirme gleiten (app.css .scr) bzw. blenden (portal.css .scr)
+   3 Bestätigen (.fx-haken, .okmark .tick): ein Haken wird gezogen
+   4 Fehler (.shake): kurzes Rütteln, 300 ms
+   5 Fortschritt: Balken, Ringe und Zahlen laufen nach (400–750 ms)
+   6 Einrasten (.fx-einrasten): eine Zahl setzt sich, 240 ms
+   7 Öffnen/Schließen: Blätter steigen 320 ms auf
+   8 Laden (.spin): ruhige Drehung
+   Dazu .fx-mark (Hervorheben, was neu ist) und .fx-puls (ein Ring läuft aus). Keine weiteren. */
+.rev, .rv { opacity: 0; transform: translateY(8px); transition: opacity var(--t3) var(--e-out), transform var(--t3) var(--e-out); transition-delay: calc(var(--rv, var(--i, 0)) * 50ms) }
+.rev.in, .rv.in, .scr:not(.anim) .rv { opacity: 1; transform: none }
+.fx-mark { animation: fx-mark 1.1s var(--e-out) both }
+@keyframes fx-mark { 0% { box-shadow: 0 0 0 0 var(--ink), var(--ring) } 35% { box-shadow: 0 0 0 3px var(--ink), var(--ring) } 100% { box-shadow: 0 0 0 0 transparent, var(--ring) } }
 .fx-puls { position: relative }
-.fx-puls::after { content: ''; position: absolute; inset: -6px; border-radius: inherit; border: 2px solid var(--ok, #1f7a3d); animation: fx-puls 1s ease-out both; pointer-events: none }
-@keyframes fx-puls { 0% { opacity: .9; transform: scale(.96) } 100% { opacity: 0; transform: scale(1.12) } }
+.fx-puls::after { content: ''; position: absolute; inset: -6px; border-radius: inherit; border: 2px solid currentColor; animation: fx-puls .9s var(--e-out) both; pointer-events: none }
+@keyframes fx-puls { 0% { opacity: .8; transform: scale(.96) } 100% { opacity: 0; transform: scale(1.12) } }
+.fx-einrasten { animation: fx-einrasten var(--t2) var(--e-out) both }
+@keyframes fx-einrasten { from { transform: scale(1.06); opacity: .6 } to { transform: none; opacity: 1 } }
+.fx-haken path, .okmark .tick { stroke-dasharray: 60; stroke-dashoffset: 60; animation: fx-haken .5s var(--e-out) .15s forwards }
+@keyframes fx-haken { to { stroke-dashoffset: 0 } }
+.okmark { display: block; margin: 0 auto; overflow: visible; color: var(--ok) } .okmark.send { color: var(--accent) }
+/* Bewegtbilder (Lottie): der Behälter gibt die Größe vor, das SVG füllt ihn; .lottie-still ist das Standbild, bis der Spieler da ist */
+[data-lottie] { display: block; position: relative } [data-lottie] > svg, [data-lottie] .lottie-still > svg { display: block; width: 100%; height: 100% } .lottie-still { display: block; width: 100%; height: 100% }
+.okmark-l { width: 112px; height: 112px; margin: 0 auto } .okmark-l[data-lottie="senden"] { width: 176px; height: 110px }
+/* Der Ring am SVG-Zeichen: Pseudoelemente gibt es dort nicht, also wächst ein Kreisrand nach außen */
+.okmark.fx-puls > circle:first-child { stroke: currentColor; animation: fx-puls-svg .9s var(--e-out) both }
+@keyframes fx-puls-svg { 0% { stroke-width: 0; stroke-opacity: .7 } 100% { stroke-width: 10; stroke-opacity: 0 } }
+.shake { animation: shake .3s var(--e-io) }
+@keyframes shake { 20% { transform: translateX(-4px) } 40% { transform: translateX(4px) } 60% { transform: translateX(-3px) } 80% { transform: translateX(3px) } }
+.spin { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid rgba(255, 255, 255, .35); border-top-color: #fff; animation: spin .9s linear infinite; flex: 0 0 auto }
+.spin.dark { border-color: var(--line2); border-top-color: var(--ink) }
+@keyframes spin { to { transform: rotate(360deg) } }
 
-/* Scroll-Reveal */
-.rev { opacity: 0; transform: translateY(16px); transition: opacity .6s cubic-bezier(.2, .7, .2, 1), transform .6s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--rv, 0) * 60ms) }
-.rev.in { opacity: 1; transform: none }
-@media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; transition: none } .fx-konfetti, .fx-puls::after { display: none } }
+@media (prefers-reduced-motion: reduce) {
+  .rev, .rv { opacity: 1; transform: none; transition: none }
+  .fx-mark, .fx-puls::after, .okmark.fx-puls > circle:first-child, .fx-einrasten, .shake, .fx-dialog, .fx-bg, .fi-logo .fi-fluegel, .fi-logo .fi-kachel { animation: none !important }
+  .fx-haken path, .okmark .tick { animation: none; stroke-dashoffset: 0 }
+  .btn, .chip, .seg > button, .switch, .switch > span { transition: none }
+}
