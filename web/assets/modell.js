@@ -125,7 +125,8 @@
       if (w.notiz) r.push(['Notiz des Kunden', w.notiz]);
       return r;
     }
-    const kiRows = (w) => (w.ki && w.ki.rows ? w.ki.rows : []);
+    /* Befund der KI zur Einbausituation: Zeilen, dann Hinweise und Prüfpunkte fürs Feinaufmaß */
+    const kiRows = (w) => (w.ki && w.ki.rows ? w.ki.rows.concat((w.ki.hints || []).map((t) => ['Hinweis', t]), (w.ki.pruefen || []).map((t) => ['Vor Ort prüfen', t])) : []);
     const kiChips = (w) => (w.ki ? (w.ki.chips || (w.ki.rows || []).map((r) => r[1])).filter(Boolean).slice(0, 6) : []);
     /* Fensterzeichnung: Rahmen, Flügel, Öffnungssymbole, Sprossen, Oberlicht; Farbe außen als Rahmenfarbe */
     const n1 = (v) => Math.round(v * 10) / 10;

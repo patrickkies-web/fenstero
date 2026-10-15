@@ -140,8 +140,8 @@ if (teil(3)) {
   ok(await page.locator('.qopt[data-act="situation"]').count() === 2 && await page.locator('.qopt[data-act="art"]').count() === 4 && /Schritt 1 von 6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Festverglasung, Hebe-Schiebe-Tür, Faltschiebewand) zur Wahl');
   await page.click('.bb .btn.primary');
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
-  const kiPosts = [];
-  page.on('response', (r) => { if (r.url().includes('/api/ki?') && r.request().method() === 'POST') kiPosts.push(r.status()); });
+  const kiPosts = [], kiUrls = [];
+  page.on('response', (r) => { if (r.url().includes('/api/ki?') && r.request().method() === 'POST') { kiPosts.push(r.status()); kiUrls.push(r.url()); } });
   await page.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpeg });
   await page.waitForSelector('.fx-dialog', { timeout: 5000 });
   ok(true, 'Einwilligung wird vor dem Hochladen gefragt');
@@ -149,12 +149,20 @@ if (teil(3)) {
   await foto(page, 'app-einwilligung');
   await page.click('.fx-ja');
   await page.waitForFunction(() => S.ai.in && S.ai.in.status === 'done', null, { timeout: 15000 });
-  ok(kiPosts.length === 2 && kiPosts.every((s) => s === 200), 'Zwei KI-Anfragen (Struktur, Fakten) erfolgreich: ' + kiPosts.join(', '));
+  ok(kiPosts.length === 1 && kiPosts[0] === 200 && /aufgabe=einbau&seite=in/.test(kiUrls[0]), 'Eine KI-Anfrage je Foto, Auftrag Einbausituation: ' + kiPosts.join(', '));
   const ki = await page.evaluate(() => S.win.ki);
-  ok(ki && ki.chips.includes('Testantwort') && ki.laib === 160, 'KI-Ergebnis im Fenster übernommen');
+  ok(ki && ki.chips.includes('Testantwort') && ki.laib === 160 && ki.pruefen.length > 0, 'KI-Ergebnis im Fenster übernommen: Befund, Laibungstiefe, Prüfpunkte fürs Feinaufmaß');
+  ok(ki.rows.some((r) => r[0] === 'Testauftrag' && /einbau, in, claude-sonnet-5-5, ohne Altfenster/.test(r[1])) && !ki.rows.some((r) => /^(Material|Verglasung|Flügel)$/.test(r[0])) && !('material' in ki), 'Server fragt nach der Einbausituation (Sonnet 5.5), nicht nach dem alten Fenster; nichts davon fließt ins neue Fenster');
   await page.setInputFiles('input[data-in="photo"][data-f="out"]', { name: 'aussen.jpg', mimeType: 'image/jpeg', buffer: jpeg });
   await page.waitForFunction(() => S.ai.out && S.ai.out.status === 'done', null, { timeout: 15000 });
-  ok(await page.locator('.fx-dialog').count() === 0 && kiPosts.length === 4, 'Zweites Foto ohne erneute Frage ausgewertet');
+  ok(await page.locator('.fx-dialog').count() === 0 && kiPosts.length === 2 && /aufgabe=einbau&seite=out/.test(kiUrls[1]), 'Zweites Foto ohne erneute Frage ausgewertet');
+  const kiApi = await page.evaluate(async () => {
+    const bild = '/9j/' + 'A'.repeat(400), post = async (q) => { const r = await fetch('/api/ki?' + q, { method: 'POST', headers: { 'content-type': 'text/plain' }, body: bild }); const j = await r.json().catch(() => null); return { s: r.status, auftrag: j && j.daten ? ((j.daten.rows || []).find((x) => x[0] === 'Testauftrag') || [])[1] || '' : '' }; };
+    return { wand: await post('aufgabe=wand&seite=out'), alt: await post('aufgabe=fakten&seite=in'), weg: await post('aufgabe=struktur&seite=in') };
+  });
+  /* die absichtlich abgelehnte Anfrage („struktur“) ist kein Fehler der Seite */
+  for (let i = page.probleme.length - 1; i >= 0; i--) if (/aufgabe=struktur|status of 400/.test(page.probleme[i])) page.probleme.splice(i, 1);
+  ok(kiApi.wand.s === 200 && /^wand, out/.test(kiApi.wand.auftrag) && kiApi.alt.s === 200 && /^einbau, in/.test(kiApi.alt.auftrag) && kiApi.weg.s === 400, 'KI-Server: neue Öffnung mit Wand-Auftrag, alter Name „fakten“ gilt als Einbau, „struktur“ gibt es nicht mehr');
   await foto(page, 'app-fotos');
 
   // vier Maße über die Zifferntasten, dann vier Ränder „wie Mitte“
@@ -1003,7 +1011,7 @@ if (teil(9)) {
   const pVoll = await blattDatei('voll', { notiz: 'Rollladen im Bad klemmt.', tel: '0171 2345678', mail: 'weber@beispiel.de', erreich: 'ab', baujahr: '1965' }, false);
   ok(zeichnungUeberFuss(pVoll) && !/vollständig nach Pos/.test(alleT(pVoll)), 'Aufmaßblatt mit allen Kontaktdaten und kurzer Nachricht: Seite 1 passt, Nachricht ungekürzt');
   const pZwei = await blattDatei('zwei', {}, false);
-  ok(!/fortsetzung/i.test(alleT(pZwei)) && /Bad/.test(seiteT(pZwei, 3)) && /AUS DEN FOTOS/.test(seiteT(pZwei, 3)), 'Aufmaßblatt: Position 2 steht samt Fotoauswertung auf einer Seite (Zeichnung etwas kleiner statt Rest auf neuer Seite)');
+  ok(!/fortsetzung/i.test(alleT(pZwei)) && /Bad/.test(seiteT(pZwei, 3)) && /EINBAUSITUATION AUS DEN FOTOS/.test(seiteT(pZwei, 3)) && /Vor Ort prüfen/.test(seiteT(pZwei, 3)), 'Aufmaßblatt: Position 2 steht samt Fotoauswertung auf einer Seite (Zeichnung etwas kleiner statt Rest auf neuer Seite)');
   sauber(bp, 'Aufmaßblatt-Prüfung ohne Fehler');
   await ctx3.close();
 }

@@ -89,10 +89,10 @@ Beide Texte sind Entwürfe für die Pilotphase. Lass sie vor dem öffentlichen S
 3. Cloudflare: **Workers & Pages → fenstero → Einstellungen (Settings) → Variablen und Geheimnisse (Variables and Secrets) → Hinzufügen (Add)**: Typ **Secret**, Name `ANTHROPIC_API_KEY`, Wert einfügen, **Bereitstellen** (Deploy). Secrets bleiben bei allen weiteren Deployments erhalten.
 4. Prüfen: `https://fensterino.com/api/ki` zeigt `{"bereit":true}`.
 
-Was dann passiert: Vor dem ersten Foto fragt die App um Einwilligung. Erst danach geht eine verkleinerte Kopie des Fotos über `/api/ki` an Anthropic. Pro Foto sind es zwei Anfragen (Aufbau des Fensters, Fakten fürs Angebot). Die Aufträge an die KI liegen auf dem Server (`functions/api/ki.js`), der Zugang wertet also nur Fensterfotos aus. Eine eingebaute Bremse erlaubt 40 Anfragen je 10 Minuten und IP-Adresse.
+Was dann passiert: Vor dem ersten Foto fragt die App um Einwilligung. Erst danach geht eine verkleinerte Kopie des Fotos über `/api/ki` an Anthropic, **eine Anfrage je Foto**. Die KI liest die Einbausituation rund um die Maueröffnung (Rollladenkasten, Anschlag, Laibung, Fensterbänke, Wandaufbau, Anschlüsse, Zugang, Schäden), nicht das alte Fenster; Checkliste, Quellen und Kosten in [docs/KI.md](KI.md). Die Aufträge liegen auf dem Server (`functions/api/ki.js`), der Zugang wertet also nur Fotos fürs Aufmaß aus. Eine eingebaute Bremse erlaubt 40 Anfragen je 10 Minuten und IP-Adresse; sie zählt je Server-Instanz, deshalb unbedingt das Ausgabenlimit bei Anthropic setzen.
 
 Optional:
-- Andere Modelle über die Variablen `KI_MODELL_GENAU` und `KI_MODELL_SCHNELL` (Standard: `claude-sonnet-5-5` und `claude-haiku-5-5`). Aktuelle Modellnamen: [docs.claude.com](https://docs.claude.com/en/docs/about-claude/models/overview).
+- Anderes Modell über die Variable `KI_MODELL` (Standard: `claude-sonnet-5-5`, etwa 2,5 Cent je Fenster; `claude-haiku-5-5` etwa 0,13 Cent, weniger genau). Aktuelle Modellnamen: [docs.claude.com](https://docs.claude.com/en/docs/about-claude/models/overview).
 - Zusätzlicher Schutz bei Cloudflare unter **Security → WAF → Rate limiting rules**: Pfad `/api/ki`, zum Beispiel 20 Anfragen in 10 Sekunden je IP, Aktion „Block“.
 
 Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass der Auftragsverarbeitungsvertrag (DPA) von Anthropic für dein Konto gilt; Abschnitt 4 der Datenschutzerklärung beschreibt die Verarbeitung.

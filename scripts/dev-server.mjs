@@ -18,19 +18,24 @@ const PORT = Number(process.env.PORT || 8788);
 const ATTRAPPE = process.env.KI_ATTRAPPE === '1';
 const env = Object.assign({}, process.env, {
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || (ATTRAPPE ? 'attrappe' : ''),
-  KI_MODELL_GENAU: process.env.KI_MODELL_GENAU || '',
-  KI_MODELL_SCHNELL: process.env.KI_MODELL_SCHNELL || ''
+  KI_MODELL: process.env.KI_MODELL || ''
 });
 
 if (ATTRAPPE) {
+  /* Feste Testantworten statt Anthropic. Die Zeile „Testauftrag“ spiegelt Aufgabe, Seite und Modell, damit die Prüfung sieht, was der Server geschickt hätte. */
   const echt = globalThis.fetch;
   globalThis.fetch = async (url, opts) => {
     if (!String(url).startsWith('https://api.anthropic.com/')) return echt(url, opts);
     const body = JSON.parse(opts.body);
-    const auftrag = body.messages[0].content[1].text;
-    const daten = auftrag.includes('Messsoftware')
-      ? { fenster_gefunden: true, scheiben: [], element: { ol: [250, 180], or: [750, 180], ur: [750, 820], ul: [250, 820] }, oeffnung: { ol: [210, 140], or: [790, 140], ur: [790, 860], ul: [210, 860] }, laibung_mm: 160, neigung_grad: 0.8, fluegel: 2, teilung: '2 Flügel mit Pfosten', oeffnungsart: 'Dreh-Kipp', material: 'kunststoff', farbe: 'weiß', hinweise: 'Testantwort' }
-      : { chips: ['Kunststoff, weiß', '2 Flügel Dreh-Kipp', 'Testantwort'], rows: [['Material', 'Kunststoff, weiß (Testantwort)'], ['Verglasung', '2-fach (Testantwort)']], hinweise: ['Dies ist eine Testantwort des lokalen Servers.'], sicherheit: 0.5 };
+    const system = String(body.system || ''), satz = String((body.messages[0].content[1] || {}).text || '');
+    const wand = system.includes('Wanddurchbruch'), aussen = satz.includes('von außen');
+    const altesFenster = system.includes('Das bestehende Fenster wird ausgebaut');
+    const daten = wand
+      ? { foto_passt: true, neigung_grad: 0.6, rows: [[aussen ? 'Fassade' : 'Wand', aussen ? 'Putz, vermutlich Mauerwerk (Testantwort)' : 'Verputzt, vermutlich Außenwand (Testantwort)'], ['Elektro', 'Steckdose in der Fläche (Testantwort)'], ['Testauftrag', 'wand, ' + (aussen ? 'out' : 'in') + ', ' + body.model]], chips: ['Außenwand', 'Testantwort'], hinweise: ['Leitungen vor dem Durchbruch orten (Testantwort).'], vor_ort: ['Statik und Sturz klären (Testantwort).'], sicherheit: 0.5 }
+      : { foto_passt: true, neigung_grad: 0.8, laibung_mm: aussen ? undefined : 160, rows: aussen
+          ? [['Fassade', 'Putz auf Mauerwerk (Testantwort)'], ['Fensterbank außen', 'Aluminium mit Tropfkante (Testantwort)'], ['Testauftrag', 'einbau, out, ' + body.model + (altesFenster ? ', ohne Altfenster' : '')]]
+          : [['Rollladen', 'Einbaukasten innen mit Revisionsdeckel (Testantwort)'], ['Anschlag', 'Innenanschlag (Testantwort)'], ['Testauftrag', 'einbau, in, ' + body.model + (altesFenster ? ', ohne Altfenster' : '')]],
+        chips: aussen ? ['Putzfassade', 'Testantwort'] : ['Rollladenkasten innen', 'Testantwort'], hinweise: ['Dies ist eine Testantwort des lokalen Servers.'], vor_ort: ['Dämmung des Rollladenkastens prüfen (Testantwort).'], sicherheit: 0.5 };
     return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify(daten) }], stop_reason: 'end_turn' }), { status: 200, headers: { 'content-type': 'application/json' } });
   };
 }
