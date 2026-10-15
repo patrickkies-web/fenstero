@@ -439,9 +439,10 @@ window.Blatt = (() => {
       const hs = karten.map((k) => karteH(k[1], cw3, k[0], o3)), hmax = Math.max.apply(null, hs);
       const mitBild = !!(w.neu && w.plan && w.plan.bild && /^data:image\/jpeg/.test(w.plan.bild));
       const bw0 = mitBild ? w.plan.bw || 3 : 3, bh0 = mitBild ? w.plan.bh || 4 : 4, iw2 = Math.min(CW - 8, 78 * bw0 / bh0), ih2 = iw2 * bh0 / bw0, bildH = ih2 + 14;
-      const ki = w.ki && w.ki.rows ? w.ki.rows : [], hints = w.ki && w.ki.hints ? w.ki.hints : [];
-      const kiRows = ki.map((r) => [r[0], r[1]]).concat(hints.map((hh2, k) => ['Hinweis ' + (k + 1), hh2, { bold: true, col: WARN }]));
-      const kiTitel = 'Aus den Fotos (KI, ' + (w.fotos || 0) + (w.fotos === 1 ? ' Foto' : ' Fotos') + ')', o2 = { lw: 25, fs: 8.2, spalten: 2, bg: '#eef5fd', rand: '#cfe0f5', titelCol: '#0a5bb5' };
+      /* Einbausituation aus den Fotos: Befunde, Hinweise für Angebot und Montage, Prüfpunkte fürs Feinaufmaß */
+      const ki = w.ki && w.ki.rows ? w.ki.rows : [], hints = w.ki && w.ki.hints ? w.ki.hints : [], pruefen = w.ki && w.ki.pruefen ? w.ki.pruefen : [];
+      const kiRows = ki.map((r) => [r[0], r[1]]).concat(hints.map((hh2, k) => ['Hinweis ' + (k + 1), hh2, { bold: true, col: WARN }]), pruefen.map((t) => ['Vor Ort prüfen', t]));
+      const kiTitel = 'Einbausituation aus den Fotos (KI, ' + (w.fotos || 0) + (w.fotos === 1 ? ' Foto' : ' Fotos') + ')', o2 = { lw: 25, fs: 8.2, spalten: 2, bg: '#eef5fd', rand: '#cfe0f5', titelCol: '#0a5bb5' };
       const kiH = kiRows.length ? karteH(kiRows, CW, kiTitel, o2) : 0;
       const notizRows = w.notiz ? [[sie ? 'Notiz des Kunden' : 'Deine Notiz', '„' + w.notiz + '“']] : [], oN = { lw: 26, fs: FS, bg: '#fffbe8', rand: '#f2e2a4' };
       const notizH = notizRows.length ? karteH(notizRows, CW, '', oN) : 0;
@@ -481,7 +482,7 @@ window.Blatt = (() => {
           while (rest.length > 1 && y + karteH(teil.concat([rest[0]]), CW, kiTitel, o2) <= unten()) teil.push(rest.shift());
           if (rest.length < 2 && teil.length > 2) rest.unshift(teil.pop());
           if (teil.length) { karte(M, y, CW, kiTitel, teil, o2); y += karteH(teil, CW, kiTitel, o2) + 4; }
-          neueSeite(); karte(M, y, CW, 'Aus den Fotos (KI), Fortsetzung', rest, o2); y += karteH(rest, CW, 'x', o2) + 4;
+          neueSeite(); karte(M, y, CW, 'Einbausituation (KI), Fortsetzung', rest, o2); y += karteH(rest, CW, 'x', o2) + 4;
         } else { platz(kiH); karte(M, y, CW, kiTitel, kiRows, o2); y += kiH + 4; }
       }
       if (notizRows.length) { platz(notizH); karte(M, y, CW, '', notizRows, oN); y += notizH + 4; }

@@ -1,5 +1,5 @@
 /* eeziframes · gemeinsame Bausteine für App und Portal
-   - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung
+   - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung: die Einbausituation, eine Anfrage je Foto
    - Pilot-Hinweis im Portal
    - Logo (weißes Fenster auf Schwarz, der Flügel kippt kurz)
    - Rückmeldungen (Markieren, Einrasten, Haken, Maßlinien, Puls), Scroll-Reveal und Scroll-Bindung
@@ -39,7 +39,7 @@
       var bg = el('div', 'fx-bg');
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
-        '<p>Die KI erkennt auf deinen Fotos Rahmen, Glas, Material und mehr und trägt es fürs Aufmaß ein. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. eeziframes speichert deine Fotos nicht.</p>' +
+        '<p>Die KI liest auf deinen Fotos die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade und was dein Fensterbauer sonst noch wissen muss. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. eeziframes speichert deine Fotos nicht.</p>' +
         '<p class="fx-klein">Ohne KI geht es auch, dann fehlen nur die Zusatzinfos aus den Fotos. Mehr dazu in der <a href="' + C.datenschutz + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>' +
         '<div class="fx-knoepfe"><button type="button" class="fx-ja">Ja, auswerten</button><button type="button" class="fx-nein">Ohne KI weiter</button></div>');
       box.setAttribute('role', 'dialog');
@@ -88,7 +88,7 @@
         if (o.signal && o.signal.aborted) throw fehler('cancelled');
         return base64(o.images);
       }).then(function (bild) {
-        var url = C.ki + '?aufgabe=' + (o.aufgabe === 'struktur' ? 'struktur' : 'fakten') + '&seite=' + (o.seite === 'out' ? 'out' : 'in');
+        var url = C.ki + '?aufgabe=' + (o.aufgabe === 'wand' ? 'wand' : 'einbau') + '&seite=' + (o.seite === 'out' ? 'out' : 'in');
         return fetch(url, { method: 'POST', headers: { 'content-type': 'text/plain', accept: 'application/json' }, body: bild, signal: o.signal });
       }).then(function (r) {
         return r.json().catch(function () { return null; }).then(function (j) {

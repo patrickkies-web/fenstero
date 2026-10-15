@@ -339,7 +339,7 @@ const GLOSS = {
   fensterbank: { t: 'Fensterbank innen und außen', x: ['Innen zum Beispiel Werzalit (pflegeleichte Kunststoffplatte), Naturstein oder Holz. Außen meist Aluminium, alternativ Naturstein.', 'Die äußere Fensterbank leitet Regenwasser von der Fassade weg.'], ico: () => ICO.bank('aussen'), see: [] },
   ral: { t: 'Was bedeutet RAL?', x: ['RAL ist ein Farbsystem mit festen Nummern. So sieht Anthrazitgrau bei jedem Hersteller gleich aus: RAL 7016.', 'Holzdekore sind Folien mit Holzmaserung auf Kunststoffprofilen. Farben am Bildschirm weichen ab, ein Farbmuster zeigt das echte Ergebnis.'], ico: () => [P(C(20, 24, 11), '#383e42'), P(C(40, 24, 11), '#f1f0ea', INK, 0.8), P(C(30, 42, 11), '#b5732f')], see: [] },
   lueftung: { t: 'Brauche ich ein Lüftungskonzept?', x: ['Neue Fenster sind sehr dicht. Wird mehr als ein Drittel der Fenster getauscht, muss eine Fachperson nach der Norm DIN 1946-6 prüfen, ob ein Lüftungskonzept nötig ist, damit kein Schimmel entsteht. Nötig ist es nur in manchen Fällen.', 'Oft reichen kleine Lüfter im Fensterfalz. Dein Fensterbauer berät dich dazu.'], ico: () => [P(R(16, 8, 32, 48, 1.2), FR, INK, 1.3), P(R(20, 12, 24, 40), GL, INK, 0.6), P('M4 20c4-3 8 3 12 0M4 30c4-3 8 3 12 0M48 34c4-3 8 3 12 0M48 44c4-3 8 3 12 0', 'none', '#5b9bd5', 1.8)], see: ['ralmontage'] },
-  referenz: { lottie: 'messen', t: 'Wie genau ist das Aufmaß?', x: ['Du misst mit dem Zollstock, die App führt dich: erst die Maueröffnung, dann das Fensterelement, jeweils senkrecht und waagerecht in der Mitte. Danach legt die KI beide Rechtecke auf dein Foto und fragt die restlichen Maße ab.', 'Das kleinste von drei Maßen zählt, so wie es der Fensterbauer auch macht. Die Fotos liefern ihm dazu Material, Zustand, Rollladen und Fensterbank.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['feinaufmass', 'rahmenmass'] },
+  referenz: { lottie: 'messen', t: 'Wie genau ist das Aufmaß?', x: ['Du misst mit dem Zollstock, die App führt dich: erst die Maueröffnung, dann das Fensterelement, jeweils senkrecht und waagerecht in der Mitte, danach die Ränder.', 'Das kleinste von drei Maßen zählt, so wie es der Fensterbauer auch macht. Die Fotos liefern ihm dazu die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade und Zugang.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['feinaufmass', 'rahmenmass'] },
   feinaufmass: { t: 'Was ist ein Feinaufmaß?', x: ['Bevor dein Fenster produziert wird, misst der Fensterbauer vor Ort noch einmal genau nach. Dein Aufmaß ersetzt den ersten Termin und reicht fürs Angebot, nicht aber diese Endkontrolle.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['referenz', 'rahmenmass'] },
   unterlicht: { t: 'Was ist ein Unterlicht?', x: ['Ein festes Feld unter den Flügeln, als Glas oder als gedämmtes Paneel. Typisch in Küchen: Die Arbeitsplatte steht vor dem Fenster, der Flügel beginnt erst darüber und lässt sich trotzdem öffnen.', 'Die Höhe richtet sich nach Arbeitsplatte oder Brüstung, meist 30 bis 60 cm.'], ico: () => ICO.ul('glas'), see: ['oberlicht', 'fest'] },
   festverglasung: { t: 'Was ist eine Festverglasung?', x: ['Glas direkt im Blendrahmen, ohne Flügel und ohne Griff. Dadurch schmalere Ansichten, mehr Licht und weniger Kosten. Zum Lüften braucht es daneben ein Fenster, das aufgeht.', 'Großflächige Festverglasungen werden in Feldern geteilt, weil Scheiben ab etwa 2,5 m² schwer und teuer werden.'], ico: () => ICO.art('fest'), see: ['fest', 'pfosten'] },
@@ -433,9 +433,9 @@ function derive(w) {
 }
 function demoProject() {
   const a = Object.assign(baseWin(), { name: 'Wohnzimmer', w: 1760, h: 1385, mo: { hm: 1410, hl: 1408, hr: 1412, wm: 1790, wt: 1792, wb: 1788 }, el: { h: 1385, w: 1760 }, bru: 620, laib: 140, teilung: '3', e_teilung: true, sashes: sashesFor('3'), roll: 'aufsatz', antrieb: 'motor', insekt: 'spann', fotos: 2,
-    ki: { material: 'Kunststoff', farbe: 'weiß', fluegel: 3, oeffnung: 'Dreh-Kipp, Mitte fest', chips: ['Kunststoff, weiß', '3 Flügel, Mitte fest', 'Rollladenkasten innen', 'Heizkörper unter dem Fenster', 'Dichtungen porös'], rows: [['Material', 'Kunststoff, weiß, vergilbt'], ['Verglasung', '2-fach, vermutlich vor 2000'], ['Rollladen', 'Kasten innen über dem Fenster, Gurtantrieb'], ['Fensterbank innen', 'Naturstein, ca. 25 cm tief'], ['Heizkörper', 'Direkt unter dem Fenster, Oberkante ca. 5 cm unter der Bank'], ['Zustand', 'Dichtungen porös, Beschläge in Ordnung'], ['Fassade', 'Putz, Außenanschlag ca. 3 cm'], ['Fensterbank außen', 'Aluminium mit Gefälle'], ['Hinweis', 'Rollladengurt läuft durch die Laibung, beim Ausbau beachten']] } });
+    ki: { auto: true, laib: 140, chips: ['Rollladenkasten innen', 'Fensterbank Naturstein', 'Heizkörper darunter', 'Putzfassade'], rows: [['Rollladen', 'Einbaukasten innen über der Öffnung mit Revisionsdeckel, Gurt mit Unterputz-Wickler links'], ['Anschlag', 'Innenanschlag, Blendrahmen sitzt etwa 2 cm hinter der Innenkante'], ['Laibung', 'Verputzt und tapeziert, Gurtdurchführung links'], ['Fensterbank innen', 'Naturstein, etwa 25 cm tief, über dem Heizkörper'], ['Heizung', 'Heizkörper direkt unter dem Fenster, Oberkante knapp unter der Bank'], ['Fassade', 'Putz auf Mauerwerk, Außenanschlag etwa 3 cm'], ['Fensterbank außen', 'Aluminium mit Gefälle und Tropfkante'], ['Zugang', 'Erdgeschoss, kein Gerüst nötig']], hints: ['Der Gurtwickler sitzt in der Laibung; nach dem Ausbau ist Putz nachzuarbeiten.'], pruefen: ['Dämmung und Luftdichtheit des Rollladenkastens prüfen.'] } });
   const b = Object.assign(baseWin(), { name: 'Bad', etage: 'og', w: 880, h: 1010, mo: { hm: 1040, hl: 1040, hr: 1038, wm: 905, wt: 905, wb: 902 }, el: { h: 1010, w: 880 }, bru: 1320, laib: 120, teilung: '1', e_teilung: true, sashes: sashesFor('1'), fa: '9016', glasfn: ['sicht'], fotos: 1,
-    ki: { material: 'Holz', farbe: 'weiß', fluegel: 1, oeffnung: 'Dreh-Kipp', chips: ['Holz, weiß lackiert', '1 Flügel Dreh-Kipp', 'Fliesenlaibung', 'Ornamentglas'], rows: [['Material', 'Holz, weiß lackiert, Lack blättert unten'], ['Verglasung', 'Einfachglas, Ornamentglas'], ['Laibung innen', 'Gefliest, Fliesen laufen bis an den Rahmen'], ['Rollladen', 'Keiner'], ['Fensterbank innen', 'Gefliest'], ['Zustand', 'Rahmen unten feucht, Holz weich'], ['Hinweis', 'Fliesen an der Laibung werden beim Ausbau wahrscheinlich beschädigt']] } });
+    ki: { auto: true, laib: 120, chips: ['Fliesenlaibung', 'kein Rollladen', 'Bad im Obergeschoss'], rows: [['Laibung', 'Gefliest, Fliesen laufen bis an den Blendrahmen'], ['Fensterbank innen', 'Gefliest, mit dem Fliesenspiegel verbunden'], ['Rollladen', 'Kein Kasten, kein Sonnenschutz'], ['Feuchte', 'Feuchteflecken in der unteren Laibungsecke'], ['Besonderheit', 'Bad: Sichtschutz und Lüftung beim neuen Fenster mitdenken'], ['Zugang', 'Obergeschoss, Montage von innen möglich']], hints: ['Die Fliesen an der Laibung werden beim Ausbau wahrscheinlich beschädigt; Ersatzfliesen oder eine Verkleidung einplanen.'], pruefen: ['Ursache der Feuchte in der Laibungsecke klären (Anschluss oder Kondensat).'] } });
   return [a, b];
 }
 const thousand = (v) => (v === '' || v == null || isNaN(v) || v === 0) ? '–' : String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -585,8 +585,6 @@ function demoPhotoUrl(side) {
     im.src = url;
   });
 }
-/* Bekannte Lage von Rahmen und Öffnung im Beispielfoto (Pixel im 1200 × 1400-Bild) */
-const DEMO_QUADS = { in: { inner: [[248, 192], [952, 192], [952, 1008], [248, 1008]], outer: [[208, 152], [992, 152], [992, 1008], [208, 1008]] }, out: { inner: [[264, 248], [936, 248], [936, 1008], [264, 1008]], outer: [[224, 160], [976, 160], [976, 1008], [224, 1008]] } };
 
 /* ---------- 3-D-Modell: Wand, Maueröffnung, Fensterelement, aus CSS-Transformationen ----------
    Weltkoordinaten in Pixeln: Ursprung in der Mitte der Maueröffnung auf der Innenwand, x nach rechts, y nach unten,
@@ -1133,7 +1131,10 @@ function bindW3D(stage, getOpts) {
 /* Kamera weich auf eine Ansicht fahren */
 function w3dView(stage, v) { if (!stage || !v) return; stage.style.setProperty('--rx', v[0] + 'deg'); stage.style.setProperty('--ry', v[1] + 'deg'); }
 
-/* ---------- KI im Hintergrund: Struktur (Glas, Rahmen, Laibung) und technische Fakten je Foto ---------- */
+/* ---------- KI im Hintergrund: die Einbausituation je Foto ----------
+   Eine Anfrage je Foto. Die Aufträge liegen auf dem Server (functions/api/ki.js, Checkliste und Quellen in docs/KI.md):
+   gelesen wird alles rund um die Maueröffnung, was der Fensterbauer außer den Maßen wissen muss; das alte Fenster nicht,
+   es wird ausgebaut. „einbau“ für ein Fenster, das ersetzt wird, „wand“ für die neue Öffnung. */
 const AI = (function () {
   let sample = null, limits = null, initP = null;
   function init() {
@@ -1147,7 +1148,6 @@ const AI = (function () {
     return initP;
   }
   const available = () => !!(sample && limits && limits.images);
-  const okPt = (a) => Array.isArray(a) && a.length >= 2 && a[0] !== null && a[1] !== null && isFinite(+a[0]) && isFinite(+a[1]);
   function loadImage(src) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('Bild')); im.src = src; }); }
   async function shrink(file) {
     const url = URL.createObjectURL(file);
@@ -1159,78 +1159,50 @@ const AI = (function () {
       return { blob: blob, w: W, h: H };
     } finally { URL.revokeObjectURL(url); }
   }
-  function promptStructure(side) {
-    const out = side === 'out';
-    return [
-      'Du bist die Messsoftware einer App für Fenster-Aufmaße. Das Bild ist ein Handyfoto eines Fensters ' + (out ? 'von außen (Fassade).' : 'von innen.'),
-      'Koordinaten: x von 0 (linker Bildrand) bis 1000 (rechter Bildrand), y von 0 (oberer Bildrand) bis 1000 (unterer Bildrand), bezogen auf Bildbreite und Bildhöhe. Prüfe jede Koordinate am Bild nach.',
-      'Arbeite von innen nach außen.',
-      'Schritt 1, Glas: Finde jede Glasscheibe. Sie hebt sich durch den Lichteinfall deutlich ab. Gib je Scheibe die vier Ecken der Glasfläche. Was durch das Glas zu sehen ist, ist unwichtig.',
-      'Schritt 2, Fensterelement: Um die Scheiben liegt der Rahmen aus Flügeln und Blendrahmen, meist einfarbig. Gib die vier äußeren Ecken des sichtbaren Fensterelements, dort, wo die Rahmenfarbe endet und ' + (out ? 'Putz, Mauerwerk oder Fensterbank' : 'Laibung, Putz oder Wand') + ' beginnt.',
-      'Schritt 3, Maueröffnung: die Öffnung in der Wand, in der das Fenster sitzt. Gib die vier Ecken, an denen die Laibung in die Wandfläche übergeht' + (out ? ' (von außen die Kante des Mauerwerks um das Fenster)' : ' (die Kante zwischen Laibung und Zimmerwand; unten die Fensterbank)') + '. Schätze die Laibungstiefe in mm.',
-      'Schritt 4, Lage: Wie schräg ist das Foto? Gib "neigung_grad" als Drehung der oberen Rahmenkante gegen die Waagerechte (positiv = rechts tiefer).',
-      'Schritt 5: Anzahl der Flügel, Teilung, Öffnungsart, material (kunststoff, holz, alu, holzalu), farbe.',
-      '',
-      'Antworte ausschließlich mit JSON in genau dieser Form:',
-      '{"fenster_gefunden":true,"scheiben":[{"ol":[x,y],"or":[x,y],"ur":[x,y],"ul":[x,y]}],"element":{"ol":[x,y],"or":[x,y],"ur":[x,y],"ul":[x,y]},"oeffnung":{"ol":[x,y],"or":[x,y],"ur":[x,y],"ul":[x,y]},"laibung_mm":150,"neigung_grad":1.5,"fluegel":2,"teilung":"2 Flügel mit Pfosten","oeffnungsart":"Dreh-Kipp","material":"kunststoff","farbe":"weiß","hinweise":"ein kurzer Satz"}',
-      'Ist keine Öffnung erkennbar, setze "oeffnung": null. Ist wirklich kein Fenster zu sehen: {"fenster_gefunden":false,"hinweise":"..."}'
-    ].join('\n');
-  }
-  /* Neue Öffnung: kein Fenster im Bild, dafür alles über die Wand, was Durchbruch und Einbau betrifft */
-  function promptFactsNeu(side) {
-    const out = side === 'out';
-    return [
-      'Du berätst einen Fensterbauer. Das Bild ist ein Handyfoto einer Wand ' + (out ? 'von außen (Fassade)' : 'von innen') + ', an der noch kein Fenster ist. Der Kunde wünscht sich dort einen neuen Wanddurchbruch für ein Fenster oder eine Tür. Beschreibe alles, was für Durchbruch, Sturz und Einbau wichtig ist, so genau, wie es das Foto hergibt. Wenn etwas nicht erkennbar ist, schreibe "unbekannt" statt zu raten.',
-      out ? 'Achte auf: Fassade (Putz, Klinker, WDVS, Holz, Beton), Geschoss und Geländeniveau, Nachbarfenster (Stil, Sturzhöhe, Fensterbank), Fallrohre, Leitungen, Dachüberstand, Hinweise auf tragendes Mauerwerk oder Ringanker, Hindernisse vor der Wand.'
-        : 'Achte auf: Wandoberfläche (Putz, Tapete, Fliesen, Holz), Heizkörper und Heizungsrohre, Steckdosen, Schalter und sichtbare Leitungen, Möbel oder Einbauten vor der Wand, Deckenhöhe (geschätzt), Fußboden, Nachbarfenster im Raum, Hinweise auf eine tragende Wand (Außenwand, Dicke an Nachbaröffnungen).',
-      'Antworte ausschließlich mit JSON: {"chips":["Außenwand, Putz","Heizkörper links daneben","Steckdose in der Fläche"],"rows":[["Wand","Verputzt, tapeziert, vermutlich Außenwand"],["Heizung","Heizkörper 60 cm links der gewünschten Stelle, Rohre aus dem Boden"],["Elektro","Steckdose mittig in der Fläche, Leitung vermutlich senkrecht"]],"hinweise":["Leitungen vor dem Durchbruch orten.","Sturz nach Statik, Wandstärke vor Ort messen."]}',
-      '"chips": 3 bis 5 kurze Stichworte für den Kunden. "rows": 5 bis 10 Zeilen [Begriff, Befund] für den Fensterbauer, Fachsprache erlaubt. "hinweise": 0 bis 4 Sätze zu Durchbruch, Statik, Leitungen oder Einbau.'
-    ].join('\n');
-  }
-  function promptFacts(side) {
-    const out = side === 'out';
-    return [
-      'Du berätst einen Fensterbauer. Das Bild ist ein Handyfoto eines Fensters ' + (out ? 'von außen (Fassade)' : 'von innen') + ', aufgenommen vom Kunden für ein Angebot. Beschreibe alles, was der Fensterbauer für Angebot und Einbau wissen muss, so genau, wie es das Foto hergibt. Wenn etwas nicht erkennbar ist, schreibe "unklar". Erfinde nichts.',
-      out ? 'Achte auf: Fassade (Putz, Klinker, WDVS, Holz), Außenanschlag (steht Mauerwerk vor dem Rahmen, wie viel), Rollladen außen (Vorbaukasten, Führungsschienen), Fensterbank außen (Material, Gefälle, Überstand), Zustand von Rahmen, Dichtungen und Anschlussfugen, Verglasung (Abstandhalter, Spiegelung), Gitter, Klappläden, Markise, Geschoss, Zugänglichkeit (Gerüst nötig?), Besonderheiten.'
-        : 'Achte auf: Material und Farbe des Rahmens, Alter und Zustand (vergilbt, Lack, feucht, Dichtungen porös, Beschläge), Verglasung (einfach, 2-fach, 3-fach, Sprossen, Ornamentglas), Flügel und Öffnungsart, Griff, Rollladen (Kasten innen, Gurt, Kurbel, Motor), Fensterbank innen (Material, Tiefe), Heizkörper unter dem Fenster (Abstand), Laibung (Putz, Tapete, Fliesen, Holzverkleidung), Innenanschlag, Gardinenschiene, Steckdosen oder Kabel in der Laibung, Raumart, Besonderheiten für Ausbau und Montage.',
-      'Antworte ausschließlich mit JSON: {"chips":["Kunststoff, weiß","2 Flügel Dreh-Kipp","Rollladenkasten innen"],"rows":[["Material","Kunststoff, weiß, leicht vergilbt"],["Verglasung","2-fach, Abstandhalter Alu, vermutlich 1990er"],["Rollladen","Kasten innen über dem Fenster, Gurtantrieb links"]],"hinweise":["Gardinenschiene vor dem Einbau abnehmen"],"sicherheit":0.7}',
-      '"chips": 3 bis 5 kurze Stichworte für den Kunden. "rows": 6 bis 12 Zeilen [Begriff, Befund] für den Fensterbauer, Fachsprache erlaubt. "hinweise": 0 bis 4 Sätze zu Ausbau, Montage oder Angebot.'
-    ].join('\n');
-  }
-  const quad = (q, W, H) => { if (!q || typeof q !== 'object') return null; const pts = ['ol', 'or', 'ur', 'ul'].map((k) => (okPt(q[k]) ? [Math.max(0, Math.min(1000, +q[k][0])) / 1000 * W, Math.max(0, Math.min(1000, +q[k][1])) / 1000 * H] : null)); return pts.some((p) => !p) ? null : pts; };
-  function readStructure(j, W, H) {
-    if (!j || j.fenster_gefunden === false) return { found: false, hint: j && j.hinweise ? String(j.hinweise) : '' };
-    const inner = quad(j.element, W, H), outer = quad(j.oeffnung, W, H);
-    const out = { found: !!inner, inner: inner, outer: outer, glass: (Array.isArray(j.scheiben) ? j.scheiben : []).map((q) => quad(q, W, H)).filter(Boolean),
-      laib: isFinite(+j.laibung_mm) ? Math.max(0, Math.min(600, Math.round(+j.laibung_mm))) : null, tilt: isFinite(+j.neigung_grad) ? Math.round(+j.neigung_grad * 10) / 10 : null,
-      fluegel: parseInt(j.fluegel, 10) || null, teilung: j.teilung ? String(j.teilung).slice(0, 60) : '', oeffnung: j.oeffnungsart ? String(j.oeffnungsart).slice(0, 60) : '', material: j.material ? String(j.material).slice(0, 20) : '', farbe: j.farbe ? String(j.farbe).slice(0, 20) : '', hint: j.hinweise ? String(j.hinweise).slice(0, 200) : '' };
-    if (inner) { const xs = inner.map((p) => p[0]), ys = inner.map((p) => p[1]); if (Math.max.apply(null, xs) - Math.min.apply(null, xs) < 0.08 * W || Math.max.apply(null, ys) - Math.min.apply(null, ys) < 0.08 * H) out.found = false; }
-    return out;
-  }
-  function readFacts(j) {
+  const str = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n || 160);
+  const liste = (x, n, m) => (Array.isArray(x) ? x : []).map((t) => str(t, m)).filter(Boolean).slice(0, n);
+  const zahl = (v) => (v === null || v === undefined || v === '' || !isFinite(+v) ? null : +v);
+  /* Antwort der KI lesen: rows [Thema, Befund], chips für den Kunden, hints für Angebot und Montage, pruefen fürs Feinaufmaß */
+  function readBefund(j, side) {
     if (!j || typeof j !== 'object') return null;
-    const str = (v) => String(v == null ? '' : v).slice(0, 160);
-    return { chips: (Array.isArray(j.chips) ? j.chips : []).map(str).filter(Boolean).slice(0, 6), rows: (Array.isArray(j.rows) ? j.rows : []).filter((r) => Array.isArray(r) && r.length >= 2).map((r) => [str(r[0]).slice(0, 40), str(r[1])]).slice(0, 14), hints: (Array.isArray(j.hinweise) ? j.hinweise : []).map(str).filter(Boolean).slice(0, 5), conf: isFinite(+j.sicherheit) ? +j.sicherheit : null };
+    if (j.foto_passt === false) return { ok: false, chips: [], rows: [], hints: liste(j.hinweise, 2, 220), pruefen: [], tilt: null, laib: null, conf: null };
+    const t = zahl(j.neigung_grad), l = zahl(j.laibung_mm);
+    return {
+      ok: true,
+      chips: liste(j.chips, 6, 40),
+      rows: (Array.isArray(j.rows) ? j.rows : []).filter((r) => Array.isArray(r) && r.length >= 2 && str(r[0]) && str(r[1])).map((r) => [str(r[0], 40), str(r[1], 180)]).slice(0, 14),
+      hints: liste(j.hinweise, 4, 220),
+      pruefen: liste(j.vor_ort, 4, 220),
+      tilt: t === null ? null : Math.round(t * 10) / 10,
+      laib: side === 'in' && l !== null && l > 0 ? Math.min(600, Math.round(l)) : null,
+      conf: zahl(j.sicherheit)
+    };
   }
-  async function ask(prompt, blob, tier, signal, task, side) { return sample.json(prompt, { images: blob, modelTier: tier, signal: signal, aufgabe: task, seite: side }); }
-  /* Beide Anfragen je Foto laufen parallel; Fehler einzeln, damit ein Teil den anderen nicht mitreißt */
   async function analyze(file, side, signal, onPart, neu) {
-    const img = await shrink(file), res = { w: img.w, h: img.h, struct: null, facts: null, errs: {} };
-    /* Neue Öffnung: keine Strukturerkennung (es gibt kein Fenster), nur die Fakten zur Wand */
-    await Promise.all([
-      neu ? Promise.resolve() : ask(promptStructure(side), img.blob, 'complex', signal, 'struktur', side).then((j) => { res.struct = readStructure(j, img.w, img.h); if (onPart) onPart('struct', res); }, (e) => { res.errs.struct = e && e.code || 'error'; if (e && e.code === 'cancelled') throw e; }),
-      ask(neu ? promptFactsNeu(side) : promptFacts(side), img.blob, 'default', signal, 'fakten', side).then((j) => { res.facts = readFacts(j); if (onPart) onPart('facts', res); }, (e) => { res.errs.facts = e && e.code || 'error'; if (e && e.code === 'cancelled') throw e; })
-    ]);
+    const img = await shrink(file), res = { w: img.w, h: img.h, befund: null, errs: {} };
+    try {
+      res.befund = readBefund(await sample.json('', { images: img.blob, signal: signal, aufgabe: neu ? 'wand' : 'einbau', seite: side }), side);
+      if (!res.befund) res.errs.befund = 'error';
+    } catch (e) {
+      if (e && e.code === 'cancelled') throw e;
+      res.errs.befund = e && e.code || 'error';
+    }
     return res;
   }
   const ERR = { not_granted: 'Ohne deine Freigabe kann die KI die Fotos nicht ansehen.', rate_limited: 'Gerade laufen zu viele KI-Anfragen. Die Fotos werden später ausgewertet.', refused: 'Die KI hat dieses Foto nicht ausgewertet.', image_rejected: 'Dieses Bild konnte die KI nicht verarbeiten.', images_unavailable: 'In dieser Ansicht kann die KI keine Bilder ansehen.' };
   const errText = (code) => ERR[code] || 'Die KI-Auswertung hat nicht geklappt. Dein Aufmaß geht trotzdem weiter.';
-  /* Beispielfotos: feste Ergebnisse, damit der Ablauf ohne KI erlebbar ist */
+  /* Beispielfotos (Führung, Prüfungen): feste Ergebnisse, so wie die KI die Einbausituation beschreibt */
   const DEMO = {
-    in: { w: 1200, h: 1400, struct: { found: true, inner: DEMO_QUADS.in.inner, outer: DEMO_QUADS.in.outer, glass: [], laib: 150, tilt: 0.4, fluegel: 2, teilung: '2 Flügel mit Pfosten', oeffnung: 'Dreh-Kipp', material: 'kunststoff', farbe: 'weiß', hint: '' },
-      facts: { chips: ['Kunststoff, weiß', '2 Flügel Dreh-Kipp', 'Heizkörper unter dem Fenster', 'Steckdose in der Laibung'], rows: [['Material', 'Kunststoff, weiß, leicht vergilbt'], ['Verglasung', '2-fach, Abstandhalter Aluminium, vermutlich 1990er Jahre'], ['Flügel', '2 Flügel Dreh-Kipp mit Pfosten, Griffe weiß'], ['Zustand', 'Dichtungen porös, Beschläge sichtbar in Ordnung'], ['Rollladen', 'Keiner erkennbar'], ['Fensterbank innen', 'Werzalit weiß, ca. 20 cm tief'], ['Heizkörper', 'Plattenheizkörper direkt unter dem Fenster, Oberkante ca. 8 cm unter der Bank'], ['Laibung', 'Glatt verputzt, Innenanschlag nicht erkennbar'], ['Elektrik', 'Steckdose und Lichtschalter rechts neben dem Fenster']], hints: ['Heizkörper bleibt beim Ausbau im Weg, Fensterbank vorsichtig lösen.'], conf: 0.8 }, errs: {} },
-    out: { w: 1200, h: 1400, struct: { found: true, inner: DEMO_QUADS.out.inner, outer: DEMO_QUADS.out.outer, glass: [], laib: 120, tilt: -0.3, fluegel: 2, teilung: '2 Flügel mit Pfosten', oeffnung: 'Dreh-Kipp', material: 'kunststoff', farbe: 'weiß', hint: '' },
-      facts: { chips: ['Klinkerfassade', 'Vorbaurollladen', 'Fensterbank Alu'], rows: [['Fassade', 'Klinker, Normalformat, Fugen in Ordnung'], ['Außenanschlag', 'Ca. 3 cm, Mauerwerk steht vor dem Rahmen'], ['Rollladen', 'Vorbaukasten über dem Fenster, Führungsschienen seitlich'], ['Fensterbank außen', 'Aluminium mit Gefälle, Überstand ca. 4 cm'], ['Zustand außen', 'Rahmen hell, Silikonfuge zur Fensterbank gerissen'], ['Geschoss', 'Erdgeschoss, vom Boden erreichbar, kein Gerüst nötig']], hints: ['Rollladenschienen beim Ausbau lösen, Kasten bleibt.'], conf: 0.75 }, errs: {} }
+    in: { w: 1200, h: 1400, errs: {}, befund: { ok: true, tilt: 0.4, laib: 150, conf: 0.8,
+      chips: ['Heizkörper darunter', 'Fensterbank Kunststoff', 'Laibung verputzt', 'Steckdose daneben'],
+      rows: [['Rollladen', 'Innen kein Kasten zu sehen, außen vermutlich Vorbaukasten (siehe Außenfoto)'], ['Anschlag', 'Blendrahmen sitzt etwa 3 cm hinter der Innenkante, Innenanschlag nicht erkennbar'], ['Laibung', 'Glatt verputzt und gestrichen, keine Risse; nach dem Ausbau ist Beiputz nötig'], ['Fensterbank innen', 'Kunststoff, weiß, Überstand etwa 3 cm über dem Heizkörper, kann vermutlich bleiben'], ['Brüstung', 'Normale Brüstungshöhe, keine Absturzsicherung nötig'], ['Heizung', 'Plattenheizkörper direkt unter dem Fenster, Thermostat rechts'], ['Elektro', 'Steckdose und Lichtschalter rechts neben der Öffnung, außerhalb der Laibung'], ['Hindernisse', 'Gardinenleiste über dem Fenster, sonst frei zugänglich']],
+      hints: ['Der Heizkörper ist beim Ausbau im Weg; die Fensterbank vorsichtig lösen oder vorher abnehmen.'],
+      pruefen: ['Ist die Fensterbank unter dem Blendrahmen eingemörtelt?'] } },
+    out: { w: 1200, h: 1400, errs: {}, befund: { ok: true, tilt: -0.3, laib: null, conf: 0.75,
+      chips: ['Klinkerfassade', 'Vorbaurollladen', 'Fensterbank Aluminium', 'Erdgeschoss'],
+      rows: [['Fassade', 'Klinker im Normalformat, vermutlich zweischalig mit Luftschicht'], ['Anschlag außen', 'Mauerwerk steht etwa 3 cm vor dem Blendrahmen (Außenanschlag)'], ['Sonnenschutz', 'Vorbaurollladen über der Öffnung, Führungsschienen seitlich in der Laibung'], ['Fensterbank außen', 'Aluminium mit Gefälle und Tropfkante, Überstand etwa 4 cm, Endstücke vorhanden'], ['Anschlüsse', 'Silikonfuge zur Fensterbank gerissen'], ['Sturz', 'Klinker-Rollschicht ohne Risse'], ['Zugang', 'Erdgeschoss, vom Boden erreichbar, kein Gerüst nötig'], ['Einbruchschutz', 'Leicht erreichbar, RC 2 empfehlen']],
+      hints: ['Führungsschienen beim Ausbau lösen; der Vorbaukasten kann vermutlich bleiben.'],
+      pruefen: ['Luftschicht oder Kerndämmung hinter dem Klinker klären, davon hängt der Anschluss ab.'] } }
   };
   return { init: init, available: available, analyze: analyze, errText: errText, DEMO: DEMO };
 })();
@@ -1413,7 +1385,7 @@ SCREENS.home = () => {
     '<div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 340, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div></section>' + betrieb +
     '<section class="sec"><div class="sec-head"><h2 class="sec-title">Dein Projekt.</h2><span class="sub">' + S.windows.length + ' Fenster erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + cardsH + '<button type="button" class="dashed" data-act="new"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M2 9h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>' + (S.windows.length ? 'Weiteres Fenster' : 'Erstes Fenster aufmessen') + '</button></div></section>' + (S.windows.length ? dateiCard() : '') +
     '<section class="card erklaert"><p class="eyebrow">So funktioniert\'s</p><h2 class="sec-title">Zollstock statt Rätselraten.</h2><div class="steps">' +
-    '<div class="step"><span class="n">1</span><div><b>Fotografieren.</b><p>Innen und außen, das Handy gerade halten. Die KI liest daraus Material, Zustand, Rollladen und Fensterbank.</p></div></div>' +
+    '<div class="step"><span class="n">1</span><div><b>Fotografieren.</b><p>Innen und außen, das Handy gerade halten. Die KI liest daraus die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade.</p></div></div>' +
     '<div class="step"><span class="n">2</span><div><b>Messen.</b><p>Vier Maße mit dem Zollstock, Schritt für Schritt erklärt. Mit jeder Zahl formt sich Öffnung und Fenster als Modell, dann ergänzt du die Ränder.</p></div></div>' +
     '<div class="step"><span class="n">3</span><div><b>Wünschen.</b><p>Flügel antippen, Sprossen ziehen, Farben innen und außen wählen. Jeder Fachbegriff mit Bild erklärt.</p></div></div></div>' +
     '<p class="nachsatz">Vor der Fertigung misst dein Fensterbauer einmal vor Ort nach, das <button type="button" class="ulink" data-act="gloss" data-k="feinaufmass">Feinaufmaß</button>.</p></section>' +
@@ -1479,12 +1451,12 @@ function photoTile(which) {
   return '<label class="tile"><input type="file" accept="image/*" capture="environment" data-in="photo" data-f="' + which + '">' + inner + ai + (p ? '<span class="tag">' + CHECK + esc(label) + (demo ? ' · Beispiel' : '') + '</span>' : '') + '</label>';
 }
 SCREENS.fotos = () => {
-  const p = S.photos.in, tilt = p && S.ai.in && S.ai.in.struct && S.ai.in.struct.tilt != null ? S.ai.in.struct.tilt : null;
+  const p = S.photos.in, tilt = p && S.ai.in && S.ai.in.befund && S.ai.in.befund.tilt != null ? S.ai.in.befund.tilt : null;
   const neu = !!S.win.neu, tuer = istTuer(S.win), ding = tuer ? 'die Tür' : S.win.art === 'fest' ? 'die Verglasung' : 'das Fenster';
   let level = '<div class="level"><span class="bubble"><span></span></span><span>Handy <b>gerade</b> halten, ' + (neu ? 'die ganze Stelle' : ding + ' ganz') + ' im Bild, etwas Wand drumherum.</span></div>';
   if (tilt != null) level = '<div class="level"><span class="bubble"><span style="animation: none; left: ' + Math.round(25 + Math.max(-20, Math.min(20, tilt * 4))) + 'px"></span></span><span>' + (Math.abs(tilt) <= 2.5 ? 'Dein Foto ist mit ' + String(Math.abs(tilt)).replace('.', ',') + '° fast waagerecht. Passt.' : 'Dein Foto ist etwa ' + String(Math.abs(tilt)).replace('.', ',') + '° schräg. Es geht, gerader wäre besser.') + '</span></div>';
   const kiNote = S.aiOk === false ? noteBox('Die KI-Auswertung der Fotos ist hier gerade nicht eingeschaltet. Das Aufmaß funktioniert trotzdem komplett, nur die Zusatzinfos aus den Fotos fehlen.', null, 'warn') : '';
-  const html = hd('Schritt 2 von 6 · Fotos', neu ? 'Fotografiere die Stelle.' : 'Fotografiere ' + ding + '.', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll, mit etwas Platz drumherum. Danach zeichnest du es auf dem Foto ein.' : 'Einmal von innen, einmal von außen. Die KI liest daraus Material, Glas, Rollladen und mehr, du musst nichts eintippen.') +
+  const html = hd('Schritt 2 von 6 · Fotos', neu ? 'Fotografiere die Stelle.' : 'Fotografiere ' + ding + '.', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll, mit etwas Platz drumherum. Danach zeichnest du es auf dem Foto ein.' : 'Einmal von innen, einmal von außen. Die KI liest daraus die Einbausituation für deinen Fensterbauer: Rollladenkasten, Laibung, Fensterbänke, Fassade. Du musst nichts eintippen.') +
     '<div class="tiles">' + photoTile('in') + photoTile('out') + '</div>' + level + kiNote +
     (!p && !S.photos.out && !S.betrieb ? '<button type="button" class="link" style="align-self: center" data-act="tour-start">Nur mal ansehen? Führung mit Beispielfotos</button>' : '');
   return { html: html, back: ['Start', 'start'], bar: { label: neu ? 'Weiter zum Einzeichnen' : 'Weiter zum Messen', act: 'go', v: neu ? 'zeichnen' : 'messen', dis: !p } };
@@ -1716,7 +1688,7 @@ SCREENS.ergebnis = () => {
     '<div><span class="k">' + esc(en) + ' Höhe</span><span class="v" style="color: var(--el); animation-delay: .3s">' + thousand(d.elH) + '<small> mm</small></span><span class="tag" style="background: var(--el-soft); color: var(--el)">' + tEl + '</span></div></div>' +
     (!neu && (d.devW > 10 || d.devH > 10) ? '<p class="sub">Bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel, alle sechs Einzelmaße stehen im Aufmaßblatt.</p>' : '') + '</div>';
   const teaser = ki && (ki.chips || []).length ? '<div class="teaser"><p class="eyebrow">Aus deinen Fotos gelesen · ' + (ki.rows || []).length + ' Angaben fürs Aufmaßblatt</p><div class="chips">' + ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
-    : (S.ai.in && S.ai.in.status === 'running' ? '<div class="teaser"><p class="eyebrow">Aus deinen Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest noch Material, Zustand und Umgebung aus den Fotos.</p></div>' : '');
+    : (S.ai.in && S.ai.in.status === 'running' ? '<div class="teaser"><p class="eyebrow">Aus deinen Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest noch die Einbausituation aus den Fotos.</p></div>' : '');
   const html = hd('Schritt 5 von 6 · Ergebnis', neu ? 'Dein Wunsch steht.' : 'Dein Aufmaß steht.', neu ? 'Rohbauöffnung und Element als Wunschmaße, die Lage auf deinem Foto. Das endgültige Maß legt der Fachbetrieb nach der Statik fest.' : 'Maueröffnung und ' + esc(elName()) + ', so wie der Fensterbauer sie fürs Angebot braucht.') + model(w, { id: 'w3d', view: 'result', sway: true, dims: ['hl', 'hm', 'hr', 'wt', 'wm', 'wb', 'eh', 'ew'], labels: messLabels(), stageH: 300, fitW: 0.56, fitH: 0.6, cls: 'dims-all', bg: photoBg(), hint: 'Zum Drehen ziehen' }) + res + teaser +
     (neu && w.plan && w.plan.bild ? '<div class="card plan-card"><p class="eyebrow">Lage auf deinem Foto</p><img class="plan-bild" src="' + w.plan.bild + '" alt="Foto der Wand mit eingezeichneter Lage"><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="zeichnen">Lage ändern</button><button type="button" class="pill" data-act="go" data-v="planmasse">Maße ändern</button></div></div>' : '') +
     '<details class="card fold"><summary><span>Falls zur Hand<small>Brüstungshöhe und Laibungstiefe, sonst beim Feinaufmaß</small></span></summary><div class="fold-body"><div class="rows">' + fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'bruestung') + fieldRow('Laibungstiefe innen', 'laib', 'mm', 5, 'laibung', ki && ki.laib && !w.e_laib ? 'KI-Schätzung' : '') + '</div></div></details>';
@@ -1730,7 +1702,7 @@ SCREENS.fertig = () => {
   const facts = [thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), lab('material', w.material), rahmenFarbe(w, 'aussen').name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
   const html = model(w, { id: 'w3d', view: 'three', sway: true, stageH: 210, hint: 'Pos. ' + (S.editIdx + 1) }) + '<div class="center"><p class="eyebrow" style="color: var(--ok)">' + CHECK + ' Gespeichert · Position ' + (S.editIdx + 1) + '</p><h1 style="margin: 10px 0 0">' + esc(w.name || 'Fenster') + '</h1><p style="margin: 8px 0 0">' + esc(facts.join(' · ')) + '</p></div>' +
     '<details class="card fold"><summary><span>Alle Angaben<small>' + specRows(w).length + ' Zeilen' + (w.ki && w.ki.rows && w.ki.rows.length ? ', dazu ' + w.ki.rows.length + ' aus den Fotos' : '') + '</small></span></summary><div class="fold-body"><div class="kv">' + specRows(w).map((r) => '<div><span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span></div>').join('') + '</div>' +
-    (w.ki && w.ki.rows && w.ki.rows.length ? '<p class="eyebrow">Aus den Fotos gelesen</p><dl class="facts">' + w.ki.rows.map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>' +
+    (w.ki && w.ki.rows && w.ki.rows.length ? '<p class="eyebrow">Einbausituation aus den Fotos</p><dl class="facts">' + kiZeilen(w.ki).map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>' +
     '<div class="pill-row grid2"><button type="button" class="pill" data-act="go" data-v="ergebnis">Maße ändern</button><button type="button" class="pill" data-act="wuensche">Wünsche ändern</button><button type="button" class="pill" data-act="copywin">Kopieren</button><button type="button" class="pill danger" data-act="delwin">Löschen</button></div>' +
     '<p class="sub center" style="padding: 0 10px">' + (lk ? 'Noch ein Fenster? Oder weiter zum Absenden an ' + esc(S.betrieb.name || 'deinen Fensterbauer') + '.' : 'Noch ein Fenster? Oder weiter zum Aufmaßblatt.') + '</p>';
   return { html: html, back: ['Projekt', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
@@ -1774,7 +1746,7 @@ function blattHTML(windows, pr, opts) {
     const d = derive(x), rows = specRows(x), ki = x.ki;
     h += '<div class="paper-pos"><div class="ph">' + svgIcon(miniWin(x), 54) + '<div class="t"><p class="eyebrow">Pos. ' + (i + 1) + ' · ' + (num(x.anzahl) || 1) + ' Stk.</p><p style="margin: 2px 0 0; font-size: 17px; font-weight: 800">' + esc(x.name || 'Fenster ' + (i + 1)) + '</p><p style="margin: 2px 0 0; font-size: 15px; font-weight: 700">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p></div><span class="badge ' + (d.complete ? 'ok' : 'warn') + '" style="flex: 0 0 auto">' + (d.complete ? 'Handmaß, 8 Werte' : 'Maße offen') + '</span></div>';
     h += '<div class="paper-grid">' + rows.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div>';
-    if (ki && ki.rows && ki.rows.length) h += '<p class="eyebrow" style="margin-top: 4px">Aus den Fotos (KI, ' + (x.fotos || 0) + (x.fotos === 1 ? ' Foto' : ' Fotos') + ')</p><div class="paper-grid">' + ki.rows.map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + (ki.hints && ki.hints.length ? '<span>Hinweise</span><span>' + ki.hints.map(esc).join(' ') + '</span>' : '') + '</div>';
+    if (ki && ki.rows && ki.rows.length) h += '<p class="eyebrow" style="margin-top: 4px">Einbausituation (KI, ' + (x.fotos || 0) + (x.fotos === 1 ? ' Foto' : ' Fotos') + ')</p><div class="paper-grid">' + ki.rows.map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + (ki.hints && ki.hints.length ? '<span>Hinweise</span><span>' + ki.hints.map(esc).join(' ') + '</span>' : '') + '</div>';
     h += '</div>';
   });
   h += '<div style="display: flex; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 2px solid var(--fg); font-size: 13px"><span style="font-weight: 800">' + windows.length + ' Positionen · ' + replaced + ' Elemente</span><span style="color: var(--muted)">Vor Fertigung: Feinaufmaß</span></div></div>';
@@ -1787,7 +1759,7 @@ function blattMarkdown(windows, pr) {
     lines.push('## Pos. ' + (i + 1) + ' · ' + (x.name || 'Fenster') + ' · ' + (num(x.anzahl) || 1) + ' Stk.');
     lines.push('Maueröffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Fensterelement ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm', '');
     specRows(x).forEach((r) => lines.push('- **' + r.k + ':** ' + r.v));
-    if (x.ki && x.ki.rows && x.ki.rows.length) { lines.push('', '### Aus den Fotos (KI)'); x.ki.rows.forEach((r) => lines.push('- **' + r[0] + ':** ' + r[1])); (x.ki.hints || []).forEach((t) => lines.push('- Hinweis: ' + t)); }
+    if (x.ki && x.ki.rows && x.ki.rows.length) { lines.push('', '### Einbausituation aus den Fotos (KI)'); x.ki.rows.forEach((r) => lines.push('- **' + r[0] + ':** ' + r[1])); (x.ki.hints || []).forEach((t) => lines.push('- Hinweis: ' + t)); (x.ki.pruefen || []).forEach((t) => lines.push('- Vor Ort prüfen: ' + t)); }
     lines.push('');
   });
   lines.push('Erfasst mit eeziframes. Vor der Fertigung Feinaufmaß vor Ort.');
@@ -2316,7 +2288,7 @@ async function startAI(which, file) {
     const res = await AI.analyze(file, which, ctrl.signal, (part, r) => { if (ctrl.signal.aborted) return; z.ai[which] = Object.assign({ status: 'running' }, r); mergeKI(z); render(); }, !!z.win.neu);
     if (ctrl.signal.aborted) return;
     z.ai[which] = Object.assign({ status: 'done' }, res);
-    if (res.errs.struct && res.errs.facts) { z.ai[which].status = 'error'; z.ai[which].code = res.errs.struct; }
+    if (res.errs.befund) { z.ai[which].status = 'error'; z.ai[which].code = res.errs.befund; }
     mergeKI(z);
     render();
   } catch (e) {
@@ -2324,18 +2296,25 @@ async function startAI(which, file) {
     z.ai[which] = { status: 'error', code: e && e.code || 'error' }; render();
   }
 }
-/* KI-Ergebnisse beider Fotos zu einer Sicht fürs Fenster zusammenführen */
+/* Befund zum Anzeigen: Zeilen, dann Hinweise und Prüfpunkte fürs Feinaufmaß */
+const kiZeilen = (ki) => (ki && ki.rows ? ki.rows : []).concat((ki && ki.hints || []).map((t) => ['Hinweis', t]), (ki && ki.pruefen || []).map((t) => ['Vor Ort prüfen', t]));
+/* KI-Ergebnisse beider Fotos zu einer Sicht fürs Fenster zusammenführen.
+   Übernommen werden nur Angaben zur Einbausituation; das alte Fenster bestimmt nichts am neuen (Material, Teilung wählt der Kunde).
+   Dasselbe Thema innen und außen: außen bekommt den Zusatz „Außen:“. Die Laibungstiefe kommt nur vom Innenfoto. */
 function mergeKI(z) {
   z = z || { ai: S.ai, win: S.win, photos: S.photos };
-  const a = z.ai.in, b = z.ai.out, w = z.win, ki = w.ki && w.ki.auto !== false ? w.ki : {};
-  const chips = [], rows = [], hints = [];
-  [a, b].forEach((x, i) => { if (!x || !x.facts) return; x.facts.chips.forEach((c) => { if (chips.length < 6 && chips.indexOf(c) < 0) chips.push(c); }); x.facts.rows.forEach((r) => rows.push([(i ? 'Außen: ' : '') + r[0], r[1]])); x.facts.hints.forEach((t) => hints.push(t)); });
-  /* Neue Öffnung: die Fotos zeigen kein Fenster, also keine Übernahme von Material, Flügeln oder Laibung */
-  const st = !w.neu && (a && a.struct && a.struct.found ? a.struct : (b && b.struct && b.struct.found ? b.struct : null)) || null;
-  w.ki = { auto: true, chips: chips, rows: rows, hints: hints, laib: st ? st.laib : null, tilt: st ? st.tilt : null, material: st ? st.material : '', farbe: st ? st.farbe : '', fluegel: st ? st.fluegel : null, teilung: st ? st.teilung : '', oeffnung: st ? st.oeffnung : '' };
-  if (st && st.laib && !w.e_laib && !num(w.laib)) w.laib = st.laib;
-  if (st && st.material && !w.e_material && OPT.material.some((o) => o.k === st.material)) w.material = st.material;
-  if (st && st.fluegel && !w.e_teilung) { const t = st.fluegel === 1 ? '1' : st.fluegel === 3 ? '3' : '2p'; if (w.teilung !== t) { w.teilung = t; w.sashes = sashesFor(t); w.bars = w.preset !== 'keine' && w.preset !== 'eigene' ? presetBars(w.preset, w.sashes.length) : []; } }
+  const a = z.ai.in, b = z.ai.out, w = z.win;
+  const fi = a && a.befund && a.befund.ok ? a.befund : null, fa = b && b.befund && b.befund.ok ? b.befund : null;
+  const chips = [], rows = [], hints = [], pruefen = [], dazu = (liste, x) => { if (x && liste.indexOf(x) < 0) liste.push(x); };
+  const innen = new Set((fi ? fi.rows : []).map((r) => r[0].toLowerCase()));
+  [fi, fa].forEach((f, i) => {
+    if (!f) return;
+    f.chips.forEach((c) => { if (chips.length < 6) dazu(chips, c); });
+    f.rows.forEach((r) => rows.push([i && innen.has(r[0].toLowerCase()) ? 'Außen: ' + r[0] : r[0], r[1]]));
+    f.hints.forEach((t) => dazu(hints, t)); f.pruefen.forEach((t) => dazu(pruefen, t));
+  });
+  w.ki = { auto: true, chips: chips, rows: rows, hints: hints.slice(0, 6), pruefen: pruefen.slice(0, 6), laib: fi ? fi.laib : null, tilt: fi ? fi.tilt : null };
+  if (!w.neu && w.ki.laib && !w.e_laib && !num(w.laib)) w.laib = w.ki.laib;
   w.fotos = (z.photos.in ? 1 : 0) + (z.photos.out ? 1 : 0);
 }
 /* Beispielfotos mit festen KI-Ergebnissen: nur noch für Prüfungen; im echten Aufmaß gibt es sie nicht (die Führung hat eigene) */
@@ -2688,10 +2667,10 @@ SCREENS.tour = () => {
   } else if (id === 'fotos') {
     const kachel = (k, label) => { const p = S.photos[k], a = S.ai[k]; return '<div class="tile">' + (p ? '<img src="' + p.url + '" alt="' + label + ', Beispielfoto">' : '<span class="empty"><span class="spin dark"></span>' + label + '</span>') + (a && a.status === 'running' ? '<span class="ai-scan" data-lottie="fotos" data-loop="1" aria-hidden="true"></span><span class="ai"><span class="spin"></span>KI liest</span>' : a && a.status === 'done' ? '<span class="ai">' + KI_OK + 'KI fertig</span>' : '') + (p ? '<span class="tag">' + CHECK + esc(label) + '</span>' : '') + '</div>'; };
     const ki = w.ki && w.ki.chips && w.ki.chips.length && S.ai.in && S.ai.in.status === 'done';
-    html = kopf('Zwei Fotos, die KI liest mit.', 'Einmal innen, einmal außen. Die KI erkennt Material, Glas, Rollladen und Fensterbank. Hier mit Beispielfotos, die Kamera bleibt aus.') +
+    html = kopf('Zwei Fotos, die KI liest mit.', 'Einmal innen, einmal außen. Die KI liest die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade. Hier mit Beispielfotos, die Kamera bleibt aus.') +
       '<div class="tiles">' + kachel('in', 'Von innen') + kachel('out', 'Von außen') + '</div>' +
       (ki ? '<div class="teaser"><p class="eyebrow">Aus den Fotos gelesen · ' + w.ki.rows.length + ' Angaben fürs Aufmaßblatt</p><div class="chips">' + w.ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
-        : '<div class="teaser"><p class="eyebrow">Aus den Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest Material, Zustand und Umgebung.</p></div>');
+        : '<div class="teaser"><p class="eyebrow">Aus den Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest die Einbausituation.</p></div>');
   } else if (id === 'messen') {
     const m = t.mess || (t.mess = { k: 0, cur: '', fertig: true }), d = derive(w);
     if (m.fertig) {
