@@ -55,7 +55,9 @@ alter table public.ereignisse enable row level security;
 revoke all on public.betriebe, public.zahlungen, public.ereignisse from anon, authenticated;
 
 -- updated_at pflegt der Server selbst (speicher.js); dieser Auslöser ist nur ein Netz für Änderungen von Hand
-create or replace function public.fensterino_touch() returns trigger language plpgsql as $$
+create or replace function public.eeziframes_touch() returns trigger language plpgsql as $$
 begin new.updated_at = now(); return new; end $$;
 drop trigger if exists betriebe_touch on public.betriebe;
-create trigger betriebe_touch before update on public.betriebe for each row execute function public.fensterino_touch();
+create trigger betriebe_touch before update on public.betriebe for each row execute function public.eeziframes_touch();
+-- Rest aus der Zeit vor der Umbenennung, falls die Datei schon einmal ausgeführt wurde
+drop function if exists public.fensterino_touch();

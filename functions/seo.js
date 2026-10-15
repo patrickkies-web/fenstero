@@ -2,11 +2,13 @@
 
    Freigabe über eine Variable, ohne Code zu ändern:
      INDEXIERUNG = 1     Seiten dürfen in Suchmaschinen und KI-Suchen; robots.txt erlaubt das Durchsuchen, sitemap.xml ist da.
+                         Die Cloudflare-Testadresse (…workers.dev) bleibt trotzdem gesperrt, damit sie die Hauptdomain nicht doppelt.
      (nicht gesetzt)     Pilotphase: robots.txt sperrt alles, jede Seite trägt X-Robots-Tag: noindex.
-     KANONISCH           optional, die Hauptadresse, z. B. https://eeziframes.com. Sonst gilt die Adresse der Anfrage.
+     KANONISCH           optional, die Hauptadresse, z. B. https://eeziframes.com; nur nötig, wenn weitere Domains am Worker hängen.
 
-   Adressen in robots.txt, sitemap.xml, llms.txt und im Canonical-Hinweis kommen aus der Domain, unter der die Seite läuft,
-   damit nach einem Domainwechsel nichts angepasst werden muss. Begründung und Quellen: docs/SEO.md. */
+   Adressen in robots.txt, sitemap.xml, llms.txt und im Canonical-Hinweis kommen aus der Domain, unter der die Seite läuft
+   (www.eeziframes.com zählt als eeziframes.com), damit nach einem Domainwechsel nichts angepasst werden muss.
+   Begründung und Quellen: docs/SEO.md. */
 import { konfig } from './api/umgebung.js';
 
 export const STAND = '2026-10-15';
@@ -41,8 +43,8 @@ export const SICHERHEIT = {
 };
 export const SPERRE = 'noindex, nofollow';
 
-export const frei = (env) => !!env && String(env.INDEXIERUNG || '') === '1';
-export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : url.origin);
+export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1' && !(url && /\.workers\.dev$/i.test(url.hostname));
+export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : url.protocol + '//' + url.host.replace(/^www\./i, ''));
 export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz)(\/|$)/.test(pfad);
 const kanonischerPfad = (pfad) => pfad.replace(/index\.html$/, '');
 
@@ -82,7 +84,7 @@ export function absolut(html, b) {
 export async function seite(antwort, env, url) {
   const h = new Headers(antwort.headers);
   for (const [k, v] of Object.entries(SICHERHEIT)) if (!h.has(k)) h.set(k, v);
-  if (frei(env)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
+  if (frei(env, url)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
   const b = basis(env, url);
@@ -133,9 +135,9 @@ export function llms(origin, env) {
 export async function behandeln(request, env, holen) {
   const url = new URL(request.url);
   const text = (inhalt, typ, status, extra) => new Response(inhalt, { status: status || 200, headers: Object.assign({ 'content-type': typ, 'cache-control': 'public, max-age=3600', 'x-content-type-options': 'nosniff' }, extra || {}) });
-  if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env)), 'text/plain; charset=utf-8');
-  if (url.pathname === '/sitemap.xml') return frei(env) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
-  if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env) ? null : { 'x-robots-tag': SPERRE });
+  if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env, url)), 'text/plain; charset=utf-8');
+  if (url.pathname === '/sitemap.xml') return frei(env, url) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
+  if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env, url) ? null : { 'x-robots-tag': SPERRE });
   if (istSeite(url.pathname)) return await seite(await holen(request), env, url);
   return null;
 }

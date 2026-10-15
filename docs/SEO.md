@@ -57,21 +57,21 @@ Aufbau jeder Seite: zuerst „Kurz gesagt“ mit der Antwort, dann Schritte, Tab
 - `robots.txt` aus dem Worker: Pilotphase `Disallow: /`; mit Freigabe alles erlaubt außer `/api/`, die KI-Suchen namentlich, Verweis auf die Sitemap. Trainings-Crawler (GPTBot, ClaudeBot, Google-Extended) sind über `User-agent: *` erlaubt, damit künftige Modelle eeziframes kennen; wer das nicht will, sperrt sie in `robots()` einzeln.
 - `sitemap.xml` mit allen Seiten aus `SEITEN` (nur mit Freigabe), `lastmod` aus `STAND`.
 - `llms.txt` mit Kurzfassung, Fakten, Preisen aus den Variablen und Links.
-- Kopfzeilen jeder Seite: Canonical als `Link`-Kopfzeile (Hauptadresse aus `KANONISCH`, sonst die aufgerufene Domain), Sicherheitskopfzeilen wie in `web/_headers` (der Worker setzt sie selbst, weil Cloudflare `_headers` auf Antworten des Workers nicht verlässlich anwendet), `X-Robots-Tag: noindex` nur in der Pilotphase. Die Meta-Tags `robots` in den Seiten sind entfernt (sie hätten die Freigabe blockiert); die Fehlerseite behält ihres.
+- Kopfzeilen jeder Seite: Canonical als `Link`-Kopfzeile (Hauptadresse aus `KANONISCH`, sonst die aufgerufene Domain ohne `www.`; unter `…workers.dev` gilt immer die Sperre der Pilotphase), Sicherheitskopfzeilen wie in `web/_headers` (der Worker setzt sie selbst, weil Cloudflare `_headers` auf Antworten des Workers nicht verlässlich anwendet), `X-Robots-Tag: noindex` nur in der Pilotphase. Die Meta-Tags `robots` in den Seiten sind entfernt (sie hätten die Freigabe blockiert); die Fehlerseite behält ihres.
 - Logo und Icon ohne `noindex` (`! X-Robots-Tag` in `_headers`), damit Google das Logo aus den strukturierten Daten zeigen darf; Skripte und Schriften bleiben `noindex`.
 - Interne Links: Fußzeile des Portals („Aufmaß-App für Fensterbauer“, „Ratgeber“), Startseite der App („Anleitung: Fenster ausmessen“), Direktlink `/#tour` für die Tour.
 
 ## Freigabe
 
 1. Impressum und Datenschutz vollständig ausfüllen (orange Platzhalter in `web/impressum/` und `web/datenschutz/`) und prüfen lassen. Eine öffentliche, auffindbare Website braucht ein vollständiges Impressum (§ 5 DDG).
-2. Cloudflare → Workers & Pages → `fenstero` → Einstellungen → Variablen und Geheimnisse: `INDEXIERUNG` = `1` (Typ Text). Laufen mehrere Domains auf den Worker (z. B. fensterino.com und eeziframes.com): `KANONISCH` = `https://<hauptdomain>`, damit alle Canonicals auf eine Adresse zeigen.
-3. Prüfen: `https://<domain>/robots.txt` (Allow, Sitemap-Zeile), `/sitemap.xml` (9 Adressen), `/llms.txt`; eine Seite im Browser, Entwicklerwerkzeuge → Netzwerk: kein `X-Robots-Tag`, `Link: <…>; rel="canonical"`.
+2. Cloudflare → Workers & Pages → `fenstero` → Einstellungen → Variablen und Geheimnisse: `INDEXIERUNG` = `1` (Typ Text). Die Hauptdomain ist `eeziframes.com`; `www.eeziframes.com` zählt von selbst als `eeziframes.com`, die `…workers.dev`-Adresse bleibt immer gesperrt. Nur wenn weitere Domains am Worker hängen (etwa `eeziframes.de`): `KANONISCH` = `https://eeziframes.com`, damit alle Canonicals auf eine Adresse zeigen (besser noch: die weitere Domain per Weiterleitungsregel umleiten).
+3. Prüfen: `https://eeziframes.com/robots.txt` (Allow, Sitemap-Zeile), `/sitemap.xml` (9 Adressen), `/llms.txt`; eine Seite im Browser, Entwicklerwerkzeuge → Netzwerk: kein `X-Robots-Tag`, `Link: <…>; rel="canonical"`.
 
 Zurück in die Pilotphase: Variable löschen. Ohne Code-Änderung, wirksam mit dem nächsten Aufruf.
 
 ## Nach der Freigabe (außerhalb des Codes)
 
-1. **Google Search Console:** Domain-Property anlegen und per DNS-Eintrag bestätigen, `sitemap.xml` einreichen, die fünf Hauptseiten über die URL-Prüfung zur Indexierung anmelden. Danach monatlich: Suchanfragen, Klicks, Seiten mit Problemen.
+1. **Google Search Console:** Domain-Property `eeziframes.com` anlegen und per DNS-Eintrag bei Cloudflare bestätigen, `sitemap.xml` einreichen, die fünf Hauptseiten über die URL-Prüfung zur Indexierung anmelden. Danach monatlich: Suchanfragen, Klicks, Seiten mit Problemen.
 2. **Bing Webmaster Tools:** Website aus der Search Console übernehmen, Sitemap einreichen. Bing ist die Grundlage von Copilot; der Bericht „AI Performance“ zeigt, wo die Seite in KI-Antworten auftaucht ([Bing Webmaster Blog, 02/2026](https://blogs.bing.com/webmaster/February-2026/Introducing-AI-Performance-in-Bing-Webmaster-Tools-Public-Preview)).
 3. **Erwähnungen:** Pilotbetriebe bitten, auf ihrer Website auf eeziframes zu verlinken („Fenster selbst ausmessen mit eeziframes“); Einträge in Software-Vergleichen fürs Handwerk; Fachpresse und Innungen. Überall dieselben Fakten: Name klein, „Aufmaß-App für Fenster“, Preise wie auf der Seite.
 4. **Bewertungen:** echte Bewertungen von Kunden und Betrieben sammeln, sobald es sie gibt; erst dann Bewertungs-Markup.
