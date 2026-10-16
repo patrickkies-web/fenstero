@@ -527,7 +527,7 @@ export async function aufraeumen(k, sp) {
       for (const e of liste) {
         if (out.entwuerfe + out.entwuerfeGeleert >= 200) break;
         let row = byId.get(e.betrieb);
-        if (!row) { row = await sp.betriebHolen(e.betrieb).catch(() => null); if (row) byId.set(row.id, row); } // die Liste kann gekürzt sein
+        if (!row) { try { row = await sp.betriebHolen(e.betrieb); } catch (err) { out.ok = false; continue; } if (row) byId.set(row.id, row); } // die Liste kann gekürzt sein; bei einem Fehler nichts löschen
         const l = row ? ((row.daten || {}).links || []).find((x) => x.code === e.code) : null, still = jetzt - (Date.parse(e.updated_at || '') || jetzt);
         if (!row || !l) { if (await sp.entwurfLoeschen(e.code)) out.entwuerfe++; continue; }
         const zu = X().linkZu(l, jetzt), ein = Number(l.eingegangenAt) || 0;
