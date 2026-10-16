@@ -19,7 +19,10 @@
   },
   // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU, PREIS_AUFMASS_CENT, MWST) bei jedem Deployment behalten
   "keep_vars": true,
-  // Sammelrechnungen für Betriebe: am 1. und 15. jeden Monats um 3 Uhr UTC (worker.js → scheduled → Abrechnungslauf)
+  // Sammelrechnungen für Betriebe und Aufräumen (Protokoll nach Frist, liegengebliebene Kassen, Anmeldungen ohne Betrieb):
+  // am 1. und 15. jeden Monats um 3 Uhr UTC (worker.js → scheduled → geplant)
   "triggers": { "crons": ["0 3 1,15 * *"] },
-  "observability": { "enabled": true }
+  // Fehlermeldungen (console.log) bleiben zur Fehlersuche ein paar Tage im Dashboard; Zugriffsprotokolle je Aufruf (Adresse, Kopfzeilen)
+  // schreibt Cloudflare nicht, so wie es die Datenschutzerklärung sagt (Abschnitt 2)
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } }
 }

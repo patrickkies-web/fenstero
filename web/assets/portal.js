@@ -100,7 +100,9 @@ const Server = {
       if (e && e.ok) { this.merken(Object.assign({}, this.sitzung, { token: e.token, refresh: e.refresh })); init.headers.authorization = 'Bearer ' + e.token; r = await fetch(pfad, init); j = await r.json().catch(() => null); }
     }
     if (r.status === 401) { this.merken(null); if (S.cur === this.id) { S.role = null; nav('landing'); } }
-    if (!r.ok || !j || j.ok === false) { const err = new Error(j && j.fehler ? j.fehler : 'Der Server antwortet gerade nicht.'); err.status = r.status; throw err; }
+    /* Von eeziframes gesperrt: abmelden, die Begründung kommt als Fehlermeldung (Hinweis oder Fehler im Anmeldeblatt) */
+    if (r.status === 403 && j && j.gesperrt) { this.abmelden(); if (S.role === 'betrieb') { S.role = null; nav('landing'); } }
+    if (!r.ok || !j || j.ok === false) { const err = new Error(j && j.fehler ? j.fehler : 'Der Server antwortet gerade nicht.'); err.status = r.status; err.gesperrt = !!(j && j.gesperrt); throw err; }
     return j;
   },
   uebernehmen(konto) {
@@ -114,7 +116,7 @@ const Server = {
     if (this.status && this.status.preise) X.setPreise(this.status.preise);
     if (!this.an) { if (S.cur === this.id) { S.cur = null; if (S.role) S.role = null; } return false; }
     this.lesen();
-    if (this.sitzung) { try { await this.laden(); if (!S.role || S.cur === this.id) { S.role = 'betrieb'; S.cur = this.id; } } catch (e) { /* Sitzung abgelaufen: Startseite */ } }
+    if (this.sitzung) { try { await this.laden(); if (!S.role || S.cur === this.id) { S.role = 'betrieb'; S.cur = this.id; } } catch (e) { if (e.gesperrt) toast(e.message); /* sonst Sitzung abgelaufen: Startseite */ } }
     else if (S.cur === this.id) { S.role = null; S.cur = null; }
     await this.linkAnmeldung();
     await this.rueckkehr();
@@ -161,7 +163,7 @@ const Server = {
   importieren(code) { return this.tu(async () => { const r = await this.api('/api/konto/import', { code: code }); this.uebernehmen(r.konto); const e = r.eingang; if (!e.ok) { if (e.id) { S.sheet = null; go('link', e.id); } else { const ta = document.getElementById('code-in'); if (ta) { ta.classList.add('bad'); ta.focus(); } } return toast(e.msg); } S.sheet = null; S.justCreated = null; S._feier = e.feier; go('link', e.id); toast(e.msg); }); },
   plan(k) { return this.tu(async () => { const r = await this.api('/api/konto/plan', { plan: k }); if (r.url) { toast('Weiter zu Stripe …'); location.href = r.url; return; } this.uebernehmen(r.konto); render(); toast(r.ergebnis.msg); }); },
   zahlungsart() { return this.tu(async () => { const r = await this.api('/api/konto/zahlungsart', {}); if (r.url) { toast('Weiter zu Stripe …'); location.href = r.url; } }); },
-  async aktualisieren() { if (!this.online() || this.laeuft || S.sheet) return; try { const vorher = JSON.stringify(S.acc[this.id]); await this.laden(); if (JSON.stringify(S.acc[this.id]) !== vorher) refresh(); } catch (e) { /* ruhig */ } }
+  async aktualisieren() { if (!this.online() || this.laeuft || S.sheet) return; try { const vorher = JSON.stringify(S.acc[this.id]); await this.laden(); if (JSON.stringify(S.acc[this.id]) !== vorher) refresh(); } catch (e) { if (e.gesperrt) { toast(e.message); refresh(); } /* sonst ruhig */ } }
 };
 /* ---------- Konten ---------- */
 function allCompanies() { return BASE_COMPANIES.concat(S.myCompanies || []); }

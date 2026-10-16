@@ -19,6 +19,9 @@
 // Abschnitt 11 prüft die Stripe-Anbindung gegen ein nachgestelltes Stripe (scripts/stripe-attrappe.mjs): Kassen, selbst angelegte Preise
 // und Steuersätze, Webhook in beiden Formen der API, Sammelrechnung ohne leere oder doppelte Rechnungen, Fehler je Betrieb.
 // Abschnitt 12 prüft die Supabase-Schlüssel (neue sb_secret_…/sb_publishable_… und frühere JWT) und die Hinweise in /api/status.
+// Abschnitt 13 prüft die Zentrale des Inhabers: Zugang (Passwort, zweiter Faktor, Sitzungs-Cookie, Bremse), Betriebe mit Kennzahlen,
+// Kunden der Betriebe nur als Projektnummer, Einblick mit Anlass, Sperren, Entsperren, Notiz, Nachricht, Gutschrift, Export, CSV,
+// Löschen mit Nachweis, eigene Statistik ohne Cookies, Protokoll, Aufräumen; im Browser auf einem vierten Testserver samt Gestaltung.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -82,12 +85,13 @@ if (teil(1)) {
   console.log('1. Seiten laden');
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
-  for (const [pfad, titel] of [['/', 'eeziframes'], ['/app/', 'eeziframes'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/gibtsnicht', 'nicht gefunden']]) {
+  for (const [pfad, titel] of [['/', 'eeziframes'], ['/app/', 'eeziframes'], ['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/zentrale/', 'Zentrale'], ['/gibtsnicht', 'nicht gefunden']]) {
     const r = await page.goto(BASE + pfad, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
     const text = await page.evaluate(() => document.body.innerText);
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
-    ok(!/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(text) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
+    const ohneWorker = pfad === '/zentrale/' ? text.replace(/\bfenstero\b/g, '') : text; // die Zentrale nennt dem Inhaber den internen Worker-Namen bei Cloudflare
+    ok(!/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(ohneWorker) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
     ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
     if (pfad !== '/gibtsnicht') ok(await page.locator('svg .fi-fluegel').count() > 0 && await page.locator('svg .fi-kachel').count() > 0, pfad + ': Logo (Fenster auf der Kachel) da');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
@@ -1194,8 +1198,9 @@ if (teil(10)) {
   ok(!fehlt.length, 'Freigabe: alle Seiten ohne noindex, mit CSP und Canonical auf die Hauptadresse' + (fehlt.length ? ' (fehlt: ' + fehlt.join(', ') + ')' : ''));
   const fb3 = await roh('/fuer-fensterbauer/', B3);
   ok(fb3.text.includes('<meta property="og:image" content="' + KAN + '/og.png">') && fb3.text.includes('"url":"' + KAN + '/fuer-fensterbauer/"'), 'Freigabe: Vorschaubild und strukturierte Daten zeigen auf die Hauptadresse');
-  const js3 = await fetch(B3 + '/assets/app.js'), logo3 = await fetch(B3 + '/apple-touch-icon.png'), weg3 = await fetch(B3 + '/ratgeber/gibtsnicht/');
+  const js3 = await fetch(B3 + '/assets/app.js'), logo3 = await fetch(B3 + '/apple-touch-icon.png'), weg3 = await fetch(B3 + '/ratgeber/gibtsnicht/'), z3 = await fetch(B3 + '/zentrale/');
   ok(js3.headers.get('x-robots-tag') === seo.SPERRE && !logo3.headers.get('x-robots-tag') && weg3.status === 404, 'Freigabe: Skripte bleiben noindex, das Logo darf in die Suche, Unbekanntes bleibt 404');
+  ok(z3.status === 200 && z3.headers.get('x-robots-tag') === seo.SPERRE && z3.headers.get('cache-control') === 'no-store', 'Freigabe: die Zentrale bleibt noindex und wird nicht zwischengespeichert');
   aus();
 
   /* f) Gleichstand: Kopfzeilen, Sitemap, Worker-Routen, Preise */
@@ -1204,7 +1209,9 @@ if (teil(10)) {
   ok(ausDatei['X-Robots-Tag'] === seo.SPERRE && Object.entries(seo.SICHERHEIT).every(([k, v]) => ausDatei[k] === v) && Object.keys(ausDatei).every((k) => k === 'X-Robots-Tag' || k in seo.SICHERHEIT), 'Kopfzeilen in functions/seo.js und web/_headers stimmen überein');
   const dateien = [], such = (d, rel) => { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) such(path10.join(d, e.name), rel + e.name + '/'); else if (e.name === 'index.html') dateien.push(rel); } };
   such(path10.join(WURZEL, 'web'), '/');
-  ok(dateien.length === seo.SEITEN.length && dateien.every((p) => seo.SEITEN.some((s) => s.pfad === p)), 'Sitemap kennt jede Seite in web/ (' + dateien.length + ')');
+  const oeffentlich = dateien.filter((p) => p !== '/zentrale/');
+  ok(oeffentlich.length === seo.SEITEN.length && oeffentlich.every((p) => seo.SEITEN.some((s) => s.pfad === p)), 'Sitemap kennt jede öffentliche Seite in web/ (' + oeffentlich.length + ')');
+  ok(dateien.includes('/zentrale/') && !seo.SEITEN.some((s) => s.pfad.startsWith('/zentrale')) && !seo.istSeite('/zentrale/') && !seo.llms('https://eeziframes.com', {}).includes('zentrale'), 'Zentrale des Inhabers: nicht in Sitemap und llms.txt, keine Seite für Suchmaschinen');
   const routen = JSON.parse((fs10.readFileSync(path10.join(WURZEL, 'wrangler.jsonc'), 'utf8').match(/"run_worker_first":\s*(\[[^\]]*\])/) || [])[1] || '[]');
   const passt = (r, p) => (r.endsWith('*') ? p.startsWith(r.slice(0, -1)) : p === r);
   ok(seo.SEITEN.every((s) => seo.istSeite(s.pfad) && routen.some((r) => passt(r, s.pfad))) && ['/robots.txt', '/sitemap.xml', '/llms.txt'].every((p) => routen.includes(p)), 'Worker übernimmt alle Seiten, robots.txt, sitemap.xml und llms.txt (run_worker_first in wrangler.jsonc)');
@@ -1394,6 +1401,33 @@ if (teil(11)) {
     st.abschliessen(zweite.id);
     const hZ = await hook('checkout.session.completed', st.db.kassen.get(zweite.id)), nachZw = await sp.betriebHolen(bid);
     ok(hZ._status === 200 && nachZw.stripe_subscription === laufend.subscription && X.konto(nachZw.daten) === 'plus' && /Zweites Abo/.test(nachZw.daten.notif[0].t), 'Zweites laufendes Abo (Wettlauf zweier Kassen): das erste bleibt im Konto, Hinweis an den Betrieb');
+    // j) Zwei Abrechnungsläufe zur selben Zeit (Cron und „jetzt abrechnen“ in der Zentrale): eine Rechnung, keine doppelten Posten
+    const gleich = await sp.betriebAnlegen({ auth_user: 'u-gleich11', mail: 'gleich11@beispiel.de', name: 'Gleichzeitig GmbH', plz: '50667', tel_norm: '', name_norm: 'gleich11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bQ1'), buchung('bQ2')], rechnungen: [], notif: [] } });
+    const cusQ = await zd.kundeAnlegen({ id: gleich.id, mail: 'gleich11@beispiel.de', name: 'Gleichzeitig GmbH' }); await sp.betriebFelder(gleich.id, { stripe_customer: cusQ });
+    const zwei = await Promise.all([ko.abrechnungslauf(k, sp, zd, gleich.id), ko.abrechnungslauf(k, sp, zd, gleich.id)]);
+    const rQ = [...st.db.rechnungen.values()].filter((r) => r.customer === cusQ), pQ = [...st.db.posten.values()].filter((it) => it.customer === cusQ), gQ = await sp.betriebHolen(gleich.id);
+    ok(rQ.length === 1 && rQ[0].status === 'open' && pQ.length === 2 && pQ.every((it) => it.invoice === rQ[0].id) && gQ.daten.book.every((b) => b.status === 'berechnet' && b.rechnung === rQ[0].number) && gQ.daten.rechnungen.length === 1 && zwei.some((r) => r.rechnungen === 1), 'Zwei Abrechnungsläufe gleichzeitig: eine Rechnung mit zwei Posten, nichts doppelt (der zweite Lauf bekommt dieselbe Rechnung oder bricht ohne Wirkung ab)');
+    // k) Ein Lauf scheitert heute schon einmal (Entwurf aufgeräumt), danach laufen zwei gleichzeitig: wieder genau eine Rechnung
+    const nach = await sp.betriebAnlegen({ auth_user: 'u-nach11', mail: 'nach11@beispiel.de', name: 'Nachher GmbH', plz: '50667', tel_norm: '', name_norm: 'nach11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bN1'), buchung('bN2'), buchung('bN3')], rechnungen: [], notif: [] } });
+    const cusN = await zd.kundeAnlegen({ id: nach.id, mail: 'nach11@beispiel.de', name: 'Nachher GmbH' }); await sp.betriebFelder(nach.id, { stripe_customer: cusN });
+    let nPost = 0; st.fehlerBei((e) => e.method === 'POST' && e.pfad === '/invoiceitems' && e.p.customer === cusN && ++nPost === 2);
+    const erst = await ko.abrechnungslauf(k, sp, zd, nach.id);
+    st.fehlerBei(null);
+    const leerN = [...st.db.rechnungen.values()].filter((r) => r.customer === cusN).length;
+    const zweiN = await Promise.all([ko.abrechnungslauf(k, sp, zd, nach.id), ko.abrechnungslauf(k, sp, zd, nach.id)]);
+    const rN = [...st.db.rechnungen.values()].filter((r) => r.customer === cusN), pN = [...st.db.posten.values()].filter((it) => it.customer === cusN), gN = await sp.betriebHolen(nach.id);
+    ok(erst.fehler === 1 && leerN === 0 && rN.length === 1 && rN[0].status === 'open' && pN.length === 3 && pN.every((it) => it.invoice === rN[0].id) && gN.daten.book.every((b) => b.status === 'berechnet' && b.rechnung === rN[0].number) && gN.daten.rechnungen.length === 1 && zweiN.filter((r) => r.rechnungen === 1).length === 1, 'Erst ein gescheiterter Lauf (Entwurf gelöscht), dann zwei gleichzeitig: genau eine Rechnung mit drei Posten, der zweite Lauf bricht ohne Wirkung ab');
+    // l) Zentrale „Jetzt abrechnen“: Scheitert Stripe, sagt die Zentrale das (statt „Nichts abzurechnen“); der nächste Versuch rechnet ab
+    const envZ = Object.assign({}, env, { ZENTRALE_PASSWORT: 'pruefung-zentrale-11' });
+    const zRufe = async (pfad, body, keks) => { const r = await api(new Request(B + pfad, { method: body ? 'POST' : 'GET', headers: Object.assign({ accept: 'application/json', origin: B, 'x-zentrale': '1', 'cf-connecting-ip': '198.51.100.11' }, body ? { 'content-type': 'application/json' } : {}, keks ? { cookie: keks } : {}), body: body ? JSON.stringify(body) : undefined }), envZ, null); return Object.assign({ _status: r.status, _kopf: r.headers }, await r.json().catch(() => ({}))); };
+    const zAn = await zRufe('/api/zentrale/anmelden', { passwort: 'pruefung-zentrale-11' }), zKeks = (zAn._kopf.get('set-cookie') || '').split(';')[0];
+    const zb = await sp.betriebAnlegen({ auth_user: 'u-zentrale11', mail: 'zentrale11@beispiel.de', name: 'Zentrale GmbH', plz: '50667', tel_norm: '', name_norm: 'zentrale11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bZ1')], rechnungen: [], notif: [] } });
+    const cusZ = await zd.kundeAnlegen({ id: zb.id, mail: 'zentrale11@beispiel.de', name: 'Zentrale GmbH' }); await sp.betriebFelder(zb.id, { stripe_customer: cusZ });
+    st.fehlerBei((e) => e.method === 'POST' && /\/finalize$/.test(e.pfad) && (st.db.rechnungen.get(e.pfad.split('/')[2]) || {}).customer === cusZ);
+    const zFehl = await zRufe('/api/zentrale/betriebe/' + zb.id + '/abrechnen', {}, zKeks), zVor = await sp.betriebHolen(zb.id);
+    st.fehlerBei(null);
+    const zOk = await zRufe('/api/zentrale/betriebe/' + zb.id + '/abrechnen', {}, zKeks), zNach = await sp.betriebHolen(zb.id), zProt = (await sp.protokollLesen({ betrieb: zb.id, anzahl: 10 })) || [];
+    ok(/^__Host-zentrale=/.test(zKeks) && zFehl._status === 502 && /^Abrechnung fehlgeschlagen: /.test(zFehl.fehler || '') && zVor.daten.book[0].status === 'offen' && zOk._status === 200 && zOk.ergebnis.rechnungen === 1 && zNach.daten.book[0].status === 'berechnet' && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Abrechnung fehlgeschlagen') && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Sammelrechnung erstellt'), 'Zentrale „Jetzt abrechnen“: Scheitert Stripe, stehen der Grund im Dialog und „Abrechnung fehlgeschlagen“ im Protokoll, die Buchung bleibt offen; der nächste Versuch rechnet ab');
     if (process.env.STRIPE_PROTOKOLL) (await import('node:fs')).writeFileSync(process.env.STRIPE_PROTOKOLL, JSON.stringify(st.log, null, 1));
   } catch (e) {
     ok(false, 'Stripe-Anbindung ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
@@ -1444,6 +1478,314 @@ if (teil(12)) {
   } finally {
     globalThis.fetch = echt;
   }
+}
+
+/* ---------- 13. Zentrale des Inhabers: Zugang, Betriebe, Sperren, Löschen, Export, Statistik ohne Cookies, Protokoll ---------- */
+if (teil(13)) {
+  console.log('13. Zentrale des Inhabers');
+  const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js'), stat = await import('../functions/api/statistik.js');
+  const B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-13', GEHEIM = 'JBSWY3DPEHPK3PXPJBSWY3DP', stempel = Date.now().toString(36), seoSperre = (await import('../functions/seo.js')).SPERRE;
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef13' }, env2 = Object.assign({}, env, { ZENTRALE_2FA: GEHEIM });
+  let ipNr = 1; const neueIp = () => '198.51.100.' + (ipNr++);
+  const rufe = async (pfad, o) => {
+    o = o || {}; const h = Object.assign({ accept: 'application/json', origin: B, 'cf-connecting-ip': o.ip || '192.0.2.10' }, o.kopf || {});
+    if (o.body) h['content-type'] = 'application/json';
+    if (o.cookie) { h.cookie = o.cookie; if (o.z !== false) h['x-zentrale'] = '1'; }
+    if (o.token) h.authorization = 'Bearer ' + o.token;
+    const r = await api(new Request(B + pfad, { method: o.method || (o.body ? 'POST' : 'GET'), headers: h, body: o.body ? JSON.stringify(o.body) : undefined }), o.env || env, null);
+    const text = await r.text(); let j = null; try { j = JSON.parse(text); } catch (e) { j = null; }
+    return Object.assign({ _status: r.status, _kopf: r.headers, _text: text }, j || {});
+  };
+  const anmelden = async (e, pw, code, ip) => { const r = await rufe('/api/zentrale/anmelden', { body: { passwort: pw, code: code || '' }, env: e, ip: ip || neueIp() }); const sc = r._kopf.get('set-cookie') || ''; return { r: r, sc: sc, cookie: sc.split(';')[0] }; };
+  const tok = (m) => 'test.' + Buffer.from(m, 'utf8').toString('base64').replace(/=+$/, '');
+  const ruhe = () => new Promise((r) => setTimeout(r, 30)); // Zähler laufen nach der Antwort weiter
+  const sp = spM.speicher(umg.konfig(env));
+  const fenster = [{ name: 'Küche', etage: 'eg', mo: { hm: 1440, hl: 1442, hr: 1438, wm: 1260, wt: 1262, wb: 1258 }, el: { w: 1230, h: 1410 }, fotos: 2 }, { name: 'Bad', etage: 'og', mo: { hm: 900, hl: 900, hr: 900, wm: 800, wt: 800, wb: 800 }, el: { w: 770, h: 870 }, fotos: 2 }];
+  const anzahl = (liste, name) => ((liste || []).find((x) => x.schluessel === name || x.name === name) || { n: 0 }).n;
+  try {
+    // a) Eingerichtet nur mit Passwort ab 12 Zeichen; /api/status verrät nichts über die Zentrale
+    const s0 = await rufe('/api/zentrale/status', { env: { DATEN_ATTRAPPE: '1' } }), s1 = await rufe('/api/zentrale/status', { env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: 'zu-kurz-123' } }), a1 = await rufe('/api/zentrale/anmelden', { body: { passwort: 'zu-kurz-123' }, env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: 'zu-kurz-123' }, ip: neueIp() });
+    const st = await rufe('/api/status', { env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: 'zu-kurz-123', ZENTRALE_2FA: 'kaputt' } });
+    const s2 = await rufe('/api/zentrale/status', { env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, ZENTRALE_2FA: 'kein-base32!' } }), a2 = await rufe('/api/zentrale/anmelden', { body: { passwort: PW }, env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, ZENTRALE_2FA: 'kein-base32!' }, ip: neueIp() });
+    ok(!s0.eingerichtet && s0.grund === 'fehlt' && !s1.eingerichtet && s1.grund === 'zu_kurz' && a1._status === 503 && !/ZENTRALE|zentrale/.test(st._text), 'Zentrale bleibt zu ohne Passwort oder mit weniger als 12 Zeichen; /api/status verrät nichts darüber');
+    ok(!s2.eingerichtet && s2.grund === '2fa_ungueltig' && a2._status === 503, 'Ungültiger zweiter Faktor schließt die Zentrale, statt nur mit Passwort offen zu bleiben');
+    // b) Ohne Sitzung nichts, ohne Kopfzeile x-zentrale nichts
+    const zu = await Promise.all(['/api/zentrale/uebersicht', '/api/zentrale/betriebe', '/api/zentrale/statistik', '/api/zentrale/protokoll', '/api/zentrale/einstellungen', '/api/zentrale/kaeufe', '/api/zentrale/betriebe.csv'].map((p) => rufe(p)));
+    ok(zu.every((r) => r._status === 403), 'Ohne Kopfzeile x-zentrale: jede Anfrage abgewiesen');
+    const zu2 = await Promise.all(['/api/zentrale/uebersicht', '/api/zentrale/betriebe', '/api/zentrale/protokoll'].map((p) => rufe(p, { kopf: { 'x-zentrale': '1' } })));
+    ok(zu2.every((r) => r._status === 401 && r.abgemeldet === true), 'Ohne Sitzung: 401, keine Daten');
+    // c) Falsches Passwort: abgewiesen und protokolliert (gekürzte IP), nach fünf Versuchen gebremst
+    const versuche = []; for (let i = 0; i < 6; i++) versuche.push(await rufe('/api/zentrale/anmelden', { body: { passwort: 'falsch-' + i + '-xxxxxxxx' }, ip: '203.0.113.7' }));
+    ok(versuche.slice(0, 5).every((r) => r._status === 401 && !r._kopf.get('set-cookie')) && versuche[5]._status === 429, 'Falsches Passwort: abgewiesen ohne Cookie; nach fünf Versuchen je IP-Adresse gebremst (429)');
+    // d) Richtiges Passwort: Sitzungs-Cookie nur für HTTPS, für Skripte unlesbar, nur von dieser Seite, 8 Stunden
+    const an1 = await anmelden(env, PW);
+    ok(an1.r._status === 200 && /^__Host-zentrale=[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+;/.test(an1.sc) && /; Path=\//.test(an1.sc) && /; Secure/.test(an1.sc) && /; HttpOnly/.test(an1.sc) && /; SameSite=Strict/.test(an1.sc) && /Max-Age=28800/.test(an1.sc), 'Anmeldung: Cookie __Host-zentrale (Secure, HttpOnly, SameSite=Strict, 8 Stunden)');
+    const C = an1.cookie, mitC = (pfad, o) => rufe(pfad, Object.assign({ cookie: C }, o || {}));
+    ok((await rufe('/api/zentrale/status', { cookie: C })).angemeldet === true && (await mitC('/api/zentrale/uebersicht', { z: false }))._status === 403, 'Mit Sitzung angemeldet; ohne x-zentrale trotz Cookie abgewiesen');
+    // e) Gefälschte, abgelaufene oder mit anderem Passwort unterschriebene Sitzungen
+    const schl = 'eeziframes-zentrale|' + PW + '||pruef13', unterschrift = async (n) => Buffer.from(await umg.hmac(schl, n)).toString('base64url');
+    const nutz = (exp) => b64u(JSON.stringify({ v: 1, iat: Date.now() - 1000, exp: exp, z: false, n: 'pruef' }));
+    const gut = nutz(Date.now() + 60000), alt = nutz(Date.now() - 1000);
+    const echtSelbst = await rufe('/api/zentrale/uebersicht', { cookie: '__Host-zentrale=' + gut + '.' + (await unterschrift(gut)) });
+    const abgelaufen = await rufe('/api/zentrale/uebersicht', { cookie: '__Host-zentrale=' + alt + '.' + (await unterschrift(alt)) });
+    const gefaelscht = await rufe('/api/zentrale/uebersicht', { cookie: C.slice(0, -2) + (C.slice(-2) === 'AA' ? 'BB' : 'AA') });
+    const anderesPw = await rufe('/api/zentrale/uebersicht', { cookie: C, env: Object.assign({}, env, { ZENTRALE_PASSWORT: PW + '-neu' }) });
+    ok(echtSelbst._status === 200 && abgelaufen._status === 401 && gefaelscht._status === 401 && anderesPw._status === 401, 'Sitzung: abgelaufen, verändert oder nach einem Passwortwechsel ungültig');
+
+    // f) Betriebe anlegen wie im echten Ablauf: zwei Projekte, ein Aufmaß aus der App, ein Link geöffnet; Zweitkonto mit gleicher Nummer
+    const evVor = (await stat.auswerten(sp, 7)).ereignisse;
+    const mailA = 'zentrale-a-' + stempel + '@beispiel.de', TA = tok(mailA), tel = '0221 9' + String(Date.now()).slice(-6), firmaA = 'Zentrale Prüf A ' + stempel;
+    const regA = await rufe('/api/konto/registrieren', { body: { firma: firmaA, ap: 'Anna Prüf', tel: tel, plz: '50667', agb: true }, token: TA }), idA = regA.konto.id;
+    const p1 = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Geheim', kontakt: '0171 9999999', adresse: 'Geheimweg 7, 50667 Köln', plan: ['Fenster'], days: 14 }, token: TA });
+    const p2 = await rufe('/api/konto/projekte', { body: { kunde: 'Herr Verborgen', kontakt: 'verborgen@beispiel.de', plan: ['Fenster'], days: 14 }, token: TA });
+    const codeA1 = p1.konto.acc.links.find((l) => l.id === p1.id).code, codeA2 = p2.konto.acc.links.find((l) => l.id === p2.id).code;
+    await rufe('/api/link/' + codeA2 + '/fortschritt', { body: { stufe: 'geoeffnet' } });
+    const einA = await rufe('/api/aufmass', { body: { v: 1, b: codeA1, w: fenster, p: { name: 'Familie Geheim' }, t: Date.now() } });
+    const mailB = 'zentrale-b-' + stempel + '@beispiel.de', TB = tok(mailB);
+    const regB = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf B ' + stempel, ap: 'Bert Prüf', tel: tel, plz: '50667', agb: true }, token: TB }), idB = regB.konto.id;
+    const pB = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Wartet', plan: ['Fenster'], days: 14 }, token: TB }), codeB = pB.konto.acc.links.find((l) => l.id === pB.id).code;
+    const einB = await rufe('/api/aufmass', { body: { v: 1, b: codeB, w: fenster.slice(0, 1), p: { name: 'Familie Wartet' }, t: Date.now() + 1 } });
+    const k1 = await rufe('/api/zahlung/start', { body: { mail: 'kauf13@beispiel.de', kennung: 'pruef13kauf' } }), cs13 = new URL(k1.url).searchParams.get('bezahlt');
+    await rufe('/api/zahlung/pruefen?session=' + cs13 + '&kennung=pruef13kauf'); await rufe('/api/zahlung/pruefen?session=' + cs13 + '&kennung=pruef13kauf');
+    await ruhe();
+    const evNach = (await stat.auswerten(sp, 7)).ereignisse, d = (n) => (evNach[n] || 0) - (evVor[n] || 0);
+    ok(einA.ok && einB.ok && d('registrierung') === 2 && d('doppelkonto_verdacht') === 1 && d('projekt') === 3 && d('aufmass_gesendet') === 2 && d('link_geoeffnet') === 1 && d('kasse') === 1 && d('kauf') === 1, 'Vorgänge für die Statistik: Registrierungen (eine mit Doppelkonto-Verdacht), Projekte, Aufmaße, geöffneter Link, Kasse und Kauf (zweite Prüfung zählt nicht doppelt)');
+
+    // g) Liste und Detail: Kennzahlen; Kunden der Betriebe nur als Projektnummer
+    const liste = await mitC('/api/zentrale/betriebe'), zA = liste.betriebe.find((b) => b.id === idA), zB = liste.betriebe.find((b) => b.id === idB);
+    ok(zA && zA.k.projekte === 2 && zA.k.verschickt === 2 && zA.k.geoeffnet === 2 && zA.k.aufmasse === 1 && zA.k.positionen === 2 && zA.k.fotos === 4 && zA.angemeldet && zA.anmeldungen === 1 && zA.tarif === 'service' && !zA.gesperrt, 'Liste: Projekte, verschickte und geöffnete Links, Aufmaße, Positionen, Fotos, letzte Anmeldung, Tarif');
+    ok(zB && zB.doppelt === firmaA && zB.k.wartend === 1 && !zB.zahlungsart, 'Liste: Doppelkonto-Verdacht und ein Aufmaß, das auf eine Zahlungsart wartet');
+    const detA = await mitC('/api/zentrale/betriebe/' + idA);
+    ok(detA.ok && detA.betrieb.projekte.length === 2 && !/Geheim|Verborgen|Geheimweg|9999999/.test(detA._text) && /Aufmaß · P-\d{4}-\d{3}/.test(detA.betrieb.buchungen[0].text) && detA.betrieb.einblick === false && detA.betrieb.nachrichten === null, 'Detail ohne Daten der Endkunden: keine Namen, Kontakte oder Adressen, Buchungen mit Projektnummer, keine Mitteilungstexte');
+    ok((await mitC('/api/zentrale/betriebe/gibts-nicht-1234'))._status === 404 && (await mitC('/api/zentrale/betriebe/x'))._status === 404, 'Unbekannter Betrieb: 404');
+    const einOhne = await mitC('/api/zentrale/betriebe/' + idA + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs' } });
+    ok(einOhne._status === 403 && /zweite Faktor/.test(einOhne.fehler || ''), 'Einblick in Daten der Endkunden ohne zweiten Faktor: abgewiesen');
+
+    // h) Sperren: Konto, Anmeldung und Kundenlinks ruhen, die Begründung sieht nur der Betrieb selbst
+    ok((await mitC('/api/zentrale/betriebe/' + idA + '/sperren', { body: { grund: 'x' } }))._status === 400, 'Sperren ohne Begründung: abgewiesen');
+    const sp1 = await mitC('/api/zentrale/betriebe/' + idA + '/sperren', { body: { grund: 'Rechnung seit acht Wochen offen' } });
+    const kontoGesperrt = await rufe('/api/konto', { token: TA }), linkGesperrt = await rufe('/api/link/' + codeA2), amGesperrt = await rufe('/api/aufmass', { body: { v: 1, b: codeA2, w: fenster, p: {}, t: Date.now() + 2 } });
+    await rufe('/api/konto/anmelden', { body: { mail: mailA }, ip: neueIp() }); const bestGesperrt = await rufe('/api/konto/bestaetigen', { body: { mail: mailA, code: '123456' }, ip: neueIp() });
+    const fortGesperrt = await rufe('/api/link/' + codeA2 + '/fortschritt', { body: { stufe: 'arbeit', k: 2 } });
+    ok(sp1.ok && sp1.betrieb.gesperrt && kontoGesperrt._status === 403 && kontoGesperrt.gesperrt === true && /gesperrt/.test(kontoGesperrt.fehler) && /acht Wochen/.test(kontoGesperrt.fehler) && bestGesperrt._status === 403 && /acht Wochen/.test(bestGesperrt.fehler), 'Gesperrt: kein Zugang zum Konto, auch nicht über eine neue Anmeldung; die Begründung steht in der Meldung');
+    ok(linkGesperrt._status === 404 && /nicht aktiv/.test(linkGesperrt.fehler) && !/acht Wochen/.test(linkGesperrt._text) && amGesperrt._status === 404 && fortGesperrt.ok && (await sp.betriebHolen(idA)).daten.links.find((l) => l.code === codeA2).status === 'geoeffnet', 'Gesperrt: Kundenlinks ruhen ohne Begründung, kein Aufmaß, kein Fortschritt');
+    const ent = await mitC('/api/zentrale/betriebe/' + idA + '/entsperren', { body: {} }), kontoFrei = await rufe('/api/konto', { token: TA });
+    ok(ent.ok && !ent.betrieb.gesperrt && kontoFrei.ok && kontoFrei.konto.acc.verwaltung === undefined && /wieder frei/.test(kontoFrei.konto.acc.notif[0].t), 'Entsperrt: Konto wieder da, mit Mitteilung; Vermerke der Zentrale verlassen den Server nicht');
+    // i) Notiz, Nachricht, Gutschrift, Doppelkonto-Verdacht aufheben
+    await mitC('/api/zentrale/betriebe/' + idA + '/notiz', { body: { text: 'Telefonat am 15.10.: Rechnung kommt' } });
+    const nach = await mitC('/api/zentrale/betriebe/' + idA + '/nachricht', { body: { titel: 'Neue Funktion', text: 'Ab heute gibt es die Zentrale.' } }), kontoN = await rufe('/api/konto', { token: TA });
+    ok(nach.ok && nach.betrieb.notiz === 'Telefonat am 15.10.: Rechnung kommt' && kontoN.konto.acc.notif[0].t === 'Neue Funktion' && !kontoN._text.includes('Telefonat am 15.10.'), 'Interne Notiz bleibt in der Zentrale; Nachricht erscheint bei den Mitteilungen des Betriebs');
+    const gut2 = await mitC('/api/zentrale/betriebe/' + idB + '/gutschrift', { body: { anzahl: 2, grund: 'Kulanz' } });
+    const nachGut = await sp.betriebHolen(idB);
+    ok(gut2.ok && gut2.freigeschaltet === 1 && nachGut.daten.freeQuota === 2 && !nachGut.daten.links[0].locked && /gutgeschrieben/.test(nachGut.daten.notif[0].t), 'Gutschrift: zwei kostenlose Projekte, das wartende Aufmaß ist sofort frei, Mitteilung an den Betrieb');
+    const dop = await mitC('/api/zentrale/betriebe/' + idB + '/doppelkonto', { body: {} }), dopNein = await mitC('/api/zentrale/betriebe/' + idA + '/doppelkonto', { body: {} });
+    ok(dop.ok && dop.betrieb.doppelt === '' && dop.betrieb.freiKontingent === 3 && dopNein._status === 400, 'Doppelkonto-Verdacht aufgehoben: übliche kostenlose Projekte; ohne Verdacht abgewiesen');
+    ok((await mitC('/api/zentrale/betriebe/' + idB + '/abo', { body: { aktion: 'kuendigen' } }))._status === 400, 'Abo kündigen ohne Abo: abgewiesen');
+
+    // j) Export (Art. 15/20) und Liste als CSV (ohne Formeln aus Eingaben)
+    const exOhne = await mitC('/api/zentrale/betriebe/' + idA + '/export', { body: { grund: 'Auskunftsersuchen des Betriebs' } }), exGet = await mitC('/api/zentrale/betriebe/' + idA + '/export');
+    ok(exOhne._status === 403 && /zweiten Faktor/.test(exOhne.fehler || '') && exGet._status === 404, 'Export enthält Kundendaten: ohne zweiten Faktor abgewiesen, nur per POST');
+    const regC = await rufe('/api/konto/registrieren', { body: { firma: '=SUMME(1;2)', ap: 'Carl Prüf', tel: '0221 8' + String(Date.now()).slice(-6), plz: '50667', agb: true }, token: tok('zentrale-c-' + stempel + '@beispiel.de') });
+    const csv = await mitC('/api/zentrale/betriebe.csv'), csvBytes = new Uint8Array(await (await api(new Request(B + '/api/zentrale/betriebe.csv', { headers: { cookie: C, 'x-zentrale': '1' } }), env, null)).arrayBuffer());
+    ok(csv._status === 200 && /text\/csv/.test(csv._kopf.get('content-type')) && csvBytes[0] === 0xef && csvBytes[1] === 0xbb && csvBytes[2] === 0xbf && csv._text.includes('"Betrieb";"Ansprechpartner"') && csv._text.includes('"' + firmaA + '"') && csv._text.includes('"\'=SUMME(1;2)"') && !csv._text.includes('";"=SUMME'), 'CSV für Excel: Semikolon, UTF-8 mit BOM, Eingaben wie =… werden nicht zur Formel');
+    // k) Löschen (Art. 17): nur mit dem Namen, danach weg; der Löschnachweis bleibt
+    const falschL = await mitC('/api/zentrale/betriebe/' + idA + '/loeschen', { body: { bestaetigung: 'Falscher Name' } });
+    const lo = await mitC('/api/zentrale/betriebe/' + idA + '/loeschen', { body: { bestaetigung: ' ' + firmaA.toUpperCase() + ' ', grund: 'Löschwunsch per E-Mail' } });
+    const prot = await mitC('/api/zentrale/protokoll'), nachweis = prot.eintraege.find((e) => e.art === 'loeschen' && e.betrieb === idA), kontoWeg = await rufe('/api/konto', { token: TA });
+    ok(falschL._status === 400 && (await sp.betriebHolen(idA)) === null && lo.ok && lo.geloescht === firmaA && nachweis && nachweis.daten.betrieb === firmaA && Array.isArray(nachweis.daten.rechnungen) && !JSON.stringify(nachweis).includes(mailA) && kontoWeg._status === 404, 'Löschen nur mit dem Namen; danach ist das Konto weg, der Löschnachweis (ohne E-Mail) steht im Protokoll');
+    await mitC('/api/zentrale/betriebe/' + regC.konto.id + '/loeschen', { body: { bestaetigung: '=SUMME(1;2)' } });
+
+    // l) Statistik ohne Cookies: was zählt und was nicht
+    const vor = await stat.auswerten(sp, 7);
+    const iphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
+    const aufruf = (pfad, kopf, method) => stat.seitenaufruf(new Request(B + pfad, { method: method || 'GET', headers: Object.assign({ 'user-agent': iphone }, kopf || {}) }), env);
+    await aufruf('/app/', { referer: 'https://www.google.de/', 'cf-ipcountry': 'AT' });
+    await aufruf('/ratgeber/fenster-ausmessen/', { referer: B + '/app/' });
+    await aufruf('/', { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' });
+    await aufruf('/', { dnt: '1' }); await aufruf('/', { 'sec-gpc': '1' }); await aufruf('/', { cookie: '__Host-zentrale=abc.def' }); await aufruf('/', { 'sec-purpose': 'prefetch' });
+    await aufruf('/zentrale/'); await aufruf('/impressum/', {}, 'POST'); await aufruf('/llms.txt', { 'user-agent': 'ChatGPT-User/1.0' });
+    await aufruf('/fuer-fensterbauer/?utm_source=newsletter'); await aufruf('/ratgeber/?utm_source=max.mustermann@gmail.com', { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36' }); await aufruf('/app/?von=pdf', { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36' });
+    const nachS = await stat.auswerten(sp, 7), dS = (art, name) => anzahl(nachS[art], name) - anzahl(vor[art], name);
+    ok(dS('herkunft', 'Kampagne: (andere)') === 1 && !JSON.stringify(nachS).includes('mustermann'), 'Kampagnen: nur bekannte Namen einzeln, alles andere als „(andere)“ (keine E-Mail-Adresse in der Statistik)');
+    ok(nachS.summe.aufrufe - vor.summe.aufrufe === 5 && nachS.summe.besuche - vor.summe.besuche === 4 && dS('seiten', '/app/') === 2 && dS('seiten', '/ratgeber/fenster-ausmessen/') === 1 && dS('seiten', '/zentrale/') === 0, 'Statistik: Seitenaufrufe und Besuche (ein Aufruf von einer eigenen Seite ist kein neuer Besuch); die Zentrale zählt nicht');
+    ok(dS('herkunft', 'Google') === 1 && dS('herkunft', 'Kampagne: newsletter') === 1 && dS('herkunft', 'Aufmaßblatt (QR-Code)') === 1 && dS('geraet', 'Telefon') === 2 && dS('geraet', 'Computer') === 2 && dS('browser', 'Safari') === 2 && dS('system', 'iOS') === 2 && dS('land', 'AT') === 1 && dS('bots', 'Google') === 1 && dS('dateien', '/llms.txt') === 1, 'Statistik: Herkunft (Suchmaschine, Kampagne, QR-Code des Aufmaßblatts), Gerät, Browser, System, Land, Bots als Familie, llms.txt');
+    ok(nachS.summe.aufrufe - vor.summe.aufrufe === 5 && dS('herkunft', 'Direkt') === 0, 'Nicht gezählt: Do Not Track, Global Privacy Control, der angemeldete Inhaber, Vorab-Laden, POST');
+    const roh = await stat.auswerten(Object.assign({}, sp, { statistikAuswerten: undefined }), 30), verd = await stat.auswerten(sp, 30);
+    ok(JSON.stringify(roh.summe) === JSON.stringify(verd.summe) && JSON.stringify(roh.reihe) === JSON.stringify(verd.reihe) && JSON.stringify(roh.herkunft) === JSON.stringify(verd.herkunft) && JSON.stringify(roh.ereignisse) === JSON.stringify(verd.ereignisse), 'Auswertung verdichtet (Datenbankfunktion) und aus den einzelnen Tageszählern ergibt dasselbe');
+    const stZ = await mitC('/api/zentrale/statistik?tage=30');
+    ok(stZ.ok && stZ.tabelle && stZ.tage === 30 && stZ.reihe.length === 30 && stZ.reihe[29].aufrufe >= 4 && stZ.seiten.some((x) => x.name === 'App') && !/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(JSON.stringify(stZ)), 'Auswertung: 30 Tage als Reihe, Seiten mit Namen, keine IP-Adressen');
+
+    // m) Übersicht, Käufe, Einstellungen, Protokoll
+    const ue = await mitC('/api/zentrale/uebersicht');
+    ok(ue.ok && ue.kpi.betriebe >= 1 && ue.kpi.kaeufe >= 1 && ue.wochen.length === 12 && ue.hinweise.some((h) => /Zweiter Faktor fehlt/.test(h.text)) && !ue._text.includes(PW), 'Übersicht: Kennzahlen, zwölf Wochen, Hinweis auf den fehlenden zweiten Faktor, kein Passwort');
+    const ka = await mitC('/api/zentrale/kaeufe');
+    ok(ka.ok && ka.kaeufe.some((x) => x.mail === 'kauf13@beispiel.de' && x.status === 'bezahlt' && x.betrag === 7.99) && ka.summe.anzahl >= 1, 'Käufe: Aufmaßblätter mit E-Mail, Betrag und Stand');
+    const ei = await mitC('/api/zentrale/einstellungen');
+    ok(ei.ok && ei.dienste.daten.art === 'attrappe' && ei.dienste.statistik === true && ei.dienste.protokoll === true && ei.zentrale.zweiFaktor === false && !ei._text.includes(PW) && !ei._text.includes('pruef13'), 'Einstellungen: Dienste und Tabellen, kein Passwort und kein Geheimnis in der Antwort');
+    const pr = await mitC('/api/zentrale/protokoll'), arten = pr.eintraege.map((e) => e.art), fehl = pr.eintraege.find((e) => e.art === 'anmeldung_fehlgeschlagen' && e.netz === '203.0.113.0/24');
+    ok(pr.tabelle && ['anmeldung', 'sperren', 'entsperren', 'notiz', 'nachricht', 'gutschrift', 'doppelkonto', 'liste_export', 'loeschen'].every((a) => arten.includes(a)) && fehl && !JSON.stringify(pr).includes('203.0.113.7') && pr.eintraege[0].zeit >= pr.eintraege[pr.eintraege.length - 1].zeit, 'Protokoll: Anmeldungen (IP nur gekürzt) und jeder Eingriff, neueste zuerst');
+    const ab = await rufe('/api/zentrale/abmelden', { body: {}, cookie: C });
+    ok(/__Host-zentrale=;.*Max-Age=0/.test(ab._kopf.get('set-cookie') || ''), 'Abmelden löscht das Cookie');
+
+    // n) Zweiter Faktor (TOTP): Code nötig, nur einmal gültig; Einblick in Endkundendaten mit Anlass und Protokoll
+    const schritt = Math.floor(Date.now() / 30000), richtig = await ze.totpCode(GEHEIM, schritt), falschCode = richtig === '123456' ? '654321' : '123456';
+    const t1 = await anmelden(env2, PW, ''), t2 = await anmelden(env2, PW, falschCode), t3 = await anmelden(env2, PW, richtig), t4 = await anmelden(env2, PW, richtig);
+    const zf = await rufe('/api/zentrale/status', { env: env2 });
+    ok(zf.zweiFaktor === true && t1.r._status === 401 && t2.r._status === 401 && t3.r._status === 200 && t4.r._status === 401 && (await rufe('/api/zentrale/uebersicht', { cookie: C, env: env2 }))._status === 401, 'Zweiter Faktor: ohne oder mit falschem Code keine Anmeldung, jeder Code nur einmal; ältere Sitzungen ohne Faktor gelten nicht mehr');
+    ok((await ze.totpCode('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 1)) === '287082' && (await ze.totpCode('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 37037036)) === '081804', 'TOTP rechnet wie RFC 6238 (Testvektoren für SHA-1)');
+    const C2 = t3.cookie;
+    const mailE = 'zentrale-e-' + stempel + '@beispiel.de', TE = tok(mailE), regE = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf E ' + stempel, ap: 'Eva Prüf', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', agb: true }, token: TE });
+    const pE = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Einblick', kontakt: '0171 5555555', adresse: 'Lupenweg 3', plan: ['Fenster'], days: 14 }, token: TE }), codeE = pE.konto.acc.links.find((l) => l.id === pE.id).code;
+    await rufe('/api/aufmass', { body: { v: 1, b: codeE, w: fenster, p: { name: 'Familie Einblick', notiz: 'Bitte Rollladen prüfen' }, t: Date.now() + 3 } });
+    const codeJetzt = async () => { ze.codesVergessen(); return ze.totpCode(GEHEIM, Math.floor(Date.now() / 30000)); }; // jeder Code gilt einmal; die Prüfung wartet nicht auf den nächsten
+    const wieder = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs vom 15.10.', code: richtig }, cookie: C2, env: env2 });
+    ok(wieder._status === 401 && /nur einmal/.test(wieder.fehler || ''), 'Der Code der Anmeldung gilt nicht noch einmal für den Einblick (ein abgefangener Anmeldecode öffnet keine Kundendaten)');
+    const kurz = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'x', code: await codeJetzt() }, cookie: C2, env: env2 });
+    const ohneCode = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs vom 15.10.' }, cookie: C2, env: env2 });
+    const blick = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs vom 15.10.', code: await codeJetzt() }, cookie: C2, env: env2 });
+    ok(ohneCode._status === 401 && /Code/.test(ohneCode.fehler || ''), 'Einblick verlangt einen frischen Code aus der Authenticator-App');
+    // Raten des Codes mit einer gestohlenen Sitzung: nach fünf falschen Codes ist die Sitzung beendet, jeder Versuch im Protokoll
+    ze.codesVergessen(); const t5 = await anmelden(env2, PW, await ze.totpCode(GEHEIM, Math.floor(Date.now() / 30000))), C5 = t5.cookie, rateErg = [];
+    const echteCodes = new Set(await Promise.all([-1, 0, 1].map((d) => ze.totpCode(GEHEIM, Math.floor(Date.now() / 30000) + d))));
+    const falsche = ['111111', '222222', '333333', '444444', '555555', '666666', '777777'].filter((c) => !echteCodes.has(c)).slice(0, 5);
+    for (const c of falsche) rateErg.push(await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs', code: c }, cookie: C5, env: env2 }));
+    const danach = await rufe('/api/zentrale/uebersicht', { cookie: C5, env: env2 }), protCode = await rufe('/api/zentrale/protokoll?art=code_falsch', { cookie: C2, env: env2 });
+    ok(t5.r._status === 200 && rateErg.every((r) => r._status === 401) && rateErg[4].abgemeldet === true && danach._status === 401 && protCode.eintraege.filter((e) => /Falscher Code/.test(e.text)).length >= 5, 'Fünf falsche Codes für heikle Schritte beenden die Sitzung; jeder Fehlversuch steht im Protokoll');
+    const pj = blick.betrieb && blick.betrieb.projekte[0], prot2 = await rufe('/api/zentrale/protokoll?art=einblick', { cookie: C2, env: env2 });
+    ok(kurz._status === 400 && blick.ok && blick.betrieb.einblick === true && pj.kunde === 'Familie Einblick' && pj.adresse === 'Lupenweg 3' && pj.fenster.length === 2 && pj.fenster[0].oeffnung === '1258 × 1438' && pj.angaben.notiz === 'Bitte Rollladen prüfen' && prot2.eintraege.some((e) => e.betrieb === regE.konto.id && e.text === 'Support-Anfrage des Betriebs vom 15.10.'), 'Einblick mit zweitem Faktor und Anlass: Namen, Kontakt, Objekt und Aufmaß in Kurzform; im Protokoll mit Anlass');
+    // Export mit zweitem Faktor: Anlass und frischer Code, Kundendaten drin, gesperrte (unbezahlte) Aufmaße nur als Umriss
+    const mailF = 'zentrale-f-' + stempel + '@beispiel.de', TF = tok(mailF), telF = '0221 5' + String(Date.now()).slice(-6);
+    await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F1 ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: true }, token: tok('zentrale-f1-' + stempel + '@beispiel.de') });
+    const regF = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: true }, token: TF });
+    const pF = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Unbezahlt', kontakt: '0171 4444444', plan: ['Fenster'], days: 14 }, token: TF }), codeF = pF.konto.acc.links.find((l) => l.id === pF.id).code;
+    await rufe('/api/aufmass', { body: { v: 1, b: codeF, w: fenster, p: { name: 'Familie Unbezahlt' }, t: Date.now() + 4 } });
+    await rufe('/api/zentrale/betriebe/' + regF.konto.id + '/notiz', { body: { text: 'Notiz für den Export' }, cookie: C2, env: env2 });
+    const exKurz = await rufe('/api/zentrale/betriebe/' + regF.konto.id + '/export', { body: { grund: 'x', code: await codeJetzt() }, cookie: C2, env: env2 });
+    const ex = await rufe('/api/zentrale/betriebe/' + regF.konto.id + '/export', { body: { grund: 'Auskunftsersuchen des Betriebs vom 15.10.', code: await codeJetzt() }, cookie: C2, env: env2 }), exJ = JSON.parse(ex._text || '{}');
+    const lF = ((exJ.daten || {}).links || [])[0] || {}, protEx = await rufe('/api/zentrale/protokoll?art=export', { cookie: C2, env: env2 });
+    ok(exKurz._status === 400 && ex._status === 200 && /attachment; filename="eeziframes-export-zentrale-pr/.test(ex._kopf.get('content-disposition')) && exJ.konto.mail === mailF && lF.kunde === 'Familie Unbezahlt' && lF.locked === true && lF.aufmass.gesperrt === true && !ex._text.includes('1258') && exJ.daten.verwaltung.notiz === 'Notiz für den Export' && exJ.eingriffe.some((e) => e.art === 'notiz') && !exJ.eingriffe.some((e) => /^anmeldung/.test(e.art)) && protEx.eintraege.some((e) => e.betrieb === regF.konto.id && /Auskunftsersuchen/.test(e.text)), 'Export mit zweitem Faktor, Anlass und Code: Daten mit Notiz und Eingriffen, unbezahlte Aufmaße nur als Umriss, im Protokoll vermerkt');
+    const loOhne = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/loeschen', { body: { bestaetigung: 'Zentrale Prüf E ' + stempel }, cookie: C2, env: env2 });
+    const loMit = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/loeschen', { body: { bestaetigung: 'Zentrale Prüf E ' + stempel, code: await codeJetzt() }, cookie: C2, env: env2 });
+    ok(loOhne._status === 401 && loMit.ok && loMit.nachweis === true && (await sp.betriebHolen(regE.konto.id)) === null, 'Mit zweitem Faktor verlangt auch das Löschen einen frischen Code; danach ist das Konto weg, mit Löschnachweis');
+    for (const fid of [regF.konto.id]) await rufe('/api/zentrale/betriebe/' + fid + '/loeschen', { body: { bestaetigung: 'Zentrale Prüf F ' + stempel, code: await codeJetzt() }, cookie: C2, env: env2 });
+
+    // o) Aufräumen: Fristen fürs Protokoll, liegengebliebene Kassen
+    const tage = (n) => new Date(Date.now() - n * 864e5).toISOString();
+    await sp.protokollSchreiben({ art: 'anmeldung', text: 'alt-91', zeit: tage(91) }); await sp.protokollSchreiben({ art: 'anmeldung', text: 'neu-80', zeit: tage(80) });
+    await sp.protokollSchreiben({ art: 'sperren', text: 'alt-4j', zeit: tage(4 * 365) }); await sp.protokollSchreiben({ art: 'sperren', text: 'neu-1j', zeit: tage(365) });
+    await sp.zahlungAnlegen({ stripe_session: 'cs_alt_offen_' + stempel, status: 'offen', mail: 'alt@beispiel.de', created_at: tage(31) }); await sp.zahlungAnlegen({ stripe_session: 'cs_alt_bezahlt_' + stempel, status: 'bezahlt', mail: 'b@beispiel.de', created_at: tage(400) }); await sp.zahlungAnlegen({ stripe_session: 'cs_neu_offen_' + stempel, status: 'offen', mail: 'n@beispiel.de', created_at: tage(5) });
+    const wegR = await ze.aufraeumen(umg.konfig(env), sp), texte = (await sp.protokollLesen({ anzahl: 500 })).map((e) => e.text);
+    ok(wegR.ok && !texte.includes('alt-91') && texte.includes('neu-80') && !texte.includes('alt-4j') && texte.includes('neu-1j') && !(await sp.zahlungHolen('cs_alt_offen_' + stempel)) && !!(await sp.zahlungHolen('cs_alt_bezahlt_' + stempel)) && !!(await sp.zahlungHolen('cs_neu_offen_' + stempel)), 'Aufräumen: Anmeldungen nach 90 Tagen, Eingriffe nach 3 Jahren, nicht bezahlte Kassen nach 30 Tagen; bezahlte bleiben');
+  } catch (e) {
+    ok(false, 'Zentrale ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
+  }
+
+  // p) Oberfläche im Browser, auf einem eigenen Testserver mit Zentrale
+  const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
+  const port = 8890 + Math.floor(Math.random() * 90), B4 = 'http://localhost:' + port;
+  const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind.stderr.on('data', (dd) => process.stderr.write('  [Server 4] ' + dd));
+  const aus4 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus4);
+  try {
+    let bereit = false; for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B4 + '/api/zentrale/status').then((r) => r.json())).eingerichtet === true; } catch (e) { /* noch nicht */ } }
+    ok(bereit, 'Testserver mit Zentrale läuft: ' + B4);
+    const http = async (p, body, token) => { const r = await fetch(B4 + p, { method: body ? 'POST' : 'GET', headers: Object.assign({ accept: 'application/json', origin: B4 }, body ? { 'content-type': 'application/json' } : {}, token ? { authorization: 'Bearer ' + token } : {}), body: body ? JSON.stringify(body) : undefined }); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
+    const mailU = 'ui-' + stempel + '@beispiel.de', TU = tok(mailU);
+    await http('/api/konto/registrieren', { firma: 'Fensterbau Oberfläche', ap: 'Uwe Ober', tel: '0221 6' + String(Date.now()).slice(-6), plz: '50667', agb: true }, TU);
+    const pr = await http('/api/konto/projekte', { kunde: 'Familie Unsichtbar', kontakt: '0171 1111111', plan: ['Fenster'], days: 14 }, TU), codeU = pr.konto.acc.links.find((l) => l.id === pr.id).code;
+    await http('/api/aufmass', { v: 1, b: codeU, w: fenster, p: { name: 'Familie Unsichtbar' }, t: Date.now() });
+    const MENSCH = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36'; // Headless-Chromium meldet sich als HeadlessChrome und zählt deshalb als Bot
+    const zctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true, userAgent: MENSCH }), zp = await neueSeite(zctx, B4);
+    const r0 = await zp.goto(B4 + '/zentrale/', { waitUntil: 'networkidle' });
+    ok(r0.headers()['x-robots-tag'] === seoSperre && r0.headers()['cache-control'] === 'no-store' && /Zentrale/.test(await zp.title()) && await zp.locator('#z-pw').count() === 1 && await zp.locator('svg .fi-kachel').count() === 1, '/zentrale/: Anmeldung mit Logo, noindex, nicht zwischengespeichert');
+    await zp.fill('#z-pw', 'falsch-falsch-falsch'); await zp.click('form[data-form="anmelden"] button[type="submit"]'); await zp.waitForSelector('.z-login .err');
+    ok(/stimmt nicht/.test(await zp.locator('.z-login .err').textContent()) && await zp.locator('.z-stats').count() === 0, 'Falsches Passwort: Hinweis, keine Zentrale');
+    zp.probleme = zp.probleme.filter((x) => !/401/.test(x));
+    await zp.fill('#z-pw', PW); await zp.click('form[data-form="anmelden"] button[type="submit"]'); await zp.waitForSelector('.z-stats');
+    const ck = (await zctx.cookies()).find((c) => c.name === '__Host-zentrale');
+    ok(!!ck && ck.httpOnly && ck.secure && ck.sameSite === 'Strict' && !(await zp.evaluate(() => document.cookie)).includes('zentrale') && await zp.evaluate(() => !Object.keys(localStorage).length && !Object.keys(sessionStorage).length), 'Sitzung als Cookie, das kein Skript lesen kann; nichts im Speicher des Browsers');
+    ok(/Zweiter Faktor fehlt/.test(await zp.evaluate(() => document.body.innerText)) && await zp.locator('.z-chart svg').count() >= 3, 'Übersicht: Kennzahlen, Diagramme, Hinweis auf den zweiten Faktor');
+    await foto(zp, 'zentrale-uebersicht');
+    await zp.goto(B4 + '/zentrale/#betriebe'); await zp.waitForSelector('.z-tab');
+    await zp.fill('#z-suche', 'Oberfläche'); await zp.waitForTimeout(150);
+    ok(await zp.locator('.z-tab tbody tr').count() === 1 && (await zp.inputValue('#z-suche')) === 'Oberfläche', 'Suche filtert beim Tippen, das Feld behält den Fokus und den Text');
+    await zp.click('.z-tab tbody tr td:nth-child(3)'); await zp.waitForSelector('.z-aktionen');
+    const det = await zp.evaluate(() => document.body.innerText);
+    ok(/Fensterbau Oberfläche/.test(det) && /P-\d{4}-001/.test(det) && !/Unsichtbar|1111111/.test(det), 'Klick auf die Zeile öffnet den Betrieb; Kunden nur als Projektnummer');
+    await foto(zp, 'zentrale-betrieb');
+    await zp.click('[data-act="dlg"][data-v="sperren"]'); await zp.waitForSelector('#d-grund');
+    ok(await zp.evaluate(() => document.activeElement && document.activeElement.id === 'd-grund'), 'Dialog „Sperren“: Fokus im Feld für die Begründung');
+    await zp.fill('#d-grund', 'Prüfung der Sperre'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForSelector('.z-hinweis.bad');
+    ok(/Prüfung der Sperre/.test(await zp.locator('.z-hinweis.bad').textContent()), 'Gesperrt: Hinweis mit Begründung am Betrieb');
+    const pctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), pp = await neueSeite(pctx, B4);
+    await pp.goto(B4 + '/', { waitUntil: 'networkidle' });
+    await pp.evaluate((s) => localStorage.setItem('aufmass.sitzung', JSON.stringify(s)), { token: TU, refresh: 'test-refresh', mail: mailU });
+    await pp.reload({ waitUntil: 'networkidle' }); await pp.waitForTimeout(500);
+    const gesp = await pp.evaluate(() => ({ online: Server.online(), sitzung: localStorage.getItem('aufmass.sitzung'), toast: (document.getElementById('toast') || {}).textContent || '' }));
+    pp.probleme = pp.probleme.filter((x) => !/403/.test(x));
+    ok(!gesp.online && !gesp.sitzung && /gesperrt/.test(gesp.toast) && /Prüfung der Sperre/.test(gesp.toast), 'Betriebsbereich: gesperrter Betrieb wird abgemeldet und sieht die Begründung');
+    const lk = await http('/api/link/' + codeU);
+    ok(lk._status === 404 && /nicht aktiv/.test(lk.fehler || ''), 'Kundenlink eines gesperrten Betriebs ruht');
+    await zp.click('[data-act="dlg"][data-v="entsperren"]'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForFunction(() => !document.querySelector('.z-hinweis.bad'));
+    await pp.evaluate((s) => localStorage.setItem('aufmass.sitzung', JSON.stringify(s)), { token: TU, refresh: 'test-refresh', mail: mailU });
+    await pp.reload({ waitUntil: 'networkidle' }); await pp.waitForTimeout(500);
+    ok(await pp.evaluate(() => Server.online()), 'Entsperrt: der Betrieb kommt wieder in sein Konto');
+    sauber(pp, 'Betriebsbereich mit Sperre ohne Fehler'); await pctx.close();
+    await zp.click('[data-act="dlg"][data-v="export"]'); await zp.waitForSelector('.z-dialog #d-grund');
+    const warnt = /zweite Faktor eingerichtet sein/.test(await zp.locator('.z-dialog').textContent());
+    await zp.fill('#d-grund', 'Auskunftsersuchen zur Prüfung'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForSelector('.z-dialog .err');
+    ok(warnt && /zweiten Faktor/.test(await zp.locator('.z-dialog .err').textContent()), 'Export ohne zweiten Faktor: Dialog warnt, der Server lehnt ab');
+    zp.probleme = zp.probleme.filter((x) => !/403/.test(x));
+    await zp.click('.z-dialog [data-act="dlg-zu"]');
+    // Eigene Aufrufe zählen nicht, fremde schon
+    const summe = () => zp.evaluate(async () => (await (await fetch('/api/zentrale/statistik?tage=7', { headers: { 'x-zentrale': '1' } })).json()).summe.aufrufe);
+    const vorA = await summe();
+    await zp.goto(B4 + '/', { waitUntil: 'networkidle' });
+    const fctx = await browser.newContext({ locale: 'de-DE', userAgent: MENSCH }), fp = await fctx.newPage(); await fp.goto(B4 + '/ratgeber/fenster-ausmessen/', { waitUntil: 'networkidle' }); await fctx.close();
+    await zp.goto(B4 + '/zentrale/#statistik'); await zp.waitForSelector('.z-chart svg'); await zp.waitForTimeout(200);
+    ok((await summe()) === vorA + 1, 'Statistik im Browser: Aufrufe des angemeldeten Inhabers zählen nicht, fremde schon');
+    await foto(zp, 'zentrale-statistik');
+    await zp.goto(B4 + '/zentrale/#einstellungen'); await zp.waitForSelector('[data-act="2fa-neu"]'); await zp.click('[data-act="2fa-neu"]'); await zp.waitForSelector('.z-qr');
+    const geheimUI = await zp.inputValue('#z-geheim');
+    await zp.fill('#z-probe', '000000'); await zp.click('form[data-form="2fa-probe"] button[type="submit"]'); await zp.waitForTimeout(150);
+    const falschUI = await zp.locator('#z-2fa .err').count();
+    await zp.fill('#z-probe', await ze.totpCode(geheimUI, Math.floor(Date.now() / 30000))); await zp.click('form[data-form="2fa-probe"] button[type="submit"]'); await zp.waitForSelector('#z-2fa .z-hinweis.ok');
+    ok(/^[A-Z2-7]{32}$/.test(geheimUI) && falschUI === 1 && /ZENTRALE_2FA/.test(await zp.locator('#z-2fa .z-hinweis.ok').textContent()), 'Zweiter Faktor einrichten: Schlüssel und QR-Code im Browser, falscher Code abgewiesen, richtiger bestätigt, Anleitung für Cloudflare');
+    await foto(zp, 'zentrale-zweiter-faktor');
+    sauber(zp, 'Zentrale ohne Fehler, ohne CSP-Verstöße, ohne fremde Server');
+    // Gestaltung: erlaubte Schriftgrößen, Ziele ab 44 px, kein Querscrollen, am Schreibtisch und am Telefon, hell und dunkel
+    const messen = (seite) => seite.evaluate(() => {
+      const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
+      const groessen = new Set(), klein = [];
+      document.querySelectorAll('body *').forEach((el) => { if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+      document.querySelectorAll('a, button, input, select, textarea, summary').forEach((el) => { if (!sichtbar(el)) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || el.value || '').trim().slice(0, 24) + ')'); });
+      return { groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.scrollingElement.scrollWidth > window.innerWidth + 1 };
+    });
+    const seiten = ['#uebersicht', '#betriebe', '#kaeufe', '#statistik', '#protokoll', '#einstellungen'];
+    const pruefeGestaltung = async (ctxOpt, erlaubt, name) => {
+      const c = await browser.newContext(Object.assign({ locale: 'de-DE' }, ctxOpt));
+      const s = await neueSeite(c, B4), befund = [];
+      await s.goto(B4 + '/zentrale/#betriebe', { waitUntil: 'networkidle' }); await s.fill('#z-pw', PW); await s.click('form[data-form="anmelden"] button[type="submit"]'); await s.waitForSelector('.z-tab'); const idDetail = await s.evaluate(() => (document.querySelector('.z-zeile') || {}).getAttribute('href'));
+      for (const h of seiten.concat([idDetail])) {
+        await s.goto(B4 + '/zentrale/' + h, { waitUntil: 'networkidle' }); await s.waitForTimeout(250);
+        const m = await messen(s), fremd = m.groessen.filter((g) => !erlaubt.includes(g));
+        if (fremd.length || m.klein.length || m.quer) befund.push(h + ': ' + (fremd.length ? 'Größen ' + fremd.join(', ') + ' ' : '') + (m.klein.length ? 'klein ' + m.klein.slice(0, 4).join('; ') + ' ' : '') + (m.quer ? 'Querscrollen' : ''));
+      }
+      const animiert = ctxOpt.reducedMotion ? await s.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length) : 0;
+      ok(!befund.length && !animiert, 'Gestaltung ' + name + ': nur Schriftgrößen ' + erlaubt.join(' · ') + ', Ziele ab 44 px, kein Querscrollen' + (ctxOpt.reducedMotion ? ', bei „weniger Bewegung“ keine Animation' : '') + (befund.length ? '\n      ' + befund.join('\n      ') : '') + (animiert ? ' (' + animiert + ' laufend)' : ''));
+      if (name === 'Telefon, dunkel') { await s.goto(B4 + '/zentrale/#uebersicht', { waitUntil: 'networkidle' }); await s.waitForTimeout(200); ok((await s.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(17, 17, 16)', 'Dunkler Modus: Papier aus den Tokens'); await foto(s, 'zentrale-telefon-dunkel'); }
+      sauber(s, 'Gestaltung ' + name + ' ohne Fehler'); await c.close();
+    };
+    await pruefeGestaltung({ viewport: { width: 1280, height: 900 } }, [13, 15, 17, 22, 30], 'Schreibtisch');
+    await pruefeGestaltung({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, colorScheme: 'dark', reducedMotion: 'reduce' }, [13, 15, 17, 22, 26], 'Telefon, dunkel');
+    await zp.click('[data-act="abmelden"]'); await zp.waitForSelector('#z-pw');
+    const nachAb = await zp.evaluate(async () => (await fetch('/api/zentrale/uebersicht', { headers: { 'x-zentrale': '1' } })).status);
+    zp.probleme = zp.probleme.filter((x) => !/401/.test(x));
+    ok(nachAb === 401, 'Abmelden: zurück zur Anmeldung, Daten nicht mehr erreichbar');
+    await zctx.close();
+  } catch (e) {
+    ok(false, 'Zentrale im Browser ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
+  } finally { aus4(); }
 }
 
 await browser.close();

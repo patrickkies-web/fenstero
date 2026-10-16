@@ -1,5 +1,6 @@
 -- eeziframes · Datenbank (Supabase/Postgres)
--- Einmal im SQL-Editor des Supabase-Projekts ausführen (docs/ONLINE-STELLEN.md, Stufe 2).
+-- Im SQL-Editor des Supabase-Projekts ausführen (docs/ONLINE-STELLEN.md, Stufe 2). Die Datei lässt sich gefahrlos erneut ausführen:
+-- Vorhandenes bleibt, Neues (zuletzt: Protokoll und Statistik der Zentrale) kommt dazu.
 -- Der Server greift ausschließlich mit dem geheimen Schlüssel zu (sb_secret_… bzw. früher service_role, functions/api/speicher.js);
 -- Browser haben keinen direkten Zugriff: Row Level Security ist an, ohne Regeln für anon/authenticated.
 
@@ -48,15 +49,65 @@ create table if not exists public.ereignisse (
   created_at  timestamptz not null default now()
 );
 
+-- Zentrale des Inhabers: Protokoll der Anmeldungen und Eingriffe (sperren, löschen, Export, Einblick …), siehe functions/api/zentrale.js.
+-- Aufbewahrung: Anmeldungen 90 Tage, Eingriffe und Löschnachweise 3 Jahre (der Server räumt beim Abrechnungslauf auf).
+create table if not exists public.protokoll (
+  id       uuid primary key default gen_random_uuid(),
+  zeit     timestamptz not null default now(),
+  art      text not null,                                  -- anmeldung | anmeldung_fehlgeschlagen | sperren | entsperren | loeschen | export | einblick | notiz | gutschrift | nachricht | abo | abrechnung | …
+  betrieb  uuid,                                           -- betroffenes Konto (bleibt nach dem Löschen als Nachweis stehen)
+  text     text not null default '',                       -- kurze Beschreibung, z. B. die Begründung
+  daten    jsonb not null default '{}'::jsonb,             -- Einzelheiten, z. B. der Löschnachweis
+  netz     text                                            -- nur bei Anmeldungen: gekürzte IP-Adresse (/24 bzw. /48)
+);
+create index if not exists protokoll_zeit_idx on public.protokoll (zeit desc);
+create index if not exists protokoll_betrieb_idx on public.protokoll (betrieb, zeit desc);
+
+-- Eigene Statistik ohne Cookies: nur Tageszähler je Schlüssel (z. B. aufruf:/app/, herkunft:Google, ereignis:kauf),
+-- keine IP-Adressen, keine Kennungen, keine einzelnen Aufrufe (functions/api/statistik.js)
+create table if not exists public.statistik (
+  tag         date not null,
+  schluessel  text not null,
+  anzahl      integer not null default 0,
+  primary key (tag, schluessel)
+);
+-- Zählt eine Liste von Schlüsseln für einen Tag hoch (ein Aufruf je Seitenaufruf oder Vorgang)
+create or replace function public.eeziframes_zaehlen(p_tag date, p_schluessel text[]) returns void
+language sql security invoker set search_path = '' as $$
+  insert into public.statistik (tag, schluessel, anzahl)
+  select p_tag, s, count(*)::integer from unnest(p_schluessel) as s group by s
+  on conflict (tag, schluessel) do update set anzahl = public.statistik.anzahl + excluded.anzahl;
+$$;
+-- Auswertung für die Zentrale, in der Datenbank verdichtet: je Tag die Summen der Aufrufe, Besuche und Bots (Schlüssel aufruf:* usw.),
+-- dazu je Schlüssel die Summe über den Zeitraum (ohne Tag). So bleibt die Antwort klein, auch über ein Jahr.
+create or replace function public.eeziframes_auswerten(p_von date) returns table (tag date, schluessel text, anzahl bigint)
+language sql stable security invoker set search_path = '' as $$
+  select s.tag, split_part(s.schluessel, ':', 1) || ':*', sum(s.anzahl)::bigint
+    from public.statistik s
+   where s.tag >= p_von and split_part(s.schluessel, ':', 1) in ('aufruf', 'besuch', 'bot')
+   group by s.tag, split_part(s.schluessel, ':', 1)
+  union all
+  select null::date, s.schluessel, sum(s.anzahl)::bigint
+    from public.statistik s
+   where s.tag >= p_von
+   group by s.schluessel;
+$$;
+
 -- Kein direkter Zugriff aus dem Browser: RLS an, keine Regeln → nur der geheime Schlüssel des Servers kommt durch
 alter table public.betriebe   enable row level security;
 alter table public.zahlungen  enable row level security;
 alter table public.ereignisse enable row level security;
-revoke all on public.betriebe, public.zahlungen, public.ereignisse from anon, authenticated;
+alter table public.protokoll  enable row level security;
+alter table public.statistik  enable row level security;
+revoke all on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik from anon, authenticated;
+revoke all on function public.eeziframes_zaehlen(date, text[]) from public, anon, authenticated;
+revoke all on function public.eeziframes_auswerten(date) from public, anon, authenticated;
 -- Der Server (geheimer Schlüssel sb_secret_… bzw. service_role) darf lesen und schreiben; ausdrücklich gewährt, auch wenn neue
 -- Tabellen im Projekt nicht mehr von selbst für die Data API freigegeben werden
 grant usage on schema public to service_role;
-grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse to service_role;
+grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik to service_role;
+grant execute on function public.eeziframes_zaehlen(date, text[]) to service_role;
+grant execute on function public.eeziframes_auswerten(date) to service_role;
 
 -- updated_at pflegt der Server selbst (speicher.js); dieser Auslöser ist nur ein Netz für Änderungen von Hand
 create or replace function public.eeziframes_touch() returns trigger language plpgsql set search_path = '' as $$

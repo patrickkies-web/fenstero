@@ -8,7 +8,7 @@
 //   - Entwurf löschen: seine Posten werden wieder offen (die vorsichtige Annahme; der Server muss sie selbst löschen)
 //   - Abschließen mit Guthaben des Kunden (balance < 0): die Rechnung ist sofort bezahlt
 //   - Abos haben einen Status; nur laufende zählen. Listen mit has_more und starting_after
-//   - Idempotency-Key: dieselbe Anfrage noch einmal liefert dasselbe Objekt
+//   - Idempotency-Key: dieselbe Anfrage noch einmal liefert dasselbe Objekt; läuft sie noch, antwortet Stripe mit 409
 //   - Steuersätze: exklusiv kommt die Steuer dazu, inklusiv steckt sie im Betrag
 // webhook(…) baut ein unterschriebenes Ereignis wie Stripe (Stripe-Signature: t=…,v1=HMAC-SHA256).
 import { createHmac } from 'node:crypto';
@@ -143,7 +143,8 @@ export function stripeNachstellen() {
     const eintrag = { method: method, pfad: pfad, version: kopf['Stripe-Version'], idem: kopf['Idempotency-Key'] || '', auth: kopf.Authorization || '', p: p, roh: method === 'GET' ? u.search.slice(1) : String(init.body || '') };
     log.push(eintrag);
     if (fehlerBei && fehlerBei(eintrag)) return fehler(400, 'Nachgestellter Fehler bei ' + method + ' ' + pfad);
-    if (eintrag.idem && db.idem.has(eintrag.idem)) { const alt = db.idem.get(eintrag.idem); if (alt.roh !== eintrag.roh) return fehler(400, 'Keys for idempotent requests can only be used with the same parameters they were first used with.'); return new Response(alt.text, { status: alt.status, headers: { 'content-type': 'application/json' } }); }
+    if (eintrag.idem && db.idem.has(eintrag.idem)) { const alt = db.idem.get(eintrag.idem); if (alt.roh !== eintrag.roh) return fehler(400, 'Keys for idempotent requests can only be used with the same parameters they were first used with.'); if (alt.laeuft) return fehler(409, 'There is currently another in-progress request using this Idempotent Key (that probably means you submitted twice, and the other request is still going through). Please try again later.'); return new Response(alt.text, { status: alt.status, headers: { 'content-type': 'application/json', 'idempotent-replayed': 'true' } }); }
+    if (eintrag.idem) db.idem.set(eintrag.idem, { roh: eintrag.roh, laeuft: true }); // wie bei Stripe: dieselbe Anfrage noch unterwegs → 409
     const r = behandeln(method, pfad, p, kopf), text = await r.text();
     if (eintrag.idem) db.idem.set(eintrag.idem, { roh: eintrag.roh, text: text, status: r.status });
     return new Response(text, { status: r.status, headers: { 'content-type': 'application/json' } });

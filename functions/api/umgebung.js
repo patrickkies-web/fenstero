@@ -9,6 +9,9 @@
                               dort geht auch noch der frühere service_role-Schlüssel (eyJ…, Supabase schafft ihn bis Ende 2026 ab)
      SUPABASE_PUBLISHABLE_KEY optional, sb_publishable_… (alter Name SUPABASE_ANON_KEY); ohne ihn nimmt die Anmeldung den geheimen
      FREISCHALT_GEHEIMNIS     beliebiger langer Zufallstext; unterschreibt die Freischalt-Nachweise für bezahlte Aufmaßblätter
+     ZENTRALE_PASSWORT        Passwort der Zentrale des Inhabers (/zentrale/), mindestens 12 Zeichen; ohne bleibt die Zentrale zu
+     ZENTRALE_2FA             optional, empfohlen: Schlüssel für eine Authenticator-App (Base32, erzeugt die Zentrale unter
+                              Einstellungen → Zweiter Faktor); dann braucht die Anmeldung zusätzlich den sechsstelligen Code
 
    Variablen (Typ Text, alle optional):
      MWST                     0 = Kleinunternehmerregelung (§ 19 UStG): keine Umsatzsteuer, Hinweis auf jeder Rechnung; sonst 19 %
@@ -19,6 +22,8 @@
      STRIPE_PRICE_PLUS        Preis-ID „Plus“ (monatlich)
      STRIPE_TAX_RATE          Steuersatz-ID 19 % exklusiv (Rechnungen an Betriebe)
      STRIPE_TAX_RATE_INKL     Steuersatz-ID 19 % inklusiv (Aufmaßblatt)
+     STATISTIK_KAMPAGNEN      eigene Kampagnen-Namen für ?utm_source=…, durch Komma getrennt (bekannte wie newsletter, flyer, facebook
+                              zählen ohnehin einzeln, alles andere als „Kampagne (andere)“), siehe functions/api/statistik.js
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1   nur lokal zum Testen: Stripe bzw. Datenbank werden nachgestellt */
 const num = (v, d) => { const n = Number(v); return v !== undefined && v !== '' && !isNaN(n) ? n : d; };
 /* Rolle aus einem früheren Supabase-Schlüssel (JWT, eyJ…) lesen, ohne ihn zu prüfen: nur um anon und service_role zu unterscheiden */
@@ -42,9 +47,16 @@ export function konfig(env) {
   if (/^sb_publishable_/.test(sbGeheim) || jwtRolle(sbGeheim) === 'anon') { hinweise.push('SUPABASE_SECRET_KEY: Das ist der öffentliche Schlüssel (sb_publishable_… bzw. anon). Gebraucht wird der geheime (sb_secret_… bzw. service_role).'); sbOk = false; }
   const supabase = sbOk ? { url: sbUrl, service: sbGeheim, anon: sbOffen || sbGeheim } : null;
   const zahlungAttrappe = env.ZAHLUNG_ATTRAPPE === '1', datenAttrappe = env.DATEN_ATTRAPPE === '1';
+  /* Zentrale des Inhabers: offen nur mit einem Passwort ab 12 Zeichen; der zweite Faktor ist ein Base32-Schlüssel (TOTP, RFC 6238).
+     Diese Angaben verlassen den Server nie, auch nicht als Hinweis in /api/status (die Zentrale meldet sich selbst unter /api/zentrale/status). */
+  const zPw = String(env.ZENTRALE_PASSWORT || '').trim(), zTotp = String(env.ZENTRALE_2FA || '').replace(/[\s-]/g, '').replace(/=+$/, '').toUpperCase();
+  const totpOk = /^[A-Z2-7]{16,128}$/.test(zTotp);
+  /* Ein eingetragener, aber ungültiger zweiter Faktor schließt die Zentrale (lieber zu als nur mit Passwort offen) */
+  const zentrale = { passwort: zPw.length >= 12 && !(zTotp && !totpOk) ? zPw : '', grund: !zPw ? 'fehlt' : zPw.length < 12 ? 'zu_kurz' : zTotp && !totpOk ? '2fa_ungueltig' : '', totp: totpOk ? zTotp : '', totpFehler: !!zTotp && !totpOk };
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
+    zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1',
     ki: !!env.ANTHROPIC_API_KEY,
     geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
     preise: { aufmass: num(env.PREIS_AUFMASS_CENT, 799) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, 49), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, 79), mwst: env.MWST !== '0' }
@@ -52,7 +64,8 @@ export function konfig(env) {
 }
 export const json = (obj, status, extra) => new Response(JSON.stringify(obj), { status: status || 200, headers: Object.assign({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }, extra || {}) });
 export const fehler = (text, status) => json({ ok: false, fehler: text }, status || 400);
-export class ApiFehler extends Error { constructor(text, status) { super(text); this.status = status || 400; } }
+/* extra: zusätzliche Felder der Fehlerantwort, z. B. { gesperrt: true } */
+export class ApiFehler extends Error { constructor(text, status, extra) { super(text); this.status = status || 400; this.extra = extra || null; } }
 export const b64url = (bytes) => btoa(String.fromCharCode.apply(null, Array.from(bytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 export async function hmac(geheimnis, text) {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(geheimnis), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -68,3 +81,26 @@ export function erlaubt(schluessel, max, fensterMs) {
   liste.push(jetzt); zaehler.set(schluessel, liste); if (zaehler.size > 5000) zaehler.clear(); return true;
 }
 export const ip = (request) => request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || 'unbekannt';
+/* Gekürzte IP-Adresse fürs Protokoll der Zentrale: IPv4 auf /24, IPv6 auf /48 (der Anschluss ist so nicht mehr bestimmbar) */
+export function netzKurz(adresse) {
+  const a = String(adresse || '').split(',')[0].trim().replace(/^::ffff:(\d{1,3}(\.\d{1,3}){3})$/i, '$1');
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(a)) return a.split('.').slice(0, 3).join('.') + '.0/24';
+  if (a.includes(':')) { const t = a.split('::')[0].split(':').filter(Boolean).slice(0, 3); return t.length ? t.join(':') + '::/48' : ''; }
+  return '';
+}
+/* Schlüssel für Bremsen je Anschluss: IPv4 die Adresse, IPv6 das /64-Netz (ein Anschluss hat dort viele Adressen) */
+export function anschluss(adresse) {
+  const a = String(adresse || '').split(',')[0].trim().replace(/^::ffff:(\d{1,3}(\.\d{1,3}){3})$/i, '$1');
+  if (!a.includes(':')) return a;
+  const [vorn, hinten] = a.split('::'), v = vorn ? vorn.split(':') : [], h = hinten !== undefined ? (hinten ? hinten.split(':') : []) : null;
+  const voll = h === null ? v : v.concat(new Array(Math.max(0, 8 - v.length - h.length)).fill('0'), h);
+  return voll.slice(0, 4).map((x) => x.toLowerCase().replace(/^0+(?=.)/, '')).join(':') + '::/64';
+}
+/* Vergleich zweier Geheimnisse in gleichbleibender Zeit (über ihre SHA-256-Werte, damit auch die Länge nichts verrät) */
+export async function gleich(a, b) {
+  const enc = new TextEncoder();
+  const [x, y] = await Promise.all([crypto.subtle.digest('SHA-256', enc.encode(String(a))), crypto.subtle.digest('SHA-256', enc.encode(String(b)))]);
+  const p = new Uint8Array(x), q = new Uint8Array(y); let d = 0;
+  for (let i = 0; i < p.length; i++) d |= p[i] ^ q[i];
+  return d === 0;
+}

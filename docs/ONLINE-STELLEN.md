@@ -95,7 +95,7 @@ Optional:
 - Anderes Modell über die Variable `KI_MODELL` (Standard: `claude-sonnet-5-5`, etwa 2,5 Cent je Fenster; `claude-haiku-5-5` etwa 0,13 Cent, weniger genau). Aktuelle Modellnamen: [docs.claude.com](https://docs.claude.com/en/docs/about-claude/models/overview).
 - Zusätzlicher Schutz bei Cloudflare unter **Security → WAF → Rate limiting rules**: Pfad `/api/ki`, zum Beispiel 20 Anfragen in 10 Sekunden je IP, Aktion „Block“.
 
-Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass der Auftragsverarbeitungsvertrag (DPA) von Anthropic für dein Konto gilt; Abschnitt 4 der Datenschutzerklärung beschreibt die Verarbeitung.
+Datenschutz: Anthropic verarbeitet die Fotos dann in deinem Auftrag. Prüf, dass der Auftragsverarbeitungsvertrag (DPA) von Anthropic für dein Konto gilt; Abschnitt 5 der Datenschutzerklärung beschreibt die Verarbeitung.
 
 ## Schritt 6: Eigene Domain eeziframes.com
 
@@ -133,7 +133,7 @@ Stripe geht auch allein, ohne Supabase: Dann kaufen Hauseigentümer das Aufmaßb
 ### A. Supabase (Datenbank und Anmeldung), etwa 20 Minuten
 
 1. [supabase.com](https://supabase.com) → **New project**: Name `eeziframes`, Region **Central EU (Frankfurt)**, Datenbank-Passwort über **Generate a password** (in den Passwort-Manager, du brauchst es sonst nicht). Fragt Supabase nach Sicherheitsoptionen, die Vorgaben lassen („Data API + Connection String“, „public schema“): Der Server spricht über die Data API mit der Datenbank.
-2. **SQL Editor → New query**: den Inhalt von `supabase/schema.sql` einfügen, **Run**. Das legt die Tabellen `betriebe`, `zahlungen`, `ereignisse` an und sperrt sie für Browser (nur der Server kommt mit dem geheimen Schlüssel dran).
+2. **SQL Editor → New query**: den Inhalt von `supabase/schema.sql` einfügen, **Run**. Das legt die Tabellen `betriebe`, `zahlungen`, `ereignisse`, `protokoll` und `statistik` an und sperrt sie für Browser (nur der Server kommt mit dem geheimen Schlüssel dran). Die Datei lässt sich gefahrlos erneut ausführen; kommt etwas Neues dazu (zuletzt Protokoll und Statistik für die Zentrale), einfach noch einmal komplett ausführen.
 3. **Project Settings → API Keys**: den **Secret key** (`sb_secret_…`) anzeigen und kopieren, gleich bei Cloudflare als Secret `SUPABASE_SECRET_KEY` eintragen (C). Die **Project URL** (`https://….supabase.co`) steht oben unter **Connect**. Der geheime Schlüssel darf nur bei Cloudflare liegen, nie im Browser, nie im Repo, nie in einem Chat. Den Publishable key (`sb_publishable_…`) braucht der Server nicht; ohne ihn nimmt die Anmeldung den geheimen. Ältere Projekte mit den früheren Schlüsseln (`eyJ…`, „Legacy API keys“: service_role und anon) gehen weiter unter `SUPABASE_SERVICE_KEY` und `SUPABASE_ANON_KEY`; Supabase schafft sie bis Ende 2026 ab, also besser die neuen nehmen.
 4. **Authentication → Sign In / Providers → Email**: eingeschaltet lassen, „Confirm email“ ist egal, **„Allow new users to sign up“ muss an sein**.
 5. **Authentication → URL Configuration**: **Site URL** `https://eeziframes.com` (statt `http://localhost:3000`), bei **Redirect URLs** `https://eeziframes.com/**` hinzufügen (und die `…workers.dev`-Adresse mit `/**`, falls du dort testest). Dorthin führt der Anmeldelink aus der E-Mail zurück.
@@ -179,10 +179,12 @@ Umsatzsteuer: Ohne Variable `MWST` rechnet der Server mit 19 % (Betriebspreise n
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` aus B4 (Test- und Live-Modus haben je ein eigenes) |
 | `FREISCHALT_GEHEIMNIS` | ein langer Zufallstext (z. B. aus dem Passwort-Manager); unterschreibt die Freischalt-Nachweise der gekauften Aufmaßblätter. Einmal setzen und nie ändern, sonst gelten alte Nachweise nicht mehr |
 | `ANTHROPIC_API_KEY` | aus Schritt 5, falls noch nicht da |
+| `ZENTRALE_PASSWORT` | Passwort für deine Zentrale unter `/zentrale/`, mindestens 12 Zeichen (besser 20 und mehr); ohne bleibt sie zu ([docs/ZENTRALE.md](ZENTRALE.md)) |
+| `ZENTRALE_2FA` | optional, empfohlen: Schlüssel für die Authenticator-App, erzeugt die Zentrale unter **Einstellungen → Zweiter Faktor** |
 
 Als normale Variablen (Typ Text), alle optional: `MWST` (`0` bei Kleinunternehmerregelung), die Preise `PREIS_AUFMASS_CENT` (799), `PREIS_PROJEKT` (9), `FREI_PROJEKTE` (3), `PREIS_ABO` (49), `ABO_INKL` (10), `PREIS_ABO_EXTRA` (5), `PREIS_PLUS` (79). Variablen aus dem Dashboard bleiben bei jedem Deployment erhalten (`keep_vars` in `wrangler.jsonc`). Nur wer eigene Objekte in Stripe nutzen will: `STRIPE_PRICE_ABO`, `STRIPE_PRICE_PLUS`, `STRIPE_PRICE_AUFMASS`, `STRIPE_TAX_RATE`, `STRIPE_TAX_RATE_INKL` (IDs aus Stripe; sie haben Vorrang).
 
-Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrangler.jsonc`, Cloudflare richtet den Zeitplan beim Deployment ein; sichtbar unter **Einstellungen → Trigger**). Du musst nichts weiter tun.
+Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrangler.jsonc`, Cloudflare richtet den Zeitplan beim Deployment ein; sichtbar unter **Einstellungen → Trigger**). Im selben Lauf räumt der Server auf: Protokoll nach Frist, nicht bezahlte Kassen nach 30 Tagen, Anmeldungen ohne Betrieb nach 30 Tagen ohne Nutzung. Du musst nichts weiter tun.
 
 ### D. Prüfen
 
@@ -190,6 +192,10 @@ Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrang
 - App ohne Link: ein Fenster messen, **Freischalten · 7,99 €**, E-Mail, weiter zu Stripe. Die Kasse sagt „Testbetrieb“ und nennt die Testkarte `4242 4242 4242 4242` (Datum in der Zukunft, beliebige Prüfziffer). Zurück in der App ist das Blatt frei, PDF und Code sind da, Stripe schickt den Beleg.
 - Stripe → **Workbench → Webhooks** → dein Ziel: Zustellungen mit Antwort `200`. Ein `503` bei `invoice.paid` kurz nach einer Sammelrechnung ist gewollt: Die Rechnung wird gerade eingetragen, Stripe stellt später erneut zu.
 - Mit Supabase, Betriebe: **Kostenlos starten** → deine E-Mail → in der Mail auf den Anmeldelink klicken (oder den Code eingeben) → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code. Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder die Testkarte hinterlegt ist (das Blatt nennt beide im Testmodus). Nach dem ersten Abo stehen in Stripe unter **Produktkatalog** „eeziframes Abo 10“ und die Steuersätze.
+
+### Zentrale (dein Verwaltungsbereich)
+
+Unter `https://eeziframes.com/zentrale/` siehst du alle Betriebe mit ihren Zahlen, kannst sperren, löschen und Daten exportieren, siehst die Käufe, eine eigene Statistik ohne Cookies und ein Protokoll. Einrichten: `ZENTRALE_PASSWORT` als Secret bei Cloudflare (C), `supabase/schema.sql` noch einmal ausführen (A2), anmelden, unter **Einstellungen** den zweiten Faktor einrichten. Alles Weitere: [docs/ZENTRALE.md](ZENTRALE.md).
 
 ### E. Echtes Geld
 
@@ -211,19 +217,23 @@ Erstattungen, Kündigungen und Rechnungen siehst und erledigst du im Stripe-Dash
 | Käufe des Aufmaßblatts | Stripe, dazu eine Zeile je Kauf in `zahlungen` (Kennung, E-Mail, Betrag, Nachweis) |
 | Das Aufmaß des Hauseigentümers ohne Link | nur auf seinem Gerät; der Server sieht nur E-Mail, Betrag und eine zufällige Projekt-Kennung |
 | Fotos | nur auf dem Gerät; an Anthropic geht eine verkleinerte Kopie zur Auswertung, gespeichert wird nichts |
+| Protokoll der Zentrale (Anmeldungen mit gekürzter IP, Eingriffe, Löschnachweise) | Supabase, Tabelle `protokoll`; Anmeldungen 90 Tage, Eingriffe 3 Jahre |
+| Eigene Statistik | Supabase, Tabelle `statistik`: nur Tagessummen, keine IP-Adressen, keine Kennungen |
+| Vermerke der Zentrale an einem Konto (Sperre, interne Notiz) | im Dokument des Betriebs (`daten.verwaltung`), verlässt den Server nur im Datenexport |
 
 ## Sicherheit
 
 - Geheime Schlüssel nur als **Secret** bei Cloudflare, niemals in Dateien im Repo.
 - Das Repo ist öffentlich. Das ist in Ordnung, weil keine Geheimnisse darin stehen und der Code einer Website ohnehin im Browser sichtbar ist. Lieber privat: GitHub → Settings → Change visibility; Cloudflare funktioniert auch mit privaten Repos.
 - Die Website lädt nichts von fremden Servern (Schriften und Bibliotheken liegen in `web/`) und setzt strenge Sicherheits-Kopfzeilen (`web/_headers`).
+- Die Zentrale ist nur mit `ZENTRALE_PASSWORT` erreichbar, am besten mit zweitem Faktor; jede Anmeldung und jeder Eingriff steht im Protokoll ([docs/ZENTRALE.md](ZENTRALE.md), Abschnitt Sicherheit).
 
 ## Lokal ausprobieren (für Entwickler)
 
 ```bash
 KI_ATTRAPPE=1 node scripts/dev-server.mjs                                   # http://localhost:8788, Pilot, KI mit festen Testantworten
-KI_ATTRAPPE=1 DATEN_ATTRAPPE=1 ZAHLUNG_ATTRAPPE=1 PORT=8789 node scripts/dev-server.mjs   # Stufe 2 nachgestellt: Anmeldecode 123456, Kassen kehren sofort als bezahlt zurück
-node scripts/pruefen.mjs                                                    # Browser-Prüfung (Abschnitt 8 startet den zweiten Server selbst, Abschnitt 11 prüft die Stripe-Anbindung gegen ein nachgestelltes Stripe), braucht playwright-core
+KI_ATTRAPPE=1 DATEN_ATTRAPPE=1 ZAHLUNG_ATTRAPPE=1 PORT=8789 ZENTRALE_PASSWORT=lokales-testpasswort node scripts/dev-server.mjs   # Stufe 2 nachgestellt: Anmeldecode 123456, Kassen kehren sofort als bezahlt zurück, Zentrale unter /zentrale/
+node scripts/pruefen.mjs                                                    # Browser-Prüfung (Abschnitte 8 und 13 starten eigene Server, Abschnitt 11 prüft die Stripe-Anbindung gegen ein nachgestelltes Stripe), braucht playwright-core
 npx wrangler dev                                                            # wie bei Cloudflare (Worker-Laufzeit), http://localhost:8787
 ```
 
