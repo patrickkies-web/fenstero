@@ -33,7 +33,7 @@ function shapeIco(form, x, y, w, h) {
 /* Fenster als Pfadliste – für Karten, Projektliste und Aufmaßblatt */
 function winIco(c, bx, by, bw, bh, fc) {
   if (c.form && c.form !== 'rechteck') return shapeIco(c.form, bx, by, bw, bh);
-  fc = fc || FR; const o = [], da = c.richtung === 'aussen' ? '3 2' : undefined, art = c.art || 'fenster', tuer = art === 'hst' || art === 'fsw';
+  fc = fc || FR; const o = [], da = c.richtung === 'aussen' ? '3 2' : undefined, art = c.art || 'fenster', tuer = art === 'hst' || art === 'fsw' || art === 'balkon' || art === 'psk';
   o.push(P(R(bx, by, bw, bh, 1.2), fc, INK, 1.3));
   const f = Math.max(2, bw * 0.06); let ix = bx + f, iy = by + f; const iw = bw - 2 * f; let ih = bh - 2 * f;
   if (c.ol) { const oh = ih * 0.27; o.push(P(R(ix, iy, iw, oh), GL, INK, 0.7)); o.push(...sym(ix, iy, iw, oh, c.olT || 'K', 'L', da, INK, 0.7)); iy += oh + f * 0.7; ih -= oh + f * 0.7; }
@@ -46,7 +46,7 @@ function winIco(c, bx, by, bw, bh, fc) {
     const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ih - 2 * g;
     o.push(P(R(gx, gy, gw, gh), GL, INK, 0.6));
     (c.bars || []).filter((b) => b.s === i).forEach((b) => o.push(P(b.d === 'v' ? L([gx + gw * b.p, gy], [gx + gw * b.p, gy + gh]) : L([gx, gy + gh * b.p], [gx + gw, gy + gh * b.p]), 'none', INK, 1)));
-    if (s.t === 'S') { const d = s.din === 'L' ? 1 : -1, cx = gx + gw / 2, cy = gy + gh * 0.62; o.push(P(L([cx - d * gw * 0.25, cy], [cx + d * gw * 0.25, cy]), 'none', INK, 1.1), P(L([cx + d * gw * 0.25 - d * 2, cy - 2], [cx + d * gw * 0.25, cy], [cx + d * gw * 0.25 - d * 2, cy + 2]), 'none', INK, 1.1), P(R(s.din === 'L' ? gx + 1 : gx + gw - 2.6, gy + gh * 0.38, 1.6, gh * 0.24, 0.8), INK)); }
+    if (s.t === 'S' || s.t === 'PS') { const d = s.din === 'L' ? 1 : -1, cx = gx + gw / 2, cy = gy + gh * 0.62; o.push(P(L([cx - d * gw * 0.25, cy], [cx + d * gw * 0.25, cy]), 'none', INK, 1.1), P(L([cx + d * gw * 0.25 - d * 2, cy - 2], [cx + d * gw * 0.25, cy], [cx + d * gw * 0.25 - d * 2, cy + 2]), 'none', INK, 1.1), P(R(s.din === 'L' ? gx + 1 : gx + gw - 2.6, gy + gh * 0.38, 1.6, gh * 0.24, 0.8), INK)); if (s.t === 'PS') o.push(...sym(gx, gy, gw, gh, 'K', s.din, da, INK, 0.75)); }
     else if (s.t === 'P') o.push(...sym(gx, gy, gw, gh, 'D', s.din, da, INK, 0.75));
     else if (s.t !== 'X') o.push(...sym(gx, gy, gw, gh, s.t, s.din, da, INK, 0.75));
   });
@@ -72,6 +72,8 @@ const ICO = {
     if (m === 'kunststoff') return [P(R(16, 10, 32, 44, 4), FR, INK, 1.3), P(R(21, 15, 9, 15, 1.5), 'none', MUT, 0.9), P(R(34, 15, 9, 15, 1.5), 'none', MUT, 0.9), P(R(21, 34, 22, 14, 1.5), 'none', MUT, 0.9)];
     if (m === 'holz') return [P(R(16, 10, 32, 44, 3), '#d9b48a', INK, 1.3), P('M20 16c6 6 6 14 0 20M27 12c5 10 5 22 0 38M35 14c4 8 4 20 0 34M42 18c3 6 3 16 0 26', 'none', '#a3763f', 1)];
     if (m === 'holzalu') return [P(R(22, 10, 26, 44, 3), '#d9b48a', INK, 1.3), P('M27 16c5 10 5 22 0 34M36 14c4 8 4 22 0 34', 'none', '#a3763f', 1), P(R(13, 8, 9, 48, 2), '#c8cdd2', INK, 1.3)];
+    /* Kunststoff mit Aluminium-Schale außen (links) */
+    if (m === 'kunststoffalu') return [P(R(22, 10, 26, 44, 4), FR, INK, 1.3), P(R(26, 15, 8, 15, 1.5), 'none', MUT, 0.9), P(R(37, 15, 7, 15, 1.5), 'none', MUT, 0.9), P(R(26, 34, 18, 14, 1.5), 'none', MUT, 0.9), P(R(13, 8, 9, 48, 2), '#c8cdd2', INK, 1.3)];
     return [P(R(20, 10, 24, 44, 2), '#c8cdd2', INK, 1.3), P(L([32, 12], [32, 52]), 'none', INK, 1, '3 2'), P(R(24, 16, 5, 10, 1), 'none', MUT, 0.8), P(R(35, 16, 5, 10, 1), 'none', MUT, 0.8)];
   },
   spross: (k) => {
@@ -119,7 +121,29 @@ const ICO = {
     if (k === 'fest') return [P(R(8, 8, 48, 48, 1.5), FR, INK, 1.4), P(R(11, 11, 20.5, 42), GL, INK, 0.7), P(R(32.5, 11, 20.5, 42), GL, INK, 0.7)];
     if (k === 'hst') return [P(R(6, 6, 52, 52, 1.5), FR, INK, 1.4), P(R(9, 9, 23, 46), GL, INK, 0.7), P(R(30, 7.5, 26, 49), FR, INK, 1.1), P(R(32.5, 10, 21, 44), GL, INK, 0.7), P(R(33.5, 24, 2.4, 16, 1), INK), P(L([22, 32], [12, 32]), 'none', INK, 1.6), P(L([15, 29], [12, 32], [15, 35]), 'none', INK, 1.6), P(R(4, 58, 56, 2.5), WALL, INK, 0.6)];
     if (k === 'fsw') { const o = [P(R(6, 6, 52, 52, 1.5), FR, INK, 1.4)]; [9, 21, 33, 45].forEach((x, i) => { o.push(P(R(x, 9, 10, 46), GL, INK, 0.7)); if (i) o.push(P(L([x, 9], [x, 55]), 'none', INK, 1.4)); }); o.push(P(R(53.5, 24, 2, 14, 1), INK), P(R(4, 58, 56, 2.5), WALL, INK, 0.6)); return o; }
+    /* Balkon- oder Terrassentür: ein Dreh-Kipp-Flügel bis zum Boden */
+    if (k === 'balkon') return winIco({ art: 'balkon', teilung: '1', sashes: [{ t: 'DK', din: 'L' }] }, 19, 4, 26, 54);
+    /* PSK: der Flügel kippt oder schiebt sich parallel vor das Festteil, beide in einer Ebene */
+    if (k === 'psk') return ICO.psk('A');
     return winIco({ teilung: '2p', sashes: [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }] }, 10, 8, 44, 48);
+  },
+  psk: (k) => {
+    const o = [P(R(3, 6, 58, 52, 1.5), FR, INK, 1.3)], pf = (x, w) => o.push(P(R(x, 9, w, 46), GL, INK, 0.6));
+    const sf = (x, w) => { o.push(P(R(x, 8.5, w, 47), FR, INK, 1.1), P(R(x + 2.5, 11, w - 5, 42), GL, INK, 0.6), P(L([x + 2.5, 53], [x + w / 2, 11], [x + w - 2.5, 53]), 'none', INK, 0.7, '2 1.6'), P(R(x + w - 5, 25, 2, 14, 1), INK)); const a = x + w / 2; o.push(P(L([a + 6, 40], [a - 6, 40]), 'none', INK, 1.5), P(L([a - 3, 37], [a - 6, 40], [a - 3, 43]), 'none', INK, 1.5)); };
+    if (k === 'A3') { pf(6, 16); pf(24, 16); sf(42, 16); } else { pf(6, 25); sf(33, 25); }
+    o.push(P(R(1, 58, 62, 2.5), WALL, INK, 0.6));
+    return o;
+  },
+  /* Absturzsicherung: Balkon davor, Geländer außen, Glas in der Laibung, unteres Feld fest */
+  absturz: (k) => {
+    const o = [P(R(16, 4, 28, 50, 1.2), FR, INK, 1.2)];
+    if (k === 'fest') { o.push(P(R(19, 7, 22, 26), GL, INK, 0.6), ...sym(19, 7, 22, 26, 'DK', 'L', undefined, INK, 0.6), P(L([16, 35.5], [44, 35.5]), 'none', INK, 1.2), P(R(19, 38, 22, 13), GL, INK, 0.6), P(L([21, 49], [27, 40]) + L([27, 49], [33, 40]) + L([33, 49], [39, 40]), 'none', '#4f7fae', 0.8)); }
+    else o.push(P(R(19, 7, 22, 44), GL, INK, 0.6));
+    if (k === 'balkon') o.push(P(R(2, 54, 60, 4), WALL, INK, 0.7), P(L([50, 54], [50, 42]) + L([58, 54], [58, 42]) + L([48, 42], [60, 42]), 'none', INK, 1.3));
+    else o.push(P(R(4, 54, 56, 3), WALL, INK, 0.6));
+    if (k === 'gelaender') { let r = ''; for (let x = 18; x <= 42; x += 4) r += L([x, 34], [x, 53]); o.push(P(r, 'none', INK, 0.9), P(L([14, 34], [46, 34]), 'none', INK, 1.8)); }
+    if (k === 'glas') o.push(P(R(17, 33, 26, 20, 0.6), '#cfe2f4', '#4f7fae', 1, undefined, 0.9), P(L([16, 33], [44, 33]), 'none', INK, 1.6));
+    return o;
   },
   situation: (k) => {
     if (k === 'neu') return [P(R(6, 6, 52, 52, 2), WALL, INK, 0.8), P(R(17, 15, 30, 36, 1.5), 'none', '#5b9bd5', 1.6, '3 2.5'), P(L([32, 26], [32, 40]), 'none', '#5b9bd5', 1.8), P(L([25, 33], [39, 33]), 'none', '#5b9bd5', 1.8)];
@@ -269,7 +293,8 @@ const OPT = {
   din: [{ k: 'L', label: 'DIN links' }, { k: 'R', label: 'DIN rechts' }],
   olT: [{ k: 'F', label: 'Oberlicht fest' }, { k: 'K', label: 'Oberlicht kippbar' }],
   richtung: [{ k: 'innen', label: 'Nach innen (Standard)' }, { k: 'aussen', label: 'Nach außen' }],
-  material: [{ k: 'kunststoff', label: 'Kunststoff', sub: 'Pflegeleicht, günstig', price: '€' }, { k: 'holz', label: 'Holz', sub: 'Warm, braucht Pflege', price: '€€' }, { k: 'holzalu', label: 'Holz-Alu', sub: 'Innen Holz, außen Alu', price: '€€€' }, { k: 'alu', label: 'Aluminium', sub: 'Schlank, sehr stabil', price: '€€€' }],
+  /* Unterzeilen höchstens 14 Zeichen: fünf Karten stehen in einer Reihe zum Wischen */
+  material: [{ k: 'kunststoff', label: 'Kunststoff', sub: 'Pflegeleicht', price: '€' }, { k: 'kunststoffalu', label: 'Kunststoff-Alu', sub: 'Außen Alu', price: '€€' }, { k: 'holz', label: 'Holz', sub: 'Braucht Pflege', price: '€€' }, { k: 'holzalu', label: 'Holz-Alu', sub: 'Innen Holz', price: '€€€' }, { k: 'alu', label: 'Aluminium', sub: 'Sehr schlank', price: '€€€' }],
   preset: [{ k: 'keine', label: 'Keine' }, { k: 'kreuz', label: 'Kreuz' }, { k: 'sechs', label: '6 Felder' }, { k: 'quer', label: 'Oben quer' }, { k: 'senk', label: 'Dreiteilig' }],
   spross: [{ k: 'wiener', label: 'Wiener Sprosse', sub: 'Wirkt echt, gut gedämmt', g: 'wiener' }, { k: 'szr', label: 'Innenliegend', sub: 'Zwischen den Scheiben', g: 'szr' }, { k: 'auf', label: 'Aufgesetzt', sub: 'Aufgeklebt, günstig', g: 'auf' }, { k: 'echt', label: 'Glasteilend', sub: 'Jedes Feld eigenes Glas', g: 'echt' }],
   breite: [{ k: 18, label: '18 mm, fein' }, { k: 26, label: '26 mm' }, { k: 45, label: '45 mm, kräftig' }],
@@ -282,10 +307,17 @@ const OPT = {
   griff: [{ k: 'standard', label: 'Standard' }, { k: 'abschliessbar', label: 'Abschließbar' }, { k: 'druckknopf', label: 'Druckknopf' }, { k: 'ohne', label: 'Ohne Griff', sub: 'verdeckt oder elektrisch' }],
   hstGriff: [{ k: 'standard', label: 'Hebegriff' }, { k: 'abschliessbar', label: 'Abschließbar' }, { k: 'motor', label: 'Elektrisch', sub: 'per Taster oder App' }],
   gf: [{ k: 'weiss', label: 'Weiß', bg: '#f4f4f2' }, { k: 'silber', label: 'Silber', bg: '#c9ccd0' }, { k: 'edelstahl', label: 'Edelstahl', bg: 'linear-gradient(135deg, #eceef0, #a7abb0)' }, { k: 'titan', label: 'Titan', bg: '#8b8d8f' }, { k: 'schwarz', label: 'Schwarz', bg: '#1d1d1f' }],
-  rc: [{ k: 'basis', label: 'Basis' }, { k: 'rc1', label: 'RC1 N' }, { k: 'rc2', label: 'RC2' }],
+  rc: [{ k: 'basis', label: 'Basisschutz' }, { k: 'rc1', label: 'RC1 N' }, { k: 'rc2', label: 'RC2' }],
+  erreichbar: [{ k: 'ja', label: 'Ja, leicht' }, { k: 'nein', label: 'Nein' }],
+  absturz: [{ k: 'balkon', label: 'Balkon davor', sub: 'dann keine nötig' }, { k: 'gelaender', label: 'Geländer außen', sub: 'französischer Balkon' }, { k: 'glas', label: 'Glasbrüstung', sub: 'Glas in der Laibung' }, { k: 'fest', label: 'Unten fest', sub: 'Sicherheitsglas' }],
+  absturzTuer: [{ k: 'balkon', label: 'Ja, Balkon', sub: 'oder Terrasse davor' }, { k: 'gelaender', label: 'Nein, Geländer', sub: 'französischer Balkon' }, { k: 'glas', label: 'Nein, Glas', sub: 'Glasbrüstung davor' }],
+  griffA: [{ k: 'keiner', label: 'Kein Griff außen' }, { k: 'ziehgriff', label: 'Ziehgriff mit Schnäpper' }, { k: 'abschliessbar', label: 'Abschließbar, mit Schlüssel' }],
+  boden: [{ k: 'bleibt', label: 'Bleibt, wie er ist' }, { k: 'neu', label: 'Wird erneuert' }],
+  pskSchema: [{ k: 'A', label: '2-teilig', sub: '1 schiebt vor 1 festem' }, { k: 'A3', label: '3-teilig', sub: '1 schiebt vor 2 festen' }],
+  foerdweg: [{ k: 'bafa', label: 'BAFA-Zuschuss' }, { k: 'steuer', label: 'Steuerbonus' }, { k: 'keine', label: 'Keine' }, { k: 'offen', label: 'Noch offen' }],
   roll: [{ k: 'keiner', label: 'Keiner' }, { k: 'behalten', label: 'Bestehender', sub: 'bleibt drin' }, { k: 'aufsatz', label: 'Aufsatz', sub: 'neu, auf dem Fenster', g: 'aufsatz' }, { k: 'vorbau', label: 'Vorbau', sub: 'neu, außen davor', g: 'vorbau' }],
   antrieb: [{ k: 'gurt', label: 'Gurt' }, { k: 'kurbel', label: 'Kurbel' }, { k: 'motor', label: 'Elektrisch' }, { k: 'smart', label: 'Smart Home' }],
-  art: [{ k: 'fenster', label: 'Fenster', sub: 'Dreh, Kipp, fest' }, { k: 'fest', label: 'Festverglasung', sub: 'großflächig, ohne Griff' }, { k: 'hst', label: 'Hebe-Schiebe-Tür', sub: 'bodentief, schiebt' }, { k: 'fsw', label: 'Faltschiebewand', sub: 'ganz zu öffnen' }],
+  art: [{ k: 'fenster', label: 'Fenster', sub: 'Dreh, Kipp, fest' }, { k: 'balkon', label: 'Balkon- oder Terrassentür', sub: 'geht auf wie ein Fenster', g: 'balkon' }, { k: 'fest', label: 'Festverglasung', sub: 'großflächig, ohne Griff' }, { k: 'hst', label: 'Hebe-Schiebe-Tür', sub: 'bodentief, schiebt', g: 'hst' }, { k: 'psk', label: 'PSK-Tür', sub: 'schiebt und kippt, meist günstiger', g: 'psk' }, { k: 'fsw', label: 'Faltschiebewand', sub: 'ganz zu öffnen' }],
   situation: [{ k: 'ersatz', label: 'Fenster ersetzen', sub: 'Dort ist schon eins' }, { k: 'neu', label: 'Neue Öffnung', sub: 'Dort war noch keins' }],
   felder: [{ k: '1', label: '1 Feld' }, { k: '2p', label: '2 Felder' }, { k: '3', label: '3 Felder' }, { k: '4', label: '4 Felder' }],
   ul: [{ k: 'nein', label: 'Kein Unterlicht' }, { k: 'glas', label: 'Unterlicht aus Glas', sub: 'fest verglast' }, { k: 'paneel', label: 'Unterlicht als Paneel', sub: 'geschlossen, gedämmt' }],
@@ -308,7 +340,7 @@ const OPT = {
   erreich: [{ k: 'vm', label: 'Vormittags' }, { k: 'nm', label: 'Nachmittags' }, { k: 'ab', label: 'Abends' }],
   baujahr: [{ k: 'vor 1978', label: 'vor 1978' }, { k: '1978 bis 1995', label: '1978 bis 1995' }, { k: '1995 bis 2010', label: '1995 bis 2010' }, { k: 'nach 2010', label: 'nach 2010' }, { k: '', label: 'Weiß ich nicht' }]
 };
-const TYPNAME = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp', S: 'Schiebeflügel', X: 'Faltflügel', P: 'Gehflügel' };
+const TYPNAME = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp', S: 'Schiebeflügel', X: 'Faltflügel', P: 'Gehflügel', PS: 'PSK-Flügel' };
 /* ---------- Glossar ---------- */
 const GLOSS = {
   dinlr: { t: 'Was bedeutet DIN links und DIN rechts?', x: ['Die Angabe sagt, auf welcher Seite die Scharniere sitzen. Man schaut dafür immer von innen, also von der Seite, zu der das Fenster aufgeht.', 'Scharniere links heißt DIN links. Der Griff sitzt dann rechts. Merkhilfe: Stell dich innen vor das offene Fenster und leg die Hand auf die Scharniere. Linke Hand bedeutet DIN links.'], ico: () => [...ICO.typ('DK'), P(R(10.5, 14, 3, 9, 1), INK), P(R(10.5, 41, 3, 9, 1), INK)], see: ['symbol', 'dk'] },
@@ -321,7 +353,7 @@ const GLOSS = {
   oberlicht: { t: 'Was ist ein Oberlicht?', x: ['Ein eigenes Feld über dem eigentlichen Fenster, fest oder kippbar. Es bringt Licht und Luft, ohne dass der große Flügel aufgehen muss.'], ico: () => winIco({ teilung: '1', ol: true, olT: 'K', sashes: [{ t: 'DK', din: 'L' }] }, 14, 6, 36, 52), see: ['kipp'] },
   anschlag: { t: 'Was ist ein Maueranschlag?', x: ['Bei manchen Häusern steht das Mauerwerk ein paar Zentimeter vor dem Fensterrahmen, innen oder außen. Dann ist der Rahmen größer als die Öffnung, die du siehst.', 'Ohne Anschlag ist die Laibung glatt und das Fenster sitzt einfach in der Öffnung. Für die Bestellung ist das ein wichtiger Unterschied.'], ico: () => ICO.anschlag('aussen'), see: ['laibung', 'rahmenmass'] },
   laibung: { t: 'Was ist die Laibung?', x: ['Die Wandfläche in der Fensteröffnung, also die Tiefe der Wand rund um das Fenster. Es gibt eine Innenlaibung und eine Außenlaibung.'], ico: () => [...ICO.anschlag('ohne'), P(L([6, 56], [20, 56]), 'none', '#d4502b', 1.6), P(L([6, 53], [6, 59]), 'none', '#d4502b', 1.4), P(L([20, 53], [20, 59]), 'none', '#d4502b', 1.4)], see: ['anschlag'] },
-  bruestung: { t: 'Was ist die Brüstungshöhe?', x: ['Der Abstand vom fertigen Fußboden bis zur Unterkante der Fensteröffnung. Bei sehr tiefen Fenstern kann eine Absturzsicherung vorgeschrieben sein.'], ico: () => [P(R(4, 58, 56, 3), INK), P(R(16, 6, 28, 30, 1), FR, INK, 1.3), P(R(19, 9, 22, 24), GL, INK, 0.6), P(L([52, 37], [52, 57]), 'none', '#d4502b', 1.6), P(L([49, 37], [55, 37]), 'none', '#d4502b', 1.4), P(L([49, 57], [55, 57]), 'none', '#d4502b', 1.4)], see: ['rahmenmass'] },
+  bruestung: { t: 'Was ist die Brüstungshöhe?', x: ['Der Abstand vom fertigen Fußboden bis zur Unterkante der Fensteröffnung. Bei sehr tiefen Fenstern kann eine Absturzsicherung vorgeschrieben sein.'], ico: () => [P(R(4, 58, 56, 3), INK), P(R(16, 6, 28, 30, 1), FR, INK, 1.3), P(R(19, 9, 22, 24), GL, INK, 0.6), P(L([52, 37], [52, 57]), 'none', '#d4502b', 1.6), P(L([49, 37], [55, 37]), 'none', '#d4502b', 1.4), P(L([49, 57], [55, 57]), 'none', '#d4502b', 1.4)], see: ['absturz', 'rahmenmass'] },
   rahmenmass: { lottie: 'messen', t: 'Maueröffnung oder Fensterelement?', x: ['Die Maueröffnung ist das Loch in der Wand, gemessen von Laibung zu Laibung. Das Fensterelement ist das Fenster selbst mit seinem Rahmen, so wie du es siehst.', 'Beides brauchst du fürs Angebot. Das neue Fenster wird etwas kleiner als die Öffnung, damit Platz für Dämmung und Abdichtung bleibt. Das Bestellmaß legt dein Fensterbauer beim Feinaufmaß fest.'], ico: () => [P(R(6, 6, 52, 52), WALL, INK, 0.8), P(R(13, 13, 38, 38), '#f5f5f7', INK, 0.8, '3 2'), P(R(16, 16, 32, 32, 1), FR, INK, 1.3), P(R(20, 20, 24, 24), GL, INK, 0.6)], see: ['anschlag', 'feinaufmass'] },
   wiener: { t: 'Was ist eine Wiener Sprosse?', x: ['Sprossen, die außen und innen auf die Scheibe geklebt werden. Dazwischen sitzt ein dunkler Steg im Scheibenzwischenraum.', 'So sieht das Fenster aus wie mit echten Sprossen, dämmt aber wie eine durchgehende Scheibe.'], ico: () => ICO.spross('wiener'), see: ['szr', 'echt'] },
   szr: { t: 'Was sind innenliegende Sprossen?', x: ['Sprossen zwischen den Glasscheiben, im Scheibenzwischenraum. Die Oberfläche bleibt glatt, Putzen geht wie bei einem Fenster ohne Sprossen.'], ico: () => ICO.spross('szr'), see: ['wiener', 'auf'] },
@@ -338,7 +370,7 @@ const GLOSS = {
   ralmontage: { t: 'Was ist RAL-Montage?', x: ['Einbau nach dem Montageleitfaden der RAL-Gütegemeinschaft in drei Ebenen: innen luftdicht, in der Mitte gedämmt, außen schlagregendicht und trotzdem dampfdurchlässig.', 'Das schützt die Fuge um das Fenster vor Zugluft, Feuchtigkeit und Schimmel.'], ico: () => [P(R(4, 10, 18, 44), WALL, INK, 0.8), P(R(42, 10, 18, 44), WALL, INK, 0.8), P(R(22, 18, 20, 4), '#5b9bd5'), P(R(22, 22, 20, 18), '#f2d27a'), P(R(22, 40, 20, 4), '#8e8e93'), P(R(26, 26, 12, 10, 1), FR, INK, 1.1)], see: ['lueftung'] },
   fensterbank: { t: 'Fensterbank innen und außen', x: ['Innen zum Beispiel Werzalit (pflegeleichte Kunststoffplatte), Naturstein oder Holz. Außen meist Aluminium, alternativ Naturstein.', 'Die äußere Fensterbank leitet Regenwasser von der Fassade weg.'], ico: () => ICO.bank('aussen'), see: [] },
   ral: { t: 'Was bedeutet RAL?', x: ['RAL ist ein Farbsystem mit festen Nummern. So sieht Anthrazitgrau bei jedem Hersteller gleich aus: RAL 7016.', 'Holzdekore sind Folien mit Holzmaserung auf Kunststoffprofilen. Farben am Bildschirm weichen ab, ein Farbmuster zeigt das echte Ergebnis.'], ico: () => [P(C(20, 24, 11), '#383e42'), P(C(40, 24, 11), '#f1f0ea', INK, 0.8), P(C(30, 42, 11), '#b5732f')], see: [] },
-  lueftung: { t: 'Brauche ich ein Lüftungskonzept?', x: ['Neue Fenster sind sehr dicht. Wird mehr als ein Drittel der Fenster getauscht, muss eine Fachperson nach der Norm DIN 1946-6 prüfen, ob ein Lüftungskonzept nötig ist, damit kein Schimmel entsteht. Nötig ist es nur in manchen Fällen.', 'Oft reichen kleine Lüfter im Fensterfalz. Dein Fensterbauer berät dich dazu.'], ico: () => [P(R(16, 8, 32, 48, 1.2), FR, INK, 1.3), P(R(20, 12, 24, 40), GL, INK, 0.6), P('M4 20c4-3 8 3 12 0M4 30c4-3 8 3 12 0M48 34c4-3 8 3 12 0M48 44c4-3 8 3 12 0', 'none', '#5b9bd5', 1.8)], see: ['ralmontage'] },
+  lueftung: { t: 'Brauche ich ein Lüftungskonzept?', x: ['Neue Fenster sind sehr dicht. Wird mehr als ein Drittel der Fenster getauscht, ist nach der Norm DIN 1946-6 ein Lüftungskonzept erforderlich. Es zeigt, ob zusätzlich gelüftet werden muss, damit kein Schimmel entsteht.', 'Oft reichen kleine Lüfter im Fensterfalz. Um das Konzept kümmert sich dein Fensterbauer.'], ico: () => [P(R(16, 8, 32, 48, 1.2), FR, INK, 1.3), P(R(20, 12, 24, 40), GL, INK, 0.6), P('M4 20c4-3 8 3 12 0M4 30c4-3 8 3 12 0M48 34c4-3 8 3 12 0M48 44c4-3 8 3 12 0', 'none', '#5b9bd5', 1.8)], see: ['ralmontage'] },
   referenz: { lottie: 'messen', t: 'Wie genau ist das Aufmaß?', x: ['Du misst mit dem Zollstock, die App führt dich: erst die Maueröffnung, dann das Fensterelement, jeweils senkrecht und waagerecht in der Mitte, danach die Ränder.', 'Das kleinste von drei Maßen zählt, so wie es der Fensterbauer auch macht. Die Fotos liefern ihm dazu die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade und Zugang.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['feinaufmass', 'rahmenmass'] },
   feinaufmass: { t: 'Was ist ein Feinaufmaß?', x: ['Bevor dein Fenster produziert wird, misst der Fensterbauer vor Ort noch einmal genau nach. Dein Aufmaß ersetzt den ersten Termin und reicht fürs Angebot, nicht aber diese Endkontrolle.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['referenz', 'rahmenmass'] },
   unterlicht: { t: 'Was ist ein Unterlicht?', x: ['Ein festes Feld unter den Flügeln, als Glas oder als gedämmtes Paneel. Typisch in Küchen: Die Arbeitsplatte steht vor dem Fenster, der Flügel beginnt erst darüber und lässt sich trotzdem öffnen.', 'Die Höhe richtet sich nach Arbeitsplatte oder Brüstung, meist 30 bis 60 cm.'], ico: () => ICO.ul('glas'), see: ['oberlicht', 'fest'] },
@@ -349,9 +381,13 @@ const GLOSS = {
   raffstore: { t: 'Was ist ein Raffstore?', x: ['Eine Außenjalousie aus Aluminium-Lamellen. Die Lamellen lassen sich kippen: Schatten oben, Durchblick unten. Hält die Hitze draußen, bevor sie ans Glas kommt.', 'Lamellenfarben wie Silber, Anthrazit oder Bronze; Kasten als Aufsatz auf dem Element oder vorgebaut.'], ico: () => ICO.sonne('raffstore'), see: ['screen', 'aufsatz', 'vorbau'] },
   screen: { t: 'Was ist ein Screen?', x: ['Ein textiler Sonnenschutz außen, der wie ein Rollo herunterfährt. Das Gewebe lässt Durchblick nach außen, hält aber Hitze und Blicke ab. Mit Führungsschienen (ZIP) auch windstabil.'], ico: () => ICO.sonne('screen'), see: ['raffstore'] },
   innenschutz: { t: 'Rollo, Plissee oder Jalousie innen?', x: ['Innenliegender Sonnen- und Sichtschutz, in Stoff oder Aluminium. Rollos rollen auf, Plissees falten sich und lassen sich von oben und unten verschieben, Jalousien haben kippbare Lamellen.', 'Gegen Hitze hilft außen mehr als innen; innen geht es um Blendung und Sichtschutz.'], ico: () => ICO.innen('rollo'), see: ['raffstore'] },
-  neuoeffnung: { t: 'Neue Öffnung in der Wand', x: ['Wo noch kein Fenster ist, braucht die Wand einen Durchbruch mit Sturz. Bei tragenden Wänden muss ein Statiker oder der Fensterbauer mit seinem Bauunternehmen prüfen, was geht.', 'Du markierst die gewünschte Lage auf dem Foto und gibst die Wunschgröße an. Das Rohbaumaß legt am Ende der Fachbetrieb fest.'], ico: () => ICO.situation('neu'), see: ['referenz', 'feinaufmass'] }
+  neuoeffnung: { t: 'Neue Öffnung in der Wand', x: ['Wo noch kein Fenster ist, braucht die Wand einen Durchbruch mit Sturz. Bei tragenden Wänden muss ein Statiker oder der Fensterbauer mit seinem Bauunternehmen prüfen, was geht.', 'Du markierst die gewünschte Lage auf dem Foto und gibst die Wunschgröße an. Das Rohbaumaß legt am Ende der Fachbetrieb fest.'], ico: () => ICO.situation('neu'), see: ['referenz', 'feinaufmass'] },
+  balkon: { t: 'Was ist eine Balkon- oder Terrassentür?', x: ['Eine Tür, die aufgeht wie ein Fenster: drehen zum Durchgehen, kippen zum Lüften. Unten sitzt eine Schwelle statt der Fensterbank.', 'Damit sie von außen zugeht, gibt es einen Ziehgriff mit Schnäpper. Mit Schloss lässt sie sich auch von außen abschließen.'], ico: () => ICO.art('balkon'), see: ['schwelle', 'psk'] },
+  psk: { t: 'Was ist eine PSK-Tür?', x: ['Parallel-Schiebe-Kipp: Der Flügel kippt zum Lüften. Zum Öffnen stellt er sich parallel ab und schiebt sich vor das feste Teil.', 'Meist deutlich günstiger als eine Hebe-Schiebe-Tür. Dafür sind die Flügel kleiner, und unten ist immer eine Schwelle.'], ico: () => ICO.art('psk'), see: ['hst', 'schwelle'] },
+  absturz: { t: 'Wann braucht es eine Absturzsicherung?', x: ['Im Obergeschoss verlangt die Landesbauordnung eine Absturzsicherung, wenn die Brüstung niedriger ist als 80 bis 90 cm, je nach Bundesland. Bei bodentiefen Fenstern und Türen ohne Balkon davor gilt das immer.', 'Möglich sind ein Geländer außen (französischer Balkon), Glas in der Laibung oder ein unten fest verglastes Feld aus Sicherheitsglas.'], ico: () => ICO.absturz('gelaender'), see: ['bruestung', 'vsg'] },
+  foerderung: { t: 'BAFA-Zuschuss oder Steuerbonus?', x: ['BAFA: 15 % Zuschuss für neue Fenster und Außentüren. Ein Energieeffizienz-Experte muss den Antrag begleiten, gestellt wird er vor Beginn der Arbeiten. Den Vertrag erst mit Förderklausel unterschreiben.', 'Steuerbonus: 20 % der Kosten über drei Jahre von der Steuer abziehen, für selbst bewohnte Häuser, die älter als zehn Jahre sind. Der Fachbetrieb stellt eine Bescheinigung nach amtlichem Muster aus.', 'Beides gilt nur, wenn die Fenster gut dämmen: Uw höchstens 0,95, mit Einbruchschutz RC2 oder barrierearmer Schwelle höchstens 1,1. Für dieselben Fenster gibt es nur eins von beiden.'], ico: () => [...ICO.glas('3'), P(C(52, 14, 9), '#f2d27a', INK, 1.1), P(L([52, 9], [52, 19]) + L([49.5, 11], [54.5, 11]) + L([49.5, 17], [54.5, 17]), 'none', INK, 1.1)], see: ['uwert', 'lueftung'] }
 };
-const GLOSS_ORDER = ['referenz', 'feinaufmass', 'neuoeffnung', 'rahmenmass', 'bruestung', 'laibung', 'anschlag', 'dinlr', 'symbol', 'dk', 'kipp', 'fest', 'festverglasung', 'oberlicht', 'unterlicht', 'hst', 'fsw', 'schwelle', 'pfosten', 'stulp', 'wiener', 'szr', 'auf', 'echt', 'uwert', 'schall', 'vsg', 'ornament', 'rc2', 'ral', 'aufsatz', 'vorbau', 'insekt', 'fensterbank', 'ralmontage', 'lueftung', 'raffstore', 'screen', 'innenschutz'];
+const GLOSS_ORDER = ['referenz', 'feinaufmass', 'neuoeffnung', 'rahmenmass', 'bruestung', 'absturz', 'laibung', 'anschlag', 'dinlr', 'symbol', 'dk', 'kipp', 'fest', 'festverglasung', 'oberlicht', 'unterlicht', 'balkon', 'hst', 'psk', 'fsw', 'schwelle', 'pfosten', 'stulp', 'wiener', 'szr', 'auf', 'echt', 'uwert', 'schall', 'vsg', 'ornament', 'rc2', 'ral', 'aufsatz', 'vorbau', 'insekt', 'fensterbank', 'ralmontage', 'lueftung', 'foerderung', 'raffstore', 'screen', 'innenschutz'];
 /* ---------- Fenster-Modell ---------- */
 let BID = 1;
 const nid = () => 'b' + (BID++);
@@ -380,14 +416,22 @@ function fswFluegel(n, schema, geh) {
   if (geh && n > 1) { const i = schema === 'rechts' ? 0 : n - 1; out[i] = { t: 'P', din: schema === 'rechts' ? 'R' : 'L' }; }
   return out;
 }
+/* PSK-Tür: A = Schiebeflügel (kippbar) vor einem Festteil, A3 = vor zwei Festteilen; richtung = Seite, auf der der Flügel geschlossen steht */
+function pskFluegel(schema, richtung) {
+  const S = { t: 'PS', din: richtung }, F = { t: 'F', din: richtung };
+  if (schema === 'A3') return richtung === 'L' ? [S, F, F] : [F, F, S];
+  return richtung === 'L' ? [S, F] : [F, S];
+}
 /* Wechsel der Elementart: Flügel, Teilung und Griff passend setzen; Sprossen, Ober- und Unterlicht zurück auf Standard */
 function artSetzen(w, art) {
   w.art = art;
   if (art === 'fest') { w.teilung = '2p'; w.sashes = festFelder(2); w.ol = false; w.ul = false; w.griff = 'ohne'; }
   else if (art === 'hst') { w.hst = Object.assign({ schema: 'A', richtung: 'R', schwelle: 'flach' }, w.hst || {}); w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); w.teilung = String(w.sashes.length); w.ol = false; w.ul = false; w.form = 'rechteck'; if (!OPT.hstGriff.some((o) => o.k === w.griff)) w.griff = 'standard'; }
   else if (art === 'fsw') { w.fsw = Object.assign({ n: 3, schema: 'links', geh: true, schwelle: 'flach' }, w.fsw || {}); w.sashes = fswFluegel(w.fsw.n, w.fsw.schema, w.fsw.geh); w.teilung = String(w.sashes.length); w.ol = false; w.ul = false; w.form = 'rechteck'; if (w.griff !== 'abschliessbar') w.griff = 'standard'; }
+  else if (art === 'psk') { w.psk = Object.assign({ schema: 'A', richtung: 'R', schwelle: 'standard' }, w.psk || {}); w.sashes = pskFluegel(w.psk.schema, w.psk.richtung); w.teilung = String(w.sashes.length); w.ol = false; w.ul = false; w.form = 'rechteck'; if (w.griff !== 'abschliessbar') w.griff = 'standard'; }
+  else if (art === 'balkon') { w.bt = Object.assign({ schwelle: 'standard', griffA: 'keiner', boden: 'bleibt' }, w.bt || {}); w.teilung = '1'; w.sashes = sashesFor('1'); w.ol = false; w.ul = false; w.form = 'rechteck'; if (w.griff === 'motor') w.griff = 'standard'; }
   else { w.teilung = '2p'; w.sashes = sashesFor('2p'); if (w.griff === 'motor') w.griff = 'standard'; }
-  w.e_teilung = art !== 'fenster'; w.bars = []; w.preset = 'keine';
+  w.e_teilung = art !== 'fenster' && art !== 'balkon'; w.bars = []; w.preset = 'keine';
 }
 const artName = (w) => (istTuer(w) ? 'Tür' : w.art === 'fest' ? 'Festverglasung' : 'Fenster');
 /* Für Türen heißt es Schwelle statt Fensterbank und Tür statt Fenster */
@@ -420,6 +464,9 @@ function baseWin() {
     /* Elementart, Lage, Unterlicht, Türen, Sonnenschutz */
     art: 'fenster', neu: false, plan: null, wand: '', ul: false, ulH: 400, ulA: 'glas', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, fsw: { n: 3, schema: 'links', geh: true, schwelle: 'flach' },
     sart: 'keiner', sfarbe: 'silber', iart: 'keiner', ifarbe: 'weiss',
+    /* Balkon-/Terrassentür und PSK-Tür; offen = Wünsche, die der Kunde noch nicht entschieden hat (Weiß ich noch nicht); Absturzsicherung,
+       Erreichbarkeit fürs Einbruchschutz-Thema, massOk = Maße trotz Abweichung zum Foto bestätigt. Gleiche Standards in modell.js */
+    bt: { schwelle: 'standard', griffA: 'keiner', boden: 'bleibt' }, psk: { schema: 'A', richtung: 'R', schwelle: 'standard' }, offen: {}, absturz: '', erreichbar: '', massOk: false,
     demontage: true, durchbruch: true, ralm: true, putz: true, notiz: '', ki: null, tilt: null, fotos: 0, quelle: 'hand' };
 }
 const num = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
@@ -448,12 +495,17 @@ const colorOf = (k) => COLORS.find((c) => c.k === k) || COLORS[0];
    Nicht erkannt → die gewählte Farbe aus der Liste bleibt, der Text geht als Wunsch an den Fensterbauer. */
 const farbLesen = (t) => (t && window.Farbtext ? window.Farbtext.lesen(t) : null);
 const mischHex = (hex, ziel, t) => (window.Farbtext ? window.Farbtext.mischen(hex, ziel, t) : hex);
+/* Noch nicht entschieden (Weiß ich noch nicht, oder die Frage ohne Vorauswahl übergangen): das Modell zeigt neutral Weiß, das Blatt „offen“ */
+const FARBE_OFFEN = { k: 'offen', name: 'Farbe offen', code: 'bitte beraten', bg: '#f1f0ea', solid: '#f1f0ea', offen: true };
+const farbeOffen = (w, seite) => !!(w.offen && (seite === 'innen' ? (w.gleich ? w.offen.fa : w.offen.fi) : w.offen.fa));
 function rahmenFarbe(w, seite) {
+  if (farbeOffen(w, seite)) return FARBE_OFFEN;
   const innen = seite === 'innen', t = innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, k = innen ? (w.gleich ? w.fa : w.fi) : w.fa, f = farbLesen(t);
   if (!f) return colorOf(k);
   return COLORS.find((x) => x.k === f.key) || { k: 'eigen', name: f.name, code: f.code ? 'RAL ' + f.code : f.holz ? 'Holzdekor' : 'eigene Farbe', bg: f.bg, solid: f.hex, eigen: true };
 }
 function farbZeile(w, seite) {
+  if (farbeOffen(w, seite)) return AW.OFFEN_TEXT;
   const innen = seite === 'innen', t = (innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA) || '', c = rahmenFarbe(w, seite);
   if (t && farbLesen(t)) return c.name + (c.code && c.name.indexOf(c.code) < 0 ? ' (' + c.code + ')' : '') + ', eigene Angabe';
   return c.name + ' (' + c.code + ')' + (t ? ', Wunsch: ' + t : '');
@@ -463,25 +515,37 @@ function sonneFarbeW(w) { const f = farbLesen(w.wunschSf); return f ? [f.hex, mi
 function innenFarbeW(w) { const f = farbLesen(w.wunschIf); return f ? [f.hex, mischHex(f.hex, '#000000', 0.22), mischHex(f.hex, '#ffffff', 0.3)] : innenFarbe(w.ifarbe); }
 const sonneName = (w) => { const f = farbLesen(w.wunschSf); return f ? f.name : (lab('sfarbe', w.sfarbe) || '') + (w.wunschSf ? ', Wunsch: ' + w.wunschSf : ''); };
 const innenName = (w) => { const f = farbLesen(w.wunschIf); return f ? f.name : (lab('ifarbe', w.ifarbe) || '') + (w.wunschIf ? ', Wunsch: ' + w.wunschIf : ''); };
-const istTuer = (w) => w.art === 'hst' || w.art === 'fsw';
+const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
+/* Einstellungen der Tür je Art (Schwelle usw.) */
+const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' ? w.bt : null) || {};
 const schwelleText = (k) => ({ flach: 'flache Schwelle', null: 'barrierefrei ohne Schwelle', standard: 'Standardschwelle' }[k] || 'flache Schwelle');
+/* Gehflügel der Balkontür: der erste Dreh-Kipp-Flügel, sonst der erste Drehflügel */
+const gehFluegel = (w) => { const dk = w.sashes.findIndex((x) => x.t === 'DK'); return dk >= 0 ? dk : w.sashes.findIndex((x) => x.t === 'D'); };
+/* Offen statt Vorgabe (Regeln in modell.js): istOffen prüft auch, ob die Angabe zum Element gehört */
+const OT = 'offen, bitte beraten';
+const istOffen = (w, k) => AW.istOffen(w, k);
+const ov = (w, k, text) => (istOffen(w, k) ? OT : text);
 function openingText(w) {
   if (w.art === 'fest') return w.sashes.length + (w.sashes.length === 1 ? ' Feld' : ' Felder') + ', fest verglast, ohne Griff';
-  if (w.art === 'hst') { const h = w.hst || {}; return 'Hebe-Schiebe-Tür ' + lab('hstSchema', h.schema) + (h.schema === 'A' || h.schema === 'A3' ? ', Schiebeflügel ' + (h.richtung === 'L' ? 'links' : 'rechts') : '') + ', ' + schwelleText(h.schwelle); }
-  if (w.art === 'fsw') { const f = w.fsw || {}; return 'Faltschiebewand, ' + w.sashes.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + ', ' + schwelleText(f.schwelle); }
+  if (w.art === 'hst') { const h = w.hst || {}; return 'Hebe-Schiebe-Tür ' + lab('hstSchema', h.schema) + (h.schema === 'A' || h.schema === 'A3' ? ', Schiebeflügel ' + (h.richtung === 'L' ? 'links' : 'rechts') : '') + ', ' + ov(w, 'schwelle', schwelleText(h.schwelle)); }
+  if (w.art === 'fsw') { const f = w.fsw || {}; return 'Faltschiebewand, ' + w.sashes.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + ', ' + ov(w, 'schwelle', schwelleText(f.schwelle)); }
+  if (w.art === 'psk') { const p = w.psk || {}; return 'PSK-Tür ' + lab('pskSchema', p.schema) + ', Schiebeflügel ' + (p.richtung === 'L' ? 'links' : 'rechts') + ', kippbar, mit Schwelle'; }
   const s = w.sashes.map((x) => TYPNAME[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
+  if (w.art === 'balkon') return 'Balkontür, ' + (w.ol ? lab('olT', w.olT) + ' · ' : '') + s + ', ' + ov(w, 'schwelle', schwelleText((w.bt || {}).schwelle));
   return (w.ol ? lab('olT', w.olT) + ' · ' : '') + s + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + thousand(w.ulH) + ' mm' : '');
 }
 /* Sonnenschutz außen in Worten */
 function sonneText(w) {
+  if (istOffen(w, 'sart')) return OT;
   const a = w.sart && w.sart !== 'keiner' ? w.sart : (w.roll === 'aufsatz' || w.roll === 'vorbau' ? 'rollladen' : w.roll === 'behalten' ? 'behalten' : 'keiner');
   if (a === 'keiner') return 'Keiner';
   if (a === 'behalten') return 'Bestehender bleibt';
-  return lab('sart', a) + (a === 'screen' ? '' : ', ' + lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz')) + ', ' + sonneName(w) + ', ' + lab('antrieb', w.antrieb);
+  return lab('sart', a) + (a === 'screen' ? '' : ', ' + (istOffen(w, 'einbau') ? 'Kasten nach Wahl des Fensterbauers' : lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz'))) + ', ' + sonneName(w) + ', ' + (istOffen(w, 'antrieb') ? 'Antrieb offen' : lab('antrieb', w.antrieb));
 }
-const innenText = (w) => (!w.iart || w.iart === 'keiner' ? 'Keiner' : lab('iart', w.iart) + ', ' + innenName(w));
+const innenText = (w) => (istOffen(w, 'iart') ? OT : !w.iart || w.iart === 'keiner' ? 'Keiner' : lab('iart', w.iart) + ', ' + innenName(w));
+const griffText = (w) => (w.art === 'fest' ? 'Ohne Griff' : istOffen(w, 'griff') ? 'Griff ' + OT : (w.art === 'hst' ? lab('hstGriff', w.griff) || 'Hebegriff' : lab('griff', w.griff)) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + griffFarbe(w).name)) + (w.art === 'balkon' ? '; außen ' + ov(w, 'griffA', lab('griffA', (w.bt || {}).griffA) || 'kein Griff') : '');
 function specRows(w) {
-  const d = derive(w), mo = w.mo || {};
+  const d = derive(w), mo = w.mo || {}, z = AW.uwZiel(w, S.proj);
   const rows = [
     { k: 'Maueröffnung', v: d.moW && d.moH ? thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm (kleinstes Maß)' + (d.devW > 5 || d.devH > 5 ? ', bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel' : '') : 'noch nicht gemessen' },
     { k: 'Breiten', v: ['wt', 'wm', 'wb'].map((k) => MO_LABEL[k].replace('Breite ', '') + ' ' + thousand(num(mo[k]))).join(' · ') },
@@ -491,15 +555,18 @@ function specRows(w) {
     { k: 'Einbau', v: w.neu ? 'Neue Öffnung: Lage vom Kunden auf dem Foto eingezeichnet, Maße sind Wunschmaße. Sturz und Statik vor dem Durchbruch prüfen.' : 'Anschlag und Fassade laut Fotos, Feinaufmaß vor Ort' },
     { k: 'Element', v: lab('art', w.art || 'fenster') },
     { k: 'Öffnung', v: openingText(w) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ', öffnet nach außen' : '') },
-    { k: 'Form', v: lab('form', w.form) + ', ' + lab('material', w.material) },
+    { k: 'Form', v: lab('form', w.form) + ', ' + (istOffen(w, 'material') ? 'Material ' + OT : lab('material', w.material)) },
     { k: 'Farbe', v: 'außen ' + farbZeile(w, 'aussen') + ', innen ' + (w.gleich ? 'wie außen' : farbZeile(w, 'innen')) },
-    { k: 'Glas', v: lab('glas', w.glas) + (w.glasfn.length ? ', ' + w.glasfn.map((g) => lab('glasfn', g) + (g === 'sicht' ? ' (' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label + ')' : '')).join(', ') : '') },
-    { k: 'Sprossen', v: w.bars.length ? lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite).toLowerCase() + ')' : '') + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'Keine' },
-    { k: 'Griff', v: (w.art === 'fest' ? 'Ohne Griff' : w.art === 'hst' ? lab('hstGriff', w.griff) || 'Hebegriff' : lab('griff', w.griff)) + (w.art === 'fest' || w.griff === 'ohne' ? '' : ', ' + griffFarbe(w).name) + ', Schutz ' + lab('rc', w.rc) },
-    { k: 'Sonnenschutz', v: 'außen: ' + sonneText(w) + ' · innen: ' + innenText(w) + ' · Insektenschutz: ' + lab('insekt', w.insekt) },
-    istTuer(w) ? { k: 'Schwelle', v: lab('schwelle', (w.art === 'hst' ? w.hst : w.fsw).schwelle) } : { k: 'Fensterbank', v: 'innen ' + lab('fbi', w.fbi) + ', außen ' + lab('fba', w.fba) },
-    { k: 'Montage', v: [w.neu ? (w.durchbruch ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'Nur Lieferung' }
+    { k: 'Glas', v: ov(w, 'glas', lab('glas', w.glas)) + (istOffen(w, 'glasfn') ? ', Extras ' + OT : w.glasfn.length ? ', ' + w.glasfn.map((g) => lab('glasfn', g) + (g === 'sicht' ? ' (' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label + ')' : '')).join(', ') : '') },
+    { k: 'Sprossen', v: w.bars.length ? ov(w, 'spross', lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite).toLowerCase() + ')' : '')) + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'Keine' },
+    { k: 'Griff', v: griffText(w) },
+    { k: 'Einbruchschutz', v: AW.rcText(w) }
   ];
+  if (AW.absturzFrage(w)) rows.push({ k: 'Absturzsicherung', v: AW.absturzText(w) });
+  if (z) rows.push({ k: 'Förderwert', v: AW.uwText(z) + ', ' + lab('foerdweg', AW.foerdWeg(S.proj)) });
+  rows.push({ k: 'Sonnenschutz', v: 'außen: ' + sonneText(w) + ' · innen: ' + innenText(w) + ' · Insektenschutz: ' + ov(w, 'insekt', lab('insekt', w.insekt)) });
+  rows.push(istTuer(w) ? { k: 'Schwelle', v: w.art === 'psk' ? 'Mit Schwelle (PSK)' : ov(w, 'schwelle', lab('schwelle', tuerCfg(w).schwelle)) + (w.art === 'balkon' ? ', Fußboden ' + ((w.bt || {}).boden === 'neu' ? 'wird erneuert' : 'bleibt') : '') } : { k: 'Fensterbank', v: 'innen ' + ov(w, 'fbi', lab('fbi', w.fbi)) + ', außen ' + ov(w, 'fba', lab('fba', w.fba)) });
+  rows.push({ k: 'Montage', v: istOffen(w, 'montage') ? 'Nach Vorschlag des Fensterbauers' : [w.neu ? (w.durchbruch ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'Nur Lieferung' });
   if (w.notiz) rows.push({ k: 'Notiz', v: w.notiz });
   return rows;
 }
@@ -601,13 +668,14 @@ function w3dCalc(w, o) {
   o = o || {};
   const d = derive(w), haveMo = !!(d.moW && d.moH), moW = d.moW || o.moW || 1250, moH = d.moH || o.moH || 1480;
   const elW = d.elW || Math.round(moW - 60), elH = d.elH || Math.round(moH - 40);
-  /* Türen: tieferer Blendrahmen mit zwei Laufebenen (Hebe-Schiebe) bzw. Laufschiene (Falt), unten die Schwelle statt des Rahmenprofils */
-  const tuer = istTuer(w), art = w.art || 'fenster', fd = art === 'hst' ? 170 : tuer ? 90 : W3D.FD;
-  const schw = tuer ? (art === 'hst' ? w.hst : w.fsw).schwelle : '', pfB = tuer ? (schw === 'null' ? 16 : schw === 'standard' ? 62 : 28) : W3D.PF;
+  /* Türen: tieferer Blendrahmen mit zwei Laufebenen (Hebe-Schiebe) bzw. Laufschiene (Falt, PSK), unten die Schwelle statt des Rahmenprofils.
+     Die Balkontür hat Fensterprofile (gleiche Tiefe, Pfosten zwischen zwei Flügeln), steht aber wie jede Tür auf dem Boden */
+  const tuer = istTuer(w), art = w.art || 'fenster', fd = art === 'hst' ? 170 : art === 'balkon' ? W3D.FD : tuer ? 90 : W3D.FD;
+  const schw = tuer ? tuerCfg(w).schwelle : '', pfB = tuer ? (schw === 'null' ? 16 : schw === 'standard' ? 62 : 28) : W3D.PF;
   const laib = num(w.laib) || (w.ki && w.ki.laib) || 140, T = laib + fd + W3D.OUTD;
   const sw = o.stageW || 358, sh = o.stageH || 360;
   const s = o.s || Math.min(sw * (o.fitW || 0.64) / moW, sh * (o.fitH || 0.7) / moH);
-  const n = Math.max(1, w.sashes.length), pf = W3D.PF, sf = W3D.SF, mul = tuer ? 0 : w.teilung === '2s' ? 8 : W3D.MUL;
+  const n = Math.max(1, w.sashes.length), pf = W3D.PF, sf = W3D.SF, mul = tuer && art !== 'balkon' ? 0 : w.teilung === '2s' ? 8 : W3D.MUL;
   const innerW = elW - 2 * pf, innerH = elH - pf - pfB, olH = w.ol ? Math.round(Math.min(innerH * 0.6, Math.max(innerH * 0.26, formSenke(w.form, innerW, innerH)))) : 0;
   const ulH = w.ul && art === 'fenster' && w.form !== 'rund' ? Math.round(clamp(num(w.ulH) || 400, 200, Math.max(200, (innerH - olH) * 0.55))) : 0;
   const sashH = innerH - (olH ? olH + mul : 0) - (ulH ? ulH + W3D.MUL : 0), sashW = (innerW - mul * (n - 1)) / n;
@@ -759,6 +827,8 @@ function w3dHTML(w, o) {
     h += faceEl('sf-out-' + i, 'w3d-frame w3d-sf w3d-back', ' style="background: ' + fout.bg + '"');
     ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('sfe-' + k + '-' + i, 'w3d-frame w3d-side w3d-sfe', ' style="background-color: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
     h += '<div class="w3d-handle" data-r="handle-' + i + '" style="background: ' + hcol + '"></div>';
+    /* Balkontür: Griff außen (Ziehgriff mit Schnäpper oder abschließbar) auf der Außenseite des Gehflügels */
+    if (w.art === 'balkon') h += '<div class="w3d-griffa" data-r="ga-' + i + '" style="background: ' + hcol + '"></div>';
     h += '<div class="w3d-selring" data-r="ring-' + i + '"></div>';
     h += '</div>';
   });
@@ -778,6 +848,7 @@ function w3dHTML(w, o) {
 const dimHTML = (k, active) => '<div class="w3d-dim ' + (k[0] === 'e' ? 'el' : 'mo') + (active ? ' is-active' : '') + '" data-r="dim-' + k + '" data-dim="' + k + '"><span class="w3d-dim-line"></span><span class="w3d-dim-cap a"></span><span class="w3d-dim-cap b"></span><span class="w3d-dim-lab" data-r="lab-' + k + '"></span></div>';
 function symPaths(w, x) {
   if (x.t === 'X') return '';
+  if (x.t === 'PS') return symPaths(w, { t: 'S', din: x.din }) + symPaths(w, { t: 'K', din: x.din });
   if (x.t === 'S') { const d = x.din === 'L' ? 1 : -1, a = 50 - d * 26, b = 50 + d * 26; return '<path d="M' + a + ' 56H' + b + 'M' + (b - d * 7) + ' 49L' + b + ' 56L' + (b - d * 7) + ' 63" fill="none" stroke="rgba(29,29,31,.45)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>'; }
   return sym(0, 0, 100, 100, x.t === 'P' ? 'D' : x.t, x.din, w.richtung === 'aussen' ? '5 4' : undefined, 'rgba(29,29,31,.45)', 1).map((p) => '<path d="' + p.d + '" fill="none" stroke="' + p.s + '" stroke-width="1.2"' + (p.da ? ' stroke-dasharray="' + p.da + '"' : '') + ' vector-effect="non-scaling-stroke"></path>').join(''); }
 /* Lupe: Schnitt durch die Unterkante des Flügels, groß genug zum Lesen. Links Raum, rechts außen. Zeigt Scheibenzahl,
@@ -816,7 +887,7 @@ function glasLupe(w) {
 const glasLupeKey = (w) => [w.glas, (w.glasfn || []).join(','), w.rc].join('|');
 const glasText = (w) => (w.glas === '2' ? '2 Scheiben · Ug ≈ 1,1' : '3 Scheiben · Ug ≈ 0,5 bis 0,7');
 /* Struktur-Signatur: solange sie gleich bleibt, wird die Bühne weiterverwendet und alles morpht mit Übergängen */
-function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? 1 : 0, innenAktiv(w) ? 1 : 0].join('|'); }
+function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? 1 : 0, innenAktiv(w) ? 1 : 0].join('|'); }
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
   /* Nur schreiben, was sich geändert hat (der Vergleich mit dem gelesenen Stil schlägt bei Verläufen immer fehl) */
@@ -836,7 +907,7 @@ function w3dPaint(stage, w) {
   if (sonneAktiv(w)) { const c = sonneFarbeW(w); bg('roll-f', 'linear-gradient(180deg, ' + c[2] + ', ' + c[0] + ' 30%, ' + c[1] + ')'); bg('roll-b', c[1]); bg('roll-t', c[2]); bg('roll-l', c[0]); bg('roll-r', c[0]); }
   else { bg('roll-f', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
-    bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol);
+    bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol); bg('ga-' + i, hcol);
     bgc('sfe-l-' + i, fout.solid); bgc('sfe-r-' + i, fout.solid); bgc('sfe-t-' + i, fin.solid); bgc('sfe-b-' + i, fin.solid);
     const sash = q('sash-' + i); if (sash) { sash.classList.toggle('is-fixed', x.t === 'F' || x.t === 'X'); sash.classList.toggle('is-schiebe', x.t === 'S'); sash.setAttribute('data-t', x.t); sash.setAttribute('data-din', x.din); sash.style.setProperty('--sdir', x.din === 'L' ? '1' : '-1'); }
     const sv = q('sym-' + i); if (sv) { const p = symPaths(w, x); if (sv.getAttribute('data-k') !== x.t + x.din + w.richtung) { sv.innerHTML = p; sv.setAttribute('data-k', x.t + x.din + w.richtung); } }
@@ -1030,6 +1101,11 @@ function w3dLayout(stage, w, o, gr) {
         const hhl = 320 * s, hhw = Math.max(6, 30 * s), hx = x.din === 'L' ? sf / 2 - hhw / 2 : sashW - sf / 2 - hhw / 2, ym = Math.max(hhl, Math.min(sashH - 180 * s, sashH - 1050 * s + hhl / 2));
         hd.style.width = px(hhw); hd.style.height = px(hhl); hd.style.transformOrigin = '50% 50%';
         hd.style.translate = px(hx) + ' ' + px(ym - hhl) + ' 6px';
+      } else if (x.t === 'PS') {
+        /* PSK: Griff wie am Fenster, auf der Schließseite, etwa 1.050 mm über dem Boden */
+        const hx = x.din === 'L' ? sf / 2 - hw / 2 : sashW - sf / 2 - hw / 2, ym = Math.max(hw, Math.min(sashH - hl - sf, sashH - 1050 * s));
+        hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transformOrigin = '50% ' + px(hw / 2);
+        hd.style.translate = px(hx) + ' ' + px(ym - hw / 2) + ' 5px';
       } else if (x.t === 'K') {
         const yt = G ? Math.max(0, gI.top(left + sashW / 2) - sashTop) : 0;
         hd.style.width = px(hl); hd.style.height = px(hw); hd.style.transformOrigin = '50% 50%';
@@ -1041,6 +1117,13 @@ function w3dLayout(stage, w, o, gr) {
         hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transformOrigin = '50% ' + px(hw / 2);
         hd.style.translate = px(hx) + ' ' + px(ym - hw / 2) + ' 5px';
       }
+    }
+    /* Griff außen der Balkontür: am Gehflügel, auf der Griffseite, außen vor dem Flügelrahmen */
+    const ga = q('ga-' + i);
+    if (ga) {
+      const cfg = w.bt || {}, an = w.art === 'balkon' && i === gehFluegel(w) && cfg.griffA && cfg.griffA !== 'keiner', zg = cfg.griffA === 'ziehgriff';
+      const gw2 = Math.max(4, (zg ? 26 : 22) * s), gh2 = (zg ? 300 : 140) * s, hx2 = x.din === 'L' ? sashW - sf / 2 - gw2 / 2 : sf / 2 - gw2 / 2, ym2 = Math.max(0, Math.min(sashH - gh2, sashH - 1050 * s - gh2 / 2));
+      ga.style.width = px(gw2); ga.style.height = px(gh2); ga.style.transform = 'translate3d(' + px(hx2) + ', ' + px(ym2) + ', ' + px(-sd - 5) + ')'; ga.style.opacity = an ? '1' : '0';
     }
     w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
   });
@@ -1164,11 +1247,20 @@ const AI = (function () {
   const str = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n || 160);
   const liste = (x, n, m) => (Array.isArray(x) ? x : []).map((t) => str(t, m)).filter(Boolean).slice(0, n);
   const zahl = (v) => (v === null || v === undefined || v === '' || !isFinite(+v) ? null : +v);
-  /* Antwort der KI lesen: rows [Thema, Befund], chips für den Kunden, hints für Angebot und Montage, pruefen fürs Feinaufmaß */
+  /* Fachangaben als feste Werte (functions/api/ki.js): nur bekannte Werte, „unklar“ fällt weg */
+  const FACH = { rollladen: ['einbau', 'aufsatz', 'vorbau', 'keiner'], anschlag: ['innen', 'aussen', 'ohne'], fassade: ['putz', 'klinker', 'wdvs', 'holz', 'sonstige'], fensterbank: ['naturstein', 'kunststoff', 'holz', 'fliesen', 'aluminium', 'klinker', 'faserzement', 'beton', 'keine'], bruestung: ['bodentief', 'niedrig', 'normal'], geschoss: ['kg', 'eg', 'og', 'dg'] };
+  function readFach(f) {
+    const o = {}; if (!f || typeof f !== 'object') return o;
+    Object.keys(FACH).forEach((k) => { const v = String(f[k] == null ? '' : f[k]).toLowerCase().trim(); if (FACH[k].indexOf(v) >= 0) o[k] = v; });
+    ['erreichbar', 'strom', 'geruest'].forEach((k) => { if (f[k] === true || f[k] === false) o[k] = f[k]; });
+    return o;
+  }
+  /* Antwort der KI lesen: rows [Thema, Befund], chips für den Kunden, hints für Angebot und Montage, pruefen fürs Feinaufmaß,
+     fach (feste Werte für den Fensterbauer), verh (Breite : Höhe des Elements laut Foto) */
   function readBefund(j, side) {
     if (!j || typeof j !== 'object') return null;
-    if (j.foto_passt === false) return { ok: false, chips: [], rows: [], hints: liste(j.hinweise, 2, 220), pruefen: [], tilt: null, laib: null, conf: null };
-    const t = zahl(j.neigung_grad), l = zahl(j.laibung_mm);
+    if (j.foto_passt === false) return { ok: false, chips: [], rows: [], hints: liste(j.hinweise, 2, 220), pruefen: [], tilt: null, laib: null, conf: null, fach: {}, verh: null };
+    const t = zahl(j.neigung_grad), l = zahl(j.laibung_mm), v = zahl(j.verhaeltnis);
     return {
       ok: true,
       chips: liste(j.chips, 6, 40),
@@ -1177,7 +1269,9 @@ const AI = (function () {
       pruefen: liste(j.vor_ort, 4, 220),
       tilt: t === null ? null : Math.round(t * 10) / 10,
       laib: side === 'in' && l !== null && l > 0 ? Math.min(600, Math.round(l)) : null,
-      conf: zahl(j.sicherheit)
+      conf: zahl(j.sicherheit),
+      fach: readFach(j.fach),
+      verh: v !== null && v >= 0.2 && v <= 5 ? Math.round(v * 100) / 100 : null
     };
   }
   async function analyze(file, side, signal, onPart, neu) {
@@ -1199,12 +1293,12 @@ const AI = (function () {
       chips: ['Heizkörper darunter', 'Fensterbank Kunststoff', 'Laibung verputzt', 'Steckdose daneben'],
       rows: [['Rollladen', 'Innen kein Kasten zu sehen, außen vermutlich Vorbaukasten (siehe Außenfoto)'], ['Anschlag', 'Blendrahmen sitzt etwa 3 cm hinter der Innenkante, Innenanschlag nicht erkennbar'], ['Laibung', 'Glatt verputzt und gestrichen, keine Risse; nach dem Ausbau ist Beiputz nötig'], ['Fensterbank innen', 'Kunststoff, weiß, Überstand etwa 3 cm über dem Heizkörper, kann vermutlich bleiben'], ['Brüstung', 'Normale Brüstungshöhe, keine Absturzsicherung nötig'], ['Heizung', 'Plattenheizkörper direkt unter dem Fenster, Thermostat rechts'], ['Elektro', 'Steckdose und Lichtschalter rechts neben der Öffnung, außerhalb der Laibung'], ['Hindernisse', 'Gardinenleiste über dem Fenster, sonst frei zugänglich']],
       hints: ['Der Heizkörper ist beim Ausbau im Weg; die Fensterbank vorsichtig lösen oder vorher abnehmen.'],
-      pruefen: ['Ist die Fensterbank unter dem Blendrahmen eingemörtelt?'] } },
+      pruefen: ['Ist die Fensterbank unter dem Blendrahmen eingemörtelt?'], fach: { rollladen: 'keiner', anschlag: 'ohne', fensterbank: 'kunststoff', bruestung: 'normal', strom: true }, verh: 0.86 } },
     out: { w: 1200, h: 1400, errs: {}, befund: { ok: true, tilt: -0.3, laib: null, conf: 0.75,
       chips: ['Klinkerfassade', 'Vorbaurollladen', 'Fensterbank Aluminium', 'Erdgeschoss'],
       rows: [['Fassade', 'Klinker im Normalformat, vermutlich zweischalig mit Luftschicht'], ['Anschlag außen', 'Mauerwerk steht etwa 3 cm vor dem Blendrahmen (Außenanschlag)'], ['Sonnenschutz', 'Vorbaurollladen über der Öffnung, Führungsschienen seitlich in der Laibung'], ['Fensterbank außen', 'Aluminium mit Gefälle und Tropfkante, Überstand etwa 4 cm, Endstücke vorhanden'], ['Anschlüsse', 'Silikonfuge zur Fensterbank gerissen'], ['Sturz', 'Klinker-Rollschicht ohne Risse'], ['Zugang', 'Erdgeschoss, vom Boden erreichbar, kein Gerüst nötig'], ['Einbruchschutz', 'Leicht erreichbar, RC 2 empfehlen']],
       hints: ['Führungsschienen beim Ausbau lösen; der Vorbaukasten kann vermutlich bleiben.'],
-      pruefen: ['Luftschicht oder Kerndämmung hinter dem Klinker klären, davon hängt der Anschluss ab.'] } }
+      pruefen: ['Luftschicht oder Kerndämmung hinter dem Klinker klären, davon hängt der Anschluss ab.'], fach: { rollladen: 'vorbau', anschlag: 'aussen', fassade: 'klinker', fensterbank: 'aluminium', geschoss: 'eg', erreichbar: true, geruest: false }, verh: 0.86 } }
   };
   return { init: init, available: available, analyze: analyze, errText: errText, DEMO: DEMO };
 })();
@@ -1217,7 +1311,7 @@ const PORTAL_OPEN = PORTAL_URL;
 const PORTAL_KURZ = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + '#fensterbauer';
 const STORE = 'aufmass.v1';
-const PROJ0 = { gebaeude: 'efh', baujahr: '', total: 9, zeit: '3m', budget: 'b0', foerd: false, name: '', ort: '', tel: '', mail: '', erreich: 'nm' };
+const PROJ0 = { gebaeude: 'efh', baujahr: '', total: 9, zeit: '3m', budget: 'b0', foerd: false, foerdweg: '', name: '', ort: '', tel: '', mail: '', erreich: 'nm' };
 const S = {
   screen: 'home', dir: 'fwd', betrieb: null, windows: [], win: baseWin(), editIdx: -1,
   photos: { in: null, out: null }, ai: { in: null, out: null }, aiOk: null,
@@ -1332,7 +1426,9 @@ function go(screen, dir) {
   S.dir = dir || 'fwd'; S.screen = screen; S.gloss = null; S.glossIndex = false; S.selBar = null; S.neuFrage = false;
   if (screen === 'rest') { const first = REST.findIndex((r) => !num(S.win.mo[r.k])); S.rest = { i: first < 0 ? 4 : first, cur: '', msg: null }; }
   if (screen !== 'frage') S.openSash = -1;
-  if (screen === 'frage' && !S.win.e_teilung && (S.win.art || 'fenster') === 'fenster') { const ew = derive(S.win).elW || 0, t = ew && ew < 1000 ? '1' : ew >= 2000 ? '3' : '2p'; if (t !== S.win.teilung) { S.win.teilung = t; S.win.sashes = sashesFor(t); S.win.bars = S.win.preset !== 'keine' && S.win.preset !== 'eigene' ? presetBars(S.win.preset, S.win.sashes.length) : S.win.bars.filter((b) => b.s < S.win.sashes.length); S.selSash = 0; } }
+  /* Flügelzahl nach der Breite vorschlagen: Fenster bis 1 m einflügelig, ab 2 m dreiteilig; Balkontür ab 1,3 m zwei Flügel (Stulp) */
+  const vorschlag = (art, ew) => (art === 'balkon' ? (ew >= 1300 ? '2s' : '1') : ew && ew < 1000 ? '1' : ew >= 2000 ? '3' : '2p');
+  if (screen === 'frage' && !S.win.e_teilung && ((S.win.art || 'fenster') === 'fenster' || S.win.art === 'balkon')) { const ew = derive(S.win).elW || 0, t = vorschlag(S.win.art || 'fenster', ew); if (t !== S.win.teilung) { S.win.teilung = t; S.win.sashes = sashesFor(t); S.win.bars = S.win.preset !== 'keine' && S.win.preset !== 'eigene' ? presetBars(S.win.preset, S.win.sashes.length) : S.win.bars.filter((b) => b.s < S.win.sashes.length); S.selSash = 0; } }
   render(true);
 }
 function toast(msg) { S.toast = msg; render(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = ''; render(); }, 1900 + Math.min(4000, Math.max(0, String(msg || '').length - 40) * 45)); } // längere Meldungen bleiben länger stehen (bis drei Zeilen)
@@ -1542,10 +1638,10 @@ function linkHomeInhalt() {
 }
 /* ---------- Start: die Stelle und das Element ---------- */
 /* Vorschau fürs Startbild: ein typisches Element je Art mit plausiblen Maßen, in den Farben und Einstellungen des Kunden */
-const START_MASS = { fenster: [1230, 1410, 620], fest: [1800, 1400, 620], hst: [2600, 2200, 0], fsw: [3600, 2200, 0] };
+const START_MASS = { fenster: [1230, 1410, 620], balkon: [1010, 2180, 0], fest: [1800, 1400, 620], hst: [2600, 2200, 0], psk: [2000, 2180, 0], fsw: [3600, 2200, 0] };
 function startWin(w) {
   const m = START_MASS[w.art] || START_MASS.fenster;
-  const v = Object.assign(baseWin(), { w: m[0], h: m[1], mo: { hm: m[1] + 70, hl: m[1] + 70, hr: m[1] + 70, wm: m[0] + 140, wt: m[0] + 140, wb: m[0] + 140 }, el: { h: m[1], w: m[0] }, bru: m[2], laib: 140, fa: w.fa, fi: w.fi, material: w.material, neu: w.neu, hst: w.hst, fsw: w.fsw });
+  const v = Object.assign(baseWin(), { w: m[0], h: m[1], mo: { hm: m[1] + 70, hl: m[1] + 70, hr: m[1] + 70, wm: m[0] + 140, wt: m[0] + 140, wb: m[0] + 140 }, el: { h: m[1], w: m[0] }, bru: m[2], laib: 140, fa: w.fa, fi: w.fi, offen: kopie(w.offen || {}), material: w.material, neu: w.neu, hst: w.hst, fsw: w.fsw, bt: w.bt, psk: w.psk });
   artSetzen(v, w.art || 'fenster'); return v;
 }
 function startKarten(group, cur, act, cls) {
@@ -1583,7 +1679,7 @@ SCREENS.fotos = () => {
 /* ---------- Neue Öffnung, Schritt 3: das Element auf dem Foto einzeichnen ----------
    Vier Ecken auf dem Foto, wie beim Scannen eines Dokuments: Außen abgedunkelt, innen ein Raster, die Ecken als große Griffe.
    Beim Ziehen zeigt eine Lupe die Stelle unter dem Finger vergrößert. Die Ecken liegen normiert (0 bis 1) in w.plan.ecken. */
-const PLAN_MASS = { fenster: [1230, 1480, 620], fest: [1800, 1400, 620], hst: [2600, 2200, 0], fsw: [3600, 2200, 0] };
+const PLAN_MASS = { fenster: [1230, 1480, 620], balkon: [1010, 2200, 0], fest: [1800, 1400, 620], hst: [2600, 2200, 0], psk: [2000, 2200, 0], fsw: [3600, 2200, 0] };
 function planFoto() { const pl = S.win && S.win.plan; if (pl && pl.seite === 'out' && S.photos.out) return S.photos.out; return S.photos.in || S.photos.out || null; }
 function planStart(w) {
   const p = planFoto(), m = PLAN_MASS[w.art] || PLAN_MASS.fenster, r = m[0] / m[1], bw = p && p.w || 3, bh = p && p.h || 4, tuer = istTuer(w);
@@ -1806,9 +1902,13 @@ SCREENS.ergebnis = () => {
     '<div><span class="k">' + esc(en) + ' Breite</span><span class="v" style="color: var(--el); animation-delay: .2s">' + thousand(d.elW) + '<small> mm</small></span><span class="tag" style="background: var(--el-soft); color: var(--el)">' + tEl + '</span></div>' +
     '<div><span class="k">' + esc(en) + ' Höhe</span><span class="v" style="color: var(--el); animation-delay: .3s">' + thousand(d.elH) + '<small> mm</small></span><span class="tag" style="background: var(--el-soft); color: var(--el)">' + tEl + '</span></div></div>' +
     (!neu && (d.devW > 10 || d.devH > 10) ? '<p class="sub">Bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel, alle sechs Einzelmaße stehen im Aufmaßblatt.</p>' : '') + '</div>';
-  const teaser = ki && (ki.chips || []).length ? '<div class="teaser"><p class="eyebrow">Aus deinen Fotos gelesen · ' + (ki.rows || []).length + ' Angaben fürs Aufmaßblatt</p><div class="chips">' + ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
+  /* Maße gegen das Foto: vertauscht oder stark abweichend? Dann fragen, bevor es weitergeht (nie bei der neuen Öffnung) */
+  const mp = !neu && !w.massOk ? AW.massPruef(w) : null;
+  const massHinweis = mp ? '<div class="msg warn mass-pruef" role="status">' + (mp.typ === 'tausch' ? 'Auf dem Foto ist ' + (istTuer(w) ? 'die Tür' : 'das Fenster') + ' eher ' + (mp.rk < 1 ? 'hoch als breit' : 'breit als hoch') + ', deine Maße sagen das Gegenteil. Breite und Höhe vertauscht?' : 'Das Foto wirkt anders proportioniert als deine Maße. Bitte miss noch einmal nach.') +
+    '<div class="pill-row">' + (mp.typ === 'tausch' ? '<button type="button" class="pill" data-act="mass-tausch">Tauschen</button>' : '<button type="button" class="pill" data-act="mass-nach">Nachmessen</button>') + '<button type="button" class="pill" data-act="mass-ok">Stimmt so</button></div></div>' : '';
+  const teaser = ki && (ki.chips || []).length ? '<div class="teaser"><p class="eyebrow">Aus deinen Fotos gelesen · ' + kiAnzahl(ki) + ' fürs Aufmaßblatt</p><div class="chips">' + ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
     : (S.ai.in && S.ai.in.status === 'running' ? '<div class="teaser"><p class="eyebrow">Aus deinen Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest noch die Einbausituation aus den Fotos.</p></div>' : '');
-  const html = hd('Schritt 5 von 6 · Ergebnis', neu ? 'Dein Wunsch steht.' : 'Dein Aufmaß steht.', neu ? 'Rohbauöffnung und Element als Wunschmaße, die Lage auf deinem Foto. Das endgültige Maß legt der Fachbetrieb nach der Statik fest.' : 'Maueröffnung und ' + esc(elName()) + ', so wie der Fensterbauer sie fürs Angebot braucht.') + model(w, { id: 'w3d', view: 'result', sway: true, dims: ['hl', 'hm', 'hr', 'wt', 'wm', 'wb', 'eh', 'ew'], labels: messLabels(), stageH: 300, fitW: 0.56, fitH: 0.6, cls: 'dims-all', bg: photoBg(), hint: 'Zum Drehen ziehen' }) + res + teaser +
+  const html = hd('Schritt 5 von 6 · Ergebnis', neu ? 'Dein Wunsch steht.' : 'Dein Aufmaß steht.', neu ? 'Rohbauöffnung und Element als Wunschmaße, die Lage auf deinem Foto. Das endgültige Maß legt der Fachbetrieb nach der Statik fest.' : 'Maueröffnung und ' + esc(elName()) + ', so wie der Fensterbauer sie fürs Angebot braucht.') + model(w, { id: 'w3d', view: 'result', sway: true, dims: ['hl', 'hm', 'hr', 'wt', 'wm', 'wb', 'eh', 'ew'], labels: messLabels(), stageH: 300, fitW: 0.56, fitH: 0.6, cls: 'dims-all', bg: photoBg(), hint: 'Zum Drehen ziehen' }) + res + massHinweis + teaser +
     (neu && w.plan && w.plan.bild ? '<div class="card plan-card"><p class="eyebrow">Lage auf deinem Foto</p><img class="plan-bild" src="' + w.plan.bild + '" alt="Foto der Wand mit eingezeichneter Lage"><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="zeichnen">Lage ändern</button><button type="button" class="pill" data-act="go" data-v="planmasse">Maße ändern</button></div></div>' : '') +
     '<details class="card fold"><summary><span>Falls zur Hand<small>Brüstungshöhe und Laibungstiefe, sonst beim Feinaufmaß</small></span></summary><div class="fold-body"><div class="rows">' + fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'bruestung') + fieldRow('Laibungstiefe innen', 'laib', 'mm', 5, 'laibung', ki && ki.laib && !w.e_laib ? 'KI-Schätzung' : '') + '</div></div></details>';
   return { html: html, back: neu ? ['Maße', 'planmasse'] : ['Ränder', 'rest'], cls: 'tight', bar: { label: istTuer(w) ? 'Weiter: Wunschtür' : 'Weiter: Wünsche', act: 'wuensche' } };
@@ -1820,10 +1920,10 @@ const MAL = ['keinmal', 'einmal', 'zweimal', 'dreimal', 'viermal'];
 SCREENS.fertig = () => {
   const w = S.win, d = derive(w), lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'deinen Fensterbauer') : '', offen = masseZeigen(), gespeichert = S.windows[S.editIdx] || w;
   const facts = [offen ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : '', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), lab('material', w.material), rahmenFarbe(w, 'aussen').name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
-  const kiN = w.ki && w.ki.rows ? w.ki.rows.length : 0, st = aendStand(gespeichert);
+  const kiN = w.ki ? ((w.ki.rows || []).length + (AW.fachZeile(w) ? 1 : 0)) : 0, st = aendStand(gespeichert);
   /* Die geordnete Übersicht mit allen Angaben gibt es erst nach dem Freischalten (beim Kundenlink bekommt sie der Betrieb) */
   const alle = offen ? '<details class="card fold"><summary><span>Alle Angaben<small>' + specRows(w).length + ' Zeilen' + (kiN ? ', dazu ' + kiN + ' aus den Fotos' : '') + '</small></span></summary><div class="fold-body"><div class="kv">' + specRows(w).map((r) => '<div><span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span></div>').join('') + '</div>' +
-    (kiN ? '<p class="eyebrow">Einbausituation aus den Fotos</p><dl class="facts">' + kiZeilen(w.ki).map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>'
+    (kiN ? '<p class="eyebrow">Einbausituation aus den Fotos</p><dl class="facts">' + AW.kiRows(w).map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>'
     : '<div class="card datei-card zu-karte"><div class="dc-row"><span class="dc-ic">' + LOCK + '</span><div><p class="eyebrow">Alle Angaben · ' + specRows(w).length + (kiN ? ' + ' + kiN + ' aus den Fotos' : '') + '</p><b>' + (lk ? 'Gehen mit deinem Aufmaß an ' + esc(bn) : 'Stehen in deinem Aufmaßblatt') + '</b><small>' + (lk ? esc(bn) + ' bekommt jedes Fenster mit Zeichnung, allen Maßen, deinen Wünschen und der Auswertung der Fotos.' : 'Mit Zeichnung, allen Maßen, deinen Wünschen und der Auswertung der Fotos. Einmal freischalten, für dieses Projekt.') + '</small></div></div>' + (lk ? '' : '<button type="button" class="btn primary" style="flex: 0 0 auto" data-act="k-start">Freischalten</button>') + '</div>';
   const zu = st.fest ? ' aria-disabled="true"' : '';
   const aend = st.fest ? noteBox(festText(st) + ' ' + (lk ? 'Änderungen klärst du direkt mit ' + esc(bn) + '.' : 'Brauchst du etwas anders, legst du es als neues Fenster an.'), null, 'warn')
@@ -1839,6 +1939,14 @@ SCREENS.fertig = () => {
 };
 /* Anfrage: zwei kurze Seiten im Link, drei ohne Link (dann mit Kontakt) */
 const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von 2' : 'Fürs Angebot · ' + step + ' von 3';
+/* Was der gewählte Förderweg bedeutet (Quellen: BAFA, BEG EM; § 35c EStG mit ESanMV; docs/GESTALTUNG.md) */
+const FOERD_HINWEIS = {
+  bafa: '15 % Zuschuss vom BAFA. Ein Energieeffizienz-Experte begleitet den Antrag, gestellt wird er vor Beginn der Arbeiten; den Vertrag erst mit Förderklausel unterschreiben. Die Fenster müssen gut dämmen (Uw höchstens 0,95). Dein Fensterbauer plant das ein.',
+  steuer: '20 % der Kosten über drei Jahre von der Steuer abziehen, wenn du selbst im Haus wohnst und es älter als zehn Jahre ist. Dein Fensterbauer stellt die Bescheinigung aus; die Fenster müssen gut dämmen (Uw höchstens 0,95).',
+  offen: 'Dein Fensterbauer zeigt dir beide Wege: Zuschuss vom BAFA oder Steuerbonus. Für den Zuschuss muss der Antrag vor Beginn gestellt sein.'
+};
+/* Klärungsliste (Regeln in modell.js): was dein Fensterbauer mit dir klärt, bevor er anbietet */
+const klaerListe = (windows, pr) => AW.klaerung(windows, pr);
 SCREENS.anfrage = () => {
   const pr = S.proj, replaced = S.windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : 'der Fensterbauer';
   let html = hd(anfrageHead(1, lk), 'Noch kurz zum Haus.', 'Damit ' + esc(bn) + ' gut planen kann. Alles freiwillig.');
@@ -1846,7 +1954,7 @@ SCREENS.anfrage = () => {
   if (pr.gebaeude === 'denkmal') html += noteBox('Bei Denkmalschutz brauchst du meist eine Genehmigung. Material und Sprossen können vorgeschrieben sein.', 'echt', 'warn');
   html += '<div class="sec">' + secHead('Baujahr des Hauses') + chips('baujahr', pr.baujahr, 'baujahr', 'setp') + '</div>';
   html += '<div class="sec">' + secHead('Fenster im ganzen Haus', null, 'Du tauschst ' + replaced + ' davon.') + '<div class="rows"><div class="row"><label><span class="lbl">Insgesamt</span><span class="val"><input type="text" inputmode="numeric" id="p-total" data-in="p" data-f="total" value="' + esc(pr.total) + '"><span class="unit">Stück</span></span></label><button type="button" class="rnd" aria-label="Weniger" data-act="bumpp" data-v="-1">−</button><button type="button" class="rnd" aria-label="Mehr" data-act="bumpp" data-v="1">+</button></div></div></div>';
-  if (replaced > (num(pr.total) || 0) / 3) html += noteBox('Du tauschst mehr als ein Drittel der Fenster. Dann muss geprüft werden, ob nach DIN 1946-6 ein Lüftungskonzept nötig ist.', 'lueftung', 'warn');
+  if (replaced > (num(pr.total) || 0) / 3) html += noteBox('Du tauschst ' + replaced + ' von ' + (num(pr.total) || 0) + ' Fenstern, mehr als ein Drittel. Dann ist ein Lüftungskonzept nach DIN 1946-6 erforderlich; darum kümmert sich dein Fensterbauer.', 'lueftung', 'warn');
   return { html: html, back: ['Aufmaß', 'home'], cls: 'tight', bar: { label: 'Weiter', act: 'go', v: 'anfrage2' } };
 };
 SCREENS.anfrage2 = () => {
@@ -1854,7 +1962,10 @@ SCREENS.anfrage2 = () => {
   let html = hd(anfrageHead(2, lk), 'Zeit und Budget.', lk ? 'Freiwillig. Deine Kontaktdaten hat ' + esc(bn) + ' schon.' : 'Freiwillig, hilft beim Angebot.');
   html += '<div class="sec">' + secHead('Wann soll es losgehen?') + chips('zeit', pr.zeit, 'zeit', 'setp') + '</div>';
   html += '<div class="sec">' + secHead('Budget') + chips('budget', pr.budget, 'budget', 'setp') + '</div>';
-  html += '<div class="rows">' + switchRow('Förderung nutzen', 'Dein Fensterbauer klärt die Voraussetzungen.', pr.foerd, 'foerd', null, 'togglep') + '</div>';
+  /* Förderweg früh klären: Er ändert das Angebot (Zielwerte, Energieeffizienz-Experte, Bescheinigung) */
+  const fw = AW.foerdWeg(pr);
+  html += '<div class="sec">' + secHead('Förderung', 'foerderung') + chips('foerdweg', fw, 'foerdweg', 'setp') + '</div>';
+  if (FOERD_HINWEIS[fw]) html += noteBox(FOERD_HINWEIS[fw]);
   if (lk) { html += '<div class="sec">' + secHead('Nachricht an ' + bn, null, 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '<div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>'; return { html: html, back: ['Haus', 'anfrage'], cls: 'tight', bar: { label: 'Prüfen und senden', act: 'go', v: 'blatt' } }; }
   return { html: html, back: ['Haus', 'anfrage'], cls: 'tight', bar: { label: 'Weiter', act: 'go', v: 'anfrage3' } };
 };
@@ -1868,28 +1979,33 @@ SCREENS.anfrage3 = () => {
 function blattHTML(windows, pr, opts) {
   opts = opts || {};
   let today = ''; try { today = new Date(opts.date || Date.now()).toLocaleDateString('de-DE'); } catch (e) { today = ''; }
-  const replaced = windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0);
-  const proj = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Förderung', pr.foerd ? 'gewünscht' : 'nein'], ['Lüftung', replaced > (num(pr.total) || 0) / 3 ? 'Lüftungskonzept prüfen (' + replaced + ' von ' + pr.total + ' Fenstern)' : replaced + ' von ' + pr.total + ' Fenstern']];
+  const replaced = windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), fw = AW.foerdWeg(pr);
+  const proj = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Förderung', fw ? lab('foerdweg', fw) : 'keine Angabe'], ['Lüftung', replaced > (num(pr.total) || 0) / 3 ? 'Lüftungskonzept erforderlich (' + replaced + ' von ' + pr.total + ' Fenstern)' : replaced + ' von ' + pr.total + ' Fenstern']];
+  const kl = klaerListe(windows, pr);
   let h = '<div class="sheet-paper"><div class="paper-head"><div style="min-width: 0"><p class="eyebrow">Aufmaßblatt</p><p style="margin: 4px 0 0; font-size: 24px; font-weight: 900; letter-spacing: -.02em">' + esc(pr.name || 'Ohne Namen') + '</p>' + ([pr.ort, pr.tel].filter(Boolean).length ? '<p style="margin: 2px 0 0; font-size: 13px; color: var(--muted)">' + esc([pr.ort, pr.tel].filter(Boolean).join(' · ')) + '</p>' : '') + '</div><div style="text-align: right; flex: 0 0 auto"><p style="margin: 0; font-size: 13px; color: var(--muted)">' + (opts.betrieb ? 'An ' + esc(opts.betrieb) : 'Erfasst mit eeziframes') + '</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">' + esc(today) + '</p></div></div>';
   h += '<div class="paper-grid">' + proj.map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>';
+  if (kl.length) h += '<div class="paper-klaer"><p class="eyebrow">Noch zu klären · ' + kl.length + '</p><div class="paper-grid">' + kl.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div></div>';
   windows.forEach((x, i) => {
     const d = derive(x), rows = specRows(x), ki = x.ki;
     h += '<div class="paper-pos"><div class="ph">' + svgIcon(miniWin(x), 54) + '<div class="t"><p class="eyebrow">Pos. ' + (i + 1) + ' · ' + (num(x.anzahl) || 1) + ' Stk.</p><p style="margin: 2px 0 0; font-size: 17px; font-weight: 800">' + esc(x.name || 'Fenster ' + (i + 1)) + '</p><p style="margin: 2px 0 0; font-size: 15px; font-weight: 700">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p></div><span class="badge ' + (d.complete ? 'ok' : 'warn') + '" style="flex: 0 0 auto">' + (d.complete ? 'Handmaß, 8 Werte' : 'Maße offen') + '</span></div>';
     h += '<div class="paper-grid">' + rows.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div>';
-    if (ki && ki.rows && ki.rows.length) h += '<p class="eyebrow" style="margin-top: 4px">Einbausituation (KI, ' + (x.fotos || 0) + (x.fotos === 1 ? ' Foto' : ' Fotos') + ')</p><div class="paper-grid">' + ki.rows.map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + (ki.hints && ki.hints.length ? '<span>Hinweise</span><span>' + ki.hints.map(esc).join(' ') + '</span>' : '') + '</div>';
+    const fz = AW.fachZeile(x), mz = AW.massZeile(x);
+    if (ki && ((ki.rows && ki.rows.length) || fz)) h += '<p class="eyebrow" style="margin-top: 4px">Einbausituation (KI, ' + (x.fotos || 0) + (x.fotos === 1 ? ' Foto' : ' Fotos') + ')</p><div class="paper-grid">' + (fz ? '<span>Auf einen Blick</span><span>' + esc(fz) + '</span>' : '') + (mz ? '<span>Maße und Foto</span><span>' + esc(mz) + '</span>' : '') + (ki.rows || []).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + (ki.hints && ki.hints.length ? '<span>Hinweise</span><span>' + ki.hints.map(esc).join(' ') + '</span>' : '') + '</div>';
     h += '</div>';
   });
   h += '<div style="display: flex; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 2px solid var(--fg); font-size: 13px"><span style="font-weight: 800">' + windows.length + ' Positionen · ' + replaced + ' Elemente</span><span style="color: var(--muted)">Vor Fertigung: Feinaufmaß</span></div></div>';
   return h;
 }
 function blattMarkdown(windows, pr) {
-  const lines = ['# Aufmaßblatt · ' + (pr.name || '[Name]'), (pr.ort || '') + (pr.tel ? ' · ' + pr.tel : '') + (pr.mail ? ' · ' + pr.mail : ''), '', 'Gebäude: ' + lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '') + ' · Zeitraum: ' + lab('zeit', pr.zeit) + ' · Budget: ' + lab('budget', pr.budget), ''];
+  const fw = AW.foerdWeg(pr), kl = klaerListe(windows, pr);
+  const lines = ['# Aufmaßblatt · ' + (pr.name || '[Name]'), (pr.ort || '') + (pr.tel ? ' · ' + pr.tel : '') + (pr.mail ? ' · ' + pr.mail : ''), '', 'Gebäude: ' + lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '') + ' · Zeitraum: ' + lab('zeit', pr.zeit) + ' · Budget: ' + lab('budget', pr.budget) + (fw ? ' · Förderung: ' + lab('foerdweg', fw) : ''), ''];
+  if (kl.length) { lines.push('## Noch zu klären'); kl.forEach((r) => lines.push('- **' + r.k + ':** ' + r.v)); lines.push(''); }
   windows.forEach((x, i) => {
     const d = derive(x);
     lines.push('## Pos. ' + (i + 1) + ' · ' + (x.name || 'Fenster') + ' · ' + (num(x.anzahl) || 1) + ' Stk.');
     lines.push('Maueröffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Fensterelement ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm', '');
     specRows(x).forEach((r) => lines.push('- **' + r.k + ':** ' + r.v));
-    if (x.ki && x.ki.rows && x.ki.rows.length) { lines.push('', '### Einbausituation aus den Fotos (KI)'); x.ki.rows.forEach((r) => lines.push('- **' + r[0] + ':** ' + r[1])); (x.ki.hints || []).forEach((t) => lines.push('- Hinweis: ' + t)); (x.ki.pruefen || []).forEach((t) => lines.push('- Vor Ort prüfen: ' + t)); }
+    if (x.ki && ((x.ki.rows && x.ki.rows.length) || x.ki.fach)) { lines.push('', '### Einbausituation aus den Fotos (KI)'); AW.kiRows(x).forEach((r) => lines.push('- **' + r[0] + ':** ' + r[1])); }
     lines.push('');
   });
   lines.push('Erfasst mit eeziframes. Vor der Fertigung Feinaufmaß vor Ort.');
@@ -2129,8 +2245,8 @@ async function pdfTeilen() {
 function teilMark(k) { const t = teilStand(); if (!t[k]) { t[k] = Date.now(); S._feier = 'loop'; persist(); setTimeout(() => render(), 150); } }
 function blattFile() {
   const css = 'body{font:14px/1.45 -apple-system,system-ui,sans-serif;color:#1d1d1f;margin:32px auto;max-width:760px;padding:0 20px}h1{font-size:28px;margin:0 0 4px}.m{color:#6e6e73}.p{border-top:2px solid #1d1d1f;margin-top:20px;padding-top:12px}.p h2{font-size:17px;margin:0 0 6px}.g{display:grid;grid-template-columns:150px 1fr;gap:4px 12px}.g span:nth-child(odd){color:#6e6e73}h3{font-size:14px;margin:14px 0 6px}@media print{body{margin:0}}';
-  const pr = S.proj, g = (rs) => '<div class="g">' + rs.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div>', rowsH = (x) => g(specRows(x)) + (x.ki && x.ki.rows && x.ki.rows.length ? '<h3>Bestand laut Fotos</h3>' + g(x.ki.rows.map((r) => ({ k: r[0], v: r[1] }))) : '');
-  return '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Aufmaßblatt</title><style>' + css + '</style></head><body><h1>Aufmaßblatt</h1><p class="m">' + esc([lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : ''), lab('zeit', pr.zeit), new Date().toLocaleDateString('de-DE')].join(' · ')) + '</p>' +
+  const pr = S.proj, g = (rs) => '<div class="g">' + rs.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div>', rowsH = (x) => g(specRows(x)) + (AW.kiRows(x).length ? '<h3>Bestand laut Fotos</h3>' + g(AW.kiRows(x).map((r) => ({ k: r[0], v: r[1] }))) : ''), kl = klaerListe(S.windows, pr);
+  return '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Aufmaßblatt</title><style>' + css + '</style></head><body><h1>Aufmaßblatt</h1><p class="m">' + esc([lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : ''), lab('zeit', pr.zeit), new Date().toLocaleDateString('de-DE')].join(' · ')) + '</p>' + (kl.length ? '<h3>Noch zu klären</h3>' + g(kl) : '') +
     S.windows.map((x, i) => { const d = derive(x); return '<div class="p"><h2>Pos. ' + (i + 1) + ' · ' + esc(x.name || 'Fenster') + '</h2><p class="m">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' mm · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p>' + rowsH(x) + '</div>'; }).join('') + '<p class="m" style="margin-top:24px">Erfasst mit eeziframes. Vor der Fertigung Feinaufmaß vor Ort.</p></body></html>';
 }
 /* variante 'kunde' (Standard, für die eigenen Unterlagen) oder 'fensterbauer' (so, wie es an einen Betrieb geht) */
@@ -2151,29 +2267,46 @@ async function saveDatei(variante) {
 }
 
 /* ---------- Wunschfenster als Fragen: eine Frage, das Modell darüber, die Antwort sofort sichtbar ---------- */
-const QSEC = { lage: 'Lage', teilung: 'Fenster', typ: 'Fenster', din: 'Fenster', material: 'Fenster', ol: 'Fenster', ul: 'Fenster', form: 'Fenster', richtung: 'Fenster', felder: 'Fenster', hsts: 'Fenster', hstr: 'Fenster', schwelle: 'Fenster', fswn: 'Fenster', fsws: 'Fenster', fswg: 'Fenster', sprossen: 'Sprossen', spross: 'Sprossen', aufseite: 'Sprossen', breite: 'Sprossen', fa: 'Farbe & Glas', fi: 'Farbe & Glas', glas: 'Farbe & Glas', glasfn: 'Farbe & Glas', orn: 'Farbe & Glas', griff: 'Farbe & Glas', gf: 'Farbe & Glas', rc: 'Farbe & Glas', sart: 'Sonnenschutz', einbau: 'Sonnenschutz', sfarbe: 'Sonnenschutz', antrieb: 'Sonnenschutz', iart: 'Sonnenschutz', ifarbe: 'Sonnenschutz', insekt: 'Extras', fbi: 'Extras', fba: 'Extras', montage: 'Extras', notiz: 'Extras' };
+const QSEC = { lage: 'Lage', absturz: 'Lage', design: 'Gestaltung', teilung: 'Fenster', typ: 'Fenster', din: 'Fenster', material: 'Fenster', ol: 'Fenster', ul: 'Fenster', form: 'Fenster', richtung: 'Fenster', felder: 'Fenster', hsts: 'Fenster', hstr: 'Fenster', pskS: 'Fenster', pskR: 'Fenster', schwelle: 'Fenster', boden: 'Fenster', fswn: 'Fenster', fsws: 'Fenster', fswg: 'Fenster', sprossen: 'Sprossen', spross: 'Sprossen', aufseite: 'Sprossen', breite: 'Sprossen', fa: 'Farbe & Glas', fi: 'Farbe & Glas', glas: 'Farbe & Glas', glasfn: 'Farbe & Glas', orn: 'Farbe & Glas', griff: 'Farbe & Glas', griffA: 'Farbe & Glas', gf: 'Farbe & Glas', rc: 'Sicherheit', sart: 'Sonnenschutz', einbau: 'Sonnenschutz', sfarbe: 'Sonnenschutz', antrieb: 'Sonnenschutz', iart: 'Sonnenschutz', ifarbe: 'Sonnenschutz', insekt: 'Extras', fbi: 'Extras', fba: 'Extras', montage: 'Extras', notiz: 'Extras' };
 /* Die Fragen je Elementart. Fenster: Flügel, Öffnung, Scharniere, Ober- und Unterlicht, Form. Festverglasung: Felder und Form.
-   Hebe-Schiebe-Tür: Schema, Seite, Schwelle. Faltschiebewand: Flügelzahl, Faltrichtung, Gehflügel, Schwelle. Danach für alle:
-   Farbe, Glas, Griff, Schutz, Sonnenschutz außen und innen, Insektenschutz, Fensterbank bzw. nichts bei Türen, Montage, Notiz. */
+   Balkon-/Terrassentür: Flügel, Öffnung, Oberlicht, Schwelle, Fußboden, Griff außen. Hebe-Schiebe-Tür: Schema, Seite, Schwelle.
+   PSK-Tür: Teile, Seite. Faltschiebewand: Flügelzahl, Faltrichtung, Gehflügel, Schwelle. Vorweg: Lage, Absturzsicherung (wenn nötig),
+   Gestaltung wie ein anderes Fenster (wenn es schon welche gibt). Danach für alle: Farbe, Glas, Griff, Erreichbarkeit und Einbruchschutz,
+   Sonnenschutz außen und innen, Insektenschutz, Fensterbank bzw. nichts bei Türen, Montage, Notiz.
+   offen: Schlüssel für „Weiß ich noch nicht“ (Wunschfragen); dann ist keine Option gedrückt, das Blatt zeigt „offen“. */
 function qList(w) {
-  const L = [], d = derive(w), n = w.sashes.length, art = w.art || 'fenster', tuer = istTuer(w), neu = !!w.neu, rund = w.form === 'rund';
+  const L = [], d = derive(w), n = w.sashes.length, art = w.art || 'fenster', tuer = istTuer(w), neu = !!w.neu, rund = w.form === 'rund', ki = (w.ki && w.ki.fach) || {};
   const ohne = (g) => (neu ? OPT[g].filter((o) => o.k !== 'behalten') : OPT[g]);
-  const material = { id: 'material', title: 'Welches Material?', sub: 'Bestimmt Preis, Pflege und Profilbreite.', kind: 'cards', group: 'material', val: w.material, act: 'setw', f: 'material', ico: ICO.material, view: 'inside' };
+  const material = { id: 'material', title: 'Welches Material?', sub: 'Bestimmt Preis, Pflege und Profilbreite.', kind: 'cards', group: 'material', val: w.material, act: 'setw', f: 'material', ico: ICO.material, view: 'inside', offen: 'material' };
   const form = { id: 'form', title: 'Welche Form?', sub: 'Antippen zeigt die Form am Modell.', kind: 'formen', group: 'form', val: w.form, act: 'form', ico: ICO.form, view: 'inside' };
-  const schwelle = (o, act) => ({ id: 'schwelle', title: 'Welche Schwelle?', sub: 'Barrierefrei heißt ohne Schwelle, mit Rinne davor.', kind: 'cards', group: 'schwelle', val: o.schwelle, act: act, f: 'schwelle', ico: ICO.schwelle, view: 'bankInnen', g: 'schwelle', hint: lab('schwelle', o.schwelle) });
+  const schwelle = (o, act) => ({ id: 'schwelle', title: 'Welche Schwelle?', sub: 'Barrierefrei heißt ohne Schwelle, mit Rinne davor.', kind: 'cards', group: 'schwelle', val: o.schwelle, act: act, f: 'schwelle', ico: ICO.schwelle, view: 'bankInnen', g: 'schwelle', hint: lab('schwelle', o.schwelle), offen: 'schwelle' });
+  const fluegel = (typen) => w.sashes.forEach((x, i) => {
+    L.push({ id: 'typ-' + i, title: n > 1 ? 'Wie öffnet Flügel ' + (i + 1) + '?' : 'Wie soll es aufgehen?', sub: n > 1 ? 'Der markierte Flügel. Antippen wechselt.' : '', kind: 'cards', group: 'typ', opts: typen, val: x.t, act: 'sash', f: 't', sash: i, ico: ICO.typ, view: 'inside', g: 'symbol', hint: n > 1 ? 'Flügel ' + (i + 1) + ' von ' + n : 'Er schwingt so auf' });
+    if (x.t === 'D' || x.t === 'DK') L.push({ id: 'din-' + i, title: n > 1 ? 'Scharniere von Flügel ' + (i + 1) + '?' : 'Scharniere links oder rechts?', sub: 'Von innen gesehen. Der Griff sitzt gegenüber.', kind: 'chips', group: 'din', val: x.din, act: 'sash', f: 'din', sash: i, view: 'inside', g: 'dinlr', hint: 'Der Griff wandert mit' });
+  });
   L.push({ id: 'lage', title: tuer ? 'Wo ist die Tür?' : art === 'fest' ? 'Wo ist die Verglasung?' : 'Wo ist das Fenster?', sub: 'Damit der Fensterbauer die Position zuordnen kann.', kind: 'lage', view: 'three' });
+  /* Pflichtthema: im Obergeschoss bei niedriger Brüstung, bei Türen immer (außer mit Balkon davor) */
+  if (AW.absturzFrage(w)) L.push(tuer
+    ? { id: 'absturz', title: 'Führt die Tür auf einen Balkon oder eine Terrasse?', sub: 'Sonst braucht sie im ' + lab('etage', w.etage) + ' eine Absturzsicherung davor.', kind: 'cards', group: 'absturzTuer', val: w.absturz, act: 'absturz', ico: ICO.absturz, view: 'outside', g: 'absturz', offen: 'absturz', offenLabel: 'Weiß ich noch nicht', hint: 'Ansicht von außen' }
+    : { id: 'absturz', title: 'Wie wird gegen Absturz gesichert?', sub: num(w.bru) ? 'Brüstung ' + thousand(w.bru) + ' mm im ' + lab('etage', w.etage) + ': Unter 80 bis 90 cm ist eine Absturzsicherung Pflicht.' : 'Laut Foto ist die Brüstung niedrig. Im ' + lab('etage', w.etage) + ' ist dann eine Absturzsicherung Pflicht.', kind: 'cards', group: 'absturz', val: w.absturz, act: 'absturz', ico: ICO.absturz, view: 'outside', g: 'absturz', offen: 'absturz', offenLabel: 'Weiß ich noch nicht', hint: 'Ansicht von außen' });
+  /* Gestaltung übernehmen: Farben, Glas, Sprossen, Sonnenschutz wie bei einem schon gespeicherten Fenster */
+  if (designListe().length) L.push({ id: 'design', title: 'Gestalten wie ein anderes Fenster?', sub: 'Übernimmt Material, Farben, Glas, Sprossen, Griff und Sonnenschutz. Maße und Flügel bleiben.', kind: 'design', view: 'three', hint: 'Antippen übernimmt' });
   if (art === 'fenster') {
     /* Runde Fenster sind fest verglast: keine Fragen nach Flügeln, Öffnung, Scharnieren, Ober- und Unterlicht */
     if (!rund) L.push({ id: 'teilung', title: 'Wie viele Flügel?', sub: w.e_teilung ? '' : 'Vorschlag nach deiner Breite von ' + thousand(d.elW) + ' mm.', kind: 'cards', group: 'teilung', val: w.teilung, act: 'teilung', ico: ICO.layout, view: 'inside', g: 'pfosten', hint: 'Zum Drehen ziehen' });
-    if (!rund) w.sashes.forEach((x, i) => {
-      L.push({ id: 'typ-' + i, title: n > 1 ? 'Wie öffnet Flügel ' + (i + 1) + '?' : 'Wie soll es aufgehen?', sub: n > 1 ? 'Der markierte Flügel. Antippen wechselt.' : '', kind: 'cards', group: 'typ', val: x.t, act: 'sash', f: 't', sash: i, ico: ICO.typ, view: 'inside', g: 'symbol', hint: n > 1 ? 'Flügel ' + (i + 1) + ' von ' + n : 'Er schwingt so auf' });
-      if (x.t === 'D' || x.t === 'DK') L.push({ id: 'din-' + i, title: n > 1 ? 'Scharniere von Flügel ' + (i + 1) + '?' : 'Scharniere links oder rechts?', sub: 'Von innen gesehen. Der Griff sitzt gegenüber.', kind: 'chips', group: 'din', val: x.din, act: 'sash', f: 'din', sash: i, view: 'inside', g: 'dinlr', hint: 'Der Griff wandert mit' });
-    });
+    if (!rund) fluegel(OPT.typ);
     L.push(material);
     if (!rund) L.push({ id: 'ol', title: 'Ein Oberlicht?', sub: 'Ein extra Feld über dem Fenster.', kind: 'chips', group: 'ol', val: w.ol ? w.olT : 'nein', act: 'ol-set', view: 'inside', g: 'oberlicht' });
     if (!rund) L.push({ id: 'ul', title: 'Ein Unterlicht?', sub: 'Ein festes Feld unten, typisch hinter der Küchenzeile.', kind: 'ul', view: 'inside', g: 'unterlicht', hint: w.ul ? lab('ul', w.ulA) + ' · ' + thousand(w.ulH) + ' mm hoch' : 'Flügel bis zur Fensterbank' });
     L.push(form);
     L.push({ id: 'richtung', title: 'Öffnet nach innen oder außen?', kind: 'chips', group: 'richtung', val: w.richtung, act: 'setw', f: 'richtung', view: 'inside', g: 'symbol' });
+  } else if (art === 'balkon') {
+    L.push({ id: 'teilung', title: 'Wie viele Flügel?', sub: w.e_teilung ? 'Zwei Flügel ohne Pfosten (Stulp) geben die ganze Breite frei.' : 'Vorschlag nach deiner Breite von ' + thousand(d.elW) + ' mm.', kind: 'cards', group: 'teilung', opts: OPT.teilung.filter((o) => o.k !== '3'), val: w.teilung, act: 'teilung', ico: ICO.layout, view: 'inside', g: 'stulp', hint: 'Zum Drehen ziehen' });
+    fluegel(OPT.typ.filter((o) => o.k !== 'K'));
+    L.push(material);
+    L.push({ id: 'ol', title: 'Ein Oberlicht?', sub: 'Ein extra Feld über der Tür.', kind: 'chips', group: 'ol', val: w.ol ? w.olT : 'nein', act: 'ol-set', view: 'inside', g: 'oberlicht' });
+    L.push(schwelle(w.bt, 'bt'));
+    L.push({ id: 'boden', title: 'Und der Fußboden?', sub: 'Davon hängt ab, wie hoch die Schwelle sitzt.', kind: 'chips', group: 'boden', val: w.bt.boden, act: 'bt', f: 'boden', view: 'bankInnen', hint: lab('boden', w.bt.boden) });
   } else if (art === 'fest') {
     L.push({ id: 'felder', title: 'Wie viele Felder?', sub: 'Große Scheiben werden geteilt, ab etwa 2,5 m² je Feld.', kind: 'cards', group: 'felder', val: w.teilung, act: 'felder', ico: ICO.felder, view: 'inside', g: 'festverglasung', hint: 'Zum Drehen ziehen' });
     L.push(material);
@@ -2183,6 +2316,10 @@ function qList(w) {
     if (w.hst.schema === 'A' || w.hst.schema === 'A3') L.push({ id: 'hstr', title: 'Schiebeflügel links oder rechts?', sub: 'Von innen gesehen. Der feste Teil steht gegenüber.', kind: 'chips', group: 'hstRichtung', val: w.hst.richtung, act: 'hst', f: 'richtung', view: 'inside', hint: 'Von innen gesehen' });
     L.push(schwelle(w.hst, 'hst'));
     L.push(material);
+  } else if (art === 'psk') {
+    L.push({ id: 'pskS', title: 'Wie viele Teile?', sub: 'Der Flügel kippt oder schiebt sich vor das feste Teil. PSK-Türen haben immer eine kleine Schwelle.', kind: 'cards', group: 'pskSchema', val: w.psk.schema, act: 'psk', f: 'schema', ico: ICO.psk, view: 'inside', g: 'psk', hint: 'Antippen zeigt, wie sie öffnet' });
+    L.push({ id: 'pskR', title: 'Schiebeflügel links oder rechts?', sub: 'Von innen gesehen. Der feste Teil steht daneben.', kind: 'chips', group: 'hstRichtung', val: w.psk.richtung, act: 'psk', f: 'richtung', view: 'inside', hint: 'Von innen gesehen' });
+    L.push(material);
   } else if (art === 'fsw') {
     L.push({ id: 'fswn', title: 'Wie viele Flügel?', sub: 'Mehr Flügel heißt schmalere Flügel und ein größeres Paket.', kind: 'chips', group: 'fswN', val: String(w.fsw.n), act: 'fsw', f: 'n', view: 'inside', g: 'fsw', hint: w.fsw.n + ' Flügel · Antippen faltet' });
     L.push({ id: 'fsws', title: 'Wohin faltet sie?', sub: 'Auf welcher Seite das Paket steht, von innen gesehen.', kind: 'chips', group: 'fswSchema', val: w.fsw.schema, act: 'fsw', f: 'schema', view: 'inside', hint: lab('fswSchema', w.fsw.schema) });
@@ -2190,39 +2327,45 @@ function qList(w) {
     L.push(schwelle(w.fsw, 'fsw'));
     L.push(material);
   }
-  if (!tuer) {
+  if (!tuer || art === 'balkon') {
     L.push({ id: 'sprossen', title: 'Sprossen?', sub: 'Mit + und − dazu, an den Reglern verschieben.', kind: 'bars', view: 'front' });
     if (w.bars.length) {
-      L.push({ id: 'spross', title: 'Welche Sprossenart?', kind: 'cards', group: 'spross', val: w.spross, act: 'setw', f: 'spross', ico: ICO.spross, view: 'front' });
+      L.push({ id: 'spross', title: 'Welche Sprossenart?', kind: 'cards', group: 'spross', val: w.spross, act: 'setw', f: 'spross', ico: ICO.spross, view: 'front', offen: 'spross' });
       if (w.spross === 'auf') L.push({ id: 'aufseite', title: 'Aufgesetzt wo?', kind: 'chips', group: 'aufseite', val: w.aufSeite, act: 'setw', f: 'aufSeite', view: 'outside', hint: 'Ansicht von außen' });
       L.push({ id: 'breite', title: 'Wie breit sollen sie sein?', kind: 'chips', group: 'breite', val: w.breite, act: 'setw', f: 'breite', view: 'front' });
     }
   }
-  L.push({ id: 'fa', title: 'Welche Farbe außen?', kind: 'color', side: 'aussen', view: 'outside', g: 'ral', hint: 'Ansicht von außen' });
-  L.push({ id: 'fi', title: 'Und innen?', kind: 'color', side: 'innen', view: 'inside', g: 'ral', hint: 'Ansicht von innen' });
-  L.push({ id: 'glas', title: 'Welche Verglasung?', sub: 'Je kleiner der U-Wert, desto weniger Wärme geht verloren.', kind: 'cards', group: 'glas', val: w.glas, act: 'setw', f: 'glas', ico: ICO.glas, view: 'inside', g: 'uwert', lupe: true, hint: glasText(w) });
-  L.push({ id: 'glasfn', title: 'Extras fürs Glas?', sub: 'Mehrfachauswahl möglich.', kind: 'multi', group: 'glasfn', vals: w.glasfn, act: 'glasfn', view: 'inside', lupe: true, hint: w.glasfn.length ? w.glasfn.map((g) => lab('glasfn', g)).join(' · ') : 'Ohne Extras' });
+  L.push({ id: 'fa', title: 'Welche Farbe außen?', kind: 'color', side: 'aussen', view: 'outside', g: 'ral', hint: 'Ansicht von außen', offen: 'fa' });
+  L.push({ id: 'fi', title: 'Und innen?', kind: 'color', side: 'innen', view: 'inside', g: 'ral', hint: 'Ansicht von innen', offen: 'fi' });
+  L.push({ id: 'glas', title: 'Welche Verglasung?', sub: 'Je kleiner der U-Wert, desto weniger Wärme geht verloren.', kind: 'cards', group: 'glas', val: w.glas, act: 'setw', f: 'glas', ico: ICO.glas, view: 'inside', g: 'uwert', lupe: true, hint: glasText(w), offen: 'glas' });
+  L.push({ id: 'glasfn', title: 'Extras fürs Glas?', sub: 'Mehrfachauswahl möglich.', kind: 'multi', group: 'glasfn', vals: w.glasfn, act: 'glasfn', view: 'inside', lupe: true, hint: w.glasfn.length ? w.glasfn.map((g) => lab('glasfn', g)).join(' · ') : 'Ohne Extras', offen: 'glasfn' });
   if (w.glasfn.indexOf('sicht') >= 0) L.push({ id: 'orn', title: 'Welches Ornamentglas?', kind: 'orn', view: 'inside', g: 'ornament', hint: 'Sichtschutz: ' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label });
-  if (art === 'fenster') L.push({ id: 'griff', title: 'Welcher Griff?', sub: 'Ohne Griff: verdeckt im Flügel oder elektrisch.', kind: 'cards', group: 'griff', val: w.griff, act: 'setw', f: 'griff', ico: ICO.griff, view: 'inside', hint: w.griff === 'ohne' ? 'Glatte Fläche, kein Griff' : '' });
-  else if (art === 'hst') L.push({ id: 'griff', title: 'Welcher Griff?', sub: 'Der Hebegriff hebt den Flügel aus der Dichtung.', kind: 'cards', group: 'hstGriff', val: w.griff, act: 'setw', f: 'griff', ico: ICO.hgriff, view: 'inside', g: 'hst' });
-  else if (art === 'fsw') L.push({ id: 'griff', title: 'Welcher Griff am Gehflügel?', kind: 'cards', group: 'griff', opts: OPT.griff.filter((o) => o.k === 'standard' || o.k === 'abschliessbar'), val: w.griff, act: 'setw', f: 'griff', ico: ICO.griff, view: 'inside' });
-  if (art !== 'fest' && w.griff !== 'ohne' && w.griff !== 'motor') L.push({ id: 'gf', title: 'Welche Griff-Farbe?', kind: 'chips', group: 'gf', val: w.gf, act: 'setw', f: 'gf', view: 'inside', hint: 'Der Griff wechselt mit' });
-  L.push({ id: 'rc', title: 'Einbruchschutz?', kind: 'chips', group: 'rc', val: w.rc, act: 'setw', f: 'rc', view: 'inside', g: 'rc2', lupe: w.rc === 'rc2', hint: { basis: 'Basis: normaler Beschlag', rc1: art === 'fest' ? 'RC1 N: Glas von innen verklotzt' : 'RC1 N: Pilzköpfe an den Seiten', rc2: art === 'fest' ? 'RC2: Sicherheitsglas, Verglasung gesichert' : 'RC2: Pilzköpfe rundum, Griff abschließbar, Sicherheitsglas' }[w.rc] || '' });
-  L.push({ id: 'sart', title: 'Sonnenschutz außen?', sub: 'Hält die Hitze draußen, bevor sie ans Glas kommt.', kind: 'cards', group: 'sart', opts: ohne('sart'), val: w.sart, act: 'sart', ico: ICO.sonne, view: 'outside', g: 'raffstore', hint: 'Ansicht von außen · ' + lab('sart', w.sart) });
+  if (art === 'fenster' || art === 'balkon') L.push({ id: 'griff', title: art === 'balkon' ? 'Welcher Griff innen?' : 'Welcher Griff?', sub: 'Ohne Griff: verdeckt im Flügel oder elektrisch.', kind: 'cards', group: 'griff', val: w.griff, act: 'setw', f: 'griff', ico: ICO.griff, view: 'inside', hint: w.griff === 'ohne' ? 'Glatte Fläche, kein Griff' : '', offen: 'griff' });
+  else if (art === 'hst') L.push({ id: 'griff', title: 'Welcher Griff?', sub: 'Der Hebegriff hebt den Flügel aus der Dichtung.', kind: 'cards', group: 'hstGriff', val: w.griff, act: 'setw', f: 'griff', ico: ICO.hgriff, view: 'inside', g: 'hst', offen: 'griff' });
+  else if (art === 'fsw' || art === 'psk') L.push({ id: 'griff', title: art === 'psk' ? 'Welcher Griff?' : 'Welcher Griff am Gehflügel?', kind: 'cards', group: 'griff', opts: OPT.griff.filter((o) => o.k === 'standard' || o.k === 'abschliessbar'), val: w.griff, act: 'setw', f: 'griff', ico: ICO.griff, view: 'inside', offen: 'griff' });
+  if (art === 'balkon') L.push({ id: 'griffA', title: 'Und außen?', sub: 'Mit Ziehgriff und Schnäpper ziehst du die Tür von außen zu.', kind: 'chips', group: 'griffA', val: w.bt.griffA, act: 'bt', f: 'griffA', view: 'outside', g: 'balkon', hint: 'Ansicht von außen', offen: 'griffA' });
+  if (art !== 'fest' && w.griff !== 'ohne' && w.griff !== 'motor' && !istOffen(w, 'griff')) L.push({ id: 'gf', title: 'Welche Griff-Farbe?', kind: 'chips', group: 'gf', val: w.gf, act: 'setw', f: 'gf', view: 'inside', hint: 'Der Griff wechselt mit' });
+  /* Statt der Stufen zuerst die Frage, die der Kunde beantworten kann: Ist es leicht erreichbar? Dann empfiehlt die Polizei RC2 */
+  L.push({ id: 'rc', title: tuer ? 'Ist die Tür leicht erreichbar?' : 'Ist das Fenster leicht erreichbar?', sub: 'Zum Beispiel im Erdgeschoss, vom Balkon, Anbau oder Garagendach aus.' + (!w.erreichbar && typeof ki.erreichbar === 'boolean' ? ' Laut Außenfoto vermutlich ' + (ki.erreichbar ? 'ja.' : 'nein.') : ''), kind: 'rc', view: 'inside', g: 'rc2', lupe: w.rc === 'rc2', hint: { basis: 'Basis: normaler Beschlag', rc1: art === 'fest' ? 'RC1 N: Glas von innen verklotzt' : 'RC1 N: Pilzköpfe an den Seiten', rc2: art === 'fest' ? 'RC2: Sicherheitsglas, Verglasung gesichert' : 'RC2: Pilzköpfe rundum, Griff abschließbar, Sicherheitsglas' }[w.rc] || '', offen: 'rc' });
+  L.push({ id: 'sart', title: 'Sonnenschutz außen?', sub: 'Hält die Hitze draußen, bevor sie ans Glas kommt.', kind: 'cards', group: 'sart', opts: ohne('sart'), val: w.sart, act: 'sart', ico: ICO.sonne, view: 'outside', g: 'raffstore', hint: 'Ansicht von außen · ' + lab('sart', w.sart), offen: 'sart' });
   if (w.sart === 'rollladen' || w.sart === 'raffstore' || w.sart === 'screen') {
-    L.push({ id: 'einbau', title: 'Wo sitzt der Kasten?', kind: 'cards', group: 'einbau', val: w.roll, act: 'setw', f: 'roll', ico: ICO.einbau, view: 'outside', g: w.roll === 'vorbau' ? 'vorbau' : 'aufsatz', hint: 'Ansicht von außen' });
+    /* Der Kasten ist Sache des Fensterbauers: Vorschlag nach den Fotos, der Kunde darf wählen */
+    const kasten = ki.rollladen && ki.rollladen !== 'keiner' ? 'Laut Foto vorhanden: ' + AW.lab('kasten', ki.rollladen) + '. ' : '';
+    L.push({ id: 'einbau', title: 'Wo sitzt der Kasten?', sub: kasten + 'Unsicher? Dein Fensterbauer wählt den passenden.', kind: 'cards', group: 'einbau', val: w.roll, act: 'setw', f: 'roll', ico: ICO.einbau, view: 'outside', g: w.roll === 'vorbau' ? 'vorbau' : 'aufsatz', hint: 'Ansicht von außen', offen: 'einbau', offenLabel: 'Fensterbauer entscheidet', offenSub: 'nach den Fotos und vor Ort' });
     L.push({ id: 'sfarbe', title: 'Welche Farbe?', sub: w.sart === 'raffstore' ? 'Lamellen, Kasten und Schienen.' : w.sart === 'screen' ? 'Gewebe und Kasten.' : 'Panzer, Kasten und Führungsschienen.', kind: 'swatch', group: 'sfarbe', f: 'sfarbe', val: w.sfarbe, view: 'outside', hint: 'Ansicht von außen · ' + sonneName(w) });
-    L.push({ id: 'antrieb', title: 'Wie wird er bedient?', kind: 'chips', group: 'antrieb', val: w.antrieb, act: 'setw', f: 'antrieb', view: 'outside', hint: 'Ansicht von außen' });
+    L.push({ id: 'antrieb', title: 'Wie wird er bedient?', sub: w.antrieb === 'motor' || w.antrieb === 'smart' ? (ki.strom === true ? 'Laut Foto liegt am Fenster schon Strom.' : 'Elektrisch braucht Strom am Fenster, das klärt dein Fensterbauer.') : '', kind: 'chips', group: 'antrieb', val: w.antrieb, act: 'setw', f: 'antrieb', view: 'outside', hint: 'Ansicht von außen', offen: 'antrieb' });
   }
-  L.push({ id: 'insekt', title: 'Insektenschutz?', kind: 'cards', group: 'insekt', val: w.insekt, act: 'setw', f: 'insekt', ico: ICO.insekt, view: 'outside', g: 'insekt', hint: 'Ansicht von außen' });
-  L.push({ id: 'iart', title: 'Sicht- und Blendschutz innen?', sub: 'Rollo, Plissee oder Jalousie, gleich mitbestellt.', kind: 'cards', group: 'iart', val: w.iart, act: 'setw', f: 'iart', ico: ICO.innen, view: 'inside', g: 'innenschutz', hint: 'Ansicht von innen' });
+  L.push({ id: 'insekt', title: 'Insektenschutz?', kind: 'cards', group: 'insekt', val: w.insekt, act: 'setw', f: 'insekt', ico: ICO.insekt, view: 'outside', g: 'insekt', hint: 'Ansicht von außen', offen: 'insekt' });
+  L.push({ id: 'iart', title: 'Sicht- und Blendschutz innen?', sub: 'Rollo, Plissee oder Jalousie, gleich mitbestellt.', kind: 'cards', group: 'iart', val: w.iart, act: 'setw', f: 'iart', ico: ICO.innen, view: 'inside', g: 'innenschutz', hint: 'Ansicht von innen', offen: 'iart' });
   if (w.iart && w.iart !== 'keiner') L.push({ id: 'ifarbe', title: 'Welche Farbe innen?', kind: 'swatch', group: 'ifarbe', f: 'ifarbe', val: w.ifarbe, view: 'inside', hint: lab('iart', w.iart) + ' · ' + innenName(w) });
   if (!tuer && !rund) {
-    L.push({ id: 'fbi', title: 'Fensterbank innen?', kind: 'chips', group: 'fbi', opts: ohne('fbi'), val: w.fbi, act: 'setw', f: 'fbi', view: 'bankInnen', g: 'fensterbank', hint: 'Fensterbank: ' + lab('fbi', w.fbi) });
-    L.push({ id: 'fba', title: 'Fensterbank außen?', kind: 'chips', group: 'fba', opts: ohne('fba'), val: w.fba, act: 'setw', f: 'fba', view: 'bankAussen', hint: 'Von außen · ' + lab('fba', w.fba) });
+    L.push({ id: 'fbi', title: 'Fensterbank innen?', sub: ki.fbi ? 'Laut Foto: ' + AW.lab('bank', ki.fbi) + '.' : '', kind: 'chips', group: 'fbi', opts: ohne('fbi'), val: w.fbi, act: 'setw', f: 'fbi', view: 'bankInnen', g: 'fensterbank', hint: 'Fensterbank: ' + lab('fbi', w.fbi), offen: 'fbi' });
+    L.push({ id: 'fba', title: 'Fensterbank außen?', sub: ki.fba ? 'Laut Foto: ' + AW.lab('bank', ki.fba) + '.' : '', kind: 'chips', group: 'fba', opts: ohne('fba'), val: w.fba, act: 'setw', f: 'fba', view: 'bankAussen', hint: 'Von außen · ' + (istOffen(w, 'fba') ? 'noch offen' : lab('fba', w.fba)), offen: 'fba' });
   }
-  L.push({ id: 'montage', title: 'Was soll der Fensterbauer übernehmen?', kind: 'switches', view: 'three' });
+  L.push({ id: 'montage', title: 'Was soll der Fensterbauer übernehmen?', kind: 'switches', view: 'three', offen: 'montage', offenLabel: 'Fensterbauer schlägt vor', offenSub: 'nach dem Termin vor Ort' });
   L.push({ id: 'notiz', title: 'Noch etwas für den Fensterbauer?', kind: 'text', view: 'three' });
+  /* „Weiß ich noch nicht“: keine Option gedrückt */
+  L.forEach((q) => { if (q.offen && q.offen !== 'absturz' && istOffen(w, q.offen)) { q.val = '\u0000'; if (q.vals) q.vals = []; } });
   return L;
 }
 function qCurrent() { const list = qList(S.win); let i = list.findIndex((q) => q.id === S.q); if (i < 0) { i = 0; S.q = list[0].id; } return { list: list, i: i, q: list[i] }; }
@@ -2233,7 +2376,7 @@ function qStep(delta) {
   S.openSash = nx.sash != null ? nx.sash : -1; if (nx.sash != null) S.selSash = nx.sash;
   render(true);
   if (nx.sash != null && nx.id.indexOf('typ-') === 0) nachBild(() => { if (S.q === nx.id) oeffnungZeigen(nx.sash); }, 200);
-  if (nx.id === 'hsts' || nx.id === 'hstr' || nx.id === 'fswn' || nx.id === 'fsws') nachBild(() => { if (S.q === nx.id) tuerZeigen(); }, 240);
+  if (nx.id === 'hsts' || nx.id === 'hstr' || nx.id === 'fswn' || nx.id === 'fsws' || nx.id === 'pskS' || nx.id === 'pskR') nachBild(() => { if (S.q === nx.id) tuerZeigen(); }, 240);
   if (nx.id === 'fswg') nachBild(() => { if (S.q !== nx.id) return; const i = S.win.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 240);
 }
 function qOpt(q, o, pressed, inner) { return '<button type="button" class="qopt" data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : '') + ' data-v="' + o.k + '" aria-pressed="' + pressed + '">' + inner + '</button>'; }
@@ -2267,9 +2410,9 @@ function qMulti(q) {
 }
 function qColor(q) {
   const w = S.win, side = q.side, cur = side === 'innen' ? (w.gleich ? w.fa : w.fi) : w.fa, wunsch = side === 'innen' ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, eigen = farbLesen(wunsch), c = rahmenFarbe(w, side);
-  const aktiv = eigen ? (COLORS.some((x) => x.k === eigen.key) ? eigen.key : '') : cur;
+  const aktiv = c.offen ? '' : eigen ? (COLORS.some((x) => x.k === eigen.key) ? eigen.key : '') : cur;
   let h = '<div class="qswatches">' + COLORS.map((x) => '<button type="button" class="qsw" data-act="color" data-side="' + side + '" data-v="' + x.k + '" aria-pressed="' + (x.k === aktiv) + '" aria-label="' + esc(x.name) + '"><span class="c" style="background: ' + x.bg + '"></span><span class="n">' + esc(x.name).replace(/^(Verkehrs|Anthrazit|Schwarz|Basalt)(weiß|grau|braun)$/, '$1&shy;$2') + '</span></button>').join('') + '</div>';
-  h += '<p class="qcur"><b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code) + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>';
+  h += c.offen ? '<p class="qcur"><b>Noch offen</b> · im Modell neutral weiß' + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>' : '<p class="qcur"><b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code) + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>';
   if (side === 'innen') h += '<div class="qrow"><button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button></div>';
   return h + farbFeld(side === 'innen' ? 'wunschI' : 'wunschA');
 }
@@ -2306,6 +2449,7 @@ function farbeLive(el, f) {
   if (cur && (f === 'wunschA' || f === 'wunschI')) { const c = rahmenFarbe(w, f === 'wunschI' ? 'innen' : 'aussen'); cur.innerHTML = '<b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code); }
   else if (cur && (f === 'wunschSf' || f === 'wunschIf')) cur.innerHTML = '<b>' + esc(f === 'wunschSf' ? sonneName(w) : innenName(w)) + '</b>' + (fx ? ' · eigene Farbe' : '');
   if (fx) document.querySelectorAll('.qpanel .qsw[aria-pressed="true"], .qpanel .chip[data-f="gf"][aria-pressed="true"]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+  const ob = document.querySelector('.qpanel .qoffen'); if (ob && (f === 'wunschA' || f === 'wunschI')) ob.setAttribute('aria-pressed', String(istOffen(w, f === 'wunschA' ? 'fa' : 'fi')));
   const st = document.getElementById('w3d'), reg = W3DS.w3d; if (st && reg) { w3dPaint(st, w); w3dLayout(st, w, reg.o); }
 }
 function qOrn() { const w = S.win; return '<div class="qswatches">' + ORN.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="orn" data-v="' + o.k + '" aria-pressed="' + (w.orn === o.k) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div>'; }
@@ -2332,7 +2476,62 @@ function qBars() {
   return h;
 }
 function qSwitches() { const w = S.win; return '<div class="rows">' + (w.neu ? switchRow('Wanddurchbruch samt Sturz', 'Öffnung brechen, Sturz setzen, Statik klären', w.durchbruch, 'durchbruch', 'neuoeffnung') : switchRow('Altfenster ausbauen und entsorgen', '', w.demontage, 'demontage')) + switchRow('RAL-Montage', 'Luftdicht, gedämmt, schlagregendicht', w.ralm, 'ralm', 'ralmontage') + switchRow('Innenlaibung verputzen', '', w.putz, 'putz') + '</div>'; }
-function qLage() { const w = S.win; return '<div class="rows"><div class="trow"><span>Raum</span><input type="text" id="t-name" data-in="w" data-f="name" value="' + esc(w.name || '') + '" placeholder="z. B. Küche" autocomplete="off"></div></div>' + chips('etage', w.etage, 'etage') + '<div class="rows">' + fieldRow('Gleiche Fenster im Haus', 'anzahl', 'Stück', 1) + '</div>'; }
+/* Lage: Raum, Geschoss (aus dem Außenfoto vorgeschlagen, bis der Kunde selbst wählt), Anzahl; im Obergeschoss die Brüstung, falls
+   sie noch fehlt (davon hängt die Absturzsicherung ab) */
+function qLage() {
+  const w = S.win, f = (w.ki && w.ki.fach) || {}, ausFoto = !w.e_etage && f.geschoss && f.geschoss === w.etage, obenOhneBru = (w.etage === 'og' || w.etage === 'dg') && !istTuer(w) && (w.bru === '' || w.bru == null);
+  return '<div class="rows"><div class="trow"><span>Raum</span><input type="text" id="t-name" data-in="w" data-f="name" value="' + esc(w.name || '') + '" placeholder="z. B. Küche" autocomplete="off"></div></div>' + chips('etage', w.etage, 'etage') +
+    (ausFoto ? '<p class="qcur">Geschoss aus dem Außenfoto gelesen. Stimmt es nicht, tipp das richtige an.</p>' : '') +
+    '<div class="rows">' + (obenOhneBru ? fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'absturz') : '') + fieldRow('Gleiche Fenster im Haus', 'anzahl', 'Stück', 1) + '</div>';
+}
+/* Erreichbarkeit zuerst (das weiß der Kunde), dann der Einbruchschutz mit der Empfehlung der Polizei; RC1 N nur noch, wenn schon gewählt */
+function qRc() {
+  const w = S.win, offen = istOffen(w, 'rc');
+  let h = auswahl(OPT.erreichbar, 'data-act="erreichbar"', (o) => w.erreichbar === o.k);
+  h += w.erreichbar === 'ja' ? '<p class="qcur">Die Polizei empfiehlt hier mindestens <b>RC2</b>: Pilzköpfe rundum, abschließbarer Griff, Sicherheitsglas.</p>' : w.erreichbar === 'nein' ? '<p class="qcur">Dann reicht meist der Basisschutz.</p>' : '';
+  h += '<p class="qlabel">Einbruchschutz</p>' + auswahl(OPT.rc.filter((o) => o.k !== 'rc1' || w.rc === 'rc1'), 'data-act="setw" data-f="rc"', (o) => !offen && w.rc === o.k);
+  return h;
+}
+/* Gestaltung übernehmen: je gespeicherte Gestaltung eine Karte (gleiche zusammengefasst), mit Zeichnung, Räumen und den wichtigsten Angaben */
+const DESIGN_FELDER = ['material', 'fa', 'fi', 'gleich', 'wunschA', 'wunschI', 'glas', 'glasfn', 'orn', 'spross', 'breite', 'aufSeite', 'griff', 'gf', 'wunschGf', 'rc', 'sart', 'roll', 'sfarbe', 'wunschSf', 'antrieb', 'iart', 'ifarbe', 'wunschIf', 'insekt', 'fbi', 'fba', 'ralm', 'putz'];
+const DESIGN_OFFEN = ['material', 'fa', 'fi', 'glas', 'glasfn', 'spross', 'griff', 'rc', 'sart', 'einbau', 'antrieb', 'insekt', 'iart', 'fbi', 'fba', 'montage'];
+function designVon(w) {
+  const o = {}; DESIGN_FELDER.forEach((k) => { o[k] = w[k]; });
+  o.offen = DESIGN_OFFEN.filter((k) => w.offen && w.offen[k]);
+  o.muster = (w.bars || []).filter((b) => b.s === 0).map((b) => b.d + Math.round(b.p * 1000)).sort().join(',');
+  return stabil(o);
+}
+/* Gestaltung von src auf w: Werte, Sprossenmuster (auf die Flügelzahl von w gespiegelt) und offene Punkte; was zu w nicht passt
+   (Griff einer Tür, „bleibt drin“ bei einer neuen Öffnung), wird angeglichen */
+function designAnwenden(w, src) {
+  DESIGN_FELDER.forEach((k) => { w[k] = kopie(src[k] === undefined ? baseWin()[k] : src[k]); });
+  const art = w.art || 'fenster';
+  if (art === 'fest') w.griff = 'ohne';
+  else if (art === 'hst') { if (!OPT.hstGriff.some((o) => o.k === w.griff)) w.griff = 'standard'; }
+  else if (art === 'fsw' || art === 'psk') { if (w.griff !== 'abschliessbar') w.griff = 'standard'; }
+  else if (w.griff === 'motor') w.griff = 'standard';
+  if (w.neu) { if (w.sart === 'behalten') { w.sart = 'keiner'; w.roll = 'keiner'; } if (w.fbi === 'behalten') w.fbi = 'werzalit'; if (w.fba === 'behalten') w.fba = 'alu'; }
+  if (!istTuer(w) || art === 'balkon') { w.bars = (src.bars || []).filter((b) => b.s === 0).map((b) => ({ id: nid(), s: 0, d: b.d, p: b.p })); mirrorBars(w); w.preset = w.bars.length ? 'eigene' : 'keine'; }
+  else { w.bars = []; w.preset = 'keine'; }
+  const off = Object.assign({}, w.offen || {}); DESIGN_OFFEN.forEach((k) => { if (src.offen && src.offen[k]) off[k] = true; else delete off[k]; }); w.offen = off;
+  return w;
+}
+function designListe() {
+  const eigen = S.editIdx >= 0 && S.windows[S.editIdx] ? S.windows[S.editIdx].wid : null, gruppen = [];
+  S.windows.forEach((x, i) => { if (eigen && x.wid === eigen) return; const key = designVon(x), g = gruppen.find((y) => y.key === key); if (g) { g.namen.push(x.name || 'Fenster ' + (i + 1)); g.src = x; g.i = i; } else gruppen.push({ key: key, src: x, i: i, namen: [x.name || 'Fenster ' + (i + 1)] }); });
+  return gruppen.reverse().slice(0, 4).map((g) => { const src = g.src, n = g.namen.length; return { i: g.i, src: src, label: 'Wie ' + g.namen[0] + (n === 2 ? ' und ' + g.namen[1] : n > 2 ? ' und ' + (n - 1) + ' weitere' : ''), sub: [istOffen(src, 'material') ? 'Material offen' : lab('material', src.material), rahmenFarbe(src, 'aussen').name, src.bars.length ? lab('spross', src.spross) : '', src.sart && src.sart !== 'keiner' && !istOffen(src, 'sart') ? lab('sart', src.sart) : ''].filter(Boolean).join(' · ') }; });
+}
+function qDesign() {
+  const w = S.win, L = designListe(), jetzt = designVon(w);
+  const gewaehlt = L.find((d) => designVon(designAnwenden(kopie(w), d.src)) === jetzt);
+  return '<div class="qcards liste design">' + L.map((d) => '<div class="qo"><button type="button" class="qopt" data-act="design" data-v="' + d.i + '" aria-pressed="' + (d === gewaehlt) + '">' + svgIcon(miniWin(d.src), 44) + '<span class="tx"><span class="lbl">' + esc(d.label) + '</span><span class="sb">' + esc(d.sub) + '</span></span></button></div>').join('') + '</div>' +
+    (gewaehlt ? '<div class="qrow"><span class="sub">Übernommen. Speichern oder einzeln anpassen.</span>' + (S.designVorher ? '<button type="button" class="chip" data-act="design-weg">Doch neu gestalten</button>' : '') + '</div>' : '<div class="qrow"><span class="sub">Lieber neu gestalten? Einfach weiter.</span></div>');
+}
+/* „Weiß ich noch nicht“ als eigene Antwort unter den Optionen; gedrückt, solange die Angabe offen ist */
+function offenZeile(q) {
+  const w = S.win, an = q.offen === 'absturz' ? !w.absturz : istOffen(w, q.offen);
+  return '<button type="button" class="qoffen" data-act="offen" data-f="' + q.offen + '" aria-pressed="' + an + '"><span class="tx"><b>' + esc(q.offenLabel || 'Weiß ich noch nicht') + '</b><small>' + esc(q.offenSub || 'Dein Fensterbauer berät dich') + '</small></span><span class="mark">' + CHECK_S + '</span></button>';
+}
 function qText() { return '<div class="rows"><div class="trow"><span>Notiz für den Fensterbauer</span><textarea rows="3" id="t-notiz" data-in="w" data-f="notiz" placeholder="z. B. Fenster klemmt, Zugluft unten links">' + esc(S.win.notiz) + '</textarea></div></div>'; }
 SCREENS.frage = () => {
   const c = qCurrent(), q = c.q, w = S.win, n = c.list.length, last = c.i === n - 1;
@@ -2340,19 +2539,24 @@ SCREENS.frage = () => {
   let panel;
   if (q.kind === 'cards') panel = qCards(q); else if (q.kind === 'formen') panel = qFormen(q); else if (q.kind === 'chips') panel = qChips(q); else if (q.kind === 'multi') panel = qMulti(q); else if (q.kind === 'color') panel = qColor(q);
   else if (q.kind === 'orn') panel = qOrn(); else if (q.kind === 'bars') panel = qBars(); else if (q.kind === 'switches') panel = qSwitches(); else if (q.kind === 'lage') panel = qLage();
-  else if (q.kind === 'ul') panel = qUnterlicht(); else if (q.kind === 'geh') panel = qGeh(); else if (q.kind === 'swatch') panel = qSwatch(q); else panel = qText();
+  else if (q.kind === 'ul') panel = qUnterlicht(); else if (q.kind === 'geh') panel = qGeh(); else if (q.kind === 'swatch') panel = qSwatch(q); else if (q.kind === 'rc') panel = qRc(); else if (q.kind === 'design') panel = qDesign(); else panel = qText();
+  if (q.offen) panel += offenZeile(q);
+  /* Gestaltung übernommen: gleich speichern oder die Fragen einzeln durchgehen */
+  const designFertig = q.kind === 'design' && /aria-pressed="true"/.test(panel);
   const isSash = q.sash != null, selIdx = isSash ? q.sash : Math.min(S.selSash, w.sashes.length - 1);
   const view = q.id === 'sprossen' || q.kind === 'bars' ? 'front' : q.view;
   const stage = model(w, { id: 'w3d', view: view, sway: !isSash && q.kind !== 'bars', selectable: isSash, selSash: selIdx, openSash: isSash ? S.openSash : -1, symbols: isSash || q.id === 'richtung', rails: q.kind === 'bars', selBar: S.selBar, formen: q.id === 'form', lupe: !!q.lupe, stageH: 'auto', fitW: q.kind === 'bars' ? 0.72 : view === 'front' ? 0.88 : 0.66, fitH: q.kind === 'bars' ? 0.66 : view === 'front' ? 0.82 : 0.72, hint: q.kind === 'bars' ? '' : (q.hint || '') });
   const title = hd('Frage ' + (c.i + 1) + ' von ' + n + ' · ' + sec, esc(q.title) + (q.g ? ' <button type="button" class="qg" aria-label="Erklärung" data-act="gloss" data-k="' + q.g + '">' + ICON_I + '</button>' : ''), q.sub ? esc(q.sub) : '', 'compact');
-  const html = title + stage + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div>' + '<div class="qnav"><button type="button" class="btn ghost" data-act="qprev" aria-label="Zurück">' + '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button type="button" class="btn primary" data-act="qnext">' + (last ? 'Fenster speichern' : 'Weiter') + '</button></div>';
+  const sichern = istTuer(w) ? 'Tür speichern' : w.art === 'fest' ? 'Verglasung speichern' : 'Fenster speichern';
+  const html = title + stage + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div>' + '<div class="qnav"><button type="button" class="btn ghost" data-act="qprev" aria-label="Zurück">' + '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>' +
+    (designFertig ? '<button type="button" class="btn ghost anpassen" data-act="qnext">Anpassen</button><button type="button" class="btn primary" data-act="save">Speichern</button>' : '<button type="button" class="btn primary" data-act="qnext">' + (last ? sichern : 'Weiter') + '</button>') + '</div>';
   return { html: html, back: [c.i ? 'Zurück' : 'Ergebnis', 'qprev'], fit: true, qpos: (c.i + 1) / n };
 };
 /* Merkzettel für den Wechsel auf „Rund“: was vorher eingestellt war, kommt beim Wechsel zurück wieder (nur in dieser Sitzung) */
 const VOR_RUND = new WeakMap();
 /* Öffnung vorführen: der Flügel geht kurz auf und wieder zu, der Griff dreht mit; „Fest“ zeigt einen Glanz übers Glas.
    nur = 'D' zeigt nur das Drehen (bei der Frage nach den Scharnieren). Ruhig bei „weniger Bewegung“. */
-const DEMO_MS = { D: 1600, K: 1400, DK: 2700, F: 1000, S: 3000, P: 1600 };
+const DEMO_MS = { D: 1600, K: 1400, DK: 2700, F: 1000, S: 3000, P: 1600, PS: 3000 };
 /* Erst wenn das neue Bild gezeichnet ist (zwei Bildwechsel), dann nach kurzer Pause: so beginnt die Vorführung nie mitten im Aufbau */
 function nachBild(fn, ms) { requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(fn, ms || 0))); }
 let demoTimer = null;
@@ -2364,7 +2568,7 @@ function oeffnungZeigen(i, nur) {
   let t = nur || sa.getAttribute('data-t') || 'F';
   if (t === 'X') return faltenZeigen();
   if (t === 'P') t = 'D';
-  stage.querySelectorAll('.w3d-sash').forEach((x) => x.classList.remove('demo-D', 'demo-K', 'demo-DK', 'demo-F', 'demo-S'));
+  stage.querySelectorAll('.w3d-sash').forEach((x) => x.classList.remove('demo-D', 'demo-K', 'demo-DK', 'demo-F', 'demo-S', 'demo-PS'));
   void sa.offsetWidth;
   sa.classList.add('demo-' + t); stage.classList.add('is-vorf');
   clearTimeout(demoTimer);
@@ -2406,7 +2610,7 @@ function faltenZeigen() {
 function tuerZeigen() {
   const w = S.win; if (!w) return;
   if (w.art === 'fsw') return faltenZeigen();
-  const i = w.sashes.findIndex((x) => x.t === 'S'); if (i >= 0) oeffnungZeigen(i);
+  const i = w.sashes.findIndex((x) => x.t === 'S' || x.t === 'PS'); if (i >= 0) oeffnungZeigen(i);
 }
 /* Flügel im Modell antippen: springt zur Frage dieses Flügels */
 function onSashTap(i) {
@@ -2458,7 +2662,7 @@ function bindRails(stage) {
 }
 
 /* ---------- Glossar ---------- */
-const SHORT = { unterlicht: 'Unterlicht', festverglasung: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', fsw: 'Faltschiebewand', schwelle: 'Schwelle', raffstore: 'Raffstore', screen: 'Screen', innenschutz: 'Rollo, Plissee, Jalousie', neuoeffnung: 'Neue Öffnung', dinlr: 'DIN links/rechts', symbol: 'Öffnungssymbole', dk: 'Dreh-Kipp', fest: 'Festverglasung', kipp: 'Kippfenster', stulp: 'Stulpfenster', pfosten: 'Pfosten', oberlicht: 'Oberlicht', anschlag: 'Maueranschlag', laibung: 'Laibung', bruestung: 'Brüstungshöhe', rahmenmass: 'Öffnung und Element', wiener: 'Wiener Sprosse', szr: 'Innenliegende Sprossen', auf: 'Aufgesetzte Sprossen', echt: 'Glasteilende Sprossen', uwert: 'U-Wert', schall: 'Schallschutzglas', vsg: 'Sicherheitsglas', ornament: 'Ornamentglas', rc2: 'RC2', aufsatz: 'Aufsatzrollladen', vorbau: 'Vorbaurollladen', insekt: 'Insektenschutz', ralmontage: 'RAL-Montage', fensterbank: 'Fensterbank', ral: 'RAL-Farben', lueftung: 'Lüftungskonzept', referenz: 'Genauigkeit', feinaufmass: 'Feinaufmaß' };
+const SHORT = { unterlicht: 'Unterlicht', festverglasung: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', fsw: 'Faltschiebewand', balkon: 'Balkon- und Terrassentür', psk: 'PSK-Tür', absturz: 'Absturzsicherung', foerderung: 'Förderung', schwelle: 'Schwelle', raffstore: 'Raffstore', screen: 'Screen', innenschutz: 'Rollo, Plissee, Jalousie', neuoeffnung: 'Neue Öffnung', dinlr: 'DIN links/rechts', symbol: 'Öffnungssymbole', dk: 'Dreh-Kipp', fest: 'Festverglasung', kipp: 'Kippfenster', stulp: 'Stulpfenster', pfosten: 'Pfosten', oberlicht: 'Oberlicht', anschlag: 'Maueranschlag', laibung: 'Laibung', bruestung: 'Brüstungshöhe', rahmenmass: 'Öffnung und Element', wiener: 'Wiener Sprosse', szr: 'Innenliegende Sprossen', auf: 'Aufgesetzte Sprossen', echt: 'Glasteilende Sprossen', uwert: 'U-Wert', schall: 'Schallschutzglas', vsg: 'Sicherheitsglas', ornament: 'Ornamentglas', rc2: 'RC2', aufsatz: 'Aufsatzrollladen', vorbau: 'Vorbaurollladen', insekt: 'Insektenschutz', ralmontage: 'RAL-Montage', fensterbank: 'Fensterbank', ral: 'RAL-Farben', lueftung: 'Lüftungskonzept', referenz: 'Genauigkeit', feinaufmass: 'Feinaufmaß' };
 function sheetsHTML() {
   const X = '<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="15" fill="var(--seg)"></circle><path d="M10.5 10.5l9 9M19.5 10.5l-9 9" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round"></path></svg>';
   if (S.gloss && GLOSS[S.gloss]) {
@@ -3027,8 +3231,8 @@ async function startAI(which, file) {
     z.ai[which] = { status: 'error', code: e && e.code || 'error' }; render();
   }
 }
-/* Befund zum Anzeigen: Zeilen, dann Hinweise und Prüfpunkte fürs Feinaufmaß */
-const kiZeilen = (ki) => (ki && ki.rows ? ki.rows : []).concat((ki && ki.hints || []).map((t) => ['Hinweis', t]), (ki && ki.pruefen || []).map((t) => ['Vor Ort prüfen', t]));
+/* Zahl der Angaben aus den Fotos: Befundzeilen, dazu die Fachangaben auf einen Blick */
+const kiAnzahl = (ki) => { const n = ((ki && ki.rows) || []).length + (ki && ki.fach && Object.keys(ki.fach).length ? 1 : 0); return n + (n === 1 ? ' Angabe' : ' Angaben'); };
 /* KI-Ergebnisse beider Fotos zu einer Sicht fürs Fenster zusammenführen.
    Übernommen werden nur Angaben zur Einbausituation; das alte Fenster bestimmt nichts am neuen (Material, Teilung wählt der Kunde).
    Dasselbe Thema innen und außen: außen bekommt den Zusatz „Außen:“. Die Laibungstiefe kommt nur vom Innenfoto. */
@@ -3044,9 +3248,36 @@ function mergeKI(z) {
     f.rows.forEach((r) => rows.push([i && innen.has(r[0].toLowerCase()) ? 'Außen: ' + r[0] : r[0], r[1]]));
     f.hints.forEach((t) => dazu(hints, t)); f.pruefen.forEach((t) => dazu(pruefen, t));
   });
-  w.ki = { auto: true, chips: chips, rows: rows, hints: hints.slice(0, 6), pruefen: pruefen.slice(0, 6), laib: fi ? fi.laib : null, tilt: fi ? fi.tilt : null };
+  const fach = fachMischen(fi && fi.fach, fa && fa.fach), verh = (fi && fi.verh) || (fa && fa.verh) || null;
+  w.ki = Object.assign({ auto: true, chips: chips, rows: rows, hints: hints.slice(0, 6), pruefen: pruefen.slice(0, 6), laib: fi ? fi.laib : null, tilt: fi ? fi.tilt : null }, Object.keys(fach).length ? { fach: fach } : {}, verh && !w.neu ? { verh: verh } : {});
   if (!w.neu && w.ki.laib && !w.e_laib && !num(w.laib)) w.laib = w.ki.laib;
+  fachVerwerten(w);
   w.fotos = (z.photos.in ? 1 : 0) + (z.photos.out ? 1 : 0);
+}
+/* Fachangaben beider Fotos zusammenführen. Rollladenkasten: innen erkannter Einbau- oder Aufsatzkasten geht vor, sonst der Vorbaukasten
+   von außen; Anschlag innen und außen getrennt; Fassade, Geschoss, Erreichbarkeit und Gerüst kommen von außen, Brüstung von innen */
+function fachMischen(i, a) {
+  i = i || {}; a = a || {};
+  const f = {};
+  const kasten = i.rollladen === 'einbau' || i.rollladen === 'aufsatz' ? i.rollladen : a.rollladen && a.rollladen !== 'keiner' ? a.rollladen : i.rollladen || a.rollladen;
+  if (kasten) f.rollladen = kasten;
+  if (i.anschlag) f.anschlagI = i.anschlag;
+  if (a.anschlag) f.anschlagA = a.anschlag;
+  if (a.fassade) f.fassade = a.fassade;
+  if (i.fensterbank) f.fbi = i.fensterbank;
+  if (a.fensterbank) f.fba = a.fensterbank;
+  if (i.bruestung) f.bruestung = i.bruestung;
+  if (a.geschoss) f.geschoss = a.geschoss;
+  ['erreichbar', 'geruest'].forEach((k) => { if (typeof a[k] === 'boolean') f[k] = a[k]; });
+  if (i.strom === true || a.strom === true) f.strom = true; else if (i.strom === false || a.strom === false) f.strom = false;
+  return f;
+}
+/* Was der Kunde nicht wissen muss, kommt aus den Fotos: Fassade fürs Modell, Anschlag fürs Blatt, das Geschoss als Vorschlag (bis er es selbst wählt) */
+function fachVerwerten(w) {
+  const f = w.ki && w.ki.fach; if (!f) return;
+  if (f.fassade && f.fassade !== 'sonstige') w.fassade = f.fassade;
+  if (f.anschlagI === 'innen') w.anschlag = 'innen'; else if (f.anschlagA === 'aussen') w.anschlag = 'aussen'; else if (f.anschlagI === 'ohne' || f.anschlagA === 'ohne') w.anschlag = 'ohne';
+  if (f.geschoss && !w.e_etage) w.etage = f.geschoss;
 }
 /* Beispielfotos mit festen KI-Ergebnissen: nur noch für Prüfungen; im echten Aufmaß gibt es sie nicht (die Führung hat eigene) */
 async function useDemo() {
@@ -3060,8 +3291,10 @@ function newWin() {
   Object.keys(ctrls).forEach((k) => { if (ctrls[k]) ctrls[k].abort(); });
   ['in', 'out'].forEach((k) => { const p = S.photos[k]; if (p && p.url && !p.demo) { try { URL.revokeObjectURL(p.url); } catch (e) { /* ok */ } } });
   S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null };
+  /* Keine Vorauswahl, wo eine Vorgabe Geld kostet: Farbe außen und Fensterbank außen starten offen, bis der Kunde wählt */
+  S.win.offen = { fa: true, fba: true };
   S.mess = { step: 0, cur: '', msg: null, ack: false }; S.rest = { i: 0, cur: '', msg: null }; S.openSash = -1;
-  S.selSash = 0; S.selBar = null; S.side = 'aussen';
+  S.selSash = 0; S.selBar = null; S.side = 'aussen'; S.designVorher = null;
   go('start');
 }
 /* Speichern: Neue Fenster zählen gegen die Grenze; nach der ersten Woche zählt jedes Speichern mit einer Änderung (höchstens vier).
@@ -3088,6 +3321,30 @@ function saveWin() {
 }
 /* ---------- Sprossen: Einrasten auf Viertel, Drittel, Hälfte ---------- */
 function snapP(p) { const pts = [0.25, 1 / 3, 0.5, 2 / 3, 0.75]; for (let i = 0; i < pts.length; i++) if (Math.abs(p - pts[i]) < 0.03) return pts[i]; return clamp(p, 0.06, 0.94); }
+/* ---------- Offen statt Vorgabe ----------
+   „Weiß ich noch nicht“ setzt den neutralen Wert (so zeigt das Modell nichts Gewähltes, Folgefragen wie die Farbe des Rollladens
+   entfallen) und merkt die Angabe als offen. Jede Wahl danach entscheidet sie. */
+const OFFEN_NEUTRAL = {
+  material: () => ({ material: 'kunststoff' }), fa: () => ({ wunschA: '' }), fi: () => ({ wunschI: '', gleich: false }), glas: () => ({ glas: '3' }), glasfn: () => ({ glasfn: [] }),
+  spross: () => ({ spross: 'wiener' }), griff: (w) => ({ griff: 'standard', wunschGf: '' }), rc: () => ({ rc: 'basis' }), sart: () => ({ sart: 'keiner', roll: 'keiner' }),
+  antrieb: () => ({ antrieb: 'gurt' }), insekt: () => ({ insekt: 'keiner' }), iart: () => ({ iart: 'keiner', wunschIf: '' }), fbi: (w) => ({ fbi: w.neu ? 'werzalit' : 'behalten' }), fba: () => ({ fba: 'alu' })
+};
+function offenSetzen(w, k, an) {
+  if (k === 'absturz') { if (an) w.absturz = ''; return; }
+  const o = Object.assign({}, w.offen || {});
+  if (an) { o[k] = true; Object.assign(w, OFFEN_NEUTRAL[k] ? OFFEN_NEUTRAL[k](w) : {}); if (k === 'griffA') w.bt = Object.assign({}, w.bt, { griffA: 'keiner' }); }
+  else delete o[k];
+  w.offen = o;
+}
+/* Aus welcher Wahl welche offene Angabe entschieden wird */
+const ENTSCHEIDET = { roll: 'einbau', wunschA: 'fa', wunschI: 'fi', gleich: 'fi', wunschGf: 'griff', demontage: 'montage', durchbruch: 'montage', ralm: 'montage', putz: 'montage', aufSeite: 'spross', breite: 'spross', orn: 'glasfn' };
+function entschieden(w, f) { const k = ENTSCHEIDET[f] || f; if (w.offen && w.offen[k]) { const o = Object.assign({}, w.offen); delete o[k]; w.offen = o; } }
+/* Breite und Höhe vertauscht: alle Maße der Öffnung und des Elements tauschen (Mitte, Ränder, Element) */
+function masseTauschen(w) {
+  const mo = w.mo || {}, t = (a, b) => { const x = mo[a]; mo[a] = mo[b]; mo[b] = x; };
+  t('hm', 'wm'); t('hl', 'wt'); t('hr', 'wb');
+  const el = w.el || {}, h = el.h; el.h = el.w; el.w = h; const hh = w.h; w.h = w.w; w.w = hh;
+}
 /* ---------- Aktionen ---------- */
 const NUMF = { w: 1, h: 1, bru: 1, laib: 1, anzahl: 1, breite: 1 };
 function act(name, el) {
@@ -3114,18 +3371,34 @@ function act(name, el) {
     case 'felder': { w.e_teilung = true; w.teilung = v; w.sashes = festFelder(v === '2p' ? 2 : num(v)); mirrorBars(w); S.selSash = 0; S.selBar = null; return render(); }
     case 'ul-set': { w.ul = v !== 'nein'; if (v !== 'nein') w.ulA = v; return render(); }
     case 'ulh': { w.ulH = clamp(num(w.ulH) + n(v), 200, 1200); return render(); }
-    case 'hst': { w.hst = Object.assign({}, w.hst, { [f]: v }); if (f !== 'schwelle') { w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
-    case 'fsw': { const o = Object.assign({}, w.fsw); if (f === 'geh') o.geh = !o.geh; else if (f === 'n') o.n = clamp(num(v), 2, 7); else o[f] = v; w.fsw = o; if (f !== 'schwelle') { w.sashes = fswFluegel(o.n, o.schema, o.geh); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f === 'geh' && o.geh) { nachBild(() => { const i = w.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 120); } else if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
+    case 'hst': { w.hst = Object.assign({}, w.hst, { [f]: v }); if (f === 'schwelle') entschieden(w, 'schwelle'); if (f !== 'schwelle') { w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
+    case 'fsw': { const o = Object.assign({}, w.fsw); if (f === 'geh') o.geh = !o.geh; else if (f === 'n') o.n = clamp(num(v), 2, 7); else o[f] = v; w.fsw = o; if (f === 'schwelle') entschieden(w, 'schwelle'); if (f !== 'schwelle') { w.sashes = fswFluegel(o.n, o.schema, o.geh); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f === 'geh' && o.geh) { nachBild(() => { const i = w.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 120); } else if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
+    case 'psk': { w.psk = Object.assign({}, w.psk, { [f]: v }); w.sashes = pskFluegel(w.psk.schema, w.psk.richtung); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; render(); nachBild(tuerZeigen, 120); return; }
+    case 'bt': { w.bt = Object.assign({}, w.bt, { [f]: v }); entschieden(w, f); return render(); }
+    case 'offen': { const k = f, an = k === 'absturz' ? true : !(w.offen && w.offen[k]); offenSetzen(w, k, an); return render(); }
+    case 'erreichbar': { w.erreichbar = v; return render(); }
+    case 'absturz': { w.absturz = v; return render(); }
+    case 'design': { const src = S.windows[+v]; if (!src) return; if (!S.designVorher) S.designVorher = designAnwenden(kopie(w), w); designAnwenden(w, src); S.selBar = null; render(); if (window.Haptik) window.Haptik.ok(); return; }
+    case 'design-weg': { if (S.designVorher) designAnwenden(w, S.designVorher); S.designVorher = null; return render(); }
+    case 'mass-tausch': { masseTauschen(w); w.massOk = false; toast('Breite und Höhe getauscht'); return render(); }
+    case 'mass-ok': { w.massOk = true; return render(); }
+    case 'mass-nach': { S.mess = { step: 0, cur: '', msg: null, ack: false }; return go('messen'); }
     case 'plan-rect': { planRechteck(w); const box = document.querySelector('[data-r="zeich"]'); if (box && box._geo) zeichnenUpdate(box); if (window.Haptik) window.Haptik.ok(); return; }
     case 'plan-reset': { w.plan = planStart(w); const box = document.querySelector('[data-r="zeich"]'); if (box && box._geo) zeichnenUpdate(box); return; }
     case 'plan-seite': { const pl = planSicher(w); pl.seite = pl.seite === 'in' && S.photos.out ? 'out' : 'in'; pl.bild = ''; return render(true); }
     case 'plan-bump': { const d = derive(w), cur = f === 'w' ? d.moW : f === 'h' ? d.moH : num(w[f]); planMasse(w, f, cur + n(v)); return render(); }
-    case 'sart': { w.sart = v; if (v === 'keiner' || v === 'behalten') w.roll = v; else if (w.roll !== 'vorbau') w.roll = 'aufsatz'; return render(); }
+    case 'sart': {
+      /* Neuer Rollladen, Raffstore oder Screen: den Kasten wählt erst einmal der Fensterbauer (nach den Fotos), der Kunde darf es selbst */
+      const vorher = w.sart === 'rollladen' || w.sart === 'raffstore' || w.sart === 'screen';
+      w.sart = v; entschieden(w, 'sart');
+      if (v === 'keiner' || v === 'behalten') w.roll = v; else { if (w.roll !== 'vorbau') w.roll = 'aufsatz'; if (!vorher) w.offen = Object.assign({}, w.offen || {}, { einbau: true }); }
+      return render();
+    }
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
     case 'back': { const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } return go(b, 'back'); }
-    case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
+    case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); return newWin();
-    case 'open': { if (S.betrieb && S.sent) return; if (!linkOffen()) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), kopie(S.windows[i]))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; return go('fertig'); }
+    case 'open': { if (S.betrieb && S.sent) return; if (!linkOffen()) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), kopie(S.windows[i]))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.designVorher = null; return go('fertig'); }
     case 'delwin': { if (!linkOffen()) return; if (S.editIdx < 0 || !S.windows[S.editIdx]) { S.editIdx = -1; go('home', 'back'); return toast('Dieses Fenster gibt es nicht mehr.'); } const weg = S.windows[S.editIdx]; if (weg.wid) { S.sync.geloescht[weg.wid] = zeit(); const alle = Object.keys(S.sync.geloescht); if (alle.length > 200) alle.sort((a, b) => S.sync.geloescht[a] - S.sync.geloescht[b]).slice(0, alle.length - 200).forEach((k) => { delete S.sync.geloescht[k]; }); } S.angelegt = angelegt(); S.windows.splice(S.editIdx, 1); S.editIdx = -1; persist(); toast('Fenster gelöscht'); return go('home', 'back'); }
     case 'aufmass-neu': { S.neuFrage = true; return render(); }
     case 'sichern': return sichernStart('sichern');
@@ -3147,9 +3420,9 @@ function act(name, el) {
     case 'gloss': { S.gloss = el.getAttribute('data-k'); S.glossIndex = false; return render(); }
     case 'gindex': { S.gloss = null; S.glossIndex = true; return render(); }
     case 'gclose': { S.gloss = null; S.glossIndex = false; return render(); }
-    case 'setw': { if (f === 'material') w.e_material = true; if (f === 'gf') w.wunschGf = ''; else if (f === 'sfarbe') w.wunschSf = ''; else if (f === 'ifarbe') w.wunschIf = ''; if (NUMF[f]) w[f] = n(v); else w[f] = v; return render(); }
-    case 'setp': { S.proj[f] = v; persist(); return render(); }
-    case 'togglew': { w[f] = !w[f]; return render(); }
+    case 'setw': { if (f === 'material') w.e_material = true; if (f === 'etage') w.e_etage = true; if (f === 'gf') w.wunschGf = ''; else if (f === 'sfarbe') w.wunschSf = ''; else if (f === 'ifarbe') w.wunschIf = ''; if (NUMF[f]) w[f] = n(v); else w[f] = v; entschieden(w, f); return render(); }
+    case 'setp': { S.proj[f] = v; if (f === 'foerdweg') S.proj.foerd = v === 'bafa' || v === 'steuer'; persist(); return render(); }
+    case 'togglew': { w[f] = !w[f]; entschieden(w, f); return render(); }
     case 'togglep': { S.proj[f] = !S.proj[f]; persist(); return render(); }
     case 'bump': { const cur = num(w[f]) + n(v); w[f] = clamp(cur, f === 'anzahl' ? 1 : 0, 9999); if (f === 'laib') w.e_laib = true; return render(); }
     case 'bumpp': { S.proj.total = clamp(num(S.proj.total) + n(v), 1, 999); persist(); return render(); }
@@ -3185,9 +3458,9 @@ function act(name, el) {
     case 'bareven': { ['v', 'h'].forEach((d) => { const cur = barsDir(w, d); setDir(w, d, evenP(cur.length).map((p, k) => ({ id: cur[k].id, p: p }))); }); return render(); }
     case 'clearbars': { w.bars = []; w.preset = 'keine'; S.selBar = null; return render(); }
     case 'side': { S.side = v; return render(); }
-    case 'color': { const side = el.getAttribute('data-side') || S.side; if (side === 'innen') { w.fi = v; w.gleich = false; w.wunschI = ''; } else { w.fa = v; w.wunschA = ''; } return render(); }
+    case 'color': { const side = el.getAttribute('data-side') || S.side; if (side === 'innen') { w.fi = v; w.gleich = false; w.wunschI = ''; entschieden(w, 'fi'); } else { w.fa = v; w.wunschA = ''; entschieden(w, 'fa'); } return render(); }
     case 'farbe-weg': { w[f] = ''; render(); const i = document.getElementById('t-' + f); if (i) i.focus(); return; }
-    case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); return render(); }
+    case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); entschieden(w, 'glasfn'); return render(); }
     case 'save': return saveWin();
     case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
@@ -3204,7 +3477,7 @@ function act(name, el) {
     default: return;
   }
 }
-const TOUR_DARF = /^(tour-[a-z]+|gloss|gindex|gclose|back|teilung|sash|felder|hst|fsw|setw|color|sart|glasfn|situation|none)$/;
+const TOUR_DARF = /^(tour-[a-z]+|gloss|gindex|gclose|back|teilung|sash|felder|hst|fsw|psk|setw|color|sart|glasfn|situation|none)$/;
 /* Zifferntasten und Tastatur fürs Messen: kein Eingabefeld, keine Systemtastatur, nichts springt */
 /* Haptik (gemeinsam.js): Tasten, Auswahl und Schalter tippen kurz; Fehler und fertige Schritte melden sich in feiern()/messNext() */
 const TIPPT = /^(key|rest-same|qnext|qprev|new|send|gloss|q-|chip|seg|opt|sw|tile|pos|share|copy|k-pay|k-buy|situation|art|felder|ul|hst|fsw|sart|farbe)/;
@@ -3235,7 +3508,7 @@ function onInput(el, ev) {
   if (kind === 's') { const z = S.sichern; if (!z) return; z[f] = el.value; if (z.err && z.err[f]) { delete z.err[f]; const box = el.closest('.kf'); if (box) { box.classList.remove('bad'); const sm = box.querySelector('small'); if (sm) sm.remove(); } } return; }
   if (kind === 'sc') { const z = S.sichern; if (!z) return; z[f] = el.checked; if (z.err && z.err[f]) { delete z.err[f]; render(); } return; }
   if (kind === 'rest') return restInput(el.value);
-  if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; farbeLive(el, f); if (ev.type === 'change') render(); return; }
+  if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; if (S.win[f].trim()) entschieden(S.win, f); farbeLive(el, f); if (ev.type === 'change') render(); return; }
   if (kind === 'plan') { if (ev.type !== 'change') return; planMasse(S.win, f, String(el.value).replace(/\D/g, '')); return render(); }
   if (ev.type !== 'change') return;
   if (kind === 'photo') return onPhoto(f, el.files && el.files[0]);
@@ -3265,7 +3538,7 @@ function relayoutAll() { document.querySelectorAll('.w3d-stage').forEach((stage)
    tragen ein Schloss; Antippen erklärt kurz, warum. Je Schritt ein Fakt mit Quelle (Belege: docs/GESTALTUNG.md, Führung). */
 const TOUR = ['start', 'fotos', 'messen', 'oeffnung', 'material', 'farbe', 'glas', 'sonne', 'blatt'];
 const TOUR_NAME = { start: 'Element', fotos: 'Fotos', messen: 'Messen', oeffnung: 'Öffnung', material: 'Material', farbe: 'Farbe', glas: 'Glas', sonne: 'Sonnenschutz', blatt: 'Aufmaßblatt' };
-const TOUR_MASS = { fenster: [1230, 1410, 620], fest: [1800, 1400, 620], hst: [2600, 2200, 0], fsw: [3600, 2200, 0] };
+const TOUR_MASS = { fenster: [1230, 1410, 620], balkon: [1010, 2180, 0], fest: [1800, 1400, 620], hst: [2600, 2200, 0], psk: [2000, 2180, 0], fsw: [3600, 2200, 0] };
 /* Gesperrt je Schritt: Aktion → Werte. Das Übliche bleibt frei, gesperrt ist, was ein Fenster individuell macht. */
 const TOUR_SPERRE = {
   start: { situation: ['neu'] },
@@ -3280,7 +3553,7 @@ const TOUR_FAKT = {
   start: { z: '2 bis 3', t: 'vergleichbare Angebote rät die Verbraucherzentrale vor einem Fenstertausch einzuholen.', mit: 'Du misst einmal und schickst dasselbe Aufmaßblatt an jeden Betrieb. So werden die Angebote vergleichbar.', q: 'Verbraucherzentrale NRW, Broschüre „Fenster“, 02/2025' },
   fotos: { z: '36 %', t: 'der Eigentümer finden es schwer, passende Handwerker zu finden.', mit: 'Mit Fotos, Maßen und Wünschen ist deine Anfrage für jeden Betrieb sofort kalkulierbar.', q: 'ImmoScout24, Umfrage unter 501 Eigentümern, 08/2025' },
   messen: { z: '9,9 Wochen', t: 'reichen die Aufträge im Ausbauhandwerk im Schnitt, zu dem Glaser, Tischler und Rollladenbauer gehören.', mit: 'Mit deinem Aufmaß rechnet ein Betrieb das erste Angebot ohne Termin vor Ort. Gemessen wird bei dir, wann es dir passt.', q: 'ZDH-Konjunkturbericht 1/2026' },
-  oeffnung: { z: 'Mehr als 1/3', t: 'der Fenster getauscht? Dann muss eine Fachperson prüfen, ob ein Lüftungskonzept nach DIN 1946-6 nötig ist.', mit: 'eeziframes zählt mit und vermerkt es auf dem Aufmaßblatt, damit dein Fensterbauer es gleich einplant.', q: 'Verbraucherzentrale NRW, Broschüre „Fenster“, 02/2025' },
+  oeffnung: { z: 'Mehr als 1/3', t: 'der Fenster getauscht? Dann ist nach DIN 1946-6 ein Lüftungskonzept erforderlich.', mit: 'eeziframes zählt mit und vermerkt es auf dem Aufmaßblatt, damit dein Fensterbauer es gleich einplant.', q: 'Energie-Fachberater, „Wann braucht man ein Lüftungskonzept bei der Sanierung?“' },
   material: { z: '598 bis 1.153 €', t: 'kostete ein 3-fach verglastes Fenster (1,3 × 1,3 m) mit Montage im Schnitt, von Kunststoff bis Aluminium, inklusive Mehrwertsteuer, Stand Herbst 2023.', mit: 'Du legst das Material fest, jeder Betrieb kalkuliert dasselbe.', q: 'VFF und Bundesverband Flachglas, Studie 01/2024' },
   farbe: { z: '87 %', t: 'der Handwerksbetriebe sagen: Kunden erwarten individuelle Angebote.', mit: 'Farbe nach RAL oder Dekor, Glas, Griff: Dein Fensterbauer weiß genau, was er anbieten soll.', q: 'Bitkom, Studie Digitalisierung des Handwerks, 01/2026' },
   glas: { z: '10 bis 20 %', t: 'Heizkosten sparen neue Fenster typischerweise; 3-fach-Glas statt alter Isolierverglasung lässt bis zu 60 % weniger Wärme durchs Fenster.', mit: 'Das Glas wählst du am Modell, mit dem U-Wert erklärt. Es steht genau so im Aufmaß.', q: 'Verbraucherzentrale Energieberatung, „Fenstertausch“, 03/2026' },
@@ -3289,7 +3562,7 @@ const TOUR_FAKT = {
 };
 const LOCK_S = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="currentColor"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"></path></svg>';
 const KI_OK = '<svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
-const tourArtTuer = (art) => art === 'hst' || art === 'fsw';
+const tourArtTuer = (art) => art === 'hst' || art === 'fsw' || art === 'balkon' || art === 'psk';
 /* Das Element der Führung: plausible Maße je Art, alle acht Handmaße da, eine Farbe, die im Modell gut zu sehen ist */
 function tourWin(art) {
   const m = TOUR_MASS[art] || TOUR_MASS.fenster, oH = m[1] + 70, oW = m[0] + 140;
@@ -3369,7 +3642,7 @@ function tourMessen() {
 function tourVorfuehren() {
   const t = S.tour; if (!t || TOUR[t.i] !== 'oeffnung') return;
   const art = S.win.art || 'fenster';
-  if (art === 'hst' || art === 'fsw') tuerZeigen(); else oeffnungZeigen(Math.min(S.selSash, S.win.sashes.length - 1));
+  if (art === 'hst' || art === 'fsw' || art === 'psk') tuerZeigen(); else oeffnungZeigen(Math.min(S.selSash, S.win.sashes.length - 1));
 }
 function tourSchloss() { toast('In der Führung gesperrt. Im eigenen Aufmaß wählst du frei.'); }
 /* Gesperrtes kennzeichnen: grau, mit Schloss, für Screenreader benannt; das Eingabefeld für eigene Farben ist aus */
@@ -3436,7 +3709,7 @@ SCREENS.tour = () => {
     const ki = w.ki && w.ki.chips && w.ki.chips.length && S.ai.in && S.ai.in.status === 'done';
     html = kopf('Zwei Fotos, die KI liest mit.', 'Einmal innen, einmal außen. Die KI liest die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade. Hier mit Beispielfotos, die Kamera bleibt aus.') +
       '<div class="tiles">' + kachel('in', 'Von innen') + kachel('out', 'Von außen') + '</div>' +
-      (ki ? '<div class="teaser"><p class="eyebrow">Aus den Fotos gelesen · ' + w.ki.rows.length + ' Angaben fürs Aufmaßblatt</p><div class="chips">' + w.ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
+      (ki ? '<div class="teaser"><p class="eyebrow">Aus den Fotos gelesen · ' + kiAnzahl(w.ki) + ' fürs Aufmaßblatt</p><div class="chips">' + w.ki.chips.map((c) => '<span class="chip">' + esc(c) + '</span>').join('') + '</div></div>'
         : '<div class="teaser"><p class="eyebrow">Aus den Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>Die KI liest die Einbausituation.</p></div>');
   } else if (id === 'messen') {
     const m = t.mess || (t.mess = { k: 0, cur: '', fertig: true }), d = derive(w);
@@ -3455,11 +3728,14 @@ SCREENS.tour = () => {
         '<div class="tour-sperre">' + keypad('Weiter') + '<button type="button" class="ts-deckel" data-act="tour-schloss"><span>' + LOCK_S + 'Maße sind in der Führung vorgegeben</span></button></div>';
     }
   } else if (id === 'oeffnung') {
-    if (art === 'fenster') {
-      const i = Math.min(S.selSash, w.sashes.length - 1), x = w.sashes[i], k = w.sashes.length;
+    if (art === 'fenster' || art === 'balkon') {
+      const i = Math.min(S.selSash, w.sashes.length - 1), x = w.sashes[i], k = w.sashes.length, bt = art === 'balkon';
       html = kopf(k > 1 ? 'Wie öffnet Flügel ' + (i + 1) + '?' : 'Wie soll es aufgehen?', k > 1 ? 'Flügel im Modell antippen, dann die Öffnungsart wählen. Der Flügel zeigt sie sofort.' : 'Öffnungsart wählen, der Flügel zeigt sie sofort.') +
         modell({ selectable: k > 1, selSash: i, openSash: S.openSash, symbols: true, sway: false, hint: k > 1 ? 'Flügel ' + (i + 1) + ' von ' + k + ' · antippen wechselt' : 'Er schwingt so auf' }) +
-        '<div class="qpanel">' + auswahl([{ k: '1', label: '1 Flügel' }, { k: '2p', label: '2 Flügel' }, { k: '3', label: '3 Flügel' }], 'data-act="teilung"', (o) => o.k === w.teilung) + qCards({ group: 'typ', act: 'sash', f: 't', val: x.t, ico: ICO.typ }) + '</div>';
+        '<div class="qpanel">' + auswahl(bt ? [{ k: '1', label: '1 Flügel' }, { k: '2s', label: '2 Flügel' }] : [{ k: '1', label: '1 Flügel' }, { k: '2p', label: '2 Flügel' }, { k: '3', label: '3 Flügel' }], 'data-act="teilung"', (o) => o.k === w.teilung) + qCards({ group: 'typ', opts: bt ? OPT.typ.filter((o) => o.k !== 'K') : null, act: 'sash', f: 't', val: x.t, ico: ICO.typ }) + '</div>';
+    } else if (art === 'psk') {
+      html = kopf('Wie viele Teile?', 'Der Flügel kippt zum Lüften oder schiebt sich vor das feste Teil. Antippen zeigt, wie sie öffnet.') + modell({ hint: lab('pskSchema', w.psk.schema) + ' · antippen schiebt' }) +
+        '<div class="qpanel">' + qCards({ group: 'pskSchema', act: 'psk', f: 'schema', val: w.psk.schema, ico: ICO.psk }) + '</div>';
     } else if (art === 'fest') {
       html = kopf('Wie viele Felder?', 'Große Scheiben werden geteilt, ab etwa 2,5 m² je Feld.') + modell({ hint: w.sashes.length + (w.sashes.length === 1 ? ' Feld' : ' Felder') + ' · fest verglast' }) +
         '<div class="qpanel">' + qCards({ group: 'felder', act: 'felder', val: w.teilung, ico: ICO.felder }) + '</div>';
@@ -3499,7 +3775,7 @@ async function tourPDF() {
   if (!S.tour) return;
   if (!window.Blatt) return toast('Die PDF lädt noch, gleich noch einmal.');
   await blattSchrift();
-  const pdf = window.Blatt.pdf({ variante: 'kunde', beispiel: true, fenster: [S.win], projekt: Object.assign({}, PROJ0, { name: 'Familie Muster', ort: '12345 Musterstadt', total: 9, foerd: true }), code: '', portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
+  const pdf = window.Blatt.pdf({ variante: 'kunde', beispiel: true, fenster: [S.win], projekt: Object.assign({}, PROJ0, { name: 'Familie Muster', ort: '12345 Musterstadt', total: 9, foerd: true, foerdweg: 'bafa' }), code: '', portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
   if (!pdf) return toast('Die PDF lässt sich hier gerade nicht erzeugen.');
   return dateiSpeichern(pdf, 'eeziframes-Beispiel-Aufmass.pdf');
 }

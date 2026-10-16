@@ -9,8 +9,8 @@ Code: `functions/api/ki.js` (Aufträge, nur auf dem Server), `web/assets/app.js`
 1. Der Kunde fotografiert innen und außen. Vor dem ersten Foto fragt die App um Einwilligung; ohne geht alles weiter, nur ohne Befund.
 2. Das Handy verkleinert das Foto auf etwa 1,15 Megapixel (rund 1.240 × 930 Pixel).
 3. `POST /api/ki?aufgabe=einbau&seite=in|out` (bei der neuen Öffnung `aufgabe=wand`). Der Server prüft Herkunft, Format, Größe und die Bremse (40 Anfragen je 10 Minuten und IP) und schickt Foto und Auftrag an Anthropic. **Eine Anfrage je Foto.**
-4. Antwort als JSON, in der App zusammengeführt (`w.ki`): Befundzeilen, Stichworte für den Kunden, Hinweise für Angebot und Montage, Prüfpunkte fürs Feinaufmaß, Laibungstiefe (nur innen) und Schräglage des Fotos (für die Wasserwaage).
-5. Ins neue Fenster wird nur die Laibungstiefe übernommen, und nur wenn der Kunde keine eingetragen hat. Material, Teilung und Öffnung wählt der Kunde.
+4. Antwort als JSON, in der App zusammengeführt (`w.ki`): Befundzeilen, Stichworte für den Kunden, Hinweise für Angebot und Montage, Prüfpunkte fürs Feinaufmaß, Laibungstiefe (nur innen), Schräglage des Fotos (für die Wasserwaage), dazu **Fachangaben mit festen Werten** (`fach`) und das **Seitenverhältnis** des Fensterelements (`verhaeltnis`, siehe unten).
+5. Ins neue Fenster werden übernommen: die Laibungstiefe, wenn der Kunde keine eingetragen hat; die Fassade (für das Modell); der Anschlag (fürs Blatt); das Geschoss als Vorschlag, solange der Kunde keines gewählt hat. Material, Teilung und Öffnung wählt der Kunde.
 
 ## Was die KI liest, in dieser Reihenfolge
 
@@ -29,6 +29,26 @@ Code: `functions/api/ki.js` (Aufträge, nur auf dem Server), `web/assets/app.js`
 | | 11. Besonderheiten: Fallrohre, Leitungen, Leuchten, Kameras, Satellitenschüssel |
 
 **Neue Öffnung (`wand`).** Innen: Wandoberfläche und Hinweise auf tragende Außenwand, Elektro (Dosen und vermutete Leitungen), Heizung und Wasser, Möbel, Raum (Deckenhöhe, Nachbarfenster als Anhalt), Feuchte. Außen: Wandaufbau, Geschoss und Zugang, Nachbarfenster (Stil, Sturz- und Brüstungshöhe), Leitungen und Hindernisse, Hinweise auf Statik (Ringanker, Deckenauflager, Gebäudeecken), Genehmigung und Denkmalschutz.
+
+## Fachangaben für den Fensterbauer
+
+Was der Kunde nicht beurteilen kann, wofür aber der Fensterbauer zuständig ist, liefert die KI zusätzlich zum Befund als feste Werte, damit App, Blatt und Betriebsbereich damit rechnen können (`functions/api/ki.js`, `FACH`; Auswertung `readFach` und `fachVerwerten` in `web/assets/app.js`, Texte `fachZeile` in `web/assets/modell.js`). Nur, was die KI erkennt; sonst fehlt der Schlüssel. Unbekannte Schlüssel oder Werte verwirft die App.
+
+| Schlüssel | Foto | Werte | Wofür |
+|---|---|---|---|
+| `rollladen` | innen, außen | `einbau`, `aufsatz`, `vorbau`, `keiner` | Kastenfrage nennt den gesehenen Kasten, „Auf einen Blick“ |
+| `anschlag` | innen (`anschlagI`), außen (`anschlagA`) | `innen` bzw. `aussen`, `ohne` | Anschlag im Blatt |
+| `fassade` | außen | `putz`, `klinker`, `wdvs`, `holz`, `sonstige` | Fassade im Modell |
+| `fensterbank` | innen (`fbi`), außen (`fba`) | Naturstein, Kunststoff, Holz, Fliesen, Faserzement, Aluminium, Klinker, Beton, keine | Fensterbankfrage („Laut Foto …“), Asbest-Prüfhinweis bei Faserzement |
+| `bruestung` | innen | `bodentief`, `niedrig` (unter etwa 80 cm), `normal` | löst ohne Brüstungsmaß die Frage nach der Absturzsicherung aus (OG, DG) |
+| `geschoss` | außen | `kg`, `eg`, `og`, `dg` | Vorschlag für die Lage, nie gegen eine eigene Angabe |
+| `erreichbar` | außen | ja oder nein | Einbruchschutz (Polizei empfiehlt RC2) |
+| `strom` | innen | ja oder nein | elektrischer Antrieb ohne sichtbaren Strom: Prüfpunkt „Elektriker einplanen“ |
+| `geruest` | außen | ja oder nein | Montage mit Gerüst oder Hubsteiger |
+
+Bei der neuen Öffnung (`wand`) nur `strom` (innen) und `fassade`, `geschoss`, `erreichbar`, `geruest` (außen).
+
+**Maße gegen das Foto.** `verhaeltnis` ist Breite durch Höhe des Fensterelements samt Blendrahmen, als sähe man gerade darauf (die KI rechnet die Schrägsicht heraus), oder `null`, wenn der Rahmen nicht ganz zu sehen ist. Die App vergleicht es mit den Handmaßen (`AW.massPruef`, logarithmisch, damit hoch und breit gleich zählen): bis 25 % Abweichung still; sind Breite und Höhe laut Foto vertauscht, fragt das Ergebnis „Breite und Höhe vertauscht?“, über 30 % „Bitte noch einmal nachmessen“. Bestätigt der Kunde („Stimmt so“), steht es beim Fensterbauer als Prüfpunkt fürs Feinaufmaß. Nie bei einer neuen Öffnung (Wunschmaße).
 
 **Regeln im Auftrag:** nur, was zu sehen ist oder sich klar ergibt; Vermutungen mit „vermutlich“; Unsichtbares als Prüfpunkt fürs Feinaufmaß statt geraten; keine Maße außer Laibungstiefe und Schräglage; keine Preise; sachlich, weil der Kunde mitliest.
 
@@ -49,8 +69,8 @@ Code: `functions/api/ki.js` (Aufträge, nur auf dem Server), `web/assets/app.js`
 
 Standard ist `claude-sonnet-5-5` (genau beim Erkennen kleiner Details wie Kastenart, Anschlag oder Fugen). Umstellen ohne Code: Variable `KI_MODELL` bei Cloudflare (der frühere Name `KI_MODELL_GENAU` gilt weiter).
 
-Je Foto: Bild etwa 1.530 Tokens, Auftrag etwa 1.500 Tokens, Antwort etwa 800 Tokens. Mit Sonnet 5.5 (2 $ Eingabe, 10 $ Ausgabe je Million Tokens) sind das rund 1,4 US-Cent je Foto, **etwa 2,5 Eurocent je Fenster** (1.000 Fenster im Jahr mit 20 % Wiederholungen: rund 30 €). Mit `KI_MODELL=claude-haiku-5-5` etwa 0,13 Cent je Fenster, dafür weniger genau. Preise: [Anthropic, Pricing](https://platform.claude.com/docs/en/about-claude/pricing); Bild-Tokens: [Anthropic, Vision](https://platform.claude.com/docs/en/build-with-claude/vision).
+Je Foto: Bild etwa 1.530 Tokens, Auftrag etwa 1.800 Tokens (mit den Fachangaben rund 300 mehr als vorher), Antwort etwa 850 Tokens. Mit Sonnet 5.5 (2 $ Eingabe, 10 $ Ausgabe je Million Tokens) sind das rund 1,5 US-Cent je Foto, **etwa 2,6 Eurocent je Fenster** (1.000 Fenster im Jahr mit 20 % Wiederholungen: rund 31 €). Mit `KI_MODELL=claude-haiku-5-5` etwa 0,14 Cent je Fenster, dafür weniger genau. Preise: [Anthropic, Pricing](https://platform.claude.com/docs/en/about-claude/pricing); Bild-Tokens: [Anthropic, Vision](https://platform.claude.com/docs/en/build-with-claude/vision).
 
 ## Prüfen
 
-Lokal antwortet die KI mit festen Testdaten (`KI_ATTRAPPE=1`, `scripts/dev-server.mjs`); die Zeile „Testauftrag“ zeigt Aufgabe, Seite und Modell. Die Prüfsuite kontrolliert: eine Anfrage je Foto, Auftrag Einbausituation, kein Altfenster im Befund, Prüfpunkte übernommen, Wand-Auftrag bei der neuen Öffnung, „struktur“ abgelehnt.
+Lokal antwortet die KI mit festen Testdaten (`KI_ATTRAPPE=1`, `scripts/dev-server.mjs`); die Zeile „Testauftrag“ zeigt Aufgabe, Seite und Modell. Die Testdaten enthalten Fachangaben (mit einem unbekannten Schlüssel und einem unklaren Wert, die verworfen werden müssen) und ein Seitenverhältnis. Die Prüfsuite kontrolliert: eine Anfrage je Foto, Auftrag Einbausituation, kein Altfenster im Befund, Prüfpunkte übernommen, Wand-Auftrag bei der neuen Öffnung, „struktur“ abgelehnt; Abschnitt 16: Fachangaben aus beiden Fotos, Unbekanntes verworfen, Fassade, Anschlag und Geschoss übernommen, Kastenfrage mit dem gesehenen Kasten, vertauschte und abweichende Maße mit „Tauschen“, „Nachmessen“ und „Stimmt so“.

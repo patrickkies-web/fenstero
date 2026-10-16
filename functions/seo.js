@@ -11,7 +11,7 @@
    Begründung und Quellen: docs/SEO.md. */
 import { konfig } from './api/umgebung.js';
 
-export const STAND = '2026-10-15';
+export const STAND = '2026-10-16';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst */
 export const SEITEN = [
