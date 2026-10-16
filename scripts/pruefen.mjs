@@ -2138,6 +2138,7 @@ if (teil(14)) {
     await sB.waitForFunction(() => !!S.sent, null, { timeout: 8000 }); await sB.waitForTimeout(200);
     const b1 = await sB.evaluate(() => ({ h1: (document.querySelector('.hero.lk h1') || {}).textContent || '', neu: document.querySelectorAll('[data-act="new"]').length, warn: (document.querySelector('.note.warn') || {}).textContent || '', karte: (document.querySelector('.wincard.sent') || {}).textContent || '', titel: Array.from(document.querySelectorAll('.sec-title')).map((x) => x.textContent).join('|') }));
     ok(/Schon erledigt/.test(b1.h1) && b1.neu === 0 && /nicht bei Fensterbau Weitermachen angekommen/.test(b1.warn) && /Auf diesem Gerät/.test(b1.karte) && !/Übermittelt/.test(b1.karte) && /Auf diesem Gerät/.test(b1.titel), 'Anderes Gerät nach dem Absenden: erfährt beim nächsten Speichern, dass das Aufmaß schon beim Betrieb ist („Schon erledigt.“), sagt ehrlich, dass seine Änderung nicht angekommen ist, und nennt seine Liste nicht „übermittelt“');
+    await foto(sB, 'app-link-schon-erledigt');
     /* Nachbesserung angefragt, zurückgezogen, wieder angefragt: das Gerät kommt wieder hinein */
     await http('/api/konto/projekte/' + l3.id, { nb: { hinweis: 'Bitte das Esszimmer prüfen' } }, T5, 'PATCH');
     await sA.goto(url3 + '~2', { waitUntil: 'networkidle' }); await sA.reload({ waitUntil: 'networkidle' }); await sA.waitForFunction(() => S.sync && S.sync.geladen && !!S.nb, null, { timeout: 8000 });

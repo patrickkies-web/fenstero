@@ -263,7 +263,7 @@ export const KONTO = {
        anderen Gerät) */
     const jetzt = Date.now(), wm = Array.isArray(o.wm) && o.wm.length === o.w.length ? o.wm.map((x) => ({ wid: kennung(x), t0: Number(x && x.t0) || 0, aend: Number(x && x.aend) || 0, ts: zeitKappen(x && x.ts, jetzt) })) : null, standB = zeitKappen(o.stand, jetzt);
     delete o.wm; delete o.stand;
-    const zw = langerCode(code) && ctx.sp.entwurfHolen ? await ctx.sp.entwurfHolen(code).catch(() => undefined) : undefined;
+    const zw = zu !== 'eingegangen' && langerCode(code) && ctx.sp.entwurfHolen ? await ctx.sp.entwurfHolen(code).catch(() => undefined) : undefined; // schon eingegangen: das sagt gleich importCode (409)
     if (zw && Object.keys((zw.meta || {}).fenster || {}).length && (!wm || wm.some((x) => !x.wid))) throw new ApiFehler('Bitte die Seite neu laden und noch einmal senden.', 400); // ohne Kennungen ließe sich die Grenze umgehen
     if (zw && wm) { const ids = new Set(Object.keys((zw.meta || {}).fenster || {})); wm.forEach((x) => { if (x.wid) ids.add(x.wid); }); if (Math.max(ids.size, Number((zw.meta || {}).angelegt) || 0) > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster, gelöschte zählen mit.', 400); }
     o.v = 1; o.b = code;
