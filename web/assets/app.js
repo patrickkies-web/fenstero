@@ -384,7 +384,7 @@ const GLOSS = {
   neuoeffnung: { t: 'Neue Öffnung in der Wand', x: ['Wo noch kein Fenster ist, braucht die Wand einen Durchbruch mit Sturz. Bei tragenden Wänden muss ein Statiker oder der Fensterbauer mit seinem Bauunternehmen prüfen, was geht.', 'Du markierst die gewünschte Lage auf dem Foto und gibst die Wunschgröße an. Das Rohbaumaß legt am Ende der Fachbetrieb fest.'], ico: () => ICO.situation('neu'), see: ['referenz', 'feinaufmass'] },
   balkon: { t: 'Was ist eine Balkon- oder Terrassentür?', x: ['Eine Tür, die aufgeht wie ein Fenster: drehen zum Durchgehen, kippen zum Lüften. Unten sitzt eine Schwelle statt der Fensterbank.', 'Damit sie von außen zugeht, gibt es einen Ziehgriff mit Schnäpper. Mit Schloss lässt sie sich auch von außen abschließen.'], ico: () => ICO.art('balkon'), see: ['schwelle', 'psk'] },
   psk: { t: 'Was ist eine PSK-Tür?', x: ['Parallel-Schiebe-Kipp: Der Flügel kippt zum Lüften. Zum Öffnen stellt er sich parallel ab und schiebt sich vor das feste Teil.', 'Meist deutlich günstiger als eine Hebe-Schiebe-Tür. Dafür sind die Flügel kleiner, und unten ist immer eine Schwelle.'], ico: () => ICO.art('psk'), see: ['hst', 'schwelle'] },
-  absturz: { t: 'Wann braucht es eine Absturzsicherung?', x: ['Im Obergeschoss verlangt die Landesbauordnung eine Absturzsicherung, wenn die Brüstung niedriger ist als 80 bis 90 cm, je nach Bundesland. Bei bodentiefen Fenstern und Türen ohne Balkon davor gilt das immer.', 'Möglich sind ein Geländer außen (französischer Balkon), Glas in der Laibung oder ein unten fest verglastes Feld aus Sicherheitsglas.'], ico: () => ICO.absturz('gelaender'), see: ['bruestung', 'vsg'] },
+  absturz: { t: 'Wann braucht es eine Absturzsicherung?', x: ['Die Bauordnungen der Länder verlangen Fensterbrüstungen von mindestens 80 cm, ab 12 m Absturzhöhe 90 cm. Ist sie niedriger, braucht das Fenster eine Absturzsicherung; bei bodentiefen Fenstern und Türen ohne Balkon davor immer.', 'Möglich sind ein Geländer außen (französischer Balkon), Glas in der Laibung oder ein unten fest verglastes Feld aus Sicherheitsglas.'], ico: () => ICO.absturz('gelaender'), see: ['bruestung', 'vsg'] },
   foerderung: { t: 'BAFA-Zuschuss oder Steuerbonus?', x: ['BAFA: 15 % Zuschuss für neue Fenster und Außentüren. Ein Energieeffizienz-Experte muss den Antrag begleiten, gestellt wird er vor Beginn der Arbeiten. Den Vertrag erst mit Förderklausel unterschreiben.', 'Steuerbonus: 20 % der Kosten über drei Jahre von der Steuer abziehen, für selbst bewohnte Häuser, die älter als zehn Jahre sind. Der Fachbetrieb stellt eine Bescheinigung nach amtlichem Muster aus.', 'Beides gilt nur, wenn die Fenster gut dämmen: Uw höchstens 0,95, mit Einbruchschutz RC2 oder barrierearmer Schwelle höchstens 1,1. Für dieselben Fenster gibt es nur eins von beiden.'], ico: () => [...ICO.glas('3'), P(C(52, 14, 9), '#f2d27a', INK, 1.1), P(L([52, 9], [52, 19]) + L([49.5, 11], [54.5, 11]) + L([49.5, 17], [54.5, 17]), 'none', INK, 1.1)], see: ['uwert', 'lueftung'] }
 };
 const GLOSS_ORDER = ['referenz', 'feinaufmass', 'neuoeffnung', 'rahmenmass', 'bruestung', 'absturz', 'laibung', 'anschlag', 'dinlr', 'symbol', 'dk', 'kipp', 'fest', 'festverglasung', 'oberlicht', 'unterlicht', 'balkon', 'hst', 'psk', 'fsw', 'schwelle', 'pfosten', 'stulp', 'wiener', 'szr', 'auf', 'echt', 'uwert', 'schall', 'vsg', 'ornament', 'rc2', 'ral', 'aufsatz', 'vorbau', 'insekt', 'fensterbank', 'ralmontage', 'lueftung', 'foerderung', 'raffstore', 'screen', 'innenschutz'];
@@ -1311,7 +1311,7 @@ const PORTAL_OPEN = PORTAL_URL;
 const PORTAL_KURZ = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + '#fensterbauer';
 const STORE = 'aufmass.v1';
-const PROJ0 = { gebaeude: 'efh', baujahr: '', total: 9, zeit: '3m', budget: 'b0', foerd: false, foerdweg: '', name: '', ort: '', tel: '', mail: '', erreich: 'nm' };
+const PROJ0 = { gebaeude: 'efh', baujahr: '', total: '', zeit: '3m', budget: 'b0', foerd: false, foerdweg: '', name: '', ort: '', tel: '', mail: '', erreich: 'nm' };
 const S = {
   screen: 'home', dir: 'fwd', betrieb: null, windows: [], win: baseWin(), editIdx: -1,
   photos: { in: null, out: null }, ai: { in: null, out: null }, aiOk: null,
@@ -1529,7 +1529,7 @@ const masseZeigen = () => !S.betrieb && FREI();
 function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' : 'div', fest = aendStand(x).fest;
   /* nach dem Senden im Link: keine Maße mehr, die stehen im Aufmaßblatt */
   if (hide) { const anderswo = !!(S.sent && S.sent.anderswo); return '<div class="wincard sent"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (anderswo ? 'Auf diesem Gerät' : PILOT ? 'Abgeschlossen' : 'Übermittelt') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + '</span><span class="me">' + (anderswo ? 'Maßgeblich ist das Aufmaß, das angekommen ist' : 'Maße und Angaben stehen im Aufmaßblatt') + '</span></span></div>'; }
-  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (masseZeigen() && d.elW && d.elH ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : d.complete ? 'Maße vollständig' : 'Maße offen') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + ' · ' + x.sashes.map((z) => TYPNAME[z.t]).filter((t, k, a) => a.indexOf(t) === k).join(' · ') + '</span><span class="me">' + esc(rahmenFarbe(x, 'aussen').name + ' · ' + lab('glas', x.glas) + '-Glas' + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + (fest ? ' · fest' : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
+  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (masseZeigen() && d.elW && d.elH ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : d.complete ? 'Maße vollständig' : 'Maße offen') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + ' · ' + x.sashes.map((z) => TYPNAME[z.t]).filter((t, k, a) => a.indexOf(t) === k).join(' · ') + '</span><span class="me">' + esc(rahmenFarbe(x, 'aussen').name + ' · ' + (istOffen(x, 'glas') ? 'Glas offen' : lab('glas', x.glas) + '-Glas') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + (fest ? ' · fest' : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
 SCREENS.home = () => {
   if (S.betrieb) return linkHome();
   if (S.windows.length || angelegt() >= GRENZE.fenster) return homeAufmass(); // an der Grenze ohne Fenster: dort steht „Neues Aufmaß beginnen“
@@ -1919,7 +1919,7 @@ SCREENS.ergebnis = () => {
 const MAL = ['keinmal', 'einmal', 'zweimal', 'dreimal', 'viermal'];
 SCREENS.fertig = () => {
   const w = S.win, d = derive(w), lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'deinen Fensterbauer') : '', offen = masseZeigen(), gespeichert = S.windows[S.editIdx] || w;
-  const facts = [offen ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : '', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), lab('material', w.material), rahmenFarbe(w, 'aussen').name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
+  const facts = [offen ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : '', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), istOffen(w, 'material') ? 'Material offen' : lab('material', w.material), rahmenFarbe(w, 'aussen').name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
   const kiN = w.ki ? ((w.ki.rows || []).length + (AW.fachZeile(w) ? 1 : 0)) : 0, st = aendStand(gespeichert);
   /* Die geordnete Übersicht mit allen Angaben gibt es erst nach dem Freischalten (beim Kundenlink bekommt sie der Betrieb) */
   const alle = offen ? '<details class="card fold"><summary><span>Alle Angaben<small>' + specRows(w).length + ' Zeilen' + (kiN ? ', dazu ' + kiN + ' aus den Fotos' : '') + '</small></span></summary><div class="fold-body"><div class="kv">' + specRows(w).map((r) => '<div><span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span></div>').join('') + '</div>' +
@@ -1953,8 +1953,8 @@ SCREENS.anfrage = () => {
   html += '<div class="sec">' + secHead('Gebäude') + chips('gebaeude', pr.gebaeude, 'gebaeude', 'setp') + '</div>';
   if (pr.gebaeude === 'denkmal') html += noteBox('Bei Denkmalschutz brauchst du meist eine Genehmigung. Material und Sprossen können vorgeschrieben sein.', 'echt', 'warn');
   html += '<div class="sec">' + secHead('Baujahr des Hauses') + chips('baujahr', pr.baujahr, 'baujahr', 'setp') + '</div>';
-  html += '<div class="sec">' + secHead('Fenster im ganzen Haus', null, 'Du tauschst ' + replaced + ' davon.') + '<div class="rows"><div class="row"><label><span class="lbl">Insgesamt</span><span class="val"><input type="text" inputmode="numeric" id="p-total" data-in="p" data-f="total" value="' + esc(pr.total) + '"><span class="unit">Stück</span></span></label><button type="button" class="rnd" aria-label="Weniger" data-act="bumpp" data-v="-1">−</button><button type="button" class="rnd" aria-label="Mehr" data-act="bumpp" data-v="1">+</button></div></div></div>';
-  if (replaced > (num(pr.total) || 0) / 3) html += noteBox('Du tauschst ' + replaced + ' von ' + (num(pr.total) || 0) + ' Fenstern, mehr als ein Drittel. Dann ist ein Lüftungskonzept nach DIN 1946-6 erforderlich; darum kümmert sich dein Fensterbauer.', 'lueftung', 'warn');
+  html += '<div class="sec">' + secHead('Fenster im ganzen Haus', null, 'Du tauschst ' + replaced + ' davon.') + '<div class="rows"><div class="row"><label><span class="lbl">Insgesamt</span><span class="val"><input type="text" inputmode="numeric" id="p-total" data-in="p" data-f="total" value="' + esc(pr.total) + '" placeholder="z. B. 12"><span class="unit">Stück</span></span></label><button type="button" class="rnd" aria-label="Weniger" data-act="bumpp" data-v="-1">−</button><button type="button" class="rnd" aria-label="Mehr" data-act="bumpp" data-v="1">+</button></div></div></div>';
+  if (num(pr.total) && replaced > num(pr.total) / 3) html += noteBox('Du tauschst ' + replaced + ' von ' + (num(pr.total) || 0) + ' Fenstern, mehr als ein Drittel. Dann ist ein Lüftungskonzept nach DIN 1946-6 erforderlich; darum kümmert sich dein Fensterbauer.', 'lueftung', 'warn');
   return { html: html, back: ['Aufmaß', 'home'], cls: 'tight', bar: { label: 'Weiter', act: 'go', v: 'anfrage2' } };
 };
 SCREENS.anfrage2 = () => {
@@ -1980,7 +1980,7 @@ function blattHTML(windows, pr, opts) {
   opts = opts || {};
   let today = ''; try { today = new Date(opts.date || Date.now()).toLocaleDateString('de-DE'); } catch (e) { today = ''; }
   const replaced = windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), fw = AW.foerdWeg(pr);
-  const proj = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Förderung', fw ? lab('foerdweg', fw) : 'keine Angabe'], ['Lüftung', replaced > (num(pr.total) || 0) / 3 ? 'Lüftungskonzept erforderlich (' + replaced + ' von ' + pr.total + ' Fenstern)' : replaced + ' von ' + pr.total + ' Fenstern']];
+  const proj = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Förderung', fw ? lab('foerdweg', fw) : 'keine Angabe'], ['Lüftung', !num(pr.total) ? replaced + ' Fenster, Zahl im Haus nicht angegeben' : replaced > num(pr.total) / 3 ? 'Lüftungskonzept erforderlich (' + replaced + ' von ' + pr.total + ' Fenstern)' : replaced + ' von ' + pr.total + ' Fenstern']];
   const kl = klaerListe(windows, pr);
   let h = '<div class="sheet-paper"><div class="paper-head"><div style="min-width: 0"><p class="eyebrow">Aufmaßblatt</p><p style="margin: 4px 0 0; font-size: 24px; font-weight: 900; letter-spacing: -.02em">' + esc(pr.name || 'Ohne Namen') + '</p>' + ([pr.ort, pr.tel].filter(Boolean).length ? '<p style="margin: 2px 0 0; font-size: 13px; color: var(--muted)">' + esc([pr.ort, pr.tel].filter(Boolean).join(' · ')) + '</p>' : '') + '</div><div style="text-align: right; flex: 0 0 auto"><p style="margin: 0; font-size: 13px; color: var(--muted)">' + (opts.betrieb ? 'An ' + esc(opts.betrieb) : 'Erfasst mit eeziframes') + '</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">' + esc(today) + '</p></div></div>';
   h += '<div class="paper-grid">' + proj.map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>';
@@ -2032,7 +2032,7 @@ SCREENS.blatt = () => {
 /* Übersicht vor dem Senden: vollständig oder nicht, aber keine Maßliste zum Abfotografieren */
 function checkCard(x, i) {
   const d = derive(x), n = num(x.anzahl) || 1, typ = x.sashes.map((z) => TYPNAME[z.t]).filter((t, k, a) => a.indexOf(t) === k).join(' · ');
-  return '<button type="button" class="wincard" data-act="open" data-i="' + i + '"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di"' + (d.complete ? '' : ' style="color: var(--bad)"') + '>' + (d.complete ? 'Vollständig: 8 Maße' : 'Maße fehlen noch') + (x.fotos ? ', ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : ', ohne Fotos') + '</span><span class="me">' + esc([typ, lab('material', x.material), n > 1 ? n + ' Stück' : ''].filter(Boolean).join(' · ')) + '</span></span>' + CHEV + '</button>';
+  return '<button type="button" class="wincard" data-act="open" data-i="' + i + '"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di"' + (d.complete ? '' : ' style="color: var(--bad)"') + '>' + (d.complete ? 'Vollständig: 8 Maße' : 'Maße fehlen noch') + (x.fotos ? ', ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : ', ohne Fotos') + '</span><span class="me">' + esc([typ, istOffen(x, 'material') ? 'Material offen' : lab('material', x.material), n > 1 ? n + ' Stück' : ''].filter(Boolean).join(' · ')) + '</span></span>' + CHEV + '</button>';
 }
 SCREENS.gesendet = () => {
   const name = S.betrieb ? (S.betrieb.name || 'Dein Fensterbauer') : 'Dein Fensterbauer', code = curCode();
@@ -2288,7 +2288,7 @@ function qList(w) {
   /* Pflichtthema: im Obergeschoss bei niedriger Brüstung, bei Türen immer (außer mit Balkon davor) */
   if (AW.absturzFrage(w)) L.push(tuer
     ? { id: 'absturz', title: 'Führt die Tür auf einen Balkon oder eine Terrasse?', sub: 'Sonst braucht sie im ' + lab('etage', w.etage) + ' eine Absturzsicherung davor.', kind: 'cards', group: 'absturzTuer', val: w.absturz, act: 'absturz', ico: ICO.absturz, view: 'outside', g: 'absturz', offen: 'absturz', offenLabel: 'Weiß ich noch nicht', hint: 'Ansicht von außen' }
-    : { id: 'absturz', title: 'Wie wird gegen Absturz gesichert?', sub: num(w.bru) ? 'Brüstung ' + thousand(w.bru) + ' mm im ' + lab('etage', w.etage) + ': Unter 80 bis 90 cm ist eine Absturzsicherung Pflicht.' : 'Laut Foto ist die Brüstung niedrig. Im ' + lab('etage', w.etage) + ' ist dann eine Absturzsicherung Pflicht.', kind: 'cards', group: 'absturz', val: w.absturz, act: 'absturz', ico: ICO.absturz, view: 'outside', g: 'absturz', offen: 'absturz', offenLabel: 'Weiß ich noch nicht', hint: 'Ansicht von außen' });
+    : { id: 'absturz', title: 'Wie wird gegen Absturz gesichert?', sub: AW.bruDa(w) ? (num(w.bru) ? 'Brüstung ' + thousand(w.bru) + ' mm im ' + lab('etage', w.etage) : 'Bodentief im ' + lab('etage', w.etage)) + ': Unter 80 cm (ab 12 m Höhe 90 cm) ist eine Absturzsicherung Pflicht.' : 'Laut Foto ist die Brüstung ' + (w.ki && w.ki.fach && w.ki.fach.bruestung === 'bodentief' ? 'bodentief' : 'niedrig') + '. Im ' + lab('etage', w.etage) + ' ist dann eine Absturzsicherung Pflicht.', kind: 'cards', group: 'absturz', val: w.absturz, act: 'absturz', ico: ICO.absturz, view: 'outside', g: 'absturz', offen: 'absturz', offenLabel: 'Weiß ich noch nicht', hint: 'Ansicht von außen' });
   /* Gestaltung übernehmen: Farben, Glas, Sprossen, Sonnenschutz wie bei einem schon gespeicherten Fenster */
   if (designListe().length) L.push({ id: 'design', title: 'Gestalten wie ein anderes Fenster?', sub: 'Übernimmt Material, Farben, Glas, Sprossen, Griff und Sonnenschutz. Maße und Flügel bleiben.', kind: 'design', view: 'three', hint: 'Antippen übernimmt' });
   if (art === 'fenster') {
@@ -2479,7 +2479,10 @@ function qSwitches() { const w = S.win; return '<div class="rows">' + (w.neu ? s
 /* Lage: Raum, Geschoss (aus dem Außenfoto vorgeschlagen, bis der Kunde selbst wählt), Anzahl; im Obergeschoss die Brüstung, falls
    sie noch fehlt (davon hängt die Absturzsicherung ab) */
 function qLage() {
-  const w = S.win, f = (w.ki && w.ki.fach) || {}, ausFoto = !w.e_etage && f.geschoss && f.geschoss === w.etage, obenOhneBru = (w.etage === 'og' || w.etage === 'dg') && !istTuer(w) && (w.bru === '' || w.bru == null);
+  const w = S.win, f = (w.ki && w.ki.fach) || {}, ausFoto = !w.e_etage && f.geschoss && f.geschoss === w.etage, oben = (w.etage === 'og' || w.etage === 'dg') && !istTuer(w);
+  /* Im OG und DG ohne Brüstungsmaß fragt die Lage danach; das Feld bleibt für dieses Fenster stehen, auch wenn schon etwas eingetragen ist */
+  if (oben && !AW.bruDa(w)) S.lageBru = w;
+  const obenOhneBru = oben && S.lageBru === w;
   return '<div class="rows"><div class="trow"><span>Raum</span><input type="text" id="t-name" data-in="w" data-f="name" value="' + esc(w.name || '') + '" placeholder="z. B. Küche" autocomplete="off"></div></div>' + chips('etage', w.etage, 'etage') +
     (ausFoto ? '<p class="qcur">Geschoss aus dem Außenfoto gelesen. Stimmt es nicht, tipp das richtige an.</p>' : '') +
     '<div class="rows">' + (obenOhneBru ? fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'absturz') : '') + fieldRow('Gleiche Fenster im Haus', 'anzahl', 'Stück', 1) + '</div>';
@@ -2523,7 +2526,8 @@ function designListe() {
 }
 function qDesign() {
   const w = S.win, L = designListe(), jetzt = designVon(w);
-  const gewaehlt = L.find((d) => designVon(designAnwenden(kopie(w), d.src)) === jetzt);
+  /* Als übernommen gilt eine Karte erst, wenn sie in dieser Sitzung angetippt wurde (gleiche Vorgaben zweier Fenster zählen nicht) */
+  const gewaehlt = S.designVorher ? L.find((d) => designVon(designAnwenden(kopie(w), d.src)) === jetzt) : null;
   return '<div class="qcards liste design">' + L.map((d) => '<div class="qo"><button type="button" class="qopt" data-act="design" data-v="' + d.i + '" aria-pressed="' + (d === gewaehlt) + '">' + svgIcon(miniWin(d.src), 44) + '<span class="tx"><span class="lbl">' + esc(d.label) + '</span><span class="sb">' + esc(d.sub) + '</span></span></button></div>').join('') + '</div>' +
     (gewaehlt ? '<div class="qrow"><span class="sub">Übernommen. Speichern oder einzeln anpassen.</span>' + (S.designVorher ? '<button type="button" class="chip" data-act="design-weg">Doch neu gestalten</button>' : '') + '</div>' : '<div class="qrow"><span class="sub">Lieber neu gestalten? Einfach weiter.</span></div>');
 }
@@ -3261,8 +3265,8 @@ function fachMischen(i, a) {
   const f = {};
   const kasten = i.rollladen === 'einbau' || i.rollladen === 'aufsatz' ? i.rollladen : a.rollladen && a.rollladen !== 'keiner' ? a.rollladen : i.rollladen || a.rollladen;
   if (kasten) f.rollladen = kasten;
-  if (i.anschlag) f.anschlagI = i.anschlag;
-  if (a.anschlag) f.anschlagA = a.anschlag;
+  if (i.anschlag === 'innen' || i.anschlag === 'ohne') f.anschlagI = i.anschlag;
+  if (a.anschlag === 'aussen' || a.anschlag === 'ohne') f.anschlagA = a.anschlag;
   if (a.fassade) f.fassade = a.fassade;
   if (i.fensterbank) f.fbi = i.fensterbank;
   if (a.fensterbank) f.fba = a.fensterbank;
@@ -3300,6 +3304,7 @@ function newWin() {
 /* Speichern: Neue Fenster zählen gegen die Grenze; nach der ersten Woche zählt jedes Speichern mit einer Änderung (höchstens vier).
    Gespeichert wird eine Kopie, bearbeitet wird immer eine eigene Kopie (S.win). */
 function saveWin() {
+  S.designVorher = null; S.offenVorText = null;
   const jetzt = zeit(), w = Object.assign({}, S.win, { name: S.win.name || artName(S.win) + ' ' + (S.editIdx >= 0 ? S.editIdx + 1 : S.windows.length + 1) });
   let hinweis = '';
   if (S.editIdx >= 0 && S.windows[S.editIdx]) {
@@ -3337,8 +3342,12 @@ function offenSetzen(w, k, an) {
   w.offen = o;
 }
 /* Aus welcher Wahl welche offene Angabe entschieden wird */
-const ENTSCHEIDET = { roll: 'einbau', wunschA: 'fa', wunschI: 'fi', gleich: 'fi', wunschGf: 'griff', demontage: 'montage', durchbruch: 'montage', ralm: 'montage', putz: 'montage', aufSeite: 'spross', breite: 'spross', orn: 'glasfn' };
+const ENTSCHEIDET = { roll: 'einbau', wunschA: 'fa', wunschI: 'fi', gleich: 'fi', wunschGf: 'griff', demontage: 'montage', durchbruch: 'montage', ralm: 'montage', putz: 'montage', orn: 'glasfn' };
 function entschieden(w, f) { const k = ENTSCHEIDET[f] || f; if (w.offen && w.offen[k]) { const o = Object.assign({}, w.offen); delete o[k]; w.offen = o; } }
+/* Eine eingetippte Farbe entscheidet; wird sie wieder gelöscht, ohne dass eine Farbe aus der Liste gewählt wurde, ist die Farbe wieder offen
+   (sonst stünde still die Vorgabe im Blatt). Gemerkt nur für dieses Fenster und diese Sitzung. */
+function offenMerken(w, f) { const k = ENTSCHEIDET[f]; if (k && w.offen && w.offen[k]) S.offenVorText = { w: w, f: f }; }
+function offenZurueck(w, f) { const m = S.offenVorText; if (m && m.w === w && m.f === f && !String(w[f] || '').trim()) { offenSetzen(w, ENTSCHEIDET[f], true); S.offenVorText = null; } }
 /* Breite und Höhe vertauscht: alle Maße der Öffnung und des Elements tauschen (Mitte, Ränder, Element) */
 function masseTauschen(w) {
   const mo = w.mo || {}, t = (a, b) => { const x = mo[a]; mo[a] = mo[b]; mo[b] = x; };
@@ -3375,7 +3384,7 @@ function act(name, el) {
     case 'fsw': { const o = Object.assign({}, w.fsw); if (f === 'geh') o.geh = !o.geh; else if (f === 'n') o.n = clamp(num(v), 2, 7); else o[f] = v; w.fsw = o; if (f === 'schwelle') entschieden(w, 'schwelle'); if (f !== 'schwelle') { w.sashes = fswFluegel(o.n, o.schema, o.geh); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f === 'geh' && o.geh) { nachBild(() => { const i = w.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 120); } else if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
     case 'psk': { w.psk = Object.assign({}, w.psk, { [f]: v }); w.sashes = pskFluegel(w.psk.schema, w.psk.richtung); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; render(); nachBild(tuerZeigen, 120); return; }
     case 'bt': { w.bt = Object.assign({}, w.bt, { [f]: v }); entschieden(w, f); return render(); }
-    case 'offen': { const k = f, an = k === 'absturz' ? true : !(w.offen && w.offen[k]); offenSetzen(w, k, an); return render(); }
+    case 'offen': { const k = f, an = k === 'glasfn' ? !(w.offen && w.offen[k]) : true; offenSetzen(w, k, an); return render(); }
     case 'erreichbar': { w.erreichbar = v; return render(); }
     case 'absturz': { w.absturz = v; return render(); }
     case 'design': { const src = S.windows[+v]; if (!src) return; if (!S.designVorher) S.designVorher = designAnwenden(kopie(w), w); designAnwenden(w, src); S.selBar = null; render(); if (window.Haptik) window.Haptik.ok(); return; }
@@ -3424,7 +3433,7 @@ function act(name, el) {
     case 'setp': { S.proj[f] = v; if (f === 'foerdweg') S.proj.foerd = v === 'bafa' || v === 'steuer'; persist(); return render(); }
     case 'togglew': { w[f] = !w[f]; entschieden(w, f); return render(); }
     case 'togglep': { S.proj[f] = !S.proj[f]; persist(); return render(); }
-    case 'bump': { const cur = num(w[f]) + n(v); w[f] = clamp(cur, f === 'anzahl' ? 1 : 0, 9999); if (f === 'laib') w.e_laib = true; return render(); }
+    case 'bump': { const leer = w[f] === '' || w[f] == null, cur = (leer && f === 'bru' ? 850 : num(w[f])) + n(v); w[f] = clamp(cur, f === 'anzahl' ? 1 : 0, 9999); if (f === 'laib') w.e_laib = true; return render(); }
     case 'bumpp': { S.proj.total = clamp(num(S.proj.total) + n(v), 1, 999); persist(); return render(); }
     case 'mess-next': return messNext(!!el.getAttribute('data-ack'));
     case 'mess-cm': { messInput(v); S.mess.msg = null; return render(); }
@@ -3433,7 +3442,7 @@ function act(name, el) {
     case 'rest-same': { S.rest.cur = String(num(v) || ''); S.rest.msg = null; return restNext(true); }
     case 'key': return keyIn(v);
     case 'qnext': return qStep(1);
-    case 'wuensche': { if (S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; S.q = null; S.openSash = -1; return go('frage'); }
+    case 'wuensche': { if (S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; S.q = null; S.openSash = -1; S.designVorher = null; return go('frage'); }
     case 'qprev': return qStep(-1);
     case 'qwunsch': { S.qWunsch = !S.qWunsch; render(); const t = document.getElementById('t-wunsch'); if (t && S.qWunsch) t.focus(); return; }
     case 'ol-set': { w.ol = v !== 'nein'; if (v !== 'nein') w.olT = v; return render(); }
@@ -3458,8 +3467,12 @@ function act(name, el) {
     case 'bareven': { ['v', 'h'].forEach((d) => { const cur = barsDir(w, d); setDir(w, d, evenP(cur.length).map((p, k) => ({ id: cur[k].id, p: p }))); }); return render(); }
     case 'clearbars': { w.bars = []; w.preset = 'keine'; S.selBar = null; return render(); }
     case 'side': { S.side = v; return render(); }
-    case 'color': { const side = el.getAttribute('data-side') || S.side; if (side === 'innen') { w.fi = v; w.gleich = false; w.wunschI = ''; entschieden(w, 'fi'); } else { w.fa = v; w.wunschA = ''; entschieden(w, 'fa'); } return render(); }
-    case 'farbe-weg': { w[f] = ''; render(); const i = document.getElementById('t-' + f); if (i) i.focus(); return; }
+    case 'color': { const side = el.getAttribute('data-side') || S.side; S.offenVorText = null; if (side === 'innen') { w.fi = v; w.gleich = false; w.wunschI = ''; entschieden(w, 'fi'); } else { w.fa = v; w.wunschA = ''; entschieden(w, 'fa'); } return render(); }
+    case 'farbe-weg': {
+      /* Auch das Feld selbst leeren: Browser melden beim Neuaufbau für ein Feld mit Fokus noch „change“ mit dem alten Inhalt */
+      const alt = document.getElementById('t-' + f); if (alt) alt.value = '';
+      w[f] = ''; offenZurueck(w, f); render(); const i = document.getElementById('t-' + f); if (i) i.focus(); return;
+    }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); entschieden(w, 'glasfn'); return render(); }
     case 'save': return saveWin();
     case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
@@ -3508,12 +3521,12 @@ function onInput(el, ev) {
   if (kind === 's') { const z = S.sichern; if (!z) return; z[f] = el.value; if (z.err && z.err[f]) { delete z.err[f]; const box = el.closest('.kf'); if (box) { box.classList.remove('bad'); const sm = box.querySelector('small'); if (sm) sm.remove(); } } return; }
   if (kind === 'sc') { const z = S.sichern; if (!z) return; z[f] = el.checked; if (z.err && z.err[f]) { delete z.err[f]; render(); } return; }
   if (kind === 'rest') return restInput(el.value);
-  if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; if (S.win[f].trim()) entschieden(S.win, f); farbeLive(el, f); if (ev.type === 'change') render(); return; }
+  if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; if (S.win[f].trim()) { offenMerken(S.win, f); entschieden(S.win, f); } else offenZurueck(S.win, f); farbeLive(el, f); if (ev.type === 'change') render(); return; }
   if (kind === 'plan') { if (ev.type !== 'change') return; planMasse(S.win, f, String(el.value).replace(/\D/g, '')); return render(); }
   if (ev.type !== 'change') return;
   if (kind === 'photo') return onPhoto(f, el.files && el.files[0]);
   if (kind === 'w') { if (NUMF[f]) { const v = parseInt(String(el.value).replace(/\D/g, ''), 10); S.win[f] = isNaN(v) ? '' : Math.min(v, 9999); if (f === 'laib') S.win.e_laib = true; } else S.win[f] = el.value; return render(); }
-  if (kind === 'p') { S.proj[f] = f === 'total' ? Math.min(parseInt(String(el.value).replace(/\D/g, ''), 10) || 1, 999) : f === 'baujahr' ? el.value.replace(/\D/g, '').slice(0, 4) : el.value; persist(); return render(); }
+  if (kind === 'p') { S.proj[f] = f === 'total' ? (Math.min(parseInt(String(el.value).replace(/\D/g, ''), 10) || 0, 999) || '') : f === 'baujahr' ? el.value.replace(/\D/g, '').slice(0, 4) : el.value; persist(); return render(); }
 }
 function bindAfterRender() {
   document.querySelectorAll('.w3d-stage').forEach((stage) => {
@@ -3805,6 +3818,8 @@ function boot() {
   });
   const root = $app();
   root.addEventListener('click', (e) => { const el = e.target.closest ? e.target.closest('[data-act]') : null; if (!el || el.disabled) return; const name = el.getAttribute('data-act'); if (name === 'none') return; if (el.tagName !== 'A') e.preventDefault(); tippen(name, el); act(name, el); });
+  /* ✕ an der eigenen Farbe: den Fokus im Feld lassen, sonst baut das „change“ beim Verlassen die Seite neu und der Tipp geht ins Leere */
+  root.addEventListener('mousedown', (e) => { if (e.target.closest && e.target.closest('.ff-x')) e.preventDefault(); });
   root.addEventListener('input', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
   root.addEventListener('change', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
   document.addEventListener('keydown', (e) => {

@@ -37,9 +37,9 @@ Was der Kunde nicht beurteilen kann, wofür aber der Fensterbauer zuständig ist
 | Schlüssel | Foto | Werte | Wofür |
 |---|---|---|---|
 | `rollladen` | innen, außen | `einbau`, `aufsatz`, `vorbau`, `keiner` | Kastenfrage nennt den gesehenen Kasten, „Auf einen Blick“ |
-| `anschlag` | innen (`anschlagI`), außen (`anschlagA`) | `innen` bzw. `aussen`, `ohne` | Anschlag im Blatt |
+| `anschlag` | innen (`anschlagI`), außen (`anschlagA`) | innen nur `innen` oder `ohne`, außen nur `aussen` oder `ohne` (ein Wert der anderen Seite wird verworfen) | Anschlag im Blatt |
 | `fassade` | außen | `putz`, `klinker`, `wdvs`, `holz`, `sonstige` | Fassade im Modell |
-| `fensterbank` | innen (`fbi`), außen (`fba`) | Naturstein, Kunststoff, Holz, Fliesen, Faserzement, Aluminium, Klinker, Beton, keine | Fensterbankfrage („Laut Foto …“), Asbest-Prüfhinweis bei Faserzement |
+| `fensterbank` | innen (`fbi`), außen (`fba`) | Naturstein, Kunststoff, Holz, Fliesen, Faserzement, Aluminium, Klinker, Beton, keine | Fensterbankfrage („Laut Foto …“); Faserzement: Prüfpunkt „vor dem Ausbau auf Asbest prüfen“ in der Klärungsliste |
 | `bruestung` | innen | `bodentief`, `niedrig` (unter etwa 80 cm), `normal` | löst ohne Brüstungsmaß die Frage nach der Absturzsicherung aus (OG, DG) |
 | `geschoss` | außen | `kg`, `eg`, `og`, `dg` | Vorschlag für die Lage, nie gegen eine eigene Angabe |
 | `erreichbar` | außen | ja oder nein | Einbruchschutz (Polizei empfiehlt RC2) |

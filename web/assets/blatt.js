@@ -524,7 +524,7 @@ window.Blatt = (() => {
     const colX = []; let ax = M; cols.forEach((c) => { colX.push(ax); ax += c[1]; });
     const zellen = (w) => { const d = h.derive(w), fa = rahmen(w, 'aussen'); return V === 'betrieb'
       ? [String(0), '', (d.moW ? th(d.moW) + ' × ' + th(d.moH) : '–'), (d.elW ? th(d.elW) + ' × ' + th(d.elH) : '–'), bestell(w).replace(' mm', ''), oeffnungText(w), fa[0], String(num(w.anzahl) || 1)]
-      : [String(0), '', (d.moW ? th(d.moW) + ' × ' + th(d.moH) : '–'), (d.elW ? th(d.elW) + ' × ' + th(d.elH) : '–'), oeffnungText(w), fa[0], h.lab('glas', w.glas) || '3-fach', String(num(w.anzahl) || 1)]; };
+      : [String(0), '', (d.moW ? th(d.moW) + ' × ' + th(d.moH) : '–'), (d.elW ? th(d.elW) + ' × ' + th(d.elH) : '–'), oeffnungText(w), fa[0], offen(w, 'glas') ? 'offen' : h.lab('glas', w.glas) || '3-fach', String(num(w.anzahl) || 1)]; };
     const fIdx = V === 'betrieb' ? 6 : 5;
     const zeileH = (w) => { font('normal', 8.2); const lines = zellen(w).map((c, k) => wrap(c, cols[k][1] - (k === fIdx ? 7 : 3))); return Math.max(12, Math.max.apply(null, lines.map((l) => l.length)) * 3.6 + 5); };
     const legendeText = 'Maueröffnung: von drei Breiten und drei Höhen zählt das kleinste Maß; Abweichungen stehen bei der Position. Element: das sichtbare Fenster mit Rahmen. Öffnungssymbole: Linien beginnen an der Bandseite, die Spitze zeigt zum Griff; Dreieck mit Spitze oben = Kipp. ' + (V === 'betrieb' ? 'Bestellmaß: Vorschlag aus Ihrem Abzug, verbindlich bleibt Ihr Feinaufmaß.' : 'Das Bestellmaß legt der Fensterbauer beim Feinaufmaß fest.');
@@ -561,7 +561,7 @@ window.Blatt = (() => {
       const flaeche = wins.reduce((a, x) => { const d = h.derive(x); return a + (d.elW && d.elH ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
       const groesste = wins.reduce((best, x) => { const d = h.derive(x); return !best || d.elW * d.elH > best.a ? { a: d.elW * d.elH, n: x.name || 'Fenster', d: d } : best; }, null);
       const etagen = wins.map((x) => h.lab('etage', x.etage) || 'EG').filter((v, k, a) => a.indexOf(v) === k).join(', ');
-      const ausst = [['Material', gleich((x) => (offen(x, 'material') ? 'offen' : h.lab('material', x.material) || 'Kunststoff'))], ['Farbe außen', gleich((x) => rahmen(x, 'aussen')[0] + (rahmen(x, 'aussen')[0].indexOf(rahmen(x, 'aussen')[1]) < 0 ? ' (' + rahmen(x, 'aussen')[1] + ')' : ''))], ['Farbe innen', gleich((x) => rahmen(x, 'innen')[0])], ['Glas', gleich((x) => (h.lab('glas', x.glas) || '3-fach') + ((x.glasfn || []).length ? ', ' + x.glasfn.map((g) => h.lab('glasfn', g)).join(', ') : ''))], ['Sprossen', gleich((x) => ((x.bars || []).length ? h.lab('spross', x.spross) : 'keine'))], ['Sonnenschutz außen', gleich((x) => sonneText(x))], ['Sonnenschutz innen', gleich((x) => innenText(x))], ['Insektenschutz', gleich((x) => h.lab('insekt', x.insekt) || 'keiner')], ['Fensterbank', gleich((x) => (istTuer(x) ? 'Tür, Schwelle ' + schwelleText(x) : 'innen ' + bankText(x, 'fbi') + ', außen ' + bankText(x, 'fba')))], ['Montage', gleich((x) => montageText(x))]];
+      const ausst = [['Material', gleich((x) => (offen(x, 'material') ? 'offen' : h.lab('material', x.material) || 'Kunststoff'))], ['Farbe außen', gleich((x) => rahmen(x, 'aussen')[0] + (rahmen(x, 'aussen')[0].indexOf(rahmen(x, 'aussen')[1]) < 0 ? ' (' + rahmen(x, 'aussen')[1] + ')' : ''))], ['Farbe innen', gleich((x) => rahmen(x, 'innen')[0])], ['Glas', gleich((x) => (offen(x, 'glas') ? 'offen' : h.lab('glas', x.glas) || '3-fach') + (offen(x, 'glasfn') ? ', Extras offen' : (x.glasfn || []).length ? ', ' + x.glasfn.map((g) => h.lab('glasfn', g)).join(', ') : ''))], ['Sprossen', gleich((x) => ((x.bars || []).length ? (offen(x, 'spross') ? 'Art offen' : h.lab('spross', x.spross)) : 'keine'))], ['Sonnenschutz außen', gleich((x) => sonneText(x))], ['Sonnenschutz innen', gleich((x) => innenText(x))], ['Insektenschutz', gleich((x) => (offen(x, 'insekt') ? 'offen' : h.lab('insekt', x.insekt) || 'keiner'))], ['Fensterbank', gleich((x) => (istTuer(x) ? 'Tür, Schwelle ' + schwelleText(x) : 'innen ' + bankText(x, 'fbi') + ', außen ' + bankText(x, 'fba')))], ['Montage', gleich((x) => montageText(x))]];
       const zahlen = [['Positionen', String(wins.length)], ['Elemente', String(nE)], ['Fensterfläche', flaeche ? 'etwa ' + flaeche.toFixed(1).replace('.', ',') + ' m² (Element, alle Stück)' : '–'], ['Größtes Element', groesste && groesste.d.elW ? groesste.n + ', ' + th(groesste.d.elW) + ' × ' + th(groesste.d.elH) + ' mm' : '–'], ['Geschosse', etagen || '–'], ['Fotos', nF ? nF + ', von der KI ausgewertet' : 'keine'], ['Maße', komplett ? 'alle 8 Handmaße je Fenster' : wins.filter((x) => { const d = h.derive(x); return !(d.moW && d.elW); }).length + ' Position(en) ohne vollständige Maße', { col: komplett ? OK : WARN, bold: true }]].concat(V === 'betrieb' ? [['Ihr Abzug', ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben']] : []);
       const oA = { lw: 27, fs: FS }, oZ = { lw: 28, fs: FS }, ha = karteH(ausst, halb, 'x', oA), hz = karteH(zahlen, halb, 'x', oZ);
       platz(Math.max(ha, hz));
@@ -625,7 +625,22 @@ window.Blatt = (() => {
 
     if (wins.length) position(wins[0], 0);
     else { font('normal', 10, GREY); txt('Noch kein Fenster erfasst.', M, y + 6); y += 12; }
-    if (klAlle.length) { const hk2 = karteH(klAlle, CW, klTitel, oKl); platz(hk2); karte(M, y, CW, klTitel, klAlle, oKl); y += hk2 + 4; }
+    /* Klärungsliste nach Position 1: passt sie nicht mehr auf diese Seite, aber auf eine neue, dorthin; ist sie länger als eine Seite,
+       wird sie geteilt (nie eine Zeile allein, Titel „Fortsetzung“) */
+    if (klAlle.length) {
+      const frisch = BOTTOM - 19, ganz = karteH(klAlle, CW, klTitel, oKl);
+      let rest = klAlle.slice(), titel = klTitel;
+      if (y + ganz > unten() && (ganz <= frisch || unten() - y < 40)) neueSeite();
+      while (rest.length) {
+        const teil = [];
+        while (rest.length && y + karteH(teil.concat([rest[0]]), CW, titel, oKl) <= unten()) teil.push(rest.shift());
+        if (rest.length === 1 && teil.length > 2) rest.unshift(teil.pop());
+        if (!teil.length) teil.push(rest.shift());
+        const hk2 = karteH(teil, CW, titel, oKl); karte(M, y, CW, titel, teil, oKl); y += hk2 + 4;
+        titel = klTitel + ', Fortsetzung';
+        if (rest.length) neueSeite();
+      }
+    }
     /* Lange Nachricht: auf Seite 1 gekürzt, hier vollständig */
     if (nachrichtLang) { const rows = [[sie ? 'Nachricht des Kunden' : 'Deine Nachricht', '„' + pr.notiz + '“']], oM = { lw: 26, fs: FS, bg: '#fffbe8', rand: '#f2e2a4' }, hM = karteH(rows, CW, '', oM); platz(hM); karte(M, y, CW, '', rows, oM); y += hM + 4; }
     /* Seite 2 gibt es immer (unten steht die Box für Fensterbauer); passt der Überblick noch darüber, steht er dort */

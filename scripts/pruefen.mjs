@@ -2685,6 +2685,69 @@ if (teil(16)) {
   sauber(p16, 'Klärungsliste im Betriebsbereich ohne Fehler');
   await ctxP.close();
 
+  /* i) Aus der Durchsicht: nichts entscheidet still eine Vorgabe, Rückwege bleiben sicher, lange Listen passen ins PDF */
+  const kl = (wins, p) => AW16.klaerung(wins, p || {}).map((r) => r.k + ': ' + r.v).join('\n');
+  ok(AW16.uwZiel(AW16.mk({ art: 'hst', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, offen: { schwelle: true } }), pB).wert === 0.95 && !/Glas für|3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa', gebaeude: 'denkmal' })) && /schafft praktisch nur 3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa' })), 'Förderung: offene Schwelle zählt nicht als barrierearm; im Baudenkmal (Uw 1,4) kein Hinweis, dass nur 3-fach-Glas reicht');
+  ok(/Absturzsicherung nötig \(OG, bodentief\)/.test(kl([AW16.mk({ etage: 'og', bru: 0 })])) && /Absturzsicherung nötig \(DG, bodentief laut Foto\)/.test(kl([AW16.mk({ etage: 'dg', bru: '', ki: { fach: { bruestung: 'bodentief' } } })])) && /Fensterbank außen laut Foto aus Faserzement: vor dem Ausbau auf Asbest prüfen/.test(kl([AW16.mk({ ki: { fach: { fba: 'faserzement' } } })])) && !/Lüftung/.test(kl([AW16.mk({ anzahl: 4 })], {})) && AW16.klaerKurz([AW16.mk({ ki: { fach: { fbi: 'faserzement' } } })], {}).join() === 'Asbest prüfen (Pos. 1)', 'Klärungsliste: Brüstung 0 heißt bodentief, „laut Foto“ nur ohne Maß; Faserzement-Fensterbank als Asbest-Prüfpunkt; ohne Zahl der Fenster im Haus kein Lüftungskonzept');
+  const ctxD = await browser.newContext(telefon), d16 = await neueSeite(ctxD);
+  await d16.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; const w = Object.assign(baseWin(), { name: 'Bad', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { spross: true } }); w.bars = presetBars('kreuz', w.sashes.length); w.preset = 'kreuz'; S.win = w; S.q = 'breite'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
+  await d16.click('.qpanel [data-act="setw"][data-f="breite"][data-v="18"]'); await d16.waitForTimeout(150);
+  const br = await d16.evaluate(() => ({ offen: !!S.win.offen.spross, breite: S.win.breite, zeile: specRows(S.win).find((r) => r.k === 'Sprossen').v }));
+  await d16.evaluate(() => { S.q = 'fa'; S.win.offen = Object.assign({}, S.win.offen, { fa: true }); render(true); }); await d16.waitForTimeout(200);
+  await d16.click('.qoffen[data-f="fa"]'); await d16.waitForTimeout(150);
+  const radio = await d16.evaluate(() => ({ offen: !!S.win.offen.fa, knopf: document.querySelector('.qoffen[data-f="fa"]').getAttribute('aria-pressed') }));
+  await d16.click('#t-wunschA'); await d16.keyboard.type('RAL 3004'); await d16.waitForTimeout(150);
+  const getippt = await d16.evaluate(() => !!S.win.offen.fa);
+  await d16.click('[data-act="farbe-weg"][data-f="wunschA"]'); await d16.waitForTimeout(200);
+  const geloescht = await d16.evaluate(() => ({ offen: !!S.win.offen.fa, wunsch: S.win.wunschA, zeile: specRows(S.win).find((r) => r.k === 'Farbe').v }));
+  await d16.click('.qpanel .qsw[data-v="9016"]'); await d16.click('#t-wunschA'); await d16.keyboard.type('RAL 3004'); await d16.click('[data-act="farbe-weg"][data-f="wunschA"]'); await d16.waitForTimeout(200);
+  const nachListe = await d16.evaluate(() => ({ offen: !!S.win.offen.fa, fa: S.win.fa }));
+  await d16.evaluate(() => { S.q = 'glasfn'; S.win.offen = Object.assign({}, S.win.offen, { glasfn: true }); render(true); }); await d16.waitForTimeout(150);
+  await d16.click('.qoffen[data-f="glasfn"]'); await d16.waitForTimeout(150);
+  const keineExtras = await d16.evaluate(() => !S.win.offen.glasfn && S.win.glasfn.length === 0);
+  ok(br.offen && br.breite === 18 && /offen, bitte beraten, 18 mm/.test(br.zeile) && radio.offen && radio.knopf === 'true' && !getippt && geloescht.offen && geloescht.wunsch === '' && /außen offen, bitte beraten/.test(geloescht.zeile) && !nachListe.offen && nachListe.fa === '9016' && keineExtras, 'Nichts entscheidet still: die Sprossenbreite lässt die Sprossenart offen; „Weiß ich noch nicht“ erneut antippen bleibt offen (nur Glas-Extras: aus heißt keine); eine getippte und wieder gelöschte Farbe ist wieder offen, nach einer Farbe aus der Liste nicht');
+  await d16.evaluate((MO) => { const w = Object.assign(baseWin(), { name: 'Kind', etage: 'og', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(200);
+  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="10"]'); await d16.waitForTimeout(150);
+  const lage16 = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru') }));
+  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.waitForTimeout(150);
+  const lage16b = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru'), frage: qList(S.win).some((q) => q.id === 'absturz') }));
+  await d16.evaluate(() => { S.win.bru = 0; S.q = 'absturz'; render(true); }); await d16.waitForTimeout(150);
+  const sub0 = await d16.evaluate(() => document.querySelector('.hd').textContent);
+  ok(lage16.bru === 860 && lage16.feld && lage16b.bru === 840 && lage16b.feld && lage16b.frage && /Bodentief im OG: Unter 80 cm \(ab 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: das Feld für die Brüstung bleibt beim Antippen stehen und beginnt bei einem üblichen Maß (850 mm); 0 mm heißt bodentief, nicht „laut Foto“; Regel 80 cm, ab 12 m 90 cm');
+  /* Gestaltung: nichts vorgewählt bei gleichen Vorgaben; „Doch neu gestalten“ nach dem Speichern nimmt keine gespeicherten Änderungen zurück */
+  await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; S.angelegt = 0; const a = Object.assign(baseWin(), { name: 'Flur', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = a; saveWin(); const b = Object.assign(baseWin(), { name: 'Gast', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = b; S.editIdx = -1; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
+  const vorgewaehlt = await d16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean).join() }));
+  await d16.evaluate((MO) => { const c = Object.assign(baseWin(), { name: 'Arbeit', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, fa: '9016', sart: 'raffstore', sfarbe: 'anthrazit' }); c.wid = 'wc'; c.t0 = zeit(); S.windows.push(c); S.win = kopie(S.windows[0]); S.editIdx = 0; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(200);
+  await d16.click('.qpanel [data-act="design"][data-v="1"]'); await d16.waitForTimeout(150);
+  await d16.evaluate(() => { S.win.insekt = 'spann'; saveWin(); S.win = kopie(S.windows[0]); S.editIdx = 0; S.q = 'design'; S.screen = 'frage'; render(true); }); await d16.waitForTimeout(200);
+  const nachSpeichern = await d16.evaluate(() => ({ chip: !!document.querySelector('[data-act="design-weg"]'), vorher: S.designVorher }));
+  await d16.evaluate(() => act('design-weg', document.body)); await d16.waitForTimeout(150);
+  const behalten = await d16.evaluate(() => ({ insekt: S.win.insekt, sart: S.win.sart, offenFa: !!S.win.offen.fa }));
+  ok(vorgewaehlt.gedrueckt === 0 && vorgewaehlt.nav === 'Weiter' && !nachSpeichern.chip && nachSpeichern.vorher === null && behalten.insekt === 'spann' && behalten.sart === 'raffstore' && !behalten.offenFa, 'Gestaltung übernehmen: gleiche Vorgaben zweier Fenster zählen nicht als übernommen (nichts gedrückt, „Weiter“); nach dem Speichern gibt es kein „Doch neu gestalten“ mehr, gespeicherte Änderungen bleiben');
+  /* Offene Angaben auch in Karten, Übersicht und Betrieb; Fenster im Haus ohne Vorgabe */
+  const karten16 = await d16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Bad', offen: { material: true, glas: true, insekt: true } }); return { win: winCard(w, 0, false), check: checkCard(w, 0), proj: PROJ0.total }; });
+  await d16.evaluate(() => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0); go('anfrage'); }); await d16.waitForTimeout(150);
+  const anfr = await d16.evaluate(() => ({ note: !!document.querySelector('.note.warn'), feld: document.getElementById('p-total').value, ph: document.getElementById('p-total').placeholder }));
+  ok(/Glas offen/.test(karten16.win) && /Material offen/.test(karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zeigen offenes Glas und Material als offen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
+  /* PDF: eine lange Klärungsliste wird über die Seiten geteilt, nichts fällt weg; offene Angaben in der Übersicht */
+  const b64L = await d16.evaluate(async () => {
+    const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
+    S.windows = a; S.proj = Object.assign({}, PROJ0, { name: 'Familie Lang', total: 24, foerdweg: 'offen' }); S.kauf = { paid: true, mail: 'test@beispiel.de' };
+    await blattSchrift(); const blob = await blattPDF('fensterbauer'); const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s);
+  });
+  const pdfL = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung-lang.pdf'); fs16.writeFileSync(pdfL, Buffer.from(b64L, 'base64'));
+  const txtL = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', pdfL, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  const zaehle = (re) => (txtL.match(re) || []).length, absturzZeilen = zaehle(/Absturzsicherung nötig \(OG, Brüstung 500 mm\)/g), rcZeilen = zaehle(/Die Polizei empfiehlt RC2\./g), stromZeilen = zaehle(/Elektrischer Antrieb gewünscht/g);
+  ok(absturzZeilen === 20 && rcZeilen === 20 && stromZeilen === 20 && /Alle Positionen\s+[^\n]*Insektenschutz: offen, bitte beraten/.test(txtL) && /MIT DEM KUNDEN ZU KLÄREN, FORTSETZUNG/.test(txtL) && /Insektenschutz\s+offen/.test(txtL), 'PDF mit 20 Positionen: die lange Klärungsliste geht mit „Fortsetzung“ über die Seiten, alle Absturz-, RC2- und Strom-Zeilen und die offenen Wünsche stehen darin; die Übersicht zeigt offene Angaben als offen (' + absturzZeilen + ' / ' + rcZeilen + ' / ' + stromZeilen + ')');
+  sauber(d16, 'Nachbesserungen aus der Durchsicht ohne Fehler');
+  await ctxD.close();
+  const ctxQ = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' }), q16 = await neueSeite(ctxQ);
+  await q16.goto(BASE + '/', { waitUntil: 'networkidle' }); await betrieb(q16, 'c1'); await q16.waitForTimeout(300);
+  const pos16 = await q16.evaluate(() => { const w = AW.mk({ name: 'Bad', offen: { material: true } }); return posCard(w, 0, null, false, {}); });
+  ok(/Material offen/.test(pos16) && !/Kunststoff ·/.test(pos16), 'Betriebsbereich: offenes Material steht in der Kopfzeile der Position als offen');
+  sauber(q16, 'Betriebsbereich Positionen ohne Fehler'); await ctxQ.close();
+
   /* h) Gestaltung der neuen Schritte: nur die Schriftgrößen der App, Ziele ab 44 px, kein Querscrollen, hell und dunkel */
   const messen16 = (seite) => seite.evaluate(() => {
     const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
