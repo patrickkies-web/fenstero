@@ -76,14 +76,23 @@ export const zufall = (n) => b64url(crypto.getRandomValues(new Uint8Array(n || 1
 /* Bremse je IP-Adresse, nur im Arbeitsspeicher dieser Instanz */
 const zaehler = new Map();
 export function erlaubt(schluessel, max, fensterMs) {
-  const jetzt = Date.now(), liste = (zaehler.get(schluessel) || []).filter((t) => jetzt - t < fensterMs);
-  if (liste.length >= max) { zaehler.set(schluessel, liste); return false; }
-  liste.push(jetzt); zaehler.set(schluessel, liste); if (zaehler.size > 5000) zaehler.clear(); return true;
+  const jetzt = Date.now(), e = zaehler.get(schluessel), liste = (e ? e.t : []).filter((t) => jetzt - t < fensterMs);
+  zaehler.delete(schluessel); // neu einreihen: vorn stehen dann die am längsten ruhenden Schlüssel
+  if (liste.length >= max) { zaehler.set(schluessel, { t: liste, f: fensterMs }); return false; }
+  liste.push(jetzt); zaehler.set(schluessel, { t: liste, f: fensterMs });
+  if (zaehler.size > 5000) zaehlerKuerzen(zaehler, jetzt, schluessel);
+  return true;
+}
+/* Zu viele Schlüssel: erst die abgelaufenen weg, dann die am längsten ruhenden bis auf 4000, nie alle (sonst ließe sich jede Bremse
+   mit vielen Anfragen zurücksetzen). Die Schlüssel sind Anschlüsse (IPv6 je /64), viele davon hat nur, wer ohnehin viele Adressen hat. */
+export function zaehlerKuerzen(m, jetzt, ausser) {
+  for (const [k, v] of m) if (k !== ausser && !v.t.some((t) => jetzt - t < v.f)) m.delete(k);
+  for (const k of m.keys()) { if (m.size <= 4000) break; if (k !== ausser) m.delete(k); }
 }
 /* Nur nachsehen, ob eine Bremse schon voll ist (zählt nichts); gezählt wird dann mit erlaubt(), etwa nur bei Fehlversuchen */
 export function voll(schluessel, max, fensterMs) {
   const jetzt = Date.now();
-  return (zaehler.get(schluessel) || []).filter((t) => jetzt - t < fensterMs).length >= max;
+  return ((zaehler.get(schluessel) || {}).t || []).filter((t) => jetzt - t < fensterMs).length >= max;
 }
 /* Kundenlinks ohne Anmeldung (der Code ist der Schlüssel): je Anschluss höchstens 240 Anfragen und 30 unbekannte Codes in
    10 Minuten, damit niemand Codes durchprobiert */
@@ -94,6 +103,8 @@ export function linkBremse(request) {
 }
 export function linkUnbekannt(request, text) { erlaubt('lk404:' + anschluss(ip(request)), 30, ZEHN_MIN); return new ApiFehler(text || 'Diesen Link gibt es nicht.', 404); }
 export const ip = (request) => request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || 'unbekannt';
+/* Für Bremsen: der Anschluss statt der einzelnen Adresse (IPv6 je /64), sonst brächte jede neue Adresse aus demselben Netz frische Versuche */
+export const quelle = (request) => anschluss(ip(request));
 /* Gekürzte IP-Adresse fürs Protokoll der Zentrale: IPv4 auf /24, IPv6 auf /48 (der Anschluss ist so nicht mehr bestimmbar) */
 export function netzKurz(adresse) {
   const a = String(adresse || '').split(',')[0].trim().replace(/^::ffff:(\d{1,3}(\.\d{1,3}){3})$/i, '$1');

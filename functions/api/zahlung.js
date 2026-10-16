@@ -1,7 +1,7 @@
 /* eeziframes · Das Aufmaßblatt des Hauseigentümers kaufen (7,99 €): Kasse bei Stripe, Prüfung nach der Rückkehr, Freischalt-Nachweis, Webhook.
    Der Nachweis ist eine Unterschrift (HMAC) über Kennung des Projekts und Stripe-Sitzung; die App erzeugt PDF und Code nur mit gültigem Nachweis.
    Ohne Datenbank funktioniert der Kauf trotzdem (Stripe ist das Buch); mit Datenbank wird jede Zahlung zusätzlich festgehalten. */
-import { ApiFehler, hmac, b64url, erlaubt, ip } from './umgebung.js';
+import { ApiFehler, hmac, b64url, erlaubt, quelle } from './umgebung.js';
 import { webhookEcht } from './stripe.js';
 import { stripeEreignis } from './konten.js';
 
@@ -11,7 +11,7 @@ export async function nachweis(k, kennung, session) { return b64url(await hmac(k
 
 export const ZAHLUNG = {
   'POST /api/zahlung/start': async (ctx) => {
-    if (!erlaubt('kasse:' + ip(ctx.request), 20, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte gleich noch einmal.', 429);
+    if (!erlaubt('kasse:' + quelle(ctx.request), 20, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte gleich noch einmal.', 429);
     const b = ctx.body || {}, mail = str(b.mail, 120).toLowerCase(), kennung = str(b.kennung, 40);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) throw new ApiFehler('Bitte eine gültige E-Mail-Adresse eingeben.');
     if (!kennungOk(kennung)) throw new ApiFehler('Kennung des Projekts fehlt.');

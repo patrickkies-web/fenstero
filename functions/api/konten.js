@@ -2,8 +2,8 @@
    Die Regeln (Zählung, Buchung, Nachbesserung) stehen in web/assets/modell.js und sind dieselben wie im Browser; hier führt sie der Server aus,
    deshalb kann ein Browser sie nicht umgehen. Das Konto eines Betriebs ist ein JSON-Dokument (siehe speicher.js). */
 import '../../web/assets/modell.js';
-import { ApiFehler, erlaubt, ip, linkBremse, linkUnbekannt } from './umgebung.js';
-import { GRENZEN, zuText } from './entwurf.js';
+import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt } from './umgebung.js';
+import { GRENZEN, zuText, langerCode, kennung, ohneBild, metaMischen } from './entwurf.js';
 import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
 
 const X = () => globalThis.Abrechnung;
@@ -111,21 +111,21 @@ async function aboUebernehmen(sp, zd, row, r) {
 export const KONTO = {
   /* --- Anmeldung --- */
   'POST /api/konto/anmelden': async (ctx) => {
-    if (!erlaubt('otp:' + ip(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
+    if (!erlaubt('otp:' + quelle(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const r = await codeSenden(ctx.k, ctx.sp, ctx.body.mail, zurueck(ctx));
     zaehlen(ctx, 'ereignis:anmeldecode');
     return r;
   },
   /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… auf die Startseite, portal.js schickt beides her */
   'POST /api/konto/sitzung': async (ctx) => {
-    if (!erlaubt('otpv:' + ip(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
+    if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const b = ctx.body || {}, token = str(b.token, 4000), refresh = str(b.refresh, 400);
     const n = await nutzer(ctx.k, token); if (!n) throw new ApiFehler('Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.', 401);
     const frisch = await anmeldungFertig(ctx, n.id);
     return { ok: true, token: token, refresh: refresh, mail: n.mail, konto: frisch ? sicht(frisch) : null };
   },
   'POST /api/konto/bestaetigen': async (ctx) => {
-    if (!erlaubt('otpv:' + ip(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
+    if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const s = await codePruefen(ctx.k, ctx.sp, ctx.body.mail, ctx.body.code);
     const frisch = await anmeldungFertig(ctx, s.nutzer.id);
     return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail, konto: frisch ? sicht(frisch) : null };
@@ -251,20 +251,38 @@ export const KONTO = {
   },
   'POST /api/aufmass': async (ctx) => {
     const o = ctx.body || {}; if (!o || !Array.isArray(o.w) || !o.b) throw new ApiFehler('Kein Aufmaß im Versand.');
-    if (!erlaubt('am:' + ip(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
+    if (!erlaubt('am:' + quelle(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
     const code = str(o.b, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw new ApiFehler('Dieser Link gehört zu keinem Projekt mehr.', 404);
     if (sperreVon(row)) throw new ApiFehler(LINK_RUHT, 404);
     /* Abgelaufene oder deaktivierte Links nehmen nichts mehr an (der Betrieb kann verlängern); höchstens 50 Fenster je Aufmaß */
     const zu = X().linkZu((row.daten.links || []).find((x) => x.code === code));
     if (zu === 'abgelaufen' || zu === 'deaktiviert') throw new ApiFehler(zuText(zu, row.name), 410, { zu: zu });
     if (o.w.length > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster.', 400);
+    /* Kennungen und Zähler der Fenster (wm, gleiche Reihenfolge wie w) gehören nicht ins Aufmaß des Betriebs; mit ihnen prüft der
+       Server die Grenze gegen den Zwischenstand und hält ihn auf dem gesendeten Stand (für eine spätere Nachbesserung auf einem
+       anderen Gerät) */
+    const wm = Array.isArray(o.wm) && o.wm.length === o.w.length ? o.wm.map((x) => ({ wid: kennung(x), t0: Number(x && x.t0) || 0, aend: Number(x && x.aend) || 0, ts: Number(x && x.ts) || 0 })) : null, standB = Number(o.stand) || 0;
+    delete o.wm; delete o.stand;
+    const zw = wm && langerCode(code) && ctx.sp.entwurfHolen ? await ctx.sp.entwurfHolen(code).catch(() => undefined) : undefined;
+    if (zw && wm) { const ids = new Set(Object.keys((zw.meta || {}).fenster || {})); wm.forEach((x) => { if (x.wid) ids.add(x.wid); }); if (Math.max(ids.size, Number((zw.meta || {}).angelegt) || 0) > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster, gelöschte zählen mit.', 400); }
     o.v = 1; o.b = code;
     const r = await ctx.sp.betriebAendern(row.id, (a) => { const t = X().tickKonto(a); t.notifs.forEach((n) => melden(a, n)); const res = X().importCode(a, o, undefined, 'App'); if (res.notif) melden(a, res.notif); return res; });
     if (!r.ok) throw new ApiFehler(r.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : r.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400);
     const nb = r.art === 'nb' || r.art === 'nb-neu';
     zaehlen(ctx, nb ? 'ereignis:nachbesserung' : 'ereignis:aufmass_gesendet');
-    /* Zwischenstand als gesendet vermerken (für die Zentrale und das Aufräumen); fehlt die Tabelle, ist das egal */
-    if (ctx.sp.entwurfAendern) ctx.waitUntil(ctx.sp.entwurfAendern(code, row.id, (e) => { if (!e.version) return false; e.meta = Object.assign({}, e.meta || {}, { gesendet: r.l ? r.l.runde || 1 : 1, gesendetAm: new Date().toISOString() }); return true; }).catch(() => false));
+    /* Zwischenstand als gesendet vermerken (für die Zentrale und das Aufräumen) und auf den gesendeten Stand bringen, außer bei einer
+       Teil-Nachbesserung (m); fehlt die Tabelle, ist das egal */
+    if (ctx.sp.entwurfAendern && langerCode(code)) ctx.waitUntil(ctx.sp.entwurfAendern(code, row.id, (e) => {
+      if (!e.version && !wm) return false;
+      if (wm && !o.m) {
+        /* Inhalt nur ersetzen, wenn der Zwischenstand älter ist als der gesendete (die App gleicht vorher ab; neuer ist er nur, wenn ein
+           anderes Gerät danach weitergemacht hat) */
+        if ((Number(e.stand) || 0) < standB || !((e.daten || {}).windows || []).length) { e.daten = { windows: o.w.map((w, i) => Object.assign(ohneBild(w), wm[i])), proj: o.p || {} }; e.stand = Math.max(Number(e.stand) || 0, standB); }
+        e.meta = metaMischen(e.meta || {}, wm, 0, Date.now());
+      }
+      e.meta = Object.assign({}, e.meta || {}, { gesendet: r.l ? r.l.runde || 1 : 1, gesendetAm: new Date().toISOString() });
+      return true;
+    }).catch(() => false));
     return { ok: true, betrieb: row.name, runde: r.l ? r.l.runde || 1 : 1, nachbesserung: nb };
   }
 };

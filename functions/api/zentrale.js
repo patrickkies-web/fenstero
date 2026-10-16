@@ -21,6 +21,7 @@ import '../../web/assets/modell.js';
 import { ApiFehler, hmac, b64url, erlaubt, ip, netzKurz, anschluss, gleich, zufall } from './umgebung.js';
 import { anmeldungLoeschen, anmeldungLesen, anmeldungenAlle } from './auth.js';
 import { melden, abrechnungslauf, sicht } from './konten.js';
+import { kennung } from './entwurf.js';
 import { auswerten, tagBerlin, browserName, systemName, zaehlen } from './statistik.js';
 
 const X = () => globalThis.Abrechnung;
@@ -496,7 +497,7 @@ export const ZENTRALE = {
    Anmeldungen ohne Betrieb nach 30 Tagen ohne Nutzung. Schlägt etwas fehl, wird nichts gelöscht und beim nächsten Lauf neu versucht. */
 export async function aufraeumen(k, sp) {
   if (!sp) return { ok: false };
-  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, anmeldungen: 0, entwuerfe: 0 };
+  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, anmeldungen: 0, entwuerfe: 0, entwuerfeGeleert: 0 };
   try { out.protokoll = await sp.protokollAufraeumen(new Date(jetzt - 90 * TAG).toISOString(), new Date(jetzt - 3 * 365 * TAG).toISOString()); } catch (e) { out.ok = false; }
   try { out.kassen = await sp.zahlungenAufraeumen(new Date(jetzt - 30 * TAG).toISOString()); } catch (e) { out.ok = false; }
   if (k.supabase) {
@@ -513,24 +514,29 @@ export async function aufraeumen(k, sp) {
       }
     } catch (e) { out.ok = false; }
   }
-  /* Zwischenstände der Kundenlinks (entwurf.js): weg, wenn Betrieb oder Link weg sind; wenn der Link abgelaufen oder deaktiviert
-     ist (30 Tage nach der letzten Änderung, so kann der Betrieb noch verlängern); wenn das Aufmaß eingegangen ist und keine
-     Nachbesserung mehr möglich ist (30 Tage nach dem Eingang oder alle Runden genutzt); spätestens nach 180 Tagen ohne Änderung.
-     Höchstens 200 je Lauf. */
+  /* Zwischenstände der Kundenlinks (entwurf.js), höchstens 200 je Lauf:
+     - ganz weg, wenn Betrieb oder Link weg sind oder das Aufmaß eingegangen ist und keine Nachbesserung mehr geht (alle Runden
+       genutzt oder 30 Tage nach dem Eingang)
+     - nur der Inhalt weg (Fenster, Angaben), die Zähler gegen Mehrfachnutzung bleiben, solange der Link besteht: 30 Tage nach dem Ablauf
+       oder der Deaktivierung des Links, und nach 180 Tagen ohne Änderung. So setzt „ablaufen lassen und verlängern“ keine Grenze zurück.
+       Verlängert der Betrieb den Link danach, stellt das Gerät des Kunden seine Fenster wieder her (meta.geleertIds, entwurf.js). */
   try {
     const liste = await sp.entwuerfeAlle();
     if (Array.isArray(liste) && liste.length) {
       const byId = new Map(((await sp.betriebeAlle()) || []).map((r) => [r.id, r]));
       for (const e of liste) {
-        if (out.entwuerfe >= 200) break;
-        const row = byId.get(e.betrieb), l = row ? ((row.daten || {}).links || []).find((x) => x.code === e.code) : null, still = jetzt - (Date.parse(e.updated_at || '') || jetzt);
-        let weg = !row || !l || still > 180 * TAG;
-        if (!weg) {
-          const zu = X().linkZu(l, jetzt), ein = Number(l.eingegangenAt) || 0;
-          if ((zu === 'abgelaufen' || zu === 'deaktiviert') && still > 30 * TAG) weg = true;
-          if (zu === 'eingegangen' && ((l.runde || 1) > X().NB_MAX || (ein && jetzt - ein > X().NB_TAGE * TAG))) weg = true;
+        if (out.entwuerfe + out.entwuerfeGeleert >= 200) break;
+        let row = byId.get(e.betrieb);
+        if (!row) { row = await sp.betriebHolen(e.betrieb).catch(() => null); if (row) byId.set(row.id, row); } // die Liste kann gekürzt sein
+        const l = row ? ((row.daten || {}).links || []).find((x) => x.code === e.code) : null, still = jetzt - (Date.parse(e.updated_at || '') || jetzt);
+        if (!row || !l) { if (await sp.entwurfLoeschen(e.code)) out.entwuerfe++; continue; }
+        const zu = X().linkZu(l, jetzt), ein = Number(l.eingegangenAt) || 0;
+        if (zu === 'eingegangen' && ((l.runde || 1) > X().NB_MAX || (ein && jetzt - ein > X().NB_TAGE * TAG))) { if (await sp.entwurfLoeschen(e.code)) out.entwuerfe++; continue; }
+        const ablauf = X().parseDE(l.expires), seitZu = zu === 'abgelaufen' && ablauf ? jetzt - ablauf.getTime() : zu === 'deaktiviert' ? (l.deaktiviertAm ? jetzt - l.deaktiviertAm : still) : 0;
+        if (seitZu > 30 * TAG || still > 180 * TAG) {
+          const r = await sp.entwurfAendern(e.code, e.betrieb, (x) => { const d = x.daten || {}; if (!(d.windows || []).length && !Object.keys(d.proj || {}).length) return false; const ids = (d.windows || []).map(kennung).filter(Boolean).slice(0, 60); x.daten = { windows: [], proj: {} }; x.meta = Object.assign({}, x.meta || {}, { geleert: new Date().toISOString(), geleertIds: ids }); return true; }).catch(() => null);
+          if (r && r.out) out.entwuerfeGeleert++;
         }
-        if (weg && (await sp.entwurfLoeschen(e.code))) out.entwuerfe++;
       }
     }
   } catch (e) { out.ok = false; }

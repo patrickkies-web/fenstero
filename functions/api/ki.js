@@ -13,11 +13,12 @@
    Optional: KI_MODELL (Standard claude-sonnet-5-5; früherer Name KI_MODELL_GENAU gilt weiter).
    Ohne Schlüssel meldet GET „nicht bereit“, und die App läuft ohne KI weiter. */
 
+import { erlaubt as bremse, quelle } from './umgebung.js';
+
 const MODELL = 'claude-sonnet-5-5';
 const MAX_BILD = 3000000;            // Zeichen Base64, etwa 2,2 MB Bild (die App schickt meist unter 0,7 MB)
-const FENSTER_MS = 10 * 60 * 1000;   // Bremse gegen Missbrauch: höchstens 40 Anfragen je 10 Minuten und IP-Adresse
-const MAX_ANFRAGEN = 40;
-const zaehler = new Map();           // nur im Arbeitsspeicher dieser Instanz, wird nirgends gespeichert
+const FENSTER_MS = 10 * 60 * 1000;   // Bremse gegen Missbrauch: höchstens 40 Anfragen je 10 Minuten und Anschluss (IPv6 je /64)
+const MAX_ANFRAGEN = 40;             // gezählt nur im Arbeitsspeicher dieser Instanz (umgebung.js), wird nirgends gespeichert
 
 /* Die Aufträge liegen nur hier auf dem Server, damit /api/ki ausschließlich Fotos fürs Aufmaß auswertet
    und nicht als offener KI-Zugang taugt. Reihenfolge der Punkte = Wichtigkeit für den Fensterbauer. */
@@ -118,15 +119,6 @@ function antwort(obj, status) {
   });
 }
 
-function erlaubt(ip) {
-  const jetzt = Date.now();
-  const liste = (zaehler.get(ip) || []).filter((t) => jetzt - t < FENSTER_MS);
-  if (liste.length >= MAX_ANFRAGEN) { zaehler.set(ip, liste); return false; }
-  liste.push(jetzt);
-  zaehler.set(ip, liste);
-  if (zaehler.size > 5000) zaehler.clear();
-  return true;
-}
 
 function jsonAusText(text) {
   const a = text.indexOf('{'), b = text.lastIndexOf('}');
@@ -143,7 +135,7 @@ export async function onRequestPost({ request, env }) {
   const url = new URL(request.url);
   /* nur Anfragen von der eigenen Seite */
   if (request.headers.get('Origin') !== url.origin) return antwort({ ok: false, fehler: 'forbidden' }, 403);
-  if (!erlaubt(request.headers.get('CF-Connecting-IP') || 'unbekannt')) return antwort({ ok: false, fehler: 'rate_limited' }, 429);
+  if (!bremse('ki:' + quelle(request), MAX_ANFRAGEN, FENSTER_MS)) return antwort({ ok: false, fehler: 'rate_limited' }, 429);
 
   /* „fakten“ ist der frühere Name von „einbau“ (ältere geöffnete Seiten); „struktur“ gibt es nicht mehr */
   let aufgabe = url.searchParams.get('aufgabe');

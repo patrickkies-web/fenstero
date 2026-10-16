@@ -325,7 +325,7 @@
       if (!l) return { ok: false, msg: 'Projekt nicht gefunden.' };
       if (p.gesendet && l.status === 'erstellt') { l.status = 'gesendet'; l.via = String(p.via || 'Link').slice(0, 30); l.log = l.log || {}; l.log.gesendet = stamp(now); }
       if (p.du !== undefined) { l.du = !!p.du; l.msg = ''; }
-      if (p.days && [7, 14, 30].includes(+p.days)) { l.days = +p.days; l.expires = dateIn(+p.days, now); }
+      if (p.days && [7, 14, 30].includes(+p.days)) { l.days = +p.days; const bis = dateIn(+p.days, now); if (!l.offenAm || spaeter(bis, l.expires)) l.expires = bis; } // geöffnet: die 60 Tage nie verkürzen
       if (p.verlaengern) {
         if (!['abgelaufen', 'erstellt', 'gesendet', 'geoeffnet', 'arbeit'].includes(l.status)) return { ok: false, msg: 'Dieser Link lässt sich nicht verlängern.' };
         l.expires = dateIn(VERLAENGERN_TAGE, now); l.log = l.log || {};
@@ -337,7 +337,7 @@
       if (p.memo !== undefined) l.memo = String(p.memo).slice(0, 600);
       if (p.msg !== undefined) l.msg = String(p.msg).slice(0, 1500);
       if (p.seen) l.seen = true;
-      if (p.deaktivieren) { if (l.status === 'eingegangen') return { ok: false, msg: 'Ein eingegangenes Aufmaß bleibt im Projekt und in der Abrechnung' }; l.status = 'deaktiviert'; }
+      if (p.deaktivieren) { if (l.status === 'eingegangen') return { ok: false, msg: 'Ein eingegangenes Aufmaß bleibt im Projekt und in der Abrechnung' }; l.status = 'deaktiviert'; l.deaktiviertAm = now || Date.now(); }
       if (p.nb) return nbAnfragen(l, p.nb.hinweis, now);
       if (p.nbZurueck) return nbZurueck(l);
       return { ok: true };
@@ -373,7 +373,7 @@
     /* Fortschritt aus der App (Link geöffnet, misst): ohne Buchung */
     /* Rückgabe: 'geoeffnet' (zum ersten Mal geöffnet), 'arbeit', 'frist' (nur die 60-Tage-Frist gesetzt) oder false */
     function fortschritt(l, stufe, k, now) {
-      if (!l || ['eingegangen', 'deaktiviert', 'abgelaufen'].includes(l.status)) return false;
+      if (!l || ['eingegangen', 'deaktiviert', 'abgelaufen'].includes(l.status) || linkZu(l, now)) return false; // auch abgelaufen, bevor die Zeit angewendet wurde
       l.log = l.log || {};
       let frist = false;
       if (!l.offenAm && (stufe === 'geoeffnet' || stufe === 'arbeit')) { l.offenAm = datum(now); const bis = dateIn(OFFEN_TAGE, now); if (spaeter(bis, l.expires)) l.expires = bis; frist = true; }
