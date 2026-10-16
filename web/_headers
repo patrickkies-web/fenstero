@@ -24,3 +24,8 @@
   ! X-Robots-Tag
 /favicon.svg
   ! X-Robots-Tag
+
+# Abbildungen der Ratgeber dürfen in die Bildersuche (in der Pilotphase sperrt robots.txt ohnehin alles)
+/bilder/*
+  ! X-Robots-Tag
+  Cache-Control: public, max-age=86400

@@ -1213,12 +1213,14 @@ if (teil(10)) {
   for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B3 + '/robots.txt')).ok; } catch (e) { /* noch nicht */ } }
   ok(bereit, 'Testserver mit Freigabe (INDEXIERUNG=1, KANONISCH) läuft: ' + B3);
   const rb = await roh('/robots.txt', B3), sm = await roh('/sitemap.xml', B3), ll = await roh('/llms.txt', B3);
-  ok(/User-agent: \*\nAllow: \/\nDisallow: \/api\//.test(rb.text) && rb.text.includes('Sitemap: ' + KAN + '/sitemap.xml') && ['OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot'].every((b) => rb.text.includes('User-agent: ' + b + '\n')), 'Freigabe: robots.txt erlaubt alles außer /api/, nennt die KI-Suchen und die Sitemap');
+  ok(/User-agent: \*\nContent-Signal: search=yes, ai-input=yes, ai-train=yes\nAllow: \/\nDisallow: \/api\//.test(rb.text) && rb.text.includes('Sitemap: ' + KAN + '/sitemap.xml') && ['OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot'].every((b) => rb.text.includes('User-agent: ' + b + '\n')), 'Freigabe: robots.txt erlaubt alles außer /api/, nennt die KI-Suchen und die Sitemap');
   ok(sm.status === 200 && seo.SEITEN.every((s) => sm.text.includes('<loc>' + KAN + s.pfad + '</loc>')) && (sm.text.match(/<url>/g) || []).length === seo.SEITEN.length, 'Freigabe: sitemap.xml mit allen ' + seo.SEITEN.length + ' Seiten und absoluten Adressen');
   ok(ll.status === 200 && ll.text.startsWith('# eeziframes\n\n> ') && ll.text.includes('(' + KAN + '/ratgeber/fenster-ausmessen/)') && ll.text.includes(eur(7.99)) && !ll.h.get('x-robots-tag'), 'Freigabe: llms.txt mit Kurzfassung, Preisen und absoluten Links');
   const fehlt = [];
   for (const s of seo.SEITEN) { const r = await fetch(B3 + s.pfad); if (r.headers.get('x-robots-tag') || r.headers.get('link') !== '<' + KAN + s.pfad + '>; rel="canonical"' || !r.headers.get('content-security-policy')) fehlt.push(s.pfad); }
   ok(!fehlt.length, 'Freigabe: alle Seiten ohne noindex, mit CSP und Canonical auf die Hauptadresse' + (fehlt.length ? ' (fehlt: ' + fehlt.join(', ') + ')' : ''));
+  const din3 = await roh('/ratgeber/din-links-rechts/', B3), bild3 = await fetch(B3 + '/bilder/din-links-rechts.svg');
+  ok(seo.SEITEN.every((x) => sm.text.includes('<loc>' + KAN + x.pfad + '</loc><lastmod>' + x.stand + '</lastmod>')) && din3.text.includes('"image":"' + KAN + '/bilder/din-links-rechts.svg"') && bild3.status === 200 && !bild3.headers.get('x-robots-tag'), 'Freigabe: lastmod je Seite in der Sitemap, Abbildung im JSON-LD mit voller Adresse und ohne noindex');
   const fb3 = await roh('/fuer-fensterbauer/', B3);
   ok(fb3.text.includes('<meta property="og:image" content="' + KAN + '/og.png">') && fb3.text.includes('"url":"' + KAN + '/fuer-fensterbauer/"'), 'Freigabe: Vorschaubild und strukturierte Daten zeigen auf die Hauptadresse');
   const js3 = await fetch(B3 + '/assets/app.js'), logo3 = await fetch(B3 + '/apple-touch-icon.png'), weg3 = await fetch(B3 + '/ratgeber/gibtsnicht/'), z3 = await fetch(B3 + '/zentrale/');
@@ -1241,14 +1243,73 @@ if (teil(10)) {
   const og = fs10.readFileSync(path10.join(WURZEL, 'web/og.png'));
   ok(og.readUInt32BE(16) === 1200 && og.readUInt32BE(20) === 630 && og.length < 200000, 'Vorschaubild zum Teilen: 1200 × 630, ' + Math.round(og.length / 1024) + ' KB');
   const konf = {}; new Function('window', fs10.readFileSync(path10.join(WURZEL, 'web/config.js'), 'utf8'))(konf);
-  const pr = konf.KONFIG.preise, fb = (await roh('/fuer-fensterbauer/')).text, ab = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
-  ok([eur(pr.projekt) + ' netto', eur(pr.abo.grund) + ' im Monat', 'jedes weitere ' + eur(pr.abo.extra), eur(pr.plus) + ' im Monat', 'ersten ' + pr.frei + ' Projekte'].every((t) => fb.includes(t)) && [start.text, app.text, ab, fb].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten wie in config.js (' + [pr.aufmass, pr.projekt, pr.abo.grund, pr.plus].map(eur).join(', ') + ')');
+  const pr = konf.KONFIG.preise, fb = (await roh('/fuer-fensterbauer/')).text, ab = (await roh('/ratgeber/aufmassblatt-fenster/')).text, fa = (await roh('/ratgeber/fenster-ausmessen/')).text;
+  const neuPreis = await Promise.all(['balkontuer-ausmessen', 'fenster-mit-rollladen-ausmessen', 'din-links-rechts', 'bruestungshoehe-fenster'].map(async (n) => (await roh('/ratgeber/' + n + '/')).text));
+  ok([eur(pr.projekt) + ' netto', eur(pr.abo.grund) + ' im Monat', 'jedes weitere ' + eur(pr.abo.extra), eur(pr.plus) + ' im Monat', 'ersten ' + pr.frei + ' Projekte'].every((t) => fb.includes(t)) && [start.text, app.text, ab, fb, fa, ...neuPreis].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten wie in config.js, auch in den neuen Ratgebern (' + [pr.aufmass, pr.projekt, pr.abo.grund, pr.plus].map(eur).join(', ') + ')');
   /* g) Domains: www zählt als Hauptdomain, die Cloudflare-Testadresse bleibt gesperrt (functions/seo.js direkt geprüft) */
   const probe = async (adresse, env) => { const r = await seo.behandeln(new Request(adresse), env, async () => new Response('<!doctype html><title>x</title><meta property="og:image" content="/og.png">', { headers: { 'content-type': 'text/html; charset=utf-8' } })); return { robots: r.headers.get('x-robots-tag'), link: r.headers.get('link'), text: await r.text() }; };
   const www = await probe('https://www.eeziframes.com/ratgeber/', { INDEXIERUNG: '1' }), wdev = await probe('https://fenstero.beispiel.workers.dev/ratgeber/', { INDEXIERUNG: '1' });
   const rbWww = await (await seo.behandeln(new Request('https://www.eeziframes.com/robots.txt'), { INDEXIERUNG: '1' }, null)).text(), rbDev = await (await seo.behandeln(new Request('https://fenstero.beispiel.workers.dev/robots.txt'), { INDEXIERUNG: '1' }, null)).text();
   ok(!www.robots && www.link === '<https://eeziframes.com/ratgeber/>; rel="canonical"' && www.text.includes('content="https://eeziframes.com/og.png"') && rbWww.includes('Sitemap: https://eeziframes.com/sitemap.xml'), 'Domain: www.eeziframes.com zählt als eeziframes.com (Canonical, Vorschaubild, Sitemap)');
   ok(wdev.robots === seo.SPERRE && /User-agent: \*\nDisallow: \/\n/.test(rbDev), 'Domain: die Cloudflare-Testadresse (…workers.dev) bleibt auch mit Freigabe gesperrt');
+
+  /* h) Ratgeber rund ums Aufmaß: Stand je Seite, Abbildungen, Rechner, IndexNow, llms.txt, Glossar der App */
+  const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  const deutsch = (d) => { const [j, m, t] = d.split('-').map(Number); return t + '. ' + MONATE[m - 1] + ' ' + j; };
+  const standFehler = [];
+  for (const sx of seo.SEITEN.filter((x) => /^\/ratgeber\/.+/.test(x.pfad))) {
+    const t = (await roh(sx.pfad)).text, art = ldjson(t).flatMap((x) => (x && x['@graph']) || []).find((x) => x['@type'] === 'Article');
+    if (!art || art.dateModified !== sx.stand || !t.includes('Stand ' + deutsch(sx.stand)) || !t.includes('Stand: ' + deutsch(sx.stand))) standFehler.push(sx.pfad);
+  }
+  ok(!standFehler.length && seo.SEITEN.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.stand)), 'Jede Ratgeberseite: Stand in der Sitemap = dateModified im JSON-LD = „Stand“ auf der Seite' + (standFehler.length ? ' (abweichend: ' + standFehler.join(', ') + ')' : ''));
+  /* Häufige Fragen: JSON-LD wortgleich mit dem sichtbaren Text (Google verlangt sichtbare Inhalte; KI-Assistenten zitieren beides) */
+  const sichtbar = (h) => h.replace(/\s*<a href="#q\d+">\[\d+\]<\/a>/g, '').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+  const faqFehler = [];
+  let faqZahl = 0;
+  for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer|app)\//.test(x))) {
+    const t = (await roh(pf)).text, fragen = ldjson(t).flatMap((x) => (x && x['@graph']) || [x]).filter((x) => x && x['@type'] === 'FAQPage').flatMap((x) => x.mainEntity || []);
+    const vis = new Map(Array.from(t.matchAll(/<summary>([\s\S]*?)<\/summary><div>([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])]));
+    faqZahl += fragen.length;
+    for (const q of fragen) if (vis.get(q.name) !== (q.acceptedAnswer || {}).text) faqFehler.push(pf + ' „' + q.name + '“');
+  }
+  ok(!faqFehler.length && faqZahl >= 40, 'Häufige Fragen (' + faqZahl + '): Antworten im JSON-LD wortgleich mit den sichtbaren Antworten, nur ohne Belegnummern' + (faqFehler.length ? ' (abweichend: ' + faqFehler.join(', ') + ')' : ''));
+  const neueSeiten = ['/ratgeber/balkontuer-ausmessen/', '/ratgeber/fenster-mit-rollladen-ausmessen/', '/ratgeber/bestellmass-fenster/', '/ratgeber/din-links-rechts/', '/ratgeber/bruestungshoehe-fenster/'];
+  const uebersicht = (await roh('/ratgeber/')).text, ausmessen = (await roh('/ratgeber/fenster-ausmessen/')).text, llAus = seo.llms('https://eeziframes.com', {});
+  ok(neueSeiten.every((u) => seo.SEITEN.some((x) => x.pfad === u) && uebersicht.includes('href="' + u + '"') && ausmessen.includes('href="' + u + '"') && llAus.includes('(https://eeziframes.com' + u + ')')) && /## Kurze Antworten/.test(llAus) && /Balkon- und Terrassentüren/.test(llAus) && /PSK-Türen/.test(llAus), 'Neue Ratgeber (Balkontür, Rollladenkasten, Bestellmaß, DIN links/rechts, Brüstungshöhe): in Sitemap, Übersicht, Anleitung und llms.txt verlinkt; llms.txt mit kurzen Antworten und allen Elementarten');
+  const bildFehler = [];
+  for (const sx of seo.SEITEN.filter((x) => /^\/ratgeber\/.+/.test(x.pfad))) {
+    const t = (await roh(sx.pfad)).text;
+    for (const m of t.matchAll(/<img ([^>]*)>/g)) {
+      const src = (m[1].match(/src="([^"]+)"/) || [])[1], alt = (m[1].match(/alt="([^"]*)"/) || [])[1] || '';
+      const r = src ? await fetch(BASE + src) : null;
+      if (!src || !r || r.status !== 200 || !/image\/svg\+xml/.test(r.headers.get('content-type') || '') || r.headers.get('x-robots-tag') || alt.length < 40 || !/width="\d+" height="\d+"/.test(m[1])) bildFehler.push(sx.pfad + ' ' + src);
+    }
+  }
+  const bildDa = (await Promise.all(neueSeiten.concat(['/ratgeber/fenster-ausmessen/']).map(async (u) => /<figure class="rg-bild"><img /.test((await roh(u)).text)))).every(Boolean);
+  ok(!bildFehler.length && bildDa, 'Abbildungen in den Ratgebern: Datei da (SVG), ohne noindex für die Bildersuche, Breite, Höhe und ein beschreibender Alternativtext' + (bildFehler.length ? ' (' + bildFehler.join(', ') + ')' : ''));
+  const key = await roh('/' + seo.INDEXNOW + '.txt');
+  const aufrufe = [], post = async (u, o) => { aufrufe.push({ u: u, o: o }); return { ok: true, status: 200 }; };
+  const tag = (d, plus) => new Date(Date.parse(d) + plus * 864e5);
+  const ohne = await seo.indexnow({}, post, tag(seo.STAND, 0)), mit = await seo.indexnow({ INDEXIERUNG: '1' }, post, tag(seo.STAND, 1)), spaet = await seo.indexnow({ INDEXIERUNG: '1' }, post, tag(seo.STAND, 5));
+  const body = aufrufe.length === 1 ? JSON.parse(aufrufe[0].o.body) : {}, sollUrls = seo.SEITEN.filter((x) => { const t = (Date.parse(seo.STAND) + 864e5 - Date.parse(x.stand)) / 864e5; return t >= 0 && t <= 2; }).map((x) => 'https://eeziframes.com' + x.pfad);
+  ok(key.status === 200 && key.text.trim() === seo.INDEXNOW && /^[0-9a-f]{32}$/.test(seo.INDEXNOW) && ohne.gemeldet === 0 && spaet.gemeldet === 0 && mit.gemeldet === sollUrls.length && aufrufe.length === 1 && aufrufe[0].u === 'https://api.indexnow.org/indexnow' && body.host === 'eeziframes.com' && body.key === seo.INDEXNOW && body.keyLocation === 'https://eeziframes.com/' + seo.INDEXNOW + '.txt' && JSON.stringify(body.urlList) === JSON.stringify(sollUrls), 'IndexNow: Schlüsseldatei da; gemeldet wird nur mit Freigabe und nur in den zwei Tagen nach einer Änderung, mit den geänderten Seiten (' + sollUrls.length + ')');
+  const bctx = await browser.newContext(telefon), bp = await neueSeite(bctx);
+  await bp.goto(BASE + '/ratgeber/bestellmass-fenster/', { waitUntil: 'networkidle' });
+  const tabelle = await bp.evaluate(() => Array.from(document.querySelectorAll('.rg-tab'))[0].innerText);
+  const rechne = async (b, h, art, an) => { await bp.fill('#rechner input[name="b"]', String(b)); await bp.fill('#rechner input[name="h"]', String(h)); await bp.selectOption('#rechner select[name="art"]', art); await bp.selectOption('#rechner select[name="anschlag"]', an); await bp.waitForTimeout(80); return bp.evaluate(() => document.getElementById('rechner-ergebnis').textContent); };
+  const r1 = await rechne(1230, 1410, 'weiss', 'ohne'), r2 = await rechne(2600, 2200, 'farbig', 'ohne'), r3 = await rechne(1230, 1410, 'weiss', 'mit'), r4 = await rechne(1230, 1410, 'anders', 'ohne'), r5 = await rechne(5000, 1400, 'weiss', 'ohne'), r6 = await rechne(1520, '1.410', 'weiss', 'ohne'), r7 = await rechne('1230,5', '1410 mm', 'weiss', 'ohne');
+  ok(/bis 1,5 m\s+10 mm\s+15 mm/.test(tabelle) && /bis 4,5 m\s+25 mm\s+30 mm/.test(tabelle) && /Bestellmaß etwa 1\.210 × 1\.390 mm/.test(r1) && /Fuge 10 mm links und rechts, 10 mm oben und unten/.test(r1) && /2\.550 × 2\.160 mm/.test(r2) && /Fuge 25 mm links und rechts, 20 mm oben und unten/.test(r2) && /Mauerwerksanschlag/.test(r3) && !/Bestellmaß etwa/.test(r3) && /Holz- und Alufenster/.test(r4) && /Über 4,5 m/.test(r5) && /Bestellmaß etwa 1\.500 × 1\.390 mm/.test(r6) && /Bestellmaß etwa 1\.210 × 1\.390 mm/.test(r7) && /Silikon/.test(r1), 'Rechner für das Bestellmaß: rechnet wie die Tabelle (weiß 1.230 × 1.410 → 1.210 × 1.390, farbig 2.600 × 2.200 → 2.550 × 2.160), nach der Länge des Fensters (1.520 → 1.500), versteht 1.410 und 1230,5, rechnet nicht mit Anschlag, für Holz und Alu oder über 4,5 m');
+  sauber(bp, 'Rechner ohne Fehler und ohne fremde Server'); await bctx.close();
+  const gctx = await browser.newContext(telefon), gp = await neueSeite(gctx);
+  await gp.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await gp.evaluate(() => { S.gloss = 'dinlr'; render(); }); await gp.waitForTimeout(200);
+  const gl1 = await gp.evaluate(() => { const a = document.querySelector('.sheet a[href="/ratgeber/din-links-rechts/"]'); return !!a && a.target === '_blank' && /noopener/.test(a.rel) && a.getBoundingClientRect().height >= 44; });
+  await gp.evaluate(() => { S.betrieb = { name: 'Fensterbau Test', code: 'x' }; S.gloss = 'dinlr'; render(); }); await gp.waitForTimeout(150);
+  const gl2 = await gp.evaluate(() => !document.querySelector('.sheet a[href^="/ratgeber/"]'));
+  await gp.evaluate(() => { S.betrieb = null; S.gloss = 'dk'; render(); }); await gp.waitForTimeout(150);
+  const gl3 = await gp.evaluate(() => !document.querySelector('.sheet a[href^="/ratgeber/"]'));
+  ok(gl1 && gl2 && gl3, 'Glossar der App: „Ausführlich im Ratgeber“ bei passenden Begriffen (neuer Tab, Ziel ab 44 px), nicht im Kundenlink eines Betriebs und nicht bei Begriffen ohne Seite');
+  sauber(gp, 'Glossar mit Ratgeber-Links ohne Fehler'); await gctx.close();
 
 }
 
@@ -2714,7 +2775,7 @@ if (teil(16)) {
   const lage16b = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru'), frage: qList(S.win).some((q) => q.id === 'absturz') }));
   await d16.evaluate(() => { S.win.bru = 0; S.q = 'absturz'; render(true); }); await d16.waitForTimeout(150);
   const sub0 = await d16.evaluate(() => document.querySelector('.hd').textContent);
-  ok(lage16.bru === 860 && lage16.feld && lage16b.bru === 840 && lage16b.feld && lage16b.frage && /Bodentief im OG: Unter 80 cm \(ab 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: das Feld für die Brüstung bleibt beim Antippen stehen und beginnt bei einem üblichen Maß (850 mm); 0 mm heißt bodentief, nicht „laut Foto“; Regel 80 cm, ab 12 m 90 cm');
+  ok(lage16.bru === 860 && lage16.feld && lage16b.bru === 840 && lage16b.feld && lage16b.frage && /Bodentief im OG: Unter 80 cm \(über 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: das Feld für die Brüstung bleibt beim Antippen stehen und beginnt bei einem üblichen Maß (850 mm); 0 mm heißt bodentief, nicht „laut Foto“; Regel 80 cm, ab 12 m 90 cm');
   /* Gestaltung: nichts vorgewählt bei gleichen Vorgaben; „Doch neu gestalten“ nach dem Speichern nimmt keine gespeicherten Änderungen zurück */
   await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; S.angelegt = 0; const a = Object.assign(baseWin(), { name: 'Flur', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = a; saveWin(); const b = Object.assign(baseWin(), { name: 'Gast', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = b; S.editIdx = -1; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
   const vorgewaehlt = await d16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean).join() }));

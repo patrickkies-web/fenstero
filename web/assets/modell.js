@@ -145,8 +145,8 @@
     const montageText = (w) => (istOffen(w, 'montage') ? 'nach Vorschlag des Fensterbauers' : [w.neu ? (w.durchbruch !== false ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung');
     const rcText = (w) => (istOffen(w, 'rc') ? OFFEN_TEXT : lab('rc', w.rc) || 'Basisschutz') + (w.erreichbar === 'ja' ? ' · leicht erreichbar' + (w.rc === 'rc2' ? '' : ', Polizei empfiehlt RC2') : w.erreichbar === 'nein' ? ' · nicht leicht erreichbar' : '');
     /* ---------- Pflichtthemen ----------
-       Absturzsicherung: Fensterbrüstungen müssen nach den Landesbauordnungen (§ 38 MBO) mindestens 0,80 m hoch sein, ab 12 m Absturzhöhe
-       0,90 m; darunter, bei bodentiefen Fenstern und bei Türen ohne Balkon davor braucht es eine Absturzsicherung. Gefragt wird im OG und DG
+       Absturzsicherung: Fensterbrüstungen müssen nach der Musterbauordnung (§ 38 MBO, von den meisten Ländern übernommen) mindestens 0,80 m hoch
+       sein, bei mehr als 12 m Absturzhöhe 0,90 m; darunter, bei bodentiefen Fenstern und bei Türen ohne Balkon davor braucht es eine Absturzsicherung. Gefragt wird im OG und DG
        ab einer Brüstung unter 900 mm (die Absturzhöhe kennt die App nicht); ohne gemessene Brüstung, wenn das Innenfoto eine bodentiefe oder
        niedrige zeigt. */
     const ABSTURZ_MM = 900;

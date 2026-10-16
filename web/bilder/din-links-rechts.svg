@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 340" width="480" height="340" role="img" aria-labelledby="t d">
+<title id="t">Fenster DIN links und DIN rechts, Ansicht von innen</title>
+<desc id="d">Links ein Fenster DIN links: die Bänder sitzen links, der Griff rechts. Rechts ein Fenster DIN rechts: Bänder rechts, Griff links. Die Linien des Öffnungssymbols beginnen an der Bandseite, die Spitze zeigt zum Griff.</desc>
+<rect width="480" height="340" rx="16" fill="#ffffff"/>
+<text x="240" y="34" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">Ansicht von innen</text>
+<g>
+<rect x="50" y="56" width="150" height="196" fill="#dceaf7"/>
+<rect x="50" y="56" width="150" height="196" fill="none" stroke="#3d3d3a" stroke-width="8"/>
+<path d="M56 62L194 154L56 246" fill="none" stroke="#1d4ed8" stroke-width="2.5"/>
+<rect x="42" y="76" width="7" height="22" rx="2" fill="#141414"/><rect x="42" y="210" width="7" height="22" rx="2" fill="#141414"/>
+<rect x="186" y="142" width="8" height="34" rx="3" fill="#141414"/>
+</g>
+<g transform="translate(480 0) scale(-1 1)">
+<rect x="50" y="56" width="150" height="196" fill="#dceaf7"/>
+<rect x="50" y="56" width="150" height="196" fill="none" stroke="#3d3d3a" stroke-width="8"/>
+<path d="M56 62L194 154L56 246" fill="none" stroke="#1d4ed8" stroke-width="2.5"/>
+<rect x="42" y="76" width="7" height="22" rx="2" fill="#141414"/><rect x="42" y="210" width="7" height="22" rx="2" fill="#141414"/>
+<rect x="186" y="142" width="8" height="34" rx="3" fill="#141414"/>
+</g>
+<g font-family="Helvetica Neue, Arial, sans-serif" fill="#141414" text-anchor="middle">
+<text x="125" y="286" font-size="20" font-weight="700">DIN links</text><text x="125" y="312" font-size="18">Bänder links</text>
+<text x="355" y="286" font-size="20" font-weight="700">DIN rechts</text><text x="355" y="312" font-size="18">Bänder rechts</text>
+</g>
+</svg>

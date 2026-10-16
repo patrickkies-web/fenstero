@@ -12,7 +12,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `wrangler.jsonc`, `worker.js` | Cloudflare Workers: liefert `web/` aus, beantwortet `/api/…` und startet den Abrechnungslauf (Cron); `"name"` muss zum Worker im Dashboard passen |
 | `web/index.html` | Startseite in zwei Ansichten (Hauseigentümer und Fensterbauer, Umschalter oben, Anker `/#hauseigentuemer` und `/#fensterbauer`) und Bereich für Fensterbauer (Projekte, Aufmaß-Links, Einladungslisten, Abrechnung) |
 | `web/app/` | Mess-App für Kunden, Kundenlinks: `/app/#k-…` |
-| `web/ratgeber/`, `web/fuer-fensterbauer/` | Ratgeber (Fenster ausmessen, Aufmaßblatt mit Vorlage, Fenster austauschen) und die Seite für Fensterbauer, reines HTML für Menschen, Suchmaschinen und KI-Assistenten (`ratgeber.css`); Startseite und App tragen dieselbe Art Textfassung für Leser ohne JavaScript |
+| `web/ratgeber/`, `web/fuer-fensterbauer/`, `web/bilder/` | Ratgeber rund ums Fenster-Aufmaß (Fenster ausmessen, Balkontür, Fenster mit Rollladenkasten, Bestellmaß mit Rechner, DIN links oder rechts, Brüstungshöhe, Aufmaßblatt mit Vorlage, Fenster austauschen) mit Zeichnungen und die Seite für Fensterbauer, reines HTML für Menschen, Suchmaschinen und KI-Assistenten (`ratgeber.css`, Rechner `rechner.js`); Startseite und App tragen dieselbe Art Textfassung für Leser ohne JavaScript |
 | `web/assets/` | Programmcode und Gestaltung (`app.*`, `portal.*`, gemeinsam `gemeinsam.*` mit Logo und KI-Anbindung, Rechtsseiten `recht.css`) |
 | `web/assets/blatt.js`, `blatt-schrift.js` | das Aufmaßblatt als PDF: ein Zeichner für drei Ausgaben (für den Kunden, für den Fensterbauer, im Betriebsbereich in dessen Farben), Maven Pro eingebettet (OFL), wird erst beim Erzeugen geladen |
 | `web/assets/modell.js` | Abrechnungsregeln und Aufmaß-Modell, im Browser und auf dem Server derselbe Code |
@@ -20,7 +20,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `web/impressum/`, `web/datenschutz/` | Rechtsseiten (Entwürfe mit Platzhaltern) |
 | `web/zentrale/` | Zentrale des Inhabers: Betriebe mit Kennzahlen, Sperren, Löschen, Export, Käufe, eigene Statistik, Protokoll ([docs/ZENTRALE.md](docs/ZENTRALE.md)); nur mit `ZENTRALE_PASSWORT`, nie in Suchmaschinen |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
-| `functions/seo.js` | Auffindbarkeit: `robots.txt`, `sitemap.xml`, `llms.txt` und die Kopfzeilen der Seiten (Canonical, Sicherheit, `noindex` nur in der Pilotphase); Freigabe über die Variable `INDEXIERUNG` |
+| `functions/seo.js` | Auffindbarkeit: `robots.txt` (mit Content-Signal), `sitemap.xml` (Stand je Seite), `llms.txt`, IndexNow nach Veröffentlichungen und die Kopfzeilen der Seiten (Canonical, Sicherheit, `noindex` nur in der Pilotphase); Freigabe über die Variable `INDEXIERUNG` |
 | `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weißes Fenster auf schwarzer Kachel, der Flügel kippt kurz |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT), qrcode-generator (MIT) und lottie-web light (MIT), lokal statt von fremden Servern |
 | `web/assets/lottie/`, `scripts/lottie-erzeugen.py` | fünf gezeichnete Bewegtbilder, aus Code erzeugt (`python3 scripts/lottie-erzeugen.py web/assets/lottie`) |

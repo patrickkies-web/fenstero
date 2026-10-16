@@ -17,6 +17,7 @@ import { ENTWURF } from './entwurf.js';
 import { EIGENE, kontenDa } from './eigene.js';
 import { zaehlen } from './statistik.js';
 import '../../web/assets/modell.js';
+import { indexnow } from '../seo.js';
 
 const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE);
 const MAX_BODY = 1500000;
@@ -80,6 +81,8 @@ export async function geplant(env, cron) {
   const r = abrechnen ? await abrechnungslauf(k, sp, zahlungsdienst(k)) : { ok: true, nurAufraeumen: true };
   if (r && r.rechnungen) await zaehlen(k, sp, new Array(r.rechnungen).fill('ereignis:sammelrechnung')).catch(() => false);
   let weg = null; try { weg = await aufraeumen(k, sp); } catch (e) { weg = { ok: false }; }
-  console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg));
-  return Object.assign({}, r, { aufraeumen: weg });
+  /* täglicher Lauf: nach einer Veröffentlichung die geänderten Seiten per IndexNow melden (functions/seo.js, nur mit Freigabe) */
+  let suche = null; if (cron && cron !== CRON_ABRECHNUNG) { try { suche = await indexnow(env); } catch (e) { suche = { ok: false }; } }
+  console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg), 'IndexNow', JSON.stringify(suche));
+  return Object.assign({}, r, { aufraeumen: weg, indexnow: suche });
 }

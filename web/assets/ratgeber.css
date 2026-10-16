@@ -50,6 +50,8 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 .rg-tab tr:last-child td { border-bottom: 0 }
 .rg-tab th { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
 .rg-tab td:first-child { color: var(--ink); font-weight: 700 }
+/* Begriffe in der ersten Spalte nicht mitten im Wort trennen (anywhere machte die Spalte am Schreibtisch zu schmal) */
+.rg-tab:not(.rg-leer) td:first-child { overflow-wrap: break-word; hyphens: auto }
 .rg-leer td:not(:first-child) { height: 38px }
 .rg-leer th + th, .rg-leer td + td { border-left: 1px solid var(--line) }
 /* Telefon: Tabellen als Karten untereinander (Spaltentitel aus data-k), die Vorlage bleibt eine Tabelle */
@@ -63,6 +65,21 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
   .rg-tab td[data-k]::before { content: attr(data-k); display: block; margin-top: 4px; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
   .rg-weg-tel { display: none }
 }
+
+/* Abbildungen: Zeichnung als Datei aus /bilder/ (darf in die Bildersuche), auf weißer Karte, auch im dunklen Modus */
+.rg-bild { margin: 8px 0 18px }
+.rg-bild img { display: block; width: 100%; max-width: 560px; height: auto; border-radius: var(--r3); box-shadow: var(--ring) }
+.rg-bild figcaption { margin-top: 8px; font-size: 15px; color: var(--muted) }
+
+/* Rechner (Bestellmaß): Felder 48 px, Ergebnis in der Zwischentitelrolle */
+.rg-rechner { margin: 8px 0 18px; padding: 16px 18px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring) }
+.rg-rechner .felder { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px }
+.rg-rechner label { display: flex; flex-direction: column; gap: 6px; font-size: 15px; font-weight: 700; color: var(--ink) }
+.rg-rechner input, .rg-rechner select { width: 100%; min-height: 48px; padding: 0 12px; border: 0; border-radius: var(--r2); box-shadow: var(--ring); background: var(--paper); color: var(--ink); font: inherit; font-size: 17px; font-weight: 500 }
+.rg-rechner input:focus-visible, .rg-rechner select:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px }
+.rg-rechner .rg-klein { margin: 10px 0 0 }
+.rg-rechner .ergebnis { margin: 12px 0 0; padding: 12px 14px; border-radius: var(--r2); background: var(--surface2); color: var(--ink2) }
+.rg-rechner .ergebnis b { display: inline-block; margin-bottom: 4px; font-size: 24px; line-height: 1.2; color: var(--ink) }
 
 /* Fragen */
 .rg-frage { margin: 0 0 10px; background: var(--surface); border-radius: var(--r2); box-shadow: var(--ring) }

@@ -13,17 +13,23 @@ import { konfig } from './api/umgebung.js';
 
 export const STAND = '2026-10-16';
 
-/* Alle Seiten für die Sitemap, wichtigste zuerst */
+/* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
+   Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0' },
-  { pfad: '/app/', prio: '0.9' },
-  { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9' },
-  { pfad: '/ratgeber/aufmassblatt-fenster/', prio: '0.8' },
-  { pfad: '/ratgeber/fenster-austauschen/', prio: '0.8' },
-  { pfad: '/ratgeber/', prio: '0.6' },
-  { pfad: '/impressum/', prio: '0.2' },
-  { pfad: '/datenschutz/', prio: '0.2' }
+  { pfad: '/', prio: '1.0', stand: '2026-10-16' },
+  { pfad: '/app/', prio: '0.9', stand: '2026-10-16' },
+  { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-16' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-16' },
+  { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-16' },
+  { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-16' },
+  { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-16' },
+  { pfad: '/ratgeber/aufmassblatt-fenster/', prio: '0.8', stand: '2026-10-16' },
+  { pfad: '/ratgeber/fenster-austauschen/', prio: '0.8', stand: '2026-10-16' },
+  { pfad: '/ratgeber/din-links-rechts/', prio: '0.7', stand: '2026-10-16' },
+  { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-10-16' },
+  { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-16' },
+  { pfad: '/impressum/', prio: '0.2', stand: '2026-10-15' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-16' }
 ];
 
 /* Suchen von KI-Assistenten: ausdrücklich erlaubt (OpenAI, Anthropic, Perplexity). Training (GPTBot, ClaudeBot, Google-Extended)
@@ -52,7 +58,9 @@ export function robots(origin, an) {
   if (!an) return '# eeziframes · Pilotphase: bitte noch nicht durchsuchen (Freigabe über die Variable INDEXIERUNG)\nUser-agent: *\nDisallow: /\n';
   return [
     '# eeziframes · Fenster selbst ausmessen, Aufmaß für Fensterbauer',
+    '# Content-Signal (contentsignals.org): Suche, Antworten von KI-Assistenten und Training ausdrücklich erlaubt',
     'User-agent: *',
+    'Content-Signal: search=yes, ai-input=yes, ai-train=yes',
     'Allow: /',
     'Disallow: /api/',
     '',
@@ -68,7 +76,7 @@ export function robots(origin, an) {
 
 export function sitemap(origin) {
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    SEITEN.map((s) => '  <url><loc>' + origin + s.pfad + '</loc><lastmod>' + STAND + '</lastmod><priority>' + s.prio + '</priority></url>').join('\n') +
+    SEITEN.map((s) => '  <url><loc>' + origin + s.pfad + '</loc><lastmod>' + (s.stand || STAND) + '</lastmod><priority>' + s.prio + '</priority></url>').join('\n') +
     '\n</urlset>\n';
 }
 
@@ -77,7 +85,7 @@ export function sitemap(origin) {
 export function absolut(html, b) {
   return html
     .replace(/(<meta property="og:image" content=")\//g, '$1' + b + '/')
-    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, (block) => block.replace(/"(url|@id|item|mainEntityOfPage|logo)":"\//g, '"$1":"' + b + '/'));
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, (block) => block.replace(/"(url|@id|item|mainEntityOfPage|logo|image)":"\//g, '"$1":"' + b + '/'));
 }
 
 /* Kopfzeilen einer Seite: Sicherheit wie in _headers; in der Pilotphase X-Robots-Tag: noindex, mit Freigabe ohne; dazu der Canonical-Hinweis */
@@ -93,6 +101,24 @@ export async function seite(antwort, env, url) {
   return new Response(antwort.body ? absolut(await antwort.text(), b) : null, { status: 200, statusText: antwort.statusText, headers: h });
 }
 
+/* IndexNow (indexnow.org): geänderte Seiten an Bing und die anderen Teilnehmer melden (Yandex, Seznam, Naver u. a.), damit sie schnell
+   neu gelesen werden; Bing ist die Grundlage von Copilot. Der Schlüssel ist öffentlich und liegt als Datei web/<Schlüssel>.txt.
+   Gemeldet wird beim täglichen Lauf (worker.js → scheduled → geplant), nur mit Freigabe (INDEXIERUNG=1) und nur Seiten, deren
+   stand höchstens zwei Tage zurückliegt: nach einer Veröffentlichung also zwei- bis dreimal, sonst nie. */
+export const INDEXNOW = 'f39851a897e004d2371f5b99367aa8c2';
+export const HAUPTADRESSE = 'https://eeziframes.com';
+export async function indexnow(env, holen, jetzt) {
+  if (!env || String(env.INDEXIERUNG || '') !== '1') return { ok: true, gemeldet: 0, grund: 'nicht freigegeben' };
+  const b = String(env.KANONISCH || HAUPTADRESSE).replace(/\/+$/, ''), heute = Date.parse((jetzt || new Date()).toISOString().slice(0, 10));
+  const neu = SEITEN.filter((x) => { const t = (heute - Date.parse(x.stand || STAND)) / 864e5; return t >= 0 && t <= 2; }).map((x) => b + x.pfad);
+  if (!neu.length) return { ok: true, gemeldet: 0 };
+  const r = await (holen || fetch)('https://api.indexnow.org/indexnow', {
+    method: 'POST', headers: { 'content-type': 'application/json; charset=utf-8' },
+    body: JSON.stringify({ host: new URL(b).host, key: INDEXNOW, keyLocation: b + '/' + INDEXNOW + '.txt', urlList: neu })
+  });
+  return { ok: r.ok, status: r.status, gemeldet: neu.length };
+}
+
 /* llms.txt (Vorschlag llmstxt.org): Kurzfassung für KI-Assistenten, mit Fakten, Preisen aus den Variablen und Links */
 const eur = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')) + ' €';
 export function llms(origin, env) {
@@ -105,8 +131,9 @@ export function llms(origin, env) {
     'Wichtige Fakten:',
     '',
     '- Gemessen wird mit Zollstock oder Maßband, nicht aus dem Kamerabild: je Fenster drei Breiten und drei Höhen der Maueröffnung (das kleinste Maß zählt, Abweichungen werden markiert), das Rahmenmaß, auf Wunsch Brüstungshöhe und Laibungstiefe.',
-    '- Zwei Fotos je Fenster, innen und außen. Mit Einwilligung liest eine KI daraus die Einbausituation für den Fensterbauer: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade, Zugang und Schäden, dazu Prüfpunkte fürs Feinaufmaß.',
-    '- Material, Farbe, Glas, Teilung, Öffnung und Rollladen wählt man am 3-D-Modell. Unterstützt: Fenster, Festverglasungen, Hebe-Schiebe-Türen, Faltschiebewände.',
+    '- Zwei Fotos je Fenster, innen und außen. Mit Einwilligung liest eine KI daraus die Einbausituation für den Fensterbauer: Rollladenkasten, Anschlag, Fensterbänke, Fassade, Brüstung, Geschoss, Erreichbarkeit, Strom, Gerüst, Schäden, dazu Prüfpunkte fürs Feinaufmaß; sie prüft auch, ob die Maße zum Foto passen.',
+    '- Material, Farbe, Glas, Teilung, Öffnung und Sonnenschutz wählt man am 3-D-Modell. Unterstützt: Fenster (auch mit Ober- und Unterlicht), Balkon- und Terrassentüren, Festverglasungen, Hebe-Schiebe- und PSK-Türen, Faltschiebewände; Rollladen, Raffstore, Screen, Insekten- und Sichtschutz.',
+    '- Was der Kunde noch nicht weiß, markiert er mit „Weiß ich noch nicht“, statt etwas Teures vorausgewählt zu bekommen; eine schon gespeicherte Gestaltung übernimmt er fürs nächste Fenster. Der Fensterbauer bekommt dazu eine Liste, was er mit dem Kunden klären muss: offene Wünsche, Absturzsicherung, Lüftungskonzept nach DIN 1946-6, Förderweg mit Uw-Zielwert.',
     '- Für Hauseigentümer: Messen, Fotos und 3-D-Modell kostenlos; das Aufmaßblatt als PDF kostet ' + eur(p.aufmass) + '; wer über den Link seines Fensterbauers misst, zahlt nichts.',
     '- Für Fensterbauer (' + (p.mwst ? 'netto, zuzüglich Mehrwertsteuer' : 'ohne Mehrwertsteuer') + '): ' + p.frei + ' Projekte kostenlos, danach ' + eur(p.projekt) + ' je Projekt mit eingegangenem Aufmaß; Abo 10: ' + eur(p.abo.grund) + ' im Monat mit ' + p.abo.inkl + ' Projekten, jedes weitere ' + eur(p.abo.extra) + '; Plus: ' + eur(p.plus) + ' im Monat, unbegrenzt. Monatlich kündbar.',
     '- Ohne Installation und ohne Konto zum Messen; läuft auf Handy, Tablet und Computer. Eingaben bleiben auf dem Gerät, bis man sie sichert (Konto mit E-Mail-Adresse und Code, ohne Passwort, nötig für das Aufmaßblatt) oder selbst weitergibt.',
@@ -120,6 +147,21 @@ export function llms(origin, env) {
     '- [Fenster ausmessen](' + u('/ratgeber/fenster-ausmessen/') + '): Anleitung mit Messpunkten, Altbau, Rollladenkasten und typischen Fehlern',
     '- [Aufmaßblatt für Fenster](' + u('/ratgeber/aufmassblatt-fenster/') + '): kostenlose Vorlage zum Ausdrucken, Erklärung jeder Zeile',
     '- [Fenster austauschen](' + u('/ratgeber/fenster-austauschen/') + '): Ablauf, Kosten pro Fenster, Förderung 2026, Checkliste fürs Angebot',
+    '- [Balkontür ausmessen](' + u('/ratgeber/balkontuer-ausmessen/') + '): Balkon- und Terrassentür, Hebe-Schiebe- und PSK-Tür, Schwelle und Abdichtung',
+    '- [Fenster mit Rollladenkasten ausmessen](' + u('/ratgeber/fenster-mit-rollladen-ausmessen/') + '): Aufsatz-, Einbau- oder Vorbaukasten erkennen und richtig messen',
+    '- [Bestellmaß berechnen](' + u('/ratgeber/bestellmass-fenster/') + '): Fuge je Seite nach Größe und Profilfarbe, Tabelle und Rechner',
+    '- [DIN links oder rechts](' + u('/ratgeber/din-links-rechts/') + '): Öffnungsrichtung bestimmen, Merkregel, Symbol in Zeichnungen',
+    '- [Brüstungshöhe](' + u('/ratgeber/bruestungshoehe-fenster/') + '): Mindesthöhe nach Bauordnung und Absturzsicherung',
+    '',
+    '## Kurze Antworten',
+    '',
+    '- [Wie misst man ein Fenster für neue Fenster aus?](' + u('/ratgeber/fenster-ausmessen/') + '): die Maueröffnung in Millimetern, Breite oben, in der Mitte und unten, Höhe links, in der Mitte und rechts; es zählt das kleinste Maß. Dazu Brüstungshöhe, Laibungstiefe und je ein Foto von innen und außen.',
+    '- [Wie viel kleiner als die Maueröffnung ist ein neues Fenster?](' + u('/ratgeber/bestellmass-fenster/') + '): je Seite um die Fuge, üblich sind etwa 10 bis 25 mm. Mindestfuge nach einem Profilhersteller für weiße Kunststofffenster mit Silikonfuge: 10 mm je Seite bis 1,5 m Länge, je weiteren Meter 5 mm mehr; farbige Profile 5 mm mehr. Das Bestellmaß legt der Fensterbauer nach dem Feinaufmaß fest.',
+    '- [Wie misst man eine Balkontür aus?](' + u('/ratgeber/balkontuer-ausmessen/') + '): wie ein Fenster, die Höhe aber ab der Oberkante des fertigen Fußbodens bis zum Sturz; dazu Schwelle und Belag draußen notieren.',
+    '- [Wie misst man ein Fenster mit Rollladenkasten?](' + u('/ratgeber/fenster-mit-rollladen-ausmessen/') + '): beim Aufsatzkasten bis zur Oberkante des Kastens, beim Einbaukasten bis zu seiner Unterkante, beim Vorbaurollladen die Öffnung wie immer.',
+    '- [DIN links oder DIN rechts?](' + u('/ratgeber/din-links-rechts/') + '): von der Seite gesehen, zu der das Fenster aufgeht, also meist von innen; Bänder links heißt DIN links (DIN 107).',
+    '- [Wie hoch muss eine Fensterbrüstung sein?](' + u('/ratgeber/bruestungshoehe-fenster/') + '): mindestens 80 cm, bei mehr als 12 m Absturzhöhe 90 cm, wenn draußen mehr als 1 m tiefer liegt (Musterbauordnung, von den meisten Ländern übernommen; Bayern weicht ab).',
+    '- [Gibt es eine App, mit der man Fenster selbst ausmisst?](' + u('/app/') + '): ja, eeziframes im Browser, ohne Installation; Messen kostenlos, Aufmaßblatt als PDF ' + eur(p.aufmass) + ', über den Link eines Fensterbauers kostenlos.',
     '',
     '## Optional',
     '',
