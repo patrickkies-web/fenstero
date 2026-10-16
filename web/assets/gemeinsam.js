@@ -41,8 +41,8 @@
       var bg = el('div', 'fx-bg');
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
-        '<p>Die KI liest auf deinen Fotos die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade und was dein Fensterbauer sonst noch wissen muss. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic (USA) übertragen und dort ausgewertet. eeziframes speichert deine Fotos nicht.</p>' +
-        '<p class="fx-klein">Ohne KI geht es auch, dann fehlen nur die Zusatzinfos aus den Fotos. Mehr dazu in der <a href="' + C.datenschutz + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>' +
+        '<p>Die KI liest auf deinen Fotos die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade und was dein Fensterbauer sonst noch wissen muss. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). eeziframes speichert deine Fotos nicht; Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.</p>' +
+        '<p class="fx-klein">Ohne KI geht es auch, dann fehlen nur die Zusatzinfos aus den Fotos. Deine Einwilligung kannst du jederzeit widerrufen: unten in der App über „KI-Einwilligung widerrufen“. Mehr dazu in der <a href="' + C.datenschutz + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>' +
         '<div class="fx-knoepfe"><button type="button" class="fx-ja">Ja, auswerten</button><button type="button" class="fx-nein">Ohne KI weiter</button></div>');
       box.setAttribute('role', 'dialog');
       box.setAttribute('aria-modal', 'true');
@@ -104,7 +104,12 @@
       });
     }
   };
-  window.FotoKI = { verbinden: function () { return bereit().then(function (ok) { return ok ? sample : null; }); } };
+  window.FotoKI = {
+    verbinden: function () { return bereit().then(function (ok) { return ok ? sample : null; }); },
+    /* Einwilligung erteilt (gespeichert)? Widerrufen: gilt sofort, beim nächsten Foto fragt die App wieder */
+    eingewilligt: function () { return get(KEY) === 'ja'; },
+    widerrufen: function () { try { window.localStorage.removeItem(KEY); } catch (e) { /* ohne Speicher */ } delete mem[KEY]; sitzung = null; }
+  };
 
   /* ---------- Logo: ein Fenster, dessen Flügel kurz kippt ----------
      Logo.svg(px) liefert das Zeichen. Beim Laden kippt der rechte untere Flügel einmal auf und wieder zu,

@@ -74,7 +74,8 @@ export const EIGENE = {
   /* --- Anmelden: Code per E-Mail, dann Code oder Link --- */
   'POST /api/kunde/code': async (ctx) => {
     if (!erlaubt('otp:' + quelle(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
-    const r = await codeSenden(ctx.k, ctx.sp, (ctx.body || {}).mail, ctx.url.origin + '/app/');
+    /* neu: false beim Anmelden in der App: dann entsteht kein Konto ohne Zustimmung zu den AGB (auth.js) */
+    const r = await codeSenden(ctx.k, ctx.sp, (ctx.body || {}).mail, ctx.url.origin + '/app/', (ctx.body || {}).neu !== false);
     zaehlen(ctx, 'ereignis:kunde_code');
     return r;
   },

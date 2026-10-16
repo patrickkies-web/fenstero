@@ -22,7 +22,7 @@
   <p>Hier widerrufen Sie einen Vertrag, den Sie als Verbraucher mit uns über diese Website geschlossen haben, zum Beispiel den Kauf eines Aufmaßblatts. Füllen Sie die drei Felder aus und tippen Sie auf „Widerruf bestätigen“. Sie erhalten sofort eine Eingangsbestätigung per E-Mail.</p>
   <p class="klein">Ob und bis wann Ihnen ein Widerrufsrecht zusteht, steht in der <a href="/agb/#widerrufsbelehrung">Widerrufsbelehrung</a>.</p>
 
-  <form id="widerruf" class="formular karte" novalidate>
+  <form id="widerruf" class="formular karte" method="post" action="/api/widerruf" novalidate>
     <div class="feld">
       <label for="wr-name">Ihr Name</label>
       <input id="wr-name" name="name" type="text" autocomplete="name" maxlength="120" required>
@@ -43,7 +43,7 @@
     <button type="submit" class="knopf" id="wr-senden">Widerruf bestätigen</button>
     <p class="klein">Ihre Angaben verwenden wir nur, um den Widerruf zu bearbeiten und den Eingang zu bestätigen (<a href="/datenschutz/#widerruf">Datenschutz</a>).</p>
   </form>
-  <noscript><p class="karte">Für dieses Formular braucht Ihr Browser JavaScript. Sie können auch per E-Mail oder Brief widerrufen, an die Anschrift unten.</p></noscript>
+  <noscript><p class="karte">Ohne JavaScript schickt das Formular Ihre Angaben direkt; die Bestätigung mit Datum und Uhrzeit erscheint auf der nächsten Seite. Sie können auch per E-Mail oder Brief widerrufen, an die Anschrift unten.</p></noscript>
 
   <div id="widerruf-ok" class="karte ok" role="status" hidden>
     <h2>Ihr Widerruf ist eingegangen.</h2>

@@ -1450,7 +1450,8 @@ function render(fresh) {
   if (wiz) h += '<div class="prog"><div style="width: ' + ((si + qShare) / STEPS.length * 100) + '%"></div></div>';
   else if (tourP) h += '<div class="prog" role="progressbar" aria-label="Führung" aria-valuemin="1" aria-valuemax="' + TOUR.length + '" aria-valuenow="' + (S.tour.i + 1) + '"><div style="width: ' + (tourP * 100) + '%"></div></div>';
   h += '</header>';
-  h += '<div class="scroll' + (view.fit ? ' fit' : '') + '" style="padding-top: ' + (wiz || tourP ? 56 : 52) + 'px"><div class="scr' + (view.fit ? ' fit' : '') + (view.cls ? ' ' + view.cls : '') + (S.dir === 'back' ? ' is-back' : '') + '" data-screen="' + S.screen + '">' + view.html + '</div></div>';
+  const recht = !view.fit && view.html.indexOf('foot-links recht') < 0 ? rechtLinks() : '';
+  h += '<div class="scroll' + (view.fit ? ' fit' : '') + '" style="padding-top: ' + (wiz || tourP ? 56 : 52) + 'px"><div class="scr' + (view.fit ? ' fit' : '') + (view.cls ? ' ' + view.cls : '') + (S.dir === 'back' ? ' is-back' : '') + '" data-screen="' + S.screen + '">' + view.html + recht + '</div></div>';
   if (view.bar) h += '<div class="bb">' + (view.bar.sec ? '<button type="button" class="btn ghost" data-act="' + view.bar.secAct + '">' + esc(view.bar.sec) + '</button>' : '') + '<button type="button" class="btn primary" data-act="' + view.bar.act + '"' + (view.bar.v ? ' data-v="' + view.bar.v + '"' : '') + (view.bar.dis ? ' disabled' : '') + '>' + view.bar.label + '</button></div>';
   h += sheetsHTML();
   if (S.toast) h += '<div class="toast" role="status">' + esc(S.toast) + '</div>';
@@ -2050,6 +2051,16 @@ const PREIS = () => { const p = (SERVER.preise && SERVER.preise.aufmass) != null
 const MWST = () => ((SERVER.preise && SERVER.preise.mwst) != null ? SERVER.preise.mwst : ((window.KONFIG || {}).preise || {}).mwst) !== false;
 const euro = (n) => n.toFixed(2).replace('.', ',') + ' €';
 const kauf = () => S.kauf || (S.kauf = { mail: '', agb: false, pay: '', widerruf: false, paid: false, err: {} });
+/* Stand der AGB und Wortlaut der Zustimmung an der Kasse: vom Server (/api/status, functions/api/recht.js), ohne Server diese Fassung.
+   Der Server nimmt einen Kauf nur mit genau dem Stand und Wortlaut an, den die Kasse gezeigt hat. */
+const RECHT = () => Object.assign({ agb: '2026-10-16', zustimmung: 'Ich stimme ausdrücklich zu, dass eeziframes (Patrick Kies) vor Ablauf der Widerrufsfrist mit der Bereitstellung des Aufmaßblatts beginnt. Mir ist bekannt, dass ich durch diese Zustimmung mit Beginn der Bereitstellung mein Widerrufsrecht verliere.' }, SERVER.recht || {});
+const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const standDE = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '')); return m ? Number(m[3]) + '. ' + MONATE[Number(m[2]) - 1] + ' ' + m[1] : String(iso || ''); };
+/* Zahlungsarten an der Kasse, wie der Server sie Stripe vorgibt (Variable ZAHLARTEN); sie stehen vor dem Kauf da (§ 312j Abs. 1 BGB) */
+const ZAHLART_NAMEN = { card: 'Kredit- oder Debitkarte (auf passenden Geräten auch Apple Pay oder Google Pay)', paypal: 'PayPal', klarna: 'Klarna' };
+function zahlartenText() { const z = (SERVER.zahlarten && SERVER.zahlarten.length ? SERVER.zahlarten : ['card']).map((x) => ZAHLART_NAMEN[x] || x); return z.length > 1 ? z.slice(0, -1).join(', ') + ' oder ' + z[z.length - 1] : z[0]; }
+/* Die Haken an der Kasse gelten nur für diesen einen Kauf: beim Betreten der Kasse sind sie leer */
+function kasseOeffnen() { const k = kauf(); k.bedingungen = false; k.widerruf = false; k.err = {}; persist(); go('kasse'); }
 const neueKennung = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const kennung = () => { const k = kauf(); if (!k.kennung) { k.kennung = neueKennung(); lokalSpeichern(); } return k.kennung; };
 function KUNDE_FREI() { return !(PREIS() > 0); }
@@ -2098,8 +2109,8 @@ SCREENS.konto = () => {
   const k = kauf(), e = k.err || {};
   const html = hd('Schritt 1 von 2', 'Wohin soll die Rechnung?', 'Kein Konto, kein Passwort. An diese Adresse gehen Rechnung und Nachweis, dein Blatt bleibt auf diesem Gerät.') +
     '<div class="card kform"><label class="kf' + (e.mail ? ' bad' : '') + '"><span>E-Mail</span><input type="email" id="k-mail" data-in="k" data-f="mail" value="' + esc(k.mail || '') + '" placeholder="name@beispiel.de" autocomplete="email" inputmode="email">' + (e.mail ? '<small>' + esc(e.mail) + '</small>' : '') + '</label>' +
-    '<label class="kcheck' + (e.agb ? ' bad' : '') + '"><input type="checkbox" data-in="kc" data-f="agb"' + (k.agb ? ' checked' : '') + '><span>Ich akzeptiere die <a class="ulink" href="/agb/" target="_blank" rel="noopener">AGB</a> und habe die <a class="ulink" href="' + esc((window.KONFIG || {}).datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutzerklärung</a> von eeziframes gelesen.</span></label>' + (e.agb ? '<small class="kerr">' + esc(e.agb) + '</small>' : '') + '</div>' +
-    '<p class="sub" style="padding: 0 6px">Kein Newsletter, keine Weitergabe. Dein Aufmaß bleibt auf deinem Gerät.</p>';
+    '</div>' +
+    '<p class="sub" style="padding: 0 6px">Kein Newsletter, keine Weitergabe. Dein Aufmaß bleibt auf deinem Gerät. Den AGB stimmst du im nächsten Schritt zu.</p>';
   return { html: html, back: ['Zurück', 'teilen'], bar: { label: 'Weiter zur Zahlung', act: 'k-next' } };
 };
 /* Aufmaß sichern bzw. anmelden: E-Mail, dann der Code aus der E-Mail (kein Passwort) */
@@ -2113,13 +2124,14 @@ SCREENS.sichern = () => {
     const html = hd(kopf[0], 'Code eingeben.', 'Wir haben einen sechsstelligen Code an <span class="mail">' + esc(z.mail) + '</span> geschickt. Er gilt eine Stunde.') +
       '<div class="card kform"><label class="kf' + (e.code ? ' bad' : '') + '"><span>Code aus der E-Mail</span><input type="text" id="s-code" data-in="s" data-f="code" value="' + esc(z.code || '') + '" placeholder="123456" inputmode="numeric" autocomplete="one-time-code" maxlength="8">' + (e.code ? '<small>' + esc(e.code) + '</small>' : '') + '</label></div>' +
       '<p class="sub" style="padding: 0 6px">Nichts angekommen? Schau im Spam-Ordner nach. <button type="button" class="ulink" data-act="sichern-neu">Neuen Code schicken</button> · <button type="button" class="ulink" data-act="sichern-zurueck">Andere E-Mail-Adresse</button></p>' +
+      (z.zweck === 'anmelden' ? '<p class="sub" style="padding: 0 6px">Gibt es zu dieser Adresse noch kein Konto, kommt kein Code. Dann sichere zuerst ein Aufmaß, dabei legst du das Konto an.</p>' : '') +
       (SERVER.attrappe ? '<p class="sub" style="padding: 0 6px">Testbetrieb: Der Code ist 123456.</p>' : '');
     return { html: html, back: ['Zurück', zurueck], bar: { label: z.laeuft ? 'Einen Moment …' : kauf1 ? 'Weiter zur Zahlung' : 'Anmelden', act: 'sichern-pruefen', dis: !!z.laeuft } };
   }
   const html = hd(kopf[0], kopf[1], kopf[2]) +
     '<div class="card kform"><label class="kf' + (e.mail ? ' bad' : '') + '"><span>E-Mail</span><input type="email" id="s-mail" data-in="s" data-f="mail" value="' + esc(z.mail || '') + '" placeholder="name@beispiel.de" autocomplete="email" inputmode="email">' + (e.mail ? '<small>' + esc(e.mail) + '</small>' : '') + '</label>' +
-    (z.zweck === 'anmelden' ? '' : '<label class="kcheck' + (e.agb ? ' bad' : '') + '"><input type="checkbox" data-in="sc" data-f="agb"' + (z.agb ? ' checked' : '') + '><span>Ich akzeptiere die <a class="ulink" href="/agb/" target="_blank" rel="noopener">AGB</a> und habe die <a class="ulink" href="' + esc((window.KONFIG || {}).datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutzerklärung</a> von eeziframes gelesen.</span></label>' + (e.agb ? '<small class="kerr">' + esc(e.agb) + '</small>' : '')) + '</div>' +
-    '<p class="sub" style="padding: 0 6px">' + (z.zweck === 'anmelden' ? 'Noch kein Konto? Dann sichere zuerst ein Aufmaß auf dem Gerät, auf dem du gemessen hast.' : 'Dein Aufmaß liegt dann auf unserem Server, nur für dich. Du kannst es und dein Konto jederzeit löschen.') + '</p>';
+    (z.zweck === 'anmelden' ? '' : '<label class="kcheck' + (e.agb ? ' bad' : '') + '"><input type="checkbox" data-in="sc" data-f="agb"' + (z.agb ? ' checked' : '') + '><span>Ich akzeptiere die <a class="ulink" href="/agb/" target="_blank" rel="noopener">AGB</a> von eeziframes.</span></label>' + (e.agb ? '<small class="kerr">' + esc(e.agb) + '</small>' : '')) + '</div>' +
+    '<p class="sub" style="padding: 0 6px">' + (z.zweck === 'anmelden' ? 'Noch kein Konto? Dann sichere zuerst ein Aufmaß auf dem Gerät, auf dem du gemessen hast.' : 'Dein Aufmaß liegt dann auf unserem Server, nur für dich. Du kannst es und dein Konto jederzeit löschen. Wie wir deine Daten verarbeiten, steht in der <a class="ulink" href="' + esc((window.KONFIG || {}).datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.') + '</p>';
   return { html: html, back: ['Zurück', zurueck], bar: { label: z.laeuft ? 'Einen Moment …' : 'Code schicken', act: 'sichern-code', dis: !!z.laeuft } };
 };
 /* Dein Konto: Aufmaße im Konto (öffnen, einzeln löschen), neues beginnen, abmelden, Konto löschen */
@@ -2159,12 +2171,16 @@ SCREENS.linkanmelden = () => {
 /* Kasse, Schritt 2: mit Server zu Stripe, ohne Server ein gekennzeichneter Testkauf */
 SCREENS.kasse = () => {
   const k = kauf(), e = k.err || {}, n = S.windows.length, p = PREIS(), mwst = MWST() ? p - p / 1.19 : 0;
-  if (!k.mail || !k.agb) return SCREENS.konto();
+  if (!k.mail) return SCREENS.konto();
+  const R = RECHT(), ds = esc((window.KONFIG || {}).datenschutz || '/datenschutz/');
   const html = hd('Schritt 2 von 2', 'Bezahlen.', 'Rechnung an ' + esc(k.mail)) +
     '<div class="card"><div class="order"><span><b>Aufmaßblatt als PDF</b><small>' + n + (n === 1 ? ' Fenster' : ' Fenster') + ', einmalig, für dieses Projekt</small></span><b>' + euro(p) + '</b></div>' + (MWST() ? '<div class="order sum"><span>darin 19 % MwSt.</span><span>' + euro(mwst) + '</span></div>' : '<div class="order sum"><span>umsatzsteuerfrei nach § 19 UStG</span><span></span></div>') + '</div>' +
-    (SERVER.zahlung ? '<div class="card" style="gap: 6px"><p class="eyebrow">Zahlungsart</p><p class="sub" style="color: var(--fg2); margin: 0">Karte, PayPal, Apple Pay oder Google Pay auf der sicheren Seite unseres Zahlungsdienstleisters Stripe. eeziframes sieht keine Kartendaten.</p></div>'
+    (SERVER.zahlung ? '<div class="card" style="gap: 6px"><p class="eyebrow">Zahlungsarten</p><p class="sub" style="color: var(--fg2); margin: 0">' + esc(zahlartenText()) + ', auf der sicheren Seite unseres Zahlungsdienstleisters Stripe. eeziframes sieht keine Kartendaten.</p></div>'
       : '<div class="sec">' + secHead('Zahlungsart') + '<div class="pay' + (e.pay ? ' bad' : '') + '">' + ['PayPal', 'Kreditkarte', 'Apple Pay', 'Google Pay'].map((x) => '<button type="button" class="chip" data-act="k-pay" data-v="' + x + '" aria-pressed="' + (k.pay === x) + '">' + x + '</button>').join('') + '</div>' + (e.pay ? '<small class="kerr">' + esc(e.pay) + '</small>' : '') + '</div>') +
-    '<label class="kcheck' + (e.widerruf ? ' bad' : '') + '"><input type="checkbox" data-in="kc" data-f="widerruf"' + (k.widerruf ? ' checked' : '') + '><span>Ich möchte die Datei sofort erhalten: Ich stimme zu, dass ihr vor Ablauf der Widerrufsfrist mit der Bereitstellung beginnt, und weiß, dass ich dadurch mein Widerrufsrecht verliere.</span></label>' + (e.widerruf ? '<small class="kerr">' + esc(e.widerruf) + '</small>' : '') +
+    '<div class="card kform kasse-recht">' +
+    '<label class="kcheck' + (e.bedingungen ? ' bad' : '') + '"><input type="checkbox" data-in="kc" data-f="bedingungen"' + (k.bedingungen ? ' checked' : '') + '><span>Ich akzeptiere die <a class="ulink" href="/agb/" target="_blank" rel="noopener">AGB</a> (Stand: ' + esc(standDE(R.agb)) + ').</span></label>' + (e.bedingungen ? '<small class="kerr">' + esc(e.bedingungen) + '</small>' : '') +
+    '<label class="kcheck' + (e.widerruf ? ' bad' : '') + '"><input type="checkbox" data-in="kc" data-f="widerruf"' + (k.widerruf ? ' checked' : '') + '><span>' + esc(R.zustimmung) + '</span></label>' + (e.widerruf ? '<small class="kerr">' + esc(e.widerruf) + '</small>' : '') +
+    '<p class="sub kasse-wr">Dein Widerrufsrecht: <a class="ulink" href="/agb/#widerrufsbelehrung" target="_blank" rel="noopener">Widerrufsbelehrung</a> und <a class="ulink" href="/agb/#widerrufsformular" target="_blank" rel="noopener">Muster-Widerrufsformular</a>. Wie wir deine Daten verarbeiten, steht in der <a class="ulink" href="' + ds + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p></div>' +
     (SERVER.zahlung ? (SERVER.attrappe ? '<p class="sub" style="padding: 0 6px">Testbetrieb: Die Kasse ist nachgestellt, es wird nichts abgebucht.</p>' : SERVER.testmodus ? '<p class="sub" style="padding: 0 6px"><b>Testbetrieb:</b> Stripe läuft im Testmodus, es wird nichts abgebucht. Zum Ausprobieren die Karte 4242 4242 4242 4242, ein Ablaufdatum in der Zukunft und eine beliebige Prüfziffer.</p>' : '') : '<p class="sub" style="padding: 0 6px"><b>Pilotphase: Testkauf.</b> Es wird nichts abgebucht, du bekommst das Blatt trotzdem.</p>');
   return { html: html, back: ['Zurück', kontoBereit() && KS ? 'teilen' : 'konto'], bar: { label: SERVER.zahlung ? 'Weiter zu Stripe · ' + euro(p) : 'Testkauf abschließen', act: 'k-buy' } };
 };
@@ -2177,7 +2193,7 @@ SCREENS.gekauft = () => {
 async function kaufStarten(nochmal) {
   const k = kauf();
   try {
-    const mitKonto = kontoBereit() && KS, init = { method: 'POST', body: JSON.stringify({ mail: k.mail, kennung: kennung() }) };
+    const R = RECHT(), mitKonto = kontoBereit() && KS, init = { method: 'POST', body: JSON.stringify({ mail: k.mail, kennung: kennung(), agb: k.bedingungen ? R.agb : '', zustimmung: k.widerruf ? R.zustimmung : '' }) };
     const r = mitKonto ? await kontoJson('/api/zahlung/start', init) : await fetch('/api/zahlung/start', Object.assign(init, { headers: { 'content-type': 'application/json', accept: 'application/json' } })).then((x) => x.json());
     if (r && r.anmelden) { SERVER.konten = true; return sichernStart('kauf'); } // Anmeldung abgelaufen oder kein Konto (auch wenn diese Seite noch von keinen Konten wusste)
     if (r && r.geloescht) return aufmassEntfernt();
@@ -2190,6 +2206,9 @@ async function kaufStarten(nochmal) {
       return a === 'fehler' ? nicht() : kaufStarten(true);
     }
     if (r && r.ok && r.schon) { await entwurfLaden(); return go(FREI() ? 'gekauft' : 'teilen'); } // schon freigeschaltet (anderes Gerät)
+    /* AGB oder Wortlaut haben sich geändert, seit die Kasse geladen wurde: neue Fassung zeigen, noch einmal zustimmen lassen */
+    if (r && r.neuLaden) { if (r.recht) SERVER.recht = r.recht; k.bedingungen = false; k.widerruf = false; k.err = {}; persist(); render(); return toast(r.fehler || 'Bitte stimme noch einmal zu.'); }
+    if (r && r.zustimmung) { k.err = { bedingungen: k.bedingungen ? '' : 'Bitte stimme den AGB zu.', widerruf: k.widerruf ? '' : 'Für die sofortige Lieferung brauchen wir deine Zustimmung.' }; Object.keys(k.err).forEach((x) => { if (!k.err[x]) delete k.err[x]; }); return render(); }
     if (!r || !r.ok || !r.url) return toast(r && r.fehler ? r.fehler : 'Die Kasse ist gerade nicht erreichbar.');
     persist(); location.href = r.url;
   } catch (e) { toast('Die Kasse ist gerade nicht erreichbar.'); }
@@ -2673,9 +2692,9 @@ function sheetsHTML() {
   const X = '<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="15" fill="var(--seg)"></circle><path d="M10.5 10.5l9 9M19.5 10.5l-9 9" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round"></path></svg>';
   if (S.gloss && GLOSS[S.gloss]) {
     const G = GLOSS[S.gloss];
-    return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="gclose"></button><div class="sheet" role="dialog" aria-label="Glossar"><div class="grip"></div><div class="sheet-top"><button type="button" class="link" data-act="gindex">Alle Begriffe</button><button type="button" class="xbtn" aria-label="Schließen" data-act="gclose">' + X + '</button></div><p class="eyebrow" style="text-align: center; margin-top: 4px">Glossar</p><h2 style="margin-top: 14px">' + esc(G.t) + '</h2><div class="ico' + (G.lottie ? ' ico-l' : '') + '"' + (G.lottie ? ' data-lottie="' + G.lottie + '" data-loop="1"' : '') + '><span class="lottie-still">' + svgIcon(G.ico(), 132) + '</span></div>' + G.x.map((x) => '<p class="x">' + esc(x) + '</p>').join('') + (G.see.length ? '<div class="see"><span>Siehe auch:</span>' + G.see.map((k) => '<button type="button" class="ulink" style="min-height: 44px" data-act="gloss" data-k="' + k + '">' + esc(SHORT[k]) + '</button>').join('') + '</div>' : '') + (GLOSS_RG[S.gloss] && !S.betrieb ? '<p class="see"><a class="ulink" style="min-height: 44px" href="' + GLOSS_RG[S.gloss] + '" target="_blank" rel="noopener">Ausführlich im Ratgeber</a></p>' : '') + '</div>';
+    return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="gclose"></button><div class="sheet" role="dialog" aria-label="Glossar"><div class="grip"></div><div class="sheet-top"><button type="button" class="link" data-act="gindex">Alle Begriffe</button><button type="button" class="xbtn" aria-label="Schließen" data-act="gclose">' + X + '</button></div><p class="eyebrow" style="text-align: center; margin-top: 4px">Glossar</p><h2 style="margin-top: 14px">' + esc(G.t) + '</h2><div class="ico' + (G.lottie ? ' ico-l' : '') + '"' + (G.lottie ? ' data-lottie="' + G.lottie + '" data-loop="1"' : '') + '><span class="lottie-still">' + svgIcon(G.ico(), 132) + '</span></div>' + G.x.map((x) => '<p class="x">' + esc(x) + '</p>').join('') + (G.see.length ? '<div class="see"><span>Siehe auch:</span>' + G.see.map((k) => '<button type="button" class="ulink" style="min-height: 44px" data-act="gloss" data-k="' + k + '">' + esc(SHORT[k]) + '</button>').join('') + '</div>' : '') + (GLOSS_RG[S.gloss] && !S.betrieb ? '<p class="see"><a class="ulink" style="min-height: 44px" href="' + GLOSS_RG[S.gloss] + '" target="_blank" rel="noopener">Ausführlich im Ratgeber</a></p>' : '') + rechtLinks() + '</div>';
   }
-  if (S.glossIndex) return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="gclose"></button><div class="sheet" role="dialog" aria-label="Alle Begriffe" style="padding-inline: 16px"><div class="grip"></div><div style="display: flex; justify-content: flex-end; margin-right: -4px"><button type="button" class="xbtn" aria-label="Schließen" data-act="gclose">' + X + '</button></div><p class="eyebrow" style="text-align: center">Glossar</p><h2 style="margin: 12px 0 20px">Fachbegriffe, einfach erklärt.</h2><div class="gindex">' + GLOSS_ORDER.map((k) => '<button type="button" data-act="gloss" data-k="' + k + '"><span><b>' + esc(SHORT[k]) + '</b><small>' + esc(GLOSS[k].t) + '</small></span>' + CHEV + '</button>').join('') + '</div></div>';
+  if (S.glossIndex) return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="gclose"></button><div class="sheet" role="dialog" aria-label="Alle Begriffe" style="padding-inline: 16px"><div class="grip"></div><div style="display: flex; justify-content: flex-end; margin-right: -4px"><button type="button" class="xbtn" aria-label="Schließen" data-act="gclose">' + X + '</button></div><p class="eyebrow" style="text-align: center">Glossar</p><h2 style="margin: 12px 0 20px">Fachbegriffe, einfach erklärt.</h2><div class="gindex">' + GLOSS_ORDER.map((k) => '<button type="button" data-act="gloss" data-k="' + k + '"><span><b>' + esc(SHORT[k]) + '</b><small>' + esc(GLOSS[k].t) + '</small></span>' + CHEV + '</button>').join('') + '</div>' + rechtLinks() + '</div>';
   return '';
 }
 /* ---------- Fotos und KI im Hintergrund ---------- */
@@ -2892,6 +2911,8 @@ const KUNDE = 'aufmass.kunde', ANFRAGE = 'aufmass.kunde.anfrage', BILDER = 'aufm
 const VOLL_TEXT = 'In deinem Konto haben ' + MAX_AUFMASSE + ' Aufmaße Platz. Dieses ist noch nicht gesichert: Lösche in „Dein Konto“ ein altes.';
 function kontoLesen() { try { const o = JSON.parse(localStorage.getItem(KUNDE) || 'null'); return o && o.token ? o : null; } catch (e) { return null; } }
 let KS = kontoLesen();
+/* Eine angefangene Anmeldung gilt eine Stunde (kontoAusLink); danach räumt die App die gemerkte Adresse weg */
+try { const a0 = JSON.parse(localStorage.getItem(ANFRAGE) || 'null'); if (a0 && Date.now() - (Number(a0.at) || 0) > 3600000) localStorage.removeItem(ANFRAGE); } catch (e) { /* ohne Speicher */ }
 const kontoAn = () => !!(SERVER.konten && KS && KS.token && S.kauf && S.kauf.kennung);
 const kontoBereit = () => !!(SERVER.konten && !S.betrieb && !vorschau());
 function kontoMerken(s) {
@@ -3129,7 +3150,7 @@ async function sichernCode() {
   if (Object.keys(z.err).length) return render();
   z.laeuft = true; render();
   try {
-    const res = await fetch('/api/kunde/code', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ mail: z.mail }) });
+    const res = await fetch('/api/kunde/code', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ mail: z.mail, neu: z.zweck !== 'anmelden' }) });
     const r = await res.json().catch(() => null);
     z.laeuft = false;
     if (r && r.ok) { try { localStorage.setItem(ANFRAGE, JSON.stringify({ mail: z.mail, zweck: z.zweck, at: Date.now() })); } catch (e) { /* ok */ } z.schritt = 2; z.code = ''; z.err = {}; go('sichern'); return; } // der Link aus dieser E-Mail meldet ohne Rückfrage an
@@ -3155,7 +3176,7 @@ async function kaufMitKonto() {
   if (S.sync.voll) { go('teilen'); return toast(VOLL_TEXT); }
   if (!S.sync.geladen || S.sync.offen || S.sync.p) { const a = await entwurfAbgleichen(); if (a === 'fehler') { go('teilen'); return toast(S.sync.voll ? VOLL_TEXT : 'Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.'); } }
   if (FREI()) return go('gekauft');
-  go('kasse');
+  kasseOeffnen();
 }
 /* Abmelden auf diesem Gerät: Offenes noch sichern, dann Anmeldung, Aufmaß und Bilder der Lage von diesem Gerät nehmen. false: nicht
    gesichert, dann bleibt alles, wie es ist */
@@ -3482,11 +3503,12 @@ function act(name, el) {
     case 'teil-copy': { copyText(curCode(), 'code-box', 'Code kopiert'); return act('teil-mark', el); }
     case 'teil-mark': return teilMark('betrieb');
     case 'teil-pdf': return pdfTeilen();
-    case 'k-start': { if (FREI()) return go('teilen'); if (SERVER.zahlung && kauf().wartet) return kaufPruefen(kauf().wartet); if (kontoBereit() && SERVER.zahlung) return KS ? kaufMitKonto() : sichernStart('kauf'); return go(kauf().mail && kauf().agb ? 'kasse' : 'konto'); }
-    case 'k-next': { const k = kauf(); k.err = {}; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(k.mail || '').trim())) k.err.mail = 'Bitte eine gültige E-Mail-Adresse eingeben.'; if (!k.agb) k.err.agb = 'Bitte zustimmen, sonst können wir keine Rechnung stellen.'; if (Object.keys(k.err).length) return render(); k.mail = k.mail.trim(); persist(); return go('kasse'); }
+    case 'k-start': { if (FREI()) return go('teilen'); if (SERVER.zahlung && kauf().wartet) return kaufPruefen(kauf().wartet); if (kontoBereit() && SERVER.zahlung) return KS ? kaufMitKonto() : sichernStart('kauf'); return kauf().mail ? kasseOeffnen() : go('konto'); }
+    case 'k-next': { const k = kauf(); k.err = {}; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(k.mail || '').trim())) k.err.mail = 'Bitte eine gültige E-Mail-Adresse eingeben.'; if (Object.keys(k.err).length) return render(); k.mail = k.mail.trim(); persist(); return kasseOeffnen(); }
     case 'k-pay': { const k = kauf(); k.pay = v; if (k.err) delete k.err.pay; return render(); }
-    case 'k-buy': { const k = kauf(); k.err = {}; if (!SERVER.zahlung && !k.pay) k.err.pay = 'Bitte eine Zahlungsart wählen.'; if (!k.widerruf) k.err.widerruf = 'Für die sofortige Lieferung brauchen wir deine Zustimmung.'; if (Object.keys(k.err).length) return render(); if (SERVER.zahlung) return kaufStarten(); k.paid = true; k.when = Date.now(); k.test = true; S._feier = 'gekauft'; persist(); return go('gekauft'); }
+    case 'k-buy': { const k = kauf(); k.err = {}; if (!SERVER.zahlung && !k.pay) k.err.pay = 'Bitte eine Zahlungsart wählen.'; if (!k.bedingungen) k.err.bedingungen = 'Bitte stimme den AGB zu.'; if (!k.widerruf) k.err.widerruf = 'Für die sofortige Lieferung brauchen wir deine Zustimmung.'; if (Object.keys(k.err).length) return render(); if (SERVER.zahlung) return kaufStarten(); k.paid = true; k.when = Date.now(); k.test = true; S._feier = 'gekauft'; persist(); return go('gekauft'); }
     case 'k-dl': return saveDatei();
+    case 'ki-widerrufen': { if (window.FotoKI && window.FotoKI.widerrufen) window.FotoKI.widerrufen(); toast('Einwilligung widerrufen. Die KI wertet keine Fotos mehr aus; beim nächsten Foto fragt die App wieder.'); return render(); }
     case 'copycode': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'download': return saveDatei();
     default: return;
@@ -3842,12 +3864,15 @@ function boot() {
    „Gesendet“ erst mit dem Code, keine Scheinzahlung, die Datei ist kostenlos.
    Schalter: window.KONFIG.pilot in /config.js */
 let PILOT = !!(window.KONFIG && window.KONFIG.pilot);
-const SERVER = { daten: false, zahlung: false, konten: false, attrappe: false, testmodus: false, preise: null };
+const SERVER = { daten: false, zahlung: false, konten: false, attrappe: false, testmodus: false, preise: null, zahlarten: null, recht: null };
 const LOGO = (px) => (window.Logo ? window.Logo.svg(px) : '');
 const WM = () => (window.Marke ? window.Marke.wort() : 'eeziframes');
+/* Rechtslinks unter jedem Bildschirm (render hängt sie an, wo sie fehlen; Messbildschirme ohne Platz zeigen sie im Glossar-Blatt):
+   „Vertrag widerrufen“ zuerst und als Knopf (§ 356a BGB), dazu der Widerruf der KI-Einwilligung, sobald sie erteilt ist (Art. 7 Abs. 3
+   DSGVO: so einfach wie die Erteilung) */
 function rechtLinks() {
-  const C = window.KONFIG || {};
-  return '<div class="foot-links recht"><a class="link" href="/agb/" target="_blank" rel="noopener">AGB</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a><a class="link" href="/cookies/" target="_blank" rel="noopener">Cookies</a><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a><a class="link widerruf" href="/widerruf/" target="_blank" rel="noopener">Vertrag widerrufen</a></div>';
+  const C = window.KONFIG || {}, ki = window.FotoKI && window.FotoKI.eingewilligt && window.FotoKI.eingewilligt();
+  return '<div class="foot-links recht"><a class="link widerruf" href="/widerruf/" target="_blank" rel="noopener">Vertrag widerrufen</a><a class="link" href="/agb/" target="_blank" rel="noopener">AGB</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a><a class="link" href="/cookies/" target="_blank" rel="noopener">Cookies</a><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a>' + (ki ? '<button type="button" class="link" data-act="ki-widerrufen">KI-Einwilligung widerrufen</button>' : '') + '</div>';
 }
 const SEND_IC = '<div class="okmark-l" data-lottie="senden"><span class="lottie-still"><svg class="okmark send" viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--accent-soft)"></circle><path d="M17 31l29-12-9 28-7-10z" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linejoin="round"></path><path d="M30 37l16-18" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round"></path></svg></span></div>';
 /* Versand im Kundenlink: der Code geht per WhatsApp oder E-Mail an den Betrieb */
@@ -3872,7 +3897,7 @@ SCREENS.gesendet = () => {
    daten:   Aufmaße gehen direkt an den Betrieb, ohne Code-Umweg; der Link wird beim Öffnen geprüft
    zahlung: das Aufmaßblatt wird über Stripe bezahlt */
 async function serverStart() {
-  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; } } catch (e) { /* ohne Server weiter */ }
+  try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
   PILOT = !SERVER.daten;
   if (SERVER.daten) document.querySelectorAll('.fx-pilot').forEach((e) => e.remove());
   const q = new URLSearchParams(location.search), bezahlt = q.get('bezahlt'), t = LINK_TOKEN; LINK_TOKEN = null;

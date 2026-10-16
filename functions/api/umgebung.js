@@ -12,12 +12,18 @@
      ZENTRALE_PASSWORT        Passwort der Zentrale des Inhabers (/zentrale/), mindestens 12 Zeichen; ohne bleibt die Zentrale zu
      ZENTRALE_2FA             optional, empfohlen: Schlüssel für eine Authenticator-App (Base32, erzeugt die Zentrale unter
                               Einstellungen → Zweiter Faktor); dann braucht die Anmeldung zusätzlich den sechsstelligen Code
-     MAIL_API_KEY             E-Mails des Servers über Brevo (post.js): Vertragsbestätigung nach dem Kauf, Eingangsbestätigung eines Widerrufs
+     MAIL_API_KEY             E-Mails des Servers über Resend (post.js, Schlüssel re_…): Vertragsbestätigung nach dem Kauf,
+                              Eingangsbestätigung eines Widerrufs
 
-   Variablen (Typ Text, alle optional):
-     MAIL_ABSENDER            bei Brevo bestätigte Absenderadresse, z. B. kontakt@eeziframes.com (Pflicht, wenn MAIL_API_KEY gesetzt ist)
+   Variablen (Typ Text):
+     MAIL_ABSENDER            bei Resend bestätigte Absenderadresse, z. B. kontakt@eeziframes.com (Pflicht, wenn MAIL_API_KEY gesetzt ist)
      MAIL_KONTAKT             Postfach für Kopien an den Betreiber (eingegangene Widerrufe); ohne: MAIL_ABSENDER
-     MWST                     0 = Kleinunternehmerregelung (§ 19 UStG): keine Umsatzsteuer, Hinweis auf jeder Rechnung; sonst 19 %
+     MWST                     Pflicht vor dem Verkauf mit echtem Geld: 0 = Kleinunternehmerregelung (§ 19 UStG, keine Umsatzsteuer, Hinweis
+                              auf jeder Rechnung), 19 = 19 % Umsatzsteuer. Ohne Angabe rechnet die Vorschau mit 19 %, die Kasse im Live-Modus
+                              bleibt zu (recht.js), damit niemand versehentlich Umsatzsteuer ausweist, die er nicht schuldet (§ 14c UStG)
+     ZAHLARTEN                Zahlungsarten an der Kasse des Aufmaßblatts, durch Komma getrennt: card (Karte, dazu Apple Pay und Google Pay
+                              auf passenden Geräten), paypal, klarna; Standard card. Die App nennt sie vor dem Kauf (§ 312j Abs. 1 BGB);
+                              in Stripe müssen sie unter Einstellungen → Zahlungsmethoden eingeschaltet sein
      PREIS_AUFMASS_CENT 799 · PREIS_PROJEKT 9 · FREI_PROJEKTE 3 · PREIS_ABO 49 · ABO_INKL 10 · PREIS_ABO_EXTRA 5 · PREIS_PLUS 79
      Nur falls eigene Objekte in Stripe genutzt werden sollen; sonst legt der Server Preise und Steuersätze selbst an (stripe.js):
      STRIPE_PRICE_AUFMASS     Preis-ID des Aufmaßblatts (sonst wird der Betrag je Kauf gesetzt, PREIS_AUFMASS_CENT)
@@ -59,19 +65,30 @@ export function konfig(env) {
   /* Mailversand (post.js): Schlüssel als Secret, Absender als Text; ohne gültigen Absender verschickt der Server nichts */
   const mailKey = String(env.MAIL_API_KEY || '').trim(), mailAb = String(env.MAIL_ABSENDER || '').trim().toLowerCase(), mailKontakt = String(env.MAIL_KONTAKT || '').trim().toLowerCase();
   const adresse = (m) => /^[^\s@<>()",;]+@[^\s@<>()",;]+\.[^\s@<>()",;]{2,}$/.test(m);
-  if (mailKey && !adresse(mailAb)) hinweise.push('MAIL_ABSENDER: fehlt oder ist keine E-Mail-Adresse. Eingetragen gehört die bei Brevo bestätigte Absenderadresse.');
+  if (mailKey && !/^re_/.test(mailKey)) hinweise.push('MAIL_API_KEY: beginnt nicht mit re_. Eingetragen gehört ein API-Schlüssel von Resend (API Keys → Create API Key).');
+  if (mailKey && !adresse(mailAb)) hinweise.push('MAIL_ABSENDER: fehlt oder ist keine E-Mail-Adresse. Eingetragen gehört eine Adresse der bei Resend bestätigten Domain.');
   if (mailKontakt && !adresse(mailKontakt)) hinweise.push('MAIL_KONTAKT: ist keine E-Mail-Adresse.');
+  /* Umsatzsteuer: nur 0 oder 19 gelten als festgelegt (1 als ältere Schreibweise für 19) */
+  const mwstRoh = String(env.MWST == null ? '' : env.MWST).trim(), mwstGesetzt = ['0', '19', '1'].includes(mwstRoh);
+  if (mwstRoh && !mwstGesetzt) hinweise.push('MWST: erlaubt sind 0 (Kleinunternehmerregelung, keine Umsatzsteuer) oder 19 (19 % Umsatzsteuer).');
+  /* Zahlungsarten der Kasse des Aufmaßblatts: nur solche, die sofort bestätigen (das Blatt wird sofort geliefert) */
+  const zRoh = String(env.ZAHLARTEN || 'card').split(',').map((z) => z.trim().toLowerCase()).filter(Boolean), zOk = zRoh.filter((z) => ZAHLARTEN_OK.includes(z));
+  if (zRoh.some((z) => !ZAHLARTEN_OK.includes(z))) hinweise.push('ZAHLARTEN: erlaubt sind ' + ZAHLARTEN_OK.join(', ') + ' (durch Komma getrennt).');
+  const zahlarten = zOk.length ? Array.from(new Set(zOk)) : ['card'];
   const mailAttrappe = env.MAIL_ATTRAPPE === '1' && !mailKey;
   const post = (mailKey && adresse(mailAb)) || mailAttrappe ? { key: mailKey, absender: mailAb || 'kontakt@eeziframes.invalid', kontakt: adresse(mailKontakt) ? mailKontakt : (mailAb || 'kontakt@eeziframes.invalid'), attrappe: mailAttrappe } : null;
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
     zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1', post: post,
-    ki: !!env.ANTHROPIC_API_KEY,
+    ki: !!env.ANTHROPIC_API_KEY, mwstGesetzt: mwstGesetzt, zahlarten: zahlarten,
     geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
-    preise: { aufmass: num(env.PREIS_AUFMASS_CENT, 799) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, 49), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, 79), mwst: env.MWST !== '0' }
+    preise: { aufmass: num(env.PREIS_AUFMASS_CENT, 799) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, 49), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, 79), mwst: mwstRoh !== '0' }
   };
 }
+export const ZAHLARTEN_OK = ['card', 'paypal', 'klarna'];
+/* Live-Modus von Stripe: echtes Geld (sk_live_…, rk_live_…) */
+export const live = (k) => !!(k && k.stripe && !k.stripe.test);
 export const json = (obj, status, extra) => new Response(JSON.stringify(obj), { status: status || 200, headers: Object.assign({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }, extra || {}) });
 export const fehler = (text, status) => json({ ok: false, fehler: text }, status || 400);
 /* extra: zusätzliche Felder der Fehlerantwort, z. B. { gesperrt: true } */

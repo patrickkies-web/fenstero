@@ -4,11 +4,18 @@
    Für die Zentrale (zentrale.js): alle Betriebe lesen, ein Konto löschen, Käufe lesen, Protokoll der Eingriffe, eigene Statistik
    (Tageszähler über die Funktion eeziframes_zaehlen), Zwischenstände der Kundenlinks (entwuerfe). Protokoll, Statistik und
    Zwischenstände sind optional: Fehlen die Tabellen noch (schema.sql nicht erneut ausgeführt), melden die Funktionen das
-   (null, undefined bzw. false), statt einen Fehler zu werfen. Ebenso die Aufmaße der Hauseigentümer mit Konto (eigene, eigene.js). */
+   (null, undefined bzw. false), statt einen Fehler zu werfen. Ebenso die Aufmaße der Hauseigentümer mit Konto (eigene, eigene.js).
+   Zahlungen halten seit Oktober 2026 auch die Zustimmung an der Kasse (daten), den Zeitpunkt der Zahlung und der zugestellten
+   Vertragsbestätigung; fehlen diese Spalten noch, schreibt der Server ohne sie weiter und meldet das im Log. */
 import { ApiFehler, sbNeu } from './umgebung.js';
 
-const attrappe = { betriebe: new Map(), zahlungen: new Map(), ereignisse: new Set(), codes: new Map(), protokoll: [], statistik: new Map(), entwuerfe: new Map(), eigene: new Map() };
+const attrappe = { betriebe: new Map(), zahlungen: new Map(), ereignisse: new Set(), codes: new Map(), nutzer: new Set(), protokoll: [], statistik: new Map(), entwuerfe: new Map(), eigene: new Map() };
 const kopie = (o) => (o == null ? o : JSON.parse(JSON.stringify(o)));
+/* Vertragsbestätigung: so oft versucht der tägliche Lauf eine nicht zugestellte nachzuholen (bestaetigung.js) */
+export const VERSUCHE = 12;
+/* Spalten der Zahlungen, die erst eine neuere schema.sql anlegt */
+const NEU = ['daten', 'bezahlt_am', 'bestaetigt_am', 'versuche'];
+const ohneNeu = (o) => { const x = Object.assign({}, o); NEU.forEach((s) => delete x[s]); return x; };
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
 export function speicher(k) {
@@ -32,8 +39,16 @@ function attrappeSpeicher() {
     betriebFelder: async (id, patch) => { const r = B.get(id); if (r) Object.assign(r, kopie(patch)); return kopie(r); },
     betriebeMitKunde: async () => Array.from(B.values()).filter((r) => r.stripe_customer).map(kopie),
     zahlungHolen: async (session) => kopie(attrappe.zahlungen.get(session) || null),
-    zahlungAnlegen: async (row) => { attrappe.zahlungen.set(row.stripe_session, Object.assign({ id: uuid(), created_at: new Date().toISOString() }, kopie(row))); return true; },
+    zahlungAnlegen: async (row) => { attrappe.zahlungen.set(row.stripe_session, Object.assign({ id: uuid(), created_at: new Date().toISOString(), daten: {}, bezahlt_am: null, bestaetigt_am: null, versuche: 0 }, kopie(row))); return true; },
     zahlungAendern: async (session, patch) => { const z = attrappe.zahlungen.get(session); if (z) Object.assign(z, kopie(patch)); return !!z; },
+    /* wie in der Datenbank: nur eine noch nicht bezahlte Zahlung wird bezahlt (true), sonst nichts (false) */
+    zahlungBezahlt: async (row) => {
+      const z = attrappe.zahlungen.get(row.stripe_session);
+      if (z) { if (z.status === 'bezahlt') return false; Object.assign(z, { status: 'bezahlt', token: row.token, bezahlt_am: row.bezahlt_am || new Date().toISOString() }, row.mail ? { mail: row.mail } : {}); return true; }
+      attrappe.zahlungen.set(row.stripe_session, Object.assign({ id: uuid(), created_at: new Date().toISOString(), bestaetigt_am: null, versuche: 0 }, kopie(row), { status: 'bezahlt' })); return true;
+    },
+    zahlungenUnbestaetigt: async (seit, alle) => Array.from(attrappe.zahlungen.values()).filter((z) => z.status === 'bezahlt' && z.art === 'aufmass' && !z.bestaetigt_am && (alle || (z.versuche || 0) < VERSUCHE) && String(z.created_at) >= seit).map(kopie),
+    zahlungenAltLoeschen: async (grenze) => { for (const [s, z] of attrappe.zahlungen) if (z.status === 'bezahlt' && z.created_at < grenze) attrappe.zahlungen.delete(s); return true; },
     ereignisNeu: async (id) => { if (attrappe.ereignisse.has(id)) return false; attrappe.ereignisse.add(id); return true; },
     ereignisBekannt: async (id) => attrappe.ereignisse.has(id),
     /* Zentrale */
@@ -42,8 +57,9 @@ function attrappeSpeicher() {
     zahlungenAlle: async () => Array.from(attrappe.zahlungen.values()).map(kopie).sort((x, y) => String(y.created_at).localeCompare(String(x.created_at))),
     zahlungenAufraeumen: async (grenze) => { for (const [s, z] of attrappe.zahlungen) if (z.status === 'offen' && z.created_at < grenze) attrappe.zahlungen.delete(s); return true; },
     protokollSchreiben: async (e) => { attrappe.protokoll.unshift(Object.assign({ id: uuid(), zeit: new Date().toISOString(), betrieb: null, text: '', daten: {}, netz: null }, kopie(e))); return true; },
-    protokollLesen: async (o) => { o = o || {}; const alle = attrappe.protokoll.filter((e) => (!o.betrieb || e.betrieb === o.betrieb) && (!o.art || e.art === o.art)); return alle.slice(o.von || 0, (o.von || 0) + (o.anzahl || 100)).map(kopie); },
-    protokollAufraeumen: async (grenzeAnmeldung, grenzeAlle) => { attrappe.protokoll = attrappe.protokoll.filter((e) => !(e.zeit < grenzeAlle || (/^anmeldung/.test(e.art) && e.zeit < grenzeAnmeldung))); return true; },
+    protokollLesen: async (o) => { o = o || {}; const alle = attrappe.protokoll.filter((e) => (!o.betrieb || e.betrieb === o.betrieb) && (!o.art || e.art === o.art) && (!o.seit || e.zeit >= o.seit)); return alle.slice(o.von || 0, (o.von || 0) + (o.anzahl || 100)).map(kopie); },
+    /* grenzeWiderruf: Widerrufe bleiben bis zum Ende des dritten Jahres nach dem Eingang (zentrale.js, aufraeumen) */
+    protokollAufraeumen: async (grenzeAnmeldung, grenzeAlle, grenzeWiderruf) => { attrappe.protokoll = attrappe.protokoll.filter((e) => /^widerruf/.test(e.art) ? !(grenzeWiderruf && e.zeit < grenzeWiderruf) : !(e.zeit < grenzeAlle || (/^anmeldung/.test(e.art) && e.zeit < grenzeAnmeldung))); return true; },
     zaehlen: async (tag, schluessel) => { schluessel.forEach((s) => { const k2 = tag + '|' + s; attrappe.statistik.set(k2, (attrappe.statistik.get(k2) || 0) + 1); }); return true; },
     statistikLesen: async (von) => Array.from(attrappe.statistik.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).filter((r) => r.tag >= von),
     /* wie die Funktion eeziframes_auswerten in der Datenbank: Tagessummen je Art (aufruf:*, besuch:*, bot:*) und Summen je Schlüssel */
@@ -80,9 +96,11 @@ function attrappeSpeicher() {
     /* in der App gelöscht: Inhalt weg, Löschmarke bleibt (eigene.js) */
     eigenesWeg: async (kennung) => { const r = attrappe.eigene.get(kennung); if (!r || (r.meta && r.meta.entfernt)) return false; Object.assign(r, { daten: {}, meta: { entfernt: Date.now() }, stand: 0, version: -1, updated_at: new Date().toISOString() }); return true; },
     eigeneWegVonNutzer: async (nutzer) => { const t = Date.now(), iso = new Date().toISOString(); for (const r of attrappe.eigene.values()) if (r.nutzer === nutzer && !(r.meta && r.meta.entfernt)) Object.assign(r, { daten: {}, meta: { entfernt: t }, stand: 0, version: -1, updated_at: iso }); return true; },
-    /* nur Attrappe: Anmeldecodes */
+    /* nur Attrappe: Anmeldecodes und angemeldete Adressen (wie die Nutzer in Supabase Auth) */
     codeMerken: (mail, code) => attrappe.codes.set(mail, code),
-    codeLesen: (mail) => attrappe.codes.get(mail)
+    codeLesen: (mail) => attrappe.codes.get(mail),
+    nutzerMerken: (mail) => attrappe.nutzer.add(mail),
+    nutzerBekannt: (mail) => attrappe.nutzer.has(mail)
   };
 }
 
@@ -95,6 +113,8 @@ function supabaseSpeicher(k) {
     const r = await fetch(basis + pfad, { method: init.method || 'GET', headers: Object.assign(kopf, init.headers || {}), body: init.body ? JSON.stringify(init.body) : undefined });
     if (r.status === 409) return { konflikt: true };
     if (r.status === 404 && init.optional) { await r.text().catch(() => ''); return { fehlt: true }; } // Tabelle oder Funktion noch nicht angelegt (PGRST205/PGRST202)
+    /* Spalte noch nicht angelegt (schema.sql nicht erneut ausgeführt): PGRST204 beim Schreiben, 42703 beim Filtern */
+    if (r.status === 400 && init.spalten) { const t = await r.text().catch(() => ''); if (/PGRST204|42703|does not exist|Could not find the/.test(t)) { console.log('Datenbank: neue Spalten fehlen, bitte supabase/schema.sql erneut ausführen (' + pfad.split('?')[0] + ')'); return { spalteFehlt: true }; } console.log('Supabase-Fehler', r.status, pfad.split('?')[0], t.slice(0, 200)); throw new ApiFehler('Datenbank antwortet nicht (' + r.status + ')', 502); }
     if (!r.ok) { console.log('Supabase-Fehler', r.status, pfad.split('?')[0], (await r.text().catch(() => '')).slice(0, 200)); throw new ApiFehler('Datenbank antwortet nicht (' + r.status + ')', 502); }
     if (r.status === 204) return null;
     const text = await r.text(); return text ? JSON.parse(text) : null;
@@ -135,8 +155,25 @@ function supabaseSpeicher(k) {
     betriebFelder: async (id, patch) => eins(await sb('betriebe?id=eq.' + q(id), { method: 'PATCH', body: patch })),
     betriebeMitKunde: async () => (await alle('betriebe?stripe_customer=not.is.null&select=*&order=id.asc')) || [],
     zahlungHolen: async (session) => eins(await sb('zahlungen?stripe_session=eq.' + q(session) + '&select=*')),
-    zahlungAnlegen: async (row) => { await sb('zahlungen?on_conflict=stripe_session', { method: 'POST', body: row, prefer: 'resolution=merge-duplicates,return=representation' }); return true; },
-    zahlungAendern: async (session, patch) => { const r = await sb('zahlungen?stripe_session=eq.' + q(session), { method: 'PATCH', body: patch }); return Array.isArray(r) && r.length > 0; },
+    /* Neue Spalten (daten, bezahlt_am, bestaetigt_am, versuche) fehlen in einer älteren Datenbank: dann ohne sie schreiben */
+    zahlungAnlegen: async (row) => { const r = await sb('zahlungen?on_conflict=stripe_session', { method: 'POST', body: row, prefer: 'resolution=merge-duplicates,return=representation', spalten: true }); if (r && r.spalteFehlt) await sb('zahlungen?on_conflict=stripe_session', { method: 'POST', body: ohneNeu(row), prefer: 'resolution=merge-duplicates,return=representation' }); return true; },
+    zahlungAendern: async (session, patch) => { let r = await sb('zahlungen?stripe_session=eq.' + q(session), { method: 'PATCH', body: patch, spalten: true }); if (r && r.spalteFehlt) { const p2 = ohneNeu(patch); if (!Object.keys(p2).length) return false; r = await sb('zahlungen?stripe_session=eq.' + q(session), { method: 'PATCH', body: p2 }); } return Array.isArray(r) && r.length > 0; },
+    /* Nur eine noch nicht bezahlte Zahlung wird bezahlt (true); war sie es schon, ändert sich nichts (false). So schickt nur einer von
+       zwei gleichzeitigen Wegen (Rückkehr und Webhook) die Vertragsbestätigung. Fehlt die Zeile, wird sie angelegt (Duplikat: false). */
+    zahlungBezahlt: async (row) => {
+      const patch = Object.assign({ status: 'bezahlt', token: row.token, bezahlt_am: row.bezahlt_am }, row.mail ? { mail: row.mail } : {});
+      let r = await sb('zahlungen?stripe_session=eq.' + q(row.stripe_session) + '&status=neq.bezahlt', { method: 'PATCH', body: patch, spalten: true });
+      if (r && r.spalteFehlt) r = await sb('zahlungen?stripe_session=eq.' + q(row.stripe_session) + '&status=neq.bezahlt', { method: 'PATCH', body: ohneNeu(patch) });
+      if (Array.isArray(r) && r.length) return true;
+      const neu = Object.assign({}, row, { status: 'bezahlt' });
+      let n = await sb('zahlungen?on_conflict=stripe_session', { method: 'POST', body: neu, prefer: 'resolution=ignore-duplicates,return=representation', spalten: true });
+      if (n && n.spalteFehlt) n = await sb('zahlungen?on_conflict=stripe_session', { method: 'POST', body: ohneNeu(neu), prefer: 'resolution=ignore-duplicates,return=representation' });
+      return Array.isArray(n) && n.length > 0;
+    },
+    /* Käufe ohne zugestellte Vertragsbestätigung (für den täglichen Lauf; alle: auch aufgegebene, für die Zentrale); null, wenn die
+       Spalten noch fehlen */
+    zahlungenUnbestaetigt: async (seit, alle) => { const r = await sb('zahlungen?status=eq.bezahlt&art=eq.aufmass&bestaetigt_am=is.null' + (alle ? '' : '&versuche=lt.' + VERSUCHE) + '&created_at=gte.' + q(seit) + '&select=*&order=created_at.asc&limit=' + (alle ? 200 : 50), { spalten: true }); return r && r.spalteFehlt ? null : r || []; },
+    zahlungenAltLoeschen: async (grenze) => { await sb('zahlungen?status=eq.bezahlt&created_at=lt.' + q(grenze), { method: 'DELETE', prefer: 'return=minimal' }); return true; },
     ereignisNeu: async (id) => { const r = await sb('ereignisse', { method: 'POST', body: { stripe_id: id } }); return !(r && r.konflikt); },
     ereignisBekannt: async (id) => !!eins(await sb('ereignisse?stripe_id=eq.' + q(id) + '&select=stripe_id')),
     /* Zentrale */
@@ -147,13 +184,15 @@ function supabaseSpeicher(k) {
     protokollSchreiben: async (e) => { const r = await sb('protokoll', { method: 'POST', body: e, prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); },
     protokollLesen: async (o) => {
       o = o || {};
-      const r = await sb('protokoll?select=*&order=zeit.desc,id.asc&limit=' + Math.min(500, o.anzahl || 100) + '&offset=' + (o.von || 0) + (o.betrieb ? '&betrieb=eq.' + q(o.betrieb) : '') + (o.art ? '&art=eq.' + q(o.art) : ''), { optional: true });
+      const r = await sb('protokoll?select=*&order=zeit.desc,id.asc&limit=' + Math.min(500, o.anzahl || 100) + '&offset=' + (o.von || 0) + (o.betrieb ? '&betrieb=eq.' + q(o.betrieb) : '') + (o.art ? '&art=eq.' + q(o.art) : '') + (o.seit ? '&zeit=gte.' + q(o.seit) : ''), { optional: true });
       return r && r.fehlt ? null : r || [];
     },
-    protokollAufraeumen: async (grenzeAnmeldung, grenzeAlle) => {
+    /* grenzeWiderruf: Widerrufe (und ihre nachgeholten Eingangsbestätigungen) bleiben bis zum Ende des dritten Jahres nach dem Eingang */
+    protokollAufraeumen: async (grenzeAnmeldung, grenzeAlle, grenzeWiderruf) => {
       const a = await sb('protokoll?art=in.(anmeldung,anmeldung_fehlgeschlagen)&zeit=lt.' + q(grenzeAnmeldung), { method: 'DELETE', prefer: 'return=minimal', optional: true });
       if (a && a.fehlt) return false;
-      await sb('protokoll?zeit=lt.' + q(grenzeAlle), { method: 'DELETE', prefer: 'return=minimal', optional: true });
+      await sb('protokoll?art=not.like.widerruf*&zeit=lt.' + q(grenzeAlle), { method: 'DELETE', prefer: 'return=minimal', optional: true });
+      if (grenzeWiderruf) await sb('protokoll?art=like.widerruf*&zeit=lt.' + q(grenzeWiderruf), { method: 'DELETE', prefer: 'return=minimal', optional: true });
       return true;
     },
     zaehlen: async (tag, schluessel) => { const r = await sb('rpc/eeziframes_zaehlen', { method: 'POST', body: { p_tag: tag, p_schluessel: schluessel }, prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); },

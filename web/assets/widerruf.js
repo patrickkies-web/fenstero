@@ -1,5 +1,6 @@
 /* eeziframes · Widerrufsfunktion (/widerruf/, § 356a BGB): „Widerruf bestätigen“ schickt Name, Vertrag und E-Mail an /api/widerruf.
-   Der Server bestätigt den Eingang per E-Mail; die Seite zeigt dieselbe Bestätigung mit Datum und Uhrzeit. */
+   Der Server bestätigt den Eingang per E-Mail; die Seite zeigt dieselbe Bestätigung mit Datum und Uhrzeit. Ohne JavaScript schickt
+   der Browser das Formular selbst (method="post"), dann antwortet der Server mit der Bestätigungsseite (functions/api/widerruf.js). */
 (function () {
   'use strict';
   var form = document.getElementById('widerruf'), ok = document.getElementById('widerruf-ok');
@@ -43,7 +44,7 @@
         setze('wr-ok-vertrag', j.inhalt.vertrag);
         setze('wr-ok-name', j.inhalt.name);
         setze('wr-ok-mail', j.inhalt.mail);
-        setze('wr-ok-post', j.bestaetigt ? 'Eine Eingangsbestätigung mit diesen Angaben haben wir an ' + j.an + ' geschickt.' : 'Die Bestätigung per E-Mail konnte gerade nicht verschickt werden. Bitte speichern Sie diese Seite als Nachweis; wir melden uns bei Ihnen.');
+        setze('wr-ok-post', j.bestaetigt ? 'Eine Eingangsbestätigung mit diesen Angaben haben wir an ' + j.an + ' geschickt.' : 'Die Eingangsbestätigung per E-Mail senden wir Ihnen, sobald unser E-Mail-Versand wieder erreichbar ist. Diese Seite können Sie zusätzlich speichern oder ausdrucken.');
         form.hidden = true; ok.hidden = false;
         ok.setAttribute('tabindex', '-1'); ok.focus();
       })

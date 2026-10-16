@@ -22,10 +22,12 @@ import { ApiFehler, hmac, b64url, erlaubt, ip, netzKurz, anschluss, gleich, zufa
 import { anmeldungLoeschen, anmeldungLesen, anmeldungenAlle } from './auth.js';
 import { melden, abrechnungslauf, sicht } from './konten.js';
 import { kennung } from './entwurf.js';
-import { entfernt } from './eigene.js';
+import { entfernt, kontenDa } from './eigene.js';
 /* Aufmaß eines Hauseigentümers mit Besitzer, keine Löschmarke (eigene.js) */
 const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
 import { auswerten, tagBerlin, browserName, systemName, zaehlen } from './statistik.js';
+import { verkaufStand } from './recht.js';
+import { live } from './umgebung.js';
 
 const X = () => globalThis.Abrechnung;
 const DAUER = 8 * 3600 * 1000;
@@ -33,6 +35,32 @@ const TAG = 864e5;
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
 const rund = (n) => Math.round((Number(n) || 0) * 100) / 100;
 const KOPF = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
+
+/* ---------- Verträge mit Verbrauchern: Hinweise für die Übersicht ----------
+   - Kasse im Live-Modus geschlossen, weil etwas fehlt (recht.js, verkaufStand)
+   - Käufe ohne zugestellte Vertragsbestätigung: Das Widerrufsrecht dieser Käufer ist nicht erloschen (bestaetigung.js)
+   - Widerrufe der letzten 30 Tage ohne Eingangsbestätigung (widerruf.js); der tägliche Lauf holt beides nach */
+async function rechtHinweise(ctx, sp) {
+  const out = [], k = ctx.k;
+  try {
+    const v = await verkaufStand(k, ctx.env, ctx.url.origin, sp ? await kontenDa(sp) : false);
+    if (live(k) && !v.bereit) out.push({ art: 'bad', text: 'Die Kasse für Hauseigentümer ist geschlossen. Es fehlt: ' + v.fehlt.join('; ') + '.', ziel: 'einstellungen' });
+    else if (!v.bereit) out.push({ art: 'info', text: 'Vor dem Verkauf mit echtem Geld fehlt noch: ' + v.fehlt.join('; ') + '.', ziel: 'einstellungen' });
+  } catch (e) { /* Hinweis ist entbehrlich */ }
+  try {
+    const offen = sp && sp.zahlungenUnbestaetigt ? await sp.zahlungenUnbestaetigt(new Date(Date.now() - 400 * TAG).toISOString(), true) : null;
+    const alt = (offen || []).filter((z) => Date.now() - (Date.parse(z.bezahlt_am || z.created_at || '') || 0) > 30 * 60 * 1000);
+    if (alt.length) out.push({ art: 'bad', text: X().nW(alt.length, 'Kauf', 'Käufe') + ' ohne zugestellte Vertragsbestätigung (' + alt.slice(0, 3).map((z) => z.mail || z.kennung).join(', ') + (alt.length > 3 ? ' …' : '') + '). Solange sie fehlt, ist das Widerrufsrecht nicht erloschen. Der tägliche Lauf versucht es erneut; haben sich die AGB seit dem Kauf geändert, bitte von Hand bestätigen.', ziel: 'kaeufe' });
+  } catch (e) { /* Spalten fehlen noch */ }
+  try {
+    const seit = new Date(Date.now() - 30 * TAG).toISOString();
+    const [ein, erledigt] = await Promise.all([sp.protokollLesen({ art: 'widerruf', seit: seit, anzahl: 500 }), sp.protokollLesen({ art: 'widerruf_bestaetigt', seit: seit, anzahl: 500 })]);
+    const fertig = new Set((erledigt || []).map((e) => e.daten && e.daten.zu));
+    const ohne = (ein || []).filter((e) => !(e.daten && e.daten.bestaetigt) && !fertig.has(e.id));
+    if (ohne.length) out.push({ art: 'bad', text: X().nW(ohne.length, 'Widerruf', 'Widerrufe') + ' ohne Eingangsbestätigung per E-Mail. Der tägliche Lauf schickt sie nach, sobald der Mailversand geht; sonst bitte selbst bestätigen.', ziel: 'protokoll' });
+  } catch (e) { /* Protokoll fehlt noch */ }
+  return out;
+}
 
 /* ---------- Sitzung ---------- */
 const schluessel = (k) => 'eeziframes-zentrale|' + k.zentrale.passwort + '|' + k.zentrale.totp + '|' + k.geheimnis;
@@ -292,6 +320,8 @@ export const ZENTRALE = {
     auff.slice(0, 5).forEach((x) => hinweise.push({ art: 'warn', text: 'Mehrfachnutzung prüfen: ' + (x.name || 'Betrieb') + ', Projekt ' + (x.nr || '?') + ': ' + x.gruende.join(', ') + '.', ziel: 'betrieb/' + x.betrieb }));
     if (auff.length > 5) hinweise.push({ art: 'warn', text: 'Dazu ' + X().nW(auff.length - 5, 'weiterer auffälliger Kundenlink', 'weitere auffällige Kundenlinks') + '.', ziel: 'betriebe' });
     kaeufeAuffaellig(kaeufe).slice(0, 3).forEach((x) => hinweise.push({ art: 'warn', text: x.mail + ' hat ' + x.anzahl + ' Aufmaßblätter gekauft: vielleicht ein Betrieb, der die Variante für Hauseigentümer nutzt.', ziel: 'kaeufe' }));
+    /* Verträge mit Verbrauchern: Kasse im Live-Modus geschlossen, Vertragsbestätigungen und Eingangsbestätigungen, die noch fehlen */
+    (await rechtHinweise(ctx, sp)).forEach((h) => hinweise.push(h));
     return {
       ok: true,
       kpi: {
@@ -510,9 +540,13 @@ export const ZENTRALE = {
    Anmeldungen ohne Betrieb nach 30 Tagen ohne Nutzung. Schlägt etwas fehl, wird nichts gelöscht und beim nächsten Lauf neu versucht. */
 export async function aufraeumen(k, sp) {
   if (!sp) return { ok: false };
-  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, anmeldungen: 0, entwuerfe: 0, entwuerfeGeleert: 0, eigene: 0 };
-  try { out.protokoll = await sp.protokollAufraeumen(new Date(jetzt - 90 * TAG).toISOString(), new Date(jetzt - 3 * 365 * TAG).toISOString()); } catch (e) { out.ok = false; }
+  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, kaeufe: false, anmeldungen: 0, entwuerfe: 0, entwuerfeGeleert: 0, eigene: 0 };
+  /* Fristen ab Jahresende: Widerrufe bis Ende des dritten Jahres nach dem Eingang (Verjährung, §§ 195, 199 BGB), bezahlte Käufe bis
+     Ende des achten Jahres nach dem Kauf (Buchungsbelege, § 147 AO; die Rechnungen selbst bewahrt Stripe auf) */
+  const jahr = new Date(jetzt).getUTCFullYear(), jahresanfang = (j) => new Date(Date.UTC(j, 0, 1)).toISOString();
+  try { out.protokoll = await sp.protokollAufraeumen(new Date(jetzt - 90 * TAG).toISOString(), new Date(jetzt - 3 * 365 * TAG).toISOString(), jahresanfang(jahr - 3)); } catch (e) { out.ok = false; }
   try { out.kassen = await sp.zahlungenAufraeumen(new Date(jetzt - 30 * TAG).toISOString()); } catch (e) { out.ok = false; }
+  try { out.kaeufe = sp.zahlungenAltLoeschen ? await sp.zahlungenAltLoeschen(jahresanfang(jahr - 8)) : false; } catch (e) { out.ok = false; }
   if (k.supabase) {
     try {
       const [nutzer, rows, eig] = await Promise.all([anmeldungenAlle(k), sp.betriebeAlle(), sp.eigeneAlle ? sp.eigeneAlle() : null]);

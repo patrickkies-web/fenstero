@@ -9,16 +9,13 @@
    liest alte und neue Form); bei Thin-Ereignissen holt der Server das Objekt selbst, dann in dieser Version (zahlung.js).
    Attrappe (ZAHLUNG_ATTRAPPE=1): Rückkehr-Adressen mit test_-Kennungen, ohne Stripe. */
 import { ApiFehler, hmac, hex, zufall } from './umgebung.js';
+import { AGB_STAND, ZUSTIMMUNG, standText } from './recht.js';
 
 const VERSION = '2024-06-20';
-/* Nur für die Kasse des Aufmaßblatts: excluded_payment_method_types gibt es erst in neueren Versionen (in dieser Version fehlt
-   dafür payment_method_types, das die Kasse nicht nutzt). Ausgeschlossen sind Zahlarten, die erst nach Tagen bestätigen
-   (SEPA-Lastschrift, Überweisung): Das Blatt wird sofort geliefert. */
-const VERSION_KASSE = '2026-09-30.endive';
-const SPAETER = ['sepa_debit', 'customer_balance', 'sofort'];
 export const KLEINUNTERNEHMER = 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.';
-/* steht auf der Rechnung des Aufmaßblatts (dauerhafter Datenträger), zusätzlich zur Vertragsbestätigung per E-Mail (bestaetigung.js) */
-export const ZUSTIMMUNG = 'Sie haben vor dem Kauf ausdrücklich zugestimmt, dass wir vor Ablauf der Widerrufsfrist mit der Bereitstellung des Aufmaßblatts beginnen, und bestätigt, dass Sie dadurch mit Beginn der Bereitstellung Ihr Widerrufsrecht verlieren.';
+/* steht auf der Rechnung des Aufmaßblatts (dauerhafter Datenträger), zusätzlich zur Vertragsbestätigung per E-Mail (bestaetigung.js):
+   der Haken an der Kasse im Wortlaut und die AGB-Fassung */
+export const rechnungsText = (z, origin) => 'Ihre Zustimmung beim Kauf: „' + ((z && z.text) || ZUSTIMMUNG) + '“ Es gelten unsere AGB, Stand ' + standText((z && z.agb) || AGB_STAND) + ': ' + origin + '/agb/';
 
 function flach(obj, prefix, out) {
   out = out || [];
@@ -71,6 +68,10 @@ const label = (pm) => {
 };
 const idVon = (v) => (v && typeof v === 'object' ? v.id : v) || '';
 const LAUFEND = ['active', 'trialing', 'past_due']; // Abo läuft (past_due: Zahlung wird noch versucht)
+/* Zustimmung an der Kasse aus den Metadaten einer Kasse (aufmassKasse); null bei älteren Kassen */
+export const zustimmungAus = (md) => (md && md.agb ? { agb: md.agb, text: md.zustimmung || '', zeit: md.zustimmung_zeit || '' } : null);
+/* Ende des laufenden Abrechnungsmonats eines Abos: bis API-Version 2025-02 am Abo, seither am Posten */
+const periodenEnde = (sub) => { const t = (sub && (sub.current_period_end || (sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].current_period_end))) || 0; return t ? new Date(t * 1000) : null; };
 
 /* Einmal gefundene Preise und Steuersätze je Instanz merken (Schlüsselende trennt Test- und Live-Modus) */
 const merk = new Map();
@@ -112,22 +113,25 @@ export function zahlungsdienst(k) {
   }
   return {
     art: s ? 'stripe' : 'attrappe',
-    /* Aufmaßblatt kaufen: Rückkehr nach /app/?bezahlt=<session> */
+    /* Aufmaßblatt kaufen: Rückkehr nach /app/?bezahlt=<session>. Nur Zahlungsarten, die sofort bestätigen (ZAHLARTEN, umgebung.js):
+       Das Blatt wird sofort geliefert. Der Zahlknopf heißt „Bezahlen“ (submit_type pay). Die Zustimmung an der Kasse (o.zustimmung:
+       AGB-Stand, Wortlaut, Zeitpunkt) steht in den Metadaten der Kasse und auf der Rechnung, auch ohne Datenbank nachweisbar. */
     async aufmassKasse(o) {
       if (!s) { const id = testId('test'); return { id: id, url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt=' + id + '&kennung=' + encodeURIComponent(o.kennung) }; }
-      const steuer = await steuersatz(true);
+      const steuer = await steuersatz(true), z = o.zustimmung || {};
       const posten = k.stripe.preisAufmass ? { price: k.stripe.preisAufmass, quantity: 1 } : { quantity: 1, price_data: { currency: 'eur', unit_amount: Math.round(k.preise.aufmass * 100), tax_behavior: steuer ? 'inclusive' : undefined, product_data: { name: 'eeziframes Aufmaßblatt', description: 'Ihr Fenster-Aufmaß als PDF: alle Maße, Fotoauswertung, Wünsche, mit Code für den Fensterbauer' } } };
       if (steuer) posten.tax_rates = [steuer];
-      const sess = await s.post('/checkout/sessions', { mode: 'payment', locale: 'de', customer_email: o.mail, client_reference_id: o.kennung, success_url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, line_items: [posten], excluded_payment_method_types: SPAETER, invoice_creation: { enabled: true, invoice_data: Object.assign({ description: ZUSTIMMUNG + ' Es gelten unsere AGB: ' + new URL(o.zurueck).origin + '/agb/' }, k.preise.mwst ? {} : { footer: KLEINUNTERNEHMER }) }, payment_intent_data: { description: 'eeziframes Aufmaßblatt ' + o.kennung }, metadata: Object.assign({ art: 'aufmass', kennung: o.kennung }, o.nutzer ? { nutzer: o.nutzer } : {}) }, { version: VERSION_KASSE });
+      const sess = await s.post('/checkout/sessions', { mode: 'payment', locale: 'de', submit_type: 'pay', customer_email: o.mail, client_reference_id: o.kennung, success_url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, line_items: [posten], payment_method_types: k.zahlarten || ['card'], invoice_creation: { enabled: true, invoice_data: Object.assign({ description: rechnungsText(z, new URL(o.zurueck).origin) }, k.preise.mwst ? {} : { footer: KLEINUNTERNEHMER }) }, payment_intent_data: { description: 'eeziframes Aufmaßblatt ' + o.kennung }, metadata: Object.assign({ art: 'aufmass', kennung: o.kennung }, o.nutzer ? { nutzer: o.nutzer } : {}, z.agb ? { agb: z.agb, zustimmung: String(z.text || '').slice(0, 500), zustimmung_zeit: z.zeit || '' } : {}) });
       return { id: sess.id, url: sess.url };
     },
-    /* Ist die Kasse bezahlt? Liefert Kennung und E-Mail zurück. wartet: abgeschlossen, aber die Zahlung ist noch unterwegs */
+    /* Ist die Kasse bezahlt? Liefert Kennung, E-Mail und die Zustimmung an der Kasse zurück. wartet: abgeschlossen, aber die Zahlung
+       ist noch unterwegs */
     async kasseGeprueft(session) {
       if (!s) return session.startsWith('test_') ? { bezahlt: true, kennung: '', mail: '', betragCent: Math.round(k.preise.aufmass * 100) } : { bezahlt: false, wartet: session.startsWith('wartet_') };
       const sess = await s.get('/checkout/sessions/' + encodeURIComponent(session), { expand: ['payment_intent'] });
       if (sess.mode !== 'payment' || !sess.metadata || sess.metadata.art !== 'aufmass') return { bezahlt: false }; // nur Kassen für das Aufmaßblatt
-      const pi = sess.payment_intent && typeof sess.payment_intent === 'object' ? sess.payment_intent : null;
-      return { bezahlt: sess.payment_status === 'paid', wartet: sess.status === 'complete' && sess.payment_status === 'unpaid' && (!pi || pi.status === 'processing' || pi.status === 'requires_action'), kennung: (sess.metadata && sess.metadata.kennung) || sess.client_reference_id || '', mail: (sess.customer_details && sess.customer_details.email) || sess.customer_email || '', betragCent: sess.amount_total || 0, mode: sess.mode, subscription: idVon(sess.subscription), setupIntent: idVon(sess.setup_intent), customer: idVon(sess.customer) };
+      const pi = sess.payment_intent && typeof sess.payment_intent === 'object' ? sess.payment_intent : null, md = sess.metadata || {};
+      return { bezahlt: sess.payment_status === 'paid', wartet: sess.status === 'complete' && sess.payment_status === 'unpaid' && (!pi || pi.status === 'processing' || pi.status === 'requires_action'), kennung: md.kennung || sess.client_reference_id || '', mail: (sess.customer_details && sess.customer_details.email) || sess.customer_email || '', betragCent: sess.amount_total || 0, zustimmung: zustimmungAus(md), mode: sess.mode, subscription: idVon(sess.subscription), setupIntent: idVon(sess.setup_intent), customer: idVon(sess.customer) };
     },
     async kundeAnlegen(o) {
       if (!s) return 'cus_test_' + zufall(6);
@@ -190,19 +194,23 @@ export function zahlungsdienst(k) {
       const plan = ['abo', 'plus'].includes(sub.metadata && sub.metadata.plan) ? sub.metadata.plan : ['abo', 'plus'].includes(sess.metadata.plan) ? sess.metadata.plan : 'abo';
       return { session: session, subscription: sub.id, plan: plan, pay: pm ? label(pm) : null, pm: pm ? pm.id : '', customer: customer, betrieb: sess.metadata.betrieb || '', created: sess.created || 0, bezahlt: sess.payment_status === 'paid', bis: ende ? new Date(ende * 1000) : null };
     },
-    /* Bestehendes Abo auf einen anderen Plan umstellen (sofort, anteilig) oder zum Periodenende kündigen bzw. Kündigung zurücknehmen */
-    async aboAendern(subscription, plan) {
-      if (!s) return true;
+    /* Bestehendes Abo auf einen anderen Plan umstellen. Nach oben (Abo 10 → Plus): sofort, den Unterschied rechnet Stripe anteilig für
+       den Rest des laufenden Abrechnungsmonats ab (nächste Rechnung). Nach unten (o.ohneAusgleich): der Preis wechselt ohne Ausgleich,
+       der Monat ist schon bezahlt, die nächste Rechnung kommt zum kleineren Preis; bis zum Periodenende gilt im Konto der bisherige
+       Tarif (konten.js). Rückgabe: Ende des laufenden Abrechnungsmonats (Date) oder null (Attrappe) */
+    async aboAendern(subscription, plan, o) {
+      if (!s) return null;
       const [preisId, steuer] = await Promise.all([preis(plan), steuersatz(false)]);
       const sub = await s.get('/subscriptions/' + subscription);
       const item = sub.items && sub.items.data && sub.items.data[0];
-      await s.post('/subscriptions/' + subscription, { cancel_at_period_end: false, proration_behavior: 'create_prorations', items: [{ id: item ? item.id : undefined, price: preisId }], default_tax_rates: steuer ? [steuer] : undefined, metadata: { plan: plan } });
-      return true;
+      const neu = await s.post('/subscriptions/' + subscription, { cancel_at_period_end: false, proration_behavior: o && o.ohneAusgleich ? 'none' : 'create_prorations', items: [{ id: item ? item.id : undefined, price: preisId }], default_tax_rates: steuer ? [steuer] : undefined, metadata: { plan: plan } });
+      return periodenEnde(neu);
     },
+    /* Zum Ende des laufenden Abrechnungsmonats kündigen bzw. die Kündigung zurücknehmen. Rückgabe: Periodenende (Date) oder null */
     async aboKuendigen(subscription, zurueck) {
-      if (!s) return true;
-      await s.post('/subscriptions/' + subscription, { cancel_at_period_end: !zurueck });
-      return true;
+      if (!s) return null;
+      const neu = await s.post('/subscriptions/' + subscription, { cancel_at_period_end: !zurueck });
+      return periodenEnde(neu);
     },
     /* Abo sofort beenden (Zentrale: Konto löschen oder „sofort beenden“); ein schon beendetes Abo zählt als erledigt */
     async aboBeenden(subscription) {

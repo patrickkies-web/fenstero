@@ -35,6 +35,8 @@ const BASE = process.env.BASE || 'http://localhost:8788';
 const BILDER = process.env.BILDER || '';
 const NUR = process.env.NUR ? process.env.NUR.split(',') : null; // z. B. NUR=8 für einen Abschnitt
 const teil = (n) => !NUR || NUR.includes(String(n));
+const RECHT = await import('../functions/api/recht.js'); // Stand der AGB und Nutzungsbedingungen, Wortlaut der Zustimmung an der Kasse
+const KASSE = { agb: RECHT.AGB_STAND, zustimmung: RECHT.ZUSTIMMUNG };
 if (BILDER) mkdirSync(BILDER, { recursive: true });
 
 let fehlerZahl = 0;
@@ -238,17 +240,19 @@ if (teil(3)) {
   await page.evaluate(() => go('home')); await page.waitForTimeout(300);
   ok(/Dein Aufmaßblatt · 7,99 €/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('[data-act="k-dl"]').count() === 0, 'Startseite: Karte mit Preis statt kostenloser Datei');
   await page.evaluate(() => go('teilen')); await page.waitForTimeout(200);
-  // Kasse, Schritt 1: E-Mail und Zustimmung sind Pflicht
+  // Kasse, Schritt 1 (ohne Konto): die E-Mail ist Pflicht; den AGB stimmt man an der Kasse zu, für genau diesen Kauf
   await page.click('[data-act="k-start"]'); await page.waitForSelector('#k-mail');
   await page.click('.bb .btn.primary'); await page.waitForTimeout(200);
-  ok(await page.locator('.kf.bad').count() === 1 && await page.locator('.kcheck.bad').count() === 1 && await page.evaluate(() => S.screen === 'konto'), 'Ohne E-Mail und Zustimmung geht es nicht zur Zahlung');
-  await page.fill('#k-mail', 'kunde@beispiel.de'); await page.click('[data-in="kc"][data-f="agb"]'); await page.click('.bb .btn.primary'); await page.waitForTimeout(300);
+  ok(await page.locator('.kf.bad').count() === 1 && await page.locator('.kcheck').count() === 0 && await page.evaluate(() => S.screen === 'konto'), 'Ohne E-Mail geht es nicht zur Zahlung; die AGB kommen erst an der Kasse');
+  await page.fill('#k-mail', 'kunde@beispiel.de'); await page.click('.bb .btn.primary'); await page.waitForTimeout(300);
   t3 = await page.evaluate(() => document.body.textContent);
   ok(/Schritt 2 von 2/.test(t3) && /Aufmaßblatt als PDF/.test(t3) && /7,99 €/.test(t3) && /darin 19 % MwSt\./.test(t3) && /1,28 €/.test(t3) && /Testkauf abschließen/.test(t3) && /Pilotphase: Testkauf/.test(t3), 'Kasse: 7,99 € mit ausgewiesener MwSt. (1,28 €), im Pilot als Testkauf gekennzeichnet');
+  const kasse2 = await page.evaluate(() => ({ haken: Array.from(document.querySelectorAll('.kasse-recht .kcheck')).map((l) => l.textContent.trim()), an: Array.from(document.querySelectorAll('.kasse-recht .kcheck input')).some((i) => i.checked), wr: !!document.querySelector('.kasse-recht a[href="/agb/#widerrufsbelehrung"]') && !!document.querySelector('.kasse-recht a[href="/agb/#widerrufsformular"]') && !!document.querySelector('.kasse-recht a[href="/agb/"]') }));
+  ok(kasse2.haken.length === 2 && kasse2.haken[0] === 'Ich akzeptiere die AGB (Stand: ' + RECHT.standText(RECHT.AGB_STAND) + ').' && kasse2.haken[1] === RECHT.ZUSTIMMUNG && !kasse2.an && kasse2.wr, 'Kasse: zwei leere Haken, AGB mit Stand und die Zustimmung zur sofortigen Bereitstellung im Wortlaut des Servers; Widerrufsbelehrung und Muster-Widerrufsformular verlinkt');
   await foto(page, 'app-kasse');
   await page.click('.bb .btn.primary'); await page.waitForTimeout(200);
-  ok(await page.locator('.kerr').count() === 2 && await page.evaluate(() => !(S.kauf && S.kauf.paid) && S.screen === 'kasse'), 'Ohne Zahlungsart und Widerrufs-Zustimmung kein Kauf');
-  await page.click('[data-act="k-pay"][data-v="PayPal"]'); await page.click('[data-in="kc"][data-f="widerruf"]');
+  ok(await page.locator('.kerr').count() === 3 && await page.evaluate(() => !(S.kauf && S.kauf.paid) && S.screen === 'kasse'), 'Ohne Zahlungsart, AGB und Zustimmung zur sofortigen Bereitstellung kein Kauf');
+  await page.click('[data-act="k-pay"][data-v="PayPal"]'); await page.click('[data-in="kc"][data-f="bedingungen"]'); await page.click('[data-in="kc"][data-f="widerruf"]');
   await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gekauft"]'); await page.waitForTimeout(400);
   ok(/Freigeschaltet\./.test(await page.evaluate(() => document.body.textContent)) && await page.evaluate(() => S.kauf.paid === true && S.kauf.test === true && !S.kauf.token) && await page.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Testkauf: freigeschaltet, der Haken zeichnet sich (Lottie), als Test gekennzeichnet, ohne Nachweis');
   await foto(page, 'app-gekauft');
@@ -808,7 +812,7 @@ if (teil(8)) {
   await foto(page, 'srv-portal-neu');
   // Doppelkonto: gleiche Telefonnummer → kein Freikontingent
   const dupMail = 'dup-' + stempel + '@beispiel.de', dupTok = testToken(dupMail);
-  const dup = await api('/api/konto/registrieren', { firma: 'Prüf Zweitkonto ' + stempel, ap: 'Paul Prüf', tel: tel, plz: '50667', col: '#1f7a3d', agb: true }, dupTok);
+  const dup = await api('/api/konto/registrieren', { firma: 'Prüf Zweitkonto ' + stempel, ap: 'Paul Prüf', tel: tel, plz: '50667', col: '#1f7a3d', agb: RECHT.NB_STAND, unternehmer: true }, dupTok);
   ok(dup.ok && dup.konto.acc.freeQuota === 0 && dup.konto.acc.dupOf === firma, 'Zweites Konto mit derselben Telefonnummer bekommt keine kostenlosen Projekte');
   // Projekt anlegen → Link auf den eigenen Server
   await page.evaluate(() => { S.nl = { step: 1, kunde: 'Familie Server', kontakt: '0171 000 00 01', adresse: 'Serverweg 1, 50667 Köln', geb: 'efh', fz: '3 bis 5', plan: ['Fenster'], note: '', days: 14, du: false, err: {} }; });
@@ -953,10 +957,10 @@ if (teil(8)) {
   await kp2.fill('#s-mail', 'kaeufer@beispiel.de'); await kp2.click('[data-in="sc"][data-f="agb"]'); await kp2.click('.bb .btn.primary'); await kp2.waitForSelector('#s-code');
   await kp2.fill('#s-code', '123456'); await kp2.click('.bb .btn.primary'); await kp2.waitForSelector('[data-screen="kasse"]', { timeout: 10000 }); await kp2.waitForTimeout(300);
   const kasse = await kp2.evaluate(() => document.body.innerText);
-  ok(/Weiter zu Stripe · 7,99 €/.test(kasse) && /Zahlungsdienstleisters Stripe/.test(kasse) && /Testbetrieb/.test(kasse) && /Rechnung an kaeufer@beispiel\.de/.test(kasse) && !/Testkauf/.test(kasse) && await kp2.locator('[data-act="k-pay"]').count() === 0, 'Kasse im Servermodus: Zahlung bei Stripe, Rechnung an die E-Mail des Kontos, keine Scheinauswahl, kein Testkauf');
+  ok(/Weiter zu Stripe · 7,99 €/.test(kasse) && /Zahlungsdienstleisters Stripe/.test(kasse) && /Kredit- oder Debitkarte \(auf passenden Geräten auch Apple Pay oder Google Pay\)/.test(kasse) && /Testbetrieb/.test(kasse) && /Rechnung an kaeufer@beispiel\.de/.test(kasse) && !/Testkauf/.test(kasse) && await kp2.locator('[data-act="k-pay"]').count() === 0, 'Kasse im Servermodus: Zahlung bei Stripe mit den Zahlungsarten des Servers, Rechnung an die E-Mail des Kontos, keine Scheinauswahl, kein Testkauf');
   await kp2.click('.bb .btn.primary'); await kp2.waitForTimeout(200);
-  ok(await kp2.evaluate(() => S.screen === 'kasse' && !(S.kauf && S.kauf.paid)) && await kp2.locator('.kerr').count() === 1, 'Ohne Widerrufs-Zustimmung keine Kasse');
-  await kp2.click('[data-in="kc"][data-f="widerruf"]');
+  ok(await kp2.evaluate(() => S.screen === 'kasse' && !(S.kauf && S.kauf.paid)) && await kp2.locator('.kerr').count() === 2, 'Ohne Zustimmung zu AGB und sofortiger Bereitstellung keine Kasse');
+  await kp2.click('[data-in="kc"][data-f="bedingungen"]'); await kp2.click('[data-in="kc"][data-f="widerruf"]');
   await kp2.click('.bb .btn.primary');
   await kp2.waitForFunction(() => typeof S !== 'undefined' && S.screen === 'gekauft' && S.kauf && S.kauf.paid, null, { timeout: 12000 }); await kp2.waitForTimeout(500);
   const kauf = await kp2.evaluate(() => ({ token: S.kauf.token, session: S.kauf.session, kennung: S.kauf.kennung, test: !!S.kauf.test, url: location.search, txt: document.body.innerText, feier: (function () { const e = document.querySelector('.okmark-l[data-lottie="fertig"]'); return e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0 ? 1 : 0; })() }));
@@ -1323,6 +1327,7 @@ if (teil(11)) {
   try {
     const { api } = await import('../functions/api/router.js'), ko = await import('../functions/api/konten.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), stM = await import('../functions/api/stripe.js');
     const X = globalThis.Abrechnung, W = 'whsec_pruefung', B = 'https://eeziframes.com';
+    const fs11 = await import('node:fs'), path11 = await import('node:path'), url11 = await import('node:url'), W11 = path11.resolve(path11.dirname(url11.fileURLToPath(import.meta.url)), '..');
     const env = { STRIPE_SECRET_KEY: 'sk_test_pruefung11', STRIPE_WEBHOOK_SECRET: W, DATEN_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruefung' };
     const k = umg.konfig(env), sp = spM.speicher(k), zd = stM.zahlungsdienst(k);
     const rufe = async (pfad, body, token, e) => { const h = { accept: 'application/json', origin: B }; if (body) h['content-type'] = 'application/json'; if (token) h.authorization = 'Bearer ' + token; const r = await api(new Request(B + pfad, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined }), e || env, null); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
@@ -1331,7 +1336,7 @@ if (teil(11)) {
     const kassenSeit = (n) => st.log.slice(n).filter((e) => e.method === 'POST' && e.pfad === '/checkout/sessions');
     const tok = (m) => 'test.' + Buffer.from(m, 'utf8').toString('base64').replace(/=+$/, '');
     const monat = X.monthKey(), jetzt = Math.floor(Date.now() / 1000), sitzung = (r) => r.url.split('/').pop();
-    const registrieren = async (mail, firma, tel) => (await rufe('/api/konto/registrieren', { firma: firma, ap: 'Sina Stripe', tel: tel, plz: '50667', agb: true }, tok(mail))).konto.id;
+    const registrieren = async (mail, firma, tel) => (await rufe('/api/konto/registrieren', { firma: firma, ap: 'Sina Stripe', tel: tel, plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, tok(mail))).konto.id;
 
     // a) Status: Testmodus am Schlüssel erkannt
     const s1 = await rufe('/api/status'), s2 = await rufe('/api/status', null, null, { STRIPE_SECRET_KEY: ' sk_live_beispiel ' });
@@ -1341,30 +1346,43 @@ if (teil(11)) {
     let n0 = st.log.length;
     const TK = tok('kauf@beispiel.de'), sichern11 = (kennung) => rufe('/api/kunde/aufmass/' + kennung, { windows: [{ wid: 'w1', name: 'Fenster' }], proj: {}, stand: Date.now() }, TK);
     for (const k of ['pruef11abc', 'pruef11def', 'pruef11ghi']) await sichern11(k);
-    const k0 = await rufe('/api/zahlung/start', { mail: 'kauf@beispiel.de', kennung: 'pruef11abc' });
+    const k0 = await rufe('/api/zahlung/start', { ...KASSE, mail: 'kauf@beispiel.de', kennung: 'pruef11abc' });
     ok(k0._status === 401 && k0.anmelden && kassenSeit(n0).length === 0, 'Aufmaßblatt nur mit Konto: ohne Anmeldung keine Kasse (401)');
-    const k1 = await rufe('/api/zahlung/start', { kennung: 'pruef11abc' }, TK);
+    const k1 = await rufe('/api/zahlung/start', { ...KASSE, kennung: 'pruef11abc' }, TK);
     const kasse = kassenSeit(n0)[0], inkl = st.db.steuern.find((t) => t.metadata.eeziframes === 'mwst19-inkl');
     ok(kasse.p.customer_email === 'kauf@beispiel.de' && kasse.p.metadata.nutzer && kasse.p.metadata.kennung === 'pruef11abc', 'Kasse für das Konto: Rechnung an seine E-Mail, Konto und Aufmaß in den Metadaten');
-    ok(k1.ok && /^https:\/\/checkout\.stripe\.com\//.test(k1.url) && kasse.version === '2026-09-30.endive' && kasse.p.excluded_payment_method_types.includes('sepa_debit') && kasse.p.line_items[0].price_data.unit_amount === '799' && !!inkl && inkl.inclusive && inkl.percentage === 19 && kasse.p.line_items[0].tax_rates[0] === inkl.id && kasse.p.invoice_creation.enabled === 'true', 'Aufmaßblatt: Kasse über 7,99 € mit selbst angelegtem Steuersatz 19 % inklusive, mit Rechnung, ohne SEPA-Lastschrift (bestätigt erst nach Tagen)');
+    ok(k1.ok && /^https:\/\/checkout\.stripe\.com\//.test(k1.url) && kasse.version === '2024-06-20' && kasse.p.payment_method_types.join() === 'card' && kasse.p.submit_type === 'pay' && kasse.p.line_items[0].price_data.unit_amount === '799' && !!inkl && inkl.inclusive && inkl.percentage === 19 && kasse.p.line_items[0].tax_rates[0] === inkl.id && kasse.p.invoice_creation.enabled === 'true', 'Aufmaßblatt: Kasse über 7,99 € mit selbst angelegtem Steuersatz 19 % inklusive, mit Rechnung, nur mit den Zahlungsarten aus ZAHLARTEN (Standard Karte, keine SEPA-Lastschrift), Zahlknopf „Bezahlen“');
     const besch11 = ((kasse.p.invoice_creation || {}).invoice_data || {}).description || '';
-    ok(/ausdrücklich zugestimmt/.test(besch11) && /Widerrufsrecht verlieren/.test(besch11) && /\/agb\//.test(besch11), 'Rechnung des Aufmaßblatts nennt die Zustimmung zum sofortigen Beginn, den Verlust des Widerrufsrechts und die AGB');
-    ok(st.log.slice(n0).every((e) => e.auth === 'Basic ' + Buffer.from('sk_test_pruefung11:').toString('base64')) && st.log.slice(n0).filter((e) => e.pfad !== '/checkout/sessions').every((e) => e.version === '2024-06-20'), 'Anfragen an Stripe mit dem Geheimschlüssel und fester API-Version 2024-06-20 (nur die Kasse des Aufmaßblatts neuer)');
+    ok(besch11.includes('„' + RECHT.ZUSTIMMUNG + '“') && besch11.includes('Stand ' + RECHT.standText(RECHT.AGB_STAND)) && /\/agb\//.test(besch11) && kasse.p.metadata.agb === RECHT.AGB_STAND && kasse.p.metadata.zustimmung === RECHT.ZUSTIMMUNG && !isNaN(Date.parse(kasse.p.metadata.zustimmung_zeit)), 'Zustimmung an der Kasse im Wortlaut mit Stand der AGB auf der Rechnung und mit Zeitpunkt in den Metadaten der Kasse (Nachweis auch ohne Datenbank)');
+    ok(st.log.slice(n0).every((e) => e.auth === 'Basic ' + Buffer.from('sk_test_pruefung11:').toString('base64')) && st.log.slice(n0).every((e) => e.version === '2024-06-20'), 'Anfragen an Stripe mit dem Geheimschlüssel und fester API-Version 2024-06-20');
+    /* Zustimmung ist Pflicht und muss zur geltenden Fassung passen; die Zahlung hält sie fest */
+    await sichern11('pruef11zst'); n0 = st.log.length;
+    const ohneZ = await rufe('/api/zahlung/start', { kennung: 'pruef11zst' }, TK), altZ = await rufe('/api/zahlung/start', { kennung: 'pruef11zst', agb: '2020-01-01', zustimmung: RECHT.ZUSTIMMUNG }, TK), andersZ = await rufe('/api/zahlung/start', { kennung: 'pruef11zst', agb: RECHT.AGB_STAND, zustimmung: 'Ich will sofort.' }, TK);
+    const zRow = await sp.zahlungHolen(sitzung(k1));
+    ok(ohneZ._status === 400 && ohneZ.zustimmung && altZ._status === 409 && altZ.neuLaden && altZ.recht.agb === RECHT.AGB_STAND && altZ.recht.zustimmung === RECHT.ZUSTIMMUNG && andersZ._status === 409 && kassenSeit(n0).length === 0 && zRow.daten.zustimmung.agb === RECHT.AGB_STAND && zRow.daten.zustimmung.text === RECHT.ZUSTIMMUNG, 'Kasse nur mit Zustimmung: ohne 400, mit alter Fassung oder anderem Wortlaut 409 samt geltender Fassung; die Zahlung hält Stand, Wortlaut und Zeitpunkt fest');
+    /* Echtes Geld (sk_live_…) erst, wenn Mailversand, Umsatzsteuer, Konten und Rechtstexte stehen */
+    const dateien11 = { fetch: async (req) => { const u = new URL(req.url), f = path11.join(W11, 'web', u.pathname, u.pathname.endsWith('/') ? 'index.html' : ''); try { return new Response(fs11.readFileSync(f, 'utf8'), { status: 200 }); } catch (e) { return new Response('', { status: 404 }); } } };
+    const live1 = await rufe('/api/zahlung/start', { ...KASSE, kennung: 'pruef11zst' }, TK, Object.assign({}, env, { STRIPE_SECRET_KEY: 'sk_live_pruefung11' }));
+    const live2 = await rufe('/api/zahlung/start', { ...KASSE, kennung: 'pruef11zst' }, TK, Object.assign({}, env, { STRIPE_SECRET_KEY: 'sk_live_pruefung11', MAIL_API_KEY: 're_pruefung', MAIL_ABSENDER: 'kontakt@eeziframes.com', MWST: '19', ASSETS: dateien11 }));
+    const liveS = await rufe('/api/status', null, null, Object.assign({}, env, { STRIPE_SECRET_KEY: 'sk_live_pruefung11', ASSETS: dateien11 }));
+    ok(live1._status === 503 && live1.gesperrt && live2._status === 503 && kassenSeit(n0).length === 0 && liveS.verkauf.live && !liveS.verkauf.bereit && liveS.verkauf.fehlt.some((t) => /E-Mail-Versand/.test(t)) && liveS.verkauf.fehlt.some((t) => /MWST=0/.test(t)) && liveS.verkauf.fehlt.some((t) => /Telefonnummer/.test(t) && /E-Mail-Adresse/.test(t)), 'Live-Modus: Kasse bleibt zu ohne Mailversand und festgelegte Umsatzsteuer und solange in den Rechtstexten Telefonnummer oder E-Mail-Adresse fehlen; /api/status nennt, was fehlt');
+    const live3 = await rufe('/api/zahlung/start', { ...KASSE, kennung: 'pruef11zst' }, TK, Object.assign({}, env, { STRIPE_SECRET_KEY: 'sk_live_pruefung11', MAIL_API_KEY: 're_pruefung', MAIL_ABSENDER: 'kontakt@eeziframes.com', MWST: '19' }));
+    ok(live3.ok && kassenSeit(n0).length === 1, 'Live-Modus mit Mailversand, Umsatzsteuer und Konten (Rechtstexte hier nicht gelesen): die Kasse öffnet');
     const cs1 = sitzung(k1), vor = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11abc');
     st.abschliessen(cs1);
     const bez = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11abc'), fremdK = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11zzz');
     ok(vor.bezahlt === false && !vor.wartet && bez.bezahlt === true && (bez.token || '').length === 32 && bez.mail === 'kauf@beispiel.de' && fremdK.bezahlt === false && !fremdK.token && fremdK.anderes && fremdK.kennung === 'pruef11abc', 'Aufmaßblatt: vor der Zahlung kein Nachweis, danach Nachweis vom Server, aber nur für das Projekt, das bezahlt hat (sonst der Hinweis auf das andere)');
     /* Rückkehr in einen Browser, in dem gerade ein anderes Aufmaß offen ist: der Kauf landet trotzdem am bezahlten Aufmaß im Konto */
     await sichern11('pruef11jkl');
-    const kJ = await rufe('/api/zahlung/start', { kennung: 'pruef11jkl' }, TK), csJ = sitzung(kJ); st.abschliessen(csJ);
+    const kJ = await rufe('/api/zahlung/start', { ...KASSE, kennung: 'pruef11jkl' }, TK), csJ = sitzung(kJ); st.abschliessen(csJ);
     const prJ = await rufe('/api/zahlung/pruefen?session=' + csJ + '&kennung=pruef11def'), gJ = await rufe('/api/kunde/aufmass/pruef11jkl', null, TK), gD = await rufe('/api/kunde/aufmass/pruef11def', null, TK);
     ok(prJ.anderes && prJ.kennung === 'pruef11jkl' && !prJ.token && gJ.bezahlt && gJ.bezahlt.session === csJ && !gD.bezahlt, 'Bezahlt, während im Browser ein anderes Aufmaß offen ist: der Kauf steht am bezahlten Aufmaß im Konto, das offene bleibt zu');
-    const k2 = await rufe('/api/zahlung/start', { kennung: 'pruef11def' }, TK), cs2 = sitzung(k2);
+    const k2 = await rufe('/api/zahlung/start', { ...KASSE, kennung: 'pruef11def' }, TK), cs2 = sitzung(k2);
     st.abschliessen(cs2, { zahlung: 'processing' });
     const unterwegs = await rufe('/api/zahlung/pruefen?session=' + cs2 + '&kennung=pruef11def');
     ok(unterwegs.bezahlt === false && unterwegs.wartet === true && st.db.steuern.filter((t) => t.metadata.eeziframes === 'mwst19-inkl').length === 1, 'Zahlung noch unterwegs: kein Nachweis, aber „wartet“ statt „abgebrochen“; der Steuersatz wird nicht doppelt angelegt');
     n0 = st.log.length;
-    await rufe('/api/zahlung/start', { kennung: 'pruef11ghi' }, TK, Object.assign({}, env, { MWST: '0', STRIPE_SECRET_KEY: 'sk_test_kleinunternehmer' }));
+    await rufe('/api/zahlung/start', { ...KASSE, kennung: 'pruef11ghi' }, TK, Object.assign({}, env, { MWST: '0', STRIPE_SECRET_KEY: 'sk_test_kleinunternehmer' }));
     const kasse0 = kassenSeit(n0)[0];
     ok(!kasse0.p.line_items[0].tax_rates && !kasse0.p.line_items[0].price_data.tax_behavior && /§ 19 UStG/.test((kasse0.p.invoice_creation.invoice_data || {}).footer || '') && !st.log.slice(n0).some((e) => e.pfad === '/tax_rates'), 'Kleinunternehmer (MWST=0): kein Steuersatz, Hinweis nach § 19 UStG auf der Rechnung');
 
@@ -1410,6 +1428,17 @@ if (teil(11)) {
     await rufe('/api/konto/plan', { plan: 'plus' }, T);
     const preisPlus = st.db.preise.find((x) => x.lookup_key === 'eeziframes_plus_7900_eur_monat'), aendern = st.log.filter((e) => e.method === 'POST' && e.pfad === '/subscriptions/' + sub.id).pop();
     ok(!!preisPlus && sub.items.data[0].price.id === preisPlus.id && sub.metadata.plan === 'plus' && aendern.p.default_tax_rates[0] === exkl.id && st.db.preise.filter((x) => x.lookup_key === 'eeziframes_abo_4900_eur_monat').length === 1 && st.db.steuern.filter((t) => t.metadata.eeziframes === 'mwst19').length === 1, 'Wechsel auf Plus: Preis 79 € angelegt, dasselbe Abo bei Stripe umgestellt (mit Steuersatz), nichts doppelt');
+    ok(aendern.p.proration_behavior === 'create_prorations', 'Wechsel nach oben (Abo 10 → Plus): sofort, Stripe rechnet den Unterschied anteilig ab');
+    /* Wechsel nach unten und Kündigung: zum Ende des Abrechnungsmonats bei Stripe, ohne Ausgleich; Rücknahme stellt alles wieder her */
+    const ende11 = X.datum(sub.current_period_end * 1000), aboPost = () => st.log.filter((e) => e.method === 'POST' && e.pfad === '/subscriptions/' + sub.id).pop();
+    const runter = await rufe('/api/konto/plan', { plan: 'abo' }, T), runterE = aboPost(), nachR = await sp.betriebHolen(bid);
+    ok(runter.ergebnis.art === 'vorgemerkt' && runterE.p.proration_behavior === 'none' && sub.items.data[0].price.id === preisAbo.id && X.konto(nachR.daten) === 'plus' && nachR.daten.downgrade.to === 'abo' && nachR.daten.downgrade.at === ende11 && runter.ergebnis.msg.includes(ende11), 'Wechsel zu Abo 10: bei Stripe ohne Ausgleich zum kleineren Preis, im Konto bleibt Plus bis zum Ende des Abrechnungsmonats (' + ende11 + ')');
+    const wieder11 = await rufe('/api/konto/plan', { plan: 'plus' }, T), wiederE = aboPost(), nachW = await sp.betriebHolen(bid);
+    ok(wieder11.ergebnis.art === 'bleibt' && wiederE.p.proration_behavior === 'none' && sub.items.data[0].price.id === preisPlus.id && !nachW.daten.downgrade && X.konto(nachW.daten) === 'plus', 'Wechsel zurückgenommen: wieder Plus bei Stripe, ohne Ausgleich, nichts mehr vorgemerkt');
+    const kuend11 = await rufe('/api/konto/plan', { plan: 'service' }, T), nachK = await sp.betriebHolen(bid);
+    ok(kuend11.ergebnis.art === 'vorgemerkt' && sub.cancel_at_period_end === true && nachK.daten.downgrade.to === 'service' && nachK.daten.downgrade.at === ende11 && X.konto(nachK.daten) === 'plus', 'Kündigung: bei Stripe zum Ende des Abrechnungsmonats (' + ende11 + '), bis dahin bleibt der Tarif');
+    const bleibt11 = await rufe('/api/konto/plan', { plan: 'plus' }, T), nachB = await sp.betriebHolen(bid);
+    ok(bleibt11.ergebnis.art === 'bleibt' && sub.cancel_at_period_end === false && !nachB.daten.downgrade, 'Kündigung zurückgenommen: das Abo läuft weiter');
 
     // e) Abo-Rechnung bezahlt: Ereignis in beiden Formen (bis 2025-02 subscription_details, seit 2025-03-31 parent.subscription_details)
     const altForm = { id: 'in_alt', object: 'invoice', number: 'EEZI-ALT', created: jetzt, metadata: {}, subscription: sub.id, subscription_details: { metadata: { betrieb: bid, plan: 'plus' } } };
@@ -1633,18 +1662,18 @@ if (teil(13)) {
     // f) Betriebe anlegen wie im echten Ablauf: zwei Projekte, ein Aufmaß aus der App, ein Link geöffnet; Zweitkonto mit gleicher Nummer
     const evVor = (await stat.auswerten(sp, 7)).ereignisse;
     const mailA = 'zentrale-a-' + stempel + '@beispiel.de', TA = tok(mailA), tel = '0221 9' + String(Date.now()).slice(-6), firmaA = 'Zentrale Prüf A ' + stempel;
-    const regA = await rufe('/api/konto/registrieren', { body: { firma: firmaA, ap: 'Anna Prüf', tel: tel, plz: '50667', agb: true }, token: TA }), idA = regA.konto.id;
+    const regA = await rufe('/api/konto/registrieren', { body: { firma: firmaA, ap: 'Anna Prüf', tel: tel, plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, token: TA }), idA = regA.konto.id;
     const p1 = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Geheim', kontakt: '0171 9999999', adresse: 'Geheimweg 7, 50667 Köln', plan: ['Fenster'], days: 14 }, token: TA });
     const p2 = await rufe('/api/konto/projekte', { body: { kunde: 'Herr Verborgen', kontakt: 'verborgen@beispiel.de', plan: ['Fenster'], days: 14 }, token: TA });
     const codeA1 = p1.konto.acc.links.find((l) => l.id === p1.id).code, codeA2 = p2.konto.acc.links.find((l) => l.id === p2.id).code;
     await rufe('/api/link/' + codeA2 + '/fortschritt', { body: { stufe: 'geoeffnet' } });
     const einA = await rufe('/api/aufmass', { body: { v: 1, b: codeA1, w: fenster, p: { name: 'Familie Geheim' }, t: Date.now() } });
     const mailB = 'zentrale-b-' + stempel + '@beispiel.de', TB = tok(mailB);
-    const regB = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf B ' + stempel, ap: 'Bert Prüf', tel: tel, plz: '50667', agb: true }, token: TB }), idB = regB.konto.id;
+    const regB = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf B ' + stempel, ap: 'Bert Prüf', tel: tel, plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, token: TB }), idB = regB.konto.id;
     const pB = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Wartet', plan: ['Fenster'], days: 14 }, token: TB }), codeB = pB.konto.acc.links.find((l) => l.id === pB.id).code;
     const einB = await rufe('/api/aufmass', { body: { v: 1, b: codeB, w: fenster.slice(0, 1), p: { name: 'Familie Wartet' }, t: Date.now() + 1 } });
     const TK13 = tok('kauf13@beispiel.de'); await rufe('/api/kunde/aufmass/pruef13kauf', { body: { windows: [{ wid: 'w1', name: 'Fenster' }], proj: {}, stand: Date.now() }, token: TK13 });
-    const k1 = await rufe('/api/zahlung/start', { body: { kennung: 'pruef13kauf' }, token: TK13 }), cs13 = new URL(k1.url).searchParams.get('bezahlt');
+    const k1 = await rufe('/api/zahlung/start', { body: { ...KASSE, kennung: 'pruef13kauf' }, token: TK13 }), cs13 = new URL(k1.url).searchParams.get('bezahlt');
     await rufe('/api/zahlung/pruefen?session=' + cs13 + '&kennung=pruef13kauf'); await rufe('/api/zahlung/pruefen?session=' + cs13 + '&kennung=pruef13kauf');
     await ruhe();
     const evNach = (await stat.auswerten(sp, 7)).ereignisse, d = (n) => (evNach[n] || 0) - (evVor[n] || 0);
@@ -1684,7 +1713,7 @@ if (teil(13)) {
     // j) Export (Art. 15/20) und Liste als CSV (ohne Formeln aus Eingaben)
     const exOhne = await mitC('/api/zentrale/betriebe/' + idA + '/export', { body: { grund: 'Auskunftsersuchen des Betriebs' } }), exGet = await mitC('/api/zentrale/betriebe/' + idA + '/export');
     ok(exOhne._status === 403 && /zweiten Faktor/.test(exOhne.fehler || '') && exGet._status === 404, 'Export enthält Kundendaten: ohne zweiten Faktor abgewiesen, nur per POST');
-    const regC = await rufe('/api/konto/registrieren', { body: { firma: '=SUMME(1;2)', ap: 'Carl Prüf', tel: '0221 8' + String(Date.now()).slice(-6), plz: '50667', agb: true }, token: tok('zentrale-c-' + stempel + '@beispiel.de') });
+    const regC = await rufe('/api/konto/registrieren', { body: { firma: '=SUMME(1;2)', ap: 'Carl Prüf', tel: '0221 8' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, token: tok('zentrale-c-' + stempel + '@beispiel.de') });
     const csv = await mitC('/api/zentrale/betriebe.csv'), csvBytes = new Uint8Array(await (await api(new Request(B + '/api/zentrale/betriebe.csv', { headers: { cookie: C, 'x-zentrale': '1' } }), env, null)).arrayBuffer());
     ok(csv._status === 200 && /text\/csv/.test(csv._kopf.get('content-type')) && csvBytes[0] === 0xef && csvBytes[1] === 0xbb && csvBytes[2] === 0xbf && csv._text.includes('"Betrieb";"Ansprechpartner"') && csv._text.includes('"' + firmaA + '"') && csv._text.includes('"\'=SUMME(1;2)"') && !csv._text.includes('";"=SUMME'), 'CSV für Excel: Semikolon, UTF-8 mit BOM, Eingaben wie =… werden nicht zur Formel');
     // k) Löschen (Art. 17): nur mit dem Namen, danach weg; der Löschnachweis bleibt
@@ -1733,7 +1762,7 @@ if (teil(13)) {
     ok(zf.zweiFaktor === true && t1.r._status === 401 && t2.r._status === 401 && t3.r._status === 200 && t4.r._status === 401 && (await rufe('/api/zentrale/uebersicht', { cookie: C, env: env2 }))._status === 401, 'Zweiter Faktor: ohne oder mit falschem Code keine Anmeldung, jeder Code nur einmal; ältere Sitzungen ohne Faktor gelten nicht mehr');
     ok((await ze.totpCode('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 1)) === '287082' && (await ze.totpCode('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 37037036)) === '081804', 'TOTP rechnet wie RFC 6238 (Testvektoren für SHA-1)');
     const C2 = t3.cookie;
-    const mailE = 'zentrale-e-' + stempel + '@beispiel.de', TE = tok(mailE), regE = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf E ' + stempel, ap: 'Eva Prüf', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', agb: true }, token: TE });
+    const mailE = 'zentrale-e-' + stempel + '@beispiel.de', TE = tok(mailE), regE = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf E ' + stempel, ap: 'Eva Prüf', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, token: TE });
     const pE = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Einblick', kontakt: '0171 5555555', adresse: 'Lupenweg 3', plan: ['Fenster'], days: 14 }, token: TE }), codeE = pE.konto.acc.links.find((l) => l.id === pE.id).code;
     await rufe('/api/aufmass', { body: { v: 1, b: codeE, w: fenster, p: { name: 'Familie Einblick', notiz: 'Bitte Rollladen prüfen' }, t: Date.now() + 3 } });
     const codeJetzt = async () => { ze.codesVergessen(); return ze.totpCode(GEHEIM, Math.floor(Date.now() / 30000)); }; // jeder Code gilt einmal; die Prüfung wartet nicht auf den nächsten
@@ -1754,8 +1783,8 @@ if (teil(13)) {
     ok(kurz._status === 400 && blick.ok && blick.betrieb.einblick === true && pj.kunde === 'Familie Einblick' && pj.adresse === 'Lupenweg 3' && pj.fenster.length === 2 && pj.fenster[0].oeffnung === '1258 × 1438' && pj.angaben.notiz === 'Bitte Rollladen prüfen' && prot2.eintraege.some((e) => e.betrieb === regE.konto.id && e.text === 'Support-Anfrage des Betriebs vom 15.10.'), 'Einblick mit zweitem Faktor und Anlass: Namen, Kontakt, Objekt und Aufmaß in Kurzform; im Protokoll mit Anlass');
     // Export mit zweitem Faktor: Anlass und frischer Code, Kundendaten drin, gesperrte (unbezahlte) Aufmaße nur als Umriss
     const mailF = 'zentrale-f-' + stempel + '@beispiel.de', TF = tok(mailF), telF = '0221 5' + String(Date.now()).slice(-6);
-    await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F1 ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: true }, token: tok('zentrale-f1-' + stempel + '@beispiel.de') });
-    const regF = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: true }, token: TF });
+    await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F1 ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, token: tok('zentrale-f1-' + stempel + '@beispiel.de') });
+    const regF = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, token: TF });
     const pF = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Unbezahlt', kontakt: '0171 4444444', plan: ['Fenster'], days: 14 }, token: TF }), codeF = pF.konto.acc.links.find((l) => l.id === pF.id).code;
     await rufe('/api/aufmass', { body: { v: 1, b: codeF, w: fenster, p: { name: 'Familie Unbezahlt' }, t: Date.now() + 4 } });
     await rufe('/api/zentrale/betriebe/' + regF.konto.id + '/notiz', { body: { text: 'Notiz für den Export' }, cookie: C2, env: env2 });
@@ -1790,7 +1819,7 @@ if (teil(13)) {
     ok(bereit, 'Testserver mit Zentrale läuft: ' + B4);
     const http = async (p, body, token) => { const r = await fetch(B4 + p, { method: body ? 'POST' : 'GET', headers: Object.assign({ accept: 'application/json', origin: B4 }, body ? { 'content-type': 'application/json' } : {}, token ? { authorization: 'Bearer ' + token } : {}), body: body ? JSON.stringify(body) : undefined }); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
     const mailU = 'ui-' + stempel + '@beispiel.de', TU = tok(mailU);
-    await http('/api/konto/registrieren', { firma: 'Fensterbau Oberfläche', ap: 'Uwe Ober', tel: '0221 6' + String(Date.now()).slice(-6), plz: '50667', agb: true }, TU);
+    await http('/api/konto/registrieren', { firma: 'Fensterbau Oberfläche', ap: 'Uwe Ober', tel: '0221 6' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, TU);
     const pr = await http('/api/konto/projekte', { kunde: 'Familie Unsichtbar', kontakt: '0171 1111111', plan: ['Fenster'], days: 14 }, TU), codeU = pr.konto.acc.links.find((l) => l.id === pr.id).code;
     await http('/api/aufmass', { v: 1, b: codeU, w: fenster, p: { name: 'Familie Unsichtbar' }, t: Date.now() });
     const MENSCH = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36'; // Headless-Chromium meldet sich als HeadlessChrome und zählt deshalb als Bot
@@ -2173,7 +2202,7 @@ if (teil(14)) {
     ok(bereit, 'Testserver mit Datenbank-Attrappe läuft: ' + B5);
     const http = async (p, body, token, method) => { const r = await fetch(B5 + p, { method: method || (body ? 'POST' : 'GET'), headers: Object.assign({ accept: 'application/json', origin: B5 }, body ? { 'content-type': 'application/json' } : {}, token ? { authorization: 'Bearer ' + token } : {}), body: body ? JSON.stringify(body) : undefined }); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
     const tok = (m) => 'test.' + Buffer.from(m, 'utf8').toString('base64').replace(/=+$/, ''), T5 = tok('link14-' + stempel + '@beispiel.de');
-    await http('/api/konto/registrieren', { firma: 'Fensterbau Weitermachen', ap: 'Wera', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', agb: true }, T5);
+    await http('/api/konto/registrieren', { firma: 'Fensterbau Weitermachen', ap: 'Wera', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, T5);
     const pr = await http('/api/konto/projekte', { kunde: 'Familie Rückkehr', kontakt: '0171 2222222', plan: ['Fenster'], days: 14 }, T5), lk = pr.konto.acc.links.find((l) => l.id === pr.id);
     const url = B5 + '/app/#k-' + lk.code + '-Fensterbau_Weitermachen.' + b64u('Fensterbau Weitermachen') + '.' + b64u('Familie Rückkehr');
     const c1 = await browser.newContext(telefon), s1 = await neueSeite(c1, B5);
@@ -2342,11 +2371,11 @@ if (teil(15)) {
     const voll = await sichern(tokV, 'p15v20' + stempel, [fw(1)]);
     ok(voll._status === 409 && voll.voll && /20 Aufmaße/.test(voll.fehler), 'Ein Konto hat höchstens 20 Aufmaße (409 mit Hinweis)');
     // b) Kauf nur mit Konto und nur für ein gesichertes Aufmaß; der Kauf hängt am Aufmaß; danach zählt jede Änderung
-    const kOhne = await rufe('/api/zahlung/start', { body: { mail: mail, kennung: K1 } }), kNicht = await rufe('/api/zahlung/start', { token: T, body: { kennung: K2 } }), kFremd = await rufe('/api/zahlung/start', { token: anF.token, body: { kennung: K1 } });
-    const kMit = await rufe('/api/zahlung/start', { token: T, body: { kennung: K1, mail: 'andere@beispiel.de' } }), sess = new URL(kMit.url).searchParams.get('bezahlt');
+    const kOhne = await rufe('/api/zahlung/start', { body: { ...KASSE, mail: mail, kennung: K1 } }), kNicht = await rufe('/api/zahlung/start', { token: T, body: { ...KASSE, kennung: K2 } }), kFremd = await rufe('/api/zahlung/start', { token: anF.token, body: { ...KASSE, kennung: K1 } });
+    const kMit = await rufe('/api/zahlung/start', { token: T, body: { ...KASSE, kennung: K1, mail: 'andere@beispiel.de' } }), sess = new URL(kMit.url).searchParams.get('bezahlt');
     const pr = await rufe('/api/zahlung/pruefen?session=' + sess + '&kennung=' + K1), g2 = await rufe('/api/kunde/aufmass/' + K1, { token: T }), zahl = await sp.zahlungHolen(sess);
     ok(kOhne._status === 401 && kOhne.anmelden && kNicht._status === 409 && kNicht.sichern && kFremd._status === 403 && kMit.ok && pr.bezahlt && g2.bezahlt && g2.bezahlt.token === pr.token && g2.bezahlt.at > 0 && zahl.mail === mail, 'Freischalten nur mit Konto, nur für ein gesichertes eigenes Aufmaß; Rechnung an die E-Mail des Kontos; der Kauf hängt danach am Aufmaß (auf jedem Gerät da)');
-    const nachKauf = await sichern(T, K1, [fw(1, { name: 'nach dem Kauf', ts: Date.now() }), fw(2)]), zweit = await rufe('/api/zahlung/start', { token: T, body: { kennung: K1 } });
+    const nachKauf = await sichern(T, K1, [fw(1, { name: 'nach dem Kauf', ts: Date.now() }), fw(2)]), zweit = await rufe('/api/zahlung/start', { token: T, body: { ...KASSE, kennung: K1 } });
     ok(nachKauf.meta.fenster.h1.aend === 1 && zweit.ok && zweit.schon && !zweit.url, 'Mit dem Kauf endet die freie Woche: die erste Änderung danach zählt schon; ein zweiter Kauf desselben Aufmaßes öffnet keine Kasse');
     /* als Gast gekauft (Nachweis aus dem Browser): kommt beim Sichern mit ins Konto, ein gefälschter nicht */
     const kG = 'p15g' + stempel, kG2 = 'p15h' + stempel, echt = await (await import('../functions/api/eigene.js')).kaufNachweis(umg.konfig(env), kG, 'cs_gast_' + stempel);
@@ -2354,7 +2383,7 @@ if (teil(15)) {
     ok(gast.bezahlt && gast.bezahlt.token === echt && !gast2.bezahlt, 'Als Gast gekauft: der Nachweis kommt beim Sichern mit ins Konto, ein gefälschter nicht');
     // c) Löschen: ein Aufmaß, das Konto. Der Inhalt ist sofort weg, eine Löschmarke verhindert, dass ein anderes Gerät es wieder anlegt
     const del1 = await rufe('/api/kunde/aufmass/' + kG2 + '/loeschen', { token: T, body: {} }), m1 = await sp.eigenesHolen(kG2);
-    const wieder1 = await sichern(T, kG2, [fw(1), fw(2)]), lesen1 = await rufe('/api/kunde/aufmass/' + kG2, { token: T }), kasse1 = await rufe('/api/zahlung/start', { token: T, body: { kennung: kG2 } });
+    const wieder1 = await sichern(T, kG2, [fw(1), fw(2)]), lesen1 = await rufe('/api/kunde/aufmass/' + kG2, { token: T }), kasse1 = await rufe('/api/zahlung/start', { token: T, body: { ...KASSE, kennung: kG2 } });
     ok(del1.ok && m1 && m1.meta.entfernt > 0 && !(m1.daten.windows || []).length && !m1.meta.bezahlt && !m1.meta.fenster && del1.aufmasse.every((a) => a.kennung !== kG2) && wieder1._status === 410 && wieder1.geloescht && lesen1._status === 410 && kasse1._status === 410 && kasse1.geloescht, 'Ein Aufmaß löschen: Inhalt, Zähler und Kauf weg, nur eine Löschmarke bleibt; ein anderes Gerät legt es nicht wieder an (410), auch keine Kasse');
     const delK = await rufe('/api/kunde/loeschen', { token: T, body: {} }), restK = await sp.eigeneVonNutzer((await (await import('../functions/api/auth.js')).nutzer(umg.konfig(env), T)).id), mK1 = await sp.eigenesHolen(K1);
     const wiederK = await sichern(T, K1, [fw(1)]), listeK = await rufe('/api/kunde/aufmasse', { token: T }); // dieselbe Adresse meldet sich wieder an
@@ -2367,7 +2396,7 @@ if (teil(15)) {
     /* Aufmaß ohne Besitzer (Anmeldung anders als über die App gelöscht): niemand übernimmt es, die App sichert ihre Kopie neu */
     const tokO = 'test.' + Buffer.from('ohne15-' + stempel + '@beispiel.de', 'utf8').toString('base64').replace(/=+$/, ''), KO = 'p15q' + stempel;
     await sp.eigenesAendern(KO, null, (r) => { r.daten = { windows: [fw(1)], proj: { name: 'Altes Haus' } }; return true; });
-    const oG = await rufe('/api/kunde/aufmass/' + KO, { token: tokO }), oP = await sichern(tokO, KO, [fw(1), fw(2)]), oK = await rufe('/api/zahlung/start', { token: tokO, body: { kennung: KO } }), oRow = await sp.eigenesHolen(KO);
+    const oG = await rufe('/api/kunde/aufmass/' + KO, { token: tokO }), oP = await sichern(tokO, KO, [fw(1), fw(2)]), oK = await rufe('/api/zahlung/start', { token: tokO, body: { ...KASSE, kennung: KO } }), oRow = await sp.eigenesHolen(KO);
     ok(oG._status === 409 && oG.verwaist && oP._status === 409 && oP.verwaist && oK._status === 409 && oK.sichern && !oRow.nutzer && oRow.daten.windows.length === 1, 'Aufmaß ohne Besitzer: weder lesen noch übernehmen (409 „verwaist“), die Kasse verlangt Sichern; die App sichert ihre Kopie unter neuer Kennung');
     // d) Aufräumen: nach 12 Monaten ohne Änderung weg, freigeschaltete erst nach 3 Jahren, nichts, was sich während des Laufs ändert
     const tokA = 'test.' + Buffer.from('alt15-' + stempel + '@beispiel.de', 'utf8').toString('base64').replace(/=+$/, '');
@@ -2440,7 +2469,7 @@ if (teil(15)) {
     // Kauf auf Gerät 2 (mit Konto direkt zur Kasse), Gerät 1 bekommt den Kauf; danach endet die freie Woche
     await s2.evaluate(() => go('teilen')); await s2.waitForTimeout(200); await s2.click('.bb .btn.primary'); await s2.waitForSelector('[data-screen="kasse"]', { timeout: 8000 });
     const kasse = await s2.evaluate(() => document.body.innerText);
-    await s2.click('[data-in="kc"][data-f="widerruf"]'); await s2.click('.bb .btn.primary');
+    await s2.click('[data-in="kc"][data-f="bedingungen"]'); await s2.click('[data-in="kc"][data-f="widerruf"]'); await s2.click('.bb .btn.primary');
     await s2.waitForFunction(() => S.kauf && S.kauf.paid && S.screen === 'gekauft', null, { timeout: 10000 });
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.kauf && S.kauf.paid, null, { timeout: 8000 });
     const nach = await s1.evaluate(() => { S.win = kopie(S.windows[1]); S.editIdx = 1; go('fertig'); return { frei: FREI(), note: (document.querySelector('.note.warn') || {}).textContent || '' }; });
@@ -2869,7 +2898,7 @@ if (teil(17)) {
   const konf17 = {}; new Function('window', fs17.readFileSync(path17.join(W17, 'web/config.js'), 'utf8'))(konf17);
   const pr17 = konf17.KONFIG.preise, nb17 = t17['/nutzungsbedingungen/'];
   ok(/§ 14 BGB/.test(nb17) && /id="avv"/.test(nb17) && /Unterauftragsverarbeiter/.test(nb17) && /Technische und organisatorische Maßnahmen/.test(nb17) && ['ersten ' + pr17.frei + ' Projekte', pr17.projekt + ' € je Projekt', pr17.abo.grund + ' € im Monat mit ' + pr17.abo.inkl + ' Projekten', 'jedes weitere ' + pr17.abo.extra + ' €', pr17.plus + ' € im Monat'].every((t) => nb17.includes(t)), 'Nutzungsbedingungen für Fensterbauer: nur Unternehmer, Preise wie in config.js, Vertrag über die Auftragsverarbeitung mit Maßnahmen und Unterauftragsverarbeitern');
-  ok(/Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen/.test(t17['/datenschutz/']) && /id="widerruf"/.test(t17['/datenschutz/']) && /Brevo/.test(t17['/datenschutz/']) && /href="\/cookies\/"/.test(t17['/datenschutz/']), 'Datenschutz: Aufsichtsbehörde NRW, Abschnitt zur Widerrufsfunktion, E-Mail-Dienstleister, Verweis auf die Cookies-Seite');
+  ok(/Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen/.test(t17['/datenschutz/']) && /id="widerruf"/.test(t17['/datenschutz/']) && /Resend \(Plus Five Five, Inc\./.test(t17['/datenschutz/']) && /Öffnungs- und Klickmessung ist ausgeschaltet/.test(t17['/datenschutz/']) && !/Brevo/.test(t17['/datenschutz/']) && /href="\/cookies\/"/.test(t17['/datenschutz/']), 'Datenschutz: Aufsichtsbehörde NRW, Abschnitt zur Widerrufsfunktion, E-Mail-Dienstleister, Verweis auf die Cookies-Seite');
   /* Cookies: jeder Speicher-Eintrag aus dem Code steht auf der Seite */
   const code17 = ['app.js', 'portal.js', 'gemeinsam.js'].map((f) => fs17.readFileSync(path17.join(W17, 'web/assets', f), 'utf8')).join('\n');
   const schl17 = Array.from(new Set((code17.match(/'aufmass\.[a-z0-9.]+'/g) || []).map((x) => x.slice(1, -1).replace(/\.$/, '.…'))));
@@ -2913,6 +2942,72 @@ if (teil(17)) {
   ok(fehler17 && ok17.form && /Ihr Widerruf ist eingegangen/.test(ok17.text) && /Eingang: \d{1,2}\. \S+ 20\d\d, \d\d:\d\d:\d\d Uhr/.test(ok17.text) && /Kauf des Aufmaßblatts am 16\.10\.2026/.test(ok17.text) && ok17.text.includes('haben wir an ' + mail17), 'Vertrag widerrufen im Browser: erst Hinweise je Feld, dann „Widerruf bestätigen“: Bestätigung mit Datum, Uhrzeit und Inhalt auf der Seite');
   ok(!!anKunde17 && anKunde17.betreff === 'Eingangsbestätigung Ihres Widerrufs' && /Hiermit widerrufe ich den folgenden Vertrag: Kauf des Aufmaßblatts am 16\.10\.2026/.test(anKunde17.html) && / Uhr</.test(anKunde17.html) && /nur den Eingang/.test(anKunde17.html) && !!anUns17 && anUns17.antwortAn === mail17, 'Eingangsbestätigung sofort per E-Mail an den Kunden (Inhalt, Datum, Uhrzeit, ohne Zusage zur Wirksamkeit), Kopie an den Betreiber mit Antwort an den Kunden');
   sauber(s17, 'Widerrufsfunktion ohne Fehler'); await c17.close();
+
+  /* e) Rechtstexte nach der unabhängigen Prüfung */
+  const bel17 = agb17.slice(agb17.indexOf('id="widerrufsbelehrung"'), agb17.indexOf('Ende der Widerrufsbelehrung'));
+  ok(/Telefon: <mark class="ph">\[Telefonnummer\]<\/mark>, E-Mail:/.test(bel17) && agb17.indexOf('id="erloeschen"') > agb17.indexOf('Ende der Widerrufsbelehrung') && !/Erlöschen/.test(bel17) && agb17.includes('<meta name="stand" content="' + RECHT.AGB_STAND + '">') && nb17.includes('<meta name="stand" content="' + RECHT.NB_STAND + '">') && agb17.includes('Stand: ' + RECHT.standText(RECHT.AGB_STAND)) && nb17.includes('Stand: ' + RECHT.standText(RECHT.NB_STAND)), 'AGB: Widerrufsbelehrung mit Telefonnummer, der Hinweis zum Erlöschen steht nach dem Ende der Belehrung; Stand von AGB und Nutzungsbedingungen wie in functions/api/recht.js');
+  ok(/frühestens drei Jahre nach dem Kauf/.test(agb17) && /Mit dem Kauf des Aufmaßblatts endet die Zeit für freies Ändern/.test(agb17) && /Auf der Kassenseite der App/.test(agb17) && /Eingabefehler berichtigen Sie/.test(agb17) && /Online abrufen können Sie den Vertragstext nach dem Kauf nicht/.test(agb17) && /Absatz 1 bleibt unberührt/.test(agb17) && /Für die kostenlosen Funktionen bemühen wir uns/.test(agb17), 'AGB: Kündigung eines Kontos mit Kauf erst nach drei Jahren, der Kauf beendet die freie Woche, Bestellschritte mit der Kassenseite, Eingabefehler, Vertragstext, Haftung, Mängelrechte bei Störungen');
+  const avv17 = nb17.slice(nb17.indexOf('id="avv"'));
+  ok(!/Gerichtsstand/.test(nb17) && /Abrechnungsmonat/.test(nb17) && /bis zu zwei Kalendertage vor dem Einzug/.test(nb17) && /Preiserhöhungen und Änderungen der Hauptleistungen gelten nur mit Ihrer Zustimmung/.test(nb17) && /10\. Verantwortung des Betriebs/.test(avv17) && /Inspektionen/.test(avv17) && /als eigener Verantwortlicher|selbst verantworten/.test(avv17) && !/Anthropic/.test(avv17) && /sieben Tagen/.test(avv17), 'Nutzungsbedingungen: kein Gerichtsstand, Abo je Abrechnungsmonat, SEPA-Ankündigung wie bei Stripe, Zustimmung durch Schweigen nur für Nebensachen; AVV mit Rollen, Sicherung, Kontrollen und Pflichten des Betriebs, ohne die KI-Auswertung');
+  ok(/__cf_bm/.test(t17['/cookies/']) && /cf_clearance/.test(t17['/cookies/']) && /method="post" action="\/api\/widerruf"/.test(t17['/widerruf/']) && /Anthropic Ireland, Limited/.test(t17['/datenschutz/']) && /KI-Einwilligung widerrufen/.test(t17['/datenschutz/']) && !/sobald eeziframes mit Datenbank und Zahlungsdienst läuft/.test(t17['/datenschutz/']) && /Anmeldeprotokolle/.test(t17['/datenschutz/']), 'Cookies mit den Sicherheits-Cookies von Cloudflare; Widerrufsformular auch ohne JavaScript; Datenschutz mit Anthropic Ireland, Widerruf der KI-Einwilligung, Anmeldeprotokollen, ohne Vorbehalt zur Pilotphase');
+  const gem17 = fs17.readFileSync(path17.join(W17, 'web/assets/gemeinsam.js'), 'utf8'), portalQ17 = fs17.readFileSync(path17.join(W17, 'web/assets/portal.js'), 'utf8');
+  ok(/Anthropic Ireland, Ltd\./.test(gem17) && /spätestens nach 30 Tagen/.test(gem17) && /jederzeit widerrufen/.test(gem17) && /Ich registriere mich als Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Nur für Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Angebot nur für Unternehmer im Sinne von § 14 BGB/.test((await holen17(BASE, '/fuer-fensterbauer/')).text), 'KI-Dialog nennt Anthropic Ireland, die Löschung nach 30 Tagen und den Widerruf; Betriebe registrieren sich als Unternehmer, Preise für Betriebe mit Hinweis „nur für Unternehmer“');
+
+  /* f) App: „Vertrag widerrufen“ unter jedem Bildschirm, im Glossar-Blatt, KI-Einwilligung widerrufbar */
+  const c17b = await browser.newContext(telefon), s17b = await neueSeite(c17b);
+  await s17b.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await s17b.waitForTimeout(300);
+  const schirme17 = await s17b.evaluate(() => {
+    S.windows = demoProject(); Object.assign(S.proj, { name: 'Haus Recht' }); kauf().mail = 'recht@beispiel.de'; persist();
+    return ['home', 'anfrage', 'anfrage2', 'anfrage3', 'teilen', 'blatt', 'konto', 'kasse'].map((sc) => { go(sc); const f = document.querySelector('.scr .foot-links.recht'), a = f && f.firstElementChild, r = a ? a.getBoundingClientRect() : null; return sc + ':' + (a && a.matches('a.widerruf[href="/widerruf/"]') && r.height >= 44 ? 'ja' : 'nein'); });
+  });
+  const blatt17 = await s17b.evaluate(() => { S.glossIndex = true; render(); const a = document.querySelector('.sheet .foot-links.recht a.widerruf[href="/widerruf/"]'); S.glossIndex = false; render(); return !!a; });
+  ok(schirme17.every((x) => /:ja$/.test(x)) && blatt17, '„Vertrag widerrufen“ als erster Rechtslink unter jedem Bildschirm der App (' + schirme17.join(', ') + ') und im Glossar-Blatt, das auch die Messbildschirme öffnen');
+  const ki17 = await s17b.evaluate(() => { localStorage.setItem('aufmass.ki.einwilligung', 'ja'); go('home'); const b = document.querySelector('.foot-links.recht [data-act="ki-widerrufen"]'); if (!b) return { da: false }; const r = b.getBoundingClientRect(); b.click(); return { da: true, hoch: r.height >= 44, weg: localStorage.getItem('aufmass.ki.einwilligung') === null && !window.FotoKI.eingewilligt(), danach: !document.querySelector('.foot-links.recht [data-act="ki-widerrufen"]'), toast: (document.querySelector('.toast') || {}).textContent || '' }; });
+  ok(ki17.da && ki17.hoch && ki17.weg && ki17.danach && /Einwilligung widerrufen/.test(ki17.toast), 'KI-Einwilligung: sobald erteilt, unten in der App mit einem Tipp widerrufbar; danach fragt die App wieder');
+  sauber(s17b, 'Rechtslinks und Widerruf der KI-Einwilligung ohne Fehler'); await c17b.close();
+
+  /* g) Widerruf ohne JavaScript: gewöhnliches Formular, Antwort als Seite */
+  const form17 = await fetch(B7 + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: B7 }, body: new URLSearchParams({ name: 'Otto Ohne', vertrag: 'Kauf des Aufmaßblatts am 15.10.2026', mail: 'otto-' + Date.now() + '@beispiel.de' }).toString() }), formT17 = await form17.text();
+  const formLeer17 = await fetch(B7 + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'name=&vertrag=&mail=' }), formLeerT17 = await formLeer17.text();
+  ok(form17.status === 200 && /text\/html/.test(form17.headers.get('content-type') || '') && /Ihr Widerruf ist eingegangen\./.test(formT17) && /Kauf des Aufmaßblatts am 15\.10\.2026/.test(formT17) && /\d\d:\d\d:\d\d Uhr/.test(formT17) && /Eine Eingangsbestätigung mit diesen Angaben haben wir an/.test(formT17) && !/widerruf\.js/.test(formT17) && /class="widerruf-knopf"/.test(formT17) && /default-src 'self'/.test(form17.headers.get('content-security-policy') || '') && formLeer17.status === 400 && /Bitte Ihren Namen angeben\./.test(formLeerT17) && /Zurück zum Formular/.test(formLeerT17), 'Widerruf als gewöhnliches Formular: Antwort als Seite im Aufbau der Website (Bestätigung mit Uhrzeit bzw. Hinweise je Feld), mit denselben Sicherheits-Kopfzeilen');
+  const c17n = await browser.newContext(Object.assign({}, telefon, { javaScriptEnabled: false })), s17n = await c17n.newPage();
+  await s17n.goto(B7 + '/widerruf/'); await s17n.fill('#wr-name', 'Nora Noscript'); await s17n.fill('#wr-vertrag', 'Aufmaßblatt vom 14.10.2026'); await s17n.fill('#wr-mail', 'nora-' + Date.now() + '@beispiel.de');
+  await Promise.all([s17n.waitForURL(B7 + '/api/widerruf'), s17n.click('#wr-senden')]);
+  const nos17 = await s17n.content(); await c17n.close();
+  ok(/Ihr Widerruf ist eingegangen\./.test(nos17) && /Aufmaßblatt vom 14\.10\.2026/.test(nos17), 'Browser ohne JavaScript: „Widerruf bestätigen“ schickt das Formular, die nächste Seite zeigt die Bestätigung');
+
+  /* h) Störung des Mailversands: der Widerruf gilt, die Eingangsbestätigung kommt mit dem täglichen Lauf */
+  await fetch(B7 + '/api/test/post?stoerung=1');
+  const mailS17 = 'sabine-' + Date.now() + '@beispiel.de';
+  const st17 = await fetch(B7 + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Sabine Störung', vertrag: 'Aufmaßblatt vom 13.10.2026', mail: mailS17 }) }), sj17 = await st17.json();
+  await fetch(B7 + '/api/test/post?stoerung=0');
+  const nach17 = await fetch(B7 + '/api/test/nachholen').then((r) => r.json()), nach17b = await fetch(B7 + '/api/test/nachholen').then((r) => r.json());
+  const postN17 = (await fetch(B7 + '/api/test/post').then((r) => r.json())).post || [], spaet17 = postN17.filter((m) => m.an === mailS17);
+  ok(st17.status === 200 && sj17.ok && sj17.bestaetigt === false && sj17.nachholen === true && nach17.widerruf.nachgeholt === 1 && nach17b.widerruf.nachgeholt === 0 && spaet17.length === 1 && /erst jetzt kommt/.test(spaet17[0].html) && postN17.some((m) => /^Widerruf eingegangen: Sabine Störung/.test(m.betreff) && /nachgeholt/.test(m.html)), 'Störung des Mailversands: der Widerruf ist eingegangen und gespeichert; der tägliche Lauf schickt die Eingangsbestätigung und die Kopie an den Betreiber einmal nach');
+
+  /* i) Vertragsbestätigung nachholen (im Speicher): Störung zählt, ohne lesbare AGB keine Mail mit bloßem Link, geänderte AGB von Hand */
+  const umg17 = await import(url17.pathToFileURL(path17.join(W17, 'functions/api/umgebung.js')).href), spM17 = await import(url17.pathToFileURL(path17.join(W17, 'functions/api/speicher.js')).href);
+  const best17 = await import(url17.pathToFileURL(path17.join(W17, 'functions/api/bestaetigung.js')).href), postM17 = await import(url17.pathToFileURL(path17.join(W17, 'functions/api/post.js')).href);
+  const k17 = umg17.konfig({ DATEN_ATTRAPPE: '1', MAIL_ATTRAPPE: '1' }), sp17 = spM17.speicher(k17), vor17 = new Date(Date.now() - 3600000).toISOString();
+  const dateien17 = { fetch: async (req) => { const u = new URL(req.url), f = path17.join(W17, 'web', u.pathname, u.pathname.endsWith('/') ? 'index.html' : ''); try { return new Response(fs17.readFileSync(f, 'utf8'), { status: 200 }); } catch (e) { return new Response('', { status: 404 }); } } };
+  await sp17.zahlungAnlegen({ stripe_session: 'cs_nach17a', art: 'aufmass', kennung: 'nach17aaa', mail: 'nach17a@beispiel.de', betrag_cent: 799, status: 'bezahlt', bezahlt_am: vor17, daten: { zustimmung: { agb: RECHT.AGB_STAND, text: RECHT.ZUSTIMMUNG, zeit: vor17 } } });
+  await sp17.zahlungAnlegen({ stripe_session: 'cs_nach17b', art: 'aufmass', kennung: 'nach17bbb', mail: 'nach17b@beispiel.de', betrag_cent: 799, status: 'bezahlt', bezahlt_am: vor17, daten: { zustimmung: { agb: '2020-01-01', text: RECHT.ZUSTIMMUNG, zeit: vor17 } } });
+  postM17.attrappeAus.an = true; const r1n17 = await best17.bestaetigungenNachholen(k17, sp17, { ASSETS: dateien17 }); const a1n17 = await sp17.zahlungHolen('cs_nach17a'); postM17.attrappeAus.an = false;
+  const ohneAgb17 = await best17.bestaetigungenNachholen(k17, sp17, {}), r2n17 = await best17.bestaetigungenNachholen(k17, sp17, { ASSETS: dateien17 }), r3n17 = await best17.bestaetigungenNachholen(k17, sp17, { ASSETS: dateien17 });
+  const aN17 = await sp17.zahlungHolen('cs_nach17a'), bN17 = await sp17.zahlungHolen('cs_nach17b'), mailsN17 = postM17.attrappePost.filter((m) => /^nach17/.test(m.an));
+  ok(r1n17.nachgeholt === 0 && a1n17.versuche === 1 && ohneAgb17.nachgeholt === 0 && r2n17.nachgeholt === 1 && r3n17.nachgeholt === 0 && !!aN17.bestaetigt_am && !bN17.bestaetigt_am && bN17.versuche === spM17.VERSUCHE && mailsN17.length === 1 && mailsN17[0].an === 'nach17a@beispiel.de' && mailsN17[0].html.includes('„' + RECHT.ZUSTIMMUNG + '“') && mailsN17[0].html.includes('Stand ' + RECHT.standText(RECHT.AGB_STAND)) && /Widerrufsbelehrung/.test(mailsN17[0].html) && /Muster-Widerrufsformular/.test(mailsN17[0].html), 'Vertragsbestätigung nachholen: eine Störung zählt als Versuch, ohne lesbare AGB geht keine Mail mit bloßem Link raus, danach genau eine Bestätigung mit Zustimmung im Wortlaut und AGB-Stand; bei geänderten AGB kein automatischer Versand');
+
+  /* j) Anmelden legt kein Konto an; Registrierung der Betriebe nur als Unternehmer mit geltender Fassung */
+  const post17j = (pfad, body, tok) => fetch(B7 + pfad, { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, tok ? { authorization: 'Bearer ' + tok } : {}), body: JSON.stringify(body) }).then(async (r) => Object.assign({ _status: r.status }, await r.json().catch(() => ({}))));
+  const neuMail17 = 'neu17-' + Date.now() + '@beispiel.de';
+  const cA = await post17j('/api/kunde/code', { mail: neuMail17, neu: false }), aA = await post17j('/api/kunde/anmelden', { mail: neuMail17, code: '123456' });
+  const cB = await post17j('/api/kunde/code', { mail: neuMail17 }), aB = await post17j('/api/kunde/anmelden', { mail: neuMail17, code: '123456' });
+  const cC = await post17j('/api/kunde/code', { mail: neuMail17, neu: false }), aC = await post17j('/api/kunde/anmelden', { mail: neuMail17, code: '123456' });
+  ok(cA.ok && aA._status === 401 && cB.ok && aB.ok && cC.ok && aC.ok, 'Anmelden in der App legt kein neues Konto an (ohne Konto kommt kein Code, die Antwort verrät das nicht); Sichern legt es an, danach klappt Anmelden');
+  const tokR17 = 'test.' + Buffer.from('reg17-' + Date.now() + '@beispiel.de', 'utf8').toString('base64').replace(/=+$/, '');
+  const reg17 = (zus) => post17j('/api/konto/registrieren', Object.assign({ firma: 'Fensterbau Recht ' + Date.now(), ap: 'Rita Recht', tel: '0221 9' + String(Date.now()).slice(-6), plz: '50667' }, zus), tokR17);
+  const rgA = await reg17({ agb: true }), rgB = await reg17({ agb: RECHT.NB_STAND }), rgC = await reg17({ agb: '2020-01-01', unternehmer: true }), rgD = await reg17({ agb: RECHT.NB_STAND, unternehmer: true });
+  ok(rgA._status === 400 && rgB._status === 400 && rgC._status === 409 && rgC.neuLaden && rgD.ok && rgD.konto.acc.bedingungen.fassung === RECHT.NB_STAND && rgD.konto.acc.bedingungen.unternehmer === true && rgD.konto.acc.bedingungen.avv === true && !isNaN(Date.parse(rgD.konto.acc.bedingungen.zeit)), 'Registrierung nur als Unternehmer mit Zustimmung zur geltenden Fassung der Nutzungsbedingungen samt AVV; Fassung und Zeitpunkt stehen am Konto');
   aus17();
 }
 
