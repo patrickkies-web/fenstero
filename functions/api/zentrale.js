@@ -22,6 +22,9 @@ import { ApiFehler, hmac, b64url, erlaubt, ip, netzKurz, anschluss, gleich, zufa
 import { anmeldungLoeschen, anmeldungLesen, anmeldungenAlle } from './auth.js';
 import { melden, abrechnungslauf, sicht } from './konten.js';
 import { kennung } from './entwurf.js';
+import { entfernt } from './eigene.js';
+/* Aufmaß eines Hauseigentümers mit Besitzer, keine Löschmarke (eigene.js) */
+const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
 import { auswerten, tagBerlin, browserName, systemName, zaehlen } from './statistik.js';
 
 const X = () => globalThis.Abrechnung;
@@ -258,7 +261,7 @@ export const ZENTRALE = {
   /* Übersicht: Kennzahlen, zwölf Wochen, letzte Vorgänge, Hinweise */
   'GET /api/zentrale/uebersicht': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), k = ctx.k, jetzt = Date.now();
-    const [rows, kaeufe, web, entwuerfe] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), auswerten(sp, 30).catch(() => null), sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null]);
+    const [rows, kaeufe, web, entwuerfe, eigene] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), auswerten(sp, 30).catch(() => null), sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null, sp.eigeneAlle ? sp.eigeneAlle().catch(() => null) : null]);
     const z = rows.map(zeile), alter = (iso) => (iso ? (jetzt - Date.parse(iso)) / TAG : Infinity), summe = (f) => z.reduce((s, x) => s + (Number(f(x)) || 0), 0);
     const bez = kaeufe.filter((x) => x.status === 'bezahlt'), tarife = { service: 0, abo: 0, plus: 0 }; z.forEach((x) => { tarife[x.tarif] = (tarife[x.tarif] || 0) + 1; });
     const w = wochen(12), aktivitaet = [];
@@ -283,6 +286,7 @@ export const ZENTRALE = {
     const warten = z.filter((x) => x.k.wartend > 0); if (warten.length) hinweise.push({ art: 'info', text: X().nW(warten.length, 'Betrieb hat', 'Betriebe haben') + ' Aufmaße, die auf eine Zahlungsart warten.', ziel: 'betriebe' });
     /* Mehrfachnutzung: auffällige Kundenlinks (je Link ein Hinweis, höchstens fünf) und Käufer mit mehreren Aufmaßblättern */
     if (entwuerfe === null && k.supabase) hinweise.push({ art: 'warn', text: 'Der Zwischenspeicher für Kundenlinks ist noch nicht eingerichtet: supabase/schema.sql noch einmal im SQL-Editor von Supabase ausführen.', ziel: 'einstellungen' });
+    if (eigene === null && k.supabase) hinweise.push({ art: 'warn', text: 'Konten für Hauseigentümer sind noch nicht eingerichtet: supabase/schema.sql noch einmal im SQL-Editor von Supabase ausführen. Bis dahin kaufen Hauseigentümer ohne Konto.', ziel: 'einstellungen' });
     const byId = new Map(rows.map((r) => [r.id, r]));
     const auff = (entwuerfe || []).map((e) => { const r = byId.get(e.betrieb), l = r ? ((r.daten || {}).links || []).find((x) => x.code === e.code) : null; return Object.assign(linkAuffaellig(e, l, jetzt), { betrieb: e.betrieb, name: r ? r.name : '' }); }).filter((x) => x.gruende.length);
     auff.slice(0, 5).forEach((x) => hinweise.push({ art: 'warn', text: 'Mehrfachnutzung prüfen: ' + (x.name || 'Betrieb') + ', Projekt ' + (x.nr || '?') + ': ' + x.gruende.join(', ') + '.', ziel: 'betrieb/' + x.betrieb }));
@@ -297,6 +301,7 @@ export const ZENTRALE = {
         projekte: summe((x) => x.k.projekte), verschickt: summe((x) => x.k.verschickt), geoeffnet: summe((x) => x.k.geoeffnet), aufmasse: summe((x) => x.k.aufmasse), aufmasse30: aufmasse30,
         positionen: summe((x) => x.k.positionen), fotos: summe((x) => x.k.fotos), auftraege: summe((x) => x.k.auftraege), angebote: summe((x) => x.k.angebote),
         umsatzBetriebe: rund(summe((x) => x.k.umsatz)), bezahltBetriebe: rund(summe((x) => x.k.bezahlt)), offenBetriebe: rund(summe((x) => x.k.nochOffen)), berechnetBetriebe: rund(summe((x) => x.k.berechnet)),
+        kunden: eigene ? new Set(eigene.filter(lebt).map((e) => e.nutzer)).size : null, eigeneAufmasse: eigene ? eigene.filter(lebt).length : null,
         kaeufe: bez.length, kaeufe30: bez.filter((x) => alter(x.created_at) <= 30).length, umsatzKaeufe: rund(bez.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), umsatzKaeufe30: rund(bez.filter((x) => alter(x.created_at) <= 30).reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100)
       },
       wochen: w.map((x) => ({ start: x.start, registrierungen: x.registrierungen, projekte: x.projekte, aufmasse: x.aufmasse, kaeufe: x.kaeufe })),
@@ -426,16 +431,19 @@ export const ZENTRALE = {
     await frischerCode(ctx, 'loeschen', false);
     const grund = str(b.grund, 300), a = row.daten || {};
     if ((row.stripe_subscription || row.stripe_customer) && !ctx.zd) throw new ApiFehler('Stripe ist nicht verbunden: laufende Abos ließen sich nicht beenden. Nichts wurde gelöscht.', 503);
-    /* Reihenfolge: zuerst die Anmeldung (scheitert das, ist noch nichts passiert), dann Abos und offene Kassen bei Stripe, dann das Konto */
-    const weg = await anmeldungLoeschen(ctx.k, row.auth_user);
+    /* Reihenfolge: zuerst die Anmeldung (scheitert das, ist noch nichts passiert), dann Abos und offene Kassen bei Stripe, dann das Konto.
+       Gehören zur Anmeldung auch gesicherte Aufmaße eines Hauseigentümers (dieselbe E-Mail-Adresse), bleibt sie für diese; die
+       Aufmaße löscht der Hauseigentümer selbst in der App */
+    const eigeneDa = row.auth_user && ctx.sp.eigeneVonNutzer ? await ctx.sp.eigeneVonNutzer(row.auth_user) : null, bleibt = !!(eigeneDa && eigeneDa.length);
+    const weg = bleibt ? { ok: true } : await anmeldungLoeschen(ctx.k, row.auth_user);
     if (!weg.ok) throw new ApiFehler('Die Anmeldung bei Supabase ließ sich nicht löschen (' + weg.status + '). Nichts wurde gelöscht; bitte noch einmal versuchen.', 502);
     let abos = [];
     try { abos = ctx.zd ? await ctx.zd.kundeAbosBeenden(row.stripe_customer, row.stripe_subscription) : []; }
     catch (e) { throw new ApiFehler('Die Anmeldung ist gelöscht, aber Stripe hat die Abos nicht beendet (' + String(e.message || e).slice(0, 120) + '). Das Konto steht noch da; bitte noch einmal löschen.', 502); }
     const offen = rund((a.book || []).filter((x) => x.status === 'offen' && Number(x.betrag) > 0).reduce((s, x) => s + Number(x.betrag), 0));
     await ctx.sp.betriebLoeschen(row.id);
-    const nachweis = await protokoll(ctx.sp, 'loeschen', row.id, 'Konto gelöscht' + (grund ? ': ' + grund : ''), { betrieb: row.name, registriert: row.created_at, stripe_kunde: row.stripe_customer || '', abos_beendet: abos, rechnungen: (a.rechnungen || []).map((r) => ({ nr: r.nr, datum: r.datum, betrag: r.betrag, status: r.status })), nicht_berechnet: offen });
-    return { ok: true, geloescht: row.name, nichtBerechnet: offen, stripeKunde: row.stripe_customer || '', stripeLink: stripeLink(ctx.k, 'customers', row.stripe_customer), nachweis: nachweis };
+    const nachweis = await protokoll(ctx.sp, 'loeschen', row.id, 'Konto gelöscht' + (grund ? ': ' + grund : '') + (bleibt ? ' (die Anmeldung bleibt für gesicherte Aufmaße als Hauseigentümer)' : ''), { betrieb: row.name, registriert: row.created_at, stripe_kunde: row.stripe_customer || '', abos_beendet: abos, rechnungen: (a.rechnungen || []).map((r) => ({ nr: r.nr, datum: r.datum, betrag: r.betrag, status: r.status })), nicht_berechnet: offen, anmeldung_bleibt: bleibt });
+    return { ok: true, geloescht: row.name, nichtBerechnet: offen, stripeKunde: row.stripe_customer || '', stripeLink: stripeLink(ctx.k, 'customers', row.stripe_customer), nachweis: nachweis, anmeldungBleibt: bleibt };
   },
 
   /* Käufe des Aufmaßblatts (Hauseigentümer) */
@@ -443,19 +451,24 @@ export const ZENTRALE = {
     await zugang(ctx); const z = await daten(ctx).zahlungenAlle(), jetzt = Date.now(), bez = z.filter((x) => x.status === 'bezahlt'), j30 = bez.filter((x) => jetzt - Date.parse(x.created_at) <= 30 * TAG);
     return { ok: true, kaeufe: z.slice(0, 1000).map((x) => ({ zeit: x.created_at, mail: x.mail || '', betrag: rund((x.betrag_cent || 0) / 100), status: x.status, kennung: x.kennung || '', sitzung: x.stripe_session })), summe: { anzahl: bez.length, umsatz: rund(bez.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), anzahl30: j30.length, umsatz30: rund(j30.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), offen: z.length - bez.length }, test: !!(ctx.k.stripe && ctx.k.stripe.test), stripe: ctx.k.stripe ? 'https://dashboard.stripe.com/' + (ctx.k.stripe.test ? 'test/' : '') + 'payments' : '' };
   },
-  /* Anmeldungen ohne Betrieb: E-Mail bestätigt, Registrierung nicht abgeschlossen (werden nach 30 Tagen von selbst gelöscht) */
+  /* Anmeldungen ohne Betrieb: E-Mail bestätigt, Registrierung nicht abgeschlossen (werden nach 30 Tagen von selbst gelöscht).
+     Konten von Hauseigentümern mit gesichertem Aufmaß (eigene.js) stehen nicht darin, nur ihre Anzahl: Ihre E-Mail-Adressen zeigt die
+     Zentrale nicht, und löschen können Hauseigentümer ihr Konto selbst in der App. */
   'GET /api/zentrale/anmeldungen': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx);
     if (!ctx.k.supabase) return { ok: true, liste: [], attrappe: true };
-    const [nutzer, rows] = await Promise.all([anmeldungenAlle(ctx.k), sp.betriebeAlle()]);
+    const [nutzer, rows, eig] = await Promise.all([anmeldungenAlle(ctx.k), sp.betriebeAlle(), sp.eigeneAlle ? sp.eigeneAlle() : null]);
     if (!nutzer) throw new ApiFehler('Supabase Auth antwortet nicht.', 502);
-    const mit = new Set(rows.map((r) => r.auth_user).filter(Boolean)), jetzt = Date.now();
-    return { ok: true, liste: nutzer.filter((u) => !mit.has(u.id)).map((u) => Object.assign({}, u, { tage: Math.floor((jetzt - Date.parse(u.erstellt || new Date().toISOString())) / TAG) })).sort((x, y) => String(y.erstellt).localeCompare(String(x.erstellt))) };
+    const mit = new Set(rows.map((r) => r.auth_user).filter(Boolean)), kunden = new Set((eig || []).filter(lebt).map((e) => e.nutzer)), jetzt = Date.now();
+    const ohne = nutzer.filter((u) => !mit.has(u.id));
+    return { ok: true, kunden: ohne.filter((u) => kunden.has(u.id)).length, liste: ohne.filter((u) => !kunden.has(u.id)).map((u) => Object.assign({}, u, { tage: Math.floor((jetzt - Date.parse(u.erstellt || new Date().toISOString())) / TAG) })).sort((x, y) => String(y.erstellt).localeCompare(String(x.erstellt))) };
   },
   'POST /api/zentrale/anmeldungen/:uid/loeschen': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), uid = str(ctx.params.uid, 80);
     if (!/^[0-9a-f-]{36}$/i.test(uid)) throw new ApiFehler('Unbekannte Anmeldung.', 404);
     if (await sp.betriebNachAuth(uid)) throw new ApiFehler('Zu dieser Anmeldung gehört ein Betrieb. Bitte den Betrieb löschen.');
+    const eig = sp.eigeneVonNutzer ? await sp.eigeneVonNutzer(uid) : null;
+    if (eig && eig.length) throw new ApiFehler('Zu dieser Anmeldung gehört ein Konto eines Hauseigentümers mit gesichertem Aufmaß. Das Konto löscht der Hauseigentümer selbst in der App.');
     const r = await anmeldungLoeschen(ctx.k, uid); if (!r.ok) throw new ApiFehler('Supabase hat die Anmeldung nicht gelöscht (' + r.status + ').', 502);
     await protokoll(sp, 'anmeldung_geloescht', null, 'Anmeldung ohne Betrieb gelöscht', { nutzer: uid });
     return { ok: true };
@@ -497,23 +510,38 @@ export const ZENTRALE = {
    Anmeldungen ohne Betrieb nach 30 Tagen ohne Nutzung. Schlägt etwas fehl, wird nichts gelöscht und beim nächsten Lauf neu versucht. */
 export async function aufraeumen(k, sp) {
   if (!sp) return { ok: false };
-  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, anmeldungen: 0, entwuerfe: 0, entwuerfeGeleert: 0 };
+  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, anmeldungen: 0, entwuerfe: 0, entwuerfeGeleert: 0, eigene: 0 };
   try { out.protokoll = await sp.protokollAufraeumen(new Date(jetzt - 90 * TAG).toISOString(), new Date(jetzt - 3 * 365 * TAG).toISOString()); } catch (e) { out.ok = false; }
   try { out.kassen = await sp.zahlungenAufraeumen(new Date(jetzt - 30 * TAG).toISOString()); } catch (e) { out.ok = false; }
   if (k.supabase) {
     try {
-      const [nutzer, rows] = await Promise.all([anmeldungenAlle(k), sp.betriebeAlle()]);
-      if (nutzer && Array.isArray(rows)) {
-        const mit = new Set(rows.map((r) => r.auth_user).filter(Boolean));
+      const [nutzer, rows, eig] = await Promise.all([anmeldungenAlle(k), sp.betriebeAlle(), sp.eigeneAlle ? sp.eigeneAlle() : null]);
+      if (nutzer && Array.isArray(rows) && eig !== undefined) {
+        const mit = new Set(rows.map((r) => r.auth_user).filter(Boolean)); // Anmeldungen mit Betrieb oder mit gesichertem Aufmaß bleiben
+        (eig || []).filter(lebt).forEach((e) => mit.add(e.nutzer));
         for (const u of nutzer) {
           const zuletzt = Math.max(Date.parse(u.erstellt || '') || jetzt, Date.parse(u.zuletzt || '') || 0);
           if (mit.has(u.id) || jetzt - zuletzt < 30 * TAG || out.anmeldungen >= 20) continue; // höchstens 20 je Lauf (Grenze für Unteranfragen)
           if (await sp.betriebNachAuth(u.id)) continue; // frisch registriert, während der Lauf lief
+          if (sp.eigeneVonNutzer) { const e2 = await sp.eigeneVonNutzer(u.id); if (e2 && e2.length) continue; } // gerade gesichert, oder die Liste oben war gekürzt
           if ((await anmeldungLoeschen(k, u.id)).ok) out.anmeldungen++;
         }
       }
     } catch (e) { out.ok = false; }
   }
+  /* Aufmaße der Hauseigentümer mit Konto (eigene.js): nach 12 Monaten ohne Änderung weg, freigeschaltete nach 3 Jahren, Löschmarken
+     12 Monate nach dem Löschen (höchstens 200 je Lauf, und nur, wenn seit der Liste nicht geändert). Aufmaße ohne Besitzer (die
+     Anmeldung wurde anders als über die App gelöscht, etwa bei Supabase) werden zur Löschmarke. Das Konto löschen kann der
+     Hauseigentümer jederzeit selbst in der App. */
+  try {
+    const eig = sp.eigeneAlle ? await sp.eigeneAlle() : null;
+    for (const e of eig || []) {
+      if (out.eigene >= 200) break;
+      if (!e.nutzer && !entfernt(e)) { if (await sp.eigenesWeg(e.kennung)) out.eigene++; continue; }
+      const still = jetzt - (Date.parse(e.updated_at || '') || jetzt), frist = (e.meta && e.meta.bezahlt && !entfernt(e) ? 3 * 365 : 365) * TAG;
+      if (still > frist && (await sp.eigenesLoeschen(e.kennung, new Date(jetzt - frist).toISOString()))) out.eigene++; // nur, wenn seitdem nicht geändert
+    }
+  } catch (e) { out.ok = false; }
   /* Zwischenstände der Kundenlinks (entwurf.js), höchstens 200 je Lauf:
      - ganz weg, wenn Betrieb oder Link weg sind oder das Aufmaß eingegangen ist und keine Nachbesserung mehr geht (alle Runden
        genutzt oder 30 Tage nach dem Eingang)

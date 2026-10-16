@@ -4,6 +4,7 @@
    /api/zahlung/…                   Aufmaßblatt kaufen (zahlung.js)
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js)
    /api/link/:code/entwurf          Zwischenstand eines Kundenlinks mit Zählern gegen Mehrfachnutzung (entwurf.js)
+   /api/kunde/…                     Konten der Hauseigentümer: Anmelden per Code, Aufmaße sichern und abgleichen (eigene.js)
    /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js) */
 import { konfig, json, ApiFehler } from './umgebung.js';
 import { onRequestGet as kiGet, onRequestPost as kiPost } from './ki.js';
@@ -13,10 +14,11 @@ import { KONTO, abrechnungslauf } from './konten.js';
 import { ZAHLUNG } from './zahlung.js';
 import { ZENTRALE, aufraeumen } from './zentrale.js';
 import { ENTWURF } from './entwurf.js';
+import { EIGENE, kontenDa } from './eigene.js';
 import { zaehlen } from './statistik.js';
 import '../../web/assets/modell.js';
 
-const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, ZENTRALE);
+const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE);
 const MAX_BODY = 1500000;
 
 function finde(method, pfad) {
@@ -38,7 +40,7 @@ export async function api(request, env, ctx0) {
   globalThis.Abrechnung.setPreise(k.preise);
   const warte = (p) => (ctx0 && ctx0.waitUntil ? ctx0.waitUntil(p) : p);
   try {
-    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), hinweise: k.hinweise.length ? k.hinweise : undefined });
+    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: k.daten ? !!(await kontenDa(speicher(k))) : false, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), hinweise: k.hinweise.length ? k.hinweise : undefined });
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });
       if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), ['ereignis:ki_foto']).catch(() => false)); return r; }
@@ -47,7 +49,7 @@ export async function api(request, env, ctx0) {
     const treffer = finde(request.method, pfad);
     if (!treffer) return json({ ok: false, fehler: 'not_found' }, 404);
     const sp = speicher(k), zd = zahlungsdienst(k);
-    const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad === '/api/aufmass';
+    const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad.startsWith('/api/kunde') || pfad === '/api/aufmass';
     if (brauchtDaten && !sp) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Die Datenbank fehlt (SUPABASE_URL, SUPABASE_SECRET_KEY).' }, 503);
     if (pfad.startsWith('/api/zahlung') && !zd) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Zahlungen fehlen (STRIPE_SECRET_KEY).' }, 503);
     let body = null, roh = '';

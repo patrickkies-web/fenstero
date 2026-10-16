@@ -45,9 +45,19 @@ export async function codePruefen(k, sp, mail, code) {
   return { token: 'test.' + btoa(unescape(encodeURIComponent(mail))).replace(/=+$/, ''), refresh: 'test-refresh', nutzer: { id: id, mail: mail } };
 }
 
+/* Supabase Auth gestört (Fehler 5xx, Bremse 429, keine Verbindung): eine Störung, keine abgelaufene Anmeldung. Sonst würde die App
+   die Anmeldung wegwerfen, obwohl sie gültig ist. */
+const gestoert = () => new ApiFehler('Die Anmeldung ist gerade nicht erreichbar. Bitte gleich noch einmal.', 503, { gestoert: true });
+async function gotrueSicher(k, pfad, init, token) {
+  let r; try { r = await gotrue(k, pfad, init, token); } catch (e) { throw gestoert(); }
+  if (r.status >= 500 || r.status === 429) throw gestoert();
+  return r;
+}
+
+/* null: Erneuerung abgelehnt (abgelaufen, schon benutzt, Konto gelöscht); Störung: Fehler 503 */
 export async function erneuern(k, refresh) {
   if (!k.supabase) return null;
-  const r = await gotrue(k, 'token?grant_type=refresh_token', { body: { refresh_token: String(refresh || '') } });
+  const r = await gotrueSicher(k, 'token?grant_type=refresh_token', { body: { refresh_token: String(refresh || '') } });
   if (!r.ok || !r.data || !r.data.access_token) return null;
   return { token: r.data.access_token, refresh: r.data.refresh_token || refresh, nutzer: { id: r.data.user.id, mail: String(r.data.user.email || '').toLowerCase() } };
 }
@@ -89,13 +99,14 @@ export async function anmeldungenAlle(k) {
   return out;
 }
 
-/* Wer steckt hinter dem Token? Kurz zwischengespeichert, damit nicht jeder Aufruf bei Supabase nachfragt. */
+/* Wer steckt hinter dem Token? Kurz zwischengespeichert, damit nicht jeder Aufruf bei Supabase nachfragt. null: Token ungültig;
+   ist Supabase gestört, ein Fehler 503 (dann bleibt die Anmeldung in der App erhalten) */
 export async function nutzer(k, token) {
   token = String(token || '');
   if (!token) return null;
   const c = cache.get(token); if (c && c.bis > Date.now()) return c.n;
   let n = null;
-  if (k.supabase) { const r = await gotrue(k, 'user', null, token); if (r.ok && r.data && r.data.id) n = { id: r.data.id, mail: String(r.data.email || '').toLowerCase() }; }
+  if (k.supabase) { const r = await gotrueSicher(k, 'user', null, token); if (r.ok && r.data && r.data.id) n = { id: r.data.id, mail: String(r.data.email || '').toLowerCase() }; }
   else if (token.startsWith('test.')) { try { const mail = decodeURIComponent(escape(atob(token.slice(5)))); n = { id: 'u_' + hashN(mail).toString(36), mail: mail }; } catch (e) { n = null; } }
   if (n) { cache.set(token, { n: n, bis: Date.now() + 60000 }); if (cache.size > 2000) cache.clear(); }
   return n;

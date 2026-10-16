@@ -98,8 +98,9 @@ const Server = {
     if (this.sitzung && this.sitzung.token) init.headers.authorization = 'Bearer ' + this.sitzung.token;
     let r = await fetch(pfad, init), j = await r.json().catch(() => null);
     if (r.status === 401 && this.sitzung && this.sitzung.refresh) {
-      const e = await fetch('/api/konto/erneuern', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ refresh: this.sitzung.refresh }) }).then((x) => x.json()).catch(() => null);
+      const er = await fetch('/api/konto/erneuern', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ refresh: this.sitzung.refresh }) }).catch(() => null), e = er ? await er.json().catch(() => null) : null;
       if (e && e.ok) { this.merken(Object.assign({}, this.sitzung, { token: e.token, refresh: e.refresh })); init.headers.authorization = 'Bearer ' + e.token; r = await fetch(pfad, init); j = await r.json().catch(() => null); }
+      else if (!er || er.status >= 500) { const err = new Error((e && e.fehler) || 'Die Anmeldung ist gerade nicht erreichbar. Bitte gleich noch einmal.'); err.status = 503; throw err; } // Störung: angemeldet bleiben
     }
     if (r.status === 401) { this.merken(null); if (S.cur === this.id) { S.role = null; nav('landing'); } }
     /* Von eeziframes gesperrt: abmelden, die Begründung kommt als Fehlermeldung (Hinweis oder Fehler im Anmeldeblatt) */
@@ -136,16 +137,19 @@ const Server = {
     } catch (e) { toast(e.message); }
   },
   async tu(fn) { if (this.laeuft) return; this.laeuft = true; try { return await fn(); } catch (e) { toast(e.message || 'Das hat nicht geklappt.'); } finally { this.laeuft = false; } },
-  codeSenden(mail) { return this.tu(async () => { const sh = S.sheet; if (VAL.mail(mail) !== true) { sh.err = 'Bitte eine gültige E-Mail-Adresse eingeben.'; return render(); } await this.api('/api/konto/anmelden', { mail: mail }); sh.schritt = 'code'; sh.mail = mail; sh.err = ''; sh.code = ''; render(); toast('E-Mail ist unterwegs an ' + mail); }); },
+  codeSenden(mail) { return this.tu(async () => { const sh = S.sheet; if (VAL.mail(mail) !== true) { sh.err = 'Bitte eine gültige E-Mail-Adresse eingeben.'; return render(); } await this.api('/api/konto/anmelden', { mail: mail }); try { localStorage.setItem('aufmass.sitzung.anfrage', JSON.stringify({ mail: String(mail).trim().toLowerCase(), at: Date.now() })); } catch (e) { /* ok */ } sh.schritt = 'code'; sh.mail = mail; sh.err = ''; sh.code = ''; render(); toast('E-Mail ist unterwegs an ' + mail); }); },
   codePruefen(mail, code) { return this.tu(async () => { const sh = S.sheet; let r; try { r = await this.api('/api/konto/bestaetigen', { mail: mail, code: code }); } catch (e) { sh.err = e.message; return render(); } this.nachAnmeldung(r); }); },
   /* Nach Code oder Anmeldelink: Sitzung merken, ins Konto oder (neue Adresse) den Betrieb eintragen */
   nachAnmeldung(r) {
+    try { localStorage.removeItem('aufmass.sitzung.anfrage'); } catch (e) { /* ok */ }
     this.merken({ token: r.token, refresh: r.refresh, mail: r.mail });
     if (r.konto) { this.uebernehmen(r.konto); S.sheet = null; S.reg = null; login('betrieb', this.id, 'Willkommen zurück, ' + String(r.konto.acc.ap || '').split(' ')[0]); }
     else { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: r.mail }, err: {}, server: true }; go('reg'); toast('Fast geschafft: noch Ihren Betrieb eintragen.'); }
   },
   /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… hierher zurück, bei Fehlern mit #error=…;
-     die Werte verschwinden sofort aus der Adresszeile */
+     die Werte verschwinden sofort aus der Adresszeile. Ohne Rückfrage nur, wenn dieser Browser die E-Mail für genau diese Adresse in
+     der letzten Stunde angefordert hat oder schon so angemeldet ist; sonst könnte ein untergeschobener Link in ein fremdes Konto
+     anmelden. Dann fragt das Blatt „linkfrage“ mit der Adresse des Kontos */
   async linkAnmeldung() {
     const h = new URLSearchParams(location.hash.replace(/^#/, '')), token = h.get('access_token'), fehler = h.get('error_code') || h.get('error');
     if (!token && !fehler) return false;
@@ -153,7 +157,9 @@ const Server = {
     if (!token) { toast(fehler === 'otp_expired' ? 'Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.' : 'Die Anmeldung über den Link hat nicht geklappt. Bitte noch einmal.'); return true; }
     const r = await fetch('/api/konto/sitzung', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ token: token, refresh: h.get('refresh_token') || '' }) }).then((x) => x.json()).catch(() => null);
     if (!r || !r.ok) { toast((r && r.fehler) || 'Die Anmeldung über den Link hat nicht geklappt. Bitte noch einmal.'); return true; }
-    this.nachAnmeldung(r);
+    let a = null; try { a = JSON.parse(localStorage.getItem('aufmass.sitzung.anfrage') || 'null'); } catch (e) { a = null; }
+    if ((a && a.mail === r.mail && Date.now() - (Number(a.at) || 0) < 3600000) || (this.sitzung && this.sitzung.mail === r.mail)) { this.nachAnmeldung(r); return true; }
+    S.sheet = { k: 'linkfrage', r: r }; render();
     return true;
   },
   registrieren(d) { return this.tu(async () => { const r = await this.api('/api/konto/registrieren', { firma: d.firma, ap: d.ap, tel: d.tel, plz: d.plz, col: d.col, agb: !!d.agb }); this.uebernehmen(r.konto); S.reg = null; S._feier = 'willkommen'; login('betrieb', this.id, 'Willkommen, ' + String(d.ap || '').trim().split(' ')[0]); }); },
@@ -447,7 +453,7 @@ const aufmassInhalt = () => '<section class="sec"><div class="sec-head"><h2>Was 
 const RATGEBER = [['/ratgeber/fenster-ausmessen/', 'Fenster ausmessen', 'Die Maueröffnung an drei Stellen messen, das kleinste Maß zählt. Mit Messpunkten und Tipps für den Altbau.'], ['/ratgeber/aufmassblatt-fenster/', 'Aufmaßblatt zum Ausdrucken', 'Kostenlose Vorlage für drei Fenster, jede Zeile erklärt.'], ['/ratgeber/fenster-austauschen/', 'Fenster austauschen', 'Ablauf, Kosten pro Fenster, Förderung 2026 und was ins Angebot gehört.']];
 const wechsel = (zu) => zu === 'betrieb'
   ? '<section class="owner wechsel"><div><p class="eyebrow">Für Fensterbauer</p><h2>Sie sind Fensterbauer?</h2><p>Lassen Sie Ihre Kunden selbst messen und rechnen Sie das erste Angebot ohne Anfahrt. Die ersten ' + P().frei + ' Projekte sind kostenlos.</p></div><div class="row"><button type="button" class="btn primary" data-act="ansicht" data-v="betrieb">Zur Ansicht für Fensterbauer</button></div></section>'
-  : '<section class="owner wechsel"><div><p class="eyebrow">Für Hauseigentümer</p><h2>Ihre eigenen Fenster ausmessen?</h2><p>Das geht kostenlos in der App, ohne Konto und Schritt für Schritt erklärt. Das Aufmaßblatt geht an jeden Fensterbauer.</p></div><div class="row"><button type="button" class="btn primary" data-act="ansicht" data-v="kunde">Zur Ansicht für Hauseigentümer</button></div></section>';
+  : '<section class="owner wechsel"><div><p class="eyebrow">Für Hauseigentümer</p><h2>Ihre eigenen Fenster ausmessen?</h2><p>Messen geht kostenlos in der App, ohne Konto und Schritt für Schritt erklärt. Das Aufmaßblatt geht an jeden Fensterbauer.</p></div><div class="row"><button type="button" class="btn primary" data-act="ansicht" data-v="kunde">Zur Ansicht für Hauseigentümer</button></div></section>';
 SCREENS.landing = () => {
   if (ansicht() === 'betrieb') return { title: 'eeziframes', html: '<div class="wrap">' + (vonPdf() ? '<div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small primary" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div>' : '') +
   '<section class="hero b2b" data-ansicht="betrieb"><div><p class="eyebrow">Für Fensterbauer · Erstaufmaß, ganz <span class="mk" translate="no">eezi</span></p><h1>' + 'Aufmaß ohne Anfahrt.'.split(' ').map((w, i) => '<span class="w" style="--i: ' + i + '">' + w + '</span>').join(' ') + '</h1><p class="lead">Schicken Sie Ihren Kunden einen Aufmaß-Link statt hinzufahren. Ihr Kunde misst selbst, Schritt für Schritt geführt, und Sie bekommen alles, was Sie für ein erstes Angebot brauchen: Maße, Fotos, Öffnungsarten, Farben und Ausstattung, für jedes Fenster, sortiert nach Positionen.</p><div class="cta"><button type="button" class="btn big primary" data-act="reg" data-v="betrieb">Kostenlos starten</button><button type="button" class="btn big ghost" data-act="tour">' + icon('play', 18) + 'Tour starten</button></div><p class="hint">' + P().frei + ' Projekte kostenlos · danach ' + P().projekt + ' € je Projekt oder im Abo · Ihr Kunde braucht kein Konto</p></div>' +
@@ -864,6 +870,7 @@ function loginServer(s) {
     '<p class="sub center" style="margin-top: 14px">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p>';
 }
 const SHEETS = {
+  linkfrage: (s) => '<h3>Mit diesem Konto anmelden?</h3><p class="sub">Der Link meldet Sie als <b style="overflow-wrap: anywhere">' + esc(s.r.mail) + '</b> an. Angefordert wurde er nicht in diesem Browser. Melden Sie sich nur an, wenn das Ihre E-Mail-Adresse ist.</p>' + (Server.sitzung && Server.sitzung.mail && Server.sitzung.mail !== s.r.mail ? '<p class="sub">Gerade sind Sie als <b style="overflow-wrap: anywhere">' + esc(Server.sitzung.mail) + '</b> angemeldet und werden dort abgemeldet.</p>' : '') + '<div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Nicht anmelden</button><button type="button" class="btn primary" data-act="srv-link-ja">Anmelden</button></div>',
   login: (s) => (Server.an ? loginServer(s) : '<h3>Anmelden für Fensterbauer</h3><p class="sub" style="margin: -4px 0 12px">Ein Kunde hat Ihnen ein eeziframes-Aufmaß geschickt? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button>, dann „Code vom Kunden einfügen“. Die ersten 3 Projekte sind frei.</p><form class="form" data-form="login" novalidate><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email"></div><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-pw">Passwort</label><input id="lg-pw" type="password" data-in="lg:pw" value="" autocomplete="current-password">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Pilotphase: Ihr Konto liegt nur in diesem Browser.</small>') + '</div><div class="row between"><button type="button" class="linkbtn" data-act="toast" data-v="In der Pilotphase liegt Ihr Konto nur in diesem Browser; ein Zurücksetzen per E-Mail kommt mit dem Start.">Passwort vergessen?</button><button type="submit" class="btn primary">Anmelden</button></div></form>' +
     '<p class="sub center">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p><p class="sub center">Noch kein Konto? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>'),
   linkimport: () => '<h3>Code vom Kunden einfügen</h3><p class="sub">Ihr Kunde schickt nach dem Absenden einen Aufmaß-Code, zum Beispiel als Antwort in WhatsApp; bei einem eeziframes-Aufmaßblatt steht er auf der letzten Seite. Fügen Sie ihn hier ein: Gehört er zu einem Ihrer Projekte, landet das Aufmaß dort, sonst entsteht ein neues Projekt.</p><div class="f"><textarea id="code-in" rows="4" placeholder="AM1.…"></textarea></div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="linkimport">Übernehmen</button></div>',
@@ -992,6 +999,7 @@ function act(name, el) {
     case 'back': return back();
     case 'sheet': { S.sheet = { k: v, id: id }; return render(); }
     case 'sheet-close': { S.sheet = null; return render(); }
+    case 'srv-link-ja': { const r = S.sheet && S.sheet.k === 'linkfrage' ? S.sheet.r : null; S.sheet = null; if (!r) return render(); if (Server.sitzung && Server.sitzung.mail !== r.mail) Server.abmelden(); return Server.nachAnmeldung(r); }
     case 'toast': return toast(v);
     case 'reg': {
       if (Server.an) { if (S.acc[Server.id] && Server.sitzung) return login('betrieb', Server.id); if (Server.sitzung) { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: Server.sitzung.mail }, err: {}, server: true }; return go('reg'); } S.sheet = { k: 'login', zweck: 'reg' }; return render(); }

@@ -109,7 +109,7 @@ export function llms(origin, env) {
     '- Material, Farbe, Glas, Teilung, Öffnung und Rollladen wählt man am 3-D-Modell. Unterstützt: Fenster, Festverglasungen, Hebe-Schiebe-Türen, Faltschiebewände.',
     '- Für Hauseigentümer: Messen, Fotos und 3-D-Modell kostenlos; das Aufmaßblatt als PDF kostet ' + eur(p.aufmass) + '; wer über den Link seines Fensterbauers misst, zahlt nichts.',
     '- Für Fensterbauer (' + (p.mwst ? 'netto, zuzüglich Mehrwertsteuer' : 'ohne Mehrwertsteuer') + '): ' + p.frei + ' Projekte kostenlos, danach ' + eur(p.projekt) + ' je Projekt mit eingegangenem Aufmaß; Abo 10: ' + eur(p.abo.grund) + ' im Monat mit ' + p.abo.inkl + ' Projekten, jedes weitere ' + eur(p.abo.extra) + '; Plus: ' + eur(p.plus) + ' im Monat, unbegrenzt. Monatlich kündbar.',
-    '- Ohne Installation und ohne Konto zum Messen; läuft auf Handy, Tablet und Computer. Eingaben bleiben auf dem Gerät, bis man sie selbst weitergibt.',
+    '- Ohne Installation und ohne Konto zum Messen; läuft auf Handy, Tablet und Computer. Eingaben bleiben auf dem Gerät, bis man sie sichert (Konto mit E-Mail-Adresse und Code, ohne Passwort, nötig für das Aufmaßblatt) oder selbst weitergibt.',
     '- Das eigene Aufmaß reicht für ein Angebot. Vor der Fertigung misst der Fensterbauer nach (Feinaufmaß) und legt das Bestellmaß fest.',
     '- Der Name wird immer klein geschrieben: eeziframes.',
     '',
