@@ -404,12 +404,12 @@ const SCREENS = {};
 const CAPS = [
   ['ruler', 'Maueröffnung', 'Drei Breiten und drei Höhen, das kleinste Maß zählt. Abweichungen außer Winkel werden markiert.'],
   ['frame', 'Fensterelement', 'Breite und Höhe des alten Fensters mit Rahmen, dazu Brüstungshöhe und Laibungstiefe.'],
-  ['camera', 'Fotos innen und außen', 'Die KI liest die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade, Zugang und Schäden.'],
-  ['open', 'Teilung und Öffnung', 'Flügel, Dreh, Kipp oder fest, DIN links oder rechts, Oberlicht und Sonderformen.'],
-  ['palette', 'Material und Farbe', 'Kunststoff, Holz, Holz-Alu oder Aluminium. Farbe innen und außen nach RAL oder Dekor.'],
+  ['camera', 'Fotos innen und außen', 'Die KI liest die Einbausituation: Rollladenkasten, Anschlag, Fensterbänke, Fassade, Strom, Zugang und Schäden, und prüft die Maße gegen das Foto.'],
+  ['open', 'Teilung und Öffnung', 'Flügel, Dreh, Kipp oder fest, DIN links oder rechts, Oberlicht und Sonderformen, Balkon-, Hebe-Schiebe- und PSK-Türen.'],
+  ['palette', 'Material und Farbe', 'Kunststoff, Kunststoff-Alu, Holz, Holz-Alu oder Aluminium. Farbe innen und außen nach RAL oder Dekor.'],
   ['glass', 'Glas und Sprossen', '2- oder 3-fach, Schallschutz, Sicherheits- und Ornamentglas, Sprossenart und Lage.'],
   ['shutter', 'Rollladen und Insektenschutz', 'Aufsatz oder Vorbau, Antrieb von Gurt bis Smart Home, Spann- oder Drehrahmen.'],
-  ['sill', 'Fensterbank und Montage', 'Innen und außen, Ausbau und Entsorgung, RAL-Montage, Putzarbeiten an der Laibung.']
+  ['sill', 'Montage und Klärungsliste', 'Fensterbänke, Ausbau, RAL-Montage, Putz. Dazu, was Sie mit dem Kunden klären: Absturzsicherung, Lüftung, Förderung, offene Wünsche.']
 ];
 function heroPhone() {
   return '<div class="phone hero-ph" aria-hidden="true"><div class="ph-top"><span class="ph-av">B</span><span><b>Fensterbau Brandt</b><small>WhatsApp</small></span></div><div class="ph-body">' +
@@ -426,12 +426,12 @@ function storyScenes() {
     '<div class="sc sc-in"><span class="pill">4 · Eingang</span><div class="mini in-mini"><span class="ring"></span><span class="unlock">' + ICONS.check + ' Aufmaß eingegangen</span><p class="mt">Familie Weber · Köln-Ehrenfeld</p>' + w.slice(0, 2).map((x, i) => { const d = AW.derive(x); return '<div class="in-row">' + AW.svg(x, 34) + '<span><b>Pos. ' + (i + 1) + ' · ' + esc(x.name) + '</b><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · ' + esc(AW.opening(x)) + '</small></span></div>'; }).join('') + '<p class="mf">und 2 weitere Positionen, 8 Fotos, Bestellmaß-Vorschlag</p></div><p class="cap">Sie kalkulieren, bevor Sie losfahren.</p></div>';
 }
 /* Ein Fenster aus dem Aufmaß: Kopfzeile, Maße, Bestellmaß, Einzelheiten zum Aufklappen */
-function posCard(w, i, abzug, open) {
+function posCard(w, i, abzug, open, proj) {
   const d = AW.derive(w), ab = abzug || { seite: 15, oben: 15 }, n = AW.num(w.anzahl) || 1;
   const best = d.moW && d.moH ? AW.th(d.moW - 2 * ab.seite) + ' × ' + AW.th(d.moH - ab.oben) + ' mm' : '–';
   const chips = AW.kiChips(w);
-  return '<details class="posc"' + (open ? ' open' : '') + '><summary><span class="pic">' + AW.svg(w, 46) + '</span><span class="pt"><b>Pos. ' + (i + 1) + ' · ' + esc(w.name || 'Fenster') + (n > 1 ? ' · ' + n + ' Stück' : '') + '</b><span>Bestellmaß ' + best + '</span><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · Element ' + AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm · ' + esc(AW.opening(w)) + ' · ' + esc(AW.lab('material', w.material) || 'Kunststoff') + ' · ' + esc(AW.lab('etage', w.etage) || 'EG') + '</small></span><span class="pchev" aria-hidden="true"></span></summary>' +
-    '<div class="pbody"><div class="best"><span>Bestellmaß-Vorschlag</span><b>' + best + '</b><small>Öffnung minus ' + ab.seite + ' mm je Seite und ' + ab.oben + ' mm oben</small></div><div class="kv">' + AW.rows(w).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>' +
+  return '<details class="posc"' + (open ? ' open' : '') + '><summary><span class="pic">' + AW.svg(w, 46) + '</span><span class="pt"><b>Pos. ' + (i + 1) + ' · ' + esc(w.name || 'Fenster') + (n > 1 ? ' · ' + n + ' Stück' : '') + '</b><span>Bestellmaß ' + best + '</span><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · Element ' + AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm · ' + esc(AW.opening(w)) + ' · ' + esc(AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff') + ' · ' + esc(AW.lab('etage', w.etage) || 'EG') + '</small></span><span class="pchev" aria-hidden="true"></span></summary>' +
+    '<div class="pbody"><div class="best"><span>Bestellmaß-Vorschlag</span><b>' + best + '</b><small>Öffnung minus ' + ab.seite + ' mm je Seite und ' + ab.oben + ' mm oben</small></div><div class="kv">' + AW.rows(w, proj).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>' +
     (AW.kiRows(w).length ? '<p class="eyebrow pos-h">Einbausituation (KI, ' + (w.fotos || 0) + ' Fotos)</p><div class="kv">' + AW.kiRows(w).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>' : chips.length ? '<div class="chips">' + chips.map((c) => '<span class="badge">' + esc(c) + '</span>').join('') + '</div>' : '') + '</div></details>';
 }
 function roiCalc() {
@@ -637,11 +637,13 @@ function aufmassText(l) {
   const am = l.aufmass || {}, pr = am.proj || {}, ab = A().abzug || { seite: 15, oben: 15 }, out = [];
   out.push('Aufmaß · ' + l.kunde + (l.nr ? ' · ' + l.nr : ''), [l.adresse, AW.lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')].filter(Boolean).join(' · '), 'Eingegangen: ' + ((l.log || {}).eingegangen || '') + ' · Zeitraum: ' + AW.lab('zeit', pr.zeit) + ' · Budget: ' + AW.lab('budget', pr.budget));
   if (pr.notiz) out.push('Nachricht vom Kunden: ' + pr.notiz);
+  const fw = AW.foerdWeg(pr); if (fw) out.push('Förderung: ' + AW.lab('foerdweg', fw));
+  const kl = AW.klaerung(am.windows || [], pr); if (kl.length) { out.push('', 'Mit dem Kunden zu klären:'); kl.forEach((r) => out.push('  ' + r.k + ': ' + r.v)); }
   out.push('');
   (am.windows || []).forEach((w, i) => {
     const d = AW.derive(w);
     out.push('Pos. ' + (i + 1) + ' · ' + (w.name || 'Fenster') + ' · ' + (AW.num(w.anzahl) || 1) + ' Stück');
-    AW.rows(w).forEach((r) => out.push('  ' + r[0] + ': ' + r[1]));
+    AW.rows(w, pr).forEach((r) => out.push('  ' + r[0] + ': ' + r[1]));
     if (d.moW && d.moH) out.push('  Bestellmaß-Vorschlag: ' + AW.th(d.moW - 2 * ab.seite) + ' × ' + AW.th(d.moH - ab.oben) + ' mm');
     AW.kiRows(w).forEach((r) => out.push('  Einbausituation, ' + r[0] + ': ' + r[1]));
     out.push('');
@@ -667,9 +669,11 @@ SCREENS.link = () => {
   let result = '';
   if (done && l.aufmass) {
     const am = l.aufmass, pr = am.proj || {}, wins = am.windows || [], tot = AW.num(pr.total) || 0;
+    const kl = AW.klaerung(wins, pr);
     result = '<section class="sec"><div class="sec-head"><h3>Aufmaß</h3><span class="sub">' + nW(wins.length, 'Position', 'Positionen') + ' · ' + nW(am.elemente || wins.length, 'Element', 'Elemente') + ' · ' + nW(am.fotos || 0, 'Foto', 'Fotos') + '</span></div>' +
-      '<div class="card amhead"><div class="kv"><span>Gebäude</span><span>' + esc((AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')) + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc((AW.lab('budget', pr.budget) || '–') + (pr.foerd ? ', Förderung gewünscht' : '')) + '</span><span>Lüftung</span><span>' + (tot && (am.elemente || wins.length) > tot / 3 ? 'Mehr als ein Drittel der Fenster: Lüftungskonzept nach DIN 1946-6 prüfen' : tot ? (am.elemente || wins.length) + ' von ' + tot + ' Fenstern im Haus' : '–') + '</span>' + (pr.notiz ? '<span>Nachricht</span><span class="amnote">„' + esc(pr.notiz) + '“</span>' : '') + '</div><div class="row amacts"><button type="button" class="btn small primary" data-act="pdf-am" data-id="' + l.id + '">' + icon('dl', 16) + 'PDF herunterladen</button><button type="button" class="btn small soft" data-act="copy-am" data-id="' + l.id + '">' + icon('copy', 16) + 'Als Text kopieren</button></div></div>' +
-      '<div class="row between poshead"><span class="eyebrow">Positionen</span><button type="button" class="linkbtn" data-act="pos-all">Alle aufklappen</button></div><div class="poslist">' + wins.map((w, i) => posCard(w, i, a.abzug, false)).join('') + '</div></section>' +
+      (kl.length ? '<div class="card klaer"><p class="eyebrow">Mit dem Kunden zu klären · ' + kl.length + '</p><div class="kv">' + kl.map((r) => '<span>' + esc(r.k) + '</span><span' + (r.art === 'pflicht' ? ' class="pflicht"' : '') + '>' + esc(r.v) + '</span>').join('') + '</div></div>' : '') +
+      '<div class="card amhead"><div class="kv"><span>Gebäude</span><span>' + esc((AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')) + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', AW.foerdWeg(pr)) || '–') + '</span><span>Lüftung</span><span>' + (tot && (am.elemente || wins.length) > tot / 3 ? 'Mehr als ein Drittel der Fenster: Lüftungskonzept nach DIN 1946-6 erforderlich' : tot ? (am.elemente || wins.length) + ' von ' + tot + ' Fenstern im Haus' : '–') + '</span>' + (pr.notiz ? '<span>Nachricht</span><span class="amnote">„' + esc(pr.notiz) + '“</span>' : '') + '</div><div class="row amacts"><button type="button" class="btn small primary" data-act="pdf-am" data-id="' + l.id + '">' + icon('dl', 16) + 'PDF herunterladen</button><button type="button" class="btn small soft" data-act="copy-am" data-id="' + l.id + '">' + icon('copy', 16) + 'Als Text kopieren</button></div></div>' +
+      '<div class="row between poshead"><span class="eyebrow">Positionen</span><button type="button" class="linkbtn" data-act="pos-all">Alle aufklappen</button></div><div class="poslist">' + wins.map((w, i) => posCard(w, i, a.abzug, false, pr)).join('') + '</div></section>' +
       '<section class="sec"><div class="sec-head"><h3>Stand</h3></div><div class="card"><div class="pipe">' + [['neu', 'Neu'], ['angebot', 'Angebot'], ['termin', 'Feinaufmaß'], ['auftrag', 'Auftrag'], ['verloren', 'Verloren']].map((s) => '<button type="button" data-act="l-stage" data-id="' + l.id + '" data-v="' + s[0] + '" aria-pressed="' + ((l.stage || 'neu') === s[0]) + '">' + s[1] + '</button>').join('') + '</div><div class="f" style="margin-top: 12px"><label for="lmemo">Notiz zum Stand</label><textarea id="lmemo" data-in="lmemo:' + l.id + '" placeholder="z. B. Angebot bis Freitag">' + esc(l.memo || '') + '</textarea></div></div></section>';
   }
   const pdata = '<details class="card fold"><summary><span>Projektdaten<small>' + esc([l.kontakt, placeOf(l), projFacts(l)].filter(Boolean).join(' · ') || 'Kontakt, Objekt, Eckdaten, interne Notiz') + '</small></span></summary><div class="fold-body"><div class="kv"><span>Kunde</span><span>' + esc(l.kunde) + '</span><span>Kontakt</span><span>' + (l.kontakt ? '<span class="sel">' + esc(l.kontakt) + '</span>' : '–') + '</span><span>Objekt</span><span>' + esc(l.adresse || '–') + '</span><span>Eckdaten</span><span>' + esc(projFacts(l) || '–') + '</span><span>Link</span><span>' + (dead ? esc(m[0]) : 'gültig bis ' + esc(l.expires)) + ', Anrede ' + (l.du ? 'Du' : 'Sie') + '</span></div><div class="f" style="margin-top: 12px"><label for="pnote">Interne Notiz</label><textarea id="pnote" data-in="pnote:' + l.id + '" placeholder="Sieht nur Ihr Team">' + esc(l.note || '') + '</textarea></div></div></details>';

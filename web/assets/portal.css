@@ -396,6 +396,10 @@ a.tcard { color: var(--ink); text-decoration: none; transition: box-shadow var(-
 .card.eigen { display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 0 0 1.5px var(--line2) } .card.eigen > b { font-size: 17px } .card.eigen .kt { margin: 0 }
 .amhead .row { margin-top: 12px }
 .amhead .amnote { font-style: italic; color: var(--ink) }
+/* Mit dem Kunden zu klären: über dem Aufmaß, Pflichtthemen fett; Status als Wort, nicht als Fläche */
+.klaer { margin-bottom: 12px; box-shadow: inset 3px 0 0 var(--warn), var(--ring) }
+.klaer .eyebrow { color: var(--warn); margin: 0 0 10px }
+.klaer .kv > span:nth-child(even) { font-weight: 500 } .klaer .kv > span.pflicht { font-weight: 700 }
 .amacts .btn { flex: 1 1 auto; justify-content: center } .poshead { margin-top: 4px } .poshead .eyebrow { margin: 0 }
 .eyebrow.pos-h { margin-top: 16px; margin-bottom: 2px }
 /* Position im Aufmaß: aufklappbar */

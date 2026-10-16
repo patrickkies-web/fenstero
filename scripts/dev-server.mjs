@@ -31,11 +31,14 @@ if (ATTRAPPE) {
     const wand = system.includes('Wanddurchbruch'), aussen = satz.includes('von außen');
     const altesFenster = system.includes('Das bestehende Fenster wird ausgebaut');
     const daten = wand
-      ? { foto_passt: true, neigung_grad: 0.6, rows: [[aussen ? 'Fassade' : 'Wand', aussen ? 'Putz, vermutlich Mauerwerk (Testantwort)' : 'Verputzt, vermutlich Außenwand (Testantwort)'], ['Elektro', 'Steckdose in der Fläche (Testantwort)'], ['Testauftrag', 'wand, ' + (aussen ? 'out' : 'in') + ', ' + body.model]], chips: ['Außenwand', 'Testantwort'], hinweise: ['Leitungen vor dem Durchbruch orten (Testantwort).'], vor_ort: ['Statik und Sturz klären (Testantwort).'], sicherheit: 0.5 }
+      ? { foto_passt: true, neigung_grad: 0.6, rows: [[aussen ? 'Fassade' : 'Wand', aussen ? 'Putz, vermutlich Mauerwerk (Testantwort)' : 'Verputzt, vermutlich Außenwand (Testantwort)'], ['Elektro', 'Steckdose in der Fläche (Testantwort)'], ['Testauftrag', 'wand, ' + (aussen ? 'out' : 'in') + ', ' + body.model]], chips: ['Außenwand', 'Testantwort'], hinweise: ['Leitungen vor dem Durchbruch orten (Testantwort).'], vor_ort: ['Statik und Sturz klären (Testantwort).'], fach: aussen ? { fassade: 'putz', geschoss: 'eg', erreichbar: true, geruest: false } : { strom: true }, sicherheit: 0.5 }
       : { foto_passt: true, neigung_grad: 0.8, laibung_mm: aussen ? undefined : 160, rows: aussen
           ? [['Fassade', 'Putz auf Mauerwerk (Testantwort)'], ['Fensterbank außen', 'Aluminium mit Tropfkante (Testantwort)'], ['Testauftrag', 'einbau, out, ' + body.model + (altesFenster ? ', ohne Altfenster' : '')]]
           : [['Rollladen', 'Einbaukasten innen mit Revisionsdeckel (Testantwort)'], ['Anschlag', 'Innenanschlag (Testantwort)'], ['Testauftrag', 'einbau, in, ' + body.model + (altesFenster ? ', ohne Altfenster' : '')]],
-        chips: aussen ? ['Putzfassade', 'Testantwort'] : ['Rollladenkasten innen', 'Testantwort'], hinweise: ['Dies ist eine Testantwort des lokalen Servers.'], vor_ort: ['Dämmung des Rollladenkastens prüfen (Testantwort).'], sicherheit: 0.5 };
+        chips: aussen ? ['Putzfassade', 'Testantwort'] : ['Rollladenkasten innen', 'Testantwort'], hinweise: ['Dies ist eine Testantwort des lokalen Servers.'], vor_ort: ['Dämmung des Rollladenkastens prüfen (Testantwort).'],
+        /* feste Werte und Seitenverhältnis wie ein Fenster von 1.230 × 1.410 mm; „unklar“ und Unbekanntes muss die App verwerfen */
+        fach: aussen ? { rollladen: 'keiner', anschlag: 'aussen', fassade: 'klinker', fensterbank: 'aluminium', geschoss: 'eg', erreichbar: true, geruest: false } : { rollladen: 'einbau', anschlag: 'innen', fensterbank: 'unklar', bruestung: 'normal', strom: false, quatsch: 'x' },
+        verhaeltnis: 0.87, sicherheit: 0.5 };
     return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify(daten) }], stop_reason: 'end_turn' }), { status: 200, headers: { 'content-type': 'application/json' } });
   };
 }

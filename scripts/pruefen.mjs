@@ -22,6 +22,10 @@
 // Abschnitt 13 prüft die Zentrale des Inhabers: Zugang (Passwort, zweiter Faktor, Sitzungs-Cookie, Bremse), Betriebe mit Kennzahlen,
 // Kunden der Betriebe nur als Projektnummer, Einblick mit Anlass, Sperren, Entsperren, Notiz, Nachricht, Gutschrift, Export, CSV,
 // Löschen mit Nachweis, eigene Statistik ohne Cookies, Protokoll, Aufräumen; im Browser auf einem vierten Testserver samt Gestaltung.
+// Abschnitt 14 prüft Fortsetzen, Paywall, Grenzen und den Zwischenstand beim Kundenlink, Abschnitt 15 das Konto für Hauseigentümer.
+// Abschnitt 16 prüft das Erstaufmaß: „Weiß ich noch nicht“ statt Vorgabe, Absturzsicherung, Erreichbarkeit und Einbruchschutz, Lüftung,
+// Förderweg mit Zielwerten, Balkon- und PSK-Tür, Kunststoff-Alu, KI-Fachangaben und Maße gegen das Foto, Gestaltung übernehmen,
+// Klärungsliste in App, PDF, Betriebsbereich und Code; dazu die Gestaltung der neuen Schritte hell und dunkel.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -182,7 +186,7 @@ if (teil(3)) {
 
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
-  ok(await page.locator('.qopt[data-act="situation"]').count() === 2 && await page.locator('.qopt[data-act="art"]').count() === 4 && /Schritt 1 von 6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Festverglasung, Hebe-Schiebe-Tür, Faltschiebewand) zur Wahl');
+  ok(await page.locator('.qopt[data-act="situation"]').count() === 2 && await page.locator('.qopt[data-act="art"]').count() === 6 && /Schritt 1 von 6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
   await page.click('.bb .btn.primary');
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
@@ -554,10 +558,11 @@ if (teil(6)) {
   ok(fn.sonne && fn.folie && fn.ico === 4, 'Glas-Extras: Symbole in der Auswahl, Sonnenschutz tönt das Glas, Sicherheitsglas zeigt die Folie in der Lupe');
   await frage('rc', { rc: 'basis' });
   const pilz = () => p4.evaluate(() => document.querySelectorAll('.w3d-pilz.is-on').length);
-  const r0 = await pilz();
-  await p4.click('.qpanel [data-act="setw"][data-v="rc1"]'); await p4.waitForTimeout(300); const r1 = await pilz();
+  const r0 = await pilz(), ohneRc1 = await p4.locator('.qpanel [data-act="setw"][data-v="rc1"]').count() === 0;
   await p4.click('.qpanel [data-act="setw"][data-v="rc2"]'); await p4.waitForTimeout(300); const r2 = await pilz();
-  ok(r0 === 0 && r1 === 8 && r2 === 16 && await p4.evaluate(() => document.getElementById('w3d').classList.contains('mit-schloss') && /RC2/.test(document.querySelector('.w3d-hint').textContent)), 'Einbruchschutz: RC1 N zeigt Pilzköpfe an den Seiten, RC2 rundum und ein Schloss am Griff');
+  const schloss = await p4.evaluate(() => document.getElementById('w3d').classList.contains('mit-schloss') && /RC2/.test(document.querySelector('.w3d-hint').textContent));
+  await frage('rc', { rc: 'rc1' }); const r1 = await pilz(), mitRc1 = await p4.locator('.qpanel [data-act="setw"][data-v="rc1"][aria-pressed="true"]').count() === 1;
+  ok(r0 === 0 && r1 === 8 && r2 === 16 && schloss && ohneRc1 && mitRc1, 'Einbruchschutz: Basisschutz oder RC2 zur Wahl (RC1 N nur, wenn ein älteres Aufmaß es schon hat); RC1 N zeigt Pilzköpfe an den Seiten, RC2 rundum und ein Schloss am Griff');
   await frage('fbi', { fbi: 'behalten' });
   const bank0 = await p4.evaluate(() => document.querySelector('[data-r="sill-t"]').style.background);
   await p4.click('.qpanel [data-act="setw"][data-v="stein"]'); await p4.waitForTimeout(300);
@@ -2510,6 +2515,274 @@ if (teil(15)) {
   } catch (e) {
     ok(false, 'Konten im Browser ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
   } finally { aus6(); }
+}
+
+/* ---------- 16. Erstaufmaß: offen statt Vorgabe, Pflichtthemen, Förderweg, Balkon- und PSK-Tür, KI-Fachangaben, Gestaltung übernehmen ---------- */
+if (teil(16)) {
+  console.log('16. Erstaufmaß: offen statt Vorgabe, Pflichtthemen, Förderweg, neue Elemente, KI-Fachangaben, Gestaltung übernehmen');
+  const cp16 = await import('node:child_process'), fs16 = await import('node:fs'), os16 = await import('node:os'), path16 = await import('node:path');
+  const M16 = createRequire(import.meta.url)('../web/assets/modell.js'), AW16 = M16.AW, X16 = M16.Abrechnung;
+  const MO = (w, h) => ({ hm: h + 60, hl: h + 60, hr: h + 60, wm: w + 60, wt: w + 60, wb: w + 60 });
+
+  /* a) Gemeinsames Modell (Betriebsbereich und Server): offen, Pflichtthemen, Zielwerte, Maße gegen das Foto, Klärungsliste */
+  const w1 = AW16.mk({ name: 'Küche', etage: 'og', bru: 450, offen: { fa: true, fba: true }, mo: MO(1230, 1410), el: { w: 1230, h: 1410 } });
+  const zeile = (w, k, p) => (AW16.rows(w, p).find((r) => r[0] === k) || [])[1] || '';
+  ok(AW16.istOffen(w1, 'fa') && AW16.farbe(w1, 'aussen')[0] === 'Farbe offen' && AW16.farbe(w1, 'aussen')[2] === '#f1f0ea' && /^außen offen, bitte beraten/.test(zeile(w1, 'Farbe')) && /außen offen, bitte beraten/.test(zeile(w1, 'Fensterbank')), 'Modell: offene Farbe außen und Fensterbank außen stehen als „offen, bitte beraten“, die Zeichnung zeigt neutral weiß');
+  const tuer16 = AW16.mk({ art: 'hst', offen: { fba: true, griffA: true } });
+  ok(AW16.offenListe(tuer16).length === 0 && AW16.offenListe(AW16.mk({ form: 'rund', offen: { fba: true } })).length === 0, 'Modell: offene Angaben gelten nur, wo sie zum Element gehören (keine Fensterbank an Türen und runden Fenstern)');
+  ok(AW16.absturzFrage(w1) && !AW16.absturzFrage(AW16.mk({ etage: 'eg', bru: 300 })) && !AW16.absturzFrage(AW16.mk({ etage: 'og', bru: 950 })) && AW16.absturzFrage(AW16.mk({ etage: 'dg', art: 'balkon' })) && AW16.absturzFrage(AW16.mk({ etage: 'og', bru: '', ki: { fach: { bruestung: 'bodentief' } } })) && !AW16.absturzFrage(AW16.mk({ etage: 'og', bru: '' })), 'Absturzsicherung: gefragt im OG und DG unter 900 mm Brüstung, bei Türen immer, ohne Maß bei bodentiefer Brüstung laut Foto; nicht im EG, nicht ab 900 mm');
+  const pB = { foerdweg: 'bafa' };
+  ok(AW16.uwZiel(AW16.mk({}), pB).wert === 0.95 && AW16.uwZiel(AW16.mk({ rc: 'rc2' }), pB).wert === 1.1 && AW16.uwZiel(AW16.mk({ art: 'hst', hst: { schema: 'A', richtung: 'R', schwelle: 'null' } }), pB).wert === 1.1 && AW16.uwZiel(AW16.mk({ glasfn: ['schall'] }), { foerdweg: 'steuer' }).wert === 1.1 && AW16.uwZiel(AW16.mk({}), { foerdweg: 'steuer', gebaeude: 'denkmal' }).wert === 1.4 && AW16.uwZiel(AW16.mk({ spross: 'echt', bars: [{ s: 0, d: 'v', p: 0.5 }] }), { foerdweg: 'bafa', gebaeude: 'denkmal' }).wert === 1.6 && AW16.uwZiel(AW16.mk({}), { foerdweg: 'keine' }) === null && AW16.foerdWeg({ foerd: true }) === 'offen' && /Uw höchstens 0,95 W\/\(m²K\), BAFA/.test(zeile(AW16.mk({}), 'Förderwert', pB)), 'Förderweg: Uw-Zielwerte 0,95, 1,1 (RC2, barrierearme Schwelle, Schallschutz), 1,4 und 1,6 (Denkmal); ohne Förderung keiner; ältere Aufmaße mit „Förderung ja“ gelten als noch offen');
+  const mw = (w, h, v, extra) => AW16.mk(Object.assign({ mo: MO(w, h), el: { w: w, h: h }, ki: { verh: v } }, extra || {}));
+  ok(AW16.massPruef(mw(1230, 1410, 0.87)) === null && AW16.massPruef(mw(1410, 1230, 0.87)).typ === 'tausch' && AW16.massPruef(mw(1230, 2400, 0.87)).typ === 'abweichung' && AW16.massPruef(mw(1410, 1230, 0.87, { neu: true })) === null && AW16.massPruef(mw(1000, 1000, 0.87)) === null && AW16.massPruef(mw(1410, 1230, null)) === null, 'Maße gegen das Foto: passend still, vertauscht und stark abweichend erkannt; kleine Abweichung (Schrägsicht), neue Öffnung und fehlendes Verhältnis ohne Hinweis');
+  const kl16 = AW16.klaerung([w1, AW16.mk({ name: 'Bad', offen: { fa: true } }), mw(1410, 1230, 0.87, { name: 'Flur', massOk: true })], { total: 6, foerdweg: 'offen' }).map((r) => r.k + ': ' + r.v).join('\n');
+  ok(/Pos\. 1 Küche: Absturzsicherung nötig \(OG, Brüstung 450 mm\): bitte beraten/.test(kl16) && /Lüftung: Lüftungskonzept nach DIN 1946-6 erforderlich: 3 von 6/.test(kl16) && /Förderung: Noch offen/.test(kl16) && /Pos\. 3 Flur: Breite und Höhe laut Foto vertauscht\? Die Maße sind bestätigt\. Beim Feinaufmaß prüfen\./.test(kl16) && /Pos\. 1 Küche: Farbe außen, Fensterbank außen: offen, bitte beraten/.test(kl16) && /Pos\. 2 Bad: Farbe außen: offen/.test(kl16), 'Klärungsliste: Absturzsicherung, Lüftungskonzept ab mehr als einem Drittel, Förderweg, vertauschte Maße (auch bestätigt), offene Wünsche je Position');
+  ok(AW16.klaerKurz([w1, AW16.mk({ offen: { fa: true } })], {}).join(', ') === 'Absturzsicherung (Pos. 1), Farbe außen (alle), Fensterbank außen (Pos. 1)', 'Klärungsliste in einer Zeile: je Angabe mit Positionen, „alle“, wenn es jede Position betrifft');
+  const motor16 = AW16.klaerung([AW16.mk({ sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', ki: { fach: { strom: false } } }), AW16.mk({ sart: 'raffstore', roll: 'aufsatz', antrieb: 'smart', ki: { fach: { strom: true } } }), AW16.mk({ erreichbar: 'ja' })], {}).map((r) => r.v).join('\n');
+  ok(/Strom am Fenster laut Foto nicht zu sehen/.test(motor16) && (motor16.match(/Elektrischer Antrieb/g) || []).length === 1 && /Leicht erreichbar, gewählt Basisschutz: Die Polizei empfiehlt RC2/.test(motor16), 'Klärungsliste: elektrischer Antrieb ohne Strom laut Foto (mit Strom kein Eintrag), leicht erreichbar ohne RC2');
+  ok(X16.fromAppProj({ foerdweg: 'bafa' }).foerdweg === 'bafa' && X16.fromAppProj({ foerdweg: 'bafa' }).foerd === true && X16.fromAppProj({ foerdweg: 'quatsch' }).foerdweg === '' && X16.fromAppProj({ foerd: true }).foerd === true, 'Betriebsbereich übernimmt den Förderweg aus dem Aufmaß, nur bekannte Werte');
+  ok(AW16.opening(AW16.mk({ art: 'psk', psk: { schema: 'A', richtung: 'L', schwelle: 'standard' }, sashes: [{ t: 'PS', din: 'L' }, { t: 'F', din: 'L' }] })) === '2-teilig (1 Schiebeflügel vor 1 Festteil), Schiebeflügel links, kippbar, mit Schwelle' && /Kunststoff-Alu/.test(zeile(AW16.mk({ material: 'kunststoffalu' }), 'Form, Material')) && AW16.istTuer(AW16.mk({ art: 'balkon' })) && /außen Ziehgriff mit Schnäpper/.test(zeile(AW16.mk({ art: 'balkon', bt: { schwelle: 'flach', griffA: 'ziehgriff', boden: 'neu' } }), 'Griff')) && /Fußboden wird erneuert/.test(zeile(AW16.mk({ art: 'balkon', bt: { schwelle: 'flach', griffA: 'ziehgriff', boden: 'neu' } }), 'Schwelle')), 'Modell kennt PSK-Tür (kippbar, mit Schwelle), Balkontür (Griff außen, Fußboden) und Kunststoff-Alu');
+  ok(/Auf einen Blick/.test(AW16.kiRows(AW16.mk({ ki: { rows: [], fach: { rollladen: 'einbau', fassade: 'klinker', strom: true } } })).map((r) => r[0]).join()) && /Kasten: Einbaukasten innen im Sturz · Fassade Klinker · Strom am Fenster/.test(AW16.fachZeile(AW16.mk({ ki: { fach: { rollladen: 'einbau', fassade: 'klinker', strom: true } } }))), 'Fachangaben der KI stehen für den Betrieb „auf einen Blick“ vor dem Befund');
+
+  /* b) App: offen statt Vorgabe */
+  const ctx16 = await browser.newContext(telefon), a16 = await neueSeite(ctx16);
+  await a16.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await a16.evaluate(() => newWin()); await a16.waitForTimeout(200);
+  ok(await a16.evaluate(() => S.win.offen.fa === true && S.win.offen.fba === true && S.screen === 'start'), 'Neues Fenster: Farbe außen und Fensterbank außen starten ohne Vorauswahl (offen)');
+  await a16.evaluate((MO) => { Object.assign(S.win, { name: 'Küche', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.q = 'fa'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await a16.waitForTimeout(400);
+  const fa0 = await a16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]').length, cur: document.querySelector('.qpanel .qcur').textContent, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), farbe: document.querySelector('[data-r="el-back"]').style.background, karte: winCard(S.win, 0, false) }));
+  ok(fa0.gedrueckt === 0 && /Noch offen/.test(fa0.cur) && fa0.knopf === 'true' && /241, 240, 234|#f1f0ea/i.test(fa0.farbe) && /Farbe offen/.test(fa0.karte), 'Farbe außen: nichts vorgewählt, „Weiß ich noch nicht“ gedrückt, Modell neutral weiß, Fensterkarte „Farbe offen“');
+  await a16.click('.qpanel .qsw[data-v="7016"]'); await a16.waitForTimeout(200);
+  const fa1 = await a16.evaluate(() => ({ offen: !!S.win.offen.fa, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), zeile: specRows(S.win).find((r) => r.k === 'Farbe').v }));
+  await a16.click('.qoffen'); await a16.waitForTimeout(200);
+  const fa2 = await a16.evaluate(() => ({ offen: !!S.win.offen.fa, wunsch: S.win.wunschA, zeile: specRows(S.win).find((r) => r.k === 'Farbe').v }));
+  await a16.click('#t-wunschA'); await a16.keyboard.type('RAL 7021'); await a16.waitForTimeout(200);
+  const fa3 = await a16.evaluate(() => ({ offen: !!S.win.offen.fa, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed') }));
+  ok(!fa1.offen && fa1.knopf === 'false' && /außen Anthrazitgrau/.test(fa1.zeile) && fa2.offen && fa2.wunsch === '' && /außen offen, bitte beraten/.test(fa2.zeile) && !fa3.offen && fa3.knopf === 'false', 'Eine Farbe wählen (auch eingetippt) entscheidet; „Weiß ich noch nicht“ macht sie wieder offen, das Blatt sagt „offen, bitte beraten“');
+  await a16.evaluate(() => { S.q = 'sart'; render(true); }); await a16.waitForTimeout(200);
+  await a16.click('.qpanel [data-act="sart"][data-v="rollladen"]'); await a16.waitForTimeout(200);
+  const so1 = await a16.evaluate(() => ({ einbau: !!S.win.offen.einbau, fragen: qList(S.win).map((q) => q.id), text: sonneText(S.win) }));
+  await a16.evaluate(() => { S.q = 'einbau'; render(true); }); await a16.waitForTimeout(200);
+  const so2 = await a16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length, knopf: (document.querySelector('.qoffen') || {}).textContent }));
+  await a16.evaluate(() => { S.q = 'sart'; render(true); }); await a16.waitForTimeout(200);
+  await a16.click('.qoffen[data-f="sart"]'); await a16.waitForTimeout(200);
+  const so3 = await a16.evaluate(() => ({ sart: S.win.sart, fragen: qList(S.win).map((q) => q.id), text: sonneText(S.win), gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length }));
+  ok(so1.einbau && so1.fragen.includes('einbau') && /Kasten nach Wahl des Fensterbauers/.test(so1.text) && so2.gedrueckt === 0 && /Fensterbauer entscheidet/.test(so2.knopf) && so3.sart === 'keiner' && !so3.fragen.includes('einbau') && so3.gedrueckt === 0 && /offen, bitte beraten/.test(so3.text), 'Rollladen gewählt: den Kasten wählt erst der Fensterbauer; Sonnenschutz „weiß ich noch nicht“: Folgefragen entfallen, das Blatt sagt offen');
+  const qn = await a16.evaluate(() => qList(S.win).filter((q) => q.offen).map((q) => q.id));
+  ok(['material', 'fa', 'fi', 'glas', 'glasfn', 'griff', 'rc', 'sart', 'insekt', 'iart', 'fbi', 'fba', 'montage'].every((id) => qn.includes(id)), 'Jede Wunschfrage bietet „Weiß ich noch nicht“ (' + qn.length + ' Fragen)');
+
+  /* c) Pflichtthemen: Absturzsicherung, Erreichbarkeit und Einbruchschutz, Lüftung, Förderweg */
+  await a16.evaluate(() => { S.win.etage = 'og'; S.win.bru = 450; S.q = 'absturz'; render(true); }); await a16.waitForTimeout(300);
+  const ab0 = await a16.evaluate(() => ({ da: qList(S.win).some((q) => q.id === 'absturz'), titel: document.querySelector('.hd h1').textContent, karten: document.querySelectorAll('.qpanel .qopt').length, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), kl: AW.klaerung([S.win], S.proj).map((r) => r.v).join('|') }));
+  await a16.click('.qpanel [data-act="absturz"][data-v="gelaender"]'); await a16.waitForTimeout(200);
+  const ab1 = await a16.evaluate(() => ({ wert: S.win.absturz, zeile: (specRows(S.win).find((r) => r.k === 'Absturzsicherung') || {}).v, kl: AW.klaerung([S.win], S.proj).map((r) => r.v).join('|'), eg: (S.win.etage = 'eg', qList(S.win).some((q) => q.id === 'absturz')) }));
+  await a16.evaluate(() => { S.win.etage = 'og'; S.win.bru = ''; S.q = 'lage'; render(true); }); await a16.waitForTimeout(200);
+  const lage = await a16.evaluate(() => !!document.querySelector('.qpanel #f-bru'));
+  ok(ab0.da && /Absturz/.test(ab0.titel) && ab0.karten === 4 && ab0.knopf === 'true' && /Absturzsicherung nötig \(OG, Brüstung 450 mm\): bitte beraten/.test(ab0.kl) && ab1.wert === 'gelaender' && /Geländer außen/.test(ab1.zeile) && /Geländer außen/.test(ab1.kl) && !ab1.eg && lage, 'Absturzsicherung: im OG bei 450 mm Brüstung von selbst gefragt (vier Wege oder „weiß ich noch nicht“), Wahl im Blatt und in der Klärungsliste; im EG keine Frage; im OG ohne Brüstung fragt die Lage nach ihr');
+  await a16.evaluate(() => { S.win.bru = 900; S.win.etage = 'eg'; S.q = 'rc'; render(true); }); await a16.waitForTimeout(200);
+  const rc0 = await a16.evaluate(() => ({ titel: document.querySelector('.hd h1').textContent, rc1: !!document.querySelector('.qpanel [data-v="rc1"]'), text: document.querySelector('.qpanel').textContent }));
+  await a16.click('.qpanel [data-act="erreichbar"][data-v="ja"]'); await a16.waitForTimeout(200);
+  const rc1 = await a16.evaluate(() => ({ text: document.querySelector('.qpanel').textContent, zeile: specRows(S.win).find((r) => r.k === 'Einbruchschutz').v }));
+  await a16.click('.qpanel [data-act="setw"][data-f="rc"][data-v="rc2"]'); await a16.waitForTimeout(300);
+  const rc2 = await a16.evaluate(() => ({ pilz: document.querySelectorAll('.w3d-pilz.is-on').length, zeile: specRows(S.win).find((r) => r.k === 'Einbruchschutz').v }));
+  ok(/leicht erreichbar/.test(rc0.titel) && !rc0.rc1 && /Polizei empfiehlt hier mindestens RC2/.test(rc1.text) && /Polizei empfiehlt RC2/.test(rc1.zeile) && rc2.pilz === 16 && /RC2 · leicht erreichbar/.test(rc2.zeile), 'Einbruchschutz: zuerst „leicht erreichbar?“, dann die Empfehlung der Polizei (RC2); RC2 zeigt die Pilzköpfe rundum');
+  await a16.evaluate(() => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0, { total: 4 }); go('anfrage'); }); await a16.waitForTimeout(200);
+  const lu = await a16.evaluate(() => document.querySelector('.note.warn') ? document.querySelector('.note.warn').textContent : '');
+  await a16.evaluate(() => go('anfrage2')); await a16.waitForTimeout(200);
+  await a16.click('[data-act="setp"][data-f="foerdweg"][data-v="bafa"]'); await a16.waitForTimeout(200);
+  const fw = await a16.evaluate(() => ({ weg: S.proj.foerdweg, foerd: S.proj.foerd, hinweis: Array.from(document.querySelectorAll('.note')).map((n) => n.textContent).join(' '), wert: (specRows(S.windows[0]).find((r) => r.k === 'Förderwert') || {}).v, schalter: !!document.querySelector('[data-f="foerd"]') }));
+  ok(/2 von 4 Fenstern, mehr als ein Drittel/.test(lu) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(lu) && fw.weg === 'bafa' && fw.foerd === true && /Energieeffizienz-Experte/.test(fw.hinweis) && /Förderklausel/.test(fw.hinweis) && /Uw höchstens 0,95/.test(fw.wert) && !fw.schalter, 'Lüftung: kurzer Hinweis „erforderlich“ ab mehr als einem Drittel; Förderweg als Auswahl (BAFA, Steuerbonus, keine, noch offen) mit Hinweis und Zielwert je Position');
+
+  /* d) Neue Elemente: Balkon-/Terrassentür, PSK-Tür, Kunststoff-Alu */
+  const neuesElement = (art, extra) => a16.evaluate(([art, extra, MO]) => { const w = Object.assign(baseWin(), { name: 'Terrasse', w: 1010, h: 2180, mo: MO, el: { w: 1010, h: 2180 } }); artSetzen(w, art); Object.assign(w, extra || {}); S.win = w; S.windows = []; S.editIdx = -1; S.q = null; S.screen = 'frage'; render(true); return qList(S.win).map((q) => q.id); }, [art, extra || {}, MO(1010, 2180)]);
+  const bq = await neuesElement('balkon');
+  await a16.evaluate(() => { S.q = 'griffA'; render(true); }); await a16.waitForTimeout(400);
+  /* Übergänge (Deckkraft) abwarten statt fester Zeiten: unter Last laufen sie langsamer */
+  const deck = (wert) => a16.waitForFunction((wert) => { const e = document.querySelector('#w3d [data-r="ga-0"]'), b = document.querySelector('#w3d [data-r="sill-t"]'); return e && b && getComputedStyle(e).opacity === wert && getComputedStyle(b).opacity === '0'; }, wert, { timeout: 4000 }).catch(() => {});
+  await deck('0');
+  const ga0 = await a16.evaluate(() => getComputedStyle(document.querySelector('[data-r="ga-0"]')).opacity);
+  await a16.click('.qpanel [data-act="bt"][data-f="griffA"][data-v="ziehgriff"]'); await a16.waitForTimeout(300); await deck('1');
+  const b1 = await a16.evaluate(() => { const st = document.getElementById('w3d'); return { ga: getComputedStyle(st.querySelector('[data-r="ga-0"]')).opacity, boden: !!st.querySelector('[data-r="floor-in"]'), schwelle: !!st.querySelector('[data-r="schw"]'), bank: getComputedStyle(st.querySelector('[data-r="sill-t"]')).opacity === '0', sashes: S.win.sashes.map((x) => x.t).join(), text: openingText(S.win), griff: specRows(S.win).find((r) => r.k === 'Griff').v }; });
+  const bOk = ['teilung', 'typ-0', 'material', 'ol', 'schwelle', 'boden', 'sprossen', 'griff', 'griffA', 'rc'].every((id) => bq.includes(id)) && !bq.includes('fbi') && !bq.includes('fba') && !bq.includes('ul') && ga0 === '0' && b1.ga === '1' && b1.boden && b1.schwelle && b1.bank && b1.sashes === 'DK' && /Balkontür, Dreh-Kipp DIN links, Standardschwelle/.test(b1.text) && /außen Ziehgriff mit Schnäpper/.test(b1.griff);
+  ok(bOk, 'Balkon-/Terrassentür: Flügel, Oberlicht, Schwelle, Fußboden, Sprossen, Griff innen und außen; im Modell bodentief mit Schwelle, der Ziehgriff erscheint außen' + (bOk ? '' : '\n      ' + JSON.stringify({ fragen: bq, ga0: ga0, b1: b1 })));
+  await a16.evaluate(() => { S.win.e_teilung = false; S.win.el.w = 1600; S.win.w = 1600; go('frage'); }); await a16.waitForTimeout(200);
+  ok(await a16.evaluate(() => S.win.teilung === '2s' && S.win.sashes.map((x) => x.t).join() === 'D,DK'), 'Balkontür ab 1,3 m Breite: Vorschlag zwei Flügel ohne Pfosten (Stulp)');
+  const pq = await neuesElement('psk');
+  await a16.evaluate(() => { S.q = 'pskS'; render(true); }); await a16.waitForTimeout(300);
+  await a16.evaluate(() => tuerZeigen()); await a16.waitForTimeout(250);
+  const ps = await a16.evaluate(() => { const st = document.getElementById('w3d'), s1 = st.querySelector('[data-r="sash-1"]'); return { t: S.win.sashes.map((x) => x.t).join(), demo: s1.getAnimations().some((a) => a.animationName === 'w3d-psk'), sym: s1.querySelectorAll('.w3d-sym path').length, boden: !!st.querySelector('[data-r="floor-in"]'), text: openingText(S.win) }; });
+  ok(pq.includes('pskS') && pq.includes('pskR') && !pq.includes('schwelle') && ps.t === 'F,PS' && ps.demo && ps.sym >= 2 && ps.boden && /PSK-Tür 2-teilig, Schiebeflügel rechts, kippbar, mit Schwelle/.test(ps.text), 'PSK-Tür: Teile und Seite, immer mit Schwelle; der Flügel stellt sich vor und schiebt, Symbol mit Schieben und Kippen');
+  await a16.evaluate(() => { S.q = 'material'; render(true); }); await a16.waitForTimeout(200);
+  ok(await a16.evaluate(() => !!document.querySelector('.qpanel [data-v="kunststoffalu"]') && lab('material', 'kunststoffalu') === 'Kunststoff-Alu'), 'Material Kunststoff-Alu wählbar');
+
+  /* e) KI: Fachangaben aus den Fotos, für den Betrieb aufbereitet; Maße gegen das Foto */
+  await a16.evaluate(() => { newWin(); }); await a16.waitForTimeout(150);
+  const jpg = await a16.evaluate(async () => { const c = document.createElement('canvas'); c.width = 600; c.height = 700; const g = c.getContext('2d'); g.fillStyle = '#ddd'; g.fillRect(0, 0, 600, 700); g.fillStyle = '#fff'; g.fillRect(150, 150, 300, 350); return c.toDataURL('image/jpeg', 0.8); });
+  const jpg16 = Buffer.from(jpg.split(',')[1], 'base64');
+  await a16.evaluate(() => go('fotos')); await a16.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
+  await a16.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg16 });
+  if (await a16.waitForSelector('.fx-dialog', { timeout: 4000 }).catch(() => null)) await a16.click('.fx-ja');
+  await a16.waitForFunction(() => S.ai.in && S.ai.in.status === 'done', null, { timeout: 15000 }).catch(() => {});
+  await a16.setInputFiles('input[data-in="photo"][data-f="out"]', { name: 'aussen.jpg', mimeType: 'image/jpeg', buffer: jpg16 });
+  await a16.waitForFunction(() => S.ai.out && S.ai.out.status === 'done', null, { timeout: 15000 }).catch(() => {});
+  const ki = await a16.evaluate(() => ({ fach: S.win.ki && S.win.ki.fach, verh: S.win.ki && S.win.ki.verh, fassade: S.win.fassade, anschlag: S.win.anschlag, etage: S.win.etage }));
+  ok(ki.fach && ki.fach.rollladen === 'einbau' && ki.fach.anschlagI === 'innen' && ki.fach.anschlagA === 'aussen' && ki.fach.fassade === 'klinker' && ki.fach.fba === 'aluminium' && !('fbi' in ki.fach) && !('quatsch' in ki.fach) && ki.fach.strom === false && ki.fach.erreichbar === true && ki.verh === 0.87 && ki.fassade === 'klinker' && ki.anschlag === 'innen' && ki.etage === 'eg', 'KI: feste Fachangaben aus beiden Fotos (Kasten, Anschlag innen und außen, Fassade, Fensterbank, Strom, Erreichbarkeit), Unbekanntes verworfen; Fassade im Modell, Anschlag fürs Blatt, Geschoss als Vorschlag');
+  await a16.evaluate(() => { Object.assign(S.win, { mo: { hm: 1290, hl: 1290, hr: 1290, wm: 1470, wt: 1470, wb: 1470 }, el: { w: 1410, h: 1230 }, w: 1410, h: 1230 }); go('ergebnis'); }); await a16.waitForTimeout(400);
+  const e0 = await a16.evaluate(() => (document.querySelector('.mass-pruef') || {}).textContent || '');
+  await a16.click('[data-act="mass-tausch"]'); await a16.waitForTimeout(300);
+  const e1 = await a16.evaluate(() => ({ el: S.win.el, wm: S.win.mo.wm, hm: S.win.mo.hm, hinweis: !!document.querySelector('.mass-pruef') }));
+  await a16.evaluate(() => { Object.assign(S.win, { el: { w: 1230, h: 2400 }, w: 1230, h: 2400 }); render(); }); await a16.waitForTimeout(200);
+  const e2 = await a16.evaluate(() => (document.querySelector('.mass-pruef') || {}).textContent || '');
+  await a16.click('[data-act="mass-ok"]'); await a16.waitForTimeout(200);
+  const e3 = await a16.evaluate(() => ({ ok: S.win.massOk, hinweis: !!document.querySelector('.mass-pruef'), kl: AW.klaerung([S.win], {}).map((r) => r.v).join('|'), zeile: AW.massZeile(S.win) }));
+  ok(/Breite und Höhe vertauscht\?/.test(e0) && e1.el.w === 1230 && e1.el.h === 1410 && e1.wm === 1290 && e1.hm === 1470 && !e1.hinweis && /noch einmal nach/.test(e2) && e3.ok && !e3.hinweis && /Seitenverhältnis laut Foto weicht von den Maßen ab\. Die Maße sind bestätigt/.test(e3.kl) && /weichen ab \(Breite : Höhe laut Foto etwa 0,87/.test(e3.zeile), 'Maße gegen das Foto: vertauscht → „Tauschen“ tauscht alle Maße; stark abweichend → „Nachmessen“ oder „Stimmt so“; bestätigt steht es als Prüfpunkt beim Betrieb');
+  await a16.evaluate(() => { S.q = 'einbau'; S.win.sart = 'rollladen'; S.win.roll = 'aufsatz'; S.screen = 'frage'; render(true); }); await a16.waitForTimeout(200);
+  ok(/Laut Foto vorhanden: Einbaukasten innen im Sturz/.test(await a16.evaluate(() => document.querySelector('.hd').textContent)), 'Kastenfrage nennt den Kasten, den die KI auf dem Foto erkannt hat');
+
+  /* f) Gestaltung übernehmen */
+  await a16.evaluate((MO) => {
+    const a = demoProject(); a.forEach((x) => altAngleichen(x)); a[0].bars = presetBars('kreuz', a[0].sashes.length); a[0].preset = 'kreuz'; a[0].sart = 'raffstore'; a[0].sfarbe = 'anthrazit'; a[0].offen = { fba: true };
+    S.windows = a.map((x, i) => Object.assign(x, { wid: 'wd' + i, t0: zeit(), aend: 0, ts: zeit() })); S.editIdx = -1; S.angelegt = 2;
+    const w = Object.assign(baseWin(), { name: 'Kinderzimmer', etage: 'eg', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = w; S.designVorher = null; S.q = null; S.screen = 'frage'; render(true);
+  }, MO(1230, 1410));
+  const d0 = await a16.evaluate(() => ({ ids: qList(S.win).map((q) => q.id).slice(0, 3), karten: designListe().map((d) => d.label) }));
+  await a16.evaluate(() => { S.q = 'design'; render(true); }); await a16.waitForTimeout(250);
+  await a16.click('.qpanel [data-act="design"][data-v="0"]'); await a16.waitForTimeout(400);
+  const d1 = await a16.evaluate(() => ({ fa: S.win.fa, offen: S.win.offen, bars: S.win.bars.length, preset: S.win.preset, sart: S.win.sart, sfarbe: S.win.sfarbe, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean), gedrueckt: document.querySelector('.qpanel [data-act="design"][data-v="0"]').getAttribute('aria-pressed'), name: S.win.name, mo: S.win.mo.wm }));
+  await a16.click('[data-act="design-weg"]'); await a16.waitForTimeout(250);
+  const d2 = await a16.evaluate(() => ({ fa: S.win.fa, offen: S.win.offen, bars: S.win.bars.length, sart: S.win.sart }));
+  await a16.click('.qpanel [data-act="design"][data-v="0"]'); await a16.waitForTimeout(250);
+  await a16.click('.qnav [data-act="save"]'); await a16.waitForTimeout(400);
+  const d3 = await a16.evaluate(() => { const w = S.windows[S.windows.length - 1]; return { n: S.windows.length, screen: S.screen, name: w.name, fa: w.fa, sart: w.sart, bars: w.bars.length, offen: w.offen }; });
+  await a16.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.q = 'design'; S.screen = 'frage'; render(true); }); await a16.waitForTimeout(200);
+  const d4 = await a16.evaluate(() => designListe().map((d) => d.label).join('|'));
+  await a16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Terrasse', w: 2600, h: 2200, mo: { hm: 2260, hl: 2260, hr: 2260, wm: 2660, wt: 2660, wb: 2660 }, el: { w: 2600, h: 2200 } }); artSetzen(w, 'hst'); S.win = w; S.editIdx = -1; S.windows[1].griff = 'druckknopf'; designAnwenden(S.win, S.windows[1]); });
+  const d5 = await a16.evaluate(() => ({ griff: S.win.griff, bars: S.win.bars.length }));
+  ok(d0.ids[0] === 'lage' && d0.ids[1] === 'design' && d0.karten.length === 2 && /Wie Wohnzimmer/.test(d0.karten.join()) && d1.fa === '7016' && !d1.offen.fa && d1.offen.fba && d1.bars === 4 && d1.preset === 'eigene' && d1.sart === 'raffstore' && d1.sfarbe === 'anthrazit' && d1.gedrueckt === 'true' && d1.nav.join() === 'Anpassen,Speichern' && d1.name === 'Kinderzimmer' && d1.mo === 1290 &&
+    d2.offen.fa && d2.bars === 0 && d2.sart === 'keiner' && d3.n === 3 && d3.screen === 'fertig' && d3.name === 'Kinderzimmer' && d3.fa === '7016' && d3.sart === 'raffstore' && d3.bars === 4 && !/Wohnzimmer/.test(d4) && d5.griff === 'standard' && d5.bars === 0,
+  'Gestaltung übernehmen: nach der Lage die gespeicherten Gestaltungen (gleiche zusammengefasst); Antippen übernimmt Farben, Sprossen, Raffstore und offene Punkte, Maße und Name bleiben; „Doch neu gestalten“ nimmt es zurück; „Speichern“ legt das Fenster gleich an; beim Ändern fehlt die eigene, bei Türen passt sich der Griff an');
+
+  /* g) Klärungsliste auf dem Blatt (App, PDF), im Betriebsbereich und im Code */
+  await a16.evaluate(() => { const a = demoProject(); a[0].offen = { fa: true, fba: true }; a[0].ki.fach = { rollladen: 'einbau', anschlagI: 'innen', fassade: 'putz', strom: true }; a[1].etage = 'og'; a[1].bru = 600; S.windows = a; S.proj = Object.assign({}, PROJ0, { name: 'Familie Weber', total: 5, foerdweg: 'bafa' }); S.kauf = { paid: true, mail: 'test@beispiel.de' }; go('blatt'); }); await a16.waitForTimeout(300);
+  const bl = await a16.evaluate(() => (document.querySelector('.paper-klaer') || {}).textContent || '');
+  ok(/Noch zu klären · 4/.test(bl) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(bl) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(bl) && /BAFA-Zuschuss gewünscht/.test(bl) && /Farbe außen, Fensterbank außen: offen, bitte beraten/.test(bl), 'Aufmaßblatt in der App: „Noch zu klären“ oben, mit Absturzsicherung, Lüftung, Förderweg und offenen Wünschen');
+  const b64 = await a16.evaluate(async () => { await blattSchrift(); const blob = await blattPDF('fensterbauer'); const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s); });
+  const pdf16 = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung.pdf'); fs16.writeFileSync(pdf16, Buffer.from(b64, 'base64'));
+  const pt = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf16, '-'])).toString('utf8'); } catch (e) { return ''; } };
+  const s1 = pt(1), alle16 = pt(0), kSeite = [2, 3].find((n) => /MIT DEM KUNDEN ZU KLÄREN/.test(pt(n)));
+  ok(/Zu klären/.test(s1) && /Absturzsicherung \(Pos\. 2\)/.test(s1) && /MAUERÖFFNUNG/.test(s1) && kSeite && /Übersicht/.test(pt(kSeite)) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(alle16) && /Förderwert\s+Uw höchstens 0,95/.test(alle16) && /offen, bitte beraten/.test(alle16) && /Absturz-\s/.test(alle16) && !/Absturzsicheru\s/.test(alle16) && /Auf einen Blick/.test(alle16) && /Kasten: Einbaukasten innen im Sturz/.test(alle16), 'PDF: Seite 1 nennt in den Eckdaten, was zu klären ist (Position 1 bleibt auf Seite 1); die ausführliche Liste folgt nach Position 1 mit der Übersicht auf derselben Seite; Zielwert, „offen“ (Beschriftung an der Wortfuge getrennt) und KI-Fachangaben je Position');
+  const rund = await a16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Terrasse', offen: { fa: true }, absturz: 'gelaender', erreichbar: 'ja', massOk: true }); artSetzen(w, 'balkon'); w.bt.griffA = 'abschliessbar'; const o = unpackProject(packProject([w], Object.assign({}, PROJ0, { foerdweg: 'steuer' }), null)); const alt = unpackProject(packProject([baseWin()], PROJ0, null)); return { offen: o.w[0].offen, absturz: o.w[0].absturz, erreichbar: o.w[0].erreichbar, ok: o.w[0].massOk, bt: o.w[0].bt, fw: o.p.foerdweg, altOffen: JSON.stringify(alt.w[0].offen) }; });
+  ok(rund.offen.fa && rund.absturz === 'gelaender' && rund.erreichbar === 'ja' && rund.ok === true && rund.bt.griffA === 'abschliessbar' && rund.fw === 'steuer' && rund.altOffen === '{}', 'Aufmaß-Code trägt offene Punkte, Absturzsicherung, Erreichbarkeit, Balkontür und Förderweg; ohne Angaben bleibt nichts offen');
+  sauber(a16, 'Erstaufmaß in der App ohne Fehler');
+  await ctx16.close();
+
+  const ctxP = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' }), p16 = await neueSeite(ctxP);
+  await p16.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await betrieb(p16, 'c1'); await p16.waitForTimeout(300);
+  await p16.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'); l.aufmass.windows[0].offen = { fa: true }; l.aufmass.windows[0].ki = Object.assign({}, l.aufmass.windows[0].ki, { fach: { rollladen: 'einbau', fassade: 'putz', strom: true } }); l.aufmass.proj.foerdweg = 'bafa'; go('link', 'l1'); }); await p16.waitForTimeout(400);
+  const pk = await p16.evaluate(() => ({ karte: (document.querySelector('.card.klaer') || {}).textContent || '', kopf: document.querySelector('.amhead').textContent, pos: (document.querySelector('.posc') || {}).textContent || '', text: aufmassText(A().links.find((x) => x.id === 'l1')) }));
+  ok(/Mit dem Kunden zu klären/.test(pk.karte) && /BAFA-Zuschuss gewünscht/.test(pk.karte) && /Farbe außen: offen, bitte beraten/.test(pk.karte) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(pk.karte) && /FörderungBAFA-Zuschuss \(BEG EM\)/.test(pk.kopf) && /Förderwert/.test(pk.pos) && /Auf einen Blick/.test(pk.pos) && /Mit dem Kunden zu klären:/.test(pk.text) && /Förderung: BAFA-Zuschuss/.test(pk.text), 'Betriebsbereich: „Mit dem Kunden zu klären“ über dem Aufmaß, Förderweg im Kopf, Zielwert und KI-Fachangaben je Position, auch im kopierten Text');
+  sauber(p16, 'Klärungsliste im Betriebsbereich ohne Fehler');
+  await ctxP.close();
+
+  /* i) Aus der Durchsicht: nichts entscheidet still eine Vorgabe, Rückwege bleiben sicher, lange Listen passen ins PDF */
+  const kl = (wins, p) => AW16.klaerung(wins, p || {}).map((r) => r.k + ': ' + r.v).join('\n');
+  ok(AW16.uwZiel(AW16.mk({ art: 'hst', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, offen: { schwelle: true } }), pB).wert === 0.95 && !/Glas für|3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa', gebaeude: 'denkmal' })) && /schafft praktisch nur 3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa' })), 'Förderung: offene Schwelle zählt nicht als barrierearm; im Baudenkmal (Uw 1,4) kein Hinweis, dass nur 3-fach-Glas reicht');
+  ok(/Absturzsicherung nötig \(OG, bodentief\)/.test(kl([AW16.mk({ etage: 'og', bru: 0 })])) && /Absturzsicherung nötig \(DG, bodentief laut Foto\)/.test(kl([AW16.mk({ etage: 'dg', bru: '', ki: { fach: { bruestung: 'bodentief' } } })])) && /Fensterbank außen laut Foto aus Faserzement: vor dem Ausbau auf Asbest prüfen/.test(kl([AW16.mk({ ki: { fach: { fba: 'faserzement' } } })])) && !/Lüftung/.test(kl([AW16.mk({ anzahl: 4 })], {})) && AW16.klaerKurz([AW16.mk({ ki: { fach: { fbi: 'faserzement' } } })], {}).join() === 'Asbest prüfen (Pos. 1)', 'Klärungsliste: Brüstung 0 heißt bodentief, „laut Foto“ nur ohne Maß; Faserzement-Fensterbank als Asbest-Prüfpunkt; ohne Zahl der Fenster im Haus kein Lüftungskonzept');
+  const ctxD = await browser.newContext(telefon), d16 = await neueSeite(ctxD);
+  await d16.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; const w = Object.assign(baseWin(), { name: 'Bad', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { spross: true } }); w.bars = presetBars('kreuz', w.sashes.length); w.preset = 'kreuz'; S.win = w; S.q = 'breite'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
+  await d16.click('.qpanel [data-act="setw"][data-f="breite"][data-v="18"]'); await d16.waitForTimeout(150);
+  const br = await d16.evaluate(() => ({ offen: !!S.win.offen.spross, breite: S.win.breite, zeile: specRows(S.win).find((r) => r.k === 'Sprossen').v }));
+  await d16.evaluate(() => { S.q = 'fa'; S.win.offen = Object.assign({}, S.win.offen, { fa: true }); render(true); }); await d16.waitForTimeout(200);
+  await d16.click('.qoffen[data-f="fa"]'); await d16.waitForTimeout(150);
+  const radio = await d16.evaluate(() => ({ offen: !!S.win.offen.fa, knopf: document.querySelector('.qoffen[data-f="fa"]').getAttribute('aria-pressed') }));
+  await d16.click('#t-wunschA'); await d16.keyboard.type('RAL 3004'); await d16.waitForTimeout(150);
+  const getippt = await d16.evaluate(() => !!S.win.offen.fa);
+  await d16.click('[data-act="farbe-weg"][data-f="wunschA"]'); await d16.waitForTimeout(200);
+  const geloescht = await d16.evaluate(() => ({ offen: !!S.win.offen.fa, wunsch: S.win.wunschA, zeile: specRows(S.win).find((r) => r.k === 'Farbe').v }));
+  await d16.click('.qpanel .qsw[data-v="9016"]'); await d16.click('#t-wunschA'); await d16.keyboard.type('RAL 3004'); await d16.click('[data-act="farbe-weg"][data-f="wunschA"]'); await d16.waitForTimeout(200);
+  const nachListe = await d16.evaluate(() => ({ offen: !!S.win.offen.fa, fa: S.win.fa }));
+  await d16.evaluate(() => { S.q = 'glasfn'; S.win.offen = Object.assign({}, S.win.offen, { glasfn: true }); render(true); }); await d16.waitForTimeout(150);
+  await d16.click('.qoffen[data-f="glasfn"]'); await d16.waitForTimeout(150);
+  const keineExtras = await d16.evaluate(() => !S.win.offen.glasfn && S.win.glasfn.length === 0);
+  ok(br.offen && br.breite === 18 && /offen, bitte beraten, 18 mm/.test(br.zeile) && radio.offen && radio.knopf === 'true' && !getippt && geloescht.offen && geloescht.wunsch === '' && /außen offen, bitte beraten/.test(geloescht.zeile) && !nachListe.offen && nachListe.fa === '9016' && keineExtras, 'Nichts entscheidet still: die Sprossenbreite lässt die Sprossenart offen; „Weiß ich noch nicht“ erneut antippen bleibt offen (nur Glas-Extras: aus heißt keine); eine getippte und wieder gelöschte Farbe ist wieder offen, nach einer Farbe aus der Liste nicht');
+  await d16.evaluate((MO) => { const w = Object.assign(baseWin(), { name: 'Kind', etage: 'og', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(200);
+  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="10"]'); await d16.waitForTimeout(150);
+  const lage16 = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru') }));
+  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.waitForTimeout(150);
+  const lage16b = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru'), frage: qList(S.win).some((q) => q.id === 'absturz') }));
+  await d16.evaluate(() => { S.win.bru = 0; S.q = 'absturz'; render(true); }); await d16.waitForTimeout(150);
+  const sub0 = await d16.evaluate(() => document.querySelector('.hd').textContent);
+  ok(lage16.bru === 860 && lage16.feld && lage16b.bru === 840 && lage16b.feld && lage16b.frage && /Bodentief im OG: Unter 80 cm \(ab 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: das Feld für die Brüstung bleibt beim Antippen stehen und beginnt bei einem üblichen Maß (850 mm); 0 mm heißt bodentief, nicht „laut Foto“; Regel 80 cm, ab 12 m 90 cm');
+  /* Gestaltung: nichts vorgewählt bei gleichen Vorgaben; „Doch neu gestalten“ nach dem Speichern nimmt keine gespeicherten Änderungen zurück */
+  await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; S.angelegt = 0; const a = Object.assign(baseWin(), { name: 'Flur', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = a; saveWin(); const b = Object.assign(baseWin(), { name: 'Gast', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = b; S.editIdx = -1; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
+  const vorgewaehlt = await d16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean).join() }));
+  await d16.evaluate((MO) => { const c = Object.assign(baseWin(), { name: 'Arbeit', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, fa: '9016', sart: 'raffstore', sfarbe: 'anthrazit' }); c.wid = 'wc'; c.t0 = zeit(); S.windows.push(c); S.win = kopie(S.windows[0]); S.editIdx = 0; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(200);
+  await d16.click('.qpanel [data-act="design"][data-v="1"]'); await d16.waitForTimeout(150);
+  await d16.evaluate(() => { S.win.insekt = 'spann'; saveWin(); S.win = kopie(S.windows[0]); S.editIdx = 0; S.q = 'design'; S.screen = 'frage'; render(true); }); await d16.waitForTimeout(200);
+  const nachSpeichern = await d16.evaluate(() => ({ chip: !!document.querySelector('[data-act="design-weg"]'), vorher: S.designVorher }));
+  await d16.evaluate(() => act('design-weg', document.body)); await d16.waitForTimeout(150);
+  const behalten = await d16.evaluate(() => ({ insekt: S.win.insekt, sart: S.win.sart, offenFa: !!S.win.offen.fa }));
+  ok(vorgewaehlt.gedrueckt === 0 && vorgewaehlt.nav === 'Weiter' && !nachSpeichern.chip && nachSpeichern.vorher === null && behalten.insekt === 'spann' && behalten.sart === 'raffstore' && !behalten.offenFa, 'Gestaltung übernehmen: gleiche Vorgaben zweier Fenster zählen nicht als übernommen (nichts gedrückt, „Weiter“); nach dem Speichern gibt es kein „Doch neu gestalten“ mehr, gespeicherte Änderungen bleiben');
+  /* Offene Angaben auch in Karten, Übersicht und Betrieb; Fenster im Haus ohne Vorgabe */
+  const karten16 = await d16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Bad', offen: { material: true, glas: true, insekt: true } }); return { win: winCard(w, 0, false), check: checkCard(w, 0), proj: PROJ0.total }; });
+  await d16.evaluate(() => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0); go('anfrage'); }); await d16.waitForTimeout(150);
+  const anfr = await d16.evaluate(() => ({ note: !!document.querySelector('.note.warn'), feld: document.getElementById('p-total').value, ph: document.getElementById('p-total').placeholder }));
+  ok(/Glas offen/.test(karten16.win) && /Material offen/.test(karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zeigen offenes Glas und Material als offen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
+  /* PDF: eine lange Klärungsliste wird über die Seiten geteilt, nichts fällt weg; offene Angaben in der Übersicht */
+  const b64L = await d16.evaluate(async () => {
+    const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
+    S.windows = a; S.proj = Object.assign({}, PROJ0, { name: 'Familie Lang', total: 24, foerdweg: 'offen' }); S.kauf = { paid: true, mail: 'test@beispiel.de' };
+    await blattSchrift(); const blob = await blattPDF('fensterbauer'); const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s);
+  });
+  const pdfL = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung-lang.pdf'); fs16.writeFileSync(pdfL, Buffer.from(b64L, 'base64'));
+  const txtL = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', pdfL, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  const zaehle = (re) => (txtL.match(re) || []).length, absturzZeilen = zaehle(/Absturzsicherung nötig \(OG, Brüstung 500 mm\)/g), rcZeilen = zaehle(/Die Polizei empfiehlt RC2\./g), stromZeilen = zaehle(/Elektrischer Antrieb gewünscht/g);
+  ok(absturzZeilen === 20 && rcZeilen === 20 && stromZeilen === 20 && /Alle Positionen\s+[^\n]*Insektenschutz: offen, bitte beraten/.test(txtL) && /MIT DEM KUNDEN ZU KLÄREN, FORTSETZUNG/.test(txtL) && /Insektenschutz\s+offen/.test(txtL), 'PDF mit 20 Positionen: die lange Klärungsliste geht mit „Fortsetzung“ über die Seiten, alle Absturz-, RC2- und Strom-Zeilen und die offenen Wünsche stehen darin; die Übersicht zeigt offene Angaben als offen (' + absturzZeilen + ' / ' + rcZeilen + ' / ' + stromZeilen + ')');
+  sauber(d16, 'Nachbesserungen aus der Durchsicht ohne Fehler');
+  await ctxD.close();
+  const ctxQ = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' }), q16 = await neueSeite(ctxQ);
+  await q16.goto(BASE + '/', { waitUntil: 'networkidle' }); await betrieb(q16, 'c1'); await q16.waitForTimeout(300);
+  const pos16 = await q16.evaluate(() => { const w = AW.mk({ name: 'Bad', offen: { material: true } }); return posCard(w, 0, null, false, {}); });
+  ok(/Material offen/.test(pos16) && !/Kunststoff ·/.test(pos16), 'Betriebsbereich: offenes Material steht in der Kopfzeile der Position als offen');
+  sauber(q16, 'Betriebsbereich Positionen ohne Fehler'); await ctxQ.close();
+
+  /* h) Gestaltung der neuen Schritte: nur die Schriftgrößen der App, Ziele ab 44 px, kein Querscrollen, hell und dunkel */
+  const messen16 = (seite) => seite.evaluate(() => {
+    const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
+    const groessen = new Set(), klein = [];
+    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.w3d')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.closest('.w3d') || el.matches('.ulink') || el.closest('.sheet')) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
+    return { groessen: Array.from(groessen).sort((x, y) => x - y), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
+  });
+  const GR16 = [13, 15, 17, 24, 32, 40], befund16 = [];
+  for (const dunkel of [false, true]) {
+    const c = await browser.newContext(Object.assign({}, telefon, dunkel ? { colorScheme: 'dark', reducedMotion: 'reduce' } : {})), s = await neueSeite(c);
+    await s.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+    const zeige = async (name, fn, arg) => {
+      await s.evaluate(fn, arg); await s.waitForTimeout(350);
+      const m = await messen16(s), fremd = m.groessen.filter((g) => !GR16.includes(g));
+      if (fremd.length || m.klein.length || m.quer) befund16.push((dunkel ? 'dunkel ' : 'hell ') + name + ': ' + (fremd.length ? 'Größen ' + fremd.join(', ') + ' ' : '') + (m.klein.length ? 'klein ' + m.klein.slice(0, 4).join('; ') : '') + (m.quer ? ' Querscrollen' : ''));
+    };
+    const frage16 = ([id, art, extra, MO]) => { const a = demoProject(); S.windows = a; S.editIdx = -1; const w = Object.assign(baseWin(), { name: 'Kinderzimmer mit langem Namen', etage: 'og', bru: 450, w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); artSetzen(w, art); Object.assign(w, extra || {}); S.win = w; S.designVorher = null; S.q = id; S.screen = 'frage'; render(true); };
+    const mo16 = MO(1230, 1410);
+    await zeige('Absturzsicherung', frage16, ['absturz', 'fenster', {}, mo16]);
+    await zeige('Gestaltung übernehmen', frage16, ['design', 'fenster', {}, mo16]);
+    await zeige('Gestaltung übernommen', () => { designAnwenden(S.win, S.windows[0]); S.designVorher = kopie(S.win); render(true); });
+    await zeige('Einbruchschutz', frage16, ['rc', 'fenster', { erreichbar: 'ja' }, mo16]);
+    await zeige('Farbe offen', frage16, ['fa', 'fenster', {}, mo16]);
+    await zeige('Kasten offen', frage16, ['einbau', 'fenster', { sart: 'rollladen', roll: 'aufsatz', offen: { einbau: true } }, mo16]);
+    await zeige('Griff außen', frage16, ['griffA', 'balkon', {}, mo16]);
+    await zeige('Fußboden', frage16, ['boden', 'balkon', {}, mo16]);
+    await zeige('PSK-Tür', frage16, ['pskS', 'psk', {}, mo16]);
+    await zeige('Maße prüfen', () => { const w = Object.assign(baseWin(), { name: 'Küche', w: 1410, h: 1230, mo: { hm: 1290, hl: 1290, hr: 1290, wm: 1470, wt: 1470, wb: 1470 }, el: { w: 1410, h: 1230 }, ki: { auto: true, chips: [], rows: [], hints: [], pruefen: [], verh: 0.87 } }); S.win = w; S.screen = 'ergebnis'; render(true); });
+    await zeige('Lüftung', () => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0, { total: 4 }); go('anfrage'); });
+    await zeige('Förderung', () => { S.proj.foerdweg = 'steuer'; go('anfrage2'); });
+    if (dunkel) await foto(s, 'app-foerderung-dunkel');
+    sauber(s, 'Neue Schritte ' + (dunkel ? 'dunkel' : 'hell') + ' ohne Fehler'); await c.close();
+  }
+  ok(!befund16.length, 'Gestaltung der neuen Schritte (Telefon, hell und dunkel): nur 13 · 15 · 17 · 24 · 32 · 40, Ziele ab 44 px, kein Querscrollen' + (befund16.length ? '\n      ' + befund16.join('\n      ') : ''));
 }
 
 await browser.close();

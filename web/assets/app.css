@@ -279,6 +279,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-glass::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 26%, rgba(255, 255, 255, .55) 38%, #fff 46%, rgba(255, 255, 255, .7) 52%, transparent 66%) no-repeat; background-size: 260% 100%; background-position: 130% 0 }
 .w3d-sash.demo-F .w3d-glass::after { animation: w3d-glanz 1s var(--e-out) both }
 @keyframes w3d-glanz { 0% { opacity: 0; background-position: 130% 0 } 12%, 82% { opacity: .95 } 100% { opacity: 0; background-position: -30% 0 } }
+.w3d-griffa { position: absolute; left: 0; top: 0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .2); transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
 .w3d-handle { position: absolute; left: 0; top: 0; border-radius: 3px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .2); transition: transform .7s cubic-bezier(.3, .7, .2, 1), translate .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
 .w3d-bar { position: absolute; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 1px 3px rgba(0, 0, 0, .2); z-index: 2; touch-action: none; transition: left .25s, top .25s, width .3s, height .3s, background .5s }
 .w3d-bar.is-sel { box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 0 0 2.5px var(--accent) }
@@ -296,6 +297,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes w3d-schieben { 0%, 5% { transform: none } 13%, 20% { transform: translate3d(0, -7px, 0) } 50%, 66% { transform: translate3d(calc(var(--sdir, -1) * 82%), -7px, 0) } 90% { transform: translate3d(0, -7px, 0) } 100% { transform: none } }
 .w3d-sash.demo-S .w3d-handle { animation: w3d-griff-hebe 3s var(--e-io) both }
 @keyframes w3d-griff-hebe { 0% { transform: none } 5%, 90% { transform: rotate(180deg) } 100% { transform: none } }
+/* PSK: der Flügel stellt sich parallel ab (zum Raum hin) und schiebt vor das Festteil; der Griff dreht wie am Fenster */
+.w3d-sash.demo-PS { animation: w3d-psk 3s var(--e-io) both }
+@keyframes w3d-psk { 0%, 5% { transform: none } 14%, 22% { transform: translate3d(0, 0, 9px) } 52%, 66% { transform: translate3d(calc(var(--sdir, -1) * 82%), 0, 9px) } 88% { transform: translate3d(0, 0, 9px) } 100% { transform: none } }
+.w3d-sash.demo-PS .w3d-handle { animation: w3d-griff-hebe 3s var(--e-io) both }
 /* Eine Bewegung zur Zeit: solange vorgeführt oder verwandelt wird, steht das sanfte Schwingen still */
 .w3d-stage.is-busy .w3d-sway, .w3d-stage.is-vorf .w3d-sway, .w3d-stage.is-demo .w3d-sway { animation-play-state: paused }
 .w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
@@ -345,6 +350,9 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .paper-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--ink) }
 .paper-grid { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 4px 10px; font-size: 13px; line-height: 1.4 }
 .paper-grid span:nth-child(odd) { color: var(--muted) } .paper-grid span:nth-child(even) { font-weight: 600; min-width: 0 }
+/* Noch zu klären: oben im Blatt, mit Strich in Warnfarbe */
+.paper-klaer { display: flex; flex-direction: column; gap: 6px; padding: 12px 0 2px 12px; box-shadow: inset 3px 0 0 var(--warn) }
+.paper-klaer .eyebrow { color: var(--warn) }
 .paper-pos { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line2) }
 .paper-pos .ph { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap }
 .paper-pos .ph .t { flex: 1 1 190px; min-width: 0 }
@@ -447,6 +455,16 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qwunsch small { font-size: 13px; color: var(--muted); line-height: 1.35; padding: 0 4px }
 .qnav { flex: 0 0 auto; display: flex; gap: 10px; padding-top: 2px }
 .qnav .btn.ghost { flex: 0 0 56px; padding: 0 }
+.qnav .btn.ghost.anpassen { flex: 1 1 0; padding: 0 14px }
+.qoffen { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 6px 14px 6px 16px; border: 1.5px dashed var(--line2); border-radius: var(--r3); background: transparent; font: inherit; color: var(--ink); text-align: left; transition: background var(--t2), border-color var(--t2) }
+.qoffen .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0 } .qoffen b { font-size: 15px; font-weight: 700 } .qoffen small { font-size: 13px; color: var(--muted) }
+.qoffen .mark { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--line2); display: flex; align-items: center; justify-content: center; transition: background var(--t2), box-shadow var(--t2) }
+.qoffen .mark svg { width: 13px; height: 13px; opacity: 0; transition: opacity var(--t1) }
+.qoffen[aria-pressed="true"] { border-style: solid; border-color: var(--ink); background: var(--surface) }
+.qoffen[aria-pressed="true"] .mark { background: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink) } .qoffen[aria-pressed="true"] .mark svg { opacity: 1 }
+.qoffen:active { background: var(--surface2) }
+.qlabel { margin: 4px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .02em }
+.qcards.design .qopt .lbl { font-size: 15px }
 .qpanel .rows { margin: 0 }
 .sub.center { margin: 0; font-size: 15px }
 /* Sprossen-Regler am Modell */

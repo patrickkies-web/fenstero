@@ -6,7 +6,9 @@
 
    Eine Anfrage je Foto. Die KI liest die Einbausituation rund um die Maueröffnung, also alles, was ein Fensterbauer
    fürs Erstaufmaß außer den Maßen wissen muss (Rollladenkasten, Anschlag, Laibung, Fensterbänke, Wandaufbau, Anschlüsse,
-   Hindernisse, Zugang, Schäden, Sonderfälle). Das alte Fenster wird ausgebaut und deshalb nicht beschrieben.
+   Hindernisse, Zugang, Schäden, Sonderfälle). Das alte Fenster wird ausgebaut und deshalb nicht beschrieben. Dazu feste Werte („fach“:
+   Rollladenkasten, Anschlag, Fassade, Fensterbank, Brüstung, Geschoss, Erreichbarkeit, Strom, Gerüst) und das Seitenverhältnis des
+   Fensterelements („verhaeltnis“), mit dem die App die Handmaße gegenprüft.
    „wand“ ist die neue Öffnung: eine Wand ohne Fenster, an die ein Durchbruch soll. Checkliste und Quellen: docs/KI.md.
 
    Der Schlüssel liegt nur bei Cloudflare: Umgebungsvariable ANTHROPIC_API_KEY, als „Secret“ angelegt.
@@ -97,9 +99,23 @@ const PRUEFLISTE = {
   }
 };
 
+/* Feste Werte für den Fensterbauer („fach“): was dem Kunden zu fachlich ist, liest die KI aus dem Foto; die App zeigt es dem Betrieb
+   auf einen Blick und nutzt es selbst (Fassade im Modell, Geschoss als Vorschlag, Absturzsicherung bei niedriger Brüstung, Hinweis auf
+   Strom bei elektrischem Antrieb). „verhaeltnis“ prüft die Handmaße gegen das Foto (vertauscht oder stark abweichend). */
+const FACH = {
+  einbau: {
+    in: '"fach" mit festen Werten, nur was du erkennst, sonst den Schlüssel weglassen: "rollladen": "einbau" (Kasten innen im Sturz mit Revisionsdeckel), "aufsatz" (Kasten auf dem Altfenster) oder "keiner"; "anschlag": "innen" oder "ohne"; "fensterbank": "naturstein", "kunststoff", "holz", "fliesen", "faserzement" oder "keine"; "bruestung": "bodentief", "niedrig" (unter etwa 80 cm) oder "normal"; "strom": true, wenn Rollladenschalter, Motor, Steckdose oder Kabel direkt an der Öffnung zu sehen sind, sonst false.\n"verhaeltnis": Breite geteilt durch Höhe des Fensterelements samt Blendrahmen, so als sähest du gerade darauf (Schrägsicht herausrechnen), zwei Nachkommastellen; null, wenn der Rahmen nicht ganz zu sehen ist.',
+    out: '"fach" mit festen Werten, nur was du erkennst, sonst den Schlüssel weglassen: "rollladen": "vorbau" (Kasten außen vor der Fassade), "aufsatz", "einbau" (nur der Schlitz im Sturz zu sehen) oder "keiner"; "anschlag": "aussen" oder "ohne"; "fassade": "putz", "klinker", "wdvs", "holz" oder "sonstige"; "fensterbank": "aluminium", "naturstein", "klinker", "faserzement", "beton" oder "keine"; "geschoss": "kg", "eg", "og" oder "dg"; "erreichbar": true, wenn das Fenster vom Boden, Balkon, Anbau oder Garagendach leicht zu erreichen ist, sonst false; "geruest": true, wenn für die Montage ein Gerüst oder Hubsteiger nötig ist, sonst false.\n"verhaeltnis": Breite geteilt durch Höhe des Fensterelements samt Blendrahmen, so als sähest du gerade darauf (Schrägsicht herausrechnen), zwei Nachkommastellen; null, wenn der Rahmen nicht ganz zu sehen ist.'
+  },
+  wand: {
+    in: '"fach" mit festen Werten, nur was du erkennst: "strom": true, wenn Steckdosen, Schalter oder Leitungen in der Fläche zu sehen sind, sonst false. "verhaeltnis" weglassen.',
+    out: '"fach" mit festen Werten, nur was du erkennst: "fassade": "putz", "klinker", "wdvs", "holz" oder "sonstige"; "geschoss": "kg", "eg", "og" oder "dg"; "erreichbar": true oder false; "geruest": true oder false. "verhaeltnis" weglassen.'
+  }
+};
+
 const FORMAT = [
   'Antworte ausschließlich mit JSON in dieser Form:',
-  '{"foto_passt":true,"neigung_grad":1.5,"laibung_mm":180,"rows":[["Rollladen","Einbaukasten innen über der Öffnung mit Revisionsdeckel, Gurt mit Unterputz-Wickler links"],["Anschlag","Innenanschlag, Blendrahmen sitzt vermutlich 2 cm hinter der Innenkante"]],"chips":["Rollladenkasten innen","Fensterbank Naturstein","Heizkörper darunter"],"hinweise":["Der Gurtwickler sitzt in der Laibung; nach dem Ausbau ist Putz nachzuarbeiten."],"vor_ort":["Dämmung und Luftdichtheit des Rollladenkastens prüfen."],"sicherheit":0.7}',
+  '{"foto_passt":true,"neigung_grad":1.5,"laibung_mm":180,"rows":[["Rollladen","Einbaukasten innen über der Öffnung mit Revisionsdeckel, Gurt mit Unterputz-Wickler links"],["Anschlag","Innenanschlag, Blendrahmen sitzt vermutlich 2 cm hinter der Innenkante"]],"chips":["Rollladenkasten innen","Fensterbank Naturstein","Heizkörper darunter"],"hinweise":["Der Gurtwickler sitzt in der Laibung; nach dem Ausbau ist Putz nachzuarbeiten."],"vor_ort":["Dämmung und Luftdichtheit des Rollladenkastens prüfen."],"fach":{"rollladen":"einbau","anschlag":"innen","fensterbank":"naturstein","bruestung":"normal","strom":true},"verhaeltnis":0.87,"sicherheit":0.7}',
   '"rows": 5 bis 12 Zeilen [Thema, Befund], wichtigstes zuerst. Thema kurz, zum Beispiel Rollladen, Anschlag, Laibung, Fensterbank innen, Brüstung, Heizung, Elektro, Hindernisse, Feuchte, Fassade, Anschlag außen, Sonnenschutz, Fensterbank außen, Anschlüsse, Sturz, Zugang, Gestaltung, Einbruchschutz, Wand, Statik, Besonderheit. Befund in Fachsprache, höchstens 140 Zeichen.',
   '"chips": 3 bis 5 kurze Stichworte für den Kunden.',
   '"hinweise": 0 bis 4 Sätze, was für Angebot, Ausbau oder Montage wichtig ist.',
@@ -108,7 +124,7 @@ const FORMAT = [
 ].join('\n');
 
 function auftrag(aufgabe, seite) {
-  return [GRUNDSAETZE, AUFGABE[aufgabe], PRUEFLISTE[aufgabe][seite].join('\n'), FORMAT].join('\n\n');
+  return [GRUNDSAETZE, AUFGABE[aufgabe], PRUEFLISTE[aufgabe][seite].join('\n'), FORMAT, FACH[aufgabe][seite]].join('\n\n');
 }
 const kurz = (aufgabe, seite) => (aufgabe === 'wand' ? 'Wand für eine neue Öffnung, ' : 'Fenster, das ersetzt wird, ') + (seite === 'out' ? 'Foto von außen.' : 'Foto von innen.');
 
