@@ -20,6 +20,7 @@
 <text x="398" y="324" text-anchor="end">Brüstungshöhe</text>
 </g>
 <line x1="16" y1="340" x2="464" y2="340" stroke="#141414" stroke-width="3"/>
-<line x1="414" y1="338" x2="414" y2="296" stroke="#c2410c" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)"/>
+<line x1="360" y1="284" x2="426" y2="284" stroke="#3d3d3a" stroke-width="1.5" stroke-dasharray="4 3"/>
+<line x1="414" y1="339" x2="414" y2="285" stroke="#c2410c" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)"/>
 <text x="240" y="374" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">Fußboden</text>
 </svg>
