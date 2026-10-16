@@ -28,8 +28,12 @@ export const SEITEN = [
   { pfad: '/ratgeber/din-links-rechts/', prio: '0.7', stand: '2026-10-16' },
   { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-10-16' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-16' },
-  { pfad: '/impressum/', prio: '0.2', stand: '2026-10-15' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-16' }
+  { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-16' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-10-16' },
+  { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-16' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-16' },
+  { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ];
 
 /* Suchen von KI-Assistenten: ausdrücklich erlaubt (OpenAI, Anthropic, Perplexity). Training (GPTBot, ClaudeBot, Google-Extended)
@@ -51,7 +55,7 @@ export const SPERRE = 'noindex, nofollow';
 
 export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1' && !(url && /\.workers\.dev$/i.test(url.hostname));
 export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : url.protocol + '//' + url.host.replace(/^www\./i, ''));
-export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz)(\/|$)/.test(pfad);
+export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf)(\/|$)/.test(pfad);
 const kanonischerPfad = (pfad) => pfad.replace(/index\.html$/, '');
 
 export function robots(origin, an) {
@@ -145,11 +149,11 @@ export function llms(origin, env) {
     '- [App: Fenster ausmessen](' + u('/app/') + '): kostenlose Aufmaß-App im Browser, mit Führung zum Ausprobieren',
     '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): Erstaufmaß ohne Anfahrt, Ablauf, Inhalt des Aufmaßes, Preise',
     '- [Fenster ausmessen](' + u('/ratgeber/fenster-ausmessen/') + '): Anleitung mit Messpunkten, Altbau, Rollladenkasten und typischen Fehlern',
-    '- [Aufmaßblatt für Fenster](' + u('/ratgeber/aufmassblatt-fenster/') + '): kostenlose Vorlage zum Ausdrucken, Erklärung jeder Zeile',
+    '- [Aufmaßblatt für Fenster](' + u('/ratgeber/aufmassblatt-fenster/') + '): was ein Aufmaß je Fenster umfasst, Punkt für Punkt; das Aufmaßblatt selbst entsteht als PDF in der App (keine Vorlage zum Ausdrucken)',
     '- [Fenster austauschen](' + u('/ratgeber/fenster-austauschen/') + '): Ablauf, Kosten pro Fenster, Förderung 2026, Checkliste fürs Angebot',
     '- [Balkontür ausmessen](' + u('/ratgeber/balkontuer-ausmessen/') + '): Balkon- und Terrassentür, Hebe-Schiebe- und PSK-Tür, Schwelle und Abdichtung',
     '- [Fenster mit Rollladenkasten ausmessen](' + u('/ratgeber/fenster-mit-rollladen-ausmessen/') + '): Aufsatz-, Einbau- oder Vorbaukasten erkennen und richtig messen',
-    '- [Bestellmaß berechnen](' + u('/ratgeber/bestellmass-fenster/') + '): Fuge je Seite nach Größe und Profilfarbe, Tabelle und Rechner',
+    '- [Bestellmaß berechnen](' + u('/ratgeber/bestellmass-fenster/') + '): Fuge je Seite nach Größe und Profilfarbe, Tabelle und Beispiel',
     '- [DIN links oder rechts](' + u('/ratgeber/din-links-rechts/') + '): Öffnungsrichtung bestimmen, Merkregel, Symbol in Zeichnungen',
     '- [Brüstungshöhe](' + u('/ratgeber/bruestungshoehe-fenster/') + '): Mindesthöhe nach Bauordnung und Absturzsicherung',
     '',

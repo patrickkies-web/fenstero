@@ -1,6 +1,7 @@
 -- eeziframes · Datenbank (Supabase/Postgres)
 -- Im SQL-Editor des Supabase-Projekts ausführen (docs/ONLINE-STELLEN.md, Stufe 2). Die Datei lässt sich gefahrlos erneut ausführen:
--- Vorhandenes bleibt, Neues (zuletzt: Zwischenstände der Kundenlinks, davor Protokoll und Statistik der Zentrale) kommt dazu.
+-- Vorhandenes bleibt, Neues (zuletzt: Zustimmung an der Kasse und Vertragsbestätigung bei den Zahlungen, davor Zwischenstände der
+-- Kundenlinks, Protokoll und Statistik der Zentrale) kommt dazu.
 -- Der Server greift ausschließlich mit dem geheimen Schlüssel zu (sb_secret_… bzw. früher service_role, functions/api/speicher.js);
 -- Browser haben keinen direkten Zugriff: Row Level Security ist an, ohne Regeln für anon/authenticated.
 
@@ -42,6 +43,13 @@ create table if not exists public.zahlungen (
   created_at      timestamptz not null default now()
 );
 create index if not exists zahlungen_kennung_idx on public.zahlungen (kennung);
+-- Seit Oktober 2026: Zustimmung an der Kasse (AGB-Stand, Wortlaut, Zeitpunkt; Nachweis für das Erlöschen des Widerrufsrechts),
+-- Zeitpunkt der Zahlung und der zugestellten Vertragsbestätigung (der tägliche Lauf holt nicht zugestellte nach, versuche zählt mit)
+alter table public.zahlungen add column if not exists daten jsonb not null default '{}'::jsonb;
+alter table public.zahlungen add column if not exists bezahlt_am timestamptz;
+alter table public.zahlungen add column if not exists bestaetigt_am timestamptz;
+alter table public.zahlungen add column if not exists versuche integer not null default 0;
+create index if not exists zahlungen_offen_idx on public.zahlungen (status, bestaetigt_am);
 
 -- Verarbeitete Stripe-Ereignisse (Webhook), damit nichts doppelt gebucht wird
 create table if not exists public.ereignisse (
@@ -49,8 +57,10 @@ create table if not exists public.ereignisse (
   created_at  timestamptz not null default now()
 );
 
--- Zentrale des Inhabers: Protokoll der Anmeldungen und Eingriffe (sperren, löschen, Export, Einblick …), siehe functions/api/zentrale.js.
--- Aufbewahrung: Anmeldungen 90 Tage, Eingriffe und Löschnachweise 3 Jahre (der Server räumt beim Abrechnungslauf auf).
+-- Zentrale des Inhabers: Protokoll der Anmeldungen und Eingriffe (sperren, löschen, Export, Einblick …), siehe functions/api/zentrale.js,
+-- und der Widerrufe über die Website (widerruf, nachgeholte Eingangsbestätigung widerruf_bestaetigt; functions/api/widerruf.js).
+-- Aufbewahrung: Anmeldungen 90 Tage, Eingriffe und Löschnachweise 3 Jahre, Widerrufe bis zum Ende des dritten Jahres nach dem Eingang
+-- (der Server räumt jeden Tag auf).
 create table if not exists public.protokoll (
   id       uuid primary key default gen_random_uuid(),
   zeit     timestamptz not null default now(),

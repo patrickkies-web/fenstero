@@ -32,7 +32,7 @@ Erhoben über die Vorschläge der Google-Suche (Deutschland, deutsch), Reihenfol
 | Thema | Suchbegriffe | Seite |
 |---|---|---|
 | Ausmessen (Hauptbegriff) | fenster ausmessen, fenster ausmessen altbau, fenster ausmessen anleitung, fenster ausmessen für neue fenster, fenster ausmessen für austausch, fenster ausmessen innen oder außen, fenster ausmessen mit aufsatzrollladen, alte fenster ausmessen, fenster messen, aufmaß fenster, aufmaß fenster altbau, maueröffnung fenster | `/ratgeber/fenster-ausmessen/` |
-| Vorlage | aufmaßblatt fenster, aufmaßblatt fenster pdf, aufmaßblatt vorlage pdf, aufmaßblatt pdf kostenlos, fenster ausmessen vorlage, fenster ausmessen pdf, fenster ausmessen tabelle, aufmaß fenster vorlage pdf | `/ratgeber/aufmassblatt-fenster/` |
+| Aufmaßblatt | aufmaßblatt fenster, aufmaßblatt fenster pdf, aufmaß fenster pdf, fenster ausmessen pdf (Suchende nach „vorlage“ bekommen die ehrliche Antwort: keine Vorlage, das Blatt entsteht in der App) | `/ratgeber/aufmassblatt-fenster/` |
 | App | fenster ausmessen app, fenster messen app, aufmaß app fenster, aufmaß app kostenlos, aufmaß app iphone, hebeschiebetür ausmessen | `/app/`, `/` |
 | Austausch, Kosten, Förderung | fenster austauschen, fenster austauschen kosten, fenster austauschen förderung, fenster austauschen dauer, fensteraustausch, neue fenster kosten, neue fenster kosten mit einbau, neue fenster kosten einfamilienhaus, neue fenster förderung, fenster angebot einholen, fenster angebot vergleichen | `/ratgeber/fenster-austauschen/` |
 | Fensterbauer (B2B) | digitales aufmaß, digitales aufmaß app, digitales aufmaß handwerk, digitales aufmaß fenster, aufmaß software, aufmaß software kostenlos, fenster aufmaß software freeware, fenster angebot software | `/fuer-fensterbauer/` |
@@ -51,12 +51,12 @@ Regeln für Texte: Suchbegriff vorn im Titel und im h1, Marke am Ende des Titels
 | Seite | Inhalt | Strukturierte Daten |
 |---|---|---|
 | `/ratgeber/fenster-ausmessen/` | Anleitung in sechs Schritten, Messpunkte, innen oder außen, Altbau, Bestellmaß, Fehler, Fragen | Article, HowTo, FAQPage, BreadcrumbList |
-| `/ratgeber/aufmassblatt-fenster/` | was aufs Aufmaßblatt gehört, Vorlage für drei Fenster (druckt allein auf eine A4-Seite), App-PDF | Article, FAQPage, BreadcrumbList |
+| `/ratgeber/aufmassblatt-fenster/` | was ein Aufmaß je Fenster umfasst (zwölf Punkte, Tabelle zum Lesen), wie das Aufmaßblatt in der App als PDF entsteht; bewusst keine Vorlage zum Ausdrucken | Article, FAQPage, BreadcrumbList |
 | `/ratgeber/fenster-austauschen/` | Ablauf, Kosten pro Fenster (BKI 2026, VFF/BF 2023), Förderung 2026 (BAFA, § 35c), Checkliste fürs Angebot, Dauer | Article, HowTo, FAQPage, BreadcrumbList |
 | `/fuer-fensterbauer/` | Ablauf, Inhalt des Aufmaßes, Zahlen zum Handwerk, Preise, Datenschutz (Sie-Form) | SoftwareApplication mit Angeboten, FAQPage, BreadcrumbList |
 | `/ratgeber/balkontuer-ausmessen/` | Balkon- und Terrassentür, Hebe-Schiebe- und PSK-Tür: Höhe ab fertigem Fußboden, Schwelle und Abdichtung (DIN 18531, DIN 18040-2), Vergleich HST und PSK | Article mit Bild, HowTo, FAQPage, BreadcrumbList |
 | `/ratgeber/fenster-mit-rollladen-ausmessen/` | Aufsatz-, Einbau- oder Vorbaukasten erkennen, was jeweils gemessen wird, Kastenhöhen, Dämmung und Förderung | Article mit Bild, HowTo, FAQPage, BreadcrumbList |
-| `/ratgeber/bestellmass-fenster/` | Mindestfuge je Seite nach Rahmenlänge und Profilfarbe (Tabelle eines Profilherstellers für Silikonfugen, Stand 2015; Dichtbänder nach Bandhersteller), Rechner (`web/assets/rechner.js`, rechnet nur im Browser, nach der Länge des Fensters, ohne Anschlag und nur für Kunststoff, versteht „1.410“ und „1230,5“), Begriffe | Article mit Bild, HowTo, FAQPage, BreadcrumbList |
+| `/ratgeber/bestellmass-fenster/` | Mindestfuge je Seite nach Rahmenlänge und Profilfarbe (Tabelle eines Profilherstellers für Silikonfugen, Stand 2015; Dichtbänder nach Bandhersteller), Beispiel, Begriffe; bewusst ohne Rechner | Article mit Bild, HowTo, FAQPage, BreadcrumbList |
 | `/ratgeber/din-links-rechts/` | DIN 107: von der Öffnungsseite gesehen, Merkregel, Symbol in Zeichnungen | Article mit Bild, HowTo, FAQPage, BreadcrumbList |
 | `/ratgeber/bruestungshoehe-fenster/` | Brüstungshöhe messen (ab Stufe oder Podest von deren Oberkante), 80 cm bzw. über 12 m Absturzhöhe 90 cm nach Musterbauordnung und BauO NRW § 38, Abweichung Bayern (BayBO Art. 36: ab 0,50 m, keine festen Höhen), Absturzsicherung mindestens 90 cm bzw. 1,10 m | Article mit Bild, HowTo, FAQPage, BreadcrumbList |
 | `/ratgeber/` | Übersicht | CollectionPage, BreadcrumbList |
@@ -81,7 +81,7 @@ Aufbau jeder Seite: zuerst „Kurz gesagt“ mit der Antwort, dann eine Zeichnun
 
 ## Freigabe
 
-1. Impressum und Datenschutz vollständig ausfüllen (orange Platzhalter in `web/impressum/` und `web/datenschutz/`) und prüfen lassen. Eine öffentliche, auffindbare Website braucht ein vollständiges Impressum (§ 5 DDG).
+1. Impressum und Datenschutz vollständig: Name und Anschrift stehen drin, E-Mail-Adresse und Telefonnummer fehlen noch (orange Platzhalter); dazu AGB, Nutzungsbedingungen und Cookies, alles rechtlich prüfen lassen. Eine öffentliche, auffindbare Website braucht ein vollständiges Impressum (§ 5 DDG).
 2. Cloudflare → Workers & Pages → `fenstero` → Einstellungen → Variablen und Geheimnisse: `INDEXIERUNG` = `1` (Typ Text). Die Hauptdomain ist `eeziframes.com`; `www.eeziframes.com` zählt von selbst als `eeziframes.com`, die `…workers.dev`-Adresse bleibt immer gesperrt. Nur wenn weitere Domains am Worker hängen (etwa `eeziframes.de`): `KANONISCH` = `https://eeziframes.com`, damit alle Canonicals auf eine Adresse zeigen (besser noch: die weitere Domain per Weiterleitungsregel umleiten).
 3. Prüfen: `https://eeziframes.com/robots.txt` (Allow, Content-Signal, Sitemap-Zeile), `/sitemap.xml` (14 Adressen), `/llms.txt`, `/f39851a897e004d2371f5b99367aa8c2.txt` (IndexNow-Schlüssel); eine Seite im Browser, Entwicklerwerkzeuge → Netzwerk: kein `X-Robots-Tag`, `Link: <…>; rel="canonical"`.
 
@@ -94,13 +94,14 @@ Zurück in die Pilotphase: Variable löschen. Ohne Code-Änderung, wirksam mit d
 3. **Erwähnungen** (der größte Hebel außerhalb des Codes, siehe Befunde): Pilotbetriebe bitten, auf ihrer Website auf eeziframes zu verlinken („Fenster selbst ausmessen mit eeziframes“); Einträge in Software-Verzeichnissen (Softguide, Capterra, OMR Reviews); die Autoren von Vergleichsartikeln anschreiben, in denen bisher keine App für Hauseigentümer vorkommt (z. B. Clean Invoice, „Digitales Aufmaß: Die besten Apps im Vergleich“); Produktmeldung an Fachportale und -presse (Baunetz Wissen, GLASWELT, glas+rahmen), Innungen und Verbände; ein kurzes Video „Fenster ausmessen in fünf Minuten“ auf YouTube, verlinkt auf die Anleitung. Überall dieselben Fakten: Name klein, „Aufmaß-App für Fenster“, Preise wie auf der Seite.
 4. **Bewertungen:** echte Bewertungen von Kunden und Betrieben sammeln, sobald es sie gibt; erst dann Bewertungs-Markup.
 5. **Aktualität:** Förderung (BAFA, § 35c) und Kosten mindestens vierteljährlich prüfen; bei Änderungen Text, Quelle mit Datum, `dateModified` im JSON-LD, „Stand“ auf der Seite und `STAND` in `functions/seo.js` anpassen.
-6. **Beobachten:** einmal im Monat dieselben Fragen in ChatGPT, Claude, Perplexity und Google stellen („Wie messe ich Fenster für neue Fenster aus?“, „Aufmaßblatt Fenster Vorlage“, „Aufmaß-App für Fensterbauer“) und notieren, ob eeziframes genannt oder verlinkt wird.
+6. **Beobachten:** einmal im Monat dieselben Fragen in ChatGPT, Claude, Perplexity und Google stellen („Wie messe ich Fenster für neue Fenster aus?“, „Aufmaßblatt Fenster PDF“, „Aufmaß-App für Fensterbauer“) und notieren, ob eeziframes genannt oder verlinkt wird.
 
 ## Pflege
 
 - **Neue Seite:** `web/<pfad>/index.html` im Aufbau der Ratgeberseiten, Eintrag in `SEITEN` mit `stand` (`functions/seo.js`), Karte in der Übersicht `/ratgeber/`, Link in der Fußzeile aller Ratgeber und in `llms.txt`; bei einem neuen Pfad oberster Ebene auch `istSeite()` und `run_worker_first` in `wrangler.jsonc`. Die Suite meldet, wenn eines fehlt.
 - **Änderung an einer Seite:** `stand` in `SEITEN`, `dateModified` im JSON-LD und beide „Stand“-Angaben auf der Seite auf denselben Tag setzen (die Suite vergleicht sie); IndexNow meldet die Seite dann beim nächsten täglichen Lauf.
 - **Häufige Fragen:** Die Antwort im JSON-LD ist wortgleich mit der sichtbaren Antwort, nur ohne Belegnummern; die Suite vergleicht alle Fragen auf Ratgebern, der Seite für Fensterbauer und der App.
+- **Keine Eingaben im Ratgeber:** keine Vorlagen zum Ausdrucken, keine leeren Tabellen, keine Formulare oder Rechner, in die man Fensterwerte oder Wünsche einträgt; der Ratgeber erklärt und zeigt den Umfang, das Aufmaß entsteht in der App (Geschäftsmodell). Die Suite prüft alle Ratgeberseiten darauf.
 - **Fakten:** Rechtswerte mit Geltungsbereich nennen (Musterbauordnung, „die meisten Länder“, Abweichungen wie Bayern), Normen nicht als Gesetz ausgeben (DIN 1946-6: Norm, Beratungspflicht des Fachbetriebs), Herstellerwerte mit Herkunft und Bedingung (Silikonfuge, Stand 2015); „kostenlos“ nur fürs Messen, wo das Aufmaßblatt vorkommt, steht der Preis daneben.
 - **Preise:** Die statischen Seiten nennen die Preise aus `web/config.js` (7,99 €, 9 €, 49 €, 79 €). Werden sie über die Variablen (`PREIS_…`) geändert, auch die Seiten anpassen; die Suite vergleicht Seiten und `config.js`. `llms.txt` liest die Variablen selbst.
 - **Kopfzeilen:** Änderungen an der Content-Security-Policy in `web/_headers` und in `SICHERHEIT` (`functions/seo.js`) gleich machen; die Suite vergleicht beides.

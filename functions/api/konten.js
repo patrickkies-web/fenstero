@@ -2,9 +2,10 @@
    Die Regeln (Zählung, Buchung, Nachbesserung) stehen in web/assets/modell.js und sind dieselben wie im Browser; hier führt sie der Server aus,
    deshalb kann ein Browser sie nicht umgehen. Das Konto eines Betriebs ist ein JSON-Dokument (siehe speicher.js). */
 import '../../web/assets/modell.js';
-import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt } from './umgebung.js';
+import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt, live } from './umgebung.js';
 import { GRENZEN, zuText, langerCode, kennung, ohneBild, metaMischen, zeitKappen } from './entwurf.js';
 import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
+import { NB_STAND } from './recht.js';
 
 const X = () => globalThis.Abrechnung;
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
@@ -61,6 +62,9 @@ async function stripeKunde(ctx) {
   await ctx.sp.betriebFelder(ctx.row.id, { stripe_customer: id }); ctx.row.stripe_customer = id; return id;
 }
 const zurueck = (ctx) => ctx.url.origin + '/';
+/* Echtes Geld nur mit ausdrücklich festgelegter Umsatzsteuer (MWST=0 oder 19, umgebung.js): sonst stünde womöglich Umsatzsteuer auf
+   der Rechnung, die ein Kleinunternehmer dann schuldet (§ 14c UStG) */
+function mwstPruefen(ctx) { if (live(ctx.k) && !ctx.k.mwstGesetzt) { console.log('Abo-Kasse gesperrt: MWST nicht festgelegt'); throw new ApiFehler('Der Abschluss ist gerade nicht möglich. Bitte versuchen Sie es später noch einmal.', 503); } }
 /* Kassen von Stripe übernehmen. Rückkehr des Betriebs und Webhook können in beliebiger Reihenfolge und auch gleichzeitig ankommen,
    Stripe stellt Webhooks nach Fehlern erneut zu, auch Stunden später. Darum:
    - Eine Kasse gehört zu genau einem Betrieb (Metadaten) und zählt je Betrieb nur einmal.
@@ -138,7 +142,10 @@ export const KONTO = {
     if (ap.length < 2) throw new ApiFehler('Bitte einen Ansprechpartner eingeben.');
     if (tel.replace(/\D/g, '').length < 6) throw new ApiFehler('Bitte eine Telefonnummer eingeben.');
     if (!/^\d{5}$/.test(plz)) throw new ApiFehler('Bitte eine fünfstellige Postleitzahl eingeben.');
-    if (!b.agb) throw new ApiFehler('Bitte den Nutzungsbedingungen zustimmen.');
+    /* Nur für Unternehmer (§ 14 BGB): ausdrücklich bestätigt, zusammen mit den Nutzungsbedingungen in der geltenden Fassung samt Vertrag
+       über die Auftragsverarbeitung; Fassung und Zeitpunkt bleiben am Konto (Nachweis, Art. 28 Abs. 9 DSGVO) */
+    if (!b.agb || !b.unternehmer) throw new ApiFehler('Bitte bestätigen, dass Sie sich als Unternehmer registrieren, und den Nutzungsbedingungen zustimmen.');
+    if (b.agb !== NB_STAND) throw new ApiFehler('Unsere Nutzungsbedingungen haben sich gerade geändert. Bitte lesen Sie sie und stimmen Sie noch einmal zu.', 409, { neuLaden: true, nb: NB_STAND });
     const telN = X().normTel(tel), nameN = X().normFirma(firma);
     const dups = await ctx.sp.betriebeDup({ tel: telN.length >= 6 ? telN : '', name: nameN.length >= 4 ? nameN : '', plz: plz.slice(0, 2) });
     const dup = dups && dups.length ? dups[0] : null;
@@ -146,6 +153,7 @@ export const KONTO = {
     if (dup) { a.freeQuota = 0; a.dupOf = dup.name; }
     melden(a, { t: 'Willkommen bei eeziframes', s: dup ? 'Für ' + dup.name + ' gibt es schon ein Konto, die kostenlosen Projekte wurden dort genutzt. Ab dem ersten Aufmaß brauchen Sie eine Zahlungsart.' : 'Legen Sie Ihr erstes Projekt an oder laden Sie gleich mehrere Kunden ein. Die ersten ' + X().preise().frei + ' Projekte sind kostenlos.', to: ['links'] });
     a.zuletzt = a.angemeldet = new Date().toISOString(); a.anmeldungen = 1;
+    a.bedingungen = { fassung: NB_STAND, zeit: a.angemeldet, unternehmer: true, avv: true };
     const row = await ctx.sp.betriebAnlegen({ auth_user: n.id, mail: n.mail, name: firma, plz: plz, tel_norm: telN, name_norm: nameN, daten: a });
     zaehlen(ctx, dup ? ['ereignis:registrierung', 'ereignis:doppelkonto_verdacht'] : 'ereignis:registrierung');
     return { ok: true, konto: sicht(row) };
@@ -186,12 +194,18 @@ export const KONTO = {
     if (out.eingang.ok) zaehlen(ctx, 'ereignis:code_eingefuegt');
     return out;
   },
-  /* --- Tarif --- */
+  /* --- Tarif ---
+     Wie die Nutzungsbedingungen (§ 6 Abs. 3, § 8 Abs. 2) es sagen: Ein Abo läuft je Abrechnungsmonat ab dem Abschluss (Stripe).
+     - nach oben (Start → Abo 10 oder Plus, Abo 10 → Plus): sofort; Abo 10 → Plus rechnet Stripe anteilig ab
+     - nach unten (Plus → Abo 10) und Kündigung (→ Start): zum Ende des laufenden Abrechnungsmonats, bis dahin gilt der bisherige Tarif;
+       der Preis wechselt bei Stripe ohne Ausgleich (der Monat ist bezahlt), die Kündigung über cancel_at_period_end
+     - denselben Tarif wieder wählen, solange ein Wechsel vorgemerkt ist: nimmt den Wechsel bzw. die Kündigung zurück */
   'POST /api/konto/plan': async (ctx) => {
-    await mitBetrieb(ctx); const plan = ['service', 'abo', 'plus'].includes((ctx.body || {}).plan) ? ctx.body.plan : 'service', a0 = ctx.row.daten || {}, alt = X().konto(a0);
+    await mitBetrieb(ctx); const plan = ['service', 'abo', 'plus'].includes((ctx.body || {}).plan) ? ctx.body.plan : 'service', a0 = ctx.row.daten || {}, alt = X().konto(a0), sub = ctx.row.stripe_subscription;
     const hoch = X().RANG[plan] > X().RANG[alt];
     if (hoch && plan !== 'service') {
-      if (ctx.row.stripe_subscription) { await ctx.zd.aboAendern(ctx.row.stripe_subscription, plan); return aendern(ctx, (a) => ({ ergebnis: X().planWechsel(a, plan) })); }
+      mwstPruefen(ctx);
+      if (sub) { await ctx.zd.aboAendern(sub, plan); return aendern(ctx, (a) => ({ ergebnis: X().planWechsel(a, plan) })); }
       const customer = await stripeKunde(ctx);
       const kasse = await ctx.zd.aboKasse({ id: ctx.row.id, customer: customer, plan: plan, zurueck: zurueck(ctx) });
       if (kasse.vorhanden) { // bei Stripe läuft schon ein Abo dieses Betriebs: übernehmen und umstellen, kein zweites
@@ -201,10 +215,16 @@ export const KONTO = {
       zaehlen(ctx, 'ereignis:abo_kasse');
       return { ok: true, url: kasse.url };
     }
-    if (plan === 'service' && ctx.row.stripe_subscription) await ctx.zd.aboKuendigen(ctx.row.stripe_subscription, false);
-    if (plan === alt && a0.downgrade && ctx.row.stripe_subscription) await ctx.zd.aboKuendigen(ctx.row.stripe_subscription, true);
-    if (plan !== 'service' && !hoch && plan !== alt && ctx.row.stripe_subscription) { await ctx.zd.aboAendern(ctx.row.stripe_subscription, plan); }
-    return aendern(ctx, (a) => ({ ergebnis: X().planWechsel(a, plan) }));
+    let ende = null;
+    if (plan === alt && a0.downgrade && sub) { if (a0.downgrade.to === 'service') await ctx.zd.aboKuendigen(sub, true); else await ctx.zd.aboAendern(sub, plan, { ohneAusgleich: true }); }
+    if (plan === 'service' && sub) ende = await ctx.zd.aboKuendigen(sub, false);
+    if (plan !== 'service' && !hoch && plan !== alt && sub) ende = await ctx.zd.aboAendern(sub, plan, { ohneAusgleich: true });
+    return aendern(ctx, (a) => {
+      const e = X().planWechsel(a, plan);
+      /* Vorgemerkt bis zum Ende des Abrechnungsmonats bei Stripe statt zum Kalendermonat (ohne Stripe bleibt das Monatsende) */
+      if (e.art === 'vorgemerkt' && ende && a.downgrade) { a.downgrade.at = X().datum(ende.getTime()); e.msg = 'Vorgemerkt: ' + X().planName(alt) + ' läuft bis ' + a.downgrade.at + ', danach ' + X().planName(plan); }
+      return { ergebnis: e };
+    });
   },
   'GET /api/konto/plan/pruefen': async (ctx) => {
     await mitBetrieb(ctx); const session = str(ctx.url.searchParams.get('session'), 120), planA = str(ctx.url.searchParams.get('plan'), 10);
@@ -302,6 +322,7 @@ export const KONTO = {
    nurId: nur dieser Betrieb (Zentrale, „jetzt abrechnen“). */
 export async function abrechnungslauf(k, sp, zd, nurId) {
   if (!sp || !zd) return { ok: false, grund: 'kein Speicher oder Zahlungsdienst' };
+  if (live(k) && !k.mwstGesetzt) return { ok: false, grund: 'MWST nicht festgelegt (0 oder 19): keine Sammelrechnungen', rechnungen: 0, fehler: 0, meldung: 'Umsatzsteuer festlegen: Variable MWST bei Cloudflare (0 = Kleinunternehmer, 19 = 19 %).' };
   const rows = nurId ? [await sp.betriebHolen(nurId)].filter((r) => r && r.stripe_customer) : await sp.betriebeMitKunde(); let n = 0, fehler = 0, meldung = '';
   for (const row of rows) {
     const offen = ((row.daten || {}).book || []).filter((b) => b.kind === 'aufmass' && b.status === 'offen' && b.betrag > 0);

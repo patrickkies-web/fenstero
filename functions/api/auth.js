@@ -18,15 +18,21 @@ async function gotrue(k, pfad, init, token) {
   return { ok: r.ok, status: r.status, data: data };
 }
 
-/* zurueck: Adresse, auf die der Anmeldelink führt (muss bei Supabase unter Redirect URLs erlaubt sein, sonst nimmt Supabase die Site URL) */
-export async function codeSenden(k, sp, mail, zurueck) {
+/* zurueck: Adresse, auf die der Anmeldelink führt (muss bei Supabase unter Redirect URLs erlaubt sein, sonst nimmt Supabase die Site URL).
+   neu === false: nur anmelden, kein neues Konto anlegen (App „Anmelden“: ein Konto entsteht nur mit Zustimmung zu den AGB beim Sichern).
+   Gibt es zu der Adresse kein Konto, antwortet der Server trotzdem wie sonst, damit sich nicht ausprobieren lässt, wer ein Konto hat;
+   es kommt dann nur kein Code an. */
+export async function codeSenden(k, sp, mail, zurueck, neu) {
   mail = String(mail || '').trim().toLowerCase();
   if (!mailOk(mail)) throw new ApiFehler('Bitte eine gültige E-Mail-Adresse eingeben.');
+  const anlegen = neu !== false;
   if (k.supabase) {
-    const r = await gotrue(k, 'otp' + (zurueck ? '?redirect_to=' + encodeURIComponent(zurueck) : ''), { body: { email: mail, create_user: true } });
-    if (!r.ok) { console.log('Supabase Auth', r.status, JSON.stringify(r.data || {}).slice(0, 200)); throw new ApiFehler(r.status === 429 ? 'Zu viele Versuche. Bitte in einer Minute noch einmal.' : 'Der Code konnte nicht verschickt werden.', 502); }
+    const r = await gotrue(k, 'otp' + (zurueck ? '?redirect_to=' + encodeURIComponent(zurueck) : ''), { body: { email: mail, create_user: anlegen } });
+    if (!r.ok && !anlegen && (r.status === 422 || r.status === 400) && /otp_disabled|signup|not allowed|not found/i.test(JSON.stringify(r.data || {}))) return { ok: true, mail: mail };
+    if (!r.ok) { console.log('Supabase Auth', r.status, String((r.data && (r.data.error_code || r.data.code)) || '').slice(0, 60)); throw new ApiFehler(r.status === 429 ? 'Zu viele Versuche. Bitte in einer Minute noch einmal.' : 'Der Code konnte nicht verschickt werden.', 502); }
     return { ok: true, mail: mail };
   }
+  if (!anlegen && sp.nutzerBekannt && !sp.nutzerBekannt(mail)) return { ok: true, mail: mail, attrappe: true }; // wie Supabase: ohne Konto kein Code
   sp.codeMerken(mail, '123456');
   console.log('[Attrappe] Anmeldecode für ' + mail + ': 123456');
   return { ok: true, mail: mail, attrappe: true };
@@ -41,6 +47,7 @@ export async function codePruefen(k, sp, mail, code) {
     return { token: r.data.access_token, refresh: r.data.refresh_token || '', nutzer: { id: r.data.user.id, mail: String(r.data.user.email || mail).toLowerCase() } };
   }
   if (sp.codeLesen(mail) !== code) throw new ApiFehler('Der Code stimmt nicht oder ist abgelaufen.', 401);
+  if (sp.nutzerMerken) sp.nutzerMerken(mail);
   const id = 'u_' + hashN(mail).toString(36);
   return { token: 'test.' + btoa(unescape(encodeURIComponent(mail))).replace(/=+$/, ''), refresh: 'test-refresh', nutzer: { id: id, mail: mail } };
 }

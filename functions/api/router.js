@@ -5,8 +5,12 @@
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js)
    /api/link/:code/entwurf          Zwischenstand eines Kundenlinks mit Zählern gegen Mehrfachnutzung (entwurf.js)
    /api/kunde/…                     Konten der Hauseigentümer: Anmelden per Code, Aufmaße sichern und abgleichen (eigene.js)
-   /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js) */
+   /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js)
+   POST /api/widerruf               Widerrufsfunktion nach § 356a BGB mit Eingangsbestätigung per E-Mail (widerruf.js, post.js), als JSON
+                                    oder ohne JavaScript als Formular (dann antwortet der Server mit einer Seite) */
 import { konfig, json, ApiFehler } from './umgebung.js';
+import { AGB_STAND, NB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
+import { bestaetigungenNachholen } from './bestaetigung.js';
 import { onRequestGet as kiGet, onRequestPost as kiPost } from './ki.js';
 import { speicher } from './speicher.js';
 import { zahlungsdienst } from './stripe.js';
@@ -15,11 +19,13 @@ import { ZAHLUNG } from './zahlung.js';
 import { ZENTRALE, aufraeumen } from './zentrale.js';
 import { ENTWURF } from './entwurf.js';
 import { EIGENE, kontenDa } from './eigene.js';
+import { WIDERRUF, widerrufeNachholen } from './widerruf.js';
+import { attrappePost, attrappeAus } from './post.js';
 import { zaehlen } from './statistik.js';
 import '../../web/assets/modell.js';
 import { indexnow } from '../seo.js';
 
-const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE);
+const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF);
 const MAX_BODY = 1500000;
 
 function finde(method, pfad) {
@@ -41,7 +47,14 @@ export async function api(request, env, ctx0) {
   globalThis.Abrechnung.setPreise(k.preise);
   const warte = (p) => (ctx0 && ctx0.waitUntil ? ctx0.waitUntil(p) : p);
   try {
-    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: k.daten ? !!(await kontenDa(speicher(k))) : false, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), hinweise: k.hinweise.length ? k.hinweise : undefined });
+    /* verkauf: was vor dem Verkauf mit echtem Geld fehlt (recht.js); recht: Stand der AGB und der Nutzungsbedingungen und der Wortlaut
+       der Zustimmung an der Kasse, so wie die App sie zeigt und der Server sie annimmt */
+    if (pfad === '/api/status') { const konten = k.daten ? !!(await kontenDa(speicher(k))) : false; return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: konten, preise: k.preise, zahlarten: k.zahlarten, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), post: !!k.post, verkauf: await verkaufStand(k, env, url.origin, konten), recht: { agb: AGB_STAND, nb: NB_STAND, zustimmung: ZUSTIMMUNG }, hinweise: k.hinweise.length ? k.hinweise : undefined }); }
+    /* nur lokal mit MAIL_ATTRAPPE=1: die zuletzt „verschickten“ Mails, damit die Prüfung sie lesen kann; ?stoerung=1 bzw. 0 stellt
+       eine Störung des Mailversands nach bzw. beendet sie */
+    if (pfad === '/api/test/post' && k.post && k.post.attrappe) { const st = url.searchParams.get('stoerung'); if (st !== null) attrappeAus.an = st === '1'; return json({ ok: true, post: attrappePost, stoerung: attrappeAus.an }); }
+    /* nur lokal mit DATEN_ATTRAPPE=1 und MAIL_ATTRAPPE=1: das Nachholen des täglichen Laufs sofort ausführen */
+    if (pfad === '/api/test/nachholen' && k.datenAttrappe && k.post && k.post.attrappe) { const sp0 = speicher(k); return json({ ok: true, vertrag: await bestaetigungenNachholen(k, sp0, env), widerruf: await widerrufeNachholen(k, sp0) }); }
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });
       if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), ['ereignis:ki_foto']).catch(() => false)); return r; }
@@ -54,14 +67,17 @@ export async function api(request, env, ctx0) {
     if (brauchtDaten && !sp) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Die Datenbank fehlt (SUPABASE_URL, SUPABASE_SECRET_KEY).' }, 503);
     if (pfad.startsWith('/api/zahlung') && !zd) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Zahlungen fehlen (STRIPE_SECRET_KEY).' }, 503);
     let body = null, roh = '';
+    /* Nur die Widerrufsfunktion nimmt auch ein gewöhnliches Formular an (Browser ohne JavaScript) */
+    const formular = pfad === '/api/widerruf' && /^application\/x-www-form-urlencoded/i.test(request.headers.get('content-type') || '');
     if (request.method === 'POST' || request.method === 'PATCH') {
       if (Number(request.headers.get('content-length') || 0) > MAX_BODY) return json({ ok: false, fehler: 'Zu groß.' }, 413);
       roh = await request.text(); if (roh.length > MAX_BODY) return json({ ok: false, fehler: 'Zu groß.' }, 413);
-      if (roh) { try { body = JSON.parse(roh); } catch (e) { if (pfad !== '/api/zahlung/webhook') return json({ ok: false, fehler: 'Kein JSON.' }, 400); } }
+      if (roh && formular) body = Object.fromEntries(new URLSearchParams(roh));
+      else if (roh) { try { body = JSON.parse(roh); } catch (e) { if (pfad !== '/api/zahlung/webhook') return json({ ok: false, fehler: 'Kein JSON.' }, 400); } }
       if (pfad !== '/api/zahlung/webhook' && request.headers.get('origin') && request.headers.get('origin') !== url.origin) return json({ ok: false, fehler: 'forbidden' }, 403);
     }
     /* zaehlen: Vorgang für die eigene Statistik (läuft nach der Antwort weiter, Fehler bleiben folgenlos) */
-    const ctx = { k: k, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, params: treffer.params, waitUntil: warte, zaehlen: (s) => { warte(zaehlen(k, sp, Array.isArray(s) ? s : [s]).catch(() => false)); } };
+    const ctx = { k: k, env: env, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, formular: formular, params: treffer.params, waitUntil: warte, zaehlen: (s) => { warte(zaehlen(k, sp, Array.isArray(s) ? s : [s]).catch(() => false)); } };
     const out = await treffer.fn(ctx);
     if (out instanceof Response) return out;
     return json(out == null ? { ok: true } : out);
@@ -73,16 +89,19 @@ export async function api(request, env, ctx0) {
 }
 
 /* Cron (wrangler.jsonc: triggers.crons): am 1. und 15. Sammelrechnungen, jeden Tag Aufräumen (Protokoll nach Frist,
-   liegengebliebene Kassen, Anmeldungen ohne Betrieb nach 30 Tagen, Zwischenstände erledigter Kundenlinks) */
+   liegengebliebene Kassen, Anmeldungen ohne Betrieb nach 30 Tagen, Zwischenstände erledigter Kundenlinks) und Nachholen: nicht
+   zugestellte Vertragsbestätigungen (bestaetigung.js) und Eingangsbestätigungen von Widerrufen (widerruf.js) */
 export const CRON_ABRECHNUNG = '0 3 1,15 * *';
 export async function geplant(env, cron) {
   const k = konfig(env); globalThis.Abrechnung.setPreise(k.preise);
-  const sp = speicher(k), abrechnen = !cron || cron === CRON_ABRECHNUNG;
+  const sp = speicher(k), abrechnen = !cron || cron === CRON_ABRECHNUNG, taeglich = !cron || cron !== CRON_ABRECHNUNG;
   const r = abrechnen ? await abrechnungslauf(k, sp, zahlungsdienst(k)) : { ok: true, nurAufraeumen: true };
   if (r && r.rechnungen) await zaehlen(k, sp, new Array(r.rechnungen).fill('ereignis:sammelrechnung')).catch(() => false);
   let weg = null; try { weg = await aufraeumen(k, sp); } catch (e) { weg = { ok: false }; }
+  let nach = null;
+  if (taeglich) { nach = {}; try { nach.vertrag = await bestaetigungenNachholen(k, sp, env); } catch (e) { nach.vertrag = { ok: false }; } try { nach.widerruf = await widerrufeNachholen(k, sp); } catch (e) { nach.widerruf = { ok: false }; } }
   /* täglicher Lauf: nach einer Veröffentlichung die geänderten Seiten per IndexNow melden (functions/seo.js, nur mit Freigabe) */
   let suche = null; if (cron && cron !== CRON_ABRECHNUNG) { try { suche = await indexnow(env); } catch (e) { suche = { ok: false }; } }
-  console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg), 'IndexNow', JSON.stringify(suche));
-  return Object.assign({}, r, { aufraeumen: weg, indexnow: suche });
+  console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg), 'Nachholen', JSON.stringify(nach), 'IndexNow', JSON.stringify(suche));
+  return Object.assign({}, r, { aufraeumen: weg, nachholen: nach, indexnow: suche });
 }
