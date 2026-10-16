@@ -85,15 +85,18 @@ window.Blatt = (() => {
 
     /* ---------- Seitenrahmen ---------- */
     let y = 0;
-    /* Das Zeichen: Kachel mit Fenster (auf dunklem Band weiße Kachel, sonst schwarze) */
+    /* Das Zeichen: Licht fällt durch ein Fenster in einen dunklen Raum. Dieselben Punkte wie im SVG (scripts/logo-setzen.py,
+       Raster 64); der Lichtstreifen endet unten links an der Rundung der Kachel. Auf dunklem Band weiße Kachel, sonst schwarze. */
+    const ZEICHEN = (() => {
+      const strahl = [[44.2, 41], [55.9, 43.3], [11.7, 64], [10, 64]];
+      for (let i = 1; i <= 8; i++) { const a = Math.PI / 2 + (Math.PI / 2) * i / 8; strahl.push([10 + 10 * Math.cos(a), 54 + 10 * Math.sin(a)]); }
+      return [[[26.4, 12.2], [44.4, 19.7], [56.3, 15.3], [42, 6.6]], [[45, 22], [57, 17.6], [57, 41.9], [45, 39.8]], strahl];
+    })();
     function marke(x, y0, s, hell) {
-      const k = hell ? '#ffffff' : '#000000', f = hell ? '#000000' : '#ffffff';
-      fill(k); rr(x, y0, s, s, s * 0.24);
-      const px = x + s * 0.2, py = y0 + s * 0.17, pw = s * 0.6, ph = s * 0.58;
-      fill(f); rr(px, py, pw, ph, s * 0.03);
-      fill(k); const g = s * 0.065, cw = (pw - 3 * g) / 2, ch = (ph - 3 * g) / 2;
-      doc.rect(px + g, py + g, cw, ch, 'F'); doc.rect(px + 2 * g + cw, py + g, cw, ch, 'F'); doc.rect(px + g, py + 2 * g + ch, cw, ch, 'F'); doc.rect(px + 2 * g + cw, py + 2 * g + ch, cw, ch, 'F');
-      fill(f); doc.rect(x + s * 0.15, y0 + s * 0.8, s * 0.7, s * 0.045, 'F');
+      const u = s / 64;
+      fill(hell ? '#ffffff' : '#000000'); rr(x, y0, s, s, 10 * u);
+      fill(hell ? '#000000' : '#ffffff');
+      ZEICHEN.forEach((pts) => doc.lines(pts.slice(1).map((p, i) => [(p[0] - pts[i][0]) * u, (p[1] - pts[i][1]) * u]), x + pts[0][0] * u, y0 + pts[0][1] * u, [1, 1], 'F', true));
     }
     const kopfband = (gross) => {
       const bh = gross ? 24 : 9;

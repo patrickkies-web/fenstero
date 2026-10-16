@@ -19,6 +19,9 @@ a { color: var(--accent) }
 .kopf div { max-width: 760px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px }
 .marke { display: inline-flex; align-items: center; gap: 9px; color: var(--fg); text-decoration: none; font-weight: 900; font-size: 19px; letter-spacing: -.02em }
 .marke svg { width: 30px; height: 30px; flex: 0 0 auto }
+/* Haarstrich des Zeichens: im dunklen Modus hell, damit sich die schwarze Kachel vom Hintergrund abhebt */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fi-rand { stroke: #fff; stroke-opacity: .2 } }
+:root[data-theme="dark"] .fi-rand { stroke: #fff; stroke-opacity: .2 }
 /* Wortmarke wie in App und Betriebsbereich: „eezi“ Black, „frames“ Medium, immer klein */
 .wm { font-weight: 500; text-transform: none; white-space: nowrap } .wm b { font-weight: 900 }
 .kopf nav { display: flex; gap: 16px; font-size: 15px; font-weight: 600 }

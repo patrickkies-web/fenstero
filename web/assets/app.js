@@ -1419,7 +1419,11 @@ const $app = () => document.getElementById('app');
 let lastScreen = null, toastTimer = null;
 function setW(patch) { Object.assign(S.win, patch); render(); }
 function setP(patch) { Object.assign(S.proj, patch); persist(); render(); }
+/* Kundenschutz: Wer über den Link eines Betriebs misst, bekommt von eeziframes weder das Aufmaßblatt noch einen Code, kann nichts
+   kaufen und kein Konto anlegen. Diese Bildschirme gibt es im Link nicht; dort zeigt die App „Prüfen und senden“ (blatt). */
+const NUR_EIGENES = { teilen: 1, datei: 1, kasse: 1, gekauft: 1, konto: 1, sichern: 1, meinkonto: 1 };
 function go(screen, dir) {
+  if (S.betrieb && NUR_EIGENES[screen]) screen = 'blatt';
   if (screen === 'zeichnen' && !planFoto()) { toast('Erst ein Foto der Stelle'); screen = 'fotos'; }
   if (S.screen === 'zeichnen' && screen !== 'zeichnen' && S.win.plan && !S.win.plan.bild) planBildErzeugen(S.win).then(() => { if (S.editIdx >= 0) persist(); });
   if (screen === 'planmasse') planVorgabe(S.win);
@@ -2023,7 +2027,7 @@ SCREENS.blatt = () => {
   if (S.sent) return { html: hd('Gesendet', 'Schon unterwegs.', esc(bn) + ' hat dein Aufmaß seit ' + esc(sentWhen()) + '.') + dateiCard(), back: ['Start', 'home'], bar: null };
   const pr = S.proj, items = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)]].concat(pr.notiz ? [['Nachricht', pr.notiz]] : []);
   const voll = S.windows.filter((x) => derive(x).complete).length, fehlt = S.windows.length - voll;
-  const html = hd('Prüfen', 'Alles vollständig?', esc(bn) + ' bekommt deine Fenster mit allen Maßen und Wünschen, dazu die Auswertung der Fotos. Tipp ein Fenster an, um es zu prüfen oder zu ändern.') +
+  const html = hd('Prüfen', 'Alles vollständig?', 'Deine Fenster mit allen Maßen und Wünschen, dazu die Auswertung der Fotos, gehen nur an ' + esc(bn) + '. Tipp ein Fenster an, um es zu prüfen oder zu ändern.') +
     (fehlt ? '<div class="msg ' + (voll ? 'warn' : 'bad') + '">' + (voll ? fehlt + (fehlt === 1 ? ' Fenster hat' : ' Fenster haben') + ' noch keine vollständigen Maße. Du kannst trotzdem senden, ' + esc(bn) + ' sieht dann, was fehlt.' : (S.windows.length ? 'Noch kein Fenster ist vollständig gemessen. Tipp ein Fenster an und trag die fehlenden Maße nach.' : 'Noch kein Fenster erfasst.')) + '</div>' : '') +
     '<div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => checkCard(x, i)).join('') + '</div>' +
     '<div class="kv">' + items.map((r) => '<div><span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>').join('') + '</div>' +
@@ -2246,6 +2250,7 @@ function blattPDF(variante) {
 const blattSchrift = () => (window.Blatt ? window.Blatt.schrift() : Promise.resolve(false));
 /* PDF direkt weitergeben: auf dem Telefon per Teilen-Menü (WhatsApp, Mail), sonst herunterladen */
 async function pdfTeilen() {
+  if (S.betrieb) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
   await blattSchrift();
   const pdf = blattPDF('fensterbauer');
   if (pdf && navigator.canShare && typeof File === 'function') {
@@ -2270,7 +2275,7 @@ function blattFile() {
 }
 /* variante 'kunde' (Standard, für die eigenen Unterlagen) oder 'fensterbauer' (so, wie es an einen Betrieb geht) */
 async function saveDatei(variante) {
-  if (S.betrieb && !kauf().paid) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
+  if (S.betrieb) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
   if (!FREI()) return go('teilen');
   await blattSchrift();
   const fb = variante === 'fensterbauer', pdf = blattPDF(fb ? 'fensterbauer' : 'kunde'), name = fileBase() + (fb ? '-fuer-Fensterbauer' : '') + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
@@ -2388,8 +2393,16 @@ function qList(w) {
   return L;
 }
 function qCurrent() { const list = qList(S.win); let i = list.findIndex((q) => q.id === S.q); if (i < 0) { i = 0; S.q = list[0].id; } return { list: list, i: i, q: list[i] }; }
+/* Name des Fensters: Pflichtfeld in der Frage „Wo ist das Fenster?“ */
+const nameDa = (w) => !!String((w && w.name) || '').trim();
+function nameVerlangen() {
+  S.nameFehler = true; S.q = 'lage'; S.dir = 'back';
+  if (S.screen !== 'frage') go('frage'); else render(true);
+  nachBild(() => { const f = document.getElementById('t-name'); if (f) f.focus(); }, 60);
+}
 function qStep(delta) {
   const c = qCurrent(), nx = c.list[c.i + delta];
+  if (delta > 0 && c.q.id === 'lage' && !nameDa(S.win)) return nameVerlangen();
   if (!nx) { if (delta > 0) return saveWin(); return go('ergebnis', 'back'); }
   S.q = nx.id; S.dir = delta < 0 ? 'back' : 'fwd'; S.selBar = null; S.qWunsch = false;
   S.openSash = nx.sash != null ? nx.sash : -1; if (nx.sash != null) S.selSash = nx.sash;
@@ -2502,7 +2515,9 @@ function qLage() {
   /* Im OG und DG ohne Brüstungsmaß fragt die Lage danach; das Feld bleibt für dieses Fenster stehen, auch wenn schon etwas eingetragen ist */
   if (oben && !AW.bruDa(w)) S.lageBru = w;
   const obenOhneBru = oben && S.lageBru === w;
-  return '<div class="rows"><div class="trow"><span>Raum</span><input type="text" id="t-name" data-in="w" data-f="name" value="' + esc(w.name || '') + '" placeholder="z. B. Küche" autocomplete="off"></div></div>' + chips('etage', w.etage, 'etage') +
+  /* Der Name ist Pflicht: Ohne ihn geht es nicht weiter (qStep, saveWin), damit jede Position im Blatt einen Namen hat */
+  const nameFehlt = !!S.nameFehler && !nameDa(w);
+  return '<div class="rows"><div class="trow pflicht' + (nameFehlt ? ' bad' : '') + '"><label for="t-name">Name des Fensters <span class="pfl">Pflichtfeld</span></label><input type="text" id="t-name" data-in="w" data-f="name" value="' + esc(w.name || '') + '" placeholder="z. B. Küche links" autocomplete="off" maxlength="50" required aria-required="true"' + (nameFehlt ? ' aria-invalid="true" aria-describedby="t-name-f"' : '') + '>' + (nameFehlt ? '<small id="t-name-f" class="trow-f">Bitte gib dem Fenster einen Namen, zum Beispiel Küche links. So findet der Fensterbauer es im Aufmaß wieder.</small>' : '') + '</div></div>' + chips('etage', w.etage, 'etage') +
     (ausFoto ? '<p class="qcur">Geschoss aus dem Außenfoto gelesen. Stimmt es nicht, tipp das richtige an.</p>' : '') +
     '<div class="rows">' + (obenOhneBru ? fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'absturz') : '') + fieldRow('Gleiche Fenster im Haus', 'anzahl', 'Stück', 1) + '</div>';
 }
@@ -3317,7 +3332,7 @@ async function useDemo() {
 function newWin() {
   Object.keys(ctrls).forEach((k) => { if (ctrls[k]) ctrls[k].abort(); });
   ['in', 'out'].forEach((k) => { const p = S.photos[k]; if (p && p.url && !p.demo) { try { URL.revokeObjectURL(p.url); } catch (e) { /* ok */ } } });
-  S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null };
+  S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.nameFehler = false;
   /* Keine Vorauswahl, wo eine Vorgabe Geld kostet: Farbe außen und Fensterbank außen starten offen, bis der Kunde wählt */
   S.win.offen = { fa: true, fba: true };
   S.mess = { step: 0, cur: '', msg: null, ack: false }; S.rest = { i: 0, cur: '', msg: null }; S.openSash = -1;
@@ -3327,8 +3342,9 @@ function newWin() {
 /* Speichern: Neue Fenster zählen gegen die Grenze; nach der ersten Woche zählt jedes Speichern mit einer Änderung (höchstens vier).
    Gespeichert wird eine Kopie, bearbeitet wird immer eine eigene Kopie (S.win). */
 function saveWin() {
-  S.designVorher = null; S.offenVorText = null;
-  const jetzt = zeit(), w = Object.assign({}, S.win, { name: S.win.name || artName(S.win) + ' ' + (S.editIdx >= 0 ? S.editIdx + 1 : S.windows.length + 1) });
+  if (!nameDa(S.win)) return nameVerlangen(); // ohne Namen kein Speichern, auch nicht über „Speichern“ bei der Gestaltung
+  S.designVorher = null; S.offenVorText = null; S.nameFehler = false;
+  const jetzt = zeit(), w = Object.assign({}, S.win, { name: String(S.win.name).trim() });
   let hinweis = '';
   if (S.editIdx >= 0 && S.windows[S.editIdx]) {
     const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w);
@@ -3465,7 +3481,7 @@ function act(name, el) {
     case 'rest-same': { S.rest.cur = String(num(v) || ''); S.rest.msg = null; return restNext(true); }
     case 'key': return keyIn(v);
     case 'qnext': return qStep(1);
-    case 'wuensche': { if (S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; S.q = null; S.openSash = -1; S.designVorher = null; return go('frage'); }
+    case 'wuensche': { if (S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; S.q = null; S.openSash = -1; S.designVorher = null; S.nameFehler = false; return go('frage'); }
     case 'qprev': return qStep(-1);
     case 'qwunsch': { S.qWunsch = !S.qWunsch; render(); const t = document.getElementById('t-wunsch'); if (t && S.qWunsch) t.focus(); return; }
     case 'ol-set': { w.ol = v !== 'nein'; if (v !== 'nein') w.olT = v; return render(); }
@@ -3547,6 +3563,14 @@ function onInput(el, ev) {
   if (kind === 'rest') return restInput(el.value);
   if (kind === 'farbe') { S.win[f] = String(el.value).slice(0, 60); if (f === 'wunschI' && S.win.wunschI.trim()) S.win.gleich = false; if (S.win[f].trim()) { offenMerken(S.win, f); entschieden(S.win, f); } else offenZurueck(S.win, f); farbeLive(el, f); if (ev.type === 'change') render(); return; }
   if (kind === 'plan') { if (ev.type !== 'change') return; planMasse(S.win, f, String(el.value).replace(/\D/g, '')); return render(); }
+  /* Name des Fensters: bei jedem Tastendruck übernehmen, ohne neu zu zeichnen. So geht das Tippen auf „Weiter“ direkt nach der
+     Eingabe nicht verloren (ein Neuzeichnen beim Verlassen des Felds würde den Knopf unter dem Finger austauschen). */
+  if (kind === 'w' && f === 'name') {
+    S.win.name = String(el.value).slice(0, 50);
+    const box = el.closest('.trow');
+    if (box && S.nameFehler && nameDa(S.win)) { box.classList.remove('bad'); el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); const m = box.querySelector('.trow-f'); if (m) m.remove(); }
+    return;
+  }
   if (ev.type !== 'change') return;
   if (kind === 'photo') return onPhoto(f, el.files && el.files[0]);
   if (kind === 'w') { if (NUMF[f]) { const v = parseInt(String(el.value).replace(/\D/g, ''), 10); S.win[f] = isNaN(v) ? '' : Math.min(v, 9999); if (f === 'laib') S.win.e_laib = true; } else S.win[f] = el.value; return render(); }
