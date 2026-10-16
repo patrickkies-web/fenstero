@@ -150,6 +150,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .dashed { min-height: 56px; border: 1.5px dashed var(--line2); border-radius: var(--r3); background: transparent; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: border-color var(--t2), background var(--t2) }
 .dashed:active { background: var(--surface) }
 /* Angefangenes Aufmaß: Liste oben, Grenzen, Hinweise zum Weitermachen (app.js: homeAufmass, linkHome, fertig) */
+.mail { overflow-wrap: anywhere }
 .liste-in { display: flex; flex-direction: column; gap: 10px }
 .sub.grenze { padding: 2px 6px 0; font-size: 13px; line-height: 1.45 }
 .pill.voll { width: 100%; justify-content: center }
@@ -366,7 +367,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .gindex button { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--line); background: var(--surface); font: inherit; text-align: left; color: var(--ink) }
 .gindex button:last-child { border-bottom: 0 }
 .gindex button span { display: flex; flex-direction: column; gap: 2px } .gindex b { font-size: 17px; font-weight: 700 } .gindex small { font-size: 13px; color: var(--muted) }
-.toast { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); z-index: 70; max-width: calc(100% - 32px); padding: 11px 16px; border-radius: var(--r2); background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 700; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: var(--lift); animation: toast-in var(--t3) var(--e-out) both; pointer-events: none }
+.toast { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); z-index: 70; width: max-content; max-width: calc(100% - 32px); padding: 11px 16px; border-radius: var(--r2); background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 700; line-height: 1.35; text-align: center; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; box-shadow: var(--lift); animation: toast-in var(--t3) var(--e-out) both; pointer-events: none }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px) } to { opacity: 1; transform: translateX(-50%) } }
 
 /* ---------- Fragen: eine Frage pro Bildschirm, das Modell darüber antwortet sofort ----------

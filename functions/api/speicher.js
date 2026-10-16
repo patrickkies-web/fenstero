@@ -4,10 +4,10 @@
    Für die Zentrale (zentrale.js): alle Betriebe lesen, ein Konto löschen, Käufe lesen, Protokoll der Eingriffe, eigene Statistik
    (Tageszähler über die Funktion eeziframes_zaehlen), Zwischenstände der Kundenlinks (entwuerfe). Protokoll, Statistik und
    Zwischenstände sind optional: Fehlen die Tabellen noch (schema.sql nicht erneut ausgeführt), melden die Funktionen das
-   (null, undefined bzw. false), statt einen Fehler zu werfen. */
+   (null, undefined bzw. false), statt einen Fehler zu werfen. Ebenso die Aufmaße der Hauseigentümer mit Konto (eigene, eigene.js). */
 import { ApiFehler, sbNeu } from './umgebung.js';
 
-const attrappe = { betriebe: new Map(), zahlungen: new Map(), ereignisse: new Set(), codes: new Map(), protokoll: [], statistik: new Map(), entwuerfe: new Map() };
+const attrappe = { betriebe: new Map(), zahlungen: new Map(), ereignisse: new Set(), codes: new Map(), protokoll: [], statistik: new Map(), entwuerfe: new Map(), eigene: new Map() };
 const kopie = (o) => (o == null ? o : JSON.parse(JSON.stringify(o)));
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
@@ -66,6 +66,18 @@ function attrappeSpeicher() {
     entwuerfeAlle: async () => Array.from(attrappe.entwuerfe.values()).map((r) => ({ code: r.code, betrieb: r.betrieb, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at })),
     entwurfLoeschen: async (code) => attrappe.entwuerfe.delete(code),
     entwuerfeVonBetrieb: async (id) => Array.from(attrappe.entwuerfe.values()).filter((r) => r.betrieb === id).map((r) => ({ code: r.code, betrieb: r.betrieb, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at })),
+    /* Aufmaße der Hauseigentümer mit Konto (eigene.js): wie Zwischenstände, je Kennung, mit der Anmeldung (nutzer) als Besitzer */
+    eigeneDa: async () => true,
+    eigenesHolen: async (kennung) => kopie(attrappe.eigene.get(kennung) || null),
+    eigenesAendern: async (kennung, nutzer, fn) => {
+      const alt = attrappe.eigene.get(kennung) || null, r = kopie(alt) || { kennung: kennung, nutzer: nutzer, daten: {}, meta: {}, stand: 0, version: 0, created_at: new Date().toISOString() };
+      const out = await fn(r); if (out === false) return { row: kopie(alt), out: out };
+      r.version = (alt ? alt.version : 0) + 1; r.updated_at = new Date().toISOString(); attrappe.eigene.set(kennung, r); return { row: kopie(r), out: out };
+    },
+    eigeneVonNutzer: async (nutzer) => Array.from(attrappe.eigene.values()).filter((r) => r.nutzer === nutzer).sort((x, y) => String(y.updated_at).localeCompare(String(x.updated_at))).map((r) => ({ kennung: r.kennung, nutzer: r.nutzer, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at, name: ((r.daten || {}).proj || {}).name || '' })),
+    eigeneAlle: async () => Array.from(attrappe.eigene.values()).map((r) => ({ kennung: r.kennung, nutzer: r.nutzer, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at })),
+    eigenesLoeschen: async (kennung, bis) => { const r = attrappe.eigene.get(kennung); if (!r || (bis && !(String(r.updated_at || '') < bis))) return false; return attrappe.eigene.delete(kennung); },
+    eigeneLoeschenVonNutzer: async (nutzer) => { for (const [k2, r] of attrappe.eigene) if (r.nutzer === nutzer) attrappe.eigene.delete(k2); return true; },
     /* nur Attrappe: Anmeldecodes */
     codeMerken: (mail, code) => attrappe.codes.set(mail, code),
     codeLesen: (mail) => attrappe.codes.get(mail)
@@ -166,6 +178,29 @@ function supabaseSpeicher(k) {
     },
     entwuerfeAlle: async () => alle('entwuerfe?select=code,betrieb,meta,stand,created_at,updated_at&order=updated_at.desc,code.asc', true),
     entwuerfeVonBetrieb: async (id) => { const r = await sb('entwuerfe?betrieb=eq.' + q(id) + '&select=code,betrieb,meta,stand,created_at,updated_at&order=updated_at.desc', { optional: true }); return r && r.fehlt ? null : r || []; },
-    entwurfLoeschen: async (code) => { const r = await sb('entwuerfe?code=eq.' + q(code), { method: 'DELETE', prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); }
+    entwurfLoeschen: async (code) => { const r = await sb('entwuerfe?code=eq.' + q(code), { method: 'DELETE', prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); },
+    /* Aufmaße der Hauseigentümer mit Konto (eigene.js). undefined bzw. null: Tabelle fehlt noch */
+    eigeneDa: async () => { const r = await sb('eigene?select=kennung&limit=1', { optional: true }); return !(r && r.fehlt); },
+    eigenesHolen: async (kennung) => { const r = await sb('eigene?kennung=eq.' + q(kennung) + '&select=*', { optional: true }); return r && r.fehlt ? undefined : eins(r); },
+    eigenesAendern: async (kennung, nutzer, fn) => {
+      for (let i = 0; i < 4; i++) {
+        const gelesen = await sb('eigene?kennung=eq.' + q(kennung) + '&select=*', { optional: true }); if (gelesen && gelesen.fehlt) return { fehlt: true };
+        const alt = eins(gelesen), r = alt ? JSON.parse(JSON.stringify(alt)) : { kennung: kennung, nutzer: nutzer, daten: {}, meta: {}, stand: 0, version: 0 };
+        const out = await fn(r); if (out === false) return { row: alt, out: out };
+        if (!alt) {
+          const neu = await sb('eigene', { method: 'POST', body: { kennung: kennung, nutzer: nutzer, daten: r.daten, meta: r.meta, stand: r.stand, version: 1 }, optional: true });
+          if (neu && neu.konflikt) continue; if (neu && neu.fehlt) return { fehlt: true };
+          return { row: eins(neu), out: out };
+        }
+        const res = await sb('eigene?kennung=eq.' + q(kennung) + '&version=eq.' + q(alt.version), { method: 'PATCH', body: { daten: r.daten, meta: r.meta, stand: r.stand, version: (alt.version || 0) + 1, updated_at: new Date().toISOString() }, optional: true });
+        if (Array.isArray(res) && res.length) return { row: res[0], out: out };
+      }
+      throw new ApiFehler('Gleichzeitige Änderung, bitte gleich noch einmal.', 409);
+    },
+    eigeneVonNutzer: async (nutzer) => { const r = await sb('eigene?nutzer=eq.' + q(nutzer) + '&select=kennung,nutzer,meta,stand,created_at,updated_at,name:daten->proj->>name&order=updated_at.desc&limit=100', { optional: true }); return r && r.fehlt ? null : r || []; },
+    eigeneAlle: async () => alle('eigene?select=kennung,nutzer,meta,stand,created_at,updated_at&order=updated_at.asc,kennung.asc', true),
+    /* bis (ISO-Zeit): nur löschen, wenn seitdem nicht geändert (Aufräumen) */
+    eigenesLoeschen: async (kennung, bis) => { const r = await sb('eigene?kennung=eq.' + q(kennung) + (bis ? '&updated_at=lt.' + q(bis) : '') + '&select=kennung', { method: 'DELETE', optional: true }); return Array.isArray(r) && r.length > 0; },
+    eigeneLoeschenVonNutzer: async (nutzer) => { const r = await sb('eigene?nutzer=eq.' + q(nutzer), { method: 'DELETE', prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); }
   };
 }

@@ -110,6 +110,23 @@ create table if not exists public.entwuerfe (
 create index if not exists entwuerfe_betrieb_idx on public.entwuerfe (betrieb);
 create index if not exists entwuerfe_updated_idx on public.entwuerfe (updated_at);
 
+-- Aufmaße der Hauseigentümer mit Konto (functions/api/eigene.js): Wer ohne Link eines Fensterbauers misst, startet als Gast (alles im
+-- Browser). Wer sein Aufmaß sichert (E-Mail und Code, kein Passwort), hat es hier und damit auf jedem Gerät; zum Kauf des
+-- Aufmaßblatts ist das Konto Pflicht. Ohne Fotos; meta hält die Zähler gegen Mehrfachnutzung und den Kauf. Gelöscht wird in der App
+-- (Aufmaß oder Konto löschen), mit der Anmeldung und beim Aufräumen nach Fristen.
+create table if not exists public.eigene (
+  kennung     text primary key,                          -- Kennung des Aufmaßes (dieselbe wie beim Kauf)
+  nutzer      uuid not null references auth.users(id) on delete cascade, -- die Anmeldung (Supabase Auth)
+  daten       jsonb not null default '{}'::jsonb,        -- Fenster und Angaben zum Haus, wie in der App, ohne Fotos
+  meta        jsonb not null default '{}'::jsonb,        -- Zähler (angelegt, fenster, geloescht), Kauf (bezahlt)
+  stand       bigint not null default 0,                 -- letzte Änderung im Browser (Millisekunden)
+  version     integer not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists eigene_nutzer_idx on public.eigene (nutzer);
+create index if not exists eigene_updated_idx on public.eigene (updated_at);
+
 -- Kein direkter Zugriff aus dem Browser: RLS an, keine Regeln → nur der geheime Schlüssel des Servers kommt durch
 alter table public.betriebe   enable row level security;
 alter table public.zahlungen  enable row level security;
@@ -117,13 +134,14 @@ alter table public.ereignisse enable row level security;
 alter table public.protokoll  enable row level security;
 alter table public.statistik  enable row level security;
 alter table public.entwuerfe  enable row level security;
-revoke all on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe from anon, authenticated;
+alter table public.eigene     enable row level security;
+revoke all on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe, public.eigene from anon, authenticated;
 revoke all on function public.eeziframes_zaehlen(date, text[]) from public, anon, authenticated;
 revoke all on function public.eeziframes_auswerten(date) from public, anon, authenticated;
 -- Der Server (geheimer Schlüssel sb_secret_… bzw. service_role) darf lesen und schreiben; ausdrücklich gewährt, auch wenn neue
 -- Tabellen im Projekt nicht mehr von selbst für die Data API freigegeben werden
 grant usage on schema public to service_role;
-grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe to service_role;
+grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe, public.eigene to service_role;
 grant execute on function public.eeziframes_zaehlen(date, text[]) to service_role;
 grant execute on function public.eeziframes_auswerten(date) to service_role;
 

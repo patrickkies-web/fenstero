@@ -35,7 +35,7 @@ const TAG = 864e5, MAX_JSON = 400000;
 export const TOLERANZ = 5 * 60 * 1000;
 export const zeitKappen = (t, jetzt) => Math.max(0, Math.min((jetzt || Date.now()) + TOLERANZ, Number(t) || 0));
 /* Die n neuesten Einträge eines Objekts Kennung → Zeitpunkt */
-const neueste = (o, n) => Object.fromEntries(Object.entries(o || {}).filter((e) => e[0] && Number(e[1]) > 0).sort((a, b) => b[1] - a[1]).slice(0, n));
+export const neueste = (o, n) => Object.fromEntries(Object.entries(o || {}).filter((e) => e[0] && Number(e[1]) > 0).sort((a, b) => b[1] - a[1]).slice(0, n));
 const LINK_RUHT = 'Dieser Link ist zurzeit nicht aktiv. Bitte beim Fensterbauer nachfragen.';
 /* Zwischenstand nur für Links mit langem Code (seit Oktober 2026 zehn Zeichen) */
 export const langerCode = (code) => String(code || '').length >= 10;
@@ -70,8 +70,8 @@ export async function linkFinden(ctx) {
   return { row: row, l: l, code: code };
 }
 /* Was der Browser vom Zwischenstand und von den Zählern sieht */
-const entwurfSicht = (e) => { const d = e.daten || {}; return { windows: d.windows || [], proj: d.proj || null, projTs: Number(d.projTs) || 0, stand: Number(e.stand) || 0, geleert: !!(e.meta && e.meta.geleert) }; };
-const metaSicht = (m) => { m = m || {}; const f = {}; Object.keys(m.fenster || {}).forEach((k) => { f[k] = { t0: m.fenster[k].t0, aend: m.fenster[k].aend || 0 }; }); return { angelegt: m.angelegt || 0, fenster: f }; };
+export const entwurfSicht = (e) => { const d = e.daten || {}; return { windows: d.windows || [], proj: d.proj || null, projTs: Number(d.projTs) || 0, stand: Number(e.stand) || 0, geleert: !!(e.meta && e.meta.geleert) }; };
+export const metaSicht = (m) => { m = m || {}; const f = {}; Object.keys(m.fenster || {}).forEach((k) => { f[k] = { t0: m.fenster[k].t0, aend: m.fenster[k].aend || 0 }; }); return { angelegt: m.angelegt || 0, fenster: f }; };
 /* Zähler zusammenführen: bekannte Fenster behalten das früheste erste Speichern und die meisten Änderungen; neue kommen dazu */
 export function metaMischen(alt, fenster, angelegtBrowser, jetzt) {
   const m = Object.assign({}, alt, { angelegt: Number(alt.angelegt) || 0, fenster: Object.assign({}, alt.fenster || {}) });
@@ -86,17 +86,18 @@ export function metaMischen(alt, fenster, angelegtBrowser, jetzt) {
 }
 /* Je Fenster zusammenführen (Regeln oben). frei: offene Nachbesserung, dann zählt und sperrt nichts. wieder: Kennungen, die nach
    dem Leeren wiederhergestellt werden dürfen. geloescht: auf dem Gerät gelöschte Kennungen mit Zeitpunkt (null: ältere App, dann
-   gilt als gelöscht, was das Gerät kannte und nicht mehr schickt).
+   gilt als gelöscht, was das Gerät kannte und nicht mehr schickt). kaufAm: beim eigenen Aufmaß der Kauf des Aufmaßblatts; ab dann
+   ist die freie Woche vorbei.
    Rückgabe: fenster (Ergebnis), zurueck (feste Fenster, deren Änderung nicht übernommen wurde), anders (Ergebnis weicht vom Gerät
    ab), weg (jetzt gelöschte Kennungen mit Zeitpunkt), zurueckGeholt (nach dem Löschen anderswo noch geändert) */
-export function zusammenfuehren(alt, eingang, metaAlt, bekannt, hierNeuer, jetzt, frei, wieder, geloescht) {
+export function zusammenfuehren(alt, eingang, metaAlt, bekannt, hierNeuer, jetzt, frei, wieder, geloescht, kaufAm) {
   const altMap = new Map((alt || []).filter((w) => kennung(w)).map((w) => [kennung(w), w])), kennt = metaAlt.fenster || {}, warWeg = metaAlt.geloescht || {};
   const zurueck = [], out = [], weg = {}, zurueckGeholt = [];
   let anders = false;
   /* Änderung nach der ersten Woche: zählen; null, wenn das Fenster fest ist (dann gilt die Änderung nicht) */
   const gezaehlt = (w, id) => {
     const m = kennt[id];
-    if (frei || !m || jetzt - (Number(m.t0) || jetzt) < GRENZEN.freiTage * TAG) return w;
+    if (frei || !m || jetzt < Math.min((Number(m.t0) || jetzt) + GRENZEN.freiTage * TAG, Number(kaufAm) || Infinity)) return w; // nach dem Kauf zählt jede Änderung
     const n = Number(m.aend) || 0;
     if (n >= GRENZEN.aenderungen) return null;
     return (Number(w.aend) || 0) > n ? w : Object.assign({}, w, { aend: n + 1 }); // hat der Browser nicht mitgezählt, zählt der Server
@@ -131,6 +132,47 @@ export function zusammenfuehren(alt, eingang, metaAlt, bekannt, hierNeuer, jetzt
   return { fenster: out, zurueck: zurueck, anders: anders, weg: weg, zurueckGeholt: zurueckGeholt };
 }
 
+/* Eingang eines Geräts prüfen (Kundenlink und eigenes Aufmaß): Fenster ohne Bild der Lage, Zeitpunkte begrenzt, Kennung Pflicht */
+const objekt = (x) => x && typeof x === 'object' && !Array.isArray(x);
+export function eingangPruefen(b, jetzt, grenzMeldung) {
+  if (!Array.isArray(b.windows)) throw new ApiFehler('Kein Zwischenstand im Versand.');
+  if (b.windows.length > GRENZEN.fenster) throw new ApiFehler(grenzMeldung || grenzText(), 409, { grenze: true });
+  const eingang = b.windows.filter(objekt).map((w) => Object.assign(ohneBild(w), { ts: zeitKappen(w.ts, jetzt) })), proj = objekt(b.proj) ? b.proj : {};
+  if (eingang.some((w) => !kennung(w))) throw new ApiFehler('Ein Fenster hat keine Kennung. Bitte die Seite neu laden.', 400);
+  if (JSON.stringify({ windows: eingang, proj: proj }).length > MAX_JSON) throw new ApiFehler('Der Zwischenstand ist zu groß.', 413);
+  return {
+    eingang: eingang, proj: proj, stand: zeitKappen(b.stand, jetzt), projTs: zeitKappen(b.projTs, jetzt), angelegt: b.angelegt,
+    bekannt: new Set((Array.isArray(b.bekannt) ? b.bekannt : []).slice(0, 500).map((x) => String(x).slice(0, 40))),
+    geloescht: objekt(b.geloescht) ? Object.fromEntries(Object.keys(b.geloescht).slice(0, 300).map((k) => [kennung({ wid: k }), zeitKappen(b.geloescht[k], jetzt)]).filter((x) => x[0] && x[1])) : null
+  };
+}
+/* Eingang in den gespeicherten Stand r (daten, meta, stand) einarbeiten. frei: offene Nachbesserung; kaufAm: Kauf beim eigenen
+   Aufmaß. Rückgabe { grenze } (dann r unverändert lassen) oder { zurueck, anders, hierNeuer }; r ist dann geändert */
+export function eingangMischen(r, e, jetzt, frei, kaufAm) {
+  const metaAlt = r.meta || {}, d = r.daten || {}, alt = Array.isArray(d.windows) ? d.windows : [];
+  const hierNeuer = e.stand >= (Number(r.stand) || 0);
+  const wieder = new Set(metaAlt.geleert && Array.isArray(metaAlt.geleertIds) ? metaAlt.geleertIds : []);
+  const z = zusammenfuehren(alt, e.eingang, metaAlt, e.bekannt, hierNeuer, jetzt, frei, wieder, e.geloescht, kaufAm), meta = metaMischen(metaAlt, z.fenster, e.angelegt, jetzt);
+  if (meta.angelegt > GRENZEN.fenster || z.fenster.length > GRENZEN.fenster) return { grenze: true };
+  if (metaAlt.geleert) { // wiederhergestellt oder auf diesem Gerät gelöscht: erledigt; was das Gerät nie hatte, darf ein anderes noch bringen
+    const geschickt = new Set(e.eingang.map(kennung)), rest = Array.from(wieder).filter((id) => !geschickt.has(id) && !e.bekannt.has(id) && !(e.geloescht && e.geloescht[id]));
+    if (rest.length) meta.geleertIds = rest; else { delete meta.geleert; delete meta.geleertIds; }
+  }
+  const wegAlle = Object.assign({}, metaAlt.geloescht || {}, z.weg); z.zurueckGeholt.forEach((id) => { delete wegAlle[id]; });
+  meta.geloescht = neueste(wegAlle, 300);
+  /* Angaben zum Haus: das zuletzt geänderte gewinnt (ohne Zeitpunkte der neuere Zwischenstand); leere überschreiben nie */
+  const projAlt = objekt(d.proj) ? d.proj : null, projTsAlt = Number(d.projTs) || 0, altLeer = !projAlt || !Object.keys(projAlt).length;
+  const projHier = altLeer || !!metaAlt.geleert || (e.projTs || projTsAlt ? e.projTs > projTsAlt || (e.projTs === projTsAlt && hierNeuer) : hierNeuer);
+  if (!projHier && stabil(projAlt) !== stabil(e.proj)) z.anders = true;
+  r.meta = meta; r.daten = { windows: z.fenster, proj: projHier ? e.proj : projAlt, projTs: projHier ? e.projTs : projTsAlt }; r.stand = Math.max(Number(r.stand) || 0, e.stand);
+  return { zurueck: z.zurueck, anders: z.anders, hierNeuer: hierNeuer };
+}
+/* Antwort an das Gerät: weicht das Ergebnis ab, der ganze Stand */
+export function antwortNachMischen(row, m) {
+  const zurueckGeben = m.anders || !m.hierNeuer || m.zurueck.length > 0;
+  return { ok: true, stand: Number(row.stand) || 0, meta: metaSicht(row.meta), zurueck: m.zurueck, entwurf: zurueckGeben ? entwurfSicht(row) : null, jetzt: Date.now() };
+}
+
 export const ENTWURF = {
   'GET /api/link/:code/entwurf': async (ctx) => {
     const { row, l, code } = await linkFinden(ctx);
@@ -146,39 +188,11 @@ export const ENTWURF = {
     const { row, l, code } = await linkFinden(ctx);
     if (!langerCode(code)) return { ok: true, aus: true };
     const zu = X().linkZu(l); if (zu) throw new ApiFehler(zuText(zu, row.name), 410, { zu: zu, runde: l.runde || 1, seit: l.eingegangenAt || 0 });
-    const b = ctx.body || {}; if (!Array.isArray(b.windows)) throw new ApiFehler('Kein Zwischenstand im Versand.');
-    if (b.windows.length > GRENZEN.fenster) throw new ApiFehler(grenzText(), 409, { grenze: true });
-    const jetzt = Date.now(), objekt = (x) => x && typeof x === 'object' && !Array.isArray(x);
-    const eingang = b.windows.filter(objekt).map((w) => Object.assign(ohneBild(w), { ts: zeitKappen(w.ts, jetzt) })), proj = objekt(b.proj) ? b.proj : {};
-    if (eingang.some((w) => !kennung(w))) throw new ApiFehler('Ein Fenster hat keine Kennung. Bitte die Seite neu laden.', 400);
-    if (JSON.stringify({ windows: eingang, proj: proj }).length > MAX_JSON) throw new ApiFehler('Der Zwischenstand ist zu groß.', 413);
-    const stand = zeitKappen(b.stand, jetzt), projTs = zeitKappen(b.projTs, jetzt), frei = !!(l.nb && l.nb.offen);
-    const bekannt = new Set((Array.isArray(b.bekannt) ? b.bekannt : []).slice(0, 500).map((x) => String(x).slice(0, 40)));
-    const geloescht = objekt(b.geloescht) ? Object.fromEntries(Object.keys(b.geloescht).slice(0, 300).map((k) => [kennung({ wid: k }), zeitKappen(b.geloescht[k], jetzt)]).filter((x) => x[0] && x[1])) : null;
-    let grenze = false, zurueck = [], anders = false, hierNeuer = true;
-    const res = await ctx.sp.entwurfAendern(code, row.id, (r) => {
-      const metaAlt = r.meta || {}, d = r.daten || {}, alt = Array.isArray(d.windows) ? d.windows : [];
-      hierNeuer = stand >= (Number(r.stand) || 0);
-      const wieder = new Set(metaAlt.geleert && Array.isArray(metaAlt.geleertIds) ? metaAlt.geleertIds : []);
-      const z = zusammenfuehren(alt, eingang, metaAlt, bekannt, hierNeuer, jetzt, frei, wieder, geloescht), meta = metaMischen(metaAlt, z.fenster, b.angelegt, jetzt);
-      if (meta.angelegt > GRENZEN.fenster || z.fenster.length > GRENZEN.fenster) { grenze = true; return false; }
-      if (metaAlt.geleert) { // wiederhergestellt oder auf diesem Gerät gelöscht: erledigt; was das Gerät nie hatte, darf ein anderes noch bringen
-        const geschickt = new Set(eingang.map(kennung)), rest = Array.from(wieder).filter((id) => !geschickt.has(id) && !bekannt.has(id) && !(geloescht && geloescht[id]));
-        if (rest.length) meta.geleertIds = rest; else { delete meta.geleert; delete meta.geleertIds; }
-      }
-      const wegAlle = Object.assign({}, metaAlt.geloescht || {}, z.weg); z.zurueckGeholt.forEach((id) => { delete wegAlle[id]; });
-      meta.geloescht = neueste(wegAlle, 300);
-      /* Angaben zum Haus: das zuletzt geänderte gewinnt (ohne Zeitpunkte der neuere Zwischenstand); leere überschreiben nie */
-      const projAlt = objekt(d.proj) ? d.proj : null, projTsAlt = Number(d.projTs) || 0, altLeer = !projAlt || !Object.keys(projAlt).length;
-      const projHier = altLeer || !!metaAlt.geleert || (projTs || projTsAlt ? projTs > projTsAlt || (projTs === projTsAlt && hierNeuer) : hierNeuer);
-      if (!projHier && stabil(projAlt) !== stabil(proj)) z.anders = true;
-      zurueck = z.zurueck; anders = z.anders;
-      r.meta = meta; r.daten = { windows: z.fenster, proj: projHier ? proj : projAlt, projTs: projHier ? projTs : projTsAlt }; r.stand = Math.max(Number(r.stand) || 0, stand);
-      return true;
-    });
+    const jetzt = Date.now(), e = eingangPruefen(ctx.body || {}, jetzt), frei = !!(l.nb && l.nb.offen);
+    let m = null;
+    const res = await ctx.sp.entwurfAendern(code, row.id, (r) => { m = eingangMischen(r, e, jetzt, frei, 0); return !m.grenze; });
     if (res && res.fehlt) return { ok: true, aus: true };
-    if (grenze) throw new ApiFehler(grenzText(), 409, { grenze: true });
-    const e = res.row || {}, zurueckGeben = anders || !hierNeuer || zurueck.length > 0;
-    return { ok: true, stand: Number(e.stand) || 0, meta: metaSicht(e.meta), zurueck: zurueck, entwurf: zurueckGeben ? entwurfSicht(e) : null, jetzt: Date.now() };
+    if (m.grenze) throw new ApiFehler(grenzText(), 409, { grenze: true });
+    return antwortNachMischen(res.row || {}, m);
   }
 };

@@ -106,6 +106,17 @@ Die öffentlichen Seiten haben zwei Ansichten, nie gemischt: Wer auf „Starten�
 - **Vorschau für den Betrieb** („Als Kunde öffnen“, nur im Browser mit dem Betriebskonto): ganz oben ein Hinweis in Warnfarbe in der Sie-Form („Vorschau für Ihren Betrieb. … wird weder gespeichert noch gesendet …“), darunter alles wie beim Kunden, ohne die Karte „Jederzeit weitermachen“; „Senden“ meldet „Vorschau: Hier wird nichts gesendet.“
 - **Schon erledigt:** Hat ein anderes Gerät gesendet, heißt die Startseite des Links „Schon erledigt.“ statt „Danke, erledigt.“; lagen hier noch Änderungen, sagt ein Hinweis in Warnfarbe, dass sie nicht angekommen sind. Die Liste heißt „Auf diesem Gerät.“, die Karten „Auf diesem Gerät“ statt „Übermittelt“.
 
+## Konto für Hauseigentümer
+
+Gilt nur ohne Link eines Fensterbauers und nur, wenn der Server Konten hat (`/api/status` meldet `konten`); sonst bleibt alles wie vorher (Gast, Kasse mit E-Mail).
+
+- **Gast zuerst:** Messen geht ohne Konto. Unter der Liste steht die Karte „Nur auf diesem Gerät“ mit „Aufmaß sichern“ (Knopf Primär, eine Zeile Nutzen, „Kein Passwort.“). Ist die Anmeldung abgelaufen, heißt sie „Bitte neu anmelden“ mit „Anmelden“. Gesichert zeigt sie „Gesichert“, die E-Mail-Adresse (bricht notfalls an jeder Stelle um, `.mail`) und die Pille „Dein Konto“ bzw. „Deine n Aufmaße“.
+- **Startbild:** Unter „Wie genau ist das?“ eine zweite Zeile: „Schon ein Aufmaß gesichert? Anmelden“ bzw. „Angemeldet als … · Dein Konto“.
+- **Sichern** (`#sichern`): zwei Schritte mit derselben Kasse-Gestalt (`kform`): E-Mail und Zustimmung, dann „Code eingeben.“ mit sechs Ziffern (`autocomplete="one-time-code"`), „Neuen Code schicken“ und „Andere E-Mail-Adresse“ als Textlinks. Drei Anlässe, je eigene Überschrift: „Auf jedem Gerät weitermachen.“ (sichern), „Weiter mit deinem Aufmaß.“ (anmelden, ohne Zustimmung), „Dein Aufmaß sichern.“ als „Schritt 1 von 2“ der Kasse (Freischalten). Der Anmeldelink aus der E-Mail führt direkt zurück in die App.
+- **Dein Konto** (`#meinkonto`): h1 „Alles gesichert.“, die Adresse in der Unterzeile; „Deine Aufmaße.“ als Karten wie die Fensterliste (Dateisymbol, „GERADE GEÖFFNET“ bzw. „GEÄNDERT AM …“, Name oder „Aufmaß vom …“, Fenster und „freigeschaltet“), darunter gestrichelt „Neues Aufmaß beginnen“. Abmelden, „Dieses Aufmaß löschen“ und „Konto löschen“ fragen in einer Karte „Bitte bestätigen“ mit Folge in einem Satz; Löschen ist Gefahrfarbe. Unten Platz (20) und Fristen.
+- **Kasse mit Konto:** Schritt 2 sagt „Rechnung an“ die Adresse des Kontos; wer schon angemeldet ist, springt von „Freischalten“ direkt dorthin.
+- **Meldungen** (Toast) brechen bis zu drei Zeilen um, statt abgeschnitten zu werden, und bleiben je nach Länge länger stehen.
+
 ## Rückmeldung statt Feier
 
 Konfetti ist vollständig entfernt (`Feier.konfetti`, `.fx-konfetti`, alle Aufrufe, Prüfungen angepasst). Jeder frühere Moment hat eine Rückmeldung am Gegenstand:
