@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
+<title id="t">Messpunkte für das Fenster-Aufmaß</title>
+<desc id="d">Maueröffnung von innen: Breite oben, in der Mitte und unten messen, Höhe links, in der Mitte und rechts; es zählt das kleinste Maß. Dazu die Brüstungshöhe vom Fußboden bis zur Fensterbank.</desc>
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#c2410c"/></marker></defs>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<rect x="16" y="16" width="448" height="324" fill="#ecebe6"/>
+<rect x="136" y="52" width="210" height="232" fill="#dceaf7"/>
+<rect x="144" y="60" width="194" height="216" fill="none" stroke="#3d3d3a" stroke-width="3"/>
+<line x1="241" y1="60" x2="241" y2="276" stroke="#3d3d3a" stroke-width="3"/>
+<rect x="136" y="52" width="210" height="232" fill="none" stroke="#c2410c" stroke-width="3"/>
+<rect x="122" y="284" width="238" height="10" rx="2" fill="#a8a79f"/>
+<g stroke="#c2410c" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)">
+<line x1="138" y1="78" x2="344" y2="78"/><line x1="138" y1="168" x2="344" y2="168"/><line x1="138" y1="258" x2="344" y2="258"/>
+<line x1="162" y1="54" x2="162" y2="282"/><line x1="214" y1="54" x2="214" y2="282"/><line x1="322" y1="54" x2="322" y2="282"/>
+</g>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<text x="126" y="84" text-anchor="end">Breite oben</text><text x="126" y="174" text-anchor="end">Mitte</text><text x="126" y="264" text-anchor="end">unten</text>
+<text x="162" y="42" text-anchor="middle">links</text><text x="214" y="42" text-anchor="middle">Mitte</text><text x="322" y="42" text-anchor="middle">rechts</text>
+<text x="358" y="164">Höhe an</text><text x="358" y="186">3 Stellen</text>
+<text x="398" y="324" text-anchor="end">Brüstungshöhe</text>
+</g>
+<line x1="16" y1="340" x2="464" y2="340" stroke="#141414" stroke-width="3"/>
+<line x1="414" y1="338" x2="414" y2="296" stroke="#c2410c" stroke-width="2.5" marker-start="url(#p)" marker-end="url(#p)"/>
+<text x="240" y="374" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">Fußboden</text>
+</svg>

@@ -261,7 +261,9 @@ Seiten aus reinem HTML für Menschen, Suchmaschinen und KI-Assistenten (`web/rat
 - **Spalte:** höchstens 820 px, Rand 16 px. Brotkrumen in 13 px, Augenbraue mit Datum, ein h1.
 - **Antwort zuerst:** Karte „Kurz gesagt“ direkt unter dem Titel; die Seite beantwortet die Frage in zwei, drei Sätzen, der Rest vertieft.
 - **Schritte:** nummerierte Liste mit schwarzen Ziffernkacheln (32 px, Radius 10), fetter Satzanfang als Schrittname.
-- **Tabellen:** Karte mit Ring, Spaltenköpfe als Label (13 px, Versalien). Am Telefon werden sie zu Karten untereinander: erste Spalte als Titel, die übrigen mit ihrem Spaltentitel aus `data-k`; so bricht kein Wort mitten durch. Die Vorlage zum Ausdrucken bleibt eine Tabelle mit Linien.
+- **Tabellen:** Karte mit Ring, Spaltenköpfe als Label (13 px, Versalien). Am Telefon werden sie zu Karten untereinander: erste Spalte als Titel, die übrigen mit ihrem Spaltentitel aus `data-k`; so bricht kein Wort mitten durch, auch am Schreibtisch trennt die erste Spalte nur an Silbengrenzen. Die Vorlage zum Ausdrucken bleibt eine Tabelle mit Linien.
+- **Zeichnungen:** `figure.rg-bild` mit einer SVG-Datei aus `/bilder/` (höchstens 560 px breit, Karte mit Ring), Unterschrift 15 px in Nebentext. In der Zeichnung: weiße Fläche, Wand in Fläche 2, Glas hellblau, Maueröffnung Orange, Element Blau, Maßpfeile Orange; Beschriftung mindestens 18 Einheiten bei 480 Breite, damit sie am Telefon nicht unter 13 px fällt; so wenig Text wie möglich, den Rest sagt die Unterschrift.
+- **Rechner:** `form.rg-rechner` als Karte, Felder 48 px mit 17 px Schrift, Beschriftung 15 px fett, Ergebnis auf Fläche 2 mit der Zahl in der Zwischentitelrolle (24 px); rechnet bei jeder Eingabe, ohne JavaScript bleibt die Tabelle darüber gültig.
 - **Fragen:** `details` als Karten, 48 px hoch, „+“ und „–“ rechts.
 - **Quellen:** nummeriert im Text ([1]), Liste am Ende mit Datum; „Stand“ als letzte Zeile.
 - **Druck:** Kopf, Fuß, Knöpfe und Brotkrumen fallen weg; auf der Seite „Aufmaßblatt“ druckt nur Titel und Vorlage, eine A4-Seite.
