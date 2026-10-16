@@ -45,6 +45,16 @@ function attrappeSpeicher() {
     protokollAufraeumen: async (grenzeAnmeldung, grenzeAlle) => { attrappe.protokoll = attrappe.protokoll.filter((e) => !(e.zeit < grenzeAlle || (/^anmeldung/.test(e.art) && e.zeit < grenzeAnmeldung))); return true; },
     zaehlen: async (tag, schluessel) => { schluessel.forEach((s) => { const k2 = tag + '|' + s; attrappe.statistik.set(k2, (attrappe.statistik.get(k2) || 0) + 1); }); return true; },
     statistikLesen: async (von) => Array.from(attrappe.statistik.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).filter((r) => r.tag >= von),
+    /* wie die Funktion eeziframes_auswerten in der Datenbank: Tagessummen je Art (aufruf:*, besuch:*, bot:*) und Summen je Schlüssel */
+    statistikAuswerten: async (von) => {
+      const tage = new Map(), summen = new Map();
+      for (const [k2, n] of attrappe.statistik.entries()) {
+        const tag = k2.slice(0, 10), sch = k2.slice(11), art = sch.split(':')[0]; if (tag < von) continue;
+        if (['aufruf', 'besuch', 'bot'].includes(art)) tage.set(tag + '|' + art + ':*', (tage.get(tag + '|' + art + ':*') || 0) + n);
+        summen.set(sch, (summen.get(sch) || 0) + n);
+      }
+      return Array.from(tage.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).concat(Array.from(summen.entries()).map(([sch, n]) => ({ tag: null, schluessel: sch, anzahl: n })));
+    },
     /* nur Attrappe: Anmeldecodes */
     codeMerken: (mail, code) => attrappe.codes.set(mail, code),
     codeLesen: (mail) => attrappe.codes.get(mail)
@@ -66,10 +76,11 @@ function supabaseSpeicher(k) {
   }
   const eins = (rows) => (Array.isArray(rows) && rows.length ? rows[0] : null);
   const q = (s) => encodeURIComponent(String(s));
-  /* Supabase liefert höchstens 1000 Zeilen je Anfrage (Einstellung „Max rows“): seitenweise lesen; null, wenn die Tabelle fehlt */
+  /* Supabase liefert höchstens 1000 Zeilen je Anfrage (Einstellung „Max rows“): seitenweise lesen, höchstens 40 Seiten (Grenze für
+     Unteranfragen je Aufruf bei Cloudflare); null, wenn die Tabelle fehlt */
   async function alle(pfad, optional) {
     const out = [];
-    for (let von = 0; von < 200000; von += 1000) {
+    for (let von = 0; von < 40000; von += 1000) {
       const r = await sb(pfad + (pfad.includes('?') ? '&' : '?') + 'limit=1000&offset=' + von, { optional: optional });
       if (r && r.fehlt) return null;
       const teil = Array.isArray(r) ? r : [];
@@ -97,7 +108,7 @@ function supabaseSpeicher(k) {
       throw new ApiFehler('Gleichzeitige Änderung, bitte noch einmal versuchen.', 409);
     },
     betriebFelder: async (id, patch) => eins(await sb('betriebe?id=eq.' + q(id), { method: 'PATCH', body: patch })),
-    betriebeMitKunde: async () => (await sb('betriebe?stripe_customer=not.is.null&select=*')) || [],
+    betriebeMitKunde: async () => (await alle('betriebe?stripe_customer=not.is.null&select=*&order=id.asc')) || [],
     zahlungHolen: async (session) => eins(await sb('zahlungen?stripe_session=eq.' + q(session) + '&select=*')),
     zahlungAnlegen: async (row) => { await sb('zahlungen?on_conflict=stripe_session', { method: 'POST', body: row, prefer: 'resolution=merge-duplicates,return=representation' }); return true; },
     zahlungAendern: async (session, patch) => { const r = await sb('zahlungen?stripe_session=eq.' + q(session), { method: 'PATCH', body: patch }); return Array.isArray(r) && r.length > 0; },
@@ -121,6 +132,8 @@ function supabaseSpeicher(k) {
       return true;
     },
     zaehlen: async (tag, schluessel) => { const r = await sb('rpc/eeziframes_zaehlen', { method: 'POST', body: { p_tag: tag, p_schluessel: schluessel }, prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); },
-    statistikLesen: async (von) => alle('statistik?select=tag,schluessel,anzahl&tag=gte.' + q(von) + '&order=tag.asc,schluessel.asc', true)
+    statistikLesen: async (von) => alle('statistik?select=tag,schluessel,anzahl&tag=gte.' + q(von) + '&order=tag.desc,schluessel.asc', true),
+    /* verdichtet in der Datenbank (Funktion eeziframes_auswerten); null, wenn es die Funktion noch nicht gibt */
+    statistikAuswerten: async (von) => alle('rpc/eeziframes_auswerten?p_von=' + q(von) + '&order=schluessel.asc,tag.asc', true)
   };
 }

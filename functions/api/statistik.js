@@ -80,9 +80,27 @@ const QUELLEN = [
   ['X (Twitter)', /(^|\.)(t\.co|twitter\.com|x\.com)$/], ['YouTube', /(^|\.)(youtube\.com|youtu\.be)$/], ['Pinterest', /(^|\.)pinterest\.[a-z.]+$/], ['Reddit', /(^|\.)reddit\.com$/],
   ['WhatsApp', /(^|\.)(whatsapp\.com|wa\.me)$/], ['E-Mail', /^(mail\.google\.com|outlook\.live\.com|outlook\.office\.com|mail\.yahoo\.com|webmail\..+|mail\..+)$/]
 ];
-export function quelle(referer, url, eigenerHost) {
-  const utm = (url.searchParams.get('utm_source') || '').replace(/[^\w.@-]/g, '').slice(0, 40);
-  if (utm) return 'Kampagne: ' + utm;
+/* Kampagnen (?utm_source=…): nur bekannte Namen (und eigene aus der Variablen STATISTIK_KAMPAGNEN, durch Komma getrennt) werden
+   einzeln gezählt, alles andere als „Kampagne (andere)“. So landet keine E-Mail-Adresse oder Empfänger-Kennung in der Statistik,
+   und niemand kann die Tabelle mit erfundenen Werten füllen. */
+const KAMPAGNEN = ['newsletter', 'email', 'mail', 'flyer', 'plakat', 'visitenkarte', 'qr', 'messe', 'partner', 'google', 'googleads', 'bing', 'facebook', 'instagram', 'linkedin', 'xing', 'youtube', 'tiktok', 'pinterest', 'whatsapp', 'telegram', 'signal', 'sms', 'chatgpt', 'perplexity', 'aufmassblatt', 'pdf', 'presse', 'blog', 'podcast'];
+export function kampagne(wert, env) {
+  const w = String(wert || '').trim().toLowerCase();
+  if (!w) return '';
+  const eigene = String((env && env.STATISTIK_KAMPAGNEN) || '').toLowerCase().split(',').map((x) => x.trim()).filter((x) => /^[a-z0-9_-]{2,30}$/.test(x));
+  return KAMPAGNEN.includes(w) || eigene.includes(w) ? w : '(andere)';
+}
+/* Unbekannte Herkunft: nur die Domain (zwei Ebenen, bei co.uk und Ähnlichem drei), höchstens 100 neue je Tag und Instanz, danach
+   „Andere Website“; so bleibt die Tabelle klein, auch wenn jemand erfundene Herkunftsangaben schickt */
+const neueHosts = { tag: '', menge: new Set() };
+function domain(host) {
+  const t = host.split('.'); if (t.length <= 2) return host;
+  const zweite = t[t.length - 2], drei = t.length >= 3 && t[t.length - 1].length === 2 && ['co', 'com', 'org', 'net', 'gov', 'ac', 'edu', 'or', 'ne'].includes(zweite);
+  return t.slice(drei ? -3 : -2).join('.');
+}
+export function quelle(referer, url, eigenerHost, env) {
+  const utm = url.searchParams.get('utm_source');
+  if (utm) return 'Kampagne: ' + kampagne(utm, env);
   if (url.searchParams.get('von') === 'pdf') return 'Aufmaßblatt (QR-Code)';
   if (!referer) return 'Direkt';
   let host = '';
@@ -91,11 +109,15 @@ export function quelle(referer, url, eigenerHost) {
   if (!host) return 'Direkt';
   if (host === String(eigenerHost || '').toLowerCase().replace(/^www\./, '')) return null; // von einer eigenen Seite: kein neuer Besuch
   for (const [name, muster] of QUELLEN) if (muster.test(host)) return name;
-  return host.slice(0, 60);
+  if (!/^[a-z0-9.-]{1,253}$/.test(host) || !host.includes('.') || /^\d+(\.\d+){3}$/.test(host)) return 'Andere Website';
+  const d = domain(host).slice(0, 60), heute = tagBerlin();
+  if (neueHosts.tag !== heute) { neueHosts.tag = heute; neueHosts.menge = new Set(); }
+  if (!neueHosts.menge.has(d)) { if (neueHosts.menge.size >= 100) return 'Andere Website'; neueHosts.menge.add(d); }
+  return d;
 }
 
 /* Was ein Seitenaufruf zählt (leer: nichts). Auch für die Prüfsuite exportiert. */
-export function schluesselFuer(request) {
+export function schluesselFuer(request, env) {
   const url = new URL(request.url), h = request.headers;
   if (request.method !== 'GET') return [];
   if (h.get('sec-gpc') === '1' || h.get('dnt') === '1') return [];
@@ -107,7 +129,7 @@ export function schluesselFuer(request) {
   const ua = h.get('user-agent') || '', bot = botFamilie(ua);
   if (bot) return ['bot:' + bot];
   const keys = ['aufruf:' + pfad];
-  const q = quelle(h.get('referer') || '', url, url.host);
+  const q = quelle(h.get('referer') || '', url, url.host, env);
   if (q !== null) {
     const cf = request.cf || {}, land = String(cf.country || h.get('cf-ipcountry') || '').toUpperCase();
     keys.push('besuch:' + pfad, 'herkunft:' + q, 'geraet:' + geraet(ua), 'browser:' + browserName(ua), 'system:' + systemName(ua), 'land:' + (/^[A-Z]{2}$/.test(land) && land !== 'XX' && land !== 'T1' ? land : '??'));
@@ -126,7 +148,7 @@ export async function zaehlen(k, sp, schluessel) {
   } catch (e) { ausBis = Date.now() + 60 * 1000; return false; }
 }
 export async function seitenaufruf(request, env) {
-  const keys = schluesselFuer(request); if (!keys.length) return false;
+  const keys = schluesselFuer(request, env); if (!keys.length) return false;
   const k = konfig(env); if (!k.daten) return false;
   return zaehlen(k, speicher(k), keys);
 }
@@ -134,16 +156,19 @@ export async function seitenaufruf(request, env) {
 /* Auswertung für die Zentrale: Zeitreihe je Tag und Ranglisten je Merkmal über den Zeitraum */
 export async function auswerten(sp, tage) {
   tage = [7, 30, 90, 365].includes(+tage) ? +tage : 30;
-  const von = tagVor(tage - 1), rows = await sp.statistikLesen(von);
+  const von = tagVor(tage - 1);
+  /* Bevorzugt in der Datenbank verdichtet (kleine Antwort); fehlt die Funktion noch, die einzelnen Tageszähler (neueste zuerst) */
+  let rows = sp.statistikAuswerten ? await sp.statistikAuswerten(von) : null, verdichtet = rows !== null;
+  if (rows === null) rows = await sp.statistikLesen(von);
   if (rows === null) return { ok: true, tabelle: false, tage: tage };
   const liste = [], reihe = new Map();
   for (let i = tage - 1; i >= 0; i--) { const t = tagVor(i); liste.push(t); reihe.set(t, { tag: t, aufrufe: 0, besuche: 0, bots: 0 }); }
   const summen = {};
   for (const r of rows || []) {
     const i = r.schluessel.indexOf(':'), art = r.schluessel.slice(0, i), name = r.schluessel.slice(i + 1), n = Number(r.anzahl) || 0;
-    (summen[art] = summen[art] || new Map()).set(name, ((summen[art] && summen[art].get(name)) || 0) + n);
-    const tag = reihe.get(String(r.tag).slice(0, 10));
-    if (tag) { if (art === 'aufruf') tag.aufrufe += n; else if (art === 'besuch') tag.besuche += n; else if (art === 'bot') tag.bots += n; }
+    const tagZeile = r.tag ? reihe.get(String(r.tag).slice(0, 10)) : null;
+    if (!verdichtet || !r.tag) (summen[art] = summen[art] || new Map()).set(name, ((summen[art] && summen[art].get(name)) || 0) + n);
+    if (tagZeile && (!verdichtet || name === '*')) { if (art === 'aufruf') tagZeile.aufrufe += n; else if (art === 'besuch') tagZeile.besuche += n; else if (art === 'bot') tagZeile.bots += n; }
   }
   const rang = (art, namen) => Array.from((summen[art] || new Map()).entries()).map(([name, n]) => ({ name: namen && namen[name] ? namen[name] : name, schluessel: name, n: n })).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
   const ereignisse = {}; for (const [name, n] of (summen.ereignis || new Map()).entries()) ereignisse[name] = n;

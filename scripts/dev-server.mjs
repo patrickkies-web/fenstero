@@ -97,7 +97,7 @@ http.createServer(async (req, res) => {
     /* Seiten, robots.txt, sitemap.xml wie beim Worker (functions/seo.js), sonst die Datei aus web/ */
     const request = new Request(url.href, { method: req.method, headers: req.headers });
     const seite = await behandeln(request, env, () => statisch(url));
-    if (seite && seite.status === 200) seitenaufruf(request, env).catch(() => false); // eigene Statistik wie im Worker
+    if (seite && (seite.status === 200 || seite.status === 304)) seitenaufruf(request, env).catch(() => false); // eigene Statistik wie im Worker
     const antwort = seite || (await statisch(url));
     res.writeHead(antwort.status, Object.fromEntries(antwort.headers));
     res.end(Buffer.from(await antwort.arrayBuffer()));

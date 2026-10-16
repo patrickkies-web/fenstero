@@ -41,7 +41,9 @@ export function stripe(k) {
     if (o.idem) headers['Idempotency-Key'] = o.idem;
     const r = await fetch('https://api.stripe.com/v1' + pfad, { method: method, headers: headers, body: params ? form(params) : undefined });
     let data = null; try { data = await r.json(); } catch (e) { data = null; }
-    if (!r.ok) { const msg = data && data.error && data.error.message ? data.error.message : 'Stripe antwortet nicht (' + r.status + ')'; console.log('Stripe-Fehler', method, pfad, msg.slice(0, 200)); throw new ApiFehler('Zahlungsdienst: ' + msg, 502); }
+    if (!r.ok) { const msg = data && data.error && data.error.message ? data.error.message : 'Stripe antwortet nicht (' + r.status + ')'; console.log('Stripe-Fehler', method, pfad, msg.slice(0, 200)); throw new ApiFehler('Zahlungsdienst: ' + msg, 502, { stripeStatus: r.status }); }
+    /* Stripe kennzeichnet eine wiederholte Antwort auf denselben Idempotency-Key (Idempotent-Replayed: true) */
+    if (data && typeof data === 'object' && r.headers && r.headers.get('idempotent-replayed') === 'true') Object.defineProperty(data, '_wiederholt', { value: true });
     return data;
   }
   return { post: (p, params, o) => call('POST', p, params, o), get: (p, params) => call('GET', p + (params ? '?' + form(params) : '')), del: (p) => call('DELETE', p) };
@@ -206,6 +208,29 @@ export function zahlungsdienst(k) {
       try { await s.del('/subscriptions/' + encodeURIComponent(subscription)); } catch (e) { if (/no such subscription|already (been )?cancel|canceled subscription/i.test(String(e && e.message))) return true; throw e; }
       return true;
     },
+    /* Alle laufenden Abos eines Stripe-Kunden sofort beenden und seine offenen Kassen verfallen lassen (Konto löschen, „sofort beenden“):
+       auch ein zweites Abo aus einem Wettlauf zweier Kassen und eine noch offene Abo-Kasse, die sonst nach dem Löschen bezahlt würde.
+       Rückgabe: die beendeten Abos */
+    async kundeAbosBeenden(customer, auchDieses, nurAboKassen) {
+      if (!s) return auchDieses ? [auchDieses] : [];
+      const ids = new Set(auchDieses ? [auchDieses] : []);
+      if (customer) {
+        /* Zuerst die offenen Kassen verfallen lassen, damit nach dem Auflisten keine mehr zu einem neuen Abo wird */
+        const offen = await s.get('/checkout/sessions', { customer: customer, status: 'open', limit: 100 });
+        for (const k2 of (offen.data || []).filter((x) => !nurAboKassen || x.mode === 'subscription')) {
+          try { await s.post('/checkout/sessions/' + k2.id + '/expire'); } catch (e) { if (!/status|expire|complete|open/i.test(String(e && e.message))) throw e; } // schon abgeschlossen oder verfallen
+        }
+        let nach = '';
+        for (let seite = 0; seite < 5; seite++) {
+          const abos = await s.get('/subscriptions', { customer: customer, status: 'all', limit: 100, starting_after: nach || undefined });
+          (abos.data || []).filter((x) => LAUFEND.includes(x.status) || ['incomplete', 'unpaid', 'paused'].includes(x.status)).forEach((x) => ids.add(x.id));
+          if (!abos.has_more || !(abos.data || []).length) break;
+          nach = abos.data[abos.data.length - 1].id;
+        }
+      }
+      for (const id of ids) await this.aboBeenden(id);
+      return Array.from(ids);
+    },
     /* Objekt zu einem Thin-Ereignis holen: related_object.url aus dem unterschriebenen Ereignis, nur die Arten, die der Webhook braucht */
     async objekt(url) {
       if (!s || !/^\/v1\/(checkout\/sessions|invoices|subscriptions)\/[A-Za-z0-9_]+$/.test(String(url || ''))) return null;
@@ -239,12 +264,37 @@ export function zahlungsdienst(k) {
       const posten = o.posten.filter((p) => offen.has(p.buchung)).slice(0, 250);
       if (!posten.length) return { neu: null, schon: Array.from(schon.values()) };
       const steuer = await steuersatz(false);
-      const inv = await s.post('/invoices', { customer: o.customer, currency: 'eur', collection_method: 'charge_automatically', auto_advance: false, pending_invoice_items_behavior: 'exclude', description: 'eeziframes: Projekte mit eingegangenem Aufmaß', footer: k.preise.mwst ? undefined : KLEINUNTERNEHMER, metadata: { betrieb: o.id, art: 'sammelrechnung' } });
+      /* Zwei Läufe zur selben Zeit (Cron und „jetzt abrechnen“ in der Zentrale): Der Idempotency-Key je Betrieb, Buchungen und Tag gibt
+         beiden denselben Entwurf. Nur der Lauf, der ihn angelegt hat, füllt und schließt ihn ab; der andere bricht ohne Wirkung ab, und
+         eine schon abgeschlossene Rechnung zählt als „schon“. Als berechnet gelten nur Buchungen, deren Posten wirklich auf der
+         Rechnung stehen. Wurde der Entwurf nach einem Fehler gelöscht, geht es mit einem Schlüssel weiter, der an genau diesem
+         Entwurf hängt: So treffen sich auch dann zwei gleichzeitige Läufe wieder beim selben neuen Entwurf. */
+      const satz = posten.map((p) => p.buchung).sort().join(','), tag = new Date().toISOString().slice(0, 10).replace(/\D/g, '');
+      const idem = 'eeziframes-re-' + o.id + '-' + satz.split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7).toString(36) + '-' + posten.length + '-' + tag;
+      const daten = { customer: o.customer, currency: 'eur', collection_method: 'charge_automatically', auto_advance: false, pending_invoice_items_behavior: 'exclude', description: 'eeziframes: Projekte mit eingegangenem Aufmaß', footer: k.preise.mwst ? undefined : KLEINUNTERNEHMER, metadata: { betrieb: o.id, art: 'sammelrechnung' } };
+      const ergebnis = (r, b) => ({ nr: r.number || r.id, id: r.id, betrag: (r.total || 0) / 100, url: r.hosted_invoice_url || '', status: r.status === 'paid' ? 'bezahlt' : 'offen', buchungen: b });
+      const drauf = async (invId) => { const b = []; let nach2 = ''; for (let i = 0; i < 5; i++) { const l = await s.get('/invoiceitems', { invoice: invId, limit: 100, starting_after: nach2 || undefined }); (l.data || []).forEach((it) => { if (it.metadata && it.metadata.buchung) b.push(it.metadata.buchung); }); if (!l.has_more || !(l.data || []).length) break; nach2 = l.data[l.data.length - 1].id; } return b; };
+      let inv = null;
+      for (let schluessel = idem, versuch = 0; ; versuch++) {
+        inv = await s.post('/invoices', daten, { idem: schluessel });
+        if (!inv._wiederholt) break;
+        let stand = null;
+        try { stand = await s.get('/invoices/' + inv.id); } catch (e) { if (!/no such invoice/i.test(String(e && e.message))) throw e; }
+        if (stand && stand.deleted) stand = null;
+        if (stand && stand.status === 'draft') throw new ApiFehler('Ein anderer Abrechnungslauf arbeitet gerade an dieser Rechnung. Bitte später noch einmal.', 409);
+        if (stand && stand.status !== 'void') return { neu: null, schon: Array.from(schon.values()).concat([ergebnis(stand, await drauf(stand.id))]) };
+        if (versuch >= 5) throw new ApiFehler('Die Sammelrechnung ließ sich heute mehrmals nicht anlegen. Bitte später noch einmal.', 409);
+        schluessel = idem + '-' + inv.id; // gelöscht oder storniert: neuer Entwurf, für alle Läufe unter demselben Schlüssel
+      }
       try {
         for (const p of posten) await s.post('/invoiceitems', { customer: o.customer, invoice: inv.id, amount: Math.round(p.betrag * 100), currency: 'eur', description: p.text, tax_rates: steuer ? [steuer] : undefined, metadata: { betrieb: o.id, buchung: p.buchung } }, { idem: 'eeziframes-' + inv.id + '-' + p.buchung });
         const fin = await s.post('/invoices/' + inv.id + '/finalize', { auto_advance: true });
-        return { neu: { nr: fin.number || fin.id, id: fin.id, betrag: (fin.total || 0) / 100, url: fin.hosted_invoice_url || '', status: fin.status === 'paid' ? 'bezahlt' : 'offen', buchungen: posten.map((p) => p.buchung) }, schon: Array.from(schon.values()) };
+        return { neu: ergebnis(fin, await drauf(fin.id)), schon: Array.from(schon.values()) };
       } catch (e) {
+        /* Ein anderer Lauf nutzt gerade dieselben Schlüssel: alles ihm überlassen, nichts aufräumen */
+        if (/in-progress request|another in-progress/i.test(String(e && e.message))) throw e;
+        /* Schon abgeschlossen (etwa durch einen anderen Lauf): nichts ist schiefgegangen, als „schon“ melden */
+        try { const st2 = await s.get('/invoices/' + inv.id); if (st2 && st2.status && !['draft', 'void'].includes(st2.status)) return { neu: null, schon: Array.from(schon.values()).concat([ergebnis(st2, await drauf(st2.id))]) }; } catch (e3) { /* weiter mit Aufräumen */ }
         /* Aufräumen: alle Posten am Entwurf löschen (auch solche, deren Antwort verloren ging), dann den Entwurf. Klappt das nicht,
            bleibt der Entwurf stehen: Er wird nie eingezogen (auto_advance aus), und seine Posten hängen nicht frei herum. */
         try {

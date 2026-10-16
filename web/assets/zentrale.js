@@ -41,8 +41,8 @@
   }
   var toastZeit = null;
   function toast(t) { S.toast = t; var el = document.getElementById('z-toast'); if (el) { el.textContent = t; el.classList.add('an'); } clearTimeout(toastZeit); toastZeit = setTimeout(function () { S.toast = ''; var x = document.getElementById('z-toast'); if (x) x.classList.remove('an'); }, 3200); }
-  async function herunterladen(pfad, vorschlag) {
-    var r = await api(pfad, null, true), blob = await r.blob(), cd = r.headers.get('content-disposition') || '', m = /filename="([^"]+)"/.exec(cd);
+  async function herunterladen(pfad, vorschlag, body) {
+    var r = await api(pfad, body || null, true), blob = await r.blob(), cd = r.headers.get('content-disposition') || '', m = /filename="([^"]+)"/.exec(cd);
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = m ? m[1] : vorschlag; document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
@@ -52,7 +52,7 @@
   var stat = function (titel, wert, unter, ton) { return '<div class="stat' + (ton ? ' tone-' + ton : '') + '"><small>' + esc(titel) + '</small><b class="num">' + wert + '</b>' + (unter ? '<span>' + unter + '</span>' : '') + '</div>'; };
   var kv = function (paare) { return '<dl class="z-kv">' + paare.filter(Boolean).map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + p[1] + '</dd>'; }).join('') + '</dl>'; };
   var leer = function (titel, text) { return '<div class="z-leer"><b>' + esc(titel) + '</b>' + (text ? '<span>' + text + '</span>' : '') + '</div>'; };
-  var aussen = function (href, text) { return href ? '<a class="z-a" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + esc(text) + '</a>' : '–'; };
+  var aussen = function (href, text) { return href && /^https:\/\//.test(href) ? '<a class="z-a" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + esc(text) + '</a>' : '–'; };
   var kopf = function (titel, unter, rechts) { return '<header class="z-kopf"><div><h1 class="z-h">' + esc(titel) + '</h1>' + (unter ? '<p class="z-unter">' + unter + '</p>' : '') + '</div>' + (rechts ? '<div class="z-kopf-r">' + rechts + '</div>' : '') + '</header>'; };
   /* Balken: eine Reihe, gleiche Skala, Zahl über dem höchsten, Achse mit Anfang und Ende; Werte stehen zusätzlich im title */
   function balken(reihe, opt) {
@@ -89,8 +89,9 @@
     var st = S.status || {};
     var inhalt;
     if (!st.eingerichtet) {
-      inhalt = '<h1 class="z-h">Zentrale</h1><p class="z-text">Die Zentrale ist noch nicht eingerichtet. Sie öffnet sich, sobald bei Cloudflare ein Passwort hinterlegt ist:</p>' +
+      inhalt = '<h1 class="z-h">Zentrale</h1><p class="z-text">' + (st.grund === '2fa_ungueltig' ? 'Die Zentrale ist geschlossen.' : 'Die Zentrale ist noch nicht eingerichtet. Sie öffnet sich, sobald bei Cloudflare ein Passwort hinterlegt ist:') + '</p>' +
         (st.grund === 'zu_kurz' ? '<p class="z-hinweis bad">Das eingetragene Passwort ist kürzer als 12 Zeichen. Bitte ein längeres eintragen.</p>' : '') +
+        (st.grund === '2fa_ungueltig' ? '<p class="z-hinweis bad">ZENTRALE_2FA ist eingetragen, aber kein gültiger Schlüssel. Deshalb bleibt die Zentrale zu. Bei Cloudflare ZENTRALE_2FA löschen, anmelden und unter Einstellungen neu einrichten.</p>' : '') +
         '<ol class="z-schritte"><li>Cloudflare öffnen: Workers &amp; Pages → <b>fenstero</b> → Settings → Variables and Secrets.</li><li>„Add“ wählen, Typ <b>Secret</b>, Name <code>ZENTRALE_PASSWORT</code>, als Wert ein Passwort mit mindestens 12 Zeichen (besser 20 und mehr).</li><li>„Deploy“ drücken und diese Seite neu laden.</li></ol>';
     } else {
       inhalt = '<h1 class="z-h">Zentrale</h1><p class="z-text">Nur für den Inhaber. Jede Anmeldung steht im Protokoll.</p>' +
@@ -191,7 +192,7 @@
       (d.doppelt ? '<button class="btn soft small" type="button" data-act="dlg" data-v="doppelkonto">Doppelkonto-Verdacht aufheben</button>' : '') +
       (d.tarif !== 'service' || d.stripe.abo ? '<button class="btn soft small" type="button" data-act="dlg" data-v="abo">Abo …</button>' : '') +
       (k.nochOffen > 0 && d.stripe.kunde && d.zahlungsart ? '<button class="btn soft small" type="button" data-act="dlg" data-v="abrechnen">Jetzt abrechnen</button>' : '') +
-      '<button class="btn soft small" type="button" data-act="export">Daten exportieren</button>' +
+      '<button class="btn soft small" type="button" data-act="dlg" data-v="export">Daten exportieren</button>' +
       (d.gesperrt ? '<button class="btn soft small" type="button" data-act="dlg" data-v="entsperren">Entsperren</button>' : '<button class="btn soft small" type="button" data-act="dlg" data-v="sperren">Sperren</button>') +
       '<button class="btn danger small" type="button" data-act="dlg" data-v="loeschen">Konto löschen</button></div>';
     var quote = function (a, b) { return b ? Math.round((a / b) * 100) + '\u00a0%' : '–'; };
@@ -266,7 +267,7 @@
   var EREIGNIS = { kasse: 'Kasse geöffnet (Aufmaßblatt)', kauf: 'Aufmaßblatt gekauft', ki_foto: 'Foto von der KI ausgewertet', aufmass_gesendet: 'Aufmaß an einen Betrieb gesendet', nachbesserung: 'Nachbesserung gesendet', link_geoeffnet: 'Kundenlink erstmals geöffnet', anmeldecode: 'Anmelde-E-Mail angefordert', anmeldung: 'Anmeldung eines Betriebs', anmeldung_ohne_betrieb: 'Anmeldung ohne Betrieb', registrierung: 'Registrierung', doppelkonto_verdacht: 'Registrierung mit Doppelkonto-Verdacht', projekt: 'Projekt angelegt', code_eingefuegt: 'Aufmaß-Code eingefügt', zahlungsart_kasse: 'Zahlungsart: Stripe geöffnet', abo_kasse: 'Abo: Stripe geöffnet', sammelrechnung: 'Sammelrechnung erstellt' };
 
   /* ---------- Protokoll ---------- */
-  var ART = { anmeldung: 'Anmeldung', anmeldung_fehlgeschlagen: 'Anmeldung fehlgeschlagen', sperren: 'Gesperrt', entsperren: 'Entsperrt', loeschen: 'Gelöscht', export: 'Export', liste_export: 'Liste exportiert', einblick: 'Einblick', notiz: 'Notiz', gutschrift: 'Gutschrift', doppelkonto: 'Doppelkonto', nachricht: 'Nachricht', abo: 'Abo', abrechnung: 'Abrechnung', anmeldung_geloescht: 'Anmeldung gelöscht', aufraeumen: 'Aufgeräumt' };
+  var ART = { anmeldung: 'Anmeldung', anmeldung_fehlgeschlagen: 'Anmeldung fehlgeschlagen', sperren: 'Gesperrt', entsperren: 'Entsperrt', loeschen: 'Gelöscht', export: 'Export', liste_export: 'Liste exportiert', einblick: 'Einblick', notiz: 'Notiz', gutschrift: 'Gutschrift', doppelkonto: 'Doppelkonto', nachricht: 'Nachricht', abo: 'Abo', abrechnung: 'Abrechnung', anmeldung_geloescht: 'Anmeldung gelöscht', aufraeumen: 'Aufgeräumt', code_falsch: 'Code falsch' };
   function seiteProtokoll() {
     var d = S.daten.protokoll;
     var wahl = '<div class="f z-art"><label for="z-part">Art</label><select id="z-part" data-in="protokollArt"><option value="">Alle</option>' + Object.keys(ART).map(function (a) { return '<option value="' + a + '"' + (S.protokollArt === a ? ' selected' : '') + '>' + ART[a] + '</option>'; }).join('') + '</select></div>';
@@ -274,7 +275,7 @@
     if (!d.tabelle) return kopf('Protokoll', 'Anmeldungen und Eingriffe', wahl) + '<div class="z-hinweis warn"><span>Das Protokoll ist noch nicht eingerichtet. Einmal <code>supabase/schema.sql</code> im SQL-Editor von Supabase ausführen.</span></div>';
     var eintraege = d.eintraege.map(function (e) {
       var extra = e.daten && e.art === 'loeschen' ? '<details class="z-details"><summary>Löschnachweis</summary>' + kv([['Betrieb', esc(e.daten.betrieb || '')], ['Registriert', wann(e.daten.registriert)], ['Stripe-Kunde', esc(e.daten.stripe_kunde || '–')], ['Rechnungen', (e.daten.rechnungen || []).map(function (r) { return esc(r.nr + ' · ' + r.datum + ' · ' + euro(r.betrag) + ' · ' + r.status); }).join('<br>') || 'keine'], ['Nicht berechnet', euro(e.daten.nicht_berechnet || 0)]]) + '</details>' : '';
-      return '<li><span class="badge' + (e.art === 'anmeldung_fehlgeschlagen' || e.art === 'loeschen' || e.art === 'sperren' ? ' bad' : e.art === 'einblick' ? ' warn' : '') + '">' + esc(ART[e.art] || e.art) + '</span><span class="z-liste-t">' + esc(e.text) + (e.daten && e.daten.betrieb && e.art !== 'loeschen' ? ' · ' + (e.betrieb ? '<a class="z-a" href="#betrieb/' + esc(e.betrieb) + '">' + esc(e.daten.betrieb) + '</a>' : esc(e.daten.betrieb)) : '') + (e.netz ? ' · ' + esc(e.netz) : '') + (e.daten && e.daten.geraet ? ' · ' + esc(e.daten.geraet) : '') + extra + '</span><span class="z-neben">' + wann(e.zeit) + '</span></li>';
+      return '<li><span class="badge' + (e.art === 'anmeldung_fehlgeschlagen' || e.art === 'code_falsch' || e.art === 'loeschen' || e.art === 'sperren' ? ' bad' : e.art === 'einblick' || e.art === 'export' ? ' warn' : '') + '">' + esc(ART[e.art] || e.art) + '</span><span class="z-liste-t">' + esc(e.text) + (e.daten && e.daten.betrieb && e.art !== 'loeschen' ? ' · ' + (e.betrieb ? '<a class="z-a" href="#betrieb/' + esc(e.betrieb) + '">' + esc(e.daten.betrieb) + '</a>' : esc(e.daten.betrieb)) : '') + (e.netz ? ' · ' + esc(e.netz) : '') + (e.daten && e.daten.geraet ? ' · ' + esc(e.daten.geraet) : '') + extra + '</span><span class="z-neben">' + wann(e.zeit) + '</span></li>';
     }).join('');
     return kopf('Protokoll', 'Anmeldungen (90 Tage) und Eingriffe (3 Jahre)', wahl) + (eintraege ? '<section class="z-karte"><ul class="z-liste">' + eintraege + '</ul>' + (d.weitere ? '<button class="btn soft small" type="button" data-act="mehr-protokoll">Ältere laden</button>' : '') + '</section>' : leer('Keine Einträge.'));
   }
@@ -327,6 +328,8 @@
   function qrLaden() { return window.qrcode ? Promise.resolve() : new Promise(function (ok, nein) { var s = document.createElement('script'); s.src = '/vendor/qrcode.js'; s.onload = ok; s.onerror = nein; document.head.appendChild(s); }); }
 
   /* ---------- Dialoge ---------- */
+  /* Frischer Code für heikle Schritte, wenn der zweite Faktor eingerichtet ist */
+  function codeFeld() { return S.daten.zweiFaktor ? '<div class="f"><label for="d-code">Aktueller Code aus der Authenticator-App</label><input id="d-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></div>' : ''; }
   function dialog() {
     var g = S.dialog; if (!g) return '';
     var d = S.daten['betrieb:' + S.id] || {}, titel = '', inhalt = '', knopf = '', gefahr = false;
@@ -339,10 +342,11 @@
       case 'abo': titel = 'Abo'; inhalt = '<p>Zum Monatsende kündigen: wie wenn der Betrieb selbst kündigt, der laufende Monat bleibt. Sofort beenden: Stripe beendet das Abo jetzt, der Tarif ist sofort Start.</p><div class="seg" role="radiogroup" aria-label="Art"><button type="button" data-act="abo-art" data-v="kuendigen" aria-pressed="' + (g.abo !== 'beenden') + '">Zum Monatsende</button><button type="button" data-act="abo-art" data-v="beenden" aria-pressed="' + (g.abo === 'beenden') + '">Sofort beenden</button></div>'; knopf = g.abo === 'beenden' ? 'Abo sofort beenden' : 'Abo kündigen'; gefahr = g.abo === 'beenden'; break;
       case 'abrechnen': titel = 'Jetzt abrechnen'; inhalt = '<p>Die offenen Buchungen dieses Betriebs (' + euro((d.k || {}).nochOffen || 0) + ' netto) gehen jetzt als Sammelrechnung an Stripe und werden von seiner Zahlungsart eingezogen.</p>'; knopf = 'Abrechnen'; break;
       case 'abrechnung': titel = 'Sammelrechnungen jetzt erstellen'; inhalt = '<p>Für alle Betriebe mit offenen Buchungen und Zahlungsart entsteht jetzt eine Sammelrechnung bei Stripe. Doppelt berechnet wird nichts.</p>'; knopf = 'Jetzt abrechnen'; break;
-      case 'einblick': titel = 'Kundendaten einblenden'; inhalt = '<p>Namen, Kontakte, Objekte und Aufmaße der Kunden dieses Betriebs. eeziframes verarbeitet sie im Auftrag des Betriebs: Einblick nur mit Anlass, etwa einer Support-Anfrage des Betriebs. Der Einblick steht mit Anlass im Protokoll.</p>' + (S.daten.zweiFaktor === false ? '<p class="z-hinweis warn">Dafür muss der zweite Faktor eingerichtet sein (Einstellungen).</p>' : '') + '<div class="f"><label for="d-grund">Anlass</label><input id="d-grund" name="grund" maxlength="300" required placeholder="z. B. Support-Anfrage des Betriebs vom 15.10."></div>'; knopf = 'Einblenden'; break;
+      case 'einblick': titel = 'Kundendaten einblenden'; inhalt = '<p>Namen, Kontakte, Objekte und Aufmaße der Kunden dieses Betriebs. eeziframes verarbeitet sie im Auftrag des Betriebs: Einblick nur mit Anlass, etwa einer Support-Anfrage des Betriebs. Der Einblick steht mit Anlass im Protokoll.</p>' + (S.daten.zweiFaktor === false ? '<p class="z-hinweis warn">Dafür muss der zweite Faktor eingerichtet sein (Einstellungen).</p>' : '') + '<div class="f"><label for="d-grund">Anlass</label><input id="d-grund" name="grund" maxlength="300" required placeholder="z. B. Support-Anfrage des Betriebs vom 15.10."></div>' + codeFeld(); knopf = 'Einblenden'; break;
+      case 'export': titel = 'Daten exportieren'; inhalt = '<p>Alle Daten dieses Kontos als JSON-Datei, für die Auskunft (Art. 15 DSGVO) oder zur Mitnahme (Art. 20): Stammdaten, Projekte mit den Daten der Kunden des Betriebs, Aufmaße, Buchungen, Rechnungen, Mitteilungen, interne Notiz und Eingriffe. Aufmaße, die noch auf eine Zahlungsart warten, nur als Umriss. Weil Kundendaten darin stehen: nur mit zweitem Faktor und Anlass, im Protokoll vermerkt.</p>' + (S.daten.zweiFaktor === false ? '<p class="z-hinweis warn">Dafür muss der zweite Faktor eingerichtet sein (Einstellungen).</p>' : '') + '<div class="f"><label for="d-grund">Anlass</label><input id="d-grund" name="grund" maxlength="300" required placeholder="z. B. Auskunftsersuchen des Betriebs vom 15.10."></div>' + codeFeld(); knopf = 'Exportieren'; break;
       case 'loeschen': titel = 'Konto endgültig löschen'; gefahr = true;
-        inhalt = '<p>Das lässt sich nicht rückgängig machen:</p><ul class="z-punkte"><li>Ein laufendes Abo endet sofort.</li><li>Anmeldung, Konto, Projekte und Aufmaße werden gelöscht, auch die Daten der Kunden des Betriebs.</li>' + ((d.k || {}).nochOffen ? '<li>' + euro(d.k.nochOffen) + ' sind noch nicht berechnet und entfallen (vorher „Jetzt abrechnen“).</li>' : '') + '<li>Rechnungen bleiben bei Stripe (Aufbewahrungspflicht). Im Protokoll bleibt ein Löschnachweis: Name, Stripe-Kunde, Rechnungsnummern.</li></ul><p>Will der Betrieb seine Daten haben, vorher exportieren.</p><button class="btn soft small" type="button" data-act="export">Vorher exportieren</button>' +
-          '<div class="f"><label for="d-best">Zur Bestätigung den Namen eintippen: ' + esc(d.name || '') + '</label><input id="d-best" name="bestaetigung" autocomplete="off" required></div><div class="f"><label for="d-grund">Anlass (optional, fürs Protokoll)</label><input id="d-grund" name="grund" maxlength="300" placeholder="z. B. Löschwunsch per E-Mail vom 15.10."></div>';
+        inhalt = '<p>Das lässt sich nicht rückgängig machen:</p><ul class="z-punkte"><li>Ein laufendes Abo endet sofort.</li><li>Anmeldung, Konto, Projekte und Aufmaße werden gelöscht, auch die Daten der Kunden des Betriebs.</li>' + ((d.k || {}).nochOffen ? '<li>' + euro(d.k.nochOffen) + ' sind noch nicht berechnet und entfallen (vorher „Jetzt abrechnen“).</li>' : '') + '<li>Rechnungen bleiben bei Stripe (Aufbewahrungspflicht). Im Protokoll bleibt ein Löschnachweis: Name, Stripe-Kunde, Rechnungsnummern.</li></ul><p>Will der Betrieb seine Daten haben, vorher exportieren.</p><button class="btn soft small" type="button" data-act="dlg" data-v="export">Vorher exportieren</button>' +
+          '<div class="f"><label for="d-best">Zur Bestätigung den Namen eintippen: ' + esc(d.name || '') + '</label><input id="d-best" name="bestaetigung" autocomplete="off" required></div><div class="f"><label for="d-grund">Anlass (optional, fürs Protokoll)</label><input id="d-grund" name="grund" maxlength="300" placeholder="z. B. Löschwunsch per E-Mail vom 15.10."></div>' + codeFeld();
         knopf = 'Endgültig löschen'; break;
       case 'anmeldung-loeschen': titel = 'Anmeldung löschen'; inhalt = '<p>Die E-Mail-Adresse wird aus der Anmeldung gelöscht. Zu ihr gehört kein Betrieb.</p>'; knopf = 'Löschen'; gefahr = true; break;
     }
@@ -363,9 +367,10 @@
         case 'doppelkonto': r = await api(basis + 'doppelkonto', {}); toast('Verdacht aufgehoben.'); break;
         case 'abo': r = await api(basis + 'abo', { aktion: g.abo === 'beenden' ? 'beenden' : 'kuendigen' }); toast(g.abo === 'beenden' ? 'Abo beendet.' : 'Abo gekündigt.'); break;
         case 'abrechnen': r = await api(basis + 'abrechnen', {}); toast(r.ergebnis && r.ergebnis.rechnungen ? 'Sammelrechnung erstellt.' : 'Nichts abzurechnen.'); break;
-        case 'abrechnung': { const a = await api('/api/zentrale/abrechnung', {}); toast(nW(a.ergebnis.rechnungen || 0, 'Rechnung', 'Rechnungen') + ' erstellt' + (a.ergebnis.fehler ? ', ' + a.ergebnis.fehler + ' Fehler' : '') + '.'); S.dialog = null; return render(); }
-        case 'einblick': r = await api(basis + 'einblick', { grund: f.grund }); S.einblick[S.id] = r.betrieb; S.dialog = null; toast('Kundendaten eingeblendet. Im Protokoll vermerkt.'); return render();
-        case 'loeschen': { const l = await api(basis + 'loeschen', { bestaetigung: f.bestaetigung, grund: f.grund }); S.dialog = null; delete S.daten['betrieb:' + S.id]; delete S.einblick[S.id]; S.daten.betriebe = null; S.daten.uebersicht = null; toast(l.geloescht + ' ist gelöscht.'); location.hash = '#betriebe'; return; }
+        case 'abrechnung': { const a = await api('/api/zentrale/abrechnung', {}); toast(nW(a.ergebnis.rechnungen || 0, 'Rechnung', 'Rechnungen') + ' erstellt' + (a.ergebnis.fehler ? ', ' + a.ergebnis.fehler + ' Fehler' + (a.ergebnis.meldung ? ' (zuletzt: ' + a.ergebnis.meldung + ')' : '') : '') + '.'); S.dialog = null; return render(); }
+        case 'einblick': r = await api(basis + 'einblick', { grund: f.grund, code: f.code || '' }); S.einblick[S.id] = r.betrieb; S.dialog = null; toast('Kundendaten eingeblendet. Im Protokoll vermerkt.'); return render();
+        case 'export': await herunterladen(basis + 'export', 'eeziframes-export.json', { grund: f.grund, code: f.code || '' }); S.dialog = null; toast('Export wird gespeichert. Im Protokoll vermerkt.'); return render();
+        case 'loeschen': { const l = await api(basis + 'loeschen', { bestaetigung: f.bestaetigung, grund: f.grund, code: f.code || '' }); S.dialog = null; delete S.daten['betrieb:' + S.id]; delete S.einblick[S.id]; S.daten.betriebe = null; S.daten.uebersicht = null; toast(l.geloescht + ' ist gelöscht.' + (l.nachweis === false ? ' Achtung: Der Löschnachweis ließ sich nicht ins Protokoll schreiben (supabase/schema.sql ausführen).' : l.stripeKunde ? ' Bei Stripe bleibt der Kunde mit den Rechnungen.' : '')); location.hash = '#betriebe'; return; }
         case 'anmeldung-loeschen': await api('/api/zentrale/anmeldungen/' + encodeURIComponent(g.v) + '/loeschen', {}); S.anmeldungen = await api('/api/zentrale/anmeldungen'); S.dialog = null; toast('Anmeldung gelöscht.'); return render();
       }
       if (r && r.betrieb) { S.daten['betrieb:' + S.id] = r.betrieb; delete S.einblick[S.id]; S.daten.betriebe = null; S.daten.uebersicht = null; }
@@ -423,7 +428,6 @@
       case 'filter': S.filter = v; return render();
       case 'tage': S.tage = +v; return laden(false);
       case 'csv': try { await herunterladen('/api/zentrale/betriebe.csv', 'eeziframes-betriebe.csv'); toast('Tabelle wird gespeichert.'); } catch (e) { if (!e.still) toast(e.message); } return;
-      case 'export': try { await herunterladen('/api/zentrale/betriebe/' + encodeURIComponent(S.id) + '/export', 'eeziframes-export.json'); toast('Export wird gespeichert. Im Protokoll vermerkt.'); } catch (e) { if (!e.still) toast(e.message); } return;
       case 'dlg': S.dialog = { art: v, abo: 'kuendigen' }; return render();
       case 'abo-art': if (S.dialog) { S.dialog.abo = v; render(); } return;
       case 'dlg-zu': S.dialog = null; return render();

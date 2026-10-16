@@ -22,6 +22,8 @@
      STRIPE_PRICE_PLUS        Preis-ID „Plus“ (monatlich)
      STRIPE_TAX_RATE          Steuersatz-ID 19 % exklusiv (Rechnungen an Betriebe)
      STRIPE_TAX_RATE_INKL     Steuersatz-ID 19 % inklusiv (Aufmaßblatt)
+     STATISTIK_KAMPAGNEN      eigene Kampagnen-Namen für ?utm_source=…, durch Komma getrennt (bekannte wie newsletter, flyer, facebook
+                              zählen ohnehin einzeln, alles andere als „Kampagne (andere)“), siehe functions/api/statistik.js
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1   nur lokal zum Testen: Stripe bzw. Datenbank werden nachgestellt */
 const num = (v, d) => { const n = Number(v); return v !== undefined && v !== '' && !isNaN(n) ? n : d; };
 /* Rolle aus einem früheren Supabase-Schlüssel (JWT, eyJ…) lesen, ohne ihn zu prüfen: nur um anon und service_role zu unterscheiden */
@@ -49,7 +51,8 @@ export function konfig(env) {
      Diese Angaben verlassen den Server nie, auch nicht als Hinweis in /api/status (die Zentrale meldet sich selbst unter /api/zentrale/status). */
   const zPw = String(env.ZENTRALE_PASSWORT || '').trim(), zTotp = String(env.ZENTRALE_2FA || '').replace(/[\s-]/g, '').replace(/=+$/, '').toUpperCase();
   const totpOk = /^[A-Z2-7]{16,128}$/.test(zTotp);
-  const zentrale = { passwort: zPw.length >= 12 ? zPw : '', grund: !zPw ? 'fehlt' : zPw.length < 12 ? 'zu_kurz' : '', totp: totpOk ? zTotp : '', totpFehler: !!zTotp && !totpOk };
+  /* Ein eingetragener, aber ungültiger zweiter Faktor schließt die Zentrale (lieber zu als nur mit Passwort offen) */
+  const zentrale = { passwort: zPw.length >= 12 && !(zTotp && !totpOk) ? zPw : '', grund: !zPw ? 'fehlt' : zPw.length < 12 ? 'zu_kurz' : zTotp && !totpOk ? '2fa_ungueltig' : '', totp: totpOk ? zTotp : '', totpFehler: !!zTotp && !totpOk };
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
@@ -80,10 +83,18 @@ export function erlaubt(schluessel, max, fensterMs) {
 export const ip = (request) => request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || 'unbekannt';
 /* Gekürzte IP-Adresse fürs Protokoll der Zentrale: IPv4 auf /24, IPv6 auf /48 (der Anschluss ist so nicht mehr bestimmbar) */
 export function netzKurz(adresse) {
-  const a = String(adresse || '').split(',')[0].trim();
+  const a = String(adresse || '').split(',')[0].trim().replace(/^::ffff:(\d{1,3}(\.\d{1,3}){3})$/i, '$1');
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(a)) return a.split('.').slice(0, 3).join('.') + '.0/24';
   if (a.includes(':')) { const t = a.split('::')[0].split(':').filter(Boolean).slice(0, 3); return t.length ? t.join(':') + '::/48' : ''; }
   return '';
+}
+/* Schlüssel für Bremsen je Anschluss: IPv4 die Adresse, IPv6 das /64-Netz (ein Anschluss hat dort viele Adressen) */
+export function anschluss(adresse) {
+  const a = String(adresse || '').split(',')[0].trim().replace(/^::ffff:(\d{1,3}(\.\d{1,3}){3})$/i, '$1');
+  if (!a.includes(':')) return a;
+  const [vorn, hinten] = a.split('::'), v = vorn ? vorn.split(':') : [], h = hinten !== undefined ? (hinten ? hinten.split(':') : []) : null;
+  const voll = h === null ? v : v.concat(new Array(Math.max(0, 8 - v.length - h.length)).fill('0'), h);
+  return voll.slice(0, 4).map((x) => x.toLowerCase().replace(/^0+(?=.)/, '')).join(':') + '::/64';
 }
 /* Vergleich zweier Geheimnisse in gleichbleibender Zeit (über ihre SHA-256-Werte, damit auch die Länge nichts verrät) */
 export async function gleich(a, b) {

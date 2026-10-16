@@ -7,11 +7,11 @@ Code: `web/zentrale/index.html`, `web/assets/zentrale.js`, `web/assets/zentrale.
 ## Einrichten
 
 1. **Passwort.** Cloudflare → Workers & Pages → **fenstero** → Settings → Variables and Secrets → **Add**: Typ **Secret**, Name `ZENTRALE_PASSWORT`, Wert ein langes Passwort (mindestens 12 Zeichen, besser 20 und mehr, am besten aus dem Passwort-Manager). **Deploy**. Ohne dieses Secret oder mit weniger als 12 Zeichen bleibt die Zentrale geschlossen.
-2. **Datenbank-Tabellen.** Supabase → SQL Editor → New query: den ganzen Inhalt von `supabase/schema.sql` einfügen, **Run**. Die Datei lässt sich gefahrlos erneut ausführen; sie legt nur an, was fehlt (Tabellen `protokoll` und `statistik`, Funktion `eeziframes_zaehlen`). Ohne diesen Schritt funktioniert die Zentrale trotzdem, nur Protokoll und Statistik melden „noch nicht eingerichtet“.
+2. **Datenbank-Tabellen.** Supabase → SQL Editor → New query: den ganzen Inhalt von `supabase/schema.sql` einfügen, **Run**. Die Datei lässt sich gefahrlos erneut ausführen; sie legt nur an, was fehlt (Tabellen `protokoll` und `statistik`, Funktionen `eeziframes_zaehlen` und `eeziframes_auswerten`). Ohne diesen Schritt funktioniert die Zentrale trotzdem, nur Protokoll und Statistik melden „noch nicht eingerichtet“.
 3. **Anmelden.** `https://eeziframes.com/zentrale/` öffnen, Passwort eingeben.
 4. **Zweiter Faktor (empfohlen, nötig für den Einblick in Daten der Endkunden).** In der Zentrale unter **Einstellungen → Zweiter Faktor einrichten**: Der Browser erzeugt einen Schlüssel und zeigt ihn als QR-Code. Mit einer Authenticator-App scannen (Passwörter-App von Apple, Google Authenticator, Microsoft Authenticator, 1Password …), den Code zur Probe eingeben, dann bei Cloudflare als Secret `ZENTRALE_2FA` eintragen und **Deploy**. Ab dann braucht die Anmeldung Passwort und Code.
 
-Passwort ändern: `ZENTRALE_PASSWORT` bei Cloudflare ersetzen. Damit enden alle Sitzungen, auch auf anderen Geräten. Telefon verloren: `ZENTRALE_2FA` bei Cloudflare löschen (dann reicht wieder das Passwort) und neu einrichten.
+Passwort ändern: `ZENTRALE_PASSWORT` bei Cloudflare ersetzen. Damit enden alle Sitzungen, auch auf anderen Geräten. Telefon verloren: `ZENTRALE_2FA` bei Cloudflare löschen (dann reicht wieder das Passwort) und neu einrichten. Ist `ZENTRALE_2FA` eingetragen, aber kein gültiger Schlüssel, bleibt die Zentrale ganz zu (lieber zu als nur mit Passwort offen); die Anmeldeseite sagt dann, was zu tun ist.
 
 ## Was sie kann
 
@@ -28,15 +28,18 @@ Passwort ändern: `ZENTRALE_PASSWORT` bei Cloudflare ersetzen. Damit enden alle 
 
 **Sperren.** Der Betrieb kommt nicht mehr in sein Konto, auch nicht über eine neue Anmeldung; er sieht dabei die Begründung und den Hinweis, dass er widersprechen kann. Seine Kundenlinks ruhen („Dieser Link ist zurzeit nicht aktiv“), ohne dass Kunden die Begründung sehen. Daten, Abo und Abrechnung bleiben. Entsperren stellt alles wieder her, der Betrieb bekommt eine Mitteilung.
 
-**Löschen.** Nur mit dem eingetippten Namen des Betriebs. Ein laufendes Abo endet sofort, die Anmeldung bei Supabase und das Konto samt Projekten und Aufmaßen werden gelöscht. Im Protokoll bleibt ein Löschnachweis (Name, Stripe-Kunde, Rechnungsnummern, nicht berechneter Betrag), keine E-Mail-Adresse. Rechnungen bleiben bei Stripe. Will der Betrieb seine Daten haben: vorher **Daten exportieren** (JSON mit allem, auch der internen Notiz und den Eingriffen).
+**Löschen.** Nur mit dem eingetippten Namen des Betriebs, mit zweitem Faktor zusätzlich mit frischem Code. Reihenfolge: zuerst die Anmeldung bei Supabase (scheitert das, ist nichts passiert), dann alle laufenden Abos des Stripe-Kunden (auch ein zweites aus einem Wettlauf) und seine offenen Kassen, dann das Konto samt Projekten und Aufmaßen. Im Protokoll bleibt ein Löschnachweis (Name, Stripe-Kunde, beendete Abos, Rechnungsnummern, nicht berechneter Betrag), keine E-Mail-Adresse. Bei Stripe bleibt der Kunde mit seinen Rechnungen (Aufbewahrungspflicht); seine Zahlungsarten kannst du dort löschen, wenn alle Rechnungen bezahlt sind.
 
-**Einblick in Daten der Endkunden.** Namen, Kontakte, Adressen und Aufmaße der Kunden eines Betriebs erscheinen nur als Projektnummer. **Kundendaten einblenden** geht nur mit zweitem Faktor und mit Anlass (etwa „Support-Anfrage des Betriebs vom …“); der Einblick steht samt Anlass im Protokoll und endet, sobald du den Betrieb verlässt.
+**Daten exportieren** (Art. 15 und 20 DSGVO): JSON mit allem, auch der internen Notiz und den Eingriffen, Aufmaße ohne Zahlungsart nur als Umriss (wie im Konto des Betriebs). Weil die Daten der Kunden des Betriebs darin stehen, gelten dieselben Regeln wie beim Einblick.
+
+**Einblick in Daten der Endkunden.** Namen, Kontakte, Adressen und Aufmaße der Kunden eines Betriebs erscheinen nur als Projektnummer. **Kundendaten einblenden** geht nur mit zweitem Faktor, frischem Code und Anlass (etwa „Support-Anfrage des Betriebs vom …“), und erst, wenn der Eintrag im Protokoll gespeichert ist; der Einblick endet, sobald du den Betrieb verlässt.
 
 ## Sicherheit
 
 - Passwort nur als Cloudflare-Secret, mindestens 12 Zeichen. Vergleich in gleichbleibender Zeit, nach einem Fehlversuch 0,4 Sekunden Pause, höchstens 5 Versuche je 15 Minuten und IP-Adresse (je Server-Instanz).
 - Sitzung: Cookie `__Host-zentrale` (nur HTTPS, für Skripte unlesbar, nur von dieser Seite gesendet, 8 Stunden), unterschrieben mit einem Schlüssel aus Passwort, zweitem Faktor und `FREISCHALT_GEHEIMNIS`. Jede Anfrage braucht zusätzlich die Kopfzeile `x-zentrale: 1`, die eine fremde Seite nicht setzen kann; Formulare fremder Seiten kommen außerdem an der Herkunftsprüfung nicht vorbei.
-- Zweiter Faktor nach RFC 6238 (TOTP, 6 Ziffern, 30 Sekunden), jeder Code nur einmal.
+- Zweiter Faktor nach RFC 6238 (TOTP, 6 Ziffern, 30 Sekunden). Jeder Code gilt nur einmal, auch über Anmeldung und heikle Schritte hinweg: Einblick, Export und Löschen verlangen einen frischen Code, nach der Anmeldung also den nächsten aus der App. Fünf falsche Codes in einer Sitzung beenden sie.
+- Die Bremse zählt je Anschluss (IPv4-Adresse, bei IPv6 das /64-Netz); Fehlversuche landen höchstens 30-mal je Stunde im Protokoll. Gegen verteilte Angriffe hilft eine Rate-Limiting-Regel bei Cloudflare (Security → WAF → Rate limiting rules: Pfad `/api/zentrale/anmelden`, etwa 10 Anfragen je Minute, Aktion „Block“) oder Cloudflare Access (unten).
 - Strenge Content-Security-Policy wie überall, `noindex`, `Cache-Control: no-store`, keine Daten in der HTML-Datei, nichts im Speicher des Browsers.
 - Optional zusätzlich: Cloudflare Zero Trust → Access → Application für `eeziframes.com/zentrale*` und `eeziframes.com/api/zentrale/*` mit deiner E-Mail (kostenlos bis 50 Nutzer). Dann fragt Cloudflare schon vor der Zentrale nach einem Code per E-Mail.
 
@@ -46,6 +49,8 @@ Gezählt wird auf dem Server, während er eine Seite ausliefert (`worker.js` →
 
 - **Besuch** heißt: ein Aufruf, der nicht von einer eigenen Seite kommt. Nur Besuche tragen Herkunft, Gerät, Browser, System und Land, damit jeder Besuch einmal zählt.
 - **Nicht gezählt:** Aufrufe mit „Global Privacy Control“ oder „Do Not Track“, Vorab-Ladevorgänge, Aufrufe des Inhabers, solange er angemeldet ist, die Zentrale selbst, Fehlerseiten, Bots (nur als Familie, auch Headless-Browser).
+- **Kampagnen** (`?utm_source=…`): bekannte Namen wie `newsletter`, `flyer`, `facebook`, `qr` zählen einzeln, eigene kommen über die Variable `STATISTIK_KAMPAGNEN` dazu (durch Komma getrennt, z. B. `herbst26,messe-koeln`); alles andere zählt als „Kampagne (andere)“. So landet keine E-Mail-Adresse oder Empfänger-Kennung in der Statistik.
+- **Unbekannte Herkunft** zählt mit ihrer Domain (`blog.beispiel.de` → `beispiel.de`), höchstens 100 neue je Tag und Server-Instanz, danach „Andere Website“; IP-Adressen als Herkunft ebenfalls „Andere Website“. Erfundene Herkunftsangaben können die Tabelle so nicht aufblähen.
 - **Bewusst nicht gezählt: eindeutige Besucher.** Dafür bräuchte es eine Kennung, etwa einen Hash aus IP-Adresse und Browser. Der wäre, solange er existiert, ein personenbezogenes Pseudonym und brächte die Frage nach § 25 TDDDG zurück; die Aufsichtsbehörden haben solche Verfahren nicht gebilligt. Besuche (Einstiege) reichen für die Reichweite.
 - Ein Messskript im Browser (Pixel, Beacon) gibt es nicht: Das wäre ein Zugriff auf das Endgerät und bräuchte eine Einwilligung.
 
@@ -63,6 +68,13 @@ Gezählt wird auf dem Server, während er eine Seite ausliefert (`worker.js` →
 | Sperren | Gründe, Vorwarnung, sofortige Sperre und Wiederfreigabe gehören in die Nutzungsbedingungen; bei Sperre wegen Verstoß eine Begründung mit Fakten, Klausel und Widerspruchsweg (DSA Art. 17) | §§ 307, 314, 320 BGB; [DSA Art. 17](https://www.springlex.eu/en/packages/dsa/dsa-regulation/article-17/) |
 
 Umgesetzt ist das in der Datenschutzerklärung (Abschnitte 3, 4, 8 und 9) und hier im Code.
+
+## Grenzen
+
+- Das Aufräumen löscht Anmeldungen bei Supabase, zu denen kein Betrieb gehört und die 30 Tage ungenutzt sind (höchstens 20 je Lauf). Das setzt voraus, dass das Supabase-Projekt nur für eeziframes da ist.
+- Übersicht und Liste lesen alle Betriebe auf einmal (je Anfrage höchstens 40.000 Zeilen). Für ein paar hundert Betriebe ist das kein Thema; bei mehreren tausend gehören die Zahlen in eine Auswertung in der Datenbank.
+- Sammelrechnungen: Laufen Cron und „Jetzt abrechnen“ gleichzeitig, gibt ein Idempotency-Key je Betrieb, Buchungen und Tag beiden Läufen denselben Entwurf bei Stripe. Nur der Lauf, der ihn angelegt hat, füllt und schließt ihn ab; der andere meldet „Ein anderer Abrechnungslauf arbeitet gerade …“ und ändert nichts. Bleibt nach einem Absturz ein Entwurf liegen, wird er nie eingezogen (automatisches Abschließen aus); die Buchungen kommen beim nächsten Lauf an einem anderen Tag auf eine neue Rechnung, den Entwurf kannst du bei Stripe löschen.
+- Rechnungen an Betriebe nennen je Posten den Kunden des Betriebs („Aufmaß · Familie Weber“), damit der Betrieb sie zuordnen kann. Wer das sparsamer will, stellt den Text in `abrechnungslauf` (`functions/api/konten.js`) auf die Projektnummer um.
 
 ## Noch zu tun (nicht technisch)
 

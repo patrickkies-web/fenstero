@@ -17,7 +17,7 @@ export default {
     /* Seiten, robots.txt, sitemap.xml: Freigabe für Suchmaschinen (Variable INDEXIERUNG) und Canonical, siehe functions/seo.js */
     const seo = await behandeln(request, env, (r) => env.ASSETS.fetch(r));
     if (seo) {
-      if (seo.status === 200) ctx.waitUntil(seitenaufruf(request, env).catch(() => false));
+      if (seo.status === 200 || seo.status === 304) ctx.waitUntil(seitenaufruf(request, env).catch(() => false)); // 304: aus dem Browser-Cache, trotzdem ein Aufruf
       return seo;
     }
     /* alles andere: Datei aus web/, sonst die Fehlerseite */

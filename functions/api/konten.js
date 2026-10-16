@@ -261,13 +261,13 @@ export const KONTO = {
    nurId: nur dieser Betrieb (Zentrale, „jetzt abrechnen“). */
 export async function abrechnungslauf(k, sp, zd, nurId) {
   if (!sp || !zd) return { ok: false, grund: 'kein Speicher oder Zahlungsdienst' };
-  const rows = (await sp.betriebeMitKunde()).filter((r) => !nurId || r.id === nurId); let n = 0, fehler = 0;
+  const rows = nurId ? [await sp.betriebHolen(nurId)].filter((r) => r && r.stripe_customer) : await sp.betriebeMitKunde(); let n = 0, fehler = 0, meldung = '';
   for (const row of rows) {
     const offen = ((row.daten || {}).book || []).filter((b) => b.kind === 'aufmass' && b.status === 'offen' && b.betrag > 0);
     if (!offen.length || !(row.daten || {}).pay) continue;
     try {
       const re = await zd.rechnung({ id: row.id, customer: row.stripe_customer, posten: offen.map((b) => ({ buchung: b.id, betrag: b.betrag, text: b.text + (b.sub ? ' · ' + b.sub : '') })) });
-      const alle = (re.schon || []).concat(re.neu ? [Object.assign({ neu: true, status: 'offen' }, re.neu)] : []);
+      const alle = (re.schon || []).concat(re.neu ? [Object.assign({ neu: true, status: 'offen' }, re.neu)] : []).filter((r) => (r.buchungen || []).length);
       if (!alle.length) continue;
       await sp.betriebAendern(row.id, (a) => {
         alle.forEach((r) => {
@@ -280,10 +280,13 @@ export async function abrechnungslauf(k, sp, zd, nurId) {
       });
       if (re.neu) n++;
     } catch (e) {
-      fehler++; console.log('Sammelrechnung fehlgeschlagen', row.id, String(e && e.message ? e.message : e).slice(0, 200));
+      const text = String(e && e.message ? e.message : e);
+      fehler++; console.log('Sammelrechnung fehlgeschlagen', row.id, text.slice(0, 200));
+      /* für die Zentrale: der letzte Grund, Stripes „noch unterwegs“ auf Deutsch */
+      meldung = /in-progress request|another in-progress/i.test(text) ? 'Ein anderer Abrechnungslauf arbeitet gerade an dieser Rechnung. Bitte später noch einmal.' : text.slice(0, 200);
     }
   }
-  return { ok: !fehler, rechnungen: n, fehler: fehler };
+  return { ok: !fehler, rechnungen: n, fehler: fehler, meldung: meldung };
 }
 /* Stripe meldet: Kasse abgeschlossen (Zahlungsart, Abo), Rechnung bezahlt (Sammelrechnung oder Abo), Zahlung fehlgeschlagen, Abo beendet.
    Der Betrieb steht in den Metadaten: bei Kassen und Sammelrechnungen auf dem Objekt selbst, bei Abo-Rechnungen auf dem Abo.

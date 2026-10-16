@@ -8,8 +8,9 @@
    Was die Zentrale zeigt und darf (Begründung: docs/ZENTRALE.md, Datenschutzerklärung Abschnitt 7):
    - Betriebe: Stammdaten, Tarif, Zahlungsart, Kennzahlen (Projekte, verschickte Links, eingegangene Aufmaße, Positionen, Aufträge,
      Umsatz), Buchungen und Rechnungen. Eigene Kunden der Betriebe (Hauseigentümer) erscheinen nur als Projektnummer: Für diese
-     Daten ist eeziframes Auftragsverarbeiter. Einblick in Namen, Kontakt und Aufmaß gibt es nur mit Begründung (etwa die
-     Support-Anfrage des Betriebs), nur mit zweitem Faktor und mit Eintrag im Protokoll.
+     Daten ist eeziframes Auftragsverarbeiter. Einblick in Namen, Kontakt und Aufmaß und der Datenexport (der diese Daten enthält)
+     gibt es nur mit Anlass, mit zweitem Faktor samt frischem Code und erst nach dem Eintrag im Protokoll (ohne Protokoll keine Daten).
+     Löschen verlangt bei eingerichtetem zweitem Faktor ebenfalls einen frischen Code.
    - Eingriffe: sperren (der Betrieb sieht die Begründung beim Anmelden, seine Links ruhen), entsperren, interne Notiz, kostenlose
      Projekte gutschreiben, Doppelkonto-Verdacht aufheben, Nachricht ins Konto, Abo kündigen oder beenden, offene Buchungen
      abrechnen, Daten exportieren (Art. 15 und 20 DSGVO), Konto löschen (Abo endet sofort, Anmeldung und Konto werden gelöscht,
@@ -17,10 +18,10 @@
    - Käufe des Aufmaßblatts, Anmeldungen ohne Betrieb, eigene Statistik (statistik.js), Protokoll, Einstellungen.
    Jeder Eingriff und jede Anmeldung landet im Protokoll (Tabelle protokoll; Anmeldungen 90 Tage, Eingriffe 3 Jahre, aufraeumen()). */
 import '../../web/assets/modell.js';
-import { ApiFehler, hmac, b64url, erlaubt, ip, netzKurz, gleich, zufall } from './umgebung.js';
+import { ApiFehler, hmac, b64url, erlaubt, ip, netzKurz, anschluss, gleich, zufall } from './umgebung.js';
 import { anmeldungLoeschen, anmeldungLesen, anmeldungenAlle } from './auth.js';
-import { melden, abrechnungslauf } from './konten.js';
-import { auswerten, tagBerlin, browserName, systemName } from './statistik.js';
+import { melden, abrechnungslauf, sicht } from './konten.js';
+import { auswerten, tagBerlin, browserName, systemName, zaehlen } from './statistik.js';
 
 const X = () => globalThis.Abrechnung;
 const DAUER = 8 * 3600 * 1000;
@@ -54,7 +55,7 @@ async function zugang(ctx) {
   if (!ctx.k.zentrale.passwort) throw new ApiFehler('Die Zentrale ist noch nicht eingerichtet.', 503);
   if (ctx.request.headers.get('x-zentrale') !== '1') throw new ApiFehler('Nicht erlaubt.', 403);
   const p = await sitzungPruefen(ctx.k, cookieLesen(ctx.request));
-  if (!p) throw new ApiFehler('Bitte neu anmelden.', 401, { abgemeldet: true });
+  if (!p || beendet.has(p.n)) throw new ApiFehler('Bitte neu anmelden.', 401, { abgemeldet: true });
   ctx.zentrale = p;
   return p;
 }
@@ -74,18 +75,39 @@ export async function totpCode(geheim, schritt) {
   const zahl = ((h[o] & 127) * 16777216) + (h[o + 1] << 16) + (h[o + 2] << 8) + h[o + 3];
   return String(zahl % 1000000).padStart(6, '0');
 }
-const verbraucht = new Map(); // ein Code gilt je Zeitschritt nur einmal (je Instanz)
+/* Ein Code gilt nur einmal, für die Anmeldung wie für heikle Schritte (je Instanz): Wer einen Anmeldecode abfängt, kann damit
+   keinen Einblick und keinen Export auslösen */
+const verbraucht = new Map();
 async function totpPruefen(geheim, code) {
   code = String(code || '').replace(/\s+/g, ''); if (!/^\d{6}$/.test(code)) return false;
   const jetzt = Math.floor(Date.now() / 30000);
   for (const d of [0, -1, 1]) {
     if (await gleich(await totpCode(geheim, jetzt + d), code)) {
       if (verbraucht.get(code) === jetzt + d) return false;
-      verbraucht.set(code, jetzt + d); if (verbraucht.size > 200) verbraucht.clear();
+      verbraucht.set(code, jetzt + d); if (verbraucht.size > 500) verbraucht.clear();
       return true;
     }
   }
   return false;
+}
+/* nur für die Prüfsuite: verbrauchte Codes vergessen, damit sie nicht 30 Sekunden auf den nächsten warten muss */
+export function codesVergessen() { verbraucht.clear(); }
+/* Heikle Schritte (Einblick in Endkundendaten, Export, Löschen) verlangen bei eingerichtetem zweitem Faktor einen frischen Code.
+   Nach fünf falschen Codes endet die Sitzung (je Instanz); jeder Fehlversuch steht im Protokoll. */
+const fehlStufe = new Map(), beendet = new Set();
+async function frischerCode(ctx, zweck, pflicht) {
+  const z = ctx.k.zentrale;
+  if (!z.totp) { if (pflicht) throw new ApiFehler('Dafür ist der zweite Faktor nötig (Einstellungen → Zweiter Faktor).', 403); return; }
+  if (await totpPruefen(z.totp, (ctx.body || {}).code)) return;
+  const nonce = (ctx.zentrale && ctx.zentrale.n) || '?', n = (fehlStufe.get(nonce) || 0) + 1;
+  fehlStufe.set(nonce, n); if (fehlStufe.size > 1000) fehlStufe.clear();
+  await protokoll(ctx.sp, 'code_falsch', null, 'Falscher Code für ' + zweck + ' (' + n + '. Versuch dieser Sitzung)', { geraet: geraetVon(ctx.request) }, netzKurz(ip(ctx.request)));
+  if (n >= 5) { beendet.add(nonce); throw new ApiFehler('Fünfmal ein falscher Code: Die Sitzung ist beendet. Bitte neu anmelden.', 401, { abgemeldet: true }); }
+  throw new ApiFehler('Bitte den aktuellen Code aus der Authenticator-App eingeben. Jeder Code gilt nur einmal; nach der Anmeldung den nächsten abwarten.', 401);
+}
+/* Für Einblick und Export gilt: ohne Eintrag im Protokoll keine Daten */
+async function protokollPflicht(sp, art, betrieb, text, extra) {
+  if (!(await protokoll(sp, art, betrieb, text, extra))) throw new ApiFehler('Das Protokoll ist nicht erreichbar (supabase/schema.sql ausführen). Ohne Eintrag im Protokoll gibt es keinen Einblick und keinen Export.', 503);
 }
 
 /* ---------- Protokoll ---------- */
@@ -93,6 +115,7 @@ export async function protokoll(sp, art, betrieb, text, extra, netz) {
   if (!sp || !sp.protokollSchreiben) return false;
   try { return await sp.protokollSchreiben({ art: art, betrieb: betrieb || null, text: str(text, 300), daten: extra || {}, netz: netz || null }); } catch (e) { console.log('Protokoll nicht geschrieben', art, String((e && e.message) || e).slice(0, 120)); return false; }
 }
+let fehlUeber = 0;
 const geraetVon = (request) => { const ua = request.headers.get('user-agent') || ''; return browserName(ua) + ' auf ' + systemName(ua); };
 
 /* ---------- Kennzahlen eines Betriebs ---------- */
@@ -193,12 +216,15 @@ export const ZENTRALE = {
   'POST /api/zentrale/anmelden': async (ctx) => {
     const z = ctx.k.zentrale; if (!z.passwort) throw new ApiFehler('Die Zentrale ist noch nicht eingerichtet.', 503);
     const adresse = ip(ctx.request), netz = netzKurz(adresse);
-    if (!erlaubt('zentrale:' + adresse, 5, 15 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in 15 Minuten noch einmal.', 429);
+    if (!erlaubt('zentrale:' + anschluss(adresse), 5, 15 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in 15 Minuten noch einmal.', 429);
     const b = ctx.body || {}, pwOk = await gleich(String(b.passwort || '').trim(), z.passwort);
     const codeOk = !z.totp || (pwOk && (await totpPruefen(z.totp, b.code)));
     if (!pwOk || !codeOk) {
       await new Promise((r) => setTimeout(r, 400));
-      await protokoll(ctx.sp, 'anmeldung_fehlgeschlagen', null, !pwOk ? 'Passwort falsch' : 'Code falsch', { geraet: geraetVon(ctx.request) }, netz);
+      /* Einzeln protokolliert werden höchstens 30 Fehlversuche je Stunde und Instanz, danach je 25 weitere ein Sammeleintrag:
+         So füllt niemand das Protokoll, und es geht trotzdem kein Versuch unter */
+      if (erlaubt('zentrale-protokoll', 30, 3600 * 1000)) await protokoll(ctx.sp, 'anmeldung_fehlgeschlagen', null, !pwOk ? 'Passwort falsch' : 'Code falsch', { geraet: geraetVon(ctx.request) }, netz);
+      else if (++fehlUeber % 25 === 0) await protokoll(ctx.sp, 'anmeldung_fehlgeschlagen', null, '25 weitere Fehlversuche (zusammengefasst, letzter von ' + (netz || 'unbekannt') + ')', { zusammengefasst: 25 }, netz);
       throw new ApiFehler(z.totp ? 'Passwort oder Code stimmt nicht.' : 'Das Passwort stimmt nicht.', 401);
     }
     await protokoll(ctx.sp, 'anmeldung', null, z.totp ? 'mit zweitem Faktor' : 'nur mit Passwort', { geraet: geraetVon(ctx.request) }, netz);
@@ -267,14 +293,21 @@ export const ZENTRALE = {
     if (!ctx.k.zentrale.totp) throw new ApiFehler('Für den Einblick in Daten der Endkunden ist der zweite Faktor nötig (Einstellungen → Zweiter Faktor).', 403);
     const grund = str((ctx.body || {}).grund, 300); if (grund.length < 5) throw new ApiFehler('Bitte den Anlass angeben, etwa „Support-Anfrage des Betriebs vom …“.');
     const row = await betriebLaden(ctx);
-    await protokoll(ctx.sp, 'einblick', row.id, grund, { betrieb: row.name });
+    await frischerCode(ctx, 'einblick', true);
+    await protokollPflicht(ctx.sp, 'einblick', row.id, grund, { betrieb: row.name });
     return { ok: true, betrieb: await detail(ctx, row, true) };
   },
-  'GET /api/zentrale/betriebe/:id/export': async (ctx) => {
-    await zugang(ctx); const row = await betriebLaden(ctx), sp = ctx.sp;
+  /* Datenexport für den Betrieb (Art. 15 und 20 DSGVO): enthält die Daten seiner Kunden, deshalb wie der Einblick nur mit zweitem
+     Faktor, frischem Code und Anlass, und erst nach dem Eintrag im Protokoll. Gesperrte (noch nicht bezahlte) Aufmaße nur als Umriss. */
+  'POST /api/zentrale/betriebe/:id/export': async (ctx) => {
+    await zugang(ctx); const row = await betriebLaden(ctx), sp = ctx.sp, grund = str((ctx.body || {}).grund, 300);
+    if (!ctx.k.zentrale.totp) throw new ApiFehler('Der Export enthält Daten der Kunden des Betriebs und braucht deshalb den zweiten Faktor (Einstellungen → Zweiter Faktor).', 403);
+    if (grund.length < 5) throw new ApiFehler('Bitte den Anlass angeben, etwa „Auskunftsersuchen des Betriebs vom …“.');
+    await frischerCode(ctx, 'export', true);
     const eintraege = ((await sp.protokollLesen({ betrieb: row.id, anzahl: 500 }).catch(() => null)) || []).filter((e) => !/^anmeldung/.test(e.art)).map((e) => ({ zeit: e.zeit, art: e.art, text: e.text }));
-    await protokoll(sp, 'export', row.id, 'Datenexport (Art. 15/20 DSGVO)', { betrieb: row.name });
-    const inhalt = { erstellt: new Date().toISOString(), hinweis: 'Alle bei eeziframes gespeicherten Daten dieses Kontos (Auskunft nach Art. 15 und Datenübertragbarkeit nach Art. 20 DSGVO). Zahlungsdaten liegen bei Stripe; Rechnungen kommen von dort.', konto: { id: row.id, firma: row.name, mail: row.mail, plz: row.plz, registriert: row.created_at, geaendert: row.updated_at, stripe_kunde: row.stripe_customer || null, stripe_abo: row.stripe_subscription || null }, daten: row.daten || {}, eingriffe: eintraege };
+    await protokollPflicht(sp, 'export', row.id, grund, { betrieb: row.name });
+    const daten = Object.assign({}, sicht(row).acc, { verwaltung: (row.daten || {}).verwaltung });
+    const inhalt = { erstellt: new Date().toISOString(), hinweis: 'Alle bei eeziframes gespeicherten Daten dieses Kontos (Auskunft nach Art. 15 und Datenübertragbarkeit nach Art. 20 DSGVO). Aufmaße, die noch auf eine Zahlungsart warten, stehen wie im Konto nur als Umriss darin. Zahlungsdaten liegen bei Stripe; Rechnungen kommen von dort.', konto: { id: row.id, firma: row.name, mail: row.mail, plz: row.plz, registriert: row.created_at, geaendert: row.updated_at, stripe_kunde: row.stripe_customer || null, stripe_abo: row.stripe_subscription || null }, daten: daten, eingriffe: eintraege };
     const name = 'eeziframes-export-' + String(row.name || 'betrieb').toLowerCase().replace(/[^a-z0-9äöüß]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '-' + tagBerlin() + '.json';
     return new Response(JSON.stringify(inhalt, null, 2), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'content-disposition': 'attachment; filename="' + name.replace(/[^\w.-]/g, '-') + '"' } });
   },
@@ -334,9 +367,9 @@ export const ZENTRALE = {
   'POST /api/zentrale/betriebe/:id/abo': async (ctx) => {
     await zugang(ctx); const row = await betriebLaden(ctx), aktion = (ctx.body || {}).aktion === 'beenden' ? 'beenden' : 'kuendigen';
     if (!row.stripe_subscription && X().konto(row.daten || {}) === 'service') throw new ApiFehler('Dieser Betrieb hat kein Abo.');
-    if (row.stripe_subscription && !ctx.zd) throw new ApiFehler('Stripe ist nicht verbunden (STRIPE_SECRET_KEY).', 503);
+    if ((row.stripe_subscription || row.stripe_customer) && !ctx.zd) throw new ApiFehler('Stripe ist nicht verbunden (STRIPE_SECRET_KEY).', 503);
     if (aktion === 'beenden') {
-      if (row.stripe_subscription) await ctx.zd.aboBeenden(row.stripe_subscription);
+      if (ctx.zd) await ctx.zd.kundeAbosBeenden(row.stripe_customer, row.stripe_subscription, true); // nur Abo-Kassen verfallen lassen
       await ctx.sp.betriebFelder(row.id, { stripe_subscription: null });
       await aendernVerwaltung(ctx.sp, row.id, (a, v) => { a.konto = 'service'; a.downgrade = null; vermerk(v, 'abo', 'Abo sofort beendet'); melden(a, { t: 'Abo beendet', s: 'Ihr Tarif ist jetzt Start: ' + X().preise().projekt + ' € je Projekt mit eingegangenem Aufmaß.', to: ['abrechnung'], von: 'eeziframes' }); });
     } else {
@@ -351,21 +384,28 @@ export const ZENTRALE = {
     await zugang(ctx); const row = await betriebLaden(ctx);
     if (!ctx.zd) throw new ApiFehler('Stripe ist nicht verbunden (STRIPE_SECRET_KEY).', 503);
     const r = await abrechnungslauf(ctx.k, ctx.sp, ctx.zd, row.id);
-    await protokoll(ctx.sp, 'abrechnung', row.id, r.rechnungen ? 'Sammelrechnung erstellt' : 'nichts abzurechnen', { betrieb: row.name, ergebnis: r });
+    if (r.rechnungen) await zaehlen(ctx.k, ctx.sp, new Array(r.rechnungen).fill('ereignis:sammelrechnung'));
+    await protokoll(ctx.sp, 'abrechnung', row.id, r.rechnungen ? 'Sammelrechnung erstellt' : r.fehler ? 'Abrechnung fehlgeschlagen' : 'nichts abzurechnen', { betrieb: row.name, ergebnis: r });
+    if (r.fehler && !r.rechnungen) throw new ApiFehler('Abrechnung fehlgeschlagen' + (r.meldung ? ': ' + r.meldung : '. Die Buchungen bleiben offen.'), 502);
     return { ok: true, ergebnis: r, betrieb: await detail(ctx, await ctx.sp.betriebHolen(row.id), false) };
   },
   /* Konto löschen (Art. 17 DSGVO): Abo endet sofort, Anmeldung und Konto werden gelöscht, der Löschnachweis bleibt im Protokoll */
   'POST /api/zentrale/betriebe/:id/loeschen': async (ctx) => {
     await zugang(ctx); const row = await betriebLaden(ctx), b = ctx.body || {}, norm = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
     if (!row.name || norm(b.bestaetigung) !== norm(row.name)) throw new ApiFehler('Zur Bestätigung bitte den Namen des Betriebs genau eintippen.');
+    await frischerCode(ctx, 'loeschen', false);
     const grund = str(b.grund, 300), a = row.daten || {};
-    if (row.stripe_subscription) { if (!ctx.zd) throw new ApiFehler('Stripe ist nicht verbunden: das laufende Abo ließe sich nicht beenden.', 503); await ctx.zd.aboBeenden(row.stripe_subscription); }
+    if ((row.stripe_subscription || row.stripe_customer) && !ctx.zd) throw new ApiFehler('Stripe ist nicht verbunden: laufende Abos ließen sich nicht beenden. Nichts wurde gelöscht.', 503);
+    /* Reihenfolge: zuerst die Anmeldung (scheitert das, ist noch nichts passiert), dann Abos und offene Kassen bei Stripe, dann das Konto */
     const weg = await anmeldungLoeschen(ctx.k, row.auth_user);
     if (!weg.ok) throw new ApiFehler('Die Anmeldung bei Supabase ließ sich nicht löschen (' + weg.status + '). Nichts wurde gelöscht; bitte noch einmal versuchen.', 502);
+    let abos = [];
+    try { abos = ctx.zd ? await ctx.zd.kundeAbosBeenden(row.stripe_customer, row.stripe_subscription) : []; }
+    catch (e) { throw new ApiFehler('Die Anmeldung ist gelöscht, aber Stripe hat die Abos nicht beendet (' + String(e.message || e).slice(0, 120) + '). Das Konto steht noch da; bitte noch einmal löschen.', 502); }
     const offen = rund((a.book || []).filter((x) => x.status === 'offen' && Number(x.betrag) > 0).reduce((s, x) => s + Number(x.betrag), 0));
     await ctx.sp.betriebLoeschen(row.id);
-    await protokoll(ctx.sp, 'loeschen', row.id, 'Konto gelöscht' + (grund ? ': ' + grund : ''), { betrieb: row.name, registriert: row.created_at, stripe_kunde: row.stripe_customer || '', abo_beendet: row.stripe_subscription || '', rechnungen: (a.rechnungen || []).map((r) => ({ nr: r.nr, datum: r.datum, betrag: r.betrag, status: r.status })), nicht_berechnet: offen });
-    return { ok: true, geloescht: row.name, nichtBerechnet: offen, stripeKunde: row.stripe_customer || '' };
+    const nachweis = await protokoll(ctx.sp, 'loeschen', row.id, 'Konto gelöscht' + (grund ? ': ' + grund : ''), { betrieb: row.name, registriert: row.created_at, stripe_kunde: row.stripe_customer || '', abos_beendet: abos, rechnungen: (a.rechnungen || []).map((r) => ({ nr: r.nr, datum: r.datum, betrag: r.betrag, status: r.status })), nicht_berechnet: offen });
+    return { ok: true, geloescht: row.name, nichtBerechnet: offen, stripeKunde: row.stripe_customer || '', stripeLink: stripeLink(ctx.k, 'customers', row.stripe_customer), nachweis: nachweis };
   },
 
   /* Käufe des Aufmaßblatts (Hauseigentümer) */
@@ -417,6 +457,7 @@ export const ZENTRALE = {
   'POST /api/zentrale/abrechnung': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx); if (!ctx.zd) throw new ApiFehler('Stripe ist nicht verbunden (STRIPE_SECRET_KEY).', 503);
     const r = await abrechnungslauf(ctx.k, sp, ctx.zd);
+    if (r.rechnungen) await zaehlen(ctx.k, sp, new Array(r.rechnungen).fill('ereignis:sammelrechnung'));
     await protokoll(sp, 'abrechnung', null, 'Abrechnungslauf von Hand: ' + X().nW(r.rechnungen || 0, 'Rechnung', 'Rechnungen') + (r.fehler ? ', ' + r.fehler + ' Fehler' : ''), { ergebnis: r });
     return { ok: true, ergebnis: r };
   }
@@ -436,7 +477,7 @@ export async function aufraeumen(k, sp) {
         const mit = new Set(rows.map((r) => r.auth_user).filter(Boolean));
         for (const u of nutzer) {
           const zuletzt = Math.max(Date.parse(u.erstellt || '') || jetzt, Date.parse(u.zuletzt || '') || 0);
-          if (mit.has(u.id) || jetzt - zuletzt < 30 * TAG) continue;
+          if (mit.has(u.id) || jetzt - zuletzt < 30 * TAG || out.anmeldungen >= 20) continue; // höchstens 20 je Lauf (Grenze für Unteranfragen)
           if (await sp.betriebNachAuth(u.id)) continue; // frisch registriert, während der Lauf lief
           if ((await anmeldungLoeschen(k, u.id)).ok) out.anmeldungen++;
         }

@@ -1401,6 +1401,33 @@ if (teil(11)) {
     st.abschliessen(zweite.id);
     const hZ = await hook('checkout.session.completed', st.db.kassen.get(zweite.id)), nachZw = await sp.betriebHolen(bid);
     ok(hZ._status === 200 && nachZw.stripe_subscription === laufend.subscription && X.konto(nachZw.daten) === 'plus' && /Zweites Abo/.test(nachZw.daten.notif[0].t), 'Zweites laufendes Abo (Wettlauf zweier Kassen): das erste bleibt im Konto, Hinweis an den Betrieb');
+    // j) Zwei Abrechnungsläufe zur selben Zeit (Cron und „jetzt abrechnen“ in der Zentrale): eine Rechnung, keine doppelten Posten
+    const gleich = await sp.betriebAnlegen({ auth_user: 'u-gleich11', mail: 'gleich11@beispiel.de', name: 'Gleichzeitig GmbH', plz: '50667', tel_norm: '', name_norm: 'gleich11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bQ1'), buchung('bQ2')], rechnungen: [], notif: [] } });
+    const cusQ = await zd.kundeAnlegen({ id: gleich.id, mail: 'gleich11@beispiel.de', name: 'Gleichzeitig GmbH' }); await sp.betriebFelder(gleich.id, { stripe_customer: cusQ });
+    const zwei = await Promise.all([ko.abrechnungslauf(k, sp, zd, gleich.id), ko.abrechnungslauf(k, sp, zd, gleich.id)]);
+    const rQ = [...st.db.rechnungen.values()].filter((r) => r.customer === cusQ), pQ = [...st.db.posten.values()].filter((it) => it.customer === cusQ), gQ = await sp.betriebHolen(gleich.id);
+    ok(rQ.length === 1 && rQ[0].status === 'open' && pQ.length === 2 && pQ.every((it) => it.invoice === rQ[0].id) && gQ.daten.book.every((b) => b.status === 'berechnet' && b.rechnung === rQ[0].number) && gQ.daten.rechnungen.length === 1 && zwei.some((r) => r.rechnungen === 1), 'Zwei Abrechnungsläufe gleichzeitig: eine Rechnung mit zwei Posten, nichts doppelt (der zweite Lauf bekommt dieselbe Rechnung oder bricht ohne Wirkung ab)');
+    // k) Ein Lauf scheitert heute schon einmal (Entwurf aufgeräumt), danach laufen zwei gleichzeitig: wieder genau eine Rechnung
+    const nach = await sp.betriebAnlegen({ auth_user: 'u-nach11', mail: 'nach11@beispiel.de', name: 'Nachher GmbH', plz: '50667', tel_norm: '', name_norm: 'nach11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bN1'), buchung('bN2'), buchung('bN3')], rechnungen: [], notif: [] } });
+    const cusN = await zd.kundeAnlegen({ id: nach.id, mail: 'nach11@beispiel.de', name: 'Nachher GmbH' }); await sp.betriebFelder(nach.id, { stripe_customer: cusN });
+    let nPost = 0; st.fehlerBei((e) => e.method === 'POST' && e.pfad === '/invoiceitems' && e.p.customer === cusN && ++nPost === 2);
+    const erst = await ko.abrechnungslauf(k, sp, zd, nach.id);
+    st.fehlerBei(null);
+    const leerN = [...st.db.rechnungen.values()].filter((r) => r.customer === cusN).length;
+    const zweiN = await Promise.all([ko.abrechnungslauf(k, sp, zd, nach.id), ko.abrechnungslauf(k, sp, zd, nach.id)]);
+    const rN = [...st.db.rechnungen.values()].filter((r) => r.customer === cusN), pN = [...st.db.posten.values()].filter((it) => it.customer === cusN), gN = await sp.betriebHolen(nach.id);
+    ok(erst.fehler === 1 && leerN === 0 && rN.length === 1 && rN[0].status === 'open' && pN.length === 3 && pN.every((it) => it.invoice === rN[0].id) && gN.daten.book.every((b) => b.status === 'berechnet' && b.rechnung === rN[0].number) && gN.daten.rechnungen.length === 1 && zweiN.filter((r) => r.rechnungen === 1).length === 1, 'Erst ein gescheiterter Lauf (Entwurf gelöscht), dann zwei gleichzeitig: genau eine Rechnung mit drei Posten, der zweite Lauf bricht ohne Wirkung ab');
+    // l) Zentrale „Jetzt abrechnen“: Scheitert Stripe, sagt die Zentrale das (statt „Nichts abzurechnen“); der nächste Versuch rechnet ab
+    const envZ = Object.assign({}, env, { ZENTRALE_PASSWORT: 'pruefung-zentrale-11' });
+    const zRufe = async (pfad, body, keks) => { const r = await api(new Request(B + pfad, { method: body ? 'POST' : 'GET', headers: Object.assign({ accept: 'application/json', origin: B, 'x-zentrale': '1', 'cf-connecting-ip': '198.51.100.11' }, body ? { 'content-type': 'application/json' } : {}, keks ? { cookie: keks } : {}), body: body ? JSON.stringify(body) : undefined }), envZ, null); return Object.assign({ _status: r.status, _kopf: r.headers }, await r.json().catch(() => ({}))); };
+    const zAn = await zRufe('/api/zentrale/anmelden', { passwort: 'pruefung-zentrale-11' }), zKeks = (zAn._kopf.get('set-cookie') || '').split(';')[0];
+    const zb = await sp.betriebAnlegen({ auth_user: 'u-zentrale11', mail: 'zentrale11@beispiel.de', name: 'Zentrale GmbH', plz: '50667', tel_norm: '', name_norm: 'zentrale11', daten: { konto: 'service', pay: { type: 'Karte', label: 'x' }, links: [], book: [buchung('bZ1')], rechnungen: [], notif: [] } });
+    const cusZ = await zd.kundeAnlegen({ id: zb.id, mail: 'zentrale11@beispiel.de', name: 'Zentrale GmbH' }); await sp.betriebFelder(zb.id, { stripe_customer: cusZ });
+    st.fehlerBei((e) => e.method === 'POST' && /\/finalize$/.test(e.pfad) && (st.db.rechnungen.get(e.pfad.split('/')[2]) || {}).customer === cusZ);
+    const zFehl = await zRufe('/api/zentrale/betriebe/' + zb.id + '/abrechnen', {}, zKeks), zVor = await sp.betriebHolen(zb.id);
+    st.fehlerBei(null);
+    const zOk = await zRufe('/api/zentrale/betriebe/' + zb.id + '/abrechnen', {}, zKeks), zNach = await sp.betriebHolen(zb.id), zProt = (await sp.protokollLesen({ betrieb: zb.id, anzahl: 10 })) || [];
+    ok(/^__Host-zentrale=/.test(zKeks) && zFehl._status === 502 && /^Abrechnung fehlgeschlagen: /.test(zFehl.fehler || '') && zVor.daten.book[0].status === 'offen' && zOk._status === 200 && zOk.ergebnis.rechnungen === 1 && zNach.daten.book[0].status === 'berechnet' && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Abrechnung fehlgeschlagen') && zProt.some((e) => e.art === 'abrechnung' && e.text === 'Sammelrechnung erstellt'), 'Zentrale „Jetzt abrechnen“: Scheitert Stripe, stehen der Grund im Dialog und „Abrechnung fehlgeschlagen“ im Protokoll, die Buchung bleibt offen; der nächste Versuch rechnet ab');
     if (process.env.STRIPE_PROTOKOLL) (await import('node:fs')).writeFileSync(process.env.STRIPE_PROTOKOLL, JSON.stringify(st.log, null, 1));
   } catch (e) {
     ok(false, 'Stripe-Anbindung ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
@@ -1479,7 +1506,9 @@ if (teil(13)) {
     // a) Eingerichtet nur mit Passwort ab 12 Zeichen; /api/status verrät nichts über die Zentrale
     const s0 = await rufe('/api/zentrale/status', { env: { DATEN_ATTRAPPE: '1' } }), s1 = await rufe('/api/zentrale/status', { env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: 'zu-kurz-123' } }), a1 = await rufe('/api/zentrale/anmelden', { body: { passwort: 'zu-kurz-123' }, env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: 'zu-kurz-123' }, ip: neueIp() });
     const st = await rufe('/api/status', { env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: 'zu-kurz-123', ZENTRALE_2FA: 'kaputt' } });
+    const s2 = await rufe('/api/zentrale/status', { env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, ZENTRALE_2FA: 'kein-base32!' } }), a2 = await rufe('/api/zentrale/anmelden', { body: { passwort: PW }, env: { DATEN_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, ZENTRALE_2FA: 'kein-base32!' }, ip: neueIp() });
     ok(!s0.eingerichtet && s0.grund === 'fehlt' && !s1.eingerichtet && s1.grund === 'zu_kurz' && a1._status === 503 && !/ZENTRALE|zentrale/.test(st._text), 'Zentrale bleibt zu ohne Passwort oder mit weniger als 12 Zeichen; /api/status verrät nichts darüber');
+    ok(!s2.eingerichtet && s2.grund === '2fa_ungueltig' && a2._status === 503, 'Ungültiger zweiter Faktor schließt die Zentrale, statt nur mit Passwort offen zu bleiben');
     // b) Ohne Sitzung nichts, ohne Kopfzeile x-zentrale nichts
     const zu = await Promise.all(['/api/zentrale/uebersicht', '/api/zentrale/betriebe', '/api/zentrale/statistik', '/api/zentrale/protokoll', '/api/zentrale/einstellungen', '/api/zentrale/kaeufe', '/api/zentrale/betriebe.csv'].map((p) => rufe(p)));
     ok(zu.every((r) => r._status === 403), 'Ohne Kopfzeile x-zentrale: jede Anfrage abgewiesen');
@@ -1554,8 +1583,8 @@ if (teil(13)) {
     ok((await mitC('/api/zentrale/betriebe/' + idB + '/abo', { body: { aktion: 'kuendigen' } }))._status === 400, 'Abo kündigen ohne Abo: abgewiesen');
 
     // j) Export (Art. 15/20) und Liste als CSV (ohne Formeln aus Eingaben)
-    const ex = await mitC('/api/zentrale/betriebe/' + idA + '/export'), exJ = JSON.parse(ex._text);
-    ok(ex._status === 200 && /attachment; filename="eeziframes-export-zentrale-pr/.test(ex._kopf.get('content-disposition')) && exJ.konto.mail === mailA && exJ.daten.links.length === 2 && exJ.daten.verwaltung.notiz && exJ.eingriffe.some((e) => e.art === 'sperren') && !exJ.eingriffe.some((e) => /^anmeldung/.test(e.art)), 'Export: alle Daten des Kontos als JSON, mit Notiz und Eingriffen, ohne Anmeldungen der Zentrale');
+    const exOhne = await mitC('/api/zentrale/betriebe/' + idA + '/export', { body: { grund: 'Auskunftsersuchen des Betriebs' } }), exGet = await mitC('/api/zentrale/betriebe/' + idA + '/export');
+    ok(exOhne._status === 403 && /zweiten Faktor/.test(exOhne.fehler || '') && exGet._status === 404, 'Export enthält Kundendaten: ohne zweiten Faktor abgewiesen, nur per POST');
     const regC = await rufe('/api/konto/registrieren', { body: { firma: '=SUMME(1;2)', ap: 'Carl Prüf', tel: '0221 8' + String(Date.now()).slice(-6), plz: '50667', agb: true }, token: tok('zentrale-c-' + stempel + '@beispiel.de') });
     const csv = await mitC('/api/zentrale/betriebe.csv'), csvBytes = new Uint8Array(await (await api(new Request(B + '/api/zentrale/betriebe.csv', { headers: { cookie: C, 'x-zentrale': '1' } }), env, null)).arrayBuffer());
     ok(csv._status === 200 && /text\/csv/.test(csv._kopf.get('content-type')) && csvBytes[0] === 0xef && csvBytes[1] === 0xbb && csvBytes[2] === 0xbf && csv._text.includes('"Betrieb";"Ansprechpartner"') && csv._text.includes('"' + firmaA + '"') && csv._text.includes('"\'=SUMME(1;2)"') && !csv._text.includes('";"=SUMME'), 'CSV für Excel: Semikolon, UTF-8 mit BOM, Eingaben wie =… werden nicht zur Formel');
@@ -1575,11 +1604,14 @@ if (teil(13)) {
     await aufruf('/', { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' });
     await aufruf('/', { dnt: '1' }); await aufruf('/', { 'sec-gpc': '1' }); await aufruf('/', { cookie: '__Host-zentrale=abc.def' }); await aufruf('/', { 'sec-purpose': 'prefetch' });
     await aufruf('/zentrale/'); await aufruf('/impressum/', {}, 'POST'); await aufruf('/llms.txt', { 'user-agent': 'ChatGPT-User/1.0' });
-    await aufruf('/fuer-fensterbauer/?utm_source=newsletter'); await aufruf('/app/?von=pdf', { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36' });
+    await aufruf('/fuer-fensterbauer/?utm_source=newsletter'); await aufruf('/ratgeber/?utm_source=max.mustermann@gmail.com', { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36' }); await aufruf('/app/?von=pdf', { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36' });
     const nachS = await stat.auswerten(sp, 7), dS = (art, name) => anzahl(nachS[art], name) - anzahl(vor[art], name);
-    ok(nachS.summe.aufrufe - vor.summe.aufrufe === 4 && nachS.summe.besuche - vor.summe.besuche === 3 && dS('seiten', '/app/') === 2 && dS('seiten', '/ratgeber/fenster-ausmessen/') === 1 && dS('seiten', '/zentrale/') === 0, 'Statistik: Seitenaufrufe und Besuche (ein Aufruf von einer eigenen Seite ist kein neuer Besuch); die Zentrale zählt nicht');
-    ok(dS('herkunft', 'Google') === 1 && dS('herkunft', 'Kampagne: newsletter') === 1 && dS('herkunft', 'Aufmaßblatt (QR-Code)') === 1 && dS('geraet', 'Telefon') === 2 && dS('geraet', 'Computer') === 1 && dS('browser', 'Safari') === 2 && dS('system', 'iOS') === 2 && dS('land', 'AT') === 1 && dS('bots', 'Google') === 1 && dS('dateien', '/llms.txt') === 1, 'Statistik: Herkunft (Suchmaschine, Kampagne, QR-Code des Aufmaßblatts), Gerät, Browser, System, Land, Bots als Familie, llms.txt');
-    ok(nachS.summe.aufrufe - vor.summe.aufrufe === 4 && dS('herkunft', 'Direkt') === 0, 'Nicht gezählt: Do Not Track, Global Privacy Control, der angemeldete Inhaber, Vorab-Laden, POST');
+    ok(dS('herkunft', 'Kampagne: (andere)') === 1 && !JSON.stringify(nachS).includes('mustermann'), 'Kampagnen: nur bekannte Namen einzeln, alles andere als „(andere)“ (keine E-Mail-Adresse in der Statistik)');
+    ok(nachS.summe.aufrufe - vor.summe.aufrufe === 5 && nachS.summe.besuche - vor.summe.besuche === 4 && dS('seiten', '/app/') === 2 && dS('seiten', '/ratgeber/fenster-ausmessen/') === 1 && dS('seiten', '/zentrale/') === 0, 'Statistik: Seitenaufrufe und Besuche (ein Aufruf von einer eigenen Seite ist kein neuer Besuch); die Zentrale zählt nicht');
+    ok(dS('herkunft', 'Google') === 1 && dS('herkunft', 'Kampagne: newsletter') === 1 && dS('herkunft', 'Aufmaßblatt (QR-Code)') === 1 && dS('geraet', 'Telefon') === 2 && dS('geraet', 'Computer') === 2 && dS('browser', 'Safari') === 2 && dS('system', 'iOS') === 2 && dS('land', 'AT') === 1 && dS('bots', 'Google') === 1 && dS('dateien', '/llms.txt') === 1, 'Statistik: Herkunft (Suchmaschine, Kampagne, QR-Code des Aufmaßblatts), Gerät, Browser, System, Land, Bots als Familie, llms.txt');
+    ok(nachS.summe.aufrufe - vor.summe.aufrufe === 5 && dS('herkunft', 'Direkt') === 0, 'Nicht gezählt: Do Not Track, Global Privacy Control, der angemeldete Inhaber, Vorab-Laden, POST');
+    const roh = await stat.auswerten(Object.assign({}, sp, { statistikAuswerten: undefined }), 30), verd = await stat.auswerten(sp, 30);
+    ok(JSON.stringify(roh.summe) === JSON.stringify(verd.summe) && JSON.stringify(roh.reihe) === JSON.stringify(verd.reihe) && JSON.stringify(roh.herkunft) === JSON.stringify(verd.herkunft) && JSON.stringify(roh.ereignisse) === JSON.stringify(verd.ereignisse), 'Auswertung verdichtet (Datenbankfunktion) und aus den einzelnen Tageszählern ergibt dasselbe');
     const stZ = await mitC('/api/zentrale/statistik?tage=30');
     ok(stZ.ok && stZ.tabelle && stZ.tage === 30 && stZ.reihe.length === 30 && stZ.reihe[29].aufrufe >= 4 && stZ.seiten.some((x) => x.name === 'App') && !/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(JSON.stringify(stZ)), 'Auswertung: 30 Tage als Reihe, Seiten mit Namen, keine IP-Adressen');
 
@@ -1591,7 +1623,7 @@ if (teil(13)) {
     const ei = await mitC('/api/zentrale/einstellungen');
     ok(ei.ok && ei.dienste.daten.art === 'attrappe' && ei.dienste.statistik === true && ei.dienste.protokoll === true && ei.zentrale.zweiFaktor === false && !ei._text.includes(PW) && !ei._text.includes('pruef13'), 'Einstellungen: Dienste und Tabellen, kein Passwort und kein Geheimnis in der Antwort');
     const pr = await mitC('/api/zentrale/protokoll'), arten = pr.eintraege.map((e) => e.art), fehl = pr.eintraege.find((e) => e.art === 'anmeldung_fehlgeschlagen' && e.netz === '203.0.113.0/24');
-    ok(pr.tabelle && ['anmeldung', 'sperren', 'entsperren', 'notiz', 'nachricht', 'gutschrift', 'doppelkonto', 'export', 'liste_export', 'loeschen'].every((a) => arten.includes(a)) && fehl && !JSON.stringify(pr).includes('203.0.113.7') && pr.eintraege[0].zeit >= pr.eintraege[pr.eintraege.length - 1].zeit, 'Protokoll: Anmeldungen (IP nur gekürzt) und jeder Eingriff, neueste zuerst');
+    ok(pr.tabelle && ['anmeldung', 'sperren', 'entsperren', 'notiz', 'nachricht', 'gutschrift', 'doppelkonto', 'liste_export', 'loeschen'].every((a) => arten.includes(a)) && fehl && !JSON.stringify(pr).includes('203.0.113.7') && pr.eintraege[0].zeit >= pr.eintraege[pr.eintraege.length - 1].zeit, 'Protokoll: Anmeldungen (IP nur gekürzt) und jeder Eingriff, neueste zuerst');
     const ab = await rufe('/api/zentrale/abmelden', { body: {}, cookie: C });
     ok(/__Host-zentrale=;.*Max-Age=0/.test(ab._kopf.get('set-cookie') || ''), 'Abmelden löscht das Cookie');
 
@@ -1605,11 +1637,37 @@ if (teil(13)) {
     const mailE = 'zentrale-e-' + stempel + '@beispiel.de', TE = tok(mailE), regE = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf E ' + stempel, ap: 'Eva Prüf', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', agb: true }, token: TE });
     const pE = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Einblick', kontakt: '0171 5555555', adresse: 'Lupenweg 3', plan: ['Fenster'], days: 14 }, token: TE }), codeE = pE.konto.acc.links.find((l) => l.id === pE.id).code;
     await rufe('/api/aufmass', { body: { v: 1, b: codeE, w: fenster, p: { name: 'Familie Einblick', notiz: 'Bitte Rollladen prüfen' }, t: Date.now() + 3 } });
-    const kurz = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'x' }, cookie: C2, env: env2 });
-    const blick = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs vom 15.10.' }, cookie: C2, env: env2 });
+    const codeJetzt = async () => { ze.codesVergessen(); return ze.totpCode(GEHEIM, Math.floor(Date.now() / 30000)); }; // jeder Code gilt einmal; die Prüfung wartet nicht auf den nächsten
+    const wieder = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs vom 15.10.', code: richtig }, cookie: C2, env: env2 });
+    ok(wieder._status === 401 && /nur einmal/.test(wieder.fehler || ''), 'Der Code der Anmeldung gilt nicht noch einmal für den Einblick (ein abgefangener Anmeldecode öffnet keine Kundendaten)');
+    const kurz = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'x', code: await codeJetzt() }, cookie: C2, env: env2 });
+    const ohneCode = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs vom 15.10.' }, cookie: C2, env: env2 });
+    const blick = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs vom 15.10.', code: await codeJetzt() }, cookie: C2, env: env2 });
+    ok(ohneCode._status === 401 && /Code/.test(ohneCode.fehler || ''), 'Einblick verlangt einen frischen Code aus der Authenticator-App');
+    // Raten des Codes mit einer gestohlenen Sitzung: nach fünf falschen Codes ist die Sitzung beendet, jeder Versuch im Protokoll
+    ze.codesVergessen(); const t5 = await anmelden(env2, PW, await ze.totpCode(GEHEIM, Math.floor(Date.now() / 30000))), C5 = t5.cookie, rateErg = [];
+    const echteCodes = new Set(await Promise.all([-1, 0, 1].map((d) => ze.totpCode(GEHEIM, Math.floor(Date.now() / 30000) + d))));
+    const falsche = ['111111', '222222', '333333', '444444', '555555', '666666', '777777'].filter((c) => !echteCodes.has(c)).slice(0, 5);
+    for (const c of falsche) rateErg.push(await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/einblick', { body: { grund: 'Support-Anfrage des Betriebs', code: c }, cookie: C5, env: env2 }));
+    const danach = await rufe('/api/zentrale/uebersicht', { cookie: C5, env: env2 }), protCode = await rufe('/api/zentrale/protokoll?art=code_falsch', { cookie: C2, env: env2 });
+    ok(t5.r._status === 200 && rateErg.every((r) => r._status === 401) && rateErg[4].abgemeldet === true && danach._status === 401 && protCode.eintraege.filter((e) => /Falscher Code/.test(e.text)).length >= 5, 'Fünf falsche Codes für heikle Schritte beenden die Sitzung; jeder Fehlversuch steht im Protokoll');
     const pj = blick.betrieb && blick.betrieb.projekte[0], prot2 = await rufe('/api/zentrale/protokoll?art=einblick', { cookie: C2, env: env2 });
     ok(kurz._status === 400 && blick.ok && blick.betrieb.einblick === true && pj.kunde === 'Familie Einblick' && pj.adresse === 'Lupenweg 3' && pj.fenster.length === 2 && pj.fenster[0].oeffnung === '1258 × 1438' && pj.angaben.notiz === 'Bitte Rollladen prüfen' && prot2.eintraege.some((e) => e.betrieb === regE.konto.id && e.text === 'Support-Anfrage des Betriebs vom 15.10.'), 'Einblick mit zweitem Faktor und Anlass: Namen, Kontakt, Objekt und Aufmaß in Kurzform; im Protokoll mit Anlass');
-    await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/loeschen', { body: { bestaetigung: 'Zentrale Prüf E ' + stempel }, cookie: C2, env: env2 });
+    // Export mit zweitem Faktor: Anlass und frischer Code, Kundendaten drin, gesperrte (unbezahlte) Aufmaße nur als Umriss
+    const mailF = 'zentrale-f-' + stempel + '@beispiel.de', TF = tok(mailF), telF = '0221 5' + String(Date.now()).slice(-6);
+    await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F1 ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: true }, token: tok('zentrale-f1-' + stempel + '@beispiel.de') });
+    const regF = await rufe('/api/konto/registrieren', { body: { firma: 'Zentrale Prüf F ' + stempel, ap: 'Fritz Prüf', tel: telF, plz: '50667', agb: true }, token: TF });
+    const pF = await rufe('/api/konto/projekte', { body: { kunde: 'Familie Unbezahlt', kontakt: '0171 4444444', plan: ['Fenster'], days: 14 }, token: TF }), codeF = pF.konto.acc.links.find((l) => l.id === pF.id).code;
+    await rufe('/api/aufmass', { body: { v: 1, b: codeF, w: fenster, p: { name: 'Familie Unbezahlt' }, t: Date.now() + 4 } });
+    await rufe('/api/zentrale/betriebe/' + regF.konto.id + '/notiz', { body: { text: 'Notiz für den Export' }, cookie: C2, env: env2 });
+    const exKurz = await rufe('/api/zentrale/betriebe/' + regF.konto.id + '/export', { body: { grund: 'x', code: await codeJetzt() }, cookie: C2, env: env2 });
+    const ex = await rufe('/api/zentrale/betriebe/' + regF.konto.id + '/export', { body: { grund: 'Auskunftsersuchen des Betriebs vom 15.10.', code: await codeJetzt() }, cookie: C2, env: env2 }), exJ = JSON.parse(ex._text || '{}');
+    const lF = ((exJ.daten || {}).links || [])[0] || {}, protEx = await rufe('/api/zentrale/protokoll?art=export', { cookie: C2, env: env2 });
+    ok(exKurz._status === 400 && ex._status === 200 && /attachment; filename="eeziframes-export-zentrale-pr/.test(ex._kopf.get('content-disposition')) && exJ.konto.mail === mailF && lF.kunde === 'Familie Unbezahlt' && lF.locked === true && lF.aufmass.gesperrt === true && !ex._text.includes('1258') && exJ.daten.verwaltung.notiz === 'Notiz für den Export' && exJ.eingriffe.some((e) => e.art === 'notiz') && !exJ.eingriffe.some((e) => /^anmeldung/.test(e.art)) && protEx.eintraege.some((e) => e.betrieb === regF.konto.id && /Auskunftsersuchen/.test(e.text)), 'Export mit zweitem Faktor, Anlass und Code: Daten mit Notiz und Eingriffen, unbezahlte Aufmaße nur als Umriss, im Protokoll vermerkt');
+    const loOhne = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/loeschen', { body: { bestaetigung: 'Zentrale Prüf E ' + stempel }, cookie: C2, env: env2 });
+    const loMit = await rufe('/api/zentrale/betriebe/' + regE.konto.id + '/loeschen', { body: { bestaetigung: 'Zentrale Prüf E ' + stempel, code: await codeJetzt() }, cookie: C2, env: env2 });
+    ok(loOhne._status === 401 && loMit.ok && loMit.nachweis === true && (await sp.betriebHolen(regE.konto.id)) === null, 'Mit zweitem Faktor verlangt auch das Löschen einen frischen Code; danach ist das Konto weg, mit Löschnachweis');
+    for (const fid of [regF.konto.id]) await rufe('/api/zentrale/betriebe/' + fid + '/loeschen', { body: { bestaetigung: 'Zentrale Prüf F ' + stempel, code: await codeJetzt() }, cookie: C2, env: env2 });
 
     // o) Aufräumen: Fristen fürs Protokoll, liegengebliebene Kassen
     const tage = (n) => new Date(Date.now() - n * 864e5).toISOString();
@@ -1673,8 +1731,12 @@ if (teil(13)) {
     await pp.reload({ waitUntil: 'networkidle' }); await pp.waitForTimeout(500);
     ok(await pp.evaluate(() => Server.online()), 'Entsperrt: der Betrieb kommt wieder in sein Konto');
     sauber(pp, 'Betriebsbereich mit Sperre ohne Fehler'); await pctx.close();
-    const [dl] = await Promise.all([zp.waitForEvent('download', { timeout: 8000 }), zp.click('[data-act="export"]')]);
-    ok(/^eeziframes-export-fensterbau-oberfl.*\.json$/.test(dl.suggestedFilename()), 'Export lädt als JSON-Datei: ' + dl.suggestedFilename());
+    await zp.click('[data-act="dlg"][data-v="export"]'); await zp.waitForSelector('.z-dialog #d-grund');
+    const warnt = /zweite Faktor eingerichtet sein/.test(await zp.locator('.z-dialog').textContent());
+    await zp.fill('#d-grund', 'Auskunftsersuchen zur Prüfung'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForSelector('.z-dialog .err');
+    ok(warnt && /zweiten Faktor/.test(await zp.locator('.z-dialog .err').textContent()), 'Export ohne zweiten Faktor: Dialog warnt, der Server lehnt ab');
+    zp.probleme = zp.probleme.filter((x) => !/403/.test(x));
+    await zp.click('.z-dialog [data-act="dlg-zu"]');
     // Eigene Aufrufe zählen nicht, fremde schon
     const summe = () => zp.evaluate(async () => (await (await fetch('/api/zentrale/statistik?tage=7', { headers: { 'x-zentrale': '1' } })).json()).summe.aufrufe);
     const vorA = await summe();
