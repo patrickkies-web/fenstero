@@ -177,6 +177,10 @@
     const planName = (k) => PLAN_NAME[k] || PLAN_NAME.service;
     const konto = (a) => (RANG[a.konto] !== undefined ? a.konto : 'service');
     const NB_MAX = 2, NB_TAGE = 30;
+    /* Ab dem ersten Öffnen hat der Kunde 60 Tage Zeit (auch wenn die gewählte Laufzeit kürzer ist); danach schließt der Link,
+       der Betrieb kann ihn verlängern */
+    const OFFEN_TAGE = 60, VERLAENGERN_TAGE = 30;
+    const spaeter = (a, b) => { const x = parseDE(a), y = parseDE(b); return !!x && (!y || x.getTime() > y.getTime()); };
     const two = (n) => String(n).padStart(2, '0');
     const d0 = (now) => new Date(now || Date.now());
     const monthKey = (now) => { const d = d0(now); return d.getFullYear() + '-' + two(d.getMonth() + 1); };
@@ -188,7 +192,10 @@
     const parseDE = (s) => { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(s || '').trim()); return m ? new Date(+m[3], +m[2] - 1, +m[1], 23, 59, 59) : null; };
     const hashN = (s) => String(s).split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7);
     const nW = (n, one, many) => n + ' ' + (n === 1 ? one : many);
-    const newCode = () => Math.random().toString(36).slice(2, 7).replace(/[^a-z0-9]/g, 'x').padEnd(5, '7');
+    /* Link-Code: 10 Zeichen aus a–z und 0–9 (rund 3,6 Billiarden Möglichkeiten), damit niemand fremde Links errät; ältere Links
+       mit 5 Zeichen bleiben gültig */
+    const ZEICHEN = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const newCode = () => { const z = new Uint8Array(10); if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(z); else for (let i = 0; i < 10; i++) z[i] = Math.floor(Math.random() * 256); let c = ''; for (let i = 0; i < 10; i++) c += ZEICHEN[z[i] % 36]; return c; };
     const newId = (p) => (p || 'l') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     function nextNr(a, now) { const y = d0(now).getFullYear(), mx = (a.links || []).reduce((m, l) => { const k = /-(\d+)$/.exec(l.nr || ''); return k ? Math.max(m, +k[1]) : m; }, 0); return 'P-' + y + '-' + String(mx + 1).padStart(3, '0'); }
     const normTel = (t) => { let d = String(t || '').replace(/\D/g, ''); if (d.startsWith('0049')) d = '0' + d.slice(4); else if (d.startsWith('49') && d.length > 10) d = '0' + d.slice(2); return d; };
@@ -319,6 +326,12 @@
       if (p.gesendet && l.status === 'erstellt') { l.status = 'gesendet'; l.via = String(p.via || 'Link').slice(0, 30); l.log = l.log || {}; l.log.gesendet = stamp(now); }
       if (p.du !== undefined) { l.du = !!p.du; l.msg = ''; }
       if (p.days && [7, 14, 30].includes(+p.days)) { l.days = +p.days; l.expires = dateIn(+p.days, now); }
+      if (p.verlaengern) {
+        if (!['abgelaufen', 'erstellt', 'gesendet', 'geoeffnet', 'arbeit'].includes(l.status)) return { ok: false, msg: 'Dieser Link lässt sich nicht verlängern.' };
+        l.expires = dateIn(VERLAENGERN_TAGE, now); l.log = l.log || {};
+        if (l.status === 'abgelaufen') { l.status = l.log.arbeit ? 'arbeit' : l.log.geoeffnet ? 'geoeffnet' : l.log.gesendet ? 'gesendet' : 'erstellt'; l.log.verlaengert = stamp(now); }
+        return { ok: true, msg: 'Der Link gilt jetzt bis ' + l.expires + '.' };
+      }
       if (p.stage && ['neu', 'angebot', 'termin', 'auftrag', 'verloren'].includes(p.stage)) l.stage = p.stage;
       if (p.note !== undefined) l.note = String(p.note).slice(0, 600);
       if (p.memo !== undefined) l.memo = String(p.memo).slice(0, 600);
@@ -358,18 +371,31 @@
       return { ok: true, art: 'neu', l: l, feier: r.ok ? 'eingang' : '', locked: !r.ok, notif: r.notif, msg: r.ok ? (war ? 'Link war abgelaufen, Aufmaß trotzdem übernommen: ' : 'Aufmaß übernommen: ') + l.kunde : 'Aufmaß übernommen. Zum Ansehen Zahlungsart hinterlegen' };
     }
     /* Fortschritt aus der App (Link geöffnet, misst): ohne Buchung */
+    /* Rückgabe: 'geoeffnet' (zum ersten Mal geöffnet), 'arbeit', 'frist' (nur die 60-Tage-Frist gesetzt) oder false */
     function fortschritt(l, stufe, k, now) {
       if (!l || ['eingegangen', 'deaktiviert', 'abgelaufen'].includes(l.status)) return false;
       l.log = l.log || {};
-      if (stufe === 'geoeffnet' && ['erstellt', 'gesendet'].includes(l.status)) { l.status = 'geoeffnet'; l.log.geoeffnet = stamp(now); return true; }
-      if (stufe === 'arbeit') { if (l.status !== 'arbeit') { l.status = 'arbeit'; l.log.arbeit = stamp(now); } l.progress = Math.max(l.progress || 0, Math.min(4, +k || 0)); return true; }
-      return false;
+      let frist = false;
+      if (!l.offenAm && (stufe === 'geoeffnet' || stufe === 'arbeit')) { l.offenAm = datum(now); const bis = dateIn(OFFEN_TAGE, now); if (spaeter(bis, l.expires)) l.expires = bis; frist = true; }
+      if (stufe === 'geoeffnet' && ['erstellt', 'gesendet'].includes(l.status)) { l.status = 'geoeffnet'; l.log.geoeffnet = stamp(now); return 'geoeffnet'; }
+      if (stufe === 'arbeit') { if (l.status !== 'arbeit') { l.status = 'arbeit'; l.log.arbeit = stamp(now); } l.progress = Math.max(l.progress || 0, Math.min(4, +k || 0)); return 'arbeit'; }
+      return frist ? 'frist' : false;
+    }
+    /* Ist der Link für den Kunden zu? Abgelaufen (auch wenn tickKonto noch nicht lief), deaktiviert oder schon eingegangen ohne
+       offene Nachbesserung */
+    function linkZu(l, now) {
+      if (!l) return 'fehlt';
+      if (l.status === 'deaktiviert') return 'deaktiviert';
+      if (l.status === 'eingegangen') return l.nb && l.nb.offen ? '' : 'eingegangen';
+      if (l.status === 'abgelaufen') return 'abgelaufen';
+      const d = parseDE(l.expires); if (d && (now || Date.now()) > d.getTime()) return 'abgelaufen';
+      return '';
     }
 
-    return { preise: preise, setPreise: setPreise, planName: planName, konto: konto, RANG: RANG, NB_MAX: NB_MAX, NB_TAGE: NB_TAGE, monthKey: monthKey, monthLabel: monthLabel, monthEnd: monthEnd, stamp: stamp, datum: datum, dateIn: dateIn, parseDE: parseDE, hashN: hashN, nW: nW, newCode: newCode, newId: newId, nextNr: nextNr, normTel: normTel, normFirma: normFirma,
+    return { preise: preise, setPreise: setPreise, planName: planName, konto: konto, RANG: RANG, NB_MAX: NB_MAX, NB_TAGE: NB_TAGE, OFFEN_TAGE: OFFEN_TAGE, VERLAENGERN_TAGE: VERLAENGERN_TAGE, monthKey: monthKey, monthLabel: monthLabel, monthEnd: monthEnd, stamp: stamp, datum: datum, dateIn: dateIn, parseDE: parseDE, hashN: hashN, nW: nW, newCode: newCode, newId: newId, nextNr: nextNr, normTel: normTel, normFirma: normFirma,
       unpack: unpack, fromApp: fromApp, fingerprint: fingerprint, fromAppProj: fromAppProj, aufmassOf: aufmassOf,
       freeQuota: freeQuota, ledger: ledger, freeLeft: freeLeft, lockedLinks: lockedLinks, aboGenutzt: aboGenutzt, aboFrei: aboFrei, bookAufmass: bookAufmass, receiveAufmass: receiveAufmass, unlockWaiting: unlockWaiting, bookPlan: bookPlan, planWechsel: planWechsel, tickKonto: tickKonto,
-      passt: passt, ueberschneidung: ueberschneidung, nbMoeglich: nbMoeglich, nbAnfragen: nbAnfragen, nbZurueck: nbZurueck, neuesProjekt: neuesProjekt, listeProjekte: listeProjekte, projektAendern: projektAendern, importCode: importCode, fortschritt: fortschritt };
+      passt: passt, ueberschneidung: ueberschneidung, nbMoeglich: nbMoeglich, nbAnfragen: nbAnfragen, nbZurueck: nbZurueck, neuesProjekt: neuesProjekt, listeProjekte: listeProjekte, projektAendern: projektAendern, importCode: importCode, fortschritt: fortschritt, linkZu: linkZu };
   })();
 
   return { AW: AW, Abrechnung: Abrechnung };

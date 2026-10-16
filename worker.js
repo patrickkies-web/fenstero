@@ -24,6 +24,6 @@ export default {
     return env.ASSETS.fetch(request);
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(geplant(env));
+    ctx.waitUntil(geplant(env, event && event.cron));
   }
 };

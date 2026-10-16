@@ -80,6 +80,19 @@ export function erlaubt(schluessel, max, fensterMs) {
   if (liste.length >= max) { zaehler.set(schluessel, liste); return false; }
   liste.push(jetzt); zaehler.set(schluessel, liste); if (zaehler.size > 5000) zaehler.clear(); return true;
 }
+/* Nur nachsehen, ob eine Bremse schon voll ist (zählt nichts); gezählt wird dann mit erlaubt(), etwa nur bei Fehlversuchen */
+export function voll(schluessel, max, fensterMs) {
+  const jetzt = Date.now();
+  return (zaehler.get(schluessel) || []).filter((t) => jetzt - t < fensterMs).length >= max;
+}
+/* Kundenlinks ohne Anmeldung (der Code ist der Schlüssel): je Anschluss höchstens 240 Anfragen und 30 unbekannte Codes in
+   10 Minuten, damit niemand Codes durchprobiert */
+const ZEHN_MIN = 10 * 60 * 1000;
+export function linkBremse(request) {
+  const a = anschluss(ip(request));
+  if (!erlaubt('lk:' + a, 240, ZEHN_MIN) || voll('lk404:' + a, 30, ZEHN_MIN)) throw new ApiFehler('Zu viele Anfragen. Bitte gleich noch einmal.', 429);
+}
+export function linkUnbekannt(request, text) { erlaubt('lk404:' + anschluss(ip(request)), 30, ZEHN_MIN); return new ApiFehler(text || 'Diesen Link gibt es nicht.', 404); }
 export const ip = (request) => request.headers.get('CF-Connecting-IP') || request.headers.get('x-forwarded-for') || 'unbekannt';
 /* Gekürzte IP-Adresse fürs Protokoll der Zentrale: IPv4 auf /24, IPv6 auf /48 (der Anschluss ist so nicht mehr bestimmbar) */
 export function netzKurz(adresse) {

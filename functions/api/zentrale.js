@@ -176,10 +176,32 @@ function buchungen(a, einblick) {
     return { id: b.id, art: b.kind, wann: b.when || '', monat: b.month || '', text: text, sub: b.kind === 'aufmass' ? '' : b.sub || '', betrag: Number(b.betrag) || 0, status: b.status, rechnung: b.rechnung || '', hinweis: b.badge || '' };
   });
 }
+/* ---------- Auffälligkeiten gegen Mehrfachnutzung: Hinweise zum Prüfen, keine automatische Sperre ----------
+   Kundenlinks (Zwischenstand, entwurf.js): viele angelegte oder gelöschte Fenster, Grenze von 50 erreicht, Fenster nach vier
+   Änderungen fest, lange nicht gesendet. Käufe des Aufmaßblatts: mehrere Käufe mit derselben E-Mail (vielleicht ein Betrieb, der die
+   Variante für Hauseigentümer nutzt). */
+function linkAuffaellig(e, l, jetzt) {
+  const m = e.meta || {}, angelegt = Number(m.angelegt) || 0, aktuell = Number(m.aktuell) || 0, geloescht = Math.max(0, angelegt - aktuell);
+  const fest = Object.values(m.fenster || {}).filter((f) => (Number(f.aend) || 0) >= 4).length, gruende = [];
+  if (angelegt >= 50) gruende.push('Grenze von 50 Fenstern erreicht'); else if (angelegt >= 30) gruende.push(angelegt + ' Fenster angelegt');
+  if (geloescht >= 10) gruende.push(geloescht + ' Fenster gelöscht');
+  if (fest) gruende.push(X().nW(fest, 'Fenster', 'Fenster') + ' nach vier Änderungen fest');
+  const tage = Math.floor((jetzt - (Date.parse(e.created_at || '') || jetzt)) / TAG);
+  if (gruende.length && !m.gesendet && !(l && l.status === 'eingegangen') && tage >= 14) gruende.push('seit ' + tage + ' Tagen nicht gesendet');
+  return { code: e.code, nr: l ? l.nr || '' : '', kunde: l ? l.kunde || '' : '', angelegt: angelegt, aktuell: aktuell, geloescht: geloescht, fest: fest, gesendet: !!m.gesendet, gruende: gruende };
+}
+function kaeufeAuffaellig(kaeufe) {
+  const je = new Map();
+  kaeufe.filter((x) => x.status === 'bezahlt' && x.mail).forEach((x) => { const k2 = String(x.mail).trim().toLowerCase(); je.set(k2, (je.get(k2) || 0) + 1); });
+  return Array.from(je.entries()).filter((x) => x[1] >= 3).sort((x, y) => y[1] - x[1]).map((x) => ({ mail: x[0], anzahl: x[1] }));
+}
 async function detail(ctx, row, einblick) {
   const a = row.daten || {}, v = a.verwaltung || {};
-  const [auth, eintraege] = await Promise.all([anmeldungLesen(ctx.k, row.auth_user).catch(() => null), ctx.sp.protokollLesen({ betrieb: row.id, anzahl: 50 }).catch(() => null)]);
+  const [auth, eintraege, entwuerfe] = await Promise.all([anmeldungLesen(ctx.k, row.auth_user).catch(() => null), ctx.sp.protokollLesen({ betrieb: row.id, anzahl: 50 }).catch(() => null), ctx.sp.entwuerfeVonBetrieb ? ctx.sp.entwuerfeVonBetrieb(row.id).catch(() => null) : null]);
+  const jetzt = Date.now(), links = new Map((a.links || []).map((l) => [l.code, l]));
+  const zwischen = (entwuerfe || []).map((e) => linkAuffaellig(e, links.get(e.code), jetzt));
   return Object.assign(zeile(row), {
+    zwischenstaende: zwischen.map((x) => ({ nr: x.nr, kunde: einblick ? x.kunde : '', angelegt: x.angelegt, aktuell: x.aktuell, geloescht: x.geloescht, fest: x.fest, gesendet: x.gesendet, gruende: x.gruende })),
     seit: a.since || '', farbe: a.col || '', abzug: a.abzug || null, freiKontingent: X().freeQuota(a), freiGenutzt: a.freeUsed || 0,
     notiz: v.notiz || '', notizZeit: v.notizZeit || '', verlauf: (v.verlauf || []).slice(0, 30),
     projekte: projekte(a, einblick), buchungen: buchungen(a, einblick),
@@ -235,7 +257,7 @@ export const ZENTRALE = {
   /* Übersicht: Kennzahlen, zwölf Wochen, letzte Vorgänge, Hinweise */
   'GET /api/zentrale/uebersicht': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), k = ctx.k, jetzt = Date.now();
-    const [rows, kaeufe, web] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), auswerten(sp, 30).catch(() => null)]);
+    const [rows, kaeufe, web, entwuerfe] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), auswerten(sp, 30).catch(() => null), sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null]);
     const z = rows.map(zeile), alter = (iso) => (iso ? (jetzt - Date.parse(iso)) / TAG : Infinity), summe = (f) => z.reduce((s, x) => s + (Number(f(x)) || 0), 0);
     const bez = kaeufe.filter((x) => x.status === 'bezahlt'), tarife = { service: 0, abo: 0, plus: 0 }; z.forEach((x) => { tarife[x.tarif] = (tarife[x.tarif] || 0) + 1; });
     const w = wochen(12), aktivitaet = [];
@@ -258,6 +280,13 @@ export const ZENTRALE = {
     k.hinweise.forEach((t) => hinweise.push({ art: 'bad', text: t, ziel: 'einstellungen' }));
     const fehl = z.filter((x) => x.k.fehlgeschlagen > 0); if (fehl.length) hinweise.push({ art: 'bad', text: X().nW(fehl.length, 'Betrieb hat', 'Betriebe haben') + ' eine fehlgeschlagene Zahlung.', ziel: 'betriebe' });
     const warten = z.filter((x) => x.k.wartend > 0); if (warten.length) hinweise.push({ art: 'info', text: X().nW(warten.length, 'Betrieb hat', 'Betriebe haben') + ' Aufmaße, die auf eine Zahlungsart warten.', ziel: 'betriebe' });
+    /* Mehrfachnutzung: auffällige Kundenlinks (je Link ein Hinweis, höchstens fünf) und Käufer mit mehreren Aufmaßblättern */
+    if (entwuerfe === null && k.supabase) hinweise.push({ art: 'warn', text: 'Der Zwischenspeicher für Kundenlinks ist noch nicht eingerichtet: supabase/schema.sql noch einmal im SQL-Editor von Supabase ausführen.', ziel: 'einstellungen' });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const auff = (entwuerfe || []).map((e) => { const r = byId.get(e.betrieb), l = r ? ((r.daten || {}).links || []).find((x) => x.code === e.code) : null; return Object.assign(linkAuffaellig(e, l, jetzt), { betrieb: e.betrieb, name: r ? r.name : '' }); }).filter((x) => x.gruende.length);
+    auff.slice(0, 5).forEach((x) => hinweise.push({ art: 'warn', text: 'Mehrfachnutzung prüfen: ' + (x.name || 'Betrieb') + ', Projekt ' + (x.nr || '?') + ': ' + x.gruende.join(', ') + '.', ziel: 'betrieb/' + x.betrieb }));
+    if (auff.length > 5) hinweise.push({ art: 'warn', text: 'Dazu ' + X().nW(auff.length - 5, 'weiterer auffälliger Kundenlink', 'weitere auffällige Kundenlinks') + '.', ziel: 'betriebe' });
+    kaeufeAuffaellig(kaeufe).slice(0, 3).forEach((x) => hinweise.push({ art: 'warn', text: x.mail + ' hat ' + x.anzahl + ' Aufmaßblätter gekauft: vielleicht ein Betrieb, der die Variante für Hauseigentümer nutzt.', ziel: 'kaeufe' }));
     return {
       ok: true,
       kpi: {
@@ -467,7 +496,7 @@ export const ZENTRALE = {
    Anmeldungen ohne Betrieb nach 30 Tagen ohne Nutzung. Schlägt etwas fehl, wird nichts gelöscht und beim nächsten Lauf neu versucht. */
 export async function aufraeumen(k, sp) {
   if (!sp) return { ok: false };
-  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, anmeldungen: 0 };
+  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, anmeldungen: 0, entwuerfe: 0 };
   try { out.protokoll = await sp.protokollAufraeumen(new Date(jetzt - 90 * TAG).toISOString(), new Date(jetzt - 3 * 365 * TAG).toISOString()); } catch (e) { out.ok = false; }
   try { out.kassen = await sp.zahlungenAufraeumen(new Date(jetzt - 30 * TAG).toISOString()); } catch (e) { out.ok = false; }
   if (k.supabase) {
@@ -484,6 +513,27 @@ export async function aufraeumen(k, sp) {
       }
     } catch (e) { out.ok = false; }
   }
+  /* Zwischenstände der Kundenlinks (entwurf.js): weg, wenn Betrieb oder Link weg sind; wenn der Link abgelaufen oder deaktiviert
+     ist (30 Tage nach der letzten Änderung, so kann der Betrieb noch verlängern); wenn das Aufmaß eingegangen ist und keine
+     Nachbesserung mehr möglich ist (30 Tage nach dem Eingang oder alle Runden genutzt); spätestens nach 180 Tagen ohne Änderung.
+     Höchstens 200 je Lauf. */
+  try {
+    const liste = await sp.entwuerfeAlle();
+    if (Array.isArray(liste) && liste.length) {
+      const byId = new Map(((await sp.betriebeAlle()) || []).map((r) => [r.id, r]));
+      for (const e of liste) {
+        if (out.entwuerfe >= 200) break;
+        const row = byId.get(e.betrieb), l = row ? ((row.daten || {}).links || []).find((x) => x.code === e.code) : null, still = jetzt - (Date.parse(e.updated_at || '') || jetzt);
+        let weg = !row || !l || still > 180 * TAG;
+        if (!weg) {
+          const zu = X().linkZu(l, jetzt), ein = Number(l.eingegangenAt) || 0;
+          if ((zu === 'abgelaufen' || zu === 'deaktiviert') && still > 30 * TAG) weg = true;
+          if (zu === 'eingegangen' && ((l.runde || 1) > X().NB_MAX || (ein && jetzt - ein > X().NB_TAGE * TAG))) weg = true;
+        }
+        if (weg && (await sp.entwurfLoeschen(e.code))) out.entwuerfe++;
+      }
+    }
+  } catch (e) { out.ok = false; }
   if (out.anmeldungen) await protokoll(sp, 'aufraeumen', null, X().nW(out.anmeldungen, 'Anmeldung', 'Anmeldungen') + ' ohne Betrieb gelöscht (30 Tage ungenutzt)');
   return out;
 }

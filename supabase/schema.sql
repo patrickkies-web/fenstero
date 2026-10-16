@@ -1,6 +1,6 @@
 -- eeziframes · Datenbank (Supabase/Postgres)
 -- Im SQL-Editor des Supabase-Projekts ausführen (docs/ONLINE-STELLEN.md, Stufe 2). Die Datei lässt sich gefahrlos erneut ausführen:
--- Vorhandenes bleibt, Neues (zuletzt: Protokoll und Statistik der Zentrale) kommt dazu.
+-- Vorhandenes bleibt, Neues (zuletzt: Zwischenstände der Kundenlinks, davor Protokoll und Statistik der Zentrale) kommt dazu.
 -- Der Server greift ausschließlich mit dem geheimen Schlüssel zu (sb_secret_… bzw. früher service_role, functions/api/speicher.js);
 -- Browser haben keinen direkten Zugriff: Row Level Security ist an, ohne Regeln für anon/authenticated.
 
@@ -93,19 +93,37 @@ language sql stable security invoker set search_path = '' as $$
    group by s.schluessel;
 $$;
 
+-- Zwischenstand eines Kundenlinks: Der Kunde kommt über seinen Link zurück (auch auf einem anderen Gerät) und sieht seine Fenster.
+-- Ohne Fotos (die bleiben auf dem Gerät). meta hält die Zähler gegen Mehrfachnutzung: angelegte Fenster (auch gelöschte) und je
+-- Fenster erstes Speichern und Änderungen nach der ersten Woche (functions/api/entwurf.js). Gelöscht wird beim Aufräumen, wenn der
+-- Link fertig, abgelaufen oder weg ist.
+create table if not exists public.entwuerfe (
+  code        text primary key,                          -- Code des Kundenlinks
+  betrieb     uuid not null references public.betriebe(id) on delete cascade,
+  daten       jsonb not null default '{}'::jsonb,        -- Fenster und Angaben zum Haus, wie in der App, ohne Fotos
+  meta        jsonb not null default '{}'::jsonb,        -- Zähler (angelegt, fenster: {kennung: {t0, aend}}), gesendet
+  stand       bigint not null default 0,                 -- letzte Änderung im Browser (Millisekunden)
+  version     integer not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists entwuerfe_betrieb_idx on public.entwuerfe (betrieb);
+create index if not exists entwuerfe_updated_idx on public.entwuerfe (updated_at);
+
 -- Kein direkter Zugriff aus dem Browser: RLS an, keine Regeln → nur der geheime Schlüssel des Servers kommt durch
 alter table public.betriebe   enable row level security;
 alter table public.zahlungen  enable row level security;
 alter table public.ereignisse enable row level security;
 alter table public.protokoll  enable row level security;
 alter table public.statistik  enable row level security;
-revoke all on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik from anon, authenticated;
+alter table public.entwuerfe  enable row level security;
+revoke all on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe from anon, authenticated;
 revoke all on function public.eeziframes_zaehlen(date, text[]) from public, anon, authenticated;
 revoke all on function public.eeziframes_auswerten(date) from public, anon, authenticated;
 -- Der Server (geheimer Schlüssel sb_secret_… bzw. service_role) darf lesen und schreiben; ausdrücklich gewährt, auch wenn neue
 -- Tabellen im Projekt nicht mehr von selbst für die Data API freigegeben werden
 grant usage on schema public to service_role;
-grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik to service_role;
+grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe to service_role;
 grant execute on function public.eeziframes_zaehlen(date, text[]) to service_role;
 grant execute on function public.eeziframes_auswerten(date) to service_role;
 

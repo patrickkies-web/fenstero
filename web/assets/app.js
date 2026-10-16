@@ -503,10 +503,12 @@ function specRows(w) {
   if (w.notiz) rows.push({ k: 'Notiz', v: w.notiz });
   return rows;
 }
-/* Kompakter Aufmaß-Code: nur Abweichungen vom Standard, für den Weg zum Fensterbauer ohne Server */
+/* Kompakter Aufmaß-Code: nur Abweichungen vom Standard, für den Weg zum Fensterbauer ohne Server; ohne die Zähler gegen
+   Mehrfachnutzung (Kennung, erstes Speichern, Änderungen), die bleiben in der App und beim Zwischenstand */
+const NUR_APP = { wid: 1, t0: 1, aend: 1 };
 function packProject(windows, proj, betrieb) {
   const base = baseWin();
-  const ws = windows.map((w) => { const o = {}; Object.keys(w).forEach((k) => { if (JSON.stringify(w[k]) !== JSON.stringify(base[k])) o[k] = w[k]; }); if (o.plan && o.plan.bild) o.plan = Object.assign({}, o.plan, { bild: '' }); return o; });
+  const ws = windows.map((w) => { const o = {}; Object.keys(w).forEach((k) => { if (!NUR_APP[k] && JSON.stringify(w[k]) !== JSON.stringify(base[k])) o[k] = w[k]; }); if (o.plan && o.plan.bild) o.plan = Object.assign({}, o.plan, { bild: '' }); return o; });
   const runde = betrieb && S.nb && S.nb.runde ? S.nb.runde : (betrieb && S.sent && S.sent.runde) || 1;
   const json = JSON.stringify(Object.assign({ v: 1, b: betrieb ? betrieb.code : '', p: proj, w: ws, t: Date.now() }, runde > 1 ? { r: runde } : {}, runde > 1 && S.nb && S.nb.teil ? { m: 1 } : {}));
   const bytes = new TextEncoder().encode(json);
@@ -1222,40 +1224,59 @@ const S = {
   mess: { step: 0, cur: '', msg: null, ack: false }, rest: { i: 0, cur: '', msg: null }, openSash: -1,
   selSash: 0, selBar: null, side: 'aussen', q: null, gloss: null, glossIndex: false, toast: '',
   proj: Object.assign({}, PROJ0),
-  sent: null
+  sent: null, angelegt: 0, stand: 0,
+  /* Zwischenstand beim Kundenlink (Server): fp = zuletzt gemerkter Stand, offen = noch nicht gesendet */
+  sync: { fp: '', offen: false, laeuft: false, wieder: false, timer: null, aus: false, geladen: false, bekannt: [] }
 };
 /* Kundenlink: eigenes Projekt je Code, getrennt vom eigenen Projekt; Senden geht einmal */
 const linkKey = () => 'aufmass.k.' + (S.betrieb ? S.betrieb.code : '');
 /* Passwörter nie im Browser speichern */
 function kaufSicher() { return S.kauf ? Object.assign({}, S.kauf, { pw: '' }) : S.kauf; }
-function persist() {
+function lokalSpeichern() {
+  if (S.betrieb) { const b = new Set(S.sync.bekannt || []); S.windows.forEach((w) => { if (w.wid) b.add(w.wid); }); S.sync.bekannt = Array.from(b).slice(-200); }
   try {
-    if (S.betrieb) localStorage.setItem(linkKey(), JSON.stringify({ windows: S.windows, proj: S.proj, sent: S.sent, nb: S.nb || null, kauf: kaufSicher(), name: S.betrieb.name }));
-    else localStorage.setItem(STORE, JSON.stringify({ windows: S.windows, proj: S.proj, kauf: kaufSicher(), teil: S.teil || null }));
+    if (S.betrieb) localStorage.setItem(linkKey(), JSON.stringify({ windows: S.windows, proj: S.proj, sent: S.sent, nb: S.nb || null, kauf: kaufSicher(), name: S.betrieb.name, angelegt: angelegt(), stand: S.stand || 0, bekannt: S.sync.bekannt }));
+    else localStorage.setItem(STORE, JSON.stringify({ windows: S.windows, proj: S.proj, kauf: kaufSicher(), teil: S.teil || null, angelegt: angelegt() }));
   } catch (e) { /* ohne Speicher weiter */ }
+}
+/* Speichern: im Browser und beim Kundenlink zusätzlich als Zwischenstand auf dem Server (kurz gesammelt, ohne Fotos) */
+function persist() {
+  if (S.betrieb) entwurfStand();
+  lokalSpeichern();
+  if (S.betrieb) entwurfPlanen();
 }
 function normProj(p) { if (p.zeit === 'sofort') p.zeit = 'asap'; if (p.zeit === 'offen') p.zeit = '12m'; if (p.gebaeude === 'altbau') p.gebaeude = 'efh'; return p; }
 /* Ältere Aufmaße kennen nur roll (Rollladen): daraus wird der Sonnenschutz außen abgeleitet */
 function altAngleichen(w) { if ((!w.sart || w.sart === 'keiner') && (w.roll === 'aufsatz' || w.roll === 'vorbau')) w.sart = 'rollladen'; else if ((!w.sart || w.sart === 'keiner') && w.roll === 'behalten') w.sart = 'behalten'; return w; }
-function takeWindows(arr) { S.windows = arr.map((x) => altAngleichen(Object.assign(baseWin(), x))); S.windows.forEach((x) => (x.bars || []).forEach((b) => { const m = /^b(\d+)/.exec(String(b.id)); if (m && +m[1] >= BID) BID = +m[1] + 1; })); }
+function takeWindows(arr) {
+  const jetzt = Date.now(); let nachgetragen = false;
+  S.windows = arr.map((x) => altAngleichen(Object.assign(baseWin(), x)));
+  S.windows.forEach((x) => { (x.bars || []).forEach((b) => { const m = /^b(\d+)/.exec(String(b.id)); if (m && +m[1] >= BID) BID = +m[1] + 1; }); if (!x.wid) { x.wid = neueWid(); nachgetragen = true; } if (!(Number(x.t0) > 0)) { x.t0 = jetzt; nachgetragen = true; } x.aend = Number(x.aend) || 0; });
+  return nachgetragen;
+}
 function loadLink() {
   S.windows = []; S.proj = Object.assign({}, PROJ0); S.sent = null; S.kauf = null; S.editIdx = -1; S.win = baseWin();
-  S.nb = null;
-  try { const raw = localStorage.getItem(linkKey()); const o = raw ? JSON.parse(raw) : null; if (o && Array.isArray(o.windows)) takeWindows(o.windows); if (o && o.proj) normProj(Object.assign(S.proj, o.proj)); if (o && o.sent) S.sent = o.sent; if (o && o.kauf) S.kauf = o.kauf; if (o && o.nb) S.nb = o.nb; } catch (e) { /* ok */ }
+  S.nb = null; S.angelegt = 0; S.stand = 0; S.linkZu = ''; S.linkZuText = ''; clearTimeout(S.sync.timer);
+  S.sync = { fp: '', offen: false, laeuft: false, wieder: false, timer: null, aus: false, geladen: false, bekannt: [] };
+  let nach = false;
+  try { const raw = localStorage.getItem(linkKey()); const o = raw ? JSON.parse(raw) : null; if (o && Array.isArray(o.windows)) nach = takeWindows(o.windows); if (o && o.proj) normProj(Object.assign(S.proj, o.proj)); if (o && o.sent) S.sent = o.sent; if (o && o.kauf) S.kauf = o.kauf; if (o && o.nb) S.nb = o.nb; if (o) { S.angelegt = Number(o.angelegt) || 0; S.stand = Number(o.stand) || 0; S.sync.bekannt = Array.isArray(o.bekannt) ? o.bekannt.slice(-200) : []; } } catch (e) { /* ok */ }
+  S.sync.fp = entwurfFp(); if (nach) lokalSpeichern(); // ältere Aufmaße: nachgetragene Kennungen gleich merken
   /* Der Betrieb hat um Nachbesserung gebeten (Runde im Link höher als die gesendete): wieder bearbeitbar, Angaben bleiben */
   const r = S.betrieb && S.betrieb.runde ? S.betrieb.runde : 1;
   if (r > 1 && (!S.sent || r > (S.sent.runde || 1)) && !(S.nb && S.nb.runde === r)) { S.nb = { runde: r, vorher: S.sent || null, teil: !S.windows.length }; S.sent = null; persist(); }
 }
-function loadOwn() { S.windows = []; S.proj = Object.assign({}, PROJ0); S.sent = null; S.kauf = null; S.editIdx = -1; S.win = baseWin(); restore(); }
+function loadOwn() { S.windows = []; S.proj = Object.assign({}, PROJ0); S.sent = null; S.kauf = null; S.editIdx = -1; S.win = baseWin(); S.angelegt = 0; S.linkZu = ''; restore(); }
 function restore() {
   try {
     const raw = localStorage.getItem(STORE);
     if (!raw) return;
     const o = JSON.parse(raw);
-    if (o && Array.isArray(o.windows)) takeWindows(o.windows);
+    const nach = o && Array.isArray(o.windows) ? takeWindows(o.windows) : false;
     if (o && o.proj) normProj(Object.assign(S.proj, o.proj));
     if (o && o.kauf) S.kauf = o.kauf;
     S.teil = o && o.teil ? o.teil : null;
+    S.angelegt = o ? Number(o.angelegt) || 0 : 0;
+    if (nach) lokalSpeichern(); // sonst begänne die freie Woche älterer Fenster bei jedem Laden neu
   } catch (e) { /* ok */ }
 }
 function readHash() {
@@ -1275,7 +1296,7 @@ function go(screen, dir) {
   if (screen === 'zeichnen' && !planFoto()) { toast('Erst ein Foto der Stelle'); screen = 'fotos'; }
   if (S.screen === 'zeichnen' && screen !== 'zeichnen' && S.win.plan && !S.win.plan.bild) planBildErzeugen(S.win).then(() => { if (S.editIdx >= 0) persist(); });
   if (screen === 'planmasse') planVorgabe(S.win);
-  S.dir = dir || 'fwd'; S.screen = screen; S.gloss = null; S.glossIndex = false; S.selBar = null;
+  S.dir = dir || 'fwd'; S.screen = screen; S.gloss = null; S.glossIndex = false; S.selBar = null; S.neuFrage = false;
   if (screen === 'rest') { const first = REST.findIndex((r) => !num(S.win.mo[r.k])); S.rest = { i: first < 0 ? 4 : first, cur: '', msg: null }; }
   if (screen !== 'frage') S.openSash = -1;
   if (screen === 'frage' && !S.win.e_teilung && (S.win.art || 'fenster') === 'fenster') { const ew = derive(S.win).elW || 0, t = ew && ew < 1000 ? '1' : ew >= 2000 ? '3' : '2p'; if (t !== S.win.teilung) { S.win.teilung = t; S.win.sashes = sashesFor(t); S.win.bars = S.win.preset !== 'keine' && S.win.preset !== 'eigene' ? presetBars(S.win.preset, S.win.sashes.length) : S.win.bars.filter((b) => b.s < S.win.sashes.length); S.selSash = 0; } }
@@ -1373,14 +1394,16 @@ function model(w, o) {
   if (id === 'w3d') { const alt = document.getElementById('w3d'); if (alt && alt.getAttribute('data-sig') === w3dSig(w, o)) return w3dHuelle(w, o) + '</div>'; }
   return w3dHTML(w, o);
 }
-function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' : 'div';
+/* Maße in Listen erst nach dem Freischalten (eigenes Aufmaß); beim Kundenlink bekommt sie der Betrieb, vorher nur „vollständig“ */
+const masseZeigen = () => !S.betrieb && FREI();
+function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' : 'div', fest = aendStand(x).fest;
   /* nach dem Senden im Link: keine Maße mehr, die stehen im Aufmaßblatt */
   if (hide) return '<div class="wincard sent"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (PILOT ? 'Abgeschlossen' : 'Übermittelt') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + '</span><span class="me">Maße und Angaben stehen im Aufmaßblatt</span></span></div>';
-  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (d.elW && d.elH ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : 'Maße offen') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + ' · ' + x.sashes.map((z) => TYPNAME[z.t]).join(' · ') + '</span><span class="me">' + esc(rahmenFarbe(x, 'aussen').name + ' · ' + lab('glas', x.glas) + '-Glas' + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
+  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (masseZeigen() && d.elW && d.elH ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : d.complete ? 'Maße vollständig' : 'Maße offen') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + ' · ' + x.sashes.map((z) => TYPNAME[z.t]).filter((t, k, a) => a.indexOf(t) === k).join(' · ') + '</span><span class="me">' + esc(rahmenFarbe(x, 'aussen').name + ' · ' + lab('glas', x.glas) + '-Glas' + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + (fest ? ' · fest' : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
 SCREENS.home = () => {
   if (S.betrieb) return linkHome();
-  const cardsH = S.windows.map((x, i) => winCard(x, i, true)).join('');
-  const betrieb = S.betrieb ? '<div class="betrieb"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="3" width="22" height="22" rx="5" fill="var(--accent)"></rect><path d="M9 14.5l3.5 3.5 7-8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dein Aufmaß geht an<b>' + esc(S.betrieb.name || 'deinen Fensterbauer') + '</b></span></div>' : '';
+  if (S.windows.length) return homeAufmass();
+  const cardsH = '', betrieb = '';
   const html = '<section class="hero"><p class="eyebrow">Fensterplanung, ganz <span class="mk" translate="no">eezi</span></p><h1>Fotografieren.<br>Messen.<br>Wünschen.</h1><p>Zwei Fotos, vier Maße mit dem Zollstock, und aus deinen Zahlen wächst dein Fenster als 3-D-Modell. Dein Fensterbauer bekommt alles fürs Angebot.</p>' +
     '<div class="cta stapel"><button type="button" class="btn primary" data-act="new">Fenster ausmessen</button><button type="button" class="btn ghost" data-act="tour-start">Führung starten</button><p class="cta-zeile">Zwei Minuten, ohne eigene Maße · <button type="button" class="ulink" data-act="gloss" data-k="referenz">Wie genau ist das?</button></p></div>' +
     '<div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 340, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div></section>' + betrieb +
@@ -1394,6 +1417,37 @@ SCREENS.home = () => {
   return { html: html, bar: S.windows.length ? { label: FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen', act: 'go', v: FREI() ? 'teilen' : 'anfrage' } : null };
 };
 const PLUS = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M2 9h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>';
+/* Stand des Aufmaßes in einem Satz */
+function aufmassStand() {
+  const n = S.windows.length, voll = S.windows.filter((x) => derive(x).complete).length;
+  return n + ' Fenster erfasst' + (voll === n ? ', alle mit vollständigen Maßen.' : voll ? ', ' + voll + ' davon mit vollständigen Maßen.' : ', die Maße fehlen noch.');
+}
+/* „Weiteres Fenster“, solange die Grenze nicht erreicht ist; kurz davor ein Hinweis, an der Grenze die Erklärung */
+function neuKnopf(label) {
+  const rest = GRENZE.fenster - angelegt();
+  if (rest <= 0) return '<div class="note warn grenze">' + esc(maxMsg()) + (S.betrieb ? '' : ' <button type="button" class="ulink" data-act="aufmass-neu">Neues Aufmaß beginnen</button>') + '</div>';
+  return '<button type="button" class="dashed" data-act="new">' + PLUS + esc(label || 'Weiteres Fenster') + '</button>' + (rest <= 10 ? '<p class="sub grenze">Noch ' + rest + (rest === 1 ? ' neues Fenster' : ' neue Fenster') + ' möglich. Ein Aufmaß umfasst höchstens ' + GRENZE.fenster + ' Fenster, gelöschte zählen mit.</p>' : '');
+}
+/* Eigenes Aufmaß, schon angefangen: weiter, wo du warst. Die Liste steht oben, Erklärung und Führung weiter unten */
+function homeAufmass() {
+  const neu = S.neuFrage ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Dieses Aufmaß auf diesem Gerät löschen?</b><p class="sub">Fenster, Angaben und die Freischaltung dieses Aufmaßes sind danach weg. Lade dein Aufmaßblatt vorher herunter, falls du es noch brauchst.</p><div class="pill-row"><button type="button" class="pill danger" data-act="aufmass-neu-ja">Löschen und neu beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>' : '';
+  const html = hd('Dein Aufmaß', 'Weiter, wo du warst.', esc(aufmassStand())) +
+    '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + S.windows.length + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + neu +
+    dateiCard() +
+    '<p class="sub center merk">Dein Aufmaß bleibt in diesem Browser gespeichert. Öffne eeziframes wieder hier, dann geht es weiter.</p>' +
+    '<section class="card erklaert"><p class="eyebrow">So funktioniert\'s</p><h2 class="sec-title">Zollstock statt Rätselraten.</h2><div class="steps">' +
+    '<div class="step"><span class="n">1</span><div><b>Fotografieren.</b><p>Innen und außen, das Handy gerade halten. Die KI liest daraus die Einbausituation.</p></div></div>' +
+    '<div class="step"><span class="n">2</span><div><b>Messen.</b><p>Vier Maße mit dem Zollstock, Schritt für Schritt erklärt, dann die Ränder.</p></div></div>' +
+    '<div class="step"><span class="n">3</span><div><b>Wünschen.</b><p>Flügel, Sprossen, Farben innen und außen, jeder Fachbegriff mit Bild erklärt.</p></div></div></div>' +
+    '<p class="nachsatz">Ein Fenster in zwei Minuten ausprobieren, ohne eigene Maße: <button type="button" class="ulink" data-act="tour-start">Führung starten</button></p></section>' +
+    '<div class="foot-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a></div>' + rechtLinks();
+  return { html: html, bar: { label: FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen', act: 'go', v: FREI() ? 'teilen' : 'anfrage' } };
+}
+/* Hinweis im Kundenlink: jederzeit über den Link weitermachen */
+function linkMerk(name) {
+  const server = SERVER.daten && !S.sync.aus, bis = S.betrieb && S.betrieb.expires ? S.betrieb.expires : '';
+  return '<div class="card merk-karte"><p class="eyebrow">Jederzeit weitermachen</p><p>Öffne einfach wieder den Link von <b>' + esc(name) + '</b>. ' + (server ? 'Deine Angaben sind gespeichert, auch für ein anderes Gerät. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.' : 'Deine Angaben bleiben in diesem Browser gespeichert; öffne den Link später im selben Browser.') + (bis ? ' Der Link gilt bis ' + esc(bis) + '.' : '') + '</p></div>';
+}
 /* Nach dem Senden bleibt der Code, wie er abgeschickt wurde */
 const curCode = () => (S.sent && S.sent.code) || packProject(S.windows, S.proj, S.betrieb);
 const sentWhen = () => { try { const d = new Date(S.sent.when); return d.toLocaleDateString('de-DE') + ' um ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'; } catch (e) { return ''; } };
@@ -1409,18 +1463,29 @@ function linkHome() {
       '<p class="sub center lk-note">Fragen und Änderungen klärst du direkt mit ' + esc(name) + '.</p>' + rechtLinks();
     return { html: html, bar: null };
   }
+  if (S.linkZu && S.linkZu !== 'eingegangen') {
+    const html3 = '<section class="hero lk">' + head + '<p class="eyebrow" style="color: var(--warn)">' + (S.linkZu === 'abgelaufen' ? 'Link abgelaufen' : S.linkZu === 'deaktiviert' ? 'Link deaktiviert' : 'Link nicht aktiv') + '</p><h1>Hier geht es gerade nicht weiter.</h1><p>' + esc(S.linkZuText || 'Bitte melde dich bei ' + name + '.') + '</p></section>' +
+      (n ? '<section class="sec"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, false)).join('') + '</div></section>' : '') + rechtLinks();
+    return { html: html3, bar: null };
+  }
   if (S.nb) {
     const html2 = '<section class="hero lk">' + head + '<p class="eyebrow" style="color: var(--warn)">Bitte noch einmal prüfen</p><h1>Fast fertig,<br>eine Runde noch.</h1><p>' + esc(name) + ' hat dein Aufmaß bekommen und bittet dich, es noch einmal zu prüfen. Was genau, steht in der Nachricht. ' + (n ? 'Deine Angaben sind alle noch da: Tipp ein Fenster an, ändere, was nötig ist, und schick es erneut ab.' : 'Auf diesem Gerät ist dein Aufmaß nicht gespeichert. Miss die Fenster, um die es geht, bitte neu auf; ' + esc(name) + ' ergänzt sie im bisherigen Aufmaß.') + '</p>' +
       '<div class="cta"><button type="button" class="btn primary" data-act="' + (n ? 'go' : 'new') + '" data-v="anfrage">' + (n ? 'Prüfen und erneut senden' : 'Fenster neu ausmessen') + '</button></div></section>' +
-      '<section class="sec"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + '<button type="button" class="dashed" data-act="new">' + PLUS + 'Weiteres Fenster</button></div></section>' + rechtLinks();
+      '<section class="sec"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + rechtLinks();
     return { html: html2, bar: null };
   }
-  const html = '<section class="hero lk">' + head + '<p class="eyebrow">Fenster-Aufmaß, geführt</p><h1>Deine Fenster.<br>Deine Maße.</h1><p>' + esc(name) + ' braucht für dein Angebot die Maße deiner Fenster. Zwei Fotos und vier Maße je Fenster, jeder Schritt erklärt. Ein Konto brauchst du nicht.</p>' +
-    '<div class="cta"><button type="button" class="btn primary" data-act="new">' + (n ? 'Weiteres Fenster ausmessen' : 'Erstes Fenster ausmessen') + '</button><button type="button" class="link" data-act="gloss" data-k="referenz">Wie genau ist das? ›</button></div>' +
-    (n ? '' : '<div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 250, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div>') + '</section>' +
-    (n ? '<section class="sec"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + '<button type="button" class="dashed" data-act="new">' + PLUS + 'Weiteres Fenster</button></div></section>' : '') +
+  if (n) {
+    const html4 = '<div class="lk-kopf">' + head + '</div>' + hd('Dein Aufmaß', 'Weiter, wo du warst.', esc(aufmassStand())) +
+      '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
+      linkMerk(name) +
+      '<p class="sub center lk-note">Deine Angaben gehen nur an ' + esc(name) + ', sonst an niemanden.</p>' + rechtLinks();
+    return { html: html4, bar: { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } };
+  }
+  const html = '<section class="hero lk">' + head + '<p class="eyebrow">Fenster-Aufmaß, geführt</p><h1>Deine Fenster.<br>Deine Maße.</h1><p>' + esc(name) + ' braucht für dein Angebot die Maße deiner Fenster. Zwei Fotos und vier Maße je Fenster, jeder Schritt erklärt. Ein Konto brauchst du nicht. Du musst nicht alles auf einmal machen: Über diesen Link kommst du jederzeit zurück.</p>' +
+    '<div class="cta"><button type="button" class="btn primary" data-act="new">Erstes Fenster ausmessen</button><button type="button" class="link" data-act="gloss" data-k="referenz">Wie genau ist das? ›</button></div>' +
+    '<div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 250, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div></section>' +
     '<p class="sub center lk-note">Deine Angaben gehen nur an ' + esc(name) + ', sonst an niemanden.</p>' + rechtLinks();
-  return { html: html, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
+  return { html: html, bar: null };
 }
 /* ---------- Start: die Stelle und das Element ---------- */
 /* Vorschau fürs Startbild: ein typisches Element je Art mit plausiblen Maßen, in den Farben und Einstellungen des Kunden */
@@ -1440,7 +1505,7 @@ SCREENS.start = () => {
     (w.neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung') : '') + '</div>' +
     '<div class="qgroup"><p class="eyebrow">Das Element</p>' + startKarten('art', art, 'art', 'liste') + '</div>' +
     model(startWin(w), { id: 'w3d', view: 'three', sway: true, stageH: 230, fitW: 0.76, fitH: 0.7, hint: o.label + (istTuer(w) ? ' · bodentief' : '') });
-  return { html: html, back: ['Projekt', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos' } };
+  return { html: html, back: ['Aufmaß', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos' } };
 };
 /* ---------- Fotos ---------- */
 function photoTile(which) {
@@ -1698,15 +1763,25 @@ SCREENS.ergebnis = () => {
 
 /* ---------- Wunschfenster: das Modell wird konfiguriert ---------- */
 /* ---------- Zusammenfassung, Anfrage, Aufmaßblatt ---------- */
+const MAL = ['keinmal', 'einmal', 'zweimal', 'dreimal', 'viermal'];
 SCREENS.fertig = () => {
-  const w = S.win, d = derive(w), lk = !!S.betrieb;
-  const facts = [thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), lab('material', w.material), rahmenFarbe(w, 'aussen').name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
+  const w = S.win, d = derive(w), lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'deinen Fensterbauer') : '', offen = masseZeigen(), gespeichert = S.windows[S.editIdx] || w;
+  const facts = [offen ? thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm' : '', w.sashes.map((z) => TYPNAME[z.t]).filter((t, i, a) => a.indexOf(t) === i).join(' · '), lab('material', w.material), rahmenFarbe(w, 'aussen').name, (num(w.anzahl) || 1) > 1 ? w.anzahl + ' Stück' : ''].filter(Boolean);
+  const kiN = w.ki && w.ki.rows ? w.ki.rows.length : 0, st = aendStand(gespeichert);
+  /* Die geordnete Übersicht mit allen Angaben gibt es erst nach dem Freischalten (beim Kundenlink bekommt sie der Betrieb) */
+  const alle = offen ? '<details class="card fold"><summary><span>Alle Angaben<small>' + specRows(w).length + ' Zeilen' + (kiN ? ', dazu ' + kiN + ' aus den Fotos' : '') + '</small></span></summary><div class="fold-body"><div class="kv">' + specRows(w).map((r) => '<div><span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span></div>').join('') + '</div>' +
+    (kiN ? '<p class="eyebrow">Einbausituation aus den Fotos</p><dl class="facts">' + kiZeilen(w.ki).map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>'
+    : '<div class="card datei-card zu-karte"><div class="dc-row"><span class="dc-ic">' + LOCK + '</span><div><p class="eyebrow">Alle Angaben · ' + specRows(w).length + (kiN ? ' + ' + kiN + ' aus den Fotos' : '') + '</p><b>' + (lk ? 'Gehen mit deinem Aufmaß an ' + esc(bn) : 'Stehen in deinem Aufmaßblatt') + '</b><small>' + (lk ? esc(bn) + ' bekommt jedes Fenster mit Zeichnung, allen Maßen, deinen Wünschen und der Auswertung der Fotos.' : 'Mit Zeichnung, allen Maßen, deinen Wünschen und der Auswertung der Fotos. Einmal freischalten, für dieses Projekt.') + '</small></div></div>' + (lk ? '' : '<button type="button" class="btn primary" style="flex: 0 0 auto" data-act="k-start">Freischalten</button>') + '</div>';
+  const zu = st.fest ? ' aria-disabled="true"' : '';
+  const aend = st.fest ? noteBox('Dieses Fenster ist fest: Die vier Änderungen nach der ersten Woche sind aufgebraucht. ' + (lk ? 'Änderungen klärst du direkt mit ' + esc(bn) + '.' : 'Brauchst du etwas anders, legst du es als neues Fenster an.'), null, 'warn')
+    : !st.frei ? noteBox('Seit dem ' + esc(datumKurz(st.bis)) + ' kannst du dieses Fenster noch ' + MAL[st.rest] + ' ändern. Jedes Speichern mit einer Änderung zählt.', null, 'warn')
+    : '<p class="sub center aend-frei">Bis zum ' + esc(datumKurz(st.bis)) + ' kannst du dieses Fenster beliebig ändern, danach noch viermal.</p>';
   const html = model(w, { id: 'w3d', view: 'three', sway: true, stageH: 210, hint: 'Pos. ' + (S.editIdx + 1) }) + '<div class="center"><p class="eyebrow" style="color: var(--ok)">' + CHECK + ' Gespeichert · Position ' + (S.editIdx + 1) + '</p><h1 style="margin: 10px 0 0">' + esc(w.name || 'Fenster') + '</h1><p style="margin: 8px 0 0">' + esc(facts.join(' · ')) + '</p></div>' +
-    '<details class="card fold"><summary><span>Alle Angaben<small>' + specRows(w).length + ' Zeilen' + (w.ki && w.ki.rows && w.ki.rows.length ? ', dazu ' + w.ki.rows.length + ' aus den Fotos' : '') + '</small></span></summary><div class="fold-body"><div class="kv">' + specRows(w).map((r) => '<div><span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span></div>').join('') + '</div>' +
-    (w.ki && w.ki.rows && w.ki.rows.length ? '<p class="eyebrow">Einbausituation aus den Fotos</p><dl class="facts">' + kiZeilen(w.ki).map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>' +
-    '<div class="pill-row grid2"><button type="button" class="pill" data-act="go" data-v="ergebnis">Maße ändern</button><button type="button" class="pill" data-act="wuensche">Wünsche ändern</button><button type="button" class="pill" data-act="copywin">Kopieren</button><button type="button" class="pill danger" data-act="delwin">Löschen</button></div>' +
-    '<p class="sub center" style="padding: 0 10px">' + (lk ? 'Noch ein Fenster? Oder weiter zum Absenden an ' + esc(S.betrieb.name || 'deinen Fensterbauer') + '.' : 'Noch ein Fenster? Oder weiter zum Aufmaßblatt.') + '</p>';
-  return { html: html, back: ['Projekt', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
+    alle + aend +
+    '<div class="pill-row grid2"><button type="button" class="pill" data-act="go" data-v="ergebnis"' + zu + '>Maße ändern</button><button type="button" class="pill" data-act="wuensche"' + zu + '>Wünsche ändern</button><button type="button" class="pill" data-act="copywin">Kopieren</button><button type="button" class="pill danger" data-act="delwin">Löschen</button></div>' +
+    '<button type="button" class="pill voll" data-act="go" data-v="home">Alle Fenster ansehen (' + S.windows.length + ')</button>' +
+    '<p class="sub center" style="padding: 0 10px">' + (lk ? 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.' : 'Noch ein Fenster? Oder weiter zum Aufmaßblatt.') + '</p>';
+  return { html: html, back: ['Aufmaß', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
 };
 /* Anfrage: zwei kurze Seiten im Link, drei ohne Link (dann mit Kontakt) */
 const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von 2' : 'Fürs Angebot · ' + step + ' von 3';
@@ -1718,7 +1793,7 @@ SCREENS.anfrage = () => {
   html += '<div class="sec">' + secHead('Baujahr des Hauses') + chips('baujahr', pr.baujahr, 'baujahr', 'setp') + '</div>';
   html += '<div class="sec">' + secHead('Fenster im ganzen Haus', null, 'Du tauschst ' + replaced + ' davon.') + '<div class="rows"><div class="row"><label><span class="lbl">Insgesamt</span><span class="val"><input type="text" inputmode="numeric" id="p-total" data-in="p" data-f="total" value="' + esc(pr.total) + '"><span class="unit">Stück</span></span></label><button type="button" class="rnd" aria-label="Weniger" data-act="bumpp" data-v="-1">−</button><button type="button" class="rnd" aria-label="Mehr" data-act="bumpp" data-v="1">+</button></div></div></div>';
   if (replaced > (num(pr.total) || 0) / 3) html += noteBox('Du tauschst mehr als ein Drittel der Fenster. Dann muss geprüft werden, ob nach DIN 1946-6 ein Lüftungskonzept nötig ist.', 'lueftung', 'warn');
-  return { html: html, back: ['Projekt', 'home'], cls: 'tight', bar: { label: 'Weiter', act: 'go', v: 'anfrage2' } };
+  return { html: html, back: ['Aufmaß', 'home'], cls: 'tight', bar: { label: 'Weiter', act: 'go', v: 'anfrage2' } };
 };
 SCREENS.anfrage2 = () => {
   const pr = S.proj, lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : '';
@@ -1822,7 +1897,8 @@ function dateiCard() {
 /* Vorschau des Blatts vor dem Freischalten: Kopf und Übersicht echt, die Positionen dahinter verschwommen */
 function blattVorschau() {
   const pr = S.proj, n = S.windows.length, nE = anzahlFenster();
-  const rows = S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + thousand(d.moW) + ' × ' + thousand(d.moH) + '</td><td>' + thousand(d.elW) + ' × ' + thousand(d.elH) + '</td></tr>'; }).join('') + (n > 4 ? '<tr><td colspan="4" style="color: #6e6e73">und ' + (n - 4) + ' weitere</td></tr>' : '');
+  const zu = (v) => thousand(v).replace(/\d/g, '•'); // Stellen statt Zahlen: die Maße stehen erst im freigeschalteten Blatt
+  const rows = S.windows.slice(0, 4).map((x, i) => { const d = derive(x); return '<tr><td><b>' + (i + 1) + '</b></td><td>' + esc(x.name || 'Fenster') + '</td><td>' + zu(d.moW) + ' × ' + zu(d.moH) + '</td><td>' + zu(d.elW) + ' × ' + zu(d.elH) + '</td></tr>'; }).join('') + (n > 4 ? '<tr><td colspan="4" style="color: #6e6e73">und ' + (n - 4) + ' weitere</td></tr>' : '');
   return '<div class="dv pw"><div class="dv-paper pw" aria-hidden="true"><div class="dv-band">' + LOGO(18) + WM() + '<span>Aufmaßblatt</span></div><div class="dv-in"><p class="dv-h">' + esc(pr.name || 'Dein Aufmaß') + '</p><p class="dv-s">' + n + (n === 1 ? ' Position' : ' Positionen') + ' · ' + nE + (nE === 1 ? ' Element' : ' Elemente') + ' · ' + esc(lab('gebaeude', pr.gebaeude)) + '</p><table class="dv-tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr>' + rows + '</table></div>' +
     '<div class="dv-blur"><div class="dv-sk"><i class="dh"></i><i class="dw"></i></div><div class="dv-lines"><i></i><i class="s"></i><i></i><i class="s"></i><i></i><i class="s"></i></div></div></div>' +
     '<button type="button" class="dv-lock bottom" data-act="k-start">' + LOCK + 'Freischalten · ' + euro(PREIS()) + '</button></div>';
@@ -1831,9 +1907,9 @@ SCREENS.teilen = () => {
   const n = anzahlFenster(), t = teilStand(), code = packProject(S.windows, S.proj, null);
   if (!FREI()) {
     const html = hd('Fertig gemessen', 'Dein Aufmaßblatt ist fertig.', n + (n === 1 ? ' Fenster' : ' Fenster') + ', alle acht Handmaße, die Auswertung der Fotos, deine Wünsche. Einmal freischalten, dann gehört es dir.') + blattVorschau() +
-      '<div class="card"><div class="incl">' + ['Technische Zeichnung mit allen Maßen je Fenster', 'Auswertung der Fotos und deine Wünsche', 'Als PDF teilen, so oft du willst, an jeden Fensterbauer', 'Mit Code: Dein Fensterbauer übernimmt alles mit einem Klick', 'Gilt für dieses Projekt, auch wenn du später Fenster ergänzt'].map((x) => '<p>' + CHECK + '<span>' + esc(x) + '</span></p>').join('') + '</div>' +
+      '<div class="card"><div class="incl">' + ['Technische Zeichnung mit allen Maßen je Fenster', 'Auswertung der Fotos und deine Wünsche', 'Als PDF teilen, so oft du willst, an jeden Fensterbauer', 'Mit Code: Dein Fensterbauer übernimmt alles mit einem Klick', 'Gilt für dieses Projekt, auch wenn du später Fenster ergänzt (bis ' + GRENZE.fenster + ' je Aufmaß)'].map((x) => '<p>' + CHECK + '<span>' + esc(x) + '</span></p>').join('') + '</div>' +
       '<div class="price-row"><span><b>' + euro(PREIS()) + '</b><small>einmalig' + (MWST() ? ', inkl. MwSt.' : '') + '</small></span><small class="sub">Messen, Fotos und 3-D-Modell bleiben kostenlos</small></div></div>' +
-      (S.kauf && S.kauf.wartet ? '<p class="sub" style="padding: 0 6px"><b>Deine Zahlung ist unterwegs.</b> Sobald Stripe sie bestätigt, schaltet sich dein Blatt hier von selbst frei. Bitte nicht noch einmal bezahlen.</p>' : '<p class="sub" style="padding: 0 6px">Du kannst jederzeit weitere Fenster messen und ändern. Das Blatt wächst mit.</p>');
+      (S.kauf && S.kauf.wartet ? '<p class="sub" style="padding: 0 6px"><b>Deine Zahlung ist unterwegs.</b> Sobald Stripe sie bestätigt, schaltet sich dein Blatt hier von selbst frei. Bitte nicht noch einmal bezahlen.</p>' : '<p class="sub" style="padding: 0 6px">Du kannst weitere Fenster messen, das Blatt wächst mit. Jedes Fenster kannst du eine Woche lang beliebig ändern, danach noch viermal.</p>');
     return { html: html, back: ['Zurück', 'anfrage3'], cls: 'tight', bar: { label: 'Freischalten · ' + euro(PREIS()), act: 'k-start' } };
   }
   const msg = 'Hallo, hier ist mein Fenster-Aufmaß aus eeziframes (' + n + ' Fenster): alle Maße, die Auswertung der Fotos und meine Wünsche. Den Code bitte bei eeziframes unter „Code vom Kunden einfügen“ einsetzen. Noch kein Zugang? Kostenlos anmelden, die ersten 3 Projekte sind frei: ' + PORTAL_URL + '\n\n' + code;
@@ -2267,9 +2343,111 @@ function sheetsHTML() {
 }
 /* ---------- Fotos und KI im Hintergrund ---------- */
 let DL = null, DLP = null;
-/* Ein Aufmaß ist ein Objekt: höchstens 20 Positionen, gleiche Fenster über „Anzahl“. Im echten Betrieb prüft das auch der Server. */
-const MAXPOS = 20;
-const maxMsg = () => 'Ein Aufmaß umfasst bis zu ' + MAXPOS + ' Fenster. Gleiche Fenster zählst du über „Anzahl“' + (S.betrieb ? '; für ein weiteres Haus schickt dir ' + (S.betrieb.name || 'dein Fensterbauer') + ' gern einen eigenen Link.' : '.');
+/* Grenzen gegen Mehrfachnutzung (sonst ließe sich ein Aufmaß für viele Häuser nutzen): je Aufmaß höchstens 50 angelegte Fenster,
+   gelöschte zählen mit; je Fenster nach dem ersten Speichern 7 Tage freies Ändern, danach noch 4 gespeicherte Änderungen, dann ist
+   es fest. Gleiche Fenster über „Anzahl“. Beim Kundenlink hält der Server dieselben Zähler (functions/api/entwurf.js), ein geleerter
+   Browserspeicher setzt sie also nicht zurück. */
+const GRENZE = { fenster: 50, freiTage: 7, aenderungen: 4 }, TAG_MS = 864e5;
+const angelegt = () => Math.max(Number(S.angelegt) || 0, S.windows.length);
+const neuMoeglich = () => angelegt() < GRENZE.fenster;
+const maxMsg = () => 'Ein Aufmaß umfasst höchstens ' + GRENZE.fenster + ' Fenster, gelöschte zählen mit. Gleiche Fenster zählst du über „Anzahl“' + (S.betrieb ? '; für ein weiteres Haus schickt dir ' + (S.betrieb.name || 'dein Fensterbauer') + ' gern einen eigenen Link.' : '; für ein weiteres Haus beginnst du ein neues Aufmaß.');
+/* Stand der Änderungen an einem Fenster: frei (erste Woche), rest (Änderungen danach), fest */
+function aendStand(w, jetzt) {
+  jetzt = jetzt || Date.now();
+  const t0 = Number(w && w.t0) || jetzt, bis = t0 + GRENZE.freiTage * TAG_MS, n = Number(w && w.aend) || 0, frei = jetzt < bis;
+  return { frei: frei, bis: bis, n: n, rest: Math.max(0, GRENZE.aenderungen - n), fest: !frei && n >= GRENZE.aenderungen };
+}
+/* Fingerabdruck eines Fensters ohne Zähler und ohne das abgeleitete Bild der Lage (gleiche Regel wie auf dem Server) */
+const stabil = (v) => (Array.isArray(v) ? '[' + v.map(stabil).join(',') + ']' : v && typeof v === 'object' ? '{' + Object.keys(v).sort().filter((k) => v[k] !== undefined).map((k) => JSON.stringify(k) + ':' + stabil(v[k])).join(',') + '}' : JSON.stringify(v === undefined ? null : v));
+function fensterFp(w) { const o = Object.assign({}, w); delete o.wid; delete o.t0; delete o.aend; if (o.plan && typeof o.plan === 'object') { o.plan = Object.assign({}, o.plan); delete o.plan.bild; delete o.plan.bw; delete o.plan.bh; } return stabil(o); }
+const neueWid = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const kopie = (o) => JSON.parse(JSON.stringify(o));
+const datumKurz = (ms) => { try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return ''; } };
+/* Darf das offene Fenster noch geändert werden? Sonst ein Hinweis */
+function darfAendern() {
+  const g = S.editIdx >= 0 ? S.windows[S.editIdx] : null;
+  if (!g || !aendStand(g).fest) return true;
+  toast('Dieses Fenster ist fest: Die vier Änderungen nach der ersten Woche sind aufgebraucht.'); return false;
+}
+/* Kundenlink zu (abgelaufen, deaktiviert)? Dann nichts mehr ändern */
+function linkOffen() { if (!S.betrieb || !S.linkZu || S.linkZu === 'eingegangen') return true; toast(S.linkZuText || 'Dieser Link ist nicht mehr aktiv.'); return false; }
+
+/* ---------- Zwischenstand beim Kundenlink (Server) ----------
+   Ohne Fotos und ohne das Bild der Lage. Der neuere Stand gewinnt (stand = letzte Änderung); die Zähler (angelegt, je Fenster t0 und
+   aend) führt der Server und gibt sie zurück. Fehlt die Tabelle auf dem Server (aus), bleibt alles im Browser. */
+/* Für den Zwischenstand nur Abweichungen vom Standard (wie beim Aufmaß-Code), dazu Kennung und Zähler, ohne Bild der Lage: So ändert
+   eine neue App-Fassung mit neuen Feldern nichts an den Fenstern, und der Server zählt keine Änderung, die keiner gemacht hat */
+function packFenster(w) {
+  const base = baseWin(), o = {};
+  Object.keys(w).forEach((k) => { if (k === 'wid' || k === 't0' || k === 'aend' || JSON.stringify(w[k]) !== JSON.stringify(base[k])) o[k] = w[k]; });
+  if (o.plan && typeof o.plan === 'object' && o.plan.bild) o.plan = Object.assign({}, o.plan, { bild: '', bw: 0, bh: 0 });
+  return o;
+}
+const entwurfFp = () => stabil({ w: S.windows.map(packFenster), p: S.proj, a: angelegt() });
+const entwurfAn = () => SERVER.daten && S.betrieb && !S.sync.aus && !S.sent && !(S.linkZu && S.linkZu !== 'eingegangen');
+function entwurfStand() { const fp = entwurfFp(); if (fp !== S.sync.fp) { S.sync.fp = fp; S.stand = Date.now(); S.sync.offen = true; } }
+function entwurfPlanen(sofort) { if (!entwurfAn() || !S.sync.offen || !S.sync.geladen) return; clearTimeout(S.sync.timer); S.sync.timer = setTimeout(entwurfSenden, sofort ? 0 : 1200); }
+/* Bilder der Lage, die nur auf diesem Gerät liegen, an gleich gebliebene Fenster hängen */
+function bilderBehalten(neu) {
+  const alt = new Map(S.windows.filter((w) => w.plan && w.plan.bild).map((w) => [w.wid, w.plan]));
+  neu.forEach((w) => { const p = alt.get(w.wid); if (p && w.plan && !w.plan.bild && stabil(p.ecken) === stabil(w.plan.ecken)) w.plan = Object.assign({}, w.plan, { bild: p.bild, bw: p.bw, bh: p.bh }); });
+  return neu;
+}
+function metaUebernehmen(m) {
+  if (!m) return;
+  S.angelegt = Math.max(Number(S.angelegt) || 0, Number(m.angelegt) || 0);
+  S.windows.forEach((w) => { const f = (m.fenster || {})[w.wid]; if (!f) return; if (Number(f.t0) > 0) w.t0 = Number(f.t0); w.aend = Math.max(Number(w.aend) || 0, Number(f.aend) || 0); });
+}
+function entwurfAnnehmen(e) {
+  const wid = S.editIdx >= 0 && S.windows[S.editIdx] ? S.windows[S.editIdx].wid : '';
+  const alt = S.windows; takeWindows(e.windows || []); const neu = S.windows; S.windows = alt; S.windows = bilderBehalten(neu);
+  if (e.proj) S.proj = normProj(Object.assign({}, PROJ0, e.proj));
+  S.stand = Number(e.stand) || S.stand;
+  if (wid) S.editIdx = S.windows.findIndex((w) => w.wid === wid);
+}
+async function entwurfSenden(behalten) {
+  if (!entwurfAn()) return;
+  if (S.sync.laeuft) { S.sync.wieder = true; return; }
+  S.sync.laeuft = true; S.sync.offen = false; clearTimeout(S.sync.timer);
+  const body = JSON.stringify({ windows: S.windows.map(packFenster), proj: S.proj, stand: S.stand || Date.now(), angelegt: angelegt(), bekannt: S.sync.bekannt || [] });
+  let neuZeigen = false;
+  try {
+    const res = await fetch('/api/link/' + encodeURIComponent(S.betrieb.code) + '/entwurf', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: body, keepalive: !!behalten && body.length < 60000 });
+    const r = await res.json().catch(() => null);
+    if (r && r.ok && r.aus) S.sync.aus = true;
+    else if (r && r.ok) {
+      if (r.entwurf) { entwurfAnnehmen(r.entwurf); neuZeigen = true; }
+      metaUebernehmen(r.meta);
+      if (r.zurueck && r.zurueck.length) toast('Ein Fenster war schon fest; die Änderung daran wurde nicht übernommen.');
+      S.sync.fp = entwurfFp(); lokalSpeichern();
+    } else if (res.status === 410) { S.linkZu = (r && r.zu) || 'abgelaufen'; S.linkZuText = (r && r.fehler) || ''; neuZeigen = true; }
+    else if (res.status === 409 && r && r.grenze) toast(r.fehler);
+    else S.sync.offen = true;
+  } catch (e) { S.sync.offen = true; }
+  S.sync.laeuft = false;
+  if (neuZeigen && ['home', 'fertig', 'blatt'].includes(S.screen)) render();
+  if (S.sync.wieder) { S.sync.wieder = false; S.sync.offen = true; entwurfPlanen(); }
+}
+/* Beim Öffnen des Links: Zwischenstand vom Server holen; der neuere Stand gewinnt, die Zähler kommen vom Server */
+async function entwurfLaden() {
+  try {
+    const r = await fetch('/api/link/' + encodeURIComponent(S.betrieb.code) + '/entwurf', { headers: { accept: 'application/json' }, cache: 'no-store' }).then((x) => x.json());
+    if (!r || !r.ok) { S.sync.geladen = true; return; }
+    if (r.aus) { S.sync.aus = true; S.sync.geladen = true; return render(); }
+    if (r.expires) S.betrieb.expires = r.expires;
+    const e = r.entwurf, kennt = (r.meta && r.meta.fenster) || {}, unbekannt = S.windows.some((w) => w.wid && !kennt[w.wid]);
+    if (e && Array.isArray(e.windows) && (!S.windows.length || ((Number(e.stand) || 0) > (S.stand || 0) && !unbekannt))) { entwurfAnnehmen(e); if (S.nb && S.nb.teil && S.windows.length) S.nb.teil = false; }
+    metaUebernehmen(r.meta);
+    S.sync.fp = entwurfFp(); lokalSpeichern();
+    S.sync.geladen = true;
+    /* Hier neuer, oder hier liegen Fenster, die der Server nie gesehen hat: senden; der Server führt zusammen und schickt den Stand zurück */
+    if (S.windows.length && (!e || unbekannt || (S.stand || 0) > (Number(e.stand) || 0))) { if (!S.stand) S.stand = Date.now(); S.sync.offen = true; entwurfPlanen(true); }
+    render();
+  } catch (e) { S.sync.geladen = true; }
+}
+/* Noch nicht Gesendetes beim Verlassen der Seite mitnehmen; nach einer Funkstille erneut versuchen */
+window.addEventListener('pagehide', () => { if (S.sync && S.sync.offen && entwurfAn() && S.sync.geladen) entwurfSenden(true); });
+window.addEventListener('online', () => { if (S.sync && S.sync.offen) entwurfPlanen(true); });
 const ctrls = {};
 function imageDims(url) { return new Promise((res) => { const im = new Image(); im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => res({ w: 1200, h: 1600 }); im.src = url; }); }
 async function onPhoto(which, file) {
@@ -2341,10 +2519,27 @@ function newWin() {
   S.selSash = 0; S.selBar = null; S.side = 'aussen';
   go('start');
 }
+/* Speichern: Neue Fenster zählen gegen die Grenze; nach der ersten Woche zählt jedes Speichern mit einer Änderung (höchstens vier).
+   Gespeichert wird eine Kopie, bearbeitet wird immer eine eigene Kopie (S.win). */
 function saveWin() {
-  const w = Object.assign({}, S.win, { name: S.win.name || artName(S.win) + ' ' + (S.editIdx >= 0 ? S.editIdx + 1 : S.windows.length + 1) });
-  if (S.editIdx >= 0) S.windows[S.editIdx] = w; else { S.windows.push(w); S.editIdx = S.windows.length - 1; S._feier = 'fertig'; fortschritt('arbeit', 4); }
-  S.win = w; persist(); go('fertig');
+  const jetzt = Date.now(), w = Object.assign({}, S.win, { name: S.win.name || artName(S.win) + ' ' + (S.editIdx >= 0 ? S.editIdx + 1 : S.windows.length + 1) });
+  let hinweis = '';
+  if (S.editIdx >= 0 && S.windows[S.editIdx]) {
+    const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w);
+    w.wid = alt.wid || neueWid(); w.t0 = Number(alt.t0) || jetzt; w.aend = Number(alt.aend) || 0;
+    if (anders && st.fest) { toast('Dieses Fenster ist fest: Die vier Änderungen nach der ersten Woche sind aufgebraucht.'); S.win = kopie(alt); return go('fertig'); }
+    if (anders && !st.frei) { w.aend += 1; const rest = GRENZE.aenderungen - w.aend; hinweis = rest > 0 ? 'Gespeichert. Dieses Fenster kannst du noch ' + MAL[rest] + ' ändern.' : 'Gespeichert. Das war die letzte Änderung an diesem Fenster.'; }
+    S.windows[S.editIdx] = kopie(w);
+  } else {
+    if (!neuMoeglich()) { toast(maxMsg()); return go('home', 'back'); }
+    w.wid = neueWid(); w.t0 = jetzt; w.aend = 0;
+    S.angelegt = angelegt() + 1; S.windows.push(kopie(w)); S.editIdx = S.windows.length - 1; S._feier = 'fertig'; fortschritt('arbeit', 4);
+  }
+  const ziel = S.windows[S.editIdx];
+  /* Das Bild der Lage entsteht erst aus Foto und Ecken; fehlt es, wird es für das gespeicherte Fenster nachgezogen */
+  if (ziel.plan && !ziel.plan.bild && ziel.plan.ecken && planFoto()) planBildErzeugen(ziel).then((b) => { if (b && S.win && S.win.wid === ziel.wid && S.win.plan) { S.win.plan.bild = b; S.win.plan.bw = ziel.plan.bw; S.win.plan.bh = ziel.plan.bh; } lokalSpeichern(); });
+  S.win = kopie(ziel); persist(); go('fertig');
+  if (hinweis) toast(hinweis);
 }
 /* ---------- Sprossen: Einrasten auf Viertel, Drittel, Hälfte ---------- */
 function snapP(p) { const pts = [0.25, 1 / 3, 0.5, 2 / 3, 0.75]; for (let i = 0; i < pts.length; i++) if (Math.abs(p - pts[i]) < 0.03) return pts[i]; return clamp(p, 0.06, 0.94); }
@@ -2381,12 +2576,15 @@ function act(name, el) {
     case 'plan-seite': { const pl = planSicher(w); pl.seite = pl.seite === 'in' && S.photos.out ? 'out' : 'in'; pl.bild = ''; return render(true); }
     case 'plan-bump': { const d = derive(w), cur = f === 'w' ? d.moW : f === 'h' ? d.moH : num(w[f]); planMasse(w, f, cur + n(v)); return render(); }
     case 'sart': { w.sart = v; if (v === 'keiner' || v === 'behalten') w.roll = v; else if (w.roll !== 'vorbau') w.roll = 'aufsatz'; return render(); }
-    case 'go': return go(v);
+    case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
     case 'back': { const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } return go(b, 'back'); }
-    case 'copywin': { if (S.windows.length >= MAXPOS) return toast(maxMsg()); const c = Object.assign(baseWin(), JSON.parse(JSON.stringify(w)), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki }); S.windows.push(c); S.win = c; S.editIdx = S.windows.length - 1; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
-    case 'new': if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (S.windows.length >= MAXPOS) return toast(maxMsg()); return newWin();
-    case 'open': { if (S.betrieb && S.sent) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), JSON.parse(JSON.stringify(S.windows[i])))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; return go('fertig'); }
-    case 'delwin': { if (S.editIdx >= 0) S.windows.splice(S.editIdx, 1); S.editIdx = -1; persist(); toast('Fenster gelöscht'); return go('home', 'back'); }
+    case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: Date.now(), aend: 0 }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
+    case 'new': if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); return newWin();
+    case 'open': { if (S.betrieb && S.sent) return; if (!linkOffen()) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), kopie(S.windows[i]))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; return go('fertig'); }
+    case 'delwin': { if (!linkOffen()) return; if (S.editIdx >= 0) { S.angelegt = angelegt(); S.windows.splice(S.editIdx, 1); } S.editIdx = -1; persist(); toast('Fenster gelöscht'); return go('home', 'back'); }
+    case 'aufmass-neu': { S.neuFrage = true; return render(); }
+    case 'aufmass-neu-nein': { S.neuFrage = false; return render(); }
+    case 'aufmass-neu-ja': { if (S.betrieb) return; S.neuFrage = false; try { localStorage.removeItem(STORE); } catch (e) { /* ok */ } loadOwn(); S.teil = null; toast('Neues Aufmaß begonnen'); return go('home'); }
     case 'gloss': { S.gloss = el.getAttribute('data-k'); S.glossIndex = false; return render(); }
     case 'gindex': { S.gloss = null; S.glossIndex = true; return render(); }
     case 'gclose': { S.gloss = null; S.glossIndex = false; return render(); }
@@ -2403,7 +2601,7 @@ function act(name, el) {
     case 'rest-same': { S.rest.cur = String(num(v) || ''); S.rest.msg = null; return restNext(true); }
     case 'key': return keyIn(v);
     case 'qnext': return qStep(1);
-    case 'wuensche': { S.q = null; S.openSash = -1; return go('frage'); }
+    case 'wuensche': { if (S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; S.q = null; S.openSash = -1; return go('frage'); }
     case 'qprev': return qStep(-1);
     case 'qwunsch': { S.qWunsch = !S.qWunsch; render(); const t = document.getElementById('t-wunsch'); if (t && S.qWunsch) t.focus(); return; }
     case 'ol-set': { w.ol = v !== 'nein'; if (v !== 'nein') w.olT = v; return render(); }
@@ -2432,7 +2630,7 @@ function act(name, el) {
     case 'farbe-weg': { w[f] = ''; render(); const i = document.getElementById('t-' + f); if (i) i.focus(); return; }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); return render(); }
     case 'save': return saveWin();
-    case 'send': { if (S.betrieb && S.sent) return go('gesendet'); if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
+    case 'send': { if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'teil-copy': { copyText(curCode(), 'code-box', 'Code kopiert'); return act('teil-mark', el); }
     case 'teil-mark': return teilMark('betrieb');
@@ -2762,6 +2960,7 @@ function boot() {
     const b = readHash(), was = S.betrieb ? S.betrieb.code : '', now = b ? b.code : '';
     if (was === now) { if (b) S.betrieb = b; if (fuehrung) return tourStart(); return render(); }
     S.betrieb = b; if (b) loadLink(); else loadOwn(); S.screen = 'home'; render(true);
+    if (b && SERVER.daten) linkPruefen();
     if (fuehrung) tourStart();
   });
   const root = $app();
@@ -2829,14 +3028,17 @@ async function serverStart() {
 async function linkPruefen() {
   try {
     const r = await fetch('/api/link/' + encodeURIComponent(S.betrieb.code), { headers: { accept: 'application/json' } }).then((x) => x.json());
-    if (!r || !r.ok) { S.linkStatus = 'fehlt'; return render(); }
-    S.betrieb.name = r.betrieb || S.betrieb.name; S.betrieb.kunde = r.kunde || S.betrieb.kunde; S.linkStatus = r.status;
+    if (!r || !r.ok) { S.linkStatus = 'fehlt'; if (!S.sent) { S.linkZu = 'fehlt'; S.linkZuText = (r && r.fehler) || 'Diesen Link gibt es nicht (mehr). Bitte melde dich bei deinem Fensterbauer.'; } return render(); }
+    S.betrieb.name = r.betrieb || S.betrieb.name; S.betrieb.kunde = r.kunde || S.betrieb.kunde; S.linkStatus = r.status; if (r.expires) S.betrieb.expires = r.expires;
     if (r.status === 'eingegangen' && !S.sent && !(r.runde > 1)) { S.sent = { when: Date.now(), code: '', runde: r.runde || 1, uebertragen: true }; persist(); }
-    if (!S.sent && ['erstellt', 'gesendet'].includes(r.status)) fortschritt('geoeffnet');
+    if (r.zu === 'abgelaufen' || r.zu === 'deaktiviert') { S.linkZu = r.zu; S.linkZuText = r.zuText || ''; }
+    /* geöffnet melden: beim ersten Öffnen beginnen die 60 Tage, die neue Frist kommt zurück */
+    if (!S.sent && !S.linkZu) fortschritt('geoeffnet');
     render();
+    entwurfLaden();
   } catch (e) { /* ohne Server weiter */ }
 }
-function fortschritt(stufe, k) { if (!SERVER.daten || !S.betrieb) return; try { fetch('/api/link/' + encodeURIComponent(S.betrieb.code) + '/fortschritt', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ stufe: stufe, k: k || 0 }) }).then((r) => r.text()).catch(() => {}); } catch (e) { /* ok */ } }
+function fortschritt(stufe, k) { if (!SERVER.daten || !S.betrieb) return; try { fetch('/api/link/' + encodeURIComponent(S.betrieb.code) + '/fortschritt', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ stufe: stufe, k: k || 0 }) }).then((r) => r.json()).then((j) => { if (j && j.expires && S.betrieb && j.expires !== S.betrieb.expires) { S.betrieb.expires = j.expires; if (S.screen === 'home') render(); } }).catch(() => {}); } catch (e) { /* ok */ } }
 /* Aufmaß direkt an den Betrieb schicken; schlägt es fehl, bleibt der Code-Weg */
 async function sendenServer() {
   const o = JSON.parse(JSON.stringify(unpackProject(packProject(S.windows, S.proj, S.betrieb))));
