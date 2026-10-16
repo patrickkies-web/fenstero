@@ -74,10 +74,12 @@ function attrappeSpeicher() {
       const out = await fn(r); if (out === false) return { row: kopie(alt), out: out };
       r.version = (alt ? alt.version : 0) + 1; r.updated_at = new Date().toISOString(); attrappe.eigene.set(kennung, r); return { row: kopie(r), out: out };
     },
-    eigeneVonNutzer: async (nutzer) => Array.from(attrappe.eigene.values()).filter((r) => r.nutzer === nutzer).sort((x, y) => String(y.updated_at).localeCompare(String(x.updated_at))).map((r) => ({ kennung: r.kennung, nutzer: r.nutzer, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at, name: ((r.daten || {}).proj || {}).name || '' })),
+    eigeneVonNutzer: async (nutzer) => Array.from(attrappe.eigene.values()).filter((r) => r.nutzer === nutzer && !(r.meta && r.meta.entfernt)).sort((x, y) => String(y.updated_at).localeCompare(String(x.updated_at))).map((r) => ({ kennung: r.kennung, nutzer: r.nutzer, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at, name: ((r.daten || {}).proj || {}).name || '' })),
     eigeneAlle: async () => Array.from(attrappe.eigene.values()).map((r) => ({ kennung: r.kennung, nutzer: r.nutzer, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at })),
     eigenesLoeschen: async (kennung, bis) => { const r = attrappe.eigene.get(kennung); if (!r || (bis && !(String(r.updated_at || '') < bis))) return false; return attrappe.eigene.delete(kennung); },
-    eigeneLoeschenVonNutzer: async (nutzer) => { for (const [k2, r] of attrappe.eigene) if (r.nutzer === nutzer) attrappe.eigene.delete(k2); return true; },
+    /* in der App gelöscht: Inhalt weg, Löschmarke bleibt (eigene.js) */
+    eigenesWeg: async (kennung) => { const r = attrappe.eigene.get(kennung); if (!r || (r.meta && r.meta.entfernt)) return false; Object.assign(r, { daten: {}, meta: { entfernt: Date.now() }, stand: 0, version: -1, updated_at: new Date().toISOString() }); return true; },
+    eigeneWegVonNutzer: async (nutzer) => { const t = Date.now(), iso = new Date().toISOString(); for (const r of attrappe.eigene.values()) if (r.nutzer === nutzer && !(r.meta && r.meta.entfernt)) Object.assign(r, { daten: {}, meta: { entfernt: t }, stand: 0, version: -1, updated_at: iso }); return true; },
     /* nur Attrappe: Anmeldecodes */
     codeMerken: (mail, code) => attrappe.codes.set(mail, code),
     codeLesen: (mail) => attrappe.codes.get(mail)
@@ -197,10 +199,13 @@ function supabaseSpeicher(k) {
       }
       throw new ApiFehler('Gleichzeitige Änderung, bitte gleich noch einmal.', 409);
     },
-    eigeneVonNutzer: async (nutzer) => { const r = await sb('eigene?nutzer=eq.' + q(nutzer) + '&select=kennung,nutzer,meta,stand,created_at,updated_at,name:daten->proj->>name&order=updated_at.desc&limit=100', { optional: true }); return r && r.fehlt ? null : r || []; },
+    eigeneVonNutzer: async (nutzer) => { const r = await sb('eigene?nutzer=eq.' + q(nutzer) + '&meta->>entfernt=is.null&select=kennung,nutzer,meta,stand,created_at,updated_at,name:daten->proj->>name&order=updated_at.desc&limit=100', { optional: true }); return r && r.fehlt ? null : r || []; },
     eigeneAlle: async () => alle('eigene?select=kennung,nutzer,meta,stand,created_at,updated_at&order=updated_at.asc,kennung.asc', true),
     /* bis (ISO-Zeit): nur löschen, wenn seitdem nicht geändert (Aufräumen) */
     eigenesLoeschen: async (kennung, bis) => { const r = await sb('eigene?kennung=eq.' + q(kennung) + (bis ? '&updated_at=lt.' + q(bis) : '') + '&select=kennung', { method: 'DELETE', optional: true }); return Array.isArray(r) && r.length > 0; },
-    eigeneLoeschenVonNutzer: async (nutzer) => { const r = await sb('eigene?nutzer=eq.' + q(nutzer), { method: 'DELETE', prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); }
+    /* in der App gelöscht: Inhalt weg, Löschmarke bleibt (eigene.js). version -1 lässt jedes gleichzeitige Schreiben scheitern, das
+       danach neu liest und die Marke sieht */
+    eigenesWeg: async (kennung) => { const iso = new Date().toISOString(), r = await sb('eigene?kennung=eq.' + q(kennung) + '&meta->>entfernt=is.null&select=kennung', { method: 'PATCH', body: { daten: {}, meta: { entfernt: Date.now() }, stand: 0, version: -1, updated_at: iso }, optional: true }); return Array.isArray(r) && r.length > 0; },
+    eigeneWegVonNutzer: async (nutzer) => { const iso = new Date().toISOString(), r = await sb('eigene?nutzer=eq.' + q(nutzer) + '&meta->>entfernt=is.null&select=kennung', { method: 'PATCH', body: { daten: {}, meta: { entfernt: Date.now() }, stand: 0, version: -1, updated_at: iso }, optional: true }); return !(r && r.fehlt); }
   };
 }

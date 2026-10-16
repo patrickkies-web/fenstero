@@ -1237,7 +1237,7 @@ function uhrStellen(serverJetzt, vorher, nachher) {
   const sj = Number(serverJetzt); if (!(sj > 0)) return;
   UHR = Math.round(sj - (vorher + nachher) / 2); if (!vorschau()) { try { localStorage.setItem('aufmass.uhr', String(UHR)); } catch (e) { /* ok */ } }
 }
-function syncNeu() { return { fp: '', pfp: '', offen: false, laeuft: false, wieder: false, timer: null, aus: false, geladen: false, bekannt: [], geloescht: {}, ok: false, zuletzt: 0, p: null, pruefTimer: null, nochmal: 0 }; }
+function syncNeu() { return { fp: '', pfp: '', offen: false, laeuft: false, wieder: false, timer: null, aus: false, voll: false, geladen: false, bekannt: [], geloescht: {}, ok: false, zuletzt: 0, p: null, pruefTimer: null, nochmal: 0 }; }
 /* Vorschau für den Betrieb („Als Kunde öffnen“ im Portal, ?vorschau=1): zeigt den Link wie beim Kunden, liest und schreibt aber
    keinen Zwischenstand, speichert nichts im Browser, meldet kein Öffnen (die 60 Tage beginnen nicht) und sendet nichts. Gilt nur
    in einem Browser, in dem das Konto des Betriebs mit diesem Link liegt (Betriebsbereich, gleiche Adresse); bekommt ein Kunde die
@@ -1256,11 +1256,12 @@ const linkKey = () => 'aufmass.k.' + (S.betrieb ? S.betrieb.code : '');
 function kaufSicher() { return S.kauf ? Object.assign({}, S.kauf, { pw: '' }) : S.kauf; }
 function lokalSpeichern() {
   const b = new Set(S.sync.bekannt || []); S.windows.forEach((w) => { if (w.wid) b.add(w.wid); }); S.sync.bekannt = Array.from(b).slice(-200);
-  if (vorschau()) return;
+  if (vorschau()) return false;
   try {
     if (S.betrieb) localStorage.setItem(linkKey(), JSON.stringify({ windows: S.windows, proj: S.proj, sent: S.sent, nb: S.nb || null, kauf: kaufSicher(), name: S.betrieb.name, angelegt: angelegt(), stand: S.stand || 0, projTs: S.projTs || 0, bekannt: S.sync.bekannt, geloescht: S.sync.geloescht, offen: !!S.sync.offen }));
     else localStorage.setItem(STORE, JSON.stringify({ windows: S.windows, proj: S.proj, kauf: kaufSicher(), teil: S.teil || null, angelegt: angelegt(), stand: S.stand || 0, projTs: S.projTs || 0, bekannt: S.sync.bekannt, geloescht: S.sync.geloescht, offen: !!S.sync.offen }));
-  } catch (e) { /* ohne Speicher weiter */ }
+    return true;
+  } catch (e) { return false; } // ohne Speicher weiter
 }
 /* Speichern: im Browser und beim Kundenlink zusätzlich als Zwischenstand auf dem Server (kurz gesammelt, ohne Fotos) */
 function persist() {
@@ -1337,7 +1338,7 @@ function render(fresh) {
   const view = SCREENS[S.screen] ? SCREENS[S.screen]() : SCREENS.home();
   const STEPS = stepsFor(S.win), si = STEPS.indexOf(S.screen), wiz = si >= 0;
   const qShare = S.screen === 'frage' && view.qpos ? view.qpos : 1;
-  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: 'Fenster', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', sichern: 'Konto', meinkonto: 'Konto', tour: 'Führung' }[S.screen] || '');
+  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: 'Fenster', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', sichern: 'Konto', meinkonto: 'Konto', linkanmelden: 'Konto', tour: 'Führung' }[S.screen] || '');
   const tourP = S.screen === 'tour' && S.tour ? (S.tour.i + 1) / TOUR.length : 0;
   const prevStage = root.querySelector('#w3d'), prevSig = prevStage ? prevStage.getAttribute('data-sig') : null;
   const backLabel = view.back ? view.back[0] : '';
@@ -1477,6 +1478,7 @@ function homeAufmass() {
 /* Eigenes Aufmaß: wo es gespeichert ist. Gast: nur in diesem Browser, mit „Aufmaß sichern“; mit Konto: gesichert, „Dein Konto“ */
 function kontoKarte() {
   if (!kontoBereit()) return '<p class="sub center merk">Dein Aufmaß bleibt in diesem Browser gespeichert. Öffne eeziframes wieder hier, dann geht es weiter.</p>';
+  if (KS && S.sync.voll) return '<div class="card merk-karte konto-karte gast"><p class="eyebrow">Nicht gesichert</p><p>' + esc(VOLL_TEXT) + '</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="meinkonto">Dein Konto</button></div></div>';
   if (KS) {
     const n = (S.konto.liste || []).length;
     return '<div class="card merk-karte konto-karte"><p class="eyebrow">Gesichert</p><p>In deinem Konto <b class="mail">' + esc(KS.mail) + '</b>, auf jedem Gerät. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="meinkonto">' + (n > 1 ? 'Deine ' + n + ' Aufmaße' : 'Dein Konto') + '</button></div></div>';
@@ -1820,7 +1822,7 @@ SCREENS.fertig = () => {
     (kiN ? '<p class="eyebrow">Einbausituation aus den Fotos</p><dl class="facts">' + kiZeilen(w.ki).map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' : '') + '</div></details>'
     : '<div class="card datei-card zu-karte"><div class="dc-row"><span class="dc-ic">' + LOCK + '</span><div><p class="eyebrow">Alle Angaben · ' + specRows(w).length + (kiN ? ' + ' + kiN + ' aus den Fotos' : '') + '</p><b>' + (lk ? 'Gehen mit deinem Aufmaß an ' + esc(bn) : 'Stehen in deinem Aufmaßblatt') + '</b><small>' + (lk ? esc(bn) + ' bekommt jedes Fenster mit Zeichnung, allen Maßen, deinen Wünschen und der Auswertung der Fotos.' : 'Mit Zeichnung, allen Maßen, deinen Wünschen und der Auswertung der Fotos. Einmal freischalten, für dieses Projekt.') + '</small></div></div>' + (lk ? '' : '<button type="button" class="btn primary" style="flex: 0 0 auto" data-act="k-start">Freischalten</button>') + '</div>';
   const zu = st.fest ? ' aria-disabled="true"' : '';
-  const aend = st.fest ? noteBox('Dieses Fenster ist fest: Die vier Änderungen nach der ersten Woche sind aufgebraucht. ' + (lk ? 'Änderungen klärst du direkt mit ' + esc(bn) + '.' : 'Brauchst du etwas anders, legst du es als neues Fenster an.'), null, 'warn')
+  const aend = st.fest ? noteBox(festText(st) + ' ' + (lk ? 'Änderungen klärst du direkt mit ' + esc(bn) + '.' : 'Brauchst du etwas anders, legst du es als neues Fenster an.'), null, 'warn')
     : !st.frei ? noteBox((st.kauf ? 'Seit dem Freischalten' : 'Seit dem ' + esc(datumKurz(st.bis))) + ' kannst du dieses Fenster noch ' + MAL[st.rest] + ' ändern. Jedes Speichern mit einer Änderung zählt.', null, 'warn')
     : st.nb ? '<p class="sub center aend-frei">Während der Nachbesserung kannst du dieses Fenster frei ändern, darum hat ' + esc(bn) + ' gebeten.</p>'
     : '<p class="sub center aend-frei">Bis zum ' + esc(datumKurz(st.bis)) + ' kannst du dieses Fenster beliebig ändern, danach noch viermal.</p>';
@@ -2000,21 +2002,35 @@ SCREENS.sichern = () => {
     '<p class="sub" style="padding: 0 6px">' + (z.zweck === 'anmelden' ? 'Noch kein Konto? Dann sichere zuerst ein Aufmaß auf dem Gerät, auf dem du gemessen hast.' : 'Dein Aufmaß liegt dann auf unserem Server, nur für dich. Du kannst es und dein Konto jederzeit löschen.') + '</p>';
   return { html: html, back: ['Zurück', zurueck], bar: { label: z.laeuft ? 'Einen Moment …' : 'Code schicken', act: 'sichern-code', dis: !!z.laeuft } };
 };
-/* Dein Konto: Aufmaße im Konto, neues beginnen, abmelden, löschen */
+/* Dein Konto: Aufmaße im Konto (öffnen, einzeln löschen), neues beginnen, abmelden, Konto löschen */
+const MUELL = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10.5 11v5.5M13.5 11v5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 SCREENS.meinkonto = () => {
   if (!KS) return SCREENS.home();
   const liste = S.konto.liste || [], jetzt = S.kauf && S.kauf.kennung, frage = S.kontoFrage || '';
   const datum = (iso) => { const t = Date.parse(iso || ''); return t ? datumKurz(t) : ''; };
-  const karten = liste.map((a) => '<button type="button" class="wincard konto-aufmass" data-act="projekt-oeffnen" data-k="' + esc(a.kennung) + '"><span class="ic">' + FILE_IC + '</span><span class="tx"><span class="pos">' + (a.kennung === jetzt ? 'GERADE GEÖFFNET' : 'GEÄNDERT AM ' + esc(datum(a.geaendert))) + '</span><span class="ti">' + esc(a.name || ('Aufmaß vom ' + datum(a.angelegt))) + '</span><span class="di">' + a.fenster + ' Fenster' + (a.bezahlt ? ' · freigeschaltet' : '') + '</span></span>' + CHEV + '</button>').join('');
+  const name = (a) => a.name || ('Aufmaß vom ' + datum(a.angelegt));
+  const frageKarte = (b) => '<div class="card neu-frage"><p class="eyebrow">Bitte bestätigen</p><b>' + esc(b[0]) + '</b><p class="sub">' + esc(b[1]) + '</p><div class="pill-row"><button type="button" class="pill danger" data-act="' + b[2] + '"' + (b[4] ? ' data-k="' + esc(b[4]) + '"' : '') + '>' + esc(b[3]) + '</button><button type="button" class="pill" data-act="konto-frage" data-v="">Abbrechen</button></div></div>';
+  const wegK = frage.indexOf('weg:') === 0 ? frage.slice(4) : '';
+  const karten = liste.map((a) => '<div class="konto-zeile"><button type="button" class="wincard konto-aufmass" data-act="projekt-oeffnen" data-k="' + esc(a.kennung) + '"><span class="ic">' + FILE_IC + '</span><span class="tx"><span class="pos">' + (a.kennung === jetzt ? 'GERADE GEÖFFNET' : 'GEÄNDERT AM ' + esc(datum(a.geaendert))) + '</span><span class="ti">' + esc(name(a)) + '</span><span class="di">' + a.fenster + ' Fenster' + (a.bezahlt ? ' · freigeschaltet' : '') + '</span></span>' + CHEV + '</button>' +
+    '<button type="button" class="konto-weg" data-act="konto-frage" data-v="weg:' + esc(a.kennung) + '" aria-label="' + esc(name(a)) + ' löschen">' + MUELL + '</button></div>' +
+    (a.kennung === wegK ? frageKarte(['„' + name(a) + '“ löschen?', (a.kennung === jetzt ? 'Das Aufmaß wird aus deinem Konto und von diesem Gerät gelöscht.' : 'Das Aufmaß wird aus deinem Konto gelöscht, auf allen Geräten.') + (a.bezahlt ? ' Es ist freigeschaltet; mit dem Löschen ist auch das weg. Heruntergeladene Aufmaßblätter behältst du.' : '') + ' Das lässt sich nicht rückgängig machen.', 'aufmass-weg-ja', 'Aufmaß löschen', a.kennung]) : '')).join('');
   const bestaetigen = frage === 'abmelden' ? ['Abmelden?', 'Dein Aufmaß bleibt in deinem Konto. Auf diesem Gerät wird es entfernt; Fotos und eingezeichnete Bilder der Lage, die nur hier liegen, gehen dabei verloren.', 'konto-abmelden-ja', 'Abmelden']
-    : frage === 'loeschen' ? ['Konto löschen?', 'Dein Konto und alle Aufmaße darin werden gelöscht, auch auf diesem Gerät. Gekaufte Aufmaßblätter, die du heruntergeladen hast, behältst du. Das lässt sich nicht rückgängig machen.', 'konto-loeschen-ja', 'Konto löschen']
-    : frage === 'aufmass' ? ['Dieses Aufmaß löschen?', 'Das geöffnete Aufmaß wird aus deinem Konto und von diesem Gerät gelöscht. Das lässt sich nicht rückgängig machen.', 'aufmass-konto-loeschen-ja', 'Aufmaß löschen'] : null;
+    : frage === 'loeschen' ? ['Konto löschen?', 'Dein Konto und alle Aufmaße darin werden gelöscht, auch auf diesem Gerät. Gekaufte Aufmaßblätter, die du heruntergeladen hast, behältst du. Das lässt sich nicht rückgängig machen.', 'konto-loeschen-ja', 'Konto löschen'] : null;
   const html = hd('Dein Konto', 'Alles gesichert.', 'Angemeldet als <b class="mail">' + esc(KS.mail) + '</b>. Deine Aufmaße sind auf jedem Gerät da, auf dem du dich anmeldest. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.') +
+    (S.sync.voll ? noteBox('Das geöffnete Aufmaß ist noch nicht gesichert: In deinem Konto haben ' + MAX_AUFMASSE + ' Aufmaße Platz. Lösche ein altes, dann kommt es hinein.', null, 'warn') : '') +
     '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">Deine Aufmaße.</h2><span class="sub">' + liste.length + ' im Konto</span></div><div class="liste-in">' + (karten || '<p class="sub">Noch keines gesichert. Sobald du ein Fenster gespeichert hast, liegt dein Aufmaß hier.</p>') + '<button type="button" class="dashed" data-act="konto-neu">' + PLUS + 'Neues Aufmaß beginnen</button></div></section>' +
-    (bestaetigen ? '<div class="card neu-frage"><p class="eyebrow">Bitte bestätigen</p><b>' + bestaetigen[0] + '</b><p class="sub">' + bestaetigen[1] + '</p><div class="pill-row"><button type="button" class="pill danger" data-act="' + bestaetigen[2] + '">' + bestaetigen[3] + '</button><button type="button" class="pill" data-act="konto-frage" data-v="">Abbrechen</button></div></div>' : '') +
-    '<div class="pill-row grid2"><button type="button" class="pill" data-act="konto-frage" data-v="abmelden">Abmelden</button>' + (jetzt && liste.some((a) => a.kennung === jetzt) ? '<button type="button" class="pill danger" data-act="konto-frage" data-v="aufmass">Dieses Aufmaß löschen</button>' : '') + '<button type="button" class="pill danger" data-act="konto-frage" data-v="loeschen">Konto löschen</button></div>' +
-    '<p class="sub center lk-note">In deinem Konto haben 20 Aufmaße Platz. Aufmaße, die du 12 Monate nicht änderst, löschen wir, freigeschaltete nach 3 Jahren.</p>' + rechtLinks();
+    (bestaetigen ? frageKarte(bestaetigen) : '') +
+    '<div class="pill-row grid2"><button type="button" class="pill" data-act="konto-frage" data-v="abmelden">Abmelden</button><button type="button" class="pill danger" data-act="konto-frage" data-v="loeschen">Konto löschen</button></div>' +
+    '<p class="sub center lk-note">In deinem Konto haben ' + MAX_AUFMASSE + ' Aufmaße Platz. Aufmaße, die du 12 Monate nicht änderst, löschen wir, freigeschaltete nach 3 Jahren.</p>' + rechtLinks();
   return { html: html, back: ['Aufmaß', 'home'], bar: null };
+};
+/* Anmeldelink, den dieser Browser nicht angefordert hat (oder für ein anderes Konto): erst fragen (kontoAusLink) */
+SCREENS.linkanmelden = () => {
+  const r = S.linkAnmeldung; if (!r) return SCREENS.home();
+  const hier = S.windows.length > 0 && !(S.kauf && S.kauf.konto);
+  const html = hd('Anmeldelink', 'Mit diesem Konto anmelden?', 'Der Link meldet dich als <b class="mail">' + esc(r.mail) + '</b> an. Angefordert wurde er nicht in diesem Browser. Melde dich nur an, wenn das deine E-Mail-Adresse ist.') +
+    (KS ? '<p class="sub" style="padding: 0 6px">Gerade bist du als <b class="mail">' + esc(KS.mail) + '</b> angemeldet. Dein Aufmaß bleibt in diesem Konto; auf diesem Gerät öffnet sich dann das andere.</p>' : hier ? '<p class="sub" style="padding: 0 6px">Dein Aufmaß auf diesem Gerät wird dann in diesem Konto gesichert.</p>' : '');
+  return { html: html, back: ['Abbrechen', 'home'], bar: { label: 'Anmelden', act: 'link-anmelden-ja', sec: 'Nicht anmelden', secAct: 'link-anmelden-nein' } };
 };
 /* Kasse, Schritt 2: mit Server zu Stripe, ohne Server ein gekennzeichneter Testkauf */
 SCREENS.kasse = () => {
@@ -2034,13 +2050,21 @@ SCREENS.gekauft = () => {
   return { html: html, bar: { label: 'Weiter: Blatt teilen', act: 'go', v: 'teilen' } };
 };
 /* Kauf über den Server: Kasse starten, nach der Rückkehr prüfen */
-async function kaufStarten() {
+async function kaufStarten(nochmal) {
   const k = kauf();
   try {
     const mitKonto = kontoBereit() && KS, init = { method: 'POST', body: JSON.stringify({ mail: k.mail, kennung: kennung() }) };
     const r = mitKonto ? await kontoJson('/api/zahlung/start', init) : await fetch('/api/zahlung/start', Object.assign(init, { headers: { 'content-type': 'application/json', accept: 'application/json' } })).then((x) => x.json());
-    if (r && r.anmelden) return sichernStart('kauf'); // Anmeldung abgelaufen oder kein Konto
-    if (r && r.sichern) { S.sync.offen = true; const a = await entwurfAbgleichen(); return a === 'fehler' ? toast('Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.') : kaufStarten(); }
+    if (r && r.anmelden) { SERVER.konten = true; return sichernStart('kauf'); } // Anmeldung abgelaufen oder kein Konto (auch wenn diese Seite noch von keinen Konten wusste)
+    if (r && r.geloescht) return aufmassEntfernt();
+    if (r && r.fremd) return aufmassFremd();
+    if (r && r.sichern) { // noch nicht im Konto: einmal abgleichen und noch einmal versuchen
+      SERVER.konten = true;
+      const nicht = () => toast(S.sync.voll ? VOLL_TEXT : 'Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.');
+      if (nochmal || S.sync.voll) return nicht();
+      S.sync.offen = true; const a = await entwurfAbgleichen();
+      return a === 'fehler' ? nicht() : kaufStarten(true);
+    }
     if (r && r.ok && r.schon) { await entwurfLaden(); return go(FREI() ? 'gekauft' : 'teilen'); } // schon freigeschaltet (anderes Gerät)
     if (!r || !r.ok || !r.url) return toast(r && r.fehler ? r.fehler : 'Die Kasse ist gerade nicht erreichbar.');
     persist(); location.href = r.url;
@@ -2054,6 +2078,12 @@ async function kaufPruefen(session, leise) {
     const antwort = await fetch('/api/zahlung/pruefen?session=' + encodeURIComponent(session) + '&kennung=' + encodeURIComponent(kennung()), { headers: { accept: 'application/json' } });
     const r = await antwort.json().catch(() => null);
     if (!antwort.ok || !r) throw new Error('Server');
+    if (r.anderes && r.kennung) { // bezahlt für ein anderes Aufmaß (etwa in einem anderen Tab gewechselt): mit Konto dieses öffnen
+      if (k.wartet === session) { k.wartet = ''; persist(); }
+      if (KS && kontoBereit() && (await projektOeffnen(r.kennung, true)) && FREI()) { S._feier = 'gekauft'; return go('gekauft'); }
+      if (leise) return render();
+      toast('Diese Zahlung gehört zu einem anderen Aufmaß' + (KS ? ' in deinem Konto; dort ist es freigeschaltet.' : '.')); return go('teilen');
+    }
     if (r.ok && r.bezahlt) { k.paid = true; k.when = Date.now(); k.session = session; k.token = r.token; k.wartet = ''; if (r.mail) k.mail = r.mail; S._feier = 'gekauft'; persist(); go('gekauft'); return; }
     if (r.wartet) { k.wartet = session; persist(); if (leise) return render(); toast('Deine Zahlung ist unterwegs. Sobald Stripe sie bestätigt, schaltet sich dein Blatt von selbst frei.'); go('teilen'); return; }
     if (k.wartet === session) { k.wartet = ''; persist(); toast('Die Zahlung ist nicht durchgegangen. Du kannst es jederzeit noch einmal versuchen.'); return go('teilen'); }
@@ -2456,10 +2486,12 @@ const neueWid = () => 'f' + Date.now().toString(36) + Math.random().toString(36)
 const kopie = (o) => JSON.parse(JSON.stringify(o));
 const datumKurz = (ms) => { try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return ''; } };
 /* Darf das offene Fenster noch geändert werden? Sonst ein Hinweis */
+/* Seit wann gezählt wird: nach der ersten Woche, oder seit dem Freischalten, wenn das früher war */
+const festText = (st) => 'Dieses Fenster ist fest: Die vier Änderungen ' + (st && st.kauf ? 'seit dem Freischalten' : 'nach der ersten Woche') + ' sind aufgebraucht.';
 function darfAendern() {
-  const g = S.editIdx >= 0 ? S.windows[S.editIdx] : null;
-  if (!g || !aendStand(g).fest) return true;
-  toast('Dieses Fenster ist fest: Die vier Änderungen nach der ersten Woche sind aufgebraucht.'); return false;
+  const g = S.editIdx >= 0 ? S.windows[S.editIdx] : null, st = g ? aendStand(g) : null;
+  if (!st || !st.fest) return true;
+  toast(festText(st)); return false;
 }
 /* Kundenlink zu (abgelaufen, deaktiviert)? Dann nichts mehr ändern */
 function linkOffen() { if (!S.betrieb || !S.linkZu || S.linkZu === 'eingegangen') return true; toast(S.linkZuText || 'Dieser Link ist nicht mehr aktiv.'); return false; }
@@ -2495,7 +2527,7 @@ function entwurfStand() {
   const pfp = stabil(S.proj); if (pfp !== S.sync.pfp) { if (S.sync.pfp) S.projTs = zeit(); S.sync.pfp = pfp; } // Angaben zum Haus mit eigenem Zeitpunkt
   const fp = entwurfFp(); if (fp !== S.sync.fp) { S.sync.fp = fp; S.stand = zeit(); S.sync.offen = true; }
 }
-function entwurfPlanen(sofort) { if (!entwurfAn() || !S.sync.offen || !S.sync.geladen) return; clearTimeout(S.sync.timer); S.sync.timer = setTimeout(entwurfSenden, sofort ? 0 : 1200); }
+function entwurfPlanen(sofort) { if (!entwurfAn() || !S.sync.offen || !S.sync.geladen || S.sync.voll) return; clearTimeout(S.sync.timer); S.sync.timer = setTimeout(entwurfSenden, sofort ? 0 : 1200); } // voll: erst wieder, wenn im Konto Platz ist
 /* Bilder der Lage, die nur auf diesem Gerät liegen, an gleich gebliebene Fenster hängen */
 function bilderBehalten(neu) {
   const alt = new Map(S.windows.filter((w) => w.plan && w.plan.bild).map((w) => [w.wid, w.plan]));
@@ -2530,14 +2562,14 @@ function weichtAb(gesendet) {
   return !!o && stabil(o.w.map(fensterFp)) !== stabil(S.windows.map(fensterFp));
 }
 function entwurfSenden(behalten) {
-  if (!entwurfAn()) return Promise.resolve(false);
+  if (!entwurfAn() || S.sync.voll) return Promise.resolve(false);
   if (S.sync.laeuft) { S.sync.wieder = true; return S.sync.p || Promise.resolve(false); }
   const sync = S.sync, ziel = syncZiel();
   sync.laeuft = true; sync.offen = false; clearTimeout(sync.timer);
   const k0 = !S.betrieb && S.kauf && S.kauf.paid && S.kauf.token ? { session: S.kauf.session || '', token: S.kauf.token } : null; // als Gast gekauft: Nachweis mit ins Konto
   const body = JSON.stringify(Object.assign({ windows: S.windows.map(packFenster), proj: S.proj, projTs: S.projTs || 0, stand: S.stand || zeit(), angelegt: angelegt(), bekannt: sync.bekannt || [], geloescht: sync.geloescht || {} }, k0 ? { kauf: k0 } : {})), fpGesendet = entwurfFp();
   sync.p = (async () => {
-    let neuZeigen = false;
+    let neuZeigen = false, weg = '';
     try {
       const t1 = Date.now(), res = await syncAbruf(ziel, { method: 'POST', body: body, keepalive: !!behalten && body.length < 60000 });
       const r = await res.json().catch(() => null);
@@ -2555,17 +2587,19 @@ function entwurfSenden(behalten) {
         sync.ok = true; sync.zuletzt = Date.now();
         if (!sync.wieder) { sync.fp = entwurfFp(); sync.offen = false; } // inzwischen weiter geändert: bleibt offen
         lokalSpeichern();
-      } else if (res.status === 410) {
+      } else if (ziel.art === 'konto' && res.status === 410 && r && r.geloescht) weg = 'entfernt'; // auf einem anderen Gerät gelöscht
+      else if (res.status === 410) {
         const zu = (r && r.zu) || 'abgelaufen';
         if (zu === 'eingegangen') schonEingegangen(r && r.runde, true, r && r.seit); else { S.linkZu = zu; S.linkZuText = (r && r.fehler) || ''; sync.offen = true; lokalSpeichern(); }
         neuZeigen = true;
       } else if (res.status === 409 && r && r.grenze) { sync.ok = true; toast(r.fehler); }
-      else if (ziel.art === 'konto' && res.status === 403 && r && r.fremd) { kauf().kennung = neueKennung(); sync.offen = true; sync.wieder = true; lokalSpeichern(); } // Kennung gehört zu einem anderen Konto: neue
-      else if (ziel.art === 'konto' && res.status === 409 && r && r.voll) { sync.aus = true; sync.offen = true; lokalSpeichern(); toast(r.fehler); neuZeigen = true; }
+      else if (ziel.art === 'konto' && res.status === 403 && r && r.fremd) weg = 'fremd'; // gehört zu einem anderen Konto
+      else if (ziel.art === 'konto' && res.status === 409 && r && r.voll) { sync.voll = true; sync.offen = true; lokalSpeichern(); toast(r.fehler); neuZeigen = true; } // Konto voll: bleibt hier, bis Platz ist
       else { sync.offen = true; sync.ok = false; lokalSpeichern(); }
     } catch (e) { if (S.sync === sync) { sync.offen = true; sync.ok = false; lokalSpeichern(); } }
     if (S.sync !== sync) return false;
     sync.laeuft = false; sync.p = null;
+    if (weg) { if (weg === 'fremd') aufmassFremd(); else aufmassEntfernt(); return true; }
     if (neuZeigen && ['home', 'fertig', 'blatt', 'anfrage', 'anfrage2', 'anfrage3'].includes(S.screen)) render();
     if (sync.wieder) { sync.wieder = false; sync.offen = true; entwurfPlanen(); }
     return neuZeigen;
@@ -2575,6 +2609,7 @@ function entwurfSenden(behalten) {
 /* Vor dem Absenden: Offenes zum Server bringen, dann nachsehen, ob ein anderes Gerät inzwischen weitergemacht hat. true: der Stand
    hier hat sich dabei geändert, oder der Link ist inzwischen zu bzw. das Aufmaß schon beim Betrieb */
 async function entwurfAbgleichen() {
+  if (kontoAn() && !S.betrieb && S.sync.voll) return 'fehler'; // Konto voll: das Aufmaß hier ist nicht im Konto
   if (!entwurfAn()) return false;
   let anders = false;
   const hin = async () => { for (let i = 0; i < 3 && entwurfAn(); i++) { if (S.sync.p) anders = (await S.sync.p.catch(() => false)) || anders; else if (S.sync.offen) anders = (await entwurfSenden()) || anders; else break; } };
@@ -2596,7 +2631,8 @@ async function entwurfLaden() {
     if (r) uhrStellen(r.jetzt, t1, Date.now());
     if (S.sync !== sync) return false; // inzwischen ein anderer Link, ein anderes Aufmaß oder abgemeldet
     sync.zuletzt = Date.now();
-    if (ziel.art === 'konto' && res.status === 403 && r && r.fremd) { kauf().kennung = neueKennung(); lokalSpeichern(); sync.geladen = true; sync.offen = true; entwurfPlanen(true); return false; }
+    if (ziel.art === 'konto' && res.status === 403 && r && r.fremd) { aufmassFremd(); return true; }
+    if (ziel.art === 'konto' && res.status === 410 && r && r.geloescht) { aufmassEntfernt(); return true; }
     if (!r || !r.ok) { sync.geladen = true; sync.ok = false; return false; }
     if (r.aus) { sync.aus = true; sync.geladen = true; render(); return false; }
     if (ziel.art === 'konto') bezahltUebernehmen(r.bezahlt);
@@ -2622,6 +2658,7 @@ window.addEventListener('online', () => { if (S.betrieb && SERVER.daten && S.syn
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible' || !(S.betrieb || kontoAn())) return;
   if (S.betrieb && SERVER.daten && !S.sync.geladen) return linkPruefen(); // das erste Prüfen ist nicht durchgekommen
+  if (!S.betrieb && S.sync.voll) return kontoListe(); // Konto voll: vielleicht inzwischen anderswo Platz gemacht
   if (!entwurfAn() || S.sync.laeuft) return;
   if (S.sync.offen) return entwurfPlanen(true);
   if (Date.now() - (S.sync.zuletzt || 0) > 20000) entwurfLaden();
@@ -2631,23 +2668,41 @@ document.addEventListener('visibilitychange', () => {
    (functions/api/eigene.js) und wird abgeglichen wie beim Kundenlink. Zum Freischalten ist das Konto Pflicht, der Kauf hängt dann am
    Aufmaß. Die Anmeldung bleibt in diesem Browser (aufmass.kunde, ohne Passwort). Abmelden nimmt das Aufmaß von diesem Gerät, im
    Konto bleibt es. Ohne Konten auf dem Server (SERVER.konten) bleibt alles wie für Gäste, gekauft wird dann ohne Konto. */
-const KUNDE = 'aufmass.kunde';
-let KS = (() => { try { const o = JSON.parse(localStorage.getItem(KUNDE) || 'null'); return o && o.token ? o : null; } catch (e) { return null; } })();
+const KUNDE = 'aufmass.kunde', ANFRAGE = 'aufmass.kunde.anfrage', BILDER = 'aufmass.bilder.', MAX_AUFMASSE = 20;
+const VOLL_TEXT = 'In deinem Konto haben ' + MAX_AUFMASSE + ' Aufmaße Platz. Dieses ist noch nicht gesichert: Lösche in „Dein Konto“ ein altes.';
+function kontoLesen() { try { const o = JSON.parse(localStorage.getItem(KUNDE) || 'null'); return o && o.token ? o : null; } catch (e) { return null; } }
+let KS = kontoLesen();
 const kontoAn = () => !!(SERVER.konten && KS && KS.token && S.kauf && S.kauf.kennung);
 const kontoBereit = () => !!(SERVER.konten && !S.betrieb && !vorschau());
 function kontoMerken(s) {
   KS = s && s.token ? { token: s.token, refresh: s.refresh || '', mail: s.mail || '' } : null;
   try { if (KS) localStorage.setItem(KUNDE, JSON.stringify(KS)); else localStorage.removeItem(KUNDE); } catch (e) { /* ok */ }
 }
+/* Anmeldung in einem anderen Tab: nur erneuert, dann übernehmen; an- oder abgemeldet oder ein anderes Konto, dann neu laden, damit
+   Aufmaß und Anmeldung zusammenpassen (sonst schriebe dieser Tab ein Aufmaß zurück, das nicht mehr hierher gehört) */
+window.addEventListener('storage', (e) => {
+  if (e.key !== KUNDE && e.key !== null) return;
+  const neu = kontoLesen();
+  if (neu && KS && neu.mail === KS.mail) { KS = neu; return; }
+  if (!neu && !KS) return;
+  location.reload();
+});
 let erneuernLaeuft = null;
-async function kontoErneuern() {
+/* alt: das Token, mit dem es gerade nicht ging. Hat ein anderer Tab schon erneuert, gilt dessen Anmeldung: Ein zweimal benutztes
+   Erneuerungstoken beendet Supabase sonst überall. Nur eine Ablehnung (401) beendet die Anmeldung hier, keine Störung (503) */
+async function kontoErneuern(alt) {
+  const frisch = kontoLesen();
+  if (frisch && frisch.token !== alt) { KS = frisch; return true; }
   if (!KS || !KS.refresh) return false;
   if (!erneuernLaeuft) erneuernLaeuft = (async () => {
     try {
       const r = await fetch('/api/kunde/erneuern', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ refresh: KS.refresh }) });
       const j = await r.json().catch(() => null);
       if (r.ok && j && j.ok && j.token) { kontoMerken({ token: j.token, refresh: j.refresh, mail: j.mail || KS.mail }); return true; }
-      if (r.status === 401) { S.konto.abgelaufen = KS.mail; kontoMerken(null); render(); } // Anmeldung abgelaufen: das Aufmaß bleibt hier, gesichert wird erst nach neuem Anmelden
+      if (r.status === 401) {
+        const nun = kontoLesen(); if (nun && nun.token !== alt) { KS = nun; return true; } // inzwischen anderswo erneuert
+        S.konto.abgelaufen = KS.mail; kontoMerken(null); render(); // abgelaufen: das Aufmaß bleibt hier, gesichert wird erst nach neuem Anmelden
+      }
       return false;
     } catch (e) { return false; }
   })();
@@ -2656,9 +2711,11 @@ async function kontoErneuern() {
 /* Abruf mit der Anmeldung; ist sie abgelaufen, einmal erneuern und noch einmal */
 async function kontoAbruf(pfad, init) {
   init = init || {};
+  const frisch = kontoLesen(); if (frisch && KS && frisch.mail === KS.mail) KS = frisch; // vielleicht in einem anderen Tab erneuert
+  const tok = KS ? KS.token : '';
   const los = () => fetch(pfad, Object.assign({}, init, { headers: Object.assign({ accept: 'application/json' }, init.body ? { 'content-type': 'application/json' } : {}, KS ? { authorization: 'Bearer ' + KS.token } : {}) }));
   let res = await los();
-  if (res.status === 401 && KS && (await kontoErneuern())) res = await los();
+  if (res.status === 401 && KS && (await kontoErneuern(tok))) res = await los();
   return res;
 }
 async function kontoJson(pfad, init) { try { const res = await kontoAbruf(pfad, init); const j = await res.json().catch(() => null); return Object.assign({ _status: res.status }, j || {}); } catch (e) { return { _status: 0, ok: false, fehler: 'Keine Verbindung. Bitte gleich noch einmal.' }; } }
@@ -2676,43 +2733,101 @@ async function kontoListe() {
   if (!KS) return null;
   listeZuletzt = Date.now();
   const r = await kontoJson('/api/kunde/aufmasse');
-  if (r.ok) { S.konto.liste = r.aufmasse || []; if (r.aus) SERVER.konten = false; if (['meinkonto', 'home'].includes(S.screen)) render(); }
+  if (r.ok) {
+    S.konto.liste = r.aufmasse || []; if (r.aus) SERVER.konten = false;
+    if (S.sync.voll && S.konto.liste.length < MAX_AUFMASSE) { S.sync.voll = false; S.sync.offen = true; entwurfPlanen(true); } // wieder Platz, etwa auf einem anderen Gerät gelöscht
+    if (['meinkonto', 'home'].includes(S.screen)) render();
+  }
   return r.ok ? S.konto.liste : null;
 }
+/* Bilder der eingezeichneten Lage liegen nur auf diesem Gerät (nicht im Konto). Beim Wechsel des Aufmaßes kommen sie je Aufmaß
+   beiseite und beim Zurückwechseln wieder an ihre Fenster (gleiche Kennung, gleiche Ecken) */
+function bilderAblegen() {
+  const k = S.kauf && S.kauf.kennung; if (!k) return true;
+  const b = {}; S.windows.forEach((w) => { if (w.wid && w.plan && w.plan.bild) b[w.wid] = { bild: w.plan.bild, bw: w.plan.bw, bh: w.plan.bh, ecken: w.plan.ecken }; });
+  if (!Object.keys(b).length) return true;
+  try { localStorage.setItem(BILDER + k, JSON.stringify(b)); return true; } catch (e) { return false; }
+}
+function bilderZurueck(k) {
+  let b = null; try { b = JSON.parse(localStorage.getItem(BILDER + k) || 'null'); } catch (e) { b = null; }
+  if (!b) return;
+  S.windows.forEach((w) => { const p = b[w.wid]; if (p && w.plan && !w.plan.bild && stabil(p.ecken) === stabil(w.plan.ecken)) w.plan = Object.assign({}, w.plan, { bild: p.bild, bw: p.bw, bh: p.bh }); });
+  if (lokalSpeichern()) { try { localStorage.removeItem(BILDER + k); } catch (e) { /* ok */ } }
+}
+function bilderWeg(k) { try { (k ? [BILDER + k] : Object.keys(localStorage).filter((x) => x.indexOf(BILDER) === 0)).forEach((x) => localStorage.removeItem(x)); } catch (e) { /* ok */ } }
+/* Ein leeres Aufmaß mit neuer Kennung, mit Anmeldung gleich dem Konto zugeordnet */
+function leeresAufmass() {
+  clearTimeout(S.sync.timer); S.sync = syncNeu(); S.sync.geladen = true; S.sync.ok = true;
+  S.windows = []; S.proj = Object.assign({}, PROJ0); S.projTs = 0; S.stand = 0; S.angelegt = 0; S.teil = null; S.editIdx = -1; S.win = baseWin(); S.neuFrage = false; S.kontoFrage = '';
+  S.kauf = { kennung: neueKennung(), mail: KS ? KS.mail : '', agb: !!KS, konto: KS ? KS.mail : '', pay: '', widerruf: false, paid: false, err: {} };
+  S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj); lokalSpeichern();
+}
+/* Das Aufmaß dieses Geräts wegnehmen: Speicher und Bilder der Lage weg, dann leer */
+function hierLeeren() {
+  const k = S.kauf && S.kauf.kennung;
+  clearTimeout(S.sync.timer);
+  try { localStorage.removeItem(STORE); } catch (e) { /* ok */ }
+  if (k) bilderWeg(k);
+  loadOwn(); S.teil = null;
+}
+/* Danach: das neueste Aufmaß aus dem Konto öffnen, sonst ein leeres beginnen */
+async function naechstesAufmass() {
+  const l = KS ? await kontoListe() : null;
+  if (l && l.length && (await projektOeffnen(l[0].kennung, true))) return;
+  if (KS) leeresAufmass();
+  go('home');
+}
+/* Auf einem anderen Gerät gelöscht (oder mit dem Konto): auch hier weg */
+function aufmassEntfernt() { hierLeeren(); toast('Dieses Aufmaß wurde gelöscht, auch auf diesem Gerät.'); return naechstesAufmass(); }
+/* Gehört zu einem anderen Konto (geteiltes Gerät): nicht in dieses Konto kopieren, sondern von diesem Gerät nehmen; im anderen Konto bleibt es */
+function aufmassFremd() { hierLeeren(); toast('Dieses Aufmaß gehört zu einem anderen Konto und wurde von diesem Gerät entfernt.'); return naechstesAufmass(); }
 /* Ein Aufmaß aus dem Konto auf dieses Gerät holen (anderes Gerät, oder in „Dein Konto“ gewählt) */
 async function projektOeffnen(k, still) {
   if (!KS) return false;
   if (S.kauf && S.kauf.kennung === k && S.windows.length) { if (!still) go('home'); return true; }
-  if (kontoAn() && S.sync.offen) { const a = await entwurfAbgleichen(); if (a === 'fehler') { toast('Dein aktuelles Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.'); return false; } }
+  if (kontoAn() && (S.sync.offen || S.sync.p || S.sync.voll)) { const a = await entwurfAbgleichen(); if (a === 'fehler') { toast(S.sync.voll ? VOLL_TEXT : 'Dein aktuelles Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.'); return false; } }
   const r = await kontoJson('/api/kunde/aufmass/' + encodeURIComponent(k));
+  if (r._status === 410) { bilderWeg(k); toast('Dieses Aufmaß wurde gelöscht.'); kontoListe(); return false; }
   if (!r.ok || !r.entwurf) { toast(r.fehler || 'Dieses Aufmaß ließ sich gerade nicht öffnen.'); return false; }
+  const platz = bilderAblegen();
   clearTimeout(S.sync.timer); S.sync = syncNeu();
   S.windows = []; takeWindows(r.entwurf.windows || []);
   S.proj = normProj(Object.assign({}, PROJ0, r.entwurf.proj || {})); S.projTs = Number(r.entwurf.projTs) || 0; S.stand = Number(r.entwurf.stand) || 0;
-  S.kauf = { kennung: k, mail: KS.mail, agb: true, pay: '', widerruf: false, paid: false, err: {} }; S.teil = null; S.angelegt = 0; S.editIdx = -1; S.win = baseWin();
+  S.kauf = { kennung: k, mail: KS.mail, agb: true, konto: KS.mail, pay: '', widerruf: false, paid: false, err: {} }; S.teil = null; S.angelegt = 0; S.editIdx = -1; S.win = baseWin();
   bezahltUebernehmen(r.bezahlt); metaUebernehmen(r.meta);
   S.sync.geladen = true; S.sync.ok = true; S.sync.zuletzt = Date.now(); S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj); S.sync.bekannt = S.windows.map((w) => w.wid);
-  lokalSpeichern();
-  if (!still) { go('home'); toast('Aufmaß geöffnet'); } else render();
+  lokalSpeichern(); bilderZurueck(k);
+  const hinweis = platz ? 'Aufmaß geöffnet' : 'Aufmaß geöffnet. Für die Bilder der Lage im vorigen war auf diesem Gerät kein Platz.';
+  if (!still) { go('home'); toast(hinweis); } else { render(); if (!platz) toast(hinweis); }
   return true;
 }
-/* Nach dem Anmelden: Aufmaß dieses Geräts ins Konto bringen, sonst das zuletzt bearbeitete aus dem Konto holen */
+/* Nach dem Anmelden: Aufmaß dieses Geräts ins Konto bringen, sonst das zuletzt bearbeitete aus dem Konto holen. Ein Aufmaß, das
+   schon zu einem anderen Konto gehört (geteiltes Gerät), kommt nicht mit hinein. Gemeldet wird erst, was wirklich angekommen ist */
 async function nachAnmeldung(r, zweck) {
+  try { localStorage.removeItem(ANFRAGE); } catch (e) { /* ok */ }
   kontoMerken({ token: r.token, refresh: r.refresh, mail: r.mail }); S.konto.abgelaufen = ''; S.konto.liste = r.aufmasse || []; listeZuletzt = Date.now();
   if (r.aus) { SERVER.konten = false; toast('Konten sind gerade nicht verfügbar.'); return go('home'); }
+  SERVER.konten = true;
+  if (S.kauf && S.kauf.konto && S.kauf.konto !== r.mail) hierLeeren();
   const hier = S.windows.length > 0, imKonto = S.kauf && S.kauf.kennung && S.konto.liste.some((a) => a.kennung === S.kauf.kennung);
+  let a = true;
   if (!hier && !imKonto && S.konto.liste.length) { await projektOeffnen(S.konto.liste[0].kennung, true); }
   else {
-    const k = kauf(); kennung(); k.mail = KS.mail; k.agb = true;
+    const k = kauf(); kennung(); k.mail = KS.mail; k.agb = true; k.konto = KS.mail;
     clearTimeout(S.sync.timer); const alt = S.sync; S.sync = syncNeu(); S.sync.bekannt = alt.bekannt || []; S.sync.geloescht = alt.geloescht || {};
     S.sync.offen = hier; if (hier && !S.stand) S.stand = zeit(); S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj); lokalSpeichern();
+    const s0 = S.sync;
     await entwurfLaden(); // nicht im Konto: geht hoch; schon im Konto: wird zusammengeführt
+    if (S.sync !== s0) { S.sichern = null; return; } // inzwischen gelöscht oder einem anderen Konto zugehörig: schon gemeldet
+    if (hier && zweck !== 'kauf') a = await entwurfAbgleichen();
   }
   S.sichern = null;
   if (zweck === 'kauf') return kaufMitKonto();
-  go('home'); toast(zweck === 'anmelden' ? 'Angemeldet' : 'Gesichert, in deinem Konto.');
+  go('home');
+  toast(S.sync.voll ? VOLL_TEXT : a === 'fehler' ? 'Angemeldet. Dein Aufmaß wird gesichert, sobald die Verbindung steht.' : zweck === 'anmelden' ? 'Angemeldet' : 'Gesichert, in deinem Konto.');
 }
-/* Anmeldelink aus der E-Mail: Supabase kommt mit #access_token=…&refresh_token=… zurück */
+/* Anmeldelink aus der E-Mail: Supabase kommt mit #access_token=…&refresh_token=… zurück. Die Adresse wird gleich beim Start
+   bereinigt (die Schlüssel sollen nicht im Verlauf bleiben), verarbeitet wird der Link, sobald klar ist, ob es Konten gibt */
 function tokenAusAdresse() {
   const h = location.hash || '';
   if (!/access_token=|error_description=/.test(h)) return null;
@@ -2720,21 +2835,35 @@ function tokenAusAdresse() {
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ }
   return q.get('access_token') ? { token: q.get('access_token'), refresh: q.get('refresh_token') || '' } : { fehler: q.get('error_description') || 'Anmeldung fehlgeschlagen' };
 }
+let LINK_TOKEN = null;
+/* Angemeldet wird ohne Rückfrage nur, wenn dieser Browser den Code für genau diese Adresse angefordert hat (in der letzten Stunde).
+   Sonst könnte ein untergeschobener Link jemanden in ein fremdes Konto anmelden und sein Aufmaß dorthin bringen: Dann zeigt die App
+   die Adresse des Kontos und fragt erst, ebenso vor einem Wechsel des Kontos */
 async function kontoAusLink(t) {
-  if (t.fehler) { toast('Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordere einen neuen Code an.'); return; }
+  if (t.fehler) { toast('Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordere einen neuen Code an.'); return render(); }
   try {
     const res = await fetch('/api/kunde/sitzung', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(t) });
     const r = await res.json().catch(() => null);
-    if (r && r.ok) return nachAnmeldung(r, 'anmelden');
-    toast((r && r.fehler) || 'Die Anmeldung hat nicht geklappt. Bitte fordere einen neuen Code an.');
-  } catch (e) { toast('Keine Verbindung. Bitte gleich noch einmal.'); }
+    if (!(r && r.ok)) { toast((r && r.fehler) || 'Die Anmeldung hat nicht geklappt. Bitte fordere einen neuen Code an.'); return render(); }
+    let a = null; try { a = JSON.parse(localStorage.getItem(ANFRAGE) || 'null'); } catch (e) { a = null; }
+    const erwartet = !!(a && a.mail === r.mail && Date.now() - (Number(a.at) || 0) < 3600000);
+    if (KS && KS.mail === r.mail) return nachAnmeldung(r, 'anmelden'); // dasselbe Konto, nur frisch angemeldet
+    if (!KS && erwartet) return nachAnmeldung(r, a.zweck || 'anmelden');
+    S.linkAnmeldung = r; go('linkanmelden');
+  } catch (e) { toast('Keine Verbindung. Bitte gleich noch einmal.'); render(); }
+}
+/* Nach der Rückfrage: ein anderes Konto zuerst sauber verlassen (Offenes sichern, Aufmaß von diesem Gerät nehmen) */
+async function kontoWechseln(r) {
+  if (KS && KS.mail !== r.mail && !(await abmeldenHier())) return go('home');
+  return nachAnmeldung(r, 'anmelden');
 }
 /* Beim Start mit Anmeldung: Liste holen, das Aufmaß dieses Geräts abgleichen oder, wenn hier keines liegt, das letzte öffnen */
 async function kontoStart() {
   const liste = await kontoListe();
   if (!KS) return render();
+  if (S.kauf && S.kauf.konto && S.kauf.konto !== KS.mail) hierLeeren(); // gehört zu einem anderen Konto
   if (liste && !S.windows.length && !(S.kauf && S.kauf.kennung && liste.some((a) => a.kennung === S.kauf.kennung)) && liste.length) return projektOeffnen(liste[0].kennung, true);
-  const k = kauf(); kennung(); k.mail = KS.mail; k.agb = true; lokalSpeichern();
+  const k = kauf(); kennung(); k.mail = KS.mail; k.agb = true; k.konto = KS.mail; lokalSpeichern();
   entwurfLaden();
 }
 /* Sichern-Ablauf: zweck 'sichern' (Gast sichert), 'anmelden' (anderes Gerät), 'kauf' (vor dem Freischalten) */
@@ -2750,7 +2879,7 @@ async function sichernCode() {
     const res = await fetch('/api/kunde/code', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ mail: z.mail }) });
     const r = await res.json().catch(() => null);
     z.laeuft = false;
-    if (r && r.ok) { z.schritt = 2; z.code = ''; z.err = {}; go('sichern'); return; }
+    if (r && r.ok) { try { localStorage.setItem(ANFRAGE, JSON.stringify({ mail: z.mail, zweck: z.zweck, at: Date.now() })); } catch (e) { /* ok */ } z.schritt = 2; z.code = ''; z.err = {}; go('sichern'); return; } // der Link aus dieser E-Mail meldet ohne Rückfrage an
     z.err.mail = (r && r.fehler) || 'Der Code ließ sich gerade nicht verschicken.'; render();
   } catch (e) { z.laeuft = false; z.err.mail = 'Keine Verbindung. Bitte gleich noch einmal.'; render(); }
 }
@@ -2769,43 +2898,57 @@ async function sichernPruefen() {
 }
 /* Freischalten mit Konto: erst abgleichen (der Kauf hängt am gesicherten Aufmaß), dann zur Kasse */
 async function kaufMitKonto() {
-  const k = kauf(); kennung(); k.mail = KS ? KS.mail : k.mail; k.agb = true; lokalSpeichern();
-  if (!S.sync.geladen || S.sync.offen) { const a = await entwurfAbgleichen(); if (a === 'fehler') { go('teilen'); return toast('Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.'); } }
+  const k = kauf(); kennung(); k.mail = KS ? KS.mail : k.mail; k.agb = true; if (KS) k.konto = KS.mail; lokalSpeichern();
+  if (S.sync.voll) { go('teilen'); return toast(VOLL_TEXT); }
+  if (!S.sync.geladen || S.sync.offen || S.sync.p) { const a = await entwurfAbgleichen(); if (a === 'fehler') { go('teilen'); return toast(S.sync.voll ? VOLL_TEXT : 'Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.'); } }
   if (FREI()) return go('gekauft');
   go('kasse');
 }
-/* Abmelden: Offenes noch sichern, dann das Aufmaß von diesem Gerät nehmen (im Konto bleibt es) */
-async function kontoAbmelden() {
-  if (kontoAn() && (S.sync.offen || S.sync.p)) { const a = await entwurfAbgleichen(); if (a === 'fehler') return toast('Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal, sonst gehen die letzten Änderungen verloren.'); }
+/* Abmelden auf diesem Gerät: Offenes noch sichern, dann Anmeldung, Aufmaß und Bilder der Lage von diesem Gerät nehmen. false: nicht
+   gesichert, dann bleibt alles, wie es ist */
+async function abmeldenHier() {
+  if (S.sync.voll) { toast('Dein Konto ist voll, dieses Aufmaß ist noch nicht gesichert. Lösche zuerst in „Dein Konto“ ein altes, sonst geht es beim Abmelden verloren.'); return false; }
+  if (kontoAn() && (S.sync.offen || S.sync.p)) { const a = await entwurfAbgleichen(); if (a === 'fehler') { toast('Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal, sonst gehen die letzten Änderungen verloren.'); return false; } }
   kontoMerken(null); S.konto = { liste: null, abgelaufen: '' }; S.kontoFrage = '';
   try { localStorage.removeItem(STORE); } catch (e) { /* ok */ }
-  loadOwn(); S.teil = null; go('home'); toast('Abgemeldet. Dein Aufmaß bleibt im Konto.');
+  bilderWeg(); loadOwn(); S.teil = null;
+  return true;
 }
+async function kontoAbmelden() { if (await abmeldenHier()) { go('home'); toast('Abgemeldet. Dein Aufmaß bleibt im Konto.'); } }
+/* Während des Löschens nichts mehr senden; ein laufender Versand darf erst fertig werden */
+async function sendenAnhalten() { clearTimeout(S.sync.timer); S.sync.aus = true; if (S.sync.p) await S.sync.p.catch(() => false); }
 async function kontoLoeschen() {
+  await sendenAnhalten();
   const r = await kontoJson('/api/kunde/loeschen', { method: 'POST', body: '{}' });
-  if (!r.ok) return toast(r.fehler || 'Das hat gerade nicht geklappt. Bitte gleich noch einmal.');
+  if (!r.ok) { S.sync.aus = false; entwurfPlanen(); return toast(r.fehler || 'Das hat gerade nicht geklappt. Bitte gleich noch einmal.'); }
   kontoMerken(null); S.konto = { liste: null, abgelaufen: '' }; S.kontoFrage = '';
   try { localStorage.removeItem(STORE); } catch (e) { /* ok */ }
-  loadOwn(); S.teil = null; go('home'); toast('Konto und Aufmaße gelöscht.');
+  bilderWeg(); loadOwn(); S.teil = null; go('home'); toast('Konto und Aufmaße gelöscht.');
 }
-async function aufmassImKontoLoeschen() {
-  const k = S.kauf && S.kauf.kennung; if (!k || !KS) return;
+/* Ein Aufmaß aus dem Konto löschen; das geöffnete auch von diesem Gerät. Ist das Konto voll, geht danach das Aufmaß hier hinein */
+async function aufmassLoeschen(k) {
+  if (!k || !KS) return;
+  const offen = !!(S.kauf && S.kauf.kennung === k);
+  if (offen) await sendenAnhalten();
   const r = await kontoJson('/api/kunde/aufmass/' + encodeURIComponent(k) + '/loeschen', { method: 'POST', body: '{}' });
-  if (!r.ok) return toast(r.fehler || 'Das hat gerade nicht geklappt. Bitte gleich noch einmal.');
-  S.konto.liste = r.aufmasse || []; S.kontoFrage = '';
-  try { localStorage.removeItem(STORE); } catch (e) { /* ok */ }
-  loadOwn(); S.teil = null;
-  if (S.konto.liste.length) return projektOeffnen(S.konto.liste[0].kennung).then(() => toast('Aufmaß gelöscht'));
-  go('home'); toast('Aufmaß gelöscht');
+  if (!r.ok) { if (offen) { S.sync.aus = false; entwurfPlanen(); } return toast(r.fehler || 'Das hat gerade nicht geklappt. Bitte gleich noch einmal.'); }
+  S.konto.liste = r.aufmasse || []; S.kontoFrage = ''; bilderWeg(k);
+  if (offen) {
+    hierLeeren();
+    if (!(S.konto.liste.length && (await projektOeffnen(S.konto.liste[0].kennung, true)))) leeresAufmass();
+    go('meinkonto'); return toast('Aufmaß gelöscht');
+  }
+  if (S.sync.voll) { S.sync.voll = false; S.sync.offen = true; entwurfPlanen(true); }
+  render(); toast('Aufmaß gelöscht');
 }
 /* Neues Aufmaß mit Konto: das bisherige bleibt im Konto */
 async function kontoNeuesAufmass() {
+  if ((S.konto.liste || []).length >= MAX_AUFMASSE) return toast('In deinem Konto haben ' + MAX_AUFMASSE + ' Aufmaße Platz. Lösche zuerst ein altes.');
+  if (S.sync.voll) return toast(VOLL_TEXT);
   if (kontoAn() && (S.sync.offen || S.sync.p)) { const a = await entwurfAbgleichen(); if (a === 'fehler') return toast('Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal.'); }
-  clearTimeout(S.sync.timer); S.sync = syncNeu(); S.sync.geladen = true; S.sync.ok = true;
-  S.windows = []; S.proj = Object.assign({}, PROJ0); S.projTs = 0; S.stand = 0; S.angelegt = 0; S.teil = null; S.editIdx = -1; S.win = baseWin(); S.neuFrage = false; S.kontoFrage = '';
-  S.kauf = { kennung: neueKennung(), mail: KS ? KS.mail : '', agb: !!KS, pay: '', widerruf: false, paid: false, err: {} };
-  S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj); lokalSpeichern();
-  go('home'); toast('Neues Aufmaß begonnen.');
+  const platz = bilderAblegen();
+  leeresAufmass();
+  go('home'); toast(platz ? 'Neues Aufmaß begonnen.' : 'Neues Aufmaß begonnen. Für die Bilder der Lage im vorigen war auf diesem Gerät kein Platz.');
 }
 const ctrls = {};
 function imageDims(url) { return new Promise((res) => { const im = new Image(); im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => res({ w: 1200, h: 1600 }); im.src = url; }); }
@@ -2886,7 +3029,7 @@ function saveWin() {
   if (S.editIdx >= 0 && S.windows[S.editIdx]) {
     const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w);
     w.wid = alt.wid || neueWid(); w.t0 = Number(alt.t0) || jetzt; w.aend = Number(alt.aend) || 0; w.ts = anders ? jetzt : Number(alt.ts) || 0;
-    if (anders && st.fest) { toast('Dieses Fenster ist fest: Die vier Änderungen nach der ersten Woche sind aufgebraucht.'); S.win = kopie(alt); return go('fertig'); }
+    if (anders && st.fest) { toast(festText(st)); S.win = kopie(alt); return go('fertig'); }
     if (anders && !st.frei) { w.aend += 1; const rest = GRENZE.aenderungen - w.aend; hinweis = rest > 0 ? 'Gespeichert. Dieses Fenster kannst du noch ' + MAL[rest] + ' ändern.' : 'Gespeichert. Das war die letzte Änderung an diesem Fenster.'; }
     S.windows[S.editIdx] = kopie(w);
   } else {
@@ -2953,7 +3096,9 @@ function act(name, el) {
     case 'konto-frage': { S.kontoFrage = v || ''; return render(); }
     case 'konto-abmelden-ja': return kontoAbmelden();
     case 'konto-loeschen-ja': return kontoLoeschen();
-    case 'aufmass-konto-loeschen-ja': return aufmassImKontoLoeschen();
+    case 'aufmass-weg-ja': return aufmassLoeschen(el.getAttribute('data-k'));
+    case 'link-anmelden-ja': { const r = S.linkAnmeldung; S.linkAnmeldung = null; return r ? kontoWechseln(r) : go('home'); }
+    case 'link-anmelden-nein': { S.linkAnmeldung = null; go('home'); return toast('Nicht angemeldet.'); }
     case 'aufmass-neu-nein': { S.neuFrage = false; return render(); }
     case 'aufmass-neu-ja': { if (S.betrieb) return; if (kontoBereit() && KS) return kontoNeuesAufmass(); S.neuFrage = false; try { localStorage.removeItem(STORE); } catch (e) { /* ok */ } loadOwn(); S.teil = null; toast('Neues Aufmaß begonnen'); return go('home'); }
     case 'gloss': { S.gloss = el.getAttribute('data-k'); S.glossIndex = false; return render(); }
@@ -3324,12 +3469,13 @@ async function dateiSpeichern(data, name) {
   catch (e) { toast('Speichern geht hier nicht'); return false; }
 }
 function boot() {
+  LINK_TOKEN = tokenAusAdresse(); // Anmeldelink: Schlüssel gleich aus Adresse und Verlauf nehmen, verarbeitet wird er in serverStart
   restore();
   S.betrieb = readHash();
   vorschauPruefen(S.betrieb);
   if (S.betrieb) loadLink();
   window.addEventListener('hashchange', () => {
-    if (/access_token=|error_description=/.test(location.hash || '')) { const t = tokenAusAdresse(); if (t && kontoBereit()) kontoAusLink(t); return; } // Anmeldelink im offenen Tab
+    if (/access_token=|error_description=/.test(location.hash || '')) { const t = tokenAusAdresse(); if (t && kontoBereit()) kontoAusLink(t); else if (t) toast('Die Anmeldung ist hier gerade nicht möglich.'); return; } // Anmeldelink im offenen Tab
     const fuehrung = location.hash === '#fuehrung';
     if (S.tour && !fuehrung) tourEnde(false, true);
     const b = readHash(), was = S.betrieb ? S.betrieb.code : '', now = b ? b.code : '';
@@ -3397,7 +3543,9 @@ async function serverStart() {
   if (bezahlt) { history.replaceState(null, '', location.pathname + location.hash); if (!S.betrieb) { await kaufPruefen(bezahlt); if (kontoBereit() && KS) kontoStart(); return; } }
   if (SERVER.zahlung && !S.betrieb && S.kauf && S.kauf.wartet && !S.kauf.paid) { await kaufPruefen(S.kauf.wartet, true); if (kontoBereit() && KS) kontoStart(); return; }
   if (SERVER.daten && S.betrieb) linkPruefen();
-  if (kontoBereit()) { const t = tokenAusAdresse(); if (t) { await kontoAusLink(t); return; } if (KS) kontoStart(); }
+  const t = LINK_TOKEN; LINK_TOKEN = null;
+  if (kontoBereit()) { if (t) { await kontoAusLink(t); return; } if (KS) kontoStart(); }
+  else if (t) toast('Die Anmeldung ist hier gerade nicht möglich. Bitte versuche es gleich noch einmal.');
   render();
 }
 /* Im Kundenlink: Stand beim Betrieb nachsehen (Name, Runde, abgelaufen) und melden, dass der Link geöffnet wurde. Nur „gibt es

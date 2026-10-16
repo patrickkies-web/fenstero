@@ -98,8 +98,9 @@ const Server = {
     if (this.sitzung && this.sitzung.token) init.headers.authorization = 'Bearer ' + this.sitzung.token;
     let r = await fetch(pfad, init), j = await r.json().catch(() => null);
     if (r.status === 401 && this.sitzung && this.sitzung.refresh) {
-      const e = await fetch('/api/konto/erneuern', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ refresh: this.sitzung.refresh }) }).then((x) => x.json()).catch(() => null);
+      const er = await fetch('/api/konto/erneuern', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ refresh: this.sitzung.refresh }) }).catch(() => null), e = er ? await er.json().catch(() => null) : null;
       if (e && e.ok) { this.merken(Object.assign({}, this.sitzung, { token: e.token, refresh: e.refresh })); init.headers.authorization = 'Bearer ' + e.token; r = await fetch(pfad, init); j = await r.json().catch(() => null); }
+      else if (!er || er.status >= 500) { const err = new Error((e && e.fehler) || 'Die Anmeldung ist gerade nicht erreichbar. Bitte gleich noch einmal.'); err.status = 503; throw err; } // Störung: angemeldet bleiben
     }
     if (r.status === 401) { this.merken(null); if (S.cur === this.id) { S.role = null; nav('landing'); } }
     /* Von eeziframes gesperrt: abmelden, die Begründung kommt als Fehlermeldung (Hinweis oder Fehler im Anmeldeblatt) */

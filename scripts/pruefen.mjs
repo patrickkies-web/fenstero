@@ -1269,7 +1269,12 @@ if (teil(11)) {
     const cs1 = sitzung(k1), vor = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11abc');
     st.abschliessen(cs1);
     const bez = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11abc'), fremdK = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11zzz');
-    ok(vor.bezahlt === false && !vor.wartet && bez.bezahlt === true && (bez.token || '').length === 32 && bez.mail === 'kauf@beispiel.de' && fremdK.bezahlt === false && !fremdK.token, 'Aufmaßblatt: vor der Zahlung kein Nachweis, danach Nachweis vom Server, aber nur für das Projekt, das bezahlt hat');
+    ok(vor.bezahlt === false && !vor.wartet && bez.bezahlt === true && (bez.token || '').length === 32 && bez.mail === 'kauf@beispiel.de' && fremdK.bezahlt === false && !fremdK.token && fremdK.anderes && fremdK.kennung === 'pruef11abc', 'Aufmaßblatt: vor der Zahlung kein Nachweis, danach Nachweis vom Server, aber nur für das Projekt, das bezahlt hat (sonst der Hinweis auf das andere)');
+    /* Rückkehr in einen Browser, in dem gerade ein anderes Aufmaß offen ist: der Kauf landet trotzdem am bezahlten Aufmaß im Konto */
+    await sichern11('pruef11jkl');
+    const kJ = await rufe('/api/zahlung/start', { kennung: 'pruef11jkl' }, TK), csJ = sitzung(kJ); st.abschliessen(csJ);
+    const prJ = await rufe('/api/zahlung/pruefen?session=' + csJ + '&kennung=pruef11def'), gJ = await rufe('/api/kunde/aufmass/pruef11jkl', null, TK), gD = await rufe('/api/kunde/aufmass/pruef11def', null, TK);
+    ok(prJ.anderes && prJ.kennung === 'pruef11jkl' && !prJ.token && gJ.bezahlt && gJ.bezahlt.session === csJ && !gD.bezahlt, 'Bezahlt, während im Browser ein anderes Aufmaß offen ist: der Kauf steht am bezahlten Aufmaß im Konto, das offene bleibt zu');
     const k2 = await rufe('/api/zahlung/start', { kennung: 'pruef11def' }, TK), cs2 = sitzung(k2);
     st.abschliessen(cs2, { zahlung: 'processing' });
     const unterwegs = await rufe('/api/zahlung/pruefen?session=' + cs2 + '&kennung=pruef11def');
@@ -2263,11 +2268,18 @@ if (teil(15)) {
     const kG = 'p15g' + stempel, kG2 = 'p15h' + stempel, echt = await (await import('../functions/api/eigene.js')).kaufNachweis(umg.konfig(env), kG, 'cs_gast_' + stempel);
     const gast = await sichern(T, kG, [fw(1)], { kauf: { session: 'cs_gast_' + stempel, token: echt } }), gast2 = await sichern(T, kG2, [fw(1)], { kauf: { session: 'cs_gast_' + stempel, token: 'x'.repeat(32) } });
     ok(gast.bezahlt && gast.bezahlt.token === echt && !gast2.bezahlt, 'Als Gast gekauft: der Nachweis kommt beim Sichern mit ins Konto, ein gefälschter nicht');
-    // c) Löschen: ein Aufmaß, das Konto; die Anmeldung eines Betriebs bleibt
-    const del1 = await rufe('/api/kunde/aufmass/' + kG2 + '/loeschen', { token: T, body: {} });
-    ok(del1.ok && !(await sp.eigenesHolen(kG2)) && del1.aufmasse.every((a) => a.kennung !== kG2), 'Ein Aufmaß löschen: weg aus dem Konto');
-    const delK = await rufe('/api/kunde/loeschen', { token: T, body: {} }), restK = await sp.eigeneVonNutzer((await (await import('../functions/api/auth.js')).nutzer(umg.konfig(env), T)).id);
-    ok(delK.ok && restK.length === 0 && !(await sp.eigenesHolen(K1)), 'Konto löschen: alle Aufmaße weg');
+    // c) Löschen: ein Aufmaß, das Konto. Der Inhalt ist sofort weg, eine Löschmarke verhindert, dass ein anderes Gerät es wieder anlegt
+    const del1 = await rufe('/api/kunde/aufmass/' + kG2 + '/loeschen', { token: T, body: {} }), m1 = await sp.eigenesHolen(kG2);
+    const wieder1 = await sichern(T, kG2, [fw(1), fw(2)]), lesen1 = await rufe('/api/kunde/aufmass/' + kG2, { token: T }), kasse1 = await rufe('/api/zahlung/start', { token: T, body: { kennung: kG2 } });
+    ok(del1.ok && m1 && m1.meta.entfernt > 0 && !(m1.daten.windows || []).length && !m1.meta.bezahlt && !m1.meta.fenster && del1.aufmasse.every((a) => a.kennung !== kG2) && wieder1._status === 410 && wieder1.geloescht && lesen1._status === 410 && kasse1._status === 410 && kasse1.geloescht, 'Ein Aufmaß löschen: Inhalt, Zähler und Kauf weg, nur eine Löschmarke bleibt; ein anderes Gerät legt es nicht wieder an (410), auch keine Kasse');
+    const delK = await rufe('/api/kunde/loeschen', { token: T, body: {} }), restK = await sp.eigeneVonNutzer((await (await import('../functions/api/auth.js')).nutzer(umg.konfig(env), T)).id), mK1 = await sp.eigenesHolen(K1);
+    const wiederK = await sichern(T, K1, [fw(1)]), listeK = await rufe('/api/kunde/aufmasse', { token: T }); // dieselbe Adresse meldet sich wieder an
+    ok(delK.ok && restK.length === 0 && mK1 && mK1.meta.entfernt > 0 && !(mK1.daten.windows || []).length && wiederK._status === 410 && listeK.aufmasse.length === 0, 'Konto löschen: alle Aufmaße weg (nur Löschmarken); nach neuem Anmelden kommt keines zurück');
+    /* Supabase gestört: kein „abgelaufen“ (sonst wirft die App eine gültige Anmeldung weg); abgelehnt: abgelaufen */
+    const auth = await import('../functions/api/auth.js'), kSb = { supabase: { url: 'https://pruef15.supabase.co', anon: 'sb_publishable_pruef15' } }, echtFetch = globalThis.fetch;
+    const mit = async (status, fn) => { globalThis.fetch = async () => new Response(JSON.stringify(status >= 500 ? { message: 'down' } : { error: 'invalid_grant' }), { status: status, headers: { 'content-type': 'application/json' } }); try { return await fn(); } catch (e) { return e; } finally { globalThis.fetch = echtFetch; } };
+    const e500 = await mit(500, () => auth.erneuern(kSb, 'r1')), e429 = await mit(429, () => auth.nutzer(kSb, 'tok-pruef15-' + stempel)), e400 = await mit(400, () => auth.erneuern(kSb, 'r2')), e401 = await mit(401, () => auth.nutzer(kSb, 'tok2-pruef15-' + stempel));
+    ok(e500 && e500.status === 503 && e429 && e429.status === 503 && e400 === null && e401 === null, 'Anmeldung bei Störung von Supabase (5xx, 429): Fehler 503 statt „abgelaufen“; abgelehnte Erneuerung und ungültiges Token: abgelaufen');
     // d) Aufräumen: nach 12 Monaten ohne Änderung weg, freigeschaltete erst nach 3 Jahren, nichts, was sich während des Laufs ändert
     const tokA = 'test.' + Buffer.from('alt15-' + stempel + '@beispiel.de', 'utf8').toString('base64').replace(/=+$/, '');
     const mitZeit = async (versatz, fn) => { const D = globalThis.Date; class Frueher extends D { constructor(...a) { if (a.length) super(...a); else super(D.now() - versatz); } static now() { return D.now() - versatz; } } globalThis.Date = Frueher; try { return await fn(); } finally { globalThis.Date = D; } };
@@ -2276,11 +2288,16 @@ if (teil(15)) {
       await sp.eigenesAendern('p15x' + stempel, null, (r) => { r.meta = Object.assign({}, r.meta, { bezahlt: { session: 's', token: 't', at: 1 } }); return true; });
     });
     await sichern(tokA, 'p15z' + stempel, [fw(1)]); await sichern(tokA, 'p15w' + stempel, [fw(1)]);
+    await mitZeit(400 * TAG, async () => { await sichern(tokA, 'p15m' + stempel, [fw(1)]); await sp.eigenesWeg('p15m' + stempel); }); // Löschmarke von vor 400 Tagen
+    await sichern(tokA, 'p15n' + stempel, [fw(1)]); await sp.eigenesWeg('p15n' + stempel); // frische Löschmarke
+    await sp.eigenesAendern('p15o' + stempel, null, (r) => { r.daten = { windows: [fw(1)], proj: {} }; return true; }); // ohne Besitzer (Anmeldung anders gelöscht)
     const echtAlle = sp.eigeneAlle; // w steht in der Liste noch alt, wurde aber inzwischen gespeichert (Änderung während des Laufs)
     sp.eigeneAlle = async () => (await echtAlle()).map((e) => (e.kennung === 'p15w' + stempel ? Object.assign({}, e, { updated_at: new Date(Date.now() - 400 * TAG).toISOString() }) : e));
     const auf = await ze.aufraeumen(umg.konfig(env), sp);
     sp.eigeneAlle = echtAlle;
-    ok(auf.eigene === 1 && !!(await sp.eigenesHolen('p15x' + stempel)) && !(await sp.eigenesHolen('p15y' + stempel)) && !!(await sp.eigenesHolen('p15z' + stempel)) && !!(await sp.eigenesHolen('p15w' + stempel)), 'Aufräumen: Aufmaß nach 12 Monaten ohne Änderung weg, freigeschaltetes bleibt (3 Jahre), aktuelles bleibt, eines mit Änderung während des Laufs auch');
+    const o15 = await sp.eigenesHolen('p15o' + stempel);
+    ok(!!(await sp.eigenesHolen('p15x' + stempel)) && !(await sp.eigenesHolen('p15y' + stempel)) && !!(await sp.eigenesHolen('p15z' + stempel)) && !!(await sp.eigenesHolen('p15w' + stempel)), 'Aufräumen: Aufmaß nach 12 Monaten ohne Änderung weg, freigeschaltetes bleibt (3 Jahre), aktuelles bleibt, eines mit Änderung während des Laufs auch');
+    ok(auf.eigene === 3 && !(await sp.eigenesHolen('p15m' + stempel)) && !!(await sp.eigenesHolen('p15n' + stempel)) && o15 && o15.meta.entfernt > 0 && !(o15.daten.windows || []).length, 'Aufräumen: Löschmarken 12 Monate nach dem Löschen weg, frische bleiben; Aufmaße ohne Besitzer werden zur Löschmarke');
   } catch (e) {
     ok(false, 'Konten im Prozess ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
   }
@@ -2348,21 +2365,47 @@ if (teil(15)) {
     await fensterAnlegen(s1, [['Gaube', 900, 1100]]); await ruhig(s1); await s1.evaluate(() => kontoListe()); await s1.waitForTimeout(300);
     await s1.evaluate(() => go('meinkonto')); await s1.waitForTimeout(300);
     const konto2 = await s1.evaluate(() => Array.from(document.querySelectorAll('.konto-aufmass')).map((x) => x.textContent));
-    await s1.click('.konto-aufmass:not(:first-child)'); await s1.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 });
+    const nichtOffen = (seite, wahl) => seite.evaluate((wahl) => { const z = Array.from(document.querySelectorAll('.konto-zeile')).find((x) => !/GERADE GEÖFFNET/.test(x.textContent)); z.querySelector(wahl).click(); }, wahl);
+    await nichtOffen(s1, '.konto-aufmass'); await s1.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 });
     const gewechselt = await s1.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), paid: !!S.kauf.paid }));
     ok(konto1.n === 1 && /Angemeldet als/.test(konto1.text) && neuA.n === 0 && !neuA.paid && konto2.length === 2 && /freigeschaltet/.test(konto2.join('|')) && gewechselt.namen === 'Wohnzimmer links,Küche' && gewechselt.paid, '„Dein Konto“: neues Aufmaß beginnen, das alte bleibt im Konto; zwischen den Aufmaßen wechseln, der Kauf gehört zum richtigen');
+    /* ein anderes Aufmaß direkt in der Liste löschen, mit Rückfrage an Ort und Stelle */
+    await s1.evaluate(() => go('meinkonto')); await s1.waitForTimeout(250);
+    await nichtOffen(s1, '.konto-weg'); await s1.waitForTimeout(200);
+    const frageWeg = await s1.evaluate(() => { const f = document.querySelector('.liste-in .neu-frage'); return f ? f.textContent : ''; });
+    await foto(s1, 'app-konto-loeschen');
+    await s1.click('[data-act="aufmass-weg-ja"]'); await s1.waitForFunction(() => document.querySelectorAll('.konto-aufmass').length === 1, null, { timeout: 8000 });
+    const nachWeg = await s1.evaluate(async () => ({ n: S.windows.length, liste: (await kontoJson('/api/kunde/aufmasse')).aufmasse.length }));
+    ok(/löschen\?/.test(frageWeg) && /auf allen Geräten/.test(frageWeg) && nachWeg.n === 2 && nachWeg.liste === 1, '„Dein Konto“: ein anderes Aufmaß direkt in der Liste löschen, nach Rückfrage; das offene bleibt');
     await s1.evaluate(() => go('meinkonto')); await s1.waitForTimeout(200);
     await s1.click('[data-act="konto-frage"][data-v="abmelden"]'); await s1.waitForTimeout(150);
     const frage = await s1.evaluate(() => (document.querySelector('.neu-frage') || {}).textContent || '');
     await s1.click('[data-act="konto-abmelden-ja"]'); await s1.waitForFunction(() => !KS && S.screen === 'home', null, { timeout: 8000 });
     const ab = await s1.evaluate(() => ({ n: S.windows.length, speicher: localStorage.getItem('aufmass.v1'), sitzung: localStorage.getItem('aufmass.kunde'), toast: S.toast }));
     ok(/bleibt in deinem Konto/.test(frage) && ab.n === 0 && !ab.sitzung && (!ab.speicher || JSON.parse(ab.speicher).windows.length === 0) && /Abgemeldet/.test(ab.toast), 'Abmelden fragt nach; danach ist das Aufmaß von diesem Gerät weg, im Konto bleibt es');
-    // Anmeldelink aus der E-Mail (#access_token=…)
-    const tok6 = 'test.' + Buffer.from(mail6, 'utf8').toString('base64').replace(/=+$/, '');
-    await s1.goto(B6 + '/app/#access_token=' + encodeURIComponent(tok6) + '&refresh_token=test-refresh&type=magiclink', { waitUntil: 'networkidle' });
+    // Anmeldelink aus der E-Mail (#access_token=…): in dem Browser, der den Code angefordert hat, ohne Rückfrage
+    const tok6 = 'test.' + Buffer.from(mail6, 'utf8').toString('base64').replace(/=+$/, ''), linkAdr = (tok) => B6 + '/app/#access_token=' + encodeURIComponent(tok) + '&refresh_token=test-refresh&type=magiclink';
+    await s1.evaluate((m) => localStorage.setItem('aufmass.kunde.anfrage', JSON.stringify({ mail: m, zweck: 'anmelden', at: Date.now() })), mail6);
+    await s1.goto(linkAdr(tok6), { waitUntil: 'networkidle' });
     await s1.waitForFunction(() => KS && S.windows.length > 0, null, { timeout: 8000 }); await s1.waitForTimeout(200);
-    const link = await s1.evaluate(() => ({ hash: location.hash, mail: KS.mail, n: S.windows.length }));
-    ok(link.hash === '' && link.mail === mail6 && link.n >= 1, 'Anmeldelink aus der E-Mail: angemeldet, zuletzt bearbeitetes Aufmaß geladen, Adresse bereinigt');
+    const link = await s1.evaluate(() => ({ hash: location.hash, mail: KS.mail, n: S.windows.length, screen: S.screen, anfrage: localStorage.getItem('aufmass.kunde.anfrage') }));
+    ok(link.hash === '' && link.mail === mail6 && link.n >= 1 && link.screen === 'home' && !link.anfrage, 'Anmeldelink im Browser, der den Code angefordert hat: ohne Rückfrage angemeldet, zuletzt bearbeitetes Aufmaß geladen, Adresse bereinigt');
+    // Ein Link, den dieser Browser nicht angefordert hat (etwa untergeschoben): erst die Rückfrage mit der Adresse des Kontos
+    const c3 = await browser.newContext(telefon), s3 = await neueSeite(c3, B6);
+    await s3.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await fensterAnlegen(s3, [['Gast-Bad', 600, 800]]); await s3.waitForTimeout(250);
+    const vorLink = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json())).aufmasse.length;
+    await s3.goto(linkAdr(tok6), { waitUntil: 'networkidle' }); await s3.waitForFunction(() => S.screen === 'linkanmelden', null, { timeout: 8000 }); await s3.waitForTimeout(200);
+    const frageL = await s3.evaluate(() => ({ hash: location.hash, ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), text: document.body.innerText }));
+    await foto(s3, 'app-link-rueckfrage');
+    await s3.click('[data-act="link-anmelden-nein"]'); await s3.waitForTimeout(300);
+    const nein = await s3.evaluate(() => ({ ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), n: S.windows.length, screen: S.screen }));
+    const nachNein = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json())).aufmasse.length;
+    ok(frageL.hash === '' && !frageL.ks && !frageL.gespeichert && /Mit diesem Konto anmelden\?/.test(frageL.text) && frageL.text.includes(mail6) && /in diesem Konto gesichert/.test(frageL.text) && !nein.ks && !nein.gespeichert && nein.n === 1 && nein.screen === 'home' && nachNein === vorLink, 'Fremder Anmeldelink: Rückfrage mit der Adresse des Kontos, vorher keine Anmeldung; „Nicht anmelden“ lässt alles, wie es war, nichts geht ins fremde Konto');
+    await s3.goto(linkAdr(tok6), { waitUntil: 'networkidle' }); await s3.waitForFunction(() => S.screen === 'linkanmelden', null, { timeout: 8000 });
+    await s3.click('[data-act="link-anmelden-ja"]'); await s3.waitForFunction(() => KS && S.screen === 'home' && S.sync.ok && !S.sync.offen, null, { timeout: 8000 });
+    const nachJa = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json())).aufmasse.length;
+    ok(nachJa === vorLink + 1, 'Nach „Anmelden“ in der Rückfrage: angemeldet, das Aufmaß dieses Geräts ist im Konto');
+    sauber(s3, 'Anmeldelink mit Rückfrage ohne Fehler'); await c3.close();
     // abgelaufene Anmeldung: Hinweis „Bitte neu anmelden“, nichts geht verloren
     await s1.evaluate(() => { kontoMerken({ token: 'kaputt', refresh: 'kaputt', mail: KS.mail }); });
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => !KS && S.konto.abgelaufen, null, { timeout: 8000 }); await s1.waitForTimeout(300);
@@ -2374,7 +2417,34 @@ if (teil(15)) {
     await s2.waitForFunction(() => !KS && S.screen === 'home', null, { timeout: 8000 });
     const weg = await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json());
     ok(weg.ok && weg.aufmasse.length === 0 && await s2.evaluate(() => S.windows.length === 0), 'Konto löschen: alle Aufmaße weg, auf dem Gerät auch');
-    for (const s of [s1, s2]) { s.probleme = s.probleme.filter((x) => !/401/.test(x)); }
+    // Gerät 1 hat noch eine Kopie (Anmeldung abgelaufen): nach neuem Anmelden kommt das gelöschte Aufmaß nicht zurück, es geht auch hier weg
+    const vorher1 = await s1.evaluate(() => S.windows.length);
+    await s1.evaluate(() => sichernStart('anmelden')); await s1.waitForSelector('#s-mail');
+    await anmelden(s1, mail6, false);
+    await s1.waitForFunction(() => KS && S.windows.length === 0 && S.screen === 'home', null, { timeout: 8000 }); await s1.waitForTimeout(300);
+    const zurueck = await s1.evaluate(async () => ({ toast: S.toast, liste: (await kontoJson('/api/kunde/aufmasse')).aufmasse.length }));
+    ok(vorher1 >= 1 && /gelöscht/.test(zurueck.toast) && zurueck.liste === 0, 'Gelöschtes Konto: ein Gerät mit alter Kopie legt das Aufmaß nach neuem Anmelden nicht wieder an, sondern nimmt es weg');
+    // Konto voll (20 Aufmaße): Das Aufmaß dieses Geräts bleibt hier, gilt nicht als gesichert, Abmelden würde es nicht wegwerfen;
+    // ein altes in der Liste löschen, dann kommt es hinein
+    const mailV = 'voll6-' + stempel + '@beispiel.de', tokV6 = 'test.' + Buffer.from(mailV, 'utf8').toString('base64').replace(/=+$/, '');
+    for (let i = 0; i < 20; i++) { const j = Date.now(); await fetch(B6 + '/api/kunde/aufmass/p6v' + i + stempel, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', authorization: 'Bearer ' + tokV6 }, body: JSON.stringify({ windows: [{ wid: 'v' + i, t0: j, aend: 0, ts: j, name: 'Alt ' + i }], proj: { name: 'Altes Haus ' + i }, projTs: j, stand: j, angelegt: 1, bekannt: ['v' + i], geloescht: {} }) }); }
+    const c5 = await browser.newContext(telefon), s5 = await neueSeite(c5, B6);
+    await s5.goto(B6 + '/app/', { waitUntil: 'networkidle' }); await fensterAnlegen(s5, [['Neues Haus', 900, 1200]]); await s5.waitForTimeout(250);
+    await s5.click('.konto-karte [data-act="sichern"]'); await s5.waitForSelector('#s-mail');
+    await anmelden(s5, mailV, true);
+    await s5.waitForFunction(() => KS && S.screen === 'home' && S.sync.voll, null, { timeout: 8000 }); await s5.waitForTimeout(300);
+    const voll = await s5.evaluate(() => ({ toast: S.toast, karte: (document.querySelector('.konto-karte') || {}).textContent || '', n: S.windows.length }));
+    await foto(s5, 'app-konto-voll');
+    await s5.evaluate(() => go('meinkonto')); await s5.waitForTimeout(200);
+    await s5.click('[data-act="konto-frage"][data-v="abmelden"]'); await s5.waitForTimeout(150); await s5.click('[data-act="konto-abmelden-ja"]'); await s5.waitForTimeout(400);
+    const blieb = await s5.evaluate(() => ({ ks: !!KS, n: S.windows.length, toast: S.toast, hinweis: !!document.querySelector('.note.warn') }));
+    await s5.click('.konto-zeile .konto-weg'); await s5.waitForTimeout(150); await s5.click('[data-act="aufmass-weg-ja"]');
+    await s5.waitForFunction(() => !S.sync.voll && S.sync.ok && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    const danach = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tokV6, accept: 'application/json' } }).then((r) => r.json())).aufmasse;
+    const hierK = await s5.evaluate(() => S.kauf.kennung);
+    ok(/20 Aufmaße/.test(voll.toast) && !/Gesichert/.test(voll.toast) && /Nicht gesichert/.test(voll.karte) && voll.n === 1 && blieb.ks && blieb.n === 1 && /verloren/.test(blieb.toast) && blieb.hinweis && danach.length === 20 && danach.some((a) => a.kennung === hierK), 'Konto voll: das Aufmaß bleibt auf dem Gerät und heißt „Nicht gesichert“, Abmelden würde es nicht wegwerfen; nach dem Löschen eines alten kommt es ins Konto');
+    s5.probleme = s5.probleme.filter((x) => !/\b409\b/.test(x)); sauber(s5, 'Konto voll ohne Fehler (außer der gewollten Antwort „voll“)'); await c5.close();
+    for (const s of [s1, s2]) { s.probleme = s.probleme.filter((x) => !/\b(401|410)\b/.test(x)); } // abgelaufene Anmeldung und gelöschtes Aufmaß sind hier gewollt
     sauber(s1, 'Konto im Browser ohne Fehler (Gerät 1)'); sauber(s2, 'Konto im Browser ohne Fehler (Gerät 2)');
     await c1.close(); await c2.close();
     // Gestaltung: Gast-Karte, Sichern, Konto-Seite, Telefon hell und dunkel
@@ -2395,6 +2465,9 @@ if (teil(15)) {
       await anmelden(s, 'design' + (dunkel ? 'd' : 'h') + stempel + '-mit-einer-sehr-langen-adresse@beispiel-handwerk.de', true);
       await s.waitForFunction(() => S.screen === 'home' && KS, null, { timeout: 8000 }); await s.waitForTimeout(300); await pruefe('Gesichert');
       await s.evaluate(() => go('meinkonto')); await s.waitForTimeout(300); await pruefe('Konto');
+      await s.evaluate(() => { S.kontoFrage = 'weg:' + ((S.konto.liste || [])[0] || {}).kennung; render(); }); await s.waitForTimeout(200); await pruefe('Löschen bestätigen');
+      await s.evaluate(() => { S.kontoFrage = ''; S.linkAnmeldung = { ok: true, token: 'x', refresh: 'y', mail: 'jemand-mit-einer-sehr-langen-adresse@beispiel-handwerk.de', aufmasse: [] }; go('linkanmelden'); }); await s.waitForTimeout(250); await pruefe('Rückfrage Anmeldelink');
+      await s.evaluate(() => { S.linkAnmeldung = null; go('meinkonto'); }); await s.waitForTimeout(200);
       if (dunkel) await foto(s, 'app-konto-dunkel');
       sauber(s, 'Gestaltung Konto ' + (dunkel ? 'dunkel' : 'hell') + ' ohne Fehler'); await c.close();
     }

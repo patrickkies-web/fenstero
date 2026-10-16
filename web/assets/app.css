@@ -669,3 +669,8 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
   .w3d-sash, .w3d-sash .w3d-handle, .w3d-glass::after { animation: none !important }
   .w3d-dim.is-drawing .w3d-dim-line, .w3d-dim.is-drawing .w3d-dim-lab, .w3d-dim.is-drawing .w3d-dim-cap { animation: none !important }
 }
+/* Dein Konto: jedes Aufmaß mit eigenem Löschen (app.js: SCREENS.meinkonto) */
+.konto-zeile { display: flex; gap: 8px; align-items: stretch }
+.konto-zeile .wincard { flex: 1; min-width: 0 }
+.konto-weg { flex: 0 0 52px; min-height: 52px; border: 0; border-radius: var(--r3); background: var(--bad-soft); color: var(--bad); display: flex; align-items: center; justify-content: center; font: inherit; transition: transform var(--t1) }
+.konto-weg:active { transform: scale(.97) }

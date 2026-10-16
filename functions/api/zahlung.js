@@ -7,7 +7,7 @@ import { ApiFehler, erlaubt, quelle } from './umgebung.js';
 import { webhookEcht } from './stripe.js';
 import { stripeEreignis } from './konten.js';
 import { nutzer } from './auth.js';
-import { kontenDa, eigenesBezahlt, kaufNachweis } from './eigene.js';
+import { kontenDa, eigenesBezahlt, kaufNachweis, entfernt } from './eigene.js';
 
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
 const kennungOk = (s) => /^[A-Za-z0-9_-]{6,40}$/.test(s);
@@ -24,6 +24,7 @@ export const ZAHLUNG = {
       if (!n) throw new ApiFehler('Bitte sichere dein Aufmaß zuerst mit deiner E-Mail-Adresse.', 401, { anmelden: true });
       const e = await ctx.sp.eigenesHolen(kennung);
       if (!e) throw new ApiFehler('Bitte sichere dein Aufmaß zuerst.', 409, { sichern: true });
+      if (entfernt(e) && (!e.nutzer || e.nutzer === n.id)) throw new ApiFehler('Dieses Aufmaß wurde gelöscht.', 410, { geloescht: true });
       if (e.nutzer !== n.id) throw new ApiFehler('Dieses Aufmaß gehört zu einem anderen Konto.', 403, { fremd: true });
       if (e.meta && e.meta.bezahlt && e.meta.bezahlt.session) return { ok: true, schon: true }; // schon freigeschaltet: kein zweiter Kauf
       mail = n.mail; wer = n.id;
@@ -40,11 +41,13 @@ export const ZAHLUNG = {
     if (!session) throw new ApiFehler('Keine Zahlung angegeben.');
     const r = await ctx.zd.kasseGeprueft(session);
     if (!r.bezahlt) return { ok: false, bezahlt: false, wartet: !!r.wartet };
-    if (r.kennung && kennungApp && r.kennung !== kennungApp) return { ok: false, bezahlt: false }; // bezahlt, aber für ein anderes Projekt
     const kennung = r.kennung || kennungApp; if (!kennungOk(kennung)) throw new ApiFehler('Zahlung gehört zu keinem Aufmaß.');
     const token = await nachweis(ctx.k, kennung, session);
+    /* Festhalten gilt immer für das Aufmaß der Zahlung, auch wenn in diesem Browser gerade ein anderes offen ist (anderer Tab,
+       gewechselt): Mit Konto ist der Kauf dann trotzdem am richtigen Aufmaß */
     if (ctx.sp) { try { const vorher = await ctx.sp.zahlungHolen(session); if (vorher) await ctx.sp.zahlungAendern(session, { status: 'bezahlt', token: token, mail: r.mail || vorher.mail }); else await ctx.sp.zahlungAnlegen({ stripe_session: session, art: 'aufmass', kennung: kennung, mail: r.mail || '', betrag_cent: r.betragCent || 0, status: 'bezahlt', token: token }); if (ctx.zaehlen && (!vorher || vorher.status !== 'bezahlt')) ctx.zaehlen('ereignis:kauf'); } catch (e) { console.log('Zahlung nicht festgehalten', String(e).slice(0, 120)); }
-      await eigenesBezahlt(ctx.sp, kennung, session, token); }
+      try { await eigenesBezahlt(ctx.sp, kennung, session, token); } catch (e) { console.log('Kauf nicht am Aufmaß vermerkt', String(e).slice(0, 120)); } }
+    if (r.kennung && kennungApp && r.kennung !== kennungApp) return { ok: false, bezahlt: false, anderes: true, kennung: r.kennung }; // bezahlt, aber für ein anderes Aufmaß
     return { ok: true, bezahlt: true, kennung: kennung, token: token, mail: r.mail || '' };
   },
   /* Nachweis prüfen (z. B. auf einem anderen Gerät): Kennung + Sitzung + Nachweis */
