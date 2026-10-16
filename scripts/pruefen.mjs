@@ -387,11 +387,12 @@ if (teil(5)) {
   console.log('5. Rechtsseiten');
   const ctx = await browser.newContext(telefon);
   const page = await neueSeite(ctx);
-  await page.goto(BASE + '/datenschutz/', { waitUntil: 'networkidle' });
-  ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'Datenschutz: kein seitliches Scrollen');
-  await foto(page, 'datenschutz');
-  await page.goto(BASE + '/impressum/', { waitUntil: 'networkidle' });
-  await foto(page, 'impressum');
+  for (const [pfad, name] of [['/datenschutz/', 'datenschutz'], ['/impressum/', 'impressum'], ['/agb/', 'agb'], ['/nutzungsbedingungen/', 'nutzungsbedingungen'], ['/cookies/', 'cookies'], ['/widerruf/', 'widerruf']]) {
+    await page.goto(BASE + pfad, { waitUntil: 'networkidle' });
+    const m5 = await page.evaluate(() => { const k = document.querySelector('.fuss a.widerruf-knopf'), r = k ? k.getBoundingClientRect() : null; return { quer: document.documentElement.scrollWidth > window.innerWidth + 1, knopf: !!r && r.height >= 44 && getComputedStyle(k).boxShadow !== 'none', klein: Array.from(document.querySelectorAll('main *, footer *')).filter((e) => e.childElementCount === 0 && e.textContent.trim() && parseFloat(getComputedStyle(e).fontSize) < 13).length }; });
+    ok(!m5.quer && m5.knopf && !m5.klein, pfad + ': kein seitliches Scrollen, Schrift ab 13 px, „Vertrag widerrufen“ als Knopf ab 44 px');
+    await foto(page, name);
+  }
   sauber(page, 'Rechtsseiten ohne Fehler');
   await ctx.close();
 }
@@ -1147,7 +1148,7 @@ if (teil(10)) {
   for (const s of seo.SEITEN) {
     const r = await roh(s.pfad);
     const titel = (r.text.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
-    const rechts = s.pfad === '/impressum/' || s.pfad === '/datenschutz/', ld = ldjson(r.text);
+    const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/'].includes(s.pfad), ld = ldjson(r.text);
     ok(r.status === 200 && (r.text.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
     ok(!/<meta name="robots"/.test(r.text) && r.h.get('x-robots-tag') === seo.SPERRE && !!r.h.get('content-security-policy') && r.h.get('link') === '<' + BASE + s.pfad + '>; rel="canonical"', s.pfad + ': Pilotphase per Kopfzeile noindex (kein Meta-Tag), CSP und Canonical vom Worker');
     if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + '/og.png', s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut');
@@ -1253,7 +1254,7 @@ if (teil(10)) {
   ok(!www.robots && www.link === '<https://eeziframes.com/ratgeber/>; rel="canonical"' && www.text.includes('content="https://eeziframes.com/og.png"') && rbWww.includes('Sitemap: https://eeziframes.com/sitemap.xml'), 'Domain: www.eeziframes.com zählt als eeziframes.com (Canonical, Vorschaubild, Sitemap)');
   ok(wdev.robots === seo.SPERRE && /User-agent: \*\nDisallow: \/\n/.test(rbDev), 'Domain: die Cloudflare-Testadresse (…workers.dev) bleibt auch mit Freigabe gesperrt');
 
-  /* h) Ratgeber rund ums Aufmaß: Stand je Seite, Abbildungen, Rechner, IndexNow, llms.txt, Glossar der App */
+  /* h) Ratgeber rund ums Aufmaß: Stand je Seite, Abbildungen, keine Eingaben, IndexNow, llms.txt, Glossar der App */
   const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
   const deutsch = (d) => { const [j, m, t] = d.split('-').map(Number); return t + '. ' + MONATE[m - 1] + ' ' + j; };
   const standFehler = [];
@@ -1293,13 +1294,14 @@ if (teil(10)) {
   const ohne = await seo.indexnow({}, post, tag(seo.STAND, 0)), mit = await seo.indexnow({ INDEXIERUNG: '1' }, post, tag(seo.STAND, 1)), spaet = await seo.indexnow({ INDEXIERUNG: '1' }, post, tag(seo.STAND, 5));
   const body = aufrufe.length === 1 ? JSON.parse(aufrufe[0].o.body) : {}, sollUrls = seo.SEITEN.filter((x) => { const t = (Date.parse(seo.STAND) + 864e5 - Date.parse(x.stand)) / 864e5; return t >= 0 && t <= 2; }).map((x) => 'https://eeziframes.com' + x.pfad);
   ok(key.status === 200 && key.text.trim() === seo.INDEXNOW && /^[0-9a-f]{32}$/.test(seo.INDEXNOW) && ohne.gemeldet === 0 && spaet.gemeldet === 0 && mit.gemeldet === sollUrls.length && aufrufe.length === 1 && aufrufe[0].u === 'https://api.indexnow.org/indexnow' && body.host === 'eeziframes.com' && body.key === seo.INDEXNOW && body.keyLocation === 'https://eeziframes.com/' + seo.INDEXNOW + '.txt' && JSON.stringify(body.urlList) === JSON.stringify(sollUrls), 'IndexNow: Schlüsseldatei da; gemeldet wird nur mit Freigabe und nur in den zwei Tagen nach einer Änderung, mit den geänderten Seiten (' + sollUrls.length + ')');
-  const bctx = await browser.newContext(telefon), bp = await neueSeite(bctx);
-  await bp.goto(BASE + '/ratgeber/bestellmass-fenster/', { waitUntil: 'networkidle' });
-  const tabelle = await bp.evaluate(() => Array.from(document.querySelectorAll('.rg-tab'))[0].innerText);
-  const rechne = async (b, h, art, an) => { await bp.fill('#rechner input[name="b"]', String(b)); await bp.fill('#rechner input[name="h"]', String(h)); await bp.selectOption('#rechner select[name="art"]', art); await bp.selectOption('#rechner select[name="anschlag"]', an); await bp.waitForTimeout(80); return bp.evaluate(() => document.getElementById('rechner-ergebnis').textContent); };
-  const r1 = await rechne(1230, 1410, 'weiss', 'ohne'), r2 = await rechne(2600, 2200, 'farbig', 'ohne'), r3 = await rechne(1230, 1410, 'weiss', 'mit'), r4 = await rechne(1230, 1410, 'anders', 'ohne'), r5 = await rechne(5000, 1400, 'weiss', 'ohne'), r6 = await rechne(1520, '1.410', 'weiss', 'ohne'), r7 = await rechne('1230,5', '1410 mm', 'weiss', 'ohne');
-  ok(/bis 1,5 m\s+10 mm\s+15 mm/.test(tabelle) && /bis 4,5 m\s+25 mm\s+30 mm/.test(tabelle) && /Bestellmaß etwa 1\.210 × 1\.390 mm/.test(r1) && /Fuge 10 mm links und rechts, 10 mm oben und unten/.test(r1) && /2\.550 × 2\.160 mm/.test(r2) && /Fuge 25 mm links und rechts, 20 mm oben und unten/.test(r2) && /Mauerwerksanschlag/.test(r3) && !/Bestellmaß etwa/.test(r3) && /Holz- und Alufenster/.test(r4) && /Über 4,5 m/.test(r5) && /Bestellmaß etwa 1\.500 × 1\.390 mm/.test(r6) && /Bestellmaß etwa 1\.210 × 1\.390 mm/.test(r7) && /Silikon/.test(r1), 'Rechner für das Bestellmaß: rechnet wie die Tabelle (weiß 1.230 × 1.410 → 1.210 × 1.390, farbig 2.600 × 2.200 → 2.550 × 2.160), nach der Länge des Fensters (1.520 → 1.500), versteht 1.410 und 1230,5, rechnet nicht mit Anschlag, für Holz und Alu oder über 4,5 m');
-  sauber(bp, 'Rechner ohne Fehler und ohne fremde Server'); await bctx.close();
+  /* Ratgeber ohne Eingaben: keine Formulare, keine leeren Tabellen zum Ausfüllen, keine Vorlage zum Ausdrucken, kein Rechner (das Aufmaß entsteht in der App) */
+  const eingabeFehler = [];
+  for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x))) {
+    const t = (await roh(pf)).text;
+    if (/<(form|input|select|textarea)\b|contenteditable|rg-leer|rechner\.js|<td><\/td>/i.test(t)) eingabeFehler.push(pf);
+  }
+  const ohneRechner = (await fetch(BASE + '/assets/rechner.js')).status === 404, bm = (await roh('/ratgeber/bestellmass-fenster/')).text, ab2 = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
+  ok(!eingabeFehler.length && ohneRechner && /bis 1,5 m<\/td><td data-k="weiß">10 mm/.test(bm) && /Gibt es hier eine Vorlage zum Ausdrucken\?<\/summary><div><p>Nein\./.test(ab2) && /Aufmaßblatt in der App erstellen/.test(ab2) && !/Vorlage für drei Fenster/.test(ab2), 'Ratgeber ohne Eingaben: keine Formulare, keine leeren Tabellen, keine Vorlage zum Ausdrucken, kein Rechner; das Aufmaßblatt entsteht in der App' + (eingabeFehler.length ? ' (' + eingabeFehler.join(', ') + ')' : ''));
   const gctx = await browser.newContext(telefon), gp = await neueSeite(gctx);
   await gp.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await gp.evaluate(() => { S.gloss = 'dinlr'; render(); }); await gp.waitForTimeout(200);
@@ -1345,6 +1347,8 @@ if (teil(11)) {
     const kasse = kassenSeit(n0)[0], inkl = st.db.steuern.find((t) => t.metadata.eeziframes === 'mwst19-inkl');
     ok(kasse.p.customer_email === 'kauf@beispiel.de' && kasse.p.metadata.nutzer && kasse.p.metadata.kennung === 'pruef11abc', 'Kasse für das Konto: Rechnung an seine E-Mail, Konto und Aufmaß in den Metadaten');
     ok(k1.ok && /^https:\/\/checkout\.stripe\.com\//.test(k1.url) && kasse.version === '2026-09-30.endive' && kasse.p.excluded_payment_method_types.includes('sepa_debit') && kasse.p.line_items[0].price_data.unit_amount === '799' && !!inkl && inkl.inclusive && inkl.percentage === 19 && kasse.p.line_items[0].tax_rates[0] === inkl.id && kasse.p.invoice_creation.enabled === 'true', 'Aufmaßblatt: Kasse über 7,99 € mit selbst angelegtem Steuersatz 19 % inklusive, mit Rechnung, ohne SEPA-Lastschrift (bestätigt erst nach Tagen)');
+    const besch11 = ((kasse.p.invoice_creation || {}).invoice_data || {}).description || '';
+    ok(/ausdrücklich zugestimmt/.test(besch11) && /Widerrufsrecht verlieren/.test(besch11) && /\/agb\//.test(besch11), 'Rechnung des Aufmaßblatts nennt die Zustimmung zum sofortigen Beginn, den Verlust des Widerrufsrechts und die AGB');
     ok(st.log.slice(n0).every((e) => e.auth === 'Basic ' + Buffer.from('sk_test_pruefung11:').toString('base64')) && st.log.slice(n0).filter((e) => e.pfad !== '/checkout/sessions').every((e) => e.version === '2024-06-20'), 'Anfragen an Stripe mit dem Geheimschlüssel und fester API-Version 2024-06-20 (nur die Kasse des Aufmaßblatts neuer)');
     const cs1 = sitzung(k1), vor = await rufe('/api/zahlung/pruefen?session=' + cs1 + '&kennung=pruef11abc');
     st.abschliessen(cs1);
@@ -2390,7 +2394,7 @@ if (teil(15)) {
   // e) Im Browser: Gast, sichern, zweites Gerät, Kauf nur mit Konto, Konto-Seite, abmelden, Link aus der E-Mail, abgelaufene Anmeldung
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
   const port = 9100 + Math.floor(Math.random() * 80), B6 = 'http://localhost:' + port;
-  const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
+  const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', MAIL_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (dd) => process.stderr.write('  [Server 6] ' + dd));
   const aus6 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus6);
   const fensterAnlegen = (seite, liste) => seite.evaluate((liste) => { liste.forEach((f) => { S.win = Object.assign(baseWin(), { name: f[0], mo: { hm: f[2] + 70, hl: f[2] + 70, hr: f[2] + 70, wm: f[1] + 140, wt: f[1] + 140, wb: f[1] + 140 }, el: { w: f[1], h: f[2] }, w: f[1], h: f[2], fotos: 2 }); S.editIdx = -1; saveWin(); }); go('home'); }, liste);
@@ -2441,6 +2445,9 @@ if (teil(15)) {
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.kauf && S.kauf.paid, null, { timeout: 8000 });
     const nach = await s1.evaluate(() => { S.win = kopie(S.windows[1]); S.editIdx = 1; go('fertig'); return { frei: FREI(), note: (document.querySelector('.note.warn') || {}).textContent || '' }; });
     ok(/Rechnung an haus6-/.test(kasse) && !/Wohin soll die Rechnung/.test(kasse) && nach.frei && /Seit dem Freischalten kannst du dieses Fenster noch viermal ändern/.test(nach.note), 'Mit Konto direkt zur Kasse (Rechnung an die E-Mail des Kontos); der Kauf kommt aufs andere Gerät; danach zählt jede Änderung („Seit dem Freischalten … noch viermal“)');
+    let post15 = []; for (let i = 0; i < 20 && !post15.some((m) => m.an === mail6); i++) { post15 = (await fetch(B6 + '/api/test/post').then((r) => r.json())).post || []; if (!post15.some((m) => m.an === mail6)) await new Promise((r) => setTimeout(r, 150)); }
+    const best15 = post15.filter((m) => m.an === mail6 && /Vertragsbestätigung/.test(m.betreff));
+    ok(best15.length === 1 && /Ihre Zustimmung beim Kauf/.test(best15[0].html) && /Widerrufsbelehrung/.test(best15[0].html) && /Sie können Ihr Widerrufsrecht auch online unter/.test(best15[0].html) && /Muster-Widerrufsformular/.test(best15[0].html) && /Patrick Kies/.test(best15[0].html) && /7,99 €/.test(best15[0].html) && !/<script/.test(best15[0].html), 'Nach dem Kauf genau eine Vertragsbestätigung per E-Mail: Anbieter, Preis, Zustimmung zum sofortigen Beginn, AGB mit Widerrufsbelehrung und Muster-Widerrufsformular');
     // Konto-Seite: neues Aufmaß (das alte bleibt), zwischen Aufmaßen wechseln, abmelden, wieder anmelden
     await s1.evaluate(() => go('meinkonto')); await s1.waitForTimeout(300);
     await foto(s1, 'app-konto');
@@ -2844,6 +2851,69 @@ if (teil(16)) {
     sauber(s, 'Neue Schritte ' + (dunkel ? 'dunkel' : 'hell') + ' ohne Fehler'); await c.close();
   }
   ok(!befund16.length, 'Gestaltung der neuen Schritte (Telefon, hell und dunkel): nur 13 · 15 · 17 · 24 · 32 · 40, Ziele ab 44 px, kein Querscrollen' + (befund16.length ? '\n      ' + befund16.join('\n      ') : ''));
+}
+
+if (teil(17)) {
+  console.log('17. Rechtstexte, Vertrag widerrufen (§ 356a BGB), E-Mails des Servers');
+  const cp17 = await import('node:child_process'), fs17 = await import('node:fs'), path17 = await import('node:path'), url17 = await import('node:url');
+  const W17 = path17.resolve(path17.dirname(url17.fileURLToPath(import.meta.url)), '..');
+  const seo17 = await import(url17.pathToFileURL(path17.join(W17, 'functions/seo.js')).href);
+  const holen17 = async (b, p) => { const r = await fetch(b + p); return { status: r.status, text: await r.text() }; };
+  /* a) Rechtsseiten mit den Angaben des Anbieters, ohne alte Platzhalter */
+  const t17 = {}; for (const p of ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/']) t17[p] = (await holen17(BASE, p)).text;
+  const anbieter17 = (t) => /Patrick Kies/.test(t) && /Postweg 35/.test(t) && /33442 Herzebrock-Clarholz/.test(t);
+  ok(['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/widerruf/'].every((p) => anbieter17(t17[p])) && !Object.values(t17).some((t) => /\[Vor- und Nachname|\[Straße und Hausnummer|\[PLZ und Ort|Landesdatenschutzbehörde Ihres|Es werden keine Zahlungen ausgeführt/.test(t)), 'Rechtsseiten: Anbieter Patrick Kies, Postweg 35, 33442 Herzebrock-Clarholz; keine alten Platzhalter, kein Pilot-Hinweis im Impressum');
+  ok(/§ 5 DDG/.test(t17['/impressum/']) && /§ 18 Abs\. 2 MStV/.test(t17['/impressum/']) && /Verbraucherschlichtungsstelle/.test(t17['/impressum/']) && !/ec\.europa\.eu\/consumers\/odr|OS-Plattform/i.test(Object.values(t17).join('')), 'Impressum: § 5 DDG, Verantwortlicher nach § 18 Abs. 2 MStV, Verbraucherstreitbeilegung; kein Verweis auf die eingestellte OS-Plattform');
+  const agb17 = t17['/agb/'];
+  ok(/id="widerrufsbelehrung"/.test(agb17) && /Sie können Ihr Widerrufsrecht auch online unter/.test(agb17) && /Eingangsbestätigung mit Informationen zum Inhalt der Widerrufserklärung sowie dem Datum und der Uhrzeit ihres Eingangs/.test(agb17) && /id="widerrufsformular"/.test(agb17) && /Erlöschen des Widerrufsrechts/.test(agb17) && /Bestätigung des Vertrags auf einem dauerhaften Datenträger/.test(agb17) && /7,99 €/.test(agb17) && /§ 19 UStG/.test(agb17), 'AGB: Widerrufsbelehrung mit Online-Funktion und Eingangsbestätigung, Erlöschen bei digitalen Inhalten, Muster-Widerrufsformular, Preis mit beiden Umsatzsteuer-Fällen');
+  const konf17 = {}; new Function('window', fs17.readFileSync(path17.join(W17, 'web/config.js'), 'utf8'))(konf17);
+  const pr17 = konf17.KONFIG.preise, nb17 = t17['/nutzungsbedingungen/'];
+  ok(/§ 14 BGB/.test(nb17) && /id="avv"/.test(nb17) && /Unterauftragsverarbeiter/.test(nb17) && /Technische und organisatorische Maßnahmen/.test(nb17) && ['ersten ' + pr17.frei + ' Projekte', pr17.projekt + ' € je Projekt', pr17.abo.grund + ' € im Monat mit ' + pr17.abo.inkl + ' Projekten', 'jedes weitere ' + pr17.abo.extra + ' €', pr17.plus + ' € im Monat'].every((t) => nb17.includes(t)), 'Nutzungsbedingungen für Fensterbauer: nur Unternehmer, Preise wie in config.js, Vertrag über die Auftragsverarbeitung mit Maßnahmen und Unterauftragsverarbeitern');
+  ok(/Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen/.test(t17['/datenschutz/']) && /id="widerruf"/.test(t17['/datenschutz/']) && /Brevo/.test(t17['/datenschutz/']) && /href="\/cookies\/"/.test(t17['/datenschutz/']), 'Datenschutz: Aufsichtsbehörde NRW, Abschnitt zur Widerrufsfunktion, E-Mail-Dienstleister, Verweis auf die Cookies-Seite');
+  /* Cookies: jeder Speicher-Eintrag aus dem Code steht auf der Seite */
+  const code17 = ['app.js', 'portal.js', 'gemeinsam.js'].map((f) => fs17.readFileSync(path17.join(W17, 'web/assets', f), 'utf8')).join('\n');
+  const schl17 = Array.from(new Set((code17.match(/'aufmass\.[a-z0-9.]+'/g) || []).map((x) => x.slice(1, -1).replace(/\.$/, '.…'))));
+  const fehlt17 = schl17.filter((x) => !t17['/cookies/'].includes('<code>' + x + '</code>'));
+  ok(schl17.length >= 12 && !fehlt17.length && /__Host-zentrale/.test(t17['/cookies/']) && !/document\.cookie/.test(code17), 'Cookies-Seite nennt jeden Speicher-Eintrag aus dem Code (' + schl17.length + ') und das Sitzungs-Cookie der Zentrale; die Website setzt selbst keine Cookies' + (fehlt17.length ? ': es fehlen ' + fehlt17.join(', ') : ''));
+  /* b) „Vertrag widerrufen“ auf jeder Seite, hervorgehoben */
+  const ohne17 = [];
+  for (const sx of seo17.SEITEN.concat([{ pfad: '/gibtsnicht' }])) { const t = (await holen17(BASE, sx.pfad)).text; if (!/class="(rg-widerruf|widerruf-knopf)" href="\/widerruf\/">Vertrag widerrufen</.test(t)) ohne17.push(sx.pfad); }
+  ok(!ohne17.length, '„Vertrag widerrufen“ auf jeder Seite der Website (' + (seo17.SEITEN.length + 1) + ', auch der Fehlerseite), hervorgehoben als Knopf' + (ohne17.length ? ': fehlt auf ' + ohne17.join(', ') : ''));
+  const c17a = await browser.newContext(telefon), s17a = await neueSeite(c17a);
+  await s17a.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await s17a.waitForTimeout(300);
+  const app17 = await s17a.evaluate(() => { const a = document.querySelector('.foot-links.recht a.widerruf[href="/widerruf/"]'), r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!document.querySelector('.foot-links.recht a[href="/agb/"]') && !!document.querySelector('.foot-links.recht a[href="/cookies/"]'); });
+  await s17a.goto(BASE + '/', { waitUntil: 'networkidle' }); await s17a.waitForTimeout(300);
+  const portal17 = await s17a.evaluate(() => { const a = document.querySelector('.foot a.foot-widerruf[href="/widerruf/"]'), r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!document.querySelector('.foot a[href="/nutzungsbedingungen/"]') && !!document.querySelector('.foot a[href="/agb/"]'); });
+  ok(app17 && portal17, 'App und Startseite: „Vertrag widerrufen“ als Knopf ab 44 px, dazu AGB, Cookies und Nutzungsbedingungen');
+  sauber(s17a, 'App und Startseite mit den neuen Rechtslinks ohne Fehler'); await c17a.close();
+  /* c) Ohne Mailversand und ohne Datenbank (Pilot) nimmt der Server keinen Widerruf an, statt ihn zu verlieren */
+  const pilot17 = await fetch(BASE + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Test', vertrag: 'Aufmaßblatt', mail: 'test@beispiel.de' }) }), pj17 = await pilot17.json();
+  ok(pilot17.status === 503 && pj17.anders === true && /E-Mail oder Brief/.test(pj17.fehler), 'Widerruf ohne Mailversand und Datenbank: 503 mit Hinweis auf E-Mail oder Brief');
+  /* d) eigener Testserver mit Mail- und Daten-Attrappe: Formular, Eingangsbestätigung, Kopie */
+  const port17 = 9300 + Math.floor(Math.random() * 80), B7 = 'http://localhost:' + port17;
+  const kind17 = cp17.spawn(process.execPath, [path17.join(W17, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port17), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', MAIL_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind17.stderr.on('data', (dd) => process.stderr.write('  [Server 7] ' + dd));
+  const aus17 = () => { try { kind17.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus17);
+  let bereit17 = false; for (let i = 0; i < 60 && !bereit17; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit17 = (await fetch(B7 + '/api/status').then((r) => r.json())).post === true; } catch (e) { /* noch nicht */ } }
+  ok(bereit17, 'Testserver mit Mail-Attrappe läuft: ' + B7);
+  const leer17 = await fetch(B7 + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }), lj17 = await leer17.json();
+  const fremd17 = await fetch(B7 + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json', origin: 'https://fremd.example' }, body: JSON.stringify({ name: 'X', vertrag: 'Y', mail: 'x@beispiel.de' }) });
+  ok(leer17.status === 400 && !!(lj17.felder && lj17.felder.name && lj17.felder.vertrag && lj17.felder.mail) && fremd17.status === 403, 'Widerruf-API: ohne Name, Vertrag und E-Mail 400 mit Hinweis je Feld; fremde Herkunft 403');
+  const c17 = await browser.newContext(telefon), s17 = await neueSeite(c17, B7);
+  await s17.goto(B7 + '/widerruf/', { waitUntil: 'networkidle' });
+  await s17.click('#wr-senden'); await s17.waitForTimeout(150);
+  const fehler17 = await s17.evaluate(() => ['name', 'vertrag', 'mail'].every((f) => !document.getElementById('wr-' + f + '-f').hidden) && document.activeElement && document.activeElement.id === 'wr-name' && document.getElementById('wr-senden').textContent === 'Widerruf bestätigen');
+  const mail17 = 'erika-' + Date.now() + '@beispiel.de';
+  await s17.fill('#wr-name', 'Erika Muster'); await s17.fill('#wr-vertrag', 'Kauf des Aufmaßblatts am 16.10.2026'); await s17.fill('#wr-mail', mail17);
+  await s17.click('#wr-senden'); await s17.waitForSelector('#widerruf-ok:not([hidden])', { timeout: 8000 });
+  const ok17 = await s17.evaluate(() => ({ text: document.getElementById('widerruf-ok').innerText, form: document.getElementById('widerruf').hidden }));
+  await foto(s17, 'widerruf-bestaetigt');
+  const post17 = (await fetch(B7 + '/api/test/post').then((r) => r.json())).post || [];
+  const anKunde17 = post17.find((m) => m.an === mail17), anUns17 = post17.find((m) => /^Widerruf eingegangen: Erika Muster/.test(m.betreff));
+  ok(fehler17 && ok17.form && /Ihr Widerruf ist eingegangen/.test(ok17.text) && /Eingang: \d{1,2}\. \S+ 20\d\d, \d\d:\d\d:\d\d Uhr/.test(ok17.text) && /Kauf des Aufmaßblatts am 16\.10\.2026/.test(ok17.text) && ok17.text.includes('haben wir an ' + mail17), 'Vertrag widerrufen im Browser: erst Hinweise je Feld, dann „Widerruf bestätigen“: Bestätigung mit Datum, Uhrzeit und Inhalt auf der Seite');
+  ok(!!anKunde17 && anKunde17.betreff === 'Eingangsbestätigung Ihres Widerrufs' && /Hiermit widerrufe ich den folgenden Vertrag: Kauf des Aufmaßblatts am 16\.10\.2026/.test(anKunde17.html) && / Uhr</.test(anKunde17.html) && /nur den Eingang/.test(anKunde17.html) && !!anUns17 && anUns17.antwortAn === mail17, 'Eingangsbestätigung sofort per E-Mail an den Kunden (Inhalt, Datum, Uhrzeit, ohne Zusage zur Wirksamkeit), Kopie an den Betreiber mit Antwort an den Kunden');
+  sauber(s17, 'Widerrufsfunktion ohne Fehler'); await c17.close();
+  aus17();
 }
 
 await browser.close();

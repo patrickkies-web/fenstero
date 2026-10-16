@@ -12,8 +12,11 @@
      ZENTRALE_PASSWORT        Passwort der Zentrale des Inhabers (/zentrale/), mindestens 12 Zeichen; ohne bleibt die Zentrale zu
      ZENTRALE_2FA             optional, empfohlen: Schlüssel für eine Authenticator-App (Base32, erzeugt die Zentrale unter
                               Einstellungen → Zweiter Faktor); dann braucht die Anmeldung zusätzlich den sechsstelligen Code
+     MAIL_API_KEY             E-Mails des Servers über Brevo (post.js): Vertragsbestätigung nach dem Kauf, Eingangsbestätigung eines Widerrufs
 
    Variablen (Typ Text, alle optional):
+     MAIL_ABSENDER            bei Brevo bestätigte Absenderadresse, z. B. kontakt@eeziframes.com (Pflicht, wenn MAIL_API_KEY gesetzt ist)
+     MAIL_KONTAKT             Postfach für Kopien an den Betreiber (eingegangene Widerrufe); ohne: MAIL_ABSENDER
      MWST                     0 = Kleinunternehmerregelung (§ 19 UStG): keine Umsatzsteuer, Hinweis auf jeder Rechnung; sonst 19 %
      PREIS_AUFMASS_CENT 799 · PREIS_PROJEKT 9 · FREI_PROJEKTE 3 · PREIS_ABO 49 · ABO_INKL 10 · PREIS_ABO_EXTRA 5 · PREIS_PLUS 79
      Nur falls eigene Objekte in Stripe genutzt werden sollen; sonst legt der Server Preise und Steuersätze selbst an (stripe.js):
@@ -24,7 +27,7 @@
      STRIPE_TAX_RATE_INKL     Steuersatz-ID 19 % inklusiv (Aufmaßblatt)
      STATISTIK_KAMPAGNEN      eigene Kampagnen-Namen für ?utm_source=…, durch Komma getrennt (bekannte wie newsletter, flyer, facebook
                               zählen ohnehin einzeln, alles andere als „Kampagne (andere)“), siehe functions/api/statistik.js
-     ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1   nur lokal zum Testen: Stripe bzw. Datenbank werden nachgestellt */
+     ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1 / MAIL_ATTRAPPE=1   nur lokal zum Testen: Stripe, Datenbank bzw. Mailversand werden nachgestellt */
 const num = (v, d) => { const n = Number(v); return v !== undefined && v !== '' && !isNaN(n) ? n : d; };
 /* Rolle aus einem früheren Supabase-Schlüssel (JWT, eyJ…) lesen, ohne ihn zu prüfen: nur um anon und service_role zu unterscheiden */
 function jwtRolle(t) { try { if (!/^eyJ/.test(t)) return ''; const m = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(atob(m + '==='.slice((m.length + 3) % 4))).role || ''; } catch (e) { return ''; } }
@@ -53,10 +56,17 @@ export function konfig(env) {
   const totpOk = /^[A-Z2-7]{16,128}$/.test(zTotp);
   /* Ein eingetragener, aber ungültiger zweiter Faktor schließt die Zentrale (lieber zu als nur mit Passwort offen) */
   const zentrale = { passwort: zPw.length >= 12 && !(zTotp && !totpOk) ? zPw : '', grund: !zPw ? 'fehlt' : zPw.length < 12 ? 'zu_kurz' : zTotp && !totpOk ? '2fa_ungueltig' : '', totp: totpOk ? zTotp : '', totpFehler: !!zTotp && !totpOk };
+  /* Mailversand (post.js): Schlüssel als Secret, Absender als Text; ohne gültigen Absender verschickt der Server nichts */
+  const mailKey = String(env.MAIL_API_KEY || '').trim(), mailAb = String(env.MAIL_ABSENDER || '').trim().toLowerCase(), mailKontakt = String(env.MAIL_KONTAKT || '').trim().toLowerCase();
+  const adresse = (m) => /^[^\s@<>()",;]+@[^\s@<>()",;]+\.[^\s@<>()",;]{2,}$/.test(m);
+  if (mailKey && !adresse(mailAb)) hinweise.push('MAIL_ABSENDER: fehlt oder ist keine E-Mail-Adresse. Eingetragen gehört die bei Brevo bestätigte Absenderadresse.');
+  if (mailKontakt && !adresse(mailKontakt)) hinweise.push('MAIL_KONTAKT: ist keine E-Mail-Adresse.');
+  const mailAttrappe = env.MAIL_ATTRAPPE === '1' && !mailKey;
+  const post = (mailKey && adresse(mailAb)) || mailAttrappe ? { key: mailKey, absender: mailAb || 'kontakt@eeziframes.invalid', kontakt: adresse(mailKontakt) ? mailKontakt : (mailAb || 'kontakt@eeziframes.invalid'), attrappe: mailAttrappe } : null;
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
-    zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1',
+    zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1', post: post,
     ki: !!env.ANTHROPIC_API_KEY,
     geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
     preise: { aufmass: num(env.PREIS_AUFMASS_CENT, 799) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, 49), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, 79), mwst: env.MWST !== '0' }

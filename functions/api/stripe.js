@@ -17,6 +17,8 @@ const VERSION = '2024-06-20';
 const VERSION_KASSE = '2026-09-30.endive';
 const SPAETER = ['sepa_debit', 'customer_balance', 'sofort'];
 export const KLEINUNTERNEHMER = 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.';
+/* steht auf der Rechnung des Aufmaßblatts (dauerhafter Datenträger), zusätzlich zur Vertragsbestätigung per E-Mail (bestaetigung.js) */
+export const ZUSTIMMUNG = 'Sie haben vor dem Kauf ausdrücklich zugestimmt, dass wir vor Ablauf der Widerrufsfrist mit der Bereitstellung des Aufmaßblatts beginnen, und bestätigt, dass Sie dadurch mit Beginn der Bereitstellung Ihr Widerrufsrecht verlieren.';
 
 function flach(obj, prefix, out) {
   out = out || [];
@@ -116,7 +118,7 @@ export function zahlungsdienst(k) {
       const steuer = await steuersatz(true);
       const posten = k.stripe.preisAufmass ? { price: k.stripe.preisAufmass, quantity: 1 } : { quantity: 1, price_data: { currency: 'eur', unit_amount: Math.round(k.preise.aufmass * 100), tax_behavior: steuer ? 'inclusive' : undefined, product_data: { name: 'eeziframes Aufmaßblatt', description: 'Ihr Fenster-Aufmaß als PDF: alle Maße, Fotoauswertung, Wünsche, mit Code für den Fensterbauer' } } };
       if (steuer) posten.tax_rates = [steuer];
-      const sess = await s.post('/checkout/sessions', { mode: 'payment', locale: 'de', customer_email: o.mail, client_reference_id: o.kennung, success_url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, line_items: [posten], excluded_payment_method_types: SPAETER, invoice_creation: { enabled: true, invoice_data: k.preise.mwst ? undefined : { footer: KLEINUNTERNEHMER } }, payment_intent_data: { description: 'eeziframes Aufmaßblatt ' + o.kennung }, metadata: Object.assign({ art: 'aufmass', kennung: o.kennung }, o.nutzer ? { nutzer: o.nutzer } : {}) }, { version: VERSION_KASSE });
+      const sess = await s.post('/checkout/sessions', { mode: 'payment', locale: 'de', customer_email: o.mail, client_reference_id: o.kennung, success_url: o.zurueck + (o.zurueck.includes('?') ? '&' : '?') + 'bezahlt={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, line_items: [posten], excluded_payment_method_types: SPAETER, invoice_creation: { enabled: true, invoice_data: Object.assign({ description: ZUSTIMMUNG + ' Es gelten unsere AGB: ' + new URL(o.zurueck).origin + '/agb/' }, k.preise.mwst ? {} : { footer: KLEINUNTERNEHMER }) }, payment_intent_data: { description: 'eeziframes Aufmaßblatt ' + o.kennung }, metadata: Object.assign({ art: 'aufmass', kennung: o.kennung }, o.nutzer ? { nutzer: o.nutzer } : {}) }, { version: VERSION_KASSE });
       return { id: sess.id, url: sess.url };
     },
     /* Ist die Kasse bezahlt? Liefert Kennung und E-Mail zurück. wartet: abgeschlossen, aber die Zahlung ist noch unterwegs */

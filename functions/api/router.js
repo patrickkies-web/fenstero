@@ -5,7 +5,8 @@
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js)
    /api/link/:code/entwurf          Zwischenstand eines Kundenlinks mit Zählern gegen Mehrfachnutzung (entwurf.js)
    /api/kunde/…                     Konten der Hauseigentümer: Anmelden per Code, Aufmaße sichern und abgleichen (eigene.js)
-   /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js) */
+   /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js)
+   POST /api/widerruf               Widerrufsfunktion nach § 356a BGB mit Eingangsbestätigung per E-Mail (widerruf.js, post.js) */
 import { konfig, json, ApiFehler } from './umgebung.js';
 import { onRequestGet as kiGet, onRequestPost as kiPost } from './ki.js';
 import { speicher } from './speicher.js';
@@ -15,11 +16,13 @@ import { ZAHLUNG } from './zahlung.js';
 import { ZENTRALE, aufraeumen } from './zentrale.js';
 import { ENTWURF } from './entwurf.js';
 import { EIGENE, kontenDa } from './eigene.js';
+import { WIDERRUF } from './widerruf.js';
+import { attrappePost } from './post.js';
 import { zaehlen } from './statistik.js';
 import '../../web/assets/modell.js';
 import { indexnow } from '../seo.js';
 
-const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE);
+const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF);
 const MAX_BODY = 1500000;
 
 function finde(method, pfad) {
@@ -41,7 +44,9 @@ export async function api(request, env, ctx0) {
   globalThis.Abrechnung.setPreise(k.preise);
   const warte = (p) => (ctx0 && ctx0.waitUntil ? ctx0.waitUntil(p) : p);
   try {
-    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: k.daten ? !!(await kontenDa(speicher(k))) : false, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), hinweise: k.hinweise.length ? k.hinweise : undefined });
+    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: k.daten ? !!(await kontenDa(speicher(k))) : false, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), post: !!k.post, hinweise: k.hinweise.length ? k.hinweise : undefined });
+    /* nur lokal mit MAIL_ATTRAPPE=1: die zuletzt „verschickten“ Mails, damit die Prüfung sie lesen kann */
+    if (pfad === '/api/test/post' && k.post && k.post.attrappe) return json({ ok: true, post: attrappePost });
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });
       if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), ['ereignis:ki_foto']).catch(() => false)); return r; }
@@ -61,7 +66,7 @@ export async function api(request, env, ctx0) {
       if (pfad !== '/api/zahlung/webhook' && request.headers.get('origin') && request.headers.get('origin') !== url.origin) return json({ ok: false, fehler: 'forbidden' }, 403);
     }
     /* zaehlen: Vorgang für die eigene Statistik (läuft nach der Antwort weiter, Fehler bleiben folgenlos) */
-    const ctx = { k: k, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, params: treffer.params, waitUntil: warte, zaehlen: (s) => { warte(zaehlen(k, sp, Array.isArray(s) ? s : [s]).catch(() => false)); } };
+    const ctx = { k: k, env: env, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, params: treffer.params, waitUntil: warte, zaehlen: (s) => { warte(zaehlen(k, sp, Array.isArray(s) ? s : [s]).catch(() => false)); } };
     const out = await treffer.fn(ctx);
     if (out instanceof Response) return out;
     return json(out == null ? { ok: true } : out);

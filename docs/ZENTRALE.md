@@ -80,6 +80,6 @@ Umgesetzt ist das in der Datenschutzerklärung (Abschnitte 3, 4, 8 und 9) und hi
 
 ## Noch zu tun (nicht technisch)
 
-- **Nutzungsbedingungen für Betriebe** fehlen noch (die Registrierung verlangt die Zustimmung). Hinein gehört unter anderem eine Klausel zur Sperre, etwa: „Wir dürfen den Zugang sperren, wenn Rechnungen trotz Mahnung offen bleiben, der Dienst missbräuchlich genutzt wird oder ein schwerer Verstoß gegen diese Bedingungen vorliegt. Wir teilen die Gründe mit; der Betrieb kann widersprechen. Während der Sperre bleiben Daten und Abrechnung erhalten; auf Wunsch geben wir die Daten heraus.“
-- **Auftragsverarbeitungsvertrag (AVV) mit jedem Betrieb** für die Daten seiner Kunden, mit Regel zum Support-Zugriff (auf Anfrage des Betriebs, zur Störungsbehebung, bei gesetzlicher Pflicht) und zur Rückgabe oder Löschung am Vertragsende.
-- Beides rechtlich prüfen lassen, zusammen mit Impressum und Datenschutzerklärung.
+- **Nutzungsbedingungen für Betriebe** stehen als Entwurf unter `/nutzungsbedingungen/` (mit Sperr-Klausel und dem Vertrag über die Auftragsverarbeitung als Anlage, inklusive Regel zum Support-Zugriff und zur Löschung am Vertragsende); die Registrierung verlinkt sie.
+- **Widerrufe** von Verbrauchern kommen über „Vertrag widerrufen“ (`/widerruf/`, § 356a BGB) als E-Mail an `MAIL_KONTAKT` und stehen im Protokoll (Art „Widerruf“, drei Jahre). Prüfen und dem Kunden antworten; eine Erstattung machst du in Stripe.
+- Alle Rechtstexte rechtlich prüfen lassen, zusammen mit Impressum und Datenschutzerklärung.

@@ -4,6 +4,7 @@
 //   node scripts/dev-server.mjs                   Pilotmodus: ohne KI, ohne Zahlung, ohne Datenbank
 //   KI_ATTRAPPE=1                                  KI mit festen Beispielantworten (kein Schlüssel nötig)
 //   ZAHLUNG_ATTRAPPE=1 DATEN_ATTRAPPE=1            Stripe und Datenbank nachgestellt: Anmeldecode 123456, Kassen kehren sofort als bezahlt zurück
+//   MAIL_ATTRAPPE=1                                Mailversand nachgestellt (Vertragsbestätigung, Widerruf); lesbar unter /api/test/post
 //   ANTHROPIC_API_KEY=… STRIPE_SECRET_KEY=… SUPABASE_URL=… SUPABASE_SECRET_KEY=…   echte Dienste (Schlüssel nie ins Repo schreiben)
 //
 // Danach im Browser: http://localhost:8788
@@ -84,6 +85,9 @@ async function statisch(url) {
   for (const [k, v] of kopfzeilen(p)) { if (k === '!') kopf.delete(v); else kopf.set(k, v); }
   return new Response(await readFile(ziel), { status: status, headers: kopf });
 }
+
+/* wie env.ASSETS im Worker: Dateien aus web/ (für die Vertragsbestätigung, die die AGB aus /agb/ liest) */
+env.ASSETS = { fetch: (r) => statisch(new URL(typeof r === 'string' ? r : r.url)) };
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost:' + PORT);

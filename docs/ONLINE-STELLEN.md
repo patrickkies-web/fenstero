@@ -72,15 +72,11 @@ Die Menünamen bei Cloudflare ändern sich ab und zu; die Werte in der Tabelle b
 
 **Wichtig im Pilot:** Der Bereich für Betriebe speichert alles im Browser des Geräts. Kundenlinks anlegen und Codes einfügen deshalb immer im selben Browser auf demselben Gerät, zum Beispiel am Büro-PC.
 
-## Schritt 4: Impressum und Datenschutz ausfüllen
+## Schritt 4: Rechtstexte
 
-Pflicht, bevor du die Adresse an Kunden oder Betriebe gibst. In `web/impressum/index.html` und `web/datenschutz/index.html` sind alle offenen Angaben orange markiert: Name oder Firma, Anschrift, E-Mail, Telefon, gegebenenfalls USt-IdNr. und Registereintrag, zuständige Datenschutzbehörde.
+Impressum (`web/impressum/`), Datenschutzerklärung (`web/datenschutz/`), AGB für Hauseigentümer mit Widerrufsbelehrung und Muster-Widerrufsformular (`web/agb/`), Nutzungsbedingungen für Fensterbauer mit dem Vertrag über die Auftragsverarbeitung (`web/nutzungsbedingungen/`), Cookies (`web/cookies/`) und die Widerrufsfunktion (`web/widerruf/`) sind mit den Angaben des Anbieters ausgefüllt (Patrick Kies, Postweg 35, 33442 Herzebrock-Clarholz). Orange markiert und noch offen: E-Mail-Adresse und Telefonnummer. Alle Fußzeilen verlinken die Texte und zeigen „Vertrag widerrufen“ als Knopf (§ 356a BGB, seit 19. Juni 2026 Pflicht, sobald Verbraucher online kaufen).
 
-Zwei Wege:
-- Du schickst mir die Angaben, ich trage sie ein.
-- Oder du bearbeitest die Dateien direkt auf GitHub (Datei öffnen, Stift-Symbol, speichern). Cloudflare veröffentlicht danach automatisch.
-
-Beide Texte sind Entwürfe für die Pilotphase. Lass sie vor dem öffentlichen Start rechtlich prüfen.
+Die Texte sind Entwürfe. Lass sie vor dem öffentlichen Start rechtlich prüfen. Die Suite (Abschnitt 17) prüft, dass Anbieter, Preise, Widerrufsbelehrung, Speicher-Einträge und Knöpfe zur Website passen.
 
 ## Schritt 5: KI-Fotoauswertung einschalten (optional)
 
@@ -138,7 +134,7 @@ Stripe geht auch allein, ohne Supabase: Dann kaufen Hauseigentümer das Aufmaßb
 4. **Authentication → Sign In / Providers → Email**: eingeschaltet lassen, „Confirm email“ ist egal, **„Allow new users to sign up“ muss an sein**.
 5. **Authentication → URL Configuration**: **Site URL** `https://eeziframes.com` (statt `http://localhost:3000`), bei **Redirect URLs** `https://eeziframes.com/**` hinzufügen (und die `…workers.dev`-Adresse mit `/**`, falls du dort testest). Dorthin führt der Anmeldelink aus der E-Mail zurück (Betriebe auf `/konto/`, Hauseigentümer auf `/app/`, beides deckt `/**` ab).
 6. **Die Anmelde-E-Mail.** Betriebe und Hauseigentümer melden sich ohne Passwort an: Sie bekommen eine E-Mail mit Anmeldelink oder sechsstelligem Code, die Website nimmt beides an. Beide bekommen dieselbe Vorlage. Ohne eigenen Mailversand verschickt Supabase seine Standardmail mit Link, die Vorlagen lassen sich dann nicht ändern, und der eingebaute Versand schickt nur an Adressen aus deinem Supabase-Team, höchstens **2 E-Mails pro Stunde** (andere Adressen bekommen „Email address not authorized“). Zum Testen reicht das mit deiner eigenen Adresse.
-7. Für echte Betriebe und Hauseigentümer, **Authentication → Emails → SMTP Settings** (bzw. „Set up SMTP“): einen eigenen Versand eintragen (Resend, Postmark oder Brevo haben kostenlose Einstiegsstufen; Absender z. B. `anmeldung@eeziframes.com`, dafür bei Cloudflare die DNS-Einträge des Anbieters setzen). Danach unter **Authentication → Emails → Templates** die Vorlage **Magic Link** anpassen, Betreff zum Beispiel `Ihr eeziframes-Anmeldecode`, Text zum Beispiel:
+7. Für echte Betriebe und Hauseigentümer, **Authentication → Emails → SMTP Settings** (bzw. „Set up SMTP“): einen eigenen Versand eintragen. Vorgesehen ist **Brevo** (Paris, Daten in der EU, kostenlos bis 300 E-Mails am Tag; so steht es in der Datenschutzerklärung): Konto anlegen, Absender `kontakt@eeziframes.com` bestätigen, die DNS-Einträge von Brevo (Domain-Authentifizierung) bei Cloudflare setzen, dann unter **SMTP & API** die SMTP-Zugangsdaten hier eintragen und einen API-Schlüssel für den Server anlegen (`MAIL_API_KEY`, Abschnitt C). Wer einen anderen Anbieter nimmt, muss die Datenschutzerklärung anpassen. Danach unter **Authentication → Emails → Templates** die Vorlage **Magic Link** anpassen, Betreff zum Beispiel `Ihr eeziframes-Anmeldecode`, Text zum Beispiel:
    ```
    <p>Guten Tag,</p>
    <p>Ihr Anmeldecode für eeziframes lautet: <strong>{{ .Token }}</strong></p>
@@ -181,14 +177,15 @@ Umsatzsteuer: Ohne Variable `MWST` rechnet der Server mit 19 % (Betriebspreise n
 | `ANTHROPIC_API_KEY` | aus Schritt 5, falls noch nicht da |
 | `ZENTRALE_PASSWORT` | Passwort für deine Zentrale unter `/zentrale/`, mindestens 12 Zeichen (besser 20 und mehr); ohne bleibt sie zu ([docs/ZENTRALE.md](ZENTRALE.md)) |
 | `ZENTRALE_2FA` | optional, empfohlen: Schlüssel für die Authenticator-App, erzeugt die Zentrale unter **Einstellungen → Zweiter Faktor** |
+| `MAIL_API_KEY` | API-Schlüssel von Brevo (**SMTP & API → API-Schlüssel**); der Server verschickt damit die Vertragsbestätigung nach dem Kauf (mit AGB und Widerrufsbelehrung, ohne sie erlischt das Widerrufsrecht nicht) und die Eingangsbestätigung eines Widerrufs |
 
-Als normale Variablen (Typ Text), alle optional: `MWST` (`0` bei Kleinunternehmerregelung), die Preise `PREIS_AUFMASS_CENT` (799), `PREIS_PROJEKT` (9), `FREI_PROJEKTE` (3), `PREIS_ABO` (49), `ABO_INKL` (10), `PREIS_ABO_EXTRA` (5), `PREIS_PLUS` (79). Variablen aus dem Dashboard bleiben bei jedem Deployment erhalten (`keep_vars` in `wrangler.jsonc`). Nur wer eigene Objekte in Stripe nutzen will: `STRIPE_PRICE_ABO`, `STRIPE_PRICE_PLUS`, `STRIPE_PRICE_AUFMASS`, `STRIPE_TAX_RATE`, `STRIPE_TAX_RATE_INKL` (IDs aus Stripe; sie haben Vorrang).
+Als normale Variablen (Typ Text): `MAIL_ABSENDER` (Pflicht mit `MAIL_API_KEY`: die bei Brevo bestätigte Absenderadresse, z. B. `kontakt@eeziframes.com`), `MAIL_KONTAKT` (optional: Postfach für Kopien eingegangener Widerrufe, sonst `MAIL_ABSENDER`); alle weiteren optional: `MWST` (`0` bei Kleinunternehmerregelung), die Preise `PREIS_AUFMASS_CENT` (799), `PREIS_PROJEKT` (9), `FREI_PROJEKTE` (3), `PREIS_ABO` (49), `ABO_INKL` (10), `PREIS_ABO_EXTRA` (5), `PREIS_PLUS` (79). Variablen aus dem Dashboard bleiben bei jedem Deployment erhalten (`keep_vars` in `wrangler.jsonc`). Nur wer eigene Objekte in Stripe nutzen will: `STRIPE_PRICE_ABO`, `STRIPE_PRICE_PLUS`, `STRIPE_PRICE_AUFMASS`, `STRIPE_TAX_RATE`, `STRIPE_TAX_RATE_INKL` (IDs aus Stripe; sie haben Vorrang).
 
 Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrangler.jsonc`, Cloudflare richtet den Zeitplan beim Deployment ein; sichtbar unter **Einstellungen → Trigger**). Im selben Lauf räumt der Server auf: Protokoll nach Frist, nicht bezahlte Kassen nach 30 Tagen, Anmeldungen ohne Betrieb nach 30 Tagen ohne Nutzung. Du musst nichts weiter tun.
 
 ### D. Prüfen
 
-- `https://eeziframes.com/api/status` zeigt `"zahlung":true`, `"testmodus":true` (Sandbox-Schlüssel) und `"webhook":true`, mit Supabase auch `"daten":true`, dazu die Preise. Ist ein Schlüssel verwechselt oder fehlt einer, steht dort `"hinweise"` mit dem Namen der Variablen (nie mit ihrem Wert).
+- `https://eeziframes.com/api/status` zeigt `"zahlung":true`, `"testmodus":true` (Sandbox-Schlüssel) und `"webhook":true`, mit Supabase auch `"daten":true`, mit Brevo `"post":true`, dazu die Preise. Ist ein Schlüssel verwechselt oder fehlt einer, steht dort `"hinweise"` mit dem Namen der Variablen (nie mit ihrem Wert).
 - App ohne Link: ein Fenster messen, **Freischalten · 7,99 €**, E-Mail, weiter zu Stripe. Die Kasse sagt „Testbetrieb“ und nennt die Testkarte `4242 4242 4242 4242` (Datum in der Zukunft, beliebige Prüfziffer). Zurück in der App ist das Blatt frei, PDF und Code sind da, Stripe schickt den Beleg.
 - Stripe → **Workbench → Webhooks** → dein Ziel: Zustellungen mit Antwort `200`. Ein `503` bei `invoice.paid` kurz nach einer Sammelrechnung ist gewollt: Die Rechnung wird gerade eingetragen, Stripe stellt später erneut zu.
 - Mit Supabase, Betriebe: **Kostenlos starten** → deine E-Mail → in der Mail auf den Anmeldelink klicken (oder den Code eingeben) → Betrieb eintragen. Projekt anlegen, Link aufs Handy, als Kunde messen und absenden: Das Aufmaß erscheint im Projekt, ohne Code. Drei Projekte mit Aufmaß sind frei; das vierte bleibt gesperrt, bis unter **Abrechnung → Zahlungsart** eine Test-IBAN (`DE89 3704 0044 0532 0130 00`) oder die Testkarte hinterlegt ist (das Blatt nennt beide im Testmodus). Nach dem ersten Abo stehen in Stripe unter **Produktkatalog** „eeziframes Abo 10“ und die Steuersätze.
@@ -202,7 +199,7 @@ Unter `https://eeziframes.com/zentrale/` siehst du alle Betriebe mit ihren Zahle
 1. Stripe-Konto aktivieren (Firmendaten, Bankkonto, Identität). Steuernummer bzw. USt-IdNr. in den Rechnungseinstellungen eintragen, damit sie auf jeder Rechnung steht.
 2. Im **Live-Modus** einen Geheimschlüssel (`sk_live_…`) und ein neues Ereignisziel anlegen (gleiche Adresse, gleiche Ereignisse; Test- und Live-Modus sind getrennt), bei Cloudflare `STRIPE_SECRET_KEY` und `STRIPE_WEBHOOK_SECRET` austauschen. Preise und Steuersätze legt der Server im Live-Modus selbst neu an.
 3. Stripe-Kennungen aus dem Testmodus gelten live nicht: In Supabase (Tabelle `betriebe`) die Spalten `stripe_customer` und `stripe_subscription` der Testkonten leeren oder die Testkonten löschen.
-4. Rechtliches vor der ersten echten Zahlung: Impressum (Schritt 4), Datenschutzerklärung um Supabase und Stripe als Auftragsverarbeiter ergänzen (AV-Verträge sind bei beiden Teil der Nutzungsbedingungen, in deren Kontoeinstellungen bestätigen), **Nutzungsbedingungen für Betriebe** und für den Kauf des Aufmaßblatts samt **Widerrufsbelehrung** (digitaler Inhalt: der Kunde stimmt in der Kasse zu, dass die Lieferung sofort beginnt und das Widerrufsrecht erlischt; dieser Satz steht schon in der Kasse). Lass die Texte prüfen.
+4. Rechtliches vor der ersten echten Zahlung: E-Mail-Adresse und Telefonnummer in die Rechtstexte (Schritt 4), Mailversand eingerichtet (`MAIL_API_KEY`, sonst gehen weder Vertragsbestätigung noch Eingangsbestätigung eines Widerrufs raus), Gewerbe angemeldet und Kleinunternehmer-Frage geklärt (`MWST`), die Texte rechtlich prüfen lassen.
 5. Suchmaschinen freigeben: Schritt 7 (Variable `INDEXIERUNG`).
 
 Erstattungen, Kündigungen und Rechnungen siehst und erledigst du im Stripe-Dashboard (**Zahlungen** → Zahlung → **⋯** → **Zahlung erstatten**; **Kunden**; **Rechnungen**). Eine Erstattung des Aufmaßblatts sperrt das Blatt nicht nachträglich; es liegt auf dem Gerät des Käufers.
