@@ -15,8 +15,8 @@
    kommt ein anderswo gelöschtes Fenster zurück, wenn ein Gerät es nach dem Löschen noch geändert hat (meta.geloescht), und zählt dann
    als Änderung. Fenster, die das Gerät nie hatte, bleiben stehen. Die Angaben zum Haus haben ihren eigenen Zeitpunkt (projTs), das
    zuletzt geänderte gewinnt; leere Angaben (nach dem Aufräumen) überschreiben nie welche vom Gerät.
-   Zeitpunkte kommen von der Uhr des Geräts und werden auf die Zeit des Servers plus fünf Minuten begrenzt, damit eine vorgehende Uhr
-   kein Fenster sperrt. Weicht das Ergebnis vom Gerät ab, bekommt es den zusammengeführten Stand zurück. Fenster ohne Kennung nimmt
+   Zeitpunkte kommen von der Uhr des Geräts; die App gleicht sie mit der Zeit des Servers ab (jetzt in jeder Antwort), und der Server
+   begrenzt sie auf seine Zeit plus fünf Minuten, damit eine vorgehende Uhr kein Fenster sperrt. Weicht das Ergebnis vom Gerät ab, bekommt es den zusammengeführten Stand zurück. Fenster ohne Kennung nimmt
    der Server nicht an (sie liefen an den Zählern vorbei).
    Hat das Aufräumen den Inhalt geleert (30 Tage nach Ablauf oder Deaktivierung, zentrale.js), bleiben die Zähler; verlängert der
    Betrieb den Link, darf ein Gerät die damals vorhandenen Fenster wiederherstellen (meta.geleertIds), bis es sie geschickt oder
@@ -134,7 +134,7 @@ export function zusammenfuehren(alt, eingang, metaAlt, bekannt, hierNeuer, jetzt
 export const ENTWURF = {
   'GET /api/link/:code/entwurf': async (ctx) => {
     const { row, l, code } = await linkFinden(ctx);
-    const zu = X().linkZu(l), basis = { ok: true, zu: zu, zuText: zu ? zuText(zu, row.name) : '', expires: l.expires || '', grenzen: GRENZEN, runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0 };
+    const zu = X().linkZu(l), basis = { ok: true, zu: zu, zuText: zu ? zuText(zu, row.name) : '', expires: l.expires || '', grenzen: GRENZEN, runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now() }; // jetzt: damit die App eine falsch gehende Uhr ausgleicht
     if (!langerCode(code)) return Object.assign(basis, { aus: true, entwurf: null, meta: null });
     /* Zu: kein Inhalt mehr, wer den Link hat (der Betrieb kann ihn deaktiviert haben, weil er an die falsche Person ging) */
     if (zu) return Object.assign(basis, { entwurf: null, meta: null });
@@ -179,6 +179,6 @@ export const ENTWURF = {
     if (res && res.fehlt) return { ok: true, aus: true };
     if (grenze) throw new ApiFehler(grenzText(), 409, { grenze: true });
     const e = res.row || {}, zurueckGeben = anders || !hierNeuer || zurueck.length > 0;
-    return { ok: true, stand: Number(e.stand) || 0, meta: metaSicht(e.meta), zurueck: zurueck, entwurf: zurueckGeben ? entwurfSicht(e) : null };
+    return { ok: true, stand: Number(e.stand) || 0, meta: metaSicht(e.meta), zurueck: zurueck, entwurf: zurueckGeben ? entwurfSicht(e) : null, jetzt: Date.now() };
   }
 };

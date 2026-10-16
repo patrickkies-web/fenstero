@@ -1229,6 +1229,14 @@ const S = {
      geklappt, p = laufender Versand */
   sync: syncNeu()
 };
+/* Uhr: Abstand der Uhr dieses Geräts zur Zeit des Servers (aus jeder Antwort des Zwischenstands), damit Zeitpunkte von Fenstern,
+   Angaben und Löschungen vergleichbar sind, auch wenn die Uhr eines Geräts vor- oder nachgeht */
+let UHR = (() => { try { return Number(localStorage.getItem('aufmass.uhr')) || 0; } catch (e) { return 0; } })();
+const zeit = () => Date.now() + UHR;
+function uhrStellen(serverJetzt, vorher, nachher) {
+  const sj = Number(serverJetzt); if (!(sj > 0)) return;
+  UHR = Math.round(sj - (vorher + nachher) / 2); if (!vorschau()) { try { localStorage.setItem('aufmass.uhr', String(UHR)); } catch (e) { /* ok */ } }
+}
 function syncNeu() { return { fp: '', pfp: '', offen: false, laeuft: false, wieder: false, timer: null, aus: false, geladen: false, bekannt: [], geloescht: {}, ok: false, zuletzt: 0, p: null, pruefTimer: null, nochmal: 0 }; }
 /* Vorschau für den Betrieb („Als Kunde öffnen“ im Portal, ?vorschau=1): zeigt den Link wie beim Kunden, liest und schreibt aber
    keinen Zwischenstand, speichert nichts im Browser, meldet kein Öffnen (die 60 Tage beginnen nicht) und sendet nichts. Gilt nur
@@ -1264,7 +1272,7 @@ function normProj(p) { if (p.zeit === 'sofort') p.zeit = 'asap'; if (p.zeit === 
 /* Ältere Aufmaße kennen nur roll (Rollladen): daraus wird der Sonnenschutz außen abgeleitet */
 function altAngleichen(w) { if ((!w.sart || w.sart === 'keiner') && (w.roll === 'aufsatz' || w.roll === 'vorbau')) w.sart = 'rollladen'; else if ((!w.sart || w.sart === 'keiner') && w.roll === 'behalten') w.sart = 'behalten'; return w; }
 function takeWindows(arr) {
-  const jetzt = Date.now(); let nachgetragen = false;
+  const jetzt = zeit(); let nachgetragen = false;
   S.windows = arr.map((x) => altAngleichen(Object.assign(baseWin(), x)));
   S.windows.forEach((x) => { (x.bars || []).forEach((b) => { const m = /^b(\d+)/.exec(String(b.id)); if (m && +m[1] >= BID) BID = +m[1] + 1; }); if (!x.wid) { x.wid = neueWid(); nachgetragen = true; } if (!(Number(x.t0) > 0)) { x.t0 = jetzt; nachgetragen = true; } x.aend = Number(x.aend) || 0; x.ts = Number(x.ts) || 0; });
   return nachgetragen;
@@ -1274,7 +1282,7 @@ function loadLink() {
   S.nb = null; S.angelegt = 0; S.stand = 0; S.projTs = 0; S.linkZu = ''; S.linkZuText = ''; S.linkStatus = ''; clearTimeout(S.sync.timer); clearTimeout(S.sync.pruefTimer);
   S.sync = syncNeu();
   let nach = false;
-  try { const raw = vorschau() ? null : localStorage.getItem(linkKey()); const o = raw ? JSON.parse(raw) : null; if (o && Array.isArray(o.windows)) nach = takeWindows(o.windows); if (o && o.proj) normProj(Object.assign(S.proj, o.proj)); if (o && o.sent) S.sent = o.sent; if (o && o.kauf) S.kauf = o.kauf; if (o && o.nb) S.nb = o.nb; if (o) { S.angelegt = Number(o.angelegt) || 0; S.stand = Number(o.stand) || 0; S.sync.bekannt = Array.isArray(o.bekannt) ? o.bekannt.slice(-200) : []; S.sync.offen = !!o.offen; S.projTs = Number(o.projTs) || 0; if (o.geloescht && typeof o.geloescht === 'object') S.sync.geloescht = o.geloescht; } } catch (e) { /* ok */ }
+  try { const raw = vorschau() ? null : localStorage.getItem(linkKey()); const o = raw ? JSON.parse(raw) : null; if (o && Array.isArray(o.windows)) nach = takeWindows(o.windows); if (o && o.proj) normProj(Object.assign(S.proj, o.proj)); if (o && o.sent) S.sent = o.sent; if (o && o.kauf) S.kauf = o.kauf; if (o && o.nb) S.nb = o.nb; if (o) { S.angelegt = Number(o.angelegt) || 0; S.stand = Number(o.stand) || 0; S.sync.bekannt = Array.isArray(o.bekannt) ? o.bekannt.slice(-200) : []; S.sync.offen = !!o.offen; S.projTs = Number(o.projTs) || 0; if (o.geloescht && typeof o.geloescht === 'object') S.sync.geloescht = o.geloescht; else if (o.offen && Array.isArray(o.bekannt)) { const da = new Set(S.windows.map((w) => w.wid)); o.bekannt.forEach((id) => { if (id && !da.has(id)) S.sync.geloescht[id] = Number(o.stand) || zeit(); }); } } } catch (e) { /* ok */ }
   S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj); if (nach) lokalSpeichern(); // ältere Aufmaße: nachgetragene Kennungen gleich merken
   /* Der Betrieb hat um Nachbesserung gebeten (Runde im Link höher als die gesendete): wieder bearbeitbar, Angaben bleiben. Auch wenn
      eine frühere, zurückgezogene Anfrage derselben Runde hier noch liegt */
@@ -2381,7 +2389,7 @@ const maxMsg = () => 'Ein Aufmaß umfasst höchstens ' + GRENZE.fenster + ' Fens
 /* Stand der Änderungen an einem Fenster: frei (erste Woche, beim Kundenlink auch während einer Nachbesserung, um die der Betrieb
    gebeten hat), rest (Änderungen danach), fest */
 function aendStand(w, jetzt) {
-  jetzt = jetzt || Date.now();
+  jetzt = jetzt || zeit();
   const t0 = Number(w && w.t0) || jetzt, bis = t0 + GRENZE.freiTage * TAG_MS, n = Number(w && w.aend) || 0, nb = jetzt >= bis && !!(S.betrieb && S.nb), frei = jetzt < bis || nb;
   return { frei: frei, nb: nb, bis: bis, n: n, rest: Math.max(0, GRENZE.aenderungen - n), fest: !frei && n >= GRENZE.aenderungen };
 }
@@ -2418,8 +2426,8 @@ const entwurfFp = () => stabil({ w: S.windows.map(packFenster), p: S.proj, a: an
 const inhaltFp = () => stabil({ w: S.windows.map(fensterFp), p: S.proj }); // nur Angaben, ohne Zähler
 const entwurfAn = () => SERVER.daten && S.betrieb && !vorschau() && !S.sync.aus && !S.sent && !(S.linkZu && S.linkZu !== 'eingegangen');
 function entwurfStand() {
-  const pfp = stabil(S.proj); if (pfp !== S.sync.pfp) { if (S.sync.pfp) S.projTs = Date.now(); S.sync.pfp = pfp; } // Angaben zum Haus mit eigenem Zeitpunkt
-  const fp = entwurfFp(); if (fp !== S.sync.fp) { S.sync.fp = fp; S.stand = Date.now(); S.sync.offen = true; }
+  const pfp = stabil(S.proj); if (pfp !== S.sync.pfp) { if (S.sync.pfp) S.projTs = zeit(); S.sync.pfp = pfp; } // Angaben zum Haus mit eigenem Zeitpunkt
+  const fp = entwurfFp(); if (fp !== S.sync.fp) { S.sync.fp = fp; S.stand = zeit(); S.sync.offen = true; }
 }
 function entwurfPlanen(sofort) { if (!entwurfAn() || !S.sync.offen || !S.sync.geladen) return; clearTimeout(S.sync.timer); S.sync.timer = setTimeout(entwurfSenden, sofort ? 0 : 1200); }
 /* Bilder der Lage, die nur auf diesem Gerät liegen, an gleich gebliebene Fenster hängen */
@@ -2460,12 +2468,13 @@ function entwurfSenden(behalten) {
   if (S.sync.laeuft) { S.sync.wieder = true; return S.sync.p || Promise.resolve(false); }
   const sync = S.sync, code = S.betrieb.code;
   sync.laeuft = true; sync.offen = false; clearTimeout(sync.timer);
-  const body = JSON.stringify({ windows: S.windows.map(packFenster), proj: S.proj, projTs: S.projTs || 0, stand: S.stand || Date.now(), angelegt: angelegt(), bekannt: sync.bekannt || [], geloescht: sync.geloescht || {} }), fpGesendet = entwurfFp();
+  const body = JSON.stringify({ windows: S.windows.map(packFenster), proj: S.proj, projTs: S.projTs || 0, stand: S.stand || zeit(), angelegt: angelegt(), bekannt: sync.bekannt || [], geloescht: sync.geloescht || {} }), fpGesendet = entwurfFp();
   sync.p = (async () => {
     let neuZeigen = false;
     try {
-      const res = await fetch('/api/link/' + encodeURIComponent(code) + '/entwurf', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: body, keepalive: !!behalten && body.length < 60000 });
+      const t1 = Date.now(), res = await fetch('/api/link/' + encodeURIComponent(code) + '/entwurf', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: body, keepalive: !!behalten && body.length < 60000 });
       const r = await res.json().catch(() => null);
+      if (r) uhrStellen(r.jetzt, t1, Date.now());
       if (S.sync !== sync) return false; // inzwischen ein anderer Link oder das eigene Aufmaß
       if (r && r.ok && r.aus) sync.aus = true;
       else if (r && r.ok) {
@@ -2503,6 +2512,7 @@ async function entwurfAbgleichen() {
   if (!S.sync.geladen && !(await her())) return 'fehler'; // noch nie abgeglichen (etwa nach einem Funkloch beim Öffnen)
   await hin();
   if (entwurfAn()) { if (!(await her())) return 'fehler'; await hin(); }
+  if (entwurfAn() && S.sync.offen) return 'fehler'; // eigene Änderungen nicht hochgekommen: der Server konnte nicht zusammenführen
   return anders || !entwurfAn();
 }
 /* Beim Öffnen des Links und beim Zurückkehren in den Tab: Zwischenstand vom Server holen. Übernommen wird er, wenn hier nichts offen
@@ -2511,8 +2521,9 @@ async function entwurfLaden() {
   if (!S.betrieb || vorschau()) return false;
   const sync = S.sync, code = S.betrieb.code;
   try {
-    const res = await fetch('/api/link/' + encodeURIComponent(code) + '/entwurf', { headers: { accept: 'application/json' }, cache: 'no-store' });
+    const t1 = Date.now(), res = await fetch('/api/link/' + encodeURIComponent(code) + '/entwurf', { headers: { accept: 'application/json' }, cache: 'no-store' });
     const r = await res.json().catch(() => null);
+    if (r) uhrStellen(r.jetzt, t1, Date.now());
     if (S.sync !== sync || !S.betrieb || S.betrieb.code !== code) return false;
     sync.zuletzt = Date.now();
     if (!r || !r.ok) { sync.geladen = true; sync.ok = false; return false; }
@@ -2525,7 +2536,7 @@ async function entwurfLaden() {
     metaUebernehmen(r.meta);
     sync.fp = entwurfFp(); sync.ok = true; sync.geladen = true; lokalSpeichern();
     /* Hier Offenes, hier neuer, hier Fenster, die der Server nie gesehen hat, oder der Server wurde geleert: senden */
-    if (S.windows.length && (sync.offen || unbekannt || !e || e.geleert || (S.stand || 0) > (Number(e.stand) || 0))) { if (!S.stand) S.stand = Date.now(); sync.offen = true; entwurfPlanen(true); }
+    if (S.windows.length && (sync.offen || unbekannt || !e || e.geleert || (S.stand || 0) > (Number(e.stand) || 0))) { if (!S.stand) S.stand = zeit(); sync.offen = true; entwurfPlanen(true); }
     const geaendert = inhaltFp() !== vorher;
     if (geaendert || erstes || S.screen === 'home') render(); // sonst nicht mitten in eine Eingabe hinein
     return geaendert;
@@ -2617,7 +2628,7 @@ function newWin() {
 /* Speichern: Neue Fenster zählen gegen die Grenze; nach der ersten Woche zählt jedes Speichern mit einer Änderung (höchstens vier).
    Gespeichert wird eine Kopie, bearbeitet wird immer eine eigene Kopie (S.win). */
 function saveWin() {
-  const jetzt = Date.now(), w = Object.assign({}, S.win, { name: S.win.name || artName(S.win) + ' ' + (S.editIdx >= 0 ? S.editIdx + 1 : S.windows.length + 1) });
+  const jetzt = zeit(), w = Object.assign({}, S.win, { name: S.win.name || artName(S.win) + ' ' + (S.editIdx >= 0 ? S.editIdx + 1 : S.windows.length + 1) });
   let hinweis = '';
   if (S.editIdx >= 0 && S.windows[S.editIdx]) {
     const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w);
@@ -2673,10 +2684,10 @@ function act(name, el) {
     case 'sart': { w.sart = v; if (v === 'keiner' || v === 'behalten') w.roll = v; else if (w.roll !== 'vorbau') w.roll = 'aufsatz'; return render(); }
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
     case 'back': { const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } return go(b, 'back'); }
-    case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: Date.now(), aend: 0, ts: Date.now() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
+    case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); return newWin();
     case 'open': { if (S.betrieb && S.sent) return; if (!linkOffen()) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), kopie(S.windows[i]))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; return go('fertig'); }
-    case 'delwin': { if (!linkOffen()) return; if (S.editIdx < 0 || !S.windows[S.editIdx]) { S.editIdx = -1; go('home', 'back'); return toast('Dieses Fenster gibt es nicht mehr.'); } const weg = S.windows[S.editIdx]; if (S.betrieb && weg.wid) { S.sync.geloescht[weg.wid] = Date.now(); const alle = Object.keys(S.sync.geloescht); if (alle.length > 200) alle.sort((a, b) => S.sync.geloescht[a] - S.sync.geloescht[b]).slice(0, alle.length - 200).forEach((k) => { delete S.sync.geloescht[k]; }); } S.angelegt = angelegt(); S.windows.splice(S.editIdx, 1); S.editIdx = -1; persist(); toast('Fenster gelöscht'); return go('home', 'back'); }
+    case 'delwin': { if (!linkOffen()) return; if (S.editIdx < 0 || !S.windows[S.editIdx]) { S.editIdx = -1; go('home', 'back'); return toast('Dieses Fenster gibt es nicht mehr.'); } const weg = S.windows[S.editIdx]; if (S.betrieb && weg.wid) { S.sync.geloescht[weg.wid] = zeit(); const alle = Object.keys(S.sync.geloescht); if (alle.length > 200) alle.sort((a, b) => S.sync.geloescht[a] - S.sync.geloescht[b]).slice(0, alle.length - 200).forEach((k) => { delete S.sync.geloescht[k]; }); } S.angelegt = angelegt(); S.windows.splice(S.editIdx, 1); S.editIdx = -1; persist(); toast('Fenster gelöscht'); return go('home', 'back'); }
     case 'aufmass-neu': { S.neuFrage = true; return render(); }
     case 'aufmass-neu-nein': { S.neuFrage = false; return render(); }
     case 'aufmass-neu-ja': { if (S.betrieb) return; S.neuFrage = false; try { localStorage.removeItem(STORE); } catch (e) { /* ok */ } loadOwn(); S.teil = null; toast('Neues Aufmaß begonnen'); return go('home'); }
@@ -3127,8 +3138,9 @@ async function linkPruefen() {
   const code = S.betrieb.code, sync = S.sync;
   clearTimeout(sync.pruefTimer);
   try {
-    const res = await fetch('/api/link/' + encodeURIComponent(code), { headers: { accept: 'application/json' } });
+    const t1 = Date.now(), res = await fetch('/api/link/' + encodeURIComponent(code), { headers: { accept: 'application/json' } });
     const r = await res.json().catch(() => null);
+    if (r) uhrStellen(r.jetzt, t1, Date.now());
     if (!S.betrieb || S.betrieb.code !== code) return;
     if (res.status === 404) { S.linkStatus = 'fehlt'; if (!S.sent) { S.linkZu = 'fehlt'; S.linkZuText = (r && r.fehler) || 'Diesen Link gibt es nicht (mehr). Bitte melde dich bei deinem Fensterbauer.'; } return render(); }
     if (!r || !r.ok) { if (!vorschau()) entwurfLaden(); return; }
@@ -3166,11 +3178,12 @@ async function sendenServer() {
   }
   if (!S.betrieb || S.betrieb.code !== code0 || S.sent) return;
   const o = JSON.parse(JSON.stringify(unpackProject(packProject(S.windows, S.proj, S.betrieb))));
-  o.wm = S.windows.map((w) => ({ wid: w.wid || '', t0: Number(w.t0) || 0, aend: Number(w.aend) || 0, ts: Number(w.ts) || 0 })); o.stand = S.stand || 0;
+  o.wm = S.windows.map((w) => ({ wid: w.wid || '', t0: Number(w.t0) || 0, aend: Number(w.aend) || 0, ts: Number(w.ts) || 0 })); o.stand = S.stand || 0; o.projTs = S.projTs || 0;
   try {
     const r = await fetch('/api/aufmass', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(o) }).then((x) => x.json());
     if (!S.betrieb || S.betrieb.code !== code0) return;
     if (r && !r.ok && r.zu === 'eingegangen') { schonEingegangen(r.runde, true, r.seit); go('home'); return toast(r.fehler); } // schon da (anderes Gerät)
+    if (r && !r.ok && r.abgleichen) { S.sync.offen = true; await entwurfSenden(); if (!S.betrieb || S.betrieb.code !== code0) return; render(); return toast(r.fehler); } // anderes Gerät war schneller: zusammenführen, prüfen lassen
     if (!r || !r.ok) return toast(r && r.fehler ? r.fehler : 'Senden hat nicht geklappt. Bitte gleich noch einmal.');
     clearTimeout(S.sync.timer); S.sync.offen = false;
     S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1, uebertragen: true }; S.nb = null; S._feier = 'gesendet'; S.toast = ''; clearTimeout(toastTimer); persist(); go('gesendet');

@@ -1915,6 +1915,12 @@ if (teil(14)) {
     const ohneId = await rufe(pT, { body: { windows: [{ name: 'ohne Kennung' }], proj: {}, stand: t } });
     const ohneWm = await rufe('/api/aufmass', { body: { v: 1, b: lT.code, w: [fwSend('Ohne Kennung')], p: {}, t: Date.now() } });
     ok(fern.ok && a5.ts > 0 && a5.ts <= Date.now() + 5 * 60000 && dZ.stand <= Date.now() + 5 * 60000 && ohneId._status === 400 && ohneWm._status === 400 && /neu laden/.test(ohneWm.fehler), 'Zeitpunkte von der Uhr des Geräts höchstens fünf Minuten nach der Serverzeit (eine vorgehende Uhr sperrt kein Fenster); Fenster ohne Kennung und Senden ohne Kennungen trotz Zwischenstand lehnt der Server ab');
+    /* Senden mit altem Stand, während ein anderes Gerät schon weiter ist: erst abgleichen (409) */
+    const gT = await rufe(pT), wmVon = (fenster) => fenster.map((w) => ({ wid: w.wid, t0: Number(w.t0) || t, aend: Number(w.aend) || 0, ts: Number(w.ts) || 0 }));
+    const sendeAm = (wm, projTs) => rufe('/api/aufmass', { body: { v: 1, b: lT.code, w: wm.map((x) => fwSend('Fenster ' + x.wid)), p: projT('0171 NEU'), t: Date.now(), wm: wm, stand: t + 99, projTs: projTs } });
+    const alleT = wmVon(dZ.daten.windows), ohneA5 = alleT.filter((x) => x.wid !== 'a5'), aelterA2 = alleT.map((x) => (x.wid === 'a2' ? Object.assign({}, x, { ts: x.ts - 1 }) : x));
+    const s1 = await sendeAm(ohneA5, t + 80), s2 = await sendeAm(aelterA2, t + 80), s3 = await sendeAm(alleT, t + 10), s4 = await sendeAm(alleT, t + 80);
+    ok(typeof gT.jetzt === 'number' && Math.abs(gT.jetzt - Date.now()) < 5000 && s1._status === 409 && s1.abgleichen && s2._status === 409 && s2.abgleichen && s3._status === 409 && s3.abgleichen && s4.ok, 'Senden mit altem Stand (ein Fenster fehlt, ist anderswo neuer, oder die Angaben zum Haus sind dort neuer): 409 „erst abgleichen“; auf dem neuesten Stand geht es durch; jede Antwort nennt die Serverzeit');
     await sp.betriebLoeschen(rowT.id);
     let gebremst = 0; for (let i = 0; i < 34; i++) { const r = await rufe('/api/link/qqqqqqqq' + String(i).padStart(2, '0'), { ip: '203.0.113.77' }); if (r._status === 429) gebremst++; }
     const fremd = await rufe('/api/link/' + code, { ip: '203.0.113.77' });
@@ -2169,8 +2175,26 @@ if (teil(14)) {
     await s4a.unroute('**/api/link/' + l4.code);
     ok(!funkloch.geladen && funkloch.name === 'Bad' && nachFunkloch.name === 'Bad oben' && !nachFunkloch.sent, 'Funkloch beim Öffnen: vor dem Absenden holt die App den Zwischenstand nach und zeigt erst den neueren Stand des anderen Geräts, statt den alten zu senden');
     s4a.probleme = s4a.probleme.filter((x) => !/ERR_FAILED|net::|Failed to load resource/i.test(x));
+    /* Hochladen scheitert (503), Herunterladen geht: nicht senden, der Server konnte nicht zusammenführen */
+    await s4a.route('**/api/link/' + l4.code + '/entwurf', (route) => (route.request().method() === 'POST' ? route.fulfill({ status: 503, contentType: 'application/json', body: '{"ok":false,"fehler":"kurz weg"}' }) : route.continue()));
+    await s4a.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Bad A'; saveWin(); go('home'); }); await s4a.waitForTimeout(1600);
+    await s4a.evaluate(() => act('send', document.body)); await s4a.waitForFunction(() => /Keine Verbindung/.test(S.toast), null, { timeout: 8000 });
+    const blockiert = await s4a.evaluate(() => ({ sent: !!S.sent, offen: S.sync.offen }));
+    const l4s = await http('/api/link/' + l4.code);
+    await s4a.unroute('**/api/link/' + l4.code + '/entwurf');
+    ok(!blockiert.sent && blockiert.offen && l4s.status !== 'eingegangen', 'Hochladen scheitert, Herunterladen geht: die App sendet nicht (der Server konnte nicht zusammenführen) und bittet, es gleich noch einmal zu versuchen');
+    s4a.probleme = s4a.probleme.filter((x) => !/503/.test(x));
     sauber(s4a, 'Funkloch beim Öffnen ohne Fehler'); sauber(s4b, 'Zweites Gerät beim Funkloch ohne Fehler');
     await c4a.close(); await c4b.close();
+    /* Uhr des Geräts geht drei Stunden nach: die App gleicht mit der Serverzeit ab */
+    const pr5 = await http('/api/konto/projekte', { kunde: 'Familie Uhr', plan: ['Fenster'], days: 14 }, T5), l5 = pr5.konto.acc.links.find((l) => l.id === pr5.id);
+    const c5 = await browser.newContext(telefon); await c5.addInitScript(() => { const echt = Date.now.bind(Date); Date.now = () => echt() - 3 * 3600 * 1000; });
+    const s5 = await neueSeite(c5, B5);
+    await s5.goto(B5 + '/app/#k-' + l5.code + '-Fensterbau_Weitermachen.' + b64u('Fensterbau Weitermachen') + '.' + b64u('Familie Uhr'), { waitUntil: 'networkidle' }); await s5.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 });
+    await fensterAnlegen(s5, [['Gaube', 900, 1100]]); await s5.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    const d5 = await http('/api/link/' + l5.code + '/entwurf'), w5 = (d5.entwurf && d5.entwurf.windows[0]) || {};
+    ok(Math.abs((w5.ts || 0) - Date.now()) < 60000 && Math.abs((w5.t0 || 0) - Date.now()) < 60000, 'Uhr des Geräts geht drei Stunden nach: die App gleicht mit der Serverzeit ab, Zeitpunkte der Fenster stimmen');
+    sauber(s5, 'Gerät mit falscher Uhr ohne Fehler'); await c5.close();
     /* Betrieb deaktiviert den Link: zu, mit Hinweis */
     await http('/api/konto/projekte/' + lk.id, { deaktivieren: true }, T5, 'PATCH');
     await s2.goto(url.replace('#', '?x=1#'), { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.linkZu === 'deaktiviert', null, { timeout: 8000 }); await s2.waitForTimeout(200);

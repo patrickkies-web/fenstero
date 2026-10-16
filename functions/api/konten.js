@@ -236,7 +236,7 @@ export const KONTO = {
     const l = (row.daten.links || []).find((x) => x.code === code), a = row.daten;
     /* zu: abgelaufen (auch wenn die Zeit noch nicht angewendet wurde), deaktiviert oder schon eingegangen */
     const zu = X().linkZu(l), status = zu === 'abgelaufen' ? 'abgelaufen' : l.status;
-    return { ok: true, betrieb: row.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, row.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: !!l.du, expires: l.expires || '', ap: a.ap || '', grenzen: GRENZEN };
+    return { ok: true, betrieb: row.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, row.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now(), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: !!l.du, expires: l.expires || '', ap: a.ap || '', grenzen: GRENZEN };
   },
   /* Geöffnet: der Betrieb bekommt einen Hinweis; beim ersten Öffnen beginnen die 60 Tage, die der Kunde Zeit hat */
   'POST /api/link/:code/fortschritt': async (ctx) => {
@@ -262,10 +262,19 @@ export const KONTO = {
        Server die Grenze gegen den Zwischenstand und hält ihn auf dem gesendeten Stand (für eine spätere Nachbesserung auf einem
        anderen Gerät) */
     const jetzt = Date.now(), wm = Array.isArray(o.wm) && o.wm.length === o.w.length ? o.wm.map((x) => ({ wid: kennung(x), t0: Number(x && x.t0) || 0, aend: Number(x && x.aend) || 0, ts: zeitKappen(x && x.ts, jetzt) })) : null, standB = zeitKappen(o.stand, jetzt);
-    delete o.wm; delete o.stand;
+    const projTsB = zeitKappen(o.projTs, jetzt);
+    delete o.wm; delete o.stand; delete o.projTs;
     const zw = zu !== 'eingegangen' && langerCode(code) && ctx.sp.entwurfHolen ? await ctx.sp.entwurfHolen(code).catch(() => undefined) : undefined; // schon eingegangen: das sagt gleich importCode (409)
     if (zw && Object.keys((zw.meta || {}).fenster || {}).length && (!wm || wm.some((x) => !x.wid))) throw new ApiFehler('Bitte die Seite neu laden und noch einmal senden.', 400); // ohne Kennungen ließe sich die Grenze umgehen
     if (zw && wm) { const ids = new Set(Object.keys((zw.meta || {}).fenster || {})); wm.forEach((x) => { if (x.wid) ids.add(x.wid); }); if (Math.max(ids.size, Number((zw.meta || {}).angelegt) || 0) > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster, gelöschte zählen mit.', 400); }
+    /* Hat ein anderes Gerät inzwischen etwas gespeichert, das dieses Gerät nicht hat (ein Fenster fehlt hier oder ist dort neuer, die
+       Angaben zum Haus sind dort neuer), erst abgleichen; sonst bekäme der Betrieb einen alten Stand. Bei einer Teil-Nachbesserung (m)
+       hat das Gerät absichtlich nur einen Teil */
+    if (zw && wm && !o.m) {
+      const d = zw.daten || {}, hier = new Map(wm.map((x) => [x.wid, x]));
+      const veraltet = (d.windows || []).some((w) => { const x = hier.get(kennung(w)); return !x || (Number(w.ts) || 0) > x.ts; }) || (Number(d.projTs) || 0) > projTsB;
+      if (veraltet) throw new ApiFehler('Ein anderes Gerät hat inzwischen etwas geändert. Bitte kurz prüfen und noch einmal senden.', 409, { abgleichen: true });
+    }
     o.v = 1; o.b = code;
     const r = await ctx.sp.betriebAendern(row.id, (a) => { const t = X().tickKonto(a); t.notifs.forEach((n) => melden(a, n)); const res = X().importCode(a, o, undefined, 'App'); if (res.notif) melden(a, res.notif); return res; });
     if (!r.ok) throw new ApiFehler(r.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : r.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400, r.art === 'schon' && r.l && X().linkZu(r.l) === 'eingegangen' ? { zu: 'eingegangen', runde: r.l.runde || 1, seit: r.l.eingegangenAt || 0 } : undefined); // schon da: die App zeigt „schon erledigt“
@@ -278,7 +287,7 @@ export const KONTO = {
       if (wm && !o.m) {
         /* Inhalt nur ersetzen, wenn der Zwischenstand älter ist als der gesendete (die App gleicht vorher ab; neuer ist er nur, wenn ein
            anderes Gerät danach weitergemacht hat) */
-        if ((Number(e.stand) || 0) < standB || !((e.daten || {}).windows || []).length) { e.daten = { windows: o.w.map((w, i) => Object.assign(ohneBild(w), wm[i])), proj: o.p || {} }; e.stand = Math.max(Number(e.stand) || 0, standB); }
+        if ((Number(e.stand) || 0) < standB || !((e.daten || {}).windows || []).length) { e.daten = { windows: o.w.map((w, i) => Object.assign(ohneBild(w), wm[i])), proj: o.p || {}, projTs: projTsB }; e.stand = Math.max(Number(e.stand) || 0, standB); }
         e.meta = metaMischen(e.meta || {}, wm, 0, jetzt);
       }
       e.meta = Object.assign({}, e.meta || {}, { gesendet: r.l ? r.l.runde || 1 : 1, gesendetAm: new Date().toISOString() });
