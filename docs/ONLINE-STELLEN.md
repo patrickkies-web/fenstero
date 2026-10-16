@@ -119,7 +119,7 @@ In der Pilotphase ist die Website für Google, Bing, ChatGPT, Claude und Perplex
 
 1. Schritt 4 erledigt? Ohne vollständiges Impressum keine Freigabe.
 2. Cloudflare: **Workers & Pages → fenstero → Einstellungen → Variablen und Geheimnisse → Hinzufügen**: Typ **Text**, Name `INDEXIERUNG`, Wert `1`, **Bereitstellen**. Hängen außer `eeziframes.com` und `www.` weitere Domains am Worker, zusätzlich `KANONISCH` = `https://eeziframes.com`.
-3. Prüfen: `https://eeziframes.com/robots.txt` zeigt `Allow: /` und eine Zeile `Sitemap:`, `https://eeziframes.com/sitemap.xml` listet 9 Seiten, `https://eeziframes.com/llms.txt` die Kurzfassung für KI-Assistenten.
+3. Prüfen: `https://eeziframes.com/robots.txt` zeigt `Allow: /` und eine Zeile `Sitemap:`, `https://eeziframes.com/sitemap.xml` listet 14 Seiten, `https://eeziframes.com/llms.txt` die Kurzfassung für KI-Assistenten.
 4. [Google Search Console](https://search.google.com/search-console) und [Bing Webmaster Tools](https://www.bing.com/webmasters): Domain bestätigen (DNS-Eintrag bei Cloudflare), Sitemap einreichen.
 
 Was danach hilft (Erwähnungen, Bewertungen, Aktualität) und warum: [docs/SEO.md](SEO.md). Zurück in die Pilotphase: Variable `INDEXIERUNG` löschen.
