@@ -566,14 +566,26 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 .tbm > span:not(.tbm-pfeil) { display: flex; flex-direction: column; gap: 2px }
 .tbm small { font-size: 13px; font-weight: 700; color: var(--muted) } .tbm b { font-size: 22px; font-weight: 900; letter-spacing: -.02em; font-variant-numeric: tabular-nums }
 .tbm-pfeil { font-size: 22px; color: var(--muted) }
-.tour-pdfkarte { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: center }
-.tpk-papier { aspect-ratio: 1 / 1.414; border-radius: 4px; background: #fff; box-shadow: var(--lift); overflow: hidden; display: flex; flex-direction: column }
-.tpk-band { display: flex; align-items: center; gap: 6px; padding: 7px 8px; color: #fff; font-size: 13px; font-weight: 800; line-height: 1.1 }
-.tpk-band span { width: 18px; height: 18px; border-radius: 50%; background: #fff; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; flex: 0 0 auto }
-.tpk-in { padding: 8px; display: flex; flex-direction: column; gap: 5px; color: #1d1d1f }
-.tpk-in small { font-size: 13px; font-weight: 700; color: #5f5f64 } .tpk-in b { font-size: 13px; font-weight: 900 }
-.tpk-in i { display: block; height: 5px; border-radius: 3px; background: #e6e6ea } .tpk-in i.s { width: 60% }
-.tpk-tx { display: flex; flex-direction: column; gap: 8px; align-items: flex-start }
+/* Kundenschutz (Startseite der Betriebe, „So funktioniert es“): Zusage aus den Nutzungsbedingungen § 11 */
+.schutz { gap: 18px; padding: 24px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring) }
+.schutz-kopf { display: flex; gap: 16px; align-items: flex-start }
+.schutz-kopf h2 { margin: 2px 0 6px; font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15 }
+.schutz-kopf p:not(.eyebrow) { margin: 0; font-size: 17px; color: var(--ink2); line-height: 1.5; max-width: 62ch }
+.schutz-kopf .eyebrow { color: var(--ok) }
+.schutz-ic { width: 52px; height: 52px; border-radius: 16px; background: var(--ok-soft); color: var(--ok); display: flex; align-items: center; justify-content: center; flex: 0 0 auto }
+.schutz-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px }
+.schutz-liste li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--ink2); line-height: 1.5 }
+.schutz-liste li b { display: block; font-size: 17px; color: var(--ink); margin-bottom: 2px }
+.schutz-haken { width: 24px; height: 24px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; margin-top: 1px }
+.schutz-fuss { align-self: flex-start }
+.pv-schutz { display: flex; gap: 8px; align-items: flex-start; color: var(--ink2) } .pv-schutz svg { flex: 0 0 auto; color: var(--ok); margin-top: 1px }
+.tour-pdfkarte { display: flex; flex-direction: column; padding: 0; overflow: hidden }
+/* Echter Ausschnitt des Aufmaßblatts (scripts/tour-bild.mjs): ein Blatt auf einem zweiten, unten ausgeblendet */
+.tpk-blatt { position: relative; margin: 0; padding: 18px 18px 0; background: var(--surface2); isolation: isolate }
+.tpk-blatt::before { content: ''; position: absolute; z-index: 0; top: 10px; left: 30px; right: 9px; bottom: 0; border-radius: 6px 6px 0 0; background: #fff; box-shadow: var(--lift); opacity: .7 }
+.tpk-blatt img { position: relative; z-index: 1; display: block; width: 100%; height: auto; border-radius: 6px 6px 0 0; background: #fff; box-shadow: var(--lift) }
+.tpk-blatt::after { content: ''; position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; height: 19%; background: linear-gradient(to bottom, transparent, var(--surface2) 96%); pointer-events: none }
+.tpk-tx { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding: 16px 20px 20px; border-top: 1px solid var(--line) }
 .tpk-tx b { font-size: 17px }
 .tour-nb, .tour-code { display: flex; flex-direction: column; gap: 12px; align-items: flex-start }
 .tour-nb .tf-feld, .tour-code .tf-feld { align-self: stretch }
@@ -600,7 +612,8 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .tour-schritte { margin: 0 -16px; padding: 0 16px 2px }
   .tour-nav { margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) } .tour-nav .btn { flex: 1 1 0; min-width: 0 }
   .tour-buehne { padding: 18px 12px; border-radius: var(--r3) }
-  .tour-pdfkarte { grid-template-columns: 88px minmax(0, 1fr); gap: 12px }
+  .schutz { padding: 18px } .schutz-kopf { flex-direction: column; gap: 12px } .schutz-kopf h2 { font-size: 26px } .schutz-liste { grid-template-columns: minmax(0, 1fr) }
+  .tpk-blatt { padding: 12px 12px 0 } .tpk-blatt::before { top: 6px; left: 20px; right: 6px } .tpk-tx { padding: 14px 16px 16px }
   .tpr { grid-template-columns: minmax(0, 1fr) auto; } .tpr span { grid-column: 1 / -1 }
   .tbi li { grid-template-columns: 84px minmax(0, 1fr) }
   .tbm { flex-direction: column; align-items: flex-start; gap: 2px } .tbm-pfeil { transform: rotate(90deg); line-height: 1 }

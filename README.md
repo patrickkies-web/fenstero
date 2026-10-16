@@ -21,7 +21,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `web/zentrale/` | Zentrale des Inhabers: Betriebe mit Kennzahlen, Sperren, Löschen, Export, Käufe, eigene Statistik, Protokoll ([docs/ZENTRALE.md](docs/ZENTRALE.md)); nur mit `ZENTRALE_PASSWORT`, nie in Suchmaschinen |
 | `web/_headers` | Sicherheits-Kopfzeilen, in der Pilotphase `noindex` |
 | `functions/seo.js` | Auffindbarkeit: `robots.txt` (mit Content-Signal), `sitemap.xml` (Stand je Seite), `llms.txt`, IndexNow nach Veröffentlichungen und die Kopfzeilen der Seiten (Canonical, Sicherheit, `noindex` nur in der Pilotphase); Freigabe über die Variable `INDEXIERUNG` |
-| `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weißes Fenster auf schwarzer Kachel, der Flügel kippt kurz |
+| `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: Licht fällt durch ein Fenster in einen dunklen Raum; eine Quelle für alle Stellen (`scripts/logo-setzen.py`), Bilder daraus mit `scripts/marke-bilder.mjs` |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT), qrcode-generator (MIT) und lottie-web light (MIT), lokal statt von fremden Servern |
 | `web/assets/lottie/`, `scripts/lottie-erzeugen.py` | fünf gezeichnete Bewegtbilder, aus Code erzeugt (`python3 scripts/lottie-erzeugen.py web/assets/lottie`) |
 | `functions/api/` | der Server: `router.js` (Verteiler), `ki.js` (KI-Auswertung der Einbausituation), `zahlung.js` (Kauf des Aufmaßblatts, Nachweis, Webhook), `konten.js` (Betriebe, Projekte, Eingang, Tarif, Sammelrechnung), `stripe.js`, `auth.js` (Anmeldung per E-Mail mit Link oder Code über Supabase Auth), `speicher.js` (Supabase oder Attrappe), `umgebung.js` (alle Variablen), `zentrale.js` (Zentrale des Inhabers), `statistik.js` (eigene Statistik ohne Cookies, nur Tagessummen), `entwurf.js` (Zwischenstand eines Kundenlinks: jederzeit über den Link weitermachen, Zähler gegen Mehrfachnutzung), `eigene.js` (Konto für Hauseigentümer ohne Link: Aufmaß sichern mit E-Mail und Code, auf jedem Gerät, Kauf nur mit Konto), `post.js` (E-Mails über Resend, ohne Öffnungs- und Klickmessung), `bestaetigung.js` (Vertragsbestätigung nach dem Kauf mit Zustimmung im Wortlaut und AGB samt Widerrufsbelehrung; der tägliche Lauf holt nicht zugestellte nach), `widerruf.js` (Widerrufsfunktion mit Eingangsbestätigung, auch ohne JavaScript; nachgeholt bei Störung des Mailversands), `recht.js` (Stand von AGB und Nutzungsbedingungen, Wortlaut der Zustimmung an der Kasse, was vor dem Verkauf mit echtem Geld fehlt), `anbieter.js` (Name, Anschrift, Telefon für E-Mails) |
@@ -54,6 +54,16 @@ python3 scripts/marke-umbenennen.py NeuerName
 ```
 
 Das Skript tauscht den Namen in derselben Schreibweise aus. Von Hand bleiben: die Wortmarke (`Marke.wort()` in `web/assets/gemeinsam.js`, `wortmarke()` in `web/assets/blatt.js`), Wortspiele und Versalzeilen (siehe Abschnitt Marke in [docs/GESTALTUNG.md](docs/GESTALTUNG.md)) und die Domain.
+
+## Zeichen und Bilder neu erzeugen
+
+```bash
+python3 scripts/logo-setzen.py                         # das Zeichen aus einer Quelle in alle Seiten, Favicon, Zentrale, Logo.svg
+PW_PFAD=/opt/node-tools node scripts/marke-bilder.mjs  # Apple-Icon, Vorschaubild (og.png), Bild für die E-Mails (functions/api/marke.js)
+PW_PFAD=/opt/node-tools node scripts/tour-bild.mjs     # Ausschnitt des echten Aufmaßblatts für die Tour (web/bilder/tour-aufmassblatt-*.webp)
+```
+
+Die Prüfsuite meldet, wenn der Ausschnitt in der Tour nicht mehr zum Aufmaßblatt passt (blatt.js, Schrift, jsPDF, modell.js oder die Daten der Tour geändert); dann das dritte Skript laufen lassen. Für die Punkte des Zeichens im PDF siehe `marke()` in `web/assets/blatt.js`.
 
 ## Lizenzen
 

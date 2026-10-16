@@ -1,7 +1,7 @@
 /* eeziframes · gemeinsame Bausteine für App und Portal
    - KI-Auswertung der Fotos über /api/ki (Cloudflare Function), erst nach Einwilligung: die Einbausituation, eine Anfrage je Foto
    - Pilot-Hinweis im Portal
-   - Logo (weißes Fenster auf Schwarz, der Flügel kippt kurz)
+   - Logo (Licht fällt durch ein Fenster in einen dunklen Raum; beim Laden geht das Licht an)
    - Rückmeldungen (Markieren, Einrasten, Haken, Maßlinien, Puls), Scroll-Reveal und Scroll-Bindung
    - Lottie-Zeichen in Tokenfarben, Haptik
    Hier stehen keine geheimen Schlüssel. */
@@ -111,18 +111,19 @@
     widerrufen: function () { try { window.localStorage.removeItem(KEY); } catch (e) { /* ohne Speicher */ } delete mem[KEY]; sitzung = null; }
   };
 
-  /* ---------- Logo: ein Fenster, dessen Flügel kurz kippt ----------
-     Logo.svg(px) liefert das Zeichen. Beim Laden kippt der rechte untere Flügel einmal auf und wieder zu,
-     danach bei Berührung oder Mauszeiger erneut. Wer weniger Bewegung eingestellt hat, sieht es ruhig. */
-  var LOGO_INNEN = '<rect class="fi-kachel" width="64" height="64" rx="16" fill="#000"/><rect x="13" y="8" width="38" height="46" rx="3" fill="#fff"/><rect x="17.5" y="12.5" width="13" height="16" rx="1.2" fill="#000"/><rect x="33.5" y="12.5" width="13" height="16" rx="1.2" fill="#000"/><rect x="17.5" y="32" width="13" height="17.5" rx="1.2" fill="#000"/><rect x="33.5" y="32" width="13" height="17.5" rx="1.2" fill="#000"/><g class="fi-fluegel"><rect x="34.5" y="33" width="11" height="15.5" rx="1" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M36 35.5v3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></g><rect x="9" y="55" width="46" height="3.5" rx="1.75" fill="#fff"/><rect x=".75" y=".75" width="62.5" height="62.5" rx="15.4" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.5"/>';
+  /* ---------- Logo: Licht fällt durch ein Fenster in einen dunklen Raum ----------
+     Logo.svg(px) liefert das Zeichen (eine Quelle für alle Stellen: scripts/logo-setzen.py). Beim Laden geht das Licht einmal an:
+     Fenster und Decke werden hell, dann läuft der Lichtstreifen über den Boden; danach bei Berührung oder Mauszeiger erneut.
+     Wer weniger Bewegung eingestellt hat, sieht es ruhig. */
+  var LOGO_INNEN = '<rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/>';
   window.Logo = {
     svg: function (px) { var s = String(px || 32); return '<svg class="fi-logo" viewBox="0 0 64 64" width="' + s + '" height="' + s + '" aria-hidden="true" focusable="false">' + LOGO_INNEN + '</svg>'; },
     bewegen: function (ziel) {
       var liste = ziel && ziel.classList && ziel.classList.contains('fi-logo') ? [ziel] : (ziel || document).querySelectorAll('.fi-logo');
       Array.prototype.forEach.call(liste, function (l) {
-        if (l.classList.contains('kippt')) return;
-        l.classList.add('kippt');
-        setTimeout(function () { l.classList.remove('kippt'); }, 1900);
+        if (l.classList.contains('leuchtet')) return;
+        l.classList.add('leuchtet');
+        setTimeout(function () { l.classList.remove('leuchtet'); }, 1700);
       });
     }
   };

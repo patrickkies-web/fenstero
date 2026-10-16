@@ -141,15 +141,18 @@ a.link { text-decoration: underline }
 .fx-ja { background: var(--primary); color: var(--on-primary) }
 .fx-nein { background: var(--surface2); color: var(--ink) }
 
-/* ---------- Logo: ein Fenster; der rechte untere Flügel kippt kurz auf und schließt wieder ---------- */
+/* ---------- Logo: Licht fällt durch ein Fenster in einen dunklen Raum (scripts/logo-setzen.py) ----------
+   Beim Laden und bei Berührung geht das Licht an: Fenster und Decke werden hell, dann läuft der Lichtstreifen über den Boden.
+   Der Haarstrich (fi-rand) zeigt die Kachel dort, wo der Lichtstreifen sie verlässt; im dunklen Modus wird er hell. */
 .fi-logo { display: block; flex: 0 0 auto; overflow: visible }
 .lm, .logo .lm { width: auto; height: auto; border-radius: 0; background: none; box-shadow: none }
-.fi-logo .fi-fluegel { transform-box: fill-box; transform-origin: 50% 100%; opacity: 0 }
-.fi-logo .fi-kachel { transform-box: fill-box; transform-origin: 50% 50% }
-.fi-logo.kippt .fi-fluegel { animation: fi-kipp 1.8s cubic-bezier(.4, 0, .2, 1) both }
-.fi-logo.kippt .fi-kachel { animation: fi-kachel 1.8s linear both }
-@keyframes fi-kipp { 0% { transform: none; opacity: 0 } 10% { opacity: 1 } 28% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) } 60% { transform: translateY(1.2px) scaleY(.68) skewX(-10deg) } 85% { transform: none; opacity: 1 } 100% { transform: none; opacity: 0 } }
-@keyframes fi-kachel { 0%, 82% { transform: none } 86% { transform: translate(.6px, -.4px) } 90% { transform: translate(-.4px, .3px) } 94%, 100% { transform: none } }
+.fi-logo .fi-strahl { transform-box: view-box; transform-origin: 50px 42px }
+.fi-logo.leuchtet .fi-strahl { animation: fi-strahl 1.6s var(--e-out) both }
+.fi-logo.leuchtet .fi-fenster, .fi-logo.leuchtet .fi-decke { animation: fi-schein 1.6s ease-out both }
+@keyframes fi-strahl { 0% { transform: scale(.08); opacity: 0 } 18% { opacity: 1 } 70%, 100% { transform: none; opacity: 1 } }
+@keyframes fi-schein { 0% { opacity: .25 } 22%, 100% { opacity: 1 } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fi-rand { stroke: #fff; stroke-opacity: .2 } }
+:root[data-theme="dark"] .fi-rand { stroke: #fff; stroke-opacity: .2 }
 
 /* ---------- Bewegungskatalog ----------
    1 Erscheinen (.rev/.rv): 8 px aufwärts, 320 ms, gestaffelt nur beim Aufbau
@@ -187,7 +190,7 @@ a.link { text-decoration: underline }
 
 @media (prefers-reduced-motion: reduce) {
   .rev, .rv { opacity: 1; transform: none; transition: none }
-  .fx-mark, .fx-puls::after, .okmark.fx-puls > circle:first-child, .fx-einrasten, .shake, .fx-dialog, .fx-bg, .fi-logo .fi-fluegel, .fi-logo .fi-kachel { animation: none !important }
+  .fx-mark, .fx-puls::after, .okmark.fx-puls > circle:first-child, .fx-einrasten, .shake, .fx-dialog, .fx-bg, .fi-logo .fi-licht path { animation: none !important }
   .fx-haken path, .okmark .tick { animation: none; stroke-dashoffset: 0 }
   .btn, .chip, .seg > button, .switch, .switch > span { transition: none }
 }

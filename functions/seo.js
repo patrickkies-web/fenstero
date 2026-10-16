@@ -147,7 +147,7 @@ export function llms(origin, env) {
     '## Seiten',
     '',
     '- [App: Fenster ausmessen](' + u('/app/') + '): kostenlose Aufmaß-App im Browser, mit Führung zum Ausprobieren',
-    '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): Erstaufmaß ohne Anfahrt, Ablauf, Inhalt des Aufmaßes, Preise',
+    '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): Erstaufmaß ohne Anfahrt, Ablauf, Kundenschutz (der Kunde sieht im Link nur den eigenen Betrieb), Inhalt des Aufmaßes, Preise',
     '- [Fenster ausmessen](' + u('/ratgeber/fenster-ausmessen/') + '): Anleitung mit Messpunkten, Altbau, Rollladenkasten und typischen Fehlern',
     '- [Aufmaßblatt für Fenster](' + u('/ratgeber/aufmassblatt-fenster/') + '): was ein Aufmaß je Fenster umfasst, Punkt für Punkt; das Aufmaßblatt selbst entsteht als PDF in der App (keine Vorlage zum Ausdrucken)',
     '- [Fenster austauschen](' + u('/ratgeber/fenster-austauschen/') + '): Ablauf, Kosten pro Fenster, Förderung 2026, Checkliste fürs Angebot',

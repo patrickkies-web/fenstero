@@ -99,7 +99,7 @@ if (teil(1)) {
     const ohneWorker = pfad === '/zentrale/' ? text.replace(/\bfenstero\b/g, '') : text; // die Zentrale nennt dem Inhaber den internen Worker-Namen bei Cloudflare
     ok(!/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(ohneWorker) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
     ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
-    if (pfad !== '/gibtsnicht') ok(await page.locator('svg .fi-fluegel').count() > 0 && await page.locator('svg .fi-kachel').count() > 0, pfad + ': Logo (Fenster auf der Kachel) da');
+    ok(await page.locator('svg .fi-kachel').count() > 0 && await page.locator('svg .fi-strahl').count() > 0 && await page.locator('svg .fi-fluegel').count() === 0, pfad + ': Logo (Licht fällt durch ein Fenster) da, auch auf der Fehlerseite');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
   }
@@ -231,8 +231,17 @@ if (teil(3)) {
   const erg = await page.evaluate(() => { const d = derive(S.win); return [d.moW, d.moH, d.elW, d.elH].join('×'); });
   ok(erg === '1370×1480×1230×1410', 'Ergebnis stimmt: ' + erg);
   await foto(page, 'app-ergebnis');
+  // Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern; nach dem Tippen geht „Weiter“ gleich beim ersten Antippen
+  await page.evaluate(() => { S.win.name = ''; S.q = 'lage'; S.screen = 'frage'; render(true); }); await page.waitForTimeout(300);
+  await page.click('[data-act="qnext"]'); await page.waitForTimeout(300);
+  const n1 = await page.evaluate(() => ({ q: S.q, inv: document.getElementById('t-name').getAttribute('aria-invalid'), fokus: document.activeElement && document.activeElement.id, satz: (document.getElementById('t-name-f') || {}).textContent || '', pflicht: /Name des Fensters\s*Pflichtfeld/.test((document.querySelector('label[for="t-name"]') || {}).textContent || '') }));
+  await page.evaluate(() => saveWin()); await page.waitForTimeout(200);
+  const n2 = await page.evaluate(() => ({ q: S.q, screen: S.screen, n: S.windows.length }));
+  await page.fill('#t-name', 'Wohnzimmer'); await page.click('[data-act="qnext"]'); await page.waitForTimeout(300);
+  const n3 = await page.evaluate(() => ({ q: S.q, name: S.win.name }));
+  ok(n1.q === 'lage' && n1.inv === 'true' && n1.fokus === 't-name' && /Bitte gib dem Fenster einen Namen/.test(n1.satz) && n1.pflicht && n2.q === 'lage' && n2.screen === 'frage' && n2.n === 0 && n3.q !== 'lage' && n3.name === 'Wohnzimmer', 'Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern, Hinweis am Feld mit Fokus; nach dem Tippen geht „Weiter“ beim ersten Antippen');
   // Eigenes Aufmaß: speichern, dann die Paywall: Vorschau mit Preis, kein Code und keine Datei vor der Zahlung
-  await page.evaluate(() => { saveWin(); S.screen = 'teilen'; render(true); }); await page.waitForTimeout(400);
+  await page.evaluate(() => { S.win.name = 'Wohnzimmer'; saveWin(); S.screen = 'teilen'; render(true); }); await page.waitForTimeout(400); // der Name ist Pflicht (Frage „Wo ist das Fenster?“)
   let t3 = await page.evaluate(() => document.body.textContent);
   ok(/Dein Aufmaßblatt ist fertig/.test(t3) && /Freischalten · 7,99 €/.test(t3) && /inkl\. MwSt\./.test(t3) && /Messen, Fotos und 3-D-Modell bleiben kostenlos/.test(t3), 'Paywall: Aufmaßblatt für 7,99 € inkl. MwSt., Messen bleibt kostenlos');
   ok(!/AM1\./.test(t3) && !/Code kopieren/.test(t3) && await page.locator('[data-act="k-dl"], [data-act="teil-pdf"]').count() === 0 && await page.locator('.dv-blur').count() === 1 && await page.locator('.dv-tab tr').count() === 2, 'Vor der Zahlung: Vorschau mit Übersicht, Positionen verschwommen, kein Code, keine Datei');
@@ -284,7 +293,9 @@ if (teil(3)) {
   const seite3 = (() => { try { return cp.execFileSync('pdftotext', ['-f', '3', '-l', '3', dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })();
   ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /eeziframes/.test(seite3) && !/EEZI/.test(txt3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite; Marke im PDF überall klein');
   ok(/IHRES KUNDEN/.test(txt3) && /FÜR SIE ALS FENSTERBAUER/.test(txt3) && /Maueröffnung/.test(txt3) && !/Übersicht/.test(txt3), 'Ausgabe für den Fensterbauer: Sie-Ansprache, Position mit Maßen; bei einer Position keine doppelte Übersicht');
-  const m3 = /AM1\.[A-Za-z0-9_\-\s]+/.exec(txt3), code3 = m3 ? m3[0].replace(/\s+/g, '') : '';
+  /* Der Code steht in Zeilen direkt untereinander; danach kommt nach Leerzeilen der Seitenfuß (nicht mitnehmen). Mit der KI-Auswertung im
+     Fenster wird er lang (mehrere Zeilen). */
+  const m3 = /AM1\.[A-Za-z0-9_-]+(?:\n[ \t]*[A-Za-z0-9_-]+)*/.exec(txt3), code3 = m3 ? m3[0].replace(/\s+/g, '') : '';
   const dekod3 = await page.evaluate((c) => { const o = unpackProject(c); return o ? o.w.length : 0; }, code3);
   ok(dekod3 === 1, 'Aufmaß-Code aus dem PDF-Text ist wieder lesbar (' + code3.length + ' Zeichen)');
   const [dl4] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
@@ -340,6 +351,14 @@ if (teil(4)) {
   await page.waitForSelector('[data-screen="blatt"]');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('mit allen Maßen und Wünschen') && !text.includes('Fotos und Wünschen'), 'Prüfen-Seite verspricht keine Fotos');
+  /* Kundenschutz (Nutzungsbedingungen § 11): Im Link gibt es weder Aufmaßblatt noch Code, keine Kasse und kein Konto; das Aufmaß geht nur an den Betrieb */
+  const ks4 = await page.evaluate(async () => {
+    const wege = ['teilen', 'datei', 'kasse', 'konto', 'sichern', 'meinkonto'].map((s) => { go(s); return S.screen; });
+    const sichtbar = document.body.textContent; go('blatt');
+    await saveDatei(); const t1 = S.toast || ''; await pdfTeilen(); const t2 = S.toast || '';
+    return { wege: wege.join(','), code: /AM1\./.test(sichtbar), t1: t1, t2: t2, nurAn: /gehen nur an /.test(document.body.textContent) };
+  });
+  ok(ks4.wege === 'blatt,blatt,blatt,blatt,blatt,blatt' && !ks4.code && /bekommst du von/.test(ks4.t1) && /bekommst du von/.test(ks4.t2) && ks4.nurAn, 'Kundenschutz im Link: kein Weg zu Aufmaßblatt, Code, Kasse oder Konto, die PDF gibt es nur vom Betrieb; Prüfen-Seite: geht nur an den Betrieb (' + ks4.wege + ')');
   await page.click('.bb .btn.primary'); // An … senden
   await page.waitForSelector('[data-screen="gesendet"]');
   text = await page.evaluate(() => document.body.innerText);
@@ -478,6 +497,7 @@ if (teil(6)) {
   const startB = await page.evaluate(() => document.body.textContent);
   ok(/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c').count() === 0, 'Startseite, Ansicht Fensterbauer: Aufmaß ohne Anfahrt, nichts für Hauseigentümer');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start + startB), 'Kein Marktplatz mehr auf der Startseite');
+  ok(await page.locator('#kundenschutz').count() === 1 && await page.locator('#kundenschutz a[href="/nutzungsbedingungen/#kundenschutz"]').count() === 1 && /Ihr Kunde bleibt Ihr Kunde\./.test(startB) && (startB.match(/Nur Ihr Betrieb|Nur in Ihr Konto|Keine Kopie von uns|Kein Weiterverkauf/g) || []).length === 4, 'Startseite für Betriebe: Abschnitt Kundenschutz mit vier Zusagen und Verweis auf § 11 der Nutzungsbedingungen');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
   await ctx.close();
@@ -1058,6 +1078,15 @@ if (teil(9)) {
   await page.click('.tour-schritte [data-v="4"]'); await page.waitForTimeout(250);
   await page.click('[data-act="tour-abzug"][data-v="20"]'); await page.waitForTimeout(200);
   ok(/1\.219 × 1\.419 mm/.test(await page.evaluate(() => document.querySelector('.tbm').textContent)), 'Abzug 20 mm rechnet das Bestellmaß neu');
+  /* Echter Ausschnitt des Aufmaßblatts statt einer Skizze: Bild zum gewählten Abzug, aus demselben Code und denselben Daten erzeugt
+     (scripts/tour-bild.mjs); der Fingerabdruck verrät, wenn blatt.js, Schrift, jsPDF, modell.js oder die Daten der Tour sich geändert haben */
+  await page.waitForFunction(() => { const i = document.querySelector('.tpk-blatt img'); return !!(i && i.complete && i.naturalWidth > 0); }, null, { timeout: 8000 }).catch(() => {});
+  const tb9 = await page.evaluate(() => { const i = document.querySelector('.tpk-blatt img'); return i ? { src: i.getAttribute('src'), alt: i.alt, w: i.naturalWidth, h: i.naturalHeight, skizze: !!document.querySelector('.tpk-papier') } : null; });
+  const fs9b = await import('node:fs'), url9b = await import('node:url'), tourBild = await import('./tour-bild.mjs');
+  const tourInfo = JSON.parse(fs9b.readFileSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt.json', import.meta.url)), 'utf8'));
+  const tourDaten = await page.evaluate(tourBild.DATEN_AUS_SEITE);
+  ok(!!tb9 && tb9.src === '/bilder/tour-aufmassblatt-20.webp' && /Bestellmaß-Vorschlag 1\.749 × 1\.389 mm/.test(tb9.alt) && tb9.w === tourInfo.breite && tb9.h === tourInfo.hoehe && !tb9.skizze && tourInfo.abzuege.every((a) => fs9b.existsSync(url9b.fileURLToPath(new URL('../web/bilder/tour-aufmassblatt-' + a + '.webp', import.meta.url)))), 'Tour, Bestellmaß und PDF: echter Ausschnitt von Seite 1 des Aufmaßblatts zum gewählten Abzug (' + (tb9 ? tb9.src + ', ' + tb9.w + ' × ' + tb9.h : 'kein Bild') + '), keine Skizze mehr');
+  ok(tourBild.fingerabdruck(tourDaten) === tourInfo.stand, 'Tour-Ausschnitt passt zum aktuellen Aufmaßblatt (sonst neu erzeugen: PW_PFAD=/opt/node-tools node scripts/tour-bild.mjs)');
   const [dlB] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="tour-pdf"]')]);
   let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlB.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
   ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Bestellmaß, gekennzeichnet als Beispiel');
@@ -1247,10 +1276,21 @@ if (teil(10)) {
   ok(seo.SEITEN.every((s) => seo.istSeite(s.pfad) && routen.some((r) => passt(r, s.pfad))) && ['/robots.txt', '/sitemap.xml', '/llms.txt'].every((p) => routen.includes(p)), 'Worker übernimmt alle Seiten, robots.txt, sitemap.xml und llms.txt (run_worker_first in wrangler.jsonc)');
   const og = fs10.readFileSync(path10.join(WURZEL, 'web/og.png'));
   ok(og.readUInt32BE(16) === 1200 && og.readUInt32BE(20) === 630 && og.length < 200000, 'Vorschaubild zum Teilen: 1200 × 630, ' + Math.round(og.length / 1024) + ' KB');
+  /* Das Zeichen überall gleich (eine Quelle: scripts/logo-setzen.py): alle Seitenköpfe (die Zentrale zeichnet es per Skript), Favicon,
+     Zentrale, Logo.svg in App und Betriebsbereich; das PDF mit denselben Punkten; das Bild für die E-Mails (scripts/marke-bilder.mjs) */
+  const gem10 = fs10.readFileSync(path10.join(WURZEL, 'web/assets/gemeinsam.js'), 'utf8'), innen10 = (gem10.match(/var LOGO_INNEN = '([^']*)';/) || [])[1] || '';
+  const statisch10 = '<svg viewBox="0 0 64 64" aria-hidden="true">' + innen10 + '</svg>', seiten10 = [];
+  (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep)) seiten10.push(f); } })(path10.join(WURZEL, 'web'));
+  const ohneZeichen10 = seiten10.filter((f) => !fs10.readFileSync(f, 'utf8').includes(statisch10)).map((f) => path10.relative(WURZEL, f));
+  const lies10 = (f) => fs10.readFileSync(path10.join(WURZEL, f), 'utf8'), bl10 = lies10('web/assets/blatt.js');
+  ok(/fi-strahl/.test(innen10) && seiten10.length >= 19 && !ohneZeichen10.length && lies10('web/favicon.svg').includes(innen10) && lies10('web/assets/zentrale.js').includes(innen10) && ['[26.4, 12.2]', '[57, 17.6]', '[44.2, 41]', '[11.7, 64]'].every((s) => bl10.includes(s)) && !/fi-fluegel|rx="16" fill="#000"/.test(seiten10.map((f) => fs10.readFileSync(f, 'utf8')).join('') + gem10) && /ZEICHEN_PNG = 'iVBOR/.test(lies10('functions/api/marke.js')), 'Das neue Zeichen steht überall gleich: ' + seiten10.length + ' Seiten, Favicon, Zentrale, App und Betriebsbereich, im PDF mit denselben Punkten, als Bild für die E-Mails' + (ohneZeichen10.length ? '; fehlt in ' + ohneZeichen10.join(', ') : ''));
+  const apple10 = fs10.readFileSync(path10.join(WURZEL, 'web/apple-touch-icon.png'));
+  ok(apple10.readUInt32BE(16) === 180 && apple10.readUInt32BE(20) === 180, 'Apple-Icon 180 × 180 mit dem neuen Zeichen (scripts/marke-bilder.mjs)');
   const konf = {}; new Function('window', fs10.readFileSync(path10.join(WURZEL, 'web/config.js'), 'utf8'))(konf);
   const pr = konf.KONFIG.preise, fb = (await roh('/fuer-fensterbauer/')).text, ab = (await roh('/ratgeber/aufmassblatt-fenster/')).text, fa = (await roh('/ratgeber/fenster-ausmessen/')).text;
   const neuPreis = await Promise.all(['balkontuer-ausmessen', 'fenster-mit-rollladen-ausmessen', 'din-links-rechts', 'bruestungshoehe-fenster'].map(async (n) => (await roh('/ratgeber/' + n + '/')).text));
   ok([eur(pr.projekt) + ' netto', eur(pr.abo.grund) + ' im Monat', 'jedes weitere ' + eur(pr.abo.extra), eur(pr.plus) + ' im Monat', 'ersten ' + pr.frei + ' Projekte'].every((t) => fb.includes(t)) && [start.text, app.text, ab, fb, fa, ...neuPreis].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten wie in config.js, auch in den neuen Ratgebern (' + [pr.aufmass, pr.projekt, pr.abo.grund, pr.plus].map(eur).join(', ') + ')');
+  ok(/<h2 id="kundenschutz">Kundenschutz: Ihr Kunde bleibt Ihr Kunde<\/h2>/.test(fb) && ['Nur Ihr Betrieb:', 'Nur in Ihr Konto:', 'Keine Kopie von uns:', 'Kein Weiterverkauf:'].every((s) => fb.includes(s)) && fb.includes('href="/nutzungsbedingungen/#kundenschutz"') && fb.includes('Kann mir ein anderer Betrieb über eeziframes den Kunden abwerben?'), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen, Verweis auf § 11 der Nutzungsbedingungen und die Frage zum Abwerben');
   /* g) Domains: www zählt als Hauptdomain, die Cloudflare-Testadresse bleibt gesperrt (functions/seo.js direkt geprüft) */
   const probe = async (adresse, env) => { const r = await seo.behandeln(new Request(adresse), env, async () => new Response('<!doctype html><title>x</title><meta property="og:image" content="/og.png">', { headers: { 'content-type': 'text/html; charset=utf-8' } })); return { robots: r.headers.get('x-robots-tag'), link: r.headers.get('link'), text: await r.text() }; };
   const www = await probe('https://www.eeziframes.com/ratgeber/', { INDEXIERUNG: '1' }), wdev = await probe('https://fenstero.beispiel.workers.dev/ratgeber/', { INDEXIERUNG: '1' });
@@ -2941,6 +2981,7 @@ if (teil(17)) {
   const anKunde17 = post17.find((m) => m.an === mail17), anUns17 = post17.find((m) => /^Widerruf eingegangen: Erika Muster/.test(m.betreff));
   ok(fehler17 && ok17.form && /Ihr Widerruf ist eingegangen/.test(ok17.text) && /Eingang: \d{1,2}\. \S+ 20\d\d, \d\d:\d\d:\d\d Uhr/.test(ok17.text) && /Kauf des Aufmaßblatts am 16\.10\.2026/.test(ok17.text) && ok17.text.includes('haben wir an ' + mail17), 'Vertrag widerrufen im Browser: erst Hinweise je Feld, dann „Widerruf bestätigen“: Bestätigung mit Datum, Uhrzeit und Inhalt auf der Seite');
   ok(!!anKunde17 && anKunde17.betreff === 'Eingangsbestätigung Ihres Widerrufs' && /Hiermit widerrufe ich den folgenden Vertrag: Kauf des Aufmaßblatts am 16\.10\.2026/.test(anKunde17.html) && / Uhr</.test(anKunde17.html) && /nur den Eingang/.test(anKunde17.html) && !!anUns17 && anUns17.antwortAn === mail17, 'Eingangsbestätigung sofort per E-Mail an den Kunden (Inhalt, Datum, Uhrzeit, ohne Zusage zur Wirksamkeit), Kopie an den Betreiber mit Antwort an den Kunden');
+  ok(!!anKunde17 && /<img src="cid:eeziframes-zeichen"/.test(anKunde17.html) && (anKunde17.bilder || []).includes('eeziframes-zeichen') && /<b style="font-weight:900">eezi<\/b>frames/.test(anKunde17.html), 'E-Mails tragen oben das Zeichen mit Wortmarke, als eingebettetes Bild (cid), nichts wird nachgeladen');
   sauber(s17, 'Widerrufsfunktion ohne Fehler'); await c17.close();
 
   /* e) Rechtstexte nach der unabhängigen Prüfung */
@@ -2949,6 +2990,7 @@ if (teil(17)) {
   ok(/frühestens drei Jahre nach dem Kauf/.test(agb17) && /Mit dem Kauf des Aufmaßblatts endet die Zeit für freies Ändern/.test(agb17) && /Auf der Kassenseite der App/.test(agb17) && /Eingabefehler berichtigen Sie/.test(agb17) && /Online abrufen können Sie den Vertragstext nach dem Kauf nicht/.test(agb17) && /Absatz 1 bleibt unberührt/.test(agb17) && /Für die kostenlosen Funktionen bemühen wir uns/.test(agb17), 'AGB: Kündigung eines Kontos mit Kauf erst nach drei Jahren, der Kauf beendet die freie Woche, Bestellschritte mit der Kassenseite, Eingabefehler, Vertragstext, Haftung, Mängelrechte bei Störungen');
   const avv17 = nb17.slice(nb17.indexOf('id="avv"'));
   ok(!/Gerichtsstand/.test(nb17) && /Abrechnungsmonat/.test(nb17) && /bis zu zwei Kalendertage vor dem Einzug/.test(nb17) && /Preiserhöhungen und Änderungen der Hauptleistungen gelten nur mit Ihrer Zustimmung/.test(nb17) && /10\. Verantwortung des Betriebs/.test(avv17) && /Inspektionen/.test(avv17) && /als eigener Verantwortlicher|selbst verantworten/.test(avv17) && !/Anthropic/.test(avv17) && /sieben Tagen/.test(avv17), 'Nutzungsbedingungen: kein Gerichtsstand, Abo je Abrechnungsmonat, SEPA-Ankündigung wie bei Stripe, Zustimmung durch Schweigen nur für Nebensachen; AVV mit Rollen, Sicherung, Kontrollen und Pflichten des Betriebs, ohne die KI-Auswertung');
+  ok(/<h2 id="kundenschutz">§ 11 Kundenschutz<\/h2>/.test(nb17) && /Ihr Kunde sieht beim Messen nur Ihren Betrieb/.test(nb17) && /Kein anderer Betrieb kann es über eeziframes öffnen oder in sein Konto übernehmen/.test(nb17) && /weder das Aufmaßblatt noch einen Code, mit dem ein anderer Betrieb das Aufmaß übernehmen könnte/.test(nb17) && /verkaufen keine Anfragen oder Kontaktdaten/.test(nb17) && /ohne Einhaltung einer Frist kündigen/.test(nb17) && /<h2>§ 13 Haftung<\/h2>/.test(nb17) && /<h2>§ 15 Schlussbestimmungen<\/h2>/.test(nb17) && !/Kundenschutz-?Garantie/.test(nb17), 'Nutzungsbedingungen § 11 Kundenschutz: nur der eigene Betrieb im Link, kein Zugriff anderer Betriebe, kein Blatt und kein Code vom Anbieter, keine Ansprache und kein Verkauf, fristlose Kündigung bei Verstoß; folgende Paragrafen neu nummeriert');
   ok(/__cf_bm/.test(t17['/cookies/']) && /cf_clearance/.test(t17['/cookies/']) && /method="post" action="\/api\/widerruf"/.test(t17['/widerruf/']) && /Anthropic Ireland, Limited/.test(t17['/datenschutz/']) && /KI-Einwilligung widerrufen/.test(t17['/datenschutz/']) && !/sobald eeziframes mit Datenbank und Zahlungsdienst läuft/.test(t17['/datenschutz/']) && /Anmeldeprotokolle/.test(t17['/datenschutz/']), 'Cookies mit den Sicherheits-Cookies von Cloudflare; Widerrufsformular auch ohne JavaScript; Datenschutz mit Anthropic Ireland, Widerruf der KI-Einwilligung, Anmeldeprotokollen, ohne Vorbehalt zur Pilotphase');
   const gem17 = fs17.readFileSync(path17.join(W17, 'web/assets/gemeinsam.js'), 'utf8'), portalQ17 = fs17.readFileSync(path17.join(W17, 'web/assets/portal.js'), 'utf8');
   ok(/Anthropic Ireland, Ltd\./.test(gem17) && /spätestens nach 30 Tagen/.test(gem17) && /jederzeit widerrufen/.test(gem17) && /Ich registriere mich als Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Nur für Unternehmer \(§ 14 BGB\)/.test(portalQ17) && /Angebot nur für Unternehmer im Sinne von § 14 BGB/.test((await holen17(BASE, '/fuer-fensterbauer/')).text), 'KI-Dialog nennt Anthropic Ireland, die Löschung nach 30 Tagen und den Widerruf; Betriebe registrieren sich als Unternehmer, Preise für Betriebe mit Hinweis „nur für Unternehmer“');
