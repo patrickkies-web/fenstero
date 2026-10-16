@@ -1051,8 +1051,8 @@ if (teil(9)) {
   await ap.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await ap.evaluate(() => { S.windows = demoProject().slice(0, 1); persist(); render(true); });
   const vorher = await ap.evaluate(() => localStorage.getItem('aufmass.v1'));
-  ok(await ap.locator('.hero [data-act="tour-start"]').count() === 1, 'App-Startseite: „Führung starten“ neben „Fenster ausmessen“');
-  await ap.click('.hero [data-act="tour-start"]'); await ap.waitForSelector('.scr[data-screen="tour"]');
+  ok(await ap.locator('[data-act="tour-start"]').count() === 1, 'App-Startseite mit angefangenem Aufmaß: „Führung starten“ bleibt erreichbar (unter der Liste)');
+  await ap.click('[data-act="tour-start"]'); await ap.waitForSelector('.scr[data-screen="tour"]');
   const schritte = [];
   for (let i = 0; i < 9; i++) {
     const st = await ap.evaluate(() => ({ id: TOUR[S.tour.i], fakt: !!document.querySelector('.tour-fakt .tf-q'), gesperrt: document.querySelectorAll('.gesperrt[aria-disabled="true"], .farbfeld.gesperrt').length }));
@@ -1786,6 +1786,427 @@ if (teil(13)) {
   } catch (e) {
     ok(false, 'Zentrale im Browser ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
   } finally { aus4(); }
+}
+
+/* ---------- 14. Fortsetzen, keine Gesamtansicht vor dem Freischalten, Grenzen gegen Mehrfachnutzung, Zwischenstand beim Kundenlink ---------- */
+if (teil(14)) {
+  console.log('14. Fortsetzen, Paywall, Grenzen, Zwischenstand beim Kundenlink');
+  const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js'), ze = await import('../functions/api/zentrale.js');
+  const X = globalThis.Abrechnung, B = 'https://eeziframes.com', PW = 'pruef-passwort-zentrale-14', TAG = 864e5, stempel = Date.now().toString(36);
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW, FREISCHALT_GEHEIMNIS: 'pruef14' };
+  const sp = spM.speicher(umg.konfig(env));
+  let ipNr = 1; const neueIp = () => '198.51.100.' + (60 + (ipNr++ % 150));
+  const rufe = async (pfad, o) => {
+    o = o || {}; const h = Object.assign({ accept: 'application/json', origin: B, 'cf-connecting-ip': o.ip || neueIp() }, o.kopf || {});
+    if (o.body) h['content-type'] = 'application/json';
+    if (o.cookie) { h.cookie = o.cookie; h['x-zentrale'] = '1'; }
+    const r = await api(new Request(B + pfad, { method: o.method || (o.body ? 'POST' : 'GET'), headers: h, body: o.body ? JSON.stringify(o.body) : undefined }), o.env || env, { waitUntil() {} });
+    const text = await r.text(); let j = null; try { j = JSON.parse(text); } catch (e) { j = null; }
+    return Object.assign({ _status: r.status, _kopf: r.headers }, j || {});
+  };
+  try {
+    // a) Modell: lange Link-Codes, 60 Tage ab dem ersten Öffnen, abgelaufen erkennen, verlängern
+    const jetzt = Date.now(), a0 = { konto: 'service', links: [], book: [], notif: [] }, l0 = X.neuesProjekt(a0, { kunde: 'Familie Modell', days: 7 }, jetzt).l;
+    ok(/^[a-z0-9]{10}$/.test(l0.code) && new Set(Array.from({ length: 200 }, () => X.newCode())).size === 200, 'Neue Link-Codes: 10 Zeichen aus a–z und 0–9 (rund 3,6 Billiarden Möglichkeiten), ältere mit 5 Zeichen gelten weiter');
+    const f1 = X.fortschritt(l0, 'geoeffnet', 0, jetzt), f2 = X.fortschritt(l0, 'geoeffnet', 0, jetzt + 1000);
+    ok(f1 === 'geoeffnet' && !!l0.offenAm && l0.expires === X.dateIn(60, jetzt) && f2 === false, 'Erstes Öffnen: ab dann 60 Tage Zeit, auch wenn der Betrieb 7 Tage gewählt hat; das zweite Öffnen ändert nichts');
+    const alt = { status: 'arbeit', expires: X.dateIn(3, jetzt), log: { geoeffnet: 'x', arbeit: 'y' } };
+    ok(X.fortschritt(alt, 'geoeffnet', 0, jetzt) === 'frist' && alt.expires === X.dateIn(60, jetzt), 'Schon geöffnete Links von vorher bekommen die 60 Tage beim nächsten Öffnen, ohne erneute Meldung an den Betrieb');
+    l0.expires = X.dateIn(-1, jetzt);
+    const zuVorher = X.linkZu(l0, jetzt); X.tickKonto(a0, jetzt); const v0 = X.projektAendern(l0, { verlaengern: true }, jetzt);
+    ok(zuVorher === 'abgelaufen' && v0.ok && l0.status === 'geoeffnet' && l0.expires === X.dateIn(30, jetzt) && X.linkZu(l0, jetzt) === '' && /gilt jetzt bis/.test(v0.msg), 'Abgelaufen wird erkannt, auch bevor die Zeit angewendet ist; Verlängern öffnet den Link für 30 Tage mit dem Stand von vorher');
+    const lx = { status: 'gesendet', expires: X.dateIn(-2, jetzt), log: {} };
+    ok(X.fortschritt(lx, 'geoeffnet', 0, jetzt) === false && !lx.offenAm && lx.status === 'gesendet' && lx.expires === X.dateIn(-2, jetzt), 'Abgelaufener Link: Öffnen bringt keine neuen 60 Tage, auch bevor die Zeit angewendet ist');
+    const ly = X.neuesProjekt(a0, { kunde: 'Familie Frist', days: 14 }, jetzt).l; X.fortschritt(ly, 'geoeffnet', 0, jetzt); const bisY = ly.expires; X.projektAendern(ly, { days: 7 }, jetzt + 1000);
+    const lz = X.neuesProjekt(a0, { kunde: 'Familie Kurz', days: 30 }, jetzt).l; X.projektAendern(lz, { days: 7 }, jetzt);
+    ok(ly.expires === bisY && bisY === X.dateIn(60, jetzt) && lz.expires === X.dateIn(7, jetzt), 'Laufzeit ändern: verkürzt die 60 Tage eines geöffneten Links nicht, vor dem Öffnen gilt die neue Laufzeit');
+    const kx = 'pruef-bremse-' + stempel; for (let i = 0; i < 3; i++) umg.erlaubt(kx, 3, 60000);
+    for (let i = 0; i < 4500; i++) umg.erlaubt('fuell-' + stempel + '-' + i, 5, 1);
+    await new Promise((r) => setTimeout(r, 5));
+    for (let i = 0; i < 1000; i++) umg.erlaubt('fuell2-' + stempel + '-' + i, 5, 60000);
+    ok(umg.erlaubt(kx, 3, 60000) === false && umg.anschluss('2001:db8:1:2:aaaa::1') === umg.anschluss('2001:db8:1:2:bbbb:cccc:dddd:2'), 'Bremsen: viele andere Schlüssel setzen eine volle Bremse nicht zurück (erst Abgelaufenes weg, nie alles); gezählt je Anschluss, zwei Adressen aus einem IPv6-/64 teilen sich eine Bremse');
+
+    // b) Zwischenstand auf dem Server (im Prozess)
+    const aB = { konto: 'service', links: [], book: [], notif: [] }, lB = X.neuesProjekt(aB, { kunde: 'Familie Zwischen', days: 14 }).l;
+    const rowB = await sp.betriebAnlegen({ auth_user: 'u-zw-' + stempel, mail: 'zw' + stempel + '@beispiel.de', name: 'Fensterbau Zwischen', plz: '50667', tel_norm: '', name_norm: 'zw' + stempel, daten: aB });
+    const code = lB.code, t = Date.now(), pfadE = '/api/link/' + code + '/entwurf';
+    const fw = (i, extra) => Object.assign({ wid: 'w' + i, t0: t, aend: 0, name: 'Fenster ' + i, art: 'fenster', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, plan: { bild: 'data:image/jpeg;base64,AAAA', ecken: [[0.1, 0.1], [0.9, 0.1], [0.9, 0.9], [0.1, 0.9]] } }, extra || {});
+    const g0 = await rufe(pfadE);
+    const p1 = await rufe(pfadE, { body: { windows: [fw(1), fw(2)], proj: { notiz: 'Rollladen klemmt' }, stand: t, angelegt: 2 } });
+    const g1 = await rufe(pfadE);
+    ok(g0._status === 200 && g0.entwurf === null && p1.ok && g1.entwurf.windows.length === 2 && g1.entwurf.windows.every((w) => w.plan.bild === '') && g1.entwurf.proj.notiz === 'Rollladen klemmt' && g1.meta.angelegt === 2 && g1.meta.fenster.w1.t0 === t, 'Zwischenstand: gespeichert und wieder gelesen, ohne das Bild der Lage; Zähler je Fenster vom Server');
+    const p2 = await rufe(pfadE, { body: { windows: [fw(1), fw(3)], proj: {}, stand: t + 1, angelegt: 0, bekannt: ['w1', 'w2', 'w3'] } });
+    const p3 = await rufe(pfadE, { body: { windows: [fw(1)], proj: {}, stand: t - 10, angelegt: 0 } });
+    ok(p2.meta.angelegt === 3 && !p2.entwurf && p3.entwurf && p3.entwurf.windows.length === 2 && p3.meta.angelegt === 3, 'Gelöschte Fenster zählen weiter (3 angelegt, 2 da); ein älterer Stand überschreibt nichts, der Browser bekommt den neueren zurück');
+    const p4 = await rufe(pfadE, { body: { windows: Array.from({ length: 50 }, (_, i) => fw(100 + i)), proj: {}, stand: t + 2, angelegt: 0 } });
+    const p5 = await rufe(pfadE, { body: { windows: Array.from({ length: 51 }, (_, i) => fw(200 + i)), proj: {}, stand: t + 2 } });
+    ok(p4._status === 409 && p4.grenze && /höchstens 50 Fenster, gelöschte zählen mit/.test(p4.fehler) && p5._status === 409 && (await sp.entwurfHolen(code)).daten.windows.length === 2, 'Grenze: mehr als 50 angelegte Fenster (gelöschte mitgezählt) nimmt der Server nicht an, der Zwischenstand bleibt');
+    /* nach der ersten Woche: der Server zählt Änderungen selbst; nach vier ist das Fenster fest und behält seine Fassung */
+    await sp.entwurfAendern(code, rowB.id, (r) => { r.meta.fenster.w1.t0 = t - 8 * TAG; return true; });
+    const p6 = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Wohnzimmer neu', ts: t + 3 }), fw(3)], proj: {}, stand: t + 3, angelegt: 3, bekannt: ['w1', 'w2', 'w3'] } });
+    let p7 = null; for (let i = 0; i < 4; i++) p7 = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Versuch ' + i, ts: t + 4 + i }), fw(3)], proj: {}, stand: t + 4 + i, angelegt: 3, bekannt: ['w1', 'w2', 'w3'] } });
+    ok(p6.meta.fenster.w1.aend === 1 && p6.meta.fenster.w1.t0 === t - 8 * TAG && p7.meta.fenster.w1.aend === 4 && p7.zurueck.includes('w1') && p7.entwurf.windows.find((w) => w.wid === 'w1').name === 'Versuch 2', 'Nach der ersten Woche zählt der Server jede Änderung, auch wenn der Browser nicht mitzählt; nach vier bleibt die alte Fassung, das erste Speichern lässt sich nicht nach hinten schieben');
+    const pl = await rufe('/api/link/' + code), fo = await rufe('/api/link/' + code + '/fortschritt', { body: { stufe: 'geoeffnet' } });
+    ok(pl.ok && pl.zu === '' && pl.grenzen.fenster === 50 && fo.ok && fo.expires === X.dateIn(60), 'Link offen; beim ersten Öffnen kommt die neue Frist zurück (60 Tage)');
+    await sp.betriebAendern(rowB.id, (d) => { d.links[0].expires = '01.01.2020'; });
+    const z1 = await rufe('/api/link/' + code), z2 = await rufe(pfadE, { body: { windows: [fw(1)], proj: {}, stand: t + 99, angelegt: 3 } }), z3 = await rufe('/api/aufmass', { body: { b: code, w: [{ name: 'x' }], p: {} } }), z4 = await rufe(pfadE);
+    ok(z1.status === 'abgelaufen' && z1.zu === 'abgelaufen' && /verlängern/.test(z1.zuText) && z2._status === 410 && z2.zu === 'abgelaufen' && z3._status === 410 && z4.ok && z4.zu === 'abgelaufen' && z4.entwurf === null && z4.meta === null, 'Abgelaufener Link: kein Inhalt mehr für den, der den Link hat, weder Zwischenstand noch Aufmaß angenommen (410), mit Hinweis aufs Verlängern');
+    await sp.betriebAendern(rowB.id, (d) => { X.projektAendern(d.links[0], { verlaengern: true }); });
+    const z5 = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Versuch 2' }), fw(3)], proj: {}, stand: t + 100, angelegt: 3, bekannt: ['w1', 'w2', 'w3'] } });
+    /* Zwei Geräte: Gerät B legt w9 an; Gerät A (kennt w9 nicht, neuerer Stand) verliert w9 nicht; ein älteres Gerät C bringt sein neues w8 mit */
+    const zB = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Versuch 2' }), fw(3), fw(9)], proj: {}, stand: t + 110, angelegt: 4, bekannt: ['w1', 'w2', 'w3', 'w9'] } });
+    const zA = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Versuch 2' })], proj: {}, stand: t + 120, angelegt: 3, bekannt: ['w1', 'w2', 'w3'] } });
+    const zC = await rufe(pfadE, { body: { windows: [fw(1, { name: 'alt' }), fw(8)], proj: {}, stand: t + 5, angelegt: 3, bekannt: ['w1', 'w8'] } });
+    const idsA = (zA.entwurf ? zA.entwurf.windows : []).map((w) => w.wid).sort().join(','), idsC = (zC.entwurf ? zC.entwurf.windows : []).map((w) => w.wid).sort().join(',');
+    ok(zB.ok && idsA === 'w1,w9' && idsC === 'w1,w8,w9' && zC.entwurf.windows.find((w) => w.wid === 'w1').name === 'Versuch 2', 'Zwei Geräte: Gelöschtes (w3) bleibt gelöscht, anderswo Angelegtes (w9) bleibt erhalten; ein älterer Stand ändert nichts, bringt aber sein neues Fenster (w8) mit');
+    const z6 = await rufe('/api/aufmass', { body: { v: 1, b: code, w: Array.from({ length: 51 }, () => ({ name: 'x' })), p: {}, t: Date.now() } });
+    ok(z5.ok && z6._status === 400 && /höchstens 50/.test(z6.fehler), 'Nach dem Verlängern geht es weiter; ein Aufmaß mit mehr als 50 Fenstern lehnt der Server ab');
+    /* Gerät mit altem Stand: w9 nach der ersten Woche; ein Gerät speichert es später (ts), ein anderes mit älterer Fassung, aber neuerem
+       Zwischenstand schickt danach seine Liste */
+    await sp.entwurfAendern(code, rowB.id, (r) => { r.meta.fenster.w9.t0 = t - 8 * TAG; r.meta.fenster.w9.aend = 0; return true; });
+    const gNeu = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Versuch 2' }), fw(8), fw(9, { name: 'Neu', ts: t + 500 })], proj: {}, stand: t + 200, angelegt: 0, bekannt: ['w1', 'w8', 'w9'] } });
+    const gAlt = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Versuch 2' }), fw(8), fw(9, { name: 'Fenster 9', ts: t + 100 })], proj: {}, stand: t + 300, angelegt: 0, bekannt: ['w1', 'w8', 'w9'] } });
+    ok(gNeu.meta.fenster.w9.aend === 1 && gAlt.meta.fenster.w9.aend === 1 && gAlt.entwurf && gAlt.entwurf.windows.find((w) => w.wid === 'w9').name === 'Neu' && (await sp.entwurfHolen(code)).daten.windows.find((w) => w.wid === 'w9').name === 'Neu', 'Gerät mit altem Stand: dreht ein später gespeichertes Fenster nicht zurück und verbraucht keine Änderung (je Fenster gewinnt das zuletzt gespeicherte)');
+    /* Offene Nachbesserung: der Kunde ändert frei, auch ein festes Fenster; danach (eingegangen) kein Inhalt und keine Änderung mehr */
+    await sp.betriebAendern(rowB.id, (d) => { Object.assign(d.links[0], { status: 'eingegangen', eingegangenAt: Date.now(), runde: 2, nb: { offen: true, runde: 2 } }); });
+    const nbP = await rufe(pfadE, { body: { windows: [fw(1, { name: 'Korrigiert', ts: t + 900 }), fw(8), fw(9, { name: 'Neu', ts: t + 500 })], proj: {}, stand: t + 400, angelegt: 0, bekannt: ['w1', 'w8', 'w9'] } });
+    ok(nbP.ok && nbP.meta.fenster.w1.aend === 4 && !(nbP.zurueck || []).length && (await sp.entwurfHolen(code)).daten.windows.find((w) => w.wid === 'w1').name === 'Korrigiert', 'Offene Nachbesserung: Änderungen gehen durch, auch an einem festen Fenster, und zählen nicht (darum hat der Betrieb gebeten)');
+    await sp.betriebAendern(rowB.id, (d) => { d.links[0].nb.offen = false; });
+    const eg = await rufe(pfadE), ep = await rufe(pfadE, { body: { windows: [fw(1)], proj: {}, stand: t + 999 } });
+    ok(eg.ok && eg.zu === 'eingegangen' && eg.entwurf === null && eg.runde === 2 && ep._status === 410 && ep.zu === 'eingegangen' && ep.runde === 2 && ep.seit > 0, 'Eingegangen ohne offene Nachbesserung: kein Inhalt, keine Änderung (410 mit Grund, Runde und Eingang; die App zeigt dann „Schon erledigt.“ und erkennt eine spätere Nachbesserung)');
+    /* Ältere Links mit fünfstelligem Code: kein Zwischenstand */
+    const aK = { konto: 'service', links: [], book: [], notif: [] }, lK = X.neuesProjekt(aK, { kunde: 'Familie Kurzcode', days: 14 }).l; lK.code = 'k' + stempel.slice(-4);
+    await sp.betriebAnlegen({ auth_user: 'u-kurz-' + stempel, mail: 'kurz' + stempel + '@beispiel.de', name: 'Fensterbau Kurz', plz: '50667', tel_norm: '', name_norm: 'kurz' + stempel, daten: aK });
+    const gk = await rufe('/api/link/' + lK.code + '/entwurf'), pk = await rufe('/api/link/' + lK.code + '/entwurf', { body: { windows: [fw(1)], proj: {}, stand: t } });
+    ok(lK.code.length === 5 && gk.ok && gk.aus && pk.ok && pk.aus && !(await sp.entwurfHolen(lK.code)), 'Ältere Links mit fünfstelligem Code: kein Zwischenstand auf dem Server (zu leicht zu erraten), die App speichert dort nur im Browser');
+    /* Senden mit Kennungen der Fenster (wm): gezählt wird gegen den Zwischenstand; danach steht er auf dem gesendeten Stand */
+    const aW = { konto: 'service', links: [], book: [], notif: [] }, lW = X.neuesProjekt(aW, { kunde: 'Familie Senden', days: 14 }).l;
+    const rowW = await sp.betriebAnlegen({ auth_user: 'u-send-' + stempel, mail: 'send' + stempel + '@beispiel.de', name: 'Fensterbau Senden', plz: '50667', tel_norm: '', name_norm: 'send' + stempel, daten: aW });
+    await sp.entwurfAendern(lW.code, rowW.id, (r) => { r.meta = { angelegt: 48, fenster: Object.fromEntries(Array.from({ length: 48 }, (_, i) => ['x' + i, { t0: t, aend: 0 }])) }; r.daten = { windows: [], proj: {} }; return true; });
+    const fwSend = (n) => ({ name: n, art: 'fenster', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 } });
+    const sw = await rufe('/api/aufmass', { body: { v: 1, b: lW.code, w: [0, 1, 2].map((i) => fwSend('Neu ' + i)), p: {}, t: Date.now(), wm: [0, 1, 2].map((i) => ({ wid: 'neu' + i, t0: t, aend: 0, ts: t })), stand: t } });
+    const sw2 = await rufe('/api/aufmass', { body: { v: 1, b: lW.code, w: [fwSend('Bekannt')], p: {}, t: Date.now(), wm: [{ wid: 'x0', t0: t, aend: 0, ts: t }], stand: t } });
+    await new Promise((r) => setTimeout(r, 30));
+    const dW = await sp.entwurfHolen(lW.code);
+    ok(sw._status === 400 && /gelöschte zählen mit/.test(sw.fehler) && sw2.ok && dW.meta.gesendet === 1 && dW.daten.windows.length === 1 && dW.daten.windows[0].wid === 'x0' && dW.daten.windows[0].name === 'Bekannt', 'Senden: 48 angelegt plus 3 neue Fenster lehnt der Server ab; mit bekannten Fenstern geht es, der Zwischenstand steht danach auf dem gesendeten Stand');
+    const sw3 = await rufe('/api/aufmass', { body: { v: 1, b: lW.code, w: [fwSend('Bekannt')], p: {}, t: Date.now(), wm: [{ wid: 'x0', t0: t, aend: 0, ts: t }], stand: t } });
+    ok(sw3._status === 409 && sw3.zu === 'eingegangen' && sw3.runde === 1 && sw3.seit > 0, 'Noch einmal gesendet (anderes Gerät): 409 mit Grund, die App zeigt „Schon erledigt.“');
+    /* Löschen mit Zeitpunkt, Angaben zum Haus mit eigenem Zeitpunkt, Uhr des Geräts begrenzt, Fenster ohne Kennung, Senden ohne Kennungen */
+    const aT = { konto: 'service', links: [], book: [], notif: [] }, lT = X.neuesProjekt(aT, { kunde: 'Familie Zeitpunkt', days: 14 }).l;
+    const rowT = await sp.betriebAnlegen({ auth_user: 'u-zeit-' + stempel, mail: 'zeit' + stempel + '@beispiel.de', name: 'Fensterbau Zeitpunkt', plz: '50667', tel_norm: '', name_norm: 'zeit' + stempel, daten: aT });
+    const pT = '/api/link/' + lT.code + '/entwurf', projT = (tel) => ({ name: 'Familie Zeitpunkt', tel: tel });
+    const sendeT = (fenster, extra) => rufe(pT, { body: Object.assign({ windows: fenster, proj: projT('0171 1'), projTs: t + 10, angelegt: 0, bekannt: ['a1', 'a2'], geloescht: {} }, extra) });
+    await sendeT([fw(1, { wid: 'a1', ts: t + 10 }), fw(2, { wid: 'a2', ts: t + 10 })], { stand: t + 10 });
+    await sendeT([fw(1, { wid: 'a1', ts: t + 10 }), fw(2, { wid: 'a2', ts: t + 30, name: 'B geändert' })], { stand: t + 30 }); // Gerät B ändert a2
+    const delA = await sendeT([fw(1, { wid: 'a1', ts: t + 10 })], { stand: t + 40, geloescht: { a2: t + 20 } }); // Gerät A hatte a2 vorher gelöscht
+    ok(delA.entwurf && delA.entwurf.windows.some((w) => w.wid === 'a2' && w.name === 'B geändert') && (await sp.entwurfHolen(lT.code)).daten.windows.length === 2, 'Löschen mit Zeitpunkt: ein Fenster, das anderswo nach dem Löschen noch gespeichert wurde, bleibt und kommt aufs löschende Gerät zurück');
+    await sendeT([fw(2, { wid: 'a2', ts: t + 30, name: 'B geändert' })], { stand: t + 50, geloescht: { a1: t + 50 } }); // A löscht a1
+    const nachDel = await sp.entwurfHolen(lT.code);
+    const altC = await sendeT([fw(1, { wid: 'a1', ts: t + 10 }), fw(2, { wid: 'a2', ts: t + 30, name: 'B geändert' })], { stand: t + 55 }); // altes Gerät hat a1 noch
+    const nachB = await sendeT([fw(1, { wid: 'a1', ts: t + 60, name: 'B nach dem Löschen' }), fw(2, { wid: 'a2', ts: t + 30, name: 'B geändert' })], { stand: t + 60 }); // B hat a1 danach noch geändert
+    const dT = await sp.entwurfHolen(lT.code);
+    ok(nachDel.daten.windows.length === 1 && nachDel.meta.geloescht.a1 === t + 50 && altC.entwurf && !altC.entwurf.windows.some((w) => w.wid === 'a1') && nachB.ok && (dT.daten.windows.find((w) => w.wid === 'a1') || {}).name === 'B nach dem Löschen' && !dT.meta.geloescht.a1, 'Anderswo gelöscht: ein Gerät mit altem Stand bringt das Fenster nicht zurück, eines, das es nach dem Löschen noch geändert hat, schon');
+    await sendeT(dT.daten.windows, { stand: t + 80, proj: projT('0171 NEU'), projTs: t + 80 }); // B ändert die Telefonnummer
+    const projA = await sendeT(dT.daten.windows.map((w) => (w.wid === 'a2' ? Object.assign({}, w, { name: 'A ändert ein Fenster', ts: t + 90 }) : w)), { stand: t + 90 }); // A mit alten Angaben
+    const dP = await sp.entwurfHolen(lT.code);
+    ok(dP.daten.proj.tel === '0171 NEU' && dP.daten.windows.some((w) => w.name === 'A ändert ein Fenster') && projA.entwurf && projA.entwurf.proj.tel === '0171 NEU', 'Angaben zum Haus mit eigenem Zeitpunkt: ein Gerät, das nur ein Fenster ändert, setzt die neue Telefonnummer nicht zurück und bekommt sie');
+    const fern = await sendeT(dP.daten.windows.concat([fw(5, { wid: 'a5', ts: Date.now() + 30 * 365 * TAG })]), { stand: Date.now() + 1e12, bekannt: ['a1', 'a2', 'a5'] });
+    const dZ = await sp.entwurfHolen(lT.code), a5 = dZ.daten.windows.find((w) => w.wid === 'a5') || {};
+    const ohneId = await rufe(pT, { body: { windows: [{ name: 'ohne Kennung' }], proj: {}, stand: t } });
+    const ohneWm = await rufe('/api/aufmass', { body: { v: 1, b: lT.code, w: [fwSend('Ohne Kennung')], p: {}, t: Date.now() } });
+    ok(fern.ok && a5.ts > 0 && a5.ts <= Date.now() + 5 * 60000 && dZ.stand <= Date.now() + 5 * 60000 && ohneId._status === 400 && ohneWm._status === 400 && /neu laden/.test(ohneWm.fehler), 'Zeitpunkte von der Uhr des Geräts höchstens fünf Minuten nach der Serverzeit (eine vorgehende Uhr sperrt kein Fenster); Fenster ohne Kennung und Senden ohne Kennungen trotz Zwischenstand lehnt der Server ab');
+    /* Senden mit altem Stand, während ein anderes Gerät schon weiter ist: erst abgleichen (409) */
+    const gT = await rufe(pT), wmVon = (fenster) => fenster.map((w) => ({ wid: w.wid, t0: Number(w.t0) || t, aend: Number(w.aend) || 0, ts: Number(w.ts) || 0 }));
+    const sendeAm = (wm, projTs) => rufe('/api/aufmass', { body: { v: 1, b: lT.code, w: wm.map((x) => fwSend('Fenster ' + x.wid)), p: projT('0171 NEU'), t: Date.now(), wm: wm, stand: t + 99, projTs: projTs } });
+    const alleT = wmVon(dZ.daten.windows), ohneA5 = alleT.filter((x) => x.wid !== 'a5'), aelterA2 = alleT.map((x) => (x.wid === 'a2' ? Object.assign({}, x, { ts: x.ts - 1 }) : x));
+    const s1 = await sendeAm(ohneA5, t + 80), s2 = await sendeAm(aelterA2, t + 80), s3 = await sendeAm(alleT, t + 10), s4 = await sendeAm(alleT, t + 80);
+    ok(typeof gT.jetzt === 'number' && Math.abs(gT.jetzt - Date.now()) < 5000 && s1._status === 409 && s1.abgleichen && s2._status === 409 && s2.abgleichen && s3._status === 409 && s3.abgleichen && s4.ok, 'Senden mit altem Stand (ein Fenster fehlt, ist anderswo neuer, oder die Angaben zum Haus sind dort neuer): 409 „erst abgleichen“; auf dem neuesten Stand geht es durch; jede Antwort nennt die Serverzeit');
+    await sp.betriebLoeschen(rowT.id);
+    let gebremst = 0; for (let i = 0; i < 34; i++) { const r = await rufe('/api/link/qqqqqqqq' + String(i).padStart(2, '0'), { ip: '203.0.113.77' }); if (r._status === 429) gebremst++; }
+    const fremd = await rufe('/api/link/' + code, { ip: '203.0.113.77' });
+    ok(gebremst === 4 && fremd._status === 429, 'Unbekannte Link-Codes: nach 30 Fehlversuchen je Anschluss in 10 Minuten gebremst (429), damit niemand Codes durchprobiert');
+
+    // c) Zentrale: Hinweise auf Mehrfachnutzung, Kundenlinks in Arbeit; Aufräumen
+    const aC = { konto: 'service', links: [], book: [], notif: [] }, lC = X.neuesProjekt(aC, { kunde: 'Familie Viel', days: 14 }).l;
+    const rowC = await sp.betriebAnlegen({ auth_user: 'u-viel-' + stempel, mail: 'viel' + stempel + '@beispiel.de', name: 'Fensterbau Vielmesser ' + stempel, plz: '50667', tel_norm: '', name_norm: 'viel' + stempel, daten: aC });
+    await sp.entwurfAendern(lC.code, rowC.id, (r) => { r.meta = { angelegt: 42, aktuell: 3, fenster: { a: { t0: 1, aend: 4 } } }; r.daten = { windows: [], proj: {} }; return true; });
+    const kaeufer = 'mehrfach' + stempel + '@beispiel.de';
+    for (let i = 0; i < 3; i++) await sp.zahlungAnlegen({ stripe_session: 'cs_mehr_' + stempel + i, status: 'bezahlt', mail: i ? kaeufer : kaeufer.toUpperCase(), betrag_cent: 799, kennung: 'p' + i });
+    const anm = await rufe('/api/zentrale/anmelden', { body: { passwort: PW } }), keks = (anm._kopf.get('set-cookie') || '').split(';')[0];
+    const ue = await rufe('/api/zentrale/uebersicht', { cookie: keks }), hin = (ue.hinweise || []).map((h) => h.text + '|' + (h.ziel || ''));
+    const hl = hin.find((h) => h.includes('Fensterbau Vielmesser ' + stempel)) || '', hk = hin.find((h) => h.includes(kaeufer)) || '';
+    ok(/Mehrfachnutzung prüfen/.test(hl) && /42 Fenster angelegt/.test(hl) && /39 Fenster gelöscht/.test(hl) && /nach vier Änderungen fest/.test(hl) && hl.endsWith('|betrieb/' + rowC.id) && /3 Aufmaßblätter gekauft/.test(hk) && hk.endsWith('|kaeufe'), 'Zentrale: Hinweis auf einen auffälligen Kundenlink (viele angelegte und gelöschte Fenster, feste Fenster) und auf einen Käufer mit drei Aufmaßblättern');
+    const dt = await rufe('/api/zentrale/betriebe/' + rowC.id, { cookie: keks }), zs = ((dt.betrieb || {}).zwischenstaende || [])[0] || {};
+    ok(zs.nr === lC.nr && zs.angelegt === 42 && zs.geloescht === 39 && zs.fest === 1 && zs.kunde === '' && zs.gruende.length >= 3, 'Betrieb in der Zentrale: Kundenlinks in Arbeit mit Zählern, ohne Namen des Kunden (nur mit Einblick)');
+    /* Aufräumen: Zwischenstand ohne Link weg, eingegangen und Nachbesserung vorbei weg, laufender Link bleibt */
+    await sp.entwurfAendern('weg' + stempel, rowC.id, (r) => { r.meta = {}; r.daten = { windows: [] }; return true; });
+    const lD = X.neuesProjekt(aC, { kunde: 'Familie Fertig', days: 14 }).l; Object.assign(lD, { status: 'eingegangen', eingegangenAt: Date.now() - 31 * TAG, runde: 1 });
+    await sp.betriebAendern(rowC.id, (d) => { d.links.unshift(lD); });
+    await sp.entwurfAendern(lD.code, rowC.id, (r) => { r.meta = {}; r.daten = { windows: [] }; return true; });
+    const lE = X.neuesProjekt(aC, { kunde: 'Familie Abgelaufen', days: 14 }).l; Object.assign(lE, { status: 'abgelaufen', expires: X.dateIn(-40), offenAm: X.dateIn(-100), log: { geoeffnet: 'x' } });
+    const lF = X.neuesProjekt(aC, { kunde: 'Familie Kürzlich', days: 14 }).l; Object.assign(lF, { status: 'abgelaufen', expires: X.dateIn(-10) });
+    const lG = X.neuesProjekt(aC, { kunde: 'Familie Deaktiviert', days: 14 }).l; Object.assign(lG, { status: 'deaktiviert', deaktiviertAm: Date.now() - 31 * TAG });
+    await sp.betriebAendern(rowC.id, (d) => { d.links.unshift(lE, lF, lG); });
+    for (const l of [lE, lF, lG]) await sp.entwurfAendern(l.code, rowC.id, (r) => { r.meta = { angelegt: 5, aktuell: 2, fenster: { e1: { t0: 1, aend: 2 }, e2: { t0: 1, aend: 0 } } }; r.daten = { windows: [fw(1, { wid: 'e1' }), fw(2, { wid: 'e2' })], proj: { notiz: 'privat' } }; r.stand = t; return true; });
+    const auf = await ze.aufraeumen(umg.konfig(env), sp);
+    const dE = await sp.entwurfHolen(lE.code), dF = await sp.entwurfHolen(lF.code), dG = await sp.entwurfHolen(lG.code);
+    ok(dE && !dE.daten.windows.length && !Object.keys(dE.daten.proj).length && dE.meta.angelegt === 5 && dE.meta.fenster.e1.aend === 2 && dE.meta.geleertIds.join(',') === 'e1,e2' && dG && !dG.daten.windows.length && dF.daten.windows.length === 2 && auf.entwuerfeGeleert >= 2, 'Aufräumen: 30 Tage nach Ablauf oder Deaktivierung ist der Inhalt weg, die Zähler bleiben (Verlängern setzt keine Grenze zurück); kürzlich abgelaufen bleibt alles');
+    await sp.betriebAendern(rowC.id, (d) => { X.projektAendern(d.links.find((x) => x.code === lE.code), { verlaengern: true }); });
+    const gE = await rufe('/api/link/' + lE.code + '/entwurf');
+    const wE = await rufe('/api/link/' + lE.code + '/entwurf', { body: { windows: [fw(1, { wid: 'e1' }), fw(2, { wid: 'e2' })], proj: { notiz: 'privat' }, stand: t - 1000, angelegt: 5, bekannt: ['e1', 'e2'], geloescht: {} } });
+    const dE2 = await sp.entwurfHolen(lE.code);
+    ok(gE.entwurf && gE.entwurf.geleert && !gE.entwurf.windows.length && wE.ok && dE2.daten.windows.length === 2 && dE2.daten.proj.notiz === 'privat' && !(wE.entwurf && !Object.keys(wE.entwurf.proj || {}).length) && !dE2.meta.geleert && !dE2.meta.geleertIds && dE2.meta.fenster.e1.aend === 2, 'Nach dem Verlängern stellt das Gerät des Kunden seine Fenster und Angaben zum Haus wieder her, auch mit älterem Stand; die Zähler gelten weiter');
+    ok(auf.entwuerfe >= 2 && !(await sp.entwurfHolen('weg' + stempel)) && !(await sp.entwurfHolen(lD.code)) && !!(await sp.entwurfHolen(lC.code)) && !!(await sp.entwurfHolen(code)), 'Aufräumen: Zwischenstände ohne Link und nach dem Ende der Nachbesserungsfrist gelöscht, laufende bleiben');
+    await sp.betriebLoeschen(rowC.id);
+    ok(!(await sp.entwurfHolen(lC.code)), 'Konto gelöscht: seine Zwischenstände sind mit weg');
+  } catch (e) {
+    ok(false, 'Zwischenstand und Zentrale ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
+  }
+
+  // d) App, eigenes Aufmaß (Pilot): Liste oben, keine Gesamtansicht vor dem Freischalten, Grenzen
+  const messenApp = (seite) => seite.evaluate(() => {
+    const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
+    const groessen = new Set(), klein = [];
+    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    /* Textlinks im Fließtext (WCAG 2.5.8, Ausnahme „inline“) zählen nicht als Zielfläche */
+    document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.matches('.ulink') || el.closest('.sheet')) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
+    return { groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
+  });
+  const APP_GROESSEN = [13, 15, 17, 24, 32, 40];
+  const fensterAnlegen = (seite, liste) => seite.evaluate((liste) => {
+    liste.forEach((f) => { S.win = Object.assign(baseWin(), { name: f[0], mo: { hm: f[2] + 70, hl: f[2] + 70, hr: f[2] + 70, wm: f[1] + 140, wt: f[1] + 140, wb: f[1] + 140 }, el: { w: f[1], h: f[2] }, w: f[1], h: f[2], fotos: 2 }); S.editIdx = -1; saveWin(); });
+    go('home');
+  }, liste);
+  const ctx = await browser.newContext(telefon), page = await neueSeite(ctx);
+  try {
+    await page.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+    await fensterAnlegen(page, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210], ['Bad', 610, 810]]); await page.waitForTimeout(400);
+    const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0) }; });
+    ok(h1.h1 === 'Weiter, wo du warst.' && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Weiter, wo du warst.“, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
+    ok(/Maße vollständig/.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: „Maße vollständig“ statt Zahlen');
+    await foto(page, 'app-aufmass-fortsetzen');
+    await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]'); await page.waitForTimeout(200);
+    const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !!document.querySelector('.zu-karte [data-act="k-start"]'), fakten: document.querySelector('.center p:not(.eyebrow)').textContent, frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: document.querySelector('.hdr-btn[data-act="back"]').textContent, alle: !!document.querySelector('.pill.voll[data-v="home"]') }));
+    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Aufmaß' && f0.alle, 'Fenster gespeichert: keine Liste aller Angaben und keine Maße vor dem Freischalten, dafür „Freischalten“; Hinweis auf 7 Tage freies Ändern; zurück heißt „Aufmaß“, dazu „Alle Fenster ansehen“');
+    await foto(page, 'app-fenster-gesperrt');
+    const mFertig = await messenApp(page);
+    await page.evaluate(() => go('teilen')); await page.waitForTimeout(300);
+    const tab = await page.evaluate(() => Array.from(document.querySelectorAll('.dv-tab tr')).slice(1).map((tr) => Array.from(tr.children).slice(2).map((td) => td.textContent).join(' ')));
+    ok(tab.length === 3 && tab.every((z) => !/\d/.test(z) && /•/.test(z)), 'Vorschau des Blatts: Positionen und Räume, die Maße nur als Platzhalter');
+    await page.evaluate(() => { const k = kauf(); k.paid = true; k.test = true; persist(); go('home'); }); await page.waitForTimeout(250);
+    const nachKauf = await page.evaluate(() => document.querySelector('.liste-in').textContent);
+    await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]');
+    ok(/1\.230 × 1\.410 mm/.test(nachKauf) && await page.locator('details.fold .kv').count() === 1 && await page.locator('.zu-karte').count() === 0, 'Nach dem Freischalten: Maße in der Liste und alle Angaben');
+    // Portal: angefangenes Aufmaß → „Aufmaß fortsetzen“
+    await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+    const po = await page.evaluate(() => ({ top: (document.querySelector('.top a.btn.primary') || {}).textContent, hero: (document.querySelector('.hero.b2c a.btn.primary') || {}).textContent, hint: (document.querySelector('.hint.fortsetzen') || {}).textContent || '' }));
+    ok(po.top === 'Aufmaß fortsetzen' && po.hero === 'Aufmaß fortsetzen' && /3 Fenster erfasst/.test(po.hint), 'Startseite (Hauseigentümer) mit angefangenem Aufmaß: „Aufmaß fortsetzen“ statt „Jetzt ausmessen“');
+    await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+    // Grenze: 50 angelegte Fenster, Löschen gibt keinen Platz zurück
+    await page.evaluate(() => { S.angelegt = 49; persist(); render(); });
+    const vorGrenze = await page.evaluate(() => (document.querySelector('.sub.grenze') || {}).textContent || '');
+    await fensterAnlegen(page, [['Flur', 800, 1200]]);
+    await page.evaluate(() => { S.win = kopie(S.windows[3]); S.editIdx = 3; act('delwin', document.body); }); await page.waitForTimeout(250);
+    const anGrenze = await page.evaluate(() => ({ n: S.windows.length, a: angelegt(), note: (document.querySelector('.note.grenze') || {}).textContent || '', neu: !!document.querySelector('.liste-in [data-act="new"]') }));
+    await page.evaluate(() => act('new', document.body)); await page.waitForTimeout(150);
+    const blockiert = await page.evaluate(() => ({ screen: S.screen, toast: S.toast }));
+    ok(/Noch 1 neues Fenster möglich/.test(vorGrenze) && anGrenze.n === 3 && anGrenze.a === 50 && /höchstens 50 Fenster, gelöschte zählen mit/.test(anGrenze.note) && !anGrenze.neu && blockiert.screen === 'home' && /höchstens 50/.test(blockiert.toast), 'Grenze: kurz vorher ein Hinweis; nach 50 angelegten Fenstern kein neues mehr, auch nicht nach dem Löschen (3 da, 50 angelegt)');
+    await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(250);
+    const nachLaden = await page.evaluate(() => angelegt());
+    await page.evaluate(() => act('copywin', document.body)); await page.waitForTimeout(100);
+    ok(nachLaden === 50 && await page.evaluate(() => S.windows.length === 3 && /höchstens 50/.test(S.toast)), 'Der Zähler bleibt nach dem Neuladen; auch Kopieren legt kein Fenster mehr an');
+    await page.evaluate(() => { for (let k = 0; k < 3; k++) { S.win = kopie(S.windows[0]); S.editIdx = 0; act('delwin', document.body); } go('home'); }); await page.waitForTimeout(250);
+    const leerGrenze = await page.evaluate(() => ({ n: S.windows.length, a: angelegt(), h1: (document.querySelector('.hd h1') || {}).textContent || '', stand: (document.querySelector('.hd .sub, .hd p:not(.eyebrow)') || {}).textContent || '', neu: !!document.querySelector('.note.grenze [data-act="aufmass-neu"]'), bar: !!document.querySelector('.bb') }));
+    await page.evaluate(() => { S.editIdx = -1; go('fertig'); act('delwin', document.body); }); await page.waitForTimeout(100);
+    ok(leerGrenze.n === 0 && leerGrenze.a === 50 && leerGrenze.h1 === 'Weiter, wo du warst.' && /kein Fenster erfasst/.test(leerGrenze.stand) && leerGrenze.neu && !leerGrenze.bar && await page.evaluate(() => /gibt es nicht mehr/.test(S.toast) && S.screen === 'home'), 'An der Grenze und alles gelöscht: kein Startbild mit totem Knopf, sondern die Erklärung mit „Neues Aufmaß beginnen“; Löschen eines verschwundenen Fensters meldet sich ehrlich');
+    await page.click('.note.grenze [data-act="aufmass-neu"]'); await page.waitForSelector('.neu-frage');
+    await page.click('[data-act="aufmass-neu-ja"]'); await page.waitForTimeout(250);
+    ok(await page.evaluate(() => S.windows.length === 0 && angelegt() === 0 && !FREI() && /Erstes Fenster ausmessen/.test(document.body.textContent)), 'Für ein weiteres Haus: neues Aufmaß nach Rückfrage, die Freischaltung gilt nur für das alte');
+    // 7 Tage frei, danach vier gespeicherte Änderungen, dann fest
+    await fensterAnlegen(page, [['Gaube', 900, 1100]]);
+    await page.evaluate(() => { S.windows[0].t0 = Date.now() - 8 * 864e5; persist(); });
+    const aendern = (name) => page.evaluate((name) => { S.win = altAngleichen(Object.assign(baseWin(), kopie(S.windows[0]))); S.editIdx = 0; S.win.name = name; saveWin(); return { aend: S.windows[0].aend, toast: S.toast, name: S.windows[0].name }; }, name);
+    await page.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; go('fertig'); }); await page.waitForTimeout(150);
+    const hinweis0 = await page.evaluate(() => (document.querySelector('.note.warn') || {}).textContent || '');
+    const c1 = await aendern('Gaube links'), c0 = await page.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; saveWin(); return S.windows[0].aend; });
+    const c2 = await aendern('Gaube 2'), c3 = await aendern('Gaube 3'), c4 = await aendern('Gaube 4');
+    ok(/noch viermal ändern/.test(hinweis0) && c1.aend === 1 && /noch dreimal/.test(c1.toast) && c0 === 1 && c2.aend === 2 && c3.aend === 3 && c4.aend === 4 && /letzte Änderung/.test(c4.toast), 'Nach der ersten Woche: Hinweis „noch viermal“, jedes Speichern mit Änderung zählt (Speichern ohne Änderung nicht), die vierte ist die letzte');
+    await page.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; go('fertig'); }); await page.waitForTimeout(150);
+    const fest = await page.evaluate(() => ({ zu: document.querySelectorAll('.pill[aria-disabled="true"]').length, note: (document.querySelector('.note.warn') || {}).textContent || '' }));
+    await page.locator('.pill[data-act="wuensche"]').dispatchEvent('click'); await page.waitForTimeout(100); // aria-disabled: antippbar, erklärt sich
+    const nachKlick = await page.evaluate(() => ({ screen: S.screen, toast: S.toast }));
+    const c5 = await aendern('Gaube 5'), karte = await page.evaluate(() => { go('home'); return document.querySelector('.liste-in .wincard').textContent; });
+    ok(fest.zu === 2 && /ist fest/.test(fest.note) && nachKlick.screen === 'fertig' && /ist fest/.test(nachKlick.toast) && c5.aend === 4 && c5.name === 'Gaube 4' && /fest/.test(karte), 'Nach vier Änderungen ist das Fenster fest: „Maße/Wünsche ändern“ gesperrt, Speichern ändert nichts, die Liste zeigt „fest“');
+    await page.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; act('copywin', document.body); }); await page.waitForTimeout(100);
+    ok(await page.evaluate(() => S.windows.length === 2 && S.windows[1].aend === 0 && angelegt() === 2 && S.windows[1].wid !== S.windows[0].wid), 'Kopie eines festen Fensters: neues Fenster mit eigener Woche, zählt gegen die Grenze');
+    await fensterAnlegen(page, [['Keller', 700, 500]]);
+    const frei = await page.evaluate(() => { const i = S.windows.length - 1; for (let k = 0; k < 5; k++) { S.win = kopie(S.windows[i]); S.editIdx = i; S.win.name = 'Keller ' + k; saveWin(); } return { aend: S.windows[i].aend, name: S.windows[i].name }; });
+    ok(frei.aend === 0 && frei.name === 'Keller 4', 'In der ersten Woche zählt keine Änderung (fünfmal geändert, nichts verbraucht)');
+    sauber(page, 'Fortsetzen, Paywall und Grenzen ohne Fehler');
+    // Gestaltung: Liste und Fenster gespeichert, Telefon hell und dunkel
+    const befund = [];
+    for (const dunkel of [false, true]) {
+      const c = await browser.newContext(Object.assign({}, telefon, dunkel ? { colorScheme: 'dark', reducedMotion: 'reduce' } : {})), s = await neueSeite(c);
+      await s.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+      await fensterAnlegen(s, [['Wohnzimmer', 1230, 1410], ['Kinderzimmer', 1010, 1210]]); await s.waitForTimeout(300);
+      for (const schritt of ['home', 'fertig']) {
+        if (schritt === 'fertig') { await s.click('.liste-in .wincard[data-i="1"]'); await s.waitForSelector('[data-screen="fertig"]'); await s.waitForTimeout(250); }
+        const m = await messenApp(s), fremd = m.groessen.filter((g) => !APP_GROESSEN.includes(g));
+        if (fremd.length || m.klein.length || m.quer) befund.push((dunkel ? 'dunkel ' : 'hell ') + schritt + ': ' + (fremd.length ? 'Größen ' + fremd.join(', ') + ' ' : '') + (m.klein.length ? 'klein ' + m.klein.slice(0, 4).join('; ') : '') + (m.quer ? ' Querscrollen' : ''));
+      }
+      if (dunkel) await foto(s, 'app-fenster-gesperrt-dunkel');
+      sauber(s, 'Gestaltung ' + (dunkel ? 'dunkel' : 'hell') + ' ohne Fehler'); await c.close();
+    }
+    const fremdF = mFertig.groessen.filter((g) => !APP_GROESSEN.includes(g));
+    ok(!befund.length && !fremdF.length, 'Gestaltung (Telefon, hell und dunkel): Liste und gespeichertes Fenster nur mit 13 · 15 · 17 · 24 · 32 · 40, Ziele ab 44 px, kein Querscrollen' + (befund.length ? '\n      ' + befund.join('\n      ') : '') + (fremdF.length ? ' (' + fremdF.join(', ') + ')' : ''));
+  } catch (e) {
+    ok(false, 'App mit angefangenem Aufmaß ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
+  } finally { await ctx.close(); }
+
+  // e) Kundenlink im Servermodus: Hinweis, Zwischenstand auf dem Server, anderes Gerät, deaktivierter Link
+  const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
+  const port = 8990 + Math.floor(Math.random() * 90), B5 = 'http://localhost:' + port;
+  const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind.stderr.on('data', (dd) => process.stderr.write('  [Server 5] ' + dd));
+  const aus5 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus5);
+  try {
+    let bereit = false; for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B5 + '/api/status').then((r) => r.json())).daten === true; } catch (e) { /* noch nicht */ } }
+    ok(bereit, 'Testserver mit Datenbank-Attrappe läuft: ' + B5);
+    const http = async (p, body, token, method) => { const r = await fetch(B5 + p, { method: method || (body ? 'POST' : 'GET'), headers: Object.assign({ accept: 'application/json', origin: B5 }, body ? { 'content-type': 'application/json' } : {}, token ? { authorization: 'Bearer ' + token } : {}), body: body ? JSON.stringify(body) : undefined }); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
+    const tok = (m) => 'test.' + Buffer.from(m, 'utf8').toString('base64').replace(/=+$/, ''), T5 = tok('link14-' + stempel + '@beispiel.de');
+    await http('/api/konto/registrieren', { firma: 'Fensterbau Weitermachen', ap: 'Wera', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', agb: true }, T5);
+    const pr = await http('/api/konto/projekte', { kunde: 'Familie Rückkehr', kontakt: '0171 2222222', plan: ['Fenster'], days: 14 }, T5), lk = pr.konto.acc.links.find((l) => l.id === pr.id);
+    const url = B5 + '/app/#k-' + lk.code + '-Fensterbau_Weitermachen.' + b64u('Fensterbau Weitermachen') + '.' + b64u('Familie Rückkehr');
+    const c1 = await browser.newContext(telefon), s1 = await neueSeite(c1, B5);
+    await s1.goto(url, { waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await s1.waitForTimeout(200);
+    const erst = await s1.evaluate(() => document.querySelector('.hero.lk').textContent);
+    ok(/Über diesen Link kommst du jederzeit zurück/.test(erst), 'Kundenlink, erster Besuch: Hinweis, dass der Kunde jederzeit über den Link zurückkommt');
+    await fensterAnlegen(s1, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210]]);
+    await s1.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 }); await s1.waitForTimeout(200);
+    const srv = await http('/api/link/' + lk.code + '/entwurf');
+    ok(srv.entwurf && srv.entwurf.windows.length === 2 && srv.meta.angelegt === 2 && srv.entwurf.windows.every((w) => w.wid && !(w.plan && w.plan.bild)), 'Zwischenstand liegt auf dem Server: 2 Fenster, Zähler dabei, keine Bilder');
+    const p1 = await http('/api/link/' + lk.code);
+    ok(p1.expires === X.dateIn(60), 'Beim ersten Öffnen beginnen die 60 Tage (gilt bis ' + p1.expires + ')');
+    await foto(s1, 'app-link-weitermachen');
+    const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B5);
+    await s2.goto(url, { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
+    const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary').textContent }));
+    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo du warst.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
+    ok(/Maße vollständig/.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
+    await s2.click('.liste-in .wincard[data-i="0"]'); await s2.waitForSelector('[data-screen="fertig"]');
+    ok(await s2.locator('details.fold .kv').count() === 0 && /Gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.zu-karte').textContent()) && await s2.locator('.zu-karte [data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
+    /* Änderung auf Gerät 2 kommt auf Gerät 1 an */
+    await s2.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Wohnzimmer links'; saveWin(); });
+    await s2.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.windows[0] && S.windows[0].name === 'Wohnzimmer links', null, { timeout: 8000 });
+    ok(true, 'Änderung auf dem zweiten Gerät ist nach dem Neuladen auch auf dem ersten da (der neuere Stand gewinnt)');
+    sauber(s1, 'Kundenlink mit Zwischenstand ohne Fehler (Gerät 1)'); sauber(s2, 'Kundenlink mit Zwischenstand ohne Fehler (Gerät 2)');
+    /* Serverfehler beim Prüfen des Links sperrt nicht; nur „gibt es nicht“ (404) schließt */
+    await s1.route('**/api/link/' + lk.code, (route) => route.fulfill({ status: 500, contentType: 'application/json', body: '{"ok":false,"fehler":"Serverfehler"}' }));
+    await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await s1.waitForTimeout(200);
+    const k500 = await s1.evaluate(() => ({ zu: S.linkZu, n: S.windows.length, neu: !!document.querySelector('.liste-in [data-act="new"]') }));
+    await s1.unroute('**/api/link/' + lk.code);
+    s1.probleme = s1.probleme.filter((x) => !/500/.test(x));
+    ok(k500.zu === '' && k500.n === 2 && k500.neu, 'Serverfehler beim Prüfen des Links: der Kunde arbeitet weiter, nur „gibt es nicht“ (404) schließt den Link');
+    /* Vorschau des Betriebs („Als Kunde öffnen“): kein Zwischenstand des Kunden, nichts gespeichert, nichts gesendet, nicht geöffnet */
+    const pr2 = await http('/api/konto/projekte', { kunde: 'Familie Vorschau', plan: ['Fenster'], days: 7 }, T5), lv = pr2.konto.acc.links.find((l) => l.id === pr2.id);
+    const cV = await browser.newContext(telefon); await cV.addInitScript((codes) => { try { localStorage.setItem('aufmass.portal.v1', JSON.stringify({ v: 5, acc: { b1: { links: codes.map((c) => ({ code: c })) } } })); } catch (e) { /* ok */ } }, [lk.code, lv.code]);
+    const sV = await neueSeite(cV, B5);
+    await sV.goto(url.replace('/app/#', '/app/?vorschau=1#'), { waitUntil: 'networkidle' }); await sV.waitForTimeout(500);
+    const vor0 = await sV.evaluate(() => ({ n: S.windows.length, note: (document.querySelector('.note.vorschau') || {}).textContent || '' }));
+    await sV.goto(B5 + '/app/?vorschau=1#k-' + lv.code + '-Fensterbau_Weitermachen.' + b64u('Fensterbau Weitermachen') + '.' + b64u('Familie Vorschau'), { waitUntil: 'networkidle' }); await sV.reload({ waitUntil: 'networkidle' }); await sV.waitForTimeout(400);
+    await fensterAnlegen(sV, [['Probe', 1000, 1200]]); await sV.waitForTimeout(1600);
+    await sV.evaluate(() => act('send', document.body)); await sV.waitForTimeout(100);
+    const vor2 = await sV.evaluate(() => ({ n: S.windows.length, toast: S.toast, speicher: Object.keys(localStorage).filter((k) => k.startsWith('aufmass.k.')).length, note: (document.querySelector('.note.vorschau') || {}).textContent || '' }));
+    const lvNach = await http('/api/link/' + lv.code), dv = await http('/api/link/' + lv.code + '/entwurf');
+    ok(vor0.n === 0 && /Vorschau für Ihren Betrieb/.test(vor0.note) && vor2.n === 1 && /Vorschau/.test(vor2.toast) && vor2.speicher === 0 && dv.entwurf === null && !['geoeffnet', 'arbeit'].includes(lvNach.status) && lvNach.expires === lv.expires, 'Vorschau des Betriebs: Hinweis oben, der Zwischenstand des Kunden bleibt unsichtbar, nichts im Browser oder auf dem Server gespeichert, nichts gesendet, der Link gilt weiter als ungeöffnet');
+    await foto(sV, 'app-link-vorschau');
+    sauber(sV, 'Vorschau ohne Fehler'); await cV.close();
+    const cK = await browser.newContext(telefon), sK = await neueSeite(cK, B5);
+    await sK.goto(url.replace('/app/#', '/app/?vorschau=1#'), { waitUntil: 'networkidle' }); await sK.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await sK.waitForTimeout(200);
+    const kunde = await sK.evaluate(() => ({ n: S.windows.length, note: !!document.querySelector('.note.vorschau'), suche: location.search, vorschau: vorschau() }));
+    ok(kunde.n === 2 && !kunde.note && kunde.suche === '' && !kunde.vorschau, 'Bekommt ein Kunde die Adresse der Vorschau, arbeitet er normal: seine Liste ist da, kein Vorschau-Hinweis, der Zusatz verschwindet aus der Adresse');
+    sauber(sK, 'Kunde mit Adresse der Vorschau ohne Fehler'); await cK.close();
+    /* Absenden auf Gerät A mit Abgleich; Gerät B erfährt danach, dass das Aufmaß schon beim Betrieb ist */
+    const pr3 = await http('/api/konto/projekte', { kunde: 'Familie Zwei Geräte', plan: ['Fenster'], days: 14 }, T5), l3 = pr3.konto.acc.links.find((l) => l.id === pr3.id);
+    const url3 = B5 + '/app/#k-' + l3.code + '-Fensterbau_Weitermachen.' + b64u('Fensterbau Weitermachen') + '.' + b64u('Familie Zwei Geräte');
+    const cA = await browser.newContext(telefon), sA = await neueSeite(cA, B5), cB = await browser.newContext(telefon), sB = await neueSeite(cB, B5);
+    await sA.goto(url3, { waitUntil: 'networkidle' }); await sA.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 });
+    await fensterAnlegen(sA, [['Esszimmer', 1230, 1410]]); await sA.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    await sB.goto(url3, { waitUntil: 'networkidle' }); await sB.waitForFunction(() => S.windows.length === 1, null, { timeout: 8000 });
+    await sB.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Esszimmer Süd'; saveWin(); go('home'); }); await sB.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    await sA.evaluate(() => { go('home'); act('send', document.body); }); await sA.waitForFunction(() => /abgeglichen/.test(S.toast), null, { timeout: 8000 });
+    const a1 = await sA.evaluate(() => ({ name: S.windows[0].name, sent: !!S.sent }));
+    await sA.evaluate(() => act('send', document.body)); await sA.waitForFunction(() => !!S.sent, null, { timeout: 8000 }); await sA.waitForTimeout(100);
+    const p3s = await http('/api/link/' + l3.code), d3 = await http('/api/link/' + l3.code + '/entwurf');
+    ok(a1.name === 'Esszimmer Süd' && !a1.sent && p3s.status === 'eingegangen' && d3.zu === 'eingegangen' && d3.entwurf === null, 'Absenden mit Abgleich: hat ein anderes Gerät inzwischen geändert, zeigt die App erst den neuen Stand; danach geht das Aufmaß an den Betrieb, der Zwischenstand ist zu');
+    await sB.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Esszimmer Nord'; saveWin(); go('home'); });
+    await sB.waitForFunction(() => !!S.sent, null, { timeout: 8000 }); await sB.waitForTimeout(200);
+    const b1 = await sB.evaluate(() => ({ h1: (document.querySelector('.hero.lk h1') || {}).textContent || '', neu: document.querySelectorAll('[data-act="new"]').length, warn: (document.querySelector('.note.warn') || {}).textContent || '', karte: (document.querySelector('.wincard.sent') || {}).textContent || '', titel: Array.from(document.querySelectorAll('.sec-title')).map((x) => x.textContent).join('|') }));
+    ok(/Schon erledigt/.test(b1.h1) && b1.neu === 0 && /nicht bei Fensterbau Weitermachen angekommen/.test(b1.warn) && /Auf diesem Gerät/.test(b1.karte) && !/Übermittelt/.test(b1.karte) && /Auf diesem Gerät/.test(b1.titel), 'Anderes Gerät nach dem Absenden: erfährt beim nächsten Speichern, dass das Aufmaß schon beim Betrieb ist („Schon erledigt.“), sagt ehrlich, dass seine Änderung nicht angekommen ist, und nennt seine Liste nicht „übermittelt“');
+    await foto(sB, 'app-link-schon-erledigt');
+    /* Nachbesserung angefragt, zurückgezogen, wieder angefragt: das Gerät kommt wieder hinein */
+    await http('/api/konto/projekte/' + l3.id, { nb: { hinweis: 'Bitte das Esszimmer prüfen' } }, T5, 'PATCH');
+    await sA.goto(url3 + '~2', { waitUntil: 'networkidle' }); await sA.reload({ waitUntil: 'networkidle' }); await sA.waitForFunction(() => S.sync && S.sync.geladen && !!S.nb, null, { timeout: 8000 });
+    await sA.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Esszimmer korrigiert'; saveWin(); go('home'); }); await sA.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    await http('/api/konto/projekte/' + l3.id, { nbZurueck: true }, T5, 'PATCH');
+    await sA.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Esszimmer noch einmal'; saveWin(); go('home'); }); await sA.waitForFunction(() => !!S.sent, null, { timeout: 8000 });
+    const zurueckgezogen = await sA.evaluate(() => ({ runde: S.sent.runde, nb: !!S.nb, h1: (document.querySelector('.hero.lk h1') || {}).textContent || '' }));
+    await http('/api/konto/projekte/' + l3.id, { nb: { hinweis: 'Doch noch einmal' } }, T5, 'PATCH');
+    await sA.reload({ waitUntil: 'networkidle' }); await sA.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await sA.waitForTimeout(200);
+    const wieder = await sA.evaluate(() => ({ nb: !!S.nb, sent: !!S.sent, h1: (document.querySelector('.hero.lk h1') || {}).textContent || '' }));
+    ok(zurueckgezogen.runde === 1 && !zurueckgezogen.nb && /Schon erledigt/.test(zurueckgezogen.h1) && wieder.nb && !wieder.sent && /eine Runde noch/.test(wieder.h1), 'Nachbesserung zurückgezogen: das Gerät zeigt „Schon erledigt.“ mit der Runde beim Betrieb; wird wieder angefragt, kommt es in die Nachbesserung zurück');
+    sA.probleme = sA.probleme.filter((x) => !/410/.test(x));
+    sB.probleme = sB.probleme.filter((x) => !/410/.test(x)); sauber(sA, 'Absenden mit Abgleich ohne Fehler'); sauber(sB, 'Zweites Gerät nach dem Absenden ohne Fehler');
+    await cA.close(); await cB.close();
+    /* Funkloch beim Öffnen: vor dem Absenden holt die App den Zwischenstand nach */
+    const pr4 = await http('/api/konto/projekte', { kunde: 'Familie Funkloch', plan: ['Fenster'], days: 14 }, T5), l4 = pr4.konto.acc.links.find((l) => l.id === pr4.id);
+    const url4 = B5 + '/app/#k-' + l4.code + '-Fensterbau_Weitermachen.' + b64u('Fensterbau Weitermachen') + '.' + b64u('Familie Funkloch');
+    const c4a = await browser.newContext(telefon), s4a = await neueSeite(c4a, B5), c4b = await browser.newContext(telefon), s4b = await neueSeite(c4b, B5);
+    await s4a.goto(url4, { waitUntil: 'networkidle' }); await s4a.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 });
+    await fensterAnlegen(s4a, [['Bad', 1010, 1210]]); await s4a.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    await s4b.goto(url4, { waitUntil: 'networkidle' }); await s4b.waitForFunction(() => S.windows.length === 1, null, { timeout: 8000 });
+    await s4b.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Bad oben'; saveWin(); go('home'); }); await s4b.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    let ersterVersuch = true; await s4a.route('**/api/link/' + l4.code, (route) => { if (ersterVersuch) { ersterVersuch = false; return route.abort(); } return route.continue(); });
+    await s4a.reload({ waitUntil: 'networkidle' }); await s4a.waitForTimeout(300);
+    const funkloch = await s4a.evaluate(() => ({ geladen: S.sync.geladen, name: S.windows[0].name }));
+    await s4a.evaluate(() => { go('home'); act('send', document.body); }); await s4a.waitForFunction(() => /abgeglichen/.test(S.toast), null, { timeout: 8000 });
+    const nachFunkloch = await s4a.evaluate(() => ({ name: S.windows[0].name, sent: !!S.sent }));
+    await s4a.unroute('**/api/link/' + l4.code);
+    ok(!funkloch.geladen && funkloch.name === 'Bad' && nachFunkloch.name === 'Bad oben' && !nachFunkloch.sent, 'Funkloch beim Öffnen: vor dem Absenden holt die App den Zwischenstand nach und zeigt erst den neueren Stand des anderen Geräts, statt den alten zu senden');
+    s4a.probleme = s4a.probleme.filter((x) => !/ERR_FAILED|net::|Failed to load resource/i.test(x));
+    /* Hochladen scheitert (503), Herunterladen geht: nicht senden, der Server konnte nicht zusammenführen */
+    await s4a.route('**/api/link/' + l4.code + '/entwurf', (route) => (route.request().method() === 'POST' ? route.fulfill({ status: 503, contentType: 'application/json', body: '{"ok":false,"fehler":"kurz weg"}' }) : route.continue()));
+    await s4a.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Bad A'; saveWin(); go('home'); }); await s4a.waitForTimeout(1600);
+    await s4a.evaluate(() => act('send', document.body)); await s4a.waitForFunction(() => /Keine Verbindung/.test(S.toast), null, { timeout: 8000 });
+    const blockiert = await s4a.evaluate(() => ({ sent: !!S.sent, offen: S.sync.offen }));
+    const l4s = await http('/api/link/' + l4.code);
+    await s4a.unroute('**/api/link/' + l4.code + '/entwurf');
+    ok(!blockiert.sent && blockiert.offen && l4s.status !== 'eingegangen', 'Hochladen scheitert, Herunterladen geht: die App sendet nicht (der Server konnte nicht zusammenführen) und bittet, es gleich noch einmal zu versuchen');
+    s4a.probleme = s4a.probleme.filter((x) => !/503/.test(x));
+    sauber(s4a, 'Funkloch beim Öffnen ohne Fehler'); sauber(s4b, 'Zweites Gerät beim Funkloch ohne Fehler');
+    await c4a.close(); await c4b.close();
+    /* Uhr des Geräts geht drei Stunden nach: die App gleicht mit der Serverzeit ab */
+    const pr5 = await http('/api/konto/projekte', { kunde: 'Familie Uhr', plan: ['Fenster'], days: 14 }, T5), l5 = pr5.konto.acc.links.find((l) => l.id === pr5.id);
+    const c5 = await browser.newContext(telefon); await c5.addInitScript(() => { const echt = Date.now.bind(Date); Date.now = () => echt() - 3 * 3600 * 1000; });
+    const s5 = await neueSeite(c5, B5);
+    await s5.goto(B5 + '/app/#k-' + l5.code + '-Fensterbau_Weitermachen.' + b64u('Fensterbau Weitermachen') + '.' + b64u('Familie Uhr'), { waitUntil: 'networkidle' }); await s5.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 });
+    await fensterAnlegen(s5, [['Gaube', 900, 1100]]); await s5.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
+    const d5 = await http('/api/link/' + l5.code + '/entwurf'), w5 = (d5.entwurf && d5.entwurf.windows[0]) || {};
+    ok(Math.abs((w5.ts || 0) - Date.now()) < 60000 && Math.abs((w5.t0 || 0) - Date.now()) < 60000, 'Uhr des Geräts geht drei Stunden nach: die App gleicht mit der Serverzeit ab, Zeitpunkte der Fenster stimmen');
+    sauber(s5, 'Gerät mit falscher Uhr ohne Fehler'); await c5.close();
+    /* Betrieb deaktiviert den Link: zu, mit Hinweis */
+    await http('/api/konto/projekte/' + lk.id, { deaktivieren: true }, T5, 'PATCH');
+    await s2.goto(url.replace('#', '?x=1#'), { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.linkZu === 'deaktiviert', null, { timeout: 8000 }); await s2.waitForTimeout(200);
+    const zu = await s2.evaluate(() => ({ t: document.querySelector('.hero.lk').textContent, neu: document.querySelectorAll('[data-act="new"]').length, bar: !!document.querySelector('.bb') }));
+    await s2.evaluate(() => act('new', document.body));
+    ok(/Link deaktiviert/.test(zu.t) && /Hier geht es gerade nicht weiter/.test(zu.t) && zu.neu === 0 && !zu.bar && await s2.evaluate(() => S.screen === 'home' && /deaktiviert/.test(S.toast)), 'Deaktivierter Link: Hinweis statt Messen, nichts lässt sich mehr anlegen oder senden');
+    s2.probleme = s2.probleme.filter((x) => !/410/.test(x));
+    sauber(s2, 'Deaktivierter Link ohne Fehler');
+    await c1.close(); await c2.close();
+  } catch (e) {
+    ok(false, 'Kundenlink mit Zwischenstand ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
+  } finally { aus5(); }
 }
 
 await browser.close();

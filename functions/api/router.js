@@ -3,6 +3,7 @@
    GET/POST /api/ki                 KI-Auswertung der Fotos (ki.js)
    /api/zahlung/…                   Aufmaßblatt kaufen (zahlung.js)
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js)
+   /api/link/:code/entwurf          Zwischenstand eines Kundenlinks mit Zählern gegen Mehrfachnutzung (entwurf.js)
    /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js) */
 import { konfig, json, ApiFehler } from './umgebung.js';
 import { onRequestGet as kiGet, onRequestPost as kiPost } from './ki.js';
@@ -11,10 +12,11 @@ import { zahlungsdienst } from './stripe.js';
 import { KONTO, abrechnungslauf } from './konten.js';
 import { ZAHLUNG } from './zahlung.js';
 import { ZENTRALE, aufraeumen } from './zentrale.js';
+import { ENTWURF } from './entwurf.js';
 import { zaehlen } from './statistik.js';
 import '../../web/assets/modell.js';
 
-const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ZENTRALE);
+const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, ZENTRALE);
 const MAX_BODY = 1500000;
 
 function finde(method, pfad) {
@@ -67,11 +69,13 @@ export async function api(request, env, ctx0) {
   }
 }
 
-/* Cron (wrangler.jsonc: triggers.crons): Sammelrechnungen, danach Aufräumen (Protokoll nach Frist, liegengebliebene Kassen,
-   Anmeldungen ohne Betrieb nach 30 Tagen) */
-export async function geplant(env) {
+/* Cron (wrangler.jsonc: triggers.crons): am 1. und 15. Sammelrechnungen, jeden Tag Aufräumen (Protokoll nach Frist,
+   liegengebliebene Kassen, Anmeldungen ohne Betrieb nach 30 Tagen, Zwischenstände erledigter Kundenlinks) */
+export const CRON_ABRECHNUNG = '0 3 1,15 * *';
+export async function geplant(env, cron) {
   const k = konfig(env); globalThis.Abrechnung.setPreise(k.preise);
-  const sp = speicher(k), r = await abrechnungslauf(k, sp, zahlungsdienst(k));
+  const sp = speicher(k), abrechnen = !cron || cron === CRON_ABRECHNUNG;
+  const r = abrechnen ? await abrechnungslauf(k, sp, zahlungsdienst(k)) : { ok: true, nurAufraeumen: true };
   if (r && r.rechnungen) await zaehlen(k, sp, new Array(r.rechnungen).fill('ereignis:sammelrechnung')).catch(() => false);
   let weg = null; try { weg = await aufraeumen(k, sp); } catch (e) { weg = { ok: false }; }
   console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg));

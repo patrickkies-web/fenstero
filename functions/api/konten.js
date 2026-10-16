@@ -2,7 +2,8 @@
    Die Regeln (Zählung, Buchung, Nachbesserung) stehen in web/assets/modell.js und sind dieselben wie im Browser; hier führt sie der Server aus,
    deshalb kann ein Browser sie nicht umgehen. Das Konto eines Betriebs ist ein JSON-Dokument (siehe speicher.js). */
 import '../../web/assets/modell.js';
-import { ApiFehler, erlaubt, ip } from './umgebung.js';
+import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt } from './umgebung.js';
+import { GRENZEN, zuText, langerCode, kennung, ohneBild, metaMischen, zeitKappen } from './entwurf.js';
 import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
 
 const X = () => globalThis.Abrechnung;
@@ -110,21 +111,21 @@ async function aboUebernehmen(sp, zd, row, r) {
 export const KONTO = {
   /* --- Anmeldung --- */
   'POST /api/konto/anmelden': async (ctx) => {
-    if (!erlaubt('otp:' + ip(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
+    if (!erlaubt('otp:' + quelle(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const r = await codeSenden(ctx.k, ctx.sp, ctx.body.mail, zurueck(ctx));
     zaehlen(ctx, 'ereignis:anmeldecode');
     return r;
   },
   /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… auf die Startseite, portal.js schickt beides her */
   'POST /api/konto/sitzung': async (ctx) => {
-    if (!erlaubt('otpv:' + ip(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
+    if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const b = ctx.body || {}, token = str(b.token, 4000), refresh = str(b.refresh, 400);
     const n = await nutzer(ctx.k, token); if (!n) throw new ApiFehler('Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.', 401);
     const frisch = await anmeldungFertig(ctx, n.id);
     return { ok: true, token: token, refresh: refresh, mail: n.mail, konto: frisch ? sicht(frisch) : null };
   },
   'POST /api/konto/bestaetigen': async (ctx) => {
-    if (!erlaubt('otpv:' + ip(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
+    if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const s = await codePruefen(ctx.k, ctx.sp, ctx.body.mail, ctx.body.code);
     const frisch = await anmeldungFertig(ctx, s.nutzer.id);
     return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail, konto: frisch ? sicht(frisch) : null };
@@ -228,30 +229,70 @@ export const KONTO = {
   },
   /* --- Aus der App: Link prüfen, Fortschritt melden, Aufmaß direkt senden (ohne Anmeldung, der Link-Code ist der Schlüssel) --- */
   'GET /api/link/:code': async (ctx) => {
-    const code = str(ctx.params.code, 12).toLowerCase(); if (!/^[a-z0-9]{3,12}$/.test(code)) throw new ApiFehler('Kein gültiger Link.', 404);
-    const row = await ctx.sp.betriebNachCode(code); if (!row) throw new ApiFehler('Diesen Link gibt es nicht.', 404);
+    linkBremse(ctx.request);
+    const code = str(ctx.params.code, 12).toLowerCase(); if (!/^[a-z0-9]{3,12}$/.test(code)) throw linkUnbekannt(ctx.request, 'Kein gültiger Link.');
+    const row = await ctx.sp.betriebNachCode(code); if (!row) throw linkUnbekannt(ctx.request);
     if (sperreVon(row)) throw new ApiFehler(LINK_RUHT, 404);
     const l = (row.daten.links || []).find((x) => x.code === code), a = row.daten;
-    return { ok: true, betrieb: row.name, kunde: l.kunde || '', status: l.status, runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: !!l.du, expires: l.expires || '', ap: a.ap || '' };
+    /* zu: abgelaufen (auch wenn die Zeit noch nicht angewendet wurde), deaktiviert oder schon eingegangen */
+    const zu = X().linkZu(l), status = zu === 'abgelaufen' ? 'abgelaufen' : l.status;
+    return { ok: true, betrieb: row.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, row.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now(), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: !!l.du, expires: l.expires || '', ap: a.ap || '', grenzen: GRENZEN };
   },
+  /* Geöffnet: der Betrieb bekommt einen Hinweis; beim ersten Öffnen beginnen die 60 Tage, die der Kunde Zeit hat */
   'POST /api/link/:code/fortschritt': async (ctx) => {
-    const code = str(ctx.params.code, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw new ApiFehler('Diesen Link gibt es nicht.', 404);
+    linkBremse(ctx.request);
+    const code = str(ctx.params.code, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw linkUnbekannt(ctx.request);
     if (!erlaubt('fort:' + code, 60, 10 * 60 * 1000) || sperreVon(row)) return { ok: true };
     const b = ctx.body || {};
-    const neu = await ctx.sp.betriebAendern(row.id, (a) => { const l = (a.links || []).find((x) => x.code === code); if (X().fortschritt(l, b.stufe, b.k) && b.stufe === 'geoeffnet') { melden(a, { t: l.kunde + ' hat den Link geöffnet', s: 'Projekt ' + (l.nr || '') + ', noch keine Maße eingetragen.', to: ['link', l.id] }); return true; } return false; });
+    let expires = '';
+    const neu = await ctx.sp.betriebAendern(row.id, (a) => { const l = (a.links || []).find((x) => x.code === code); const r = X().fortschritt(l, b.stufe, b.k); if (l) expires = l.expires || ''; if (r === 'geoeffnet') { melden(a, { t: l.kunde + ' hat den Link geöffnet', s: 'Projekt ' + (l.nr || '') + ', noch keine Maße eingetragen.', to: ['link', l.id] }); return true; } return false; });
     if (neu) zaehlen(ctx, 'ereignis:link_geoeffnet');
-    return { ok: true };
+    return { ok: true, expires: expires };
   },
   'POST /api/aufmass': async (ctx) => {
     const o = ctx.body || {}; if (!o || !Array.isArray(o.w) || !o.b) throw new ApiFehler('Kein Aufmaß im Versand.');
-    if (!erlaubt('am:' + ip(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
+    if (!erlaubt('am:' + quelle(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
     const code = str(o.b, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw new ApiFehler('Dieser Link gehört zu keinem Projekt mehr.', 404);
     if (sperreVon(row)) throw new ApiFehler(LINK_RUHT, 404);
+    /* Abgelaufene oder deaktivierte Links nehmen nichts mehr an (der Betrieb kann verlängern); höchstens 50 Fenster je Aufmaß */
+    const zu = X().linkZu((row.daten.links || []).find((x) => x.code === code));
+    if (zu === 'abgelaufen' || zu === 'deaktiviert') throw new ApiFehler(zuText(zu, row.name), 410, { zu: zu });
+    if (o.w.length > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster.', 400);
+    /* Kennungen und Zähler der Fenster (wm, gleiche Reihenfolge wie w) gehören nicht ins Aufmaß des Betriebs; mit ihnen prüft der
+       Server die Grenze gegen den Zwischenstand und hält ihn auf dem gesendeten Stand (für eine spätere Nachbesserung auf einem
+       anderen Gerät) */
+    const jetzt = Date.now(), wm = Array.isArray(o.wm) && o.wm.length === o.w.length ? o.wm.map((x) => ({ wid: kennung(x), t0: Number(x && x.t0) || 0, aend: Number(x && x.aend) || 0, ts: zeitKappen(x && x.ts, jetzt) })) : null, standB = zeitKappen(o.stand, jetzt);
+    const projTsB = zeitKappen(o.projTs, jetzt);
+    delete o.wm; delete o.stand; delete o.projTs;
+    const zw = zu !== 'eingegangen' && langerCode(code) && ctx.sp.entwurfHolen ? await ctx.sp.entwurfHolen(code).catch(() => undefined) : undefined; // schon eingegangen: das sagt gleich importCode (409)
+    if (zw && Object.keys((zw.meta || {}).fenster || {}).length && (!wm || wm.some((x) => !x.wid))) throw new ApiFehler('Bitte die Seite neu laden und noch einmal senden.', 400); // ohne Kennungen ließe sich die Grenze umgehen
+    if (zw && wm) { const ids = new Set(Object.keys((zw.meta || {}).fenster || {})); wm.forEach((x) => { if (x.wid) ids.add(x.wid); }); if (Math.max(ids.size, Number((zw.meta || {}).angelegt) || 0) > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster, gelöschte zählen mit.', 400); }
+    /* Hat ein anderes Gerät inzwischen etwas gespeichert, das dieses Gerät nicht hat (ein Fenster fehlt hier oder ist dort neuer, die
+       Angaben zum Haus sind dort neuer), erst abgleichen; sonst bekäme der Betrieb einen alten Stand. Bei einer Teil-Nachbesserung (m)
+       hat das Gerät absichtlich nur einen Teil */
+    if (zw && wm && !o.m) {
+      const d = zw.daten || {}, hier = new Map(wm.map((x) => [x.wid, x]));
+      const veraltet = (d.windows || []).some((w) => { const x = hier.get(kennung(w)); return !x || (Number(w.ts) || 0) > x.ts; }) || (Number(d.projTs) || 0) > projTsB;
+      if (veraltet) throw new ApiFehler('Ein anderes Gerät hat inzwischen etwas geändert. Bitte kurz prüfen und noch einmal senden.', 409, { abgleichen: true });
+    }
     o.v = 1; o.b = code;
     const r = await ctx.sp.betriebAendern(row.id, (a) => { const t = X().tickKonto(a); t.notifs.forEach((n) => melden(a, n)); const res = X().importCode(a, o, undefined, 'App'); if (res.notif) melden(a, res.notif); return res; });
-    if (!r.ok) throw new ApiFehler(r.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : r.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400);
+    if (!r.ok) throw new ApiFehler(r.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : r.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400, r.art === 'schon' && r.l && X().linkZu(r.l) === 'eingegangen' ? { zu: 'eingegangen', runde: r.l.runde || 1, seit: r.l.eingegangenAt || 0 } : undefined); // schon da: die App zeigt „schon erledigt“
     const nb = r.art === 'nb' || r.art === 'nb-neu';
     zaehlen(ctx, nb ? 'ereignis:nachbesserung' : 'ereignis:aufmass_gesendet');
+    /* Zwischenstand als gesendet vermerken (für die Zentrale und das Aufräumen) und auf den gesendeten Stand bringen, außer bei einer
+       Teil-Nachbesserung (m); fehlt die Tabelle, ist das egal */
+    if (ctx.sp.entwurfAendern && langerCode(code)) ctx.waitUntil(ctx.sp.entwurfAendern(code, row.id, (e) => {
+      if (!e.version && !wm) return false;
+      if (wm && !o.m) {
+        /* Inhalt nur ersetzen, wenn der Zwischenstand älter ist als der gesendete (die App gleicht vorher ab; neuer ist er nur, wenn ein
+           anderes Gerät danach weitergemacht hat) */
+        if ((Number(e.stand) || 0) < standB || !((e.daten || {}).windows || []).length) { e.daten = { windows: o.w.map((w, i) => Object.assign(ohneBild(w), wm[i])), proj: o.p || {}, projTs: projTsB }; e.stand = Math.max(Number(e.stand) || 0, standB); }
+        e.meta = metaMischen(e.meta || {}, wm, 0, jetzt);
+      }
+      e.meta = Object.assign({}, e.meta || {}, { gesendet: r.l ? r.l.runde || 1 : 1, gesendetAm: new Date().toISOString() });
+      return true;
+    }).catch(() => false));
     return { ok: true, betrieb: row.name, runde: r.l ? r.l.runde || 1 : 1, nachbesserung: nb };
   }
 };

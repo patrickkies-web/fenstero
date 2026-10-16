@@ -2,11 +2,12 @@
    Tabellen: siehe supabase/schema.sql. Je Betrieb liegt das Konto als ein JSON-Dokument (daten) mit Projekten, Buchungen und Nachrichten;
    Änderungen laufen über betriebAendern(id, fn) mit Versionszähler, damit zwei gleichzeitige Eingänge sich nicht überschreiben.
    Für die Zentrale (zentrale.js): alle Betriebe lesen, ein Konto löschen, Käufe lesen, Protokoll der Eingriffe, eigene Statistik
-   (Tageszähler über die Funktion eeziframes_zaehlen). Protokoll und Statistik sind optional: Fehlen die Tabellen noch
-   (schema.sql nicht erneut ausgeführt), melden die Funktionen das (null bzw. false), statt einen Fehler zu werfen. */
+   (Tageszähler über die Funktion eeziframes_zaehlen), Zwischenstände der Kundenlinks (entwuerfe). Protokoll, Statistik und
+   Zwischenstände sind optional: Fehlen die Tabellen noch (schema.sql nicht erneut ausgeführt), melden die Funktionen das
+   (null, undefined bzw. false), statt einen Fehler zu werfen. */
 import { ApiFehler, sbNeu } from './umgebung.js';
 
-const attrappe = { betriebe: new Map(), zahlungen: new Map(), ereignisse: new Set(), codes: new Map(), protokoll: [], statistik: new Map() };
+const attrappe = { betriebe: new Map(), zahlungen: new Map(), ereignisse: new Set(), codes: new Map(), protokoll: [], statistik: new Map(), entwuerfe: new Map() };
 const kopie = (o) => (o == null ? o : JSON.parse(JSON.stringify(o)));
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
@@ -37,7 +38,7 @@ function attrappeSpeicher() {
     ereignisBekannt: async (id) => attrappe.ereignisse.has(id),
     /* Zentrale */
     betriebeAlle: async () => Array.from(B.values()).map(kopie).sort((x, y) => String(y.created_at).localeCompare(String(x.created_at))),
-    betriebLoeschen: async (id) => B.delete(id),
+    betriebLoeschen: async (id) => { for (const [c, e] of attrappe.entwuerfe) if (e.betrieb === id) attrappe.entwuerfe.delete(c); return B.delete(id); }, // wie on delete cascade
     zahlungenAlle: async () => Array.from(attrappe.zahlungen.values()).map(kopie).sort((x, y) => String(y.created_at).localeCompare(String(x.created_at))),
     zahlungenAufraeumen: async (grenze) => { for (const [s, z] of attrappe.zahlungen) if (z.status === 'offen' && z.created_at < grenze) attrappe.zahlungen.delete(s); return true; },
     protokollSchreiben: async (e) => { attrappe.protokoll.unshift(Object.assign({ id: uuid(), zeit: new Date().toISOString(), betrieb: null, text: '', daten: {}, netz: null }, kopie(e))); return true; },
@@ -55,6 +56,16 @@ function attrappeSpeicher() {
       }
       return Array.from(tage.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).concat(Array.from(summen.entries()).map(([sch, n]) => ({ tag: null, schluessel: sch, anzahl: n })));
     },
+    /* Zwischenstand eines Kundenlinks (entwurf.js): lesen, mit Versionszähler ändern, für Zentrale und Aufräumen ohne Inhalt auflisten */
+    entwurfHolen: async (code) => kopie(attrappe.entwuerfe.get(code) || null),
+    entwurfAendern: async (code, betrieb, fn) => {
+      const alt = attrappe.entwuerfe.get(code) || null, r = kopie(alt) || { code: code, betrieb: betrieb, daten: {}, meta: {}, stand: 0, version: 0, created_at: new Date().toISOString() };
+      const out = await fn(r); if (out === false) return { row: kopie(alt), out: out };
+      r.version = (alt ? alt.version : 0) + 1; r.updated_at = new Date().toISOString(); attrappe.entwuerfe.set(code, r); return { row: kopie(r), out: out };
+    },
+    entwuerfeAlle: async () => Array.from(attrappe.entwuerfe.values()).map((r) => ({ code: r.code, betrieb: r.betrieb, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at })),
+    entwurfLoeschen: async (code) => attrappe.entwuerfe.delete(code),
+    entwuerfeVonBetrieb: async (id) => Array.from(attrappe.entwuerfe.values()).filter((r) => r.betrieb === id).map((r) => ({ code: r.code, betrieb: r.betrieb, meta: kopie(r.meta), stand: r.stand, created_at: r.created_at, updated_at: r.updated_at })),
     /* nur Attrappe: Anmeldecodes */
     codeMerken: (mail, code) => attrappe.codes.set(mail, code),
     codeLesen: (mail) => attrappe.codes.get(mail)
@@ -134,6 +145,27 @@ function supabaseSpeicher(k) {
     zaehlen: async (tag, schluessel) => { const r = await sb('rpc/eeziframes_zaehlen', { method: 'POST', body: { p_tag: tag, p_schluessel: schluessel }, prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); },
     statistikLesen: async (von) => alle('statistik?select=tag,schluessel,anzahl&tag=gte.' + q(von) + '&order=tag.desc,schluessel.asc', true),
     /* verdichtet in der Datenbank (Funktion eeziframes_auswerten); null, wenn es die Funktion noch nicht gibt */
-    statistikAuswerten: async (von) => alle('rpc/eeziframes_auswerten?p_von=' + q(von) + '&order=schluessel.asc,tag.asc', true)
+    statistikAuswerten: async (von) => alle('rpc/eeziframes_auswerten?p_von=' + q(von) + '&order=schluessel.asc,tag.asc', true),
+    /* Zwischenstand eines Kundenlinks (entwurf.js). undefined: Tabelle fehlt noch (schema.sql nicht erneut ausgeführt) */
+    entwurfHolen: async (code) => { const r = await sb('entwuerfe?code=eq.' + q(code) + '&select=*', { optional: true }); return r && r.fehlt ? undefined : eins(r); },
+    /* Lesen, ändern, mit Versionsnummer zurückschreiben (wie betriebAendern); fn gibt false zurück, wenn nichts zu speichern ist */
+    entwurfAendern: async (code, betrieb, fn) => {
+      for (let i = 0; i < 4; i++) {
+        const gelesen = await sb('entwuerfe?code=eq.' + q(code) + '&select=*', { optional: true }); if (gelesen && gelesen.fehlt) return { fehlt: true };
+        const alt = eins(gelesen), r = alt ? JSON.parse(JSON.stringify(alt)) : { code: code, betrieb: betrieb, daten: {}, meta: {}, stand: 0, version: 0 };
+        const out = await fn(r); if (out === false) return { row: alt, out: out };
+        if (!alt) {
+          const neu = await sb('entwuerfe', { method: 'POST', body: { code: code, betrieb: betrieb, daten: r.daten, meta: r.meta, stand: r.stand, version: 1 }, optional: true });
+          if (neu && neu.konflikt) continue; if (neu && neu.fehlt) return { fehlt: true };
+          return { row: eins(neu), out: out };
+        }
+        const res = await sb('entwuerfe?code=eq.' + q(code) + '&version=eq.' + q(alt.version), { method: 'PATCH', body: { daten: r.daten, meta: r.meta, stand: r.stand, version: (alt.version || 0) + 1, updated_at: new Date().toISOString() }, optional: true });
+        if (Array.isArray(res) && res.length) return { row: res[0], out: out };
+      }
+      throw new ApiFehler('Gleichzeitige Änderung, bitte gleich noch einmal.', 409);
+    },
+    entwuerfeAlle: async () => alle('entwuerfe?select=code,betrieb,meta,stand,created_at,updated_at&order=updated_at.desc,code.asc', true),
+    entwuerfeVonBetrieb: async (id) => { const r = await sb('entwuerfe?betrieb=eq.' + q(id) + '&select=code,betrieb,meta,stand,created_at,updated_at&order=updated_at.desc', { optional: true }); return r && r.fehlt ? null : r || []; },
+    entwurfLoeschen: async (code) => { const r = await sb('entwuerfe?code=eq.' + q(code), { method: 'DELETE', prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); }
   };
 }

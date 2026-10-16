@@ -24,9 +24,9 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `web/favicon.svg`, `web/apple-touch-icon.png` | Logo: weißes Fenster auf schwarzer Kachel, der Flügel kippt kurz |
 | `web/fonts/`, `web/vendor/` | Maven Pro (OFL), jsPDF (MIT), qrcode-generator (MIT) und lottie-web light (MIT), lokal statt von fremden Servern |
 | `web/assets/lottie/`, `scripts/lottie-erzeugen.py` | fünf gezeichnete Bewegtbilder, aus Code erzeugt (`python3 scripts/lottie-erzeugen.py web/assets/lottie`) |
-| `functions/api/` | der Server: `router.js` (Verteiler), `ki.js` (KI-Auswertung der Einbausituation), `zahlung.js` (Kauf des Aufmaßblatts, Nachweis, Webhook), `konten.js` (Betriebe, Projekte, Eingang, Tarif, Sammelrechnung), `stripe.js`, `auth.js` (Anmeldung per E-Mail mit Link oder Code über Supabase Auth), `speicher.js` (Supabase oder Attrappe), `umgebung.js` (alle Variablen), `zentrale.js` (Zentrale des Inhabers), `statistik.js` (eigene Statistik ohne Cookies, nur Tagessummen) |
+| `functions/api/` | der Server: `router.js` (Verteiler), `ki.js` (KI-Auswertung der Einbausituation), `zahlung.js` (Kauf des Aufmaßblatts, Nachweis, Webhook), `konten.js` (Betriebe, Projekte, Eingang, Tarif, Sammelrechnung), `stripe.js`, `auth.js` (Anmeldung per E-Mail mit Link oder Code über Supabase Auth), `speicher.js` (Supabase oder Attrappe), `umgebung.js` (alle Variablen), `zentrale.js` (Zentrale des Inhabers), `statistik.js` (eigene Statistik ohne Cookies, nur Tagessummen), `entwurf.js` (Zwischenstand eines Kundenlinks: jederzeit über den Link weitermachen, Zähler gegen Mehrfachnutzung) |
 | `supabase/schema.sql` | die Tabellen (Betriebe, Käufe, Stripe-Ereignisse, Protokoll, Statistik), im Supabase-Projekt ausführen; erneut ausführen schadet nicht |
-| `scripts/` | lokaler Testserver (mit Attrappen für Datenbank und Kasse), Browser-Prüfung in 13 Abschnitten (Abschnitt 11 gegen ein nachgestelltes Stripe, `stripe-attrappe.mjs`, Abschnitt 13 die Zentrale), Umbenennen |
+| `scripts/` | lokaler Testserver (mit Attrappen für Datenbank und Kasse), Browser-Prüfung in 14 Abschnitten (Abschnitt 11 gegen ein nachgestelltes Stripe, `stripe-attrappe.mjs`, Abschnitt 13 die Zentrale, Abschnitt 14 Fortsetzen, Paywall, Grenzen und Zwischenstand), Umbenennen |
 | `docs/ONLINE-STELLEN.md` | Schritt-für-Schritt-Anleitung |
 | `docs/ABRECHNUNG.md` | Preise und Abrechnungsregeln: was gezählt wird, wo die Paywalls sitzen, Nachbesserung, Schranken, was der Server erzwingt |
 | `docs/KI.md` | Die KI-Auswertung: was sie aus den Fotos liest (Einbausituation, nicht das alte Fenster), in welcher Reihenfolge, warum (mit Quellen), Modell und Kosten |
@@ -43,7 +43,7 @@ Cloudflare → Workers & Pages → Repository importieren → dieses Repo, Worke
 ```bash
 KI_ATTRAPPE=1 node scripts/dev-server.mjs                                       # Pilot, http://localhost:8788
 KI_ATTRAPPE=1 DATEN_ATTRAPPE=1 ZAHLUNG_ATTRAPPE=1 PORT=8789 node scripts/dev-server.mjs   # Stufe 2 nachgestellt: Anmeldecode 123456, Kassen ohne Stripe
-node scripts/pruefen.mjs                                                        # Browser-Prüfung (NUR=8 nur den Servermodus, NUR=11 nur die Stripe-Anbindung, NUR=13 nur die Zentrale)
+node scripts/pruefen.mjs                                                        # Browser-Prüfung (NUR=8 nur den Servermodus, NUR=11 nur die Stripe-Anbindung, NUR=13 nur die Zentrale, NUR=14 Grenzen und Zwischenstand)
 npx wrangler dev                                                                # wie bei Cloudflare, http://localhost:8787
 ```
 
