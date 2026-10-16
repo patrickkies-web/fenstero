@@ -146,7 +146,7 @@ Stripe geht auch allein, ohne Supabase: Dann kaufen Hauseigentümer das Aufmaßb
    <p>Code und Link gelten eine Stunde. Wenn Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail.</p>
    ```
    `{{ .Token }}` ist der Code, `{{ .ConfirmationURL }}` der Link. Die Vorlage **Confirm signup** genauso anpassen (sie geht beim allerersten Anmelden einer Adresse raus).
-8. Optional, **Authentication → Rate Limits**: Anmelde-E-Mails pro Stunde begrenzen (die Website bremst zusätzlich: 8 je 10 Minuten und IP).
+8. **Authentication → Rate Limits**: Mit eigenem Versand erlaubt Supabase zunächst nur 30 E-Mails pro Stunde ([Supabase: Custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)). Weil sich auch Hauseigentümer anmelden, den Wert für E-Mails erhöhen, zum Beispiel auf 100; die Website bremst zusätzlich (8 Anmelde-E-Mails je 10 Minuten und Anschluss).
 
 ### B. Stripe (Zahlungen), etwa 15 Minuten, erst im Testmodus
 
