@@ -19,12 +19,15 @@ export const ZAHLUNG = {
     const b = ctx.body || {}, kennung = str(b.kennung, 40);
     let mail = str(b.mail, 120).toLowerCase(), wer = '';
     if (!kennungOk(kennung)) throw new ApiFehler('Kennung des Projekts fehlt.');
-    if (ctx.sp && (await kontenDa(ctx.sp))) {
+    const mitKonten = ctx.sp ? await kontenDa(ctx.sp) : false;
+    if (mitKonten === undefined) throw new ApiFehler('Die Kasse ist gerade nicht erreichbar. Bitte gleich noch einmal.', 503); // Datenbank gestört: nicht ohne Konto verkaufen
+    if (mitKonten) {
       const n = await nutzer(ctx.k, (ctx.request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
       if (!n) throw new ApiFehler('Bitte sichere dein Aufmaß zuerst mit deiner E-Mail-Adresse.', 401, { anmelden: true });
       const e = await ctx.sp.eigenesHolen(kennung);
       if (!e) throw new ApiFehler('Bitte sichere dein Aufmaß zuerst.', 409, { sichern: true });
       if (entfernt(e) && (!e.nutzer || e.nutzer === n.id)) throw new ApiFehler('Dieses Aufmaß wurde gelöscht.', 410, { geloescht: true });
+      if (!e.nutzer) throw new ApiFehler('Bitte sichere dein Aufmaß zuerst.', 409, { sichern: true }); // ohne Besitzer: die App sichert es unter neuer Kennung
       if (e.nutzer !== n.id) throw new ApiFehler('Dieses Aufmaß gehört zu einem anderen Konto.', 403, { fremd: true });
       if (e.meta && e.meta.bezahlt && e.meta.bezahlt.session) return { ok: true, schon: true }; // schon freigeschaltet: kein zweiter Kauf
       mail = n.mail; wer = n.id;

@@ -137,16 +137,19 @@ const Server = {
     } catch (e) { toast(e.message); }
   },
   async tu(fn) { if (this.laeuft) return; this.laeuft = true; try { return await fn(); } catch (e) { toast(e.message || 'Das hat nicht geklappt.'); } finally { this.laeuft = false; } },
-  codeSenden(mail) { return this.tu(async () => { const sh = S.sheet; if (VAL.mail(mail) !== true) { sh.err = 'Bitte eine gültige E-Mail-Adresse eingeben.'; return render(); } await this.api('/api/konto/anmelden', { mail: mail }); sh.schritt = 'code'; sh.mail = mail; sh.err = ''; sh.code = ''; render(); toast('E-Mail ist unterwegs an ' + mail); }); },
+  codeSenden(mail) { return this.tu(async () => { const sh = S.sheet; if (VAL.mail(mail) !== true) { sh.err = 'Bitte eine gültige E-Mail-Adresse eingeben.'; return render(); } await this.api('/api/konto/anmelden', { mail: mail }); try { localStorage.setItem('aufmass.sitzung.anfrage', JSON.stringify({ mail: String(mail).trim().toLowerCase(), at: Date.now() })); } catch (e) { /* ok */ } sh.schritt = 'code'; sh.mail = mail; sh.err = ''; sh.code = ''; render(); toast('E-Mail ist unterwegs an ' + mail); }); },
   codePruefen(mail, code) { return this.tu(async () => { const sh = S.sheet; let r; try { r = await this.api('/api/konto/bestaetigen', { mail: mail, code: code }); } catch (e) { sh.err = e.message; return render(); } this.nachAnmeldung(r); }); },
   /* Nach Code oder Anmeldelink: Sitzung merken, ins Konto oder (neue Adresse) den Betrieb eintragen */
   nachAnmeldung(r) {
+    try { localStorage.removeItem('aufmass.sitzung.anfrage'); } catch (e) { /* ok */ }
     this.merken({ token: r.token, refresh: r.refresh, mail: r.mail });
     if (r.konto) { this.uebernehmen(r.konto); S.sheet = null; S.reg = null; login('betrieb', this.id, 'Willkommen zurück, ' + String(r.konto.acc.ap || '').split(' ')[0]); }
     else { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: r.mail }, err: {}, server: true }; go('reg'); toast('Fast geschafft: noch Ihren Betrieb eintragen.'); }
   },
   /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… hierher zurück, bei Fehlern mit #error=…;
-     die Werte verschwinden sofort aus der Adresszeile */
+     die Werte verschwinden sofort aus der Adresszeile. Ohne Rückfrage nur, wenn dieser Browser die E-Mail für genau diese Adresse in
+     der letzten Stunde angefordert hat oder schon so angemeldet ist; sonst könnte ein untergeschobener Link in ein fremdes Konto
+     anmelden. Dann fragt das Blatt „linkfrage“ mit der Adresse des Kontos */
   async linkAnmeldung() {
     const h = new URLSearchParams(location.hash.replace(/^#/, '')), token = h.get('access_token'), fehler = h.get('error_code') || h.get('error');
     if (!token && !fehler) return false;
@@ -154,7 +157,9 @@ const Server = {
     if (!token) { toast(fehler === 'otp_expired' ? 'Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.' : 'Die Anmeldung über den Link hat nicht geklappt. Bitte noch einmal.'); return true; }
     const r = await fetch('/api/konto/sitzung', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ token: token, refresh: h.get('refresh_token') || '' }) }).then((x) => x.json()).catch(() => null);
     if (!r || !r.ok) { toast((r && r.fehler) || 'Die Anmeldung über den Link hat nicht geklappt. Bitte noch einmal.'); return true; }
-    this.nachAnmeldung(r);
+    let a = null; try { a = JSON.parse(localStorage.getItem('aufmass.sitzung.anfrage') || 'null'); } catch (e) { a = null; }
+    if ((a && a.mail === r.mail && Date.now() - (Number(a.at) || 0) < 3600000) || (this.sitzung && this.sitzung.mail === r.mail)) { this.nachAnmeldung(r); return true; }
+    S.sheet = { k: 'linkfrage', r: r }; render();
     return true;
   },
   registrieren(d) { return this.tu(async () => { const r = await this.api('/api/konto/registrieren', { firma: d.firma, ap: d.ap, tel: d.tel, plz: d.plz, col: d.col, agb: !!d.agb }); this.uebernehmen(r.konto); S.reg = null; S._feier = 'willkommen'; login('betrieb', this.id, 'Willkommen, ' + String(d.ap || '').trim().split(' ')[0]); }); },
@@ -865,6 +870,7 @@ function loginServer(s) {
     '<p class="sub center" style="margin-top: 14px">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p>';
 }
 const SHEETS = {
+  linkfrage: (s) => '<h3>Mit diesem Konto anmelden?</h3><p class="sub">Der Link meldet Sie als <b style="overflow-wrap: anywhere">' + esc(s.r.mail) + '</b> an. Angefordert wurde er nicht in diesem Browser. Melden Sie sich nur an, wenn das Ihre E-Mail-Adresse ist.</p>' + (Server.sitzung && Server.sitzung.mail && Server.sitzung.mail !== s.r.mail ? '<p class="sub">Gerade sind Sie als <b style="overflow-wrap: anywhere">' + esc(Server.sitzung.mail) + '</b> angemeldet und werden dort abgemeldet.</p>' : '') + '<div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Nicht anmelden</button><button type="button" class="btn primary" data-act="srv-link-ja">Anmelden</button></div>',
   login: (s) => (Server.an ? loginServer(s) : '<h3>Anmelden für Fensterbauer</h3><p class="sub" style="margin: -4px 0 12px">Ein Kunde hat Ihnen ein eeziframes-Aufmaß geschickt? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button>, dann „Code vom Kunden einfügen“. Die ersten 3 Projekte sind frei.</p><form class="form" data-form="login" novalidate><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email"></div><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-pw">Passwort</label><input id="lg-pw" type="password" data-in="lg:pw" value="" autocomplete="current-password">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Pilotphase: Ihr Konto liegt nur in diesem Browser.</small>') + '</div><div class="row between"><button type="button" class="linkbtn" data-act="toast" data-v="In der Pilotphase liegt Ihr Konto nur in diesem Browser; ein Zurücksetzen per E-Mail kommt mit dem Start.">Passwort vergessen?</button><button type="submit" class="btn primary">Anmelden</button></div></form>' +
     '<p class="sub center">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p><p class="sub center">Noch kein Konto? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>'),
   linkimport: () => '<h3>Code vom Kunden einfügen</h3><p class="sub">Ihr Kunde schickt nach dem Absenden einen Aufmaß-Code, zum Beispiel als Antwort in WhatsApp; bei einem eeziframes-Aufmaßblatt steht er auf der letzten Seite. Fügen Sie ihn hier ein: Gehört er zu einem Ihrer Projekte, landet das Aufmaß dort, sonst entsteht ein neues Projekt.</p><div class="f"><textarea id="code-in" rows="4" placeholder="AM1.…"></textarea></div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="linkimport">Übernehmen</button></div>',
@@ -993,6 +999,7 @@ function act(name, el) {
     case 'back': return back();
     case 'sheet': { S.sheet = { k: v, id: id }; return render(); }
     case 'sheet-close': { S.sheet = null; return render(); }
+    case 'srv-link-ja': { const r = S.sheet && S.sheet.k === 'linkfrage' ? S.sheet.r : null; S.sheet = null; if (!r) return render(); if (Server.sitzung && Server.sitzung.mail !== r.mail) Server.abmelden(); return Server.nachAnmeldung(r); }
     case 'toast': return toast(v);
     case 'reg': {
       if (Server.an) { if (S.acc[Server.id] && Server.sitzung) return login('betrieb', Server.id); if (Server.sitzung) { S.sheet = null; S.reg = { role: 'betrieb', path: 'service', step: 1, d: { mail: Server.sitzung.mail }, err: {}, server: true }; return go('reg'); } S.sheet = { k: 'login', zweck: 'reg' }; return render(); }

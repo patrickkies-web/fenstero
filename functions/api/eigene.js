@@ -27,18 +27,20 @@ export const kaufAm = (meta) => (meta && meta.bezahlt ? Number(meta.bezahlt.at) 
    verwechseln mit meta.geloescht, den gelöschten Fenstern) */
 export const entfernt = (r) => !!(r && r.meta && r.meta.entfernt);
 const weg = () => new ApiFehler('Dieses Aufmaß wurde gelöscht.', 410, { geloescht: true });
+/* Aufmaß ohne Besitzer (die Anmeldung wurde anders als über die App gelöscht): nicht übernehmen, die App sichert ihre Kopie unter neuer Kennung */
+const verwaist = () => new ApiFehler('Dieses Aufmaß gehört zu keinem Konto mehr.', 409, { verwaist: true });
 /* Der Kauf, wie ihn die App braucht (Nachweis für das Blatt auf jedem Gerät); nur für den Besitzer */
 const bezahltSicht = (meta) => (meta && meta.bezahlt ? { session: meta.bezahlt.session || '', token: meta.bezahlt.token || '', at: Number(meta.bezahlt.at) || 0 } : null);
 const kurz = (r) => ({ kennung: r.kennung, name: str(r.name, 60), fenster: Number((r.meta || {}).aktuell) || 0, bezahlt: !!(r.meta && r.meta.bezahlt), geaendert: r.updated_at || '', angelegt: r.created_at || '' });
 
 /* Gibt es die Tabelle? Kurz gemerkt, damit /api/status nicht bei jedem Aufruf nachfragt. Eine Störung der Datenbank gilt nicht als
-   „fehlt“ (sonst liefe die Kasse eine Minute lang ohne Konto): dann bleibt der letzte bekannte Stand, ungemerkt */
-let da = { wert: false, bis: 0 };
+   „fehlt“ (sonst liefe die Kasse ohne Konto): dann bleibt der letzte bekannte Stand, ungemerkt; gab es noch keinen, undefined */
+let da = { wert: false, bis: 0, je: false };
 export async function kontenDa(sp) {
   if (!sp || !sp.eigeneDa) return false;
   if (da.bis > Date.now()) return da.wert;
-  let wert = false; try { wert = await sp.eigeneDa(); } catch (e) { return da.wert; }
-  da = { wert: wert, bis: Date.now() + (wert ? 10 * 60000 : 60000) };
+  let wert = false; try { wert = await sp.eigeneDa(); } catch (e) { return da.je ? da.wert : undefined; }
+  da = { wert: wert, bis: Date.now() + (wert ? 10 * 60000 : 60000), je: true };
   return wert;
 }
 async function kunde(ctx) {
@@ -99,7 +101,7 @@ export const EIGENE = {
     if (e === undefined) return { ok: true, aus: true };
     if (e && e.nutzer && e.nutzer !== n.id) throw fremd();
     if (entfernt(e)) throw weg(); // auch ohne Besitzer (Konto gelöscht)
-    if (e && !e.nutzer) throw fremd();
+    if (e && !e.nutzer) throw verwaist();
     return { ok: true, entwurf: e ? entwurfSicht(e) : null, meta: e ? metaSicht(e.meta) : null, bezahlt: e ? bezahltSicht(e.meta) : null, grenzen: GRENZEN, jetzt: Date.now() };
   },
   'POST /api/kunde/aufmass/:kennung': async (ctx) => {
@@ -108,16 +110,16 @@ export const EIGENE = {
     if (vorhanden === undefined) return { ok: true, aus: true };
     if (vorhanden && vorhanden.nutzer && vorhanden.nutzer !== n.id) throw fremd();
     if (entfernt(vorhanden)) throw weg();
-    if (vorhanden && !vorhanden.nutzer) throw fremd();
+    if (vorhanden && !vorhanden.nutzer) throw verwaist();
     if (!vorhanden) { const l = await ctx.sp.eigeneVonNutzer(n.id); if (l && l.length >= MAX_AUFMASSE) throw new ApiFehler('In einem Konto haben ' + MAX_AUFMASSE + ' Aufmaße Platz. Lösche ein altes, um dieses zu sichern.', 409, { voll: true }); }
     /* Ein vorher als Gast gekauftes Blatt (Nachweis aus diesem Browser) kommt mit ins Konto, wenn die Unterschrift stimmt */
     const b = ctx.body || {}, kauf = b.kauf && typeof b.kauf === 'object' ? { session: str(b.kauf.session, 120), token: str(b.kauf.token, 64) } : null;
     const kaufEcht = !!(kauf && kauf.session && kauf.token && (!vorhanden || !kaufAm(vorhanden.meta)) && (await kaufNachweis(ctx.k, k, kauf.session)) === kauf.token);
-    let m = null, andere = false, ist_weg = false;
+    let m = null, andere = false, ist_weg = false, ohne = false;
     const res = await ctx.sp.eigenesAendern(k, n.id, (r) => {
       if (r.nutzer && r.nutzer !== n.id) { andere = true; return false; }
       if (entfernt(r)) { ist_weg = true; return false; } // inzwischen gelöscht
-      if (r.version && !r.nutzer) { andere = true; return false; }
+      if (r.version && !r.nutzer) { ohne = true; return false; }
       m = eingangMischen(r, e, jetzt, false, kaufAm(r.meta));
       if (!m.grenze && kaufEcht && !kaufAm(r.meta)) r.meta = Object.assign({}, r.meta, { bezahlt: { session: kauf.session, token: kauf.token, at: jetzt } });
       return !m.grenze;
@@ -125,6 +127,7 @@ export const EIGENE = {
     if (res && res.fehlt) return { ok: true, aus: true };
     if (andere) throw fremd();
     if (ist_weg) throw weg();
+    if (ohne) throw verwaist();
     if (m && m.grenze) throw new ApiFehler(GRENZ_TEXT, 409, { grenze: true });
     if (!vorhanden) zaehlen(ctx, 'ereignis:kunde_gesichert');
     const row = res.row || {};

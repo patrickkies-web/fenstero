@@ -127,6 +127,11 @@ create table if not exists public.eigene (
 );
 create index if not exists eigene_nutzer_idx on public.eigene (nutzer);
 create index if not exists eigene_updated_idx on public.eigene (updated_at);
+-- Wer die Tabelle mit einer früheren Fassung angelegt hat (nutzer not null, on delete cascade): angleichen, damit Löschmarken das
+-- Löschen der Anmeldung überstehen
+alter table public.eigene alter column nutzer drop not null;
+alter table public.eigene drop constraint if exists eigene_nutzer_fkey;
+alter table public.eigene add constraint eigene_nutzer_fkey foreign key (nutzer) references auth.users(id) on delete set null;
 
 -- Kein direkter Zugriff aus dem Browser: RLS an, keine Regeln → nur der geheime Schlüssel des Servers kommt durch
 alter table public.betriebe   enable row level security;

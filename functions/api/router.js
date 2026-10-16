@@ -40,7 +40,7 @@ export async function api(request, env, ctx0) {
   globalThis.Abrechnung.setPreise(k.preise);
   const warte = (p) => (ctx0 && ctx0.waitUntil ? ctx0.waitUntil(p) : p);
   try {
-    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: k.daten ? await kontenDa(speicher(k)) : false, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), hinweise: k.hinweise.length ? k.hinweise : undefined });
+    if (pfad === '/api/status') return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: k.daten ? !!(await kontenDa(speicher(k))) : false, preise: k.preise, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), hinweise: k.hinweise.length ? k.hinweise : undefined });
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });
       if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), ['ereignis:ki_foto']).catch(() => false)); return r; }
