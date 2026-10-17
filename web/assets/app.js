@@ -571,11 +571,12 @@ function specRows(w) {
   return rows;
 }
 /* Kompakter Aufmaß-Code: nur Abweichungen vom Standard, für den Weg zum Fensterbauer ohne Server; ohne die Zähler gegen
-   Mehrfachnutzung (Kennung, erstes Speichern, Änderungen, letztes Speichern), die bleiben in der App und beim Zwischenstand */
+   Mehrfachnutzung (Kennung, erstes Speichern, Änderungen, letztes Speichern), die bleiben in der App und beim Zwischenstand.
+   Die Kennungen der Fotos nur mit Link: Dort liegen die Fotos beim Server; ohne Link stehen sie nur im Aufmaßblatt */
 const NUR_APP = { wid: 1, t0: 1, aend: 1, ts: 1 };
 function packProject(windows, proj, betrieb) {
   const base = baseWin();
-  const ws = windows.map((w) => { const o = {}; Object.keys(w).forEach((k) => { if (!NUR_APP[k] && JSON.stringify(w[k]) !== JSON.stringify(base[k])) o[k] = w[k]; }); if (o.plan && o.plan.bild) o.plan = Object.assign({}, o.plan, { bild: '' }); return o; });
+  const ws = windows.map((w) => { const o = {}; Object.keys(w).forEach((k) => { if (!NUR_APP[k] && JSON.stringify(w[k]) !== JSON.stringify(base[k])) o[k] = w[k]; }); if (o.plan && o.plan.bild) o.plan = Object.assign({}, o.plan, { bild: '' }); if (!betrieb) delete o.bilder; return o; });
   const runde = betrieb && S.nb && S.nb.runde ? S.nb.runde : (betrieb && S.sent && S.sent.runde) || 1;
   const json = JSON.stringify(Object.assign({ v: 1, b: betrieb ? betrieb.code : '', p: proj, w: ws, t: Date.now() }, runde > 1 ? { r: runde } : {}, runde > 1 && S.nb && S.nb.teil ? { m: 1 } : {}));
   const bytes = new TextEncoder().encode(json);
@@ -1274,8 +1275,9 @@ const AI = (function () {
       verh: v !== null && v >= 0.2 && v <= 5 ? Math.round(v * 100) / 100 : null
     };
   }
+  /* file: das Foto, oder schon verkleinert ({ blob, w, h } aus shrink, wie es auch auf dem Gerät abgelegt wird) */
   async function analyze(file, side, signal, onPart, neu) {
-    const img = await shrink(file), res = { w: img.w, h: img.h, befund: null, errs: {} };
+    const img = file && file.blob ? file : await shrink(file), res = { w: img.w, h: img.h, befund: null, errs: {} };
     try {
       res.befund = readBefund(await sample.json('', { images: img.blob, signal: signal, aufgabe: neu ? 'wand' : 'einbau', seite: side }), side);
       if (!res.befund) res.errs.befund = 'error';
@@ -1300,7 +1302,7 @@ const AI = (function () {
       hints: ['Führungsschienen beim Ausbau lösen; der Vorbaukasten kann vermutlich bleiben.'],
       pruefen: ['Luftschicht oder Kerndämmung hinter dem Klinker klären, davon hängt der Anschluss ab.'], fach: { rollladen: 'vorbau', anschlag: 'aussen', fassade: 'klinker', fensterbank: 'aluminium', geschoss: 'eg', erreichbar: true, geruest: false }, verh: 0.86 } }
   };
-  return { init: init, available: available, analyze: analyze, errText: errText, DEMO: DEMO };
+  return { init: init, available: available, analyze: analyze, shrink: shrink, errText: errText, DEMO: DEMO };
 })();
 
 /* ---------- Zustand ---------- */
@@ -1360,7 +1362,7 @@ function lokalSpeichern() {
     return true;
   } catch (e) { return false; } // ohne Speicher weiter
 }
-/* Speichern: im Browser und beim Kundenlink zusätzlich als Zwischenstand auf dem Server (kurz gesammelt, ohne Fotos) */
+/* Speichern: im Browser und beim Kundenlink zusätzlich als Zwischenstand auf dem Server (kurz gesammelt; die Fotos gehen getrennt, fotosHochladen) */
 function persist() {
   entwurfStand(); // auch als Gast: Stand und „offen“ merken, damit nach dem Sichern alles hochgeht
   lokalSpeichern();
@@ -1586,7 +1588,7 @@ function kontoKarte() {
   if (KS && S.sync.voll) return '<div class="card merk-karte konto-karte gast"><p class="eyebrow">Nicht gesichert</p><p>' + esc(VOLL_TEXT) + '</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="meinkonto">Dein Konto</button></div></div>';
   if (KS) {
     const n = (S.konto.liste || []).length;
-    return '<div class="card merk-karte konto-karte"><p class="eyebrow">Gesichert</p><p>In deinem Konto <b class="mail">' + esc(KS.mail) + '</b>, auf jedem Gerät. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="meinkonto">' + (n > 1 ? 'Deine ' + n + ' Aufmaße' : 'Dein Konto') + '</button></div></div>';
+    return '<div class="card merk-karte konto-karte"><p class="eyebrow">Gesichert</p><p>In deinem Konto <b class="mail">' + esc(KS.mail) + '</b>, auf jedem Gerät, mit deinen Fotos.</p><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="meinkonto">' + (n > 1 ? 'Deine ' + n + ' Aufmaße' : 'Dein Konto') + '</button></div></div>';
   }
   const ab = S.konto.abgelaufen;
   return '<div class="card merk-karte konto-karte gast"><p class="eyebrow">' + (ab ? 'Bitte neu anmelden' : 'Nur auf diesem Gerät') + '</p><p>' + (ab ? 'Deine Anmeldung ist abgelaufen. Melde dich wieder an, dann wird dein Aufmaß weiter gesichert.' : 'Sichere dein Aufmaß mit deiner E-Mail-Adresse, dann geht es auf jedem Gerät weiter und nichts geht verloren. Kein Passwort.') + '</p><div class="pill-row"><button type="button" class="btn primary" data-act="' + (ab ? 'anmelden' : 'sichern') + '">' + (ab ? 'Anmelden' : 'Aufmaß sichern') + '</button></div></div>';
@@ -1594,7 +1596,7 @@ function kontoKarte() {
 /* Hinweis im Kundenlink: jederzeit über den Link weitermachen */
 function linkMerk(name) {
   const server = SERVER.daten && !S.sync.aus && S.sync.ok, bis = S.betrieb && S.betrieb.expires ? S.betrieb.expires : '';
-  return '<div class="card merk-karte"><p class="eyebrow">Jederzeit weitermachen</p><p>Öffne einfach wieder den Link von <b>' + esc(name) + '</b>. ' + (server ? 'Deine Angaben sind gespeichert, auch für ein anderes Gerät. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.' : 'Deine Angaben bleiben in diesem Browser gespeichert; öffne den Link später im selben Browser.') + (bis ? ' Der Link gilt bis ' + esc(bis) + '.' : '') + '</p></div>';
+  return '<div class="card merk-karte"><p class="eyebrow">Jederzeit weitermachen</p><p>Öffne einfach wieder den Link von <b>' + esc(name) + '</b>. ' + (server ? 'Deine Angaben sind gespeichert, auch für ein anderes Gerät. Deine Fotos sieht ' + esc(name) + ' erst, wenn du sendest.' : 'Deine Angaben bleiben in diesem Browser gespeichert; öffne den Link später im selben Browser.') + (bis ? ' Der Link gilt bis ' + esc(bis) + '.' : '') + '</p></div>';
 }
 /* Nach dem Senden bleibt der Code, wie er abgeschickt wurde */
 const curCode = () => (S.sent && S.sent.code) || packProject(S.windows, S.proj, S.betrieb);
@@ -2033,7 +2035,7 @@ SCREENS.blatt = () => {
     '<div class="kv">' + items.map((r) => '<div><span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>').join('') + '</div>' +
     (kiLaeuftFuer() ? kiLaeuftKarte('Die Auswertung der Fotos kommt gleich dazu. Wer jetzt sendet, wartet kurz, damit sie mitgeht.') : '') +
     '<p class="sub" style="padding: 0 6px">Nach dem Absenden ist der Link erledigt. Ändern kannst du danach nur noch über ' + esc(bn) + '.</p>';
-  return { html: html, back: ['Zurück', 'anfrage2'], bar: { label: S.kiWartet === 'senden' ? 'Fotos werden ausgewertet …' : (S.nb ? 'Erneut an ' : 'An ') + bn + ' senden', act: 'send', dis: !voll || S.kiWartet === 'senden' } };
+  return { html: html, back: ['Zurück', 'anfrage2'], bar: { label: S.kiWartet === 'senden' ? S.warteText || 'Einen Moment …' : (S.nb ? 'Erneut an ' : 'An ') + bn + ' senden', act: 'send', dis: !voll || S.kiWartet === 'senden' } };
 };
 /* Übersicht vor dem Senden: vollständig oder nicht, aber keine Maßliste zum Abfotografieren */
 function checkCard(x, i) {
@@ -2123,7 +2125,7 @@ SCREENS.sichern = () => {
   const z = S.sichern || (S.sichern = { zweck: 'sichern', schritt: 1, mail: '', agb: false, code: '', err: {} }), e = z.err || {}, kauf1 = z.zweck === 'kauf';
   const kopf = z.zweck === 'anmelden' ? ['Anmelden', 'Weiter mit deinem Aufmaß.', 'Wir schicken dir einen Code an die E-Mail-Adresse, mit der du dein Aufmaß gesichert hast. Kein Passwort.']
     : kauf1 ? ['Schritt 1 von 2', 'Dein Aufmaß sichern.', 'Für das Aufmaßblatt brauchst du ein Konto: E-Mail-Adresse und Code, kein Passwort. So ist dein Blatt auf jedem Gerät da und geht nicht verloren.']
-    : ['Aufmaß sichern', 'Auf jedem Gerät weitermachen.', 'Wir schicken dir einen Code per E-Mail. Kein Passwort, kein Newsletter. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.'];
+    : ['Aufmaß sichern', 'Auf jedem Gerät weitermachen.', 'Wir schicken dir einen Code per E-Mail. Kein Passwort, kein Newsletter. Deine Fotos kommen mit ins Konto, nur für dich.'];
   const zurueck = kauf1 ? 'teilen' : 'home';
   if (z.schritt === 2) {
     /* Wie viele Stellen der Code hat, stellt man bei Supabase ein (6 bis 10); die App nimmt jede dieser Längen. Ein Link statt Code
@@ -2154,9 +2156,9 @@ SCREENS.meinkonto = () => {
   const karten = liste.map((a) => '<div class="konto-zeile"><button type="button" class="wincard konto-aufmass" data-act="projekt-oeffnen" data-k="' + esc(a.kennung) + '"><span class="ic">' + FILE_IC + '</span><span class="tx"><span class="pos">' + (a.kennung === jetzt ? 'GERADE GEÖFFNET' : 'GEÄNDERT AM ' + esc(datum(a.geaendert))) + '</span><span class="ti">' + esc(name(a)) + '</span><span class="di">' + a.fenster + ' Fenster' + (a.bezahlt ? ' · freigeschaltet' : '') + '</span></span>' + CHEV + '</button>' +
     '<button type="button" class="konto-weg" data-act="konto-frage" data-v="weg:' + esc(a.kennung) + '" aria-label="' + esc(name(a)) + ' löschen">' + MUELL + '</button></div>' +
     (a.kennung === wegK ? frageKarte(['„' + name(a) + '“ löschen?', (a.kennung === jetzt ? 'Das Aufmaß wird aus deinem Konto und von diesem Gerät gelöscht.' : 'Das Aufmaß wird aus deinem Konto gelöscht, auf allen Geräten.') + (a.bezahlt ? ' Es ist freigeschaltet; mit dem Löschen ist auch das weg. Heruntergeladene Aufmaßblätter behältst du.' : '') + ' Das lässt sich nicht rückgängig machen.', 'aufmass-weg-ja', 'Aufmaß löschen', a.kennung]) : '')).join('');
-  const bestaetigen = frage === 'abmelden' ? ['Abmelden?', 'Dein Aufmaß bleibt in deinem Konto. Auf diesem Gerät wird es entfernt; Fotos und eingezeichnete Bilder der Lage, die nur hier liegen, gehen dabei verloren.', 'konto-abmelden-ja', 'Abmelden']
+  const bestaetigen = frage === 'abmelden' ? ['Abmelden?', 'Dein Aufmaß bleibt in deinem Konto, mit seinen Fotos. Auf diesem Gerät wird es entfernt; eingezeichnete Bilder der Lage, die nur hier liegen, gehen dabei verloren.', 'konto-abmelden-ja', 'Abmelden']
     : frage === 'loeschen' ? ['Konto löschen?', 'Dein Konto und alle Aufmaße darin werden gelöscht, auch auf diesem Gerät. Gekaufte Aufmaßblätter, die du heruntergeladen hast, behältst du. Das lässt sich nicht rückgängig machen.', 'konto-loeschen-ja', 'Konto löschen'] : null;
-  const html = hd('Dein Konto', 'Alles gesichert.', 'Angemeldet als <b class="mail">' + esc(KS.mail) + '</b>. Deine Aufmaße sind auf jedem Gerät da, auf dem du dich anmeldest. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.') +
+  const html = hd('Dein Konto', 'Alles gesichert.', 'Angemeldet als <b class="mail">' + esc(KS.mail) + '</b>. Deine Aufmaße sind mit ihren Fotos auf jedem Gerät da, auf dem du dich anmeldest.') +
     (S.sync.voll ? noteBox('Das geöffnete Aufmaß ist noch nicht gesichert: In deinem Konto haben ' + MAX_AUFMASSE + ' Aufmaße Platz. Lösche ein altes, dann kommt es hinein.', null, 'warn') : '') +
     '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">Deine Aufmaße.</h2><span class="sub">' + liste.length + ' im Konto</span></div><div class="liste-in">' + (karten || '<p class="sub">Noch keines gesichert. Sobald du ein Fenster gespeichert hast, liegt dein Aufmaß hier.</p>') + '<button type="button" class="dashed" data-act="konto-neu">' + PLUS + 'Neues Aufmaß beginnen</button></div></section>' +
     (bestaetigen ? frageKarte(bestaetigen) : '') +
@@ -2249,9 +2251,10 @@ const fileBase = () => 'Aufmass-' + (slug(S.proj.name || (S.betrieb && S.betrieb
 /* Die PDF zeichnet /assets/blatt.js (gemeinsam mit dem Betriebsbereich). Zwei Ausgaben aus der App:
    'kunde' für die eigenen Unterlagen (Du), 'fensterbauer' so, wie es an einen Betrieb geht (Sie); beide mit der Seite für den Fensterbauer am Ende. */
 const BLATT_H = { derive: derive, lab: lab, num: num, th: thousand, col: (k) => { const c = colorOf(k); return [c.name, c.code, c.solid || c.bg]; }, farbe: (w, seite) => { const c = rahmenFarbe(w, seite); return [c.name, c.code, c.solid || c.bg]; }, farbeZeile: farbZeile, griffFarbe: (w) => griffFarbe(w).name, orn: (k) => (ORN.find((o) => o.k === k) || ORN[0]).label, opening: openingText, sonne: sonneText, innen: innenText };
-function blattPDF(variante) {
+/* fotos: Kennung → { data, w, h } (fotosFuerBlatt); ohne stehen die Positionen ohne Fotos da */
+function blattPDF(variante, fotos) {
   if (!window.Blatt) return null;
-  return window.Blatt.pdf({ variante: S.betrieb ? 'fensterbauer' : (variante || 'kunde'), fenster: S.windows, projekt: S.proj, code: packProject(S.windows, S.proj, null), portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H });
+  return window.Blatt.pdf({ variante: S.betrieb ? 'fensterbauer' : (variante || 'kunde'), fenster: S.windows, projekt: S.proj, code: packProject(S.windows, S.proj, null), portalUrl: PORTAL_URL, portalKurz: PORTAL_KURZ, appKurz: PORTAL_KURZ + '/app/', qr: window.qrcode, h: BLATT_H, fotos: fotos || {} });
 }
 const blattSchrift = () => (window.Blatt ? window.Blatt.schrift() : Promise.resolve(false));
 /* PDF direkt weitergeben: auf dem Telefon per Teilen-Menü (WhatsApp, Mail), sonst herunterladen */
@@ -2259,7 +2262,7 @@ async function pdfTeilen() {
   if (S.betrieb) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
   if (!(await kiVorher('blatt'))) return;
   await blattSchrift();
-  const pdf = blattPDF('fensterbauer');
+  const pdf = blattPDF('fensterbauer', await fotosFuerBlatt(S.windows));
   if (pdf && navigator.canShare && typeof File === 'function') {
     try {
       const file = new File([pdf], fileBase() + '.pdf', { type: 'application/pdf' });
@@ -2286,7 +2289,7 @@ async function saveDatei(variante) {
   if (!FREI()) return go('teilen');
   if (!(await kiVorher('blatt'))) return;
   await blattSchrift();
-  const fb = variante === 'fensterbauer', pdf = blattPDF(fb ? 'fensterbauer' : 'kunde'), name = fileBase() + (fb ? '-fuer-Fensterbauer' : '') + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
+  const fb = variante === 'fensterbauer', pdf = blattPDF(fb ? 'fensterbauer' : 'kunde', await fotosFuerBlatt(S.windows)), name = fileBase() + (fb ? '-fuer-Fensterbauer' : '') + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
   if (!DL && DLP) await DLP;
   if (DL) {
     try { await DL.save({ filename: name, data: data }); S._feier = 'pdf'; toast('Gespeichert'); }
@@ -2742,9 +2745,9 @@ function aendStand(w, jetzt) {
 /* Fingerabdruck eines Fensters ohne Zähler und ohne das abgeleitete Bild der Lage (gleiche Regel wie auf dem Server) */
 const stabil = (v) => (Array.isArray(v) ? '[' + v.map(stabil).join(',') + ']' : v && typeof v === 'object' ? '{' + Object.keys(v).sort().filter((k) => v[k] !== undefined).map((k) => JSON.stringify(k) + ':' + stabil(v[k])).join(',') + '}' : JSON.stringify(v === undefined ? null : v));
 function fensterFp(w) { const o = Object.assign({}, w); delete o.wid; delete o.t0; delete o.aend; delete o.ts; if (o.plan && typeof o.plan === 'object') { o.plan = Object.assign({}, o.plan); delete o.plan.bild; delete o.plan.bw; delete o.plan.bh; } return stabil(o); }
-/* Für die Zählung der Änderungen: ohne die Auswertung der Fotos und die Zahl der Fotos. Eine Auswertung, die nach dem Speichern
-   ankommt, oder ein neues Foto ist keine Änderung des Kunden (gleiche Regel wie auf dem Server) */
-function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; return fensterFp(o); }
+/* Für die Zählung der Änderungen: ohne die Auswertung der Fotos, die Zahl der Fotos und ihre Kennungen. Eine Auswertung, die nach
+   dem Speichern ankommt, oder ein neues Foto ist keine Änderung des Kunden (gleiche Regel wie auf dem Server) */
+function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; delete o.bilder; return fensterFp(o); }
 const neueWid = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const kopie = (o) => JSON.parse(JSON.stringify(o));
 const datumKurz = (ms) => { try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return ''; } };
@@ -2919,9 +2922,10 @@ const parseTag = (t) => { const m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(Strin
 /* Noch nicht Gesendetes beim Verlassen der Seite mitnehmen; nach einer Funkstille erneut versuchen; zurück im Tab nachsehen, ob ein
    anderes Gerät weitergemacht hat (höchstens alle 20 Sekunden) */
 window.addEventListener('pagehide', () => { if (S.sync && S.sync.offen && entwurfAn() && S.sync.geladen) entwurfSenden(true); });
-window.addEventListener('online', () => { if (S.betrieb && SERVER.daten && S.sync && !S.sync.geladen) return linkPruefen(); if (!S.betrieb && kontoAn() && !S.sync.geladen) return entwurfLaden(); if (S.sync && S.sync.offen) entwurfPlanen(true); });
+window.addEventListener('online', () => { fotosHochladen(); if (S.betrieb && SERVER.daten && S.sync && !S.sync.geladen) return linkPruefen(); if (!S.betrieb && kontoAn() && !S.sync.geladen) return entwurfLaden(); if (S.sync && S.sync.offen) entwurfPlanen(true); });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible' || !(S.betrieb || kontoAn())) return;
+  fotosHochladen();
   if (S.betrieb && SERVER.daten && !S.sync.geladen) return linkPruefen(); // das erste Prüfen ist nicht durchgekommen
   if (!S.betrieb && S.sync.voll) return kontoListe(); // Konto voll: vielleicht inzwischen anderswo Platz gemacht
   if (!entwurfAn() || S.sync.laeuft) return;
@@ -3071,9 +3075,9 @@ async function naechstesAufmass() {
   go('home');
 }
 /* Auf einem anderen Gerät gelöscht (oder mit dem Konto): auch hier weg */
-function aufmassEntfernt() { hierLeeren(); toast('Dieses Aufmaß wurde gelöscht, auch auf diesem Gerät.'); return naechstesAufmass(); }
+function aufmassEntfernt() { fotosHierWeg(true); hierLeeren(); toast('Dieses Aufmaß wurde gelöscht, auch auf diesem Gerät.'); return naechstesAufmass(); }
 /* Gehört zu einem anderen Konto (geteiltes Gerät): nicht in dieses Konto kopieren, sondern von diesem Gerät nehmen; im anderen Konto bleibt es */
-function aufmassFremd() { hierLeeren(); toast('Dieses Aufmaß gehört zu einem anderen Konto und wurde von diesem Gerät entfernt.'); return naechstesAufmass(); }
+function aufmassFremd() { fotosHierWeg(false); hierLeeren(); toast('Dieses Aufmaß gehört zu einem anderen Konto und wurde von diesem Gerät entfernt.'); return naechstesAufmass(); }
 /* Ein Aufmaß aus dem Konto auf dieses Gerät holen (anderes Gerät, oder in „Dein Konto“ gewählt) */
 async function projektOeffnen(k, still) {
   OEFFNET++;
@@ -3108,7 +3112,7 @@ async function nachAnmeldung(r, zweck, bestaetigt) {
   kontoMerken({ token: r.token, refresh: r.refresh, mail: r.mail }); S.konto.abgelaufen = ''; S.konto.liste = r.aufmasse || []; listeZuletzt = Date.now();
   if (r.aus) { SERVER.konten = false; toast('Konten sind gerade nicht verfügbar.'); return go('home'); }
   SERVER.konten = true;
-  if (S.kauf && S.kauf.konto && S.kauf.konto !== r.mail) hierLeeren(true); // gehört zu einem anderen Konto (dort ist es gesichert): nicht hineinkopieren
+  if (S.kauf && S.kauf.konto && S.kauf.konto !== r.mail) { fotosHierWeg(false); hierLeeren(true); } // gehört zu einem anderen Konto (dort ist es gesichert): nicht hineinkopieren
   const hier = S.windows.length > 0, imKonto = S.kauf && S.kauf.kennung && S.konto.liste.some((a) => a.kennung === S.kauf.kennung);
   let a = true;
   if (!hier && !imKonto && S.konto.liste.length) { await projektOeffnen(S.konto.liste[0].kennung, true); }
@@ -3122,6 +3126,7 @@ async function nachAnmeldung(r, zweck, bestaetigt) {
     if (hier && zweck !== 'kauf') a = await entwurfAbgleichen();
   }
   S.sichern = null;
+  fotosHochladen(); // als Gast aufgenommene Fotos gehen jetzt ins Konto
   if (zweck === 'kauf') return kaufMitKonto();
   go('home');
   toast(S.sync.voll ? VOLL_TEXT : a === 'fehler' ? 'Angemeldet. Dein Aufmaß wird gesichert, sobald die Verbindung steht.' : zweck === 'anmelden' ? 'Angemeldet' : 'Gesichert, in deinem Konto.');
@@ -3161,10 +3166,11 @@ async function kontoWechseln(r) {
 async function kontoStart() {
   const liste = await kontoListe();
   if (!KS) return render();
-  if (S.kauf && S.kauf.konto && S.kauf.konto !== KS.mail) hierLeeren(true); // gehört zu einem anderen Konto
+  if (S.kauf && S.kauf.konto && S.kauf.konto !== KS.mail) { fotosHierWeg(false); hierLeeren(true); } // gehört zu einem anderen Konto
   if (liste && !S.windows.length && !(S.kauf && S.kauf.kennung && liste.some((a) => a.kennung === S.kauf.kennung)) && liste.length) return projektOeffnen(liste[0].kennung, true);
   const k = kauf(); kennung(); k.mail = KS.mail; k.agb = true; lokalSpeichern();
   entwurfLaden();
+  fotosHochladen();
 }
 /* Sichern-Ablauf: zweck 'sichern' (Gast sichert), 'anmelden' (anderes Gerät), 'kauf' (vor dem Freischalten) */
 function sichernStart(zweck) { S.sichern = { zweck: zweck, schritt: 1, mail: S.konto.abgelaufen || (S.kauf && S.kauf.mail) || '', agb: zweck === 'anmelden', code: '', err: {}, laeuft: false }; go('sichern'); }
@@ -3209,6 +3215,8 @@ async function kaufMitKonto() {
 async function abmeldenHier() {
   if (S.sync.voll) { toast('Dein Konto ist voll, dieses Aufmaß ist noch nicht gesichert. Lösche zuerst in „Dein Konto“ ein altes, sonst geht es beim Abmelden verloren.'); return false; }
   if (kontoAn() && (S.sync.offen || S.sync.p)) { const a = await entwurfAbgleichen(); if (a === 'fehler') { toast('Dein Aufmaß ist noch nicht gesichert. Bitte gleich noch einmal, sonst gehen die letzten Änderungen verloren.'); return false; } }
+  if (await fotosOffen()) await fotosAbwarten(15000); // Fotos noch ins Konto; was nicht ankommt, bleibt auf dem Gerät
+  fotosHierWeg(false);
   kontoMerken(null); S.konto = { liste: null, abgelaufen: '' }; S.kontoFrage = '';
   try { localStorage.removeItem(STORE); } catch (e) { /* ok */ }
   bilderWeg(); loadOwn(); S.teil = null;
@@ -3221,6 +3229,7 @@ async function kontoLoeschen() {
   await sendenAnhalten();
   const r = await kontoJson('/api/kunde/loeschen', { method: 'POST', body: '{}' });
   if (!r.ok) { S.sync.aus = false; entwurfPlanen(); return toast(r.fehler || 'Das hat gerade nicht geklappt. Bitte gleich noch einmal.'); }
+  fotosHierWeg(true);
   kontoMerken(null); S.konto = { liste: null, abgelaufen: '' }; S.kontoFrage = '';
   try { localStorage.removeItem(STORE); } catch (e) { /* ok */ }
   bilderWeg(); loadOwn(); S.teil = null; go('home'); toast('Konto und Aufmaße gelöscht.');
@@ -3234,7 +3243,7 @@ async function aufmassLoeschen(k) {
   if (!r.ok) { if (offen) { S.sync.aus = false; entwurfPlanen(); } return toast(r.fehler || 'Das hat gerade nicht geklappt. Bitte gleich noch einmal.'); }
   S.konto.liste = r.aufmasse || []; S.kontoFrage = ''; bilderWeg(k);
   if (offen) {
-    hierLeeren();
+    fotosHierWeg(true); hierLeeren();
     if (!(S.konto.liste.length && (await projektOeffnen(S.konto.liste[0].kennung, true)))) leeresAufmass();
     go('meinkonto'); return toast('Aufmaß gelöscht');
   }
@@ -3257,7 +3266,7 @@ async function kontoNeuesAufmass() {
 const KI_LAEUFT = new Set();
 const KI_ZIEL = new WeakMap();
 function kiZielMerken(bearbeitet, wid) {
-  if (!wid || !Array.from(KI_LAEUFT).some((j) => j.win === bearbeitet)) return;
+  if (!wid || !bearbeitet) return; // immer merken: ein Auftrag kann auch erst nach dem Speichern starten (Foto wird noch verkleinert)
   let s = KI_ZIEL.get(bearbeitet); if (!s) { s = new Set(); KI_ZIEL.set(bearbeitet, s); }
   s.add(wid);
 }
@@ -3290,29 +3299,208 @@ function kiAbwarten(ms) {
 /* Vor dem Senden an den Betrieb und vor dem Aufmaßblatt: Läuft noch eine Auswertung, kurz darauf warten, damit sie mitkommt.
    false nur, wenn schon gewartet wird (zweites Antippen); nach höchstens 45 Sekunden geht es auch ohne Auswertung weiter */
 async function kiVorher(was) {
-  if (!kiLaeuftFuer()) return true;
+  const arbeit = fotoInArbeit(), ki = kiLaeuftFuer(), fotos = was === 'senden' ? await fotosOffen() : 0;
+  if (!arbeit && !ki && !fotos) return true;
   if (S.kiWartet) return false;
-  S.kiWartet = was; render();
-  toast(was === 'senden' ? 'Die Fotos werden gerade noch ausgewertet. Einen Moment, dann geht dein Aufmaß mit der Auswertung raus.' : 'Die Fotos werden gerade noch ausgewertet. Einen Moment, dann kommt die Auswertung mit ins Aufmaßblatt.');
-  await kiAbwarten(45000);
-  S.kiWartet = ''; render();
+  S.kiWartet = was;
+  /* ein gerade aufgenommenes Foto wird noch verkleinert: danach beginnt seine Auswertung, und es kann hochgehen */
+  if (arbeit) { S.warteText = 'Fotos werden vorbereitet …'; render(); await fotoArbeitAbwarten(15000); }
+  if (kiLaeuftFuer()) {
+    S.warteText = 'Fotos werden ausgewertet …'; render();
+    toast(was === 'senden' ? 'Die Fotos werden gerade noch ausgewertet. Einen Moment, dann geht dein Aufmaß mit der Auswertung raus.' : 'Die Fotos werden gerade noch ausgewertet. Einen Moment, dann kommt die Auswertung mit ins Aufmaßblatt.');
+    await kiAbwarten(45000);
+  }
+  /* beim Senden: erst, wenn die Fotos beim Server sind, sieht sie der Betrieb (fotos.js) */
+  if (was === 'senden' && (await fotosOffen())) {
+    S.warteText = 'Fotos werden übertragen …'; render();
+    toast('Deine Fotos werden noch übertragen. Einen Moment, dann geht dein Aufmaß mit den Fotos raus.');
+    if (!(await fotosAbwarten(60000))) toast('Nicht alle Fotos sind angekommen. Dein Aufmaß geht trotzdem raus, die fehlenden Fotos zeigt der Betrieb als nicht übertragen.');
+  }
+  S.kiWartet = ''; S.warteText = ''; render();
   return true;
+}
+/* ---------- Fotos: auf dem Gerät ablegen und zum Server bringen (functions/api/fotos.js) ----------
+   Jedes Foto bekommt eine Kennung (b…), das Fenster nennt sie (w.bilder = { in, out }); die Bilder selbst stehen nie im Aufmaß oder im
+   Code. Auf dem Gerät liegen die verkleinerten Fotos (wie für die KI, etwa 1,15 Megapixel) in IndexedDB („aufmass-fotos“), damit sie
+   Speichern, Neuladen und das Aufmaßblatt überstehen. Zum Server gehen sie mit dem gespeicherten Fenster, sobald klar ist, wohin:
+   beim Kundenlink zum Link (der Betrieb sieht sie mit dem eingegangenen Aufmaß), beim eigenen Aufmaß mit Konto ins Konto. Als Gast
+   bleiben sie auf dem Gerät, bis das Aufmaß gesichert ist. Senden an den Betrieb wartet, bis alle angekommen sind (höchstens
+   60 Sekunden). */
+const Fotos = (function () {
+  const NAME = 'aufmass-fotos', ABLAGE = 'fotos';
+  let dbP = null;
+  function db() {
+    if (!dbP) dbP = new Promise((fertig) => {
+      try {
+        const r = indexedDB.open(NAME, 1);
+        r.onupgradeneeded = () => { try { r.result.createObjectStore(ABLAGE); } catch (e) { /* schon da */ } };
+        r.onsuccess = () => fertig(r.result); r.onerror = () => fertig(null); r.onblocked = () => fertig(null);
+      } catch (e) { fertig(null); }
+    });
+    return dbP;
+  }
+  /* eine Transaktion; Ergebnis der Anfrage, die fn zurückgibt (sonst true), null ohne Speicher oder bei einem Fehler */
+  async function tun(art, fn) {
+    const d = await db(); if (!d) return null;
+    return new Promise((fertig) => {
+      try { const t = d.transaction(ABLAGE, art), r = fn(t.objectStore(ABLAGE)); t.oncomplete = () => fertig(r && 'result' in r ? r.result : true); t.onerror = () => fertig(null); t.onabort = () => fertig(null); }
+      catch (e) { fertig(null); }
+    });
+  }
+  return {
+    neueId: () => 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10),
+    ablegen: (id, blob, w, h) => tun('readwrite', (s) => s.put({ blob: blob, w: w, h: h, at: Date.now(), hoch: {} }, id)),
+    holen: (id) => tun('readonly', (s) => s.get(id)),
+    /* hochgeladen nach ziel (link:<code> bzw. konto:<kennung>) */
+    vermerken: (id, ziel) => tun('readwrite', (s) => { const g = s.get(id); g.onsuccess = () => { const v = g.result; if (v) { v.hoch = Object.assign({}, v.hoch || {}); v.hoch[ziel] = Date.now(); s.put(v, id); } }; return null; }),
+    weg: (ids) => tun('readwrite', (s) => { ids.forEach((id) => s.delete(id)); return null; }),
+    alle: () => tun('readonly', (s) => s.getAllKeys())
+  };
+})();
+const FOTO_ID = /^b[a-z0-9]{12,24}$/;
+/* Fotos, die gerade verkleinert und abgelegt werden (onPhoto). Gehören sie zu einem gespeicherten Fenster, warten Senden und
+   Aufmaßblatt darauf (kiVorher), und fotosOffen zählt sie mit */
+const FOTO_ARBEIT = new Set();
+const fotoInArbeit = () => FOTO_ARBEIT.size > 0 && Array.from(fotoIdsHier(true)).some((id) => FOTO_ARBEIT.has(id));
+async function fotoArbeitAbwarten(ms) { const bis = Date.now() + (ms || 15000); while (fotoInArbeit() && Date.now() < bis) await new Promise((fertig) => setTimeout(fertig, 150)); }
+const bilderVon = (w) => (w && w.bilder ? ['in', 'out'].map((k) => w.bilder[k]).filter((id) => FOTO_ID.test(String(id || ''))) : []);
+const blobText = (blob) => new Promise((fertig) => { const fr = new FileReader(); fr.onload = () => fertig(String(fr.result || '')); fr.onerror = () => fertig(''); fr.readAsDataURL(blob); });
+/* Wohin die Fotos dieses Aufmaßes gehen; null: nirgendwohin (Gast, Pilotphase, Vorschau des Betriebs, schon gesendet). Hoch gehen nur
+   die Fotos gespeicherter Fenster: Ein verworfenes Fenster hinterlässt beim Server nichts, und mit dem gespeicherten Fenster gibt es
+   dort einen Zwischenstand, mit dem das Aufräumen die Fotos eines nie gesendeten Links findet (zentrale.js) */
+function fotoZiel() {
+  if (S.tour || vorschau() || !SERVER.daten) return null;
+  if (S.betrieb) {
+    if (S.sent || (S.linkZu && S.linkZu !== 'eingegangen')) return null;
+    const code = S.betrieb.code;
+    return { schluessel: 'link:' + code, pfad: (id) => '/api/link/' + encodeURIComponent(code) + '/foto/' + id, abruf: (p, init) => fetch(p, init), nurGespeichert: true };
+  }
+  if (kontoAn()) { const k = S.kauf.kennung; return { schluessel: 'konto:' + k, pfad: (id) => '/api/kunde/aufmass/' + encodeURIComponent(k) + '/foto/' + id, abruf: kontoAbruf, lesbar: true, nurGespeichert: true }; }
+  return null;
+}
+/* Kennungen der Fotos dieses Aufmaßes: gespeicherte Fenster, dazu (ohne nurGespeichert) das gerade bearbeitete */
+function fotoIdsHier(nurGespeichert) { const s = new Set(); S.windows.forEach((w) => bilderVon(w).forEach((id) => s.add(id))); if (!nurGespeichert) bilderVon(S.win).forEach((id) => s.add(id)); return s; }
+const FotoSync = { laeuft: false, nochmal: false, fehler: 0, timer: 0, fertig: [] };
+async function fotosHochladen() {
+  if (FotoSync.laeuft) { FotoSync.nochmal = true; return; }
+  const z = fotoZiel(); if (!z) return;
+  FotoSync.laeuft = true; clearTimeout(FotoSync.timer);
+  try {
+    for (const id of fotoIdsHier(!!z.nurGespeichert)) {
+      if (fotoZiel() === null || fotoZiel().schluessel !== z.schluessel) break; // inzwischen gesendet oder ein anderes Aufmaß
+      const v = await Fotos.holen(id);
+      if (!v || !v.blob || (v.hoch && v.hoch[z.schluessel])) continue;
+      const text = await blobText(v.blob), bild = text.slice(text.indexOf(',') + 1);
+      if (!bild) continue;
+      const r = await z.abruf(z.pfad(id), { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ bild: bild }) });
+      if (r.ok) { await Fotos.vermerken(id, z.schluessel); FotoSync.fehler = 0; continue; }
+      if ([400, 403, 409, 410, 413].includes(r.status)) continue; // geht so nicht (Link zu, zu groß, voll): nicht endlos versuchen
+      throw new Error('Foto nicht angekommen (' + r.status + ')');
+    }
+  } catch (e) {
+    FotoSync.fehler++;
+    FotoSync.timer = setTimeout(fotosHochladen, Math.min(60000, 1500 * Math.pow(2, FotoSync.fehler))); // nach einer Störung später noch einmal
+  } finally {
+    FotoSync.laeuft = false;
+    if (FotoSync.nochmal) { FotoSync.nochmal = false; fotosHochladen(); } else { const f = FotoSync.fertig; FotoSync.fertig = []; f.forEach((x) => x()); }
+  }
+}
+/* Wie viele Fotos gespeicherter Fenster noch nicht beim Server sind */
+async function fotosOffen() {
+  const z = fotoZiel(); if (!z) return 0;
+  let n = 0;
+  for (const id of fotoIdsHier(true)) { if (FOTO_ARBEIT.has(id)) { n++; continue; } const v = await Fotos.holen(id); if (v && v.blob && !(v.hoch && v.hoch[z.schluessel])) n++; }
+  return n;
+}
+async function fotosAbwarten(ms) {
+  const bis = Date.now() + (ms || 60000);
+  while (Date.now() < bis) {
+    if (!(await fotosOffen())) return true;
+    await new Promise((fertig) => { FotoSync.fertig.push(fertig); fotosHochladen(); setTimeout(fertig, 1500); });
+  }
+  return !(await fotosOffen());
+}
+/* Fürs PDF verkleinert: längste Kante höchstens 960 px, JPEG 0,8. Das Blatt zeigt die Fotos etwa 56 mm hoch; so bleibt die Datei
+   auch mit vielen Fenstern klein genug für E-Mail und Messenger (das volle Foto gibt es im Betriebsbereich) */
+async function pdfFoto(blob) {
+  let u = ''; try { u = URL.createObjectURL(blob); } catch (e) { return null; }
+  try {
+    const im = await new Promise((fertig, fehler) => { const i = new Image(); i.onload = () => fertig(i); i.onerror = fehler; i.src = u; });
+    const f = Math.min(1, 960 / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.max(1, Math.round(im.naturalWidth * f)), h = Math.max(1, Math.round(im.naturalHeight * f));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h);
+    const data = c.toDataURL('image/jpeg', 0.8);
+    return /^data:image\/jpeg/.test(data) ? { data: data, w: w, h: h } : null;
+  } catch (e) { return null; } finally { URL.revokeObjectURL(u); }
+}
+/* Fürs Aufmaßblatt: Kennung → { data (JPEG als Data-URL), w, h }, vom Gerät, sonst aus dem Konto */
+async function fotosFuerBlatt(wins) {
+  const out = {}, z = fotoZiel();
+  for (const w of wins || []) for (const id of bilderVon(w)) {
+    if (out[id]) continue;
+    let v = await Fotos.holen(id);
+    if (!(v && v.blob) && z && z.lesbar) { try { const r = await z.abruf(z.pfad(id)); if (r.ok) { const blob = await r.blob(); const d = await new Promise((fertig) => { const u = URL.createObjectURL(blob), im = new Image(); im.onload = () => { fertig({ w: im.naturalWidth, h: im.naturalHeight }); URL.revokeObjectURL(u); }; im.onerror = () => { fertig(null); URL.revokeObjectURL(u); }; im.src = u; }); if (d) { v = { blob: blob, w: d.w, h: d.h }; Fotos.ablegen(id, blob, d.w, d.h).then(() => Fotos.vermerken(id, z.schluessel)); } } } catch (e) { /* ohne dieses Foto */ } }
+    if (v && v.blob) { const p = await pdfFoto(v.blob); if (p) out[id] = p; }
+  }
+  return out;
+}
+/* Beim Öffnen eines gespeicherten Fensters: seine Fotos wieder in die Kacheln (vom Gerät, sonst aus dem Konto) */
+async function fotosInKacheln(w, photos) {
+  const z = fotoZiel();
+  for (const seite of ['in', 'out']) {
+    const id = w && w.bilder && w.bilder[seite]; if (!FOTO_ID.test(String(id || '')) || photos[seite]) continue;
+    let v = await Fotos.holen(id);
+    if (!(v && v.blob) && z && z.lesbar) { try { const r = await z.abruf(z.pfad(id)); if (r.ok) { const blob = await r.blob(); v = { blob: blob, w: 0, h: 0 }; } } catch (e) { /* ohne */ } }
+    if (!(v && v.blob) || S.photos !== photos) continue;
+    const url = URL.createObjectURL(v.blob), d = v.w && v.h ? { w: v.w, h: v.h } : await imageDims(url);
+    photos[seite] = { url: url, file: null, w: d.w, h: d.h, demo: false, id: id };
+  }
+  if (S.photos === photos) render();
+}
+/* Aufräumen auf dem Gerät: Fotos, die kein Fenster in diesem Browser mehr nennt (eigenes Aufmaß, Kundenlinks): nach zwei Tagen, wenn
+   sie beim Server liegen, sonst nach 30 Tagen (etwa ein Aufmaß, das ohne Netz gewechselt wurde) */
+async function fotosLokalAufraeumen() {
+  const ids = await Fotos.alle(); if (!ids || !ids.length) return;
+  const genannt = new Set();
+  try {
+    Object.keys(localStorage).filter((k) => k === STORE || k.indexOf('aufmass.k.') === 0).forEach((k) => { const o = JSON.parse(localStorage.getItem(k) || 'null'); ((o && o.windows) || []).forEach((w) => bilderVon(w).forEach((id) => genannt.add(id))); });
+  } catch (e) { return; } // ohne lesbaren Speicher nichts löschen
+  S.windows.forEach((w) => bilderVon(w).forEach((id) => genannt.add(id))); bilderVon(S.win).forEach((id) => genannt.add(id));
+  const weg = [];
+  for (const id of ids) { if (genannt.has(id)) continue; const v = await Fotos.holen(id), oben = !!(v && v.hoch && Object.keys(v.hoch).length); if (v && Date.now() - (Number(v.at) || 0) > (oben ? 2 : 30) * 864e5) weg.push(id); }
+  if (weg.length) Fotos.weg(weg);
+}
+/* Fotos des geöffneten Aufmaßes von diesem Gerät nehmen: alle (Aufmaß gelöscht) oder nur, was im Konto liegt (abmelden, anderes
+   Konto); der Rest bleibt fürs Aufräumen. Kennungen werden sofort gelesen, Aufrufer leeren danach das Aufmaß */
+async function fotosHierWeg(alle) {
+  const ids = Array.from(fotoIdsHier()), k = S.kauf && S.kauf.kennung, weg = [];
+  for (const id of ids) { const v = alle ? null : await Fotos.holen(id); if (alle || (v && v.hoch && k && v.hoch['konto:' + k])) weg.push(id); }
+  if (weg.length) await Fotos.weg(weg);
 }
 function imageDims(url) { return new Promise((res) => { const im = new Image(); im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => res({ w: 1200, h: 1600 }); im.src = url; }); }
 async function onPhoto(which, file) {
   if (!file) return;
-  if (S.photos[which] && S.photos[which].url && !S.photos[which].demo) { try { URL.revokeObjectURL(S.photos[which].url); } catch (e) { /* ok */ } }
+  /* alles für dieses Fenster festhalten: legt der Kunde währenddessen ein neues an, gehören Foto und Auswertung trotzdem hierher */
+  const z0 = { ai: S.ai, win: S.win, photos: S.photos };
+  if (z0.photos[which] && z0.photos[which].url && !z0.photos[which].demo) { try { URL.revokeObjectURL(z0.photos[which].url); } catch (e) { /* ok */ } }
   let url = ''; try { url = URL.createObjectURL(file); } catch (e) { url = ''; }
   if (!url) { url = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(''); fr.readAsDataURL(file); }); }
-  const d = await imageDims(url);
-  S.photos[which] = { url: url, file: file, w: d.w, h: d.h, demo: false };
-  S.ai[which] = { status: 'idle' };
-  S.win.fotos = (S.photos.in ? 1 : 0) + (S.photos.out ? 1 : 0);
-  render();
-  startAI(which, file);
+  const id = Fotos.neueId(); FOTO_ARBEIT.add(id);
+  try {
+    const d = await imageDims(url);
+    const eintrag = z0.photos[which] = { url: url, file: file, w: d.w, h: d.h, demo: false, id: id };
+    z0.ai[which] = { status: 'idle' };
+    z0.win.bilder = Object.assign({}, z0.win.bilder || {}, { [which]: id });
+    z0.win.fotos = (z0.photos.in ? 1 : 0) + (z0.photos.out ? 1 : 0);
+    render();
+    /* einmal verkleinern, für die KI und für die Ablage (Gerät, dann Server) */
+    let klein = null; try { klein = await AI.shrink(file); } catch (e) { klein = null; }
+    if (z0.photos[which] !== eintrag) return; // inzwischen neu fotografiert
+    if (klein && klein.blob) { await Fotos.ablegen(id, klein.blob, klein.w, klein.h); fotosHochladen(); } // wurde das Fenster schon gespeichert, bevor das Foto abgelegt war, geht es jetzt hoch
+    startAI(which, klein && klein.blob ? klein : file, z0); // trägt die Auswertung sofort ein (KI_LAEUFT), erst danach endet die Arbeit am Foto
+  } finally { FOTO_ARBEIT.delete(id); }
 }
-async function startAI(which, file) {
-  const z = { ai: S.ai, win: S.win, photos: S.photos, which: which, ctrl: new AbortController() };
+async function startAI(which, file, z0) {
+  const z = Object.assign({}, z0 || { ai: S.ai, win: S.win, photos: S.photos }, { which: which, ctrl: new AbortController() });
   /* dasselbe Fenster, dieselbe Seite: der alte Auftrag gilt nicht mehr */
   KI_LAEUFT.forEach((j) => { if (j.ai === z.ai && j.which === which) { j.ctrl.abort(); KI_LAEUFT.delete(j); } });
   KI_LAEUFT.add(z);
@@ -3430,6 +3618,7 @@ function saveWin() {
   /* Das Bild der Lage entsteht erst aus Foto und Ecken; fehlt es, wird es für das gespeicherte Fenster nachgezogen */
   if (ziel.plan && !ziel.plan.bild && ziel.plan.ecken && planFoto()) planBildErzeugen(ziel).then((b) => { if (b && S.win && S.win.wid === ziel.wid && S.win.plan) { S.win.plan.bild = b; S.win.plan.bw = ziel.plan.bw; S.win.plan.bh = ziel.plan.bh; } lokalSpeichern(); });
   S.win = kopie(ziel); persist(); go('fertig');
+  fotosHochladen(); // die Fotos gehen mit dem gespeicherten Fenster zum Server (Link oder Konto)
   if (hinweis) toast(hinweis);
 }
 /* ---------- Sprossen: Einrasten auf Viertel, Drittel, Hälfte ---------- */
@@ -3515,8 +3704,8 @@ function act(name, el) {
     case 'back': { const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); return newWin();
-    case 'open': { if (S.betrieb && S.sent) return; if (!linkOffen()) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), kopie(S.windows[i]))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.designVorher = null; return go('fertig'); }
-    case 'delwin': { if (!linkOffen()) return; if (S.editIdx < 0 || !S.windows[S.editIdx]) { S.editIdx = -1; go('home', 'back'); return toast('Dieses Fenster gibt es nicht mehr.'); } const weg = S.windows[S.editIdx]; if (weg.wid) { S.sync.geloescht[weg.wid] = zeit(); const alle = Object.keys(S.sync.geloescht); if (alle.length > 200) alle.sort((a, b) => S.sync.geloescht[a] - S.sync.geloescht[b]).slice(0, alle.length - 200).forEach((k) => { delete S.sync.geloescht[k]; }); } S.angelegt = angelegt(); S.windows.splice(S.editIdx, 1); S.editIdx = -1; persist(); toast('Fenster gelöscht'); return go('home', 'back'); }
+    case 'open': { if (S.betrieb && S.sent) return; if (!linkOffen()) return; const i = +el.getAttribute('data-i'); S.win = altAngleichen(Object.assign(baseWin(), kopie(S.windows[i]))); S.editIdx = i; S.selSash = 0; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.designVorher = null; fotosInKacheln(S.win, S.photos); return go('fertig'); }
+    case 'delwin': { if (!linkOffen()) return; if (S.editIdx < 0 || !S.windows[S.editIdx]) { S.editIdx = -1; go('home', 'back'); return toast('Dieses Fenster gibt es nicht mehr.'); } const weg = S.windows[S.editIdx]; if (weg.wid) { S.sync.geloescht[weg.wid] = zeit(); const alle = Object.keys(S.sync.geloescht); if (alle.length > 200) alle.sort((a, b) => S.sync.geloescht[a] - S.sync.geloescht[b]).slice(0, alle.length - 200).forEach((k) => { delete S.sync.geloescht[k]; }); } S.angelegt = angelegt(); S.windows.splice(S.editIdx, 1); S.editIdx = -1; persist(); Fotos.weg(bilderVon(weg).filter((id) => !S.windows.some((x) => bilderVon(x).includes(id)))); toast('Fenster gelöscht'); return go('home', 'back'); }
     case 'aufmass-neu': { S.neuFrage = true; return render(); }
     case 'sichern': return sichernStart('sichern');
     case 'anmelden': return sichernStart('anmelden');
@@ -3533,7 +3722,7 @@ function act(name, el) {
     case 'link-anmelden-ja': { const r = S.linkAnmeldung; S.linkAnmeldung = null; return r ? kontoWechseln(r) : go('home'); }
     case 'link-anmelden-nein': { S.linkAnmeldung = null; go('home'); return toast('Nicht angemeldet.'); }
     case 'aufmass-neu-nein': { S.neuFrage = false; return render(); }
-    case 'aufmass-neu-ja': { if (S.betrieb) return; if (kontoBereit() && KS) return kontoNeuesAufmass(); S.neuFrage = false; try { localStorage.removeItem(STORE); } catch (e) { /* ok */ } loadOwn(); S.teil = null; toast('Neues Aufmaß begonnen'); return go('home'); }
+    case 'aufmass-neu-ja': { if (S.betrieb) return; if (kontoBereit() && KS) return kontoNeuesAufmass(); S.neuFrage = false; fotosHierWeg(true); try { localStorage.removeItem(STORE); } catch (e) { /* ok */ } loadOwn(); S.teil = null; toast('Neues Aufmaß begonnen'); return go('home'); }
     case 'gloss': { S.gloss = el.getAttribute('data-k'); S.glossIndex = false; return render(); }
     case 'gindex': { S.gloss = null; S.glossIndex = true; return render(); }
     case 'gclose': { S.gloss = null; S.glossIndex = false; return render(); }
@@ -3981,7 +4170,7 @@ SCREENS.gesendet = () => {
     '<p style="margin: 0">Dein Aufmaß ist fertig. Schick ' + esc(dat) + ' jetzt den Aufmaß-Code, am einfachsten per WhatsApp. Erst damit hat ' + esc(nom) + ' deine Maße und Wünsche.</p></div>' +
     '<div class="card send-card" style="gap: 12px"><p class="eyebrow">Senden</p><div class="pill-row send-row"><a class="btn primary" href="' + wa + '" target="_blank" rel="noopener">Per WhatsApp senden</a><a class="btn ghost" href="' + mail + '">Per E-Mail senden</a></div>' +
     '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea><div class="pill-row"><button type="button" class="pill" data-act="copyblatt">Code kopieren</button></div>' +
-    '<p class="sub">Pilotphase: eeziframes überträgt dein Aufmaß noch nicht von selbst. Der Code enthält alle Maße, deine Wünsche und die Auswertung der Fotos, die Fotos selbst nicht.</p></div>' +
+    '<p class="sub">Pilotphase: eeziframes überträgt dein Aufmaß noch nicht von selbst. Der Code enthält alle Maße, deine Wünsche und die Auswertung der Fotos, die Fotos selbst nicht; die stehen im Aufmaßblatt.</p></div>' +
     '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(bn || 'deinem Fensterbauer') + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
     dateiCard();
   return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home' } };
@@ -3992,6 +4181,7 @@ SCREENS.gesendet = () => {
 async function serverStart() {
   try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
   PILOT = !SERVER.daten;
+  setTimeout(() => { fotosHochladen(); fotosLokalAufraeumen(); }, 4000); // liegengebliebene Fotos nachschicken, Überholtes auf dem Gerät wegräumen
   if (SERVER.daten) document.querySelectorAll('.fx-pilot').forEach((e) => e.remove());
   const q = new URLSearchParams(location.search), bezahlt = q.get('bezahlt'), t = LINK_TOKEN; LINK_TOKEN = null;
   /* Anmeldung (Link aus der E-Mail oder gemerkte Anmeldung), auch nach einer Zahlung */

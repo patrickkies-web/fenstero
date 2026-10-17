@@ -6,9 +6,18 @@ import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt, live } from './u
 import { GRENZEN, zuText, langerCode, kennung, ohneBild, metaMischen, zeitKappen } from './entwurf.js';
 import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
 import { NB_STAND } from './recht.js';
+import { ablage, linkOrdner, fotoIds, fotosLinkAufraeumen } from './fotos.js';
 
 const X = () => globalThis.Abrechnung;
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
+/* Am eingegangenen Aufmaß: welche seiner Fotos beim Server liegen (namen: Dateien im Ordner des Links; null: Ablage antwortet gerade
+   nicht, dann ohne Angabe, und der Betriebsbereich versucht alle genannten) */
+function fotosVermerken(am, namen) {
+  const ids = fotoIds(am.windows);
+  if (!ids.size) am.fotosDa = [];
+  else if (namen) am.fotosDa = Array.from(ids).filter((id) => namen.has(id + '.jpg'));
+  else delete am.fotosDa;
+}
 const jahr = () => new Date().getFullYear();
 const FARBEN = ['#0071e3', '#1f7a3d', '#a85a00', '#6e3fc2', '#0b7285', '#b3261e'];
 
@@ -190,7 +199,14 @@ export const KONTO = {
   'POST /api/konto/import': async (ctx) => {
     await mitBetrieb(ctx); const o = X().unpack((ctx.body || {}).code);
     if (!o) throw new ApiFehler('Code nicht lesbar. Bitte komplett kopieren, er beginnt mit AM1.');
-    const out = await aendern(ctx, (a) => { const r = X().importCode(a, o); if (r.notif) melden(a, r.notif); return { eingang: { ok: r.ok, art: r.art, msg: r.msg, feier: r.feier || '', id: r.l ? r.l.id : '', locked: !!r.locked } }; });
+    /* Fotos gibt es nur zum Code eines Kundenlinks (die App lädt sie beim Messen dorthin, fotos.js); ein Code ohne Link nennt keine,
+       dann stehen sie im Aufmaßblatt des Kunden. Gehört der Link einem anderen Betrieb, lehnt importCode ab */
+    const code = o.b ? String(o.b).trim().toLowerCase() : '';
+    if (!code) o.w.forEach((w) => { if (w && typeof w === 'object') delete w.bilder; });
+    const ab = code ? ablage(ctx.k) : null;
+    let namen = ab ? null : new Set();
+    if (ab && fotoIds(o.w).size) { try { namen = new Set(await ab.liste(linkOrdner(code))); } catch (e) { namen = null; } }
+    const out = await aendern(ctx, (a) => { const r = X().importCode(a, o); if (r.notif) melden(a, r.notif); if (r.ok && r.l && r.l.aufmass) fotosVermerken(r.l.aufmass, namen); return { eingang: { ok: r.ok, art: r.art, msg: r.msg, feier: r.feier || '', id: r.l ? r.l.id : '', locked: !!r.locked } }; });
     if (out.eingang.ok) zaehlen(ctx, 'ereignis:code_eingefuegt');
     return out;
   },
@@ -296,10 +312,17 @@ export const KONTO = {
       if (veraltet) throw new ApiFehler('Ein anderes Gerät hat inzwischen etwas geändert. Bitte kurz prüfen und noch einmal senden.', 409, { abgleichen: true });
     }
     o.v = 1; o.b = code;
-    const r = await ctx.sp.betriebAendern(row.id, (a) => { const t = X().tickKonto(a); t.notifs.forEach((n) => melden(a, n)); const res = X().importCode(a, o, undefined, 'App'); if (res.notif) melden(a, res.notif); return res; });
+    /* Welche Fotos beim Server liegen (die App lädt sie vor dem Senden hoch, fotos.js): steht am Aufmaß, damit der Betriebsbereich
+       genau diese zeigt. Bei einer Teil-Nachbesserung (m) zählen auch die Fotos der Positionen, die bleiben */
+    const ab = ablage(ctx.k);
+    let namen = ab ? null : new Set();
+    if (ab && (fotoIds(o.w).size || o.m)) { try { namen = new Set(await ab.liste(linkOrdner(code))); } catch (e) { namen = null; } }
+    const r = await ctx.sp.betriebAendern(row.id, (a) => { const t = X().tickKonto(a); t.notifs.forEach((n) => melden(a, n)); const res = X().importCode(a, o, undefined, 'App'); if (res.notif) melden(a, res.notif); if (res.ok && res.l && res.l.aufmass) fotosVermerken(res.l.aufmass, namen); return res; });
     if (!r.ok) throw new ApiFehler(r.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : r.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400, r.art === 'schon' && r.l && X().linkZu(r.l) === 'eingegangen' ? { zu: 'eingegangen', runde: r.l.runde || 1, seit: r.l.eingegangenAt || 0 } : undefined); // schon da: die App zeigt „schon erledigt“
     const nb = r.art === 'nb' || r.art === 'nb-neu';
     zaehlen(ctx, nb ? 'ereignis:nachbesserung' : 'ereignis:aufmass_gesendet');
+    /* Fotos, die kein Fenster des eingegangenen Aufmaßes mehr nennt, sind überholt (neu fotografiert, Fenster gelöscht) */
+    if (r.l && r.l.aufmass) ctx.waitUntil(fotosLinkAufraeumen(ctx.k, code, fotoIds(r.l.aufmass.windows)).catch(() => 0));
     /* Zwischenstand als gesendet vermerken (für die Zentrale und das Aufräumen) und auf den gesendeten Stand bringen, außer bei einer
        Teil-Nachbesserung (m); fehlt die Tabelle, ist das egal */
     if (ctx.sp.entwurfAendern && langerCode(code)) ctx.waitUntil(ctx.sp.entwurfAendern(code, row.id, (e) => {

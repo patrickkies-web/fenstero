@@ -23,6 +23,7 @@ import { anmeldungLoeschen, anmeldungLesen, anmeldungenAlle } from './auth.js';
 import { melden, abrechnungslauf, sicht } from './konten.js';
 import { kennung } from './entwurf.js';
 import { entfernt, kontenDa } from './eigene.js';
+import { fotosLinkLoeschen, fotosEigenesLoeschen, fotosNutzerLoeschen, fotosAltLoeschen } from './fotos.js';
 /* Aufmaß eines Hauseigentümers mit Besitzer, keine Löschmarke (eigene.js) */
 const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
 import { auswerten, tagBerlin, browserName, systemName, zaehlen } from './statistik.js';
@@ -472,6 +473,7 @@ export const ZENTRALE = {
     catch (e) { throw new ApiFehler('Die Anmeldung ist gelöscht, aber Stripe hat die Abos nicht beendet (' + String(e.message || e).slice(0, 120) + '). Das Konto steht noch da; bitte noch einmal löschen.', 502); }
     const offen = rund((a.book || []).filter((x) => x.status === 'offen' && Number(x.betrag) > 0).reduce((s, x) => s + Number(x.betrag), 0));
     await ctx.sp.betriebLoeschen(row.id);
+    for (const l of a.links || []) if (l && l.code) await fotosLinkLoeschen(ctx.k, l.code); // Fotos der Kundenlinks (fotos.js)
     const nachweis = await protokoll(ctx.sp, 'loeschen', row.id, 'Konto gelöscht' + (grund ? ': ' + grund : '') + (bleibt ? ' (die Anmeldung bleibt für gesicherte Aufmaße als Hauseigentümer)' : ''), { betrieb: row.name, registriert: row.created_at, stripe_kunde: row.stripe_customer || '', abos_beendet: abos, rechnungen: (a.rechnungen || []).map((r) => ({ nr: r.nr, datum: r.datum, betrag: r.betrag, status: r.status })), nicht_berechnet: offen, anmeldung_bleibt: bleibt });
     return { ok: true, geloescht: row.name, nichtBerechnet: offen, stripeKunde: row.stripe_customer || '', stripeLink: stripeLink(ctx.k, 'customers', row.stripe_customer), nachweis: nachweis, anmeldungBleibt: bleibt };
   },
@@ -500,6 +502,7 @@ export const ZENTRALE = {
     const eig = sp.eigeneVonNutzer ? await sp.eigeneVonNutzer(uid) : null;
     if (eig && eig.length) throw new ApiFehler('Zu dieser Anmeldung gehört ein Konto eines Hauseigentümers mit gesichertem Aufmaß. Das Konto löscht der Hauseigentümer selbst in der App.');
     const r = await anmeldungLoeschen(ctx.k, uid); if (!r.ok) throw new ApiFehler('Supabase hat die Anmeldung nicht gelöscht (' + r.status + ').', 502);
+    await fotosNutzerLoeschen(ctx.k, uid);
     await protokoll(sp, 'anmeldung_geloescht', null, 'Anmeldung ohne Betrieb gelöscht', { nutzer: uid });
     return { ok: true };
   },
@@ -540,7 +543,7 @@ export const ZENTRALE = {
    Anmeldungen ohne Betrieb nach 30 Tagen ohne Nutzung. Schlägt etwas fehl, wird nichts gelöscht und beim nächsten Lauf neu versucht. */
 export async function aufraeumen(k, sp) {
   if (!sp) return { ok: false };
-  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, kaeufe: false, anmeldungen: 0, entwuerfe: 0, entwuerfeGeleert: 0, eigene: 0 };
+  const jetzt = Date.now(), out = { ok: true, protokoll: false, kassen: false, kaeufe: false, anmeldungen: 0, entwuerfe: 0, entwuerfeGeleert: 0, eigene: 0, fotos: 0 };
   /* Fristen ab Jahresende: Widerrufe bis Ende des dritten Jahres nach dem Eingang (Verjährung, §§ 195, 199 BGB), bezahlte Käufe bis
      Ende des achten Jahres nach dem Kauf (Buchungsbelege, § 147 AO; die Rechnungen selbst bewahrt Stripe auf) */
   const jahr = new Date(jetzt).getUTCFullYear(), jahresanfang = (j) => new Date(Date.UTC(j, 0, 1)).toISOString();
@@ -558,7 +561,7 @@ export async function aufraeumen(k, sp) {
           if (mit.has(u.id) || jetzt - zuletzt < 30 * TAG || out.anmeldungen >= 20) continue; // höchstens 20 je Lauf (Grenze für Unteranfragen)
           if (await sp.betriebNachAuth(u.id)) continue; // frisch registriert, während der Lauf lief
           if (sp.eigeneVonNutzer) { const e2 = await sp.eigeneVonNutzer(u.id); if (e2 && e2.length) continue; } // gerade gesichert, oder die Liste oben war gekürzt
-          if ((await anmeldungLoeschen(k, u.id)).ok) out.anmeldungen++;
+          if ((await anmeldungLoeschen(k, u.id)).ok) { out.anmeldungen++; await fotosNutzerLoeschen(k, u.id); }
         }
       }
     } catch (e) { out.ok = false; }
@@ -573,7 +576,7 @@ export async function aufraeumen(k, sp) {
       if (out.eigene >= 200) break;
       if (!e.nutzer && !entfernt(e)) { if (await sp.eigenesWeg(e.kennung)) out.eigene++; continue; }
       const still = jetzt - (Date.parse(e.updated_at || '') || jetzt), frist = (e.meta && e.meta.bezahlt && !entfernt(e) ? 3 * 365 : 365) * TAG;
-      if (still > frist && (await sp.eigenesLoeschen(e.kennung, new Date(jetzt - frist).toISOString()))) out.eigene++; // nur, wenn seitdem nicht geändert
+      if (still > frist && (await sp.eigenesLoeschen(e.kennung, new Date(jetzt - frist).toISOString()))) { out.eigene++; if (e.nutzer) await fotosEigenesLoeschen(k, e.nutzer, e.kennung); } // nur, wenn seitdem nicht geändert; die Fotos gehen mit
     }
   } catch (e) { out.ok = false; }
   /* Zwischenstände der Kundenlinks (entwurf.js), höchstens 200 je Lauf:
@@ -591,17 +594,20 @@ export async function aufraeumen(k, sp) {
         let row = byId.get(e.betrieb);
         if (!row) { try { row = await sp.betriebHolen(e.betrieb); } catch (err) { out.ok = false; continue; } if (row) byId.set(row.id, row); } // die Liste kann gekürzt sein; bei einem Fehler nichts löschen
         const l = row ? ((row.daten || {}).links || []).find((x) => x.code === e.code) : null, still = jetzt - (Date.parse(e.updated_at || '') || jetzt);
-        if (!row || !l) { if (await sp.entwurfLoeschen(e.code)) out.entwuerfe++; continue; }
+        if (!row || !l) { if (await sp.entwurfLoeschen(e.code)) { out.entwuerfe++; await fotosLinkLoeschen(k, e.code); } continue; } // Link weg: seine Fotos auch
         const zu = X().linkZu(l, jetzt), ein = Number(l.eingegangenAt) || 0;
         if (zu === 'eingegangen' && ((l.runde || 1) > X().NB_MAX || (ein && jetzt - ein > X().NB_TAGE * TAG))) { if (await sp.entwurfLoeschen(e.code)) out.entwuerfe++; continue; }
         const ablauf = X().parseDE(l.expires), seitZu = zu === 'abgelaufen' && ablauf ? jetzt - ablauf.getTime() : zu === 'deaktiviert' ? (l.deaktiviertAm ? jetzt - l.deaktiviertAm : still) : 0;
         if (seitZu > 30 * TAG || still > 180 * TAG) {
           const r = await sp.entwurfAendern(e.code, e.betrieb, (x) => { const d = x.daten || {}; if (!(d.windows || []).length && !Object.keys(d.proj || {}).length) return false; const ids = (d.windows || []).map(kennung).filter(Boolean).slice(0, 60); x.daten = { windows: [], proj: {} }; x.meta = Object.assign({}, x.meta || {}, { geleert: new Date().toISOString(), geleertIds: ids }); return true; }).catch(() => null);
           if (r && r.out) out.entwuerfeGeleert++;
+          if (!l.aufmass) await fotosLinkLoeschen(k, e.code); // nie gesendet: die Fotos gehen mit dem Inhalt; ein eingegangenes Aufmaß behält sie (fotos.js)
         }
       }
     }
   } catch (e) { out.ok = false; }
+  /* Fotos eingegangener Aufmaße beim Betrieb: 12 Monate nach dem Eingang (fotos.js), höchstens 50 Links je Lauf */
+  try { out.fotos = await fotosAltLoeschen(k, sp, await sp.betriebeAlle(), jetzt, 50); } catch (e) { out.ok = false; }
   if (out.anmeldungen) await protokoll(sp, 'aufraeumen', null, X().nW(out.anmeldungen, 'Anmeldung', 'Anmeldungen') + ' ohne Betrieb gelöscht (30 Tage ungenutzt)');
   return out;
 }

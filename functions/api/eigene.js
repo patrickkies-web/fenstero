@@ -15,6 +15,7 @@
 import { ApiFehler, erlaubt, quelle, hmac, b64url } from './umgebung.js';
 import { codeSenden, codePruefen, erneuern, nutzer, anmeldungLoeschen } from './auth.js';
 import { GRENZEN, eingangPruefen, eingangMischen, antwortNachMischen, entwurfSicht, metaSicht } from './entwurf.js';
+import { fotoIds, fotosEigeneEntfernen, fotosEigenesLoeschen, fotosNutzerLoeschen } from './fotos.js';
 
 export const MAX_AUFMASSE = 20;
 /* Freischalt-Nachweis eines gekauften Aufmaßblatts: Unterschrift über Kennung und Stripe-Sitzung (auch zahlung.js) */
@@ -116,12 +117,14 @@ export const EIGENE = {
     /* Ein vorher als Gast gekauftes Blatt (Nachweis aus diesem Browser) kommt mit ins Konto, wenn die Unterschrift stimmt */
     const b = ctx.body || {}, kauf = b.kauf && typeof b.kauf === 'object' ? { session: str(b.kauf.session, 120), token: str(b.kauf.token, 64) } : null;
     const kaufEcht = !!(kauf && kauf.session && kauf.token && (!vorhanden || !kaufAm(vorhanden.meta)) && (await kaufNachweis(ctx.k, k, kauf.session)) === kauf.token);
-    let m = null, andere = false, ist_weg = false, ohne = false;
+    let m = null, andere = false, ist_weg = false, ohne = false, fotosVor = null, fotosNach = null;
     const res = await ctx.sp.eigenesAendern(k, n.id, (r) => {
       if (r.nutzer && r.nutzer !== n.id) { andere = true; return false; }
       if (entfernt(r)) { ist_weg = true; return false; } // inzwischen gelöscht
       if (r.version && !r.nutzer) { ohne = true; return false; }
+      fotosVor = fotoIds((r.daten || {}).windows); fotosNach = null;
       m = eingangMischen(r, e, jetzt, false, kaufAm(r.meta));
+      if (!m.grenze) fotosNach = fotoIds((r.daten || {}).windows);
       if (!m.grenze && kaufEcht && !kaufAm(r.meta)) r.meta = Object.assign({}, r.meta, { bezahlt: { session: kauf.session, token: kauf.token, at: jetzt } });
       return !m.grenze;
     });
@@ -131,6 +134,8 @@ export const EIGENE = {
     if (ohne) throw verwaist();
     if (m && m.grenze) throw new ApiFehler(GRENZ_TEXT, 409, { grenze: true });
     if (!vorhanden) zaehlen(ctx, 'ereignis:kunde_gesichert');
+    /* Fotos, die nach dem Abgleich kein Fenster mehr nennt (neu fotografiert, Fenster gelöscht), sind überholt (fotos.js) */
+    if (fotosVor && fotosNach && res.row) { const ueber = Array.from(fotosVor).filter((id) => !fotosNach.has(id)); if (ueber.length) ctx.waitUntil(fotosEigeneEntfernen(ctx.k, n.id, k, ueber)); }
     const row = res.row || {};
     return Object.assign(antwortNachMischen(row, m), { bezahlt: bezahltSicht(row.meta) });
   },
@@ -139,6 +144,7 @@ export const EIGENE = {
     const n = await kunde(ctx), k = kennungVon(ctx), e = await ctx.sp.eigenesHolen(k);
     if (e && e.nutzer !== n.id) throw fremd();
     if (e && !entfernt(e)) await ctx.sp.eigenesWeg(k);
+    await fotosEigenesLoeschen(ctx.k, n.id, k); // die Fotos des Aufmaßes (fotos.js), auch wenn es nie gesichert war
     return { ok: true, aufmasse: (await liste(ctx, n)) || [] };
   },
   /* Konto löschen: alle Aufmaße (Löschmarken bleiben, ohne Besitzer, sobald die Anmeldung weg ist), dazu die Anmeldung, außer sie
@@ -146,6 +152,7 @@ export const EIGENE = {
   'POST /api/kunde/loeschen': async (ctx) => {
     const n = await kunde(ctx);
     await ctx.sp.eigeneWegVonNutzer(n.id);
+    await fotosNutzerLoeschen(ctx.k, n.id); // alle Fotos des Kontos (fotos.js)
     const betrieb = await ctx.sp.betriebNachAuth(n.id);
     const weg = betrieb ? { ok: false } : await anmeldungLoeschen(ctx.k, n.id);
     return { ok: true, anmeldungGeloescht: !betrieb && !!weg.ok };

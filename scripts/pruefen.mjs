@@ -29,6 +29,9 @@
 // Abschnitt 17 prüft Rechtstexte, Widerruf, E-Mails des Servers und die Anmelde-E-Mails bei Supabase.
 // Abschnitt 18 prüft die KI-Auswertung mit langsamer Antwort (eigener Testserver mit KI_VERZOEGERUNG_MS): Sie kommt auch an, wenn
 // vorher gespeichert, ein weiteres Fenster angelegt oder gesendet wird, und zählt nicht als Änderung.
+// Abschnitt 19 prüft die Fotos (functions/api/fotos.js): Ablage über den Kundenlink, beim Betrieb erst nach dem Senden und nicht
+// gesperrt, Löschfristen und Aufräumen, Fotos im Konto des Hauseigentümers; im Browser auf einem eigenen Testserver: Fotos überstehen
+// das Neuladen, Senden wartet auf sie, der Betriebsbereich zeigt sie (klein, groß, im PDF), ein zweites Gerät holt sie aus dem Konto.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -3181,6 +3184,195 @@ if (teil(18)) {
     const echt18 = ent18.zusammenfuehren([alt18], [Object.assign({}, alt18, { name: 'Bad oben', ki: { rows: [['Rollladen', 'Einbaukasten']] }, ts: j18 })], meta18, new Set(['fk18']), true, j18, false, null, {}, 0);
     ok(nurKi.zurueck.length === 0 && nurKi.fenster[0].ki && nurKi.fenster[0].aend === 4 && echt18.zurueck[0] === 'fk18' && echt18.fenster[0].name === 'Bad', 'Server: eine nachgereichte Auswertung wird übernommen, ohne als Änderung zu zählen; eine echte Änderung an einem festen Fenster nicht');
   } finally { aus18(); }
+}
+
+/* ---------- 19. Fotos: zum Fensterbauer, ins Konto, ins Aufmaßblatt ---------- */
+if (teil(19)) {
+  console.log('19. Fotos kommen beim Fensterbauer an, liegen im Konto und im Aufmaßblatt');
+  const { api } = await import('../functions/api/router.js'), umg = await import('../functions/api/umgebung.js'), spM = await import('../functions/api/speicher.js');
+  const fo = await import('../functions/api/fotos.js'), ze = await import('../functions/api/zentrale.js'), auth = await import('../functions/api/auth.js');
+  const B = 'https://eeziframes.com', TAG = 864e5, stempel = Date.now().toString(36);
+  const env = { DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', FREISCHALT_GEHEIMNIS: 'pruef19' }, k19 = umg.konfig(env), sp = spM.speicher(k19), ab = fo.ablage(k19);
+  let ipNr = 1; const hinten = [];
+  const rufe = async (pfad, o) => {
+    o = o || {}; const h = { accept: 'application/json', origin: B, 'cf-connecting-ip': '203.0.113.' + (10 + (ipNr++ % 200)) };
+    if (o.body) h['content-type'] = 'application/json'; if (o.token) h.authorization = 'Bearer ' + o.token;
+    const r = await api(new Request(B + pfad, { method: o.method || (o.body ? 'POST' : 'GET'), headers: h, body: o.body ? JSON.stringify(o.body) : undefined }), env, { waitUntil(pr) { hinten.push(pr); } });
+    if (o.roh) return r;
+    const text = await r.text(); let j = null; try { j = JSON.parse(text); } catch (e) { j = null; }
+    return Object.assign({ _status: r.status }, j || {});
+  };
+  const fertig = async () => { while (hinten.length) await Promise.resolve(hinten.shift()).catch(() => 0); };
+  const tok = (m) => 'test.' + Buffer.from(m, 'utf8').toString('base64').replace(/=+$/, '');
+  const id = (n) => 'b' + stempel.slice(-6) + 'f19x' + n + 'abcd';
+  const sJ = await browser.newPage();
+  const jpegs = await sJ.evaluate(() => [1, 2, 3, 4].map((n) => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = ['#d9d2c5', '#c9d6df', '#e3d5c9', '#d5e3c9'][n - 1]; g.fillRect(0, 0, 600, 800); g.fillStyle = '#fff'; g.fillRect(150, 140, 300, 520); g.fillStyle = '#333'; g.font = '60px sans-serif'; g.fillText(String(n), 280, 420); return c.toDataURL('image/jpeg', 0.85).split(',')[1]; }));
+  const png = await sJ.evaluate(() => { const c = document.createElement('canvas'); c.width = 300; c.height = 300; c.getContext('2d').fillRect(0, 0, 300, 300); return c.toDataURL('image/png').split(',')[1]; });
+  await sJ.close();
+  const fenster = { name: 'Bad', art: 'fenster', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, fotos: 2, bilder: { in: id(1), out: id(2) }, ki: { auto: true, chips: [], rows: [['Rollladen', 'Aufsatzkasten']], hints: [], pruefen: [] } };
+
+  // a) Kundenlink: ablegen, vor dem Senden unsichtbar, nach dem Senden nur für den Betrieb
+  const mailB = 'foto19-' + stempel + '@beispiel.de', TB = tok(mailB), TB2 = tok('foto19b-' + stempel + '@beispiel.de');
+  const reg = await rufe('/api/konto/registrieren', { token: TB, body: { firma: 'Fensterbau Foto ' + stempel, ap: 'Fia Foto', tel: '0221 81' + String(Date.now()).slice(-5), plz: '50667', col: '#1f5fa8', agb: RECHT.NB_STAND, unternehmer: true } });
+  const reg2 = await rufe('/api/konto/registrieren', { token: TB2, body: { firma: 'Glaserei Fremd ' + stempel, ap: 'Fred Fremd', tel: '0221 92' + String(Date.now()).slice(-5), plz: '50668', col: '#7a1f3d', agb: RECHT.NB_STAND, unternehmer: true } });
+  const pr = await rufe('/api/konto/projekte', { token: TB, body: { kunde: 'Familie Foto', kontakt: '', plan: ['Fenster'], days: 14 } }), code = pr.konto.acc.links.find((l) => l.id === pr.id).code;
+  const rowB = await sp.betriebNachAuth((await auth.nutzer(k19, TB)).id);
+  const hoch = (c, i, bild) => rufe('/api/link/' + c + '/foto/' + i, { body: { bild: bild } });
+  const holen = (c, i, t) => rufe('/api/konto/foto/' + c + '/' + i, { token: t, roh: true });
+  const ordner = (pfx) => ab.alle().filter((x) => x.startsWith(pfx)).map((x) => x.split('/').pop().replace(/\.jpg$/, '')).sort().join(',');
+  const h1 = await hoch(code, id(1), jpegs[0]), h2 = await hoch(code, id(2), jpegs[1]), h3 = await hoch(code, id(3), jpegs[2]);
+  ok(reg.ok && reg2.ok && h1.ok && h2.ok && h3.ok && ordner('link/' + code + '/') === [id(1), id(2), id(3)].sort().join(','), 'Fotos über den Kundenlink abgelegt, je Link ein eigener Ordner (link/<code>/<kennung>.jpg)');
+  const hPng = await hoch(code, id(4), png), hId = await hoch(code, 'b12', jpegs[0]), hGross = await hoch(code, id(4), '/9j/' + 'A'.repeat(1400000)), hKurz = await hoch('abc123', id(4), jpegs[0]), hFremd = await hoch('zzzzzzzzzz', id(4), jpegs[0]);
+  ok(hPng._status === 400 && hId._status === 400 && hGross._status === 400 && hKurz._status === 400 && hFremd._status === 404 && !ordner('link/' + code + '/').includes(id(4)), 'Abgewiesen: kein JPEG, falsche Kennung, zu groß, alter kurzer Link (400), unbekannter Link (404)');
+  const vorher = await holen(code, id(1), TB);
+  ok(vorher.status === 404, 'Vor dem Senden sieht auch der Betrieb kein Foto');
+  const send = await rufe('/api/aufmass', { body: { v: 1, b: code, p: { name: 'Familie Foto' }, w: [fenster], t: Date.now() } }); await fertig();
+  const nach = (await rufe('/api/konto', { token: TB })).konto.acc.links.find((l) => l.code === code);
+  ok(send.ok && nach.status === 'eingegangen' && (nach.aufmass.fotosDa || []).slice().sort().join(',') === [id(1), id(2)].sort().join(',') && nach.aufmass.windows[0].bilder.in === id(1) && ordner('link/' + code + '/') === [id(1), id(2)].sort().join(','), 'Gesendet: das Aufmaß nennt seine angekommenen Fotos; ein überholtes Foto (neu fotografiert) ist aus der Ablage gelöscht');
+  const g1 = await holen(code, id(1), TB), b1 = Buffer.from(await g1.arrayBuffer());
+  ok(g1.status === 200 && g1.headers.get('content-type') === 'image/jpeg' && /private/.test(g1.headers.get('cache-control') || '') && /sandbox/.test(g1.headers.get('content-security-policy') || '') && b1[0] === 0xff && b1[1] === 0xd8 && b1.equals(Buffer.from(jpegs[0], 'base64')), 'Nach dem Senden: der Betrieb lädt das Foto, Byte für Byte wie hochgeladen (JPEG, privat zwischengespeichert, abgeschottet)');
+  const ohneT = await holen(code, id(1), ''), fremdT = await holen(code, id(1), TB2), ungenannt = await holen(code, id(3), TB), spaet = await hoch(code, id(4), jpegs[3]);
+  ok(ohneT.status === 401 && fremdT.status === 404 && ungenannt.status === 404 && spaet._status === 410 && spaet.zu === 'eingegangen', 'Ohne Anmeldung 401, ein anderer Betrieb 404, ein Foto, das das Aufmaß nicht nennt, 404; nach dem Senden nimmt der Link keine Fotos mehr an (410)');
+  await sp.betriebAendern(rowB.id, (a) => { a.links.find((l) => l.code === code).locked = true; });
+  const gesperrt = await holen(code, id(1), TB), gesperrtSicht = (await rufe('/api/konto', { token: TB })).konto.acc.links.find((l) => l.code === code);
+  await sp.betriebAendern(rowB.id, (a) => { a.links.find((l) => l.code === code).locked = false; });
+  ok(gesperrt.status === 402 && !gesperrtSicht.aufmass.windows[0].bilder, 'Gesperrtes Aufmaß (noch keine Zahlungsart): keine Fotos, auch keine Kennungen (402)');
+  // Code ohne Link (eingefügt): ohne Kennungen von Fotos; die Fotos stehen im Aufmaßblatt des Kunden
+  const am1 = 'AM1.' + Buffer.from(JSON.stringify({ v: 1, b: '', p: { name: 'Ohne Link' }, w: [Object.assign({}, fenster, { name: 'Flur' })], t: Date.now() }), 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const imp = await rufe('/api/konto/import', { token: TB, body: { code: am1 } }), impL = (await rufe('/api/konto', { token: TB })).konto.acc.links.find((l) => l.id === imp.eingang.id);
+  ok(imp.eingang.ok && impL.aufmass.windows[0].name === 'Flur' && !impL.aufmass.windows[0].bilder && Array.isArray(impL.aufmass.fotosDa) && !impL.aufmass.fotosDa.length, 'Code ohne Link: übernommen ohne Kennungen von Fotos');
+
+  // b) Löschfristen: nie gesendet mit dem Zwischenstand, eingegangen 12 Monate nach dem Eingang
+  const pr2 = await rufe('/api/konto/projekte', { token: TB, body: { kunde: 'Familie Nie', kontakt: '', plan: ['Fenster'], days: 14 } }), code2 = pr2.konto.acc.links.find((l) => l.id === pr2.id).code;
+  const h5 = await hoch(code2, id(5), jpegs[0]), j19 = Date.now();
+  const zw2 = await rufe('/api/link/' + code2 + '/entwurf', { body: { windows: [Object.assign({}, fenster, { wid: 'w19n' + stempel, t0: j19, aend: 0, ts: j19, bilder: { in: id(5) } })], proj: {}, stand: j19, projTs: j19, angelegt: 1, bekannt: [], geloescht: {} } });
+  await rufe('/api/konto/projekte/' + pr2.id, { method: 'PATCH', token: TB, body: { deaktivieren: true } });
+  await sp.betriebAendern(rowB.id, (a) => { a.links.find((l) => l.code === code2).deaktiviertAm = Date.now() - 31 * TAG; });
+  const auf1 = await ze.aufraeumen(k19, sp);
+  ok(h5.ok && zw2.ok && !ordner('link/' + code2 + '/') && ordner('link/' + code + '/') === [id(1), id(2)].sort().join(','), 'Nie gesendet: die Fotos gehen 30 Tage nach dem Deaktivieren mit dem Inhalt des Zwischenstands; die eines eingegangenen Aufmaßes bleiben');
+  await sp.betriebAendern(rowB.id, (a) => { a.links.find((l) => l.code === code).eingegangenAt = Date.now() - 366 * TAG; });
+  const auf2 = await ze.aufraeumen(k19, sp);
+  const nachJahr = (await rufe('/api/konto', { token: TB })).konto.acc.links.find((l) => l.code === code), gJahr = await holen(code, id(1), TB), gJahrT = await gJahr.json().catch(() => ({}));
+  ok(auf1.ok !== undefined && auf2.fotos >= 1 && nachJahr.fotosGeloescht > 0 && nachJahr.aufmass.windows.length === 1 && !ordner('link/' + code + '/') && gJahr.status === 410 && /12 Monate/.test(gJahrT.fehler || ''), '12 Monate nach dem Eingang: Fotos gelöscht, das Aufmaß bleibt, der Betrieb erfährt es (410)');
+
+  // c) Konto des Hauseigentümers: eigener Ordner, nur der Besitzer, Überholtes und Gelöschtes geht weg
+  const TH = tok('haus19-' + stempel + '@beispiel.de'), TH2 = tok('haus19b-' + stempel + '@beispiel.de'), KH = 'p19a' + stempel, nH = await auth.nutzer(k19, TH), t0 = Date.now();
+  const hk = (t, kn, i, bild) => rufe('/api/kunde/aufmass/' + kn + '/foto/' + i, { token: t, body: { bild: bild } });
+  const gk = (t, kn, i) => rufe('/api/kunde/aufmass/' + kn + '/foto/' + i, { token: t, roh: true });
+  const fwH = (bilder, ts) => ({ wid: 'h19' + stempel, t0: t0, aend: 0, ts: ts, name: 'Küche', art: 'fenster', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, fotos: 2, bilder: bilder });
+  const sichernH = (kn, w, stand) => rufe('/api/kunde/aufmass/' + kn, { token: TH, body: { windows: [w], proj: { name: 'Haus' }, projTs: t0, stand: stand, angelegt: 1, bekannt: [w.wid], geloescht: {} } });
+  const eig = (kn) => ordner('konto/' + nH.id + '/' + kn + '/');
+  const k1 = await hk(TH, KH, id(6), jpegs[0]), k2 = await hk(TH, KH, id(7), jpegs[1]), s1 = await sichernH(KH, fwH({ in: id(6), out: id(7) }, t0 + 1), t0 + 1);
+  const gOwn = await gk(TH, KH, id(6)), gOther = await gk(TH2, KH, id(6)), gNone = await gk('', KH, id(6));
+  ok(k1.ok && k2.ok && s1.ok && eig(KH) === [id(6), id(7)].sort().join(',') && gOwn.status === 200 && gOther.status === 404 && gNone.status === 401, 'Konto: Fotos im eigenen Ordner, nur der Besitzer lädt sie (anderes Konto 404, ohne Anmeldung 401)');
+  const k3 = await hk(TH, KH, id(8), jpegs[2]), s2 = await sichernH(KH, fwH({ in: id(8), out: id(7) }, t0 + 5000), t0 + 5000); await fertig();
+  ok(k3.ok && s2.ok && eig(KH) === [id(7), id(8)].sort().join(','), 'Neu fotografiert und gespeichert: das überholte Foto löscht der Server nach dem Abgleich');
+  const del = await rufe('/api/kunde/aufmass/' + KH + '/loeschen', { token: TH, body: {} }), KH2 = 'p19b' + stempel, k4 = await hk(TH, KH2, id(9), jpegs[3]);
+  const delK = await rufe('/api/kunde/loeschen', { token: TH, body: {} });
+  ok(del.ok && !eig(KH) && k4.ok && delK.ok && !ordner('konto/' + nH.id + '/'), 'Aufmaß löschen nimmt seine Fotos mit, Konto löschen alle, auch die eines nie gesicherten Aufmaßes');
+  ok(fo.fotoIds([{ bilder: { in: id(1), out: '../x' } }, { bilder: { in: 'kaputt' } }, null]).size === 1, 'Nur gültige Kennungen zählen (fotoIds)');
+
+  // d) im Browser: Kundenlink, Betriebsbereich, Konto auf zwei Geräten (eigener Testserver mit nachgestellter Datenbank)
+  const cp19 = await import('node:child_process'), path19 = await import('node:path'), url19 = await import('node:url');
+  const W19 = path19.resolve(path19.dirname(url19.fileURLToPath(import.meta.url)), '..');
+  const port19 = 9400 + Math.floor(Math.random() * 80), B19 = 'http://localhost:' + port19;
+  const kind19 = cp19.spawn(process.execPath, [path19.join(W19, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port19), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind19.stderr.on('data', (d) => process.stderr.write('  [Server 19] ' + d));
+  const aus19 = () => { try { kind19.kill(); } catch (e) { /* schon weg */ } };
+  process.on('exit', aus19);
+  let bereit19 = false;
+  for (let i = 0; i < 60 && !bereit19; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit19 = !!(await fetch(B19 + '/api/status').then((r) => r.json())).daten; } catch (e) { /* noch nicht */ } }
+  ok(bereit19, 'Testserver mit nachgestellter Datenbank und Fotoablage läuft: ' + B19);
+  try {
+    const api19 = async (p, body, token) => { const init = { method: body ? 'POST' : 'GET', headers: { accept: 'application/json', origin: B19 } }; if (body) { init.headers['content-type'] = 'application/json'; init.body = JSON.stringify(body); } if (token) init.headers.authorization = 'Bearer ' + token; const r = await fetch(B19 + p, init); const j = await r.json().catch(() => ({})); return Object.assign({ _status: r.status }, j); };
+    const bilderGleich = (b, da) => !!b && [b.in, b.out].sort().join(',') === (da || []).slice().sort().join(',');
+    const bis = async (s, fn, ms, arg) => { const ende = Date.now() + (ms || 10000); while (Date.now() < ende) { if (await s.evaluate(fn, arg)) return true; await new Promise((r) => setTimeout(r, 200)); } return false; };
+    const jpg = Buffer.from(jpegs[0], 'base64');
+    const fotosMachen = async (s) => {
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.bb .btn.primary');
+      await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
+      await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
+      if (await s.waitForSelector('.fx-dialog', { timeout: 2500 }).then(() => true, () => false)) await s.click('.fx-ja');
+      await s.setInputFiles('input[data-in="photo"][data-f="out"]', { name: 'aussen.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(jpegs[1], 'base64') });
+      await bis(s, async () => { const b = S.win.bilder || {}; return !!(b.in && b.out && (await Fotos.holen(b.in)) && (await Fotos.holen(b.out))); }, 8000); // verkleinert und auf dem Gerät abgelegt
+    };
+    const speichern = (s, name) => s.evaluate((n) => { Object.assign(S.win, { name: n, mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin(); }, name);
+    const oeffnen = (s, i) => s.evaluate((i) => { const b = document.createElement('button'); b.setAttribute('data-i', String(i)); act('open', b); }, i);
+    const mailL = 'foto19l-' + stempel + '@beispiel.de', TL = tok(mailL);
+    const regL = await api19('/api/konto/registrieren', { firma: 'Fensterbau Lichtblick ' + stempel, ap: 'Lea Licht', tel: '0221 63' + String(Date.now()).slice(-5), plz: '50670', col: '#1f5fa8', agb: RECHT.NB_STAND, unternehmer: true }, TL);
+    const prL = await api19('/api/konto/projekte', { kunde: 'Familie Sonnig', kontakt: '', plan: ['Fenster'], days: 14 }, TL), linkL = prL.konto.acc.links.find((l) => l.id === prL.id);
+    const c1 = await browser.newContext(telefon), s1b = await neueSeite(c1, B19);
+    await s1b.goto(B19 + '/app/#k-' + linkL.code, { waitUntil: 'networkidle' }); await s1b.waitForTimeout(500);
+    await fotosMachen(s1b);
+    const vorSpeichern = await s1b.evaluate(async () => ({ offen: await fotosOffen(), lokal: ((await Fotos.alle()) || []).length }));
+    await speichern(s1b, 'Wohnzimmer');
+    const oben = await bis(s1b, async () => !!S.windows[0] && bilderVon(S.windows[0]).length === 2 && (await fotosOffen()) === 0, 10000);
+    ok(regL.ok && vorSpeichern.lokal === 2 && oben, 'Kundenlink: Fotos liegen verkleinert auf dem Gerät (IndexedDB) und gehen mit dem gespeicherten Fenster zum Server');
+    await s1b.reload({ waitUntil: 'networkidle' }); await s1b.waitForTimeout(400);
+    await oeffnen(s1b, 0);
+    const zurueck = await bis(s1b, () => !!(S.photos.in && /^blob:/.test(S.photos.in.url) && S.photos.out && /^blob:/.test(S.photos.out.url)), 5000);
+    await s1b.evaluate(() => go('fotos')); await s1b.waitForTimeout(300);
+    const kacheln = await s1b.evaluate(() => Array.from(document.querySelectorAll('.tile img')).filter((i) => /^blob:/.test(i.src) && i.complete && i.naturalWidth > 0).length);
+    ok(zurueck && kacheln === 2, 'Nach dem Neuladen: das gespeicherte Fenster zeigt seine Fotos wieder (vom Gerät)');
+    await s1b.evaluate(() => { go('blatt'); }); await s1b.waitForTimeout(200);
+    await s1b.evaluate(() => { act('send', document.body); });
+    await s1b.waitForFunction(() => S.sent && S.sent.uebertragen, null, { timeout: 20000 });
+    const linkB = (await api19('/api/konto', null, TL)).konto.acc.links.find((l) => l.code === linkL.code);
+    ok(linkB.status === 'eingegangen' && (linkB.aufmass.fotosDa || []).length === 2 && bilderGleich(linkB.aufmass.windows[0].bilder, linkB.aufmass.fotosDa), 'Gesendet: beide Fotos sind beim Betrieb angekommen');
+    sauber(s1b, 'Kundenlink mit Fotos ohne Fehler'); await c1.close();
+    /* Betriebsbereich: klein beim Aufklappen, groß im Blatt, im PDF */
+    const c2 = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), s2b = await neueSeite(c2, B19);
+    await s2b.goto(B19 + '/', { waitUntil: 'networkidle' });
+    await s2b.evaluate((x) => localStorage.setItem('aufmass.sitzung', JSON.stringify(x)), { token: TL, refresh: 'test-refresh', mail: mailL });
+    await s2b.reload({ waitUntil: 'networkidle' }); await s2b.waitForTimeout(500);
+    await s2b.evaluate((lid) => go('link', lid), linkB.id); await s2b.waitForTimeout(400);
+    const zu = await s2b.evaluate(() => ({ kacheln: document.querySelectorAll('.posc .pfoto').length, geladen: document.querySelectorAll('.pfoto img[src]').length }));
+    await s2b.click('.poslist details summary');
+    const klein = await bis(s2b, () => document.querySelectorAll('.pfoto img[src^="blob:"]').length === 2 && Array.from(document.querySelectorAll('.pfoto img')).every((i) => i.complete && i.naturalWidth > 0), 8000);
+    const masse = await s2b.evaluate(() => Array.from(document.querySelectorAll('.pfoto')).map((b) => { const r = b.getBoundingClientRect(), t = b.querySelector('.pf-tag'); return { h: r.height, w: r.width, schrift: t ? parseFloat(getComputedStyle(t).fontSize) : 0, text: t ? t.textContent : '' }; }));
+    await foto(s2b, 'betrieb-fotos');
+    await s2b.click('.pfoto');
+    const gross = await bis(s2b, () => { const i = document.querySelector('.sheet .foto-gross img'); return !!(i && /^blob:/.test(i.src) && i.naturalWidth > 0); }, 5000);
+    const blatt = await s2b.evaluate(() => ({ titel: (document.querySelector('.sheet h3') || {}).textContent || '', text: (document.querySelector('.sheet') || {}).textContent || '' }));
+    await foto(s2b, 'betrieb-foto-gross');
+    ok(zu.kacheln === 2 && zu.geladen === 0 && klein && masse.every((m) => m.h >= 44 && m.w >= 44 && m.schrift >= 13) && masse.map((m) => m.text).join(',') === 'Von innen,Von außen', 'Betriebsbereich: zwei Fotos je Position, geladen erst beim Aufklappen; Felder mindestens 44 px, Beschriftung 13 px');
+    ok(gross && blatt.titel === 'Von innen' && /12 Monate/.test(blatt.text), 'Antippen zeigt das Foto groß, mit Hinweis auf die 12 Monate');
+    const pdf = await s2b.evaluate(async (lid) => { const l = A().links.find((x) => x.id === lid); await window.Blatt.schrift(); const f = await amFotos(l), mit = amPDF(l, f), ohne = amPDF(l, {}); const zahl = async (b) => ((await b.text()).match(/\/Subtype \/Image/g) || []).length; return { n: Object.keys(f).length, mit: await zahl(mit), ohne: await zahl(ohne), breit: Math.max.apply(null, Object.values(f).map((x) => Math.max(x.w, x.h))) }; }, linkB.id);
+    ok(pdf.n === 2 && pdf.mit === pdf.ohne + 2 && pdf.breit <= 960, 'PDF des Betriebs: beide Fotos stehen darin, fürs PDF verkleinert (längste Kante höchstens 960 px)');
+    sauber(s2b, 'Betriebsbereich mit Fotos ohne Fehler'); await c2.close();
+    /* Konto: zwei Geräte; das zweite holt die Fotos aus dem Konto; neu fotografiert löscht das alte; abmelden räumt das Gerät */
+    const mailH = 'foto19h-' + stempel + '@beispiel.de', THb = tok(mailH), sitzH = { token: THb, refresh: 'test-refresh', mail: mailH };
+    const c3 = await browser.newContext(telefon), s3b = await neueSeite(c3, B19);
+    await s3b.goto(B19 + '/app/', { waitUntil: 'networkidle' }); await s3b.evaluate((x) => localStorage.setItem('aufmass.kunde', JSON.stringify(x)), sitzH);
+    await s3b.reload({ waitUntil: 'networkidle' }); await s3b.waitForTimeout(500);
+    await fotosMachen(s3b); await speichern(s3b, 'Küche');
+    const imKonto = await bis(s3b, async () => !!KS && S.sync.ok && !S.sync.offen && !!S.windows[0] && bilderVon(S.windows[0]).length === 2 && (await fotosOffen()) === 0, 15000);
+    const kennH = await s3b.evaluate(() => S.kauf.kennung), idsH = await s3b.evaluate(() => bilderVon(S.windows[0]));
+    const gKonto = await fetch(B19 + '/api/kunde/aufmass/' + kennH + '/foto/' + idsH[0], { headers: { authorization: 'Bearer ' + THb } });
+    const codeOhne = await s3b.evaluate(() => { const o = unpackProject(packProject(S.windows, S.proj, null)); const m = unpackProject(packProject(S.windows, S.proj, { code: 'abcdefghij' })); return { ohne: !o.w[0].bilder, mit: !!(m.w[0].bilder && m.w[0].bilder.in) }; });
+    ok(imKonto && gKonto.status === 200 && codeOhne.ohne && codeOhne.mit, 'Mit Konto: die Fotos des gespeicherten Fensters liegen im Konto; der Aufmaß-Code ohne Link nennt keine Fotos');
+    const c4 = await browser.newContext(telefon), s4b = await neueSeite(c4, B19);
+    await s4b.goto(B19 + '/app/', { waitUntil: 'networkidle' }); await s4b.evaluate((x) => localStorage.setItem('aufmass.kunde', JSON.stringify(x)), sitzH);
+    await s4b.reload({ waitUntil: 'networkidle' });
+    await bis(s4b, () => S.windows.length === 1, 10000);
+    await oeffnen(s4b, 0);
+    const ausKonto = await bis(s4b, () => !!(S.photos.in && /^blob:/.test(S.photos.in.url) && S.photos.out), 8000);
+    const blattH = await s4b.evaluate(async () => Object.keys(await fotosFuerBlatt(S.windows)).length);
+    ok(ausKonto && blattH === 2, 'Zweites Gerät: die Fotos kommen aus dem Konto in die Kacheln und ins Aufmaßblatt');
+    await s4b.evaluate(async (b64) => { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); await onPhoto('in', new File([u], 'neu.jpg', { type: 'image/jpeg' })); }, jpegs[2]);
+    await bis(s4b, async () => (await Fotos.holen(S.win.bilder.in)) !== null, 5000);
+    await speichern(s4b, 'Küche');
+    const neuOben = await bis(s4b, async () => S.sync.ok && !S.sync.offen && S.windows[0].bilder.in !== undefined && (await fotosOffen()) === 0, 15000);
+    const neuId = await s4b.evaluate(() => S.windows[0].bilder.in);
+    let altWeg = 0; for (let i = 0; i < 20 && altWeg !== 404; i++) { altWeg = (await fetch(B19 + '/api/kunde/aufmass/' + kennH + '/foto/' + idsH[0], { headers: { authorization: 'Bearer ' + THb } })).status; if (altWeg !== 404) await new Promise((r) => setTimeout(r, 200)); }
+    const neuDa = (await fetch(B19 + '/api/kunde/aufmass/' + kennH + '/foto/' + neuId, { headers: { authorization: 'Bearer ' + THb } })).status;
+    ok(neuOben && neuId !== idsH[0] && altWeg === 404 && neuDa === 200, 'Neu fotografiert auf dem zweiten Gerät: das neue Foto liegt im Konto, das alte ist gelöscht');
+    sauber(s4b, 'Zweites Gerät mit Fotos aus dem Konto ohne Fehler'); await c4.close();
+    await s3b.evaluate(() => kontoAbmelden());
+    const geraeumt = await bis(s3b, async (ids) => !KS && !((await Fotos.alle()) || []).some((x) => ids.includes(x)), 8000, idsH);
+    ok(geraeumt, 'Abmelden nimmt die Fotos, die im Konto liegen, auch vom Gerät');
+    sauber(s3b, 'Konto mit Fotos ohne Fehler'); await c3.close();
+  } finally { aus19(); }
 }
 
 await browser.close();
