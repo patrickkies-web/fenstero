@@ -3,6 +3,7 @@
 //
 //   node scripts/dev-server.mjs                   Pilotmodus: ohne KI, ohne Zahlung, ohne Datenbank
 //   KI_ATTRAPPE=1                                  KI mit festen Beispielantworten (kein Schlüssel nötig)
+//   KI_VERZOEGERUNG_MS=20000                       dazu: jede Antwort erst nach dieser Zeit, wie eine echte Auswertung
 //   ZAHLUNG_ATTRAPPE=1 DATEN_ATTRAPPE=1            Stripe und Datenbank nachgestellt: Anmeldecode 123456, Kassen kehren sofort als bezahlt zurück
 //   MAIL_ATTRAPPE=1                                Mailversand nachgestellt (Vertragsbestätigung, Widerruf); lesbar unter /api/test/post
 //   ANTHROPIC_API_KEY=… STRIPE_SECRET_KEY=… SUPABASE_URL=… SUPABASE_SECRET_KEY=…   echte Dienste (Schlüssel nie ins Repo schreiben)
@@ -40,6 +41,9 @@ if (ATTRAPPE) {
         /* feste Werte und Seitenverhältnis wie ein Fenster von 1.230 × 1.410 mm; „unklar“ und Unbekanntes muss die App verwerfen */
         fach: aussen ? { rollladen: 'keiner', anschlag: 'aussen', fassade: 'klinker', fensterbank: 'aluminium', geschoss: 'eg', erreichbar: true, geruest: false } : { rollladen: 'einbau', anschlag: 'innen', fensterbank: 'unklar', bruestung: 'normal', strom: false, quatsch: 'x' },
         verhaeltnis: 0.87, sicherheit: 0.5 };
+    /* KI_VERZOEGERUNG_MS: so lange wie eine echte Auswertung (etwa 15 bis 30 Sekunden), damit sich Speichern und neue Fenster währenddessen prüfen lassen */
+    const warten = Number(process.env.KI_VERZOEGERUNG_MS) || 0;
+    if (warten > 0) await new Promise((r) => setTimeout(r, warten));
     return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify(daten) }], stop_reason: 'end_turn' }), { status: 200, headers: { 'content-type': 'application/json' } });
   };
 }

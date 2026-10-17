@@ -12,6 +12,10 @@ Code: `functions/api/ki.js` (Aufträge, nur auf dem Server), `web/assets/app.js`
 4. Antwort als JSON, in der App zusammengeführt (`w.ki`): Befundzeilen, Stichworte für den Kunden, Hinweise für Angebot und Montage, Prüfpunkte fürs Feinaufmaß, Laibungstiefe (nur innen), Schräglage des Fotos (für die Wasserwaage), dazu **Fachangaben mit festen Werten** (`fach`) und das **Seitenverhältnis** des Fensterelements (`verhaeltnis`, siehe unten).
 5. Ins neue Fenster werden übernommen: die Laibungstiefe, wenn der Kunde keine eingetragen hat; die Fassade (für das Modell); der Anschlag (fürs Blatt); das Geschoss als Vorschlag, solange der Kunde keines gewählt hat. Material, Teilung und Öffnung wählt der Kunde.
 
+**Wenn die Antwort später kommt.** Eine echte Auswertung dauert 15 bis 30 Sekunden; der Kunde misst währenddessen weiter und speichert oft vorher. Jeder Auftrag gehört zu dem Fenster, für das fotografiert wurde (`KI_LAEUFT`, `KI_ZIEL`, `kiNachtragen` in `app.js`): Wird es vorher gespeichert, kommt die Antwort ins gespeicherte Fenster (mit neuem Zeitpunkt, damit der Server diese Fassung nimmt). „Weiteres Fenster“ bricht nichts ab; abgebrochen wird nur, wenn für dasselbe Fenster und dieselbe Seite ein neues Foto kommt. Solange noch gelesen wird, zeigt die Seite des gespeicherten Fensters und die Prüfen-Seite „liest noch“; **Senden an den Betrieb und das Aufmaßblatt warten** darauf (höchstens 45 Sekunden, der Knopf heißt dann „Fotos werden ausgewertet …“). Eine nachgereichte Auswertung oder ein neues Foto ist **keine Änderung** des Kunden: Sie zählt nicht gegen die vier Änderungen und kommt auch in ein festes Fenster (`aenderungFp` in App und `functions/api/entwurf.js`). Bis Oktober 2026 ging die Antwort verloren, wenn vor ihr gespeichert wurde; im Blatt stand dann „2 Fotos ausgewertet“ ohne Auswertung. Das Blatt schreibt „ausgewertet“ jetzt nur noch, wo die Auswertung auch drinsteht.
+
+Zum Nachstellen: `KI_ATTRAPPE=1 KI_VERZOEGERUNG_MS=20000 node scripts/dev-server.mjs` (jede Testantwort erst nach dieser Zeit); die Prüfsuite tut das in Abschnitt 18.
+
 ## Was die KI liest, in dieser Reihenfolge
 
 | Foto innen | Foto außen |

@@ -74,6 +74,9 @@ window.Blatt = (() => {
     const dash = (on) => { try { doc.setLineDashPattern(on ? [1.1, 0.9] : [], 0); } catch (err) { /* ok */ } };
     const num = h.num, th = h.th;
     const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), nF = wins.reduce((a, x) => a + (num(x.fotos) || 0), 0);
+    /* „ausgewertet“ nur, wo die Auswertung auch im Blatt steht (Befund oder Fachangaben); sonst ehrlich nur die Zahl der Fotos */
+    const nA = wins.reduce((a, x) => a + (x.ki && ((x.ki.rows || []).length || (x.ki.fach && Object.keys(x.ki.fach).length)) ? num(x.fotos) || 0 : 0), 0);
+    const fotoText = !nF ? 'ohne Fotos' : nA === nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' ausgewertet' : nA ? nA + ' von ' + nF + ' Fotos ausgewertet' : nF + (nF === 1 ? ' Foto' : ' Fotos');
     const komplett = wins.length > 0 && wins.every((x) => { const d = h.derive(x); return d.moW && d.moH && d.elW && d.elH; });
     const heute = (() => { try { return new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }); } catch (err) { return ''; } })();
     const titelName = V === 'betrieb' ? (kd.name || 'Kunde') : (pr.name || '');
@@ -368,7 +371,7 @@ window.Blatt = (() => {
     }
     /* Eine Zeile Zusammenfassung: Umfang und Vollständigkeit */
     let cx = M;
-    [[wins.length + (wins.length === 1 ? ' Position' : ' Positionen'), INK, '#ffffff'], [nE + (nE === 1 ? ' Element' : ' Elemente'), PAPER, INK], [nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' ausgewertet' : 'ohne Fotos', PAPER, INK], [komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett ? '#e8f5ec' : '#fff4e5', komplett ? OK : WARN], ['alle Maße in mm', PAPER, INK]].forEach((c) => { cx += chip(c[0], cx, y, c[1], c[2], 8) + 2.5; });
+    [[wins.length + (wins.length === 1 ? ' Position' : ' Positionen'), INK, '#ffffff'], [nE + (nE === 1 ? ' Element' : ' Elemente'), PAPER, INK], [fotoText, PAPER, INK], [komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett ? '#e8f5ec' : '#fff4e5', komplett ? OK : WARN], ['alle Maße in mm', PAPER, INK]].forEach((c) => { cx += chip(c[0], cx, y, c[1], c[2], 8) + 2.5; });
     y += 12;
     const kontaktZ = [['Name', pr.name || '–'], ['Ort', pr.ort || '–'], ['Telefon', pr.tel || '–'], ['E-Mail', pr.mail || '–'], ['Erreichbar', ERREICH[pr.erreich] || '–']].filter((r) => r[1] !== '–');
     /* Die Nachricht steht auf Seite 1 höchstens dreizeilig, damit Position 1 dort in jedem Fall Platz hat; ist sie länger, steht sie vollständig nach Position 1 */

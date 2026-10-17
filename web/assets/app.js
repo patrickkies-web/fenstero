@@ -1936,7 +1936,7 @@ SCREENS.fertig = () => {
     : st.nb ? '<p class="sub center aend-frei">Während der Nachbesserung kannst du dieses Fenster frei ändern, darum hat ' + esc(bn) + ' gebeten.</p>'
     : '<p class="sub center aend-frei">Bis zum ' + esc(datumKurz(st.bis)) + ' kannst du dieses Fenster beliebig ändern, danach noch viermal.</p>';
   const html = model(w, { id: 'w3d', view: 'three', sway: true, stageH: 210, hint: 'Pos. ' + (S.editIdx + 1) }) + '<div class="center"><p class="eyebrow" style="color: var(--ok)">' + CHECK + ' Gespeichert · Position ' + (S.editIdx + 1) + '</p><h1 style="margin: 10px 0 0">' + esc(w.name || 'Fenster') + '</h1><p style="margin: 8px 0 0">' + esc(facts.join(' · ')) + '</p></div>' +
-    alle + aend +
+    (kiLaeuftFuer(gespeichert) || kiLaeuftFuer(w) ? kiLaeuftKarte('Die KI liest noch die Einbausituation. Die Auswertung kommt von selbst zu diesem Fenster.') : '') + alle + aend +
     '<div class="pill-row grid2"><button type="button" class="pill" data-act="go" data-v="ergebnis"' + zu + '>Maße ändern</button><button type="button" class="pill" data-act="wuensche"' + zu + '>Wünsche ändern</button><button type="button" class="pill" data-act="copywin">Kopieren</button><button type="button" class="pill danger" data-act="delwin">Löschen</button></div>' +
     '<button type="button" class="pill voll" data-act="go" data-v="home">Alle Fenster ansehen (' + S.windows.length + ')</button>' +
     '<p class="sub center" style="padding: 0 10px">' + (lk ? 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.' : 'Noch ein Fenster? Oder weiter zum Aufmaßblatt.') + '</p>';
@@ -2031,8 +2031,9 @@ SCREENS.blatt = () => {
     (fehlt ? '<div class="msg ' + (voll ? 'warn' : 'bad') + '">' + (voll ? fehlt + (fehlt === 1 ? ' Fenster hat' : ' Fenster haben') + ' noch keine vollständigen Maße. Du kannst trotzdem senden, ' + esc(bn) + ' sieht dann, was fehlt.' : (S.windows.length ? 'Noch kein Fenster ist vollständig gemessen. Tipp ein Fenster an und trag die fehlenden Maße nach.' : 'Noch kein Fenster erfasst.')) + '</div>' : '') +
     '<div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => checkCard(x, i)).join('') + '</div>' +
     '<div class="kv">' + items.map((r) => '<div><span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>').join('') + '</div>' +
+    (kiLaeuftFuer() ? kiLaeuftKarte('Die Auswertung der Fotos kommt gleich dazu. Wer jetzt sendet, wartet kurz, damit sie mitgeht.') : '') +
     '<p class="sub" style="padding: 0 6px">Nach dem Absenden ist der Link erledigt. Ändern kannst du danach nur noch über ' + esc(bn) + '.</p>';
-  return { html: html, back: ['Zurück', 'anfrage2'], bar: { label: (S.nb ? 'Erneut an ' : 'An ') + bn + ' senden', act: 'send', dis: !voll } };
+  return { html: html, back: ['Zurück', 'anfrage2'], bar: { label: S.kiWartet === 'senden' ? 'Fotos werden ausgewertet …' : (S.nb ? 'Erneut an ' : 'An ') + bn + ' senden', act: 'send', dis: !voll || S.kiWartet === 'senden' } };
 };
 /* Übersicht vor dem Senden: vollständig oder nicht, aber keine Maßliste zum Abfotografieren */
 function checkCard(x, i) {
@@ -2256,6 +2257,7 @@ const blattSchrift = () => (window.Blatt ? window.Blatt.schrift() : Promise.reso
 /* PDF direkt weitergeben: auf dem Telefon per Teilen-Menü (WhatsApp, Mail), sonst herunterladen */
 async function pdfTeilen() {
   if (S.betrieb) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
+  if (!(await kiVorher('blatt'))) return;
   await blattSchrift();
   const pdf = blattPDF('fensterbauer');
   if (pdf && navigator.canShare && typeof File === 'function') {
@@ -2282,6 +2284,7 @@ function blattFile() {
 async function saveDatei(variante) {
   if (S.betrieb) return toast('Das Aufmaßblatt bekommst du von ' + (S.betrieb.name || 'deinem Fensterbauer'));
   if (!FREI()) return go('teilen');
+  if (!(await kiVorher('blatt'))) return;
   await blattSchrift();
   const fb = variante === 'fensterbauer', pdf = blattPDF(fb ? 'fensterbauer' : 'kunde'), name = fileBase() + (fb ? '-fuer-Fensterbauer' : '') + (pdf ? '.pdf' : '.html'), data = pdf || blattFile();
   if (!DL && DLP) await DLP;
@@ -2739,6 +2742,9 @@ function aendStand(w, jetzt) {
 /* Fingerabdruck eines Fensters ohne Zähler und ohne das abgeleitete Bild der Lage (gleiche Regel wie auf dem Server) */
 const stabil = (v) => (Array.isArray(v) ? '[' + v.map(stabil).join(',') + ']' : v && typeof v === 'object' ? '{' + Object.keys(v).sort().filter((k) => v[k] !== undefined).map((k) => JSON.stringify(k) + ':' + stabil(v[k])).join(',') + '}' : JSON.stringify(v === undefined ? null : v));
 function fensterFp(w) { const o = Object.assign({}, w); delete o.wid; delete o.t0; delete o.aend; delete o.ts; if (o.plan && typeof o.plan === 'object') { o.plan = Object.assign({}, o.plan); delete o.plan.bild; delete o.plan.bw; delete o.plan.bh; } return stabil(o); }
+/* Für die Zählung der Änderungen: ohne die Auswertung der Fotos und die Zahl der Fotos. Eine Auswertung, die nach dem Speichern
+   ankommt, oder ein neues Foto ist keine Änderung des Kunden (gleiche Regel wie auf dem Server) */
+function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; return fensterFp(o); }
 const neueWid = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const kopie = (o) => JSON.parse(JSON.stringify(o));
 const datumKurz = (ms) => { try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return ''; } };
@@ -3244,7 +3250,54 @@ async function kontoNeuesAufmass() {
   leeresAufmass();
   go('home'); toast(platz ? 'Neues Aufmaß begonnen.' : 'Neues Aufmaß begonnen. Für die Bilder der Lage im vorigen war auf diesem Gerät kein Platz.');
 }
-const ctrls = {};
+/* Laufende KI-Auswertungen. Eine echte Auswertung dauert 15 bis 30 Sekunden; wer vorher speichert oder schon das nächste Fenster
+   anlegt, darf die Antwort nicht verlieren. Jeder Auftrag gehört zur Bearbeitungskopie (z.win), für die fotografiert wurde. saveWin
+   merkt sich an ihr die Kennung des gespeicherten Fensters (KI_ZIEL), und die Antwort wird dort nachgetragen. Abgebrochen wird nur,
+   wenn für dasselbe Fenster und dieselbe Seite ein neues Foto kommt. Senden und das Aufmaßblatt warten kurz auf laufende Aufträge. */
+const KI_LAEUFT = new Set();
+const KI_ZIEL = new WeakMap();
+function kiZielMerken(bearbeitet, wid) {
+  if (!wid || !Array.from(KI_LAEUFT).some((j) => j.win === bearbeitet)) return;
+  let s = KI_ZIEL.get(bearbeitet); if (!s) { s = new Set(); KI_ZIEL.set(bearbeitet, s); }
+  s.add(wid);
+}
+/* Läuft für dieses Fenster (Bearbeitungskopie oder gespeichert) noch eine Auswertung? Ohne w: für ein gespeichertes Fenster dieses Aufmaßes */
+function kiLaeuftFuer(w) {
+  const wids = new Set(S.windows.map((x) => x.wid));
+  return Array.from(KI_LAEUFT).some((j) => { const ziele = KI_ZIEL.get(j.win) || new Set(); return w ? j.win === w || (!!w.wid && ziele.has(w.wid)) : Array.from(ziele).some((id) => wids.has(id)); });
+}
+/* Antwort nach dem Speichern: ins gespeicherte Fenster (und in die offene Kopie desselben Fensters) übernehmen, mit neuem Zeitpunkt,
+   damit der Server die Fassung mit Auswertung nimmt. Das zählt nicht als Änderung (aenderungFp) */
+function kiNachtragen(z) {
+  const ziele = KI_ZIEL.get(z.win); if (!ziele || !ziele.size || !z.win.ki) return false;
+  const uebernehmen = (w) => { w.ki = kopie(z.win.ki); w.fotos = z.win.fotos; if (!w.neu && w.ki.laib && !w.e_laib && !num(w.laib)) w.laib = w.ki.laib; fachVerwerten(w); };
+  let gespeichert = false;
+  ziele.forEach((wid) => {
+    const g = S.windows.find((w) => w.wid === wid);
+    if (g) { uebernehmen(g); g.ts = zeit(); gespeichert = true; }
+    if (S.win && S.win !== z.win && S.win.wid === wid) uebernehmen(S.win);
+  });
+  if (gespeichert) persist();
+  return gespeichert;
+}
+let kiWarteListe = [];
+function kiFertigMelden() { if (kiLaeuftFuer()) return; const l = kiWarteListe; kiWarteListe = []; l.forEach((f) => f()); }
+/* Vor dem Senden und vor dem Aufmaßblatt: höchstens ms auf laufende Auswertungen warten; true, wenn nichts mehr läuft */
+function kiAbwarten(ms) {
+  if (!kiLaeuftFuer()) return Promise.resolve(true);
+  return new Promise((fertig) => { const t = setTimeout(() => { kiWarteListe = kiWarteListe.filter((f) => f !== los); fertig(!kiLaeuftFuer()); }, ms || 45000); const los = () => { clearTimeout(t); fertig(true); }; kiWarteListe.push(los); });
+}
+/* Vor dem Senden an den Betrieb und vor dem Aufmaßblatt: Läuft noch eine Auswertung, kurz darauf warten, damit sie mitkommt.
+   false nur, wenn schon gewartet wird (zweites Antippen); nach höchstens 45 Sekunden geht es auch ohne Auswertung weiter */
+async function kiVorher(was) {
+  if (!kiLaeuftFuer()) return true;
+  if (S.kiWartet) return false;
+  S.kiWartet = was; render();
+  toast(was === 'senden' ? 'Die Fotos werden gerade noch ausgewertet. Einen Moment, dann geht dein Aufmaß mit der Auswertung raus.' : 'Die Fotos werden gerade noch ausgewertet. Einen Moment, dann kommt die Auswertung mit ins Aufmaßblatt.');
+  await kiAbwarten(45000);
+  S.kiWartet = ''; render();
+  return true;
+}
 function imageDims(url) { return new Promise((res) => { const im = new Image(); im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => res({ w: 1200, h: 1600 }); im.src = url; }); }
 async function onPhoto(which, file) {
   if (!file) return;
@@ -3259,25 +3312,35 @@ async function onPhoto(which, file) {
   startAI(which, file);
 }
 async function startAI(which, file) {
-  const z = { ai: S.ai, win: S.win, photos: S.photos };
-  const ok = await AI.init();
-  S.aiOk = ok;
-  if (!ok) { z.ai[which] = { status: 'error', code: 'unavailable' }; render(); return; }
-  if (ctrls[which]) ctrls[which].abort();
-  const ctrl = new AbortController(); ctrls[which] = ctrl;
-  z.ai[which] = { status: 'running' }; render();
+  const z = { ai: S.ai, win: S.win, photos: S.photos, which: which, ctrl: new AbortController() };
+  /* dasselbe Fenster, dieselbe Seite: der alte Auftrag gilt nicht mehr */
+  KI_LAEUFT.forEach((j) => { if (j.ai === z.ai && j.which === which) { j.ctrl.abort(); KI_LAEUFT.delete(j); } });
+  KI_LAEUFT.add(z);
+  let zeigen = false;
   try {
-    const res = await AI.analyze(file, which, ctrl.signal, (part, r) => { if (ctrl.signal.aborted) return; z.ai[which] = Object.assign({ status: 'running' }, r); mergeKI(z); render(); }, !!z.win.neu);
-    if (ctrl.signal.aborted) return;
+    const ok = await AI.init();
+    S.aiOk = ok;
+    if (z.ctrl.signal.aborted) return;
+    if (!ok) { z.ai[which] = { status: 'error', code: 'unavailable' }; zeigen = true; return; }
+    z.ai[which] = { status: 'running' }; render();
+    const res = await AI.analyze(file, which, z.ctrl.signal, (part, r) => { if (z.ctrl.signal.aborted) return; z.ai[which] = Object.assign({ status: 'running' }, r); mergeKI(z); render(); }, !!z.win.neu);
+    if (z.ctrl.signal.aborted) return;
     z.ai[which] = Object.assign({ status: 'done' }, res);
     if (res.errs.befund) { z.ai[which].status = 'error'; z.ai[which].code = res.errs.befund; }
     mergeKI(z);
-    render();
+    kiNachtragen(z);
+    zeigen = true;
   } catch (e) {
     if (e && e.code === 'cancelled') return;
-    z.ai[which] = { status: 'error', code: e && e.code || 'error' }; render();
+    z.ai[which] = { status: 'error', code: e && e.code || 'error' }; zeigen = true;
+  } finally {
+    KI_LAEUFT.delete(z); // erst austragen, dann zeichnen: sonst steht „liest noch“ weiter da
+    if (zeigen) render();
+    kiFertigMelden();
   }
 }
+/* Hinweis, solange die KI noch liest (nach dem Speichern, vor dem Senden) */
+const kiLaeuftKarte = (satz) => '<div class="teaser ki-laeuft" role="status"><p class="eyebrow">Aus deinen Fotos</p><p class="sub" style="display: flex; align-items: center; gap: 10px"><span class="spin dark"></span>' + esc(satz) + '</p></div>';
 /* Zahl der Angaben aus den Fotos: Befundzeilen, dazu die Fachangaben auf einen Blick */
 const kiAnzahl = (ki) => { const n = ((ki && ki.rows) || []).length + (ki && ki.fach && Object.keys(ki.fach).length ? 1 : 0); return n + (n === 1 ? ' Angabe' : ' Angaben'); };
 /* KI-Ergebnisse beider Fotos zu einer Sicht fürs Fenster zusammenführen.
@@ -3335,7 +3398,7 @@ async function useDemo() {
   setTimeout(() => { S.ai.in = Object.assign({ status: 'done' }, AI.DEMO.in); S.ai.out = Object.assign({ status: 'done' }, AI.DEMO.out); mergeKI(); render(); }, 1400);
 }
 function newWin() {
-  Object.keys(ctrls).forEach((k) => { if (ctrls[k]) ctrls[k].abort(); });
+  /* laufende Auswertungen des vorigen Fensters laufen weiter (kiNachtragen); nur die Vorschaubilder kommen weg */
   ['in', 'out'].forEach((k) => { const p = S.photos[k]; if (p && p.url && !p.demo) { try { URL.revokeObjectURL(p.url); } catch (e) { /* ok */ } } });
   S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.nameFehler = false;
   /* Keine Vorauswahl, wo eine Vorgabe Geld kostet: Farbe außen und Fensterbank außen starten offen, bis der Kunde wählt */
@@ -3352,10 +3415,10 @@ function saveWin() {
   const jetzt = zeit(), w = Object.assign({}, S.win, { name: String(S.win.name).trim() });
   let hinweis = '';
   if (S.editIdx >= 0 && S.windows[S.editIdx]) {
-    const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w);
+    const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w), zaehlt = aenderungFp(alt) !== aenderungFp(w);
     w.wid = alt.wid || neueWid(); w.t0 = Number(alt.t0) || jetzt; w.aend = Number(alt.aend) || 0; w.ts = anders ? jetzt : Number(alt.ts) || 0;
-    if (anders && st.fest) { toast(festText(st)); S.win = kopie(alt); return go('fertig'); }
-    if (anders && !st.frei) { w.aend += 1; const rest = GRENZE.aenderungen - w.aend; hinweis = rest > 0 ? 'Gespeichert. Dieses Fenster kannst du noch ' + MAL[rest] + ' ändern.' : 'Gespeichert. Das war die letzte Änderung an diesem Fenster.'; }
+    if (zaehlt && st.fest) { toast(festText(st)); S.win = kopie(alt); return go('fertig'); }
+    if (zaehlt && !st.frei) { w.aend += 1; const rest = GRENZE.aenderungen - w.aend; hinweis = rest > 0 ? 'Gespeichert. Dieses Fenster kannst du noch ' + MAL[rest] + ' ändern.' : 'Gespeichert. Das war die letzte Änderung an diesem Fenster.'; }
     S.windows[S.editIdx] = kopie(w);
   } else {
     if (!neuMoeglich()) { toast(maxMsg()); return go('home', 'back'); }
@@ -3363,6 +3426,7 @@ function saveWin() {
     S.angelegt = angelegt() + 1; S.windows.push(kopie(w)); S.editIdx = S.windows.length - 1; S._feier = 'fertig'; fortschritt('arbeit', 4);
   }
   const ziel = S.windows[S.editIdx];
+  kiZielMerken(S.win, ziel.wid); // läuft die Auswertung noch, kommt ihre Antwort in dieses gespeicherte Fenster
   /* Das Bild der Lage entsteht erst aus Foto und Ecken; fehlt es, wird es für das gespeicherte Fenster nachgezogen */
   if (ziel.plan && !ziel.plan.bild && ziel.plan.ecken && planFoto()) planBildErzeugen(ziel).then((b) => { if (b && S.win && S.win.wid === ziel.wid && S.win.plan) { S.win.plan.bild = b; S.win.plan.bw = ziel.plan.bw; S.win.plan.bh = ziel.plan.bh; } lokalSpeichern(); });
   S.win = kopie(ziel); persist(); go('fertig');
@@ -3519,7 +3583,7 @@ function act(name, el) {
     }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); entschieden(w, 'glasfn'); return render(); }
     case 'save': return saveWin();
-    case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); return go('gesendet'); }
+    case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); return kiVorher('senden').then((weiter) => { if (!weiter || (S.betrieb && S.sent)) return; if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); go('gesendet'); }); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'teil-copy': { copyText(curCode(), 'code-box', 'Code kopiert'); return act('teil-mark', el); }
     case 'teil-mark': return teilMark('betrieb');

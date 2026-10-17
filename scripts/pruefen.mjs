@@ -26,6 +26,9 @@
 // Abschnitt 16 prüft das Erstaufmaß: „Weiß ich noch nicht“ statt Vorgabe, Absturzsicherung, Erreichbarkeit und Einbruchschutz, Lüftung,
 // Förderweg mit Zielwerten, Balkon- und PSK-Tür, Kunststoff-Alu, KI-Fachangaben und Maße gegen das Foto, Gestaltung übernehmen,
 // Klärungsliste in App, PDF, Betriebsbereich und Code; dazu die Gestaltung der neuen Schritte hell und dunkel.
+// Abschnitt 17 prüft Rechtstexte, Widerruf, E-Mails des Servers und die Anmelde-E-Mails bei Supabase.
+// Abschnitt 18 prüft die KI-Auswertung mit langsamer Antwort (eigener Testserver mit KI_VERZOEGERUNG_MS): Sie kommt auch an, wenn
+// vorher gespeichert, ein weiteres Fenster angelegt oder gesendet wird, und zählt nicht als Änderung.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -3102,6 +3105,82 @@ if (teil(17)) {
   ok(!vorlFehler17.length, 'Anmelde-E-Mails (Supabase-Vorlagen): genau ein Code, keine Anmeldelinks, Bilder, Skripte oder fremden Adressen, Schrift ab 13 px, Wortmarke, ohne Anrede, mit Anbieter; 10 Stellen und lange Adresse bei 360 px ohne Querscrollen, Codefeld hell und dunkel wie der Primärknopf' + (vorlFehler17.length ? ': ' + vorlFehler17.join(' | ') : ''));
   ok(rgA._status === 400 && rgB._status === 400 && rgC._status === 409 && rgC.neuLaden && rgD.ok && rgD.konto.acc.bedingungen.fassung === RECHT.NB_STAND && rgD.konto.acc.bedingungen.unternehmer === true && rgD.konto.acc.bedingungen.avv === true && !isNaN(Date.parse(rgD.konto.acc.bedingungen.zeit)), 'Registrierung nur als Unternehmer mit Zustimmung zur geltenden Fassung der Nutzungsbedingungen samt AVV; Fassung und Zeitpunkt stehen am Konto');
   aus17();
+}
+
+if (teil(18)) {
+  console.log('18. KI-Auswertung kommt an, auch wenn schneller gespeichert oder gesendet wird');
+  const cp18 = await import('node:child_process'), path18 = await import('node:path'), url18 = await import('node:url');
+  const W18 = path18.resolve(path18.dirname(url18.fileURLToPath(import.meta.url)), '..');
+  const port18 = 9300 + Math.floor(Math.random() * 80), B18 = 'http://localhost:' + port18, stempel18 = Date.now().toString(36);
+  /* eine echte Auswertung dauert 15 bis 30 Sekunden; hier 4 Sekunden je Foto, damit Speichern und Senden davor liegen */
+  const kind18 = cp18.spawn(process.execPath, [path18.join(W18, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port18), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', KI_VERZOEGERUNG_MS: '4000' }), stdio: ['ignore', 'ignore', 'pipe'] });
+  kind18.stderr.on('data', (d) => process.stderr.write('  [Server 18] ' + d));
+  const aus18 = () => { try { kind18.kill(); } catch (e) { /* schon weg */ } };
+  process.on('exit', aus18);
+  let bereit18 = false;
+  for (let i = 0; i < 60 && !bereit18; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit18 = !!(await fetch(B18 + '/api/status').then((r) => r.json())).daten; } catch (e) { /* noch nicht */ } }
+  ok(bereit18, 'Testserver mit langsamer KI (4 s je Foto) läuft: ' + B18);
+  try {
+    const fotosMachen = async (s) => {
+      const jpg = Buffer.from(await s.evaluate(() => { const c = document.createElement('canvas'); c.width = 900; c.height = 1200; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 900, 1200); g.fillStyle = '#fff'; g.fillRect(220, 200, 460, 760); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.bb .btn.primary');
+      await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
+      await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
+      if (await s.waitForSelector('.fx-dialog', { timeout: 3000 }).then(() => true, () => false)) await s.click('.fx-ja');
+      await s.setInputFiles('input[data-in="photo"][data-f="out"]', { name: 'aussen.jpg', mimeType: 'image/jpeg', buffer: jpg });
+      await s.waitForFunction(() => S.ai.in && S.ai.in.status === 'running' && S.ai.out && S.ai.out.status === 'running', null, { timeout: 5000 });
+    };
+    const schnellSpeichern = (s, name) => s.evaluate((n) => { Object.assign(S.win, { name: n, mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin(); }, name);
+    /* a) eigenes Aufmaß: gespeichert, bevor die KI antwortet */
+    const c18a = await browser.newContext(telefon), s18a = await neueSeite(c18a, B18);
+    await s18a.goto(B18 + '/app/', { waitUntil: 'networkidle' }); await s18a.waitForTimeout(300);
+    await fotosMachen(s18a); await schnellSpeichern(s18a, 'Wohnzimmer'); await s18a.waitForTimeout(200);
+    const waehrend = await s18a.evaluate(() => ({ screen: S.screen, ki: !!(S.windows[0] && S.windows[0].ki), hinweis: (document.querySelector('.ki-laeuft') || {}).textContent || '' }));
+    await s18a.waitForFunction(() => S.windows[0] && S.windows[0].ki && S.windows[0].ki.rows.some((r) => r[0] === 'Fassade') && S.windows[0].ki.rows.some((r) => r[0] === 'Rollladen'), null, { timeout: 15000 }); await s18a.waitForTimeout(300);
+    const danach = await s18a.evaluate(() => ({ rows: S.windows[0].ki.rows.map((r) => r[0]).join(','), laib: S.windows[0].laib, fotos: S.windows[0].fotos, offen: S.win.ki && S.win.ki.rows.length, hinweis: !!document.querySelector('.ki-laeuft'), gespeichert: JSON.parse(localStorage.getItem('aufmass.v1') || '{}').windows[0].ki.rows.length }));
+    ok(waehrend.screen === 'fertig' && !waehrend.ki && /Die KI liest noch die Einbausituation/.test(waehrend.hinweis) && /Rollladen/.test(danach.rows) && /Fassade/.test(danach.rows) && danach.laib === 160 && danach.fotos === 2 && danach.offen > 2 && !danach.hinweis && danach.gespeichert > 2, 'Gespeichert, bevor die KI antwortet: Hinweis „liest noch“, danach stehen beide Auswertungen im gespeicherten Fenster (auch im Browserspeicher) und in der offenen Ansicht');
+    /* Auswertung allein ist keine Änderung: auch ein festes Fenster nimmt sie an; eine echte Änderung bleibt gesperrt */
+    const fest = await s18a.evaluate(() => {
+      const g = S.windows[0]; g.t0 = Date.now() - 30 * 864e5; g.aend = 4; persist();
+      S.editIdx = 0; S.win = kopie(g); S.win.ki = Object.assign({}, S.win.ki, { chips: ['nachgereicht'] }); saveWin();
+      const a = { aend: S.windows[0].aend, chips: S.windows[0].ki.chips.join(',') };
+      S.win = kopie(S.windows[0]); S.win.name = 'Wohnzimmer links'; saveWin();
+      return Object.assign(a, { name: S.windows[0].name, toast: S.toast || '' });
+    });
+    ok(fest.aend === 4 && fest.chips === 'nachgereicht' && fest.name === 'Wohnzimmer' && /fest/.test(fest.toast), 'Feste Fenster: neue Auswertung wird gespeichert und zählt nicht als Änderung, eine echte Änderung bleibt gesperrt');
+    sauber(s18a, 'Langsame KI im eigenen Aufmaß ohne Fehler'); await c18a.close();
+    /* b) gespeichert und gleich das nächste Fenster angelegt: die Auswertung des ersten läuft weiter und kommt dort an */
+    const c18b = await browser.newContext(telefon), s18b = await neueSeite(c18b, B18);
+    await s18b.goto(B18 + '/app/', { waitUntil: 'networkidle' }); await s18b.waitForTimeout(300);
+    await fotosMachen(s18b); await schnellSpeichern(s18b, 'Küche'); await s18b.evaluate(() => newWin());
+    await s18b.waitForFunction(() => S.windows[0] && S.windows[0].ki && S.windows[0].ki.rows.some((r) => r[0] === 'Fassade') && S.windows[0].ki.rows.some((r) => r[0] === 'Rollladen'), null, { timeout: 15000 });
+    const naechstes = await s18b.evaluate(() => ({ n: S.windows.length, neuOhne: !S.win.ki, screen: S.screen }));
+    ok(naechstes.n === 1 && naechstes.neuOhne && naechstes.screen === 'start', '„Weiteres Fenster“ bricht die Auswertung nicht mehr ab: sie landet im gespeicherten Fenster, das neue bleibt leer');
+    sauber(s18b, 'Neues Fenster während der Auswertung ohne Fehler'); await c18b.close();
+    /* c) Kundenlink: gespeichert und sofort gesendet; Senden wartet, der Betrieb bekommt die Auswertung */
+    const api18 = async (p, body, token) => { const init = { method: body ? 'POST' : 'GET', headers: { accept: 'application/json', origin: B18 } }; if (body) { init.headers['content-type'] = 'application/json'; init.body = JSON.stringify(body); } if (token) init.headers.authorization = 'Bearer ' + token; const r = await fetch(B18 + p, init); const j = await r.json().catch(() => ({})); return Object.assign({ _status: r.status }, j); };
+    const tok18 = 'test.' + Buffer.from('ki18-' + stempel18 + '@beispiel.de', 'utf8').toString('base64').replace(/=+$/, '');
+    const reg18 = await api18('/api/konto/registrieren', { firma: 'Fensterbau KI ' + stempel18, ap: 'Kai Klar', tel: '0221 7' + String(Date.now()).slice(-6), plz: '50667', col: '#1f7a3d', agb: RECHT.NB_STAND, unternehmer: true }, tok18);
+    const pr18 = await api18('/api/konto/projekte', { kunde: 'Familie Schnell', kontakt: '', plan: ['Fenster'], days: 14 }, tok18), code18 = pr18.konto.acc.links.find((l) => l.id === pr18.id).code;
+    const c18c = await browser.newContext(telefon), s18c = await neueSeite(c18c, B18);
+    await s18c.goto(B18 + '/app/#k-' + code18, { waitUntil: 'networkidle' }); await s18c.waitForTimeout(600);
+    await fotosMachen(s18c); await schnellSpeichern(s18c, 'Bad');
+    await s18c.evaluate(() => { go('blatt'); }); await s18c.waitForTimeout(200);
+    const vorSenden = await s18c.evaluate(() => ({ hinweis: (document.querySelector('.ki-laeuft') || {}).textContent || '', voll: derive(S.windows[0]).complete }));
+    await s18c.evaluate(() => { act('send', document.body); }); await s18c.waitForTimeout(150); // nicht auf das Senden warten: der Zustand währenddessen zählt
+    const wartet = await s18c.evaluate(() => ({ wartet: S.kiWartet, sent: !!S.sent, knopf: (document.querySelector('.bb .btn.primary') || {}).textContent || '', aus: !!(document.querySelector('.bb .btn.primary') || {}).disabled, toast: S.toast || '' }));
+    await s18c.waitForFunction(() => S.sent && S.sent.uebertragen, null, { timeout: 20000 });
+    const beimBetrieb = (await api18('/api/konto', null, tok18)).konto.acc.links.find((l) => l.code === code18);
+    const kiBetrieb = beimBetrieb && beimBetrieb.aufmass && beimBetrieb.aufmass.windows[0] && beimBetrieb.aufmass.windows[0].ki;
+    ok(reg18.ok && vorSenden.voll && /kommt gleich dazu/.test(vorSenden.hinweis) && wartet.wartet === 'senden' && !wartet.sent && /Fotos werden ausgewertet/.test(wartet.knopf) && wartet.aus && /noch ausgewertet/.test(wartet.toast) && !!kiBetrieb && kiBetrieb.rows.length > 2 && kiBetrieb.rows.some((r) => r[0] === 'Fassade'), 'Kundenlink: sofort gesendet, während die KI liest; Senden wartet sichtbar, der Betrieb bekommt beide Auswertungen');
+    sauber(s18c, 'Senden mit laufender Auswertung ohne Fehler'); await c18c.close();
+    /* d) Server: nur die Auswertung neu zählt nicht als Änderung, auch bei festen Fenstern; eine echte Änderung bleibt fest */
+    const ent18 = await import(url18.pathToFileURL(path18.join(W18, 'functions/api/entwurf.js')).href);
+    const j18 = Date.now(), alt18 = { wid: 'fk18', name: 'Bad', t0: j18 - 30 * 864e5, aend: 4, ts: j18 - 5000, mo: { hm: 1480 } }, meta18 = { fenster: { fk18: { t0: alt18.t0, aend: 4 } } };
+    const nurKi = ent18.zusammenfuehren([alt18], [Object.assign({}, alt18, { ki: { rows: [['Rollladen', 'Einbaukasten']] }, fotos: 2, ts: j18 })], meta18, new Set(['fk18']), true, j18, false, null, {}, 0);
+    const echt18 = ent18.zusammenfuehren([alt18], [Object.assign({}, alt18, { name: 'Bad oben', ki: { rows: [['Rollladen', 'Einbaukasten']] }, ts: j18 })], meta18, new Set(['fk18']), true, j18, false, null, {}, 0);
+    ok(nurKi.zurueck.length === 0 && nurKi.fenster[0].ki && nurKi.fenster[0].aend === 4 && echt18.zurueck[0] === 'fk18' && echt18.fenster[0].name === 'Bad', 'Server: eine nachgereichte Auswertung wird übernommen, ohne als Änderung zu zählen; eine echte Änderung an einem festen Fenster nicht');
+  } finally { aus18(); }
 }
 
 await browser.close();

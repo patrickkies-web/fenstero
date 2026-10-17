@@ -48,6 +48,9 @@ export function fensterFp(w) {
   if (o.plan && typeof o.plan === 'object') { o.plan = Object.assign({}, o.plan); delete o.plan.bild; delete o.plan.bw; delete o.plan.bh; }
   return stabil(o);
 }
+/* Für die Zählung der Änderungen: ohne die Auswertung der Fotos und die Zahl der Fotos (gleiche Regel wie aenderungFp in app.js).
+   Eine Auswertung, die nach dem Speichern ankommt, oder ein neues Foto ist keine Änderung des Kunden */
+export function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; return fensterFp(o); }
 export const ohneBild = (w) => { const o = Object.assign({}, w); if (o.plan && typeof o.plan === 'object' && o.plan.bild) o.plan = Object.assign({}, o.plan, { bild: '' }); return o; };
 export const kennung = (w) => String((w && w.wid) || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
 
@@ -116,6 +119,7 @@ export function zusammenfuehren(alt, eingang, metaAlt, bekannt, hierNeuer, jetzt
     const tsG = Number(w.ts) || 0, tsS = Number(vorher.ts) || 0;
     if (!(tsG > tsS || (tsG === tsS && tsG > 0 && hierNeuer))) { if (fensterFp(vorher) !== fensterFp(w)) anders = true; out.push(vorher); return; } // anderswo später gespeichert
     if (fensterFp(vorher) === fensterFp(w)) { out.push(w); return; }
+    if (aenderungFp(vorher) === aenderungFp(w)) { out.push(w); return; } // nur Auswertung oder Fotos neu: zählt nicht, gilt auch bei festen Fenstern
     const z = gezaehlt(w, id);
     if (!z) { zurueck.push(id); anders = true; out.push(Object.assign({}, vorher, { aend: Number(kennt[id].aend) || 0 })); return; }
     out.push(z);
