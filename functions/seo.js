@@ -101,10 +101,17 @@ export async function seite(antwort, env, url) {
   if (frei(env, url)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
-  const b = basis(env, url);
-  h.set('Link', '<' + b + kanonischerPfad(url.pathname) + '>; rel="canonical"');
+  const b = basis(env, url), kan = b + kanonischerPfad(url.pathname);
+  h.set('Link', '<' + kan + '>; rel="canonical"');
   h.delete('content-length');
-  return new Response(antwort.body ? absolut(await antwort.text(), b) : null, { status: 200, statusText: antwort.statusText, headers: h });
+  return new Response(antwort.body ? kopf(absolut(await antwort.text(), b), kan) : null, { status: 200, statusText: antwort.statusText, headers: h });
+}
+
+/* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
+export function kopf(html, kan) {
+  const neu = (/<link rel="canonical"/.test(html) ? '' : '<link rel="canonical" href="' + kan + '">\n') +
+    (/property="og:url"/.test(html) || !/property="og:title"/.test(html) ? '' : '<meta property="og:url" content="' + kan + '">\n');
+  return neu && html.includes('</head>') ? html.replace('</head>', () => neu + '</head>') : html; // als Funktion: „$“ in einer Adresse bleibt, wie es ist
 }
 
 /* IndexNow (indexnow.org): geänderte Seiten an Bing und die anderen Teilnehmer melden (Yandex, Seznam, Naver u. a.), damit sie schnell
@@ -184,15 +191,19 @@ export function llms(origin, env) {
    dieser Adresse und ohne Weiterleitung: Cloudflare leitet „….html“ sonst auf die Adresse ohne Endung um. Inhalt wie die Datei in web/
    (die Prüfsuite vergleicht beides); die Adresse steht in wrangler.jsonc unter run_worker_first. */
 export const BESTAETIGUNG = { '/verifyforzoho.html': '41302434' };
-/* Eine Adresse je Seite: http:// und www. leiten dauerhaft (301) auf https://eeziframes.com mit demselben Pfad um, damit Suchmaschinen
-   keine Doppel sehen und Links auf www nicht ins Leere laufen. Nur Seitenabrufe (GET, HEAD), nie /api/ (worker.js ruft das vorher
-   nicht auf), nie lokal und nie die Bestätigungsdatei (muss ohne Weiterleitung kommen) */
+/* Eine Adresse je Seite: http://, www., Seiten ohne Schrägstrich am Ende (/ratgeber) und …/index.html leiten dauerhaft (301) auf
+   https://eeziframes.com/…/ um, damit Suchmaschinen keine Doppel sehen und Links auf www nicht ins Leere laufen (Cloudflare selbst
+   leitet die letzten beiden nur vorläufig um, 307). Nur Seitenabrufe (GET, HEAD), nie /api/ (worker.js ruft das vorher nicht auf),
+   nie lokal und nie die Bestätigungsdatei (muss ohne Weiterleitung kommen) */
 export function umleitung(request) {
   const url = new URL(request.url);
   if (!['GET', 'HEAD'].includes(request.method) || LOKAL.test(url.hostname) || BESTAETIGUNG[url.pathname]) return null;
-  const www = /^www\./i.test(url.hostname);
-  if (url.protocol === 'https:' && !www) return null;
+  const www = /^www\./i.test(url.hostname), seite = istSeite(url.pathname);
+  const slash = seite && !url.pathname.endsWith('/') && !/\.[a-z0-9]+$/i.test(url.pathname), index = seite && url.pathname.endsWith('/index.html');
+  if (url.protocol === 'https:' && !www && !slash && !index) return null;
   url.protocol = 'https:'; url.hostname = url.hostname.replace(/^www\./i, '');
+  if (slash) url.pathname += '/';
+  if (index) url.pathname = kanonischerPfad(url.pathname);
   return new Response(null, { status: 301, headers: { location: url.href, 'cache-control': 'public, max-age=86400' } });
 }
 export async function behandeln(request, env, holen) {

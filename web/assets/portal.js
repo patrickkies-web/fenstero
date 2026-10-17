@@ -1296,5 +1296,5 @@ const ankerLink = () => {
 if (vonPdf()) ansichtMerken('betrieb');
 if (!ankerLink()) render();
 window.addEventListener('hashchange', ankerLink);
-Server.start().then((an) => { if (an) { document.querySelectorAll('.fx-pilot').forEach((e) => e.remove()); render(); setInterval(() => Server.aktualisieren(), 30000); } else if (Server.status) render(); });
+Server.start().then((an) => { if (an) { render(); setInterval(() => Server.aktualisieren(), 30000); } else { window.PilotHinweis(); if (Server.status) render(); } });
 
