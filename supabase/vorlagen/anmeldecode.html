@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<title>Anmeldecode für eeziframes</title>
+<style>
+a[x-apple-data-detectors], u + #body a { color: inherit !important; text-decoration: none !important; font: inherit !important; }
+@media (max-width: 520px) {
+  .rahmen { padding: 20px 12px !important; }
+  .karte { padding: 28px 22px 24px !important; border-radius: 20px !important; }
+  .titel { font-size: 30px !important; }
+  .code { font-size: 32px !important; letter-spacing: .12em !important; padding-left: .12em !important; }
+}
+@media (prefers-color-scheme: dark) {
+  .papier { background: #111110 !important; }
+  .karte { background: #1c1c1b !important; border-color: #2c2c2a !important; }
+  .tinte { color: #f2f1ed !important; }
+  .tinte2 { color: #cfcdc6 !important; }
+  .leise, .leise a { color: #a3a19a !important; }
+  .linie { border-color: #2c2c2a !important; }
+  .codefeld { background: #f2f1ed !important; }
+  .codelabel { color: #63635e !important; }
+  .code { color: #111110 !important; }
+}
+</style>
+</head>
+<body id="body" class="papier" style="margin:0;padding:0;background:#f3f2ee;-webkit-text-size-adjust:100%;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Auf der Seite eingeben, auf der er angefordert wurde. Gültig für eine Stunde.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="papier" style="background:#f3f2ee;">
+<tr><td align="center" class="rahmen" style="padding:40px 16px;font-family:'Maven Pro',ui-rounded,'SF Pro Rounded',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+<tr><td class="karte" style="background:#ffffff;border:1px solid #e6e5e0;border-radius:24px;padding:36px 36px 30px;text-align:left;">
+<p class="tinte" style="margin:0 0 32px;font-size:22px;line-height:1;color:#141414;"><b style="font-weight:900;">eezi</b><span style="font-weight:500;">frames</span></p>
+<p class="leise" style="margin:0 0 10px;font-size:13px;line-height:1.3;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#63635e;">Anmeldung</p>
+<h1 class="tinte titel" style="margin:0 0 12px;font-size:34px;line-height:1.08;font-weight:900;letter-spacing:-.02em;color:#141414;">Hier ist der Code.</h1>
+<p class="tinte2" style="margin:0 0 26px;font-size:17px;line-height:1.5;color:#3d3d3a;">Einfach auf der Seite eingeben, auf der er angefordert wurde. Ein Passwort braucht es nicht.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td class="codefeld" align="center" style="background:#141414;border-radius:18px;padding:18px 12px 22px;">
+<p class="codelabel" style="margin:0 0 8px;font-size:13px;line-height:1.3;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a3a19a;">Anmeldecode</p>
+<p class="code" style="margin:0;padding-left:.18em;font-size:40px;line-height:1.1;font-weight:800;letter-spacing:.18em;color:#ffffff;font-variant-numeric:tabular-nums;">{{ .Token }}</p>
+</td></tr>
+</table>
+<p class="leise" style="margin:12px 0 0;font-size:13px;line-height:1.5;color:#63635e;text-align:center;overflow-wrap:anywhere;word-break:break-word;">Gültig für eine Stunde · für&nbsp;{{ .Email }}</p>
+<p class="leise linie" style="margin:28px 0 0;padding-top:20px;border-top:1px solid #ecebe6;font-size:15px;line-height:1.5;color:#63635e;">Nicht angefordert? Dann diese E-Mail einfach ignorieren. Ohne den Code kommt niemand ins Konto.</p>
+</td></tr>
+<tr><td class="leise" align="center" style="padding:20px 12px 0;font-size:13px;line-height:1.6;color:#63635e;">eeziframes · Patrick&nbsp;Kies · Postweg&nbsp;35 · 33442&nbsp;Herzebrock-Clarholz<br><a href="https://eeziframes.com/impressum/" style="color:#63635e;">Impressum</a> · <a href="https://eeziframes.com/datenschutz/" style="color:#63635e;">Datenschutz</a></td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
