@@ -483,8 +483,12 @@ window.Blatt = (() => {
       const kiH = kiRows.length ? karteH(kiRows, CW, kiTitel, o2) : 0;
       const notizRows = w.notiz ? [[sie ? 'Notiz des Kunden' : 'Deine Notiz', '„' + w.notiz + '“']] : [], oN = { lw: 26, fs: FS, bg: '#fffbe8', rand: '#f2e2a4' };
       const notizH = notizRows.length ? karteH(notizRows, CW, '', oN) : 0;
+      /* Fotos des Kunden (innen, außen), so wie sie angekommen sind: nebeneinander, gleich hoch (e.fotos: Kennung → { data, w, h }) */
+      const fotos = ['in', 'out'].map((s2) => ({ s: s2, f: w.bilder && e.fotos ? e.fotos[w.bilder[s2]] : null })).filter((x) => x.f && /^data:image\/jpeg/.test(String(x.f.data || '')) && x.f.w > 0 && x.f.h > 0);
+      const FH = 56, fotoH = fotos.length ? FH + 15 : 0;
       let nach = hmax, luecke = 5;
       if (mitBild) { nach += luecke + bildH + 2; luecke = 4; }
+      if (fotoH) { nach += luecke + fotoH; luecke = 4; }
       if (kiH) { nach += luecke + kiH; luecke = 4; }
       if (notizH) nach += luecke + notizH;
       /* Zeichnung über die volle Breite, so hoch wie Platz ist (78 bis 108 mm, auf Seite 1 notfalls 64 mm, damit sie nie in den Fuß ragt).
@@ -511,6 +515,18 @@ window.Blatt = (() => {
         font('bold', 7, INK2); txt('LAGE AUF DEM FOTO', M + 5, y + 5.2, { charSpace: 0.4 }); font('normal', 7.6, INK2); txt((sie ? 'vom Kunden' : 'von dir') + ' eingezeichnet, Foto ' + (w.plan.seite === 'out' ? 'von außen' : 'von innen'), XR - 5, y + 5.2, { align: 'right' });
         try { doc.addImage(w.plan.bild, 'JPEG', M + (CW - iw2) / 2, y + 8.5, iw2, ih2); } catch (err) { /* ohne Bild weiter */ }
         y += bildH + 4;
+      }
+      if (fotos.length) {
+        platz(fotoH + 2);
+        fill(PAPER); rr(M, y, CW, fotoH, 4);
+        font('bold', 7, INK2); txt(sie ? 'FOTOS DES KUNDEN' : 'DEINE FOTOS', M + 5, y + 5.2, { charSpace: 0.4 }); font('normal', 7.6, INK2); txt(kiRows.length ? 'daraus die Einbausituation unten' : sie ? 'vom Kunden aufgenommen' : 'von dir aufgenommen', XR - 5, y + 5.2, { align: 'right' });
+        const zw = (CW - 16) / 2;
+        fotos.forEach((x, k) => {
+          const fx = M + 5 + k * (zw + 6), r = x.f.w / x.f.h; let iw = zw, ih = iw / r; if (ih > FH) { ih = FH; iw = ih * r; }
+          try { doc.addImage(x.f.data, 'JPEG', fx + (zw - iw) / 2, y + 8.5 + (FH - ih) / 2, iw, ih); } catch (err) { /* ohne Bild weiter */ }
+          font('bold', 7.2, INK2); txt(x.s === 'in' ? 'Von innen' : 'Von außen', fx + zw / 2, y + 8.5 + FH + 4.4, { align: 'center' });
+        });
+        y += fotoH + 4;
       }
       /* Aus den Fotos; muss die Karte geteilt werden, gehen mindestens zwei Zeilen auf die nächste Seite, nie eine allein */
       if (kiRows.length) {

@@ -108,6 +108,16 @@ const Server = {
     if (!r.ok || !j || j.ok === false) { const err = new Error(j && j.fehler ? j.fehler : 'Der Server antwortet gerade nicht.'); err.status = r.status; err.gesperrt = !!(j && j.gesperrt); throw err; }
     return j;
   },
+  /* wie api, aber die rohe Antwort (Fotos): mit Anmeldung, eine abgelaufene wird einmal erneuert */
+  async roh(pfad) {
+    const los = () => fetch(pfad, { headers: this.sitzung && this.sitzung.token ? { authorization: 'Bearer ' + this.sitzung.token } : {} });
+    let r = await los();
+    if (r.status === 401 && this.sitzung && this.sitzung.refresh) {
+      const er = await fetch('/api/konto/erneuern', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ refresh: this.sitzung.refresh }) }).catch(() => null), e = er ? await er.json().catch(() => null) : null;
+      if (e && e.ok) { this.merken(Object.assign({}, this.sitzung, { token: e.token, refresh: e.refresh })); r = await los(); }
+    }
+    return r;
+  },
   uebernehmen(konto) {
     if (!konto || !konto.acc) return;
     S.acc[this.id] = konto.acc; S.notif[this.id] = konto.acc.notif || [];
@@ -331,9 +341,43 @@ function sidebar() {
 function footer() {
   return '<footer class="foot"><div class="wrap"><div class="row between"><span class="lm-foot">' + LOGO(22) + WM() + '</span><div class="row foot-links"><button type="button" data-act="go" data-v="wie">So funktioniert es für Betriebe</button><button type="button" data-act="tour">Tour für Fensterbauer</button><button type="button" data-act="go" data-v="preise">Preise für Betriebe</button><a href="/fuer-fensterbauer/">Aufmaß-App für Fensterbauer</a><a href="/ratgeber/">Ratgeber</a><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a><a href="/agb/">AGB</a><a href="/datenschutz/">Datenschutz</a><a href="/cookies/">Cookies</a><a href="/impressum/">Impressum</a><a class="foot-widerruf" href="/widerruf/">Vertrag widerrufen</a></div></div>' + (Server.an ? '<p>Ihre Projekte und Aufmaße liegen auf unserem Server; Zahlungen laufen über Stripe.</p>' : '<p>Pilotphase: Es wird nichts berechnet. Echt funktionieren schon Aufmaß-Links, der Code-Eingang, Nachbesserungen und der PDF-Export; Konto und Projekte bleiben in Ihrem Browser.</p>') + '</div></footer>';
 }
+/* ---------- Fotos des Kunden (functions/api/fotos.js) ----------
+   Kommen nur vom Server, mit der Anmeldung des Betriebs: als Blob geladen (ein <img> kann die Anmeldung nicht mitschicken) und hier
+   gemerkt, solange die Seite offen ist. Geladen wird erst, was sichtbar ist: Positionen beim Aufklappen, das große Foto im Blatt. */
+const FOTO_ID = /^b[a-z0-9]{12,24}$/;
+const FOTO_CACHE = new Map();
+function fotoLaden(key) {
+  if (!FOTO_CACHE.has(key)) FOTO_CACHE.set(key, (async () => {
+    try {
+      const teile = String(key).split('/'), r = await Server.roh('/api/konto/foto/' + encodeURIComponent(teile[0]) + '/' + encodeURIComponent(teile[1]));
+      if (!r.ok) return null;
+      const blob = await r.blob(), url = URL.createObjectURL(blob);
+      const d = await new Promise((fertig) => { const im = new Image(); im.onload = () => fertig({ w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => fertig(null); im.src = url; });
+      if (!d) { URL.revokeObjectURL(url); return null; }
+      return { url: url, blob: blob, w: d.w, h: d.h };
+    } catch (e) { FOTO_CACHE.delete(key); return null; } // Netzfehler: beim nächsten Mal noch einmal
+  })());
+  return FOTO_CACHE.get(key);
+}
+function fotoEinsetzen(img) {
+  if (img.dataset.geladen) return; img.dataset.geladen = '1';
+  const rahmen = img.closest('.pfoto, .foto-gross'); if (rahmen) rahmen.classList.add('laedt');
+  fotoLaden(img.getAttribute('data-foto')).then((f) => {
+    if (rahmen) rahmen.classList.remove('laedt');
+    if (f) { img.src = f.url; return; }
+    if (rahmen) { rahmen.classList.add('fehlt'); const k = document.createElement('small'); k.textContent = 'Foto nicht angekommen'; rahmen.appendChild(k); }
+  });
+}
+/* Aufgeklappte Positionen bleiben beim Neuzeichnen offen (etwa nach dem großen Foto), solange die Seite offen ist */
+const POS_OFFEN = new Set();
+function posMerken(wurzel) { wurzel.querySelectorAll('details[data-pos]').forEach((d) => d.addEventListener('toggle', () => { if (d.open) POS_OFFEN.add(d.dataset.pos); else POS_OFFEN.delete(d.dataset.pos); })); }
+function fotosZeigen(wurzel) {
+  wurzel.querySelectorAll('img[data-foto]').forEach((img) => { const d = img.closest('details'); if (!d || d.open) fotoEinsetzen(img); else if (!d.dataset.fotoHoeren) { d.dataset.fotoHoeren = '1'; d.addEventListener('toggle', () => { if (d.open) d.querySelectorAll('img[data-foto]').forEach(fotoEinsetzen); }); } });
+}
 /* ---------- Nach dem Rendern: Bewegung ---------- */
 function afterRender(anim) {
   if (S.screen === 'link' && window.Blatt) window.Blatt.schrift();
+  posMerken(document); fotosZeigen(document);
   if (window.Lottie) window.Lottie.auf(document.body);
   /* Startseitenkarte dreht sich leicht mit dem Scrollen */
   const b2c = document.querySelector('.b2c-win'); if (b2c && window.Scroll) window.Scroll.binden(b2c, (p) => b2c.style.setProperty('--sp', p.toFixed(3)));
@@ -426,13 +470,24 @@ function storyScenes() {
     '<div class="sc sc-mess"><span class="pill">3 · Kunde misst</span>' + win + '<p class="cap">Im Browser, ohne Konto. Das Modell wächst beim Tippen.</p></div>' +
     '<div class="sc sc-in"><span class="pill">4 · Eingang</span><div class="mini in-mini"><span class="ring"></span><span class="unlock">' + ICONS.check + ' Aufmaß eingegangen</span><p class="mt">Familie Weber · Köln-Ehrenfeld</p>' + w.slice(0, 2).map((x, i) => { const d = AW.derive(x); return '<div class="in-row">' + AW.svg(x, 34) + '<span><b>Pos. ' + (i + 1) + ' · ' + esc(x.name) + '</b><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · ' + esc(AW.opening(x)) + '</small></span></div>'; }).join('') + '<p class="mf">und 2 weitere Positionen, 8 Fotos, Bestellmaß-Vorschlag</p></div><p class="cap">Sie kalkulieren, bevor Sie losfahren.</p></div>';
 }
+/* Fotos einer Position (code: Link des Aufmaßes; fotosDa: was beim Server angekommen ist, null = unbekannt; weg: nach 12 Monaten gelöscht) */
+function posFotos(w, code, fotosDa, weg) {
+  const ids = ['in', 'out'].map((s2) => ({ s: s2, id: w.bilder && w.bilder[s2] })).filter((x) => FOTO_ID.test(String(x.id || '')));
+  if (!code || !ids.length) return '';
+  if (weg) return '<p class="km-s pos-fotos-weg">Die Fotos wurden 12 Monate nach dem Eingang gelöscht.</p>';
+  const da = Array.isArray(fotosDa) ? new Set(fotosDa) : null, name = (s2) => (s2 === 'in' ? 'Von innen' : 'Von außen');
+  return '<div class="pos-fotos">' + ids.map((x) => (da && !da.has(x.id)
+    ? '<span class="pfoto fehlt"><span class="pf-tag">' + name(x.s) + '</span><small>Foto nicht angekommen</small></span>'
+    : '<button type="button" class="pfoto" data-act="foto-gross" data-v="' + esc(code + '/' + x.id) + '" data-id="' + esc(name(x.s)) + '" aria-label="Foto ' + name(x.s).toLowerCase() + ' groß ansehen"><img alt="" data-foto="' + esc(code + '/' + x.id) + '"><span class="pf-tag">' + name(x.s) + '</span></button>')).join('') + '</div>';
+}
 /* Ein Fenster aus dem Aufmaß: Kopfzeile, Maße, Bestellmaß, Einzelheiten zum Aufklappen */
-function posCard(w, i, abzug, open, proj) {
+function posCard(w, i, abzug, open, proj, l) {
   const d = AW.derive(w), ab = abzug || { seite: 15, oben: 15 }, n = AW.num(w.anzahl) || 1;
   const best = d.moW && d.moH ? AW.th(d.moW - 2 * ab.seite) + ' × ' + AW.th(d.moH - ab.oben) + ' mm' : '–';
   const chips = AW.kiChips(w);
-  return '<details class="posc"' + (open ? ' open' : '') + '><summary><span class="pic">' + AW.svg(w, 46) + '</span><span class="pt"><b>Pos. ' + (i + 1) + ' · ' + esc(w.name || 'Fenster') + (n > 1 ? ' · ' + n + ' Stück' : '') + '</b><span>Bestellmaß ' + best + '</span><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · Element ' + AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm · ' + esc(AW.opening(w)) + ' · ' + esc(AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff') + ' · ' + esc(AW.lab('etage', w.etage) || 'EG') + '</small></span><span class="pchev" aria-hidden="true"></span></summary>' +
+  return '<details class="posc"' + (open ? ' open' : '') + (l ? ' data-pos="' + esc(l.id + ':' + i) + '"' : '') + '><summary><span class="pic">' + AW.svg(w, 46) + '</span><span class="pt"><b>Pos. ' + (i + 1) + ' · ' + esc(w.name || 'Fenster') + (n > 1 ? ' · ' + n + ' Stück' : '') + '</b><span>Bestellmaß ' + best + '</span><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · Element ' + AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm · ' + esc(AW.opening(w)) + ' · ' + esc(AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff') + ' · ' + esc(AW.lab('etage', w.etage) || 'EG') + '</small></span><span class="pchev" aria-hidden="true"></span></summary>' +
     '<div class="pbody"><div class="best"><span>Bestellmaß-Vorschlag</span><b>' + best + '</b><small>Öffnung minus ' + ab.seite + ' mm je Seite und ' + ab.oben + ' mm oben</small></div><div class="kv">' + AW.rows(w, proj).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>' +
+    (l && l.aufmass ? posFotos(w, l.code, l.aufmass.fotosDa, !!l.fotosGeloescht) : '') +
     (AW.kiRows(w).length ? '<p class="eyebrow pos-h">Einbausituation (KI, ' + (w.fotos || 0) + ' Fotos)</p><div class="kv">' + AW.kiRows(w).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>' : chips.length ? '<div class="chips">' + chips.map((c) => '<span class="badge">' + esc(c) + '</span>').join('') + '</div>' : '') + '</div></details>';
 }
 function roiCalc() {
@@ -505,7 +560,7 @@ const FAQ = [
 ];
 SCREENS.wie = () => ({ html: '<div class="wrap narrow"><div class="h hbild"><div><p class="eyebrow">So funktioniert es</p><h2>Aufmaß ohne Anfahrt, abgerechnet mit Ihnen.</h2><p>Für Fensterbauer, die ihren Kunden ein sauberes Erstaufmaß ermöglichen wollen, ohne selbst hinzufahren.</p><div class="row"><button type="button" class="btn primary" data-act="tour">' + icon('play', 16) + 'Tour starten, acht Schritte</button></div></div><span class="hbild-l" data-lottie="messen" data-loop="1" aria-hidden="true"></span></div>' +
   '<div class="card"><p class="eyebrow">Projekt und Aufmaß-Link</p><div class="kv" style="margin-top: 10px"><span>1 · Projekt</span><span>Sie legen ein Projekt an: Kunde, Adresse und grobe Eckdaten wie Gebäude und ungefähre Fensterzahl. Oder Sie laden eine ganze Liste von Kunden auf einmal ein.</span><span>2 · Link</span><span>Sie schicken den Aufmaß-Link per WhatsApp, SMS oder E-Mail. Er gilt für ein Aufmaß: Ihr Kunde öffnet ihn innerhalb von 7, 14 oder 30 Tagen und hat ab dann 60 Tage Zeit.</span><span>3 · Aufmaß</span><span>Ihr Kunde öffnet den Link im Browser, ohne Konto und ohne Installation, und misst geführt: Fotos, Maße, Wünsche am 3-D-Modell.</span><span>4 · Eingang</span><span>Das Aufmaß landet in Ihrem Projekt. Kein anderer Betrieb sieht es.</span><span>5 · Nachbesserung</span><span>Fehlt etwas oder stimmt ein Maß nicht, fragen Sie eine Nachbesserung an. Ihr Kunde ändert nur das Nötige und schickt erneut. Kostenlos, bis zu zweimal je Projekt.</span><span>6 · Abrechnung</span><span>Mit Ihnen: 3 Projekte kostenlos, danach 9 € netto je Projekt mit eingegangenem Aufmaß, im Abo 10 Projekte für 49 € im Monat, mit Plus unbegrenzt. Ihr Kunde zahlt nichts.</span><span>7 · Datei</span><span>Ihr Kunde bekommt keine Kopie mit Maßen zum Weiterschicken; möchte er eine, geben Sie ihm das Aufmaßblatt als PDF mit dem Angebot.</span></div></div>' +
-  '<div class="card"><p class="eyebrow">Für Hauseigentümer</p><div class="kv" style="margin-top: 10px"><span>Kostenlos messen</span><span>Messen, Fotos, 3-D-Modell und Wünsche sind kostenlos, mit oder ohne Link eines Betriebs. Wer ohne Link misst, kauft sein Aufmaßblatt als PDF für 7,99 €; wer über Ihren Link kommt, zahlt nichts, Sie bekommen das Aufmaß.</span><span>Ohne Konto</span><span>Nichts installieren, nichts anmelden. Alles bleibt auf dem eigenen Gerät, Fotos verlassen es nur für die freiwillige KI-Auswertung.</span><span>Zum Fensterbauer</span><span>Das Aufmaßblatt lässt sich direkt teilen. Auf der letzten Seite steht, wie ein Fensterbauer es in sein eeziframes-Konto holt.</span></div></div>' +
+  '<div class="card"><p class="eyebrow">Für Hauseigentümer</p><div class="kv" style="margin-top: 10px"><span>Kostenlos messen</span><span>Messen, Fotos, 3-D-Modell und Wünsche sind kostenlos, mit oder ohne Link eines Betriebs. Wer ohne Link misst, kauft sein Aufmaßblatt als PDF für 7,99 €; wer über Ihren Link kommt, zahlt nichts, Sie bekommen das Aufmaß.</span><span>Ohne Konto</span><span>Nichts installieren, nichts anmelden. Wer ohne Link und ohne Konto misst, behält alles auf dem eigenen Gerät; Fotos verlassen es dann nur für die freiwillige KI-Auswertung. Über Ihren Link kommen die Fotos mit dem Aufmaß zu Ihnen.</span><span>Zum Fensterbauer</span><span>Das Aufmaßblatt lässt sich direkt teilen. Auf der letzten Seite steht, wie ein Fensterbauer es in sein eeziframes-Konto holt.</span></div></div>' +
   kundenschutz() +
   '<section class="sec"><div class="sec-head"><h3>Häufige Fragen</h3></div><div class="faq">' + FAQ.map((f) => '<details class="fq"><summary>' + esc(f[0]) + '<span class="pchev" aria-hidden="true"></span></summary><p>' + esc(f[1]) + '</p></details>').join('') + '</div></section>' +
   '<div class="row"><button type="button" class="btn primary" data-act="reg" data-v="betrieb">Kostenlos starten</button><button type="button" class="btn ghost" data-act="tour">' + icon('play', 16) + 'Tour starten</button><button type="button" class="btn ghost" data-act="go" data-v="preise">Preise</button><a class="btn ghost" href="' + APP_OPEN + '">Zur App</a></div></div>' });
@@ -690,7 +745,7 @@ SCREENS.link = () => {
     result = '<section class="sec"><div class="sec-head"><h3>Aufmaß</h3><span class="sub">' + nW(wins.length, 'Position', 'Positionen') + ' · ' + nW(am.elemente || wins.length, 'Element', 'Elemente') + ' · ' + nW(am.fotos || 0, 'Foto', 'Fotos') + '</span></div>' +
       (kl.length ? '<div class="card klaer"><p class="eyebrow">Mit dem Kunden zu klären · ' + kl.length + '</p><div class="kv">' + kl.map((r) => '<span>' + esc(r.k) + '</span><span' + (r.art === 'pflicht' ? ' class="pflicht"' : '') + '>' + esc(r.v) + '</span>').join('') + '</div></div>' : '') +
       '<div class="card amhead"><div class="kv"><span>Gebäude</span><span>' + esc((AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')) + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', AW.foerdWeg(pr)) || '–') + '</span><span>Lüftung</span><span>' + (tot && (am.elemente || wins.length) > tot / 3 ? 'Mehr als ein Drittel der Fenster: Lüftungskonzept nach DIN 1946-6 erforderlich' : tot ? (am.elemente || wins.length) + ' von ' + tot + ' Fenstern im Haus' : '–') + '</span>' + (pr.notiz ? '<span>Nachricht</span><span class="amnote">„' + esc(pr.notiz) + '“</span>' : '') + '</div><div class="row amacts"><button type="button" class="btn small primary" data-act="pdf-am" data-id="' + l.id + '">' + icon('dl', 16) + 'PDF herunterladen</button><button type="button" class="btn small soft" data-act="copy-am" data-id="' + l.id + '">' + icon('copy', 16) + 'Als Text kopieren</button></div></div>' +
-      '<div class="row between poshead"><span class="eyebrow">Positionen</span><button type="button" class="linkbtn" data-act="pos-all">Alle aufklappen</button></div><div class="poslist">' + wins.map((w, i) => posCard(w, i, a.abzug, false, pr)).join('') + '</div></section>' +
+      '<div class="row between poshead"><span class="eyebrow">Positionen</span><button type="button" class="linkbtn" data-act="pos-all">Alle aufklappen</button></div><div class="poslist">' + wins.map((w, i) => posCard(w, i, a.abzug, POS_OFFEN.has(l.id + ':' + i), pr, Server.online() ? l : null)).join('') + '</div></section>' +
       '<section class="sec"><div class="sec-head"><h3>Stand</h3></div><div class="card"><div class="pipe">' + [['neu', 'Neu'], ['angebot', 'Angebot'], ['termin', 'Feinaufmaß'], ['auftrag', 'Auftrag'], ['verloren', 'Verloren']].map((s) => '<button type="button" data-act="l-stage" data-id="' + l.id + '" data-v="' + s[0] + '" aria-pressed="' + ((l.stage || 'neu') === s[0]) + '">' + s[1] + '</button>').join('') + '</div><div class="f" style="margin-top: 12px"><label for="lmemo">Notiz zum Stand</label><textarea id="lmemo" data-in="lmemo:' + l.id + '" placeholder="z. B. Angebot bis Freitag">' + esc(l.memo || '') + '</textarea></div></div></section>';
   }
   const pdata = '<details class="card fold"><summary><span>Projektdaten<small>' + esc([l.kontakt, placeOf(l), projFacts(l)].filter(Boolean).join(' · ') || 'Kontakt, Objekt, Eckdaten, interne Notiz') + '</small></span></summary><div class="fold-body"><div class="kv"><span>Kunde</span><span>' + esc(l.kunde) + '</span><span>Kontakt</span><span>' + (l.kontakt ? '<span class="sel">' + esc(l.kontakt) + '</span>' : '–') + '</span><span>Objekt</span><span>' + esc(l.adresse || '–') + '</span><span>Eckdaten</span><span>' + esc(projFacts(l) || '–') + '</span><span>Link</span><span>' + (dead ? esc(m[0]) : 'gültig bis ' + esc(l.expires)) + ', Anrede ' + (l.du ? 'Du' : 'Sie') + '</span></div><div class="f" style="margin-top: 12px"><label for="pnote">Interne Notiz</label><textarea id="pnote" data-in="pnote:' + l.id + '" placeholder="Sieht nur Ihr Team">' + esc(l.note || '') + '</textarea></div></div></details>';
@@ -899,7 +954,7 @@ SCREENS.tour = () => {
 /* ---------- Blätter ---------- */
 /* Stand der Nutzungsbedingungen: vom Server (/api/status, functions/api/recht.js), ohne Server diese Fassung; der Server nimmt die
    Registrierung nur mit genau diesem Stand an und speichert ihn am Konto */
-const nbStand = () => (Server.status && Server.status.recht && Server.status.recht.nb) || '2026-10-16';
+const nbStand = () => (Server.status && Server.status.recht && Server.status.recht.nb) || '2026-10-17';
 function nbStandDE() { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(nbStand()); return m ? Number(m[3]) + '. ' + ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][Number(m[2]) - 1] + ' ' + m[1] : nbStand(); }
 const LEGAL = { impressum: ['Impressum', 'Anbieter und Kontakt nach § 5 DDG.', '/impressum/'], datenschutz: ['Datenschutz', 'Welche Daten eeziframes verarbeitet, wofür, mit welchen Dienstleistern und welche Rechte Sie haben.', '/datenschutz/'], agb: ['Nutzungsbedingungen für Fensterbauer', 'Kurz: Die ersten 3 Projekte mit eingegangenem Aufmaß sind kostenlos, danach gelten die Preise unter „Preise“ (netto, Abos monatlich kündbar). Aufmaße Ihrer Kunden nutzen Sie nur für deren Projekt. Kundenschutz (§ 11): Aufmaße aus Ihren Links gehen an keinen anderen Betrieb, Ihr Kunde sieht im Link nur Sie, und wir sprechen ihn nicht an. Für die Daten Ihrer Kunden gilt der Vertrag über die Auftragsverarbeitung in der Anlage.', '/nutzungsbedingungen/'] };
 function loginServer(s) {
@@ -912,6 +967,7 @@ function loginServer(s) {
     '<p class="sub center" style="margin-top: 14px">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p>';
 }
 const SHEETS = {
+  foto: (s) => '<h3>' + esc(s.titel) + '</h3><div class="foto-gross"><img alt="' + esc(s.titel) + '" data-foto="' + esc(s.key) + '"></div><p class="km-s">Aufgenommen vom Kunden. Die Fotos bleiben 12 Monate nach dem Eingang beim Aufmaß.</p>',
   linkfrage: (s) => '<h3>Mit diesem Konto anmelden?</h3><p class="sub">Der Link meldet Sie als <b style="overflow-wrap: anywhere">' + esc(s.r.mail) + '</b> an. Angefordert wurde er nicht in diesem Browser. Melden Sie sich nur an, wenn das Ihre E-Mail-Adresse ist.</p>' + (Server.sitzung && Server.sitzung.mail && Server.sitzung.mail !== s.r.mail ? '<p class="sub">Gerade sind Sie als <b style="overflow-wrap: anywhere">' + esc(Server.sitzung.mail) + '</b> angemeldet und werden dort abgemeldet.</p>' : '') + '<div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Nicht anmelden</button><button type="button" class="btn primary" data-act="srv-link-ja">Anmelden</button></div>',
   login: (s) => (Server.an ? loginServer(s) : '<h3>Anmelden für Fensterbauer</h3><p class="sub" style="margin: -4px 0 12px">Ein Kunde hat Ihnen ein eeziframes-Aufmaß geschickt? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button>, dann „Code vom Kunden einfügen“. Die ersten 3 Projekte sind frei.</p><form class="form" data-form="login" novalidate><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email"></div><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-pw">Passwort</label><input id="lg-pw" type="password" data-in="lg:pw" value="" autocomplete="current-password">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Pilotphase: Ihr Konto liegt nur in diesem Browser.</small>') + '</div><div class="row between"><button type="button" class="linkbtn" data-act="toast" data-v="In der Pilotphase liegt Ihr Konto nur in diesem Browser; ein Zurücksetzen per E-Mail kommt mit dem Start.">Passwort vergessen?</button><button type="submit" class="btn primary">Anmelden</button></div></form>' +
     '<p class="sub center">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p><p class="sub center">Noch kein Konto? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>'),
@@ -930,15 +986,39 @@ let PDL = null;
 const PDLP = (async () => { try { PDL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { PDL = null; } return PDL; })();
 /* Die PDF zeichnet /assets/blatt.js (gemeinsam mit der App): Ausgabe 'betrieb' in den Farben des Betriebs, mit Bestellmaß-Vorschlag */
 const BLATT_H = { derive: AW.derive, lab: AW.lab, num: AW.num, th: AW.th, col: AW.col, orn: (k) => AW.lab('orn', k), opening: AW.opening, sonne: AW.sonne, innen: AW.innen, farbe: AW.farbe, farbeZeile: AW.farbZeile, griffFarbe: AW.griffName };
-function amPDF(l) {
+function amPDF(l, fotos) {
   if (!window.Blatt || !l.aufmass) return null;
   const am = l.aufmass, c = BC(), a = A();
-  return window.Blatt.pdf({ variante: 'betrieb', fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse }, betrieb: { name: c.name, col: c.col, abzug: a.abzug || { seite: 15, oben: 15 }, nr: l.nr, eingegangen: (l.log || {}).eingegangen }, portalKurz: location.host, h: BLATT_H });
+  return window.Blatt.pdf({ variante: 'betrieb', fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse }, betrieb: { name: c.name, col: c.col, abzug: a.abzug || { seite: 15, oben: 15 }, nr: l.nr, eingegangen: (l.log || {}).eingegangen }, portalKurz: location.host, h: BLATT_H, fotos: fotos || {} });
+}
+/* Fürs PDF verkleinert: längste Kante höchstens 960 px, JPEG 0,8. Das Blatt zeigt die Fotos etwa 56 mm hoch; so bleibt die Datei
+   auch mit vielen Fenstern klein genug für E-Mail und Messenger (das volle Foto gibt es im Betriebsbereich) */
+async function pdfFoto(blob) {
+  let u = ''; try { u = URL.createObjectURL(blob); } catch (e) { return null; }
+  try {
+    const im = await new Promise((fertig, fehler) => { const i = new Image(); i.onload = () => fertig(i); i.onerror = fehler; i.src = u; });
+    const f = Math.min(1, 960 / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.max(1, Math.round(im.naturalWidth * f)), h = Math.max(1, Math.round(im.naturalHeight * f));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h);
+    const data = c.toDataURL('image/jpeg', 0.8);
+    return /^data:image\/jpeg/.test(data) ? { data: data, w: w, h: h } : null;
+  } catch (e) { return null; } finally { URL.revokeObjectURL(u); }
+}
+/* Fürs Aufmaßblatt: die angekommenen Fotos als Data-URL (Kennung → { data, w, h }) */
+async function amFotos(l) {
+  const out = {};
+  if (!Server.online() || !l || !l.aufmass || l.fotosGeloescht || l.locked) return out;
+  const da = Array.isArray(l.aufmass.fotosDa) ? new Set(l.aufmass.fotosDa) : null;
+  for (const w of l.aufmass.windows || []) for (const s2 of ['in', 'out']) {
+    const id = w.bilder && w.bilder[s2]; if (!FOTO_ID.test(String(id || '')) || out[id] || (da && !da.has(id))) continue;
+    const f = await fotoLaden(l.code + '/' + id); if (!f) continue;
+    const p = await pdfFoto(f.blob); if (p) out[id] = p;
+  }
+  return out;
 }
 async function saveAm(l) {
   if (!l || !l.aufmass) return;
   if (window.Blatt) await window.Blatt.schrift();
-  const pdf = amPDF(l), base = 'Aufmass-' + [l.nr, slug(l.kunde.replace(/^Beispiel:\s*/, ''))].filter(Boolean).join('-').replace(/[^A-Za-z0-9_-]+/g, '-');
+  const pdf = amPDF(l, await amFotos(l)), base = 'Aufmass-' + [l.nr, slug(l.kunde.replace(/^Beispiel:\s*/, ''))].filter(Boolean).join('-').replace(/[^A-Za-z0-9_-]+/g, '-');
   const name = base + (pdf ? '.pdf' : '.txt'), data = pdf || aufmassText(l);
   if (!PDL) await PDLP;
   if (PDL) {
@@ -1040,7 +1120,7 @@ function act(name, el) {
     case 'nav': return nav(v);
     case 'back': return back();
     case 'sheet': { S.sheet = { k: v, id: id }; return render(); }
-    case 'sheet-close': { S.sheet = null; return render(); }
+    case 'sheet-close': { const y = window.scrollY; S.sheet = null; render(); window.scrollTo(0, y); return; }
     case 'srv-link-ja': { const r = S.sheet && S.sheet.k === 'linkfrage' ? S.sheet.r : null; S.sheet = null; if (!r) return render(); if (Server.sitzung && Server.sitzung.mail !== r.mail) Server.abmelden(); return Server.nachAnmeldung(r); }
     case 'toast': return toast(v);
     case 'reg': {
@@ -1141,6 +1221,7 @@ function act(name, el) {
       save(); render();
       return toast(then && then !== 'service' ? r.msg : r.n ? nW(r.n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet' : 'Zahlungsart gespeichert');
     }
+    case 'foto-gross': { const y = window.scrollY; S.sheet = { k: 'foto', key: v, titel: id || 'Foto' }; render(); window.scrollTo(0, y); return; }
     case 'pos-all': { const ds = Array.from(document.querySelectorAll('.poslist details')), open = ds.some((d) => !d.open); ds.forEach((d) => { d.open = open; }); el.textContent = open ? 'Alle zuklappen' : 'Alle aufklappen'; return; }
     case 'linkimport': {
       const ta = document.getElementById('code-in'), code = ta ? ta.value : '', o = unpack(code);

@@ -5,6 +5,7 @@
    /api/konto/…, /api/link/…, /api/aufmass   Betriebe, Links, Eingang (konten.js)
    /api/link/:code/entwurf          Zwischenstand eines Kundenlinks mit Zählern gegen Mehrfachnutzung (entwurf.js)
    /api/kunde/…                     Konten der Hauseigentümer: Anmelden per Code, Aufmaße sichern und abgleichen (eigene.js)
+   …/foto/:id                       Fotos der Fenster: Kunde legt ab (Link, eigenes Aufmaß), Betrieb und Besitzer lesen (fotos.js)
    /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js)
    POST /api/widerruf               Widerrufsfunktion nach § 356a BGB mit Eingangsbestätigung per E-Mail (widerruf.js, post.js), als JSON
                                     oder ohne JavaScript als Formular (dann antwortet der Server mit einer Seite) */
@@ -20,12 +21,13 @@ import { ZENTRALE, aufraeumen } from './zentrale.js';
 import { ENTWURF } from './entwurf.js';
 import { EIGENE, kontenDa } from './eigene.js';
 import { WIDERRUF, widerrufeNachholen } from './widerruf.js';
+import { FOTOS } from './fotos.js';
 import { attrappePost, attrappeAus } from './post.js';
 import { zaehlen } from './statistik.js';
 import '../../web/assets/modell.js';
 import { indexnow } from '../seo.js';
 
-const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF);
+const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
 const MAX_BODY = 1500000;
 
 function finde(method, pfad) {

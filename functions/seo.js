@@ -11,15 +11,15 @@
    Begründung und Quellen: docs/SEO.md. */
 import { konfig } from './api/umgebung.js';
 
-export const STAND = '2026-10-16';
+export const STAND = '2026-10-17';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-16' },
-  { pfad: '/app/', prio: '0.9', stand: '2026-10-16' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-17' },
+  { pfad: '/app/', prio: '0.9', stand: '2026-10-17' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-16' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-16' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-17' },
   { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-16' },
   { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-16' },
   { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-16' },
@@ -29,10 +29,10 @@ export const SEITEN = [
   { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-10-16' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-16' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-16' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-17' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-16' },
+  { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-17' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-17' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ];
 
