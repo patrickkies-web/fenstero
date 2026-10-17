@@ -105,6 +105,10 @@ Die Hauptdomain ist `eeziframes.com`. Markenschutz: kurz ins Markenregister scha
 2. **Workers & Pages → fenstero → Einstellungen → Domains & Routen (Domains & Routes) → Hinzufügen (Add) → Benutzerdefinierte Domain (Custom domain)**: `eeziframes.com` eintragen, hinzufügen. Dasselbe noch einmal für `www.eeziframes.com`. Cloudflare legt DNS-Eintrag und Zertifikat selbst an; nach ein paar Minuten lädt die Seite.
 3. Meldet Cloudflare, dass es für den Namen schon einen DNS-Eintrag gibt: unter **DNS → Einträge (Records)** den A-, AAAA- oder CNAME-Eintrag für genau diesen Namen löschen und Schritt 2 wiederholen. Eigene A-Einträge braucht die Website nicht.
 
+Beide Namen müssen am Worker hängen: Fehlt `www.eeziframes.com`, zeigt Cloudflare dort eine Fehlerseite. Hängt er dran, leitet der Worker `www.` und `http://` dauerhaft auf `https://eeziframes.com` um (`functions/seo.js`, `umleitung()`).
+
+**Web Analytics von Cloudflare ausschalten:** **Analytics & Logs → Web Analytics** → `eeziframes.com` → automatische Einrichtung bzw. die Website deaktivieren. Sonst baut Cloudflare ein Zählskript in jede Seite ein; die Sicherheitsregeln der Seite blocken es zwar (Fehlermeldung in der Konsole), aber die Datenschutzerklärung sagt: keine Tracking-Dienste. Die eigene Statistik ohne Cookies steht in der Zentrale.
+
 So erkennst du, wo es hakt: **Fehler 522** heißt, die Domain zeigt noch nicht auf den Worker (Punkt 2 und 3 oben). **„Server nicht gefunden“** heißt, für diesen Namen gibt es gar keinen Eintrag (häufig bei `www.`). Eine **leere oder 404-Seite** heißt, der letzte Build in `main` hat die Website nicht gefunden (Einstellungen aus Schritt 2 prüfen).
 
 Kundenlinks, QR-Codes und die Adresse im Aufmaßblatt nehmen von selbst die Domain, unter der der Betriebsbereich geöffnet wurde; im Code steht keine Domain. Für Suchmaschinen zählt `www.eeziframes.com` als `eeziframes.com`, und die `…workers.dev`-Adresse wird nie freigegeben (`functions/seo.js`). Hängen weitere Domains am Worker, etwa `eeziframes.de`, leite sie bei Cloudflare per Weiterleitungsregel (Rules → Redirect Rules, 301, Pfad behalten) auf `eeziframes.com` um oder setze `KANONISCH` (Schritt 7).
