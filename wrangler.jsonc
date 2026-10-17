@@ -14,8 +14,8 @@
     "directory": "./web",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    // /api/… und die Seiten selbst laufen durch worker.js (Freigabe für Suchmaschinen, robots.txt, sitemap.xml, llms.txt); Skripte, Bilder und Schriften kommen direkt
-    "run_worker_first": ["/api/*", "/", "/index.html", "/app/*", "/ratgeber/*", "/fuer-fensterbauer/*", "/impressum/*", "/datenschutz/*", "/agb/*", "/nutzungsbedingungen/*", "/cookies/*", "/widerruf/*", "/robots.txt", "/sitemap.xml", "/llms.txt"]
+    // /api/… und die Seiten selbst laufen durch worker.js (Freigabe für Suchmaschinen, robots.txt, sitemap.xml, llms.txt, Bestätigung der Domain für Zoho); Skripte, Bilder und Schriften kommen direkt
+    "run_worker_first": ["/api/*", "/", "/index.html", "/app/*", "/ratgeber/*", "/fuer-fensterbauer/*", "/impressum/*", "/datenschutz/*", "/agb/*", "/nutzungsbedingungen/*", "/cookies/*", "/widerruf/*", "/robots.txt", "/sitemap.xml", "/llms.txt", "/verifyforzoho.html"]
   },
   // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU, PREIS_AUFMASS_CENT, MWST) bei jedem Deployment behalten
   "keep_vars": true,

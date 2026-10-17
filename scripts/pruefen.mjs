@@ -1274,13 +1274,16 @@ if (teil(10)) {
   const routen = JSON.parse((fs10.readFileSync(path10.join(WURZEL, 'wrangler.jsonc'), 'utf8').match(/"run_worker_first":\s*(\[[^\]]*\])/) || [])[1] || '[]');
   const passt = (r, p) => (r.endsWith('*') ? p.startsWith(r.slice(0, -1)) : p === r);
   ok(seo.SEITEN.every((s) => seo.istSeite(s.pfad) && routen.some((r) => passt(r, s.pfad))) && ['/robots.txt', '/sitemap.xml', '/llms.txt'].every((p) => routen.includes(p)), 'Worker übernimmt alle Seiten, robots.txt, sitemap.xml und llms.txt (run_worker_first in wrangler.jsonc)');
+  const zoho10 = await seo.behandeln(new Request('https://eeziframes.com/verifyforzoho.html'), {}, async () => new Response('falsch'));
+  const zohoText10 = zoho10 ? await zoho10.text() : '';
+  ok(!!zoho10 && zoho10.status === 200 && zohoText10 === '41302434' && zohoText10 === fs10.readFileSync(path10.join(WURZEL, 'web/verifyforzoho.html'), 'utf8') && /text\/html/.test(zoho10.headers.get('content-type') || '') && routen.includes('/verifyforzoho.html'), 'Bestätigung der Domain für Zoho Mail: /verifyforzoho.html liefert genau den Code wie die Datei in web/, über den Worker und ohne Weiterleitung');
   const og = fs10.readFileSync(path10.join(WURZEL, 'web/og.png'));
   ok(og.readUInt32BE(16) === 1200 && og.readUInt32BE(20) === 630 && og.length < 200000, 'Vorschaubild zum Teilen: 1200 × 630, ' + Math.round(og.length / 1024) + ' KB');
   /* Das Zeichen überall gleich (eine Quelle: scripts/logo-setzen.py): alle Seitenköpfe (die Zentrale zeichnet es per Skript), Favicon,
      Zentrale, Logo.svg in App und Betriebsbereich; das PDF mit denselben Punkten; das Bild für die E-Mails (scripts/marke-bilder.mjs) */
   const gem10 = fs10.readFileSync(path10.join(WURZEL, 'web/assets/gemeinsam.js'), 'utf8'), innen10 = (gem10.match(/var LOGO_INNEN = '([^']*)';/) || [])[1] || '';
   const statisch10 = '<svg viewBox="0 0 64 64" aria-hidden="true">' + innen10 + '</svg>', seiten10 = [];
-  (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep)) seiten10.push(f); } })(path10.join(WURZEL, 'web'));
+  (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep) && !seo.BESTAETIGUNG['/' + e.name]) seiten10.push(f); } })(path10.join(WURZEL, 'web'));
   const ohneZeichen10 = seiten10.filter((f) => !fs10.readFileSync(f, 'utf8').includes(statisch10)).map((f) => path10.relative(WURZEL, f));
   const lies10 = (f) => fs10.readFileSync(path10.join(WURZEL, f), 'utf8'), bl10 = lies10('web/assets/blatt.js');
   ok(/fi-strahl/.test(innen10) && seiten10.length >= 19 && !ohneZeichen10.length && lies10('web/favicon.svg').includes(innen10) && lies10('web/assets/zentrale.js').includes(innen10) && ['[26.4, 12.2]', '[57, 17.6]', '[44.2, 41]', '[11.7, 64]'].every((s) => bl10.includes(s)) && !/fi-fluegel|rx="16" fill="#000"/.test(seiten10.map((f) => fs10.readFileSync(f, 'utf8')).join('') + gem10) && /ZEICHEN_PNG = 'iVBOR/.test(lies10('functions/api/marke.js')), 'Das neue Zeichen steht überall gleich: ' + seiten10.length + ' Seiten, Favicon, Zentrale, App und Betriebsbereich, im PDF mit denselben Punkten, als Bild für die E-Mails' + (ohneZeichen10.length ? '; fehlt in ' + ohneZeichen10.join(', ') : ''));
