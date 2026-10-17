@@ -2125,9 +2125,12 @@ SCREENS.sichern = () => {
     : ['Aufmaß sichern', 'Auf jedem Gerät weitermachen.', 'Wir schicken dir einen Code per E-Mail. Kein Passwort, kein Newsletter. Fotos bleiben auf dem Gerät, mit dem du sie aufgenommen hast.'];
   const zurueck = kauf1 ? 'teilen' : 'home';
   if (z.schritt === 2) {
-    const html = hd(kopf[0], 'Code eingeben.', 'Wir haben einen sechsstelligen Code an <span class="mail">' + esc(z.mail) + '</span> geschickt. Er gilt eine Stunde.') +
-      '<div class="card kform"><label class="kf' + (e.code ? ' bad' : '') + '"><span>Code aus der E-Mail</span><input type="text" id="s-code" data-in="s" data-f="code" value="' + esc(z.code || '') + '" placeholder="123456" inputmode="numeric" autocomplete="one-time-code" maxlength="8">' + (e.code ? '<small>' + esc(e.code) + '</small>' : '') + '</label></div>' +
+    /* Wie viele Stellen der Code hat, stellt man bei Supabase ein (6 bis 10); die App nimmt jede dieser Längen. Ein Link statt Code
+       (Vorlage ohne {{ .Token }}) öffnet sich in manchen Mail-Apps in einem anderen Browser, dort fehlt dann das Aufmaß dieses Browsers */
+    const html = hd(kopf[0], 'Code eingeben.', 'Wir haben dir einen Code an <span class="mail">' + esc(z.mail) + '</span> geschickt. Er gilt eine Stunde.') +
+      '<div class="card kform"><label class="kf' + (e.code ? ' bad' : '') + '"><span>Code aus der E-Mail</span><input type="text" id="s-code" data-in="s" data-f="code" value="' + esc(z.code || '') + '" placeholder="123456" inputmode="numeric" autocomplete="one-time-code" maxlength="10">' + (e.code ? '<small>' + esc(e.code) + '</small>' : '') + '</label></div>' +
       '<p class="sub" style="padding: 0 6px">Nichts angekommen? Schau im Spam-Ordner nach. <button type="button" class="ulink" data-act="sichern-neu">Neuen Code schicken</button> · <button type="button" class="ulink" data-act="sichern-zurueck">Andere E-Mail-Adresse</button></p>' +
+      '<p class="sub link-statt-code" style="padding: 0 6px">' + (z.zweck === 'anmelden' ? 'Steht in der E-Mail ein Link statt eines Codes, tippe ihn einfach an.' : 'Steht in der E-Mail ein Link statt eines Codes, öffne ihn in diesem Browser: Dein Aufmaß liegt bisher nur hier.') + '</p>' +
       (z.zweck === 'anmelden' ? '<p class="sub" style="padding: 0 6px">Gibt es zu dieser Adresse noch kein Konto, kommt kein Code. Dann sichere zuerst ein Aufmaß, dabei legst du das Konto an.</p>' : '') +
       (SERVER.attrappe ? '<p class="sub" style="padding: 0 6px">Testbetrieb: Der Code ist 123456.</p>' : '');
     return { html: html, back: ['Zurück', zurueck], bar: { label: z.laeuft ? 'Einen Moment …' : kauf1 ? 'Weiter zur Zahlung' : 'Anmelden', act: 'sichern-pruefen', dis: !!z.laeuft } };
@@ -2169,7 +2172,9 @@ SCREENS.linkanmelden = () => {
   const html = hd(kopf[0], kopf[1], kopf[2]) +
     (ungesichert ? noteBox('Auf diesem Gerät liegt ein Aufmaß aus dem Konto <b class="mail">' + esc(ungesichert) + '</b> mit Änderungen, die dort noch nicht angekommen sind. Mit der Anmeldung wird es von diesem Gerät entfernt; im Konto bleibt der zuletzt gesicherte Stand. Um die Änderungen zu sichern, melde dich zuerst mit dieser Adresse an.', null, 'warn')
       : KS ? '<p class="sub" style="padding: 0 6px">Gerade bist du als <b class="mail">' + esc(KS.mail) + '</b> angemeldet. Dein Aufmaß bleibt in diesem Konto; auf diesem Gerät öffnet sich dann das andere.</p>'
-      : hier ? '<p class="sub" style="padding: 0 6px">Dein Aufmaß auf diesem Gerät wird dann in diesem Konto gesichert.</p>' : '');
+      : hier ? '<p class="sub" style="padding: 0 6px">Dein Aufmaß auf diesem Gerät wird dann in diesem Konto gesichert.</p>'
+      /* Link in einem anderen Browser geöffnet (Mail-Apps machen das gern): Das angefangene Aufmaß liegt im Browser, in dem gemessen wurde */
+      : perLink ? noteBox('Hast du dein Aufmaß in einem anderen Browser oder einer anderen App angefangen? Dann liegt es dort und noch nicht in deinem Konto. Geh am besten dorthin zurück und gib dort den Code aus der E-Mail ein, dann kommt es mit.', null, 'link-anderswo') : '');
   return { html: html, back: ['Abbrechen', 'home'], bar: { label: ungesichert ? 'Trotzdem anmelden' : 'Anmelden', act: 'link-anmelden-ja', sec: 'Nicht anmelden', secAct: 'link-anmelden-nein' } };
 };
 /* Kasse, Schritt 2: mit Server zu Stripe, ohne Server ein gekennzeichneter Testkauf */
@@ -2918,7 +2923,7 @@ document.addEventListener('visibilitychange', () => {
   if (Date.now() - (S.sync.zuletzt || 0) > 20000) entwurfLaden();
 });
 /* ---------- Konto für Hauseigentümer (ohne Link eines Fensterbauers) ----------
-   Gast: alles im Browser. „Aufmaß sichern“: E-Mail und sechsstelliger Code, kein Passwort; danach liegt das Aufmaß im Konto
+   Gast: alles im Browser. „Aufmaß sichern“: E-Mail und Code (6 bis 10 Stellen), kein Passwort; danach liegt das Aufmaß im Konto
    (functions/api/eigene.js) und wird abgeglichen wie beim Kundenlink. Zum Freischalten ist das Konto Pflicht, der Kauf hängt dann am
    Aufmaß. Die Anmeldung bleibt in diesem Browser (aufmass.kunde, ohne Passwort). Abmelden nimmt das Aufmaß von diesem Gerät, im
    Konto bleibt es. Ohne Konten auf dem Server (SERVER.konten) bleibt alles wie für Gäste, gekauft wird dann ohne Konto. */
@@ -3175,7 +3180,7 @@ async function sichernCode() {
 async function sichernPruefen() {
   const z = S.sichern; if (!z || z.laeuft) return;
   z.code = String(z.code || '').replace(/\D/g, ''); z.err = {};
-  if (z.code.length < 6) { z.err.code = 'Bitte den sechsstelligen Code aus der E-Mail eingeben.'; return render(); }
+  if (z.code.length < 6) { z.err.code = 'Bitte den Code aus der E-Mail eingeben.'; return render(); }
   z.laeuft = true; render();
   try {
     const res = await fetch('/api/kunde/anmelden', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ mail: z.mail, code: z.code }) });

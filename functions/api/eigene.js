@@ -1,5 +1,5 @@
 /* eeziframes · Konten für Hauseigentümer, die ohne Link eines Fensterbauers messen
-   Gast: alles bleibt im Browser. Wer sein Aufmaß sichert (E-Mail und sechsstelliger Code, kein Passwort; Supabase Auth wie bei den
+   Gast: alles bleibt im Browser. Wer sein Aufmaß sichert (E-Mail und Code, kein Passwort; Supabase Auth wie bei den
    Betrieben, auth.js), hat es auf dem Server und damit auf jedem Gerät. Zum Freischalten (Kauf des Aufmaßblatts, zahlung.js) ist das
    Konto Pflicht; der Kauf hängt dann am Aufmaß und ist auf jedem Gerät da. Je Konto höchstens 20 Aufmaße (eines je Haus), jedes mit
    seiner Kennung (dieselbe wie beim Kauf).

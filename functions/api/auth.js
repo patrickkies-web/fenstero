@@ -1,7 +1,10 @@
-/* eeziframes · Anmeldung für Betriebe ohne Passwort: eine E-Mail mit Anmeldelink oder sechsstelligem Code (Supabase Auth).
-   Der Link führt mit #access_token=… zurück auf die Startseite (portal.js → /api/konto/sitzung); der Code geht über /api/konto/bestaetigen.
-   Welche E-Mail Supabase schickt, bestimmt die Vorlage „Magic Link“: Ohne eigenen Mailversand (SMTP) ist es die Standardvorlage mit Link,
-   mit eigenem Mailversand lässt sich {{ .Token }} (Code) eintragen; beides funktioniert (docs/ONLINE-STELLEN.md, Stufe 2 A).
+/* eeziframes · Anmeldung ohne Passwort für Betriebe und Hauseigentümer: eine E-Mail mit Code (Supabase Auth).
+   Der Code geht über /api/konto/bestaetigen bzw. /api/kunde/anmelden. Ein Anmeldelink führt mit #access_token=… zurück
+   (portal.js → /api/konto/sitzung, app.js → /api/kunde/sitzung) und wird ebenfalls angenommen.
+   Welche E-Mail Supabase schickt, bestimmen zwei Vorlagen: „Confirm signup“ geht an eine Adresse ohne bestätigtes Konto (beim
+   allerersten Anmelden), „Magic Link“ an alle anderen. In beiden steht nur {{ .Token }}, kein Link: Mail-Apps öffnen Links gern in
+   einem anderen Browser, dort fehlt dann ein angefangenes Aufmaß (docs/ONLINE-STELLEN.md, Stufe 2 A). Die Länge des Codes stellt man
+   bei Supabase ein (Email OTP Length, 6 bis 10 Stellen); angenommen wird jede davon.
    Attrappe (DATEN_ATTRAPPE=1): der Code ist immer 123456. */
 import { ApiFehler, sbNeu } from './umgebung.js';
 
@@ -40,7 +43,7 @@ export async function codeSenden(k, sp, mail, zurueck, neu) {
 
 export async function codePruefen(k, sp, mail, code) {
   mail = String(mail || '').trim().toLowerCase(); code = String(code || '').replace(/\s+/g, '');
-  if (!mailOk(mail) || !/^\d{6,8}$/.test(code)) throw new ApiFehler('Bitte den sechsstelligen Code aus der E-Mail eingeben.');
+  if (!mailOk(mail) || !/^\d{6,10}$/.test(code)) throw new ApiFehler('Bitte den Code aus der E-Mail eingeben.');
   if (k.supabase) {
     const r = await gotrue(k, 'verify', { body: { type: 'email', email: mail, token: code } });
     if (!r.ok || !r.data || !r.data.access_token) throw new ApiFehler('Der Code stimmt nicht oder ist abgelaufen.', 401);

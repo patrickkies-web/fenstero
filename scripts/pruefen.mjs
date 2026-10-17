@@ -2494,6 +2494,13 @@ if (teil(15)) {
     await foto(s1, 'app-sichern-mail');
     await s1.fill('#s-mail', mail6); await s1.click('[data-in="sc"][data-f="agb"]'); await s1.click('.bb .btn.primary'); await s1.waitForSelector('#s-code'); await s1.waitForTimeout(250);
     await foto(s1, 'app-sichern-code');
+    const codeSchirm = await s1.evaluate(() => ({ max: document.getElementById('s-code').getAttribute('maxlength'), text: document.body.innerText, link: (document.querySelector('.link-statt-code') || {}).textContent || '' }));
+    ok(codeSchirm.max === '10' && !/sechsstellig/.test(codeSchirm.text) && /Wir haben dir einen Code an/.test(codeSchirm.text) && /Link statt eines Codes, öffne ihn in diesem Browser: Dein Aufmaß liegt bisher nur hier/.test(codeSchirm.link), 'Code-Schritt: Feld für 6 bis 10 Stellen (Länge stellt man bei Supabase ein), kein „sechsstellig“; Hinweis, einen Link statt Code in diesem Browser zu öffnen');
+    /* Server: jede Länge von 6 bis 10 Stellen ist ein Code (dann „stimmt nicht“), 5 oder 11 Stellen sind keiner */
+    const codeLaenge = async (pfad, code) => (await fetch(B6 + pfad, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', 'cf-connecting-ip': '198.51.100.' + (laengen.length + 20) }, body: JSON.stringify({ mail: mail6, code: code }) }).then((r) => r.json())).fehler || ''; // eigene Adresse je Versuch: die Bremse der Seite bleibt für die übrigen Schritte frei
+    const laengen = [];
+    for (const pfad of ['/api/kunde/anmelden', '/api/konto/bestaetigen']) for (const c of ['12345', '87654321', '9876543210', '12345678901']) laengen.push(await codeLaenge(pfad, c));
+    ok(laengen.every((f, i) => ([1, 2].includes(i % 4) ? /stimmt nicht/.test(f) : /Bitte den Code aus der E-Mail eingeben/.test(f))), 'Anmeldecode mit 8 oder 10 Stellen wird geprüft (Supabase: Email OTP Length), 5 oder 11 Stellen gelten nicht als Code (App und Betriebsbereich)');
     await s1.fill('#s-code', '999999'); await s1.click('.bb .btn.primary'); await s1.waitForTimeout(500);
     const falschC = await s1.evaluate(() => ({ screen: S.screen, err: (S.sichern && S.sichern.err.code) || '', ks: !!KS }));
     await s1.fill('#s-code', '123456'); await s1.click('.bb .btn.primary');
@@ -2568,7 +2575,14 @@ if (teil(15)) {
     await s3.click('[data-act="link-anmelden-nein"]'); await s3.waitForTimeout(300);
     const nein = await s3.evaluate(() => ({ ks: !!KS, gespeichert: localStorage.getItem('aufmass.kunde'), n: S.windows.length, screen: S.screen }));
     const nachNein = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json())).aufmasse.length;
-    ok(frageL.hash === '' && !frageL.ks && !frageL.gespeichert && /Mit diesem Konto anmelden\?/.test(frageL.text) && frageL.text.includes(mail6) && /in diesem Konto gesichert/.test(frageL.text) && !nein.ks && !nein.gespeichert && nein.n === 1 && nein.screen === 'home' && nachNein === vorLink, 'Fremder Anmeldelink: Rückfrage mit der Adresse des Kontos, vorher keine Anmeldung; „Nicht anmelden“ lässt alles, wie es war, nichts geht ins fremde Konto');
+    ok(frageL.hash === '' && !frageL.ks && !frageL.gespeichert && /Mit diesem Konto anmelden\?/.test(frageL.text) && frageL.text.includes(mail6) && /in diesem Konto gesichert/.test(frageL.text) && !/anderen Browser oder einer anderen App/.test(frageL.text) && !nein.ks && !nein.gespeichert && nein.n === 1 && nein.screen === 'home' && nachNein === vorLink, 'Fremder Anmeldelink: Rückfrage mit der Adresse des Kontos, vorher keine Anmeldung; „Nicht anmelden“ lässt alles, wie es war, nichts geht ins fremde Konto');
+    /* Link in einem leeren Browser (Mail-App öffnet ihn woanders als dort, wo gemessen wurde): Hinweis, wo das Aufmaß liegt */
+    const c3b = await browser.newContext(telefon), s3b = await neueSeite(c3b, B6);
+    await s3b.goto(linkAdr(tok6), { waitUntil: 'networkidle' }); await s3b.waitForFunction(() => S.screen === 'linkanmelden', null, { timeout: 8000 }); await s3b.waitForTimeout(200);
+    const leer = await s3b.evaluate(() => ({ ks: !!KS, n: S.windows.length, note: (document.querySelector('.note.link-anderswo') || {}).textContent || '' }));
+    await foto(s3b, 'app-link-anderer-browser');
+    ok(!leer.ks && leer.n === 0 && /in einem anderen Browser oder einer anderen App angefangen\? Dann liegt es dort und noch nicht in deinem Konto/.test(leer.note) && /gib dort den Code aus der E-Mail ein/.test(leer.note), 'Anmeldelink in einem Browser ohne Aufmaß: Hinweis, dass ein angefangenes Aufmaß im anderen Browser liegt und dort mit dem Code ins Konto kommt');
+    sauber(s3b, 'Anmeldelink im leeren Browser ohne Fehler'); await c3b.close();
     await s3.goto(linkAdr(tok6), { waitUntil: 'networkidle' }); await s3.waitForFunction(() => S.screen === 'linkanmelden', null, { timeout: 8000 });
     await s3.click('[data-act="link-anmelden-ja"]'); await s3.waitForFunction(() => KS && S.screen === 'home' && S.sync.ok && !S.sync.offen, null, { timeout: 8000 });
     const nachJa = (await fetch(B6 + '/api/kunde/aufmasse', { headers: { authorization: 'Bearer ' + tok6, accept: 'application/json' } }).then((r) => r.json())).aufmasse.length;
