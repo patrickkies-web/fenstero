@@ -178,9 +178,14 @@ export function llms(origin, env) {
 }
 
 /* robots.txt, sitemap.xml und llms.txt selbst beantworten, Seiten über holen() aus web/ laden und anpassen; sonst null */
+/* Bestätigung der Domain bei Diensten, die eine Datei im Hauptverzeichnis abrufen (Zoho Mail: Methode „HTML-Datei“). Genau unter
+   dieser Adresse und ohne Weiterleitung: Cloudflare leitet „….html“ sonst auf die Adresse ohne Endung um. Inhalt wie die Datei in web/
+   (die Prüfsuite vergleicht beides); die Adresse steht in wrangler.jsonc unter run_worker_first. */
+export const BESTAETIGUNG = { '/verifyforzoho.html': '41302434' };
 export async function behandeln(request, env, holen) {
   const url = new URL(request.url);
   const text = (inhalt, typ, status, extra) => new Response(inhalt, { status: status || 200, headers: Object.assign({ 'content-type': typ, 'cache-control': 'public, max-age=3600', 'x-content-type-options': 'nosniff' }, extra || {}) });
+  if (BESTAETIGUNG[url.pathname]) return text(BESTAETIGUNG[url.pathname], 'text/html; charset=utf-8', 200, { 'cache-control': 'no-store', 'x-robots-tag': SPERRE });
   if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env, url)), 'text/plain; charset=utf-8');
   if (url.pathname === '/sitemap.xml') return frei(env, url) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
   if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env, url) ? null : { 'x-robots-tag': SPERRE });
