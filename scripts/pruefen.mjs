@@ -3073,6 +3073,33 @@ if (teil(17)) {
   const tokR17 = 'test.' + Buffer.from('reg17-' + Date.now() + '@beispiel.de', 'utf8').toString('base64').replace(/=+$/, '');
   const reg17 = (zus) => post17j('/api/konto/registrieren', Object.assign({ firma: 'Fensterbau Recht ' + Date.now(), ap: 'Rita Recht', tel: '0221 9' + String(Date.now()).slice(-6), plz: '50667' }, zus), tokR17);
   const rgA = await reg17({ agb: true }), rgB = await reg17({ agb: RECHT.NB_STAND }), rgC = await reg17({ agb: '2020-01-01', unternehmer: true }), rgD = await reg17({ agb: RECHT.NB_STAND, unternehmer: true });
+  /* e) Anmelde-E-Mails bei Supabase (supabase/vorlagen): nur der Code, nichts Nachgeladenes, Stil der Seite, bis 10 Stellen auf dem Telefon */
+  const vorl17 = {}; for (const n of ['anmeldecode', 'registrierung']) vorl17[n] = fs17.readFileSync(path17.join(W17, 'supabase/vorlagen', n + '.html'), 'utf8');
+  const vorlFehler17 = [];
+  for (const [n, h] of Object.entries(vorl17)) {
+    const aktionen = h.match(/\{\{[^}]*\}\}/g) || [], text = h.replace(/<head>[\s\S]*?<\/head>/, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ');
+    if ((h.match(/\{\{ \.Token \}\}/g) || []).length !== 1 || !h.includes('{{ .Email }}')) vorlFehler17.push(n + ': Code nicht genau einmal oder Adresse fehlt');
+    if (!aktionen.every((a) => a === '{{ .Token }}' || a === '{{ .Email }}')) vorlFehler17.push(n + ': andere Platzhalter ' + aktionen.join(' '));
+    if (/ConfirmationURL|TokenHash|<img|<script|url\(|@import|src=|<!--/i.test(h)) vorlFehler17.push(n + ': Link zur Anmeldung, Bild, Skript, Kommentar oder Nachgeladenes');
+    if ((h.match(/https?:\/\/[^"'\s<]+/g) || []).some((u) => !/^https:\/\/eeziframes\.com\/(impressum|datenschutz)\/$/.test(u))) vorlFehler17.push(n + ': fremde Adresse');
+    if ((h.match(/font-size:\s*\d+px/g) || []).map((x) => +x.match(/\d+/)[0]).some((g) => g > 0 && g < 13)) vorlFehler17.push(n + ': Schrift unter 13 px');
+    if (/Eeziframes|EEZIFRAMES|eeziFrames/.test(h) || !h.includes('<b style="font-weight:900;">eezi</b><span style="font-weight:500;">frames</span>')) vorlFehler17.push(n + ': Wortmarke');
+    if (/\b(du|dich|dir|dein|deine|Sie|Ihr|Ihre|Ihnen)\b/.test(text)) vorlFehler17.push(n + ': Anrede (Betriebe und Hauseigentümer bekommen dieselbe Mail)');
+    if (!text.includes(anb17.name) || !/Herzebrock-Clarholz/.test(text)) vorlFehler17.push(n + ': Anbieter fehlt');
+  }
+  for (const schema of ['light', 'dark']) {
+    const cV = await browser.newContext({ viewport: { width: 360, height: 800 }, deviceScaleFactor: 1, colorScheme: schema }), sV = await cV.newPage();
+    for (const [n, h] of Object.entries(vorl17)) {
+      await sV.setContent(h.replace('{{ .Token }}', '4829137750').replace('{{ .Email }}', 'sehr.lange.adresse.fuer.den.test@fensterbau-beispiel.de'), { waitUntil: 'load' });
+      const m = await sV.evaluate(() => { const c = document.querySelector('.code'), f = document.querySelector('.codefeld'); return { quer: document.documentElement.scrollWidth - innerWidth, zeilen: Math.round(c.getBoundingClientRect().height / parseFloat(getComputedStyle(c).lineHeight)), feld: getComputedStyle(f).backgroundColor, ziffern: getComputedStyle(c).color }; });
+      const erwartet = schema === 'dark' ? ['rgb(242, 241, 237)', 'rgb(17, 17, 16)'] : ['rgb(20, 20, 20)', 'rgb(255, 255, 255)'];
+      if (m.quer > 0 || m.zeilen !== 1 || m.feld !== erwartet[0] || m.ziffern !== erwartet[1]) vorlFehler17.push(n + ' ' + schema + ': ' + JSON.stringify(m));
+    }
+    await cV.close();
+  }
+  const os17 = fs17.readFileSync(path17.join(W17, 'docs/ONLINE-STELLEN.md'), 'utf8');
+  if (!os17.includes('supabase/vorlagen/anmeldecode.html') || !os17.includes('supabase/vorlagen/registrierung.html') || !os17.includes('`Anmeldecode für eeziframes: {{ .Token }}`')) vorlFehler17.push('Anleitung nennt Vorlagen oder Betreff nicht');
+  ok(!vorlFehler17.length, 'Anmelde-E-Mails (Supabase-Vorlagen): genau ein Code, keine Anmeldelinks, Bilder, Skripte oder fremden Adressen, Schrift ab 13 px, Wortmarke, ohne Anrede, mit Anbieter; 10 Stellen und lange Adresse bei 360 px ohne Querscrollen, Codefeld hell und dunkel wie der Primärknopf' + (vorlFehler17.length ? ': ' + vorlFehler17.join(' | ') : ''));
   ok(rgA._status === 400 && rgB._status === 400 && rgC._status === 409 && rgC.neuLaden && rgD.ok && rgD.konto.acc.bedingungen.fassung === RECHT.NB_STAND && rgD.konto.acc.bedingungen.unternehmer === true && rgD.konto.acc.bedingungen.avv === true && !isNaN(Date.parse(rgD.konto.acc.bedingungen.zeit)), 'Registrierung nur als Unternehmer mit Zustimmung zur geltenden Fassung der Nutzungsbedingungen samt AVV; Fassung und Zeitpunkt stehen am Konto');
   aus17();
 }
