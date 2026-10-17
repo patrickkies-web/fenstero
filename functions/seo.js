@@ -54,7 +54,9 @@ export const SICHERHEIT = {
 export const SPERRE = 'noindex, nofollow';
 
 export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1' && !(url && /\.workers\.dev$/i.test(url.hostname));
-export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : url.protocol + '//' + url.host.replace(/^www\./i, ''));
+/* Lokal (Testserver, wrangler dev) gilt die aufgerufene Adresse; im Netz immer https, auch wenn eine Seite über http:// abgerufen wurde */
+const LOKAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i;
+export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : (LOKAL.test(url.hostname) ? url.protocol : 'https:') + '//' + url.host.replace(/^www\./i, ''));
 export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf)(\/|$)/.test(pfad);
 const kanonischerPfad = (pfad) => pfad.replace(/index\.html$/, '');
 
@@ -182,6 +184,17 @@ export function llms(origin, env) {
    dieser Adresse und ohne Weiterleitung: Cloudflare leitet „….html“ sonst auf die Adresse ohne Endung um. Inhalt wie die Datei in web/
    (die Prüfsuite vergleicht beides); die Adresse steht in wrangler.jsonc unter run_worker_first. */
 export const BESTAETIGUNG = { '/verifyforzoho.html': '41302434' };
+/* Eine Adresse je Seite: http:// und www. leiten dauerhaft (301) auf https://eeziframes.com mit demselben Pfad um, damit Suchmaschinen
+   keine Doppel sehen und Links auf www nicht ins Leere laufen. Nur Seitenabrufe (GET, HEAD), nie /api/ (worker.js ruft das vorher
+   nicht auf), nie lokal und nie die Bestätigungsdatei (muss ohne Weiterleitung kommen) */
+export function umleitung(request) {
+  const url = new URL(request.url);
+  if (!['GET', 'HEAD'].includes(request.method) || LOKAL.test(url.hostname) || BESTAETIGUNG[url.pathname]) return null;
+  const www = /^www\./i.test(url.hostname);
+  if (url.protocol === 'https:' && !www) return null;
+  url.protocol = 'https:'; url.hostname = url.hostname.replace(/^www\./i, '');
+  return new Response(null, { status: 301, headers: { location: url.href, 'cache-control': 'public, max-age=86400' } });
+}
 export async function behandeln(request, env, holen) {
   const url = new URL(request.url);
   const text = (inhalt, typ, status, extra) => new Response(inhalt, { status: status || 200, headers: Object.assign({ 'content-type': typ, 'cache-control': 'public, max-age=3600', 'x-content-type-options': 'nosniff' }, extra || {}) });

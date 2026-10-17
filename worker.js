@@ -4,7 +4,7 @@
    Ohne eingerichtete Schlüssel läuft die Website im Pilotmodus weiter; /api/status sagt der App, was da ist.
    Ausgelieferte Seiten zählt die eigene Statistik als Tageszähler (functions/api/statistik.js), ohne Cookies und ohne Kennungen. */
 import { api, geplant } from './functions/api/router.js';
-import { behandeln } from './functions/seo.js';
+import { behandeln, umleitung } from './functions/seo.js';
 import { seitenaufruf } from './functions/api/statistik.js';
 
 export default {
@@ -14,6 +14,9 @@ export default {
       const antwort = await api(request, env, ctx);
       if (antwort) return antwort;
     }
+    /* http:// und www. auf https://eeziframes.com (301), siehe functions/seo.js */
+    const weiter = umleitung(request);
+    if (weiter) return weiter;
     /* Seiten, robots.txt, sitemap.xml: Freigabe für Suchmaschinen (Variable INDEXIERUNG) und Canonical, siehe functions/seo.js */
     const seo = await behandeln(request, env, (r) => env.ASSETS.fetch(r));
     if (seo) {

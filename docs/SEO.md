@@ -71,6 +71,7 @@ Aufbau jeder Seite: zuerst „Kurz gesagt“ mit der Antwort, dann eine Zeichnun
 
 **Technik** (`functions/seo.js`, läuft im Worker und im lokalen Testserver):
 - `robots.txt` aus dem Worker: Pilotphase `Disallow: /`; mit Freigabe alles erlaubt außer `/api/`, die KI-Suchen namentlich, Verweis auf die Sitemap. Trainings-Crawler (GPTBot, ClaudeBot, Google-Extended) sind über `User-agent: *` erlaubt, damit künftige Modelle eeziframes kennen; wer das nicht will, sperrt sie in `robots()` einzeln.
+- Eine Adresse je Seite: `http://` und `www.` leiten dauerhaft (301) auf `https://eeziframes.com` mit demselben Pfad um (`umleitung()`, nur Seitenabrufe, nie `/api/`, nie lokal); Canonical, Vorschaubild und JSON-LD tragen immer `https://`. Damit `www.` überhaupt beim Worker ankommt, muss `www.eeziframes.com` als benutzerdefinierte Domain am Worker hängen (docs/ONLINE-STELLEN.md, Schritt 6).
 - `sitemap.xml` mit allen Seiten aus `SEITEN` (nur mit Freigabe), `lastmod` je Seite aus `stand` (bei Ratgebern gleich `dateModified` und „Stand“ auf der Seite, prüft die Suite).
 - `robots.txt` mit Freigabe zusätzlich `Content-Signal: search=yes, ai-input=yes, ai-train=yes`.
 - IndexNow: öffentlicher Schlüssel in `INDEXNOW` (`functions/seo.js`) und als Datei `web/<Schlüssel>.txt`; der tägliche Lauf (4:17 Uhr UTC) meldet mit Freigabe die Seiten, deren `stand` höchstens zwei Tage zurückliegt, an `api.indexnow.org` (Hauptadresse aus `KANONISCH`, sonst `https://eeziframes.com`).
