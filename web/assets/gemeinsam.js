@@ -316,8 +316,10 @@
     anstossen: scrollAnstoss
   };
 
-  /* ---------- Pilot-Hinweis im Portal ---------- */
-  function pilotHinweis() {
+  /* ---------- Pilot-Hinweis im Portal ----------
+     erst, wenn /api/status sagt, dass kein Server angeschlossen ist (portal.js ruft PilotHinweis() dann auf): Vorher eingeblendet
+     und wieder entfernt, ließ er die Seite springen und zeigte auch im echten Betrieb kurz „Pilotphase“ */
+  window.PilotHinweis = function pilotHinweis() {
     if (!C.pilot || document.body.getAttribute('data-seite') !== 'portal' || get('aufmass.pilot.zu') === '1') return;
     var bar = el('div', 'fx-pilot', '<p><b>Pilotphase:</b> Im Bereich für Betriebe wird nichts berechnet, Konto und Projekte bleiben in Ihrem Browser. Echt funktionieren schon Aufmaß-Links, Code-Eingang, Nachbesserung und PDF-Export. Zum Kennenlernen gibt es die Tour.</p>' +
       '<button type="button" class="mehr">Mehr</button><button type="button" class="zu" aria-label="Hinweis schließen"><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>');
@@ -326,8 +328,7 @@
     /* am Telefon zwei Zeilen, „Mehr“ klappt auf */
     bar.querySelector('button.mehr').addEventListener('click', function () { bar.classList.add('offen'); });
     document.body.insertBefore(bar, document.body.firstChild);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pilotHinweis); else pilotHinweis();
+  };
 })();
 
 /* ---------- Farbtext: eine eingetippte Farbe verstehen ----------

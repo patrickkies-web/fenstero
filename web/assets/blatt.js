@@ -1,7 +1,8 @@
 'use strict';
 /* eeziframes · Aufmaßblatt als PDF: ein Zeichner für drei Ausgaben
    Blatt.pdf(e)      -> Blob (null, wenn jsPDF fehlt)
-   Blatt.schrift()   -> Promise; lädt die eingebettete Schrift (blatt-schrift.js) einmal nach, danach sofort
+   Blatt.schrift()   -> Promise; lädt vor dem ersten Blatt jsPDF, den QR-Code und die eingebettete Schrift (blatt-schrift.js) einmal nach,
+                        danach sofort; vor jedem Blatt.pdf() abwarten
 
    e = {
      variante: 'kunde' | 'fensterbauer' | 'betrieb',
@@ -28,16 +29,24 @@ window.Blatt = (() => {
   const offen = (w, k) => { const a = A(); return a ? a.istOffen(w, k) : !!(w.offen && w.offen[k]); };
   const ERREICH = { vm: 'vormittags', nm: 'nachmittags', ab: 'abends' };
   const BASIS = document.currentScript && document.currentScript.src ? document.currentScript.src.replace(/[^/]*$/, '') : '/assets/';
-  let ladePromise = null;
-  function schrift() {
-    if (window.BlattSchrift) return Promise.resolve(true);
-    if (ladePromise) return ladePromise;
-    ladePromise = new Promise((res) => {
-      const s = document.createElement('script'); s.src = BASIS + 'blatt-schrift.js'; s.async = true;
-      s.onload = () => res(!!window.BlattSchrift); s.onerror = () => { ladePromise = null; res(false); };
+  /* jsPDF (etwa 360 KB) und der QR-Code kommen erst mit dem ersten Blatt, nicht mit der Seite: Startseite und App laden schneller */
+  const VENDOR = BASIS.replace(/assets\/$/, 'vendor/');
+  const geladen = {};
+  const skript = (src, da) => {
+    if (da()) return Promise.resolve(true);
+    if (geladen[src]) return geladen[src];
+    return (geladen[src] = new Promise((res) => {
+      const s = document.createElement('script'); s.src = src; s.async = true;
+      s.onload = () => res(!!da()); s.onerror = () => { delete geladen[src]; s.remove(); res(false); };
       document.head.appendChild(s);
-    });
-    return ladePromise;
+    }));
+  };
+  function schrift() {
+    return Promise.all([
+      skript(VENDOR + 'jspdf.umd.min.js', () => !!(window.jspdf && window.jspdf.jsPDF)),
+      skript(VENDOR + 'qrcode.js', () => typeof window.qrcode === 'function'),
+      skript(BASIS + 'blatt-schrift.js', () => !!window.BlattSchrift)
+    ]).then((r) => r[2]);
   }
 
   function pdf(e) {
