@@ -5,7 +5,8 @@
      ohne sie erlischt das Widerrufsrecht bei digitalen Inhalten nicht)
    - Eingangsbestätigung eines Widerrufs über die Widerrufsfunktion (§ 356a BGB) und eine Kopie an den Betreiber
    Variablen bei Cloudflare: MAIL_API_KEY (Secret, Schlüssel re_… aus Resend → API Keys), MAIL_ABSENDER (Text, Adresse der bei Resend
-   bestätigten Domain, z. B. kontakt@eeziframes.com), MAIL_KONTAKT (Text, optional: Postfach für Kopien, sonst MAIL_ABSENDER).
+   bestätigten Domain, hier ask@eeziframes.com), MAIL_KONTAKT (Text, optional: Postfach für Kopien und Antwortadresse, sonst die Adresse
+   aus anbieter.js, wie im Impressum).
    Ohne Schlüssel verschickt der Server nichts (postDienst liefert null). MAIL_ATTRAPPE=1 merkt sich die Mails nur (lokale Prüfung).
    Resend verlangt eine Kopfzeile User-Agent (sonst 403, Fehler 1010); Cloudflare setzt keine von selbst. */
 import { ANBIETER } from './anbieter.js';

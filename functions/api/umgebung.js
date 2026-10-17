@@ -16,8 +16,8 @@
                               Eingangsbestätigung eines Widerrufs
 
    Variablen (Typ Text):
-     MAIL_ABSENDER            bei Resend bestätigte Absenderadresse, z. B. kontakt@eeziframes.com (Pflicht, wenn MAIL_API_KEY gesetzt ist)
-     MAIL_KONTAKT             Postfach für Kopien an den Betreiber (eingegangene Widerrufe); ohne: MAIL_ABSENDER
+     MAIL_ABSENDER            bei Resend bestätigte Absenderadresse, z. B. ask@eeziframes.com (Pflicht, wenn MAIL_API_KEY gesetzt ist)
+     MAIL_KONTAKT             Postfach für Kopien an den Betreiber (eingegangene Widerrufe); ohne: die Adresse aus anbieter.js (wie im Impressum)
      MWST                     Pflicht vor dem Verkauf mit echtem Geld: 0 = Kleinunternehmerregelung (§ 19 UStG, keine Umsatzsteuer, Hinweis
                               auf jeder Rechnung), 19 = 19 % Umsatzsteuer. Ohne Angabe rechnet die Vorschau mit 19 %, die Kasse im Live-Modus
                               bleibt zu (recht.js), damit niemand versehentlich Umsatzsteuer ausweist, die er nicht schuldet (§ 14c UStG)
@@ -34,6 +34,8 @@
      STATISTIK_KAMPAGNEN      eigene Kampagnen-Namen für ?utm_source=…, durch Komma getrennt (bekannte wie newsletter, flyer, facebook
                               zählen ohnehin einzeln, alles andere als „Kampagne (andere)“), siehe functions/api/statistik.js
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1 / MAIL_ATTRAPPE=1   nur lokal zum Testen: Stripe, Datenbank bzw. Mailversand werden nachgestellt */
+import { ANBIETER } from './anbieter.js';
+
 const num = (v, d) => { const n = Number(v); return v !== undefined && v !== '' && !isNaN(n) ? n : d; };
 /* Rolle aus einem früheren Supabase-Schlüssel (JWT, eyJ…) lesen, ohne ihn zu prüfen: nur um anon und service_role zu unterscheiden */
 function jwtRolle(t) { try { if (!/^eyJ/.test(t)) return ''; const m = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(atob(m + '==='.slice((m.length + 3) % 4))).role || ''; } catch (e) { return ''; } }
@@ -76,7 +78,7 @@ export function konfig(env) {
   if (zRoh.some((z) => !ZAHLARTEN_OK.includes(z))) hinweise.push('ZAHLARTEN: erlaubt sind ' + ZAHLARTEN_OK.join(', ') + ' (durch Komma getrennt).');
   const zahlarten = zOk.length ? Array.from(new Set(zOk)) : ['card'];
   const mailAttrappe = env.MAIL_ATTRAPPE === '1' && !mailKey;
-  const post = (mailKey && adresse(mailAb)) || mailAttrappe ? { key: mailKey, absender: mailAb || 'kontakt@eeziframes.invalid', kontakt: adresse(mailKontakt) ? mailKontakt : (mailAb || 'kontakt@eeziframes.invalid'), attrappe: mailAttrappe } : null;
+  const post = (mailKey && adresse(mailAb)) || mailAttrappe ? { key: mailKey, absender: mailAb || 'kontakt@eeziframes.invalid', kontakt: adresse(mailKontakt) ? mailKontakt : (ANBIETER.mail || mailAb || 'kontakt@eeziframes.invalid'), attrappe: mailAttrappe } : null;
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
