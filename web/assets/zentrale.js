@@ -5,7 +5,7 @@
 (function () {
   'use strict';
   var wurzel = document.getElementById('z');
-  var S = { status: null, seite: 'uebersicht', id: '', daten: {}, laedt: false, fehler: '', dialog: null, toast: '', suche: '', filter: 'alle', sortierung: 'neu', zeitraum: { art: '30', von: '', bis: '' }, zrFrei: false, zrFehler: '', einblick: {}, protokollArt: '', kaufSuche: '', zweiFaktor: null, anmeldungen: null, anmeldenFehler: '', sendet: false };
+  var S = { status: null, seite: 'uebersicht', id: '', daten: {}, laedt: false, fehler: '', dialog: null, toast: '', suche: '', filter: 'alle', sortierung: 'neu', zeitraum: { art: '30', von: '', bis: '', vonZeit: '', bisZeit: '' }, zrFrei: false, zrFehler: '', einblick: {}, protokollArt: '', kaufSuche: '', zweiFaktor: null, anmeldungen: null, anmeldenFehler: '', sendet: false };
 
   /* ---------- Werkzeuge ---------- */
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
@@ -85,8 +85,8 @@
     }).join('') + '</ol>' + (hinweis ? '<p class="z-neben">' + hinweis + '</p>' : '') + '</section>';
   }
 
-  /* ---------- Zeitraum der Auswertung: die letzten 7, 30 oder 90 Tage, 12 Monate, alles oder von einem Tag bis zu einem Tag ----------
-     Der Server rechnet in deutschen Kalendertagen und meldet den Zeitraum zurück (zeitraum: von, bis, tage, einheit) */
+  /* ---------- Zeitraum der Auswertung: die letzten 7, 30 oder 90 Tage, 12 Monate, alles oder von – bis (Tag, auf Wunsch mit Uhrzeit) ----------
+     Der Server rechnet in deutscher Zeit und meldet den Zeitraum zurück (zeitraum: von, bis, vonZeit, bisZeit, start, ende, tage, einheit) */
   var ZEITRAUM = [['7', '7 Tage'], ['30', '30 Tage'], ['90', '90 Tage'], ['365', '12 Monate'], ['anfang', 'Gesamt'], ['frei', 'Von – bis']];
   var heuteBerlin = function () { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } };
   var tagText = function (t) { return t ? datum(t + 'T12:00:00Z') : '–'; };
@@ -94,14 +94,25 @@
   var monatText = function (t) { return new Date(t + 'T12:00:00Z').toLocaleDateString('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' }); };
   var monatKurz = function (t) { return new Date(t + 'T12:00:00Z').toLocaleDateString('de-DE', { month: 'short', year: '2-digit', timeZone: 'UTC' }); };
   var JE = { tag: 'je Tag', woche: 'je Woche', monat: 'je Monat' };
-  function zrQuery() { var z = S.zeitraum; return z.art === 'frei' ? 'von=' + z.von + '&bis=' + z.bis : z.art === 'anfang' ? 'von=anfang' : 'tage=' + z.art; }
+  function zrQuery() { var z = S.zeitraum; return z.art === 'frei' ? 'von=' + z.von + (z.vonZeit ? 'T' + z.vonZeit : '') + '&bis=' + z.bis + (z.bisZeit ? 'T' + z.bisZeit : '') : z.art === 'anfang' ? 'von=anfang' : 'tage=' + z.art; }
+  var mitUhr = function (zr) { return !!(zr && (zr.vonZeit || zr.bisZeit)); };
+  /* „01.10.2026, 08:30 Uhr bis 18.10.2026 (18 Tage)“; bei weniger als zwei Tagen mit Uhrzeit die Dauer in Stunden */
+  function zrText(zr) {
+    var stunden = mitUhr(zr) ? Math.round((Date.parse(zr.ende) + 1 - Date.parse(zr.start)) / 36e5) : 0;
+    return tagText(zr.von) + (zr.vonZeit ? ', ' + zr.vonZeit + ' Uhr' : '') + ' bis ' + tagText(zr.bis) + (zr.bisZeit ? ', ' + zr.bisZeit + ' Uhr' : '') + ' (' + (stunden && stunden < 48 ? nW(stunden, 'Stunde', 'Stunden') : nW(zr.tage, 'Tag', 'Tage')) + ')';
+  }
+  /* Die Statistik der Website kennt nur Tagessummen */
+  var ganzeTage = function (zr) { return mitUhr(zr) ? 'Die Website zählt nur ganze Tage: ' + tagText(zr.von) + ' bis ' + tagText(zr.bis) + '.' : ''; };
   function zeitraumLeiste(zr) {
     var z = S.zeitraum, heute = heuteBerlin();
     var knoepfe = ZEITRAUM.map(function (t) { return '<button type="button" data-act="zeitraum" data-v="' + t[0] + '" aria-pressed="' + (S.zrFrei ? t[0] === 'frei' : z.art === t[0]) + '">' + t[1] + '</button>'; }).join('');
-    var frei = S.zrFrei ? '<form class="z-zr-frei" data-form="zeitraum" novalidate><div class="f"><label for="z-von">Von</label><input id="z-von" name="von" type="date" max="' + heute + '" value="' + esc(z.von || (zr ? zr.von : '')) + '" required></div>' +
-      '<div class="f"><label for="z-bis">Bis</label><input id="z-bis" name="bis" type="date" max="' + heute + '" value="' + esc(z.bis || (zr ? zr.bis : heute)) + '" required></div><button class="btn primary small" type="submit">Anwenden</button></form>' + (S.zrFehler ? '<p class="err" role="alert">' + esc(S.zrFehler) + '</p>' : '') : '';
+    var feld = function (id, name, typ, titel, wert, extra) { return '<div class="f z-zr-' + typ + '"><label for="' + id + '">' + titel + '</label><input id="' + id + '" name="' + name + '" type="' + typ + '" value="' + esc(wert) + '"' + (extra || '') + '></div>'; };
+    var frei = S.zrFrei ? '<form class="z-zr-frei" data-form="zeitraum" novalidate>' +
+      '<div class="z-zr-paar">' + feld('z-von', 'von', 'date', 'Von Tag', z.von || (zr ? zr.von : ''), ' max="' + heute + '" required') + feld('z-von-zeit', 'vonZeit', 'time', 'Uhrzeit', z.vonZeit || (zr && zr.vonZeit) || '00:00') + '</div>' +
+      '<div class="z-zr-paar">' + feld('z-bis', 'bis', 'date', 'Bis Tag', z.bis || (zr ? zr.bis : heute), ' max="' + heute + '" required') + feld('z-bis-zeit', 'bisZeit', 'time', 'Uhrzeit', z.bisZeit || (zr && zr.bisZeit) || '23:59') + '</div>' +
+      '<button class="btn primary small" type="submit">Anwenden</button></form><p class="z-neben">Uhrzeit nach deutscher Zeit; 00:00 bis 23:59 heißt ganze Tage.</p>' + (S.zrFehler ? '<p class="err" role="alert">' + esc(S.zrFehler) + '</p>' : '') : '';
     return '<section class="z-zeitraum" aria-label="Zeitraum der Auswertung"><div class="seg z-zr-seg" role="group" aria-label="Zeitraum">' + knoepfe + '</div>' + frei +
-      (zr ? '<p class="z-neben">Ausgewertet: ' + tagText(zr.von) + ' bis ' + tagText(zr.bis) + ' (' + nW(zr.tage, 'Tag', 'Tage') + ')</p>' : '') + '</section>';
+      (zr ? '<p class="z-neben z-zr-text">Ausgewertet: ' + zrText(zr) + '</p>' : '') + '</section>';
   }
   /* Neuer Zeitraum: alles, was davon abhängt, neu laden (die aktuelle Seite sofort, die anderen beim nächsten Besuch) */
   function zeitraumNeu() {
@@ -172,10 +183,10 @@
       stat('Abos, monatlich', euro(k.mrr), 'Stand heute · Abo 10: ' + zahl(k.tarife.abo) + ' · Plus: ' + zahl(k.tarife.plus) + (k.mwst ? ' · netto' : '')) +
       stat('Umsatz Betriebe', euro(k.umsatzBetriebe), euro(k.bezahltBetriebe) + ' bezahlt · ' + euro(k.offenBetriebe) + ' noch nicht berechnet') +
       stat('Aufmaßblätter verkauft', zahl(k.kaeufe), euro(k.umsatzKaeufe) + ' brutto' + (k.kunden != null ? ' · ' + nW(k.kunden, 'Hauseigentümer hat', 'Hauseigentümer haben') + ' ein Aufmaß gesichert' : '')) +
-      stat('Besuche der Website', web ? zahl(web.besuche) : '–', web ? zahl(web.aufrufe) + ' Seitenaufrufe' : 'Statistik noch nicht eingerichtet') +
+      stat('Besuche der Website', web ? zahl(web.besuche) : '–', web ? zahl(web.aufrufe) + ' Seitenaufrufe' + (mitUhr(zr) ? ', ganze Tage' : '') : 'Statistik noch nicht eingerichtet') +
       '</div>' +
       '<div class="z-raster3">' + mini('Registrierungen', 'registrierungen') + mini('Aufmaße eingegangen', 'aufmasse') + mini('Aufmaßblätter verkauft', 'kaeufe') + '</div>' +
-      (web ? '<section class="z-karte"><h2 class="z-h2">Website</h2><p class="z-neben"><span class="z-leg z-leg1"></span>Besuche <span class="z-leg z-leg2"></span>Seitenaufrufe ' + je + ' · häufigste Herkunft: ' + (web.herkunft.length ? web.herkunft.slice(0, 3).map(function (h) { return esc(h.name) + ' (' + zahl(h.n) + ')'; }).join(', ') : 'noch keine') + '</p>' + balken(v.map(function (x) { return { wert: x.aufrufe, wert2: x.besuche, titel: titelVon(x) + ' Seitenaufrufe', kurz: kurzVon(x) }; }), { label: 'Besuche und Seitenaufrufe ' + je, name2: 'Besuche' }) + '</section>' : '') +
+      (web ? '<section class="z-karte"><h2 class="z-h2">Website</h2><p class="z-neben"><span class="z-leg z-leg1"></span>Besuche <span class="z-leg z-leg2"></span>Seitenaufrufe ' + je + ' · häufigste Herkunft: ' + (web.herkunft.length ? web.herkunft.slice(0, 3).map(function (h) { return esc(h.name) + ' (' + zahl(h.n) + ')'; }).join(', ') : 'noch keine') + (mitUhr(zr) ? ' · ' + ganzeTage(zr) : '') + '</p>' + balken(v.map(function (x) { return { wert: x.aufrufe, wert2: x.besuche, titel: titelVon(x) + ' Seitenaufrufe', kurz: kurzVon(x) }; }), { label: 'Besuche und Seitenaufrufe ' + je, name2: 'Besuche' }) + '</section>' : '') +
       '<section class="z-karte"><h2 class="z-h2">Letzte Vorgänge im Zeitraum</h2>' + ((d.aktivitaet || []).length ? '<ul class="z-liste">' + d.aktivitaet.map(function (x) { return '<li><span class="badge ' + (x.art === 'kauf' ? 'acc' : x.art === 'aufmass' ? 'ok' : '') + '">' + ({ registrierung: 'Registrierung', aufmass: 'Aufmaß', kauf: 'Kauf' }[x.art] || x.art) + '</span><span class="z-liste-t">' + (x.betrieb ? '<a class="z-a" href="#betrieb/' + esc(x.betrieb) + '">' + esc(x.text) + '</a>' : esc(x.text)) + '</span><span class="z-neben">' + vor(x.zeit) + '</span></li>'; }).join('') + '</ul>' : '<p class="z-neben">Im Zeitraum ist nichts passiert.</p>') + '</section>';
   }
 
@@ -301,7 +312,7 @@
     if (!d.tabelle) return kopf('Statistik', 'Ohne Cookies, nur Tagessummen') + wahl + '<div class="z-hinweis warn"><span>Die Statistik ist noch nicht eingerichtet. Einmal <code>supabase/schema.sql</code> im SQL-Editor von Supabase ausführen (die Datei lässt sich gefahrlos erneut ausführen). Danach zählt der Server mit.</span></div>';
     var e = d.ereignisse || {}, ev = function (n) { return e[n] || 0; }, seite = function (p) { var x = (d.seiten || []).find(function (s) { return s.schluessel === p; }); return x ? x.n : 0; };
     var einheit = d.zeitraum ? d.zeitraum.einheit : d.tage <= 62 ? 'tag' : d.tage <= 400 ? 'woche' : 'monat', reihe = gruppiert(d.reihe, einheit);
-    return kopf('Statistik', 'Ohne Cookies, nur Tagessummen') + wahl +
+    return kopf('Statistik', 'Ohne Cookies, nur Tagessummen') + wahl + (mitUhr(d.zeitraum) ? '<div class="z-hinweis info"><span>' + esc(ganzeTage(d.zeitraum)) + ' Die Uhrzeit gilt hier nicht.</span></div>' : '') +
       '<div class="z-stats">' + stat('Besuche', zahl(d.summe.besuche), 'Einstiege von außen') + stat('Seitenaufrufe', zahl(d.summe.aufrufe), d.summe.besuche ? (function (q) { return q.toLocaleString('de-DE', { maximumFractionDigits: 1 }) + (q === 1 ? ' Seite' : ' Seiten') + ' je Besuch'; })(Math.round((d.summe.aufrufe / d.summe.besuche) * 10) / 10) : '–') + stat('Aufmaßblätter verkauft', zahl(ev('kauf')), zahl(ev('kasse')) + ' Kassen geöffnet') + stat('Aufmaße an Betriebe', zahl(ev('aufmass_gesendet')), zahl(ev('link_geoeffnet')) + ' Kundenlinks erstmals geöffnet') + stat('Registrierungen', zahl(ev('registrierung')), zahl(ev('anmeldecode')) + ' Anmelde-E-Mails angefordert') + stat('Zugriffe von Bots', zahl(d.summe.bots), 'Suchmaschinen, KI, Linkvorschauen') + '</div>' +
       '<section class="z-karte"><h2 class="z-h2">' + { tag: 'Je Tag', woche: 'Je Woche', monat: 'Je Monat' }[einheit] + '</h2><p class="z-neben"><span class="z-leg z-leg1"></span>Besuche <span class="z-leg z-leg2"></span>Seitenaufrufe</p>' + balken(reihe, { label: 'Besuche und Seitenaufrufe', name2: 'Besuche' }) + '</section>' +
       '<div class="z-raster2">' +
@@ -481,7 +492,7 @@
         S.zrFehler = '';
         if (v === 'frei') { S.zrFrei = true; render(); var von = document.getElementById('z-von'); if (von) von.focus(); return; }
         S.zrFrei = false; if (S.zeitraum.art === v) return render();
-        S.zeitraum = { art: v, von: '', bis: '' }; return zeitraumNeu();
+        S.zeitraum = { art: v, von: '', bis: '', vonZeit: '', bisZeit: '' }; return zeitraumNeu();
       case 'csv': try { await herunterladen('/api/zentrale/betriebe.csv?' + zrQuery(), 'eeziframes-betriebe.csv'); toast('Tabelle wird gespeichert.'); } catch (e) { if (!e.still) toast(e.message); } return;
       case 'dlg': S.dialog = { art: v, abo: 'kuendigen' }; return render();
       case 'abo-art': if (S.dialog) { S.dialog.abo = v; render(); } return;
@@ -513,11 +524,14 @@
     }
     if (art === 'dialog') return dialogAbschicken(form);
     if (art === 'zeitraum') {
-      var von = form.elements.von.value, bis = form.elements.bis.value, heute = heuteBerlin(), tag = /^\d{4}-\d{2}-\d{2}$/;
-      if (!tag.test(von) || !tag.test(bis)) { S.zrFehler = 'Bitte beide Tage wählen.'; return render(); }
-      if (von > bis) { var t = von; von = bis; bis = t; }
-      if (bis > heute) bis = heute; if (von > heute) von = heute;
-      S.zrFehler = ''; S.zeitraum = { art: 'frei', von: von, bis: bis }; document.activeElement && document.activeElement.blur(); return zeitraumNeu();
+      var tag = /^\d{4}-\d{2}-\d{2}$/, uhr = /^([01]\d|2[0-3]):[0-5]\d$/, heute = heuteBerlin();
+      var a = { tag: form.elements.von.value, zeit: String(form.elements.vonZeit.value || '').slice(0, 5) || '00:00' }, b = { tag: form.elements.bis.value, zeit: String(form.elements.bisZeit.value || '').slice(0, 5) || '23:59' };
+      if (!tag.test(a.tag) || !tag.test(b.tag)) { S.zrFehler = 'Bitte beide Tage wählen.'; return render(); }
+      if (!uhr.test(a.zeit) || !uhr.test(b.zeit)) { S.zrFehler = 'Bitte die Uhrzeit als Stunden und Minuten eingeben, etwa 08:30.'; return render(); }
+      if (a.tag > b.tag) { var t = a.tag; a.tag = b.tag; b.tag = t; } // vertauschte Tage: die Uhrzeiten bleiben bei Von und Bis
+      if (a.tag === b.tag && a.zeit > b.zeit) { var u = a.zeit; a.zeit = b.zeit; b.zeit = u; }
+      if (b.tag > heute) b = { tag: heute, zeit: '23:59' }; if (a.tag > heute) a = { tag: heute, zeit: '00:00' };
+      S.zrFehler = ''; S.zeitraum = { art: 'frei', von: a.tag, bis: b.tag, vonZeit: a.zeit === '00:00' ? '' : a.zeit, bisZeit: b.zeit === '23:59' ? '' : b.zeit }; document.activeElement && document.activeElement.blur(); return zeitraumNeu();
     }
     if (art === 'notiz') { try { var n = await api('/api/zentrale/betriebe/' + encodeURIComponent(S.id) + '/notiz?' + zrQuery(), { text: form.elements.text.value }); S.daten['betrieb:' + S.id] = n.betrieb; toast('Notiz gespeichert.'); document.activeElement && document.activeElement.blur(); render(); } catch (e) { if (!e.still) toast(e.message); } return; }
     if (art === '2fa-probe') {

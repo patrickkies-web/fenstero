@@ -182,12 +182,12 @@ function kennzahlen(row) {
    wie Angebot und Auftrag haben kein Datum), Aufmaße, die darin eingegangen sind, Buchungen dieses Zeitraums */
 function kennzahlenZeitraum(row, zr) {
   const a = row.daten || {}, links = (a.links || []).filter((l) => !l.demo), am = (l) => l.aufmass || {};
-  const neu = links.filter((l) => drin(zr, tagDE(l.created))), ein = links.filter((l) => l.status === 'eingegangen' && drin(zr, tagAus(l.eingegangenAt)));
+  const neu = links.filter((l) => drin(zr, projektZeit(l))), ein = links.filter((l) => l.status === 'eingegangen' && drin(zr, l.eingegangenAt));
   const n = (f) => neu.filter(f).length, summe = (arr) => rund(arr.reduce((s, b) => s + (Number(b.betrag) || 0), 0));
-  const kosten = (a.book || X().ledger(JSON.parse(JSON.stringify(a)))).filter((b) => Number(b.betrag) > 0 && drin(zr, buchungTag(b)));
-  const reg = drin(zr, tagAus(row.created_at));
+  const kosten = (a.book || X().ledger(JSON.parse(JSON.stringify(a)))).filter((b) => Number(b.betrag) > 0 && drin(zr, buchungZeit(b)));
+  const reg = drin(zr, row.created_at);
   return {
-    registriert: reg, aktiv: reg || drin(zr, tagAus(a.zuletzt || row.updated_at)) || drin(zr, tagAus(a.angemeldet)) || links.some((l) => linkImZeitraum(l, zr)),
+    registriert: reg, aktiv: reg || drin(zr, a.zuletzt || row.updated_at) || drin(zr, a.angemeldet) || links.some((l) => linkImZeitraum(l, zr)),
     projekte: neu.length,
     verschickt: n((l) => (l.log && l.log.gesendet) || VERSCHICKT.includes(l.status)),
     geoeffnet: n((l) => l.log && l.log.geoeffnet),
@@ -228,7 +228,7 @@ function buchungen(a, einblick, zr) {
   return (X().ledger(JSON.parse(JSON.stringify(a)))).map((b) => {
     const ref = String(b.ref || ''), runde = ref.includes('#') ? ref.split('#')[1] : '';
     const text = b.kind === 'aufmass' && !einblick ? 'Aufmaß · ' + (nr.get(ref.split('#')[0]) || 'Projekt') + (runde ? ', anderes Aufmaß in Runde ' + runde : '') : b.text;
-    return { id: b.id, drin: drin(zr, buchungTag(b)), art: b.kind, wann: b.when || '', monat: b.month || '', text: text, sub: b.kind === 'aufmass' ? '' : b.sub || '', betrag: Number(b.betrag) || 0, status: b.status, rechnung: b.rechnung || '', hinweis: b.badge || '' };
+    return { id: b.id, drin: drin(zr, buchungZeit(b)), art: b.kind, wann: b.when || '', monat: b.month || '', text: text, sub: b.kind === 'aufmass' ? '' : b.sub || '', betrag: Number(b.betrag) || 0, status: b.status, rechnung: b.rechnung || '', hinweis: b.badge || '' };
   });
 }
 /* ---------- Auffälligkeiten gegen Mehrfachnutzung: Hinweise zum Prüfen, keine automatische Sperre ----------
@@ -277,35 +277,49 @@ const datumDE = (iso) => { const d = iso ? new Date(iso) : null; return d && !is
 const zahlDE = (n) => String(rund(n)).replace('.', ',');
 
 /* ---------- Zeitraum der Auswertung ----------
-   ?tage=7 (die letzten 7 Tage bis heute), ?von=anfang (ab dem ersten Eintrag) oder ?von=JJJJ-MM-TT&bis=JJJJ-MM-TT; Kalendertage
-   nach deutscher Zeit, von und bis eingeschlossen, bis höchstens heute, ohne Angabe die letzten 30 Tage. Bestände (Betriebe, Tarife,
-   Abos, Sperren) gelten für heute. Gezählt wird nach dem Tag des Vorgangs: Registrierung, Projekt angelegt, Aufmaß eingegangen,
-   Buchung, Kauf; Projekte mit ihrem heutigen Stand. */
+   ?tage=7 (die letzten 7 Tage bis heute), ?von=anfang (ab dem ersten Eintrag) oder ?von=…&bis=… als Tag (JJJJ-MM-TT) oder Tag mit
+   Uhrzeit (JJJJ-MM-TTTHH:MM), deutsche Zeit, beide eingeschlossen (bis zur Uhrzeit einschließlich dieser Minute), Ende höchstens
+   heute, ohne Angabe die letzten 30 Tage. Bestände (Betriebe, Tarife, Abos, Sperren) gelten für heute. Gezählt wird nach dem
+   Zeitpunkt des Vorgangs: Registrierung, Projekt angelegt, Aufmaß eingegangen, Buchung, Kauf; Projekte mit ihrem heutigen Stand.
+   Was nur ein Datum trägt (Rechnungen, die Statistik der Website), zählt, wenn sein Tag im Zeitraum liegt. */
 const DATUM = /^\d{4}-\d{2}-\d{2}$/;
 const gueltig = (t) => DATUM.test(t || '') && tagPlus(t, 0) === t;
 const tagAus = (z) => { if (z == null || z === '') return ''; if (typeof z === 'string' && DATUM.test(z)) return z; const t = typeof z === 'number' ? z : Date.parse(z); return isNaN(t) ? '' : tagBerlin(new Date(t)); };
 const tagDE = (s) => { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(s || '').trim()); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; };
-/* Zeitstempel ohne Jahr („18.10., 14:05“, modell.js): der erste solche Tag ab dem Tag, an dem das Projekt angelegt wurde */
-const stempelTag = (s, ab) => { const m = /^(\d{2})\.(\d{2})\./.exec(String(s || '')); if (!m || !ab) return ''; const j = +ab.slice(0, 4), t = j + '-' + m[2] + '-' + m[1]; return t < ab ? (j + 1) + '-' + m[2] + '-' + m[1] : t; };
+/* Uhrzeit in Deutschland (Tag JJJJ-MM-TT, Zeit HH:MM) als Zeitpunkt; Sommer- und Winterzeit über die Zeitzonendaten */
+const WAND = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const versatz = (t) => { const p = {}; WAND.formatToParts(new Date(t)).forEach((x) => { p[x.type] = x.value; }); return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - Math.floor(t / 60000) * 60000; };
+const berlinMs = (tag, zeit) => { const z = (zeit || '00:00').split(':'), roh = Date.UTC(+tag.slice(0, 4), +tag.slice(5, 7) - 1, +tag.slice(8, 10), +z[0], +z[1]); return roh - versatz(roh - versatz(roh)); };
+/* Zeitstempel ohne Jahr („18.10., 14:05“, modell.js, auf dem Server in UTC geschrieben): der erste solche Zeitpunkt ab dem Tag ab */
+const stempelZeit = (s, ab) => { const m = /^(\d{2})\.(\d{2})\.,?\s*(\d{2}):(\d{2})/.exec(String(s || '')); if (!m || !ab) return ''; const j = +ab.slice(0, 4), t = Date.UTC(j, +m[2] - 1, +m[1], +m[3], +m[4]); return t < Date.UTC(j, +ab.slice(5, 7) - 1, +ab.slice(8, 10)) ? Date.UTC(j + 1, +m[2] - 1, +m[1], +m[3], +m[4]) : t; };
+/* Projekt angelegt: Datum mit der Uhrzeit aus dem Verlauf, sonst nur der Tag */
+const projektZeit = (l) => { const tag = tagDE(l.created), t = stempelZeit((l.log || {}).erstellt, tag); return t && new Date(t).toISOString().slice(0, 10) === tag ? t : tag; };
 /* Buchungen tragen den Monat (JJJJ-MM) und einen Zeitstempel ohne Jahr; passt sein Monat nicht, zählt der Monatserste */
-const buchungTag = (b) => { const mo = /^(\d{4})-(\d{2})$/.exec(String(b.month || '')); if (!mo) return ''; const m = /^(\d{2})\.(\d{2})\./.exec(String(b.when || '')); return mo[1] + '-' + mo[2] + '-' + (m && m[2] === mo[2] ? m[1] : '01'); };
+const buchungZeit = (b) => { const mo = /^(\d{4})-(\d{2})$/.exec(String(b.month || '')); if (!mo) return ''; const t = stempelZeit(b.when, mo[1] + '-' + mo[2] + '-01'); return t && new Date(t).toISOString().slice(0, 7) === mo[1] + '-' + mo[2] ? t : mo[1] + '-' + mo[2] + '-01'; };
 const fruehester = (tage) => tage.filter(Boolean).sort()[0] || '';
-const drin = (zr, tag) => !!(zr && tag && tag >= zr.von && tag <= zr.bis);
+/* z: Zeitpunkt (Millisekunden oder ISO) oder nur ein Tag (JJJJ-MM-TT) */
+const drin = (zr, z) => {
+  if (!zr || z == null || z === '') return false;
+  if (typeof z === 'string' && DATUM.test(z)) return z >= zr.von && z <= zr.bis;
+  const t = typeof z === 'number' ? z : Date.parse(z); return !isNaN(t) && t >= zr.ab && t <= zr.ende;
+};
 /* Vorgang an einem Projekt im Zeitraum: angelegt, verschickt, geöffnet, bearbeitet, eingegangen oder nachgebessert */
-const linkImZeitraum = (l, zr) => { const ab = tagDE(l.created), log = l.log || {}; return drin(zr, ab) || drin(zr, tagAus(l.eingegangenAt)) || ['gesendet', 'geoeffnet', 'arbeit', 'eingegangen', 'nachbesserung'].some((s) => drin(zr, stempelTag(log[s], ab))); };
+const linkImZeitraum = (l, zr) => { const ab = tagDE(l.created), log = l.log || {}; return drin(zr, projektZeit(l)) || drin(zr, l.eingegangenAt) || ['gesendet', 'geoeffnet', 'arbeit', 'eingegangen', 'nachbesserung'].some((s) => drin(zr, stempelZeit(log[s], ab))); };
+const ZEITPUNKT = /^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2}))?$/;
+const zeitpunkt = (s) => { const m = ZEITPUNKT.exec(s || ''); return m && gueltig(m[1]) ? { tag: m[1], zeit: m[2] && /^([01]\d|2[0-3]):[0-5]\d$/.test(m[2]) ? m[2] : '' } : null; };
 function zeitraum(url, anfang) {
-  const p = url.searchParams, heute = tagBerlin(), n = parseInt(p.get('tage'), 10);
-  let von = p.get('von') || '', bis = p.get('bis') || '';
-  if (!gueltig(bis) || bis > heute) bis = heute;
-  if (von === 'anfang') von = anfang || bis;
-  else if (!gueltig(von)) von = tagPlus(bis, -((n >= 1 && n <= 4000 ? n : 30) - 1));
-  if (von > heute) von = heute;
-  if (von > bis) { const t = von; von = bis; bis = t; }
-  if (tageZwischen(von, bis) > 4000) von = tagPlus(bis, -3999);
-  const tage = tageZwischen(von, bis);
-  return { von: von, bis: bis, tage: tage, einheit: tage <= 62 ? 'tag' : tage <= 400 ? 'woche' : 'monat' };
+  const p = url.searchParams, heute = tagBerlin(), n = parseInt(p.get('tage'), 10), vonRoh = p.get('von');
+  let b = zeitpunkt(p.get('bis')); if (!b || b.tag > heute) b = { tag: heute, zeit: '' };
+  let v = vonRoh === 'anfang' ? { tag: anfang || b.tag, zeit: '' } : zeitpunkt(vonRoh) || { tag: tagPlus(b.tag, -((n >= 1 && n <= 4000 ? n : 30) - 1)), zeit: '' };
+  if (v.tag > heute) v = { tag: heute, zeit: '' };
+  const ab = () => berlinMs(v.tag, v.zeit), ende = () => (b.zeit ? berlinMs(b.tag, b.zeit) + 59999 : berlinMs(tagPlus(b.tag, 1), '00:00') - 1);
+  if (v.tag > b.tag) { const t = v.tag; v = { tag: b.tag, zeit: v.zeit }; b = { tag: t, zeit: b.zeit }; } // vertauschte Tage; die Uhrzeiten bleiben bei von und bis
+  if (ab() > ende()) { const t = v.zeit; v = { tag: v.tag, zeit: b.zeit }; b = { tag: b.tag, zeit: t }; }
+  if (tageZwischen(v.tag, b.tag) > 4000) v = { tag: tagPlus(b.tag, -3999), zeit: '' };
+  const tage = tageZwischen(v.tag, b.tag);
+  return { von: v.tag, bis: b.tag, vonZeit: v.zeit, bisZeit: b.zeit, ab: ab(), ende: ende(), tage: tage, einheit: tage <= 62 ? 'tag' : tage <= 400 ? 'woche' : 'monat' };
 }
-const zrAus = (zr) => ({ von: zr.von, bis: zr.bis, tage: zr.tage, einheit: zr.einheit });
+const zrAus = (zr) => ({ von: zr.von, bis: zr.bis, vonZeit: zr.vonZeit, bisZeit: zr.bisZeit, start: new Date(zr.ab).toISOString(), ende: new Date(zr.ende).toISOString(), tage: zr.tage, einheit: zr.einheit });
 /* Fächer für die Verläufe: je Tag bis 62 Tage, je Woche (ab Montag) bis 400 Tage, sonst je Monat */
 function eimer(zr) {
   const out = [], zwei = (n) => String(n).padStart(2, '0');
@@ -317,7 +331,7 @@ function eimer(zr) {
   }
   return out.map((x) => Object.assign(x, { registrierungen: 0, projekte: 0, aufmasse: 0, kaeufe: 0, besuche: 0, aufrufe: 0 }));
 }
-const inEimer = (liste, tag, feld, n) => { const e = tag ? liste.find((x) => tag >= x.start && tag <= x.ende) : null; if (e) e[feld] += n == null ? 1 : n; };
+const inEimer = (liste, z, feld, n) => { const tag = tagAus(z), e = tag ? liste.find((x) => tag >= x.start && tag <= x.ende) : null; if (e) e[feld] += n == null ? 1 : n; };
 
 export const ZENTRALE = {
   /* Ohne Anmeldung: ob die Zentrale eingerichtet ist, ob ein zweiter Faktor gebraucht wird, ob schon eine Sitzung besteht */
@@ -355,19 +369,17 @@ export const ZENTRALE = {
     const tarife = { service: 0, abo: 0, plus: 0 }; z.forEach((x) => { tarife[x.tarif] = (tarife[x.tarif] || 0) + 1; });
     const verlauf = eimer(zr), aktivitaet = [];
     rows.forEach((r) => {
-      const reg = tagAus(r.created_at);
-      if (drin(zr, reg)) { inEimer(verlauf, reg, 'registrierungen'); aktivitaet.push({ zeit: r.created_at, art: 'registrierung', text: r.name + ' hat sich registriert', betrieb: r.id }); }
+      if (drin(zr, r.created_at)) { inEimer(verlauf, r.created_at, 'registrierungen'); aktivitaet.push({ zeit: r.created_at, art: 'registrierung', text: r.name + ' hat sich registriert', betrieb: r.id }); }
       ((r.daten || {}).links || []).forEach((l) => {
         if (l.demo) return;
-        const angelegt = tagDE(l.created); if (drin(zr, angelegt)) inEimer(verlauf, angelegt, 'projekte');
-        const ein = l.status === 'eingegangen' && l.eingegangenAt ? tagAus(l.eingegangenAt) : '';
-        if (drin(zr, ein)) { inEimer(verlauf, ein, 'aufmasse'); aktivitaet.push({ zeit: new Date(l.eingegangenAt).toISOString(), art: 'aufmass', text: 'Aufmaß bei ' + r.name + ' eingegangen (' + (l.nr || 'Projekt') + ', ' + X().nW(((l.aufmass || {}).windows || []).length, 'Position', 'Positionen') + ')', betrieb: r.id }); }
+        const angelegt = projektZeit(l); if (drin(zr, angelegt)) inEimer(verlauf, angelegt, 'projekte');
+        if (l.status === 'eingegangen' && drin(zr, l.eingegangenAt)) { inEimer(verlauf, l.eingegangenAt, 'aufmasse'); aktivitaet.push({ zeit: new Date(l.eingegangenAt).toISOString(), art: 'aufmass', text: 'Aufmaß bei ' + r.name + ' eingegangen (' + (l.nr || 'Projekt') + ', ' + X().nW(((l.aufmass || {}).windows || []).length, 'Position', 'Positionen') + ')', betrieb: r.id }); }
       });
     });
-    const bezZr = bez.filter((x) => drin(zr, tagAus(x.created_at)));
-    bezZr.forEach((x) => { inEimer(verlauf, tagAus(x.created_at), 'kaeufe'); aktivitaet.push({ zeit: x.created_at, art: 'kauf', text: 'Aufmaßblatt gekauft (' + zahlDE((x.betrag_cent || 0) / 100) + ' €)' }); });
+    const bezZr = bez.filter((x) => drin(zr, x.created_at));
+    bezZr.forEach((x) => { inEimer(verlauf, x.created_at, 'kaeufe'); aktivitaet.push({ zeit: x.created_at, art: 'kauf', text: 'Aufmaßblatt gekauft (' + zahlDE((x.betrag_cent || 0) / 100) + ' €)' }); });
     if (web && web.tabelle) web.reihe.forEach((x) => { inEimer(verlauf, x.tag, 'besuche', x.besuche); inEimer(verlauf, x.tag, 'aufrufe', x.aufrufe); });
-    const gesichert = eigene ? eigene.filter((e) => lebt(e) && drin(zr, tagAus(e.created_at))) : null;
+    const gesichert = eigene ? eigene.filter((e) => lebt(e) && drin(zr, e.created_at)) : null;
     const hinweise = [];
     if (!k.zentrale.totp) hinweise.push({ art: 'warn', text: 'Zweiter Faktor fehlt: Die Zentrale ist nur mit dem Passwort geschützt. Einrichten unter Einstellungen.', ziel: 'einstellungen' });
     if (k.zentrale.totpFehler) hinweise.push({ art: 'bad', text: 'ZENTRALE_2FA ist kein gültiger Schlüssel (Base32). Die Anmeldung braucht deshalb keinen Code.', ziel: 'einstellungen' });
@@ -413,7 +425,7 @@ export const ZENTRALE = {
   'GET /api/zentrale/betriebe': async (ctx) => { await zugang(ctx); const rows = await daten(ctx).betriebeAlle(), zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at)))); return { ok: true, zeitraum: zrAus(zr), betriebe: rows.map((r) => zeile(r, zr)), preise: ctx.k.preise }; },
   'GET /api/zentrale/betriebe.csv': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), rows = await sp.betriebeAlle(), zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at))));
-    const im = ' ' + datumDE(zr.von + 'T12:00:00Z') + '–' + datumDE(zr.bis + 'T12:00:00Z');
+    const im = ' ' + datumDE(zr.von + 'T12:00:00Z') + (zr.vonZeit ? ' ' + zr.vonZeit : '') + '–' + datumDE(zr.bis + 'T12:00:00Z') + (zr.bisZeit ? ' ' + zr.bisZeit : '');
     const kopf = ['Betrieb', 'Ansprechpartner', 'E-Mail (Anmeldung)', 'E-Mail (Kontakt)', 'Telefon', 'PLZ', 'Registriert', 'Zuletzt aktiv', 'Tarif', 'Zahlungsart', 'Projekte', 'Links verschickt', 'Aufmaße eingegangen', 'Positionen', 'Aufträge', 'Umsatz netto (€)', 'davon bezahlt (€)', 'noch nicht berechnet (€)', 'Projekte' + im, 'Aufmaße' + im, 'Umsatz netto' + im + ' (€)', 'Gesperrt', 'Doppelkonto-Verdacht'];
     const zeilen = rows.map((r) => zeile(r, zr)).map((x) => [x.name, x.ap, x.mail, x.kontaktMail, x.tel, x.plz, datumDE(x.registriert), datumDE(x.zuletzt), X().planName(x.tarif), x.zahlungsart ? x.zahlungsart.art : '', x.k.projekte, x.k.verschickt, x.k.aufmasse, x.k.positionen, x.k.auftraege, zahlDE(x.k.umsatz), zahlDE(x.k.bezahlt), zahlDE(x.k.nochOffen), x.z.projekte, x.z.aufmasse, zahlDE(x.z.umsatz), x.gesperrt ? 'ja' : '', x.doppelt ? 'ja (' + x.doppelt + ')' : '']);
     await protokoll(sp, 'liste_export', null, X().nW(rows.length, 'Betrieb', 'Betriebe') + ' als CSV');
@@ -549,7 +561,7 @@ export const ZENTRALE = {
   /* Käufe des Aufmaßblatts (Hauseigentümer) im Zeitraum */
   'GET /api/zentrale/kaeufe': async (ctx) => {
     await zugang(ctx); const alle = await daten(ctx).zahlungenAlle(), zr = zeitraum(ctx.url, fruehester(alle.map((x) => tagAus(x.created_at))));
-    const z = alle.filter((x) => drin(zr, tagAus(x.created_at))), bez = z.filter((x) => x.status === 'bezahlt');
+    const z = alle.filter((x) => drin(zr, x.created_at)), bez = z.filter((x) => x.status === 'bezahlt');
     return { ok: true, zeitraum: zrAus(zr), kaeufe: z.slice(0, 1000).map((x) => ({ zeit: x.created_at, mail: x.mail || '', betrag: rund((x.betrag_cent || 0) / 100), status: x.status, kennung: x.kennung || '', sitzung: x.stripe_session })), summe: { anzahl: bez.length, umsatz: rund(bez.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), offen: z.length - bez.length, liste: z.length }, test: !!(ctx.k.stripe && ctx.k.stripe.test), stripe: ctx.k.stripe ? 'https://dashboard.stripe.com/' + (ctx.k.stripe.test ? 'test/' : '') + 'payments' : '' };
   },
   /* Anmeldungen ohne Betrieb: E-Mail bestätigt, Registrierung nicht abgeschlossen (werden nach 30 Tagen von selbst gelöscht).
