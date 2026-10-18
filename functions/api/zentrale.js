@@ -333,6 +333,60 @@ function eimer(zr) {
 }
 const inEimer = (liste, z, feld, n) => { const tag = tagAus(z), e = tag ? liste.find((x) => tag >= x.start && tag <= x.ende) : null; if (e) e[feld] += n == null ? 1 : n; };
 
+/* ---------- Anzeigen: Verlauf je Stunde, Tagesprofil und Vergleich mit den gleichen Uhrzeiten an den Tagen davor ----------
+   Besuche und Vorgänge kommen aus den Stundenzählern der Statistik (stunde:HH|…, erst ab deren Einführung), Käufe und Registrierungen
+   genau aus der Datenbank (auch rückwirkend). Käufe werden bewusst keiner Anzeige zugeordnet: Dafür müsste die Herkunft mit der Zahlung
+   gespeichert werden. Ihre Wirkung zeigt der Vergleich. */
+const STUNDEN_MAX = 31, STUNDE_MS = 36e5;
+const VERGLEICH = [
+  ['besuche', 'Besuche', 'besuch'], ['anzeigen', 'davon über Anzeigen', 'anzeige'], ['aufrufe', 'Seitenaufrufe', 'aufruf'],
+  ['ki_foto', 'Fotos von der KI ausgewertet', 'ereignis:ki_foto'], ['kunde_code', 'Hauseigentümer: Anmelde-E-Mail', 'ereignis:kunde_code'], ['kasse', 'Kasse geöffnet', 'ereignis:kasse'],
+  ['kauf', 'Aufmaßblätter gekauft', null], ['umsatz', 'Umsatz Aufmaßblatt (brutto, €)', null],
+  ['anmeldecode', 'Betriebe: Anmelde-E-Mail', 'ereignis:anmeldecode'], ['registrierung', 'Betriebe registriert', null], ['projekt', 'Projekte angelegt', 'ereignis:projekt']
+];
+/* Stundenzähler je Stunde: [{ t (Beginn in ms), werte: { besuch, anzeige, 'ereignis:kasse' … } }] */
+function stundenListe(rows) {
+  const je = new Map();
+  for (const r of rows || []) {
+    const m = /^stunde:(\d{2})\|(.+)$/.exec(r.schluessel || ''); if (!m) continue;
+    const tag = String(r.tag).slice(0, 10), k2 = tag + ' ' + m[1];
+    let e = je.get(k2); if (!e) { e = { t: berlinMs(tag, m[1] + ':00'), werte: {} }; je.set(k2, e); }
+    e.werte[m[2]] = (e.werte[m[2]] || 0) + (Number(r.anzahl) || 0);
+  }
+  return Array.from(je.values()).sort((a, b) => a.t - b.t);
+}
+/* Summe eines Zählers über die Stunden, die das Fenster berühren */
+const imFenster = (stunden, ab, ende, schl) => stunden.reduce((s, x) => s + (x.t + STUNDE_MS > ab && x.t <= ende ? x.werte[schl] || 0 : 0), 0);
+function anzeigenAuswerten(zr, stunden, ersteStunde, kaeufe, rows, jetzt) {
+  const ende = Math.min(zr.ende, jetzt), laenge = Math.max(0, ende - zr.ab);
+  /* genau aus der Datenbank: Käufe zum Zeitpunkt der Kasse (wie unter Käufe; bezahlt wird Minuten danach), Registrierungen */
+  const kaufZeit = (x) => Date.parse(x.created_at || '') || 0, bez = kaeufe.filter((x) => x.status === 'bezahlt');
+  const db = (ab, bis) => {
+    const k = bez.filter((x) => { const t = kaufZeit(x); return t >= ab && t <= bis; });
+    return { kauf: k.length, umsatz: rund(k.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), registrierung: rows.filter((r) => { const t = Date.parse(r.created_at || '') || 0; return t >= ab && t <= bis; }).length };
+  };
+  const werte = (ab, bis) => { const d = db(ab, bis), out = {}; VERGLEICH.forEach(([id, , schl]) => { out[id] = schl ? imFenster(stunden, ab, bis, schl) : d[id]; }); return out; };
+  /* Vergleich: dieselbe Uhrzeit an den 7 Tagen davor; ist das Fenster länger als ein Tag, die Fenster gleicher Länge davor (bis 7 Tage zurück) */
+  const tageVersatz = laenge <= 864e5 ? 1 : Math.ceil(laenge / 864e5), anzahl = Math.max(1, Math.floor(7 / tageVersatz)), kopien = [];
+  for (let i = 1; i <= anzahl; i++) { const ab = berlinMs(tagPlus(zr.von, -i * tageVersatz), zr.vonZeit); kopien.push({ ab: ab, ende: ab + laenge, mitStunden: ersteStunde != null && ab >= ersteStunde }); }
+  const jetztWerte = werte(zr.ab, ende), kopieWerte = kopien.map((k) => werte(k.ab, k.ende));
+  const kennzahlen = VERGLEICH.map(([id, name, schl]) => {
+    const nutzbar = kopien.map((k, i) => (schl && !k.mitStunden ? null : kopieWerte[i][id])).filter((v) => v != null);
+    return { id: id, name: name, wert: jetztWerte[id], vorher: nutzbar.length ? Math.round((nutzbar.reduce((s, v) => s + v, 0) / nutzbar.length) * 10) / 10 : null, kopien: nutzbar.length, ausStunden: !!schl, mitStunden: !schl || (ersteStunde != null && zr.ab >= ersteStunde) };
+  });
+  const werbung = {}; stunden.forEach((x) => { if (x.t + STUNDE_MS > zr.ab && x.t <= ende) Object.keys(x.werte).forEach((k) => { if (k.startsWith('werbung:')) werbung[k.slice(8)] = (werbung[k.slice(8)] || 0) + x.werte[k]; }); });
+  /* Verlauf: bis 7 Tage je Stunde, sonst je Tag; Tagesprofil: Summe je Uhrzeit */
+  const jeStunde = zr.tage <= 7, faecher = [];
+  if (jeStunde) { for (let t = Math.floor(zr.ab / STUNDE_MS) * STUNDE_MS; t <= ende && faecher.length < 200; t += STUNDE_MS) faecher.push({ ab: t, bis: t + STUNDE_MS - 1 }); }
+  else tageListe(zr.von, zr.bis).forEach((tag) => { const ab = berlinMs(tag, '00:00'); if (ab <= ende) faecher.push({ ab: ab, bis: berlinMs(tagPlus(tag, 1), '00:00') - 1 }); });
+  const schritte = ['ereignis:kasse', 'ereignis:kunde_code', 'ereignis:anmeldecode', 'ereignis:ki_foto'];
+  const verlauf = faecher.map((f) => { const a = Math.max(f.ab, zr.ab), b = Math.min(f.bis, ende), d = db(a, b); return { start: new Date(f.ab).toISOString(), besuche: imFenster(stunden, a, b, 'besuch'), anzeigen: imFenster(stunden, a, b, 'anzeige'), schritte: schritte.reduce((s, k) => s + imFenster(stunden, a, b, k), 0), abschluesse: d.kauf + d.registrierung }; });
+  const profil = Array.from({ length: 24 }, (x, h) => ({ stunde: h, besuche: 0, anzeigen: 0 }));
+  stunden.forEach((x) => { if (x.t + STUNDE_MS > zr.ab && x.t <= ende) { const h = +stundeVon(x.t); profil[h].besuche += x.werte.besuch || 0; profil[h].anzeigen += x.werte.anzeige || 0; } });
+  return { fenster: { start: new Date(zr.ab).toISOString(), ende: new Date(ende).toISOString() }, kennzahlen: kennzahlen, werbung: werbung, kopien: kopien.map((k) => ({ start: new Date(k.ab).toISOString(), ende: new Date(k.ende).toISOString(), mitStunden: k.mitStunden })), tageVersatz: tageVersatz, verlauf: { einheit: jeStunde ? 'stunde' : 'tag', reihe: verlauf }, profil: profil };
+}
+const stundeVon = (t) => { const p = {}; WAND.formatToParts(new Date(t)).forEach((x) => { p[x.type] = x.value; }); return p.hour; };
+
 export const ZENTRALE = {
   /* Ohne Anmeldung: ob die Zentrale eingerichtet ist, ob ein zweiter Faktor gebraucht wird, ob schon eine Sitzung besteht */
   'GET /api/zentrale/status': async (ctx) => {
@@ -593,6 +647,23 @@ export const ZENTRALE = {
     await zugang(ctx); const sp = daten(ctx);
     const anfang = ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null, zr = zeitraum(ctx.url, anfang);
     return Object.assign(await auswerten(sp, zr), { zeitraum: zrAus(zr) });
+  },
+  /* Anzeigen: Wirkung von Werbeanzeigen im Zeitraum (mit Uhrzeit), Herkunft der Besuche aus Anzeigen, Vergleich mit den Tagen davor */
+  'GET /api/zentrale/anzeigen': async (ctx) => {
+    await zugang(ctx); const sp = daten(ctx), jetzt = Date.now();
+    const zr = zeitraum(ctx.url, ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null);
+    const mitStunden = zr.tage <= STUNDEN_MAX && !!sp.statistikStunden;
+    const [web, rows, kaeufe, stundenRoh, ab] = await Promise.all([auswerten(sp, zr).catch(() => null), sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), mitStunden ? sp.statistikStunden(tagPlus(zr.von, -8), zr.bis).catch(() => null) : null, sp.statistikStundenAb ? sp.statistikStundenAb().catch(() => null) : null]);
+    if (!web || web.tabelle === false) return { ok: true, tabelle: false, zeitraum: zrAus(zr) };
+    const ersteStunde = ab ? berlinMs(ab.slice(0, 10), ab.slice(11, 13) + ':00') : null;
+    const a = anzeigenAuswerten(zr, stundenListe(stundenRoh), ersteStunde, kaeufe, rows, jetzt);
+    if (!mitStunden) {
+      /* länger als 31 Tage: Besuche und Vorgänge aus den Tageszählern, ohne Vergleich */
+      const tagWert = { besuch: web.summe.besuche, aufruf: web.summe.aufrufe, anzeige: web.anzeigen.reduce((s, x) => s + x.n, 0) };
+      a.kennzahlen.forEach((k2) => { const schl = (VERGLEICH.find((v) => v[0] === k2.id) || [])[2]; if (schl) { k2.wert = schl in tagWert ? tagWert[schl] : web.ereignisse[schl.slice(9)] || 0; k2.vorher = null; k2.kopien = 0; } });
+      a.werbung = web.werbung; a.verlauf.reihe.forEach((x) => { const r = web.reihe.find((y) => y.tag === tagAus(x.start)); x.besuche = r ? r.besuche : 0; x.anzeigen = null; x.schritte = null; });
+    }
+    return Object.assign({ ok: true, tabelle: true, zeitraum: zrAus(zr), stundenAb: ersteStunde ? new Date(ersteStunde).toISOString() : null, stundenwerte: mitStunden, summe: web.summe, anzeigen: web.anzeigen, kampagnen: web.kampagnen, anzeigeseiten: web.anzeigeseiten, herkunft: web.herkunft.slice(0, 10) }, a);
   },
   'GET /api/zentrale/protokoll': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), von = Math.max(0, parseInt(ctx.url.searchParams.get('von'), 10) || 0), art = str(ctx.url.searchParams.get('art'), 40);

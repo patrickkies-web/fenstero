@@ -1,11 +1,11 @@
 /* eeziframes · Zentrale des Inhabers (Oberfläche). Daten kommen nur nach der Anmeldung von /api/zentrale/… (functions/api/zentrale.js).
    Die Sitzung ist ein Cookie, das kein Skript lesen kann; jede Anfrage trägt x-zentrale: 1. Nichts wird im Browser gespeichert.
-   Seiten über den Anker: #uebersicht, #betriebe, #betrieb/<id>, #kaeufe, #statistik, #protokoll, #einstellungen.
-   Übersicht, Betriebe, ein Betrieb, Käufe und Statistik zeigen einen Zeitraum (S.zeitraum, für alle Seiten derselbe). */
+   Seiten über den Anker: #uebersicht, #betriebe, #betrieb/<id>, #kaeufe, #statistik, #anzeigen, #protokoll, #einstellungen.
+   Übersicht, Betriebe, ein Betrieb, Käufe, Statistik und Anzeigen zeigen einen Zeitraum (S.zeitraum, für alle Seiten derselbe). */
 (function () {
   'use strict';
   var wurzel = document.getElementById('z');
-  var S = { status: null, seite: 'uebersicht', id: '', daten: {}, laedt: false, fehler: '', dialog: null, toast: '', suche: '', filter: 'alle', sortierung: 'neu', zeitraum: { art: '30', von: '', bis: '', vonZeit: '', bisZeit: '' }, zrFrei: false, zrFehler: '', einblick: {}, protokollArt: '', kaufSuche: '', zweiFaktor: null, anmeldungen: null, anmeldenFehler: '', sendet: false };
+  var S = { status: null, seite: 'uebersicht', id: '', daten: {}, laedt: false, fehler: '', dialog: null, toast: '', suche: '', filter: 'alle', sortierung: 'neu', zeitraum: { art: '30', von: '', bis: '', vonZeit: '', bisZeit: '' }, zrFrei: false, zrFehler: '', link: { ziel: 'app', netz: 'instagram', kampagne: '' }, einblick: {}, protokollArt: '', kaufSuche: '', zweiFaktor: null, anmeldungen: null, anmeldenFehler: '', sendet: false };
 
   /* ---------- Werkzeuge ---------- */
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
@@ -57,7 +57,7 @@
   var kopf = function (titel, unter, rechts) { return '<header class="z-kopf"><div><h1 class="z-h">' + esc(titel) + '</h1>' + (unter ? '<p class="z-unter">' + unter + '</p>' : '') + '</div>' + (rechts ? '<div class="z-kopf-r">' + rechts + '</div>' : '') + '</header>'; };
   /* Balken: eine Reihe, gleiche Skala, Zahl über dem höchsten, Achse mit Anfang und Ende; Werte stehen zusätzlich im title */
   function balken(reihe, opt) {
-    opt = opt || {}; var max = Math.max.apply(null, reihe.map(function (x) { return x.wert; }).concat([opt.min || 1]));
+    opt = opt || {}; var max = Math.max.apply(null, reihe.map(function (x) { return Math.max(x.wert, x.wert2 || 0); }).concat([opt.min || 1]));
     var n = reihe.length, b = 100 / n;
     var saeulen = reihe.map(function (x, i) {
       var h = x.wert ? Math.max(2, Math.round((x.wert / max) * 100)) : 0, h2 = x.wert2 ? Math.max(1, Math.round((x.wert2 / max) * 100)) : 0;
@@ -87,7 +87,7 @@
 
   /* ---------- Zeitraum der Auswertung: die letzten 7, 30 oder 90 Tage, 12 Monate, alles oder von – bis (Tag, auf Wunsch mit Uhrzeit) ----------
      Der Server rechnet in deutscher Zeit und meldet den Zeitraum zurück (zeitraum: von, bis, vonZeit, bisZeit, start, ende, tage, einheit) */
-  var ZEITRAUM = [['7', '7 Tage'], ['30', '30 Tage'], ['90', '90 Tage'], ['365', '12 Monate'], ['anfang', 'Gesamt'], ['frei', 'Von – bis']];
+  var ZEITRAUM = [['1', 'Heute'], ['7', '7 Tage'], ['30', '30 Tage'], ['90', '90 Tage'], ['365', '12 Monate'], ['anfang', 'Gesamt'], ['frei', 'Von – bis']];
   var heuteBerlin = function () { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } };
   var tagText = function (t) { return t ? datum(t + 'T12:00:00Z') : '–'; };
   var tagKurz = function (t) { return new Date(t + 'T12:00:00Z').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', timeZone: 'UTC' }); };
@@ -101,7 +101,7 @@
     var stunden = mitUhr(zr) ? Math.round((Date.parse(zr.ende) + 1 - Date.parse(zr.start)) / 36e5) : 0;
     return tagText(zr.von) + (zr.vonZeit ? ', ' + zr.vonZeit + ' Uhr' : '') + ' bis ' + tagText(zr.bis) + (zr.bisZeit ? ', ' + zr.bisZeit + ' Uhr' : '') + ' (' + (stunden && stunden < 48 ? nW(stunden, 'Stunde', 'Stunden') : nW(zr.tage, 'Tag', 'Tage')) + ')';
   }
-  /* Die Statistik der Website kennt nur Tagessummen */
+  /* Die Ranglisten der Statistik kennen nur Summen je Tag (Stundenwerte nur für Besuche, Aufrufe und Vorgänge, Seite Anzeigen) */
   var ganzeTage = function (zr) { return mitUhr(zr) ? 'Die Website zählt nur ganze Tage: ' + tagText(zr.von) + ' bis ' + tagText(zr.bis) + '.' : ''; };
   function zeitraumLeiste(zr) {
     var z = S.zeitraum, heute = heuteBerlin();
@@ -116,7 +116,7 @@
   }
   /* Neuer Zeitraum: alles, was davon abhängt, neu laden (die aktuelle Seite sofort, die anderen beim nächsten Besuch) */
   function zeitraumNeu() {
-    Object.keys(S.daten).forEach(function (k) { if (/^(uebersicht|betriebe|betrieb:|kaeufe|statistik)/.test(k)) S.daten[k] = null; });
+    Object.keys(S.daten).forEach(function (k) { if (/^(uebersicht|betriebe|betrieb:|kaeufe|statistik|anzeigen)/.test(k)) S.daten[k] = null; });
     laden(false);
   }
   /* Tageswerte der Statistik zu Wochen (ab Montag) oder Monaten zusammenfassen, wie der Server die Verläufe der Übersicht */
@@ -153,7 +153,7 @@
   }
 
   /* ---------- Rahmen ---------- */
-  var NAV = [['uebersicht', 'Übersicht'], ['betriebe', 'Betriebe'], ['kaeufe', 'Käufe'], ['statistik', 'Statistik'], ['protokoll', 'Protokoll'], ['einstellungen', 'Einstellungen']];
+  var NAV = [['uebersicht', 'Übersicht'], ['betriebe', 'Betriebe'], ['kaeufe', 'Käufe'], ['statistik', 'Statistik'], ['anzeigen', 'Anzeigen'], ['protokoll', 'Protokoll'], ['einstellungen', 'Einstellungen']];
   function rahmen(inhalt) {
     var aktiv = S.seite === 'betrieb' ? 'betriebe' : S.seite;
     return '<div class="z-app"><aside class="z-seite">' + MARKE + '<nav class="z-nav" aria-label="Bereiche">' + NAV.map(function (n) { return '<a href="#' + n[0] + '"' + (n[0] === aktiv ? ' aria-current="page"' : '') + '>' + n[1] + '</a>'; }).join('') + '</nav>' +
@@ -308,11 +308,11 @@
   var DATEI = { '/robots.txt': 'robots.txt (Regeln für Suchmaschinen)', '/llms.txt': 'llms.txt (Kurzfassung für KI-Assistenten)', '/sitemap.xml': 'sitemap.xml' };
   function seiteStatistik() {
     var d = S.daten.statistik, wahl = zeitraumLeiste(d && d.zeitraum);
-    if (!d) return kopf('Statistik', 'Ohne Cookies, nur Tagessummen') + wahl + (S.fehler ? fehlerKarte() : ladeHinweis());
-    if (!d.tabelle) return kopf('Statistik', 'Ohne Cookies, nur Tagessummen') + wahl + '<div class="z-hinweis warn"><span>Die Statistik ist noch nicht eingerichtet. Einmal <code>supabase/schema.sql</code> im SQL-Editor von Supabase ausführen (die Datei lässt sich gefahrlos erneut ausführen). Danach zählt der Server mit.</span></div>';
+    if (!d) return kopf('Statistik', 'Ohne Cookies, nur Summen je Tag') + wahl + (S.fehler ? fehlerKarte() : ladeHinweis());
+    if (!d.tabelle) return kopf('Statistik', 'Ohne Cookies, nur Summen je Tag') + wahl + '<div class="z-hinweis warn"><span>Die Statistik ist noch nicht eingerichtet. Einmal <code>supabase/schema.sql</code> im SQL-Editor von Supabase ausführen (die Datei lässt sich gefahrlos erneut ausführen). Danach zählt der Server mit.</span></div>';
     var e = d.ereignisse || {}, ev = function (n) { return e[n] || 0; }, seite = function (p) { var x = (d.seiten || []).find(function (s) { return s.schluessel === p; }); return x ? x.n : 0; };
     var einheit = d.zeitraum ? d.zeitraum.einheit : d.tage <= 62 ? 'tag' : d.tage <= 400 ? 'woche' : 'monat', reihe = gruppiert(d.reihe, einheit);
-    return kopf('Statistik', 'Ohne Cookies, nur Tagessummen') + wahl + (mitUhr(d.zeitraum) ? '<div class="z-hinweis info"><span>' + esc(ganzeTage(d.zeitraum)) + ' Die Uhrzeit gilt hier nicht.</span></div>' : '') +
+    return kopf('Statistik', 'Ohne Cookies, nur Summen je Tag') + wahl + (mitUhr(d.zeitraum) ? '<div class="z-hinweis info"><span>' + esc(ganzeTage(d.zeitraum)) + ' Die Uhrzeit gilt hier nicht.</span></div>' : '') +
       '<div class="z-stats">' + stat('Besuche', zahl(d.summe.besuche), 'Einstiege von außen') + stat('Seitenaufrufe', zahl(d.summe.aufrufe), d.summe.besuche ? (function (q) { return q.toLocaleString('de-DE', { maximumFractionDigits: 1 }) + (q === 1 ? ' Seite' : ' Seiten') + ' je Besuch'; })(Math.round((d.summe.aufrufe / d.summe.besuche) * 10) / 10) : '–') + stat('Aufmaßblätter verkauft', zahl(ev('kauf')), zahl(ev('kasse')) + ' Kassen geöffnet') + stat('Aufmaße an Betriebe', zahl(ev('aufmass_gesendet')), zahl(ev('link_geoeffnet')) + ' Kundenlinks erstmals geöffnet') + stat('Registrierungen', zahl(ev('registrierung')), zahl(ev('anmeldecode')) + ' Anmelde-E-Mails angefordert') + stat('Zugriffe von Bots', zahl(d.summe.bots), 'Suchmaschinen, KI, Linkvorschauen') + '</div>' +
       '<section class="z-karte"><h2 class="z-h2">' + { tag: 'Je Tag', woche: 'Je Woche', monat: 'Je Monat' }[einheit] + '</h2><p class="z-neben"><span class="z-leg z-leg1"></span>Besuche <span class="z-leg z-leg2"></span>Seitenaufrufe</p>' + balken(reihe, { label: 'Besuche und Seitenaufrufe', name2: 'Besuche' }) + '</section>' +
       '<div class="z-raster2">' +
@@ -322,9 +322,70 @@
       rang('Seiten', d.seiten) + rang('Einstiegsseiten', d.einstiege) + rang('Herkunft', d.herkunft) + rang('Geräte', d.geraet) + rang('Browser', d.browser) + rang('Systeme', d.system) +
       rang('Länder', d.land, function (x) { return landName(x.schluessel); }) + rang('Bots und Linkvorschauen', d.bots, null, 'Noch keine Bots gezählt.') + rang('Dateien für Maschinen', d.dateien, function (x) { return DATEI[x.schluessel] || x.name; }) +
       rang('Vorgänge', Object.keys(e).map(function (n) { return { name: EREIGNIS[n] || n, n: e[n] }; }).sort(function (a, b) { return b.n - a.n; })) +
-      '</div><p class="z-neben z-fuss">Gezählt wird auf dem Server, während er eine Seite ausliefert: keine Cookies, kein Skript, keine IP-Adressen, keine Kennungen, nur Tagessummen. Besuche sind Aufrufe, die nicht von einer eigenen Seite kommen. Nicht gezählt: deine eigenen Aufrufe, solange du angemeldet bist, Aufrufe mit „Global Privacy Control“ oder „Do Not Track“, Vorab-Ladevorgänge, Bots (nur als Familie). Eindeutige Besucher werden bewusst nicht gezählt, dafür bräuchte es eine Kennung.</p>';
+      '</div><p class="z-neben z-fuss">Gezählt wird auf dem Server, während er eine Seite ausliefert: keine Cookies, kein Skript, keine IP-Adressen, keine Kennungen, nur Summen je Tag (Besuche, Seitenaufrufe und Vorgänge auch je Stunde, siehe Anzeigen). Besuche sind Aufrufe, die nicht von einer eigenen Seite kommen. Nicht gezählt: deine eigenen Aufrufe, solange du angemeldet bist, Aufrufe mit „Global Privacy Control“ oder „Do Not Track“, Vorab-Ladevorgänge, Bots (nur als Familie). Eindeutige Besucher werden bewusst nicht gezählt, dafür bräuchte es eine Kennung.</p>';
   }
   var EREIGNIS = { kasse: 'Kasse geöffnet (Aufmaßblatt)', kauf: 'Aufmaßblatt gekauft', ki_foto: 'Foto von der KI ausgewertet', aufmass_gesendet: 'Aufmaß an einen Betrieb gesendet', kunde_code: 'Hauseigentümer: Anmelde-E-Mail angefordert', kunde_gesichert: 'Hauseigentümer: Aufmaß gesichert', nachbesserung: 'Nachbesserung gesendet', link_geoeffnet: 'Kundenlink erstmals geöffnet', anmeldecode: 'Anmelde-E-Mail angefordert', anmeldung: 'Anmeldung eines Betriebs', anmeldung_ohne_betrieb: 'Anmeldung ohne Betrieb', registrierung: 'Registrierung', doppelkonto_verdacht: 'Registrierung mit Doppelkonto-Verdacht', projekt: 'Projekt angelegt', code_eingefuegt: 'Aufmaß-Code eingefügt', zahlungsart_kasse: 'Zahlungsart: Stripe geöffnet', abo_kasse: 'Abo: Stripe geöffnet', sammelrechnung: 'Sammelrechnung erstellt' };
+
+  /* ---------- Anzeigen: Wirkung von Werbeanzeigen (functions/api/zentrale.js, anzeigenAuswerten) ---------- */
+  var ZIELE = [['app', 'App für Hauseigentümer', '/app/'], ['fensterbauer', 'Startseite für Fensterbauer', '/#fensterbauer'], ['info', 'Seite „Für Fensterbauer“', '/fuer-fensterbauer/']];
+  var NETZ_WAHL = [['instagram', 'Instagram'], ['facebook', 'Facebook'], ['google', 'Google'], ['tiktok', 'TikTok'], ['linkedin', 'LinkedIn'], ['youtube', 'YouTube'], ['pinterest', 'Pinterest']];
+  var META_PARAMETER = 'utm_source={{site_source_name}}&utm_medium=paid&utm_campaign={{campaign.name}}';
+  var STUNDE_DE = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', hourCycle: 'h23' });
+  var stundeText = function (iso) { var p = {}; STUNDE_DE.formatToParts(new Date(iso)).forEach(function (x) { p[x.type] = x.value; }); return p.day + '.' + p.month + '. ' + p.hour + ' Uhr'; };
+  var kampagneAus = function (s) { return String(s || '').trim().toLowerCase().replace(/ß/g, 'ss').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40); };
+  function anzeigenLink() {
+    var z = ZIELE.find(function (x) { return x[0] === S.link.ziel; }) || ZIELE[0], k = kampagneAus(S.link.kampagne), teile = z[2].split('#');
+    return location.origin + teile[0] + '?utm_source=' + S.link.netz + '&utm_medium=paid' + (k ? '&utm_campaign=' + k : '') + (teile[1] ? '#' + teile[1] : '');
+  }
+  var veraenderung = function (k) {
+    if (k.vorher == null) return '–';
+    if (!k.vorher) return k.wert ? 'neu' : '±0';
+    var p = Math.round(((k.wert - k.vorher) / k.vorher) * 100); return p > 0 ? '+' + p + '\u00a0%' : p < 0 ? '−' + Math.abs(p) + '\u00a0%' : '±0';
+  };
+  function seiteAnzeigen() {
+    var d = S.daten.anzeigen, aktual = '<button class="btn soft small" data-act="neu-laden" type="button">Aktualisieren</button>', unter = 'Wirkung deiner Werbung: Besuche je Stunde, Herkunft, Vorgänge';
+    if (!d) return kopf('Anzeigen', unter, aktual) + zeitraumLeiste() + (S.fehler ? fehlerKarte() : ladeHinweis());
+    if (!d.tabelle) return kopf('Anzeigen', unter, aktual) + zeitraumLeiste(d.zeitraum) + '<div class="z-hinweis warn"><span>Die Statistik ist noch nicht eingerichtet. Einmal <code>supabase/schema.sql</code> im SQL-Editor von Supabase ausführen.</span></div>' + anzeigenLinks();
+    var kz = {}; d.kennzahlen.forEach(function (k) { kz[k.id] = k; });
+    var werbung = Object.keys(d.werbung || {}).map(function (n) { return { name: EREIGNIS[n] || n, n: d.werbung[n] }; }).sort(function (a, b) { return b.n - a.n; }), ausAnzeigen = werbung.reduce(function (s, x) { return s + x.n; }, 0);
+    var ab = d.stundenAb ? stundeText(d.stundenAb) : '', vorStunden = d.stundenwerte && d.stundenAb && Date.parse(d.fenster.start) < Date.parse(d.stundenAb);
+    var hinweis = !d.stundenwerte ? '<div class="z-hinweis info"><span>Stundenwerte und den Vergleich gibt es für Zeiträume bis 31 Tage; hier zählen ganze Tage.</span></div>'
+      : !d.stundenAb ? '<div class="z-hinweis info"><span>Stundenwerte zählt der Server ab jetzt. Sie erscheinen mit den ersten Besuchen; den Vergleich mit den Tagen davor gibt es nach und nach.</span></div>'
+      : vorStunden ? '<div class="z-hinweis info"><span>Stundenwerte gibt es erst ab ' + esc(ab) + '. Besuche und Vorgänge davor fehlen hier; Käufe und Registrierungen sind vollständig.</span></div>' : '';
+    var vgl = d.kennzahlen.map(function (k) {
+      var f = function (v) { return v == null ? '–' : k.id === 'umsatz' ? euro(v) : (Number(v) || 0).toLocaleString('de-DE', { maximumFractionDigits: 1 }); };
+      return '<tr><td data-k="Kennzahl"><span>' + esc(k.name) + (k.ausStunden && !k.mitStunden ? ' *' : '') + '</span></td><td data-k="Im Zeitraum" class="num"><span>' + f(k.wert) + '</span></td><td data-k="Vorher (Ø)" class="num"><span>' + f(k.vorher) + (k.vorher != null ? '<small>aus ' + nW(k.kopien, d.tageVersatz > 1 ? 'Zeitraum' : 'Tag', d.tageVersatz > 1 ? 'Zeiträumen' : 'Tagen') + '</small>' : '') + '</span></td><td data-k="Veränderung" class="num"><span>' + veraenderung(k) + '</span></td></tr>';
+    }).join('');
+    var vglText = d.tageVersatz > 1 ? 'Vorher: Durchschnitt der Zeiträume gleicher Länge direkt davor (bis 7 Tage zurück).' : 'Vorher: Durchschnitt derselben Uhrzeit an den 7 Tagen davor.';
+    var e = d.verlauf.einheit, reihe = d.verlauf.reihe, titel = function (x) { return e === 'stunde' ? stundeText(x.start) : datum(x.start); }, kurz = function (x) { return e === 'stunde' ? stundeText(x.start) : datum(x.start).slice(0, 6); };
+    var besuchsChart = balken(reihe.map(function (x) { return { wert: x.besuche, wert2: x.anzeigen == null ? null : x.anzeigen, titel: 'Besuche ' + titel(x), kurz: kurz(x) }; }), { label: 'Besuche und Besuche über Anzeigen ' + (e === 'stunde' ? 'je Stunde' : 'je Tag'), name2: 'über Anzeigen' });
+    var vorgangsChart = reihe.some(function (x) { return x.schritte != null; }) ? balken(reihe.map(function (x) { return { wert: x.schritte || 0, wert2: x.abschluesse, titel: 'Schritte ' + titel(x), kurz: kurz(x) }; }), { label: 'Vorgänge ' + (e === 'stunde' ? 'je Stunde' : 'je Tag'), name2: 'Käufe und Registrierungen' }) : '';
+    var profil = balken(d.profil.map(function (p) { return { wert: p.besuche, wert2: p.anzeigen, titel: 'Besuche ' + p.stunde + '–' + (p.stunde + 1) + ' Uhr', kurz: p.stunde + ' Uhr' }; }), { label: 'Besuche je Uhrzeit', name2: 'über Anzeigen' });
+    return kopf('Anzeigen', unter, aktual) + zeitraumLeiste(d.zeitraum) + hinweis +
+      '<div class="z-stats">' +
+      stat('Besuche über Anzeigen', zahl(kz.anzeigen.wert), kz.besuche.wert ? Math.round((kz.anzeigen.wert / kz.besuche.wert) * 100) + '\u00a0% von ' + nW(kz.besuche.wert, 'Besuch', 'Besuchen') : 'noch keine Besuche', 'ok') +
+      stat('Vorgänge aus Anzeigen', zahl(ausAnzeigen), werbung.length ? werbung.slice(0, 3).map(function (x) { return zahl(x.n) + ' × ' + esc(x.name); }).join(' · ') : 'Kasse, Anmeldung oder KI-Foto auf einer Seite aus einer Anzeige') +
+      stat('Aufmaßblätter gekauft', zahl(kz.kauf.wert), euro(kz.umsatz.wert) + ' brutto' + (kz.kauf.vorher != null ? ' · vorher Ø ' + kz.kauf.vorher.toLocaleString('de-DE') : '')) +
+      stat('Betriebe registriert', zahl(kz.registrierung.wert), nW(kz.anmeldecode.wert, 'Anmelde-E-Mail', 'Anmelde-E-Mails') + (kz.registrierung.vorher != null ? ' · vorher Ø ' + kz.registrierung.vorher.toLocaleString('de-DE') : '')) + '</div>' +
+      '<section class="z-karte z-tabkarte"><h2 class="z-h2">Vergleich mit vorher</h2><p class="z-neben">' + vglText + (d.stundenwerte ? ' Besuche und Vorgänge zählen in vollen Stunden; Käufe (Zeitpunkt der Kasse) und Registrierungen auf die Minute.' : '') + '</p>' +
+      '<table class="z-tab"><thead><tr><th>Kennzahl</th><th class="num">Im Zeitraum</th><th class="num">Vorher (Ø)</th><th class="num">Veränderung</th></tr></thead><tbody>' + vgl + '</tbody></table>' +
+      (d.kennzahlen.some(function (k) { return k.ausStunden && !k.mitStunden; }) && d.stundenwerte ? '<p class="z-neben">* Der Zeitraum beginnt vor den ersten Stundenwerten, der Wert ist zu niedrig.</p>' : '') + (d.kennzahlen.some(function (k) { return k.ausStunden && k.vorher == null; }) && d.stundenwerte ? '<p class="z-neben">„–“: für die Tage davor gibt es noch keine Stundenwerte' + (ab ? ' (ab ' + esc(ab) + ')' : '') + '.</p>' : '') + '</section>' +
+      '<section class="z-karte"><h2 class="z-h2">' + (e === 'stunde' ? 'Besuche je Stunde' : 'Besuche je Tag') + '</h2><p class="z-neben"><span class="z-leg z-leg1"></span>über Anzeigen <span class="z-leg z-leg2"></span>alle Besuche</p>' + besuchsChart + '</section>' +
+      (vorgangsChart ? '<section class="z-karte"><h2 class="z-h2">' + (e === 'stunde' ? 'Vorgänge je Stunde' : 'Vorgänge je Tag') + '</h2><p class="z-neben"><span class="z-leg z-leg1"></span>Käufe und Registrierungen <span class="z-leg z-leg2"></span>Schritte davor (Kasse, Anmelde-E-Mail, KI-Foto)</p>' + vorgangsChart + '</section>' : '') +
+      (d.stundenwerte ? '<section class="z-karte"><h2 class="z-h2">Besuche nach Uhrzeit</h2><p class="z-neben">Summe je Uhrzeit im Zeitraum: Wann kommen die Besucher, wann die aus Anzeigen?</p>' + profil + '</section>' : '') +
+      '<div class="z-raster2">' + rang('Anzeigen nach Netz', d.anzeigen, null, 'Noch kein Besuch über einen Anzeigenlink.') + rang('Kampagnen', d.kampagnen, null, 'Noch keine Kampagne im Link.') + rang('Einstiegsseiten aus Anzeigen', d.anzeigeseiten, null, 'Noch keine.') + rang('Vorgänge aus Anzeigen', werbung, null, 'Noch keine.') + rang('Herkunft aller Besuche', d.herkunft) + '</div>' +
+      anzeigenLinks() +
+      '<p class="z-neben z-fuss">Gezählt wird ohne Cookies auf dem Server. Ein Besuch zählt als Anzeige, wenn der Link utm_medium=paid trägt (oder eine Klick-Kennung von Google, Microsoft, TikTok und anderen). Kasse, Anmelde-E-Mail, KI-Foto und Registrierung zählen als „aus Anzeigen“, wenn sie auf der Seite passieren, die über den Anzeigenlink geöffnet wurde. Käufe ordnet die Zentrale bewusst keiner Anzeige zu (dafür müsste die Herkunft mit der Zahlung gespeichert werden); ihre Wirkung zeigt der Vergleich. Wer in der App von Instagram oder Facebook surft, ohne dass der Link gekennzeichnet ist, erscheint unter Herkunft als „Instagram“ oder „Facebook“.</p>';
+  }
+  function anzeigenLinks() {
+    var L = S.link, opt = function (liste, wert) { return liste.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === wert ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join(''); };
+    return '<section class="z-karte"><h2 class="z-h2">Links für deine Anzeigen</h2><p class="z-text">Damit die Zentrale Besuche aus einer Anzeige erkennt, braucht der Link in der Anzeige ein Kennzeichen. Am besten führt er direkt dorthin, wo gekauft oder registriert wird: Dann zählen auch Kasse und Anmeldung als „aus Anzeigen“.</p>' +
+      '<div class="z-werkzeug"><div class="f"><label for="z-l-ziel">Ziel</label><select id="z-l-ziel" data-in="linkZiel">' + opt(ZIELE, L.ziel) + '</select></div><div class="f"><label for="z-l-netz">Netz</label><select id="z-l-netz" data-in="linkNetz">' + opt(NETZ_WAHL, L.netz) + '</select></div>' +
+      '<div class="f z-suche"><label for="z-l-kamp">Kampagne (optional)</label><input id="z-l-kamp" data-in="linkKampagne" value="' + esc(L.kampagne) + '" placeholder="z. B. herbst-hauseigentuemer" autocomplete="off" maxlength="60"></div></div>' +
+      '<div class="f"><label for="z-l-url">Link für die Anzeige</label><input id="z-l-url" readonly value="' + esc(anzeigenLink()) + '"></div><button class="btn soft small" type="button" data-act="kopieren" data-v="z-l-url">Link kopieren</button>' +
+      '<p class="z-text">Bei Meta (Instagram, Facebook) geht es auch für alle Anzeigen auf einmal: im Werbeanzeigenmanager bei der Anzeige unter „URL-Parameter“ das hier eintragen. Meta setzt Netz und Kampagnennamen dann selbst ein.</p>' +
+      '<div class="f"><label for="z-l-meta">URL-Parameter für Meta</label><input id="z-l-meta" readonly value="' + esc(META_PARAMETER) + '"></div><button class="btn soft small" type="button" data-act="kopieren" data-v="z-l-meta">Parameter kopieren</button></section>';
+  }
 
   /* ---------- Protokoll ---------- */
   var ART = { widerruf: 'Widerruf', widerruf_bestaetigt: 'Eingangsbestätigung nachgeholt', anmeldung: 'Anmeldung', anmeldung_fehlgeschlagen: 'Anmeldung fehlgeschlagen', sperren: 'Gesperrt', entsperren: 'Entsperrt', loeschen: 'Gelöscht', export: 'Export', liste_export: 'Liste exportiert', einblick: 'Einblick', notiz: 'Notiz', gutschrift: 'Gutschrift', doppelkonto: 'Doppelkonto', nachricht: 'Nachricht', abo: 'Abo', abrechnung: 'Abrechnung', anmeldung_geloescht: 'Anmeldung gelöscht', aufraeumen: 'Aufgeräumt', code_falsch: 'Code falsch' };
@@ -441,13 +502,13 @@
   /* ---------- Laden je Seite ---------- */
   async function laden(neu) {
     S.fehler = '';
-    var schluessel = { uebersicht: 'uebersicht', betriebe: 'betriebe', betrieb: 'betrieb:' + S.id, kaeufe: 'kaeufe', statistik: 'statistik', protokoll: 'protokoll', einstellungen: 'einstellungen' }[S.seite];
-    var q = zrQuery(), mitZeitraum = ['uebersicht', 'betriebe', 'betrieb', 'kaeufe', 'statistik'].includes(S.seite);
+    var schluessel = { uebersicht: 'uebersicht', betriebe: 'betriebe', betrieb: 'betrieb:' + S.id, kaeufe: 'kaeufe', statistik: 'statistik', anzeigen: 'anzeigen', protokoll: 'protokoll', einstellungen: 'einstellungen' }[S.seite];
+    var q = zrQuery(), mitZeitraum = ['uebersicht', 'betriebe', 'betrieb', 'kaeufe', 'statistik', 'anzeigen'].includes(S.seite);
     if (!neu && S.daten[schluessel]) return render();
     if (neu) S.daten[schluessel] = null;
     render();
     try {
-      var pfad = { uebersicht: '/api/zentrale/uebersicht?' + q, betriebe: '/api/zentrale/betriebe?' + q, betrieb: '/api/zentrale/betriebe/' + encodeURIComponent(S.id) + '?' + q, kaeufe: '/api/zentrale/kaeufe?' + q, statistik: '/api/zentrale/statistik?' + q, protokoll: '/api/zentrale/protokoll' + (S.protokollArt ? '?art=' + encodeURIComponent(S.protokollArt) : ''), einstellungen: '/api/zentrale/einstellungen' }[S.seite];
+      var pfad = { uebersicht: '/api/zentrale/uebersicht?' + q, betriebe: '/api/zentrale/betriebe?' + q, betrieb: '/api/zentrale/betriebe/' + encodeURIComponent(S.id) + '?' + q, kaeufe: '/api/zentrale/kaeufe?' + q, statistik: '/api/zentrale/statistik?' + q, anzeigen: '/api/zentrale/anzeigen?' + q, protokoll: '/api/zentrale/protokoll' + (S.protokollArt ? '?art=' + encodeURIComponent(S.protokollArt) : ''), einstellungen: '/api/zentrale/einstellungen' }[S.seite];
       var j = await api(pfad);
       if (mitZeitraum && q !== zrQuery()) return; // der Zeitraum hat sich inzwischen geändert, die neuere Anfrage zählt
       if (S.seite === 'betrieb') { S.daten[schluessel] = j.betrieb; S.daten.zweiFaktor = j.zweiFaktor; } else S.daten[schluessel] = j;
@@ -456,7 +517,7 @@
   }
   function route() {
     var h = (location.hash || '#uebersicht').slice(1), teile = h.split('/');
-    var seite = ['uebersicht', 'betriebe', 'betrieb', 'kaeufe', 'statistik', 'protokoll', 'einstellungen'].includes(teile[0]) ? teile[0] : 'uebersicht';
+    var seite = ['uebersicht', 'betriebe', 'betrieb', 'kaeufe', 'statistik', 'anzeigen', 'protokoll', 'einstellungen'].includes(teile[0]) ? teile[0] : 'uebersicht';
     if (seite === 'betrieb' && !teile[1]) seite = 'betriebe';
     if (seite !== S.seite || teile[1] !== S.id) { S.dialog = null; if (S.seite === 'betrieb' && S.id !== teile[1]) delete S.einblick[S.id]; }
     S.seite = seite; S.id = seite === 'betrieb' ? decodeURIComponent(teile[1]) : '';
@@ -468,11 +529,11 @@
     var fokus = document.activeElement, fokusId = fokus && fokus.id, pos = fokus && typeof fokus.selectionStart === 'number' ? fokus.selectionStart : null;
     if (!S.status) { wurzel.innerHTML = '<main class="z-login"><div class="z-login-karte">' + MARKE + '<p class="z-text">' + (S.fehler ? esc(S.fehler) : 'Wird geladen …') + '</p></div></main>'; return; }
     if (!S.status.angemeldet) { wurzel.innerHTML = seiteAnmelden(); var pw = document.getElementById(S.status.zweiFaktor && S.anmeldenFehler && document.getElementById('z-code') ? 'z-code' : 'z-pw'); if (pw && !fokusId) pw.focus(); if (fokusId) { var f0 = document.getElementById(fokusId); if (f0) f0.focus(); } return; }
-    var inhalt = { uebersicht: seiteUebersicht, betriebe: seiteBetriebe, betrieb: seiteBetrieb, kaeufe: seiteKaeufe, statistik: seiteStatistik, protokoll: seiteProtokoll, einstellungen: seiteEinstellungen }[S.seite]();
+    var inhalt = { uebersicht: seiteUebersicht, betriebe: seiteBetriebe, betrieb: seiteBetrieb, kaeufe: seiteKaeufe, statistik: seiteStatistik, anzeigen: seiteAnzeigen, protokoll: seiteProtokoll, einstellungen: seiteEinstellungen }[S.seite]();
     wurzel.innerHTML = rahmen(inhalt);
     if (fokusId) { var f = document.getElementById(fokusId); if (f) { f.focus(); if (pos != null && typeof f.setSelectionRange === 'function' && f.type !== 'number' && f.type !== 'email') try { f.setSelectionRange(pos, pos); } catch (e) { /* ok */ } } }
     else if (S.dialog) { var erstes = document.querySelector('.z-dialog input:not([readonly]), .z-dialog textarea, .z-dialog select, .z-dialog button'); if (erstes) erstes.focus(); }
-    document.title = ({ uebersicht: 'Übersicht', betriebe: 'Betriebe', betrieb: (S.daten['betrieb:' + S.id] || {}).name || 'Betrieb', kaeufe: 'Käufe', statistik: 'Statistik', protokoll: 'Protokoll', einstellungen: 'Einstellungen' }[S.seite] || 'Zentrale') + ' · Zentrale | eeziframes';
+    document.title = ({ uebersicht: 'Übersicht', betriebe: 'Betriebe', betrieb: (S.daten['betrieb:' + S.id] || {}).name || 'Betrieb', kaeufe: 'Käufe', statistik: 'Statistik', anzeigen: 'Anzeigen', protokoll: 'Protokoll', einstellungen: 'Einstellungen' }[S.seite] || 'Zentrale') + ' · Zentrale | eeziframes';
   }
 
   /* ---------- Bedienung ---------- */
@@ -488,6 +549,7 @@
       case 'abmelden': ev.preventDefault(); try { await fetch('/api/zentrale/abmelden', { method: 'POST', headers: { 'content-type': 'application/json', 'x-zentrale': '1' }, body: '{}' }); } catch (e) { /* ok */ } S.daten = {}; S.einblick = {}; S.zweiFaktor = null; S.anmeldungen = null; S.status = Object.assign({}, S.status, { angemeldet: false }); S.anmeldenFehler = ''; render(); return;
       case 'neu-laden': return laden(true);
       case 'filter': S.filter = v; return render();
+      case 'kopieren': { var feld = document.getElementById(v); if (!feld) return; try { await navigator.clipboard.writeText(feld.value); toast('Kopiert.'); } catch (e) { feld.select(); toast('Bitte markieren und kopieren.'); } return; }
       case 'zeitraum':
         S.zrFehler = '';
         if (v === 'frei') { S.zrFrei = true; render(); var von = document.getElementById('z-von'); if (von) von.focus(); return; }
@@ -545,12 +607,14 @@
     var f = el.getAttribute('data-in');
     if (f === 'suche') { S.suche = el.value; return render(); }
     if (f === 'kaufSuche') { S.kaufSuche = el.value; return render(); }
+    if (f === 'linkKampagne') { S.link.kampagne = el.value; return render(); }
   });
   document.addEventListener('change', function (ev) {
     var el = ev.target.closest('[data-in]'); if (!el) return;
     var f = el.getAttribute('data-in');
     if (f === 'sortierung') { S.sortierung = el.value; el.blur(); return render(); }
     if (f === 'protokollArt') { S.protokollArt = el.value; el.blur(); return laden(true); }
+    if (f === 'linkZiel' || f === 'linkNetz') { S.link[f === 'linkZiel' ? 'ziel' : 'netz'] = el.value; return render(); }
   });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && S.dialog && !S.dialog.sendet) { S.dialog = null; render(); } });
   window.addEventListener('hashchange', route);

@@ -63,6 +63,8 @@ function attrappeSpeicher() {
     zaehlen: async (tag, schluessel) => { schluessel.forEach((s) => { const k2 = tag + '|' + s; attrappe.statistik.set(k2, (attrappe.statistik.get(k2) || 0) + 1); }); return true; },
     statistikLesen: async (von, bis) => Array.from(attrappe.statistik.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).filter((r) => r.tag >= von && (!bis || r.tag <= bis)),
     statistikErsterTag: async () => Array.from(attrappe.statistik.keys()).map((k2) => k2.slice(0, 10)).sort()[0] || null,
+    statistikStunden: async (von, bis) => Array.from(attrappe.statistik.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).filter((r) => r.tag >= von && r.tag <= bis && r.schluessel.startsWith('stunde:')),
+    statistikStundenAb: async () => Array.from(attrappe.statistik.keys()).filter((k2) => k2.slice(11).startsWith('stunde:')).map((k2) => k2.slice(0, 10) + ' ' + k2.slice(18, 20)).sort()[0] || null,
     /* wie die Funktionen eeziframes_auswerten und eeziframes_auswerten_zeitraum in der Datenbank: Tagessummen je Art (aufruf:*,
        besuch:*, bot:*) und Summen je Schlüssel */
     statistikAuswerten: async (von, bis) => {
@@ -203,6 +205,10 @@ function supabaseSpeicher(k) {
     /* mit Ende: eigene Funktion (schema.sql); fehlt sie noch, liefert das null, und auswerten nimmt die einzelnen Tageszähler */
     statistikAuswerten: async (von, bis) => alle(bis ? 'rpc/eeziframes_auswerten_zeitraum?p_von=' + q(von) + '&p_bis=' + q(bis) + '&order=schluessel.asc,tag.asc' : 'rpc/eeziframes_auswerten?p_von=' + q(von) + '&order=schluessel.asc,tag.asc', true),
     statistikErsterTag: async () => { const r = await sb('statistik?select=tag&order=tag.asc&limit=1', { optional: true }); return Array.isArray(r) && r[0] ? String(r[0].tag).slice(0, 10) : null; },
+    /* Stundenzähler (stunde:HH|…) eines Zeitraums für die Auswertung der Anzeigen; null, wenn die Tabelle fehlt */
+    statistikStunden: async (von, bis) => alle('statistik?select=tag,schluessel,anzahl&schluessel=like.stunde:*&tag=gte.' + q(von) + '&tag=lte.' + q(bis) + '&order=tag.asc,schluessel.asc', true),
+    /* erster Stundenzähler überhaupt („JJJJ-MM-TT HH“): ab dann gibt es Stundenwerte */
+    statistikStundenAb: async () => { const r = await sb('statistik?select=tag,schluessel&schluessel=like.stunde:*&order=tag.asc,schluessel.asc&limit=1', { optional: true }); return Array.isArray(r) && r[0] ? String(r[0].tag).slice(0, 10) + ' ' + String(r[0].schluessel).slice(7, 9) : null; },
     /* Zwischenstand eines Kundenlinks (entwurf.js). undefined: Tabelle fehlt noch (schema.sql nicht erneut ausgeführt) */
     entwurfHolen: async (code) => { const r = await sb('entwuerfe?code=eq.' + q(code) + '&select=*', { optional: true }); return r && r.fehlt ? undefined : eins(r); },
     /* Lesen, ändern, mit Versionsnummer zurückschreiben (wie betriebAendern); fn gibt false zurück, wenn nichts zu speichern ist */

@@ -29,7 +29,7 @@ export const SEITEN = [
   { pfad: '/ratgeber/bruestungshoehe-fenster/', prio: '0.7', stand: '2026-10-16' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-16' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-17' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/cookies/', prio: '0.1', stand: '2026-10-18' },
