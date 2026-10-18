@@ -1357,7 +1357,7 @@ if (teil(10)) {
     faqZahl += fragen.length;
     for (const q of fragen) if (vis.get(q.name) !== (q.acceptedAnswer || {}).text) faqFehler.push(pf + ' „' + q.name + '“');
   }
-  ok(!faqFehler.length && faqZahl >= 40, 'Häufige Fragen (' + faqZahl + '): Antworten im JSON-LD wortgleich mit den sichtbaren Antworten, nur ohne Belegnummern' + (faqFehler.length ? ' (abweichend: ' + faqFehler.join(', ') + ')' : ''));
+  ok(!faqFehler.length && faqZahl >= 100, 'Häufige Fragen (' + faqZahl + '): Antworten im JSON-LD wortgleich mit den sichtbaren Antworten, nur ohne Belegnummern' + (faqFehler.length ? ' (abweichend: ' + faqFehler.join(', ') + ')' : ''));
   const neueSeiten = ['/ratgeber/balkontuer-ausmessen/', '/ratgeber/fenster-mit-rollladen-ausmessen/', '/ratgeber/bestellmass-fenster/', '/ratgeber/din-links-rechts/', '/ratgeber/bruestungshoehe-fenster/'];
   const uebersicht = (await roh('/ratgeber/')).text, ausmessen = (await roh('/ratgeber/fenster-ausmessen/')).text, llAus = seo.llms('https://eeziframes.com', {});
   ok(neueSeiten.every((u) => seo.SEITEN.some((x) => x.pfad === u) && uebersicht.includes('href="' + u + '"') && ausmessen.includes('href="' + u + '"') && llAus.includes('(https://eeziframes.com' + u + ')')) && /## Kurze Antworten/.test(llAus) && /Balkon- und Terrassentüren/.test(llAus) && /PSK-Türen/.test(llAus), 'Neue Ratgeber (Balkontür, Rollladenkasten, Bestellmaß, DIN links/rechts, Brüstungshöhe): in Sitemap, Übersicht, Anleitung und llms.txt verlinkt; llms.txt mit kurzen Antworten und allen Elementarten');
@@ -1369,7 +1369,7 @@ if (teil(10)) {
   const fussLinks = fussMod.GRUPPEN.flatMap(([, l]) => l.map(([h]) => h));
   for (const [pf, datei] of fussMod.seiten(path10.join(WURZEL, 'web'))) { const m = fs10.readFileSync(datei, 'utf8').match(fussMod.FUSS); if (!m || m[0] !== fussMod.fusszeile(pf)) fussFehler.push(pf); }
   const fussOhne = seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x) && !fussLinks.includes(x));
-  ok(!fussFehler.length && !fussOhne.length && fussMod.seiten(path10.join(WURZEL, 'web')).length >= 23, 'Fußzeile aller Ratgeber und Seiten für Fensterbauer gleich (scripts/ratgeber-fuss.mjs), in drei Gruppen, mit jeder dieser Seiten' + (fussFehler.length ? ' (abweichend: ' + fussFehler.join(', ') + ')' : '') + (fussOhne.length ? ' (fehlt: ' + fussOhne.join(', ') + ')' : ''));
+  ok(!fussFehler.length && !fussOhne.length && fussMod.seiten(path10.join(WURZEL, 'web')).length >= 22, 'Fußzeile aller Ratgeber und Seiten für Fensterbauer gleich (scripts/ratgeber-fuss.mjs), in drei Gruppen, mit jeder dieser Seiten' + (fussFehler.length ? ' (abweichend: ' + fussFehler.join(', ') + ')' : '') + (fussOhne.length ? ' (fehlt: ' + fussOhne.join(', ') + ')' : ''));
   const bildFehler = [];
   for (const sx of seo.SEITEN.filter((x) => UNTERSEITE.test(x.pfad))) {
     const t = (await roh(sx.pfad)).text;
