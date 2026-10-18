@@ -102,6 +102,19 @@ language sql stable security invoker set search_path = '' as $$
    where s.tag >= p_von
    group by s.schluessel;
 $$;
+-- Dasselbe für einen Zeitraum mit Ende (Zentrale: frei gewählter Zeitraum, beide Tage eingeschlossen)
+create or replace function public.eeziframes_auswerten_zeitraum(p_von date, p_bis date) returns table (tag date, schluessel text, anzahl bigint)
+language sql stable security invoker set search_path = '' as $$
+  select s.tag, split_part(s.schluessel, ':', 1) || ':*', sum(s.anzahl)::bigint
+    from public.statistik s
+   where s.tag between p_von and p_bis and split_part(s.schluessel, ':', 1) in ('aufruf', 'besuch', 'bot')
+   group by s.tag, split_part(s.schluessel, ':', 1)
+  union all
+  select null::date, s.schluessel, sum(s.anzahl)::bigint
+    from public.statistik s
+   where s.tag between p_von and p_bis
+   group by s.schluessel;
+$$;
 
 -- Zwischenstand eines Kundenlinks: Der Kunde kommt über seinen Link zurück (auch auf einem anderen Gerät) und sieht seine Fenster.
 -- Ohne Fotos (die bleiben auf dem Gerät). meta hält die Zähler gegen Mehrfachnutzung: angelegte Fenster (auch gelöschte) und je
@@ -154,12 +167,14 @@ alter table public.eigene     enable row level security;
 revoke all on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe, public.eigene from anon, authenticated;
 revoke all on function public.eeziframes_zaehlen(date, text[]) from public, anon, authenticated;
 revoke all on function public.eeziframes_auswerten(date) from public, anon, authenticated;
+revoke all on function public.eeziframes_auswerten_zeitraum(date, date) from public, anon, authenticated;
 -- Der Server (geheimer Schlüssel sb_secret_… bzw. service_role) darf lesen und schreiben; ausdrücklich gewährt, auch wenn neue
 -- Tabellen im Projekt nicht mehr von selbst für die Data API freigegeben werden
 grant usage on schema public to service_role;
 grant select, insert, update, delete on public.betriebe, public.zahlungen, public.ereignisse, public.protokoll, public.statistik, public.entwuerfe, public.eigene to service_role;
 grant execute on function public.eeziframes_zaehlen(date, text[]) to service_role;
 grant execute on function public.eeziframes_auswerten(date) to service_role;
+grant execute on function public.eeziframes_auswerten_zeitraum(date, date) to service_role;
 
 -- updated_at pflegt der Server selbst (speicher.js); dieser Auslöser ist nur ein Netz für Änderungen von Hand
 create or replace function public.eeziframes_touch() returns trigger language plpgsql set search_path = '' as $$

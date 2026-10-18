@@ -30,6 +30,11 @@ export function seitePfad(p) {
 const TAG = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' });
 export const tagBerlin = (d) => TAG.format(d || new Date());
 export const tagVor = (n, d) => tagBerlin(new Date((d ? d.getTime() : Date.now()) - n * 864e5));
+/* Kalendertage als JJJJ-MM-TT, von und bis eingeschlossen (reine Datumsrechnung, ohne Uhrzeit und Zeitzone) */
+const utc = (t) => Date.UTC(+t.slice(0, 4), +t.slice(5, 7) - 1, +t.slice(8, 10));
+export const tagPlus = (t, n) => new Date(utc(t) + n * 864e5).toISOString().slice(0, 10);
+export const tageZwischen = (von, bis) => Math.round((utc(bis) - utc(von)) / 864e5) + 1;
+export function tageListe(von, bis) { const out = []; for (let t = von; t <= bis && out.length < 4000; t = tagPlus(t, 1)) out.push(t); return out; }
 
 /* Bots und Link-Vorschauen: nur die Familie zählt, die Reihenfolge entscheidet (Spezielles zuerst) */
 const BOTS = [
@@ -153,20 +158,24 @@ export async function seitenaufruf(request, env) {
   return zaehlen(k, speicher(k), keys);
 }
 
-/* Auswertung für die Zentrale: Zeitreihe je Tag und Ranglisten je Merkmal über den Zeitraum */
-export async function auswerten(sp, tage) {
-  tage = [7, 30, 90, 365].includes(+tage) ? +tage : 30;
-  const von = tagVor(tage - 1);
+/* Auswertung für die Zentrale: Zeitreihe je Tag und Ranglisten je Merkmal über den Zeitraum.
+   zeit: { von, bis } als JJJJ-MM-TT (beide eingeschlossen) oder wie früher eine Zahl von Tagen bis heute (7, 30, 90, 365) */
+export async function auswerten(sp, zeit) {
+  const heute = tagBerlin();
+  let von, bis;
+  if (zeit && typeof zeit === 'object') { bis = zeit.bis && zeit.bis < heute ? zeit.bis : heute; von = zeit.von && zeit.von <= bis ? zeit.von : bis; }
+  else { const n = [7, 30, 90, 365].includes(+zeit) ? +zeit : 30; bis = heute; von = tagVor(n - 1); }
+  const tage = tageZwischen(von, bis), mitEnde = bis < heute ? bis : null;
   /* Bevorzugt in der Datenbank verdichtet (kleine Antwort); fehlt die Funktion noch, die einzelnen Tageszähler (neueste zuerst) */
-  let rows = sp.statistikAuswerten ? await sp.statistikAuswerten(von) : null, verdichtet = rows !== null;
-  if (rows === null) rows = await sp.statistikLesen(von);
-  if (rows === null) return { ok: true, tabelle: false, tage: tage };
-  const liste = [], reihe = new Map();
-  for (let i = tage - 1; i >= 0; i--) { const t = tagVor(i); liste.push(t); reihe.set(t, { tag: t, aufrufe: 0, besuche: 0, bots: 0 }); }
+  let rows = sp.statistikAuswerten ? await sp.statistikAuswerten(von, mitEnde) : null, verdichtet = rows !== null;
+  if (rows === null) rows = await sp.statistikLesen(von, mitEnde);
+  if (rows === null) return { ok: true, tabelle: false, tage: tage, von: von, bis: bis };
+  const liste = tageListe(von, bis), reihe = new Map(liste.map((t) => [t, { tag: t, aufrufe: 0, besuche: 0, bots: 0 }]));
   const summen = {};
   for (const r of rows || []) {
     const i = r.schluessel.indexOf(':'), art = r.schluessel.slice(0, i), name = r.schluessel.slice(i + 1), n = Number(r.anzahl) || 0;
     const tagZeile = r.tag ? reihe.get(String(r.tag).slice(0, 10)) : null;
+    if (!verdichtet && r.tag && !tagZeile) continue; // einzelne Tageszähler außerhalb des Zeitraums
     if (!verdichtet || !r.tag) (summen[art] = summen[art] || new Map()).set(name, ((summen[art] && summen[art].get(name)) || 0) + n);
     if (tagZeile && (!verdichtet || name === '*')) { if (art === 'aufruf') tagZeile.aufrufe += n; else if (art === 'besuch') tagZeile.besuche += n; else if (art === 'bot') tagZeile.bots += n; }
   }
@@ -174,7 +183,7 @@ export async function auswerten(sp, tage) {
   const ereignisse = {}; for (const [name, n] of (summen.ereignis || new Map()).entries()) ereignisse[name] = n;
   const reiheListe = liste.map((t) => reihe.get(t));
   return {
-    ok: true, tabelle: true, tage: tage, von: von, bis: liste[liste.length - 1],
+    ok: true, tabelle: true, tage: tage, von: von, bis: bis,
     summe: { aufrufe: reiheListe.reduce((s, x) => s + x.aufrufe, 0), besuche: reiheListe.reduce((s, x) => s + x.besuche, 0), bots: reiheListe.reduce((s, x) => s + x.bots, 0) },
     reihe: reiheListe,
     seiten: rang('aufruf', SEITEN_NAMEN), einstiege: rang('besuch', SEITEN_NAMEN), herkunft: rang('herkunft'), geraet: rang('geraet'), browser: rang('browser'),
