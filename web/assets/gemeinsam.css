@@ -116,6 +116,15 @@ a.link { text-decoration: underline }
 .switch[aria-pressed="true"] > span, .switch[aria-checked="true"] > span { transform: translateX(20px) }
 
 /* ---------- Pilot-Hinweis oben im Betriebsbereich ---------- */
+/* Einführungspreis: schwarzes Banner über die ganze Breite, ganz oben (Startseite, App, Ratgeber, Seite für Fensterbauer), mit Countdown;
+   am Stichtag verschwindet es von selbst (gemeinsam.js EinfBanner, functions/seo.js banner) */
+.einf-bar { display: block; width: 100%; margin: 0; border: 0; border-radius: 0; background: var(--ink); color: var(--paper); font: inherit; font-family: var(--font); text-align: center; text-decoration: none; cursor: pointer }
+.einf-bar > span { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 14px; max-width: 1080px; margin: 0 auto; padding: 11px 16px; font-size: 15px; line-height: 1.35 }
+.einf-bar b { font-weight: 800 }
+.einf-bar .rest { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 800; white-space: nowrap }
+.einf-bar .los { font-weight: 800; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap }
+.einf-bar:hover .los, .einf-bar:focus-visible .los { text-decoration-thickness: 2px }
+@media (max-width: 560px) { .einf-bar > span { font-size: 14px; gap: 6px 10px; padding: 10px 12px } .einf-bar .spaeter { display: none } }
 .fx-pilot { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px 10px 16px; background: var(--ink); color: var(--paper); font-family: var(--font); font-size: 15px; line-height: 1.45 }
 .fx-pilot p { flex: 1; min-width: 0; max-width: 1040px; margin: 0 auto }
 .fx-pilot b { font-weight: 800 }

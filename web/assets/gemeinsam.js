@@ -316,6 +316,24 @@
     anstossen: scrollAnstoss
   };
 
+  /* ---------- Einführungspreis: Banner ganz oben ----------
+     EinfBanner('kunde' | 'betrieb', ziel) → HTML oder '' (kein Einführungspreis mehr, modell.js: einfuehrung). ziel: { href } für
+     einen Link oder { act, v } für einen Knopf der Oberfläche. Dieselbe Gestalt setzt der Server in Ratgeber und Seite für
+     Fensterbauer (functions/seo.js, banner()); am Stichtag verschwindet es überall von selbst */
+  window.EinfBanner = function (art, ziel) {
+    var X = window.Abrechnung, e = X && X.einfuehrung && X.einfuehrung();
+    if (!e || !e.danach) return '';
+    var p = X.preise(), eur = function (v) { return (Math.round(v) === v ? String(v) : v.toFixed(2).replace('.', ',')) + '\u00a0€'; };
+    var n = X.einfRest(), rest = n <= 1 ? 'Nur noch heute' : 'Noch ' + n + ' Tage';
+    var text = art === 'betrieb'
+      ? '<b>Einführungspreise bis ' + X.einfBis() + ':</b> Abo 10 für ' + eur(p.abo.grund) + ', Plus für ' + eur(p.plus) + ' im Monat <span class="spaeter">· danach ' + eur(e.danach.abo) + ' und ' + eur(e.danach.plus) + '</span>'
+      : '<b>Einführungspreis bis ' + X.einfBis() + ':</b> Aufmaßblatt ' + eur(p.aufmass) + ' <span class="spaeter">· danach ' + eur(e.danach.aufmass) + '</span>';
+    var innen = '<span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">' + (art === 'betrieb' ? 'Preise ansehen' : 'Jetzt ausmessen') + ' →</span></span>';
+    ziel = ziel || {};
+    return ziel.href ? '<a class="einf-bar" href="' + ziel.href + '">' + innen + '</a>'
+      : '<button type="button" class="einf-bar" data-act="' + ziel.act + '"' + (ziel.v ? ' data-v="' + ziel.v + '"' : '') + '>' + innen + '</button>';
+  };
+
   /* ---------- Pilot-Hinweis im Portal ----------
      erst, wenn /api/status sagt, dass kein Server angeschlossen ist (portal.js ruft PilotHinweis() dann auf): Vorher eingeblendet
      und wieder entfernt, ließ er die Seite springen und zeigte auch im echten Betrieb kurz „Pilotphase“ */

@@ -9,7 +9,7 @@
    Adressen in robots.txt, sitemap.xml, llms.txt und im Canonical-Hinweis kommen aus der Domain, unter der die Seite läuft
    (www.eeziframes.com zählt als eeziframes.com), damit nach einem Domainwechsel nichts angepasst werden muss.
    Begründung und Quellen: docs/SEO.md. */
-import { konfig, einfuehrungLaeuft, EINFUEHRUNG } from './api/umgebung.js';
+import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung.js';
 
 export const STAND = '2026-10-18';
 
@@ -102,18 +102,21 @@ export async function seite(antwort, env, url) {
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
   const b = basis(env, url), kan = b + kanonischerPfad(url.pathname), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
+  const mitTag = einfuehrungLaeuft(env) && BANNER_SEITEN.test(url.pathname); // Banner mit Countdown: der Text ändert sich jeden Tag
   h.set('Link', '<' + kan + '>; rel="canonical"');
   h.delete('content-length');
-  /* nach dem Einführungspreis ändert sich der Text, die Datei aber nicht: ohne ETag, sonst bekäme ein Browser die alte Fassung als 304 */
-  if (nach) { h.delete('etag'); h.delete('last-modified'); }
+  /* nach dem Einführungspreis und mit Countdown ändert sich der Text, die Datei aber nicht: ohne ETag, sonst bekäme ein Browser die
+     alte Fassung als 304 */
+  if (nach || mitTag) { h.delete('etag'); h.delete('last-modified'); }
   const text = antwort.body ? kopf(absolut(await antwort.text(), b), kan) : null;
-  return new Response(text && nach ? nachEinfuehrung(text) : text, { status: 200, statusText: antwort.statusText, headers: h });
+  return new Response(text && nach ? nachEinfuehrung(text) : text && einfuehrungLaeuft(env) ? mitBanner(text, url.pathname, env) : text, { status: 200, statusText: antwort.statusText, headers: h });
 }
 
 /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): Ab dem Stichtag nennen die Seiten die regulären Preise und die
    Hinweise <span class="einf">…</span> fallen weg, ohne dass jemand die Dateien ändert. AGB und Nutzungsbedingungen nennen beide
    Zeiträume selbst (Vertragstext mit Stand) und bleiben, wie sie sind. Die Prüfsuite gibt jede Seite einmal nach dem Stichtag aus. */
 const RECHT_MIT_ZEITRAUM = ['/agb/', '/nutzungsbedingungen/'];
+const BANNER_SEITEN = /^\/(ratgeber|fuer-fensterbauer)\//;
 const zahl = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ','));
 const NACH_EINFUEHRUNG = [
   [/<span class="einf">[\s\S]*?<\/span>/g, () => ''],
@@ -126,6 +129,20 @@ const NACH_EINFUEHRUNG = [
   [/"price":"79\.00"/g, () => '"price":"' + EINFUEHRUNG.danach.plus.toFixed(2) + '"']
 ];
 export const nachEinfuehrung = (html) => NACH_EINFUEHRUNG.reduce((t, [muster, neu]) => t.replace(muster, neu), html);
+
+/* Banner zum Einführungspreis ganz oben in Ratgeber und Seite für Fensterbauer, so wie Startseite und App es zeigen (gemeinsam.js
+   EinfBanner, Gestalt in gemeinsam.css). Mit Countdown, gerechnet beim Ausliefern; ab dem Stichtag kommt es nicht mehr dazu */
+const geld = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ',')) + '&nbsp;€';
+export function banner(pfad, env) {
+  const tage = Math.max(1, Math.ceil((Date.parse(EINFUEHRUNG.ende) - jetztAus(env)) / 864e5)), rest = tage <= 1 ? 'Nur noch heute' : 'Noch ' + tage + ' Tage';
+  const [, m, t] = EINFUEHRUNG.bis.split('-').map(Number), bis = t + '. ' + ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][m - 1];
+  const v = EINFUEHRUNG.vorher, d = EINFUEHRUNG.danach, betrieb = pfad.startsWith('/fuer-fensterbauer/');
+  const text = betrieb
+    ? '<b>Einführungspreise bis ' + bis + ':</b> Abo 10 für ' + geld(v.abo) + ', Plus für ' + geld(v.plus) + ' im Monat <span class="spaeter">· danach ' + geld(d.abo) + ' und ' + geld(d.plus) + '</span>'
+    : '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
+  return '<a class="einf-bar" href="' + (betrieb ? '/#fensterbauer' : '/app/') + '"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">' + (betrieb ? 'Preise ansehen' : 'Jetzt ausmessen') + ' →</span></span></a>';
+}
+const mitBanner = (html, pfad, env) => (BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? html.replace(/<body[^>]*>/, (m) => m + '\n' + banner(pfad, env)) : html);
 
 /* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
 export function kopf(html, kan) {
@@ -236,6 +253,6 @@ export async function behandeln(request, env, holen) {
   if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env, url)), 'text/plain; charset=utf-8');
   if (url.pathname === '/sitemap.xml') return frei(env, url) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
   if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env, url) ? null : { 'x-robots-tag': SPERRE });
-  if (istSeite(url.pathname)) return await seite(await holen(einfuehrungLaeuft(env) ? request : ohneBedingung(request)), env, url);
+  if (istSeite(url.pathname)) return await seite(await holen(einfuehrungLaeuft(env) && !BANNER_SEITEN.test(url.pathname) ? request : ohneBedingung(request)), env, url);
   return null;
 }
