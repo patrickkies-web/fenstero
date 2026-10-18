@@ -8,6 +8,8 @@ Hauseigentümer messen mit eeziframes kostenlos; ihr fertiges Aufmaßblatt koste
 
 ## 2. Preise
 
+**Einführungspreis zum Start:** Aufmaßblatt, Abo 10 und Plus kosten bei Kauf bzw. Abschluss bis einschließlich **17. November 2026** die Preise in der Tabelle; ab **18. November 2026, 0:00 Uhr** gelten von selbst **12,99 €**, **69 €** und **119 €** (Projektpreis 9 € und Kontingente bleiben). Quelle: `EINFUEHRUNG` in `functions/api/umgebung.js`. Bis dahin zeigen Startseite, Preisseite, Kasse und Textfassungen den Hinweis „Einführungspreis bis 17. November, danach …“; ab dem Stichtag nennen die festen Seiten die regulären Preise (`nachEinfuehrung()` in `functions/seo.js`), App und Betriebsbereich lesen sie aus `/api/status`. AGB (§ 6) und Nutzungsbedingungen (§ 4) nennen beide Zeiträume, Stand 18. Oktober 2026. Laufende Abos behalten bei Stripe den Preis, zu dem sie abgeschlossen wurden, bis zum nächsten Tarifwechsel; neue Preise legt der Server bei Stripe selbst an. Gesetzte Variablen `PREIS_AUFMASS_CENT`, `PREIS_ABO`, `PREIS_PLUS` schalten den Wechsel ab (Hinweis in `/api/status`). Einen „statt“-Preis, der nie verlangt wurde, zeigen wir bewusst nicht (irreführende Werbung, § 5 UWG); ein Einführungspreis ist zulässig, weil die regulären Preise am Stichtag tatsächlich gelten.
+
 | Wer | Was | Preis | Steuer |
 |---|---|---|---|
 | Hauseigentümer ohne Link | Aufmaßblatt als PDF, mit Code für den Fensterbauer, für das ganze Projekt (auch wenn später Fenster dazukommen) | **7,99 €** einmalig | brutto, inkl. 19 % MwSt. |

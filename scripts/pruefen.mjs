@@ -121,6 +121,7 @@ if (teil(2)) {
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar');
+  ok((await page.locator('.einf-chip').innerText()).trim() === 'Einführungspreis bis 17. November' && (await page.locator('.strip .einf').innerText()).includes('danach 12,99 €'), 'Startseite: Einführungspreis bis 17. November, danach 12,99 € (verschwindet am Stichtag von selbst)');
   await foto(page, 'portal-desktop');
   await page.click('.fx-pilot button.zu');
   await page.reload({ waitUntil: 'networkidle' });
@@ -1309,6 +1310,28 @@ if (teil(10)) {
   const httpKan = await probe('http://eeziframes.com/ratgeber/', { INDEXIERUNG: '1' });
   ok(um('http://eeziframes.com/ratgeber/?x=1') === '301 https://eeziframes.com/ratgeber/?x=1' && um('https://www.eeziframes.com/app/') === '301 https://eeziframes.com/app/' && um('http://www.eeziframes.com/') === '301 https://eeziframes.com/' && um('https://eeziframes.com/') === null && um('http://localhost:8788/') === null && um('http://eeziframes.com/', 'POST') === null && um('http://eeziframes.com/verifyforzoho.html') === null && um('https://eeziframes.com/ratgeber') === '301 https://eeziframes.com/ratgeber/' && um('https://eeziframes.com/ratgeber/fenster-ausmessen?x=1') === '301 https://eeziframes.com/ratgeber/fenster-ausmessen/?x=1' && um('https://eeziframes.com/index.html') === '301 https://eeziframes.com/' && um('http://www.eeziframes.com/app/index.html') === '301 https://eeziframes.com/app/' && um('https://eeziframes.com/assets/app.js') === null && um('https://eeziframes.com/bilder/messpunkte.svg') === null && um('https://eeziframes.com/zentrale') === null && ['/app', '/ratgeber', '/fuer-fensterbauer', '/impressum'].every((p) => routen.includes(p)) && httpKan.link === '<https://eeziframes.com/ratgeber/>; rel="canonical"' && httpKan.text.includes('content="https://eeziframes.com/og.png"'), 'Domain: http://, www., Seiten ohne Schrägstrich und …/index.html leiten dauerhaft (301) auf https://eeziframes.com/…/ um (nicht lokal, nicht POST, nicht die Bestätigungsdatei, keine Dateien); Canonical immer mit https');
   ok(wdev.robots === seo.SPERRE && /User-agent: \*\nDisallow: \/\n/.test(rbDev), 'Domain: die Cloudflare-Testadresse (…workers.dev) bleibt auch mit Freigabe gesperrt');
+
+  /* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): bis 17.11.2026 Startpreise und Hinweise, ab 18.11. 0:00 Uhr von selbst die regulären */
+  const umg = await import(new URL('../functions/api/umgebung.js', import.meta.url).href);
+  const VOR = '2026-11-17T23:59:59+01:00', NACH = '2026-11-18T00:00:00+01:00';
+  const kv = umg.konfig({ JETZT: VOR }), kn = umg.konfig({ JETZT: NACH }), ke = umg.konfig({ JETZT: VOR, PREIS_ABO: '49' });
+  ok(kv.preise.aufmass === 7.99 && kv.preise.abo.grund === 49 && kv.preise.plus === 79 && kv.einfuehrung && kv.einfuehrung.danach.aufmass === 12.99 && kn.preise.aufmass === 12.99 && kn.preise.abo.grund === 69 && kn.preise.plus === 119 && kn.preise.projekt === 9 && kn.einfuehrung === null && ke.einfuehrung === null && ke.hinweise.some((h) => /^PREIS_ABO:/.test(h)), 'Einführungspreis: bis 17.11. 7,99 €, 49 € und 79 €, ab 18.11. 0:00 Uhr 12,99 €, 69 € und 119 € (Projektpreis bleibt); gesetzte PREIS_… schalten den Wechsel ab und stehen als Hinweis in /api/status');
+  const einfFehler = [];
+  for (const s10 of seo.SEITEN) {
+    const datei = path10.join(WURZEL, 'web', s10.pfad, 'index.html'); if (!fs10.existsSync(datei)) continue;
+    const roh10 = fs10.readFileSync(datei, 'utf8');
+    const aus = async (jetzt) => { const r = await seo.behandeln(new Request('https://eeziframes.com' + s10.pfad, { headers: { 'if-none-match': '"alt"' } }), { INDEXIERUNG: '1', JETZT: jetzt }, async (req) => (req.headers.get('if-none-match') ? new Response(null, { status: 304, headers: { etag: '"alt"' } }) : new Response(roh10, { headers: { 'content-type': 'text/html; charset=utf-8', etag: '"alt"' } }))); return { status: r.status, etag: r.headers.get('etag'), text: r.status === 200 ? await r.text() : '' }; };
+    const vor = await aus(VOR), nach = await aus(NACH), recht = ['/agb/', '/nutzungsbedingungen/'].includes(s10.pfad);
+    if (vor.status !== 304) einfFehler.push(s10.pfad + ' (vorher kein 304)');
+    if (nach.status !== 200 || (nach.etag && !recht)) einfFehler.push(s10.pfad + ' (danach alte Fassung aus dem Browser-Cache möglich)');
+    if (recht) { if (!/7,99 € bei Kauf bis einschließlich 17\. November 2026|49 € im Monat bei Abschluss bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €|69 € im Monat bei Abschluss ab dem 18\. November 2026/.test(nach.text)) einfFehler.push(s10.pfad + ' (nennt nicht beide Zeiträume)'); continue; }
+    if (/7,99|class="einf"|49(&nbsp;|\u00a0| )€ im Monat|79(&nbsp;|\u00a0| )€|"price":"(7\.99|49\.00|79\.00)"/.test(nach.text)) einfFehler.push(s10.pfad + ' (alter Preis nach dem Stichtag)');
+    if (/7,99/.test(roh10) && !/12,99/.test(nach.text)) einfFehler.push(s10.pfad + ' (neuer Preis fehlt)');
+  }
+  const startRoh = fs10.readFileSync(path10.join(WURZEL, 'web/index.html'), 'utf8'), fbRoh = fs10.readFileSync(path10.join(WURZEL, 'web/fuer-fensterbauer/index.html'), 'utf8');
+  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && /Einführungspreis bis 17\. November 2026, danach 119&nbsp;€/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB und Nutzungsbedingungen nennen beide Zeiträume' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
+  const llVor = seo.llms('https://eeziframes.com', { JETZT: VOR }), llNach = seo.llms('https://eeziframes.com', { JETZT: NACH });
+  ok(/Einführungspreise bis 17\.11\.2026/.test(llVor) && !/Einführungspreis/.test(llNach) && llNach.includes('12,99 €') && llNach.includes('119 € im Monat'), 'llms.txt: Einführungspreise mit Stichtag, danach nur die regulären Preise');
 
   /* h) Ratgeber rund ums Aufmaß: Stand je Seite, Abbildungen, keine Eingaben, IndexNow, llms.txt, Glossar der App */
   const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -2970,7 +2993,7 @@ if (teil(17)) {
   ok(/id="widerrufsbelehrung"/.test(agb17) && /Sie können Ihr Widerrufsrecht auch online unter/.test(agb17) && /Eingangsbestätigung mit Informationen zum Inhalt der Widerrufserklärung sowie dem Datum und der Uhrzeit ihres Eingangs/.test(agb17) && /id="widerrufsformular"/.test(agb17) && /Erlöschen des Widerrufsrechts/.test(agb17) && /Bestätigung des Vertrags auf einem dauerhaften Datenträger/.test(agb17) && /7,99 €/.test(agb17) && /§ 19 UStG/.test(agb17), 'AGB: Widerrufsbelehrung mit Online-Funktion und Eingangsbestätigung, Erlöschen bei digitalen Inhalten, Muster-Widerrufsformular, Preis mit beiden Umsatzsteuer-Fällen');
   const konf17 = {}; new Function('window', fs17.readFileSync(path17.join(W17, 'web/config.js'), 'utf8'))(konf17);
   const pr17 = konf17.KONFIG.preise, nb17 = t17['/nutzungsbedingungen/'];
-  ok(/§ 14 BGB/.test(nb17) && /id="avv"/.test(nb17) && /Unterauftragsverarbeiter/.test(nb17) && /Technische und organisatorische Maßnahmen/.test(nb17) && ['ersten ' + pr17.frei + ' Projekte', pr17.projekt + ' € je Projekt', pr17.abo.grund + ' € im Monat mit ' + pr17.abo.inkl + ' Projekten', 'jedes weitere ' + pr17.abo.extra + ' €', pr17.plus + ' € im Monat'].every((t) => nb17.includes(t)), 'Nutzungsbedingungen für Fensterbauer: nur Unternehmer, Preise wie in config.js, Vertrag über die Auftragsverarbeitung mit Maßnahmen und Unterauftragsverarbeitern');
+  ok(/§ 14 BGB/.test(nb17) && /id="avv"/.test(nb17) && /Unterauftragsverarbeiter/.test(nb17) && /Technische und organisatorische Maßnahmen/.test(nb17) && ['ersten ' + pr17.frei + ' Projekte', pr17.projekt + ' € je Projekt', pr17.abo.grund + ' € im Monat bei Abschluss bis einschließlich', 'mit ' + pr17.abo.inkl + ' Projekten je Kalendermonat', 'jedes weitere ' + pr17.abo.extra + ' €', pr17.plus + ' € im Monat'].every((t) => nb17.includes(t)), 'Nutzungsbedingungen für Fensterbauer: nur Unternehmer, Preise wie in config.js, Vertrag über die Auftragsverarbeitung mit Maßnahmen und Unterauftragsverarbeitern');
   ok(/Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen/.test(t17['/datenschutz/']) && /id="widerruf"/.test(t17['/datenschutz/']) && /Resend \(Plus Five Five, Inc\./.test(t17['/datenschutz/']) && /Öffnungs- und Klickmessung ist ausgeschaltet/.test(t17['/datenschutz/']) && !/Brevo/.test(t17['/datenschutz/']) && /href="\/cookies\/"/.test(t17['/datenschutz/']), 'Datenschutz: Aufsichtsbehörde NRW, Abschnitt zur Widerrufsfunktion, E-Mail-Dienstleister, Verweis auf die Cookies-Seite');
   /* Cookies: jeder Speicher-Eintrag aus dem Code steht auf der Seite */
   const code17 = ['app.js', 'portal.js', 'gemeinsam.js'].map((f) => fs17.readFileSync(path17.join(W17, 'web/assets', f), 'utf8')).join('\n');

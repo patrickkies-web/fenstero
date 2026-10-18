@@ -7,8 +7,8 @@
    - verkaufStand(): Was vor dem Verkauf mit echtem Geld fehlt. Im Live-Modus von Stripe (sk_live_…) nimmt die Kasse erst an, wenn
      der Mailversand steht (Vertragsbestätigung, Eingangsbestätigung eines Widerrufs), die Umsatzsteuer ausdrücklich festgelegt ist,
      Konten laufen und in den Rechtstexten keine Platzhalter mehr stehen (E-Mail-Adresse, Telefonnummer). /api/status zeigt das. */
-export const AGB_STAND = '2026-10-16';
-export const NB_STAND = '2026-10-17';
+export const AGB_STAND = '2026-10-18';
+export const NB_STAND = '2026-10-18';
 export const ZUSTIMMUNG = 'Ich stimme ausdrücklich zu, dass eeziframes (Patrick Kies) vor Ablauf der Widerrufsfrist mit der Bereitstellung des Aufmaßblatts beginnt. Mir ist bekannt, dass ich durch diese Zustimmung mit Beginn der Bereitstellung mein Widerrufsrecht verliere.';
 
 const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];

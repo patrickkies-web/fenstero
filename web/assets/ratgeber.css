@@ -109,3 +109,5 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 
 /* Textfassung von Startseite und App (ohne JavaScript): eigener Bereich über die ganze Breite der App-Hülle */
 .app > .vorab { grid-column: 1 / -1; height: 100%; overflow-y: auto; background: var(--paper); color: var(--ink); font-size: 17px; line-height: 1.6 }
+/* Einführungspreis in den Textfassungen und auf der Seite für Fensterbauer; der Server nimmt ihn am Stichtag heraus (functions/seo.js) */
+.einf { font-weight: 700 }
