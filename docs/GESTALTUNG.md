@@ -11,7 +11,8 @@ eeziframes ist ein Präzisionswerkzeug: Schrift führt, das Fenster ist das Bild
 | Stelle | Text |
 |---|---|
 | Startseite, Hauseigentümer (einziges h1 der Startseite, auch in der Textfassung) | „Fenster ausmessen. Selbst. eezi.“ |
-| Startseite, Fensterbauer (Eyebrow) | „Für Fensterbauer · Erstaufmaß, ganz eezi“ |
+| Startseite, Hauseigentümer (Eyebrow) | „In Minuten zum Aufmaß für jeden Fensterbauer“ (sagt, was man bekommt; der Einführungspreis steht nur im Band ganz oben) |
+| Startseite und Seite für Fensterbauer (Eyebrow) | „Das Erstaufmaß kommt zu Ihnen, ganz eezi“ |
 | App, Startbild und Textfassung der App (Eyebrow) | „Fensterplanung, ganz eezi“ |
 | Ratgeber, Übersicht (Eyebrow) | „Ratgeber · Fensterplanung, ganz eezi“ |
 | Führung, letzter Schritt | „Fertig. Das war eezi.“ |

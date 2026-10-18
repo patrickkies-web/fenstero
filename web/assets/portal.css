@@ -201,11 +201,13 @@ button.item:active { transform: scale(.995) }
 .tabs .cnt { position: absolute; top: 2px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--ink); color: var(--paper); font-size: 13px; display: flex; align-items: center; justify-content: center; transform: scale(.85) }
 
 /* ---------- Startseite ---------- */
-.hero { position: relative; padding: clamp(28px, 6vw, 56px) 0 10px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 32px; align-items: center }
+.hero { position: relative; padding: clamp(16px, 3vw, 32px) 0 10px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 32px; align-items: center }
 .hero h1, .hero h2 { margin: 0; font-size: clamp(36px, 5vw, 44px); line-height: 1; font-weight: 900; letter-spacing: -.04em }
 .hero p { margin: 14px 0 0; font-size: 17px; line-height: 1.5; color: var(--ink2); max-width: 54ch }
 .hero .cta { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap }
 .hero p.hint { margin: 14px 0 0; font-size: 15px; color: var(--muted) }
+/* Zeile über der Überschrift: am Schreibtisch in einer Zeile, am Telefon gleichmäßig auf zwei verteilt */
+.hero p.eyebrow { max-width: none; text-wrap: balance }
 .hero h1 .w, .hero h2 .w { display: inline-block; opacity: 0; transform: translateY(8px); animation: wordin var(--t3) var(--e-out) forwards; animation-delay: calc(var(--i) * 50ms + 50ms) }
 @keyframes wordin { to { opacity: 1; transform: none } }
 .hero .lead { opacity: 0; animation: wordin var(--t3) .3s var(--e-out) forwards } .hero .cta { opacity: 0; animation: wordin var(--t3) .4s var(--e-out) forwards } .hero p.hint { opacity: 0; animation: wordin var(--t3) .5s var(--e-out) forwards }
@@ -222,8 +224,7 @@ button.item:active { transform: scale(.995) }
 .b2c-win .dim-eh { right: 4px; top: 56%; background: var(--el); animation-delay: 1.5s } .b2c-win .dim-ew { left: 50%; top: 4px; transform: translateX(-50%); background: var(--el); animation-delay: 1.8s }
 @keyframes dimin { from { opacity: 0; translate: 0 8px } to { opacity: 1; translate: 0 0 } }
 .b2c-chips { display: flex; flex-wrap: wrap; gap: 6px } .b2c-chips .badge { opacity: 0; animation: wordin var(--t3) var(--e-out) forwards } .b2c-chips .badge:nth-child(1) { animation-delay: 2.1s } .b2c-chips .badge:nth-child(2) { animation-delay: 2.25s } .b2c-chips .badge:nth-child(3) { animation-delay: 2.4s } .b2c-chips .badge:nth-child(4) { animation-delay: 2.7s }
-/* Einführungspreis: schwarzer Chip über der Zeile im Startbild, fette Zeile in Kachel und Preiskarte; verschwindet am Stichtag von selbst */
-.hero p.einf-chip { display: inline-flex; align-items: center; justify-self: start; align-self: start; width: max-content; max-width: 100%; min-height: 32px; padding: 4px 14px; border-radius: 999px; background: var(--primary); color: var(--on-primary); font-size: 14px; line-height: 1.3; font-weight: 800; letter-spacing: .01em; margin: 0 0 14px }
+/* Einführungspreis: fette Zeile in Kachel und Preiskarte (im Startbild nur das Band ganz oben, .einf-bar); verschwindet am Stichtag von selbst */
 .strip .st .einf { font-weight: 800; color: var(--fg) }
 .kcost .einf { margin: 4px 0 0; font-size: 15px; font-weight: 800; color: var(--fg) }
 .strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
