@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 416" width="480" height="416" role="img" aria-labelledby="t d">
+<title id="t">Aufmaß vor Ort oder per Link: wie viele Fahrten bis zum Auftrag</title>
+<desc id="d">Oben das Aufmaß vor Ort: eine Fahrt fürs Erstaufmaß, solange der Auftrag offen ist, und eine zweite Fahrt fürs Feinaufmaß nach dem Auftrag. Unten das Aufmaß per Link: Der Kunde misst selbst fürs Angebot, gefahren wird nur zum Feinaufmaß nach dem Auftrag.</desc>
+<defs><marker id="o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 1L9 5L0 9z" fill="#c2410c"/></marker></defs>
+<rect width="480" height="416" rx="16" fill="#ffffff"/>
+<rect x="16" y="16" width="448" height="184" rx="12" fill="#ffffff" stroke="#d6d4cc" stroke-width="1.5"/>
+<rect x="16" y="216" width="448" height="184" rx="12" fill="#ffffff" stroke="#d6d4cc" stroke-width="1.5"/>
+<line x1="36" y1="108" x2="394" y2="108" stroke="#c2410c" stroke-width="3" marker-end="url(#o)"/>
+<path d="M402 118V100L421 84L440 100V118Z" fill="#ecebe6" stroke="#141414" stroke-width="2" stroke-linejoin="round"/><rect x="415" y="106" width="12" height="12" fill="#ffffff" stroke="#141414" stroke-width="1.5"/>
+<line x1="36" y1="166" x2="394" y2="166" stroke="#c2410c" stroke-width="3" marker-end="url(#o)"/>
+<path d="M402 176V158L421 142L440 158V176Z" fill="#ecebe6" stroke="#141414" stroke-width="2" stroke-linejoin="round"/><rect x="415" y="164" width="12" height="12" fill="#ffffff" stroke="#141414" stroke-width="1.5"/>
+<line x1="36" y1="308" x2="398" y2="308" stroke="#1d4ed8" stroke-width="3" stroke-dasharray="8 6"/>
+<rect x="410" y="282" width="22" height="38" rx="4" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/><line x1="417" y1="314" x2="425" y2="314" stroke="#1d4ed8" stroke-width="2"/>
+<line x1="36" y1="366" x2="394" y2="366" stroke="#c2410c" stroke-width="3" marker-end="url(#o)"/>
+<path d="M402 376V358L421 342L440 358V376Z" fill="#ecebe6" stroke="#141414" stroke-width="2" stroke-linejoin="round"/><rect x="415" y="364" width="12" height="12" fill="#ffffff" stroke="#141414" stroke-width="1.5"/>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<text x="36" y="52" font-weight="700" fill="#c2410c">Aufmaß vor Ort: zwei Fahrten</text>
+<text x="36" y="252" font-weight="700" fill="#1d4ed8">Aufmaß per Link: eine Fahrt</text>
+<text x="36" y="88">1 · Erstaufmaß, Auftrag offen</text>
+<text x="36" y="146">2 · Feinaufmaß nach Auftrag</text>
+<text x="36" y="288">1 · Kunde misst selbst</text>
+<text x="36" y="346">2 · Feinaufmaß nach Auftrag</text>
+</g>
+</svg>

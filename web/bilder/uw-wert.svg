@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 370" width="480" height="370" role="img" aria-labelledby="t d">
+<title id="t">Woraus der Uw-Wert eines Fensters entsteht</title>
+<desc id="d">Ein Fenster von vorn: die Glasscheibe (Ug), der Rand der Scheibe mit dem Abstandhalter (Psi g) und der Rahmen (Uf). Zusammen ergeben sie den Uw-Wert des ganzen Fensters.</desc>
+<rect width="480" height="370" rx="16" fill="#ffffff"/>
+<rect x="36" y="28" width="196" height="256" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="62" y="54" width="144" height="204" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="68" y="60" width="132" height="192" fill="none" stroke="#c2410c" stroke-width="3" stroke-dasharray="8 5"/>
+<g stroke="#141414" stroke-width="1.5" fill="none">
+<path d="M134 110H282"/><path d="M200 172H282"/><path d="M49 240V262H282"/>
+</g>
+<g fill="#141414"><circle cx="134" cy="110" r="4"/><circle cx="200" cy="172" r="4"/><circle cx="49" cy="240" r="4"/></g>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="20" fill="#141414">
+<text x="292" y="104" font-weight="700" fill="#1d4ed8">Glas</text>
+<text x="292" y="128">U<tspan font-size="18" dy="5">g</tspan></text>
+<text x="292" y="166" font-weight="700" fill="#c2410c">Glasrand</text>
+<text x="292" y="190">Ψ<tspan font-size="18" dy="5">g</tspan><tspan dy="-5"> je Meter</tspan></text>
+<text x="292" y="256" font-weight="700" fill="#1d4ed8">Rahmen</text>
+<text x="292" y="280">U<tspan font-size="18" dy="5">f</tspan></text>
+<text x="240" y="326" text-anchor="middle" font-weight="700">Ganzes Fenster: U<tspan font-size="18" dy="5">w</tspan></text>
+<text x="240" y="352" text-anchor="middle">je kleiner, desto weniger Wärmeverlust</text>
+</g>
+</svg>

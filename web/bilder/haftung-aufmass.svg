@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
+<title id="t">Vom Erstaufmaß zur Bestellung: welches Maß wofür gilt</title>
+<desc id="d">Vier Schritte untereinander. Erstaufmaß und Angebot beruhen auf den Maßen des Kunden. Feinaufmaß und Freigabe des Bestellmaßes beruhen auf dem Maß des Betriebs; erst danach wird gefertigt.</desc>
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#141414"/></marker></defs>
+<rect width="480" height="400" rx="16" fill="#ffffff"/>
+<rect x="110" y="24" width="346" height="68" rx="10" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="110" y="116" width="346" height="68" rx="10" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="110" y="208" width="346" height="68" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<rect x="110" y="300" width="346" height="68" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<g stroke="#141414" stroke-width="1.5" marker-end="url(#p)">
+<line x1="283" y1="93" x2="283" y2="114"/><line x1="283" y1="185" x2="283" y2="206"/><line x1="283" y1="277" x2="283" y2="298"/>
+</g>
+<g stroke-width="3" fill="none">
+<path d="M92 28V180" stroke="#1d4ed8"/><path d="M92 212V364" stroke="#c2410c"/>
+</g>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<text x="66" y="104" text-anchor="middle" transform="rotate(-90 66 104)" fill="#1d4ed8" font-weight="700">fürs Angebot</text>
+<text x="66" y="288" text-anchor="middle" transform="rotate(-90 66 288)" fill="#c2410c" font-weight="700">für die Fertigung</text>
+<text x="128" y="52" font-weight="700">1 · Erstaufmaß</text><text x="128" y="78">Kunde misst, etwa per Link</text>
+<text x="128" y="144" font-weight="700">2 · Angebot</text><text x="128" y="170">aus Kundenmaßen und Fotos</text>
+<text x="128" y="236" font-weight="700">3 · Feinaufmaß</text><text x="128" y="262">Betrieb misst vor Ort nach</text>
+<text x="128" y="328" font-weight="700">4 · Bestellmaß freigeben</text><text x="128" y="354">erst dann fertigen lassen</text>
+</g>
+</svg>

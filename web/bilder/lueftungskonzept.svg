@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-labelledby="t d">
+<title id="t">Lüftung zum Feuchteschutz nach dem Fenstertausch</title>
+<desc id="d">Schnitt durch eine Wohnung: Außenluft strömt über einen Lüfter im Fensterrahmen in den Wohnraum, durch den Spalt unter der Tür ins Bad und wird dort von einem Abluftventilator nach draußen geführt, ohne dass jemand ein Fenster öffnet.</desc>
+<defs><marker id="p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 1L9 5L0 9z" fill="#1d4ed8"/></marker><marker id="o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 1L9 5L0 9z" fill="#c2410c"/></marker></defs>
+<rect width="480" height="360" rx="16" fill="#ffffff"/>
+<path d="M24 92H456V100H24Z" fill="#ecebe6"/>
+<rect x="24" y="92" width="22" height="196" fill="#ecebe6"/>
+<rect x="434" y="92" width="22" height="196" fill="#ecebe6"/>
+<rect x="24" y="280" width="432" height="10" fill="#ecebe6"/>
+<rect x="268" y="100" width="12" height="138" fill="#ecebe6"/>
+<rect x="26" y="146" width="18" height="86" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="26" y="138" width="18" height="8" fill="#1d4ed8"/>
+<circle cx="445" cy="132" r="13" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<path d="M445 121V143M434 132H456" stroke="#c2410c" stroke-width="2"/>
+<g fill="none" stroke-width="3">
+<path d="M4 142H70" stroke="#1d4ed8" marker-end="url(#p)"/>
+<path d="M90 160C150 200 200 262 300 262" stroke="#1d4ed8" marker-end="url(#p)"/>
+<path d="M330 250C380 230 410 170 420 140" stroke="#c2410c" marker-end="url(#o)"/>
+<path d="M458 132H476" stroke="#c2410c" marker-end="url(#o)"/>
+</g>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="20" fill="#141414">
+<text x="24" y="40" font-weight="700" fill="#1d4ed8">Zuluft</text>
+<text x="24" y="64">Lüfter im Fensterrahmen</text>
+<text x="456" y="40" text-anchor="end" font-weight="700" fill="#c2410c">Abluft</text>
+<text x="456" y="64" text-anchor="end">Ventilator im Bad</text>
+<text x="150" y="128" text-anchor="middle">Wohnen</text>
+<text x="360" y="200" text-anchor="middle">Bad</text>
+<text x="260" y="226" text-anchor="end" font-size="18">Türspalt</text>
+<text x="240" y="324" text-anchor="middle" font-weight="700">Feuchteschutz ohne Zutun</text>
+<text x="240" y="348" text-anchor="middle">auch wenn niemand ein Fenster öffnet</text>
+</g>
+</svg>

@@ -95,6 +95,12 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 @media (hover: hover) { .rg-fuss a:hover { color: var(--ink) } }
 /* „Vertrag widerrufen“ hervorgehoben (Widerrufsfunktion, § 356a BGB): Knopf mit Rand statt einfachem Textlink */
 .rg-fuss a.rg-widerruf { padding: 0 16px; border-radius: 999px; color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--ink) }
+/* Ratgeber und Seiten für Fensterbauer: drei Gruppen untereinander (scripts/ratgeber-fuss.mjs), die eigene Seite hervorgehoben */
+.rg-fuss-gruppen > div { display: block }
+.rg-fuss-gruppen nav { display: flex; flex-wrap: wrap; gap: 0 16px; padding: 10px 0 }
+.rg-fuss-gruppen nav + nav { border-top: 1px solid var(--line) }
+.rg-fuss-titel { flex-basis: 100%; margin: 4px 0 0; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.rg-fuss a[aria-current] { color: var(--ink); font-weight: 700 }
 
 @media (max-width: 600px) {
   .rg h1 { font-size: 32px }

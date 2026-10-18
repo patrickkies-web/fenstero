@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 350" width="480" height="350" role="img" aria-labelledby="t d">
+<title id="t">Kellerfenster mit Lichtschacht im Schnitt</title>
+<desc id="d">Schnitt durch die Kellerwand: Das Kellerfenster (blau) sitzt in der Zarge oder Maueröffnung (orange) unter dem Gelände. Davor liegt außen der Lichtschacht mit Gitterrost oben. Gemessen werden die Öffnung, die Wandstärke und der Lichtschacht.</desc>
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#141414"/></marker></defs>
+<rect width="480" height="350" rx="16" fill="#ffffff"/>
+<path d="M240 92H456V326H240Z" fill="#e7e2d6"/>
+<path d="M240 92H384V244H240Z" fill="#ffffff"/>
+<path d="M376 92H386V250H240V242H376Z" fill="#cfcdc4" stroke="#141414" stroke-width="1.5"/>
+<rect x="170" y="24" width="70" height="302" fill="#ecebe6" stroke="#141414" stroke-width="1.5"/>
+<rect x="170" y="124" width="70" height="88" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<rect x="196" y="132" width="20" height="72" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<g stroke="#141414" stroke-width="2.5"><line x1="240" y1="89" x2="386" y2="89"/></g>
+<g stroke="#141414" stroke-width="1.5"><path d="M252 84V94M264 84V94M276 84V94M288 84V94M300 84V94M312 84V94M324 84V94M336 84V94M348 84V94M360 84V94M372 84V94"/></g>
+<line x1="386" y1="92" x2="456" y2="92" stroke="#141414" stroke-width="2"/>
+<g stroke="#141414" stroke-width="1.5" marker-start="url(#p)" marker-end="url(#p)">
+<line x1="171" y1="290" x2="239" y2="290"/>
+<line x1="242" y1="226" x2="374" y2="226"/>
+</g>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<text x="36" y="60" font-weight="700">Keller</text>
+<text x="444" y="60" text-anchor="end" font-weight="700">außen</text>
+<text x="313" y="74" text-anchor="middle">Gitterrost</text>
+<text x="36" y="160" fill="#1d4ed8" font-weight="700">Kellerfenster</text>
+<text x="36" y="188" fill="#c2410c">in Zarge oder</text>
+<text x="36" y="210" fill="#c2410c">Maueröffnung</text>
+<text x="310" y="150" text-anchor="middle">Lichtschacht</text>
+<text x="308" y="214" text-anchor="middle">Tiefe</text>
+<text x="162" y="296" text-anchor="end">Wandstärke</text>
+<text x="412" y="290" text-anchor="middle">Erdreich</text>
+</g>
+</svg>
