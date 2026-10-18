@@ -122,7 +122,7 @@ if (teil(2)) {
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar');
   ok(await page.locator('.einf-bar').first().isVisible() && /Einführungspreis bis 17\. November: Aufmaßblatt 7,99\s€/.test(await page.locator('.einf-bar').first().innerText()) && /Noch \d+ Tage|Nur noch heute/.test(await page.locator('.einf-bar .rest').first().innerText()), 'Startseite: Banner zum Einführungspreis ganz oben, mit Countdown');
-  ok(await page.locator('.hero .einf-chip').count() === 0 && (await page.locator('.hero.b2c .eyebrow').innerText()).trim().toLowerCase() === 'in minuten zum aufmaß für jeden fensterbauer' && (await page.locator('.strip .einf').innerText()).includes('danach 12,99 €'), 'Startseite: Einführungspreis nur im Band ganz oben und in der Preiskachel (danach 12,99 €), im Startbild direkt die Zeile „In Minuten zum Aufmaß für jeden Fensterbauer“');
+  ok(await page.locator('.hero .einf-chip').count() === 0 && (await page.locator('.hero.b2c .eyebrow').textContent()).trim() === 'In Minuten zum Aufmaß für jeden Fensterbauer' && (await page.locator('.strip .einf').innerText()).includes('danach 12,99 €'), 'Startseite: Einführungspreis nur im Band ganz oben und in der Preiskachel (danach 12,99 €), im Startbild direkt die Zeile „In Minuten zum Aufmaß für jeden Fensterbauer“');
   await foto(page, 'portal-desktop');
   await page.click('.fx-pilot button.zu');
   await page.reload({ waitUntil: 'networkidle' });
