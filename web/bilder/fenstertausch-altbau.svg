@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 370" width="480" height="370" role="img" aria-labelledby="t d">
+<title id="t">Laibung im Altbau nach dem Fenstertausch, von oben gesehen</title>
+<desc id="d">Schnitt von oben durch eine dicke Altbauwand mit neuem Fenster in der Mitte der Laibung. Links ohne Dämmung: Die innere Laibung bleibt kalt, dort droht Schimmel. Rechts mit Laibungsdämmung: Die Oberfläche bleibt wärmer.</desc>
+<defs><pattern id="h" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#ffffff"/><path d="M0 0V8" stroke="#c2410c" stroke-width="2"/></pattern></defs>
+<rect width="480" height="370" rx="16" fill="#ffffff"/>
+<rect x="24" y="96" width="146" height="150" fill="#ecebe6"/>
+<rect x="310" y="96" width="146" height="150" fill="#ecebe6"/>
+<rect x="170" y="160" width="140" height="22" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="170" y="152" width="16" height="38" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="294" y="152" width="16" height="38" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="292" y="191" width="18" height="55" fill="url(#h)" stroke="#c2410c" stroke-width="1.5"/>
+<circle cx="170" cy="216" r="20" fill="none" stroke="#c2410c" stroke-width="3"/>
+<g stroke="#141414" stroke-width="1.5" fill="none"><path d="M156 230L110 282"/><path d="M301 246L360 282"/></g>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="20" fill="#141414">
+<text x="240" y="40" text-anchor="middle" font-weight="700">außen</text>
+<text x="240" y="66" text-anchor="middle" font-size="18">dicke Altbauwand, ungedämmt</text>
+<text x="240" y="142" text-anchor="middle" fill="#1d4ed8" font-weight="700">neues Fenster</text>
+<text x="240" y="236" text-anchor="middle" font-weight="700">innen</text>
+<text x="24" y="306" font-weight="700" fill="#c2410c">kalte Laibung</text>
+<text x="24" y="332">hier droht Schimmel</text>
+<text x="456" y="306" text-anchor="end" font-weight="700" fill="#c2410c">Laibungsdämmung</text>
+<text x="456" y="332" text-anchor="end">Oberfläche wärmer</text>
+</g>
+</svg>

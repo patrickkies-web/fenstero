@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 350" width="480" height="350" role="img" aria-labelledby="t d">
+<title id="t">Fensteröffnung im 12,5-cm-Raster</title>
+<desc id="d">Mauerwerk im Raster von 12,5 cm (Stein plus Fuge). Die Öffnung (orange) ist acht Raster breit plus 1 cm, also 101 cm; darin das Fenster (blau), rundum um die Fuge kleiner.</desc>
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#141414"/></marker></defs>
+<rect width="480" height="350" rx="16" fill="#ffffff"/>
+<rect x="24" y="24" width="432" height="232" fill="#ecebe6"/>
+<g stroke="#d4d2ca" stroke-width="2">
+<line x1="24" y1="53" x2="456" y2="53"/><line x1="24" y1="82" x2="456" y2="82"/><line x1="24" y1="111" x2="456" y2="111"/><line x1="24" y1="140" x2="456" y2="140"/><line x1="24" y1="169" x2="456" y2="169"/><line x1="24" y1="198" x2="456" y2="198"/><line x1="24" y1="227" x2="456" y2="227"/>
+<path d="M40 24V53M90 24V53M390 24V53M440 24V53M65 53V82M115 53V82M365 53V82M415 53V82M40 82V111M90 82V111M390 82V111M440 82V111M65 111V140M115 111V140M365 111V140M415 111V140M40 140V169M90 140V169M390 140V169M440 140V169M65 169V198M115 169V198M365 169V198M415 169V198M40 198V227M90 198V227M390 198V227M440 198V227M65 227V256M115 227V256M365 227V256M415 227V256"/>
+</g>
+<rect x="139" y="53" width="202" height="145" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<rect x="151" y="65" width="178" height="121" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<line x1="240" y1="65" x2="240" y2="186" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="161" y="208" width="158" height="40" rx="6" fill="#ffffff"/>
+<line x1="140" y1="214" x2="340" y2="214" stroke="#141414" stroke-width="1.5" marker-start="url(#p)" marker-end="url(#p)"/>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<text x="240" y="240" text-anchor="middle" fill="#c2410c" font-weight="700">Öffnung 101 cm</text>
+<text x="240" y="292" text-anchor="middle" font-weight="700">8 × 12,5 cm + 1 cm = 101 cm</text>
+<text x="240" y="322" text-anchor="middle">Raster 12,5 cm: Stein 11,5 cm + Fuge 1 cm</text>
+</g>
+</svg>
