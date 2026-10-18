@@ -319,7 +319,9 @@ function render() {
   const canBack = S.hist.length > 0 || (!!role && !!PARENT[S.screen]) || (S.screen === 'reg' && !!S.reg && S.reg.step > 0);
   const backBtn = '<button type="button" class="back" data-act="back" aria-label="Zurück"><svg width="10" height="17" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Zurück</span></button>';
   const logo = '<button type="button" class="logo-s" data-act="nav" data-v="landing"><span class="lm">' + LOGO(32) + '</span>' + WM() + '</button>';
-  h += '<div class="main"><header class="top' + (out ? ' mit-ansicht' : '') + '">' + (canBack ? backBtn : out ? logo : '') + (out ? umschalter() : '') + (out && S.screen === 'landing' ? '<div class="top-h"></div>' : '<h1>' + esc(view.title || TITLES[S.screen] || '') + '</h1>');
+  /* Einführungspreis: Banner ganz oben, für Besucher je nach Ansicht, angemeldet nur im Tarif Start (gemeinsam.js EinfBanner) */
+  const einfZeigen = S.screen !== 'tour' && (out || X.konto(A()) === 'service'), einfArt = out ? ansicht() : 'betrieb';
+  h += '<div class="main">' + (einfZeigen ? window.EinfBanner(einfArt, einfArt === 'kunde' ? { href: APP_OPEN } : { act: 'go', v: 'preise' }) : '') + '<header class="top' + (out ? ' mit-ansicht' : '') + '">' + (canBack ? backBtn : out ? logo : '') + (out ? umschalter() : '') + (out && S.screen === 'landing' ? '<div class="top-h"></div>' : '<h1>' + esc(view.title || TITLES[S.screen] || '') + '</h1>');
   /* Knöpfe nur für die gewählte Ansicht: Hauseigentümer messen in der App, Fensterbauer melden sich an oder starten ein Konto */
   if (out) h += ansicht() === 'kunde'
     ? '<a class="btn small ghost hide-s" href="/ratgeber/">Ratgeber</a><a class="btn small primary" href="' + APP_OPEN + '">' + (eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Fenster ausmessen') + '</a>'

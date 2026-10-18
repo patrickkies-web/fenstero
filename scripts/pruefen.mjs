@@ -121,6 +121,7 @@ if (teil(2)) {
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar');
+  ok(await page.locator('.einf-bar').first().isVisible() && /Einführungspreis bis 17\. November: Aufmaßblatt 7,99\s€/.test(await page.locator('.einf-bar').first().innerText()) && /Noch \d+ Tage|Nur noch heute/.test(await page.locator('.einf-bar .rest').first().innerText()), 'Startseite: Banner zum Einführungspreis ganz oben, mit Countdown');
   ok((await page.locator('.einf-chip').innerText()).trim() === 'Einführungspreis bis 17. November' && (await page.locator('.strip .einf').innerText()).includes('danach 12,99 €'), 'Startseite: Einführungspreis bis 17. November, danach 12,99 € (verschwindet am Stichtag von selbst)');
   await foto(page, 'portal-desktop');
   await page.click('.fx-pilot button.zu');
@@ -1322,7 +1323,9 @@ if (teil(10)) {
     const roh10 = fs10.readFileSync(datei, 'utf8');
     const aus = async (jetzt) => { const r = await seo.behandeln(new Request('https://eeziframes.com' + s10.pfad, { headers: { 'if-none-match': '"alt"' } }), { INDEXIERUNG: '1', JETZT: jetzt }, async (req) => (req.headers.get('if-none-match') ? new Response(null, { status: 304, headers: { etag: '"alt"' } }) : new Response(roh10, { headers: { 'content-type': 'text/html; charset=utf-8', etag: '"alt"' } }))); return { status: r.status, etag: r.headers.get('etag'), text: r.status === 200 ? await r.text() : '' }; };
     const vor = await aus(VOR), nach = await aus(NACH), recht = ['/agb/', '/nutzungsbedingungen/'].includes(s10.pfad);
-    if (vor.status !== 304) einfFehler.push(s10.pfad + ' (vorher kein 304)');
+    const mitBanner = /^\/(ratgeber|fuer-fensterbauer)\//.test(s10.pfad);
+    if (mitBanner ? (vor.status !== 200 || vor.etag || !/<a class="einf-bar" href="[^"]+"><span><span class="txt"><b>Einführungspreise? bis 17\. November:<\/b>[\s\S]*?<span class="rest">Nur noch heute<\/span>/.test(vor.text)) : vor.status !== 304) einfFehler.push(s10.pfad + (mitBanner ? ' (vorher kein Banner mit Countdown oder alte Fassung aus dem Browser-Cache möglich)' : ' (vorher kein 304)'));
+    if (/einf-bar/.test(nach.text)) einfFehler.push(s10.pfad + ' (Banner nach dem Stichtag)');
     if (nach.status !== 200 || (nach.etag && !recht)) einfFehler.push(s10.pfad + ' (danach alte Fassung aus dem Browser-Cache möglich)');
     if (recht) { if (!/7,99 € bei Kauf bis einschließlich 17\. November 2026|49 € im Monat bei Abschluss bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €|69 € im Monat bei Abschluss ab dem 18\. November 2026/.test(nach.text)) einfFehler.push(s10.pfad + ' (nennt nicht beide Zeiträume)'); continue; }
     if (/7,99|class="einf"|49(&nbsp;|\u00a0| )€ im Monat|79(&nbsp;|\u00a0| )€|"price":"(7\.99|49\.00|79\.00)"/.test(nach.text)) einfFehler.push(s10.pfad + ' (alter Preis nach dem Stichtag)');
