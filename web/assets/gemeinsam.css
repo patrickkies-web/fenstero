@@ -124,7 +124,7 @@ a.link { text-decoration: underline }
 .einf-bar .rest { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 800; white-space: nowrap }
 .einf-bar .los { font-weight: 800; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap }
 .einf-bar:hover .los, .einf-bar:focus-visible .los { text-decoration-thickness: 2px }
-@media (max-width: 560px) { .einf-bar > span { font-size: 14px; gap: 6px 10px; padding: 10px 12px } .einf-bar .spaeter { display: none } }
+@media (max-width: 560px) { .einf-bar > span { gap: 6px 10px; padding: 10px 12px } .einf-bar .spaeter { display: none } }
 .fx-pilot { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px 10px 16px; background: var(--ink); color: var(--paper); font-family: var(--font); font-size: 15px; line-height: 1.45 }
 .fx-pilot p { flex: 1; min-width: 0; max-width: 1040px; margin: 0 auto }
 .fx-pilot b { font-weight: 800 }
