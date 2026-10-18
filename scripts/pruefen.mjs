@@ -2832,6 +2832,31 @@ if (teil(16)) {
   await a16.evaluate(() => { S.q = 'einbau'; S.win.sart = 'rollladen'; S.win.roll = 'aufsatz'; S.screen = 'frage'; render(true); }); await a16.waitForTimeout(200);
   ok(/Laut Foto vorhanden: Einbaukasten innen im Sturz/.test(await a16.evaluate(() => document.querySelector('.hd').textContent)), 'Kastenfrage nennt den Kasten, den die KI auf dem Foto erkannt hat');
 
+  /* e2) Ohne Foto weiter: Hinweis, warum ein Foto besser ist, abschaltbar; neue Öffnung ohne Einzeichnen; Klärungsliste für den Betrieb */
+  await a16.evaluate(() => { localStorage.removeItem('aufmass.ohnefoto.zu'); newWin(); go('fotos'); }); await a16.waitForTimeout(250);
+  const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.bb button')).map((b) => b.className + ':' + b.textContent).join('|'));
+  await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
+  const of1 = await a16.evaluate(() => ({ text: (document.querySelector('.sheet.ofoto') || {}).textContent || '', screen: S.screen }));
+  await a16.check('.sheet.ofoto input[data-in="ohnefoto-zu"]');
+  await a16.click('.sheet.ofoto [data-act="ohne-foto-weiter"]'); await a16.waitForTimeout(250);
+  const of2 = await a16.evaluate(() => ({ screen: S.screen, ohne: S.win.ohneFoto, zu: localStorage.getItem('aufmass.ohnefoto.zu'), blatt: !!document.querySelector('.sheet.ofoto') }));
+  await a16.evaluate(() => { S.win.neu = true; go('fotos'); }); await a16.waitForTimeout(200);
+  await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
+  const of3 = await a16.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.sheet.ofoto'), zurueck: SCREENS.planmasse().back[1], einbau: (specRows(S.win).find((r) => r.k === 'Einbau') || {}).v }));
+  await a16.evaluate(() => { localStorage.removeItem('aufmass.ohnefoto.zu'); newWin(); go('fotos'); }); await a16.waitForTimeout(200);
+  await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
+  await a16.setInputFiles('.sheet.ofoto input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg16 }); await a16.waitForTimeout(400);
+  const of4 = await a16.evaluate(() => ({ blatt: !!document.querySelector('.sheet.ofoto'), foto: !!S.photos.in, fotos: S.win.fotos, weiter: (document.querySelector('.bb .btn.primary') || {}).textContent || '' }));
+  const ofw = (o) => AW16.mk(Object.assign({ ohneFoto: true }, o)), kl16o = (wins) => AW16.klaerung(wins, {}).map((r) => r.k + ': ' + r.v).join('|');
+  const of5 = { eins: kl16o([ofw({ name: 'Bad' })]), alle: kl16o([ofw(), ofw({ neu: true })]), kurz: AW16.klaerKurz([ofw(), AW16.mk({}), ofw({ fotos: 2 }), ofw()], {}).join(', '), nachgereicht: AW16.klaerung([ofw({ fotos: 1 })], {}).length, ohneWahl: AW16.klaerung([AW16.mk({})], {}).length };
+  const ent16 = await import(new URL('../functions/api/entwurf.js', import.meta.url).href), wo16 = { name: 'X', mo: { hm: 1200 } }, wo16b = Object.assign({}, wo16, { ohneFoto: true });
+  const of6 = (await a16.evaluate(([a, b]) => aenderungFp(a) === aenderungFp(b) && fensterFp(a) !== fensterFp(b), [wo16, wo16b])) && ent16.aenderungFp(wo16) === ent16.aenderungFp(wo16b);
+  ok(of0 === 'btn ghost:Ohne Foto weiter' && of1.screen === 'fotos' && /Mit Foto wird dein Aufmaß besser\./.test(of1.text) && /Rollladenkasten, Laibung, Fensterbänke und Fassade/.test(of1.text) && /Diesen Hinweis nicht mehr anzeigen/.test(of1.text) && /Foto machen/.test(of1.text) &&
+    of2.screen === 'messen' && of2.ohne === true && of2.zu === '1' && !of2.blatt && of3.screen === 'planmasse' && !of3.blatt && of3.zurueck === 'fotos' && /ohne Foto, Lage nicht eingezeichnet/.test(of3.einbau) &&
+    !of4.blatt && of4.foto && of4.fotos === 1 && /Weiter zum Messen/.test(of4.weiter) &&
+    of5.eins === 'Pos. 1 Bad: Ohne Fotos erfasst: Einbausituation (Rollladenkasten, Laibung, Fensterbänke, Fassade) vor Ort aufnehmen.' && /^Pos\. 2: Neue Öffnung.*\|Alle Positionen: Ohne Fotos erfasst: .* und Lage der neuen Öffnung vor Ort aufnehmen\.$/.test(of5.alle) && of5.kurz === 'Ohne Fotos (Pos. 1, 4)' && of5.nachgereicht === 0 && of5.ohneWahl === 0 && of6,
+    'Ohne Foto weiter: unten nur dieser Knopf, Hinweis warum ein Foto besser ist, „Nicht mehr anzeigen“ hält (aufmass.ohnefoto.zu), neue Öffnung ohne Einzeichnen mit Rückweg zu den Fotos, „Foto machen“ öffnet die Kamera und schließt den Hinweis; Klärungsliste „Ohne Fotos“ je Position oder für alle, nicht nach einem nachgereichten Foto; die Wahl zählt in App und Server nicht als Änderung');
+
   /* f) Gestaltung übernehmen */
   await a16.evaluate((MO) => {
     const a = demoProject(); a.forEach((x) => altAngleichen(x)); a[0].bars = presetBars('kreuz', a[0].sashes.length); a[0].preset = 'kreuz'; a[0].sart = 'raffstore'; a[0].sfarbe = 'anthrazit'; a[0].offen = { fba: true };
@@ -2946,7 +2971,7 @@ if (teil(16)) {
     const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
     const groessen = new Set(), klein = [];
     document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.w3d')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
-    document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.closest('.w3d') || el.matches('.ulink') || el.closest('.sheet')) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
+    document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.closest('.w3d') || el.matches('.ulink') || el.closest('.sheet')) return; const h = (el.matches('input') && el.closest('label') || el).getBoundingClientRect().height; /* ein Feld im Label: getippt wird das Label (Foto-Kachel) */ if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
     return { groessen: Array.from(groessen).sort((x, y) => x - y), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
   });
   const GR16 = [13, 15, 17, 24, 32, 40], befund16 = [];
@@ -2970,6 +2995,9 @@ if (teil(16)) {
     await zeige('Fußboden', frage16, ['boden', 'balkon', {}, mo16]);
     await zeige('PSK-Tür', frage16, ['pskS', 'psk', {}, mo16]);
     await zeige('Maße prüfen', () => { const w = Object.assign(baseWin(), { name: 'Küche', w: 1410, h: 1230, mo: { hm: 1290, hl: 1290, hr: 1290, wm: 1470, wt: 1470, wb: 1470 }, el: { w: 1410, h: 1230 }, ki: { auto: true, chips: [], rows: [], hints: [], pruefen: [], verh: 0.87 } }); S.win = w; S.screen = 'ergebnis'; render(true); });
+    await zeige('Fotos ohne Foto', () => { S.windows = []; newWin(); go('fotos'); });
+    await zeige('Hinweis ohne Foto', () => { S.ohneFotoFrage = true; render(); });
+    await zeige('Hinweis ohne Foto, neue Öffnung', () => { S.win.neu = true; S.ohneFotoFrage = true; render(); });
     await zeige('Lüftung', () => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0, { total: 4 }); go('anfrage'); });
     await zeige('Förderung', () => { S.proj.foerdweg = 'steuer'; go('anfrage2'); });
     if (dunkel) await foto(s, 'app-foerderung-dunkel');

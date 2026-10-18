@@ -174,6 +174,8 @@
       return { wert: 0.95, grund: '' };
     }
     const uwText = (z) => (z ? 'Uw höchstens ' + String(z.wert).replace('.', ',') + ' W/(m²K)' + (z.grund ? ' (' + z.grund + ')' : '') : '');
+    /* Ohne Fotos erfasst: Der Kunde hat im Foto-Schritt „Ohne Foto weiter“ gewählt und bisher kein Foto nachgereicht */
+    const ohneFotos = (w) => !!(w && w.ohneFoto) && !num(w.fotos);
     /* ---------- Maße gegen das Foto ----------
        Die KI schätzt aus dem Innenfoto das Seitenverhältnis des Fensterelements (Breite : Höhe, Schrägsicht herausgerechnet). Weicht es
        stark von den Handmaßen ab, sind Breite und Höhe vertauscht (Kehrwert passt) oder ein Maß stimmt nicht. Großzügige Grenzen,
@@ -218,7 +220,7 @@
         ['Höhen', 'links ' + th(mo.hl) + ' · Mitte ' + th(mo.hm) + ' · rechts ' + th(mo.hr)],
         [istTuer(w) ? 'Türelement' : 'Fensterelement', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' + (w.neu ? ' (Wunschmaß)' : '') : 'nicht gemessen'],
         ['Lage', (w.name || 'ohne Raum') + ', ' + (lab('etage', w.etage) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
-        ['Einbau', w.neu ? 'Neue Öffnung: Lage vom Kunden auf dem Foto eingezeichnet, Maße sind Wunschmaße. Sturz und Statik vor dem Durchbruch prüfen.' : 'Austausch, Feinaufmaß vor Ort'],
+        ['Einbau', w.neu ? 'Neue Öffnung: ' + (ohneFotos(w) ? 'ohne Foto, Lage nicht eingezeichnet' : 'Lage vom Kunden auf dem Foto eingezeichnet') + ', Maße sind Wunschmaße. Sturz und Statik vor dem Durchbruch prüfen.' : 'Austausch' + (ohneFotos(w) ? ' ohne Fotos' : '') + ', Feinaufmaß vor Ort'],
         ['Element', lab('art', art) || 'Fenster'],
         ['Öffnung', opening(w) + (w.richtung === 'aussen' && !istTuer(w) && art !== 'fest' ? ', öffnet nach außen' : '')],
         ['Form, Material', (lab('form', w.form) || 'Rechteck') + ', ' + (istOffen(w, 'material') ? 'Material ' + OFFEN_TEXT : lab('material', w.material) || 'Kunststoff')],
@@ -254,6 +256,9 @@
       const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), tot = num(p.total);
       if (tot && nE > tot / 3) dazu('Lüftung', 'Lüftungskonzept nach DIN 1946-6 erforderlich: ' + nE + ' von ' + tot + ' Fenstern werden getauscht, mehr als ein Drittel.', 'pflicht', 'Lüftungskonzept');
       wins.forEach((w, i) => { if (w.neu) dazu(pos(w, i), 'Neue Öffnung: Sturz und Statik vor dem Durchbruch klären.', 'pflicht', 'Sturz und Statik', i); });
+      /* Ohne Fotos: Positionen in einer Zeile, damit ein Aufmaß ganz ohne Fotos die Liste nicht füllt */
+      const ohne = []; wins.forEach((w, i) => { if (ohneFotos(w)) ohne.push(i); });
+      if (ohne.length) dazu(ohne.length === wins.length && wins.length > 1 ? 'Alle Positionen' : ohne.length === 1 ? pos(wins[ohne[0]], ohne[0]) : 'Pos. ' + ohne.map((i) => i + 1).join(', '), 'Ohne Fotos erfasst: Einbausituation (Rollladenkasten, Laibung, Fensterbänke, Fassade)' + (ohne.some((i) => wins[i].neu) ? ' und Lage der neuen Öffnung' : '') + ' vor Ort aufnehmen.', 'pruefen', 'Ohne Fotos', ohne.length === 1 ? ohne[0] : ohne);
       const fw = foerdWeg(p);
       if (fw === 'bafa') dazu('Förderung', 'BAFA-Zuschuss gewünscht: Energieeffizienz-Experte einbinden, Antrag vor Beginn, Vertrag nur mit Förderklausel. Uw-Zielwerte bei den Positionen.', 'foerder', 'Förderung BAFA');
       else if (fw === 'steuer') dazu('Förderung', 'Steuerbonus nach § 35c EStG gewünscht: Bescheinigung nach amtlichem Muster vom Fachbetrieb. Uw-Zielwerte bei den Positionen.', 'foerder', 'Steuerbonus');
@@ -275,7 +280,7 @@
     function klaerKurz(wins, p) {
       wins = wins || [];
       const map = new Map(), add = (key, i) => { if (!map.has(key)) map.set(key, []); if (i != null && map.get(key).indexOf(i) < 0) map.get(key).push(i); };
-      klaerung(wins, p).forEach((r) => { if (r.art !== 'offen') add(r.kurz, r.pos); });
+      klaerung(wins, p).forEach((r) => { if (r.art !== 'offen') (Array.isArray(r.pos) ? r.pos : [r.pos]).forEach((i) => add(r.kurz, i)); });
       wins.forEach((w, i) => offenListe(w).forEach((k) => add(OFFEN_NAME[k], i)));
       return Array.from(map.entries()).map((e) => e[0] + (e[1].length ? ' (' + (e[1].length === wins.length && wins.length > 1 ? 'alle' : 'Pos. ' + e[1].sort((a, b) => a - b).map((i) => i + 1).join(', ')) + ')' : ''));
     }
@@ -316,7 +321,7 @@
     }
     return { OPT: OPT, TYP: TYP, lab: lab, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, rcText: rcText,
-      absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz };
+      absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz };
   })();
 
   /* ---------- Abrechnung ---------- */

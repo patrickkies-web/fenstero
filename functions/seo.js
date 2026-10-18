@@ -32,7 +32,7 @@ export const SEITEN = [
   { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-17' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-17' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-18' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ];
 
