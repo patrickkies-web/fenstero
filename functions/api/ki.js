@@ -18,6 +18,9 @@
 import { erlaubt as bremse, quelle } from './umgebung.js';
 
 const MODELL = 'claude-sonnet-5-5';
+/* Ein echter Befund (bis zu 12 Zeilen, Hinweise, Prüfpunkte, Fachangaben) braucht oft mehr als 2.000 Tokens; abgeschnitten wäre das
+   JSON unlesbar und die App bliebe ohne Auswertung. Bezahlt wird nur, was das Modell wirklich schreibt. */
+const MAX_TOKENS = 8000;
 const MAX_BILD = 3000000;            // Zeichen Base64, etwa 2,2 MB Bild (die App schickt meist unter 0,7 MB)
 const FENSTER_MS = 10 * 60 * 1000;   // Bremse gegen Missbrauch: höchstens 40 Anfragen je 10 Minuten und Anschluss (IPv6 je /64)
 const MAX_ANFRAGEN = 40;             // gezählt nur im Arbeitsspeicher dieser Instanz (umgebung.js), wird nirgends gespeichert
@@ -165,7 +168,7 @@ export async function onRequestPost({ request, env }) {
 
   const modell = env.KI_MODELL || env.KI_MODELL_GENAU || MODELL;
   /* Anfrage als Text zusammensetzen: spart Rechenzeit beim großen Bild. Auftrag als System, im Nutzerteil erst das Bild, dann ein Satz dazu. */
-  const body = '{"model":' + JSON.stringify(modell) + ',"max_tokens":2000,"system":' + JSON.stringify(auftrag(aufgabe, seite)) + ',"messages":[{"role":"user","content":[' +
+  const body = '{"model":' + JSON.stringify(modell) + ',"max_tokens":' + MAX_TOKENS + ',"system":' + JSON.stringify(auftrag(aufgabe, seite)) + ',"messages":[{"role":"user","content":[' +
     '{"type":"image","source":{"type":"base64","media_type":"image/jpeg","data":"' + bild + '"}},' +
     '{"type":"text","text":' + JSON.stringify(kurz(aufgabe, seite)) + '}]}]}';
 
@@ -188,6 +191,7 @@ export async function onRequestPost({ request, env }) {
     return antwort({ ok: false, fehler: /image/i.test(msg) ? 'image_rejected' : 'error' }, 502);
   }
   if (data && data.stop_reason === 'refusal') return antwort({ ok: false, fehler: 'refused' }, 422);
+  if (data && data.stop_reason === 'max_tokens') console.log('KI-Antwort abgeschnitten', modell, MAX_TOKENS);
   const text = (data && Array.isArray(data.content) ? data.content : []).filter((b) => b && b.type === 'text').map((b) => b.text).join('\n');
   const daten = jsonAusText(text);
   if (!daten) return antwort({ ok: false, fehler: 'error' }, 502);
