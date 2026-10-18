@@ -327,6 +327,17 @@
     if (typeof window !== 'undefined' && window.KONFIG && window.KONFIG.preise) PREISE = Object.assign({}, PREISE, window.KONFIG.preise, { abo: Object.assign({}, PREISE.abo, window.KONFIG.preise.abo || {}) });
     function setPreise(p) { if (!p) return PREISE; PREISE = Object.assign({}, PREISE, p, { abo: Object.assign({}, PREISE.abo, p.abo || {}) }); return PREISE; }
     const preise = () => PREISE;
+    /* Einführungspreis (functions/api/umgebung.js, EINFUEHRUNG): vom Server über /api/status, ohne Server aus /config.js; null, wenn er vorbei ist.
+       einfBis() → „17. November“, einfText('aufmass' | 'abo' | 'plus') → „Einführungspreis bis 17. November, danach 12,99 €“; sonst '' */
+    let EINF = (typeof window !== 'undefined' && window.KONFIG && window.KONFIG.einfuehrung) || null;
+    function setEinfuehrung(e) { EINF = e || null; return EINF; }
+    const einfuehrung = () => (EINF && EINF.ende && Date.now() < Date.parse(EINF.ende) ? EINF : null);
+    const MONAT = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    const einfBis = () => { const e = einfuehrung(); if (!e) return ''; const d = String(e.bis).split('-'); return Number(d[2]) + '. ' + MONAT[Number(d[1]) - 1]; };
+    function einfText(k) {
+      const e = einfuehrung(), v = e && e.danach ? e.danach[k] : null;
+      return v == null ? '' : 'Einführungspreis bis ' + einfBis() + ', danach ' + (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ',')) + ' €';
+    }
     const RANG = { service: 0, abo: 1, plus: 2 };
     const PLAN_NAME = { service: 'Start', abo: 'Abo 10', plus: 'Plus' };
     const planName = (k) => PLAN_NAME[k] || PLAN_NAME.service;
@@ -547,7 +558,7 @@
       return '';
     }
 
-    return { preise: preise, setPreise: setPreise, planName: planName, konto: konto, RANG: RANG, NB_MAX: NB_MAX, NB_TAGE: NB_TAGE, OFFEN_TAGE: OFFEN_TAGE, VERLAENGERN_TAGE: VERLAENGERN_TAGE, monthKey: monthKey, monthLabel: monthLabel, monthEnd: monthEnd, stamp: stamp, datum: datum, dateIn: dateIn, parseDE: parseDE, hashN: hashN, nW: nW, newCode: newCode, newId: newId, nextNr: nextNr, normTel: normTel, normFirma: normFirma,
+    return { preise: preise, setPreise: setPreise, einfuehrung: einfuehrung, setEinfuehrung: setEinfuehrung, einfBis: einfBis, einfText: einfText, planName: planName, konto: konto, RANG: RANG, NB_MAX: NB_MAX, NB_TAGE: NB_TAGE, OFFEN_TAGE: OFFEN_TAGE, VERLAENGERN_TAGE: VERLAENGERN_TAGE, monthKey: monthKey, monthLabel: monthLabel, monthEnd: monthEnd, stamp: stamp, datum: datum, dateIn: dateIn, parseDE: parseDE, hashN: hashN, nW: nW, newCode: newCode, newId: newId, nextNr: nextNr, normTel: normTel, normFirma: normFirma,
       unpack: unpack, fromApp: fromApp, fingerprint: fingerprint, fromAppProj: fromAppProj, aufmassOf: aufmassOf,
       freeQuota: freeQuota, ledger: ledger, freeLeft: freeLeft, lockedLinks: lockedLinks, aboGenutzt: aboGenutzt, aboFrei: aboFrei, bookAufmass: bookAufmass, receiveAufmass: receiveAufmass, unlockWaiting: unlockWaiting, bookPlan: bookPlan, planWechsel: planWechsel, tickKonto: tickKonto,
       passt: passt, ueberschneidung: ueberschneidung, nbMoeglich: nbMoeglich, nbAnfragen: nbAnfragen, nbZurueck: nbZurueck, neuesProjekt: neuesProjekt, listeProjekte: listeProjekte, projektAendern: projektAendern, importCode: importCode, fortschritt: fortschritt, linkZu: linkZu };

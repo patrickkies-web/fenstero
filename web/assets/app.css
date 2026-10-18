@@ -570,6 +570,8 @@ a.pill { text-decoration: none }
 .dv-lines { padding-top: 8px; border-top: 1.5px solid #1d1d1f } .dv-lines i:nth-child(n+3) { display: none }
 .dv-lock { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; gap: 8px; align-items: center; padding: 10px 16px; border-radius: 14px; background: var(--ink); color: var(--paper); font-weight: 800; font-size: 15px; box-shadow: var(--lift) }
 .incl { display: flex; flex-direction: column; gap: 8px } .incl p { margin: 0; display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.45 } .incl svg { flex: 0 0 auto; margin-top: 4px }
+/* Einführungspreis: fette Zeile unter dem Preis (Freischalten, Kasse); verschwindet am Stichtag von selbst */
+.price-row span small.einf, .order span small.einf { display: block; font-size: 13px; font-weight: 800; color: var(--fg); margin-top: 2px }
 .price-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); flex-wrap: wrap }
 .price-row b { display: block; font-size: 32px; font-weight: 900; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1 } .price-row span small { font-size: 13px; color: var(--muted) }
 .kform { gap: 14px } .kf { display: flex; flex-direction: column; gap: 6px } .kf > span { font-size: 13px; font-weight: 700; color: var(--ink2) }

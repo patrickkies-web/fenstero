@@ -25,6 +25,9 @@
                               auf passenden Geräten), paypal, klarna; Standard card. Die App nennt sie vor dem Kauf (§ 312j Abs. 1 BGB);
                               in Stripe müssen sie unter Einstellungen → Zahlungsmethoden eingeschaltet sein
      PREIS_AUFMASS_CENT 799 · PREIS_PROJEKT 9 · FREI_PROJEKTE 3 · PREIS_ABO 49 · ABO_INKL 10 · PREIS_ABO_EXTRA 5 · PREIS_PLUS 79
+                              (Einführungspreise bis 17.11.2026; ab 18.11.2026 ohne Angabe 1299, 69 und 119, siehe EINFUEHRUNG unten.
+                              Wer PREIS_AUFMASS_CENT, PREIS_ABO oder PREIS_PLUS setzt, schaltet den Wechsel ab; /api/status weist darauf hin)
+     JETZT                    nur für die Prüfung: Zeitpunkt (ISO), an dem der Server sich wähnt, etwa für den Einführungspreis
      Nur falls eigene Objekte in Stripe genutzt werden sollen; sonst legt der Server Preise und Steuersätze selbst an (stripe.js):
      STRIPE_PRICE_AUFMASS     Preis-ID des Aufmaßblatts (sonst wird der Betrag je Kauf gesetzt, PREIS_AUFMASS_CENT)
      STRIPE_PRICE_ABO         Preis-ID „Abo 10“ (monatlich)
@@ -41,9 +44,18 @@ const num = (v, d) => { const n = Number(v); return v !== undefined && v !== '' 
 function jwtRolle(t) { try { if (!/^eyJ/.test(t)) return ''; const m = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(atob(m + '==='.slice((m.length + 3) % 4))).role || ''; } catch (e) { return ''; } }
 /* Neue Supabase-Schlüssel gehören nur in den Kopf apikey, nicht in Authorization (sie sind kein JWT) */
 export const sbNeu = (schluessel) => /^sb_(secret|publishable)_/.test(String(schluessel || ''));
+/* Einführungspreis zum Start: Käufe und Abschlüsse bis einschließlich 17. November 2026 (deutsche Zeit) zu den Startpreisen, ab
+   18. November 0:00 Uhr gelten von selbst die regulären. Die Seiten nennen bis dahin beide (functions/seo.js tauscht die festen
+   Texte am Stichtag, AGB und Nutzungsbedingungen nennen beide Zeiträume selbst); laufende Abos behalten bei Stripe ihren Preis */
+export const EINFUEHRUNG = { bis: '2026-11-17', ende: '2026-11-17T23:00:00Z', vorher: { aufmass: 7.99, abo: 49, plus: 79 }, danach: { aufmass: 12.99, abo: 69, plus: 119 } };
+export const jetztAus = (env) => { const t = env && env.JETZT ? Date.parse(env.JETZT) : NaN; return Number.isNaN(t) ? Date.now() : t; };
+export const einfuehrungLaeuft = (env) => jetztAus(env) < Date.parse(EINFUEHRUNG.ende);
 export function konfig(env) {
   env = env || {};
   const hinweise = []; // häufige Verwechslungen beim Eintragen, /api/status zeigt sie an (ohne Werte)
+  const einf = einfuehrungLaeuft(env), eigenePreise = ['PREIS_AUFMASS_CENT', 'PREIS_ABO', 'PREIS_PLUS'].filter((n) => env[n] != null && String(env[n]).trim() !== '');
+  const stufe = einf ? EINFUEHRUNG.vorher : EINFUEHRUNG.danach;
+  if (einf && eigenePreise.length) hinweise.push(eigenePreise.join(', ') + ': gesetzt, deshalb gilt dieser Preis auch nach dem Einführungspreis (ab 18.11.2026). Für den Wechsel auf die regulären Preise die Variable löschen.');
   const schluessel = String(env.STRIPE_SECRET_KEY || '').trim();
   if (/^pk_/.test(schluessel)) hinweise.push('STRIPE_SECRET_KEY: Das ist der veröffentlichbare Schlüssel (pk_…). Gebraucht wird der Geheimschlüssel (sk_… oder rk_…).');
   const stripe = schluessel && !/^pk_/.test(schluessel) ? { key: schluessel, test: /^(sk|rk)_test_/.test(schluessel), webhook: String(env.STRIPE_WEBHOOK_SECRET || '').trim(), preisAufmass: env.STRIPE_PRICE_AUFMASS || '', preisAbo: env.STRIPE_PRICE_ABO || '', preisPlus: env.STRIPE_PRICE_PLUS || '', steuer: env.STRIPE_TAX_RATE || '', steuerInkl: env.STRIPE_TAX_RATE_INKL || '' } : null;
@@ -85,7 +97,9 @@ export function konfig(env) {
     zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1', post: post,
     ki: !!env.ANTHROPIC_API_KEY, mwstGesetzt: mwstGesetzt, zahlarten: zahlarten,
     geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
-    preise: { aufmass: num(env.PREIS_AUFMASS_CENT, 799) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, 49), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, 79), mwst: mwstRoh !== '0' }
+    preise: { aufmass: num(env.PREIS_AUFMASS_CENT, Math.round(stufe.aufmass * 100)) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, stufe.abo), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, stufe.plus), mwst: mwstRoh !== '0' },
+    /* solange er läuft und keine eigenen Preise gesetzt sind: Stichtag und Preise danach für die Hinweise in App und Betriebsbereich */
+    einfuehrung: einf && !eigenePreise.length ? { bis: EINFUEHRUNG.bis, ende: EINFUEHRUNG.ende, danach: EINFUEHRUNG.danach } : null
   };
 }
 export const ZAHLARTEN_OK = ['card', 'paypal', 'klarna'];

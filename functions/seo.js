@@ -9,17 +9,17 @@
    Adressen in robots.txt, sitemap.xml, llms.txt und im Canonical-Hinweis kommen aus der Domain, unter der die Seite läuft
    (www.eeziframes.com zählt als eeziframes.com), damit nach einem Domainwechsel nichts angepasst werden muss.
    Begründung und Quellen: docs/SEO.md. */
-import { konfig } from './api/umgebung.js';
+import { konfig, einfuehrungLaeuft, EINFUEHRUNG } from './api/umgebung.js';
 
-export const STAND = '2026-10-17';
+export const STAND = '2026-10-18';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-17' },
-  { pfad: '/app/', prio: '0.9', stand: '2026-10-17' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-18' },
+  { pfad: '/app/', prio: '0.9', stand: '2026-10-18' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-16' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-17' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-18' },
   { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-16' },
   { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-16' },
   { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-16' },
@@ -30,8 +30,8 @@ export const SEITEN = [
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-16' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
   { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-17' },
-  { pfad: '/agb/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-17' },
+  { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
+  { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/cookies/', prio: '0.1', stand: '2026-10-17' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ];
@@ -101,11 +101,31 @@ export async function seite(antwort, env, url) {
   if (frei(env, url)) h.delete('X-Robots-Tag'); else h.set('X-Robots-Tag', SPERRE);
   const html = antwort.status === 200 && /text\/html/.test(h.get('content-type') || '');
   if (!html) return new Response(antwort.body, { status: antwort.status, statusText: antwort.statusText, headers: h });
-  const b = basis(env, url), kan = b + kanonischerPfad(url.pathname);
+  const b = basis(env, url), kan = b + kanonischerPfad(url.pathname), nach = !einfuehrungLaeuft(env) && !RECHT_MIT_ZEITRAUM.includes(url.pathname);
   h.set('Link', '<' + kan + '>; rel="canonical"');
   h.delete('content-length');
-  return new Response(antwort.body ? kopf(absolut(await antwort.text(), b), kan) : null, { status: 200, statusText: antwort.statusText, headers: h });
+  /* nach dem Einführungspreis ändert sich der Text, die Datei aber nicht: ohne ETag, sonst bekäme ein Browser die alte Fassung als 304 */
+  if (nach) { h.delete('etag'); h.delete('last-modified'); }
+  const text = antwort.body ? kopf(absolut(await antwort.text(), b), kan) : null;
+  return new Response(text && nach ? nachEinfuehrung(text) : text, { status: 200, statusText: antwort.statusText, headers: h });
 }
+
+/* Einführungspreis (EINFUEHRUNG in functions/api/umgebung.js): Ab dem Stichtag nennen die Seiten die regulären Preise und die
+   Hinweise <span class="einf">…</span> fallen weg, ohne dass jemand die Dateien ändert. AGB und Nutzungsbedingungen nennen beide
+   Zeiträume selbst (Vertragstext mit Stand) und bleiben, wie sie sind. Die Prüfsuite gibt jede Seite einmal nach dem Stichtag aus. */
+const RECHT_MIT_ZEITRAUM = ['/agb/', '/nutzungsbedingungen/'];
+const zahl = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ','));
+const NACH_EINFUEHRUNG = [
+  [/<span class="einf">[\s\S]*?<\/span>/g, () => ''],
+  [/7,99(&nbsp;|\u00a0| )€/g, (m, l) => zahl(EINFUEHRUNG.danach.aufmass) + l + '€'],
+  [/"price":"7\.99"/g, () => '"price":"' + EINFUEHRUNG.danach.aufmass.toFixed(2) + '"'],
+  [/49(&nbsp;|\u00a0| )€ im Monat/g, (m, l) => EINFUEHRUNG.danach.abo + l + '€ im Monat'],
+  [/"price":"49\.00"/g, () => '"price":"' + EINFUEHRUNG.danach.abo.toFixed(2) + '"'],
+  [/79(&nbsp;|\u00a0| )€ im Monat/g, (m, l) => EINFUEHRUNG.danach.plus + l + '€ im Monat'],
+  [/Plus für 79(&nbsp;|\u00a0| )€/g, (m, l) => 'Plus für ' + EINFUEHRUNG.danach.plus + l + '€'],
+  [/"price":"79\.00"/g, () => '"price":"' + EINFUEHRUNG.danach.plus.toFixed(2) + '"']
+];
+export const nachEinfuehrung = (html) => NACH_EINFUEHRUNG.reduce((t, [muster, neu]) => t.replace(muster, neu), html);
 
 /* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
 export function kopf(html, kan) {
@@ -135,7 +155,8 @@ export async function indexnow(env, holen, jetzt) {
 /* llms.txt (Vorschlag llmstxt.org): Kurzfassung für KI-Assistenten, mit Fakten, Preisen aus den Variablen und Links */
 const eur = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')) + ' €';
 export function llms(origin, env) {
-  const p = konfig(env).preise, u = (pfad) => origin + pfad;
+  const k = konfig(env), p = k.preise, u = (pfad) => origin + pfad;
+  const einf = k.einfuehrung ? Object.assign({ bisText: k.einfuehrung.bis.split('-').reverse().map(Number).join('.') }, k.einfuehrung) : null;
   return [
     '# eeziframes',
     '',
@@ -149,6 +170,7 @@ export function llms(origin, env) {
     '- Was der Kunde noch nicht weiß, markiert er mit „Weiß ich noch nicht“, statt etwas Teures vorausgewählt zu bekommen; eine schon gespeicherte Gestaltung übernimmt er fürs nächste Fenster. Der Fensterbauer bekommt dazu eine Liste, was er mit dem Kunden klären muss: offene Wünsche, Absturzsicherung, Lüftungskonzept nach DIN 1946-6, Förderweg mit Uw-Zielwert.',
     '- Für Hauseigentümer: Messen, Fotos und 3-D-Modell kostenlos; das Aufmaßblatt als PDF kostet ' + eur(p.aufmass) + '; wer über den Link seines Fensterbauers misst, zahlt nichts.',
     '- Für Fensterbauer (' + (p.mwst ? 'netto, zuzüglich Mehrwertsteuer' : 'ohne Mehrwertsteuer') + '): ' + p.frei + ' Projekte kostenlos, danach ' + eur(p.projekt) + ' je Projekt mit eingegangenem Aufmaß; Abo 10: ' + eur(p.abo.grund) + ' im Monat mit ' + p.abo.inkl + ' Projekten, jedes weitere ' + eur(p.abo.extra) + '; Plus: ' + eur(p.plus) + ' im Monat, unbegrenzt. Monatlich kündbar.',
+    ...(einf ? ['- Einführungspreise bis ' + einf.bisText + ': Aufmaßblatt ' + eur(p.aufmass) + ', Abo 10 ' + eur(p.abo.grund) + ', Plus ' + eur(p.plus) + ' im Monat; ab dem Folgetag ' + eur(einf.danach.aufmass) + ', ' + eur(einf.danach.abo) + ' und ' + eur(einf.danach.plus) + '.'] : []),
     '- Ohne Installation und ohne Konto zum Messen; läuft auf Handy, Tablet und Computer. Eingaben bleiben auf dem Gerät, bis man sie sichert (Konto mit E-Mail-Adresse und Code, ohne Passwort, nötig für das Aufmaßblatt) oder selbst weitergibt.',
     '- Das eigene Aufmaß reicht für ein Angebot. Vor der Fertigung misst der Fensterbauer nach (Feinaufmaß) und legt das Bestellmaß fest.',
     '- Der Name wird immer klein geschrieben: eeziframes.',
@@ -206,6 +228,7 @@ export function umleitung(request) {
   if (index) url.pathname = kanonischerPfad(url.pathname);
   return new Response(null, { status: 301, headers: { location: url.href, 'cache-control': 'public, max-age=86400' } });
 }
+const ohneBedingung = (r) => { const h = new Headers(r.headers); h.delete('if-none-match'); h.delete('if-modified-since'); return new Request(r.url, { method: r.method, headers: h }); };
 export async function behandeln(request, env, holen) {
   const url = new URL(request.url);
   const text = (inhalt, typ, status, extra) => new Response(inhalt, { status: status || 200, headers: Object.assign({ 'content-type': typ, 'cache-control': 'public, max-age=3600', 'x-content-type-options': 'nosniff' }, extra || {}) });
@@ -213,6 +236,6 @@ export async function behandeln(request, env, holen) {
   if (url.pathname === '/robots.txt') return text(robots(basis(env, url), frei(env, url)), 'text/plain; charset=utf-8');
   if (url.pathname === '/sitemap.xml') return frei(env, url) ? text(sitemap(basis(env, url)), 'application/xml; charset=utf-8') : text('Nicht freigegeben.\n', 'text/plain; charset=utf-8', 404);
   if (url.pathname === '/llms.txt') return text(llms(basis(env, url), env), 'text/plain; charset=utf-8', 200, frei(env, url) ? null : { 'x-robots-tag': SPERRE });
-  if (istSeite(url.pathname)) return await seite(await holen(request), env, url);
+  if (istSeite(url.pathname)) return await seite(await holen(einfuehrungLaeuft(env) ? request : ohneBedingung(request)), env, url);
   return null;
 }
