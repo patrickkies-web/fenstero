@@ -2,7 +2,7 @@
 
 Ziel: Wer Google, ChatGPT, Claude, Perplexity oder Copilot fragt, wie man Fenster ausmisst, was auf ein Aufmaßblatt gehört oder wie ein Fensterbauer zu einem Aufmaß ohne Anfahrt kommt, soll auf eeziframes stoßen, als Quelle zitiert und empfohlen werden.
 
-**Stand (16.10.2026):** alles umgesetzt und geprüft (Abschnitt 10 der Prüfsuite), aber **noch nicht freigegeben**. In der Pilotphase sperrt `robots.txt` alles und jede Seite trägt `X-Robots-Tag: noindex`; **solange das so ist, findet keine Suchmaschine und kein KI-Assistent eeziframes**, egal wie gut die Seiten sind. Freigabe mit der Variablen `INDEXIERUNG=1` bei Cloudflare, erst wenn Impressum und Datenschutz vollständig sind (siehe unten).
+**Stand (18.10.2026):** alles umgesetzt, geprüft (Abschnitt 10 der Prüfsuite) und **freigegeben**: `INDEXIERUNG=1` ist bei Cloudflare gesetzt, `robots.txt` erlaubt das Durchsuchen, die Seiten tragen kein `noindex`. Ohne die Variable gilt wieder die Pilotphase: `robots.txt` sperrt alles und jede Seite trägt `X-Robots-Tag: noindex` (siehe „Freigabe“).
 
 Code: `functions/seo.js` (robots.txt, sitemap.xml, llms.txt, Kopfzeilen der Seiten), `worker.js`, `wrangler.jsonc` (`run_worker_first`), die Seiten in `web/ratgeber/`, `web/fuer-fensterbauer/`, die Textfassung in `web/index.html` und `web/app/index.html`, Gestaltung `web/assets/ratgeber.css`.
 
@@ -40,7 +40,7 @@ Erhoben über die Vorschläge der Google-Suche (Deutschland, deutsch), Reihenfol
 | Sonderfälle beim Aufmaß (16.10.2026, Suchergebnisse geprüft: oft nur Foren und Shops, wenig Anleitungen) | balkontür ausmessen, terrassentür ausmessen, hebeschiebetür ausmessen, psk tür, fenster mit rollladenkasten ausmessen, aufsatzrollladen ausmessen, brüstungshöhe fenster, absturzsicherung fenster | `/ratgeber/balkontuer-ausmessen/`, `/ratgeber/fenster-mit-rollladen-ausmessen/`, `/ratgeber/bruestungshoehe-fenster/` |
 | Vom Aufmaß zur Bestellung | bestellmaß fenster, bestellmaß fenster berechnen, einbaufuge fenster, fenster wie viel kleiner als maueröffnung, rohbaumaß fenster, fenster din links rechts, din links fenster | `/ratgeber/bestellmass-fenster/`, `/ratgeber/din-links-rechts/` |
 
-Nicht besetzt, weil nicht unser Thema: „fensterbauer in der nähe“ (lokale Suche, gehört den Betrieben), Haustür (eigenes Produkt) und Normmaße („fenstermaße standard“, „fenstermaße tabelle“): Kandidat für eine spätere Ratgeberseite.
+Nicht besetzt, weil nicht unser Thema: „fensterbauer in der nähe“ (lokale Suche, gehört den Betrieben), Haustür und Dachfenster (kann die App nicht), Vorlagen zum Ausdrucken und Rechner (Regel „keine Eingaben im Ratgeber“, siehe Pflege).
 
 Regeln für Texte: Suchbegriff vorn im Titel und im h1, Marke am Ende des Titels; Titel bis 75 Zeichen, Beschreibung 70 bis 170 Zeichen (prüft die Suite); „ausmessen“ statt „aufmessen“, wo Hauseigentümer angesprochen sind; das Wortspiel „eezi“ bleibt in Vorschautexten, Hero und Augenbrauen.
 
@@ -65,7 +65,7 @@ Aufbau jeder Seite: zuerst „Kurz gesagt“ mit der Antwort, dann eine Zeichnun
 
 **Zeichnungen** (`web/bilder/*.svg`): je Anleitung eine, als Datei mit Breite, Höhe und beschreibendem Alternativtext, im JSON-LD als `image`; `/bilder/*` trägt kein `noindex` (`_headers`), damit die Bildersuche sie zeigen darf. Beschriftungen mindestens 18 Einheiten groß, damit sie am Telefon (358 px breit) nicht unter 13 px fallen; Farben wie in der Oberfläche (Orange Maueröffnung, Blau Element).
 
-**Glossar der App:** Begriffe mit eigener Ratgeberseite (DIN links und rechts, Brüstung, Absturzsicherung, Aufsatz- und Vorbaurollladen, Balkontür, Hebe-Schiebe- und PSK-Tür, Schwelle, Feinaufmaß, RAL-Montage, Laibung, Anschlag, Lüftung, Förderung) haben „Ausführlich im Ratgeber“ (neuer Tab), nicht im Kundenlink eines Betriebs.
+**Glossar der App:** Begriffe mit eigener Ratgeberseite (DIN links und rechts, Brüstung, Absturzsicherung, Aufsatz- und Vorbaurollladen, Balkontür, Hebe-Schiebe- und PSK-Tür, Schwelle, Feinaufmaß, RAL-Montage, Laibung, Anschlag, Lüftung, U-Wert, Fensterbank, Förderung; RAL-Montage, Lüftung, U-Wert und Fensterbank seit 18.10.2026 mit eigener Seite) haben „Ausführlich im Ratgeber“ (neuer Tab), nicht im Kundenlink eines Betriebs.
 
 **Startseite und App:** Im HTML steht innerhalb von `#app` eine Textfassung (`.vorab`) mit h1, Erklärung, Fakten „auf einen Blick“, Preisen, Fragen und Links. `gemeinsam.js` setzt sofort die Klasse `js` auf `<html>`, `.js .vorab` ist verborgen, und beim ersten `render()` ersetzt die App den Inhalt. Wer kein JavaScript ausführt (KI-Crawler), liest die Textfassung; Google rendert und sieht die App, deren Inhalt derselbe ist. Titel und Beschreibungen beginnen mit dem Suchbegriff. Die Startseite hat zwei Ansichten (Umschalter oben, docs/GESTALTUNG.md); Google rendert die Standardansicht für Hauseigentümer, dort ist „Fenster ausmessen. Selbst. eezi.“ das einzige h1, in der Ansicht für Fensterbauer „Aufmaß ohne Anfahrt.“.
 
@@ -87,7 +87,7 @@ Aufbau jeder Seite: zuerst „Kurz gesagt“ mit der Antwort, dann eine Zeichnun
 
 1. Impressum und Datenschutz vollständig: Name und Anschrift stehen drin, E-Mail-Adresse und Telefonnummer fehlen noch (orange Platzhalter); dazu AGB, Nutzungsbedingungen und Cookies, alles rechtlich prüfen lassen. Eine öffentliche, auffindbare Website braucht ein vollständiges Impressum (§ 5 DDG).
 2. Cloudflare → Workers & Pages → `fenstero` → Einstellungen → Variablen und Geheimnisse: `INDEXIERUNG` = `1` (Typ Text). Die Hauptdomain ist `eeziframes.com`; `www.eeziframes.com` zählt von selbst als `eeziframes.com`, die `…workers.dev`-Adresse bleibt immer gesperrt. Nur wenn weitere Domains am Worker hängen (etwa `eeziframes.de`): `KANONISCH` = `https://eeziframes.com`, damit alle Canonicals auf eine Adresse zeigen (besser noch: die weitere Domain per Weiterleitungsregel umleiten).
-3. Prüfen: `https://eeziframes.com/robots.txt` (Allow, Content-Signal, Sitemap-Zeile), `/sitemap.xml` (14 Adressen), `/llms.txt`, `/f39851a897e004d2371f5b99367aa8c2.txt` (IndexNow-Schlüssel); eine Seite im Browser, Entwicklerwerkzeuge → Netzwerk: kein `X-Robots-Tag`, `Link: <…>; rel="canonical"`.
+3. Prüfen: `https://eeziframes.com/robots.txt` (Allow, Content-Signal, Sitemap-Zeile), `/sitemap.xml` (30 Adressen), `/llms.txt`, `/f39851a897e004d2371f5b99367aa8c2.txt` (IndexNow-Schlüssel); eine Seite im Browser, Entwicklerwerkzeuge → Netzwerk: kein `X-Robots-Tag`, `Link: <…>; rel="canonical"`.
 
 Zurück in die Pilotphase: Variable löschen. Ohne Code-Änderung, wirksam mit dem nächsten Aufruf.
 
@@ -102,7 +102,7 @@ Zurück in die Pilotphase: Variable löschen. Ohne Code-Änderung, wirksam mit d
 
 ## Pflege
 
-- **Neue Seite:** `web/<pfad>/index.html` im Aufbau der Ratgeberseiten, Eintrag in `SEITEN` mit `stand` (`functions/seo.js`), Karte in der Übersicht `/ratgeber/`, Link in der Fußzeile aller Ratgeber und in `llms.txt`; bei einem neuen Pfad oberster Ebene auch `istSeite()` und `run_worker_first` in `wrangler.jsonc`. Die Suite meldet, wenn eines fehlt.
+- **Neue Seite:** `web/<pfad>/index.html` im Aufbau der Ratgeberseiten, Eintrag in `SEITEN` mit `stand` (`functions/seo.js`), Karte in der Übersicht `/ratgeber/` (Seiten für Fensterbauer auch auf `/fuer-fensterbauer/`), Link in `llms.txt` und in der Fußzeile: Eintrag in `GRUPPEN` in `scripts/ratgeber-fuss.mjs`, dann `node scripts/ratgeber-fuss.mjs` (schreibt die Fußzeile aller Seiten unter `/ratgeber/` und `/fuer-fensterbauer/` neu, die eigene Seite mit `aria-current`); bei einem neuen Pfad oberster Ebene auch `istSeite()` und `run_worker_first` in `wrangler.jsonc`. Die Suite meldet, wenn eines fehlt.
 - **Änderung an einer Seite:** `stand` in `SEITEN`, `dateModified` im JSON-LD und beide „Stand“-Angaben auf der Seite auf denselben Tag setzen (die Suite vergleicht sie); IndexNow meldet die Seite dann beim nächsten täglichen Lauf.
 - **Häufige Fragen:** Die Antwort im JSON-LD ist wortgleich mit der sichtbaren Antwort, nur ohne Belegnummern; die Suite vergleicht alle Fragen auf Ratgebern, der Seite für Fensterbauer und der App.
 - **Keine Eingaben im Ratgeber:** keine Vorlagen zum Ausdrucken, keine leeren Tabellen, keine Formulare oder Rechner, in die man Fensterwerte oder Wünsche einträgt; der Ratgeber erklärt und zeigt den Umfang, das Aufmaß entsteht in der App (Geschäftsmodell). Die Suite prüft alle Ratgeberseiten darauf.

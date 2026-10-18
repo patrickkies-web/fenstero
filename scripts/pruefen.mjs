@@ -1341,11 +1341,12 @@ if (teil(10)) {
   const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
   const deutsch = (d) => { const [j, m, t] = d.split('-').map(Number); return t + '. ' + MONATE[m - 1] + ' ' + j; };
   const standFehler = [];
-  for (const sx of seo.SEITEN.filter((x) => /^\/ratgeber\/.+/.test(x.pfad))) {
+  const UNTERSEITE = /^\/(ratgeber|fuer-fensterbauer)\/.+/;
+  for (const sx of seo.SEITEN.filter((x) => UNTERSEITE.test(x.pfad))) {
     const t = (await roh(sx.pfad)).text, art = ldjson(t).flatMap((x) => (x && x['@graph']) || []).find((x) => x['@type'] === 'Article');
     if (!art || art.dateModified !== sx.stand || !t.includes('Stand ' + deutsch(sx.stand)) || !t.includes('Stand: ' + deutsch(sx.stand))) standFehler.push(sx.pfad);
   }
-  ok(!standFehler.length && seo.SEITEN.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.stand)), 'Jede Ratgeberseite: Stand in der Sitemap = dateModified im JSON-LD = „Stand“ auf der Seite' + (standFehler.length ? ' (abweichend: ' + standFehler.join(', ') + ')' : ''));
+  ok(!standFehler.length && seo.SEITEN.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.stand)), 'Jede Ratgeberseite und Unterseite für Fensterbauer: Stand in der Sitemap = dateModified im JSON-LD = „Stand“ auf der Seite' + (standFehler.length ? ' (abweichend: ' + standFehler.join(', ') + ')' : ''));
   /* Häufige Fragen: JSON-LD wortgleich mit dem sichtbaren Text (Google verlangt sichtbare Inhalte; KI-Assistenten zitieren beides) */
   const sichtbar = (h) => h.replace(/\s*<a href="#q\d+">\[\d+\]<\/a>/g, '').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
   const faqFehler = [];
@@ -1360,8 +1361,17 @@ if (teil(10)) {
   const neueSeiten = ['/ratgeber/balkontuer-ausmessen/', '/ratgeber/fenster-mit-rollladen-ausmessen/', '/ratgeber/bestellmass-fenster/', '/ratgeber/din-links-rechts/', '/ratgeber/bruestungshoehe-fenster/'];
   const uebersicht = (await roh('/ratgeber/')).text, ausmessen = (await roh('/ratgeber/fenster-ausmessen/')).text, llAus = seo.llms('https://eeziframes.com', {});
   ok(neueSeiten.every((u) => seo.SEITEN.some((x) => x.pfad === u) && uebersicht.includes('href="' + u + '"') && ausmessen.includes('href="' + u + '"') && llAus.includes('(https://eeziframes.com' + u + ')')) && /## Kurze Antworten/.test(llAus) && /Balkon- und Terrassentüren/.test(llAus) && /PSK-Türen/.test(llAus), 'Neue Ratgeber (Balkontür, Rollladenkasten, Bestellmaß, DIN links/rechts, Brüstungshöhe): in Sitemap, Übersicht, Anleitung und llms.txt verlinkt; llms.txt mit kurzen Antworten und allen Elementarten');
+  const NEU_OKT18 = ['/ratgeber/fenster-standardmasse/', '/ratgeber/fensterbank-ausmessen/', '/ratgeber/kellerfenster-ausmessen/', '/ratgeber/fenstertausch-altbau/', '/ratgeber/ral-montage-fenster/', '/ratgeber/uw-wert-fenster/', '/ratgeber/lueftungskonzept-fenstertausch/', '/fuer-fensterbauer/erstaufmass-feinaufmass/', '/fuer-fensterbauer/falsches-aufmass-haftung/', '/fuer-fensterbauer/aufmass-kostenpflichtig/', '/fuer-fensterbauer/geplatzter-aufmasstermin/', '/fuer-fensterbauer/fensterbau-software/'];
+  const fbSeite = (await roh('/fuer-fensterbauer/')).text;
+  ok(NEU_OKT18.every((u) => seo.SEITEN.some((x) => x.pfad === u) && uebersicht.includes('href="' + u + '"') && llAus.includes('(https://eeziframes.com' + u + ')') && (!u.startsWith('/fuer-fensterbauer/') || fbSeite.includes('href="' + u + '"'))) && /## Für Fensterbauer/.test(llAus), 'Ratgeber vom 18.10. (Standardmaße, Fensterbank, Kellerfenster, Altbau, RAL-Montage, Uw-Wert, Lüftungskonzept) und Unterseiten für Fensterbauer (Erstaufmaß, Haftung, Kosten, geplatzter Termin, Software): in Sitemap, Übersicht und llms.txt, die für Fensterbauer auch auf deren Seite');
+  /* Fußzeile aller Ratgeber und Seiten für Fensterbauer aus einer Quelle (scripts/ratgeber-fuss.mjs), mit jeder dieser Seiten */
+  const fussMod = await import(new URL('./ratgeber-fuss.mjs', import.meta.url).href), fussFehler = [];
+  const fussLinks = fussMod.GRUPPEN.flatMap(([, l]) => l.map(([h]) => h));
+  for (const [pf, datei] of fussMod.seiten(path10.join(WURZEL, 'web'))) { const m = fs10.readFileSync(datei, 'utf8').match(fussMod.FUSS); if (!m || m[0] !== fussMod.fusszeile(pf)) fussFehler.push(pf); }
+  const fussOhne = seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x) && !fussLinks.includes(x));
+  ok(!fussFehler.length && !fussOhne.length && fussMod.seiten(path10.join(WURZEL, 'web')).length >= 23, 'Fußzeile aller Ratgeber und Seiten für Fensterbauer gleich (scripts/ratgeber-fuss.mjs), in drei Gruppen, mit jeder dieser Seiten' + (fussFehler.length ? ' (abweichend: ' + fussFehler.join(', ') + ')' : '') + (fussOhne.length ? ' (fehlt: ' + fussOhne.join(', ') + ')' : ''));
   const bildFehler = [];
-  for (const sx of seo.SEITEN.filter((x) => /^\/ratgeber\/.+/.test(x.pfad))) {
+  for (const sx of seo.SEITEN.filter((x) => UNTERSEITE.test(x.pfad))) {
     const t = (await roh(sx.pfad)).text;
     for (const m of t.matchAll(/<img ([^>]*)>/g)) {
       const src = (m[1].match(/src="([^"]+)"/) || [])[1], alt = (m[1].match(/alt="([^"]*)"/) || [])[1] || '';
@@ -1369,7 +1379,7 @@ if (teil(10)) {
       if (!src || !r || r.status !== 200 || !/image\/svg\+xml/.test(r.headers.get('content-type') || '') || r.headers.get('x-robots-tag') || alt.length < 40 || !/width="\d+" height="\d+"/.test(m[1])) bildFehler.push(sx.pfad + ' ' + src);
     }
   }
-  const bildDa = (await Promise.all(neueSeiten.concat(['/ratgeber/fenster-ausmessen/']).map(async (u) => /<figure class="rg-bild"><img /.test((await roh(u)).text)))).every(Boolean);
+  const bildDa = (await Promise.all(neueSeiten.concat(['/ratgeber/fenster-ausmessen/'], NEU_OKT18).map(async (u) => /<figure class="rg-bild"><img /.test((await roh(u)).text)))).every(Boolean);
   ok(!bildFehler.length && bildDa, 'Abbildungen in den Ratgebern: Datei da (SVG), ohne noindex für die Bildersuche, Breite, Höhe und ein beschreibender Alternativtext' + (bildFehler.length ? ' (' + bildFehler.join(', ') + ')' : ''));
   const key = await roh('/' + seo.INDEXNOW + '.txt');
   const aufrufe = [], post = async (u, o) => { aufrufe.push({ u: u, o: o }); return { ok: true, status: 200 }; };
@@ -1389,11 +1399,12 @@ if (teil(10)) {
   await gp.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await gp.evaluate(() => { S.gloss = 'dinlr'; render(); }); await gp.waitForTimeout(200);
   const gl1 = await gp.evaluate(() => { const a = document.querySelector('.sheet a[href="/ratgeber/din-links-rechts/"]'); return !!a && a.target === '_blank' && /noopener/.test(a.rel) && a.getBoundingClientRect().height >= 44; });
+  const glNeu = await gp.evaluate(() => [['ralmontage', '/ratgeber/ral-montage-fenster/'], ['lueftung', '/ratgeber/lueftungskonzept-fenstertausch/'], ['uwert', '/ratgeber/uw-wert-fenster/'], ['fensterbank', '/ratgeber/fensterbank-ausmessen/']].every(([k, u]) => { S.gloss = k; render(); return !!document.querySelector('.sheet a[href="' + u + '"]'); }));
   await gp.evaluate(() => { S.betrieb = { name: 'Fensterbau Test', code: 'x' }; S.gloss = 'dinlr'; render(); }); await gp.waitForTimeout(150);
   const gl2 = await gp.evaluate(() => !document.querySelector('.sheet a[href^="/ratgeber/"]'));
   await gp.evaluate(() => { S.betrieb = null; S.gloss = 'dk'; render(); }); await gp.waitForTimeout(150);
   const gl3 = await gp.evaluate(() => !document.querySelector('.sheet a[href^="/ratgeber/"]'));
-  ok(gl1 && gl2 && gl3, 'Glossar der App: „Ausführlich im Ratgeber“ bei passenden Begriffen (neuer Tab, Ziel ab 44 px), nicht im Kundenlink eines Betriebs und nicht bei Begriffen ohne Seite');
+  ok(gl1 && glNeu && gl2 && gl3, 'Glossar der App: „Ausführlich im Ratgeber“ bei passenden Begriffen (neuer Tab, Ziel ab 44 px; RAL-Montage, Lüftung, U-Wert und Fensterbank mit eigener Seite), nicht im Kundenlink eines Betriebs und nicht bei Begriffen ohne Seite');
   sauber(gp, 'Glossar mit Ratgeber-Links ohne Fehler'); await gctx.close();
 
 }
