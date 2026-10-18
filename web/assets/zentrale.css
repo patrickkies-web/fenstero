@@ -99,7 +99,7 @@ p.z-hinweis { margin: 0; padding-left: 34px; position: relative } p.z-hinweis::b
 .z-zr-seg > button { flex: 0 0 auto; padding: 0 14px }
 .z-zr-frei { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end }
 .z-zr-paar { display: flex; gap: 8px; flex: 0 1 auto; min-width: 0 }
-.z-zr-date { flex: 0 1 190px } .z-zr-time { flex: 0 1 120px }
+.z-zr-date { flex: 0 0 200px } .z-zr-time { flex: 0 0 160px }
 .z-zr-frei .btn { min-height: 48px }
 
 /* ---------- Tabellen: am Telefon Karten untereinander, Spaltentitel aus data-k ---------- */

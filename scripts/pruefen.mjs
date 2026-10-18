@@ -1938,7 +1938,7 @@ if (teil(13)) {
     ok(/Zweiter Faktor fehlt/.test(await zp.evaluate(() => document.body.innerText)) && await zp.locator('.z-chart svg').count() >= 3, 'Übersicht: Kennzahlen, Diagramme, Hinweis auf den zweiten Faktor');
     await foto(zp, 'zentrale-uebersicht');
     // Zeitraum: Voreinstellung, eigener Zeitraum (gilt auf allen Seiten), „Gesamt“; gezeigt wird nur, was darin passiert ist
-    const zrSteht = (re) => zp.waitForFunction((q) => new RegExp(q).test((document.querySelector('.z-zeitraum .z-neben') || {}).textContent || ''), re.source);
+    const zrSteht = (re) => zp.waitForFunction((q) => new RegExp(q).test((document.querySelector('.z-zr-text') || {}).textContent || ''), re.source);
     const aufmZahl = () => zp.evaluate(() => { const s = Array.from(document.querySelectorAll('.stat')).find((x) => /Aufmaße eingegangen/.test(x.textContent)); return s ? +s.querySelector('b').textContent : NaN; });
     await zp.click('.z-zr-seg [data-v="7"]'); await zrSteht(/\(7 Tage\)/); const a7 = await aufmZahl();
     await zp.click('.z-zr-seg [data-v="frei"]'); await zp.waitForSelector('#z-von'); const fokusVon = await zp.evaluate(() => document.activeElement && document.activeElement.id);
