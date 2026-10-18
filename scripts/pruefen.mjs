@@ -211,7 +211,7 @@ if (teil(3)) {
   ok(kiPosts.length === 1 && kiPosts[0] === 200 && /aufgabe=einbau&seite=in/.test(kiUrls[0]), 'Eine KI-Anfrage je Foto, Auftrag Einbausituation: ' + kiPosts.join(', '));
   const ki = await page.evaluate(() => S.win.ki);
   ok(ki && ki.chips.includes('Testantwort') && ki.laib === 160 && ki.pruefen.length > 0, 'KI-Ergebnis im Fenster übernommen: Befund, Laibungstiefe, Prüfpunkte fürs Feinaufmaß');
-  ok(ki.rows.some((r) => r[0] === 'Testauftrag' && /einbau, in, claude-sonnet-5-5, ohne Altfenster/.test(r[1])) && !ki.rows.some((r) => /^(Material|Verglasung|Flügel)$/.test(r[0])) && !('material' in ki), 'Server fragt nach der Einbausituation (Sonnet 5.5), nicht nach dem alten Fenster; nichts davon fließt ins neue Fenster');
+  ok(ki.rows.some((r) => r[0] === 'Testauftrag' && /einbau, in, claude-sonnet-5-5, ohne Altfenster/.test(r[1]) && Number((/max_tokens (\d+)/.exec(r[1]) || [])[1]) >= 8000) && !ki.rows.some((r) => /^(Material|Verglasung|Flügel)$/.test(r[0])) && !('material' in ki), 'Server fragt nach der Einbausituation (Sonnet 5.5, Antwort bis 8.000 Tokens, damit ein langer Befund nicht abgeschnitten wird), nicht nach dem alten Fenster; nichts davon fließt ins neue Fenster');
   await page.setInputFiles('input[data-in="photo"][data-f="out"]', { name: 'aussen.jpg', mimeType: 'image/jpeg', buffer: jpeg });
   await page.waitForFunction(() => S.ai.out && S.ai.out.status === 'done', null, { timeout: 15000 });
   ok(await page.locator('.fx-dialog').count() === 0 && kiPosts.length === 2 && /aufgabe=einbau&seite=out/.test(kiUrls[1]), 'Zweites Foto ohne erneute Frage ausgewertet');
