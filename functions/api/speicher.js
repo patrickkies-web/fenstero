@@ -61,12 +61,14 @@ function attrappeSpeicher() {
     /* grenzeWiderruf: Widerrufe bleiben bis zum Ende des dritten Jahres nach dem Eingang (zentrale.js, aufraeumen) */
     protokollAufraeumen: async (grenzeAnmeldung, grenzeAlle, grenzeWiderruf) => { attrappe.protokoll = attrappe.protokoll.filter((e) => /^widerruf/.test(e.art) ? !(grenzeWiderruf && e.zeit < grenzeWiderruf) : !(e.zeit < grenzeAlle || (/^anmeldung/.test(e.art) && e.zeit < grenzeAnmeldung))); return true; },
     zaehlen: async (tag, schluessel) => { schluessel.forEach((s) => { const k2 = tag + '|' + s; attrappe.statistik.set(k2, (attrappe.statistik.get(k2) || 0) + 1); }); return true; },
-    statistikLesen: async (von) => Array.from(attrappe.statistik.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).filter((r) => r.tag >= von),
-    /* wie die Funktion eeziframes_auswerten in der Datenbank: Tagessummen je Art (aufruf:*, besuch:*, bot:*) und Summen je Schlüssel */
-    statistikAuswerten: async (von) => {
+    statistikLesen: async (von, bis) => Array.from(attrappe.statistik.entries()).map(([k2, n]) => ({ tag: k2.slice(0, 10), schluessel: k2.slice(11), anzahl: n })).filter((r) => r.tag >= von && (!bis || r.tag <= bis)),
+    statistikErsterTag: async () => Array.from(attrappe.statistik.keys()).map((k2) => k2.slice(0, 10)).sort()[0] || null,
+    /* wie die Funktionen eeziframes_auswerten und eeziframes_auswerten_zeitraum in der Datenbank: Tagessummen je Art (aufruf:*,
+       besuch:*, bot:*) und Summen je Schlüssel */
+    statistikAuswerten: async (von, bis) => {
       const tage = new Map(), summen = new Map();
       for (const [k2, n] of attrappe.statistik.entries()) {
-        const tag = k2.slice(0, 10), sch = k2.slice(11), art = sch.split(':')[0]; if (tag < von) continue;
+        const tag = k2.slice(0, 10), sch = k2.slice(11), art = sch.split(':')[0]; if (tag < von || (bis && tag > bis)) continue;
         if (['aufruf', 'besuch', 'bot'].includes(art)) tage.set(tag + '|' + art + ':*', (tage.get(tag + '|' + art + ':*') || 0) + n);
         summen.set(sch, (summen.get(sch) || 0) + n);
       }
@@ -196,9 +198,11 @@ function supabaseSpeicher(k) {
       return true;
     },
     zaehlen: async (tag, schluessel) => { const r = await sb('rpc/eeziframes_zaehlen', { method: 'POST', body: { p_tag: tag, p_schluessel: schluessel }, prefer: 'return=minimal', optional: true }); return !(r && r.fehlt); },
-    statistikLesen: async (von) => alle('statistik?select=tag,schluessel,anzahl&tag=gte.' + q(von) + '&order=tag.desc,schluessel.asc', true),
+    statistikLesen: async (von, bis) => alle('statistik?select=tag,schluessel,anzahl&tag=gte.' + q(von) + (bis ? '&tag=lte.' + q(bis) : '') + '&order=tag.desc,schluessel.asc', true),
     /* verdichtet in der Datenbank (Funktion eeziframes_auswerten); null, wenn es die Funktion noch nicht gibt */
-    statistikAuswerten: async (von) => alle('rpc/eeziframes_auswerten?p_von=' + q(von) + '&order=schluessel.asc,tag.asc', true),
+    /* mit Ende: eigene Funktion (schema.sql); fehlt sie noch, liefert das null, und auswerten nimmt die einzelnen Tageszähler */
+    statistikAuswerten: async (von, bis) => alle(bis ? 'rpc/eeziframes_auswerten_zeitraum?p_von=' + q(von) + '&p_bis=' + q(bis) + '&order=schluessel.asc,tag.asc' : 'rpc/eeziframes_auswerten?p_von=' + q(von) + '&order=schluessel.asc,tag.asc', true),
+    statistikErsterTag: async () => { const r = await sb('statistik?select=tag&order=tag.asc&limit=1', { optional: true }); return Array.isArray(r) && r[0] ? String(r[0].tag).slice(0, 10) : null; },
     /* Zwischenstand eines Kundenlinks (entwurf.js). undefined: Tabelle fehlt noch (schema.sql nicht erneut ausgeführt) */
     entwurfHolen: async (code) => { const r = await sb('entwuerfe?code=eq.' + q(code) + '&select=*', { optional: true }); return r && r.fehlt ? undefined : eins(r); },
     /* Lesen, ändern, mit Versionsnummer zurückschreiben (wie betriebAendern); fn gibt false zurück, wenn nichts zu speichern ist */

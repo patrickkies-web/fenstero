@@ -26,7 +26,7 @@ import { entfernt, kontenDa } from './eigene.js';
 import { fotosLinkLoeschen, fotosEigenesLoeschen, fotosNutzerLoeschen, fotosAltLoeschen } from './fotos.js';
 /* Aufmaß eines Hauseigentümers mit Besitzer, keine Löschmarke (eigene.js) */
 const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
-import { auswerten, tagBerlin, browserName, systemName, zaehlen } from './statistik.js';
+import { auswerten, tagBerlin, tagPlus, tageZwischen, tageListe, browserName, systemName, zaehlen } from './statistik.js';
 import { verkaufStand } from './recht.js';
 import { live } from './umgebung.js';
 
@@ -178,7 +178,29 @@ function kennzahlen(row) {
     ungelesen: (a.notif || []).filter((x) => x.new).length
   };
 }
-function zeile(row) {
+/* Kennzahlen eines Betriebs im Zeitraum (zr, siehe zeitraum): Projekte, die darin angelegt wurden, mit ihrem heutigen Stand (Phasen
+   wie Angebot und Auftrag haben kein Datum), Aufmaße, die darin eingegangen sind, Buchungen dieses Zeitraums */
+function kennzahlenZeitraum(row, zr) {
+  const a = row.daten || {}, links = (a.links || []).filter((l) => !l.demo), am = (l) => l.aufmass || {};
+  const neu = links.filter((l) => drin(zr, tagDE(l.created))), ein = links.filter((l) => l.status === 'eingegangen' && drin(zr, tagAus(l.eingegangenAt)));
+  const n = (f) => neu.filter(f).length, summe = (arr) => rund(arr.reduce((s, b) => s + (Number(b.betrag) || 0), 0));
+  const kosten = (a.book || X().ledger(JSON.parse(JSON.stringify(a)))).filter((b) => Number(b.betrag) > 0 && drin(zr, buchungTag(b)));
+  const reg = drin(zr, tagAus(row.created_at));
+  return {
+    registriert: reg, aktiv: reg || drin(zr, tagAus(a.zuletzt || row.updated_at)) || drin(zr, tagAus(a.angemeldet)) || links.some((l) => linkImZeitraum(l, zr)),
+    projekte: neu.length,
+    verschickt: n((l) => (l.log && l.log.gesendet) || VERSCHICKT.includes(l.status)),
+    geoeffnet: n((l) => l.log && l.log.geoeffnet),
+    mitAufmass: n((l) => l.status === 'eingegangen'),
+    angebote: n((l) => l.stage === 'angebot'), termine: n((l) => l.stage === 'termin'), auftraege: n((l) => l.stage === 'auftrag'), verloren: n((l) => l.stage === 'verloren'),
+    aufmasse: ein.length,
+    nachbesserungen: ein.reduce((s, l) => s + Math.max(0, (l.runde || 1) - 1), 0),
+    positionen: ein.reduce((s, l) => s + (am(l).windows || []).length, 0),
+    fotos: ein.reduce((s, l) => s + (Number(am(l).fotos) || 0), 0),
+    umsatz: summe(kosten), bezahlt: summe(kosten.filter((b) => b.status === 'bezahlt')), berechnet: summe(kosten.filter((b) => b.status === 'berechnet')), nochOffen: summe(kosten.filter((b) => b.status === 'offen'))
+  };
+}
+function zeile(row, zr) {
   const a = row.daten || {}, s = sperreVon(row);
   return {
     id: row.id, name: row.name, mail: row.mail, kontaktMail: a.mail && a.mail !== row.mail ? a.mail : '', ap: a.ap || '', tel: a.tel || '', plz: row.plz || '',
@@ -187,26 +209,26 @@ function zeile(row) {
     zahlungsart: a.pay ? { art: a.pay.type || 'Zahlungsart', text: a.pay.label || '', seit: a.pay.when || '' } : null,
     gesperrt: s ? { seit: s.seit, grund: s.grund } : null, doppelt: a.dupOf || '',
     stripe: { kunde: row.stripe_customer || '', abo: row.stripe_subscription || '' },
-    k: kennzahlen(row)
+    k: kennzahlen(row), z: zr ? kennzahlenZeitraum(row, zr) : null
   };
 }
 const stripeLink = (k, art, id) => (k.stripe && id ? 'https://dashboard.stripe.com/' + (k.stripe.test ? 'test/' : '') + art + '/' + encodeURIComponent(id) : '');
 const fensterKurz = (w) => { const d = globalThis.AW.derive(w); return { name: w.name || '', etage: globalThis.AW.lab('etage', w.etage) || '', art: globalThis.AW.lab('art', w.art || 'fenster') || 'Fenster', anzahl: Number(w.anzahl) || 1, oeffnung: d.moW && d.moH ? d.moW + ' × ' + d.moH : '', element: d.elW && d.elH ? d.elW + ' × ' + d.elH : '' }; };
 /* Projekte ohne Daten der Endkunden; mit einblick zusätzlich Name, Kontakt, Objekt, Notizen und das Aufmaß in Kurzform */
-function projekte(a, einblick) {
+function projekte(a, einblick, zr) {
   return (a.links || []).filter((l) => !l.demo).map((l) => {
     const am = l.aufmass || {}, log = l.log || {};
-    const p = { id: l.id, nr: l.nr || '', status: l.status, phase: l.stage || '', angelegt: l.created || '', gueltig: l.expires || '', via: l.via || '', du: !!l.du, runde: l.runde || 1, gesperrt: !!l.locked, plan: l.plan || [], gebaeude: globalThis.AW.lab('gebaeude', l.geb) || '', positionen: (am.windows || []).length, elemente: Number(am.elemente) || 0, fotos: Number(am.fotos) || 0, verlauf: { erstellt: log.erstellt || '', gesendet: log.gesendet || '', geoeffnet: log.geoeffnet || '', arbeit: log.arbeit || '', eingegangen: log.eingegangen || '', nachbesserung: log.nachbesserung || '' }, nachbesserungOffen: !!(l.nb && l.nb.offen) };
+    const p = { id: l.id, drin: linkImZeitraum(l, zr), nr: l.nr || '', status: l.status, phase: l.stage || '', angelegt: l.created || '', gueltig: l.expires || '', via: l.via || '', du: !!l.du, runde: l.runde || 1, gesperrt: !!l.locked, plan: l.plan || [], gebaeude: globalThis.AW.lab('gebaeude', l.geb) || '', positionen: (am.windows || []).length, elemente: Number(am.elemente) || 0, fotos: Number(am.fotos) || 0, verlauf: { erstellt: log.erstellt || '', gesendet: log.gesendet || '', geoeffnet: log.geoeffnet || '', arbeit: log.arbeit || '', eingegangen: log.eingegangen || '', nachbesserung: log.nachbesserung || '' }, nachbesserungOffen: !!(l.nb && l.nb.offen) };
     if (einblick) Object.assign(p, { kunde: l.kunde || '', kontakt: l.kontakt || '', adresse: l.adresse || '', notiz: l.note || '', memo: l.memo || '', nachricht: l.msg || '', angaben: am.proj || null, fenster: l.locked ? [] : (am.windows || []).map(fensterKurz) });
     return p;
   });
 }
-function buchungen(a, einblick) {
+function buchungen(a, einblick, zr) {
   const nr = new Map((a.links || []).map((l) => [l.id, l.nr]));
   return (X().ledger(JSON.parse(JSON.stringify(a)))).map((b) => {
     const ref = String(b.ref || ''), runde = ref.includes('#') ? ref.split('#')[1] : '';
     const text = b.kind === 'aufmass' && !einblick ? 'Aufmaß · ' + (nr.get(ref.split('#')[0]) || 'Projekt') + (runde ? ', anderes Aufmaß in Runde ' + runde : '') : b.text;
-    return { id: b.id, art: b.kind, wann: b.when || '', monat: b.month || '', text: text, sub: b.kind === 'aufmass' ? '' : b.sub || '', betrag: Number(b.betrag) || 0, status: b.status, rechnung: b.rechnung || '', hinweis: b.badge || '' };
+    return { id: b.id, drin: drin(zr, buchungTag(b)), art: b.kind, wann: b.when || '', monat: b.month || '', text: text, sub: b.kind === 'aufmass' ? '' : b.sub || '', betrag: Number(b.betrag) || 0, status: b.status, rechnung: b.rechnung || '', hinweis: b.badge || '' };
   });
 }
 /* ---------- Auffälligkeiten gegen Mehrfachnutzung: Hinweise zum Prüfen, keine automatische Sperre ----------
@@ -232,13 +254,14 @@ async function detail(ctx, row, einblick) {
   const a = row.daten || {}, v = a.verwaltung || {};
   const [auth, eintraege, entwuerfe] = await Promise.all([anmeldungLesen(ctx.k, row.auth_user).catch(() => null), ctx.sp.protokollLesen({ betrieb: row.id, anzahl: 50 }).catch(() => null), ctx.sp.entwuerfeVonBetrieb ? ctx.sp.entwuerfeVonBetrieb(row.id).catch(() => null) : null]);
   const jetzt = Date.now(), links = new Map((a.links || []).map((l) => [l.code, l]));
-  const zwischen = (entwuerfe || []).map((e) => linkAuffaellig(e, links.get(e.code), jetzt));
-  return Object.assign(zeile(row), {
+  const zwischen = (entwuerfe || []).map((e) => linkAuffaellig(e, links.get(e.code), jetzt)), zr = zeitraum(ctx.url, tagAus(row.created_at));
+  return Object.assign(zeile(row, zr), {
+    zeitraum: zrAus(zr),
     zwischenstaende: zwischen.map((x) => ({ nr: x.nr, kunde: einblick ? x.kunde : '', angelegt: x.angelegt, aktuell: x.aktuell, geloescht: x.geloescht, fest: x.fest, gesendet: x.gesendet, gruende: x.gruende })),
     seit: a.since || '', farbe: a.col || '', abzug: a.abzug || null, freiKontingent: X().freeQuota(a), freiGenutzt: a.freeUsed || 0,
     notiz: v.notiz || '', notizZeit: v.notizZeit || '', verlauf: (v.verlauf || []).slice(0, 30),
-    projekte: projekte(a, einblick), buchungen: buchungen(a, einblick),
-    rechnungen: (a.rechnungen || []).map((r) => ({ nr: r.nr, datum: r.datum, betrag: r.betrag, positionen: r.pos, status: r.status, url: r.url || '' })),
+    projekte: projekte(a, einblick, zr), buchungen: buchungen(a, einblick, zr),
+    rechnungen: (a.rechnungen || []).map((r) => ({ drin: drin(zr, tagDE(r.datum)), nr: r.nr, datum: r.datum, betrag: r.betrag, positionen: r.pos, status: r.status, url: r.url || '' })),
     nachrichten: einblick ? (a.notif || []).slice(0, 30).map((m) => ({ titel: m.t, text: m.s, wann: m.when, neu: !!m.new })) : null,
     anmeldung: auth ? { erstellt: auth.erstellt, zuletzt: auth.zuletzt, bestaetigt: auth.bestaetigt } : null,
     stripeLinks: { kunde: stripeLink(ctx.k, 'customers', row.stripe_customer), abo: stripeLink(ctx.k, 'subscriptions', row.stripe_subscription) },
@@ -253,14 +276,48 @@ const csvFeld = (v) => { let s = v == null ? '' : String(v); if (/^[=+\-@\t\r]/.
 const datumDE = (iso) => { const d = iso ? new Date(iso) : null; return d && !isNaN(d) ? d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''; };
 const zahlDE = (n) => String(rund(n)).replace('.', ',');
 
-/* ---------- Wochen für die Übersicht (Montag bis Sonntag, deutsche Zeit grob) ---------- */
-function wochen(anzahl) {
-  const heute = new Date(tagBerlin() + 'T00:00:00Z'), wt = (heute.getUTCDay() + 6) % 7, montag = new Date(heute.getTime() - wt * TAG), out = [];
-  for (let i = anzahl - 1; i >= 0; i--) { const s = new Date(montag.getTime() - i * 7 * TAG); out.push({ von: s.getTime(), bis: s.getTime() + 7 * TAG, start: s.toISOString().slice(0, 10), registrierungen: 0, aufmasse: 0, kaeufe: 0, projekte: 0 }); }
-  return out;
+/* ---------- Zeitraum der Auswertung ----------
+   ?tage=7 (die letzten 7 Tage bis heute), ?von=anfang (ab dem ersten Eintrag) oder ?von=JJJJ-MM-TT&bis=JJJJ-MM-TT; Kalendertage
+   nach deutscher Zeit, von und bis eingeschlossen, bis höchstens heute, ohne Angabe die letzten 30 Tage. Bestände (Betriebe, Tarife,
+   Abos, Sperren) gelten für heute. Gezählt wird nach dem Tag des Vorgangs: Registrierung, Projekt angelegt, Aufmaß eingegangen,
+   Buchung, Kauf; Projekte mit ihrem heutigen Stand. */
+const DATUM = /^\d{4}-\d{2}-\d{2}$/;
+const gueltig = (t) => DATUM.test(t || '') && tagPlus(t, 0) === t;
+const tagAus = (z) => { if (z == null || z === '') return ''; if (typeof z === 'string' && DATUM.test(z)) return z; const t = typeof z === 'number' ? z : Date.parse(z); return isNaN(t) ? '' : tagBerlin(new Date(t)); };
+const tagDE = (s) => { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(s || '').trim()); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; };
+/* Zeitstempel ohne Jahr („18.10., 14:05“, modell.js): der erste solche Tag ab dem Tag, an dem das Projekt angelegt wurde */
+const stempelTag = (s, ab) => { const m = /^(\d{2})\.(\d{2})\./.exec(String(s || '')); if (!m || !ab) return ''; const j = +ab.slice(0, 4), t = j + '-' + m[2] + '-' + m[1]; return t < ab ? (j + 1) + '-' + m[2] + '-' + m[1] : t; };
+/* Buchungen tragen den Monat (JJJJ-MM) und einen Zeitstempel ohne Jahr; passt sein Monat nicht, zählt der Monatserste */
+const buchungTag = (b) => { const mo = /^(\d{4})-(\d{2})$/.exec(String(b.month || '')); if (!mo) return ''; const m = /^(\d{2})\.(\d{2})\./.exec(String(b.when || '')); return mo[1] + '-' + mo[2] + '-' + (m && m[2] === mo[2] ? m[1] : '01'); };
+const fruehester = (tage) => tage.filter(Boolean).sort()[0] || '';
+const drin = (zr, tag) => !!(zr && tag && tag >= zr.von && tag <= zr.bis);
+/* Vorgang an einem Projekt im Zeitraum: angelegt, verschickt, geöffnet, bearbeitet, eingegangen oder nachgebessert */
+const linkImZeitraum = (l, zr) => { const ab = tagDE(l.created), log = l.log || {}; return drin(zr, ab) || drin(zr, tagAus(l.eingegangenAt)) || ['gesendet', 'geoeffnet', 'arbeit', 'eingegangen', 'nachbesserung'].some((s) => drin(zr, stempelTag(log[s], ab))); };
+function zeitraum(url, anfang) {
+  const p = url.searchParams, heute = tagBerlin(), n = parseInt(p.get('tage'), 10);
+  let von = p.get('von') || '', bis = p.get('bis') || '';
+  if (!gueltig(bis) || bis > heute) bis = heute;
+  if (von === 'anfang') von = anfang || bis;
+  else if (!gueltig(von)) von = tagPlus(bis, -((n >= 1 && n <= 4000 ? n : 30) - 1));
+  if (von > heute) von = heute;
+  if (von > bis) { const t = von; von = bis; bis = t; }
+  if (tageZwischen(von, bis) > 4000) von = tagPlus(bis, -3999);
+  const tage = tageZwischen(von, bis);
+  return { von: von, bis: bis, tage: tage, einheit: tage <= 62 ? 'tag' : tage <= 400 ? 'woche' : 'monat' };
 }
-const inWoche = (liste, zeit, feld) => { if (!zeit) return; const t = typeof zeit === 'number' ? zeit : Date.parse(zeit); const w = liste.find((x) => t >= x.von - 2 * 3600 * 1000 && t < x.bis - 2 * 3600 * 1000); if (w) w[feld]++; };
-const parseStempel = (s, jahrHint) => { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(s || '')); return m ? Date.UTC(+m[3], +m[2] - 1, +m[1], 12) : null; };
+const zrAus = (zr) => ({ von: zr.von, bis: zr.bis, tage: zr.tage, einheit: zr.einheit });
+/* Fächer für die Verläufe: je Tag bis 62 Tage, je Woche (ab Montag) bis 400 Tage, sonst je Monat */
+function eimer(zr) {
+  const out = [], zwei = (n) => String(n).padStart(2, '0');
+  if (zr.einheit === 'tag') tageListe(zr.von, zr.bis).forEach((t) => out.push({ start: t, ende: t }));
+  else if (zr.einheit === 'woche') { for (let t = tagPlus(zr.von, -((new Date(zr.von + 'T12:00:00Z').getUTCDay() + 6) % 7)); t <= zr.bis; t = tagPlus(t, 7)) out.push({ start: t, ende: tagPlus(t, 6) }); }
+  else {
+    let j = +zr.von.slice(0, 4), m = +zr.von.slice(5, 7);
+    for (;;) { const start = j + '-' + zwei(m) + '-01', nj = m === 12 ? j + 1 : j, nm = m === 12 ? 1 : m + 1; if (start > zr.bis) break; out.push({ start: start, ende: tagPlus(nj + '-' + zwei(nm) + '-01', -1) }); j = nj; m = nm; }
+  }
+  return out.map((x) => Object.assign(x, { registrierungen: 0, projekte: 0, aufmasse: 0, kaeufe: 0, besuche: 0, aufrufe: 0 }));
+}
+const inEimer = (liste, tag, feld, n) => { const e = tag ? liste.find((x) => tag >= x.start && tag <= x.ende) : null; if (e) e[feld] += n == null ? 1 : n; };
 
 export const ZENTRALE = {
   /* Ohne Anmeldung: ob die Zentrale eingerichtet ist, ob ein zweiter Faktor gebraucht wird, ob schon eine Sitzung besteht */
@@ -287,23 +344,30 @@ export const ZENTRALE = {
   },
   'POST /api/zentrale/abmelden': async () => antwort({ ok: true }, 200, { 'set-cookie': cookieSetzen('', 0) }),
 
-  /* Übersicht: Kennzahlen, zwölf Wochen, letzte Vorgänge, Hinweise */
+  /* Übersicht: Kennzahlen und Verlauf im Zeitraum (zeitraum), letzte Vorgänge darin, Hinweise (immer der Stand von heute) */
   'GET /api/zentrale/uebersicht': async (ctx) => {
-    await zugang(ctx); const sp = daten(ctx), k = ctx.k, jetzt = Date.now();
-    const [rows, kaeufe, web, entwuerfe, eigene] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), auswerten(sp, 30).catch(() => null), sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null, sp.eigeneAlle ? sp.eigeneAlle().catch(() => null) : null]);
-    const z = rows.map(zeile), alter = (iso) => (iso ? (jetzt - Date.parse(iso)) / TAG : Infinity), summe = (f) => z.reduce((s, x) => s + (Number(f(x)) || 0), 0);
-    const bez = kaeufe.filter((x) => x.status === 'bezahlt'), tarife = { service: 0, abo: 0, plus: 0 }; z.forEach((x) => { tarife[x.tarif] = (tarife[x.tarif] || 0) + 1; });
-    const w = wochen(12), aktivitaet = [];
+    await zugang(ctx); const sp = daten(ctx), k = ctx.k, jetzt = Date.now(), abAnfang = ctx.url.searchParams.get('von') === 'anfang';
+    const [rows, kaeufe, ersterWeb, entwuerfe, eigene] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), abAnfang && sp.statistikErsterTag ? sp.statistikErsterTag().catch(() => null) : null, sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null, sp.eigeneAlle ? sp.eigeneAlle().catch(() => null) : null]);
+    const bez = kaeufe.filter((x) => x.status === 'bezahlt');
+    const zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at)).concat(bez.map((x) => tagAus(x.created_at)), [ersterWeb])));
+    const web = await auswerten(sp, zr).catch(() => null);
+    const z = rows.map((r) => zeile(r, zr)), summe = (f) => z.reduce((s, x) => s + (Number(f(x)) || 0), 0);
+    const tarife = { service: 0, abo: 0, plus: 0 }; z.forEach((x) => { tarife[x.tarif] = (tarife[x.tarif] || 0) + 1; });
+    const verlauf = eimer(zr), aktivitaet = [];
     rows.forEach((r) => {
-      inWoche(w, r.created_at, 'registrierungen'); aktivitaet.push({ zeit: r.created_at, art: 'registrierung', text: r.name + ' hat sich registriert', betrieb: r.id });
+      const reg = tagAus(r.created_at);
+      if (drin(zr, reg)) { inEimer(verlauf, reg, 'registrierungen'); aktivitaet.push({ zeit: r.created_at, art: 'registrierung', text: r.name + ' hat sich registriert', betrieb: r.id }); }
       ((r.daten || {}).links || []).forEach((l) => {
         if (l.demo) return;
-        const angelegt = parseStempel(l.created); if (angelegt) inWoche(w, angelegt, 'projekte');
-        if (l.status === 'eingegangen' && l.eingegangenAt) { inWoche(w, l.eingegangenAt, 'aufmasse'); aktivitaet.push({ zeit: new Date(l.eingegangenAt).toISOString(), art: 'aufmass', text: 'Aufmaß bei ' + r.name + ' eingegangen (' + (l.nr || 'Projekt') + ', ' + X().nW(((l.aufmass || {}).windows || []).length, 'Position', 'Positionen') + ')', betrieb: r.id }); }
+        const angelegt = tagDE(l.created); if (drin(zr, angelegt)) inEimer(verlauf, angelegt, 'projekte');
+        const ein = l.status === 'eingegangen' && l.eingegangenAt ? tagAus(l.eingegangenAt) : '';
+        if (drin(zr, ein)) { inEimer(verlauf, ein, 'aufmasse'); aktivitaet.push({ zeit: new Date(l.eingegangenAt).toISOString(), art: 'aufmass', text: 'Aufmaß bei ' + r.name + ' eingegangen (' + (l.nr || 'Projekt') + ', ' + X().nW(((l.aufmass || {}).windows || []).length, 'Position', 'Positionen') + ')', betrieb: r.id }); }
       });
     });
-    bez.forEach((x) => { inWoche(w, x.created_at, 'kaeufe'); aktivitaet.push({ zeit: x.created_at, art: 'kauf', text: 'Aufmaßblatt gekauft (' + zahlDE((x.betrag_cent || 0) / 100) + ' €)' }); });
-    const aufmasse30 = rows.reduce((s, r) => s + ((r.daten || {}).links || []).filter((l) => l.status === 'eingegangen' && l.eingegangenAt && jetzt - l.eingegangenAt <= 30 * TAG).length, 0);
+    const bezZr = bez.filter((x) => drin(zr, tagAus(x.created_at)));
+    bezZr.forEach((x) => { inEimer(verlauf, tagAus(x.created_at), 'kaeufe'); aktivitaet.push({ zeit: x.created_at, art: 'kauf', text: 'Aufmaßblatt gekauft (' + zahlDE((x.betrag_cent || 0) / 100) + ' €)' }); });
+    if (web && web.tabelle) web.reihe.forEach((x) => { inEimer(verlauf, x.tag, 'besuche', x.besuche); inEimer(verlauf, x.tag, 'aufrufe', x.aufrufe); });
+    const gesichert = eigene ? eigene.filter((e) => lebt(e) && drin(zr, tagAus(e.created_at))) : null;
     const hinweise = [];
     if (!k.zentrale.totp) hinweise.push({ art: 'warn', text: 'Zweiter Faktor fehlt: Die Zentrale ist nur mit dem Passwort geschützt. Einrichten unter Einstellungen.', ziel: 'einstellungen' });
     if (k.zentrale.totpFehler) hinweise.push({ art: 'bad', text: 'ZENTRALE_2FA ist kein gültiger Schlüssel (Base32). Die Anmeldung braucht deshalb keinen Code.', ziel: 'einstellungen' });
@@ -324,30 +388,34 @@ export const ZENTRALE = {
     /* Verträge mit Verbrauchern: Kasse im Live-Modus geschlossen, Vertragsbestätigungen und Eingangsbestätigungen, die noch fehlen */
     (await rechtHinweise(ctx, sp)).forEach((h) => hinweise.push(h));
     return {
-      ok: true,
+      ok: true, zeitraum: zrAus(zr),
       kpi: {
-        betriebe: z.length, neu7: z.filter((x) => alter(x.registriert) <= 7).length, neu30: z.filter((x) => alter(x.registriert) <= 30).length, aktiv30: z.filter((x) => alter(x.zuletzt) <= 30).length,
-        gesperrt: z.filter((x) => x.gesperrt).length, mitZahlungsart: z.filter((x) => x.zahlungsart).length, doppelt: z.filter((x) => x.doppelt).length, tarife: tarife,
+        /* Bestand heute */
+        betriebe: z.length, gesperrt: z.filter((x) => x.gesperrt).length, mitZahlungsart: z.filter((x) => x.zahlungsart).length, doppelt: z.filter((x) => x.doppelt).length, tarife: tarife,
         mrr: rund(tarife.abo * k.preise.abo.grund + tarife.plus * k.preise.plus), mwst: k.preise.mwst,
-        projekte: summe((x) => x.k.projekte), verschickt: summe((x) => x.k.verschickt), geoeffnet: summe((x) => x.k.geoeffnet), aufmasse: summe((x) => x.k.aufmasse), aufmasse30: aufmasse30,
-        positionen: summe((x) => x.k.positionen), fotos: summe((x) => x.k.fotos), auftraege: summe((x) => x.k.auftraege), angebote: summe((x) => x.k.angebote),
-        umsatzBetriebe: rund(summe((x) => x.k.umsatz)), bezahltBetriebe: rund(summe((x) => x.k.bezahlt)), offenBetriebe: rund(summe((x) => x.k.nochOffen)), berechnetBetriebe: rund(summe((x) => x.k.berechnet)),
-        kunden: eigene ? new Set(eigene.filter(lebt).map((e) => e.nutzer)).size : null, eigeneAufmasse: eigene ? eigene.filter(lebt).length : null,
-        kaeufe: bez.length, kaeufe30: bez.filter((x) => alter(x.created_at) <= 30).length, umsatzKaeufe: rund(bez.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), umsatzKaeufe30: rund(bez.filter((x) => alter(x.created_at) <= 30).reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100)
+        /* im Zeitraum */
+        neu: z.filter((x) => x.z.registriert).length, aktiv: z.filter((x) => x.z.aktiv).length,
+        projekte: summe((x) => x.z.projekte), verschickt: summe((x) => x.z.verschickt), geoeffnet: summe((x) => x.z.geoeffnet), mitAufmass: summe((x) => x.z.mitAufmass),
+        aufmasse: summe((x) => x.z.aufmasse), positionen: summe((x) => x.z.positionen), fotos: summe((x) => x.z.fotos), auftraege: summe((x) => x.z.auftraege), angebote: summe((x) => x.z.angebote),
+        umsatzBetriebe: rund(summe((x) => x.z.umsatz)), bezahltBetriebe: rund(summe((x) => x.z.bezahlt)), offenBetriebe: rund(summe((x) => x.z.nochOffen)), berechnetBetriebe: rund(summe((x) => x.z.berechnet)),
+        kunden: gesichert ? new Set(gesichert.map((e) => e.nutzer)).size : null, eigeneAufmasse: gesichert ? gesichert.length : null,
+        kaeufe: bezZr.length, umsatzKaeufe: rund(bezZr.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100)
       },
-      wochen: w.map((x) => ({ start: x.start, registrierungen: x.registrierungen, projekte: x.projekte, aufmasse: x.aufmasse, kaeufe: x.kaeufe })),
-      web: web && web.tabelle ? { aufrufe30: web.summe.aufrufe, besuche30: web.summe.besuche, heute: web.reihe[web.reihe.length - 1], herkunft: web.herkunft.slice(0, 5), reihe: web.reihe } : null,
+      verlauf: verlauf,
+      web: web && web.tabelle ? { aufrufe: web.summe.aufrufe, besuche: web.summe.besuche, herkunft: web.herkunft.slice(0, 5) } : null,
       aktivitaet: aktivitaet.filter((x) => x.zeit).sort((x, y) => String(y.zeit).localeCompare(String(x.zeit))).slice(0, 12),
       hinweise: hinweise
     };
   },
 
   /* Betriebe: Liste mit Kennzahlen (Filter und Suche macht die Oberfläche) */
-  'GET /api/zentrale/betriebe': async (ctx) => { await zugang(ctx); const rows = await daten(ctx).betriebeAlle(); return { ok: true, betriebe: rows.map(zeile), preise: ctx.k.preise }; },
+  /* Betriebe: Liste mit Kennzahlen gesamt (k) und im Zeitraum (z); Filter und Suche macht die Oberfläche */
+  'GET /api/zentrale/betriebe': async (ctx) => { await zugang(ctx); const rows = await daten(ctx).betriebeAlle(), zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at)))); return { ok: true, zeitraum: zrAus(zr), betriebe: rows.map((r) => zeile(r, zr)), preise: ctx.k.preise }; },
   'GET /api/zentrale/betriebe.csv': async (ctx) => {
-    await zugang(ctx); const sp = daten(ctx), rows = await sp.betriebeAlle();
-    const kopf = ['Betrieb', 'Ansprechpartner', 'E-Mail (Anmeldung)', 'E-Mail (Kontakt)', 'Telefon', 'PLZ', 'Registriert', 'Zuletzt aktiv', 'Tarif', 'Zahlungsart', 'Projekte', 'Links verschickt', 'Aufmaße eingegangen', 'Positionen', 'Aufträge', 'Umsatz netto (€)', 'davon bezahlt (€)', 'noch nicht berechnet (€)', 'Gesperrt', 'Doppelkonto-Verdacht'];
-    const zeilen = rows.map(zeile).map((x) => [x.name, x.ap, x.mail, x.kontaktMail, x.tel, x.plz, datumDE(x.registriert), datumDE(x.zuletzt), X().planName(x.tarif), x.zahlungsart ? x.zahlungsart.art : '', x.k.projekte, x.k.verschickt, x.k.aufmasse, x.k.positionen, x.k.auftraege, zahlDE(x.k.umsatz), zahlDE(x.k.bezahlt), zahlDE(x.k.nochOffen), x.gesperrt ? 'ja' : '', x.doppelt ? 'ja (' + x.doppelt + ')' : '']);
+    await zugang(ctx); const sp = daten(ctx), rows = await sp.betriebeAlle(), zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at))));
+    const im = ' ' + datumDE(zr.von + 'T12:00:00Z') + '–' + datumDE(zr.bis + 'T12:00:00Z');
+    const kopf = ['Betrieb', 'Ansprechpartner', 'E-Mail (Anmeldung)', 'E-Mail (Kontakt)', 'Telefon', 'PLZ', 'Registriert', 'Zuletzt aktiv', 'Tarif', 'Zahlungsart', 'Projekte', 'Links verschickt', 'Aufmaße eingegangen', 'Positionen', 'Aufträge', 'Umsatz netto (€)', 'davon bezahlt (€)', 'noch nicht berechnet (€)', 'Projekte' + im, 'Aufmaße' + im, 'Umsatz netto' + im + ' (€)', 'Gesperrt', 'Doppelkonto-Verdacht'];
+    const zeilen = rows.map((r) => zeile(r, zr)).map((x) => [x.name, x.ap, x.mail, x.kontaktMail, x.tel, x.plz, datumDE(x.registriert), datumDE(x.zuletzt), X().planName(x.tarif), x.zahlungsart ? x.zahlungsart.art : '', x.k.projekte, x.k.verschickt, x.k.aufmasse, x.k.positionen, x.k.auftraege, zahlDE(x.k.umsatz), zahlDE(x.k.bezahlt), zahlDE(x.k.nochOffen), x.z.projekte, x.z.aufmasse, zahlDE(x.z.umsatz), x.gesperrt ? 'ja' : '', x.doppelt ? 'ja (' + x.doppelt + ')' : '']);
     await protokoll(sp, 'liste_export', null, X().nW(rows.length, 'Betrieb', 'Betriebe') + ' als CSV');
     const text = '\ufeff' + [kopf].concat(zeilen).map((r) => r.map(csvFeld).join(';')).join('\r\n') + '\r\n';
     return new Response(text, { status: 200, headers: { 'content-type': 'text/csv; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'content-disposition': 'attachment; filename="eeziframes-betriebe-' + tagBerlin() + '.csv"' } });
@@ -478,10 +546,11 @@ export const ZENTRALE = {
     return { ok: true, geloescht: row.name, nichtBerechnet: offen, stripeKunde: row.stripe_customer || '', stripeLink: stripeLink(ctx.k, 'customers', row.stripe_customer), nachweis: nachweis, anmeldungBleibt: bleibt };
   },
 
-  /* Käufe des Aufmaßblatts (Hauseigentümer) */
+  /* Käufe des Aufmaßblatts (Hauseigentümer) im Zeitraum */
   'GET /api/zentrale/kaeufe': async (ctx) => {
-    await zugang(ctx); const z = await daten(ctx).zahlungenAlle(), jetzt = Date.now(), bez = z.filter((x) => x.status === 'bezahlt'), j30 = bez.filter((x) => jetzt - Date.parse(x.created_at) <= 30 * TAG);
-    return { ok: true, kaeufe: z.slice(0, 1000).map((x) => ({ zeit: x.created_at, mail: x.mail || '', betrag: rund((x.betrag_cent || 0) / 100), status: x.status, kennung: x.kennung || '', sitzung: x.stripe_session })), summe: { anzahl: bez.length, umsatz: rund(bez.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), anzahl30: j30.length, umsatz30: rund(j30.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), offen: z.length - bez.length }, test: !!(ctx.k.stripe && ctx.k.stripe.test), stripe: ctx.k.stripe ? 'https://dashboard.stripe.com/' + (ctx.k.stripe.test ? 'test/' : '') + 'payments' : '' };
+    await zugang(ctx); const alle = await daten(ctx).zahlungenAlle(), zr = zeitraum(ctx.url, fruehester(alle.map((x) => tagAus(x.created_at))));
+    const z = alle.filter((x) => drin(zr, tagAus(x.created_at))), bez = z.filter((x) => x.status === 'bezahlt');
+    return { ok: true, zeitraum: zrAus(zr), kaeufe: z.slice(0, 1000).map((x) => ({ zeit: x.created_at, mail: x.mail || '', betrag: rund((x.betrag_cent || 0) / 100), status: x.status, kennung: x.kennung || '', sitzung: x.stripe_session })), summe: { anzahl: bez.length, umsatz: rund(bez.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100), offen: z.length - bez.length, liste: z.length }, test: !!(ctx.k.stripe && ctx.k.stripe.test), stripe: ctx.k.stripe ? 'https://dashboard.stripe.com/' + (ctx.k.stripe.test ? 'test/' : '') + 'payments' : '' };
   },
   /* Anmeldungen ohne Betrieb: E-Mail bestätigt, Registrierung nicht abgeschlossen (werden nach 30 Tagen von selbst gelöscht).
      Konten von Hauseigentümern mit gesichertem Aufmaß (eigene.js) stehen nicht darin, nur ihre Anzahl: Ihre E-Mail-Adressen zeigt die
@@ -507,7 +576,12 @@ export const ZENTRALE = {
     return { ok: true };
   },
 
-  'GET /api/zentrale/statistik': async (ctx) => { await zugang(ctx); return auswerten(daten(ctx), ctx.url.searchParams.get('tage')); },
+  /* Statistik der Website im Zeitraum; „von Anfang an“ beginnt beim ersten gezählten Tag */
+  'GET /api/zentrale/statistik': async (ctx) => {
+    await zugang(ctx); const sp = daten(ctx);
+    const anfang = ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null, zr = zeitraum(ctx.url, anfang);
+    return Object.assign(await auswerten(sp, zr), { zeitraum: zrAus(zr) });
+  },
   'GET /api/zentrale/protokoll': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), von = Math.max(0, parseInt(ctx.url.searchParams.get('von'), 10) || 0), art = str(ctx.url.searchParams.get('art'), 40);
     const liste = await sp.protokollLesen({ von: von, anzahl: 100, art: /^[a-z_]+$/.test(art) ? art : '' });

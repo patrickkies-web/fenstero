@@ -90,9 +90,16 @@ p.z-hinweis { margin: 0; padding-left: 34px; position: relative } p.z-hinweis::b
 .z-suche { flex: 1 1 320px }
 .z-filter .chip { gap: 8px }
 .z-n { font-size: 13px; font-weight: 800; color: inherit; opacity: .7 }
-.z-seg { min-width: min(420px, 100%) }
 .z-art { min-width: 220px }
 .z-aktionen { display: flex; flex-wrap: wrap; gap: 8px }
+
+/* ---------- Zeitraum der Auswertung: Segmente, darunter auf Wunsch zwei Tage ---------- */
+.z-zeitraum { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.z-zr-seg { align-self: flex-start; max-width: 100% }
+.z-zr-seg > button { flex: 0 0 auto; padding: 0 14px }
+.z-zr-frei { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end }
+.z-zr-frei .f { flex: 0 1 200px }
+.z-zr-frei .btn { min-height: 48px }
 
 /* ---------- Tabellen: am Telefon Karten untereinander, Spaltentitel aus data-k ---------- */
 .z-tabkarte { overflow-x: auto }
@@ -203,7 +210,10 @@ p.z-hinweis { margin: 0; padding-left: 34px; position: relative } p.z-hinweis::b
   .z-unterzeile td { display: block; text-align: left }
   .z-liste li { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 10px 0 }
   .z-liste li .badge { justify-self: start }
-  .z-seg { min-width: 0; width: 100% }
+  .z-zr-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-self: stretch }
+  .z-zr-seg > button { padding: 0 6px }
+  .z-zr-frei .f { flex: 1 1 140px }
+  .z-zr-frei .btn { flex: 1 1 100% }
   .z-kopf-r { width: 100% }
   .z-achse span:nth-child(2) { display: none }
 }
