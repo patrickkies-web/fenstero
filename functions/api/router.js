@@ -23,7 +23,7 @@ import { EIGENE, kontenDa } from './eigene.js';
 import { WIDERRUF, widerrufeNachholen } from './widerruf.js';
 import { FOTOS } from './fotos.js';
 import { attrappePost, attrappeAus } from './post.js';
-import { zaehlen } from './statistik.js';
+import { zaehlen, mitWerbung, werbungAus } from './statistik.js';
 import '../../web/assets/modell.js';
 import { indexnow } from '../seo.js';
 
@@ -59,7 +59,7 @@ export async function api(request, env, ctx0) {
     if (pfad === '/api/test/nachholen' && k.datenAttrappe && k.post && k.post.attrappe) { const sp0 = speicher(k); return json({ ok: true, vertrag: await bestaetigungenNachholen(k, sp0, env), widerruf: await widerrufeNachholen(k, sp0) }); }
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });
-      if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), ['ereignis:ki_foto']).catch(() => false)); return r; }
+      if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), mitWerbung(['ereignis:ki_foto'], werbungAus(request))).catch(() => false)); return r; }
       return new Response(null, { status: 405, headers: { allow: 'GET, POST' } });
     }
     const treffer = finde(request.method, pfad);
@@ -78,8 +78,9 @@ export async function api(request, env, ctx0) {
       else if (roh) { try { body = JSON.parse(roh); } catch (e) { if (pfad !== '/api/zahlung/webhook') return json({ ok: false, fehler: 'Kein JSON.' }, 400); } }
       if (pfad !== '/api/zahlung/webhook' && request.headers.get('origin') && request.headers.get('origin') !== url.origin) return json({ ok: false, fehler: 'forbidden' }, 403);
     }
-    /* zaehlen: Vorgang für die eigene Statistik (läuft nach der Antwort weiter, Fehler bleiben folgenlos) */
-    const ctx = { k: k, env: env, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, formular: formular, params: treffer.params, waitUntil: warte, zaehlen: (s) => { warte(zaehlen(k, sp, Array.isArray(s) ? s : [s]).catch(() => false)); } };
+    /* zaehlen: Vorgang für die eigene Statistik (läuft nach der Antwort weiter, Fehler bleiben folgenlos); kommt die Anfrage von einer
+       Seite, die über einen Anzeigenlink aufgerufen wurde, zählt der Vorgang zusätzlich als werbung:… (statistik.js) */
+    const ctx = { k: k, env: env, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, formular: formular, params: treffer.params, waitUntil: warte, zaehlen: (s) => { warte(zaehlen(k, sp, mitWerbung(Array.isArray(s) ? s : [s], werbungAus(request))).catch(() => false)); } };
     const out = await treffer.fn(ctx);
     if (out instanceof Response) return out;
     return json(out == null ? { ok: true } : out);

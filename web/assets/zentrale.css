@@ -211,7 +211,7 @@ p.z-hinweis { margin: 0; padding-left: 34px; position: relative } p.z-hinweis::b
   .z-unterzeile td { display: block; text-align: left }
   .z-liste li { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 10px 0 }
   .z-liste li .badge { justify-self: start }
-  .z-zr-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-self: stretch }
+  .z-zr-seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-self: stretch }
   .z-zr-seg > button { padding: 0 6px }
   .z-zr-paar { flex: 1 1 100% } .z-zr-date { flex: 1 1 58% } .z-zr-time { flex: 1 1 42% }
   .z-zr-frei .btn { flex: 1 1 100% }

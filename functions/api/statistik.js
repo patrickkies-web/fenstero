@@ -1,8 +1,9 @@
 /* eeziframes · Eigene Statistik ohne Cookies, ohne Skript im Browser, ohne Kennungen.
    Gezählt wird auf dem Server, während er eine Seite ausliefert (worker.js bzw. scripts/dev-server.mjs → seitenaufruf), und bei
    Vorgängen, die ohnehin über den Server laufen (ereignis: Kasse geöffnet, Aufmaßblatt gekauft, Aufmaß an einen Betrieb gesendet,
-   Betrieb registriert …). Gespeichert werden nur Tageszähler (Tabelle statistik: Tag, Schlüssel, Anzahl), keine IP-Adresse, keine
-   Browser-Kennung, keine Liste einzelner Aufrufe. Was der Browser bei jedem Seitenaufruf ohnehin mitschickt (Adresse, Herkunft,
+   Betrieb registriert …). Gespeichert werden nur Zähler je Tag (Tabelle statistik: Tag, Schlüssel, Anzahl), für Besuche, Seitenaufrufe,
+   Besuche über Anzeigen und Vorgänge zusätzlich je Stunde (Schlüssel stunde:HH|…), keine IP-Adresse, keine Browser-Kennung, keine
+   Liste einzelner Aufrufe. Was der Browser bei jedem Seitenaufruf ohnehin mitschickt (Adresse, Herkunft,
    Browser-Kennung) wird in diesem Moment zu groben Klassen verdichtet und dann vergessen; Cloudflare liefert das Land.
    Rechtsgrundlage und Gründe: web/datenschutz/ (Abschnitt „Eigene Statistik“), docs/ZENTRALE.md.
 
@@ -59,6 +60,8 @@ export function geraet(ua) {
   return 'Computer';
 }
 export function browserName(ua) {
+  if (/Instagram/.test(ua)) return 'Instagram (App)';
+  if (/FBAN|FBAV|FB_IAB|FBIOS/.test(ua)) return 'Facebook (App)';
   if (/Edg(e|A|iOS)?\//.test(ua)) return 'Edge';
   if (/OPR\/|Opera/.test(ua)) return 'Opera';
   if (/SamsungBrowser/.test(ua)) return 'Samsung Internet';
@@ -95,6 +98,34 @@ export function kampagne(wert, env) {
   const eigene = String((env && env.STATISTIK_KAMPAGNEN) || '').toLowerCase().split(',').map((x) => x.trim()).filter((x) => /^[a-z0-9_-]{2,30}$/.test(x));
   return KAMPAGNEN.includes(w) || eigene.includes(w) ? w : '(andere)';
 }
+/* Anzeigen: Ein Link aus einer bezahlten Anzeige trägt utm_medium=paid (cpc, paid_social …) oder die Klick-Kennung einer
+   Werbeplattform (gclid bei Google, msclkid bei Microsoft …). Gezählt wird nur das Netz, der Wert der Klick-Kennung wird nicht
+   gespeichert. fbclid hängt Meta an jeden Link aus Facebook und Instagram, auch ohne Anzeige: Er zählt deshalb nur als Herkunft. */
+const BEZAHLT = /^(cpc|ppc|cpm|cpv|paid|paid[_-]?social|paid[_-]?search|social[_-]?paid|paidsocial|ads?|anzeigen?|werbung|sponsored|display|retargeting)$/;
+const KLICK = [['gclid', 'Google'], ['gbraid', 'Google'], ['wbraid', 'Google'], ['dclid', 'Google'], ['msclkid', 'Microsoft'], ['ttclid', 'TikTok'], ['li_fat_id', 'LinkedIn'], ['twclid', 'X (Twitter)'], ['epik', 'Pinterest'], ['ScCid', 'Snapchat']];
+const NETZE = { facebook: 'Facebook', fb: 'Facebook', instagram: 'Instagram', ig: 'Instagram', meta: 'Meta', msg: 'Messenger', an: 'Meta Audience Network', threads: 'Threads', google: 'Google', googleads: 'Google', adwords: 'Google', youtube: 'YouTube', bing: 'Microsoft', microsoft: 'Microsoft', tiktok: 'TikTok', linkedin: 'LinkedIn', pinterest: 'Pinterest', snapchat: 'Snapchat', x: 'X (Twitter)', twitter: 'X (Twitter)', xing: 'Xing', reddit: 'Reddit' };
+export function anzeigeNetz(url) {
+  const p = url.searchParams;
+  for (const [k, netz] of KLICK) if (p.has(k)) return netz;
+  const quelle = String(p.get('utm_source') || '').trim().toLowerCase(), medium = String(p.get('utm_medium') || '').trim().toLowerCase();
+  return BEZAHLT.test(medium) ? NETZE[quelle] || (quelle ? 'Andere' : 'ohne Angabe') : '';
+}
+/* Kampagnenname (utm_campaign) in Kleinbuchstaben, Ziffern und Bindestrichen, höchstens 40 Zeichen; Werte, die nach E-Mail-Adresse,
+   Telefonnummer oder Kennung aussehen, zählen als „(andere)“; je Tag und Instanz höchstens 30 neue Namen, danach „(weitere)“ */
+const neueKampagnen = { tag: '', menge: new Set() };
+export function kampagnenName(wert) {
+  const roh = String(wert || '').trim(); if (!roh) return '';
+  const w = roh.toLowerCase().replace(/ß/g, 'ss').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  if (!w || /@/.test(roh) || /\d{6,}/.test(w)) return '(andere)';
+  const heute = tagBerlin();
+  if (neueKampagnen.tag !== heute) { neueKampagnen.tag = heute; neueKampagnen.menge = new Set(); }
+  if (!neueKampagnen.menge.has(w)) { if (neueKampagnen.menge.size >= 30) return '(weitere)'; neueKampagnen.menge.add(w); }
+  return w;
+}
+/* Browser in einer App (Instagram, Facebook …) schicken oft keine Herkunft mit; ihre Browser-Kennung verrät die App */
+const APPS = [['Instagram', /Instagram/], ['Facebook', /FBAN|FBAV|FB_IAB|FBIOS|\[FB/], ['TikTok', /musical_ly|BytedanceWebview|TikTok/i], ['LinkedIn', /LinkedInApp/], ['Pinterest', /Pinterest\//], ['Snapchat', /Snapchat/]];
+function inApp(ua, url) { for (const [name, muster] of APPS) if (muster.test(ua || '')) return name; return url.searchParams.has('fbclid') ? 'Facebook oder Instagram' : ''; }
+
 /* Unbekannte Herkunft: nur die Domain (zwei Ebenen, bei co.uk und Ähnlichem drei), höchstens 100 neue je Tag und Instanz, danach
    „Andere Website“; so bleibt die Tabelle klein, auch wenn jemand erfundene Herkunftsangaben schickt */
 const neueHosts = { tag: '', menge: new Set() };
@@ -103,11 +134,13 @@ function domain(host) {
   const zweite = t[t.length - 2], drei = t.length >= 3 && t[t.length - 1].length === 2 && ['co', 'com', 'org', 'net', 'gov', 'ac', 'edu', 'or', 'ne'].includes(zweite);
   return t.slice(drei ? -3 : -2).join('.');
 }
-export function quelle(referer, url, eigenerHost, env) {
+export function quelle(referer, url, eigenerHost, env, ua) {
+  const netz = anzeigeNetz(url);
+  if (netz) return 'Anzeige: ' + netz;
   const utm = url.searchParams.get('utm_source');
   if (utm) return 'Kampagne: ' + kampagne(utm, env);
   if (url.searchParams.get('von') === 'pdf') return 'Aufmaßblatt (QR-Code)';
-  if (!referer) return 'Direkt';
+  if (!referer) return inApp(ua, url) || 'Direkt';
   let host = '';
   try { const r = new URL(referer); host = r.protocol === 'android-app:' ? r.host : r.hostname; } catch (e) { return 'Direkt'; }
   host = host.toLowerCase().replace(/^www\./, '');
@@ -134,12 +167,36 @@ export function schluesselFuer(request, env) {
   const ua = h.get('user-agent') || '', bot = botFamilie(ua);
   if (bot) return ['bot:' + bot];
   const keys = ['aufruf:' + pfad];
-  const q = quelle(h.get('referer') || '', url, url.host, env);
+  const q = quelle(h.get('referer') || '', url, url.host, env, ua);
   if (q !== null) {
     const cf = request.cf || {}, land = String(cf.country || h.get('cf-ipcountry') || '').toUpperCase();
     keys.push('besuch:' + pfad, 'herkunft:' + q, 'geraet:' + geraet(ua), 'browser:' + browserName(ua), 'system:' + systemName(ua), 'land:' + (/^[A-Z]{2}$/.test(land) && land !== 'XX' && land !== 'T1' ? land : '??'));
+    const netz = anzeigeNetz(url), kamp = kampagnenName(url.searchParams.get('utm_campaign'));
+    if (netz) keys.push('anzeige:' + netz, 'anzeigeseite:' + pfad);
+    if (kamp) keys.push('kampagne:' + kamp);
   }
   return keys;
+}
+
+/* Vorgang auf einer Seite, die über einen Anzeigenlink aufgerufen wurde: Die Adresse dieser Seite schickt der Browser bei jeder
+   Anfrage an den eigenen Server ohnehin mit (Referer, Referrer-Policy strict-origin-when-cross-origin). Zählt zusätzlich als
+   werbung:<Vorgang>; gespeichert wird dabei nichts über die Person. */
+export function werbungAus(request) {
+  try { const r = new URL(request.headers.get('referer') || ''), u = new URL(request.url); return r.host === u.host ? anzeigeNetz(r) : ''; } catch (e) { return ''; }
+}
+export const mitWerbung = (schluessel, netz) => (netz && !schluessel.some((s) => s.startsWith('werbung:')) ? schluessel.concat(schluessel.filter((s) => s.startsWith('ereignis:')).map((s) => 'werbung:' + s.slice(9))) : schluessel);
+/* Stunde in deutscher Zeit (00 bis 23) und die Stundenzähler zu einem Vorgang: Besuche, Seitenaufrufe, Besuche über Anzeigen,
+   Vorgänge (auch aus Anzeigen) */
+const STUNDE = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Berlin', hour: '2-digit', hourCycle: 'h23' });
+export const stundeBerlin = (d) => STUNDE.format(d || new Date()).padStart(2, '0');
+export function mitStunden(schluessel, stunde) {
+  const out = schluessel.slice();
+  for (const s of schluessel) {
+    const art = s.slice(0, s.indexOf(':'));
+    if (art === 'aufruf' || art === 'besuch' || art === 'anzeige') out.push('stunde:' + stunde + '|' + art);
+    else if (art === 'ereignis' || art === 'werbung') out.push('stunde:' + stunde + '|' + s);
+  }
+  return out;
 }
 
 /* Zählen: ein Aufruf der Datenbankfunktion je Vorgang. Fehlt die Tabelle noch, wird es zehn Minuten lang nicht erneut versucht. */
@@ -147,7 +204,7 @@ let ausBis = 0;
 export async function zaehlen(k, sp, schluessel) {
   if (!sp || !sp.zaehlen || !schluessel || !schluessel.length || Date.now() < ausBis) return false;
   try {
-    const ok = await sp.zaehlen(tagBerlin(), schluessel.map((s) => String(s).slice(0, 120)));
+    const jetzt = new Date(), ok = await sp.zaehlen(tagBerlin(jetzt), mitStunden(schluessel.map((s) => String(s).slice(0, 120)), stundeBerlin(jetzt)));
     if (!ok) ausBis = Date.now() + 10 * 60 * 1000;
     return ok;
   } catch (e) { ausBis = Date.now() + 60 * 1000; return false; }
@@ -187,6 +244,9 @@ export async function auswerten(sp, zeit) {
     summe: { aufrufe: reiheListe.reduce((s, x) => s + x.aufrufe, 0), besuche: reiheListe.reduce((s, x) => s + x.besuche, 0), bots: reiheListe.reduce((s, x) => s + x.bots, 0) },
     reihe: reiheListe,
     seiten: rang('aufruf', SEITEN_NAMEN), einstiege: rang('besuch', SEITEN_NAMEN), herkunft: rang('herkunft'), geraet: rang('geraet'), browser: rang('browser'),
-    system: rang('system'), land: rang('land'), bots: rang('bot'), dateien: rang('datei'), ereignisse: ereignisse
+    system: rang('system'), land: rang('land'), bots: rang('bot'), dateien: rang('datei'), ereignisse: ereignisse,
+    anzeigen: rang('anzeige'), kampagnen: rang('kampagne'), anzeigeseiten: rang('anzeigeseite', SEITEN_NAMEN), werbung: Object.fromEntries((summen.werbung || new Map()).entries()),
+    /* Stundensummen über den Zeitraum (stunde:HH|…), etwa für das Tagesprofil */
+    stunden: Object.fromEntries((summen.stunde || new Map()).entries())
   };
 }

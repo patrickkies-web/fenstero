@@ -23,6 +23,7 @@ Passwort ändern: `ZENTRALE_PASSWORT` bei Cloudflare ersetzen. Damit enden alle 
 | Eingriffe | Sperren (mit Begründung) und Entsperren · Nachricht ins Konto · kostenlose Projekte gutschreiben · Doppelkonto-Verdacht aufheben · Abo zum Monatsende kündigen oder sofort beenden · offene Buchungen jetzt abrechnen · Daten exportieren · Konto löschen |
 | Käufe | Aufmaßblätter der Hauseigentümer im Zeitraum mit E-Mail, Betrag, Stand; Schnitt je Tag; nicht abgeschlossene Kassen |
 | Statistik | Besuche, Seitenaufrufe, Seiten, Einstiegsseiten, Herkunft (Suchmaschinen, KI-Assistenten, Netzwerke, Kampagnen über `?utm_source=…`, QR-Code des Aufmaßblatts), Geräte, Browser, Systeme, Länder, Bots und Linkvorschauen (etwa wenn ein Link in WhatsApp geteilt wird), Abrufe von `llms.txt` und `robots.txt`, Vorgänge (Kasse, Kauf, Aufmaß gesendet, Registrierung …) und drei Trichter, alles im Zeitraum |
+| Anzeigen | Wirkung von Werbeanzeigen im Zeitraum (auch mit Uhrzeit): Besuche über Anzeigen, Vorgänge aus Anzeigen, Vergleich mit derselben Uhrzeit an den 7 Tagen davor, Besuche und Vorgänge je Stunde, Besuche nach Uhrzeit, Netze, Kampagnen, Einstiegsseiten; Baukasten für Anzeigenlinks und die URL-Parameter für Meta |
 | Protokoll | jede Anmeldung in der Zentrale (gekürzte IP, Browser) und jeder Eingriff, mit Filter |
 | Einstellungen | Stand der Dienste (KI, Stripe Test oder Live, Webhook, Datenbank, Statistik, Protokoll, Suchmaschinen), Preise, zweiter Faktor, Passwort, Sammelrechnungen sofort, Anmeldungen ohne Betrieb (Hauseigentümer mit gesichertem Aufmaß nur als Anzahl, ohne E-Mail-Adresse; ihr Konto löschen sie selbst in der App), Links zu Cloudflare, Stripe und Supabase |
 
@@ -55,7 +56,7 @@ Passwort ändern: `ZENTRALE_PASSWORT` bei Cloudflare ersetzen. Damit enden alle 
 
 ## Statistik ohne Cookies
 
-Gezählt wird auf dem Server, während er eine Seite ausliefert (`worker.js` → `seitenaufruf`), und bei Vorgängen, die ohnehin über den Server laufen. Gespeichert werden nur Tageszähler je Schlüssel (`aufruf:/app/`, `herkunft:Google`, `ereignis:kauf` …), keine IP-Adressen, keine Kennungen, keine einzelnen Aufrufe.
+Gezählt wird auf dem Server, während er eine Seite ausliefert (`worker.js` → `seitenaufruf`), und bei Vorgängen, die ohnehin über den Server laufen. Gespeichert werden nur Zähler je Tag und Schlüssel (`aufruf:/app/`, `herkunft:Google`, `ereignis:kauf` …), für Besuche, Seitenaufrufe, Besuche über Anzeigen und Vorgänge zusätzlich je Stunde (`stunde:18|besuch`, `stunde:18|ereignis:kasse` …), keine IP-Adressen, keine Kennungen, keine einzelnen Aufrufe.
 
 - **Besuch** heißt: ein Aufruf, der nicht von einer eigenen Seite kommt. Nur Besuche tragen Herkunft, Gerät, Browser, System und Land, damit jeder Besuch einmal zählt.
 - **Nicht gezählt:** Aufrufe mit „Global Privacy Control“ oder „Do Not Track“, Vorab-Ladevorgänge, Aufrufe des Inhabers, solange er angemeldet ist, die Zentrale selbst, Fehlerseiten, Bots (nur als Familie, auch Headless-Browser).
@@ -63,6 +64,21 @@ Gezählt wird auf dem Server, während er eine Seite ausliefert (`worker.js` →
 - **Unbekannte Herkunft** zählt mit ihrer Domain (`blog.beispiel.de` → `beispiel.de`), höchstens 100 neue je Tag und Server-Instanz, danach „Andere Website“; IP-Adressen als Herkunft ebenfalls „Andere Website“. Erfundene Herkunftsangaben können die Tabelle so nicht aufblähen.
 - **Bewusst nicht gezählt: eindeutige Besucher.** Dafür bräuchte es eine Kennung, etwa einen Hash aus IP-Adresse und Browser. Der wäre, solange er existiert, ein personenbezogenes Pseudonym und brächte die Frage nach § 25 TDDDG zurück; die Aufsichtsbehörden haben solche Verfahren nicht gebilligt. Besuche (Einstiege) reichen für die Reichweite.
 - Ein Messskript im Browser (Pixel, Beacon) gibt es nicht: Das wäre ein Zugriff auf das Endgerät und bräuchte eine Einwilligung.
+
+## Werbeanzeigen messen
+
+Die Seite **Anzeigen** zeigt, was eine Anzeige bringt, ohne Pixel, Cookies oder Skript der Werbeplattform auf der Website.
+
+1. **Link kennzeichnen.** Der Link in der Anzeige braucht `utm_medium=paid` (oder `cpc`, `paid_social` …) und am besten `utm_source` (Netz) und `utm_campaign` (Name der Kampagne). Den passenden Link baut die Seite Anzeigen (Ziel, Netz, Kampagne). Bei Meta reicht im Werbeanzeigenmanager unter „URL-Parameter“: `utm_source={{site_source_name}}&utm_medium=paid&utm_campaign={{campaign.name}}` (`ig`, `fb`, `msg` und `an` erkennt die Statistik). Klick-Kennungen von Google (`gclid`, `gbraid`, `wbraid`), Microsoft (`msclkid`), TikTok (`ttclid`), LinkedIn, X, Pinterest und Snapchat zählen von selbst als Anzeige. `fbclid` hängt Meta an jeden Link, auch ohne Anzeige; er zählt deshalb nur als Herkunft „Facebook oder Instagram“.
+2. **Direkt zum Ziel verlinken.** Vorgänge zählen als „aus Anzeigen“, wenn sie auf der Seite passieren, die über den Anzeigenlink geöffnet wurde (der Browser schickt ihre Adresse bei jeder Anfrage an den eigenen Server mit). Also Hauseigentümer auf `/app/?…`, Fensterbauer auf `/?…#fensterbauer` (dort wird registriert). Wer erst über die Startseite in die App geht, zählt als Besuch aus der Anzeige, seine Kasse aber nicht mehr.
+3. **Zeitraum wählen.** Zum Beispiel „Von – bis“ ab der Uhrzeit, zu der die Anzeige startet. Die Seite vergleicht mit derselben Uhrzeit an den 7 Tagen davor (Durchschnitt); ist der Zeitraum länger als ein Tag, mit den Zeiträumen gleicher Länge davor, bis 7 Tage zurück.
+
+Was wie gezählt wird:
+- **Stundenwerte** (Besuche, Seitenaufrufe, Besuche über Anzeigen, Vorgänge, Vorgänge aus Anzeigen) gibt es ab der Version vom 18.10.2026; davor nur Tageswerte. Die Seite sagt, ab wann. Stundenwerte und Vergleich gibt es für Zeiträume bis 31 Tage, darüber zeigt sie Tageswerte.
+- **Käufe und Registrierungen** kommen genau aus der Datenbank, auch rückwirkend (Käufe zum Zeitpunkt der Kasse, wie unter Käufe).
+- **Käufe werden keiner Anzeige zugeordnet**: Dafür müsste die Herkunft mit der Zahlung gespeichert werden. Ihre Wirkung zeigt der Vergleich mit vorher, dazu „Kasse geöffnet aus Anzeigen“.
+- Wer in der App von Instagram, Facebook, TikTok oder LinkedIn surft, ohne dass der Link gekennzeichnet ist, erscheint unter Herkunft mit dem Namen der App (an der Browser-Kennung erkannt).
+- Kampagnennamen werden zu Kleinbuchstaben, Ziffern und Bindestrichen; was nach E-Mail-Adresse oder Nummer aussieht, zählt als „(andere)“, und je Tag kommen höchstens 30 neue Namen dazu.
 
 ## Rechtlicher Rahmen (Recherche vom 15.10.2026, keine Rechtsberatung)
 
