@@ -2,7 +2,10 @@
 //
 //   node marketing/highlights/video.mjs h03          Video videos/h03.mp4  ->  out/h03.mp4 (1080 × 1920, H.264, mit Ton)
 //   STANDBILD=1 node marketing/highlights/video.mjs h03   Standbild bilder/<slot>.png neu aus dem ersten Bild des Videos
+//   STANDBILD=0 ...                                         bilder/ nicht anfassen (die Bildfassung behält ihr Foto)
 //
+// Nur fürs Video gelten data-video-fp (Ausschnitt) und data-video-voll (bis wohin voll sichtbar, z. B. 78%) am <img>;
+// ohne sie gelten data-fp und die Ausblendung des Screens.
 // Das Video läuft im Foto-Bereich des Screens (gleicher Ausschnitt wie das Foto: data-fp am <img>, sonst 50% 0%) und blendet
 // mit derselben Maske wie das Foto weich in den Grund #161616 aus. Schrift, Chips und alles andere liegen als scharfe, ruhende
 // Ebene darüber; die KI animiert also nie Buchstaben. Fehlt bilder/<slot>.png, wird es aus dem ersten Videobild erzeugt; damit
@@ -33,15 +36,16 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
 await page.goto(pathToFileURL(screen).href, { waitUntil: 'load' });
 const slot = await page.$eval('.ef-foto > img[data-slot]', (el) => el.getAttribute('data-slot'));
-const standbild = join(HIER, 'bilder', slot + '.png');
-if (!existsSync(standbild) || process.env.STANDBILD === '1') {
+const standbild = process.env.STANDBILD === '0' ? join(tmp, 'standbild.png') : join(HIER, 'bilder', slot + '.png');
+if (!existsSync(standbild) || process.env.STANDBILD === '1' || process.env.STANDBILD === '0') {
   execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', video, '-frames:v', '1', standbild]);
-  console.log('Standbild ' + slot + '.png aus dem ersten Videobild');
+  if (process.env.STANDBILD !== '0') console.log('Standbild ' + slot + '.png aus dem ersten Videobild');
 }
 /* Slot wie render.mjs auflösen, dann warten */
 const lage = await page.evaluate(async (url) => {
   const im = document.querySelector('.ef-foto > img[data-slot]'), fig = im.closest('.ef-foto');
-  fig.style.setProperty('--ef-fp', im.getAttribute('data-fp') || '50% 0%');
+  fig.style.setProperty('--ef-fp', im.getAttribute('data-video-fp') || im.getAttribute('data-fp') || '50% 0%');
+  if (im.getAttribute('data-video-voll')) fig.style.setProperty('--ef-foto-voll', im.getAttribute('data-video-voll'));
   im.src = url; await im.decode(); await document.fonts.ready;
   await Promise.all([...document.images].map((b) => b.decode().catch(() => {})));
   const r = im.getBoundingClientRect(), [px, py] = getComputedStyle(im).objectPosition.split(' ').map((v) => parseFloat(v) / 100);
