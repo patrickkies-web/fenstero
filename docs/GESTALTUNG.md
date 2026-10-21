@@ -327,7 +327,7 @@ Seiten aus reinem HTML für Menschen, Suchmaschinen und KI-Assistenten (`web/rat
 - Blätter am Schreibtisch mittig statt am unteren Rand.
 - Die Telefon-Attrappe und die Bühne „So läuft es“ sind Illustration; dort gelten die Rollen sinngemäß (verkleinerte Oberfläche), aber nie unter 13 px.
 - Pilot-Hinweis bleibt eine Tintenzeile; am Telefon zwei Zeilen mit „Mehr“, verschwindet im Servermodus. Text unverändert.
-- Startbilder: am Telefon steht das Fenster auf dem ersten Bildschirm – Titel, Knopf, Bild, dann der Text (App-Start, Kundenlink, Startseite des Betriebsbereichs).
+- Startbilder: am Telefon stehen Titel, Cream-Pille und Fotokarte auf dem ersten Bildschirm, dann der Text; das 3-D-Modell folgt darunter (App-Start) bzw. in „Was im Aufmaß steckt“ (Startseite). Der Kundenlink eines Betriebs bleibt ohne Foto (dort steht der Betrieb, nicht wir).
 - Bewegtbilder sind gezeichnet, nicht gekauft: dieselben Linienstärken, Radien und Farben wie die Oberfläche, aus Code erzeugt und jederzeit änderbar.
 - Haptik ist leise: ein Tippen von 8 ms, nie als Dauerfeuer; Fehler stoßen einmal.
 - Rund heißt fest verglast: die Fragen nach Flügeln, Öffnung, Scharnieren, Oberlicht und Fensterbank entfallen, ein Hinweis sagt warum; was vorher eingestellt war, kommt beim Wechsel zurück wieder.
