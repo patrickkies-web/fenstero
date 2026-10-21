@@ -48,7 +48,7 @@ img { max-width: 100% }
 .hdr-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .hdr-btn svg { flex: 0 0 auto }
 .prog { height: 3px; background: var(--line) }
-.prog > div { height: 3px; background: var(--ink); border-radius: 0 3px 3px 0; transition: width .4s var(--e-out) }
+.prog > div { height: 3px; background: var(--accent); border-radius: 0 3px 3px 0; transition: width .4s var(--e-out) }
 .bb { position: absolute; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; gap: 10px; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: saturate(160%) blur(18px); -webkit-backdrop-filter: saturate(160%) blur(18px); border-top: 1px solid var(--line) }
 .btn.primary, .btn.ghost { flex: 1 }
 .btn.small, .btn.soft { flex: 0 0 auto }
@@ -60,7 +60,8 @@ img { max-width: 100% }
 .hd p { margin: 10px 0 0; font-size: 17px; line-height: 1.5; color: var(--ink2); text-wrap: pretty }
 .hd.compact { padding-top: 14px } .hd.compact h1 { margin-top: 6px; font-size: 24px; letter-spacing: -.02em } .hd.compact p { margin-top: 6px; font-size: 15px; line-height: 1.45 }
 .scr.fit .hd.compact h1 { font-size: 24px }
-.hd .eyebrow.mo { color: var(--mo) } .hd .eyebrow.el { color: var(--el) }
+/* Kicker über dem Titel in Grün; Maueröffnung und Element behalten ihre Zeichnungsfarbe */
+.hd .eyebrow { color: var(--accent) } .hd .eyebrow.mo { color: var(--mo) } .hd .eyebrow.el { color: var(--el) }
 h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; letter-spacing: -.02em }
 .sub { margin: 0; font-size: 15px; line-height: 1.45; color: var(--muted) }
 .center { text-align: center; padding: 0 8px }
@@ -135,6 +136,9 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .hero p { margin: 14px 0 0; font-size: 17px; line-height: 1.5; color: var(--ink2); text-wrap: pretty; max-width: 34ch }
 /* Reihenfolge auf dem Startbild: Titel, Knopf, das Fenster, dann der Text; so steht das Fenster auf dem ersten Bildschirm */
 .hero > .eyebrow { order: 1 } .hero > h1, .hero > .lk-for { order: 2 } .hero > .cta { order: 3 } .hero > .hero-scene { order: 4; margin-top: 18px } .hero > p:not(.eyebrow):not(.lk-for) { order: 5 }
+/* Startbild der App: Kicker → Headline → Knöpfe → Fotokarte (Baustein in gemeinsam.css, Breite kommt vom Behälter) → Lead → 3-D-Modell; ab 640 px liegt das Foto rechts neben dem Text */
+.hero.start > .hero-foto { order: 4; width: 100%; margin-top: 18px } .hero.start > .hero-scene { order: 6 }
+@media (min-width: 640px) { .hero.start { display: grid; grid-template-columns: minmax(0, 1fr) 248px; column-gap: 28px; align-items: start } .hero.start > * { grid-column: 1 } .hero.start > .hero-foto { grid-column: 2; grid-row: 1 / span 4; align-self: center; margin-top: 0 } .hero.start > .hero-scene { grid-column: 1 / -1 } }
 .hero .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 18px; width: 100% }
 .hero .cta .btn { flex: 0 0 auto; padding: 0 22px } .hero .cta .link { font-size: 15px }
 .hero-scene { position: relative; width: 100%; margin: 22px 0 0; border-radius: var(--r4); overflow: hidden; box-shadow: var(--ring); transform: perspective(1100px) rotateX(calc((var(--sp, 0.5) - 0.5) * -6deg)); transform-origin: 50% 50% }
@@ -149,7 +153,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .wincard .ti { font-size: 17px; font-weight: 800; letter-spacing: -.01em }
 .wincard .di { font-size: 15px; color: var(--ink2) }
 .wincard .me { font-size: 13px; color: var(--muted) }
-.dashed { min-height: 56px; border: 1.5px dashed var(--line2); border-radius: var(--r3); background: transparent; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: border-color var(--t2), background var(--t2) }
+.dashed { min-height: 56px; border: 2px dashed var(--line2); border-radius: var(--r3); background: transparent; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: border-color var(--t2), background var(--t2) }
 .dashed:active { background: var(--surface) }
 /* Angefangenes Aufmaß: Liste oben, Grenzen, Hinweise zum Weitermachen (app.js: homeAufmass, linkHome, fertig) */
 .mail { overflow-wrap: anywhere }
@@ -226,9 +230,9 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .facts dt { color: var(--muted) } .facts dd { margin: 0; font-weight: 600; min-width: 0 }
 
 /* ---------- 3-D-Modell: der Raum ist das Bild, der Rahmen ein Hauch ---------- */
-.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, #d7e6f5 0%, #ecf1f6 55%, #e4dfd6 100%); box-shadow: var(--ring), inset 0 0 0 1px rgba(255, 255, 255, .5); perspective: 1300px; perspective-origin: 50% 46%; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100% }
+.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, var(--surface3), var(--surface2)); box-shadow: var(--ring); perspective: 1300px; perspective-origin: 50% 46%; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100% }
 .w3d-stage.hero { height: 320px }
-.w3d-bg { position: absolute; inset: -28px; background-size: cover; background-position: center; filter: blur(20px) saturate(.5) brightness(1.06); opacity: .3; pointer-events: none; animation: w3dbgin 1.2s ease-out both }
+.w3d-bg { position: absolute; inset: -28px; background-size: cover; background-position: center; filter: blur(20px) saturate(.5) brightness(.85); opacity: .3; pointer-events: none; animation: w3dbgin 1.2s ease-out both }
 @keyframes w3dbgin { from { opacity: 0; transform: scale(1.06) } to { opacity: .3; transform: none } }
 .w3d-cam { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .9s cubic-bezier(.4, .1, .2, 1) }
 .w3d-stage.is-drag .w3d-cam { transition: none }
@@ -237,11 +241,11 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes w3dsway { from { transform: rotateY(-3deg) rotateX(1deg) } to { transform: rotateY(3deg) rotateX(-1deg) } }
 .w3d-f { position: absolute; left: 0; top: 0; backface-visibility: visible; pointer-events: none; transition: width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), transform .7s cubic-bezier(.3, .7, .2, 1), clip-path .7s cubic-bezier(.3, .7, .2, 1), opacity .4s, background .5s }
 .no-anim .w3d-f, .no-anim .w3d-sash, .no-anim .w3d-dim, .no-anim .w3d-handle, .no-anim .w3d-el, .no-anim .w3d-cam, .no-anim .w3d-bar { transition: none !important }
-.w3d-wall-in { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .06) 100%), linear-gradient(180deg, #f4f0e9, #e8e2d8) }
-.w3d-rev-t { background: linear-gradient(180deg, #c9bfb0, #b7ac9b) } .w3d-rev-l { background: linear-gradient(90deg, #e9e2d6, #d9d1c3) } .w3d-rev-r { background: linear-gradient(90deg, #cdc4b5, #c0b6a6) }
+.w3d-wall-in { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .14) 100%), linear-gradient(180deg, #4a4540, #3b3733) }
+.w3d-rev-t { background: linear-gradient(180deg, #2c2925, #24211e) } .w3d-rev-l { background: linear-gradient(90deg, #5c564f, #4b4640) } .w3d-rev-r { background: linear-gradient(90deg, #433e39, #37332e) }
 .w3d-sill { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08) }
 .w3d-el { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: opacity .6s } .w3d-el.is-hidden { opacity: 0 }
-.w3d-frame { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16) } .w3d-side { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22); background-image: linear-gradient(90deg, rgba(0, 0, 0, .13), rgba(0, 0, 0, .05) 35%, rgba(0, 0, 0, .05) 65%, rgba(0, 0, 0, .13)) }
+.w3d-frame { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16), 0 0 0 1px rgba(255, 255, 255, .09) } .w3d-side { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22); background-image: linear-gradient(90deg, rgba(0, 0, 0, .13), rgba(0, 0, 0, .05) 35%, rgba(0, 0, 0, .05) 65%, rgba(0, 0, 0, .13)) }
 .w3d-glass { background: linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .42) 34%, transparent 50%), linear-gradient(135deg, rgba(205, 225, 245, .6) 0%, rgba(160, 196, 230, .5) 48%, rgba(226, 238, 250, .66) 100%); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) }
 /* Weitere Scheiben (2- oder 3-fach): fast klar, mit dunkler Randverbund-Kante; in der Schräge sieht man die Schichten */
 .w3d-scheibe { background: linear-gradient(135deg, rgba(225, 238, 250, .16), rgba(195, 218, 240, .1)); box-shadow: inset 0 0 0 1.5px rgba(55, 62, 70, .42); pointer-events: none }
@@ -266,7 +270,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-selring.is-form { border: 0; border-radius: 0 } .w3d-selring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible } .w3d-selring polygon { fill: none; stroke: var(--accent); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke }
 /* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler) und die Fuge zwischen Wand und Rahmen */
 .w3d-rs { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(0, 0, 0, .07)) }
-.w3d-fuge { background: #c6bcab }
+.w3d-fuge { background: #2a2622 }
 /* Öffnung vorführen (oeffnungZeigen): der Flügel geht kurz auf und zu, der Griff dreht vorher mit. Fest: ein Glanz läuft übers Glas */
 .w3d-sash.demo-D { animation: w3d-dreh 1.6s var(--e-io) both }
 .w3d-sash.demo-K { animation: w3d-kipp 1.4s var(--e-io) both }
@@ -297,8 +301,8 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Unterlicht als Paneel, Schwelle, Böden bei Türen */
 .w3d-paneel { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), inset 0 0 30px rgba(0, 0, 0, .06) }
 .w3d-schw { background: linear-gradient(180deg, #d9dde1, #aeb4ba); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-schw-t { background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .18) 0 1px, transparent 1px 4px), linear-gradient(180deg, #e3e6e9, #c3c8cd) }
-.w3d-floor-in { background: repeating-linear-gradient(90deg, rgba(90, 60, 30, .08) 0 1px, transparent 1px 34px), linear-gradient(180deg, #e2d6c3, #d2c2a8) }
-.w3d-floor-out { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px 48px), linear-gradient(180deg, #cfcac2, #bdb7ad) }
+.w3d-floor-in { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 34px), linear-gradient(180deg, #5b4b3b, #4a3c2f) }
+.w3d-floor-out { background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .06) 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, rgba(255, 255, 255, .06) 0 1px, transparent 1px 48px), linear-gradient(180deg, #4a4843, #3a3835) }
 /* Hebe-Schiebe: Griff dreht, der Flügel hebt sich 7 px aus der Dichtung, schiebt vor das Festteil und zurück */
 .w3d-sash.demo-S { animation: w3d-schieben 3s var(--e-io) both }
 @keyframes w3d-schieben { 0%, 5% { transform: none } 13%, 20% { transform: translate3d(0, -7px, 0) } 50%, 66% { transform: translate3d(calc(var(--sdir, -1) * 82%), -7px, 0) } 90% { transform: translate3d(0, -7px, 0) } 100% { transform: none } }
@@ -330,16 +334,16 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes dimdraw { from { transform: scaleX(0) } to { transform: none } }
 @keyframes dimdraw-v { from { transform: scaleY(0) } to { transform: none } }
 @keyframes dimlab { from { opacity: 0 } to { opacity: 1 } }
-.w3d-dim-lab { position: absolute; padding: 3px 8px; border-radius: var(--r1); color: var(--on-accent); font-size: 13px; font-weight: 800; letter-spacing: .01em; line-height: 1.2; white-space: nowrap; box-shadow: 0 1px 3px rgba(0, 0, 0, .28), 0 0 0 1.5px rgba(255, 255, 255, .55); transform-style: preserve-3d; font-variant-numeric: tabular-nums; transition: padding .25s; background: var(--dc) }
+.w3d-dim-lab { position: absolute; padding: 3px 8px; border-radius: var(--r1); color: var(--on-accent); font-size: 13px; font-weight: 800; letter-spacing: .01em; line-height: 1.2; white-space: nowrap; box-shadow: 0 0 0 1.5px rgba(22, 22, 22, .6); transform-style: preserve-3d; font-variant-numeric: tabular-nums; transition: padding .25s; background: var(--dc) }
 .w3d-dim.v .w3d-dim-lab { left: 0; top: 50%; transform: translate(-50%, -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
 .w3d-dim.h .w3d-dim-lab { left: 50%; top: 0; transform: translate(-50%, -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
-.w3d-dim.is-active .w3d-dim-lab { padding: 4px 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, .3), 0 0 0 2px rgba(255, 255, 255, .7) }
+.w3d-dim.is-active .w3d-dim-lab { padding: 4px 10px; box-shadow: 0 0 0 2px var(--ink) }
 .w3d-stage[data-view="outside"] .w3d-bar { background: var(--bo) !important }
 /* Lupe: Schnitt durch Glas und Flügelprofil, unten rechts in der Bühne */
-.w3d-lupe { position: absolute; right: 12px; bottom: 12px; width: 108px; height: 108px; border-radius: 50%; background: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, .18), 0 0 0 1px rgba(0, 0, 0, .06); pointer-events: none; z-index: 3 }
+.w3d-lupe { position: absolute; right: 12px; bottom: 12px; width: 108px; height: 108px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--line2); pointer-events: none; z-index: 3 }
 .w3d-lupe svg { display: block; width: 100%; height: 100% }
 @media (max-height: 700px) { .w3d-lupe { width: 88px; height: 88px; right: 8px; bottom: 8px } }
-.w3d-hint { position: absolute; left: 12px; bottom: 10px; padding: 6px 10px; border-radius: var(--r1); background: rgba(20, 20, 20, .8); color: #fff; font-size: 13px; font-weight: 700; pointer-events: none }
+.w3d-hint { position: absolute; left: 12px; bottom: 10px; padding: 6px 10px; border-radius: var(--r1); background: rgba(22, 22, 22, .82); color: var(--ink); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); font-size: 13px; font-weight: 700; pointer-events: none }
 /* Neben der Lupe bleibt der Hinweis links und bricht notfalls um */
 .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 148px); line-height: 1.3 }
 @media (max-height: 700px) { .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 120px) } }
@@ -367,19 +371,19 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .copybox { width: 100%; min-height: 72px; border-radius: var(--r2); border: 1px solid var(--line2); background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; padding: 10px; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace }
 
 /* ---------- Glossar-Blätter ---------- */
-.sheet-bg { position: absolute; inset: 0; z-index: 60; border: 0; padding: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, .4); animation: fx-fade var(--t2) var(--e-out) both }
-.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 90%; overflow-y: auto; background: var(--paper); border-radius: var(--r4) var(--r4) 0 0; padding: 8px 22px calc(40px + env(safe-area-inset-bottom, 0px)); box-shadow: var(--float); animation: sheet-up var(--t3) var(--e-out) both }
+.sheet-bg { position: absolute; inset: 0; z-index: 60; border: 0; padding: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, .6); animation: fx-fade var(--t2) var(--e-out) both }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 90%; overflow-y: auto; background: var(--surface); border-radius: var(--r4) var(--r4) 0 0; padding: 8px 22px calc(40px + env(safe-area-inset-bottom, 0px)); box-shadow: var(--float); animation: sheet-up var(--t3) var(--e-out) both }
 @keyframes sheet-up { from { transform: translateY(32px); opacity: 0 } to { transform: none; opacity: 1 } }
 .grip { width: 36px; height: 4px; border-radius: 2px; background: var(--line2); margin: 0 auto }
 .sheet-top { display: flex; justify-content: space-between; align-items: center; margin: 2px -8px 0; min-height: 44px }
 .xbtn { width: 44px; height: 44px; border: 0; border-radius: var(--r2); background: none; display: flex; align-items: center; justify-content: center; color: var(--ink) }
 .sheet h2 { margin: 0; font-size: 32px; line-height: 1.06; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; text-align: center }
 .sheet .ico.ico-l > svg { width: 150px; height: 150px; margin: 5px }
-.sheet .ico { width: 160px; height: 160px; margin: 20px auto; border-radius: var(--r4); background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--ring) }
+.sheet .ico { width: 160px; height: 160px; margin: 20px auto; border-radius: var(--r4); background: var(--surface2); display: flex; align-items: center; justify-content: center; box-shadow: var(--ring) }
 .sheet p.x { margin: 0 0 14px; font-size: 17px; line-height: 1.6; text-wrap: pretty }
 .see { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; font-size: 15px; color: var(--muted) }
-.gindex { background: var(--surface); border-radius: var(--r3); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--ring) }
-.gindex button { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--line); background: var(--surface); font: inherit; text-align: left; color: var(--ink) }
+.gindex { background: var(--surface2); border-radius: var(--r3); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--ring) }
+.gindex button { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--line2); background: var(--surface2); font: inherit; text-align: left; color: var(--ink) }
 .gindex button:last-child { border-bottom: 0 }
 .gindex button span { display: flex; flex-direction: column; gap: 2px } .gindex b { font-size: 17px; font-weight: 700 } .gindex small { font-size: 13px; color: var(--muted) }
 .toast { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); z-index: 70; width: max-content; max-width: calc(100% - 32px); padding: 11px 16px; border-radius: var(--r2); background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 700; line-height: 1.35; text-align: center; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; box-shadow: var(--lift); animation: toast-in var(--t3) var(--e-out) both; pointer-events: none }
@@ -458,7 +462,8 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 24px }
 .qrow .sub { margin: 0; font-size: 15px }
 .qwunsch { display: flex; flex-direction: column; gap: 4px }
-.qwunsch input { min-height: 48px; border-radius: var(--r2); border: 1.5px solid var(--line2); background: var(--surface); padding: 0 14px; font: inherit; font-size: 17px; color: var(--ink) }
+.qwunsch input { min-height: 48px; border-radius: var(--r2); border: 2px solid var(--line2); background: var(--surface); padding: 0 14px; font: inherit; font-size: 17px; color: var(--ink); transition: border-color var(--t2) }
+.qwunsch input:focus { outline: none; border-color: var(--ink) }
 .qwunsch small { font-size: 13px; color: var(--muted); line-height: 1.35; padding: 0 4px }
 .qnav { flex: 0 0 auto; display: flex; gap: 10px; padding-top: 2px }
 .qnav .btn.ghost { flex: 0 0 56px; padding: 0 }
@@ -477,19 +482,19 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Sprossen-Regler am Modell */
 .rail { position: absolute; z-index: 6; touch-action: none; user-select: none; -webkit-user-select: none; transition: left .7s cubic-bezier(.3, .7, .2, 1), top .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1) }
 .rail-h { height: 36px; margin-top: -18px } .rail-v { width: 36px; margin-left: -18px }
-.rail .track { position: absolute; background: rgba(29, 29, 31, .22); border-radius: 2px; pointer-events: none }
+.rail .track { position: absolute; background: rgba(255, 255, 255, .3); border-radius: 2px; pointer-events: none }
 .rail-h .track { left: 0; right: 0; top: 50%; height: 3px; margin-top: -1.5px } .rail-v .track { top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px }
-.rail-h .track::before, .rail-h .track::after, .rail-v .track::before, .rail-v .track::after { content: ''; position: absolute; background: rgba(29, 29, 31, .22); border-radius: 2px }
+.rail-h .track::before, .rail-h .track::after, .rail-v .track::before, .rail-v .track::after { content: ''; position: absolute; background: rgba(255, 255, 255, .3); border-radius: 2px }
 .rail-h .track::before, .rail-h .track::after { top: -5px; width: 3px; height: 13px } .rail-h .track::before { left: 0 } .rail-h .track::after { right: 0 }
 .rail-v .track::before, .rail-v .track::after { left: -5px; height: 3px; width: 13px } .rail-v .track::before { top: 0 } .rail-v .track::after { bottom: 0 }
-.rail .rh { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 0; border-radius: 50%; padding: 0; background: #fff center / 15px no-repeat; box-shadow: 0 0 0 2px var(--ink), 0 2px 8px rgba(0, 0, 0, .28); cursor: grab; transition: transform .15s, box-shadow .15s, background-color .15s }
+.rail .rh { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border: 0; border-radius: 50%; padding: 0; background: #fff center / 15px no-repeat; box-shadow: 0 0 0 2px var(--paper); cursor: grab; transition: transform .15s, box-shadow .15s, background-color .15s }
 .rail .rh::before { content: ''; position: absolute; inset: -12px }
 .rail-h .rh { top: 50% } .rail-v .rh { left: 50% }
 .rail-h .rh { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M1.5 7h11M4.5 4L1.5 7l3 3M9.5 4l3 3-3 3' fill='none' stroke='%23141414' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") }
 .rail-v .rh { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1.5v11M4 4.5l3-3 3 3M4 9.5l3 3 3-3' fill='none' stroke='%23141414' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") }
-.rail .rh.is-sel { box-shadow: 0 0 0 3px var(--ink), 0 2px 8px rgba(0, 0, 0, .28) }
+.rail .rh.is-sel { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent) }
 .rail .rh.is-drag { transform: scale(1.18); cursor: grabbing }
-.rail .rh.is-out { background-color: var(--bad); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 3.5l7 7M10.5 3.5l-7 7' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); box-shadow: 0 0 0 2px var(--bad), 0 2px 8px rgba(0, 0, 0, .28) }
+.rail .rh.is-out { background-color: var(--bad); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 3.5l7 7M10.5 3.5l-7 7' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); box-shadow: 0 0 0 2px var(--paper) }
 .qsteps { display: flex; flex-direction: column; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); overflow: hidden }
 .qstep { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 16px; border-bottom: 1px solid var(--line) }
 .qstep:last-child { border-bottom: 0 }
@@ -520,7 +525,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .zframe { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; vector-effect: non-scaling-stroke }
 .zcorner { cursor: grab } .zcorner .hit { fill: transparent; pointer-events: all } .zcorner .dot { fill: #fff; stroke: var(--accent); stroke-width: 3; transition: r .15s var(--e-out), stroke-width .15s }
 .zcorner.is-drag { cursor: grabbing } .zcorner.is-drag .dot { r: 14; stroke-width: 4 }
-.zlupe { position: absolute; width: 96px; height: 96px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 8px 24px rgba(0, 0, 0, .4), 0 0 0 1px rgba(0, 0, 0, .25); background-repeat: no-repeat; background-color: #111; pointer-events: none; z-index: 3 }
+.zlupe { position: absolute; width: 96px; height: 96px; border-radius: 50%; border: 3px solid var(--ink); box-shadow: 0 0 0 2px var(--paper); background-repeat: no-repeat; background-color: #111; pointer-events: none; z-index: 3 }
 .zlupe::before, .zlupe::after { content: ''; position: absolute; left: 50%; top: 50%; background: var(--accent); translate: -50% -50% } .zlupe::before { width: 2px; height: 26px } .zlupe::after { width: 26px; height: 2px }
 .zhint { z-index: 2 } .zrow { flex: 0 0 auto }
 .plan-card { gap: 10px } .plan-bild { display: block; width: 100%; max-height: 260px; object-fit: contain; border-radius: var(--r2); background: #141414 }
@@ -573,8 +578,8 @@ a.pill { text-decoration: none }
 .price-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); flex-wrap: wrap }
 .price-row b { display: block; font-size: 32px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1 } .price-row span small { font-size: 13px; color: var(--muted) }
 .kform { gap: 14px } .kf { display: flex; flex-direction: column; gap: 6px } .kf > span { font-size: 13px; font-weight: 700; color: var(--ink2) }
-.kf input { min-height: var(--h2); border-radius: var(--r2); border: 1.5px solid var(--line2); background: var(--surface); color: var(--ink); padding: 0 14px; font-size: 17px; transition: border-color var(--t2), box-shadow var(--t2) }
-.kf input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--surface2) }
+.kf input { min-height: var(--h2); border-radius: var(--r2); border: 2px solid var(--line2); background: var(--surface); color: var(--ink); padding: 0 14px; font-size: 17px; transition: border-color var(--t2), box-shadow var(--t2) }
+.kf input:focus { outline: none; border-color: var(--ink); box-shadow: none }
 .kf.bad input { border-color: var(--bad); background: var(--bad-soft) } .kf small, .kerr { color: var(--bad); font-size: 13px; font-weight: 700 } .kerr { display: block; padding: 0 6px; margin-top: -10px }
 /* Kasse: Zustimmung zu den AGB und zur sofortigen Bereitstellung, darunter Widerrufsbelehrung und Formular */
 .kasse-recht { gap: 10px }
@@ -604,7 +609,7 @@ details.fold > .fold-body { margin-top: 14px; display: flex; flex-direction: col
 details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) }
 /* Paywall: Vorschau des Aufmaßblatts, Kopf und Übersicht echt, der Rest verschwommen */
 .dv.pw { padding: 22px 18px 0; align-items: flex-end; min-height: 300px }
-.dv-paper.pw { filter: none; transform: none; width: min(100%, 330px); border-radius: 8px 8px 0 0; padding: 0; overflow: hidden; box-shadow: 0 -10px 30px rgba(0, 0, 0, .12) }
+.dv-paper.pw { filter: none; transform: none; width: min(100%, 330px); border-radius: 8px 8px 0 0; padding: 0; overflow: hidden; box-shadow: none }
 .dv-band { display: flex; align-items: center; gap: 8px; background: #000; color: #fff; padding: 10px 14px; font-size: 13px } .dv-band > span:last-child { margin-left: auto; opacity: .75; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; transform: scale(.85); transform-origin: right center }
 .dv-band .fi-logo .fi-kachel { fill: #fff } .dv-band .fi-logo .fi-licht { fill: #000 } .dv-band .fi-logo .fi-rand { display: none }
 .dv-in { padding: 12px 14px 4px } .dv-paper.pw .dv-h { font-size: 17px } .dv-paper.pw .dv-s { margin-bottom: 6px }
