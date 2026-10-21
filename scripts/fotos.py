@@ -21,10 +21,11 @@ WURZEL = pathlib.Path(__file__).resolve().parent.parent
 ROH = WURZEL / 'fotos-roh'
 ZIEL = WURZEL / 'web' / 'bilder' / 'foto'
 
-# Name, Breite, Höhe (Pixel; 4:5 wie die Beiträge, 16:10 für breite Plätze)
+# Name, Breite, Höhe (Pixel; 4:5 wie die Beiträge, 16:10 für breite Plätze; die beiden Startbilder laufen randlos aus und
+# werden per CSS beschnitten, darum quadratisch bzw. in der Größe des Originals)
 PLAETZE = [
-    ('start-hauseigentuemer', 1200, 1500),
-    ('start-fensterbauer', 1200, 1500),
+    ('start-hauseigentuemer', 1250, 1250),
+    ('start-fensterbauer', 1120, 1400),
     ('app-start', 1200, 1500),
     ('gross', 1200, 1500),
     ('fuer-fensterbauer', 1200, 1500),
