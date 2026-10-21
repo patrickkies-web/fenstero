@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""eeziframes · Fotos für die Website aus den Originalen erzeugen.
+
+Die Website zeigt an festen Plätzen Fotos in der Bildsprache der Instagram-Beiträge (ein Tier oder ein Astronaut tut etwas
+Menschliches rund ums Fenster, fotorealistisch, warmes Licht). Welcher Platz wo liegt, welches Motiv und welcher Prompt
+dazugehören, steht in docs/BILDER.md.
+
+  1. Original (PNG, JPG oder WebP, beliebige Größe) nach fotos-roh/<name>.<ext> legen; der Ordner bleibt außerhalb von Git.
+  2. python3 scripts/fotos.py
+  3. web/bilder/foto/<name>.webp einchecken.
+
+Jedes Bild wird mittig auf das Format seines Platzes beschnitten, verkleinert und als WebP geschrieben (Qualität 82).
+Fehlt ein Original, entsteht ein Platzhalter (dunkle Karte, Fensterumriss, Name des Platzes), damit die Seite schon steht;
+ein vorhandenes Foto wird nie durch einen Platzhalter ersetzt. Mit --platzhalter werden alle Platzhalter neu geschrieben."""
+import pathlib
+import sys
+
+from PIL import Image, ImageDraw, ImageFont
+
+WURZEL = pathlib.Path(__file__).resolve().parent.parent
+ROH = WURZEL / 'fotos-roh'
+ZIEL = WURZEL / 'web' / 'bilder' / 'foto'
+
+# Name, Breite, Höhe (Pixel; 4:5 wie die Beiträge, 16:10 für breite Plätze)
+PLAETZE = [
+    ('start-hauseigentuemer', 1200, 1500),
+    ('start-fensterbauer', 1200, 1500),
+    ('app-start', 1200, 1500),
+    ('gross', 1200, 1500),
+    ('fuer-fensterbauer', 1200, 1500),
+    ('ratgeber', 1600, 1000),
+    ('weg-pruefen', 1600, 1000),
+    ('weg-entscheiden', 1600, 1000),
+    ('weg-auswaehlen', 1600, 1000),
+    ('weg-ausmessen', 1600, 1000),
+    ('weg-vergleichen', 1600, 1000),
+    ('weg-einbauen', 1600, 1000),
+    ('fehler', 1600, 1000),
+]
+GRUND, FLAECHE, LINIE, LINIE2, TEXT, NEBEN, SIGNAL = '#161616', '#1f1f1f', '#2b2b2b', '#3a3a3a', '#f3f2ee', '#93928d', '#8fd694'
+SCHRIFT = pathlib.Path('/usr/share/fonts/opentype/inter')
+
+
+def schrift(gewicht, px):
+    for name in (f'Inter-{gewicht}.otf', 'Inter-Bold.otf'):
+        p = SCHRIFT / name
+        if p.exists():
+            return ImageFont.truetype(str(p), px)
+    return ImageFont.load_default()
+
+
+def original(name):
+    for ext in ('png', 'jpg', 'jpeg', 'webp', 'PNG', 'JPG', 'JPEG'):
+        p = ROH / f'{name}.{ext}'
+        if p.exists():
+            return p
+    return None
+
+
+def zuschneiden(im, w, h):
+    """mittig auf das Seitenverhältnis des Platzes, dann verkleinern"""
+    im = im.convert('RGB')
+    q = im.width / im.height
+    if q > w / h:  # zu breit
+        nb = round(im.height * w / h)
+        x = (im.width - nb) // 2
+        im = im.crop((x, 0, x + nb, im.height))
+    else:
+        nh = round(im.width * h / w)
+        y = (im.height - nh) // 2
+        im = im.crop((0, y, im.width, y + nh))
+    return im.resize((w, h), Image.LANCZOS)
+
+
+def platzhalter(name, w, h):
+    """dunkle Karte mit Fensterumriss: zeigt, wo ein Foto hinkommt, und sagt welches"""
+    im = Image.new('RGB', (w, h), FLAECHE)
+    d = ImageDraw.Draw(im)
+    s = w / 1200  # Maßstab
+    r = round(28 * s)
+    # Fenster mit Kreuz
+    fw, fh = round(w * 0.42), round(h * 0.38)
+    fx, fy = (w - fw) // 2, round(h * 0.22)
+    d.rounded_rectangle((fx, fy, fx + fw, fy + fh), radius=round(10 * s), outline=LINIE2, width=round(6 * s))
+    d.line((fx + fw // 2, fy, fx + fw // 2, fy + fh), fill=LINIE2, width=round(6 * s))
+    d.line((fx, fy + fh // 2, fx + fw, fy + fh // 2), fill=LINIE2, width=round(6 * s))
+    # Fensterbank
+    d.rectangle((fx - round(30 * s), fy + fh, fx + fw + round(30 * s), fy + fh + round(14 * s)), fill=LINIE2)
+    # Kicker, Titel, Name
+    k = schrift('Bold', round(26 * s))
+    t = schrift('ExtraBold', round(64 * s))
+    n = schrift('Medium', round(30 * s))
+    y = fy + fh + round(90 * s)
+    d.text((w // 2, y), 'F O T O   F O L G T', font=k, fill=SIGNAL, anchor='ma')
+    d.text((w // 2, y + round(44 * s)), 'Hier kommt ein Bild hin.', font=t, fill=TEXT, anchor='ma')
+    d.text((w // 2, y + round(44 * s) + round(86 * s)), f'fotos-roh/{name}.jpg  ·  {w} × {h}', font=n, fill=NEBEN, anchor='ma')
+    d.text((w // 2, y + round(44 * s) + round(130 * s)), 'Motiv und Prompt: docs/BILDER.md', font=n, fill=NEBEN, anchor='ma')
+    # Rand wie eine Karte
+    d.rounded_rectangle((3, 3, w - 4, h - 4), radius=r, outline=LINIE, width=6)
+    return im
+
+
+def main():
+    nur_platzhalter = '--platzhalter' in sys.argv
+    ZIEL.mkdir(parents=True, exist_ok=True)
+    for name, w, h in PLAETZE:
+        ziel = ZIEL / f'{name}.webp'
+        roh = None if nur_platzhalter else original(name)
+        if roh:
+            im = zuschneiden(Image.open(roh), w, h)
+            im.save(ziel, 'WEBP', quality=82, method=6)
+            print(f'{ziel.relative_to(WURZEL)}  aus {roh.relative_to(WURZEL)}  ({ziel.stat().st_size // 1024} KB)')
+        elif nur_platzhalter or not ziel.exists():
+            platzhalter(name, w, h).save(ziel, 'WEBP', quality=80, method=6)
+            print(f'{ziel.relative_to(WURZEL)}  Platzhalter')
+        else:
+            print(f'{ziel.relative_to(WURZEL)}  bleibt (kein Original in fotos-roh/)')
+
+
+if __name__ == '__main__':
+    main()

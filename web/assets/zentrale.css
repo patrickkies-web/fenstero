@@ -37,7 +37,7 @@ a { color: var(--ink) }
 /* ---------- Kopf je Seite ---------- */
 .z-kopf { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap }
 .z-kopf > div:first-child { min-width: 0; display: flex; flex-direction: column; gap: 6px }
-.z-h { margin: 0; font-size: 30px; line-height: 1.1; font-weight: 900; letter-spacing: -.03em; overflow-wrap: anywhere }
+.z-h { margin: 0; font-size: 30px; line-height: 1.1; font-weight: 800; letter-spacing: -.03em; overflow-wrap: anywhere }
 .z-unter { margin: 0; font-size: 15px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px }
 .z-kopf-r { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end }
 .z-h2 { margin: 0; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -.02em }
@@ -53,7 +53,7 @@ a { color: var(--ink) }
 .z-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px }
 .stat { position: relative; padding: 16px 18px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); display: flex; flex-direction: column; gap: 2px; min-height: 104px; --t: var(--ink) }
 .stat small { font-size: 13px; font-weight: 700; color: var(--muted) }
-.stat b { font-size: 30px; line-height: 1.1; font-weight: 900; letter-spacing: -.03em; color: var(--ink) }
+.stat b { font-size: 30px; line-height: 1.1; font-weight: 800; letter-spacing: -.03em; color: var(--ink) }
 .stat span { font-size: 13px; color: var(--ink2); line-height: 1.4 }
 .stat.tone-ok b { color: var(--ink) } .stat.tone-ok small::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--ok); vertical-align: 1px }
 
@@ -150,7 +150,7 @@ p.z-hinweis { margin: 0; padding-left: 34px; position: relative } p.z-hinweis::b
 
 /* ---------- Dialog (Grundlage .fx-dialog aus gemeinsam.css) ---------- */
 .z-dialog { width: min(520px, calc(100% - 32px)) }
-.z-dialog h2 { font-size: 22px; line-height: 1.2; font-weight: 900; letter-spacing: -.02em }
+.z-dialog h2 { font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -.02em }
 .z-dialog p { font-size: 15px; line-height: 1.5; margin: 0 }
 .z-dialog .z-form { gap: 12px }
 .z-dialog .z-form > .btn { align-self: flex-start }

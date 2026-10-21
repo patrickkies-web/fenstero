@@ -5,6 +5,8 @@
    - die Übersicht /ratgeber/ als dieser Weg (Karten je Schritt) und ihre strukturierten Daten (hasPart)
    - die Fußzeile in drei Gruppen (Ratgeber, Für Fensterbauer, Mehr; die eigene Seite mit aria-current)
    - ids an allen h2, damit „Auf dieser Seite“ und Google („Springe zu“) auf Abschnitte zeigen können
+   - die Bildsprache der Beiträge: Kicker in Grün über dem h1, das letzte Wort des h1 in Grün (.ak), der Pfeil auf der ersten
+     Cream-Pille, die Fotos (web/bilder/foto/, scripts/fotos.py, docs/BILDER.md) in der Übersicht und in „Nächster Schritt“
    Neue Seite: Eintrag in SEITEN_INFO und im passenden Schritt von WEG (Hauseigentümer) bzw. in FENSTERBAUER, dann
      node scripts/ratgeber-bausteine.mjs
    Das Skript ist idempotent; scripts/pruefen.mjs (Abschnitt 10) prüft, dass jede Seite genau so aussieht, wie es sie bauen würde. */
@@ -56,6 +58,21 @@ export const WEG = [
 ];
 export const FENSTERBAUER = ['/fuer-fensterbauer/', '/fuer-fensterbauer/erstaufmass-feinaufmass/', '/fuer-fensterbauer/falsches-aufmass-haftung/', '/fuer-fensterbauer/aufmass-kostenpflichtig/', '/fuer-fensterbauer/geplatzter-aufmasstermin/', '/fuer-fensterbauer/fensterbau-software/'];
 
+/* Fotos der Bildsprache: die Übersicht, je Schritt eines, dazu das Startbild der App für den letzten „Nächster Schritt“ */
+export const FOTOS = {
+  ratgeber: ['ratgeber', 'Eine Eule mit Lesebrille sitzt am Fenster und liest auf einem Tablet'],
+  app: ['app-start', 'Ein Waschbär sitzt mit dem Handy auf dem Sofa und tippt seine Wünsche an'],
+  schritte: [
+    ['weg-pruefen', 'Eine Katze prüft mit einer Taschenlampe eine beschlagene Fensterscheibe'],
+    ['weg-entscheiden', 'Ein Fuchs sitzt mit Taschenrechner und Fensterprospekt am Küchentisch'],
+    ['weg-auswaehlen', 'Ein Oktopus hält Farbfächer, Fensterprofile und ein Handy'],
+    ['weg-ausmessen', 'Ein Biber misst mit dem Zollstock eine Balkontür aus'],
+    ['weg-vergleichen', 'Eine Eule vergleicht mit der Lupe zwei Angebote'],
+    ['weg-einbauen', 'Ein Bär in Arbeitskleidung setzt ein Fenster in die Maueröffnung']
+  ]
+};
+const foto = ([name, alt], w, h, extra) => '<img src="/bilder/foto/' + name + '.webp" width="' + w + '" height="' + h + '" alt="' + alt + '" decoding="async"' + (extra || '') + '>';
+
 const name = (p) => SEITEN_INFO[p][0], karte = (p) => SEITEN_INFO[p][1];
 export const schrittVon = (pfad) => WEG.findIndex((s) => s.seiten.includes(pfad));
 
@@ -77,6 +94,14 @@ export const FUSS = /<footer class="rg-fuss[^"]*">[\s\S]*?<\/footer>/;
 const slug = (t) => t.replace(/<[^>]+>/g, '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   .replace(/&[a-z]+;/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').split('-').slice(0, 6).join('-') || 'abschnitt';
 const OHNE_INHALT = ['Weiterlesen', 'Quellen', 'Dein Weg zu neuen Fenstern'];
+/* Bildsprache der Beiträge, alles idempotent: die Zeile über dem h1 wird zum Kicker, das letzte Wort des h1 grün, die erste
+   Cream-Pille bekommt den Pfeil im Kreis */
+const kicker = (h) => h.replace(/(<nav class="rg-pfad"[\s\S]*?<\/nav>\s*<p class=")eyebrow(">)/, '$1eyebrow kicker$2');
+const gruenesWort = (h) => h.replace(/<h1>([\s\S]*?)<\/h1>/, (m, innen) => {
+  const text = innen.replace(/<span class="ak">([\s\S]*?)<\/span>/g, '$1'), k = text.lastIndexOf(' ');
+  return k < 0 ? m : '<h1>' + text.slice(0, k + 1) + '<span class="ak">' + text.slice(k + 1) + '</span></h1>';
+});
+const pfeil = (h) => h.replace(/<div class="rg-cta">[\s\S]*?<\/div>/, (block) => (/class="pf"/.test(block) ? block : block.replace(/(<a class="btn primary" href="[^"]*">)([^<]*)(<\/a>)/, (m, a, t, z) => a + t + '<span class="pf" aria-hidden="true"></span>' + z)));
 const INHALT = /\n?\s*<nav class="rg-inhalt"[\s\S]*?<\/nav>/;
 const WEGBLOCK = /\n?\s*<section class="rg-weg"[\s\S]*?<\/section>/;
 
@@ -90,15 +115,16 @@ function wegBlock(pfad) {
   const i = schrittVon(pfad);
   const liste = WEG.map((s, j) => '<li' + (j === i ? ' aria-current="step"' : '') + '><a href="' + s.seiten[0] + '"><span class="n">Schritt ' + (j + 1) + '</span><b>' + s.name + '</b><span class="t">' + (j === i ? 'Du bist hier' : s.text) + '</span></a></li>').join('');
   const naechster = WEG[i + 1];
+  const bild = naechster ? foto(FOTOS.schritte[i + 1], 1600, 1000, ' loading="lazy" class="rg-weiter-bild"') : foto(FOTOS.app, 1200, 1500, ' loading="lazy" class="rg-weiter-bild"');
   const weiter = naechster
-    ? '<a class="rg-karte rg-weiter" href="' + naechster.seiten[0] + '"><span class="eyebrow">Nächster Schritt · ' + (i + 2) + ' von ' + WEG.length + ': ' + naechster.name + '</span><b>' + name(naechster.seiten[0]) + '</b><span>' + karte(naechster.seiten[0]) + '</span></a>'
-    : '<a class="rg-karte rg-weiter" href="/app/"><span class="eyebrow">Alles geplant?</span><b>Fenster ausmessen, kostenlos</b><span>Etwa fünf Minuten je Fenster; das Aufmaßblatt kann jeder Fensterbauer lesen.</span></a>';
+    ? '<a class="rg-karte rg-weiter" href="' + naechster.seiten[0] + '">' + bild + '<span class="rg-weiter-text"><span class="eyebrow">Nächster Schritt · ' + (i + 2) + ' von ' + WEG.length + ': ' + naechster.name + '</span><b>' + name(naechster.seiten[0]) + '</b><span>' + karte(naechster.seiten[0]) + '</span></span></a>'
+    : '<a class="rg-karte rg-weiter" href="/app/">' + bild + '<span class="rg-weiter-text"><span class="eyebrow">Alles geplant?</span><b>Fenster ausmessen, kostenlos</b><span>Etwa fünf Minuten je Fenster; das Aufmaßblatt kann jeder Fensterbauer lesen.</span></span></a>';
   return '\n  <section class="rg-weg" aria-labelledby="weg"><h2 id="weg">Dein Weg zu neuen Fenstern</h2><ol class="rg-weg-liste">' + liste + '</ol>' + weiter + '</section>';
 }
 
 /* Eine Seite (nicht die Übersicht): Bausteine entfernen, ids setzen, neu einsetzen, Fußzeile */
 export function baue(pfad, html) {
-  let h = html.replace(INHALT, '').replace(WEGBLOCK, '');
+  let h = pfeil(gruenesWort(kicker(html.replace(INHALT, '').replace(WEGBLOCK, ''))));
   const m = h.match(/<main class="rg">[\s\S]*<\/main>/);
   if (!m) return h.replace(FUSS, () => fusszeile(pfad));
   let main = m[0];
@@ -114,7 +140,8 @@ export function baue(pfad, html) {
   const eintraege = abschnitte.map((x) => '<li><a href="#' + x[1] + '">' + x[2].trim() + '</a></li>')
     .concat(imWeg ? ['<li><a href="#weg">Dein Weg: Schritt ' + (schrittVon(pfad) + 1) + ' von ' + WEG.length + '</a></li>'] : []);
   const inhalt = '\n  <nav class="rg-inhalt" aria-label="Auf dieser Seite"><p class="eyebrow">Auf dieser Seite · ' + lesezeit(main) + ' Min. Lesezeit</p><ol>' + eintraege.join('') + '</ol></nav>';
-  main = main.replace(/(<div class="rg-cta">[\s\S]*?<\/div>)/, (x) => x + inhalt);
+  /* nach dem ersten Knopfblock; folgt dort eine Fotokarte (Startbild), erst nach ihr */
+  main = main.replace(/(<div class="rg-cta">[\s\S]*?<\/div>(?:\s*<figure class="foto-karte[^"]*">[\s\S]*?<\/figure>)?)/, (x) => x + inhalt);
   if (imWeg) main = main.replace(/(\n\s*)<h2([^>]*)>Weiterlesen<\/h2>/, (x) => wegBlock(pfad) + x);
   return h.replace(m[0], () => main).replace(FUSS, () => fusszeile(pfad));
 }
@@ -122,11 +149,12 @@ export function baue(pfad, html) {
 /* Übersicht /ratgeber/: Karten je Schritt zwischen den Markierungen, strukturierte Daten aus den h1 der Seiten */
 export function uebersicht(html, h1Von) {
   const karten = (liste) => '<div class="rg-karten">' + liste.map((p) => '<a class="rg-karte" href="' + p + '"><b>' + name(p) + '</b><span>' + karte(p) + '</span></a>').join('') + '</div>';
-  const teile = WEG.map((s, j) => '\n  <h2 id="schritt-' + (j + 1) + '">' + (j + 1) + '. ' + s.name + '</h2>\n  <p class="rg-klein">' + s.text + '</p>\n  ' + karten(s.seiten));
-  const weg = '<!-- weg -->\n  <ol class="rg-weg-liste">' + WEG.map((s, j) => '<li><a href="#schritt-' + (j + 1) + '"><span class="n">Schritt ' + (j + 1) + '</span><b>' + s.name + '</b><span class="t">' + s.text + '</span></a></li>').join('') + '</ol>' + teile.join('') +
+  const oben = '\n  <figure class="foto-karte breit">' + foto(FOTOS.ratgeber, 1600, 1000, ' fetchpriority="high"') + '<div class="chips">' + WEG.map((s) => '<span class="chip haken">' + s.name + '</span>').join('') + '</div></figure>';
+  const teile = WEG.map((s, j) => '\n  <h2 id="schritt-' + (j + 1) + '">' + (j + 1) + '. ' + s.name + '</h2>\n  <p class="rg-klein">' + s.text + '</p>\n  <figure class="foto-karte breit">' + foto(FOTOS.schritte[j], 1600, 1000, ' loading="lazy"') + '<div class="chips"><span class="chip">Schritt ' + (j + 1) + ' · ' + s.name + '</span></div></figure>\n  ' + karten(s.seiten));
+  const weg = '<!-- weg -->' + oben + '\n  <ol class="rg-weg-liste">' + WEG.map((s, j) => '<li><a href="#schritt-' + (j + 1) + '"><span class="n">Schritt ' + (j + 1) + '</span><b>' + s.name + '</b><span class="t">' + s.text + '</span></a></li>').join('') + '</ol>' + teile.join('') +
     '\n  <h2 id="fuer-fensterbauer">Für Fensterbauer</h2>\n  ' + karten(FENSTERBAUER) + '\n  <!-- /weg -->';
   const hasPart = '"hasPart":[\n' + WEG.flatMap((s) => s.seiten).concat(FENSTERBAUER.slice(1)).map((p) => '{"@type":"Article","headline":' + JSON.stringify(h1Von(p)) + ',"url":"' + p + '"}').join(',\n') + ']}';
-  return html.replace(/<!-- weg -->[\s\S]*?<!-- \/weg -->/, () => weg).replace(/"hasPart":\[[\s\S]*?\]\}(?=,\n\{"@type":"BreadcrumbList")/, () => hasPart);
+  return gruenesWort(kicker(html)).replace(/<!-- weg -->[\s\S]*?<!-- \/weg -->/, () => weg).replace(/"hasPart":\[[\s\S]*?\]\}(?=,\n\{"@type":"BreadcrumbList")/, () => hasPart);
 }
 
 /* Alle Seiten unter web/ratgeber/ und web/fuer-fensterbauer/ */

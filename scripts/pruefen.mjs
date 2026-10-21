@@ -109,8 +109,8 @@ if (teil(1)) {
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
   }
-  const font = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('700 16px "Maven Pro"'); });
-  ok(font, 'Schrift Maven Pro lokal geladen');
+  const font = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('700 16px "Inter"'); });
+  ok(font, 'Schrift Inter lokal geladen');
   await ctx.close();
 }
 
@@ -542,7 +542,7 @@ if (teil(6)) {
   ok(await p2.evaluate(() => !!(window.lottie && window.Lottie && window.Haptik && window.Scroll && window.Lottie.bereit())), 'Spieler sowie Lottie-, Haptik- und Scroll-Bausteine geladen');
   await p2.click('[data-act="gloss"][data-k="referenz"]'); await p2.waitForTimeout(700);
   ok(await p2.evaluate(() => { const e = document.querySelector('.sheet [data-lottie="messen"]'); return !!(e && e._lottie && !e._lottie.isPaused && e.querySelector('svg') && !e.querySelector('.lottie-still')); }), 'Glossar „Wie genau“: das Messen läuft als Bewegtbild in Schleife, Standbild ist ersetzt');
-  ok(await p2.evaluate(() => { const st = Array.from(document.querySelectorAll('.sheet [data-lottie="messen"] svg [stroke]')).map((x) => x.getAttribute('stroke')); return st.some((c) => /rgb\(194,\s*65,\s*12\)|#c2410c/i.test(c)) && st.some((c) => /rgb\(20,\s*20,\s*20\)|#141414/i.test(c)); }), 'Bewegtbild trägt die Tokenfarben (Tinte, Maueröffnung)');
+  ok(await p2.evaluate(() => { const st = Array.from(document.querySelectorAll('.sheet [data-lottie="messen"] svg [stroke]')).map((x) => x.getAttribute('stroke')); return st.some((c) => /rgb\(255,\s*138,\s*91\)|#ff8a5b/i.test(c)) && st.some((c) => /rgb\(243,\s*242,\s*238\)|#f3f2ee/i.test(c)); }), 'Bewegtbild trägt die Tokenfarben (Schrift, Maueröffnung)');
   ok(await p2.evaluate(() => window.Haptik.an() === true && window.Haptik.tick() === true), 'Haptik: am Telefon nach einer Berührung ein kurzes Tippen');
   await p2.evaluate(() => { S.gloss = null; render(); }); await p2.waitForTimeout(200);
   const sp = await p2.evaluate(async () => { const hs = document.querySelector('.hero-scene'), sc = document.querySelector('.scroll'); if (!hs || !sc) return null; const a = hs.style.getPropertyValue('--sp'); sc.scrollTop = 260; await new Promise((r) => setTimeout(r, 250)); return [a, hs.style.getPropertyValue('--sp')]; });
@@ -1385,12 +1385,12 @@ if (teil(10)) {
     const t = (await roh(sx.pfad)).text;
     for (const m of t.matchAll(/<img ([^>]*)>/g)) {
       const src = (m[1].match(/src="([^"]+)"/) || [])[1], alt = (m[1].match(/alt="([^"]*)"/) || [])[1] || '';
-      const r = src ? await fetch(BASE + src) : null;
-      if (!src || !r || r.status !== 200 || !/image\/svg\+xml/.test(r.headers.get('content-type') || '') || r.headers.get('x-robots-tag') || alt.length < 40 || !/width="\d+" height="\d+"/.test(m[1])) bildFehler.push(sx.pfad + ' ' + src);
+      const r = src ? await fetch(BASE + src) : null, fotoTyp = /^\/bilder\/foto\//.test(src || '') ? /image\/webp/ : /image\/svg\+xml/;
+      if (!src || !r || r.status !== 200 || !fotoTyp.test(r.headers.get('content-type') || '') || r.headers.get('x-robots-tag') || alt.length < 40 || !/width="\d+" height="\d+"/.test(m[1])) bildFehler.push(sx.pfad + ' ' + src);
     }
   }
   const bildDa = (await Promise.all(neueSeiten.concat(['/ratgeber/fenster-ausmessen/', '/ratgeber/fenster-austauschen/'], NEU_OKT18, NEU_WEG).map(async (u) => /<figure class="rg-bild"><img /.test((await roh(u)).text)))).every(Boolean);
-  ok(!bildFehler.length && bildDa, 'Abbildungen in den Ratgebern: Datei da (SVG), ohne noindex für die Bildersuche, Breite, Höhe und ein beschreibender Alternativtext' + (bildFehler.length ? ' (' + bildFehler.join(', ') + ')' : ''));
+  ok(!bildFehler.length && bildDa, 'Abbildungen in den Ratgebern: Datei da (Zeichnungen als SVG, Fotos als WebP unter /bilder/foto/), ohne noindex für die Bildersuche, Breite, Höhe und ein beschreibender Alternativtext' + (bildFehler.length ? ' (' + bildFehler.join(', ') + ')' : ''));
   const key = await roh('/' + seo.INDEXNOW + '.txt');
   const aufrufe = [], post = async (u, o) => { aufrufe.push({ u: u, o: o }); return { ok: true, status: 200 }; };
   const tag = (d, plus) => new Date(Date.parse(d) + plus * 864e5);
@@ -2058,7 +2058,7 @@ if (teil(13)) {
       }
       const animiert = ctxOpt.reducedMotion ? await s.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length) : 0;
       ok(!befund.length && !animiert, 'Gestaltung ' + name + ': nur Schriftgrößen ' + erlaubt.join(' · ') + ', Ziele ab 44 px, kein Querscrollen' + (ctxOpt.reducedMotion ? ', bei „weniger Bewegung“ keine Animation' : '') + (befund.length ? '\n      ' + befund.join('\n      ') : '') + (animiert ? ' (' + animiert + ' laufend)' : ''));
-      if (name === 'Telefon, dunkel') { await s.goto(B4 + '/zentrale/#uebersicht', { waitUntil: 'networkidle' }); await s.waitForTimeout(200); ok((await s.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(17, 17, 16)', 'Dunkler Modus: Papier aus den Tokens'); await foto(s, 'zentrale-telefon-dunkel'); }
+      if (name === 'Telefon, dunkel') { await s.goto(B4 + '/zentrale/#uebersicht', { waitUntil: 'networkidle' }); await s.waitForTimeout(200); ok((await s.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(22, 22, 22)', 'Dunkle Bühne: Grund aus den Tokens'); await foto(s, 'zentrale-telefon-dunkel'); }
       sauber(s, 'Gestaltung ' + name + ' ohne Fehler'); await c.close();
     };
     await pruefeGestaltung({ viewport: { width: 1280, height: 900 } }, [13, 15, 17, 22, 30], 'Schreibtisch');
