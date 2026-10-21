@@ -245,7 +245,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .facts dt { color: var(--muted) } .facts dd { margin: 0; font-weight: 600; min-width: 0 }
 
 /* ---------- 3-D-Modell: der Raum ist das Bild, der Rahmen ein Hauch ---------- */
-.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, var(--surface3), var(--surface2)); box-shadow: var(--ring); perspective: 1300px; perspective-origin: 50% 46%; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100% }
+.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, #e6e0d7, #d6cfc4); box-shadow: var(--ring); perspective: 1300px; perspective-origin: 50% 46%; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100% }
 .w3d-stage.hero { height: 320px }
 .w3d-bg { position: absolute; inset: -28px; background-size: cover; background-position: center; filter: blur(20px) saturate(.5) brightness(.85); opacity: .3; pointer-events: none; animation: w3dbgin 1.2s ease-out both }
 @keyframes w3dbgin { from { opacity: 0; transform: scale(1.06) } to { opacity: .3; transform: none } }
@@ -256,8 +256,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes w3dsway { from { transform: rotateY(-3deg) rotateX(1deg) } to { transform: rotateY(3deg) rotateX(-1deg) } }
 .w3d-f { position: absolute; left: 0; top: 0; backface-visibility: visible; pointer-events: none; transition: width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), transform .7s cubic-bezier(.3, .7, .2, 1), clip-path .7s cubic-bezier(.3, .7, .2, 1), opacity .4s, background .5s }
 .no-anim .w3d-f, .no-anim .w3d-sash, .no-anim .w3d-dim, .no-anim .w3d-handle, .no-anim .w3d-el, .no-anim .w3d-cam, .no-anim .w3d-bar { transition: none !important }
-.w3d-wall-in { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .14) 100%), linear-gradient(180deg, #4a4540, #3b3733) }
-.w3d-rev-t { background: linear-gradient(180deg, #2c2925, #24211e) } .w3d-rev-l { background: linear-gradient(90deg, #5c564f, #4b4640) } .w3d-rev-r { background: linear-gradient(90deg, #433e39, #37332e) }
+/* Wand und Laibung als heller Putz wie im echten Raum: die Laibung ist je Seite anders beleuchtet (oben im Schatten, eine Seite
+   im Licht, die andere halb) und wird zum Rahmen hin dunkler. So liest man sie als Tiefe und nicht als Loch in der Wand. */
+.w3d-wall-in { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .1) 100%), linear-gradient(180deg, #ebe6de, #dcd5ca) }
+.w3d-rev-t { background: linear-gradient(180deg, #b4aa9b, #978d7f) } .w3d-rev-l { background: linear-gradient(90deg, #e9e3d9, #cdc5b8) } .w3d-rev-r { background: linear-gradient(90deg, #c8bfb1, #aba191) }
 .w3d-sill { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08) }
 .w3d-el { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: opacity .6s } .w3d-el.is-hidden { opacity: 0 }
 .w3d-frame { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16), 0 0 0 1px rgba(255, 255, 255, .09) } .w3d-side { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22); background-image: linear-gradient(90deg, rgba(0, 0, 0, .13), rgba(0, 0, 0, .05) 35%, rgba(0, 0, 0, .05) 65%, rgba(0, 0, 0, .13)) }
@@ -283,9 +285,9 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-sash.is-sel .w3d-selring { display: block; animation: ring-ein .25s var(--e-out) both }
 @keyframes ring-ein { from { opacity: 0 } to { opacity: 1 } }
 .w3d-selring.is-form { border: 0; border-radius: 0 } .w3d-selring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible } .w3d-selring polygon { fill: none; stroke: var(--accent); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke }
-/* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler) und die Fuge zwischen Wand und Rahmen */
+/* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler); bei allen Fenstern die Fuge zwischen Wand und Rahmen */
 .w3d-rs { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(0, 0, 0, .07)) }
-.w3d-fuge { background: #2a2622 }
+.w3d-fuge { background: linear-gradient(180deg, #8e8578, #7f7669) }
 /* Öffnung vorführen (oeffnungZeigen): der Flügel geht kurz auf und zu, der Griff dreht vorher mit. Fest: ein Glanz läuft übers Glas */
 .w3d-sash.demo-D { animation: w3d-dreh 1.6s var(--e-io) both }
 .w3d-sash.demo-K { animation: w3d-kipp 1.4s var(--e-io) both }
