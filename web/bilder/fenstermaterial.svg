@@ -1,49 +1,53 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
 <title id="t">Vier Rahmenmaterialien im Schnitt</title>
-<desc id="d">Schnitte durch vier Fensterrahmen mit Glas: Kunststoff mit mehreren Kammern, Holz, Holz-Alu mit einer Aluminiumschale außen und Aluminium. Darunter je die wichtigste Eigenschaft.</desc>
+<desc id="d">Schnitte durch vier Fensterrahmen mit Glas: Kunststoff mit mehreren Kammern, Holz, Holz-Alu mit einer Aluminiumschale außen und Aluminium. Darunter je eine Eigenschaft: pflegeleicht und günstig, reparierbar und zu streichen, außen mit Aluschale, schlank und langlebig.</desc>
 <rect width="480" height="400" rx="16" fill="#ffffff"/>
 <g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
 <!-- Kunststoff -->
 <g transform="translate(24 24)">
 <rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="22" width="64" height="96" fill="#ffffff" stroke="#141414" stroke-width="2"/>
-<path d="M41 22V118M62 22V118M20 54H84M20 86H84" stroke="#141414" stroke-width="1.5" fill="none"/>
-<rect x="84" y="46" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="66" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="86" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<text x="20" y="146" font-weight="700">Kunststoff</text>
+<rect x="20" y="14" width="64" height="80" fill="#ffffff" stroke="#141414" stroke-width="2"/>
+<path d="M41 14V94M62 14V94M20 41H84M20 67H84" stroke="#141414" stroke-width="1.5" fill="none"/>
+<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<text x="20" y="124" font-weight="700">Kunststoff</text>
+<text x="20" y="148" fill="#3d3d3a">pflegeleicht, günstig</text>
 </g>
 <!-- Holz -->
 <g transform="translate(252 24)">
 <rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="22" width="64" height="96" fill="#efe4d2" stroke="#141414" stroke-width="2"/>
-<path d="M28 30C40 50 30 80 44 110M52 28C62 54 52 84 64 112M72 30C78 50 70 80 78 108" stroke="#141414" stroke-width="1" stroke-opacity=".45" fill="none"/>
-<rect x="84" y="46" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="66" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="86" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<text x="20" y="146" font-weight="700">Holz</text>
+<rect x="20" y="14" width="64" height="80" fill="#efe4d2" stroke="#141414" stroke-width="2"/>
+<path d="M28 20C40 38 30 64 44 90M52 18C62 40 52 66 64 92M72 20C78 38 70 64 78 88" stroke="#141414" stroke-width="1" stroke-opacity=".45" fill="none"/>
+<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<text x="20" y="124" font-weight="700">Holz</text>
+<text x="20" y="148" fill="#3d3d3a">reparierbar, streichen</text>
 </g>
 <!-- Holz-Alu -->
 <g transform="translate(24 208)">
 <rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="22" width="64" height="96" fill="#efe4d2" stroke="#141414" stroke-width="2"/>
-<path d="M30 30C42 50 32 80 46 110M56 28C66 54 56 84 68 112" stroke="#141414" stroke-width="1" stroke-opacity=".45" fill="none"/>
-<rect x="8" y="16" width="12" height="108" rx="2" fill="#b9bcc2" stroke="#141414" stroke-width="1.5"/>
-<rect x="84" y="46" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="66" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="86" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<text x="20" y="146" font-weight="700">Holz-Alu</text>
+<rect x="20" y="14" width="64" height="80" fill="#efe4d2" stroke="#141414" stroke-width="2"/>
+<path d="M30 20C42 38 32 64 46 90M56 18C66 40 56 66 68 92" stroke="#141414" stroke-width="1" stroke-opacity=".45" fill="none"/>
+<rect x="8" y="10" width="12" height="88" rx="2" fill="#b9bcc2" stroke="#141414" stroke-width="1.5"/>
+<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<text x="20" y="124" font-weight="700">Holz-Alu</text>
+<text x="20" y="148" fill="#3d3d3a">außen Aluschale</text>
 </g>
 <!-- Aluminium -->
 <g transform="translate(252 208)">
 <rect width="204" height="160" rx="10" fill="#f6f5f1"/>
-<rect x="20" y="22" width="26" height="96" fill="#b9bcc2" stroke="#141414" stroke-width="2"/>
-<rect x="46" y="22" width="12" height="96" fill="#141414"/>
-<rect x="58" y="22" width="26" height="96" fill="#b9bcc2" stroke="#141414" stroke-width="2"/>
-<rect x="84" y="46" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="66" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<rect x="84" y="86" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
-<text x="20" y="146" font-weight="700">Aluminium</text>
+<rect x="20" y="14" width="26" height="80" fill="#b9bcc2" stroke="#141414" stroke-width="2"/>
+<rect x="46" y="14" width="12" height="80" fill="#141414"/>
+<rect x="58" y="14" width="26" height="80" fill="#b9bcc2" stroke="#141414" stroke-width="2"/>
+<rect x="84" y="28" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
+<text x="20" y="124" font-weight="700">Aluminium</text>
+<text x="20" y="148" fill="#3d3d3a">schlank, langlebig</text>
 </g>
 </g>
 </svg>
