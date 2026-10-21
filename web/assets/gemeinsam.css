@@ -104,6 +104,16 @@ a.link { text-decoration: underline }
 .badge:has(> svg)::before { display: none } .badge svg { color: var(--tone, currentColor) }
 .badge svg { width: 12px; height: 12px }
 
+/* ---------- Fotokarte: ein Foto in einer Karte mit Rand, unten eine Reihe Haken-Chips, wie die Beiträge auf Instagram ----------
+   <figure class="foto-karte"><img …><div class="chips"><span class="chip haken">Maße</span>…</div></figure>
+   Das Foto füllt die Karte (4:5 oder 16:10, Maße aus width/height), nie vollflächig hinter Text. .breit für 16:10-Plätze. */
+.foto-karte { position: relative; margin: 0; border-radius: var(--r4); overflow: hidden; background: var(--surface); box-shadow: var(--ring) }
+.foto-karte img { display: block; width: 100%; height: auto }
+.foto-karte .chips { position: absolute; left: 12px; right: 12px; bottom: 12px; gap: 6px }
+.foto-karte .chip { min-height: 36px; padding: 0 12px; font-size: 13px; color: var(--text); background: rgba(22, 22, 22, .72); border-color: rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px) }
+.foto-karte .chip.haken::before { width: 6px; height: 10px; border-width: 0 2px 2px 0 }
+.foto-karte figcaption { padding: 10px 14px 12px; font-size: 13px; color: var(--muted) }
+
 /* ---------- Schalter ---------- */
 .switch { position: relative; flex: 0 0 auto; width: 52px; height: 32px; border-radius: 16px; border: 0; padding: 0; background: var(--surface3); transition: background var(--t2) var(--e-out) }
 .switch::before { content: ''; position: absolute; inset: -8px }

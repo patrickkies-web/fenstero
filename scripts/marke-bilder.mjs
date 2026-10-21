@@ -1,6 +1,6 @@
 /* eeziframes · Bilder des Zeichens aus der einen Quelle (LOGO_INNEN in web/assets/gemeinsam.js, gesetzt von scripts/logo-setzen.py)
    - web/apple-touch-icon.png  180 × 180, randlos (iOS rundet selbst), auch Logo in den strukturierten Daten
-   - web/og.png                das Vorschaubild zum Teilen: das Zeichen oben links neu, der Rest bleibt
+   - web/og.png                das Vorschaubild zum Teilen, im Stil der Beiträge (dunkle Bühne, Inter, Grün als Signal)
    - functions/api/marke.js    das Zeichen als kleines PNG für den Kopf der E-Mails (als eingebettetes Bild, ohne Nachladen)
    PW_PFAD=/opt/node-tools node scripts/marke-bilder.mjs
    Danach mit Python verkleinern lassen (Palette), siehe unten; die Prüfsuite verlangt für og.png weniger als 200 KB. */
@@ -33,9 +33,18 @@ const seite = async (html, w, h, ziel, transparent) => {
 /* 1. Apple-Icon */
 await seite(svg(RANDLOS, 180), 180, 180, path.join(WURZEL, 'web/apple-touch-icon.png'));
 
-/* 2. Vorschaubild: das alte Zeichen (72 px bei 80/76) mit der Hintergrundfarbe abdecken, das neue darüber */
-const og = fs.readFileSync(path.join(WURZEL, 'web/og.png')).toString('base64');
-await seite('<div style="position:relative;width:1200px;height:630px;background:url(data:image/png;base64,' + og + ')"><div style="position:absolute;left:78px;top:74px;width:76px;height:76px;background:#f3f2ee"></div><div style="position:absolute;left:80px;top:76px">' + svg(INNEN, 72) + '</div></div>', 1200, 630, path.join(WURZEL, 'web/og.png'));
+/* 2. Vorschaubild zum Teilen, wie ein Cover der Beiträge: dunkle Bühne, Wortmarke, Kicker in Grün, Headline mit einem grünen Wort,
+      eine Reihe Haken-Chips (Werte wie in web/assets/gemeinsam.css; Inter als Daten-URI, weil die Seite aus dem Nichts geladen wird) */
+const inter = fs.readFileSync(path.join(WURZEL, 'web/fonts/inter-latin-wght-normal.woff2')).toString('base64');
+const chip = (t) => '<span style="display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 18px;border-radius:999px;border:2px solid #2b2b2b;background:#1f1f1f;color:#f3f2ee;font-size:22px;font-weight:700"><span style="width:9px;height:16px;margin-top:-5px;border:solid #8fd694;border-width:0 3px 3px 0;transform:rotate(45deg)"></span>' + t + '</span>';
+await seite('<style>@font-face{font-family:Inter;font-weight:100 900;src:url(data:font/woff2;base64,' + inter + ') format("woff2")}</style>' +
+  '<div style="position:relative;box-sizing:border-box;width:1200px;height:630px;padding:56px 64px;background:#161616;color:#f3f2ee;font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased">' +
+  '<div style="display:flex;align-items:center;gap:14px;font-size:30px;font-weight:800;letter-spacing:-.02em">' + svg(INNEN, 44) + '<span>eeziframes</span></div>' +
+  '<p style="margin:60px 0 0;font-size:22px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#8fd694">Aufmaß-App für Fenster</p>' +
+  '<h1 style="margin:14px 0 0;font-size:104px;line-height:1;font-weight:800;letter-spacing:-.04em">Fenster ausmessen.<br>Selbst. <span style="color:#8fd694">eezi.</span></h1>' +
+  '<p style="margin:26px 0 0;font-size:30px;line-height:1.35;color:#c9c8c3;max-width:900px">Zollstock, Handy, fünf Minuten je Fenster. Das Aufmaßblatt kann jeder Fensterbauer lesen.</p>' +
+  '<div style="position:absolute;left:64px;bottom:56px;display:flex;gap:10px">' + ['Maße', 'Fotos', '3-D-Modell', 'Aufmaßblatt', 'Für Fensterbauer: ohne Anfahrt'].map(chip).join('') + '</div>' +
+  '</div>', 1200, 630, path.join(WURZEL, 'web/og.png'));
 
 /* 3. E-Mail: 96 × 96, durchsichtig um die Kachel, angezeigt mit 32 px */
 const tmp = path.join(WURZEL, '.marke-mail.png');
