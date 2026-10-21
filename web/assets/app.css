@@ -14,13 +14,24 @@ img { max-width: 100% }
 @keyframes scr-in-back { from { opacity: 0; transform: translateX(-20px) } to { opacity: 1; transform: none } }
 
 /* ---------- Ein Bildschirm, nichts scrollt (Messen, Fragen): Modell oben, Eingabe unten im Daumenbereich ----------
-   Das Modell bekommt, was Kopf, Eingabe und Navigation übrig lassen; die Eingabe ist ein kompaktes Dock darunter. */
+   Messen: das Modell bekommt, was Kopf, Eingabe und Tasten übrig lassen. Fragen: das Modell hat eine feste Höhe (siehe unten). */
 .scroll.fit { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) }
 .scr.fit { min-height: 100%; gap: 8px }
 .scr.fit .hd.compact { padding-top: 4px; flex: 0 0 auto }
 .scr.fit .w3d-stage { flex: 1 1 auto; min-height: 150px; max-height: 72vh; height: auto }
 .scr.fit .qpanel { flex: 0 0 auto }
 .scr.fit .qnav { margin-top: auto }
+/* Fragen: das Modell steht still. Es sitzt oben unter der Kopfzeile und ist bei jeder Frage gleich hoch und am gleichen Ort: die Höhe hängt
+   nur vom Bildschirm ab (Höhe minus Navigation und Platz fürs Dock), nie von der Frage. Darunter das Dock mit Kicker, Frage, Satz und Eingabe;
+   was nicht hineinpasst, scrollt im Dock, das Modell bleibt. --q-dock ist der Platz fürs Dock (38 % der Höhe, 240 bis 300 px). */
+.scr.fit[data-screen="frage"] { --q-dock: clamp(240px, 38%, 300px); height: 100%; min-height: 0; padding-top: 8px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: clamp(160px, calc(100% - 68px - var(--q-dock)), 600px) minmax(0, 1fr) auto; row-gap: 8px }
+.scr.fit[data-screen="frage"] > .w3d-stage { height: auto; min-height: 0; max-height: none }
+.qdock { min-height: 0; display: flex; flex-direction: column; gap: 6px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; margin: 0 -16px; padding: 0 16px 2px }
+.qdock > * { flex-shrink: 0 }
+.qdock > .hd.compact { padding-top: 0 }
+/* Steht unten im Dock noch mehr als ein paar Pixel, blendet der untere Rand aus (.mehr, gesetzt beim Zeichnen, Scrollen und Drehen) */
+.qdock.mehr { -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent); mask-image: linear-gradient(#000 calc(100% - 28px), transparent) }
+.scr.fit[data-screen="frage"] > .qnav { margin-top: 0 }
 /* Eingabe beim Messen */
 .ask { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 10px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring) }
 .ask .q { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; letter-spacing: -.01em }
@@ -462,6 +473,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
    Zeile; 56 px hoch, gleich hoch je Reihe, gewählt mit Rand in Schriftfarbe. Die Info steht rechts als eigenes Ziel (44 px).
    Zwei Optionen nebeneinander, vier als 2 × 2, drei schmal mit Symbol oben, mehr als vier als Reihe zum Wischen (Breite nach Inhalt). */
 .qcards.kompakt .qopt, .qcards.kompakt.quad .qopt { min-height: 56px; padding: 8px 10px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; text-align: left }
+.qcards.kompakt.quad { grid-auto-rows: auto }
 .qcards.kompakt .qopt > svg, .qcards.kompakt.quad .qopt > svg { width: 28px; height: 28px }
 .qcards.kompakt .qopt .tx, .qcards.kompakt.quad .qopt .tx { display: block; flex: 1 1 auto; width: auto; min-width: 0; font-size: 13px; line-height: 1.25 }
 .qcards.kompakt .qopt .lbl, .qcards.kompakt.quad .qopt .lbl { display: block; width: auto; font-size: 15px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; white-space: normal; overflow: visible; text-overflow: clip; -webkit-hyphens: manual; hyphens: manual }
