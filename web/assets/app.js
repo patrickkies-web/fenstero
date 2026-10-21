@@ -2447,9 +2447,14 @@ function qStep(delta) {
   if (nx.id === 'fswg') nachBild(() => { if (S.q !== nx.id) return; const i = S.win.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 240);
 }
 function qOpt(q, o, pressed, inner) { return '<button type="button" class="qopt" data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : '') + ' data-v="' + o.k + '" aria-pressed="' + pressed + '">' + inner + '</button>'; }
+/* Kompakte Kacheln: Symbol links, Name und eine kurze Zeile rechts, der Preis in dieser Zeile; die Info rechts als eigenes Ziel.
+   Zwei Optionen stehen nebeneinander, vier als 2 × 2, drei als schmale Kacheln mit Symbol oben, mehr als vier als Reihe zum Wischen.
+   Lange Wörter bekommen in der Anzeige weiche Trennstellen (TRENN), damit sie in schmalen Kacheln nicht überlaufen. */
+const TRENN = { Abschließbar: 'Abschließ&shy;bar', Aufgesetzt: 'Auf&shy;gesetzt', Barrierefrei: 'Barriere&shy;frei', Bestehender: 'Beste&shy;hender', Drehrahmen: 'Dreh&shy;rahmen', Druckknopf: 'Druck&shy;knopf', Glasbrüstung: 'Glas&shy;brüstung', Glasteilend: 'Glas&shy;teilend', Innenliegend: 'Innen&shy;liegend', Sicherheitsglas: 'Sicherheits&shy;glas', Spannrahmen: 'Spann&shy;rahmen', französischer: 'franzö&shy;sischer' };
+const trenn = (t) => esc(t).replace(/[A-Za-zÄÖÜäöüß]{10,}/g, (x) => TRENN[x] || x).replace(/(\d) bis (\d)/g, '$1&nbsp;bis&nbsp;$2').replace(/ ≈ /g, '&nbsp;≈&nbsp;');
 function qCards(q) {
-  const opts = q.opts || OPT[q.group], scroll = opts.length > 4;
-  return '<div class="qcards' + (scroll ? ' reihe' : opts.length === 4 ? ' quad' : '') + '">' + opts.map((o) => '<div class="qo">' + qOpt(q, o, String(o.k) === String(q.val), (q.ico ? svgIcon(q.ico(o.k), 44) : '') + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + (o.price ? '<span class="pr">' + esc(o.price) + '</span>' : '') + '</span>') + (o.g ? '<button type="button" class="qinfo" aria-label="Erklärung" data-act="gloss" data-k="' + o.g + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
+  const opts = q.opts || OPT[q.group], n = opts.length, form = n > 4 ? ' reihe' : n === 4 ? ' quad' : n === 3 ? ' drei' : '';
+  return '<div class="qcards kompakt' + form + '">' + opts.map((o) => '<div class="qo">' + qOpt(q, o, String(o.k) === String(q.val), (q.ico ? svgIcon(q.ico(o.k), 28) : '') + '<span class="tx"><span class="lbl">' + trenn(o.label) + '</span>' + (o.sub ? '<span class="sb">' + trenn(o.sub) + '</span>' : '') + (o.price ? '<span class="pr">' + esc(o.price) + '</span>' : '') + '</span>') + (o.g ? '<button type="button" class="qinfo" aria-label="Erklärung: ' + esc(o.label) + '" data-act="gloss" data-k="' + o.g + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
 }
 /* Auswahl aus wenigen Optionen, eine Familie: 2–3 kurze Beschriftungen als Segmente, bis 4 kürzere als Raster gleich breiter Chips,
    sonst Zeilen mit Haken. Das Gewicht wechselt beim Auswählen nicht, damit nichts springt. */
@@ -2478,9 +2483,10 @@ function qMulti(q) {
 function qColor(q) {
   const w = S.win, side = q.side, cur = side === 'innen' ? (w.gleich ? w.fa : w.fi) : w.fa, wunsch = side === 'innen' ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, eigen = farbLesen(wunsch), c = rahmenFarbe(w, side);
   const aktiv = c.offen ? '' : eigen ? (COLORS.some((x) => x.k === eigen.key) ? eigen.key : '') : cur;
-  let h = '<div class="qswatches">' + COLORS.map((x) => '<button type="button" class="qsw" data-act="color" data-side="' + side + '" data-v="' + x.k + '" aria-pressed="' + (x.k === aktiv) + '" aria-label="' + esc(x.name) + '"><span class="c" style="background: ' + x.bg + '"></span><span class="n">' + esc(x.name).replace(/^(Verkehrs|Anthrazit|Schwarz|Basalt)(weiß|grau|braun)$/, '$1&shy;$2') + '</span></button>').join('') + '</div>';
-  h += c.offen ? '<p class="qcur"><b>Noch offen</b> · im Modell neutral weiß' + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>' : '<p class="qcur"><b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code) + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>';
-  if (side === 'innen') h += '<div class="qrow"><button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button></div>';
+  let h = '<div class="qswatches">' + COLORS.map((x) => qTupf('data-act="color" data-side="' + side + '"', x.k, x.k === aktiv, x.name, x.bg)).join('') + '</div>';
+  const name = c.offen ? '<p class="qcur"><b>Noch offen</b> · im Modell neutral weiß' + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>' : '<p class="qcur"><b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code) + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>';
+  /* Innen: der Name der Farbe und „Innen wie außen“ teilen sich eine Zeile (bricht um, wenn es nicht passt) */
+  h += side === 'innen' ? '<div class="qrow qcur-zeile">' + name + '<button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button></div>' : name;
   return h + farbFeld(side === 'innen' ? 'wunschI' : 'wunschA');
 }
 /* Unterlicht: Art als Chips, Höhe als Stufenregler in 5-cm-Schritten */
@@ -2494,8 +2500,10 @@ function qGeh() { const w = S.win; return '<div class="rows">' + switchRow('Gehf
 /* Farbfelder für Sonnenschutz außen und innen */
 function qSwatch(q) {
   const opts = OPT[q.group], cur = opts.find((o) => o.k === q.val) || opts[0], ff = q.f === 'sfarbe' ? 'wunschSf' : 'wunschIf', eigen = farbLesen(S.win[ff]);
-  return '<div class="qswatches">' + opts.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="' + q.f + '" data-v="' + o.k + '" aria-pressed="' + (!eigen && o.k === cur.k) + '" aria-label="' + esc(o.label) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div><p class="qcur"><b>' + esc(eigen ? eigen.name : cur.label) + '</b>' + (eigen ? ' · eigene Farbe' : '') + '</p>' + farbFeld(ff);
+  return '<div class="qswatches">' + opts.map((o) => qTupf('data-act="setw" data-f="' + q.f + '"', o.k, !eigen && o.k === cur.k, o.label, o.bg)).join('') + '</div><p class="qcur"><b>' + esc(eigen ? eigen.name : cur.label) + '</b>' + (eigen ? ' · eigene Farbe' : '') + '</p>' + farbFeld(ff);
 }
+/* Ein Farbtupfen: der Name steht im Namen des Knopfs (und als Tooltip), sichtbar steht der gewählte unter der Reihe (.qcur) */
+function qTupf(attrs, k, an, name, bg) { return '<button type="button" class="qsw" ' + attrs + ' data-v="' + k + '" aria-pressed="' + an + '" aria-label="' + esc(name) + '" title="' + esc(name) + '"><span class="c" style="background: ' + bg + '"></span></button>'; }
 /* Eigene Farbe: ein Textfeld unter jeder Farbwahl. Erkennt RAL (z. B. 7021), DB 703, Holzdekore, Farbwörter und #hex;
    der Tupfen zeigt die erkannte Farbe, das Modell färbt sich schon beim Tippen. */
 const FARBFELD = { wunschA: 'z. B. RAL 7021 oder DB 703', wunschI: 'z. B. RAL 9001 oder Eiche', wunschGf: 'z. B. Messing oder RAL 9005', wunschSf: 'z. B. RAL 7016 oder DB 703', wunschIf: 'z. B. Sand, Taupe oder RAL 1015' };
@@ -2519,7 +2527,7 @@ function farbeLive(el, f) {
   const ob = document.querySelector('.qpanel .qoffen'); if (ob && (f === 'wunschA' || f === 'wunschI')) ob.setAttribute('aria-pressed', String(istOffen(w, f === 'wunschA' ? 'fa' : 'fi')));
   const st = document.getElementById('w3d'), reg = W3DS.w3d; if (st && reg) { w3dPaint(st, w); w3dLayout(st, w, reg.o); }
 }
-function qOrn() { const w = S.win; return '<div class="qswatches">' + ORN.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="orn" data-v="' + o.k + '" aria-pressed="' + (w.orn === o.k) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div>'; }
+function qOrn() { const w = S.win, cur = ORN.find((o) => o.k === w.orn) || ORN[0]; return '<div class="qswatches">' + ORN.map((o) => qTupf('data-act="setw" data-f="orn"', o.k, w.orn === o.k, o.label, o.bg)).join('') + '</div><p class="qcur"><b>' + esc(cur.label) + '</b> · ' + esc(cur.sub) + '</p>'; }
 /* Sprossen: in allen Flügeln gleich, Flügel 1 ist das Muster */
 const barBase = (id) => String(id).replace(/s\d+$/, '');
 function mirrorBars(w) {
