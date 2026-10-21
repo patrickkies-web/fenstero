@@ -76,3 +76,10 @@ Wird es eng: Text kürzen oder das Visual verkleinern, nie die Schrift verkleine
 `export/` enthält die gerenderten Story-Bilder in Upload-Reihenfolge, je Highlight ein Ordner (`1-warum` bis `6-preise`),
 dazu je Highlight `cover.png` für das Highlight-Cover. Nach einem neuen Render (`node render.mjs`) den Ordner mit dem Skript
 im Commit „Highlights für Betriebe: fertige Story-Bilder“ neu befüllen oder die PNGs aus `out/` von Hand kopieren.
+
+## Story als Video
+
+Ein KI-Video (z. B. aus Kling, Bild zu Video mit dem Standbild des Foto-Slots) als `videos/<id>.mp4` ablegen, dann
+`node marketing/highlights/video.mjs <id>`. Das Video läuft im Foto-Bereich mit derselben Ausblendung wie das Foto, Schrift und
+Elemente liegen ruhig und scharf darüber. Ergebnis: `out/<id>.mp4` (1080 × 1920, H.264, mit Ton). Fehlt `bilder/<slot>.png`, wird es
+aus dem ersten Videobild erzeugt, sodass `render.mjs` dieselbe Story auch als Bild liefert. Ausschnitt über `data-fp` am `<img>`.
