@@ -72,7 +72,7 @@ window.Blatt = (() => {
     const tw = (s) => doc.getTextWidth(t(s));
     const wrap = (s, w) => doc.splitTextToSize(t(s), w);
     /* Beschriftungen: ein langes zusammengesetztes Wort, das nicht in die Spalte passt, an der Fuge trennen statt mitten im Wort */
-    const FUGE = { Absturzsicherung: 'Absturz', Einbruchschutz: 'Einbruch', Insektenschutz: 'Insekten', Sonnenschutz: 'Sonnen', Fensterbank: 'Fenster', Förderwert: 'Förder' };
+    const FUGE = { Absturzsicherung: 'Absturz', Einbruchschutz: 'Einbruch', Insektenschutz: 'Insekten', Sonnenschutz: 'Sonnen', Fensterbank: 'Fenster', Förderwert: 'Förder', Insektenschutzgewebe: 'Insekten', Rollladenpanzer: 'Rollladen', Kindersicherung: 'Kinder', Abstandhalter: 'Abstand', Fensteröffner: 'Fenster', Rahmenansicht: 'Rahmen', Abdeckleisten: 'Abdeck', Lichtschlitze: 'Licht', Fenstergitter: 'Fenster' };
     const wrapK = (s, w) => wrap(String(s).split(' ').map((wd) => (FUGE[wd] && tw(wd) > w ? FUGE[wd] + '-\n' + wd.slice(FUGE[wd].length) : wd)).join(' '), w);
     const txt = (s, x, y, o) => doc.text(t(s), x, y, o);
     /* Marke: immer klein, auch in Versalzeilen; Wortmarke „eezi“ in Black, „frames“ in Medium */
@@ -293,13 +293,16 @@ window.Blatt = (() => {
       S.forEach((sa, i) => { fill(GLASS); doc.setLineWidth(0.2); doc.rect(ix + i * (sw + gap), iy, sw, ih, 'FD'); });
     }
     const teilungText = (w) => {
-      const n = (w.sashes || []).length || 1, art = w.art || 'fenster';
+      /* Seitenteile zählen nicht als Flügel, sie stehen dahinter */
+      const st = (w.sashes || []).filter((x) => x.st).length, n = ((w.sashes || []).length - st) || 1, art = w.art || 'fenster';
+      const seiten = st ? ', ' + (st === 2 ? '2 Seitenteile' : 'Seitenteil ' + (w.seiten === 'links' ? 'links' : 'rechts')) + (num(w.seitenB) ? ' je ' + th(w.seitenB) + ' mm' : '') : '';
       if (art === 'fest') return n + (n === 1 ? ' Feld' : ' Felder') + ', fest verglast';
-      if (art === 'hst') return 'Hebe-Schiebe-Tür, ' + n + (n === 1 ? ' Teil' : ' Teile') + ', ' + (h.lab('hstSchema', (w.hst || {}).schema) || 'Schema A').split(' (')[0];
-      if (art === 'fsw') return 'Faltschiebewand, ' + n + ' Flügel, ' + (h.lab('fswSchema', (w.fsw || {}).schema) || 'Paket links');
-      if (art === 'psk') return 'PSK-Tür, ' + n + ' Teile, ' + ((w.psk || {}).richtung === 'L' ? 'Schiebeflügel links' : 'Schiebeflügel rechts');
-      if (art === 'balkon') return 'Balkontür, ' + n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : '') + (w.ol ? ', ' + (h.lab('olT', w.olT) || 'Oberlicht') : '');
-      return n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : w.teilung === '3' ? ', Mitte fest' : '') + (w.ol ? ', ' + (h.lab('olT', w.olT) || 'Oberlicht') : '') + (w.ul ? ', ' + (h.lab('ul', w.ulA) || 'Unterlicht') + ' ' + th(w.ulH) + ' mm' : '');
+      const ol = w.ol ? ', ' + (h.lab('olT', w.olT) || 'Oberlicht') : '';
+      if (art === 'hst') return 'Hebe-Schiebe-Tür, ' + n + (n === 1 ? ' Teil' : ' Teile') + ', ' + (h.lab('hstSchema', (w.hst || {}).schema) || 'Schema A').split(' (')[0] + ol;
+      if (art === 'fsw') return 'Faltschiebewand, ' + n + ' Flügel, ' + (h.lab('fswSchema', (w.fsw || {}).schema) || 'Paket links') + ol;
+      if (art === 'psk') return 'PSK-Tür, ' + n + ' Teile, ' + ((w.psk || {}).schema === 'C' ? '2 Schiebeflügel mittig' : (w.psk || {}).richtung === 'L' ? 'Schiebeflügel links' : 'Schiebeflügel rechts');
+      if (art === 'balkon') return 'Balkontür, ' + n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : '') + seiten + ol + (w.paneel === 'paneel' ? ', unten Paneel' : '');
+      return n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : w.teilung === '3' || w.teilung === '4' ? ', Mitte fest' : '') + seiten + ol + (w.ul ? ', ' + (h.lab('ul', w.ulA) || 'Unterlicht') + ' ' + th(w.ulH) + ' mm' : '');
     };
     const oeffnungText = (w) => (h.opening ? h.opening(w) : (w.sashes || []).map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ')) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ' · nach außen' : '');
     const sonneText = (w) => (h.sonne ? h.sonne(w) : (h.lab('roll', w.roll) || 'keiner') + (w.roll === 'aufsatz' || w.roll === 'vorbau' ? ', ' + h.lab('antrieb', w.antrieb) : ''));
@@ -453,6 +456,16 @@ window.Blatt = (() => {
     const klTitel = V === 'kunde' ? 'Noch zu klären, dein Fensterbauer berät dich' : 'Mit dem Kunden zu klären', oKl = { lw: 30, fs: 8, bg: '#fff8eb', rand: '#efd9ad', titelCol: WARN };
 
     /* ---------- Positionen: Position 1 beginnt auf Seite 1 ---------- */
+    /* Karte über die volle Breite; muss sie geteilt werden, gehen mindestens zwei Zeilen auf die nächste Seite, nie eine allein */
+    function teilbar(rows, titel, titel2, o, hh) {
+      if (y + hh > unten() && y + 30 < unten() && rows.length > 3) {
+        let teil = [], rest = rows.slice();
+        while (rest.length > 1 && y + karteH(teil.concat([rest[0]]), CW, titel, o) <= unten()) teil.push(rest.shift());
+        if (rest.length < 2 && teil.length > 2) rest.unshift(teil.pop());
+        if (teil.length) { karte(M, y, CW, titel, teil, o); y += karteH(teil, CW, titel, o) + 4; }
+        neueSeite(); karte(M, y, CW, titel2, rest, o); y += karteH(rest, CW, 'x', o) + 4;
+      } else { platz(hh); karte(M, y, CW, titel, rows, o); y += hh + 4; }
+    }
     function position(w, i) {
       const d = h.derive(w), fa = rahmen(w, 'aussen'), fi = rahmen(w, 'innen'), n = num(w.anzahl) || 1;
       platz(70);
@@ -490,12 +503,16 @@ window.Blatt = (() => {
       const kiRows = (fz ? [['Auf einen Blick', fz, { bold: true }]] : []).concat(mz ? [['Maße und Foto', mz, mp ? { bold: true, col: WARN } : null]] : [], ki.map((r) => [r[0], r[1]]), hints.map((hh2, k) => ['Hinweis ' + (k + 1), hh2, { bold: true, col: WARN }]), pruefen.map((t) => ['Vor Ort prüfen', t]));
       const kiTitel = 'Einbausituation aus den Fotos (KI, ' + (w.fotos || 0) + (w.fotos === 1 ? ' Foto' : ' Fotos') + ')', o2 = { lw: 25, fs: 8.2, spalten: 2, bg: '#eef5fd', rand: '#cfe0f5', titelCol: '#0a5bb5' };
       const kiH = kiRows.length ? karteH(kiRows, CW, kiTitel, o2) : 0;
+      /* Weitere Ausstattung: nur die Detailangaben, die gewählt sind (sonst gilt der Standard des Fensterbauers), zweispaltig und teilbar */
+      const detRows = A() && A().detailRows ? A().detailRows(w) : [], detTitel = 'Weitere Ausstattung', oD = { lw: 34, fs: 8.2, spalten: 2 };
+      const detH = detRows.length ? karteH(detRows, CW, detTitel, oD) : 0;
       const notizRows = w.notiz ? [[sie ? 'Notiz des Kunden' : 'Deine Notiz', '„' + w.notiz + '“']] : [], oN = { lw: 26, fs: FS, bg: '#fffbe8', rand: '#f2e2a4' };
       const notizH = notizRows.length ? karteH(notizRows, CW, '', oN) : 0;
       /* Fotos des Kunden (innen, außen), so wie sie angekommen sind: nebeneinander, gleich hoch (e.fotos: Kennung → { data, w, h }) */
       const fotos = ['in', 'out'].map((s2) => ({ s: s2, f: w.bilder && e.fotos ? e.fotos[w.bilder[s2]] : null })).filter((x) => x.f && /^data:image\/jpeg/.test(String(x.f.data || '')) && x.f.w > 0 && x.f.h > 0);
       const FH = 56, fotoH = fotos.length ? FH + 15 : 0;
       let nach = hmax, luecke = 5;
+      if (detH) { nach += luecke + detH; luecke = 4; }
       if (mitBild) { nach += luecke + bildH + 2; luecke = 4; }
       if (fotoH) { nach += luecke + fotoH; luecke = 4; }
       if (kiH) { nach += luecke + kiH; luecke = 4; }
@@ -517,6 +534,7 @@ window.Blatt = (() => {
       platz(hmax);
       karten.forEach((k, j) => { const x = M + j * (cw3 + 4); karte(x, y, cw3, k[0], k[1], o3); });
       y += hmax + 5;
+      if (detRows.length) teilbar(detRows, detTitel, 'Weitere Ausstattung, Fortsetzung', oD, detH);
       /* Neue Öffnung: das Foto mit der eingezeichneten Lage */
       if (mitBild) {
         platz(bildH + 2);
@@ -537,16 +555,8 @@ window.Blatt = (() => {
         });
         y += fotoH + 4;
       }
-      /* Aus den Fotos; muss die Karte geteilt werden, gehen mindestens zwei Zeilen auf die nächste Seite, nie eine allein */
-      if (kiRows.length) {
-        if (y + kiH > unten() && y + 30 < unten() && kiRows.length > 3) {
-          let teil = [], rest = kiRows.slice();
-          while (rest.length > 1 && y + karteH(teil.concat([rest[0]]), CW, kiTitel, o2) <= unten()) teil.push(rest.shift());
-          if (rest.length < 2 && teil.length > 2) rest.unshift(teil.pop());
-          if (teil.length) { karte(M, y, CW, kiTitel, teil, o2); y += karteH(teil, CW, kiTitel, o2) + 4; }
-          neueSeite(); karte(M, y, CW, 'Einbausituation (KI), Fortsetzung', rest, o2); y += karteH(rest, CW, 'x', o2) + 4;
-        } else { platz(kiH); karte(M, y, CW, kiTitel, kiRows, o2); y += kiH + 4; }
-      }
+      /* Aus den Fotos */
+      if (kiRows.length) teilbar(kiRows, kiTitel, 'Einbausituation (KI), Fortsetzung', o2, kiH);
       if (notizRows.length) { platz(notizH); karte(M, y, CW, '', notizRows, oN); y += notizH + 4; }
     }
 

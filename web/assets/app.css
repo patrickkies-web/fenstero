@@ -10,16 +10,29 @@ img { max-width: 100% }
 .scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-top: 56px; padding-bottom: 120px }
 .scr { padding-inline: 16px; display: flex; flex-direction: column; gap: 20px; animation: scr-in var(--t3) var(--e-out) both }
 .scr.is-back { animation-name: scr-in-back }
+.scr.mit-buehne > :not(.w3d-stage) { animation: scr-in var(--t3) var(--e-out) both } .scr.mit-buehne.is-back > :not(.w3d-stage) { animation-name: scr-in-back }
 @keyframes scr-in { from { opacity: 0; transform: translateX(20px) } to { opacity: 1; transform: none } }
 @keyframes scr-in-back { from { opacity: 0; transform: translateX(-20px) } to { opacity: 1; transform: none } }
 
-/* ---------- Ein Bildschirm, nichts scrollt (Messen, Fragen): Modell oben, Eingabe unten im Daumenbereich ---------- */
+/* ---------- Ein Bildschirm, nichts scrollt (Messen, Fragen): Modell oben, Eingabe unten im Daumenbereich ----------
+   Messen: das Modell bekommt, was Kopf, Eingabe und Tasten übrig lassen. Fragen: das Modell hat eine feste Höhe (siehe unten). */
 .scroll.fit { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) }
-.scr.fit { min-height: 100%; gap: 12px }
-.scr.fit .hd.compact { padding-top: 6px; flex: 0 0 auto }
-.scr.fit .w3d-stage { flex: 1 1 auto; min-height: 150px; max-height: 58vh; height: auto }
+.scr.fit { min-height: 100%; gap: 8px }
+.scr.fit .hd.compact { padding-top: 4px; flex: 0 0 auto }
+.scr.fit .w3d-stage { flex: 1 1 auto; min-height: 150px; max-height: 72vh; height: auto }
 .scr.fit .qpanel { flex: 0 0 auto }
 .scr.fit .qnav { margin-top: auto }
+/* Fragen: das Modell steht still. Es sitzt oben unter der Kopfzeile und ist bei jeder Frage gleich hoch und am gleichen Ort: die Höhe hängt
+   nur vom Bildschirm ab (Höhe minus Navigation und Platz fürs Dock), nie von der Frage. Darunter das Dock mit Kicker, Frage, Satz und Eingabe;
+   was nicht hineinpasst, scrollt im Dock, das Modell bleibt. --q-dock ist der Platz fürs Dock (38 % der Höhe, 240 bis 300 px). */
+.scr.fit[data-screen="frage"] { --q-dock: clamp(240px, 38%, 300px); height: 100%; min-height: 0; padding-top: 8px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: clamp(160px, calc(100% - 68px - var(--q-dock)), 600px) minmax(0, 1fr) auto; row-gap: 8px }
+.scr.fit[data-screen="frage"] > .w3d-stage { height: auto; min-height: 0; max-height: none }
+.qdock { min-height: 0; display: flex; flex-direction: column; gap: 6px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; margin: 0 -16px; padding: 0 16px 2px }
+.qdock > * { flex-shrink: 0 }
+.qdock > .hd.compact { padding-top: 0 }
+/* Steht unten im Dock noch mehr als ein paar Pixel, blendet der untere Rand aus (.mehr, gesetzt beim Zeichnen, Scrollen und Drehen) */
+.qdock.mehr { -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent); mask-image: linear-gradient(#000 calc(100% - 28px), transparent) }
+.scr.fit[data-screen="frage"] > .qnav { margin-top: 0 }
 /* Eingabe beim Messen */
 .ask { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 10px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring) }
 .ask .q { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; letter-spacing: -.01em }
@@ -59,7 +72,10 @@ img { max-width: 100% }
 .hd h1 { margin: 10px 0 0; font-size: 32px; line-height: 1.06; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
 .hd p { margin: 10px 0 0; font-size: 17px; line-height: 1.5; color: var(--ink2); text-wrap: pretty }
 .hd.compact { padding-top: 14px } .hd.compact h1 { margin-top: 6px; font-size: 24px; letter-spacing: -.02em } .hd.compact p { margin-top: 6px; font-size: 15px; line-height: 1.45 }
-.scr.fit .hd.compact h1 { font-size: 24px }
+/* Kompakter Kopf (Fragen, Messen, Führung): Kicker 13 px wie überall, Titel und Satz eng darunter */
+.hd.compact p.eyebrow { margin: 0; font-size: 13px; line-height: 1.3 }
+.scr.fit .hd.compact h1 { margin-top: 4px; font-size: 24px; line-height: 1.1 }
+.scr.fit .hd.compact p:not(.eyebrow) { margin-top: 4px; line-height: 1.4 }
 /* Kicker über dem Titel in Grün; Maueröffnung und Element behalten ihre Zeichnungsfarbe */
 .hd .eyebrow { color: var(--accent) } .hd .eyebrow.mo { color: var(--mo) } .hd .eyebrow.el { color: var(--el) }
 h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; letter-spacing: -.02em }
@@ -301,9 +317,12 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-sash.demo-D .w3d-handle { animation: w3d-griff-d 1.6s var(--e-io) both }
 .w3d-sash.demo-DK .w3d-handle { animation: w3d-griff-dk 2.7s var(--e-io) both }
 .w3d-sash.demo-K .w3d-handle { animation: w3d-griff-k 1.4s var(--e-io) both }
+/* Kipp vor Dreh: die erste Griffstellung (waagerecht) kippt, erst die zweite (nach oben) dreht */
+.w3d-sash.demo-DK.is-kvd .w3d-handle { animation-name: w3d-griff-kvd }
 @keyframes w3d-griff-d { 0% { transform: none } 6%, 90% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
 @keyframes w3d-griff-dk { 0% { transform: none } 4%, 42% { transform: rotate(calc(var(--hsgn, 1) * 180deg)) } 48%, 94% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
 @keyframes w3d-griff-k { 0% { transform: none } 6%, 90% { transform: rotate(90deg) } 100% { transform: none } }
+@keyframes w3d-griff-kvd { 0% { transform: none } 4%, 42% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 48%, 94% { transform: rotate(calc(var(--hsgn, 1) * 180deg)) } 100% { transform: none } }
 .w3d-glass::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 26%, rgba(255, 255, 255, .55) 38%, #fff 46%, rgba(255, 255, 255, .7) 52%, transparent 66%) no-repeat; background-size: 260% 100%; background-position: 130% 0 }
 .w3d-sash.demo-F .w3d-glass::after { animation: w3d-glanz 1s var(--e-out) both }
 @keyframes w3d-glanz { 0% { opacity: 0; background-position: 130% 0 } 12%, 82% { opacity: .95 } 100% { opacity: 0; background-position: -30% 0 } }
@@ -332,6 +351,8 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Eine Bewegung zur Zeit: solange vorgeführt oder verwandelt wird, steht das sanfte Schwingen still */
 .w3d-stage.is-busy .w3d-sway, .w3d-stage.is-vorf .w3d-sway, .w3d-stage.is-demo .w3d-sway { animation-play-state: paused }
 .w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
+.w3d-band { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-leiste { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) } .w3d-schiene { border-radius: 1px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) }
+.w3d-solar, .w3d-klappladen { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3) } .w3d-sicht-u { opacity: .9 }
 .w3d-mesh { background: repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1.5px #55585c }
 .w3d-dim { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s; pointer-events: none }
 .w3d-dim.mo { --dc: color-mix(in srgb, var(--mo) 62%, #fff) } .w3d-dim.el { --dc: color-mix(in srgb, var(--el) 62%, #fff) }
@@ -364,6 +385,16 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Neben der Lupe bleibt der Hinweis links und bricht notfalls um */
 .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 148px); line-height: 1.3 }
 @media (max-height: 700px) { .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 120px) } }
+/* WebGL-Bühne (buehne.js): die Leinwand zeichnet das Modell, die Flächen bleiben als Beschreibung im DOM; Maßlinien bleiben sichtbar.
+   Kamera und Schwingen setzt die Bühne selbst, ohne CSS-Übergang. Ohne WebGL 2 fehlt .gl und das CSS-Modell zeichnet wie bisher. */
+.w3d-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none }
+.w3d-stage.gl .w3d-f, .w3d-stage.gl .w3d-selring, .w3d-stage.gl .w3d-sash.is-sel .w3d-selring { display: none }
+.w3d-stage.gl .w3d-handle, .w3d-stage.gl .w3d-griffa { visibility: hidden }
+.w3d-stage.gl .w3d-cam { transition: none }
+.w3d-stage.gl .w3d-sway { animation: none !important }
+/* neues Modell verwandelt sich aus dem alten (buehne.js erben): Maßlinien erst danach einblenden */
+.w3d-stage.gl .w3d-dim { transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s, opacity .3s var(--e-out) }
+.w3d-stage.gl.gl-erbe .w3d-dim { opacity: 0; transition: none }
 .drag-ghost { position: fixed; z-index: 90; pointer-events: none; border-radius: 4px; background: var(--accent); box-shadow: var(--lift) }
 .btn, .chip, .opt > button, .pill, .swatch { transition: transform var(--t1) var(--e-out), background var(--t2), border-color var(--t2), box-shadow var(--t2), color var(--t2) }
 .tick { stroke-dasharray: 60; stroke-dashoffset: 60; animation: fx-haken .5s var(--e-out) .15s forwards }
@@ -407,23 +438,23 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px) } to { opacity: 1; transform: translateX(-50%) } }
 
 /* ---------- Fragen: eine Frage pro Bildschirm, das Modell darüber antwortet sofort ----------
-   Auswahlfamilie: 2–3 kurze Optionen = Segmente · bis 4 mit Symbol = Karten gleicher Größe · sonst Zeilen oder ein Raster gleich breiter Chips. */
-.scr.fit .hd.compact h1 .qg { vertical-align: middle; border: 0; background: none; padding: 0; margin: -8px 0 -8px 2px; width: 44px; height: 44px; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r2) }
-.qpanel { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; min-height: 0 }
+   Die Eingabe ist ein kompaktes Dock unter dem Modell: Ziele 44 px, so wenig Höhe wie möglich, den Rest bekommt das Modell.
+   Auswahlfamilie: 2–3 kurze Optionen = Segmente · mit Symbol = kompakte Kacheln (qCards) · sonst Zeilen oder ein Raster gleich breiter Chips. */
+.scr.fit .hd.compact h1 .qg { vertical-align: middle; border: 0; background: none; padding: 0; margin: -12px 0 -12px 2px; width: 44px; height: 44px; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r2) }
+.qpanel { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; min-height: 0 }
 .qcards { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); grid-auto-rows: 1fr; gap: 8px }
 .qcards.reihe { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 0 16px 4px; scrollbar-width: none }
 .qcards.reihe::-webkit-scrollbar { display: none }
 .qcards.reihe .qo { flex: 0 0 112px; scroll-snap-align: start }
 /* Formen: fünf gleich große Symbolkacheln in einer Reihe, die gewählte Form steht mit Namen darunter */
 .qformen { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px }
-.qf { position: relative; height: 76px; min-width: 0; padding: 0; border-radius: var(--r3); border: 2px solid transparent; background: var(--surface); box-shadow: var(--ring); color: var(--ink); font: inherit; display: flex; align-items: center; justify-content: center; transition: border-color var(--t2) var(--e-out), box-shadow var(--t2) }
-.qf svg { width: 54px; height: 54px; flex: 0 0 auto }
+.qf { position: relative; height: 60px; min-width: 0; padding: 0; border-radius: var(--r3); border: 2px solid transparent; background: var(--surface); box-shadow: var(--ring); color: var(--ink); font: inherit; display: flex; align-items: center; justify-content: center; transition: border-color var(--t2) var(--e-out), box-shadow var(--t2) }
+.qf svg { width: 44px; height: 44px; flex: 0 0 auto }
 .qf[aria-pressed="true"] { border-color: var(--ink); box-shadow: none }
 .qf:active { transform: scale(.97) }
 @media (hover: hover) { .qf:not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1.5px var(--line2) } }
-.qformen + .qcur { margin-top: 10px; text-align: center }
-/* vier Optionen: zwei Reihen, Symbol links, Text rechts */
-/* Vier Karten: zwei Spalten, Symbol oben, Name bis zu zwei Zeilen; so passt auch „Festverglasung“ ohne Abschneiden */
+.qformen + .qcur { text-align: center }
+/* Vier Karten in der Führung (Elementart): zwei Spalten, Symbol oben, Name bis zu zwei Zeilen; so passt auch „Festverglasung“ ohne Abschneiden */
 .qcards.quad { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)) }
 .qcards.quad .qopt { min-height: 104px; padding: 12px 12px 10px; gap: 8px }
 .qcards.quad .qopt svg { width: 44px; height: 44px }
@@ -442,59 +473,124 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qopt { width: 100%; min-height: 108px; padding: 12px 6px 10px; overflow: hidden; border-radius: var(--r3); border: 2px solid transparent; background: var(--surface); box-shadow: var(--ring); font: inherit; color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; text-align: center; transition: transform var(--t1), border-color var(--t2), background var(--t2) }
 .qopt:active { transform: scale(.97) }
 .qopt[aria-pressed="true"] { border-color: var(--ink); box-shadow: none }
+@media (hover: hover) { .qopt:not([aria-pressed="true"]):not(.gesperrt):hover { box-shadow: inset 0 0 0 1.5px var(--line2), var(--ring) } }
 .qopt svg { width: 40px; height: 40px; flex: 0 0 auto }
 .qopt .tx { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; min-width: 0 }
 .qcards.small .qopt { min-height: 84px; padding: 10px 4px 8px } .qcards.small .qopt svg { width: 32px; height: 32px }
 .qopt .lbl { font-size: 13px; font-weight: 800; line-height: 1.2; letter-spacing: -.01em; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .qopt .sb { font-size: 13px; line-height: 1.25; color: var(--muted); width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .qopt .pr { font-size: 13px; font-weight: 800; color: var(--muted); letter-spacing: .08em }
-.qinfo { position: absolute; top: 0; right: 0; width: 40px; height: 40px; border: 0; background: none; padding: 0; color: var(--muted); display: flex; align-items: flex-start; justify-content: flex-end; padding: 6px 6px 0 0 }
+/* Info zu einer Option: eigenes Ziel 44 × 44, das Symbol oben rechts in der Karte */
+.qinfo { position: absolute; top: 0; right: 0; width: 44px; height: 44px; border: 0; background: none; padding: 8px 8px 0 0; color: var(--muted); display: flex; align-items: flex-start; justify-content: flex-end; border-radius: var(--r2) }
 .qinfo svg { width: 18px; height: 18px }
 .qopt[aria-pressed="true"] + .qinfo { color: var(--ink) }
+
+/* Kompakte Kacheln (qCards in Fragen und Führung): Symbol 28 px links, Name 15 px fett, darunter eine Zeile 13 px, der Preis in dieser
+   Zeile; 56 px hoch, gleich hoch je Reihe, gewählt mit Rand in Schriftfarbe. Die Info steht rechts als eigenes Ziel (44 px).
+   Zwei Optionen nebeneinander, vier als 2 × 2, drei schmal mit Symbol oben, mehr als vier als Reihe zum Wischen (Breite nach Inhalt). */
+.qcards.kompakt .qopt, .qcards.kompakt.quad .qopt { min-height: 56px; padding: 8px 10px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; text-align: left }
+.qcards.kompakt.quad { grid-auto-rows: auto }
+.qcards.kompakt .qopt > svg, .qcards.kompakt.quad .qopt > svg { width: 28px; height: 28px }
+.qcards.kompakt .qopt .tx, .qcards.kompakt.quad .qopt .tx { display: block; flex: 1 1 auto; width: auto; min-width: 0; font-size: 13px; line-height: 1.25 }
+.qcards.kompakt .qopt .lbl, .qcards.kompakt.quad .qopt .lbl { display: block; width: auto; font-size: 15px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; white-space: normal; overflow: visible; text-overflow: clip; -webkit-hyphens: manual; hyphens: manual }
+.qcards.kompakt .qopt .sb, .qcards.kompakt.quad .qopt .sb { display: inline; width: auto; line-height: 1.25; white-space: normal; overflow: visible; text-overflow: clip }
+.qcards.kompakt .qopt .pr { display: inline; line-height: 1.25; color: var(--ink2); letter-spacing: .04em; white-space: nowrap }
+.qcards.kompakt .qopt .sb + .pr::before { content: '·'; margin: 0 6px; font-weight: 500; color: var(--muted); letter-spacing: 0 }
+.qcards.kompakt .qo:has(> .qinfo) > .qopt { padding-right: 40px; gap: 8px }
+.qcards.kompakt .qinfo { top: 50%; transform: translateY(-50%); padding: 0 2px 0 0; align-items: center; justify-content: center }
+.qcards.kompakt .qinfo svg { width: 20px; height: 20px }
+/* Mehr als vier: eine Reihe zum Wischen, jede Kachel so breit wie ihr Inhalt, am Rand blendet die Reihe aus */
+.qcards.kompakt.reihe { padding: 0 16px; scroll-padding-inline: 16px; scroll-snap-type: x proximity; -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent) }
+.qcards.kompakt.reihe .qo { flex: 0 0 auto }
+.qcards.kompakt.reihe .qopt .lbl, .qcards.kompakt.reihe .qopt .sb { white-space: nowrap }
+/* Drei: schmale Kacheln, Symbol oben links, die Info oben rechts daneben, Name und Zeile darunter */
+.qcards.kompakt.drei .qopt { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 10px 10px }
+.qcards.kompakt.drei .qo:has(> .qinfo) > .qopt { padding-right: 10px; gap: 6px }
+.qcards.kompakt.drei .qinfo { top: 0; transform: none; padding: 14px 10px 0 0; align-items: flex-start; justify-content: flex-end }
+.qcards.kompakt.drei .qinfo svg { width: 20px; height: 20px }
+/* Schmale Telefone (unter 375 px): Symbol 24 px und etwas weniger Abstand, damit Namen und Zeilen Platz haben */
+@media (max-width: 374px) { .qcards.kompakt:not(.drei) .qopt { padding-left: 8px; gap: 8px } .qcards.kompakt .qopt > svg, .qcards.kompakt.quad .qopt > svg { width: 24px; height: 24px } }
+/* Gestaltung übernehmen: Liste mit kleiner Zeichnung */
+.qcards.design .qopt { min-height: 56px; padding: 8px 12px; gap: 12px }
+.qcards.design .qopt svg { width: 36px; height: 36px }
+.qcards.design .qopt .lbl { font-size: 15px }
+
 .qchips { display: flex; flex-wrap: wrap; gap: 8px }
 .qchips.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
-.qchips.grid2 .chip { width: 100%; padding: 0 10px; overflow: hidden; text-overflow: ellipsis }
+.qchips.grid2 .chip { width: 100%; padding: 0 8px; gap: 6px; overflow: hidden; text-overflow: ellipsis }
 .chip.big { min-height: var(--h1); padding: 0 16px; font-size: 15px; border-radius: var(--r2) }
-/* Zeilen mit Haken, wenn Beschriftungen lang sind */
+/* Zeilen mit Haken, wenn Beschriftungen lang sind: 44 px je Zeile */
 .qlist { display: flex; flex-direction: column; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); overflow: hidden }
-.qlist > button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 50px; padding: 0 14px 0 16px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); text-align: left; transition: background var(--t2) }
+.qlist > button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px 0 16px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); text-align: left; transition: background var(--t2) }
 .qlist > button:last-child { border-bottom: 0 }
 .qlist > button:active { background: var(--surface2) }
 .qlist > button .dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); margin-right: 10px; flex: 0 0 auto }
 .qlist > button .tx { flex: 1; min-width: 0; display: flex; align-items: center }
-.qlist .mark { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--line2); display: flex; align-items: center; justify-content: center; transition: background var(--t2), box-shadow var(--t2) }
-.qlist .mark svg { width: 13px; height: 13px; opacity: 0; transition: opacity var(--t1) }
+.qlist .mark { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--line2); display: flex; align-items: center; justify-content: center; transition: background var(--t2), box-shadow var(--t2) }
+.qlist .mark svg { width: 12px; height: 12px; opacity: 0; transition: opacity var(--t1) }
 .qlist > button[aria-pressed="true"] { font-weight: 700 }
 .qlist > button[aria-pressed="true"] .mark { background: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink) } .qlist > button[aria-pressed="true"] .mark svg { opacity: 1 }
 .qlist > button[aria-pressed="true"] .tx { font-weight: 600 }
-/* Farben */
-.qswatches { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 4px 16px 4px; scrollbar-width: none; scroll-snap-type: x proximity; mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent) }
+/* Farben: Tupfen in einer Reihe zum Wischen (38 px, Ziel 48 × 52), gewählt mit Ring; der Name der gewählten steht darunter (.qcur) */
+.qswatches { display: flex; gap: 4px; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scroll-padding-inline: 16px; scrollbar-width: none; scroll-snap-type: x proximity; mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent) }
 .qswatches::-webkit-scrollbar { display: none }
-.qsw { flex: 0 0 auto; width: 76px; border: 0; background: none; padding: 0; font: inherit; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 6px; scroll-snap-align: start }
-.qsw .c { width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14); transition: transform var(--t2) var(--e-out), box-shadow var(--t2) }
-.qsw[aria-pressed="true"] .c { transform: scale(1.08); box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink) }
-.qsw .n { font-size: 13px; font-weight: 600; line-height: 1.15; color: var(--muted); text-align: center; max-width: 76px; height: 30px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; hyphens: manual }
-.qsw[aria-pressed="true"] .n { color: var(--ink); font-weight: 800 }
-.qcur { margin: 0; font-size: 15px; color: var(--ink2) }
+.qsw { position: relative; flex: 0 0 auto; width: 48px; height: 52px; border: 0; border-radius: var(--r2); background: none; padding: 0; font: inherit; color: var(--ink); display: flex; align-items: center; justify-content: center; scroll-snap-align: start }
+.qsw .c { width: 38px; height: 38px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--line2); transition: box-shadow var(--t2) var(--e-out), transform var(--t1) var(--e-out) }
+.qsw[aria-pressed="true"] .c { box-shadow: inset 0 0 0 1px var(--line2), 0 0 0 3px var(--paper), 0 0 0 5px var(--ink) }
+@media (hover: hover) { .qsw:not([aria-pressed="true"]):not(.gesperrt):hover .c { box-shadow: inset 0 0 0 1px var(--line2), 0 0 0 3px var(--paper), 0 0 0 5px var(--line2) } }
+.qsw:active .c { transform: scale(.94) }
+.qcur { margin: 0; font-size: 15px; line-height: 1.35; color: var(--ink2) }
+.qcur b { color: var(--ink) }
 .qrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 24px }
 .qrow .sub { margin: 0; font-size: 15px }
+/* Innen: Name der Farbe und „Innen wie außen“ in einer Zeile */
+.qcur-zeile { justify-content: space-between; gap: 6px 12px }
+.qcur-zeile .qcur { flex: 1 1 160px; min-width: 0 }
+.qcur-zeile .chip { flex: 0 0 auto }
 .qwunsch { display: flex; flex-direction: column; gap: 4px }
 .qwunsch input { min-height: 48px; border-radius: var(--r2); border: 2px solid var(--line2); background: var(--surface); padding: 0 14px; font: inherit; font-size: 17px; color: var(--ink); transition: border-color var(--t2) }
 .qwunsch input:focus { outline: none; border-color: var(--ink) }
 .qwunsch small { font-size: 13px; color: var(--muted); line-height: 1.35; padding: 0 4px }
-.qnav { flex: 0 0 auto; display: flex; gap: 10px; padding-top: 2px }
-.qnav .btn.ghost { flex: 0 0 56px; padding: 0 }
+/* Navigation: Zurück als Kreis, „Weiter“ als Cream-Pille, beide 52 px */
+.qnav { flex: 0 0 auto; display: flex; gap: 10px }
+.qnav .btn.ghost { flex: 0 0 52px; padding: 0 }
 .qnav .btn.ghost.anpassen { flex: 1 1 0; padding: 0 14px }
-.qoffen { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 6px 14px 6px 16px; border: 1.5px dashed var(--line2); border-radius: var(--r3); background: transparent; font: inherit; color: var(--ink); text-align: left; transition: background var(--t2), border-color var(--t2) }
-.qoffen .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0 } .qoffen b { font-size: 15px; font-weight: 700 } .qoffen small { font-size: 13px; color: var(--muted) }
-.qoffen .mark { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--line2); display: flex; align-items: center; justify-content: center; transition: background var(--t2), box-shadow var(--t2) }
-.qoffen .mark svg { width: 13px; height: 13px; opacity: 0; transition: opacity var(--t1) }
+/* Weiß ich noch nicht: volle Breite, 48 px, gestrichelt; zwei kurze Zeilen, rechts der Markierungskreis */
+.qoffen { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 4px 12px 4px 16px; border: 1.5px dashed var(--line2); border-radius: var(--r3); background: transparent; font: inherit; color: var(--ink); text-align: left; transition: background var(--t2), border-color var(--t2) }
+.qoffen .tx { display: flex; flex-direction: column; gap: 0; min-width: 0 } .qoffen b { font-size: 15px; font-weight: 700; line-height: 1.25 } .qoffen small { font-size: 13px; line-height: 1.25; color: var(--muted) }
+.qoffen .mark { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--line2); display: flex; align-items: center; justify-content: center; transition: background var(--t2), box-shadow var(--t2) }
+.qoffen .mark svg { width: 12px; height: 12px; opacity: 0; transition: opacity var(--t1) }
 .qoffen[aria-pressed="true"] { border-style: solid; border-color: var(--ink); background: var(--surface) }
 .qoffen[aria-pressed="true"] .mark { background: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink) } .qoffen[aria-pressed="true"] .mark svg { opacity: 1 }
 .qoffen:active { background: var(--surface2) }
-.qlabel { margin: 4px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .02em }
-.qcards.design .qopt .lbl { font-size: 15px }
+/* Detailtiefe: oben die Tiefe als kleiner Knopf (Ziel 44 px, sichtbar eine Pille in der Zeile der Frage), die Wahl als drei Zeilen,
+   am Ende eines Kapitels „Mehr zu …“ für das, was bei dieser Tiefe nicht gefragt wird */
+.qkopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0 }
+.qkopf .eyebrow { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.qtiefe { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 44px; margin: -14px -6px -14px 0; padding: 0 6px; border: 0; background: none; font: inherit; color: var(--ink2) }
+.qtiefe span { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 10px; border-radius: 12px; background: var(--seg); font-size: 13px; font-weight: 700; line-height: 1 }
+.qtiefe:active span { background: var(--surface2) }
+.qtiefen > button { min-height: 64px; padding-top: 8px; padding-bottom: 8px }
+.qtiefen .tx { flex-direction: column; align-items: flex-start !important; gap: 2px }
+.qtiefen .tx b { font-size: 15px; line-height: 1.25 } .qtiefen .tx small { font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--muted) }
+.qmehr { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 4px 12px 4px 16px; border: 0; border-radius: var(--r3); background: var(--seg); font: inherit; color: var(--ink); text-align: left }
+.qmehr .tx { display: flex; flex-direction: column; min-width: 0 } .qmehr b { font-size: 15px; font-weight: 700; line-height: 1.25 } .qmehr small { font-size: 13px; line-height: 1.25; color: var(--muted) }
+.qmehr .plus { width: 24px; height: 24px; flex: 0 0 auto; border-radius: 50%; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; line-height: 1 }
+.qmehr:active { background: var(--surface2) }
+.kap-sprung { display: flex; flex-direction: column; gap: 6px }
+.kap-chips { display: flex; flex-wrap: wrap; gap: 8px }
+.kap-chips .chip { flex: 0 0 auto }
+.qlabel { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .02em }
+/* Zeilen im Dock: Schalter, Textfelder und Zahlen enger als in Formularen, Ziele bleiben 44 px */
 .qpanel .rows { margin: 0 }
+.qpanel .sw-row { min-height: 52px; padding: 6px 12px 6px 16px; gap: 10px }
+.qpanel .sw-row .t b { font-size: 15px; font-weight: 700; line-height: 1.3 }
+.qpanel .sw-row .t small { line-height: 1.3 }
+.qpanel .trow { padding: 8px 16px 2px; gap: 0 }
+.qpanel .trow input { min-height: 44px }
+.qpanel .trow textarea { padding: 4px 0 8px }
+.qpanel .row { padding: 4px 8px 4px 16px }
+.qpanel .row input[type="text"] { min-height: 44px }
 .sub.center { margin: 0; font-size: 15px }
 /* Sprossen-Regler am Modell */
 .rail { position: absolute; z-index: 6; touch-action: none; user-select: none; -webkit-user-select: none; transition: left .7s cubic-bezier(.3, .7, .2, 1), top .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1) }
@@ -513,19 +609,21 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .rail .rh.is-drag { transform: scale(1.18); cursor: grabbing }
 .rail .rh.is-out { background-color: var(--bad); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 3.5l7 7M10.5 3.5l-7 7' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); box-shadow: 0 0 0 2px var(--paper) }
 .qsteps { display: flex; flex-direction: column; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); overflow: hidden }
-.qstep { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 16px; border-bottom: 1px solid var(--line) }
+/* Stufenregler (Sprossen, Höhe des Unterlichts): eine Zeile 52 px, − und + als Ziele 44 × 44 in einer ruhigen Fläche */
+.qstep { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 4px 4px 4px 16px; border-bottom: 1px solid var(--line) }
 .qstep:last-child { border-bottom: 0 }
-.qstep .t { display: flex; flex-direction: column; gap: 1px; min-width: 0 } .qstep .t b { font-size: 15px; font-weight: 700 } .qstep .t small { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.stepper { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; padding: 4px; border-radius: var(--r2); background: var(--surface2) }
-.stepper button { width: 44px; height: 40px; border: 0; border-radius: var(--r1); background: var(--surface); font: inherit; font-size: 24px; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: center; transition: transform var(--t1); box-shadow: var(--ring) }
-.stepper button:active { transform: scale(.94) } .stepper button[disabled] { opacity: .35 }
+.qstep .t { display: flex; flex-direction: column; gap: 1px; min-width: 0 } .qstep .t b { font-size: 15px; font-weight: 700; line-height: 1.3 } .qstep .t small { font-size: 13px; line-height: 1.25; color: var(--muted) }
+.stepper { display: flex; align-items: center; gap: 0; flex: 0 0 auto; padding: 0; border-radius: var(--r2); background: var(--surface2) }
+.stepper button { width: 44px; height: 44px; border: 0; border-radius: var(--r2); background: transparent; font: inherit; font-size: 24px; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: center; transition: transform var(--t1), background var(--t2) }
+.stepper button:active { transform: scale(.94); background: var(--surface3) } .stepper button[disabled] { opacity: .35 }
+@media (hover: hover) { .stepper button:not([disabled]):hover { background: var(--surface3) } }
 .stepper b { width: 36px; text-align: center; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums }
 .stepper.weit b { width: 84px; white-space: nowrap }
 /* Eigene Farbe: Textfeld unter jeder Farbwahl, links ein Tupfen in der erkannten Farbe (kariert, solange nichts erkannt ist) */
 .farbfeld { position: relative; flex: 0 0 auto; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 2px 0 12px; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring) }
 .farbfeld:focus-within { box-shadow: inset 0 0 0 2px var(--ink) }
 .ff-tupf { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; background: repeating-conic-gradient(var(--surface3) 0 25%, var(--surface) 0 50%) 0 0 / 8px 8px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16); transition: background var(--t2) }
-.farbfeld input { flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0; border: 0; background: transparent; font: inherit; font-size: 17px; color: var(--ink); outline: none }
+.farbfeld input { flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0; border: 0; background: transparent; font: inherit; font-size: 17px; color: var(--ink); outline: none; text-overflow: ellipsis }
 .farbfeld input::placeholder { color: var(--muted); opacity: 1 }
 .ff-x { flex: 0 0 44px; height: 44px; border: 0; padding: 0; border-radius: var(--r1); background: none; color: var(--muted); display: flex; align-items: center; justify-content: center }
 .ff-x[hidden] { display: none }
@@ -642,7 +740,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .scr.tight .sec { gap: 8px } .scr.tight .sec-head { min-height: 0; padding: 0 4px } .scr.tight .sec-title { font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
 .scr.tight .chip { min-height: var(--h1); padding: 0 14px; font-size: 15px } .scr.tight .sub { font-size: 15px }
 .scr.tight .result .v { font-size: 24px } .scr.tight .result { gap: 10px 12px } .scr.tight .teaser { padding: 14px 16px; gap: 8px }
-@media (max-height: 700px) { .keypad { gap: 6px } .keypad button { min-height: 44px; font-size: 24px } .scr.fit .hd.compact h1 { font-size: 24px } .scr.fit { gap: 8px } .scr.fit .w3d-stage { max-height: 40vh } }
+@media (max-height: 700px) { .keypad { gap: 6px } .keypad button { min-height: 44px; font-size: 24px } .scr.fit .hd.compact h1 { font-size: 24px } .scr.fit { gap: 8px } .scr.fit .w3d-stage { max-height: 56vh } }
 
 /* ---------- Führung: ausprobieren ohne eigene Maße ---------- */
 /* Startseite: zwei gleich breite Knöpfe untereinander, darunter eine Zeile */
@@ -669,13 +767,19 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .qopt.gesperrt .lbl, .qopt.gesperrt .sb, .qopt.gesperrt .pr { color: var(--muted) }
 .qopt .schloss { position: absolute; top: 8px; right: 8px }
 .qcards .qo .qopt .schloss svg { width: 12px; height: 12px; flex: 0 0 auto; opacity: 1 }
+/* Kompakte Kacheln: das Schloss rechts in der Mitte, der Text macht ihm Platz (in schmalen Kacheln oben rechts) */
+.qcards.kompakt .qopt.gesperrt { padding-right: 40px }
+.qcards.kompakt .qopt .schloss { top: 50%; right: 10px; transform: translateY(-50%) }
+.qcards.kompakt.drei .qopt.gesperrt { padding-right: 10px }
+.qcards.kompakt.drei .qopt .schloss { top: 10px; transform: none }
 .chip.gesperrt, .seg > button.gesperrt, .qlist > button.gesperrt { color: var(--muted); background: var(--surface2); border-style: dashed }
 .chip .schloss, .seg > button .schloss, .qlist > button .schloss { width: 18px; height: 18px; margin-left: 6px; background: none; color: var(--muted) }
+/* In Chips und Segmenten steht das Schloss mit dem üblichen Abstand des Knopfs; ein Symbol im Chip weicht ihm, damit der Name ganz bleibt */
+.chip .schloss, .seg > button .schloss { margin-left: 0 } .chip.gesperrt .ci { display: none }
 .chip .schloss svg, .seg > button .schloss svg, .qlist > button .schloss svg { width: 14px; height: 14px }
 .qsw { position: relative }
 .qsw.gesperrt .c { opacity: .28; transform: none; box-shadow: inset 0 0 0 1px var(--line2) }
-.qsw.gesperrt .n { color: var(--muted); font-weight: 600 }
-.qsw .schloss { position: absolute; top: 11px; left: 50%; transform: translateX(-50%) }
+.qsw .schloss { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) }
 .farbfeld.gesperrt { background: var(--surface2); box-shadow: none }
 .farbfeld.gesperrt input { color: var(--muted) }
 .farbfeld.gesperrt .ff-tupf { display: inline-flex; align-items: center; justify-content: center; background: none; box-shadow: none; color: var(--muted) }
@@ -726,7 +830,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .ts-ziele .av { flex: 0 0 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 800 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scr, .result .v, .sheet, .sheet-bg, .toast, .level .bubble span, .w3d-sway, .w3d-dim-line, .w3d-dim-lab, .tick, .w3d-bg { animation: none !important; opacity: 1; stroke-dashoffset: 0 }
+  .scr, .scr.mit-buehne > *, .result .v, .sheet, .sheet-bg, .toast, .level .bubble span, .w3d-sway, .w3d-dim-line, .w3d-dim-lab, .tick, .w3d-bg { animation: none !important; opacity: 1; stroke-dashoffset: 0 }
   .w3d-f, .w3d-sash, .w3d-cam, .w3d-dim, .w3d-handle, .w3d-el, .w3d-bar, .w3d-dim-line, .w3d-dim-lab { transition: none !important }
   .w3d-sash, .w3d-sash .w3d-handle, .w3d-glass::after { animation: none !important }
   .w3d-dim.is-drawing .w3d-dim-line, .w3d-dim.is-drawing .w3d-dim-lab, .w3d-dim.is-drawing .w3d-dim-cap { animation: none !important }

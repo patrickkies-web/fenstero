@@ -12,17 +12,17 @@
   const AW = (() => {
     const OPT = {
       etage: { kg: 'Keller', eg: 'EG', og: 'OG', dg: 'DG' },
-      form: { rechteck: 'Rechteck', rundbogen: 'Rundbogen', segment: 'Segmentbogen', schraeg: 'Schräg', rund: 'Rund' },
+      form: { rechteck: 'Rechteck', rundbogen: 'Rundbogen', segment: 'Segmentbogen', schraeg: 'Schräg', rund: 'Rund', trapez: 'Trapez', dreieck: 'Dreieck' },
       olT: { F: 'Oberlicht fest', K: 'Oberlicht kippbar' },
       material: { kunststoff: 'Kunststoff', kunststoffalu: 'Kunststoff-Alu', holz: 'Holz', holzalu: 'Holz-Alu', alu: 'Aluminium' },
       spross: { wiener: 'Wiener Sprosse', szr: 'Innenliegende Sprossen', auf: 'Aufgesetzte Sprossen', echt: 'Glasteilende Sprossen' },
       aufseite: { beide: 'innen und außen', aussen: 'nur außen', innen: 'nur innen' },
       glas: { '2': '2-fach', '3': '3-fach' },
-      glasfn: { schall: 'Schallschutz', vsg: 'Sicherheitsglas', sicht: 'Sichtschutz', sonne: 'Sonnenschutz' },
+      glasfn: { schall: 'Schallschutz', vsg: 'Sicherheitsglas', sicht: 'Sichtschutz', sonne: 'Sonnenschutz', extraklar: 'Weißglas (extraklar)', vogel: 'Vogelschutzglas', selbstr: 'selbstreinigend' },
       griff: { standard: 'Standard', abschliessbar: 'abschließbar', druckknopf: 'mit Druckknopf', ohne: 'ohne Griff (verdeckt oder elektrisch)', motor: 'elektrisch' },
       hstGriff: { standard: 'Hebegriff', abschliessbar: 'Hebegriff, abschließbar', motor: 'elektrisch (Taster oder App)' },
       art: { fenster: 'Fenster', balkon: 'Balkon- oder Terrassentür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür (Parallel-Schiebe-Kipp)', fsw: 'Faltschiebewand' },
-      pskSchema: { A: '2-teilig (1 Schiebeflügel vor 1 Festteil)', A3: '3-teilig (1 Schiebeflügel vor 2 Festteilen)' },
+      pskSchema: { A: '2-teilig (1 Schiebeflügel vor 1 Festteil)', A3: '3-teilig (1 Schiebeflügel vor 2 Festteilen)', C: '4-teilig (2 Schiebeflügel mittig vor 2 Festteilen)' },
       griffA: { keiner: 'kein Griff außen', ziehgriff: 'Ziehgriff mit Schnäpper', abschliessbar: 'abschließbar, Schlüssel außen' },
       boden: { bleibt: 'Fußboden bleibt, wie er ist', neu: 'Fußboden wird erneuert' },
       absturz: { balkon: 'Balkon oder Terrasse davor, keine nötig', gelaender: 'Geländer außen (französischer Balkon)', glas: 'Glasbrüstung in der Laibung', fest: 'unteres Feld fest, Sicherheitsglas' },
@@ -38,22 +38,68 @@
       hstRichtung: { L: 'Schiebeflügel links', R: 'Schiebeflügel rechts' },
       schwelle: { flach: 'flache Schwelle (ca. 20 mm)', null: 'barrierefrei ohne Schwelle (DIN 18040)', standard: 'Standardschwelle mit Anschlag' },
       fswSchema: { links: 'Paket links', rechts: 'Paket rechts', geteilt: 'Paket beidseitig' },
-      sart: { keiner: 'keiner', behalten: 'bestehender bleibt', rollladen: 'Rollladen', raffstore: 'Raffstore', screen: 'Screen (Textil)' },
-      einbau: { aufsatz: 'Aufsatzkasten', vorbau: 'Vorbaukasten' },
+      sart: { keiner: 'keiner', behalten: 'bestehender bleibt', rollladen: 'Rollladen', raffstore: 'Raffstore', screen: 'Screen (Textil)', klappladen: 'Klappläden' },
+      einbau: { aufsatz: 'Aufsatzkasten', vorbau: 'Vorbaukasten', unterputz: 'Unterputzkasten (in der Wand, überputzt)' },
       sfarbe: { silber: 'silber', weiss: 'weiß', hellgrau: 'hellgrau', anthrazit: 'anthrazit', braun: 'braun', bronze: 'bronze', schwarz: 'schwarz' },
       iart: { keiner: 'keiner', rollo: 'Rollo', plissee: 'Plissee', jalousie: 'Jalousie' },
       ifarbe: { weiss: 'weiß', creme: 'creme', grau: 'grau', anthrazit: 'anthrazit', blau: 'blau', gruen: 'salbei', terra: 'terracotta' },
       gf: { weiss: 'weiß', silber: 'silber', edelstahl: 'Edelstahl', titan: 'titan', schwarz: 'schwarz' },
-      rc: { basis: 'Basisschutz', rc1: 'RC1 N', rc2: 'RC2' },
-      roll: { keiner: 'keiner', behalten: 'bestehender bleibt', aufsatz: 'Aufsatzrollladen neu', vorbau: 'Vorbaurollladen neu' },
-      antrieb: { gurt: 'Gurt', kurbel: 'Kurbel', motor: 'elektrisch', smart: 'Smart Home' },
-      insekt: { keiner: 'keiner', spann: 'Spannrahmen', dreh: 'Drehrahmen', plissee: 'Plissee' },
+      rc: { basis: 'Basisschutz', rc1: 'RC1 N', rc2n: 'RC2 N (ohne geprüftes Glas)', rc2: 'RC2', rc3: 'RC3' },
+      roll: { keiner: 'keiner', behalten: 'bestehender bleibt', aufsatz: 'Aufsatzrollladen neu', vorbau: 'Vorbaurollladen neu', unterputz: 'Unterputzrollladen neu' },
+      antrieb: { gurt: 'Gurt', kurbel: 'Kurbel', motor: 'elektrisch', smart: 'Smart Home', solar: 'Solar (ohne Stromanschluss)' },
+      insekt: { keiner: 'keiner', spann: 'Spannrahmen', dreh: 'Drehrahmen', plissee: 'Plissee', rollo: 'Rollo', pendel: 'Pendeltür', schiebe: 'Schiebeanlage' },
       fbi: { behalten: 'behalten', werzalit: 'Werzalit', stein: 'Naturstein', holz: 'Holz' },
       fba: { behalten: 'behalten', alu: 'Aluminium', stein: 'Naturstein' },
       gebaeude: { efh: 'Einfamilienhaus', dh: 'Doppelhaushälfte', rh: 'Reihenhaus', mfh: 'Mehrfamilienhaus', etw: 'Eigentumswohnung', denkmal: 'Denkmalschutz', altbau: 'Altbau', gewerbe: 'Gewerbe' },
       zeit: { asap: 'so bald wie möglich', '3m': 'in 1 bis 3 Monaten', '6m': 'in 3 bis 6 Monaten', '12m': 'später, erst Angebote', sofort: 'so bald wie möglich', offen: 'noch offen' },
       budget: { b0: 'noch offen', b1: 'bis 5.000 €', b2: '5.000 bis 10.000 €', b3: '10.000 bis 20.000 €', b4: 'über 20.000 €' },
-      orn: { satinato: 'Satinato', chinchilla: 'Chinchilla', master: 'Mastercarré' }
+      orn: { satinato: 'Satinato', chinchilla: 'Chinchilla', master: 'Mastercarré' },
+      /* Detailangaben (DETAIL unten): fehlt der Wert, gilt der Standard des Fensterbauers */
+      kvd: { dk: 'Dreh-Kipp', kvd: 'Kipp vor Dreh' },
+      seiten: { links: 'Seitenteil links', rechts: 'Seitenteil rechts', beide: 'Seitenteile links und rechts' },
+      paneel: { ohne: 'ohne Paneel', paneel: 'unten Paneel, gedämmt' },
+      hstEck: { eck: 'über Eck, ohne Eckpfosten' },
+      fswAuf: { innen: 'faltet nach innen', aussen: 'faltet nach außen' },
+      holzart: { kiefer: 'Kiefer', fichte: 'Fichte', laerche: 'Lärche', eiche: 'Eiche', meranti: 'Meranti' },
+      oberfl: { glatt: 'glatt', matt: 'matt', struktur: 'Feinstruktur', holz: 'Holzstruktur' },
+      profil: { kantig: 'kantig (classic)', softline: 'gerundet (softline)', stil: 'Stilprofil mit Kehle' },
+      schmal: { standard: 'Standardansicht', schmal: 'schmale Ansicht' },
+      dicht: { schwarz: 'schwarz', grau: 'grau', beige: 'beige', weiss: 'weiß' },
+      sichtZone: { ganz: 'ganze Scheibe', unten: 'nur unten satiniert' },
+      ahFarbe: { schwarz: 'schwarz', grau: 'grau', silber: 'silber', weiss: 'weiß' },
+      sprFarbe: { rahmen: 'wie der Rahmen', weiss: 'weiß', anthrazit: 'anthrazit', messing: 'messingfarben' },
+      griffM: { standard: 'Standardgriff', design: 'Designgriff, flache Rosette', stil: 'Stilgriff (Olive)' },
+      griffPos: { mitte: 'mittig', tief: 'tiefer, gut erreichbar', hoch: 'höher, außer Kinderhöhe' },
+      kinder: { ohne: 'ohne', schloss: 'abschließbarer Griff', sperre: 'Drehsperre, nur kippen' },
+      stulpBed: { hebel: 'Stulphebel oben und unten', griff: 'zweiter Griff (Treibriegel)' },
+      hstPlus: { muschel: 'Griffmuschel außen', soft: 'Softclose' },
+      pskZwang: { ohne: 'ohne Zwangssteuerung', zwang: 'mit Zwangssteuerung' },
+      baender: { sichtbar: 'sichtbar', verdeckt: 'verdeckt liegend' },
+      oeffner: { ohne: 'ohne', kette: 'Kettenantrieb', verdeckt: 'verdeckter Antrieb im Rahmen' },
+      luefter: { ohne: 'ohne', falz: 'Fensterfalzlüfter', schall: 'Schalldämmlüfter mit Filter' },
+      kontakt: { ohne: 'ohne', oeffnung: 'Öffnungsmelder', verschluss: 'Öffnung und Verschluss überwacht' },
+      gitter: { ohne: 'ohne', stab: 'Stabgitter', zier: 'Ziergitter' },
+      gelForm: { stab: 'senkrechte Stäbe', quer: 'Querstäbe', lochblech: 'Lochblech', glas: 'Glas mit Haltern' },
+      gelFarbe: { rahmen: 'wie der Fensterrahmen', edelstahl: 'Edelstahl', anthrazit: 'anthrazit', weiss: 'weiß' },
+      sfTeile: { gleich: 'wie der Behang', rahmen: 'wie der Fensterrahmen außen', eigen: 'eigene Farben' },
+      lamelle: { c80: 'C-Lamelle 80 mm', z90: 'Z-Lamelle 90 mm', flach: 'Flachlamelle' },
+      fuehrung: { schiene: 'Führungsschienen', seil: 'Seilführung' },
+      panzer: { kunststoff: 'Kunststoff', alu: 'Aluminium, ausgeschäumt' },
+      schlitz: { ohne: 'ohne Lichtschlitze', mit: 'mit Lichtschlitzen' },
+      transp: { licht: 'lichtdurchlässig', mittel: 'blendfrei', dunkel: 'verdunkelnd' },
+      klBauart: { lamellen: 'Lamellen', fuellung: 'Füllung', leisten: 'Brettleisten' },
+      klFarbe: { weiss: 'weiß', anthrazit: 'anthrazit', gruen: 'moosgrün', braun: 'braun', holz: 'Holz natur' },
+      bedien: { links: 'Bedienung links', rechts: 'Bedienung rechts' },
+      sensor: { zeit: 'Zeitschaltuhr', sonne: 'Sonnensensor', wind: 'Windwächter', funk: 'Funk-Handsender' },
+      insFarbe: { rahmen: 'wie der Fensterrahmen', weiss: 'weiß', braun: 'braun', anthrazit: 'anthrazit' },
+      insGewebe: { standard: 'Standardgewebe', klar: 'Klarsichtgewebe', pollen: 'Pollenschutz', tier: 'reißfest (Haustiere)' },
+      fbiFarbe: { weiss: 'weiß', marmor: 'Marmor hell', granit: 'Granit dunkel', holz: 'Holzdekor' },
+      fbaFarbe: { silber: 'silber eloxiert', weiss: 'weiß', anthrazit: 'anthrazit', bronze: 'bronze' },
+      fbaUeber: { '30': '30 mm', '40': '40 mm', '50': '50 mm', '60': '60 mm' },
+      fbaKappe: { kunststoff: 'Kunststoff', alu: 'Aluminium', gleit: 'Gleitabschluss (gedämmte Fassade)' },
+      leiste: { ohne: 'ohne', innen: 'innen', aussen: 'außen', beide: 'innen und außen' },
+      /* Wie genau der Kunde geplant hat (Projekt): was er nicht gefragt wurde, macht der Fensterbauer nach Standard */
+      tiefe: { kurz: 'das Wichtigste, Details nach Standard des Fensterbauers', normal: 'die üblichen Wünsche, feine Details nach Standard', genau: 'alles im Detail' }
     };
     const COL = { '9016': ['Verkehrsweiß', 'RAL 9016', '#f1f0ea'], '9001': ['Cremeweiß', 'RAL 9001', '#e9e0cf'], '7035': ['Lichtgrau', 'RAL 7035', '#cbd0cc'], '7039': ['Quarzgrau', 'RAL 7039', '#6c6960'], '7012': ['Basaltgrau', 'RAL 7012', '#575d5e'], '7016': ['Anthrazitgrau', 'RAL 7016', '#383e42'], '9005': ['Tiefschwarz', 'RAL 9005', '#141516'], '8022': ['Schwarzbraun', 'RAL 8022', '#2b2522'], '6005': ['Moosgrün', 'RAL 6005', '#1f4436'], '5011': ['Stahlblau', 'RAL 5011', '#1e2b3a'], '3005': ['Weinrot', 'RAL 3005', '#5e2129'], goak: ['Golden Oak', 'Holzdekor', '#b5732f'], nuss: ['Nussbaum', 'Holzdekor', '#6b4428'], eiche: ['Eiche hell', 'Holzdekor', '#c9a46b'], mahag: ['Mahagoni', 'Holzdekor', '#6f2f22'] };
     const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp', S: 'Schiebeflügel', X: 'Faltflügel', P: 'Gehflügel', PS: 'PSK-Flügel' };
@@ -85,6 +131,82 @@
     const istOffen = (w, k) => !!(w && w.offen && w.offen[k]) && offenGilt(w, k);
     const offenListe = (w) => OFFEN_REIHE.filter((k) => istOffen(w, k));
     const ov = (w, k, text) => (istOffen(w, k) ? OFFEN_TEXT : text);
+    /* Einbruchschutz als Rang: RC2 N hat die Beschläge von RC2, aber kein geprüftes Glas. Für die Empfehlung der Polizei und die
+       Förderung zählt erst RC2 (oder RC3) */
+    const RC_RANG = { basis: 0, rc1: 1, rc2n: 2, rc2: 3, rc3: 4 };
+    const rcAb = (w, k) => (RC_RANG[w && w.rc] || 0) >= RC_RANG[k];
+    /* ---------- Detailangaben ----------
+       Feiner als die Grundfragen und nur gespeichert, wenn der Kunde sie wählt. Fehlt der Wert, gilt der Standard des Fensterbauers:
+       kein „offen“, kein Eintrag in der Klärungsliste, keine Zeile im Blatt. s: Tiefe, ab der die App fragt (2 übliche Wünsche,
+       3 alles im Detail); kap: Kapitel; n: Name im Blatt; g: Beschriftungen in OPT (sonst k); gilt(w): passt zum Element;
+       mm: Zahl in Millimetern; mehr: Mehrfachauswahl; text(w): eigene Zeile; zeile: false, wenn die Öffnung es schon nennt;
+       design: geht mit „Gestaltung übernehmen“ mit */
+    const fenOderTuer = (w) => !w.art || w.art === 'fenster' || w.art === 'balkon';
+    const mitDreh = (w) => (w.sashes || []).some((x) => x.t === 'D' || x.t === 'DK');
+    const mitGriff = (w) => w.art !== 'fest' && w.griff !== 'ohne' && w.griff !== 'motor' && !istOffen(w, 'griff');
+    const sonneDa = (w) => kastenAktiv(w) && !istOffen(w, 'sart');
+    const insektDa = (w) => w.art !== 'fest' && !!w.insekt && w.insekt !== 'keiner' && !istOffen(w, 'insekt');
+    const bankAussen = (w) => offenGilt(w, 'fba') && w.fba !== 'behalten' && !istOffen(w, 'fba');
+    const DETAIL = [
+      { k: 'seiten', s: 2, kap: 'aufbau', n: 'Seitenteile', gilt: (w) => fenOderTuer(w) && (w.form || 'rechteck') === 'rechteck', text: (w) => lab('seiten', w.seiten) + (num(w.seitenB) ? ', ' + th(w.seitenB) + ' mm breit, fest verglast' : ', fest verglast') },
+      { k: 'kvd', s: 2, kap: 'aufbau', n: 'Beschlag', zeile: false, gilt: (w) => fenOderTuer(w) && (w.sashes || []).some((x) => x.t === 'DK') },
+      { k: 'paneel', s: 2, kap: 'aufbau', n: 'Paneel unten', zeile: false, gilt: (w) => w.art === 'balkon' },
+      { k: 'hstEck', s: 2, kap: 'aufbau', n: 'Ecklösung', zeile: false, gilt: (w) => w.art === 'hst' },
+      { k: 'fswAuf', s: 2, kap: 'aufbau', n: 'Faltrichtung', zeile: false, gilt: (w) => w.art === 'fsw' },
+      { k: 'holzart', s: 2, kap: 'material', n: 'Holzart', gilt: (w) => w.material === 'holz' || w.material === 'holzalu', design: true },
+      { k: 'oberfl', s: 3, kap: 'material', n: 'Oberfläche', design: true },
+      { k: 'profil', s: 3, kap: 'material', n: 'Profilform', design: true },
+      { k: 'schmal', s: 3, kap: 'material', n: 'Rahmenansicht', design: true },
+      { k: 'dicht', s: 3, kap: 'material', n: 'Dichtung', design: true },
+      { k: 'sichtZone', s: 3, kap: 'glas', n: 'Sichtschutz', gilt: (w) => (w.glasfn || []).indexOf('sicht') >= 0 && !istOffen(w, 'glasfn'), design: true },
+      { k: 'ahFarbe', s: 3, kap: 'glas', n: 'Abstandhalter', design: true },
+      { k: 'sprFarbe', s: 3, kap: 'glas', n: 'Sprossenfarbe', gilt: (w) => (w.bars || []).length > 0, design: true },
+      { k: 'griffM', s: 3, kap: 'bedienung', n: 'Griffmodell', gilt: (w) => mitGriff(w) && w.art !== 'hst', design: true },
+      { k: 'griffPos', s: 3, kap: 'bedienung', n: 'Griffhöhe', gilt: (w) => fenOderTuer(w) && mitGriff(w) && mitDreh(w) },
+      { k: 'kinder', s: 3, kap: 'bedienung', n: 'Kindersicherung', gilt: (w) => fenOderTuer(w) && mitDreh(w) },
+      { k: 'stulpBed', s: 3, kap: 'bedienung', n: 'Stulpflügel', gilt: (w) => fenOderTuer(w) && w.teilung === '2s' },
+      { k: 'hstPlus', s: 3, kap: 'bedienung', n: 'Hebe-Schiebe-Tür', mehr: true, gilt: (w) => w.art === 'hst' },
+      { k: 'pskZwang', s: 3, kap: 'bedienung', n: 'Beschlag', gilt: (w) => w.art === 'psk' },
+      { k: 'baender', s: 3, kap: 'bedienung', n: 'Bänder', gilt: (w) => fenOderTuer(w) && mitDreh(w), design: true },
+      { k: 'oeffner', s: 3, kap: 'bedienung', n: 'Fensteröffner', gilt: (w) => (!w.art || w.art === 'fenster') && ((w.sashes || []).some((x) => x.t === 'K' || x.t === 'DK') || (w.ol && w.olT === 'K')) },
+      { k: 'luefter', s: 2, kap: 'bedienung', n: 'Lüfter', gilt: fenOderTuer, design: true },
+      { k: 'kontakt', s: 3, kap: 'bedienung', n: 'Alarmkontakt', gilt: (w) => w.art !== 'fest' },
+      { k: 'gitter', s: 3, kap: 'bedienung', n: 'Fenstergitter', gilt: (w) => !w.art || w.art === 'fenster' || w.art === 'fest' },
+      { k: 'gelForm', s: 3, kap: 'bedienung', n: 'Geländer', gilt: (w) => absturzFrage(w) && w.absturz === 'gelaender' },
+      { k: 'gelFarbe', s: 3, kap: 'bedienung', n: 'Farbe Geländer', gilt: (w) => absturzFrage(w) && (w.absturz === 'gelaender' || w.absturz === 'glas') },
+      { k: 'sfTeile', s: 2, kap: 'sonne', n: 'Kasten und Schienen', gilt: sonneDa, design: true, text: (w) => (w.sfTeile === 'eigen' ? '' : lab('sfTeile', w.sfTeile)) },
+      { k: 'sfK', s: 2, kap: 'sonne', n: 'Farbe Kasten', g: 'sfarbe', gilt: (w) => sonneDa(w) && w.sfTeile === 'eigen' && w.roll !== 'unterputz', design: true },
+      { k: 'sfS', s: 2, kap: 'sonne', n: 'Farbe Schienen', g: 'sfarbe', gilt: (w) => sonneDa(w) && w.sfTeile === 'eigen', design: true },
+      { k: 'klBauart', s: 2, kap: 'sonne', n: 'Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
+      { k: 'klFarbe', s: 2, kap: 'sonne', n: 'Farbe Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
+      { k: 'lamelle', s: 3, kap: 'sonne', n: 'Lamellen', gilt: (w) => sonneDa(w) && w.sart === 'raffstore', design: true },
+      { k: 'fuehrung', s: 3, kap: 'sonne', n: 'Führung', gilt: (w) => sonneDa(w) && w.sart === 'raffstore', design: true },
+      { k: 'panzer', s: 3, kap: 'sonne', n: 'Rollladenpanzer', gilt: (w) => sonneDa(w) && w.sart === 'rollladen', design: true },
+      { k: 'schlitz', s: 3, kap: 'sonne', n: 'Lichtschlitze', gilt: (w) => sonneDa(w) && w.sart === 'rollladen', design: true },
+      { k: 'transp', s: 3, kap: 'sonne', n: 'Screen-Gewebe', gilt: (w) => sonneDa(w) && w.sart === 'screen', design: true },
+      { k: 'bedien', s: 3, kap: 'sonne', n: 'Bedienseite', gilt: sonneDa },
+      { k: 'sensor', s: 3, kap: 'sonne', n: 'Steuerung', mehr: true, gilt: (w) => sonneDa(w) && ['motor', 'smart', 'solar'].indexOf(w.antrieb) >= 0 && !istOffen(w, 'antrieb'), design: true },
+      { k: 'insFarbe', s: 3, kap: 'sonne', n: 'Farbe Insektenschutz', gilt: insektDa, design: true },
+      { k: 'insGewebe', s: 3, kap: 'sonne', n: 'Insektenschutzgewebe', gilt: insektDa, design: true },
+      { k: 'fbiFarbe', s: 3, kap: 'bank', n: 'Fensterbank innen, Farbe', gilt: (w) => offenGilt(w, 'fbi') && w.fbi !== 'behalten' && !istOffen(w, 'fbi'), design: true },
+      { k: 'fbaFarbe', s: 3, kap: 'bank', n: 'Fensterbank außen, Farbe', gilt: (w) => bankAussen(w) && w.fba === 'alu', design: true },
+      { k: 'fbaTiefe', s: 3, kap: 'bank', n: 'Fensterbank außen, Ausladung', mm: true, gilt: bankAussen },
+      { k: 'fbaUeber', s: 3, kap: 'bank', n: 'Fensterbank außen, Überstand', gilt: bankAussen, design: true },
+      { k: 'fbaKappe', s: 3, kap: 'bank', n: 'Fensterbank außen, Endkappen', gilt: bankAussen, design: true },
+      { k: 'leiste', s: 3, kap: 'bank', n: 'Abdeckleisten', design: true }
+    ];
+    const DMAP = {}; DETAIL.forEach((d) => { DMAP[d.k] = d; });
+    const detailGilt = (w, k) => !!DMAP[k] && (!DMAP[k].gilt || !!DMAP[k].gilt(w));
+    const leer = (v) => v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length);
+    function detailText(w, d) {
+      if (typeof d === 'string') d = DMAP[d];
+      if (!d || leer(w[d.k])) return '';
+      if (d.text) return d.text(w);
+      if (d.mm) return th(w[d.k]) + ' mm';
+      return (Array.isArray(w[d.k]) ? w[d.k] : [w[d.k]]).map((x) => lab(d.g || d.k, x) || String(x)).join(', ');
+    }
+    /* Zeilen fürs Blatt und den Betrieb: nur, was der Kunde gewählt hat und zum Element passt */
+    const detailRows = (w) => DETAIL.filter((d) => d.zeile !== false && detailGilt(w, d.k)).map((d) => [d.n, detailText(w, d)]).filter((r) => r[1]);
     /* Eigene Farben: im Browser erkennt Farbtext (gemeinsam.js) RAL, DB, Dekore und Farbwörter; auf dem Server bleibt der Text als Wunsch */
     const leser = () => (typeof globalThis !== 'undefined' && globalThis.Farbtext) || null;
     const erkannt = (t) => { const ft = leser(); return t && ft ? ft.lesen(t) : null; };
@@ -107,6 +229,7 @@
       if (k === '1') return [{ t: 'DK', din: 'L' }];
       if (k === '2s') return [{ t: 'D', din: 'L' }, { t: 'DK', din: 'R' }];
       if (k === '3') return [{ t: 'DK', din: 'L' }, { t: 'F', din: 'L' }, { t: 'DK', din: 'R' }];
+      if (k === '4') return [{ t: 'DK', din: 'L' }, { t: 'F', din: 'L' }, { t: 'F', din: 'R' }, { t: 'DK', din: 'R' }];
       return [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }];
     }
     function base() {
@@ -122,15 +245,18 @@
       const moH = hs.length ? Math.min.apply(null, hs) : 0, moW = ws.length ? Math.min.apply(null, ws) : 0;
       return { moH: moH, moW: moW, devH: hs.length > 1 ? Math.max.apply(null, hs) - moH : 0, devW: ws.length > 1 ? Math.max.apply(null, ws) - moW : 0, elH: num(w.el && w.el.h) || num(w.h), elW: num(w.el && w.el.w) || num(w.w) };
     }
-    const fluegelText = (S) => S.map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
+    const fluegelText = (S) => S.map((x) => (x.st ? 'Seitenteil' : TYP[x.t]) + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
+    /* Zusätze zur Öffnung, nur wenn gewählt (die Texte bei Standardwerten bleiben gleich) */
+    const kvdText = (w) => (w.kvd === 'kvd' && detailGilt(w, 'kvd') ? ', Kipp vor Dreh' : '');
     function opening(w) {
       const S = w.sashes || [];
       if (w.art === 'fest') return S.length + (S.length === 1 ? ' Feld' : ' Felder') + ', fest verglast, ohne Griff';
-      if (w.art === 'hst') { const h = w.hst || {}; return lab('hstSchema', h.schema) + (h.schema === 'A' || h.schema === 'A3' ? ', ' + lab('hstRichtung', h.richtung) : '') + ', ' + ov(w, 'schwelle', lab('schwelle', h.schwelle)); }
-      if (w.art === 'fsw') { const f = w.fsw || {}; return S.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + ', ' + ov(w, 'schwelle', lab('schwelle', f.schwelle)); }
-      if (w.art === 'psk') { const p = w.psk || {}; return lab('pskSchema', p.schema) + ', ' + lab('hstRichtung', p.richtung) + ', kippbar, mit Schwelle'; }
-      if (w.art === 'balkon') { const b = w.bt || {}; return (w.ol ? lab('olT', w.olT) + ' · ' : '') + fluegelText(S) + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle)); }
-      return (w.ol ? lab('olT', w.olT) + ' · ' : '') + fluegelText(S) + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + th(w.ulH) + ' mm' : '');
+      const ol = w.ol ? lab('olT', w.olT) + ' · ' : '';
+      if (w.art === 'hst') { const h = w.hst || {}; return ol + lab('hstSchema', h.schema) + (h.schema === 'A' || h.schema === 'A3' ? ', ' + lab('hstRichtung', h.richtung) : '') + (w.hstEck === 'eck' ? ', über Eck ohne Eckpfosten' : '') + ', ' + ov(w, 'schwelle', lab('schwelle', h.schwelle)); }
+      if (w.art === 'fsw') { const f = w.fsw || {}; return ol + S.length + ' Flügel, ' + lab('fswSchema', f.schema) + (f.geh ? ', mit Gehflügel' : ', ohne Gehflügel') + (w.fswAuf ? ', ' + lab('fswAuf', w.fswAuf) : '') + ', ' + ov(w, 'schwelle', lab('schwelle', f.schwelle)); }
+      if (w.art === 'psk') { const p = w.psk || {}; return lab('pskSchema', p.schema) + (p.schema === 'C' ? '' : ', ' + lab('hstRichtung', p.richtung)) + ', kippbar, mit Schwelle'; }
+      if (w.art === 'balkon') { const b = w.bt || {}; return ol + fluegelText(S) + kvdText(w) + (w.paneel === 'paneel' ? ' · unten Paneel ' + th(w.paneelH || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle)); }
+      return ol + fluegelText(S) + kvdText(w) + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + th(w.ulH) + ' mm' : '');
     }
     /* Sonnenschutz außen in Worten; ältere Aufmaße kennen nur roll */
     function sonne(w) {
@@ -138,12 +264,13 @@
       const a = w.sart && w.sart !== 'keiner' ? w.sart : (w.roll === 'aufsatz' || w.roll === 'vorbau' ? 'rollladen' : w.roll === 'behalten' ? 'behalten' : 'keiner');
       if (a === 'keiner') return 'keiner';
       if (a === 'behalten') return 'bestehender bleibt';
-      return lab('sart', a) + ', ' + (istOffen(w, 'einbau') ? 'Kasten nach Wahl des Fensterbauers' : lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz')) + ', ' + nameMitWunsch(w.wunschSf, lab('sfarbe', w.sfarbe) || 'silber') + ', ' + (istOffen(w, 'antrieb') ? 'Antrieb offen' : lab('antrieb', w.antrieb));
+      if (a === 'klappladen') return 'Klappläden';
+      return lab('sart', a) + ', ' + (istOffen(w, 'einbau') ? 'Kasten nach Wahl des Fensterbauers' : lab('einbau', OPT.einbau[w.roll] ? w.roll : 'aufsatz')) + ', ' + nameMitWunsch(w.wunschSf, lab('sfarbe', w.sfarbe) || 'silber') + ', ' + (istOffen(w, 'antrieb') ? 'Antrieb offen' : lab('antrieb', w.antrieb));
     }
     const innen = (w) => (istOffen(w, 'iart') ? OFFEN_TEXT : !w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + nameMitWunsch(w.wunschIf, lab('ifarbe', w.ifarbe) || 'weiß'));
     const griffText = (w) => (w.art === 'fest' ? 'ohne Griff' : istOffen(w, 'griff') ? OFFEN_TEXT : (w.art === 'hst' ? (lab('hstGriff', w.griff) || 'Hebegriff') : (lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + griffName(w)));
     const montageText = (w) => (istOffen(w, 'montage') ? 'nach Vorschlag des Fensterbauers' : [w.neu ? (w.durchbruch !== false ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung');
-    const rcText = (w) => (istOffen(w, 'rc') ? OFFEN_TEXT : lab('rc', w.rc) || 'Basisschutz') + (w.erreichbar === 'ja' ? ' · leicht erreichbar' + (w.rc === 'rc2' ? '' : ', Polizei empfiehlt RC2') : w.erreichbar === 'nein' ? ' · nicht leicht erreichbar' : '');
+    const rcText = (w) => (istOffen(w, 'rc') ? OFFEN_TEXT : lab('rc', w.rc) || 'Basisschutz') + (w.erreichbar === 'ja' ? ' · leicht erreichbar' + (rcAb(w, 'rc2') ? '' : ', Polizei empfiehlt RC2') : w.erreichbar === 'nein' ? ' · nicht leicht erreichbar' : '');
     /* ---------- Pflichtthemen ----------
        Absturzsicherung: Fensterbrüstungen müssen nach der Musterbauordnung (§ 38 MBO, von den meisten Ländern übernommen) mindestens 0,80 m hoch
        sein, bei mehr als 12 m Absturzhöhe 0,90 m; darunter, bei bodentiefen Fenstern und bei Türen ohne Balkon davor braucht es eine Absturzsicherung. Gefragt wird im OG und DG
@@ -167,7 +294,7 @@
     function uwZiel(w, p) {
       const fw = foerdWeg(p); if (fw !== 'bafa' && fw !== 'steuer') return null;
       if ((p || {}).gebaeude === 'denkmal') { const echt = w.spross === 'echt' && (w.bars || []).length > 0; return { wert: echt ? 1.6 : 1.4, grund: 'Baudenkmal' + (echt ? ', glasteilende Sprossen' : '') }; }
-      if (w.rc === 'rc2' && !istOffen(w, 'rc')) return { wert: 1.1, grund: 'einbruchhemmend (RC2)' };
+      if (rcAb(w, 'rc2') && !istOffen(w, 'rc')) return { wert: 1.1, grund: 'einbruchhemmend (' + (w.rc === 'rc3' ? 'RC3' : 'RC2') + ')' };
       const s = istTuer(w) && !istOffen(w, 'schwelle') ? tuerCfg(w).schwelle : '';
       if (s === 'null' || s === 'flach') return { wert: 1.1, grund: 'barrierearme Schwelle' };
       if ((w.glasfn || []).indexOf('schall') >= 0) return { wert: 1.1, grund: 'Schallschutzglas ab Rw 40 dB' };
@@ -189,8 +316,9 @@
       return ab > 0.3 ? { typ: 'abweichung', rm: rm, rk: rk } : null;
     }
     const verhText = (v) => String(Math.round(v * 100) / 100).replace('.', ',');
-    /* Elektrischer Antrieb gewünscht: Rollladen/Raffstore/Screen mit Motor oder Hebe-Schiebe-Tür elektrisch */
-    const motor = (w) => (kastenAktiv(w) && !istOffen(w, 'sart') && (w.antrieb === 'motor' || w.antrieb === 'smart') && !istOffen(w, 'antrieb')) || (w.art === 'hst' && w.griff === 'motor');
+    /* Elektrischer Antrieb gewünscht: Rollladen/Raffstore/Screen mit Motor (Solar braucht keinen Strom), Hebe-Schiebe-Tür elektrisch,
+       elektrischer Fensteröffner */
+    const motor = (w) => (kastenAktiv(w) && !istOffen(w, 'sart') && (w.antrieb === 'motor' || w.antrieb === 'smart') && !istOffen(w, 'antrieb')) || (w.art === 'hst' && w.griff === 'motor') || (detailGilt(w, 'oeffner') && !!w.oeffner && w.oeffner !== 'ohne');
     /* Fachangaben der KI in einer Zeile: was der Fensterbauer sonst beim ersten Termin anschaut */
     function fachZeile(w) {
       const f = w && w.ki && w.ki.fach; if (!f) return '';
@@ -235,6 +363,7 @@
       r.push(['Sonnenschutz außen', sonne(w)], ['Sonnenschutz innen', innen(w)], ['Insektenschutz', ov(w, 'insekt', lab('insekt', w.insekt) || 'keiner')]);
       if (istTuer(w)) r.push(['Schwelle', art === 'psk' ? 'mit Schwelle (PSK)' : ov(w, 'schwelle', lab('schwelle', tuerCfg(w).schwelle) || 'flache Schwelle') + (art === 'balkon' ? ', ' + lab('boden', (w.bt || {}).boden || 'bleibt') : '')]);
       else r.push(['Fensterbank', 'innen ' + ov(w, 'fbi', lab('fbi', w.fbi) || 'behalten') + ', außen ' + ov(w, 'fba', lab('fba', w.fba) || 'behalten')]);
+      detailRows(w).forEach((x) => r.push(x));
       r.push(['Montage', montageText(w)]);
       if (w.notiz) r.push(['Notiz des Kunden', w.notiz]);
       return r;
@@ -269,7 +398,7 @@
       wins.forEach((w, i) => { if (motor(w) && !(w.ki && w.ki.fach && w.ki.fach.strom === true)) dazu(pos(w, i), 'Elektrischer Antrieb gewünscht: Strom am Fenster ' + (w.ki && w.ki.fach && w.ki.fach.strom === false ? 'laut Foto nicht zu sehen' : 'klären') + ', gegebenenfalls Elektriker einplanen.', 'pruefen', 'Strom für den Antrieb', i); });
       /* Faserzement laut Foto: bis 1993 enthielt er oft Asbest, vor dem Ausbau prüfen lassen */
       wins.forEach((w, i) => { const f = (w.ki && w.ki.fach) || {}, wo = [f.fbi === 'faserzement' ? 'innen' : '', f.fba === 'faserzement' ? 'außen' : ''].filter(Boolean); if (wo.length) dazu(pos(w, i), 'Fensterbank ' + wo.join(' und ') + ' laut Foto aus Faserzement: vor dem Ausbau auf Asbest prüfen (bis 1993 verbaut).', 'pruefen', 'Asbest prüfen', i); });
-      wins.forEach((w, i) => { if (w.erreichbar === 'ja' && w.rc !== 'rc2' && !istOffen(w, 'rc')) dazu(pos(w, i), 'Leicht erreichbar, gewählt ' + (lab('rc', w.rc) || 'Basisschutz') + ': Die Polizei empfiehlt RC2.', 'hinweis', 'Einbruchschutz RC2', i); });
+      wins.forEach((w, i) => { if (w.erreichbar === 'ja' && !rcAb(w, 'rc2') && !istOffen(w, 'rc')) dazu(pos(w, i), 'Leicht erreichbar, gewählt ' + (lab('rc', w.rc) || 'Basisschutz') + ': Die Polizei empfiehlt RC2.', 'hinweis', 'Einbruchschutz RC2', i); });
       /* Offene Wünsche: Positionen mit derselben Liste zusammen */
       const gruppen = [];
       wins.forEach((w, i) => { const l = offenListe(w).map((k) => OFFEN_NAME[k]); if (!l.length) return; const key = l.join(', '), g = gruppen.find((x) => x.key === key); if (g) g.i.push(i); else gruppen.push({ key: key, i: [i] }); });
@@ -320,6 +449,7 @@
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
     return { OPT: OPT, TYP: TYP, lab: lab, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
+      DETAIL: DETAIL, detailGilt: detailGilt, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb, kastenAktiv: kastenAktiv,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, rcText: rcText,
       absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz };
   })();
@@ -386,7 +516,7 @@
     /* Fenster aus der App vollständig übernehmen: gleiche Felder, fehlende Werte sind App-Standard */
     const fromApp = (w) => AW.mk(Object.assign({}, w, { name: w.name || 'Fenster' }));
     function fingerprint(o) { try { return hashN(JSON.stringify([o.w, o.p])); } catch (e) { return 0; } }
-    function fromAppProj(p) { p = p || {}; const fw = AW.OPT.foerdweg[p.foerdweg] ? p.foerdweg : ''; return { gebaeude: p.gebaeude || '', baujahr: p.baujahr || '', total: AW.num(p.total) || 0, zeit: p.zeit || '', budget: p.budget || '', foerd: !!p.foerd || fw === 'bafa' || fw === 'steuer', foerdweg: fw, notiz: String(p.notiz || '').replace(/\s+/g, ' ').trim().slice(0, 600) }; }
+    function fromAppProj(p) { p = p || {}; const fw = AW.OPT.foerdweg[p.foerdweg] ? p.foerdweg : ''; return { gebaeude: p.gebaeude || '', baujahr: p.baujahr || '', total: AW.num(p.total) || 0, zeit: p.zeit || '', budget: p.budget || '', foerd: !!p.foerd || fw === 'bafa' || fw === 'steuer', foerdweg: fw, tiefe: ['kurz', 'normal', 'genau'].indexOf(p.tiefe) >= 0 ? p.tiefe : '', notiz: String(p.notiz || '').replace(/\s+/g, ' ').trim().slice(0, 600) }; }
     const aufmassOf = (wins, proj) => ({ windows: wins, proj: proj, fotos: wins.reduce((s, w) => s + (w.fotos || 0), 0), elemente: wins.reduce((s, w) => s + (AW.num(w.anzahl) || 1), 0) });
 
     /* ---------- Buchungen ----------
