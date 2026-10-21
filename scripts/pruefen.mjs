@@ -109,8 +109,8 @@ if (teil(1)) {
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
   }
-  const font = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('700 16px "Maven Pro"'); });
-  ok(font, 'Schrift Maven Pro lokal geladen');
+  const font = await page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('700 16px "Inter"'); });
+  ok(font, 'Schrift Inter lokal geladen');
   await ctx.close();
 }
 
@@ -2058,7 +2058,7 @@ if (teil(13)) {
       }
       const animiert = ctxOpt.reducedMotion ? await s.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length) : 0;
       ok(!befund.length && !animiert, 'Gestaltung ' + name + ': nur Schriftgrößen ' + erlaubt.join(' · ') + ', Ziele ab 44 px, kein Querscrollen' + (ctxOpt.reducedMotion ? ', bei „weniger Bewegung“ keine Animation' : '') + (befund.length ? '\n      ' + befund.join('\n      ') : '') + (animiert ? ' (' + animiert + ' laufend)' : ''));
-      if (name === 'Telefon, dunkel') { await s.goto(B4 + '/zentrale/#uebersicht', { waitUntil: 'networkidle' }); await s.waitForTimeout(200); ok((await s.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(17, 17, 16)', 'Dunkler Modus: Papier aus den Tokens'); await foto(s, 'zentrale-telefon-dunkel'); }
+      if (name === 'Telefon, dunkel') { await s.goto(B4 + '/zentrale/#uebersicht', { waitUntil: 'networkidle' }); await s.waitForTimeout(200); ok((await s.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(22, 22, 22)', 'Dunkle Bühne: Grund aus den Tokens'); await foto(s, 'zentrale-telefon-dunkel'); }
       sauber(s, 'Gestaltung ' + name + ' ohne Fehler'); await c.close();
     };
     await pruefeGestaltung({ viewport: { width: 1280, height: 900 } }, [13, 15, 17, 22, 30], 'Schreibtisch');

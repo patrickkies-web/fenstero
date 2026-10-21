@@ -1,33 +1,28 @@
 /* eeziframes · Rechtsseiten (Impressum, Datenschutz, AGB, Nutzungsbedingungen, Cookies, Vertrag widerrufen, 404) */
+/* Dieselbe Bühne wie überall (docs/GESTALTUNG.md): dunkler Grund, Flächen mit Rand, Grün als Signal; nur eine Stimmung */
 :root {
-  --bg: #f5f5f7; --surface: #ffffff; --fg: #1d1d1f; --fg2: #3a3a3c; --muted: #6e6e73; --line: rgba(0,0,0,.1);
-  --accent: #0071e3; --ph-bg: #fff4e5; --ph-fg: #a85a00; --bad: #c4321c; --ok-bg: #e8f5ec;
-  --body: 'Maven Pro', ui-rounded, system-ui, -apple-system, sans-serif;
-  color-scheme: light;
+  --bg: #161616; --surface: #1f1f1f; --fg: #f3f2ee; --fg2: #c9c8c3; --muted: #93928d; --line: #2b2b2b;
+  --accent: #8fd694; --ph-bg: rgba(240, 179, 90, .14); --ph-fg: #f0b35a; --bad: #ff7b72; --ok-bg: rgba(143, 214, 148, .14);
+  --body: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #000000; --surface: #1c1c1e; --fg: #f5f5f7; --fg2: #d1d1d6; --muted: #a1a1a6; --line: rgba(255,255,255,.14);
-  --accent: #2997ff; --ph-bg: rgba(255,159,10,.18); --ph-fg: #ffb340; --bad: #ff6b57; --ok-bg: rgba(48,209,88,.14); color-scheme: dark } }
-:root[data-theme="dark"] {
-  --bg: #000000; --surface: #1c1c1e; --fg: #f5f5f7; --fg2: #d1d1d6; --muted: #a1a1a6; --line: rgba(255,255,255,.14);
-  --accent: #2997ff; --ph-bg: rgba(255,159,10,.18); --ph-fg: #ffb340; --bad: #ff6b57; --ok-bg: rgba(48,209,88,.14); color-scheme: dark }
 * { box-sizing: border-box }
 html { -webkit-text-size-adjust: 100% }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased }
 a { color: var(--accent) }
 .kopf { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); border-bottom: 1px solid var(--line) }
 .kopf div { max-width: 760px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px }
-.marke { display: inline-flex; align-items: center; gap: 9px; color: var(--fg); text-decoration: none; font-weight: 900; font-size: 19px; letter-spacing: -.02em }
+.marke { display: inline-flex; align-items: center; gap: 9px; color: var(--fg); text-decoration: none; font-weight: 800; font-size: 19px; letter-spacing: -.02em }
 .marke svg { width: 30px; height: 30px; flex: 0 0 auto }
 /* Haarstrich des Zeichens: im dunklen Modus hell, damit sich die schwarze Kachel vom Hintergrund abhebt */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fi-rand { stroke: #fff; stroke-opacity: .2 } }
-:root[data-theme="dark"] .fi-rand { stroke: #fff; stroke-opacity: .2 }
+.fi-rand { stroke: #fff; stroke-opacity: .2 }
+
 /* Wortmarke wie in App und Betriebsbereich: „eezi“ Black, „frames“ Medium, immer klein */
-.wm { font-weight: 500; text-transform: none; white-space: nowrap } .wm b { font-weight: 900 }
+.wm { font-weight: 500; text-transform: none; white-space: nowrap } .wm b { font-weight: 800 }
 .kopf nav { display: flex; gap: 16px; font-size: 15px; font-weight: 600 }
 .kopf nav a { text-decoration: none }
 main { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px }
-h1 { margin: 6px 0 18px; font-size: clamp(32px, 7vw, 44px); line-height: 1.05; font-weight: 900; letter-spacing: -.03em }
+h1 { margin: 6px 0 18px; font-size: clamp(32px, 7vw, 44px); line-height: 1.05; font-weight: 800; letter-spacing: -.03em }
 h2 { margin: 34px 0 8px; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -.015em }
 h3 { margin: 22px 0 6px; font-size: 18px; font-weight: 800 }
 p, li { color: var(--fg2) }

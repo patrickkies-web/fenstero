@@ -2,105 +2,101 @@
    Lädt vor app.css bzw. portal.css. Alles, was beide Oberflächen teilen, steht hier einmal;
    die Regeln dazu in docs/GESTALTUNG.md. Keine Geheimnisse, keine fremden Server. */
 
-/* ---------- Tokens ---------- */
+/* ---------- Tokens ----------
+   Die Bühne ist dunkel, wie in den Beiträgen auf Instagram: Grund #161616, Flächen als Karten mit 2-px-Rand, Schrift in Cream-Weiß,
+   ein Signal (Grün) für Kicker, Haken und genau ein Wort je Überschrift, Cream für die Hauptaktion. Es gibt nur diese eine Stimmung,
+   hell und dunkel sind dasselbe (prefers-color-scheme und data-theme ändern nichts mehr). Regeln: docs/GESTALTUNG.md. */
 :root {
-  /* Farbe: Papier, Fläche, Linie, Tinte. Ein Akzent (Blau) für Links, Fokus und das Fensterelement; Orange für die Maueröffnung. */
-  --paper: #f3f2ee; --surface: #ffffff; --surface2: #ecebe6; --surface3: #e1e0da;
-  --ink: #141414; --ink2: #3d3d3a; --muted: #63635e;
-  --line: rgba(20, 20, 20, .09); --line2: rgba(20, 20, 20, .17);
-  --accent: #1d4ed8; --accent-soft: rgba(29, 78, 216, .1); --on-accent: #ffffff;
-  --primary: #141414; --primary-hover: #2a2a28; --on-primary: #ffffff;
-  --ok: #15733a; --ok-soft: #e3f3e8; --warn: #9a5b00; --warn-soft: #fdf1dc; --bad: #b42318; --bad-soft: #fbe9e7;
-  --mo: #c2410c; --mo-soft: rgba(194, 65, 12, .12); --el: #1d4ed8; --el-soft: rgba(29, 78, 216, .12);
-  /* bisherige Namen bleiben gültig */
+  --ground: #161616; --surface: #1f1f1f; --surface2: #262626; --surface3: #2e2e2e;
+  --text: #f3f2ee; --text2: #c9c8c3; --muted: #93928d;
+  --line: #2b2b2b; --line2: #3a3a3a;
+  --accent: #8fd694; --accent-soft: rgba(143, 214, 148, .14); --on-accent: #161616;
+  --cream: #f1f0ea;
+  --primary: var(--cream); --primary-hover: #ffffff; --on-primary: #161616;
+  --ok: #8fd694; --ok-soft: rgba(143, 214, 148, .14); --warn: #f0b35a; --warn-soft: rgba(240, 179, 90, .14); --bad: #ff7b72; --bad-soft: rgba(255, 123, 114, .14);
+  /* Zeichnungsfarben: Orange ist die Maueröffnung, Blau das Element (Zeichnungen, 3-D-Modell, Aufmaßblatt); keine Oberflächenfarben */
+  --mo: #ff8a5b; --mo-soft: rgba(255, 138, 91, .18); --el: #7aa2ff; --el-soft: rgba(122, 162, 255, .18);
+  /* bisherige Namen bleiben gültig: Papier ist der Grund, Tinte die Schrift */
+  --paper: var(--ground); --ink: var(--text); --ink2: var(--text2);
   --bg: var(--paper); --fg: var(--ink); --fg2: var(--ink2); --chip: var(--surface2); --seg: var(--surface2);
-  /* Schatten: Flächen liegen auf dem Papier (Ring), nur Schwebendes wirft Schatten */
-  --ring: 0 0 0 1px var(--line); --lift: 0 1px 2px rgba(20, 20, 20, .05), 0 10px 30px rgba(20, 20, 20, .08); --float: 0 24px 60px rgba(20, 20, 20, .2);
+  /* Karten tragen einen 2-px-Rand statt Schatten; nur Blätter und Dialoge schweben */
+  --ring: 0 0 0 2px var(--line); --lift: 0 0 0 2px var(--line2); --float: 0 0 0 2px var(--line2), 0 24px 60px rgba(0, 0, 0, .6);
   --shadow: var(--ring); --shadow2: var(--lift);
-  /* Form: Radien und Kontrollhöhen */
-  --r1: 8px; --r2: 12px; --r3: 18px; --r4: 24px; --h1: 44px; --h2: 52px;
-  /* Schrift */
-  --font: 'Maven Pro', ui-rounded, system-ui, -apple-system, sans-serif; --display: var(--font); --body: var(--font);
+  /* Form: Radien, Pille und Kontrollhöhen */
+  --r1: 8px; --r2: 12px; --r3: 18px; --r4: 24px; --pill: 999px; --h1: 44px; --h2: 52px;
+  /* Schrift: Inter, 500 für Text, 700 für Listen, 800 für Überschriften */
+  --font: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif; --display: var(--font); --body: var(--font);
   /* Bewegung: drei Dauern, zwei Kurven */
   --t1: 150ms; --t2: 220ms; --t3: 320ms; --e-out: cubic-bezier(.2, .7, .2, 1); --e-io: cubic-bezier(.45, 0, .2, 1);
-  color-scheme: light;
+  color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --paper: #111110; --surface: #1c1c1b; --surface2: #272725; --surface3: #323230;
-  --ink: #f2f1ed; --ink2: #cfcdc6; --muted: #a3a19a;
-  --line: rgba(255, 255, 255, .1); --line2: rgba(255, 255, 255, .2);
-  --accent: #7aa2ff; --accent-soft: rgba(122, 162, 255, .16); --on-accent: #0b0b0b;
-  --primary: #f2f1ed; --primary-hover: #ffffff; --on-primary: #111110;
-  --ok: #5fd38a; --ok-soft: rgba(95, 211, 138, .14); --warn: #f0b35a; --warn-soft: rgba(240, 179, 90, .14); --bad: #ff7b72; --bad-soft: rgba(255, 123, 114, .14);
-  --mo: #ff8a5b; --mo-soft: rgba(255, 138, 91, .18); --el: #7aa2ff; --el-soft: rgba(122, 162, 255, .18);
-  --ring: 0 0 0 1px rgba(255, 255, 255, .08); --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px rgba(0, 0, 0, .4); --float: 0 24px 60px rgba(0, 0, 0, .6);
-  color-scheme: dark } }
-:root[data-theme="dark"] {
-  --paper: #111110; --surface: #1c1c1b; --surface2: #272725; --surface3: #323230;
-  --ink: #f2f1ed; --ink2: #cfcdc6; --muted: #a3a19a;
-  --line: rgba(255, 255, 255, .1); --line2: rgba(255, 255, 255, .2);
-  --accent: #7aa2ff; --accent-soft: rgba(122, 162, 255, .16); --on-accent: #0b0b0b;
-  --primary: #f2f1ed; --primary-hover: #ffffff; --on-primary: #111110;
-  --ok: #5fd38a; --ok-soft: rgba(95, 211, 138, .14); --warn: #f0b35a; --warn-soft: rgba(240, 179, 90, .14); --bad: #ff7b72; --bad-soft: rgba(255, 123, 114, .14);
-  --mo: #ff8a5b; --mo-soft: rgba(255, 138, 91, .18); --el: #7aa2ff; --el-soft: rgba(122, 162, 255, .18);
-  --ring: 0 0 0 1px rgba(255, 255, 255, .08); --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px rgba(0, 0, 0, .4); --float: 0 24px 60px rgba(0, 0, 0, .6);
-  color-scheme: dark }
 
 /* ---------- Grundlagen ---------- */
 *, *::before, *::after { box-sizing: border-box }
 button, input, select, textarea { font-family: inherit }
 button { cursor: pointer; color: inherit }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--r1) }
-::selection { background: var(--ink); color: var(--paper) }
+::selection { background: var(--accent); color: var(--ground) }
 a.btn { text-decoration: none }
 svg { shape-rendering: geometricPrecision }
 
 /* ---------- Schrift: Rollen statt Zufallsgrößen ---------- */
-.eyebrow { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+.eyebrow { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--muted) }
+/* Kicker: die Zeile über einer Überschrift trägt das Signal; ein Wort je Überschrift ebenso (.ak) */
+.eyebrow.kicker, .kicker { color: var(--accent) }
+.ak { color: var(--accent) }
 .num { font-variant-numeric: tabular-nums }
 /* Marke: eeziframes steht immer klein, auch in Versalzeilen; Wortmarke „eezi“ Black, „frames“ Medium */
 /* Textfassung von Startseite und App für Leser ohne JavaScript (Suchmaschinen, KI-Assistenten); mit JavaScript rendert die App */
 .js .vorab { display: none }
 .mk, .wm { text-transform: none }
-.wm { font-weight: 500; white-space: nowrap } .wm b { font-weight: 900 }
+.wm { font-weight: 500; white-space: nowrap } .wm b { font-weight: 800 }
 
 /* ---------- Knöpfe: eine Familie, zwei Höhen ---------- */
-.btn { position: relative; min-height: var(--h2); padding: 0 22px; border: 0; border-radius: 14px; background: var(--surface2); color: var(--ink); font: inherit; font-size: 17px; font-weight: 700; letter-spacing: -.005em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; white-space: nowrap; text-decoration: none; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), box-shadow var(--t2) var(--e-out), transform var(--t1) var(--e-out), opacity var(--t2) }
+.btn { position: relative; min-height: var(--h2); padding: 0 22px; border: 0; border-radius: var(--pill); background: var(--surface2); color: var(--ink); font: inherit; font-size: 17px; font-weight: 700; letter-spacing: -.005em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; white-space: nowrap; text-decoration: none; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), box-shadow var(--t2) var(--e-out), transform var(--t1) var(--e-out), opacity var(--t2) }
 .btn.primary { background: var(--primary); color: var(--on-primary) }
-.btn.ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line2) }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line2) }
 .btn.soft { background: var(--surface2); color: var(--ink) }
 .btn.danger { background: var(--bad-soft); color: var(--bad) }
-.btn.ok { background: var(--ok); color: #fff }
-.btn.small { min-height: var(--h1); padding: 0 16px; font-size: 15px; border-radius: var(--r2) }
+.btn.ok { background: var(--ok); color: var(--on-accent) }
+.btn.small { min-height: var(--h1); padding: 0 16px; font-size: 15px }
 .btn.big { min-height: 56px; padding: 0 26px }
 .btn[disabled] { opacity: .4; cursor: default }
 .btn:active:not([disabled]) { transform: scale(.98) }
-@media (hover: hover) { .btn.primary:hover:not([disabled]) { background: var(--primary-hover) } .btn.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink) } .btn.soft:hover, .btn:not([class*="primary"]):not(.ghost):not(.danger):not(.ok):hover { background: var(--surface3) } }
+@media (hover: hover) { .btn.primary:hover:not([disabled]) { background: var(--primary-hover) } .btn.ghost:hover { box-shadow: inset 0 0 0 2px var(--ink) } .btn.soft:hover, .btn:not([class*="primary"]):not(.ghost):not(.danger):not(.ok):hover { background: var(--surface3) } }
 .link { border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-decoration-thickness: 1.5px; text-underline-offset: 4px; min-height: var(--h1); display: inline-flex; align-items: center; gap: 4px; transition: text-decoration-color var(--t2) }
 .link:hover { text-decoration-color: var(--ink) }
 a.link { text-decoration: underline }
 .ulink { border: 0; background: none; padding: 0; font: inherit; font-weight: 800; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; text-decoration-color: var(--line2) }
 .ulink:hover { text-decoration-color: var(--ink) }
 
+/* Pfeil im Kreis am Ende einer Hauptaktion, wie auf der Cream-Pille der Beiträge: <span class="pf" aria-hidden="true"></span> */
+.btn .pf { flex: 0 0 auto; width: 28px; height: 28px; margin: 0 -8px 0 4px; border-radius: 50%; background: var(--on-primary); color: var(--primary); display: inline-flex; align-items: center; justify-content: center }
+.btn .pf::before { content: ''; width: 9px; height: 9px; border-top: 2.5px solid currentColor; border-right: 2.5px solid currentColor; transform: translateX(-2px) rotate(45deg) }
+.btn.ghost .pf, .btn.soft .pf { background: var(--ink); color: var(--paper) }
+
 /* ---------- Auswahl: Segmente, Chips, Marken ----------
    Ein Prinzip: gewählt = Tinte gefüllt, helle Schrift. Das Gewicht wechselt nicht, damit nichts springt. */
-.seg { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface2) }
-.seg > button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--ink2); font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), box-shadow var(--t2) }
-.seg > button[aria-pressed="true"] { background: var(--ink); color: var(--paper); box-shadow: 0 1px 2px rgba(0, 0, 0, .12) }
+.seg { display: flex; gap: 4px; padding: 4px; border-radius: var(--pill); background: var(--surface2) }
+.seg > button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 10px; border: 0; border-radius: var(--pill); background: transparent; color: var(--ink2); font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), box-shadow var(--t2) }
+.seg > button[aria-pressed="true"] { background: var(--primary); color: var(--on-primary) }
 .seg > button:active { transform: scale(.98) }
 @media (hover: hover) { .seg > button:not([aria-pressed="true"]):hover { color: var(--ink); background: var(--surface3) } }
 .chips { display: flex; flex-wrap: wrap; gap: 8px }
 .chips.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
 .chips.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) }
-.chip { min-height: var(--h1); padding: 0 16px; border-radius: var(--r2); border: 1.5px solid var(--line2); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; font-weight: 600; line-height: 1.2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; text-decoration: none; min-width: 0; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), border-color var(--t2) var(--e-out), transform var(--t1) }
+.chip { min-height: var(--h1); padding: 0 16px; border-radius: var(--pill); border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; font-weight: 700; line-height: 1.2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; text-decoration: none; min-width: 0; transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out), border-color var(--t2) var(--e-out), transform var(--t1) }
 .chips.grid2 .chip, .chips.grid3 .chip { width: 100%; padding: 0 10px; overflow: hidden; text-overflow: ellipsis }
-.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper) }
+.chip[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--on-primary) }
 .chip:active { transform: scale(.98) }
 .chip .dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); flex: 0 0 auto }
 .chip .ci { display: inline-flex; width: 20px; height: 20px; margin-left: -2px; flex: 0 0 auto } .chip .ci svg { width: 20px; height: 20px }
-.chip[aria-pressed="true"] .dot { box-shadow: 0 0 0 1.5px var(--paper) }
-@media (hover: hover) { .chip:not([aria-pressed="true"]):hover { border-color: var(--ink) } }
-.badge { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 2px 9px; border-radius: var(--r1); background: var(--surface2); color: var(--ink2); font-size: 13px; font-weight: 700; line-height: 1.2; white-space: nowrap }
+.chip[aria-pressed="true"] .dot { box-shadow: 0 0 0 1.5px var(--on-primary) }
+@media (hover: hover) { .chip:not([aria-pressed="true"]):hover { border-color: var(--line2) } }
+/* Haken-Chip wie in den Beiträgen: ein grüner Haken vor dem Wort (Aufzählung, keine Auswahl) */
+.chip.haken::before { content: ''; width: 7px; height: 12px; margin: -3px 2px 0 -2px; border-right: 2.5px solid var(--accent); border-bottom: 2.5px solid var(--accent); transform: rotate(45deg); flex: 0 0 auto }
+.chip.weg::before { content: '×'; margin: 0 2px 0 -2px; color: var(--muted); font-weight: 800; line-height: 1 }
+.badge { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 2px 9px; border-radius: var(--pill); background: var(--surface2); color: var(--ink2); font-size: 13px; font-weight: 700; line-height: 1.2; white-space: nowrap }
 /* Status als Wort mit Punkt in der Statusfarbe, die Fläche bleibt ruhig; ein Symbol übernimmt die Farbe statt des Punkts */
 .badge.ok, .badge.warn, .badge.bad, .badge.acc, .badge.lead { color: var(--ink); --tone: var(--ink) }
 .badge.ok { --tone: var(--ok) } .badge.warn { --tone: var(--warn) } .badge.bad { --tone: var(--bad) } .badge.acc { --tone: var(--accent) } .badge.lead { --tone: var(--mo) }
@@ -111,21 +107,21 @@ a.link { text-decoration: underline }
 /* ---------- Schalter ---------- */
 .switch { position: relative; flex: 0 0 auto; width: 52px; height: 32px; border-radius: 16px; border: 0; padding: 0; background: var(--surface3); transition: background var(--t2) var(--e-out) }
 .switch::before { content: ''; position: absolute; inset: -8px }
-.switch > span { position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform var(--t2) var(--e-out) }
-.switch[aria-pressed="true"], .switch[aria-checked="true"] { background: var(--ink) }
+.switch > span { position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: var(--cream); box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform var(--t2) var(--e-out) }
+.switch[aria-pressed="true"], .switch[aria-checked="true"] { background: var(--accent) }
 .switch[aria-pressed="true"] > span, .switch[aria-checked="true"] > span { transform: translateX(20px) }
 
 /* ---------- Pilot-Hinweis oben im Betriebsbereich ---------- */
-/* Einführungspreis: schwarzes Banner über die ganze Breite, ganz oben (Startseite, App, Ratgeber, Seite für Fensterbauer), mit Countdown;
+/* Einführungspreis: Band über die ganze Breite, ganz oben (Startseite, App, Ratgeber, Seite für Fensterbauer), mit Countdown;
    am Stichtag verschwindet es von selbst (gemeinsam.js EinfBanner, functions/seo.js banner) */
-.einf-bar { display: block; width: 100%; margin: 0; border: 0; border-radius: 0; background: var(--ink); color: var(--paper); font: inherit; font-family: var(--font); text-align: center; text-decoration: none; cursor: pointer }
+.einf-bar { display: block; width: 100%; margin: 0; border: 0; border-bottom: 2px solid var(--line); border-radius: 0; background: var(--surface); color: var(--ink); font: inherit; font-family: var(--font); text-align: center; text-decoration: none; cursor: pointer }
 .einf-bar > span { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 14px; max-width: 1080px; margin: 0 auto; padding: 11px 16px; font-size: 15px; line-height: 1.35 }
 .einf-bar b { font-weight: 800 }
-.einf-bar .rest { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 800; white-space: nowrap }
-.einf-bar .los { font-weight: 800; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap }
+.einf-bar .rest { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: var(--pill); background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 800; white-space: nowrap }
+.einf-bar .los { font-weight: 800; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap }
 .einf-bar:hover .los, .einf-bar:focus-visible .los { text-decoration-thickness: 2px }
 @media (max-width: 560px) { .einf-bar > span { gap: 6px 10px; padding: 10px 12px } .einf-bar .spaeter { display: none } }
-.fx-pilot { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px 10px 16px; background: var(--ink); color: var(--paper); font-family: var(--font); font-size: 15px; line-height: 1.45 }
+.fx-pilot { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px 10px 16px; background: var(--surface); border-bottom: 2px solid var(--line); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.45 }
 .fx-pilot p { flex: 1; min-width: 0; max-width: 1040px; margin: 0 auto }
 .fx-pilot b { font-weight: 800 }
 .fx-pilot button { flex: 0 0 auto; width: 44px; height: 44px; margin: -10px -8px -10px 0; border: 0; border-radius: var(--r1); background: transparent; color: inherit; display: inline-flex; align-items: center; justify-content: center; cursor: pointer }
@@ -134,19 +130,19 @@ a.link { text-decoration: underline }
   .fx-pilot { font-size: 13px; line-height: 1.4; padding: 8px 8px 8px 14px; align-items: center } .fx-pilot button { margin: -6px -4px -6px 0 }
   .fx-pilot:not(.offen) p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden } .fx-pilot:not(.offen) button.mehr { display: inline-flex }
 }
-.fx-pilot button:hover { background: rgba(255, 255, 255, .14) }
+.fx-pilot button:hover { background: var(--surface3) }
 
 /* ---------- Dialog (KI-Einwilligung) ---------- */
-.fx-bg { position: fixed; inset: 0; z-index: 200; background: rgba(20, 20, 20, .44); animation: fx-fade var(--t2) var(--e-out) both }
+.fx-bg { position: fixed; inset: 0; z-index: 200; background: rgba(0, 0, 0, .6); animation: fx-fade var(--t2) var(--e-out) both }
 .fx-dialog { position: fixed; z-index: 201; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px 22px 18px; border-radius: var(--r4); background: var(--surface); color: var(--ink); box-shadow: var(--float); font-family: var(--font); animation: fx-in var(--t3) var(--e-out) both }
 @keyframes fx-in { from { opacity: 0; transform: translate(-50%, -48%) scale(.98) } to { opacity: 1; transform: translate(-50%, -50%) } }
 @keyframes fx-fade { from { opacity: 0 } to { opacity: 1 } }
-.fx-dialog h2 { margin: 0 0 10px; font-size: 24px; line-height: 1.12; font-weight: 900; letter-spacing: -.02em }
+.fx-dialog h2 { margin: 0 0 10px; font-size: 24px; line-height: 1.12; font-weight: 800; letter-spacing: -.03em }
 .fx-dialog p { margin: 0 0 10px; font-size: 17px; line-height: 1.5; color: var(--ink2) }
 .fx-dialog .fx-klein { font-size: 15px; color: var(--muted) }
 .fx-dialog a { color: var(--ink); font-weight: 700 }
 .fx-knoepfe { display: flex; flex-direction: column; gap: 8px; margin-top: 16px }
-.fx-knoepfe button { min-height: var(--h2); border: 0; border-radius: 14px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer }
+.fx-knoepfe button { min-height: var(--h2); border: 0; border-radius: var(--pill); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer }
 .fx-ja { background: var(--primary); color: var(--on-primary) }
 .fx-nein { background: var(--surface2); color: var(--ink) }
 
@@ -160,8 +156,7 @@ a.link { text-decoration: underline }
 .fi-logo.leuchtet .fi-fenster, .fi-logo.leuchtet .fi-decke { animation: fi-schein 1.6s ease-out both }
 @keyframes fi-strahl { 0% { transform: scale(.08); opacity: 0 } 18% { opacity: 1 } 70%, 100% { transform: none; opacity: 1 } }
 @keyframes fi-schein { 0% { opacity: .25 } 22%, 100% { opacity: 1 } }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fi-rand { stroke: #fff; stroke-opacity: .2 } }
-:root[data-theme="dark"] .fi-rand { stroke: #fff; stroke-opacity: .2 }
+.fi-rand { stroke: #fff; stroke-opacity: .2 }
 
 /* ---------- Bewegungskatalog ----------
    1 Erscheinen (.rev/.rv): 8 px aufwärts, 320 ms, gestaffelt nur beim Aufbau
@@ -193,8 +188,9 @@ a.link { text-decoration: underline }
 @keyframes fx-puls-svg { 0% { stroke-width: 0; stroke-opacity: .7 } 100% { stroke-width: 10; stroke-opacity: 0 } }
 .shake { animation: shake .3s var(--e-io) }
 @keyframes shake { 20% { transform: translateX(-4px) } 40% { transform: translateX(4px) } 60% { transform: translateX(-3px) } 80% { transform: translateX(3px) } }
-.spin { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid rgba(255, 255, 255, .35); border-top-color: #fff; animation: spin .9s linear infinite; flex: 0 0 auto }
+.spin { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid var(--line2); border-top-color: var(--ink); animation: spin .9s linear infinite; flex: 0 0 auto }
 .spin.dark { border-color: var(--line2); border-top-color: var(--ink) }
+.btn.primary .spin, .btn.ok .spin { border-color: rgba(22, 22, 22, .25); border-top-color: var(--on-primary) }
 @keyframes spin { to { transform: rotate(360deg) } }
 
 @media (prefers-reduced-motion: reduce) {
