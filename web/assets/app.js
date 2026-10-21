@@ -684,7 +684,9 @@ function w3dCalc(w, o) {
     x0: -elW / 2, y0: moH / 2 - elH, wallW: moW + W3D.MARGIN_W, wallH: moH + W3D.MARGIN_H, showEl: o.showEl !== false, dims: o.dims || [], active: o.active || '' };
 }
 const px = (v) => (Math.round(v * 100) / 100) + 'px';
-const hole = (W, H, x1, y1, x2, y2) => 'polygon(evenodd, 0 0, ' + px(W) + ' 0, ' + px(W) + ' ' + px(H) + ', 0 ' + px(H) + ', 0 0, ' + px(x1) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y1) + ')';
+/* Umriss für clip-path; .g trägt dieselbe Geometrie in Zahlen für die WebGL-Bühne (buehne.js) */
+const umriss = (css, g) => { const u = new String(css); u.g = g; return u; };
+const hole = (W, H, x1, y1, x2, y2) => umriss('polygon(evenodd, 0 0, ' + px(W) + ' 0, ' + px(W) + ' ' + px(H) + ', 0 ' + px(H) + ', 0 0, ' + px(x1) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y1) + ')', { t: 'hole', r: [x1, y1, x2, y2] });
 /* ---------- Formen im Modell ----------
    formGeo(form, x, y, b, h): Ober- und Unterkante als Funktion von x, waagerechte Ausdehnung [xl, xr] und ein Umriss mit fester
    Punktzahl (oben 21, unten 11, im Uhrzeigersinn ab der linken Kämpferlinie). Alle Formen haben gleich viele Punkte, deshalb
@@ -723,8 +725,9 @@ function formSchnitt(g, x, y, b, h, J) {
    unten ein Stück. Zwei Spitzen ohne Fläche zu den Ecken (0 0) und (B H) halten den Umriss so groß wie die Fläche. */
 const polyPts = (pts, ox, oy, W) => pts.map((p) => px(W != null ? W - (p[0] - ox) : p[0] - ox) + ' ' + px(p[1] - oy)).join(', ');
 const eckSpitzen = (B, H) => '0px 0px, ' + px(B) + ' ' + px(H) + ', 0px 0px';
-const ringClip = (aus, inn, ox, oy, B, H, W) => 'polygon(evenodd, 0px 0px, ' + polyPts(aus.concat([aus[0]]), ox, oy, W) + ', ' + eckSpitzen(B, H) + ', ' + polyPts(inn.concat([inn[0]]), ox, oy, W) + ')';
-const polyClip = (pts, ox, oy, B, H, W) => 'polygon(0px 0px, ' + polyPts(pts.concat([pts[0]]), ox, oy, W) + ', ' + eckSpitzen(B, H) + ')';
+const polyLok = (pts, ox, oy, W) => pts.map((p) => [W != null ? W - (p[0] - ox) : p[0] - ox, p[1] - oy]);
+const ringClip = (aus, inn, ox, oy, B, H, W) => umriss('polygon(evenodd, 0px 0px, ' + polyPts(aus.concat([aus[0]]), ox, oy, W) + ', ' + eckSpitzen(B, H) + ', ' + polyPts(inn.concat([inn[0]]), ox, oy, W) + ')', { t: 'ring', o: polyLok(aus, ox, oy, W), i: polyLok(inn, ox, oy, W) });
+const polyClip = (pts, ox, oy, B, H, W) => umriss('polygon(0px 0px, ' + polyPts(pts.concat([pts[0]]), ox, oy, W) + ', ' + eckSpitzen(B, H) + ')', { t: 'poly', p: polyLok(pts, ox, oy, W) });
 /* Laibung: Farbe nach der Richtung, in die ein Streifen schaut (Licht von links oben), wie bei den vier Flächen des Rechtecks */
 const REV_FARBEN = [[0, [233, 226, 214]], [90, [201, 191, 176]], [180, [205, 196, 181]], [270, [221, 214, 202]], [360, [233, 226, 214]]];
 function revFarbe(deg) {
@@ -733,14 +736,24 @@ function revFarbe(deg) {
   return 'rgb(233, 226, 214)';
 }
 const w3dGeformt = (w, o) => !!(w.form && w.form !== 'rechteck') || !!(o && o.formen);
-/* Fläche: Größe in Weltpixeln, Lage der linken oberen Ecke, Drehung um diese Kante */
+/* Fläche: Größe in Weltpixeln, Lage der linken oberen Ecke, Drehung um diese Kante. el._f: dieselben Werte für die WebGL-Bühne,
+   n = ohne Übergang (erster Aufbau, weniger Bewegung) */
+let W3D_SOFORT = false;
 function face(el, W, H, x, y, z, rot, origin, clip) {
   if (!el) return;
   const bw = px(W), bh = px(H), tf = 'translate3d(' + px(x) + ', ' + px(y) + ', ' + px(z) + ')' + (rot ? ' ' + rot : ''), og = origin || '0 0', cp = clip || 'none';
   const k = bw + '|' + bh + '|' + tf + '|' + og + '|' + cp;
   if (el._k === k) return;
   el._k = k;
+  el._f = { W: W, H: H, x: x, y: y, z: z, r: rot || '', o: og, c: clip && clip.g ? clip.g : null, n: W3D_SOFORT };
   el.style.width = bw; el.style.height = bh; el.style.transform = tf; el.style.transformOrigin = og; el.style.clipPath = cp;
+}
+/* Werte für die WebGL-Bühne nur bei Änderung neu setzen (sonst begänne jedes Mal ein Übergang) */
+function w3dWerte(el, feld, o) {
+  if (!el) return;
+  const k = JSON.stringify(o);
+  if (el[feld + 'k'] === k) return;
+  el[feld + 'k'] = k; o.n = W3D_SOFORT; el[feld] = o;
 }
 function facadeBg(k) {
   if (k === 'klinker') return 'repeating-linear-gradient(0deg, #b85c42 0 18px, #bfb6a9 18px 21px), repeating-linear-gradient(90deg, transparent 0 38px, #bfb6a9 38px 41px)';
@@ -895,7 +908,7 @@ function w3dPaint(stage, w) {
   const q = (r) => stage.querySelector('[data-r="' + r + '"]'), bg = (r, v) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.background = v; } }, bgc = (r, v) => { const el = q(r); if (el && el._bg !== v) { el._bg = v; el.style.backgroundColor = v; } };
   const fin = rahmenFarbe(w, 'innen'), fout = rahmenFarbe(w, 'aussen'), hcol = griffFarbe(w).bg;
   stage.classList.toggle('glas-sonne', w.glasfn.indexOf('sonne') >= 0); stage.classList.toggle('glas-sicht', w.glasfn.indexOf('sicht') >= 0);
-  stage.style.setProperty('--orn', (ORN.find((o) => o.k === w.orn) || ORN[0]).bg); stage.setAttribute('data-scheiben', w.glas === '2' ? '2' : '3');
+  stage._orn = (ORN.find((o) => o.k === w.orn) || ORN[0]).bg; stage.style.setProperty('--orn', stage._orn); stage.setAttribute('data-scheiben', w.glas === '2' ? '2' : '3');
   stage.classList.toggle('mit-schloss', w.rc === 'rc2' || w.griff === 'abschliessbar');
   const bi = bank(w.fbi, 'innen'), ba = bank(w.fba, 'aussen');
   bg('wall-out', facadeBg(w.fassade)); bg('sill-t', bi.oben); bg('sill-f', bi.stirn); bg('sill-l', bi.stirn); bg('sill-r', bi.stirn); bg('sa-t1', ba.oben); bg('sa-t2', ba.oben); bg('sa-f', ba.stirn);
@@ -903,8 +916,8 @@ function w3dPaint(stage, w) {
   bg('ol-front', fin.bg); bg('ol-back', fout.bg); bg('kf', fin.bg); bg('kfb', fout.bg);
   bg('ul-front', fin.bg); bg('ul-back', fout.bg); bg('kfu', fin.bg); bg('kfub', fout.bg);
   const paneel = w.ul && w.ulA === 'paneel', ug = q('ul-glass'), upb = q('ul-pan-b');
-  if (ug) { ug.classList.toggle('w3d-glass', !paneel); ug.classList.toggle('w3d-paneel', paneel); ug.style.background = paneel ? fin.solid : ''; }
-  if (upb) { upb.style.background = fout.solid; upb.style.opacity = paneel ? '' : '0'; }
+  if (ug) { ug.classList.toggle('w3d-glass', !paneel); ug.classList.toggle('w3d-paneel', paneel); ug._bg = paneel ? fin.solid : ''; ug.style.background = ug._bg; }
+  if (upb) { upb._bg = fout.solid; upb.style.background = upb._bg; upb.style.opacity = paneel ? '' : '0'; }
   if (sonneAktiv(w)) { const c = sonneFarbeW(w); bg('roll-f', 'linear-gradient(180deg, ' + c[2] + ', ' + c[0] + ' 30%, ' + c[1] + ')'); bg('roll-b', c[1]); bg('roll-t', c[2]); bg('roll-l', c[0]); bg('roll-r', c[0]); }
   else { bg('roll-f', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
@@ -913,7 +926,24 @@ function w3dPaint(stage, w) {
     const sash = q('sash-' + i); if (sash) { sash.classList.toggle('is-fixed', x.t === 'F' || x.t === 'X'); sash.classList.toggle('is-schiebe', x.t === 'S'); sash.setAttribute('data-t', x.t); sash.setAttribute('data-din', x.din); sash.style.setProperty('--sdir', x.din === 'L' ? '1' : '-1'); }
     const sv = q('sym-' + i); if (sv) { const p = symPaths(w, x); if (sv.getAttribute('data-k') !== x.t + x.din + w.richtung) { sv.innerHTML = p; sv.setAttribute('data-k', x.t + x.din + w.richtung); } }
   });
-  w.bars.forEach((b) => { const be = q('bar-' + b.id); if (be) { be.style.setProperty('--bi', barBg(w, fin, 'innen')); be.style.setProperty('--bo', barBg(w, fout, 'aussen')); } });
+  w.bars.forEach((b) => { const be = q('bar-' + b.id); if (be) { be._bi = barBg(w, fin, 'innen'); be._bo = barBg(w, fout, 'aussen'); be._art = holzig(fin) && w.spross !== 'szr' ? 'holz' : ''; be._arto = holzig(fout) && w.spross !== 'szr' ? 'holz' : ''; be.style.setProperty('--bi', be._bi); be.style.setProperty('--bo', be._bo); } });
+  w3dOberflaeche(stage, w, fin, fout);
+}
+/* Oberflächen für die WebGL-Bühne (buehne.js): Holzdekor mit Maserung, Fensterbänke aus Naturstein, Holz und Aluminium,
+   Fassade als Klinker, Holz, Putz oder WDVS. Das CSS-Modell zeigt weiter die Verläufe aus BANK, WOOD und facadeBg. */
+const holzig = (c) => !!(c && /Holzdekor/.test(c.code || ''));
+const BANK_ART = { stein: 'granit', holz: 'holz', alu: 'alu' };
+const FASSADE_ART = { klinker: 'klinker', holz: 'holzfassade', wdvs: 'putzfein' };
+function w3dOberflaeche(stage, w, fin, fout) {
+  const setz = (r, k) => { const el = stage.querySelector('[data-r="' + r + '"]'); if (el) el._art = k; };
+  const hi = holzig(fin) ? 'holz' : '', ha = holzig(fout) ? 'holz' : '';
+  ['el-front', 'ol-front', 'kf', 'ul-front', 'kfu', 'el-side-t', 'el-side-b'].forEach((r) => setz(r, hi));
+  ['el-back', 'ol-back', 'kfb', 'ul-back', 'kfub', 'el-side-l', 'el-side-r', 'ul-pan-b'].forEach((r) => setz(r, ha));
+  setz('ul-glass', w.ul && w.ulA === 'paneel' ? hi : '');
+  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-'].forEach((r) => setz(r + i, hi)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-'].forEach((r) => setz(r + i, ha)); });
+  const bi = BANK_ART[w.fbi] || '', ba = w.fba === 'alu' ? 'alu' : '';
+  ['sill-t', 'sill-f', 'sill-l', 'sill-r'].forEach((r) => setz(r, bi)); ['sa-t1', 'sa-t2', 'sa-f'].forEach((r) => setz(r, ba));
+  setz('wall-out', FASSADE_ART[w.fassade] || 'putz');
 }
 /* Maßlinien nachziehen: fehlende anlegen, überzählige entfernen */
 function ensureDims(stage, o) {
@@ -953,7 +983,8 @@ function w3dLayout(stage, w, o, gr) {
   const q = (r) => stage.querySelector('[data-r="' + r + '"]'), G = stage.getAttribute('data-struct') === 'g', form = G ? (w.form || 'rechteck') : 'rechteck';
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, sd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s, tuer = V.tuer;
   const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
-  const wandLoch = (spiegel) => G ? 'polygon(evenodd, 0 0, ' + px(wallW) + ' 0, ' + px(wallW) + ' ' + px(wallH) + ', 0 ' + px(wallH) + ', 0 0, ' + polyPts(gO.pts.concat([gO.pts[0]]), -wallW / 2, -wallH / 2, spiegel ? wallW : null) + ')'
+  W3D_SOFORT = stage.classList.contains('no-anim') || ruhig();
+  const wandLoch = (spiegel) => G ? umriss('polygon(evenodd, 0 0, ' + px(wallW) + ' 0, ' + px(wallW) + ' ' + px(wallH) + ', 0 ' + px(wallH) + ', 0 0, ' + polyPts(gO.pts.concat([gO.pts[0]]), -wallW / 2, -wallH / 2, spiegel ? wallW : null) + ')', { t: 'wand', p: polyLok(gO.pts, -wallW / 2, -wallH / 2, spiegel ? wallW : null) })
     : hole(wallW, wallH, (wallW - moW) / 2, (wallH - moH) / 2, (wallW + moW) / 2, (wallH + moH) / 2);
   face(q('wall-in'), wallW, wallH, -wallW / 2, -wallH / 2, 0, '', '0 0', wandLoch(false));
   face(q('wall-out'), wallW, wallH, -wallW / 2, -wallH / 2, -T, 'rotateY(180deg)', '50% 50%', wandLoch(true));
@@ -972,13 +1003,13 @@ function w3dLayout(stage, w, o, gr) {
       el._ang = ang;
       face(el, len > 0.01 ? len + 0.8 : 0, T, a[0], a[1], 0, 'rotateZ(' + n1(ang) + 'deg) rotateX(-90deg)', '0 0');
       const unten = !gO.rund && k > FORM_O && k < n - 1;
-      el.style.backgroundColor = unten ? 'transparent' : revFarbe(Math.atan2(dx, -dy) * 180 / Math.PI);
-      el.style.backgroundImage = unten ? bankZone : '';
+      el._bgc = unten ? 'transparent' : revFarbe(Math.atan2(dx, -dy) * 180 / Math.PI); el._bgi = unten ? bankZone : '';
+      el.style.backgroundColor = el._bgc; el.style.backgroundImage = el._bgi;
     }
   } else {
     face(q('rev-t'), moW, T, -moW / 2, -moH / 2, 0, 'rotateX(-90deg)', '0 0');
     const rb = q('rev-b'); face(rb, moW, T, -moW / 2, moH / 2, 0, 'rotateX(-90deg)', '0 0');
-    if (rb) rb.style.background = tuer ? '#d6d0c6' : bankZone;
+    if (rb) { rb._bg = tuer ? '#d6d0c6' : bankZone; rb.style.background = rb._bg; }
     face(q('rev-l'), T, moH, -moW / 2, -moH / 2, 0, 'rotateY(90deg)', '0 0');
     face(q('rev-r'), T, moH, moW / 2, -moH / 2, 0, 'rotateY(90deg)', '0 0');
   }
@@ -1054,6 +1085,7 @@ function w3dLayout(stage, w, o, gr) {
     sash.style.setProperty('--hinge', x.din === 'L' ? '0 50%' : '100% 50%'); sash.style.setProperty('--sgn', x.din === 'L' ? '-1' : '1'); sash.style.setProperty('--hsgn', x.din === 'L' ? '1' : '-1');
     sash.style.translate = px(left) + ' ' + px(sashTop) + ' ' + px(z0 + zS);
     sash.style.transform = 'none';
+    w3dWerte(sash, '_s', { w: sashW, h: sashH, tx: left, ty: sashTop, tz: z0 + zS, ox: x.t === 'K' ? sashW / 2 : x.din === 'L' ? 0 : sashW, oy: x.t === 'K' ? sashH : sashH / 2 });
     let aus = null, inn = null;
     if (G) {
       const gS = formGeo(form, ix + ssf, iy + ssf, iw - 2 * ssf, ih - 2 * ssf);
@@ -1102,21 +1134,25 @@ function w3dLayout(stage, w, o, gr) {
         const hhl = 320 * s, hhw = Math.max(6, 30 * s), hx = x.din === 'L' ? sf / 2 - hhw / 2 : sashW - sf / 2 - hhw / 2, ym = Math.max(hhl, Math.min(sashH - 180 * s, sashH - 1050 * s + hhl / 2));
         hd.style.width = px(hhw); hd.style.height = px(hhl); hd.style.transformOrigin = '50% 50%';
         hd.style.translate = px(hx) + ' ' + px(ym - hhl) + ' 6px';
+        w3dWerte(hd, '_h', { w: hhw, h: hhl, tx: hx, ty: ym - hhl, tz: 6, ox: hhw / 2, oy: hhl / 2 });
       } else if (x.t === 'PS') {
         /* PSK: Griff wie am Fenster, auf der Schließseite, etwa 1.050 mm über dem Boden */
         const hx = x.din === 'L' ? sf / 2 - hw / 2 : sashW - sf / 2 - hw / 2, ym = Math.max(hw, Math.min(sashH - hl - sf, sashH - 1050 * s));
         hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transformOrigin = '50% ' + px(hw / 2);
         hd.style.translate = px(hx) + ' ' + px(ym - hw / 2) + ' 5px';
+        w3dWerte(hd, '_h', { w: hw, h: hl, tx: hx, ty: ym - hw / 2, tz: 5, ox: hw / 2, oy: hw / 2 });
       } else if (x.t === 'K') {
         const yt = G ? Math.max(0, gI.top(left + sashW / 2) - sashTop) : 0;
         hd.style.width = px(hl); hd.style.height = px(hw); hd.style.transformOrigin = '50% 50%';
         hd.style.translate = px(sashW / 2 - hl / 2) + ' ' + px(yt + Math.max(2, sf / 2 - hw / 2)) + ' 5px';
+        w3dWerte(hd, '_h', { w: hl, h: hw, tx: sashW / 2 - hl / 2, ty: yt + Math.max(2, sf / 2 - hw / 2), tz: 5, ox: hl / 2, oy: hw / 2 });
       } else {
         const hx = x.din === 'L' ? sashW - sf / 2 - hw / 2 : sf / 2 - hw / 2, xw = left + hx + hw / 2;
         const yt = G ? Math.max(0, gI.top(xw) - sashTop) : 0, yb = G ? Math.min(sashH, gI.bot(xw) - sashTop) : sashH;
         const ym = Math.max(yt + hw, Math.min(sashH / 2, yb - hl - sf / 2));
         hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transformOrigin = '50% ' + px(hw / 2);
         hd.style.translate = px(hx) + ' ' + px(ym - hw / 2) + ' 5px';
+        w3dWerte(hd, '_h', { w: hw, h: hl, tx: hx, ty: ym - hw / 2, tz: 5, ox: hw / 2, oy: hw / 2 });
       }
     }
     /* Griff außen der Balkontür: am Gehflügel, auf der Griffseite, außen vor dem Flügelrahmen */
@@ -1125,6 +1161,7 @@ function w3dLayout(stage, w, o, gr) {
       const cfg = w.bt || {}, an = w.art === 'balkon' && i === gehFluegel(w) && cfg.griffA && cfg.griffA !== 'keiner', zg = cfg.griffA === 'ziehgriff';
       const gw2 = Math.max(4, (zg ? 26 : 22) * s), gh2 = (zg ? 300 : 140) * s, hx2 = x.din === 'L' ? sashW - sf / 2 - gw2 / 2 : sf / 2 - gw2 / 2, ym2 = Math.max(0, Math.min(sashH - gh2, sashH - 1050 * s - gh2 / 2));
       ga.style.width = px(gw2); ga.style.height = px(gh2); ga.style.transform = 'translate3d(' + px(hx2) + ', ' + px(ym2) + ', ' + px(-sd - 5) + ')'; ga.style.opacity = an ? '1' : '0';
+      w3dWerte(ga, '_g', { w: gw2, h: gh2, tx: hx2, ty: ym2, tz: -sd - 5, op: an ? 1 : 0 });
     }
     w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
   });
@@ -1134,16 +1171,16 @@ function w3dLayout(stage, w, o, gr) {
   const bh = q('behang');
   if (bh) {
     const zb = w.roll === 'vorbau' ? -T - 70 * s : -T + 2, bwB = moW + 20 * s, bxB = -moW / 2 - 10 * s, hB = moH * 0.42, uH = Math.max(3, 36 * s), c = sonneFarbeW(w);
-    face(bh, bwB, hB, bxB, -moH / 2, zb, '', '0 0'); bh.style.background = behangBg(w, s); bh.style.opacity = w.sart === 'screen' ? '.86' : '';
-    face(q('behang-u'), bwB, uH, bxB, -moH / 2 + hB, zb + 0.4, '', '0 0'); const bu = q('behang-u'); if (bu) bu.style.background = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')';
+    face(bh, bwB, hB, bxB, -moH / 2, zb, '', '0 0'); bh._bg = behangBg(w, s); bh.style.background = bh._bg; bh.style.opacity = w.sart === 'screen' ? '.86' : '';
+    face(q('behang-u'), bwB, uH, bxB, -moH / 2 + hB, zb + 0.4, '', '0 0'); const bu = q('behang-u'); if (bu) { bu._bg = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')'; bu.style.background = bu._bg; }
   }
   /* Sichtschutz innen: Kassette oben, Behang zu 38 % herab, Endleiste; vor dem Rahmen auf der Raumseite */
   const inn = q('innen');
   if (inn) {
     const zi = z0 + 24 * s, bwI2 = iw + 12 * s, bxI2 = ix - 6 * s, kH = Math.max(3, (w.iart === 'rollo' ? 58 : 36) * s), hI = ih * 0.38, c = innenFarbeW(w);
-    face(q('innen-k'), bwI2, kH, bxI2, iy - kH, zi, '', '0 0'); const ik = q('innen-k'); if (ik) ik.style.background = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')';
-    face(inn, bwI2, hI, bxI2, iy, zi - 0.4, '', '0 0'); inn.style.background = innenBg(w, s); inn.style.boxShadow = w.iart === 'jalousie' ? 'none' : '';
-    face(q('innen-u'), bwI2, Math.max(2, 14 * s), bxI2, iy + hI, zi, '', '0 0'); const iu = q('innen-u'); if (iu) iu.style.background = c[1];
+    face(q('innen-k'), bwI2, kH, bxI2, iy - kH, zi, '', '0 0'); const ik = q('innen-k'); if (ik) { ik._bg = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')'; ik.style.background = ik._bg; }
+    face(inn, bwI2, hI, bxI2, iy, zi - 0.4, '', '0 0'); inn._bg = innenBg(w, s); inn.style.background = inn._bg; inn.style.boxShadow = w.iart === 'jalousie' ? 'none' : '';
+    face(q('innen-u'), bwI2, Math.max(2, 14 * s), bxI2, iy + hI, zi, '', '0 0'); const iu = q('innen-u'); if (iu) { iu._bg = c[1]; iu.style.background = iu._bg; }
   }
   /* Maßlinien in der Wandebene (Öffnung) oder Fensterebene (Element) */
   const DIM = { hm: ['v', 0, -moH / 2, moH, 4, 24], hl: ['v', -moW / 2 + 40 * s, -moH / 2, moH, 4, 78], hr: ['v', moW / 2 - 40 * s, -moH / 2, moH, 4, 78], wm: ['h', -moW / 2, 0, moW, 4, 22], wt: ['h', -moW / 2, -moH / 2 + 40 * s, moW, 4, 76], wb: ['h', -moW / 2, moH / 2 - 40 * s, moW, 4, 24], eh: ['v', x0 + elW * 0.72, y0, elH, z0 + 6, 58], ew: ['h', x0, y0 + elH * 0.4, elW, z0 + 6, 76] };
@@ -1155,10 +1192,13 @@ function w3dLayout(stage, w, o, gr) {
     de.classList.toggle('v', vert); de.classList.toggle('h', !vert);
     const lab = q('lab-' + k); if (lab) { lab.textContent = (o.labels && o.labels[k]) || '?'; if (vert) { lab.style.top = D[5] + '%'; lab.style.left = '0'; } else { lab.style.left = D[5] + '%'; lab.style.top = '0'; } }
   });
+  stage._v = { d: d, fd: fd, T: T, s: s, moW: moW, moH: moH };
+  W3D_SOFORT = false;
   return V;
 }
 function w3dBarPos(be, b, bw) {
   if (!be) return;
+  be._b = { d: b.d, p: b.p, bw: bw };
   if (b.d === 'v') { be.style.left = 'calc(' + n1(b.p * 100) + '% - ' + px(bw / 2) + ')'; be.style.top = '0'; be.style.width = px(bw); be.style.height = '100%'; }
   else { be.style.top = 'calc(' + n1(b.p * 100) + '% - ' + px(bw / 2) + ')'; be.style.left = '0'; be.style.height = px(bw); be.style.width = '100%'; }
 }
@@ -1203,13 +1243,15 @@ function bindW3D(stage, getOpts) {
     if (e.button != null && e.button > 0) return;
     rx = cur('--rx', view[0]); ry = cur('--ry', view[1]);
     const sx = e.clientX, sy = e.clientY, rx0 = rx, ry0 = ry, hit = e.target.closest ? e.target.closest('[data-sash]') : null;
+    /* WebGL-Bühne: die Flächen sind unsichtbar, getroffen wird über die Geometrie */
+    const glHit = !hit && window.Buehne3D && window.Buehne3D.aktiv(stage) ? window.Buehne3D.treffer(stage, sx, sy) : -1;
     let moved = false;
     try { stage.setPointerCapture(e.pointerId); } catch (err) { /* ok */ }
     const move = (ev) => { const dx = ev.clientX - sx, dy = ev.clientY - sy; if (!moved && Math.abs(dx) + Math.abs(dy) < 4) return; moved = true; stage.classList.add('is-drag'); ry = Math.max(view[1] - 40, Math.min(view[1] + 40, ry0 + dx * 0.35)); rx = Math.max(view[0] - 20, Math.min(view[0] + 20, rx0 - dy * 0.25)); stage.style.setProperty('--rx', rx + 'deg'); stage.style.setProperty('--ry', ry + 'deg'); };
     const up = (ev) => {
       stage.removeEventListener('pointermove', move); stage.removeEventListener('pointerup', up); stage.removeEventListener('pointercancel', up);
       stage.classList.remove('is-drag');
-      if (!moved && o.onSash && hit) o.onSash(+hit.getAttribute('data-sash'));
+      if (!moved && o.onSash && (hit || glHit >= 0)) o.onSash(hit ? +hit.getAttribute('data-sash') : glHit);
     };
     stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
   });
@@ -3872,6 +3914,7 @@ function bindAfterRender() {
       stage.classList.add('no-anim'); w3dApply(stage, reg.w, openIdx >= 0 ? Object.assign({}, reg.o, { openSash: -1 }) : reg.o); void stage.offsetWidth; stage.classList.remove('no-anim');
       if (openIdx >= 0) requestAnimationFrame(() => { const r = W3DS[stage.id]; if (r && document.body.contains(stage)) w3dApply(stage, r.w, r.o); });
     }
+    if (window.Buehne3D) window.Buehne3D.an(stage);
     bindW3D(stage, () => { const r = W3DS[stage.id]; return r ? Object.assign({}, r.o, { onSash: r.o.selectable ? (i) => { if (S.screen === 'frage') onSashTap(i); else if (S.screen === 'tour') { S.selSash = i; S.openSash = i; render(); nachBild(() => { if (S.screen === 'tour') oeffnungZeigen(i); }, 60); } else { S.selSash = i; S.selBar = null; render(); } } : null }) : {}; });
   });
   document.querySelectorAll('.w3d-stage').forEach(bindRails);

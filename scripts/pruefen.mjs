@@ -32,6 +32,9 @@
 // Abschnitt 19 prüft die Fotos (functions/api/fotos.js): Ablage über den Kundenlink, beim Betrieb erst nach dem Senden und nicht
 // gesperrt, Löschfristen und Aufräumen, Fotos im Konto des Hauseigentümers; im Browser auf einem eigenen Testserver: Fotos überstehen
 // das Neuladen, Senden wartet auf sie, der Betriebsbereich zeigt sie (klein, groß, im PDF), ein zweites Gerät holt sie aus dem Konto.
+// Abschnitt 20 prüft die 3-D-Bühne in WebGL (web/assets/buehne.js, mit ?gl=voll auch ohne Grafikchip): keine Nahtlinien auf der Wand
+// aus allen Blickwinkeln, die Laibung nur in der Öffnung sichtbar (auch von oben und über Eck), Vorführung, Antippen eines Flügels,
+// ohne WebGL 2 und nach Verlust des Zusammenhangs das CSS-Modell, ohne Grafikchip das CSS-Modell, bei „weniger Bewegung“ kein Schwingen.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -3505,6 +3508,101 @@ if (teil(19)) {
     ok(geraeumt, 'Abmelden nimmt die Fotos, die im Konto liegen, auch vom Gerät');
     sauber(s3b, 'Konto mit Fotos ohne Fehler'); await c3.close();
   } finally { aus19(); }
+}
+
+/* ---------- 20. 3-D-Bühne in WebGL ---------- */
+if (teil(20)) {
+  console.log('20. 3-D-Bühne in WebGL');
+  const ctx20 = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, locale: 'de-DE' };
+  const frage20 = async (pg, id, set, art) => { await pg.evaluate(([id, set, art]) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set || {}); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}, art || '']); await pg.waitForTimeout(900); };
+  const c20 = await browser.newContext(ctx20), g = await neueSeite(c20);
+  await g.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await g.waitForTimeout(400);
+  await frage20(g, 'material');
+  const an = await g.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), cv: !!st.querySelector('canvas.w3d-gl'), flaeche: getComputedStyle(st.querySelector('[data-r="wall-in"]')).display, rollen: Buehne3D.pruef.rollen(st).length }; });
+  ok(an.gl && an.cv && an.flaeche === 'none' && an.rollen > 20, 'WebGL-Bühne: die Leinwand zeichnet das Modell, die Flächen bleiben unsichtbar als Beschreibung im DOM (' + an.rollen + ' Flächen)');
+  /* Nahtlinien: außerhalb der Öffnung (samt Fensterbank) ist nur Wand, ihr Helligkeitsverlauf hat keine Knicke */
+  const WINKEL = [[-9, -27], [-30, -74], [-30, 6], [10, -74], [10, 6], [-20, -50], [-28, 112], [-8, 152]];
+  const naht = await g.evaluate((winkel) => {
+    const st = document.getElementById('w3d'), out = [];
+    st.classList.add('is-drag');
+    for (const [rx, ry] of winkel) {
+      st.style.setProperty('--rx', rx + 'deg'); st.style.setProperty('--ry', ry + 'deg');
+      const P = Buehne3D.pruef.pixel(st), w = P.w, h = P.h, px = P.px, L = (x, y) => { const i = ((h - 1 - y) * w + x) * 4; return 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2]; };
+      const umr = Buehne3D.pruef.oeffnung(st, Math.cos(ry * Math.PI / 180) < 0).map((q) => [q[0] * P.k, q[1] * P.k]);
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; umr.forEach((q) => { x0 = Math.min(x0, q[0]); y0 = Math.min(y0, q[1]); x1 = Math.max(x1, q[0]); y1 = Math.max(y1, q[1]); });
+      const mx = (x1 - x0) * 0.18 + 6, mo = (y1 - y0) * 0.45 + 6, mu = (y1 - y0) * 0.3 + 6;
+      let n = 0;
+      for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+        if (x > x0 - mx && x < x1 + mx && y > y0 - mo && y < y1 + mu) continue;
+        const c = L(x, y);
+        if (Math.abs(2 * c - L(x - 1, y) - L(x + 1, y)) > 9 || Math.abs(2 * c - L(x, y - 1) - L(x, y + 1)) > 9) n++;
+      }
+      out.push(n);
+    }
+    st.classList.remove('is-drag');
+    return out;
+  }, WINKEL);
+  ok(naht.every((n) => n === 0), 'Keine Nahtlinien auf der Wand, auch nicht in Verlängerung der Laibung, aus ' + WINKEL.length + ' Blickwinkeln von innen und außen (auffällige Pixel: ' + naht.join(', ') + ')');
+  /* Laibung durch die Wand: mit und ohne Laibung gezeichnet, Unterschiede nur innerhalb der Öffnung */
+  const durch = await g.evaluate((winkel) => {
+    const st = document.getElementById('w3d'), out = [];
+    st.classList.add('is-drag');
+    const innen = (p, x, y) => { let c = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) { if ((p[i][1] > y) !== (p[j][1] > y) && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) c = !c; } return c; };
+    const nah = (p, x, y, d) => { for (let i = 0, j = p.length - 1; i < p.length; j = i++) { const ax = p[j][0], ay = p[j][1], bx = p[i][0], by = p[i][1], vx = bx - ax, vy = by - ay, t = Math.max(0, Math.min(1, ((x - ax) * vx + (y - ay) * vy) / (vx * vx + vy * vy || 1))); if (Math.hypot(ax + vx * t - x, ay + vy * t - y) < d) return true; } return false; };
+    for (const [rx, ry] of winkel) {
+      st.style.setProperty('--rx', rx + 'deg'); st.style.setProperty('--ry', ry + 'deg');
+      Buehne3D.pruef.ohne(null); const A = Buehne3D.pruef.pixel(st);
+      Buehne3D.pruef.ohne(/^(rev-|rs-)/); const B = Buehne3D.pruef.pixel(st); Buehne3D.pruef.ohne(null);
+      const umr = Buehne3D.pruef.oeffnung(st, Math.cos(ry * Math.PI / 180) < 0).map((q) => [q[0] * A.k, q[1] * A.k]);
+      let n = 0;
+      for (let y = 0; y < A.h; y++) for (let x = 0; x < A.w; x++) {
+        const i = ((A.h - 1 - y) * A.w + x) * 4;
+        if (Math.abs(A.px[i] - B.px[i]) + Math.abs(A.px[i + 1] - B.px[i + 1]) + Math.abs(A.px[i + 2] - B.px[i + 2]) < 24) continue;
+        if (innen(umr, x + 0.5, y + 0.5) || nah(umr, x + 0.5, y + 0.5, 2)) continue;
+        n++;
+      }
+      out.push(n);
+    }
+    st.classList.remove('is-drag');
+    return out;
+  }, [[-30, -74], [-30, -27], [-30, 6], [10, -74], [10, 6], [-28, 112]]);
+  ok(durch.every((n) => n === 0), 'Laibung nur in der Öffnung sichtbar: von oben, von unten und über Eck scheint sie nicht durch die Wand (Pixel außerhalb: ' + durch.join(', ') + ')');
+  /* Vorführung: der Flügel dreht sich auch in der WebGL-Bühne */
+  await frage20(g, 'typ-0', {}); await g.evaluate(() => { S.win.sashes[0].t = 'D'; DEMO_MS.D = 60000; render(true); }); await g.waitForTimeout(500);
+  await g.evaluate(() => oeffnungZeigen(0)); await g.waitForTimeout(1000);
+  const dreh = await g.evaluate(() => { const m = Buehne3D.pruef.matrix(document.getElementById('w3d'), 'sf-in-0'); return m ? Math.abs(m[2]) : 0; });
+  await g.evaluate(() => { DEMO_MS.D = 1600; });
+  ok(dreh > 0.3, 'Vorführung in der WebGL-Bühne: der Flügel schwingt auf (Drehung ' + Math.round(Math.asin(Math.min(1, dreh)) * 180 / Math.PI) + '°)');
+  /* Antippen: Flügel 2 trifft Flügel 2 */
+  await frage20(g, 'typ-0'); await g.waitForTimeout(400);
+  const pos = await g.evaluate(() => Buehne3D.pruef.fluegel(document.getElementById('w3d'), 1)), box = await (await g.$('#w3d')).boundingBox();
+  await g.mouse.click(box.x + pos[0], box.y + pos[1]); await g.waitForTimeout(600);
+  const sel = await g.evaluate(() => ({ s: S.selSash, q: S.q }));
+  ok(sel.s === 1 && sel.q === 'typ-1', 'Flügel antippen: die WebGL-Bühne trifft den angetippten Flügel und springt zu seiner Frage');
+  /* Verlust des WebGL-Zusammenhangs: zurück zum CSS-Modell, Kamera wieder per CSS */
+  const verlust = await g.evaluate(async () => { const st = document.getElementById('w3d'), cv = st.querySelector('canvas.w3d-gl'); cv.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext(); await new Promise((r) => setTimeout(r, 150)); return { gl: st.classList.contains('gl'), cam: st.querySelector('.w3d-cam').style.transform, flaeche: getComputedStyle(st.querySelector('[data-r="wall-in"]')).display }; });
+  ok(!verlust.gl && !verlust.cam && verlust.flaeche !== 'none', 'Verliert der Browser den WebGL-Zusammenhang, zeichnet sofort das CSS-Modell');
+  sauber(g, 'WebGL-Bühne ohne Fehler'); await c20.close();
+  /* ohne WebGL 2 */
+  const c20b = await browser.newContext(ctx20);
+  await c20b.addInitScript(() => { const o = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, a) { return t === 'webgl2' ? null : o.call(this, t, a); }; });
+  const g2 = await neueSeite(c20b); await g2.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await frage20(g2, 'material');
+  const ohne = await g2.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), cv: !!st.querySelector('canvas'), flaeche: getComputedStyle(st.querySelector('[data-r="wall-in"]')).display }; });
+  ok(!ohne.gl && !ohne.cv && ohne.flaeche !== 'none', 'Ohne WebGL 2 zeichnet das CSS-Modell wie bisher');
+  sauber(g2, 'Ohne WebGL 2 ohne Fehler'); await c20b.close();
+  /* ohne Grafikchip: CSS-Modell (ohne ?gl=voll); mit Grafikchip: WebGL */
+  const c20c = await browser.newContext(ctx20), g3 = await neueSeite(c20c);
+  await g3.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await frage20(g3, 'material');
+  const soft = await g3.evaluate(() => { const c = document.createElement('canvas').getContext('webgl2'); const x = c && c.getExtension('WEBGL_debug_renderer_info'); const r = c ? String(x ? c.getParameter(x.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER)) : ''; return { software: !c || /swiftshader|llvmpipe|softpipe|software|basic render/i.test(r), gl: document.getElementById('w3d').classList.contains('gl') }; });
+  ok(soft.gl === !soft.software, soft.software ? 'Ohne Grafikchip (Software-WebGL) bleibt das CSS-Modell, damit nichts ruckelt' : 'Mit Grafikchip zeichnet die WebGL-Bühne');
+  sauber(g3, 'Bühnenwahl ohne Fehler'); await c20c.close();
+  /* weniger Bewegung: kein Schwingen */
+  const c20d = await browser.newContext(Object.assign({ reducedMotion: 'reduce' }, ctx20)), g4 = await neueSeite(c20d);
+  await g4.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await frage20(g4, 'material');
+  const t1 = await g4.evaluate(() => document.querySelector('#w3d .w3d-sway').style.transform); await g4.waitForTimeout(700);
+  const t2 = await g4.evaluate(() => document.querySelector('#w3d .w3d-sway').style.transform);
+  ok(t1 === t2 && /rotateY\(0(\.0+)?deg\)/.test(t1), 'Weniger Bewegung: die WebGL-Bühne steht still (' + t1 + ')');
+  sauber(g4, 'Weniger Bewegung ohne Fehler'); await c20d.close();
 }
 
 await browser.close();
