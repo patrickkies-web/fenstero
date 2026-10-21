@@ -713,7 +713,17 @@ function formGeo(form, bx, by, bw, bh) {
 /* Rechteck (x, y, b, h) geschnitten mit einer Form: oben J Punkte (links nach rechts), unten J Punkte (zurück). x ist kosinusverteilt,
    so liegen die Punkte dort dicht, wo ein Bogen steil wird; beim Kreis ergibt das genau gleiche Winkelschritte. */
 function formSchnitt(g, x, y, b, h, J) {
-  const xa = Math.max(x, g.xl), xb = Math.min(x + b, g.xr), o = [], u = [];
+  let xa = Math.max(x, g.xl), xb = Math.min(x + b, g.xr);
+  /* die Punkte nur über die Breite verteilen, in der die Form das Rechteck wirklich schneidet (bei schmalen Streifen wie dem
+     Kämpfer eines Rundfensters sonst ein Keil zwischen Umriss und Rahmen) */
+  const drin = (xx) => g.top(xx) <= y + h + 1e-6 && g.bot(xx) >= y - 1e-6;
+  let mitte = null;
+  for (let k = 0; k <= 32 && mitte === null; k++) { const xx = xa + (xb - xa) * (k % 2 ? 16 - (k + 1) / 2 : 16 + k / 2) / 32; if (drin(xx)) mitte = xx; }
+  if (mitte !== null) {
+    if (!drin(xa)) { let a = xa, c = mitte; for (let i = 0; i < 40; i++) { const m = (a + c) / 2; if (drin(m)) c = m; else a = m; } xa = c; }
+    if (!drin(xb)) { let a = mitte, c = xb; for (let i = 0; i < 40; i++) { const m = (a + c) / 2; if (drin(m)) a = m; else c = m; } xb = a; }
+  }
+  const o = [], u = [];
   for (let j = 0; j < J; j++) {
     const xx = xa + (xb - xa) * (1 - Math.cos(Math.PI * j / (J - 1))) / 2, yt = Math.min(y + h, Math.max(y, g.top(xx))), yb = Math.max(yt, Math.min(y + h, g.bot(xx)));
     o.push([xx, yt]); u.unshift([xx, yb]);
@@ -935,12 +945,13 @@ const holzig = (c) => !!(c && /Holzdekor/.test(c.code || ''));
 const BANK_ART = { stein: 'granit', holz: 'holz', alu: 'alu' };
 const FASSADE_ART = { klinker: 'klinker', holz: 'holzfassade', wdvs: 'putzfein' };
 function w3dOberflaeche(stage, w, fin, fout) {
-  const setz = (r, k) => { const el = stage.querySelector('[data-r="' + r + '"]'); if (el) el._art = k; };
+  /* _sol: Vollfarbe für die Falzflächen, die buehne.js zwischen Vorder- und Rückseite eines Profils ergänzt */
+  const setz = (r, k, sol) => { const el = stage.querySelector('[data-r="' + r + '"]'); if (el) { el._art = k; if (sol) el._sol = sol; } };
   const hi = holzig(fin) ? 'holz' : '', ha = holzig(fout) ? 'holz' : '';
-  ['el-front', 'ol-front', 'kf', 'ul-front', 'kfu', 'el-side-t', 'el-side-b'].forEach((r) => setz(r, hi));
-  ['el-back', 'ol-back', 'kfb', 'ul-back', 'kfub', 'el-side-l', 'el-side-r', 'ul-pan-b'].forEach((r) => setz(r, ha));
+  ['el-front', 'ol-front', 'kf', 'ul-front', 'kfu', 'el-side-t', 'el-side-b'].forEach((r) => setz(r, hi, fin.solid));
+  ['el-back', 'ol-back', 'kfb', 'ul-back', 'kfub', 'el-side-l', 'el-side-r', 'ul-pan-b'].forEach((r) => setz(r, ha, fout.solid));
   setz('ul-glass', w.ul && w.ulA === 'paneel' ? hi : '');
-  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-'].forEach((r) => setz(r + i, hi)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-'].forEach((r) => setz(r + i, ha)); });
+  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-'].forEach((r) => setz(r + i, hi, fin.solid)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-'].forEach((r) => setz(r + i, ha, fout.solid)); });
   const bi = BANK_ART[w.fbi] || '', ba = w.fba === 'alu' ? 'alu' : '';
   ['sill-t', 'sill-f', 'sill-l', 'sill-r'].forEach((r) => setz(r, bi)); ['sa-t1', 'sa-t2', 'sa-f'].forEach((r) => setz(r, ba));
   setz('wall-out', FASSADE_ART[w.fassade] || 'putz');
@@ -1055,8 +1066,9 @@ function w3dLayout(stage, w, o, gr) {
       face(q('ol-glass'), iw - 2 * osf, olH - 2 * osf, ix + osf, iy + osf, z0 - fd / 2, '', '0 0');
     }
     /* Kämpfer: der Riegel zwischen Oberlicht und Flügeln (fehlte bisher, man sah durch einen Spalt) */
-    face(q('kf'), iw, mul, ix, iy + olH, z0, '', '0 0');
-    face(q('kfb'), iw, mul, ix, iy + olH, z0 - fd, 'rotateY(180deg)', '50% 50%');
+    const kc = G ? formSchnitt(gI, ix, iy + olH, iw, mul, 12) : null;
+    face(q('kf'), iw, mul, ix, iy + olH, z0, '', '0 0', kc ? polyClip(kc, ix, iy + olH, iw, mul) : null);
+    face(q('kfb'), iw, mul, ix, iy + olH, z0 - fd, 'rotateY(180deg)', '50% 50%', kc ? polyClip(kc, ix, iy + olH, iw, mul, iw) : null);
   }
   /* Unterlicht unter den Flügeln: Kämpfer, dann das feste Feld mit Glasleiste oder als Paneel */
   const ulH = V.ulH * s;
@@ -1508,7 +1520,7 @@ function render(fresh) {
   /* Gleiche Modellstruktur wie zuvor: die alte Bühne bleibt, alles Weitere morpht mit Übergängen */
   const ph = root.querySelector('#w3d');
   if (ph && prevStage && prevSig && ph.getAttribute('data-sig') === prevSig && ph.getAttribute('data-keep') !== '0') { prevStage.className = ph.className; prevStage.style.height = ph.style.height; ph.replaceWith(prevStage); prevStage.setAttribute('data-reused', '1'); }
-  else { if (prevStage) prevStage.removeAttribute('data-reused'); if (ph && !ph.firstChild && W3DS.w3d) ph.outerHTML = w3dHTML(W3DS.w3d.w, W3DS.w3d.o); }
+  else { if (prevStage) { prevStage.removeAttribute('data-reused'); prevStage._abgang = performance.now(); } if (ph && !ph.firstChild && W3DS.w3d) ph.outerHTML = w3dHTML(W3DS.w3d.w, W3DS.w3d.o); }
   const sc = root.querySelector('.scroll'), neu = fresh || lastScreen !== S.screen;
   if (neu) { if (sc) sc.scrollTop = 0; } else if (sc) sc.scrollTop = keep;
   if (!neu) { const scr = root.querySelector('.scr'); if (scr) scr.style.animation = 'none'; }

@@ -387,6 +387,9 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-stage.gl .w3d-handle, .w3d-stage.gl .w3d-griffa { visibility: hidden }
 .w3d-stage.gl .w3d-cam { transition: none }
 .w3d-stage.gl .w3d-sway { animation: none !important }
+/* neues Modell verwandelt sich aus dem alten (buehne.js erben): Maßlinien erst danach einblenden */
+.w3d-stage.gl .w3d-dim { transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s, opacity .3s var(--e-out) }
+.w3d-stage.gl.gl-erbe .w3d-dim { opacity: 0; transition: none }
 .drag-ghost { position: fixed; z-index: 90; pointer-events: none; border-radius: 4px; background: var(--accent); box-shadow: var(--lift) }
 .btn, .chip, .opt > button, .pill, .swatch { transition: transform var(--t1) var(--e-out), background var(--t2), border-color var(--t2), box-shadow var(--t2), color var(--t2) }
 .tick { stroke-dasharray: 60; stroke-dashoffset: 60; animation: fx-haken .5s var(--e-out) .15s forwards }

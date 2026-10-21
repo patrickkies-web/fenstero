@@ -3571,10 +3571,9 @@ if (teil(20)) {
   /* Vorführung: der Flügel dreht sich auch in der WebGL-Bühne */
   await frage20(g, 'typ-0', {}); await g.evaluate(() => { S.win.sashes[0].t = 'D'; DEMO_MS.D = 60000; render(true); }); await g.waitForTimeout(500);
   await g.evaluate(() => oeffnungZeigen(0));
-  /* ohne Grafikchip dauert ein Bild Sekunden: warten, bis die Vorführung wirklich läuft */
-  await g.waitForFunction(() => { const a = document.querySelector('#w3d [data-r="sash-0"]').getAnimations()[0]; return a && a.currentTime > 500; }, null, { timeout: 30000 }).catch(() => {});
-  /* sofort zeichnen (liest den Stand der Vorführung), auch wenn Bilder ohne Grafikchip lange dauern */
-  const dreh = await g.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const m = Buehne3D.pruef.matrix(st, 'sf-in-0'); return m ? Math.abs(m[2]) : 0; });
+  /* ohne Grafikchip dauert ein Bild Sekunden: die Vorführung bei 0,8 s (Flügel offen) anhalten, dann sofort zeichnen */
+  await g.waitForFunction(() => { const a = document.querySelector('#w3d [data-r="sash-0"]').getAnimations()[0]; if (!a) return false; a.pause(); a.currentTime = 800; return true; }, null, { timeout: 30000 }).catch(() => {});
+  const dreh = await g.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const m = Buehne3D.pruef.matrix(st, 'sf-in-0'); const a = document.querySelector('#w3d [data-r="sash-0"]').getAnimations()[0]; if (a) a.play(); return m ? Math.abs(m[2]) : 0; });
   await g.evaluate(() => { DEMO_MS.D = 1600; });
   ok(dreh > 0.3, 'Vorführung in der WebGL-Bühne: der Flügel schwingt auf (Drehung ' + Math.round(Math.asin(Math.min(1, dreh)) * 180 / Math.PI) + '°)');
   /* Antippen: Flügel 2 trifft Flügel 2 */
