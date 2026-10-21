@@ -2,8 +2,9 @@
 
 Die Website zeigt an festen Plätzen Fotos in der Bildsprache der Instagram-Beiträge: **ein Tier oder ein Astronaut tut etwas
 Menschliches rund ums Fenster**, fotorealistisch, in einem warmen, modernen Wohnraum mit großem Fenster, Licht wie am späten
-Nachmittag. Das Bild erzählt die Aussage der Seite (messen, wählen, vergleichen), der Text daneben bleibt sachlich. Jedes Foto
-liegt in einer Karte mit Rand, unten eine Reihe Haken-Chips; es liegt nie vollflächig hinter Text (docs/GESTALTUNG.md).
+Nachmittag. Das Bild erzählt die Aussage der Seite (messen, wählen, vergleichen), der Text daneben bleibt sachlich. Die beiden
+Startbilder der Startseite laufen wie in den Beiträgen randlos in den dunklen Grund aus; alle anderen Fotos liegen in einer Karte
+mit Rand. Unten jeweils eine Reihe Haken-Chips; Fließtext steht nie auf dem sichtbaren Teil eines Fotos (docs/GESTALTUNG.md).
 
 ## So kommen die Fotos auf die Seite
 
@@ -14,16 +15,20 @@ liegt in einer Karte mit Rand, unten eine Reihe Haken-Chips; es liegt nie vollfl
 3. `python3 scripts/fotos.py` erzeugt `web/bilder/foto/<name>.webp` in der richtigen Größe (WebP, Qualität 82, etwa 100 bis 250 KB).
 4. Einchecken und veröffentlichen. Die Seiten verweisen schon auf die Dateien; bis dahin steht dort ein Platzhalter („Foto folgt“).
 
+Für die beiden Startbilder der Startseite gilt: Das Foto wird nicht in eine Karte gesetzt, sondern per CSS beschnitten und an den
+Rändern ausgeblendet. Das Motiv steht darum am besten in der Mitte oder rechts davon, links und unten darf Raum sein, der im
+Dunkel verschwindet; wichtige Dinge (Gesicht, Werkzeug, Fenster) nicht an den Rand.
+
 Die drei Motive aus den Beiträgen können direkt wiederverwendet werden: der Waschbär auf dem Sofa (Beitrag „Wünsche antippen.“)
-→ `app-start`, der Astronaut („Aufmaß in 384.400 km.“) → `start-fensterbauer`, der Oktopus mit Kaffee an der Hebe-Schiebe-Tür
+→ `app-start`, der Astronaut („Aufmaß in 384.400 km.“) → `fuer-fensterbauer` oder `fehler`, der Oktopus mit Kaffee an der Hebe-Schiebe-Tür
 („Auch ganz groß.“) → `gross`, der Oktopus mit Farbfächer (Reel „Acht Arme. Kein Plan.“) → `weg-auswaehlen`.
 
 ## Die Plätze
 
 | Name | Format | Wo | Chips auf dem Foto | Priorität |
 |---|---|---|---|---|
-| `start-hauseigentuemer` | 1200 × 1500 | Startseite, Ansicht Hauseigentümer, Startbild neben der Überschrift (Telefon: unter den Knöpfen) | Maße · Öffnungsart · Farbe · Glas | 1 |
-| `start-fensterbauer` | 1200 × 1500 | Startseite, Ansicht Fensterbauer, Startbild | Maße · Fotos · Öffnungsarten · Positionen | 1 |
+| `start-hauseigentuemer` | 1250 × 1250 | Startseite, Ansicht Hauseigentümer, randlos rechts hinter dem Text (Telefon: randlos ganz oben). **Da:** Waschbär auf dem Tritt an der Maueröffnung | Maße · Öffnungsart · Farbe · Glas | 1 |
+| `start-fensterbauer` | 1120 × 1400 | Startseite, Ansicht Fensterbauer, randlos wie oben. **Da:** Bär in der Werkstatt mit Tablet | Maße · Fotos · Öffnungsarten · Positionen | 1 |
 | `app-start` | 1200 × 1500 | App, Startbild vor dem ersten Fenster | Fotografieren · Messen · Wünschen | 1 |
 | `gross` | 1200 × 1500 | Startseite Hauseigentümer, Abschnitt „Auch ganz groß.“ | Elementarten | 1 |
 | `fuer-fensterbauer` | 1200 × 1500 | Seite /fuer-fensterbauer/, oben | Maße · Fotos · Positionen · Bestellmaß | 1 |
