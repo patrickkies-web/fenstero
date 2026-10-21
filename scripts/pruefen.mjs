@@ -35,6 +35,8 @@
 // Abschnitt 20 prüft die 3-D-Bühne in WebGL (web/assets/buehne.js, mit ?gl=voll auch ohne Grafikchip): keine Nahtlinien auf der Wand
 // aus allen Blickwinkeln, die Laibung nur in der Öffnung sichtbar (auch von oben und über Eck), Vorführung, Antippen eines Flügels,
 // ohne WebGL 2 und nach Verlust des Zusammenhangs das CSS-Modell, ohne Grafikchip das CSS-Modell, bei „weniger Bewegung“ kein Schwingen.
+// Abschnitt 21 prüft die Detailtiefe (docs/GESTALTUNG.md): drei Tiefen mit wachsender Fragenzahl, Kapitel und „Mehr zu …“, Standard des
+// Fensterbauers ohne Klärung und ohne Zeile, Detailangaben im Code, Aufmaßblatt und Modell, RC2N/RC3, neue Formen und Bauarten im 3-D-Modell.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -3606,6 +3608,78 @@ if (teil(20)) {
   const t2 = await g4.evaluate(() => document.querySelector('#w3d .w3d-sway').style.transform);
   ok(t1 === t2 && /rotateY\(0(\.0+)?deg\)/.test(t1), 'Weniger Bewegung: die WebGL-Bühne steht still (' + t1 + ')');
   sauber(g4, 'Weniger Bewegung ohne Fehler'); await c20d.close();
+}
+
+if (teil(21)) {
+  console.log('21. Detailtiefe: Tiefen, Kapitel, Standard des Fensterbauers, Detailangaben, neue Bauarten im Modell');
+  const M21 = createRequire(import.meta.url)('../web/assets/modell.js'), AW21 = M21.AW;
+  /* a) Modell: Register, Standard ohne Zeile und ohne Klärung, Geltung, RC-Stufen */
+  const leer21 = AW21.mk({ name: 'Küche', etage: 'eg', bru: 900 });
+  ok(AW21.DETAIL.length >= 40 && AW21.DETAIL.every((d) => d.mm || (AW21.OPT[d.g || d.k] && Object.keys(AW21.OPT[d.g || d.k]).length)) && AW21.DETAIL.every((d) => leer21[d.k] === undefined), 'Register: ' + AW21.DETAIL.length + ' Detailangaben, jede mit Texten im Modell und ohne Vorgabe im Fenster (alte Codes bleiben gleich)');
+  ok(AW21.detailRows(leer21).length === 0 && !AW21.klaerung([leer21], {}).some((r) => /Gitter|Dichtung|Profil|Abstandhalter/.test(r.v)), 'Standard des Fensterbauers: ohne Angabe keine Zeile im Blatt und kein Eintrag in der Klärungsliste');
+  const voll21 = AW21.mk({ gitter: 'stab', leiste: 'beide', profil: 'softline', dicht: 'grau', fbaUeber: '40', sart: 'raffstore', roll: 'vorbau', lamelle: 'z90', panzer: 'alu' });
+  const zeilen21 = AW21.detailRows(voll21).map((r) => r[0] + ': ' + r[1]).join('\n');
+  ok(/Fenstergitter: /.test(zeilen21) && /Abdeckleisten: /.test(zeilen21) && /Profilform: /.test(zeilen21) && /Dichtung: /.test(zeilen21) && /Lamellen: /.test(zeilen21) && !/Rollladenpanzer/.test(zeilen21), 'Detailangaben stehen als eigene Zeilen, nur wo sie gelten (Lamellen beim Raffstore, kein Rollladenpanzer)');
+  ok(AW21.rows(voll21).findIndex((r) => r[0] === 'Fenstergitter') >= 0 && AW21.rows(voll21).findIndex((r) => r[0] === 'Fenstergitter') < AW21.rows(voll21).findIndex((r) => r[0] === 'Montage'), 'Detailzeilen stehen im Aufmaß vor der Montage');
+  ok(!AW21.detailGilt(AW21.mk({ sart: 'rollladen', roll: 'aufsatz' }), 'lamelle') && AW21.detailGilt(AW21.mk({ art: 'balkon' }), 'paneel') && !AW21.detailGilt(AW21.mk({}), 'paneel') && AW21.detailGilt(AW21.mk({ art: 'hst' }), 'hstEck') && !AW21.detailGilt(AW21.mk({ form: 'rund' }), 'seiten'), 'Geltung: Lamellen nur beim Raffstore, Paneel nur an der Balkontür, Ecklösung nur bei der Hebe-Schiebe-Tür, Seitenteile nur bei Rechtecken');
+  ok(AW21.rcAb({ rc: 'rc3' }, 'rc2') && AW21.rcAb({ rc: 'rc2' }, 'rc2n') && !AW21.rcAb({ rc: 'rc2n' }, 'rc2') && AW21.rcAb({ rc: 'rc2n' }, 'rc1') && !AW21.rcAb({}, 'rc1') && AW21.uwZiel(AW21.mk({ rc: 'rc3' }), { foerdweg: 'bafa' }).wert === 1.1, 'RC-Stufen der Reihe nach (Basis, RC1, RC2N, RC2, RC3), RC3 zählt wie RC2 beim Förderziel');
+
+  /* b) App: Register gleich, Fragenzahl je Tiefe, Kapitel, „Mehr zu …“, Code */
+  const ctx21 = await browser.newContext(telefon), a21 = await neueSeite(ctx21);
+  await a21.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' });
+  const zahl21 = await a21.evaluate(() => {
+    const w = demoProject()[0], n = {}; S.win = w;
+    const fehlt = AW.DETAIL.filter((d) => !DETAIL_UI[d.k] || (!d.mm && !(OPT[d.g || d.k] || []).length)).map((d) => d.k);
+    ['kurz', 'normal', 'genau'].forEach((t) => { S.proj.tiefe = t; n[t] = qSichtbar(w).length; });
+    S.proj.tiefe = 'kurz'; const vorher = qSichtbar(w).length; MEHR.set(w, { material: true }); const mehr = qSichtbar(w).filter((q) => q.kap === 'material').length, ohne = qList(w).filter((q) => q.kap === 'material').length; MEHR.delete(w);
+    delete S.proj.tiefe; const ids = qSichtbar(w).map((q) => q.id), alle = qList(w).map((q) => q.id);
+    S.proj.tiefe = 'genau'; const genau = qSichtbar(w).map((q) => q.id);
+    return { fehlt: fehlt, n: n, vorher: vorher, mehr: mehr, ohne: ohne, tiefeNach: ids.indexOf('tiefe') > 0 && ids.slice(0, ids.indexOf('tiefe')).every((id) => ['lage', 'absturz', 'design'].indexOf(id) >= 0) && qSichtbar(w)[ids.indexOf('tiefe') + 1].kap === 'aufbau', kapitel: Array.from(new Set(qList(w).map((q) => q.kap))).join(','), gitter: genau.indexOf('gitter') >= 0, alleDetails: AW.DETAIL.filter((d) => AW.detailGilt(w, d.k)).every((d) => alle.indexOf(d.k) >= 0) };
+  });
+  ok(zahl21.fehlt.length === 0, 'App und Modell haben dieselben Detailangaben, jede mit Frage und Auswahl' + (zahl21.fehlt.length ? ' (fehlt: ' + zahl21.fehlt.join(', ') + ')' : ''));
+  ok(zahl21.n.kurz < zahl21.n.normal && zahl21.n.normal < zahl21.n.genau && zahl21.n.kurz <= 20, 'Drei Tiefen: „Das Wichtigste“ ' + zahl21.n.kurz + ', „Die üblichen Wünsche“ ' + zahl21.n.normal + ', „Alles im Detail“ ' + zahl21.n.genau + ' Fragen');
+  ok(zahl21.tiefeNach && zahl21.kapitel === 'vorweg,aufbau,material,glas,bedienung,sonne,bank', 'Die Frage nach der Tiefe kommt nach Lage und Gestaltung; Kapitel in fester Reihenfolge (' + zahl21.kapitel + ')');
+  ok(zahl21.mehr === zahl21.ohne && zahl21.mehr > 3, '„Mehr zu Material & Farbe“ zeigt bei „Das Wichtigste“ alle Fragen des Kapitels (' + zahl21.mehr + ')');
+  ok(zahl21.gitter && zahl21.alleDetails, 'Bei „Alles im Detail“ kommen die neuen Angaben (z. B. Fenstergitter); jede geltende Detailangabe hat ihre Frage');
+  /* Tiefe wählen per Antippen, Pille im Kopf führt zurück */
+  await a21.evaluate(() => { const w = demoProject()[0]; S.win = w; delete S.proj.tiefe; S.q = 'tiefe'; S.screen = 'frage'; render(true); }); await a21.waitForTimeout(300);
+  const tw = await a21.evaluate(() => Array.from(document.querySelectorAll('[data-act="tiefe"]')).map((b) => b.getAttribute('data-v')).join(','));
+  await a21.click('[data-act="tiefe"][data-v="kurz"]'); await a21.waitForTimeout(300);
+  const tk = await a21.evaluate(() => ({ t: S.proj.tiefe, pille: !!document.querySelector('.qtiefe') }));
+  ok(tw === 'kurz,normal,genau' && tk.t === 'kurz', 'Tiefe wählen: drei Karten, „Das Wichtigste“ setzt die Tiefe (' + tw + ')');
+  /* Standard des Fensterbauers in der Frage, Wahl und Zurücknehmen */
+  await a21.evaluate(() => { S.proj.tiefe = 'genau'; S.q = 'gitter'; render(true); }); await a21.waitForTimeout(300);
+  const st21 = await a21.evaluate(() => ({ std: !!document.querySelector('.qstd'), wahl: Array.from(document.querySelectorAll('[data-act="detail"]')).map((b) => b.getAttribute('data-v')).join(',') }));
+  await a21.click('[data-act="detail"][data-v="stab"]'); await a21.waitForTimeout(400);
+  const gz = await a21.evaluate(() => ({ v: S.win.gitter, flaeche: !!document.querySelector('#w3d [data-r="gitter"]'), zeile: specRows(S.win).some((r) => r.k === 'Fenstergitter') }));
+  await a21.click('[data-act="detail"][data-v=""]'); await a21.waitForTimeout(300);
+  const gw = await a21.evaluate(() => ({ da: 'gitter' in S.win, flaeche: !!document.querySelector('#w3d [data-r="gitter"]') }));
+  ok(st21.wahl.indexOf('stab') >= 0 && gz.v === 'stab' && gz.flaeche && gz.zeile && !gw.da && !gw.flaeche, 'Fenstergitter: Wahl steht im Modell und in der Liste, „Ohne“ nimmt die Angabe ganz zurück');
+  /* Code: Detailangaben reisen mit, Fenster ohne Angaben bleiben schlank */
+  const code21 = await a21.evaluate(() => {
+    const a = Object.assign(demoProject()[0], { gitter: 'zier', profil: 'stil', fbaTiefe: 180, sensor: ['sonne', 'wind'], sart: 'raffstore', roll: 'vorbau', antrieb: 'motor' }), b = demoProject()[0];
+    const code = packProject([a, b], { tiefe: 'genau' }), o = unpackProject(code), roh = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(code.slice(4).replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((code.length - 4 + 3) % 4)), (c) => c.charCodeAt(0))));
+    return { a: [o.w[0].gitter, o.w[0].profil, o.w[0].fbaTiefe, (o.w[0].sensor || []).join('+')].join('|'), b: AW.DETAIL.filter((d) => d.k in roh.w[1]).map((d) => d.k), tiefe: o.p.tiefe };
+  });
+  ok(code21.a === 'zier|stil|180|sonne+wind' && code21.b.length === 0 && code21.tiefe === 'genau', 'Code: Detailangaben und Tiefe kommen beim Fensterbauer an, Fenster ohne Angaben tragen keine (' + code21.a + ')');
+  /* c) 3-D: neue Bauarten und Teile haben Flächen mit Maß */
+  const teile21 = await a21.evaluate(async () => {
+    const warte = (ms) => new Promise((f) => setTimeout(f, ms)), out = {};
+    const zeige = async (set, art, rollen, psk) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set); if (psk) { w.psk.schema = psk; w.sashes = pskFluegel(psk, w.psk.richtung); } S.win = w; S.q = 'griff'; S.screen = 'frage'; render(true); await warte(250); const st = document.getElementById('w3d'); return rollen.map((r) => { const el = st.querySelector('[data-r="' + r + '"]'); return r + ':' + (el && ((el._f && el._f.W > 0.5 && el._f.H > 0.5) || (el._s && el._s.w > 0.5 && el._s.h > 0.5)) ? 1 : 0); }).join(' '); };
+    out.fenster = await zeige({ leiste: 'beide', oeffner: 'kette', luefter: 'schall', baender: 'sichtbar', gitter: 'stab', fba: 'alu', fbaKappe: 'kunststoff' }, '', ['li-t', 'la-l', 'oeff', 'luef', 'bd-o-0', 'gitter', 'sa-l', 'sa-r']);
+    out.sonne = await zeige({ sart: 'raffstore', roll: 'vorbau', antrieb: 'solar' }, '', ['schiene-l', 'schiene-r', 'solar', 'behang']);
+    out.klapp = await zeige({ sart: 'klappladen', roll: 'keiner' }, '', ['kl-l', 'kl-r']);
+    out.balkon = await zeige({ etage: 'og', absturz: 'gelaender', paneel: 'paneel' }, 'balkon', ['gel', 'gel-h', 'pan-i-0', 'riegel-i-0']);
+    out.psk = await zeige({}, 'psk', ['sash-3'], 'C');
+    out.form = await zeige({ form: 'dreieck' }, '', ['rs-0', 'el-front']);
+    out.pskT = S.win.sashes.map((x) => x.t).join();
+    return out;
+  });
+  const alle21 = Object.keys(teile21).filter((k) => k !== 'pskT').map((k) => teile21[k]).join(' ');
+  ok(!/:0/.test(alle21), '3-D: Abdeckleisten, Fensteröffner, Lüfter, Bänder, Gitter, Endkappen, Schienen, Solarmodul, Klappläden, Geländer, Paneel, PSK mit 4 Teilen und Dreieck haben Flächen' + (/:0/.test(alle21) ? ' (' + alle21 + ')' : ''));
+  const kvd21 = await a21.evaluate(async () => { const w = demoProject()[0]; w.kvd = 'kvd'; S.win = w; S.q = 'griff'; render(true); await new Promise((f) => setTimeout(f, 300)); const i = w.sashes.findIndex((x) => x.t === 'DK'); oeffnungZeigen(i); await new Promise((f) => setTimeout(f, 80)); const sa = document.querySelector('#w3d [data-r="sash-' + i + '"]'); return sa.querySelector('.w3d-handle').getAnimations().map((a) => a.animationName).join(); });
+  ok(kvd21 === 'w3d-griff-kvd', 'Kipp vor Dreh: die Vorführung dreht den Griff erst waagerecht (kippen), dann nach oben (drehen)');
+  sauber(a21, 'Detailtiefe ohne Fehler'); await ctx21.close();
 }
 
 await browser.close();

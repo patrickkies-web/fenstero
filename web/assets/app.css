@@ -317,9 +317,12 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-sash.demo-D .w3d-handle { animation: w3d-griff-d 1.6s var(--e-io) both }
 .w3d-sash.demo-DK .w3d-handle { animation: w3d-griff-dk 2.7s var(--e-io) both }
 .w3d-sash.demo-K .w3d-handle { animation: w3d-griff-k 1.4s var(--e-io) both }
+/* Kipp vor Dreh: die erste Griffstellung (waagerecht) kippt, erst die zweite (nach oben) dreht */
+.w3d-sash.demo-DK.is-kvd .w3d-handle { animation-name: w3d-griff-kvd }
 @keyframes w3d-griff-d { 0% { transform: none } 6%, 90% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
 @keyframes w3d-griff-dk { 0% { transform: none } 4%, 42% { transform: rotate(calc(var(--hsgn, 1) * 180deg)) } 48%, 94% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 100% { transform: none } }
 @keyframes w3d-griff-k { 0% { transform: none } 6%, 90% { transform: rotate(90deg) } 100% { transform: none } }
+@keyframes w3d-griff-kvd { 0% { transform: none } 4%, 42% { transform: rotate(calc(var(--hsgn, 1) * 90deg)) } 48%, 94% { transform: rotate(calc(var(--hsgn, 1) * 180deg)) } 100% { transform: none } }
 .w3d-glass::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 26%, rgba(255, 255, 255, .55) 38%, #fff 46%, rgba(255, 255, 255, .7) 52%, transparent 66%) no-repeat; background-size: 260% 100%; background-position: 130% 0 }
 .w3d-sash.demo-F .w3d-glass::after { animation: w3d-glanz 1s var(--e-out) both }
 @keyframes w3d-glanz { 0% { opacity: 0; background-position: 130% 0 } 12%, 82% { opacity: .95 } 100% { opacity: 0; background-position: -30% 0 } }
@@ -348,6 +351,8 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Eine Bewegung zur Zeit: solange vorgeführt oder verwandelt wird, steht das sanfte Schwingen still */
 .w3d-stage.is-busy .w3d-sway, .w3d-stage.is-vorf .w3d-sway, .w3d-stage.is-demo .w3d-sway { animation-play-state: paused }
 .w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
+.w3d-band { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-leiste { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) } .w3d-schiene { border-radius: 1px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) }
+.w3d-solar, .w3d-klappladen { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3) } .w3d-sicht-u { opacity: .9 }
 .w3d-mesh { background: repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1.5px #55585c }
 .w3d-dim { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s; pointer-events: none }
 .w3d-dim.mo { --dc: color-mix(in srgb, var(--mo) 62%, #fff) } .w3d-dim.el { --dc: color-mix(in srgb, var(--el) 62%, #fff) }
@@ -558,6 +563,23 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qoffen[aria-pressed="true"] { border-style: solid; border-color: var(--ink); background: var(--surface) }
 .qoffen[aria-pressed="true"] .mark { background: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink) } .qoffen[aria-pressed="true"] .mark svg { opacity: 1 }
 .qoffen:active { background: var(--surface2) }
+/* Detailtiefe: oben die Tiefe als kleiner Knopf (Ziel 44 px, sichtbar eine Pille in der Zeile der Frage), die Wahl als drei Zeilen,
+   am Ende eines Kapitels „Mehr zu …“ für das, was bei dieser Tiefe nicht gefragt wird */
+.qkopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0 }
+.qkopf .eyebrow { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.qtiefe { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 44px; margin: -14px -6px -14px 0; padding: 0 6px; border: 0; background: none; font: inherit; color: var(--ink2) }
+.qtiefe span { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 10px; border-radius: 12px; background: var(--seg); font-size: 13px; font-weight: 700; line-height: 1 }
+.qtiefe:active span { background: var(--surface2) }
+.qtiefen > button { min-height: 64px; padding-top: 8px; padding-bottom: 8px }
+.qtiefen .tx { flex-direction: column; align-items: flex-start !important; gap: 2px }
+.qtiefen .tx b { font-size: 15px; line-height: 1.25 } .qtiefen .tx small { font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--muted) }
+.qmehr { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 4px 12px 4px 16px; border: 0; border-radius: var(--r3); background: var(--seg); font: inherit; color: var(--ink); text-align: left }
+.qmehr .tx { display: flex; flex-direction: column; min-width: 0 } .qmehr b { font-size: 15px; font-weight: 700; line-height: 1.25 } .qmehr small { font-size: 13px; line-height: 1.25; color: var(--muted) }
+.qmehr .plus { width: 24px; height: 24px; flex: 0 0 auto; border-radius: 50%; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; line-height: 1 }
+.qmehr:active { background: var(--surface2) }
+.kap-sprung { display: flex; flex-direction: column; gap: 6px }
+.kap-chips { display: flex; flex-wrap: wrap; gap: 8px }
+.kap-chips .chip { flex: 0 0 auto }
 .qlabel { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .02em }
 /* Zeilen im Dock: Schalter, Textfelder und Zahlen enger als in Formularen, Ziele bleiben 44 px */
 .qpanel .rows { margin: 0 }
