@@ -10,6 +10,7 @@ img { max-width: 100% }
 .scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-top: 56px; padding-bottom: 120px }
 .scr { padding-inline: 16px; display: flex; flex-direction: column; gap: 20px; animation: scr-in var(--t3) var(--e-out) both }
 .scr.is-back { animation-name: scr-in-back }
+.scr.mit-buehne > :not(.w3d-stage) { animation: scr-in var(--t3) var(--e-out) both } .scr.mit-buehne.is-back > :not(.w3d-stage) { animation-name: scr-in-back }
 @keyframes scr-in { from { opacity: 0; transform: translateX(20px) } to { opacity: 1; transform: none } }
 @keyframes scr-in-back { from { opacity: 0; transform: translateX(-20px) } to { opacity: 1; transform: none } }
 
@@ -792,7 +793,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .ts-ziele .av { flex: 0 0 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 800 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scr, .result .v, .sheet, .sheet-bg, .toast, .level .bubble span, .w3d-sway, .w3d-dim-line, .w3d-dim-lab, .tick, .w3d-bg { animation: none !important; opacity: 1; stroke-dashoffset: 0 }
+  .scr, .scr.mit-buehne > *, .result .v, .sheet, .sheet-bg, .toast, .level .bubble span, .w3d-sway, .w3d-dim-line, .w3d-dim-lab, .tick, .w3d-bg { animation: none !important; opacity: 1; stroke-dashoffset: 0 }
   .w3d-f, .w3d-sash, .w3d-cam, .w3d-dim, .w3d-handle, .w3d-el, .w3d-bar, .w3d-dim-line, .w3d-dim-lab { transition: none !important }
   .w3d-sash, .w3d-sash .w3d-handle, .w3d-glass::after { animation: none !important }
   .w3d-dim.is-drawing .w3d-dim-line, .w3d-dim.is-drawing .w3d-dim-lab, .w3d-dim.is-drawing .w3d-dim-cap { animation: none !important }

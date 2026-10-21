@@ -277,15 +277,32 @@ window.Buehne3D = (function () {
   const BUEHNEN = new Set();
   let raf = 0;
   function anstoss(stage) { if (stage && stage._b3) stage._b3.neu = true; if (!raf) raf = requestAnimationFrame(bild); }
+  /* Neue Bühne an der Stelle einer alten (andere Struktur, z. B. zwei statt drei Flügel): Leinwand, Kamera, Schwingen und der
+     Stand jeder Fläche gehen über, so verwandelt sich das Modell, statt neu aufzutauchen; neue Flächen blenden ein */
+  function erben(alt, stage, B) {
+    const A = alt._b3, now = performance.now(), karte = new Map();
+    alt.querySelectorAll('[data-r]').forEach((e) => karte.set(e.getAttribute('data-r'), e));
+    B.cam = A.cam; B.schwing = A.schwing; B.zuletzt = A.zuletzt; B.stufe = A.stufe;
+    stage.querySelectorAll('.w3d-world [data-r]').forEach((e) => {
+      const o = karte.get(e.getAttribute('data-r'));
+      if (!o) { if (!e.closest('.w3d-dim')) e._wop = { ziel: 0, von: 0, jetzt: 0, t0: now }; return; }
+      Object.keys(o).forEach((k) => { if ((k.indexOf('_t') === 0 || k.indexOf('_w') === 0) && o[k] && typeof o[k] === 'object' && 'jetzt' in o[k]) e[k] = Object.assign({}, o[k], { erbe: true }); });
+    });
+  }
   function an(stage) {
     if (!stage || !unterstuetzt()) return false;
-    BUEHNEN.forEach((st) => { if (!st.isConnected) freigeben(st); });
+    let alt = null;
+    BUEHNEN.forEach((st) => { if (!st.isConnected && st.id === stage.id && st !== stage && st._b3 && !st._b3.aus && !st._b3.L.verloren) alt = st; });
+    BUEHNEN.forEach((st) => { if (!st.isConnected && st !== alt) freigeben(st); });
     let B = stage._b3;
     if (B && B.aus) { zumCss(stage); return false; }
     if (!B) {
-      const L = POOL.pop() || neueLeinwand();
+      let L = null;
+      if (alt) { L = alt._b3.L; }
+      L = L || POOL.pop() || neueLeinwand();
       if (!L) return false;
       B = stage._b3 = { L: L, neu: true, cam: null, stufe: 0, schwing: { t: 0, a: 0, b: 0, k: 0 }, sicht: true, zuletzt: 0, picks: [], items: null };
+      if (alt) { erben(alt, stage, B); const A = alt._b3; BUEHNEN.delete(alt); if (A.mo) A.mo.disconnect(); if (A.io) A.io.disconnect(); alt._b3 = null; }
       stage.insertBefore(L.cv, stage.querySelector('.w3d-cam'));
       stage.classList.add('gl');
       BUEHNEN.add(stage);
@@ -350,7 +367,7 @@ window.Buehne3D = (function () {
     const k = '_t' + feld;
     let s = el[k];
     if (!s) { el[k] = { ziel: ziel, von: null, jetzt: ziel, t0: now }; return ziel; }
-    if (s.ziel !== ziel) { s.von = (ziel && ziel.n) || B.sofort ? null : s.jetzt; s.ziel = ziel; s.t0 = now; }
+    if (s.ziel !== ziel) { s.von = !s.erbe && ((ziel && ziel.n) || B.sofort) ? null : s.jetzt; s.ziel = ziel; s.t0 = now; s.erbe = false; }
     if (!s.von || !ziel) { s.jetzt = ziel; return ziel; }
     const f = (now - s.t0) / dauer;
     if (f >= 1) { s.von = null; s.jetzt = ziel; return ziel; }
@@ -363,7 +380,7 @@ window.Buehne3D = (function () {
     const k = '_w' + feld;
     let s = el[k];
     if (!s) { el[k] = { ziel: ziel, von: ziel, t0: now, jetzt: ziel }; return ziel; }
-    if (s.ziel !== ziel) { s.von = B.sofort ? ziel : s.jetzt; s.ziel = ziel; s.t0 = now; }
+    if (s.ziel !== ziel) { s.von = B.sofort && !s.erbe ? ziel : s.jetzt; s.ziel = ziel; s.t0 = now; s.erbe = false; }
     if (s.von === ziel) { s.jetzt = ziel; return ziel; }
     const f = (now - s.t0) / dauer;
     if (f >= 1) { s.von = ziel; s.jetzt = ziel; return ziel; }
@@ -472,7 +489,8 @@ window.Buehne3D = (function () {
     'w3d-roll': 'linear-gradient(180deg, #ededeb, #d2d2cf)', 'w3d-roll-b': '#c9c9c6', 'w3d-roll-t': '#f1f1ef', 'w3d-roll-s': '#d9d9d6',
     'w3d-schw': 'linear-gradient(180deg, #d9dde1, #aeb4ba)', 'w3d-schw-t': 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .18) 0 1px, transparent 1px 4px), linear-gradient(180deg, #e3e6e9, #c3c8cd)',
     'w3d-floor-in': 'repeating-linear-gradient(90deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 34px), linear-gradient(180deg, #5b4b3b, #4a3c2f)',
-    'w3d-floor-out': 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .06) 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, rgba(255, 255, 255, .06) 0 1px, transparent 1px 48px), linear-gradient(180deg, #4a4843, #3a3835)',
+    /* Terrasse heller als im CSS-Modell: durch die Tür sieht man Tageslicht statt einer dunklen Fläche */
+    'w3d-floor-out': 'repeating-linear-gradient(90deg, rgba(60, 56, 50, .22) 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, rgba(60, 56, 50, .22) 0 1px, transparent 1px 48px), linear-gradient(180deg, #a19c93, #918c83)',
     'w3d-mesh': 'repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px)',
     'schloss': 'radial-gradient(circle at 50% 50%, #e9ecef 0 22%, #3a3e43 26%)'
   };
@@ -881,7 +899,7 @@ window.Buehne3D = (function () {
       if (c && c.t === 'hole') gl.uniform4f(u.uBevI, c.r[0], c.r[1], c.r[2], c.r[3]); else gl.uniform4f(u.uBevI, 0, 0, 0, 0);
     } else { gl.uniform4f(u.uBev, 0, 0, 0, 0); gl.uniform4f(u.uBevI, 0, 0, 0, 0); }
     if (it.fade) gl.uniform2f(u.uFade, it.fade[0], it.fade[1]); else gl.uniform2f(u.uFade, 0, 0);
-    if (st.art) {
+    if (st.art && !DBG.ohneArt) {
       const k = Math.max(0.02, MASSSTAB), f = st.artFarbe;
       gl.uniform4f(u.uArt, st.art[0], k, it.senk ? 2 : it.W >= it.H ? 1 : 2, st.art[1]); gl.uniform3f(u.uArtC, f[0], f[1], f[2]);
       const c = it.el && it.el._f && it.el._f.c; if (c && c.t === 'hole' && st.art[0] === 4) gl.uniform4f(u.uBand, c.r[0], c.r[1], c.r[2], c.r[3]); else gl.uniform4f(u.uBand, 0, 0, 0, 0);
@@ -932,7 +950,7 @@ window.Buehne3D = (function () {
     },
     rollen(stage) { const B = stage && stage._b3; return B && B.items ? B.items.map((x) => x.role || '') : []; },
     matrix(stage, role) { const B = stage && stage._b3, it = B && B.items ? B.items.find((x) => x.role === role) : null; return it ? Array.from(it.M) : null; },
-    ohne(re) { DBG.ohne = re || null; }
+    ohne(re, ohneArt) { DBG.ohne = re || null; DBG.ohneArt = !!ohneArt; }
   };
   return { DBG: DBG, pruef: pruef, an: an, anstoss: anstoss, treffer: treffer, aktiv: (stage) => !!(stage && stage._b3 && !stage._b3.aus), unterstuetzt: unterstuetzt };
 })();

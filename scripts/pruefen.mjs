@@ -3527,7 +3527,8 @@ if (teil(20)) {
     st.classList.add('is-drag');
     for (const [rx, ry] of winkel) {
       st.style.setProperty('--rx', rx + 'deg'); st.style.setProperty('--ry', ry + 'deg');
-      const P = Buehne3D.pruef.pixel(st), w = P.w, h = P.h, px = P.px, L = (x, y) => { const i = ((h - 1 - y) * w + x) * 4; return 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2]; };
+      /* Geometrie ohne Oberflächenstruktur (Putzkörnung und Klinker sind gewollt, Linien nicht) */
+      Buehne3D.pruef.ohne(null, true); const P = Buehne3D.pruef.pixel(st); Buehne3D.pruef.ohne(null); const w = P.w, h = P.h, px = P.px, L = (x, y) => { const i = ((h - 1 - y) * w + x) * 4; return 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2]; };
       const umr = Buehne3D.pruef.oeffnung(st, Math.cos(ry * Math.PI / 180) < 0).map((q) => [q[0] * P.k, q[1] * P.k]);
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; umr.forEach((q) => { x0 = Math.min(x0, q[0]); y0 = Math.min(y0, q[1]); x1 = Math.max(x1, q[0]); y1 = Math.max(y1, q[1]); });
       const mx = (x1 - x0) * 0.18 + 6, mo = (y1 - y0) * 0.45 + 6, mu = (y1 - y0) * 0.3 + 6;
