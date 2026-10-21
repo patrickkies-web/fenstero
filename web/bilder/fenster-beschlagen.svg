@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-labelledby="t d">
+<title id="t">Fenster beschlagen: innen, zwischen den Scheiben oder außen</title>
+<desc id="d">Drei Schnitte durch eine Isolierscheibe, links jeweils der Raum, rechts draußen. Tropfen auf der Raumseite bedeuten zu feuchte Luft, Tropfen zwischen den Scheiben einen undichten Randverbund, Tropfen außen gut dämmendes Glas.</desc>
+<rect width="480" height="360" rx="16" fill="#ffffff"/>
+<rect x="68" y="64" width="36" height="10" fill="#141414"/>
+<rect x="68" y="234" width="36" height="10" fill="#141414"/>
+<rect x="68" y="74" width="36" height="160" fill="#f4f8fd"/>
+<rect x="60" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="104" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<circle cx="51" cy="98" r="5.5" fill="#c2410c"/>
+<circle cx="51" cy="126" r="5.5" fill="#c2410c"/>
+<circle cx="51" cy="154" r="5.5" fill="#c2410c"/>
+<circle cx="51" cy="182" r="5.5" fill="#c2410c"/>
+<circle cx="51" cy="210" r="5.5" fill="#c2410c"/>
+<rect x="222" y="64" width="36" height="10" fill="#141414"/>
+<rect x="222" y="234" width="36" height="10" fill="#141414"/>
+<rect x="222" y="74" width="36" height="160" fill="#f4f8fd"/>
+<rect x="214" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="258" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<circle cx="247" cy="98" r="5.5" fill="#c2410c"/>
+<circle cx="233" cy="126" r="5.5" fill="#c2410c"/>
+<circle cx="247" cy="154" r="5.5" fill="#c2410c"/>
+<circle cx="233" cy="182" r="5.5" fill="#c2410c"/>
+<circle cx="247" cy="210" r="5.5" fill="#c2410c"/>
+<rect x="376" y="64" width="36" height="10" fill="#141414"/>
+<rect x="376" y="234" width="36" height="10" fill="#141414"/>
+<rect x="376" y="74" width="36" height="160" fill="#f4f8fd"/>
+<rect x="368" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="412" y="64" width="8" height="180" fill="#dceaf7" stroke="#1d4ed8" stroke-width="2"/>
+<circle cx="429" cy="98" r="5.5" fill="#c2410c"/>
+<circle cx="429" cy="126" r="5.5" fill="#c2410c"/>
+<circle cx="429" cy="154" r="5.5" fill="#c2410c"/>
+<circle cx="429" cy="182" r="5.5" fill="#c2410c"/>
+<circle cx="429" cy="210" r="5.5" fill="#c2410c"/>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414" text-anchor="middle">
+<text x="86" y="46" font-size="20" font-weight="700">innen</text>
+<text x="86" y="276" font-weight="700" fill="#c2410c">Luft zu</text>
+<text x="86" y="300" font-weight="700" fill="#c2410c">feucht</text>
+<text x="240" y="46" font-size="20" font-weight="700">zwischen</text>
+<text x="240" y="276" font-weight="700" fill="#c2410c">Randverbund</text>
+<text x="240" y="300" font-weight="700" fill="#c2410c">undicht</text>
+<text x="394" y="46" font-size="20" font-weight="700">außen</text>
+<text x="394" y="276" font-weight="700" fill="#1d4ed8">gutes Glas,</text>
+<text x="394" y="300" font-weight="700" fill="#1d4ed8">kein Mangel</text>
+<text x="240" y="340">links der Raum, rechts draußen</text>
+</g>
+<line x1="163" y1="24" x2="163" y2="306" stroke="#ecebe6" stroke-width="2"/><line x1="317" y1="24" x2="317" y2="306" stroke="#ecebe6" stroke-width="2"/>
+</svg>

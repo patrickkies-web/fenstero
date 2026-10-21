@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" width="480" height="420" role="img" aria-labelledby="t d">
+<title id="t">Fenster reparieren oder austauschen: drei Fragen</title>
+<desc id="d">Entscheidungsweg in drei Fragen. Ist der Rahmen morsch, verzogen oder gerissen, wird ausgetauscht. Ist es Einfachglas, ein Kastenfenster oder Glas von vor 1995, lohnt der Austausch. Sind nur Dichtung, Beschlag oder eine Scheibe defekt, wird repariert. Sonst sieht sich ein Fachbetrieb das Fenster an.</desc>
+<defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L9 5L0 9z" fill="#141414"/></marker></defs>
+<rect width="480" height="420" rx="16" fill="#ffffff"/>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<rect x="24" y="24" width="272" height="74" rx="10" fill="#ecebe6"/>
+<text x="40" y="54" font-weight="700">1 · Rahmen morsch,</text>
+<text x="40" y="78">verzogen oder gerissen?</text>
+<rect x="24" y="130" width="272" height="74" rx="10" fill="#ecebe6"/>
+<text x="40" y="160" font-weight="700">2 · Einfachglas, Kasten-</text>
+<text x="40" y="184">fenster, Glas vor 1995?</text>
+<rect x="24" y="236" width="272" height="74" rx="10" fill="#ecebe6"/>
+<text x="40" y="266" font-weight="700">3 · Nur Dichtung, Beschlag</text>
+<text x="40" y="290">oder eine Scheibe defekt?</text>
+<rect x="24" y="342" width="432" height="54" rx="10" fill="#ffffff" stroke="#141414" stroke-width="2"/>
+<text x="240" y="375" text-anchor="middle">Sonst: Fachbetrieb ansehen lassen</text>
+<g fill="none" stroke="#141414" stroke-width="2" marker-end="url(#p)">
+<line x1="296" y1="61" x2="338" y2="61"/><line x1="296" y1="167" x2="338" y2="167"/><line x1="296" y1="273" x2="338" y2="273"/>
+<line x1="160" y1="98" x2="160" y2="128"/><line x1="160" y1="204" x2="160" y2="234"/><line x1="160" y1="310" x2="160" y2="340"/>
+</g>
+<text x="317" y="52" text-anchor="middle">ja</text><text x="317" y="158" text-anchor="middle">ja</text><text x="317" y="264" text-anchor="middle">ja</text>
+<rect x="340" y="34" width="116" height="54" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<text x="398" y="67" text-anchor="middle" font-weight="700" fill="#c2410c">Tauschen</text>
+<rect x="340" y="140" width="116" height="54" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<text x="398" y="173" text-anchor="middle" font-weight="700" fill="#c2410c">Tauschen</text>
+<rect x="340" y="246" width="116" height="54" rx="10" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<text x="398" y="279" text-anchor="middle" font-weight="700" fill="#1d4ed8">Reparieren</text>
+<text x="180" y="120">nein</text><text x="180" y="226">nein</text><text x="180" y="332">nein</text>
+</g>
+</svg>

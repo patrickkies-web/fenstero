@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 400" width="480" height="400" role="img" aria-labelledby="t d">
 <title id="t">Vier Rahmenmaterialien im Schnitt</title>
-<desc id="d">Schnitte durch vier Fensterrahmen mit Glas: Kunststoff mit mehreren Kammern, Holz, Holz-Alu mit einer Aluminiumschale außen und Aluminium. Darunter je eine Eigenschaft: pflegeleicht und günstig, reparierbar und zu streichen, außen mit Aluschale, schlank und langlebig.</desc>
+<desc id="d">Schnitte durch vier Fensterrahmen mit Glas: Kunststoff mit mehreren Kammern, Holz, Holz-Alu mit einer Aluminiumschale außen und Aluminium. Darunter je eine Eigenschaft: pflegeleicht und günstig, warm und reparierbar, außen mit Aluschale, schlank und langlebig.</desc>
 <rect width="480" height="400" rx="16" fill="#ffffff"/>
 <g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
 <!-- Kunststoff -->
@@ -23,7 +23,7 @@
 <rect x="84" y="48" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
 <rect x="84" y="68" width="70" height="8" fill="#dceaf7" stroke="#1d4ed8" stroke-width="1.5"/>
 <text x="20" y="124" font-weight="700">Holz</text>
-<text x="20" y="148" fill="#3d3d3a">reparierbar, streichen</text>
+<text x="20" y="148" fill="#3d3d3a">warm, reparierbar</text>
 </g>
 <!-- Holz-Alu -->
 <g transform="translate(24 208)">
