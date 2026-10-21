@@ -788,6 +788,13 @@ window.Buehne3D = (function () {
     durch.forEach((it) => malen(gl, u, it, 0));
     oben.forEach((it) => malen(gl, u, it, 0));
     gl.depthMask(true);
+    /* Selbsttest beim ersten Bild: oben links ist immer Wand (hell, deckend). Ist dort nichts oder Schwarz, zeichnet der
+       Grafiktreiber falsch: dann lieber das CSS-Modell */
+    if (!L.geprueft && B.items && B.items.length) {
+      L.geprueft = true;
+      const px = new Uint8Array(4); gl.readPixels(Math.round(pw * 0.04), Math.round(ph * 0.96), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      if (px[3] < 250 || px[0] + px[1] + px[2] < 60) { if (window.console) console.warn('3-D-Bühne: Selbsttest fehlgeschlagen, CSS-Modell', Array.from(px)); B.aus = true; zumCss(stage); return false; }
+    }
     return lauf;
   }
   function global(gl, u, B, VP, eye, L, seite) {
