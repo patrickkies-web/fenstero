@@ -11,12 +11,12 @@
    Begründung und Quellen: docs/SEO.md. */
 import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung.js';
 
-export const STAND = '2026-10-18';
+export const STAND = '2026-10-21';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-18' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-21' },
   { pfad: '/app/', prio: '0.9', stand: '2026-10-18' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-16' },
   { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-18' },
@@ -34,20 +34,20 @@ export const SEITEN = [
   { pfad: '/ratgeber/ral-montage-fenster/', prio: '0.7', stand: '2026-10-18' },
   { pfad: '/ratgeber/uw-wert-fenster/', prio: '0.7', stand: '2026-10-18' },
   { pfad: '/ratgeber/lueftungskonzept-fenstertausch/', prio: '0.7', stand: '2026-10-18' },
-  { pfad: '/ratgeber/fenster-beschlagen/', prio: '0.8', stand: '2026-10-18' },
-  { pfad: '/ratgeber/fenster-undicht/', prio: '0.8', stand: '2026-10-18' },
-  { pfad: '/ratgeber/fenster-alter-erkennen/', prio: '0.7', stand: '2026-10-18' },
-  { pfad: '/ratgeber/fenster-reparieren-oder-austauschen/', prio: '0.8', stand: '2026-10-18' },
-  { pfad: '/ratgeber/fenster-material-vergleich/', prio: '0.7', stand: '2026-10-18' },
-  { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-10-18' },
-  { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-10-18' },
-  { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-10-18' },
+  { pfad: '/ratgeber/fenster-beschlagen/', prio: '0.8', stand: '2026-10-21' },
+  { pfad: '/ratgeber/fenster-undicht/', prio: '0.8', stand: '2026-10-21' },
+  { pfad: '/ratgeber/fenster-alter-erkennen/', prio: '0.7', stand: '2026-10-21' },
+  { pfad: '/ratgeber/fenster-reparieren-oder-austauschen/', prio: '0.8', stand: '2026-10-21' },
+  { pfad: '/ratgeber/fenster-material-vergleich/', prio: '0.7', stand: '2026-10-21' },
+  { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-10-21' },
+  { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-10-21' },
+  { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-18' },
   { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-18' },
   { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-18' },
   { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-18' },
   { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-18' },
-  { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-18' },
+  { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-21' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
   { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
