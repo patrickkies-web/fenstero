@@ -2,11 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>h12 · Alles drin · Auch rund und schräg.</title>
+<title>h12 · Elemente · Auch rund und schräg.</title>
 <link rel="stylesheet" href="../vorlage/vorlage.css">
 <style>
-  /* screen-lokal: Raster 3 × 3 aus echten 3-D-Modellen, je Kachel nur die Modellfläche (Aufnahme 358 × 164 CSS-px, Faktor 3),
-     Beschriftung darunter; das Raster füllt die Höhe bis zur Fußzeile (Kachel etwa 293 × 134) */
+  /* screen-lokal: Raster 3 × 3 aus echten 3-D-Modellen, je Kachel nur die Modellfläche (Aufnahme im Seitenverhältnis der Kachel, Faktor 3),
+     Beschriftung darunter; das Raster füllt die Höhe bis zur Fußzeile (Kachel etwa 293 × 177), das Modell füllt die Kachelhöhe */
   .ef-inhalt { flex: 1 1 auto }
   .h-raster { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 24px 16px }
   .h-kachel { display: flex; flex-direction: column; gap: 10px; min-height: 0 }
@@ -16,26 +16,27 @@
 </style>
 </head>
 <body>
-<!-- Kapitel „Alles drin“, Inhalt (h12): Formen und Öffnung, je das echte 3-D-Modell der passenden Frage im Kundenlink (Fensterbau Brandt,
+<!-- Kapitel „Elemente“, Inhalt (h12): Formen und Öffnung, je das echte 3-D-Modell der passenden Frage im Kundenlink (Fensterbau Brandt,
      Familie Weber), aufgenommen mit werkzeug/aufnahmen-alles-drin.mjs h12: K.fenster(page, 'fenster', …), K.frage(page, id), Modellfläche #w3d
-     358 × 164, Kamera der Frage („inside“), ohne Schwingen und ohne Beschriftungspille, alle neun im selben Maßstab (s = 0,088 px je mm).
-     Formen: Frage „form“ („Welche Form? Antippen zeigt die Form am Modell.“, Frage 10 von 26), Rund 1.200 × 1.200 mm fest verglast;
+     im Seitenverhältnis der Kachel, Kamera der Frage („inside“), ohne Schwingen und ohne Beschriftungspille, jedes Modell für sich in die
+     Kachelhöhe eingepasst (w3dCalc fitW/fitH).
+     Formen: Frage „form“ („Welche Form? Antippen zeigt die Form am Modell.“), Rund 1.200 × 1.200 mm fest verglast;
      Stulp und 3 Flügel: Frage „teilung“; Oberlicht kippbar: Frage „ol“; Unterlicht Glas 450 mm: Frage „ul“; Dreh-Kipp gekippt: Frage „typ-0“
      mit K.vorfuehren { i: 0, t: 650 } (grüner Rahmen = markierter Flügel der App, Linien = Öffnungssymbol).
-     Belege: web/assets/modell.js:15 form; web/assets/app.js:2340; werkzeug/berichte/kunde.md Auswahlwerte teilung, din, ol, ul, Sprossen;
-     modell.js:59 TYP Fest, Dreh, Kipp, Dreh-Kipp. -->
+     Lead in einer Zeile und eine Chip-Reihe, damit die Kacheln höher werden; die Formen nennen die Beschriftungen, die Sprossen zeigt h13.
+     Belege: web/assets/modell.js:15 form (Rechteck und 4 weitere); web/assets/app.js qList teilung (1 Flügel, 2 mit Pfosten, 2 Stulp, 3),
+     typ-i, din-i, ol, ul; modell.js TYP Fest, Dreh, Kipp, Dreh-Kipp; din links, rechts (app.js „Scharniere links oder rechts?“). -->
 <main class="ef-buehne">
   <header class="ef-kopf">
     <span class="ef-wortmarke">eeziframes</span>
-    <span class="ef-label">Alles drin · 3/4</span>
+    <span class="ef-label">Elemente · 3/4</span>
   </header>
   <div class="ef-inhalt">
     <div class="ef-text">
       <p class="ef-kicker">Form und Öffnung</p>
       <h2 class="ef-display">Auch rund<br>und <span class="ef-gruen">schräg.</span></h2>
-      <p class="ef-lead">Rundbogen, Segmentbogen, Schräg und Rund. Dazu Stulp, Oberlicht, Unterlicht und Sprossen.</p>
+      <p class="ef-lead">5 Formen, 1 bis 3 Flügel, Ober- und Unterlicht.</p>
       <ul class="ef-chips">
-        <li class="ef-chip">1 bis 3 Flügel</li>
         <li class="ef-chip">Dreh, Kipp, Dreh-Kipp</li>
         <li class="ef-chip">DIN links oder rechts</li>
       </ul>

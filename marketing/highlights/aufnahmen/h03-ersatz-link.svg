@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 760" width="760" height="760">
+  <!-- Ersatz für den Foto-Slot h03-foto, solange bilder/h03-foto.* fehlt: Link-Icon wie das Highlight-Cover cover-link
+       (Strich-Icon im 24er-Raster, Stärke 1,8, runde Enden, accent #8fd694 auf accent-soft rgba(143,214,148,.14)). -->
+  <circle cx="380" cy="380" r="380" fill="#8fd694" fill-opacity=".14"/>
+  <g transform="translate(170 170) scale(17.5)" fill="none" stroke="#8fd694" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/>
+    <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>
+  </g>
+</svg>

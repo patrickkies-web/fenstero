@@ -21,7 +21,7 @@ RASTER=1 node marketing/highlights/render.mjs           # zusätzlich out/raster
 
 Die Highlight-Cover `screens/cover-<kapitel>.html` sind fertiges HTML: ein Strich-Icon als SVG im 24er-Raster; ein anderes Icon direkt dort eintragen.
 
-Das Skript wartet auf Inter und alle Bilder und meldet mit `!`, was über die Sicherheitszonen ragt (oben und unten 250 px, links und rechts 84 px), was abgeschnitten ist und wenn das Foto zu klein wird. Vor dem Hochladen jeden Screen einmal mit `RASTER=1` ansehen. Bei Highlight-Covern zeigt das Raster den Kreis, den Instagram ausschneidet.
+Das Skript wartet auf Inter und alle Bilder und meldet mit `!`, was über die Sicherheitszonen ragt (oben und unten 250 px, links und rechts 84 px), was abgeschnitten ist, wenn die Fotofläche zu klein wird und wenn ein Foto hochgerechnet werden muss. Je Foto-Screen steht eine Zeile `Foto …` mit der Lage des Fotos dabei. Vor dem Hochladen jeden Screen einmal mit `RASTER=1` ansehen. Bei Highlight-Covern zeigt das Raster den Kreis, den Instagram ausschneidet, bei Foto-Screens die Gesichtszone.
 
 ## Fotos tauschen
 
@@ -33,7 +33,12 @@ Ein Screen mit Foto trägt einen Slot und ein Ersatzfoto:
 </figure>
 ```
 
-Neues Foto als `bilder/h03-foto.png`, `.jpg` oder `.webp` ablegen und neu rendern, mehr ist nicht nötig. Fehlt die Datei, nimmt `render.mjs` das Ersatzfoto (im Browser sieht man immer das Ersatzfoto). Gut passt Hochformat 1120 × 1400 oder größer, Motiv in den oberen zwei Dritteln, unten ruhig und dunkel. Den Ausschnitt verschiebt `--ef-fp` (wie `object-position`), die Länge der Ausblendung `--ef-foto-voll` (Standard 56 %).
+Neues Foto als `bilder/h03-foto.png`, `.jpg` oder `.webp` ablegen und mit `RASTER=1` neu rendern, mehr ist nicht nötig. Fehlt die Datei, nimmt `render.mjs` das Ersatzfoto (im Browser sieht man immer das Ersatzfoto).
+
+- **Format:** 4:5, mindestens 1120 × 1400 px, wie die vorhandenen Fotos. Nicht 9:16: Gezeigt wird nur das obere Band, 1080 px breit und je nach Textlänge 620 bis 870 px hoch, voll sichtbar bis 56 % dieser Höhe, danach ausgeblendet.
+- **Komposition:** oberes Fünftel nur Raum und Licht (dort liegt die Bedienleiste von Instagram), Kopf und Augen bei 19 bis 26 % der Fotohöhe, die Handlung bis 32 %, darunter ruhig und dunkel. Maße je Slot und die Prompts: `PROMPTS.md`, Abschnitte 1 und 3.
+- **Ausschnitt:** `--ef-fp` am `<figure>` (wie `object-position`) gilt nur für das Ersatzfoto. Ein Slot-Foto steht oben bündig (`50% 0%`), so wie `PROMPTS.md` es komponiert. Einen anderen Ausschnitt für das Slot-Foto trägt das `<img>` als `data-fp="50% 4%"`. Die Länge der Ausblendung steuert `--ef-foto-voll` (Standard 56 %).
+- **Prüfen:** `render.mjs` meldet je Foto die Fotofläche, wo die Ausblendung beginnt und welche Zeilen des Fotos in der Gesichtszone liegen (y 250 bis Beginn der Ausblendung). `RASTER=1` umrandet diese Zone türkis. Gesicht und Werkzeug müssen darin liegen, nichts davon in den oberen 250 px.
 
 ## Neuen Screen anlegen
 
@@ -65,3 +70,9 @@ Wird es eng: Text kürzen oder das Visual verkleinern, nie die Schrift verkleine
 | `ef-cta`, `ef-pf` | Cream-Pille mit Pfeil im Kreis, eine je Screen |
 | `ef-fuss`, `ef-fuss-text` | Fußzeile: Fortschritt oder Hauptaktion links, Nebenzeile rechts |
 | `ef-hl`, `ef-hl-kreis` | Highlight-Cover: Strich-Icon (24er-Raster, Stärke 1,8) auf accent-soft Kreis |
+
+## Fertige Story-Bilder
+
+`export/` enthält die gerenderten Story-Bilder in Upload-Reihenfolge, je Highlight ein Ordner (`1-warum` bis `6-preise`),
+dazu je Highlight `cover.png` für das Highlight-Cover. Nach einem neuen Render (`node render.mjs`) den Ordner mit dem Skript
+im Commit „Highlights für Betriebe: fertige Story-Bilder“ neu befüllen oder die PNGs aus `out/` von Hand kopieren.

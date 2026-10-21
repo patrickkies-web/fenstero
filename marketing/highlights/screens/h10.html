@@ -2,33 +2,36 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>h10 · Alles drin · Bis ins Detail.</title>
+<title>h10 · Elemente · Bis ins Detail.</title>
 <link rel="stylesheet" href="../vorlage/vorlage.css">
 </head>
 <body>
-<!-- h10 Cover Kapitel „Alles drin“ (1/4). Foto randlos oben, weich in #161616 auslaufend, Text erst auf dem dunklen Grund darunter.
+<!-- h10 Cover Kapitel „Elemente“ (1/4). Foto randlos oben, weich in #161616 auslaufend, Text erst auf dem dunklen Grund darunter.
      Foto-Slot h10-foto: liegt bilder/h10-foto.(png|jpg|webp) vor, nimmt render.mjs diese Datei, sonst das Ersatzfoto
      bilder/waschbaeren-sofa.webp (= web/bilder/foto/app-start.webp, 1120 × 1400). Besetzung: Waschbär = Hauseigentümer, Kunde.
+     Kapitelname „Elemente“ statt „Alles drin“: Haustür, Dachfenster und Kellerfenster gibt es im Aufmaß nicht (modell.js:24 OPT.art).
      Belege: web/assets/modell.js:24 OPT.art (6 Elementarten), modell.js:15 OPT.form (5 Formen);
-     werkzeug/berichte/kunde.md „Wie viele Schritte und Fragen“ (Fenster mit 2 Flügeln 26 Fragen, mit bedingten Zusatzfragen bis 29;
-     erkundung/kunde-sonne-aussen.png „Frage 20 von 29“); alle Fragen vorbelegt, Pflicht ist nur der Name; jede Frage dreht das Modell
-     in die passende Ansicht (app.js SCREENS.frage: model(w, { view: q.view … })). docs/BILDER.md:32 app-start. -->
+     „Jede Frage am 3-D-Modell“: app.js SCREENS.frage zeichnet zu jeder Frage model(w, { view: q.view … }), die Ansicht kommt aus der Frage;
+     „Nur der Name ist Pflicht“: app.js qStep (nameVerlangen nur bei der Frage „lage“), saveWin; der Knopf „Weiter“ ist sonst nie gesperrt;
+     „Sonst genügt Weiter“: jede Frage hat beim Start eine Vorgabe oder „Weiß ich noch nicht“ gedrückt (app.js baseWin, newWin S.win.offen fa, fba;
+     offenZeile: Absturz leer = „Weiß ich noch nicht“). Bewusst ohne Fragenzahl: die Zahl wächst mit bedingten Fragen (Fenster 26 in der
+     Grundeinstellung, mit Rollladen, Sprossen und mehr bis 38), eine Obergrenze wie „bis 29“ wäre falsch. docs/BILDER.md:32 app-start. -->
 <main class="ef-buehne ef-buehne--foto">
   <figure class="ef-foto" style="--ef-fp: 50% 18%">
     <img data-slot="h10-foto" data-ersatz="waschbaeren-sofa.webp" src="../bilder/waschbaeren-sofa.webp" alt="Drei Waschbären im Wohnzimmer: einer fotografiert die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche ins Handy, einer lehnt sich zurück.">
   </figure>
   <header class="ef-kopf">
     <span class="ef-wortmarke">eeziframes</span>
-    <span class="ef-label">Alles drin · 1/4</span>
+    <span class="ef-label">Elemente · 1/4</span>
   </header>
   <div class="ef-text">
-    <p class="ef-kicker">Teil 4 von 6 · Alles drin</p>
+    <p class="ef-kicker">Teil 4 von 6 · Elemente</p>
     <h1 class="ef-display-xl">Bis ins<br><span class="ef-gruen">Detail.</span></h1>
-    <p class="ef-lead">6 Elementarten, 5 Formen, dazu Öffnung,<br>Farbe, Glas und Sonnenschutz.<br>Alles am <span style="white-space: nowrap">3-D-Modell.</span></p>
+    <p class="ef-lead">6 Elementarten, 5 Formen, dazu Öffnung,<br>Farbe, Glas und Sonnenschutz.</p>
     <ul class="ef-chips">
-      <li class="ef-chip">Bis 29 Fragen je Element</li>
-      <li class="ef-chip">Alle vorbelegt</li>
-      <li class="ef-chip">Am 3-D-Modell</li>
+      <li class="ef-chip">Jede Frage am 3-D-Modell</li>
+      <li class="ef-chip">Nur der Name ist Pflicht</li>
+      <li class="ef-chip">Sonst genügt „Weiter“</li>
     </ul>
   </div>
 </main>

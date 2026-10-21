@@ -19,7 +19,11 @@
      Belege: web/assets/portal.js:453 (CAPS: drei Breiten und drei Höhen, das kleinste Maß zählt, außer Winkel markiert),
      web/assets/app.js:473-478 (derive: kleinstes von drei Maßen), app.js:1906 (Hinweis ab 10 mm), app.js:635 (Warnung ab 60 mm),
      app.js:605-616 (MESS und REST: 4 Maße mit Zifferntasten plus 4 Ränder = 8 Maße), werkzeug/berichte/kunde.md Ablauf 4 bis 6 (Maßlinie wächst im Modell mit).
-     Chip „Außer Winkel markiert“ entfällt aus Platzgründen: Er wiederholt den Lead und steht im Hinweis-Ausschnitt. -->
+     Chip „Außer Winkel markiert“ entfällt aus Platzgründen: Er wiederholt den Lead und steht im Hinweis-Ausschnitt.
+     Chip „cm statt mm wird erkannt“ (statt „3-D-Modell wächst mit“): web/assets/app.js:621 und 633 („Meintest du … cm? Das wären … mm.“, bei Eingaben
+     unter 250, die mal 10 ein Fenstermaß ergeben). Bewusst nicht „Tippfehler fallen auf“: Ein Zahlendreher wie 1.206 statt 1.260 bleibt unbemerkt.
+     Weitere Prüfungen, nicht im Chip: Element größer als die Öffnung (app.js:625), Rand weicht mehr als 60 mm vom Mittelmaß ab (app.js:635).
+     Lead „dazu Breite und Höhe des alten Fensters“ wie web/assets/portal.js:454 („Breite und Höhe des alten Fensters mit Rahmen“). -->
 <main class="ef-buehne">
   <header class="ef-kopf">
     <span class="ef-wortmarke">eeziframes</span>
@@ -29,10 +33,10 @@
     <div class="ef-text">
       <p class="ef-kicker">Messen mit dem Zollstock</p>
       <h2 class="ef-display">Das <span class="ef-gruen">kleinste</span><br>Maß zählt.</h2>
-      <p class="ef-lead">3 Breiten, 3 Höhen, dazu das alte Element. Ist die Öffnung außer Winkel, markiert die App das.</p>
+      <p class="ef-lead">3 Breiten, 3 Höhen, dazu Breite und Höhe des alten Fensters. Ist die Öffnung außer Winkel, markiert die App das.</p>
       <ul class="ef-chips">
         <li class="ef-chip">8 Maße je Fenster</li>
-        <li class="ef-chip">3-D-Modell wächst mit</li>
+        <li class="ef-chip">cm statt mm wird erkannt</li>
       </ul>
     </div>
     <div class="ef-stapel h09-stapel">

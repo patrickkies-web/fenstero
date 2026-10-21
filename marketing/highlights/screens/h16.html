@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>h16 · Ergebnis · Bestellmaß schon drin.</title>
+<title>h16 · Ergebnis · Bestellmaß vorgerechnet.</title>
 <link rel="stylesheet" href="../vorlage/vorlage.css">
 <style>
   /* zwei Ausschnitte aus der aufgeklappten Position 1 (Aufnahmen 560 CSS-px breit, Faktor 3): --s = Story-px je CSS-px */
@@ -18,6 +18,8 @@
      Belege: web/assets/portal.js:481-488 (posCard: Bestellmaß aus Maueröffnung minus Abzug, Abschnitt „Einbausituation (KI, n Fotos)“),
      portal.js:814 (Betriebsprofil: eigener Abzug, „verbindlich bleibt Ihr Feinaufmaß“), portal.js:482 (Standard 15/15 mm),
      portal.js:534 („Vor der Fertigung messen Sie einmal nach.“).
+     Headline „Bestellmaß vorgerechnet.“ nach portal.js:814 („Damit rechnet eeziframes … ein Bestellmaß vor; verbindlich bleibt Ihr Feinaufmaß“),
+     damit der Vorschlagscharakter schon in der Headline steht; Chip „Vor der Fertigung nachmessen“ nach portal.js:534 und blatt.js:167.
      Abweichung vom Storyboard: Der Kopf „Pos. 1 · Wohnzimmer“ (summary mit Kurzzeile, 3 Zeilen) fehlt im oberen Ausschnitt, sonst ragt das Visual
      in die Fußzeile; die Position steht im Kicker. Mit KOPF=1 nimmt ergebnis-aufnahmen.mjs ihn wieder auf. -->
 
@@ -29,12 +31,12 @@
   <div class="ef-inhalt">
     <div class="ef-text">
       <p class="ef-kicker">Position 1 · Wohnzimmer</p>
-      <h2 class="ef-display"><span class="ef-gruen">Bestellmaß</span><br>schon drin.</h2>
+      <h2 class="ef-display">Bestellmaß<br><span class="ef-gruen">vorgerechnet.</span></h2>
       <p class="ef-lead">Als Vorschlag: Öffnung minus Ihr eigener Abzug. Dazu die Einbausituation aus den Fotos.</p>
       <ul class="ef-chips">
         <li class="ef-chip">Abzug einstellbar</li>
         <li class="ef-chip">Einbausituation per KI</li>
-        <li class="ef-chip">Vor Ort prüfen</li>
+        <li class="ef-chip">Vor der Fertigung nachmessen</li>
       </ul>
     </div>
     <div class="ef-stapel h16-stapel">

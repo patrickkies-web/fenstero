@@ -6,14 +6,20 @@
 <link rel="stylesheet" href="../vorlage/vorlage.css">
 </head>
 <body>
-<!-- h20 Abschluss Kapitel „Preise“ (2/2) nach SlideAbschluss: Kopfzeile, Textblock, eine Karte, Fußzeile mit der einzigen Cream-Fläche.
+<!-- h20 Abschluss Kapitel „Preise“ (2/2) nach SlideAbschluss: Kopfzeile, Textblock, eine Karte, Fußzeile mit der einzigen Cream-Fläche,
+     darunter freier Grund für den Link-Sticker (PROMPTS.md Abschnitt 6: „Kostenlos starten“, Link https://eeziframes.com/#fensterbauer,
+     unter der Cream-Pille, oberhalb der unteren 250 px). Die Bühne steht oben bündig (justify-content: flex-start), der ganze Rest
+     zwischen Pille und Sicherheitskante y 1670 bleibt für den Sticker frei. Die Pille selbst ist in der Story nicht antippbar; sie sagt
+     deshalb, wohin man tippt, und ihr Pfeil zeigt nach unten auf den Sticker. So steht „Kostenlos starten“ nur einmal da, im Sticker.
      Karte: echte Aufnahme des Tarifs „Start“ aus der Preisseite (abgemeldet, tun('go','preise') mit Preis-Umschreibung aus betrieb-lib.mjs;
-     Telefon 390 breit, Faktor 3), ohne den Knopf der Karte und ohne die Abo-Karten; Ring und Radius der App-Karte weggenommen, den Rahmen
-     setzt .ef-ausschnitt. Aufnahme aufnahmen/h20-tarif-start.png, erzeugt mit werkzeug/preise-aufnahmen.mjs.
+     Telefon 390 breit, Faktor 3), ohne den Knopf der Karte, ohne den Punkt „Projekte, Aufmaß-Links, Einladungslisten“ und ohne die
+     Abo-Karten; Ring und Radius der App-Karte weggenommen, den Rahmen setzt .ef-ausschnitt. Unten wird nur leerer Kartengrund
+     abgeschnitten (--ef-aus-h), damit der Abstand unter der letzten Zeile dem über „START“ entspricht. Aufnahme aufnahmen/h20-tarif-start.png,
+     erzeugt mit werkzeug/preise-aufnahmen.mjs.
      Belege: web/assets/portal.js:590 (Tarif Start mit 0 € Grundgebühr und den gezeigten Punkten), portal.js:530 (Hauptknopf der Startseite
-     „Kostenlos starten“), web/nutzungsbedingungen/index.html:44 und 52 (3 Projekte frei, für die kostenlosen Projekte keine Zahlungsart),
-     BEITRAGS-LINIE.txt (Cream nur für die Hauptaktion, eine Cream-Fläche je Screen). -->
-<main class="ef-buehne">
+     „Kostenlos starten“, Ziel des Stickers), web/nutzungsbedingungen/index.html:44 und 52 (3 Projekte frei, für die kostenlosen Projekte
+     keine Zahlungsart), BEITRAGS-LINIE.txt (Cream nur für die Hauptaktion, eine Cream-Fläche je Screen). -->
+<main class="ef-buehne" style="justify-content: flex-start">
   <header class="ef-kopf">
     <span class="ef-wortmarke">eeziframes</span>
     <span class="ef-label">Preise · 2/2</span>
@@ -22,12 +28,12 @@
     <div class="ef-text">
       <p class="ef-kicker">Für Fensterbauer</p>
       <h2 class="ef-display"><span class="ef-gruen">Link</span> statt<br>Anfahrt.</h2>
-      <p class="ef-lead">Testen Sie mit Ihren nächsten 3 Kunden. Ohne Grundgebühr und ohne Zahlungsart.</p>
+      <p class="ef-lead">Testen Sie mit Ihren nächsten 3 Kunden.</p>
     </div>
-    <figure class="ef-ausschnitt"><img src="../aufnahmen/h20-tarif-start.png" alt="Tarif Start: 0 € Grundgebühr. 3 Projekte kostenlos, danach 9 € je Projekt mit eingegangenem Aufmaß. Projekte, Aufmaß-Links, Einladungslisten. Nachbesserungen inklusive. Zahlungsart erst ab dem 4. Projekt."></figure>
+    <figure class="ef-ausschnitt" style="--ef-aus-h: 582px"><img src="../aufnahmen/h20-tarif-start.png" alt="Tarif Start: 0 € Grundgebühr. 3 Projekte kostenlos, danach 9 € je Projekt mit eingegangenem Aufmaß. Nachbesserungen inklusive. Zahlungsart erst ab dem 4. Projekt."></figure>
   </div>
   <footer class="ef-fuss">
-    <span class="ef-cta">Kostenlos starten<span class="ef-pf"></span></span>
+    <span class="ef-cta">Link unten antippen<span class="ef-pf" style="transform: rotate(90deg)"></span></span>
     <span class="ef-fuss-text ef-fuss-text--hell">eeziframes.com</span>
   </footer>
 </main>

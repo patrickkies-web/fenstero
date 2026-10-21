@@ -14,8 +14,8 @@ Zwei Regeln gelten für jedes Bild und jeden Text:
 | Screen | Kapitel | Headline | Foto-Slot | Prompts |
 |---|---|---|---|---|
 | h01 | Warum | Aufmaß ohne Anfahrt. | `h01-foto`, vorhanden (start-fensterbauer) | 3.1 |
-| h02 | Warum | 975 € oder 79 €. | kein Foto | 4 |
-| h03 | Link | In 4 Klicks raus. | `h03-foto`, neu | 3.2 |
+| h02 | Warum | 975 € oder 108 €. | kein Foto | 4 |
+| h03 | Link | In 4 Klicks bereit. | `h03-foto`, neu | 3.2 |
 | h04 | Link | Ein Name genügt. | kein Foto | 4 |
 | h05 | Link | Absender: Sie. | kein Foto | 4 |
 | h06 | Link | Sie sehen, wer misst. | kein Foto | 4 |
@@ -28,20 +28,20 @@ Zwei Regeln gelten für jedes Bild und jeden Text:
 | h13 | Alles drin | Bis zur Fensterbank. | kein Foto | 4 |
 | h14 | Ergebnis | Aufmaß kommt sortiert. | `h14-foto`, neu | 3.5 |
 | h15 | Ergebnis | Was zu klären ist. | kein Foto | 4 |
-| h16 | Ergebnis | Bestellmaß schon drin. | kein Foto | 4 |
+| h16 | Ergebnis | Bestellmaß vorgerechnet. | kein Foto | 4 |
 | h17 | Ergebnis | Als PDF in Ihrer Farbe. | kein Foto | 4 |
 | h18 | Ergebnis | Nachbessern kostenlos. | kein Foto | 4 |
-| h19 | Preise | Zahlen nur bei Eingang. | `h19-foto`, neu | 3.6 |
+| h19 | Preise | Links kosten nichts. | `h19-foto`, neu | 3.6 |
 | h20 | Preise | Link statt Anfahrt. | kein Foto | 4 |
 
 Begleittexte für alle 20 Screens und der Link-Sticker stehen in Abschnitt 6.
 
 ## Ablauf
 
-1. **Foto erzeugen** (Abschnitt 3): Nano Banana Pro, Referenzfotos anhängen, Seitenverhältnis 9:16, Auflösung 2K oder 4K. Das Ergebnis muss mindestens 1080 × 1920 px haben. Steht im Werkzeug keine Auswahl für das Seitenverhältnis bereit, steht „vertical 9:16“ schon im Prompt. Nimmt das Werkzeug kein WebP an, die Referenz vorher umwandeln: `ffmpeg -i web/bilder/foto/start-fensterbauer.webp start-fensterbauer.png`.
+1. **Foto erzeugen** (Abschnitt 3): Nano Banana Pro, Referenzfotos anhängen, Seitenverhältnis 4:5, Auflösung 2K oder 4K. Das Ergebnis muss mindestens 1120 × 1400 px haben, wie die vorhandenen Fotos. Steht im Werkzeug keine Auswahl für das Seitenverhältnis bereit, steht „vertical 4:5“ schon im Prompt. Warum 4:5 und nicht 9:16, steht in Abschnitt 1 unter „Komposition“. Nimmt das Werkzeug kein WebP an, die Referenz vorher umwandeln: `ffmpeg -i web/bilder/foto/start-fensterbauer.webp start-fensterbauer.png`.
 2. **Prüfen** (Prüfliste unten). Im Zweifel neu erzeugen, nicht retuschieren.
 3. **Ablegen** als PNG unter `/home/user/fenstero/marketing/highlights/bilder/<slot>.png`, also z. B. `bilder/h03-foto.png`. Den Ordner bei Bedarf anlegen. JPG oder WebP vorher umwandeln: `ffmpeg -i ergebnis.jpg marketing/highlights/bilder/h03-foto.png`.
-4. **Neu rendern** im Repo-Wurzelordner: `cd /home/user/fenstero && node marketing/highlights/render.mjs`. Das Foto steht laut Storyboard randlos oben und läuft weich in #161616 aus, wie `.hero-foto` in `web/assets/portal.css`. Kicker, Headline, Lead und Chips stehen erst darunter auf dem dunklen Grund. Hat `render.mjs` Optionen für einzelne Screens, stehen sie im Kopf des Skripts.
+4. **Neu rendern und prüfen** im Repo-Wurzelordner: `cd /home/user/fenstero && RASTER=1 node marketing/highlights/render.mjs`. Das Foto steht randlos oben und läuft weich in #161616 aus, wie `.hero-foto` in `web/assets/portal.css`. Kopfzeile, Kicker, Headline, Lead und Chips stehen erst darunter auf dem dunklen Grund. Ein Slot-Foto steht oben bündig (Ausschnitt `50% 0%`). Das `--ef-fp` im Screen (h14 `50% 22%`, h19 `50% 10%`) gilt nur für das Ersatzfoto und muss nicht geändert werden. `render.mjs` meldet je Foto, welche Zeilen des Fotos in der Gesichtszone liegen. In `out/raster-<screen>.png` ist die Gesichtszone türkis umrandet: Gesicht und Pfote mit Werkzeug müssen darin liegen, nichts davon in den oberen 250 px. Sitzt das Gesicht etwas zu tief, am `<img>` im Screen `data-fp="50% 4%"` setzen (höherer Wert schiebt das Foto nach oben) und noch einmal rendern. Sitzt es zu hoch, neu erzeugen.
 5. **Optional bewegen** (Abschnitte 3 und 4): Kling, Bild zu Video, 5 s. Ablage-Vorschlag: `/home/user/fenstero/marketing/highlights/video/<screen>.mp4`.
 
 **Prüfliste vor dem Ablegen**
@@ -49,7 +49,8 @@ Begleittexte für alle 20 Screens und der Link-Sticker stehen in Abschnitt 6.
 - Kein Buchstabe, keine Ziffer, kein Logo, kein Wasserzeichen. Auch nicht auf Transporter, Tasse, Papier oder Werkzeug.
 - Bildschirme zeigen vom Betrachter weg oder sind dunkel und leer.
 - Figur wie im Referenzfoto: Fellfarbe, Gesicht, Latzhose, Gürtel. Pfoten mit Krallen, keine Menschenhände, keine zusätzlichen Finger.
-- Gesicht und Handlung im oberen Drittel. Ab etwa der Bildmitte nur ruhige, dunkle Flächen.
+- Format 4:5, mindestens 1120 × 1400 px.
+- Oberes Fünftel (bis 19 % der Bildhöhe) nur Raum, Decke und Licht, kein Gesicht. Kopf und Augen bei 19 bis 26 % der Bildhöhe, die Pfote mit dem Werkzeug direkt darunter bis 32 %. Darunter ruhig, ab etwa der Bildmitte dunkel.
 - Fertige Fensterrahmen weiß oder anthrazit.
 - Keine Menschen, kein Baustellenchaos, nichts Gefährliches.
 - Bär und Waschbär nie im selben Bild.
@@ -90,18 +91,34 @@ Begleittexte für alle 20 Screens und der Link-Sticker stehen in Abschnitt 6.
 - Kamera auf Augenhöhe der Figur oder knapp darunter, gerade Linien, keine Weitwinkelverzerrung.
 - Leichtes Filmkorn, natürliche, leicht gedeckte warme Farben: Honigholz, Ocker, Bernstein, gedämpftes Grün.
 
-### Komposition für Story 9:16
+### Komposition: Format 4:5, Motiv oben
 
-Hochformat von Anfang an erzeugen, nicht aus einem Querformat schneiden. Richtwerte bei 1080 × 1920 px; maßgeblich ist die Ausblendung, die `render.mjs` setzt.
+Neue Fotos im Hochformat 4:5 erzeugen, mindestens 1120 × 1400 px, wie die vorhandenen Fotos in `web/bilder/foto/`. Nicht aus einem Querformat schneiden. Ein 9:16-Foto bringt nichts: Der Screen zeigt ohnehin nur das obere Band.
 
-| Bereich (px von oben) | Was dort liegt | Inhalt im Foto |
-|---|---|---|
-| 0 bis 250 | Bedienleiste von Instagram | Raum, Decke, Licht; kein Gesicht |
-| 250 bis etwa 750 | Motiv | Gesicht, Pranken, Werkzeug, die eine Handlung |
-| etwa 750 bis 950 | Auslauf | ruhige, dunkler werdende Flächen: Boden, Tischkante, Schatten |
-| etwa 950 bis 1670 | Kicker, Headline, Lead, Chips | warmer, fast schwarzer Grund nahe #161616, keine Details |
-| 1670 bis 1920 | Bedienleiste von Instagram | dunkel |
+So zeigt `render.mjs` ein Foto: randlos ab der Oberkante der Bühne, 1080 px breit, über der Kopfzeile (`object-fit: cover`). Ein 4:5-Foto wird dabei 1350 px hoch. Ein Slot-Foto steht oben bündig (Ausschnitt `50% 0%`), seine Zeilen liegen also fast 1:1 auf der Bühne (Faktor 0,96 bei 1120 px Breite). Bis 56 % der Fotofläche ist es voll sichtbar, danach läuft es bis zu deren Ende ganz in #161616 aus. Das Foto liegt nie hinter Text. Die Fotofläche ist je Slot verschieden hoch, weil der Text darunter verschieden lang ist. Gemessen am 21.10.2026 (y in px von oben auf der Bühne 1080 × 1920):
 
+| Slot | Fotofläche | voll sichtbar bis | Deckkraft 72 % bei | ganz ausgeblendet bei | davon gezeigt bei 4:5, oben bündig |
+|---|---|---|---|---|---|
+| h01 (vorhanden) | y 0 bis 783 | 438 | 542 | 783 | obere 58 % |
+| h03 (neu) | y 0 bis 783 | 438 | 542 | 783 | obere 58 % |
+| h07 (vorhanden, 1:1) | y 0 bis 703 | 394 | 486 | 703 | obere 52 % (beim vorhandenen 1:1-Foto 65 %) |
+| h10 (vorhanden) | y 0 bis 865 | 484 | 598 | 865 | obere 64 % |
+| h14 (neu) | y 0 bis 651 | 364 | 450 | 651 | obere 48 % |
+| h19 (neu) | y 0 bis 623 | 349 | 431 | 623 | obere 46 % |
+
+Daraus folgt die Komposition. Sie passt in jeden der sechs Slots:
+
+| Bühne (y von oben) | im 4:5-Foto (Anteil der Höhe, Zeilen bei 1120 × 1400) | Was dort liegt | Inhalt im Foto |
+|---|---|---|---|
+| 0 bis 250 | 0 bis 19 % (0 bis 260) | Bedienleiste von Instagram: Fortschrittsbalken, Profilname | Raum, Decke, Licht; kein Gesicht, keine Pfote |
+| 260 bis 350 | 19 bis 26 % (270 bis 363) | in jedem Slot voll sichtbar | Kopf und Augen |
+| 350 bis 430 | 26 bis 32 % (363 bis 446) | Ausblendung beginnt, in h19 noch 72 % Deckkraft, sonst mehr | Pfote mit dem einen Werkzeug, die Handlung |
+| 430 bis Ende der Fotofläche (623 bis 865) | 32 bis 46 % (h19) bzw. 64 % (h10) | Ausblendung bis ganz durchsichtig | ruhige, dunkler werdende Flächen: Oberkörper, Tischkante, Boden |
+| darunter bis 1670 | ab 46 bis 64 % | kein Foto mehr: Kopfzeile, Kicker, Headline, Lead, Chips auf #161616 | wird nicht gezeigt; trotzdem ruhig und dunkel halten, falls ein Text kürzer wird |
+| 1670 bis 1920 | entfällt | Bedienleiste von Instagram | entfällt |
+
+- Das Tier ist deshalb von etwas weiter weg zu sehen als in den vorhandenen Fotos (Halbtotale), der Kopf ist klein im Bild. Die Ohren dürfen knapp in die oberen 19 % ragen, Augen und Schnauze nicht.
+- Ändert sich ein Text auf einem Foto-Screen, ändert sich die Fotofläche. `render.mjs` meldet die aktuellen Werte bei jedem Lauf, `RASTER=1` zeigt die Gesichtszone.
 - Links und rechts fällt das Bild natürlich ins Dunkle (Schatten, Wände). Oben darf Licht sein.
 - Eine Handlung je Bild, ein Werkzeug in der Pfote. Das Tier tut etwas und schaut nicht wie ein Maskottchen in die Kamera.
 - Keine kräftig grünen und keine großen cremeweißen Flächen im unteren Teil. Sie würden mit dem grünen Signal und der Cream-Pille der Grafik konkurrieren.
@@ -119,27 +136,27 @@ Hochformat von Anfang an erzeugen, nicht aus einem Querformat schneiden. Richtwe
 Den Master-Prompt jedem neuen Foto-Prompt voranstellen. Die Prompts in Abschnitt 3 enthalten ihn bereits in verdichteter Form und sind auch allein vollständig.
 
 ```text
-Photorealistic advertising photograph for a calm, premium craft brand. An anthropomorphic animal does a real human task around windows with quiet competence: a brown grizzly bear is the window maker in his own carpentry workshop, a raccoon is the homeowner in his own house. Warm golden-hour sunlight or soft natural window daylight, warm practical lamps as fill light, gentle backlight in the fur, fine sawdust or dust glowing in the light. Shot on a 35 mm lens at f/2, shallow depth of field, focus on the eyes and on the paw holding the one tool, softly blurred foreground and background, subtle film grain, natural, slightly muted warm colours: honey wood, ochre, amber, muted green. Real, highly detailed fur, believable proportions, paws with visible claws. Finished window frames are white or anthracite. Vertical 9:16 composition for a phone story: the face and the action sit in the upper third of the frame, above them the room and the light; from the middle of the frame downward the scene becomes calm, low in detail and falls off into deep, warm, near-black shadow; the left and right edges fade into darkness. Any screen faces away from the camera or is dark and blank. No text, no letters, no numbers, no logos, no signage, no watermark, no people.
+Photorealistic advertising photograph for a calm, premium craft brand. An anthropomorphic animal does a real human task around windows with quiet competence: a brown grizzly bear is the window maker in his own carpentry workshop, a raccoon is the homeowner in his own house. Warm golden-hour sunlight or soft natural window daylight, warm practical lamps as fill light, gentle backlight in the fur, fine sawdust or dust glowing in the light. Shot on a 35 mm lens at f/2, shallow depth of field, focus on the eyes and on the paw holding the one tool, softly blurred foreground and background, subtle film grain, natural, slightly muted warm colours: honey wood, ochre, amber, muted green. Real, highly detailed fur, believable proportions, paws with visible claws. Finished window frames are white or anthracite. Vertical 4:5 composition, medium-wide shot from a little further back, so the animal's head is small in the frame: the top fifth of the frame shows only the room, the ceiling and the light; the head sits just below it, between one fifth and one quarter of the way down from the top edge, and the paw with the one tool directly below the head, so the whole action stays within the upper third; below that the scene becomes calm and low in detail, and from the middle of the frame downward it falls off into deep, warm, near-black shadow; the left and right edges fade into darkness. Any screen faces away from the camera or is dark and blank. No text, no letters, no numbers, no logos, no signage, no watermark, no people.
 ```
 
 **Negativliste** (für Werkzeuge mit eigenem Feld; bei Nano Banana Pro, das kein Negativfeld hat, die Kurzfassung als „Avoid: …“ an den Prompt hängen, wie in Abschnitt 3):
 
 ```text
-text, letters, numbers, captions, subtitles, watermark, signature, logo, brand name, lettering on vehicles, license plate, signage, readable screen, user interface on screens, app icons, glowing screen facing the camera, people, human hands, human face, extra limbs, extra fingers, fused paws, deformed claws, duplicated animals, cartoon, 3D render, CGI look, plastic fur, oversaturated colours, neon light, HDR halo, heavy lens flare, fisheye distortion, tilted horizon, motion blur on the subject, bright or cluttered lower half, white floor, coloured window frames, construction chaos, sparks, running power tools, mascot pose looking into the camera, collage, split screen, border, frame, rounded corners, artificial vignette overlay, gradient overlay
+text, letters, numbers, captions, subtitles, watermark, signature, logo, brand name, lettering on vehicles, license plate, signage, readable screen, user interface on screens, app icons, glowing screen facing the camera, people, human hands, human face, extra limbs, extra fingers, fused paws, deformed claws, duplicated animals, cartoon, 3D render, CGI look, plastic fur, oversaturated colours, neon light, HDR halo, heavy lens flare, fisheye distortion, tilted horizon, motion blur on the subject, head near the top edge, face in the top fifth, close-up, bright or cluttered lower half, white floor, coloured window frames, construction chaos, sparks, running power tools, mascot pose looking into the camera, collage, split screen, border, frame, rounded corners, artificial vignette overlay, gradient overlay
 ```
 
 ## 3. Foto-Slots
 
-Sechs Slots: drei vorhandene Fotos (h01, h07, h10) und drei neue (h03, h14, h19). Für die vorhandenen gilt laut Storyboard das Foto aus `web/bilder/foto/`. Der Prompt dort baut es nur auf 9:16 aus, falls der Auslauf im Render zu knapp wird; die Bildmitte bleibt unverändert.
+Sechs Slots: drei vorhandene Fotos (h01, h07, h10) und drei neue (h03, h14, h19). Für die vorhandenen gilt laut Storyboard das Foto aus `web/bilder/foto/`. Sie brauchen keinen Ausbau: `render.mjs` zeigt ohnehin nur ihr oberes Band (h01 die oberen 58 %, h07 die oberen 65 %, h10 mit Ausschnitt `50% 18%` die Zeilen bei 6 bis 71 % der Höhe), den Auslauf nach unten erzeugt die Ausblendung. Für diese drei Slots steht hier deshalb nur der Kling-Prompt.
 
 Referenzbilder werden in den Prompts nach ihrem Inhalt benannt, nicht nummeriert. Nano Banana Pro kennt keine Reihenfolge.
 
 Für alle Slots gleich:
 
-- **Format:** 9:16, mindestens 1080 × 1920 px, besser 2K oder 4K. PNG.
+- **Format:** 4:5, mindestens 1120 × 1400 px, besser 2K oder 4K. PNG. Komposition wie in Abschnitt 1: Kopf bei 19 bis 26 % der Bildhöhe, Handlung bis 32 %.
 - **Ablage:** `/home/user/fenstero/marketing/highlights/bilder/<slot>.png`
-- **Neu rendern:** `cd /home/user/fenstero && node marketing/highlights/render.mjs`
-- **Kling:** Bild zu Video, 5 s, kein Endbild, Startbild ist das fertig gerenderte PNG des Screens (empfohlen) oder das Rohfoto. Der Prompt lässt den dunklen Teil mit dem Text stillstehen. Negativ-Prompt für alle Foto-Screens:
+- **Neu rendern und prüfen:** `cd /home/user/fenstero && RASTER=1 node marketing/highlights/render.mjs`, dann `out/raster-<screen>.png` ansehen (Ablauf, Schritt 4).
+- **Kling:** Bild zu Video, 5 s, kein Endbild, Startbild ist das fertig gerenderte PNG des Screens (1080 × 1920). Das Rohfoto im Format 4:5 ergäbe kein Story-Video. Der Prompt lässt den dunklen Teil mit dem Text stillstehen. Negativ-Prompt für alle Foto-Screens:
 
 ```text
 text changes, morphing letters, new text, warping, wobble, flicker, fast motion, camera shake, zoom out, rotation, scene cut, extra animals, people, human hands, extra limbs, deformed paws, screen turning toward the camera, glowing screen, vehicle moving
@@ -147,17 +164,10 @@ text changes, morphing letters, new text, warping, wobble, flicker, fast motion,
 
 ### 3.1 `h01-foto` · h01 „Aufmaß ohne Anfahrt.“ (vorhanden)
 
-- **Datei:** `h01-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h01-foto.png`
-- **Quelle laut Storyboard:** `web/bilder/foto/start-fensterbauer.webp` (1120 × 1400, 4:5). Der Ausbau unten ist optional.
-- **Format:** 9:16, mindestens 1080 × 1920 px.
-- **Referenz:** start-fensterbauer.webp (das Bild, das ausgebaut wird).
+- **Datei, nur für ein anderes Foto:** `h01-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h01-foto.png`
+- **Quelle laut Storyboard:** `web/bilder/foto/start-fensterbauer.webp` (1120 × 1400, 4:5), im Screen als Ersatzfoto `bilder/bar-werkstatt.webp`. Kein neues Foto nötig.
+- **Im Screen:** Fotofläche y 0 bis 783, voll sichtbar bis 438, Ausschnitt `50% 0%`.
 - **Motiv:** Der Bär sitzt in seiner Werkstatt an der Hobelbank und prüft ein Aufmaß auf dem Tablet, hinter ihm lehnen fertige Fensterrahmen im goldenen Abendlicht.
-
-**Nano Banana Pro** (Bearbeitung, Ausbau auf 9:16):
-
-```text
-Extend the attached golden-hour workshop photo of the brown grizzly bear in tan canvas bib overalls who checks a tablet at the workbench to a vertical 9:16 frame. Keep the original photograph completely unchanged and place it in the upper part of the new frame: the same bear, pose and smile, the tablet with its back to the camera, the workbench with tools and sawdust, the leaning window frames, the tall windows with white frames and the low sun on the right. Add a little more of the room above: wooden ceiling beams and the warm pendant lamp. Below the original frame continue the same workshop floor with soft sawdust and the legs of the workbench, in the exact same light direction, colour temperature and film grain, getting calmer and darker toward the bottom until the lowest third is an even, warm, near-black shadow with almost no detail. The left and right edges stay in deep shadow. Add no new objects, no text, no logos, no people.
-```
 
 **Kling** (5 s):
 
@@ -165,18 +175,20 @@ Extend the attached golden-hour workshop photo of the brown grizzly bear in tan 
 Very slow, steady push-in of the camera, about 5 percent over 5 seconds, locked and level, no shake. The bear at the workbench taps once on the tablet with one claw, looks up briefly with a content smile and turns back to the tablet. Sawdust drifts slowly through the golden light, the sun flickers softly through the pine trees outside the windows. Window frames, tools and workbench stay still. The tablet keeps its back to the camera. The dark lower part of the frame stays completely still and unchanged; any text in it stays sharp and identical.
 ```
 
-### 3.2 `h03-foto` · h03 „In 4 Klicks raus.“ (neu)
+### 3.2 `h03-foto` · h03 „In 4 Klicks bereit.“ (neu)
 
 - **Datei:** `h03-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h03-foto.png`
-- **Format:** 9:16, mindestens 1080 × 1920 px, besser 2K oder 4K.
+- **Bis dahin:** h03 zeigt statt des Bärenfotos aus h01 das Link-Icon (`aufnahmen/h03-ersatz-link.svg`). Liegt das Foto in `bilder/`, rendert `render.mjs` es ohne weitere Änderung.
+- **Format:** 4:5, mindestens 1120 × 1400 px, besser 2K oder 4K.
+- **Im Screen:** Fotofläche y 0 bis 783, voll sichtbar bis 438, ganz ausgeblendet bei 783. Gezeigt werden die oberen 58 % des Fotos. Kopf bei 19 bis 26 %, Smartphone bis 32 % der Bildhöhe.
 - **Referenz:** start-fensterbauer.webp für Figur, Kleidung, Werkstatt und Licht.
 - **Motiv:** Der Bär steht in seiner Werkstatt neben einem Fensterrahmen auf zwei Böcken und tippt entspannt auf sein Smartphone, durch das offene Tor sieht man den Firmentransporter, der heute stehen bleibt.
 
 **Nano Banana Pro:**
 
 ```text
-Use the brown grizzly bear from the attached golden-hour workshop photo as the same character: same shaggy reddish-brown fur, same face and lighter muzzle, same tan canvas bib overalls with dark straps, metal buckles and chest pocket, same leather tool belt with hammer, yellow tape measure and screwdrivers, no shirt. Take the bright wooden workshop, the warm light and the colour grading from that photo as well. Vertical 9:16 photograph. The bear stands upright in his workshop beside a finished white window frame lying flat on two wooden trestles, relaxed, holding a black smartphone at chest height in one paw and tapping it with a claw of the other paw; the phone screen faces him and is turned away from the camera; calm, satisfied expression. Behind him on the right the large workshop door stands open, and outside in the yard a plain white van without any lettering is parked in the evening sun. Warm, low golden-hour light falls in through the open door, backlight in his fur, sawdust floating in the beams. 35 mm lens at f/2, shallow depth of field, focus on his face and paws, subtle film grain, natural warm colours. Composition: his head and the phone sit in the upper third of the frame, the open door with the van at the same height behind him; below his hips the scene turns into the calm, dark workshop floor with a little sawdust that falls into warm, near-black shadow across the lower half; dark edges left and right. No text, no letters, no numbers, no logos, no people.
-Avoid: readable screen, lettering or logo on the van, license plate, human hands, extra fingers, cartoon look, bright lower half.
+Use the brown grizzly bear from the attached golden-hour workshop photo as the same character: same shaggy reddish-brown fur, same face and lighter muzzle, same tan canvas bib overalls with dark straps, metal buckles and chest pocket, same leather tool belt with hammer, yellow tape measure and screwdrivers, no shirt. Take the bright wooden workshop, the warm light and the colour grading from that photo as well. Vertical 4:5 photograph, medium-wide shot from a little further back. The bear stands upright in his workshop beside a finished white window frame lying flat on two wooden trestles, relaxed, holding a black smartphone at chest height in one paw and tapping it with a claw of the other paw; the phone screen faces him and is turned away from the camera; calm, satisfied expression. Behind him on the right the large workshop door stands open, and outside in the yard a plain white van without any lettering is parked in the evening sun. Warm, low golden-hour light falls in through the open door, backlight in his fur, sawdust floating in the beams. 35 mm lens at f/2, shallow depth of field, focus on his face and paws, subtle film grain, natural warm colours. Composition: the top fifth of the frame shows only the workshop ceiling with its beams and the warm light; his head sits just below it, between one fifth and one quarter of the way down from the top edge, and the phone in his paws directly below his head, so head and phone stay within the upper third of the frame; the open door with the van stands at the same height behind him. Below his chest the scene becomes calm: the trestles and the workshop floor with a little sawdust fall into warm, near-black shadow, and the lower half is an even dark shadow; dark edges left and right. No text, no letters, no numbers, no logos, no people.
+Avoid: readable screen, lettering or logo on the van, license plate, human hands, extra fingers, cartoon look, close-up, head near the top edge, bright lower half.
 ```
 
 **Kling** (5 s):
@@ -187,17 +199,10 @@ Very slow push-in toward the bear, locked and level, no shake. The bear taps the
 
 ### 3.3 `h07-foto` · h07 „Ihr Kunde misst.“ (vorhanden)
 
-- **Datei:** `h07-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h07-foto.png`
-- **Quelle laut Storyboard:** `web/bilder/foto/start-hauseigentuemer.webp` (1250 × 1250, quadratisch). Der Ausbau auf 9:16 braucht viel neuen Bildraum; nur nutzen, wenn das quadratische Foto im Render zu knapp wird.
-- **Format:** 9:16, mindestens 1080 × 1920 px.
-- **Referenz:** start-hauseigentuemer.webp (das Bild, das ausgebaut wird).
+- **Datei, nur für ein anderes Foto:** `h07-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h07-foto.png`
+- **Quelle laut Storyboard:** `web/bilder/foto/start-hauseigentuemer.webp` (1250 × 1250, quadratisch), im Screen als Ersatzfoto `bilder/waschbaer-tritt.webp`. Kein neues Foto nötig.
+- **Im Screen:** Fotofläche y 0 bis 703, voll sichtbar bis 394, Ausschnitt `50% 0%`.
 - **Motiv:** Der Waschbär steht auf einem Tritt und misst mit dem gelben Zollstock die Maueröffnung, in der anderen Pfote das Handy.
-
-**Nano Banana Pro** (Bearbeitung, Ausbau auf 9:16):
-
-```text
-Extend the attached daylight photo of the raccoon standing on a paint-splattered wooden step stool, measuring a raw brick window opening with a yellow folding rule while holding a black smartphone, to a vertical 9:16 frame. Keep the original photograph completely unchanged and place it in the upper part of the new frame: the same raccoon with the red pencil behind its ear and the leather tool belt, the phone, the folding rule, the brick opening, the scaffolding outside and the soft daylight. Add a little of the plain ceiling above. Below the original frame continue the same room: the lower legs of the step stool and the dusty floor with a protective fleece, in the same light direction, colour temperature and film grain, getting calmer and darker toward the bottom until the lowest third is an even, warm, near-black shadow with almost no detail. The left and right edges fall into shadow. Add no new objects, no text, no logos, no people.
-```
 
 **Kling** (5 s):
 
@@ -207,17 +212,10 @@ Very slow push-in toward the raccoon, locked and level, no shake. The raccoon sl
 
 ### 3.4 `h10-foto` · h10 „Bis ins Detail.“ (vorhanden)
 
-- **Datei:** `h10-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h10-foto.png`
-- **Quelle laut Storyboard:** `web/bilder/foto/app-start.webp` (1120 × 1400, 4:5). Der Ausbau unten ist optional.
-- **Format:** 9:16, mindestens 1080 × 1920 px.
-- **Referenz:** app-start.webp (das Bild, das ausgebaut wird).
+- **Datei, nur für ein anderes Foto:** `h10-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h10-foto.png`
+- **Quelle laut Storyboard:** `web/bilder/foto/app-start.webp` (1120 × 1400, 4:5), im Screen als Ersatzfoto `bilder/waschbaeren-sofa.webp`. Kein neues Foto nötig.
+- **Im Screen:** Fotofläche y 0 bis 865, voll sichtbar bis 484, Ausschnitt `50% 18%`.
 - **Motiv:** Drei Waschbären im Wohnzimmer: Einer fotografiert die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche ins Handy, einer lehnt sich zurück.
-
-**Nano Banana Pro** (Bearbeitung, Ausbau auf 9:16):
-
-```text
-Extend the attached warm living-room photo of three raccoons (one in the foreground photographing a window opening with a yellow folding rule, one on the beige sofa tapping a smartphone, one leaning back with closed eyes beside a coffee cup) to a vertical 9:16 frame. Keep the original photograph completely unchanged and place it in the upper part of the new frame, including the phone in the foreground exactly as it is. Add a little more ceiling and soft window light above. Below the original frame continue the same room: the blurred wooden coffee table, the woven rug and the wooden floor, in the same golden light and film grain, getting calmer and darker toward the bottom until the lowest third is an even, warm, near-black shadow with almost no detail. The left and right edges fall into shadow. Add no new objects, no text, no logos, no people.
-```
 
 **Kling** (5 s):
 
@@ -228,7 +226,8 @@ Very slow push-in toward the raccoon on the sofa, locked and level, no shake. Th
 ### 3.5 `h14-foto` · h14 „Aufmaß kommt sortiert.“ (neu)
 
 - **Datei:** `h14-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h14-foto.png`
-- **Format:** 9:16, mindestens 1080 × 1920 px, besser 2K oder 4K.
+- **Format:** 4:5, mindestens 1120 × 1400 px, besser 2K oder 4K.
+- **Im Screen:** Fotofläche y 0 bis 651, voll sichtbar bis 364, ganz ausgeblendet bei 651. Gezeigt werden die oberen 48 % des Fotos. Kopf bei 19 bis 26 %, Blatt, Pfote und Tasse bis 32 % der Bildhöhe. Das `--ef-fp: 50% 22%` im Screen gilt nur dem Ersatzfoto, das Slot-Foto steht oben bündig.
 - **Referenz:** start-fensterbauer.webp für Figur, Kleidung und Licht.
 - **Motiv:** Der Bär sitzt im kleinen Büro seiner Werkstatt am Holzschreibtisch und prüft ein ausgedrucktes Aufmaßblatt mit Fensterzeichnungen, daneben Tablet, Zollstock und Kaffeetasse, hinter der Glasscheibe die Werkstatt mit gestapelten Fensterrahmen.
 - **Achtung:** Das Blatt zeigt nur einen blauen Kopfbalken und Linienzeichnungen ohne Schrift und ohne Ziffern. Das Tablet zeigt die Rückseite.
@@ -236,8 +235,8 @@ Very slow push-in toward the raccoon on the sofa, locked and level, no shake. Th
 **Nano Banana Pro:**
 
 ```text
-Use the brown grizzly bear from the attached golden-hour workshop photo as the same character: same shaggy reddish-brown fur, same face and lighter muzzle, same tan canvas bib overalls with dark straps and metal buckles, same leather tool belt, no shirt. Keep the warm light and colour grading of that photo. Vertical 9:16 photograph. The bear sits at a sturdy wooden desk in the small office of his workshop, leaning forward with a focused, content look, one paw resting on a printed A4 sheet that shows only a plain blue header band and simple line drawings of window outlines with dimension lines, without any letters or numbers. Beside the sheet a tablet stands in a case with its back to the camera, a folded yellow carpenter's folding rule and a plain white coffee mug with a thin wisp of steam. Behind him a large interior glass pane looks into the workshop, where finished white and anthracite window frames stand stacked in warm evening light, softly out of focus. A warm desk lamp as fill light, low golden sun from the workshop windows. 35 mm lens at f/2, slightly high eye-level view onto the desk, shallow depth of field, focus on his eyes and the paw on the sheet, subtle film grain. Composition: his head, the sheet and the mug sit in the upper third of the frame; below the desk edge the frame becomes calm and dark, the front of the desk and the floor fall into warm, near-black shadow across the lower half; dark edges left and right. No text, no letters, no numbers, no logos, no people.
-Avoid: readable text on the paper, numbers in the drawings, glowing screen facing the camera, printed mug, human hands, extra fingers, cartoon look.
+Use the brown grizzly bear from the attached golden-hour workshop photo as the same character: same shaggy reddish-brown fur, same face and lighter muzzle, same tan canvas bib overalls with dark straps and metal buckles, same leather tool belt, no shirt. Keep the warm light and colour grading of that photo. Vertical 4:5 photograph, medium-wide shot from a little further back. The bear sits at a sturdy wooden desk in the small office of his workshop, leaning forward with a focused, content look, one paw resting on a printed A4 sheet that shows only a plain blue header band and simple line drawings of window outlines with dimension lines, without any letters or numbers. Beside the sheet a tablet stands in a case with its back to the camera, a folded yellow carpenter's folding rule and a plain white coffee mug with a thin wisp of steam. Behind him a large interior glass pane looks into the workshop, where finished white and anthracite window frames stand stacked in warm evening light, softly out of focus. A warm desk lamp as fill light, low golden sun from the workshop windows. 35 mm lens at f/2, slightly high eye-level view onto the desk, shallow depth of field, focus on his eyes and the paw on the sheet, subtle film grain. Composition: the top fifth of the frame shows only the glass pane with the softly lit workshop behind it; his head sits just below it, between one fifth and one quarter of the way down from the top edge, and the desk top with the sheet, his paw and the mug directly below his head, so the whole action stays within the upper third of the frame. Below the desk edge the frame becomes calm and dark: the front of the desk and the floor fall into warm, near-black shadow, and the lower half is an even dark shadow; dark edges left and right. No text, no letters, no numbers, no logos, no people.
+Avoid: readable text on the paper, numbers in the drawings, glowing screen facing the camera, printed mug, human hands, extra fingers, cartoon look, close-up, head near the top edge.
 ```
 
 **Kling** (5 s):
@@ -246,18 +245,19 @@ Avoid: readable text on the paper, numbers in the drawings, glowing screen facin
 Very slow push-in toward the bear at the desk, locked and level, no shake. The bear runs one claw slowly along a drawn window outline on the sheet, gives a small, satisfied nod and reaches for the coffee mug. Thin steam rises from the mug, the light in the workshop behind the glass shifts very softly. The sheet keeps its plain drawings, no text appears on it, the tablet keeps its back to the camera. The dark lower part of the frame stays completely still and unchanged; any text in it stays sharp and identical.
 ```
 
-### 3.6 `h19-foto` · h19 „Zahlen nur bei Eingang.“ (neu)
+### 3.6 `h19-foto` · h19 „Links kosten nichts.“ (neu)
 
 - **Datei:** `h19-foto.png` → `/home/user/fenstero/marketing/highlights/bilder/h19-foto.png`
-- **Format:** 9:16, mindestens 1080 × 1920 px, besser 2K oder 4K.
+- **Format:** 4:5, mindestens 1120 × 1400 px, besser 2K oder 4K.
+- **Im Screen:** Fotofläche y 0 bis 623, voll sichtbar bis 349, ganz ausgeblendet bei 623. Das ist der knappste Slot: Gezeigt werden nur die oberen 46 % des Fotos. Kopf bei 19 bis 26 %, Becher bis 32 % der Bildhöhe. Das `--ef-fp: 50% 10%` im Screen gilt nur dem Ersatzfoto, das Slot-Foto steht oben bündig.
 - **Referenz:** start-fensterbauer.webp für Figur, Kleidung und Licht.
 - **Motiv:** Der Bär lehnt entspannt am geparkten Firmentransporter im Hof vor seiner Werkstatt, einen Kaffeebecher in der Pranke, das Smartphone in der Brusttasche, unter dem Vordach stehen gestapelte Fensterrahmen.
 
 **Nano Banana Pro:**
 
 ```text
-Use the brown grizzly bear from the attached golden-hour workshop photo as the same character: same shaggy reddish-brown fur, same face and lighter muzzle, same tan canvas bib overalls with dark straps, metal buckles and chest pocket, same leather tool belt, no shirt. Keep the warm light and colour grading of that photo. Vertical 9:16 photograph. The bear leans relaxed with one shoulder against a parked plain white van in the gravel yard in front of his wooden workshop, holding a plain white coffee mug in one paw, a black smartphone tucked into the chest pocket of his overalls with only its dark back showing, looking calmly and contentedly into the distance. Under the workshop canopy behind him finished white and anthracite window frames stand stacked, the workshop windows with white frames glow warm. Late afternoon sun low from the side, long soft shadows, backlight in his fur. The van has no lettering, no logo and no visible license plate. 35 mm lens at f/2.2, shallow depth of field, focus on his face and the mug, subtle film grain, natural warm colours. Composition: his head and the mug sit in the upper third of the frame, the van and the canopy around him at the same height; below his knees the yard turns into calm gravel that falls into warm, near-black shadow across the lower half; dark edges left and right. No text, no letters, no numbers, no logos, no people.
-Avoid: lettering on the van, license plate, printed mug, human hands, extra fingers, cartoon look, bright lower half.
+Use the brown grizzly bear from the attached golden-hour workshop photo as the same character: same shaggy reddish-brown fur, same face and lighter muzzle, same tan canvas bib overalls with dark straps, metal buckles and chest pocket, same leather tool belt, no shirt. Keep the warm light and colour grading of that photo. Vertical 4:5 photograph, medium-wide shot from a little further back. The bear leans relaxed with one shoulder against a parked plain white van in the gravel yard in front of his wooden workshop, holding a plain white coffee mug in one paw, a black smartphone tucked into the chest pocket of his overalls with only its dark back showing, looking calmly and contentedly into the distance. Under the workshop canopy behind him finished white and anthracite window frames stand stacked, the workshop windows with white frames glow warm. Late afternoon sun low from the side, long soft shadows, backlight in his fur. The van has no lettering, no logo and no visible license plate. 35 mm lens at f/2.2, shallow depth of field, focus on his face and the mug, subtle film grain, natural warm colours. Composition: the top fifth of the frame shows only the edge of the canopy and the warm evening light; his head sits just below it, between one fifth and one quarter of the way down from the top edge, and the mug in his paw directly below his head at chest height, so head and mug stay within the upper third of the frame; the van and the stacked frames under the canopy at the same height around him. Below his chest the scene becomes calm: his legs and the gravel yard fall into warm, near-black shadow, and the lower half is an even dark shadow; dark edges left and right. No text, no letters, no numbers, no logos, no people.
+Avoid: lettering on the van, license plate, printed mug, human hands, extra fingers, cartoon look, close-up, head near the top edge, bright lower half.
 ```
 
 **Kling** (5 s):
@@ -290,7 +290,7 @@ changing text, morphing letters, new words, blurred text, flickering numbers, wa
 
 Die Prompts unterscheiden sich nur im Ziel der Fahrt. So wirkt die Reihe ruhig und gleich.
 
-**h02 „975 € oder 79 €.“** Ziel: die Karte mit den beiden Kästen.
+**h02 „975 € oder 108 €.“** Ziel: die Karte mit den beiden Kästen.
 
 ```text
 Static graphic design on a flat dark background. The camera makes one very slow, smooth push-in of about 3 percent over 5 seconds toward the card with the two cost boxes in the lower middle, perfectly level. The image itself does not change: every letter, number, check mark, line and colour stays exactly as it is, sharp and still. No new elements, no light effects, no particles.
@@ -308,10 +308,10 @@ Static graphic design on a flat dark background. The camera makes one very slow,
 Static graphic design on a flat dark background. The camera makes one very slow, smooth push-in of about 3 percent over 5 seconds toward the row of share buttons and the message field below it, perfectly level. The image itself does not change: every letter, button, marker and colour stays exactly as it is, sharp and still; the message text stays fully readable. No new elements, no light effects, no particles.
 ```
 
-**h06 „Sie sehen, wer misst.“** Ziel: die drei Meldungskarten.
+**h06 „Sie sehen, wer misst.“** Ziel: die vier Projektkarten der Projektliste.
 
 ```text
-Static graphic design on a flat dark background. The camera makes one very slow, smooth push-in of about 3 percent over 5 seconds toward the three stacked notification cards, perfectly level. The image itself does not change: every name, number, icon and colour stays exactly as it is, sharp and still. No new elements, no pop-ups, no light effects, no particles.
+Static graphic design on a flat dark background. The camera makes one very slow, smooth push-in of about 3 percent over 5 seconds toward the four stacked project cards, perfectly level. The image itself does not change: every name, number, ring, status label, icon and colour stays exactly as it is, sharp and still. No new elements, no pop-ups, no light effects, no particles.
 ```
 
 **h08 „Zwei Fotos je Fenster.“** Ziel: der Telefonrahmen mit den beiden Fotokacheln.
@@ -350,7 +350,7 @@ Static graphic design on a flat dark background. The camera makes one very slow,
 Static graphic design on a flat dark background. The camera makes one very slow, smooth push-in of about 3 percent over 5 seconds toward the project card with the list of open points, perfectly level. The image itself does not change: every letter, number, badge and colour stays exactly as it is, sharp and still. No new elements, no light effects, no particles.
 ```
 
-**h16 „Bestellmaß schon drin.“** Ziel: der Kasten mit dem Bestellmaß-Vorschlag oben in der Karte.
+**h16 „Bestellmaß vorgerechnet.“** Ziel: der Kasten mit dem Bestellmaß-Vorschlag oben in der Karte.
 
 ```text
 Static graphic design on a flat dark background. The camera makes one very slow, smooth push-in of about 3 percent over 5 seconds toward the highlighted size box at the top of the upper card, perfectly level. The image itself does not change: every number, unit, letter and colour stays exactly as it is, sharp and still. No new elements, no light effects, no particles.
@@ -443,7 +443,8 @@ Eine Familie: Inter (Google Fonts) in 500 bis 800, Fallback Helvetica Neue, Aria
 - Bär = Fensterbauer: brauner Grizzly, Arbeitslatzhose aus braunem Canvas ohne Hemd, Werkzeuggürtel aus Leder, in seiner Werkstatt mit Fensterrahmen. Er fährt nie raus.
 - Waschbär = Hauseigentümer: Werkzeuggürtel, roter Bleistift hinterm Ohr, Handy, gelber Zollstock, im eigenen Haus.
 - Bär und Waschbär nie im selben Bild. Keine Menschen. Kein Text, keine Logos, keine Oberflächen im Bild; Bildschirme zeigen vom Betrachter weg. Fensterrahmen weiß oder anthrazit.
-- Komposition 9:16: Motiv im oberen Drittel, untere Hälfte ruhig und dunkel für Headline und Text.
+- Format 4:5, mindestens 1120 × 1400 px, nicht 9:16. Der Screen zeigt nur das obere Band: Das Foto steht randlos und oben bündig, 1080 px breit, und reicht je nach Textlänge bis y 620 bis 870 der Bühne. Voll sichtbar ist es bis 56 % dieser Höhe, danach läuft es in #161616 aus. Darunter stehen Kopfzeile und Text auf dem dunklen Grund, nie auf dem Foto.
+- Komposition: oberes Fünftel des Fotos (Bühne y 0 bis 250, Bedienleiste von Instagram) nur Raum und Licht, kein Gesicht. Kopf und Augen bei 19 bis 26 % der Fotohöhe (Bühne y 260 bis 350), die Pfote mit dem Werkzeug bis 32 % (y 430). Halbtotale, der Kopf ist klein im Bild. Darunter ruhige, dunkle Flächen.
 
 8. SPRACHE
 Deutsch, Sie-Form, sachlich, ruhig, verbindlich. Kurze Sätze. Keine Gedankenstriche als Einschub, keine Ausrufezeichen, keine Emojis, keine Superlative.
@@ -478,18 +479,25 @@ Abschluss h20:
 Liefern Sie je neuem Screen die Felder im Format von storyboard.json: id, layout (cover, inhalt oder abschluss), kicker, headline (Zeilen mit \n), gruenes_wort, lead, chips, klick_badge, visual, foto_slot, foto_motiv, belege. Auf Wunsch zusätzlich ein HTML-Entwurf mit 1080 × 1920 px und genau den Werten oben. Prüfen Sie zum Schluss: ein grünes Wort je Headline, höchstens eine Cream-Fläche, kein Text auf dem sichtbaren Foto, nichts unter 26 px außer label, 250 px oben und unten frei, jede Aussage belegt.
 ```
 
-## 6. Begleittexte für Sticker und Untertitel
+## 6. Begleittexte und Link-Sticker
 
-Je Screen höchstens ein Satz. Gesetzt in Inter, wie die Grafik, und nie über Headline oder Chips gelegt.
+Die Begleittexte kommen nie als Text auf die Screens, weder auf das PNG noch ins Video. Dort ist kein Platz frei: Auf den Inhalts-Screens reicht der Inhalt bis y 1533 bis 1582, die Fußzeile liegt bei 1630 bis 1670. Auf den Foto-Covern reicht der Textblock bis 1670, und auf dem Foto steht nie Text. Darüber und darunter liegen die freizuhaltenden 250 px. Der Text-Editor von Instagram bietet Inter außerdem nicht an.
+
+Wofür sie gedacht sind:
+
+- **Alternativtext** beim Hochladen, wo Instagram dafür ein Feld anbietet.
+- **Beschreibung unter einem Video**, wenn ein Screen aus Abschnitt 3 oder 4 zusätzlich als Reel oder Beitrag erscheint. Der Satz steht dann in der Beschreibung, nicht im Bild.
+
+In der Story selbst stehen sie nicht. Je Screen höchstens ein Satz.
 
 | Screen | Begleittext |
 |---|---|
 | h01 | In 6 kurzen Teilen sehen Sie, wie das Erstaufmaß ohne Anfahrt zu Ihnen kommt. |
 | h02 | Gespart wird die erste Fahrt, das Feinaufmaß vor der Fertigung machen Sie weiter selbst. |
-| h03 | Vom neuen Projekt bis zum versendeten Link sind es 4 Klicks und 1 Eingabe. |
+| h03 | Vom neuen Projekt bis WhatsApp mit fertiger Nachricht sind es 4 Klicks und 1 Eingabe. |
 | h04 | Mehr als den Namen Ihres Kunden brauchen Sie für den Link nicht. |
 | h05 | Ihr Kunde bekommt den Link von Ihnen, mit Ihrem Namen unter der Nachricht. |
-| h06 | Ob Ihr Kunde schon misst, sehen Sie im Projekt. |
+| h06 | Ob Ihr Kunde schon misst, sehen Sie in der Projektliste. |
 | h07 | Ihr Kunde öffnet den Link im Browser und legt los. |
 | h08 | Aus 2 Fotos je Fenster liest die KI die Einbausituation. |
 | h09 | Gemessen wird wie bei Ihnen: 3 Breiten, 3 Höhen, das kleinste Maß zählt. |
@@ -509,4 +517,4 @@ Je Screen höchstens ein Satz. Gesetzt in Inter, wie die Grafik, und nie über H
 
 - Sticker-Text: **Kostenlos starten**
 - Link: `https://eeziframes.com/#fensterbauer` (öffnet die Startseite gleich in der Ansicht für Fensterbauer, dort steht der Knopf „Kostenlos starten“)
-- Lage: unter der Cream-Pille, oberhalb der unteren 250 px, ohne die Pille zu verdecken.
+- Lage: unter der Cream-Pille, oberhalb der unteren 250 px, ohne die Pille zu verdecken. Frei ist dort y 1516 bis 1670. Der Sticker ist ein Instagram-Element, kein Begleittext; seine Schrift gibt Instagram vor.

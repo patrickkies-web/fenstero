@@ -5,13 +5,16 @@
 <title>h06 · Link · Sie sehen, wer misst.</title>
 <link rel="stylesheet" href="../vorlage/vorlage.css">
 <style>
-  /* Ausschnitt der drei Meldungen (Aufnahme 520 × 1000, Faktor 3): --s = Story-px je CSS-px; flex: none, damit nichts gestaucht wird */
-  .h-meldungen { --s: 1.66; flex: none; width: calc(512px * var(--s)) }
+  /* Ausschnitt der Projektliste (Aufnahme 572 × 476 CSS-px, Ansicht 600 × 1100, Faktor 3) in voller Inhaltsbreite;
+     flex: none, damit nichts gestaucht wird */
+  .h-projekte { flex: none; width: 912px }
 </style>
 </head>
 <body>
-<!-- Kapitel Link, Inhalt (h06): echte Aufnahme „Nachrichten“ im Betriebsbereich (werkzeug/link-aufnahmen.mjs), Beispieldaten aus betrieb().
-     Gezeigt als Ansicht im Projekt, keine Zusage einer E-Mail- oder Push-Benachrichtigung. -->
+<!-- Kapitel Link, Inhalt (h06): echte Aufnahme der Projektliste im Betriebsbereich (werkzeug/link-aufnahmen.mjs h06), Beispielbetrieb aus betrieb().
+     Die beiden offenen Projekte laufen dort durch die echte Modellfunktion Abrechnung.fortschritt (wie bei einer Meldung aus der App):
+     Roth „Link geöffnet“, Kaya „Kunde misst“ mit 4/4 (die App meldet nur 4, sobald das erste Fenster gespeichert ist), dazu die 60 Tage ab dem
+     ersten Öffnen. Keine Seite „Nachrichten“: Eine Meldung „misst gerade“ erzeugt das Produkt nicht. Keine Zusage einer E-Mail- oder Push-Nachricht. -->
 <main class="ef-buehne">
   <header class="ef-kopf">
     <span class="ef-wortmarke">eeziframes</span>
@@ -21,15 +24,9 @@
     <div class="ef-text">
       <p class="ef-kicker">Danach</p>
       <h2 class="ef-display">Sie sehen,<br>wer <span class="ef-gruen">misst.</span></h2>
-      <p class="ef-lead">Im Projekt sehen Sie, ob der Link geöffnet ist und wie weit Ihr Kunde misst.</p>
-      <ul class="ef-chips">
-        <li class="ef-chip">Link gesendet</li>
-        <li class="ef-chip">Link geöffnet</li>
-        <li class="ef-chip">Kunde misst</li>
-        <li class="ef-chip">Aufmaß da</li>
-      </ul>
+      <p class="ef-lead">In der Projektliste sehen Sie bei jedem Kunden, wie weit er ist.</p>
     </div>
-    <figure class="ef-ausschnitt ef-ausschnitt--grund h-meldungen"><img src="../aufnahmen/h06-nachrichten.png" alt="Meldungen: Familie Roth hat den Link geöffnet. Herr Kaya misst gerade, 2 von 4 Maßen eingetragen. Aufmaß eingegangen: Familie Weber, 4 Positionen, 5 Elemente, 8 Fotos."></figure>
+    <figure class="ef-ausschnitt ef-ausschnitt--grund h-projekte"><img src="../aufnahmen/h06-projekte.png" alt="Projektliste mit vier Kunden: Herr Kaya, Kunde misst, Link noch 60 Tage gültig. Familie Roth, Link geöffnet, über WhatsApp. Frau Schulze, Link gesendet, über SMS. Familie Weber, Aufmaß da, 4 Positionen, neu."></figure>
   </div>
   <footer class="ef-fuss">
     <ol class="ef-punkte" aria-label="Screen 4 von 4">
