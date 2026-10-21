@@ -1364,12 +1364,22 @@ if (teil(10)) {
   const NEU_OKT18 = ['/ratgeber/fenster-standardmasse/', '/ratgeber/fensterbank-ausmessen/', '/ratgeber/kellerfenster-ausmessen/', '/ratgeber/fenstertausch-altbau/', '/ratgeber/ral-montage-fenster/', '/ratgeber/uw-wert-fenster/', '/ratgeber/lueftungskonzept-fenstertausch/', '/fuer-fensterbauer/erstaufmass-feinaufmass/', '/fuer-fensterbauer/falsches-aufmass-haftung/', '/fuer-fensterbauer/aufmass-kostenpflichtig/', '/fuer-fensterbauer/geplatzter-aufmasstermin/', '/fuer-fensterbauer/fensterbau-software/'];
   const fbSeite = (await roh('/fuer-fensterbauer/')).text;
   ok(NEU_OKT18.every((u) => seo.SEITEN.some((x) => x.pfad === u) && uebersicht.includes('href="' + u + '"') && llAus.includes('(https://eeziframes.com' + u + ')') && (!u.startsWith('/fuer-fensterbauer/') || fbSeite.includes('href="' + u + '"'))) && /## Für Fensterbauer/.test(llAus), 'Ratgeber vom 18.10. (Standardmaße, Fensterbank, Kellerfenster, Altbau, RAL-Montage, Uw-Wert, Lüftungskonzept) und Unterseiten für Fensterbauer (Erstaufmaß, Haftung, Kosten, geplatzter Termin, Software): in Sitemap, Übersicht und llms.txt, die für Fensterbauer auch auf deren Seite');
-  /* Fußzeile aller Ratgeber und Seiten für Fensterbauer aus einer Quelle (scripts/ratgeber-fuss.mjs), mit jeder dieser Seiten */
-  const fussMod = await import(new URL('./ratgeber-fuss.mjs', import.meta.url).href), fussFehler = [];
-  const fussLinks = fussMod.GRUPPEN.flatMap(([, l]) => l.map(([h]) => h));
-  for (const [pf, datei] of fussMod.seiten(path10.join(WURZEL, 'web'))) { const m = fs10.readFileSync(datei, 'utf8').match(fussMod.FUSS); if (!m || m[0] !== fussMod.fusszeile(pf)) fussFehler.push(pf); }
-  const fussOhne = seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x) && !fussLinks.includes(x));
-  ok(!fussFehler.length && !fussOhne.length && fussMod.seiten(path10.join(WURZEL, 'web')).length >= 22, 'Fußzeile aller Ratgeber und Seiten für Fensterbauer gleich (scripts/ratgeber-fuss.mjs), in drei Gruppen, mit jeder dieser Seiten' + (fussFehler.length ? ' (abweichend: ' + fussFehler.join(', ') + ')' : '') + (fussOhne.length ? ' (fehlt: ' + fussOhne.join(', ') + ')' : ''));
+  /* Bausteine aller Ratgeber und Seiten für Fensterbauer aus einer Quelle (scripts/ratgeber-bausteine.mjs): „Auf dieser Seite“ mit
+     Lesezeit, der Weg zu neuen Fenstern mit „Nächster Schritt“, die Übersicht als Weg, die Fußzeile; jede Seite so, wie das Skript sie baut */
+  const bau = await import(new URL('./ratgeber-bausteine.mjs', import.meta.url).href), bauSeiten = bau.gebaut(path10.join(WURZEL, 'web'));
+  const bauFehler = bauSeiten.filter(([, , alt, neu]) => alt !== neu).map(([pf]) => pf);
+  const imWeg = bau.WEG.flatMap((x) => x.seiten), fussLinks = bau.GRUPPEN.flatMap(([, l]) => l.map(([h]) => h));
+  const ohneHeimat = seo.SEITEN.map((x) => x.pfad).filter((x) => (/^\/ratgeber\/.+/.test(x) && !imWeg.includes(x)) || (/^\/fuer-fensterbauer\//.test(x) && !bau.FENSTERBAUER.includes(x)) || (/^\/(ratgeber|fuer-fensterbauer)\/./.test(x) && !fussLinks.includes(x)));
+  const wegFehler = [];
+  for (const [pf, , alt] of bauSeiten) {
+    if (pf === '/ratgeber/') { if (!bau.WEG.every((x, k) => alt.includes('<h2 id="schritt-' + (k + 1) + '">')) || !imWeg.concat(bau.FENSTERBAUER).every((u) => alt.includes('href="' + u + '"'))) wegFehler.push(pf); continue; }
+    const inhalt = (alt.match(/<nav class="rg-inhalt"[\s\S]*?<\/nav>/) || [''])[0];
+    if (!/Auf dieser Seite · \d+ Min\. Lesezeit/.test(inhalt) || (inhalt.match(/<li>/g) || []).length < 3) wegFehler.push(pf + ' (Auf dieser Seite)');
+    if (imWeg.includes(pf) && ((alt.match(/aria-current="step"/g) || []).length !== 1 || !/class="rg-karte rg-weiter"/.test(alt))) wegFehler.push(pf + ' (Weg)');
+  }
+  ok(!bauFehler.length && !ohneHeimat.length && !wegFehler.length && bauSeiten.length >= 30, 'Leseführung aller Ratgeber (' + bauSeiten.length + ' Seiten, scripts/ratgeber-bausteine.mjs): „Auf dieser Seite“ mit Lesezeit, Weg in sechs Schritten mit „Nächster Schritt“, Übersicht als Weg, gleiche Fußzeile mit jeder Seite' + (bauFehler.length ? ' (nicht neu gebaut: ' + bauFehler.join(', ') + ')' : '') + (ohneHeimat.length ? ' (ohne Platz im Weg oder in der Fußzeile: ' + ohneHeimat.join(', ') + ')' : '') + (wegFehler.length ? ' (' + wegFehler.join(', ') + ')' : ''));
+  const NEU_WEG = ['/ratgeber/fenster-beschlagen/', '/ratgeber/fenster-undicht/', '/ratgeber/fenster-alter-erkennen/', '/ratgeber/fenster-reparieren-oder-austauschen/', '/ratgeber/fenster-material-vergleich/', '/ratgeber/dreifachverglasung/', '/ratgeber/fenster-oeffnungsarten/', '/ratgeber/fenster-angebot-vergleichen/'];
+  ok(NEU_WEG.every((u) => seo.SEITEN.some((x) => x.pfad === u) && uebersicht.includes('href="' + u + '"') && llAus.includes('(https://eeziframes.com' + u + ')')), 'Ratgeber für die Zeit vor dem Messen (beschlagen, undicht, Alter, reparieren oder tauschen, Material, Dreifachglas, Öffnungsarten, Angebote vergleichen): in Sitemap, Übersicht und llms.txt');
   const bildFehler = [];
   for (const sx of seo.SEITEN.filter((x) => UNTERSEITE.test(x.pfad))) {
     const t = (await roh(sx.pfad)).text;
@@ -1379,7 +1389,7 @@ if (teil(10)) {
       if (!src || !r || r.status !== 200 || !/image\/svg\+xml/.test(r.headers.get('content-type') || '') || r.headers.get('x-robots-tag') || alt.length < 40 || !/width="\d+" height="\d+"/.test(m[1])) bildFehler.push(sx.pfad + ' ' + src);
     }
   }
-  const bildDa = (await Promise.all(neueSeiten.concat(['/ratgeber/fenster-ausmessen/'], NEU_OKT18).map(async (u) => /<figure class="rg-bild"><img /.test((await roh(u)).text)))).every(Boolean);
+  const bildDa = (await Promise.all(neueSeiten.concat(['/ratgeber/fenster-ausmessen/', '/ratgeber/fenster-austauschen/'], NEU_OKT18, NEU_WEG).map(async (u) => /<figure class="rg-bild"><img /.test((await roh(u)).text)))).every(Boolean);
   ok(!bildFehler.length && bildDa, 'Abbildungen in den Ratgebern: Datei da (SVG), ohne noindex für die Bildersuche, Breite, Höhe und ein beschreibender Alternativtext' + (bildFehler.length ? ' (' + bildFehler.join(', ') + ')' : ''));
   const key = await roh('/' + seo.INDEXNOW + '.txt');
   const aufrufe = [], post = async (u, o) => { aufrufe.push({ u: u, o: o }); return { ok: true, status: 200 }; };

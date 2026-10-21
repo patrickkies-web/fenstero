@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" width="480" height="420" role="img" aria-labelledby="t d">
+<title id="t">Alter der Fenster erkennen: Abstandhalter lesen und Feuerzeugtest</title>
+<desc id="d">Oben ein Ausschnitt einer Isolierglasscheibe: Auf dem Abstandhalter zwischen den Scheiben stehen Hersteller und Herstellungsdatum. Unten der Feuerzeugtest: Eine Flamme vor Zweifachglas spiegelt sich viermal; ist ein Spiegelbild anders gefärbt, ist es Wärmeschutzglas.</desc>
+<rect width="480" height="420" rx="16" fill="#ffffff"/>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<text x="24" y="38" font-weight="700">1 · Abstandhalter lesen</text>
+<rect x="24" y="54" width="432" height="128" fill="#ecebe6" stroke="#141414" stroke-width="2"/>
+<rect x="44" y="74" width="412" height="108" fill="#dceaf7"/>
+<rect x="44" y="74" width="412" height="34" fill="#c9ccd1"/>
+<line x1="44" y1="108" x2="456" y2="108" stroke="#141414" stroke-width="1.5"/>
+<line x1="44" y1="74" x2="44" y2="182" stroke="#141414" stroke-width="2"/>
+<text x="60" y="97" font-weight="700">Hersteller · 14.03.1994</text>
+<text x="250" y="152" text-anchor="middle" fill="#1d4ed8">Glas</text>
+<text x="24" y="210">Aufdruck zwischen den Scheiben:</text>
+<text x="24" y="232">Hersteller und Datum der Scheibe</text>
+<line x1="24" y1="252" x2="456" y2="252" stroke="#ecebe6" stroke-width="2"/>
+<text x="24" y="282" font-weight="700">2 · Feuerzeugtest</text>
+<path d="M62 344c-14 0-20-10-20-20 0-14 12-20 20-36 8 16 20 22 20 36 0 10-6 20-20 20z" fill="#c2410c"/>
+<g fill="#c2410c" opacity=".55">
+<path d="M190 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z"/>
+<path d="M250 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z"/>
+<path d="M370 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z"/>
+</g>
+<path d="M310 340c-9 0-13-6-13-13 0-9 8-13 13-23 5 10 13 14 13 23 0 7-4 13-13 13z" fill="#1d4ed8"/>
+<line x1="132" y1="296" x2="132" y2="350" stroke="#141414" stroke-width="2" stroke-dasharray="4 4"/>
+<text x="24" y="376">Zweifachglas: vier Spiegelbilder.</text>
+<text x="24" y="400" fill="#1d4ed8" font-weight="700">Eins anders gefärbt: Wärmeschutzglas.</text>
+</g>
+</svg>

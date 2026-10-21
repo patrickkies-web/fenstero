@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-labelledby="t d">
+<title id="t">Wo es am Fenster zieht</title>
+<desc id="d">Fenster von innen in der Wand mit Rollladenkasten darüber. Markiert sind drei Stellen für Zugluft: 1 die Dichtung zwischen Flügel und Rahmen, geprüft mit einem Blatt Papier, 2 die Fuge zwischen Rahmen und Wand, 3 die Gurtöffnung am Rollladenkasten.</desc>
+<rect width="480" height="360" rx="16" fill="#ffffff"/>
+<rect x="20" y="24" width="250" height="312" fill="#ecebe6"/>
+<rect x="50" y="60" width="190" height="244" fill="#ffffff" stroke="#c2410c" stroke-width="3"/>
+<rect x="50" y="60" width="190" height="38" fill="#e1e0da" stroke="#141414" stroke-width="1.5"/>
+<rect x="196" y="94" width="16" height="8" fill="#141414"/>
+<rect x="58" y="104" width="174" height="194" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="72" y="118" width="146" height="166" fill="#dceaf7" stroke="#1d4ed8" stroke-width="3"/>
+<rect x="86" y="132" width="118" height="138" fill="#f4f8fd" stroke="#1d4ed8" stroke-width="1.5"/>
+<rect x="207" y="192" width="6" height="26" rx="2" fill="#141414"/>
+<rect x="30" y="178" width="48" height="34" fill="#ffffff" stroke="#141414" stroke-width="1.5" transform="rotate(-8 54 195)"/>
+<g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">
+<circle cx="145" cy="118" r="13" fill="#c2410c"/><text x="145" y="124">1</text>
+<circle cx="232" cy="244" r="13" fill="#c2410c"/><text x="232" y="250">2</text>
+<circle cx="204" cy="80" r="13" fill="#c2410c"/><text x="204" y="86">3</text>
+</g><g font-family="Helvetica Neue, Arial, sans-serif" font-size="18" fill="#141414">
+<circle cx="294" cy="90" r="12" fill="#c2410c"/><text x="294" y="96" text-anchor="middle" font-weight="700" fill="#ffffff">1</text>
+<text x="314" y="96" font-weight="700">Dichtung,</text><text x="314" y="118">Anpressdruck</text>
+<circle cx="294" cy="190" r="12" fill="#c2410c"/><text x="294" y="196" text-anchor="middle" font-weight="700" fill="#ffffff">2</text>
+<text x="314" y="196" font-weight="700">Fuge zwischen</text><text x="314" y="218">Rahmen und Wand</text>
+<circle cx="294" cy="270" r="12" fill="#c2410c"/><text x="294" y="276" text-anchor="middle" font-weight="700" fill="#ffffff">3</text>
+<text x="314" y="276" font-weight="700">Gurtöffnung am</text><text x="314" y="298">Rollladenkasten</text>
+<text x="314" y="140">Papiertest</text>
+</g></svg>
