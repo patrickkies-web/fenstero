@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h01 · Warum · Aufmaß ohne Anfahrt.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+</head>
+<body>
+<!-- h01 Cover Kapitel „Warum“ (1/2). Foto randlos oben, weich in #161616 auslaufend, Text erst auf dem dunklen Grund darunter.
+     Foto-Slot h01-foto: liegt bilder/h01-foto.(png|jpg|webp) vor, nimmt render.mjs diese Datei, sonst das Ersatzfoto
+     bilder/bar-werkstatt.webp (= web/bilder/foto/start-fensterbauer.webp, 1120 × 1400).
+     Kicker „Teil 1 von 6 · Warum“ wie die übrigen Cover (Kapitelname gleich dem Label); „Für Fensterbauer“ trägt h20.
+     Lead mit „Fürs erste Angebot“, damit niemand „ohne Aufmaß vor Ort bestellen“ liest (web/assets/portal.js:534 „Vor der Fertigung messen Sie einmal nach.
+     Fürs erste Angebot sparen Sie die Anfahrt.“).
+     Belege: web/assets/portal.js:530 (h1 „Aufmaß ohne Anfahrt.“, Lead), :531 (heroFoto start-fensterbauer, Chips Maße, Fotos, Öffnungsarten, Positionen). -->
+<main class="ef-buehne ef-buehne--foto">
+  <figure class="ef-foto" style="--ef-fp: 50% 0%">
+    <img data-slot="h01-foto" data-ersatz="bar-werkstatt.webp" src="../bilder/bar-werkstatt.webp" alt="Bär in Arbeitskleidung prüft an der Hobelbank seiner Werkstatt ein Aufmaß auf dem Tablet, hinter ihm lehnen fertige Fensterrahmen.">
+  </figure>
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Warum · 1/2</span>
+  </header>
+  <div class="ef-text">
+    <p class="ef-kicker">Teil 1 von 6 · Warum</p>
+    <h1 class="ef-display-xl">Aufmaß<br>ohne<br><span class="ef-gruen">Anfahrt.</span></h1>
+    <p class="ef-lead">Fürs erste Angebot schicken Sie einen Link. Ihr Kunde misst selbst, Schritt für Schritt geführt.</p>
+    <ul class="ef-chips">
+      <li class="ef-chip">Maße</li>
+      <li class="ef-chip">Fotos</li>
+      <li class="ef-chip">Öffnungsarten</li>
+      <li class="ef-chip">Positionen</li>
+    </ul>
+  </div>
+</main>
+</body>
+</html>

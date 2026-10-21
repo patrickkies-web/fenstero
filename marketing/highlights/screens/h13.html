@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h13 · Alles drin · Bis zur Fensterbank.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Raster 3 × 2 aus echten 3-D-Modellen (Aufnahme 358 × 153 CSS-px, Faktor 3), Beschriftung darunter,
+     darunter über die volle Breite der echte Knopf „Weiß ich noch nicht“ (Aufnahme mit 4 px App-Grund rundum, der App-Grund ist #161616 wie die Bühne) */
+  .ef-inhalt { flex: 1 1 auto }
+  .h-visual { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 24px }
+  .h-raster { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 24px 16px }
+  .h-kachel { display: flex; flex-direction: column; gap: 10px; min-height: 0 }
+  .h-kachel > .ef-ausschnitt { flex: 1 1 0; min-height: 0; border-radius: 24px }
+  .h-kachel > .ef-ausschnitt > img { height: 100%; object-fit: cover; object-position: 50% 50% }
+  .h-kachel > figcaption { flex: none; font-size: var(--ef-fs-chip); line-height: 1.2; font-weight: 700; color: var(--ef-text-2); white-space: nowrap }
+  .h-offen { flex: none; margin: -10px }   /* die 4 px App-Grund der Aufnahme (10 Story-px, unsichtbar auf #161616) liegen außerhalb der Kante; data-frei für die Zonenprüfung */
+</style>
+</head>
+<body>
+<!-- Kapitel „Alles drin“, Inhalt (h13): Wunschfragen im Kundenlink (Fensterbau Brandt, Familie Weber), je das echte 3-D-Modell in der Ansicht der Frage,
+     aufgenommen mit werkzeug/aufnahmen-alles-drin.mjs h13: K.fenster(page, 'fenster', …), K.frage(page, id), Modellfläche #w3d 358 × 153,
+     ohne Schwingen und ohne Beschriftungspille, alle sechs im selben Maßstab (s = 0,076 px je mm).
+     Farbe außen Golden Oak (Frage „fa“, Ansicht von außen), Farbe innen Eiche hell bei außen Anthrazitgrau (Frage „fi“), Sprossen Wiener Sprosse
+     (Frage „spross“, Ansicht von vorn), Sonnenschutz außen Raffstore anthrazit (Frage „sart“), Insektenschutz Plissee (Frage „insekt“),
+     Fensterbank innen Holz (Frage „fbi“, Ansicht auf die Bank; außen Aluminium war in der Kachel kaum zu erkennen).
+     Knopf: Frage „fa“ mit w.offen.fa = true (aria-pressed true, Haken). Den fünften Chip „Weiß ich noch nicht“ zeigt der echte Knopf, als Chip entfällt er aus Platzgründen.
+     Belege: web/assets/modell.js:17 material; web/assets/app.js:260 COLORS (11 RAL-Farben, 4 Holzdekore), Freitext „Eigene Farbe, z. B. RAL 7021 oder DB …“;
+     modell.js:41 Sonnenschutz; modell.js:49 Antrieb Gurt, Kurbel, elektrisch, Smart Home; modell.js:50 Insektenschutz; modell.js:51 Fensterbank innen;
+     modell.js:47 Einbruchschutz Basis, RC1 N, RC2; app.js:2604-2606 offenZeile „Weiß ich noch nicht · Dein Fensterbauer berät dich“; modell.js:70 „offen, bitte beraten“. -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Alles drin · 4/4</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Ausstattung</p>
+      <h2 class="ef-display">Bis zur<br><span class="ef-gruen">Fensterbank.</span></h2>
+      <p class="ef-lead">Material, Farbe innen und außen, Glas,<br>Rollladen, Insektenschutz.<br>Unsicher? Dann beraten Sie.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">RAL und Holzdekore</li>
+        <li class="ef-chip">Wunschfarbe frei</li>
+        <li class="ef-chip">Griff und Einbruchschutz</li>
+        <li class="ef-chip">Antrieb bis Smart Home</li>
+      </ul>
+    </div>
+    <div class="h-visual">
+      <div class="h-raster">
+        <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h13-farbe-aussen.png" alt="3-D-Modell von außen: Fenster in Golden Oak."></div><figcaption>Farbe außen</figcaption></figure>
+        <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h13-farbe-innen.png" alt="3-D-Modell von innen: Fenster innen in Eiche hell."></div><figcaption>Farbe innen</figcaption></figure>
+        <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h13-sprossen.png" alt="3-D-Modell von vorn: Fenster mit Sprossen, 6 Felder je Flügel."></div><figcaption>Sprossen</figcaption></figure>
+        <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h13-sonne-aussen.png" alt="3-D-Modell von außen: Raffstore mit Kasten, halb heruntergelassen."></div><figcaption>Sonnenschutz außen</figcaption></figure>
+        <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h13-insekt.png" alt="3-D-Modell von außen: Insektenschutz-Plissee vor dem Fenster."></div><figcaption>Insektenschutz</figcaption></figure>
+        <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h13-bank-innen.png" alt="3-D-Modell von innen: Fensterbank aus Holz."></div><figcaption>Fensterbank innen</figcaption></figure>
+      </div>
+      <figure class="h-offen" data-frei><img src="../aufnahmen/h13-offen.png" alt="Gedrückter Knopf in der App: Weiß ich noch nicht. Dein Fensterbauer berät dich. Mit Haken."></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 4 von 4">
+      <li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-jetzt"></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

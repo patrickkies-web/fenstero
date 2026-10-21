@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h17 · Ergebnis · Als PDF in Ihrer Farbe.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* Blatt A4 (1654 × 2339 px aus pdftoppm -r 200) als ganze Seite, flach, mit radius-card; daneben die drei Punkte als Haken-Liste */
+  .h17-blatt { flex: none; width: 526px; background: #fff }
+</style>
+</head>
+<body>
+<!-- h17 Inhalt Kapitel „Ergebnis“ (4/5): Seite 1 des echten Aufmaßblatts für den Betrieb (Projekt l1 Familie Weber, Download über
+     [data-act="pdf-am"], pdftoppm -r 200), Datei aufnahmen/h17-aufmassblatt.pdf (6 Seiten), Bild aufnahmen/h17-blatt-seite1.png,
+     erzeugt mit werkzeug/ergebnis-aufnahmen.mjs. Kopf in der Betriebsfarbe von Fensterbau Brandt (#0071e3).
+     Belege: web/assets/blatt.js:56 (BRAND = Farbe des Betriebs bt.col), web/assets/portal.js:626 (Farbe bei der Registrierung),
+     blatt.js:602-609 („Alle Elemente im selben Maßstab“, Seite 2), blatt.js:167 (Fußzeile „Vor der Fertigung Feinaufmaß vor Ort.“),
+     portal.js:765 („PDF herunterladen“ und „Als Text kopieren“), portal.js:534 („Vor der Fertigung messen Sie einmal nach.“).
+     Abweichung vom Storyboard: Das ganze Blatt passt neben Kopf, Headline und Lead nur in etwa 526 px Breite; die drei Chips stehen deshalb
+     als Haken-Liste rechts neben dem Blatt (Texte unverändert). -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Ergebnis · 4/5</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Aufmaßblatt</p>
+      <h2 class="ef-display">Als PDF in<br>Ihrer <span class="ef-gruen">Farbe.</span></h2>
+      <p class="ef-lead">Je Position eine Zeichnung mit allen Maßen. Vor der Fertigung messen Sie einmal nach.</p>
+    </div>
+    <div class="ef-split">
+      <figure class="ef-ausschnitt h17-blatt"><img src="../aufnahmen/h17-blatt-seite1.png" alt="Aufmaßblatt Seite 1: blauer Kopf Fensterbau Brandt, Aufmaß vom Kunden fürs Angebot, Familie Weber, 4 Positionen, 5 Elemente, 8 Fotos ausgewertet, Eckdaten zum Projekt, Position 1 Wohnzimmer mit Bestellmaß-Vorschlag 1.759 × 1.394 mm und Zeichnung mit allen Maßen, Fußzeile: Vor der Fertigung Feinaufmaß vor Ort."></figure>
+      <ul class="ef-haken">
+        <li>Ihr Name im Kopf</li>
+        <li>Alle Elemente im Maßstab</li>
+        <li>Als Text kopieren</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 4 von 5">
+      <li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

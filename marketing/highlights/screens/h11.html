@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h11 · Alles drin · Auch ganz groß.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Raster 3 × 2 aus echten 3-D-Modellen, je Kachel nur die Modellfläche (Aufnahme 358 × 240 CSS-px, Faktor 3), Beschriftung darunter */
+  .h-raster { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 16px }
+  .h-kachel { display: flex; flex-direction: column; gap: 14px }
+  .h-kachel > .ef-ausschnitt { border-radius: 24px }
+  .h-kachel > .ef-ausschnitt > img { aspect-ratio: 1074 / 723 }
+  .h-kachel > figcaption { font-size: var(--ef-fs-chip); line-height: 1.2; font-weight: 700; color: var(--ef-text-2); white-space: nowrap }
+</style>
+</head>
+<body>
+<!-- Kapitel „Alles drin“, Inhalt (h11): 6 Elementarten, je das echte 3-D-Modell des Startschritts im Kundenlink (Fensterbau Brandt, Familie Weber),
+     aufgenommen mit werkzeug/aufnahmen-alles-drin.mjs h11: K.fenster(page, art), S.screen = 'start', render(true), Modellfläche #w3d 358 × 240,
+     Kamera „three“ ohne Schwingen und ohne Beschriftungspille, alle sechs im selben Maßstab (s = 0,075 px je mm), damit die Größen vergleichbar sind.
+     Hebe-Schiebe- und PSK-Tür halb geöffnet (K.vorfuehren { wie: 'tuer', t: 1750 }), Faltschiebewand mit 5 Flügeln gefaltet (t: 1250).
+     Belege: web/assets/modell.js:24 OPT.art; web/assets/portal.js:522 („Jede Elementart hat in der App ihr eigenes Modell und ihre eigenen Fragen,
+     bis zur Schwelle und zum Sonnenschutz.“); modell.js:37 hstSchema A, 3-teilig, C, D; modell.js:25 pskSchema 2- und 3-teilig;
+     werkzeug/berichte/kunde.md fswN 2 bis 7; modell.js:39 Schwelle flach, barrierefrei (DIN 18040), Standard. -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Alles drin · 2/4</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">6 Elementarten</p>
+      <h2 class="ef-display">Auch ganz<br><span class="ef-gruen">groß.</span></h2>
+      <p class="ef-lead">Jede Art hat ihr eigenes <span style="white-space: nowrap">3-D-Modell</span><br>und eigene Fragen, bis zur Schwelle.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">HST-Schema A, C, D</li>
+        <li class="ef-chip">PSK 2- oder 3-teilig</li>
+        <li class="ef-chip">Faltwand bis 7 Flügel</li>
+        <li class="ef-chip">Schwelle barrierefrei</li>
+      </ul>
+    </div>
+    <div class="h-raster">
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-fenster.png" alt="3-D-Modell eines zweiflügeligen Fensters in der Wand."></div><figcaption>Fenster</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-balkon.png" alt="3-D-Modell einer Balkontür, bodentief."></div><figcaption>Balkontür</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-fest.png" alt="3-D-Modell einer Festverglasung mit zwei Feldern."></div><figcaption>Festverglasung</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-hst.png" alt="3-D-Modell einer Hebe-Schiebe-Tür, der Schiebeflügel halb geöffnet."></div><figcaption>Hebe-Schiebe-Tür</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-psk.png" alt="3-D-Modell einer PSK-Tür, der Flügel halb zur Seite geschoben."></div><figcaption>PSK-Tür</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-fsw.png" alt="3-D-Modell einer Faltschiebewand mit 5 Flügeln, zum Paket gefaltet."></div><figcaption>Faltschiebewand</figcaption></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 2 von 4">
+      <li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

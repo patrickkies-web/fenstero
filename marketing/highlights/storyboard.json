@@ -1,0 +1,436 @@
+{
+  "leitgedanke": "Ein Link statt einer Anfahrt. In 4 Klicks schicken Sie den Aufmaß-Link, Ihr Kunde misst geführt am 3-D-Modell, und Sie bekommen ein sortiertes Aufmaß fürs erste Angebot. Vor der Fertigung messen Sie einmal nach.",
+  "kapitel": [
+    {
+      "key": "warum",
+      "titel": "Warum",
+      "cover_icon": "Uhr: Kreis mit zwei Zeigern, Strich-Icon im 24er-Raster, runde Enden, Stärke 1,8, stroke currentColor (Vorlage icon('clock') in web/assets/portal.js ICONS)",
+      "frames": [
+        {
+          "id": "h01",
+          "layout": "cover",
+          "kicker": "Teil 1 von 6 · Warum",
+          "headline": "Aufmaß\nohne\nAnfahrt.",
+          "gruenes_wort": "Anfahrt.",
+          "lead": "Fürs erste Angebot schicken Sie einen Link. Ihr Kunde misst selbst, Schritt für Schritt geführt.",
+          "chips": ["Maße", "Fotos", "Öffnungsarten", "Positionen"],
+          "klick_badge": "",
+          "visual": "Slot h01-foto wird mit dem vorhandenen Foto web/bilder/foto/start-fensterbauer.webp (1120 × 1400, Bär an der Hobelbank mit Tablet) belegt: randlos auf 1080 Breite ab Oberkante, unten weich in #161616 auslaufend wie .hero-foto in web/assets/portal.css. Der Bär bleibt im oberen Teil sichtbar. Wortmarke, Kicker, Headline (172px, 3 Zeilen), Lead und Haken-Chips stehen erst auf dem dunklen Grund unterhalb der Ausblendung, unten 250px frei.",
+          "foto_slot": "h01-foto",
+          "foto_motiv": "Vorhanden: Bär in Arbeitskleidung an der Hobelbank in seiner Werkstatt, prüft ein Aufmaß auf dem Tablet, hinter ihm lehnen fertige Fensterrahmen, goldenes Licht (start-fensterbauer.webp).",
+          "belege": [
+            "web/assets/portal.js:530 Startseite Fensterbauer: h1 „Aufmaß ohne Anfahrt.“, Lead „Schicken Sie Ihren Kunden einen Aufmaß-Link statt hinzufahren. Ihr Kunde misst selbst, Schritt für Schritt geführt …“",
+            "web/assets/portal.js:531 heroFoto('start-fensterbauer') mit den Haken-Chips Maße, Fotos, Öffnungsarten, Positionen",
+            "docs/BILDER.md:31 Platz start-fensterbauer 1120 × 1400, Bär in der Werkstatt mit Tablet",
+            "marketing/highlights/BEITRAGS-LINIE.txt, Markenkern: Kernsatz „Aufmaß ohne Anfahrt.“",
+            "web/assets/portal.js:534 „Vor der Fertigung messen Sie einmal nach. Fürs erste Angebot sparen Sie die Anfahrt.“ (darum „Fürs erste Angebot“ in der Lead)"
+          ]
+        },
+        {
+          "id": "h02",
+          "layout": "inhalt",
+          "kicker": "Rechnen Sie nach",
+          "headline": "975 € oder\n108 €.",
+          "gruenes_wort": "108 €.",
+          "lead": "12 Erstaufmaße vor Ort kosten 15 Stunden im Monat, fast 2 Arbeitstage. Rechnen Sie mit Ihren Zahlen auf eeziframes.com.",
+          "chips": ["12 Termine im Monat", "75 Min. mit Fahrt", "65 € je Stunde"],
+          "klick_badge": "",
+          "visual": "Eigene Rechenkarte (ef-karte, keine Aufnahme), gerechnet auf den Tarif, den das Preiskapitel zeigt (h19, h20): oben „Vor Ort im Monat 975 €, 15 Stunden unterwegs und beim Kunden“, darunter durch eine 2px-Linie getrennt „Mit eeziframes im Monat, Tarif Start 108 €, 12 Projekte × 9 € netto, keine Grundgebühr“, unten die Annahme-Zeile des Rechners „Annahme: Jedes Erstaufmaß ersetzt einen Termin fürs erste Angebot. Das Feinaufmaß vor der Fertigung bleibt.“ Beträge in text, nicht in Grün. Keine Aufnahme des Website-Rechners, weil er bei 12 Projekten den günstigsten Tarif (Abo 10 mit Grundbetrag) zeigt und das nicht zu „Keine Grundgebühr“ in h19 passt. Die Regler (12, 75 Min., 65 €) stehen als Chips ohne Haken (ef-chip--ohne), weil sie Annahmen sind. In der Headline „108 €“ mit geschütztem Leerzeichen als ein grünes Wort setzen.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/portal.js:490-495 roiCalc: Standardwerte 12 Erstaufmaße, 75 Min., 65 €; Texte „Vor Ort im Monat“, „… Stunden unterwegs und beim Kunden“, „Mit eeziframes“; Annahme „Jedes Erstaufmaß ersetzt einen Termin fürs erste Angebot. Das Feinaufmaß vor der Fertigung bleibt.“",
+            "web/assets/portal.js:497-502 roiVals: 12 × 75 / 60 × 65 = 975 €, 15 Stunden; Tarif Start = n × projekt = 12 × 9 € = 108 €, Planzeile „12 Projekte × 9 € netto (Start)“",
+            "functions/api/umgebung.js:100 projekt: num(env.PREIS_PROJEKT, 9), ohne Stichtag (dauerhaft); web/nutzungsbedingungen/index.html:44 Start: keine Grundgebühr, danach 9 € je Projekt",
+            "15 Stunden bei 8 Stunden je Arbeitstag = 1,9 Arbeitstage („fast 2 Arbeitstage“); Rechner zum Nachrechnen auf der Startseite in der Ansicht für Fensterbauer (web/assets/portal.js:537)"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "link",
+      "titel": "Link",
+      "cover_icon": "Link: zwei verschränkte Kettenglieder, Strich-Icon im 24er-Raster, runde Enden, Stärke 1,8 (Vorlage icon('link') in web/assets/portal.js ICONS, Bedeutung laut BEITRAGS-LINIE: Aufmaß-Link)",
+      "frames": [
+        {
+          "id": "h03",
+          "layout": "cover",
+          "kicker": "Teil 2 von 6 · Der Link",
+          "headline": "In 4\nKlicks\nraus.",
+          "gruenes_wort": "raus.",
+          "lead": "Projekt anlegen, Namen eintragen, Link verschicken. In WhatsApp nur noch senden.",
+          "chips": ["4 Klicks", "1 Eingabe", "WhatsApp, SMS, E-Mail"],
+          "klick_badge": "",
+          "visual": "KI-Foto im Slot h03-foto randlos oben, weich in #161616 auslaufend wie .hero-foto; Kicker, Headline (172px), Lead und Chips darunter auf dem dunklen Grund, nie auf dem sichtbaren Foto.",
+          "foto_slot": "h03-foto",
+          "foto_motiv": "Bär in Arbeitskleidung (Latzhose, Hemd mit hochgekrempelten Ärmeln) steht in seiner Werkstatt neben einem Fensterrahmen auf dem Bock und tippt entspannt mit einer Pranke auf das Smartphone in der anderen; durch das offene Werkstatttor sieht man den Firmentransporter, der heute stehen bleibt; warmes, goldenes Abendlicht, Sägespäne in der Luft, surreal-fotorealistisch wie start-fensterbauer.webp; Display nicht lesbar, keine Schrift, keine Logos; Hochformat 1120 × 1400, Motiv in den oberen zwei Dritteln, unten ruhiger, dunkler Werkstattboden für die Ausblendung. Prompt (EN): A brown bear in work overalls standing in a carpentry workshop next to a window frame on trestles, calmly tapping on a smartphone with one paw, the company van parked outside the open workshop door, warm golden evening light, sawdust in the air, photorealistic, no readable text.",
+          "belege": [
+            "marketing/highlights/werkzeug/berichte/betrieb.md §1: Klickpfad auf Telefon und Schreibtisch getestet, 4 Klicks und 1 Eingabe (erkunden-klickpfad.mjs)",
+            "web/assets/portal.js:755 Teilen-Knöpfe WhatsApp (wa.me), SMS, E-Mail, Text kopieren",
+            "marketing/highlights/werkzeug/berichte/betrieb.md §1: mit eingetragener Handynummer öffnet sich direkt der Chat, dann nur noch „Senden“",
+            "Besetzung laut Auftrag: Bär = Fensterbauer"
+          ]
+        },
+        {
+          "id": "h04",
+          "layout": "inhalt",
+          "kicker": "Projekt anlegen",
+          "headline": "Ein Name\ngenügt.",
+          "gruenes_wort": "genügt.",
+          "lead": "Pflicht ist nur der Name. Adresse, Gebäude und Fensterzahl sind freiwillig.",
+          "chips": ["Eckdaten freiwillig", "Sie oder Du", "Ganze Liste auf einmal"],
+          "klick_badge": "Klick 1 bis 3 von 4",
+          "visual": "Echte Ausschnitte aus dem Klickpfad (erkunden-klickpfad.mjs, Telefon, toastWeg, Kunde „Familie Neumann“) als Karten untereinander, links je eine runde Marke in accent-soft mit grüner Ziffer: 1 = Pille „+ Neues Projekt“ aus der Projektliste (.h.hrow [data-act=go][data-v=newlink], Probe betrieb-pfad0-projekte-t.png). Eingabe = Feld „Name des Kunden“ mit „Familie Neumann“ samt Zeile „Steht als Anrede in der Nachricht.“ (#nl-kunde, Probe betrieb-pfad2-name-t.png), Marke mit dem Wort „Eingabe“ statt Ziffer. 2 = Knopfzeile „Abbrechen / Weiter“ aus Schritt 1. 3 = Knopfzeile „Zurück / Projekt anlegen“ aus Schritt 2 mit den beiden Hinweisen darunter („Bezahlt wird nur ein eingegangenes Aufmaß. Noch … von 3 Projekten kostenlos …“ und „Kundenschutz: Ihr Kunde sieht im Link nur Ihren Betrieb, sein Aufmaß geht nur an Sie.“). Nichts wegretuschieren: Kontaktfeld und Sie/Du entfallen nur, weil getrennte Ausschnitte genommen werden. Gesamthöhe des Stapels etwa 880px.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "marketing/highlights/werkzeug/berichte/betrieb.md §1 Tabelle: Klick „Neues Projekt“, Eingabe Name (#nl-kunde), Klick „Weiter“, Klick „Projekt anlegen“, Klick „WhatsApp“",
+            "web/assets/portal.js:1202 nl-next: Pflichtfeld nur der Name, mindestens 2 Zeichen",
+            "erkundung/betrieb-neu-eckdaten-t.png: „Ein paar Eckdaten. Alles freiwillig, hilft beim Angebot.“ (Objektadresse, Gebäude, Fensterzahl, Was ist geplant?)",
+            "erkundung/betrieb-pfad1-neu-schritt1-t.png: „Anrede in der Nachricht“ Sie oder Du",
+            "web/assets/portal.js:719 unter „Projekt anlegen“: „Bezahlt wird nur ein eingegangenes Aufmaß.“ und Kundenschutz-Hinweis; portal.js:780-784 kontingentText",
+            "web/assets/portal.js:1222 Liste einladen: „… Projekte angelegt. Jetzt die Links verschicken.“; Knopf „Liste einladen“ in erkundung/betrieb-pfad0-projekte-t.png"
+          ]
+        },
+        {
+          "id": "h05",
+          "layout": "inhalt",
+          "kicker": "Link schicken",
+          "headline": "Absender:\nSie.",
+          "gruenes_wort": "Sie.",
+          "lead": "Die Nachricht ist vorformuliert und trägt Ihren Namen. Sie geht über Ihr WhatsApp, per SMS oder E-Mail.",
+          "chips": ["Text änderbar", "Gültig 7, 14 oder 30 Tage", "Kein Konto für Ihren Kunden"],
+          "klick_badge": "Klick 4 von 4",
+          "visual": "Echte Aufnahme, Ausschnitt .sharecard (Rezept teilen-karte mit https(p), Probe erkundung/betrieb-teilen-karte-https-t.png), aber für das in h04 angelegte Projekt „Familie Neumann“. Gezeigt: die vier Knöpfe WhatsApp, SMS, E-Mail, Text kopieren und das Feld „Nachricht“; das Textfeld per CSS auf volle Höhe gezogen, damit der ganze Text lesbar ist, von „Guten Tag Familie Neumann, für Ihr Fensterangebot …“ über „Ein Konto brauchen Sie nicht“ bis „Viele Grüße Jens Brandt, Fensterbau Brandt“. Marke „4“ am WhatsApp-Knopf. Linkzeile und Sie/Du/Tage-Schalter dürfen entfallen, wenn es zu hoch wird; Breite 760 bis 912px, Höhe höchstens etwa 880px. Nicht die Schreibtisch-Vorschau „So kommt die Nachricht an“ verwenden (Fehler 2 im Bericht frisst „Viele“).",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "marketing/highlights/werkzeug/berichte/betrieb.md §1: 4. Klick „WhatsApp“ (.share a.sbtn.wa) setzt „Link gesendet · über WhatsApp“ (erkundung/betrieb-pfad5-gesendet-t.png)",
+            "web/assets/portal.js:675 vorformulierte Nachricht in Sie-Form mit „Ein Konto brauchen Sie nicht“, unterschrieben mit Ansprechpartner und Betriebsname (a.ap, c.name)",
+            "web/assets/portal.js:755 wa.me, sms: und mailto: öffnen WhatsApp, SMS oder E-Mail des eigenen Geräts",
+            "web/assets/portal.js:756 Nachricht im Textfeld änderbar, Schalter Sie/Du und 7, 14 oder 30 Tage"
+          ]
+        },
+        {
+          "id": "h06",
+          "layout": "inhalt",
+          "kicker": "Danach",
+          "headline": "Sie sehen,\nwer misst.",
+          "gruenes_wort": "misst.",
+          "lead": "Im Projekt sehen Sie, ob der Link geöffnet ist und wie weit Ihr Kunde misst.",
+          "chips": ["Link gesendet", "Link geöffnet", "Kunde misst", "Aufmaß da"],
+          "klick_badge": "",
+          "visual": "Echte Aufnahme, Rezept nachrichten (.ibtn[data-act=nav][data-v=notif], Probe erkundung/betrieb-nachrichten-t.png), Ausschnitt der drei Meldungskarten ohne Seitenkopf und Tab-Leiste (ausschnitt()): „Familie Roth hat den Link geöffnet“, „Herr Kaya misst gerade · 2 von 4 Maßen eingetragen“, „Aufmaß eingegangen: Familie Weber · 4 Positionen, 5 Elemente, 8 Fotos“. Breite 760 bis 912px. Beispieldaten aus betrieb(); gezeigt als „so sieht es aus“, nicht als Zusage einer E-Mail- oder Push-Benachrichtigung.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/portal.js:659 Statusnamen: Link gesendet, Link geöffnet, Kunde misst, Aufmaß da",
+            "web/assets/portal.js:572 FAQ: „Im Projekt sehen Sie, ob der Link geöffnet wurde und wie weit Ihr Kunde ist, und können gezielt nachhaken.“",
+            "erkundung/betrieb-nachrichten-t.png: Meldungen „hat den Link geöffnet“, „misst gerade, 2 von 4 Maßen“, „Aufmaß eingegangen“",
+            "marketing/highlights/werkzeug/berichte/betrieb.md §5 und Nachtrag: Live-Status nur im Servermodus, als Ansicht zeigen ist ok; E-Mail bei neuem Aufmaß und Erinnerungen nicht behaupten"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "kunde",
+      "titel": "Kunde misst",
+      "cover_icon": "Zollstock: schräg liegender Gliedermaßstab mit Teilstrichen, Strich-Icon im 24er-Raster, runde Enden, Stärke 1,8 (Vorlage icon('ruler') in web/assets/portal.js:222)",
+      "frames": [
+        {
+          "id": "h07",
+          "layout": "cover",
+          "kicker": "Teil 3 von 6 · Ihr Kunde",
+          "headline": "Ihr\nKunde\nmisst.",
+          "gruenes_wort": "misst.",
+          "lead": "Im Browser, ohne Konto und ohne App. Er sieht nur Ihren Betrieb.",
+          "chips": ["Kein Konto", "Keine App", "Kostenlos", "Nur Ihr Betrieb"],
+          "klick_badge": "",
+          "visual": "Slot h07-foto wird mit dem vorhandenen Foto web/bilder/foto/start-hauseigentuemer.webp (1250 × 1250, Waschbär auf dem Tritt misst mit dem Zollstock die Maueröffnung, Handy in der Pfote) belegt: randlos auf 1080 Breite oben, weich in #161616 auslaufend wie .hero-foto. Text darunter auf dem dunklen Grund.",
+          "foto_slot": "h07-foto",
+          "foto_motiv": "Vorhanden: Waschbär steht auf einem Tritt und misst mit dem Zollstock die Maueröffnung eines Fensters, in der anderen Pfote das Handy, Baustelle (start-hauseigentuemer.webp).",
+          "belege": [
+            "web/assets/portal.js:536 „Er öffnet den Link im Browser und legt los. Kein Konto, keine App aus dem Store, keine Kosten. Seine Angaben gehen nur an Sie.“",
+            "web/assets/portal.js:557 KS_PUNKTE „Nur Ihr Betrieb“; web/nutzungsbedingungen/index.html:82 § 11 Abs. 1 Nr. 1: Ihr Kunde sieht beim Messen nur Ihren Betrieb",
+            "web/assets/app.js:1615 und 1646 Start des Links: „Persönliche Anfrage von …“, „Deine Angaben gehen nur an …, sonst an niemanden.“ (erkundung/kunde-begruessung-korrigiert.png)",
+            "Besetzung laut Auftrag: Waschbär = Hauseigentümer/Kunde"
+          ]
+        },
+        {
+          "id": "h08",
+          "layout": "inhalt",
+          "kicker": "Fotos innen und außen",
+          "headline": "Zwei Fotos\nje Fenster.",
+          "gruenes_wort": "Fotos",
+          "lead": "Von innen und von außen. Die KI liest daraus Rollladenkasten, Anschlag, Fensterbänke und Fassade.",
+          "chips": ["Wasserwaage im Bild", "Maße gegen Foto geprüft"],
+          "klick_badge": "",
+          "visual": "Echte Aufnahme der Kunden-App, Schritt 2 Fotos (Probe erkundung/kunde-fotos-ki-fertig.png; Rezept K.linkOeffnen(page,{einwilligen:true}), K.fenster(page,'fenster'), K.demoFotos(page), dann Fotos-Schritt). Im Telefonrahmen von „Schritt 2 von 6 · Fotos“ bis zum Hinweis „Dein Foto ist mit 0,4° fast waagerecht. Passt.“; Rechtslinks und Knopf „Weiter zum Messen“ abgeschnitten. Die Kacheln „Von innen“ und „Von außen“ mit Plakette „KI fertig“. Sie zeigen die gezeichneten Beispielszenen der App; liegen echte Fensterfotos (innen mit Heizkörper, außen mit Putzfassade) vor, diese stattdessen in S.photos setzen. Die Du-Texte der App bleiben, die Story-Texte siezen.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/app.js:1684 „Schritt 2 von 6 · Fotos“, je ein Foto innen und außen",
+            "web/assets/app.js:1552 „Die KI liest daraus die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade.“",
+            "web/assets/portal.js:455 CAPS: Die KI liest Rollladenkasten, Anschlag, Fensterbänke, Fassade, Strom, Zugang und Schäden und prüft die Maße gegen das Foto",
+            "erkundung/kunde-fotos-ki-fertig.png: Plakette „KI fertig“, Wasserwaage „0,4° fast waagerecht. Passt.“",
+            "marketing/highlights/werkzeug/berichte/kunde.md Ablauf 6: „Auf dem Foto ist das Fenster eher hoch als breit … vertauscht?“ mit Tauschen und Stimmt so"
+          ]
+        },
+        {
+          "id": "h09",
+          "layout": "inhalt",
+          "kicker": "Messen mit dem Zollstock",
+          "headline": "Das kleinste\nMaß zählt.",
+          "gruenes_wort": "kleinste",
+          "lead": "3 Breiten, 3 Höhen, dazu das alte Element. Ist die Öffnung außer Winkel, markiert die App das.",
+          "chips": ["8 Maße je Fenster", "Außer Winkel markiert", "3-D-Modell wächst mit"],
+          "klick_badge": "",
+          "visual": "Zwei echte Ausschnitte aus „Ränder fertig“ der Kunden-App (Probe erkundung/kunde-raender-fertig.png; Ablauf aus erkunden-kunde-ablauf.mjs bis zu den Rändern), als Karten untereinander: oben das 3-D-Modell #w3d mit allen Maßlinien und der Plakette „Alle Ränder gemessen“, darunter der Hinweis „Die Öffnung ist bis zu … mm außer Winkel. Das kleinste Maß zählt, so wie es der Fensterbauer auch macht.“ Für ein glaubwürdiges Beispiel eine Abweichung von etwa 25 mm statt 180 mm eintippen (z. B. Höhe rechts 1.455 bei Mitte 1.480; der Hinweis erscheint ab 10 mm). Wenn Platz bleibt, klein dazu die Zifferntasten aus kunde-messen-1-getippt.png („Öffnung · Höhe Mitte 1.480, 148,0 cm“).",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/portal.js:453 CAPS: „Drei Breiten und drei Höhen, das kleinste Maß zählt. Abweichungen außer Winkel werden markiert.“",
+            "web/assets/app.js:1906 „Alle Maße da“ und ab 10 mm Abweichung „Die Öffnung ist bis zu … mm außer Winkel. Das kleinste Maß zählt, so wie es der Fensterbauer auch macht.“",
+            "web/assets/app.js:635 Hinweis bei mehr als 60 mm Abweichung vom Mittelmaß; app.js:621 Plausibilität „Meintest du … cm?“",
+            "marketing/highlights/werkzeug/berichte/kunde.md Ablauf 4 bis 6: 4 Maße mit Zollstock plus 4 Ränder, Maßlinie wächst im 3-D-Modell mit; Öffnung „kleinstes von 3“ (app.js:1927)",
+            "erkundung/kunde-pruefen-3.png: „Vollständig: 8 Maße, 2 Fotos“ je Position"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "alles-drin",
+      "titel": "Alles drin",
+      "cover_icon": "Fenster mit zwei Flügeln und Dreh-Kipp-Dreieck, Strich-Icon im 24er-Raster, runde Enden, Stärke 1,8 (Vorlage icon('open') in web/assets/portal.js ICONS)",
+      "frames": [
+        {
+          "id": "h10",
+          "layout": "cover",
+          "kicker": "Teil 4 von 6 · Alles drin",
+          "headline": "Bis ins\nDetail.",
+          "gruenes_wort": "Detail.",
+          "lead": "6 Elementarten, 5 Formen, dazu Öffnung, Farbe, Glas und Sonnenschutz. Alles am 3-D-Modell.",
+          "chips": ["Bis 29 Fragen je Element", "Alle vorbelegt", "Am 3-D-Modell"],
+          "klick_badge": "",
+          "visual": "Slot h10-foto wird mit dem vorhandenen Foto web/bilder/foto/app-start.webp (1120 × 1400, drei Waschbären im Wohnzimmer: einer fotografiert die Maueröffnung samt Zollstock, einer tippt auf dem Sofa, einer lehnt sich zurück) belegt: randlos oben, weich in #161616 auslaufend wie .hero-foto. Text darunter auf dem dunklen Grund.",
+          "foto_slot": "h10-foto",
+          "foto_motiv": "Vorhanden: drei Waschbären im Wohnzimmer, einer fotografiert die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche ins Handy, einer lehnt sich zurück (app-start.webp).",
+          "belege": [
+            "web/assets/modell.js:24 OPT.art: 6 Elementarten; web/assets/modell.js:15 OPT.form: 5 Formen",
+            "marketing/highlights/werkzeug/berichte/kunde.md „Wie viele Schritte und Fragen“: Fenster mit 2 Flügeln 26 Fragen, mit bedingten Zusatzfragen bis 29; erkundung/kunde-sonne-aussen.png „Frage 20 von 29“",
+            "marketing/highlights/werkzeug/berichte/kunde.md: Alle Fragen sind vorbelegt, Pflicht ist nur der Name des Fensters; jede Frage dreht das Modell in die passende Ansicht",
+            "docs/BILDER.md:32 app-start, drei Waschbären im Wohnzimmer"
+          ]
+        },
+        {
+          "id": "h11",
+          "layout": "inhalt",
+          "kicker": "6 Elementarten",
+          "headline": "Auch ganz\ngroß.",
+          "gruenes_wort": "groß.",
+          "lead": "Jede Art hat ihr eigenes 3-D-Modell und eigene Fragen, bis zur Schwelle.",
+          "chips": ["HST-Schema A, C, D", "PSK 2- oder 3-teilig", "Faltwand bis 7 Flügel", "Schwelle barrierefrei"],
+          "klick_badge": "",
+          "visual": "Raster 3 × 2 aus echten 3-D-Modellen der Kunden-App: je nur die helle Modellfläche #w3d mit runden Ecken, ohne die Beschriftungspille der App, darunter eigene Beschriftung 26px in text-2: Fenster, Balkontür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand. Quellen: erkundung/kunde-element-fest-modell.png, kunde-element-hst-modell.png, kunde-element-psk-modell.png, kunde-element-fsw-modell.png; Fenster und Balkontür neu: K.fenster(page,'fenster' bzw. 'balkon'), S.screen='start', render(true), K.zeige(page,'#w3d'). Hebe-Schiebe- und PSK-Tür halb geöffnet (K.vorfuehren {wie:'tuer', t:1750}), Faltschiebewand gefaltet (t:1250). Gleicher Kamerawinkel und Maßstab in allen Kacheln.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/modell.js:24 OPT.art: Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand",
+            "web/assets/portal.js:522 Abschnitt „Auch ganz groß.“: „Jede Elementart hat in der App ihr eigenes Modell und ihre eigenen Fragen, bis zur Schwelle und zum Sonnenschutz.“",
+            "web/assets/modell.js:37 hstSchema A, 3-teilig, C, D; modell.js:25 pskSchema 2- und 3-teilig; modell.js:39 Schwelle flach, barrierefrei (DIN 18040), Standard",
+            "marketing/highlights/werkzeug/berichte/kunde.md Auswahlwerte: fswN 2 bis 7, Paket links, rechts oder beide Seiten, Gehflügel",
+            "erkundung/kunde-element-hst-modell.png, kunde-element-psk-modell.png, kunde-element-fsw-modell.png, kunde-element-fest-modell.png"
+          ]
+        },
+        {
+          "id": "h12",
+          "layout": "inhalt",
+          "kicker": "Form und Öffnung",
+          "headline": "Auch rund\nund schräg.",
+          "gruenes_wort": "schräg.",
+          "lead": "Rundbogen, Segmentbogen, Schräg und Rund. Dazu Stulp, Oberlicht, Unterlicht und Sprossen.",
+          "chips": ["1 bis 3 Flügel", "Dreh, Kipp, Dreh-Kipp", "DIN links oder rechts"],
+          "klick_badge": "",
+          "visual": "Raster 3 × 3 aus echten 3-D-Modellen, gleiche Machart wie h11, je Kachel eine Beschriftung: Rundbogen (erkundung/kunde-form-rundbogen.png), Segmentbogen (kunde-form-segment.png), Schräg (kunde-form-schraeg.png), Rund (kunde-form-rund.png), Stulp (kunde-stulp.png), 3 Flügel (kunde-teilung.png), Oberlicht (kunde-oberlicht.png), Unterlicht (kunde-unterlicht.png), Dreh-Kipp gekippt (K.vorfuehren {i:0, t:650} bzw. kunde-oeffnung-kipp.png). Nur die Modellfläche, ohne Fragekopf und Knöpfe.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/modell.js:15 form: Rechteck, Rundbogen, Segmentbogen, Schräg, Rund; web/assets/app.js:2340 „Welche Form? Antippen zeigt die Form am Modell.“",
+            "marketing/highlights/werkzeug/berichte/kunde.md Auswahlwerte: teilung 1 Flügel, 2 mit Pfosten, 2 Stulp, 3 (Mitte fest); din links, rechts; Oberlicht kein, kippbar, fest; Unterlicht kein, Glas, Paneel; Sprossen frei verschiebbar",
+            "web/assets/modell.js:59 TYP: Fest, Dreh, Kipp, Dreh-Kipp",
+            "erkundung/kunde-form-rundbogen.png („Frage 10 von 26 · Fenster“), kunde-teilung.png, kunde-stulp.png, kunde-oberlicht.png, kunde-unterlicht.png, kunde-oeffnung-kipp.png"
+          ]
+        },
+        {
+          "id": "h13",
+          "layout": "inhalt",
+          "kicker": "Ausstattung",
+          "headline": "Bis zur\nFensterbank.",
+          "gruenes_wort": "Fensterbank.",
+          "lead": "Material, Farbe innen und außen, Glas, Rollladen, Insektenschutz. Unsicher? Dann beraten Sie.",
+          "chips": ["RAL und Holzdekore", "Wunschfarbe frei", "Griff und Einbruchschutz", "Antrieb bis Smart Home", "Weiß ich noch nicht"],
+          "klick_badge": "",
+          "visual": "Raster 3 × 2 aus Wunschfragen der Kunden-App, je nur das 3-D-Modell in der Ansicht der Frage, Beschriftung darunter: Farbe außen Golden Oak (erkundung/kunde-farbe-aussen.png), Farbe innen (kunde-farbe-innen.png), Sprossen (kunde-sprossen.png), Sonnenschutz außen (kunde-sonne-aussen.png), Insektenschutz (kunde-insekt.png), Fensterbank außen (kunde-bank-aussen.png). Darunter über die volle Breite der echte Knopf „Weiß ich noch nicht · Dein Fensterbauer berät dich“ im gedrückten Zustand mit Haken (Ausschnitt .qoffen aus kunde-offen.png).",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/modell.js:17 material: Kunststoff, Kunststoff-Alu, Holz, Holz-Alu, Aluminium; web/assets/app.js:260 COLORS: 11 RAL-Farben und 4 Holzdekore; Freitext „Eigene Farbe, z. B. RAL 7021 oder DB …“ (erkundung/kunde-farbe-aussen.png); Farbe außen und innen getrennt (app.js Fragen fa, fi)",
+            "web/assets/modell.js:41 Sonnenschutz Rollladen, Raffstore, Screen; modell.js:49 Antrieb Gurt, Kurbel, elektrisch, Smart Home; modell.js:50 Insektenschutz; modell.js:51 Fensterbank innen; modell.js:47 Einbruchschutz Basis, RC1 N, RC2",
+            "web/assets/app.js:2603-2606 Knopf „Weiß ich noch nicht · Dein Fensterbauer berät dich“ bei den Wunschfragen (offen bei Material, Farben, Glas, Sprossen, Griff, Einbruchschutz, Sonnenschutz, Insektenschutz u. a.)",
+            "web/assets/modell.js:70 im Aufmaß steht dann „offen, bitte beraten“"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "ergebnis",
+      "titel": "Ergebnis",
+      "cover_icon": "Dokument: Blatt mit umgeknickter Ecke und drei Zeilen, Strich-Icon im 24er-Raster, runde Enden, Stärke 1,8 (Bedeutung laut BEITRAGS-LINIE: Aufmaßblatt)",
+      "frames": [
+        {
+          "id": "h14",
+          "layout": "cover",
+          "kicker": "Teil 5 von 6 · Ergebnis",
+          "headline": "Aufmaß\nkommt\nsortiert.",
+          "gruenes_wort": "sortiert.",
+          "lead": "Nach Positionen, mit Fotos, Bestellmaß-Vorschlag und Klärungsliste. Bereit fürs erste Angebot.",
+          "chips": ["Positionen", "Fotos", "Bestellmaß", "Klärungsliste", "PDF"],
+          "klick_badge": "",
+          "visual": "KI-Foto im Slot h14-foto randlos oben, weich in #161616 auslaufend wie .hero-foto; Text darunter auf dem dunklen Grund.",
+          "foto_slot": "h14-foto",
+          "foto_motiv": "Bär in Arbeitskleidung sitzt im kleinen Büro seiner Werkstatt am Holzschreibtisch, vor sich ein Tablet mit einer geordneten Liste und ein ausgedrucktes Aufmaßblatt mit farbigem Kopf und Fensterzeichnungen (nichts lesbar), daneben ein zusammengeklappter Zollstock und eine Kaffeetasse; durch die Glasscheibe hinter ihm die Werkstatt mit gestapelten Fensterrahmen; zufriedener, konzentrierter Blick; warmes Licht, surreal-fotorealistisch wie start-fensterbauer.webp; Hochformat 1120 × 1400, unten ruhig und dunkel für die Ausblendung. Prompt (EN): A brown bear in work clothes sitting at a wooden desk in a small workshop office, looking at a tablet and a printed measurement sheet with window drawings (no readable text), a folded carpenter's rule and a coffee cup beside it, window frames stacked in the workshop behind a glass pane, warm light, photorealistic.",
+          "belege": [
+            "web/assets/portal.js:532 So läuft es, Schritt 4 „Aufmaß kommt an: Sortiert nach Positionen, mit Bestellmaß-Vorschlag und der Einbausituation aus den Fotos.“",
+            "web/assets/portal.js:530 „… alles, was Sie für ein erstes Angebot brauchen: Maße, Fotos, Öffnungsarten, Farben und Ausstattung, für jedes Fenster, sortiert nach Positionen.“",
+            "web/assets/portal.js:764 Karte „Mit dem Kunden zu klären“; Aufmaßblatt-PDF über data-act pdf-am (marketing/highlights/werkzeug/berichte/betrieb.md §3)",
+            "Bewusst ohne 3-D-Ansicht im Betriebsbereich (berichte/betrieb.md §5 und Nachtrag)"
+          ]
+        },
+        {
+          "id": "h15",
+          "layout": "inhalt",
+          "kicker": "Im Projekt",
+          "headline": "Was zu\nklären ist.",
+          "gruenes_wort": "klären",
+          "lead": "4 Positionen, 5 Elemente, 8 Fotos. Ganz oben steht, was Sie mit dem Kunden besprechen.",
+          "chips": ["Lüftungskonzept", "Förderung", "Absturzsicherung", "Offene Wünsche"],
+          "klick_badge": "",
+          "visual": "Echte Aufnahme, Rezept aufmass-kopf (Klick .pcard.st-eingegangen, Familie Weber; Probe erkundung/betrieb-aufmass-kopf-t.png): Ausschnitt von der Statuszeile „Aufmaß da · über WhatsApp“ über „Aufmaß · 4 Positionen · 5 Elemente · 8 Fotos“ bis zum Ende der Karte „Mit dem Kunden zu klären · 2“ (Lüftungskonzept nach DIN 1946-6, Förderung noch offen). Kopfzeile und Tab-Leiste per ausschnitt() ausgeblendet, Breite 912px.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/portal.js:763 Kopf „Aufmaß“ mit Positionen · Elemente · Fotos",
+            "web/assets/portal.js:764 Karte „Mit dem Kunden zu klären · n“ aus AW.klaerung",
+            "web/assets/portal.js:459 CAPS: „was Sie mit dem Kunden klären: Absturzsicherung, Lüftung, Förderung, offene Wünsche“",
+            "erkundung/betrieb-aufmass-kopf-t.png: 4 Positionen · 5 Elemente · 8 Fotos, Lüftungskonzept nach DIN 1946-6, Förderung"
+          ]
+        },
+        {
+          "id": "h16",
+          "layout": "inhalt",
+          "kicker": "Position 1 · Wohnzimmer",
+          "headline": "Bestellmaß\nschon drin.",
+          "gruenes_wort": "Bestellmaß",
+          "lead": "Als Vorschlag: Öffnung minus Ihr eigener Abzug. Dazu die Einbausituation aus den Fotos.",
+          "chips": ["Abzug einstellbar", "Einbausituation per KI", "Vor Ort prüfen"],
+          "klick_badge": "",
+          "visual": "Zwei echte Ausschnitte aus Position 1 (Rezept position1-sauber: .poslist details.posc:nth-child(1) summary aufklappen; Probe erkundung/betrieb-position1-sauber-t.png) als Karten untereinander, Breite etwa 800px: oben Kopf „Pos. 1 · Wohnzimmer“ mit Kasten „Bestellmaß-Vorschlag 1.759 × 1.394 mm, Öffnung minus 15 mm je Seite und 15 mm oben“ und den Zeilen Maueröffnung, Breiten, Höhen; darunter der Abschnitt „Einbausituation (KI, 2 Fotos)“ mit den Zeilen Rollladen und Anschlag. Gesamthöhe höchstens etwa 880px.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/portal.js:481-488 posCard: Bestellmaß-Vorschlag aus Maueröffnung minus Abzug, Abschnitt „Einbausituation (KI, n Fotos)“",
+            "web/assets/portal.js:814 Betriebsprofil: „Ihr Abzug von der Maueröffnung. Damit rechnet eeziframes in jedem eingegangenen Aufmaß ein Bestellmaß vor“; Standard 15/15 mm (portal.js:191)",
+            "erkundung/betrieb-position1-sauber-t.png: Bestellmaß-Vorschlag 1.759 × 1.394 mm, KI-Zeilen Rollladen, Anschlag, Fensterbank, Heizung, Fassade, Zugang, Vor Ort prüfen",
+            "web/assets/portal.js:534 „Vor der Fertigung messen Sie einmal nach. Fürs erste Angebot sparen Sie die Anfahrt.“"
+          ]
+        },
+        {
+          "id": "h17",
+          "layout": "inhalt",
+          "kicker": "Aufmaßblatt",
+          "headline": "Als PDF in\nIhrer Farbe.",
+          "gruenes_wort": "Farbe.",
+          "lead": "Je Position eine Zeichnung mit allen Maßen. Vor der Fertigung messen Sie einmal nach.",
+          "chips": ["Ihr Name im Kopf", "Alle Elemente im Maßstab", "Als Text kopieren"],
+          "klick_badge": "",
+          "visual": "Seite 1 des echten Aufmaßblatts (Rezept pdf-seite: Projekt l1, Download [data-act=pdf-am], pdftoppm -r 200; Probe erkundung/betrieb-pdf-seite-1.png aus betrieb-aufmassblatt-domain.pdf) als ganzes Blatt, etwa 640px breit, flach ohne Schatten, mit radius-card: blauer Kopf „Fensterbau Brandt“ in der Betriebsfarbe, Familie Weber, Chips 4 Positionen, 5 Elemente, 8 Fotos ausgewertet, Eckdaten, Pos. 1 Wohnzimmer mit Zeichnung aller Maße und Bestellmaß-Vorschlag, Fußzeile „Vor der Fertigung Feinaufmaß vor Ort.“",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/blatt.js:56 BRAND = Farbe des Betriebs (bt.col) im Aufmaßblatt für Betriebe; Farbe wählt der Betrieb bei der Registrierung (web/assets/portal.js:626)",
+            "erkundung/betrieb-pdf-seite-1.png und betrieb-pdf-seite-3.png: Kopf „Fensterbau Brandt“, je Position Zeichnung mit allen Maßen und Bestellmaß-Vorschlag, Fußzeile „Vor der Fertigung Feinaufmaß vor Ort.“",
+            "erkundung/betrieb-pdf-seite-2.png: „Alle Elemente im selben Maßstab“",
+            "marketing/highlights/werkzeug/berichte/betrieb.md §3 aufmass-kopf: „PDF herunterladen“ und „Als Text kopieren“",
+            "web/assets/portal.js:534 „Vor der Fertigung messen Sie einmal nach.“"
+          ]
+        },
+        {
+          "id": "h18",
+          "layout": "inhalt",
+          "kicker": "Nachbesserung",
+          "headline": "Nachbessern\nkostenlos.",
+          "gruenes_wort": "kostenlos.",
+          "lead": "Ihr Kunde bekommt den Link noch einmal und ändert nur das Nötige. Berechnet wird nichts.",
+          "chips": ["Bis zu 2 Runden", "Bis 30 Tage nach Eingang", "Ihr Hinweis in der Nachricht"],
+          "klick_badge": "",
+          "visual": "Echte Aufnahme, Rezept nachbesserung-blatt ([data-act=sheet][data-v=nachbesserung], #nb-hinweis; Probe erkundung/betrieb-nachbesserung-blatt-t.png): nur das Blatt „Nachbesserung anfragen“ mit dem Text „… sieht alle bisherigen Angaben und kann sie ändern … berechnet wird nichts. Höchstens 2 Runden je Projekt, bis 30 Tage nach dem Eingang …“ und dem Feld „Was soll der Kunde prüfen?“ mit „Beim Küchenfenster fehlt die Brüstungshöhe.“ samt Knöpfen. Der abgedunkelte Verlauf oberhalb des Blatts wird abgeschnitten. Breite 800 bis 912px.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/portal.js:994 Blatt „Nachbesserung anfragen“: „… sieht alle bisherigen Angaben und kann sie ändern. Das neue Aufmaß ersetzt das alte im selben Projekt, berechnet wird nichts. Höchstens 2 Runden je Projekt, bis 30 Tage nach dem Eingang.“",
+            "web/nutzungsbedingungen/index.html:53 § 5 Abs. 3: Nachbesserungen im selben Projekt kostenlos, höchstens zwei Runden bis 30 Tage nach dem Eingang",
+            "web/assets/modell.js:352 NB_MAX = 2, NB_TAGE = 30",
+            "web/assets/portal.js:754 Karte „Nachbesserung · Link erneut schicken“ mit „Ihr Hinweis: …“ in der Nachricht an den Kunden"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "preise",
+      "titel": "Preise",
+      "cover_icon": "Euro-Zeichen im Kreis, Strich-Icon im 24er-Raster, runde Enden, Stärke 1,8 (Vorlage icon('euro') in web/assets/portal.js ICONS)",
+      "frames": [
+        {
+          "id": "h19",
+          "layout": "cover",
+          "kicker": "Teil 6 von 6 · Preise",
+          "headline": "Zahlen\nnur bei\nEingang.",
+          "gruenes_wort": "Eingang.",
+          "lead": "Die ersten 3 Projekte sind frei. Danach 9 € netto je Projekt mit eingegangenem Aufmaß.",
+          "chips": ["Keine Grundgebühr", "Zahlungsart ab Projekt 4", "Nachbesserung kostenlos", "Ihr Kunde zahlt nichts", "Kundenschutz nach § 11"],
+          "klick_badge": "",
+          "visual": "KI-Foto im Slot h19-foto randlos oben, weich in #161616 auslaufend wie .hero-foto; Text darunter auf dem dunklen Grund. Keine befristeten Preise, kein Abo-Preis auf diesem Screen.",
+          "foto_slot": "h19-foto",
+          "foto_motiv": "Bär in Arbeitskleidung lehnt entspannt am geparkten Firmentransporter im Hof vor seiner Werkstatt, einen Kaffeebecher in der Pranke, das Smartphone in der Brusttasche; unter dem Vordach gestapelte Fensterrahmen; späte Nachmittagssonne, ruhige Stimmung, der Transporter bleibt heute stehen; surreal-fotorealistisch wie start-fensterbauer.webp; keine Schrift und keine Logos am Transporter; Hochformat 1120 × 1400, unten ruhiger, dunkler Hofboden für die Ausblendung. Prompt (EN): A brown bear in work clothes leaning relaxed against a parked company van in the yard of his carpentry workshop, holding a coffee mug, smartphone in his chest pocket, window frames stacked under the canopy, late afternoon sun, calm mood, photorealistic, no text or logos.",
+          "belege": [
+            "web/nutzungsbedingungen/index.html:44 § 4 Start: keine Grundgebühr, die ersten 3 Projekte mit eingegangenem Aufmaß kostenlos, danach 9 € je Projekt",
+            "functions/api/umgebung.js:100 PREIS_PROJEKT 9 und FREI_PROJEKTE 3, nicht Teil des Einführungspreises (EINFUEHRUNG betrifft nur Aufmaßblatt, Abo und Plus, umgebung.js:50)",
+            "web/nutzungsbedingungen/index.html:51-52 § 5 Abs. 1-2: berechnet wird ein Projekt erst, wenn darin ein Aufmaß eingeht; für die kostenlosen Projekte keine Zahlungsart",
+            "web/assets/portal.js:590 Tarif Start: „Zahlungsart erst ab dem 4. Projekt“, „Nachbesserungen inklusive“; portal.js:719 „Bezahlt wird nur ein eingegangenes Aufmaß.“",
+            "web/assets/portal.js:585-589 Preisseite: „Ihr Kunde zahlt nichts und braucht kein Konto“, alle Preise netto",
+            "web/nutzungsbedingungen/index.html:79-88 § 11 Kundenschutz"
+          ]
+        },
+        {
+          "id": "h20",
+          "layout": "abschluss",
+          "kicker": "Für Fensterbauer",
+          "headline": "Link statt\nAnfahrt.",
+          "gruenes_wort": "Link",
+          "lead": "Testen Sie mit Ihren nächsten 3 Kunden. Ohne Grundgebühr und ohne Zahlungsart.",
+          "chips": [],
+          "klick_badge": "",
+          "visual": "Abschluss nach SlideAbschluss: Wortmarke „eeziframes“, Kicker, Headline, Lead und eine Karte: echter Ausschnitt des Tarifs „Start“ aus der Preisseite (Rezept preise: tun('go','preise') mit Preis-Umschreibung; Probe erkundung/betrieb-preise-t.png) mit „0 € Grundgebühr“ und den Punkten 3 Projekte kostenlos, danach 9 € je Projekt mit eingegangenem Aufmaß, Projekte, Aufmaß-Links, Einladungslisten, Nachbesserungen inklusive, Zahlungsart erst ab dem 4. Projekt; ohne den Knopf der Karte und ohne die Abo-Karten. Darunter die einzige Cream-Fläche des Screens: Pille „Kostenlos starten“ mit Pfeil, dazu „eeziframes.com“ in text-2. Kein Foto, unten 250px frei.",
+          "foto_slot": "",
+          "foto_motiv": "",
+          "belege": [
+            "web/assets/portal.js:590 Tarif Start mit 0 € Grundgebühr und den genannten Punkten (erkundung/betrieb-preise-t.png)",
+            "web/assets/portal.js:530 Hauptknopf der Startseite „Kostenlos starten“",
+            "web/nutzungsbedingungen/index.html:44 und 52: 3 Projekte frei, für die kostenlosen Projekte keine Zahlungsart",
+            "marketing/highlights/BEITRAGS-LINIE.txt Farbe: Cream nur für die Hauptaktion (CTA-Pill), eine Cream-Fläche pro Slide"
+          ]
+        }
+      ]
+    }
+  ]
+}

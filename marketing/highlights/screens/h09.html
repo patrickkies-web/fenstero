@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h09 · Kunde misst · Das kleinste Maß zählt.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Stapel so breit, dass er zwischen Chips und Fußzeile passt (Schrift im Hinweis etwa 27 px, Maßzahlen etwa 23 px).
+     Das Modell verliert oben 25 CSS-px leere Wand (--ef-aus-h, --ef-aus-pos), Maßlinien und Plakette bleiben ganz. */
+  .h09-stapel { width: 628px }
+  .h09-modell { --ef-aus-h: 361px; --ef-aus-pos: 50% 100% }
+</style>
+</head>
+<body>
+<!-- h09 Inhalt Kapitel „Kunde misst“ (3/3): zwei echte Ausschnitte aus „Ränder fertig“ der Kunden-App (Link Fensterbau Brandt, Familie Weber).
+     Aufnahmen: aufnahmen/h09-modell.png (#w3d mit allen sechs Maßlinien der Öffnung und „Alle Ränder gemessen“) und aufnahmen/h09-hinweis.png
+     (Hinweis „bis zu 25 mm außer Winkel“), erzeugt mit werkzeug/aufnahmen-kunde.mjs (echte Klicks über die Zifferntasten, Telefon 390 × 844, Faktor 3).
+     Messwerte: Öffnung Mitte 2.000 × 1.260, Höhe rechts 1.235 (25 mm), Breite unten 1.994; Fenster 1.965 × 1.225.
+     Belege: web/assets/portal.js:453 (CAPS: drei Breiten und drei Höhen, das kleinste Maß zählt, außer Winkel markiert),
+     web/assets/app.js:473-478 (derive: kleinstes von drei Maßen), app.js:1906 (Hinweis ab 10 mm), app.js:635 (Warnung ab 60 mm),
+     app.js:605-616 (MESS und REST: 4 Maße mit Zifferntasten plus 4 Ränder = 8 Maße), werkzeug/berichte/kunde.md Ablauf 4 bis 6 (Maßlinie wächst im Modell mit).
+     Chip „Außer Winkel markiert“ entfällt aus Platzgründen: Er wiederholt den Lead und steht im Hinweis-Ausschnitt. -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Kunde misst · 3/3</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Messen mit dem Zollstock</p>
+      <h2 class="ef-display">Das <span class="ef-gruen">kleinste</span><br>Maß zählt.</h2>
+      <p class="ef-lead">3 Breiten, 3 Höhen, dazu das alte Element. Ist die Öffnung außer Winkel, markiert die App das.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">8 Maße je Fenster</li>
+        <li class="ef-chip">3-D-Modell wächst mit</li>
+      </ul>
+    </div>
+    <div class="ef-stapel h09-stapel">
+      <figure class="ef-ausschnitt h09-modell"><img src="../aufnahmen/h09-modell.png" alt="Kunden-App, Ränder fertig: 3-D-Modell eines zweiflügeligen Fensters mit sechs Maßlinien der Maueröffnung, Breiten 2.000, 2.000 und 1.994 mm, Höhen 1.260, 1.260 und 1.235 mm, Plakette Alle Ränder gemessen."></figure>
+      <figure class="ef-ausschnitt ef-ausschnitt--rand"><img src="../aufnahmen/h09-hinweis.png" alt="Hinweis in der App: Die Öffnung ist bis zu 25 mm außer Winkel. Das kleinste Maß zählt, so wie es der Fensterbauer auch macht."></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 3 von 3">
+      <li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-jetzt"></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h04 · Link · Ein Name genügt.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Klick-Badge und Kicker in einer Zeile (spart eine Zeile für den Stapel) */
+  .h-zeile { display: flex; align-items: center; gap: 28px }
+  /* Ausschnitte in einheitlichem Maßstab: --s = Story-px je CSS-px der App (Aufnahme 430 × 932, Faktor 3) */
+  .h-stapel { --s: 1.53; row-gap: 16px; grid-template-columns: auto auto; justify-content: start; flex: none }
+  .h-stapel > figure { justify-self: start }
+  .h-pille { width: calc(421px * var(--s)) }
+  .h-karte { width: calc(382px * var(--s)) }
+  /* Marke 3 auf Höhe der Knopfreihe „Zurück / Projekt anlegen“ (oberer Rand 10 + halbe Knopfhöhe 26 CSS-px) */
+  .h-stapel > .h-marke-oben { align-self: start; margin-top: calc(36px * var(--s) - 36px) }
+</style>
+</head>
+<body>
+<!-- Kapitel Link, Inhalt (h04): echte Ausschnitte aus dem Klickpfad (werkzeug/link-aufnahmen.mjs, Telefon 430 × 932, Faktor 3),
+     Kunde „Familie Neumann“, Kontakt leer, Sie. Marken: 1 = Neues Projekt, Eingabe = Name, 2 = Weiter, 3 = Projekt anlegen. -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Link · 2/4</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <div class="h-zeile">
+        <span class="ef-klick">Klick 1 bis 3 von 4</span>
+        <p class="ef-kicker">Projekt anlegen</p>
+      </div>
+      <h2 class="ef-display">Ein Name<br><span class="ef-gruen">genügt.</span></h2>
+      <p class="ef-lead">Pflicht ist nur der Name. Adresse, Gebäude und Fensterzahl sind freiwillig.</p>
+    </div>
+    <div class="ef-schritte h-stapel">
+      <span class="ef-marke">1</span>
+      <figure class="ef-ausschnitt ef-ausschnitt--grund h-pille"><img src="../aufnahmen/h04-1-neues-projekt.png" alt="Knopf „Neues Projekt“ in der Projektliste."></figure>
+      <span class="ef-marke ef-marke--wort">Eingabe</span>
+      <figure class="ef-ausschnitt h-karte"><img src="../aufnahmen/h04-2-name.png" alt="Feld „Name des Kunden“ mit „Familie Neumann“, darunter „Steht als Anrede in der Nachricht.“"></figure>
+      <span class="ef-marke">2</span>
+      <figure class="ef-ausschnitt h-karte"><img src="../aufnahmen/h04-3-weiter.png" alt="Knöpfe „Abbrechen“ und „Weiter“."></figure>
+      <span class="ef-marke h-marke-oben">3</span>
+      <figure class="ef-ausschnitt h-karte"><img src="../aufnahmen/h04-4-anlegen.png" alt="Knöpfe „Zurück“ und „Projekt anlegen“, darunter die Hinweise zur Abrechnung und zum Kundenschutz."></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 2 von 4">
+      <li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

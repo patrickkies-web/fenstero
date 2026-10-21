@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h08 · Kunde misst · Zwei Fotos je Fenster.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+</head>
+<body>
+<!-- h08 Inhalt Kapitel „Kunde misst“ (2/3): echte Aufnahme der Kunden-App im Telefonrahmen, Schritt 2 Fotos, von „Schritt 2 von 6 · Fotos“
+     bis „Dein Foto ist mit 0,4° fast waagerecht. Passt.“ (Rechtslinks und „Weiter zum Messen“ abgeschnitten).
+     Aufnahme: aufnahmen/h08-fotos.png, erzeugt mit werkzeug/aufnahmen-kunde.mjs (Link Fensterbau Brandt, Familie Weber, Telefon 390 × 844, Faktor 3).
+     Die Kacheln zeigen die gezeichneten Beispielszenen der App (demoPhotoUrl) mit der festen Beispielauswertung AI.DEMO; echte Fensterfotos lagen nicht vor.
+     Die App duzt den Kunden, die Texte des Screens siezen. Aufbau wie vorlage/muster-telefon.html: Telefon links, Chips rechts.
+     Belege: web/assets/app.js:1684 („Schritt 2 von 6 · Fotos“, je ein Foto innen und außen), app.js:1682 (Wasserwaage aus dem Foto, „fast waagerecht. Passt.“),
+     app.js:1552 (KI liest Rollladenkasten, Laibung, Fensterbänke, Fassade), web/assets/portal.js:455 (CAPS: KI liest Rollladenkasten, Anschlag,
+     Fensterbänke, Fassade und prüft die Maße gegen das Foto), werkzeug/berichte/kunde.md Ablauf 6 (Breite und Höhe vertauscht? Tauschen, Stimmt so). -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Kunde misst · 2/3</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Fotos innen und außen</p>
+      <h2 class="ef-display">Zwei <span class="ef-gruen">Fotos</span><br>je Fenster.</h2>
+      <p class="ef-lead">Von innen und von außen. Die KI liest daraus Rollladenkasten, Anschlag, Fensterbänke und Fassade.</p>
+    </div>
+    <div class="ef-split">
+      <figure class="ef-telefon" style="--ef-tel-b: 452px"><img src="../aufnahmen/h08-fotos.png" alt="Kunden-App, Schritt 2 von 6, Fotos: Fotografiere das Fenster. Zwei Kacheln Von innen und Von außen, jeweils mit der Plakette KI fertig, darunter der Hinweis Dein Foto ist mit 0,4 Grad fast waagerecht. Passt."></figure>
+      <ul class="ef-chips ef-chips--spalte">
+        <li class="ef-chip">Wasserwaage im Bild</li>
+        <li class="ef-chip">Maße gegen Foto geprüft</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 2 von 3">
+      <li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>
