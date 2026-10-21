@@ -8,7 +8,7 @@
 }
 * { box-sizing: border-box }
 html { -webkit-text-size-adjust: 100% }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; font-weight: 500; -webkit-font-smoothing: antialiased }
 a { color: var(--accent) }
 .kopf { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); border-bottom: 1px solid var(--line) }
 .kopf div { max-width: 760px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px }
@@ -22,14 +22,17 @@ a { color: var(--accent) }
 .kopf nav { display: flex; gap: 16px; font-size: 15px; font-weight: 600 }
 .kopf nav a { text-decoration: none }
 main { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px }
-h1 { margin: 6px 0 18px; font-size: clamp(32px, 7vw, 44px); line-height: 1.05; font-weight: 800; letter-spacing: -.03em }
+h1 { margin: 6px 0 18px; font-size: clamp(32px, 7vw, 44px); line-height: 1.04; font-weight: 800; letter-spacing: -.04em }
+/* Kicker über dem h1: die Zeile davor (z. B. „Angaben nach § 5 DDG“) in Grün und Versalien, wie auf allen Seiten */
+main > p.klein:first-child { margin: 0 0 4px; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--accent) }
+.ak { color: var(--accent) }
 h2 { margin: 34px 0 8px; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -.015em }
 h3 { margin: 22px 0 6px; font-size: 18px; font-weight: 800 }
 p, li { color: var(--fg2) }
 p { margin: 0 0 12px }
 ul { margin: 0 0 12px; padding-left: 22px }
 li { margin-bottom: 4px }
-.karte { background: var(--surface); border-radius: 20px; padding: 18px 20px; margin: 0 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 0 0 1px var(--line) }
+.karte { background: var(--surface); border-radius: 20px; padding: 18px 20px; margin: 0 0 16px; box-shadow: 0 0 0 2px var(--line) }
 .karte p:last-child { margin-bottom: 0 }
 .klein { font-size: 15px; color: var(--muted) }
 mark.ph { background: var(--ph-bg); color: var(--ph-fg); padding: 1px 6px; border-radius: 6px; font-weight: 700 }
@@ -39,14 +42,15 @@ address { font-style: normal }
 .fuss { max-width: 760px; margin: 0 auto; padding: 0 16px 40px; font-size: 14px; color: var(--muted); display: flex; gap: 0 18px; flex-wrap: wrap; align-items: center }
 .fuss a { color: var(--muted) }
 .mitte { text-align: center; padding-top: 12vh }
-.knopf { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; text-decoration: none; margin: 6px }
-.knopf.leise { background: var(--surface); color: var(--fg); box-shadow: inset 0 0 0 1.5px var(--line) }
+/* Hauptaktion in Cream, Nebenaktion mit Rand (wie .btn.primary und .btn.ghost in gemeinsam.css) */
+.knopf { display: inline-flex; align-items: center; min-height: 52px; padding: 0 22px; border-radius: 999px; background: #f1f0ea; color: #161616; font-weight: 700; text-decoration: none; margin: 6px }
+.knopf.leise { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 2px #3a3a3a }
 
 /* Fußzeile: „Vertrag widerrufen“ hervorgehoben (Widerrufsfunktion, § 356a BGB), als Knopf mit Rand, Ziel ab 44 px */
 .fuss a { display: inline-flex; align-items: center; min-height: 44px }
-.fuss a.widerruf-knopf { padding: 0 16px; border-radius: 999px; color: var(--fg); font-weight: 700; text-decoration: none; box-shadow: inset 0 0 0 1.5px var(--fg) }
+.fuss a.widerruf-knopf { padding: 0 16px; border-radius: 999px; color: var(--fg); font-weight: 700; text-decoration: none; box-shadow: inset 0 0 0 2px var(--fg) }
 /* Tabellen (Cookies): waagerecht scrollbar statt die Seite zu verbreitern */
-.tabelle { overflow-x: auto; margin: 0 0 16px; background: var(--surface); border-radius: 16px; box-shadow: 0 0 0 1px var(--line) }
+.tabelle { overflow-x: auto; margin: 0 0 16px; background: var(--surface); border-radius: 16px; box-shadow: 0 0 0 2px var(--line) }
 .tabelle table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px }
 .tabelle th, .tabelle td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); color: var(--fg2) }
 .tabelle tr:last-child td { border-bottom: 0 }
@@ -67,7 +71,7 @@ code { font-size: 15px; overflow-wrap: anywhere }
 .formular { display: flex; flex-direction: column; gap: 16px }
 .feld { display: flex; flex-direction: column; gap: 6px }
 .feld label { font-size: 15px; font-weight: 700; color: var(--fg) }
-.feld input, .feld textarea { width: 100%; min-height: 48px; padding: 10px 12px; border: 0; border-radius: 12px; background: var(--bg); color: var(--fg); font: inherit; font-size: 17px; box-shadow: inset 0 0 0 1.5px var(--line) }
+.feld input, .feld textarea { width: 100%; min-height: 48px; padding: 10px 12px; border: 0; border-radius: 12px; background: var(--bg); color: var(--fg); font: inherit; font-size: 17px; box-shadow: inset 0 0 0 2px #3a3a3a }
 .feld textarea { resize: vertical; min-height: 96px }
 .feld input:focus-visible, .feld textarea:focus-visible, .knopf:focus-visible, .fuss a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
 .feld input[aria-invalid="true"], .feld textarea[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--bad) }
@@ -75,5 +79,9 @@ code { font-size: 15px; overflow-wrap: anywhere }
 .fehler { color: var(--bad) !important; font-size: 15px; margin: 0 }
 .formular .knopf { align-self: flex-start; margin: 0; border: 0; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer }
 .formular .knopf:disabled { opacity: .6; cursor: default }
-.karte.ok { background: var(--ok-bg) }
+.karte.ok { background: var(--ok-bg); box-shadow: 0 0 0 2px var(--accent) }
+/* Fehlerseite: Fotokarte (gemeinsam.css gibt es hier nicht, deshalb die Karte selbst) unter den Knöpfen, mittig */
+.mitte .foto-karte { position: relative; max-width: 560px; margin: 28px auto 0; border-radius: 24px; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 2px var(--line) }
+.mitte .foto-karte img { display: block; width: 100%; height: auto }
+.mitte .foto-karte figcaption { padding: 10px 14px 12px; font-size: 13px; color: var(--muted); text-align: left }
 .karte.ok h2 { margin-top: 0 }

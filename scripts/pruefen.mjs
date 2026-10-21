@@ -1385,12 +1385,12 @@ if (teil(10)) {
     const t = (await roh(sx.pfad)).text;
     for (const m of t.matchAll(/<img ([^>]*)>/g)) {
       const src = (m[1].match(/src="([^"]+)"/) || [])[1], alt = (m[1].match(/alt="([^"]*)"/) || [])[1] || '';
-      const r = src ? await fetch(BASE + src) : null;
-      if (!src || !r || r.status !== 200 || !/image\/svg\+xml/.test(r.headers.get('content-type') || '') || r.headers.get('x-robots-tag') || alt.length < 40 || !/width="\d+" height="\d+"/.test(m[1])) bildFehler.push(sx.pfad + ' ' + src);
+      const r = src ? await fetch(BASE + src) : null, fotoTyp = /^\/bilder\/foto\//.test(src || '') ? /image\/webp/ : /image\/svg\+xml/;
+      if (!src || !r || r.status !== 200 || !fotoTyp.test(r.headers.get('content-type') || '') || r.headers.get('x-robots-tag') || alt.length < 40 || !/width="\d+" height="\d+"/.test(m[1])) bildFehler.push(sx.pfad + ' ' + src);
     }
   }
   const bildDa = (await Promise.all(neueSeiten.concat(['/ratgeber/fenster-ausmessen/', '/ratgeber/fenster-austauschen/'], NEU_OKT18, NEU_WEG).map(async (u) => /<figure class="rg-bild"><img /.test((await roh(u)).text)))).every(Boolean);
-  ok(!bildFehler.length && bildDa, 'Abbildungen in den Ratgebern: Datei da (SVG), ohne noindex für die Bildersuche, Breite, Höhe und ein beschreibender Alternativtext' + (bildFehler.length ? ' (' + bildFehler.join(', ') + ')' : ''));
+  ok(!bildFehler.length && bildDa, 'Abbildungen in den Ratgebern: Datei da (Zeichnungen als SVG, Fotos als WebP unter /bilder/foto/), ohne noindex für die Bildersuche, Breite, Höhe und ein beschreibender Alternativtext' + (bildFehler.length ? ' (' + bildFehler.join(', ') + ')' : ''));
   const key = await roh('/' + seo.INDEXNOW + '.txt');
   const aufrufe = [], post = async (u, o) => { aufrufe.push({ u: u, o: o }); return { ok: true, status: 200 }; };
   const tag = (d, plus) => new Date(Date.parse(d) + plus * 864e5);

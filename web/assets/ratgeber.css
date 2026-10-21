@@ -1,22 +1,24 @@
 /* eeziframes · Ratgeber, Seite für Fensterbauer und die Textfassung von Startseite und App.
-   Lesbar ohne JavaScript, für Menschen, Suchmaschinen und KI-Assistenten (docs/SEO.md). Tokens aus gemeinsam.css.
+   Lesbar ohne JavaScript, für Menschen, Suchmaschinen und KI-Assistenten (docs/SEO.md). Tokens aus gemeinsam.css: dunkle Bühne,
+   Karten mit 2-px-Rand, Grün als Signal (Kicker über dem h1, ein Wort im h1, Haken), Cream für die Hauptaktion; die Fotokarte
+   (.foto-karte) kommt aus gemeinsam.css, hier nur ihre Breite.
    Schriftrollen: 40 Titel (32 am Telefon) · 24 Zwischentitel · 17 Text · 15 Nebentext · 13 Label. */
-body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased }
+body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; font-weight: 500; -webkit-font-smoothing: antialiased }
 .rg-kopf { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--paper) 90%, transparent); -webkit-backdrop-filter: saturate(160%) blur(14px); backdrop-filter: saturate(160%) blur(14px); border-bottom: 1px solid var(--line) }
 .rg-kopf > div { max-width: 820px; margin: 0 auto; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px }
 .rg-marke { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); text-decoration: none; font-size: 17px; letter-spacing: -.02em }
 .rg-marke svg { width: 30px; height: 30px; flex: 0 0 auto }
 .rg-nav { display: flex; align-items: center; gap: 4px }
-.rg-nav .leise { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; color: var(--ink2); text-decoration: none; font-size: 15px; font-weight: 700; border-radius: var(--r2) }
+.rg-nav .leise { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; color: var(--ink2); text-decoration: none; font-size: 15px; font-weight: 700; border-radius: var(--pill) }
 .rg-nav .btn { white-space: nowrap }
-@media (hover: hover) { .rg-nav .leise:hover { background: var(--surface2) } }
+@media (hover: hover) { .rg-nav .leise:hover { background: var(--surface2); color: var(--ink) } }
 @media (max-width: 640px) { .rg-nav .leise { display: none } }
 
 .rg { max-width: 820px; margin: 0 auto; padding: 16px 16px 56px }
 .rg-pfad { margin: 6px 0 14px; font-size: 13px; color: var(--muted) }
 .rg-pfad a { color: var(--muted) }
-.rg h1 { margin: 6px 0 14px; font-size: 40px; line-height: 1.08; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
-.rg h2 { margin: 40px 0 10px; font-size: 24px; line-height: 1.2; font-weight: 800; letter-spacing: -.015em; text-wrap: balance }
+.rg h1 { margin: 6px 0 14px; font-size: 40px; line-height: 1.04; font-weight: 800; letter-spacing: -.04em; text-wrap: balance }
+.rg h2 { margin: 40px 0 10px; font-size: 24px; line-height: 1.2; font-weight: 800; letter-spacing: -.025em; text-wrap: balance }
 .rg h3 { margin: 22px 0 6px; font-size: 17px; line-height: 1.35; font-weight: 800 }
 .rg p, .rg li, .rg td, .rg dd { color: var(--ink2) }
 .rg p { margin: 0 0 12px }
@@ -26,7 +28,15 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 .rg a { color: var(--accent); text-underline-offset: 2px }
 .rg sub, .rg sup { font-size: 13px; line-height: 0 }
 .rg .eyebrow { margin-top: 8px }
+/* Kicker: die Zeile über dem h1 trägt das Signal (das Skript setzt .kicker, die Regel hält es auch ohne) */
+.rg > .eyebrow, .rg .eyebrow.kicker { color: var(--accent) }
 .rg-klein { font-size: 15px; color: var(--muted) }
+
+/* Fotokarte (gemeinsam.css): Startbild 4:5 bis 480 px, breite Plätze (16:10) über die ganze Spalte */
+.rg .foto-karte { margin: 8px 0 18px; max-width: 480px }
+.rg .foto-karte.breit { max-width: none }
+/* Breite Fotos am Telefon: die Chips unter dem Bild statt darauf, sonst decken drei Reihen das halbe Foto ab */
+@media (max-width: 600px) { .rg .foto-karte.breit .chips { position: static; padding: 10px 12px 12px } .rg .foto-karte.breit .chip { background: var(--surface2); border-color: var(--line); -webkit-backdrop-filter: none; backdrop-filter: none } }
 
 /* Die Antwort zuerst */
 .rg-kurz { margin: 16px 0 18px; padding: 16px 18px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring) }
@@ -38,17 +48,17 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 .rg-cta .btn { text-decoration: none; color: var(--ink) }
 .rg-cta .btn.primary { color: var(--on-primary) }
 
-/* Schritte */
+/* Schritte: Ziffern in Cream, wie die Hauptaktion */
 .rg .rg-schritte { list-style: none; counter-reset: schritt; padding: 0 }
 .rg-schritte li { counter-increment: schritt; position: relative; margin: 0 0 16px; padding-left: 46px }
-.rg-schritte li::before { content: counter(schritt); position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 10px; background: var(--primary); color: var(--on-primary); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center }
+.rg-schritte li::before { content: counter(schritt); position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: var(--on-primary); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center }
 .rg-schritte b { display: block; color: var(--ink) }
 
 /* Tabellen: umbrechen statt querscrollen */
-.rg-tab { width: 100%; margin: 6px 0 16px; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: var(--r2); box-shadow: var(--ring); font-size: 15px; overflow: hidden }
+.rg-tab { width: 100%; margin: 6px 0 16px; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring); font-size: 15px; overflow: hidden }
 .rg-tab th, .rg-tab td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); overflow-wrap: anywhere }
 .rg-tab tr:last-child td { border-bottom: 0 }
-.rg-tab th { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.rg-tab th { font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
 .rg-tab td:first-child { color: var(--ink); font-weight: 700 }
 /* Begriffe in der ersten Spalte nicht mitten im Wort trennen (anywhere machte die Spalte am Schreibtisch zu schmal) */
 .rg-tab td:first-child { overflow-wrap: break-word; hyphens: auto }
@@ -60,25 +70,26 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
   .rg-tab tr:last-child { border-bottom: 0 }
   .rg-tab td { padding: 0; border: 0 }
   .rg-tab td + td { margin-top: 4px }
-  .rg-tab td[data-k]::before { content: attr(data-k); display: block; margin-top: 4px; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+  .rg-tab td[data-k]::before { content: attr(data-k); display: block; margin-top: 4px; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
 }
 
-/* Abbildungen: Zeichnung als Datei aus /bilder/ (darf in die Bildersuche), auf weißer Karte, auch im dunklen Modus */
+/* Abbildungen: Zeichnung als Datei aus /bilder/ (darf in die Bildersuche), bleibt eine weiße Karte auf der dunklen Bühne */
 .rg-bild { margin: 8px 0 18px }
-.rg-bild img { display: block; width: 100%; max-width: 560px; height: auto; border-radius: var(--r3); box-shadow: var(--ring) }
+.rg-bild img { display: block; width: 100%; max-width: 560px; height: auto; border-radius: var(--r3); box-shadow: var(--ring); background: #fff }
 .rg-bild figcaption { margin-top: 8px; font-size: 15px; color: var(--muted) }
 
-/* Gut zu wissen, Häufiger Fehler: ein Kasten mitten im Text, der eine Sache auf den Punkt bringt */
+/* Gut zu wissen (grüner Strich), Häufiger Fehler (Strich in Orange, der Farbe der Maueröffnung): ein Kasten mitten im Text */
 .rg-tipp { margin: 18px 0; padding: 14px 18px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring), inset 4px 0 0 var(--accent) }
-.rg-tipp.fehler { box-shadow: var(--ring), inset 4px 0 0 #c2410c }
-.rg-tipp .eyebrow { margin: 0 0 6px }
+.rg-tipp.fehler { box-shadow: var(--ring), inset 4px 0 0 var(--mo) }
+.rg-tipp .eyebrow { margin: 0 0 6px; color: var(--accent) }
+.rg-tipp.fehler .eyebrow { color: var(--mo) }
 .rg-tipp p { margin: 0 }
 .rg-tipp p + p { margin-top: 8px }
 
 /* Selbstcheck: Anzeichen zum Abhaken im Kopf, ohne Eingabefelder (Regel „keine Eingaben im Ratgeber“) */
 .rg .rg-check { list-style: none; padding: 0; margin: 8px 0 16px }
 .rg-check li { position: relative; margin: 0 0 10px; padding-left: 34px }
-.rg-check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 20px; height: 20px; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--ink2) }
+.rg-check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 20px; height: 20px; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--line2) }
 .rg-check b { color: var(--ink) }
 
 /* Auf dieser Seite: Abschnitte mit Lesezeit (scripts/ratgeber-bausteine.mjs) */
@@ -92,28 +103,31 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 @media (hover: hover) { .rg-inhalt a:hover { color: var(--accent) } }
 @media (max-width: 600px) { .rg .rg-inhalt ol { columns: 1 } }
 
-/* Dein Weg zu neuen Fenstern: sechs Schritte, der eigene schwarz, darunter der nächste Schritt (auch oben in der Übersicht) */
+/* Dein Weg zu neuen Fenstern: sechs Schritte, der eigene in Cream, darunter der nächste Schritt mit Foto (auch oben in der Übersicht) */
 .rg-weg { margin: 40px 0 0 }
 .rg .rg-weg-liste { list-style: none; margin: 10px 0 14px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
 .rg .rg-weg-liste li { margin: 0 }
-.rg-weg-liste a { display: flex; flex-direction: column; gap: 2px; height: 100%; min-height: 44px; box-sizing: border-box; padding: 10px 14px; background: var(--surface); border-radius: var(--r2); box-shadow: var(--ring); color: var(--ink); text-decoration: none }
-.rg-weg-liste .n { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.rg-weg-liste a { display: flex; flex-direction: column; gap: 2px; height: 100%; min-height: 44px; box-sizing: border-box; padding: 10px 14px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring); color: var(--ink); text-decoration: none }
+.rg-weg-liste .n { font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent) }
 .rg-weg-liste b { font-size: 17px }
 .rg-weg-liste .t { font-size: 15px; line-height: 1.35; color: var(--ink2) }
 .rg .rg-weg-liste li[aria-current] a { background: var(--primary); box-shadow: none }
 .rg .rg-weg-liste li[aria-current] b, .rg .rg-weg-liste li[aria-current] .t { color: var(--on-primary) }
 .rg .rg-weg-liste li[aria-current] .n { color: var(--on-primary); opacity: .7 }
 @media (hover: hover) { .rg-weg-liste li:not([aria-current]) a:hover { box-shadow: var(--lift) } }
-.rg-karte.rg-weiter { margin-top: 4px; box-shadow: inset 0 0 0 2px var(--ink) }
-.rg-weiter b::after { content: ' →' }
-.rg-karte.rg-weiter .eyebrow { margin: 0; font-size: 13px; color: var(--muted) }
+.rg-karte.rg-weiter { flex-direction: row; align-items: center; gap: 14px; margin-top: 4px; box-shadow: inset 0 0 0 2px var(--line2) }
+.rg-weiter-bild { flex: 0 0 96px; width: 96px; height: 72px; border-radius: var(--r2); object-fit: cover; background: var(--surface2) }
+.rg-karte .rg-weiter-text { display: flex; flex-direction: column; gap: 3px; min-width: 0 }
+.rg-karte.rg-weiter .eyebrow { margin: 0; font-size: 13px; color: var(--accent) }
+.rg-weiter b::after { content: ' →'; color: var(--accent) }
+@media (hover: hover) { .rg-karte.rg-weiter:hover { box-shadow: inset 0 0 0 2px var(--ink) } }
 @media (max-width: 600px) { .rg .rg-weg-liste { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 
 /* Fragen */
-.rg-frage { margin: 0 0 10px; background: var(--surface); border-radius: var(--r2); box-shadow: var(--ring) }
+.rg-frage { margin: 0 0 10px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring) }
 .rg-frage summary { display: flex; align-items: center; min-height: 48px; padding: 10px 16px; list-style: none; cursor: pointer; font-weight: 800; color: var(--ink) }
 .rg-frage summary::-webkit-details-marker { display: none }
-.rg-frage summary::after { content: '+'; margin-left: auto; padding-left: 12px; font-size: 24px; line-height: 1; color: var(--muted) }
+.rg-frage summary::after { content: '+'; margin-left: auto; padding-left: 12px; font-size: 24px; line-height: 1; color: var(--accent) }
 .rg-frage[open] summary::after { content: '–' }
 .rg-frage > div { padding: 0 16px 14px }
 .rg-frage > div p:last-child { margin-bottom: 0 }
@@ -135,23 +149,25 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 .rg-fuss a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; color: var(--ink2); font-size: 15px; text-decoration: none }
 @media (hover: hover) { .rg-fuss a:hover { color: var(--ink) } }
 /* „Vertrag widerrufen“ hervorgehoben (Widerrufsfunktion, § 356a BGB): Knopf mit Rand statt einfachem Textlink */
-.rg-fuss a.rg-widerruf { padding: 0 16px; border-radius: 999px; color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--ink) }
-/* Ratgeber und Seiten für Fensterbauer: drei Gruppen untereinander (scripts/ratgeber-fuss.mjs), die eigene Seite hervorgehoben */
+.rg-fuss a.rg-widerruf { padding: 0 16px; border-radius: var(--pill); color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 2px var(--ink) }
+/* Ratgeber und Seiten für Fensterbauer: drei Gruppen untereinander (scripts/ratgeber-bausteine.mjs), die eigene Seite hervorgehoben */
 .rg-fuss-gruppen > div { display: block }
 .rg-fuss-gruppen nav { display: flex; flex-wrap: wrap; gap: 0 16px; padding: 10px 0 }
 .rg-fuss-gruppen nav + nav { border-top: 1px solid var(--line) }
-.rg-fuss-titel { flex-basis: 100%; margin: 4px 0 0; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
-.rg-fuss a[aria-current] { color: var(--ink); font-weight: 700 }
+.rg-fuss-titel { flex-basis: 100%; margin: 4px 0 0; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.rg-fuss a[aria-current] { color: var(--accent); font-weight: 700 }
 
 @media (max-width: 600px) {
   .rg h1 { font-size: 32px }
   .rg h2 { margin-top: 32px }
 }
-/* Drucken: nur der Text der Seite */
+/* Drucken: schwarz auf weiß, nur der Text der Seite (die Tokens der Bühne gelten nicht auf Papier) */
 @media print {
-  .rg-kopf, .rg-fuss, .rg-cta, .rg-pfad { display: none }
+  :root { --ground: #fff; --surface: #fff; --surface2: #f2f2f2; --surface3: #e6e6e6; --text: #000; --text2: #222; --muted: #555; --line: #bbb; --line2: #888; --accent: #1f6f36; --cream: #000; --primary: #000; --on-primary: #fff }
+  .rg-kopf, .rg-fuss, .rg-cta, .rg-pfad, .foto-karte, .rg-weg, .rg-inhalt, .rg-frage summary::after { display: none }
   body.rg-seite { background: #fff; color: #000 }
-  .rg-tab, .rg-kurz, .rg-frage { box-shadow: 0 0 0 1px #999 }
+  .rg-tab, .rg-kurz, .rg-frage, .rg-tipp, .rg-karte { box-shadow: 0 0 0 1px #999 }
+  .rg-frage > div { display: block }
 }
 
 /* Textfassung von Startseite und App (ohne JavaScript): eigener Bereich über die ganze Breite der App-Hülle */
