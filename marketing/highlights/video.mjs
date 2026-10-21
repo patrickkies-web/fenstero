@@ -4,7 +4,8 @@
 //   STANDBILD=1 node marketing/highlights/video.mjs h03   Standbild bilder/<slot>.png neu aus dem ersten Bild des Videos
 //   STANDBILD=0 ...                                         bilder/ nicht anfassen (die Bildfassung behält ihr Foto)
 //
-// Nur fürs Video gelten data-video-fp (Ausschnitt) und data-video-voll (bis wohin voll sichtbar, z. B. 78%) am <img>;
+// Nur fürs Video gelten data-video-fp (Ausschnitt), data-video-voll (bis wohin voll sichtbar, z. B. 78%) und
+// data-video-breite (Video schmaler, seitlich ausgeblendet) am <img>;
 // ohne sie gelten data-fp und die Ausblendung des Screens.
 // Das Video läuft im Foto-Bereich des Screens (gleicher Ausschnitt wie das Foto: data-fp am <img>, sonst 50% 0%) und blendet
 // mit derselben Maske wie das Foto weich in den Grund #161616 aus. Schrift, Chips und alles andere liegen als scharfe, ruhende
@@ -46,6 +47,14 @@ const lage = await page.evaluate(async (url) => {
   const im = document.querySelector('.ef-foto > img[data-slot]'), fig = im.closest('.ef-foto');
   fig.style.setProperty('--ef-fp', im.getAttribute('data-video-fp') || im.getAttribute('data-fp') || '50% 0%');
   if (im.getAttribute('data-video-voll')) fig.style.setProperty('--ef-foto-voll', im.getAttribute('data-video-voll'));
+  /* data-video-breite (z. B. 78%): Video schmaler und mittig, seitlich weich in den Grund ausgeblendet. So passt bei einem
+     flachen Foto-Bereich mehr vom Bild in die Höhe. */
+  const breite = im.getAttribute('data-video-breite');
+  if (breite) {
+    const senk = getComputedStyle(im).webkitMaskImage || getComputedStyle(im).maskImage;
+    const quer = 'linear-gradient(to right, transparent 0, #000 16%, #000 84%, transparent 100%)';
+    Object.assign(im.style, { display: 'block', width: breite, margin: '0 auto', webkitMaskImage: quer + ', ' + senk, maskImage: quer + ', ' + senk, webkitMaskComposite: 'source-in', maskComposite: 'intersect' });
+  }
   im.src = url; await im.decode(); await document.fonts.ready;
   await Promise.all([...document.images].map((b) => b.decode().catch(() => {})));
   const r = im.getBoundingClientRect(), [px, py] = getComputedStyle(im).objectPosition.split(' ').map((v) => parseFloat(v) / 100);
