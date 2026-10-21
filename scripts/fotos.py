@@ -26,7 +26,7 @@ ZIEL = WURZEL / 'web' / 'bilder' / 'foto'
 PLAETZE = [
     ('start-hauseigentuemer', 1250, 1250),
     ('start-fensterbauer', 1120, 1400),
-    ('app-start', 1200, 1500),
+    ('app-start', 1120, 1400),
     ('gross', 1200, 1500),
     ('fuer-fensterbauer', 1200, 1500),
     ('ratgeber', 1600, 1000),
