@@ -562,7 +562,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .stats .stat { display: flex; flex-direction: column; justify-content: flex-start; gap: 2px; padding: 10px 12px; min-height: 0; border-radius: var(--r2) }
   .stats .stat .stat-ic { display: none }
   .stats .stat > small { order: 2; padding-right: 0; line-height: 1.25 } .stats .stat > b { order: 1; font-size: 26px; line-height: 1.1 } .stats .stat > span:not(.stat-ic) { display: none }
-  .l-leiste { flex-direction: column; align-items: stretch; gap: 12px } .l-leiste .lfilter { order: 2; flex: 0 0 auto } .l-neben { order: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0 } .l-neben .btn { min-width: 0; padding: 0 10px; overflow: hidden }
+  .l-leiste { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 12px } .l-leiste .lfilter { order: 2; flex: 0 0 auto } .l-neben { order: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0 } .l-neben .btn { min-width: 0; padding: 0 10px; overflow: hidden }
   .nitem .neu-w { display: inline }
   .logo-s.neben-zurueck .wm { display: none }
   .nitem .badge { display: none }
