@@ -4122,6 +4122,16 @@ if (teil(20)) {
   await p.setViewportSize({ width: 390, height: 844 });
   const wenden = await p.evaluate(() => { const b = document.querySelector('#w3d [data-w3d="wenden"]'); return b ? b.getAttribute('aria-label') : null; });
   ok(!sonne.length, 'Sonnenschutz: Bühne mindestens 220 px, Knöpfe, Zoom und Beschriftung überdecken sich nicht (320 und 390 px breit)' + (sonne.length ? ' (' + sonne.join(' | ') + ')' : ''));
+  // Schmale Telefone: die Eyebrow läuft nicht unter i und „Notiz“
+  await p.setViewportSize({ width: 320, height: 640 });
+  const eyeUeber = [];
+  for (const scr of ['start', 'fotos', 'ergebnis', 'anfrage', 'anfrage2']) {
+    await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150);
+    const u = await p.evaluate(() => { const e = document.querySelector('.hd-zeile .eyebrow'), t = document.querySelector('.hd-zeile .hd-tools'); if (!e || !t) return 0; const rg = document.createRange(); rg.selectNodeContents(e); return Math.max(...Array.from(rg.getClientRects()).map((x) => x.right)) - t.getBoundingClientRect().left; });
+    if (u > 0) eyeUeber.push(scr + ' ' + Math.round(u) + ' px');
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
+  ok(!eyeUeber.length, 'Bei 320 px Breite läuft die Eyebrow nicht unter die Knöpfe i und Notiz' + (eyeUeber.length ? ' (' + eyeUeber.join(', ') + ')' : ''));
   // Genau ein grünes Wort je Titel (Schritte und alle Fragen)
   const titel = [];
   for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }

@@ -880,6 +880,9 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .hd-zeile { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px }
 .hd-zeile .eyebrow { min-width: 0 }
 .eyebrow .nw { white-space: nowrap }
+/* Schmale Telefone: Neben i und „Notiz“ ist für „Schritt 2 von 6 ·“ in einer Zeile kein Platz; dann bricht auch innerhalb um, statt
+   unter die Knöpfe zu laufen */
+@media (max-width: 374px) { .hd-zeile .eyebrow .nw { white-space: normal } }
 .hd-tools { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; margin: -6px -6px -6px 0 }
 .hd-i { width: 44px; height: 44px; border: 0; border-radius: var(--pill); background: none; padding: 0; color: var(--muted); display: inline-flex; align-items: center; justify-content: center }
 .hd-i:active { transform: scale(.94) }
