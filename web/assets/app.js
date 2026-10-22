@@ -2351,6 +2351,7 @@ function setP(patch) { Object.assign(S.proj, patch); persist(); render(); }
 const NUR_EIGENES = { teilen: 1, datei: 1, kasse: 1, gekauft: 1, konto: 1, sichern: 1, meinkonto: 1 };
 function go(screen, dir) {
   if (S.betrieb && NUR_EIGENES[screen]) screen = 'blatt';
+  S.sendeFrage = false; // Rückfrage vor dem Senden gilt nur auf „Prüfen“
   if (screen === 'zeichnen' && !planFoto()) { toast('Erst ein Foto der Stelle'); screen = 'fotos'; }
   if (S.screen === 'zeichnen' && screen !== 'zeichnen' && S.win.plan && !S.win.plan.bild) planBildErzeugen(S.win).then(() => { if (S.editIdx >= 0) persist(); });
   if (screen === 'planmasse') planVorgabe(S.win);
@@ -3044,6 +3045,7 @@ SCREENS.blatt = () => {
   const voll = S.windows.filter((x) => derive(x).complete).length, fehlt = S.windows.length - voll;
   const html = hd('Prüfen', 'Alles vollständig?', 'Deine Fenster mit allen Maßen und Wünschen, dazu die Auswertung der Fotos, gehen nur an ' + esc(bn) + '. Tipp ein Fenster an, um es zu prüfen oder zu ändern.') +
     (fehlt ? '<div class="msg ' + (voll ? 'warn' : 'bad') + '">' + (voll ? fehlt + (fehlt === 1 ? ' Fenster hat' : ' Fenster haben') + ' noch keine vollständigen Maße. Du kannst trotzdem senden, ' + esc(bn) + ' sieht dann, was fehlt.' : (S.windows.length ? 'Noch kein Fenster ist vollständig gemessen. Tipp ein Fenster an und trag die fehlenden Maße nach.' : 'Noch kein Fenster erfasst.')) + '</div>' : '') +
+    entwurfWarnung() +
     '<div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => checkCard(x, i)).join('') + '</div>' +
     (kiLaeuftFuer() ? kiLaeuftKarte('Die Auswertung der Fotos kommt gleich dazu. Wer jetzt sendet, wartet kurz, damit sie mitgeht.') : '') +
     '<p class="sub" style="padding: 0 6px">Nach dem Absenden ist der Link erledigt. Ändern kannst du danach nur noch über ' + esc(bn) + '.</p>';
@@ -3109,7 +3111,7 @@ function blattVorschau() {
 SCREENS.teilen = () => {
   const n = anzahlFenster(), t = teilStand(), code = packProject(S.windows, S.proj, null);
   if (!FREI()) {
-    const html = hd('Fertig gemessen', 'Dein Aufmaßblatt ist fertig.', n + (n === 1 ? ' Fenster' : ' Fenster') + ', alle acht Handmaße, die Auswertung der Fotos, deine Wünsche. Einmal freischalten, dann gehört es dir.') + blattVorschau() +
+    const html = hd('Fertig gemessen', 'Dein Aufmaßblatt ist fertig.', n + (n === 1 ? ' Fenster' : ' Fenster') + ', alle acht Handmaße, die Auswertung der Fotos, deine Wünsche. Einmal freischalten, dann gehört es dir.') + entwurfWarnung() + blattVorschau() +
       '<div class="card"><div class="incl">' + ['Technische Zeichnung mit allen Maßen je Fenster', 'Auswertung der Fotos und deine Wünsche', 'Als PDF teilen, so oft du willst, an jeden Fensterbauer', 'Mit Code: Dein Fensterbauer übernimmt alles mit einem Klick', 'Gilt für dieses Projekt, auch wenn du später Fenster ergänzt (bis ' + GRENZE.fenster + ' je Aufmaß)'].map((x) => '<p>' + CHECK + '<span>' + esc(x) + '</span></p>').join('') + '</div>' +
       '<div class="price-row"><span><b>' + euro(PREIS()) + '</b><small>einmalig' + (MWST() ? ', inkl. MwSt.' : '') + '</small>' + (EINF() ? '<small class="einf">' + esc(EINF()) + '</small>' : '') + '</span><small class="sub">Messen, Fotos und 3-D-Modell bleiben kostenlos</small></div></div>' +
       (S.kauf && S.kauf.wartet ? '<p class="sub" style="padding: 0 6px"><b>Deine Zahlung ist unterwegs.</b> Sobald Stripe sie bestätigt, schaltet sich dein Blatt hier von selbst frei. Bitte nicht noch einmal bezahlen.</p>' : '<p class="sub" style="padding: 0 6px">Du kannst weitere Fenster messen, das Blatt wächst mit. Jedes Fenster kannst du eine Woche lang beliebig ändern; ab dem Freischalten zählt jede Änderung, viermal je Fenster.</p>');
@@ -3583,7 +3585,13 @@ function qStep(delta) {
   if (c.q.id === 'tiefe') {
     if (!S.proj.tiefe) { S.proj.tiefe = 'normal'; persist(); }
     const zur = S.tiefeZurueck; S.tiefeZurueck = null;
-    if (zur && zur !== 'tiefe') { const z = qSichtbar(S.win).find((q) => q.id === zur); if (z) { S.q = z.id; S.dir = delta < 0 ? 'back' : 'fwd'; return render(true); } }
+    if (zur && zur !== 'tiefe') {
+      /* Gibt es die Frage bei der neuen Tiefe nicht mehr: die erste sichtbare dahinter (wie qCurrent bei verschwundenen Fragen),
+         sonst die letzte sichtbare; nie zurück an den Anfang der Wünsche */
+      const alle = qList(S.win), sicht = qSichtbar(S.win, alle).filter((q) => q.id !== 'tiefe'), j = alle.findIndex((q) => q.id === zur);
+      const z = sicht.find((q) => q.id === zur) || (j < 0 ? null : sicht.find((q) => alle.indexOf(q) > j) || sicht[sicht.length - 1]);
+      if (z) { if (z.id !== zur) { S.openSash = z.sash != null ? z.sash : -1; if (z.sash != null) S.selSash = z.sash; } S.q = z.id; S.dir = delta < 0 ? 'back' : 'fwd'; return render(true); }
+    }
     c = qCurrent();
   }
   const nx = c.list[c.i + delta];
@@ -3610,6 +3618,14 @@ function qCards(q) {
 const CHECK_S = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="var(--paper)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 /* Gruppe je Option (auch nach filter()), damit auswahl() die Erklärung einer Option findet */
 const OPT_GRUPPE = new WeakMap(); Object.keys(OPT).forEach((g) => (OPT[g] || []).forEach((o) => OPT_GRUPPE.set(o, g)));
+/* Breite einer Beschriftung in der Schrift der Chips (Inter 700, 15 px); ohne Canvas grob über die Zeichenzahl */
+let MESS_CTX = null;
+function textBreite(t) {
+  try { if (!MESS_CTX) { MESS_CTX = document.createElement('canvas').getContext('2d'); MESS_CTX.font = '700 15px ' + getComputedStyle(document.body).fontFamily; } return MESS_CTX.measureText(t).width; } catch (e) { return String(t).length * 8.6; }
+}
+/* Platz für die Beschriftung in einem Chip mit i im Raster aus zwei Spalten: halbe Breite des Docks (16 px Rand, 8 px Abstand) minus
+   Rand 2 × 2, links 10, rechts 40 fürs i und gegebenenfalls Symbol oder Tupfen samt Abstand */
+const chipPlatz = (sym) => (Math.min(document.documentElement.clientWidth || 390, 640) - 32 - 8) / 2 - 4 - 10 - 40 - (sym ? 24 : 0);
 function auswahl(opts, attrs, istGewaehlt) {
   const lang = Math.max.apply(null, opts.map((o) => o.label.length)), dots = opts.some((o) => o.bg);
   const knopf = (o, cls, inner) => '<button type="button" class="' + cls + '" ' + attrs + ' data-v="' + o.k + '" aria-pressed="' + istGewaehlt(o) + '">' + inner + '</button>';
@@ -3619,8 +3635,11 @@ function auswahl(opts, attrs, istGewaehlt) {
   const info = (o) => (gi(o) ? '<button type="button" class="qci-i" data-act="gloss" data-k="' + gi(o) + '" aria-label="' + esc('Erklärung: ' + o.label) + '">' + ICON_I + '</button>' : '');
     /* Segmente: bis 3 kurze, 4 sehr kurze (Geschoss) oder bis 6 Zahlen (Flügel der Faltwand) passen in eine Reihe; mit Fachbegriff (i) nicht */
     if (!dots && !mitI && ((opts.length <= 3 && lang <= 11) || (opts.length === 4 && lang <= 6) || (opts.length <= 6 && lang <= 2))) return '<div class="seg qseg">' + opts.map((o) => knopf(o, '', esc(o.label))).join('') + '</div>';
-  if (opts.length <= 6 && lang <= 16) return '<div class="qchips grid2' + (mitI ? ' mit-i' : '') + '">' + opts.map((o) => (mitI ? '<div class="qci">' + knopf(o, 'chip', punkt(o) + esc(o.label)) + info(o) + '</div>' : knopf(o, 'chip', punkt(o) + esc(o.label)))).join('') + '</div>';
-  return '<div class="qlist' + (mitI ? ' mit-i' : '') + '">' + opts.map((o) => (mitI ? '<div class="qli">' : '') + knopf(o, '', '<span class="tx">' + punkt(o) + esc(o.label) + '</span><span class="mark">' + CHECK_S + '</span>') + (mitI ? info(o) + '</div>' : '')).join('') + '</div>';
+  /* Chips mit i nur, wenn jede Beschriftung bei dieser Breite ganz vor das i passt (kein Umbruch, kein Überlauf); sonst Zeilen */
+  const passt = !mitI || opts.every((o) => textBreite(o.label) <= chipPlatz(!!(o.bg || o.ico)) - 2);
+  if (opts.length <= 6 && lang <= 16 && passt) return '<div class="qchips grid2' + (mitI ? ' mit-i' : '') + '">' + opts.map((o) => (mitI ? '<div class="qci">' + knopf(o, 'chip', punkt(o) + '<span class="lb">' + esc(o.label) + '</span>') + info(o) + '</div>' : knopf(o, 'chip', punkt(o) + esc(o.label)))).join('') + '</div>';
+  /* Zeilen ohne eigenen Begriff bekommen den Platz des i, damit die Haken untereinander stehen */
+  return '<div class="qlist' + (mitI ? ' mit-i' : '') + '">' + opts.map((o) => (mitI ? '<div class="qli">' : '') + knopf(o, '', '<span class="tx">' + punkt(o) + esc(o.label) + '</span><span class="mark">' + CHECK_S + '</span>') + (mitI ? (info(o) || '<span class="qli-platz" aria-hidden="true"></span>') + '</div>' : '')).join('') + '</div>';
 }
 /* Formen: fünf Symbolkacheln in einer Reihe; Name und Kurzbeschreibung der gewählten Form darunter */
 function qFormen(q) {
@@ -4260,6 +4279,7 @@ function sheetsHTML() {
   if (S.fotoGross) return fotoBlatt();
   if (S.notiz) return notizBlatt();
   if (S.verlassen) return verlassenBlatt();
+  if (S.sendeFrage && S.screen === 'blatt') return sendeFrageBlatt();
   if (S.gloss && GLOSS[S.gloss]) return glossBlatt();
   if (S.glossIndex) return glossIndexBlatt();
   if (S.wohin) return wohinBlatt();
@@ -4386,9 +4406,27 @@ function entwurfStelle(o) {
   if (o.screen === 'frage') { const q = qList(o.w).find((x) => x.id === o.q); return 'Wünsche' + (q ? ', ' + AW.notizStelle(q.id) : ''); }
   return STEP_TITEL[o.screen] || 'Start';
 }
+const entwurfName = (o) => o.w.name || (o.g && o.g.name) || (istTuer(o.w) ? 'Neue Tür' : o.w.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster');
+/* Vor dem Senden (Kundenlink) und vor der Kasse (eigenes Aufmaß): Was nur als Entwurf auf dem Gerät liegt, geht nicht mit */
+function entwurfWarnung() {
+  const o = entwurfLesen(); if (!o) return '';
+  const name = entwurfName(o), an = S.betrieb ? ' nicht mit an ' + (S.betrieb.name || 'deinen Fensterbauer') : ' im Aufmaßblatt';
+  const satz = o.g ? 'Deine Änderungen an „' + name + '“ sind nicht gespeichert. Erst speichern oder verwerfen, sonst ' + (S.betrieb ? 'gehen sie' : 'fehlen sie') + an + '.'
+    : '„' + name + '“ ist angefangen und nicht gespeichert. Erst fertig machen oder verwerfen, sonst ' + (S.betrieb ? 'geht es' : 'fehlt es') + an + '.';
+  return '<div class="msg warn ek-warn" role="status"><span>' + esc(satz) + '</span><div class="pill-row"><button type="button" class="pill" data-act="entwurf-weiter">Fortsetzen</button><button type="button" class="pill" data-act="entwurf-weg">Verwerfen</button></div></div>';
+}
+/* „Senden“ mit einem angefangenen Fenster: nachfragen, statt still ohne es zu senden (danach ist der Link erledigt) */
+function sendeFrageBlatt() {
+  const o = entwurfLesen(); if (!o) return '';
+  const name = entwurfName(o), bn = (S.betrieb && S.betrieb.name) || 'deinen Fensterbauer';
+  return '<button type="button" class="sheet-bg" aria-label="Abbrechen" data-act="sende-frage-zu"></button><div class="sheet verlassen" role="alertdialog" aria-modal="true" aria-labelledby="sf-t" aria-describedby="sf-s"><div class="grip"></div>' +
+    '<p class="eyebrow kicker" style="margin-top: 6px">Nicht gespeichert</p><h2 id="sf-t" tabindex="-1">' + (o.g ? 'Änderungen an ' + esc(name) + ' <span class="ak">fehlen</span> noch' : esc(name) + ' <span class="ak">fehlt</span> noch') + '</h2>' +
+    '<p class="vl-sub" id="sf-s">' + esc((o.g ? 'Deine Änderungen an „' + name + '“ liegen nur als Entwurf auf diesem Gerät.' : '„' + name + '“ ist angefangen und liegt nur als Entwurf auf diesem Gerät.') + ' Nach dem Absenden ist der Link erledigt, dann kommt ' + (o.g ? 'nichts davon' : 'es nicht') + ' mehr zu ' + bn + '.') + '</p>' +
+    '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="entwurf-weiter">Erst fertig machen</button><button type="button" class="btn ghost vl-weg" data-act="send-ohne">' + esc(o.g ? 'Ohne die Änderungen senden' : 'Ohne „' + name + '“ senden') + '</button><button type="button" class="link vl-ab" data-act="sende-frage-zu">Abbrechen</button></div></div>';
+}
 function entwurfKarte() {
   const o = entwurfLesen(); if (!o) return '';
-  const name = o.w.name || (o.g && o.g.name) || (istTuer(o.w) ? 'Neue Tür' : o.w.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster');
+  const name = entwurfName(o);
   return '<section class="card entwurf-karte" aria-label="Angefangenes Fenster"><p class="eyebrow kicker">' + (o.g ? 'Änderungen nicht gespeichert' : 'Angefangen') + '</p><div class="ek-zeile"><span class="ic">' + svgIcon(miniWin(o.w), 44) + '</span><span class="tx"><b>' + esc(name) + '</b><small>Weiter bei: ' + esc(entwurfStelle(o)) + '. Liegt auf diesem Gerät.</small></span></div>' +
     '<div class="ek-knoepfe"><button type="button" class="btn ghost" data-act="entwurf-weiter">Fortsetzen</button><button type="button" class="link ek-weg" data-act="entwurf-weg">Verwerfen</button></div></section>';
 }
@@ -4474,10 +4512,13 @@ function falleStellen() {
   try { if (!(history.state && history.state.eezi === 1)) history.pushState({ eezi: 1 }, '', location.href); FALLE_URL = location.href; } catch (e) { /* ohne Verlauf */ }
 }
 function zurueckTaste() {
-  if (FB.el) { fbZu(true); return true; } // Farbblatt „Alle Farben“ (S2) liegt über allem
+  /* Einwilligung der KI (gemeinsam.js) liegt über allem: Zurück schließt sie wie „Ohne KI weiter“, der Schritt darunter bleibt */
+  const ki = document.querySelector('.fx-dialog .fx-nein'); if (ki) { ki.click(); return true; }
+  if (FB.el) { fbZu(true); return true; } // Farbblatt „Alle Farben“ (S2)
   if (S.fotoGross) { S.fotoGross = null; render(); return true; }
   if (S.notiz) { notizZu(); return true; }
   if (S.verlassen) { S.verlassen = null; render(); return true; }
+  if (S.sendeFrage) { S.sendeFrage = false; render(); return true; }
   if (S.gloss || S.glossIndex) { S.gloss = null; S.glossIndex = false; render(); return true; }
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
@@ -4502,6 +4543,7 @@ function escTaste() {
   if (S.fotoGross) { S.fotoGross = null; render(); return true; }
   if (S.notiz) { notizZu(); return true; }
   if (S.verlassen) { S.verlassen = null; render(); return true; }
+  if (S.sendeFrage) { S.sendeFrage = false; render(); return true; }
   if (S.gloss || S.glossIndex) { S.gloss = null; S.glossIndex = false; render(); return true; }
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
@@ -5532,7 +5574,13 @@ function act(name, el) {
     case 'offen': { const k = f, an = k === 'glasfn' ? !(w.offen && w.offen[k]) : true; offenSetzen(w, k, an); if (an && (k === 'fba' || k === 'einbau')) w.offenWahl = Object.assign({}, w.offenWahl || {}, { [k]: 1 }); return render(); } // selbst getippt, kein Startwert (AW.nachTiefe)
     case 'tiefe': { S.proj.tiefe = v; persist(); return render(); }
     case 'tiefe-zeigen': { if (S.q !== 'tiefe') S.tiefeZurueck = S.q; S.q = 'tiefe'; S.dir = 'fwd'; return render(true); }
-    case 'kap-mehr': { const m = Object.assign({}, MEHR.get(w) || {}); m[v] = true; MEHR.set(w, m); const c = qCurrent(), nx = c.list[c.i + 1]; if (nx && nx.kap === v) { S.q = nx.id; S.dir = 'fwd'; } return render(true); }
+    case 'kap-mehr': {
+      /* Die dazugeholten Fragen stehen meist vor der aktuellen (der Knopf sitzt an der letzten sichtbaren des Kapitels): weiter bei der
+         ersten, die vorher nicht zu sehen war; „Weiter“ führt dann der Reihe nach durchs Kapitel */
+      const vorher = new Set(qSichtbar(w).map((q) => q.id)), m = Object.assign({}, MEHR.get(w) || {}); m[v] = true; MEHR.set(w, m);
+      const neu = qCurrent().list.find((q) => q.kap === v && !vorher.has(q.id)); if (neu) { S.q = neu.id; S.dir = 'fwd'; S.selBar = null; S.qWunsch = false; S.qMass = null; S.openSash = neu.sash != null ? neu.sash : -1; if (neu.sash != null) S.selSash = neu.sash; }
+      return render(true);
+    }
     case 'detail': {
       /* Detailangabe: '' heißt Standard des Fensterbauers (Wert weg); Mehrfachauswahl schaltet einzeln */
       const dd = AW.DETAIL.find((x) => x.k === f); if (!dd) return;
@@ -5616,8 +5664,10 @@ function act(name, el) {
     case 'verlassen-verwerfen': { const z = S.verlassen && S.verlassen.ziel, g = S.editIdx >= 0 ? S.windows[S.editIdx] : null; S.verlassen = null; entwurfWeg(); if (g) S.win = altAngleichen(Object.assign(baseWin(), kopie(g))); else { S.win = baseWin(); S.editIdx = -1; } ziehen(z); return toast(g ? 'Änderungen verworfen' : 'Fenster verworfen'); }
     case 'verlassen-name': { S.verlassen = null; return nameVerlangen(); }
     case 'verlassen-abbrechen': { S.verlassen = null; return render(); }
-    case 'entwurf-weiter': return entwurfFortsetzen();
-    case 'entwurf-weg': { entwurfWeg(); render(); return toast('Entwurf verworfen'); }
+    case 'entwurf-weiter': S.sendeFrage = false; return entwurfFortsetzen();
+    case 'entwurf-weg': { S.sendeFrage = false; entwurfWeg(); render(); return toast('Entwurf verworfen'); }
+    case 'sende-frage-zu': S.sendeFrage = false; return render();
+    case 'send-ohne': { S.sendeFrage = false; entwurfWeg(); render(); return act('send', el); }
     /* Foto groß */
     case 'foto-gross': { if (v === 'plan' ? !(w.plan && w.plan.bild) : !S.photos[v]) return; S.fotoGross = { seite: v }; return render(); }
     case 'foto-zu': { S.fotoGross = null; return render(); }
@@ -5687,7 +5737,7 @@ function act(name, el) {
     }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); entschieden(w, 'glasfn'); return render(); }
     case 'save': return saveWin();
-    case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); return kiVorher('senden').then((weiter) => { if (!weiter || (S.betrieb && S.sent)) return; if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); go('gesendet'); }); }
+    case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (S.betrieb && entwurfLesen()) { S.sendeFrage = true; return render(); } return kiVorher('senden').then((weiter) => { if (!weiter || (S.betrieb && S.sent)) return; if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); go('gesendet'); }); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'teil-copy': { copyText(curCode(), 'code-box', 'Code kopiert'); return act('teil-mark', el); }
     case 'teil-mark': return teilMark('betrieb');
@@ -5708,7 +5758,7 @@ const TOUR_DARF = /^(tour-[a-z]+|gloss|gindex|gclose|back|teilung|sash|felder|hs
 /* Zifferntasten und Tastatur fürs Messen: kein Eingabefeld, keine Systemtastatur, nichts springt */
 /* Haptik (gemeinsam.js): Tasten, Auswahl und Schalter tippen kurz; Fehler und fertige Schritte melden sich in feiern()/messNext() */
 const TIPPT = /^(key|rest-same|qnext|qprev|new|send|gloss|q-|chip|seg|opt|sw|tile|pos|share|copy|k-pay|k-buy|situation|art|felder|ul|hst|fsw|sart|farbe|detail|tiefe|kap-mehr)/;
-function tippen(name, el) { if (!window.Haptik) return; if (TIPPT.test(name) || el.matches('.chip, .seg > button, .qopt, .qlist > button, .qsw, .pill, .switch, .keypad button, .stepper button, .colors button')) window.Haptik.tick(); }
+function tippen(name, el) { if (!window.Haptik) return; if (TIPPT.test(name) || el.matches('.chip, .seg > button, .qopt, .qlist > button, .qli > button[data-v], .qsw, .pill, .switch, .keypad button, .stepper button, .colors button')) window.Haptik.tick(); }
 function keyIn(k) {
   if (S.qMass && S.screen === 'frage') return massKey(k);
   const rest = S.screen === 'rest', st = rest ? S.rest : S.mess;
@@ -5941,7 +5991,7 @@ function tourBlatt() {
     '<div class="tb-band">' + LOGO(18) + WM() + '<span>AM-BEISPIEL</span></div><div class="tb-in">' +
     '<p class="tb-eb">Dein Fenster-Aufmaß</p><p class="tb-t">Familie Muster.</p>' +
     '<p class="tb-eb">Dein Weg · 4 von 5 erledigt</p><ol class="tb-weg">' + weg.map((s) => '<li class="' + (s[1] ? 'ok' : 'jetzt') + '"><i>' + (s[1] ? ok : '') + '</i><span>' + s[0] + '</span></li>').join('') + '</ol>' +
-    '<div class="tb-boxen"><div class="tb-box"><p class="tb-eb">Eckdaten</p><p>Einfamilienhaus</p><p>Förderung gewünscht</p></div><div class="tb-box fb"><p class="tb-eb">Für den Fensterbauer</p><p>Maße in mm</p><p>Code auf Seite 2</p></div></div>' +
+    '<div class="tb-boxen"><div class="tb-box"><p class="tb-eb">Eckdaten</p><p>Einfamilienhaus</p><p>Förderung gewünscht</p></div><div class="tb-box tb-fb"><p class="tb-eb">Für den Fensterbauer</p><p>Maße in mm</p><p>Code auf Seite 2</p></div></div>' +
     '<div class="tb-pos"><p class="tb-eb">Pos. 1 · ' + esc(w.name || 'Fenster') + '</p><div class="tb-zeich">' + tourZeichnung(w) + '</div><p class="tb-m">' + esc(lab('art', w.art || 'fenster') + ' · ' + lab('material', w.material) + ' · ' + rahmenFarbe(w, 'aussen').name) + '</p></div>' +
     '</div><span class="tb-stempel">Beispiel</span></div></div></div>';
 }
@@ -6067,7 +6117,7 @@ function boot() {
   root.addEventListener('input', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
   root.addEventListener('change', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-in')) onInput(el, e); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && escTaste()) { e.preventDefault(); return; }
+    if (e.key === 'Escape' && (e.defaultPrevented || escTaste())) { e.preventDefault(); return; } // schon erledigt (KI-Einwilligung, Farbblatt): nicht noch ein Blatt darunter schließen
     /* Tab bleibt im offenen Blatt (das Farbblatt hat seine eigene Falle) */
     if (e.key === 'Tab' && !FB.el) { const sh = $app().querySelector('.sheet[aria-modal="true"]'), z = sh ? fokusZiele(sh) : []; if (z.length) { const i = z.indexOf(document.activeElement); if (e.shiftKey ? i <= 0 : (i < 0 || i === z.length - 1)) { e.preventDefault(); (e.shiftKey ? z[z.length - 1] : z[0]).focus(); } } return; }
     if (S.notiz || S.gloss || S.glossIndex || S.wohin || S.verlassen || S.fotoGross) return;

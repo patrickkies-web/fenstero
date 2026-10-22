@@ -671,7 +671,7 @@ if (teil(6)) {
   await frage('glasfn', { glasfn: [] });
   await p4.click('.qpanel [data-act="glasfn"][data-v="sonne"]'); await p4.waitForTimeout(300);
   await p4.click('.qpanel [data-act="glasfn"][data-v="vsg"]'); await p4.waitForTimeout(300);
-  const fn = await p4.evaluate(() => ({ sonne: document.getElementById('w3d').classList.contains('glas-sonne'), folie: /#2fa57f/i.test(document.querySelector('.w3d-lupe').innerHTML), ico: document.querySelectorAll('.qpanel .chip .ci svg').length }));
+  const fn = await p4.evaluate(() => ({ sonne: document.getElementById('w3d').classList.contains('glas-sonne'), folie: /#2fa57f/i.test(document.querySelector('.w3d-lupe').innerHTML), ico: document.querySelectorAll('.qpanel .chip .ci svg, .qpanel .qlist .ci svg').length })); // mit i als Zeilen, wenn die Chips zu schmal sind
   ok(fn.sonne && fn.folie && fn.ico === 4, 'Glas-Extras: Symbole in der Auswahl, Sonnenschutz tönt das Glas, Sicherheitsglas zeigt die Folie in der Lupe');
   await frage('rc', { rc: 'basis' });
   const pilz = () => p4.evaluate(() => document.querySelectorAll('.w3d-pilz.is-on').length);
@@ -4670,6 +4670,90 @@ if (teil(22)) {
   await p.click('.qnav .btn.primary'); await p.waitForTimeout(400);
   const eM2 = await p.evaluate(() => ({ q: S.q, sichtbar: qSichtbar(S.win).filter((q) => q.kap === 'material').length, alle: qList(S.win).filter((q) => q.kap === 'material').length }));
   ok(eM0.kap === 'material' && eM0.q !== 'fi' && eM1.q === 'tiefe' && eM1.mehr && eM1.tiefe === 'kurz' && eM2.q === eM0.q && eM2.sichtbar === eM2.alle, 'Entwurf: aufgeklappte Kapitel („Mehr zu …“) und der Rückweg von der Tiefe überstehen das Neuladen; Weiter führt zurück zur Frage (' + eM0.q + ')');
+  /* Nacharbeit nach dem Merge von #46 (Prüfbefunde app): Zeilen und Chips mit i, „Mehr zu …“, Tiefe-Pille mitten in den Detailfragen,
+     angefangenes Fenster beim Senden, letzter Schritt der Führung, Zurück-Taste bei der KI-Einwilligung */
+  // Glas-Extras mit Symbol und i: jede Zeile 44 px (vorher 341 px je Option mit riesigen Symbolen), Haken untereinander
+  const gx = {};
+  for (const t of ['genau', 'normal']) {
+    await frageB('glasfn', { glasfn: ['sicht'] }, t);
+    gx[t] = await p.evaluate(() => { const d = document.querySelector('.qdock'); return { zeilen: Array.from(d.querySelectorAll('.qlist > .qli')).map((x) => Math.round(x.getBoundingClientRect().height)), ci: Array.from(d.querySelectorAll('.qlist .ci')).map((x) => Math.round(x.getBoundingClientRect().width)), sh: d.scrollHeight, haken: new Set(Array.from(d.querySelectorAll('.qlist .mark')).map((x) => Math.round(x.getBoundingClientRect().left))).size, i: d.querySelectorAll('.qlist .qci-i[data-act="gloss"]').length }; });
+  }
+  ok(gx.genau.zeilen.length === 7 && gx.normal.zeilen.length === 4 && gx.genau.zeilen.concat(gx.normal.zeilen).every((h) => h >= 44 && h <= 56) && gx.genau.ci.concat(gx.normal.ci).every((w) => w === 20) && gx.genau.sh < 600 && gx.genau.haken === 1 && gx.genau.i === 7,
+    'Glas-Extras mit Symbol und i („Alles im Detail“ und „Die üblichen Wünsche“): Zeilen 44 bis 56 px, Symbole 20 px, Haken untereinander, Dock ' + gx.genau.sh + ' px statt 2.500 (' + gx.genau.zeilen.join('/') + ')');
+  // Chips mit i: Beschriftung ganz vor dem i (sonst Zeilen), das i auf dem gedrückten Chip hell mit dunklem Zeichen; 390 und 360 px
+  const chipsI = [];
+  for (const breite of [390, 360]) {
+    await p.setViewportSize({ width: breite, height: 844 });
+    for (const [q, set, tiefe] of [['glasfn', { glasfn: ['sicht'] }, 'normal'], ['fbi', { fbi: 'werzalit' }, 'normal'], ['rc', { rc: 'basis' }, 'genau'], ['antrieb', { sart: 'rollladen', roll: 'vorbau', antrieb: 'smart' }, 'normal']]) {
+      await frageB(q, set, tiefe);
+      const r = await p.evaluate(() => Array.from(document.querySelectorAll('.qpanel .qci')).map((c) => {
+        const lb = c.querySelector('.chip .lb'), i = c.querySelector('.qci-i'); if (!lb) return 'ohne Beschriftung';
+        const rg = document.createRange(); rg.selectNodeContents(lb); const rechts = Math.max.apply(null, Array.from(rg.getClientRects()).map((x) => x.right));
+        const kreis = i && i.querySelector('svg > circle'), gedrueckt = c.querySelector('.chip').getAttribute('aria-pressed') === 'true';
+        if (lb.scrollWidth > lb.clientWidth + 1) return lb.textContent + ' abgeschnitten';
+        if (i && rechts > i.getBoundingClientRect().left + 13) return lb.textContent + ' unter dem i';
+        if (i && gedrueckt && getComputedStyle(kreis).fill !== 'rgb(241, 240, 234)') return lb.textContent + ' i unlesbar';
+        return '';
+      }).filter(Boolean));
+      r.forEach((x) => chipsI.push(breite + ' ' + q + ': ' + x));
+    }
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
+  ok(!chipsI.length, 'Chips mit i bei 390 und 360 px: Beschriftung ganz vor dem i (Glas-Extras, Fensterbank innen, Einbruchschutz, Antrieb), das i auf dem gedrückten Chip lesbar' + (chipsI.length ? ' (' + chipsI.join(' | ') + ')' : ''));
+  // „Mehr zu …“ bei „Das Wichtigste“: weiter bei der ersten dazugeholten Frage des Kapitels, nicht dahinter
+  const mz = await p.evaluate(() => {
+    const out = [], mk = () => { S.verlassen = null; S.wohin = false; const w = baseWin(); Object.assign(w, { name: 'X', e_teilung: true }); S.win = w; S.editIdx = -1; S.proj.tiefe = 'kurz'; S.qMass = null; S.screen = 'frage'; };
+    mk(); S.q = 'lage'; const ids = qCurrent().list.map((q) => q.id);
+    ids.forEach((id) => { mk(); S.q = id; render(true); const b = document.querySelector('.qmehr'); if (!b) return; const kap = qCurrent().q.kap, vorher = qSichtbar(S.win).map((q) => q.id); b.click(); const neu = qCurrent().list.filter((q) => q.kap === kap && vorher.indexOf(q.id) < 0).map((q) => q.id); out.push({ id: id, q: S.q, erste: neu[0], n: neu.length }); });
+    return out;
+  });
+  ok(mz.length >= 5 && mz.every((x) => x.n > 0 && x.q === x.erste), '„Mehr zu …“ führt zur ersten dazugeholten Frage des Kapitels, „Weiter“ dann der Reihe nach (' + mz.map((x) => x.id + ' → ' + x.q).join(', ') + ')');
+  // Tiefe-Pille auf einer Frage, die es in der niedrigeren Tiefe nicht gibt: weiter hinter der Stelle, nicht bei „Welche Form?“
+  const tzW = [];
+  for (const [von, t0, t1, weg] of [['griffM', 'genau', 'kurz', 'weiter'], ['oberfl', 'genau', 'normal', 'browser'], ['griff', 'normal', 'kurz', 'zurueck']]) {
+    await frageB(von, {}, t0); await p.click('.qdock .qtiefe'); await p.waitForTimeout(300);
+    await p.click('[data-act="tiefe"][data-v="' + t1 + '"]'); await p.waitForTimeout(200);
+    if (weg === 'weiter') await p.click('.qnav .btn.primary'); else if (weg === 'zurueck') await p.click('.qnav [data-act="qprev"]'); else await p.evaluate(() => history.back());
+    await p.waitForTimeout(450);
+    tzW.push(await p.evaluate((v) => { const alle = qList(S.win).map((q) => q.id), sicht = qSichtbar(S.win).map((q) => q.id).filter((x) => x !== 'tiefe'), j = alle.indexOf(v); return { von: v, q: S.q, soll: sicht.find((x) => alle.indexOf(x) > j), screen: S.screen }; }, von));
+  }
+  ok(tzW.every((x) => x.screen === 'frage' && x.q === x.soll && x.q !== 'form'), 'Tiefe-Pille auf einer Frage, die es dann nicht mehr gibt: Weiter, Zurück und die Zurück-Taste führen zur nächsten sichtbaren Frage dahinter (' + tzW.map((x) => x.von + ' → ' + x.q).join(', ') + ')');
+  // Angefangenes Fenster beim Senden (Kundenlink): Hinweis auf „Prüfen“, Rückfrage statt stillem Senden, Zurück-Taste schließt sie
+  const ctxE = await browser.newContext(telefon), pE = await neueSeite(ctxE);
+  await pE.goto(BASE + '/app/#k-nach22-Fensterbau_Elster.' + b64u('Fensterbau Elster') + '.' + b64u('Familie Star'), { waitUntil: 'networkidle' }); await pE.waitForTimeout(300);
+  await pE.evaluate(() => { const k = demoProject()[0]; k.name = 'Küche'; S.windows = [k]; persist(); const w = demoProject()[1]; w.name = 'Bad'; delete w.wid; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); entwurfJetzt(); S.win = baseWin(); go('blatt'); });
+  await pE.waitForTimeout(400);
+  const eS0 = await pE.evaluate(() => ({ karte: (document.querySelector('.ek-warn') || {}).textContent || '', knoepfe: document.querySelectorAll('.ek-warn [data-act="entwurf-weiter"], .ek-warn [data-act="entwurf-weg"]').length }));
+  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400);
+  const eS1 = await pE.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); return { titel: sh ? sh.querySelector('h2').textContent : '', ak: sh ? sh.querySelectorAll('h2 .ak').length : 0, fokus: !!sh && sh.contains(document.activeElement), sent: !!S.sent }; });
+  await pE.evaluate(() => history.back()); await pE.waitForTimeout(450);
+  const eS2 = await pE.evaluate(() => ({ blatt: !!document.querySelector('.sheet[aria-modal="true"]'), screen: S.screen, sent: !!S.sent }));
+  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400); await pE.click('.sheet [data-act="send-ohne"]'); await pE.waitForSelector('[data-screen="gesendet"]'); await pE.waitForTimeout(300);
+  const eS3 = await pE.evaluate(() => ({ sent: !!S.sent, entwurf: Object.keys(localStorage).filter((k) => /\.entwurf$/.test(k)).length }));
+  ok(/„Bad“ ist angefangen und nicht gespeichert/.test(eS0.karte) && /nicht mit an Fensterbau Elster/.test(eS0.karte) && eS0.knoepfe === 2 && eS1.titel === 'Bad fehlt noch' && eS1.ak === 1 && eS1.fokus && !eS1.sent && !eS2.blatt && eS2.screen === 'blatt' && !eS2.sent && eS3.sent && !eS3.entwurf,
+    'Angefangenes Fenster beim Senden: „Prüfen“ nennt es mit Fortsetzen und Verwerfen, „Senden“ fragt erst nach (die Zurück-Taste schließt die Frage), „Ohne … senden“ räumt den Entwurf weg');
+  sauber(pE, 'Senden mit angefangenem Fenster: keine Fehler');
+  await ctxE.close();
+  // Führung, letzter Schritt: die Box „Für den Fensterbauer“ steht im Vorschaublatt (vorher traf sie die Regel des Farbblatts .fb)
+  const ctxT = await browser.newContext(telefon), pT = await neueSeite(ctxT);
+  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.hero [data-act="tour-start"]'); await pT.waitForTimeout(400);
+  await pT.evaluate(() => tourGehe(TOUR.length - 1)); await pT.waitForTimeout(1200);
+  const tbB = await pT.evaluate(() => { const b = document.querySelector('.tb-box.tb-fb'), bl = b && b.closest('.tb-blatt'); if (!b || !bl) return null; const r = b.getBoundingClientRect(), rb = bl.getBoundingClientRect(); return { drin: r.left >= rb.left && r.right <= rb.right && r.top >= rb.top && r.bottom <= rb.bottom, pos: getComputedStyle(b).position, alt: document.querySelectorAll('.tb-box.fb').length }; });
+  ok(tbB && tbB.drin && tbB.pos === 'static' && !tbB.alt, 'Führung, letzter Schritt: „Für den Fensterbauer“ steht im Vorschaublatt, nicht über dem Titel');
+  sauber(pT, 'Führung bis zum Aufmaßblatt: keine Fehler');
+  await ctxT.close();
+  // Zurück-Taste bei offener KI-Einwilligung: schließt sie wie „Ohne KI weiter“, der Schritt darunter bleibt
+  const ctxK = await browser.newContext(telefon), pK = await neueSeite(ctxK);
+  await pK.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const jpegK = Buffer.from(await pK.evaluate(() => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 600, 800); g.fillStyle = '#a9c8e8'; g.fillRect(150, 150, 300, 500); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
+  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await pK.click('.bb .btn.primary');
+  await pK.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
+  await pK.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpegK });
+  const kiOffen = await pK.waitForSelector('.fx-dialog', { timeout: 5000 }).then(() => true, () => false);
+  await pK.evaluate(() => history.back()); await pK.waitForTimeout(500);
+  const kiZu = await pK.evaluate(() => ({ dlg: !!document.querySelector('.fx-dialog'), screen: S.screen, ja: !!(window.FotoKI && window.FotoKI.eingewilligt()) }));
+  ok(kiOffen && !kiZu.dlg && kiZu.screen === 'fotos' && !kiZu.ja, 'Zurück-Taste bei offener KI-Einwilligung: schließt sie wie „Ohne KI weiter“, der Schritt Fotos bleibt (' + JSON.stringify(kiZu) + ')');
+  await ctxK.close();
   sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
   await ctx.close();
 }
