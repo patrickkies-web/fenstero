@@ -117,9 +117,9 @@ window.Blatt = (() => {
     function betriebZeichen(x, cy, hoehe) {
       const lg = bt.logo && bt.logo.data && logoFmt(bt.logo.data) && bt.logo.w > 0 && bt.logo.h > 0 ? bt.logo : null;
       if (lg) {
-        const r = lg.w / lg.h, hh = hoehe, ww = Math.min(hoehe * 3.6, hh * r), h2 = ww / r, pad = lg.grund === 'dunkel' ? 0 : hoehe * 0.12;
-        if (pad) { fill('#ffffff'); rr(x, cy - h2 / 2 - pad, ww + 2 * pad, h2 + 2 * pad, Math.min(2.4, hoehe * 0.2)); }
-        try { doc.addImage(lg.data, logoFmt(lg.data), x + pad, cy - h2 / 2, ww, h2); return ww + 2 * pad; } catch (err) { /* ohne Logo weiter */ }
+        const r = lg.w / lg.h, hh = hoehe, ww = Math.min(hoehe * 3.6, hh * r), h2 = ww / r, pad = lg.grund === 'dunkel' ? 0 : hoehe * 0.12, padX = pad * 1.6;
+        if (pad) { fill('#ffffff'); rr(x, cy - h2 / 2 - pad, ww + 2 * padX, h2 + 2 * pad, Math.min(2.4, hoehe * 0.2)); }
+        try { doc.addImage(lg.data, logoFmt(lg.data), x + padX, cy - h2 / 2, ww, h2); return ww + 2 * padX; } catch (err) { /* ohne Logo weiter */ }
       }
       const r = hoehe / 2; fill(HELL); doc.circle(x + r, cy, r, 'F'); font('extra', hoehe * 1.55, BUEHNE); txt(initial(bt.name), x + r, cy + hoehe * 0.19, { align: 'center' });
       return hoehe;
@@ -129,9 +129,16 @@ window.Blatt = (() => {
       fill(BUEHNE); doc.rect(0, 0, W, bh, 'F');
       if (V === 'betrieb') {
         const zw = betriebZeichen(M, bh / 2, gross ? 14 : 6.4), nx = M + zw + (gross ? 5 : 3);
-        font('extra', gross ? 15 : 8.6, '#ffffff'); txt(wrap(bt.name || 'Ihr Betrieb', XR - nx - 70)[0], nx, bh / 2 + (gross ? -0.6 : 1.1));
-        if (gross) { font('normal', 7.6, HELL2); txt('Aufmaß Ihres Kunden · übermittelt mit eeziframes', nx, bh / 2 + 5); }
-        if (gross) { font('bold', 7.2, GRUEN); txt(VERSAL('Aufmaß · ' + kennung), XR, bh / 2 - 1.6, { align: 'right', charSpace: 0.55 }); font('normal', 8, HELL2); txt([bt.eingegangen ? 'eingegangen ' + bt.eingegangen : '', heute].filter(Boolean).join(' · '), XR, bh / 2 + 4, { align: 'right' }); }
+        /* rechts Kennung und Eingang; links bleibt nur der Platz bis dorthin, damit ein breites Logo nichts überdeckt */
+        const kicker = VERSAL('Aufmaß · ' + kennung), stand = [bt.eingegangen ? 'eingegangen ' + bt.eingegangen : '', heute].filter(Boolean).join(' · ');
+        let rw = 70;
+        if (gross) { font('bold', 7.2); rw = tw(kicker) + kicker.length * 0.55; font('normal', 8); rw = Math.max(rw, tw(stand)) + 6; }
+        const frei = XR - nx - rw;
+        const bname = bt.name || 'Ihr Betrieb'; let gn = gross ? 15 : 8.6; font('extra', gn, '#ffffff');
+        while (gn > (gross ? 10.5 : 7) && tw(bname) > frei) { gn -= 0.5; font('extra', gn); } // langer Name neben breitem Logo: kleiner statt abgeschnitten
+        txt(wrap(bname, frei)[0], nx, bh / 2 + (gross ? -0.6 : 1.1));
+        if (gross) { font('normal', 7.6, HELL2); const sub = 'Aufmaß Ihres Kunden · übermittelt mit eeziframes'; txt(tw(sub) <= frei ? sub : wrap('Übermittelt mit eeziframes', frei)[0], nx, bh / 2 + 5); }
+        if (gross) { font('bold', 7.2, GRUEN); txt(kicker, XR, bh / 2 - 1.6, { align: 'right', charSpace: 0.55 }); font('normal', 8, HELL2); txt(stand, XR, bh / 2 + 4, { align: 'right' }); }
         else { font('normal', 6.8, HELL2); txt(laufTitel + ' · ' + kennung, XR, bh / 2 + 1.1, { align: 'right' }); }
       } else {
         marke(M, gross ? 7 : 2.6, gross ? 14 : 5.8, true);

@@ -148,6 +148,7 @@
   /* Absender: oben auf jeder Startseite im Link. klein: in der Liste „Weiter, wo …“ */
   function kopf(o) {
     const q = o || {}, p = q.p || {}, name = q.name || 'Ihr Fensterbauer';
+    if (q.unten) q.unten = String(q.unten).replace(/^für Herr(?= )/, 'für Herrn'); // „für Herrn Kaya“, die Anrede selbst bleibt „Herr“
     return '<div class="ein-abs' + (q.klein ? ' klein' : '') + (p.logo ? ' mit-logo' : '') + '">' + zeichen(name, p, q.klein ? 'klein' : 'gross') + '<span class="ein-abs-tx"><small>' + esc(q.oben || 'Persönliche Anfrage von') + '</small><b>' + esc(name) + '</b>' + (q.unten ? '<span class="ein-fuer">' + esc(q.unten) + '</span>' : '') + '</span></div>';
   }
   /* Kontakt: Ansprechpartner mit Anruf- und E-Mail-Knopf (44 px); ohne Angaben der Weg über die Nachricht */
