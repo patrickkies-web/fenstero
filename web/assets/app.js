@@ -1408,12 +1408,16 @@ function restore() {
     if (nach) lokalSpeichern(); // sonst begänne die freie Woche älterer Fenster bei jedem Laden neu
   } catch (e) { /* ok */ }
 }
+/* Kundenlink: #k-<code>-<slug>.<b64 Betrieb>.<b64 Kunde>[.<b64 Profil>][~<Runde>]. Das Profil (Anrede, im Pilotbetrieb auch
+   Ansprechpartner, Telefon, eigene Begrüßung, Hinweis der Nachbesserung) kam mit der Einladungsseite dazu (einladung.js linkTeil);
+   Links ohne Profil gelten wie bisher (du, Name aus dem Link) */
 function readHash() {
-  const m = /^#k-([a-z0-9]{3,12})(?:-([A-Za-z0-9_]*))?(?:\.([A-Za-z0-9_-]+))?(?:\.([A-Za-z0-9_-]+))?(?:~(\d{1,2}))?$/.exec(location.hash || '');
+  const m = /^#k-([a-z0-9]{3,12})(?:-([A-Za-z0-9_]*))?(?:\.([A-Za-z0-9_-]+))?(?:\.([A-Za-z0-9_-]*))?(?:\.([A-Za-z0-9_-]+))?(?:~(\d{1,2}))?$/.exec(location.hash || '');
   if (!m) return null;
   const dec = (v) => { if (!v) return ''; try { const b = v.replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); } catch (e) { return ''; } };
   const clean = (t) => String(t || '').replace(/[<>"]/g, '').trim().slice(0, 60);
-  return { code: m[1].toLowerCase(), name: clean(dec(m[3]) || (m[2] || '').replace(/_/g, ' ')), kunde: clean(dec(m[4])), runde: m[5] ? +m[5] : 1 };
+  const pr = m[5] && window.Einladung ? window.Einladung.linkLesen(m[5]) : null;
+  return { code: m[1].toLowerCase(), name: clean(dec(m[3]) || (m[2] || '').replace(/_/g, ' ')), kunde: clean(dec(m[4])), runde: m[6] ? +m[6] : 1, du: pr ? pr.du : undefined, hinweis: pr ? pr.hinweis : '', auftritt: pr ? pr.profil : null };
 }
 const slug = (t) => String(t || '').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/Ä/g, 'Ae').replace(/Ö/g, 'Oe').replace(/Ü/g, 'Ue').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
 /* ---------- Rendern ---------- */
@@ -1449,7 +1453,7 @@ function render(fresh) {
   const prevStage = root.querySelector('#w3d'), prevSig = prevStage ? prevStage.getAttribute('data-sig') : null;
   const backLabel = view.back ? view.back[0] : '';
   let h = '<header class="hdr"><div class="hdr-row">';
-  h += S.screen === 'home' ? '<div class="hdr-logo">' + LOGO(30) + '<span class="hdr-name">' + WM() + '</span></div>'
+  h += S.screen === 'home' ? (S.betrieb ? '<span></span>' : '<div class="hdr-logo">' + LOGO(30) + '<span class="hdr-name">' + WM() + '</span></div>') // im Kundenlink steht der Betrieb vorn (Einladungsseite), eeziframes klein unten
     : (view.back ? '<button type="button" class="hdr-btn" data-act="back">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : '<span></span>');
   h += '<span class="hdr-title">' + esc(title) + '</span>';
   h += '<button type="button" class="hdr-btn" data-act="gindex"><svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v16H4.5c-.8 0-1.5.5-1.5 1.2zM19 4.5c0-.8-.7-1.5-1.5-1.5H11v16h6.5c.8 0 1.5.5 1.5 1.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg><span>Begriffe</span></button></div>';
@@ -1596,10 +1600,10 @@ function kontoKarte() {
   const ab = S.konto.abgelaufen;
   return '<div class="card merk-karte konto-karte gast"><p class="eyebrow">' + (ab ? 'Bitte neu anmelden' : 'Nur auf diesem Gerät') + '</p><p>' + (ab ? 'Deine Anmeldung ist abgelaufen. Melde dich wieder an, dann wird dein Aufmaß weiter gesichert.' : 'Sichere dein Aufmaß mit deiner E-Mail-Adresse, dann geht es auf jedem Gerät weiter und nichts geht verloren. Kein Passwort.') + '</p><div class="pill-row"><button type="button" class="btn primary" data-act="' + (ab ? 'anmelden' : 'sichern') + '">' + (ab ? 'Anmelden' : 'Aufmaß sichern') + '</button></div></div>';
 }
-/* Hinweis im Kundenlink: jederzeit über den Link weitermachen */
-function linkMerk(name) {
-  const server = SERVER.daten && !S.sync.aus && S.sync.ok, bis = S.betrieb && S.betrieb.expires ? S.betrieb.expires : '';
-  return '<div class="card merk-karte"><p class="eyebrow">Jederzeit weitermachen</p><p>Öffne einfach wieder den Link von <b>' + esc(name) + '</b>. ' + (server ? 'Deine Angaben sind gespeichert, auch für ein anderes Gerät. Deine Fotos sieht ' + esc(name) + ' erst, wenn du sendest.' : 'Deine Angaben bleiben in diesem Browser gespeichert; öffne den Link später im selben Browser.') + (bis ? ' Der Link gilt bis ' + esc(bis) + '.' : '') + '</p></div>';
+/* Hinweis im Kundenlink: jederzeit über den Link weitermachen (in der Anrede, die der Betrieb gewählt hat) */
+function linkMerk(name, du) {
+  const server = SERVER.daten && !S.sync.aus && S.sync.ok, bis = S.betrieb && S.betrieb.expires ? S.betrieb.expires : '', T = (sie, x) => (du === false ? sie : x);
+  return '<div class="card merk-karte"><p class="eyebrow">Jederzeit weitermachen</p><p>' + T('Öffnen Sie einfach wieder den Link von ', 'Öffne einfach wieder den Link von ') + '<b>' + esc(name) + '</b>. ' + (server ? T('Ihre Angaben sind gespeichert, auch für ein anderes Gerät. Ihre Fotos sieht ', 'Deine Angaben sind gespeichert, auch für ein anderes Gerät. Deine Fotos sieht ') + esc(name) + T(' erst, wenn Sie senden.', ' erst, wenn du sendest.') : T('Ihre Angaben bleiben in diesem Browser gespeichert; öffnen Sie den Link später im selben Browser.', 'Deine Angaben bleiben in diesem Browser gespeichert; öffne den Link später im selben Browser.')) + (bis ? ' Der Link gilt bis ' + esc(bis) + '.' : '') + '</p></div>';
 }
 /* Nach dem Senden bleibt der Code, wie er abgeschickt wurde */
 const curCode = () => (S.sent && S.sent.code) || packProject(S.windows, S.proj, S.betrieb);
@@ -1610,40 +1614,52 @@ function linkHome() {
   if (vorschau()) v.html = '<div class="note warn vorschau" role="note"><b>Vorschau für Ihren Betrieb.</b> So sieht Ihr Kunde den Link. Was Sie hier eingeben, wird weder gespeichert noch gesendet, und der Link gilt weiter als ungeöffnet.</div>' + v.html;
   return v;
 }
+/* Einladungsseite (Strang S4): Der Betrieb steht vorn, eeziframes klein als Übermittler. Aufbau, Texte und Gestaltung kommen aus
+   einladung.js (dieselbe Seite zeigt der Betriebsbereich als Vorschau). Was der Betrieb eingestellt hat, kommt im Servermodus mit
+   GET /api/link/:code (auftritt, du, hinweis), im Pilotbetrieb gekürzt aus dem Link (readHash); ältere Links ohne Angaben duzen und
+   zeigen den Namen aus dem Link. Die Anrede gilt für diese Seite; die Messschritte der App duzen immer. */
+const LK_SERVER = {}; // je Code, was der Server zuletzt gesagt hat (überlebt einen Wechsel der Runde im selben Tab)
+function lkDaten() {
+  const b = S.betrieb || {}, s = LK_SERVER[b.code] || {}, E = window.Einladung;
+  const du = typeof s.du === 'boolean' ? s.du : typeof b.du === 'boolean' ? b.du : true;
+  return { name: b.name || (du ? 'Dein Fensterbauer' : 'Ihr Fensterbauer'), kunde: b.kunde || '', du: du, p: s.auftritt || b.auftritt || E.profil({}), hinweis: s.hinweis !== undefined ? s.hinweis : b.hinweis || '', bis: b.expires || '' };
+}
 function linkHomeInhalt() {
-  const name = S.betrieb.name || 'Dein Fensterbauer', ini = esc((name.replace(/^(Fensterbau|Glaserei|Schreinerei|Tischlerei)\s+/i, '') || 'F').slice(0, 1).toUpperCase()), n = S.windows.length, sent = !!S.sent, kd = S.betrieb.kunde;
-  const head = '<div class="lk-from"><span class="lk-av">' + ini + '</span><span><small>' + (sent ? (PILOT ? 'Aufmaß für' : 'Gesendet an') : 'Persönliche Anfrage von') + '</small><b>' + esc(name) + '</b></span></div>' + (kd && !sent ? '<p class="lk-for">für ' + esc(kd) + '</p>' : '');
-  const steps = (a, b, c) => '<section class="card" style="gap: 18px"><p class="eyebrow">' + a + '</p><div class="steps">' + b.map((x, i) => '<div class="step"><span class="n">' + (i + 1) + '</span><div><b>' + x[0] + '</b><p>' + x[1] + '</p></div></div>').join('') + '</div></section>' + (c || '');
+  const E = window.Einladung, d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), n = S.windows.length, sent = !!S.sent;
+  const kopf = (oben) => E.kopf({ name: name, p: d.p, oben: oben, unten: d.kunde ? 'für ' + d.kunde : '' });
+  const kontakt = () => E.kontakt({ name: name, p: d.p, du: du, bis: sent || S.linkZu ? '' : d.bis });
+  const fuss = E.fuss({ name: name, du: du });
+  const liste = (titel, karten) => '<section class="sec"><div class="sec-head"><h2 class="sec-title">' + titel + '</h2><span class="sub">' + n + (sent ? ' Fenster' : ' erfasst') + '</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + karten + '</div></section>';
+  const pf = '<span class="pf" aria-hidden="true"></span>';
   if (sent) {
-    const html = '<section class="hero lk">' + head + '<div class="okmark-l" data-lottie="fertig"><span class="lottie-still"><svg class="okmark" viewBox="0 0 64 64" width="84" height="84" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>' + (PILOT ? '<h1>Fast erledigt.</h1><p>Abgeschlossen am ' + esc(sentWhen()) + '. Schick ' + esc(name) + ' jetzt noch deinen Aufmaß-Code, falls noch nicht geschehen. Erst damit kommt dein Aufmaß an.</p><div class="cta"><button type="button" class="btn primary" data-act="go" data-v="gesendet">Code senden</button></div></section>' : '<h1>' + (S.sent.anderswo ? 'Schon erledigt.' : 'Danke, erledigt.') + '</h1><p>' + esc(name) + ' hat dein Aufmaß seit ' + esc(sentWhen()) + ' und meldet sich mit einem Angebot.</p></section>') +
-      (S.sent.abweichend ? noteBox('Änderungen auf diesem Gerät sind nicht bei ' + esc(name) + ' angekommen. Kläre sie bitte direkt mit ' + esc(name) + '.', null, 'warn') : '') +
-      dateiCard() +
-      '<section class="sec"><div class="sec-head"><h2 class="sec-title">' + (S.sent.anderswo ? 'Auf diesem Gerät.' : PILOT ? 'Abgeschlossen.' : 'Gesendet.') + '</h2><span class="sub">' + n + (n === 1 ? ' Fenster' : ' Fenster') + '</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, false, true)).join('') + '</div></section>' +
-      '<p class="sub center lk-note">Fragen und Änderungen klärst du direkt mit ' + esc(name) + '.</p>' + rechtLinks();
+    const html = '<section class="hero lk"><div class="ein-start-in">' + kopf(PILOT ? 'Aufmaß für' : 'Gesendet an') + '<div class="okmark-l" data-lottie="fertig"><span class="lottie-still"><svg class="okmark" viewBox="0 0 64 64" width="84" height="84" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>' +
+      (PILOT ? '<h1>Fast erledigt.</h1><p class="ein-lead">Abgeschlossen am ' + esc(sentWhen()) + '. ' + T('Schicken Sie ', 'Schick ') + esc(name) + T(' jetzt noch Ihren Aufmaß-Code, falls noch nicht geschehen. Erst damit kommt Ihr Aufmaß an.', ' jetzt noch deinen Aufmaß-Code, falls noch nicht geschehen. Erst damit kommt dein Aufmaß an.') + '</p><div class="ein-cta"><button type="button" class="btn primary" data-act="go" data-v="gesendet">Code senden' + pf + '</button></div>'
+        : '<h1>' + (S.sent.anderswo ? 'Schon erledigt.' : 'Danke, erledigt.') + '</h1><p class="ein-lead">' + esc(name) + T(' hat Ihr Aufmaß seit ', ' hat dein Aufmaß seit ') + esc(sentWhen()) + T(' und meldet sich mit einem Angebot bei Ihnen.', ' und meldet sich mit einem Angebot bei dir.') + '</p>') + '</div></section>' +
+      (S.sent.abweichend ? noteBox('Änderungen auf diesem Gerät sind nicht bei ' + esc(name) + T(' angekommen. Klären Sie sie bitte direkt mit ', ' angekommen. Kläre sie bitte direkt mit ') + esc(name) + '.', null, 'warn') : '') +
+      (du ? dateiCard() : '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für Sie?</p><b>Fragen Sie ' + esc(name) + '</b><small>Ihr Aufmaß gehört zu diesem Auftrag. ' + esc(name) + ' hat das komplette Aufmaßblatt als PDF und gibt es Ihnen gern mit dem Angebot.</small></div></div></div>') +
+      liste(S.sent.anderswo ? 'Auf diesem Gerät.' : PILOT ? 'Abgeschlossen.' : 'Gesendet.', S.windows.map((x, i) => winCard(x, i, false, true)).join('')) +
+      kontakt() + fuss + rechtLinks();
     return { html: html, bar: null };
   }
   if (S.linkZu && S.linkZu !== 'eingegangen') {
-    const html3 = '<section class="hero lk">' + head + '<p class="eyebrow" style="color: var(--warn)">' + (S.linkZu === 'abgelaufen' ? 'Link abgelaufen' : S.linkZu === 'deaktiviert' ? 'Link deaktiviert' : 'Link nicht aktiv') + '</p><h1>Hier geht es gerade nicht weiter.</h1><p>' + esc(S.linkZuText || 'Bitte melde dich bei ' + name + '.') + '</p></section>' +
-      (n ? '<section class="sec"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, false)).join('') + '</div></section>' : '') + rechtLinks();
+    const html3 = '<section class="hero lk"><div class="ein-start-in">' + kopf() + '<p class="eyebrow" style="color: var(--warn)">' + (S.linkZu === 'abgelaufen' ? 'Link abgelaufen' : S.linkZu === 'deaktiviert' ? 'Link deaktiviert' : 'Link nicht aktiv') + '</p><h1>Hier geht es gerade nicht weiter.</h1><p class="ein-lead">' + esc(S.linkZuText || T('Bitte melden Sie sich bei ', 'Bitte melde dich bei ') + name + '.') + '</p></div></section>' +
+      (n ? liste(T('Ihre Fenster.', 'Deine Fenster.'), S.windows.map((x, i) => winCard(x, i, false)).join('')) : '') + kontakt() + fuss + rechtLinks();
     return { html: html3, bar: null };
   }
   if (S.nb) {
-    const html2 = '<section class="hero lk">' + head + '<p class="eyebrow" style="color: var(--warn)">Bitte noch einmal prüfen</p><h1>Fast fertig,<br>eine Runde noch.</h1><p>' + esc(name) + ' hat dein Aufmaß bekommen und bittet dich, es noch einmal zu prüfen. Was genau, steht in der Nachricht. ' + (n ? 'Deine Angaben sind alle noch da: Tipp ein Fenster an, ändere, was nötig ist, und schick es erneut ab.' : 'Auf diesem Gerät ist dein Aufmaß nicht gespeichert. Miss die Fenster, um die es geht, bitte neu auf; ' + esc(name) + ' ergänzt sie im bisherigen Aufmaß.') + '</p>' +
-      '<div class="cta"><button type="button" class="btn primary" data-act="' + (n ? 'go' : 'new') + '" data-v="anfrage">' + (n ? 'Prüfen und erneut senden' : 'Fenster neu ausmessen') + '</button></div></section>' +
-      '<section class="sec"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + rechtLinks();
+    const hin = d.hinweis ? '<div class="ein-hinweis"><p class="eyebrow">Darum bittet ' + esc(name) + '</p><p>' + esc(d.hinweis) + '</p></div>' : '';
+    const html2 = '<section class="hero lk"><div class="ein-start-in">' + kopf() + '<p class="eyebrow" style="color: var(--warn)">Bitte noch einmal prüfen</p><h1>Fast fertig,<br>eine Runde noch.</h1><p class="ein-lead">' + esc(name) + T(' hat Ihr Aufmaß bekommen und bittet Sie, es noch einmal zu prüfen.', ' hat dein Aufmaß bekommen und bittet dich, es noch einmal zu prüfen.') + (d.hinweis ? ' ' : ' Was genau, steht in der Nachricht. ') + (n ? T('Ihre Angaben sind alle noch da: Tippen Sie ein Fenster an, ändern Sie, was nötig ist, und schicken Sie es erneut ab.', 'Deine Angaben sind alle noch da: Tipp ein Fenster an, ändere, was nötig ist, und schick es erneut ab.') : T('Auf diesem Gerät ist Ihr Aufmaß nicht gespeichert. Messen Sie die Fenster, um die es geht, bitte neu auf; ', 'Auf diesem Gerät ist dein Aufmaß nicht gespeichert. Miss die Fenster, um die es geht, bitte neu auf; ') + esc(name) + ' ergänzt sie im bisherigen Aufmaß.') + '</p>' + hin +
+      '<div class="ein-cta"><button type="button" class="btn primary" data-act="' + (n ? 'go' : 'new') + '" data-v="anfrage">' + (n ? 'Prüfen und erneut senden' : 'Fenster neu ausmessen') + pf + '</button></div></div></section>' +
+      '<section class="sec"><div class="sec-head"><h2 class="sec-title">' + T('Ihre Fenster.', 'Deine Fenster.') + '</h2><span class="sub">' + n + ' erfasst</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + kontakt() + fuss + rechtLinks();
     return { html: html2, bar: null };
   }
   if (n || angelegt() >= GRENZE.fenster) {
-    const html4 = '<div class="lk-kopf">' + head + '</div>' + hd('Dein Aufmaß', 'Weiter, wo du warst.', esc(aufmassStand())) +
-      '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + n + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
-      (vorschau() ? '' : linkMerk(name)) +
-      '<p class="sub center lk-note">Deine Angaben gehen nur an ' + esc(name) + ', sonst an niemanden.</p>' + rechtLinks();
+    const html4 = '<div class="lk-kopf">' + E.kopf({ name: name, p: d.p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '' }) + '</div>' + hd(T('Ihr Aufmaß', 'Dein Aufmaß'), T('Weiter, wo Sie waren.', 'Weiter, wo du warst.'), esc(aufmassStand())) +
+      '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">' + T('Ihre Fenster.', 'Deine Fenster.') + '</h2><span class="sub">' + n + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
+      (vorschau() ? '' : linkMerk(name, du)) + kontakt() + fuss + rechtLinks();
     return { html: html4, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
   }
-  const html = '<section class="hero lk">' + head + '<p class="eyebrow">Fenster-Aufmaß, geführt</p><h1>Deine Fenster.<br>Deine Maße.</h1><p>' + esc(name) + ' braucht für dein Angebot die Maße deiner Fenster. Zwei Fotos und vier Maße je Fenster, jeder Schritt erklärt. Ein Konto brauchst du nicht. Du musst nicht alles auf einmal machen: Über diesen Link kommst du jederzeit zurück.</p>' +
-    '<div class="cta"><button type="button" class="btn primary" data-act="new">Erstes Fenster ausmessen</button><button type="button" class="link" data-act="gloss" data-k="referenz">Wie genau ist das? ›</button></div>' +
-    '<div class="hero-scene">' + model(HERO_WIN, { id: 'w3d-hero', view: 'three', sway: true, cls: 'hero dims-all', stageH: 250, dims: ['hm', 'wm', 'eh', 'ew'], labels: { hm: '1.480 mm', wm: '1.370 mm', eh: '1.410 mm', ew: '1.230 mm' } }) + '</div></section>' +
-    '<p class="sub center lk-note">Deine Angaben gehen nur an ' + esc(name) + ', sonst an niemanden.</p>' + rechtLinks();
+  const html = E.html({ name: name, kunde: d.kunde, du: du, p: d.p, bis: d.bis, server: !!SERVER.daten }) + rechtLinks();
   return { html: html, bar: null };
 }
 /* ---------- Start: die Stelle und das Element ---------- */
@@ -4238,6 +4254,8 @@ async function linkPruefen() {
     if (res.status === 404) { S.linkStatus = 'fehlt'; if (!S.sent) { S.linkZu = 'fehlt'; S.linkZuText = (r && r.fehler) || 'Diesen Link gibt es nicht (mehr). Bitte melde dich bei deinem Fensterbauer.'; } return render(); }
     if (!r || !r.ok) { if (!vorschau()) entwurfLaden(); return; }
     S.betrieb.name = r.betrieb || S.betrieb.name; S.betrieb.kunde = r.kunde || S.betrieb.kunde; S.linkStatus = r.status; if (r.expires) S.betrieb.expires = r.expires;
+    /* Einladungsseite: Profil des Betriebs, Anrede des Projekts und der Hinweis einer offenen Nachbesserung (einladung.js prüft alles) */
+    LK_SERVER[code] = { auftritt: window.Einladung ? window.Einladung.profil(Object.assign({ ap: r.ap }, r.auftritt || {})) : null, du: typeof r.du === 'boolean' ? r.du : undefined, hinweis: String(r.hinweis || '').slice(0, 300) };
     if (r.zu === 'eingegangen' && !S.sent) schonEingegangen(r.runde, S.sync.offen || weichtAb(S.nb && S.nb.vorher), r.seit);
     if (r.zu === 'abgelaufen' || r.zu === 'deaktiviert') { S.linkZu = r.zu; S.linkZuText = r.zuText || ''; }
     /* geöffnet melden: beim ersten Öffnen beginnen die 60 Tage, die neue Frist kommt zurück */
