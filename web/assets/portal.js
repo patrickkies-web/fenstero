@@ -373,9 +373,39 @@ function fotoEinsetzen(img) {
 }
 /* Aufgeklappte Positionen bleiben beim Neuzeichnen offen (etwa nach dem großen Foto), solange die Seite offen ist */
 const POS_OFFEN = new Set();
-function posMerken(wurzel) { wurzel.querySelectorAll('details[data-pos]').forEach((d) => d.addEventListener('toggle', () => { if (d.open) POS_OFFEN.add(d.dataset.pos); else POS_OFFEN.delete(d.dataset.pos); })); }
+function posMerken(wurzel) { wurzel.querySelectorAll('details[data-pos]').forEach((d) => d.addEventListener('toggle', () => { if (d.open) POS_OFFEN.add(d.dataset.pos); else POS_OFFEN.delete(d.dataset.pos); })); wurzel.querySelectorAll('details.kl-fold').forEach((d) => d.addEventListener('toggle', () => { S.klaerVorort = d.open; })); }
 function fotosZeigen(wurzel) {
   wurzel.querySelectorAll('img[data-foto]').forEach((img) => { const d = img.closest('details'); if (!d || d.open) fotoEinsetzen(img); else if (!d.dataset.fotoHoeren) { d.dataset.fotoHoeren = '1'; d.addEventListener('toggle', () => { if (d.open) d.querySelectorAll('img[data-foto]').forEach(fotoEinsetzen); }); } });
+  wurzel.querySelectorAll('.foto-gross.fz').forEach(fotoZoom);
+}
+/* Foto groß zoomen (Strang S5): zwei Finger, Doppeltipp oder Doppelklick, Mausrad, Knöpfe + und −; vergrößert verschieben.
+   Der Punkt unter Finger oder Maus bleibt stehen; 1- bis 5-fach; ohne Bewegung bei „weniger Bewegung“ (CSS). */
+function fotoZoom(box) {
+  if (!box || box._zoom) return;
+  const img = box.querySelector('img'), st = { z: 1, x: 0, y: 0 }, zeiger = new Map(); let pinch = null, zuletzt = 0, zug = null;
+  const wert = () => { const el = document.querySelector('.fz-wert'); if (el) el.textContent = Math.round(st.z * 100) + ' %'; };
+  const grenzen = () => { const r = box.getBoundingClientRect(), mx = Math.max(0, (r.width * st.z - r.width) / 2), my = Math.max(0, (r.height * st.z - r.height) / 2); st.x = Math.max(-mx, Math.min(mx, st.x)); st.y = Math.max(-my, Math.min(my, st.y)); };
+  const setzen = (ruhig) => { grenzen(); img.style.transition = ruhig ? 'none' : ''; img.style.transform = 'translate(' + st.x.toFixed(1) + 'px, ' + st.y.toFixed(1) + 'px) scale(' + st.z.toFixed(3) + ')'; box.classList.toggle('gross', st.z > 1.01); wert(); };
+  /* um den Punkt (px, py) relativ zur Mitte der Fläche */
+  const um = (z, px, py, ruhig) => { z = Math.max(1, Math.min(5, z)); const k = z / st.z; st.x = px - (px - st.x) * k; st.y = py - (py - st.y) * k; st.z = z; if (z === 1) { st.x = 0; st.y = 0; } setzen(ruhig); };
+  const mitte = (e) => { const r = box.getBoundingClientRect(); return [e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2]; };
+  box._zoom = (d) => um(d > 0 ? st.z * 1.6 : d < 0 ? st.z / 1.6 : 1, 0, 0);
+  box.addEventListener('wheel', (e) => { e.preventDefault(); const m = mitte(e); um(st.z * Math.exp(-e.deltaY * 0.0022), m[0], m[1], true); }, { passive: false });
+  box.addEventListener('dblclick', (e) => { const m = mitte(e); um(st.z > 1.01 ? 1 : 2.5, m[0], m[1]); });
+  box.addEventListener('pointerdown', (e) => {
+    zeiger.set(e.pointerId, [e.clientX, e.clientY]); try { box.setPointerCapture(e.pointerId); } catch (err) { /* ok */ }
+    if (zeiger.size === 2) { const p = Array.from(zeiger.values()); pinch = { d: Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]), z: st.z }; zug = null; return; }
+    const jetzt = Date.now(); if (e.pointerType === 'touch' && jetzt - zuletzt < 300) { const m = mitte(e); um(st.z > 1.01 ? 1 : 2.5, m[0], m[1]); zuletzt = 0; return; } zuletzt = jetzt;
+    zug = { x: e.clientX - st.x, y: e.clientY - st.y };
+  });
+  box.addEventListener('pointermove', (e) => {
+    if (!zeiger.has(e.pointerId)) return; zeiger.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pinch && zeiger.size === 2) { const p = Array.from(zeiger.values()), r = box.getBoundingClientRect(), cx = (p[0][0] + p[1][0]) / 2 - r.left - r.width / 2, cy = (p[0][1] + p[1][1]) / 2 - r.top - r.height / 2; um(pinch.z * Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]) / Math.max(1, pinch.d), cx, cy, true); return; }
+    if (zug && st.z > 1.01) { st.x = e.clientX - zug.x; st.y = e.clientY - zug.y; setzen(true); }
+  });
+  const los = (e) => { zeiger.delete(e.pointerId); if (zeiger.size < 2) pinch = null; if (!zeiger.size) zug = null; };
+  box.addEventListener('pointerup', los); box.addEventListener('pointercancel', los);
+  wert();
 }
 /* ---------- Nach dem Rendern: Bewegung ---------- */
 function afterRender(anim) {
@@ -467,25 +497,106 @@ function storyScenes() {
     '<div class="sc sc-mess"><span class="pill">3 · Kunde misst</span>' + win + '<p class="cap">Im Browser, ohne Konto. Das Modell wächst beim Tippen.</p></div>' +
     '<div class="sc sc-in"><span class="pill">4 · Eingang</span><div class="mini in-mini"><span class="ring"></span><span class="unlock">' + ICONS.check + ' Aufmaß eingegangen</span><p class="mt">Familie Weber · Köln-Ehrenfeld</p>' + w.slice(0, 2).map((x, i) => { const d = AW.derive(x); return '<div class="in-row">' + AW.svg(x, 34) + '<span><b>Pos. ' + (i + 1) + ' · ' + esc(x.name) + '</b><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · ' + esc(AW.opening(x)) + '</small></span></div>'; }).join('') + '<p class="mf">und 2 weitere Positionen, 8 Fotos, Bestellmaß-Vorschlag</p></div><p class="cap">Sie kalkulieren, bevor Sie losfahren.</p></div>';
 }
+/* ---------- Aufmaß beim Betrieb (Strang S5) ----------
+   Eigenes Vorgehen für ein eingegangenes Aufmaß: Kopf mit Eckdaten, „Mit dem Kunden zu klären“ zum Abhaken (l.klaer), Übersicht aller
+   Positionen (Zeichnung, Öffnung, Element, Bestellmaß), je Position aufklappbar: was hier zu klären ist, die Zeichnung mit Maßketten
+   (AW.zeichnungSVG), der Bestellmaß-Vorschlag, die Wünsche in einem Satz und in Gruppen mit den Notizen des Kunden an ihrer Stelle,
+   die Maße und die Einbausituation laut Fotos. Regeln und Texte stehen in modell.js, damit Bildschirm, Text und PDF dasselbe sagen. */
+const SPRECH = I('<path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>', 16);
+const WARN_I = I('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5v.5"/>', 16);
+const ARTKURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
+const amKlaer = (l) => { const am = (l && l.aufmass) || {}; return AW.klaerung(am.windows || [], am.proj || {}, l || {}); };
+const klaerOk = (l, id) => !!(l && l.klaer && l.klaer[id] && l.klaer[id].ok);
+const klaerNotiz = (l, id) => (l && l.klaer && l.klaer[id] && l.klaer[id].notiz) || '';
+const klaerBei = (kl, i) => kl.filter((r) => r.pos === i || (Array.isArray(r.pos) && r.pos.indexOf(i) >= 0));
+/* Fragen an den Kunden: nur, was er mit einer Nachbesserung selbst beantworten kann (Maße, Brüstung, Laibung, offene Wünsche, Farbe,
+   Absturzsicherung, Glas, Einbruchschutz, Schwelle, Fensterbank, Förderweg, Zahl der Fenster); Text für die Nachricht mit Position */
+const klaerFragbar = (r) => /^(absturz|glas|rc2|boden|unvoll|bru|laib|farbe|fba|offen|massfoto|groesser|kleiner)-|^(foerd|fensterzahl)$/.test(r.id);
+const klaerFrage = (r) => (r.pos != null && !Array.isArray(r.pos) ? 'Pos. ' + (r.pos + 1) + ': ' : /^(Pos\.|Alle)/.test(r.k) ? r.k + ': ' : '') + r.v;
+const notizHTML = (n) => '<blockquote class="am-notiz">' + SPRECH + '<span><small>' + (n[2] === 'notiz' ? 'Notiz des Kunden' : 'Notiz des Kunden zu ' + esc(n[0])) + '</small>„' + esc(n[1]) + '“</span></blockquote>';
+function klaerZeile(r, l, o) {
+  o = o || {};
+  const ok = klaerOk(l, r.id), nz = klaerNotiz(l, r.id), frei = !!(l && l.id) && !o.nurLesen, nfeld = frei && !o.kompakt && S.klaerNotiz === r.id, idA = ' data-v="' + esc(r.id) + '" data-id="' + (l ? l.id : '') + '"';
+  return '<li class="kl-z' + (ok ? ' ok' : '') + (r.gruppe === 'pflicht' ? ' pflicht' : '') + '">' +
+    (frei ? '<button type="button" class="kl-haken" data-act="klaer-ok"' + idA + ' aria-pressed="' + ok + '" aria-label="' + (ok ? 'Wieder offen: ' : 'Geklärt: ') + esc(r.kurz || r.k) + '">' + icon('check', 18) + '</button>' : '<span class="kl-punkt" aria-hidden="true"></span>') +
+    '<div class="kl-t">' + (o.ohnePos ? '' : '<span class="kl-k">' + esc(r.k) + '</span>') + '<p>' + esc(r.v) + '</p>' + (r.warum ? '<small>' + esc(r.warum) + '</small>' : '') +
+    (ok ? '<small class="kl-ok">' + icon('check', 14) + 'geklärt' + (l.klaer[r.id].wann ? ', ' + esc(l.klaer[r.id].wann) : '') + '</small>' : '') +
+    (nz && !nfeld ? '<p class="kl-n">' + SPRECH + '<span>' + esc(nz) + '</span></p>' : '') +
+    (nfeld ? '<div class="f kl-nf"><label for="kn-' + esc(r.id) + '">Ihre Notiz</label><input id="kn-' + esc(r.id) + '" data-in="klaer:' + esc(r.id) + '" value="' + esc(nz) + '" maxlength="300" placeholder="z. B. Am Telefon geklärt: Geländer außen" autocomplete="off"><small>Sieht nur Ihr Team. Wird beim Verlassen des Felds gespeichert.</small></div>' : '') +
+    (frei && !o.kompakt ? '<div class="kl-akt"><button type="button" class="linkbtn" data-act="klaer-notiz"' + idA + '>' + (nfeld ? 'Fertig' : nz ? 'Notiz ändern' : 'Notiz') + '</button>' + (o.frage && klaerFragbar(r) && !ok ? '<button type="button" class="linkbtn" data-act="klaer-frage"' + idA + '>Beim Kunden nachfragen</button>' : '') + '</div>' : '') +
+    '</div></li>';
+}
+/* Die ganze Liste, nach Gruppen; o.nurLesen (Tour), o.max (höchstens so viele Punkte) */
+function klaerKarte(l, kl, o) {
+  o = o || {};
+  if (!kl.length) return '<div class="card klaer leer"><p class="eyebrow">Mit dem Kunden zu klären</p><p class="kl-nichts">' + icon('check', 18) + '<span>Nichts offen: keine Pflichtthemen, keine offenen Wünsche, keine Hinweise aus den Fotos.</span></p></div>';
+  const n = kl.filter((r) => klaerOk(l, r.id)).length, frage = !!(l && l.id && !o.nurLesen && nbMoeglich(l) === 'ok' && !(l.nb && l.nb.offen));
+  let rest = o.max || 1e9;
+  const gruppen = AW.klaerGruppen(kl).map((g) => { const p = g.punkte.slice(0, Math.max(0, rest)); rest -= p.length; if (!p.length) return ''; const liste = '<ul class="kl-liste">' + p.map((r) => klaerZeile(r, l, { frage: frage, nurLesen: o.nurLesen })).join('') + '</ul>', offenN = g.punkte.filter((r) => !klaerOk(l, r.id)).length;
+    /* Vor Ort prüfen ist für den Termin: ab fünf Punkten zum Aufklappen, damit Pflicht und Fragen an den Kunden oben bleiben */
+    if (g.id === 'vorort' && g.punkte.length > 4 && !o.nurLesen) return '<details class="kl-g kl-fold"' + (S.klaerVorort ? ' open' : '') + '><summary><h4>' + esc(g.titel) + '<span class="n">' + g.punkte.length + '</span></h4><span class="kl-fold-t">' + (offenN ? offenN + ' offen, für den Termin vor Ort' : 'alle geklärt') + '</span><span class="pchev" aria-hidden="true"></span></summary>' + liste + '</details>';
+    return '<div class="kl-g"><h4>' + esc(g.titel) + '<span class="n">' + g.punkte.length + '</span></h4>' + liste + '</div>'; }).join('');
+  return '<div class="card klaer" id="klaer"><div class="kl-kopf"><p class="eyebrow">Mit dem Kunden zu klären · ' + kl.length + '</p>' + (o.nurLesen ? '' : '<span class="kl-stand"><b>' + n + ' von ' + kl.length + '</b> geklärt</span>') + '</div>' +
+    (o.nurLesen ? '' : '<div class="kl-balken" role="progressbar" aria-label="Geklärt" aria-valuemin="0" aria-valuemax="' + kl.length + '" aria-valuenow="' + n + '"><span style="width: ' + Math.round(n / kl.length * 100) + '%"></span></div>') + gruppen +
+    (o.max && kl.length > o.max ? '<p class="km-s">und ' + (kl.length - o.max) + ' weitere Punkte</p>' : '') + '</div>';
+}
 /* Fotos einer Position (code: Link des Aufmaßes; fotosDa: was beim Server angekommen ist, null = unbekannt; weg: nach 12 Monaten gelöscht) */
-function posFotos(w, code, fotosDa, weg) {
+function posFotos(w, code, fotosDa, weg, posName) {
   const ids = ['in', 'out'].map((s2) => ({ s: s2, id: w.bilder && w.bilder[s2] })).filter((x) => FOTO_ID.test(String(x.id || '')));
   if (!code || !ids.length) return '';
   if (weg) return '<p class="km-s pos-fotos-weg">Die Fotos wurden 12 Monate nach dem Eingang gelöscht.</p>';
   const da = Array.isArray(fotosDa) ? new Set(fotosDa) : null, name = (s2) => (s2 === 'in' ? 'Von innen' : 'Von außen');
   return '<div class="pos-fotos">' + ids.map((x) => (da && !da.has(x.id)
     ? '<span class="pfoto fehlt"><span class="pf-tag">' + name(x.s) + '</span><small>Foto nicht angekommen</small></span>'
-    : '<button type="button" class="pfoto" data-act="foto-gross" data-v="' + esc(code + '/' + x.id) + '" data-id="' + esc(name(x.s)) + '" aria-label="Foto ' + name(x.s).toLowerCase() + ' groß ansehen"><img alt="" data-foto="' + esc(code + '/' + x.id) + '"><span class="pf-tag">' + name(x.s) + '</span></button>')).join('') + '</div>';
+    : '<button type="button" class="pfoto" data-act="foto-gross" data-v="' + esc(code + '/' + x.id) + '" data-id="' + esc(name(x.s)) + '" data-pos="' + esc(posName || '') + '" aria-label="Foto ' + name(x.s).toLowerCase() + ' groß ansehen"><img alt="" data-foto="' + esc(code + '/' + x.id) + '"><span class="pf-tag">' + name(x.s) + '</span></button>')).join('') + '</div>';
 }
-/* Ein Fenster aus dem Aufmaß: Kopfzeile, Maße, Bestellmaß, Einzelheiten zum Aufklappen */
-function posCard(w, i, abzug, open, proj, l) {
-  const d = AW.derive(w), ab = abzug || { seite: 15, oben: 15 }, n = AW.num(w.anzahl) || 1;
-  const best = d.moW && d.moH ? AW.th(d.moW - 2 * ab.seite) + ' × ' + AW.th(d.moH - ab.oben) + ' mm' : '–';
-  const chips = AW.kiChips(w);
-  return '<details class="posc"' + (open ? ' open' : '') + (l ? ' data-pos="' + esc(l.id + ':' + i) + '"' : '') + '><summary><span class="pic">' + AW.svg(w, 46) + '</span><span class="pt"><b>Pos. ' + (i + 1) + ' · ' + esc(w.name || 'Fenster') + (n > 1 ? ' · ' + n + ' Stück' : '') + '</b><span>Bestellmaß ' + best + '</span><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · Element ' + AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm · ' + esc(AW.opening(w)) + ' · ' + esc(AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff') + ' · ' + esc(AW.lab('etage', w.etage) || 'EG') + '</small></span><span class="pchev" aria-hidden="true"></span></summary>' +
-    '<div class="pbody"><div class="best"><span>Bestellmaß-Vorschlag</span><b>' + best + '</b><small>Öffnung minus ' + ab.seite + ' mm je Seite und ' + ab.oben + ' mm oben</small></div><div class="kv">' + AW.rows(w, proj).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>' +
-    (l && l.aufmass ? posFotos(w, l.code, l.aufmass.fotosDa, !!l.fotosGeloescht) : '') +
-    (AW.kiRows(w).length ? '<p class="eyebrow pos-h">Einbausituation (KI, ' + (w.fotos || 0) + ' Fotos)</p><div class="kv">' + AW.kiRows(w).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>' : chips.length ? '<div class="chips">' + chips.map((c) => '<span class="badge">' + esc(c) + '</span>').join('') + '</div>' : '') + '</div></details>';
+const dlZeilen = (rows) => '<dl class="am-dl">' + rows.map((r) => '<dt>' + esc(r[0]) + '</dt><dd' + (r[2] ? ' class="' + r[2] + '"' : '') + '>' + (r[3] ? '<i class="sw" style="background: ' + esc(r[3]) + '"></i>' : '') + esc(r[1]) + '</dd>').join('') + '</dl>';
+function posMasse(w) {
+  const d = AW.derive(w), mo = w.mo || {}, t = (k) => (AW.num(mo[k]) ? AW.th(mo[k]) : '–'), luecken = AW.massLuecken(w), dev = Math.max(d.devW, d.devH);
+  return [[w.neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW && d.moH ? AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' mm' + (w.neu ? ', Wunschmaß' : ', kleinstes Maß') : 'nicht gemessen', d.moW && d.moH ? 'mo' : 'offen']]
+    .concat(w.neu ? [] : [['Breiten', 'oben ' + t('wt') + ' · Mitte ' + t('wm') + ' · unten ' + t('wb'), /Breite/.test(luecken.join()) ? 'offen' : ''], ['Höhen', 'links ' + t('hl') + ' · Mitte ' + t('hm') + ' · rechts ' + t('hr'), /Höhe/.test(luecken.join()) ? 'offen' : '']],
+      !w.neu && dev > 5 ? [['Außer Winkel', 'bis ' + dev + ' mm, das kleinste Maß zählt', dev > 10 ? 'offen' : '']] : [],
+      [[AW.istTuer(w) ? 'Türelement' : 'Element', d.elW && d.elH ? AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm mit Rahmen' + (w.neu ? ', gerechnet' : '') : 'nicht gemessen', d.elW && d.elH ? 'el' : 'offen'],
+        ['Lage', (AW.lab('etage', w.etage) || 'EG') + (AW.istTuer(w) ? ', bodentief' : AW.bruDa(w) ? (AW.num(w.bru) ? ', Brüstung ' + AW.th(w.bru) + ' mm' : ', bodentief') : ', Brüstung nicht gemessen') + (AW.num(w.laib) ? ', Laibung innen ' + AW.th(w.laib) + ' mm' : '') + (AW.num(w.wand) ? ', Wand ' + AW.th(w.wand) + ' mm' : '')],
+        ['Einbau', w.neu ? 'neue Öffnung, Lage ' + (AW.ohneFotos(w) ? 'nicht eingezeichnet' : 'auf dem Foto eingezeichnet') : 'Austausch' + (AW.ohneFotos(w) ? ', ohne Fotos' : '')]]);
+}
+/* Ein Fenster aus dem Aufmaß. Zu: Zeichnung klein, Name, Bestellmaß, Kurzzeile, Marken (zu klären, offen, Notizen).
+   Auf: was hier zu klären ist, Zeichnung mit Maßen und Bestellmaß, Wünsche, Maße, Einbausituation mit Fotos. */
+function posCard(w, i, abzug, open, proj, l, kl) {
+  const d = AW.derive(w), n = AW.num(w.anzahl) || 1, b = AW.bestellmass(w, abzug), W = AW.wuensche(w, proj), art = w.art || 'fenster', S0 = w.sashes || AW.sashesFor(w.teilung);
+  const hier = klaerBei(kl || [], i), klN = hier.filter((r) => !klaerOk(l, r.id)).length, nzN = AW.notizenVon(w).length, name = 'Pos. ' + (i + 1) + ' · ' + (w.name || 'Fenster');
+  const kurz = [ARTKURZ[art] || 'Fenster', AW.lab('etage', w.etage) || 'EG', art === 'fest' ? S0.length + (S0.length === 1 ? ' Feld' : ' Felder') : art === 'fenster' || art === 'balkon' ? S0.length + ' Flügel' : '', AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff'].filter(Boolean).join(' · ');
+  const kiR = AW.kiRows(w), chips = AW.kiChips(w), fotos = l && l.aufmass ? posFotos(w, l.code, l.aufmass.fotosDa, !!l.fotosGeloescht, name) : '';
+  return '<details class="posc" id="pos-' + i + '"' + (open ? ' open' : '') + (l ? ' data-pos="' + esc(l.id + ':' + i) + '"' : '') + '><summary><span class="pic">' + AW.svg(w, 46) + '</span><span class="pt"><b>' + esc(name) + (n > 1 ? ' · ' + n + ' Stück' : '') + '</b><span>Bestellmaß ' + (b ? b.text : '–') + '</span><small>' + esc(kurz) + '</small>' +
+    (klN || W.offen.length || nzN ? '<span class="pmarks">' + (klN ? '<span class="badge warn">' + klN + ' zu klären</span>' : '') + (W.offen.length ? '<span class="badge">' + W.offen.length + ' offen</span>' : '') + (nzN ? '<span class="badge">' + SPRECH + nW(nzN, 'Notiz', 'Notizen') + '</span>' : '') + '</span>' : '') + '</span><span class="pchev" aria-hidden="true"></span></summary>' +
+    '<div class="pbody">' +
+    (hier.length ? '<div class="pos-klaer"><p class="eyebrow">Zu klären bei dieser Position · ' + hier.length + '</p><ul class="kl-liste">' + hier.map((r) => klaerZeile(r, l, { ohnePos: true, kompakt: true, nurLesen: !l })).join('') + '</ul><p class="km-s">Notiz und Rückfrage an den Kunden: in der Liste oben.</p></div>' : '') +
+    '<div class="pos-plan"><figure class="zk">' + AW.zeichnungSVG(w, { b: 640, fs: 15, h: 760, cls: 'zeichnung zk-gross', label: 'Zeichnung ' + name + ', Ansicht von innen, Maße in mm' }) + AW.zeichnungSVG(w, { b: 340, fs: 12.5, h: 520, cls: 'zeichnung zk-klein', label: 'Zeichnung ' + name + ', Ansicht von innen, Maße in mm' }) + '<figcaption class="zk-leg"><span class="lg mo">' + (w.neu ? 'Rohbauöffnung, Wunschmaß' : 'Maueröffnung') + '</span><span class="lg el">Element</span><span>Ansicht von innen · Maße in mm' + (w.richtung === 'aussen' && !AW.istTuer(w) && art !== 'fest' ? ' · gestrichelt: öffnet nach außen' : '') + '</span></figcaption></figure>' +
+    '<div class="best' + (b && b.warn.length ? ' warn' : '') + '"><span>Bestellmaß-Vorschlag</span><b>' + (b ? b.text : '–') + '</b><small>' + (b ? esc(b.formel) : 'Ohne Maueröffnung kein Vorschlag.') + '</small>' + (b && b.warnText ? '<p class="best-warn">' + WARN_I + '<span>' + esc(b.warnText) + '</span></p>' : '') + '</div></div>' +
+    '<div class="am-wunsch"><p class="eyebrow kicker">Wünsche des Kunden</p><p class="satz">' + esc(W.satz) + '.</p>' + (W.offen.length ? '<p class="am-offen"><span>Noch offen</span>' + W.offen.map((x) => '<span class="chip offen">' + esc(x) + '</span>').join('') + '</p>' : '') + W.notizen.allgemein.map(notizHTML).join('') + '</div>' +
+    '<div class="am-gruppen">' + W.gruppen.map((g) => '<div class="am-g am-g-' + g.id + '"><p class="eyebrow">' + esc(g.titel) + '</p>' + dlZeilen(g.zeilen.map((z) => [z.k, z.t, z.offen ? 'offen' : '', z.offen ? '' : z.hex])) + g.notizen.map(notizHTML).join('') + '</div>').join('') + '</div>' +
+    '<div class="am-g am-masse"><p class="eyebrow">Maße von Hand</p>' + dlZeilen(posMasse(w)) + W.notizen.masse.map(notizHTML).join('') + '</div>' +
+    (kiR.length || fotos || chips.length || W.notizen.fotos.length ? '<div class="am-g am-ki"><p class="eyebrow">Einbausituation laut Fotos' + (w.ki ? ' (KI, ' + nW(w.fotos || 0, 'Foto', 'Fotos') + ')' : '') + '</p>' + fotos +
+      (kiR.length ? dlZeilen(kiR.map((r) => [r[0], r[1], r[0] === 'Hinweis' || r[0] === 'Vor Ort prüfen' || (r[0] === 'Maße und Foto' && AW.massPruef(w)) ? 'hinweis' : ''])) : chips.length ? '<div class="chips">' + chips.map((c) => '<span class="badge">' + esc(c) + '</span>').join('') + '</div>' : '') + W.notizen.fotos.map(notizHTML).join('') + '</div>' : '') +
+    '</div></details>';
+}
+/* Übersicht: alle Positionen als Zeilen gleichen Aufbaus, Antippen springt zur Position und klappt sie auf */
+function amUebersicht(l, wins, ab, kl) {
+  return '<div class="card am-tab"><div class="am-tab-kopf" aria-hidden="true"><span>Pos.</span><span>Öffnung</span><span>Element</span><span>Bestellmaß</span></div>' + wins.map((w, i) => {
+    const d = AW.derive(w), b = AW.bestellmass(w, ab), n = AW.num(w.anzahl) || 1, klN = klaerBei(kl, i).filter((r) => !klaerOk(l, r.id)).length;
+    return '<button type="button" class="am-zeile" data-act="pos-zu" data-v="' + i + '"><span class="pic">' + AW.svg(w, 40) + '</span><span class="az-t"><b>' + (i + 1) + ' · ' + esc(w.name || 'Fenster') + '</b><small>' + esc([ARTKURZ[w.art || 'fenster'], AW.lab('etage', w.etage) || 'EG', n > 1 ? n + ' Stück' : ''].filter(Boolean).join(' · ')) + (klN ? ' · <span class="az-k">' + klN + ' zu klären</span>' : '') + '</small></span>' +
+      '<span class="az-m"><small>Öffnung</small>' + (d.moW && d.moH ? AW.th(d.moW) + ' × ' + AW.th(d.moH) : '–') + '</span><span class="az-m"><small>Element</small>' + (d.elW && d.elH ? AW.th(d.elW) + ' × ' + AW.th(d.elH) : '–') + '</span><span class="az-m az-b"><small>Bestellmaß</small><b>' + (b ? AW.th(b.b) + ' × ' + AW.th(b.h) : '–') + '</b></span></button>';
+  }).join('') + '<p class="km-s am-tab-fuss">Maße in mm, Breite × Höhe. Bestellmaß: Ihr Abzug von der Maueröffnung, verbindlich bleibt Ihr Feinaufmaß.</p></div>';
+}
+/* Kopf des Aufmaßes: Umfang, Kunde, Objekt, Eckdaten, Eingang (die Nachricht steht in der Klärungsliste); darunter die Hauptaktion PDF */
+function amKopf(l, am) {
+  const pr = am.proj || {}, wins = am.windows || [], nE = am.elemente || wins.reduce((s2, w) => s2 + (AW.num(w.anzahl) || 1), 0), tot = AW.num(pr.total), komplett = wins.length > 0 && wins.every((w) => !AW.massLuecken(w).length), fw = AW.foerdWeg(pr);
+  const chip = (t, ok) => '<span class="chip ' + (ok === false ? 'warnung' : 'haken') + '">' + esc(t) + '</span>';
+  return '<div class="card amhead"><div class="chips am-chips">' + chip(nW(wins.length, 'Position', 'Positionen')) + chip(nW(nE, 'Element', 'Elemente')) + chip(nW(am.fotos || 0, 'Foto', 'Fotos'), (am.fotos || 0) > 0) + chip(komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett) + '</div>' +
+    '<div class="kv"><span>Kunde</span><span>' + esc(l.kunde) + (l.kontakt ? ' · <span class="sel">' + esc(l.kontakt) + '</span>' : '') + '</span><span>Objekt</span><span>' + esc(l.adresse || '–') + '</span><span>Gebäude</span><span>' + esc((AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')) + '</span>' +
+    '<span>Fenster im Haus</span><span>' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben') + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', fw) || '–') + '</span>' +
+    '<span>Eingegangen</span><span>' + esc([(l.log || {}).eingegangen, l.via ? 'über ' + l.via : '', (l.runde || 1) > 1 ? 'Runde ' + l.runde : ''].filter(Boolean).join(' · ') || '–') + '</span>' + '</div>' +
+    '<div class="row amacts"><button type="button" class="btn primary" data-act="pdf-am" data-id="' + l.id + '">' + icon('dl', 18) + 'Aufmaßblatt als PDF<span class="pf" aria-hidden="true"></span></button><button type="button" class="btn ghost" data-act="copy-am" data-id="' + l.id + '">' + icon('copy', 18) + 'Als Text kopieren</button></div></div>';
 }
 function roiCalc() {
   const n = S.roi ? S.roi.n : 12, t = S.roi ? S.roi.t : 75, r = S.roi ? S.roi.r : 65, v = roiVals(n, t, r);
@@ -535,7 +646,7 @@ SCREENS.landing = () => {
   kundenschutz() +
   '<section class="grid c2 trust"><div class="tcard"><span class="ci">' + icon('nouser', 22) + '</span><b>Für Ihren Kunden ohne Hürde</b><p>Er öffnet den Link im Browser und legt los. Kein Konto, keine App aus dem Store, keine Kosten. Seine Angaben gehen nur an Sie.</p></div><div class="tcard"><span class="ci">' + icon('euro', 22) + '</span><b>Abgerechnet wird je Projekt</b><p>' + P().frei + ' Projekte kostenlos, danach ' + P().projekt + ' € netto je Projekt mit eingegangenem Aufmaß. Oder im Abo: ' + P().abo.inkl + ' Projekte für ' + P().abo.grund + ' € im Monat, unbegrenzt mit Plus für ' + P().plus + ' €. Nachbesserungen kosten nichts.' + einfBetrieb() + '</p></div></section>' +
   roiCalc() +
-  '<section class="owner"><div><p class="eyebrow kicker">Ein Kunde hat Ihnen ein <span class="mk" translate="no">eeziframes</span>-Aufmaß geschickt?</p><h2>Holen Sie es in Ihr Konto.</h2><p>Auf der letzten Seite des Aufmaßblatts steht ein Code. Kostenlos registrieren, „Code vom Kunden einfügen“, und das Aufmaß liegt als Projekt bei Ihnen: mit 3-D-Ansicht, Positionen zum Bearbeiten und Nachbesserung per Link.</p></div><div class="row"><button type="button" class="btn primary" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn ghost" data-act="sheet" data-v="login">Anmelden</button></div></section>' +
+  '<section class="owner"><div><p class="eyebrow kicker">Ein Kunde hat Ihnen ein <span class="mk" translate="no">eeziframes</span>-Aufmaß geschickt?</p><h2>Holen Sie es in Ihr Konto.</h2><p>Auf der letzten Seite des Aufmaßblatts steht ein Code. Kostenlos registrieren, „Code vom Kunden einfügen“, und das Aufmaß liegt als Projekt bei Ihnen: je Position mit Zeichnung und Bestellmaß, dazu die Klärungsliste und Nachbesserung per Link.</p></div><div class="row"><button type="button" class="btn primary" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn ghost" data-act="sheet" data-v="login">Anmelden</button></div></section>' +
   wechsel('kunde') + '</div>' };
   return { title: 'eeziframes', html: '<div class="wrap">' +
   '<section class="hero b2c foto" data-ansicht="kunde"><div><p class="eyebrow kicker">In Minuten zum Aufmaß für jeden Fensterbauer</p><h1>' + worte('Fenster ausmessen. Selbst. eezi.') + '</h1><p class="lead">Zwei Fotos, vier Maße mit dem Zollstock, jeder Schritt erklärt. Aus Ihren Zahlen wächst Ihr Fenster als 3-D-Modell, dazu Ihre Wünsche zu Material, Farbe, Glas und Rollladen. Messen, Fotos und 3-D-Modell sind kostenlos. Am Ende Ihr vollständiges Aufmaßblatt als PDF für ' + eur2(P().aufmass) + ', für jeden Fensterbauer lesbar.</p><div class="cta"><a class="btn big primary" href="' + APP_OPEN + '">' + (eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt ausmessen') + '<span class="pf" aria-hidden="true"></span></a><a class="btn big ghost" href="' + APP_OPEN + '#fuehrung">Führung starten</a></div>' + (eigenesAufmass() ? '<p class="hint fortsetzen">Ihr Aufmaß ist angefangen: ' + nW(eigenesAufmass(), 'Fenster', 'Fenster') + ' erfasst, gespeichert in diesem Browser.</p>' : '') + '<p class="hint">Führung: ein Fenster in zwei Minuten, ohne eigene Maße · kein Konto zum Messen · keine App aus dem Store</p></div>' +
@@ -724,18 +835,29 @@ SCREENS.newlink = () => {
 };
 const pvHTML = (fake) => esc(linkMsg(fake)).replace(/\n/g, '<br>').replace(/https?:\/\/\S+/, '<span class="lp"><b>eeziframes · Aufmaß für ' + esc(BC().name) + '</b><small>Ohne Konto, etwa 5 Minuten pro Fenster</small></span>');
 function pvUpdate() { const el = document.getElementById('pv-msg'), n = S.nl; if (el && n) el.innerHTML = pvHTML({ kunde: n.kunde || 'Familie Weber', code: 'xxxxx', du: n.du }); }
+/* Das Aufmaß als Text (Kopieren, Speichern ohne PDF): dieselbe Reihenfolge wie auf dem Bildschirm, Klärungsliste mit Stand */
 function aufmassText(l) {
-  const am = l.aufmass || {}, pr = am.proj || {}, ab = A().abzug || { seite: 15, oben: 15 }, out = [];
-  out.push('Aufmaß · ' + l.kunde + (l.nr ? ' · ' + l.nr : ''), [l.adresse, AW.lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')].filter(Boolean).join(' · '), 'Eingegangen: ' + ((l.log || {}).eingegangen || '') + ' · Zeitraum: ' + AW.lab('zeit', pr.zeit) + ' · Budget: ' + AW.lab('budget', pr.budget));
+  const am = l.aufmass || {}, pr = am.proj || {}, wins = am.windows || [], ab = AW.abzugVon(A().abzug), out = [], tot = AW.num(pr.total), nE = am.elemente || wins.reduce((s2, w) => s2 + (AW.num(w.anzahl) || 1), 0);
+  out.push('Aufmaß · ' + l.kunde + (l.nr ? ' · ' + l.nr : ''), [l.adresse, AW.lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')].filter(Boolean).join(' · '), 'Eingegangen: ' + ((l.log || {}).eingegangen || '') + ' · Zeitraum: ' + (AW.lab('zeit', pr.zeit) || '–') + ' · Budget: ' + (AW.lab('budget', pr.budget) || '–'));
+  out.push('Fenster im Haus: ' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'));
   if (pr.notiz) out.push('Nachricht vom Kunden: ' + pr.notiz);
   const fw = AW.foerdWeg(pr); if (fw) out.push('Förderung: ' + AW.lab('foerdweg', fw));
-  const kl = AW.klaerung(am.windows || [], pr); if (kl.length) { out.push('', 'Mit dem Kunden zu klären:'); kl.forEach((r) => out.push('  ' + r.k + ': ' + r.v)); }
+  const kl = amKlaer(l);
+  if (kl.length) {
+    out.push('', 'Mit dem Kunden zu klären: ' + kl.filter((r) => klaerOk(l, r.id)).length + ' von ' + kl.length + ' geklärt');
+    AW.klaerGruppen(kl).forEach((g) => { out.push('  ' + g.titel); g.punkte.forEach((r) => { out.push('  [' + (klaerOk(l, r.id) ? 'x' : ' ') + '] ' + r.k + ': ' + r.v + (r.warum ? ' (' + r.warum + ')' : '')); if (klaerNotiz(l, r.id)) out.push('      Notiz: ' + klaerNotiz(l, r.id)); }); });
+  }
   out.push('');
-  (am.windows || []).forEach((w, i) => {
-    const d = AW.derive(w);
+  wins.forEach((w, i) => {
+    const b = AW.bestellmass(w, ab), W = AW.wuensche(w, pr), N = (n) => '    Notiz des Kunden' + (n[2] === 'notiz' ? '' : ' zu ' + n[0]) + ': „' + n[1] + '“';
     out.push('Pos. ' + (i + 1) + ' · ' + (w.name || 'Fenster') + ' · ' + (AW.num(w.anzahl) || 1) + ' Stück');
-    AW.rows(w, pr).forEach((r) => out.push('  ' + r[0] + ': ' + r[1]));
-    if (d.moW && d.moH) out.push('  Bestellmaß-Vorschlag: ' + AW.th(d.moW - 2 * ab.seite) + ' × ' + AW.th(d.moH - ab.oben) + ' mm');
+    if (b) out.push('  Bestellmaß-Vorschlag: ' + b.text + ' (' + b.formel + ')' + (b.warnText ? '. ' + b.warnText : ''));
+    out.push('  Wunsch: ' + W.satz + '.');
+    if (W.offen.length) out.push('  Noch offen: ' + W.offen.join(', '));
+    W.notizen.allgemein.forEach((n) => out.push(N(n)));
+    W.gruppen.forEach((g) => { out.push('  ' + g.titel + ': ' + g.zeilen.map((z) => (g.zeilen.length > 1 || z.k !== g.titel ? z.k + ' ' : '') + z.t).join('; ')); g.notizen.forEach((n) => out.push(N(n))); });
+    out.push('  Maße: ' + posMasse(w).map((r) => r[0] + ' ' + r[1]).join('; '));
+    W.notizen.masse.concat(W.notizen.fotos).forEach((n) => out.push(N(n)));
     AW.kiRows(w).forEach((r) => out.push('  Einbausituation, ' + r[0] + ': ' + r[1]));
     out.push('');
   });
@@ -759,12 +881,12 @@ SCREENS.link = () => {
     '<p class="km-s">' + (l.kontakt ? 'Kontakt: <span class="sel">' + esc(l.kontakt) + '</span>. ' : 'Ohne Nummer öffnet WhatsApp die Kontaktauswahl. ') + 'SMS und E-Mail öffnen Ihr Programm, falls das Gerät es erlaubt; sonst den Text kopieren.</p></div>';
   let result = '';
   if (done && l.aufmass) {
-    const am = l.aufmass, pr = am.proj || {}, wins = am.windows || [], tot = AW.num(pr.total) || 0;
-    const kl = AW.klaerung(wins, pr);
-    result = '<section class="sec"><div class="sec-head"><h3>Aufmaß</h3><span class="sub">' + nW(wins.length, 'Position', 'Positionen') + ' · ' + nW(am.elemente || wins.length, 'Element', 'Elemente') + ' · ' + nW(am.fotos || 0, 'Foto', 'Fotos') + '</span></div>' +
-      (kl.length ? '<div class="card klaer"><p class="eyebrow">Mit dem Kunden zu klären · ' + kl.length + '</p><div class="kv">' + kl.map((r) => '<span>' + esc(r.k) + '</span><span' + (r.art === 'pflicht' ? ' class="pflicht"' : '') + '>' + esc(r.v) + '</span>').join('') + '</div></div>' : '') +
-      '<div class="card amhead"><div class="kv"><span>Gebäude</span><span>' + esc((AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')) + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', AW.foerdWeg(pr)) || '–') + '</span><span>Lüftung</span><span>' + (tot && (am.elemente || wins.length) > tot / 3 ? 'Mehr als ein Drittel der Fenster: Lüftungskonzept nach DIN 1946-6 erforderlich' : tot ? (am.elemente || wins.length) + ' von ' + tot + ' Fenstern im Haus' : '–') + '</span>' + (pr.notiz ? '<span>Nachricht</span><span class="amnote">„' + esc(pr.notiz) + '“</span>' : '') + '</div><div class="row amacts"><button type="button" class="btn small primary" data-act="pdf-am" data-id="' + l.id + '">' + icon('dl', 16) + 'PDF herunterladen</button><button type="button" class="btn small soft" data-act="copy-am" data-id="' + l.id + '">' + icon('copy', 16) + 'Als Text kopieren</button></div></div>' +
-      '<div class="row between poshead"><span class="eyebrow">Positionen</span><button type="button" class="linkbtn" data-act="pos-all">Alle aufklappen</button></div><div class="poslist">' + wins.map((w, i) => posCard(w, i, a.abzug, POS_OFFEN.has(l.id + ':' + i), pr, Server.online() ? l : null)).join('') + '</div></section>' +
+    const am = l.aufmass, pr = am.proj || {}, wins = am.windows || [], ab = AW.abzugVon(a.abzug), kl = amKlaer(l);
+    /* Strang S5: Kopf, Klärungsliste, Übersicht, Positionen (siehe „Aufmaß beim Betrieb“ oben) */
+    result = '<section class="sec am5"><div class="sec-head"><h3>Aufmaß</h3><span class="sub">' + nW(wins.length, 'Position', 'Positionen') + ' · ' + nW(am.elemente || wins.length, 'Element', 'Elemente') + ' · ' + nW(am.fotos || 0, 'Foto', 'Fotos') + '</span></div>' +
+      amKopf(l, am) + klaerKarte(l, kl) +
+      '<div class="row between poshead"><span class="eyebrow">Positionen</span><button type="button" class="linkbtn" data-act="pos-all">Alle aufklappen</button></div>' + amUebersicht(l, wins, ab, kl) +
+      '<div class="poslist">' + wins.map((w, i) => posCard(w, i, ab, POS_OFFEN.has(l.id + ':' + i), pr, l, kl)).join('') + '</div></section>' +
       '<section class="sec"><div class="sec-head"><h3>Stand</h3></div><div class="card"><div class="pipe">' + [['neu', 'Neu'], ['angebot', 'Angebot'], ['termin', 'Feinaufmaß'], ['auftrag', 'Auftrag'], ['verloren', 'Verloren']].map((s) => '<button type="button" data-act="l-stage" data-id="' + l.id + '" data-v="' + s[0] + '" aria-pressed="' + ((l.stage || 'neu') === s[0]) + '">' + s[1] + '</button>').join('') + '</div><div class="f" style="margin-top: 12px"><label for="lmemo">Notiz zum Stand</label><textarea id="lmemo" data-in="lmemo:' + l.id + '" placeholder="z. B. Angebot bis Freitag">' + esc(l.memo || '') + '</textarea></div></div></section>';
   }
   const pdata = '<details class="card fold"><summary><span>Projektdaten<small>' + esc([l.kontakt, placeOf(l), projFacts(l)].filter(Boolean).join(' · ') || 'Kontakt, Objekt, Eckdaten, interne Notiz') + '</small></span></summary><div class="fold-body"><div class="kv"><span>Kunde</span><span>' + esc(l.kunde) + '</span><span>Kontakt</span><span>' + (l.kontakt ? '<span class="sel">' + esc(l.kontakt) + '</span>' : '–') + '</span><span>Objekt</span><span>' + esc(l.adresse || '–') + '</span><span>Eckdaten</span><span>' + esc(projFacts(l) || '–') + '</span><span>Link</span><span>' + (dead ? esc(m[0]) : 'gültig bis ' + esc(l.expires)) + ', Anrede ' + (l.du ? 'Du' : 'Sie') + '</span></div><div class="f" style="margin-top: 12px"><label for="pnote">Interne Notiz</label><textarea id="pnote" data-in="pnote:' + l.id + '" placeholder="Sieht nur Ihr Team">' + esc(l.note || '') + '</textarea></div></div></details>';
@@ -806,12 +928,12 @@ SCREENS.abrechnung = () => {
     (a.downgrade ? '<p class="km-s">Wechsel zu ' + X.planName(a.downgrade.to) + ' zum ' + esc(a.downgrade.at) + ' vorgemerkt. Bis dahin bleibt ' + X.planName(k) + ' aktiv. <button type="button" class="linkbtn" data-act="konto" data-v="' + k + '">' + X.planName(k) + ' behalten</button></p>' : k !== 'service' ? '<p class="km-s">' + X.planName(k) + ' ist für ' + esc(monthLabel()) + ' gebucht. Ein Wechsel nach unten gilt zum Monatsende; gebuchte Positionen bleiben, wie sie sind.</p>' : '') + '</section>' +
     '<section class="sec"><div class="sec-head"><h3>Positionen</h3></div>' + (all.length ? '<div class="card ledger">' + all.join('') + '</div><p class="km-s">Gebucht wird beim ersten Eingang je Projekt, zum dann gültigen Tarif. Nachbesserungen im selben Projekt kosten nichts. Projekte löschen oder den Tarif wechseln ändert gebuchte Positionen nicht.</p>' : empty('Noch keine Positionen.', 'Sobald ein Aufmaß eingeht, steht es hier.')) + '</section></div>' };
 };
-const abEx = (ab) => 'Beispiel: Öffnung 1.260 × 1.440 mm ergibt ' + AW.th(1260 - 2 * ab.seite) + ' × ' + AW.th(1440 - ab.oben) + ' mm.';
+const abEx = (ab) => 'Beispiel: Fensteröffnung 1.260 × 1.440 mm ergibt ' + AW.th(1260 - 2 * ab.seite) + ' × ' + AW.th(1440 - ab.oben - (ab.unten || 0)) + ' mm. Meldet ein Foto einen Anschlag oder ist die Öffnung außer Winkel, steht beim Bestellmaß ein Hinweis.';
 SCREENS.bprofil = () => {
   const c = BC(), a = A(), p = a.prefs || {}, ab = a.abzug || (a.abzug = { seite: 15, oben: 15 });
   return { html: '<div class="wrap"><div class="h"><h2>' + esc(c.name) + '</h2><p>Ihre Einladungsseite, Ihr Kontakt zu eeziframes und wie eeziframes für Sie rechnet.</p></div><div class="grid c2">' + einKarte() +
     '<div class="card"><p class="eyebrow">Zugang und Kontakt</p><div class="form" style="margin-top: 10px"><div class="f"><label for="b-ap">Ansprechpartner</label><input id="b-ap" data-in="b:ap" value="' + esc(a.ap) + '"><small>Unterschreibt die Nachricht an Ihre Kunden.</small></div><div class="f2"><div class="f"><label for="b-mail">E-Mail</label><input id="b-mail" data-in="b:mail" value="' + esc(a.mail) + '" type="email"></div><div class="f"><label for="b-tel">Telefon</label><input id="b-tel" data-in="b:tel" value="' + esc(a.tel) + '" type="tel"></div></div></div></div></div>' +
-    '<div class="grid c2"><div class="card"><p class="eyebrow">Bestellmaß-Vorschlag</p><p class="sub" style="margin-top: 6px">Ihr Abzug von der Maueröffnung. Damit rechnet eeziframes in jedem eingegangenen Aufmaß ein Bestellmaß vor; verbindlich bleibt Ihr Feinaufmaß.</p><div class="f2" style="margin-top: 10px"><div class="f"><label for="ab-seite">Je Seite</label><input id="ab-seite" type="number" inputmode="numeric" min="0" max="60" value="' + ab.seite + '" data-in="ab:seite"><small>mm, links und rechts</small></div><div class="f"><label for="ab-oben">Oben</label><input id="ab-oben" type="number" inputmode="numeric" min="0" max="60" value="' + ab.oben + '" data-in="ab:oben"><small>mm</small></div></div><p class="km-s" id="ab-ex" style="margin-top: 8px">' + abEx(ab) + '</p></div>' +
+    '<div class="grid c2"><div class="card"><p class="eyebrow">Bestellmaß-Vorschlag</p><p class="sub" style="margin-top: 6px">Ihr Abzug von der Maueröffnung. Damit rechnet eeziframes in jedem eingegangenen Aufmaß ein Bestellmaß vor; verbindlich bleibt Ihr Feinaufmaß.</p><div class="f2" style="margin-top: 10px"><div class="f"><label for="ab-seite">Je Seite</label><input id="ab-seite" type="number" inputmode="numeric" min="0" max="60" value="' + ab.seite + '" data-in="ab:seite"><small>mm, links und rechts</small></div><div class="f"><label for="ab-oben">Oben</label><input id="ab-oben" type="number" inputmode="numeric" min="0" max="60" value="' + ab.oben + '" data-in="ab:oben"><small>mm</small></div><div class="f"><label for="ab-unten">Unten, Fenster</label><input id="ab-unten" type="number" inputmode="numeric" min="0" max="60" value="' + (ab.unten || 0) + '" data-in="ab:unten"><small>mm, Fensterbankanschluss</small></div><div class="f"><label for="ab-untenT">Unten, Türen</label><input id="ab-untenT" type="number" inputmode="numeric" min="0" max="60" value="' + (ab.untenT || 0) + '" data-in="ab:untenT"><small>mm, an der Schwelle</small></div></div><p class="km-s" id="ab-ex" style="margin-top: 8px">' + abEx(ab) + '</p></div>' +
     '<div class="card"><p class="eyebrow">Benachrichtigungen</p>' + sw('E-Mail bei neuem Aufmaß', 'sofort, mit Link zum Projekt', p.mail !== false, 'bpref', 'mail') + sw('Erinnerung an offene Links', 'wenn ein Kunde nach 3 Tagen noch nicht gemessen hat', p.remind !== false, 'bpref', 'remind') + '</div></div>' +
     '<section class="sec"><div class="sec-head"><h3>Team</h3></div><div class="card"><div class="kv"><span>Inhaber</span><span>' + esc(a.ap) + ' · darf alles</span>' + '' + '</div><p style="margin: 10px 0 0"><button type="button" class="btn small soft" data-act="toast" data-v="Einladung per E-Mail. Im Prototyp nur angedeutet.">Mitglied einladen</button></p></div></section>' +
     '<div class="row"><button type="button" class="btn ghost" data-act="tour">' + icon('play', 16) + 'Tour ansehen</button><button type="button" class="btn ghost" data-act="logout">Abmelden</button></div></div>' };
@@ -1021,7 +1143,7 @@ function tourLauf() {
 }
 /* Das Beispiel-Aufmaß der Tour als Eingabe für Blatt.pdf: dieselben Daten für das Beispiel-PDF zum Herunterladen und für den
    Ausschnitt in der Tour (web/bilder/tour-aufmassblatt-*.webp, erzeugt von scripts/tour-bild.mjs über window.TourBeispiel) */
-const tourBlatt = (abzug, host, beispiel) => ({ variante: 'betrieb', beispiel: beispiel !== false, fenster: demoWins('weber'), projekt: projOf({ total: 11, foerd: true, notiz: 'Der Rollladen im Bad klemmt, bitte mit anschauen.' }), kunde: { name: 'Familie Weber', kontakt: '0171 234 56 78', adresse: 'Lindenstraße 14, 50823 Köln' }, betrieb: { name: TOUR_BETRIEB.name, col: TOUR_BETRIEB.col, abzug: { seite: abzug, oben: abzug }, nr: 'P-BEISPIEL', eingegangen: 'heute' }, portalKurz: host || location.host, h: BLATT_H });
+const tourBlatt = (abzug, host, beispiel) => ({ variante: 'betrieb', beispiel: beispiel !== false, fenster: demoWins('weber'), projekt: projOf({ total: 11, foerd: true, notiz: 'Der Rollladen im Bad klemmt, bitte mit anschauen.' }), kunde: { name: 'Familie Weber', kontakt: '0171 234 56 78', adresse: 'Lindenstraße 14, 50823 Köln' }, betrieb: { name: TOUR_BETRIEB.name, col: TOUR_BETRIEB.col, abzug: { seite: abzug, oben: abzug }, nr: 'P-BEISPIEL', eingegangen: 'heute' }, klaerung: AW.klaerung(demoWins('weber'), projOf({ total: 11, foerd: true, notiz: 'Der Rollladen im Bad klemmt, bitte mit anschauen.' }), { plan: ['Fenster', 'Rollläden'] }), portalKurz: host || location.host, h: BLATT_H });
 window.TourBeispiel = { blatt: tourBlatt, abzuege: [10, 15, 20] };
 /* Karte „Das Aufmaßblatt als PDF“: ein echter Ausschnitt von Seite 1 des Beispiel-PDFs zum gewählten Abzug (Bestellmaß ändert sich
    mit), darunter der Weg zum ganzen Beispiel. Bilder und Maße aus scripts/tour-bild.mjs. */
@@ -1029,8 +1151,8 @@ const TOUR_BILD = { breite: 920, hoehe: 872 };
 const tourBildSrc = (abzug) => '/bilder/tour-aufmassblatt-' + abzug + '.webp';
 function tourBlattKarte(abzug) {
   const w0 = demoWins('weber')[0], d0 = AW.derive(w0), bm = AW.th(d0.moW - 2 * abzug) + ' × ' + AW.th(d0.moH - abzug) + ' mm';
-  return '<div class="card tour-pdfkarte"><figure class="tpk-blatt"><img src="' + tourBildSrc(abzug) + '" width="' + TOUR_BILD.breite + '" height="' + TOUR_BILD.hoehe + '" decoding="async" alt="Ausschnitt aus Seite 1 des Aufmaßblatts: Kopf in der Farbe von ' + esc(TOUR_BETRIEB.name) + ', Kunde Familie Weber, Position 1 ' + esc(w0.name) + ' mit Bestellmaß-Vorschlag ' + bm + ' und Zeichnung mit allen Maßen"></figure>' +
-    '<div class="tpk-tx"><b>Das Aufmaßblatt als PDF</b><p class="km-s">So sieht Seite 1 aus: in Ihrer Farbe, mit Bestellmaß nach Ihrem Abzug, Zeichnung und Fotoauswertung je Position. Zum Ausdrucken, Weiterleiten, Abheften.</p><button type="button" class="btn small primary" data-act="tour-pdf">' + icon('dl', 16) + 'Ganzes Beispiel-PDF ansehen</button></div></div>';
+  return '<div class="card tour-pdfkarte"><figure class="tpk-blatt"><img src="' + tourBildSrc(abzug) + '" width="' + TOUR_BILD.breite + '" height="' + TOUR_BILD.hoehe + '" decoding="async" alt="Ausschnitt aus Seite 1 des Aufmaßblatts: Kopf mit dem Namen von ' + esc(TOUR_BETRIEB.name) + ', Kunde Familie Weber mit Eckdaten, Übersicht aller Positionen, Position 1 ' + esc(w0.name) + ' mit Bestellmaß-Vorschlag ' + bm + '"></figure>' +
+    '<div class="tpk-tx"><b>Das Aufmaßblatt als PDF</b><p class="km-s">So sieht Seite 1 aus: mit Ihrem Namen und Logo, allen Positionen mit Bestellmaß nach Ihrem Abzug und der Klärungsliste. Danach je Position eine Seite mit Zeichnung, Wünschen und Fotoauswertung. Zum Ausdrucken, Weiterleiten, Abheften.</p><button type="button" class="btn small primary" data-act="tour-pdf">' + icon('dl', 16) + 'Ganzes Beispiel-PDF ansehen</button></div></div>';
 }
 /* Die anderen Abzüge schon laden, damit der Wechsel ohne Lücke geht */
 let tourBilderGeladen = false;
@@ -1071,13 +1193,13 @@ SCREENS.tour = () => {
       '<div class="card tlcard tour-verlauf"><ol class="tlh">' + LORDER.map((s, i) => '<li class="' + (i < idx || st === 'eingegangen' ? 'done' : i === idx ? 'now' : '') + '"><span class="dot"></span><small>' + TLS[s] + '</small></li>').join('') + '</ol><p class="km-s tl-now"><b>' + TL[st] + (st === 'arbeit' ? ' · ' + k + ' von 4 Maßen' : '') + '</b></p></div>' +
       (L >= 6 ? '<div class="ph-note tour-note"><span class="ph-dot"></span><span><b>Aufmaß eingegangen</b><small>Familie Weber · 4 Positionen, 8 Fotos</small></span></div><button type="button" class="btn small ghost tour-nochmal" data-act="tour-lauf">' + icon('play', 15) + 'Nochmal abspielen</button>' : '');
   } else if (id === 'eingang') {
-    titel = 'Das Aufmaß kommt an.'; lead = 'Sortiert nach Positionen, so wie Sie es vom Termin kennen. Positionen zum Aufklappen.';
-    merk = ['Acht Handmaße je Fenster, das kleinste zählt, Abweichungen sind markiert.', 'Fotos mit Auswertung: Material, Zustand, Rollladen, Fensterbank, Fassade.', 'Öffnungsarten, Farben, Glas, Sonnenschutz und Montage je Position.'];
-    v = '<div class="card sample tour-eingang"><div class="sample-h"><span class="badge ok">' + icon('check', 12) + 'Aufmaß eingegangen</span><b>Familie Weber · Lindenstraße 14, Köln</b><span class="km-s">4 Positionen · 5 Elemente · 8 Fotos · Einfamilienhaus, Baujahr 1978</span></div>' + demoWins('weber').slice(0, 2).map((w, i) => posCard(w, i, { seite: t.abzug, oben: t.abzug }, i === 0)).join('') + '<p class="km-s">und 2 weitere Positionen</p></div>';
+    titel = 'Das Aufmaß kommt an.'; lead = 'Ganz oben, was Sie mit dem Kunden klären. Darunter die Positionen, so wie Sie sie vom Termin kennen, zum Aufklappen.';
+    merk = ['Ganz oben, was Sie mit dem Kunden klären: Pflichtthemen, offene Wünsche, Hinweise aus den Fotos, zum Abhaken.', 'Je Position eine Zeichnung mit allen Maßen, Bestellmaß nach Ihrem Abzug.', 'Die Wünsche in einem Satz und in Gruppen, Notizen des Kunden an ihrer Stelle.'];
+    v = '<div class="card sample tour-eingang"><div class="sample-h"><span class="badge ok">' + icon('check', 12) + 'Aufmaß eingegangen</span><b>Familie Weber · Lindenstraße 14, Köln</b><span class="km-s">4 Positionen · 5 Elemente · 8 Fotos · Einfamilienhaus, Baujahr 1978</span></div>' + (() => { const ws = demoWins('weber'), pr = projOf({ total: 11, foerd: true, notiz: 'Der Rollladen im Bad klemmt, bitte mit anschauen.' }), kl = AW.klaerung(ws, pr, { plan: ['Fenster', 'Rollläden'] }); return klaerKarte(null, kl, { nurLesen: true, max: 4 }) + ws.slice(0, 2).map((w, i) => posCard(w, i, { seite: t.abzug, oben: t.abzug }, i === 0, pr, null, kl)).join(''); })() + '<p class="km-s">und 2 weitere Positionen</p></div>';
   } else if (id === 'bestell') {
     const x = demoWins('weber')[1], d = AW.derive(x), a = t.abzug;
     tourBilderVorladen();
-    titel = 'Bestellmaß und PDF.'; lead = 'Aus der Maueröffnung rechnet eeziframes ein Bestellmaß nach Ihrem Abzug vor. Das Aufmaßblatt gibt es als PDF in Ihrer Farbe.';
+    titel = 'Bestellmaß und PDF.'; lead = 'Aus der Maueröffnung rechnet eeziframes ein Bestellmaß nach Ihrem Abzug vor. Das Aufmaßblatt gibt es als PDF mit Ihrem Namen und Logo.';
     merk = ['Ihr Abzug gilt für jedes eingegangene Aufmaß.', 'PDF mit Zeichnung je Position, Bestellmaß und Fotoauswertung.', 'Verbindlich bleibt Ihr Feinaufmaß vor Ort.'];
     v = '<div class="card tour-bestell"><p class="eyebrow">Bestellmaß-Vorschlag · Pos. 2 · ' + esc(x.name) + '</p><div class="tbm"><span><small>Maueröffnung</small><b>' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' mm</b></span><span class="tbm-pfeil" aria-hidden="true">→</span><span><small>Bestellmaß</small><b>' + AW.th(d.moW - 2 * a) + ' × ' + AW.th(d.moH - a) + ' mm</b></span></div>' +
       '<div class="tf-zeile"><small>Ihr Abzug in mm, je Seite und oben</small>' + seg([['10', '10'], ['15', '15'], ['20', '20']], String(a), 'tour-abzug', 'fit').replace(/<\/div>$/, '<button type="button" class="gesperrt" data-act="tour-schloss" aria-disabled="true">Eigener<span class="schloss" aria-hidden="true">' + LOCK_S + '</span></button></div>') + '</div></div>' +
@@ -1123,13 +1245,16 @@ function loginServer(s) {
     '<p class="sub center" style="margin-top: 14px">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p>';
 }
 const SHEETS = {
-  foto: (s) => '<h3>' + esc(s.titel) + '</h3><div class="foto-gross"><img alt="' + esc(s.titel) + '" data-foto="' + esc(s.key) + '"></div><p class="km-s">Aufgenommen vom Kunden. Die Fotos bleiben 12 Monate nach dem Eingang beim Aufmaß.</p>',
+  /* Foto groß (Strang S5): Zoom mit zwei Fingern, Doppeltipp, Mausrad und Knöpfen, Verschieben, „Nächstes Foto“ (fotoZoom) */
+  foto: (s) => '<h3>' + esc(s.titel) + '</h3>' + (s.pos ? '<p class="km-s fz-pos">' + esc(s.pos) + '</p>' : '') + '<div class="foto-gross fz" data-key="' + esc(s.key) + '"><img alt="' + esc(s.titel + (s.pos ? ', ' + s.pos : '')) + '" data-foto="' + esc(s.key) + '" draggable="false"></div>' +
+    '<div class="row between fz-leiste"><div class="fz-zoom" role="group" aria-label="Zoom"><button type="button" class="btn small ghost" data-act="foto-zoom" data-v="-1" aria-label="Verkleinern">−</button><span class="fz-wert" aria-live="polite">100 %</span><button type="button" class="btn small ghost" data-act="foto-zoom" data-v="1" aria-label="Vergrößern">+</button></div>' + (s.liste && s.liste.length > 1 ? '<button type="button" class="btn small soft" data-act="foto-naechst">Nächstes Foto ' + ((s.liste.findIndex((x) => x.key === s.key) + 1) || 1) + ' von ' + s.liste.length + '</button>' : '') + '</div>' +
+    '<p class="km-s">Aufgenommen vom Kunden. Zoomen mit zwei Fingern, Doppeltipp oder Mausrad. Die Fotos bleiben 12 Monate nach dem Eingang beim Aufmaß.</p>',
   linkfrage: (s) => '<h3>Mit diesem Konto anmelden?</h3><p class="sub">Der Link meldet Sie als <b style="overflow-wrap: anywhere">' + esc(s.r.mail) + '</b> an. Angefordert wurde er nicht in diesem Browser. Melden Sie sich nur an, wenn das Ihre E-Mail-Adresse ist.</p>' + (Server.sitzung && Server.sitzung.mail && Server.sitzung.mail !== s.r.mail ? '<p class="sub">Gerade sind Sie als <b style="overflow-wrap: anywhere">' + esc(Server.sitzung.mail) + '</b> angemeldet und werden dort abgemeldet.</p>' : '') + '<div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Nicht anmelden</button><button type="button" class="btn primary" data-act="srv-link-ja">Anmelden</button></div>',
   login: (s) => (Server.an ? loginServer(s) : '<h3>Anmelden für Fensterbauer</h3><p class="sub" style="margin: -4px 0 12px">Ein Kunde hat Ihnen ein eeziframes-Aufmaß geschickt? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button>, dann „Code vom Kunden einfügen“. Die ersten 3 Projekte sind frei.</p><form class="form" data-form="login" novalidate><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-mail">E-Mail</label><input id="lg-mail" type="email" data-in="lg:mail" value="' + esc(s.mail || '') + '" autocomplete="email"></div><div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-pw">Passwort</label><input id="lg-pw" type="password" data-in="lg:pw" value="" autocomplete="current-password">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Pilotphase: Ihr Konto liegt nur in diesem Browser.</small>') + '</div><div class="row between"><button type="button" class="linkbtn" data-act="toast" data-v="In der Pilotphase liegt Ihr Konto nur in diesem Browser; ein Zurücksetzen per E-Mail kommt mit dem Start.">Passwort vergessen?</button><button type="submit" class="btn primary">Anmelden</button></div></form>' +
     '<p class="sub center">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p><p class="sub center">Noch kein Konto? <button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos registrieren</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>'),
   linkimport: () => '<h3>Code vom Kunden einfügen</h3><p class="sub">Ihr Kunde schickt nach dem Absenden einen Aufmaß-Code, zum Beispiel als Antwort in WhatsApp; bei einem eeziframes-Aufmaßblatt steht er auf der letzten Seite. Fügen Sie ihn hier ein: Gehört er zu einem Ihrer Projekte, landet das Aufmaß dort, sonst entsteht ein neues Projekt.</p><div class="f"><textarea id="code-in" rows="4" placeholder="AM1.…"></textarea></div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="linkimport">Übernehmen</button></div>',
   liste: (s) => '<h3>Mehrere Kunden einladen</h3><p class="sub">Eine Zeile je Kunde: Name, dann Handynummer oder E-Mail, durch Komma oder Semikolon getrennt. Für jeden entsteht ein Projekt mit eigenem Aufmaß-Link; verschickt wird aus dem Projekt, die Nachricht ist vorformuliert. Kosten entstehen erst, wenn ein Aufmaß eingeht.</p><div class="f"><textarea id="liste-in" rows="6" data-in="liste" placeholder="Familie Weber, 0171 2345678\nHerr Kaya, kaya@beispiel.de\nFrau Schulze">' + esc(s.text || '') + '</textarea><small>Ohne Kontakt geht es auch, dann kopieren Sie den Link später aus dem Projekt.</small></div><div class="f"><label>Anrede in der Nachricht</label>' + seg([['sie', 'Sie'], ['du', 'Du']], s.du ? 'du' : 'sie', 'liste-du') + '</div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="liste-create">' + icon('people', 18) + 'Projekte anlegen</button></div>',
-  nachbesserung: (s) => { const l = A().links.find((x) => x.id === s.id) || {}; return '<h3>Nachbesserung anfragen</h3><p class="sub">' + esc(l.kunde || 'Der Kunde') + ' bekommt den Link noch einmal, sieht alle bisherigen Angaben und kann sie ändern. Das neue Aufmaß ersetzt das alte im selben Projekt, <b>berechnet wird nichts</b>. Höchstens ' + NB_MAX + ' Runden je Projekt, bis ' + NB_TAGE + ' Tage nach dem Eingang. Hat das neue Aufmaß keine Position mit dem alten gemeinsam, ist es ein anderes Aufmaß und wird wie ein neues gebucht.</p><div class="f"><label for="nb-hinweis">Was soll der Kunde prüfen?</label><textarea id="nb-hinweis" rows="3" data-in="nb-hinweis" placeholder="z. B. Beim Küchenfenster fehlt die Brüstungshöhe, und die Breite unten scheint vertauscht.">' + esc(s.hinweis || '') + '</textarea><small>Steht so in der Nachricht an den Kunden.</small></div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="nb-send" data-id="' + s.id + '">Link erneut öffnen</button></div>'; },
+  nachbesserung: (s) => { const l = A().links.find((x) => x.id === s.id) || {}, punkte = l.aufmass ? amKlaer(l).filter((r) => klaerFragbar(r) && !klaerOk(l, r.id)).slice(0, 10) : [], gew = s.chips || []; return '<h3>Nachbesserung anfragen</h3><p class="sub">' + esc(l.kunde || 'Der Kunde') + ' bekommt den Link noch einmal, sieht alle bisherigen Angaben und kann sie ändern. Das neue Aufmaß ersetzt das alte im selben Projekt, <b>berechnet wird nichts</b>. Höchstens ' + NB_MAX + ' Runden je Projekt, bis ' + NB_TAGE + ' Tage nach dem Eingang. Hat das neue Aufmaß keine Position mit dem alten gemeinsam, ist es ein anderes Aufmaß und wird wie ein neues gebucht.</p>' + (punkte.length ? '<div class="f nb-punkte"><label>Offene Punkte aus der Klärungsliste</label><div class="chips">' + punkte.map((r) => '<button type="button" class="chip" data-act="nb-chip" data-v="' + esc(r.id) + '" aria-pressed="' + (gew.indexOf(r.id) >= 0) + '">' + esc((r.kurz || 'Offene Wünsche') + (r.pos != null && !Array.isArray(r.pos) ? ' · Pos. ' + (r.pos + 1) : '')) + '</button>').join('') + '</div><small>Antippen übernimmt den Punkt in den Hinweis; danach können Sie ihn anpassen.</small></div>' : '') + '<div class="f"><label for="nb-hinweis">Was soll der Kunde prüfen?</label><textarea id="nb-hinweis" rows="3" data-in="nb-hinweis" placeholder="z. B. Beim Küchenfenster fehlt die Brüstungshöhe, und die Breite unten scheint vertauscht.">' + esc(s.hinweis || '') + '</textarea><small>Steht so in der Nachricht an den Kunden.</small></div><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn primary" data-act="nb-send" data-id="' + s.id + '">Link erneut öffnen</button></div>'; },
   pay: (s) => paySheet(s),
   deact: (s) => '<h3>Link deaktivieren?</h3><p class="sub">Ihr Kunde kann über diesen Link dann kein Aufmaß mehr schicken. Das kostet nichts. Einen neuen Link können Sie jederzeit erstellen.</p><div class="row between"><button type="button" class="btn ghost" data-act="sheet-close">Abbrechen</button><button type="button" class="btn danger" data-act="l-deact" data-id="' + s.id + '">Deaktivieren</button></div>',
   legal: (s) => { const L = LEGAL[s.id] || LEGAL.agb, pilot = L === LEGAL.agb && !Server.an ? 'eeziframes ist in der Pilotphase: Solange kein Server angeschlossen ist, wird nichts berechnet, alle Preise sind eine Vorschau. ' : ''; return '<h3>' + esc(L[0]) + '</h3><p class="sub">' + esc(pilot + L[1]) + '</p><div class="row">' + (L[2] ? '<a class="btn primary" href="' + L[2] + '" target="_blank" rel="noopener">Seite öffnen</a><button type="button" class="btn ghost" data-act="sheet-close">Schließen</button>' : '<button type="button" class="btn primary" data-act="sheet-close">Schließen</button>') + '</div>'; }
@@ -1140,12 +1265,23 @@ const nextNr = (a) => X.nextNr(a || A());
 /* ---------- Aufmaßblatt als PDF für den Betrieb ---------- */
 let PDL = null;
 const PDLP = (async () => { try { PDL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { PDL = null; } return PDL; })();
-/* Die PDF zeichnet /assets/blatt.js (gemeinsam mit der App): Ausgabe 'betrieb' in den Farben des Betriebs, mit Bestellmaß-Vorschlag */
+/* Die PDF zeichnet /assets/blatt.js (gemeinsam mit der App): Ausgabe 'betrieb' mit Namen und Logo des Betriebs, Bestellmaß-Vorschlag und Stand der Klärungsliste */
 const BLATT_H = { derive: AW.derive, lab: AW.lab, num: AW.num, th: AW.th, col: AW.col, orn: (k) => AW.lab('orn', k), opening: AW.opening, sonne: AW.sonne, innen: AW.innen, farbe: AW.farbe, farbeZeile: AW.farbZeile, griffFarbe: AW.griffName };
-function amPDF(l, fotos) {
+/* Strang S5: dieselbe Klärungsliste wie auf dem Bildschirm (mit Stand), Logo des Betriebs im Kopf (pdfLogo, sonst die Initiale) */
+function amPDF(l, fotos, logo) {
   if (!window.Blatt || !l.aufmass) return null;
   const am = l.aufmass, c = BC(), a = A();
-  return window.Blatt.pdf({ variante: 'betrieb', fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse }, betrieb: { name: c.name, col: c.col, abzug: a.abzug || { seite: 15, oben: 15 }, nr: l.nr, eingegangen: (l.log || {}).eingegangen }, portalKurz: location.host, h: BLATT_H, fotos: fotos || {} });
+  return window.Blatt.pdf({ variante: 'betrieb', fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse }, betrieb: { name: c.name, col: c.col, logo: logo || null, abzug: AW.abzugVon(a.abzug), nr: l.nr, eingegangen: (l.log || {}).eingegangen }, klaerung: amKlaer(l), klaerStand: l.klaer || {}, portalKurz: location.host, h: BLATT_H, fotos: fotos || {} });
+}
+/* Logo aus dem Betriebskonto (Data-URL, auch WebP oder aus SVG gerechnet) fürs PDF als PNG, längste Kante höchstens 600 px */
+async function pdfLogo() {
+  const a = A(), url = a && a.logo; if (!url || !/^data:image\//.test(url)) return null;
+  try {
+    const im = await new Promise((fertig, fehler) => { const i = new Image(); i.onload = () => fertig(i); i.onerror = fehler; i.src = url; });
+    const f = Math.min(1, 600 / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.max(1, Math.round(im.naturalWidth * f)), h = Math.max(1, Math.round(im.naturalHeight * f));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(im, 0, 0, w, h);
+    return { data: cv.toDataURL('image/png'), w: w, h: h, grund: (a.einladung && a.einladung.logoGrund) === 'dunkel' ? 'dunkel' : 'hell' };
+  } catch (e) { return null; }
 }
 /* Fürs PDF verkleinert: längste Kante höchstens 960 px, JPEG 0,8. Das Blatt zeigt die Fotos etwa 56 mm hoch; so bleibt die Datei
    auch mit vielen Fenstern klein genug für E-Mail und Messenger (das volle Foto gibt es im Betriebsbereich) */
@@ -1174,7 +1310,7 @@ async function amFotos(l) {
 async function saveAm(l) {
   if (!l || !l.aufmass) return;
   if (window.Blatt) await window.Blatt.schrift();
-  const pdf = amPDF(l, await amFotos(l)), base = 'Aufmass-' + [l.nr, slug(l.kunde.replace(/^Beispiel:\s*/, ''))].filter(Boolean).join('-').replace(/[^A-Za-z0-9_-]+/g, '-');
+  const pdf = amPDF(l, await amFotos(l), await pdfLogo()), base = 'Aufmass-' + [l.nr, slug(l.kunde.replace(/^Beispiel:\s*/, ''))].filter(Boolean).join('-').replace(/[^A-Za-z0-9_-]+/g, '-');
   const name = base + (pdf ? '.pdf' : '.txt'), data = pdf || aufmassText(l);
   if (!PDL) await PDLP;
   if (PDL) {
@@ -1377,7 +1513,15 @@ function act(name, el) {
       save(); render();
       return toast(then && then !== 'service' ? r.msg : r.n ? nW(r.n, 'Aufmaß', 'Aufmaße') + ' freigeschaltet' : 'Zahlungsart gespeichert');
     }
-    case 'foto-gross': { const y = window.scrollY; S.sheet = { k: 'foto', key: v, titel: id || 'Foto' }; render(); window.scrollTo(0, y); return; }
+    /* Strang S5: Foto groß mit Zoom und „Nächstes Foto“, Klärungsliste abhaken, Notiz, Rückfrage, Sprung zur Position */
+    case 'foto-gross': { const y = window.scrollY, liste = Array.from(document.querySelectorAll('.pfoto[data-act="foto-gross"]')).map((b) => ({ key: b.getAttribute('data-v'), titel: b.getAttribute('data-id') || 'Foto', pos: b.getAttribute('data-pos') || '' })).filter((x, k, a) => a.findIndex((z) => z.key === x.key) === k); const hier = liste.find((x) => x.key === v) || { key: v, titel: id || 'Foto', pos: el.getAttribute('data-pos') || '' }; S.sheet = { k: 'foto', key: hier.key, titel: hier.titel, pos: hier.pos, liste: liste }; render(); window.scrollTo(0, y); return; }
+    case 'foto-naechst': { const s = S.sheet; if (!s || !s.liste || s.liste.length < 2) return; const k = (s.liste.findIndex((x) => x.key === s.key) + 1) % s.liste.length; Object.assign(s, s.liste[k]); return render(); }
+    case 'foto-zoom': { const b = document.querySelector('.foto-gross.fz'); if (b && b._zoom) b._zoom(+v); return; }
+    case 'klaer-ok': { const l = findLink(); if (!l) return; const ok = !klaerOk(l, v), nz = klaerNotiz(l, v); X.projektAendern(l, { klaer: { id: v, ok: ok, notiz: nz } }); Server.projekt(l.id, { klaer: { id: v, ok: ok, notiz: nz } }); save(); S._pop = { act: name, v: v, k: '' }; render(); return toast(ok ? 'Als geklärt markiert' : 'Wieder offen'); }
+    case 'klaer-notiz': { S.klaerNotiz = S.klaerNotiz === v ? null : v; render(); if (S.klaerNotiz) { const f = document.getElementById('kn-' + v); if (f) { try { f.focus({ preventScroll: true }); } catch (e) { /* ok */ } } } return; }
+    case 'klaer-frage': { const l = findLink(); if (!l) return; const r = amKlaer(l).find((x) => x.id === v); S.sheet = { k: 'nachbesserung', id: l.id, chips: r ? [r.id] : [], hinweis: r ? klaerFrage(r).slice(0, 300) : '' }; return render(); }
+    case 'nb-chip': { const s = S.sheet; if (!s) return; const l = A().links.find((x) => x.id === s.id), r = l ? amKlaer(l).find((x) => x.id === v) : null; if (!r) return; s.chips = s.chips || []; const t = klaerFrage(r), da = s.chips.indexOf(v) >= 0, h = String(s.hinweis || ''); if (da) { s.chips = s.chips.filter((x) => x !== v); s.hinweis = h.split(t).join('').replace(/\s*;\s*;\s*/g, '; ').replace(/^\s*;\s*|\s*;\s*$/g, '').trim(); } else { s.chips.push(v); s.hinweis = (h.trim() ? h.trim().replace(/[;.]?$/, ';') + ' ' : '') + t; } if (s.hinweis.length > 300) toast('Der Hinweis ist länger als 300 Zeichen und wird gekürzt.'); return render(); }
+    case 'pos-zu': { const d = document.getElementById('pos-' + v); if (!d) return; d.open = true; try { d.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } catch (e) { d.scrollIntoView(); } const sm = d.querySelector('summary'); if (sm) { try { sm.focus({ preventScroll: true }); } catch (e) { /* ok */ } } return; }
     case 'pos-all': { const ds = Array.from(document.querySelectorAll('.poslist details')), open = ds.some((d) => !d.open); ds.forEach((d) => { d.open = open; }); el.textContent = open ? 'Alle zuklappen' : 'Alle aufklappen'; return; }
     case 'linkimport': {
       const ta = document.getElementById('code-in'), code = ta ? ta.value : '', o = unpack(code);
@@ -1403,6 +1547,8 @@ function fallbackCopy(text, ok) {
 /* ---------- Eingaben ---------- */
 function onInput(el, ev) {
   if (el.getAttribute('data-in') === 'nb-hinweis') { if (S.sheet) S.sheet.hinweis = el.value; return; }
+  /* Strang S5: Notiz zu einem Punkt der Klärungsliste, gespeichert beim Verlassen des Felds */
+  if (/^klaer:/.test(el.getAttribute('data-in') || '')) { if (ev.type !== 'change') return; const id = el.getAttribute('data-in').slice(6), l = A().links.find((x) => x.id === S.sel); if (!l) return; const ok = klaerOk(l, id), r = X.projektAendern(l, { klaer: { id: id, ok: ok, notiz: el.value } }); if (r && r.ok === false) return toast(r.msg); Server.projekt(l.id, { klaer: { id: id, ok: ok, notiz: el.value } }); save(); return toast('Notiz gespeichert'); }
   if (el.getAttribute('data-in') === 'liste') { if (S.sheet) S.sheet.text = el.value; return; }
   const k = el.getAttribute('data-in'), v = el.type === 'checkbox' ? el.checked : el.value, i = k.indexOf(':'), ns = i >= 0 ? k.slice(0, i) : k, f = i >= 0 ? k.slice(i + 1) : '';
   if (ns === 'r') { const r = S.reg; if (!r) return; r.d[f] = v; if (r.err && r.err[f]) { delete r.err[f]; const box = el.closest('.f, .agree'); if (box) { box.classList.remove('has-err'); const er = box.querySelector('.err'); if (er) er.remove(); } } if (f === 'agb' && ev.type === 'change') { const er = document.querySelector('.agree + .err'); if (er && v) er.remove(); } return; }
