@@ -29,6 +29,11 @@ const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
 import { auswerten, tagBerlin, tagPlus, tageZwischen, tageListe, browserName, systemName, zaehlen } from './statistik.js';
 import { verkaufStand } from './recht.js';
 import { live } from './umgebung.js';
+import { aufgabenListe, paketeKennzahlen } from './zentrale-bestellungen.js';
+/* Betriebszeile einer Konfigurator-Instanz (docs/INSTANZEN.md): kein Altbestand, zählt nicht in dessen Kennzahlen, wird über die Instanz
+   verwaltet (Seite „Instanzen“) */
+const istInstanz = (row) => !!(row && row.daten && (row.daten.konto === 'instanz' || row.daten.instanz));
+const altbestand = (rows) => (rows || []).filter((r) => !istInstanz(r));
 
 const X = () => globalThis.Abrechnung;
 const DAUER = 8 * 3600 * 1000;
@@ -84,7 +89,7 @@ const cookieLesen = (request) => { const m = /(?:^|;\s*)__Host-zentrale=([^;\s]+
 const cookieSetzen = (wert, sekunden) => '__Host-zentrale=' + wert + '; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=' + sekunden;
 const antwort = (obj, status, extra) => new Response(JSON.stringify(obj), { status: status || 200, headers: Object.assign({}, KOPF, extra || {}) });
 
-async function zugang(ctx) {
+export async function zugang(ctx) {
   if (!ctx.k.zentrale.passwort) throw new ApiFehler('Die Zentrale ist noch nicht eingerichtet.', 503);
   if (ctx.request.headers.get('x-zentrale') !== '1') throw new ApiFehler('Nicht erlaubt.', 403);
   const p = await sitzungPruefen(ctx.k, cookieLesen(ctx.request));
@@ -92,8 +97,8 @@ async function zugang(ctx) {
   ctx.zentrale = p;
   return p;
 }
-function daten(ctx) { if (!ctx.sp) throw new ApiFehler('Die Datenbank ist noch nicht verbunden (SUPABASE_URL, SUPABASE_SECRET_KEY bei Cloudflare).', 503); return ctx.sp; }
-async function betriebLaden(ctx) {
+export function daten(ctx) { if (!ctx.sp) throw new ApiFehler('Die Datenbank ist noch nicht verbunden (SUPABASE_URL, SUPABASE_SECRET_KEY bei Cloudflare).', 503); return ctx.sp; }
+export async function betriebLaden(ctx) {
   const id = str(ctx.params.id, 80); if (!/^[A-Za-z0-9-]{8,80}$/.test(id)) throw new ApiFehler('Unbekannter Betrieb.', 404);
   const row = await daten(ctx).betriebHolen(id); if (!row) throw new ApiFehler('Diesen Betrieb gibt es nicht (mehr).', 404);
   return row;
@@ -128,7 +133,7 @@ export function codesVergessen() { verbraucht.clear(); }
 /* Heikle Schritte (Einblick in Endkundendaten, Export, Löschen) verlangen bei eingerichtetem zweitem Faktor einen frischen Code.
    Nach fünf falschen Codes endet die Sitzung (je Instanz); jeder Fehlversuch steht im Protokoll. */
 const fehlStufe = new Map(), beendet = new Set();
-async function frischerCode(ctx, zweck, pflicht) {
+export async function frischerCode(ctx, zweck, pflicht) {
   const z = ctx.k.zentrale;
   if (!z.totp) { if (pflicht) throw new ApiFehler('Dafür ist der zweite Faktor nötig (Einstellungen → Zweiter Faktor).', 403); return; }
   if (await totpPruefen(z.totp, (ctx.body || {}).code)) return;
@@ -209,6 +214,7 @@ function zeile(row, zr) {
     zahlungsart: a.pay ? { art: a.pay.type || 'Zahlungsart', text: a.pay.label || '', seit: a.pay.when || '' } : null,
     gesperrt: s ? { seit: s.seit, grund: s.grund } : null, doppelt: a.dupOf || '',
     stripe: { kunde: row.stripe_customer || '', abo: row.stripe_subscription || '' },
+    instanz: istInstanz(row) ? String(((a.instanz || {}).id) || '') || true : null,
     k: kennzahlen(row), z: zr ? kennzahlenZeitraum(row, zr) : null
   };
 }
@@ -415,7 +421,8 @@ export const ZENTRALE = {
   /* Übersicht: Kennzahlen und Verlauf im Zeitraum (zeitraum), letzte Vorgänge darin, Hinweise (immer der Stand von heute) */
   'GET /api/zentrale/uebersicht': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), k = ctx.k, jetzt = Date.now(), abAnfang = ctx.url.searchParams.get('von') === 'anfang';
-    const [rows, kaeufe, ersterWeb, entwuerfe, eigene] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), abAnfang && sp.statistikErsterTag ? sp.statistikErsterTag().catch(() => null) : null, sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null, sp.eigeneAlle ? sp.eigeneAlle().catch(() => null) : null]);
+    const [alleRows, kaeufe, ersterWeb, entwuerfe, eigene, aufgaben, pakete] = await Promise.all([sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), abAnfang && sp.statistikErsterTag ? sp.statistikErsterTag().catch(() => null) : null, sp.entwuerfeAlle ? sp.entwuerfeAlle().catch(() => null) : null, sp.eigeneAlle ? sp.eigeneAlle().catch(() => null) : null, aufgabenListe(ctx).catch(() => null), paketeKennzahlen(ctx).catch(() => null)]);
+    const rows = altbestand(alleRows); // Kennzahlen des Altbestands ohne die Betriebszeilen der Instanzen
     const bez = kaeufe.filter((x) => x.status === 'bezahlt');
     const zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at)).concat(bez.map((x) => tagAus(x.created_at)), [ersterWeb])));
     const web = await auswerten(sp, zr).catch(() => null);
@@ -447,7 +454,8 @@ export const ZENTRALE = {
     if (entwuerfe === null && k.supabase) hinweise.push({ art: 'warn', text: 'Der Zwischenspeicher für Kundenlinks ist noch nicht eingerichtet: supabase/schema.sql noch einmal im SQL-Editor von Supabase ausführen.', ziel: 'einstellungen' });
     if (eigene === null && k.supabase) hinweise.push({ art: 'warn', text: 'Konten für Hauseigentümer sind noch nicht eingerichtet: supabase/schema.sql noch einmal im SQL-Editor von Supabase ausführen. Bis dahin kaufen Hauseigentümer ohne Konto.', ziel: 'einstellungen' });
     const byId = new Map(rows.map((r) => [r.id, r]));
-    const auff = (entwuerfe || []).map((e) => { const r = byId.get(e.betrieb), l = r ? ((r.daten || {}).links || []).find((x) => x.code === e.code) : null; return Object.assign(linkAuffaellig(e, l, jetzt), { betrieb: e.betrieb, name: r ? r.name : '' }); }).filter((x) => x.gruende.length);
+    const instanzZeilen = new Set((alleRows || []).filter(istInstanz).map((r) => r.id));
+    const auff = (entwuerfe || []).filter((e) => !(e.meta && e.meta.instanz) && !instanzZeilen.has(e.betrieb)).map((e) => { const r = byId.get(e.betrieb), l = r ? ((r.daten || {}).links || []).find((x) => x.code === e.code) : null; return Object.assign(linkAuffaellig(e, l, jetzt), { betrieb: e.betrieb, name: r ? r.name : '' }); }).filter((x) => x.gruende.length);
     auff.slice(0, 5).forEach((x) => hinweise.push({ art: 'warn', text: 'Mehrfachnutzung prüfen: ' + (x.name || 'Betrieb') + ', Projekt ' + (x.nr || '?') + ': ' + x.gruende.join(', ') + '.', ziel: 'betrieb/' + x.betrieb }));
     if (auff.length > 5) hinweise.push({ art: 'warn', text: 'Dazu ' + X().nW(auff.length - 5, 'weiterer auffälliger Kundenlink', 'weitere auffällige Kundenlinks') + '.', ziel: 'betriebe' });
     kaeufeAuffaellig(kaeufe).slice(0, 3).forEach((x) => hinweise.push({ art: 'warn', text: x.mail + ' hat ' + x.anzahl + ' Aufmaßblätter gekauft: vielleicht ein Betrieb, der die Variante für Hauseigentümer nutzt.', ziel: 'kaeufe' }));
@@ -468,6 +476,9 @@ export const ZENTRALE = {
         kaeufe: bezZr.length, umsatzKaeufe: rund(bezZr.reduce((s, x) => s + (x.betrag_cent || 0), 0) / 100)
       },
       verlauf: verlauf,
+      /* Konfigurator-Pakete: Aufgaben (Bestellungen, Rückrufe, Nachrichten, Versand, Domains) und Kennzahlen, getrennt vom Altbestand */
+      aufgaben: aufgaben && aufgaben.tabelle ? { anzahl: aufgaben.anzahl, liste: aufgaben.liste } : null,
+      pakete: pakete,
       web: web && web.tabelle ? { aufrufe: web.summe.aufrufe, besuche: web.summe.besuche, herkunft: web.herkunft.slice(0, 5) } : null,
       aktivitaet: aktivitaet.filter((x) => x.zeit).sort((x, y) => String(y.zeit).localeCompare(String(x.zeit))).slice(0, 12),
       hinweise: hinweise
@@ -476,9 +487,9 @@ export const ZENTRALE = {
 
   /* Betriebe: Liste mit Kennzahlen (Filter und Suche macht die Oberfläche) */
   /* Betriebe: Liste mit Kennzahlen gesamt (k) und im Zeitraum (z); Filter und Suche macht die Oberfläche */
-  'GET /api/zentrale/betriebe': async (ctx) => { await zugang(ctx); const rows = await daten(ctx).betriebeAlle(), zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at)))); return { ok: true, zeitraum: zrAus(zr), betriebe: rows.map((r) => zeile(r, zr)), preise: ctx.k.preise }; },
+  'GET /api/zentrale/betriebe': async (ctx) => { await zugang(ctx); const rows = await daten(ctx).betriebeAlle(), zr = zeitraum(ctx.url, fruehester(altbestand(rows).map((r) => tagAus(r.created_at)))); return { ok: true, zeitraum: zrAus(zr), betriebe: rows.map((r) => zeile(r, zr)), preise: ctx.k.preise }; },
   'GET /api/zentrale/betriebe.csv': async (ctx) => {
-    await zugang(ctx); const sp = daten(ctx), rows = await sp.betriebeAlle(), zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at))));
+    await zugang(ctx); const sp = daten(ctx), rows = altbestand(await sp.betriebeAlle()), zr = zeitraum(ctx.url, fruehester(rows.map((r) => tagAus(r.created_at))));
     const im = ' ' + datumDE(zr.von + 'T12:00:00Z') + (zr.vonZeit ? ' ' + zr.vonZeit : '') + '–' + datumDE(zr.bis + 'T12:00:00Z') + (zr.bisZeit ? ' ' + zr.bisZeit : '');
     const kopf = ['Betrieb', 'Ansprechpartner', 'E-Mail (Anmeldung)', 'E-Mail (Kontakt)', 'Telefon', 'PLZ', 'Registriert', 'Zuletzt aktiv', 'Tarif', 'Zahlungsart', 'Projekte', 'Links verschickt', 'Aufmaße eingegangen', 'Positionen', 'Aufträge', 'Umsatz netto (€)', 'davon bezahlt (€)', 'noch nicht berechnet (€)', 'Projekte' + im, 'Aufmaße' + im, 'Umsatz netto' + im + ' (€)', 'Gesperrt', 'Doppelkonto-Verdacht'];
     const zeilen = rows.map((r) => zeile(r, zr)).map((x) => [x.name, x.ap, x.mail, x.kontaktMail, x.tel, x.plz, datumDE(x.registriert), datumDE(x.zuletzt), X().planName(x.tarif), x.zahlungsart ? x.zahlungsart.art : '', x.k.projekte, x.k.verschickt, x.k.aufmasse, x.k.positionen, x.k.auftraege, zahlDE(x.k.umsatz), zahlDE(x.k.bezahlt), zahlDE(x.k.nochOffen), x.z.projekte, x.z.aufmasse, zahlDE(x.z.umsatz), x.gesperrt ? 'ja' : '', x.doppelt ? 'ja (' + x.doppelt + ')' : '']);
@@ -592,6 +603,7 @@ export const ZENTRALE = {
   /* Konto löschen (Art. 17 DSGVO): Abo endet sofort, Anmeldung und Konto werden gelöscht, der Löschnachweis bleibt im Protokoll */
   'POST /api/zentrale/betriebe/:id/loeschen': async (ctx) => {
     await zugang(ctx); const row = await betriebLaden(ctx), b = ctx.body || {}, norm = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (istInstanz(row)) throw new ApiFehler('Diese Betriebszeile gehört zu einer Konfigurator-Instanz. Bitte über die Instanz beenden; ihre Daten löscht der tägliche Lauf nach der Frist.', 409, { instanz: (row.daten.instanz || {}).id || '' });
     if (!row.name || norm(b.bestaetigung) !== norm(row.name)) throw new ApiFehler('Zur Bestätigung bitte den Namen des Betriebs genau eintippen.');
     await frischerCode(ctx, 'loeschen', false);
     const grund = str(b.grund, 300), a = row.daten || {};
@@ -627,13 +639,15 @@ export const ZENTRALE = {
     const [nutzer, rows, eig] = await Promise.all([anmeldungenAlle(ctx.k), sp.betriebeAlle(), sp.eigeneAlle ? sp.eigeneAlle() : null]);
     if (!nutzer) throw new ApiFehler('Supabase Auth antwortet nicht.', 502);
     const mit = new Set(rows.map((r) => r.auth_user).filter(Boolean)), kunden = new Set((eig || []).filter(lebt).map((e) => e.nutzer)), jetzt = Date.now();
-    const ohne = nutzer.filter((u) => !mit.has(u.id));
-    return { ok: true, kunden: ohne.filter((u) => kunden.has(u.id)).length, liste: ohne.filter((u) => !kunden.has(u.id)).map((u) => Object.assign({}, u, { tage: Math.floor((jetzt - Date.parse(u.erstellt || new Date().toISOString())) / TAG) })).sort((x, y) => String(y.erstellt).localeCompare(String(x.erstellt))) };
+    const geschuetzt = sp.geschuetzteNutzer ? await sp.geschuetzteNutzer().catch(() => new Set()) : new Set(); // Partner und Dashboard-Zugänge der Instanzen
+    const ohne = nutzer.filter((u) => !mit.has(u.id) && !geschuetzt.has(u.id));
+    return { ok: true, kunden: ohne.filter((u) => kunden.has(u.id)).length, pakete: nutzer.filter((u) => !mit.has(u.id) && geschuetzt.has(u.id)).length, liste: ohne.filter((u) => !kunden.has(u.id)).map((u) => Object.assign({}, u, { tage: Math.floor((jetzt - Date.parse(u.erstellt || new Date().toISOString())) / TAG) })).sort((x, y) => String(y.erstellt).localeCompare(String(x.erstellt))) };
   },
   'POST /api/zentrale/anmeldungen/:uid/loeschen': async (ctx) => {
     await zugang(ctx); const sp = daten(ctx), uid = str(ctx.params.uid, 80);
     if (!/^[0-9a-f-]{36}$/i.test(uid)) throw new ApiFehler('Unbekannte Anmeldung.', 404);
     if (await sp.betriebNachAuth(uid)) throw new ApiFehler('Zu dieser Anmeldung gehört ein Betrieb. Bitte den Betrieb löschen.');
+    if (sp.geschuetzteNutzer && (await sp.geschuetzteNutzer()).has(uid)) throw new ApiFehler('Diese Anmeldung gehört zu einem Kundenkonto für Konfigurator-Pakete oder einem Dashboard-Zugang. Sie lässt sich hier nicht löschen.', 409);
     const eig = sp.eigeneVonNutzer ? await sp.eigeneVonNutzer(uid) : null;
     if (eig && eig.length) throw new ApiFehler('Zu dieser Anmeldung gehört ein Konto eines Hauseigentümers mit gesichertem Aufmaß. Das Konto löscht der Hauseigentümer selbst in der App.');
     const r = await anmeldungLoeschen(ctx.k, uid); if (!r.ok) throw new ApiFehler('Supabase hat die Anmeldung nicht gelöscht (' + r.status + ').', 502);
@@ -653,7 +667,7 @@ export const ZENTRALE = {
     await zugang(ctx); const sp = daten(ctx), jetzt = Date.now();
     const zr = zeitraum(ctx.url, ctx.url.searchParams.get('von') === 'anfang' && sp.statistikErsterTag ? await sp.statistikErsterTag().catch(() => null) : null);
     const mitStunden = zr.tage <= STUNDEN_MAX && !!sp.statistikStunden;
-    const [web, rows, kaeufe, stundenRoh, ab] = await Promise.all([auswerten(sp, zr).catch(() => null), sp.betriebeAlle(), sp.zahlungenAlle().catch(() => []), mitStunden ? sp.statistikStunden(tagPlus(zr.von, -8), zr.bis).catch(() => null) : null, sp.statistikStundenAb ? sp.statistikStundenAb().catch(() => null) : null]);
+    const [web, rows, kaeufe, stundenRoh, ab] = await Promise.all([auswerten(sp, zr).catch(() => null), sp.betriebeAlle().then(altbestand), sp.zahlungenAlle().catch(() => []), mitStunden ? sp.statistikStunden(tagPlus(zr.von, -8), zr.bis).catch(() => null) : null, sp.statistikStundenAb ? sp.statistikStundenAb().catch(() => null) : null]);
     if (!web || web.tabelle === false) return { ok: true, tabelle: false, zeitraum: zrAus(zr) };
     const ersteStunde = ab ? berlinMs(ab.slice(0, 10), ab.slice(11, 13) + ':00') : null;
     const a = anzeigenAuswerten(zr, stundenListe(stundenRoh), ersteStunde, kaeufe, rows, jetzt);
@@ -683,6 +697,8 @@ export const ZENTRALE = {
       dienste: { ki: k.ki, zahlung: { an: k.zahlung, attrappe: k.zahlungAttrappe, test: !!(s && s.test), webhook: !!(s && s.webhook) }, daten: { an: k.daten, art: ctx.sp ? ctx.sp.art : '' }, statistik: statistik, protokoll: protokollTab },
       hinweise: k.hinweise, zentrale: { zweiFaktor: !!k.zentrale.totp, totpFehler: k.zentrale.totpFehler, sitzungBis: p.exp },
       preise: k.preise, indexierung: k.indexierung,
+      /* Konfigurator-Pakete: was für Verkauf, Domains, Sitzungen und Zustellung eingerichtet ist (Bauplan §4) */
+      pakete: { offen: !!k.paketeOffen, cloudflare: !!(ctx.env && String(ctx.env.CF_API_TOKEN || '').trim() && /^[0-9a-f]{32}$/i.test(String(ctx.env.CF_ACCOUNT_ID || '').trim())), sitzung: !!(k.sitzung && k.sitzung.geheimnis && !k.sitzung.attrappe), absender: (k.instanzen || {}).absender || '', webhook: !!((k.instanzen || {}).webhook && !(k.instanzen || {}).webhookAttrappe) },
       links: { stripe: s ? 'https://dashboard.stripe.com/' + (s.test ? 'test/' : '') : '', supabase: projekt ? 'https://supabase.com/dashboard/project/' + projekt : '', cloudflare: 'https://dash.cloudflare.com/?to=/:account/workers/services/view/fenstero/production/settings' }
     };
   },
@@ -753,6 +769,7 @@ export async function aufraeumen(k, sp) {
         if (!row) { try { row = await sp.betriebHolen(e.betrieb); } catch (err) { out.ok = false; continue; } if (row) byId.set(row.id, row); } // die Liste kann gekürzt sein; bei einem Fehler nichts löschen
         if (row && ((row.daten && row.daten.instanz) || (e.meta && e.meta.instanz))) continue; // Instanzen räumt anfragenAufraeumen auf (eingang.js); ohne Betriebszeile weg wie unten
         const l = row ? ((row.daten || {}).links || []).find((x) => x.code === e.code) : null, still = jetzt - (Date.parse(e.updated_at || '') || jetzt);
+        if ((!row || !l) && sp.anfrageHolen && (await sp.anfrageHolen(e.code).catch(() => true))) continue; // Anfrage einer Instanz (Tabelle anfragen): räumt anfragenAufraeumen auf
         if (!row || !l) { if (await sp.entwurfLoeschen(e.code)) { out.entwuerfe++; await fotosLinkLoeschen(k, e.code); } continue; } // Link weg: seine Fotos auch
         const zu = X().linkZu(l, jetzt), ein = Number(l.eingegangenAt) || 0;
         if (zu === 'eingegangen' && ((l.runde || 1) > X().NB_MAX || (ein && jetzt - ein > X().NB_TAGE * TAG))) { if (await sp.entwurfLoeschen(e.code)) out.entwuerfe++; continue; }
