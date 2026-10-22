@@ -623,7 +623,8 @@ SCREENS.reg = () => {
   const firmaName = d.firma || 'Ihr Betrieb', col = d.col || '#0071e3';
   let body = '', title = '';
   if (r.step === 1) { title = 'Ihr Betrieb.'; body = inp('Firma', 'firma', 'z. B. Fensterbau Muster GmbH', 'text', 'Steht als Absender in Ihren Aufmaß-Links.', 'organization') + inp('Ansprechpartner', 'ap', 'Vor- und Nachname', 'text', '', 'name') + (r.server ? '<div class="f2"><div class="f"><label>E-Mail</label><input value="' + esc(d.mail || '') + '" disabled><small>Bestätigt. Darüber melden Sie sich an.</small></div>' + inp('Telefon', 'tel', 'z. B. 0221 123456', 'tel', 'Für Rückfragen und als Schutz vor Doppelkonten.', 'tel') + '</div>' : '<div class="f2">' + inp('E-Mail', 'mail', 'buero@beispiel.de', 'email', '', 'email') + inp('Telefon', 'tel', 'z. B. 0221 123456', 'tel', '', 'tel') + '</div>' + inp('Passwort', 'pw', 'mindestens 8 Zeichen', 'password', 'Mindestens 8 Zeichen.', 'new-password')); }
-  if (r.step === 2) { title = 'So sieht Ihr Kunde den Link.'; body = dupNote(d) + '<div class="f2">' + inp('Postleitzahl des Betriebs', 'plz', 'z. B. 51063', 'text', 'Für die Rechnung.', 'postal-code') + '<div class="f"><label>Ihre Farbe</label><div class="colors">' + ['#0071e3', '#1f7a3d', '#a85a00', '#6e3fc2', '#0b7285', '#b3261e'].map((c) => '<button type="button" class="col" data-act="reg-set" data-k="col" data-v="' + c + '" style="background: ' + c + '" aria-label="Farbe ' + c + '" aria-pressed="' + (col === c) + '"></button>').join('') + '</div></div></div><div class="preview"><p class="eyebrow">Erster Bildschirm beim Kunden</p><div class="pv-card"><span class="av" style="background: ' + col + '">' + esc(firmaName.replace(/^(Fensterbau|Glaserei|Schreinerei|Tischlerei)\s+/i, '').slice(0, 1).toUpperCase() || 'F') + '</span><span><small>Persönliche Anfrage von</small><b>' + esc(firmaName) + '</b></span></div><p class="pv-t">Deine Fenster. Deine Maße.</p><small class="pv-s">' + esc(firmaName) + ' braucht für dein Angebot die Maße deiner Fenster. Etwa fünf Minuten pro Fenster, jeder Schritt erklärt.</small></div><p class="km-s pv-schutz">' + icon('shield', 16) + '<span>Kundenschutz: Im Link sieht Ihr Kunde nur Ihren Betrieb, und sein Aufmaß geht nur an Sie.</span></p>' + agree('Ich registriere mich als Unternehmer (§ 14 BGB) für meinen Betrieb und akzeptiere die <button type="button" class="ulink" data-act="sheet" data-v="legal" data-id="agb">Nutzungsbedingungen für Fensterbauer</button> (Stand: ' + esc(nbStandDE()) + ') einschließlich des Vertrags über die Auftragsverarbeitung (Anlage). Aufmaße meiner Kunden nutze ich nur für deren Projekt.'); }
+  if (r.step === 2) { title = 'Ihre Einladung.'; body = dupNote(d) + '<div class="f2">' + inp('Postleitzahl des Betriebs', 'plz', 'z. B. 51063', 'text', 'Für die Rechnung.', 'postal-code') + '<div class="f"><label>Farbe Ihres Zeichens</label><div class="colors">' + window.Einladung.FARBEN.map((c) => '<button type="button" class="col" data-act="reg-set" data-k="col" data-v="' + c + '" style="background: ' + c + '" aria-label="Farbe ' + EIN_FARBNAME[c] + '" aria-pressed="' + (col === c) + '"></button>').join('') + '</div><small>Für Ihre Initiale beim Kunden und den Kopf Ihres Aufmaßblatts.</small></div></div>' +
+    '<div class="ein-reg-vor"><p class="eyebrow">Erster Bildschirm beim Kunden</p>' + einTelefon(window.Einladung.html({ name: firmaName, kunde: 'Familie Weber', du: false, p: window.Einladung.auftritt({ ap: d.ap }, col), vorschau: true }), 'kurz') + '<p class="km-s">Logo, Begrüßung und Telefon für Rückfragen stellen Sie danach unter „Mein Betrieb · Einladungsseite“ ein.</p></div><p class="km-s pv-schutz">' + icon('shield', 16) + '<span>Kundenschutz: Im Link sieht Ihr Kunde nur Ihren Betrieb, und sein Aufmaß geht nur an Sie.</span></p>' + agree('Ich registriere mich als Unternehmer (§ 14 BGB) für meinen Betrieb und akzeptiere die <button type="button" class="ulink" data-act="sheet" data-v="legal" data-id="agb">Nutzungsbedingungen für Fensterbauer</button> (Stand: ' + esc(nbStandDE()) + ') einschließlich des Vertrags über die Auftragsverarbeitung (Anlage). Aufmaße meiner Kunden nutze ich nur für deren Projekt.'); }
   const total = steps.length - f0, pos = r.step - f0 + 1, last = r.step === steps.length - 1;
   return { title: 'Konto für Fensterbauer', html: '<div class="wrap narrow"><div class="stepbar"><span style="width: ' + (pos / total * 100) + '%"></span></div><div class="h"><p class="eyebrow">Schritt ' + pos + ' von ' + total + ' · ' + steps[r.step] + '</p><h2>' + title + '</h2></div><form class="form" data-form="reg" novalidate>' + body + '</form>' + (Object.keys(e).length ? '<p class="err-sum" role="alert">Bitte die markierten Felder prüfen.</p>' : '') + '<div class="row between formnav"><button type="button" class="btn ghost" data-act="reg-prev">' + (r.step > f0 ? 'Zurück' : 'Abbrechen') + '</button><button type="button" class="btn primary" data-act="reg-next">' + (last ? 'Konto anlegen' : 'Weiter') + '</button></div>' + (r.step === f0 ? '<p class="sub center">Schon ein Konto? <button type="button" class="ulink" data-act="sheet" data-v="login">Anmelden</button> · Hauseigentümer? <a class="ulink" href="' + APP_OPEN + '">Zur App, ohne Konto</a></p>' : '') + '</div>' };
 };
@@ -663,7 +664,7 @@ const LORDER = ['erstellt', 'gesendet', 'geoeffnet', 'arbeit', 'eingegangen'];
 const PGEB = { efh: 'Einfamilienhaus', dh: 'Doppelhaushälfte', rh: 'Reihenhaus', mfh: 'Mehrfamilienhaus', etw: 'Wohnung', gewerbe: 'Gewerbe' };
 const PFZ = ['1 bis 2', '3 bis 5', '6 bis 10', 'mehr als 10'];
 const PPLAN = ['Fenster', 'Haustür', 'Rollläden', 'Insektenschutz', 'Fensterbänke'];
-const linkHash = (l) => '#k-' + l.code + '-' + slug(BC().name) + '.' + b64u(BC().name) + '.' + b64u(l.kunde || '') + (l.nb && l.nb.offen ? '~' + l.nb.runde : '');
+const linkHash = (l) => '#k-' + l.code + '-' + slug(BC().name) + '.' + b64u(BC().name) + '.' + b64u(l.kunde || '') + einLinkTeil(l) + (l.nb && l.nb.offen ? '~' + l.nb.runde : ''); // einLinkTeil: Anrede und Profil (Einladungsseite)
 const linkURL = (l) => APP_URL + linkHash(l);
 const linkOpen = (l) => APP_OPEN + '?vorschau=1' + linkHash(l); // Vorschau: speichert und sendet nichts, zählt nicht als geöffnet
 function linkMsg(l) {
@@ -702,14 +703,14 @@ SCREENS.links = () => {
     '<div class="list plist">' + (shown.length ? shown.slice().sort((x, y) => order(x) - order(y)).map(projCard).join('') : empty(S.lfilt === 'eingegangen' ? 'Noch nichts eingegangen.' : 'Keine offenen Projekte.', S.lfilt === 'eingegangen' ? 'Sobald ein Kunde sein Aufmaß abschickt, steht es hier.' : 'Alle verschickten Links sind erledigt.', '', 'eingang')) + '</div></div>' };
 };
 SCREENS.newlink = () => {
-  const n = S.nl || (S.nl = { step: 0, kunde: '', kontakt: '', adresse: '', geb: '', fz: '', plan: ['Fenster'], note: '', days: 14, du: false, err: {} }), e = n.err || {}, c = BC(), a = A(), st = n.step || 0;
+  const n = S.nl || (S.nl = { step: 0, kunde: '', kontakt: '', adresse: '', geb: '', fz: '', plan: ['Fenster'], note: '', days: 14, du: (A().einladung || {}).anrede === 'du', err: {} }), e = n.err || {}, c = BC(), a = A(), st = n.step || 0;
   const fake = { kunde: n.kunde || 'Familie Weber', code: 'xxxxx', du: n.du };
   const one = (k, v, label) => '<button type="button" class="chip small" data-act="nl-set" data-k="' + k + '" data-v="' + esc(v) + '" aria-pressed="' + (n[k] === v) + '">' + esc(label) + '</button>';
   let body, nav;
   if (!st) {
     body = '<div class="f' + (e.kunde ? ' has-err' : '') + '"><label for="nl-kunde">Name des Kunden</label><input id="nl-kunde" data-in="nl:kunde" value="' + esc(n.kunde) + '" placeholder="z. B. Familie Weber" autocomplete="off">' + (e.kunde ? '<small class="err">' + esc(e.kunde) + '</small>' : '<small>Steht als Anrede in der Nachricht.</small>') + '</div>' +
       '<div class="f"><label for="nl-kontakt">Handynummer oder E-Mail</label><input id="nl-kontakt" data-in="nl:kontakt" value="' + esc(n.kontakt) + '" placeholder="z. B. 0171 2345678" autocomplete="off"><small>Freiwillig. Dann geht der Link gleich per WhatsApp, SMS oder E-Mail raus.</small></div>' +
-      '<div class="f"><label>Anrede in der Nachricht</label>' + seg([['sie', 'Sie'], ['du', 'Du']], n.du ? 'du' : 'sie', 'nl-du') + '</div>';
+      '<div class="f"><label>Anrede in Nachricht und Einladungsseite</label>' + seg([['sie', 'Sie'], ['du', 'Du']], n.du ? 'du' : 'sie', 'nl-du') + '<small>Die Messschritte der App duzen immer, damit jede Anleitung kurz bleibt.</small></div>';
     nav = '<div class="row between formnav"><button type="button" class="btn ghost" data-act="back">Abbrechen</button><button type="button" class="btn primary" data-act="nl-next">Weiter</button></div>';
   } else {
     body = '<div class="f"><label for="nl-adresse">Objektadresse</label><input id="nl-adresse" data-in="nl:adresse" value="' + esc(n.adresse) + '" placeholder="z. B. Lindenstraße 14, 50823 Köln" autocomplete="off"></div>' +
@@ -753,7 +754,7 @@ SCREENS.link = () => {
   const nbOffen = !!(l.nb && l.nb.offen), nbOk = nbMoeglich(l);
   const share = '<div class="card sharecard' + (nbOffen ? ' nbcard' : '') + '"><div class="row between"><p class="eyebrow">' + (nbOffen ? 'Nachbesserung · Link erneut schicken' : 'Aufmaß-Link schicken') + '</p><span class="km-s">gilt bis ' + esc(l.expires) + '</span></div>' + (nbOffen ? '<p class="km-s nbhint">Runde ' + l.nb.runde + (l.nb.hinweis ? ' · Ihr Hinweis: „' + esc(l.nb.hinweis) + '“' : '') + '. Der Kunde sieht seine bisherigen Angaben, ändert sie und schickt erneut ab. Dafür wird nichts berechnet. <button type="button" class="ulink" data-act="nb-cancel" data-id="' + l.id + '">Zurückziehen</button></p>' : '') + '<div class="linkbox"><code class="sel" id="lnk">' + esc(u) + '</code><button type="button" class="btn small soft" data-act="l-share" data-v="link" data-id="' + l.id + '">' + icon('copy', 16) + 'Kopieren</button></div>' +
     '<div class="share"><a class="sbtn wa" href="https://wa.me/' + (phone ? intl(l.kontakt) : '') + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="l-share" data-v="WhatsApp" data-id="' + l.id + '">' + ICONS.wa + '<span>WhatsApp</span></a><a class="sbtn" href="sms:' + (phone ? String(l.kontakt).replace(/\s/g, '') : '') + '?body=' + encodeURIComponent(msg) + '" data-act="l-share" data-v="SMS" data-id="' + l.id + '">' + ICONS.sms + '<span>SMS</span></a><a class="sbtn" href="mailto:' + (mail ? esc(l.kontakt) : '') + '?subject=' + encodeURIComponent('Ihr Fenster-Aufmaß für ' + BC().name) + '&body=' + encodeURIComponent(msg) + '" data-act="l-share" data-v="E-Mail" data-id="' + l.id + '">' + ICONS.mail + '<span>E-Mail</span></a><button type="button" class="sbtn" data-act="l-share" data-v="Text" data-id="' + l.id + '">' + ICONS.copy + '<span>Text kopieren</span></button></div>' +
-    '<div class="f"><label for="lmsg">Nachricht</label><textarea id="lmsg" rows="4" data-in="lmsg:' + l.id + '">' + esc(msg) + '</textarea><div class="row between"><span class="row" style="gap: 8px">' + seg([['sie', 'Sie'], ['du', 'Du']], l.du ? 'du' : 'sie', 'l-du') + seg([['7', '7 Tage'], ['14', '14 Tage'], ['30', '30 Tage']], String(l.days || 14), 'l-days') + '</span>' + (l.msg ? '<button type="button" class="linkbtn" data-act="l-reset-msg" data-id="' + l.id + '">Text zurücksetzen</button>' : '') + '</div></div>' +
+    '<div class="f"><label for="lmsg">Nachricht</label><textarea id="lmsg" rows="4" data-in="lmsg:' + l.id + '">' + esc(msg) + '</textarea><div class="row between"><span class="row" style="gap: 8px">' + seg([['sie', 'Sie'], ['du', 'Du']], l.du ? 'du' : 'sie', 'l-du') + seg([['7', '7 Tage'], ['14', '14 Tage'], ['30', '30 Tage']], String(l.days || 14), 'l-days') + '</span>' + (l.msg ? '<button type="button" class="linkbtn" data-act="l-reset-msg" data-id="' + l.id + '">Text zurücksetzen</button>' : '') + '</div></div>' + einAnredeZeile(l) +
     '<p class="km-s">' + (Server.online() ? 'Ab dem ersten Öffnen hat Ihr Kunde ' + X.OFFEN_TAGE + ' Tage Zeit, auch wenn die Laufzeit kürzer ist; sein Zwischenstand bleibt gespeichert, er kann jederzeit über den Link weitermachen. Abgelaufene Links lassen sich verlängern.' : 'Ihr Kunde kann jederzeit über den Link weitermachen; seine Angaben bleiben in seinem Browser gespeichert.') + '</p>' +
     '<p class="km-s">' + (l.kontakt ? 'Kontakt: <span class="sel">' + esc(l.kontakt) + '</span>. ' : 'Ohne Nummer öffnet WhatsApp die Kontaktauswahl. ') + 'SMS und E-Mail öffnen Ihr Programm, falls das Gerät es erlaubt; sonst den Text kopieren.</p></div>';
   let result = '';
@@ -808,14 +809,151 @@ SCREENS.abrechnung = () => {
 const abEx = (ab) => 'Beispiel: Öffnung 1.260 × 1.440 mm ergibt ' + AW.th(1260 - 2 * ab.seite) + ' × ' + AW.th(1440 - ab.oben) + ' mm.';
 SCREENS.bprofil = () => {
   const c = BC(), a = A(), p = a.prefs || {}, ab = a.abzug || (a.abzug = { seite: 15, oben: 15 });
-  const ini = esc(c.name.replace(/^(Fensterbau|Glaserei|Schreinerei|Tischlerei)\s+/i, '').slice(0, 1).toUpperCase());
-  return { html: '<div class="wrap"><div class="h"><h2>' + esc(c.name) + '</h2><p>So begrüßt die App Ihre Kunden, wenn sie Ihren Aufmaß-Link öffnen.</p></div><div class="grid c2"><div class="card fcard"><p class="eyebrow">Beim Kunden in der App</p><div class="preview"><div class="pv-card"><span class="av" style="background: ' + c.col + '">' + ini + '</span><span><small>Persönliche Anfrage von</small><b>' + esc(c.name) + '</b></span></div><p class="pv-t">Deine Fenster. Deine Maße.</p><small class="pv-s">' + esc(c.name) + ' braucht für dein Angebot die Maße deiner Fenster.</small></div><p class="km-s">Ihr Kunde sieht nur Ihren Betrieb: keine anderen Anbieter, keine Werbung. Mit Betrieb Plus auch mit Ihrem Logo.</p></div>' +
+  return { html: '<div class="wrap"><div class="h"><h2>' + esc(c.name) + '</h2><p>Ihre Einladungsseite, Ihr Kontakt zu eeziframes und wie eeziframes für Sie rechnet.</p></div><div class="grid c2">' + einKarte() +
     '<div class="card"><p class="eyebrow">Zugang und Kontakt</p><div class="form" style="margin-top: 10px"><div class="f"><label for="b-ap">Ansprechpartner</label><input id="b-ap" data-in="b:ap" value="' + esc(a.ap) + '"><small>Unterschreibt die Nachricht an Ihre Kunden.</small></div><div class="f2"><div class="f"><label for="b-mail">E-Mail</label><input id="b-mail" data-in="b:mail" value="' + esc(a.mail) + '" type="email"></div><div class="f"><label for="b-tel">Telefon</label><input id="b-tel" data-in="b:tel" value="' + esc(a.tel) + '" type="tel"></div></div></div></div></div>' +
     '<div class="grid c2"><div class="card"><p class="eyebrow">Bestellmaß-Vorschlag</p><p class="sub" style="margin-top: 6px">Ihr Abzug von der Maueröffnung. Damit rechnet eeziframes in jedem eingegangenen Aufmaß ein Bestellmaß vor; verbindlich bleibt Ihr Feinaufmaß.</p><div class="f2" style="margin-top: 10px"><div class="f"><label for="ab-seite">Je Seite</label><input id="ab-seite" type="number" inputmode="numeric" min="0" max="60" value="' + ab.seite + '" data-in="ab:seite"><small>mm, links und rechts</small></div><div class="f"><label for="ab-oben">Oben</label><input id="ab-oben" type="number" inputmode="numeric" min="0" max="60" value="' + ab.oben + '" data-in="ab:oben"><small>mm</small></div></div><p class="km-s" id="ab-ex" style="margin-top: 8px">' + abEx(ab) + '</p></div>' +
     '<div class="card"><p class="eyebrow">Benachrichtigungen</p>' + sw('E-Mail bei neuem Aufmaß', 'sofort, mit Link zum Projekt', p.mail !== false, 'bpref', 'mail') + sw('Erinnerung an offene Links', 'wenn ein Kunde nach 3 Tagen noch nicht gemessen hat', p.remind !== false, 'bpref', 'remind') + '</div></div>' +
     '<section class="sec"><div class="sec-head"><h3>Team</h3></div><div class="card"><div class="kv"><span>Inhaber</span><span>' + esc(a.ap) + ' · darf alles</span>' + '' + '</div><p style="margin: 10px 0 0"><button type="button" class="btn small soft" data-act="toast" data-v="Einladung per E-Mail. Im Prototyp nur angedeutet.">Mitglied einladen</button></p></div></section>' +
     '<div class="row"><button type="button" class="btn ghost" data-act="tour">' + icon('play', 16) + 'Tour ansehen</button><button type="button" class="btn ghost" data-act="logout">Abmelden</button></div></div>' };
 };
+
+/* ---------- Einladungsseite (Strang S4) ----------
+   Die erste Seite beim Kunden gestaltet der Betrieb hier: Logo, Farbe seines Zeichens, Begrüßung (Sie und Du, mit {Kunde}),
+   Ansprechpartner mit Foto, Telefon und E-Mail für Rückfragen, Ort, Website und die Anrede für neue Projekte. Die Vorschau zeigt die
+   echte Seite (einladung.js, dieselbe Funktion wie in der App), so wie Ihr Kunde sie jetzt sieht. Gespeichert wird wie die übrigen
+   Betriebsdaten: im Browser (Pilotphase) bzw. auf dem Server (PATCH /api/konto, geprüft in konten.js). Beim Kunden kommt an:
+   - mit Server: alles, sofort auch in schon verschickten Links (GET /api/link/:code liefert das Profil)
+   - Pilotphase: Begrüßung, Ansprechpartner, Telefon, E-Mail, Ort, Website, Farbe und Anrede reisen gekürzt im Link mit (Stand beim
+     Verschicken, linkHash); Logo und Foto nicht, dort steht die Initiale. Die Seite sagt das dem Betrieb.
+   Bedient wird über data-ein, data-ein-feld und data-ein-datei mit eigenen Zuhörern (unten), act() und onInput() bleiben unberührt. */
+const EIN_UI = { acc: null, entwurf: null, du: null, laeuft: '' };
+const EIN_FARBNAME = { '#0071e3': 'Blau', '#1f7a3d': 'Grün', '#a85a00': 'Ocker', '#6e3fc2': 'Violett', '#0b7285': 'Petrol', '#b3261e': 'Rot' };
+const einAuftritt = (a) => window.Einladung.auftritt(a || A(), BC().col);
+/* was beim Kunden ankommt: ohne Server weder Logo noch Foto */
+const einSichtbar = (p) => (Server.online() ? p : Object.assign({}, p, { logo: '', foto: '' }));
+/* Teil des Kundenlinks: die Anrede immer, im Pilotbetrieb das gekürzte Profil und der Hinweis einer Nachbesserung */
+function einLinkTeil(l) {
+  if (!window.Einladung) return '';
+  const pilot = !Server.online(), t = window.Einladung.linkTeil(einAuftritt(), { du: !!l.du, voll: pilot, hinweis: pilot && l.nb && l.nb.offen ? l.nb.hinweis || '' : '' });
+  return t ? '.' + t : '';
+}
+/* Einstellungen zum Bearbeiten: der gespeicherte Stand oder, beim ersten Mal, vorbelegt aus dem Konto (Telefon noch nicht sichtbar) */
+function einEntwurf() {
+  if (EIN_UI.acc !== S.cur) { EIN_UI.acc = S.cur; EIN_UI.entwurf = null; EIN_UI.du = null; }
+  if (EIN_UI.entwurf) return EIN_UI.entwurf;
+  const a = A();
+  return window.Einladung.einstellungen(a.einladung || { ansprechpartner: a.ap, telefon: a.tel, telefonZeigen: false, anrede: 'sie' });
+}
+const einDu = () => (EIN_UI.du !== null ? EIN_UI.du : einEntwurf().anrede === 'du');
+/* Auf dem Server speichern; scheitert es, gilt wieder der Stand des Servers */
+function einServer(p) {
+  if (!Server.online()) return;
+  Server.api('/api/konto', p, 'PATCH').then((r) => { Server.uebernehmen(r.konto); refresh(); }).catch((e) => { toast(e.message); Server.laden().then(() => refresh()).catch(() => {}); });
+}
+function einSpeichern(teil, still) {
+  const E = window.Einladung, e = Object.assign({}, einEntwurf(), teil || {});
+  ['begruessung', 'begruessungDu'].forEach((k, i) => { if (String(e[k] || '').trim() === E.VORLAGE[i ? 'du' : 'sie']) e[k] = ''; }); // Vorlage: bleibt mit künftigen Verbesserungen gleich
+  const f = [], sauber = E.einstellungen(e, f);
+  if (f.length) { toast(f[0]); return false; }
+  A().einladung = sauber; EIN_UI.entwurf = null; einServer({ einladung: sauber }); save();
+  if (!still) toast('Gespeichert');
+  return true;
+}
+function einVorschauHTML(du) {
+  const c = BC(), online = Server.online();
+  return window.Einladung.html({ name: c.name, kunde: 'Familie Weber', du: du, p: einSichtbar(einAuftritt(Object.assign({}, A(), { einladung: einEntwurf() }))), bis: online ? dateIn(60) : '', server: online, vorschau: true });
+}
+function einVorschauNeu() { const el = document.getElementById('ein-vor'); if (!el) return; const top = el.scrollTop; el.innerHTML = einVorschauHTML(einDu()); el.scrollTop = top; }
+/* Telefonrahmen mit der echten Seite; lässt sich scrollen, nichts darin ist bedienbar */
+const einTelefon = (inhalt, cls) => '<div class="ein-telefon' + (cls ? ' ' + cls : '') + '"><div class="ein-tel-kopf" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v16H4.5c-.8 0-1.5.5-1.5 1.2zM19 4.5c0-.8-.7-1.5-1.5-1.5H11v16h6.5c.8 0 1.5.5 1.5 1.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg>Begriffe</div><div class="ein-tel-inhalt" id="ein-vor" tabindex="0" role="region" aria-label="Vorschau der Einladungsseite">' + inhalt + '</div></div>';
+/* Karte in „Mein Betrieb“: der Absender, wie ihn der Kunde sieht, der Stand in einer Zeile und der Weg zum Gestalten */
+function einKarte() {
+  const a = A(), c = BC(), e = a.einladung, p = einSichtbar(einAuftritt()), E = window.Einladung;
+  const stand = [a.logo ? (Server.online() ? 'mit Logo' : 'Logo hinterlegt, beim Kunden ab dem Serverbetrieb') : 'ohne Logo', e && (e.begruessung || e.begruessungDu) ? 'eigene Begrüßung' : 'Begrüßung nach Vorlage', p.tel ? 'Telefon sichtbar' : 'ohne Telefon', 'Anrede ' + (e && e.anrede === 'du' ? 'Du' : 'Sie')];
+  return '<div class="card fcard ein-b-karte"><p class="eyebrow">Ihre Einladungsseite</p>' + E.kopf({ name: c.name, p: p, klein: true, unten: 'für Familie Weber' }) +
+    '<p class="sub">Das sieht Ihr Kunde als Erstes, wenn er Ihren Aufmaß-Link öffnet: Ihr Name, Ihr Logo, Ihre Begrüßung und wen er bei Fragen anruft. eeziframes steht nur klein darunter, als Übermittler.</p>' +
+    '<p class="km-s">' + esc(stand.join(' · ')) + '</p><div class="row"><button type="button" class="btn primary" data-act="go" data-v="einladung">Einladungsseite gestalten<span class="pf" aria-hidden="true"></span></button></div></div>';
+}
+SCREENS.einladung = () => {
+  const E = window.Einladung, a = A(), c = BC(), e = einEntwurf(), du = einDu(), online = Server.online(), lauf = EIN_UI.laeuft;
+  const gruss = (du ? e.begruessungDu : e.begruessung) || E.VORLAGE[du ? 'du' : 'sie'], eigen = !!(du ? e.begruessungDu : e.begruessung);
+  const segE = (opts, cur, k) => '<div class="seg" role="group">' + opts.map((o) => '<button type="button" data-ein="' + k + '" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + esc(o[1]) + '</button>').join('') + '</div>';
+  const swE = (label, sub, on, k) => '<div class="sw-row"><span class="t"><b>' + esc(label) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span><button type="button" class="switch" role="switch" aria-checked="' + !!on + '" aria-label="' + esc(label) + '" data-ein="schalter" data-v="' + k + '"><span></span></button></div>';
+  const datei = (art, label) => '<label class="btn small soft ein-datei' + (lauf === art ? ' laeuft' : '') + '">' + (lauf === art ? '<span class="spin" aria-hidden="true"></span>Wird verkleinert …' : esc(label)) + '<input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" data-ein-datei="' + art + '" aria-label="' + esc(label) + '"' + (lauf ? ' disabled' : '') + '></label>';
+  const feld = (id, k, label, wert, ph, typ, klein) => '<div class="f"><label for="' + id + '">' + label + '</label><input id="' + id + '" type="' + (typ || 'text') + '" data-ein-feld="' + k + '" value="' + esc(wert || '') + '" placeholder="' + esc(ph || '') + '" maxlength="' + (E.MAX[k === 'ansprechpartner' ? 'ap' : k === 'telefon' ? 'tel' : k] || 80) + '"' + (typ === 'tel' ? ' autocomplete="tel"' : typ === 'email' ? ' autocomplete="email"' : '') + '>' + (klein ? '<small>' + klein + '</small>' : '') + '</div>';
+  const zeichen = '<div class="ein-logo-feld"><div class="ein-logo-vor">' + E.zeichen(c.name, { logo: a.logo, grund: e.logoGrund, col: c.col }, 'gross') + '</div><div class="ein-logo-tx"><b>' + (a.logo ? 'Ihr Logo' : 'Noch kein Logo') + '</b><small>' + (a.logo ? 'So steht es oben auf Ihrer Einladungsseite.' : 'Bis dahin steht Ihre Initiale in Ihrer Farbe.') + '</small></div></div>';
+  const karteLogo = '<section class="card ein-b-karte"><p class="eyebrow">Logo und Farbe</p>' + zeichen +
+    '<div class="row">' + datei('logo', a.logo ? 'Anderes Logo' : 'Logo hochladen') + (a.logo ? '<button type="button" class="btn small ghost" data-ein="logo-weg">Entfernen</button>' : '') + '</div>' +
+    '<p class="km-s">PNG, JPG oder SVG. Ihr Browser verkleinert es auf höchstens 480 × 160 Pixel und schneidet durchsichtige Ränder ab; gespeichert werden höchstens etwa 90 KB.</p>' +
+    (a.logo ? '<div class="f"><label>Hintergrund des Logos</label>' + segE([['hell', 'Helles Feld'], ['dunkel', 'Ohne Feld']], e.logoGrund, 'grund') + '<small>Dunkle Logos brauchen ein helles Feld, helle stehen direkt auf dem dunklen Grund.</small></div>' : '') +
+    '<div class="f"><label>Farbe Ihres Zeichens</label><div class="colors">' + E.FARBEN.map((col) => '<button type="button" class="col" data-ein="farbe" data-v="' + col + '" style="background: ' + col + '" aria-label="Farbe ' + EIN_FARBNAME[col] + '" aria-pressed="' + (c.col === col) + '"></button>').join('') + '</div><small>Erscheint in Ihrer Initiale, solange kein Logo da ist, und im Kopf Ihres Aufmaßblatts. Knöpfe und Texte bleiben in den Farben von eeziframes, damit sich Ihr Kunde überall zurechtfindet.</small></div>' +
+    (online ? '' : '<p class="km-s ein-pilot">' + icon('lock', 14) + '<span>Pilotphase: Logo und Foto sieht Ihr Kunde erst, wenn eeziframes mit Server läuft. Bis dahin steht dort Ihre Initiale; die Vorschau zeigt es so.</span></p>') + '</section>';
+  const karteGruss = '<section class="card ein-b-karte"><div class="row between"><p class="eyebrow">Begrüßung</p>' + segE([['sie', 'Sie'], ['du', 'Du']], du ? 'du' : 'sie', 'du') + '</div>' +
+    '<div class="f"><label for="ein-gruss">Für Kunden, die Sie ' + (du ? 'duzen' : 'siezen') + '</label><textarea id="ein-gruss" rows="5" maxlength="' + E.MAX.gruss + '" data-ein-feld="gruss">' + esc(gruss) + '</textarea>' +
+    '<div class="row between ein-gruss-zeile"><button type="button" class="btn small soft" data-ein="kunde">Kundennamen einfügen</button><span class="km-s" id="ein-zahl">' + gruss.length + ' / ' + E.MAX.gruss + '</span></div>' +
+    '<small>{Kunde} wird durch den Namen aus dem Projekt ersetzt, z. B. „Familie Weber“. ' + (eigen ? '<button type="button" class="linkbtn" data-ein="vorlage">Vorlage wiederherstellen</button>' : 'Das ist unsere Vorlage, ändern Sie sie gern.') + '</small></div>' +
+    '<div class="f"><label>Anrede für neue Projekte</label>' + segE([['sie', 'Sie'], ['du', 'Du']], e.anrede, 'anrede') + '<small>Gilt für die Nachricht und diese Seite; im Projekt ändern Sie sie je Kunde. Die Messschritte der App duzen immer, damit jede Anleitung kurz bleibt; bei Sie steht dazu ein Satz auf der Seite.</small></div></section>';
+  const apBild = e.foto ? '<img class="ein-ap-foto gross" src="' + esc(e.foto) + '" alt="Foto ' + esc(e.ansprechpartner || a.ap || '') + '">' : '<span class="ein-ap-foto gross ini" aria-hidden="true">' + esc(E.initiale(e.ansprechpartner || a.ap || c.name)) + '</span>';
+  const karteAp = '<section class="card ein-b-karte"><p class="eyebrow">Ansprechpartner</p>' +
+    '<div class="ein-ap-feld">' + apBild + '<div class="row">' + datei('foto', e.foto ? 'Anderes Foto' : 'Foto hochladen') + (e.foto ? '<button type="button" class="btn small ghost" data-ein="foto-weg">Entfernen</button>' : '') + '</div></div>' +
+    '<p class="km-s">Freiwillig. Ein Foto macht die Anfrage persönlich; es wird quadratisch auf 192 Pixel verkleinert.</p>' +
+    feld('ein-ap', 'ansprechpartner', 'Name', e.ansprechpartner, 'Vor- und Nachname', 'text', 'Unterschreibt die Begrüßung und steht bei „Fragen?“.') +
+    feld('ein-tel', 'telefon', 'Telefon für Rückfragen', e.telefon, 'z. B. 0221 123456', 'tel') + swE('Telefon beim Kunden zeigen', 'mit Knopf „Anrufen“', e.telefonZeigen, 'telefonZeigen') +
+    feld('ein-mail', 'mail', 'E-Mail für Rückfragen', e.mail, a.mail || 'buero@beispiel.de', 'email', e.mail ? '' : 'Leer: ' + esc(a.mail || 'die E-Mail-Adresse Ihres Kontos') + '.') + swE('E-Mail beim Kunden zeigen', 'mit Knopf „E-Mail“', e.mailZeigen, 'mailZeigen') +
+    '<div class="f2">' + feld('ein-ort', 'ort', 'Ort, freiwillig', e.ort, 'z. B. Köln') + feld('ein-web', 'web', 'Website, freiwillig', e.web, 'z. B. fensterbau-brandt.de', 'url') + '</div></section>';
+  const vor = '<div class="ein-vor-spalte" id="ein-vorschau"><p class="eyebrow">So sieht Ihr Kunde die Seite</p>' + einTelefon(einVorschauHTML(du)) +
+    '<p class="km-s">Beispielkunde „Familie Weber“, Anrede ' + (du ? 'Du' : 'Sie') + '. ' + (online ? 'Änderungen gelten sofort für alle Ihre Links, auch für schon verschickte.' : 'Pilotphase: Ein Link trägt den Stand von dem Moment, in dem Sie ihn verschicken; schon verschickte Links bleiben, wie sie waren.') + '</p></div>';
+  return { title: 'Einladungsseite', html: '<div class="wrap ein-bereich-wrap"><div class="h"><p class="eyebrow">Mein Betrieb</p><h2>Ihre Einladungsseite.</h2><p>Das sieht Ihr Kunde als Erstes, wenn er Ihren Aufmaß-Link öffnet. Ihr Name, Ihr Logo, Ihre Worte; eeziframes steht nur klein darunter, als Übermittler. <button type="button" class="linkbtn only-s" data-ein="zur-vorschau">Zur Vorschau</button></p></div>' +
+    '<div class="ein-bereich"><div class="col-stack">' + karteLogo + karteGruss + karteAp + '</div>' + vor + '</div></div>' };
+};
+PARENT.einladung = 'bprofil';
+/* Im Projekt unter der Nachricht: welche Anrede der Kunde sieht und wo die Seite gestaltet wird */
+const einAnredeZeile = (l) => '<p class="km-s ein-anrede"><span>Anrede in Nachricht und Einladungsseite: ' + (l.du ? 'Du' : 'Sie') + '. Die Messschritte der App duzen immer.</span><button type="button" class="linkbtn" data-act="go" data-v="einladung">Einladungsseite gestalten</button></p>';
+function einFeld(el, ev) {
+  const k = el.getAttribute('data-ein-feld'), e = EIN_UI.entwurf = Object.assign({}, einEntwurf());
+  if (k === 'gruss') { e[einDu() ? 'begruessungDu' : 'begruessung'] = el.value; const z = document.getElementById('ein-zahl'); if (z) z.textContent = el.value.length + ' / ' + window.Einladung.MAX.gruss; }
+  else e[k] = el.value;
+  const box = el.closest('.f'); if (box) box.classList.remove('has-err');
+  einVorschauNeu();
+  if (ev.type === 'change' && !einSpeichern() && box) box.classList.add('has-err');
+}
+function einAktion(k, el) {
+  const v = el.getAttribute('data-v'), a = A(), E = window.Einladung;
+  if (window.Haptik && el.matches('.seg > button, .switch, .col')) window.Haptik.tick();
+  if (k === 'zur-vorschau') { const z = document.getElementById('ein-vorschau'); if (z) z.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); return; }
+  if (k === 'du') { EIN_UI.du = v === 'du'; return render(); }
+  if (k === 'anrede') { EIN_UI.du = v === 'du'; einSpeichern({ anrede: v }); return render(); }
+  if (k === 'grund') { einSpeichern({ logoGrund: v }); return render(); }
+  if (k === 'schalter') { const t = {}; t[v] = !einEntwurf()[v]; einSpeichern(t); return render(); }
+  if (k === 'vorlage') { const t = {}; t[einDu() ? 'begruessungDu' : 'begruessung'] = ''; einSpeichern(t); return render(); }
+  if (k === 'foto-weg') { einSpeichern({ foto: '' }); return render(); }
+  if (k === 'logo-weg') { a.logo = ''; einServer({ logo: '' }); save(); toast('Logo entfernt'); return render(); }
+  if (k === 'farbe') { if (!E.FARBEN.includes(v)) return; BC().col = v; einServer({ col: v }); save(); toast('Gespeichert'); return render(); }
+  if (k === 'kunde') {
+    const ta = document.getElementById('ein-gruss'); if (!ta) return;
+    const s = ta.selectionStart != null ? ta.selectionStart : ta.value.length, en = ta.selectionEnd != null ? ta.selectionEnd : s;
+    ta.value = (ta.value.slice(0, s) + '{Kunde}' + ta.value.slice(en)).slice(0, E.MAX.gruss); ta.focus(); ta.selectionStart = ta.selectionEnd = Math.min(ta.value.length, s + 7);
+    einFeld(ta, { type: 'input' });
+  }
+}
+async function einDatei(el) {
+  const art = el.getAttribute('data-ein-datei'), datei = el.files && el.files[0], E = window.Einladung;
+  if (!datei || EIN_UI.laeuft) return;
+  EIN_UI.laeuft = art; render();
+  try {
+    const r = await E.verkleinern(datei, art);
+    if (art === 'logo') { const a = A(); a.logo = r.url; a.einladung = E.einstellungen(Object.assign({}, einEntwurf(), { logoGrund: r.grund })); EIN_UI.entwurf = null; einServer({ logo: r.url, einladung: a.einladung }); save(); toast('Logo übernommen'); }
+    else if (einSpeichern({ foto: r.url }, true)) toast('Foto übernommen');
+  } catch (e) { toast(e.message || 'Das hat nicht geklappt.'); }
+  EIN_UI.laeuft = ''; render();
+}
+(function () {
+  const wurzel = document.getElementById('app');
+  wurzel.addEventListener('click', (e) => { const el = e.target.closest ? e.target.closest('[data-ein]') : null; if (!el || el.disabled) return; e.preventDefault(); einAktion(el.getAttribute('data-ein'), el); });
+  const feld = (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-ein-feld')) einFeld(el, e); };
+  wurzel.addEventListener('input', feld);
+  wurzel.addEventListener('change', (e) => { const el = e.target; if (el && el.getAttribute && el.getAttribute('data-ein-datei')) return einDatei(el); feld(e); });
+})();
 
 /* ---------- Tour für Fensterbauer: der Ablauf in acht Schritten ----------
    Ersetzt Demo-Konten und Beispiel-Registrierungen. Jeder Schritt zeigt die echten Bausteine (Projekt, Nachricht,
@@ -929,7 +1067,7 @@ SCREENS.tour = () => {
     const L = t.lauf || 0, st = L >= 6 ? 'eingegangen' : L >= 2 ? 'arbeit' : L >= 1 ? 'geoeffnet' : 'gesendet', k = Math.min(4, Math.max(0, L - 1)), idx = LORDER.indexOf(st);
     titel = 'Ihr Kunde misst.'; lead = 'Im Browser, ohne Konto und ohne App aus dem Store. Zwei Fotos und vier Maße je Fenster, jeder Schritt erklärt.';
     merk = ['Sie sehen, ob der Link geöffnet wurde und wie weit Ihr Kunde ist.', 'Ein 3-D-Modell zeigt ihm jedes Maß, bevor er es eintippt.', 'Fachbegriffe sind mit Bild erklärt, von DIN links bis U-Wert.', 'Kein anderer Betrieb kann Ihren Kunden über eeziframes erreichen oder sein Aufmaß übernehmen.'];
-    v = tourPhone('eeziframes', 'im Browser, ohne Konto', '<div class="tour-kunde"><p class="eyebrow">Persönliche Anfrage von</p><b>' + esc(TOUR_BETRIEB.name) + '</b>' + tourMessBild(k) + '<span class="tk-stand"><span class="mprog' + (L >= 6 ? ' fertig' : '') + '"><span style="width: ' + (L >= 6 ? 100 : k / 4 * 100) + '%"></span></span><small>' + (L >= 6 ? 'Abgeschickt' : L >= 2 ? k + ' von 4 Maßen' : L >= 1 ? 'Link geöffnet' : 'Link verschickt') + '</small></span></div>', 'app-ansicht', 'F') +
+    v = tourPhone(TOUR_BETRIEB.name, 'Persönliche Anfrage, im Browser', '<div class="tour-kunde">' + tourMessBild(k) + '<span class="tk-stand"><span class="mprog' + (L >= 6 ? ' fertig' : '') + '"><span style="width: ' + (L >= 6 ? 100 : k / 4 * 100) + '%"></span></span><small>' + (L >= 6 ? 'Abgeschickt' : L >= 2 ? k + ' von 4 Maßen' : L >= 1 ? 'Link geöffnet' : 'Link verschickt') + '</small></span></div>', 'app-ansicht') +
       '<div class="card tlcard tour-verlauf"><ol class="tlh">' + LORDER.map((s, i) => '<li class="' + (i < idx || st === 'eingegangen' ? 'done' : i === idx ? 'now' : '') + '"><span class="dot"></span><small>' + TLS[s] + '</small></li>').join('') + '</ol><p class="km-s tl-now"><b>' + TL[st] + (st === 'arbeit' ? ' · ' + k + ' von 4 Maßen' : '') + '</b></p></div>' +
       (L >= 6 ? '<div class="ph-note tour-note"><span class="ph-dot"></span><span><b>Aufmaß eingegangen</b><small>Familie Weber · 4 Positionen, 8 Fotos</small></span></div><button type="button" class="btn small ghost tour-nochmal" data-act="tour-lauf">' + icon('play', 15) + 'Nochmal abspielen</button>' : '');
   } else if (id === 'eingang') {

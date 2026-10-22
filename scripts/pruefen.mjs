@@ -410,6 +410,45 @@ if (teil(4)) {
     ok(/BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
   } else ok(false, 'Portal-PDF-Knopf gefunden');
   sauber(page, 'Portal-PDF ohne Fehler');
+  // Einladungsseite (Strang S4), Pilotbetrieb: der Betrieb vorn, eeziframes klein als Übermittler, nichts überlappt, Anrede und
+  // Kontakt reisen im Link mit, die Vorschau im Betriebsbereich ist dieselbe Seite
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  const ein4 = await page.evaluate(async () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40"><rect width="40" height="40" rx="6" fill="#123"/><rect x="50" y="12" width="66" height="16" fill="#123"/></svg>';
+    const r = await Einladung.verkleinern(new File([svg], 'logo.svg', { type: 'image/svg+xml' }), 'logo');
+    A().logo = r.url; A().einladung = Einladung.einstellungen({ ansprechpartner: 'Jens Brandt', telefon: '0221 123456', telefonZeigen: true, ort: 'Köln', anrede: 'sie', logoGrund: r.grund }); save();
+    const l = A().links.find((x) => x.id === 'l3'), url = linkURL(l), teil = /\.([A-Za-z0-9_-]+)$/.exec(url.split('#')[1].split('~')[0])[1];
+    go('einladung');
+    return { url: url, profil: Einladung.linkLesen(teil), vorH1: (document.querySelector('#ein-vor .ein-start h1') || {}).textContent, vorLogo: document.querySelectorAll('#ein-vor .ein-zeichen.logo').length, pilot: !!document.querySelector('.ein-pilot'), vorTel: (document.querySelector('#ein-vor .ein-kontakt') || {}).textContent || '' };
+  });
+  ok(ein4.profil && !ein4.profil.du && ein4.profil.profil.ap === 'Jens Brandt' && ein4.profil.profil.tel === '0221 123456' && !ein4.profil.profil.logo, 'Pilotbetrieb: Link trägt Anrede (Sie), Ansprechpartner und Telefon, aber kein Logo');
+  ok(ein4.vorH1 === 'Ihre Fenster, Ihr Angebot.' && ein4.vorLogo === 0 && ein4.pilot && /0221 123456/.test(ein4.vorTel), 'Vorschau im Betriebsbereich: echte Seite, ehrlich ohne Logo in der Pilotphase, mit Hinweis');
+  await page.goto(ein4.url, { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+  const lage4 = async () => page.evaluate(() => {
+    const r = (e) => (e ? e.getBoundingClientRect() : null), teile = ['.ein-start .ein-abs', '.ein-start .eyebrow', '.ein-start h1', '.ein-start .ein-brief', '.ein-start .ein-cta'].map((s) => r(document.querySelector(s)));
+    const schneiden = teile.some((a, i) => teile.some((b, j) => j > i && a && b && a.bottom > b.top + 1 && b.bottom > a.top + 1 && a.right > b.left && b.right > a.left));
+    const groessen = new Set(); document.querySelectorAll('.ein *').forEach((el) => { if (el.closest('svg')) return; if (Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    const klein = Array.from(document.querySelectorAll('.ein .btn')).filter((b) => b.getBoundingClientRect().height < 44).length;
+    return { alle: teile.every(Boolean), schneiden: schneiden, groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.documentElement.scrollWidth > innerWidth + 1 };
+  });
+  const tel4 = await lage4(), inhalt4 = await page.evaluate(() => ({ t: document.querySelector('.scroll').textContent, kopfMarke: document.querySelectorAll('.hdr .wm, .hdr .fi-logo').length, fussMarke: !!document.querySelector('.ein-fuss .wm'), pf: !!document.querySelector('.ein-cta .btn.primary .pf'), ak: document.querySelectorAll('.ein-start h1 .ak').length, schritte: document.querySelectorAll('#ein-so .ein-schritte li').length, chips: document.querySelectorAll('.ein-brauchen .chip.haken').length, tel: (document.querySelector('.ein-kontakt a[href^="tel:"]') || {}).getAttribute ? document.querySelector('.ein-kontakt a[href^="tel:"]').getAttribute('href') : '', modell: document.querySelectorAll('.ein .w3d-stage, #w3d-hero').length, ds: !!document.querySelector('.ein-fuss a[href*="datenschutz"]') }));
+  ok(tel4.alle && !tel4.schneiden && !tel4.quer, 'Einladungsseite (Telefon): Absender, Kicker, Überschrift, Begrüßung und Knöpfe überlappen nicht, kein Querscrollen');
+  ok(tel4.groessen.every((g) => [13, 15, 17, 24, 40].includes(g)) && tel4.klein === 0, 'Einladungsseite: nur Schriftrollen der App (' + tel4.groessen.join(' · ') + '), Knöpfe ab 44 px');
+  ok(inhalt4.kopfMarke === 0 && inhalt4.fussMarke && /Übermittelt mit/.test(inhalt4.t) && /Persönliche Anfrage von/.test(inhalt4.t) && /für Frau Schulze/.test(inhalt4.t) && inhalt4.ds, 'Der Betrieb steht vorn, eeziframes nur klein unten als Übermittler mit Datenschutz');
+  ok(inhalt4.pf && inhalt4.ak === 1 && inhalt4.schritte === 4 && inhalt4.chips === 4 && /Etwa 5 Minuten je Fenster/.test(inhalt4.t) && /jederzeit zurück/.test(inhalt4.t) && /nur an Fensterbau Brandt/.test(inhalt4.t) && inhalt4.modell === 0, 'Einladungsseite erklärt: Hauptaktion mit Pfeil, ein grünes Wort, vier Schritte, Dauer, was man braucht, Pause, wer die Daten sieht; kein Beispielmodell mit fremden Maßen');
+  ok(inhalt4.tel === 'tel:+49221123456' && /Jens Brandt/.test(inhalt4.t) && /Ihre Fenster, Ihr Angebot\./.test(inhalt4.t) && /Guten Tag Frau Schulze/.test(inhalt4.t) && /„du“/.test(inhalt4.t), 'Anrede des Projekts (Sie) und Ansprechpartner mit Anruf-Knopf aus dem Link; Hinweis, dass die Messschritte duzen');
+  const hash4 = await page.evaluate(() => location.hash), sc4 = await page.evaluate(async () => { document.querySelector('[data-ein-so]').click(); await new Promise((r) => setTimeout(r, 900)); return document.querySelector('.scroll').scrollTop; });
+  ok(sc4 > 200 && (await page.evaluate(() => location.hash)) === hash4, '„So funktioniert es“ scrollt zum Ablauf, die Adresse des Links bleibt');
+  await foto(page, 'app-einladung');
+  await page.setViewportSize({ width: 1280, height: 860 }); await page.waitForTimeout(300);
+  const desk4 = await lage4();
+  ok(desk4.alle && !desk4.schneiden && !desk4.quer, 'Einladungsseite (Schreibtisch): nichts überlappt, kein Querscrollen');
+  await page.setViewportSize({ width: 390, height: 844 });
+  // ältere Links ohne Profil: wie bisher Du, Name aus dem Link, neutrale Initiale
+  await page.goto(BASE + '/app/#k-alt01-Fensterbau_Brandt.' + b64u('Fensterbau Brandt') + '.' + b64u('Familie Weber'), { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+  const alt4 = await page.evaluate(() => ({ h1: document.querySelector('.ein-start h1').textContent, ini: document.querySelector('.ein-start .ein-zeichen.ini'), stil: (document.querySelector('.ein-start .ein-zeichen.ini') || { getAttribute: () => 'x' }).getAttribute('style'), name: document.querySelector('.ein-abs b').textContent }));
+  ok(alt4.h1 === 'Deine Fenster, dein Angebot.' && alt4.name === 'Fensterbau Brandt' && alt4.stil === null, 'Ältere Links ohne Profil gelten weiter: Du, Name aus dem Link, Initiale in Cream');
+  sauber(page, 'Einladungsseite ohne Fehler');
   await ctx.close();
 }
 
@@ -1169,6 +1208,49 @@ if (teil(8)) {
     ok(r1.ok && r1.rechnungen === 1 && nach.daten.book.find((b) => b.id === 'b1').status === 'berechnet' && nach.daten.book.find((b) => b.id === 'b0').status === 'offen' && /^RE-TEST-/.test(nach.daten.rechnungen[0].nr) && nach.daten.rechnungen[0].betrag === 9 && /Sammelrechnung/.test(nach.daten.notif[0].t), 'Abrechnungslauf: offene 9-€-Buchung wird zur Sammelrechnung, kostenlose bleibt außen vor');
     const r2 = await ko.abrechnungslauf(k, sp, zd);
     ok(r2.rechnungen === 0, 'Zweiter Lauf berechnet nichts doppelt');
+  }
+  // Einladungsseite (Strang S4) im Servermodus: Logo, Begrüßung und Kontakt im Betriebsbereich gestalten, auf dem Server prüfen und
+  // speichern, beim Kunden mit Logo, Anruf-Knopf und der Anrede des Projekts; Hinweis einer Nachbesserung auf der Startseite
+  {
+    const mailE = 'einladung-' + stempel + '@beispiel.de', tokE = testToken(mailE);
+    const regE = await api('/api/konto/registrieren', { firma: 'Glaserei Einladung ' + stempel, ap: 'Erika Einladung', tel: '0221 ' + String(Date.now() + 7).slice(-7), plz: '50667', col: '#1f7a3d', agb: RECHT.NB_STAND, unternehmer: true }, tokE);
+    const ectx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), ep = await neueSeite(ectx, BASE2);
+    await ep.goto(BASE2 + '/', { waitUntil: 'networkidle' });
+    await ep.evaluate((t) => localStorage.setItem('aufmass.sitzung', JSON.stringify({ token: t, refresh: '', mail: 'x' })), tokE);
+    await ep.reload({ waitUntil: 'networkidle' }); await ep.waitForFunction(() => Server.online(), null, { timeout: 8000 });
+    await ep.evaluate(() => { nav('bprofil'); }); await ep.waitForTimeout(200);
+    const karteE = await ep.evaluate(() => ({ t: (document.querySelector('.ein-b-karte') || {}).textContent || '', knopf: !!document.querySelector('.ein-b-karte [data-v="einladung"] .pf'), alt: /Deine Fenster\. Deine Maße\./.test(document.body.textContent) }));
+    ok(regE.ok && /Ihre Einladungsseite/.test(karteE.t) && /Persönliche Anfrage von/.test(karteE.t) && karteE.knopf && !karteE.alt, 'Mein Betrieb: Karte „Ihre Einladungsseite“ mit dem echten Absender statt der nachgebauten Vorschau');
+    await ep.evaluate(() => go('einladung')); await ep.waitForSelector('#ein-vor');
+    const svgE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100"><rect x="10" y="20" width="60" height="60" rx="8" fill="#1d3b8f"/><rect x="90" y="40" width="190" height="24" fill="#1d3b8f"/></svg>';
+    await ep.setInputFiles('input[data-ein-datei="logo"]', { name: 'logo.svg', mimeType: 'image/svg+xml', buffer: Buffer.from(svgE) });
+    await ep.waitForFunction(() => /^data:image\/(png|webp);base64,/.test(A().logo || '') && !EIN_UI.laeuft, null, { timeout: 8000 }); await ep.waitForTimeout(600);
+    await ep.fill('#ein-gruss', 'Guten Tag {Kunde}, schön, dass Sie mitmachen. Messen Sie in Ruhe, wir melden uns mit dem Angebot.'); await ep.locator('#ein-gruss').blur(); await ep.waitForTimeout(400);
+    await ep.fill('#ein-tel', '0221 987654'); await ep.locator('#ein-tel').blur(); await ep.waitForTimeout(400);
+    await ep.click('[data-ein="schalter"][data-v="telefonZeigen"]'); await ep.waitForTimeout(800);
+    const vorE = await ep.evaluate(() => ({ logo: !!document.querySelector('#ein-vor .ein-zeichen.logo img'), gruss: (document.querySelector('#ein-vor .ein-gruss') || {}).textContent || '', tel: (document.querySelector('#ein-vor .ein-kontakt') || {}).textContent || '', bedienbar: document.querySelectorAll('#ein-vor button, #ein-vor a[href]').length, logoLaenge: A().logo.length, grund: A().einladung.logoGrund }));
+    ok(vorE.logo && /Guten Tag Familie Weber, schön/.test(vorE.gruss) && /0221 987654/.test(vorE.tel) && vorE.bedienbar === 0 && vorE.logoLaenge <= 120000 && vorE.grund === 'hell', 'Einladungsseite gestalten: SVG-Logo im Browser verkleinert (' + vorE.logoLaenge + ' Zeichen, dunkles Logo auf hellem Feld), Begrüßung mit {Kunde}, Telefon mit Schalter; die Vorschau zeigt die echte Seite und ist nicht bedienbar');
+    const prE = await api('/api/konto/projekte', { kunde: 'Familie Einladung', kontakt: '0171 4444444', plan: ['Fenster'], days: 14 }, tokE), lE = prE.konto.acc.links.find((l) => l.id === prE.id);
+    const infoE = await api('/api/link/' + lE.code), au = infoE.auftritt || {};
+    ok(infoE.ok && /^data:image\/(png|webp);base64,/.test(au.logo) && au.tel === '0221 987654' && au.mail === '' && /schön, dass Sie mitmachen/.test(au.gruss.sie) && au.ap === 'Erika Einladung' && au.col === '#1f7a3d' && infoE.du === false, 'GET /api/link: Profil des Betriebs mit Logo, Telefon nur mit Schalter, keine E-Mail ohne Schalter, Anrede des Projekts');
+    const abw = [await api('/api/konto', { logo: 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=' }, tokE, 'PATCH'), await api('/api/konto', { logo: 'data:image/png;base64,/9j/4AAQSkZJRgABAQ==' }, tokE, 'PATCH'), await api('/api/konto', { logo: 'data:image/png;base64,' + 'A'.repeat(130000) }, tokE, 'PATCH'), await api('/api/konto', { einladung: { telefon: 'abc' } }, tokE, 'PATCH'), await api('/api/konto', { col: '#ff00ff' }, tokE, 'PATCH')];
+    const nachAbw = await api('/api/link/' + lE.code);
+    ok(abw.every((r) => r._status === 400) && nachAbw.auftritt.logo === au.logo && nachAbw.auftritt.tel === au.tel, 'Server weist SVG als Data-URL, falsche Signatur, zu große Logos, ungültige Telefonnummern und fremde Farben ab; nichts davon ändert das Profil');
+    const urlE = await ep.evaluate(async (id) => { await Server.laden(); const l = A().links.find((x) => x.id === id); return l ? linkURL(l) : ''; }, lE.id);
+    const kctxE = await browser.newContext({ ...telefon }), kpE = await neueSeite(kctxE, BASE2);
+    await kpE.goto(urlE, { waitUntil: 'networkidle' }); await kpE.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await kpE.waitForTimeout(300);
+    const kE = await kpE.evaluate(() => ({ logo: (document.querySelector('.ein-start .ein-zeichen.logo img') || {}).src || '', tel: (document.querySelector('.ein-kontakt a[href^="tel:"]') || {}).getAttribute ? document.querySelector('.ein-kontakt a[href^="tel:"]').getAttribute('href') : '', h1: (document.querySelector('.ein-start h1') || {}).textContent, gruss: (document.querySelector('.ein-gruss') || {}).textContent, gilt: (document.querySelector('.ein-gilt') || {}).textContent || '' }));
+    ok(/^data:image\//.test(kE.logo) && kE.tel === 'tel:+49221987654' && kE.h1 === 'Ihre Fenster, Ihr Angebot.' && /^Guten Tag Familie Einladung, schön/.test(kE.gruss) && /gilt bis/.test(kE.gilt), 'Kunde sieht das Logo, die eigene Begrüßung in der Anrede des Projekts (Sie), den Anruf-Knopf und bis wann der Link gilt');
+    await foto(kpE, 'srv-app-einladung');
+    // Nachbesserung: der Hinweis des Betriebs steht auf der Startseite des Links
+    const oE = await kpE.evaluate((code) => unpackProject(packProject(demoProject(), {}, { code: code })), lE.code);
+    const sendE = await api('/api/aufmass', oE);
+    const nbE = await api('/api/konto/projekte/' + lE.id, { nb: { hinweis: 'Beim Bad fehlt die Brüstungshöhe.' } }, tokE, 'PATCH');
+    await kpE.evaluate(() => { localStorage.clear(); }); await kpE.goto(urlE.replace(/~\d+$/, '') + '~2', { waitUntil: 'networkidle' }); await kpE.reload({ waitUntil: 'networkidle' }); await kpE.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }).catch(() => {}); await kpE.waitForTimeout(400);
+    const hinE = await kpE.evaluate(() => ({ nb: !!S.nb, hin: (document.querySelector('.ein-hinweis') || {}).textContent || '', p: (document.querySelector('.hero.lk .ein-lead') || {}).textContent || '' }));
+    ok(sendE.ok && nbE.ok && hinE.nb && /Darum bittet Glaserei Einladung/.test(hinE.hin) && /Beim Bad fehlt die Brüstungshöhe/.test(hinE.hin) && !/steht in der Nachricht/.test(hinE.p), 'Nachbesserung im Servermodus: Hinweis des Betriebs als Karte auf der Startseite, statt „steht in der Nachricht“');
+    sauber(ep, 'Einladungsseite gestalten im Servermodus ohne Fehler'); sauber(kpE, 'Einladungsseite beim Kunden im Servermodus ohne Fehler');
+    await kctxE.close(); await ectx.close();
   }
   if (kind) kind.kill();
 }
@@ -2490,7 +2572,7 @@ if (teil(14)) {
     const c1 = await browser.newContext(telefon), s1 = await neueSeite(c1, B5);
     await s1.goto(url, { waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await s1.waitForTimeout(200);
     const erst = await s1.evaluate(() => document.querySelector('.hero.lk').textContent);
-    ok(/Über diesen Link kommst du jederzeit zurück/.test(erst), 'Kundenlink, erster Besuch: Hinweis, dass der Kunde jederzeit über den Link zurückkommt');
+    ok(/Über diesen Link kommen Sie jederzeit zurück/.test(erst), 'Kundenlink, erster Besuch: Hinweis, dass der Kunde jederzeit über den Link zurückkommt (in der Anrede des Projekts, hier Sie)');
     await fensterAnlegen(s1, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210]]);
     await s1.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 }); await s1.waitForTimeout(200);
     const srv = await http('/api/link/' + lk.code + '/entwurf');
@@ -2501,7 +2583,7 @@ if (teil(14)) {
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B5);
     await s2.goto(url, { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
     const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary').textContent }));
-    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo du warst.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
+    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo Sie waren.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
     ok(/vollständig/i.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
     await s2.click('.liste-in .wincard[data-i="0"]'); await s2.waitForSelector('[data-screen="fertig"]');
     ok(await s2.locator('details.fold .kv').count() === 0 && await s2.locator('.zu-karte').count() === 0 && /gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.weiter-karte').textContent()) && await s2.locator('[data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
