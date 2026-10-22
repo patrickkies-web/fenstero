@@ -257,7 +257,9 @@ function sceneOut() {
   return o;
 }
 const WOOD = (a, b, c, d) => 'repeating-linear-gradient(100deg, ' + a + ' 0px, ' + b + ' 3px, ' + c + ' 6px, ' + d + ' 9px)';
-const COLORS = [
+/* Rahmenfarben (S2): alle RAL-Classic-Töne, Holzdekore und Sonderfarben aus ral.js ({ k, name, code, label, bg, solid, holz, familie }).
+   Die Schlüssel der ersten Fassung ('9016', '7016', 'goak' …) bleiben gültig; die fünfzehn von damals nur noch als Rückfall ohne ral.js. */
+const COLORS = window.RAL ? window.RAL.liste.map((e) => ({ k: e.key, name: e.name, code: e.code, label: e.label, bg: e.bg, solid: e.hex, holz: e.holz, familie: e.familie })) : [
   { k: '9016', name: 'Verkehrsweiß', code: 'RAL 9016', bg: '#f1f0ea', solid: '#f1f0ea' },
   { k: '9001', name: 'Cremeweiß', code: 'RAL 9001', bg: '#e9e0cf', solid: '#e9e0cf' },
   { k: '7035', name: 'Lichtgrau', code: 'RAL 7035', bg: '#cbd0cc', solid: '#cbd0cc' },
@@ -269,12 +271,13 @@ const COLORS = [
   { k: '6005', name: 'Moosgrün', code: 'RAL 6005', bg: '#1f4436', solid: '#1f4436' },
   { k: '5011', name: 'Stahlblau', code: 'RAL 5011', bg: '#1e2b3a', solid: '#1e2b3a' },
   { k: '3005', name: 'Weinrot', code: 'RAL 3005', bg: '#5e2129', solid: '#5e2129' },
-  { k: 'goak', name: 'Golden Oak', code: 'Holzdekor', bg: WOOD('#b5732f', '#c4843c', '#a5652a', '#bd7b35'), solid: '#b5732f' },
-  { k: 'nuss', name: 'Nussbaum', code: 'Holzdekor', bg: WOOD('#6b4428', '#7a5032', '#5a3820', '#70482b'), solid: '#6b4428' },
-  { k: 'eiche', name: 'Eiche hell', code: 'Holzdekor', bg: WOOD('#c9a46b', '#d6b47c', '#b8935c', '#cfae73'), solid: '#c9a46b' },
-  { k: 'mahag', name: 'Mahagoni', code: 'Holzdekor', bg: WOOD('#6f2f22', '#7e3a2b', '#5f261b', '#763427'), solid: '#6f2f22' }
+  { k: 'goak', name: 'Golden Oak', code: 'Holzdekor', bg: WOOD('#b5732f', '#c4843c', '#a5652a', '#bd7b35'), solid: '#b5732f', holz: true },
+  { k: 'nuss', name: 'Nussbaum', code: 'Holzdekor', bg: WOOD('#6b4428', '#7a5032', '#5a3820', '#70482b'), solid: '#6b4428', holz: true },
+  { k: 'eiche', name: 'Eiche hell', code: 'Holzdekor', bg: WOOD('#c9a46b', '#d6b47c', '#b8935c', '#cfae73'), solid: '#c9a46b', holz: true },
+  { k: 'mahag', name: 'Mahagoni', code: 'Holzdekor', bg: WOOD('#6f2f22', '#7e3a2b', '#5f261b', '#763427'), solid: '#6f2f22', holz: true }
 ];
-const DARK = { '7039': 1, '7012': 1, '7016': 1, '9005': 1, '8022': 1, '6005': 1, '5011': 1, '3005': 1, nuss: 1, mahag: 1, goak: 1 };
+const FARBE_K = {};
+COLORS.forEach((c) => { FARBE_K[c.k] = c; });
 const GLASS_BG = 'linear-gradient(165deg, #e4eff9 0%, #cadcee 58%, #b9d0e7 100%)';
 const ORN = [
   { k: 'satinato', label: 'Satinato', sub: 'Milchglas-Optik', bg: 'repeating-linear-gradient(45deg, rgba(255,255,255,.45) 0px, rgba(255,255,255,.45) 2px, transparent 2px, transparent 4px), #dde6ee' },
@@ -306,7 +309,9 @@ const OPT = {
     { k: 'sonne', label: 'Sonnenschutz', ico: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' }],
   griff: [{ k: 'standard', label: 'Standard' }, { k: 'abschliessbar', label: 'Abschließbar' }, { k: 'druckknopf', label: 'Druckknopf' }, { k: 'ohne', label: 'Ohne Griff', sub: 'verdeckt oder elektrisch' }],
   hstGriff: [{ k: 'standard', label: 'Hebegriff' }, { k: 'abschliessbar', label: 'Abschließbar' }, { k: 'motor', label: 'Elektrisch', sub: 'per Taster oder App' }],
-  gf: [{ k: 'weiss', label: 'Weiß', bg: '#f4f4f2' }, { k: 'silber', label: 'Silber', bg: '#c9ccd0' }, { k: 'edelstahl', label: 'Edelstahl', bg: 'linear-gradient(135deg, #eceef0, #a7abb0)' }, { k: 'titan', label: 'Titan', bg: '#8b8d8f' }, { k: 'schwarz', label: 'Schwarz', bg: '#1d1d1f' }],
+  /* Griff-Farben: was es an Fenstergriffen wirklich gibt (Oberflächen der Hersteller), alles andere als Wunsch */
+  gf: [{ k: 'weiss', label: 'Weiß', bg: '#f4f4f2' }, { k: 'silber', label: 'Silber', bg: '#c9ccd0' }, { k: 'edelstahl', label: 'Edelstahl', bg: 'linear-gradient(135deg, #eceef0, #a7abb0)' }, { k: 'titan', label: 'Titan', bg: '#8b8d8f' }, { k: 'schwarz', label: 'Schwarz', bg: '#1d1d1f' },
+    { k: 'anthrazit', label: 'Anthrazit', bg: '#383e42' }, { k: 'braun', label: 'Braun', bg: '#4a3526' }, { k: 'bronze', label: 'Bronze', bg: 'linear-gradient(135deg, #a88560, #6e5034)' }, { k: 'messing', label: 'Messing', bg: 'linear-gradient(135deg, #e3d39b, #a8904f)' }],
   rc: [{ k: 'basis', label: 'Basisschutz' }, { k: 'rc1', label: 'RC1 N' }, { k: 'rc2', label: 'RC2' }],
   erreichbar: [{ k: 'ja', label: 'Ja, leicht' }, { k: 'nein', label: 'Nein' }],
   absturz: [{ k: 'balkon', label: 'Balkon davor', sub: 'dann keine nötig' }, { k: 'gelaender', label: 'Geländer außen', sub: 'französischer Balkon' }, { k: 'glas', label: 'Glasbrüstung', sub: 'Glas in der Laibung' }, { k: 'fest', label: 'Unten fest', sub: 'Sicherheitsglas' }],
@@ -369,7 +374,7 @@ const GLOSS = {
   insekt: { t: 'Spannrahmen, Drehrahmen oder Plissee?', x: ['Spannrahmen werden eingeklemmt und bleiben drin. Drehrahmen gehen auf wie eine Tür, gut für Balkontüren. Plissees falten sich zur Seite zusammen und sparen Platz.'], ico: () => ICO.insekt('dreh'), see: [] },
   ralmontage: { t: 'Was ist RAL-Montage?', x: ['Einbau nach dem Montageleitfaden der RAL-Gütegemeinschaft in drei Ebenen: innen luftdicht, in der Mitte gedämmt, außen schlagregendicht und trotzdem dampfdurchlässig.', 'Das schützt die Fuge um das Fenster vor Zugluft, Feuchtigkeit und Schimmel.'], ico: () => [P(R(4, 10, 18, 44), WALL, INK, 0.8), P(R(42, 10, 18, 44), WALL, INK, 0.8), P(R(22, 18, 20, 4), '#5b9bd5'), P(R(22, 22, 20, 18), '#f2d27a'), P(R(22, 40, 20, 4), '#8e8e93'), P(R(26, 26, 12, 10, 1), FR, INK, 1.1)], see: ['lueftung'] },
   fensterbank: { t: 'Fensterbank innen und außen', x: ['Innen zum Beispiel Werzalit (pflegeleichte Kunststoffplatte), Naturstein oder Holz. Außen meist Aluminium, alternativ Naturstein.', 'Die äußere Fensterbank leitet Regenwasser von der Fassade weg.'], ico: () => ICO.bank('aussen'), see: [] },
-  ral: { t: 'Was bedeutet RAL?', x: ['RAL ist ein Farbsystem mit festen Nummern. So sieht Anthrazitgrau bei jedem Hersteller gleich aus: RAL 7016.', 'Holzdekore sind Folien mit Holzmaserung auf Kunststoffprofilen. Farben am Bildschirm weichen ab, ein Farbmuster zeigt das echte Ergebnis.'], ico: () => [P(C(20, 24, 11), '#383e42'), P(C(40, 24, 11), '#f1f0ea', INK, 0.8), P(C(30, 42, 11), '#b5732f')], see: [] },
+  ral: { t: 'Was bedeutet RAL?', x: ['RAL ist ein Farbsystem mit festen Nummern. So sieht Anthrazitgrau bei jedem Hersteller gleich aus: RAL 7016. RAL Classic hat 216 Töne, die erste Ziffer nennt die Familie: 1 Gelb und Beige, 2 Orange, 3 Rot, 4 Violett, 5 Blau, 6 Grün, 7 Grau, 8 Braun, 9 Weiß und Schwarz.', 'Am Fenster üblich sind Verkehrsweiß (RAL 9016), Cremeweiß (9001), Anthrazitgrau (7016) und Lichtgrau (7035). Holzdekore wie Golden Oak oder Nussbaum sind Folien mit Holzmaserung auf Kunststoffprofilen. DB 703 ist ein dunkler Eisenglimmer-Ton mit feinem Glanz, beliebt bei Aluminium und Raffstores; Aluminium gibt es auch eloxiert (E6/EV1).', 'Deine Farbe steht oft auf alten Rechnungen. Soll sie zur Haustür passen, hilft ein Foto. Farben am Bildschirm weichen ab, verbindlich ist das Farbmuster deines Fensterbauers.'], ico: () => [P(C(20, 24, 11), '#383e42'), P(C(40, 24, 11), '#f1f0ea', INK, 0.8), P(C(30, 42, 11), '#b5732f')], see: [] },
   lueftung: { t: 'Brauche ich ein Lüftungskonzept?', x: ['Neue Fenster sind sehr dicht. Wird mehr als ein Drittel der Fenster getauscht, ist nach der Norm DIN 1946-6 ein Lüftungskonzept erforderlich. Es zeigt, ob zusätzlich gelüftet werden muss, damit kein Schimmel entsteht.', 'Oft reichen kleine Lüfter im Fensterfalz. Um das Konzept kümmert sich dein Fensterbauer.'], ico: () => [P(R(16, 8, 32, 48, 1.2), FR, INK, 1.3), P(R(20, 12, 24, 40), GL, INK, 0.6), P('M4 20c4-3 8 3 12 0M4 30c4-3 8 3 12 0M48 34c4-3 8 3 12 0M48 44c4-3 8 3 12 0', 'none', '#5b9bd5', 1.8)], see: ['ralmontage'] },
   referenz: { lottie: 'messen', t: 'Wie genau ist das Aufmaß?', x: ['Du misst mit dem Zollstock, die App führt dich: erst die Maueröffnung, dann das Fensterelement, jeweils senkrecht und waagerecht in der Mitte, danach die Ränder.', 'Das kleinste von drei Maßen zählt, so wie es der Fensterbauer auch macht. Die Fotos liefern ihm dazu die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade und Zugang.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['feinaufmass', 'rahmenmass'] },
   feinaufmass: { t: 'Was ist ein Feinaufmaß?', x: ['Bevor dein Fenster produziert wird, misst der Fensterbauer vor Ort noch einmal genau nach. Dein Aufmaß ersetzt den ersten Termin und reicht fürs Angebot, nicht aber diese Endkontrolle.'], ico: () => [P('M6 50l12-30 4 1.6-12 30zM22 21l14 26 3.6-2-14-26zM39.6 45l12-30 3.6 1.6-12 30z', '#f2d27a', INK, 1.1), P(C(20, 21, 1.6), INK), P(C(38, 46, 1.6), INK)], see: ['referenz', 'rahmenmass'] },
@@ -494,11 +499,14 @@ const mmTxt = (v) => (num(v) ? thousand(v) + ' mm' : '–');
 const cmTxt = (v) => (num(v) ? (num(v) / 10).toFixed(1).replace('.', ',') + ' cm' : '');
 const LEGACY = { altbau: 'Altbau', sofort: 'So bald wie möglich', offen: 'Noch offen' };
 const lab = (g, k) => { const o = (OPT[g] || []).find((x) => x.k === k); return o ? o.label : (LEGACY[k] || ''); };
-const colorOf = (k) => COLORS.find((c) => c.k === k) || COLORS[0];
-/* Eigene Farben: eingetippt und erkannt (gemeinsam.js, Farbtext) → so im Modell, in der Zeichnung und im Aufmaßblatt.
+/* Gespeicherter Schlüssel → Farbe. Ein unbekannter Schlüssel bleibt mit Namen sichtbar und wird nicht still zu Verkehrsweiß. */
+const colorOf = (k) => FARBE_K[k] || (k ? { k: String(k), name: String(k), code: 'Farbe bitte prüfen', bg: FARBE_K['9016'].bg, solid: FARBE_K['9016'].solid, unbekannt: true } : FARBE_K['9016']);
+/* Eigene Farben: eingetippt und erkannt (ral.js, sonst Farbtext aus gemeinsam.js) → so im Modell, in der Zeichnung und im Aufmaßblatt.
    Nicht erkannt → die gewählte Farbe aus der Liste bleibt, der Text geht als Wunsch an den Fensterbauer. */
-const farbLesen = (t) => (t && window.Farbtext ? window.Farbtext.lesen(t) : null);
-const mischHex = (hex, ziel, t) => (window.Farbtext ? window.Farbtext.mischen(hex, ziel, t) : hex);
+const farbLesen = (t) => (!t ? null : window.RAL ? window.RAL.lesen(t) : window.Farbtext ? window.Farbtext.lesen(t) : null);
+const mischHex = (hex, ziel, t) => (window.RAL ? window.RAL.mischen(hex, ziel, t) : window.Farbtext ? window.Farbtext.mischen(hex, ziel, t) : hex);
+/* Farbeintrag aus ral.js zu einem gespeicherten Schlüssel (Sonnenschutz und Innenschutz dürfen außer ihren eigenen Tönen jede Farbe tragen) */
+const ralFarbe = (k) => (k && window.RAL ? window.RAL.eintrag(k) : null);
 /* Noch nicht entschieden (Weiß ich noch nicht, oder die Frage ohne Vorauswahl übergangen): das Modell zeigt neutral Weiß, das Blatt „offen“ */
 const FARBE_OFFEN = { k: 'offen', name: 'Farbe offen', code: 'bitte beraten', bg: '#f1f0ea', solid: '#f1f0ea', offen: true };
 const farbeOffen = (w, seite) => !!(w.offen && (seite === 'innen' ? (w.gleich ? w.offen.fa : w.offen.fi) : w.offen.fa));
@@ -506,19 +514,24 @@ function rahmenFarbe(w, seite) {
   if (farbeOffen(w, seite)) return FARBE_OFFEN;
   const innen = seite === 'innen', t = innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, k = innen ? (w.gleich ? w.fa : w.fi) : w.fa, f = farbLesen(t);
   if (!f) return colorOf(k);
-  return COLORS.find((x) => x.k === f.key) || { k: 'eigen', name: f.name, code: f.code ? 'RAL ' + f.code : f.holz ? 'Holzdekor' : 'eigene Farbe', bg: f.bg, solid: f.hex, eigen: true };
+  const e = f.eintrag;
+  return { k: e ? e.key : 'eigen', name: e ? e.name : f.name, code: e ? e.code : f.code ? 'RAL ' + f.code : f.holz ? 'Holzdekor' : 'eigene Farbe', bg: f.bg, solid: f.hex, holz: f.holz, eigen: true };
 }
 function farbZeile(w, seite) {
   if (farbeOffen(w, seite)) return AW.OFFEN_TEXT;
   const innen = seite === 'innen', t = (innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA) || '', c = rahmenFarbe(w, seite);
-  if (t && farbLesen(t)) return c.name + (c.code && c.name.indexOf(c.code) < 0 ? ' (' + c.code + ')' : '') + ', eigene Angabe';
+  if (t && farbLesen(t)) return c.name + (c.code && c.code !== 'eigene Farbe' && c.name.indexOf(c.code) < 0 ? ' (' + c.code + ')' : '') + ', eigene Angabe';
   return c.name + ' (' + c.code + ')' + (t ? ', Wunsch: ' + t : '');
 }
 function griffFarbe(w) { const f = farbLesen(w.wunschGf); if (f) return { bg: f.hex, name: f.name, eigen: true }; const o = OPT.gf.find((g) => g.k === w.gf) || OPT.gf[0]; return { bg: o.bg, name: o.label + (w.wunschGf ? ', Wunsch: ' + w.wunschGf : '') }; }
-function sonneFarbeW(w) { const f = farbLesen(w.wunschSf); return f ? [f.hex, mischHex(f.hex, '#000000', 0.32), mischHex(f.hex, '#ffffff', 0.28)] : sonneFarbe(w.sfarbe); }
-function innenFarbeW(w) { const f = farbLesen(w.wunschIf); return f ? [f.hex, mischHex(f.hex, '#000000', 0.22), mischHex(f.hex, '#ffffff', 0.3)] : innenFarbe(w.ifarbe); }
-const sonneName = (w) => { const f = farbLesen(w.wunschSf); return f ? f.name : (lab('sfarbe', w.sfarbe) || '') + (w.wunschSf ? ', Wunsch: ' + w.wunschSf : ''); };
-const innenName = (w) => { const f = farbLesen(w.wunschIf); return f ? f.name : (lab('ifarbe', w.ifarbe) || '') + (w.wunschIf ? ', Wunsch: ' + w.wunschIf : ''); };
+/* Sonnenschutz und Innenschutz: eingetippt, sonst ein Ton der eigenen Liste, sonst eine Farbe aus dem Farbblatt (RAL, DB, Struktur) */
+const behangRal = (g, k) => (lab(g, k) ? null : ralFarbe(k));
+const behangTon = (hex, d, l) => [hex, mischHex(hex, '#000000', d), mischHex(hex, '#ffffff', l)];
+function sonneFarbeW(w) { const f = farbLesen(w.wunschSf) || behangRal('sfarbe', w.sfarbe); return f ? behangTon(f.hex, 0.32, 0.28) : sonneFarbe(w.sfarbe); }
+function innenFarbeW(w) { const f = farbLesen(w.wunschIf) || behangRal('ifarbe', w.ifarbe); return f ? behangTon(f.hex, 0.22, 0.3) : innenFarbe(w.ifarbe); }
+const behangName = (g, k, wunsch) => { const f = farbLesen(wunsch); if (f) return f.name; const e = behangRal(g, k); return (e ? e.label : lab(g, k) || '') + (wunsch ? ', Wunsch: ' + wunsch : ''); };
+const sonneName = (w) => behangName('sfarbe', w.sfarbe, w.wunschSf);
+const innenName = (w) => behangName('ifarbe', w.ifarbe, w.wunschIf);
 const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
 /* Einstellungen der Tür je Art (Schwelle usw.) */
 const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' ? w.bt : null) || {};
@@ -2712,8 +2725,8 @@ function qList(w) {
       L.push({ id: 'breite', title: 'Wie breit sollen sie sein?', kind: 'chips', group: 'breite', val: w.breite, act: 'setw', f: 'breite', view: 'front' });
     }
   }
-  L.push({ id: 'fa', title: 'Welche Farbe außen?', kind: 'color', side: 'aussen', view: 'outside', g: 'ral', hint: 'Ansicht von außen', offen: 'fa' });
-  L.push({ id: 'fi', title: 'Und innen?', kind: 'color', side: 'innen', view: 'inside', g: 'ral', hint: 'Ansicht von innen', offen: 'fi' });
+  L.push({ id: 'fa', title: 'Welche Farbe außen?', kind: 'color', side: 'aussen', view: 'outside', g: 'ral', hint: 'Ansicht von außen · ' + rahmenFarbe(w, 'aussen').name, offen: 'fa' });
+  L.push({ id: 'fi', title: 'Und innen?', kind: 'color', side: 'innen', view: 'inside', g: 'ral', hint: 'Ansicht von innen · ' + rahmenFarbe(w, 'innen').name, offen: 'fi' });
   L.push({ id: 'glas', title: 'Welche Verglasung?', sub: 'Je kleiner der U-Wert, desto weniger Wärme geht verloren.', kind: 'cards', group: 'glas', val: w.glas, act: 'setw', f: 'glas', ico: ICO.glas, view: 'inside', g: 'uwert', lupe: true, hint: glasText(w), offen: 'glas' });
   L.push({ id: 'glasfn', title: 'Extras fürs Glas?', sub: 'Mehrfachauswahl möglich.', kind: 'multi', group: 'glasfn', vals: w.glasfn, act: 'glasfn', view: 'inside', lupe: true, hint: w.glasfn.length ? w.glasfn.map((g) => lab('glasfn', g)).join(' · ') : 'Ohne Extras', offen: 'glasfn' });
   if (w.glasfn.indexOf('sicht') >= 0) L.push({ id: 'orn', title: 'Welches Ornamentglas?', kind: 'orn', view: 'inside', g: 'ornament', hint: 'Sichtschutz: ' + (ORN.find((o) => o.k === w.orn) || ORN[0]).label });
@@ -2786,20 +2799,86 @@ function qFormen(q) {
   return '<div class="qformen" role="group" aria-label="Form">' + opts.map((o) => '<button type="button" class="qf" data-act="form" data-v="' + o.k + '" aria-pressed="' + (o.k === cur.k) + '" aria-label="' + esc(o.label) + '" title="' + esc(o.label) + '">' + svgIcon(ICO.form(o.k), 54) + '</button>').join('') + '</div><p class="qcur"><b>' + esc(cur.label) + '</b> · ' + esc(cur.sub) + '</p>';
 }
 function qChips(q) {
+  if (q.group === 'gf') return qGriffFarbe(q);
   const opts = q.opts || (q.group === 'ol' ? [{ k: 'nein', label: 'Kein Oberlicht' }, { k: 'K', label: 'Oberlicht, kippbar' }, { k: 'F', label: 'Oberlicht, fest' }] : OPT[q.group]);
-  const eigen = q.group === 'gf' && farbLesen(S.win.wunschGf);
-  return auswahl(opts, 'data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : ''), (o) => !eigen && String(o.k) === String(q.val)) + (q.group === 'gf' ? farbFeld('wunschGf') : '');
+  return auswahl(opts, 'data-act="' + q.act + '"' + (q.f ? ' data-f="' + q.f + '"' : ''), (o) => String(o.k) === String(q.val));
 }
 function qMulti(q) {
   return auswahl(OPT[q.group], 'data-act="' + q.act + '"', (o) => q.vals.indexOf(o.k) >= 0) + (q.vals.length ? '' : '<p class="sub center">Nichts davon? Einfach weiter.</p>');
 }
+/* ---------- Farbwahl (S2): Rahmen außen und innen, Sonnenschutz, Innenschutz, Griff ----------
+   Oben die gewählte Farbe groß mit Name und Nummer, darunter die beliebten als Raster (am Telefon ohne Wischen), dann „Alle Farben“:
+   das Farbblatt mit Suche, Farbfamilien und allen RAL-Classic-Tönen, Holzdekoren und Sonderfarben (ral.js). Die eigene Angabe bleibt
+   als Feld darunter. Gespeichert wird der Schlüssel aus ral.js ('1015', 'winch', 'db703'), eingetippte Farben wie bisher als Text. */
+const FW = {
+  fa: { titel: 'Farbe außen', wunsch: 'wunschA', beliebt: 'rahmen', offen: 'fa' },
+  fi: { titel: 'Farbe innen', wunsch: 'wunschI', beliebt: 'rahmen', offen: 'fi' },
+  sfarbe: { titel: 'Farbe des Sonnenschutzes', wunsch: 'wunschSf', beliebt: 'sonne', schnell: ['db703', '9007'] },
+  ifarbe: { titel: 'Farbe innen', wunsch: 'wunschIf', beliebt: 'innen', schnell: [] },
+  gf: { titel: 'Griff-Farbe', wunsch: 'wunschGf' }
+};
+const fwBeliebt = (g) => (window.RAL ? window.RAL.BELIEBT[g] || [] : COLORS.slice(0, 11).map((c) => c.k)).filter((k) => FARBE_K[k]);
+/* Welcher Schlüssel gerade gilt (für die gedrückte Farbe); offen oder eingetippt ohne Eintrag → keiner */
+function fwAktiv(feld) {
+  const w = S.win;
+  if (feld === 'fa' || feld === 'fi') {
+    const innen = feld === 'fi'; if (rahmenFarbe(w, innen ? 'innen' : 'aussen').offen) return '';
+    const f = farbLesen(innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA);
+    return f ? f.key || '' : innen ? (w.gleich ? w.fa : w.fi) : w.fa;
+  }
+  const f = farbLesen(w[FW[feld].wunsch]);
+  return f ? (feld === 'gf' ? '' : f.key || '') : w[feld];
+}
+/* Was oben groß steht: Name, Code und Zusätze (eigene Angabe, wie außen) */
+function fwAnzeige(feld) {
+  const w = S.win;
+  if (feld === 'fa' || feld === 'fi') {
+    const c = rahmenFarbe(w, feld === 'fi' ? 'innen' : 'aussen'), wie = feld === 'fi' && w.gleich ? 'wie außen' : '';
+    if (c.offen) return { offen: true, name: 'Noch offen', zeile: ['im Modell neutral weiß', wie] };
+    return { name: c.name, bg: c.bg, zeile: [c.code === 'eigene Farbe' ? '' : c.code, c.eigen ? 'eigene Angabe' : '', wie] };
+  }
+  const wunsch = w[FW[feld].wunsch], f = farbLesen(wunsch);
+  if (f) return { name: f.eintrag ? f.eintrag.name : f.name, bg: f.bg, zeile: [f.eintrag ? f.eintrag.code : '', 'eigene Angabe'] };
+  const wz = wunsch ? 'Wunsch: ' + wunsch : '';
+  if (feld === 'gf') { const o = OPT.gf.find((g) => g.k === w.gf) || OPT.gf[0]; return { name: o.label, bg: o.bg, zeile: [wz] }; }
+  const e = behangRal(feld, w[feld]);
+  if (e) return { name: e.name, bg: e.bg, zeile: [e.code, wz] };
+  const o = OPT[feld].find((x) => x.k === w[feld]) || OPT[feld][0];
+  return { name: o.label, bg: o.bg, zeile: [wz] };
+}
+function fwKopfInnen(feld) {
+  const a = fwAnzeige(feld), z = a.zeile.filter(Boolean).join(' · ');
+  return '<span class="fw-tupf' + (a.offen ? ' offen' : '') + '"' + (a.bg ? ' style="background: ' + a.bg + '"' : '') + ' aria-hidden="true"></span><span class="tx"><b>' + esc(a.name) + '</b>' + (z ? '<small>' + esc(z) + '</small>' : '') + '</span>';
+}
+const fwKopf = (feld, dazu) => '<div class="fw-zeile"><div class="qcur fw-cur" aria-live="polite">' + fwKopfInnen(feld) + '</div>' + (dazu || '') + '</div>';
+/* Lange Farbnamen trennen, wo das Wort zusammengesetzt ist („Anthrazit-grau“, „Schoko-laden-braun“), statt mitten im Wort */
+const fwTrenn = (name) => String(name).split(' ').map((t) => t.replace(/^(Perl|Leucht|Verkehrs|Signal|Pastell|Schoko|Ultra|Chrom|Rein)(?=[a-zäöüß]{3})/, '$1\u00ad').replace(/([a-zäöüß]{2,})(weiß|grau|braun|schwarz|blau|grün|rot|gelb|orange|violett|beige|rosa|lila|oliv|türkis|elfenbein|aluminium|magenta|gold|kupfer|enzian|brombeer|struktur|glimmer|laden|nacht|maus|raum|oxid|marin|hell|baum|eiche|chester|kiefer)$/, '$1\u00ad$2')).join(' ');
+/* Eine Farbe wählen: wie bisher „color“ und „setw“, die eigene Angabe fällt weg, offen ist entschieden */
+function fwSetzen(feld, key) {
+  const w = S.win; S.offenVorText = null;
+  if (feld === 'fa') { w.fa = key; w.wunschA = ''; entschieden(w, 'fa'); }
+  else if (feld === 'fi') { w.fi = key; w.gleich = false; w.wunschI = ''; entschieden(w, 'fi'); }
+  else { w[feld] = key; w[FW[feld].wunsch] = ''; entschieden(w, feld); }
+}
+const FW_LUPE = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="7.6" cy="7.6" r="5.2" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M11.5 11.5L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
+/* Knopf zum Farbblatt; in der Führung gesperrt wie die übrigen besonderen Farben */
+function fwBlattKnopf(feld, familie, text) {
+  const dot = familie === 'holz' ? '<span class="dot" style="background: ' + (FARBE_K.goak || {}).bg + '"></span>' : '<span class="ci">' + FW_LUPE + '</span>';
+  const zu = !!S.tour;
+  return '<button type="button" class="chip' + (zu ? ' gesperrt' : '') + '" data-farbblatt="' + feld + '"' + (familie ? ' data-familie="' + familie + '"' : '') + (zu ? ' aria-disabled="true" aria-label="' + esc(text) + ', in der Führung gesperrt"' : '') + '>' + dot + esc(text) + (zu ? '<span class="schloss" aria-hidden="true">' + LOCK_S + '</span>' : '') + '</button>';
+}
+function fwTupfen(k, attrs, aktiv, text) {
+  const c = colorOf(k);
+  return '<button type="button" class="qsw" ' + attrs + ' data-v="' + esc(k) + '" aria-pressed="' + (k === aktiv) + '" aria-label="' + esc(c.label || c.name) + '"><span class="c" style="background: ' + c.bg + '"></span><span class="n">' + esc(text) + '</span></button>';
+}
+const FW_HINWEIS = '<p class="fw-hinweis">Am Bildschirm nur ungefähr: Es zählt das Farbmuster.</p>';
 function qColor(q) {
-  const w = S.win, side = q.side, cur = side === 'innen' ? (w.gleich ? w.fa : w.fi) : w.fa, wunsch = side === 'innen' ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, eigen = farbLesen(wunsch), c = rahmenFarbe(w, side);
-  const aktiv = c.offen ? '' : eigen ? (COLORS.some((x) => x.k === eigen.key) ? eigen.key : '') : cur;
-  let h = '<div class="qswatches">' + COLORS.map((x) => '<button type="button" class="qsw" data-act="color" data-side="' + side + '" data-v="' + x.k + '" aria-pressed="' + (x.k === aktiv) + '" aria-label="' + esc(x.name) + '"><span class="c" style="background: ' + x.bg + '"></span><span class="n">' + esc(x.name).replace(/^(Verkehrs|Anthrazit|Schwarz|Basalt)(weiß|grau|braun)$/, '$1&shy;$2') + '</span></button>').join('') + '</div>';
-  h += c.offen ? '<p class="qcur"><b>Noch offen</b> · im Modell neutral weiß' + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>' : '<p class="qcur"><b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code) + (side === 'innen' && w.gleich ? ' · wie außen' : '') + '</p>';
-  if (side === 'innen') h += '<div class="qrow"><button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button></div>';
-  return h + farbFeld(side === 'innen' ? 'wunschI' : 'wunschA');
+  const w = S.win, side = q.side, feld = side === 'innen' ? 'fi' : 'fa', aktiv = fwAktiv(feld);
+  const wie = side === 'innen' ? '<button type="button" class="chip" data-act="togglew" data-f="gleich" aria-pressed="' + w.gleich + '">Innen wie außen</button>' : '';
+  let h = fwKopf(feld, wie);
+  h += '<div class="qswatches fw-raster" role="group" aria-label="Beliebt bei Fenstern">' + fwBeliebt('rahmen').map((k) => fwTupfen(k, 'data-act="color" data-side="' + side + '"', aktiv, (colorOf(k).code || '').replace(/^RAL /, ''))).join('') + '</div>';
+  h += '<div class="fw-mehr">' + fwBlattKnopf(feld, '', 'Alle Farben') + fwBlattKnopf(feld, 'holz', 'Holzdekore') + '</div>';
+  return h + farbFeld(side === 'innen' ? 'wunschI' : 'wunschA') + FW_HINWEIS;
 }
 /* Unterlicht: Art als Chips, Höhe als Stufenregler in 5-cm-Schritten */
 function qUnterlicht() {
@@ -2809,19 +2888,29 @@ function qUnterlicht() {
   return h;
 }
 function qGeh() { const w = S.win; return '<div class="rows">' + switchRow('Gehflügel', 'Ein Flügel geht wie eine Tür auf', !!w.fsw.geh, 'geh', 'fsw', 'fsw') + '</div>'; }
-/* Farbfelder für Sonnenschutz außen und innen */
+/* Farben für Sonnenschutz außen und Sicht- und Blendschutz innen: die eigenen Töne, beim Sonnenschutz dazu DB 703 und Graualuminium,
+   dann „Alle Farben“ mit den bei Rollladen und Raffstore üblichen oben */
 function qSwatch(q) {
-  const opts = OPT[q.group], cur = opts.find((o) => o.k === q.val) || opts[0], ff = q.f === 'sfarbe' ? 'wunschSf' : 'wunschIf', eigen = farbLesen(S.win[ff]);
-  return '<div class="qswatches">' + opts.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="' + q.f + '" data-v="' + o.k + '" aria-pressed="' + (!eigen && o.k === cur.k) + '" aria-label="' + esc(o.label) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div><p class="qcur"><b>' + esc(eigen ? eigen.name : cur.label) + '</b>' + (eigen ? ' · eigene Farbe' : '') + '</p>' + farbFeld(ff);
+  const feld = q.f, aktiv = fwAktiv(feld), attrs = 'data-act="setw" data-f="' + feld + '"';
+  const eigene = OPT[q.group].map((o) => '<button type="button" class="qsw" ' + attrs + ' data-v="' + o.k + '" aria-pressed="' + (o.k === aktiv) + '" aria-label="' + esc(o.label) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('');
+  const dazu = (FW[feld].schnell || []).filter((k) => FARBE_K[k]).map((k) => fwTupfen(k, attrs, aktiv, colorOf(k).code)).join('');
+  return fwKopf(feld) + '<div class="qswatches fw-raster fw-5" role="group" aria-label="' + esc(FW[feld].titel) + '">' + eigene + dazu + '</div>' +
+    '<div class="fw-mehr">' + fwBlattKnopf(feld, '', 'Alle Farben') + '</div>' + farbFeld(feld === 'sfarbe' ? 'wunschSf' : 'wunschIf');
 }
-/* Eigene Farbe: ein Textfeld unter jeder Farbwahl. Erkennt RAL (z. B. 7021), DB 703, Holzdekore, Farbwörter und #hex;
-   der Tupfen zeigt die erkannte Farbe, das Modell färbt sich schon beim Tippen. */
-const FARBFELD = { wunschA: 'z. B. RAL 7021 oder DB 703', wunschI: 'z. B. RAL 9001 oder Eiche', wunschGf: 'z. B. Messing oder RAL 9005', wunschSf: 'z. B. RAL 7016 oder DB 703', wunschIf: 'z. B. Sand, Taupe oder RAL 1015' };
+/* Griff: nur Oberflächen, die es an Griffen gibt; alles andere als Wunsch im Feld darunter */
+function qGriffFarbe(q) {
+  const aktiv = fwAktiv('gf');
+  return fwKopf('gf') + '<div class="qswatches fw-raster fw-5" role="group" aria-label="Griff-Farbe">' + OPT.gf.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="gf" data-v="' + o.k + '" aria-pressed="' + (o.k === aktiv) + '" aria-label="' + esc(o.label) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div>' + farbFeld('wunschGf');
+}
+/* Eigene Farbe: ein Textfeld unter jeder Farbwahl. Erkennt RAL (z. B. 7021), DB 703, Holzdekore, Strukturen, Farbwörter und #hex;
+   der Tupfen zeigt die erkannte Farbe, das Modell färbt sich schon beim Tippen. Platzhalter kurz, damit er am Telefon ganz zu lesen ist. */
+const FARBFELD = { wunschA: 'Eigene Angabe, z. B. RAL 7021', wunschI: 'Eigene Angabe, z. B. Eiche', wunschGf: 'Wunsch, z. B. Messing matt', wunschSf: 'Eigene Angabe, z. B. DB 703', wunschIf: 'Eigene Angabe, z. B. Taupe' };
+const FF_FELD = { wunschA: 'fa', wunschI: 'fi', wunschSf: 'sfarbe', wunschIf: 'ifarbe', wunschGf: 'gf' };
 function farbInfo(t) { if (!String(t || '').trim()) return ''; const f = farbLesen(t); return f ? 'Erkannt: ' + f.name + '. So im Modell, der Fensterbauer bekommt genau diese Angabe.' : 'Nicht in der Farbliste. Dein Fensterbauer bekommt den Text und schlägt den nächstliegenden Ton vor.'; }
 const FF_X = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
 function farbFeld(f) {
   const v = S.win[f] || '', fx = farbLesen(v);
-  return '<div class="farbfeld' + (v ? ' hat' : '') + (fx ? ' ok' : '') + '"><span class="ff-tupf" style="' + (fx ? 'background: ' + fx.bg : '') + '" aria-hidden="true"></span><input type="text" id="t-' + f + '" data-in="farbe" data-f="' + f + '" value="' + esc(v) + '" maxlength="60" placeholder="Eigene Farbe, ' + esc(FARBFELD[f] || '') + '" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" aria-label="Eigene Farbe eingeben" aria-describedby="ffi-' + f + '">' +
+  return '<div class="farbfeld' + (v ? ' hat' : '') + (fx ? ' ok' : '') + '"><span class="ff-tupf" style="' + (fx ? 'background: ' + fx.bg : '') + '" aria-hidden="true"></span><input type="text" id="t-' + f + '" data-in="farbe" data-f="' + f + '" value="' + esc(v) + '" maxlength="60" placeholder="' + esc(FARBFELD[f] || 'Eigene Angabe') + '" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" aria-label="Eigene Farbe eingeben: Nummer, Name oder Beschreibung" aria-describedby="ffi-' + f + '">' +
     '<button type="button" class="ff-x" data-act="farbe-weg" data-f="' + f + '" aria-label="Eigene Farbe löschen"' + (v ? '' : ' hidden') + '>' + FF_X + '</button></div><p class="ff-info" id="ffi-' + f + '" aria-live="polite">' + esc(farbInfo(v)) + '</p>';
 }
 /* Beim Tippen: Tupfen, Hinweis und Modell nachziehen, ohne neu aufzubauen (Fokus und Cursor bleiben) */
@@ -2830,13 +2919,114 @@ function farbeLive(el, f) {
   if (box) { box.classList.toggle('hat', !!el.value); box.classList.toggle('ok', !!fx); const t = box.querySelector('.ff-tupf'); if (t) t.style.background = fx ? fx.bg : ''; const x = box.querySelector('.ff-x'); if (x) x.hidden = !el.value; }
   const info = document.getElementById('ffi-' + f); if (info) info.textContent = farbInfo(el.value);
   /* Name der aktuellen Farbe und Auswahl in der Liste gleich mitziehen */
-  const w = S.win, cur = document.querySelector('.qpanel .qcur');
-  if (cur && (f === 'wunschA' || f === 'wunschI')) { const c = rahmenFarbe(w, f === 'wunschI' ? 'innen' : 'aussen'); cur.innerHTML = '<b>' + esc(c.name) + '</b> · ' + esc(c.eigen ? 'eigene Farbe' : c.code); }
-  else if (cur && (f === 'wunschSf' || f === 'wunschIf')) cur.innerHTML = '<b>' + esc(f === 'wunschSf' ? sonneName(w) : innenName(w)) + '</b>' + (fx ? ' · eigene Farbe' : '');
-  if (fx) document.querySelectorAll('.qpanel .qsw[aria-pressed="true"], .qpanel .chip[data-f="gf"][aria-pressed="true"]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+  const w = S.win, feld = FF_FELD[f], cur = document.querySelector('.qpanel .qcur');
+  if (cur && feld) cur.innerHTML = fwKopfInnen(feld);
+  if (feld) { const a = fwAktiv(feld); document.querySelectorAll('.qpanel .qsw[data-v]').forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === a))); }
   const ob = document.querySelector('.qpanel .qoffen'); if (ob && (f === 'wunschA' || f === 'wunschI')) ob.setAttribute('aria-pressed', String(istOffen(w, f === 'wunschA' ? 'fa' : 'fi')));
   const st = document.getElementById('w3d'), reg = W3DS.w3d; if (st && reg) { w3dPaint(st, w); w3dLayout(st, w, reg.o); }
 }
+/* ---------- Farbblatt „Alle Farben“ (S2) ----------
+   Oben die gewählte Farbe groß mit Name und Nummer, darunter Suche (Nummer oder Name, tolerant gegen Tippfehler, „RAL“ darf fehlen)
+   und die Farbfamilien als Chips; darunter das Raster aller Farben, beliebte zuerst. Das Blatt deckt nur den unteren Teil: Das Modell
+   darüber zeigt jede Wahl sofort. Es liegt als eigenes Element neben #app, damit Suche, Fokus und Scrollstand beim Neuzeichnen der App
+   bleiben, und schließt sich, sobald die Frage wechselt (Zurück, Weiter, Wechsel des Bildschirms). */
+const FB = { feld: '', q: '', familie: '', such: '', el: null, wacht: null };
+const fbKurz = (e) => (e.kurz != null ? e.kurz : e.nr || '');
+function fbWahlHTML() {
+  const a = fwAnzeige(FB.feld), z = a.zeile.filter(Boolean).join(' · ');
+  return '<span class="fw-tupf gross' + (a.offen ? ' offen' : '') + '"' + (a.bg ? ' style="background: ' + a.bg + '"' : '') + ' aria-hidden="true"></span><span class="tx"><small id="fb-t">' + esc(FW[FB.feld].titel) + '</small><b>' + esc(a.name) + '</b>' + (z ? '<small>' + esc(z) + '</small>' : '') + '</span>';
+}
+function fbListeHTML() {
+  const R = window.RAL, aktiv = fwAktiv(FB.feld), q = FB.such.trim(), cfg = FW[FB.feld];
+  const knopf = (e) => { const k = fbKurz(e); return '<button type="button" class="fb-f' + (k ? '' : ' ohne') + '" data-fb="f" data-v="' + esc(e.key) + '" aria-pressed="' + (e.key === aktiv) + '" aria-label="' + esc(e.label + (e.art === 'holz' ? ', Holzdekor' : '')) + '"><span class="c" style="background: ' + e.bg + '"></span>' + (k ? '<span class="nr">' + esc(k) + '</span>' : '') + '<span class="nm">' + esc(fwTrenn(e.name)) + '</span></button>'; };
+  const gruppe = (titel, liste) => (liste.length ? '<h3 class="fb-gr">' + esc(titel) + '</h3><div class="fb-raster">' + liste.map(knopf).join('') + '</div>' : '');
+  if (q) {
+    const t = R.suche(q);
+    if (!t.length) return '<div class="fb-leer"><p><b>Keine Farbe zu „' + esc(q) + '“ gefunden.</b> Prüf die Nummer oder such nach dem Namen, etwa „Anthrazit“. Oder nimm deine Beschreibung so mit, dein Fensterbauer findet den Ton.</p><button type="button" class="btn ghost" data-fb="wunsch">Als eigene Angabe nehmen</button></div>';
+    return gruppe(t.length + ' Treffer', t);
+  }
+  if (FB.familie) { const f = R.FAMILIEN.find((x) => x.k === FB.familie); return gruppe(f ? f.label : '', R.liste.filter((e) => e.familie === FB.familie)); }
+  const bel = R.BELIEBT[cfg.beliebt].concat(cfg.beliebt === 'rahmen' ? R.BELIEBT.rahmenMehr : []).map(R.eintrag).filter(Boolean);
+  return gruppe(cfg.beliebt === 'rahmen' ? 'Beliebt bei Fenstern' : cfg.beliebt === 'sonne' ? 'Beliebt bei Rollladen und Raffstore' : 'Beliebt für innen', bel) + R.FAMILIEN.map((f) => gruppe(f.label, R.liste.filter((e) => e.familie === f.k))).join('');
+}
+const FB_HILFE = ['Frag deinen Fensterbauer nach dem Farbfächer. Er hat echte Muster, auch für Holzdekore.', 'Auf alten Rechnungen, Auftragsbestätigungen oder dem Etikett im Falz steht die Farbe oft als RAL-Nummer.', 'Soll es zur Haustür, zum Garagentor oder zur Dachrinne passen? Mach ein Foto davon, dein Fensterbauer bestimmt den Ton.', 'Unsicher? Beschreib die Farbe im Feld unter der Auswahl, etwa „wie die Haustür“, oder lass sie offen.'];
+function fbHTML() {
+  const R = window.RAL, fam = [{ k: '', label: 'Alle' }].concat(R.FAMILIEN), cfg = FW[FB.feld];
+  return '<button type="button" class="fb-weg" data-fb="zu" tabindex="-1" aria-label="Farbwahl schließen"></button>' +
+    '<div class="fb-blatt" tabindex="-1"><div class="fb-kopf"><div class="grip" aria-hidden="true"></div>' +
+    '<div class="fb-wahl"><div class="fb-wahl-t" aria-live="polite">' + fbWahlHTML() + '</div><button type="button" class="btn primary small fb-fertig" data-fb="zu">Fertig</button></div>' +
+    '<div class="fb-such">' + FW_LUPE + '<input type="search" id="fb-such" placeholder="Nummer oder Name, z. B. 7016" maxlength="40" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" aria-label="Farbe suchen: Nummer oder Name"><button type="button" class="ff-x" data-fb="leeren" aria-label="Suche löschen" hidden>' + FF_X + '</button></div>' +
+    '<div class="fb-fam" role="group" aria-label="Farbfamilien">' + fam.map((f) => '<button type="button" class="chip" data-fb="fam" data-v="' + f.k + '" aria-pressed="' + (f.k === FB.familie) + '">' + (f.hex ? '<span class="dot" style="background: ' + (f.k === 'holz' ? R.holzBg(f.hex) : f.hex) + '"></span>' : '') + esc(f.label) + '</button>').join('') + '</div></div>' +
+    '<details class="fb-hilfe"><summary>Woher kenne ich meine Farbe?</summary><ul>' + FB_HILFE.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></details>' +
+    '<p class="fw-hinweis">Farben am Bildschirm weichen vom echten Ton ab. Verbindlich ist das Farbmuster, das dir dein Fensterbauer vor der Bestellung zeigt.</p>' +
+    '<div class="fb-liste">' + fbListeHTML() + '</div>' +
+    (cfg.offen ? '<button type="button" class="qoffen" data-fb="offen" aria-pressed="' + istOffen(S.win, cfg.offen) + '"><span class="tx"><b>Weiß ich noch nicht</b><small>Dein Fensterbauer berät dich</small></span><span class="mark">' + CHECK_S + '</span></button>' : '') + '</div>';
+}
+/* Liste neu (Suche, Familie) bzw. nur die Wahl oben und die gedrückte Farbe (nach dem Wählen) */
+function fbNeu(oben) {
+  const el = FB.el; if (!el) return;
+  el.querySelector('.fb-liste').innerHTML = fbListeHTML();
+  el.querySelectorAll('.fb-fam .chip').forEach((b) => b.setAttribute('aria-pressed', String(!FB.such.trim() && b.getAttribute('data-v') === FB.familie)));
+  if (oben) { const bl = el.querySelector('.fb-blatt'), li = el.querySelector('.fb-liste'), kopf = el.querySelector('.fb-kopf'); if (bl.scrollTop > li.offsetTop - kopf.offsetHeight) bl.scrollTop = li.offsetTop - kopf.offsetHeight; }
+}
+function fbWahlNeu() {
+  const el = FB.el; if (!el) return;
+  el.querySelector('.fb-wahl-t').innerHTML = fbWahlHTML();
+  const a = fwAktiv(FB.feld); el.querySelectorAll('.fb-f').forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === a)));
+  const ob = el.querySelector('.qoffen'); if (ob && FW[FB.feld].offen) ob.setAttribute('aria-pressed', String(istOffen(S.win, FW[FB.feld].offen)));
+}
+function fbZu(fokus) {
+  const el = FB.el; if (!el) return;
+  FB.el = null; if (FB.wacht) { FB.wacht.disconnect(); FB.wacht = null; }
+  el.remove();
+  if (fokus) { const b = document.querySelector('#app [data-farbblatt="' + FB.feld + '"]'); if (b) b.focus({ preventScroll: true }); }
+}
+function fbAuf(feld, familie) {
+  if (!FW[feld] || !window.RAL || !S.win) return;
+  if (S.tour) return tourSchloss();
+  fbZu(false);
+  Object.assign(FB, { feld: feld, q: S.q, familie: familie || '', such: '' });
+  const el = document.createElement('div');
+  el.className = 'fb'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'fb-t');
+  el.innerHTML = fbHTML();
+  document.body.appendChild(el); FB.el = el;
+  const inp = el.querySelector('#fb-such'), x = el.querySelector('.fb-such .ff-x');
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('[data-fb]') : null; if (!b) return;
+    const a = b.getAttribute('data-fb'), v = b.getAttribute('data-v') || '';
+    if (a === 'zu') return fbZu(true);
+    if (a === 'fam') { FB.familie = v; FB.such = ''; inp.value = ''; x.hidden = true; return fbNeu(true); }
+    if (a === 'leeren') { FB.such = ''; inp.value = ''; x.hidden = true; fbNeu(true); return inp.focus(); }
+    if (a === 'f') { fwSetzen(FB.feld, v); render(); return fbWahlNeu(); }
+    if (a === 'offen') { offenSetzen(S.win, FW[FB.feld].offen, true); S.offenVorText = null; render(); return fbZu(true); }
+    if (a === 'wunsch') {
+      const f = FW[FB.feld].wunsch, t = FB.such.trim().slice(0, 60); S.win[f] = t;
+      if (f === 'wunschI') S.win.gleich = false;
+      if (t) entschieden(S.win, f);
+      render(); return fbZu(false);
+    }
+  });
+  inp.addEventListener('input', () => { FB.such = inp.value; x.hidden = !inp.value; fbNeu(true); });
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); inp.blur(); } });
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); if (document.activeElement === inp && inp.value) { inp.value = ''; FB.such = ''; x.hidden = true; return fbNeu(true); } return fbZu(true); }
+    if (e.key !== 'Tab') return;
+    /* Fokus bleibt im Blatt */
+    const ziele = Array.from(el.querySelectorAll('button:not([tabindex="-1"]), input, summary')).filter((z) => !z.hidden && z.offsetParent !== null);
+    if (!ziele.length) return;
+    const i = ziele.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); ziele[ziele.length - 1].focus(); } else if (!e.shiftKey && i === ziele.length - 1) { e.preventDefault(); ziele[0].focus(); }
+  });
+  /* Wechselt die Frage oder der Bildschirm (Zurück, Weiter, Verlauf), geht das Blatt zu */
+  if (window.MutationObserver) { FB.wacht = new MutationObserver(() => { if (FB.el && (S.screen !== 'frage' || S.q !== FB.q || !S.win)) fbZu(false); }); FB.wacht.observe($app(), { childList: true }); }
+  el.querySelector('.fb-blatt').focus({ preventScroll: true });
+}
+document.addEventListener('click', (e) => {
+  const b = e.target && e.target.closest ? e.target.closest('[data-farbblatt]') : null;
+  if (!b) return;
+  e.preventDefault();
+  fbAuf(b.getAttribute('data-farbblatt'), b.getAttribute('data-familie') || '');
+});
 function qOrn() { const w = S.win; return '<div class="qswatches">' + ORN.map((o) => '<button type="button" class="qsw" data-act="setw" data-f="orn" data-v="' + o.k + '" aria-pressed="' + (w.orn === o.k) + '"><span class="c" style="background: ' + o.bg + '"></span><span class="n">' + esc(o.label) + '</span></button>').join('') + '</div>'; }
 /* Sprossen: in allen Flügeln gleich, Flügel 1 ist das Muster */
 const barBase = (id) => String(id).replace(/s\d+$/, '');

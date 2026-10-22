@@ -647,7 +647,7 @@ if (teil(6)) {
   await frage5('sfarbe', { sart: 'raffstore', roll: 'aufsatz', sfarbe: 'silber' });
   await p5.click('.qpanel .qsw[data-v="anthrazit"]'); await p5.waitForTimeout(500);
   const so2 = await p5.evaluate(() => ({ f: S.win.sfarbe, bg: document.querySelector('[data-r="lam-0"]').style.background, hint: document.querySelector('.w3d-hint').textContent, swatches: document.querySelectorAll('.qpanel .qsw').length }));
-  ok(so1.roll === 'aufsatz' && so1.lam >= 10 && /linear-gradient/.test(so1.bg) && so1.schienen && so1.knopf && so1.fragen.includes('einbau') && so1.fragen.includes('sfarbe') && so1.fragen.includes('antrieb') && so2.f === 'anthrazit' && so2.bg !== so1.bg && /Anthrazit/.test(so2.hint) && so2.swatches === 7, 'Sonnenschutz außen: Raffstore aus einzelnen Lamellen in Führungsschienen mit Endschiene vor dem Fenster, Knöpfe zum Fahren und Wenden, sieben Farben färben Lamellen und Kasten, Einbau und Antrieb folgen');
+  ok(so1.roll === 'aufsatz' && so1.lam >= 10 && /linear-gradient/.test(so1.bg) && so1.schienen && so1.knopf && so1.fragen.includes('einbau') && so1.fragen.includes('sfarbe') && so1.fragen.includes('antrieb') && so2.f === 'anthrazit' && so2.bg !== so1.bg && /Anthrazit/.test(so2.hint) && so2.swatches === 9, 'Sonnenschutz außen: Raffstore aus einzelnen Lamellen in Führungsschienen mit Endschiene vor dem Fenster, Knöpfe zum Fahren und Wenden, neun Farben (dazu DB 703 und RAL 9007, alle weiteren im Farbblatt) färben Lamellen und Kasten, Einbau und Antrieb folgen');
   await frage5('iart', { iart: 'keiner' });
   await p5.click('.qpanel [data-act="setw"][data-f="iart"][data-v="jalousie"]'); await p5.waitForTimeout(600);
   const inn = await p5.evaluate(() => ({ da: !!document.querySelector('[data-r="innen"]'), bg: document.querySelector('[data-r="innen"]').style.background, k: !!document.querySelector('[data-r="innen-k"]'), fragen: qList(S.win).map((q) => q.id) }));
@@ -657,10 +657,10 @@ if (teil(6)) {
   await p5.click('#t-wunschA'); await p5.keyboard.type('RAL 7021'); await p5.waitForTimeout(300);
   const fa1 = await p5.evaluate(() => ({ bg: document.querySelector('[data-r="el-back"]').style.background, info: document.getElementById('ffi-wunschA').textContent, fokus: document.activeElement.id, cur: document.querySelector('.qpanel .qcur').textContent }));
   await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
-  const fa2 = await p5.evaluate(() => ({ zeile: specRows(S.win).find((r) => r.k === 'Farbe').v, gewaehlt: document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]').length }));
+  const fa2 = await p5.evaluate(() => ({ zeile: specRows(S.win).find((r) => r.k === 'Farbe').v, gewaehlt: Array.from(document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]')).map((b) => b.getAttribute('data-v')).join() }));
   await p5.click('.qpanel .qsw[data-v="9016"]'); await p5.waitForTimeout(300);
   const fa3 = await p5.evaluate(() => ({ wunsch: S.win.wunschA, fa: S.win.fa }));
-  ok(/rgb\(47, 50, 52\)/.test(fa1.bg) && /Erkannt: RAL 7021 Schwarzgrau/.test(fa1.info) && fa1.fokus === 't-wunschA' && /RAL 7021 Schwarzgrau/.test(fa1.cur) && /RAL 7021 Schwarzgrau, eigene Angabe/.test(fa2.zeile) && fa2.gewaehlt === 0 && fa3.wunsch === '' && fa3.fa === '9016', 'Eigene Farbe außen: RAL-Nummer wird erkannt, das Modell färbt sich beim Tippen, eine Farbe aus der Liste hebt sie wieder auf');
+  ok(/rgb\(47, 50, 52\)/.test(fa1.bg) && /Erkannt: RAL 7021 Schwarzgrau/.test(fa1.info) && fa1.fokus === 't-wunschA' && /Schwarzgrau.*RAL 7021.*eigene Angabe/.test(fa1.cur) && /Schwarzgrau \(RAL 7021\), eigene Angabe/.test(fa2.zeile) && fa2.gewaehlt === '7021' && fa3.wunsch === '' && fa3.fa === '9016', 'Eigene Farbe außen: RAL-Nummer wird erkannt (Name und Nummer, die passende beliebte Farbe ist markiert), das Modell färbt sich beim Tippen, eine Farbe aus der Liste hebt sie wieder auf');
   await frage5('gf');
   await p5.click('#t-wunschGf'); await p5.keyboard.type('Messing'); await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
   const gf1 = await p5.evaluate(() => ({ griff: document.querySelector('[data-r="handle-0"]').style.background, zeile: specRows(S.win).find((r) => r.k === 'Griff').v }));
@@ -781,6 +781,59 @@ if (teil(6)) {
   sauber(p8, 'Weniger Bewegung am Modell ohne Fehler'); await ctx8.close();
   sauber(p2, 'App-Logik ohne Fehler');
   await ctx2.close();
+  /* Farben (S2): fast alle RAL-Töne zur Wahl, Farbblatt mit Suche und Familien, Name und Nummer bis in Aufmaßblatt, Betrieb und Server */
+  const ctxF = await browser.newContext(telefon), pF = await neueSeite(ctxF);
+  await pF.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const frageF = async (id, set) => { await pF.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await pF.waitForTimeout(400); };
+  await frageF('fa');
+  const rf0 = await pF.evaluate(() => ({ ral: RAL.liste.filter((e) => e.art === 'ral').length, holz: RAL.liste.filter((e) => e.art === 'holz').map((e) => e.name), sonder: RAL.liste.filter((e) => e.art === 'sonder').map((e) => e.key), schnell: Array.from(document.querySelectorAll('.qpanel .fw-raster .qsw')).map((b) => b.getAttribute('data-v')).join(), quer: document.documentElement.scrollWidth > innerWidth + 1, klein: Array.from(document.querySelectorAll('.qpanel .qsw .c')).filter((c) => c.getBoundingClientRect().width < 44).length, cur: document.querySelector('.qpanel .qcur').textContent, hinweis: /Bildschirm/.test(document.querySelector('.qpanel').textContent) }));
+  ok(rf0.ral === 216 && ['Golden Oak', 'Nussbaum', 'Eiche hell', 'Eiche dunkel', 'Mooreiche', 'Winchester', 'Sheffield Oak', 'Douglasie', 'Oregon', 'Mahagoni', 'Macoré', 'Schwarzbraun'].every((n) => rf0.holz.includes(n)) && ['db703', 'sand7016', 'eloxal'].every((k) => rf0.sonder.includes(k)) && rf0.schnell === '9016,7016,9001,7035,7039,8022,9005,7012,6005,8019,7021,5011' && !rf0.quer && rf0.klein === 0 && /Anthrazitgrau.*RAL 7016/.test(rf0.cur) && rf0.hinweis, 'Farben: alle 216 RAL-Classic-Töne, gängige Holzdekore und Sonderfarben; in der Frage die zwölf beliebtesten als Raster (Tupfen ab 44 px), die gewählte mit Name und Nummer, Hinweis auf echte Muster');
+  await pF.click('.qpanel [data-farbblatt="fa"]:not([data-familie])'); await pF.waitForTimeout(400);
+  const rf1 = await pF.evaluate(() => { const b = document.querySelector('.fb-blatt').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { n: document.querySelectorAll('.fb .fb-f').length, fam: document.querySelectorAll('.fb-fam .chip').length, modell: st.top < b.top - 80, gross: Array.from(document.querySelectorAll('.fb .fb-f .c')).slice(0, 5).every((c) => c.getBoundingClientRect().width >= 44), hinweis: /Bildschirm weichen/.test(document.querySelector('.fb').textContent), hilfe: !!document.querySelector('.fb .fb-hilfe'), offen: !!document.querySelector('.fb .qoffen'), dialog: document.querySelector('.fb').getAttribute('role') === 'dialog' }; });
+  await pF.click('.fb .fb-f[data-v="1015"]'); await pF.waitForTimeout(300);
+  const rf2 = await pF.evaluate(() => ({ fa: S.win.fa, wunsch: S.win.wunschA, bg: document.querySelector('[data-r="el-back"]').style.background, kopf: document.querySelector('.fb-wahl-t').textContent, zeile: specRows(S.win).find((r) => r.k === 'Farbe').v, blatt: !!document.querySelector('.fb') }));
+  ok(rf1.n > 230 && rf1.fam === 13 && rf1.modell && rf1.gross && rf1.hinweis && rf1.hilfe && rf1.offen && rf1.dialog && rf2.fa === '1015' && rf2.wunsch === '' && /rgb\(230, 210, 181\)/.test(rf2.bg) && /Hellelfenbein.*RAL 1015/.test(rf2.kopf) && /außen Hellelfenbein \(RAL 1015\)/.test(rf2.zeile) && rf2.blatt, 'Farbblatt „Alle Farben“: alle Töne, Familien als Chips, Hilfe „Woher kenne ich meine Farbe?“ und Hinweis auf echte Muster; die Wahl färbt das Modell darüber sofort, steht mit Name und Nummer oben, das Blatt bleibt offen');
+  const sucheF = async (t) => { await pF.fill('#fb-such', t); await pF.waitForTimeout(150); return pF.evaluate(() => Array.from(document.querySelectorAll('.fb .fb-f')).map((b) => b.getAttribute('data-v'))); };
+  const s1 = await sucheF('7016'), s2 = await sucheF('ral 9006'), s3 = await sucheF('antrazit'), s4 = await sucheF('golden ok'), s5 = await sucheF('70'), s6 = await sucheF('xyz quatsch');
+  const ohneTreffer = await pF.evaluate(() => !!document.querySelector('.fb [data-fb="wunsch"]'));
+  ok(s1[0] === '7016' && s2[0] === '9006' && s3[0] === '7016' && s4[0] === 'goak' && s5.length === 38 && s5.every((k) => /^70/.test(k)) && s6.length === 0 && ohneTreffer, 'Suche im Farbblatt: Nummer mit und ohne „RAL“, Name mit Tippfehler („antrazit“, „golden ok“), angefangene Nummer; ohne Treffer als eigene Angabe übernehmen');
+  await pF.fill('#fb-such', ''); await pF.click('.fb-fam .chip[data-v="holz"]'); await pF.waitForTimeout(200);
+  const holzF = await pF.evaluate(() => Array.from(document.querySelectorAll('.fb .fb-f')).map((b) => b.getAttribute('data-v')));
+  await pF.click('.fb .fb-f[data-v="winch"]'); await pF.waitForTimeout(200);
+  await pF.keyboard.press('Escape'); await pF.waitForTimeout(200);
+  const rf3 = await pF.evaluate(() => ({ blatt: !!document.querySelector('.fb'), fokus: document.activeElement.getAttribute('data-farbblatt'), fa: S.win.fa, holz: /repeating-linear-gradient/.test(rahmenFarbe(S.win, 'aussen').bg) }));
+  await pF.click('.qpanel [data-farbblatt="fa"]:not([data-familie])'); await pF.waitForTimeout(200);
+  await pF.evaluate(() => { S.q = 'fi'; render(true); }); await pF.waitForTimeout(200);
+  const zuBeimWechsel = await pF.evaluate(() => !document.querySelector('.fb'));
+  ok(holzF.length === 15 && holzF.includes('winch') && !rf3.blatt && rf3.fokus === 'fa' && rf3.fa === 'winch' && rf3.holz && zuBeimWechsel, 'Familie Holzdekore zeigt nur Dekore, mit Maserung im Modell; Escape schließt das Blatt (Fokus zurück auf „Alle Farben“), ein Wechsel der Frage ebenso');
+  await frageF('sfarbe', { sart: 'raffstore', roll: 'aufsatz' });
+  await pF.click('.qpanel [data-farbblatt="sfarbe"]'); await pF.waitForTimeout(300);
+  const sOben = await pF.evaluate(() => Array.from(document.querySelector('.fb .fb-raster').querySelectorAll('.fb-f')).map((b) => b.getAttribute('data-v')).slice(0, 4).join());
+  await pF.click('.fb .fb-f[data-v="db703"]'); await pF.waitForTimeout(300);
+  const rf4 = await pF.evaluate(() => ({ s: S.win.sfarbe, behang: document.querySelector('[data-r="behang"]').style.background, hint: document.querySelector('.w3d-hint').textContent, zeile: specRows(S.win).find((r) => r.k === 'Sonnenschutz').v, aw: AW.sonne(S.win) }));
+  ok(sOben === '9006,9007,7016,db703' && rf4.s === 'db703' && /rgb\(84, 90, 94\)/.test(rf4.behang) && /DB 703 Eisenglimmer dunkel/.test(rf4.hint) && /DB 703 Eisenglimmer dunkel/.test(rf4.zeile) && /DB 703 Eisenglimmer dunkel/.test(rf4.aw), 'Sonnenschutz: im Farbblatt oben die Lamellen- und Panzerfarben (RAL 9006, 9007, 7016, DB 703); DB 703 färbt Behang und Kasten und steht so im Aufmaß');
+  await pF.keyboard.press('Escape'); await frageF('gf');
+  const gfF = await pF.evaluate(() => Array.from(document.querySelectorAll('.qpanel .qsw')).map((b) => b.getAttribute('data-v')).join());
+  await pF.click('.qpanel .qsw[data-v="messing"]'); await pF.waitForTimeout(300);
+  const gf2 = await pF.evaluate(() => ({ gf: S.win.gf, zeile: specRows(S.win).find((r) => r.k === 'Griff').v, aw: AW.griffName(S.win), blatt: !!document.querySelector('[data-farbblatt]') }));
+  ok(gfF === 'weiss,silber,edelstahl,titan,schwarz,anthrazit,braun,bronze,messing' && gf2.gf === 'messing' && /Messing/.test(gf2.zeile) && /Messing/.test(gf2.aw) && !gf2.blatt, 'Griff: nur echte Griff-Farben (dazu Anthrazit, Braun, Bronze, Messing) und das Wunschfeld, kein RAL-Blatt');
+  const abweichend = await pF.evaluate(() => RAL.liste.filter((e) => { const w = Object.assign(baseWin(), { fa: e.key, fi: e.key, offen: {} }), z = AW.farbZeile(w, 'aussen'), b = BLATT_H.col(e.key); return !(z === e.name + ' (' + e.code + ')' && farbZeile(w, 'aussen') === z && b[0] === e.name && b[1] === e.code && b[2] === e.hex && AW.col(e.key)[2] === e.hex); }).map((e) => e.key));
+  const alt = await pF.evaluate(() => { const w = Object.assign(baseWin(), { fa: 'goak', fi: '9001', sart: 'raffstore', roll: 'aufsatz', sfarbe: 'anthrazit', gf: 'titan', offen: {} }); return [farbZeile(w, 'aussen'), farbZeile(w, 'innen'), sonneName(w), griffFarbe(w).name, AW.farbZeile(w, 'aussen'), AW.griffName(w)].join('|'); });
+  ok(abweichend.length === 0 && alt === 'Golden Oak (Holzdekor)|Cremeweiß (RAL 9001)|Anthrazit|Titan|Golden Oak (Holzdekor)|titan', 'Jede wählbare Farbe kommt in App, Aufmaßblatt und Betrieb mit Name und Nummer an; ältere Aufmaße (goak, 9001, anthrazit, titan) lesen sich wie bisher' + (abweichend.length ? ': ' + abweichend.join(', ') : ''));
+  const pdfF = await pF.evaluate(async () => {
+    const w = Object.assign(demoProject()[0], { fa: '1015', fi: 'winch', gleich: false, sart: 'raffstore', roll: 'aufsatz', sfarbe: 'db703', gf: 'messing', wunschA: '', wunschI: '', offen: {} });
+    S.windows = [w]; await blattSchrift(); const blob = blattPDF('kunde'); if (!blob) return '';
+    const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i++) s += String.fromCharCode(buf[i]); return btoa(s);
+  });
+  const fsF = await import('node:fs'), osF = await import('node:os'), pathF = await import('node:path'), cpF = await import('node:child_process');
+  const pfadF = pathF.join(osF.tmpdir(), 'farben-' + process.pid + '.pdf'); fsF.writeFileSync(pfadF, Buffer.from(pdfF, 'base64'));
+  let txtF = ''; try { txtF = cpF.execFileSync('pdftotext', ['-layout', pfadF, '-']).toString('utf8').replace(/\s+/g, ' '); } catch (e) { txtF = ''; }
+  fsF.rmSync(pfadF, { force: true });
+  ok(pdfF.length > 1000 && /Hellelfenbein/.test(txtF) && /RAL 1015/.test(txtF) && /Winchester/.test(txtF) && /DB 703/.test(txtF) && /Eisenglimmer/.test(txtF) && /Messing/.test(txtF) && !/Verkehrsweiß \(RAL 9016\)/.test(txtF), 'Aufmaßblatt (PDF): Hellelfenbein mit RAL 1015, Winchester, DB 703 und Messing kommen an, nichts wird still zu Verkehrsweiß');
+  const MF = createRequire(import.meta.url)('../web/assets/modell.js'), wF = MF.AW.mk({ fa: '1015', fi: 'sheff', sart: 'raffstore', roll: 'aufsatz', sfarbe: '9007', iart: 'rollo', ifarbe: '9010', gf: 'bronze', wunschA: 'RAL 7021' });
+  ok(/außen Schwarzgrau \(RAL 7021\), eigene Angabe, innen Sheffield Oak \(Holzdekor\)/.test(MF.AW.rows(wF).find((r) => r[0] === 'Farbe')[1]) && /RAL 9007 Graualuminium/.test(MF.AW.sonne(wF)) && /RAL 9010 Reinweiß/.test(MF.AW.innen(wF)) && MF.AW.griffName(wF) === 'bronze' && MF.AW.col('quatsch')[0] === 'quatsch', 'Server (modell.js holt ral.js selbst): Name und Nummer für gespeicherte und eingetippte Farben, auch Sonnen- und Innenschutz; Unbekanntes wird nicht still zu Verkehrsweiß');
+  sauber(pF, 'Farbwahl und Farbblatt ohne Fehler');
+  await ctxF.close();
 }
 
 /* ---------- 7. Nachbesserung: gleiches Projekt, nichts doppelt gebucht, Grenzen ---------- */
