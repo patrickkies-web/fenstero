@@ -951,6 +951,14 @@ if (teil(6)) {
     }
     ok(!befund6.length, art + ': ' + schirme6.length + ' Bildschirme mit grünem Kicker, Überschriften mit Punkt und genau einem grünen Wort, höchstens einer Cream-Pille, keinem Knopf über dem Rand und der Fußzeile samt „Vertrag widerrufen“' + (befund6.length ? ': ' + befund6.join(' | ') : ''));
     /* Avatar in Cream, Ziele ab 44 px (Schalterzeilen, Chips, Kopf), Fokus in Eingaben in Schriftfarbe */
+    /* Nacharbeit portal: „Notiz“ an jedem Punkt der Klärungsliste und das × der Blätter mindestens 44 × 44 px */
+    const ziel6b = await b6.evaluate(() => {
+      go('link', 'l1'); const m = (e) => { if (!e) return 'fehlt'; const r = e.getBoundingClientRect(); return r.width >= 44 && r.height >= 44 ? '' : (e.getAttribute('data-act') || e.className) + ' ' + Math.round(r.width) + '×' + Math.round(r.height); };
+      const notiz = Array.from(document.querySelectorAll('.scr [data-act="klaer-notiz"]')).filter((e) => e.getClientRects().length), klein = notiz.map(m);
+      S.sheet = { k: 'linkimport' }; render(); klein.push(m(document.querySelector('.sheet .xclose'))); S.sheet = null; render();
+      return { n: notiz.length, klein: Array.from(new Set(klein.filter(Boolean))) };
+    });
+    ok(ziel6b.n > 0 && !ziel6b.klein.length, art + ': „Notiz“ in der Klärungsliste (' + ziel6b.n + '-mal) und das × der Blätter mindestens 44 × 44 px' + (ziel6b.klein.length ? ': ' + ziel6b.klein.join(', ') : ''));
     const ziel6 = await b6.evaluate(() => { go('bprofil'); const av = document.querySelector('.side .av'), avOk = !av || getComputedStyle(av).backgroundColor === 'rgb(241, 240, 234)', klein = []; go('newlink'); S.nl.step = 1; render(); document.querySelectorAll('.scr .chip, .top button, .top a').forEach((e) => { const r = e.getBoundingClientRect(); if (r.width && r.height < 44) klein.push(e.textContent.trim().slice(0, 20) + ':' + Math.round(r.height)); }); document.getElementById('nl-adresse').focus(); return { av: avOk, klein: klein }; });
     await b6.waitForTimeout(350); ziel6.fokus = await b6.evaluate(() => getComputedStyle(document.getElementById('nl-adresse')).borderColor);
     ok(ziel6.av && !ziel6.klein.length && ziel6.fokus === 'rgb(243, 242, 238)', art + ': Avatar des Betriebs in Cream, Chips und Kopfknöpfe ab 44 px, Fokus in Schriftfarbe' + (ziel6.klein.length ? ': ' + ziel6.klein.join(', ') : ''));
@@ -986,6 +994,18 @@ if (teil(6)) {
   await d6.goto(BASE + '/#projekt-l2', { waitUntil: 'networkidle' }); await d6.waitForTimeout(400);
   ok(await d6.evaluate(() => S.screen === 'link' && S.sel === 'l2' && location.hash === ''), 'Direktlink /#projekt-<id> öffnet das Projekt und räumt die Adresse auf');
   sauber(d6, 'Direktlink ins Projekt ohne Fehler'); await c6d.close();
+  /* Nacharbeit portal, Telefon abgemeldet: das Logo neben „Zurück“ (Registrierung, ohne Schriftzug) und die Schrittknöpfe der Tour sind mindestens 44 px breit */
+  const c6z = await browser.newContext(telefon), z6 = await neueSeite(c6z);
+  await z6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await z6.waitForTimeout(300);
+  await z6.click('.top [data-act="reg"]'); await z6.waitForTimeout(300);
+  const masz6 = (sel) => z6.evaluate((sel) => Array.from(document.querySelectorAll(sel)).filter((e) => e.getClientRects().length).map((e) => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }), sel);
+  const logo6 = await masz6('.top .logo-s.neben-zurueck');
+  await z6.evaluate(() => { S.reg = null; nav('landing'); }); await z6.waitForTimeout(300);
+  await z6.click('.hero.b2b [data-act="tour"]'); await z6.waitForSelector('.tourw'); await z6.waitForTimeout(300);
+  await z6.click('.tour-schritte [data-v="3"]'); await z6.waitForTimeout(250); // erledigte Schritte mit Haken, offene mit Zahl
+  const tour6 = await masz6('.tour-schritte button');
+  ok(logo6.length === 1 && logo6[0][0] >= 44 && logo6[0][1] >= 44 && tour6.length === 8 && tour6.every((g) => g[0] >= 44 && g[1] >= 44), 'Telefon: Logo neben „Zurück“ in der Registrierung (' + logo6.map((g) => g.join('×')).join() + ') und alle Schrittknöpfe der Tour (' + tour6.map((g) => g[0]).join(', ') + ' px breit) mindestens 44 px');
+  sauber(z6, 'Registrierung und Tour am Telefon ohne Fehler'); await c6z.close();
 }
 
 /* ---------- 7. Nachbesserung: gleiches Projekt, nichts doppelt gebucht, Grenzen ---------- */
@@ -3542,6 +3562,10 @@ if (teil(16)) {
   const kto16 = { links: [], book: [], freeUsed: 0 }, ein16 = X16.importCode(kto16, { v: 1, b: '', p: { name: 'Herr Lange', tel: '0170 1112233', mail: 'lange@beispiel.de', erreich: 'vm', ort: 'Köln' }, w: [wn16('Bad', 1000, 1200)], t: 1 });
   const pk16 = ein16.l.aufmass.proj, fremd16 = X16.fromAppProj({ mail: 'kein mail', erreich: 'immer', tel: '0221 1' });
   ok(ein16.ok && ein16.l.kontakt === '0170 1112233' && pk16.mail === 'lange@beispiel.de' && pk16.erreich === 'vm' && pk16.name === 'Herr Lange' && fremd16.mail === '' && fremd16.erreich === '' && AW16.OPT.erreich.vm === 'vormittags', 'Code ohne Link: E-Mail und „Erreichbar“ des Kunden kommen mit (Projektangaben geprüft), nicht nur die Telefonnummer');
+  /* Nacharbeit portal: „Erreichbar“ fragt die App nur ohne Link (Seite Kontakt). Aus dem Kundenlink (Code mit b) kommt ihr Startwert nicht als Angabe des Kunden an */
+  const kl16e = { links: [], book: [], freeUsed: 0 }, pl16e = X16.neuesProjekt(kl16e, { kunde: 'Familie Pilot', kontakt: '0171 9876543' }).l;
+  const r16e = X16.importCode(kl16e, { v: 1, b: pl16e.code, p: { erreich: 'nm', notiz: 'Bitte abends anrufen.', tel: '0171 9876543' }, w: [wn16('Bad', 1000, 1200)], t: 6 });
+  ok(r16e.ok && r16e.l === pl16e && pl16e.aufmass.proj.erreich === '' && pl16e.aufmass.proj.notiz === 'Bitte abends anrufen.' && X16.fromAppProj({ erreich: 'ab' }, true).erreich === '' && X16.fromAppProj({ erreich: 'ab' }).erreich === 'ab', 'Aufmaß aus dem Kundenlink: kein „Erreichbar“ aus dem Startwert der App (dort nie gefragt), ein Code ohne Link behält die Wahl des Kunden');
   const kr16 = { links: [], book: [], freeUsed: 0 }, r16a = X16.importCode(kr16, { v: 1, b: '', p: {}, w: [wn16('Kind', 1000, 1200), wn16('Bad', 800, 1000)], t: 2 }), L16 = r16a.l;
   const abs16 = (l) => AW16.klaerung(l.aufmass.windows, l.aufmass.proj, l).filter((r) => r.kurz === 'Absturzsicherung').map((r) => r.k + (l.klaer && l.klaer[r.id] && l.klaer[r.id].ok ? ' geklärt' : ' offen')).join(' | ');
   X16.projektAendern(L16, { klaer: { id: 'absturz-p0', ok: true, notiz: 'Kind: Geländer' } }); X16.projektAendern(L16, { klaer: { id: 'lueftung', ok: true } });
@@ -3594,6 +3618,22 @@ if (teil(16)) {
   ok(lang5.name >= 60 && fuss5.length >= 2 && fuss5.every((f) => f.luft >= 6 && /^Fensterbau und Glaserei/.test(f.links)), 'PDF des Betriebs: Fußzeile mit 60 Zeichen Firmenname läuft nicht in die Seitenzahl (Abstand ' + fuss5.map((f) => Math.round(f.luft)).join(', ') + ' pt)');
   ok(/E-Mail weber@beispiel\.de/.test(lang5.kopf) && /Telefon 0171 999 00 11/.test(lang5.kopf) && /Erreichbar abends/.test(lang5.kopf) && /E-Mail\s+weber@beispiel\.de/.test(txt5) && /Erreichbar\s+abends/.test(txt5), 'Kontakt, den der Kunde selbst eingetragen hat (Telefon, E-Mail, Erreichbar), steht im Kopf des Aufmaßes und in der Karte „Ihr Kunde“ im PDF');
   ok(lang5.h3 === 'Das Aufmaß.:1|Stand des Projekts.:1|Bisheriger Verlauf.:1' && lang5.kacheln === 0 && /\d+ Fotos (ausgewertet|beim Kunden)/.test(lang5.fotoChip), 'Projektansicht: Zwischentitel mit Punkt und einem grünen Wort; im Pilotbetrieb keine leeren Fotokacheln, im Kopf „… Fotos ausgewertet“ statt angekommener Fotos (' + lang5.fotoChip + ')');
+  /* Nacharbeit portal: Aufmaß aus dem Kundenlink ohne Erreichbarkeit zeigt in Kopf, Text und PDF keine Zeile „Erreichbar“, auch wenn die App ihren Startwert mitschickt */
+  const er5 = await s5.evaluate(async () => {
+    const a = A(), l = X.neuesProjekt(a, { kunde: 'Familie Morgen', kontakt: '0176 1234567' }).l, w0 = JSON.parse(JSON.stringify(a.links.find((x) => x.id === 'l1').aufmass.windows[0]));
+    const r = X.importCode(a, { v: 1, b: l.code, p: { erreich: 'nm', notiz: 'Bitte vormittags anrufen. Der Rollladen im Bad klemmt.', tel: '0176 1234567', mail: 'morgen@beispiel.de' }, w: [w0], t: 7 });
+    l.locked = false; go('link', l.id); await window.Blatt.schrift();
+    const b = amPDF(l, {}, null), u = new Uint8Array(await b.arrayBuffer()); let bin = ''; for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+    const out = { art: r.art, erreich: l.aufmass.proj.erreich, kontakt: kundeKontakt(l).map((z) => z[0]).join(','), kopf: (document.querySelector('.amhead') || {}).innerText || '', text: aufmassText(l), b64: btoa(bin) };
+    go('link', 'l1'); return out;
+  });
+  const er5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-erreich.pdf'); fs16.writeFileSync(er5p, Buffer.from(er5.b64, 'base64'));
+  const er5t = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', er5p, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  ok(er5.art === 'neu' && er5.erreich === '' && er5.kontakt === 'E-Mail' && /E-Mail morgen@beispiel\.de/.test(er5.kopf.replace(/\s+/g, ' ')) && /Bitte vormittags anrufen/.test(er5.text) && /morgen@beispiel\.de/.test(er5t) && !/Erreichbar/.test(er5.kopf + er5.text + er5t), 'Aufmaß aus dem Kundenlink ohne Erreichbarkeit: Kopf, kopierter Text und PDF ohne „Erreichbar nachmittags“ (Kontakt und Nachricht des Kunden stehen da)');
+  /* Nacharbeit portal: große Zeichnung am Schreibtisch ohne Schrift unter 13 px (tatsächlicher Maßstab der SVG, auch „Fußboden“) */
+  await s5.click('#pos-0 summary').catch(() => {}); await s5.waitForTimeout(300);
+  const zg5 = await s5.evaluate(() => { const svg = Array.from(document.querySelectorAll('#pos-0 svg.zeichnung')).find((x) => getComputedStyle(x).display !== 'none'), k = svg.getScreenCTM().a, t = Array.from(svg.querySelectorAll('text')); return { cls: svg.getAttribute('class'), min: Math.min.apply(null, t.map((x) => parseFloat(x.getAttribute('font-size')) * k)), fuss: t.filter((x) => x.textContent === 'Fußboden').map((x) => parseFloat(x.getAttribute('font-size')) * k)[0] || 0 }; });
+  ok(/zk-gross/.test(zg5.cls) && zg5.min >= 13 && zg5.fuss >= 13, 'Schreibtisch 1280 px: große Zeichnung ohne Schrift unter 13 px (kleinste ' + zg5.min.toFixed(1) + ' px, Fußboden ' + zg5.fuss.toFixed(1) + ' px)');
   /* Nacharbeit portal: Einladungsseite gestalten am Schreibtisch (Vorschau wie am Telefon, Kicker, Schalter als ganze Zeile, Ziele ab 44 px, Gruppen mit Namen) */
   await s5.evaluate(() => go('einladung')); await s5.waitForTimeout(400);
   const ei5 = await s5.evaluate(() => {
@@ -3624,6 +3664,9 @@ if (teil(16)) {
     return { eng: dts.filter((d) => d.luft < 6).map((d) => d.t), klein: svg.getAttribute('class'), min: Math.min.apply(null, Array.from(svg.querySelectorAll('text')).map((x) => parseFloat(x.getAttribute('font-size')) * f)) };
   });
   ok(!tm5.eng.length && /zk-klein/.test(tm5.klein) && tm5.min >= 13, 'Telefon: Beschriftungen wie Einbruchschutz und Insektenschutz mit Abstand zum Wert' + (tm5.eng.length ? ' (zu eng: ' + tm5.eng.join(', ') + ')' : '') + ', Zeichnung ohne Schrift unter 13 px (kleinste ' + tm5.min.toFixed(1) + ' px)');
+  await t5.setViewportSize({ width: 360, height: 740 }); await t5.waitForTimeout(300);
+  const t360 = await t5.evaluate(() => { const svg = Array.from(document.querySelectorAll('#pos-0 svg.zeichnung')).find((x) => getComputedStyle(x).display !== 'none'), k = svg.getScreenCTM().a; return { cls: svg.getAttribute('class'), min: Math.min.apply(null, Array.from(svg.querySelectorAll('text')).map((x) => parseFloat(x.getAttribute('font-size')) * k)), quer: document.documentElement.scrollWidth > window.innerWidth + 1 }; });
+  ok(/zk-klein/.test(t360.cls) && t360.min >= 13 && !t360.quer, 'Telefon 360 px: Zeichnung ohne Schrift unter 13 px (kleinste ' + t360.min.toFixed(1) + ' px), kein Querscrollen');
   sauber(t5, 'Aufmaß beim Betrieb am Telefon ohne Fehler'); await ctxT5.close();
 
   /* l) Angleich an #46 (Detailtiefe): alle Detailangaben beim Betrieb in ihren Wünsche-Gruppen, Standard des Fensterbauers sichtbar,

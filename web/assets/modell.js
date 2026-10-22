@@ -780,7 +780,7 @@
           const x0 = ox - wr - fs * 0.6, x1 = ox + ow + wr + fs * 0.6;
           line([x0, yF], [x1, yF], ZF.ink, lw * 1.6);
           for (let hx = x0 + fs * 0.5; hx < x1; hx += fs * 0.7) line([hx, yF], [hx - fs * 0.45, yF + fs * 0.45], ZF.boden, lw * 0.8);
-          text(B - fs * 0.15, yF - fs * 0.55, 'Fußboden', { a: 'end', g: Math.max(fs * 0.82, o.fsMin || 0), c: ZF.grau, b: 500 });
+          text(B - fs * 0.15, yF - fs * 0.55, 'Fußboden', { a: 'end', g: Math.max(fs * 0.92, o.fsMin || 0), c: ZF.grau, b: 500 }); // so groß wie die Maßzahlen
         }
       }
       /* Element: Blendrahmen in der Farbe innen (Ansicht von innen), Kämpfer, Pfosten, Flügel, Glas, Symbole, Sprossen, Griffe */
@@ -1086,12 +1086,13 @@
     const fromApp = (w) => AW.mk(Object.assign({}, w, { name: w.name || 'Fenster' }, w && w.notizen ? { notizen: AW.notizSauber(w.notizen) } : {})); // Notizen je Stelle nur als saubere Texte
     function fingerprint(o) { try { return hashN(JSON.stringify([o.w, o.p])); } catch (e) { return 0; } }
     /* Angaben zum Projekt aus der App; dazu der Kontakt, den der Kunde selbst eingetragen hat (Name, Ort, Telefon, E-Mail, wann erreichbar),
-       damit beim Betrieb nichts davon verloren geht, auch wenn das Projekt erst mit dem Code entsteht */
+       damit beim Betrieb nichts davon verloren geht, auch wenn das Projekt erst mit dem Code entsteht. „Erreichbar“ fragt die App nur ohne Link
+       (Seite Kontakt); kommt das Aufmaß aus einem Kundenlink (ausLink: Code mit Projektkennung b), ist der Wert nur der Startwert der App und fällt weg */
     const zeile1 = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n);
-    function fromAppProj(p) {
+    function fromAppProj(p, ausLink) {
       p = p || {}; const fw = AW.OPT.foerdweg[p.foerdweg] ? p.foerdweg : '', mail = zeile1(p.mail, 80);
       return { gebaeude: p.gebaeude || '', baujahr: p.baujahr || '', total: AW.num(p.total) || 0, zeit: p.zeit || '', budget: p.budget || '', foerd: !!p.foerd || fw === 'bafa' || fw === 'steuer', foerdweg: fw, tiefe: ['kurz', 'normal', 'genau'].indexOf(p.tiefe) >= 0 ? p.tiefe : '', notiz: String(p.notiz || '').replace(/\s+/g, ' ').trim().slice(0, 600), notizen: AW.notizSauber(p.notizen),
-        name: zeile1(p.name, 60), ort: zeile1(p.ort, 120), tel: zeile1(p.tel, 40), mail: /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(mail) ? mail : '', erreich: AW.OPT.erreich[p.erreich] ? p.erreich : '' };
+        name: zeile1(p.name, 60), ort: zeile1(p.ort, 120), tel: zeile1(p.tel, 40), mail: /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(mail) ? mail : '', erreich: !ausLink && AW.OPT.erreich[p.erreich] ? p.erreich : '' };
     }
     const aufmassOf = (wins, proj) => ({ windows: wins, proj: proj, fotos: wins.reduce((s, w) => s + (w.fotos || 0), 0), elemente: wins.reduce((s, w) => s + (AW.num(w.anzahl) || 1), 0) });
 
@@ -1266,7 +1267,7 @@
       if (o.b && !l) return { ok: false, art: 'fremd', msg: 'Dieser Code gehört zu keinem Ihrer Projekte.' };
       if (l && l.status === 'eingegangen' && !(l.nb && l.nb.offen && (o.r || 1) >= l.nb.runde)) return { ok: false, art: 'schon', l: l, msg: l.nb && l.nb.offen ? 'Dieser Code ist noch die alte Fassung. Der Kunde muss das Aufmaß über den Nachbesserungs-Link erneut abschicken.' : 'Dieses Aufmaß ist schon eingegangen. Für eine Korrektur fragen Sie im Projekt eine Nachbesserung an.' };
       if (l && l.status === 'eingegangen') {
-        const fp2 = fingerprint(o), wins2 = (o.w || []).map(fromApp), am2 = aufmassOf(wins2, fromAppProj(o.p || {})); am2.fp = fp2;
+        const fp2 = fingerprint(o), wins2 = (o.w || []).map(fromApp), am2 = aufmassOf(wins2, fromAppProj(o.p || {}, !!o.b)); am2.fp = fp2;
         const q = ueberschneidung(l.aufmass, am2), neu = q === 0, gleich = !!(l.aufmass && l.aufmass.fp === fp2);
         (l.vorher = l.vorher || []).push({ runde: l.runde || 1, when: (l.log || {}).eingegangen || '', aufmass: l.aufmass });
         /* Kunde ohne gespeicherte Angaben (anderes Gerät) schickt nur die betroffenen Fenster: passende Positionen ersetzen, übrige behalten */
@@ -1282,7 +1283,7 @@
       const war = l && l.status === 'abgelaufen', wins = (o.w || []).map(fromApp), p = o.p || {};
       if (!l) { l = { id: newId('l'), code: newCode(), nr: nextNr(a, now), kunde: String(p.name || 'Kunde ohne Projekt').slice(0, 60), kontakt: String(p.tel || p.mail || '').slice(0, 80), adresse: String(p.ort || '').slice(0, 120), geb: '', fz: '', plan: [], note: 'direkt vom Kunden, per Code übernommen', created: datum(now), expires: dateIn(14, now), status: 'gesendet', progress: 0, via: 'Code', du: false, log: { erstellt: stamp(now), gesendet: stamp(now) } }; a.links.unshift(l); }
       l.seen = false; l.log = l.log || {}; l.log.gesendet = l.log.gesendet || stamp(now); l.log.geoeffnet = l.log.geoeffnet || stamp(now); l.log.arbeit = l.log.arbeit || stamp(now);
-      const am = aufmassOf(wins, fromAppProj(p)); am.fp = fp;
+      const am = aufmassOf(wins, fromAppProj(p, !!o.b)); am.fp = fp;
       const r = receiveAufmass(a, l, am, via || 'Code', now);
       return { ok: true, art: 'neu', l: l, feier: r.ok ? 'eingang' : '', locked: !r.ok, notif: r.notif, msg: r.ok ? (war ? 'Link war abgelaufen, Aufmaß trotzdem übernommen: ' : 'Aufmaß übernommen: ') + l.kunde : 'Aufmaß übernommen. Zum Ansehen Zahlungsart hinterlegen' };
     }
