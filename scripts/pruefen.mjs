@@ -861,7 +861,7 @@ if (teil(6)) {
   await pF.click('.qpanel [data-farbblatt="sfarbe"]'); await pF.waitForTimeout(300);
   const sOben = await pF.evaluate(() => Array.from(document.querySelector('.fb .fb-raster').querySelectorAll('.fb-f')).map((b) => b.getAttribute('data-v')).slice(0, 4).join());
   await pF.click('.fb .fb-f[data-v="db703"]'); await pF.waitForTimeout(300);
-  const rf4 = await pF.evaluate(() => ({ s: S.win.sfarbe, behang: document.querySelector('[data-r="behang"]').style.background, hint: document.querySelector('.w3d-hint').textContent, zeile: specRows(S.win).find((r) => r.k === 'Sonnenschutz').v, aw: AW.sonne(S.win) }));
+  const rf4 = await pF.evaluate(() => ({ s: S.win.sfarbe, behang: document.querySelector('[data-r="lam-0"]').style.background, hint: document.querySelector('.w3d-hint').textContent, zeile: specRows(S.win).find((r) => r.k === 'Sonnenschutz').v, aw: AW.sonne(S.win) }));
   ok(sOben === '9006,9007,7016,db703' && rf4.s === 'db703' && /rgb\(84, 90, 94\)/.test(rf4.behang) && /DB 703 Eisenglimmer dunkel/.test(rf4.hint) && /DB 703 Eisenglimmer dunkel/.test(rf4.zeile) && /DB 703 Eisenglimmer dunkel/.test(rf4.aw), 'Sonnenschutz: im Farbblatt oben die Lamellen- und Panzerfarben (RAL 9006, 9007, 7016, DB 703); DB 703 färbt Behang und Kasten und steht so im Aufmaß');
   await pF.keyboard.press('Escape'); await frageF('gf');
   const gfF = await pF.evaluate(() => Array.from(document.querySelectorAll('.qpanel .qsw')).map((b) => b.getAttribute('data-v')).join());
