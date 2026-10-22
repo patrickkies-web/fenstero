@@ -9,6 +9,12 @@ import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
 import { NB_STAND } from './recht.js';
 import { ablage, linkOrdner, fotoIds, fotosLinkAufraeumen } from './fotos.js';
 import { eingangMelden } from './benachrichtigung.js';
+import '../../web/assets/instanzregeln.js';
+import { linkAufloesen, linkAendern, pseudoKonto } from '../instanz/adapter.js';
+import { budget, bremse } from './bremse.js';
+import { eingangAnstossen, loeschenAbFuer } from './eingang.js';
+import { alarmMail } from './ki.js';
+import { instanzZaehlen } from './statistik.js';
 
 const X = () => globalThis.Abrechnung;
 const EIN = () => globalThis.Einladung;
@@ -276,6 +282,7 @@ export const KONTO = {
   },
   /* --- Aus der App: Link prüfen, Fortschritt melden, Aufmaß direkt senden (ohne Anmeldung, der Link-Code ist der Schlüssel) --- */
   'GET /api/link/:code': async (ctx) => {
+    if (ctx.instanz) return linkInstanz(ctx);
     linkBremse(ctx.request);
     const code = str(ctx.params.code, 12).toLowerCase(); if (!/^[a-z0-9]{3,12}$/.test(code)) throw linkUnbekannt(ctx.request, 'Kein gültiger Link.');
     const row = await ctx.sp.betriebNachCode(code); if (!row) throw linkUnbekannt(ctx.request);
@@ -287,6 +294,7 @@ export const KONTO = {
   },
   /* Geöffnet: der Betrieb bekommt einen Hinweis; beim ersten Öffnen beginnen die 60 Tage, die der Kunde Zeit hat */
   'POST /api/link/:code/fortschritt': async (ctx) => {
+    if (ctx.instanz) return fortschrittInstanz(ctx);
     linkBremse(ctx.request);
     const code = str(ctx.params.code, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw linkUnbekannt(ctx.request);
     if (!erlaubt('fort:' + code, 60, 10 * 60 * 1000) || sperreVon(row)) return { ok: true };
@@ -297,6 +305,7 @@ export const KONTO = {
     return { ok: true, expires: expires };
   },
   'POST /api/aufmass': async (ctx) => {
+    if (ctx.instanz) return aufmassInstanz(ctx);
     const o = ctx.body || {}; if (!o || !Array.isArray(o.w) || !o.b) throw new ApiFehler('Kein Aufmaß im Versand.');
     if (!erlaubt('am:' + quelle(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
     const code = str(o.b, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw new ApiFehler('Dieser Link gehört zu keinem Projekt mehr.', 404);
@@ -353,6 +362,110 @@ export const KONTO = {
   }
 };
 
+/* ---------- Konfigurator-Instanzen (Strang A, Bauplan §3 A.4, A.7; docs/INSTANZEN.md) ----------
+   Auf dem Host einer Instanz (ctx.instanz) laufen Link, Fortschritt und Eingang über den Adapter (functions/instanz/adapter.js): Website-
+   Besucher haben bis zum Senden einen virtuellen Link (nur Zwischenstand), Signature-Einladungen eine Zeile in anfragen. Nichts davon
+   gerät in die Abrechnung je Aufmaß (Konto 'instanz', modell.js). */
+const RI = () => globalThis.Instanzregeln;
+const TAG_MS = 864e5;
+const istoString = (t) => new Date(t).toISOString();
+async function linkInstanz(ctx) {
+  linkBremse(ctx.request);
+  if (!(await bremse(ctx, 'LINK', quelle(ctx.request)))) throw new ApiFehler('Zu viele Anfragen. Bitte gleich noch einmal.', 429);
+  const inst = ctx.instanz, aufl = await linkAufloesen(ctx, ctx.params.code), l = aufl.l;
+  const zu = X().linkZu(l), status = zu === 'abgelaufen' ? 'abgelaufen' : l.status;
+  return { ok: true, betrieb: inst.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, inst.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now(), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: l.du !== undefined ? !!l.du : !!inst.du, expires: l.expires || '', ap: (inst.auftritt || {}).ap || '', auftritt: inst.auftritt, grenzen: GRENZEN, instanz: true, art: aufl.art === 'virtuell' ? 'website' : (aufl.anfrage || {}).art || 'website', nr: l.nr || '' };
+}
+/* Virtuelle Links melden nichts; Einladungen (Signature) wie Kundenlinks, die Meldung landet im Dashboard */
+async function fortschrittInstanz(ctx) {
+  linkBremse(ctx.request);
+  const aufl = await linkAufloesen(ctx, ctx.params.code);
+  if (aufl.art !== 'anfrage' || !erlaubt('fort:' + aufl.code, 60, 10 * 60 * 1000)) return { ok: true };
+  const b = ctx.body || {}; let expires = '';
+  await linkAendern(ctx, aufl, (a, l) => { const r = X().fortschritt(l, b.stufe, b.k); expires = l.expires || ''; if (!r) return false; if (r === 'geoeffnet') melden(a, { t: (l.kunde || 'Ihr Kunde') + ' hat den Link geöffnet', s: 'Projekt ' + (l.nr || '') + ', noch keine Maße eingetragen.', to: ['link', l.id] }); return true; });
+  return { ok: true, expires: expires };
+}
+const zeileText = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n);
+async function aufmassInstanz(ctx) {
+  const inst = ctx.instanz, k = ctx.k, o = ctx.body || {};
+  if (!o || !Array.isArray(o.w) || !o.b) throw new ApiFehler('Kein Aufmaß im Versand.');
+  if (!erlaubt('am:' + quelle(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
+  const code = str(o.b, 12).toLowerCase(), aufl = await linkAufloesen(ctx, code);
+  let art = RI().anfrageArt(inst.status, { vorschau: inst.vorschau });
+  if (!art) throw new ApiFehler('Der Fensterplaner nimmt gerade keine Anfragen an.', 503);
+  if (art === 'website' && inst.demo) art = 'demo';
+  if (o.w.length > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster.', 400);
+  const jetzt = Date.now(), wm = Array.isArray(o.wm) && o.wm.length === o.w.length ? o.wm.map((x) => ({ wid: kennung(x), t0: Number(x && x.t0) || 0, aend: Number(x && x.aend) || 0, ts: zeitKappen(x && x.ts, jetzt) })) : null, standB = zeitKappen(o.stand, jetzt);
+  const projTsB = zeitKappen(o.projTs, jetzt);
+  delete o.wm; delete o.stand; delete o.projTs;
+  /* Kontakt ist Pflicht für jede Anfrage über die Website (der Betrieb kennt den Kunden sonst nicht) */
+  const p = o.p && typeof o.p === 'object' ? o.p : {}, name = zeileText(p.name, 60), tel = zeileText(p.tel, 40), mail = zeileText(p.mail, 80).toLowerCase();
+  if (aufl.art === 'virtuell' && (name.length < 2 || !(RI().telOk(tel) || RI().mailOk(mail)))) throw new ApiFehler('Bitte Namen und eine Telefonnummer oder E-Mail-Adresse angeben, damit ' + inst.name + ' sich melden kann.', 400, { kontakt: true });
+  if (aufl.art === 'virtuell') {
+    /* je Anschluss höchstens GRENZEN.anfragenIpTag Anfragen am Tag; je Instanz Alarm beim Richtwert, Schluss beim Vierfachen (E12) */
+    if (!erlaubt('anf:' + quelle(ctx.request), RI().GRENZEN.anfragenIpTag, TAG_MS)) throw new ApiFehler('Von diesem Anschluss kamen heute schon viele Anfragen. Bitte melden Sie sich direkt bei ' + inst.name + '.', 429);
+    if (art !== 'test') {
+      const richt = Math.max(1, Number(inst.m.anfragenTag) || 50), b = await budget(ctx, 'inst:' + inst.id8 + ':anfragen', richt * 4, { alarm: richt });
+      if (b.alarm) ctx.waitUntil(alarmMail(k, 'Viele Anfragen bei ' + inst.name, inst.name + ' (' + inst.haupthost + ') hat heute schon ' + b.stand + ' Anfragen bekommen (Richtwert ' + richt + '). Beim Vierfachen nimmt die Instanz bis morgen keine mehr an.'));
+      if (!b.ok) throw new ApiFehler('Heute kommen ungewöhnlich viele Anfragen. Bitte melden Sie sich direkt bei ' + inst.name + '.', 429);
+    }
+  }
+  const zw = ctx.sp.entwurfHolen ? await ctx.sp.entwurfHolen(code).catch(() => undefined) : undefined;
+  if (zw && Object.keys((zw.meta || {}).fenster || {}).length && (!wm || wm.some((x) => !x.wid))) throw new ApiFehler('Bitte die Seite neu laden und noch einmal senden.', 400);
+  if (zw && wm) { const ids = new Set(Object.keys((zw.meta || {}).fenster || {})); wm.forEach((x) => { if (x.wid) ids.add(x.wid); }); if (Math.max(ids.size, Number((zw.meta || {}).angelegt) || 0) > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster, gelöschte zählen mit.', 400); }
+  if (zw && wm && !o.m && X().linkZu(aufl.l) !== 'eingegangen') {
+    const d = zw.daten || {}, hier = new Map(wm.map((x) => [x.wid, x]));
+    const veraltet = (d.windows || []).some((w) => { const x = hier.get(kennung(w)); return !x || (Number(w.ts) || 0) > x.ts; }) || (Number(d.projTs) || 0) > projTsB;
+    if (veraltet) throw new ApiFehler('Ein anderes Gerät hat inzwischen etwas geändert. Bitte kurz prüfen und noch einmal senden.', 409, { abgleichen: true });
+  }
+  o.v = 1; o.b = code;
+  const ab = ablage(k);
+  let namen = ab ? null : new Set();
+  if (ab && (fotoIds(o.w).size || o.m)) { try { namen = new Set(await ab.liste(linkOrdner(code))); } catch (e) { namen = null; } }
+  const basis = (/(^|\.)localhost$/.test(ctx.url.hostname) ? ctx.url.protocol + '//' + ctx.url.host : 'https://' + inst.haupthost);
+  const eingangAt = istoString(k.jetzt || jetzt);
+  let r = null;
+  if (aufl.art === 'virtuell') {
+    /* in einem Schreibvorgang: Nummer, Link-Objekt, Eingang, Versand offen (K2.4) */
+    const row0 = ctx.sp.betriebHolen ? await ctx.sp.betriebHolen(inst.betrieb) : null;
+    const nr = art === 'test' ? 'TEST-' + code.slice(0, 6).toUpperCase() : await ctx.sp.instanzNr(inst.id);
+    const l = { id: X().newId('l'), code: code, nr: nr, kunde: name, kontakt: tel || mail, adresse: zeileText(p.ort, 120), geb: '', fz: '', plan: [], note: '', created: X().datum(), expires: '', status: 'arbeit', progress: 0, via: 'Website', quelle: inst.host, host: inst.haupthost, art: art, du: !!inst.du, instanz: true, log: { erstellt: X().stamp() } };
+    const a = pseudoKonto((row0 && row0.daten) || {}, l);
+    r = X().importCode(a, o, undefined, 'Website');
+    if (!r.ok) throw new ApiFehler(r.art === 'schon' || r.art === 'doppelt' ? 'Diese Anfrage ist schon angekommen.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400);
+    if (r.l && r.l.aufmass) fotosVermerken(r.l.aufmass, namen);
+    await ctx.sp.anfrageAnlegen({ code: code, instanz: inst.id, betrieb: inst.betrieb, lid: l.id, art: art, status: 'eingegangen', nr: nr, daten: a.links[0], versand: { runde: 1, status: 'offen', versuche: 0, n: 0, basis: basis }, eingegangen_at: eingangAt, loeschen_ab: loeschenAbFuer(inst.m, art, k.jetzt || jetzt) })
+      .catch((e) => { throw e && e.status === 409 ? new ApiFehler('Diese Anfrage ist schon angekommen.', 409) : e; });
+  } else {
+    /* Einladung oder Nachbesserung: über das Pseudo-Konto, Versand der neuen Runde im selben Schreibvorgang */
+    let fehl = null;
+    await linkAendern(ctx, aufl, (a) => {
+      const res = X().importCode(a, o, undefined, 'App');
+      if (!res.ok) { fehl = res; return false; }
+      if (res.l && res.l.aufmass) fotosVermerken(res.l.aufmass, namen);
+      r = res; return true;
+    }, { zeile: (z) => { const v = z.versand || {}; z.status = 'eingegangen'; z.eingegangen_at = eingangAt; z.versand = { runde: (r.l && r.l.runde) || 1, status: 'offen', versuche: 0, n: 0, basis: v.basis || basis }; z.loeschen_ab = loeschenAbFuer(inst.m, z.art, k.jetzt || jetzt); } });
+    if (fehl) throw new ApiFehler(fehl.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : fehl.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : fehl.msg, fehl.art === 'schon' || fehl.art === 'doppelt' ? 409 : 400, fehl.art === 'schon' && fehl.l && X().linkZu(fehl.l) === 'eingegangen' ? { zu: 'eingegangen', runde: fehl.l.runde || 1, seit: fehl.l.eingegangenAt || 0 } : undefined);
+  }
+  const nb = r.art === 'nb' || r.art === 'nb-neu', runde = (r.l && r.l.runde) || 1;
+  if (art !== 'test') instanzZaehlen(ctx, inst, 'anfrage');
+  /* PDF und Mail an den Betrieb: über die Warteschlange, ohne sie nach der Antwort (eingang.js) */
+  await eingangAnstossen(ctx, code, runde);
+  if (r.l && r.l.aufmass) ctx.waitUntil(fotosLinkAufraeumen(k, code, fotoIdsMitKlein(r.l.aufmass.windows)).catch(() => 0));
+  if (ctx.sp.entwurfAendern) ctx.waitUntil(ctx.sp.entwurfAendern(code, inst.betrieb, (e) => {
+    if (!e.version && !wm) return false;
+    if (wm && !o.m) {
+      if ((Number(e.stand) || 0) < standB || !((e.daten || {}).windows || []).length) { e.daten = { windows: o.w.map((w, i) => Object.assign(ohneBild(w), wm[i])), proj: o.p || {}, projTs: projTsB }; e.stand = Math.max(Number(e.stand) || 0, standB); }
+      e.meta = metaMischen(e.meta || {}, wm, 0, jetzt);
+    }
+    e.meta = Object.assign({}, e.meta || {}, { gesendet: runde, gesendetAm: new Date().toISOString() });
+    return true;
+  }).catch(() => false));
+  return { ok: true, nr: (r.l && r.l.nr) || '', betrieb: inst.name, runde: runde, nachbesserung: nb, art: art };
+}
+/* Die kleinen Fassungen (<id>k) gehören zum Foto und bleiben beim Aufräumen nach dem Senden */
+const fotoIdsMitKlein = (wins) => { const s = fotoIds(wins); Array.from(s).forEach((id) => s.add(id + 'k')); return s; };
+
 /* Alle zwei Wochen (Cron): offene Projektbuchungen je Betrieb als Sammelrechnung bei Stripe anlegen; Abos rechnet Stripe selbst ab.
    Ein Fehler bei einem Betrieb hält die anderen nicht auf. Was Stripe schon berechnet hat (Speichern danach fehlgeschlagen), wird nur nachgetragen.
    nurId: nur dieser Betrieb (Zentrale, „jetzt abrechnen“). */
@@ -361,6 +474,7 @@ export async function abrechnungslauf(k, sp, zd, nurId) {
   if (live(k) && !k.mwstGesetzt) return { ok: false, grund: 'MWST nicht festgelegt (0 oder 19): keine Sammelrechnungen', rechnungen: 0, fehler: 0, meldung: 'Umsatzsteuer festlegen: Variable MWST bei Cloudflare (0 = Kleinunternehmer, 19 = 19 %).' };
   const rows = nurId ? [await sp.betriebHolen(nurId)].filter((r) => r && r.stripe_customer) : await sp.betriebeMitKunde(); let n = 0, fehler = 0, meldung = '';
   for (const row of rows) {
+    if (row.daten && row.daten.instanz) continue; // Konfigurator-Instanzen rechnen nie je Aufmaß ab (Paket, Bauplan §3 A.12)
     const offen = ((row.daten || {}).book || []).filter((b) => b.kind === 'aufmass' && b.status === 'offen' && b.betrag > 0);
     if (!offen.length || !(row.daten || {}).pay) continue;
     try {

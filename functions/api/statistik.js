@@ -209,6 +209,16 @@ export async function zaehlen(k, sp, schluessel) {
     return ok;
   } catch (e) { ausBis = Date.now() + 60 * 1000; return false; }
 }
+/* Konfigurator-Instanzen (docs/INSTANZEN.md): eigene Zähler je Instanz inst:<id8>:aufruf|start|anfrage|ki|foto, ohne Stunden, ohne
+   Herkunft; auf den Domains der Instanzen zählt kein Seitenaufruf von eeziframes (worker.js geht dort nicht über seitenaufruf), und die
+   Auswertung unten lässt inst: und budget: (bremse.js) aus den Zahlen von eeziframes */
+export const INSTANZ_ARTEN = ['aufruf', 'start', 'anfrage', 'ki', 'foto'];
+export function instanzZaehlen(ctx, inst, art) {
+  if (!ctx || !inst || !inst.id8 || INSTANZ_ARTEN.indexOf(art) < 0) return false;
+  const p = zaehlen(ctx.k, ctx.sp, ['inst:' + inst.id8 + ':' + art]).catch(() => false);
+  if (ctx.waitUntil) ctx.waitUntil(p);
+  return p;
+}
 export async function seitenaufruf(request, env) {
   const keys = schluesselFuer(request, env); if (!keys.length) return false;
   const k = konfig(env); if (!k.daten) return false;
@@ -231,6 +241,7 @@ export async function auswerten(sp, zeit) {
   const summen = {};
   for (const r of rows || []) {
     const i = r.schluessel.indexOf(':'), art = r.schluessel.slice(0, i), name = r.schluessel.slice(i + 1), n = Number(r.anzahl) || 0;
+    if (art === 'inst' || art === 'budget') continue; // Zähler der Instanzen und Budgets gehören nicht zu den Zahlen von eeziframes
     const tagZeile = r.tag ? reihe.get(String(r.tag).slice(0, 10)) : null;
     if (!verdichtet && r.tag && !tagZeile) continue; // einzelne Tageszähler außerhalb des Zeitraums
     if (!verdichtet || !r.tag) (summen[art] = summen[art] || new Map()).set(name, ((summen[art] && summen[art].get(name)) || 0) + n);

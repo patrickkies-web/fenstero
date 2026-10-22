@@ -3,7 +3,9 @@
    Versand über post.js (Resend), nur wenn der Mailversand eingerichtet ist; sonst passiert nichts, und der Betriebsbereich sagt das
    statt der Schalter. Inhalt so knapp wie möglich: Kunde, Projektnummer, Anzahl der Positionen und ein Link zum Projekt
    (/#projekt-<id>, öffnet nach der Anmeldung genau dieses Projekt); keine Maße, keine Fotos, keine Zählpixel.
-   Gesperrte Betriebe (Zentrale) bekommen nichts. Die Datenschutzerklärung nennt diese Mails als „Hinweise zum Konto“ (Abschnitt 9). */
+   Gesperrte Betriebe (Zentrale) bekommen nichts. Die Datenschutzerklärung nennt diese Mails als „Hinweise zum Konto“ (Abschnitt 9).
+   Konfigurator-Instanzen (Betriebszeile mit daten.instanz) bekommen hier nichts: Ihre Anfragen kommen mit PDF über functions/api/eingang.js
+   an die bestätigten Eingangsadressen (nie an die Platzhalteradresse der Betriebszeile), Erinnerungen an Einladungen schickt dashboard.js. */
 import { postDienst, mailOk, esc, mailRahmen } from './post.js';
 import { basis, HAUPTADRESSE } from '../seo.js';
 
@@ -21,6 +23,7 @@ const projektLink = (origin, l) => origin + '/#projekt-' + encodeURIComponent(l.
 /* Sofort nach dem Eingang (POST /api/aufmass): r ist das Ergebnis von importCode (l, art, locked) */
 export async function eingangMelden(ctx, row, r, nb) {
   const pd = postDienst(ctx.k), a = (row && row.daten) || {}, l = r && r.l, an = anAdresse(row);
+  if (a.instanz) return false; // Instanzen: eingang.js (eingangVerarbeiten)
   if (!pd || !l || !an || gesperrt(row) || (a.prefs || {}).mail === false) return false;
   const origin = herkunft(ctx), am = l.aufmass || {}, n = (am.windows || []).length;
   const was = nb ? 'Nachbesserung' : 'Aufmaß';
@@ -56,7 +59,7 @@ export async function erinnerungenSenden(k, sp, env, now) {
   let gesendet = 0, fehler = 0;
   for (const row of await sp.betriebeAlle()) {
     const a = row.daten || {}, an = anAdresse(row);
-    if (!an || gesperrt(row) || (a.prefs || {}).remind === false) continue;
+    if (a.instanz || !an || gesperrt(row) || (a.prefs || {}).remind === false) continue; // Instanzen: einladungenErinnern (dashboard.js)
     const offen = offeneZumErinnern(a, now);
     if (!offen.length) continue;
     const zeilen = offen.slice(0, 20).map((l) => '<li style="margin:0 0 6px"><a href="' + esc(projektLink(origin, l)) + '" style="color:#161616;font-weight:700">' + esc(l.kunde || 'Kunde') + '</a>' + (l.nr ? ' · ' + esc(l.nr) : '') + ' · ' + (l.status === 'geoeffnet' ? 'Link geöffnet, noch kein Maß' : 'Link verschickt, noch nicht geöffnet') + (l.expires ? ' · gültig bis ' + esc(l.expires) : '') + '</li>').join('');

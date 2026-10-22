@@ -27,6 +27,7 @@
    Bremsen: je Anschluss 240 Anfragen und 30 unbekannte Codes in 10 Minuten (umgebung.js). */
 import '../../web/assets/modell.js';
 import { ApiFehler, linkBremse, linkUnbekannt } from './umgebung.js';
+import { linkAufloesen } from '../instanz/adapter.js';
 
 const X = () => globalThis.Abrechnung;
 export const GRENZEN = { fenster: 50, freiTage: 7, aenderungen: 4 };
@@ -63,9 +64,11 @@ export function zuText(zu, betriebName) {
   if (zu === 'eingegangen') return 'Dein Aufmaß ist schon bei ' + bn + '. Änderungen bitte direkt mit ' + bn + ' klären.';
   return 'Diesen Link gibt es nicht.';
 }
-/* Link zum Code finden; unbekannte Codes zählen für die Bremse */
+/* Link zum Code finden; unbekannte Codes zählen für die Bremse. Auf dem Host einer Konfigurator-Instanz über den Adapter
+   (functions/instanz/adapter.js): virtueller Link (Website) oder Zeile in anfragen (Signature-Einladung), nur dieser Instanz */
 export async function linkFinden(ctx) {
   linkBremse(ctx.request);
+  if (ctx.instanz) { const aufl = await linkAufloesen(ctx, ctx.params.code); return { row: aufl.row, l: aufl.l, code: aufl.code, aufl: aufl }; }
   const code = String(ctx.params.code || '').trim().toLowerCase();
   if (!/^[a-z0-9]{3,12}$/.test(code)) throw linkUnbekannt(ctx.request, 'Kein gültiger Link.');
   const row = await ctx.sp.betriebNachCode(code); if (!row) throw linkUnbekannt(ctx.request);
@@ -193,7 +196,8 @@ export const ENTWURF = {
     const { row, l, code } = await linkFinden(ctx);
     if (!langerCode(code)) return { ok: true, aus: true };
     const zu = X().linkZu(l); if (zu) throw new ApiFehler(zuText(zu, row.name), 410, { zu: zu, runde: l.runde || 1, seit: l.eingegangenAt || 0 });
-    const jetzt = Date.now(), e = eingangPruefen(ctx.body || {}, jetzt), frei = !!(l.nb && l.nb.offen);
+    /* frei: offene Nachbesserung; auf Instanzen immer (dort gibt es keine Abrechnung je Aufmaß, also nichts zu schützen) */
+    const jetzt = Date.now(), e = eingangPruefen(ctx.body || {}, jetzt), frei = !!(l.nb && l.nb.offen) || !!ctx.instanz;
     let m = null;
     const res = await ctx.sp.entwurfAendern(code, row.id, (r) => { m = eingangMischen(r, e, jetzt, frei, 0); return !m.grenze; });
     if (res && res.fehlt) return { ok: true, aus: true };

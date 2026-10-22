@@ -13,9 +13,21 @@
 
    Der Schlüssel liegt nur bei Cloudflare: Umgebungsvariable ANTHROPIC_API_KEY, als „Secret“ angelegt.
    Optional: KI_MODELL (Standard claude-sonnet-5-5; früherer Name KI_MODELL_GENAU gilt weiter).
-   Ohne Schlüssel meldet GET „nicht bereit“, und die App läuft ohne KI weiter. */
+   Ohne Schlüssel meldet GET „nicht bereit“, und die App läuft ohne KI weiter.
 
-import { erlaubt as bremse, quelle } from './umgebung.js';
+   Kosten deckeln (Bauplan E12, K1.2, K2.13):
+   - Tagesbudget über alle Domains (KI_TAG_MAX, Vorgabe 3000, dauerhaft gezählt in statistik): Mail an MAIL_KONTAKT bei 80 %, darüber 429.
+   - Auf den Domains der Konfigurator-Instanzen (kiInstanz, worker.js → functions/instanz/seiten.js) nur mit ?code=<10 Zeichen> eines
+     Links dieser Instanz; je Code höchstens min(60, 2 × Fenster + 6) Auswertungen (Zähler im Zwischenstand, meta.ki), je Instanz und
+     Monat eine Alarmgrenze aus pakete.js (kiMonat, Mail an MAIL_KONTAKT), 429 erst beim Doppelten. Die App macht ohne Auswertung weiter. */
+
+import '../../web/assets/instanzregeln.js';
+import { erlaubt as bremse, quelle, konfig } from './umgebung.js';
+import { speicher } from './speicher.js';
+import { budget, bremse as rlBremse } from './bremse.js';
+import { postDienst, mailRahmen, esc } from './post.js';
+import { linkAufloesen } from '../instanz/adapter.js';
+import { instanzZaehlen } from './statistik.js';
 
 const MODELL = 'claude-sonnet-5-5';
 /* Ein echter Befund (bis zu 12 Zeilen, Hinweise, Prüfpunkte, Fachangaben) braucht oft mehr als 2.000 Tokens; abgeschnitten wäre das
@@ -149,13 +161,62 @@ export async function onRequestGet({ env }) {
   return antwort({ bereit: !!env.ANTHROPIC_API_KEY });
 }
 
-export async function onRequestPost({ request, env }) {
+/* Alarm-Mail an den Inhaber (Tagesbudget, Monatsgrenze einer Instanz); Fehler bleiben folgenlos */
+export async function alarmMail(k, betreff, text) {
+  const pd = postDienst(k); if (!pd) return false;
+  try { return (await pd.senden({ an: pd.kontakt, betreff: betreff, html: mailRahmen(betreff, '<p style="margin:0 0 12px">' + esc(text) + '</p>', pd.kontakt) })).ok; } catch (e) { return false; }
+}
+/* Tagesbudget über alle Domains; false: Grenze erreicht */
+async function tagesBudget(ctx) {
+  const max = ctx.k.instanzen.kiTagMax, b = await budget(ctx, 'ki:tag', max, { alarm: Math.max(1, Math.floor(max * 0.8)) });
+  if (b.alarm) { const p = alarmMail(ctx.k, 'KI-Auswertungen: 80 % des Tagesbudgets', 'Heute sind schon ' + b.stand + ' von höchstens ' + max + ' KI-Auswertungen gelaufen (Variable KI_TAG_MAX). Darüber antwortet die KI bis Mitternacht nicht mehr; die App macht ohne Auswertung weiter.'); if (ctx.waitUntil) ctx.waitUntil(p); else await p; }
+  return b.ok;
+}
+const kontext = (request, env, o) => { const k = konfig(env); return Object.assign({ k: k, env: env, sp: k.daten ? speicher(k) : null, request: request, url: new URL(request.url) }, o || {}); };
+
+export async function onRequestPost({ request, env, waitUntil }) {
   if (!env.ANTHROPIC_API_KEY) return antwort({ ok: false, fehler: 'images_unavailable' }, 503);
   const url = new URL(request.url);
   /* nur Anfragen von der eigenen Seite */
   if (request.headers.get('Origin') !== url.origin) return antwort({ ok: false, fehler: 'forbidden' }, 403);
   if (!bremse('ki:' + quelle(request), MAX_ANFRAGEN, FENSTER_MS)) return antwort({ ok: false, fehler: 'rate_limited' }, 429);
+  if (!(await tagesBudget(kontext(request, env, { waitUntil: waitUntil })))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
+  return auswerten(request, env, url);
+}
 
+/* Konfigurator-Instanz: nur mit Code eines Links dieser Instanz, Grenzen je Code, Instanz und Monat, Tagesbudget */
+export async function kiInstanz({ request, env, instanz, waitUntil }) {
+  if (!env.ANTHROPIC_API_KEY) return antwort({ ok: false, fehler: 'images_unavailable' }, 503);
+  const url = new URL(request.url);
+  if (request.headers.get('Origin') !== url.origin) return antwort({ ok: false, fehler: 'forbidden' }, 403);
+  const ctx = kontext(request, env, { instanz: instanz, waitUntil: waitUntil }), G = globalThis.Instanzregeln.GRENZEN;
+  if (!bremse('ki:' + quelle(request), MAX_ANFRAGEN, FENSTER_MS) || !(await rlBremse(ctx, 'KI', quelle(request)))) return antwort({ ok: false, fehler: 'rate_limited' }, 429);
+  const code = String(url.searchParams.get('code') || '').trim().toLowerCase();
+  if (!/^[a-z0-9]{10}$/.test(code)) return antwort({ ok: false, fehler: 'code' }, 400);
+  if (!ctx.sp) return antwort({ ok: false, fehler: 'images_unavailable' }, 503);
+  let aufl = null;
+  try { aufl = await linkAufloesen(ctx, code); } catch (e) { return antwort({ ok: false, fehler: 'not_found' }, e && e.status === 429 ? 429 : 404); }
+  if (globalThis.Abrechnung.linkZu(aufl.l)) return antwort({ ok: false, fehler: 'closed' }, 410);
+  /* je Code: höchstens min(kiJeCode, 2 × Fenster + 6) Auswertungen, gezählt im Zwischenstand (überlebt jeden Browser) */
+  let frei = false;
+  await ctx.sp.entwurfAendern(code, instanz.betrieb, (r) => {
+    const mt = r.meta || {}, n = Math.max(((r.daten || {}).windows || []).length, Number(mt.angelegt) || 0), max = Math.min(G.kiJeCode, 2 * n + 6), schon = Number(mt.ki) || 0;
+    if (schon >= max) return false;
+    r.meta = Object.assign({}, mt, { ki: schon + 1 }); frei = true; return true;
+  });
+  if (!frei) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'code' }, 429);
+  /* je Instanz und Monat: Alarm beim Richtwert aus pakete.js, Schluss beim Doppelten */
+  const m = instanz.m || {}, richt = Math.max(1, Number(m.kiMonat) || 600);
+  const mb = await budget(ctx, 'inst:' + instanz.id8 + ':ki', richt * 2, { alarm: richt, monat: true });
+  if (mb.alarm) { const p = alarmMail(ctx.k, 'KI-Auswertungen: Richtwert erreicht bei ' + instanz.name, instanz.name + ' (' + (instanz.haupthost || '') + ') hat in diesem Monat ' + mb.stand + ' KI-Auswertungen, Richtwert ' + richt + '. Beim Doppelten antwortet die KI dort bis Monatsende nicht mehr.'); if (waitUntil) waitUntil(p); else await p; }
+  if (!mb.ok) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'monat' }, 429);
+  if (!(await tagesBudget(ctx))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
+  const r = await auswerten(request, env, url);
+  if (r.status === 200) instanzZaehlen(ctx, instanz, 'ki');
+  return r;
+}
+
+async function auswerten(request, env, url) {
   /* „fakten“ ist der frühere Name von „einbau“ (ältere geöffnete Seiten); „struktur“ gibt es nicht mehr */
   let aufgabe = url.searchParams.get('aufgabe');
   if (aufgabe === 'fakten') aufgabe = 'einbau';

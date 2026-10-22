@@ -41,7 +41,18 @@
                               zählen ohnehin einzeln, alles andere als „Kampagne (andere)“), siehe functions/api/statistik.js
      PAKETE_OFFEN             1 = Konfigurator-Pakete werden verkauft (Verkaufsseite mit „Paket bestellen“, Paket-Kasse auch im Live-Modus);
                               ohne: vorläufige Preise, Anfrageformular statt Bestellung, Paket-Kasse im Live-Modus zu (instanzregeln.js verkauf)
-     Weitere Variablen der Konfigurator-Instanzen (Mailabsender, Resend-Webhook, Cloudflare-Schlüssel, Cache): docs/INSTANZEN.md
+     Konfigurator-Instanzen (docs/INSTANZEN.md):
+     MAIL_ABSENDER_INSTANZ    Absender der Anfragen an die Betriebe, z. B. anfragen@post.eeziframes.com (eigene Subdomain bei Resend,
+                              eigener Ruf, E9); ohne: MAIL_ABSENDER
+     MAIL_ABSENDER_NEUTRAL    optional, neutrale Absenderadresse für Signature-Instanzen (ohne eeziframes); ohne: MAIL_ABSENDER_INSTANZ
+     RESEND_WEBHOOK_SECRET    Secret, Signing Secret des Webhooks bei Resend (whsec_…) für POST /api/post/webhook (Zustellung, Bounce,
+                              Beschwerde); ohne Secret nimmt der Server keine Meldungen an, eine gesendete Anfrage gilt dann als zugestellt
+     PDF_IM_WORKER            0 = das Aufmaßblatt nie im Worker bauen (Gratis-Tarif von Cloudflare: zu wenig Rechenzeit); die Mail an den
+                              Betrieb kommt dann mit dem Aufmaß als Text und einem Link. Vorgabe: bauen, bei einem Abbruch holt der Server es nach
+     KI_TAG_MAX               Höchstzahl KI-Auswertungen am Tag über alle Domains (Vorgabe 3000, Mail an MAIL_KONTAKT bei 80 %)
+     INSTANZ_CACHE_MS         wie lange ein Worker die Daten einer Instanz im Speicher hält (Vorgabe 60000; Prüfung 0)
+     HAUPT_HOSTS              weitere Domains, die wie eeziframes.com behandelt werden (durch Komma getrennt), nie eine Instanz
+     Weitere Variablen (Cloudflare-Schlüssel der Zentrale): docs/INSTANZEN.md
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1 / MAIL_ATTRAPPE=1   nur lokal zum Testen: Stripe, Datenbank bzw. Mailversand werden nachgestellt */
 import { ANBIETER } from './anbieter.js';
 
@@ -100,12 +111,22 @@ export function konfig(env) {
   const sGeheim = String(env.SITZUNG_GEHEIMNIS || '').trim();
   if (sGeheim && sGeheim.length < 32) hinweise.push('SITZUNG_GEHEIMNIS: zu kurz, nötig sind mindestens 32 Zeichen.');
   const sitzung = { geheimnis: sGeheim.length >= 32 ? sGeheim : datenAttrappe ? 'eeziframes-attrappe-sitzung-nur-zum-pruefen-0000' : '', attrappe: sGeheim.length < 32 && datenAttrappe };
+  /* Konfigurator-Instanzen: Absender der Anfragen, Webhook von Resend (mit DATEN_ATTRAPPE ein fester Testwert wie bei den Sitzungen) */
+  const absInst = String(env.MAIL_ABSENDER_INSTANZ || '').trim().toLowerCase(), absNeutral = String(env.MAIL_ABSENDER_NEUTRAL || '').trim().toLowerCase(), whsec = String(env.RESEND_WEBHOOK_SECRET || '').trim();
+  if (absInst && !adresse(absInst)) hinweise.push('MAIL_ABSENDER_INSTANZ: ist keine E-Mail-Adresse.');
+  if (absNeutral && !adresse(absNeutral)) hinweise.push('MAIL_ABSENDER_NEUTRAL: ist keine E-Mail-Adresse.');
+  if (whsec && !/^whsec_/.test(whsec)) hinweise.push('RESEND_WEBHOOK_SECRET: beginnt nicht mit whsec_. Eingetragen gehört das Signing Secret des Webhooks bei Resend.');
+  const instanzen = {
+    absender: adresse(absInst) ? absInst : '', neutral: adresse(absNeutral) ? absNeutral : '',
+    webhook: /^whsec_/.test(whsec) ? whsec : datenAttrappe ? 'whsec_ZWV6aWZyYW1lcy1hdHRyYXBwZS1yZXNlbmQtd2ViaG9vaw==' : '', webhookAttrappe: !/^whsec_/.test(whsec) && datenAttrappe,
+    pdf: String(env.PDF_IM_WORKER || '').trim() !== '0', kiTagMax: Math.max(1, num(env.KI_TAG_MAX, 3000))
+  };
   const post = (mailKey && adresse(mailAb)) || mailAttrappe ? { key: mailKey, absender: mailAb || 'kontakt@eeziframes.invalid', kontakt: adresse(mailKontakt) ? mailKontakt : (ANBIETER.mail || mailAb || 'kontakt@eeziframes.invalid'), attrappe: mailAttrappe } : null;
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
     zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1', post: post,
-    ki: !!env.ANTHROPIC_API_KEY, mwstGesetzt: mwstGesetzt, zahlarten: zahlarten, sitzung: sitzung, paketeOffen: String(env.PAKETE_OFFEN || '').trim() === '1', jetzt: jetztAus(env),
+    ki: !!env.ANTHROPIC_API_KEY, mwstGesetzt: mwstGesetzt, zahlarten: zahlarten, sitzung: sitzung, instanzen: instanzen, paketeOffen: String(env.PAKETE_OFFEN || '').trim() === '1', jetzt: jetztAus(env),
     geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
     preise: { aufmass: num(env.PREIS_AUFMASS_CENT, Math.round(stufe.aufmass * 100)) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, stufe.abo), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, stufe.plus), mwst: mwstRoh !== '0' },
     /* solange er läuft und keine eigenen Preise gesetzt sind: Stichtag und Preise danach für die Hinweise in App und Betriebsbereich */
