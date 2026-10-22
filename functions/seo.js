@@ -10,6 +10,8 @@
    (www.eeziframes.com zählt als eeziframes.com), damit nach einem Domainwechsel nichts angepasst werden muss.
    Begründung und Quellen: docs/SEO.md. */
 import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung.js';
+/* Haken für die Konfigurator-Pakete (Verkaufsseite, llms.txt, Seiten der Paketbedingungen): functions/pakete-seite.js */
+import { paketeSeite, paketeLlms, PAKETE_SEITEN } from './pakete-seite.js';
 
 export const STAND = '2026-10-21';
 
@@ -54,7 +56,7 @@ export const SEITEN = [
   { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/cookies/', prio: '0.1', stand: '2026-10-18' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
-];
+].concat(PAKETE_SEITEN);
 
 /* Suchen von KI-Assistenten: ausdrücklich erlaubt (OpenAI, Anthropic, Perplexity). Training (GPTBot, ClaudeBot, Google-Extended)
    ist über „User-agent: *“ ebenfalls erlaubt, damit künftige Modelle eeziframes kennen; wer das nicht will, sperrt sie hier einzeln. */
@@ -77,7 +79,7 @@ export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1'
 /* Lokal (Testserver, wrangler dev) gilt die aufgerufene Adresse; im Netz immer https, auch wenn eine Seite über http:// abgerufen wurde */
 const LOKAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i;
 export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : (LOKAL.test(url.hostname) ? url.protocol : 'https:') + '//' + url.host.replace(/^www\./i, ''));
-export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf)(\/|$)/.test(pfad);
+export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf|konfigurator-bedingungen)(\/|$)/.test(pfad);
 const kanonischerPfad = (pfad) => pfad.replace(/index\.html$/, '');
 
 export function robots(origin, an) {
@@ -89,11 +91,13 @@ export function robots(origin, an) {
     'Content-Signal: search=yes, ai-input=yes, ai-train=yes',
     'Allow: /',
     'Disallow: /api/',
+    'Disallow: /partner/',
     '',
     '# Suchen in KI-Assistenten: ausdrücklich willkommen',
     KI_SUCHE.map((b) => 'User-agent: ' + b).join('\n'),
     'Allow: /',
     'Disallow: /api/',
+    'Disallow: /partner/',
     '',
     'Sitemap: ' + origin + '/sitemap.xml',
     ''
@@ -128,7 +132,7 @@ export async function seite(antwort, env, url) {
   /* nach dem Einführungspreis und mit Countdown ändert sich der Text, die Datei aber nicht: ohne ETag, sonst bekäme ein Browser die
      alte Fassung als 304 */
   if (nach || mitTag) { h.delete('etag'); h.delete('last-modified'); }
-  const text = antwort.body ? kopf(absolut(await antwort.text(), b), kan) : null;
+  const text = antwort.body ? paketeSeite(kopf(absolut(await antwort.text(), b), kan), url, env) : null;
   return new Response(text && nach ? nachEinfuehrung(text) : text && einfuehrungLaeuft(env) ? mitBanner(text, url.pathname, env) : text, { status: 200, statusText: antwort.statusText, headers: h });
 }
 
@@ -279,6 +283,7 @@ export function llms(origin, env) {
     '- [Was kostet ein geplatzter Aufmaßtermin?](' + u('/fuer-fensterbauer/geplatzter-aufmasstermin/') + '): im Beispiel bei 25 km Entfernung rund 116 €: 24 € Fahrzeug (rund 48 Cent je km nach ADAC), 76 € Fahrzeit und 16 € Warten bei 65 € je Stunde; mit ungenutzter Zeit vor Ort rund 165 €. Ohne vorherige Vereinbarung lässt sich beim kostenlosen Aufmaß meist nichts davon berechnen.',
     '- [Welche Software brauchen Fensterbauer?](' + u('/fuer-fensterbauer/fensterbau-software/') + '): Branchensoftware oder ERP für Kalkulation, Konstruktion und Fertigung, Handwerkersoftware für Angebot und Rechnung, fürs Aufmaß eine Aufmaß-App vor Ort oder das Selbstaufmaß durch den Kunden per Link. eeziframes liefert das Erstaufmaß und ersetzt kein ERP.',
     '',
+    ...(paketeLlms(origin, env) ? [paketeLlms(origin, env), ''] : []),
     '## Optional',
     '',
     '- [Startseite](' + u('/') + ')',

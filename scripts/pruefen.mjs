@@ -45,6 +45,10 @@
 // dazu der Angleich an die Detailtiefe: ein Kapitelkonzept (Leiste, Kicker, Übersicht), Tiefe-Pille neben „Notiz“ mit Browser-Zurück,
 // Notiz und i an jeder Detailfrage, RAL-Farbwahl bei den Detailfarben, Zifferntasten für die neuen Maße, Stulp mit Seitenteilen,
 // Standard mit dem Namen des Betriebs, keine Gesamtübersicht und ein Entwurf, der „Mehr zu …“ und die Tiefe behält.
+// Abschnitte 23 bis 30 prüfen die Konfigurator-Instanzen in drei Paketen (docs/INSTANZEN.md); sie stehen je in einem Modul unter
+// scripts/pruefen-instanzen/ und laufen gegen einen eigenen Testserver mit Attrappen (Hilfsobjekt h, scripts/pruefen-instanzen/hilfe.mjs).
+// 23 Mandant, Routing, Schutz (vorneweg 23-fundament.mjs: Pakete, Regeln, Speicher, Sitzungen, Post, Bremsen, Testserver) · 24 Eingang ·
+// 25 App im Instanz-Modus · 26 Zentrale · 27 Kundenkonto und Bestellung · 28 Signature-Dashboard · 29 Verkaufsseite, Recht · 30 Ende zu Ende.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -4756,6 +4760,24 @@ if (teil(22)) {
   await ctxK.close();
   sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
   await ctx.close();
+}
+
+/* ---------- 23–30. Konfigurator-Instanzen (docs/INSTANZEN.md) ----------
+   Je Abschnitt ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu <n>-<name>.mjs, die vorher laufen): export default async (h) => {}.
+   h (scripts/pruefen-instanzen/hilfe.mjs) bringt einen eigenen Testserver mit Attrappen und den Instanzen essential.localhost,
+   plus.localhost, signature.localhost und signature2.localhost mit. Ein Fehler im Modul zählt als fehlgeschlagene Prüfung. */
+const INSTANZ_TEILE = [23, 24, 25, 26, 27, 28, 29, 30].filter((n) => teil(n));
+if (INSTANZ_TEILE.length) {
+  const inst = await import('./pruefen-instanzen/hilfe.mjs');
+  let h = null;
+  try { h = await inst.hilfe({ browser, ok, neueSeite, sauber, foto, telefon, BASE, freierPort }); } catch (e) { ok(false, 'Instanz-Testserver startet: ' + (e && e.message)); }
+  for (const n of h ? INSTANZ_TEILE : []) {
+    console.log(n + '. ' + inst.TITEL[n]);
+    for (const m of inst.module(n)) {
+      try { await (await import(m.url)).default(h); } catch (e) { ok(false, 'scripts/pruefen-instanzen/' + m.datei + ' läuft durch: ' + String(e && e.stack ? e.stack : e).split('\n').slice(0, 3).join(' | ')); }
+    }
+  }
+  if (h) h.aufraeumen();
 }
 
 await browser.close();

@@ -8,7 +8,10 @@
    …/foto/:id                       Fotos der Fenster: Kunde legt ab (Link, eigenes Aufmaß), Betrieb und Besitzer lesen (fotos.js)
    /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js)
    POST /api/widerruf               Widerrufsfunktion nach § 356a BGB mit Eingangsbestätigung per E-Mail (widerruf.js, post.js), als JSON
-                                    oder ohne JavaScript als Formular (dann antwortet der Server mit einer Seite) */
+                                    oder ohne JavaScript als Formular (dann antwortet der Server mit einer Seite)
+   Konfigurator-Instanzen (docs/INSTANZEN.md): /api/instanz/… (instanz-api.js), /api/partner/… (Kundenkonto, partner.js),
+   POST /api/post/webhook (Resend, eingang.js), /api/zentrale/instanzen|bestellungen/… (Zentrale); auf einem Instanz-Host übergibt
+   worker.js die Instanz als viertes Argument (ctx.instanz), sonst ist ctx.instanz null */
 import { konfig, json, ApiFehler } from './umgebung.js';
 import { AGB_STAND, NB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
 import { bestaetigungenNachholen } from './bestaetigung.js';
@@ -23,13 +26,24 @@ import { EIGENE, kontenDa } from './eigene.js';
 import { WIDERRUF, widerrufeNachholen } from './widerruf.js';
 import { erinnerungenSenden } from './benachrichtigung.js';
 import { FOTOS } from './fotos.js';
+import { INSTANZ_API } from './instanz-api.js';
+import { EINGANG, versandNachholen, anfragenAufraeumen } from './eingang.js';
+import { PARTNER } from './partner.js';
+import { bestellungenLauf } from './bestellung.js';
+import { DASHBOARD, einladungenErinnern } from './dashboard.js';
+import { ZENTRALE_INSTANZEN } from './zentrale-instanzen.js';
+import { ZENTRALE_BESTELLUNGEN } from './zentrale-bestellungen.js';
+import { instanzenPruefen } from './cloudflare.js';
 import { attrappePost, attrappeAus } from './post.js';
 import { zaehlen, mitWerbung, werbungAus } from './statistik.js';
 import '../../web/assets/ral.js'; // Farben (RAL, Holzdekore) für modell.js auch im Worker-Bundle, siehe ral.js
 import '../../web/assets/modell.js';
+import '../../web/assets/pakete.js'; // Merkmale je Paket (globalThis.Pakete), siehe pakete.js
+import '../../web/assets/instanzregeln.js'; // Zustände, Fristen, Grenzen der Instanzen (globalThis.Instanzregeln)
 import { indexnow } from '../seo.js';
 
-const ROUTEN = Object.assign({}, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
+/* Die bestehenden Routen stehen zuletzt und haben damit Vorrang, falls ein neues Modul dieselbe Adresse nennt (Altbestand bleibt) */
+const ROUTEN = Object.assign({}, INSTANZ_API, EINGANG, PARTNER, DASHBOARD, ZENTRALE_INSTANZEN, ZENTRALE_BESTELLUNGEN, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
 const MAX_BODY = 1500000;
 
 function finde(method, pfad) {
@@ -44,7 +58,8 @@ function finde(method, pfad) {
   return null;
 }
 
-export async function api(request, env, ctx0) {
+/* inst: die Instanz des Hosts (functions/instanz/mandant.js, Vertrag docs/INSTANZEN.md) oder nichts auf der Hauptdomain */
+export async function api(request, env, ctx0, inst) {
   const url = new URL(request.url), pfad = url.pathname;
   if (!pfad.startsWith('/api/')) return null;
   const k = konfig(env);
@@ -56,7 +71,7 @@ export async function api(request, env, ctx0) {
     if (pfad === '/api/status') { const konten = k.daten ? !!(await kontenDa(speicher(k))) : false; return json({ ok: true, ki: k.ki, zahlung: k.zahlung, daten: k.daten, konten: konten, preise: k.preise, einfuehrung: k.einfuehrung, zahlarten: k.zahlarten, attrappe: k.zahlungAttrappe || k.datenAttrappe, testmodus: !!(k.stripe && k.stripe.test), webhook: !!(k.stripe && k.stripe.webhook), post: !!k.post, verkauf: await verkaufStand(k, env, url.origin, konten), recht: { agb: AGB_STAND, nb: NB_STAND, zustimmung: ZUSTIMMUNG }, hinweise: k.hinweise.length ? k.hinweise : undefined }); }
     /* nur lokal mit MAIL_ATTRAPPE=1: die zuletzt „verschickten“ Mails, damit die Prüfung sie lesen kann; ?stoerung=1 bzw. 0 stellt
        eine Störung des Mailversands nach bzw. beendet sie */
-    if (pfad === '/api/test/post' && k.post && k.post.attrappe) { const st = url.searchParams.get('stoerung'); if (st !== null) attrappeAus.an = st === '1'; return json({ ok: true, post: attrappePost, stoerung: attrappeAus.an }); }
+    if (pfad === '/api/test/post' && k.post && k.post.attrappe) { const st = url.searchParams.get('stoerung'); if (st !== null) attrappeAus.an = st === '1'; const mitAnhang = url.searchParams.get('anhaenge') === '1'; return json({ ok: true, post: mitAnhang ? attrappePost : attrappePost.map((m) => { const x = Object.assign({}, m); delete x.anhangDaten; return x; }), stoerung: attrappeAus.an }); } // ?anhaenge=1: mit den Anhängen (Base64)
     /* nur lokal mit DATEN_ATTRAPPE=1 und MAIL_ATTRAPPE=1: das Nachholen des täglichen Laufs sofort ausführen */
     if (pfad === '/api/test/nachholen' && k.datenAttrappe && k.post && k.post.attrappe) { const sp0 = speicher(k); return json({ ok: true, vertrag: await bestaetigungenNachholen(k, sp0, env), widerruf: await widerrufeNachholen(k, sp0), erinnerung: await erinnerungenSenden(k, sp0, env) }); }
     if (pfad === '/api/ki') {
@@ -67,12 +82,12 @@ export async function api(request, env, ctx0) {
     const treffer = finde(request.method, pfad);
     if (!treffer) return json({ ok: false, fehler: 'not_found' }, 404);
     const sp = speicher(k), zd = zahlungsdienst(k);
-    const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad.startsWith('/api/kunde') || pfad === '/api/aufmass';
+    const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad.startsWith('/api/kunde') || pfad === '/api/aufmass' || pfad.startsWith('/api/partner') || pfad.startsWith('/api/instanz');
     if (brauchtDaten && !sp) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Die Datenbank fehlt (SUPABASE_URL, SUPABASE_SECRET_KEY).' }, 503);
     if (pfad.startsWith('/api/zahlung') && !zd) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Zahlungen fehlen (STRIPE_SECRET_KEY).' }, 503);
     let body = null, roh = '';
-    /* Nur die Widerrufsfunktion nimmt auch ein gewöhnliches Formular an (Browser ohne JavaScript) */
-    const formular = pfad === '/api/widerruf' && /^application\/x-www-form-urlencoded/i.test(request.headers.get('content-type') || '');
+    /* Nur die Widerrufsfunktion und die Frage ohne Konto (Verkaufsseite) nehmen auch ein gewöhnliches Formular an (Browser ohne JavaScript) */
+    const formular = (pfad === '/api/widerruf' || pfad === '/api/partner/frage') && /^application\/x-www-form-urlencoded/i.test(request.headers.get('content-type') || '');
     if (request.method === 'POST' || request.method === 'PATCH') {
       if (Number(request.headers.get('content-length') || 0) > MAX_BODY) return json({ ok: false, fehler: 'Zu groß.' }, 413);
       roh = await request.text(); if (roh.length > MAX_BODY) return json({ ok: false, fehler: 'Zu groß.' }, 413);
@@ -82,7 +97,7 @@ export async function api(request, env, ctx0) {
     }
     /* zaehlen: Vorgang für die eigene Statistik (läuft nach der Antwort weiter, Fehler bleiben folgenlos); kommt die Anfrage von einer
        Seite, die über einen Anzeigenlink aufgerufen wurde, zählt der Vorgang zusätzlich als werbung:… (statistik.js) */
-    const ctx = { k: k, env: env, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, formular: formular, params: treffer.params, waitUntil: warte, zaehlen: (s) => { warte(zaehlen(k, sp, mitWerbung(Array.isArray(s) ? s : [s], werbungAus(request))).catch(() => false)); } };
+    const ctx = { k: k, env: env, sp: sp, zd: zd, request: request, url: url, body: body, roh: roh, formular: formular, params: treffer.params, waitUntil: warte, instanz: inst || null, zaehlen: (s) => { warte(zaehlen(k, sp, mitWerbung(Array.isArray(s) ? s : [s], werbungAus(request))).catch(() => false)); } };
     const out = await treffer.fn(ctx);
     if (out instanceof Response) return out;
     return json(out == null ? { ok: true } : out);
@@ -93,20 +108,39 @@ export async function api(request, env, ctx0) {
   }
 }
 
-/* Cron (wrangler.jsonc: triggers.crons): am 1. und 15. Sammelrechnungen, jeden Tag Aufräumen (Protokoll nach Frist,
-   liegengebliebene Kassen, Anmeldungen ohne Betrieb nach 30 Tagen, Zwischenstände erledigter Kundenlinks) und Nachholen: nicht
-   zugestellte Vertragsbestätigungen (bestaetigung.js) und Eingangsbestätigungen von Widerrufen (widerruf.js) */
+/* Cron (wrangler.jsonc: triggers.crons), Weiche nach exakten Zeitplänen:
+   - CRON_ABRECHNUNG (1. und 15.): Sammelrechnungen, dann Aufräumen
+   - CRON_TAEGLICH (jeden Tag): Aufräumen (Protokoll nach Frist, liegengebliebene Kassen, Anmeldungen ohne Betrieb nach 30 Tagen,
+     Zwischenstände erledigter Kundenlinks) und Nachholen: nicht zugestellte Vertragsbestätigungen (bestaetigung.js), Eingangsbestätigungen
+     von Widerrufen (widerruf.js), Erinnerungen; dazu die Läufe der Konfigurator-Instanzen (Aufbewahrung der Anfragen, Bestellungen und
+     Abos, Domains, Erinnerungen an Einladungen) und IndexNow
+   - CRON_ZEHN (alle 10 Minuten): nur das Nachholen des Versands eingegangener Anfragen der Instanzen (eingang.js)
+   Ein anderer Zeitplan (etwa nach einer Änderung in wrangler.jsonc) gilt als täglicher Lauf; ohne cron (Aufruf von Hand) läuft alles. */
 export const CRON_ABRECHNUNG = '0 3 1,15 * *';
+export const CRON_TAEGLICH = '17 4 * * *';
+export const CRON_ZEHN = '*/10 * * * *';
+const versucht = async (fn) => { try { return await fn(); } catch (e) { console.log('Lauf fehlgeschlagen', String(e && e.message ? e.message : e).slice(0, 200)); return { ok: false }; } };
 export async function geplant(env, cron) {
   const k = konfig(env); globalThis.Abrechnung.setPreise(k.preise);
-  const sp = speicher(k), abrechnen = !cron || cron === CRON_ABRECHNUNG, taeglich = !cron || cron !== CRON_ABRECHNUNG;
+  const sp = speicher(k);
+  const zehn = !cron || cron === CRON_ZEHN;
+  if (cron === CRON_ZEHN) {
+    const versand = sp ? await versucht(() => versandNachholen(k, sp)) : { ok: true, ohneDaten: true };
+    return { ok: true, zehn: true, versand: versand };
+  }
+  if (cron && cron !== CRON_ABRECHNUNG && cron !== CRON_TAEGLICH) console.log('Unbekannter Zeitplan, läuft als täglicher Lauf:', cron);
+  const abrechnen = !cron || cron === CRON_ABRECHNUNG, taeglich = !cron || cron !== CRON_ABRECHNUNG;
   const r = abrechnen ? await abrechnungslauf(k, sp, zahlungsdienst(k)) : { ok: true, nurAufraeumen: true };
   if (r && r.rechnungen) await zaehlen(k, sp, new Array(r.rechnungen).fill('ereignis:sammelrechnung')).catch(() => false);
   let weg = null; try { weg = await aufraeumen(k, sp); } catch (e) { weg = { ok: false }; }
   let nach = null;
   if (taeglich) { nach = {}; try { nach.vertrag = await bestaetigungenNachholen(k, sp, env); } catch (e) { nach.vertrag = { ok: false }; } try { nach.widerruf = await widerrufeNachholen(k, sp); } catch (e) { nach.widerruf = { ok: false }; } try { nach.erinnerung = await erinnerungenSenden(k, sp, env); } catch (e) { nach.erinnerung = { ok: false }; } } // Erinnerung an offene Links (benachrichtigung.js)
+  /* Konfigurator-Instanzen: täglich Aufbewahrung, Bestellungen und Abos, Domains, Erinnerungen; Versand (sonst alle 10 Minuten) bei einem Aufruf ohne cron mit */
+  let inst = null;
+  if (taeglich && sp) inst = { anfragen: await versucht(() => anfragenAufraeumen(k, sp)), bestellungen: await versucht(() => bestellungenLauf(k, sp, zahlungsdienst(k), env)), domains: await versucht(() => instanzenPruefen(k, sp, env)), einladungen: await versucht(() => einladungenErinnern(k, sp, env)) };
+  if (zehn && sp) (inst = inst || {}).versand = await versucht(() => versandNachholen(k, sp));
   /* täglicher Lauf: nach einer Veröffentlichung die geänderten Seiten per IndexNow melden (functions/seo.js, nur mit Freigabe) */
   let suche = null; if (cron && cron !== CRON_ABRECHNUNG) { try { suche = await indexnow(env); } catch (e) { suche = { ok: false }; } }
-  console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg), 'Nachholen', JSON.stringify(nach), 'IndexNow', JSON.stringify(suche));
-  return Object.assign({}, r, { aufraeumen: weg, nachholen: nach, indexnow: suche });
+  console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg), 'Nachholen', JSON.stringify(nach), 'Instanzen', JSON.stringify(inst), 'IndexNow', JSON.stringify(suche));
+  return Object.assign({}, r, { aufraeumen: weg, nachholen: nach, instanzen: inst, indexnow: suche });
 }

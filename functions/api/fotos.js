@@ -27,44 +27,59 @@ import { nutzer } from './auth.js';
 import { langerCode } from './entwurf.js';
 
 const X = () => globalThis.Abrechnung;
-const BUCKET = 'fotos';
+/* Ablagen (private Buckets bei Supabase Storage, der Server legt sie beim ersten Gebrauch an). fotos: Fotos der Fenster (dazu die kleine
+   Fassung <id>k, 640 px, für das Aufmaßblatt der Instanzen); marke: veröffentlichte Bilder einer Instanz (instanz/<id>/<v>/<name>);
+   bestellungen: Uploads aus dem Bestellformular (partner/<partner>/<bestellung>/<datei>); blatt: abgelegte Aufmaßblätter (Signature,
+   instanz/<id>/<code>-<runde>.pdf). Siehe docs/INSTANZEN.md */
+export const ABLAGEN = {
+  fotos: { bucket: 'fotos', typen: ['image/jpeg'], max: 1000000 },
+  marke: { bucket: 'marke', typen: ['image/png', 'image/jpeg', 'image/webp'], max: 2000000 },
+  bestellungen: { bucket: 'bestellungen', typen: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'], max: 1000000 },
+  blatt: { bucket: 'blatt', typen: ['application/pdf'], max: 10000000 }
+};
 export const FOTO_MAX = 1000000;            // Bytes je Foto; die App schickt meist 0,2 bis 0,6 MB
 export const FOTOS_JE_ABLAGE = 160;         // je Link bzw. je eigenem Aufmaß: 50 Fenster mit je zwei Fotos und neu fotografierte
 export const FOTO_TAGE = 365;               // Fotos eines eingegangenen Aufmaßes beim Betrieb: 12 Monate nach dem Eingang
-export const FOTO_ID = /^b[a-z0-9]{12,24}$/;
+export const FOTO_ID = /^b[a-z0-9]{12,24}k?$/; // …k: kleine Fassung desselben Fotos (Instanzen)
 const TAG = 864e5;
 const ZU_GROSS = 'Dieses Foto lässt sich nicht übertragen.';
-const attrappeDaten = new Map();
+const attrappeDaten = new Map(), attrappeArten = { fotos: attrappeDaten };
 
 /* Kennungen der Fotos, die die Fenster nennen */
 export const fotoIds = (wins) => { const s = new Set(); (wins || []).forEach((w) => { const b = w && w.bilder; if (b && typeof b === 'object') ['in', 'out'].forEach((k) => { if (FOTO_ID.test(String(b[k] || ''))) s.add(b[k]); }); }); return s; };
 
-/* ---------- Ablage: Supabase Storage oder Attrappe ---------- */
-export function ablage(k) {
-  if (k.supabase) return supabaseAblage(k);
-  if (k.datenAttrappe) return attrappeAblage();
+/* ---------- Ablage: Supabase Storage oder Attrappe; art: fotos (Vorgabe) | marke | bestellungen | blatt ---------- */
+export function ablage(k, art) {
+  const a = ABLAGEN[art || 'fotos']; if (!a) throw new Error('Unbekannte Ablage ' + art);
+  if (k.supabase) return supabaseAblage(k, a);
+  if (k.datenAttrappe) return attrappeAblage(art || 'fotos', a);
   return null;
 }
-function attrappeAblage() {
+/* typ: Medientyp der Datei (Vorgabe: der erste erlaubte, bei Fotos image/jpeg); nicht erlaubte Typen und zu große Dateien legt die
+   Ablage nicht ab (false) */
+const passt = (a, bytes, typ) => { const n = bytes ? (bytes.byteLength != null ? bytes.byteLength : bytes.length) : 0; return a.typen.includes(typ) && n > 0 && n <= a.max; };
+function attrappeAblage(art, a) {
+  const daten = attrappeArten[art] || (attrappeArten[art] = new Map());
   const unter = (ordner) => String(ordner).replace(/\/?$/, '/');
   return {
     art: 'attrappe',
-    async ablegen(pfad, bytes) { attrappeDaten.set(pfad, bytes); return true; },
-    async holen(pfad) { return attrappeDaten.get(pfad) || null; },
-    async liste(ordner) { const p = unter(ordner); return Array.from(attrappeDaten.keys()).filter((x) => x.startsWith(p) && !x.slice(p.length).includes('/')).map((x) => x.slice(p.length)); },
-    async loeschen(pfade) { pfade.forEach((p) => attrappeDaten.delete(p)); return true; },
-    async ordnerLoeschen(ordner) { const p = unter(ordner); for (const x of Array.from(attrappeDaten.keys())) if (x.startsWith(p)) attrappeDaten.delete(x); return true; },
+    async ablegen(pfad, bytes, typ) { if (!passt(a, bytes, typ || a.typen[0])) return false; daten.set(pfad, bytes); return true; },
+    async holen(pfad) { return daten.get(pfad) || null; },
+    async liste(ordner) { const p = unter(ordner); return Array.from(daten.keys()).filter((x) => x.startsWith(p) && !x.slice(p.length).includes('/')).map((x) => x.slice(p.length)); },
+    async loeschen(pfade) { pfade.forEach((p) => daten.delete(p)); return true; },
+    async ordnerLoeschen(ordner) { const p = unter(ordner); for (const x of Array.from(daten.keys())) if (x.startsWith(p)) daten.delete(x); return true; },
     /* nur für die Prüfung */
-    alle: () => Array.from(attrappeDaten.keys())
+    alle: () => Array.from(daten.keys())
   };
 }
-function supabaseAblage(k) {
+function supabaseAblage(k, ab) {
+  const BUCKET = ab.bucket;
   const basis = k.supabase.url + '/storage/v1/';
   const kopf = (extra) => { const h = Object.assign({ apikey: k.supabase.service }, extra || {}); if (!sbNeu(k.supabase.service)) h.Authorization = 'Bearer ' + k.supabase.service; return h; };
   const url = (p) => String(p).split('/').map(encodeURIComponent).join('/');
   let bucketDa = false;
   async function bucketAnlegen() {
-    const r = await fetch(basis + 'bucket', { method: 'POST', headers: kopf({ 'content-type': 'application/json' }), body: JSON.stringify({ id: BUCKET, name: BUCKET, public: false, file_size_limit: FOTO_MAX, allowed_mime_types: ['image/jpeg'] }) });
+    const r = await fetch(basis + 'bucket', { method: 'POST', headers: kopf({ 'content-type': 'application/json' }), body: JSON.stringify({ id: BUCKET, name: BUCKET, public: false, file_size_limit: ab.max, allowed_mime_types: ab.typen }) });
     const t = await r.text().catch(() => '');
     if (r.ok || r.status === 409 || /already exists|duplicate/i.test(t)) { bucketDa = true; return true; }
     console.log('Fotoablage: Bucket nicht angelegt', r.status, t.slice(0, 160)); return false;
@@ -83,9 +98,11 @@ function supabaseAblage(k) {
   }
   const a = {
     art: 'supabase',
-    async ablegen(pfad, bytes) {
+    async ablegen(pfad, bytes, typ) {
+      typ = typ || ab.typen[0];
+      if (!passt(ab, bytes, typ)) return false;
       for (let i = 0; i < 2; i++) {
-        const r = await fetch(basis + 'object/' + BUCKET + '/' + url(pfad), { method: 'POST', headers: kopf({ 'content-type': 'image/jpeg', 'x-upsert': 'true', 'cache-control': 'max-age=31536000' }), body: bytes });
+        const r = await fetch(basis + 'object/' + BUCKET + '/' + url(pfad), { method: 'POST', headers: kopf({ 'content-type': typ, 'x-upsert': 'true', 'cache-control': 'max-age=31536000' }), body: bytes });
         if (r.ok) return true;
         const t = await r.text().catch(() => '');
         if (i === 0 && !bucketDa && /bucket/i.test(t) && /not.?found/i.test(t)) { if (await bucketAnlegen()) continue; }

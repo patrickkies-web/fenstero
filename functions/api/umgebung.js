@@ -14,6 +14,9 @@
                               Einstellungen → Zweiter Faktor); dann braucht die Anmeldung zusätzlich den sechsstelligen Code
      MAIL_API_KEY             E-Mails des Servers über Resend (post.js, Schlüssel re_…): Vertragsbestätigung nach dem Kauf,
                               Eingangsbestätigung eines Widerrufs
+     SITZUNG_GEHEIMNIS        langer Zufallstext (mindestens 32 Zeichen), unterschreibt die Sitzungen im Kundenkonto /partner/ und im
+                              Dashboard der Instanzen sowie Bestätigungs- und Vorschau-Links (sitzung.js); ohne ihn gibt es keine Sitzungen.
+                              Nie ändern, sonst sind alle abgemeldet und alle verschickten Links ungültig
 
    Variablen (Typ Text):
      MAIL_ABSENDER            bei Resend bestätigte Absenderadresse, z. B. ask@eeziframes.com (Pflicht, wenn MAIL_API_KEY gesetzt ist)
@@ -36,6 +39,9 @@
      STRIPE_TAX_RATE_INKL     Steuersatz-ID 19 % inklusiv (Aufmaßblatt)
      STATISTIK_KAMPAGNEN      eigene Kampagnen-Namen für ?utm_source=…, durch Komma getrennt (bekannte wie newsletter, flyer, facebook
                               zählen ohnehin einzeln, alles andere als „Kampagne (andere)“), siehe functions/api/statistik.js
+     PAKETE_OFFEN             1 = Konfigurator-Pakete werden verkauft (Verkaufsseite mit „Paket bestellen“, Paket-Kasse auch im Live-Modus);
+                              ohne: vorläufige Preise, Anfrageformular statt Bestellung, Paket-Kasse im Live-Modus zu (instanzregeln.js verkauf)
+     Weitere Variablen der Konfigurator-Instanzen (Mailabsender, Resend-Webhook, Cloudflare-Schlüssel, Cache): docs/INSTANZEN.md
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1 / MAIL_ATTRAPPE=1   nur lokal zum Testen: Stripe, Datenbank bzw. Mailversand werden nachgestellt */
 import { ANBIETER } from './anbieter.js';
 
@@ -90,12 +96,16 @@ export function konfig(env) {
   if (zRoh.some((z) => !ZAHLARTEN_OK.includes(z))) hinweise.push('ZAHLARTEN: erlaubt sind ' + ZAHLARTEN_OK.join(', ') + ' (durch Komma getrennt).');
   const zahlarten = zOk.length ? Array.from(new Set(zOk)) : ['card'];
   const mailAttrappe = env.MAIL_ATTRAPPE === '1' && !mailKey;
+  /* Sitzungen im Kundenkonto und im Dashboard (sitzung.js): nur mit eigenem Geheimnis ab 32 Zeichen; mit DATEN_ATTRAPPE ein fester Testwert */
+  const sGeheim = String(env.SITZUNG_GEHEIMNIS || '').trim();
+  if (sGeheim && sGeheim.length < 32) hinweise.push('SITZUNG_GEHEIMNIS: zu kurz, nötig sind mindestens 32 Zeichen.');
+  const sitzung = { geheimnis: sGeheim.length >= 32 ? sGeheim : datenAttrappe ? 'eeziframes-attrappe-sitzung-nur-zum-pruefen-0000' : '', attrappe: sGeheim.length < 32 && datenAttrappe };
   const post = (mailKey && adresse(mailAb)) || mailAttrappe ? { key: mailKey, absender: mailAb || 'kontakt@eeziframes.invalid', kontakt: adresse(mailKontakt) ? mailKontakt : (ANBIETER.mail || mailAb || 'kontakt@eeziframes.invalid'), attrappe: mailAttrappe } : null;
   return {
     stripe: stripe, zahlungAttrappe: zahlungAttrappe, zahlung: !!(stripe || zahlungAttrappe),
     supabase: supabase, datenAttrappe: datenAttrappe, daten: !!(supabase || datenAttrappe),
     zentrale: zentrale, indexierung: String(env.INDEXIERUNG || '') === '1', post: post,
-    ki: !!env.ANTHROPIC_API_KEY, mwstGesetzt: mwstGesetzt, zahlarten: zahlarten,
+    ki: !!env.ANTHROPIC_API_KEY, mwstGesetzt: mwstGesetzt, zahlarten: zahlarten, sitzung: sitzung, paketeOffen: String(env.PAKETE_OFFEN || '').trim() === '1', jetzt: jetztAus(env),
     geheimnis: env.FREISCHALT_GEHEIMNIS || env.STRIPE_SECRET_KEY || 'eeziframes-pilot', hinweise: hinweise,
     preise: { aufmass: num(env.PREIS_AUFMASS_CENT, Math.round(stufe.aufmass * 100)) / 100, projekt: num(env.PREIS_PROJEKT, 9), frei: num(env.FREI_PROJEKTE, 3), abo: { grund: num(env.PREIS_ABO, stufe.abo), inkl: num(env.ABO_INKL, 10), extra: num(env.PREIS_ABO_EXTRA, 5) }, plus: num(env.PREIS_PLUS, stufe.plus), mwst: mwstRoh !== '0' },
     /* solange er läuft und keine eigenen Preise gesetzt sind: Stichtag und Preise danach für die Hinweise in App und Betriebsbereich */
