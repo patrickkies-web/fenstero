@@ -726,8 +726,13 @@ const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.ar
 const schwelleText = (k) => ({ flach: 'flache Schwelle', null: 'barrierefrei ohne Schwelle', standard: 'Standardschwelle' }[k] || 'flache Schwelle');
 /* Gehflügel der Balkontür: der erste Dreh-Kipp-Flügel, sonst der erste Drehflügel */
 const gehFluegel = (w) => { const dk = w.sashes.findIndex((x) => x.t === 'DK' && !x.steh); return dk >= 0 ? dk : w.sashes.findIndex((x) => x.t === 'D' && !x.steh); };
-/* Stulpfenster: nur der Gehflügel hat einen Griff, der Standflügel (der andere) wird erst danach über den Falz geöffnet */
-const stehFluegel = (w, i) => w.teilung === '2s' && w.art !== 'fest' && !!w.sashes[i] && !w.sashes[i].st && w.sashes.filter((x) => !x.st).length === 2 && i !== gehFluegel(w);
+/* Stulpfenster: nur der Gehflügel hat einen Griff, der Standflügel (x.steh) wird erst danach über den Falz geöffnet; Seitenteile (x.st)
+   zählen nicht. Ältere Fenster ohne Kennzeichen: beim Stulp ist der Flügel, der nicht der Gehflügel ist, der Standflügel */
+const stehFluegel = (w, i) => {
+  const x = w.sashes[i]; if (!x || x.st || w.art === 'fest') return false;
+  if (w.sashes.some((y) => y.steh)) return !!x.steh;
+  return w.teilung === '2s' && w.sashes.filter((y) => !y.st).length === 2 && i !== gehFluegel(w);
+};
 /* Offen statt Vorgabe (Regeln in modell.js): istOffen prüft auch, ob die Angabe zum Element gehört */
 const OT = 'offen, bitte beraten';
 const istOffen = (w, k) => AW.istOffen(w, k);
@@ -1071,6 +1076,12 @@ function sonneTeilFarbe(w, teil) {
   return sonneFarbeW(w);
 }
 const SOLAR_BG = 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .14) 0 1px, transparent 1px 9px), repeating-linear-gradient(180deg, rgba(255, 255, 255, .14) 0 1px, transparent 1px 9px), linear-gradient(135deg, #2b3e56, #121c29)';
+/* Kleinteile mit fester Farbe (Oberlichtöffner, Bedienung innen, Stopfen): inline geschrieben, damit das CSS-Modell und die WebGL-Bühne
+   dieselbe Farbe zeigen; keine Farbe nur aus einer Klasse */
+const TEIL_BG = { olr: 'linear-gradient(90deg, #e6e8ea, #a8adb3)', olh: 'linear-gradient(90deg, #f1f2f3, #b9bec3)', 'an-wickler': 'linear-gradient(180deg, #f6f5f1, #dcd9d2)', 'an-schlitz': '#3a3b3d',
+  'an-gurt': 'repeating-linear-gradient(180deg, rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px), #bdb8ad', 'an-stange': 'linear-gradient(90deg, #c9ccd0, #6d7379)', 'an-kurbel': 'linear-gradient(180deg, #e8eaec, #8d939a)',
+  'an-taster': '#f6f5f1', 'an-wippe': 'linear-gradient(180deg, #ffffff 0 48%, #b9b7b1 48% 52%, #eceae4 52%)', 'an-funk': '#3a3b3d', 'stopf-l': '#2a2b2d', 'stopf-r': '#2a2b2d' };
+const KNOPF_BG = 'radial-gradient(circle at 40% 35%, #ffffff, #c9ced3 60%, #8a9096)', SCHLOSS_BG = 'radial-gradient(circle at 50% 50%, #e9ecef 0 22%, #3a3e43 26%)';
 /* Klappläden: Lamellen, Füllung (zwei Felder) oder senkrechte Bretter; Farbe nach Wahl, sonst Moosgrün */
 const KL_FARBE = { weiss: ['#ece9e2', '#c9c5bc', '#ffffff'], anthrazit: ['#41474c', '#26292c', '#5d646a'], gruen: ['#3d6650', '#24402f', '#5a856c'], braun: ['#5e4434', '#3b2a1f', '#7d5d49'], holz: ['#b98a50', '#8a5f30', '#d3a76c'] };
 function klBg(w, s) {
@@ -1196,9 +1207,11 @@ function w3dHTML(w, o) {
     if (Z.baender && (x.t === 'D' || x.t === 'DK' || x.t === 'P') && !x.st) h += faceEl('bd-o-' + i, 'w3d-band') + faceEl('bd-u-' + i, 'w3d-band');
     h += faceEl('sf-out-' + i, 'w3d-frame w3d-sf w3d-back', ' style="background: ' + fout.bg + '"');
     ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('sfe-' + k + '-' + i, 'w3d-frame w3d-side w3d-sfe', ' style="background-color: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
-    h += '<div class="w3d-f w3d-ros" data-r="hros-' + i + '" style="background: ' + hcol + '"></div><div class="w3d-handle" data-r="handle-' + i + '" style="background: ' + hcol + '"></div>';
-    /* Türen: Griff außen (Balkontür: Ziehgriff mit Schnäpper oder abschließbar; Schiebe- und Falttüren: Schließzylinder) auf der Außenseite */
-    if (V.tuer) h += '<div class="w3d-griffa" data-r="ga-' + i + '" style="background: ' + hcol + '"></div>';
+    /* Griff: Rosette, Hebel und darauf Druckknopf und Schließzylinder als eigene Flächen (CSS-Modell und WebGL-Bühne zeigen dieselben) */
+    h += '<div class="w3d-f w3d-ros" data-r="hros-' + i + '" style="background: ' + hcol + '"></div><div class="w3d-handle" data-r="handle-' + i + '" style="background: ' + hcol + '"><span class="w3d-f w3d-hknopf" data-r="hk-' + i + '"></span><span class="w3d-f w3d-hschloss" data-r="hs-' + i + '"></span></div>';
+    /* Türen: Griff außen (Balkontür: Ziehgriff mit Schnäpper oder abschließbar; Schiebe- und Falttüren: Schließzylinder; Hebe-Schiebe:
+       Griffmuschel) auf der Außenseite */
+    if (V.tuer) h += '<div class="w3d-griffa" data-r="ga-' + i + '" style="background: ' + hcol + '"><span class="w3d-f w3d-hschloss" data-r="gas-' + i + '"></span></div>';
     h += '<div class="w3d-selring" data-r="ring-' + i + '"></div>';
     h += '</div>';
   });
@@ -1212,7 +1225,9 @@ function w3dHTML(w, o) {
     h += faceEl('fs-l', 'w3d-fs') + faceEl('fs-l2', 'w3d-fs w3d-fs-s') + faceEl('fs-r', 'w3d-fs') + faceEl('fs-r2', 'w3d-fs w3d-fs-s');
     if (w.sart === 'raffstore') { for (let k = 0; k < LAM_MAX; k++) h += '<div class="w3d-f w3d-lam" data-r="lam-' + k + '" style="--k: ' + k + '"></div>'; h += faceEl('band-l', 'w3d-aufzug') + faceEl('band-r', 'w3d-aufzug'); }
     else h += faceEl('behang', 'w3d-behang' + (w.sart === 'screen' ? ' w3d-screen' : ''));
-    h += faceEl('behang-u', 'w3d-behang-u' + (w.sart === 'rollladen' ? ' mit-stopfen' : '')) + faceEl('behang-ub', 'w3d-behang-u w3d-behang-ub');
+    h += faceEl('behang-u', 'w3d-behang-u') + faceEl('behang-ub', 'w3d-behang-u w3d-behang-ub');
+    /* Rollladen: Anschlagstopfen auf der Endleiste (halten den Panzer oben am Kasten) */
+    if (w.sart === 'rollladen') h += faceEl('stopf-l', 'w3d-stopfen') + faceEl('stopf-r', 'w3d-stopfen');
   }
   if (Z.solar) h += faceEl('solar', 'w3d-solar');
   /* Klappläden an der Fassade, Geländer vor der Öffnung, Fenstergitter */
@@ -1222,7 +1237,7 @@ function w3dHTML(w, o) {
   if (innenAktiv(w)) h += faceEl('innen-k', 'w3d-innen-k') + faceEl('innen', 'w3d-innen') + faceEl('innen-u', 'w3d-innen-u');
   if (w.insekt && w.insekt !== 'keiner') h += faceEl('mesh', 'w3d-mesh') + (Z.insektK ? faceEl('mesh-k', 'w3d-roll w3d-mesh-k') : '');
   /* Bedienung innen neben der Öffnung: Gurtwickler mit Gurtband, Kurbelstange, Wandtaster (w3dAntrieb) */
-  if (sonneAktiv(w) || w.art === 'hst') h += faceEl('an-gurt', 'w3d-an w3d-an-gurt') + faceEl('an-wickler', 'w3d-an w3d-an-wickler') + faceEl('an-stange', 'w3d-an w3d-an-stange') + faceEl('an-kurbel', 'w3d-an w3d-an-kurbel') + faceEl('an-taster', 'w3d-an w3d-an-taster');
+  if (sonneAktiv(w) || w.art === 'hst') h += faceEl('an-gurt', 'w3d-an w3d-an-gurt') + faceEl('an-wickler', 'w3d-an w3d-an-wickler') + faceEl('an-schlitz', 'w3d-an w3d-an-schlitz') + faceEl('an-stange', 'w3d-an w3d-an-stange') + faceEl('an-kurbel', 'w3d-an w3d-an-kurbel') + faceEl('an-taster', 'w3d-an w3d-an-taster') + faceEl('an-wippe', 'w3d-an w3d-an-wippe') + faceEl('an-funk', 'w3d-an w3d-an-funk');
   (V.dims || []).forEach((k) => { h += dimHTML(k, V.active === k); });
   h += '</div></div></div>';
   h += '<span class="w3d-hint" data-r="hint"' + (o.hint ? '' : ' hidden') + '>' + esc(o.hint || '') + '</span>';
@@ -1294,7 +1309,7 @@ function w3dPaint(stage, w) {
   ['t', 'l', 'r'].forEach((k) => { bg('li-' + k, fin.bg); bg('la-' + k, fout.bg); });
   bg('oeff', 'linear-gradient(180deg, #eef0f2, #c3c8cd 60%, #a3a9af)');
   bg('luef', 'repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 5px), linear-gradient(180deg, ' + mischHex(fin.solid, '#ffffff', 0.12) + ', ' + mischHex(fin.solid, '#000000', 0.1) + ')');
-  bg('solar', SOLAR_BG);
+  bg('solar', SOLAR_BG); Object.keys(TEIL_BG).forEach((r) => bg(r, TEIL_BG[r]));
   bg('el-front', fin.bg); bg('el-back', fout.bg); bgc('el-side-l', fout.solid); bgc('el-side-r', fout.solid); bgc('el-side-t', fin.solid); bgc('el-side-b', fin.solid);
   bg('ol-front', fin.bg); bg('ol-back', fout.bg); bg('kf', fin.bg); bg('kfb', fout.bg);
   bg('ul-front', fin.bg); bg('ul-back', fout.bg); bg('kfu', fin.bg); bg('kfub', fout.bg);
@@ -1314,6 +1329,7 @@ function w3dPaint(stage, w) {
   else { bg('roll-f', ''); bg('roll-sl', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
     bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol); bg('hros-' + i, hcol); bg('ga-' + i, hcol);
+    bg('hk-' + i, KNOPF_BG); bg('hs-' + i, SCHLOSS_BG); bg('gas-' + i, SCHLOSS_BG);
     bgc('sfe-l-' + i, fout.solid); bgc('sfe-r-' + i, fout.solid); bgc('sfe-t-' + i, fin.solid); bgc('sfe-b-' + i, fin.solid);
     bg('pan-i-' + i, fin.bg); bg('pan-o-' + i, fout.bg); bg('riegel-i-' + i, fin.bg); bg('riegel-o-' + i, fout.bg);
     /* Bänder mit Abdeckkappen in einem Ton dunkler als der Rahmen; Sichtschutz nur unten im gewählten Ornament */
@@ -1332,22 +1348,30 @@ function w3dPaint(stage, w) {
 const AH_SOL = { schwarz: '#232528', grau: '#6d7378', silber: '#b9bfc5', weiss: '#ecebe6' };
 /* Oberflächen für die WebGL-Bühne (buehne.js): Holzdekor mit Maserung, Fensterbänke aus Naturstein, Holz und Aluminium,
    Fassade als Klinker, Holz, Putz oder WDVS. Das CSS-Modell zeigt weiter die Verläufe aus BANK, WOOD und facadeBg. */
-const holzig = (c) => !!(c && /Holzdekor/.test(c.code || ''));
+const holzig = (c) => !!(c && (c.holz || /Holzdekor/.test(c.code || '')));
+/* Sonderoberflächen aus dem Farbblatt (ral.js): Eisenglimmer glänzt metallisch, Struktur ist rau, Eloxal gebürstet, Holzstruktur genarbt */
+const SONDER_OBERFL = { db701: 'metall', db702: 'metall', db703: 'metall', sand7016: 'struktur', sand9005: 'struktur', holz7016: 'holz', eloxal: 'eloxal', eloxbronze: 'eloxal' };
 const BANK_ART = { stein: 'granit', holz: 'holz', alu: 'alu' };
 const FASSADE_ART = { klinker: 'klinker', holz: 'holzfassade', wdvs: 'putzfein' };
 function w3dOberflaeche(stage, w, fin, fout) {
   /* _sol: Vollfarbe für die Falzflächen, die buehne.js zwischen Vorder- und Rückseite eines Profils ergänzt */
-  const setz = (r, k, sol) => { const el = stage.querySelector('[data-r="' + r + '"]'); if (el) { el._art = k; if (sol) el._sol = sol; } };
+  /* _oberfl: Sonderoberfläche der Farbe je Seite (buehne.js, vor der Oberfläche aus der Detailangabe) */
+  const oi = SONDER_OBERFL[fin.k] || '', oa = SONDER_OBERFL[fout.k] || '';
+  const setz = (r, k, sol, of) => { const el = stage.querySelector('[data-r="' + r + '"]'); if (el) { el._art = k; if (sol) el._sol = sol; if (of != null) el._oberfl = of; } };
   const hi = holzig(fin) ? 'holz' : '', ha = holzig(fout) ? 'holz' : '';
-  ['el-front', 'ol-front', 'kf', 'ul-front', 'kfu', 'el-side-t', 'el-side-b'].forEach((r) => setz(r, hi, fin.solid));
-  ['el-back', 'ol-back', 'kfb', 'ul-back', 'kfub', 'el-side-l', 'el-side-r', 'ul-pan-b'].forEach((r) => setz(r, ha, fout.solid));
+  ['el-front', 'ol-front', 'kf', 'ul-front', 'kfu', 'el-side-t', 'el-side-b'].forEach((r) => setz(r, hi, fin.solid, oi));
+  ['el-back', 'ol-back', 'kfb', 'ul-back', 'kfub', 'el-side-l', 'el-side-r', 'ul-pan-b'].forEach((r) => setz(r, ha, fout.solid, oa));
   setz('ul-glass', w.ul && w.ulA === 'paneel' ? hi : '');
-  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-', 'pan-i-', 'riegel-i-'].forEach((r) => setz(r + i, hi, fin.solid)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-', 'pan-o-', 'riegel-o-'].forEach((r) => setz(r + i, ha, fout.solid)); });
-  ['t', 'l', 'r'].forEach((k) => { setz('li-' + k, hi, fin.solid); setz('la-' + k, ha, fout.solid); });
+  w.sashes.forEach((x, i) => { ['mul-', 'sf-in-', 'sfe-t-', 'sfe-b-', 'pan-i-', 'riegel-i-'].forEach((r) => setz(r + i, hi, fin.solid, oi)); ['mulb-', 'sf-out-', 'sfe-l-', 'sfe-r-', 'pan-o-', 'riegel-o-'].forEach((r) => setz(r + i, ha, fout.solid, oa)); });
+  ['t', 'l', 'r'].forEach((k) => { setz('li-' + k, hi, fin.solid, oi); setz('la-' + k, ha, fout.solid, oa); });
   /* Fensterbank innen: die gewählte Farbe bestimmt das Material (Marmor und Granit als Stein, Holzdekor als Holz) */
   const fF = dg(w, 'fbiFarbe') ? w.fbiFarbe : '', bi = fF === 'granit' ? 'granit' : fF === 'holz' ? 'holz' : fF === 'weiss' || fF === 'marmor' ? '' : BANK_ART[w.fbi] || '', ba = w.fba === 'alu' ? 'alu' : '';
   ['sill-t', 'sill-f', 'sill-l', 'sill-r'].forEach((r) => setz(r, bi)); ['sa-t1', 'sa-t2', 'sa-f'].forEach((r) => setz(r, ba)); ['sa-l', 'sa-r'].forEach((r) => setz(r, ba && !(dg(w, 'fbaKappe') && w.fbaKappe !== 'alu') ? 'alu' : ''));
   setz('wall-out', FASSADE_ART[w.fassade] || 'putz');
+  /* Aufsatzkasten: die Blende ist Teil der Fassade (überputzt, Klinker oder Holz), ihr Muster setzt w3dSonne in der Wand fort;
+     die Unterseite mit dem Auslaufschlitz ist feiner Putz */
+  const aufsatz = sonneAktiv(w) && w.roll === 'aufsatz';
+  setz('roll-f', aufsatz ? FASSADE_ART[w.fassade] || 'putz' : ''); setz('roll-b', aufsatz ? 'putzfein' : '');
 }
 /* Maßlinien nachziehen: fehlende anlegen, überzählige entfernen */
 function ensureDims(stage, o) {
@@ -1396,7 +1420,8 @@ function w3dLayout(stage, w, o, gr) {
   stage.classList.toggle('is-niedrig', (gr ? gr[1] : stage.clientHeight || 360) < 200); // niedrige Bühne: Knöpfe am Modell in einer Reihe (app.css)
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, sd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s, tuer = V.tuer;
   const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
-  W3D_SOFORT = stage.classList.contains('no-anim') || ruhig();
+  /* ohne Übergang: erster Aufbau, weniger Bewegung und Zoomen mit zwei Fingern oder dem Rad (is-zooming), sonst liefe das Modell nach */
+  W3D_SOFORT = stage.classList.contains('no-anim') || stage.classList.contains('is-zooming') || ruhig();
   const wandLoch = (spiegel) => G ? umriss('polygon(evenodd, 0 0, ' + px(wallW) + ' 0, ' + px(wallW) + ' ' + px(wallH) + ', 0 ' + px(wallH) + ', 0 0, ' + polyPts(gO.pts.concat([gO.pts[0]]), -wallW / 2, -wallH / 2, spiegel ? wallW : null) + ')', { t: 'wand', p: polyLok(gO.pts, -wallW / 2, -wallH / 2, spiegel ? wallW : null) })
     : hole(wallW, wallH, (wallW - moW) / 2, (wallH - moH) / 2, (wallW + moW) / 2, (wallH + moH) / 2);
   face(q('wall-in'), wallW, wallH, -wallW / 2, -wallH / 2, 0, '', '0 0', wandLoch(false));
@@ -1576,38 +1601,54 @@ function w3dLayout(stage, w, o, gr) {
       hd.style.transform = 'none';
     }
     face(ro, gl.rw, gl.rh, gl.ax - gl.rw / 2, gl.ay - gl.rh / 2, 3.5, '', '50% 50%');
-    if (ro) { ro.style.borderRadius = px(Math.min(gl.rw, gl.rh) * 0.3); ro.style.opacity = gl.sichtbar ? '' : '0'; } // Deckkraft inline: die WebGL-Bühne liest keine Klassen
+    if (ro) { ro._rund = Math.min(gl.rw, gl.rh) * 0.3; ro.style.borderRadius = px(ro._rund); ro.style.opacity = gl.sichtbar ? '' : '0'; } // Deckkraft und Rundung inline: die WebGL-Bühne liest keine Klassen
+    /* Druckknopf an der Hebelwurzel, Schließzylinder in der Nabe (an der Achse ox, oy, auch beim Kipp- und Hebegriff) */
+    const hk = q('hk-' + i), hs = q('hs-' + i);
+    if (hk && hs) {
+      const hw = Math.min(gl.lw, gl.lh), dir = gl.lw > gl.lh ? [1, 0] : gl.oy > gl.lh / 2 ? [0, -1] : [0, 1], dk = hw * 0.56, ak = hw * 0.65 + dk / 2, ds = hw * 1.2;
+      face(hk, dk, dk, gl.ox + dir[0] * ak - dk / 2, gl.oy + dir[1] * ak - dk / 2, 0, '', '50% 50%'); hk._rund = dk / 2;
+      face(hs, ds, ds, gl.ox - ds / 2, gl.oy - ds / 2, 0, '', '50% 50%'); hs._rund = ds / 2;
+      hk.style.opacity = stage.classList.contains('mit-knopf') ? '' : '0'; hs.style.opacity = stage.classList.contains('mit-schloss') ? '' : '0';
+    }
     griffe[i] = gl.sichtbar ? [left + gl.ax, sashTop + gl.ay, z0 + 6] : null;
     /* Griff außen: Balkontür nach Wahl (Ziehgriff mit Schnäpper oder abschließbar), bei Hebe-Schiebe-, PSK- und Faltschiebetür nur
        abschließbar (Schließzylinder auf der Außenseite des bedienten Flügels); auf derselben Höhe wie der Griff innen */
     const ga = q('ga-' + i);
     if (ga) {
       const cfg = w.bt || {}, balkon = w.art === 'balkon', zg = balkon && cfg.griffA === 'ziehgriff';
-      const an = gl.sichtbar && (balkon ? i === gehFluegel(w) && !!cfg.griffA && cfg.griffA !== 'keiner' : w.griff === 'abschliessbar' && (x.t === 'S' || x.t === 'PS' || x.t === 'P' || gl.bedien));
-      const gw2 = Math.max(4, (zg ? 26 : 34) * s), gh2 = Math.max(12, (zg ? 300 : 150) * s), ym2 = clamp(gl.ay - gh2 / 2, 0, Math.max(0, sashH - gh2));
+      /* Hebe-Schiebe-Tür mit Griffmuschel außen (Detailangabe hstPlus): flache Mulde am Schiebeflügel, auch ohne Griff innen */
+      const muschel = w.art === 'hst' && x.t === 'S' && dg(w, 'hstPlus') && [].concat(w.hstPlus).indexOf('muschel') >= 0 && w.griff !== 'abschliessbar';
+      const an = muschel || (gl.sichtbar && (balkon ? i === gehFluegel(w) && !!cfg.griffA && cfg.griffA !== 'keiner' : w.griff === 'abschliessbar' && (x.t === 'S' || x.t === 'PS' || x.t === 'P' || gl.bedien)));
+      const gw2 = Math.max(4, (zg ? 26 : muschel ? 44 : 34) * s), gh2 = Math.max(12, (zg ? 300 : muschel ? 180 : 150) * s), ym2 = clamp(gl.ay - gh2 / 2, 0, Math.max(0, sashH - gh2));
       ga.style.width = px(gw2); ga.style.height = px(gh2); ga.style.transform = 'translate3d(' + px(gl.ax - gw2 / 2) + ', ' + px(ym2) + ', ' + px(-sd - 5) + ')'; ga.style.opacity = an ? '1' : '0';
-      ga.classList.toggle('is-schloss', !zg);
+      ga.classList.toggle('is-schloss', !zg && !muschel); ga.classList.toggle('is-muschel', muschel);
       w3dWerte(ga, '_g', { w: gw2, h: gh2, tx: gl.ax - gw2 / 2, ty: ym2, tz: -sd - 5, op: an ? 1 : 0 });
+      /* Schließzylinder außen: eigene Fläche oben im Griff */
+      const gas = q('gas-' + i); if (gas) { const dz2 = gw2 * 0.64; face(gas, dz2, dz2, gw2 / 2 - dz2 / 2, gh2 * 0.14, 0, '', '50% 50%'); gas._rund = dz2 / 2; gas.style.opacity = !zg && !muschel ? '' : '0'; }
     }
     w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
   });
   stage._griffe = griffe;
   if (q('mesh')) face(q('mesh'), iw, ih, ix, iy, z0 - fd - 6 * s, '', '0 0', G ? polyClip(gI.pts, ix, iy, iw, ih) : null);
-  w3dSonne(stage, w, o, V, s, q); w3dAntrieb(w, V, s, q);
-  const so = q('solar'); if (so) { const rh2 = 180 * s, rz2 = w.roll === 'vorbau' ? -T - 140 * s : -T, pw = Math.min(260 * s, moW * 0.3); face(so, pw, rh2 * 0.62, moW / 2 + 10 * s - pw, -moH / 2 - rh2 + rh2 * 0.19, rz2 - 0.8, 'rotateY(180deg)', '50% 50%'); }
+  const sonneL = w3dSonne(stage, w, o, V, s, q); w3dAntrieb(w, V, s, q);
   const kll = q('kl-l'), klr = q('kl-r');
   const malB = (el, v) => { if (el && el._bg !== v) { el._bg = v; el.style.background = v; } };
   if (kll && klr) { const kw = moW / 2 + 6 * s, kh = moH + 10 * s, kz = -T - Math.max(1, 4 * s), ky = -moH / 2 - 5 * s; face(kll, kw, kh, -moW / 2 - 8 * s - kw, ky, kz, 'rotateY(180deg)', '50% 50%'); face(klr, kw, kh, moW / 2 + 8 * s, ky, kz, 'rotateY(180deg)', '50% 50%'); malB(kll, klBg(w, s)); malB(klr, klBg(w, s)); }
   /* Geländer: Oberkante 950 mm über dem Boden (bei einer Brüstung entsprechend tiefer), vor der Fassade; Glasbrüstung in der Außenlaibung */
   const gl2 = q('gel'), glh = q('gel-h');
   if (gl2 && glh) {
-    const glas = w.absturz === 'glas', hR = clamp(950 - (tuer ? 0 : num(w.bru) || 0), 320, 950) * s, gw3 = glas ? moW - 4 * s : moW + 80 * s, gz = glas ? -d - fd - 26 * s : -T - 50 * s, hh = Math.max(3, 42 * s);
+    /* vor dem Sonnenschutz: Glasbrüstung in der Laibung 6 mm vor dessen äußerer Ebene (Aufsatz, Unterputz), Geländer vor der Fassade
+       12 mm vor einem Vorbau */
+    const glas = w.absturz === 'glas', hR = clamp(950 - (tuer ? 0 : num(w.bru) || 0), 320, 950) * s, gw3 = glas ? moW - 4 * s : moW + 80 * s, hh = Math.max(3, 42 * s);
+    const gz = glas ? Math.max(-T + 2 * s, Math.min(-d - fd - 26 * s, sonneL && sonneL.laib ? sonneL.aussen - 6 * s : 0)) : Math.min(-T - 50 * s, sonneL && !sonneL.laib ? sonneL.aussen - 12 * s : 0);
     face(gl2, gw3, hR - hh, -gw3 / 2, yB - hR + hh, gz, 'rotateY(180deg)', '50% 50%'); face(glh, gw3, hh, -gw3 / 2, yB - hR, gz - 0.6, 'rotateY(180deg)', '50% 50%');
     gl2.classList.toggle('w3d-gel-glas', glas || (dg(w, 'gelForm') && w.gelForm === 'glas')); malB(gl2, gelBg(w, s)); malB(glh, gelFarbe(w));
   }
-  /* Fenstergitter in der Außenlaibung (Laibungsmontage): über der Fensterbank, hinter dem Behang */
-  const gi = q('gitter'); if (gi) { const zg = -T + Math.max(1, Math.min(30 * s, (T - d - fd) * 0.5)); face(gi, moW - 1.2, yB + moH / 2, -moW / 2 + 0.6, -moH / 2, zg, 'rotateY(180deg)', '50% 50%'); malB(gi, gitterBg(w, s)); }
-  const mk = q('mesh-k'); if (mk) { const kh2 = Math.max(4, 48 * s); face(mk, iw + 10 * s, kh2, ix - 5 * s, iy - kh2 * 0.7, z0 - fd - 10 * s, 'rotateY(180deg)', '50% 50%'); }
+  /* Fenstergitter in der Außenlaibung (Laibungsmontage): über der Fensterbank, hinter einem Vorbau-Behang; läuft der Sonnenschutz in der
+     Laibung (Aufsatz, Unterputz), liegt das Gitter davor, außerhalb der gedrehten Lamellen */
+  const gi = q('gitter'); if (gi) { const zg = Math.max(-T + 1, Math.min(-T + Math.max(1, Math.min(30 * s, (T - d - fd) * 0.5)), sonneL && sonneL.laib ? sonneL.aussen - 4 * s : 0)); face(gi, moW - 1.2, yB + moH / 2, -moW / 2 + 0.6, -moH / 2, zg, 'rotateY(180deg)', '50% 50%'); malB(gi, gitterBg(w, s)); }
+  /* Kasten des Insektenrollos oben am Rahmen, bei einem Aufsatzkasten darunter (dessen Unterseite reicht vor den Rahmen) */
+  const mk = q('mesh-k'); if (mk) { const kh2 = Math.max(4, 48 * s); face(mk, iw + 10 * s, kh2, ix - 5 * s, Math.max(iy - kh2 * 0.7, sonneL && sonneL.unten != null ? sonneL.unten : -Infinity), z0 - fd - 10 * s, 'rotateY(180deg)', '50% 50%'); }
   /* Sichtschutz innen: Kassette oben, Behang nach dem Stand der Knöpfe herab, Endleiste; vor dem Rahmen auf der Raumseite */
   const inn = q('innen');
   if (inn) {
@@ -1663,18 +1704,23 @@ function w3dSonne(stage, w, o, V, s, q) {
   const up = w.roll === 'unterputz', inLaib = auf || up, seil = raff && dg(w, 'fuehrung') && w.fuehrung === 'seil', lm = raff && dg(w, 'lamelle') ? w.lamelle : 'c80';
   const c = sonneFarbeW(w), F = c[0], D = c[1], L = c[2], aus = (el) => { if (el) { el._k = ''; el.style.opacity = '0'; el.style.width = '0px'; el.style.height = '0px'; } };
   const kH = (auf ? 200 : raff ? 150 : screen ? 130 : 180) * s, rail = seil ? [5, 6] : raff ? [26, 30] : screen ? [30, 40] : [22, 40], rw = Math.max(seil ? 1 : 2, rail[0] * s), rd = rail[1] * s;
+  /* Raffstore: Schienen mit Abstand vor Fassade bzw. Rahmen (Distanzwinkel), damit die geneigten Lamellen frei drehen und nicht in
+     die Wand ragen; der Vorbaukasten wird entsprechend tiefer */
+  const LT = raff ? LAMELLE[lm] || LAMELLE.c80 : null, abst = LT ? Math.max(0, LT.h / 2 + 3 - rail[1] / 2) * s : 0, kD = Math.max(rd + 110 * s, abst + rd + 80 * s);
   /* Kasten */
   if (q('roll-f')) {
     ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => { const e = q(r); if (e) e.style.opacity = ''; });
     if (auf) {
-      const dz = Math.max(1, T - d - fd), yb = -moH / 2 + kH, schlitz = (Math.max(3, 16 * rd / 26) + 3 * s) / dz * 100, mitte = (3 * s + rd / 2) / dz * 100;
+      const dz = Math.max(1, T - d - fd), yb = -moH / 2 + kH, schlitz = (Math.max(3, 16 * rd / 26) + 3 * s) / dz * 100, mitte = (3 * s + abst + rd / 2) / dz * 100;
       face(q('roll-f'), moW, kH, -moW / 2, -moH / 2, -T + 0.5, 'rotateY(180deg)', '50% 50%'); q('roll-f').style.backfaceVisibility = 'hidden';
+      /* Muster der Fassade läuft über die Blende weiter (WebGL): Versatz der Blende in der Wandfläche, beide von außen gesehen gespiegelt */
+      const rf = q('roll-f'), wo = q('wall-out'); rf._artVers = wo && wo._f ? [(wo._f.x + wo._f.W) - (rf._f.x + rf._f.W), rf._f.y - wo._f.y] : null;
       face(q('roll-b'), moW, dz, -moW / 2, yb, z0 - fd, 'rotateX(-90deg)', '0 0');
       const rb = q('roll-b'), rbg = 'linear-gradient(180deg, #9a9083 0 ' + n1(mitte - schlitz / 2) + '%, #232426 ' + n1(mitte - schlitz / 2) + '% ' + n1(mitte + schlitz / 2) + '%, #a49a8d ' + n1(mitte + schlitz / 2) + '%)';
       if (rb._bg !== rbg) { rb._bg = rbg; rb.style.background = rbg; }
       ['roll-sl', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => aus(q(r)));
     } else {
-      const kD = rd + 110 * s, bev = raff ? 0 : Math.min(kH * 0.3, 44 * s), bw = moW + 2 * (rw + 40 * s), bx = -bw / 2, by = -moH / 2 - kH;
+      const bev = raff ? 0 : Math.min(kH * 0.3, 44 * s), bw = moW + 2 * (rw + 40 * s), bx = -bw / 2, by = -moH / 2 - kH;
       face(q('roll-f'), bw, kH - bev, bx, by, -T - kD, 'rotateY(180deg)', '50% 50%'); q('roll-f').style.backfaceVisibility = '';
       face(q('roll-sl'), bw, bev * Math.SQRT2, bx, by + kH - bev, -T - kD, 'rotateX(45deg)', '0 0'); if (!bev) aus(q('roll-sl'));
       face(q('roll-b'), bw, kD - bev, bx, -moH / 2, -T, 'rotateX(-90deg)', '0 0');
@@ -1683,20 +1729,28 @@ function w3dSonne(stage, w, o, V, s, q) {
       face(q('roll-l'), kD, kH, bx, by, -T, 'rotateY(90deg)', '0 0', seite); face(q('roll-r'), kD, kH, bx + bw, by, -T, 'rotateY(90deg)', '0 0', seite);
     }
   }
-  if (!q('fs-l')) return;
+  /* Solarmodul auf der Blende: vor der Front des Vorbaukastens bzw. auf der Aufsatzblende in der Öffnung, am rechten Ende (von außen links) */
+  const so = q('solar');
+  if (so) {
+    if (auf) { const pw = Math.min(260 * s, moW * 0.3), ph = kH * 0.62; face(so, pw, ph, moW / 2 - 12 * s - pw, -moH / 2 + (kH - ph) / 2, -T - 0.3, 'rotateY(180deg)', '50% 50%'); }
+    else { const bev = raff ? 0 : Math.min(kH * 0.3, 44 * s), bw = moW + 2 * (rw + 40 * s), ph = (kH - bev) * 0.62, pw = Math.min(260 * s, bw * 0.3); face(so, pw, ph, bw / 2 - 12 * s - pw, -moH / 2 - kH + (kH - bev - ph) / 2, -T - kD - 0.8, 'rotateY(180deg)', '50% 50%'); }
+  }
+  if (!q('fs-l')) return null;
   /* Führungsschienen: Stirn nach außen und die Innenseite zur Öffnung hin */
   const yTop = auf ? -moH / 2 + kH : -moH / 2, yEnd = moH / 2, len = Math.max(1, yEnd - yTop);
-  const zr = inLaib ? z0 - fd - 3 * s : -T, xl = inLaib ? -moW / 2 : -moW / 2 - rw, xr = inLaib ? moW / 2 - rw : moW / 2;
+  const zr = (inLaib ? z0 - fd - 3 * s : -T) - abst, xl = inLaib ? -moW / 2 : -moW / 2 - rw, xr = inLaib ? moW / 2 - rw : moW / 2;
   face(q('fs-l'), rw, len, xl, yTop, zr - rd, 'rotateY(180deg)', '50% 50%'); face(q('fs-r'), rw, len, xr, yTop, zr - rd, 'rotateY(180deg)', '50% 50%');
   face(q('fs-l2'), rd, len, xl + rw, yTop, zr, 'rotateY(90deg)', '0 0'); face(q('fs-r2'), rd, len, xr, yTop, zr, 'rotateY(90deg)', '0 0');
   /* Behang zwischen den Schienenmitten, in der Mitte der Schienentiefe */
   const zb = zr - rd / 2, bw = inLaib ? moW - rw : moW + rw, bx = -bw / 2, uH = Math.max(3, (raff ? 45 : screen ? 30 : 38) * s), Hmax = Math.max(0, len - uH), dep = Math.max(2, rd * 0.7);
   let e;
   if (raff) {
-    const N = Math.min(LAM_MAX, Math.max(1, Math.ceil(Hmax / (72 * s)))), p = Math.max(72 * s, Hmax / N), lh = (lm === 'z90' ? 90 : lm === 'flach' ? 60 : 80) * s, pk = Math.max(0.9, (lm === 'flach' ? 5 : 7) * s);
-    const tilt = st.wend ? 6 : 52, dunkel = mischHex(D, '#000000', 0.3);
+    /* Lamellentyp (Detailangabe lamelle): Höhe, Teilung und Profil. C-Lamelle 80 mm, Teilung 72 mm, gewölbt; Z-Lamelle 90 mm, Teilung
+       80 mm, mit abgekanteten Rändern; Flachlamelle 60 mm, Teilung 52 mm, eben. _bieg wölbt die Lamelle im Licht der WebGL-Bühne */
+    const N = Math.min(LAM_MAX, Math.max(1, Math.ceil(Hmax / (LT.p * s)))), p = Math.max(LT.p * s, Hmax / N), lh = LT.h * s, pk = Math.max(0.9, LT.pk * s);
+    const tilt = st.wend ? 6 : 52;
     e = yTop + N * pk + stand * Math.max(0, Hmax - N * pk);
-    const lamBg = st.wend ? 'linear-gradient(180deg, ' + L + ' 0 7%, ' + F + ' 18% 60%, ' + D + ' 88%, ' + dunkel + ')' : 'linear-gradient(180deg, ' + L + ' 0 9%, ' + mischHex(F, '#ffffff', 0.16) + ' 30%, ' + F + ' 70%, ' + D + ')';
+    const lamBg = lamelleBg(lm, !!st.wend, F, D, L);
     for (let k = 0; k < LAM_MAX; k++) {
       const el = q('lam-' + k); if (!el) continue;
       /* überzählige Lamellen: ausgeblendet und durchsichtig (die WebGL-Bühne liest nur die Deckkraft) */
@@ -1705,6 +1759,7 @@ function w3dSonne(stage, w, o, V, s, q) {
       const haengt = yTop + (k + 0.5) * p, paket = e - (N - k - 0.5) * pk, frei = haengt <= paket, cy = Math.min(haengt, paket);
       face(el, bw, lh, bx, cy - lh / 2, zb, 'rotateX(' + (frei ? -tilt : -86) + 'deg)', '50% 50%');
       if (el._bg !== lamBg) { el._bg = lamBg; el.style.background = lamBg; }
+      el._bieg = LT.bieg;
     }
     /* Aufzugbänder bei einem Sechstel und fünf Sechsteln der Breite, an der Außenkante der Lamellen */
     const bz = zb - (lh / 2) * Math.sin(tilt * Math.PI / 180) - 0.6, bb = Math.max(1.2, 6 * s);
@@ -1714,29 +1769,57 @@ function w3dSonne(stage, w, o, V, s, q) {
   } else {
     const bh = q('behang'); e = yTop + stand * Hmax;
     if (bh) {
-      face(bh, bw, Math.max(0, e - yTop), bx, yTop, zb, '', '0 0'); bh.style.opacity = e - yTop < 0.5 ? '0' : screen ? '.86' : '';
+      /* Screen: Durchsicht nach dem Gewebe (Detailangabe transp), lichtdurchlässig bis verdunkelnd */
+      const tr = screen && dg(w, 'transp') ? w.transp : '', op = tr === 'licht' ? '.72' : tr === 'dunkel' ? '.97' : '.86';
+      face(bh, bw, Math.max(0, e - yTop), bx, yTop, zb, '', '0 0'); bh.style.opacity = e - yTop < 0.5 ? '0' : screen ? op : '';
       const bgv = behangBg(w, s); if (bh._bg !== bgv) { bh._bg = bgv; bh.style.background = bgv; }
     }
   }
   face(q('behang-u'), bw, uH, bx, e, zb - 0.4, '', '0 0');
   face(q('behang-ub'), bw, dep, bx, e + uH, zb + dep / 2, 'rotateX(-90deg)', '0 0');
+  /* Anschlagstopfen des Rollladens: zwei Klötze oben auf der Endleiste, außen davor */
+  const sw = Math.max(2, 24 * s), sh = Math.max(2, uH * 0.6);
+  face(q('stopf-l'), sw, sh, bx + bw * 0.14, e - sh, zb - 0.9, '', '0 0'); face(q('stopf-r'), sw, sh, bx + bw * 0.86 - sw, e - sh, zb - 0.9, '', '0 0');
+  ['stopf-l', 'stopf-r'].forEach((r) => { const el = q(r); if (el) el._rund = Math.min(sw, sh) * 0.25; });
+  /* äußerste Ebene des Sonnenschutzes (Schienen, beim Raffstore die gedrehten Lamellen): Glasbrüstung in der Laibung und Geländer vor
+     der Fassade liegen davor */
+  return { aussen: Math.min(zr - rd, LT ? zb - LT.h * s / 2 : zr - rd), laib: inLaib, unten: auf ? yTop : null };
 }
-/* Bedienung innen neben der Öffnung: rechts an der Wand der Gurtwickler auf etwa 1.000 mm mit Gurtband aus der Wand über der Öffnung,
-   links in der Laibung die Kurbelstange mit Kurbel auf etwa 1.100 mm, Wandtaster auf 1.050 mm (elektrisch, Smart Home mit Funk-Punkt,
-   Hebe-Schiebe-Tür elektrisch). Fußboden: Tür auf der Schwelle, Fenster nach Brüstung, ohne Angabe 900 mm angenommen */
+/* Lamellen des Raffstores je Typ: Höhe h, Teilung p, Paketdicke pk (mm) und Wölbung bieg (Grad je Kante, WebGL) */
+const LAMELLE = { c80: { h: 80, p: 72, pk: 7, bieg: 22 }, z90: { h: 90, p: 80, pk: 8, bieg: 6 }, flach: { h: 60, p: 52, pk: 5, bieg: 0 } };
+/* Verlauf über die Lamellenhöhe: C-Profil hell oben und zur Kante hin dunkel; Z-Profil mit zwei abgekanteten Rändern; flach fast gleichmäßig.
+   Gewendet (zu) steht die Lamelle fast senkrecht, das Licht fällt flacher */
+function lamelleBg(lm, zu, F, D, L) {
+  const dunkel = mischHex(D, '#000000', 0.3), hell = mischHex(F, '#ffffff', 0.16);
+  if (lm === 'z90') return 'linear-gradient(180deg, ' + D + ' 0 5%, ' + L + ' 5% 11%, ' + (zu ? F : hell) + ' 24%, ' + F + ' 78%, ' + D + ' 89%, ' + L + ' 89% 94%, ' + dunkel + ' 94%)';
+  if (lm === 'flach') return 'linear-gradient(180deg, ' + L + ' 0 5%, ' + (zu ? F : hell) + ' 14%, ' + F + ' 86%, ' + D + ')';
+  return zu ? 'linear-gradient(180deg, ' + L + ' 0 7%, ' + F + ' 18% 60%, ' + D + ' 88%, ' + dunkel + ')' : 'linear-gradient(180deg, ' + L + ' 0 9%, ' + hell + ' 30%, ' + F + ' 70%, ' + D + ')';
+}
+/* Bedienung innen neben der Öffnung: an der Wand der Gurtwickler auf etwa 1.000 mm mit Gurtband aus der Wand über der Öffnung,
+   in der Laibung die Kurbelstange mit Kurbel auf etwa 1.100 mm, Wandtaster auf 1.050 mm (elektrisch und Smart Home mit Funk-Punkt,
+   Hebe-Schiebe-Tür elektrisch; Solar ohne Wandtaster, er wird per Funk bedient). Seite nach der Detailangabe bedien, sonst Wickler und
+   Taster rechts, Kurbel links. Fußboden: Tür auf der Schwelle, Fenster nach Brüstung, ohne Angabe 900 mm angenommen */
 function w3dAntrieb(w, V, s, q) {
   const t = q('an-taster'); if (!t) return;
   const moW = V.moW * s, moH = V.moH * s, bruTxt = String(w.bru == null ? '' : w.bru).trim(), boden = moH / 2 + (V.tuer ? 0 : bruTxt !== '' ? num(w.bru) : 900) * s;
-  const sonne = sonneAktiv(w), a = w.antrieb, gurt = sonne && a === 'gurt', kurbel = sonne && a === 'kurbel', taster = (sonne && (a === 'motor' || a === 'smart' || a === 'solar')) || (w.art === 'hst' && w.griff === 'motor');
-  const x = moW / 2 + 120 * s, ww = Math.max(4, 50 * s), wh = Math.max(10, 170 * s), yw = Math.min(boden - 1000 * s, moH / 2 - wh / 2), gb = Math.max(1.5, 22 * s), yo = -moH / 2 - 70 * s;
+  const sonne = sonneAktiv(w), a = w.antrieb, gurt = sonne && a === 'gurt', kurbel = sonne && a === 'kurbel', taster = (sonne && (a === 'motor' || a === 'smart')) || (w.art === 'hst' && w.griff === 'motor');
+  const seite = dg(w, 'bedien') ? w.bedien : '', sw = seite === 'links' ? -1 : 1, sk = seite === 'rechts' ? 1 : -1;
+  const x = sw * (moW / 2 + 120 * s), ww = Math.max(4, 50 * s), wh = Math.max(10, 170 * s), yw = Math.min(boden - 1000 * s, moH / 2 - wh / 2), gb = Math.max(1.5, 22 * s), yo = -moH / 2 - 70 * s;
   face(q('an-wickler'), ww, wh, x - ww / 2, yw - wh / 2, 1, '', '0 0');
+  /* Schlitz oben im Wickler, durch den das Gurtband läuft */
+  face(q('an-schlitz'), ww * 0.4, wh * 0.1, x - ww * 0.2, yw - wh / 2 + wh * 0.08, 1.4, '', '0 0');
   face(q('an-gurt'), gb, Math.max(0, yw - wh / 2 - yo), x - gb / 2, yo, 1.2, '', '0 0');
-  const sb = Math.max(2, 16 * s), xs = -moW / 2 + 50 * s, ys = -moH / 2 + 40 * s, ye = Math.max(ys + 60 * s, Math.min(boden - 1100 * s, moH / 2 - 160 * s)), zs = -V.laib * s + 40 * s;
+  const sb = Math.max(2, 16 * s), xs = sk * (moW / 2 - 50 * s), ys = -moH / 2 + 40 * s, ye = Math.max(ys + 60 * s, Math.min(boden - 1100 * s, moH / 2 - 160 * s)), zs = -V.laib * s + 40 * s;
   face(q('an-stange'), sb, Math.max(0, ye - ys), xs - sb / 2, ys, zs, '', '0 0');
-  face(q('an-kurbel'), Math.max(10, 130 * s), Math.max(3, 22 * s), xs, ye - Math.max(1.5, 11 * s), zs + 1, 'rotateZ(32deg)', '0 50%');
-  const tg = Math.max(7, 80 * s); face(t, tg, tg, x - tg / 2, boden - 1050 * s - tg / 2, 1, '', '0 0');
-  [['an-gurt', gurt], ['an-wickler', gurt], ['an-stange', kurbel], ['an-kurbel', kurbel], ['an-taster', taster]].forEach((r) => { const e = q(r[0]); if (e) e.style.opacity = r[1] ? '' : '0'; });
-  t.classList.toggle('is-funk', sonne && a === 'smart');
+  /* Kurbel um die Kurbelstange geschwenkt, zur Öffnung hin (rotateZ, damit die WebGL-Bühne sie liest) */
+  face(q('an-kurbel'), Math.max(10, 130 * s), Math.max(3, 22 * s), sk < 0 ? xs : xs - Math.max(10, 130 * s), ye - Math.max(1.5, 11 * s), zs + 1, 'rotateZ(' + (sk < 0 ? 32 : -32) + 'deg)', sk < 0 ? '0 50%' : '100% 50%');
+  const tg = Math.max(7, 80 * s), ty = boden - 1050 * s - tg / 2;
+  face(t, tg, tg, x - tg / 2, ty, 1, '', '0 0');
+  /* Wippe in der Mitte des Tasters, beim Smart Home ein Funk-Punkt oben rechts */
+  face(q('an-wippe'), tg * 0.56, tg * 0.56, x - tg * 0.28, ty + tg * 0.22, 1.4, '', '0 0');
+  const fk = Math.max(1.5, tg * 0.14); face(q('an-funk'), fk, fk, x + tg / 2 - tg * 0.08 - fk, ty + tg * 0.08, 1.8, '', '0 0');
+  [['an-wickler', 3], ['an-taster', 4], ['an-wippe', 2], ['an-funk', fk / 2], ['an-schlitz', 2]].forEach((r) => { const e = q(r[0]); if (e) e._rund = r[1]; });
+  [['an-gurt', gurt], ['an-wickler', gurt], ['an-schlitz', gurt], ['an-stange', kurbel], ['an-kurbel', kurbel], ['an-taster', taster], ['an-wippe', taster], ['an-funk', taster && sonne && a === 'smart']].forEach((r) => { const e = q(r[0]); if (e) e.style.opacity = r[1] ? '' : '0'; });
 }
 /* Lage des Griffs auf einem Flügel (Flügelkoordinaten in Pixeln): Achse (ax, ay), Hebel (lx, ly, lw, lh, Drehpunkt) und Rosette (rw, rh).
    Fenster: Hebel hängt nach unten, Rosette etwa 30 × 75 mm, Hebel etwa 135 mm. Kipp: oben mittig, Hebel waagerecht.
@@ -1756,8 +1839,10 @@ function w3dGriffLage(V, w, x, i, s, g) {
   /* Stulp mit Griff am zweiten Flügel (Detailangabe stulpBed): auch der Standflügel zeigt einen Griff */
   const stulpGriff = steh && dg(w, 'stulpBed') && w.stulpBed === 'griff';
   const r = { steh: steh, bedien: bedien, sichtbar: !fest && (!steh || stulpGriff) && !ohne };
-  /* Griffmodell (Detailangabe griffM): Design schlanker und länger, Stilgriff kurz und kräftig */
+  /* Griffmodell (Detailangabe griffM): Design schlanker und länger mit flacher, schmaler Rosette, Stilgriff (Olive) kurz und kräftig
+     mit großer Rosette */
   const gm = dg(w, 'griffM') ? w.griffM : '', gL = gm === 'design' ? 150 / 135 : gm === 'stil' ? 112 / 135 : 1, gB = gm === 'design' ? 17 / 20 : gm === 'stil' ? 27 / 20 : 1;
+  const rB = gm === 'design' ? 26 : gm === 'stil' ? 36 : 30, rH = gm === 'design' ? 62 : gm === 'stil' ? 86 : 75;
   /* Oberkante und Unterkante des Flügels an der Griffkante (bei Formen der gerade Teil des Profils) */
   const kante = (xs) => { const xe = Math.max(0.5, Math.min(sashW - 0.5, xs)); return [G ? Math.max(0, gI.top(g.left + xe) - g.sashTop) : 0, G ? Math.min(sashH, gI.bot(g.left + xe) - g.sashTop) : sashH]; };
   if (x.t === 'S') {
@@ -1767,7 +1852,7 @@ function w3dGriffLage(V, w, x, i, s, g) {
     const ay = clamp(sashH - (1050 - V.pfB) * s, hl, Math.max(hl, sashH - 150 * s));
     return Object.assign(r, { ax: ax, ay: ay, lw: hw, lh: hl + hw / 2, lx: ax - hw / 2, ly: ay - hl, origin: '50% ' + px(hl), ox: hw / 2, oy: hl, rw: Math.max(6, 36 * s), rh: Math.max(14, 96 * s) });
   }
-  const hw = Math.max(4, 20 * gB * s), hl = Math.max(16, 135 * gL * s), rw = Math.max(5, 30 * s), rh = Math.max(11, 75 * s);
+  const hw = Math.max(4, 20 * gB * s), hl = Math.max(16, 135 * gL * s), rw = Math.max(5, rB * s), rh = Math.max(11, rH * s);
   if (x.t === 'K') {
     const k = kante(sashW / 2), ax = sashW / 2 - hl / 2 + hw / 2, ay = k[0] + sf / 2;
     return Object.assign(r, { ax: ax, ay: ay, lw: hl, lh: hw, lx: ax - hw / 2, ly: ay - hw / 2, origin: px(hw / 2) + ' 50%', ox: hw / 2, oy: hw / 2, rw: rh, rh: rw });
@@ -1775,8 +1860,10 @@ function w3dGriffLage(V, w, x, i, s, g) {
   /* Dreh, Dreh-Kipp, Gehflügel und der Bediengriff der Faltwand: Griff gegenüber den Bändern. PSK: auf der Schließseite wie bei
      Hebe-Schiebe (din = Seite, auf der der Flügel geschlossen steht) */
   const rechts = bedien ? (w.fsw || {}).schema !== 'rechts' : x.t === 'PS' ? x.din === 'R' : x.din === 'L';
+  /* PSK Schema C: zwei Schiebeflügel stoßen in der Mitte zusammen, die Griffe rücken wie bei Hebe-Schiebe je 40 mm vom Stoß weg */
+  const nbP = x.t === 'PS' ? w.sashes[rechts ? i + 1 : i - 1] : null, einP = nbP && nbP.t === 'PS' ? 40 * s : 0;
   /* Griffhöhe (Detailangabe griffPos): tief gut erreichbar, hoch außer Reichweite von Kindern; sonst nach w3dGriffAchse */
-  const ax = rechts ? sashW - sf / 2 : sf / 2, k = kante(ax), lage = dg(w, 'griffPos') ? w.griffPos : '';
+  const ax = rechts ? sashW - sf / 2 - einP : sf / 2 + einP, k = kante(ax), lage = dg(w, 'griffPos') ? w.griffPos : '';
   const ay0 = w3dGriffAchse(V, w, s, sashH, k[0], k[1], hl), lo = k[0] + Math.max(250 * s, 40 * s), hi = Math.max(lo, k[1] - Math.max(hl + 23 * s, 250 * s));
   const ay = lage === 'tief' ? clamp(Math.max(ay0, k[0] + (k[1] - k[0]) * 0.64), lo, hi) : lage === 'hoch' ? clamp(Math.min(ay0, k[0] + (k[1] - k[0]) * 0.3), lo, hi) : ay0;
   return Object.assign(r, { ax: ax, ay: ay, lw: hw, lh: hl, lx: ax - hw / 2, ly: ay - hw / 2, origin: '50% ' + px(hw / 2), ox: hw / 2, oy: hw / 2, rw: rw, rh: rh });
@@ -2405,10 +2492,14 @@ function model(w, o) {
   if (id === 'w3d') { const alt = document.getElementById('w3d'); if (alt && alt.getAttribute('data-sig') === w3dSig(w, o)) return w3dHuelle(w, o) + '</div>'; }
   return w3dHTML(w, o);
 }
+/* Knöpfe Hoch-/Herunterfahren und Wenden bei allen Fragen zum Sonnenschutz außen (auch den Detailangaben), Fahrt der Kamera zum Griff
+   bei allen Fragen zum Griff */
+const W3D_SONNE_FRAGEN = ['sart', 'einbau', 'sfarbe', 'antrieb', 'sfTeile', 'sfK', 'sfS', 'lamelle', 'fuehrung', 'panzer', 'schlitz', 'transp', 'bedien', 'sensor'];
+const W3D_GRIFF_FRAGEN = ['griff', 'gf', 'rc', 'griffM', 'griffPos', 'kinder', 'stulpBed', 'stulp', 'hstPlus'];
 function w3dFrage(q, w, o) {
   const r = {};
-  if (o.sonne == null) { if (['sart', 'einbau', 'sfarbe', 'antrieb'].indexOf(q) >= 0 && sonneAktiv(w)) r.sonne = 'aussen'; else if ((q === 'iart' || q === 'ifarbe') && innenAktiv(w)) r.sonne = 'innen'; }
-  if (o.fokus == null && (q === 'griff' || q === 'gf' || q === 'rc') && w.art !== 'fest') r.fokus = q === 'rc' ? 'rc' : 'griff';
+  if (o.sonne == null) { if (W3D_SONNE_FRAGEN.indexOf(q) >= 0 && sonneAktiv(w)) r.sonne = 'aussen'; else if ((q === 'iart' || q === 'ifarbe') && innenAktiv(w)) r.sonne = 'innen'; }
+  if (o.fokus == null && W3D_GRIFF_FRAGEN.indexOf(q) >= 0 && w.art !== 'fest') r.fokus = q === 'rc' ? 'rc' : 'griff';
   return r;
 }
 /* Maße und Wünsche stehen nie in Listen, auch nicht nach dem Freischalten: dort nur Name, Position, Symbol und Stand (fensterStatus) */

@@ -34,7 +34,9 @@
 // das Neuladen, Senden wartet auf sie, der Betriebsbereich zeigt sie (klein, groß, im PDF), ein zweites Gerät holt sie aus dem Konto.
 // Abschnitt 20 prüft die 3-D-Bühne in WebGL (web/assets/buehne.js, mit ?gl=voll auch ohne Grafikchip): keine Nahtlinien auf der Wand
 // aus allen Blickwinkeln, die Laibung nur in der Öffnung sichtbar (auch von oben und über Eck), Vorführung, Antippen eines Flügels,
-// ohne WebGL 2 und nach Verlust des Zusammenhangs das CSS-Modell, ohne Grafikchip das CSS-Modell, bei „weniger Bewegung“ kein Schwingen.
+// ohne WebGL 2 und nach Verlust des Zusammenhangs das CSS-Modell, ohne Grafikchip das CSS-Modell, bei „weniger Bewegung“ kein Schwingen;
+// dazu das CSS-Modell des Umbaus in WebGL: Raffstore aus Lamellen mit Fahren und Wenden, Kleinteile als Flächen ohne Loch, Griffe nach
+// den Regeln, Zoom und Verschiebung wie die Maßlinien, Selbsttest nur bei 1:1.
 // Abschnitt 21 prüft die Detailtiefe (docs/GESTALTUNG.md): drei Tiefen mit wachsender Fragenzahl, Kapitel und „Mehr zu …“, Standard des
 // Fensterbauers ohne Klärung und ohne Zeile, Detailangaben im Code, Aufmaßblatt und Modell, RC2N/RC3, neue Formen und Bauarten im 3-D-Modell.
 // Abschnitt 22 prüft den Konfigurator ohne Hürden: Der erste Tipp nach einem Textfeld zählt, Maßschilder bleiben in der Bühne,
@@ -4168,6 +4170,98 @@ if (teil(20)) {
   const t2 = await g4.evaluate(() => document.querySelector('#w3d .w3d-sway').style.transform);
   ok(t1 === t2 && /rotateY\(0(\.0+)?deg\)/.test(t1), 'Weniger Bewegung: die WebGL-Bühne steht still (' + t1 + ')');
   sauber(g4, 'Weniger Bewegung ohne Fehler'); await c20d.close();
+  /* Das CSS-Modell aus dem Umbau (S3) in der WebGL-Bühne: Raffstore aus einzelnen Lamellen mit Fahren und Wenden, Kleinteile ohne
+     Loch, Griffe nach den Regeln, Zoom und Verschiebung samt Maßlinien, Selbsttest im Zoom */
+  const c20e = await browser.newContext(Object.assign({ hasTouch: true }, ctx20)), g5 = await neueSeite(c20e);
+  await g5.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await g5.waitForTimeout(300);
+  const zeigeIn = async (pg, id, set, art, extra, ms) => { await pg.evaluate(([id, set, art, extra]) => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set || {}); if (set.teilung) w.sashes = sashesFor(set.teilung); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); if (extra === 'fsw-ohne') { w.fsw.geh = false; w.sashes = fswFluegel(w.fsw.n, w.fsw.schema, false); } if (extra === 'psk-c') { w.psk.schema = 'C'; w.sashes = pskFluegel('C', w.psk.richtung); } if (extra === 'kipp') w.sashes = [{ t: 'K', din: 'L' }]; S.win = w; S.q = id; S.selSash = -1; S.openSash = -1; S.screen = 'frage'; render(true); }, [id, set || {}, art || '', extra || '']); await pg.waitForTimeout(ms || 1200); };
+  const zeige20 = (id, set, art, extra) => zeigeIn(g5, id, set, art, extra);
+  await zeige20('sart', { sart: 'raffstore', roll: 'vorbau' });
+  const s3a = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return { gl: st.classList.contains('gl'), lam: R.filter((r) => /^lam-\d+$/.test(r)).length, fs: ['fs-l', 'fs-r', 'fs-l2', 'fs-r2', 'behang-u'].every((r) => R.includes(r)), zug: R.includes('band-l') && R.includes('band-r'), alt: R.some((r) => /^schiene-|^behang$/.test(r)), deckt: Buehne3D.pruef.deckt(st, 'band-l') }; });
+  ok(s3a.gl && s3a.lam >= 10 && s3a.fs && s3a.zug && !s3a.alt && s3a.deckt > 0.5, 'WebGL: Raffstore wie im CSS-Modell aus einzelnen Lamellen, mit Führungsschienen, Endschiene und Aufzugbändern mit eigener Farbe (' + s3a.lam + ' Lamellen)');
+  const lam20 = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const n = Buehne3D.pruef.rollen(st).filter((r) => /^lam-\d+$/.test(r)).length, z = 'lam-' + (n - 1), l0 = Buehne3D.pruef.matrix(st, 'lam-0'), lz = Buehne3D.pruef.matrix(st, z), e0 = st.querySelector('[data-r="lam-0"]'), ez = st.querySelector('[data-r="' + z + '"]'); return { n: n, rot: l0 ? l0[6] : 0, y: lz ? lz[13] : 0, w0: e0._tf && e0._tf.zt ? e0._tf.zt.d : 0, wz: ez._tf && ez._tf.zt ? [ez._tf.zt.d, ez._tf.zt.v] : [0, 0] }; });
+  const m20a = await lam20();
+  await g5.click('#w3d [data-w3d="wenden"]'); await g5.waitForTimeout(2000);
+  const m20b = await lam20();
+  await g5.click('#w3d [data-w3d="fahren"]'); await g5.waitForTimeout(3500);
+  const m20c = await lam20();
+  ok(Math.abs(m20b.rot - m20a.rot) > 0.3 && m20b.w0 === 600 && m20c.y > m20b.y + 5 && m20c.wz[0] === 1800 && m20c.wz[1] === (m20c.n - 1) * 12, 'WebGL: „Lamellen wenden“ dreht die Lamellen (0,6 s), „Herunterfahren“ fährt sie aus dem Paket (1,8 s, je Lamelle 12 ms später), wie im CSS-Modell');
+  /* Kleinteile als Flächen: Stopfen, Schlitz im Gurtwickler, Wippe und Funk-Punkt am Taster; der Wickler stanzt kein Loch */
+  await zeige20('sart', { sart: 'rollladen', roll: 'vorbau' });
+  const stopf20 = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return R.includes('stopf-l') && R.includes('stopf-r') && R.includes('behang'); });
+  await zeige20('antrieb', { sart: 'rollladen', roll: 'aufsatz', antrieb: 'gurt' }); await g5.evaluate(() => { const st = document.getElementById('w3d'); st.style.setProperty('--rx', '0deg'); st.style.setProperty('--ry', '0deg'); }); await g5.waitForTimeout(1500);
+  const wick20 = await g5.evaluate(() => { const st = document.getElementById('w3d'), P = Buehne3D.pruef.pixel(st), m = Buehne3D.pruef.mitte(st, 'an-wickler'), R = Buehne3D.pruef.rollen(st); if (!m) return { fehlt: 1 }; const x = Math.round(m[0] * P.k), y = Math.round(m[1] * P.k), i = ((P.h - 1 - y) * P.w + x) * 4; return { a: P.px[i + 3], deckt: Buehne3D.pruef.deckt(st, 'an-wickler'), schlitz: R.includes('an-schlitz'), gurt: R.includes('an-gurt') }; });
+  await zeige20('antrieb', { sart: 'raffstore', roll: 'aufsatz', antrieb: 'smart' });
+  const tast20 = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return R.includes('an-taster') && R.includes('an-wippe') && R.includes('an-funk') && !R.includes('an-wickler'); });
+  ok(stopf20 && wick20.a === 255 && wick20.deckt > 0.5 && wick20.schlitz && wick20.gurt && tast20, 'WebGL: Stopfen, Schlitz im Gurtwickler, Wippe und Funk-Punkt am Taster sind Flächen wie im CSS-Modell; Gurtwickler und Aufzugbänder decken (kein Loch)');
+  /* Griffe nach den Regeln: Stulp nur am Gehflügel (mit zweitem Griff nach Wahl), Festfeld ohne Griff und Rosette, Faltwand ohne
+     Gehflügel mit Bediengriff, PSK Schema C an beiden Schiebeflügeln, Druckknopf und Schließzylinder als eigene Flächen */
+  const gr20 = async (id, set, art, extra) => { await zeige20(id, set, art, extra); return g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); return { g: Object.keys(Buehne3D.pruef.griffe(st)).sort().join(','), r: Buehne3D.pruef.rollen(st) }; }); };
+  const stulp20 = await gr20('griff', { teilung: '2s', e_teilung: true }), stulpB20 = await gr20('griff', { teilung: '2s', e_teilung: true, stulpBed: 'griff' });
+  const fest20 = await gr20('griff', { teilung: '3' }), fsw20 = await gr20('griff', {}, 'fsw', 'fsw-ohne'), psk20 = await gr20('griff', {}, 'psk', 'psk-c');
+  const knopf20 = await gr20('griff', { teilung: '2p', griff: 'druckknopf' }), schloss20 = await gr20('griff', { teilung: '2p', griff: 'abschliessbar' });
+  ok(/handle-1/.test(stulp20.g) && !/handle-0/.test(stulp20.g) && !stulp20.r.includes('hros-0') && /handle-0/.test(stulpB20.g) && /handle-1/.test(stulpB20.g)
+    && /handle-0/.test(fest20.g) && !/handle-1/.test(fest20.g) && !fest20.r.includes('hros-1') && /handle-2/.test(fsw20.g) && !/handle-[01]/.test(fsw20.g) && /handle-1/.test(psk20.g) && /handle-2/.test(psk20.g)
+    && /hk-0/.test(knopf20.g) && !/hs-0/.test(knopf20.g) && /hs-0/.test(schloss20.g) && !/hk-0/.test(schloss20.g),
+  'WebGL: Griffe nach den Regeln (Stulp nur am Gehflügel, mit „zweiter Griff“ an beiden; Festfeld ohne Griff und Rosette; Faltwand ohne Gehflügel mit Bediengriff; PSK C an beiden Schiebeflügeln; Druckknopf und Schließzylinder) (' + [stulp20.g, stulpB20.g, fest20.g, fsw20.g, psk20.g].join(' | ') + ')');
+  /* Zoom und Verschiebung: die Öffnung in WebGL und die Maßlinien im DOM bewegen sich gleich, auch mit dem Versatz der Maßübersicht */
+  await g5.evaluate(() => { const w = demoProject()[0]; S.windows = [w]; S.win = w; S.editIdx = -1; go('ergebnis'); }); await g5.waitForTimeout(1800);
+  const lage20 = () => g5.evaluate(() => {
+    const st = document.getElementById('w3d'); st.classList.add('is-drag'); Buehne3D.pruef.pixel(st); st.classList.remove('is-drag');
+    const o = Buehne3D.pruef.oeffnung(st, false), xs = o.map((q) => q[0]), r = st.getBoundingClientRect();
+    const d = Array.from(st.querySelectorAll('.w3d-dim.h')).find((e) => getComputedStyle(e).display !== 'none'), l = d.querySelector('.w3d-dim-line').getBoundingClientRect();
+    return { dl: l.left - r.left, dr: l.right - r.left, ol: Math.min(...xs), or: Math.max(...xs), dimx: parseFloat(st.style.getPropertyValue('--dimx')) || 0, w: r.width };
+  });
+  const z0 = await lage20();
+  await g5.click('#w3d [data-w3d="plus"]'); await g5.waitForTimeout(2500);
+  const z1 = await lage20();
+  const bb20 = await (await g5.$('#w3d')).boundingBox(); await g5.mouse.move(bb20.x + bb20.width / 2, bb20.y + bb20.height / 2); await g5.mouse.wheel(40, 0); await g5.waitForTimeout(1500);
+  const z2 = await lage20();
+  const nah20 = (z) => Math.abs(z.dl - z.ol) < 4 && Math.abs(z.dr - z.or) < 4;
+  ok(nah20(z0) && nah20(z1) && nah20(z2) && Math.abs((z0.ol + z0.or) / 2 - z0.w / 2 - z0.dimx) < 25 && (z1.or - z1.ol) > (z0.or - z0.ol) * 1.4 && Math.abs((z2.ol - z1.ol) + 40) < 4, 'WebGL: Zoom (+) und Verschieben bewegen die Öffnung wie die Maßlinien, der Versatz der Maßübersicht gilt auch auf der Leinwand (' + [z0, z1, z2].map((z) => Math.round(z.ol) + '/' + Math.round(z.dl)).join(', ') + ')');
+  /* Frage nach dem Griff: die Kamera fährt auch in WebGL auf den Griff; zwei Finger zoomen */
+  await zeige20('griff', { teilung: '2p' }); await g5.waitForTimeout(2500);
+  const fok20 = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const p = Buehne3D.pruef.griffe(st)['handle-0']; return p ? { z: W3DZ.w3d.z, dx: Math.abs(p[0] - st.clientWidth / 2) / st.clientWidth, dy: Math.abs(p[1] - st.clientHeight / 2) / st.clientHeight } : null; });
+  await zeige20('material', { teilung: '2p' });
+  const cdp20 = await c20e.newCDPSession(g5), bp20 = await (await g5.$('#w3d')).boundingBox(), px20 = bp20.x + bp20.width / 2, py20 = bp20.y + bp20.height / 2;
+  const finger20 = (type, pts) => cdp20.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p, i) => ({ x: p[0], y: p[1], id: i })) });
+  await finger20('touchStart', [[px20 - 30, py20], [px20 + 30, py20]]);
+  for (let k = 1; k <= 8; k++) { await finger20('touchMove', [[px20 - 30 - k * 8, py20], [px20 + 30 + k * 8, py20]]); await g5.waitForTimeout(16); }
+  await finger20('touchEnd', []); await g5.waitForTimeout(1500);
+  const pinch20 = await g5.evaluate(() => ({ z: W3DZ.w3d.z, gl: document.getElementById('w3d').classList.contains('gl') }));
+  ok(fok20 && fok20.z > 2.4 && fok20.dx < 0.2 && fok20.dy < 0.3 && pinch20.z > 2 && pinch20.gl, 'WebGL: bei der Frage nach dem Griff fährt die Kamera auf den Griff, zwei Finger zoomen (' + JSON.stringify(fok20) + ', ' + pinch20.z.toFixed(2) + ')');
+  sauber(g5, 'S3 in der WebGL-Bühne ohne Fehler'); await c20e.close();
+  /* Dieselben Teile im CSS-Modell (Rückfall): Druckknopf und Schließzylinder in der Nabe, Stopfen, Schlitz, Wippe und Funk-Punkt als
+     Flächen; Fahren 1,8 s mit 12 ms je Lamelle, Wenden 0,6 s */
+  const c20g = await browser.newContext(ctx20), g7 = await neueSeite(c20g);
+  await g7.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const sicht20 = (pg, r) => pg.evaluate((r) => { const e = document.querySelector('#w3d [data-r="' + r + '"]'); if (!e) return null; const b = e.getBoundingClientRect(); return { op: getComputedStyle(e).opacity, bg: !!e.style.background, w: b.width, x: b.left + b.width / 2, y: b.top + b.height / 2 }; }, r);
+  await zeigeIn(g7, 'griff', { teilung: '2p', griff: 'druckknopf' }, '', '', 1600); const ck1 = [await sicht20(g7, 'hk-0'), await sicht20(g7, 'hs-0'), await sicht20(g7, 'handle-0')];
+  await zeigeIn(g7, 'griff', { griff: 'abschliessbar' }, 'hst', '', 1600); const ck2 = [await sicht20(g7, 'hs-1'), await sicht20(g7, 'handle-1')];
+  await zeigeIn(g7, 'griff', { teilung: '1', griff: 'abschliessbar' }, '', 'kipp', 1600); const ck3 = [await sicht20(g7, 'hs-0'), await sicht20(g7, 'handle-0')];
+  await zeigeIn(g7, 'sart', { sart: 'rollladen', roll: 'vorbau' }, '', '', 700); const ck4 = await sicht20(g7, 'stopf-l');
+  await zeigeIn(g7, 'antrieb', { sart: 'rollladen', roll: 'aufsatz', antrieb: 'gurt' }, '', '', 700); const ck5 = await sicht20(g7, 'an-schlitz');
+  await zeigeIn(g7, 'antrieb', { sart: 'raffstore', roll: 'aufsatz', antrieb: 'smart' }, '', '', 700); const ck6 = [await sicht20(g7, 'an-wippe'), await sicht20(g7, 'an-funk')];
+  await zeigeIn(g7, 'antrieb', { sart: 'raffstore', roll: 'aufsatz', antrieb: 'solar' }, '', '', 700); const ck7 = await sicht20(g7, 'an-taster');
+  const kl20 = ck1[0] && ck1[0].op === '1' && ck1[0].bg && ck1[1].op === '0' && Math.abs(ck1[0].x - ck1[2].x) < 2 && ck2[0].op === '1' && ck2[0].y > ck2[1].y && ck3[0].op === '1' && ck3[0].x < ck3[1].x
+    && ck4 && ck4.op === '1' && ck4.bg && ck4.w > 1 && ck5 && ck5.op === '1' && ck6[0].op === '1' && ck6[1].op === '1' && ck7.op === '0';
+  ok(kl20, 'CSS-Modell: Druckknopf und Schließzylinder sind Flächen in der Nabe (auch am Hebe-Schiebe- und Kippgriff), Stopfen, Schlitz, Wippe und Funk-Punkt ebenso; Solar ohne Wandtaster');
+  await zeigeIn(g7, 'sart', { sart: 'raffstore', roll: 'vorbau' }, '', '', 700);
+  await g7.click('#w3d [data-w3d="wenden"]'); await g7.waitForTimeout(80);
+  const tw20 = await g7.evaluate(() => getComputedStyle(document.querySelector('#w3d [data-r="lam-3"]')).transitionDuration);
+  await g7.waitForTimeout(900); await g7.click('#w3d [data-w3d="fahren"]'); await g7.waitForTimeout(80);
+  const tf20 = await g7.evaluate(() => { const cs = getComputedStyle(document.querySelector('#w3d [data-r="lam-3"]')); return [cs.transitionDuration, cs.transitionDelay]; });
+  ok(/0\.6s/.test(tw20) && /1\.8s/.test(tf20[0]) && /0\.036s/.test(tf20[1]), 'CSS-Modell: Wenden 0,6 s, Fahren 1,8 s mit 12 ms je Lamelle, wie in der WebGL-Bühne (' + tw20 + ' | ' + tf20.join(' ') + ')');
+  sauber(g7, 'Kleinteile im CSS-Modell ohne Fehler'); await c20g.close();
+  /* Selbsttest: ein gezoomter erster Blick (Glas oben links) schaltet die WebGL-Bühne nicht ab */
+  const c20f = await browser.newContext(ctx20), g6 = await neueSeite(c20f);
+  await g6.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' });
+  await g6.evaluate(() => { W3DZ.w3d = { z: 4, x: 0, y: 0, key: 'frage|material' }; const w = demoProject()[0]; S.win = w; S.q = 'material'; S.screen = 'frage'; render(true); }); await g6.waitForTimeout(1500);
+  /* Zusammenhang verlieren und zurückholen: danach prüft die Bühne neu, hier mit vierfachem Zoom mitten aufs Glas */
+  await g6.evaluate(async () => { const st = document.getElementById('w3d'), x = st.querySelector('canvas.w3d-gl').getContext('webgl2').getExtension('WEBGL_lose_context'); x.loseContext(); await new Promise((r) => setTimeout(r, 200)); x.restoreContext(); }); await g6.waitForTimeout(2500);
+  const st20 = await g6.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), aus: Buehne3D.pruef.aus(st), zoom: st.classList.contains('is-zoom') }; });
+  ok(st20.zoom && st20.gl && !st20.aus, 'Selbsttest nur bei 1:1: ein gezoomter erster Blick schaltet die WebGL-Bühne nicht ab');
+  sauber(g6, 'Selbsttest im Zoom ohne Fehler'); await c20f.close();
 }
 
 if (teil(21)) {
