@@ -73,7 +73,7 @@ window.Blatt = (() => {
     const tw = (s) => doc.getTextWidth(t(s));
     const wrap = (s, w) => doc.splitTextToSize(t(s), Math.max(4, w));
     /* Beschriftungen: ein langes zusammengesetztes Wort, das nicht in die Spalte passt, an der Fuge trennen statt mitten im Wort */
-    const FUGE = { Absturzsicherung: 'Absturz', Einbruchschutz: 'Einbruch', Insektenschutz: 'Insekten', Sonnenschutz: 'Sonnen', Fensterbank: 'Fenster', Förderwert: 'Förder', Maueröffnung: 'Mauer', Rohbauöffnung: 'Rohbau', Fensterbänke: 'Fenster' };
+    const FUGE = { Absturzsicherung: 'Absturz', Einbruchschutz: 'Einbruch', Insektenschutz: 'Insekten', Sonnenschutz: 'Sonnen', Fensterbank: 'Fenster', Förderwert: 'Förder', Maueröffnung: 'Mauer', Rohbauöffnung: 'Rohbau', Fensterbänke: 'Fenster', Insektenschutzgewebe: 'Insekten', Rollladenpanzer: 'Rollladen', Kindersicherung: 'Kinder', Abstandhalter: 'Abstand', Fensteröffner: 'Fenster', Rahmenansicht: 'Rahmen', Abdeckleisten: 'Abdeck', Lichtschlitze: 'Licht', Fenstergitter: 'Fenster' };
     const wrapK = (s, w) => wrap(String(s).split(' ').map((wd) => (FUGE[wd] && tw(wd) > w ? FUGE[wd] + '-\n' + wd.slice(FUGE[wd].length) : wd)).join(' '), w);
     const txt = (s, x, y0, o) => doc.text(t(s), x, y0, o);
     /* Marke: immer klein, auch in Versalzeilen; Wortmarke „eezi“ in ExtraBold, „frames“ in Medium */

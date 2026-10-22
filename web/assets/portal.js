@@ -696,7 +696,7 @@ function amKopf(l, am) {
   const chip = (t, ok) => '<span class="chip' + (ok === false ? ' warnung' : ok === null ? '' : ' haken') + '">' + esc(t) + '</span>', fc = fotoChip(am);
   return '<div class="card amhead"><div class="chips am-chips">' + chip(nW(wins.length, 'Position', 'Positionen')) + chip(nW(nE, 'Element', 'Elemente')) + chip(fc[0], fc[1]) + chip(komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett) + '</div>' +
     '<div class="kv"><span>Kunde</span><span>' + esc(l.kunde) + (l.kontakt ? ' · <span class="sel">' + esc(l.kontakt) + '</span>' : '') + '</span>' + kontaktKv(l) + '<span>Objekt</span><span>' + esc(l.adresse || '–') + '</span><span>Gebäude</span><span>' + esc((AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')) + '</span>' +
-    '<span>Fenster im Haus</span><span>' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben') + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', fw) || '–') + '</span>' +
+    '<span>Fenster im Haus</span><span>' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben') + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', fw) || '–') + '</span>' + (AW.lab('tiefe', pr.tiefe) ? '<span>Geplant</span><span>' + esc(AW.lab('tiefe', pr.tiefe)) + '</span>' : '') +
     '<span>Eingegangen</span><span>' + esc([zeitText((l.log || {}).eingegangen), l.via ? 'über ' + l.via : '', (l.runde || 1) > 1 ? 'Runde ' + l.runde : ''].filter(Boolean).join(' · ') || '–') + '</span>' + '</div>' +
     '<div class="row amacts"><button type="button" class="btn primary" data-act="pdf-am" data-id="' + l.id + '">' + icon('dl', 18) + 'Aufmaßblatt als PDF<span class="pf" aria-hidden="true"></span></button><button type="button" class="btn ghost" data-act="copy-am" data-id="' + l.id + '">' + icon('copy', 18) + 'Als Text kopieren</button></div></div>';
 }
@@ -966,6 +966,7 @@ function aufmassText(l) {
   out.push('Fenster im Haus: ' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'));
   if (pr.notiz) out.push('Nachricht vom Kunden: ' + pr.notiz);
   const fw = AW.foerdWeg(pr); if (fw) out.push('Förderung: ' + AW.lab('foerdweg', fw));
+  if (AW.lab('tiefe', pr.tiefe)) out.push('Geplant: ' + AW.lab('tiefe', pr.tiefe));
   const kl = amKlaer(l);
   if (kl.length) {
     out.push('', 'Mit dem Kunden zu klären: ' + kl.filter((r) => klaerOk(l, r.id)).length + ' von ' + kl.length + ' geklärt');
