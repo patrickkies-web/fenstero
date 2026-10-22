@@ -380,7 +380,7 @@ if (teil(4)) {
   // Link-Kunde: keine Kopie mit Maßen, die gibt der Betrieb weiter (Zusage „Ihr Kunde bleibt Ihr Kunde“)
   ok(await page.locator('.datei-card [data-act="k-dl"]').count() === 0 && /Frag Fensterbau Brandt/.test(text), 'Link-Kunde bekommt keine PDF, sondern den Hinweis auf seinen Betrieb');
 
-  await page.click('.bb .btn.primary'); // Fertig
+  await page.click('.bb .btn[data-act="go"][data-v="home"]'); // Fertig (ghost: Cream nur für „Per WhatsApp senden“)
   await page.waitForTimeout(300);
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Fast erledigt.') && text.includes('Code senden'), 'Startseite erinnert ans Code-Senden');
@@ -683,7 +683,7 @@ if (teil(6)) {
   await p5.click('.qopt[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
   const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.qgroup .note'), bar: document.querySelector('.bb .btn.primary').textContent }));
   await p5.click('.bb .btn.primary'); await p5.waitForTimeout(300);
-  const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: Array.from(document.querySelectorAll('.bb .btn')).map((b) => b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
+  const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: Array.from(document.querySelectorAll('.bb .btn:not(.bb-zurueck)')).map((b) => b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
   await p5.evaluate(() => useDemo()); await p5.waitForTimeout(1800);
   fotosNeu.weiter = await p5.evaluate(() => document.querySelector('.bb .btn.primary').textContent);
   await p5.click('.bb .btn.primary'); await p5.waitForTimeout(700);
@@ -2393,11 +2393,11 @@ if (teil(14)) {
     await fensterAnlegen(page, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210], ['Bad', 610, 810]]); await page.waitForTimeout(400);
     const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0) }; });
     ok(h1.h1 === 'Weiter, wo du warst.' && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Weiter, wo du warst.“, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
-    ok(/Maße vollständig/.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: „Maße vollständig“ statt Zahlen');
+    ok(/vollständig/i.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: nur der Stand („Vollständig“) statt Zahlen');
     await foto(page, 'app-aufmass-fortsetzen');
     await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]'); await page.waitForTimeout(200);
-    const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !!document.querySelector('.zu-karte [data-act="k-start"]'), fakten: document.querySelector('.center p:not(.eyebrow)').textContent, frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: document.querySelector('.hdr-btn[data-act="back"]').textContent, alle: !!document.querySelector('.pill.voll[data-v="home"]') }));
-    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Aufmaß' && f0.alle, 'Fenster gespeichert: keine Liste aller Angaben und keine Maße vor dem Freischalten, dafür „Freischalten“; Hinweis auf 7 Tage freies Ändern; zurück heißt „Aufmaß“, dazu „Alle Fenster ansehen“');
+    const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !document.querySelector('.zu-karte') && !/Alle Angaben/.test(document.querySelector('.scr').textContent) && /Wie geht es weiter/.test((document.querySelector('.weiter-karte') || {}).textContent || '') && document.querySelectorAll('.btn.primary').length === 1, fakten: document.querySelector('.center p:not(.eyebrow)').textContent, frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: document.querySelector('.hdr-btn[data-act="back"]').textContent, alle: !!document.querySelector('.pill.voll[data-v="home"]') }));
+    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Aufmaß' && f0.alle, 'Fenster gespeichert: keine Übersicht „Alle Angaben“ und keine Maße, dafür „Wie geht es weiter?“ und nur eine Hauptaktion; Hinweis auf 7 Tage freies Ändern; zurück heißt „Aufmaß“, dazu „Alle Fenster ansehen“');
     await foto(page, 'app-fenster-gesperrt');
     const mFertig = await messenApp(page);
     await page.evaluate(() => go('teilen')); await page.waitForTimeout(300);
@@ -2406,7 +2406,7 @@ if (teil(14)) {
     await page.evaluate(() => { const k = kauf(); k.paid = true; k.test = true; persist(); go('home'); }); await page.waitForTimeout(250);
     const nachKauf = await page.evaluate(() => document.querySelector('.liste-in').textContent);
     await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]');
-    ok(/1\.230 × 1\.410 mm/.test(nachKauf) && await page.locator('details.fold .kv').count() === 1 && await page.locator('.zu-karte').count() === 0, 'Nach dem Freischalten: Maße in der Liste und alle Angaben');
+    ok(!/\d mm/.test(nachKauf) && /vollständig/i.test(nachKauf) && await page.locator('details.fold .kv').count() === 0 && await page.locator('.zu-karte').count() === 0 && !/Alle Angaben|\d mm/.test(await page.locator('.scr').textContent()), 'Auch nach dem Freischalten keine Gesamtübersicht: Liste und gespeichertes Fenster ohne Maße und ohne „Alle Angaben“ (die stehen in der PDF)');
     // Portal: angefangenes Aufmaß → „Aufmaß fortsetzen“
     await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
     const po = await page.evaluate(() => ({ top: (document.querySelector('.top a.btn.primary') || {}).textContent, hero: (document.querySelector('.hero.b2c a.btn.primary') || {}).textContent, hint: (document.querySelector('.hint.fortsetzen') || {}).textContent || '' }));
@@ -2502,9 +2502,9 @@ if (teil(14)) {
     await s2.goto(url, { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
     const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary').textContent }));
     ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo du warst.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
-    ok(/Maße vollständig/.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
+    ok(/vollständig/i.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
     await s2.click('.liste-in .wincard[data-i="0"]'); await s2.waitForSelector('[data-screen="fertig"]');
-    ok(await s2.locator('details.fold .kv').count() === 0 && /Gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.zu-karte').textContent()) && await s2.locator('.zu-karte [data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
+    ok(await s2.locator('details.fold .kv').count() === 0 && await s2.locator('.zu-karte').count() === 0 && /gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.weiter-karte').textContent()) && await s2.locator('[data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
     /* Änderung auf Gerät 2 kommt auf Gerät 1 an */
     await s2.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Wohnzimmer links'; saveWin(); });
     await s2.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
@@ -2944,7 +2944,7 @@ if (teil(16)) {
   ok(await a16.evaluate(() => S.win.offen.fa === true && S.win.offen.fba === true && S.screen === 'start'), 'Neues Fenster: Farbe außen und Fensterbank außen starten ohne Vorauswahl (offen)');
   await a16.evaluate((MO) => { Object.assign(S.win, { name: 'Küche', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.q = 'fa'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await a16.waitForTimeout(400);
   const fa0 = await a16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]').length, cur: document.querySelector('.qpanel .qcur').textContent, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), farbe: document.querySelector('[data-r="el-back"]').style.background, karte: winCard(S.win, 0, false) }));
-  ok(fa0.gedrueckt === 0 && /Noch offen/.test(fa0.cur) && fa0.knopf === 'true' && /241, 240, 234|#f1f0ea/i.test(fa0.farbe) && /Farbe offen/.test(fa0.karte), 'Farbe außen: nichts vorgewählt, „Weiß ich noch nicht“ gedrückt, Modell neutral weiß, Fensterkarte „Farbe offen“');
+  ok(fa0.gedrueckt === 0 && /Noch offen/.test(fa0.cur) && fa0.knopf === 'true' && /241, 240, 234|#f1f0ea/i.test(fa0.farbe) && /2 Wünsche offen/.test(fa0.karte) && !/Farbe/.test(fa0.karte), 'Farbe außen: nichts vorgewählt, „Weiß ich noch nicht“ gedrückt, Modell neutral weiß, Fensterkarte zählt die offenen Wünsche (ohne sie zu nennen)');
   await a16.click('.qpanel .qsw[data-v="7016"]'); await a16.waitForTimeout(200);
   const fa1 = await a16.evaluate(() => ({ offen: !!S.win.offen.fa, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), zeile: specRows(S.win).find((r) => r.k === 'Farbe').v }));
   await a16.click('.qoffen'); await a16.waitForTimeout(200);
@@ -3034,7 +3034,7 @@ if (teil(16)) {
 
   /* e2) Ohne Foto weiter: Hinweis, warum ein Foto besser ist, abschaltbar; neue Öffnung ohne Einzeichnen; Klärungsliste für den Betrieb */
   await a16.evaluate(() => { localStorage.removeItem('aufmass.ohnefoto.zu'); newWin(); go('fotos'); }); await a16.waitForTimeout(250);
-  const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.bb button')).map((b) => b.className + ':' + b.textContent).join('|'));
+  const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.bb button:not(.bb-zurueck)')).map((b) => b.className + ':' + b.textContent).join('|'));
   await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
   const of1 = await a16.evaluate(() => ({ text: (document.querySelector('.sheet.ofoto') || {}).textContent || '', screen: S.screen }));
   await a16.check('.sheet.ofoto input[data-in="ohnefoto-zu"]');
@@ -3082,7 +3082,7 @@ if (teil(16)) {
 
   /* g) Klärungsliste auf dem Blatt (App, PDF), im Betriebsbereich und im Code */
   await a16.evaluate(() => { const a = demoProject(); a[0].offen = { fa: true, fba: true }; a[0].ki.fach = { rollladen: 'einbau', anschlagI: 'innen', fassade: 'putz', strom: true }; a[1].etage = 'og'; a[1].bru = 600; S.windows = a; S.proj = Object.assign({}, PROJ0, { name: 'Familie Weber', total: 5, foerdweg: 'bafa' }); S.kauf = { paid: true, mail: 'test@beispiel.de' }; go('blatt'); }); await a16.waitForTimeout(300);
-  const bl = await a16.evaluate(() => (document.querySelector('.paper-klaer') || {}).textContent || '');
+  const bl = await a16.evaluate(() => { const kl = klaerListe(S.windows, S.proj); return 'Noch zu klären · ' + kl.length + ' ' + kl.map((r) => r.k + ' ' + r.v).join(' | '); }); // die Übersicht in der App gibt es nicht mehr (nur PDF), geprüft wird die Liste
   ok(/Noch zu klären · 4/.test(bl) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(bl) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(bl) && /BAFA-Zuschuss gewünscht/.test(bl) && /Farbe außen, Fensterbank außen: offen, bitte beraten/.test(bl), 'Aufmaßblatt in der App: „Noch zu klären“ oben, mit Absturzsicherung, Lüftung, Förderweg und offenen Wünschen');
   const b64 = await a16.evaluate(async () => { await blattSchrift(); const blob = await blattPDF('fensterbauer'); const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s); });
   const pdf16 = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung.pdf'); fs16.writeFileSync(pdf16, Buffer.from(b64, 'base64'));
@@ -3147,7 +3147,7 @@ if (teil(16)) {
   const karten16 = await d16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Bad', offen: { material: true, glas: true, insekt: true } }); return { win: winCard(w, 0, false), check: checkCard(w, 0), proj: PROJ0.total }; });
   await d16.evaluate(() => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0); go('anfrage'); }); await d16.waitForTimeout(150);
   const anfr = await d16.evaluate(() => ({ note: !!document.querySelector('.note.warn'), feld: document.getElementById('p-total').value, ph: document.getElementById('p-total').placeholder }));
-  ok(/Glas offen/.test(karten16.win) && /Material offen/.test(karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zeigen offenes Glas und Material als offen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
+  ok(/3 Wünsche offen/.test(karten16.win) && /3 Wünsche offen/.test(karten16.check) && !/Glas|Material/.test(karten16.win + karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zählen offene Wünsche (Glas, Material, Insektenschutz), ohne sie zu nennen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
   /* PDF: eine lange Klärungsliste wird über die Seiten geteilt, nichts fällt weg; offene Angaben in der Übersicht */
   const b64L = await d16.evaluate(async () => {
     const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
@@ -3204,6 +3204,102 @@ if (teil(16)) {
     sauber(s, 'Neue Schritte ' + (dunkel ? 'dunkel' : 'hell') + ' ohne Fehler'); await c.close();
   }
   ok(!befund16.length, 'Gestaltung der neuen Schritte (Telefon, hell und dunkel): nur 13 · 15 · 17 · 24 · 32 · 40, Ziele ab 44 px, kein Querscrollen' + (befund16.length ? '\n      ' + befund16.join('\n      ') : ''));
+  /* i) Konfigurator (Strang S1): Notiz an jeder Stelle, Wege ohne Sackgasse, Zurück-Taste, Entwurf, Zifferntasten, Foto groß,
+     keine Gesamtübersicht, Erklärungen und Begriffe */
+  {
+    const ck = await browser.newContext(telefon), sk = await neueSeite(ck);
+    await sk.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+    const MOK = { hm: 1390, hl: 1390, hr: 1390, wm: 1260, wt: 1260, wb: 1260 };
+    /* Notiz-Knopf und Übersicht auf jedem Schritt, jeder Frage aller Elementarten und den Anfrage-Seiten; unten der Pfeil zurück */
+    const nzAlle = await sk.evaluate((MO) => {
+      const fehlt = [], ohneWo = [], ohnePfeil = []; let n = 0;
+      S.windows = demoProject(); persist(); newWin(); Object.assign(S.win, { name: 'Küche', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } });
+      const pruef = (wo) => { n++; if (!document.querySelector('.hd .nz-knopf')) fehlt.push(wo); if (!document.querySelector('.hdr-wo')) ohneWo.push(wo); };
+      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
+      S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
+      ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      return { fehlt: fehlt, ohneWo: ohneWo, ohnePfeil: ohnePfeil, n: n };
+    }, MOK);
+    ok(nzAlle.n > 100 && !nzAlle.fehlt.length && !nzAlle.ohneWo.length && !nzAlle.ohnePfeil.length, 'Konfigurator: „Notiz“ und „Übersicht“ auf jedem Schritt und jeder Frage (' + nzAlle.n + ' Bildschirme) und den Anfrage-Seiten, unten überall der Pfeil zurück' + (nzAlle.fehlt.length + nzAlle.ohneWo.length + nzAlle.ohnePfeil.length ? ': ' + nzAlle.fehlt.concat(nzAlle.ohneWo, nzAlle.ohnePfeil).slice(0, 8).join(', ') : ''));
+    /* Notiz anfügen, erkennen, wieder öffnen; speichern, Code, keine Änderung */
+    await sk.evaluate((MO) => { S.win = baseWin(); S.editIdx = -1; Object.assign(S.win, { name: 'Bad', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } }); S.q = 'fa'; go('frage'); }, MOK); await sk.waitForTimeout(200);
+    await sk.click('.hd .nz-knopf'); await sk.waitForSelector('#nz-text'); await sk.fill('#nz-text', 'Farbe wie die Haustür');
+    await sk.click('[data-act="notiz-sichern"]'); await sk.waitForTimeout(200);
+    const nzK = await sk.evaluate(() => { const k = document.querySelector('.hd .nz-knopf'); return { text: S.win.notizen.fa, da: k.classList.contains('da'), label: k.getAttribute('aria-label'), blatt: !!document.querySelector('.nz-blatt') }; });
+    await sk.click('.hd .nz-knopf'); await sk.waitForSelector('#nz-text'); const nzWieder = await sk.inputValue('#nz-text'); await sk.keyboard.press('Escape'); await sk.waitForTimeout(150);
+    const nzS = await sk.evaluate(() => {
+      const blattZu = !document.querySelector('.nz-blatt'); saveWin(); const w = S.windows[S.windows.length - 1], ohne = Object.assign({}, w); delete ohne.notizen;
+      const o = unpackProject(packProject(S.windows, Object.assign({}, S.proj, { notizen: { anfrage2: 'Bitte nicht vor März' } }), null));
+      return { blattZu: blattZu, gespeichert: w.notizen.fa, code: o.w[o.w.length - 1].notizen.fa, proj: o.p.notizen.anfrage2, aend: aenderungFp(w) === aenderungFp(ohne), stelle: AW.notizStelle('fa'), karte: winCard(w, 0, false) };
+    });
+    const nzM = { sauber: JSON.stringify(AW16.notizSauber({ fa: '  Haustür  ', 'böse<x>': 'nein', leer: ' ', lang: 'x'.repeat(700) })), fromApp: JSON.stringify(AW16.mk(X16.fromApp({ name: 'X', notizen: { glas: 'Schallschutz?', '<b>': 'weg' } })).notizen || null), proj: JSON.stringify(X16.fromAppProj({ notizen: { anfrage: 'Haustür auch' } }).notizen), alt: JSON.stringify(X16.fromApp({ name: 'Alt' }).notizen || {}), stelle: AW16.notizStelle('typ-1') + '|' + AW16.notizStelle('unbekannt'), liste: AW16.notizListe({ notizen: { fa: 'b', start: 'a' } }).map((r) => r[2]).join(','), server: ent16.aenderungFp(wo16) === ent16.aenderungFp(Object.assign({}, wo16, { notizen: { fa: 'x' } })) };
+    ok(nzK.text === 'Farbe wie die Haustür' && nzK.da && /Deine Notiz zu „Farbe außen“/.test(nzK.label) && !nzK.blatt && nzWieder === 'Farbe wie die Haustür' && nzS.blattZu && nzS.gespeichert === 'Farbe wie die Haustür' && nzS.code === nzS.gespeichert && nzS.proj === 'Bitte nicht vor März' && nzS.aend && nzS.stelle === 'Farbe außen' && /mit Notiz/.test(nzS.karte) && !/Haustür/.test(nzS.karte) &&
+      nzM.sauber === JSON.stringify({ fa: 'Haustür', lang: 'x'.repeat(500) }) && nzM.fromApp === JSON.stringify({ glas: 'Schallschutz?' }) && nzM.proj === JSON.stringify({ anfrage: 'Haustür auch' }) && nzM.alt === '{}' && nzM.stelle === 'Öffnung, Flügel 2|unbekannt' && nzM.liste === 'start,fa' && nzM.server,
+    'Notiz: Blatt mit Textfeld, gespeicherte Notiz am Knopf erkennbar und beim Öffnen wieder da, Esc schließt; sie geht ins gespeicherte Fenster, in den Aufmaß-Code (Projekt-Notizen der Anfrage ebenso), zählt in App und Server nicht als Änderung; das Modell säubert (500 Zeichen, nur gültige Stellen), alte Aufmaße ohne Notizen bleiben gültig');
+    /* Gespeichert: keine Gesamtübersicht */
+    const fertigK = await sk.evaluate(() => ({ screen: S.screen, t: document.querySelector('.scr').textContent, cream: document.querySelectorAll('.btn.primary').length }));
+    ok(fertigK.screen === 'fertig' && !/Alle Angaben|\d mm|Farbe wie|Aus deinen Fotos gelesen/.test(fertigK.t) && /Wie geht es weiter\?/.test(fertigK.t) && fertigK.cream === 1, 'Nach dem Speichern: keine Übersicht aller Angaben, keine Maße und keine Notiztexte, dafür „Wie geht es weiter?“ mit genau einer Hauptaktion');
+    /* Zifferntasten: Pfeil zurück unten links, „Weiter“ über die ganze Breite; Browser-Zurück bleibt in der App */
+    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(250);
+    const adresse = sk.url();
+    for (const z of ['1', '3', '9', '0']) await sk.click('.keypad [data-v="' + z + '"]');
+    await sk.click('.keypad [data-v="ok"]'); await sk.waitForTimeout(250);
+    const tasten = await sk.evaluate(() => { const k = Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')), pad = document.querySelector('.keypad').getBoundingClientRect(), okb = document.querySelector('.keypad [data-v="ok"]').getBoundingClientRect(), zb = document.querySelector('.keypad [data-v="zurueck"]').getBoundingClientRect(), eins = document.querySelector('.keypad [data-v="1"]').getBoundingClientRect(); return { reihe: k.slice(9).join(','), voll: okb.width > pad.width - 4, gleich: Math.abs(zb.height - eins.height) < 1 && Math.abs(zb.width - eins.width) < 1, step: S.mess.step }; });
+    await sk.click('.keypad [data-v="zurueck"]'); await sk.waitForTimeout(200);
+    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur }));
+    await sk.goBack(); await sk.waitForTimeout(300);
+    const zurueck2 = await sk.evaluate(() => ({ screen: S.screen, href: location.href }));
+    await sk.click('[data-act="gindex"]'); await sk.waitForSelector('.g-index'); await sk.goBack(); await sk.waitForTimeout(250);
+    const zurueck3 = await sk.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.g-index') }));
+    ok(tasten.reihe === 'zurueck,0,del,ok' && tasten.voll && tasten.gleich && tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
+      'Zifferntasten: unten Pfeil zurück (gleich groß), 0, Löschen, darunter „Weiter“ über die ganze Breite; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers geht einen Schritt zurück (Adresse bleibt) und schließt zuerst ein offenes Blatt');
+    /* Foto groß mit Zoom */
+    await sk.evaluate(() => useDemo()); await sk.waitForFunction(() => S.photos.in && S.photos.out, null, { timeout: 8000 }); await sk.evaluate(() => render()); await sk.waitForTimeout(200);
+    await sk.click('.tile[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
+    await sk.click('[data-act="foto-zoom"][data-v="1"]'); await sk.waitForTimeout(350);
+    const zoom1 = await sk.evaluate(() => document.querySelector('.fz-wert').textContent);
+    const bb = await sk.locator('.fz-buehne').boundingBox(); await sk.mouse.dblclick(bb.x + bb.width / 2, bb.y + bb.height / 2); await sk.waitForTimeout(350);
+    const zoom2 = await sk.evaluate(() => ({ wert: document.querySelector('.fz-wert').textContent, touch: getComputedStyle(document.querySelector('.fz-buehne')).touchAction, knoepfe: Array.from(document.querySelectorAll('.fz-akt > *')).map((b) => b.textContent.trim()).join('|') }));
+    await sk.goBack(); await sk.waitForTimeout(250);
+    const zoom3 = await sk.evaluate(() => ({ fz: !!document.querySelector('.fz'), screen: S.screen, kamera: !!document.querySelector('.tile input[type="file"]') }));
+    ok(zoom1 === '160 %' && zoom2.wert === '100 %' && zoom2.touch === 'none' && zoom2.knoepfe === 'Neu aufnehmen|Notiz|Löschen' && !zoom3.fz && zoom3.screen === 'fotos' && !zoom3.kamera, 'Foto groß: Antippen der Kachel öffnet die Großansicht statt der Kamera, „+“ zoomt (160 %), Doppeltipp zurück auf 100 %, Wischen nur dort abgefangen, „Neu aufnehmen“, „Notiz“, „Löschen“; die Zurück-Taste schließt sie');
+    /* Entwurf übersteht Neuladen; Verlassen mit offenen Änderungen fragt */
+    await sk.evaluate((MO) => { S.win.mo = Object.assign({}, MO); S.win.el = { w: 1230, h: 1360 }; S.q = 'material'; go('frage'); }, MOK); await sk.waitForTimeout(700);
+    await sk.reload({ waitUntil: 'networkidle' }); await sk.waitForTimeout(400);
+    const ent = await sk.evaluate(() => ({ screen: S.screen, karte: (document.querySelector('.entwurf-karte') || {}).textContent || '' }));
+    await sk.click('[data-act="entwurf-weiter"]'); await sk.waitForTimeout(400);
+    const ent2 = await sk.evaluate(() => ({ screen: S.screen, q: S.q, name: S.win.name, hm: S.win.mo.hm, fotos: !!S.photos.in }));
+    await sk.click('.hdr-wo'); await sk.waitForSelector('.sheet.wohin');
+    const wo = await sk.evaluate(() => ({ schritte: document.querySelectorAll('.wo-schritt').length, fenster: document.querySelectorAll('.wo-fenster button').length, angaben: /\d mm|Kunststoff|Weiß/.test(document.querySelector('.wo-fenster').textContent) }));
+    await sk.click('[data-act="wohin-liste"]'); await sk.waitForSelector('.sheet.verlassen');
+    const vl = await sk.evaluate(() => Array.from(document.querySelectorAll('.sheet.verlassen button')).map((b) => b.textContent).join('|'));
+    await sk.click('[data-act="verlassen-entwurf"]'); await sk.waitForTimeout(300);
+    const vl2 = await sk.evaluate(() => ({ screen: S.screen, karte: !!document.querySelector('.entwurf-karte'), logo: (document.querySelector('a.hdr-logo') || {}).getAttribute ? document.querySelector('a.hdr-logo').getAttribute('href') : '' }));
+    ok(ent.screen === 'home' && /Flur/.test(ent.karte) && /Weiter bei: Wünsche, Material/.test(ent.karte) && ent2.screen === 'frage' && ent2.q === 'material' && ent2.name === 'Flur' && ent2.hm === 1390 && wo.schritte === 6 && wo.fenster >= 2 && !wo.angaben &&
+      vl === 'Speichern|Später weitermachen|Fenster verwerfen|Abbrechen' && vl2.screen === 'home' && vl2.karte && /\/$/.test(vl2.logo),
+      'Entwurf: das angefangene Fenster übersteht Neuladen („Weiter bei: Wünsche, Material“, Fortsetzen an derselben Frage mit den Maßen); die Übersicht zeigt sechs Schritte und alle Fenster ohne Angaben; wer mit offenen Änderungen zur Liste geht, wird gefragt (Speichern, Später weitermachen, Verwerfen, Abbrechen); das Logo führt zur Startseite');
+    /* Begriffe: Suche, Gruppen, „Zu diesem Schritt“, Esc; jede Frage hat eine Erklärung, jeder Eintrag einen Praxis-Tipp */
+    await sk.evaluate(() => { S.q = 'glasfn'; S.win = Object.assign(baseWin(), { name: 'Flur' }); go('frage'); }); await sk.waitForTimeout(200);
+    const optI = await sk.evaluate(() => document.querySelectorAll('.qpanel .qci-i, .qpanel .qinfo').length);
+    await sk.click('[data-act="gindex"]'); await sk.waitForSelector('#g-such');
+    const gi0 = await sk.evaluate(() => ({ bezug: Array.from(document.querySelectorAll('.g-bezug .gindex button')).map((b) => b.getAttribute('data-k')).join(','), gruppen: document.querySelectorAll('.g-gruppe[data-g="1"]').length }));
+    await sk.fill('#g-such', 'raffst'); await sk.waitForTimeout(100);
+    const gi1 = await sk.evaluate(() => Array.from(document.querySelectorAll('.g-index .gindex button')).filter((b) => !b.hidden).map((b) => b.getAttribute('data-k')));
+    await sk.fill('#g-such', 'xyzxyz'); await sk.waitForTimeout(100);
+    const gi2 = await sk.evaluate(() => !document.querySelector('.g-leer').hidden);
+    await sk.keyboard.press('Escape'); await sk.waitForTimeout(150);
+    const gi3 = await sk.evaluate(() => {
+      const ohne = []; ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { const w = baseWin(); artSetzen(w, art); w.sart = 'rollladen'; w.iart = 'rollo'; w.sprossen = 'wiener'; qList(w).forEach((q) => { if (!q.g || !GLOSS[q.g]) ohne.push(art + ':' + q.id); }); });
+      const k = Object.keys(GLOSS), duenn = k.filter((x) => !GLOSS[x].tipp || GLOSS[x].x.length < 2 || GLOSS[x].x.join(' ').split(/\s+/).length < 30), doppelt = GLOSS_ORDER.filter((x, i) => GLOSS_ORDER.indexOf(x) !== i);
+      const verweis = [].concat(Object.values(Q_G), Object.values(Q_G_STATT), MESS.map((m) => m.g), [].concat.apply([], Object.values(SCHRITT_G)), [].concat.apply([], Object.values(OPT_G).map((o) => Object.values(o))), [].concat.apply([], k.map((x) => GLOSS[x].see))).filter((x) => !GLOSS[x]);
+      return { ohne: ohne, duenn: duenn, doppelt: doppelt, fehlend: k.filter((x) => GLOSS_ORDER.indexOf(x) < 0), verweis: verweis, n: k.length, offen: !!(S.gloss || S.glossIndex) };
+    });
+    ok(optI === 4 && /glasextras/.test(gi0.bezug) && /schall/.test(gi0.bezug) && gi0.gruppen === 10 && gi1.length >= 1 && gi1.indexOf('raffstore') >= 0 && gi1.every((x) => /raffstore|sonnenschutz|aufsatz|vorbau|antrieb|screen|innenschutz|rollladen/.test(x)) && gi2 && !gi3.offen &&
+      !gi3.ohne.length && !gi3.duenn.length && !gi3.doppelt.length && !gi3.fehlend.length && !gi3.verweis.length && gi3.n >= 90,
+    'Begriffe: ' + gi3.n + ' Einträge in zehn Gruppen, jeder mit Praxis-Tipp und mindestens zwei Absätzen, keiner doppelt; Suche filtert, ohne Treffer ein Hinweis, Esc schließt; „Zu diesem Schritt“ nennt Frage und Optionen; jede Frage aller Elementarten hat ein i, Fachbegriffe in Optionen auch, alle Verweise gibt es' + (gi3.ohne.length + gi3.duenn.length + gi3.verweis.length ? ' (' + gi3.ohne.concat(gi3.duenn, gi3.verweis).slice(0, 8).join(', ') + ')' : ''));
+    sauber(sk, 'Konfigurator S1 ohne Fehler'); await ck.close();
+  }
 }
 
 if (teil(17)) {
