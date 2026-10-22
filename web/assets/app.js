@@ -965,7 +965,7 @@ function w3dApply(stage, w, o) {
   ensureDims(stage, o); w3dPaint(stage, w);
   /* Zoom: neuer Bildschirm bzw. neue Frage setzt auf 1:1 zurück (bei Griff und Einbruchschutz fährt die Kamera danach hin) */
   const zm = w3dZoomZustand(stage), zkey = o.zkey == null ? '' : o.zkey; let fokus = false;
-  if (zm.key !== zkey) { zm.key = zkey; zm.z = 1; zm.x = 0; zm.y = 0; fokus = !!o.fokus; }
+  if (zm.key !== zkey) { if (zm.z > 1.001 && !stage.classList.contains('no-anim')) w3dZoomAnim(stage, true); zm.key = zkey; zm.z = 1; zm.x = 0; zm.y = 0; fokus = !!o.fokus; }
   if (o.rails || o.noZoom) { zm.z = 1; zm.x = 0; zm.y = 0; }
   const V = w3dLayout(stage, w, o, gr); layoutRails(stage, w, o, gr); stage._s = V ? V.s : 0.15;
   w3dZoomKnoepfe(stage, o); w3dSonneKnoepfe(stage, w, o); w3dZoomZeigen(stage);
@@ -1501,7 +1501,7 @@ function bindW3D(stage, getOpts) {
     if (zoomAus()) return;
     const zm = w3dZoomZustand(stage);
     if (e.ctrlKey || e.metaKey) { e.preventDefault(); const p = rel(e); w3dZoomSetzen(stage, zm.z * Math.exp(-clamp(e.deltaY, -60, 60) * 0.012), p[0], p[1], false); }
-    else if (zm.z > 1.001) { e.preventDefault(); zm.x -= e.deltaX; zm.y -= e.deltaY; w3dPanGrenze(stage, zm); w3dZoomZeigen(stage); }
+    else if (zm.z > 1.001) { e.preventDefault(); zm.x -= e.deltaX; zm.y -= e.deltaY; w3dPanGrenze(stage, zm); w3dZoomAnim(stage, false); w3dZoomZeigen(stage); }
   }, { passive: false });
   stage.addEventListener('click', (e) => {
     const b = e.target.closest('[data-w3d]'); if (!b || !stage.contains(b)) return;
