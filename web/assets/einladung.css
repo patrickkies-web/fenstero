@@ -88,6 +88,9 @@
 
 /* Vorschau im Betriebsbereich: dieselbe Seite, nichts ist bedienbar */
 .ein.vorschau .btn, .ein.vorschau .ulink { pointer-events: none }
+/* Im Telefonrahmen gilt immer die Telefon-Ansicht, auch wenn das Fenster des Betriebs breit ist (die Regeln ab 600 px messen das Fenster) */
+.ein-telefon .ein-cta { flex-direction: column; flex-wrap: nowrap } .ein-telefon .ein-cta .btn { width: 100%; flex: 0 0 auto }
+.ein-telefon .ein-karten { grid-template-columns: minmax(0, 1fr) } .ein-telefon .ein-so .ein-schritte { display: flex; gap: 14px }
 
 /* ---------- Betriebsbereich: Einladungsseite gestalten (portal.js SCREENS.einladung), Karte in „Mein Betrieb“, Registrierung ----------
    Rollen des Betriebsbereichs (13 · 15 · 17 · 22); die Vorschau im Telefonrahmen ist die echte Seite mit den Rollen der App. */

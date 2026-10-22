@@ -10,7 +10,7 @@
         fensterbauer: dasselbe Aufmaß, so wie es der Hauseigentümer einem Betrieb schickt (Sie), mit Seite für den Fensterbauer
         betrieb:      aus dem Betriebsbereich, mit Namen und Logo des Betriebs, Bestellmaß-Vorschlag und Stand der Klärungsliste, ohne Werbung
      fenster: [Fenster wie in der App], projekt: { name, ort, tel, mail, erreich, gebaeude, baujahr, total, zeit, budget, foerd, foerdweg, notiz, notizen },
-     kunde: { name, kontakt, adresse } (betrieb), betrieb: { name, logo: { data, w, h, grund }, abzug: { seite, oben, unten, untenT }, nr, eingegangen } (betrieb),
+     kunde: { name, kontakt, adresse, mehr: [[Beschriftung, Wert]] (vom Kunden eingetragen: Telefon, E-Mail, Erreichbar) } (betrieb), betrieb: { name, logo: { data, w, h, grund }, abzug: { seite, oben, unten, untenT }, nr, eingegangen } (betrieb),
      klaerung: [Punkte aus AW.klaerung] (betrieb, sonst gerechnet), klaerStand: { id: { ok, notiz, wann } } (betrieb),
      code, portalUrl, portalKurz, qr: window.qrcode (für die Seite an den Fensterbauer), fotos: { Kennung: { data, w, h } }, beispiel,
      h: { derive(w), lab(gruppe, key), … } (ältere Aufrufer; gerechnet wird mit window.AW aus modell.js)
@@ -174,14 +174,25 @@ window.Blatt = (() => {
       txt(s, cxw - Math.cos(a) * l / 2, cyw + Math.sin(a) * l / 2, { angle: 34 });
       alpha(1);
     };
+    /* Fußzeile links: nur so lang, wie neben der Seitenzahl Platz ist; erst fällt der Zusatz weg, dann der Host, zuletzt wird der Name gekürzt */
+    const fussLinks = (frei) => {
+      const name = String(bt.name || 'Ihr Betrieb').replace(/\s+/g, ' ').trim(), passt = (x) => tw(x) <= frei;
+      const varianten = V === 'betrieb'
+        ? [[name, 'Aufmaß übermittelt mit eeziframes', HOST, 'Vor der Fertigung Feinaufmaß vor Ort.'], [name, 'Aufmaß übermittelt mit eeziframes', HOST], [name, 'übermittelt mit eeziframes'], [name]]
+        : [['Erstellt mit eeziframes', HOST, 'Vor der Fertigung Feinaufmaß vor Ort.'], ['Erstellt mit eeziframes', HOST], ['Erstellt mit eeziframes']];
+      for (let k = 0; k < varianten.length; k++) { const s2 = varianten[k].join(' · '); if (passt(s2)) return s2; }
+      let kurz = name; while (kurz.length > 1 && !passt(kurz + '...')) kurz = kurz.slice(0, -1);
+      return kurz.trim() + '...';
+    };
     const fuss = () => {
       const n = doc.getNumberOfPages();
       for (let i = 1; i <= n; i++) {
         doc.setPage(i);
         stroke(LINE); doc.setLineWidth(0.25); doc.line(M, H - 11.5, XR, H - 11.5);
         font('normal', 7.2, GREY);
-        txt(V === 'betrieb' ? (bt.name || 'Ihr Betrieb') + ' · Aufmaß übermittelt mit eeziframes · ' + HOST + ' · Vor der Fertigung Feinaufmaß vor Ort.' : 'Erstellt mit eeziframes · ' + HOST + ' · Vor der Fertigung Feinaufmaß vor Ort.', M, H - 7.2);
-        txt(kennung + ' · Seite ' + i + ' von ' + n, XR, H - 7.2, { align: 'right' });
+        const rechts = kennung + ' · Seite ' + i + ' von ' + n;
+        txt(fussLinks(XR - M - tw(rechts) - 4), M, H - 7.2);
+        txt(rechts, XR, H - 7.2, { align: 'right' });
         streifen(i === 1 ? 28 : 11);
         if (e.beispiel) wasserzeichen();
       }
@@ -328,7 +339,7 @@ window.Blatt = (() => {
       y += hb + 9;
     } else {
       /* Ihr Kunde und Eckdaten nebeneinander, dann die Übersicht aller Positionen mit Bestellmaß */
-      const halb = (CW - 5) / 2, oB = { lw: 22, fs: FS }, kb = [['Kunde', kd.name || '–'], ['Kontakt', kd.kontakt || '–'], ['Objekt', kd.adresse || '–']];
+      const halb = (CW - 5) / 2, oB = { lw: 22, fs: FS }, kb = [['Kunde', kd.name || '–'], ['Kontakt', kd.kontakt || '–']].concat((Array.isArray(kd.mehr) ? kd.mehr : []).filter((r) => r && r[1]).slice(0, 3).map((r) => [String(r[0]), String(r[1])]), [['Objekt', kd.adresse || '–']]);
       const hk = 11 + zeilenH(kb, halb - 8, oB) + 3, he = 11 + zeilenH(eck, halb - 8, { lw: 26, fs: FS }) + 3, hm = Math.max(hk, he);
       karteRand(M, y, halb, hm); kicker('Ihr Kunde', M + 4, y + 6, GREY); zeilen(kb, M + 4, y + 9, halb - 8, oB);
       karteRand(M + halb + 5, y, halb, hm); kicker('Eckdaten zum Projekt', M + halb + 9, y + 6, GREY); zeilen(eck, M + halb + 9, y + 9, halb - 8, { lw: 26, fs: FS });

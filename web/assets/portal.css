@@ -142,7 +142,7 @@ button.item:active { transform: scale(.995) }
 
 /* ---------- Formulare ---------- */
 .form { display: flex; flex-direction: column; gap: 14px }
-.f { display: flex; flex-direction: column; gap: 6px } .f label { font-size: 13px; font-weight: 700; color: var(--ink2) }
+.f { display: flex; flex-direction: column; gap: 6px } .f label, .f .lbl { font-size: 13px; font-weight: 700; color: var(--ink2) } /* .lbl: Name einer Gruppe (aria-labelledby), kein Feld */
 .f input, .f select, .f textarea, .sharecard textarea { min-height: 48px; border-radius: var(--r2); border: 2px solid var(--line2); background: var(--surface); color: var(--ink); padding: 10px 14px; font-size: 17px; transition: border-color var(--t2), box-shadow var(--t2) }
 .f input:focus, .f select:focus, .f textarea:focus, .sharecard textarea:focus { outline: none; border-color: var(--ink); box-shadow: none }
 .f textarea { min-height: 90px; resize: vertical }
@@ -176,8 +176,8 @@ button.sw-row .switch { pointer-events: none }
 .agree + .err { margin-top: -6px; padding-left: 4px }
 .fillbtn { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; margin-top: 6px; min-height: 40px; padding: 0 14px; border: 0; border-radius: var(--r2); background: var(--surface2); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700 }
 .formnav { flex-wrap: nowrap }
-.colors { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; min-height: 46px }
-.colors .col { width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); transition: transform var(--t2), box-shadow var(--t2); position: relative }
+.colors { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; min-height: 48px }
+.colors .col { width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); transition: transform var(--t2), box-shadow var(--t2); position: relative }
 .colors .col::before { content: ''; position: absolute; inset: -4px }
 .colors .col[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink) }
 .preview { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--r3); background: var(--surface2) }
@@ -809,7 +809,8 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .am-zeile .pic { grid-area: pic; width: 44px; height: 44px; align-self: start } .am-zeile .az-t { grid-area: t } .am-zeile .az-b { grid-area: b; text-align: right; align-self: start }
   .am-zeile .az-m:nth-child(3) { grid-area: m1 } .am-zeile .az-m:nth-child(4) { grid-area: m2 }
   .az-m { font-size: 13px } .az-m small { display: inline; margin-right: 6px; font-size: 13px; color: var(--muted) } .az-b small { display: block; margin: 0 } .az-b b { font-size: 15px }
-  .am-dl { grid-template-columns: 84px minmax(0, 1fr); gap: 4px 10px }
+  /* Beschriftung so breit wie nötig (Einbruchschutz, Insektenschutz, Maueröffnung), höchstens 136 px, dann mit Trennung */
+  .am-dl { grid-template-columns: minmax(84px, max-content) minmax(0, 1fr); gap: 4px 10px } .am-dl dt { max-width: 136px; hyphens: auto; overflow-wrap: break-word }
   .zk { padding: 6px 4px 10px } .zk .zk-gross { display: none } .zk .zk-klein { display: block }
 }
 @media (prefers-reduced-motion: reduce) { .foto-gross.fz img, .kl-balken span, .kl-haken { transition: none } }

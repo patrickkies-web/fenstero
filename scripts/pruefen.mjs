@@ -3514,6 +3514,23 @@ if (teil(16)) {
   const sv16 = AW16.zeichnungSVG(voll({ mo: { wt: 1292, wm: 1290, wb: 1289, hl: 1442, hm: 1440, hr: 1439 }, el: { w: 1230, h: 1410 }, bru: 620, teilung: '2p', sashes: AW16.sashesFor('2p') }), { b: 420, fs: 13 }), pl16 = AW16.plan(voll({ mo: MO(1230, 1410) }), { b: 420, fs: 13 });
   const imGlas = pl16.teile.filter((t) => t.t === 'text' && t.bg && t.x > pl16.el.x && t.x < pl16.el.x + pl16.el.b && t.y > pl16.el.y && t.y < pl16.el.y + pl16.el.h).length;
   ok(['oben 1.292', 'Mitte 1.290', 'unten 1.289', 'links 1.442', 'Mitte 1.440', 'rechts 1.439', 'Element 1.230', 'Element 1.410', 'Brüstung 620', 'Fußboden'].every((t) => sv16.indexOf('>' + t + '<') >= 0) && /#ff8a5b/.test(sv16) && /#7aa2ff/.test(sv16) && imGlas === 0 && /<svg class="zeichnung" viewBox="0 0 420 /.test(sv16), 'Zeichnung: Maueröffnung orange mit drei Breiten und drei Höhen, Element blau, Brüstung bis zum Fußboden, keine Maßzahl auf dem Glas');
+  /* Nacharbeit portal: Kontakt bei Code ohne Link, Haken der Klärungsliste über eine Runde, Kasten nach Sonnenschutz, jede Frage der App beschriftet */
+  const mo16n = (b, h) => ({ wt: b, wm: b, wb: b, hl: h, hm: h, hr: h }), wn16 = (name, b, h) => ({ name: name, etage: 'og', bru: 500, mo: mo16n(b, h), el: { w: b - 30, h: h - 20 } });
+  const kto16 = { links: [], book: [], freeUsed: 0 }, ein16 = X16.importCode(kto16, { v: 1, b: '', p: { name: 'Herr Lange', tel: '0170 1112233', mail: 'lange@beispiel.de', erreich: 'vm', ort: 'Köln' }, w: [wn16('Bad', 1000, 1200)], t: 1 });
+  const pk16 = ein16.l.aufmass.proj, fremd16 = X16.fromAppProj({ mail: 'kein mail', erreich: 'immer', tel: '0221 1' });
+  ok(ein16.ok && ein16.l.kontakt === '0170 1112233' && pk16.mail === 'lange@beispiel.de' && pk16.erreich === 'vm' && pk16.name === 'Herr Lange' && fremd16.mail === '' && fremd16.erreich === '' && AW16.OPT.erreich.vm === 'vormittags', 'Code ohne Link: E-Mail und „Erreichbar“ des Kunden kommen mit (Projektangaben geprüft), nicht nur die Telefonnummer');
+  const kr16 = { links: [], book: [], freeUsed: 0 }, r16a = X16.importCode(kr16, { v: 1, b: '', p: {}, w: [wn16('Kind', 1000, 1200), wn16('Bad', 800, 1000)], t: 2 }), L16 = r16a.l;
+  const abs16 = (l) => AW16.klaerung(l.aufmass.windows, l.aufmass.proj, l).filter((r) => r.kurz === 'Absturzsicherung').map((r) => r.k + (l.klaer && l.klaer[r.id] && l.klaer[r.id].ok ? ' geklärt' : ' offen')).join(' | ');
+  X16.projektAendern(L16, { klaer: { id: 'absturz-p0', ok: true, notiz: 'Kind: Geländer' } }); X16.projektAendern(L16, { klaer: { id: 'lueftung', ok: true } });
+  const vor16 = abs16(L16); X16.nbAnfragen(L16, '', Date.now()); const r16b = X16.importCode(kr16, { v: 1, b: L16.code, p: {}, w: [wn16('Bad', 800, 1000)], t: 3, r: 2 });
+  const kr16c = { links: [], book: [], freeUsed: 0 }, L16c = X16.importCode(kr16c, { v: 1, b: '', p: {}, w: [wn16('Kind', 1000, 1200), wn16('Bad', 800, 1000)], t: 4 }).l;
+  X16.projektAendern(L16c, { klaer: { id: 'absturz-p1', ok: true } }); X16.nbAnfragen(L16c, '', Date.now()); X16.importCode(kr16c, { v: 1, b: L16c.code, p: {}, w: [wn16('Bad', 800, 1000), wn16('Kind', 1000, 1200)], t: 5, r: 2 });
+  ok(vor16 === 'Pos. 1 Kind geklärt | Pos. 2 Bad offen' && r16b.art === 'nb' && abs16(L16) === 'Pos. 1 Bad offen' && !!(L16.klaer.lueftung && L16.klaer.lueftung.ok) && abs16(L16c) === 'Pos. 1 Bad geklärt | Pos. 2 Kind offen', 'Klärungsliste über eine Nachbesserung: Runde 2 ohne Pos. 1, der Haken steht nicht bei der neuen Pos. 1; umsortiert wandert er mit seiner Position (' + abs16(L16) + ' / ' + abs16(L16c) + ')');
+  const raff16 = AW16.mk({ sart: 'raffstore', offen: { einbau: true } }), roll16 = AW16.mk({ sart: 'rollladen', roll: 'aufsatz', offen: { einbau: true } });
+  ok(AW16.wuensche(raff16, {}).offen.join() === 'Raffstorekasten' && AW16.wuensche(roll16, {}).offen.join() === 'Rollladenkasten' && /Raffstorekasten \(Pos\. 1\); Rollladenkasten \(Pos\. 2\)/.test(AW16.klaerKurz([raff16, roll16], {}).join('; ')) && /^Raffstorekasten: offen/.test(AW16.klaerung([raff16], {}).find((r) => r.art === 'offen').v), 'Offener Kasten heißt nach dem Sonnenschutz: Raffstorekasten statt Rollladenkasten');
+  const appQ16 = (() => { const t = fs16.readFileSync(new URL('../web/assets/app.js', import.meta.url), 'utf8'), a = t.indexOf('function qList(w) {'), e = t.indexOf('\n}\n', a); return Array.from(new Set(Array.from(t.slice(a, e).matchAll(/id: '([A-Za-z0-9-]+)'/g)).map((m) => m[1].replace(/-$/, '-0')))); })();
+  const roh16 = appQ16.filter((id) => AW16.notizStelle(id) === id);
+  ok(appQ16.length > 30 && appQ16.includes('stulp') && !roh16.length && AW16.notizStelle('stulp') === 'Gehflügel des Stulpfensters' && AW16.wuensche(AW16.mk({ notizen: { stulp: 'links zuerst' } }), {}).gruppen.find((g) => g.id === 'fenster').notizen.length === 1, 'Notizen: jede Frage der App hat eine Beschriftung beim Betrieb, auch „Welcher Flügel geht zuerst auf?“ (Gruppe Fenster)' + (roh16.length ? ': ohne ' + roh16.join(', ') : ''));
   const ctxS5 = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), s5 = await neueSeite(ctxS5);
   await s5.goto(BASE + '/', { waitUntil: 'networkidle' }); await betrieb(s5, 'c1'); await s5.waitForTimeout(300);
   await s5.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'), w = l.aufmass.windows[0]; w.notizen = { fa: 'Lieber etwas heller.' }; w.offen = { fa: true }; go('link', 'l1'); }); await s5.waitForTimeout(400);
@@ -3539,7 +3556,52 @@ if (teil(16)) {
   ok(pdf5.logo && pdf5.mit > pdf5.ohne && /InterExtraBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5t1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /BESTELLMASS-VORSCHLAG/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Inter, Seite 1 mit Übersicht und Klärungsliste samt Stand, Notiz des Kunden an der Stelle, Bestellmaß mit Abzug unten');
   const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html; S.ansicht = vorher; return h; });
   ok(/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && !/3-D-Ansicht/.test(land5) && /Zeichnung und Bestellmaß/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: übernommen wird das Aufmaß mit Zeichnung und Bestellmaß je Position');
+  /* Nacharbeit portal: Fußzeile des PDF bei 60 Zeichen Firmenname, Kontakt des Kunden im Kopf und im PDF, Zwischentitel, Fotos im Pilotbetrieb */
+  const lang5 = await s5.evaluate(async () => {
+    const c = BC(), alt = c.name, l = A().links.find((x) => x.id === 'l1'); c.name = 'Fensterbau und Glaserei Mustermann-Schmidt GmbH & Co. KG Köln';
+    l.aufmass.proj = Object.assign({}, l.aufmass.proj, { tel: '0171 999 00 11', mail: 'weber@beispiel.de', erreich: 'ab' }); await window.Blatt.schrift();
+    const b = amPDF(l, {}, null); c.name = alt; go('link', 'l1');
+    const u = new Uint8Array(await b.arrayBuffer()); let bin = ''; for (let i = 0; i < u.length; i++) bin += String.fromCharCode(u[i]);
+    return { b64: btoa(bin), name: 'Fensterbau und Glaserei Mustermann-Schmidt GmbH & Co. KG Köln'.length, kopf: document.querySelector('.amhead').innerText.replace(/\s+/g, ' '), h3: Array.from(document.querySelectorAll('.scr .sec-head h3')).map((h) => h.textContent + ':' + h.querySelectorAll('.ak').length).join('|'), kacheln: document.querySelectorAll('.pfoto').length, fotoChip: Array.from(document.querySelectorAll('.am-chips .chip')).map((x) => x.textContent).join('|') };
+  });
+  const lang5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-langer-name.pdf'); fs16.writeFileSync(lang5p, Buffer.from(lang5.b64, 'base64'));
+  let bbox5 = ''; try { bbox5 = cp16.execFileSync('pdftotext', ['-bbox', lang5p, '-']).toString('utf8'); } catch (e) { bbox5 = ''; }
+  const fuss5 = bbox5.split('<page').slice(1).map((pg) => { const w = Array.from(pg.matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="[\d.]+">([^<]*)<\/word>/g)).map((m) => ({ x0: +m[1], y: +m[2], x1: +m[3], t: m[4] })).filter((x) => x.y > 805); const k = w.findIndex((x) => /^P-\d{4}-/.test(x.t)); return k > 0 ? { luft: w[k].x0 - Math.max.apply(null, w.slice(0, k).map((x) => x.x1)), links: w.slice(0, k).map((x) => x.t).join(' ') } : { luft: -1, links: '' }; });
+  const txt5 = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', '-f', '1', '-l', '1', lang5p, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  ok(lang5.name >= 60 && fuss5.length >= 2 && fuss5.every((f) => f.luft >= 6 && /^Fensterbau und Glaserei/.test(f.links)), 'PDF des Betriebs: Fußzeile mit 60 Zeichen Firmenname läuft nicht in die Seitenzahl (Abstand ' + fuss5.map((f) => Math.round(f.luft)).join(', ') + ' pt)');
+  ok(/E-Mail weber@beispiel\.de/.test(lang5.kopf) && /Telefon 0171 999 00 11/.test(lang5.kopf) && /Erreichbar abends/.test(lang5.kopf) && /E-Mail\s+weber@beispiel\.de/.test(txt5) && /Erreichbar\s+abends/.test(txt5), 'Kontakt, den der Kunde selbst eingetragen hat (Telefon, E-Mail, Erreichbar), steht im Kopf des Aufmaßes und in der Karte „Ihr Kunde“ im PDF');
+  ok(lang5.h3 === 'Das Aufmaß.:1|Stand des Projekts.:1|Bisheriger Verlauf.:1' && lang5.kacheln === 0 && /\d+ Fotos (ausgewertet|beim Kunden)/.test(lang5.fotoChip), 'Projektansicht: Zwischentitel mit Punkt und einem grünen Wort; im Pilotbetrieb keine leeren Fotokacheln, im Kopf „… Fotos ausgewertet“ statt angekommener Fotos (' + lang5.fotoChip + ')');
+  /* Nacharbeit portal: Einladungsseite gestalten am Schreibtisch (Vorschau wie am Telefon, Kicker, Schalter als ganze Zeile, Ziele ab 44 px, Gruppen mit Namen) */
+  await s5.evaluate(() => go('einladung')); await s5.waitForTimeout(400);
+  const ei5 = await s5.evaluate(() => {
+    const v = document.querySelector('.ein-telefon'), sp = (sel) => getComputedStyle(v.querySelector(sel)).gridTemplateColumns.split(' ').length;
+    return { karten: sp('.ein-karten'), so: getComputedStyle(v.querySelector('.ein-so .ein-schritte')).display, cta: getComputedStyle(v.querySelector('.ein-cta')).flexDirection, kicker: !!document.querySelector('.h .kicker'), ak: document.querySelectorAll('.h h2 .ak').length,
+      zeilen: Array.from(document.querySelectorAll('[data-ein="schalter"]')).map((b) => b.tagName + ':' + b.classList.contains('sw-row') + ':' + (b.getBoundingClientRect().height >= 44)), farben: Array.from(document.querySelectorAll('.ein-b-karte .col')).every((c) => c.getBoundingClientRect().width >= 44 && c.getBoundingClientRect().height >= 44),
+      gruppen: Array.from(document.querySelectorAll('.ein-bereich-wrap [role="group"]')).every((g) => { const id = g.getAttribute('aria-labelledby'); return !!(id && document.getElementById(id) && document.getElementById(id).textContent.trim()); }), freieLabel: document.querySelectorAll('.ein-bereich-wrap label:not([for])').length - document.querySelectorAll('.ein-bereich-wrap label:not([for]) input').length };
+  });
+  const sw5a = await s5.evaluate(() => document.querySelector('[data-ein="schalter"][data-v="mailZeigen"]').getAttribute('aria-checked'));
+  await s5.click('[data-ein="schalter"][data-v="mailZeigen"] .t b'); await s5.waitForTimeout(300);
+  const sw5b = await s5.evaluate(() => document.querySelector('[data-ein="schalter"][data-v="mailZeigen"]').getAttribute('aria-checked'));
+  ok(ei5.karten === 1 && ei5.so === 'flex' && ei5.cta === 'column', 'Vorschau „So sieht Ihr Kunde die Seite“ am Schreibtisch einspaltig wie am Telefon (Karten, Ablauf, Knöpfe)');
+  ok(ei5.kicker && ei5.ak === 1 && ei5.zeilen.length === 2 && ei5.zeilen.every((z) => z === 'BUTTON:true:true') && sw5a !== sw5b && ei5.farben && ei5.gruppen && ei5.freieLabel === 0, 'Einladungsseite gestalten: grüner Kicker und ein grünes Wort, Schalter als ganze Zeile (Tippen auf den Text schaltet), Farbknöpfe 44 px, Gruppen mit Namen');
+  /* Zeitpunkte absolut gespeichert, „heute“/„gestern“ erst beim Anzeigen */
+  await s5.evaluate(() => { const l = A().links.find((x) => x.id === 'l2'); l.status = 'erstellt'; delete l.log.gesendet; go('link', 'l2'); }); await s5.waitForTimeout(200);
+  await s5.click('button.sbtn[data-v="Text"]'); await s5.waitForTimeout(400);
+  const zt5 = await s5.evaluate(() => { const l = A().links.find((x) => x.id === 'l2'), g = l.log.gesendet; go('link', 'l2'); const heute = document.querySelector('.tlh').textContent; const d = new Date(); d.setDate(d.getDate() - 1); l.log.gesendet = X.stamp(d.getTime()); go('link', 'l2'); return { g: g, heute: heute, gestern: document.querySelector('.tlh').textContent }; });
+  ok(/^\d{2}\.\d{2}\., \d{2}:\d{2}$/.test(zt5.g) && /Gesendetheute, \d{2}:\d{2}/.test(zt5.heute) && /Gesendetgestern, \d{2}:\d{2}/.test(zt5.gestern), 'Verlauf: Zeitpunkt wird mit Datum gespeichert (' + zt5.g + '), „heute“ und „gestern“ entstehen erst beim Anzeigen');
   sauber(s5, 'Aufmaß beim Betrieb ohne Fehler'); await ctxS5.close();
+  /* Nacharbeit portal, Telefon 390 px: Beschriftungen der Wünsche laufen nicht in den Wert, die kleine Zeichnung hat keine Schrift unter 13 px */
+  const ctxT5 = await browser.newContext(telefon), t5 = await neueSeite(ctxT5);
+  await t5.goto(BASE + '/', { waitUntil: 'networkidle' }); await betrieb(t5, 'c1'); await t5.waitForTimeout(300);
+  await t5.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'), w = l.aufmass.windows[0]; w.rc = 'rc2'; w.insekt = 'spann'; go('link', 'l1'); }); await t5.waitForTimeout(300);
+  await t5.click('#pos-0 summary'); await t5.waitForTimeout(400);
+  const tm5 = await t5.evaluate(() => {
+    const dts = Array.from(document.querySelectorAll('#pos-0 .am-dl dt')).filter((dt) => dt.offsetParent).map((dt) => { const r = document.createRange(); r.selectNodeContents(dt); return { t: dt.textContent, luft: dt.nextElementSibling.getBoundingClientRect().left - r.getBoundingClientRect().right }; });
+    const svg = Array.from(document.querySelectorAll('#pos-0 svg.zeichnung')).find((x) => getComputedStyle(x).display !== 'none'), f = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+    return { eng: dts.filter((d) => d.luft < 6).map((d) => d.t), klein: svg.getAttribute('class'), min: Math.min.apply(null, Array.from(svg.querySelectorAll('text')).map((x) => parseFloat(x.getAttribute('font-size')) * f)) };
+  });
+  ok(!tm5.eng.length && /zk-klein/.test(tm5.klein) && tm5.min >= 13, 'Telefon: Beschriftungen wie Einbruchschutz und Insektenschutz mit Abstand zum Wert' + (tm5.eng.length ? ' (zu eng: ' + tm5.eng.join(', ') + ')' : '') + ', Zeichnung ohne Schrift unter 13 px (kleinste ' + tm5.min.toFixed(1) + ' px)');
+  sauber(t5, 'Aufmaß beim Betrieb am Telefon ohne Fehler'); await ctxT5.close();
 }
 
 if (teil(17)) {
