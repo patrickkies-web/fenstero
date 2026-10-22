@@ -983,3 +983,6 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .g-tipp { margin: 4px 0 16px; padding: 14px 16px; border-radius: var(--r2); background: var(--surface2); box-shadow: var(--ring); border-left: 3px solid var(--accent) }
 .g-tipp .eyebrow { color: var(--accent); margin-bottom: 6px } .g-tipp p:not(.eyebrow) { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink2) }
 @media (prefers-reduced-motion: reduce) { .fz, .fz-bild { animation: none !important; transition: none !important } }
+
+/* ---------- Integration: Karte „Angefangen“ auf der Einladungsseite (S1 und S4) unter dem Absender, mit Abstand wie der Kicker ---------- */
+.ein-start-in > .entwurf-karte { align-self: stretch; margin: 22px 0 0 }
