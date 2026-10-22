@@ -781,8 +781,15 @@ function specRows(w) {
   if (z) rows.push({ k: 'Förderwert', v: AW.uwText(z) + ', ' + lab('foerdweg', AW.foerdWeg(S.proj)) });
   rows.push({ k: 'Sonnenschutz', v: 'außen: ' + sonneText(w) + ' · innen: ' + innenText(w) + ' · Insektenschutz: ' + ov(w, 'insekt', lab('insekt', w.insekt)) });
   rows.push(istTuer(w) ? { k: 'Schwelle', v: w.art === 'psk' ? 'Mit Schwelle (PSK)' : ov(w, 'schwelle', lab('schwelle', tuerCfg(w).schwelle)) + (w.art === 'balkon' ? ', Fußboden ' + ((w.bt || {}).boden === 'neu' ? 'wird erneuert' : 'bleibt') : '') } : { k: 'Fensterbank', v: 'innen ' + ov(w, 'fbi', lab('fbi', w.fbi)) + ', außen ' + ov(w, 'fba', lab('fba', w.fba)) });
-  AW.detailRows(w).forEach((r) => rows.push({ k: r[0], v: r[1] }));
   rows.push({ k: 'Montage', v: istOffen(w, 'montage') ? 'Nach Vorschlag des Fensterbauers' : [w.neu ? (w.durchbruch ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'Nur Lieferung' });
+  /* Detailangaben bei ihrer Gruppe (AW.DETAIL wg), in derselben Ordnung wie beim Betrieb und im Aufmaßblatt */
+  const NACH = { fenster: ['Sprossen'], glas: ['Glas'], beschlag: ['Absturzsicherung', 'Einbruchschutz'], sonne: ['Sonnenschutz'], insekt: ['Sonnenschutz'], bank: ['Fensterbank', 'Schwelle'], montage: ['Montage'] };
+  AW.DETAIL.forEach((d) => {
+    if (d.zeile === false || !AW.detailGilt(w, d.k)) return; const v = AW.detailText(w, d); if (!v) return;
+    const ziel = (NACH[d.wg] || []).map((k) => rows.map((r) => r.k).lastIndexOf(k)).find((i) => i >= 0), nach = ziel == null ? rows.length - 1 : ziel;
+    let i = nach + 1; while (i < rows.length && rows[i].wg) i++; // hinter die Detailzeilen davor, Reihenfolge wie im Register
+    rows.splice(i, 0, { k: d.n, v: v, wg: d.wg });
+  });
   if (w.notiz) rows.push({ k: 'Notiz', v: w.notiz });
   AW.notizListe(w).forEach((r) => rows.push({ k: 'Notiz · ' + r[0], v: r[1] })); // Notizen je Stelle
   return rows;
@@ -2248,6 +2255,7 @@ function loadLink() {
   S.sync = syncNeu();
   let nach = false;
   try { const raw = vorschau() ? null : localStorage.getItem(linkKey()); const o = raw ? JSON.parse(raw) : null; if (o && Array.isArray(o.windows)) nach = takeWindows(o.windows); if (o && o.proj) normProj(Object.assign(S.proj, o.proj)); if (o && o.sent) S.sent = o.sent; if (o && o.kauf) S.kauf = o.kauf; if (o && o.nb) S.nb = o.nb; if (o) { S.angelegt = Number(o.angelegt) || 0; S.stand = Number(o.stand) || 0; S.sync.bekannt = Array.isArray(o.bekannt) ? o.bekannt.slice(-200) : []; S.sync.offen = !!o.offen; S.projTs = Number(o.projTs) || 0; if (o.geloescht && typeof o.geloescht === 'object') S.sync.geloescht = o.geloescht; else if (o.offen && Array.isArray(o.bekannt)) { const da = new Set(S.windows.map((w) => w.wid)); o.bekannt.forEach((id) => { if (id && !da.has(id)) S.sync.geloescht[id] = Number(o.stand) || zeit(); }); } } } catch (e) { /* ok */ }
+  tiefeVorgabe(); // Planungstiefe des Betriebs (Link im Pilotbetrieb), solange der Kunde keine gewählt hat
   S.sync.fp = entwurfFp(); S.sync.pfp = stabil(S.proj); if (nach) lokalSpeichern(); // ältere Aufmaße: nachgetragene Kennungen gleich merken
   /* Der Betrieb hat um Nachbesserung gebeten (Runde im Link höher als die gesendete): wieder bearbeitbar, Angaben bleiben. Auch wenn
      eine frühere, zurückgezogene Anfrage derselben Runde hier noch liegt */
@@ -2590,6 +2598,13 @@ function linkHome() {
    GET /api/link/:code (auftritt, du, hinweis), im Pilotbetrieb gekürzt aus dem Link (readHash); ältere Links ohne Angaben duzen und
    zeigen den Namen aus dem Link. Die Anrede gilt für diese Seite; die Messschritte der App duzen immer. */
 const LK_SERVER = {}; // je Code, was der Server zuletzt gesagt hat (überlebt einen Wechsel der Runde im selben Tab)
+/* Planungstiefe, die der Betrieb für seine Kunden vorgibt (Einladungsseite, einladung.js tiefe): gilt, solange der Kunde selbst keine
+   gewählt hat; die Frage nach der Tiefe entfällt dann, die Pille bei jeder Frage ändert sie weiter. true, wenn gesetzt */
+function tiefeVorgabe() {
+  const t = S.betrieb ? (lkDaten().p || {}).tiefe : '';
+  if (!t || !S.proj || S.proj.tiefe || ['kurz', 'normal', 'genau'].indexOf(t) < 0) return false;
+  S.proj.tiefe = t; return true;
+}
 function lkDaten() {
   const b = S.betrieb || {}, s = LK_SERVER[b.code] || {}, E = window.Einladung;
   const du = typeof s.du === 'boolean' ? s.du : typeof b.du === 'boolean' ? b.du : true;
@@ -3306,11 +3321,11 @@ async function saveDatei(variante) {
    nicht gefragt wird, macht der Fensterbauer nach seinem Standard: kein „offen“, kein Eintrag in der Klärungsliste. */
 const KAPITEL = [{ k: 'vorweg', n: 'Lage' }, { k: 'aufbau', n: 'Aufbau' }, { k: 'material', n: 'Material & Farbe' }, { k: 'glas', n: 'Glas & Sprossen' }, { k: 'bedienung', n: 'Griff & Schutz' }, { k: 'sonne', n: 'Sonnenschutz' }, { k: 'bank', n: 'Einbau' }];
 const KAP_I = {}; KAPITEL.forEach((k, i) => { KAP_I[k.k] = i; });
-const QKAP = { lage: 'vorweg', absturz: 'vorweg', design: 'vorweg', tiefe: 'vorweg', form: 'aufbau', teilung: 'aufbau', typ: 'aufbau', din: 'aufbau', stulp: 'aufbau', felder: 'aufbau', hsts: 'aufbau', hstr: 'aufbau', pskS: 'aufbau', pskR: 'aufbau', fswn: 'aufbau', fsws: 'aufbau', fswg: 'aufbau', ol: 'aufbau', ul: 'aufbau', richtung: 'aufbau', schwelle: 'aufbau', boden: 'aufbau',
-  material: 'material', fa: 'material', fi: 'material', glas: 'glas', glasfn: 'glas', orn: 'glas', sprossen: 'glas', spross: 'glas', aufseite: 'glas', breite: 'glas', griff: 'bedienung', griffA: 'bedienung', gf: 'bedienung', rc: 'bedienung',
-  sart: 'sonne', einbau: 'sonne', sfarbe: 'sonne', antrieb: 'sonne', insekt: 'sonne', iart: 'sonne', ifarbe: 'sonne', fbi: 'bank', fba: 'bank', montage: 'bank', notiz: 'bank' };
-/* Stufe 2 (sonst 1): was viele mögen, für ein erstes Angebot aber nicht braucht. Pflichtthemen (Lage, Absturz, Erreichbarkeit) sind Stufe 1 */
-const QSTUFE = { ul: 2, richtung: 2, boden: 2, glasfn: 2, orn: 2, sprossen: 2, spross: 2, aufseite: 2, breite: 2, griff: 2, griffA: 2, gf: 2, einbau: 2, sfarbe: 2, iart: 2, ifarbe: 2, fbi: 2, fba: 2, montage: 2 };
+/* Kapitel und Stufe je Frage stehen in modell.js (AW.FRAGE), damit Klärungsliste, Betrieb und Blatt wissen, was bei welcher Tiefe
+   gefragt wurde. Stufe 2 (sonst 1): was viele mögen, für ein erstes Angebot aber nicht braucht. Pflichtthemen (Lage, Absturz,
+   Erreichbarkeit) sind Stufe 1 */
+const QKAP = AW.FRAGE.kap;
+const QSTUFE = AW.FRAGE.stufe;
 /* Kurznamen für die Zeile „Mehr zu …“ */
 const QKURZ = { ul: 'Unterlicht', richtung: 'Öffnung nach außen', boden: 'Fußboden', glasfn: 'Glas-Extras', orn: 'Ornamentglas', sprossen: 'Sprossen', spross: 'Sprossenart', aufseite: 'Sprossenseite', breite: 'Sprossenbreite', griff: 'Griff', griffA: 'Griff außen', gf: 'Griff-Farbe', einbau: 'Kasten', sfarbe: 'Farbe', iart: 'Sichtschutz innen', ifarbe: 'Farbe innen', fbi: 'Fensterbank innen', fba: 'Fensterbank außen', montage: 'Montage', ol: 'Oberlicht' };
 const TIEFE = { kurz: 1, normal: 2, genau: 3 };
@@ -5503,7 +5518,7 @@ function act(name, el) {
     case 'fsw': { const o = Object.assign({}, w.fsw); if (f === 'geh') o.geh = !o.geh; else if (f === 'n') o.n = clamp(num(v), 2, 7); else o[f] = v; w.fsw = o; if (f === 'schwelle') entschieden(w, 'schwelle'); if (f !== 'schwelle') { w.sashes = fswFluegel(o.n, o.schema, o.geh); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; } render(); if (f === 'geh' && o.geh) { nachBild(() => { const i = w.sashes.findIndex((x) => x.t === 'P'); if (i >= 0) oeffnungZeigen(i, 'D'); }, 120); } else if (f !== 'schwelle') nachBild(tuerZeigen, 120); return; }
     case 'psk': { w.psk = Object.assign({}, w.psk, { [f]: v }); w.sashes = pskFluegel(w.psk.schema, w.psk.richtung); w.teilung = String(w.sashes.length); mirrorBars(w); S.selSash = 0; render(); nachBild(tuerZeigen, 120); return; }
     case 'bt': { w.bt = Object.assign({}, w.bt, { [f]: v }); entschieden(w, f); return render(); }
-    case 'offen': { const k = f, an = k === 'glasfn' ? !(w.offen && w.offen[k]) : true; offenSetzen(w, k, an); return render(); }
+    case 'offen': { const k = f, an = k === 'glasfn' ? !(w.offen && w.offen[k]) : true; offenSetzen(w, k, an); if (an && (k === 'fba' || k === 'einbau')) w.offenWahl = Object.assign({}, w.offenWahl || {}, { [k]: 1 }); return render(); } // selbst getippt, kein Startwert (AW.nachTiefe)
     case 'tiefe': { S.proj.tiefe = v; persist(); return render(); }
     case 'tiefe-zeigen': { if (S.q !== 'tiefe') S.tiefeZurueck = S.q; S.q = 'tiefe'; S.dir = 'fwd'; return render(true); }
     case 'kap-mehr': { const m = Object.assign({}, MEHR.get(w) || {}); m[v] = true; MEHR.set(w, m); const c = qCurrent(), nx = c.list[c.i + 1]; if (nx && nx.kap === v) { S.q = nx.id; S.dir = 'fwd'; } return render(true); }
@@ -6134,6 +6149,7 @@ async function linkPruefen() {
     S.betrieb.name = r.betrieb || S.betrieb.name; S.betrieb.kunde = r.kunde || S.betrieb.kunde; S.linkStatus = r.status; if (r.expires) S.betrieb.expires = r.expires;
     /* Einladungsseite: Profil des Betriebs, Anrede des Projekts und der Hinweis einer offenen Nachbesserung (einladung.js prüft alles) */
     LK_SERVER[code] = { auftritt: window.Einladung ? window.Einladung.profil(Object.assign({ ap: r.ap }, r.auftritt || {})) : null, du: typeof r.du === 'boolean' ? r.du : undefined, hinweis: String(r.hinweis || '').slice(0, 300) };
+    if (!vorschau() && tiefeVorgabe()) persist();
     if (r.zu === 'eingegangen' && !S.sent) schonEingegangen(r.runde, S.sync.offen || weichtAb(S.nb && S.nb.vorher), r.seit);
     if (r.zu === 'abgelaufen' || r.zu === 'deaktiviert') { S.linkZu = r.zu; S.linkZuText = r.zuText || ''; }
     /* geöffnet melden: beim ersten Öffnen beginnen die 60 Tage, die neue Frist kommt zurück */

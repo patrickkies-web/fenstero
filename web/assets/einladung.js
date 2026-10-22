@@ -9,14 +9,19 @@
 
    Daten im Konto des Betriebs (acc bzw. auf dem Server a = row.daten):
      logo        verkleinertes Logo als Data-URL (PNG, JPEG oder WebP, höchstens MAX.logo Zeichen) oder ''
-     einladung   { begruessung, begruessungDu, ansprechpartner, foto, telefon, telefonZeigen, mail, mailZeigen, web, ort, anrede, logoGrund }
+     einladung   { begruessung, begruessungDu, ansprechpartner, foto, telefon, telefonZeigen, mail, mailZeigen, web, ort, anrede, logoGrund,
+                   tiefe, standard }  tiefe: wie genau die Kunden planen ('' der Kunde wählt, sonst kurz, normal, genau; Vorgabe für S.proj.tiefe
+                   in der App), standard: der Standard des Betriebs in einem Satz (was er ohne Wahl des Kunden verbaut)
      col         Farbe des Zeichens (eine aus FARBEN; Firma.col im Browser)
    Öffentliches Profil (Auftritt), wie es zum Kunden geht (GET /api/link/:code, im Pilotbetrieb gekürzt im Link):
-     { logo, grund, col, gruss: { sie, du }, ap, foto, tel, mail, web, ort } */
+     { logo, grund, col, gruss: { sie, du }, ap, foto, tel, mail, web, ort, tiefe, std } */
 (function (root) {
   'use strict';
   /* Grenzen: das Logo als Data-URL ist höchstens etwa 90 KB groß, das Foto des Ansprechpartners etwa 36 KB */
-  const MAX = { logo: 120000, foto: 48000, gruss: 400, ap: 80, tel: 40, mail: 120, web: 120, ort: 60, hinweis: 300, name: 80, kunde: 60 };
+  const MAX = { logo: 120000, foto: 48000, gruss: 400, ap: 80, tel: 40, mail: 120, web: 120, ort: 60, hinweis: 300, name: 80, kunde: 60, standard: 240 };
+  /* Planungstiefe (wie AW.TIEFE_NAME in modell.js): kurz das Wichtigste, normal die üblichen Wünsche, genau alles im Detail */
+  const TIEFEN = ['kurz', 'normal', 'genau'];
+  const tiefeOk = (t) => (TIEFEN.indexOf(t) >= 0 ? t : '');
   const FARBEN = ['#0071e3', '#1f7a3d', '#a85a00', '#6e3fc2', '#0b7285', '#b3261e'];
   const MINUTEN = 5; // etwa so lange dauert ein Fenster, so steht es auch in der Nachricht des Betriebs
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -58,7 +63,8 @@
       ansprechpartner: zeile(o.ansprechpartner, MAX.ap), foto: foto || '',
       telefon: telefon, telefonZeigen: o.telefonZeigen !== false, mail: mail, mailZeigen: !!o.mailZeigen,
       web: zeile(o.web, MAX.web), ort: zeile(o.ort, MAX.ort),
-      anrede: o.anrede === 'du' ? 'du' : 'sie', logoGrund: o.logoGrund === 'dunkel' ? 'dunkel' : 'hell'
+      anrede: o.anrede === 'du' ? 'du' : 'sie', logoGrund: o.logoGrund === 'dunkel' ? 'dunkel' : 'hell',
+      tiefe: tiefeOk(o.tiefe), standard: zeile(o.standard, MAX.standard)
     };
   }
   /* Öffentliches Profil aus dem Konto: nur, was der Kunde sehen soll. Telefon und E-Mail nur mit Schalter; ohne eigene Angaben gilt der
@@ -71,19 +77,19 @@
       gruss: { sie: x.begruessung, du: x.begruessungDu },
       ap: x.ansprechpartner || zeile(acc.ap, MAX.ap), foto: x.foto,
       tel: e && x.telefonZeigen ? telOk(x.telefon || acc.tel) : '', mail: e && x.mailZeigen ? mailOk(x.mail || acc.mail) : '',
-      web: webAdresse(x.web), ort: x.ort
+      web: webAdresse(x.web), ort: x.ort, tiefe: x.tiefe, std: x.standard
     };
   }
   /* Profil aus fremder Quelle (Server-Antwort, Link) wieder säubern: Darstellung nur aus geprüften Werten */
   function profil(p) {
     const o = p && typeof p === 'object' ? p : {}, g = o.gruss && typeof o.gruss === 'object' ? o.gruss : {};
-    return { logo: bild(o.logo, MAX.logo) || '', grund: o.grund === 'dunkel' ? 'dunkel' : 'hell', col: FARBEN.includes(o.col) ? o.col : '', gruss: { sie: kurz(g.sie, MAX.gruss), du: kurz(g.du, MAX.gruss) }, ap: zeile(o.ap, MAX.ap), foto: bild(o.foto, MAX.foto) || '', tel: telOk(o.tel), mail: mailOk(o.mail), web: webAdresse(o.web), ort: zeile(o.ort, MAX.ort) };
+    return { logo: bild(o.logo, MAX.logo) || '', grund: o.grund === 'dunkel' ? 'dunkel' : 'hell', col: FARBEN.includes(o.col) ? o.col : '', gruss: { sie: kurz(g.sie, MAX.gruss), du: kurz(g.du, MAX.gruss) }, ap: zeile(o.ap, MAX.ap), foto: bild(o.foto, MAX.foto) || '', tel: telOk(o.tel), mail: mailOk(o.mail), web: webAdresse(o.web), ort: zeile(o.ort, MAX.ort), tiefe: tiefeOk(o.tiefe), std: zeile(o.std, MAX.standard) };
   }
 
   /* ---------- Link im Pilotbetrieb: das Profil reist gekürzt im Link mit (ohne Logo und Foto) ----------
      Format des Kundenlinks: #k-<code>-<slug>.<b64 Betrieb>.<b64 Kunde>[.<b64 Profil>][~<Runde>]. Das Profil ist ein kurzes JSON:
      s (1 = Sie), a, t, m, o, w, c (Ansprechpartner, Telefon, E-Mail, Ort, Website, Farbe), g (eigene Begrüßung), h (Hinweis der
-     Nachbesserung). Ältere Links ohne Profil gelten weiter: Du, Name aus dem Link. */
+     Nachbesserung), d (Planungstiefe 1 bis 3), n (Standard des Betriebs). Ältere Links ohne Profil gelten weiter: Du, Name aus dem Link. */
   const b64u = (t) => { try { const bytes = new TextEncoder().encode(String(t || '')); let bin = ''; bytes.forEach((b) => { bin += String.fromCharCode(b); }); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); } catch (e) { return ''; } };
   const unb64u = (v) => { if (!v) return ''; try { const b = v.replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); } catch (e) { return ''; } };
   function linkTeil(p, o) {
@@ -93,6 +99,7 @@
       if (p.ap) x.a = p.ap; if (p.tel) x.t = p.tel; if (p.mail) x.m = p.mail; if (p.ort) x.o = p.ort; if (p.web) x.w = p.web;
       const c = FARBEN.indexOf(p.col); if (c >= 0) x.c = c;
       const g = q.du ? p.gruss && p.gruss.du : p.gruss && p.gruss.sie; if (g) x.g = g;
+      if (tiefeOk(p.tiefe)) x.d = TIEFEN.indexOf(p.tiefe) + 1; if (p.std) x.n = p.std;
     }
     if (q.hinweis) x.h = kurz(q.hinweis, MAX.hinweis);
     return Object.keys(x).length ? b64u(JSON.stringify(x)) : '';
@@ -101,7 +108,7 @@
     let x = null; try { x = JSON.parse(unb64u(v) || 'null'); } catch (e) { x = null; }
     if (!x || typeof x !== 'object') return null;
     const du = !x.s, g = kurz(x.g, MAX.gruss);
-    return { du: du, hinweis: kurz(x.h, MAX.hinweis), profil: profil({ ap: x.a, tel: x.t, mail: x.m, ort: x.o, web: x.w, col: x.c !== undefined ? FARBEN[Number(x.c)] : '', gruss: du ? { du: g } : { sie: g } }) };
+    return { du: du, hinweis: kurz(x.h, MAX.hinweis), profil: profil({ ap: x.a, tel: x.t, mail: x.m, ort: x.o, web: x.w, col: x.c !== undefined ? FARBEN[Number(x.c)] : '', gruss: du ? { du: g } : { sie: g }, tiefe: TIEFEN[Number(x.d) - 1] || '', std: x.n }) };
   }
 
   /* ---------- Texte ---------- */
@@ -170,6 +177,22 @@
     return '<div class="ein-fuss"><p class="ein-durch">' + logo + '<span>Übermittelt mit ' + wm + '</span></p><p class="ein-fuss-t">' + T(du, 'Ihr Aufmaß geht nur an ', 'Dein Aufmaß geht nur an ') + esc(name) + '. eeziframes ' + T(du, 'übermittelt es in dessen Auftrag und zeigt Ihnen keine anderen Anbieter und keine Werbung.', 'übermittelt es in dessen Auftrag und zeigt dir keine anderen Anbieter und keine Werbung.') + (q.vorschau ? '' : ' <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>') + '</p></div>';
   }
   const haken = (t) => '<li>' + t + '</li>';
+  /* Wie genau planen (nur, wenn der Betrieb eine Tiefe oder seinen Standard angegeben hat): was gefragt wird, was der Betrieb nach
+     seinem Standard macht, und dass sich die Tiefe bei jeder Frage oben ändern lässt */
+  const TIEFE_SATZ = {
+    kurz: [['fragt Sie nur nach dem Wichtigsten.', 'Alles Weitere macht'], ['fragt dich nur nach dem Wichtigsten.', 'Alles Weitere macht']],
+    normal: [['fragt Sie nach den üblichen Wünschen.', 'Feine Details wie Dichtung oder Bänder macht'], ['fragt dich nach den üblichen Wünschen.', 'Feine Details wie Dichtung oder Bänder macht']],
+    genau: [['fragt Sie alles im Detail.', 'Wo Sie nichts wählen, macht es'], ['fragt dich alles im Detail.', 'Wo du nichts wählst, macht es']]
+  };
+  function planung(o) {
+    const q = o || {}, p = q.p || {}, du = !!q.du, nm = esc(q.name || T(du, 'Ihr Fensterbauer', 'dein Fensterbauer')), t = TIEFE_SATZ[tiefeOk(p.tiefe)];
+    if (!t && !p.std) return '';
+    const x = t ? t[du ? 1 : 0] : ['', T(du, 'Was Sie nicht auswählen, macht', 'Was du nicht auswählst, macht')];
+    return '<section class="ein-karte ein-planung"><p class="eyebrow">' + T(du, 'Wie genau Sie planen', 'Wie genau du planst') + '</p>' +
+      '<p>' + (x[0] ? nm + ' ' + x[0] + ' ' : '') + x[1] + ' ' + nm + ' nach ' + (p.std ? 'diesem Standard:' : 'seinem Standard.') + '</p>' +
+      (p.std ? '<p class="ein-std">„' + esc(p.std) + '“</p>' : '') +
+      '<p class="ein-klein">' + T(du, 'Wie genau gefragt wird, ändern Sie jederzeit oben bei jeder Frage.', 'Wie genau gefragt wird, änderst du jederzeit oben bei jeder Frage.') + '</p></section>';
+  }
 
   /* ---------- Die ganze Seite beim ersten Besuch ----------
      o = { name, kunde, du, p (Profil), bis (gültig bis), server (Daten gehen über den Server), vorschau (Betriebsbereich: nichts ist
@@ -201,6 +224,7 @@
           '</ol>' + (du ? '' : '<p class="ein-klein">In den Messschritten spricht die App Sie kurz mit „du“ an, damit jede Anleitung knapp bleibt.</p>') + '</section>' +
         '<section class="ein-karte ein-brauchen"><p class="eyebrow">' + T(du, 'Das brauchen Sie', 'Das brauchst du') + '</p><div class="chips"><span class="chip haken">Zollstock oder Maßband</span><span class="chip haken">' + T(du, 'Ihr Handy', 'Dein Handy') + '</span><span class="chip haken">Freien Zugang zum Fenster</span><span class="chip haken">Für große Türen eine zweite Person</span></div>' +
           '<p>' + T(du, 'Unsicher bei einer Frage? Tippen Sie „Weiß ich noch nicht“. ', 'Unsicher bei einer Frage? Tipp „Weiß ich noch nicht“. ') + nm + T(du, ' berät Sie dazu.', ' berät dich dazu.') + '</p></section>' +
+        planung({ name: name, p: p, du: du }) +
         '<section class="ein-karte ein-danach"><p class="eyebrow">Danach</p><ol class="ein-schritte klein">' +
           schritt(1, 'Angebot.', nm + T(du, ' meldet sich mit einem Angebot bei Ihnen.', ' meldet sich mit einem Angebot bei dir.')) +
           schritt(2, 'Feinaufmaß.', 'Vor der Fertigung misst ' + nm + ' einmal vor Ort nach, das ' + gloss('feinaufmass', 'Feinaufmaß') + '.') +
@@ -281,7 +305,7 @@
     ziel.scrollIntoView({ behavior: ruhig ? 'auto' : 'smooth', block: 'start' });
   });
 
-  const E = { MAX: MAX, FARBEN: FARBEN, MINUTEN: MINUTEN, VORLAGE: VORLAGE, bild: bild, einstellungen: einstellungen, auftritt: auftritt, profil: profil, linkTeil: linkTeil, linkLesen: linkLesen, gruss: gruss, initiale: initiale, zeichen: zeichen, kopf: kopf, kontakt: kontakt, fuss: fuss, html: html, verkleinern: verkleinern, T: T };
+  const E = { MAX: MAX, FARBEN: FARBEN, TIEFEN: TIEFEN, planung: planung, MINUTEN: MINUTEN, VORLAGE: VORLAGE, bild: bild, einstellungen: einstellungen, auftritt: auftritt, profil: profil, linkTeil: linkTeil, linkLesen: linkLesen, gruss: gruss, initiale: initiale, zeichen: zeichen, kopf: kopf, kontakt: kontakt, fuss: fuss, html: html, verkleinern: verkleinern, T: T };
   root.Einladung = E;
   if (typeof module === 'object' && module.exports) module.exports = E;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

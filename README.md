@@ -34,7 +34,7 @@ Fensterplanung, easy gemacht: die Aufmaß-App für Fenster. Der Name wird immer 
 | `docs/KI.md` | Die KI-Auswertung: was sie aus den Fotos liest (Einbausituation, nicht das alte Fenster), in welcher Reihenfolge, warum (mit Quellen), Fachangaben für den Fensterbauer, Maße gegen das Foto, Modell und Kosten |
 | `docs/SEO.md` | Auffindbarkeit in Suchmaschinen und KI-Assistenten: Recherche mit Quellen, Suchbegriffe für Deutschland, was umgesetzt ist, Freigabe, was danach zu tun ist |
 | `docs/ZENTRALE.md` | Die Zentrale des Inhabers: einrichten (Passwort, zweiter Faktor, Tabellen), was sie kann, Sicherheit, Statistik ohne Cookies, rechtlicher Rahmen mit Quellen, was rechtlich noch zu tun ist |
-| `docs/GESTALTUNG.md` | Gestaltungsregeln: Tokens, Schriftrollen, Bedienelemente mit Zuständen, Bewegungskatalog, Rückmeldungen, Erstaufmaß (offen lassen, Pflichtthemen, Gestaltung übernehmen, Klärungsliste), Detailtiefe (drei Tiefen, Kapitel, Standard des Fensterbauers), Aufmaßblatt mit Belegen, Führung und Tour mit Fakten und Quellen, Entscheidungen, Nachweis |
+| `docs/GESTALTUNG.md` | Gestaltungsregeln: Tokens, Schriftrollen, Bedienelemente mit Zuständen, Bewegungskatalog, Rückmeldungen, Erstaufmaß (offen lassen, Pflichtthemen, Gestaltung übernehmen, Klärungsliste), Detailtiefe (drei Tiefen, Kapitel, Standard des Fensterbauers mit Vorgabe des Betriebs), Aufmaßblatt mit Belegen, Führung und Tour mit Fakten und Quellen, Entscheidungen, Nachweis |
 
 ## Kurz: online stellen
 

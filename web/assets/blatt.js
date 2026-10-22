@@ -300,7 +300,9 @@ window.Blatt = (() => {
     [[wins.length + (wins.length === 1 ? ' Position' : ' Positionen'), 'ok'], [nE + (nE === 1 ? ' Element' : ' Elemente'), 'ok'], [fotoText, nF ? 'ok' : 'warn'], [komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett ? 'ok' : 'warn'], ['alle Maße in mm', '']].forEach((c) => { const w2 = chip(c[0], cx, y, c[1]); cx += w2 + 2.2; });
     y += 12;
     const fw = AW.foerdWeg(pr), tot = num(pr.total);
-    const eck = [['Gebäude', gebText || '–'], ['Fenster im Haus', tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'], ['Zeitraum', AW.lab('zeit', pr.zeit) || '–'], ['Budget', AW.lab('budget', pr.budget) || '–'], ['Förderung', fw && fw !== 'keine' ? AW.lab('foerdweg', fw) || fw : 'keine Angabe']];
+    /* Wie genau geplant wurde (Detailtiefe): beim Kunden „Deine Planung“, sonst „Geplant“ mit „nach Ihrem Standard“ */
+    const tiefeT = AW.tiefeText ? AW.tiefeText(pr.tiefe, sie) : '';
+    const eck = [['Gebäude', gebText || '–'], ['Fenster im Haus', tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'], ['Zeitraum', AW.lab('zeit', pr.zeit) || '–'], ['Budget', AW.lab('budget', pr.budget) || '–'], ['Förderung', fw && fw !== 'keine' ? AW.lab('foerdweg', fw) || fw : 'keine Angabe']].concat(tiefeT ? [[V === 'kunde' ? 'Deine Planung' : 'Geplant', tiefeT]] : []);
     const kontaktZ = [['Name', pr.name || '–'], ['Ort', pr.ort || '–'], ['Telefon', pr.tel || '–'], ['E-Mail', pr.mail || '–'], ['Erreichbar', ERREICH[pr.erreich] || '–']].filter((r) => r[1] !== '–');
     if (V !== 'betrieb') {
       /* Der Weg: vier Schritte erledigt (Haken und Wort), der fünfte ist der nächste. Ehrlich gezählt: fehlt etwas, steht es offen da. */
@@ -361,7 +363,7 @@ window.Blatt = (() => {
         font('extra', 9.4, INK); txt(String(i + 1), cX[0] + 1, ty);
         mini(w, cX[1], y + 1.5, 9);
         font('bold', 8.6, INK); txt(wrap(w.name || 'Fenster', cols[2][1] - 3)[0], cX[2], ty - 1.6);
-        font('normal', 7.2, INK2); txt(wrap([ARTNAME[w.art] || 'Fenster', AW.lab('etage', w.etage) || 'EG', (w.sashes || []).length && (w.art || 'fenster') === 'fenster' ? w.sashes.length + ' Flügel' : ''].filter(Boolean).join(' · '), cols[2][1] - 3)[0], cX[2], ty + 2.4);
+        font('normal', 7.2, INK2); txt(wrap([ARTNAME[w.art] || 'Fenster', AW.lab('etage', w.etage) || 'EG', (w.art || 'fenster') === 'fenster' || w.art === 'balkon' ? AW.oeffnungKurz(w).split(' · ').filter((x) => /Flügel|Seitenteil/.test(x)).join(' · ') : ''].filter(Boolean).join(' · '), cols[2][1] - 3)[0], cX[2], ty + 2.4);
         font('normal', 8.4, INK2); txt(d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) : '–', cX[3], ty); txt(d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) : '–', cX[4], ty);
         font('extra', 9, INK); txt(b ? th(b.b) + ' × ' + th(b.h) : '–', cX[5], ty); if (b && b.warn.length) { punkt(cX[5] + tw(th(b.b) + ' × ' + th(b.h)) + 2, ty - 1.1, 0.9); }
         font('normal', 8.4, INK); txt(String(num(w.anzahl) || 1), XR - 1, ty, { align: 'right' });
@@ -438,8 +440,8 @@ window.Blatt = (() => {
       const boxW = 64;
       font('extra', 17, INK); txt(wrap(name, CW - boxW - 22)[0], M + 16, y + 5);
       font('normal', 8.4, INK2);
-      let datenZ = '', voll = false;
-      [ARTNAME[w.art] || 'Fenster', oeffnungText(w).split(' · ').slice(0, 2).join(' · '), AW.lab('etage', w.etage) || 'EG', n + ' Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos'].forEach((teil) => { if (voll) return; const z = datenZ ? datenZ + ' · ' + teil : teil; if (tw(z) <= CW - boxW - 22) datenZ = z; else voll = true; });
+      let datenZ = '';
+      [ARTNAME[w.art] || 'Fenster', AW.oeffnungKurz(w), AW.lab('etage', w.etage) || 'EG', n + ' Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos'].forEach((teil) => { const z = datenZ ? datenZ + ' · ' + teil : teil; if (tw(z) <= CW - boxW - 22) datenZ = z; }); // passt ein Teil nicht (lange Öffnung einer Tür), fehlt nur er
       txt(datenZ, M + 16, y + 10);
       fill(BUEHNE); rr(XR - boxW, y - 2, boxW, 15, 2.6);
       if (V === 'betrieb') { kicker('Bestellmaß-Vorschlag', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(b ? b.text : '–', XR - boxW + 4, y + 8.4); font('normal', 6.4, HELL2); txt(wrap(b ? b.formel : 'ohne Maueröffnung kein Vorschlag', boxW - 8)[0], XR - boxW + 4, y + 11.6); }
@@ -460,10 +462,14 @@ window.Blatt = (() => {
       font('bold', 10.4); const satz = wrap(Wn.satz + '.', CW), allg = Wn.notizen.allgemein;
       const wH = 5.5 + satz.length * 4.6 + (Wn.offen.length ? 9 : 0) + allg.reduce((s2, x) => s2 + notizH(x, CW) + 1.5, 0) + 2;
       const sp = (CW - 6) / 2, oG = { lw: 23, fs: 8 };
-      const gRows = (g) => g.zeilen.map((z) => [z.k, z.t, z.offen ? { offen: true } : z.hex ? { swatch: z.hex } : null]);
-      const gH = (g) => 6 + zeilenH(gRows(g), sp, oG) + g.notizen.reduce((s2, x) => s2 + notizH(x, sp) + 1, 0) + 2.4;
+      /* Standard des Fensterbauers: Zeilen, die nicht gefragt wurden, grau; je Gruppe eine Zeile mit den Angaben nach Standard */
+      const stdT = (t) => (sie ? String(t).replace(AW.STD_TEXT, 'nach Ihrem Standard') : t);
+      const gRows = (g) => g.zeilen.map((z) => [z.k, stdT(z.t), z.offen ? { offen: true } : z.std ? { col: GREY } : z.hex ? { swatch: z.hex } : null]);
+      const stdText = (g) => (g.standard && g.standard.length ? (sie ? 'Nach Ihrem Standard: ' : 'Nach Standard des Fensterbauers: ') + g.standard.join(', ') : '');
+      const stdH = (g, w2) => (stdText(g) ? (font('normal', 7.2), wrap(stdText(g), w2).length * 3.1 + 1.6) : 0);
+      const gH = (g) => 6 + zeilenH(gRows(g), sp, oG) + stdH(g, sp) + g.notizen.reduce((s2, x) => s2 + notizH(x, sp) + 1, 0) + 2.4;
       const G = Wn.gruppen, hs = G.map(gH), sum = (a, b2) => hs.slice(a, b2).reduce((s2, x) => s2 + x, 0);
-      let teil = 1, best = Infinity; for (let k = 1; k < G.length; k++) { const m2 = Math.max(sum(0, k), sum(k, G.length)); if (m2 < best) { best = m2; teil = k; } }
+      let best = Infinity; for (let k = 1; k < G.length; k++) best = Math.min(best, Math.max(sum(0, k), sum(k, G.length))); // Höhe ausgewogen in zwei Spalten
       const kiR = AW.kiRows(w).map((r) => [r[0], r[1], r[0] === 'Hinweis' || r[0] === 'Vor Ort prüfen' || (r[0] === 'Maße und Foto' && AW.massPruef(w)) ? { offen: true } : r[0] === 'Auf einen Blick' ? { bold: true } : null]);
       const fotos = ['in', 'out'].map((s2) => ({ s: s2, f: w.bilder && e.fotos ? e.fotos[w.bilder[s2]] : null })).filter((x) => x.f && /^data:image\/jpeg/.test(String(x.f.data || '')) && x.f.w > 0 && x.f.h > 0);
       const nzF = Wn.notizen.fotos, mitBild = !!(w.neu && w.plan && w.plan.bild && /^data:image\/jpeg/.test(w.plan.bild)), oK = { lw: 24, fs: 7.6 };
@@ -498,17 +504,37 @@ window.Blatt = (() => {
       function gruppe(g, x, y0, w2) {
         font('bold', 6.8, GREY); txt(VERSAL(g.titel), x, y0 + 3.2, { charSpace: 0.4 }); stroke(LINE); doc.setLineWidth(0.25); doc.line(x, y0 + 4.6, x + w2, y0 + 4.6);
         let yy = y0 + 5.4 + zeilen(gRows(g), x, y0 + 5.4, w2, oG);
+        if (stdText(g)) { font('normal', 7.2, GREY); const sl = wrap(stdText(g), w2); txt(sl, x, yy + 2.6, { lineHeightFactor: 1.2 }); yy += stdH(g, w2); }
         g.notizen.forEach((x2) => { yy += notiz(x2, x, yy + 1, w2) + 1; });
       }
-      if (y + best > unten()) {
-        /* passt nicht mehr nebeneinander: Gruppe für Gruppe weiter, nie eine Gruppe geteilt */
-        G.forEach((g) => { platzP(gH(g)); gruppe(g, M, y, CW); y += gH(g); });
-      } else {
-        let hl = 0, hr = 0;
-        G.slice(0, teil).forEach((g) => { gruppe(g, M, y + hl, sp); hl += gH(g); });
-        G.slice(teil).forEach((g) => { gruppe(g, M + sp + 6, y + hr, sp); hr += gH(g); });
-        stroke(LINE); doc.setLineWidth(0.25); doc.line(M + sp + 3, y + 1, M + sp + 3, y + Math.max(hl, hr) - 3);
-        y += Math.max(hl, hr);
+      /* Gruppen zweispaltig: passen die übrigen Gruppen auf diese Seite, ausgewogen links und rechts; sonst (viele Detailangaben)
+         fließen sie erst links bis zum Seitenende, dann rechts, und auf der nächsten Seite wieder ausgewogen. Nie eine Gruppe geteilt,
+         keine halbe Seite leer */
+      const strich = (top, h2) => { stroke(LINE); doc.setLineWidth(0.25); doc.line(M + sp + 3, top + 1, M + sp + 3, top + h2 - 3); };
+      let offenG = G.slice(), frisch = false;
+      while (offenG.length) {
+        const hr0 = offenG.map(gH), summe = (a, b2) => hr0.slice(a, b2).reduce((s2, x) => s2 + x, 0);
+        let tk = offenG.length, bb = summe(0, offenG.length); for (let k = 1; k < offenG.length; k++) { const m2 = Math.max(summe(0, k), summe(k, offenG.length)); if (m2 < bb) { bb = m2; tk = k; } }
+        if (y + bb <= unten()) {
+          let hl = 0, hr = 0;
+          offenG.slice(0, tk).forEach((g) => { gruppe(g, M, y + hl, sp); hl += gH(g); });
+          offenG.slice(tk).forEach((g) => { gruppe(g, M + sp + 6, y + hr, sp); hr += gH(g); });
+          if (hr) strich(y, Math.max(hl, hr));
+          y += Math.max(hl, hr); break;
+        }
+        const top = y, yy = [y, y]; let col = 0, i = 0;
+        while (i < offenG.length) {
+          const h = gH(offenG[i]);
+          if (yy[col] + h > unten()) {
+            if (col === 0 && top + h <= unten()) { col = 1; continue; }
+            if (i === 0 && frisch) { gruppe(offenG[0], M, top, sp); yy[0] += h; i = 1; } // höher als eine ganze Seite: trotzdem setzen, sonst hinge es fest
+            break;
+          }
+          gruppe(offenG[i], M + col * (sp + 6), yy[col], sp); yy[col] += h; i++;
+        }
+        if (yy[1] > top) strich(top, Math.max(yy[0], yy[1]) - top);
+        y = Math.max(yy[0], yy[1]); offenG = offenG.slice(i);
+        if (offenG.length) { fort(); frisch = true; }
       }
       y += 3;
       /* Einbausituation aus den Fotos: Befund der KI zweispaltig, Hinweise und Prüfpunkte markiert, darunter die Fotos */
