@@ -119,7 +119,7 @@
     const griffName = (w) => nameMitWunsch(w.wunschGf, optName('gf', w.gf, 'weiß'));
     function sashesFor(k) {
       if (k === '1') return [{ t: 'DK', din: 'L' }];
-      if (k === '2s') return [{ t: 'D', din: 'L' }, { t: 'DK', din: 'R' }];
+      if (k === '2s') return [{ t: 'D', din: 'L', steh: true }, { t: 'DK', din: 'R' }]; // Stulp: links der Standflügel ohne Griff (wie app.js)
       if (k === '3') return [{ t: 'DK', din: 'L' }, { t: 'F', din: 'L' }, { t: 'DK', din: 'R' }];
       return [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }];
     }
@@ -136,7 +136,7 @@
       const moH = hs.length ? Math.min.apply(null, hs) : 0, moW = ws.length ? Math.min.apply(null, ws) : 0;
       return { moH: moH, moW: moW, devH: hs.length > 1 ? Math.max.apply(null, hs) - moH : 0, devW: ws.length > 1 ? Math.max.apply(null, ws) - moW : 0, elH: num(w.el && w.el.h) || num(w.h), elW: num(w.el && w.el.w) || num(w.w) };
     }
-    const fluegelText = (S) => S.map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ');
+    const fluegelText = (S) => S.map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '') + (x.steh ? ' (Standflügel)' : '')).join(' · ');
     function opening(w) {
       const S = w.sashes || [];
       if (w.art === 'fest') return S.length + (S.length === 1 ? ' Feld' : ' Felder') + ', fest verglast, ohne Griff';
@@ -588,7 +588,7 @@
         if (sa.t === 'F') fest(gx + gw / 2, gy + gh / 2); else symbol(gG, gx, gy, gw, gh, sa.t, sa.din);
         if (nurEl) return;
         const gb = Math.max(fs * 0.17, sf * 0.36), gl = Math.min(h0 * 0.14, fs * 1.6);
-        if (sa.t === 'D' || sa.t === 'DK' || sa.t === 'P') griff(sa.din === 'L' ? sx + sw - sf * 0.5 : sx + sf * 0.5, y0 + h0 / 2, gb, gl);
+        if ((sa.t === 'D' || sa.t === 'DK' || sa.t === 'P') && !sa.steh) griff(sa.din === 'L' ? sx + sw - sf * 0.5 : sx + sf * 0.5, y0 + h0 / 2, gb, gl);
         else if (sa.t === 'K') griff(sx + sw / 2, y0 + sf * 0.5, Math.min(sw * 0.16, fs * 1.4), gb, true);
         else if (sa.t === 'S' || sa.t === 'PS') griff(sa.din === 'L' ? sx + sf * 0.5 : sx + sw - sf * 0.5, y0 + h0 * 0.52, gb * 1.1, Math.min(h0 * (sa.t === 'PS' ? 0.12 : 0.2), fs * 2.4));
       });
