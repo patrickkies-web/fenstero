@@ -324,6 +324,50 @@
       absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz };
   })();
 
+  /* ---------- Notizen je Stelle (Strang S1) ----------
+     Der Kunde kann an jedem Schritt der App eine Notiz anfügen: am Fenster w.notizen = { <stelle>: text }, auf den Anfrage-Seiten
+     am Projekt p.notizen. <stelle> ist der Schlüssel des Schritts ('start', 'fotos', 'messen', 'raender', 'ergebnis' …) bzw. der
+     Frage aus der App (qList: 'material', 'fa', 'typ-0' …). Höchstens 500 Zeichen je Notiz. Ältere Aufmaße ohne notizen bleiben
+     gültig; notizSauber macht aus allem, was ankommt, ein sauberes Objekt (nur Texte, Schlüssel aus Kleinbuchstaben, Ziffern, -). */
+  (function () {
+    const NOTIZ_MAX = 500;
+    const STELLE = {
+      start: 'Start: Stelle und Element', fotos: 'Fotos', zeichnen: 'Lage auf dem Foto', planmasse: 'Wunschmaße', messen: 'Messen', raender: 'Ränder der Öffnung', ergebnis: 'Ergebnis der Maße',
+      lage: 'Lage', absturz: 'Absturzsicherung', design: 'Gestaltung', teilung: 'Flügel', material: 'Material', ol: 'Oberlicht', ul: 'Unterlicht', form: 'Form', richtung: 'Öffnungsrichtung',
+      felder: 'Felder', hsts: 'Schema der Hebe-Schiebe-Tür', hstr: 'Seite des Schiebeflügels', psks: 'Teile der PSK-Tür', pskr: 'Seite des Schiebeflügels', schwelle: 'Schwelle', boden: 'Fußboden',
+      fswn: 'Zahl der Flügel', fsws: 'Faltrichtung', fswg: 'Gehflügel', sprossen: 'Sprossen', spross: 'Sprossenart', aufseite: 'Aufgesetzte Sprossen', breite: 'Sprossenbreite',
+      fa: 'Farbe außen', fi: 'Farbe innen', glas: 'Verglasung', glasfn: 'Glas-Extras', orn: 'Ornamentglas', griff: 'Griff', griffa: 'Griff außen', gf: 'Griff-Farbe', rc: 'Einbruchschutz',
+      sart: 'Sonnenschutz außen', einbau: 'Kasten des Sonnenschutzes', sfarbe: 'Farbe des Sonnenschutzes', antrieb: 'Antrieb', insekt: 'Insektenschutz', iart: 'Sicht- und Blendschutz innen',
+      ifarbe: 'Farbe des Sichtschutzes', fbi: 'Fensterbank innen', fba: 'Fensterbank außen', montage: 'Montage', notiz: 'Notiz',
+      anfrage: 'Angaben zum Haus', anfrage2: 'Zeit, Budget und Förderung', anfrage3: 'Kontakt'
+    };
+    const REIHE = Object.keys(STELLE);
+    const schluessel = (k) => String(k || '').trim();
+    /* Beschriftung einer Stelle; Flügelfragen tragen die Nummer (typ-0 → Öffnung Flügel 1); sonst der Schlüssel selbst */
+    function notizStelle(k) {
+      k = schluessel(k);
+      const m = /^(typ|din)-(\d{1,2})$/.exec(k);
+      if (m) return (m[1] === 'typ' ? 'Öffnung' : 'Scharniere') + ', Flügel ' + (Number(m[2]) + 1);
+      return STELLE[k] || STELLE[k.toLowerCase()] || k;
+    }
+    const rang = (k) => { const m = /^(typ|din)-(\d{1,2})$/.exec(k); const i = REIHE.indexOf(m ? 'teilung' : String(k).toLowerCase()); return (i < 0 ? 999 : i) + (m ? (m[1] === 'din' ? 0.5 : 0.2) + Number(m[2]) / 100 : 0); };
+    function notizSauber(o) {
+      const out = {};
+      if (!o || typeof o !== 'object' || Array.isArray(o)) return out;
+      Object.keys(o).slice(0, 80).forEach((k) => {
+        const t = typeof o[k] === 'string' ? o[k].replace(/\r\n?/g, '\n').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim().slice(0, NOTIZ_MAX) : '';
+        if (t && /^[A-Za-z0-9-]{1,24}$/.test(k)) out[k] = t;
+      });
+      return out;
+    }
+    /* Notizen eines Fensters oder Projekts in der Reihenfolge der App: [[Stelle, Text, Schlüssel]] */
+    function notizListe(o) {
+      const n = notizSauber(o && o.notizen);
+      return Object.keys(n).sort((a, b) => rang(a) - rang(b)).map((k) => [notizStelle(k), n[k], k]);
+    }
+    AW.NOTIZ_MAX = NOTIZ_MAX; AW.notizStelle = notizStelle; AW.notizSauber = notizSauber; AW.notizListe = notizListe;
+  })();
+
   /* ---------- Abrechnung ---------- */
   const Abrechnung = (() => {
     /* Preise netto für Betriebe, brutto für Hauseigentümer; aus /config.js bzw. vom Server (/api/status) überschreibbar */
@@ -384,9 +428,9 @@
       } catch (e) { return null; }
     }
     /* Fenster aus der App vollständig übernehmen: gleiche Felder, fehlende Werte sind App-Standard */
-    const fromApp = (w) => AW.mk(Object.assign({}, w, { name: w.name || 'Fenster' }));
+    const fromApp = (w) => AW.mk(Object.assign({}, w, { name: w.name || 'Fenster' }, w && w.notizen ? { notizen: AW.notizSauber(w.notizen) } : {})); // Notizen je Stelle nur als saubere Texte
     function fingerprint(o) { try { return hashN(JSON.stringify([o.w, o.p])); } catch (e) { return 0; } }
-    function fromAppProj(p) { p = p || {}; const fw = AW.OPT.foerdweg[p.foerdweg] ? p.foerdweg : ''; return { gebaeude: p.gebaeude || '', baujahr: p.baujahr || '', total: AW.num(p.total) || 0, zeit: p.zeit || '', budget: p.budget || '', foerd: !!p.foerd || fw === 'bafa' || fw === 'steuer', foerdweg: fw, notiz: String(p.notiz || '').replace(/\s+/g, ' ').trim().slice(0, 600) }; }
+    function fromAppProj(p) { p = p || {}; const fw = AW.OPT.foerdweg[p.foerdweg] ? p.foerdweg : ''; return { gebaeude: p.gebaeude || '', baujahr: p.baujahr || '', total: AW.num(p.total) || 0, zeit: p.zeit || '', budget: p.budget || '', foerd: !!p.foerd || fw === 'bafa' || fw === 'steuer', foerdweg: fw, notiz: String(p.notiz || '').replace(/\s+/g, ' ').trim().slice(0, 600), notizen: AW.notizSauber(p.notizen) }; }
     const aufmassOf = (wins, proj) => ({ windows: wins, proj: proj, fotos: wins.reduce((s, w) => s + (w.fotos || 0), 0), elemente: wins.reduce((s, w) => s + (AW.num(w.anzahl) || 1), 0) });
 
     /* ---------- Buchungen ----------

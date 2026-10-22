@@ -721,3 +721,121 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .konto-zeile .wincard { flex: 1; min-width: 0 }
 .konto-weg { flex: 0 0 52px; min-height: 52px; border: 0; border-radius: var(--r3); background: var(--bad-soft); color: var(--bad); display: flex; align-items: center; justify-content: center; font: inherit; transition: transform var(--t1) }
 .konto-weg:active { transform: scale(.97) }
+
+/* ---------- Strang S1 · Konfigurator: Notiz an jeder Stelle, Übersicht, Entwurf, Zifferntasten mit Pfeil, Foto groß, Begriffe ---------- */
+/* Werkzeuge oben rechts in jedem Schritt: Erklärung (i) und Notiz; die Eyebrow darf zweizeilig werden */
+.hd-zeile { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px }
+.hd-zeile .eyebrow { min-width: 0 }
+.hd-tools { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; margin: -4px -6px -4px 0 }
+.hd-i { width: 44px; height: 44px; border: 0; border-radius: var(--pill); background: none; padding: 0; color: var(--muted); display: inline-flex; align-items: center; justify-content: center }
+.hd-i:active { transform: scale(.94) }
+.nz-knopf { position: relative; min-height: 36px; padding: 0 12px 0 10px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
+.nz-knopf::before { content: ''; position: absolute; inset: -4px }
+.nz-knopf.da { box-shadow: inset 0 0 0 2px var(--ink) }
+.nz-knopf:active { transform: scale(.97) }
+@media (hover: hover) { .nz-knopf:hover, .hd-i:hover { color: var(--ink) } .nz-knopf:hover { box-shadow: inset 0 0 0 2px var(--ink) } }
+/* Notiz-Blatt */
+.nz-blatt h2 { font-size: 24px; margin: 8px 0 0 }
+.nz-sub { margin: 10px 0 14px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: center; text-wrap: pretty }
+.nz-blatt textarea { width: 100%; min-height: 132px; padding: 12px 14px; border: 0; border-radius: var(--r2); background: var(--surface2); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 17px; line-height: 1.45; resize: vertical }
+.nz-blatt textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink) }
+.nz-zahl { margin: 6px 2px 14px; font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums }
+.nz-knoepfe, .vl-knoepfe, .wo-knoepfe { display: flex; flex-direction: column; gap: 10px }
+.nz-knoepfe .btn, .vl-knoepfe .btn, .wo-knoepfe .btn { width: 100% }
+.nz-weg, .vl-weg { color: var(--bad) }
+/* Verlassen mit offenen Änderungen */
+.verlassen h2 { font-size: 24px; margin: 8px 0 0 }
+.vl-sub { margin: 10px 0 18px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: center; text-wrap: pretty }
+.vl-ab, .wo-web { align-self: center; min-height: 44px; font-size: 15px }
+/* Übersicht: Schritte, Abschnitte der Wünsche, alle Fenster */
+.wohin h2 { font-size: 24px; margin: 8px 0 4px }
+.wo-k { margin: 18px 0 8px }
+.wo-schritte { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+.wo-schritt { min-height: 52px; padding: 6px 8px; border: 0; border-radius: var(--r2); background: var(--surface2); color: var(--ink); font: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; text-align: left; min-width: 0 }
+.wo-schritt .wo-n { flex: 0 0 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line2); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--muted) }
+.wo-schritt.fertig .wo-n { box-shadow: none; background: var(--accent-soft) }
+.wo-schritt .wo-l { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.wo-schritt.jetzt { box-shadow: inset 0 0 0 2px var(--ink) }
+.wo-schritt[aria-disabled="true"] { opacity: .4 }
+.wo-schritt:active { transform: scale(.98) }
+.wo-abschnitte { display: flex; flex-wrap: wrap; gap: 8px }
+.wo-abschnitte .chip[aria-current="true"] { border-color: var(--ink) }
+.wo-fenster .wo-ic { flex: 0 0 44px; height: 44px; border-radius: var(--r1); background: var(--surface); display: inline-flex; align-items: center; justify-content: center }
+.wo-fenster button { justify-content: flex-start }
+.wo-fenster button > span:nth-child(2) { flex: 1; min-width: 0 }
+.wo-fenster button[aria-current="true"] { box-shadow: inset 3px 0 0 var(--ink) }
+.wo-knoepfe { margin-top: 20px }
+/* Kopfzeile: Übersicht und Begriffe rechts; am Telefon nur Symbole bei den Begriffen und kein Titel in der Mitte */
+.hdr-r { display: flex; align-items: center; gap: 0 }
+a.hdr-logo { color: inherit; text-decoration: none; min-height: 44px }
+@media (max-width: 479px) {
+  .hdr-r.zwei .hdr-gl span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+  .hdr-r.zwei .hdr-gl { padding: 0 10px; min-width: 44px; justify-content: center }
+  .hdr-row:has(.hdr-r.zwei) .hdr-title { display: none }
+}
+/* Untere Leiste: Pfeil zurück links, wie bei den Fragen */
+.bb .bb-zurueck { flex: 0 0 56px; padding: 0 }
+/* Zifferntasten: Pfeil zurück, 0, Löschen; darunter „Weiter“ über die ganze Breite */
+.keypad button.ok { grid-column: 1 / -1 }
+.keypad button.zur { color: var(--ink2) }
+/* Messanleitung: ganzer Text, nichts abgeschnitten */
+.ask .how { display: block; -webkit-line-clamp: unset; overflow: visible }
+/* Fotokachel mit Foto: Antippen öffnet die Großansicht */
+button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% }
+.tile-lupe { position: absolute; right: 10px; bottom: 10px; width: 36px; height: 36px; border-radius: 50%; background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--ink); display: flex; align-items: center; justify-content: center }
+.plan-gross { position: relative; display: block; width: 100%; border: 0; padding: 0; background: none; border-radius: var(--r2); overflow: hidden }
+.plan-gross .plan-bild { display: block }
+/* Großansicht eines Fotos: Zoom mit zwei Fingern, Doppeltipp, Knöpfe; nur hier ist touch-action aus */
+.fz { position: absolute; inset: 0; z-index: 70; display: flex; flex-direction: column; background: var(--ground); animation: fx-fade var(--t2) var(--e-out) both }
+.fz-kopf { flex: 0 0 auto; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 6px 0 16px; font-size: 17px }
+.fz-buehne { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; touch-action: none; display: flex; align-items: center; justify-content: center; background: #000; cursor: zoom-in }
+.fz-bild { max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: 50% 50%; user-select: none; -webkit-user-drag: none; will-change: transform }
+.fz-unten { flex: 0 0 auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)) }
+.fz-zoom { display: flex; align-items: center; justify-content: center; gap: 14px }
+.fz-k { width: 52px; height: 52px; border: 0; border-radius: 50%; background: var(--surface2); box-shadow: var(--ring); color: var(--ink); font: inherit; font-size: 24px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center }
+.fz-k:active { transform: scale(.95) }
+.fz-wert { min-width: 64px; text-align: center; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink2) }
+.fz-akt { justify-content: center }
+.fz-akt label.pill { cursor: pointer } .fz-akt label.pill input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
+/* Leiste der Abschnitte über der Frage: nur Namen und Haken */
+.qleiste { flex: 0 0 auto; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 6px -16px -4px; padding: 2px 16px }
+.qleiste::-webkit-scrollbar { display: none }
+.ql { position: relative; flex: 0 0 auto; min-height: 36px; padding: 0 12px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line); color: var(--ink2); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
+.ql::before { content: ''; position: absolute; inset: -4px 0 }
+.ql[aria-current="step"] { color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink) }
+.ql svg { width: 12px; height: 12px }
+@media (max-height: 700px) { .qleiste { display: none } }
+/* Optionen mit eigener Erklärung (i rechts im Chip bzw. neben der Zeile) */
+.qci { position: relative; min-width: 0 }
+.qci .chip { width: 100%; padding-right: 40px }
+.qci-i { width: 44px; height: 44px; border: 0; background: none; padding: 0; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto }
+.qci .qci-i { position: absolute; right: 0; top: 50%; transform: translateY(-50%) }
+.qci .qci-i svg, .qli .qci-i svg { width: 18px; height: 18px }
+.qci .chip[aria-pressed="true"] + .qci-i { color: var(--on-primary) }
+.qli { display: flex; align-items: stretch; gap: 4px }
+.qli > button[data-v] { flex: 1 1 auto; min-width: 0 }
+/* Angefangenes Fenster auf der Startseite */
+.entwurf-karte { gap: 12px }
+.entwurf-karte .ek-zeile { display: flex; align-items: center; gap: 12px }
+.entwurf-karte .ic { flex: 0 0 56px; height: 56px; border-radius: var(--r2); background: var(--surface2); display: flex; align-items: center; justify-content: center }
+.entwurf-karte .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.entwurf-karte b { font-size: 17px; font-weight: 800 }
+.entwurf-karte small { font-size: 13px; color: var(--muted) }
+.entwurf-karte .btn { flex: 0 0 auto; padding: 0 22px }
+/* Gespeichert: kleines Symbol statt Modell, „Wie geht es weiter?“ statt aller Angaben */
+.fertig-kopf { padding-top: 18px }
+.fertig-ic { display: inline-flex; width: 104px; height: 104px; margin-bottom: 14px; border-radius: var(--r4); background: var(--surface2); box-shadow: var(--ring); align-items: center; justify-content: center }
+.fertig-stand { color: var(--ink2) }
+.weiter-karte { gap: 8px } .weiter-karte p { margin: 0 } .weiter-karte p:not(.eyebrow):not(.sub) { font-size: 17px; line-height: 1.5 }
+.ki-zahl .sub { margin: 0; display: flex; align-items: center; gap: 8px }
+/* Begriffe: Suche, Gruppen, Praxis-Tipp */
+.g-such { position: relative; display: block; margin-bottom: 6px }
+.g-such input { width: 100%; min-height: 48px; padding: 0 14px 0 42px; border: 0; border-radius: var(--pill); background: var(--surface2); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 17px }
+.g-such input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink) }
+.g-such-ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); display: flex }
+.g-gruppe { margin-top: 18px } .g-gruppe > .eyebrow { margin: 0 4px 8px }
+.g-bezug > .eyebrow { color: var(--accent) }
+.g-leer { margin: 18px 4px 0 }
+.g-tipp { margin: 4px 0 16px; padding: 14px 16px; border-radius: var(--r2); background: var(--surface2); box-shadow: var(--ring); border-left: 3px solid var(--accent) }
+.g-tipp .eyebrow { color: var(--accent); margin-bottom: 6px } .g-tipp p:not(.eyebrow) { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink2) }
+@media (prefers-reduced-motion: reduce) { .fz, .fz-bild { animation: none !important; transition: none !important } }
