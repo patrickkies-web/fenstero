@@ -52,7 +52,9 @@
      KI_TAG_MAX               Höchstzahl KI-Auswertungen am Tag über alle Domains (Vorgabe 3000, Mail an MAIL_KONTAKT bei 80 %)
      INSTANZ_CACHE_MS         wie lange ein Worker die Daten einer Instanz im Speicher hält (Vorgabe 60000; Prüfung 0)
      HAUPT_HOSTS              weitere Domains, die wie eeziframes.com behandelt werden (durch Komma getrennt), nie eine Instanz
-     Weitere Variablen (Cloudflare-Schlüssel der Zentrale): docs/INSTANZEN.md
+     CF_API_TOKEN             Secret, Schlüssel für die Domains der Instanzen (eigene Vorlage ohne Zugriff auf eeziframes.com, siehe
+                              functions/api/cloudflare.js); ohne: die Zentrale zeigt eine Klick-Anleitung
+     CF_ACCOUNT_ID            Kontokennung bei Cloudflare (32 Zeichen, rechts auf der Kontoübersicht), nur zusammen mit CF_API_TOKEN
      ZAHLUNG_ATTRAPPE=1 / DATEN_ATTRAPPE=1 / MAIL_ATTRAPPE=1   nur lokal zum Testen: Stripe, Datenbank bzw. Mailversand werden nachgestellt */
 import { ANBIETER } from './anbieter.js';
 
@@ -116,6 +118,10 @@ export function konfig(env) {
   if (absInst && !adresse(absInst)) hinweise.push('MAIL_ABSENDER_INSTANZ: ist keine E-Mail-Adresse.');
   if (absNeutral && !adresse(absNeutral)) hinweise.push('MAIL_ABSENDER_NEUTRAL: ist keine E-Mail-Adresse.');
   if (whsec && !/^whsec_/.test(whsec)) hinweise.push('RESEND_WEBHOOK_SECRET: beginnt nicht mit whsec_. Eingetragen gehört das Signing Secret des Webhooks bei Resend.');
+  /* Cloudflare-Schlüssel der Zentrale (cloudflare.js liest sie selbst): nur zu zweit wirksam */
+  const cfToken = String(env.CF_API_TOKEN || '').trim(), cfKonto = String(env.CF_ACCOUNT_ID || '').trim();
+  if (cfToken && !/^[0-9a-f]{32}$/i.test(cfKonto)) hinweise.push('CF_ACCOUNT_ID: fehlt oder ist keine Kontokennung (32 Zeichen, rechts auf der Kontoübersicht bei Cloudflare). Ohne sie verbindet die Zentrale keine Domains.');
+  if (cfKonto && !cfToken) hinweise.push('CF_API_TOKEN: fehlt. Ohne den Schlüssel zeigt die Zentrale für Domains nur die Klick-Anleitung.');
   const instanzen = {
     absender: adresse(absInst) ? absInst : '', neutral: adresse(absNeutral) ? absNeutral : '',
     webhook: /^whsec_/.test(whsec) ? whsec : datenAttrappe ? 'whsec_ZWV6aWZyYW1lcy1hdHRyYXBwZS1yZXNlbmQtd2ViaG9vaw==' : '', webhookAttrappe: !/^whsec_/.test(whsec) && datenAttrappe,

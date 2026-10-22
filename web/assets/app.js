@@ -6456,7 +6456,7 @@ async function anfragePdf() {
     const d = lkDaten(), pr = S.proj, fotos = await fotosFuerBlatt(S.windows), logo = INST_M.logo && INST.logo ? await logoFuerBlatt(INST.logo) : null;
     const marke = { name: d.name, host: location.host || INST.host || '' }; if (logo) marke.logo = logo; if (INST_M.farbe && INST.farbe) marke.farbe = INST.farbe;
     const kunde = { name: pr.name || '', kontakt: pr.tel || pr.mail || '', adresse: pr.ort || '', mehr: AW.kundeKontakt({ kontakt: pr.tel || pr.mail || '', aufmass: { proj: pr } }) };
-    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'anfrage', kennzeichnung: INST_M.kennzeichnung, marke: marke, nr: S.sent.nr || '', sie: !d.du, fenster: S.windows, projekt: pr, kunde: kunde, fotos: fotos, h: BLATT_H }) : null;
+    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'anfrage', kennzeichnung: INST_M.pdfKennzeichnung || INST_M.kennzeichnung, marke: marke, nr: S.sent.nr || '', sie: !d.du, fenster: S.windows, projekt: pr, kunde: kunde, fotos: fotos, h: BLATT_H }) : null;
     if (!pdf) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); return; }
     await dateiSpeichern(pdf, 'Anfrage-' + (String(S.sent.nr || '').replace(/[^A-Za-z0-9-]/g, '') || 'Fenster') + '.pdf');
   } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }

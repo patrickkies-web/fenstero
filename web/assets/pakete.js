@@ -98,8 +98,9 @@
     anfragenTag: { titel: 'Anfragen am Tag (Richtwert)', art: 'zahl' }
   };
 
-  /* Was der Browser einer Instanz erfährt (window.KONFIG.instanz.m); alles andere bleibt auf dem Server */
-  const OEFFENTLICH = ['gestaltung', 'logo', 'farbe', 'fotos', 'startansicht', 'kennzeichnung', 'rechtNennung', 'kopieKunde', 'dashboard'];
+  /* Was der Browser einer Instanz erfährt (window.KONFIG.instanz.m); alles andere bleibt auf dem Server. pdfKennzeichnung braucht die
+     App für „Meine Anfrage als PDF“ und das Dashboard (Signature) für seine Aufmaßblätter */
+  const OEFFENTLICH = ['gestaltung', 'logo', 'farbe', 'fotos', 'startansicht', 'kennzeichnung', 'pdfKennzeichnung', 'rechtNennung', 'kopieKunde', 'dashboard'];
 
   const frieren = (o) => { Object.keys(o).forEach((k) => { if (o[k] && typeof o[k] === 'object') frieren(o[k]); }); return Object.freeze(o); };
   const kopie = (o) => JSON.parse(JSON.stringify(o));

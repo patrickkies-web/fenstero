@@ -146,7 +146,7 @@ export default async (h) => {
   const esS = await h.api(bi.host, '/'), esK = await h.api(bi.host, '/config.js'), esF = await h.api(bi.host, '/favicon.svg'), esM = await h.api(bi.host, '/manifest.webmanifest');
   let kon = null; try { kon = lade(esK.text); } catch (e) { kon = null; }
   const titelZ = (esS.text.match(/<title>[^<]*<\/title>/) || [''])[0];
-  ok(titelZ === '<title>Fenster planen und anfragen · Fenster &quot;Brandt&quot; $&#39; &lt;b&gt;&amp;</title>' && !esS.text.includes('<b>&') && kon && kon.marke === bos && kon.instanz.start.kicker === '</script><script>' && !/<\//.test(esK.text) && !esK.text.includes('<img') && /&quot;/.test(esF.text) && !/<b>/.test(esF.text) && JSON.parse(esM.text).name.startsWith(bos), '23.5 Escaping: Name mit Anführungszeichen, $\', <b> und & in Titel, /config.js (parsebar, ohne „<“), Initial-SVG und Manifest');
+  ok(titelZ === '<title>Fenster planen und anfragen · Fenster &quot;Brandt&quot; $&#39; &lt;b&gt;&amp;</title>' && !esS.text.includes('<b>&') && kon && kon.marke === bos && kon.instanz.start.kicker === '</script><script>' && !/<\//.test(esK.text) && !esK.text.includes('<img') && />B<\/text>/.test(esF.text) && !/<b>|["']<\/text>/.test(esF.text) && JSON.parse(esM.text).name.startsWith(bos), '23.5 Escaping: Name mit Anführungszeichen, $\', <b> und & in Titel, /config.js (parsebar, ohne „<“), Initial-SVG (erster Buchstabe „B“, wie einladung.js) und Manifest');
 
   /* ---------- 23.6 /api/status ---------- */
   const sE = await h.api(I.essential.host, '/api/status');

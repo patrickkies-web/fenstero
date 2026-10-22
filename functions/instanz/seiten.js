@@ -163,7 +163,9 @@ export function konfigJs(inst) {
 
 /* ---------- Icons, Manifest ---------- */
 const ZUSATZ = /^(Fensterbau|Fenster|Glaserei|Schreinerei|Tischlerei|Bauelemente|Fensterbaubetrieb)\s+/i;
-const initiale = (name) => ((String(name || '').replace(ZUSATZ, '').trim() || String(name || '') || 'F').charAt(0).toUpperCase());
+/* erster Buchstabe (oder Ziffer) ohne Zusatz wie „Fensterbau“, Anführungszeichen und Zeichen davor zählen nicht (wie einladung.js) */
+const ersterBuchstabe = (t) => { const m = /[\p{L}\p{N}]/u.exec(String(t || '')); return m ? m[0] : ''; };
+const initiale = (name) => ((ersterBuchstabe(String(name || '').replace(ZUSATZ, '').trim()) || ersterBuchstabe(name) || 'F').toUpperCase());
 function aufFarbe(hex) {
   const n = parseInt(hex.slice(1), 16), l = [n >> 16, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
   return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2] > 0.25 ? '#161616' : '#ffffff';
@@ -263,8 +265,9 @@ export async function ausliefern(request, env, ctx, inst) {
   }
   const k = konfig(env), basis = basisVon(inst, url);
   /* Vorschau: Link mit ?vorschau=<token> setzt das Cookie und leitet ohne Token weiter */
+  /* ?vorschau=1 ist kein Token, sondern „Als Kunde öffnen“ aus dem Betriebsbereich (app.js VORSCHAU_URL): bleibt in der Adresse */
   const tokenNeu = url.searchParams.get('vorschau');
-  if (tokenNeu && (method === 'GET' || method === 'HEAD') && !istApi) {
+  if (tokenNeu && tokenNeu !== '1' && (method === 'GET' || method === 'HEAD') && !istApi) {
     const d = await vorschauGueltig(k, inst, tokenNeu), ziel = new URL(url.href); ziel.searchParams.delete('vorschau');
     const h = { location: ziel.pathname.replace(/^\/+/, '/') + ziel.search, 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' }; // nie „//fremd.example“
     if (d) h['set-cookie'] = VORSCHAU + '=' + tokenNeu + '; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=' + Math.max(60, Math.floor(R().FRISTEN.vorschauTage * 86400));

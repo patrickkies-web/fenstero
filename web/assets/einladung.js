@@ -233,8 +233,10 @@
     return m ? esc(s.slice(0, m.index)) + '<span class="ak">' + esc(m[1]) + '</span>' + esc(m[2]) : esc(s);
   }
   const BILD_PFAD = /^\/marke\/\d{1,6}\/start-[1-6]\.(png|jpe?g|webp)$/;
-  function startBilder(I, name) {
-    const b = (Array.isArray(I.bilder) ? I.bilder : []).filter((x) => BILD_PFAD.test(String(x))).slice(0, 6);
+  /* Vorschau in der Zentrale: Bilder des Entwurfs als blob:-Adresse, die die Seite selbst erzeugt hat */
+  const BLOB_PFAD = /^blob:https?:\/\/[a-z0-9.:[\]-]+\/[0-9a-f-]{36}$/i;
+  function startBilder(I, name, vor) {
+    const b = (Array.isArray(I.bilder) ? I.bilder : []).filter((x) => BILD_PFAD.test(String(x)) || (vor && BLOB_PFAD.test(String(x)))).slice(0, 6);
     if (b.length) return '<div class="ein-bilder' + (b.length === 1 ? ' eins' : '') + '" role="group" aria-label="' + esc('Fotos von ' + name) + '">' + b.map((x, i) => '<img src="' + esc(x) + '" alt="' + esc('Foto ' + (i + 1) + ' von ' + name) + '"' + (i ? ' loading="lazy"' : ' fetchpriority="high"') + ' decoding="async">').join('') + '</div>';
     return I.standardBild ? '<figure class="ein-bild"><img src="' + STANDARD_BILD + '" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"></figure>' : '';
   }
@@ -262,7 +264,7 @@
     return '<div class="ein' + (vor ? ' vorschau' : '') + (I ? ' inst' : '') + '">' +
       '<section class="' + (vor ? '' : 'hero lk ') + 'ein-start"><div class="ein-start-in">' +
         (I && I.ohneKopf ? '' : kopf({ name: name, p: p, unten: q.kunde ? 'für ' + q.kunde : '', instanz: I })) +
-        (web ? startBilder(I, name) : '') +
+        (web ? startBilder(I, name, vor) : '') +
         '<p class="eyebrow kicker">' + kicker + '</p>' +
         '<h1>' + titel + '</h1>' +
         '<div class="ein-brief"><p class="ein-gruss">' + esc(g) + '</p>' + (p.ap ? '<div class="ein-sign">' + apBild(p) + '<span><b>' + esc(p.ap) + '</b><small>' + nm + '</small></span></div>' : '') + '</div>' +

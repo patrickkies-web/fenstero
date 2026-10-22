@@ -673,16 +673,16 @@
     }
     if (neu && S.seite === 'instanz' && S.id === d.id) render();
   }
+  /* Vorschau im Telefonrahmen: dieselbe Startseite wie in der App der Instanz (app.js instOpt, einladung.js o.instanz): Website-Besucher,
+     Kennzeichnung, Startansicht und Fotos nach dem Paket, ohne eigene Fotos das Startbild von eeziframes; Bilder des Entwurfs als blob: */
   function vorschau(d) {
     var e = d.entwurf || d.marke || {}, m = d.m || {}, st = e.start || {}, P = d.profil || {}, ein = P.einladung || {}, bi = e.bilder || {};
     var logo = m.logo && bi.logo ? bildUrl(d, bi.logo) : '', bilder = m.fotos ? (bi.start || []).slice(0, m.fotos).map(function (n) { return bildUrl(d, n); }).filter(Boolean) : [];
-    var farbe = m.farbe && /^#[0-9a-f]{6}$/i.test(e.farbe || '') ? e.farbe : '', akz = farbe && IR() ? IR().akzent(farbe) : '';
-    var p = { logo: logo, grund: 'hell', col: '', gruss: { sie: m.startansicht ? ein.begruessung || '' : '', du: m.startansicht ? ein.begruessungDu || '' : '' }, ap: ein.ansprechpartner || P.ap || '', foto: ein.foto || '', tel: ein.telefonZeigen === false ? '' : (ein.telefon || P.tel || ''), mail: ein.mailZeigen ? (ein.mail || P.mail || '') : '', web: ein.web || '', ort: ein.ort || '', tiefe: ein.tiefe || '', std: ein.standard || '' };
-    var inst = { name: e.name || d.name, m: PK() ? PK().oeffentlich(m) : {}, start: { kicker: m.startansicht ? st.kicker || '' : '', ueberschrift: m.startansicht ? st.ueberschrift || '' : '', text: m.startansicht ? st.text || '' : '', bilder: bilder }, logo: logo, farbe: farbe, akzent: akz, auftritt: p };
+    var farbe = m.farbe && /^#[0-9a-f]{6}$/i.test(e.farbe || '') ? e.farbe.toLowerCase() : '', akz = farbe && IR() ? IR().akzent(farbe) : '';
+    var p = { logo: logo, grund: 'hell', col: farbe, gruss: { sie: m.startansicht ? ein.begruessung || '' : '', du: m.startansicht ? ein.begruessungDu || '' : '' }, ap: ein.ansprechpartner || P.ap || '', foto: ein.foto || '', tel: ein.telefonZeigen === false ? '' : (ein.telefon || P.tel || ''), mail: ein.mailZeigen ? (ein.mail || P.mail || '') : '', web: ein.web || '', ort: ein.ort || '', tiefe: ein.tiefe || '', std: ein.standard || '' };
+    var inst = { kz: m.kennzeichnung, website: true, kopie: !!m.kopieKunde, start: m.startansicht ? { kicker: st.kicker || '', ueberschrift: st.ueberschrift || '', text: st.text || '' } : {}, bilder: bilder, standardBild: true };
     var html = ''; try { html = window.Einladung ? window.Einladung.html({ name: e.name || d.name, du: ein.anrede === 'du', p: p, vorschau: true, instanz: inst }) : ''; } catch (x) { html = ''; }
-    var start = m.startansicht && (st.kicker || st.ueberschrift || st.text) && html.indexOf(esc(st.ueberschrift || st.text || st.kicker)) < 0 ? '<div class="z-vs-start">' + (st.kicker ? '<p class="eyebrow kicker">' + esc(st.kicker) + '</p>' : '') + (st.ueberschrift ? '<p class="z-vs-h">' + esc(st.ueberschrift) + '</p>' : '') + (st.text ? '<p class="z-neben">' + esc(st.text) + '</p>' : '') + '</div>' : '';
-    var reihe = bilder.length && html.indexOf(bilder[0]) < 0 ? '<div class="z-vs-bilder">' + bilder.map(function (u) { return '<img src="' + esc(u) + '" alt="">'; }).join('') + '</div>' : '';
-    return '<div class="ein-telefon z-telefon" style="' + (akz ? '--accent:' + esc(akz) + ';' : '') + '"><div class="ein-tel-kopf" aria-hidden="true">' + esc(d.haupthost || 'Vorschau') + '</div><div class="ein-tel-inhalt" tabindex="0" role="region" aria-label="Vorschau der Startseite">' + reihe + start + html + '</div></div>';
+    return '<div class="ein-telefon z-telefon" style="' + (akz ? '--accent:' + esc(akz) + ';' : '') + '"><div class="ein-tel-kopf" aria-hidden="true">' + esc(d.haupthost || 'Vorschau') + '</div><div class="ein-tel-inhalt" tabindex="0" role="region" aria-label="Vorschau der Startseite">' + html + '</div></div>';
   }
   function bildSlot(d, name, titel) {
     var e = d.entwurf || d.marke || {}, bi = e.bilder || {}, datei = name === 'logo' ? bi.logo : (bi.start || []).filter(function (n) { return n.replace(/\.[a-z]+$/, '') === name; })[0], u = datei ? bildUrl(d, datei) : '';
