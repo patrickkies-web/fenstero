@@ -14,7 +14,13 @@
                    in der App), standard: der Standard des Betriebs in einem Satz (was er ohne Wahl des Kunden verbaut)
      col         Farbe des Zeichens (eine aus FARBEN; Firma.col im Browser)
    Öffentliches Profil (Auftritt), wie es zum Kunden geht (GET /api/link/:code, im Pilotbetrieb gekürzt im Link):
-     { logo, grund, col, gruss: { sie, du }, ap, foto, tel, mail, web, ort, tiefe, std } */
+     { logo, grund, col, gruss: { sie, du }, ap, foto, tel, mail, web, ort, tiefe, std }
+   Konfigurator-Instanz (eigene Domain eines Fensterbauers, docs/INSTANZEN.md): html, kopf, kontakt und fuss nehmen o.instanz =
+     { kz: 'deutlich'|'dezent'|'keine' (Kennzeichnung, Pakete.merkmale), website (Besucher der Website statt persönlicher Einladung),
+       kopie (Kopie als PDF nach dem Senden), start: { kicker, ueberschrift, text } (eigene Startansicht), bilder: ['/marke/<v>/start-1.jpg'],
+       standardBild (Startbild von eeziframes, Paket ohne eigene Gestaltung), ohneKopf (die App zeigt Zeichen und Name im Kopf) };
+     dann kein „Übermittelt mit eeziframes“ und keine Texte über einen Link, die Kennzeichnung nach dem Paket. Das Profil trägt dort
+     zusätzlich logoUrl (/marke/<v>/logo.png, KONFIG.instanz.logo); die Farbe darf jede Hex-Farbe sein (Firmenfarbe der Marke). */
 (function (root) {
   'use strict';
   /* Grenzen: das Logo als Data-URL ist höchstens etwa 90 KB groß, das Foto des Ansprechpartners etwa 36 KB */
@@ -42,6 +48,10 @@
     return ok ? s : null;
   }
   const farbe = (c) => (FARBEN.includes(c) ? c : FARBEN[0]);
+  /* Anzeige: eine der sechs Farben oder (Instanz) die Firmenfarbe der Marke; gespeichert wird im Betriebskonto weiter nur FARBEN */
+  const hexFarbe = (c) => (/^#[0-9a-f]{6}$/i.test(String(c || '')) ? String(c).toLowerCase() : '');
+  /* Logo einer Instanz: nur der Pfad der veröffentlichten Marke auf derselben Domain */
+  const LOGO_URL = /^\/marke\/\d{1,6}\/[a-z0-9-]{1,40}\.(png|jpe?g|webp)$/;
   function webAdresse(v) {
     let s = zeile(v, MAX.web);
     if (!s) return '';
@@ -83,7 +93,7 @@
   /* Profil aus fremder Quelle (Server-Antwort, Link) wieder säubern: Darstellung nur aus geprüften Werten */
   function profil(p) {
     const o = p && typeof p === 'object' ? p : {}, g = o.gruss && typeof o.gruss === 'object' ? o.gruss : {};
-    return { logo: bild(o.logo, MAX.logo) || '', grund: o.grund === 'dunkel' ? 'dunkel' : 'hell', col: FARBEN.includes(o.col) ? o.col : '', gruss: { sie: kurz(g.sie, MAX.gruss), du: kurz(g.du, MAX.gruss) }, ap: zeile(o.ap, MAX.ap), foto: bild(o.foto, MAX.foto) || '', tel: telOk(o.tel), mail: mailOk(o.mail), web: webAdresse(o.web), ort: zeile(o.ort, MAX.ort), tiefe: tiefeOk(o.tiefe), std: zeile(o.std, MAX.standard) };
+    return { logo: bild(o.logo, MAX.logo) || '', grund: o.grund === 'dunkel' ? 'dunkel' : 'hell', col: hexFarbe(o.col), gruss: { sie: kurz(g.sie, MAX.gruss), du: kurz(g.du, MAX.gruss) }, ap: zeile(o.ap, MAX.ap), foto: bild(o.foto, MAX.foto) || '', tel: telOk(o.tel), mail: mailOk(o.mail), web: webAdresse(o.web), ort: zeile(o.ort, MAX.ort), tiefe: tiefeOk(o.tiefe), std: zeile(o.std, MAX.standard) };
   }
 
   /* ---------- Link im Pilotbetrieb: das Profil reist gekürzt im Link mit (ohne Logo und Foto) ----------
@@ -124,7 +134,9 @@
     return (k ? t.replace(/\{Kunde\}/g, k) : t.replace(/\s*\{Kunde\}/g, '')).replace(/\s+([,.!?])/g, '$1');
   }
   const ZUSATZ = /^(Fensterbau|Fenster|Glaserei|Schreinerei|Tischlerei|Bauelemente|Fensterbaubetrieb)\s+/i;
-  const initiale = (name) => ((String(name || '').replace(ZUSATZ, '').trim() || String(name || '') || 'F').charAt(0).toUpperCase());
+  /* erster Buchstabe (oder Ziffer) ohne Zusatz wie „Fensterbau“; Anführungszeichen und Zeichen davor zählen nicht */
+  const ersterBuchstabe = (t) => { const m = /[\p{L}\p{N}]/u.exec(String(t || '')); return m ? m[0] : ''; };
+  const initiale = (name) => ((ersterBuchstabe(String(name || '').replace(ZUSATZ, '').trim()) || ersterBuchstabe(name) || 'F').toUpperCase());
   /* dunkle Farbe: helle Initiale, sonst dunkle (Kontrast mindestens 4,5:1) */
   function aufFarbe(hex) {
     const m = /^#([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return '#161616';
@@ -146,33 +158,47 @@
   const KNOPF = (vor, tag, attr, cls, inhalt) => (vor ? '<span class="' + cls + '" aria-hidden="true">' + inhalt + '</span>' : '<' + tag + ' class="' + cls + '" ' + attr + '>' + inhalt + '</' + tag + '>');
   /* Zeichen des Betriebs: Logo (auf hellem oder dunklem Feld) oder die Initiale in seiner Farbe */
   function zeichen(name, p, groesse) {
-    const q = p || {}, cls = 'ein-zeichen' + (groesse ? ' ' + groesse : '');
-    if (q.logo) return '<span class="' + cls + ' logo ' + (q.grund === 'dunkel' ? 'dunkel' : 'hell') + '"><img src="' + esc(q.logo) + '" alt="Logo ' + esc(name) + '"></span>';
-    const c = FARBEN.includes(q.col) ? q.col : ''; // ohne bekannte Farbe (ältere Links): Cream wie der Avatar in den Beiträgen
+    const q = p || {}, cls = 'ein-zeichen' + (groesse ? ' ' + groesse : ''), lu = LOGO_URL.test(String(q.logoUrl || '')) ? q.logoUrl : '';
+    if (q.logo || lu) return '<span class="' + cls + ' logo ' + (q.grund === 'dunkel' ? 'dunkel' : 'hell') + '"><img src="' + esc(q.logo || lu) + '" alt="Logo ' + esc(name) + '"></span>';
+    const c = hexFarbe(q.col); // ohne Farbe (ältere Links, Instanz ohne Firmenfarbe): Cream wie der Avatar in den Beiträgen
     return '<span class="' + cls + ' ini"' + (c ? ' style="--ein-col: ' + c + '; --ein-auf: ' + aufFarbe(c) + '"' : '') + ' aria-hidden="true">' + esc(initiale(name)) + '</span>';
   }
   const apBild = (p) => (p.foto ? '<img class="ein-ap-foto" src="' + esc(p.foto) + '" alt="">' : '<span class="ein-ap-foto ini" aria-hidden="true">' + esc(initiale(p.ap)) + '</span>');
   /* Absender: oben auf jeder Startseite im Link. klein: in der Liste „Weiter, wo …“ */
   function kopf(o) {
-    const q = o || {}, p = q.p || {}, name = q.name || 'Ihr Fensterbauer';
+    const q = o || {}, p = q.p || {}, name = q.name || 'Ihr Fensterbauer', I = q.instanz;
     if (q.unten) q.unten = String(q.unten).replace(/^für Herr(?= )/, 'für Herrn'); // „für Herrn Kaya“, die Anrede selbst bleibt „Herr“
-    return '<div class="ein-abs' + (q.klein ? ' klein' : '') + (p.logo ? ' mit-logo' : '') + '">' + zeichen(name, p, q.klein ? 'klein' : 'gross') + '<span class="ein-abs-tx"><small>' + esc(q.oben || 'Persönliche Anfrage von') + '</small><b>' + esc(name) + '</b>' + (q.unten ? '<span class="ein-fuer">' + esc(q.unten) + '</span>' : '') + '</span></div>';
+    const mitLogo = !!(p.logo || (p.logoUrl && LOGO_URL.test(String(p.logoUrl))));
+    return '<div class="ein-abs' + (q.klein ? ' klein' : '') + (mitLogo ? ' mit-logo' : '') + '">' + zeichen(name, p, q.klein ? 'klein' : 'gross') + '<span class="ein-abs-tx"><small>' + esc(q.oben || (I && I.website ? 'Fensterplaner von' : 'Persönliche Anfrage von')) + '</small><b>' + esc(name) + '</b>' + (q.unten ? '<span class="ein-fuer">' + esc(q.unten) + '</span>' : '') + '</span></div>';
   }
-  /* Kontakt: Ansprechpartner mit Anruf- und E-Mail-Knopf (44 px); ohne Angaben der Weg über die Nachricht */
+  /* Kontakt: Ansprechpartner mit Anruf- und E-Mail-Knopf (44 px); ohne Angaben der Weg über die Nachricht (Instanz, Website: der
+     Betrieb meldet sich nach der Anfrage) */
   function kontakt(o) {
-    const q = o || {}, p = q.p || {}, du = !!q.du, name = q.name || T(du, 'Ihr Fensterbauer', 'dein Fensterbauer'), vor = !!q.vorschau;
+    const q = o || {}, p = q.p || {}, du = !!q.du, name = q.name || T(du, 'Ihr Fensterbauer', 'dein Fensterbauer'), vor = !!q.vorschau, web = !!(q.instanz && q.instanz.website);
     const knoepfe = (p.tel ? KNOPF(vor, 'a', 'href="tel:' + esc(telHref(p.tel)) + '"', 'btn ghost small ein-k', ICO.tel + '<span>Anrufen</span>') : '') +
       (p.mail ? KNOPF(vor, 'a', 'href="mailto:' + esc(p.mail) + '"', 'btn ghost small ein-k', ICO.mail + '<span>E-Mail</span>') : '') +
       (p.web ? KNOPF(vor, 'a', 'href="' + esc(p.web) + '" target="_blank" rel="noopener"', 'btn ghost small ein-k', ICO.web + '<span>Website</span>') : '');
     const nr = p.tel ? '<p class="ein-nr">' + esc(p.tel) + (p.mail ? ' · <span class="ein-mail">' + esc(p.mail) + '</span>' : '') + '</p>' : p.mail ? '<p class="ein-nr"><span class="ein-mail">' + esc(p.mail) + '</span></p>' : '';
     return '<section class="ein-karte ein-kontakt"><p class="eyebrow">' + 'Fragen?' + '</p>' +
       (p.ap ? '<div class="ein-ap">' + apBild(p) + '<span><b>' + esc(p.ap) + '</b><small>' + esc(name) + (p.ort ? ' · ' + esc(p.ort) : '') + '</small></span></div>' : '') +
-      (knoepfe ? nr + '<div class="ein-knoepfe">' + knoepfe + '</div>' : '<p>' + T(du, 'Antworten Sie einfach auf die Nachricht, mit der dieser Link kam. ', 'Antworte einfach auf die Nachricht, mit der dieser Link kam. ') + esc(name) + T(du, ' meldet sich bei Ihnen.', ' meldet sich bei dir.') + '</p>') +
-      (q.bis ? '<p class="ein-gilt">' + ICO.uhr + '<span>' + T(du, 'Ihr Link gilt bis ', 'Dein Link gilt bis ') + esc(q.bis) + '.</span></p>' : '') + '</section>';
+      (knoepfe ? nr + '<div class="ein-knoepfe">' + knoepfe + '</div>' : '<p>' + (web ? esc(name) + T(du, ' meldet sich nach Ihrer Anfrage bei Ihnen.', ' meldet sich nach deiner Anfrage bei dir.') : T(du, 'Antworten Sie einfach auf die Nachricht, mit der dieser Link kam. ', 'Antworte einfach auf die Nachricht, mit der dieser Link kam. ') + esc(name) + T(du, ' meldet sich bei Ihnen.', ' meldet sich bei dir.')) + '</p>') +
+      (q.bis && !web ? '<p class="ein-gilt">' + ICO.uhr + '<span>' + T(du, 'Ihr Link gilt bis ', 'Dein Link gilt bis ') + esc(q.bis) + '.</span></p>' : '') + '</section>';
   }
-  /* Fußzeile: eeziframes klein als Übermittler */
+  /* Kennzeichnung einer Instanz nach ihrem Paket (Pakete.merkmale kennzeichnung, E27): deutlich mit Zeichen und Link auf die Seite für
+     Fensterbauer (neuer Tab, ohne Referrer; Endkunden müssen nie auf eeziframes.com), dezent als kleiner Text, keine: nichts */
+  const EEZI_FB = 'https://eeziframes.com/fuer-fensterbauer/';
+  function kennzeichnung(kz) {
+    if (kz === 'deutlich') {
+      const logo = root.Logo && root.Logo.svg ? root.Logo.svg(18) : '';
+      return '<p class="ein-kz deutlich"><a href="' + EEZI_FB + '" target="_blank" rel="noopener" referrerpolicy="no-referrer">' + logo + '<span>Powered by EEZIframes</span></a></p>';
+    }
+    if (kz === 'dezent') return '<p class="ein-kz dezent">Konfigurator von eeziframes</p>';
+    return '';
+  }
+  /* Fußzeile: eeziframes klein als Übermittler; auf einer Instanz nur die Kennzeichnung des Pakets */
   function fuss(o) {
     const q = o || {}, du = !!q.du, name = q.name || T(du, 'Ihren Fensterbauer', 'deinen Fensterbauer'), C = root.KONFIG || {};
+    if (q.instanz) { const kz = kennzeichnung(q.instanz.kz); return kz ? '<div class="ein-fuss inst">' + kz + '</div>' : ''; }
     const logo = root.Logo && root.Logo.svg ? root.Logo.svg(18) : '', wm = root.Marke && root.Marke.wort ? root.Marke.wort() : '<span class="wm" translate="no"><b>eezi</b>frames</span>';
     return '<div class="ein-fuss"><p class="ein-durch">' + logo + '<span>Übermittelt mit ' + wm + '</span></p><p class="ein-fuss-t">' + T(du, 'Ihr Aufmaß geht nur an ', 'Dein Aufmaß geht nur an ') + esc(name) + '. eeziframes ' + T(du, 'übermittelt es in dessen Auftrag und zeigt Ihnen keine anderen Anbieter und keine Werbung.', 'übermittelt es in dessen Auftrag und zeigt dir keine anderen Anbieter und keine Werbung.') + (q.vorschau ? '' : ' <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>') + '</p></div>';
   }
@@ -196,31 +222,59 @@
 
   /* ---------- Die ganze Seite beim ersten Besuch ----------
      o = { name, kunde, du, p (Profil), bis (gültig bis), server (Daten gehen über den Server), vorschau (Betriebsbereich: nichts ist
-     bedienbar) }. Aufbau nach dem Startbild der Gestaltung: Absender, Kicker, Überschrift mit einem grünen Wort, persönliche
-     Begrüßung mit Unterschrift, Cream-Pille mit Pfeil und Ghost-Knopf, Dauer und Pause; darunter Ablauf, was man braucht, was danach
-     kommt, wer die Daten sieht, Kontakt; ganz unten eeziframes als Übermittler. */
+     bedienbar), instanz (Konfigurator-Instanz, siehe oben) }. Aufbau nach dem Startbild der Gestaltung: Absender, Kicker, Überschrift mit
+     einem grünen Wort, persönliche Begrüßung mit Unterschrift, Cream-Pille mit Pfeil und Ghost-Knopf, Dauer und Pause; darunter Ablauf,
+     was man braucht, was danach kommt, wer die Daten sieht, Kontakt; ganz unten eeziframes als Übermittler (Instanz: die Kennzeichnung
+     des Pakets). Auf der Website einer Instanz steht über dem Kicker die Bildreihe des Betriebs bzw. das Startbild. */
+  const STANDARD_BILD = '/bilder/foto/app-start.webp';
+  /* eine eigene Überschrift: das letzte Wort grün (eine Regel je Titel, docs/GESTALTUNG.md) */
+  function gruenesWort(t) {
+    const s = String(t || ''), m = /([\p{L}\p{N}][\p{L}\p{N}-]*)([^\p{L}\p{N}]*)$/u.exec(s);
+    return m ? esc(s.slice(0, m.index)) + '<span class="ak">' + esc(m[1]) + '</span>' + esc(m[2]) : esc(s);
+  }
+  const BILD_PFAD = /^\/marke\/\d{1,6}\/start-[1-6]\.(png|jpe?g|webp)$/;
+  function startBilder(I, name) {
+    const b = (Array.isArray(I.bilder) ? I.bilder : []).filter((x) => BILD_PFAD.test(String(x))).slice(0, 6);
+    if (b.length) return '<div class="ein-bilder' + (b.length === 1 ? ' eins' : '') + '" role="group" aria-label="' + esc('Fotos von ' + name) + '">' + b.map((x, i) => '<img src="' + esc(x) + '" alt="' + esc('Foto ' + (i + 1) + ' von ' + name) + '"' + (i ? ' loading="lazy"' : ' fetchpriority="high"') + ' decoding="async">').join('') + '</div>';
+    return I.standardBild ? '<figure class="ein-bild"><img src="' + STANDARD_BILD + '" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"></figure>' : '';
+  }
   function html(o) {
     const q = o || {}, du = !!q.du, p = q.p || {}, name = q.name || T(du, 'Ihr Fensterbauer', 'Dein Fensterbauer'), vor = !!q.vorschau, nm = esc(name);
-    const g = gruss(p, q.kunde, du);
+    const I = q.instanz && typeof q.instanz === 'object' ? q.instanz : null, web = !!(I && I.website), st = (I && I.start && typeof I.start === 'object') ? I.start : {};
+    const g = (web && String(st.text || '').trim()) || gruss(p, q.kunde, du);
     const cta = KNOPF(vor, 'button', 'type="button" data-act="new"', 'btn primary', 'Erstes Fenster ausmessen<span class="pf" aria-hidden="true"></span>') +
       KNOPF(vor, 'button', 'type="button" data-ein-so=""', 'btn ghost', 'So funktioniert es');
     const schritt = (n, t, x) => '<li><span class="n">' + n + '</span><div><b>' + t + '</b><p>' + x + '</p></div></li>';
     const gloss = (k, t) => (vor ? t : '<button type="button" class="ulink" data-act="gloss" data-k="' + k + '">' + t + '</button>');
-    return '<div class="ein' + (vor ? ' vorschau' : '') + '">' +
+    const kicker = web && String(st.kicker || '').trim() ? esc(st.kicker) : web ? 'Fenster planen und anfragen' : T(du, 'Ihr Fenster-Aufmaß', 'Dein Fenster-Aufmaß');
+    const titel = web && String(st.ueberschrift || '').trim() ? gruenesWort(st.ueberschrift) : web ? T(du, 'Ihre neuen Fenster, Ihr <span class="ak">Angebot</span>.', 'Deine neuen Fenster, dein <span class="ak">Angebot</span>.') : T(du, 'Ihre Fenster, Ihr <span class="ak">Angebot</span>.', 'Deine Fenster, dein <span class="ak">Angebot</span>.');
+    const zurueck = web ? T(du, 'Sie müssen nicht alles auf einmal machen: Ihre Planung bleibt auf diesem Gerät gespeichert.', 'Du musst nicht alles auf einmal machen: Deine Planung bleibt auf diesem Gerät gespeichert.') : T(du, 'Sie müssen nicht alles auf einmal machen: Über diesen Link kommen Sie jederzeit zurück.', 'Du musst nicht alles auf einmal machen: Über diesen Link kommst du jederzeit zurück.');
+    const senden = web ? T(du, 'Kurz prüfen und an ' + nm + ' senden. Sie bekommen sofort eine Bestätigung' + (I.kopie ? ' und Ihre Anfrage als PDF.' : '.'), 'Kurz prüfen und an ' + nm + ' senden. Du bekommst sofort eine Bestätigung' + (I.kopie ? ' und deine Anfrage als PDF.' : '.'))
+      : T(du, 'Kurz prüfen und an ' + nm + ' schicken. Erst dann hat ' + nm + ' Ihre Maße und Wünsche.', 'Kurz prüfen und an ' + nm + ' schicken. Erst dann hat ' + nm + ' deine Maße und Wünsche.');
+    const daten = web
+      ? haken(T(du, 'Ihre Angaben und Fotos gehen nur an ', 'Deine Angaben und Fotos gehen nur an ') + nm + '.') +
+        haken(T(du, 'Bevor Sie senden, sieht ' + nm + ' nichts davon.', 'Bevor du sendest, sieht ' + nm + ' nichts davon.')) +
+        haken(T(du, 'Kostenlos und unverbindlich, ohne Konto und ohne Werbung.', 'Kostenlos und unverbindlich, ohne Konto und ohne Werbung.'))
+      : haken(T(du, 'Ihre Angaben und Fotos gehen nur an ', 'Deine Angaben und Fotos gehen nur an ') + nm + '.') +
+        haken(q.server ? T(du, 'Vorher sieht ' + nm + ' nur, dass Sie den Link geöffnet haben und wie weit Sie sind.', 'Vorher sieht ' + nm + ' nur, dass du den Link geöffnet hast und wie weit du bist.') : T(du, 'Bis Sie senden, bleibt alles in diesem Browser.', 'Bis du sendest, bleibt alles in diesem Browser.')) +
+        haken(T(du, 'Für Sie kostenlos, ohne Konto und ohne Werbung.', 'Für dich kostenlos, ohne Konto und ohne Werbung.')) +
+        (I ? '' : haken('eeziframes übermittelt ' + T(du, 'Ihr', 'dein') + ' Aufmaß im Auftrag von ' + nm + '.'));
+    return '<div class="ein' + (vor ? ' vorschau' : '') + (I ? ' inst' : '') + '">' +
       '<section class="' + (vor ? '' : 'hero lk ') + 'ein-start"><div class="ein-start-in">' +
-        kopf({ name: name, p: p, unten: q.kunde ? 'für ' + q.kunde : '' }) +
-        '<p class="eyebrow kicker">' + T(du, 'Ihr Fenster-Aufmaß', 'Dein Fenster-Aufmaß') + '</p>' +
-        '<h1>' + T(du, 'Ihre Fenster, Ihr <span class="ak">Angebot</span>.', 'Deine Fenster, dein <span class="ak">Angebot</span>.') + '</h1>' +
+        (I && I.ohneKopf ? '' : kopf({ name: name, p: p, unten: q.kunde ? 'für ' + q.kunde : '', instanz: I })) +
+        (web ? startBilder(I, name) : '') +
+        '<p class="eyebrow kicker">' + kicker + '</p>' +
+        '<h1>' + titel + '</h1>' +
         '<div class="ein-brief"><p class="ein-gruss">' + esc(g) + '</p>' + (p.ap ? '<div class="ein-sign">' + apBild(p) + '<span><b>' + esc(p.ap) + '</b><small>' + nm + '</small></span></div>' : '') + '</div>' +
         '<div class="ein-cta">' + cta + '</div>' +
-        '<p class="ein-zeit">' + ICO.uhr + '<span>Etwa ' + MINUTEN + ' Minuten je Fenster. ' + T(du, 'Sie müssen nicht alles auf einmal machen: Über diesen Link kommen Sie jederzeit zurück.', 'Du musst nicht alles auf einmal machen: Über diesen Link kommst du jederzeit zurück.') + '</span></p>' +
+        '<p class="ein-zeit">' + ICO.uhr + '<span>Etwa ' + MINUTEN + ' Minuten je Fenster. ' + zurueck + '</span></p>' +
       '</div></section>' +
       '<div class="ein-karten">' +
         '<section class="ein-karte ein-so" id="ein-so"><p class="eyebrow kicker">So geht’s</p><h2>In vier Schritten zum Angebot.</h2><ol class="ein-schritte">' +
           schritt(1, 'Fotos.', 'Ein Foto von innen, eins von außen. Empfohlen, aber kein Muss.') +
           schritt(2, 'Messen.', 'Mit Zollstock oder Maßband: erst vier Hauptmaße, dann die Ränder. Jeder Messpunkt wird gezeigt.') +
           schritt(3, 'Wünsche.', T(du, 'Material, Farbe, Glas, Sonnenschutz. Was Sie noch nicht wissen, lassen Sie offen.', 'Material, Farbe, Glas, Sonnenschutz. Was du noch nicht weißt, lässt du offen.')) +
-          schritt(4, 'Senden.', T(du, 'Kurz prüfen und an ' + nm + ' schicken. Erst dann hat ' + nm + ' Ihre Maße und Wünsche.', 'Kurz prüfen und an ' + nm + ' schicken. Erst dann hat ' + nm + ' deine Maße und Wünsche.')) +
+          schritt(4, 'Senden.', senden) +
           '</ol>' + (du ? '' : '<p class="ein-klein">In den Messschritten spricht die App Sie kurz mit „du“ an, damit jede Anleitung knapp bleibt.</p>') + '</section>' +
         '<section class="ein-karte ein-brauchen"><p class="eyebrow">' + T(du, 'Das brauchen Sie', 'Das brauchst du') + '</p><div class="chips"><span class="chip haken">Zollstock oder Maßband</span><span class="chip haken">' + T(du, 'Ihr Handy', 'Dein Handy') + '</span><span class="chip haken">Freien Zugang zum Fenster</span><span class="chip haken">Für große Türen eine zweite Person</span></div>' +
           '<p>' + T(du, 'Unsicher bei einer Frage? Tippen Sie „Weiß ich noch nicht“. ', 'Unsicher bei einer Frage? Tipp „Weiß ich noch nicht“. ') + nm + T(du, ' berät Sie dazu.', ' berät dich dazu.') + '</p></section>' +
@@ -229,13 +283,9 @@
           schritt(1, 'Angebot.', nm + T(du, ' meldet sich mit einem Angebot bei Ihnen.', ' meldet sich mit einem Angebot bei dir.')) +
           schritt(2, 'Feinaufmaß.', 'Vor der Fertigung misst ' + nm + ' einmal vor Ort nach, das ' + gloss('feinaufmass', 'Feinaufmaß') + '.') +
           schritt(3, 'Einbau.', 'Termin nach Absprache.') + '</ol></section>' +
-        '<section class="ein-karte ein-daten"><p class="eyebrow">' + T(du, 'Ihre Daten', 'Deine Daten') + '</p><ul class="ein-haken">' +
-          haken(T(du, 'Ihre Angaben und Fotos gehen nur an ', 'Deine Angaben und Fotos gehen nur an ') + nm + '.') +
-          haken(q.server ? T(du, 'Vorher sieht ' + nm + ' nur, dass Sie den Link geöffnet haben und wie weit Sie sind.', 'Vorher sieht ' + nm + ' nur, dass du den Link geöffnet hast und wie weit du bist.') : T(du, 'Bis Sie senden, bleibt alles in diesem Browser.', 'Bis du sendest, bleibt alles in diesem Browser.')) +
-          haken(T(du, 'Für Sie kostenlos, ohne Konto und ohne Werbung.', 'Für dich kostenlos, ohne Konto und ohne Werbung.')) +
-          haken('eeziframes übermittelt ' + T(du, 'Ihr', 'dein') + ' Aufmaß im Auftrag von ' + nm + '.') + '</ul></section>' +
-        kontakt({ name: name, p: p, du: du, bis: q.bis, vorschau: vor }) +
-      '</div>' + fuss({ name: name, du: du, vorschau: vor }) + '</div>';
+        '<section class="ein-karte ein-daten"><p class="eyebrow">' + T(du, 'Ihre Daten', 'Deine Daten') + '</p><ul class="ein-haken">' + daten + '</ul></section>' +
+        kontakt({ name: name, p: p, du: du, bis: q.bis, vorschau: vor, instanz: I }) +
+      '</div>' + fuss({ name: name, du: du, vorschau: vor, instanz: I }) + '</div>';
   }
 
   /* ---------- Nur im Browser: Bilder verkleinern, „So funktioniert es“ ---------- */
@@ -305,7 +355,7 @@
     ziel.scrollIntoView({ behavior: ruhig ? 'auto' : 'smooth', block: 'start' });
   });
 
-  const E = { MAX: MAX, FARBEN: FARBEN, TIEFEN: TIEFEN, planung: planung, MINUTEN: MINUTEN, VORLAGE: VORLAGE, bild: bild, einstellungen: einstellungen, auftritt: auftritt, profil: profil, linkTeil: linkTeil, linkLesen: linkLesen, gruss: gruss, initiale: initiale, zeichen: zeichen, kopf: kopf, kontakt: kontakt, fuss: fuss, html: html, verkleinern: verkleinern, T: T };
+  const E = { MAX: MAX, FARBEN: FARBEN, TIEFEN: TIEFEN, planung: planung, kennzeichnung: kennzeichnung, hexFarbe: hexFarbe, MINUTEN: MINUTEN, VORLAGE: VORLAGE, bild: bild, einstellungen: einstellungen, auftritt: auftritt, profil: profil, linkTeil: linkTeil, linkLesen: linkLesen, gruss: gruss, initiale: initiale, zeichen: zeichen, kopf: kopf, kontakt: kontakt, fuss: fuss, html: html, verkleinern: verkleinern, T: T };
   root.Einladung = E;
   if (typeof module === 'object' && module.exports) module.exports = E;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
