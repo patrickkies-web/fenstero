@@ -247,7 +247,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-stage.hero { height: 320px }
 .w3d-bg { position: absolute; inset: -28px; background-size: cover; background-position: center; filter: blur(20px) saturate(.5) brightness(.85); opacity: .3; pointer-events: none; animation: w3dbgin 1.2s ease-out both }
 @keyframes w3dbgin { from { opacity: 0; transform: scale(1.06) } to { opacity: .3; transform: none } }
-.w3d-cam { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translate(var(--panx, 0px), var(--pany, 0px)) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .9s cubic-bezier(.4, .1, .2, 1) }
+.w3d-cam { position: absolute; left: calc(50% + var(--dimx, 0px)); top: calc(50% + var(--dimy, 0px)); width: 0; height: 0; transform-style: preserve-3d; transform: translate(var(--panx, 0px), var(--pany, 0px)) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .9s cubic-bezier(.4, .1, .2, 1) }
 .w3d-stage.is-drag .w3d-cam { transition: none }
 .w3d-sway, .w3d-world { transform-style: preserve-3d }
 .w3d-stage.is-live:not(.is-drag) .w3d-sway { animation: w3dsway 9s ease-in-out infinite alternate }
@@ -360,7 +360,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-lupe { position: absolute; right: 12px; bottom: 12px; width: 108px; height: 108px; border-radius: 50%; background: var(--paper); box-shadow: 0 0 0 2px var(--line2); pointer-events: none; z-index: 3 }
 .w3d-lupe svg { display: block; width: 100%; height: 100% }
 @media (max-height: 700px) { .w3d-lupe { width: 88px; height: 88px; right: 8px; bottom: 8px } }
-.w3d-hint { position: absolute; left: 12px; bottom: 10px; padding: 6px 10px; border-radius: var(--r1); background: rgba(22, 22, 22, .82); color: var(--ink); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); font-size: 13px; font-weight: 700; pointer-events: none }
+.w3d-hint { position: absolute; left: 12px; bottom: 10px; max-width: calc(100% - 24px); padding: 6px 10px; border-radius: var(--r1); background: rgba(22, 22, 22, .82); color: var(--ink); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); font-size: 13px; font-weight: 700; pointer-events: none }
 /* Neben der Lupe bleibt der Hinweis links und bricht notfalls um */
 .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 148px); line-height: 1.3 }
 @media (max-height: 700px) { .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 120px) } }
@@ -394,9 +394,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .grip { width: 36px; height: 4px; border-radius: 2px; background: var(--line2); margin: 0 auto }
 .sheet-top { display: flex; justify-content: space-between; align-items: center; margin: 2px -8px 0; min-height: 44px }
 .xbtn { width: 44px; height: 44px; border: 0; border-radius: var(--r2); background: none; display: flex; align-items: center; justify-content: center; color: var(--ink) }
-.sheet h2 { margin: 0; font-size: 32px; line-height: 1.06; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; text-align: center }
+.sheet h2 { margin: 0; font-size: 32px; line-height: 1.06; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; text-align: left }
+.sheet h2:focus { outline: none }
 .sheet .ico.ico-l > svg { width: 150px; height: 150px; margin: 5px }
-.sheet .ico { width: 160px; height: 160px; margin: 20px auto; border-radius: var(--r4); background: var(--surface2); display: flex; align-items: center; justify-content: center; box-shadow: var(--ring) }
+.sheet .ico { width: 160px; height: 160px; margin: 20px 0; border-radius: var(--r4); background: var(--surface2); display: flex; align-items: center; justify-content: center; box-shadow: var(--ring) }
 .sheet p.x { margin: 0 0 14px; font-size: 17px; line-height: 1.6; text-wrap: pretty }
 .see { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; font-size: 15px; color: var(--muted) }
 .gindex { background: var(--surface2); border-radius: var(--r3); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--ring) }
@@ -758,7 +759,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .w3d-ctl { position: absolute; z-index: 4; display: flex; gap: 6px; pointer-events: none }
 .w3d-ctl > * { pointer-events: auto }
 .w3d-zoom { top: 10px; right: 10px }
-.w3d-sonne { right: 10px; bottom: 10px; flex-direction: column; align-items: flex-end }
+.w3d-sonne { right: 10px; bottom: 10px; align-items: center }
 .w3d-knopf { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(22, 22, 22, .82); color: var(--text); box-shadow: 0 0 0 2px var(--line2); font: inherit; font-size: 15px; font-weight: 700; line-height: 1; cursor: pointer; touch-action: manipulation; transition: transform var(--t1) var(--e-out), background var(--t2), box-shadow var(--t2) }
 .w3d-knopf.rund { width: 44px; padding: 0 }
 .w3d-knopf.eins { width: auto; padding: 0 14px; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums }
@@ -767,7 +768,18 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .w3d-knopf:active:not(:disabled) { transform: scale(.96) }
 .w3d-knopf[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--text) }
 .w3d-knopf:focus-visible { outline: 2px solid var(--text); outline-offset: 2px }
-.w3d-stage:has(.w3d-sonne) .w3d-hint { max-width: calc(100% - 200px); line-height: 1.3 }
+/* Mit Sonnenschutz-Knöpfen (unten rechts) steht die Beschriftung der Ansicht oben links, neben dem Zoom; die Bühne bleibt mindestens
+   220 px hoch. Niedrige Bühnen (is-niedrig, unter 200 px): nur Symbole, der Zoom rückt in dieselbe Reihe, die Beschriftung bekommt
+   die ganze Breite. In der Übersicht der Maße (dims-all) steht der Zoom oben links: oben in der Mitte steht das Schild der Breite,
+   unten das der unteren Breite und die Beschriftung, links in halber Höhe das Schild der Höhe */
+.w3d-stage.mit-sonne .w3d-hint { top: 10px; bottom: auto; max-width: calc(100% - 136px); line-height: 1.3 }
+.w3d-stage.mit-sonne.is-zoom .w3d-hint { max-width: calc(100% - 186px) }
+.scr.fit .w3d-stage.mit-sonne { min-height: 220px }
+.w3d-stage.is-niedrig .w3d-sonne .w3d-knopf { width: 44px; padding: 0 }
+.w3d-stage.is-niedrig .w3d-sonne .w3d-knopf span { display: none }
+.w3d-stage.is-niedrig.mit-sonne .w3d-zoom { top: auto; bottom: 10px; right: calc(16px + var(--sonne-n, 1) * 50px) }
+.w3d-stage.is-niedrig.mit-sonne .w3d-hint { max-width: calc(100% - 24px) }
+.w3d-stage.dims-all .w3d-zoom { right: auto; left: 10px }
 /* Scrollbare Seiten: senkrecht wischen scrollt (pan-y), auf festen Bildschirmen und gezoomt gehören alle Gesten dem Modell */
 .scr.fit .w3d-stage, .w3d-stage.is-zoom, .w3d-stage.is-pinch { touch-action: none }
 /* Gezoomt steht das Schwingen still; während der Geste ohne Übergang, per Knopf kurz und gleichmäßig */
@@ -781,6 +793,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 }
 /* Übersicht der Maße: doppelte Maße ausgeblendet, Schilder der Maueröffnung nach außen neben bzw. über die Linie */
 .w3d-dim.is-weg { display: none }
+.w3d-dim.ohne-schild .w3d-dim-lab { display: none }
 .w3d-dim.an-l .w3d-dim-lab { transform: translate(calc(-100% - 8px), -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
 .w3d-dim.an-r .w3d-dim-lab { transform: translate(8px, -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
 .w3d-dim.an-o .w3d-dim-lab { transform: translate(-50%, calc(-100% - 8px)) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
@@ -876,7 +889,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 @media (hover: hover) { .nz-knopf:hover, .hd-i:hover { color: var(--ink) } .nz-knopf:hover { box-shadow: inset 0 0 0 2px var(--ink) } }
 /* Notiz-Blatt */
 .nz-blatt h2 { font-size: 24px; margin: 8px 0 0 }
-.nz-sub { margin: 10px 0 14px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: center; text-wrap: pretty }
+.nz-sub { margin: 10px 0 14px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: left; text-wrap: pretty }
 .nz-blatt textarea { width: 100%; min-height: 132px; padding: 12px 14px; border: 0; border-radius: var(--r2); background: var(--surface2); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 17px; line-height: 1.45; resize: vertical }
 .nz-blatt textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink) }
 .nz-zahl { margin: 6px 2px 14px; font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums }
@@ -885,7 +898,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .nz-weg, .vl-weg { color: var(--bad) }
 /* Verlassen mit offenen Änderungen */
 .verlassen h2 { font-size: 24px; margin: 8px 0 0 }
-.vl-sub { margin: 10px 0 18px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: center; text-wrap: pretty }
+.vl-sub { margin: 10px 0 18px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: left; text-wrap: pretty }
 .vl-ab, .wo-web { align-self: center; min-height: 44px; font-size: 15px }
 /* Übersicht: Schritte, Abschnitte der Wünsche, alle Fenster */
 .wohin h2 { font-size: 24px; margin: 8px 0 4px }
@@ -968,6 +981,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .entwurf-karte .ek-weg { min-height: 44px; font-size: 15px; color: var(--ink2) }
 /* Gespeichert: kleines Symbol statt Modell, „Wie geht es weiter?“ statt aller Angaben */
 .fertig-kopf { padding-top: 18px }
+/* Gespeichert: linksbündig wie die Köpfe im Betriebsbereich (Symbol, grüner Kicker, Name, Stand) */
+.center.fertig-kopf.links { text-align: left; padding: 18px 6px 0 }
 .fertig-ic { display: inline-flex; width: 104px; height: 104px; margin-bottom: 14px; border-radius: var(--r4); background: var(--surface2); box-shadow: var(--ring); align-items: center; justify-content: center }
 .fertig-stand { color: var(--ink2) }
 .weiter-karte { gap: 8px } .weiter-karte p { margin: 0 } .weiter-karte p:not(.eyebrow):not(.sub) { font-size: 17px; line-height: 1.5 }

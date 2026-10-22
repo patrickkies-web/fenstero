@@ -32,6 +32,8 @@
 // Abschnitt 19 prüft die Fotos (functions/api/fotos.js): Ablage über den Kundenlink, beim Betrieb erst nach dem Senden und nicht
 // gesperrt, Löschfristen und Aufräumen, Fotos im Konto des Hauseigentümers; im Browser auf einem eigenen Testserver: Fotos überstehen
 // das Neuladen, Senden wartet auf sie, der Betriebsbereich zeigt sie (klein, groß, im PDF), ein zweites Gerät holt sie aus dem Konto.
+// Abschnitt 20 prüft den Konfigurator ohne Hürden: Der erste Tipp nach einem Textfeld zählt, Maßschilder bleiben in der Bühne,
+// Knöpfe am Sonnenschutz überdecken nichts, ein grünes Wort je Titel, Blätter linksbündig mit Fokus, Zurück nach „Wünsche ändern“.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -62,6 +64,8 @@ async function neueSeite(ctx, base) {
 }
 const sauber = (page, text) => { ok(page.probleme.length === 0, text + (page.probleme.length ? '\n      ' + page.probleme.join('\n      ') : '')); page.probleme.length = 0; };
 const foto = async (page, name) => { if (BILDER) await page.screenshot({ path: BILDER + '/' + name + '.png' }); };
+/* Aufmaß-Code im Kundenlink (Pilot): steht nicht mehr sichtbar auf der Seite, nur in der vorbereiteten Nachricht (WhatsApp, E-Mail) */
+const codeAusNachricht = async (page) => { const h = await page.getAttribute('a[href^="https://wa.me/"]', 'href'); const m = /(AM1\.[A-Za-z0-9_-]+)/.exec(decodeURIComponent(h || '')); return m ? m[1] : ''; };
 const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' };
 const b64u = (s) => Buffer.from(s, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 /* Betriebe für die Prüfung: die früheren Beispielkonten Fensterbau Brandt (c1) und Glaserei Vogt (c7). Die Website hat keine
@@ -375,8 +379,9 @@ if (teil(4)) {
   await page.waitForSelector('[data-screen="gesendet"]');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Jetzt abschicken.') && !text.includes('Gesendet.'), 'Pilot: „Jetzt abschicken“ statt „Gesendet“');
-  const code = await page.inputValue('#code-box');
+  const code = await codeAusNachricht(page);
   ok(code.startsWith('AM1.'), 'Aufmaß-Code beginnt mit AM1.');
+  ok(await page.locator('#code-box, .copybox').count() === 0 && !/AM1\./.test(text) && await page.locator('[data-act="nachricht-kopieren"]').count() === 1, 'Pilot im Kundenlink: kein Code zum Ansehen oder Abfotografieren, er steckt nur in der Nachricht (WhatsApp, E-Mail, Kopieren)');
   const wa = await page.getAttribute('a[href^="https://wa.me/"]', 'href');
   ok(decodeURIComponent(wa).includes(code) && decodeURIComponent(wa).includes('Code vom Kunden einfügen'), 'WhatsApp-Nachricht enthält Code und Anleitung');
   await foto(page, 'app-senden');
@@ -585,10 +590,10 @@ if (teil(6)) {
   await p2.evaluate(() => { S.windows.push(Object.assign({}, demoProject()[1], { name: 'Komplett' })); persist(); render(true); }); await p2.waitForTimeout(300);
   ok(await p2.locator('.bb .btn.primary[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
   await p2.click('.bb .btn.primary'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
-  const code1 = await p2.inputValue('#code-box');
+  const code1 = await codeAusNachricht(p2);
   ok(await p2.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="senden"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Abschicken: der Flieger fliegt (Lottie)');
   await p2.evaluate(() => { S.windows[0].name = 'Nachträglich geändert'; S.proj.notiz = 'anders'; render(true); }); await p2.waitForTimeout(200);
-  ok(await p2.inputValue('#code-box') === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
+  ok(!!code1 && await codeAusNachricht(p2) === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
   // Scroll-Reveal: Blöcke tragen .rev und sind sichtbar
   ok(await p2.evaluate(() => { const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv)');
   // Alle Maße da: die Maßlinien zeichnen sich nacheinander
@@ -997,7 +1002,7 @@ if (teil(7)) {
   await page.waitForTimeout(300);
   ok(/Erneut an Fensterbau Brandt senden/.test(await page.evaluate(() => document.querySelector('.bb .btn.primary').textContent)), 'Prüfen-Seite sagt „Erneut senden“');
   await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
-  const code2 = await page.inputValue('#code-box');
+  const code2 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => unpackProject(c).r === 2 && !S.nb && S.sent.runde === 2, code2), 'Erneuter Code trägt Runde 2, App ist wieder im Zustand „gesendet“');
   // Betrieb: Code übernehmen → ersetzt, nichts gebucht
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
@@ -1016,7 +1021,7 @@ if (teil(7)) {
   await page.goto(url3, { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   await page.evaluate(() => { const w = demoProject()[0]; S.windows = [Object.assign({}, w, { name: 'Garage', w: 2400, h: 2100, el: { w: 2400, h: 2100 }, mo: { hm: 2130, hl: 2130, hr: 2130, wm: 2430, wt: 2430, wb: 2430 } })]; persist(); S.screen = 'blatt'; render(true); });
   await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
-  const code3 = await page.inputValue('#code-box');
+  const code3 = await codeAusNachricht(page);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', code3); await tun('linkimport'); await page.waitForTimeout(500);
   l1 = await page.evaluate(() => ({ book: ledger(A()).filter((b) => b.kind === 'aufmass').length, extra: ledger(A()).some((b) => b.ref === 'l1#3'), toast: document.getElementById('toast').textContent, nb: nbMoeglich(A().links.find((x) => x.id === 'l1')) }));
@@ -1034,7 +1039,7 @@ if (teil(7)) {
   ok(st.nb && st.nb.teil && st.n === 0 && /nicht gespeichert/.test(st.txt), 'Ohne gespeicherte Angaben erklärt die App, nur das betroffene Fenster neu zu messen');
   await page.evaluate(() => { S.windows = [Object.assign({}, demoProject()[1], { name: 'Backstube' })]; persist(); S.screen = 'blatt'; render(true); });
   await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
-  const code4 = await page.inputValue('#code-box');
+  const code4 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => { const o = unpackProject(c); return o.r === 2 && o.m === 1; }, code4), 'Code meldet Teil-Nachbesserung');
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', code4); await tun('linkimport'); await page.waitForTimeout(500);
@@ -4058,6 +4063,97 @@ if (teil(19)) {
     ok(geraeumt, 'Abmelden nimmt die Fotos, die im Konto liegen, auch vom Gerät');
     sauber(s3b, 'Konto mit Fotos ohne Fehler'); await c3.close();
   } finally { aus19(); }
+}
+
+/* ---------- 20. Konfigurator ohne Hürden: erster Tipp zählt, Schilder in der Bühne, Knöpfe am Modell, ein grünes Wort, Zurück, Blätter ---------- */
+if (teil(20)) {
+  console.log('20. Konfigurator ohne Hürden (Nacharbeit App)');
+  const ctx = await browser.newContext(telefon), p = await neueSeite(ctx);
+  await p.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const frage20 = async (id, set) => { await p.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.editIdx = -1; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await p.waitForTimeout(450); };
+  // Erster Tipp zählt: Feld fokussieren, tippen, EIN tap() auf den Hauptknopf (vorher tauschte das Neuzeichnen beim Verlassen den Knopf aus)
+  await frage20('notiz', { name: 'Küche' });
+  await p.tap('#t-notiz'); await p.keyboard.type('Bitte vor dem Termin anrufen.'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
+  const t1 = await p.evaluate(() => ({ screen: S.screen, notiz: (S.windows[S.windows.length - 1] || {}).notiz }));
+  await frage20('fa', { name: 'Küche' });
+  await p.tap('#t-wunschA'); await p.keyboard.type('wie Garagentor'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
+  const t2 = await p.evaluate(() => ({ q: S.q, wunschA: S.win.wunschA }));
+  await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { neu: true, art: 'fest' }); S.win = w; S.editIdx = -1; go('planmasse'); }); await p.waitForTimeout(400);
+  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2000'); await p.tap('.bb .btn.primary'); await p.waitForTimeout(600);
+  const t3 = await p.evaluate(() => ({ screen: S.screen, wm: S.win.mo.wm }));
+  await p.evaluate(() => go('planmasse')); await p.waitForTimeout(300);
+  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2100'); await p.tap('#p-h'); await p.waitForTimeout(300);
+  const t3b = await p.evaluate(() => ({ fokus: document.activeElement && document.activeElement.id, wm: S.win.mo.wm }));
+  ok(t1.screen === 'fertig' && /Termin/.test(t1.notiz || '') && t2.q !== 'fa' && t2.wunschA === 'wie Garagentor' && t3.screen === 'ergebnis' && t3.wm === 2000 && t3b.fokus === 'p-h' && t3b.wm === 2100,
+    'Erster Tipp zählt nach einem Textfeld: Fenster speichern, Weiter (eigene Farbe), Weiter zum Ergebnis; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
+  // Maßschilder in der Bühne (mind. 8 px Rand), auch bei breiten Elementen; Zoom in der Übersicht unten rechts, nichts überdeckt sich
+  const buehne = () => p.evaluate(() => {
+    const st = document.getElementById('w3d'); if (!st) return { fehlt: 1 };
+    const b = st.getBoundingClientRect(), sicht = (e) => { if (!e || e.hidden || e.closest('[hidden]')) return false; const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden') return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    const t = [];
+    st.querySelectorAll('.w3d-knopf').forEach((e) => { if (sicht(e)) t.push(['knopf ' + e.getAttribute('data-w3d'), e.getBoundingClientRect()]); });
+    const h = st.querySelector('.w3d-hint'); if (sicht(h) && h.textContent.trim()) t.push(['hint', h.getBoundingClientRect()]);
+    st.querySelectorAll('.w3d-dim-lab').forEach((e) => { if (sicht(e) && getComputedStyle(e.closest('.w3d-dim')).display !== 'none') t.push(['schild ' + e.textContent, e.getBoundingClientRect()]); });
+    const fehler = [];
+    t.forEach(([n, a], i) => { if (a.left < b.left + (/^schild/.test(n) ? 8 : 4) || a.right > b.right - (/^schild/.test(n) ? 8 : 4) || a.top < b.top + 2 || a.bottom > b.bottom - 2) fehler.push(n + ' am Rand'); t.slice(i + 1).forEach(([m, c]) => { if (Math.min(a.right, c.right) - Math.max(a.left, c.left) > 1 && Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top) > 1) fehler.push(n + ' über ' + m); }); });
+    return { h: Math.round(b.height), fehler: fehler };
+  });
+  const schilder = [];
+  for (const [art, W, H, neu] of [['fenster', 1230, 1410, false], ['fest', 2400, 1400, false], ['hst', 3100, 2300, false], ['fsw', 4200, 2300, false], ['hst', 2600, 2200, true], ['fsw', 3600, 2200, true]]) for (const scr of neu ? ['planmasse', 'ergebnis'] : ['ergebnis']) {
+    await p.evaluate(([art, W, H, neu, scr]) => { const w = demoProject()[0]; Object.assign(w, { art: art, neu: neu }); planMasse(w, 'w', W); planMasse(w, 'h', H); S.win = w; S.editIdx = -1; go(scr); if (scr === 'planmasse') { planMasse(S.win, 'w', W); planMasse(S.win, 'h', H); render(); } }, [art, W, H, neu, scr]);
+    await p.waitForTimeout(1500); const m = await buehne(); if (m.fehler.length) schilder.push(art + ' ' + W + ' ' + scr + ': ' + m.fehler.join(', '));
+  }
+  for (const gleich of [false, true]) { // Übersicht nach den Rändern: gleiche Maße einmal, ungleiche an den äußeren Linien
+    await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; go('rest'); S.rest.i = 4; render(); }, gleich);
+    await p.waitForTimeout(1800); const m = await buehne(); if (m.fehler.length) schilder.push('Ränder ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
+  }
+  ok(!schilder.length, 'Maße am Modell: alle Schilder mit Abstand in der Bühne, auch bei 4,20 m breiten Elementen und nach den Rändern, nichts überdeckt sich' + (schilder.length ? ' (' + schilder.join(' | ') + ')' : ''));
+  // Sonnenschutz: Knöpfe unten rechts in einer Reihe, Beschriftung oben links, Bühne mindestens 220 px, keine Überdeckung (auch klein)
+  const sonne = [];
+  for (const vp of [[390, 844], [320, 640]]) {
+    await p.setViewportSize({ width: vp[0], height: vp[1] });
+    for (const [q, set] of [['sart', { sart: 'raffstore', roll: 'vorbau' }], ['sfarbe', { sart: 'raffstore', roll: 'vorbau' }], ['antrieb', { sart: 'raffstore', roll: 'aufsatz' }], ['ifarbe', { iart: 'plissee' }]]) {
+      await frage20(q, set); await p.waitForTimeout(500); const m = await buehne();
+      if (m.h < 219 || m.fehler.length) sonne.push(vp[0] + ' ' + q + ': ' + m.h + ' px ' + m.fehler.join(', '));
+    }
+    await p.tap('#w3d [data-w3d="fahren"]'); await p.tap('#w3d [data-w3d="plus"]'); await p.waitForTimeout(700);
+    const m = await buehne(); if (m.fehler.length) sonne.push(vp[0] + ' gefahren und gezoomt: ' + m.fehler.join(', '));
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
+  const wenden = await p.evaluate(() => { const b = document.querySelector('#w3d [data-w3d="wenden"]'); return b ? b.getAttribute('aria-label') : null; });
+  ok(!sonne.length, 'Sonnenschutz: Bühne mindestens 220 px, Knöpfe, Zoom und Beschriftung überdecken sich nicht (320 und 390 px breit)' + (sonne.length ? ' (' + sonne.join(' | ') + ')' : ''));
+  // Genau ein grünes Wort je Titel (Schritte und alle Fragen)
+  const titel = [];
+  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
+  for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
+  const ohneAk = titel.filter((x) => x[1] !== 1).map((x) => x[0]);
+  ok(titel.length > 30 && !ohneAk.length, 'Jeder Schritt- und Fragentitel hat genau ein grünes Wort (' + titel.length + ' Titel' + (ohneAk.length ? ', ohne: ' + ohneAk.join(', ') : '') + ')');
+  // Blätter: linksbündig, Kicker grün, ein grünes Wort; Fokus ins Blatt, Tab bleibt drin, zurück an den Auslöser; Textfeld der Notiz mit Namen
+  const blatt = () => p.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); if (!sh) return null; const h = sh.querySelector('h2'), e = sh.querySelector('.eyebrow'); return { links: getComputedStyle(h).textAlign === 'left', ak: h.querySelectorAll('.ak').length, kicker: e.classList.contains('kicker'), drin: sh.contains(document.activeElement) }; });
+  const fokusAct = () => p.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-act'));
+  const tabDrin = async (n) => { for (let i = 0; i < n; i++) { await p.keyboard.press(i % 5 === 2 ? 'Shift+Tab' : 'Tab'); if (!await p.evaluate(() => document.querySelector('.sheet[aria-modal="true"]').contains(document.activeElement))) return false; } return true; };
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Bad'; S.windows = [demoProject()[1]]; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); }); await p.waitForTimeout(300);
+  await p.focus('.hd [data-act="notiz-auf"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
+  const nz = await blatt(), nzName = await p.getAttribute('#nz-text', 'aria-label'); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const nzZu = await fokusAct();
+  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
+  const wo = await blatt(), woTab = await tabDrin(25); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const woZu = await fokusAct();
+  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300); await p.click('.sheet [data-act="wohin-liste"]'); await p.waitForTimeout(300);
+  const vl = await blatt(), vlTab = await tabDrin(20); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const vlZu = await fokusAct();
+  await p.click('.hdr-gl'); await p.waitForTimeout(300); const gi = await blatt(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+  ok([nz, wo, vl, gi].every((b) => b && b.links && b.ak === 1 && b.kicker && b.drin), 'Blätter (Notiz, Übersicht, Verlassen, Begriffe): linksbündig, Kicker grün, ein grünes Wort, Fokus im Blatt');
+  ok(/^Deine Notiz zu /.test(nzName || '') && nzZu === 'notiz-auf' && woTab && woZu === 'wohin' && vlTab && vlZu === 'wohin', 'Notiz-Textfeld hat einen Namen; Tab bleibt in Übersicht und Verlassen-Blatt; Esc gibt den Fokus an den Auslöser zurück (' + [nzZu, woZu, vlZu].join(', ') + ')');
+  // Zurück nach „Wünsche ändern“: über die Fragen zur Fensterseite, dann zur Liste (nicht durch alle Messschritte)
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Wohnzimmer links'; S.windows = [w]; S.win = JSON.parse(JSON.stringify(w)); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
+  await p.click('[data-act="wuensche"]'); await p.waitForTimeout(300);
+  for (let i = 0; i < 3; i++) { await p.click('.qnav .btn.primary'); await p.waitForTimeout(300); }
+  const spur = [];
+  for (let i = 0; i < 20; i++) { await p.evaluate(() => history.back()); await p.waitForTimeout(500); const st = await p.evaluate(() => S.screen); spur.push(st); if (st === 'home') break; }
+  await p.evaluate(() => { S.win = JSON.parse(JSON.stringify(S.windows[0])); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
+  await p.click('[data-act="wuensche"]'); await p.waitForTimeout(300); await p.evaluate(() => { S.win.name = 'Wohnzimmer rechts'; });
+  await p.evaluate(() => history.back()); await p.waitForTimeout(500); const geaendert = await p.evaluate(() => !!S.verlassen && S.screen === 'frage');
+  ok(spur.length <= 5 && spur[spur.length - 2] === 'fertig' && spur[spur.length - 1] === 'home' && geaendert, 'Zurück-Taste nach „Wünsche ändern“: in ' + spur.length + ' Schritten über die Fensterseite zur Liste; mit Änderung fragt erst das Blatt „Noch nicht gespeichert“');
+  sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
+  await ctx.close();
 }
 
 await browser.close();
