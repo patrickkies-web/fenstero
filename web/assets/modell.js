@@ -43,7 +43,7 @@
       sfarbe: { silber: 'silber', weiss: 'weiß', hellgrau: 'hellgrau', anthrazit: 'anthrazit', braun: 'braun', bronze: 'bronze', schwarz: 'schwarz' },
       iart: { keiner: 'keiner', rollo: 'Rollo', plissee: 'Plissee', jalousie: 'Jalousie' },
       ifarbe: { weiss: 'weiß', creme: 'creme', grau: 'grau', anthrazit: 'anthrazit', blau: 'blau', gruen: 'salbei', terra: 'terracotta' },
-      gf: { weiss: 'weiß', silber: 'silber', edelstahl: 'Edelstahl', titan: 'titan', schwarz: 'schwarz' },
+      gf: { weiss: 'weiß', silber: 'silber', edelstahl: 'Edelstahl', titan: 'titan', schwarz: 'schwarz', anthrazit: 'anthrazit', braun: 'braun', messing: 'Messing', bronze: 'bronze' },
       rc: { basis: 'Basisschutz', rc1: 'RC1 N', rc2: 'RC2' },
       roll: { keiner: 'keiner', behalten: 'bestehender bleibt', aufsatz: 'Aufsatzrollladen neu', vorbau: 'Vorbaurollladen neu' },
       antrieb: { gurt: 'Gurt', kurbel: 'Kurbel', motor: 'elektrisch', smart: 'Smart Home' },
@@ -61,7 +61,19 @@
     const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
     const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' ? w.bt : null) || {};
     const lab = (g, k) => (OPT[g] && OPT[g][k]) || '';
-    const col = (k) => COL[k] || COL['9016'];
+    /* Farben (S2): alle RAL-Classic-Töne, Holzdekore und Sonderfarben aus ral.js (im Browser globalThis.RAL, auf dem Server per require).
+       col(k) → [Name, Code, Hex] für den gespeicherten Schlüssel; Unbekanntes bleibt sichtbar statt still Verkehrsweiß zu werden. */
+    let ralCache, ralVersucht = false;
+    const ral = () => {
+      if (ralCache) return ralCache;
+      if (typeof globalThis !== 'undefined' && globalThis.RAL) return (ralCache = globalThis.RAL);
+      if (!ralVersucht) { ralVersucht = true; try { ralCache = require('./ral.js'); } catch (e) { ralCache = null; } }
+      return ralCache;
+    };
+    const ralEintrag = (k) => { const r = ral(); return k && r ? r.eintrag(k) : null; };
+    const col = (k) => { const e = ralEintrag(k); return e ? [e.name, e.code, e.hex] : COL[k] || (k ? [String(k), 'Farbe bitte prüfen', COL['9016'][2]] : COL['9016']); };
+    /* Name einer Auswahl (Griff, Sonnenschutz, Innenschutz): eigene Beschriftung, sonst der Farbeintrag mit Code */
+    const optName = (g, k, sonst) => lab(g, k) || (ralEintrag(k) || {}).label || sonst;
     const num = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
     const th = (v) => (!num(v) ? '–' : String(Math.round(num(v))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
     /* ---------- Offen statt Vorgabe ----------
@@ -85,24 +97,24 @@
     const istOffen = (w, k) => !!(w && w.offen && w.offen[k]) && offenGilt(w, k);
     const offenListe = (w) => OFFEN_REIHE.filter((k) => istOffen(w, k));
     const ov = (w, k, text) => (istOffen(w, k) ? OFFEN_TEXT : text);
-    /* Eigene Farben: im Browser erkennt Farbtext (gemeinsam.js) RAL, DB, Dekore und Farbwörter; auf dem Server bleibt der Text als Wunsch */
-    const leser = () => (typeof globalThis !== 'undefined' && globalThis.Farbtext) || null;
+    /* Eigene Farben: ral.js erkennt RAL, DB, Dekore, Strukturen und Farbwörter (im Browser und auf dem Server); ohne ral.js Farbtext (gemeinsam.js) */
+    const leser = () => ral() || (typeof globalThis !== 'undefined' && globalThis.Farbtext) || null;
     const erkannt = (t) => { const ft = leser(); return t && ft ? ft.lesen(t) : null; };
     const farbeOffen = (w, seite) => !!(w.offen && (seite === 'innen' ? (w.gleich ? w.offen.fa : w.offen.fi) : w.offen.fa));
     function farbe(w, seite) {
       if (farbeOffen(w, seite)) return ['Farbe offen', 'bitte beraten', '#f1f0ea'];
       const innen = seite === 'innen', t = innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA, k = innen ? (w.gleich ? w.fa : w.fi) : w.fa, f = erkannt(t);
       if (!f) return col(k);
-      return COL[f.key] || [f.name, f.code ? 'RAL ' + f.code : 'eigene Farbe', f.hex];
+      return f.eintrag ? [f.eintrag.name, f.eintrag.code, f.hex] : [f.name, f.code ? 'RAL ' + f.code : 'eigene Farbe', f.hex];
     }
     function farbZeile(w, seite) {
       if (farbeOffen(w, seite)) return OFFEN_TEXT;
       const innen = seite === 'innen', t = (innen ? (w.gleich ? w.wunschA : w.wunschI) : w.wunschA) || '', c = farbe(w, seite);
-      if (t && erkannt(t)) return c[0] + (c[1] && c[0].indexOf(c[1]) < 0 ? ' (' + c[1] + ')' : '') + ', eigene Angabe';
+      if (t && erkannt(t)) return c[0] + (c[1] && c[1] !== 'eigene Farbe' && c[0].indexOf(c[1]) < 0 ? ' (' + c[1] + ')' : '') + ', eigene Angabe';
       return c[0] + ' (' + c[1] + ')' + (t ? ', Wunsch: ' + t : '');
     }
     const nameMitWunsch = (t, basis) => { const f = erkannt(t); return f ? f.name : basis + (t ? ', Wunsch: ' + t : ''); };
-    const griffName = (w) => nameMitWunsch(w.wunschGf, lab('gf', w.gf) || 'weiß');
+    const griffName = (w) => nameMitWunsch(w.wunschGf, optName('gf', w.gf, 'weiß'));
     function sashesFor(k) {
       if (k === '1') return [{ t: 'DK', din: 'L' }];
       if (k === '2s') return [{ t: 'D', din: 'L' }, { t: 'DK', din: 'R' }];
@@ -138,9 +150,9 @@
       const a = w.sart && w.sart !== 'keiner' ? w.sart : (w.roll === 'aufsatz' || w.roll === 'vorbau' ? 'rollladen' : w.roll === 'behalten' ? 'behalten' : 'keiner');
       if (a === 'keiner') return 'keiner';
       if (a === 'behalten') return 'bestehender bleibt';
-      return lab('sart', a) + ', ' + (istOffen(w, 'einbau') ? 'Kasten nach Wahl des Fensterbauers' : lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz')) + ', ' + nameMitWunsch(w.wunschSf, lab('sfarbe', w.sfarbe) || 'silber') + ', ' + (istOffen(w, 'antrieb') ? 'Antrieb offen' : lab('antrieb', w.antrieb));
+      return lab('sart', a) + ', ' + (istOffen(w, 'einbau') ? 'Kasten nach Wahl des Fensterbauers' : lab('einbau', w.roll === 'vorbau' ? 'vorbau' : 'aufsatz')) + ', ' + nameMitWunsch(w.wunschSf, optName('sfarbe', w.sfarbe, 'silber')) + ', ' + (istOffen(w, 'antrieb') ? 'Antrieb offen' : lab('antrieb', w.antrieb));
     }
-    const innen = (w) => (istOffen(w, 'iart') ? OFFEN_TEXT : !w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + nameMitWunsch(w.wunschIf, lab('ifarbe', w.ifarbe) || 'weiß'));
+    const innen = (w) => (istOffen(w, 'iart') ? OFFEN_TEXT : !w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + nameMitWunsch(w.wunschIf, optName('ifarbe', w.ifarbe, 'weiß')));
     const griffText = (w) => (w.art === 'fest' ? 'ohne Griff' : istOffen(w, 'griff') ? OFFEN_TEXT : (w.art === 'hst' ? (lab('hstGriff', w.griff) || 'Hebegriff') : (lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + griffName(w)));
     const montageText = (w) => (istOffen(w, 'montage') ? 'nach Vorschlag des Fensterbauers' : [w.neu ? (w.durchbruch !== false ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung');
     const rcText = (w) => (istOffen(w, 'rc') ? OFFEN_TEXT : lab('rc', w.rc) || 'Basisschutz') + (w.erreichbar === 'ja' ? ' · leicht erreichbar' + (w.rc === 'rc2' ? '' : ', Polizei empfiehlt RC2') : w.erreichbar === 'nein' ? ' · nicht leicht erreichbar' : '');

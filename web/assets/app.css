@@ -721,3 +721,68 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .konto-zeile .wincard { flex: 1; min-width: 0 }
 .konto-weg { flex: 0 0 52px; min-height: 52px; border: 0; border-radius: var(--r3); background: var(--bad-soft); color: var(--bad); display: flex; align-items: center; justify-content: center; font: inherit; transition: transform var(--t1) }
 .konto-weg:active { transform: scale(.97) }
+
+/* ---------- S2 Farben: Farbwahl in den Fragen und Farbblatt „Alle Farben“ (app.js: qColor, qSwatch, qGriffFarbe, fbAuf; Farben aus ral.js) ----------
+   Oben die gewählte Farbe groß mit Name und Nummer, darunter ein Raster ohne Wischen (Rahmen 6 × 2 mit Nummer, Sonnenschutz und Griff 5 je Reihe
+   mit Namen), dann „Alle Farben“. Tupfen 44 px, im Blatt Farbfelder 52 px; auf dem dunklen Grund mit hellem Haarstrich, damit Schwarz sichtbar bleibt. */
+.fw-zeile { display: flex; align-items: center; gap: 12px; min-height: 44px }
+.fw-zeile .chip { flex: 0 0 auto }
+.fw-cur { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px }
+.fw-cur .tx, .fb-wahl-t .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.fw-cur b, .fb-wahl-t b { font-size: 17px; font-weight: 800; line-height: 1.2; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.fw-cur small, .fb-wahl-t small { font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--muted) }
+.fw-tupf { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16) }
+.fw-tupf.offen { background: transparent; box-shadow: none; border: 1.5px dashed var(--line2) }
+.fw-tupf.gross { width: 52px; height: 52px; border-radius: var(--r2) }
+.qswatches.fw-raster { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 4px; overflow: visible; margin: 0; padding: 4px 0; mask-image: none; -webkit-mask-image: none; scroll-snap-type: none }
+.qswatches.fw-raster.fw-5 { grid-template-columns: repeat(5, minmax(0, 1fr)) }
+.fw-raster .qsw { width: auto; min-width: 0; min-height: 44px; gap: 4px }
+.fw-raster .qsw .c { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16) }
+.fw-raster .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink) }
+.fw-raster .qsw .n { max-width: 100% }
+.fw-raster:not(.fw-5) .qsw .n { height: 16px; -webkit-line-clamp: 1; font-variant-numeric: tabular-nums }
+.fw-mehr { display: flex; gap: 8px }
+.fw-mehr .chip { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.fw-mehr .chip .ci svg { width: 18px; height: 18px; margin: 1px }
+.fw-mehr .chip.gesperrt { opacity: .55 }
+.fw-hinweis { margin: -4px 0 0; padding: 0 4px; font-size: 13px; line-height: 1.35; color: var(--muted) }
+/* Farbblatt: liegt neben #app in derselben Spalte (höchstens 640 px), deckt unten 62 % ab, oben bleibt das Modell sichtbar und ungetönt */
+.fb { position: fixed; inset: 0; z-index: 65; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; pointer-events: none }
+.fb-weg { flex: 1 1 auto; min-height: 96px; border: 0; padding: 0; background: transparent; pointer-events: auto; cursor: default }
+.fb-blatt { flex: 0 0 auto; height: 62vh; height: 62dvh; max-height: calc(100% - 96px); overflow-y: auto; overscroll-behavior: contain; pointer-events: auto; display: flex; flex-direction: column; gap: 12px; padding: 0 16px calc(28px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-radius: var(--r4) var(--r4) 0 0; box-shadow: var(--float); outline: none; animation: sheet-up var(--t3) var(--e-out) both }
+.fb-kopf { position: sticky; top: 0; z-index: 2; display: flex; flex-direction: column; gap: 10px; margin: 0 -16px; padding: 8px 16px 12px; background: var(--surface); border-bottom: 2px solid var(--line) }
+.fb-kopf .grip { margin-bottom: 2px }
+.fb-wahl { display: flex; align-items: center; gap: 12px }
+.fb-wahl-t { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px }
+.fb-such { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 2px 0 14px; border-radius: var(--r2); background: var(--surface2); box-shadow: var(--ring); color: var(--muted) }
+.fb-such:focus-within { box-shadow: inset 0 0 0 2px var(--ink) }
+.fb-such svg { flex: 0 0 auto }
+.fb-such input { flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0; border: 0; background: transparent; font: inherit; font-size: 17px; color: var(--ink); outline: none; -webkit-appearance: none; appearance: none }
+.fb-such input::-webkit-search-cancel-button { display: none }
+.fb-such input::placeholder { color: var(--muted); opacity: 1 }
+.fb-fam { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none; mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent) }
+.fb-fam::-webkit-scrollbar { display: none }
+.fb-fam .chip { flex: 0 0 auto }
+.fb-hilfe { border-radius: var(--r2); background: var(--surface2); box-shadow: var(--ring) }
+.fb-hilfe summary { min-height: 44px; display: flex; align-items: center; padding: 0 14px; font-size: 15px; font-weight: 700; cursor: pointer; list-style: none }
+.fb-hilfe summary::-webkit-details-marker { display: none }
+.fb-hilfe summary::after { content: ''; width: 8px; height: 8px; margin-left: auto; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg) translateY(-2px); transition: transform var(--t2) var(--e-out) }
+.fb-hilfe[open] summary::after { transform: rotate(225deg) translateY(-2px) }
+.fb-hilfe ul { margin: 0; padding: 0 14px 12px 32px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.45; color: var(--ink2) }
+.fb-liste { display: flex; flex-direction: column }
+.fb-gr { margin: 14px 0 0; font-size: 13px; font-weight: 800; line-height: 1.3; letter-spacing: .18em; text-transform: uppercase; color: var(--muted) }
+.fb-liste > .fb-gr:first-child { margin-top: 2px }
+.fb-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 14px 6px; margin-top: 10px }
+.fb-f { min-width: 0; min-height: 44px; border: 0; padding: 0; background: none; font: inherit; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; transition: transform var(--t1) }
+.fb-f:active { transform: scale(.98) }
+.fb-f .c { width: 52px; height: 52px; border-radius: var(--r2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); transition: box-shadow var(--t2) }
+.fb-f[aria-pressed="true"] .c { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink) }
+.fb-f .nr { font-size: 13px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis }
+.fb-f .nm { max-width: 100%; min-height: 31px; font-size: 13px; font-weight: 500; line-height: 1.2; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; hyphens: manual }
+.fb-f[aria-pressed="true"] .nm, .fb-f.ohne .nm { color: var(--ink) }
+@media (hover: hover) { .fb-f:not([aria-pressed="true"]):hover .c { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16), 0 0 0 2px var(--line2) } }
+.fb-leer { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 8px 0 }
+.fb-leer p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink2) }
+.fb-leer b { color: var(--ink) }
+.fb .qoffen { margin-top: 16px; flex: 0 0 auto }
+@media (prefers-reduced-motion: reduce) { .fb-blatt { animation: none } .fb-hilfe summary::after, .fb-f { transition: none } }
