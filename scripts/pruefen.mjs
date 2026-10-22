@@ -326,6 +326,10 @@ if (teil(3)) {
   await p2.waitForFunction(() => S.ai.in && S.ai.in.status === 'error', null, { timeout: 5000 });
   ok(posts2.length === 0, 'Ohne Einwilligung keine Übertragung');
   ok(/ohne KI/.test(await p2.evaluate(() => document.body.innerText)), 'Foto zeigt „ohne KI“');
+  // Zeichnet die App neu, während die Kamera offen ist, kommt das Foto am abgelösten Feld an: es darf nicht verloren gehen
+  const feld3 = await p2.$('input[data-in="photo"][data-f="out"]');
+  await p2.evaluate(() => render()); await feld3.setInputFiles({ name: 'aussen.jpg', mimeType: 'image/jpeg', buffer: jpeg }); await p2.waitForTimeout(800);
+  ok(await p2.evaluate(() => !!(S.win.bilder && S.win.bilder.out && S.photos.out)), 'Foto kommt auch an, wenn die App während der Aufnahme neu gezeichnet hat (abgelöstes Feld)');
   sauber(p2, 'Ablehnen ohne Fehler');
   await ctx2.close();
   await ctx.close();

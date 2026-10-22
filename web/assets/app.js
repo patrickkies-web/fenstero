@@ -1890,6 +1890,9 @@ function render(fresh) {
   if (S.toast) h += '<div class="toast" role="status">' + esc(S.toast) + '</div>';
   const reihenX = Array.from(root.querySelectorAll('.qswatches, .qcards.reihe')).map((r) => r.scrollLeft);
   root.innerHTML = h;
+  /* Foto-Felder: Zeichnet die App neu, während die Kamera offen ist (Auswertung des ersten Fotos), kommt das neue Foto an einem abgelösten
+     Feld an und erreicht den Zuhörer an #app nicht mehr. Darum hört jedes Feld auch selbst, aber nur, wenn es nicht mehr im Dokument steht */
+  root.querySelectorAll('input[data-in="photo"]').forEach((el) => el.addEventListener('change', (e) => { if (!root.contains(el)) onInput(el, e); }));
   /* Gleiche Modellstruktur wie zuvor: die alte Bühne bleibt, alles Weitere morpht mit Übergängen */
   const ph = root.querySelector('#w3d');
   if (ph && prevStage && prevSig && ph.getAttribute('data-sig') === prevSig && ph.getAttribute('data-keep') !== '0') { prevStage.className = ph.className; prevStage.style.height = ph.style.height; ph.replaceWith(prevStage); prevStage.setAttribute('data-reused', '1'); }
