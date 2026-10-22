@@ -428,7 +428,7 @@ const GLOSS = {
   echt: { s: 'Glasteilende Sprossen', t: 'Was ist eine glasteilende Sprosse?', x: ['Das klassische Original: Jedes Feld hat seine eigene Scheibe, die Sprosse trägt das Glas. Sehr authentisch und im Denkmalschutz oft gefordert.', 'Dafür teurer, mit mehr Rahmenanteil und etwas schlechterer Dämmung, weil jede kleine Scheibe einen eigenen Rand hat.'], tipp: 'Im Baudenkmal vorher bei der Denkmalbehörde fragen, welche Sprosse sie verlangt.', ico: () => ICO.spross('echt'), see: ['wiener', 'gebaeude'] },
   sprossenbreite: { s: 'Sprossenbreite', t: 'Wie breit sollen die Sprossen sein?', x: ['Die Breite bestimmt, wie stark die Sprossen auffallen. Schmale Sprossen um 18 mm wirken fein und modern, 26 mm ist der übliche Mittelweg, 45 mm wirkt kräftig und historisch.', 'Bei glasteilenden Sprossen gibt die Technik die Breite vor, sie fallen breiter aus.'], tipp: 'Orientier dich an der Fassade: Hat das Haus sonst schlanke Profile, wirken breite Sprossen schnell schwer.', ico: () => ICO.spross('wiener'), see: ['sprossen', 'wiener'] },
   /* Farbe */
-  ral: { s: 'RAL-Farben', t: 'Was bedeutet RAL?', x: ['RAL ist ein Farbsystem mit festen Nummern. So sieht Anthrazitgrau bei jedem Hersteller gleich aus: RAL 7016. Die erste Ziffer nennt die Farbfamilie, etwa 7 für Grau, 8 für Braun und 9 für Weiß und Schwarz.', 'Bei Fenstern am häufigsten sind Verkehrsweiß (RAL 9016), Cremeweiß (RAL 9001) und Anthrazitgrau (RAL 7016). Jede andere RAL-Nummer kannst du selbst eintippen.'], tipp: 'Farben am Bildschirm weichen ab. Lass dir vor dem Auftrag ein echtes Farbmuster zeigen, am besten bei Tageslicht an der Fassade.', ico: () => [P(C(20, 24, 11), '#383e42'), P(C(40, 24, 11), '#f1f0ea', INK, 0.8), P(C(30, 42, 11), '#b5732f')], see: ['holzdekor', 'db703'] },
+  ral: { s: 'RAL-Farben', t: 'Was bedeutet RAL?', x: ['RAL ist ein Farbsystem mit festen Nummern. So sieht Anthrazitgrau bei jedem Hersteller gleich aus: RAL 7016. Die erste Ziffer nennt die Farbfamilie, etwa 7 für Grau, 8 für Braun und 9 für Weiß und Schwarz.', 'Bei Fenstern am häufigsten sind Verkehrsweiß (RAL 9016), Cremeweiß (RAL 9001) und Anthrazitgrau (RAL 7016). Fast alle anderen RAL-Töne findest du über die Suche in der Farbauswahl, oder du tippst die Nummer einfach ein.'], tipp: 'Farben am Bildschirm weichen ab. Lass dir vor dem Auftrag ein echtes Farbmuster zeigen, am besten bei Tageslicht an der Fassade.', ico: () => [P(C(20, 24, 11), '#383e42'), P(C(40, 24, 11), '#f1f0ea', INK, 0.8), P(C(30, 42, 11), '#b5732f')], see: ['holzdekor', 'db703'] },
   holzdekor: { s: 'Holzdekor', t: 'Was ist ein Holzdekor?', x: ['Kunststofffenster bekommen Holzoptik über eine Folie mit Maserung, zum Beispiel Golden Oak, Nussbaum oder Eiche. Die Folie ist fest aufgebracht und fühlt sich leicht strukturiert an.', 'Das Dekor gibt es außen, innen oder auf beiden Seiten.'], tipp: 'Häufig ist Holzdekor außen und Weiß innen: Die Fassade wirkt warm, der Raum bleibt hell.', ico: () => [P(R(14, 8, 36, 48, 3), '#b5732f', INK, 1.3), P('M20 14c6 6 6 14 0 20M27 10c5 10 5 22 0 34M36 12c5 8 5 18 0 26', 'none', '#8a5522', 1.2)], see: ['ral', 'kunststoff'] },
   db703: { s: 'DB 703 und Eloxal', t: 'Was ist DB 703?', x: ['DB 703 ist ein Anthrazitgrau mit feinem Glimmer, ursprünglich aus der Farbreihe der Deutschen Bahn. Es schimmert leicht metallisch und ist bei Aluminium sehr beliebt.', 'Daneben gibt es Eloxal: Dabei wird die Oberfläche des Aluminiums selbst veredelt, etwa in Silber oder Bronze.'], tipp: 'DB 703 wirkt je nach Licht heller oder dunkler als RAL 7016. Vergleich beide als Muster nebeneinander.', ico: () => [P(C(32, 32, 20), '#4a4c4f', INK, 1), P(C(25, 26, 1.2) + C(36, 30, 1) + C(30, 39, 1.1) + C(40, 40, 0.9), '#b9bcc0')], see: ['ral', 'alu'] },
   /* Glas */
@@ -1616,7 +1616,7 @@ const ICON_I = '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="tru
 const CHEV = '<svg width="8" height="14" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5" fill="none" stroke="var(--line2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 const CHECK = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="var(--ok)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 /* Kopf eines Bildschirms; tools: Knöpfe rechts neben der Eyebrow (Erklärung und Notiz, schrittTools) */
-function hd(eyebrow, h1, sub, cls, eyeCls, tools) { const eb = '<p class="eyebrow' + (eyeCls ? ' ' + eyeCls : '') + '">' + esc(eyebrow) + '</p>'; return '<div class="hd' + (cls ? ' ' + cls : '') + '">' + (tools ? '<div class="hd-zeile">' + eb + '<span class="hd-tools">' + tools + '</span></div>' : eb) + '<h1>' + h1 + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>'; }
+function hd(eyebrow, h1, sub, cls, eyeCls, tools) { const eb = '<p class="eyebrow' + (eyeCls ? ' ' + eyeCls : '') + '">' + String(eyebrow).split(' · ').map((t, i, a) => '<span' + (t.length <= 22 ? ' class="nw"' : '') + '>' + esc(t) + (i < a.length - 1 ? ' ·' : '') + '</span>').join(' ') + '</p>'; /* umbrochen wird nur nach einem „·“ */ return '<div class="hd' + (cls ? ' ' + cls : '') + '">' + (tools ? '<div class="hd-zeile">' + eb + '<span class="hd-tools">' + tools + '</span></div>' : eb) + '<h1>' + h1 + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>'; }
 function secHead(title, g, sub) { return (title ? '<div class="sec-head"><h2 class="sec-title">' + esc(title) + '</h2>' + (g ? '<button type="button" class="link" data-act="gloss" data-k="' + g + '">' + ICON_I + 'Was heißt das?</button>' : '') + '</div>' : '') + (sub ? '<p class="sub" style="margin-top: -6px; padding: 0 6px">' + esc(sub) + '</p>' : ''); }
 function cards(group, cur, field, icoFn, cols, target) {
   return '<div class="' + (cols === 3 ? 'grid3' : 'grid2') + '">' + OPT[group].map((o) => '<div class="opt"><button type="button" data-act="' + (target || 'setw') + '" data-f="' + field + '" data-v="' + o.k + '" aria-pressed="' + (String(cur) === String(o.k)) + '">' + (icoFn ? svgIcon(icoFn(o.k), cols === 3 ? 46 : 56) : '') + '<span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + (o.price ? '<span class="pr">' + esc(o.price) + '</span>' : '') + '</button>' + (o.g ? '<button type="button" class="info" aria-label="Erklärung" data-act="gloss" data-k="' + o.g + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
@@ -1664,7 +1664,7 @@ SCREENS.home = () => {
     '<div class="step"><span class="n">2</span><div><b>Messen.</b><p>Vier Maße mit dem Zollstock, Schritt für Schritt erklärt. Mit jeder Zahl formt sich Öffnung und Fenster als Modell, dann ergänzt du die Ränder.</p></div></div>' +
     '<div class="step"><span class="n">3</span><div><b>Wünschen.</b><p>Flügel antippen, Sprossen ziehen, Farben innen und außen wählen. Jeder Fachbegriff mit Bild erklärt.</p></div></div></div>' +
     '<p class="nachsatz">Vor der Fertigung misst dein Fensterbauer einmal vor Ort nach, das <button type="button" class="ulink" data-act="gloss" data-k="feinaufmass">Feinaufmaß</button>.</p></section>' +
-    '<div class="foot-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a></div>' + rechtLinks();
+    '<div class="foot-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>' + rechtLinks();
   return { html: html, bar: S.windows.length ? { label: FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen', act: 'go', v: FREI() ? 'teilen' : 'anfrage' } : null };
 };
 const PLUS = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M2 9h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>';
@@ -1693,7 +1693,7 @@ function homeAufmass() {
     '<div class="step"><span class="n">2</span><div><b>Messen.</b><p>Vier Maße mit dem Zollstock, Schritt für Schritt erklärt, dann die Ränder.</p></div></div>' +
     '<div class="step"><span class="n">3</span><div><b>Wünschen.</b><p>Flügel, Sprossen, Farben innen und außen, jeder Fachbegriff mit Bild erklärt.</p></div></div></div>' +
     '<p class="nachsatz">Ein Fenster in zwei Minuten ausprobieren, ohne eigene Maße: <button type="button" class="ulink" data-act="tour-start">Führung starten</button></p></section>' +
-    '<div class="foot-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a></div>' + rechtLinks();
+    '<div class="foot-links"><a class="link" href="' + RATGEBER_URL + '">Anleitung: Fenster ausmessen ›</a><a class="link" href="' + FB_URL + '">Sie sind Fensterbauer? ›</a><a class="link" href="' + PORTAL_URL + '">Zur Startseite ›</a></div>' + rechtLinks();
   return { html: html, bar: S.windows.length ? { label: FREI() ? 'Zum Aufmaßblatt' : 'Aufmaßblatt fertigstellen', act: 'go', v: FREI() ? 'teilen' : 'anfrage' } : null };
 }
 /* Eigenes Aufmaß: wo es gespeichert ist. Gast: nur in diesem Browser, mit „Aufmaß sichern“; mit Konto: gesichert, „Dein Konto“ */
@@ -2126,26 +2126,6 @@ SCREENS.anfrage3 = () => {
   html += '<div class="sec">' + secHead('Am besten erreichbar') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div>';
   return { html: html, back: ['Zurück', 'anfrage2'], cls: 'tight', bar: { label: 'Zum Aufmaßblatt', act: 'go', v: 'teilen', zurueck: true } };
 };
-function blattHTML(windows, pr, opts) {
-  opts = opts || {};
-  let today = ''; try { today = new Date(opts.date || Date.now()).toLocaleDateString('de-DE'); } catch (e) { today = ''; }
-  const replaced = windows.reduce((a, x) => a + (num(x.anzahl) || 1), 0), fw = AW.foerdWeg(pr);
-  const proj = [['Gebäude', lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')], ['Zeitraum', lab('zeit', pr.zeit)], ['Budget', lab('budget', pr.budget)], ['Förderung', fw ? lab('foerdweg', fw) : 'keine Angabe'], ['Lüftung', !num(pr.total) ? replaced + ' Fenster, Zahl im Haus nicht angegeben' : replaced > num(pr.total) / 3 ? 'Lüftungskonzept erforderlich (' + replaced + ' von ' + pr.total + ' Fenstern)' : replaced + ' von ' + pr.total + ' Fenstern']];
-  const kl = klaerListe(windows, pr);
-  let h = '<div class="sheet-paper"><div class="paper-head"><div style="min-width: 0"><p class="eyebrow">Aufmaßblatt</p><p style="margin: 4px 0 0; font-size: 24px; font-weight: 900; letter-spacing: -.02em">' + esc(pr.name || 'Ohne Namen') + '</p>' + ([pr.ort, pr.tel].filter(Boolean).length ? '<p style="margin: 2px 0 0; font-size: 13px; color: var(--muted)">' + esc([pr.ort, pr.tel].filter(Boolean).join(' · ')) + '</p>' : '') + '</div><div style="text-align: right; flex: 0 0 auto"><p style="margin: 0; font-size: 13px; color: var(--muted)">' + (opts.betrieb ? 'An ' + esc(opts.betrieb) : 'Erfasst mit eeziframes') + '</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">' + esc(today) + '</p></div></div>';
-  h += '<div class="paper-grid">' + proj.map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + '</div>';
-  if (kl.length) h += '<div class="paper-klaer"><p class="eyebrow">Noch zu klären · ' + kl.length + '</p><div class="paper-grid">' + kl.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div></div>';
-  windows.forEach((x, i) => {
-    const d = derive(x), rows = specRows(x), ki = x.ki;
-    h += '<div class="paper-pos"><div class="ph">' + svgIcon(miniWin(x), 54) + '<div class="t"><p class="eyebrow">Pos. ' + (i + 1) + ' · ' + (num(x.anzahl) || 1) + ' Stk.</p><p style="margin: 2px 0 0; font-size: 17px; font-weight: 800">' + esc(x.name || 'Fenster ' + (i + 1)) + '</p><p style="margin: 2px 0 0; font-size: 15px; font-weight: 700">Öffnung ' + thousand(d.moW) + ' × ' + thousand(d.moH) + ' · Element ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm</p></div><span class="badge ' + (d.complete ? 'ok' : 'warn') + '" style="flex: 0 0 auto">' + (d.complete ? 'Handmaß, 8 Werte' : 'Maße offen') + '</span></div>';
-    h += '<div class="paper-grid">' + rows.map((r) => '<span>' + esc(r.k) + '</span><span>' + esc(r.v) + '</span>').join('') + '</div>';
-    const fz = AW.fachZeile(x), mz = AW.massZeile(x);
-    if (ki && ((ki.rows && ki.rows.length) || fz)) h += '<p class="eyebrow" style="margin-top: 4px">Einbausituation (KI, ' + (x.fotos || 0) + (x.fotos === 1 ? ' Foto' : ' Fotos') + ')</p><div class="paper-grid">' + (fz ? '<span>Auf einen Blick</span><span>' + esc(fz) + '</span>' : '') + (mz ? '<span>Maße und Foto</span><span>' + esc(mz) + '</span>' : '') + (ki.rows || []).map((r) => '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join('') + (ki.hints && ki.hints.length ? '<span>Hinweise</span><span>' + ki.hints.map(esc).join(' ') + '</span>' : '') + '</div>';
-    h += '</div>';
-  });
-  h += '<div style="display: flex; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 2px solid var(--fg); font-size: 13px"><span style="font-weight: 800">' + windows.length + ' Positionen · ' + replaced + ' Elemente</span><span style="color: var(--muted)">Vor Fertigung: Feinaufmaß</span></div></div>';
-  return h;
-}
 function blattMarkdown(windows, pr) {
   const fw = AW.foerdWeg(pr), kl = klaerListe(windows, pr);
   const lines = ['# Aufmaßblatt · ' + (pr.name || '[Name]'), (pr.ort || '') + (pr.tel ? ' · ' + pr.tel : '') + (pr.mail ? ' · ' + pr.mail : ''), '', 'Gebäude: ' + lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '') + ' · Zeitraum: ' + lab('zeit', pr.zeit) + ' · Budget: ' + lab('budget', pr.budget) + (fw ? ' · Förderung: ' + lab('foerdweg', fw) : ''), ''];
@@ -2249,7 +2229,7 @@ SCREENS.teilen = () => {
     '<div class="card share-way' + (t.betrieb ? ' done' : '') + '"><div class="way-head">' + tick(t.betrieb) + '<div><p class="eyebrow">' + (t.betrieb ? 'Erledigt' : 'Schritt 1') + '</p><h2>An deinen Fensterbauer</h2></div></div><p class="sub" style="color: var(--fg2)">Schick ihm das Aufmaßblatt als PDF: Zeichnungen, alle Maße, die Auswertung der Fotos, deine Wünsche. Dafür braucht er kein eeziframes; auf Seite 2 steht, wie er es trotzdem mit einem Klick übernimmt.</p><div class="pill-row"><button type="button" class="btn primary" style="flex: 0 0 auto; padding: 0 22px" data-act="teil-pdf">PDF schicken</button></div><p class="sub" style="color: var(--muted); margin-top: 8px">Oder nur den Code, falls er eeziframes schon nutzt:</p><div class="pill-row"><a class="pill" href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="teil-mark" data-v="betrieb">WhatsApp ›</a><a class="pill" href="mailto:?subject=' + encodeURIComponent('Mein Fenster-Aufmaß') + '&body=' + encodeURIComponent(msg) + '" data-act="teil-mark" data-v="betrieb">E-Mail</a><button type="button" class="pill" data-act="teil-copy" data-v="betrieb">Code kopieren</button></div></div>' +
     '<div class="card share-way"><p class="eyebrow">Für dich</p><h2>Als Datei behalten</h2><p class="sub" style="color: var(--fg2)">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen.' + (S.kauf && S.kauf.paid && S.kauf.mail ? ' Die Rechnung ist an ' + esc(S.kauf.mail) + ' unterwegs.' : '') + '</p><div class="pill-row"><button type="button" class="pill" data-act="k-dl">Herunterladen</button></div></div>' +
     '<div class="sec">' + secHead('Dein Aufmaß-Code', null, 'Steht auch auf Seite 2 der PDF. Falls Kopieren nicht klappt: Text markieren und kopieren.') + '<textarea class="copybox" id="code-box" readonly rows="3" aria-label="Aufmaß-Code">' + esc(code) + '</textarea></div>';
-  return { html: html, back: ['Zurück', 'anfrage3'], bar: { label: 'Zurück zum Projekt', act: 'go', v: 'home' } };
+  return { html: html, back: ['Zurück', 'anfrage3'], bar: { label: 'Zurück zum Projekt', act: 'go', v: 'home', ghost: true } }; // Cream nur für „PDF schicken“
 };
 SCREENS.datei = () => SCREENS.teilen();
 /* Kasse, Schritt 1: nur die E-Mail (Rechnung, Nachweis) und die Zustimmung */
@@ -2988,7 +2968,8 @@ const entwurfKey = () => (S.betrieb ? linkKey() + '.entwurf' : ENTWURF_EIGEN);
 const imAssistenten = () => stepsFor(S.win).indexOf(S.screen) >= 0;
 const STEP_TITEL = { start: 'Start', fotos: 'Fotos', zeichnen: 'Einzeichnen', planmasse: 'Wunschmaße', messen: 'Messen', rest: 'Ränder', ergebnis: 'Ergebnis', frage: 'Wünsche' };
 /* Vergleich mit dem gespeicherten Fenster: ohne die Auswertung der Fotos (kommt auch später an) und die Fotos selbst */
-function vergleichFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; delete o.bilder; delete o.ohneFoto; delete o.wid; delete o.t0; delete o.aend; delete o.ts; return fensterFp(o); }
+function vergleichFp(w) { const o = altAngleichen(Object.assign(baseWin(), w)); // fehlende Felder wie die Vorgabe (ältere Fenster)
+  delete o.ki; delete o.fotos; delete o.bilder; delete o.ohneFoto; delete o.wid; delete o.t0; delete o.aend; delete o.ts; return fensterFp(o); }
 const entwurfInhalt = (w) => !!(w && (nameDa(w) || bilderVon(w).length || w.ohneFoto || w.plan || MO_KEYS.some((k) => num(w.mo && w.mo[k])) || num(w.el && w.el.w) || num(w.el && w.el.h) || Object.keys(w.notizen || {}).length));
 function fensterOffen() {
   if (!imAssistenten() || S.tour) return false;
@@ -3029,7 +3010,7 @@ function entwurfKarte() {
   const o = entwurfLesen(); if (!o) return '';
   const name = o.w.name || (o.g && o.g.name) || (istTuer(o.w) ? 'Neue Tür' : o.w.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster');
   return '<section class="card entwurf-karte" aria-label="Angefangenes Fenster"><p class="eyebrow kicker">' + (o.g ? 'Änderungen nicht gespeichert' : 'Angefangen') + '</p><div class="ek-zeile"><span class="ic">' + svgIcon(miniWin(o.w), 44) + '</span><span class="tx"><b>' + esc(name) + '</b><small>Weiter bei: ' + esc(entwurfStelle(o)) + '. Liegt auf diesem Gerät.</small></span></div>' +
-    '<div class="pill-row"><button type="button" class="btn ghost" data-act="entwurf-weiter">Fortsetzen</button><button type="button" class="pill" data-act="entwurf-weg">Verwerfen</button></div></section>';
+    '<div class="ek-knoepfe"><button type="button" class="btn ghost" data-act="entwurf-weiter">Fortsetzen</button><button type="button" class="link ek-weg" data-act="entwurf-weg">Verwerfen</button></div></section>';
 }
 function entwurfFortsetzen() {
   const o = entwurfLesen(); if (!o) return render();
@@ -3101,13 +3082,14 @@ function wohinBlatt() {
 /* Status eines Fensters in Listen: nur vollständig oder offen, keine Angaben (die stehen im Aufmaßblatt) */
 function fensterStatus(x) {
   const d = derive(x), n = AW.offenListe(x).length;
-  return !d.complete ? 'Maße offen' : n ? 'Maße vollständig, ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : 'Vollständig';
+  return !d.complete || n ? (d.complete ? 'Maße vollständig' : 'Maße offen') + (n ? ', ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') : 'Vollständig';
 }
-/* Browser- und Telefon-Zurück: ein Eintrag im Verlauf fängt die Zurück-Taste ab; die Adresse (auch #k-…) bleibt gleich */
-let FALLE = false, FALLE_AUS = 0, VERLAUF = false;
+/* Browser- und Telefon-Zurück: ein Eintrag im Verlauf fängt die Zurück-Taste ab; die Adresse (auch #k-…) bleibt gleich. FALLE_URL ist
+   die Adresse, an der die Falle steht: Ein Sprung zu einer anderen Adresse (Link im selben Tab, Hash) ist kein Zurück der App */
+let FALLE_URL = '', FALLE_AUS = 0, VERLAUF = false;
 function falleStellen() {
-  if (!VERLAUF || FALLE || Date.now() < FALLE_AUS) return;
-  try { if (!(history.state && history.state.eezi === 1)) history.pushState({ eezi: 1 }, '', location.href); FALLE = true; } catch (e) { /* ohne Verlauf */ }
+  if (!VERLAUF || Date.now() < FALLE_AUS) return;
+  try { if (!(history.state && history.state.eezi === 1)) history.pushState({ eezi: 1 }, '', location.href); FALLE_URL = location.href; } catch (e) { /* ohne Verlauf */ }
 }
 function zurueckTaste() {
   if (S.fotoGross) { S.fotoGross = null; render(); return true; }
@@ -3122,9 +3104,9 @@ function zurueckTaste() {
 }
 function verlaufBinden() {
   VERLAUF = true;
-  try { if (history.state && history.state.eezi === 1) FALLE = true; } catch (e) { /* ok */ }
-  window.addEventListener('popstate', () => {
-    FALLE = false;
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.eezi === 1) { FALLE_URL = location.href; return; } // Vor auf die Falle: nichts zu tun
+    if (location.href !== FALLE_URL) { FALLE_URL = location.href; return; } // andere Adresse: das erledigt hashchange
     if (zurueckTaste()) return falleStellen();
     FALLE_AUS = Date.now() + 1500; // auf der Startseite: die App wirklich verlassen
     try { history.back(); } catch (e) { /* ok */ }

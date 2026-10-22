@@ -739,13 +739,13 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 
 /* ---------- Strang S1 · Konfigurator: Notiz an jeder Stelle, Übersicht, Entwurf, Zifferntasten mit Pfeil, Foto groß, Begriffe ---------- */
 /* Werkzeuge oben rechts in jedem Schritt: Erklärung (i) und Notiz; die Eyebrow darf zweizeilig werden */
-.hd-zeile { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px }
+.hd-zeile { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px }
 .hd-zeile .eyebrow { min-width: 0 }
-.hd-tools { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; margin: -4px -6px -4px 0 }
+.eyebrow .nw { white-space: nowrap }
+.hd-tools { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; margin: -6px -6px -6px 0 }
 .hd-i { width: 44px; height: 44px; border: 0; border-radius: var(--pill); background: none; padding: 0; color: var(--muted); display: inline-flex; align-items: center; justify-content: center }
 .hd-i:active { transform: scale(.94) }
-.nz-knopf { position: relative; min-height: 36px; padding: 0 12px 0 10px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
-.nz-knopf::before { content: ''; position: absolute; inset: -4px }
+.nz-knopf { position: relative; min-height: 44px; padding: 0 12px 0 10px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
 .nz-knopf.da { box-shadow: inset 0 0 0 2px var(--ink) }
 .nz-knopf:active { transform: scale(.97) }
 @media (hover: hover) { .nz-knopf:hover, .hd-i:hover { color: var(--ink) } .nz-knopf:hover { box-shadow: inset 0 0 0 2px var(--ink) } }
@@ -765,7 +765,8 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 /* Übersicht: Schritte, Abschnitte der Wünsche, alle Fenster */
 .wohin h2 { font-size: 24px; margin: 8px 0 4px }
 .wo-k { margin: 18px 0 8px }
-.wo-schritte { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+.wo-schritte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+@media (min-width: 480px) { .wo-schritte { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
 .wo-schritt { min-height: 52px; padding: 6px 8px; border: 0; border-radius: var(--r2); background: var(--surface2); color: var(--ink); font: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; text-align: left; min-width: 0 }
 .wo-schritt .wo-n { flex: 0 0 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line2); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--muted) }
 .wo-schritt.fertig .wo-n { box-shadow: none; background: var(--accent-soft) }
@@ -815,8 +816,7 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 /* Leiste der Abschnitte über der Frage: nur Namen und Haken */
 .qleiste { flex: 0 0 auto; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 6px -16px -4px; padding: 2px 16px }
 .qleiste::-webkit-scrollbar { display: none }
-.ql { position: relative; flex: 0 0 auto; min-height: 36px; padding: 0 12px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line); color: var(--ink2); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
-.ql::before { content: ''; position: absolute; inset: -4px 0 }
+.ql { position: relative; flex: 0 0 auto; min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line); color: var(--ink2); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
 .ql[aria-current="step"] { color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink) }
 .ql svg { width: 12px; height: 12px }
 @media (max-height: 700px) { .qleiste { display: none } }
@@ -829,6 +829,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .qci .chip[aria-pressed="true"] + .qci-i { color: var(--on-primary) }
 .qli { display: flex; align-items: stretch; gap: 4px }
 .qli > button[data-v] { flex: 1 1 auto; min-width: 0 }
+/* Erklärung an Karten: Ziel 44 px (mehr Optionen tragen jetzt ein i) */
+.qinfo { width: 44px; height: 44px }
 /* Angefangenes Fenster auf der Startseite */
 .entwurf-karte { gap: 12px }
 .entwurf-karte .ek-zeile { display: flex; align-items: center; gap: 12px }
@@ -836,7 +838,9 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .entwurf-karte .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
 .entwurf-karte b { font-size: 17px; font-weight: 800 }
 .entwurf-karte small { font-size: 13px; color: var(--muted) }
+.entwurf-karte .ek-knoepfe { display: flex; align-items: center; gap: 16px }
 .entwurf-karte .btn { flex: 0 0 auto; padding: 0 22px }
+.entwurf-karte .ek-weg { min-height: 44px; font-size: 15px; color: var(--ink2) }
 /* Gespeichert: kleines Symbol statt Modell, „Wie geht es weiter?“ statt aller Angaben */
 .fertig-kopf { padding-top: 18px }
 .fertig-ic { display: inline-flex; width: 104px; height: 104px; margin-bottom: 14px; border-radius: var(--r4); background: var(--surface2); box-shadow: var(--ring); align-items: center; justify-content: center }
