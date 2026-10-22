@@ -296,7 +296,6 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-pilz.is-on { display: block; animation: pilz-ein .32s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: calc(var(--i, 0) * 45ms) }
 @keyframes pilz-ein { from { opacity: 0; scale: .2 } to { opacity: 1; scale: 1 } }
 .no-anim .w3d-pilz { animation: none }
-.w3d-stage.mit-schloss .w3d-handle::after { content: ''; position: absolute; left: 50%; top: 0; width: 120%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #e9ecef 0 22%, #3a3e43 26%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) }
 .w3d-sym { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity .35s } .w3d-stage.show-sym .w3d-sym { opacity: 1 }
 /* Kein Griff: Festfeld, Faltflügel (außer dem Bediengriff am freien Ende), Standflügel am Stulp, „Ohne Griff“ und Hebe-Schiebe elektrisch */
 .w3d-sash.is-fixed:not(.mit-griff) .w3d-handle, .w3d-sash.is-steh .w3d-handle, .w3d-stage.ohne-griff .w3d-handle { opacity: 0; transform: scale(.5) !important }
@@ -357,7 +356,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Eine Bewegung zur Zeit: solange vorgeführt oder verwandelt wird, steht das sanfte Schwingen still */
 .w3d-stage.is-busy .w3d-sway, .w3d-stage.is-vorf .w3d-sway, .w3d-stage.is-demo .w3d-sway { animation-play-state: paused }
 .w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
-.w3d-band { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-leiste { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) } .w3d-schiene { border-radius: 1px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) }
+.w3d-band { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-leiste { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) }
 .w3d-solar, .w3d-klappladen { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3) } .w3d-sicht-u { opacity: .9 }
 .w3d-mesh { background: repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1.5px #55585c }
 .w3d-dim { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s; pointer-events: none }
@@ -572,8 +571,6 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qoffen:active { background: var(--surface2) }
 /* Detailtiefe: oben die Tiefe als kleiner Knopf (Ziel 44 px, sichtbar eine Pille in der Zeile der Frage), die Wahl als drei Zeilen,
    am Ende eines Kapitels „Mehr zu …“ für das, was bei dieser Tiefe nicht gefragt wird */
-.qkopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0 }
-.qkopf .eyebrow { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .qtiefe { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 44px; margin: -14px -6px -14px 0; padding: 0 6px; border: 0; background: none; font: inherit; color: var(--ink2) }
 .qtiefe span { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 10px; border-radius: 12px; background: var(--seg); font-size: 13px; font-weight: 700; line-height: 1 }
 .qtiefe:active span { background: var(--surface2) }
@@ -844,26 +841,24 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .konto-weg:active { transform: scale(.97) }
 
 /* ---------- S3 modell3d: Griffe, Sonnenschutz, Knöpfe und Zoom am 3-D-Modell ---------- */
-/* Griff: Rosette fest auf dem Profil, darüber der Hebel; Druckknopf an der Hebelwurzel, Schließzylinder in der Nabe (mit-schloss) */
+/* Griff: Rosette fest auf dem Profil, darüber der Hebel; Druckknopf an der Hebelwurzel, Schließzylinder in der Nabe. Knopf und
+   Zylinder sind eigene Flächen (Lage und Farbe aus app.js, Deckkraft inline), damit die WebGL-Bühne dieselben zeichnet */
 .w3d-ros { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(0, 0, 0, .3) }
-.w3d-stage.mit-knopf .w3d-handle::before { content: ''; position: absolute; left: 50%; top: calc(var(--hw, 6px) * 1.15); width: 56%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #ffffff, #c9ced3 60%, #8a9096); box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) }
-.w3d-stage.mit-knopf .w3d-sash[data-t="K"] .w3d-handle::before { left: calc(var(--hw, 6px) * 1.15); top: 50%; width: auto; height: 56%; translate: 0 -50% }
-.w3d-stage.mit-schloss .w3d-sash[data-t="S"] .w3d-handle::after { top: auto; bottom: 0 }
-.w3d-stage.mit-schloss .w3d-sash[data-t="K"] .w3d-handle::after { left: 0; top: 50%; width: auto; height: 120%; translate: 0 -50% }
+.w3d-hknopf, .w3d-hschloss { border-radius: 50%; box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) }
 .w3d-griffa.is-schloss { border-radius: 999px }
-.w3d-griffa.is-schloss::after { content: ''; position: absolute; left: 50%; top: 14%; width: 64%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #e9ecef 0 22%, #3a3e43 26%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) }
+.w3d-griffa.is-muschel { border-radius: 10px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .25) }
 /* Sonnenschutz: Führungsschienen, Lamellen mit C-Profil (Farbe je Stellung aus w3dSonne), Aufzugbänder, Endleiste mit Tiefe */
 .w3d-fs { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-fs-s { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3) }
 .w3d-lam { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 0 rgba(0, 0, 0, .35) }
-/* Aufzugbänder des Raffstores (nicht die Bänder des Flügels, .w3d-band); die Farbe steht auch inline für die WebGL-Bühne */
-.w3d-aufzug { background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 5px), #d9d7d0; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .25) }
+/* Aufzugbänder des Raffstores (nicht die Bänder des Flügels, .w3d-band); Farbe inline aus w3dSonne */
+.w3d-aufzug { box-shadow: 0 0 0 .5px rgba(0, 0, 0, .25) }
 .w3d-behang-ub { box-shadow: none }
-.w3d-behang-u.mit-stopfen::before, .w3d-behang-u.mit-stopfen::after { content: ''; position: absolute; top: -60%; width: 3%; min-width: 3px; height: 60%; border-radius: 2px 2px 0 0; background: #2a2b2d }
-.w3d-behang-u.mit-stopfen::before { left: 14% } .w3d-behang-u.mit-stopfen::after { right: 14% }
+/* Anschlagstopfen auf der Endleiste des Rollladens (eigene Flächen, Farbe inline) */
+.w3d-stopfen { border-radius: 2px 2px 0 0; box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .3) }
 .w3d-screen { box-shadow: inset 2px 0 0 rgba(0, 0, 0, .28), inset -2px 0 0 rgba(0, 0, 0, .28) }
 .w3d-roll-sl { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2) }
 /* Fahren: 1,8 s, die Lamellen folgen kurz nacheinander; Wenden 0,6 s. Bei weniger Bewegung ohne Übergang (siehe unten) */
-.w3d-stage.is-fahrt .w3d-lam, .w3d-stage.is-fahrt .w3d-aufzug, .w3d-stage.is-fahrt .w3d-behang, .w3d-stage.is-fahrt .w3d-behang-u, .w3d-stage.is-fahrt .w3d-innen, .w3d-stage.is-fahrt .w3d-innen-u { transition-duration: 1.8s; transition-timing-function: var(--e-io) }
+.w3d-stage.is-fahrt .w3d-lam, .w3d-stage.is-fahrt .w3d-aufzug, .w3d-stage.is-fahrt .w3d-behang, .w3d-stage.is-fahrt .w3d-behang-u, .w3d-stage.is-fahrt .w3d-stopfen, .w3d-stage.is-fahrt .w3d-innen, .w3d-stage.is-fahrt .w3d-innen-u { transition-duration: 1.8s; transition-timing-function: var(--e-io) }
 .w3d-stage.is-fahrt .w3d-lam { transition-delay: calc(var(--k, 0) * 12ms) }
 .w3d-stage.is-wende .w3d-lam, .w3d-stage.is-wende .w3d-aufzug { transition-duration: .6s; transition-timing-function: var(--e-io) }
 /* Knöpfe am Modell: dunkle Pillen wie der Hinweis, 2-px-Ring, kein Cream; Zoom oben rechts, Sonnenschutz unten rechts */
@@ -899,7 +894,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .w3d-stage.is-zoomanim .w3d-f, .w3d-stage.is-zoomanim .w3d-sash, .w3d-stage.is-zoomanim .w3d-dim, .w3d-stage.is-zoomanim .w3d-handle, .w3d-stage.is-zoomanim .w3d-bar, .w3d-stage.is-zoomanim .w3d-griffa { transition-duration: .38s !important; transition-timing-function: cubic-bezier(.3, .7, .2, 1) !important; transition-delay: 0s !important }
 .w3d-stage.is-zoomanim .w3d-cam { transition: transform .38s cubic-bezier(.3, .7, .2, 1) }
 @media (prefers-reduced-motion: reduce) {
-  .w3d-stage .w3d-lam, .w3d-stage .w3d-aufzug, .w3d-stage .w3d-ros, .w3d-griffa, .w3d-knopf { transition: none !important }
+  .w3d-stage .w3d-lam, .w3d-stage .w3d-aufzug, .w3d-stage .w3d-stopfen, .w3d-stage .w3d-ros, .w3d-griffa, .w3d-knopf { transition: none !important }
   .w3d-stage.is-zoomanim .w3d-f, .w3d-stage.is-zoomanim .w3d-sash, .w3d-stage.is-zoomanim .w3d-cam { transition: none !important }
 }
 /* Übersicht der Maße: doppelte Maße ausgeblendet, Schilder der Maueröffnung nach außen neben bzw. über die Linie */
@@ -909,17 +904,18 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .w3d-dim.an-r .w3d-dim-lab { transform: translate(8px, -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
 .w3d-dim.an-o .w3d-dim-lab { transform: translate(-50%, calc(-100% - 8px)) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
 .w3d-dim.an-u .w3d-dim-lab { transform: translate(-50%, 8px) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
-/* Oberlichtöffner (kippbares Oberlicht) und Bedienung des Sonnenschutzes innen neben der Öffnung */
-.w3d-olr { background: linear-gradient(90deg, #e6e8ea, #a8adb3); border-radius: 2px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .3) }
-.w3d-olh { background: linear-gradient(90deg, #f1f2f3, #b9bec3); border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .3) }
-.w3d-an-wickler { background: linear-gradient(180deg, #f6f5f1, #dcd9d2); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22), 0 1px 2px rgba(0, 0, 0, .2) }
-.w3d-an-wickler::after { content: ''; position: absolute; left: 30%; right: 30%; top: 8%; height: 10%; border-radius: 2px; background: #3a3b3d }
-.w3d-an-gurt { background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px), #bdb8ad; box-shadow: inset 1px 0 0 rgba(0, 0, 0, .15), inset -1px 0 0 rgba(0, 0, 0, .15) }
-.w3d-an-stange { background: linear-gradient(90deg, #c9ccd0, #6d7379); border-radius: 2px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35) }
-.w3d-an-kurbel { background: linear-gradient(180deg, #e8eaec, #8d939a); border-radius: 999px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35) }
-.w3d-an-taster { background: #f6f5f1; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25), 0 1px 2px rgba(0, 0, 0, .2) }
-.w3d-an-taster::after { content: ''; position: absolute; inset: 22%; border-radius: 2px; background: linear-gradient(180deg, #ffffff 0 48%, rgba(0, 0, 0, .25) 48% 52%, #eceae4 52%); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18) }
-.w3d-an-taster.is-funk::before { content: ''; position: absolute; right: 8%; top: 8%; width: 14%; aspect-ratio: 1; border-radius: 50%; background: #3a3b3d; box-shadow: 0 0 0 1px #ffffff; z-index: 1 }
+/* Oberlichtöffner (kippbares Oberlicht) und Bedienung des Sonnenschutzes innen neben der Öffnung; Farben inline (app.js TEIL_BG),
+   Schlitz des Gurtwicklers, Wippe und Funk-Punkt des Tasters sind eigene Flächen */
+.w3d-olr { border-radius: 2px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .3) }
+.w3d-olh { border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .3) }
+.w3d-an-wickler { border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22), 0 1px 2px rgba(0, 0, 0, .2) }
+.w3d-an-schlitz { border-radius: 2px }
+.w3d-an-gurt { box-shadow: inset 1px 0 0 rgba(0, 0, 0, .15), inset -1px 0 0 rgba(0, 0, 0, .15) }
+.w3d-an-stange { border-radius: 2px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35) }
+.w3d-an-kurbel { border-radius: 999px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35) }
+.w3d-an-taster { border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25), 0 1px 2px rgba(0, 0, 0, .2) }
+.w3d-an-wippe { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18) }
+.w3d-an-funk { border-radius: 50%; box-shadow: 0 0 0 1px #ffffff }
 
 /* ---------- S2 Farben: Farbwahl in den Fragen und Farbblatt „Alle Farben“ (app.js: qColor, qSwatch, qGriffFarbe, fbAuf; Farben aus ral.js) ----------
    Oben die gewählte Farbe groß mit Name und Nummer, darunter ein Raster ohne Wischen (Rahmen 6 × 2 mit Nummer, Sonnenschutz und Griff 5 je Reihe
