@@ -10,6 +10,7 @@
    Attrappe (ZAHLUNG_ATTRAPPE=1): Rückkehr-Adressen mit test_-Kennungen, ohne Stripe. */
 import { ApiFehler, hmac, hex, zufall } from './umgebung.js';
 import { AGB_STAND, ZUSTIMMUNG, standText } from './recht.js';
+import '../../web/assets/pakete.js'; // Konfigurator-Pakete: Namen und Monatspreise (globalThis.Pakete)
 
 const VERSION = '2024-06-20';
 export const KLEINUNTERNEHMER = 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.';
@@ -17,10 +18,13 @@ export const KLEINUNTERNEHMER = 'Gemäß § 19 UStG wird keine Umsatzsteuer bere
    der Haken an der Kasse im Wortlaut und die AGB-Fassung */
 export const rechnungsText = (z, origin) => 'Ihre Zustimmung beim Kauf: „' + ((z && z.text) || ZUSTIMMUNG) + '“ Es gelten unsere AGB, Stand ' + standText((z && z.agb) || AGB_STAND) + ': ' + origin + '/agb/';
 
+/* LEER: ein Feld ausdrücklich leeren (Stripe nimmt „feld=“ als Löschen, z. B. pause_collection beim Fortsetzen eines Abos) */
+export const LEER = Symbol('leer');
 function flach(obj, prefix, out) {
   out = out || [];
   Object.keys(obj).forEach((k) => {
     const v = obj[k], key = prefix ? prefix + '[' + k + ']' : k;
+    if (v === LEER) { out.push([key, '']); return; }
     if (v === undefined || v === null || v === '') return;
     if (Array.isArray(v)) v.forEach((x, i) => { if (typeof x === 'object') flach(x, key + '[' + i + ']', out); else out.push([key + '[' + i + ']', x]); });
     else if (typeof v === 'object') flach(v, key, out);
@@ -111,7 +115,7 @@ export function zahlungsdienst(k) {
       return neu.id;
     });
   }
-  return {
+  return Object.assign({
     art: s ? 'stripe' : 'attrappe',
     /* Aufmaßblatt kaufen: Rückkehr nach /app/?bezahlt=<session>. Nur Zahlungsarten, die sofort bestätigen (ZAHLARTEN, umgebung.js):
        Das Blatt wird sofort geliefert. Der Zahlknopf heißt „Bezahlen“ (submit_type pay). Die Zustimmung an der Kasse (o.zustimmung:
@@ -243,7 +247,7 @@ export function zahlungsdienst(k) {
     },
     /* Objekt zu einem Thin-Ereignis holen: related_object.url aus dem unterschriebenen Ereignis, nur die Arten, die der Webhook braucht */
     async objekt(url) {
-      if (!s || !/^\/v1\/(checkout\/sessions|invoices|subscriptions)\/[A-Za-z0-9_]+$/.test(String(url || ''))) return null;
+      if (!s || !/^\/v1\/(checkout\/sessions|invoices|subscriptions|disputes)\/[A-Za-z0-9_]+$/.test(String(url || ''))) return null;
       return s.get(String(url).slice(3));
     },
     /* Sammelrechnung für offene Projektbuchungen eines Betriebs (o.posten: { buchung, betrag, text }).
@@ -318,6 +322,188 @@ export function zahlungsdienst(k) {
         } catch (e2) { console.log('Entwurf bleibt liegen', inv.id); }
         throw e;
       }
+    }
+  }, paketDienst(k, s, steuersatz, einmal, konto));
+}
+
+/* ===================== Konfigurator-Pakete (Strang D: functions/api/bestellung.js, functions/api/partner.js) =====================
+   Kunde je Fensteranbieter (partner.stripe_customer), Einrichtungsgebühr vorab per Checkout (mode=payment, Karte oder SEPA-Lastschrift,
+   Zahlungsmittel für das Abo gespeichert: setup_future_usage=off_session), Monatsabo erst beim Live-Schalten (POST /subscriptions,
+   off_session), Rechnungen und Zahlungsmittel über das Kundenportal von Stripe.
+   Jedes Stripe-Objekt der Pakete trägt metadata.art (einrichtung, paket) und nie metadata.betrieb: stripeEreignis (konten.js) und die
+   Sammelrechnung (rechnung oben) sehen sie so nie; den Webhook leitet zahlung.js über paketObjekt (bestellung.js) hierher.
+   Preise kommen nur aus web/assets/pakete.js (Monatspreis über lookup_key mit Betrag, Einrichtung als Betrag je Kasse).
+   Attrappe (ZAHLUNG_ATTRAPPE=1, ohne Stripe): Kassen mit test_-Kennungen gelten als bezahlt; was zu einer Kasse gehört (Bestellung,
+   Partner, Kunde, Betrag), merkt sich der Server im Speicher, damit die Bindung an die Bestellung auch hier geprüft wird. */
+const paketAttrappe = { kassen: new Map(), abos: new Map(), rechnungen: new Map() };
+const TAG_S = 86400;
+const kurzHash = (s) => String(s).split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7).toString(36);
+/* Betrag der Einrichtung in Cent wie Stripe ihn rechnet: netto, exklusive Steuer je Posten gerundet */
+export const einrichtungBrutto = (preise) => { const cent = Math.round(Number((preise || {}).einrichtung || 0) * 100), m = Number((preise || {}).mwst || 0); return cent + (m ? Math.round(cent * m / 100) : 0); };
+const rechnungKurz = (inv) => ({ id: inv.id, nr: inv.number || inv.id, datum: inv.created ? new Date(inv.created * 1000).toISOString() : '', betrag: (inv.total != null ? inv.total : inv.amount_due || 0) / 100, status: inv.status === 'paid' ? 'bezahlt' : inv.status === 'open' ? 'offen' : inv.status === 'void' ? 'storniert' : inv.status === 'uncollectible' ? 'uneinbringlich' : 'entwurf', url: inv.hosted_invoice_url || '', pdf: inv.invoice_pdf || '' });
+const rechnungMerk = new Map();
+
+function paketDienst(k, s, steuersatz, einmalFn, konto) {
+  const P = () => globalThis.Pakete;
+  const testId = (prefix) => prefix + '_' + zufall(9);
+  /* Monatspreis eines Pakets; der lookup_key enthält den Betrag, eine Preisänderung in pakete.js legt also einen neuen Preis an */
+  function paketPreis(paket) {
+    const p = P().preis(paket); if (!p) throw new ApiFehler('Unbekanntes Paket.', 400);
+    const cent = Math.round(p.monat * 100), lookup = 'eeziframes_paket_' + paket + '_' + cent + '_eur_monat';
+    return einmalFn(konto + ':' + lookup, async () => {
+      const liste = await s.get('/prices', { lookup_keys: [lookup], active: true, limit: 1 });
+      if (liste.data && liste.data[0]) return liste.data[0].id;
+      const name = P().PAKETE[paket].name;
+      const neu = await s.post('/prices', { currency: 'eur', unit_amount: cent, recurring: { interval: 'month' }, lookup_key: lookup, tax_behavior: 'exclusive', nickname: name + ', monatlich', product_data: { name: name, metadata: { eeziframes: 'paket_' + paket } }, metadata: { eeziframes: 'paket_' + paket } }, { idem: 'eeziframes-' + lookup });
+      return neu.id;
+    });
+  }
+  /* Ende des laufenden Abrechnungsmonats (bis API-Version 2025-02 am Abo, seither am Posten) */
+  const bisVon = (sub) => { const d = periodenEnde(sub); return d ? d.toISOString() : null; };
+  const aboKurz = (sub) => sub ? { id: sub.id, status: sub.status, kuendigt: !!sub.cancel_at_period_end, bis: bisVon(sub), pausiert: !!(sub.pause_collection && sub.pause_collection.behavior), metadata: sub.metadata || {}, preis: (((sub.items || {}).data || [])[0] || {}).price ? sub.items.data[0].price.id : '' } : null;
+  return {
+    /* Stripe-Kunde des Partners anlegen bzw. nachziehen (Name, Anschrift, Telefon, Rechnungsadresse; USt-IdNr. beim Anlegen).
+       p: Zeile aus partner. Rückgabe: Kennung des Kunden */
+    async paketKunde(p) {
+      if (!s) return p.stripe_customer || 'cus_test_' + zufall(6);
+      const d = p.daten || {}, mail = d.rechnungMail || p.mail;
+      const daten = { email: mail, name: p.firma, phone: d.tel || undefined, address: { line1: d.strasse || undefined, postal_code: d.plz || p.plz || undefined, city: d.ort || undefined, country: 'DE' }, preferred_locales: ['de'], invoice_settings: k.preise.mwst ? undefined : { footer: KLEINUNTERNEHMER }, metadata: { art: 'paket', partner: p.id } };
+      if (p.stripe_customer) { await s.post('/customers/' + encodeURIComponent(p.stripe_customer), daten); return p.stripe_customer; }
+      if (d.ust && /^DE\d{9}$/.test(d.ust)) daten.tax_id_data = [{ type: 'eu_vat', value: d.ust }];
+      const c = await s.post('/customers', daten, { idem: 'eeziframes-partner-' + p.id + '-' + kurzHash(JSON.stringify([mail, p.firma, d.ust || ''])) });
+      return c.id;
+    },
+    /* Kasse für die Einrichtungsgebühr. o: { customer, bestellung: { id, nr, paket }, partner, preise, origin, stand }.
+       Der Preis kommt nur aus dem Preisstand der Bestellung (pakete.js), nie vom Browser. Rückgabe: { id, url } */
+    async einrichtungKasse(o) {
+      const b = o.bestellung, preise = o.preise, zurueckOk = o.origin + '/partner/?kasse={CHECKOUT_SESSION_ID}#bestellung/' + b.id, zurueckAb = o.origin + '/partner/#bestellung/' + b.id;
+      if (!s) {
+        const id = testId('test');
+        paketAttrappe.kassen.set(id, { bestellung: b.id, partner: o.partner, customer: o.customer, paket: b.paket, stand: o.stand, betrag: einrichtungBrutto(preise), pm: 'pm_test_' + zufall(6), pi: 'pi_test_' + zufall(6), created: Math.floor(Date.now() / 1000) });
+        return { id: id, url: zurueckOk.replace('{CHECKOUT_SESSION_ID}', id) };
+      }
+      const steuer = preise.mwst ? await steuersatz(false) : '', name = P().PAKETE[b.paket].name, euro = (n) => P().euro(n).replace(' €', ' €');
+      const md = { art: 'einrichtung', bestellung: b.id, partner: o.partner, paket: b.paket, stand: o.stand };
+      const sess = await s.post('/checkout/sessions', {
+        mode: 'payment', locale: 'de', submit_type: 'pay', customer: o.customer, customer_update: { address: 'auto', name: 'auto' },
+        payment_method_types: ['card', 'sepa_debit'],
+        line_items: [{ quantity: 1, tax_rates: steuer ? [steuer] : undefined, price_data: { currency: 'eur', unit_amount: Math.round(preise.einrichtung * 100), tax_behavior: 'exclusive', product_data: { name: 'Einrichtung ' + name, description: 'Einrichtung Ihres Fensterkonfigurators auf eigener Domain (Bestellung ' + b.nr + ')' } } }],
+        payment_intent_data: { setup_future_usage: 'off_session', description: 'Einrichtung ' + name + ', Bestellung ' + b.nr, metadata: { art: 'einrichtung', bestellung: b.id, partner: o.partner } },
+        invoice_creation: { enabled: true, invoice_data: { description: 'Bestellung ' + b.nr + ': ' + name + ', Einrichtung. Monatlich ' + euro(preise.monat) + ' netto ab dem Livegang.', footer: preise.mwst ? undefined : KLEINUNTERNEHMER, metadata: { art: 'einrichtung', bestellung: b.id } } },
+        custom_text: { submit: { message: 'Es gelten die Paketbedingungen (Stand ' + standText(o.stand) + ') mit dem Vertrag zur Auftragsverarbeitung, denen Sie zugestimmt haben.' } },
+        success_url: zurueckOk, cancel_url: zurueckAb, metadata: md
+      });
+      return { id: sess.id, url: sess.url };
+    },
+    /* Kasse der Einrichtung lesen (schreibt nichts). null: keine Einrichtungskasse (andere Art, unbekannt).
+       { bezahlt, laeuft, fehlgeschlagen, bestellung, partner, paket, stand, pi, pm, betrag, customer, rechnung, created } */
+    async einrichtungLesen(session) {
+      if (!s) {
+        const e = paketAttrappe.kassen.get(String(session || ''));
+        if (!e) return null;
+        const bezahlt = /^test_/.test(session);
+        if (bezahlt && e.customer && !e.rechnung) { e.rechnung = 'in_test_' + zufall(6); const l = paketAttrappe.rechnungen.get(e.customer) || []; l.unshift({ id: e.rechnung, nr: 'RE-TEST-' + String(l.length + 1).padStart(4, '0'), datum: new Date().toISOString(), betrag: e.betrag / 100, status: 'bezahlt', url: '', pdf: '' }); paketAttrappe.rechnungen.set(e.customer, l); }
+        return { bezahlt: bezahlt, laeuft: /^wartet_/.test(session), fehlgeschlagen: /^fehl_/.test(session), bestellung: e.bestellung, partner: e.partner, paket: e.paket, stand: e.stand, pi: e.pi, pm: e.pm, betrag: e.betrag, customer: e.customer, rechnung: e.rechnung || '', created: e.created };
+      }
+      const sess = await s.get('/checkout/sessions/' + encodeURIComponent(session), { expand: ['payment_intent'] });
+      const md = sess.metadata || {};
+      if (sess.mode !== 'payment' || md.art !== 'einrichtung') return null;
+      const pi = sess.payment_intent && typeof sess.payment_intent === 'object' ? sess.payment_intent : null;
+      return { bezahlt: sess.payment_status === 'paid', laeuft: sess.status === 'complete' && sess.payment_status === 'unpaid' && (!pi || pi.status === 'processing'), fehlgeschlagen: !!(pi && pi.status === 'requires_payment_method' && sess.status === 'complete'),
+        bestellung: md.bestellung || '', partner: md.partner || '', paket: md.paket || '', stand: md.stand || '', pi: pi ? pi.id : idVon(sess.payment_intent), pm: pi ? idVon(pi.payment_method) : '', betrag: sess.amount_total || 0, customer: idVon(sess.customer), rechnung: idVon(sess.invoice), created: sess.created || 0 };
+    },
+    /* Eine offene Kasse verfallen lassen (neue Kasse derselben Bestellung); schon abgeschlossen oder verfallen zählt als erledigt */
+    async einrichtungAblaufen(session) {
+      if (!s || !session) { paketAttrappe.kassen.delete(String(session || '')); return true; }
+      try { await s.post('/checkout/sessions/' + encodeURIComponent(session) + '/expire'); } catch (e) { /* nicht mehr offen */ }
+      return true;
+    },
+    /* Monatsabo beim Live-Schalten: mit dem gespeicherten Zahlungsmittel, ohne den Kunden (off_session). Läuft für diese Bestellung
+       schon ein Abo, wird es übernommen (Doppelklick, verlorene Antwort). o: { customer, paket, pm, bestellung, partner, n }.
+       Rückgabe: { id, status, bis, offeneRechnung, laeuft, vorhanden } */
+    async paketAboStarten(o) {
+      if (!s) {
+        for (const a of paketAttrappe.abos.values()) if (a.bestellung === o.bestellung && a.status === 'active') return Object.assign({ vorhanden: true }, a);
+        const id = 'sub_test_' + zufall(6), a = { id: id, status: 'active', bis: new Date(Date.now() + 30 * TAG_S * 1000).toISOString(), offeneRechnung: '', laeuft: false, bestellung: o.bestellung, paket: o.paket };
+        paketAttrappe.abos.set(id, a); return Object.assign({}, a);
+      }
+      const liste = await s.get('/subscriptions', { customer: o.customer, status: 'all', limit: 100 });
+      const da = (liste.data || []).find((x) => x.metadata && x.metadata.bestellung === o.bestellung && (LAUFEND.includes(x.status) || x.status === 'incomplete'));
+      if (da) return { id: da.id, status: da.status, bis: bisVon(da), offeneRechnung: '', laeuft: false, vorhanden: true };
+      const [preisId, steuer] = await Promise.all([paketPreis(o.paket), k.preise.mwst ? steuersatz(false) : Promise.resolve('')]);
+      const sub = await s.post('/subscriptions', { customer: o.customer, items: [{ price: preisId }], default_payment_method: o.pm || undefined, default_tax_rates: steuer ? [steuer] : undefined, off_session: true, payment_behavior: 'allow_incomplete', metadata: { art: 'paket', bestellung: o.bestellung, partner: o.partner, paket: o.paket }, expand: ['latest_invoice.payment_intent'] }, { idem: 'eeziframes-paketabo-' + o.bestellung + '-' + (o.n || 1) });
+      const inv = sub.latest_invoice && typeof sub.latest_invoice === 'object' ? sub.latest_invoice : null, pi = inv && inv.payment_intent && typeof inv.payment_intent === 'object' ? inv.payment_intent : null;
+      return { id: sub.id, status: sub.status, bis: bisVon(sub), offeneRechnung: sub.status === 'incomplete' && inv ? inv.hosted_invoice_url || '' : '', laeuft: !!(pi && pi.status === 'processing'), vorhanden: false };
+    },
+    /* Abo lesen (Abgleich im Tageslauf): { id, status, kuendigt, bis, pausiert, metadata, preis } oder null */
+    async paketAboLesen(sub) {
+      if (!s) { const a = paketAttrappe.abos.get(String(sub || '')); return a ? { id: a.id, status: a.status, kuendigt: !!a.kuendigt, bis: a.bis, pausiert: !!a.pausiert, metadata: { art: 'paket', bestellung: a.bestellung, paket: a.paket }, preis: '' } : null; }
+      try { return aboKurz(await s.get('/subscriptions/' + encodeURIComponent(sub))); } catch (e) { if (/no such subscription/i.test(String(e && e.message))) return null; throw e; }
+    },
+    /* Abo ändern. o: { paket, oben } (Preis des Pakets; nach oben sofort mit anteiliger Berechnung, nach unten ohne Ausgleich: der
+       laufende Monat ist bezahlt, die nächste Rechnung kommt zum kleineren Preis) · { kuendigen } / { zuruecknehmen } (zum Ende des
+       Abrechnungsmonats) · { aussetzen } / { fortsetzen } (Einzug ruht, pause_collection). Rückgabe: { id, status, kuendigt, bis, pausiert } */
+    async paketAboAendern(sub, o) {
+      o = o || {};
+      if (!s) {
+        const a = paketAttrappe.abos.get(String(sub || '')) || { id: sub, status: 'active', bis: null };
+        if (o.paket) a.paket = o.paket; if (o.kuendigen) a.kuendigt = true; if (o.zuruecknehmen) a.kuendigt = false; if (o.aussetzen) a.pausiert = true; if (o.fortsetzen) a.pausiert = false;
+        if (a.id) paketAttrappe.abos.set(a.id, a);
+        return { id: a.id, status: a.status, kuendigt: !!a.kuendigt, bis: a.bis || null, pausiert: !!a.pausiert };
+      }
+      const daten = {};
+      if (o.paket) {
+        const [preisId, alt] = await Promise.all([paketPreis(o.paket), s.get('/subscriptions/' + encodeURIComponent(sub))]);
+        const item = alt.items && alt.items.data && alt.items.data[0];
+        Object.assign(daten, { items: [{ id: item ? item.id : undefined, price: preisId }], proration_behavior: o.oben ? 'create_prorations' : 'none', metadata: { paket: o.paket } });
+      }
+      if (o.kuendigen) daten.cancel_at_period_end = true;
+      if (o.zuruecknehmen) daten.cancel_at_period_end = false;
+      if (o.aussetzen) daten.pause_collection = { behavior: 'void' };
+      if (o.fortsetzen) daten.pause_collection = LEER;
+      return aboKurz(await s.post('/subscriptions/' + encodeURIComponent(sub), daten));
+    },
+    /* Abo sofort beenden (Pause länger als erlaubt, Ende durch den Inhaber); schon beendet zählt als erledigt */
+    async paketAboBeenden(sub) {
+      if (!s) { const a = paketAttrappe.abos.get(String(sub || '')); if (a) a.status = 'canceled'; return true; }
+      return this.aboBeenden(sub);
+    },
+    /* Einzelner Posten auf die nächste Rechnung des Kunden (Differenz der Einrichtung beim Wechsel nach oben). o: { customer, cent,
+       text, bestellung, schluessel } */
+    async paketPosten(o) {
+      if (!s) return { id: 'ii_test_' + zufall(6) };
+      const steuer = k.preise.mwst ? await steuersatz(false) : '';
+      return s.post('/invoiceitems', { customer: o.customer, amount: o.cent, currency: 'eur', description: o.text, tax_rates: steuer ? [steuer] : undefined, metadata: { art: 'paket', bestellung: o.bestellung } }, { idem: 'eeziframes-paketposten-' + o.bestellung + '-' + o.schluessel });
+    },
+    /* Rechnungen eines Kunden, nur lesend (fünf Minuten gemerkt); Stripe bewahrt sie auf */
+    async paketRechnungen(customer) {
+      if (!customer) return [];
+      if (!s) return (paketAttrappe.rechnungen.get(customer) || []).slice();
+      const m = rechnungMerk.get(customer); if (m && m.bis > Date.now()) return m.liste.slice();
+      const r = await s.get('/invoices', { customer: customer, limit: 24 });
+      const liste = (r.data || []).filter((x) => x.status !== 'draft').map(rechnungKurz);
+      rechnungMerk.set(customer, { liste: liste, bis: Date.now() + 5 * 60 * 1000 }); if (rechnungMerk.size > 500) rechnungMerk.clear();
+      return liste.slice();
+    },
+    /* Erstattung einer Einrichtung (voll oder cent); je Bestellung und Betrag nur einmal */
+    async erstatten(pi, cent, bestellung) {
+      if (!s) return { id: 're_test_' + zufall(6), status: 'succeeded', betrag: cent || null };
+      const r = await s.post('/refunds', { payment_intent: pi, amount: cent || undefined, metadata: { art: 'einrichtung', bestellung: bestellung } }, { idem: 'eeziframes-erstattung-' + bestellung + '-' + (cent || 'voll') });
+      return { id: r.id, status: r.status, betrag: r.amount || null };
+    },
+    /* Kundenportal von Stripe: Rechnungen, Zahlungsmittel, Kündigung zum Ende des Abrechnungsmonats. Die Konfiguration legt der Server
+       einmal selbst an (Metadaten eeziframes=paket-v1). Rückgabe: { url } */
+    async kundenportal(customer, zurueck) {
+      if (!s) return { url: zurueck + (zurueck.includes('?') ? '&' : '?') + 'portal=test' };
+      const konf = await einmalFn(konto + ':portal-paket-v1', async () => {
+        const liste = await s.get('/billing_portal/configurations', { active: true, limit: 100 });
+        const da = (liste.data || []).find((c) => c.metadata && c.metadata.eeziframes === 'paket-v1');
+        if (da) return da.id;
+        const neu = await s.post('/billing_portal/configurations', { business_profile: { headline: 'eeziframes: Rechnungen, Zahlung und Abo Ihres Konfigurators' }, features: { invoice_history: { enabled: true }, payment_method_update: { enabled: true }, customer_update: { enabled: true, allowed_updates: ['email', 'address', 'name', 'tax_id'] }, subscription_cancel: { enabled: true, mode: 'at_period_end', proration_behavior: 'none' } }, metadata: { eeziframes: 'paket-v1' } }, { idem: 'eeziframes-portal-paket-v1' });
+        return neu.id;
+      });
+      const sess = await s.post('/billing_portal/sessions', { customer: customer, return_url: zurueck, configuration: konf, locale: 'de' });
+      return { url: sess.url };
     }
   };
 }
