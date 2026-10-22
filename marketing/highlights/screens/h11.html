@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h11 · Elemente · Auch ganz groß.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Raster 3 × 2 aus echten 3-D-Modellen, das Raster füllt die Höhe bis zur Fußzeile (Kachel etwa 293 × 250),
+     je Kachel nur die Modellfläche, das Modell füllt die Kachel (Aufnahme im Seitenverhältnis der Kachel, Faktor 3), Beschriftung darunter */
+  .ef-inhalt { flex: 1 1 auto }
+  .h-raster { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 32px 16px }
+  .h-kachel { display: flex; flex-direction: column; gap: 14px; min-height: 0 }
+  .h-kachel > .ef-ausschnitt { flex: 1 1 0; min-height: 0; border-radius: 24px }
+  .h-kachel > .ef-ausschnitt > img { height: 100%; object-fit: cover; object-position: 50% 50% }
+  .h-kachel > figcaption { flex: none; font-size: var(--ef-fs-chip); line-height: 1.2; font-weight: 700; color: var(--ef-text-2); white-space: nowrap }
+</style>
+</head>
+<body>
+<!-- Kapitel „Elemente“, Inhalt (h11): 6 Elementarten, je das echte 3-D-Modell des Startschritts im Kundenlink (Fensterbau Brandt, Familie Weber),
+     aufgenommen mit werkzeug/aufnahmen-alles-drin.mjs h11: K.fenster(page, art), S.screen = 'start', render(true), Modellfläche #w3d im
+     Seitenverhältnis der Kachel, Kamera „three“ ohne Schwingen und ohne Beschriftungspille. Jedes Modell ist für sich eingepasst
+     (w3dCalc fitW/fitH), damit es die Kachel füllt; die Größen untereinander sind deshalb nicht maßstäblich.
+     Unterscheidbar gemacht mit echten Zuständen der App: Fenster mit Dreh-Kipp-Flügel beim Aufdrehen (K.vorfuehren Flügel 0, wie oeffnungZeigen),
+     Festverglasung mit 3 Feldern ohne Griffe, Hebe-Schiebe-Tür Schema C (2 Schiebeflügel mittig vor 2 Festteilen), Schwelle barrierefrei,
+     ein Schiebeflügel aufgeschoben (tuerZeigen), PSK-Tür 2-teilig mit Standardschwelle, Flügel parallel abgestellt und zur Seite geschoben
+     (tuerZeigen, w3d-psk), Faltschiebewand mit 5 Flügeln gefaltet.
+     Belege: web/assets/modell.js:24 OPT.art; web/assets/portal.js:522 („Jede Elementart hat in der App ihr eigenes Modell und ihre eigenen Fragen,
+     bis zur Schwelle und zum Sonnenschutz.“); modell.js hstSchema A, 3-teilig, C, D; modell.js pskSchema 2- und 3-teilig;
+     app.js fswn 2 bis 7 (clamp 2, 7); modell.js schwelle flach, barrierefrei (DIN 18040), Standard; app.js felder (Festverglasung). -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Elemente · 2/4</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">6 Elementarten</p>
+      <h2 class="ef-display">Auch ganz<br><span class="ef-gruen">groß.</span></h2>
+      <p class="ef-lead">Jede Art mit eigenem Modell und Fragen.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">HST-Schema A, C, D</li>
+        <li class="ef-chip">PSK 2- oder 3-teilig</li>
+        <li class="ef-chip">Faltwand bis 7 Flügel</li>
+        <li class="ef-chip">Schwelle barrierefrei</li>
+      </ul>
+    </div>
+    <div class="h-raster">
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-fenster.png" alt="3-D-Modell eines zweiflügeligen Fensters, ein Flügel dreht auf."></div><figcaption>Fenster</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-balkon.png" alt="3-D-Modell einer Balkontür, bodentief."></div><figcaption>Balkontür</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-fest.png" alt="3-D-Modell einer Festverglasung mit drei Feldern, ohne Griffe."></div><figcaption>Festverglasung</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-hst.png" alt="3-D-Modell einer Hebe-Schiebe-Tür, Schema C mit vier Teilen, ein Schiebeflügel aufgeschoben."></div><figcaption>Hebe-Schiebe-Tür</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-psk.png" alt="3-D-Modell einer PSK-Tür, zweiteilig, der Flügel parallel abgestellt und zur Seite geschoben."></div><figcaption>PSK-Tür</figcaption></figure>
+      <figure class="h-kachel"><div class="ef-ausschnitt"><img src="../aufnahmen/h11-fsw.png" alt="3-D-Modell einer Faltschiebewand mit 5 Flügeln, zum Paket gefaltet."></div><figcaption>Faltschiebewand</figcaption></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 2 von 4">
+      <li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

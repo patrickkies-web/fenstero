@@ -29,7 +29,7 @@ Die drei Motive aus den Beiträgen können direkt wiederverwendet werden: der Wa
 |---|---|---|---|---|
 | `start-hauseigentuemer` | 1250 × 1250 | Startseite, Ansicht Hauseigentümer, randlos rechts hinter dem Text (Telefon: randlos ganz oben). **Da:** Waschbär auf dem Tritt an der Maueröffnung | Maße · Öffnungsart · Farbe · Glas | 1 |
 | `start-fensterbauer` | 1120 × 1400 | Startseite, Ansicht Fensterbauer, randlos wie oben. **Da:** Bär in der Werkstatt mit Tablet | Maße · Fotos · Öffnungsarten · Positionen | 1 |
-| `app-start` | 1200 × 1500 | App, Startbild vor dem ersten Fenster | Fotografieren · Messen · Wünschen | 1 |
+| `app-start` | 1120 × 1400 | App, Startbild vor dem ersten Fenster. **Da:** drei Waschbären im Wohnzimmer (fotografieren, wünschen, zurücklehnen) | Fotografieren · Messen · Wünschen | 1 |
 | `gross` | 1200 × 1500 | Startseite Hauseigentümer, Abschnitt „Auch ganz groß.“ | Elementarten | 1 |
 | `fuer-fensterbauer` | 1200 × 1500 | Seite /fuer-fensterbauer/, oben | Maße · Fotos · Positionen · Bestellmaß | 1 |
 | `ratgeber` | 1600 × 1000 | Übersicht /ratgeber/, über dem Weg | Prüfen · Entscheiden · Auswählen · Ausmessen · Vergleichen · Einbauen | 2 |

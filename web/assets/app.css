@@ -139,8 +139,21 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Startbild der App: Kicker (13 px) → Headline → Knöpfe → Fotokarte (Baustein in gemeinsam.css, Breite kommt vom Behälter) → 3-D-Modell → Lead, alles linksbündig;
    ab 640 px liegt das Foto rechts neben Headline, Knöpfen und Lead, das Modell darunter über beide Spalten */
 .hero > .eyebrow { font-size: 13px; line-height: 1.3 }
-.hero.start > .hero-foto { order: 4; width: 100%; margin-top: 18px } .hero.start > .hero-scene { order: 5 } .hero.start > p:not(.eyebrow) { order: 6 } .hero.start .cta-zeile { text-align: left }
-@media (min-width: 640px) { .hero.start { display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto auto auto; column-gap: 24px; align-items: start } .hero.start > .eyebrow { grid-area: 1 / 1 / 2 / 3 } .hero.start > h1 { grid-area: 2 / 1 } .hero.start > .cta { grid-area: 3 / 1 } .hero.start > p:not(.eyebrow) { grid-area: 4 / 1 } .hero.start > .hero-foto { grid-area: 2 / 2 / 5 / 3; align-self: start; margin-top: 10px } .hero.start > .hero-scene { grid-area: 5 / 1 / 6 / 3 } }
+.hero.start > .hero-scene { order: 5 } .hero.start > p:not(.eyebrow) { order: 6 } .hero.start .cta-zeile { text-align: left }
+/* Foto wie in den Beiträgen: kein Kasten, kein Rand, randlos bis an den Rand der App und weich in den Grund ausgeblendet.
+   Telefon: ganz oben, Kicker und Überschrift beginnen im Auslauf. Ab 640 px: rechts neben dem Text, nach links, oben und unten ausgeblendet. */
+.hero.start > .eyebrow, .hero.start > h1, .hero.start > .cta, .hero.start > p { position: relative; z-index: 1 }
+.hero-foto { order: 0; position: relative; z-index: 0; align-self: stretch; height: min(108vw, 440px); margin: -22px -20px -60px; pointer-events: none }
+.hero-foto img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; animation: fotoin 1.6s var(--e-out) both;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%) }
+@keyframes fotoin { from { transform: scale(1.06) } to { transform: none } }
+.hero-foto .chips { position: absolute; left: 20px; right: 20px; bottom: 76px; display: flex; flex-wrap: wrap; gap: 6px }
+.hero-foto .chip { min-height: 36px; padding: 0 12px; font-size: 13px; color: var(--text); background: rgba(22, 22, 22, .72); border-color: rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px) }
+.hero-foto .chip.haken::before { width: 6px; height: 10px; border-width: 0 2px 2px 0 }
+@media (prefers-reduced-motion: reduce) { .hero-foto img { animation: none } }
+@media (min-width: 640px) { .hero.start { display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto auto auto; column-gap: 24px; align-items: start } .hero.start > .eyebrow { grid-area: 1 / 1 / 2 / 3 } .hero.start > h1 { grid-area: 2 / 1 } .hero.start > .cta { grid-area: 3 / 1 } .hero.start > p:not(.eyebrow) { grid-area: 4 / 1 } .hero.start > .hero-foto { grid-area: 1 / 2 / 5 / 3; height: auto; min-height: 420px; margin: -22px -20px 0 -80px }
+  .hero-foto img { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%, #000 84%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 72%, transparent 100%); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent 0, #000 38%, #000 84%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 14%, #000 72%, transparent 100%); mask-composite: intersect }
+  .hero-foto .chips { left: 96px; bottom: 28px } .hero.start > .hero-scene { grid-area: 5 / 1 / 6 / 3 } }
 .hero .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 18px; width: 100% }
 .hero .cta .btn { flex: 0 0 auto; padding: 0 22px } .hero .cta .link { font-size: 15px }
 .hero-scene { position: relative; width: 100%; margin: 22px 0 0; border-radius: var(--r4); overflow: hidden; box-shadow: var(--ring); transform: perspective(1100px) rotateX(calc((var(--sp, 0.5) - 0.5) * -6deg)); transform-origin: 50% 50% }
@@ -232,7 +245,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .facts dt { color: var(--muted) } .facts dd { margin: 0; font-weight: 600; min-width: 0 }
 
 /* ---------- 3-D-Modell: der Raum ist das Bild, der Rahmen ein Hauch ---------- */
-.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, var(--surface3), var(--surface2)); box-shadow: var(--ring); perspective: 1300px; perspective-origin: 50% 46%; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100% }
+.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, #e6e0d7, #d6cfc4); box-shadow: var(--ring); perspective: 1300px; perspective-origin: 50% 46%; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100% }
 .w3d-stage.hero { height: 320px }
 .w3d-bg { position: absolute; inset: -28px; background-size: cover; background-position: center; filter: blur(20px) saturate(.5) brightness(.85); opacity: .3; pointer-events: none; animation: w3dbgin 1.2s ease-out both }
 @keyframes w3dbgin { from { opacity: 0; transform: scale(1.06) } to { opacity: .3; transform: none } }
@@ -243,8 +256,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @keyframes w3dsway { from { transform: rotateY(-3deg) rotateX(1deg) } to { transform: rotateY(3deg) rotateX(-1deg) } }
 .w3d-f { position: absolute; left: 0; top: 0; backface-visibility: visible; pointer-events: none; transition: width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), transform .7s cubic-bezier(.3, .7, .2, 1), clip-path .7s cubic-bezier(.3, .7, .2, 1), opacity .4s, background .5s }
 .no-anim .w3d-f, .no-anim .w3d-sash, .no-anim .w3d-dim, .no-anim .w3d-handle, .no-anim .w3d-el, .no-anim .w3d-cam, .no-anim .w3d-bar { transition: none !important }
-.w3d-wall-in { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .14) 100%), linear-gradient(180deg, #4a4540, #3b3733) }
-.w3d-rev-t { background: linear-gradient(180deg, #2c2925, #24211e) } .w3d-rev-l { background: linear-gradient(90deg, #5c564f, #4b4640) } .w3d-rev-r { background: linear-gradient(90deg, #433e39, #37332e) }
+/* Wand und Laibung als heller Putz wie im echten Raum: die Laibung ist je Seite anders beleuchtet (oben im Schatten, eine Seite
+   im Licht, die andere halb) und wird zum Rahmen hin dunkler. So liest man sie als Tiefe und nicht als Loch in der Wand. */
+.w3d-wall-in { background: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .1) 100%), linear-gradient(180deg, #ebe6de, #dcd5ca) }
+.w3d-rev-t { background: linear-gradient(180deg, #b4aa9b, #978d7f) } .w3d-rev-l { background: linear-gradient(90deg, #e9e3d9, #cdc5b8) } .w3d-rev-r { background: linear-gradient(90deg, #c8bfb1, #aba191) }
 .w3d-sill { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08) }
 .w3d-el { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: opacity .6s } .w3d-el.is-hidden { opacity: 0 }
 .w3d-frame { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16), 0 0 0 1px rgba(255, 255, 255, .09) } .w3d-side { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22); background-image: linear-gradient(90deg, rgba(0, 0, 0, .13), rgba(0, 0, 0, .05) 35%, rgba(0, 0, 0, .05) 65%, rgba(0, 0, 0, .13)) }
@@ -270,9 +285,9 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-sash.is-sel .w3d-selring { display: block; animation: ring-ein .25s var(--e-out) both }
 @keyframes ring-ein { from { opacity: 0 } to { opacity: 1 } }
 .w3d-selring.is-form { border: 0; border-radius: 0 } .w3d-selring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible } .w3d-selring polygon { fill: none; stroke: var(--accent); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke }
-/* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler) und die Fuge zwischen Wand und Rahmen */
+/* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler); bei allen Fenstern die Fuge zwischen Wand und Rahmen */
 .w3d-rs { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(0, 0, 0, .07)) }
-.w3d-fuge { background: #2a2622 }
+.w3d-fuge { background: linear-gradient(180deg, #8e8578, #7f7669) }
 /* Öffnung vorführen (oeffnungZeigen): der Flügel geht kurz auf und zu, der Griff dreht vorher mit. Fest: ein Glanz läuft übers Glas */
 .w3d-sash.demo-D { animation: w3d-dreh 1.6s var(--e-io) both }
 .w3d-sash.demo-K { animation: w3d-kipp 1.4s var(--e-io) both }

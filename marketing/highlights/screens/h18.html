@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h18 · Ergebnis · Nachbessern kostenlos.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* Blatt „Nachbesserung anfragen“ (Aufnahme 560 × 388 CSS-px, Faktor 3): --s = Story-px je CSS-px, Breite 822 px (Storyboard: 800 bis 912) */
+  .h18-aus { --s: 1.46; flex: none; width: calc(560px * var(--s) + 4px) }
+</style>
+</head>
+<body>
+<!-- h18 Inhalt Kapitel „Ergebnis“ (5/5): echte Aufnahme des Blatts „Nachbesserung anfragen“ im Projekt Familie Weber
+     ([data-act="sheet"][data-v="nachbesserung"], #nb-hinweis „Beim Küchenfenster fehlt die Brüstungshöhe.“; Ansicht 560 × 1100, Faktor 3),
+     nur das Blatt, ohne die abgedunkelte Seite darüber. Das Textfeld ist per CSS nur so hoch wie sein Text (sonst 3 Zeilen), Text unverändert. Aufnahme aufnahmen/h18-nachbesserung.png, erzeugt mit werkzeug/ergebnis-aufnahmen.mjs.
+     Belege: web/assets/portal.js:994 (Blatt-Text), web/nutzungsbedingungen/index.html:53 (§ 5 Abs. 3), web/assets/modell.js:352 (NB_MAX = 2,
+     NB_TAGE = 30), portal.js:754 (Karte „Nachbesserung · Link erneut schicken“ mit „Ihr Hinweis: …“ in der Nachricht an den Kunden). -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Ergebnis · 5/5</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Nachbesserung</p>
+      <h2 class="ef-display">Nachbessern<br><span class="ef-gruen">kostenlos.</span></h2>
+      <p class="ef-lead">Ihr Kunde bekommt den Link noch einmal und ändert nur das Nötige. Berechnet wird nichts.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">Bis zu 2 Runden</li>
+        <li class="ef-chip">Bis 30 Tage nach Eingang</li>
+        <li class="ef-chip">Ihr Hinweis in der Nachricht</li>
+      </ul>
+    </div>
+    <figure class="ef-ausschnitt h18-aus"><img src="../aufnahmen/h18-nachbesserung.png" alt="Blatt Nachbesserung anfragen: Familie Weber bekommt den Link noch einmal, sieht alle bisherigen Angaben und kann sie ändern. Das neue Aufmaß ersetzt das alte im selben Projekt, berechnet wird nichts. Höchstens 2 Runden je Projekt, bis 30 Tage nach dem Eingang. Feld Was soll der Kunde prüfen: Beim Küchenfenster fehlt die Brüstungshöhe. Steht so in der Nachricht an den Kunden. Knöpfe Abbrechen und Link erneut öffnen."></figure>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 5 von 5">
+      <li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-jetzt"></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

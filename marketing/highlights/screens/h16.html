@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h16 · Ergebnis · Bestellmaß vorgerechnet.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* zwei Ausschnitte aus der aufgeklappten Position 1 (Aufnahmen 560 CSS-px breit, Faktor 3): --s = Story-px je CSS-px */
+  .h16-stapel { --s: 1.59; flex: none; width: calc(560px * var(--s) + 4px) }
+</style>
+</head>
+<body>
+<!-- h16 Inhalt Kapitel „Ergebnis“ (3/5): zwei echte Ausschnitte aus Position 1 im Projekt Familie Weber
+     (Klick .pcard.st-eingegangen, dann .poslist details.posc:nth-child(1) summary aufklappen; Ansicht 600 × 1100, Faktor 3).
+     Aufnahmen: aufnahmen/h16-bestellmass.png (Kasten Bestellmaß-Vorschlag 1.759 × 1.394 mm, Öffnung minus 15 mm je Seite und 15 mm oben,
+     Zeilen Maueröffnung, Breiten, Höhen) und aufnahmen/h16-ki.png („Einbausituation (KI, 2 Fotos)“ mit Rollladen und Anschlag),
+     erzeugt mit werkzeug/ergebnis-aufnahmen.mjs.
+     Belege: web/assets/portal.js:481-488 (posCard: Bestellmaß aus Maueröffnung minus Abzug, Abschnitt „Einbausituation (KI, n Fotos)“),
+     portal.js:814 (Betriebsprofil: eigener Abzug, „verbindlich bleibt Ihr Feinaufmaß“), portal.js:482 (Standard 15/15 mm),
+     portal.js:534 („Vor der Fertigung messen Sie einmal nach.“).
+     Headline „Bestellmaß vorgerechnet.“ nach portal.js:814 („Damit rechnet eeziframes … ein Bestellmaß vor; verbindlich bleibt Ihr Feinaufmaß“),
+     damit der Vorschlagscharakter schon in der Headline steht; Chip „Vor der Fertigung nachmessen“ nach portal.js:534 und blatt.js:167.
+     Abweichung vom Storyboard: Der Kopf „Pos. 1 · Wohnzimmer“ (summary mit Kurzzeile, 3 Zeilen) fehlt im oberen Ausschnitt, sonst ragt das Visual
+     in die Fußzeile; die Position steht im Kicker. Mit KOPF=1 nimmt ergebnis-aufnahmen.mjs ihn wieder auf. -->
+
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Ergebnis · 3/5</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Position 1 · Wohnzimmer</p>
+      <h2 class="ef-display">Bestellmaß<br><span class="ef-gruen">vorgerechnet.</span></h2>
+      <p class="ef-lead">Als Vorschlag: Öffnung minus Ihr eigener Abzug. Dazu die Einbausituation aus den Fotos.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">Abzug einstellbar</li>
+        <li class="ef-chip">Einbausituation per KI</li>
+        <li class="ef-chip">Vor der Fertigung nachmessen</li>
+      </ul>
+    </div>
+    <div class="ef-stapel h16-stapel">
+      <figure class="ef-ausschnitt"><img src="../aufnahmen/h16-bestellmass.png" alt="Position 1, Wohnzimmer: Bestellmaß-Vorschlag 1.759 × 1.394 mm, Öffnung minus 15 mm je Seite und 15 mm oben. Maueröffnung 1.789 × 1.409 mm, kleinstes Maß. Breiten oben 1.792, Mitte 1.790, unten 1.789. Höhen links 1.412, Mitte 1.410, rechts 1.409."></figure>
+      <figure class="ef-ausschnitt"><img src="../aufnahmen/h16-ki.png" alt="Einbausituation (KI, 2 Fotos): Rollladen, Einbaukasten innen über der Öffnung mit Revisionsdeckel, Gurt mit Unterputz-Wickler links. Anschlag, Innenanschlag, Blendrahmen sitzt etwa 2 cm hinter der Innenkante."></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 3 von 5">
+      <li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>
