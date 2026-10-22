@@ -209,3 +209,12 @@ a.link { text-decoration: underline }
   .fx-haken path, .okmark .tick { animation: none; stroke-dashoffset: 0 }
   .btn, .chip, .seg > button, .switch, .switch > span { transition: none }
 }
+
+/* ---------- S6 (Betriebsbereich): Lücken zum Styleguide in Bausteinen, die beide Oberflächen teilen ----------
+   Grün ist Signal, keine Fläche: Schalter „an“ in Cream mit dunklem Knopf. Rot ist keine Fläche: der Gefahr-Knopf ist ein Ring mit
+   dem Wort in Fehlerfarbe. Orange gehört der Zeichnung: das Badge „lead“ trägt den grünen Punkt. */
+.switch[aria-pressed="true"], .switch[aria-checked="true"] { background: var(--cream) }
+.switch[aria-pressed="true"] > span, .switch[aria-checked="true"] > span { background: var(--ground); box-shadow: none }
+.btn.danger { background: transparent; color: var(--bad); box-shadow: inset 0 0 0 2px var(--line2) }
+@media (hover: hover) { .btn.danger:hover:not([disabled]) { background: transparent; box-shadow: inset 0 0 0 2px var(--bad) } }
+.badge.lead { --tone: var(--accent) }
