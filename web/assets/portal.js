@@ -645,6 +645,9 @@ function fotoChip(am) {
   if (Server.online()) return [nW(nF, 'Foto', 'Fotos'), true];
   return nA >= nF ? [nW(nF, 'Foto', 'Fotos') + ' ausgewertet', true] : nA ? [nA + ' von ' + nF + ' Fotos ausgewertet', true] : [nW(nF, 'Foto', 'Fotos') + ' beim Kunden', null];
 }
+/* Standard des Fensterbauers (modell.js wuensche): neutral „nach Standard des Fensterbauers“, im Betrieb „nach Ihrem Standard“ */
+const ihrStd = (t) => String(t || '').replace(AW.STD_TEXT, 'nach Ihrem Standard');
+const stdZeile = (g) => (g.standard && g.standard.length ? '<p class="am-std"><b>Nach Ihrem Standard:</b> ' + esc(g.standard.join(', ')) + '</p>' : '');
 const dlZeilen = (rows) => '<dl class="am-dl">' + rows.map((r) => '<dt>' + esc(r[0]) + '</dt><dd' + (r[2] ? ' class="' + r[2] + '"' : '') + '>' + (r[3] ? '<i class="sw" style="background: ' + esc(r[3]) + '"></i>' : '') + esc(r[1]) + '</dd>').join('') + '</dl>';
 function posMasse(w) {
   const d = AW.derive(w), mo = w.mo || {}, t = (k) => (AW.num(mo[k]) ? AW.th(mo[k]) : '–'), luecken = AW.massLuecken(w), dev = Math.max(d.devW, d.devH);
@@ -660,7 +663,7 @@ function posMasse(w) {
 function posCard(w, i, abzug, open, proj, l, kl) {
   const d = AW.derive(w), n = AW.num(w.anzahl) || 1, b = AW.bestellmass(w, abzug), W = AW.wuensche(w, proj), art = w.art || 'fenster', S0 = w.sashes || AW.sashesFor(w.teilung);
   const hier = klaerBei(kl || [], i), klN = hier.filter((r) => !klaerOk(l, r.id)).length, nzN = AW.notizenVon(w).length, name = 'Pos. ' + (i + 1) + ' · ' + (w.name || 'Fenster');
-  const kurz = [ARTKURZ[art] || 'Fenster', AW.lab('etage', w.etage) || 'EG', art === 'fest' ? S0.length + (S0.length === 1 ? ' Feld' : ' Felder') : art === 'fenster' || art === 'balkon' ? S0.length + ' Flügel' : '', AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff'].filter(Boolean).join(' · ');
+  const kurz = [ARTKURZ[art] || 'Fenster', AW.lab('etage', w.etage) || 'EG', art === 'fest' ? S0.length + (S0.length === 1 ? ' Feld' : ' Felder') : art === 'fenster' || art === 'balkon' ? AW.oeffnungKurz(w).split(' · ').filter((x) => /Flügel|Seitenteil|fest verglast/.test(x)).join(' · ') : '', AW.istOffen(w, 'material') ? 'Material offen' : AW.lab('material', w.material) || 'Kunststoff'].filter(Boolean).join(' · ');
   const kiR = AW.kiRows(w), chips = AW.kiChips(w), fotos = l && l.aufmass ? (Server.online() ? posFotos(w, l.code, l.aufmass.fotosDa, !!l.fotosGeloescht, name) : l.demo ? '' : fotosPilot(w, kiR)) : '';
   return '<details class="posc" id="pos-' + i + '"' + (open ? ' open' : '') + (l ? ' data-pos="' + esc(l.id + ':' + i) + '"' : '') + '><summary><span class="pic">' + AW.svg(w, 46) + '</span><span class="pt"><b>' + esc(name) + (n > 1 ? ' · ' + n + ' Stück' : '') + '</b><span>Bestellmaß ' + (b ? b.text : '–') + '</span><small>' + esc(kurz) + '</small>' +
     (klN || W.offen.length || nzN ? '<span class="pmarks">' + (klN ? '<span class="badge warn">' + klN + ' zu klären</span>' : '') + (W.offen.length ? '<span class="badge">' + W.offen.length + ' offen</span>' : '') + (nzN ? '<span class="badge">' + SPRECH + nW(nzN, 'Notiz', 'Notizen') + '</span>' : '') + '</span>' : '') + '</span><span class="pchev" aria-hidden="true"></span></summary>' +
@@ -669,7 +672,7 @@ function posCard(w, i, abzug, open, proj, l, kl) {
     '<div class="pos-plan"><figure class="zk">' + AW.zeichnungSVG(w, { b: 640, fs: 15, h: 760, cls: 'zeichnung zk-gross', label: 'Zeichnung ' + name + ', Ansicht von innen, Maße in mm' }) + AW.zeichnungSVG(w, { b: 320, fs: 14.2, fsMin: 13.2, h: 500, cls: 'zeichnung zk-klein', label: 'Zeichnung ' + name + ', Ansicht von innen, Maße in mm' }) + '<figcaption class="zk-leg"><span class="lg mo">' + (w.neu ? 'Rohbauöffnung, Wunschmaß' : 'Maueröffnung') + '</span><span class="lg el">Element</span><span>Ansicht von innen · Maße in mm' + (w.richtung === 'aussen' && !AW.istTuer(w) && art !== 'fest' ? ' · gestrichelt: öffnet nach außen' : '') + '</span></figcaption></figure>' +
     '<div class="best' + (b && b.warn.length ? ' warn' : '') + '"><span>Bestellmaß-Vorschlag</span><b>' + (b ? b.text : '–') + '</b><small>' + (b ? esc(b.formel) : 'Ohne Maueröffnung kein Vorschlag.') + '</small>' + (b && b.warnText ? '<p class="best-warn">' + WARN_I + '<span>' + esc(b.warnText) + '</span></p>' : '') + '</div></div>' +
     '<div class="am-wunsch"><p class="eyebrow kicker">Wünsche des Kunden</p><p class="satz">' + esc(W.satz) + '.</p>' + (W.offen.length ? '<p class="am-offen"><span>Noch offen</span>' + W.offen.map((x) => '<span class="chip offen">' + esc(x) + '</span>').join('') + '</p>' : '') + W.notizen.allgemein.map(notizHTML).join('') + '</div>' +
-    '<div class="am-gruppen">' + W.gruppen.map((g) => '<div class="am-g am-g-' + g.id + '"><p class="eyebrow">' + esc(g.titel) + '</p>' + dlZeilen(g.zeilen.map((z) => [z.k, z.t, z.offen ? 'offen' : '', z.offen ? '' : z.hex])) + g.notizen.map(notizHTML).join('') + '</div>').join('') + '</div>' +
+    '<div class="am-gruppen">' + W.gruppen.map((g) => '<div class="am-g am-g-' + g.id + '"><p class="eyebrow">' + esc(g.titel) + '</p>' + dlZeilen(g.zeilen.map((z) => [z.k, ihrStd(z.t), z.offen ? 'offen' : z.std ? 'std' : '', z.offen || z.std ? '' : z.hex])) + stdZeile(g) + g.notizen.map(notizHTML).join('') + '</div>').join('') + '</div>' +
     '<div class="am-g am-masse"><p class="eyebrow">Maße von Hand</p>' + dlZeilen(posMasse(w)) + W.notizen.masse.map(notizHTML).join('') + '</div>' +
     (kiR.length || fotos || chips.length || W.notizen.fotos.length ? '<div class="am-g am-ki"><p class="eyebrow">Einbausituation laut Fotos' + (w.ki ? ' (KI, ' + nW(w.fotos || 0, 'Foto', 'Fotos') + ')' : '') + '</p>' + fotos +
       (kiR.length ? dlZeilen(kiR.map((r) => [r[0], r[1], r[0] === 'Hinweis' || r[0] === 'Vor Ort prüfen' || (r[0] === 'Maße und Foto' && AW.massPruef(w)) ? 'hinweis' : ''])) : chips.length ? '<div class="chips">' + chips.map((c) => '<span class="badge">' + esc(c) + '</span>').join('') + '</div>' : '') + W.notizen.fotos.map(notizHTML).join('') + '</div>' : '') +
@@ -696,7 +699,7 @@ function amKopf(l, am) {
   const chip = (t, ok) => '<span class="chip' + (ok === false ? ' warnung' : ok === null ? '' : ' haken') + '">' + esc(t) + '</span>', fc = fotoChip(am);
   return '<div class="card amhead"><div class="chips am-chips">' + chip(nW(wins.length, 'Position', 'Positionen')) + chip(nW(nE, 'Element', 'Elemente')) + chip(fc[0], fc[1]) + chip(komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett) + '</div>' +
     '<div class="kv"><span>Kunde</span><span>' + esc(l.kunde) + (l.kontakt ? ' · <span class="sel">' + esc(l.kontakt) + '</span>' : '') + '</span>' + kontaktKv(l) + '<span>Objekt</span><span>' + esc(l.adresse || '–') + '</span><span>Gebäude</span><span>' + esc((AW.lab('gebaeude', pr.gebaeude) || PGEB[l.geb] || '–') + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')) + '</span>' +
-    '<span>Fenster im Haus</span><span>' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben') + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', fw) || '–') + '</span>' + (AW.lab('tiefe', pr.tiefe) ? '<span>Geplant</span><span>' + esc(AW.lab('tiefe', pr.tiefe)) + '</span>' : '') +
+    '<span>Fenster im Haus</span><span>' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben') + '</span><span>Zeitraum</span><span>' + esc(AW.lab('zeit', pr.zeit) || '–') + '</span><span>Budget</span><span>' + esc(AW.lab('budget', pr.budget) || '–') + '</span><span>Förderung</span><span>' + esc(AW.lab('foerdweg', fw) || '–') + '</span>' + (AW.tiefeText(pr.tiefe, true) ? '<span>Geplant</span><span>' + esc(AW.tiefeText(pr.tiefe, true)) + '</span>' : '') +
     '<span>Eingegangen</span><span>' + esc([zeitText((l.log || {}).eingegangen), l.via ? 'über ' + l.via : '', (l.runde || 1) > 1 ? 'Runde ' + l.runde : ''].filter(Boolean).join(' · ') || '–') + '</span>' + '</div>' +
     '<div class="row amacts"><button type="button" class="btn primary" data-act="pdf-am" data-id="' + l.id + '">' + icon('dl', 18) + 'Aufmaßblatt als PDF<span class="pf" aria-hidden="true"></span></button><button type="button" class="btn ghost" data-act="copy-am" data-id="' + l.id + '">' + icon('copy', 18) + 'Als Text kopieren</button></div></div>';
 }
@@ -966,7 +969,7 @@ function aufmassText(l) {
   out.push('Fenster im Haus: ' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'));
   if (pr.notiz) out.push('Nachricht vom Kunden: ' + pr.notiz);
   const fw = AW.foerdWeg(pr); if (fw) out.push('Förderung: ' + AW.lab('foerdweg', fw));
-  if (AW.lab('tiefe', pr.tiefe)) out.push('Geplant: ' + AW.lab('tiefe', pr.tiefe));
+  if (AW.tiefeText(pr.tiefe, true)) out.push('Geplant: ' + AW.tiefeText(pr.tiefe, true));
   const kl = amKlaer(l);
   if (kl.length) {
     out.push('', 'Mit dem Kunden zu klären: ' + kl.filter((r) => klaerOk(l, r.id)).length + ' von ' + kl.length + ' geklärt');
@@ -980,7 +983,7 @@ function aufmassText(l) {
     out.push('  Wunsch: ' + W.satz + '.');
     if (W.offen.length) out.push('  Noch offen: ' + W.offen.join(', '));
     W.notizen.allgemein.forEach((n) => out.push(N(n)));
-    W.gruppen.forEach((g) => { out.push('  ' + g.titel + ': ' + g.zeilen.map((z) => (g.zeilen.length > 1 || z.k !== g.titel ? z.k + ' ' : '') + z.t).join('; ')); g.notizen.forEach((n) => out.push(N(n))); });
+    W.gruppen.forEach((g) => { out.push('  ' + g.titel + ': ' + g.zeilen.map((z) => (g.zeilen.length > 1 || z.k !== g.titel ? z.k + ' ' : '') + ihrStd(z.t)).join('; ')); if (g.standard.length) out.push('    Nach Ihrem Standard: ' + g.standard.join(', ')); g.notizen.forEach((n) => out.push(N(n))); });
     out.push('  Maße: ' + posMasse(w).map((r) => r[0] + ' ' + r[1]).join('; '));
     W.notizen.masse.concat(W.notizen.fotos).forEach((n) => out.push(N(n)));
     AW.kiRows(w).forEach((r) => out.push('  Einbausituation, ' + r[0] + ': ' + r[1]));
@@ -1117,7 +1120,7 @@ const einTelefon = (inhalt, cls) => '<div class="ein-telefon' + (cls ? ' ' + cls
 /* Karte in „Mein Betrieb“: der Absender, wie ihn der Kunde sieht, der Stand in einer Zeile und der Weg zum Gestalten */
 function einKarte() {
   const a = A(), c = BC(), e = a.einladung, p = einSichtbar(einAuftritt()), E = window.Einladung;
-  const stand = [a.logo ? (Server.online() ? 'mit Logo' : 'Logo hinterlegt, beim Kunden ab dem Serverbetrieb') : 'ohne Logo', e && (e.begruessung || e.begruessungDu) ? 'eigene Begrüßung' : 'Begrüßung nach Vorlage', p.tel ? 'Telefon sichtbar' : 'ohne Telefon', 'Anrede ' + (e && e.anrede === 'du' ? 'Du' : 'Sie')];
+  const stand = [a.logo ? (Server.online() ? 'mit Logo' : 'Logo hinterlegt, beim Kunden ab dem Serverbetrieb') : 'ohne Logo', e && (e.begruessung || e.begruessungDu) ? 'eigene Begrüßung' : 'Begrüßung nach Vorlage', p.tel ? 'Telefon sichtbar' : 'ohne Telefon', 'Anrede ' + (e && e.anrede === 'du' ? 'Du' : 'Sie'), p.tiefe ? 'Planung: ' + AW.TIEFE_NAME[p.tiefe] : '', p.std ? 'eigener Standard' : ''].filter(Boolean);
   return '<div class="card fcard ein-b-karte"><p class="eyebrow">Ihre Einladungsseite</p>' + E.kopf({ name: c.name, p: p, klein: true, unten: 'für Familie Weber' }) +
     '<p class="sub">Das sieht Ihr Kunde als Erstes, wenn er Ihren Aufmaß-Link öffnet: Ihr Name, Ihr Logo, Ihre Begrüßung und wen er bei Fragen anruft. eeziframes steht nur klein darunter, als Übermittler.</p>' +
     '<p class="km-s">' + esc(stand.join(' · ')) + '</p><div class="row"><button type="button" class="btn primary" data-act="go" data-v="einladung">Einladungsseite gestalten<span class="pf" aria-hidden="true"></span></button></div></div>';
@@ -1150,10 +1153,17 @@ SCREENS.einladung = () => {
     feld('ein-tel', 'telefon', 'Telefon für Rückfragen', e.telefon, 'z. B. 0221 123456', 'tel') + swE('Telefon beim Kunden zeigen', 'mit Knopf „Anrufen“', e.telefonZeigen, 'telefonZeigen') +
     feld('ein-mail', 'mail', 'E-Mail für Rückfragen', e.mail, a.mail || 'buero@beispiel.de', 'email', e.mail ? '' : 'Leer: ' + esc(a.mail || 'die E-Mail-Adresse Ihres Kontos') + '.') + swE('E-Mail beim Kunden zeigen', 'mit Knopf „E-Mail“', e.mailZeigen, 'mailZeigen') +
     '<div class="f2">' + feld('ein-ort', 'ort', 'Ort, freiwillig', e.ort, 'z. B. Köln') + feld('ein-web', 'web', 'Website, freiwillig', e.web, 'z. B. fensterbau-brandt.de', 'url') + '</div></section>';
+  /* Standard des Fensterbauers: wie genau die Kunden planen (Vorgabe für die Tiefe in der App) und der eigene Standard in einem Satz.
+     Was der Kunde nicht gefragt wird oder nicht wählt, steht im Aufmaß als „nach Ihrem Standard“, nie als offene Frage */
+  const TIEFE_B = { '': 'Ihr Kunde wählt selbst, wie genau er plant; vorgeschlagen sind die üblichen Wünsche.', kurz: 'Nur das Wichtigste: Element, Maße, Material, Farbe, Glas, Sonnenschutz. Alles Weitere machen Sie nach Ihrem Standard.', normal: 'Die üblichen Wünsche: dazu Griff, Sprossen, Kasten, Fensterbänke und Montage. Feine Details nach Ihrem Standard.', genau: 'Alles im Detail: auch Profil, Dichtung, Bänder, Lüfter, Endkappen. Wo Ihr Kunde nichts wählt, gilt Ihr Standard.' };
+  const karteTiefe = '<section class="card ein-b-karte ein-b-tiefe"><p class="eyebrow">Standard des Fensterbauers</p>' +
+    '<p class="sub">Was Ihr Kunde nicht gefragt wird oder nicht auswählt, steht im Aufmaß als „nach Ihrem Standard“. Offen, mit der Bitte um Beratung, ist nur, wo er „Weiß ich noch nicht“ tippt.</p>' +
+    '<div class="f"><span class="lbl" id="ein-l-tiefe2">Wie genau Ihre Kunden planen</span>' + segE([['', 'Frei'], ['kurz', 'Kurz'], ['normal', 'Üblich'], ['genau', 'Alles']], e.tiefe || '', 'tiefe', 'ein-l-tiefe2') + '<small>' + esc(TIEFE_B[e.tiefe || '']) + ' Ihr Kunde kann es bei jeder Frage ändern.</small></div>' +
+    '<div class="f"><label for="ein-std">Ihr Standard in einem Satz, freiwillig</label><textarea id="ein-std" rows="3" maxlength="' + E.MAX.standard + '" data-ein-feld="standard" placeholder="z. B. Kunststoffprofile mit 3-fach-Glas, Griffe in Weiß, RAL-Montage, alte Fenster entsorgen wir.">' + esc(e.standard || '') + '</textarea><small>Steht auf Ihrer Einladungsseite unter „Wie genau ' + (du ? 'du planst' : 'Sie planen') + '“.</small></div></section>';
   const vor = '<div class="ein-vor-spalte" id="ein-vorschau"><p class="eyebrow">So sieht Ihr Kunde die Seite</p>' + einTelefon(einVorschauHTML(du)) +
     '<p class="km-s">Beispielkunde „Familie Weber“, Anrede ' + (du ? 'Du' : 'Sie') + '. ' + (online ? 'Änderungen gelten sofort für alle Ihre Links, auch für schon verschickte.' : 'Pilotphase: Ein Link trägt den Stand von dem Moment, in dem Sie ihn verschicken; schon verschickte Links bleiben, wie sie waren.') + '</p></div>';
   return { title: 'Einladungsseite', html: '<div class="wrap ein-bereich-wrap"><div class="h">' + kicker('Mein Betrieb') + '<h2>' + akSatz('Ihre Einladungsseite.') + '</h2><p>Das sieht Ihr Kunde als Erstes, wenn er Ihren Aufmaß-Link öffnet. Ihr Name, Ihr Logo, Ihre Worte; eeziframes steht nur klein darunter, als Übermittler. <button type="button" class="linkbtn only-s" data-ein="zur-vorschau">Zur Vorschau</button></p></div>' +
-    '<div class="ein-bereich"><div class="col-stack">' + karteLogo + karteGruss + karteAp + '</div>' + vor + '</div></div>' };
+    '<div class="ein-bereich"><div class="col-stack">' + karteLogo + karteGruss + karteAp + karteTiefe + '</div>' + vor + '</div></div>' };
 };
 PARENT.einladung = 'bprofil';
 /* Im Projekt unter der Nachricht: welche Anrede der Kunde sieht und wo die Seite gestaltet wird */
@@ -1173,6 +1183,7 @@ function einAktion(k, el) {
   if (k === 'du') { EIN_UI.du = v === 'du'; return render(); }
   if (k === 'anrede') { EIN_UI.du = v === 'du'; einSpeichern({ anrede: v }); return render(); }
   if (k === 'grund') { einSpeichern({ logoGrund: v }); return render(); }
+  if (k === 'tiefe') { einSpeichern({ tiefe: v }); return render(); }
   if (k === 'schalter') { const t = {}; t[v] = !einEntwurf()[v]; einSpeichern(t); return render(); }
   if (k === 'vorlage') { const t = {}; t[einDu() ? 'begruessungDu' : 'begruessung'] = ''; einSpeichern(t); return render(); }
   if (k === 'foto-weg') { einSpeichern({ foto: '' }); return render(); }
