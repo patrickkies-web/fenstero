@@ -746,7 +746,7 @@ if (teil(6)) {
   ok(/rotateX\(-52deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
   await p7.evaluate(() => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; });
   await frage7('material', { teilung: '2p' });
-  const zoomKn7 = await p7.evaluate(() => ({ da: !!document.querySelector('#w3d [data-w3d="plus"]') && !!document.querySelector('#w3d [data-w3d="minus"]'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, touch: getComputedStyle(document.getElementById('w3d')).touchAction, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  const zoomKn7 = await p7.evaluate(() => ({ da: !!document.querySelector('#w3d [data-w3d="plus"]') && !!document.querySelector('#w3d [data-w3d="minus"]'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, touch: getComputedStyle(document.getElementById('w3d')).touchAction, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width), netz: parseFloat(document.querySelector('#w3d [data-r="mesh"]').style.width) }));
   await p7.click('#w3d [data-w3d="plus"]'); await p7.waitForTimeout(500);
   const zoom7 = await p7.evaluate(() => ({ z: W3DZ.w3d.z, cls: document.getElementById('w3d').classList.contains('is-zoom'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
   await p7.click('#w3d [data-w3d="eins"]'); await p7.waitForTimeout(500);
@@ -759,7 +759,7 @@ if (teil(6)) {
   const pinch7 = await p7.evaluate(() => W3DZ.w3d.z);
   await frage7('sprossen', { teilung: '2p' });
   const spross7 = await p7.evaluate(() => !document.querySelector('#w3d [data-r="zoom"]') && W3DZ.w3d.z === 1);
-  ok(zoomKn7.da && zoomKn7.eins && zoomKn7.touch === 'none' && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
+  ok(zoomKn7.netz > 20 && zoomKn7.da && zoomKn7.eins && zoomKn7.touch === 'none' && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
   const erg7 = await p7.evaluate(() => {
     /* Bühne wie im Ergebnis (alle acht Maße, gleiche Werte je Richtung), außerhalb eines festen Bildschirms */
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:16px;top:80px;width:358px;z-index:99'; document.body.appendChild(box);

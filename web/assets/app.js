@@ -1157,6 +1157,7 @@ function w3dLayout(stage, w, o, gr) {
     w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
   });
   stage._griffe = griffe;
+  if (q('mesh')) face(q('mesh'), iw, ih, ix, iy, z0 - fd - 6 * s, '', '0 0', G ? polyClip(gI.pts, ix, iy, iw, ih) : null);
   w3dSonne(stage, w, o, V, s, q); w3dAntrieb(w, V, s, q);
   /* Sichtschutz innen: Kassette oben, Behang nach dem Stand der Knöpfe herab, Endleiste; vor dem Rahmen auf der Raumseite */
   const inn = q('innen');
@@ -1306,8 +1307,9 @@ function w3dGriffLage(V, w, x, i, s, g) {
     const k = kante(sashW / 2), ax = sashW / 2 - hl / 2 + hw / 2, ay = k[0] + sf / 2;
     return Object.assign(r, { ax: ax, ay: ay, lw: hl, lh: hw, lx: ax - hw / 2, ly: ay - hw / 2, origin: px(hw / 2) + ' 50%', rw: rh, rh: rw });
   }
-  /* Dreh, Dreh-Kipp, Gehflügel, PSK und der Bediengriff der Faltwand: Griff gegenüber den Bändern */
-  const rechts = bedien ? (w.fsw || {}).schema !== 'rechts' : x.din === 'L';
+  /* Dreh, Dreh-Kipp, Gehflügel und der Bediengriff der Faltwand: Griff gegenüber den Bändern. PSK: auf der Schließseite wie bei
+     Hebe-Schiebe (din = Seite, auf der der Flügel geschlossen steht) */
+  const rechts = bedien ? (w.fsw || {}).schema !== 'rechts' : x.t === 'PS' ? x.din === 'R' : x.din === 'L';
   const ax = rechts ? sashW - sf / 2 : sf / 2, k = kante(ax), ay = w3dGriffAchse(V, w, s, sashH, k[0], k[1], hl);
   return Object.assign(r, { ax: ax, ay: ay, lw: hw, lh: hl, lx: ax - hw / 2, ly: ay - hw / 2, origin: '50% ' + px(hw / 2), rw: rw, rh: rh });
 }
