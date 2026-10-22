@@ -22,9 +22,11 @@ a { color: var(--ink) }
 .nav .cnt { margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 11px; background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums }
 .side .me { margin-top: auto; padding: 10px 8px 10px 12px; border-radius: var(--r2); background: var(--surface2); display: flex; align-items: center; gap: 10px; font-size: 15px }
 .side .me b { display: block; font-size: 15px } .side .me small { color: var(--muted); font-size: 13px }
-.av { width: 38px; height: 38px; border-radius: var(--r2); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--cream); flex: 0 0 auto; font-size: 15px }
+.av { width: 38px; height: 38px; border-radius: var(--r2); display: flex; align-items: center; justify-content: center; font-weight: 800; background: var(--cream); color: var(--on-primary); flex: 0 0 auto; font-size: 15px }
+/* Avatar des Betriebs: Cream mit dunkler Initiale oder das Logo auf weißem Feld (S6) */
+.av.av-logo { background: #fff; padding: 4px; overflow: hidden } .av.av-logo img { display: block; width: 100%; height: 100%; object-fit: contain }
 .me-t { min-width: 0; flex: 1 } .me-t b, .me-t small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.me .ibtn.out { width: 40px; height: 40px; flex: 0 0 auto; box-shadow: none; background: transparent; color: var(--muted); border-radius: var(--r1) }
+.me .ibtn.out { width: 44px; height: 44px; flex: 0 0 auto; box-shadow: none; background: transparent; color: var(--muted); border-radius: var(--r1) }
 @media (hover: hover) { .me .ibtn.out:hover { background: var(--surface3); color: var(--ink) } }
 .tour-side { width: 100%; margin-top: 8px; gap: 8px; color: var(--ink2) }
 
@@ -35,9 +37,13 @@ a { color: var(--ink) }
 .top.scrolled { border-bottom-color: var(--line2) }
 .top h1, .top .top-h { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.02em; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .top .back { display: inline-flex; min-height: 44px; border: 0; background: none; color: var(--ink); font-weight: 700; padding: 0 8px 0 2px; font-size: 15px; align-items: center; gap: 6px; flex: 0 0 auto; border-radius: var(--r1) }
-.top .btn.small { min-height: 40px }
+.top .btn.small { min-height: 44px }
+/* Hauptaktion oben (S6): Cream nur, wenn keine Hauptaktion der Seite im Bild ist, sonst mit Ring; eine Cream-Fläche je Bildschirm */
+.top.cta-still .btn.kopf-cta { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line2) }
+@media (hover: hover) { .top.cta-still .btn.kopf-cta:hover { background: transparent; box-shadow: inset 0 0 0 2px var(--ink) } }
+.logo-s.neben-zurueck { margin-left: -4px; min-width: 44px; justify-content: center } /* am Telefon ohne Schriftzug: Ziel trotzdem 44 px */
 .ibtn { width: 44px; height: 44px; border: 0; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring); color: var(--ink2); display: inline-flex; align-items: center; justify-content: center; position: relative }
-.ibtn .dot { position: absolute; top: 9px; right: 10px; width: 9px; height: 9px; border-radius: 50%; background: var(--mo); box-shadow: 0 0 0 2px var(--surface) }
+.ibtn .dot { position: absolute; top: 9px; right: 10px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface) }
 .lm { width: 32px; height: 32px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto }
 .logo .lm { width: 36px; height: 36px }
 /* Umschalter Hauseigentümer / Fensterbauer (öffentliche Seiten): am Schreibtisch neben dem Logo, darunter als eigene Zeile */
@@ -76,7 +82,7 @@ a { color: var(--ink) }
 .form > .row.between, .wrap > .row.between { align-items: center }
 .linkbtn { border: 0; background: none; color: var(--ink); font: inherit; font-size: 15px; font-weight: 700; padding: 10px 2px; min-height: 44px; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 4px; text-decoration-thickness: 1.5px }
 .linkbtn:hover { text-decoration-color: var(--ink) }
-.chip.small { min-height: 36px; padding: 0 12px; font-size: 13px }
+.chip.small { min-height: var(--h1); padding: 0 14px; font-size: 15px } /* S6: Ziele ab 44 px wie alle Chips */
 .scrollchips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 2px 20px }
 .scrollchips::-webkit-scrollbar { display: none } .scrollchips .chip { flex: 0 0 auto }
 .seg .n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--surface3); font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums }
@@ -87,9 +93,21 @@ a { color: var(--ink) }
 .seg.fit > button { flex: 0 1 auto; padding: 0 12px }
 .seg > button .n { margin-left: 2px }
 
+/* ---------- Projektliste (S6): Hauptaktion mit Pfeil, zwei Nebenaktionen, Filter als Chips mit Anzahl ---------- */
+.hrow > .l-neu-knopf { flex: 0 0 auto }
+.l-leiste { display: flex; gap: 10px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap }
+.l-leiste .lfilter { flex: 1 1 auto; min-width: 0 } .l-neben { display: flex; gap: 8px; flex: 0 0 auto }
+.chip .n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--surface3); font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums }
+.chip[aria-pressed="true"] .n { background: rgba(22, 22, 22, .12); color: var(--on-primary) }
+.lfilter { padding-top: 2px; padding-bottom: 2px }
+.l-neu { display: flex; gap: 8px; align-items: flex-start; margin-top: -8px; color: var(--ink2) } .l-neu svg { flex: 0 0 auto; margin-top: 1px; color: var(--muted) }
+.nl-hinweis { display: block; margin-top: 4px; color: var(--ink2) }
+.note.vorort b { color: var(--ink) }
+.b-team { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px } .b-mail-pilot { margin-top: 10px }
+
 /* ---------- Kennzahlen ---------- */
 .stat { position: relative; padding: 16px 18px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); display: flex; flex-direction: column; gap: 2px; --t: var(--ink); min-height: 104px }
-.stat.tone-acc { --t: var(--accent) } .stat.tone-ok { --t: var(--ok) } .stat.tone-warn { --t: var(--warn) } .stat.tone-lead { --t: var(--mo) } .stat.tone-gold { --t: var(--warn) } .stat.tone-bad { --t: var(--bad) }
+.stat.tone-acc { --t: var(--accent) } .stat.tone-ok { --t: var(--ok) } .stat.tone-warn { --t: var(--warn) } .stat.tone-lead { --t: var(--accent) } .stat.tone-gold { --t: var(--warn) } .stat.tone-bad { --t: var(--bad) }
 .stat small { font-size: 13px; font-weight: 700; color: var(--muted); padding-right: 44px } .stat b { font-size: clamp(26px, 3.4vw, 30px); line-height: 1.1; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--ink) } .stat span { font-size: 13px; color: var(--ink2) }
 .stat .stat-ic { position: absolute; right: 14px; top: 14px; width: 36px; height: 36px; border-radius: var(--r2); background: var(--surface2); color: var(--t); display: flex; align-items: center; justify-content: center }
 .stat .stat-ic svg { width: 20px; height: 20px; flex: 0 0 auto }
@@ -124,9 +142,9 @@ button.item:active { transform: scale(.995) }
 
 /* ---------- Formulare ---------- */
 .form { display: flex; flex-direction: column; gap: 14px }
-.f { display: flex; flex-direction: column; gap: 6px } .f label { font-size: 13px; font-weight: 700; color: var(--ink2) }
+.f { display: flex; flex-direction: column; gap: 6px } .f label, .f .lbl { font-size: 13px; font-weight: 700; color: var(--ink2) } /* .lbl: Name einer Gruppe (aria-labelledby), kein Feld */
 .f input, .f select, .f textarea, .sharecard textarea { min-height: 48px; border-radius: var(--r2); border: 2px solid var(--line2); background: var(--surface); color: var(--ink); padding: 10px 14px; font-size: 17px; transition: border-color var(--t2), box-shadow var(--t2) }
-.f input:focus, .f select:focus, .f textarea:focus, .sharecard textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft) }
+.f input:focus, .f select:focus, .f textarea:focus, .sharecard textarea:focus { outline: none; border-color: var(--ink); box-shadow: none }
 .f textarea { min-height: 90px; resize: vertical }
 .f small { color: var(--muted); font-size: 13px }
 .f2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
@@ -139,6 +157,11 @@ button.item:active { transform: scale(.995) }
 .opt b { display: block; font-size: 17px } .opt small { color: var(--muted); font-size: 13px; line-height: 1.35 }
 .opt em { display: block; margin-top: 7px; font-style: normal; font-size: 13px; font-weight: 800; color: var(--ink) }
 .sw-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); min-height: 60px } .sw-row:last-child { border-bottom: 0 }
+/* Die ganze Zeile ist der Schalter (S6): ein Ziel ab 44 px, „an“ in Cream mit dunklem Knopf */
+button.sw-row { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer }
+button.sw-row:last-child { border-bottom: 0 }
+button.sw-row .switch { pointer-events: none }
+.sw-row[aria-checked="true"] .switch { background: var(--cream) } .sw-row[aria-checked="true"] .switch > span { transform: translateX(20px); background: var(--ground) }
 .sw-row .t { flex: 1; min-width: 0 } .sw-row .t b { font-size: 15px; font-weight: 600 } .sw-row .t small { display: block; color: var(--muted); font-size: 13px }
 .err { color: var(--bad); font-size: 13px; font-weight: 700 }
 .f small.err { color: var(--bad); font-weight: 700 }
@@ -153,8 +176,8 @@ button.item:active { transform: scale(.995) }
 .agree + .err { margin-top: -6px; padding-left: 4px }
 .fillbtn { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; margin-top: 6px; min-height: 40px; padding: 0 14px; border: 0; border-radius: var(--r2); background: var(--surface2); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700 }
 .formnav { flex-wrap: nowrap }
-.colors { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; min-height: 46px }
-.colors .col { width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); transition: transform var(--t2), box-shadow var(--t2); position: relative }
+.colors { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; min-height: 48px }
+.colors .col { width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); transition: transform var(--t2), box-shadow var(--t2); position: relative }
 .colors .col::before { content: ''; position: absolute; inset: -4px }
 .colors .col[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink) }
 .preview { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--r3); background: var(--surface2) }
@@ -179,7 +202,7 @@ button.item:active { transform: scale(.995) }
 .sheet .grip { width: 36px; height: 4px; border-radius: 2px; background: var(--line2); margin: 0 auto }
 .sheet h3 { margin: 0; padding-right: 48px; font-size: 22px; font-weight: 800; letter-spacing: -.02em }
 .sheet .list .item { box-shadow: inset 0 0 0 1.5px var(--line) }
-.xclose { position: absolute; top: 12px; right: 14px; width: 40px; height: 40px; border-radius: var(--r2); border: 0; background: var(--surface2); color: var(--ink2); font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center; padding: 0 0 2px }
+.xclose { position: absolute; top: 10px; right: 12px; width: 44px; height: 44px; border-radius: var(--r2); border: 0; background: var(--surface2); color: var(--ink2); font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center; padding: 0 0 2px }
 .toast { position: fixed; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); z-index: 70; width: max-content; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: var(--r2); background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 700; line-height: 1.35; text-align: center; box-shadow: var(--lift); opacity: 0; transform: translate(-50%, 12px); transition: opacity var(--t2), transform var(--t3) var(--e-out); pointer-events: none }
 .toast.show { opacity: 1; transform: translate(-50%, 0) }
 .app.is-out ~ .toast { bottom: calc(24px + env(safe-area-inset-bottom, 0px)) }
@@ -260,7 +283,7 @@ button.item:active { transform: scale(.995) }
 .phone { position: relative; width: min(100%, 320px); margin: 0 auto; padding: 9px; border-radius: 38px; background: var(--bezel); box-shadow: var(--lift) }
 .phone.small { width: min(100%, 300px) }
 .ph-top { display: flex; gap: 10px; align-items: center; padding: 14px 14px 10px; background: var(--surface); border-radius: 30px 30px 0 0; border-bottom: 1px solid var(--line) }
-.ph-av { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex: 0 0 auto }
+.ph-av { width: 34px; height: 34px; border-radius: 50%; background: var(--cream); color: var(--on-primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex: 0 0 auto }
 .ph-top b { display: block; font-size: 15px; line-height: 1.2 } .ph-top small { font-size: 13px; color: var(--muted) }
 .ph-body { display: flex; flex-direction: column; gap: 8px; padding: 14px 12px 18px; background: var(--chat); border-radius: 0 0 30px 30px; min-height: 330px }
 .phone.small .ph-body { min-height: 0 }
@@ -280,11 +303,11 @@ button.item:active { transform: scale(.995) }
 .story-stage .sc { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 52px 24px 24px; opacity: 0; transform: translateY(16px); transition: opacity var(--t3) var(--e-out), transform var(--t3) var(--e-out); pointer-events: none }
 .story-stage[data-step="0"] .sc-proj, .story-stage[data-step="1"] .sc-msg, .story-stage[data-step="2"] .sc-mess, .story-stage[data-step="3"] .sc-in { opacity: 1; transform: none; pointer-events: auto }
 .story-stage .cap { font-size: 15px; font-weight: 700; color: var(--ink2); text-align: center; margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0 }
-.story-stage .pill { position: absolute; top: 16px; left: 16px; min-height: 28px; padding: 4px 10px; border-radius: var(--r1); background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase }
+.story-stage .pill { position: absolute; top: 16px; left: 16px; min-height: 28px; padding: 4px 10px; border-radius: var(--r1); background: var(--surface2); color: var(--ink); box-shadow: var(--ring); font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase }
 .story-steps { display: flex; flex-direction: column; gap: 10vh; padding: 10vh 0 20vh }
 .story-step { padding: 22px 24px; border-radius: var(--r3); border: 2px solid transparent; background: var(--surface); box-shadow: var(--ring); opacity: .5; transition: opacity var(--t3), border-color var(--t3) }
-.story-step.on { opacity: 1; border-color: var(--accent) }
-.story-step .n { width: 32px; height: 32px; border-radius: var(--r1); background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 10px; font-variant-numeric: tabular-nums }
+.story-step.on { opacity: 1; border-color: var(--ink) }
+.story-step .n { width: 32px; height: 32px; border-radius: var(--r1); background: var(--surface2); color: var(--ink); box-shadow: var(--ring); display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 10px; font-variant-numeric: tabular-nums }
 .story-step h3 { margin: 0 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -.02em } .story-step p { margin: 0; color: var(--ink2); font-size: 15px; line-height: 1.5 }
 .form-mini { width: min(100%, 340px); padding: 16px 18px; border-radius: var(--r3); background: var(--paper); box-shadow: var(--ring); display: flex; flex-direction: column; gap: 9px; text-align: left }
 .fm { display: flex; flex-direction: column; gap: 1px; padding: 8px 11px; border-radius: 10px; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line2) }
@@ -294,7 +317,7 @@ button.item:active { transform: scale(.995) }
 @keyframes typing { to { clip-path: inset(0 0 0 0) } }
 .fm-chips { display: flex; gap: 6px; flex-wrap: wrap } .fm-chips .badge { opacity: 0 }
 .story-stage[data-step="0"] .fm-chips .badge { animation: wordin var(--t3) forwards } .story-stage[data-step="0"] .fm-chips .badge:nth-child(1) { animation-delay: 1.9s } .story-stage[data-step="0"] .fm-chips .badge:nth-child(2) { animation-delay: 2.1s } .story-stage[data-step="0"] .fm-chips .badge:nth-child(3) { animation-delay: 2.3s }
-.fm-btn { align-self: flex-start; padding: 8px 14px; border-radius: 10px; background: var(--ink); color: var(--paper); font-weight: 800; font-size: 13px; opacity: 0 }
+.fm-btn { align-self: flex-start; padding: 8px 14px; border-radius: 10px; background: var(--surface3); color: var(--ink); font-weight: 800; font-size: 13px; opacity: 0 }
 .story-stage[data-step="0"] .fm-btn { animation: wordin var(--t3) 2.7s both }
 .sc-msg .phone.small { width: min(100%, 290px) } .sc-msg .bub { opacity: 0 }
 .story-stage[data-step="1"] .sc-msg .bub { animation: bubin .45s .3s var(--e-out) forwards }
@@ -302,8 +325,8 @@ button.item:active { transform: scale(.995) }
 .sc-mess .dim { stroke-dasharray: 600; stroke-dashoffset: 600 } .story-stage[data-step="2"] .sc-mess .dim { animation: dimdraw 1.1s .3s var(--e-out) forwards } .story-stage[data-step="2"] .sc-mess .dim.h { animation-delay: .9s }
 @keyframes dimdraw { to { stroke-dashoffset: 0 } }
 .sc-mess .lab { opacity: 0 } .story-stage[data-step="2"] .sc-mess .lab { animation: wordin var(--t3) 1.2s forwards } .story-stage[data-step="2"] .sc-mess .lab.h { animation-delay: 1.8s }
-.in-mini { width: min(100%, 360px); padding: 16px 18px; border-radius: var(--r3); background: var(--ok-soft); display: flex; flex-direction: column; gap: 8px; text-align: left; position: relative }
-.in-mini .unlock { display: inline-flex; align-items: center; gap: 8px; color: var(--ok); font-weight: 800 } .in-mini .unlock svg { width: 22px; height: 22px }
+.in-mini { width: min(100%, 360px); padding: 16px 18px; border-radius: var(--r3); background: var(--surface2); box-shadow: var(--ring); display: flex; flex-direction: column; gap: 8px; text-align: left; position: relative }
+.in-mini .unlock { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 800 } .in-mini .unlock svg { color: var(--accent) } .in-mini .unlock svg { width: 22px; height: 22px }
 .in-mini .ring { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px; border-radius: 50%; border: 3px solid var(--ok); opacity: 0; pointer-events: none }
 .story-stage[data-step="3"] .in-mini .ring { animation: okring 1s .2s ease-out } @keyframes okring { 0% { opacity: .6; transform: scale(1) } 100% { opacity: 0; transform: scale(12) } }
 .in-row { display: flex; gap: 10px; align-items: center; padding: 7px 9px; border-radius: var(--r2); background: var(--surface); opacity: 0 }
@@ -321,11 +344,11 @@ button.item:active { transform: scale(.995) }
 .roi h3 { margin: 6px 0 8px; font-size: clamp(26px, 3.4vw, 30px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1 }
 .roi-in { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
 .roi-r { display: flex; flex-direction: column; gap: 6px; font-size: 15px; font-weight: 700; color: var(--ink2) }
-.roi-r > span { display: flex; justify-content: space-between; gap: 12px } .roi-r b { color: var(--ink); font-variant-numeric: tabular-nums } .roi-r input { width: 100%; accent-color: var(--accent); margin: 0 }
+.roi-r > span { display: flex; justify-content: space-between; gap: 12px } .roi-r b { color: var(--ink); font-variant-numeric: tabular-nums } .roi-r input { width: 100%; height: 44px; accent-color: var(--accent); margin: 0; cursor: pointer }
 .roi-out { display: grid; gap: 10px; min-width: 0 }
 .ro { padding: 14px 16px; border-radius: var(--r3); background: var(--surface2); display: flex; flex-direction: column; gap: 2px }
 .ro small { font-size: 13px; font-weight: 700; color: var(--muted) } .ro b { font-size: 30px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.15 } .ro span { font-size: 13px; color: var(--ink2) }
-.ro.hi { background: var(--ok-soft) } .ro.hi b { color: var(--ok) }
+.ro.hi { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink) }
 .roi-note { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45 }
 .owner { display: flex; gap: 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 22px 24px; border-radius: var(--r4); background: var(--surface); color: var(--ink); box-shadow: var(--ring) }
 .owner h2, .owner h3 { margin: 6px 0 8px; font-size: clamp(26px, 3.4vw, 30px); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; text-wrap: balance }
@@ -351,18 +374,24 @@ a.tcard { color: var(--ink); text-decoration: none; transition: box-shadow var(-
 /* „Vertrag widerrufen“ hervorgehoben (Widerrufsfunktion, § 356a BGB) */
 .foot .foot-links a.foot-widerruf { padding: 0 16px; border-radius: 999px; color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--ink) }
 .foot p { margin: 0; font-size: 13px; color: var(--muted); max-width: 72ch }
+/* Angemeldet (S6): schlanke Fußzeile unter dem Inhalt, am Telefon über der Tableiste; „Vertrag widerrufen“ vorn */
+.foot.schlank { margin-top: 36px; background: none } .foot.schlank .wrap { gap: 6px; padding-top: 14px; padding-bottom: 18px }
+.foot.schlank .foot-links { gap: 2px 14px } .foot.schlank .foot-links a.foot-widerruf { margin-right: 6px }
+.foot.schlank p { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px } .foot.schlank .lm-foot { color: var(--ink2); font-size: 13px }
 
 /* ---------- Für Fensterbauer: Projekte, Aufmaß ---------- */
-.pcard { --t: var(--muted); box-shadow: inset 3px 0 0 var(--t), var(--ring); padding-left: 18px }
-.pcard.st-eingegangen { --t: var(--ok) } .pcard.st-locked { --t: var(--warn) } .pcard.st-arbeit { --t: var(--warn) } .pcard.st-gesendet, .pcard.st-geoeffnet { --t: var(--accent) } .pcard.st-abgelaufen, .pcard.st-deaktiviert { --t: var(--line2); opacity: .72 }
-.pcard.is-new { box-shadow: inset 3px 0 0 var(--t), 0 0 0 1.5px var(--ok) }
-.pcard .neu { position: absolute; top: -9px; right: 16px; padding: 3px 9px; border-radius: var(--r1); background: var(--ink); color: var(--paper); font-size: 13px; line-height: 1.2; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; transform: scale(.9); transform-origin: right top }
+/* Status als Wort mit Punkt (Badge), keine farbigen Randstreifen; neu eingegangen: Rand in Schriftfarbe und „Neu“ mit grünem Punkt */
+.pcard { --t: var(--muted) }
+.pcard.st-eingegangen { --t: var(--ok) } .pcard.st-locked { --t: var(--warn) } .pcard.st-arbeit { --t: var(--warn) } .pcard.st-gesendet, .pcard.st-geoeffnet { --t: var(--accent) } .pcard.st-abgelaufen, .pcard.st-deaktiviert { --t: var(--muted); opacity: .72 }
+.pcard.is-new { box-shadow: inset 0 0 0 2px var(--ink) }
+.pcard .neu { position: absolute; top: -12px; right: 16px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); color: var(--ink) }
+.nr { white-space: nowrap; font-variant-numeric: tabular-nums }
 .pvis { width: 64px; height: 64px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; position: relative }
 .pcard .lst { gap: 8px; margin-top: 4px; align-items: center; flex-wrap: wrap } .pcard .lst .me { font-size: 13px }
 .pcard .rt small { font-size: 13px; color: var(--muted) }
 .litem .lst { gap: 8px; margin-top: 3px; align-items: center }
 .lst small { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums }
-.litem.is-new { box-shadow: inset 3px 0 0 var(--ok), var(--ring) }
+.litem.is-new { box-shadow: inset 0 0 0 2px var(--ink) }
 .mprog { width: 72px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; display: inline-block }
 .mprog span { display: block; height: 100%; background: var(--warn); border-radius: 3px; transition: width .4s var(--e-out) }
 .rt-m { display: none; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap } .rt-m b { font-size: 15px; font-weight: 800 }
@@ -395,7 +424,7 @@ a.tcard { color: var(--ink); text-decoration: none; transition: box-shadow var(-
 .hero-link { display: flex; flex-direction: column; gap: 18px; align-items: flex-start; padding: 24px }
 .hl-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100% }
 .hl-steps > div { display: flex; flex-direction: column; gap: 3px; padding: 16px; border-radius: var(--r3); background: var(--surface2) }
-.hl-steps .n { width: 32px; height: 32px; border-radius: var(--r1); background: var(--ink); color: var(--paper); font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px }
+.hl-steps .n { width: 32px; height: 32px; border-radius: var(--r1); background: var(--surface); color: var(--ink); box-shadow: var(--ring); font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 8px }
 .hl-steps b { font-size: 15px } .hl-steps small { color: var(--muted); font-size: 13px }
 .sharecard { display: flex; flex-direction: column; gap: 14px }
 .sharecard textarea { min-height: 96px; font-size: 15px; line-height: 1.5 }
@@ -408,7 +437,7 @@ a.tcard { color: var(--ink); text-decoration: none; transition: box-shadow var(-
 .sbtn svg { width: 26px; height: 26px }
 .sbtn.wa svg { color: var(--wa) }
 @media (hover: hover) { .sbtn:hover { background: var(--surface3) } }
-.created { display: flex; gap: 14px; align-items: center; background: var(--ok-soft); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ok) 35%, transparent) }
+.created { display: flex; gap: 14px; align-items: center; box-shadow: inset 0 0 0 2px var(--ink) }
 .burst-ok { width: 56px; height: 56px; flex: 0 0 auto; margin: -4px 0 -4px -4px } .burst-ok .lottie-still { display: flex; width: 48px; height: 48px; margin: 4px; border-radius: 50%; background: var(--ok); color: var(--on-accent); align-items: center; justify-content: center }
 .burst-ok .lottie-still svg { width: 26px; height: 26px } .burst-ok .lottie-still svg path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: fx-haken .5s var(--e-out) .2s forwards }
 .created b { display: block; font-size: 17px } .created div span { display: block; color: var(--ink2); font-size: 15px }
@@ -485,9 +514,10 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 .la { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: 0 0 auto } .la b { font-size: 15px; font-variant-numeric: tabular-nums }
 .fcard { display: flex; flex-direction: column; gap: 14px }
 .rcard { display: flex; flex-direction: column; gap: 6px; padding: 15px 18px }
-.nitem.is-new { box-shadow: inset 3px 0 0 var(--mo), var(--ring) }
+.nitem.is-new { box-shadow: inset 0 0 0 2px var(--ink) }
 .nitem .ic { width: 46px; height: 46px; border-radius: var(--r2); color: var(--ink2) }
-.nitem.is-new .ic { background: var(--mo-soft); color: var(--mo) }
+.nitem.is-new .ic { background: var(--accent-soft); color: var(--accent) }
+.nitem .neu-w { display: none; color: var(--ink); font-weight: 800 }
 .kcard { display: flex; flex-direction: column; gap: 11px }
 .who { display: flex; gap: 12px; align-items: center; border: 0; background: none; padding: 0; text-align: left; color: var(--ink); min-width: 0; font: inherit }
 .who b { display: block; font-size: 17px; letter-spacing: -.01em } .who small { display: block; color: var(--muted); font-size: 13px }
@@ -527,10 +557,14 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .hero .cta { flex-direction: column; align-items: stretch } .hero .cta .btn { width: 100% } .scrollchips { margin: 0 -16px; padding: 2px 16px }
   .share { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .hero-link { padding: 18px } .h.hrow .btn.big { width: 100% }
-  .grid.stats { grid-template-columns: minmax(0, 1fr); gap: 8px }
-  .stats .stat { display: grid; grid-template-columns: 40px auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 12px; row-gap: 0; align-items: center; padding: 10px 14px 10px 12px; min-height: 64px; border-radius: var(--r2) }
-  .stats .stat .stat-ic { position: static; grid-row: 1 / span 2; width: 40px; height: 40px }
-  .stats .stat > small { grid-column: 2 / 4; padding-right: 0; line-height: 1.2 } .stats .stat > b { font-size: 22px; line-height: 1.15 } .stats .stat > span:not(.stat-ic) { line-height: 1.3; padding-left: 2px }
+  /* Telefon (S6): Kennzahlen als eine Zeile mit drei Zahlen, damit die erste Projektkarte auf den ersten Bildschirm kommt */
+  .grid.stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+  .stats .stat { display: flex; flex-direction: column; justify-content: flex-start; gap: 2px; padding: 10px 12px; min-height: 0; border-radius: var(--r2) }
+  .stats .stat .stat-ic { display: none }
+  .stats .stat > small { order: 2; padding-right: 0; line-height: 1.25 } .stats .stat > b { order: 1; font-size: 26px; line-height: 1.1 } .stats .stat > span:not(.stat-ic) { display: none }
+  .l-leiste { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 12px } .l-leiste .lfilter { order: 2; flex: 0 0 auto } .l-neben { order: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0 } .l-neben .btn { min-width: 0; padding: 0 10px; overflow: hidden }
+  .nitem .neu-w { display: inline }
+  .logo-s.neben-zurueck .wm { display: none }
   .nitem .badge { display: none }
   .kcard .row .btn.ok { flex: 1 1 100% } .kcard .row .btn.danger, .kcard .row .btn.ghost { flex: 1 1 0; padding: 0 10px }
   .formnav .btn { flex: 1 1 0 }
@@ -540,7 +574,12 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .owner .row .btn { flex: 1 1 auto }
   .lockcard { grid-template-columns: minmax(0, 1fr) } .lockcard .row .btn { flex: 1 1 auto; justify-content: center }
   .pcard .neu { top: -7px; right: 12px } .pvis { width: 56px } .winstack { width: 56px }
-  .tlh small.ts { display: none }
+  /* Verlauf am Telefon senkrecht, mit Zeit je Schritt (S6) */
+  .tlh { grid-template-columns: minmax(0, 1fr) }
+  .tlh li { flex-direction: row; align-items: center; gap: 12px; text-align: left; min-height: 38px }
+  .tlh li::before { top: 50%; left: 8px; right: auto; width: 2px; height: 100% }
+  .tlh small { display: inline } .tlh small.ts { margin-left: auto; text-align: right }
+  .tl-now { text-align: left } .tlcard { padding: 12px 16px }
 }
 
 /* ---------- Tour für Fensterbauer: der Ablauf in acht Schritten ---------- */
@@ -553,7 +592,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 .tour-schritte .n { flex: 0 0 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 800; box-shadow: var(--ring) }
 .tour-schritte .n svg { width: 14px; height: 14px }
 .tour-schritte .tx { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis }
-.tour-schritte button.fertig .n { background: var(--ok); color: var(--on-accent); box-shadow: none }
+.tour-schritte button.fertig .n { background: var(--accent-soft); color: var(--accent); box-shadow: none }
 .tour-schritte button[aria-current="step"] { background: var(--primary); color: var(--on-primary) }
 .tour-schritte button[aria-current="step"] .n { background: var(--on-primary); color: var(--primary); box-shadow: none }
 @media (hover: hover) { .tour-schritte button:not([aria-current="step"]):hover { background: var(--surface3) } }
@@ -631,7 +670,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 .tpk-tx b { font-size: 17px }
 .tour-nb, .tour-code { display: flex; flex-direction: column; gap: 12px; align-items: flex-start }
 .tour-nb .tf-feld, .tour-code .tf-feld { align-self: stretch }
-.tour-ergebnis { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r2); background: var(--ok-soft); color: var(--ok); align-self: stretch }
+.tour-ergebnis { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r2); background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); color: var(--accent); align-self: stretch }
 .tour-ergebnis b { display: block; font-size: 15px; color: var(--ink) } .tour-ergebnis small { display: block; font-size: 13px; color: var(--ink2) } .tour-ergebnis svg { flex: 0 0 auto; margin-top: 1px }
 .tbi { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px }
 .tbi li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; font-size: 15px; line-height: 1.4 } .tbi b { font-size: 15px } .tbi span { color: var(--ink2) }
@@ -643,7 +682,7 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 .tpr span { font-size: 15px; line-height: 1.4; color: var(--ink2) }
 @media (max-width: 879px) {
   .tour-schritte { display: flex; overflow-x: auto; margin: 0 -20px; padding: 0 20px 2px; scrollbar-width: none } .tour-schritte::-webkit-scrollbar { display: none }
-  .tour-schritte li { flex: 0 0 auto } .tour-schritte button { width: auto } .tour-schritte button:not([aria-current="step"]) .tx { display: none }
+  .tour-schritte li { flex: 0 0 auto } .tour-schritte button { width: auto; min-width: 44px; justify-content: center } .tour-schritte button:not([aria-current="step"]) .tx { display: none }
   .tour-raster { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'oben' 'buehne' 'unten'; gap: 16px }
   .tour-oben { padding-top: 0 } .tour-oben h3 { font-size: 26px }
   .tour-buehne { min-height: 0; padding: 22px 16px }
@@ -667,3 +706,115 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .toast { transition: opacity .2s } .winstack i { transition: none }
   a.tcard { transition: none } a.tcard:hover { transform: none }
 }
+
+/* ---------- Strang S5: Aufmaß beim Betrieb ----------
+   Kopf, „Mit dem Kunden zu klären“ zum Abhaken, Übersicht der Positionen, je Position Zeichnung (weiße Karte, Orange und Blau nur
+   dort), Bestellmaß, Wünsche in Gruppen mit Notizen des Kunden, Maße, Einbausituation; Foto groß mit Zoom. Größen 13 · 15 · 17 · 22. */
+.am5 .amhead { display: flex; flex-direction: column; gap: 14px }
+.am5 .amhead .kv { margin: 0 }
+.am-chips { gap: 6px }
+.am-chips .chip, .am-offen .chip { min-height: 36px; padding: 0 12px; font-size: 13px; cursor: default }
+.chip.warnung::before, .chip.offen::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); flex: 0 0 auto }
+.am5 .amacts { margin: 0; gap: 10px } .am5 .amacts .btn { flex: 1 1 220px }
+/* Klärungsliste */
+.klaer .kl-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+.klaer .kl-kopf .eyebrow { margin: 0 }
+.kl-stand { font-size: 15px; color: var(--text2) } .kl-stand b { color: var(--text) }
+.kl-balken { height: 6px; margin: 10px 0 4px; border-radius: var(--pill); background: var(--surface3); overflow: hidden }
+.kl-balken span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width var(--t3) var(--e-out) }
+.kl-g { margin-top: 14px }
+.kl-g h4 { margin: 0 0 4px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text2) }
+.kl-g h4 .n { min-width: 22px; height: 22px; padding: 0 6px; border-radius: var(--pill); background: var(--surface2); color: var(--text2); font-size: 13px; letter-spacing: 0; display: inline-flex; align-items: center; justify-content: center }
+.kl-liste { list-style: none; margin: 0; padding: 0 }
+.kl-z { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--line) }
+.kl-liste > .kl-z:first-child { border-top: 0 }
+.kl-haken { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line2); background: transparent; color: var(--line2); display: inline-flex; align-items: center; justify-content: center; padding: 0; transition: background var(--t1), border-color var(--t1), color var(--t1) }
+.kl-haken[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent) }
+@media (hover: hover) { .kl-haken:not([aria-pressed="true"]):hover { border-color: var(--text); color: var(--muted) } }
+.kl-punkt { width: 10px; height: 10px; margin: 8px 0 0 17px; border-radius: 50%; background: var(--warn) }
+.kl-t { min-width: 0 }
+.kl-t > p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--text) }
+.kl-z.pflicht .kl-t > p { font-weight: 700 }
+.kl-z.ok .kl-t > p { color: var(--muted) }
+.kl-k { display: block; margin-bottom: 2px; font-size: 13px; font-weight: 800; color: var(--text2) }
+.kl-t > small { display: block; margin-top: 2px; font-size: 13px; line-height: 1.4; color: var(--muted) }
+.kl-t > small.kl-ok { display: inline-flex; align-items: center; gap: 4px; color: var(--text2) } .kl-ok svg { color: var(--accent) }
+.kl-n { margin: 6px 0 0; display: flex; gap: 8px; font-size: 15px; color: var(--text2) } .kl-n svg { flex: 0 0 auto; margin-top: 2px; color: var(--muted) }
+.kl-nf { margin-top: 8px }
+.kl-akt { display: flex; flex-wrap: wrap; gap: 0 18px }
+.kl-akt .linkbtn { font-size: 15px; padding: 6px 0; min-width: 44px; text-align: left } /* „Notiz“ an jedem Punkt: Ziel 44 px breit, Text bleibt links bündig */
+.klaer.leer .kl-nichts { margin: 8px 0 0; display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--text2) } .kl-nichts svg { flex: 0 0 auto; color: var(--accent) }
+/* Übersicht der Positionen */
+.am-tab { padding-top: 10px; padding-bottom: 12px }
+.am-tab-kopf, .am-zeile { display: grid; grid-template-columns: 48px minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); gap: 0 12px; align-items: center }
+.am-tab-kopf { padding: 6px 0; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.am-tab-kopf span:first-child { grid-column: 1 / 3 }
+.am-zeile { width: 100%; min-height: 60px; padding: 8px 0; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 0 }
+.am-zeile .pic { width: 48px; height: 48px }
+.az-t { min-width: 0; display: flex; flex-direction: column; gap: 2px } .az-t b { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .az-t small { font-size: 13px; color: var(--muted) }
+.az-k { color: var(--text2); white-space: nowrap } .az-k::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--warn); vertical-align: 1px }
+.az-m { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text2) } .az-m small { display: none } .az-b b { color: var(--text); font-size: 15px }
+@media (hover: hover) { .am-zeile:hover .az-t b { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2) } }
+.am-tab-fuss { margin: 10px 0 0 }
+/* Position */
+.posc .pt span.pmarks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px }
+.posc .pbody { gap: 14px }
+.pos-klaer { padding: 12px 14px; border-radius: var(--r2); background: var(--surface2); box-shadow: inset 3px 0 0 var(--warn) }
+.pos-klaer .eyebrow { color: var(--warn); margin: 0 0 4px }
+.pos-klaer .kl-z { border-top-color: var(--line2) }
+.pos-plan { display: flex; flex-direction: column; gap: 10px }
+.zk { margin: 0; padding: 10px 10px 12px; border-radius: var(--r2); background: #ffffff }
+.zk svg { display: block; width: 100%; height: auto; max-height: 72vh }
+.zk-leg { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 6px 0; font-size: 13px; color: #3a3a3f }
+.zk-leg .lg { display: inline-flex; align-items: center; gap: 6px; font-weight: 700 }
+.zk-leg .lg::before { content: ''; width: 16px; height: 3px; border-radius: 2px; background: var(--mo) } .zk-leg .lg.el::before { background: var(--el) }
+.best.warn { border-left-color: var(--warn) }
+.best .best-warn span { font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text2) }
+.zk .zk-klein { display: none }
+.kl-fold > summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer }
+.kl-fold > summary::-webkit-details-marker { display: none }
+.kl-fold > summary h4 { margin: 0 }
+.kl-fold-t { flex: 1; font-size: 13px; color: var(--muted) }
+.kl-fold[open] > summary .pchev { transform: rotate(-135deg); margin: 4px 6px 0 0 }
+.best-warn { margin: 6px 0 0; display: flex; gap: 8px; font-size: 15px; color: var(--text2) } .best-warn svg { flex: 0 0 auto; margin-top: 2px; color: var(--warn) }
+.am-wunsch .eyebrow { margin: 0 0 6px }
+.am-wunsch .satz { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.45; color: var(--text) }
+.am-offen { margin: 10px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px }
+.am-offen > span:first-child { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+/* Gruppen in zwei Spalten wie im PDF, jede so hoch wie ihr Inhalt (viele Detailzeilen in einer Gruppe lassen keine Lücken in der anderen) */
+.am-gruppen { columns: 2; column-gap: 10px }
+.am-g { padding: 12px 14px; border-radius: var(--r2); box-shadow: inset 0 0 0 2px var(--line); min-width: 0 }
+.am-gruppen > .am-g { break-inside: avoid; margin: 0 0 10px }
+.am-g > .eyebrow { margin: 0 0 6px }
+.am-dl { margin: 0; display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr); gap: 4px 12px; font-size: 15px }
+.am-dl dt { color: var(--muted); font-size: 13px; padding-top: 2px } .am-dl dd { margin: 0; color: var(--text); font-weight: 600; overflow-wrap: anywhere }
+.am-dl dd.offen::before, .am-dl dd.hinweis::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); vertical-align: 1px }
+.am-dl dd.std { color: var(--muted); font-weight: 500 }
+.am-std { margin: 8px 0 0; font-size: 13px; line-height: 1.45; color: var(--muted) } .am-std b { font-weight: 700 }
+.am-dl .sw { display: inline-block; width: 14px; height: 14px; margin-right: 6px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); vertical-align: -2px }
+.am-notiz { margin: 10px 0 0; padding: 10px 12px; display: flex; gap: 10px; border-radius: var(--r2); background: var(--surface2); font-size: 15px; line-height: 1.45; color: var(--text) }
+.am-notiz svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent) }
+.am-notiz small { display: block; font-size: 13px; color: var(--muted) }
+.am-masse, .am-ki { grid-column: 1 / -1 }
+.am-ki .pos-fotos { margin-bottom: 10px }
+/* Foto groß mit Zoom */
+.foto-gross.fz { position: relative; overflow: hidden; touch-action: none; cursor: zoom-in; user-select: none }
+.foto-gross.fz.gross { cursor: grab }
+.foto-gross.fz img { transition: transform var(--t2) var(--e-out); transform-origin: center center; -webkit-user-drag: none }
+.fz-pos { margin: -2px 0 10px }
+.fz-leiste { margin-top: 10px; gap: 10px; flex-wrap: wrap }
+.fz-zoom { display: inline-flex; align-items: center; gap: 6px } .fz-zoom .btn { min-width: 44px; padding: 0 12px; font-size: 17px }
+.fz-wert { min-width: 60px; text-align: center; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text2) }
+.nb-punkte .chips { margin-top: 4px }
+@media (max-width: 600px) {
+  .am-gruppen { columns: 1 }
+  .am-tab-kopf { display: none }
+  .am-zeile { grid-template-columns: 44px minmax(0, 1fr) auto; grid-template-areas: 'pic t b' 'pic m1 m1' 'pic m2 m2'; gap: 2px 10px; padding: 10px 0 }
+  .am-zeile .pic { grid-area: pic; width: 44px; height: 44px; align-self: start } .am-zeile .az-t { grid-area: t } .am-zeile .az-b { grid-area: b; text-align: right; align-self: start }
+  .am-zeile .az-m:nth-child(3) { grid-area: m1 } .am-zeile .az-m:nth-child(4) { grid-area: m2 }
+  .az-m { font-size: 13px } .az-m small { display: inline; margin-right: 6px; font-size: 13px; color: var(--muted) } .az-b small { display: block; margin: 0 } .az-b b { font-size: 15px }
+  /* Beschriftung so breit wie nötig (Einbruchschutz, Insektenschutz, Maueröffnung), höchstens 136 px, dann mit Trennung */
+  .am-dl { grid-template-columns: minmax(84px, max-content) minmax(0, 1fr); gap: 4px 10px } .am-dl dt { max-width: 136px; hyphens: auto; overflow-wrap: break-word }
+  .zk { padding: 6px 4px 10px } .zk .zk-gross { display: none } .zk .zk-klein { display: block }
+}
+@media (prefers-reduced-motion: reduce) { .foto-gross.fz img, .kl-balken span, .kl-haken { transition: none } }

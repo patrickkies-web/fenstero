@@ -34,11 +34,20 @@
 // das Neuladen, Senden wartet auf sie, der Betriebsbereich zeigt sie (klein, groß, im PDF), ein zweites Gerät holt sie aus dem Konto.
 // Abschnitt 20 prüft die 3-D-Bühne in WebGL (web/assets/buehne.js, mit ?gl=voll auch ohne Grafikchip): keine Nahtlinien auf der Wand
 // aus allen Blickwinkeln, die Laibung nur in der Öffnung sichtbar (auch von oben und über Eck), Vorführung, Antippen eines Flügels,
-// ohne WebGL 2 und nach Verlust des Zusammenhangs das CSS-Modell, ohne Grafikchip das CSS-Modell, bei „weniger Bewegung“ kein Schwingen.
+// ohne WebGL 2 und nach Verlust des Zusammenhangs das CSS-Modell, ohne Grafikchip das CSS-Modell, bei „weniger Bewegung“ kein Schwingen;
+// dazu das CSS-Modell des Umbaus in WebGL: Raffstore aus Lamellen mit Fahren und Wenden, Kleinteile als Flächen ohne Loch, Griffe nach
+// den Regeln, Zoom und Verschiebung wie die Maßlinien, Selbsttest nur bei 1:1.
 // Abschnitt 21 prüft die Detailtiefe (docs/GESTALTUNG.md): drei Tiefen mit wachsender Fragenzahl, Kapitel und „Mehr zu …“, Standard des
-// Fensterbauers ohne Klärung und ohne Zeile, Detailangaben im Code, Aufmaßblatt und Modell, RC2N/RC3, neue Formen und Bauarten im 3-D-Modell.
+// Fensterbauers ohne Klärung und ohne Zeile, Detailangaben im Code, Aufmaßblatt und Modell, RC2N/RC3, neue Formen und Bauarten im 3-D-Modell;
+// dazu die Tiefe je Fenster (ein im Wichtigsten geplantes Fenster bleibt dabei, auch wenn das nächste alles im Detail fragt).
+// Abschnitt 22 prüft den Konfigurator ohne Hürden: Der erste Tipp nach einem Textfeld zählt, Maßschilder bleiben in der Bühne,
+// Knöpfe am Sonnenschutz überdecken nichts, ein grünes Wort je Titel, Blätter linksbündig mit Fokus, Zurück nach „Wünsche ändern“;
+// dazu der Angleich an die Detailtiefe: ein Kapitelkonzept (Leiste, Kicker, Übersicht), Tiefe-Pille neben „Notiz“ mit Browser-Zurück,
+// Notiz und i an jeder Detailfrage, RAL-Farbwahl bei den Detailfarben, Zifferntasten für die neuen Maße, Stulp mit Seitenteilen,
+// Standard mit dem Namen des Betriebs, keine Gesamtübersicht und ein Entwurf, der „Mehr zu …“ und die Tiefe behält.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
+import { createServer } from 'node:net';
 
 const require = createRequire(process.env.PW_PFAD ? process.env.PW_PFAD.replace(/\/?$/, '/') + 'x.js' : import.meta.url);
 const { chromium } = require('playwright-core');
@@ -49,6 +58,10 @@ const teil = (n) => !NUR || NUR.includes(String(n));
 const RECHT = await import('../functions/api/recht.js'); // Stand der AGB und Nutzungsbedingungen, Wortlaut der Zustimmung an der Kasse
 const KASSE = { agb: RECHT.AGB_STAND, zustimmung: RECHT.ZUSTIMMUNG };
 if (BILDER) mkdirSync(BILDER, { recursive: true });
+
+/* Freier Port für die zusätzlichen Testserver (Abschnitte 8, 10, 13, 14, 15, 17, 18, 19): Das Betriebssystem vergibt ihn. Zufällige Ports
+   aus einem festen Bereich trafen gelegentlich den eigenen Testserver (mit-server.mjs, etwa 8967) oder den eines anderen Laufs */
+const freierPort = () => new Promise((ja, nein) => { const s = createServer(); s.unref(); s.on('error', nein); s.listen(0, () => { const p = s.address().port; s.close(() => ja(p)); }); });
 
 let fehlerZahl = 0;
 const ok = (bed, text) => { if (bed) console.log('  ✓ ' + text); else { fehlerZahl++; console.log('  ✗ ' + text); } };
@@ -67,6 +80,8 @@ async function neueSeite(ctx, base) {
 }
 const sauber = (page, text) => { ok(page.probleme.length === 0, text + (page.probleme.length ? '\n      ' + page.probleme.join('\n      ') : '')); page.probleme.length = 0; };
 const foto = async (page, name) => { if (BILDER) await page.screenshot({ path: BILDER + '/' + name + '.png' }); };
+/* Aufmaß-Code im Kundenlink (Pilot): steht nicht mehr sichtbar auf der Seite, nur in der vorbereiteten Nachricht (WhatsApp, E-Mail) */
+const codeAusNachricht = async (page) => { const h = await page.getAttribute('a[href^="https://wa.me/"]', 'href'); const m = /(AM1\.[A-Za-z0-9_-]+)/.exec(decodeURIComponent(h || '')); return m ? m[1] : ''; };
 const telefon = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' };
 const b64u = (s) => Buffer.from(s, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 /* Betriebe für die Prüfung: die früheren Beispielkonten Fensterbau Brandt (c1) und Glaserei Vogt (c7). Die Website hat keine
@@ -294,14 +309,14 @@ if (teil(3)) {
   const dl3Pfad = await dl3.path(), pdfBytes = fs.readFileSync(dl3Pfad);
   ok(pdfBytes.subarray(0, 5).toString() === '%PDF-', 'Datei ist ein echtes PDF');
   const roh3 = pdfBytes.toString('latin1'), txt3 = pdfText(await dl3.path());
-  ok(/MavenBlack/.test(roh3) && /MavenMedium/.test(roh3), 'PDF trägt die eingebettete Marken-Schrift');
+  ok(/InterExtraBold/.test(roh3) && /InterMedium/.test(roh3) && !/Maven/.test(roh3), 'PDF trägt die Schrift der Website (Inter, eingebettet)');
   ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /Aufmaß digital übernehmen/.test(txt3), 'PDF an den Fensterbauer: Anleitung mit QR-Link und Aufmaß-Code');
-  /* Aufbau nach Leserichtung: Seite 1 mit Weg, Box für den Fensterbauer und Position 1; Seite 2 unten eeziframes für eigene Kunden; Kennung auf jeder Seite */
+  /* Aufbau (Strang S5): Seite 1 mit Weg, Box für den Fensterbauer und Klärungsliste; je Position eine Seite; am Ende Code und eeziframes für eigene Kunden; Kennung auf jeder Seite */
   const seiteTxt = (n) => { try { return cp.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
   const s1 = seiteTxt(1), s2 = seiteTxt(2), info3 = (() => { try { return cp.execFileSync('pdfinfo', [dl3Pfad]).toString('utf8'); } catch (e) { return ''; } })();
   const kenn = (/AM-[A-Z2-9]{6}/.exec(s1) || [''])[0], nSeiten = +((/Pages:\s+(\d+)/.exec(info3) || [0, 0])[1]);
-  ok(/4 von 5 Schritten erledigt/i.test(s1) && /Ihr Schritt: Angebot/.test(s1) && /FÜR SIE ALS FENSTERBAUER/.test(s1) && /MAUERÖFFNUNG/.test(s1) && /Alle Maße in mm/.test(s1), 'Aufmaßblatt Seite 1: der Weg (4 von 5 erledigt), Box für den Fensterbauer, Position 1 beginnt schon hier');
-  ok(/AUFMASSE IHRER EIGENEN KUNDEN/.test(s2) && /Ihre Kunden messen selbst/.test(s2) && /Scannen: Projekt anlegen/.test(s2) && /3 Projekte kostenlos/.test(s2), 'Aufmaßblatt Seite 2 unten: eeziframes für die eigenen Kunden des Fensterbauers');
+  ok(/4 von 5 Schritten erledigt/i.test(s1) && /Ihr Schritt: Angebot/.test(s1) && /FÜR SIE ALS FENSTERBAUER/.test(s1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /MAUERÖFFNUNG/.test(s2) && /WÜNSCHE DES KUNDEN/.test(s2) && /Ansicht von innen/.test(s2), 'Aufmaßblatt Seite 1: der Weg (4 von 5 erledigt), Box für den Fensterbauer, Klärungsliste; Position 1 auf ihrer eigenen Seite mit Zeichnung und Wünschen');
+  ok(/AUFMASSE IHRER EIGENEN KUNDEN/.test(seiteTxt(nSeiten)) && /Ihre Kunden messen selbst/.test(seiteTxt(nSeiten)) && /Scannen: Projekt anlegen/.test(seiteTxt(nSeiten)) && /3 Projekte kostenlos/.test(seiteTxt(nSeiten)) && /Aufmaß digital übernehmen/.test(seiteTxt(nSeiten)), 'Aufmaßblatt, letzte Seite: Aufmaß-Code und eeziframes für die eigenen Kunden des Fensterbauers');
   ok(!!kenn && nSeiten >= 3 && seiteTxt(nSeiten).includes(kenn) && seiteTxt(2).includes(kenn) && /Seite 1 von/.test(s1) && /Title:\s+Aufmaßblatt/.test(info3), 'Kennung ' + kenn + ', Datum und „Seite x von y“ auf jeder Seite, Dokumenttitel gesetzt');
   const seite3 = (() => { try { return cp.execFileSync('pdftotext', ['-f', '3', '-l', '3', dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })();
   ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /eeziframes/.test(seite3) && !/EEZI/.test(txt3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite; Marke im PDF überall klein');
@@ -331,6 +346,10 @@ if (teil(3)) {
   await p2.waitForFunction(() => S.ai.in && S.ai.in.status === 'error', null, { timeout: 5000 });
   ok(posts2.length === 0, 'Ohne Einwilligung keine Übertragung');
   ok(/ohne KI/.test(await p2.evaluate(() => document.body.innerText)), 'Foto zeigt „ohne KI“');
+  // Zeichnet die App neu, während die Kamera offen ist, kommt das Foto am abgelösten Feld an: es darf nicht verloren gehen
+  const feld3 = await p2.$('input[data-in="photo"][data-f="out"]');
+  await p2.evaluate(() => render()); await feld3.setInputFiles({ name: 'aussen.jpg', mimeType: 'image/jpeg', buffer: jpeg }); await p2.waitForTimeout(800);
+  ok(await p2.evaluate(() => !!(S.win.bilder && S.win.bilder.out && S.photos.out)), 'Foto kommt auch an, wenn die App während der Aufnahme neu gezeichnet hat (abgelöstes Feld)');
   sauber(p2, 'Ablehnen ohne Fehler');
   await ctx2.close();
   await ctx.close();
@@ -376,8 +395,9 @@ if (teil(4)) {
   await page.waitForSelector('[data-screen="gesendet"]');
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Jetzt abschicken.') && !text.includes('Gesendet.'), 'Pilot: „Jetzt abschicken“ statt „Gesendet“');
-  const code = await page.inputValue('#code-box');
+  const code = await codeAusNachricht(page);
   ok(code.startsWith('AM1.'), 'Aufmaß-Code beginnt mit AM1.');
+  ok(await page.locator('#code-box, .copybox').count() === 0 && !/AM1\./.test(text) && await page.locator('[data-act="nachricht-kopieren"]').count() === 1, 'Pilot im Kundenlink: kein Code zum Ansehen oder Abfotografieren, er steckt nur in der Nachricht (WhatsApp, E-Mail, Kopieren)');
   const wa = await page.getAttribute('a[href^="https://wa.me/"]', 'href');
   ok(decodeURIComponent(wa).includes(code) && decodeURIComponent(wa).includes('Code vom Kunden einfügen'), 'WhatsApp-Nachricht enthält Code und Anleitung');
   await foto(page, 'app-senden');
@@ -385,7 +405,7 @@ if (teil(4)) {
   // Link-Kunde: keine Kopie mit Maßen, die gibt der Betrieb weiter (Zusage „Ihr Kunde bleibt Ihr Kunde“)
   ok(await page.locator('.datei-card [data-act="k-dl"]').count() === 0 && /Frag Fensterbau Brandt/.test(text), 'Link-Kunde bekommt keine PDF, sondern den Hinweis auf seinen Betrieb');
 
-  await page.click('.bb .btn.primary'); // Fertig
+  await page.click('.bb .btn[data-act="go"][data-v="home"]'); // Fertig (ghost: Cream nur für „Per WhatsApp senden“)
   await page.waitForTimeout(300);
   text = await page.evaluate(() => document.body.innerText);
   ok(text.includes('Fast erledigt.') && text.includes('Code senden'), 'Startseite erinnert ans Code-Senden');
@@ -415,6 +435,53 @@ if (teil(4)) {
     ok(/BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
   } else ok(false, 'Portal-PDF-Knopf gefunden');
   sauber(page, 'Portal-PDF ohne Fehler');
+  // Einladungsseite (Strang S4), Pilotbetrieb: der Betrieb vorn, eeziframes klein als Übermittler, nichts überlappt, Anrede und
+  // Kontakt reisen im Link mit, die Vorschau im Betriebsbereich ist dieselbe Seite
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  const ein4 = await page.evaluate(async () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40"><rect width="40" height="40" rx="6" fill="#123"/><rect x="50" y="12" width="66" height="16" fill="#123"/></svg>';
+    const r = await Einladung.verkleinern(new File([svg], 'logo.svg', { type: 'image/svg+xml' }), 'logo');
+    A().logo = r.url; A().einladung = Einladung.einstellungen({ ansprechpartner: 'Jens Brandt', telefon: '0221 123456', telefonZeigen: true, ort: 'Köln', anrede: 'sie', logoGrund: r.grund }); save();
+    const l = A().links.find((x) => x.id === 'l3'), url = linkURL(l), teil = /\.([A-Za-z0-9_-]+)$/.exec(url.split('#')[1].split('~')[0])[1];
+    go('einladung');
+    return { url: url, profil: Einladung.linkLesen(teil), vorH1: (document.querySelector('#ein-vor .ein-start h1') || {}).textContent, vorLogo: document.querySelectorAll('#ein-vor .ein-zeichen.logo').length, pilot: !!document.querySelector('.ein-pilot'), vorTel: (document.querySelector('#ein-vor .ein-kontakt') || {}).textContent || '' };
+  });
+  ok(ein4.profil && !ein4.profil.du && ein4.profil.profil.ap === 'Jens Brandt' && ein4.profil.profil.tel === '0221 123456' && !ein4.profil.profil.logo, 'Pilotbetrieb: Link trägt Anrede (Sie), Ansprechpartner und Telefon, aber kein Logo');
+  ok(ein4.vorH1 === 'Ihre Fenster, Ihr Angebot.' && ein4.vorLogo === 0 && ein4.pilot && /0221 123456/.test(ein4.vorTel), 'Vorschau im Betriebsbereich: echte Seite, ehrlich ohne Logo in der Pilotphase, mit Hinweis');
+  await page.goto(ein4.url, { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+  const lage4 = async () => page.evaluate(() => {
+    const r = (e) => (e ? e.getBoundingClientRect() : null), teile = ['.ein-start .ein-abs', '.ein-start .eyebrow', '.ein-start h1', '.ein-start .ein-brief', '.ein-start .ein-cta'].map((s) => r(document.querySelector(s)));
+    const schneiden = teile.some((a, i) => teile.some((b, j) => j > i && a && b && a.bottom > b.top + 1 && b.bottom > a.top + 1 && a.right > b.left && b.right > a.left));
+    const groessen = new Set(); document.querySelectorAll('.ein *').forEach((el) => { if (el.closest('svg')) return; if (Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    const klein = Array.from(document.querySelectorAll('.ein .btn')).filter((b) => b.getBoundingClientRect().height < 44).length;
+    return { alle: teile.every(Boolean), schneiden: schneiden, groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.documentElement.scrollWidth > innerWidth + 1 };
+  });
+  const tel4 = await lage4(), inhalt4 = await page.evaluate(() => ({ t: document.querySelector('.scroll').textContent, kopfMarke: document.querySelectorAll('.hdr .wm, .hdr .fi-logo').length, fussMarke: !!document.querySelector('.ein-fuss .wm'), pf: !!document.querySelector('.ein-cta .btn.primary .pf'), ak: document.querySelectorAll('.ein-start h1 .ak').length, schritte: document.querySelectorAll('#ein-so .ein-schritte li').length, chips: document.querySelectorAll('.ein-brauchen .chip.haken').length, tel: (document.querySelector('.ein-kontakt a[href^="tel:"]') || {}).getAttribute ? document.querySelector('.ein-kontakt a[href^="tel:"]').getAttribute('href') : '', modell: document.querySelectorAll('.ein .w3d-stage, #w3d-hero').length, ds: !!document.querySelector('.ein-fuss a[href*="datenschutz"]') }));
+  ok(tel4.alle && !tel4.schneiden && !tel4.quer, 'Einladungsseite (Telefon): Absender, Kicker, Überschrift, Begrüßung und Knöpfe überlappen nicht, kein Querscrollen');
+  ok(tel4.groessen.every((g) => [13, 15, 17, 24, 40].includes(g)) && tel4.klein === 0, 'Einladungsseite: nur Schriftrollen der App (' + tel4.groessen.join(' · ') + '), Knöpfe ab 44 px');
+  ok(inhalt4.kopfMarke === 0 && inhalt4.fussMarke && /Übermittelt mit/.test(inhalt4.t) && /Persönliche Anfrage von/.test(inhalt4.t) && /für Frau Schulze/.test(inhalt4.t) && inhalt4.ds, 'Der Betrieb steht vorn, eeziframes nur klein unten als Übermittler mit Datenschutz');
+  ok(inhalt4.pf && inhalt4.ak === 1 && inhalt4.schritte === 4 && inhalt4.chips === 4 && /Etwa 5 Minuten je Fenster/.test(inhalt4.t) && /jederzeit zurück/.test(inhalt4.t) && /nur an Fensterbau Brandt/.test(inhalt4.t) && inhalt4.modell === 0, 'Einladungsseite erklärt: Hauptaktion mit Pfeil, ein grünes Wort, vier Schritte, Dauer, was man braucht, Pause, wer die Daten sieht; kein Beispielmodell mit fremden Maßen');
+  ok(inhalt4.tel === 'tel:+49221123456' && /Jens Brandt/.test(inhalt4.t) && /Ihre Fenster, Ihr Angebot\./.test(inhalt4.t) && /Guten Tag Frau Schulze/.test(inhalt4.t) && /„du“/.test(inhalt4.t), 'Anrede des Projekts (Sie) und Ansprechpartner mit Anruf-Knopf aus dem Link; Hinweis, dass die Messschritte duzen');
+  const hash4 = await page.evaluate(() => location.hash), sc4 = await page.evaluate(async () => { document.querySelector('[data-ein-so]').click(); await new Promise((r) => setTimeout(r, 900)); return document.querySelector('.scroll').scrollTop; });
+  ok(sc4 > 200 && (await page.evaluate(() => location.hash)) === hash4, '„So funktioniert es“ scrollt zum Ablauf, die Adresse des Links bleibt');
+  await foto(page, 'app-einladung');
+  await page.setViewportSize({ width: 1280, height: 860 }); await page.waitForTimeout(300);
+  const desk4 = await lage4();
+  ok(desk4.alle && !desk4.schneiden && !desk4.quer, 'Einladungsseite (Schreibtisch): nichts überlappt, kein Querscrollen');
+  await page.setViewportSize({ width: 390, height: 844 });
+  // ältere Links ohne Profil: wie bisher Du, Name aus dem Link, neutrale Initiale
+  await page.goto(BASE + '/app/#k-alt01-Fensterbau_Brandt.' + b64u('Fensterbau Brandt') + '.' + b64u('Familie Weber'), { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
+  const alt4 = await page.evaluate(() => ({ h1: document.querySelector('.ein-start h1').textContent, ini: document.querySelector('.ein-start .ein-zeichen.ini'), stil: (document.querySelector('.ein-start .ein-zeichen.ini') || { getAttribute: () => 'x' }).getAttribute('style'), name: document.querySelector('.ein-abs b').textContent }));
+  ok(alt4.h1 === 'Deine Fenster, dein Angebot.' && alt4.name === 'Fensterbau Brandt' && alt4.stil === null, 'Ältere Links ohne Profil gelten weiter: Du, Name aus dem Link, Initiale in Cream');
+  // Integration S1 und S4: ein angefangenes Fenster (Entwurf) steht auf der Einladungsseite unter dem Absender, der Betrieb bleibt vorn
+  await page.click('[data-act="new"]'); await page.waitForTimeout(300);
+  await page.evaluate(() => { const d = demoProject()[0]; ['mo', 'el', 'bru', 'teilung', 'sashes', 'art'].forEach((k) => { S.win[k] = JSON.parse(JSON.stringify(d[k])); }); S.win.name = 'Flur'; S.q = 'material'; go('frage'); });
+  await page.waitForFunction(() => Object.keys(localStorage).some((k) => /\.entwurf$/.test(k) && /Flur/.test(localStorage.getItem(k))), null, { timeout: 5000 }).catch(() => {}); // Entwurf liegt (verzögert) im Browser
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForFunction(() => !!document.querySelector('.entwurf-karte') && document.getAnimations().every((a) => a.playState !== 'running' || a.effect.getTiming().iterations === Infinity), null, { timeout: 5000 }).catch(() => {}); // Blöcke stehen
+  const ent4 = await page.evaluate(() => { const k = document.querySelector('.entwurf-karte'), ab = document.querySelector('.ein-start .ein-abs'), ki = document.querySelector('.ein-start-in > .eyebrow.kicker'); if (!k || !ab || !ki) return null; const rk = k.getBoundingClientRect(), ra = ab.getBoundingClientRect(), rki = ki.getBoundingClientRect(); return { reihe: ra.bottom <= rk.top && rk.bottom <= rki.top, flur: /Flur/.test(k.textContent) }; });
+  ok(!!ent4 && ent4.reihe && ent4.flur, 'Einladungsseite mit angefangenem Fenster: Karte „Angefangen“ unter dem Absender und vor der Überschrift, ohne Überlappung');
+  sauber(page, 'Einladungsseite ohne Fehler');
   await ctx.close();
 }
 
@@ -430,6 +497,18 @@ if (teil(5)) {
     await foto(page, name);
   }
   sauber(page, 'Rechtsseiten ohne Fehler');
+  /* S6: Links in Schriftfarbe statt Grün (Grün gehört Kicker, Haken und dem einen Wort), Fehlerseite linksbündig, Platzhalterfotos ohne
+     Text: eine ruhige Fläche statt „Foto folgt“ und Dateipfaden (scripts/fotos.py) */
+  const gruen5 = [];
+  for (const pfad of ['/impressum/', '/agb/', '/widerruf/', '/gibtsnicht', '/ratgeber/fenster-ausmessen/']) {
+    await page.goto(BASE + pfad, { waitUntil: 'networkidle' });
+    const r = await page.evaluate(() => ({ gruen: Array.from(document.querySelectorAll('main a, .kopf nav a, .rg a')).filter((a) => !a.closest('.rg-weg-liste, .rg-inhalt, .rg-fuss, .btn') && !a.classList.contains('btn') && getComputedStyle(a).color === 'rgb(143, 214, 148)').map((a) => a.textContent.trim().slice(0, 30)), mitte: !!document.querySelector('main.mitte') && getComputedStyle(document.querySelector('main.mitte')).textAlign === 'center' }));
+    if (r.gruen.length || r.mitte) gruen5.push(pfad + ' ' + JSON.stringify(r));
+  }
+  const fs5 = await import('node:fs'), url5 = await import('node:url');
+  const py5 = fs5.readFileSync(url5.fileURLToPath(new URL('./fotos.py', import.meta.url)), 'utf8'), ph5 = py5.slice(py5.indexOf('def platzhalter('), py5.indexOf('def main('));
+  ok(!gruen5.length && ph5.length > 100 && !/\.text\(|fotos-roh|BILDER\.md|Foto folgt/.test(ph5), 'Rechtsseiten, Fehlerseite und Ratgeber: Links in Schriftfarbe, Fehlerseite linksbündig; Platzhalterfotos ohne Text (scripts/fotos.py schreibt keine Beschriftung, keine Pfade)' + (gruen5.length ? ': ' + gruen5.join(' | ') : ''));
+  sauber(page, 'Links und Platzhalter ohne Fehler');
   await ctx.close();
 }
 
@@ -527,10 +606,10 @@ if (teil(6)) {
   await p2.evaluate(() => { S.windows.push(Object.assign({}, demoProject()[1], { name: 'Komplett' })); persist(); render(true); }); await p2.waitForTimeout(300);
   ok(await p2.locator('.bb .btn.primary[disabled]').count() === 0 && /trotzdem senden/.test(await p2.evaluate(() => document.body.innerText)), 'Mit einem vollständigen Fenster geht Senden, Lücke wird genannt');
   await p2.click('.bb .btn.primary'); await p2.waitForSelector('[data-screen="gesendet"]'); await p2.waitForTimeout(400);
-  const code1 = await p2.inputValue('#code-box');
+  const code1 = await codeAusNachricht(p2);
   ok(await p2.evaluate(() => { const e = document.querySelector('.okmark-l[data-lottie="senden"]'); return !!(e && e._lottie && e.querySelector('svg') && e._lottie.currentFrame > 0); }), 'Abschicken: der Flieger fliegt (Lottie)');
   await p2.evaluate(() => { S.windows[0].name = 'Nachträglich geändert'; S.proj.notiz = 'anders'; render(true); }); await p2.waitForTimeout(200);
-  ok(await p2.inputValue('#code-box') === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
+  ok(!!code1 && await codeAusNachricht(p2) === code1, 'Der Aufmaß-Code bleibt nach dem Senden eingefroren');
   // Scroll-Reveal: Blöcke tragen .rev und sind sichtbar
   ok(await p2.evaluate(() => { const k = document.querySelectorAll('.scr > .rev'); return k.length >= 3 && Array.from(k).slice(0, 2).every((e) => e.classList.contains('in')); }), 'Blöcke erscheinen nacheinander (Scroll-Reveal aktiv)');
   // Alle Maße da: die Maßlinien zeichnen sich nacheinander
@@ -592,7 +671,7 @@ if (teil(6)) {
   await frage('glasfn', { glasfn: [] });
   await p4.click('.qpanel [data-act="glasfn"][data-v="sonne"]'); await p4.waitForTimeout(300);
   await p4.click('.qpanel [data-act="glasfn"][data-v="vsg"]'); await p4.waitForTimeout(300);
-  const fn = await p4.evaluate(() => ({ sonne: document.getElementById('w3d').classList.contains('glas-sonne'), folie: /#2fa57f/i.test(document.querySelector('.w3d-lupe').innerHTML), ico: document.querySelectorAll('.qpanel .chip .ci svg').length }));
+  const fn = await p4.evaluate(() => ({ sonne: document.getElementById('w3d').classList.contains('glas-sonne'), folie: /#2fa57f/i.test(document.querySelector('.w3d-lupe').innerHTML), ico: document.querySelectorAll('.qpanel .chip .ci svg, .qpanel .qlist .ci svg').length })); // mit i als Zeilen, wenn die Chips zu schmal sind
   ok(fn.sonne && fn.folie && fn.ico === 4, 'Glas-Extras: Symbole in der Auswahl, Sonnenschutz tönt das Glas, Sicherheitsglas zeigt die Folie in der Lupe');
   await frage('rc', { rc: 'basis' });
   const pilz = () => p4.evaluate(() => document.querySelectorAll('.w3d-pilz.is-on').length);
@@ -648,11 +727,11 @@ if (teil(6)) {
   ok(fsw.n === 6 && fsw.t === 'XXXXXP' && fsw.geh && falt && ruhe, 'Faltschiebewand: 6 Flügel mit Gehflügel am Ende, die Wand faltet sich zum Paket und kommt zurück');
   await frage5('sart', { sart: 'keiner', roll: 'keiner' });
   await p5.click('.qpanel [data-act="sart"][data-v="raffstore"]'); await p5.waitForTimeout(600);
-  const so1 = await p5.evaluate(() => ({ roll: S.win.roll, behang: !!document.querySelector('[data-r="behang"]'), bg: (document.querySelector('[data-r="behang"]') || { style: {} }).style.background || '', kasten: (document.querySelector('[data-r="roll-f"]') || { style: {} }).style.background || '', fragen: qList(S.win).map((q) => q.id) }));
+  const so1 = await p5.evaluate(() => ({ roll: S.win.roll, lam: Array.from(document.querySelectorAll('.w3d-lam')).filter((l) => l.style.display !== 'none').length, bg: (document.querySelector('[data-r="lam-0"]') || { style: {} }).style.background || '', schienen: !!document.querySelector('[data-r="fs-l"]') && !!document.querySelector('[data-r="fs-r"]') && !!document.querySelector('[data-r="behang-u"]'), knopf: !!document.querySelector('[data-w3d="fahren"]') && !!document.querySelector('[data-w3d="wenden"]'), kasten: (document.querySelector('[data-r="roll-f"]') || { style: {} }).style.background || '', fragen: qList(S.win).map((q) => q.id) }));
   await frage5('sfarbe', { sart: 'raffstore', roll: 'aufsatz', sfarbe: 'silber' });
   await p5.click('.qpanel .qsw[data-v="anthrazit"]'); await p5.waitForTimeout(500);
-  const so2 = await p5.evaluate(() => ({ f: S.win.sfarbe, bg: document.querySelector('[data-r="behang"]').style.background, hint: document.querySelector('.w3d-hint').textContent, swatches: document.querySelectorAll('.qpanel .qsw').length }));
-  ok(so1.roll === 'aufsatz' && so1.behang && /repeating-linear-gradient/.test(so1.bg) && so1.fragen.includes('einbau') && so1.fragen.includes('sfarbe') && so1.fragen.includes('antrieb') && so2.f === 'anthrazit' && so2.bg !== so1.bg && /Anthrazit/.test(so2.hint) && so2.swatches === 7, 'Sonnenschutz außen: Raffstore hängt als Lamellen-Behang vor dem Fenster, sieben Farben färben Behang und Kasten, Einbau und Antrieb folgen');
+  const so2 = await p5.evaluate(() => ({ f: S.win.sfarbe, bg: document.querySelector('[data-r="lam-0"]').style.background, hint: document.querySelector('.w3d-hint').textContent, swatches: document.querySelectorAll('.qpanel .qsw').length }));
+  ok(so1.roll === 'aufsatz' && so1.lam >= 10 && /linear-gradient/.test(so1.bg) && so1.schienen && so1.knopf && so1.fragen.includes('einbau') && so1.fragen.includes('sfarbe') && so1.fragen.includes('antrieb') && so2.f === 'anthrazit' && so2.bg !== so1.bg && /Anthrazit/.test(so2.hint) && so2.swatches === 9, 'Sonnenschutz außen: Raffstore aus einzelnen Lamellen in Führungsschienen mit Endschiene vor dem Fenster, Knöpfe zum Fahren und Wenden, neun Farben (dazu DB 703 und RAL 9007, alle weiteren im Farbblatt) färben Lamellen und Kasten, Einbau und Antrieb folgen');
   await frage5('iart', { iart: 'keiner' });
   await p5.click('.qpanel [data-act="setw"][data-f="iart"][data-v="jalousie"]'); await p5.waitForTimeout(600);
   const inn = await p5.evaluate(() => ({ da: !!document.querySelector('[data-r="innen"]'), bg: document.querySelector('[data-r="innen"]').style.background, k: !!document.querySelector('[data-r="innen-k"]'), fragen: qList(S.win).map((q) => q.id) }));
@@ -662,10 +741,10 @@ if (teil(6)) {
   await p5.click('#t-wunschA'); await p5.keyboard.type('RAL 7021'); await p5.waitForTimeout(300);
   const fa1 = await p5.evaluate(() => ({ bg: document.querySelector('[data-r="el-back"]').style.background, info: document.getElementById('ffi-wunschA').textContent, fokus: document.activeElement.id, cur: document.querySelector('.qpanel .qcur').textContent }));
   await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
-  const fa2 = await p5.evaluate(() => ({ zeile: specRows(S.win).find((r) => r.k === 'Farbe').v, gewaehlt: document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]').length }));
+  const fa2 = await p5.evaluate(() => ({ zeile: specRows(S.win).find((r) => r.k === 'Farbe').v, gewaehlt: Array.from(document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]')).map((b) => b.getAttribute('data-v')).join() }));
   await p5.click('.qpanel .qsw[data-v="9016"]'); await p5.waitForTimeout(300);
   const fa3 = await p5.evaluate(() => ({ wunsch: S.win.wunschA, fa: S.win.fa }));
-  ok(/rgb\(47, 50, 52\)/.test(fa1.bg) && /Erkannt: RAL 7021 Schwarzgrau/.test(fa1.info) && fa1.fokus === 't-wunschA' && /RAL 7021 Schwarzgrau/.test(fa1.cur) && /RAL 7021 Schwarzgrau, eigene Angabe/.test(fa2.zeile) && fa2.gewaehlt === 0 && fa3.wunsch === '' && fa3.fa === '9016', 'Eigene Farbe außen: RAL-Nummer wird erkannt, das Modell färbt sich beim Tippen, eine Farbe aus der Liste hebt sie wieder auf');
+  ok(/rgb\(47, 50, 52\)/.test(fa1.bg) && /Erkannt: RAL 7021 Schwarzgrau/.test(fa1.info) && fa1.fokus === 't-wunschA' && /Schwarzgrau.*RAL 7021.*eigene Angabe/.test(fa1.cur) && /Schwarzgrau \(RAL 7021\), eigene Angabe/.test(fa2.zeile) && fa2.gewaehlt === '7021' && fa3.wunsch === '' && fa3.fa === '9016', 'Eigene Farbe außen: RAL-Nummer wird erkannt (Name und Nummer, die passende beliebte Farbe ist markiert), das Modell färbt sich beim Tippen, eine Farbe aus der Liste hebt sie wieder auf');
   await frage5('gf');
   await p5.click('#t-wunschGf'); await p5.keyboard.type('Messing'); await p5.evaluate(() => document.activeElement.blur()); await p5.waitForTimeout(300);
   const gf1 = await p5.evaluate(() => ({ griff: document.querySelector('[data-r="handle-0"]').style.background, zeile: specRows(S.win).find((r) => r.k === 'Griff').v }));
@@ -688,7 +767,7 @@ if (teil(6)) {
   await p5.click('.qopt[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
   const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.qgroup .note'), bar: document.querySelector('.bb .btn.primary').textContent }));
   await p5.click('.bb .btn.primary'); await p5.waitForTimeout(300);
-  const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: Array.from(document.querySelectorAll('.bb .btn')).map((b) => b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
+  const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: Array.from(document.querySelectorAll('.bb .btn:not(.bb-zurueck)')).map((b) => b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
   await p5.evaluate(() => useDemo()); await p5.waitForTimeout(1800);
   fotosNeu.weiter = await p5.evaluate(() => document.querySelector('.bb .btn.primary').textContent);
   await p5.click('.bb .btn.primary'); await p5.waitForTimeout(700);
@@ -712,8 +791,221 @@ if (teil(6)) {
   await foto(p5, 'app-neu-ergebnis');
   sauber(p5, 'Elementarten, Sonnenschutz und neue Öffnung ohne Fehler');
   await ctx5.close();
+
+  // 3-D-Modell: Griffe (Lage, Stulp, ohne Griff), Raffstore mit Knöpfen, Zoom und Maße in der Übersicht
+  const ctx7 = await browser.newContext(telefon), p7 = await neueSeite(ctx7);
+  await p7.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const frage7 = async (id, set, art) => { await p7.evaluate(([id, set, art]) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set || {}); if (set.teilung) w.sashes = sashesFor(set.teilung); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; S.q = id; S.selSash = 0; S.openSash = -1; S.screen = 'frage'; render(true); }, [id, set || {}, art || '']); await p7.waitForTimeout(600); };
+  const griffe7 = () => p7.evaluate(() => Array.from(document.querySelectorAll('#w3d .w3d-sash')).map((sa) => getComputedStyle(sa.querySelector('.w3d-handle')).opacity === '1' && getComputedStyle(sa.querySelector('.w3d-ros')).opacity === '1'));
+  /* Achse über dem Fußboden in mm (Fußboden = Unterkante der Öffnung bei Türen, sonst minus Brüstung) */
+  const achse7 = (i) => p7.evaluate((i) => { const st = document.getElementById('w3d'), r = W3DS.w3d, V = w3dCalc(r.w, Object.assign({}, r.o, { stageW: st.clientWidth, stageH: st.clientHeight, zoom: w3dZ(st, r.o) })), g = st._griffe[i]; return g ? { ueber: Math.round((V.moH * V.s / 2 - g[1]) / V.s), mitte: Math.round(V.pfB + (V.ulH ? V.ulH + 72 : 0) + V.sashH / 2) } : null; }, i);
+  await frage7('griff', { griff: 'ohne', teilung: '2p' });
+  const ohne7 = await griffe7();
+  await frage7('griff', { griff: 'motor' }, 'hst');
+  const motor7 = await griffe7(), taster7 = await p7.evaluate(() => getComputedStyle(document.querySelector('[data-r="an-taster"]')).opacity);
+  ok(ohne7.every((x) => !x) && motor7.every((x) => !x) && taster7 === '1', 'Griff „Ohne“ und Hebe-Schiebe elektrisch: kein Griff im Modell, elektrisch mit Wandtaster');
+  await frage7('stulp', { teilung: '2s', e_teilung: true });
+  const stulp7 = await p7.evaluate(() => ({ ids: qList(S.win).map((q) => q.id), s: S.win.sashes.map((x) => x.t + x.din + (x.steh ? 's' : '')).join(',') }));
+  const sg7 = await griffe7();
+  await p7.click('.qpanel [data-act="stulp"][data-v="L"]'); await p7.waitForTimeout(600);
+  const stulpL7 = await p7.evaluate(() => S.win.sashes.map((x) => x.t + x.din + (x.steh ? 's' : '')).join(',')), sgL7 = await griffe7();
+  ok(stulp7.ids.includes('stulp') && stulp7.ids.filter((id) => /^typ-/.test(id)).length === 1 && !stulp7.ids.some((id) => /^din-/.test(id)) && stulp7.s === 'DLs,DKR' && !sg7[0] && sg7[1] && stulpL7 === 'DKL,DRs' && sgL7[0] && !sgL7[1], 'Stulp: nur der Gehflügel hat einen Griff; gefragt wird, welcher Flügel zuerst aufgeht, die Bänder sitzen fest außen');
+  await frage7('material', { mo: { hm: 2700, hl: 2700, hr: 2700, wm: 1000, wt: 1000, wb: 1000 }, el: { h: 2660, w: 960 } }, 'balkon');
+  const tuer7 = await achse7(0);
+  await frage7('material', { teilung: '2p' });
+  const fen7 = await achse7(0);
+  ok(tuer7 && Math.abs(tuer7.ueber - 1050) <= 15 && fen7 && Math.abs(fen7.ueber - fen7.mitte) <= 15, 'Griffhöhe: an der Tür etwa 1.050 mm über dem Fußboden, am Fenster mittig im Flügel');
+  await frage7('griff', { griff: 'standard', teilung: '2p' }); await p7.waitForTimeout(1200);
+  const fokus7 = await p7.evaluate(() => { const st = document.getElementById('w3d'), r = st.getBoundingClientRect(), h = st.querySelector('[data-r="handle-0"]').getBoundingClientRect(); return { z: W3DZ.w3d.z, dx: Math.abs(h.left + h.width / 2 - r.left - r.width / 2) / r.width, dy: Math.abs(h.top - r.top - r.height / 2) / r.height, breit: h.width }; });
+  ok(fokus7.z > 2.4 && fokus7.dx < 0.2 && fokus7.dy < 0.3 && fokus7.breit >= 6, 'Frage nach dem Griff: die Kamera fährt auf den Griff, er ist gut zu sehen');
+  await frage7('sart', { sart: 'raffstore', roll: 'aufsatz' });
+  const lam7 = () => p7.evaluate(() => ({ t0: document.querySelector('[data-r="lam-0"]').style.transform, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), fahren: document.querySelector('[data-w3d="fahren"]').textContent, wenden: document.querySelector('[data-w3d="wenden"]').getAttribute('aria-pressed'), hoch: Math.min.apply(null, Array.from(document.querySelectorAll('#w3d .w3d-knopf')).filter((b) => !b.hidden).map((b) => b.getBoundingClientRect().height)) }));
+  const l07 = await lam7();
+  await p7.click('[data-w3d="wenden"]'); await p7.waitForTimeout(300);
+  const l17 = await lam7();
+  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(400);
+  const l27 = await lam7();
+  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(400);
+  const l37 = await lam7();
+  ok(/rotateX\(-52deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
+  await p7.evaluate(() => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; });
+  await frage7('material', { teilung: '2p' });
+  const zoomKn7 = await p7.evaluate(() => ({ da: !!document.querySelector('#w3d [data-w3d="plus"]') && !!document.querySelector('#w3d [data-w3d="minus"]'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, touch: getComputedStyle(document.getElementById('w3d')).touchAction, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width), netz: parseFloat(document.querySelector('#w3d [data-r="mesh"]').style.width) }));
+  await p7.click('#w3d [data-w3d="plus"]'); await p7.waitForTimeout(500);
+  const zoom7 = await p7.evaluate(() => ({ z: W3DZ.w3d.z, cls: document.getElementById('w3d').classList.contains('is-zoom'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  await p7.click('#w3d [data-w3d="eins"]'); await p7.waitForTimeout(500);
+  const zoom7b = await p7.evaluate(() => ({ z: W3DZ.w3d.z, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  const cdp7 = await ctx7.newCDPSession(p7), bb7 = await (await p7.$('#w3d')).boundingBox(), cx7 = bb7.x + bb7.width / 2, cy7 = bb7.y + bb7.height / 2;
+  const finger7 = (type, pts) => cdp7.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p, i) => ({ x: p[0], y: p[1], id: i })) });
+  await finger7('touchStart', [[cx7 - 30, cy7], [cx7 + 30, cy7]]);
+  for (let k = 1; k <= 8; k++) { await finger7('touchMove', [[cx7 - 30 - k * 8, cy7], [cx7 + 30 + k * 8, cy7]]); await p7.waitForTimeout(16); }
+  await finger7('touchEnd', []); await p7.waitForTimeout(300);
+  const pinch7 = await p7.evaluate(() => W3DZ.w3d.z);
+  await frage7('sprossen', { teilung: '2p' });
+  const spross7 = await p7.evaluate(() => !document.querySelector('#w3d [data-r="zoom"]') && W3DZ.w3d.z === 1);
+  ok(zoomKn7.netz > 20 && zoomKn7.da && zoomKn7.eins && zoomKn7.touch === 'none' && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
+  const erg7 = await p7.evaluate(() => {
+    /* Bühne wie im Ergebnis (alle acht Maße, gleiche Werte je Richtung), außerhalb eines festen Bildschirms */
+    const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:16px;top:80px;width:358px;z-index:99'; document.body.appendChild(box);
+    const w = demoProject()[0]; w.mo = { hm: 1480, hl: 1480, hr: 1480, wm: 1250, wt: 1250, wb: 1250 }; w.el = { w: 1190, h: 1440 };
+    const o = { id: 'w3d-t7', view: 'result', dims: ['hl', 'hm', 'hr', 'wt', 'wm', 'wb', 'eh', 'ew'], labels: { hl: '1.480 mm', hm: '1.480 mm', hr: '1.480 mm', wt: '1.250 mm', wm: '1.250 mm', wb: '1.250 mm', eh: '1.440 mm', ew: '1.190 mm' }, stageH: 300, fitW: 0.56, fitH: 0.6, cls: 'dims-all' };
+    box.innerHTML = model(w, o); const st = box.querySelector('.w3d-stage'); st.classList.add('no-anim'); w3dApply(st, w, o);
+    const labs = Array.from(st.querySelectorAll('.w3d-dim:not(.is-weg) .w3d-dim-lab')).map((l) => l.getBoundingClientRect());
+    const schnitt = labs.some((a, i) => labs.some((b, j) => j > i && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom));
+    const r = { n: labs.length, schnitt: schnitt, touch: getComputedStyle(st).touchAction }; box.remove(); return r;
+  });
+  ok(erg7.n === 4 && !erg7.schnitt && erg7.touch === 'pan-y', 'Maße in der Übersicht: gleiche Maße stehen nur einmal, die Schilder überdecken sich nicht; auf scrollbaren Seiten scrollt senkrechtes Wischen über dem Modell die Seite');
+  sauber(p7, '3-D-Modell: Griffe, Raffstore, Zoom und Maße ohne Fehler');
+  await ctx7.close();
+  const ctx8 = await browser.newContext(Object.assign({}, telefon, { reducedMotion: 'reduce' })), p8 = await neueSeite(ctx8);
+  await p8.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await p8.evaluate(() => { const w = demoProject()[0]; w.sart = 'raffstore'; w.roll = 'vorbau'; S.win = w; S.q = 'sart'; S.screen = 'frage'; render(true); }); await p8.waitForTimeout(600);
+  await p8.click('[data-w3d="fahren"]'); await p8.waitForTimeout(100);
+  ok(await p8.evaluate(() => { const st = document.getElementById('w3d'), l = st.querySelector('[data-r="lam-0"]'); return !st.classList.contains('is-fahrt') && getComputedStyle(l).transitionDuration.split(',').every((d) => parseFloat(d) === 0) && W3D_BEHANG.stand === 1; }), 'Weniger Bewegung: der Raffstore springt ohne Fahrt');
+  sauber(p8, 'Weniger Bewegung am Modell ohne Fehler'); await ctx8.close();
   sauber(p2, 'App-Logik ohne Fehler');
   await ctx2.close();
+  /* Farben (S2): fast alle RAL-Töne zur Wahl, Farbblatt mit Suche und Familien, Name und Nummer bis in Aufmaßblatt, Betrieb und Server */
+  const ctxF = await browser.newContext(telefon), pF = await neueSeite(ctxF);
+  await pF.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const frageF = async (id, set) => { await pF.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await pF.waitForTimeout(400); };
+  await frageF('fa');
+  const rf0 = await pF.evaluate(() => ({ ral: RAL.liste.filter((e) => e.art === 'ral').length, holz: RAL.liste.filter((e) => e.art === 'holz').map((e) => e.name), sonder: RAL.liste.filter((e) => e.art === 'sonder').map((e) => e.key), schnell: Array.from(document.querySelectorAll('.qpanel .fw-raster .qsw')).map((b) => b.getAttribute('data-v')).join(), quer: document.documentElement.scrollWidth > innerWidth + 1, klein: Array.from(document.querySelectorAll('.qpanel .qsw .c')).filter((c) => c.getBoundingClientRect().width < 44).length, cur: document.querySelector('.qpanel .qcur').textContent, hinweis: /Bildschirm/.test(document.querySelector('.qpanel').textContent) }));
+  ok(rf0.ral === 216 && ['Golden Oak', 'Nussbaum', 'Eiche hell', 'Eiche dunkel', 'Mooreiche', 'Winchester', 'Sheffield Oak', 'Douglasie', 'Oregon', 'Mahagoni', 'Macoré', 'Schwarzbraun'].every((n) => rf0.holz.includes(n)) && ['db703', 'sand7016', 'eloxal'].every((k) => rf0.sonder.includes(k)) && rf0.schnell === '9016,7016,9001,7035,7039,8022,9005,7012,6005,8019,7021,5011' && !rf0.quer && rf0.klein === 0 && /Anthrazitgrau.*RAL 7016/.test(rf0.cur) && rf0.hinweis, 'Farben: alle 216 RAL-Classic-Töne, gängige Holzdekore und Sonderfarben; in der Frage die zwölf beliebtesten als Raster (Tupfen ab 44 px), die gewählte mit Name und Nummer, Hinweis auf echte Muster');
+  await pF.click('.qpanel [data-farbblatt="fa"]:not([data-familie])'); await pF.waitForTimeout(400);
+  const rf1 = await pF.evaluate(() => { const b = document.querySelector('.fb-blatt').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { n: document.querySelectorAll('.fb .fb-f').length, fam: document.querySelectorAll('.fb-fam .chip').length, modell: st.top < b.top - 80, gross: Array.from(document.querySelectorAll('.fb .fb-f .c')).slice(0, 5).every((c) => c.getBoundingClientRect().width >= 44), hinweis: /Bildschirm weichen/.test(document.querySelector('.fb').textContent), hilfe: !!document.querySelector('.fb .fb-hilfe'), offen: !!document.querySelector('.fb .qoffen'), dialog: document.querySelector('.fb').getAttribute('role') === 'dialog' }; });
+  await pF.click('.fb .fb-f[data-v="1015"]'); await pF.waitForTimeout(300);
+  const rf2 = await pF.evaluate(() => ({ fa: S.win.fa, wunsch: S.win.wunschA, bg: document.querySelector('[data-r="el-back"]').style.background, kopf: document.querySelector('.fb-wahl-t').textContent, zeile: specRows(S.win).find((r) => r.k === 'Farbe').v, blatt: !!document.querySelector('.fb') }));
+  ok(rf1.n > 230 && rf1.fam === 13 && rf1.modell && rf1.gross && rf1.hinweis && rf1.hilfe && rf1.offen && rf1.dialog && rf2.fa === '1015' && rf2.wunsch === '' && /rgb\(230, 210, 181\)/.test(rf2.bg) && /Hellelfenbein.*RAL 1015/.test(rf2.kopf) && /außen Hellelfenbein \(RAL 1015\)/.test(rf2.zeile) && rf2.blatt, 'Farbblatt „Alle Farben“: alle Töne, Familien als Chips, Hilfe „Woher kenne ich meine Farbe?“ und Hinweis auf echte Muster; die Wahl färbt das Modell darüber sofort, steht mit Name und Nummer oben, das Blatt bleibt offen');
+  const sucheF = async (t) => { await pF.fill('#fb-such', t); await pF.waitForTimeout(150); return pF.evaluate(() => Array.from(document.querySelectorAll('.fb .fb-f')).map((b) => b.getAttribute('data-v'))); };
+  const s1 = await sucheF('7016'), s2 = await sucheF('ral 9006'), s3 = await sucheF('antrazit'), s4 = await sucheF('golden ok'), s5 = await sucheF('70'), s6 = await sucheF('xyz quatsch');
+  const ohneTreffer = await pF.evaluate(() => !!document.querySelector('.fb [data-fb="wunsch"]'));
+  ok(s1[0] === '7016' && s2[0] === '9006' && s3[0] === '7016' && s4[0] === 'goak' && s5.length === 38 && s5.every((k) => /^70/.test(k)) && s6.length === 0 && ohneTreffer, 'Suche im Farbblatt: Nummer mit und ohne „RAL“, Name mit Tippfehler („antrazit“, „golden ok“), angefangene Nummer; ohne Treffer als eigene Angabe übernehmen');
+  await pF.fill('#fb-such', ''); await pF.click('.fb-fam .chip[data-v="holz"]'); await pF.waitForTimeout(200);
+  const holzF = await pF.evaluate(() => Array.from(document.querySelectorAll('.fb .fb-f')).map((b) => b.getAttribute('data-v')));
+  await pF.click('.fb .fb-f[data-v="winch"]'); await pF.waitForTimeout(200);
+  await pF.keyboard.press('Escape'); await pF.waitForTimeout(200);
+  const rf3 = await pF.evaluate(() => ({ blatt: !!document.querySelector('.fb'), fokus: document.activeElement.getAttribute('data-farbblatt'), fa: S.win.fa, holz: /repeating-linear-gradient/.test(rahmenFarbe(S.win, 'aussen').bg) }));
+  await pF.click('.qpanel [data-farbblatt="fa"]:not([data-familie])'); await pF.waitForTimeout(200);
+  await pF.evaluate(() => { S.q = 'fi'; render(true); }); await pF.waitForTimeout(200);
+  const zuBeimWechsel = await pF.evaluate(() => !document.querySelector('.fb'));
+  ok(holzF.length === 15 && holzF.includes('winch') && !rf3.blatt && rf3.fokus === 'fa' && rf3.fa === 'winch' && rf3.holz && zuBeimWechsel, 'Familie Holzdekore zeigt nur Dekore, mit Maserung im Modell; Escape schließt das Blatt (Fokus zurück auf „Alle Farben“), ein Wechsel der Frage ebenso');
+  await frageF('sfarbe', { sart: 'raffstore', roll: 'aufsatz' });
+  await pF.click('.qpanel [data-farbblatt="sfarbe"]'); await pF.waitForTimeout(300);
+  const sOben = await pF.evaluate(() => Array.from(document.querySelector('.fb .fb-raster').querySelectorAll('.fb-f')).map((b) => b.getAttribute('data-v')).slice(0, 4).join());
+  await pF.click('.fb .fb-f[data-v="db703"]'); await pF.waitForTimeout(300);
+  const rf4 = await pF.evaluate(() => ({ s: S.win.sfarbe, behang: document.querySelector('[data-r="lam-0"]').style.background, hint: document.querySelector('.w3d-hint').textContent, zeile: specRows(S.win).find((r) => r.k === 'Sonnenschutz').v, aw: AW.sonne(S.win) }));
+  ok(sOben === '9006,9007,7016,db703' && rf4.s === 'db703' && /rgb\(84, 90, 94\)/.test(rf4.behang) && /DB 703 Eisenglimmer dunkel/.test(rf4.hint) && /DB 703 Eisenglimmer dunkel/.test(rf4.zeile) && /DB 703 Eisenglimmer dunkel/.test(rf4.aw), 'Sonnenschutz: im Farbblatt oben die Lamellen- und Panzerfarben (RAL 9006, 9007, 7016, DB 703); DB 703 färbt Behang und Kasten und steht so im Aufmaß');
+  await pF.keyboard.press('Escape'); await frageF('gf');
+  const gfF = await pF.evaluate(() => Array.from(document.querySelectorAll('.qpanel .qsw')).map((b) => b.getAttribute('data-v')).join());
+  await pF.click('.qpanel .qsw[data-v="messing"]'); await pF.waitForTimeout(300);
+  const gf2 = await pF.evaluate(() => ({ gf: S.win.gf, zeile: specRows(S.win).find((r) => r.k === 'Griff').v, aw: AW.griffName(S.win), blatt: !!document.querySelector('[data-farbblatt]') }));
+  ok(gfF === 'weiss,silber,edelstahl,titan,schwarz,anthrazit,braun,bronze,messing' && gf2.gf === 'messing' && /Messing/.test(gf2.zeile) && /Messing/.test(gf2.aw) && !gf2.blatt, 'Griff: nur echte Griff-Farben (dazu Anthrazit, Braun, Bronze, Messing) und das Wunschfeld, kein RAL-Blatt');
+  const abweichend = await pF.evaluate(() => RAL.liste.filter((e) => { const w = Object.assign(baseWin(), { fa: e.key, fi: e.key, offen: {} }), z = AW.farbZeile(w, 'aussen'), b = BLATT_H.col(e.key); return !(z === e.name + ' (' + e.code + ')' && farbZeile(w, 'aussen') === z && b[0] === e.name && b[1] === e.code && b[2] === e.hex && AW.col(e.key)[2] === e.hex); }).map((e) => e.key));
+  const alt = await pF.evaluate(() => { const w = Object.assign(baseWin(), { fa: 'goak', fi: '9001', sart: 'raffstore', roll: 'aufsatz', sfarbe: 'anthrazit', gf: 'titan', offen: {} }); return [farbZeile(w, 'aussen'), farbZeile(w, 'innen'), sonneName(w), griffFarbe(w).name, AW.farbZeile(w, 'aussen'), AW.griffName(w)].join('|'); });
+  ok(abweichend.length === 0 && alt === 'Golden Oak (Holzdekor)|Cremeweiß (RAL 9001)|Anthrazit|Titan|Golden Oak (Holzdekor)|titan', 'Jede wählbare Farbe kommt in App, Aufmaßblatt und Betrieb mit Name und Nummer an; ältere Aufmaße (goak, 9001, anthrazit, titan) lesen sich wie bisher' + (abweichend.length ? ': ' + abweichend.join(', ') : ''));
+  const pdfF = await pF.evaluate(async () => {
+    const w = Object.assign(demoProject()[0], { fa: '1015', fi: 'winch', gleich: false, sart: 'raffstore', roll: 'aufsatz', sfarbe: 'db703', gf: 'messing', wunschA: '', wunschI: '', offen: {} });
+    S.windows = [w]; await blattSchrift(); const blob = blattPDF('kunde'); if (!blob) return '';
+    const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i++) s += String.fromCharCode(buf[i]); return btoa(s);
+  });
+  const fsF = await import('node:fs'), osF = await import('node:os'), pathF = await import('node:path'), cpF = await import('node:child_process');
+  const pfadF = pathF.join(osF.tmpdir(), 'farben-' + process.pid + '.pdf'); fsF.writeFileSync(pfadF, Buffer.from(pdfF, 'base64'));
+  let txtF = ''; try { txtF = cpF.execFileSync('pdftotext', ['-layout', pfadF, '-']).toString('utf8').replace(/\s+/g, ' '); } catch (e) { txtF = ''; }
+  fsF.rmSync(pfadF, { force: true });
+  ok(pdfF.length > 1000 && /Hellelfenbein/.test(txtF) && /RAL 1015/.test(txtF) && /Winchester/.test(txtF) && /DB 703/.test(txtF) && /Eisenglimmer/.test(txtF) && /Messing/.test(txtF) && !/Verkehrsweiß \(RAL 9016\)/.test(txtF), 'Aufmaßblatt (PDF): Hellelfenbein mit RAL 1015, Winchester, DB 703 und Messing kommen an, nichts wird still zu Verkehrsweiß');
+  const MF = createRequire(import.meta.url)('../web/assets/modell.js'), wF = MF.AW.mk({ fa: '1015', fi: 'sheff', sart: 'raffstore', roll: 'aufsatz', sfarbe: '9007', iart: 'rollo', ifarbe: '9010', gf: 'bronze', wunschA: 'RAL 7021' });
+  ok(/außen Schwarzgrau \(RAL 7021\), eigene Angabe, innen Sheffield Oak \(Holzdekor\)/.test(MF.AW.rows(wF).find((r) => r[0] === 'Farbe')[1]) && /RAL 9007 Graualuminium/.test(MF.AW.sonne(wF)) && /RAL 9010 Reinweiß/.test(MF.AW.innen(wF)) && MF.AW.griffName(wF) === 'bronze' && MF.AW.col('quatsch')[0] === 'quatsch', 'Server (modell.js holt ral.js selbst): Name und Nummer für gespeicherte und eingetippte Farben, auch Sonnen- und Innenschutz; Unbekanntes wird nicht still zu Verkehrsweiß');
+  sauber(pF, 'Farbwahl und Farbblatt ohne Fehler');
+  await ctxF.close();
+
+  /* Betriebsbereich im Styleguide und ohne Sackgassen (Strang S6): Reihenfolge der Projektliste, Kennzahlen, Nachrichten-Vorschau,
+     Überschriften mit genau einem grünen Wort, eine Cream-Fläche je Bildschirm, Avatar in Cream, Ziele ab 44 px, Fußzeile auch
+     angemeldet, Zurück im Browser, Schalter nur mit Mailversand, Team als „geplant“, Gebäude wie in der App */
+  for (const [art, opts] of [['Schreibtisch', { viewport: { width: 1280, height: 900 }, locale: 'de-DE' }], ['Telefon', telefon]]) {
+    const c6 = await browser.newContext(opts), b6 = await neueSeite(c6);
+    await b6.goto('about:blank'); await b6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' });
+    await betrieb(b6, 'c1'); await b6.waitForTimeout(400);
+    const liste6 = await b6.evaluate(() => { const k = Array.from(document.querySelectorAll('.pcard')); const st = Array.from(document.querySelectorAll('.stat')).map((s) => s.querySelector('small').textContent + '=' + s.querySelector('b').getAttribute('data-count')); return { erste: k[0] && k[0].classList.contains('is-new') && /Familie Weber/.test(k[0].textContent), neuW: !!document.querySelector('.pcard.is-new .neu.badge.acc'), st: st, filter: Array.from(document.querySelectorAll('.lfilter .chip')).map((c) => c.getAttribute('data-v')).join(',') }; });
+    ok(liste6.erste && liste6.neuW && liste6.st.includes('Beim Kunden=2') && liste6.filter === 'alle,kunde,eingegangen', art + ': neu eingegangenes Aufmaß steht oben mit „Neu“ als Wort mit grünem Punkt, „Beim Kunden“ zählt nur verschickte Links (' + liste6.st.join(', ') + ')');
+    /* ein angelegtes, nie verschicktes Projekt: nicht „beim Kunden“, sondern eigener Satz und Filter, in der Liste nach den verschickten */
+    await b6.evaluate(() => { X.neuesProjekt(A(), { kunde: 'Familie Unverschickt', plan: ['Fenster', 'Haustür'], days: 14 }); render(); }); await b6.waitForTimeout(200);
+    const neu6 = await b6.evaluate(() => { const k = Array.from(document.querySelectorAll('.pcard .ti')).map((t) => t.textContent.trim()); return { beim: Array.from(document.querySelectorAll('.stat')).find((s) => /Beim Kunden/.test(s.textContent)).querySelector('b').getAttribute('data-count'), satz: !!document.querySelector('.l-neu [data-v="neu"]'), filter: !!document.querySelector('.lfilter [data-v="neu"]'), pos: k.indexOf('Familie Unverschickt'), schulze: k.indexOf('Frau Schulze') }; });
+    ok(neu6.beim === '2' && neu6.satz && neu6.filter && neu6.pos > neu6.schulze, art + ': angelegtes, nicht verschicktes Projekt zählt nicht als „beim Kunden“, steht als Satz und Filter „Nicht verschickt“ und nach den verschickten');
+    /* Projektnummer bricht nicht um, keine farbigen Randstreifen, Glocke ohne Orange */
+    const form6 = await b6.evaluate(() => ({ nr: Array.from(document.querySelectorAll('.pcard .nr')).every((n) => getComputedStyle(n).whiteSpace === 'nowrap' && n.getClientRects().length === 1), streifen: Array.from(document.querySelectorAll('.pcard')).some((k) => /inset 3px 0px 0px/.test(getComputedStyle(k).boxShadow)), orange: Array.from(document.querySelectorAll('.top .dot, .nitem .ic, .pcard')).some((e) => /255, 138, 91/.test(getComputedStyle(e).backgroundColor + getComputedStyle(e).boxShadow)) }));
+    ok(form6.nr && !form6.streifen && !form6.orange, art + ': Projektnummer in einer Zeile, keine farbigen Randstreifen, kein Zeichnungsorange in der Oberfläche');
+    /* Überschriften: jede sichtbare h2/h3 im Betriebsbereich mit Punkt (oder Fragezeichen) und genau einem grünen Wort; Kicker in Grün;
+       eine Cream-Fläche je Bildschirm (Cream-Pillen außerhalb der Kopfzeile); Fußzeile mit „Vertrag widerrufen“ auch angemeldet */
+    const schirme6 = [['links'], ['link', 'l3'], ['newlink'], ['notif'], ['abrechnung'], ['bprofil'], ['preise'], ['wie']];
+    const befund6 = [];
+    for (const [sc, id] of schirme6) {
+      const r = await b6.evaluate(([sc, id]) => { if (sc === 'newlink') S.nl = null; go(sc, id || undefined); const cream = 'rgb(241, 240, 234)', sichtbar = (e) => e.getClientRects().length > 0;
+        const h = Array.from(document.querySelectorAll('.scr h2, .scr h3')).filter(sichtbar).filter((x) => !x.closest('.posc, .klaer, .amhead, .lockcard, .ein-b-karte, .tour-buehne')), schlecht = h.filter((x) => x.querySelectorAll('.ak').length !== 1 || !/[.?!]$/.test(x.textContent.trim())).map((x) => x.textContent.trim());
+        const kicker = Array.from(document.querySelectorAll('.scr .h > .eyebrow, .scr .h > div > .eyebrow')).filter(sichtbar).every((e) => getComputedStyle(e).color === 'rgb(143, 214, 148)');
+        const pillen = Array.from(document.querySelectorAll('.scr .btn, .scr .chip.primary')).filter(sichtbar).filter((b) => getComputedStyle(b).backgroundColor === cream && !b.closest('.ein-telefon')).length;
+        const fuss = document.querySelector('.foot.schlank a.foot-widerruf[href="/widerruf/"]'), fr = fuss ? fuss.getBoundingClientRect() : null;
+        const quer = Array.from(document.querySelectorAll('.scr .btn, .scr .chip')).filter(sichtbar).filter((e) => !e.closest('.scrollchips, .tour-schritte') && e.getBoundingClientRect().right > window.innerWidth + 1).map((e) => e.textContent.trim().slice(0, 24));
+        return { sc: sc + (id ? ':' + id : ''), schlecht: schlecht, kicker: kicker, pillen: pillen, quer: quer, fuss: !!fr && fr.height >= 44 && !!document.querySelector('.foot.schlank a[href="/impressum/"]') && !!document.querySelector('.foot.schlank a[href="/datenschutz/"]') }; }, [sc, id]);
+      if (r.schlecht.length || !r.kicker || r.pillen > 1 || r.quer.length || !r.fuss) befund6.push(JSON.stringify(r));
+    }
+    ok(!befund6.length, art + ': ' + schirme6.length + ' Bildschirme mit grünem Kicker, Überschriften mit Punkt und genau einem grünen Wort, höchstens einer Cream-Pille, keinem Knopf über dem Rand und der Fußzeile samt „Vertrag widerrufen“' + (befund6.length ? ': ' + befund6.join(' | ') : ''));
+    /* Avatar in Cream, Ziele ab 44 px (Schalterzeilen, Chips, Kopf), Fokus in Eingaben in Schriftfarbe */
+    /* Nacharbeit portal: „Notiz“ an jedem Punkt der Klärungsliste und das × der Blätter mindestens 44 × 44 px */
+    const ziel6b = await b6.evaluate(() => {
+      go('link', 'l1'); const m = (e) => { if (!e) return 'fehlt'; const r = e.getBoundingClientRect(); return r.width >= 44 && r.height >= 44 ? '' : (e.getAttribute('data-act') || e.className) + ' ' + Math.round(r.width) + '×' + Math.round(r.height); };
+      const notiz = Array.from(document.querySelectorAll('.scr [data-act="klaer-notiz"]')).filter((e) => e.getClientRects().length), klein = notiz.map(m);
+      S.sheet = { k: 'linkimport' }; render(); klein.push(m(document.querySelector('.sheet .xclose'))); S.sheet = null; render();
+      return { n: notiz.length, klein: Array.from(new Set(klein.filter(Boolean))) };
+    });
+    ok(ziel6b.n > 0 && !ziel6b.klein.length, art + ': „Notiz“ in der Klärungsliste (' + ziel6b.n + '-mal) und das × der Blätter mindestens 44 × 44 px' + (ziel6b.klein.length ? ': ' + ziel6b.klein.join(', ') : ''));
+    const ziel6 = await b6.evaluate(() => { go('bprofil'); const av = document.querySelector('.side .av'), avOk = !av || getComputedStyle(av).backgroundColor === 'rgb(241, 240, 234)', klein = []; go('newlink'); S.nl.step = 1; render(); document.querySelectorAll('.scr .chip, .top button, .top a').forEach((e) => { const r = e.getBoundingClientRect(); if (r.width && r.height < 44) klein.push(e.textContent.trim().slice(0, 20) + ':' + Math.round(r.height)); }); document.getElementById('nl-adresse').focus(); return { av: avOk, klein: klein }; });
+    await b6.waitForTimeout(350); ziel6.fokus = await b6.evaluate(() => getComputedStyle(document.getElementById('nl-adresse')).borderColor);
+    ok(ziel6.av && !ziel6.klein.length && ziel6.fokus === 'rgb(243, 242, 238)', art + ': Avatar des Betriebs in Cream, Chips und Kopfknöpfe ab 44 px, Fokus in Schriftfarbe' + (ziel6.klein.length ? ': ' + ziel6.klein.join(', ') : ''));
+    /* Nachrichten-Vorschau: „Viele Grüße“ bleibt hinter der Linkvorschau stehen */
+    const pv6 = await b6.evaluate(() => { const el = document.getElementById('pv-msg'); return el ? el.textContent : pvHTML({ kunde: 'Familie Weber', code: 'xxxxx', du: false }); });
+    ok(/Viele Grüße/.test(pv6) && /Aufmaß für Fensterbau Brandt/.test(pv6), art + ': Vorschau der Nachricht zeigt Linkvorschau und „Viele Grüße“');
+    /* Haustür geplant: Hinweis beim Anlegen und im Projekt „Vor Ort aufnehmen“; Gebäude wie in der App */
+    const hs6 = await b6.evaluate(() => { const hin = /misst Ihr Kunde in der App nicht/.test((document.querySelector('.nl-hinweis') || {}).textContent || '') || (S.nl.plan.includes('Haustür') ? false : (S.nl.plan.push('Haustür'), render(), /misst Ihr Kunde in der App nicht/.test((document.querySelector('.nl-hinweis') || {}).textContent || ''))); const geb = Array.from(document.querySelectorAll('[data-act="nl-set"][data-k="geb"]')).map((b) => b.getAttribute('data-v')); const l = A().links.find((x) => x.kunde === 'Familie Unverschickt'); go('link', l.id); return { hin: hin, geb: geb.join(','), vorort: /Vor Ort aufnehmen/.test((document.querySelector('.note.vorort') || {}).textContent || '') }; });
+    ok(hs6.hin && hs6.vorort && /denkmal/.test(hs6.geb) && /altbau/.test(hs6.geb), art + ': Gebäude mit Denkmalschutz und Altbau; Haustür geplant: Hinweis beim Anlegen und „Vor Ort aufnehmen“ im Projekt');
+    /* Mein Betrieb: ohne Mailversand keine Schalter (ein Satz statt Attrappe), Team als „geplant“ ohne Knopf, keine Prototyp-Meldung */
+    const bp6 = await b6.evaluate(() => { go('bprofil'); const t = document.querySelector('.scr').textContent; return { schalter: document.querySelectorAll('.scr .switch').length, satz: !!document.querySelector('.b-mail-pilot'), team: /geplant/.test(t) && !/Mitglied einladen|Prototyp/.test(t) }; });
+    const preis6 = await b6.evaluate(() => { go('preise'); return document.querySelector('.scr').textContent; });
+    ok(bp6.schalter === 0 && bp6.satz && bp6.team && !/Team mit Rollen|Rollen und Statistik/.test(preis6), art + ': Benachrichtigungen ohne Mailversand als Satz statt Schalter, Team „geplant“, Plus verspricht kein Team und keine Statistik');
+    /* Zurück im Browser: Projekt → Liste, Blatt schließt, zweiter Schritt → erster, auf der Liste verlässt Zurück die Seite */
+    await b6.evaluate(() => nav('links')); await b6.waitForTimeout(300);
+    const zst = () => b6.evaluate(() => ({ s: S.screen, sheet: S.sheet ? S.sheet.k : '', schritt: S.nl ? S.nl.step : null }));
+    await b6.click('.pcard >> nth=0'); await b6.waitForTimeout(250); const z1 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(350); const z2 = await zst();
+    await b6.click('.pcard >> nth=1'); await b6.waitForTimeout(250); await b6.evaluate(() => { S.sheet = { k: 'deact', id: S.sel }; render(); }); await b6.waitForTimeout(150);
+    await b6.goBack(); await b6.waitForTimeout(350); const z3 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(350); const z4 = await zst();
+    await b6.evaluate(() => { S.nl = null; }); await b6.click('.l-neu-knopf'); await b6.waitForTimeout(250); await b6.fill('#nl-kunde', 'Familie Zurück'); await b6.click('[data-act="nl-next"]'); await b6.waitForTimeout(250);
+    await b6.goBack(); await b6.waitForTimeout(350); const z5 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(350); const z6 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(600);
+    ok(z1.s === 'link' && z2.s === 'links' && z3.s === 'link' && !z3.sheet && z4.s === 'links' && z5.s === 'newlink' && z5.schritt === 0 && z6.s === 'links' && b6.url() === 'about:blank', art + ': Zurück im Browser führt Schritt für Schritt zurück (Projekt, Blatt, neues Projekt) bis zur Projektliste und erst dann aus der Seite');
+    sauber(b6, art + ': Betriebsbereich im Styleguide ohne Fehler');
+    await c6.close();
+  }
+  /* Direktlink aus der E-Mail „Aufmaß eingegangen“: /#projekt-<id> öffnet nach der Anmeldung genau dieses Projekt */
+  const c6d = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), d6 = await neueSeite(c6d);
+  await d6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await betrieb(d6, 'c1'); await d6.waitForTimeout(200);
+  await d6.goto(BASE + '/#projekt-l2', { waitUntil: 'networkidle' }); await d6.waitForTimeout(400);
+  ok(await d6.evaluate(() => S.screen === 'link' && S.sel === 'l2' && location.hash === ''), 'Direktlink /#projekt-<id> öffnet das Projekt und räumt die Adresse auf');
+  sauber(d6, 'Direktlink ins Projekt ohne Fehler'); await c6d.close();
+  /* Nacharbeit portal, Telefon abgemeldet: das Logo neben „Zurück“ (Registrierung, ohne Schriftzug) und die Schrittknöpfe der Tour sind mindestens 44 px breit */
+  const c6z = await browser.newContext(telefon), z6 = await neueSeite(c6z);
+  await z6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await z6.waitForTimeout(300);
+  await z6.click('.top [data-act="reg"]'); await z6.waitForTimeout(300);
+  const masz6 = (sel) => z6.evaluate((sel) => Array.from(document.querySelectorAll(sel)).filter((e) => e.getClientRects().length).map((e) => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }), sel);
+  const logo6 = await masz6('.top .logo-s.neben-zurueck');
+  await z6.evaluate(() => { S.reg = null; nav('landing'); }); await z6.waitForTimeout(300);
+  await z6.click('.hero.b2b [data-act="tour"]'); await z6.waitForSelector('.tourw'); await z6.waitForTimeout(300);
+  await z6.click('.tour-schritte [data-v="3"]'); await z6.waitForTimeout(250); // erledigte Schritte mit Haken, offene mit Zahl
+  const tour6 = await masz6('.tour-schritte button');
+  ok(logo6.length === 1 && logo6[0][0] >= 44 && logo6[0][1] >= 44 && tour6.length === 8 && tour6.every((g) => g[0] >= 44 && g[1] >= 44), 'Telefon: Logo neben „Zurück“ in der Registrierung (' + logo6.map((g) => g.join('×')).join() + ') und alle Schrittknöpfe der Tour (' + tour6.map((g) => g[0]).join(', ') + ' px breit) mindestens 44 px');
+  sauber(z6, 'Registrierung und Tour am Telefon ohne Fehler'); await c6z.close();
 }
 
 /* ---------- 7. Nachbesserung: gleiches Projekt, nichts doppelt gebucht, Grenzen ---------- */
@@ -746,7 +1038,7 @@ if (teil(7)) {
   await page.waitForTimeout(300);
   ok(/Erneut an Fensterbau Brandt senden/.test(await page.evaluate(() => document.querySelector('.bb .btn.primary').textContent)), 'Prüfen-Seite sagt „Erneut senden“');
   await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
-  const code2 = await page.inputValue('#code-box');
+  const code2 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => unpackProject(c).r === 2 && !S.nb && S.sent.runde === 2, code2), 'Erneuter Code trägt Runde 2, App ist wieder im Zustand „gesendet“');
   // Betrieb: Code übernehmen → ersetzt, nichts gebucht
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
@@ -765,7 +1057,7 @@ if (teil(7)) {
   await page.goto(url3, { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   await page.evaluate(() => { const w = demoProject()[0]; S.windows = [Object.assign({}, w, { name: 'Garage', w: 2400, h: 2100, el: { w: 2400, h: 2100 }, mo: { hm: 2130, hl: 2130, hr: 2130, wm: 2430, wt: 2430, wb: 2430 } })]; persist(); S.screen = 'blatt'; render(true); });
   await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
-  const code3 = await page.inputValue('#code-box');
+  const code3 = await codeAusNachricht(page);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', code3); await tun('linkimport'); await page.waitForTimeout(500);
   l1 = await page.evaluate(() => ({ book: ledger(A()).filter((b) => b.kind === 'aufmass').length, extra: ledger(A()).some((b) => b.ref === 'l1#3'), toast: document.getElementById('toast').textContent, nb: nbMoeglich(A().links.find((x) => x.id === 'l1')) }));
@@ -783,7 +1075,7 @@ if (teil(7)) {
   ok(st.nb && st.nb.teil && st.n === 0 && /nicht gespeichert/.test(st.txt), 'Ohne gespeicherte Angaben erklärt die App, nur das betroffene Fenster neu zu messen');
   await page.evaluate(() => { S.windows = [Object.assign({}, demoProject()[1], { name: 'Backstube' })]; persist(); S.screen = 'blatt'; render(true); });
   await page.waitForTimeout(200); await page.click('.bb .btn.primary'); await page.waitForSelector('[data-screen="gesendet"]');
-  const code4 = await page.inputValue('#code-box');
+  const code4 = await codeAusNachricht(page);
   ok(await page.evaluate((c) => { const o = unpackProject(c); return o.r === 2 && o.m === 1; }, code4), 'Code meldet Teil-Nachbesserung');
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await tun('sheet', 'linkimport'); await page.waitForSelector('#code-in'); await page.fill('#code-in', code4); await tun('linkimport'); await page.waitForTimeout(500);
@@ -799,7 +1091,7 @@ if (teil(8)) {
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
   let kind = null, BASE2 = process.env.BASE2 || '';
   if (!BASE2) {
-    const port = 8790 + Math.floor(Math.random() * 100); BASE2 = 'http://localhost:' + port;
+    const port = await freierPort(); BASE2 = 'http://localhost:' + port;
     const skript = pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs');
     kind = cp.spawn(process.execPath, [skript], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
     kind.stderr.on('data', (d) => process.stderr.write('  [Server 2] ' + d));
@@ -1050,6 +1342,58 @@ if (teil(8)) {
     const r2 = await ko.abrechnungslauf(k, sp, zd);
     ok(r2.rechnungen === 0, 'Zweiter Lauf berechnet nichts doppelt');
   }
+  // Einladungsseite (Strang S4) im Servermodus: Logo, Begrüßung und Kontakt im Betriebsbereich gestalten, auf dem Server prüfen und
+  // speichern, beim Kunden mit Logo, Anruf-Knopf und der Anrede des Projekts; Hinweis einer Nachbesserung auf der Startseite
+  {
+    const mailE = 'einladung-' + stempel + '@beispiel.de', tokE = testToken(mailE);
+    const regE = await api('/api/konto/registrieren', { firma: 'Glaserei Einladung ' + stempel, ap: 'Erika Einladung', tel: '0221 ' + String(Date.now() + 7).slice(-7), plz: '50667', col: '#1f7a3d', agb: RECHT.NB_STAND, unternehmer: true }, tokE);
+    const ectx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), ep = await neueSeite(ectx, BASE2);
+    await ep.goto(BASE2 + '/', { waitUntil: 'networkidle' });
+    await ep.evaluate((t) => localStorage.setItem('aufmass.sitzung', JSON.stringify({ token: t, refresh: '', mail: 'x' })), tokE);
+    await ep.reload({ waitUntil: 'networkidle' }); await ep.waitForFunction(() => Server.online(), null, { timeout: 8000 });
+    await ep.evaluate(() => { nav('bprofil'); }); await ep.waitForTimeout(200);
+    const karteE = await ep.evaluate(() => ({ t: (document.querySelector('.ein-b-karte') || {}).textContent || '', knopf: !!document.querySelector('.ein-b-karte [data-v="einladung"] .pf'), alt: /Deine Fenster\. Deine Maße\./.test(document.body.textContent) }));
+    ok(regE.ok && /Ihre Einladungsseite/.test(karteE.t) && /Persönliche Anfrage von/.test(karteE.t) && karteE.knopf && !karteE.alt, 'Mein Betrieb: Karte „Ihre Einladungsseite“ mit dem echten Absender statt der nachgebauten Vorschau');
+    await ep.evaluate(() => go('einladung')); await ep.waitForSelector('#ein-vor');
+    const svgE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100"><rect x="10" y="20" width="60" height="60" rx="8" fill="#1d3b8f"/><rect x="90" y="40" width="190" height="24" fill="#1d3b8f"/></svg>';
+    await ep.setInputFiles('input[data-ein-datei="logo"]', { name: 'logo.svg', mimeType: 'image/svg+xml', buffer: Buffer.from(svgE) });
+    await ep.waitForFunction(() => /^data:image\/(png|webp);base64,/.test(A().logo || '') && !EIN_UI.laeuft, null, { timeout: 8000 }); await ep.waitForTimeout(600);
+    await ep.fill('#ein-gruss', 'Guten Tag {Kunde}, schön, dass Sie mitmachen. Messen Sie in Ruhe, wir melden uns mit dem Angebot.'); await ep.locator('#ein-gruss').blur(); await ep.waitForTimeout(400);
+    await ep.fill('#ein-tel', '0221 987654'); await ep.locator('#ein-tel').blur(); await ep.waitForTimeout(400);
+    await ep.click('[data-ein="schalter"][data-v="telefonZeigen"]'); await ep.waitForTimeout(800);
+    const vorE = await ep.evaluate(() => ({ logo: !!document.querySelector('#ein-vor .ein-zeichen.logo img'), gruss: (document.querySelector('#ein-vor .ein-gruss') || {}).textContent || '', tel: (document.querySelector('#ein-vor .ein-kontakt') || {}).textContent || '', bedienbar: document.querySelectorAll('#ein-vor button, #ein-vor a[href]').length, logoLaenge: A().logo.length, grund: A().einladung.logoGrund }));
+    ok(vorE.logo && /Guten Tag Familie Weber, schön/.test(vorE.gruss) && /0221 987654/.test(vorE.tel) && vorE.bedienbar === 0 && vorE.logoLaenge <= 120000 && vorE.grund === 'hell', 'Einladungsseite gestalten: SVG-Logo im Browser verkleinert (' + vorE.logoLaenge + ' Zeichen, dunkles Logo auf hellem Feld), Begrüßung mit {Kunde}, Telefon mit Schalter; die Vorschau zeigt die echte Seite und ist nicht bedienbar');
+    const prE = await api('/api/konto/projekte', { kunde: 'Familie Einladung', kontakt: '0171 4444444', plan: ['Fenster'], days: 14 }, tokE), lE = prE.konto.acc.links.find((l) => l.id === prE.id);
+    const infoE = await api('/api/link/' + lE.code), au = infoE.auftritt || {};
+    ok(infoE.ok && /^data:image\/(png|webp);base64,/.test(au.logo) && au.tel === '0221 987654' && au.mail === '' && /schön, dass Sie mitmachen/.test(au.gruss.sie) && au.ap === 'Erika Einladung' && au.col === '#1f7a3d' && infoE.du === false, 'GET /api/link: Profil des Betriebs mit Logo, Telefon nur mit Schalter, keine E-Mail ohne Schalter, Anrede des Projekts');
+    const abw = [await api('/api/konto', { logo: 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=' }, tokE, 'PATCH'), await api('/api/konto', { logo: 'data:image/png;base64,/9j/4AAQSkZJRgABAQ==' }, tokE, 'PATCH'), await api('/api/konto', { logo: 'data:image/png;base64,' + 'A'.repeat(130000) }, tokE, 'PATCH'), await api('/api/konto', { einladung: { telefon: 'abc' } }, tokE, 'PATCH'), await api('/api/konto', { col: '#ff00ff' }, tokE, 'PATCH')];
+    const nachAbw = await api('/api/link/' + lE.code);
+    ok(abw.every((r) => r._status === 400) && nachAbw.auftritt.logo === au.logo && nachAbw.auftritt.tel === au.tel, 'Server weist SVG als Data-URL, falsche Signatur, zu große Logos, ungültige Telefonnummern und fremde Farben ab; nichts davon ändert das Profil');
+    const urlE = await ep.evaluate(async (id) => { await Server.laden(); const l = A().links.find((x) => x.id === id); return l ? linkURL(l) : ''; }, lE.id);
+    const kctxE = await browser.newContext({ ...telefon }), kpE = await neueSeite(kctxE, BASE2);
+    await kpE.goto(urlE, { waitUntil: 'networkidle' }); await kpE.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await kpE.waitForTimeout(300);
+    const kE = await kpE.evaluate(() => ({ logo: (document.querySelector('.ein-start .ein-zeichen.logo img') || {}).src || '', tel: (document.querySelector('.ein-kontakt a[href^="tel:"]') || {}).getAttribute ? document.querySelector('.ein-kontakt a[href^="tel:"]').getAttribute('href') : '', h1: (document.querySelector('.ein-start h1') || {}).textContent, gruss: (document.querySelector('.ein-gruss') || {}).textContent, gilt: (document.querySelector('.ein-gilt') || {}).textContent || '' }));
+    ok(/^data:image\//.test(kE.logo) && kE.tel === 'tel:+49221987654' && kE.h1 === 'Ihre Fenster, Ihr Angebot.' && /^Guten Tag Familie Einladung, schön/.test(kE.gruss) && /gilt bis/.test(kE.gilt), 'Kunde sieht das Logo, die eigene Begrüßung in der Anrede des Projekts (Sie), den Anruf-Knopf und bis wann der Link gilt');
+    await foto(kpE, 'srv-app-einladung');
+    // Nachbesserung: der Hinweis des Betriebs steht auf der Startseite des Links
+    const oE = await kpE.evaluate((code) => unpackProject(packProject(demoProject(), {}, { code: code })), lE.code);
+    const sendE = await api('/api/aufmass', oE);
+    const nbE = await api('/api/konto/projekte/' + lE.id, { nb: { hinweis: 'Beim Bad fehlt die Brüstungshöhe.' } }, tokE, 'PATCH');
+    await kpE.evaluate(() => { localStorage.clear(); }); await kpE.goto(urlE.replace(/~\d+$/, '') + '~2', { waitUntil: 'networkidle' }); await kpE.reload({ waitUntil: 'networkidle' }); await kpE.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }).catch(() => {}); await kpE.waitForTimeout(400);
+    const hinE = await kpE.evaluate(() => ({ nb: !!S.nb, hin: (document.querySelector('.ein-hinweis') || {}).textContent || '', p: (document.querySelector('.hero.lk .ein-lead') || {}).textContent || '' }));
+    ok(sendE.ok && nbE.ok && hinE.nb && /Darum bittet Glaserei Einladung/.test(hinE.hin) && /Beim Bad fehlt die Brüstungshöhe/.test(hinE.hin) && !/steht in der Nachricht/.test(hinE.p), 'Nachbesserung im Servermodus: Hinweis des Betriebs als Karte auf der Startseite, statt „steht in der Nachricht“');
+    sauber(ep, 'Einladungsseite gestalten im Servermodus ohne Fehler'); sauber(kpE, 'Einladungsseite beim Kunden im Servermodus ohne Fehler');
+    await kctxE.close(); await ectx.close();
+  }
+  /* Strang S5: Abzug unten (Fenster und Türen) und die Klärungsliste abhaken, beides über die API am Konto bzw. am Projekt */
+  {
+    const ab8 = await api('/api/konto', { abzug: { seite: 12, oben: 14, unten: 30, untenT: 99 } }, token, 'PATCH');
+    const pj8 = await api('/api/konto/projekte', { kunde: 'Familie Klar', kontakt: '', plan: ['Fenster'], days: 14 }, token);
+    const kl8 = await api('/api/konto/projekte/' + encodeURIComponent(pj8.id), { klaer: { id: 'lueftung', ok: true, notiz: 'Planer gefragt' } }, token, 'PATCH');
+    const kl8b = await api('/api/konto/projekte/' + encodeURIComponent(pj8.id), { klaer: { id: 'böse id!', ok: true } }, token, 'PATCH');
+    const st8 = ((kl8.konto && kl8.konto.acc && kl8.konto.acc.links) || []).find((l) => l.id === pj8.id) || {}, ab8w = ab8.konto && ab8.konto.acc && ab8.konto.acc.abzug;
+    ok(!!ab8w && ab8w.seite === 12 && ab8w.unten === 30 && ab8w.untenT === 60 && !!(st8.klaer && st8.klaer.lueftung && st8.klaer.lueftung.ok && st8.klaer.lueftung.notiz === 'Planer gefragt') && kl8b._status >= 400, 'Server: Abzug unten für Fenster und Türen (höchstens 60 mm); Klärungsliste abhaken mit Notiz am Projekt, fremde Kennungen abgelehnt');
+  }
   if (kind) kind.kill();
 }
 
@@ -1165,17 +1509,19 @@ if (teil(9)) {
   const seiteT = (pfad, n) => { try { return cp9.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
   const alleT = (pfad) => { try { return cp9.execFileSync('pdftotext', ['-layout', pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
   /* Lage eines Wortes auf Seite 1 in pt von oben (pdftotext -bbox): tiefste Unterkante bzw. höchste Oberkante */
-  const woerter = (pfad, wort) => { try { const html = cp9.execFileSync('pdftotext', ['-bbox', '-f', '1', '-l', '1', pfad, '-']).toString('utf8'); return [...html.matchAll(/<word xMin="[\d.]+" yMin="([\d.]+)" xMax="[\d.]+" yMax="([\d.]+)">([^<]*)<\/word>/g)].filter((x) => x[3] === wort).map((x) => [+x[1], +x[2]]); } catch (e) { return []; } };
-  const zeichnungUeberFuss = (pfad) => { const leg = woerter(pfad, 'Hand'), fuss = woerter(pfad, 'Erstellt'); return leg.length > 0 && fuss.length > 0 && Math.max(...leg.map((x) => x[1])) < Math.min(...fuss.map((x) => x[0])) - 4; };
+  const woerter = (pfad, wort, n) => { try { const html = cp9.execFileSync('pdftotext', ['-bbox', '-f', String(n || 1), '-l', String(n || 1), pfad, '-']).toString('utf8'); return [...html.matchAll(/<word xMin="[\d.]+" yMin="([\d.]+)" xMax="[\d.]+" yMax="([\d.]+)">([^<]*)<\/word>/g)].filter((x) => x[3] === wort).map((x) => [+x[1], +x[2]]); } catch (e) { return []; } };
+  /* Strang S5: die Zeichnung steht auf der Seite ihrer Position; auf jeder Seite mit Zeichnung endet die Legende („von Hand“) über dem Fuß */
+  const zeichnungUeberFuss = (pfad) => { const n = +((/Pages:\s+(\d+)/.exec(cp9.execFileSync('pdfinfo', [pfad]).toString('utf8')) || [0, 0])[1]); let mit = 0; for (let k = 1; k <= n; k++) { const leg = woerter(pfad, 'Hand', k), fuss = woerter(pfad, 'Erstellt', k); if (!leg.length) continue; mit++; if (!fuss.length || Math.max(...leg.map((x) => x[1])) >= Math.min(...fuss.map((x) => x[0])) - 4) return false; } return mit > 0; };
   const LANG = 'Bitte beachten: Der Rollladen im Bad klemmt seit dem Winter und lässt sich nur noch halb herunterlassen. Im Wohnzimmer zieht es unten links, vermutlich ist die Dichtung porös. Wir möchten gern Angebote für beide Fenster, am liebsten mit elektrischem Rollladen, und eine Einschätzung, ob sich ein Austausch der Fensterbänke lohnt. Parken bitte in der Einfahrt, der Hund ist freundlich.';
   const pLang = await blattDatei('lang', { notiz: LANG, tel: '0171 2345678', mail: 'familie.weber-schmidt@beispiel-mail.de', erreich: 'ab' }, false);
   const l1 = seiteT(pLang, 1), lRest = alleT(pLang).split(l1).join('');
-  ok(/MAUERÖFFNUNG/.test(l1) && /vollständig nach Pos\. 1/.test(l1) && !/Hund ist freundlich/.test(l1) && /Hund ist freundlich/.test(lRest) && /Deine Nachricht/.test(lRest), 'Aufmaßblatt, lange Nachricht: auf Seite 1 dreizeilig, danach vollständig; Position 1 bleibt auf Seite 1');
-  ok(zeichnungUeberFuss(pLang), 'Aufmaßblatt, lange Nachricht und alle Kontaktdaten: die Zeichnung auf Seite 1 endet über dem Fuß');
+  ok(/NOCH ZU KLÄREN/.test(l1) && /Nachricht/.test(l1 + lRest) && /Hund ist freundlich/.test(l1 + lRest) && !/vollständig nach Pos/.test(l1 + lRest) && /MAUERÖFFNUNG/.test(lRest) && !/MAUERÖFFNUNG/.test(l1), 'Aufmaßblatt, lange Nachricht: ungekürzt in der Klärungsliste vorn; die Positionen beginnen auf ihrer eigenen Seite');
+  ok(zeichnungUeberFuss(pLang), 'Aufmaßblatt, lange Nachricht und alle Kontaktdaten: jede Zeichnung endet über dem Fuß');
   const pVoll = await blattDatei('voll', { notiz: 'Rollladen im Bad klemmt.', tel: '0171 2345678', mail: 'weber@beispiel.de', erreich: 'ab', baujahr: '1965' }, false);
   ok(zeichnungUeberFuss(pVoll) && !/vollständig nach Pos/.test(alleT(pVoll)), 'Aufmaßblatt mit allen Kontaktdaten und kurzer Nachricht: Seite 1 passt, Nachricht ungekürzt');
   const pZwei = await blattDatei('zwei', {}, false);
-  ok(!/fortsetzung/i.test(alleT(pZwei)) && /Bad/.test(seiteT(pZwei, 3)) && /EINBAUSITUATION AUS DEN FOTOS/.test(seiteT(pZwei, 3)) && /Vor Ort prüfen/.test(seiteT(pZwei, 3)), 'Aufmaßblatt: Position 2 steht samt Fotoauswertung auf einer Seite (Zeichnung etwas kleiner statt Rest auf neuer Seite)');
+  const badS = [2, 3, 4, 5].find((n) => /MAUERÖFFNUNG/.test(seiteT(pZwei, n)) && /Bad/.test(seiteT(pZwei, n).split('\n').slice(0, 8).join(' ')));
+  ok(!!badS && !/Bad, Fortsetzung/.test(alleT(pZwei)) && /EINBAUSITUATION AUS DEN FOTOS/.test(seiteT(pZwei, badS)) && /Vor Ort prüfen/.test(seiteT(pZwei, badS)) && /WÜNSCHE DES KUNDEN|DEINE WÜNSCHE/.test(seiteT(pZwei, badS)), 'Aufmaßblatt: Position 2 steht samt Wünschen und Fotoauswertung auf einer Seite (Zeichnung kleiner statt Rest auf neuer Seite)');
   sauber(bp, 'Aufmaßblatt-Prüfung ohne Fehler');
   await ctx3.close();
 }
@@ -1218,7 +1564,8 @@ if (teil(10)) {
   await page.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
   await page.click('.rg-cta a[href="/#tour"]'); await page.waitForLoadState('networkidle'); await page.waitForTimeout(600);
   const tour1 = await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour');
-  await page.evaluate(() => { tourEnde(); location.hash = 'tour'; }); await page.waitForTimeout(400);
+  await page.evaluate(() => tourEnde()); await page.waitForTimeout(300); // Tour beenden räumt den eigenen Eintrag im Verlauf ab (Zurück im Browser, S6)
+  await page.evaluate(() => { location.hash = 'tour'; }); await page.waitForTimeout(400);
   ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Link „Tour“ auf der Seite für Fensterbauer öffnet die Tour (/#tour), auch als Sprungmarke auf der Startseite');
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/#fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
@@ -1252,7 +1599,9 @@ if (teil(10)) {
   ok(/User-agent: \*\nDisallow: \/\n/.test(rb1.text) && sm1.status === 404 && ll1.status === 200 && ll1.h.get('x-robots-tag') === seo.SPERRE, 'Pilotphase: robots.txt sperrt alles, keine Sitemap, llms.txt mit noindex');
 
   /* e) Freigabe: dritter Testserver mit INDEXIERUNG=1 und KANONISCH */
-  const port = 8890 + Math.floor(Math.random() * 100), B3 = 'http://localhost:' + port, KAN = 'https://eeziframes.example';
+  /* ein freier Port, nie der des Servers, unter dem die Suite selbst läuft */
+  const port = await freierPort();
+  const B3 = 'http://localhost:' + port, KAN = 'https://eeziframes.example';
   const kind = cp10.spawn(process.execPath, [path10.join(WURZEL, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', INDEXIERUNG: '1', KANONISCH: KAN }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (d) => process.stderr.write('  [Server 3] ' + d));
   const aus = () => { try { kind.kill(); } catch (e) { /* schon weg */ } };
@@ -1953,7 +2302,7 @@ if (teil(13)) {
 
   // p) Oberfläche im Browser, auf einem eigenen Testserver mit Zentrale
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = 8890 + Math.floor(Math.random() * 90), B4 = 'http://localhost:' + port;
+  const port = await freierPort(), B4 = 'http://localhost:' + port;
   const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (dd) => process.stderr.write('  [Server 4] ' + dd));
   const aus4 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus4);
@@ -2273,11 +2622,11 @@ if (teil(14)) {
     await fensterAnlegen(page, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210], ['Bad', 610, 810]]); await page.waitForTimeout(400);
     const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0) }; });
     ok(h1.h1 === 'Weiter, wo du warst.' && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Weiter, wo du warst.“, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
-    ok(/Maße vollständig/.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: „Maße vollständig“ statt Zahlen');
+    ok(/vollständig/i.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: nur der Stand („Vollständig“) statt Zahlen');
     await foto(page, 'app-aufmass-fortsetzen');
     await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]'); await page.waitForTimeout(200);
-    const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !!document.querySelector('.zu-karte [data-act="k-start"]'), fakten: document.querySelector('.center p:not(.eyebrow)').textContent, frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: document.querySelector('.hdr-btn[data-act="back"]').textContent, alle: !!document.querySelector('.pill.voll[data-v="home"]') }));
-    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Aufmaß' && f0.alle, 'Fenster gespeichert: keine Liste aller Angaben und keine Maße vor dem Freischalten, dafür „Freischalten“; Hinweis auf 7 Tage freies Ändern; zurück heißt „Aufmaß“, dazu „Alle Fenster ansehen“');
+    const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !document.querySelector('.zu-karte') && !/Alle Angaben/.test(document.querySelector('.scr').textContent) && /Wie geht es weiter/.test((document.querySelector('.weiter-karte') || {}).textContent || '') && document.querySelectorAll('.btn.primary').length === 1, fakten: document.querySelector('.center p:not(.eyebrow)').textContent, frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: document.querySelector('.hdr-btn[data-act="back"]').textContent, alle: !!document.querySelector('.pill.voll[data-v="home"]') }));
+    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Aufmaß' && f0.alle, 'Fenster gespeichert: keine Übersicht „Alle Angaben“ und keine Maße, dafür „Wie geht es weiter?“ und nur eine Hauptaktion; Hinweis auf 7 Tage freies Ändern; zurück heißt „Aufmaß“, dazu „Alle Fenster ansehen“');
     await foto(page, 'app-fenster-gesperrt');
     const mFertig = await messenApp(page);
     await page.evaluate(() => go('teilen')); await page.waitForTimeout(300);
@@ -2286,7 +2635,7 @@ if (teil(14)) {
     await page.evaluate(() => { const k = kauf(); k.paid = true; k.test = true; persist(); go('home'); }); await page.waitForTimeout(250);
     const nachKauf = await page.evaluate(() => document.querySelector('.liste-in').textContent);
     await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]');
-    ok(/1\.230 × 1\.410 mm/.test(nachKauf) && await page.locator('details.fold .kv').count() === 1 && await page.locator('.zu-karte').count() === 0, 'Nach dem Freischalten: Maße in der Liste und alle Angaben');
+    ok(!/\d mm/.test(nachKauf) && /vollständig/i.test(nachKauf) && await page.locator('details.fold .kv').count() === 0 && await page.locator('.zu-karte').count() === 0 && !/Alle Angaben|\d mm/.test(await page.locator('.scr').textContent()), 'Auch nach dem Freischalten keine Gesamtübersicht: Liste und gespeichertes Fenster ohne Maße und ohne „Alle Angaben“ (die stehen in der PDF)');
     // Portal: angefangenes Aufmaß → „Aufmaß fortsetzen“
     await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
     const po = await page.evaluate(() => ({ top: (document.querySelector('.top a.btn.primary') || {}).textContent, hero: (document.querySelector('.hero.b2c a.btn.primary') || {}).textContent, hint: (document.querySelector('.hint.fortsetzen') || {}).textContent || '' }));
@@ -2355,7 +2704,7 @@ if (teil(14)) {
 
   // e) Kundenlink im Servermodus: Hinweis, Zwischenstand auf dem Server, anderes Gerät, deaktivierter Link
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = 8990 + Math.floor(Math.random() * 90), B5 = 'http://localhost:' + port;
+  const port = await freierPort(), B5 = 'http://localhost:' + port;
   const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (dd) => process.stderr.write('  [Server 5] ' + dd));
   const aus5 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus5);
@@ -2370,7 +2719,7 @@ if (teil(14)) {
     const c1 = await browser.newContext(telefon), s1 = await neueSeite(c1, B5);
     await s1.goto(url, { waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.sync && S.sync.geladen, null, { timeout: 8000 }); await s1.waitForTimeout(200);
     const erst = await s1.evaluate(() => document.querySelector('.hero.lk').textContent);
-    ok(/Über diesen Link kommst du jederzeit zurück/.test(erst), 'Kundenlink, erster Besuch: Hinweis, dass der Kunde jederzeit über den Link zurückkommt');
+    ok(/Über diesen Link kommen Sie jederzeit zurück/.test(erst), 'Kundenlink, erster Besuch: Hinweis, dass der Kunde jederzeit über den Link zurückkommt (in der Anrede des Projekts, hier Sie)');
     await fensterAnlegen(s1, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210]]);
     await s1.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 }); await s1.waitForTimeout(200);
     const srv = await http('/api/link/' + lk.code + '/entwurf');
@@ -2381,10 +2730,10 @@ if (teil(14)) {
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B5);
     await s2.goto(url, { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
     const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary').textContent }));
-    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo du warst.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
-    ok(/Maße vollständig/.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
+    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo Sie waren.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
+    ok(/vollständig/i.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
     await s2.click('.liste-in .wincard[data-i="0"]'); await s2.waitForSelector('[data-screen="fertig"]');
-    ok(await s2.locator('details.fold .kv').count() === 0 && /Gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.zu-karte').textContent()) && await s2.locator('.zu-karte [data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
+    ok(await s2.locator('details.fold .kv').count() === 0 && await s2.locator('.zu-karte').count() === 0 && /gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.weiter-karte').textContent()) && await s2.locator('[data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
     /* Änderung auf Gerät 2 kommt auf Gerät 1 an */
     await s2.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Wohnzimmer links'; saveWin(); });
     await s2.waitForFunction(() => S.sync && !S.sync.offen && !S.sync.laeuft, null, { timeout: 8000 });
@@ -2584,7 +2933,7 @@ if (teil(15)) {
 
   // e) Im Browser: Gast, sichern, zweites Gerät, Kauf nur mit Konto, Konto-Seite, abmelden, Link aus der E-Mail, abgelaufene Anmeldung
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = 9100 + Math.floor(Math.random() * 80), B6 = 'http://localhost:' + port;
+  const port = await freierPort(), B6 = 'http://localhost:' + port;
   const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', MAIL_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (dd) => process.stderr.write('  [Server 6] ' + dd));
   const aus6 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus6);
@@ -2810,7 +3159,7 @@ if (teil(16)) {
   ok(AW16.massPruef(mw(1230, 1410, 0.87)) === null && AW16.massPruef(mw(1410, 1230, 0.87)).typ === 'tausch' && AW16.massPruef(mw(1230, 2400, 0.87)).typ === 'abweichung' && AW16.massPruef(mw(1410, 1230, 0.87, { neu: true })) === null && AW16.massPruef(mw(1000, 1000, 0.87)) === null && AW16.massPruef(mw(1410, 1230, null)) === null, 'Maße gegen das Foto: passend still, vertauscht und stark abweichend erkannt; kleine Abweichung (Schrägsicht), neue Öffnung und fehlendes Verhältnis ohne Hinweis');
   const kl16 = AW16.klaerung([w1, AW16.mk({ name: 'Bad', offen: { fa: true } }), mw(1410, 1230, 0.87, { name: 'Flur', massOk: true })], { total: 6, foerdweg: 'offen' }).map((r) => r.k + ': ' + r.v).join('\n');
   ok(/Pos\. 1 Küche: Absturzsicherung nötig \(OG, Brüstung 450 mm\): bitte beraten/.test(kl16) && /Lüftung: Lüftungskonzept nach DIN 1946-6 erforderlich: 3 von 6/.test(kl16) && /Förderung: Noch offen/.test(kl16) && /Pos\. 3 Flur: Breite und Höhe laut Foto vertauscht\? Die Maße sind bestätigt\. Beim Feinaufmaß prüfen\./.test(kl16) && /Pos\. 1 Küche: Farbe außen, Fensterbank außen: offen, bitte beraten/.test(kl16) && /Pos\. 2 Bad: Farbe außen: offen/.test(kl16), 'Klärungsliste: Absturzsicherung, Lüftungskonzept ab mehr als einem Drittel, Förderweg, vertauschte Maße (auch bestätigt), offene Wünsche je Position');
-  ok(AW16.klaerKurz([w1, AW16.mk({ offen: { fa: true } })], {}).join(', ') === 'Absturzsicherung (Pos. 1), Farbe außen (alle), Fensterbank außen (Pos. 1)', 'Klärungsliste in einer Zeile: je Angabe mit Positionen, „alle“, wenn es jede Position betrifft');
+  ok(AW16.klaerKurz([w1, AW16.mk({ offen: { fa: true }, mo: MO(1230, 1410), el: { w: 1230, h: 1410 } })], { total: 9 }).join(', ') === 'Absturzsicherung (Pos. 1), Farbe außen (alle), Fensterbank außen (Pos. 1)', 'Klärungsliste in einer Zeile: je Angabe mit Positionen, „alle“, wenn es jede Position betrifft');
   const motor16 = AW16.klaerung([AW16.mk({ sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', ki: { fach: { strom: false } } }), AW16.mk({ sart: 'raffstore', roll: 'aufsatz', antrieb: 'smart', ki: { fach: { strom: true } } }), AW16.mk({ erreichbar: 'ja' })], {}).map((r) => r.v).join('\n');
   ok(/Strom am Fenster laut Foto nicht zu sehen/.test(motor16) && (motor16.match(/Elektrischer Antrieb/g) || []).length === 1 && /Leicht erreichbar, gewählt Basisschutz: Die Polizei empfiehlt RC2/.test(motor16), 'Klärungsliste: elektrischer Antrieb ohne Strom laut Foto (mit Strom kein Eintrag), leicht erreichbar ohne RC2');
   ok(X16.fromAppProj({ foerdweg: 'bafa' }).foerdweg === 'bafa' && X16.fromAppProj({ foerdweg: 'bafa' }).foerd === true && X16.fromAppProj({ foerdweg: 'quatsch' }).foerdweg === '' && X16.fromAppProj({ foerd: true }).foerd === true, 'Betriebsbereich übernimmt den Förderweg aus dem Aufmaß, nur bekannte Werte');
@@ -2824,7 +3173,7 @@ if (teil(16)) {
   ok(await a16.evaluate(() => S.win.offen.fa === true && S.win.offen.fba === true && S.screen === 'start'), 'Neues Fenster: Farbe außen und Fensterbank außen starten ohne Vorauswahl (offen)');
   await a16.evaluate((MO) => { Object.assign(S.win, { name: 'Küche', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.q = 'fa'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await a16.waitForTimeout(400);
   const fa0 = await a16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qsw[aria-pressed="true"]').length, cur: document.querySelector('.qpanel .qcur').textContent, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), farbe: document.querySelector('[data-r="el-back"]').style.background, karte: winCard(S.win, 0, false) }));
-  ok(fa0.gedrueckt === 0 && /Noch offen/.test(fa0.cur) && fa0.knopf === 'true' && /241, 240, 234|#f1f0ea/i.test(fa0.farbe) && /Farbe offen/.test(fa0.karte), 'Farbe außen: nichts vorgewählt, „Weiß ich noch nicht“ gedrückt, Modell neutral weiß, Fensterkarte „Farbe offen“');
+  ok(fa0.gedrueckt === 0 && /Noch offen/.test(fa0.cur) && fa0.knopf === 'true' && /241, 240, 234|#f1f0ea/i.test(fa0.farbe) && /2 Wünsche offen/.test(fa0.karte) && !/Farbe/.test(fa0.karte), 'Farbe außen: nichts vorgewählt, „Weiß ich noch nicht“ gedrückt, Modell neutral weiß, Fensterkarte zählt die offenen Wünsche (ohne sie zu nennen)');
   await a16.click('.qpanel .qsw[data-v="7016"]'); await a16.waitForTimeout(200);
   const fa1 = await a16.evaluate(() => ({ offen: !!S.win.offen.fa, knopf: document.querySelector('.qoffen').getAttribute('aria-pressed'), zeile: specRows(S.win).find((r) => r.k === 'Farbe').v }));
   await a16.click('.qoffen'); await a16.waitForTimeout(200);
@@ -2914,7 +3263,7 @@ if (teil(16)) {
 
   /* e2) Ohne Foto weiter: Hinweis, warum ein Foto besser ist, abschaltbar; neue Öffnung ohne Einzeichnen; Klärungsliste für den Betrieb */
   await a16.evaluate(() => { localStorage.removeItem('aufmass.ohnefoto.zu'); newWin(); go('fotos'); }); await a16.waitForTimeout(250);
-  const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.bb button')).map((b) => b.className + ':' + b.textContent).join('|'));
+  const of0 = await a16.evaluate(() => Array.from(document.querySelectorAll('.bb button:not(.bb-zurueck)')).map((b) => b.className + ':' + b.textContent).join('|'));
   await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
   const of1 = await a16.evaluate(() => ({ text: (document.querySelector('.sheet.ofoto') || {}).textContent || '', screen: S.screen }));
   await a16.check('.sheet.ofoto input[data-in="ohnefoto-zu"]');
@@ -2927,8 +3276,8 @@ if (teil(16)) {
   await a16.click('.bb [data-act="ohne-foto"]'); await a16.waitForTimeout(250);
   await a16.setInputFiles('.sheet.ofoto input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg16 }); await a16.waitForTimeout(400);
   const of4 = await a16.evaluate(() => ({ blatt: !!document.querySelector('.sheet.ofoto'), foto: !!S.photos.in, fotos: S.win.fotos, weiter: (document.querySelector('.bb .btn.primary') || {}).textContent || '' }));
-  const ofw = (o) => AW16.mk(Object.assign({ ohneFoto: true }, o)), kl16o = (wins) => AW16.klaerung(wins, {}).map((r) => r.k + ': ' + r.v).join('|');
-  const of5 = { eins: kl16o([ofw({ name: 'Bad' })]), alle: kl16o([ofw(), ofw({ neu: true })]), kurz: AW16.klaerKurz([ofw(), AW16.mk({}), ofw({ fotos: 2 }), ofw()], {}).join(', '), nachgereicht: AW16.klaerung([ofw({ fotos: 1 })], {}).length, ohneWahl: AW16.klaerung([AW16.mk({})], {}).length };
+  const ofw = (o) => AW16.mk(Object.assign({ ohneFoto: true }, o)), kl16o = (wins) => AW16.klaerung(wins, {}).filter((r) => r.kurz === 'Ohne Fotos' || r.kurz === 'Sturz und Statik').map((r) => r.k + ': ' + r.v).join('|'), ohneF = (wins) => AW16.klaerung(wins, {}).filter((r) => r.kurz === 'Ohne Fotos');
+  const of5 = { eins: kl16o([ofw({ name: 'Bad' })]), alle: kl16o([ofw(), ofw({ neu: true })]), kurz: AW16.klaerKurz([ofw(), AW16.mk({}), ofw({ fotos: 2 }), ofw()], {}).filter((x) => /^Ohne Fotos/.test(x)).join(', '), nachgereicht: ohneF([ofw({ fotos: 1 })]).length, ohneWahl: ohneF([AW16.mk({})]).length };
   const ent16 = await import(new URL('../functions/api/entwurf.js', import.meta.url).href), wo16 = { name: 'X', mo: { hm: 1200 } }, wo16b = Object.assign({}, wo16, { ohneFoto: true });
   const of6 = (await a16.evaluate(([a, b]) => aenderungFp(a) === aenderungFp(b) && fensterFp(a) !== fensterFp(b), [wo16, wo16b])) && ent16.aenderungFp(wo16) === ent16.aenderungFp(wo16b);
   ok(of0 === 'btn ghost:Ohne Foto weiter' && of1.screen === 'fotos' && /Mit Foto wird dein Aufmaß besser\./.test(of1.text) && /Rollladenkasten, Laibung, Fensterbänke und Fassade/.test(of1.text) && /Diesen Hinweis nicht mehr anzeigen/.test(of1.text) && /Foto machen/.test(of1.text) &&
@@ -2962,13 +3311,14 @@ if (teil(16)) {
 
   /* g) Klärungsliste auf dem Blatt (App, PDF), im Betriebsbereich und im Code */
   await a16.evaluate(() => { const a = demoProject(); a[0].offen = { fa: true, fba: true }; a[0].ki.fach = { rollladen: 'einbau', anschlagI: 'innen', fassade: 'putz', strom: true }; a[1].etage = 'og'; a[1].bru = 600; S.windows = a; S.proj = Object.assign({}, PROJ0, { name: 'Familie Weber', total: 5, foerdweg: 'bafa' }); S.kauf = { paid: true, mail: 'test@beispiel.de' }; go('blatt'); }); await a16.waitForTimeout(300);
-  const bl = await a16.evaluate(() => (document.querySelector('.paper-klaer') || {}).textContent || '');
-  ok(/Noch zu klären · 4/.test(bl) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(bl) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(bl) && /BAFA-Zuschuss gewünscht/.test(bl) && /Farbe außen, Fensterbank außen: offen, bitte beraten/.test(bl), 'Aufmaßblatt in der App: „Noch zu klären“ oben, mit Absturzsicherung, Lüftung, Förderweg und offenen Wünschen');
+  const bl = await a16.evaluate(() => { const kl = klaerListe(S.windows, S.proj); return 'Noch zu klären · ' + kl.length + ' ' + kl.map((r) => r.k + ' ' + r.v).join(' | '); }); // die Übersicht in der App gibt es nicht mehr (nur PDF), geprüft wird die Liste
+  ok(/Noch zu klären · \d+/.test(bl) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(bl) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(bl) && /BAFA-Zuschuss gewünscht/.test(bl) && /Farbe außen, Fensterbank außen: offen, bitte beraten/.test(bl), 'Aufmaßblatt in der App: „Noch zu klären“ oben, mit Absturzsicherung, Lüftung, Förderweg und offenen Wünschen');
   const b64 = await a16.evaluate(async () => { await blattSchrift(); const blob = await blattPDF('fensterbauer'); const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s); });
   const pdf16 = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung.pdf'); fs16.writeFileSync(pdf16, Buffer.from(b64, 'base64'));
   const pt = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf16, '-'])).toString('utf8'); } catch (e) { return ''; } };
-  const s1 = pt(1), alle16 = pt(0), kSeite = [2, 3].find((n) => /MIT DEM KUNDEN ZU KLÄREN/.test(pt(n)));
-  ok(/Zu klären/.test(s1) && /Absturzsicherung \(Pos\. 2\)/.test(s1) && /MAUERÖFFNUNG/.test(s1) && kSeite && /Übersicht/.test(pt(kSeite)) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(alle16) && /Förderwert\s+Uw höchstens 0,95/.test(alle16) && /offen, bitte beraten/.test(alle16) && /Absturz-\s/.test(alle16) && !/Absturzsicheru\s/.test(alle16) && /Auf einen Blick/.test(alle16) && /Kasten: Einbaukasten innen im Sturz/.test(alle16), 'PDF: Seite 1 nennt in den Eckdaten, was zu klären ist (Position 1 bleibt auf Seite 1); die ausführliche Liste folgt nach Position 1 mit der Übersicht auf derselben Seite; Zielwert, „offen“ (Beschriftung an der Wortfuge getrennt) und KI-Fachangaben je Position');
+  /* Neues Vorgehen (Strang S5): Seite 1 Übersicht mit der Klärungsliste (Pflicht zuerst), danach je Position eine Seite, am Ende die Übersicht */
+  const s1 = pt(1), alle16 = pt(0), nS16 = (() => { try { return +((/Pages:\s+(\d+)/.exec(cp16.execFileSync('pdfinfo', [pdf16]).toString('utf8')) || [0, 0])[1]); } catch (e) { return 0; } })(), posSeite = [2, 3].find((n) => /MAUERÖFFNUNG/.test(pt(n)) && /WÜNSCHE DES KUNDEN/.test(pt(n)));
+  ok(/MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /PFLICHT/.test(s1) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(s1) && /Bauordnung/.test(s1) && posSeite && /Übersicht\./.test(pt(nS16 - 1) + pt(nS16)) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(alle16) && /Förderwert\s+Uw höchstens 0,95/.test(alle16) && /offen, bitte beraten/.test(alle16) && /Absturz-\s/.test(alle16) && !/Absturzsicheru\s/.test(alle16) && /Auf einen Blick/.test(alle16) && /Kasten: Einbaukasten innen im Sturz/.test(alle16), 'PDF: Seite 1 zeigt die Klärungsliste mit Grund je Punkt, Pflicht zuerst; danach je Position eine Seite mit Maueröffnung, Wünschen, Zielwert, „offen“ (Beschriftung an der Wortfuge getrennt) und KI-Fachangaben; am Ende die Übersicht');
   const rund = await a16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Terrasse', offen: { fa: true }, absturz: 'gelaender', erreichbar: 'ja', massOk: true }); artSetzen(w, 'balkon'); w.bt.griffA = 'abschliessbar'; const o = unpackProject(packProject([w], Object.assign({}, PROJ0, { foerdweg: 'steuer' }), null)); const alt = unpackProject(packProject([baseWin()], PROJ0, null)); return { offen: o.w[0].offen, absturz: o.w[0].absturz, erreichbar: o.w[0].erreichbar, ok: o.w[0].massOk, bt: o.w[0].bt, fw: o.p.foerdweg, altOffen: JSON.stringify(alt.w[0].offen) }; });
   ok(rund.offen.fa && rund.absturz === 'gelaender' && rund.erreichbar === 'ja' && rund.ok === true && rund.bt.griffA === 'abschliessbar' && rund.fw === 'steuer' && rund.altOffen === '{}', 'Aufmaß-Code trägt offene Punkte, Absturzsicherung, Erreichbarkeit, Balkontür und Förderweg; ohne Angaben bleibt nichts offen');
   sauber(a16, 'Erstaufmaß in der App ohne Fehler');
@@ -2986,7 +3336,7 @@ if (teil(16)) {
   /* i) Aus der Durchsicht: nichts entscheidet still eine Vorgabe, Rückwege bleiben sicher, lange Listen passen ins PDF */
   const kl = (wins, p) => AW16.klaerung(wins, p || {}).map((r) => r.k + ': ' + r.v).join('\n');
   ok(AW16.uwZiel(AW16.mk({ art: 'hst', hst: { schema: 'A', richtung: 'R', schwelle: 'flach' }, offen: { schwelle: true } }), pB).wert === 0.95 && !/Glas für|3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa', gebaeude: 'denkmal' })) && /schafft praktisch nur 3-fach-Glas/.test(kl([AW16.mk({ glas: '2' })], { foerdweg: 'bafa' })), 'Förderung: offene Schwelle zählt nicht als barrierearm; im Baudenkmal (Uw 1,4) kein Hinweis, dass nur 3-fach-Glas reicht');
-  ok(/Absturzsicherung nötig \(OG, bodentief\)/.test(kl([AW16.mk({ etage: 'og', bru: 0 })])) && /Absturzsicherung nötig \(DG, bodentief laut Foto\)/.test(kl([AW16.mk({ etage: 'dg', bru: '', ki: { fach: { bruestung: 'bodentief' } } })])) && /Fensterbank außen laut Foto aus Faserzement: vor dem Ausbau auf Asbest prüfen/.test(kl([AW16.mk({ ki: { fach: { fba: 'faserzement' } } })])) && !/Lüftung/.test(kl([AW16.mk({ anzahl: 4 })], {})) && AW16.klaerKurz([AW16.mk({ ki: { fach: { fbi: 'faserzement' } } })], {}).join() === 'Asbest prüfen (Pos. 1)', 'Klärungsliste: Brüstung 0 heißt bodentief, „laut Foto“ nur ohne Maß; Faserzement-Fensterbank als Asbest-Prüfpunkt; ohne Zahl der Fenster im Haus kein Lüftungskonzept');
+  ok(/Absturzsicherung nötig \(OG, bodentief\)/.test(kl([AW16.mk({ etage: 'og', bru: 0 })])) && /Absturzsicherung nötig \(DG, bodentief laut Foto\)/.test(kl([AW16.mk({ etage: 'dg', bru: '', ki: { fach: { bruestung: 'bodentief' } } })])) && /Fensterbank außen laut Foto aus Faserzement: vor dem Ausbau auf Asbest prüfen/.test(kl([AW16.mk({ ki: { fach: { fba: 'faserzement' } } })])) && !/Lüftungskonzept nach DIN 1946-6 erforderlich/.test(kl([AW16.mk({ anzahl: 4 })], {})) && /Zahl der Fenster im Haus fehlt/.test(kl([AW16.mk({ anzahl: 4 })], {})) && AW16.klaerKurz([AW16.mk({ mo: MO(1230, 1410), el: { w: 1230, h: 1410 }, ki: { fach: { fbi: 'faserzement' } } })], {}).join() === 'Asbest prüfen (Pos. 1)', 'Klärungsliste: Brüstung 0 heißt bodentief, „laut Foto“ nur ohne Maß; Faserzement-Fensterbank als Asbest-Prüfpunkt; ohne Zahl der Fenster im Haus kein Lüftungskonzept, aber die Frage nach der Zahl');
   const ctxD = await browser.newContext(telefon), d16 = await neueSeite(ctxD);
   await d16.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; const w = Object.assign(baseWin(), { name: 'Bad', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { spross: true } }); w.bars = presetBars('kreuz', w.sashes.length); w.preset = 'kreuz'; S.win = w; S.q = 'breite'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
@@ -3027,7 +3377,7 @@ if (teil(16)) {
   const karten16 = await d16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Bad', offen: { material: true, glas: true, insekt: true } }); return { win: winCard(w, 0, false), check: checkCard(w, 0), proj: PROJ0.total }; });
   await d16.evaluate(() => { S.windows = demoProject(); S.proj = Object.assign({}, PROJ0); go('anfrage'); }); await d16.waitForTimeout(150);
   const anfr = await d16.evaluate(() => ({ note: !!document.querySelector('.note.warn'), feld: document.getElementById('p-total').value, ph: document.getElementById('p-total').placeholder }));
-  ok(/Glas offen/.test(karten16.win) && /Material offen/.test(karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zeigen offenes Glas und Material als offen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
+  ok(/3 Wünsche offen/.test(karten16.win) && /3 Wünsche offen/.test(karten16.check) && !/Glas|Material/.test(karten16.win + karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zählen offene Wünsche (Glas, Material, Insektenschutz), ohne sie zu nennen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
   /* PDF: eine lange Klärungsliste wird über die Seiten geteilt, nichts fällt weg; offene Angaben in der Übersicht */
   const b64L = await d16.evaluate(async () => {
     const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
@@ -3084,6 +3434,307 @@ if (teil(16)) {
     sauber(s, 'Neue Schritte ' + (dunkel ? 'dunkel' : 'hell') + ' ohne Fehler'); await c.close();
   }
   ok(!befund16.length, 'Gestaltung der neuen Schritte (Telefon, hell und dunkel): nur 13 · 15 · 17 · 24 · 32 · 40, Ziele ab 44 px, kein Querscrollen' + (befund16.length ? '\n      ' + befund16.join('\n      ') : ''));
+  /* i) Konfigurator (Strang S1): Notiz an jeder Stelle, Wege ohne Sackgasse, Zurück-Taste, Entwurf, Zifferntasten, Foto groß,
+     keine Gesamtübersicht, Erklärungen und Begriffe */
+  {
+    const ck = await browser.newContext(telefon), sk = await neueSeite(ck);
+    await sk.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+    const MOK = { hm: 1390, hl: 1390, hr: 1390, wm: 1260, wt: 1260, wb: 1260 };
+    /* Notiz-Knopf und Übersicht auf jedem Schritt, jeder Frage aller Elementarten und den Anfrage-Seiten; unten der Pfeil zurück */
+    const nzAlle = await sk.evaluate((MO) => {
+      const fehlt = [], ohneWo = [], ohnePfeil = []; let n = 0;
+      S.windows = demoProject(); persist(); newWin(); Object.assign(S.win, { name: 'Küche', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } });
+      const pruef = (wo) => { n++; if (!document.querySelector('.hd .nz-knopf')) fehlt.push(wo); if (!document.querySelector('.hdr-wo')) ohneWo.push(wo); };
+      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
+      S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
+      ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      return { fehlt: fehlt, ohneWo: ohneWo, ohnePfeil: ohnePfeil, n: n };
+    }, MOK);
+    ok(nzAlle.n > 100 && !nzAlle.fehlt.length && !nzAlle.ohneWo.length && !nzAlle.ohnePfeil.length, 'Konfigurator: „Notiz“ und „Übersicht“ auf jedem Schritt und jeder Frage (' + nzAlle.n + ' Bildschirme) und den Anfrage-Seiten, unten überall der Pfeil zurück' + (nzAlle.fehlt.length + nzAlle.ohneWo.length + nzAlle.ohnePfeil.length ? ': ' + nzAlle.fehlt.concat(nzAlle.ohneWo, nzAlle.ohnePfeil).slice(0, 8).join(', ') : ''));
+    /* Notiz anfügen, erkennen, wieder öffnen; speichern, Code, keine Änderung */
+    await sk.evaluate((MO) => { S.win = baseWin(); S.editIdx = -1; Object.assign(S.win, { name: 'Bad', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } }); S.q = 'fa'; go('frage'); }, MOK); await sk.waitForTimeout(200);
+    await sk.click('.hd .nz-knopf'); await sk.waitForSelector('#nz-text'); await sk.fill('#nz-text', 'Farbe wie die Haustür');
+    await sk.click('[data-act="notiz-sichern"]'); await sk.waitForTimeout(200);
+    const nzK = await sk.evaluate(() => { const k = document.querySelector('.hd .nz-knopf'); return { text: S.win.notizen.fa, da: k.classList.contains('da'), label: k.getAttribute('aria-label'), blatt: !!document.querySelector('.nz-blatt') }; });
+    await sk.click('.hd .nz-knopf'); await sk.waitForSelector('#nz-text'); const nzWieder = await sk.inputValue('#nz-text'); await sk.keyboard.press('Escape'); await sk.waitForTimeout(150);
+    const nzS = await sk.evaluate(() => {
+      const blattZu = !document.querySelector('.nz-blatt'); saveWin(); const w = S.windows[S.windows.length - 1], ohne = Object.assign({}, w); delete ohne.notizen;
+      const o = unpackProject(packProject(S.windows, Object.assign({}, S.proj, { notizen: { anfrage2: 'Bitte nicht vor März' } }), null));
+      return { blattZu: blattZu, gespeichert: w.notizen.fa, code: o.w[o.w.length - 1].notizen.fa, proj: o.p.notizen.anfrage2, aend: aenderungFp(w) === aenderungFp(ohne), stelle: AW.notizStelle('fa'), karte: winCard(w, 0, false) };
+    });
+    const nzM = { sauber: JSON.stringify(AW16.notizSauber({ fa: '  Haustür  ', 'böse<x>': 'nein', leer: ' ', lang: 'x'.repeat(700) })), fromApp: JSON.stringify(AW16.mk(X16.fromApp({ name: 'X', notizen: { glas: 'Schallschutz?', '<b>': 'weg' } })).notizen || null), proj: JSON.stringify(X16.fromAppProj({ notizen: { anfrage: 'Haustür auch' } }).notizen), alt: JSON.stringify(X16.fromApp({ name: 'Alt' }).notizen || {}), stelle: AW16.notizStelle('typ-1') + '|' + AW16.notizStelle('unbekannt'), liste: AW16.notizListe({ notizen: { fa: 'b', start: 'a' } }).map((r) => r[2]).join(','), server: ent16.aenderungFp(wo16) === ent16.aenderungFp(Object.assign({}, wo16, { notizen: { fa: 'x' } })) };
+    ok(nzK.text === 'Farbe wie die Haustür' && nzK.da && /Deine Notiz zu „Farbe außen“/.test(nzK.label) && !nzK.blatt && nzWieder === 'Farbe wie die Haustür' && nzS.blattZu && nzS.gespeichert === 'Farbe wie die Haustür' && nzS.code === nzS.gespeichert && nzS.proj === 'Bitte nicht vor März' && nzS.aend && nzS.stelle === 'Farbe außen' && /mit Notiz/.test(nzS.karte) && !/Haustür/.test(nzS.karte) &&
+      nzM.sauber === JSON.stringify({ fa: 'Haustür', lang: 'x'.repeat(500) }) && nzM.fromApp === JSON.stringify({ glas: 'Schallschutz?' }) && nzM.proj === JSON.stringify({ anfrage: 'Haustür auch' }) && nzM.alt === '{}' && nzM.stelle === 'Öffnung, Flügel 2|unbekannt' && nzM.liste === 'start,fa' && nzM.server,
+    'Notiz: Blatt mit Textfeld, gespeicherte Notiz am Knopf erkennbar und beim Öffnen wieder da, Esc schließt; sie geht ins gespeicherte Fenster, in den Aufmaß-Code (Projekt-Notizen der Anfrage ebenso), zählt in App und Server nicht als Änderung; das Modell säubert (500 Zeichen, nur gültige Stellen), alte Aufmaße ohne Notizen bleiben gültig');
+    /* Gespeichert: keine Gesamtübersicht */
+    const fertigK = await sk.evaluate(() => ({ screen: S.screen, t: document.querySelector('.scr').textContent, cream: document.querySelectorAll('.btn.primary').length }));
+    ok(fertigK.screen === 'fertig' && !/Alle Angaben|\d mm|Farbe wie|Aus deinen Fotos gelesen/.test(fertigK.t) && /Wie geht es weiter\?/.test(fertigK.t) && fertigK.cream === 1, 'Nach dem Speichern: keine Übersicht aller Angaben, keine Maße und keine Notiztexte, dafür „Wie geht es weiter?“ mit genau einer Hauptaktion');
+    /* Zifferntasten: Pfeil zurück unten links, „Weiter“ über die ganze Breite; Browser-Zurück bleibt in der App */
+    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(250);
+    const adresse = sk.url();
+    for (const z of ['1', '3', '9', '0']) await sk.click('.keypad [data-v="' + z + '"]');
+    await sk.click('.keypad [data-v="ok"]'); await sk.waitForTimeout(250);
+    const tasten = await sk.evaluate(() => { const k = Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')), pad = document.querySelector('.keypad').getBoundingClientRect(), okb = document.querySelector('.keypad [data-v="ok"]').getBoundingClientRect(), zb = document.querySelector('.keypad [data-v="zurueck"]').getBoundingClientRect(), eins = document.querySelector('.keypad [data-v="1"]').getBoundingClientRect(); return { reihe: k.slice(9).join(','), voll: okb.width > pad.width - 4, gleich: Math.abs(zb.height - eins.height) < 1 && Math.abs(zb.width - eins.width) < 1, step: S.mess.step }; });
+    await sk.click('.keypad [data-v="zurueck"]'); await sk.waitForTimeout(200);
+    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur }));
+    await sk.goBack(); await sk.waitForTimeout(300);
+    const zurueck2 = await sk.evaluate(() => ({ screen: S.screen, href: location.href }));
+    await sk.click('[data-act="gindex"]'); await sk.waitForSelector('.g-index'); await sk.goBack(); await sk.waitForTimeout(250);
+    const zurueck3 = await sk.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.g-index') }));
+    ok(tasten.reihe === 'zurueck,0,del,ok' && tasten.voll && tasten.gleich && tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
+      'Zifferntasten: unten Pfeil zurück (gleich groß), 0, Löschen, darunter „Weiter“ über die ganze Breite; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers geht einen Schritt zurück (Adresse bleibt) und schließt zuerst ein offenes Blatt');
+    /* Foto groß mit Zoom */
+    await sk.evaluate(() => useDemo()); await sk.waitForFunction(() => S.photos.in && S.photos.out, null, { timeout: 8000 }); await sk.evaluate(() => render()); await sk.waitForTimeout(200);
+    await sk.click('.tile[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
+    await sk.click('[data-act="foto-zoom"][data-v="1"]'); await sk.waitForTimeout(350);
+    const zoom1 = await sk.evaluate(() => document.querySelector('.fz-wert').textContent);
+    const bb = await sk.locator('.fz-buehne').boundingBox(); await sk.mouse.dblclick(bb.x + bb.width / 2, bb.y + bb.height / 2); await sk.waitForTimeout(350);
+    const zoom2 = await sk.evaluate(() => ({ wert: document.querySelector('.fz-wert').textContent, touch: getComputedStyle(document.querySelector('.fz-buehne')).touchAction, knoepfe: Array.from(document.querySelectorAll('.fz-akt > *')).map((b) => b.textContent.trim()).join('|') }));
+    await sk.goBack(); await sk.waitForTimeout(250);
+    const zoom3 = await sk.evaluate(() => ({ fz: !!document.querySelector('.fz'), screen: S.screen, kamera: !!document.querySelector('.tile input[type="file"]') }));
+    ok(zoom1 === '160 %' && zoom2.wert === '100 %' && zoom2.touch === 'none' && zoom2.knoepfe === 'Neu aufnehmen|Notiz|Löschen' && !zoom3.fz && zoom3.screen === 'fotos' && !zoom3.kamera, 'Foto groß: Antippen der Kachel öffnet die Großansicht statt der Kamera, „+“ zoomt (160 %), Doppeltipp zurück auf 100 %, Wischen nur dort abgefangen, „Neu aufnehmen“, „Notiz“, „Löschen“; die Zurück-Taste schließt sie');
+    /* Entwurf übersteht Neuladen; Verlassen mit offenen Änderungen fragt */
+    await sk.evaluate((MO) => { S.win.mo = Object.assign({}, MO); S.win.el = { w: 1230, h: 1360 }; S.q = 'material'; go('frage'); }, MOK); await sk.waitForTimeout(700);
+    await sk.reload({ waitUntil: 'networkidle' }); await sk.waitForTimeout(400);
+    const ent = await sk.evaluate(() => ({ screen: S.screen, karte: (document.querySelector('.entwurf-karte') || {}).textContent || '' }));
+    await sk.click('[data-act="entwurf-weiter"]'); await sk.waitForTimeout(400);
+    const ent2 = await sk.evaluate(() => ({ screen: S.screen, q: S.q, name: S.win.name, hm: S.win.mo.hm, fotos: !!S.photos.in }));
+    await sk.click('.hdr-wo'); await sk.waitForSelector('.sheet.wohin');
+    const wo = await sk.evaluate(() => ({ schritte: document.querySelectorAll('.wo-schritt').length, fenster: document.querySelectorAll('.wo-fenster button').length, angaben: /\d mm|Kunststoff|Weiß/.test(document.querySelector('.wo-fenster').textContent) }));
+    await sk.click('[data-act="wohin-liste"]'); await sk.waitForSelector('.sheet.verlassen');
+    const vl = await sk.evaluate(() => Array.from(document.querySelectorAll('.sheet.verlassen button')).map((b) => b.textContent).join('|'));
+    await sk.click('[data-act="verlassen-entwurf"]'); await sk.waitForTimeout(300);
+    const vl2 = await sk.evaluate(() => ({ screen: S.screen, karte: !!document.querySelector('.entwurf-karte'), logo: (document.querySelector('a.hdr-logo') || {}).getAttribute ? document.querySelector('a.hdr-logo').getAttribute('href') : '' }));
+    ok(ent.screen === 'home' && /Flur/.test(ent.karte) && /Weiter bei: Wünsche, Material/.test(ent.karte) && ent2.screen === 'frage' && ent2.q === 'material' && ent2.name === 'Flur' && ent2.hm === 1390 && wo.schritte === 6 && wo.fenster >= 2 && !wo.angaben &&
+      vl === 'Speichern|Später weitermachen|Fenster verwerfen|Abbrechen' && vl2.screen === 'home' && vl2.karte && /\/$/.test(vl2.logo),
+      'Entwurf: das angefangene Fenster übersteht Neuladen („Weiter bei: Wünsche, Material“, Fortsetzen an derselben Frage mit den Maßen); die Übersicht zeigt sechs Schritte und alle Fenster ohne Angaben; wer mit offenen Änderungen zur Liste geht, wird gefragt (Speichern, Später weitermachen, Verwerfen, Abbrechen); das Logo führt zur Startseite');
+    /* Begriffe: Suche, Gruppen, „Zu diesem Schritt“, Esc; jede Frage hat eine Erklärung, jeder Eintrag einen Praxis-Tipp */
+    await sk.evaluate(() => { S.q = 'glasfn'; S.win = Object.assign(baseWin(), { name: 'Flur' }); go('frage'); }); await sk.waitForTimeout(200);
+    const optI = await sk.evaluate(() => document.querySelectorAll('.qpanel .qci-i, .qpanel .qinfo').length);
+    await sk.click('[data-act="gindex"]'); await sk.waitForSelector('#g-such');
+    const gi0 = await sk.evaluate(() => ({ bezug: Array.from(document.querySelectorAll('.g-bezug .gindex button')).map((b) => b.getAttribute('data-k')).join(','), gruppen: document.querySelectorAll('.g-gruppe[data-g="1"]').length }));
+    await sk.fill('#g-such', 'raffst'); await sk.waitForTimeout(100);
+    const gi1 = await sk.evaluate(() => Array.from(document.querySelectorAll('.g-index .gindex button')).filter((b) => !b.hidden).map((b) => b.getAttribute('data-k')));
+    await sk.fill('#g-such', 'xyzxyz'); await sk.waitForTimeout(100);
+    const gi2 = await sk.evaluate(() => !document.querySelector('.g-leer').hidden);
+    await sk.keyboard.press('Escape'); await sk.waitForTimeout(150);
+    const gi3 = await sk.evaluate(() => {
+      const ohne = []; ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { const w = baseWin(); artSetzen(w, art); w.sart = 'rollladen'; w.iart = 'rollo'; w.sprossen = 'wiener'; qList(w).forEach((q) => { if (!q.g || !GLOSS[q.g]) ohne.push(art + ':' + q.id); }); });
+      const k = Object.keys(GLOSS), duenn = k.filter((x) => !GLOSS[x].tipp || GLOSS[x].x.length < 2 || GLOSS[x].x.join(' ').split(/\s+/).length < 30), doppelt = GLOSS_ORDER.filter((x, i) => GLOSS_ORDER.indexOf(x) !== i);
+      const verweis = [].concat(Object.values(Q_G), Object.values(Q_G_STATT), MESS.map((m) => m.g), [].concat.apply([], Object.values(SCHRITT_G)), [].concat.apply([], Object.values(OPT_G).map((o) => Object.values(o))), [].concat.apply([], k.map((x) => GLOSS[x].see))).filter((x) => !GLOSS[x]);
+      return { ohne: ohne, duenn: duenn, doppelt: doppelt, fehlend: k.filter((x) => GLOSS_ORDER.indexOf(x) < 0), verweis: verweis, n: k.length, offen: !!(S.gloss || S.glossIndex) };
+    });
+    ok(optI === 4 && /glasextras/.test(gi0.bezug) && /schall/.test(gi0.bezug) && gi0.gruppen === 10 && gi1.length >= 1 && gi1.indexOf('raffstore') >= 0 && gi1.every((x) => /raffstore|sonnenschutz|aufsatz|vorbau|antrieb|screen|innenschutz|rollladen|sensor/.test(x)) && gi2 && !gi3.offen &&
+      !gi3.ohne.length && !gi3.duenn.length && !gi3.doppelt.length && !gi3.fehlend.length && !gi3.verweis.length && gi3.n >= 90,
+    'Begriffe: ' + gi3.n + ' Einträge in zehn Gruppen, jeder mit Praxis-Tipp und mindestens zwei Absätzen, keiner doppelt; Suche filtert, ohne Treffer ein Hinweis, Esc schließt; „Zu diesem Schritt“ nennt Frage und Optionen; jede Frage aller Elementarten hat ein i, Fachbegriffe in Optionen auch, alle Verweise gibt es' + (gi3.ohne.length + gi3.duenn.length + gi3.verweis.length ? ' (' + gi3.ohne.concat(gi3.duenn, gi3.verweis).slice(0, 8).join(', ') + ')' : ''));
+    sauber(sk, 'Konfigurator S1 ohne Fehler'); await ck.close();
+  }
+  /* j) Strang S5: Aufmaß beim Betrieb. Klärungsliste mit allen Auslösern (Gruppen, Grund, feste Kennung), Wünsche in kurzen Sätzen,
+     Bestellmaß mit Abzug unten und Warnsatz, Zeichnung mit Maßketten, Abhaken am Projekt, Ansicht im Betriebsbereich, PDF im Styleguide */
+  const kz = (wins, p, l) => AW16.klaerung(wins, p || {}, l);
+  const voll = (o) => AW16.mk(Object.assign({ mo: MO(1230, 1410), el: { w: 1230, h: 1410 }, bru: 900, laib: 140, offen: {} }, o || {}));
+  const hat = (liste, re) => liste.some((r) => re.test(r.k + ': ' + r.v));
+  const altRoll = voll({ roll: 'aufsatz', antrieb: 'motor' });
+  ok(AW16.kastenAktiv(altRoll) && AW16.motor(altRoll) && hat(kz([altRoll], { total: 9 }), /Elektrischer Antrieb gewünscht: Strom am Fenster klären/), 'Ältere Aufmaße mit Rollladen nur im Feld roll: Kasten aktiv, Strom für den Antrieb steht in der Klärungsliste');
+  const nz16 = kz([voll({ name: 'Bad', notizen: { fa: 'Wie die Haustür', messen: 'Links schief' }, notiz: 'Bitte vormittags' })], { total: 9, notiz: 'Hund ist lieb', notizen: { anfrage: 'Altbau mit Stuck' } });
+  ok(hat(nz16, /^Pos\. 1 Bad: Notiz zu .*„Wie die Haustür“/) && hat(nz16, /„Links schief“/) && hat(nz16, /^Pos\. 1 Bad: Notiz: „Bitte vormittags“/) && hat(nz16, /^Nachricht: „Hund ist lieb“/) && hat(nz16, /^Projekt: Notiz zu .*„Altbau mit Stuck“/) && nz16.filter((r) => r.kurz === 'Notizen des Kunden').every((r) => r.gruppe === 'kunde'), 'Klärungsliste: Notizen des Kunden je Stelle (w.notizen), die frühere Notiz, die Nachricht und Notizen zum Projekt, in „Mit dem Kunden“');
+  const ki16 = kz([voll({ ki: { rows: [['Fassade', 'Putz']], fach: { geruest: true, erreichbar: true }, hints: ['Feuchte im Bad'], pruefen: ['Rettungsweg prüfen'] }, fotos: 2 })], { total: 9 });
+  ok(hat(ki16, /Laut Foto: Feuchte im Bad/) && hat(ki16, /Vor Ort prüfen: Rettungsweg prüfen/) && hat(ki16, /Gerüst laut Foto nötig/) && hat(ki16, /Laut Foto leicht erreichbar.*RC2/) && ki16.filter((r) => r.art === 'ki').length === 3 && ki16.filter((r) => r.art === 'ki').every((r) => r.gruppe === 'vorort'), 'Klärungsliste: Hinweise und Prüfpunkte der KI, Gerüst laut Foto, Einbruchschutz bei laut Foto leicht erreichbaren Fenstern');
+  const ms16 = kz([voll({ mo: { wt: 1260, wm: 1290, wb: 1262, hm: 1440, hl: 1441, hr: 1442 } }), voll({ el: { w: 1320, h: 1410 } }), voll({ el: { w: 1050, h: 1200 } }), voll({ mo: { wm: 1230 }, el: { w: 0, h: 0 } }), voll({ etage: 'og', bru: '' }), voll({ laib: '', fbi: 'stein' }), voll({ anzahl: 3 }), voll({ fotos: 2 })], { total: 20 });
+  ok(hat(ms16, /^Pos\. 1: Öffnung bis 30 mm außer Winkel/) && hat(ms16, /^Pos\. 2: Element größer als die Öffnung/) && hat(ms16, /^Pos\. 3: Element je Seite über 60 mm kleiner/) && hat(ms16, /^Pos\. 4: Maße unvollständig, es fehlt: Breite oben, Breite unten, Höhe links, Höhe Mitte, Höhe rechts, Element\./) && hat(ms16, /^Pos\. 5: Brüstungshöhe fehlt: im OG/) && hat(ms16, /^Pos\. 6: Laibungstiefe innen fehlt/) && hat(ms16, /^Pos\. 7: 3 gleiche Fenster/) && hat(ms16, /^Pos\. 8: Fotos ohne Auswertung/), 'Klärungsliste: außer Winkel über 10 mm, Element größer als die Öffnung oder je Seite über 60 mm kleiner, fehlende Maße, fehlende Brüstung im OG, fehlende Laibung für eine neue Fensterbank, gleiche Fenster, Fotos ohne Auswertung');
+  const bau16 = kz([voll({ etage: 'dg' }), voll({ art: 'balkon', bt: { schwelle: 'null', griffA: 'keiner', boden: 'neu' } }), voll({ etage: 'og', el: { w: 2200, h: 1500 }, mo: MO(2240, 1540) }), voll({ fba: 'behalten' })], { gebaeude: 'denkmal', total: 30 }, { plan: ['Fenster', 'Haustür', 'Insektenschutz', 'Rollläden', 'Fensterbänke'], geb: 'etw' });
+  ok(hat(bau16, /^Gebäude: Baudenkmal: Genehmigung der Denkmalbehörde/) && hat(bau16, /^Gebäude: Eigentumswohnung: .*Beschluss der Eigentümer/) && hat(bau16, /Dachgeschoss: Ist ein Fenster zweiter Rettungsweg/) && hat(bau16, /^Pos\. 2: Fußboden wird erneuert: Höhe der Schwelle/) && hat(bau16, /^Pos\. 2: Barrierefreie Schwelle: Abdichtung und Entwässerung/) && hat(bau16, /^Pos\. 3: Großes Element im OG/) && hat(bau16, /^Pos\. 4: Fensterbank außen soll bleiben/) && hat(bau16, /Haustür ist im Projekt geplant/) && hat(bau16, /Insektenschutz ist im Projekt geplant/) && hat(bau16, /Rollläden sind im Projekt geplant/) && !hat(bau16, /Fensterbänke sind im Projekt geplant/), 'Klärungsliste: Denkmalschutz, Eigentumswohnung, Rettungsweg im Dachgeschoss, neuer Fußboden und barrierefreie Schwelle, großes Element im OG, Fensterbank außen bleibt, im Projekt geplant aber nicht im Aufmaß');
+  const ids16 = kz([w1, voll({ notizen: { fa: 'x' }, ki: { hints: ['a', 'b'] } })], { total: 4, foerdweg: 'offen', notiz: 'n' }).map((r) => r.id), alle16b = kz([w1, voll({ notizen: { fa: 'x' } })], { total: 4, foerdweg: 'offen', notiz: 'n' });
+  ok(new Set(ids16).size === ids16.length && ids16.every((x) => /^[A-Za-z0-9_-]{1,64}$/.test(x)) && alle16b.every((r) => r.warum && ['pflicht', 'kunde', 'vorort'].includes(r.gruppe)) && AW16.klaerGruppen(alle16b).map((g) => g.titel).join() === 'Pflicht,Mit dem Kunden,Vor Ort prüfen'.split(',').filter((t) => AW16.klaerGruppen(alle16b).some((g) => g.titel === t)).join() && alle16b.findIndex((r) => r.gruppe === 'kunde') > alle16b.findIndex((r) => r.gruppe === 'pflicht'), 'Klärungsliste: jeder Punkt mit eindeutiger Kennung, Grund und Gruppe (Pflicht, Mit dem Kunden, Vor Ort prüfen), Pflicht zuerst');
+  const l16 = { klaer: {} };
+  const k1 = X16.projektAendern(l16, { klaer: { id: 'lueftung', ok: true, notiz: '  Planer   gefragt ' } }), k2 = JSON.parse(JSON.stringify(l16.klaer)), k3 = X16.projektAendern(l16, { klaer: { id: 'lueftung', ok: false, notiz: '' } }), k4 = X16.projektAendern(l16, { klaer: { id: 'böse id!' , ok: true } });
+  ok(k1.ok && k2.lueftung.ok === true && k2.lueftung.notiz === 'Planer gefragt' && !!k2.lueftung.wann && k3.ok && !l16.klaer.lueftung && k4.ok === false, 'Abhaken am Projekt (auch auf dem Server): Haken und Notiz je Punkt, ohne beides fällt der Punkt weg, fremde Kennungen werden abgelehnt');
+  const wu16 = AW16.wuensche(voll({ material: 'kunststoff', fa: '7016', fi: '9016', glas: '3', teilung: '3', sashes: AW16.sashesFor('3'), sart: 'rollladen', antrieb: 'motor', insekt: 'spann', offen: { fba: true }, notizen: { fa: 'heller', montage: 'nur samstags', messen: 'schief' } }), {});
+  ok(/^Kunststoff, außen Anthrazitgrau, innen Verkehrsweiß, 3-fach, 2 Flügel und 1 Festfeld, Rollladen elektrisch, Insektenschutz$/.test(wu16.satz) && wu16.offen.join() === 'Fensterbank außen' && wu16.gruppen.map((g) => g.id).join() === 'fenster,farbe,glas,beschlag,sonne,insekt,bank,montage' && wu16.gruppen.find((g) => g.id === 'farbe').notizen[0][1] === 'heller' && wu16.gruppen.find((g) => g.id === 'montage').notizen[0][1] === 'nur samstags' && wu16.notizen.masse[0][1] === 'schief' && wu16.gruppen.find((g) => g.id === 'bank').zeilen.find((z) => z.k === 'außen').offen, 'Wünsche: ein Satz fürs Wesentliche (Flügel ohne Festfelder gezählt), offene Punkte für sich, acht Gruppen, Notizen des Kunden an ihrer Stelle');
+  const bm16 = AW16.bestellmass(voll({ ki: { fach: { anschlagI: 'innen' } } }), { seite: 15, oben: 15, unten: 30, untenT: 5 }), bmT = AW16.bestellmass(voll({ art: 'balkon' }), { seite: 15, oben: 15, unten: 30, untenT: 5 }), bmW = AW16.bestellmass(voll({ mo: { wt: 1290, wm: 1290, wb: 1290, hl: 1470, hm: 1452, hr: 1470 } }), {});
+  ok(bm16.text === '1.260 × 1.425 mm' && /30 mm unten/.test(bm16.formel) && /Anschlag innen laut Foto/.test(bm16.warnText) && /ohne Anschlag gerechnet/.test(bm16.warnText) && bmT.text === '1.260 × 1.450 mm' && /außer Winkel/.test(bmW.warnText) && AW16.abzugVon({ seite: 99, oben: -3 }).seite === 60 && AW16.abzugVon({}).unten === 0, 'Bestellmaß: Abzug unten getrennt für Fenster und Türen; Warnsatz bei Anschlag laut Foto und außer Winkel');
+  const sv16 = AW16.zeichnungSVG(voll({ mo: { wt: 1292, wm: 1290, wb: 1289, hl: 1442, hm: 1440, hr: 1439 }, el: { w: 1230, h: 1410 }, bru: 620, teilung: '2p', sashes: AW16.sashesFor('2p') }), { b: 420, fs: 13 }), pl16 = AW16.plan(voll({ mo: MO(1230, 1410) }), { b: 420, fs: 13 });
+  const imGlas = pl16.teile.filter((t) => t.t === 'text' && t.bg && t.x > pl16.el.x && t.x < pl16.el.x + pl16.el.b && t.y > pl16.el.y && t.y < pl16.el.y + pl16.el.h).length;
+  ok(['oben 1.292', 'Mitte 1.290', 'unten 1.289', 'links 1.442', 'Mitte 1.440', 'rechts 1.439', 'Element 1.230', 'Element 1.410', 'Brüstung 620', 'Fußboden'].every((t) => sv16.indexOf('>' + t + '<') >= 0) && /#ff8a5b/.test(sv16) && /#7aa2ff/.test(sv16) && imGlas === 0 && /<svg class="zeichnung" viewBox="0 0 420 /.test(sv16), 'Zeichnung: Maueröffnung orange mit drei Breiten und drei Höhen, Element blau, Brüstung bis zum Fußboden, keine Maßzahl auf dem Glas');
+  /* Nacharbeit portal: Kontakt bei Code ohne Link, Haken der Klärungsliste über eine Runde, Kasten nach Sonnenschutz, jede Frage der App beschriftet */
+  const mo16n = (b, h) => ({ wt: b, wm: b, wb: b, hl: h, hm: h, hr: h }), wn16 = (name, b, h) => ({ name: name, etage: 'og', bru: 500, mo: mo16n(b, h), el: { w: b - 30, h: h - 20 } });
+  const kto16 = { links: [], book: [], freeUsed: 0 }, ein16 = X16.importCode(kto16, { v: 1, b: '', p: { name: 'Herr Lange', tel: '0170 1112233', mail: 'lange@beispiel.de', erreich: 'vm', ort: 'Köln' }, w: [wn16('Bad', 1000, 1200)], t: 1 });
+  const pk16 = ein16.l.aufmass.proj, fremd16 = X16.fromAppProj({ mail: 'kein mail', erreich: 'immer', tel: '0221 1' });
+  ok(ein16.ok && ein16.l.kontakt === '0170 1112233' && pk16.mail === 'lange@beispiel.de' && pk16.erreich === 'vm' && pk16.name === 'Herr Lange' && fremd16.mail === '' && fremd16.erreich === '' && AW16.OPT.erreich.vm === 'vormittags', 'Code ohne Link: E-Mail und „Erreichbar“ des Kunden kommen mit (Projektangaben geprüft), nicht nur die Telefonnummer');
+  /* Nacharbeit portal: „Erreichbar“ fragt die App nur ohne Link (Seite Kontakt). Aus dem Kundenlink (Code mit b) kommt ihr Startwert nicht als Angabe des Kunden an */
+  const kl16e = { links: [], book: [], freeUsed: 0 }, pl16e = X16.neuesProjekt(kl16e, { kunde: 'Familie Pilot', kontakt: '0171 9876543' }).l;
+  const r16e = X16.importCode(kl16e, { v: 1, b: pl16e.code, p: { erreich: 'nm', notiz: 'Bitte abends anrufen.', tel: '0171 9876543' }, w: [wn16('Bad', 1000, 1200)], t: 6 });
+  ok(r16e.ok && r16e.l === pl16e && pl16e.aufmass.proj.erreich === '' && pl16e.aufmass.proj.notiz === 'Bitte abends anrufen.' && X16.fromAppProj({ erreich: 'ab' }, true).erreich === '' && X16.fromAppProj({ erreich: 'ab' }).erreich === 'ab', 'Aufmaß aus dem Kundenlink: kein „Erreichbar“ aus dem Startwert der App (dort nie gefragt), ein Code ohne Link behält die Wahl des Kunden');
+  const kr16 = { links: [], book: [], freeUsed: 0 }, r16a = X16.importCode(kr16, { v: 1, b: '', p: {}, w: [wn16('Kind', 1000, 1200), wn16('Bad', 800, 1000)], t: 2 }), L16 = r16a.l;
+  const abs16 = (l) => AW16.klaerung(l.aufmass.windows, l.aufmass.proj, l).filter((r) => r.kurz === 'Absturzsicherung').map((r) => r.k + (l.klaer && l.klaer[r.id] && l.klaer[r.id].ok ? ' geklärt' : ' offen')).join(' | ');
+  X16.projektAendern(L16, { klaer: { id: 'absturz-p0', ok: true, notiz: 'Kind: Geländer' } }); X16.projektAendern(L16, { klaer: { id: 'lueftung', ok: true } });
+  const vor16 = abs16(L16); X16.nbAnfragen(L16, '', Date.now()); const r16b = X16.importCode(kr16, { v: 1, b: L16.code, p: {}, w: [wn16('Bad', 800, 1000)], t: 3, r: 2 });
+  const kr16c = { links: [], book: [], freeUsed: 0 }, L16c = X16.importCode(kr16c, { v: 1, b: '', p: {}, w: [wn16('Kind', 1000, 1200), wn16('Bad', 800, 1000)], t: 4 }).l;
+  X16.projektAendern(L16c, { klaer: { id: 'absturz-p1', ok: true } }); X16.nbAnfragen(L16c, '', Date.now()); X16.importCode(kr16c, { v: 1, b: L16c.code, p: {}, w: [wn16('Bad', 800, 1000), wn16('Kind', 1000, 1200)], t: 5, r: 2 });
+  ok(vor16 === 'Pos. 1 Kind geklärt | Pos. 2 Bad offen' && r16b.art === 'nb' && abs16(L16) === 'Pos. 1 Bad offen' && !!(L16.klaer.lueftung && L16.klaer.lueftung.ok) && abs16(L16c) === 'Pos. 1 Bad geklärt | Pos. 2 Kind offen', 'Klärungsliste über eine Nachbesserung: Runde 2 ohne Pos. 1, der Haken steht nicht bei der neuen Pos. 1; umsortiert wandert er mit seiner Position (' + abs16(L16) + ' / ' + abs16(L16c) + ')');
+  const raff16 = AW16.mk({ sart: 'raffstore', offen: { einbau: true } }), roll16 = AW16.mk({ sart: 'rollladen', roll: 'aufsatz', offen: { einbau: true } });
+  ok(AW16.wuensche(raff16, {}).offen.join() === 'Raffstorekasten' && AW16.wuensche(roll16, {}).offen.join() === 'Rollladenkasten' && /Raffstorekasten \(Pos\. 1\); Rollladenkasten \(Pos\. 2\)/.test(AW16.klaerKurz([raff16, roll16], {}).join('; ')) && /^Raffstorekasten: offen/.test(AW16.klaerung([raff16], {}).find((r) => r.art === 'offen').v), 'Offener Kasten heißt nach dem Sonnenschutz: Raffstorekasten statt Rollladenkasten');
+  const appQ16 = (() => { const t = fs16.readFileSync(new URL('../web/assets/app.js', import.meta.url), 'utf8'), a = t.indexOf('function qList(w) {'), e = t.indexOf('\n}\n', a); return Array.from(new Set(Array.from(t.slice(a, e).matchAll(/id: '([A-Za-z0-9-]+)'/g)).map((m) => m[1].replace(/-$/, '-0')))); })();
+  const roh16 = appQ16.filter((id) => AW16.notizStelle(id) === id);
+  ok(appQ16.length > 30 && appQ16.includes('stulp') && !roh16.length && AW16.notizStelle('stulp') === 'Gehflügel des Stulpfensters' && AW16.wuensche(AW16.mk({ notizen: { stulp: 'links zuerst' } }), {}).gruppen.find((g) => g.id === 'fenster').notizen.length === 1, 'Notizen: jede Frage der App hat eine Beschriftung beim Betrieb, auch „Welcher Flügel geht zuerst auf?“ (Gruppe Fenster)' + (roh16.length ? ': ohne ' + roh16.join(', ') : ''));
+  const ctxS5 = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), s5 = await neueSeite(ctxS5);
+  await s5.goto(BASE + '/', { waitUntil: 'networkidle' }); await betrieb(s5, 'c1'); await s5.waitForTimeout(300);
+  await s5.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'), w = l.aufmass.windows[0]; w.notizen = { fa: 'Lieber etwas heller.' }; w.offen = { fa: true }; go('link', 'l1'); }); await s5.waitForTimeout(400);
+  const v5 = await s5.evaluate(() => ({ kopf: document.querySelector('.am5 .amhead').textContent, karte: document.querySelector('.card.klaer').textContent, gruppen: Array.from(document.querySelectorAll('.card.klaer .kl-g h4')).map((h) => h.textContent), zeilen: document.querySelectorAll('.am-tab .am-zeile').length, pos: document.querySelectorAll('.poslist details.posc').length, pdf: document.querySelectorAll('[data-act="pdf-am"]').length, lueft: (document.querySelector('.am5 .amhead').textContent.match(/Lüftungskonzept/g) || []).length }));
+  await s5.click('.am-zeile[data-v="0"]'); await s5.waitForTimeout(400);
+  const p5 = await s5.evaluate(() => { const d = document.getElementById('pos-0'); return { offen: d.open, svg: !!d.querySelector('.zk svg.zeichnung text'), best: d.querySelector('.best').textContent, satz: d.querySelector('.am-wunsch .satz').textContent, notiz: (d.querySelector('.am-g-farbe .am-notiz') || {}).textContent || '', klaer: (d.querySelector('.pos-klaer') || {}).textContent || '', gruppen: Array.from(d.querySelectorAll('.am-gruppen .am-g > .eyebrow')).map((e) => e.textContent).join(',') }; });
+  const id5 = await s5.evaluate(() => document.querySelector('.card.klaer .kl-haken').getAttribute('data-v'));
+  await s5.click('.card.klaer .kl-haken'); await s5.waitForTimeout(300);
+  const h5 = await s5.evaluate((id) => ({ ok: !!(A().links.find((x) => x.id === 'l1').klaer || {})[id], stand: document.querySelector('.kl-stand').textContent, gedrueckt: document.querySelector('.card.klaer .kl-haken[data-v="' + id + '"]').getAttribute('aria-pressed'), text: aufmassText(A().links.find((x) => x.id === 'l1')) }), id5);
+  await s5.evaluate(() => { S.sheet = { k: 'nachbesserung', id: 'l1' }; render(); }); await s5.waitForTimeout(250);
+  const chip5 = await s5.evaluate(() => document.querySelectorAll('.sheet .nb-punkte [data-act="nb-chip"]').length);
+  await s5.click('.sheet .nb-punkte [data-act="nb-chip"]'); await s5.waitForTimeout(200);
+  const nb5 = await s5.evaluate(() => ({ hinweis: S.sheet.hinweis, feld: document.getElementById('nb-hinweis').value, gedrueckt: document.querySelector('.sheet .nb-punkte [data-act="nb-chip"]').getAttribute('aria-pressed') }));
+  await s5.evaluate(() => { S.sheet = null; render(); });
+  ok(/Fenster im Haus5 von 11 werden getauscht/.test(v5.kopf) && v5.lueft === 0 && /Mit dem Kunden zu klären · \d+/.test(v5.karte) && v5.gruppen.length >= 2 && /^Pflicht/.test(v5.gruppen[0]) && v5.zeilen === 4 && v5.pos === 4 && v5.pdf === 1, 'Betriebsbereich: Kopf mit „5 von 11“ (Lüftung nur in der Klärungsliste), Klärungsliste nach Gruppen, Übersicht aller Positionen, ein PDF-Knopf');
+  ok(p5.offen && p5.svg && /Bestellmaß-Vorschlag1\.759 × 1\.394 mm/.test(p5.best) && /Vor Ort prüfen: Anschlag|Öffnung minus 15 mm/.test(p5.best) && /^Kunststoff, innen Verkehrsweiß/.test(p5.satz) && /Notiz des Kunden zu .*„Lieber etwas heller\.“/.test(p5.notiz) && /Zu klären bei dieser Position/.test(p5.klaer) && /FENSTER|Fenster/.test(p5.gruppen) && /Montage/.test(p5.gruppen), 'Position aus der Übersicht aufgeklappt: Zeichnung mit Maßen, Bestellmaß, Wunsch in einem Satz, Gruppen mit der Notiz des Kunden an ihrer Stelle, was hier zu klären ist');
+  ok(h5.ok && /^1 von \d+ geklärt/.test(h5.stand) && h5.gedrueckt === 'true' && /\[x\] /.test(h5.text) && /Mit dem Kunden zu klären: 1 von \d+ geklärt/.test(h5.text), 'Klärungsliste abhaken: am Projekt gespeichert, Zähler „1 von n geklärt“, auch im kopierten Text');
+  ok(chip5 > 0 && nb5.hinweis.length > 5 && nb5.feld === nb5.hinweis && nb5.gedrueckt === 'true', 'Nachbesserung: offene Punkte der Klärungsliste als Chips, Antippen füllt den Hinweis an den Kunden');
+  const pdf5 = await s5.evaluate(async () => { const l = A().links.find((x) => x.id === 'l1'); A().abzug = { seite: 15, oben: 15, unten: 30, untenT: 0 }; A().logo = (() => { const c = document.createElement('canvas'); c.width = 120; c.height = 40; const g = c.getContext('2d'); g.fillStyle = '#123456'; g.fillRect(0, 0, 120, 40); return c.toDataURL('image/png'); })(); await window.Blatt.schrift(); const lg = await pdfLogo(), mit = amPDF(l, {}, lg), ohne = amPDF(l, {}); const zahl = async (b) => ((await b.text()).match(/\/Subtype \/Image/g) || []).length; const buf = new Uint8Array(await mit.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return { b64: btoa(s), mit: await zahl(mit), ohne: await zahl(ohne), logo: !!lg }; });
+  const pdf5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-s5.pdf'); fs16.writeFileSync(pdf5p, Buffer.from(pdf5.b64, 'base64'));
+  const pt5 = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf5p, '-'])).toString('utf8'); } catch (e) { return ''; } };
+  const raw5 = fs16.readFileSync(pdf5p).toString('latin1'), s5t1 = pt5(1), s5all = pt5(0);
+  ok(pdf5.logo && pdf5.mit > pdf5.ohne && /InterExtraBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5t1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /BESTELLMASS-VORSCHLAG/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Inter, Seite 1 mit Übersicht und Klärungsliste samt Stand, Notiz des Kunden an der Stelle, Bestellmaß mit Abzug unten');
+  const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html; S.ansicht = vorher; return h; });
+  ok(/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && !/3-D-Ansicht/.test(land5) && /Zeichnung und Bestellmaß/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: übernommen wird das Aufmaß mit Zeichnung und Bestellmaß je Position');
+  /* Nacharbeit portal: Fußzeile des PDF bei 60 Zeichen Firmenname, Kontakt des Kunden im Kopf und im PDF, Zwischentitel, Fotos im Pilotbetrieb */
+  const lang5 = await s5.evaluate(async () => {
+    const c = BC(), alt = c.name, l = A().links.find((x) => x.id === 'l1'); c.name = 'Fensterbau und Glaserei Mustermann-Schmidt GmbH & Co. KG Köln';
+    l.aufmass.proj = Object.assign({}, l.aufmass.proj, { tel: '0171 999 00 11', mail: 'weber@beispiel.de', erreich: 'ab' }); await window.Blatt.schrift();
+    const b = amPDF(l, {}, null); c.name = alt; go('link', 'l1');
+    const u = new Uint8Array(await b.arrayBuffer()); let bin = ''; for (let i = 0; i < u.length; i++) bin += String.fromCharCode(u[i]);
+    return { b64: btoa(bin), name: 'Fensterbau und Glaserei Mustermann-Schmidt GmbH & Co. KG Köln'.length, kopf: document.querySelector('.amhead').innerText.replace(/\s+/g, ' '), h3: Array.from(document.querySelectorAll('.scr .sec-head h3')).map((h) => h.textContent + ':' + h.querySelectorAll('.ak').length).join('|'), kacheln: document.querySelectorAll('.pfoto').length, fotoChip: Array.from(document.querySelectorAll('.am-chips .chip')).map((x) => x.textContent).join('|') };
+  });
+  const lang5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-langer-name.pdf'); fs16.writeFileSync(lang5p, Buffer.from(lang5.b64, 'base64'));
+  let bbox5 = ''; try { bbox5 = cp16.execFileSync('pdftotext', ['-bbox', lang5p, '-']).toString('utf8'); } catch (e) { bbox5 = ''; }
+  const fuss5 = bbox5.split('<page').slice(1).map((pg) => { const w = Array.from(pg.matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="[\d.]+">([^<]*)<\/word>/g)).map((m) => ({ x0: +m[1], y: +m[2], x1: +m[3], t: m[4] })).filter((x) => x.y > 805); const k = w.findIndex((x) => /^P-\d{4}-/.test(x.t)); return k > 0 ? { luft: w[k].x0 - Math.max.apply(null, w.slice(0, k).map((x) => x.x1)), links: w.slice(0, k).map((x) => x.t).join(' ') } : { luft: -1, links: '' }; });
+  const txt5 = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', '-f', '1', '-l', '1', lang5p, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  ok(lang5.name >= 60 && fuss5.length >= 2 && fuss5.every((f) => f.luft >= 6 && /^Fensterbau und Glaserei/.test(f.links)), 'PDF des Betriebs: Fußzeile mit 60 Zeichen Firmenname läuft nicht in die Seitenzahl (Abstand ' + fuss5.map((f) => Math.round(f.luft)).join(', ') + ' pt)');
+  ok(/E-Mail weber@beispiel\.de/.test(lang5.kopf) && /Telefon 0171 999 00 11/.test(lang5.kopf) && /Erreichbar abends/.test(lang5.kopf) && /E-Mail\s+weber@beispiel\.de/.test(txt5) && /Erreichbar\s+abends/.test(txt5), 'Kontakt, den der Kunde selbst eingetragen hat (Telefon, E-Mail, Erreichbar), steht im Kopf des Aufmaßes und in der Karte „Ihr Kunde“ im PDF');
+  ok(lang5.h3 === 'Das Aufmaß.:1|Stand des Projekts.:1|Bisheriger Verlauf.:1' && lang5.kacheln === 0 && /\d+ Fotos (ausgewertet|beim Kunden)/.test(lang5.fotoChip), 'Projektansicht: Zwischentitel mit Punkt und einem grünen Wort; im Pilotbetrieb keine leeren Fotokacheln, im Kopf „… Fotos ausgewertet“ statt angekommener Fotos (' + lang5.fotoChip + ')');
+  /* Nacharbeit portal: Aufmaß aus dem Kundenlink ohne Erreichbarkeit zeigt in Kopf, Text und PDF keine Zeile „Erreichbar“, auch wenn die App ihren Startwert mitschickt */
+  const er5 = await s5.evaluate(async () => {
+    const a = A(), l = X.neuesProjekt(a, { kunde: 'Familie Morgen', kontakt: '0176 1234567' }).l, w0 = JSON.parse(JSON.stringify(a.links.find((x) => x.id === 'l1').aufmass.windows[0]));
+    const r = X.importCode(a, { v: 1, b: l.code, p: { erreich: 'nm', notiz: 'Bitte vormittags anrufen. Der Rollladen im Bad klemmt.', tel: '0176 1234567', mail: 'morgen@beispiel.de' }, w: [w0], t: 7 });
+    l.locked = false; go('link', l.id); await window.Blatt.schrift();
+    const b = amPDF(l, {}, null), u = new Uint8Array(await b.arrayBuffer()); let bin = ''; for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+    const out = { art: r.art, erreich: l.aufmass.proj.erreich, kontakt: kundeKontakt(l).map((z) => z[0]).join(','), kopf: (document.querySelector('.amhead') || {}).innerText || '', text: aufmassText(l), b64: btoa(bin) };
+    go('link', 'l1'); return out;
+  });
+  const er5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-erreich.pdf'); fs16.writeFileSync(er5p, Buffer.from(er5.b64, 'base64'));
+  const er5t = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', er5p, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  ok(er5.art === 'neu' && er5.erreich === '' && er5.kontakt === 'E-Mail' && /E-Mail morgen@beispiel\.de/.test(er5.kopf.replace(/\s+/g, ' ')) && /Bitte vormittags anrufen/.test(er5.text) && /morgen@beispiel\.de/.test(er5t) && !/Erreichbar/.test(er5.kopf + er5.text + er5t), 'Aufmaß aus dem Kundenlink ohne Erreichbarkeit: Kopf, kopierter Text und PDF ohne „Erreichbar nachmittags“ (Kontakt und Nachricht des Kunden stehen da)');
+  /* Nacharbeit portal: große Zeichnung am Schreibtisch ohne Schrift unter 13 px (tatsächlicher Maßstab der SVG, auch „Fußboden“) */
+  await s5.click('#pos-0 summary').catch(() => {}); await s5.waitForTimeout(300);
+  const zg5 = await s5.evaluate(() => { const svg = Array.from(document.querySelectorAll('#pos-0 svg.zeichnung')).find((x) => getComputedStyle(x).display !== 'none'), k = svg.getScreenCTM().a, t = Array.from(svg.querySelectorAll('text')); return { cls: svg.getAttribute('class'), min: Math.min.apply(null, t.map((x) => parseFloat(x.getAttribute('font-size')) * k)), fuss: t.filter((x) => x.textContent === 'Fußboden').map((x) => parseFloat(x.getAttribute('font-size')) * k)[0] || 0 }; });
+  ok(/zk-gross/.test(zg5.cls) && zg5.min >= 13 && zg5.fuss >= 13, 'Schreibtisch 1280 px: große Zeichnung ohne Schrift unter 13 px (kleinste ' + zg5.min.toFixed(1) + ' px, Fußboden ' + zg5.fuss.toFixed(1) + ' px)');
+  /* Nacharbeit portal: Einladungsseite gestalten am Schreibtisch (Vorschau wie am Telefon, Kicker, Schalter als ganze Zeile, Ziele ab 44 px, Gruppen mit Namen) */
+  await s5.evaluate(() => go('einladung')); await s5.waitForTimeout(400);
+  const ei5 = await s5.evaluate(() => {
+    const v = document.querySelector('.ein-telefon'), sp = (sel) => getComputedStyle(v.querySelector(sel)).gridTemplateColumns.split(' ').length;
+    return { karten: sp('.ein-karten'), so: getComputedStyle(v.querySelector('.ein-so .ein-schritte')).display, cta: getComputedStyle(v.querySelector('.ein-cta')).flexDirection, kicker: !!document.querySelector('.h .kicker'), ak: document.querySelectorAll('.h h2 .ak').length,
+      zeilen: Array.from(document.querySelectorAll('[data-ein="schalter"]')).map((b) => b.tagName + ':' + b.classList.contains('sw-row') + ':' + (b.getBoundingClientRect().height >= 44)), farben: Array.from(document.querySelectorAll('.ein-b-karte .col')).every((c) => c.getBoundingClientRect().width >= 44 && c.getBoundingClientRect().height >= 44),
+      gruppen: Array.from(document.querySelectorAll('.ein-bereich-wrap [role="group"]')).every((g) => { const id = g.getAttribute('aria-labelledby'); return !!(id && document.getElementById(id) && document.getElementById(id).textContent.trim()); }), freieLabel: document.querySelectorAll('.ein-bereich-wrap label:not([for])').length - document.querySelectorAll('.ein-bereich-wrap label:not([for]) input').length };
+  });
+  const sw5a = await s5.evaluate(() => document.querySelector('[data-ein="schalter"][data-v="mailZeigen"]').getAttribute('aria-checked'));
+  await s5.click('[data-ein="schalter"][data-v="mailZeigen"] .t b'); await s5.waitForTimeout(300);
+  const sw5b = await s5.evaluate(() => document.querySelector('[data-ein="schalter"][data-v="mailZeigen"]').getAttribute('aria-checked'));
+  ok(ei5.karten === 1 && ei5.so === 'flex' && ei5.cta === 'column', 'Vorschau „So sieht Ihr Kunde die Seite“ am Schreibtisch einspaltig wie am Telefon (Karten, Ablauf, Knöpfe)');
+  ok(ei5.kicker && ei5.ak === 1 && ei5.zeilen.length === 2 && ei5.zeilen.every((z) => z === 'BUTTON:true:true') && sw5a !== sw5b && ei5.farben && ei5.gruppen && ei5.freieLabel === 0, 'Einladungsseite gestalten: grüner Kicker und ein grünes Wort, Schalter als ganze Zeile (Tippen auf den Text schaltet), Farbknöpfe 44 px, Gruppen mit Namen');
+  /* Zeitpunkte absolut gespeichert, „heute“/„gestern“ erst beim Anzeigen */
+  await s5.evaluate(() => { const l = A().links.find((x) => x.id === 'l2'); l.status = 'erstellt'; delete l.log.gesendet; go('link', 'l2'); }); await s5.waitForTimeout(200);
+  await s5.click('button.sbtn[data-v="Text"]'); await s5.waitForTimeout(400);
+  const zt5 = await s5.evaluate(() => { const l = A().links.find((x) => x.id === 'l2'), g = l.log.gesendet; go('link', 'l2'); const heute = document.querySelector('.tlh').textContent; const d = new Date(); d.setDate(d.getDate() - 1); l.log.gesendet = X.stamp(d.getTime()); go('link', 'l2'); return { g: g, heute: heute, gestern: document.querySelector('.tlh').textContent }; });
+  ok(/^\d{2}\.\d{2}\., \d{2}:\d{2}$/.test(zt5.g) && /Gesendetheute, \d{2}:\d{2}/.test(zt5.heute) && /Gesendetgestern, \d{2}:\d{2}/.test(zt5.gestern), 'Verlauf: Zeitpunkt wird mit Datum gespeichert (' + zt5.g + '), „heute“ und „gestern“ entstehen erst beim Anzeigen');
+  sauber(s5, 'Aufmaß beim Betrieb ohne Fehler'); await ctxS5.close();
+  /* Nacharbeit portal, Telefon 390 px: Beschriftungen der Wünsche laufen nicht in den Wert, die kleine Zeichnung hat keine Schrift unter 13 px */
+  const ctxT5 = await browser.newContext(telefon), t5 = await neueSeite(ctxT5);
+  await t5.goto(BASE + '/', { waitUntil: 'networkidle' }); await betrieb(t5, 'c1'); await t5.waitForTimeout(300);
+  await t5.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'), w = l.aufmass.windows[0]; w.rc = 'rc2'; w.insekt = 'spann'; go('link', 'l1'); }); await t5.waitForTimeout(300);
+  await t5.click('#pos-0 summary'); await t5.waitForTimeout(400);
+  const tm5 = await t5.evaluate(() => {
+    const dts = Array.from(document.querySelectorAll('#pos-0 .am-dl dt')).filter((dt) => dt.offsetParent).map((dt) => { const r = document.createRange(); r.selectNodeContents(dt); return { t: dt.textContent, luft: dt.nextElementSibling.getBoundingClientRect().left - r.getBoundingClientRect().right }; });
+    const svg = Array.from(document.querySelectorAll('#pos-0 svg.zeichnung')).find((x) => getComputedStyle(x).display !== 'none'), f = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+    return { eng: dts.filter((d) => d.luft < 6).map((d) => d.t), klein: svg.getAttribute('class'), min: Math.min.apply(null, Array.from(svg.querySelectorAll('text')).map((x) => parseFloat(x.getAttribute('font-size')) * f)) };
+  });
+  ok(!tm5.eng.length && /zk-klein/.test(tm5.klein) && tm5.min >= 13, 'Telefon: Beschriftungen wie Einbruchschutz und Insektenschutz mit Abstand zum Wert' + (tm5.eng.length ? ' (zu eng: ' + tm5.eng.join(', ') + ')' : '') + ', Zeichnung ohne Schrift unter 13 px (kleinste ' + tm5.min.toFixed(1) + ' px)');
+  await t5.setViewportSize({ width: 360, height: 740 }); await t5.waitForTimeout(300);
+  const t360 = await t5.evaluate(() => { const svg = Array.from(document.querySelectorAll('#pos-0 svg.zeichnung')).find((x) => getComputedStyle(x).display !== 'none'), k = svg.getScreenCTM().a; return { cls: svg.getAttribute('class'), min: Math.min.apply(null, Array.from(svg.querySelectorAll('text')).map((x) => parseFloat(x.getAttribute('font-size')) * k)), quer: document.documentElement.scrollWidth > window.innerWidth + 1 }; });
+  ok(/zk-klein/.test(t360.cls) && t360.min >= 13 && !t360.quer, 'Telefon 360 px: Zeichnung ohne Schrift unter 13 px (kleinste ' + t360.min.toFixed(1) + ' px), kein Querscrollen');
+  sauber(t5, 'Aufmaß beim Betrieb am Telefon ohne Fehler'); await ctxT5.close();
+
+  /* l) Angleich an #46 (Detailtiefe): alle Detailangaben beim Betrieb in ihren Wünsche-Gruppen, Standard des Fensterbauers sichtbar,
+     Klärungsliste mit den neuen Auslösern und ohne Punkte für Ungefragtes, Zeichnung mit den neuen Formen, Text, PDF, Einladungsseite */
+  const g46VOLL16 = { name: 'Wohnzimmer', etage: 'og', bru: 500, absturz: 'gelaender', gelForm: 'quer', gelFarbe: 'edelstahl', material: 'holz', holzart: 'eiche', oberfl: 'matt', profil: 'softline', schmal: 'schmal', dicht: 'grau', ahFarbe: 'schwarz',
+    bars: [{ s: 1, d: 'h', p: 0.5 }, { s: 2, d: 'h', p: 0.5 }], sprFarbe: 'weiss', seiten: 'beide', seitenB: 450, sashes: [{ t: 'F', din: 'L', st: 1 }, { t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }, { t: 'F', din: 'R', st: 1 }], kvd: 'kvd', griffM: 'design', griffPos: 'tief', kinder: 'schloss', baender: 'verdeckt', oeffner: 'kette', luefter: 'schall', kontakt: 'verschluss', gitter: 'stab',
+    sart: 'raffstore', roll: 'vorbau', antrieb: 'motor', sfTeile: 'eigen', sfK: 'anthrazit', sfS: '7016', lamelle: 'z90', fuehrung: 'seil', bedien: 'links', sensor: ['sonne', 'wind'], insekt: 'spann', insFarbe: 'anthrazit', insGewebe: 'pollen',
+    fbi: 'stein', fbiFarbe: 'granit', fba: 'alu', fbaFarbe: 'anthrazit', fbaTiefe: 180, fbaUeber: '40', fbaKappe: 'kunststoff', leiste: 'beide', notizen: { griffM: 'Wie im Bad', kontakt: 'Anlage von Telenot' }, ki: { fach: { fassade: 'wdvs' } } };
+  const g46V16 = voll(g46VOLL16), g46W16 = AW16.wuensche(g46V16, { tiefe: 'genau' }), g46Gz16 = (id) => g46W16.gruppen.find((g) => g.id === id).zeilen.map((z) => z.k).join(',');
+  const g46Det16 = AW16.DETAIL.filter((d) => d.zeile !== false && AW16.detailGilt(g46V16, d.k) && AW16.detailText(g46V16, d)), g46Alle16z = g46W16.gruppen.reduce((a, g) => a + g.zeilen.length, 0);
+  ok(/Fenstergitter/.test(g46Gz16('beschlag')) && /Geländer/.test(g46Gz16('beschlag')) && /Abdeckleisten/.test(g46Gz16('montage')) && /Sprossenfarbe/.test(g46Gz16('fenster')) && /Seitenteile/.test(g46Gz16('fenster')) && /Abstandhalter/.test(g46Gz16('glas')) && /Lamellen/.test(g46Gz16('sonne')) && /Gewebe/.test(g46Gz16('insekt')) && /Ausladung/.test(g46Gz16('bank')) && g46Det16.length >= 30 && g46Alle16z >= 14 + g46Det16.length && g46W16.tiefe === 'genau',
+    'Wünsche beim Betrieb: alle ' + g46Det16.length + ' gewählten Detailangaben in ihren Gruppen (Fenstergitter und Geländer unter Beschlag und Sicherheit, Abdeckleisten unter Montage, Sprossenfarbe unter Fenster)');
+  ok(/2 Flügel und zwei Seitenteile/.test(g46W16.satz) && /Raffstore elektrisch/.test(g46W16.satz) && /Stabgitter/.test(g46W16.satz) && /Alarmkontakt/.test(g46W16.satz) && /RC2 N/.test(AW16.wuensche(voll({ rc: 'rc2n' }), {}).satz) && /Rollladen mit Solarantrieb/.test(AW16.wuensche(voll({ sart: 'rollladen', roll: 'aufsatz', antrieb: 'solar' }), {}).satz) && /Klappläden/.test(AW16.wuensche(voll({ sart: 'klappladen' }), {}).satz), 'Wunsch in einem Satz: Flügel ohne Seitenteile, Gitter, Alarmkontakt, RC2 N, Solarantrieb, Klappläden');
+  const g46Kl16 = AW16.klaerung([g46V16], { total: 2, tiefe: 'genau' }), g46Klv16 = g46Kl16.map((r) => r.id + ' ' + r.v).join('\n');
+  ok(/notiz-p0-griffM Notiz zu Griffmodell: „Wie im Bad“/.test(g46Klv16) && /notiz-p0-kontakt Notiz zu Alarmkontakt/.test(g46Klv16) && /alarm-p0 /.test(g46Klv16) && /gleit-p0 .*Gleitabschluss/.test(g46Klv16) && /absturz-p0 .*Geländer außen.*Querstäbe, Edelstahl/.test(g46Klv16) && /Lüftungskonzept.*Lüfter \(Pos\. 1\) im Konzept nennen/.test(g46Klv16) && /strom-p0/.test(g46Klv16) && !g46Kl16.some((r) => /Profil|Dichtung|Abstandhalter|Bänder/.test(r.v)),
+    'Klärungsliste: Notizen an Detailfragen mit Beschriftung („Notiz zu Griffmodell“), Alarmkontakt, Gleitabschluss bei gedämmter Fassade, Geländerform im Pflichtpunkt, Lüfter im Lüftungskonzept, kein Punkt für Gestaltungsdetails');
+  const g46Up16 = AW16.klaerung([voll({ sart: 'rollladen', roll: 'unterputz' })], { total: 9 }), g46UpN16 = AW16.klaerung([voll({ sart: 'rollladen', roll: 'unterputz', neu: true })], { total: 9 });
+  ok(g46Up16.some((r) => /^unterputz-/.test(r.id) && r.gruppe === 'vorort') && !g46UpN16.some((r) => /^unterputz-/.test(r.id)), 'Klärungsliste: Unterputzkasten im Bestand heißt Sturz öffnen (vor Ort), bei neuer Öffnung nicht');
+  /* „Das Wichtigste“: was nicht gefragt wurde, steht nach Standard des Fensterbauers da, nicht offen */
+  const g46Kz16 = voll({ offen: { fa: true, fba: true, einbau: true }, sart: 'rollladen', roll: 'aufsatz' }), g46Wk16 = AW16.wuensche(g46Kz16, { tiefe: 'kurz' }), g46Wn16 = AW16.wuensche(g46Kz16, { tiefe: 'normal' });
+  const g46Klk16 = AW16.klaerung([g46Kz16], { total: 9, tiefe: 'kurz' }), g46Kln16 = AW16.klaerung([g46Kz16], { total: 9, tiefe: 'normal' });
+  const g46Zk16 = (W, id) => W.gruppen.find((g) => g.id === id).zeilen;
+  ok(g46Wk16.offen.join() === 'Farbe außen' && !g46Klk16.some((r) => /Fensterbank außen|Rollladenkasten/.test(r.v)) && g46Kln16.some((r) => /Rollladenkasten, Fensterbank außen: offen/.test(r.v)) && g46Zk16(g46Wk16, 'bank')[0].std && g46Zk16(g46Wk16, 'beschlag')[0].std && /Kasten und Farbe nach Standard des Fensterbauers/.test(g46Zk16(g46Wk16, 'sonne')[0].t) && g46Zk16(g46Wk16, 'montage')[0].std && !g46Zk16(g46Wn16, 'bank')[0].std,
+    '„Das Wichtigste“: Fensterbank, Kasten, Griff und Montage „nach Standard des Fensterbauers“, nicht offen und ohne Klärungspunkt; bei „Die üblichen Wünsche“ bleibt das Startwert-„offen“');
+  ok(AW16.wuensche(voll({ offen: { griff: true } }), { tiefe: 'kurz' }).offen.join() === 'Griff' && !g46Zk16(AW16.wuensche(voll({ griffM: 'design' }), { tiefe: 'kurz' }), 'beschlag')[0].std && g46Wk16.standard.indexOf('Oberfläche') >= 0 && g46Zk16(g46Wk16, 'fenster').length && g46Wk16.gruppen.find((g) => g.id === 'fenster').standard.join() === 'Oberfläche,Profilform,Rahmenansicht,Dichtung' && !g46Wk16.standard.some((x) => /Gitter|Lüfter|Kindersicherung/.test(x)) && AW16.wuensche(g46Kz16, {}).standard.length === 0,
+    'Standard je Gruppe: geltende, nicht gewählte Angaben mit eigener Ausführung (nicht Gitter oder Lüfter); ein selbst getipptes „Weiß ich noch nicht“ bleibt offen; ohne Tiefe (ältere Aufmaße) keine Standard-Zeile');
+  const gew16 = AW16.mk({ offen: { fba: true }, offenWahl: { fba: 1 } });
+  ok(AW16.wuensche(gew16, { tiefe: 'kurz' }).offen.join() === 'Fensterbank außen' && AW16.klaerung([gew16], { total: 9, tiefe: 'kurz' }).some((r) => r.art === 'offen') && /offenWahl = Object\.assign/.test(fs16.readFileSync(new URL('../web/assets/app.js', import.meta.url), 'utf8')), '„Weiß ich noch nicht“ zur Fensterbank außen, selbst getippt (w.offenWahl), bleibt offen, auch wenn der Kunde danach „Das Wichtigste“ wählt');
+  ok(AW16.FRAGE.stufe.fba === 2 && AW16.FRAGE.kap.fba === 'bank' && /const QSTUFE = AW\.FRAGE\.stufe/.test(fs16.readFileSync(new URL('../web/assets/app.js', import.meta.url), 'utf8')) && AW16.tiefeText('kurz', true) === 'Das Wichtigste, alles Weitere nach Ihrem Standard' && /Standard des Fensterbauers$/.test(AW16.tiefeText('normal')) && AW16.tiefeText('') === '',
+    'Kapitel und Stufe der Fragen an einer Stelle (AW.FRAGE, die App liest von dort); „Geplant: Das Wichtigste, alles Weitere nach Ihrem Standard“');
+  /* Zeichnung: Dreieck fest, Seitenteile mit Pfosten, zweiter Griff am Stulp, Kasten und Klappläden im kleinen Bild */
+  const g46Pl16 = (o) => AW16.plan(voll(o), { b: 420, fs: 13 }), g46F16 = (p) => p.teile.filter((t) => t.t === 'text' && t.s === 'F').length, g46G16 = (p) => p.teile.filter((t) => t.t === 'poly' && t.r).length;
+  const g46Dr16 = g46Pl16({ form: 'dreieck', sashes: [{ t: 'F' }], teilung: '1' }), g46St16 = g46Pl16(g46VOLL16), g46Stulp1 = g46Pl16({ teilung: '2s', sashes: AW16.sashesFor('2s') }), g46Stulp2 = g46Pl16({ teilung: '2s', sashes: AW16.sashesFor('2s'), stulpBed: 'griff' });
+  ok(g46F16(g46Dr16) === 1 && g46G16(g46Dr16) === 0 && AW16.opening(voll({ form: 'dreieck' })) === 'fest verglast, ohne Griff' && g46F16(g46St16) === 2 && g46G16(g46St16) === 2 && g46G16(g46Stulp1) === 1 && g46G16(g46Stulp2) === 2 && /2 Flügel · 2 Seitenteile/.test(AW16.oeffnungKurz(g46V16)) && /#383e42/.test(AW16.svg(voll({ sart: 'raffstore', roll: 'vorbau', sfarbe: 'anthrazit' }))) && /#2f4f3a/.test(AW16.svg(voll({ sart: 'klappladen', klFarbe: 'gruen' }))),
+    'Zeichnung: Dreieck fest ohne Griff, Seitenteile als feste Felder, zweiter Griff am Standflügel nur mit Treibriegel; kleines Bild mit Kasten und Klappläden in ihrer Farbe');
+  /* Einladungsseite: Planungstiefe und Standard des Betriebs, geprüft wie auf dem Server und im Link */
+  const g46E16 = createRequire(import.meta.url)('../web/assets/einladung.js'), g46Ein16t = g46E16.einstellungen({ tiefe: 'kurz', standard: '  Kunststoff   mit 3-fach-Glas ' }), g46Ein16x = g46E16.einstellungen({ tiefe: 'tief' });
+  const g46Lp16 = g46E16.linkLesen(g46E16.linkTeil(g46E16.auftritt({ einladung: g46Ein16t }), { du: true, voll: true })).profil, g46Pk16k = g46E16.planung({ name: 'Fensterbau Brandt', p: g46Lp16, du: true });
+  ok(g46Ein16t.tiefe === 'kurz' && g46Ein16t.standard === 'Kunststoff mit 3-fach-Glas' && g46Ein16x.tiefe === '' && g46Lp16.tiefe === 'kurz' && g46Lp16.std === 'Kunststoff mit 3-fach-Glas' && /nur nach dem Wichtigsten/.test(g46Pk16k) && /„Kunststoff mit 3-fach-Glas“/.test(g46Pk16k) && g46E16.planung({ name: 'X', p: {}, du: true }) === '',
+    'Einladung: Planungstiefe und Standard des Betriebs werden geprüft, reisen im Link und erscheinen auf der Einladungsseite (ohne Angaben keine Karte)');
+  /* Im Browser: Betrieb (Gruppen, Standard, Kopf, Text, PDF ohne Überlauf), Einladung gestalten, Kundenlink mit Vorgabe */
+  const g46CtxL = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), g46SL = await neueSeite(g46CtxL);
+  await g46SL.goto(BASE + '/', { waitUntil: 'networkidle' }); await betrieb(g46SL, 'c1'); await g46SL.waitForTimeout(300);
+  const g46Bl16 = await g46SL.evaluate((V) => {
+    const l = A().links.find((x) => x.id === 'l1'); l.aufmass.windows[0] = Object.assign(JSON.parse(JSON.stringify(l.aufmass.windows[0])), V); l.aufmass.proj = Object.assign({}, l.aufmass.proj, { tiefe: 'genau' }); go('link', 'l1');
+    const d = document.getElementById('pos-0'), t = (sel) => (d.querySelector(sel) || {}).textContent || '';
+    return { beschlag: t('.am-g-beschlag'), montage: t('.am-g-montage'), kurz: t('summary small'), kopf: document.querySelector('.amhead').textContent, text: aufmassText(l) };
+  }, g46VOLL16);
+  ok(/Fenstergitter/.test(g46Bl16.beschlag) && /Abdeckleisten/.test(g46Bl16.montage) && /2 Flügel · 2 Seitenteile/.test(g46Bl16.kurz) && /GeplantAlles im Detail/.test(g46Bl16.kopf) && /Geplant: Alles im Detail/.test(g46Bl16.text) && /Fenstergitter Stabgitter/.test(g46Bl16.text) && /Notiz des Kunden zu Griffmodell: „Wie im Bad“/.test(g46Bl16.text) && /Notiz zu Alarmkontakt/.test(g46Bl16.text),
+    'Betriebsbereich: Detailzeilen in den Gruppen, Kurzzeile „2 Flügel · 2 Seitenteile“, „Geplant“ im Kopf; Text zum Kopieren mit Tiefe, Detailzeilen und Notizen an Detailfragen');
+  const g46Pdf16 = await g46SL.evaluate(async () => { const l = A().links.find((x) => x.id === 'l1'); await window.Blatt.schrift(); const b = amPDF(l, {}); const u = new Uint8Array(await b.arrayBuffer()); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); });
+  const g46Pdf16p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-detail.pdf'); fs16.writeFileSync(g46Pdf16p, Buffer.from(g46Pdf16, 'base64'));
+  let g46Txt16 = '', g46Box16 = ''; try { g46Txt16 = cp16.execFileSync('pdftotext', ['-layout', g46Pdf16p, '-']).toString('utf8'); g46Box16 = cp16.execFileSync('pdftotext', ['-bbox', g46Pdf16p, '-']).toString('utf8'); } catch (e) { g46Txt16 = ''; }
+  const g46Woerter16 = Array.from(g46Box16.matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">([^<]*)<\/word>/g)).map((m) => ({ x1: +m[3], y0: +m[2], y1: +m[4], t: m[5] }));
+  const g46Ueber16 = g46Woerter16.filter((x) => (x.y1 > 799 && x.y0 < 808) || (x.x1 > 560 && x.y0 > 85 && x.y0 < 800)).map((x) => x.t); // Kopfband und Fuß ausgenommen
+  ok(/Fenstergitter/.test(g46Txt16) && /Abdeckleisten/.test(g46Txt16) && /Geplant\s+Alles im Detail/.test(g46Txt16) && /Farbe Geländer/.test(g46Txt16) && !/Weitere Ausstattung/.test(g46Txt16) && g46Woerter16.length > 200 && !g46Ueber16.length, 'PDF des Betriebs mit allen Detailangaben: Zeilen in den Gruppen, „Geplant“ in den Eckdaten, keine eigene Karte „Weitere Ausstattung“, nichts läuft über den Rand oder in den Fuß' + (g46Ueber16.length ? ' (' + g46Ueber16.slice(0, 6).join(' ') + ')' : ''));
+  const g46Kurz16 = await g46SL.evaluate(() => { const l = A().links.find((x) => x.id === 'l1'); l.aufmass.proj.tiefe = 'kurz'; const w = l.aufmass.windows[1]; w.offen = { fba: true }; w.fbi = 'behalten'; go('link', 'l1'); const d = document.getElementById('pos-1'); return { bank: d.querySelector('.am-g-bank').textContent, std: d.querySelectorAll('.am-std').length, grau: !!d.querySelector('.am-dl dd.std'), klaer: amKlaer(l).map((r) => r.v).join('|'), kopf: document.querySelector('.amhead').textContent }; });
+  ok(/nach Ihrem Standard/.test(g46Kurz16.bank) && g46Kurz16.std >= 2 && g46Kurz16.grau && !/Fensterbank außen: offen|Fensterbank außen, Rollladenkasten/.test(g46Kurz16.klaer) && /Das Wichtigste, alles Weitere nach Ihrem Standard/.test(g46Kurz16.kopf), 'Betriebsbereich bei „Das Wichtigste“: grau „nach Ihrem Standard“ statt Startwerten, „Nach Ihrem Standard: …“ je Gruppe, keine offenen Punkte für Ungefragtes');
+  await g46SL.evaluate(() => go('einladung')); await g46SL.waitForTimeout(300);
+  await g46SL.click('[data-ein="tiefe"][data-v="kurz"]'); await g46SL.waitForTimeout(300);
+  const g46Ei16 = await g46SL.evaluate(() => ({ t: (A().einladung || {}).tiefe, vor: !!document.querySelector('#ein-vor .ein-planung'), ziele: Array.from(document.querySelectorAll('[data-ein="tiefe"]')).every((b) => b.getBoundingClientRect().height >= 44), gedrueckt: (document.querySelector('[data-ein="tiefe"][aria-pressed="true"]') || {}).textContent, gruppe: (() => { const g = document.querySelector('[data-ein="tiefe"]').closest('[role="group"]'); return !!(g && document.getElementById(g.getAttribute('aria-labelledby'))); })(), link: linkURL(A().links.find((x) => x.id === 'l2')) }));
+  ok(g46Ei16.t === 'kurz' && g46Ei16.vor && g46Ei16.ziele && g46Ei16.gedrueckt === 'Kurz' && g46Ei16.gruppe, 'Einladungsseite gestalten: „Standard des Fensterbauers“ mit Segment „Wie genau Ihre Kunden planen“ (44 px, beschriftet), die Vorschau zeigt „Wie genau Sie planen“');
+  sauber(g46SL, 'Detailangaben beim Betrieb ohne Fehler'); await g46CtxL.close();
+  const g46CtxL2 = await browser.newContext(telefon), g46AL = await neueSeite(g46CtxL2);
+  await g46AL.goto(g46Ei16.link.replace(/^https?:\/\/[^/]+/, BASE), { waitUntil: 'networkidle' }); await g46AL.waitForTimeout(500);
+  const g46Ap16 = await g46AL.evaluate(() => ({ t: S.proj.tiefe, karte: (document.querySelector('.ein-planung') || {}).textContent || '', frage: qList(Object.assign(baseWin(), { name: 'x' })).length > 0 && qSichtbar(Object.assign(baseWin(), { name: 'x' })).every((q) => q.id !== 'tiefe') }));
+  ok(g46Ap16.t === 'kurz' && /fragt Sie nur nach dem Wichtigsten/.test(g46Ap16.karte) && g46Ap16.frage, 'Kundenlink: die Vorgabe des Betriebs gilt als Tiefe (die Frage entfällt), die Einladungsseite erklärt sie in „Wie genau Sie planen“');
+  sauber(g46AL, 'Kundenlink mit Planungstiefe ohne Fehler'); await g46CtxL2.close();
 }
 
 if (teil(17)) {
@@ -3126,7 +3777,7 @@ if (teil(17)) {
   const pilot17 = await fetch(BASE + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Test', vertrag: 'Aufmaßblatt', mail: 'test@beispiel.de' }) }), pj17 = await pilot17.json();
   ok(pilot17.status === 503 && pj17.anders === true && /E-Mail oder Brief/.test(pj17.fehler), 'Widerruf ohne Mailversand und Datenbank: 503 mit Hinweis auf E-Mail oder Brief');
   /* d) eigener Testserver mit Mail- und Daten-Attrappe: Formular, Eingangsbestätigung, Kopie */
-  const port17 = 9300 + Math.floor(Math.random() * 80), B7 = 'http://localhost:' + port17;
+  const port17 = await freierPort(), B7 = 'http://localhost:' + port17;
   const kind17 = cp17.spawn(process.execPath, [path17.join(W17, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port17), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', MAIL_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind17.stderr.on('data', (dd) => process.stderr.write('  [Server 7] ' + dd));
   const aus17 = () => { try { kind17.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus17);
@@ -3235,15 +3886,39 @@ if (teil(17)) {
     for (const [n, h] of Object.entries(vorl17)) {
       await sV.setContent(h.replace('{{ .Token }}', '4829137750').replace('{{ .Email }}', 'sehr.lange.adresse.fuer.den.test@fensterbau-beispiel.de'), { waitUntil: 'load' });
       const m = await sV.evaluate(() => { const c = document.querySelector('.code'), f = document.querySelector('.codefeld'); return { quer: document.documentElement.scrollWidth - innerWidth, zeilen: Math.round(c.getBoundingClientRect().height / parseFloat(getComputedStyle(c).lineHeight)), feld: getComputedStyle(f).backgroundColor, ziffern: getComputedStyle(c).color }; });
-      const erwartet = schema === 'dark' ? ['rgb(242, 241, 237)', 'rgb(17, 17, 16)'] : ['rgb(20, 20, 20)', 'rgb(255, 255, 255)'];
+      const erwartet = ['rgb(241, 240, 234)', 'rgb(22, 22, 22)']; // nur noch die dunkle Bühne (S6): Codefeld in Cream wie die Hauptaktion, hell und dunkel gleich
       if (m.quer > 0 || m.zeilen !== 1 || m.feld !== erwartet[0] || m.ziffern !== erwartet[1]) vorlFehler17.push(n + ' ' + schema + ': ' + JSON.stringify(m));
     }
     await cV.close();
   }
   const os17 = fs17.readFileSync(path17.join(W17, 'docs/ONLINE-STELLEN.md'), 'utf8');
   if (!os17.includes('supabase/vorlagen/anmeldecode.html') || !os17.includes('supabase/vorlagen/registrierung.html') || !os17.includes('`Anmeldecode für eeziframes: {{ .Token }}`')) vorlFehler17.push('Anleitung nennt Vorlagen oder Betreff nicht');
-  ok(!vorlFehler17.length, 'Anmelde-E-Mails (Supabase-Vorlagen): genau ein Code, keine Anmeldelinks, Bilder, Skripte oder fremden Adressen, Schrift ab 13 px, Wortmarke, ohne Anrede, mit Anbieter; 10 Stellen und lange Adresse bei 360 px ohne Querscrollen, Codefeld hell und dunkel wie der Primärknopf' + (vorlFehler17.length ? ': ' + vorlFehler17.join(' | ') : ''));
+  ok(!vorlFehler17.length, 'Anmelde-E-Mails (Supabase-Vorlagen): genau ein Code, keine Anmeldelinks, Bilder, Skripte oder fremden Adressen, Schrift ab 13 px, Wortmarke, ohne Anrede, mit Anbieter; 10 Stellen und lange Adresse bei 360 px ohne Querscrollen, Codefeld in Cream wie der Primärknopf, hell und dunkel gleich' + (vorlFehler17.length ? ': ' + vorlFehler17.join(' | ') : ''));
   ok(rgA._status === 400 && rgB._status === 400 && rgC._status === 409 && rgC.neuLaden && rgD.ok && rgD.konto.acc.bedingungen.fassung === RECHT.NB_STAND && rgD.konto.acc.bedingungen.unternehmer === true && rgD.konto.acc.bedingungen.avv === true && !isNaN(Date.parse(rgD.konto.acc.bedingungen.zeit)), 'Registrierung nur als Unternehmer mit Zustimmung zur geltenden Fassung der Nutzungsbedingungen samt AVV; Fassung und Zeitpunkt stehen am Konto');
+  /* k) Benachrichtigungen an Betriebe (S6, functions/api/benachrichtigung.js): „Aufmaß eingegangen“ sofort mit Link ins Projekt und
+     ohne Maße, abschaltbar unter „Mein Betrieb“; Erinnerung an offene Links einmal je Projekt nach 3 Tagen, nicht bei abgeschalteter
+     Erinnerung, nicht für angelegte, gemessene oder eingegangene Projekte */
+  const mailB17 = 'mb17-' + Date.now() + '@beispiel.de', tokB17 = 'test.' + Buffer.from(mailB17, 'utf8').toString('base64').replace(/=+$/, '');
+  const regB17 = await post17j('/api/konto/registrieren', { firma: 'Fensterbau Post ' + Date.now(), ap: 'Paula Post', tel: '0221 8' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, tokB17);
+  const wB17 = [{ name: 'Küche', w: 1230, h: 1410, el: { w: 1230, h: 1410 }, mo: { hm: 1440, hl: 1440, hr: 1440, wm: 1260, wt: 1260, wb: 1260 }, fotos: 0 }];
+  const pjB17 = await post17j('/api/konto/projekte', { kunde: 'Familie Brief', plan: ['Fenster'], days: 14 }, tokB17), lB17 = ((pjB17.konto || {}).acc || { links: [{}] }).links[0];
+  const amB17 = await post17j('/api/aufmass', { v: 1, b: lB17.code, w: wB17, p: { gebaeude: 'efh' } });
+  await new Promise((r) => setTimeout(r, 300));
+  const pB17 = ((await fetch(B7 + '/api/test/post').then((r) => r.json())).post || []).filter((m) => m.an === mailB17);
+  await fetch(B7 + '/api/konto', { method: 'PATCH', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + tokB17 }, body: JSON.stringify({ prefs: { mail: false, remind: true } }) });
+  const pj2B17 = await post17j('/api/konto/projekte', { kunde: 'Familie Still', plan: ['Fenster'], days: 14 }, tokB17), l2B17 = ((pj2B17.konto || {}).acc || { links: [{}] }).links[0];
+  const am2B17 = await post17j('/api/aufmass', { v: 1, b: l2B17.code, w: wB17.map((w) => Object.assign({}, w, { name: 'Bad' })), p: { gebaeude: 'efh' } });
+  await new Promise((r) => setTimeout(r, 300));
+  const p2B17 = ((await fetch(B7 + '/api/test/post').then((r) => r.json())).post || []).filter((m) => m.an === mailB17);
+  ok(regB17.ok && amB17.ok && am2B17.ok && pB17.length === 1 && /^Aufmaß eingegangen: Familie Brief/.test(pB17[0].betreff) && pB17[0].html.includes('/#projekt-' + lB17.id) && /1 Position/.test(pB17[0].html) && !/1\.2[36]0|1\.4[14]0/.test(pB17[0].html) && p2B17.length === 1, 'E-Mail an den Betrieb beim Eingang: Kunde, Anzahl, Link ins Projekt, keine Maße; abgeschaltet kommt keine');
+  await import(url17.pathToFileURL(path17.join(W17, 'web/assets/modell.js')).href);
+  const benM17 = await import(url17.pathToFileURL(path17.join(W17, 'functions/api/benachrichtigung.js')).href), XB17 = globalThis.Abrechnung, jetztB17 = Date.now();
+  const altB17 = XB17.datum(jetztB17 - 5 * 864e5), LB17 = (id, status, created, extra) => Object.assign({ id: id, code: 'c' + id, nr: 'P-' + id, kunde: 'Kunde ' + id, status: status, progress: 0, created: created, expires: XB17.dateIn(30, jetztB17), log: {} }, extra || {});
+  const erB17 = await sp17.betriebAnlegen({ auth_user: 'u-er17', mail: 'er17@beispiel.de', name: 'Erinnerung GmbH', plz: '50667', tel_norm: '02219917', name_norm: 'erinnerung17', daten: { ap: 'Eva Erin', mail: 'er17@beispiel.de', prefs: { mail: true, remind: true }, links: [LB17('a', 'gesendet', altB17), LB17('b', 'geoeffnet', altB17), LB17('c', 'gesendet', XB17.datum(jetztB17)), LB17('d', 'arbeit', altB17, { progress: 2 }), LB17('e', 'erstellt', altB17), LB17('f', 'eingegangen', altB17)] } });
+  await sp17.betriebAnlegen({ auth_user: 'u-aus17', mail: 'aus17@beispiel.de', name: 'Ohne Erinnerung GmbH', plz: '50667', tel_norm: '02219918', name_norm: 'ohneerinnerung17', daten: { mail: 'aus17@beispiel.de', prefs: { remind: false }, links: [LB17('g', 'gesendet', altB17)] } });
+  const er1B17 = await benM17.erinnerungenSenden(k17, sp17, {}), er2B17 = await benM17.erinnerungenSenden(k17, sp17, {});
+  const erMailsB17 = postM17.attrappePost.filter((m) => /^(er17|aus17)@/.test(m.an)), erNachB17 = await sp17.betriebHolen(erB17.id || (erB17[0] || {}).id);
+  ok(er1B17.gesendet >= 1 && er2B17.gesendet === 0 && erMailsB17.length === 1 && erMailsB17[0].an === 'er17@beispiel.de' && /2 Kunden haben noch nicht gemessen/.test(erMailsB17[0].betreff) && erMailsB17[0].html.includes('/#projekt-a') && erMailsB17[0].html.includes('/#projekt-b') && !erMailsB17[0].html.includes('/#projekt-c') && !!erNachB17 && erNachB17.daten.links.filter((l) => l.erinnert).map((l) => l.id).join(',') === 'a,b', 'Erinnerung an offene Links: einmal je Projekt nach 3 Tagen, nur verschickt oder geöffnet und ohne Maß, abschaltbar');
   aus17();
 }
 
@@ -3251,7 +3926,7 @@ if (teil(18)) {
   console.log('18. KI-Auswertung kommt an, auch wenn schneller gespeichert oder gesendet wird');
   const cp18 = await import('node:child_process'), path18 = await import('node:path'), url18 = await import('node:url');
   const W18 = path18.resolve(path18.dirname(url18.fileURLToPath(import.meta.url)), '..');
-  const port18 = 9300 + Math.floor(Math.random() * 80), B18 = 'http://localhost:' + port18, stempel18 = Date.now().toString(36);
+  const port18 = await freierPort(), B18 = 'http://localhost:' + port18, stempel18 = Date.now().toString(36);
   /* eine echte Auswertung dauert 15 bis 30 Sekunden; hier 4 Sekunden je Foto, damit Speichern und Senden davor liegen */
   const kind18 = cp18.spawn(process.execPath, [path18.join(W18, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port18), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', KI_VERZOEGERUNG_MS: '4000' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind18.stderr.on('data', (d) => process.stderr.write('  [Server 18] ' + d));
@@ -3412,7 +4087,7 @@ if (teil(19)) {
   // d) im Browser: Kundenlink, Betriebsbereich, Konto auf zwei Geräten (eigener Testserver mit nachgestellter Datenbank)
   const cp19 = await import('node:child_process'), path19 = await import('node:path'), url19 = await import('node:url');
   const W19 = path19.resolve(path19.dirname(url19.fileURLToPath(import.meta.url)), '..');
-  const port19 = 9400 + Math.floor(Math.random() * 80), B19 = 'http://localhost:' + port19;
+  const port19 = await freierPort(), B19 = 'http://localhost:' + port19;
   const kind19 = cp19.spawn(process.execPath, [path19.join(W19, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port19), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind19.stderr.on('data', (d) => process.stderr.write('  [Server 19] ' + d));
   const aus19 = () => { try { kind19.kill(); } catch (e) { /* schon weg */ } };
@@ -3474,6 +4149,12 @@ if (teil(19)) {
     await foto(s2b, 'betrieb-foto-gross');
     ok(zu.kacheln === 2 && zu.geladen === 0 && klein && masse.every((m) => m.h >= 44 && m.w >= 44 && m.schrift >= 13) && masse.map((m) => m.text).join(',') === 'Von innen,Von außen', 'Betriebsbereich: zwei Fotos je Position, geladen erst beim Aufklappen; Felder mindestens 44 px, Beschriftung 13 px');
     ok(gross && blatt.titel === 'Von innen' && /12 Monate/.test(blatt.text), 'Antippen zeigt das Foto groß, mit Hinweis auf die 12 Monate');
+    /* Strang S5: Foto groß mit Zoom (Knöpfe, auch Zwei-Finger, Doppeltipp, Mausrad) und „Nächstes Foto“ */
+    await s2b.click('.sheet [data-act="foto-zoom"][data-v="1"]'); await s2b.waitForTimeout(300);
+    const zoom19 = await s2b.evaluate(() => ({ wert: (document.querySelector('.fz-wert') || {}).textContent, tr: (document.querySelector('.foto-gross.fz img') || { style: {} }).style.transform || '' }));
+    await s2b.click('.sheet [data-act="foto-naechst"]'); await s2b.waitForTimeout(300);
+    const naechst19 = await s2b.evaluate(() => ({ titel: (document.querySelector('.sheet h3') || {}).textContent || '', knopf: (document.querySelector('.sheet [data-act="foto-naechst"]') || {}).textContent || '' }));
+    ok(zoom19.wert === '160 %' && /scale\(1\.6/.test(zoom19.tr) && naechst19.titel === 'Von außen' && /2 von 2/.test(naechst19.knopf), 'Foto groß: Zoom mit Knöpfen (160 %), „Nächstes Foto“ zeigt das Foto von außen');
     const pdf = await s2b.evaluate(async (lid) => { const l = A().links.find((x) => x.id === lid); await window.Blatt.schrift(); const f = await amFotos(l), mit = amPDF(l, f), ohne = amPDF(l, {}); const zahl = async (b) => ((await b.text()).match(/\/Subtype \/Image/g) || []).length; return { n: Object.keys(f).length, mit: await zahl(mit), ohne: await zahl(ohne), breit: Math.max.apply(null, Object.values(f).map((x) => Math.max(x.w, x.h))) }; }, linkB.id);
     ok(pdf.n === 2 && pdf.mit === pdf.ohne + 2 && pdf.breit <= 960, 'PDF des Betriebs: beide Fotos stehen darin, fürs PDF verkleinert (längste Kante höchstens 960 px)');
     sauber(s2b, 'Betriebsbereich mit Fotos ohne Fehler'); await c2.close();
@@ -3608,6 +4289,98 @@ if (teil(20)) {
   const t2 = await g4.evaluate(() => document.querySelector('#w3d .w3d-sway').style.transform);
   ok(t1 === t2 && /rotateY\(0(\.0+)?deg\)/.test(t1), 'Weniger Bewegung: die WebGL-Bühne steht still (' + t1 + ')');
   sauber(g4, 'Weniger Bewegung ohne Fehler'); await c20d.close();
+  /* Das CSS-Modell aus dem Umbau (S3) in der WebGL-Bühne: Raffstore aus einzelnen Lamellen mit Fahren und Wenden, Kleinteile ohne
+     Loch, Griffe nach den Regeln, Zoom und Verschiebung samt Maßlinien, Selbsttest im Zoom */
+  const c20e = await browser.newContext(Object.assign({ hasTouch: true }, ctx20)), g5 = await neueSeite(c20e);
+  await g5.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' }); await g5.waitForTimeout(300);
+  const zeigeIn = async (pg, id, set, art, extra, ms) => { await pg.evaluate(([id, set, art, extra]) => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set || {}); if (set.teilung) w.sashes = sashesFor(set.teilung); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); if (extra === 'fsw-ohne') { w.fsw.geh = false; w.sashes = fswFluegel(w.fsw.n, w.fsw.schema, false); } if (extra === 'psk-c') { w.psk.schema = 'C'; w.sashes = pskFluegel('C', w.psk.richtung); } if (extra === 'kipp') w.sashes = [{ t: 'K', din: 'L' }]; S.win = w; S.q = id; S.selSash = -1; S.openSash = -1; S.screen = 'frage'; render(true); }, [id, set || {}, art || '', extra || '']); await pg.waitForTimeout(ms || 1200); };
+  const zeige20 = (id, set, art, extra) => zeigeIn(g5, id, set, art, extra);
+  await zeige20('sart', { sart: 'raffstore', roll: 'vorbau' });
+  const s3a = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return { gl: st.classList.contains('gl'), lam: R.filter((r) => /^lam-\d+$/.test(r)).length, fs: ['fs-l', 'fs-r', 'fs-l2', 'fs-r2', 'behang-u'].every((r) => R.includes(r)), zug: R.includes('band-l') && R.includes('band-r'), alt: R.some((r) => /^schiene-|^behang$/.test(r)), deckt: Buehne3D.pruef.deckt(st, 'band-l') }; });
+  ok(s3a.gl && s3a.lam >= 10 && s3a.fs && s3a.zug && !s3a.alt && s3a.deckt > 0.5, 'WebGL: Raffstore wie im CSS-Modell aus einzelnen Lamellen, mit Führungsschienen, Endschiene und Aufzugbändern mit eigener Farbe (' + s3a.lam + ' Lamellen)');
+  const lam20 = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const n = Buehne3D.pruef.rollen(st).filter((r) => /^lam-\d+$/.test(r)).length, z = 'lam-' + (n - 1), l0 = Buehne3D.pruef.matrix(st, 'lam-0'), lz = Buehne3D.pruef.matrix(st, z), e0 = st.querySelector('[data-r="lam-0"]'), ez = st.querySelector('[data-r="' + z + '"]'); return { n: n, rot: l0 ? l0[6] : 0, y: lz ? lz[13] : 0, w0: e0._tf && e0._tf.zt ? e0._tf.zt.d : 0, wz: ez._tf && ez._tf.zt ? [ez._tf.zt.d, ez._tf.zt.v] : [0, 0] }; });
+  const m20a = await lam20();
+  await g5.click('#w3d [data-w3d="wenden"]'); await g5.waitForTimeout(2000);
+  const m20b = await lam20();
+  await g5.click('#w3d [data-w3d="fahren"]'); await g5.waitForTimeout(3500);
+  const m20c = await lam20();
+  ok(Math.abs(m20b.rot - m20a.rot) > 0.3 && m20b.w0 === 600 && m20c.y > m20b.y + 5 && m20c.wz[0] === 1800 && m20c.wz[1] === (m20c.n - 1) * 12, 'WebGL: „Lamellen wenden“ dreht die Lamellen (0,6 s), „Herunterfahren“ fährt sie aus dem Paket (1,8 s, je Lamelle 12 ms später), wie im CSS-Modell');
+  /* Kleinteile als Flächen: Stopfen, Schlitz im Gurtwickler, Wippe und Funk-Punkt am Taster; der Wickler stanzt kein Loch */
+  await zeige20('sart', { sart: 'rollladen', roll: 'vorbau' });
+  const stopf20 = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return R.includes('stopf-l') && R.includes('stopf-r') && R.includes('behang'); });
+  await zeige20('antrieb', { sart: 'rollladen', roll: 'aufsatz', antrieb: 'gurt' }); await g5.evaluate(() => { const st = document.getElementById('w3d'); st.style.setProperty('--rx', '0deg'); st.style.setProperty('--ry', '0deg'); }); await g5.waitForTimeout(1500);
+  const wick20 = await g5.evaluate(() => { const st = document.getElementById('w3d'), P = Buehne3D.pruef.pixel(st), m = Buehne3D.pruef.mitte(st, 'an-wickler'), R = Buehne3D.pruef.rollen(st); if (!m) return { fehlt: 1 }; const x = Math.round(m[0] * P.k), y = Math.round(m[1] * P.k), i = ((P.h - 1 - y) * P.w + x) * 4; return { a: P.px[i + 3], deckt: Buehne3D.pruef.deckt(st, 'an-wickler'), schlitz: R.includes('an-schlitz'), gurt: R.includes('an-gurt') }; });
+  await zeige20('antrieb', { sart: 'raffstore', roll: 'aufsatz', antrieb: 'smart' });
+  const tast20 = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return R.includes('an-taster') && R.includes('an-wippe') && R.includes('an-funk') && !R.includes('an-wickler'); });
+  ok(stopf20 && wick20.a === 255 && wick20.deckt > 0.5 && wick20.schlitz && wick20.gurt && tast20, 'WebGL: Stopfen, Schlitz im Gurtwickler, Wippe und Funk-Punkt am Taster sind Flächen wie im CSS-Modell; Gurtwickler und Aufzugbänder decken (kein Loch)');
+  /* Griffe nach den Regeln: Stulp nur am Gehflügel (mit zweitem Griff nach Wahl), Festfeld ohne Griff und Rosette, Faltwand ohne
+     Gehflügel mit Bediengriff, PSK Schema C an beiden Schiebeflügeln, Druckknopf und Schließzylinder als eigene Flächen */
+  const gr20 = async (id, set, art, extra) => { await zeige20(id, set, art, extra); return g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); return { g: Object.keys(Buehne3D.pruef.griffe(st)).sort().join(','), r: Buehne3D.pruef.rollen(st) }; }); };
+  const stulp20 = await gr20('griff', { teilung: '2s', e_teilung: true }), stulpB20 = await gr20('griff', { teilung: '2s', e_teilung: true, stulpBed: 'griff' });
+  const fest20 = await gr20('griff', { teilung: '3' }), fsw20 = await gr20('griff', {}, 'fsw', 'fsw-ohne'), psk20 = await gr20('griff', {}, 'psk', 'psk-c');
+  const knopf20 = await gr20('griff', { teilung: '2p', griff: 'druckknopf' }), schloss20 = await gr20('griff', { teilung: '2p', griff: 'abschliessbar' });
+  ok(/handle-1/.test(stulp20.g) && !/handle-0/.test(stulp20.g) && !stulp20.r.includes('hros-0') && /handle-0/.test(stulpB20.g) && /handle-1/.test(stulpB20.g)
+    && /handle-0/.test(fest20.g) && !/handle-1/.test(fest20.g) && !fest20.r.includes('hros-1') && /handle-2/.test(fsw20.g) && !/handle-[01]/.test(fsw20.g) && /handle-1/.test(psk20.g) && /handle-2/.test(psk20.g)
+    && /hk-0/.test(knopf20.g) && !/hs-0/.test(knopf20.g) && /hs-0/.test(schloss20.g) && !/hk-0/.test(schloss20.g),
+  'WebGL: Griffe nach den Regeln (Stulp nur am Gehflügel, mit „zweiter Griff“ an beiden; Festfeld ohne Griff und Rosette; Faltwand ohne Gehflügel mit Bediengriff; PSK C an beiden Schiebeflügeln; Druckknopf und Schließzylinder) (' + [stulp20.g, stulpB20.g, fest20.g, fsw20.g, psk20.g].join(' | ') + ')');
+  /* Zoom und Verschiebung: die Öffnung in WebGL und die Maßlinien im DOM bewegen sich gleich, auch mit dem Versatz der Maßübersicht */
+  await g5.evaluate(() => { const w = demoProject()[0]; S.windows = [w]; S.win = w; S.editIdx = -1; go('ergebnis'); }); await g5.waitForTimeout(1800);
+  const lage20 = () => g5.evaluate(() => {
+    const st = document.getElementById('w3d'); st.classList.add('is-drag'); Buehne3D.pruef.pixel(st); st.classList.remove('is-drag');
+    const o = Buehne3D.pruef.oeffnung(st, false), xs = o.map((q) => q[0]), r = st.getBoundingClientRect();
+    const d = Array.from(st.querySelectorAll('.w3d-dim.h')).find((e) => getComputedStyle(e).display !== 'none'), l = d.querySelector('.w3d-dim-line').getBoundingClientRect();
+    return { dl: l.left - r.left, dr: l.right - r.left, ol: Math.min(...xs), or: Math.max(...xs), dimx: parseFloat(st.style.getPropertyValue('--dimx')) || 0, w: r.width };
+  });
+  const z0 = await lage20();
+  await g5.click('#w3d [data-w3d="plus"]'); await g5.waitForTimeout(2500);
+  const z1 = await lage20();
+  const bb20 = await (await g5.$('#w3d')).boundingBox(); await g5.mouse.move(bb20.x + bb20.width / 2, bb20.y + bb20.height / 2); await g5.mouse.wheel(40, 0); await g5.waitForTimeout(1500);
+  const z2 = await lage20();
+  const nah20 = (z) => Math.abs(z.dl - z.ol) < 4 && Math.abs(z.dr - z.or) < 4;
+  ok(nah20(z0) && nah20(z1) && nah20(z2) && Math.abs((z0.ol + z0.or) / 2 - z0.w / 2 - z0.dimx) < 25 && (z1.or - z1.ol) > (z0.or - z0.ol) * 1.4 && Math.abs((z2.ol - z1.ol) + 40) < 4, 'WebGL: Zoom (+) und Verschieben bewegen die Öffnung wie die Maßlinien, der Versatz der Maßübersicht gilt auch auf der Leinwand (' + [z0, z1, z2].map((z) => Math.round(z.ol) + '/' + Math.round(z.dl)).join(', ') + ')');
+  /* Frage nach dem Griff: die Kamera fährt auch in WebGL auf den Griff; zwei Finger zoomen */
+  await zeige20('griff', { teilung: '2p' }); await g5.waitForTimeout(2500);
+  const fok20 = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const p = Buehne3D.pruef.griffe(st)['handle-0']; return p ? { z: W3DZ.w3d.z, dx: Math.abs(p[0] - st.clientWidth / 2) / st.clientWidth, dy: Math.abs(p[1] - st.clientHeight / 2) / st.clientHeight } : null; });
+  await zeige20('material', { teilung: '2p' });
+  const cdp20 = await c20e.newCDPSession(g5), bp20 = await (await g5.$('#w3d')).boundingBox(), px20 = bp20.x + bp20.width / 2, py20 = bp20.y + bp20.height / 2;
+  const finger20 = (type, pts) => cdp20.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p, i) => ({ x: p[0], y: p[1], id: i })) });
+  await finger20('touchStart', [[px20 - 30, py20], [px20 + 30, py20]]);
+  for (let k = 1; k <= 8; k++) { await finger20('touchMove', [[px20 - 30 - k * 8, py20], [px20 + 30 + k * 8, py20]]); await g5.waitForTimeout(16); }
+  await finger20('touchEnd', []); await g5.waitForTimeout(1500);
+  const pinch20 = await g5.evaluate(() => ({ z: W3DZ.w3d.z, gl: document.getElementById('w3d').classList.contains('gl') }));
+  ok(fok20 && fok20.z > 2.4 && fok20.dx < 0.2 && fok20.dy < 0.3 && pinch20.z > 2 && pinch20.gl, 'WebGL: bei der Frage nach dem Griff fährt die Kamera auf den Griff, zwei Finger zoomen (' + JSON.stringify(fok20) + ', ' + pinch20.z.toFixed(2) + ')');
+  sauber(g5, 'S3 in der WebGL-Bühne ohne Fehler'); await c20e.close();
+  /* Dieselben Teile im CSS-Modell (Rückfall): Druckknopf und Schließzylinder in der Nabe, Stopfen, Schlitz, Wippe und Funk-Punkt als
+     Flächen; Fahren 1,8 s mit 12 ms je Lamelle, Wenden 0,6 s */
+  const c20g = await browser.newContext(ctx20), g7 = await neueSeite(c20g);
+  await g7.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const sicht20 = (pg, r) => pg.evaluate((r) => { const e = document.querySelector('#w3d [data-r="' + r + '"]'); if (!e) return null; const b = e.getBoundingClientRect(); return { op: getComputedStyle(e).opacity, bg: !!e.style.background, w: b.width, x: b.left + b.width / 2, y: b.top + b.height / 2 }; }, r);
+  await zeigeIn(g7, 'griff', { teilung: '2p', griff: 'druckknopf' }, '', '', 1600); const ck1 = [await sicht20(g7, 'hk-0'), await sicht20(g7, 'hs-0'), await sicht20(g7, 'handle-0')];
+  await zeigeIn(g7, 'griff', { griff: 'abschliessbar' }, 'hst', '', 1600); const ck2 = [await sicht20(g7, 'hs-1'), await sicht20(g7, 'handle-1')];
+  await zeigeIn(g7, 'griff', { teilung: '1', griff: 'abschliessbar' }, '', 'kipp', 1600); const ck3 = [await sicht20(g7, 'hs-0'), await sicht20(g7, 'handle-0')];
+  await zeigeIn(g7, 'sart', { sart: 'rollladen', roll: 'vorbau' }, '', '', 700); const ck4 = await sicht20(g7, 'stopf-l');
+  await zeigeIn(g7, 'antrieb', { sart: 'rollladen', roll: 'aufsatz', antrieb: 'gurt' }, '', '', 700); const ck5 = await sicht20(g7, 'an-schlitz');
+  await zeigeIn(g7, 'antrieb', { sart: 'raffstore', roll: 'aufsatz', antrieb: 'smart' }, '', '', 700); const ck6 = [await sicht20(g7, 'an-wippe'), await sicht20(g7, 'an-funk')];
+  await zeigeIn(g7, 'antrieb', { sart: 'raffstore', roll: 'aufsatz', antrieb: 'solar' }, '', '', 700); const ck7 = await sicht20(g7, 'an-taster');
+  const kl20 = ck1[0] && ck1[0].op === '1' && ck1[0].bg && ck1[1].op === '0' && Math.abs(ck1[0].x - ck1[2].x) < 2 && ck2[0].op === '1' && ck2[0].y > ck2[1].y && ck3[0].op === '1' && ck3[0].x < ck3[1].x
+    && ck4 && ck4.op === '1' && ck4.bg && ck4.w > 1 && ck5 && ck5.op === '1' && ck6[0].op === '1' && ck6[1].op === '1' && ck7.op === '0';
+  ok(kl20, 'CSS-Modell: Druckknopf und Schließzylinder sind Flächen in der Nabe (auch am Hebe-Schiebe- und Kippgriff), Stopfen, Schlitz, Wippe und Funk-Punkt ebenso; Solar ohne Wandtaster');
+  await zeigeIn(g7, 'sart', { sart: 'raffstore', roll: 'vorbau' }, '', '', 700);
+  await g7.click('#w3d [data-w3d="wenden"]'); await g7.waitForTimeout(80);
+  const tw20 = await g7.evaluate(() => getComputedStyle(document.querySelector('#w3d [data-r="lam-3"]')).transitionDuration);
+  await g7.waitForTimeout(900); await g7.click('#w3d [data-w3d="fahren"]'); await g7.waitForTimeout(80);
+  const tf20 = await g7.evaluate(() => { const cs = getComputedStyle(document.querySelector('#w3d [data-r="lam-3"]')); return [cs.transitionDuration, cs.transitionDelay]; });
+  ok(/0\.6s/.test(tw20) && /1\.8s/.test(tf20[0]) && /0\.036s/.test(tf20[1]), 'CSS-Modell: Wenden 0,6 s, Fahren 1,8 s mit 12 ms je Lamelle, wie in der WebGL-Bühne (' + tw20 + ' | ' + tf20.join(' ') + ')');
+  sauber(g7, 'Kleinteile im CSS-Modell ohne Fehler'); await c20g.close();
+  /* Selbsttest: ein gezoomter erster Blick (Glas oben links) schaltet die WebGL-Bühne nicht ab */
+  const c20f = await browser.newContext(ctx20), g6 = await neueSeite(c20f);
+  await g6.goto(BASE + '/app/?gl=voll', { waitUntil: 'networkidle' });
+  await g6.evaluate(() => { W3DZ.w3d = { z: 4, x: 0, y: 0, key: 'frage|material' }; const w = demoProject()[0]; S.win = w; S.q = 'material'; S.screen = 'frage'; render(true); }); await g6.waitForTimeout(1500);
+  /* Zusammenhang verlieren und zurückholen: danach prüft die Bühne neu, hier mit vierfachem Zoom mitten aufs Glas */
+  await g6.evaluate(async () => { const st = document.getElementById('w3d'), x = st.querySelector('canvas.w3d-gl').getContext('webgl2').getExtension('WEBGL_lose_context'); x.loseContext(); await new Promise((r) => setTimeout(r, 200)); x.restoreContext(); }); await g6.waitForTimeout(2500);
+  const st20 = await g6.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), aus: Buehne3D.pruef.aus(st), zoom: st.classList.contains('is-zoom') }; });
+  ok(st20.zoom && st20.gl && !st20.aus, 'Selbsttest nur bei 1:1: ein gezoomter erster Blick schaltet die WebGL-Bühne nicht ab');
+  sauber(g6, 'Selbsttest im Zoom ohne Fehler'); await c20f.close();
 }
 
 if (teil(21)) {
@@ -3667,7 +4440,8 @@ if (teil(21)) {
     const warte = (ms) => new Promise((f) => setTimeout(f, ms)), out = {};
     const zeige = async (set, art, rollen, psk) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set); if (psk) { w.psk.schema = psk; w.sashes = pskFluegel(psk, w.psk.richtung); } S.win = w; S.q = 'griff'; S.screen = 'frage'; render(true); await warte(250); const st = document.getElementById('w3d'); return rollen.map((r) => { const el = st.querySelector('[data-r="' + r + '"]'); return r + ':' + (el && ((el._f && el._f.W > 0.5 && el._f.H > 0.5) || (el._s && el._s.w > 0.5 && el._s.h > 0.5)) ? 1 : 0); }).join(' '); };
     out.fenster = await zeige({ leiste: 'beide', oeffner: 'kette', luefter: 'schall', baender: 'sichtbar', gitter: 'stab', fba: 'alu', fbaKappe: 'kunststoff' }, '', ['li-t', 'la-l', 'oeff', 'luef', 'bd-o-0', 'gitter', 'sa-l', 'sa-r']);
-    out.sonne = await zeige({ sart: 'raffstore', roll: 'vorbau', antrieb: 'solar' }, '', ['schiene-l', 'schiene-r', 'solar', 'behang']);
+    /* Sonnenschutz aus dem CSS-Modell (S3): Führungsschienen fs-*, beim Raffstore einzelne Lamellen und Aufzugbänder */
+    out.sonne = await zeige({ sart: 'raffstore', roll: 'vorbau', antrieb: 'solar' }, '', ['fs-l', 'fs-r', 'solar', 'lam-0', 'band-l']);
     out.klapp = await zeige({ sart: 'klappladen', roll: 'keiner' }, '', ['kl-l', 'kl-r']);
     out.balkon = await zeige({ etage: 'og', absturz: 'gelaender', paneel: 'paneel' }, 'balkon', ['gel', 'gel-h', 'pan-i-0', 'riegel-i-0']);
     out.psk = await zeige({}, 'psk', ['sash-3'], 'C');
@@ -3677,9 +4451,311 @@ if (teil(21)) {
   });
   const alle21 = Object.keys(teile21).filter((k) => k !== 'pskT').map((k) => teile21[k]).join(' ');
   ok(!/:0/.test(alle21), '3-D: Abdeckleisten, Fensteröffner, Lüfter, Bänder, Gitter, Endkappen, Schienen, Solarmodul, Klappläden, Geländer, Paneel, PSK mit 4 Teilen und Dreieck haben Flächen' + (/:0/.test(alle21) ? ' (' + alle21 + ')' : ''));
-  const kvd21 = await a21.evaluate(async () => { const w = demoProject()[0]; w.kvd = 'kvd'; S.win = w; S.q = 'griff'; render(true); await new Promise((f) => setTimeout(f, 300)); const i = w.sashes.findIndex((x) => x.t === 'DK'); oeffnungZeigen(i); await new Promise((f) => setTimeout(f, 80)); const sa = document.querySelector('#w3d [data-r="sash-' + i + '"]'); return sa.querySelector('.w3d-handle').getAnimations().map((a) => a.animationName).join(); });
+  const kvd21 = await a21.evaluate(async () => { const w = demoProject()[0]; w.kvd = 'kvd'; S.win = w; S.q = 'griff'; render(true); await new Promise((f) => setTimeout(f, 300)); const i = w.sashes.findIndex((x) => x.t === 'DK'); oeffnungZeigen(i); await new Promise((f) => setTimeout(f, 80)); const sa = document.querySelector('#w3d [data-r="sash-' + i + '"]'); return sa.querySelector('.w3d-handle').getAnimations().map((a) => a.animationName).filter(Boolean).join(); }); // Übergänge (Zoom auf den Griff, S3) haben keinen Namen
   ok(kvd21 === 'w3d-griff-kvd', 'Kipp vor Dreh: die Vorführung dreht den Griff erst waagerecht (kippen), dann nach oben (drehen)');
+  /* Angleich an den Umbau: Kapitel und Stufe kommen aus modell.js, der Text-Export der App ordnet Detailzeilen bei ihrer Gruppe ein */
+  const sr21 = await a21.evaluate(() => { const w = Object.assign(demoProject()[0], { gitter: 'stab', leiste: 'beide', dicht: 'grau', sprFarbe: 'weiss', bars: [{ s: 0, d: 'h', p: 0.5 }] }); const k = specRows(w).map((r) => r.k); return { ab: QSTUFE === AW.FRAGE.stufe && QKAP === AW.FRAGE.kap, k: k, notiz: AW.notizStelle('griffM') }; });
+  const ix21 = (n) => sr21.k.indexOf(n);
+  ok(sr21.ab && ix21('Fenstergitter') > ix21('Einbruchschutz') && ix21('Fenstergitter') < ix21('Sonnenschutz') && ix21('Dichtung') > ix21('Sprossen') && ix21('Dichtung') < ix21('Griff') && ix21('Abdeckleisten') === ix21('Montage') + 1 && sr21.notiz === 'Griffmodell', 'Kapitel und Stufen aus AW.FRAGE; Markdown- und HTML-Export ordnen Detailzeilen bei ihrer Gruppe ein (Gitter nach dem Einbruchschutz, Dichtung bei Fenster, Abdeckleisten nach der Montage)');
+  /* Tiefe je Fenster: Pos. 1 im Wichtigsten gespeichert, danach Pos. 2 mit „Alles im Detail“. Pos. 1 behält ihre Tiefe: die nicht gefragte
+     Fensterbank außen ist kein „Weiß ich noch nicht“ und kein offener Punkt, der Kopf nennt beide Tiefen; eine andere Tiefe zählt nicht als Änderung */
+  const tj21 = await a21.evaluate(() => {
+    S.windows = []; S.proj.tiefe = 'kurz'; newWin(); Object.assign(S.win, { name: 'Küche', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
+    S.proj.tiefe = 'genau'; newWin(); Object.assign(S.win, { name: 'Bad', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
+    const ws = S.windows, kl = AW.klaerung(ws, S.proj).map((r) => r.k + ':' + r.v).join('|');
+    const k1 = AW.wuensche(ws[0], S.proj), k2 = AW.wuensche(ws[1], S.proj);
+    const fp = aenderungFp(Object.assign({}, ws[0], { tiefe: 'genau' })) === aenderungFp(ws[0]);
+    const vor = { t: ws.map((w) => w.tiefe).join(), offen1: k1.offen.join(), offen2: k2.offen.join(), tiefe1: k1.tiefe, tiefe2: k2.tiefe, kl: kl, kopf: AW.tiefeKopf(ws, S.proj, true), kunde: AW.tiefeKopf(ws, S.proj, false), fp: fp };
+    S.editIdx = 0; S.win = kopie(ws[0]); saveWin(); // Pos. 1 mit „Alles im Detail“ erneut gespeichert: die tiefste Tiefe zählt, keine Änderung
+    return Object.assign(vor, { nach: S.windows[0].tiefe, aend: S.windows[0].aend });
+  });
+  const tjOk21 = tj21.t === 'kurz,genau' && !/Fensterbank außen/.test(tj21.offen1) && /Fensterbank außen/.test(tj21.offen2) && tj21.tiefe1 === 'kurz' && tj21.tiefe2 === 'genau' && !/Küche[^|]*Fensterbank außen/.test(tj21.kl) && tj21.kopf === 'Das Wichtigste (Pos. 1), Alles im Detail (Pos. 2); Weiteres nach Ihrem Standard' && /Standard des Fensterbauers$/.test(tj21.kunde) && tj21.fp && tj21.nach === 'genau' && !tj21.aend;
+  ok(tjOk21, 'Tiefe je Fenster: ein Fenster im Wichtigsten gespeichert behält seine Tiefe, wenn die nächste „Alles im Detail“ ist (keine ungefragte Fensterbank als „Weiß ich noch nicht“), der Kopf nennt beide Tiefen, erneut gespeichert zählt die tiefste, ohne Änderung' + (tjOk21 ? '' : ' (' + JSON.stringify(tj21) + ')'));
   sauber(a21, 'Detailtiefe ohne Fehler'); await ctx21.close();
+}
+
+/* ---------- 22. Konfigurator ohne Hürden: erster Tipp zählt, Schilder in der Bühne, Knöpfe am Modell, ein grünes Wort, Zurück, Blätter ---------- */
+if (teil(22)) {
+  console.log('22. Konfigurator ohne Hürden (Nacharbeit App)');
+  const ctx = await browser.newContext(telefon), p = await neueSeite(ctx);
+  await p.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const frage20 = async (id, set) => { await p.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.editIdx = -1; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await p.waitForTimeout(450); };
+  // Erster Tipp zählt: Feld fokussieren, tippen, EIN tap() auf den Hauptknopf (vorher tauschte das Neuzeichnen beim Verlassen den Knopf aus)
+  await frage20('notiz', { name: 'Küche' });
+  await p.tap('#t-notiz'); await p.keyboard.type('Bitte vor dem Termin anrufen.'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
+  const t1 = await p.evaluate(() => ({ screen: S.screen, notiz: (S.windows[S.windows.length - 1] || {}).notiz }));
+  await frage20('fa', { name: 'Küche' });
+  await p.tap('#t-wunschA'); await p.keyboard.type('wie Garagentor'); await p.tap('.qnav .btn.primary'); await p.waitForTimeout(600);
+  const t2 = await p.evaluate(() => ({ q: S.q, wunschA: S.win.wunschA }));
+  await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { neu: true, art: 'fest' }); S.win = w; S.editIdx = -1; go('planmasse'); }); await p.waitForTimeout(400);
+  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2000'); await p.tap('.bb .btn.primary'); await p.waitForTimeout(600);
+  const t3 = await p.evaluate(() => ({ screen: S.screen, wm: S.win.mo.wm }));
+  await p.evaluate(() => go('planmasse')); await p.waitForTimeout(300);
+  await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2100'); await p.tap('#p-h'); await p.waitForTimeout(300);
+  const t3b = await p.evaluate(() => ({ fokus: document.activeElement && document.activeElement.id, wm: S.win.mo.wm }));
+  ok(t1.screen === 'fertig' && /Termin/.test(t1.notiz || '') && t2.q !== 'fa' && t2.wunschA === 'wie Garagentor' && t3.screen === 'ergebnis' && t3.wm === 2000 && t3b.fokus === 'p-h' && t3b.wm === 2100,
+    'Erster Tipp zählt nach einem Textfeld: Fenster speichern, Weiter (eigene Farbe), Weiter zum Ergebnis; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
+  // Maßschilder in der Bühne (mind. 8 px Rand), auch bei breiten Elementen; Zoom in der Übersicht unten rechts, nichts überdeckt sich
+  const buehne = () => p.evaluate(() => {
+    const st = document.getElementById('w3d'); if (!st) return { fehlt: 1 };
+    const b = st.getBoundingClientRect(), sicht = (e) => { if (!e || e.hidden || e.closest('[hidden]')) return false; const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden') return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    const t = [];
+    st.querySelectorAll('.w3d-knopf').forEach((e) => { if (sicht(e)) t.push(['knopf ' + e.getAttribute('data-w3d'), e.getBoundingClientRect()]); });
+    const h = st.querySelector('.w3d-hint'); if (sicht(h) && h.textContent.trim()) t.push(['hint', h.getBoundingClientRect()]);
+    st.querySelectorAll('.w3d-dim-lab').forEach((e) => { if (sicht(e) && getComputedStyle(e.closest('.w3d-dim')).display !== 'none') t.push(['schild ' + e.textContent, e.getBoundingClientRect()]); });
+    const fehler = [];
+    t.forEach(([n, a], i) => { if (a.left < b.left + (/^schild/.test(n) ? 8 : 4) || a.right > b.right - (/^schild/.test(n) ? 8 : 4) || a.top < b.top + 2 || a.bottom > b.bottom - 2) fehler.push(n + ' am Rand'); t.slice(i + 1).forEach(([m, c]) => { if (Math.min(a.right, c.right) - Math.max(a.left, c.left) > 1 && Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top) > 1) fehler.push(n + ' über ' + m); }); });
+    return { h: Math.round(b.height), fehler: fehler };
+  });
+  const schilder = [];
+  for (const [art, W, H, neu] of [['fenster', 1230, 1410, false], ['fest', 2400, 1400, false], ['hst', 3100, 2300, false], ['fsw', 4200, 2300, false], ['hst', 2600, 2200, true], ['fsw', 3600, 2200, true]]) for (const scr of neu ? ['planmasse', 'ergebnis'] : ['ergebnis']) {
+    await p.evaluate(([art, W, H, neu, scr]) => { const w = demoProject()[0]; Object.assign(w, { art: art, neu: neu }); planMasse(w, 'w', W); planMasse(w, 'h', H); S.win = w; S.editIdx = -1; go(scr); if (scr === 'planmasse') { planMasse(S.win, 'w', W); planMasse(S.win, 'h', H); render(); } }, [art, W, H, neu, scr]);
+    await p.waitForTimeout(1500); const m = await buehne(); if (m.fehler.length) schilder.push(art + ' ' + W + ' ' + scr + ': ' + m.fehler.join(', '));
+  }
+  for (const gleich of [false, true]) { // Übersicht nach den Rändern: gleiche Maße einmal, ungleiche an den äußeren Linien
+    await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; go('rest'); S.rest.i = 4; render(); }, gleich);
+    await p.waitForTimeout(1800); const m = await buehne(); if (m.fehler.length) schilder.push('Ränder ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
+  }
+  ok(!schilder.length, 'Maße am Modell: alle Schilder mit Abstand in der Bühne, auch bei 4,20 m breiten Elementen und nach den Rändern, nichts überdeckt sich' + (schilder.length ? ' (' + schilder.join(' | ') + ')' : ''));
+  // Sonnenschutz: Knöpfe unten rechts in einer Reihe, Beschriftung oben links, Bühne mindestens 220 px, keine Überdeckung (auch klein)
+  const sonne = [];
+  for (const vp of [[390, 844], [320, 640]]) {
+    await p.setViewportSize({ width: vp[0], height: vp[1] });
+    for (const [q, set] of [['sart', { sart: 'raffstore', roll: 'vorbau' }], ['sfarbe', { sart: 'raffstore', roll: 'vorbau' }], ['antrieb', { sart: 'raffstore', roll: 'aufsatz' }], ['ifarbe', { iart: 'plissee' }]]) {
+      await frage20(q, set); await p.waitForTimeout(500); const m = await buehne();
+      if (m.h < 219 || m.fehler.length) sonne.push(vp[0] + ' ' + q + ': ' + m.h + ' px ' + m.fehler.join(', '));
+    }
+    await p.tap('#w3d [data-w3d="fahren"]'); await p.tap('#w3d [data-w3d="plus"]'); await p.waitForTimeout(700);
+    const m = await buehne(); if (m.fehler.length) sonne.push(vp[0] + ' gefahren und gezoomt: ' + m.fehler.join(', '));
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
+  const wenden = await p.evaluate(() => { const b = document.querySelector('#w3d [data-w3d="wenden"]'); return b ? b.getAttribute('aria-label') : null; });
+  ok(!sonne.length, 'Sonnenschutz: Bühne mindestens 220 px, Knöpfe, Zoom und Beschriftung überdecken sich nicht (320 und 390 px breit)' + (sonne.length ? ' (' + sonne.join(' | ') + ')' : ''));
+  // Schmale Telefone: die Eyebrow läuft nicht unter i und „Notiz“
+  await p.setViewportSize({ width: 320, height: 640 });
+  const eyeUeber = [];
+  for (const scr of ['start', 'fotos', 'ergebnis', 'anfrage', 'anfrage2']) {
+    await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150);
+    const u = await p.evaluate(() => { const e = document.querySelector('.hd-zeile .eyebrow'), t = document.querySelector('.hd-zeile .hd-tools'); if (!e || !t) return 0; const rg = document.createRange(); rg.selectNodeContents(e); return Math.max(...Array.from(rg.getClientRects()).map((x) => x.right)) - t.getBoundingClientRect().left; });
+    if (u > 0) eyeUeber.push(scr + ' ' + Math.round(u) + ' px');
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
+  ok(!eyeUeber.length, 'Bei 320 px Breite läuft die Eyebrow nicht unter die Knöpfe i und Notiz' + (eyeUeber.length ? ' (' + eyeUeber.join(', ') + ')' : ''));
+  // Genau ein grünes Wort je Titel (Schritte und alle Fragen)
+  const titel = [];
+  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
+  for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
+  const ohneAk = titel.filter((x) => x[1] !== 1).map((x) => x[0]);
+  ok(titel.length > 30 && !ohneAk.length, 'Jeder Schritt- und Fragentitel hat genau ein grünes Wort (' + titel.length + ' Titel' + (ohneAk.length ? ', ohne: ' + ohneAk.join(', ') : '') + ')');
+  // Blätter: linksbündig, Kicker grün, ein grünes Wort; Fokus ins Blatt, Tab bleibt drin, zurück an den Auslöser; Textfeld der Notiz mit Namen
+  const blatt = () => p.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); if (!sh) return null; const h = sh.querySelector('h2'), e = sh.querySelector('.eyebrow'); return { links: getComputedStyle(h).textAlign === 'left', ak: h.querySelectorAll('.ak').length, kicker: e.classList.contains('kicker'), drin: sh.contains(document.activeElement) }; });
+  const fokusAct = () => p.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-act'));
+  const tabDrin = async (n) => { for (let i = 0; i < n; i++) { await p.keyboard.press(i % 5 === 2 ? 'Shift+Tab' : 'Tab'); if (!await p.evaluate(() => document.querySelector('.sheet[aria-modal="true"]').contains(document.activeElement))) return false; } return true; };
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Bad'; S.windows = [demoProject()[1]]; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); }); await p.waitForTimeout(300);
+  await p.focus('.hd [data-act="notiz-auf"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
+  const nz = await blatt(), nzName = await p.getAttribute('#nz-text', 'aria-label'); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const nzZu = await fokusAct();
+  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
+  const wo = await blatt(), woTab = await tabDrin(25); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const woZu = await fokusAct();
+  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300); await p.click('.sheet [data-act="wohin-liste"]'); await p.waitForTimeout(300);
+  const vl = await blatt(), vlTab = await tabDrin(20); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const vlZu = await fokusAct();
+  await p.click('.hdr-gl'); await p.waitForTimeout(300); const gi = await blatt(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+  ok([nz, wo, vl, gi].every((b) => b && b.links && b.ak === 1 && b.kicker && b.drin), 'Blätter (Notiz, Übersicht, Verlassen, Begriffe): linksbündig, Kicker grün, ein grünes Wort, Fokus im Blatt');
+  ok(/^Deine Notiz zu /.test(nzName || '') && nzZu === 'notiz-auf' && woTab && woZu === 'wohin' && vlTab && vlZu === 'wohin', 'Notiz-Textfeld hat einen Namen; Tab bleibt in Übersicht und Verlassen-Blatt; Esc gibt den Fokus an den Auslöser zurück (' + [nzZu, woZu, vlZu].join(', ') + ')');
+  // Zurück nach „Wünsche ändern“: über die Fragen zur Fensterseite, dann zur Liste (nicht durch alle Messschritte)
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Wohnzimmer links'; S.windows = [w]; S.win = JSON.parse(JSON.stringify(w)); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
+  await p.click('[data-act="wuensche"]'); await p.waitForTimeout(300);
+  for (let i = 0; i < 3; i++) { await p.click('.qnav .btn.primary'); await p.waitForTimeout(300); }
+  const spur = [];
+  for (let i = 0; i < 20; i++) { await p.evaluate(() => history.back()); await p.waitForTimeout(500); const st = await p.evaluate(() => S.screen); spur.push(st); if (st === 'home') break; }
+  await p.evaluate(() => { S.win = JSON.parse(JSON.stringify(S.windows[0])); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
+  await p.click('[data-act="wuensche"]'); await p.waitForTimeout(300); await p.evaluate(() => { S.win.name = 'Wohnzimmer rechts'; });
+  await p.evaluate(() => history.back()); await p.waitForTimeout(500); const geaendert = await p.evaluate(() => !!S.verlassen && S.screen === 'frage');
+  ok(spur.length <= 5 && spur[spur.length - 2] === 'fertig' && spur[spur.length - 1] === 'home' && geaendert, 'Zurück-Taste nach „Wünsche ändern“: in ' + spur.length + ' Schritten über die Fensterseite zur Liste; mit Änderung fragt erst das Blatt „Noch nicht gespeichert“');
+  /* Angleich an #46 (Strang B): ein Kapitelkonzept, Tiefe neben der Notiz, Notizen, Begriffe und RAL bei den Detailangaben,
+     Zifferntasten für die neuen Maße, Stulp mit Seitenteilen, Standard mit Namen, keine Gesamtübersicht, Wege mit Tiefe und „Mehr zu“ */
+  const frageB = async (id, set, tiefe) => { await p.evaluate(([id, set, tiefe]) => { S.verlassen = null; S.wohin = false; S.notiz = null; S.gloss = null; S.glossIndex = false; const w = demoProject()[0]; Object.assign(w, set || {}); if (w.seiten) seitenAnwenden(w); S.proj.tiefe = tiefe || 'normal'; S.win = w; S.editIdx = -1; S.q = id; S.selSash = 0; S.qMass = null; S.screen = 'frage'; render(true); }, [id, set || {}, tiefe || '']); await p.waitForTimeout(450); };
+  const leisteZeigt = () => p.evaluate(() => { const l = document.querySelector('.qleiste'), a = l && l.querySelector('[aria-current]'); if (!a) return false; const r = l.getBoundingClientRect(), b = a.getBoundingClientRect(); return b.left >= r.left - 1 && b.right <= r.right + 1; });
+  await frageB('material', {}, 'normal');
+  const kl = await p.evaluate(() => { const l = document.querySelector('.qleiste'), b = Array.from(l.querySelectorAll('.ql')); return { label: l.getAttribute('aria-label'), namen: b.map((x) => x.textContent).join('|'), jetzt: b.filter((x) => x.getAttribute('aria-current') === 'step').map((x) => x.textContent).join(), haken: b.filter((x) => x.classList.contains('fertig')).length, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, tools: Array.from(document.querySelectorAll('.qdock .hd-tools > *')).map((x) => x.className.split(' ')[0]).join(',') }; });
+  const kl0 = await leisteZeigt();
+  await p.click('.qleiste .ql[data-kap="sonne"]'); await p.waitForTimeout(500);
+  const kl2 = await p.evaluate(() => { const c = qCurrent(), kicker = document.querySelector('.qdock .hd .eyebrow').textContent, jetzt = document.querySelector('.qleiste [aria-current]').textContent; S.wohin = true; render(); const wo = Array.from(document.querySelectorAll('.wo-abschnitte .chip')).map((x) => x.textContent).join('|'); S.wohin = false; render(); return { q: S.q, erste: c.list.find((q) => q.kap === 'sonne').id, kicker: kicker, jetzt: jetzt, wohin: wo }; });
+  const kl3 = await leisteZeigt();
+  ok(kl.label === 'Kapitel der Wünsche' && kl.namen === 'Lage|Aufbau|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Einbau' && kl.jetzt === 'Material & Farbe' && kl.haken === 2 && /^Material & Farbe · 1 von \d+$/.test(kl.kicker) && kl.tools === 'qtiefe,nz-knopf' && kl0 &&
+    kl2.q === kl2.erste && /^Sonnenschutz · 1 von \d+$/.test(kl2.kicker) && kl2.jetzt === 'Sonnenschutz' && kl3 && kl2.wohin === kl.namen,
+    'Ein Kapitelkonzept: Leiste mit den sieben Kapiteln, erledigte mit Haken, das aktuelle im Blick; Kicker „Kapitel · i von n“ mit Tiefe-Pille und Notiz daneben; Antippen springt auf die erste sichtbare Frage, die Übersicht zeigt dieselben Kapitel (' + kl.kicker + ' → ' + kl2.kicker + ')');
+  // Tiefe-Pille: Wahl öffnen, Tiefe ändern, mit der Zurück-Taste des Browsers zurück zur Frage
+  await p.click('.qdock .qtiefe'); await p.waitForTimeout(400);
+  const tp1 = await p.evaluate(() => ({ q: S.q, sub: (document.querySelector('.qdock .hd > p') || {}).textContent || '' }));
+  await p.click('[data-act="tiefe"][data-v="genau"]'); await p.waitForTimeout(300);
+  await p.evaluate(() => history.back()); await p.waitForTimeout(500);
+  const tp2 = await p.evaluate(() => ({ q: S.q, tiefe: S.proj.tiefe, screen: S.screen }));
+  ok(tp1.q === 'tiefe' && /nach seinem Standard/.test(tp1.sub) && tp2.q === kl2.q && tp2.tiefe === 'genau' && tp2.screen === 'frage', 'Tiefe-Pille: öffnet die Wahl, die Zurück-Taste des Browsers führt zur Frage zurück, die neue Tiefe bleibt');
+  // Notiz an einer Detailfrage (Griffmodell) und Beschriftung jeder Detailangabe beim Betrieb
+  await frageB('griffM', {}, 'genau');
+  await p.click('.qdock .nz-knopf'); await p.waitForSelector('#nz-text');
+  const nzB = await p.evaluate(() => ({ kicker: document.querySelector('.nz-blatt .eyebrow').textContent, platz: document.getElementById('nz-text').getAttribute('placeholder') }));
+  await p.fill('#nz-text', 'Wie die Türdrücker im Flur'); await p.click('[data-act="notiz-sichern"]'); await p.waitForTimeout(300);
+  const nzB2 = await p.evaluate(() => ({ n: (S.win.notizen || {}).griffM, da: document.querySelector('.qdock .nz-knopf').classList.contains('da'), stelle: AW.notizStelle('griffM'), tiefe: AW.notizStelle('tiefe'), roh: AW.DETAIL.filter((d) => AW.notizStelle(d.k) === d.k).map((d) => d.k), gruppe: AW.wuensche(Object.assign(AW.mk({}), { notizen: { griffM: 'x', sfK: 'y' } }), {}).gruppen.filter((g) => g.notizen.length).map((g) => g.id).join() }));
+  ok(/Notiz · Griffmodell/.test(nzB.kicker) && /Türdrücker/.test(nzB.platz) && nzB2.n === 'Wie die Türdrücker im Flur' && nzB2.da && nzB2.stelle === 'Griffmodell' && nzB2.tiefe === 'Planungstiefe' && !nzB2.roh.length && nzB2.gruppe === 'beschlag,sonne',
+    'Notiz an jeder Detailfrage: „Griffmodell“ mit eigenem Beispiel, am Knopf erkennbar; jede Detailangabe und die Planungstiefe haben eine Beschriftung, beim Betrieb in ihrer Gruppe (' + nzB2.gruppe + ')' + (nzB2.roh.length ? ' (ohne: ' + nzB2.roh.join(', ') + ')' : ''));
+  // Jede Frage bei „Alles im Detail“ hat ihr i, in allen Bauarten und mit allen Detailangaben
+  const iB = await p.evaluate(() => {
+    const ohne = [], gesehen = new Set(); S.proj.tiefe = 'genau'; S.editIdx = -1; S.screen = 'frage';
+    const varianten = [['fenster', {}], ['fenster', { sart: 'raffstore', roll: 'vorbau', antrieb: 'motor', etage: 'og', bru: 500, absturz: 'gelaender', insekt: 'spann', glasfn: ['sicht'], material: 'holz', fba: 'alu', fbi: 'werzalit', bars: 1 }], ['fenster', { sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen' }], ['fenster', { sart: 'screen', roll: 'aufsatz' }], ['fenster', { sart: 'klappladen' }], ['fenster', { teilung: '2s', seiten: 'beide' }], ['balkon', { etage: 'og', absturz: 'glas' }], ['hst', {}], ['psk', {}], ['fsw', {}], ['fest', {}]];
+    varianten.forEach(([art, set]) => {
+      const w = baseWin(); artSetzen(w, art); Object.assign(w, set, { name: 'X', offen: {} }); if (set.bars) { w.bars = []; barCount(w, 'v', 1); } if (w.teilung === '2s') w.sashes = sashesFor('2s'); if (w.seiten) seitenAnwenden(w); S.win = w;
+      qSichtbar(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg'), k = b && b.getAttribute('data-k'); gesehen.add(q.id); if (!k || !GLOSS[k] || !/^Erklärung: /.test(b.getAttribute('aria-label') || '')) ohne.push(art + ':' + q.id); });
+    });
+    return { ohne: ohne, fehlt: AW.DETAIL.map((d) => d.k).filter((k) => !gesehen.has(k)), n: gesehen.size, gloss: Object.keys(GLOSS).length, optG: [].concat.apply([], Object.keys(OPT_G).map((g) => Object.keys(OPT_G[g]).map((k) => OPT_G[g][k]))).filter((x) => !GLOSS[x]) };
+  });
+  ok(!iB.ohne.length && !iB.fehlt.length && !iB.optG.length && iB.gloss >= 120, 'Jede Frage bei „Alles im Detail“ hat ihr i mit Eintrag im Verzeichnis (' + iB.n + ' Fragen in elf Bauarten, alle ' + iB.gloss + ' Einträge, auch alle Detailangaben)' + (iB.ohne.length + iB.fehlt.length + iB.optG.length ? ' (' + iB.ohne.concat(iB.fehlt, iB.optG).slice(0, 10).join(', ') + ')' : ''));
+  // RAL-Farbwahl bei den neuen Farbangaben: Kasten über „Alle Farben“, die Farbe im Modell und im Blatt, Standard wieder wählbar
+  await frageB('sfK', { sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen', offen: {} }, 'genau');
+  await p.click('.qpanel [data-farbblatt="sfK"]'); await p.waitForSelector('.fb .fb-blatt');
+  await p.fill('#fb-such', '7016'); await p.waitForTimeout(200); await p.click('.fb .fb-f[data-v="7016"]'); await p.waitForTimeout(300);
+  const rz1 = await p.evaluate(() => ({ v: S.win.sfK, wahl: document.querySelector('.fb-wahl-t b').textContent, ton: sonneTeilFarbe(S.win, 'K')[0], hex: RAL.eintrag('7016').hex, text: AW.detailText(S.win, 'sfK'), std: !!document.querySelector('.fb [data-fb="std"]') }));
+  await p.click('.fb .fb-fertig'); await p.waitForTimeout(300);
+  const rz2 = await p.evaluate(() => ({ blatt: !!document.querySelector('.fb'), gedrueckt: (document.querySelector('.qpanel .fw-raster .qsw[aria-pressed="true"] .n') || {}).textContent, std: document.querySelector('.qpanel .qstd').getAttribute('aria-pressed') }));
+  const rz3 = await p.evaluate(() => {
+    const out = {}; S.proj.tiefe = 'genau'; const w = baseWin(); Object.assign(w, { name: 'X', offen: {}, sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen', etage: 'og', bru: 500, absturz: 'gelaender', insekt: 'spann', fba: 'alu', fbi: 'werzalit' }); barCount(w, 'v', 1); S.win = w; S.screen = 'frage';
+    const zeig = (k) => { S.q = k; render(true); const z = Array.from(document.querySelectorAll('.qpanel .fw-raster .qsw')); out[k] = (z.length && z.every((b) => b.querySelector('.n') && b.querySelector('.n').textContent.trim() && b.getBoundingClientRect().height >= 44) ? 'n' : '-') + (document.querySelector('.qpanel [data-farbblatt="' + k + '"]') ? '+' : ''); };
+    ['sfK', 'sfS', 'gelFarbe', 'insFarbe', 'fbaFarbe', 'dicht', 'ahFarbe', 'sprFarbe', 'fbiFarbe'].forEach(zeig);
+    S.win = Object.assign(baseWin(), { name: 'X', offen: {}, sart: 'klappladen', roll: 'keiner' }); zeig('klFarbe');
+    return Object.keys(out).map((k) => k + out[k]).join(' ');
+  });
+  ok(rz1.v === '7016' && rz1.wahl === 'Anthrazitgrau' && rz1.ton === rz1.hex && /Anthrazitgrau/.test(rz1.text) && rz1.std && !rz2.blatt && rz2.gedrueckt === 'RAL 7016' && rz2.std === 'false' &&
+    rz3 === 'sfKn+ sfSn+ gelFarben+ insFarben+ fbaFarben+ dichtn ahFarben sprFarben fbiFarben klFarben+',
+    'RAL-Farbwahl bei den Detailfarben: Kasten über „Alle Farben“ in RAL 7016, so im Modell und im Blatt; Kasten, Schienen, Klappläden, Geländer, Insektenschutz und Fensterbank außen mit Farbblatt, alle Farben mit Namen (' + rz3 + ')');
+  // Zifferntasten für die neuen Maße: Ausladung der Fensterbank (dazu Seitenteile, Paneel, Unterlicht)
+  await frageB('fbaTiefe', { fba: 'alu', offen: {} }, 'genau');
+  const zt0 = await p.evaluate(() => { const r = document.getElementById('w3d').getBoundingClientRect(); return { top: Math.round(r.top), h: Math.round(r.height), wert: document.querySelector('.qpanel .st-wert').textContent }; });
+  await p.click('.qpanel .st-wert'); await p.waitForTimeout(400);
+  const zt1 = await p.evaluate(() => { const r = document.getElementById('w3d').getBoundingClientRect(), k = Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')); return { top: Math.round(r.top), h: Math.round(r.height), reihe: k.slice(9).join(','), nav: !!document.querySelector('.qnav'), fokus: document.activeElement && document.activeElement.id, ziele: Array.from(document.querySelectorAll('.keypad button')).every((b) => b.getBoundingClientRect().height >= 44), quer: document.documentElement.scrollWidth <= innerWidth }; });
+  for (const z of ['1', '9', '0']) await p.click('.keypad [data-v="' + z + '"]');
+  await p.click('.keypad [data-v="ok"]'); await p.waitForTimeout(300);
+  const zt2 = await p.evaluate(() => ({ v: S.win.fbaTiefe, wert: document.querySelector('.qpanel .st-wert').textContent, nav: !!document.querySelector('.qnav'), stepper: Array.from(document.querySelectorAll('.qpanel .stepper button')).every((b) => b.getBoundingClientRect().height >= 44) }));
+  await p.click('.qpanel .st-wert'); await p.waitForTimeout(300); await p.keyboard.type('999'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
+  const zt3 = await p.evaluate(() => ({ v: S.win.fbaTiefe, msg: document.getElementById('qm-h').textContent, offen: !!S.qMass }));
+  await p.click('.keypad [data-v="zurueck"]'); await p.waitForTimeout(300);
+  const zt4 = await p.evaluate(() => ({ offen: !!S.qMass, v: S.win.fbaTiefe, q: S.q }));
+  await p.click('.qpanel .st-wert'); await p.waitForTimeout(300); await p.evaluate(() => history.back()); await p.waitForTimeout(500);
+  const zt5 = await p.evaluate(() => ({ offen: !!S.qMass, q: S.q, screen: S.screen }));
+  const zt6 = await p.evaluate(() => { const out = []; S.proj.tiefe = 'genau'; [['seiten', { seiten: 'beide' }, ''], ['paneel', { paneel: 'paneel', paneelH: 400 }, 'balkon'], ['ul', { ul: true, ulA: 'glas', ulH: 400 }, '']].forEach(([q, set, art]) => { const w = baseWin(); if (art) artSetzen(w, art); Object.assign(w, { name: 'X' }, set); if (w.seiten) seitenAnwenden(w); S.win = w; S.q = q; S.screen = 'frage'; render(true); const b = document.querySelector('.qpanel .st-wert'); out.push(q + ':' + (b ? b.getAttribute('data-f') : '-')); }); return out.join(' '); });
+  ok(zt0.wert === 'Standard' && zt1.top === zt0.top && zt1.h === zt0.h && zt1.reihe === 'zurueck,0,del,ok' && !zt1.nav && zt1.fokus === 'qm-ein' && zt1.ziele && zt1.quer && zt2.v === 190 && zt2.wert === '190 mm' && zt2.nav && zt2.stepper &&
+    zt3.v === 190 && /zwischen 80 und 400/.test(zt3.msg) && zt3.offen && !zt4.offen && zt4.v === 190 && zt4.q === 'fbaTiefe' && !zt5.offen && zt5.q === 'fbaTiefe' && zt5.screen === 'frage' && zt6 === 'seiten:seitenB paneel:paneelH ul:ulH',
+    'Zifferntasten für die neuen Maße: Tipp auf den Wert im Stufenregler (− und + bleiben 44 px), unten Pfeil zurück, 0, Löschen, „Übernehmen“; das Modell bleibt an seinem Platz; außerhalb von 80 bis 400 mm ein Hinweis; Pfeil und Zurück-Taste schließen ohne Änderung; ebenso bei Seitenteilen, Paneel und Unterlicht (' + zt6 + ')');
+  // Stulp mit Seitenteilen: Kapitel, Stufe, Aktion lässt die Seitenteile außen; „Gestaltung übernehmen“ nimmt den Gehflügel und die Wunschfarben mit
+  await p.evaluate(() => { S.proj.tiefe = 'genau'; const w = baseWin(); Object.assign(w, { name: 'Wohnen', offen: {}, teilung: '2s', sashes: sashesFor('2s'), seiten: 'beide', seitenB: 400 }); seitenAnwenden(w); barCount(w, 'v', 1); S.win = w; S.editIdx = -1; S.q = 'stulp'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(300);
+  const st0 = await p.evaluate(() => { const c = qCurrent(), ids = c.alle.map((q) => q.id); return { kap: c.q.kap, s: c.q.s, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, bed: ids.indexOf('stulpBed') > ids.indexOf('stulp') }; });
+  await p.click('[data-act="stulp"][data-v="L"]'); await p.waitForTimeout(400);
+  const st1 = await p.evaluate(() => { const w = S.win; return { folge: w.sashes.map((x) => (x.st ? 'S' : x.steh ? 'H' : x.t)).join(''), geh: gehFluegel(w), steh: w.sashes.map((x, i) => (stehFluegel(w, i) ? i : -1)).filter((i) => i >= 0).join(), felder: new Set(w.bars.map((b) => b.s)).size }; });
+  const st2 = await p.evaluate(() => { const src = kopie(S.win); src.wunschGf = 'Messing matt'; src.wunschSf = 'DB 703'; const w = baseWin(); Object.assign(w, { teilung: '2s', sashes: sashesFor('2s') }); designAnwenden(w, src); return w.sashes.map((x) => (x.steh ? 'H' : x.t)).join('') + '|' + w.wunschGf + '|' + w.wunschSf; });
+  ok(st0.kap === 'aufbau' && st0.s === 1 && /^Aufbau · /.test(st0.kicker) && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
+    'Stulp mit Seitenteilen: „Welcher Flügel geht zuerst auf?“ im Kapitel Aufbau (Stufe 1), „Wie öffnet der zweite Flügel?“ danach; die Wahl lässt die Seitenteile außen, Sprossen in allen Feldern; „Gestaltung übernehmen“ nimmt Gehflügel und Wunschfarben mit (' + st1.folge + ', ' + st2 + ')');
+  // Standard mit dem Namen des Betriebs im Kundenlink
+  const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'tiefe'; render(true); const sub = document.querySelector('.qdock .hd > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
+  ok(stdB.zeile === 'Standard von Fensterbau Brandt' && /^Den Rest macht Fensterbau Brandt nach seinem Standard/.test(stdB.sub) && stdB.eigen === 'Standard des Fensterbauers', 'Im Kundenlink heißt der Standard nach dem Betrieb („Standard von Fensterbau Brandt“), die Tiefe-Frage sagt, wer den Rest macht');
+  // Keine Gesamtübersicht: Detailangaben nur im bezahlten Blatt, nicht nach dem Speichern, im Ergebnis oder in der Liste
+  const kgB = await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { name: 'Bad', gitter: 'zier', profil: 'stil', oeffner: 'kette', dicht: 'beige', griffM: 'stil', leiste: 'beide' }); S.windows = [w]; S.win = kopie(w); S.editIdx = 0; const t = []; ['fertig', 'ergebnis', 'home'].forEach((sc) => { go(sc); t.push(document.querySelector('.scr').textContent); }); return { t: t.join(' '), blatt: specRows(w).some((r) => r.k === 'Fenstergitter') }; });
+  ok(!/Ziergitter|Stilprofil|Kettenantrieb|Beige|Stilgriff|Abdeckleisten/.test(kgB.t) && kgB.blatt, 'Keine Gesamtübersicht: Detailangaben stehen weder nach dem Speichern noch im Ergebnis noch in der Liste, nur im Aufmaßblatt');
+  // Entwurf: „Mehr zu …“ und der Rückweg von der Tiefe überstehen das Neuladen
+  await p.evaluate(() => { S.windows = [demoProject()[1]]; S.proj.tiefe = 'kurz'; persist(); const w = demoProject()[0]; w.name = 'Flur'; S.win = w; S.editIdx = -1; S.q = 'fi'; go('frage'); }); await p.waitForTimeout(400);
+  await p.click('.qpanel .qmehr'); await p.waitForTimeout(400);
+  const eM0 = await p.evaluate(() => ({ q: S.q, kap: qCurrent().q.kap }));
+  await p.click('.qdock .qtiefe'); await p.waitForTimeout(900);
+  await p.reload({ waitUntil: 'networkidle' }); await p.waitForTimeout(400);
+  await p.click('[data-act="entwurf-weiter"]'); await p.waitForTimeout(400);
+  const eM1 = await p.evaluate(() => ({ q: S.q, mehr: !!(MEHR.get(S.win) || {}).material, tiefe: S.proj.tiefe }));
+  await p.click('.qnav .btn.primary'); await p.waitForTimeout(400);
+  const eM2 = await p.evaluate(() => ({ q: S.q, sichtbar: qSichtbar(S.win).filter((q) => q.kap === 'material').length, alle: qList(S.win).filter((q) => q.kap === 'material').length }));
+  ok(eM0.kap === 'material' && eM0.q !== 'fi' && eM1.q === 'tiefe' && eM1.mehr && eM1.tiefe === 'kurz' && eM2.q === eM0.q && eM2.sichtbar === eM2.alle, 'Entwurf: aufgeklappte Kapitel („Mehr zu …“) und der Rückweg von der Tiefe überstehen das Neuladen; Weiter führt zurück zur Frage (' + eM0.q + ')');
+  /* Nacharbeit nach dem Merge von #46 (Prüfbefunde app): Zeilen und Chips mit i, „Mehr zu …“, Tiefe-Pille mitten in den Detailfragen,
+     angefangenes Fenster beim Senden, letzter Schritt der Führung, Zurück-Taste bei der KI-Einwilligung */
+  // Glas-Extras mit Symbol und i: jede Zeile 44 px (vorher 341 px je Option mit riesigen Symbolen), Haken untereinander
+  const gx = {};
+  for (const t of ['genau', 'normal']) {
+    await frageB('glasfn', { glasfn: ['sicht'] }, t);
+    gx[t] = await p.evaluate(() => { const d = document.querySelector('.qdock'); return { zeilen: Array.from(d.querySelectorAll('.qlist > .qli')).map((x) => Math.round(x.getBoundingClientRect().height)), ci: Array.from(d.querySelectorAll('.qlist .ci')).map((x) => Math.round(x.getBoundingClientRect().width)), sh: d.scrollHeight, haken: new Set(Array.from(d.querySelectorAll('.qlist .mark')).map((x) => Math.round(x.getBoundingClientRect().left))).size, i: d.querySelectorAll('.qlist .qci-i[data-act="gloss"]').length }; });
+  }
+  ok(gx.genau.zeilen.length === 7 && gx.normal.zeilen.length === 4 && gx.genau.zeilen.concat(gx.normal.zeilen).every((h) => h >= 44 && h <= 56) && gx.genau.ci.concat(gx.normal.ci).every((w) => w === 20) && gx.genau.sh < 600 && gx.genau.haken === 1 && gx.genau.i === 7,
+    'Glas-Extras mit Symbol und i („Alles im Detail“ und „Die üblichen Wünsche“): Zeilen 44 bis 56 px, Symbole 20 px, Haken untereinander, Dock ' + gx.genau.sh + ' px statt 2.500 (' + gx.genau.zeilen.join('/') + ')');
+  // Chips mit i: Beschriftung ganz vor dem i (sonst Zeilen), das i auf dem gedrückten Chip hell mit dunklem Zeichen; 390 und 360 px
+  const chipsI = [];
+  for (const breite of [390, 360]) {
+    await p.setViewportSize({ width: breite, height: 844 });
+    for (const [q, set, tiefe] of [['glasfn', { glasfn: ['sicht'] }, 'normal'], ['fbi', { fbi: 'werzalit' }, 'normal'], ['rc', { rc: 'basis' }, 'genau'], ['antrieb', { sart: 'rollladen', roll: 'vorbau', antrieb: 'smart' }, 'normal']]) {
+      await frageB(q, set, tiefe);
+      const r = await p.evaluate(() => Array.from(document.querySelectorAll('.qpanel .qci')).map((c) => {
+        const lb = c.querySelector('.chip .lb'), i = c.querySelector('.qci-i'); if (!lb) return 'ohne Beschriftung';
+        const rg = document.createRange(); rg.selectNodeContents(lb); const rechts = Math.max.apply(null, Array.from(rg.getClientRects()).map((x) => x.right));
+        const kreis = i && i.querySelector('svg > circle'), gedrueckt = c.querySelector('.chip').getAttribute('aria-pressed') === 'true';
+        if (lb.scrollWidth > lb.clientWidth + 1) return lb.textContent + ' abgeschnitten';
+        if (i && rechts > i.getBoundingClientRect().left + 13) return lb.textContent + ' unter dem i';
+        if (i && gedrueckt && getComputedStyle(kreis).fill !== 'rgb(241, 240, 234)') return lb.textContent + ' i unlesbar';
+        return '';
+      }).filter(Boolean));
+      r.forEach((x) => chipsI.push(breite + ' ' + q + ': ' + x));
+    }
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
+  ok(!chipsI.length, 'Chips mit i bei 390 und 360 px: Beschriftung ganz vor dem i (Glas-Extras, Fensterbank innen, Einbruchschutz, Antrieb), das i auf dem gedrückten Chip lesbar' + (chipsI.length ? ' (' + chipsI.join(' | ') + ')' : ''));
+  // „Mehr zu …“ bei „Das Wichtigste“: weiter bei der ersten dazugeholten Frage des Kapitels, nicht dahinter
+  const mz = await p.evaluate(() => {
+    const out = [], mk = () => { S.verlassen = null; S.wohin = false; const w = baseWin(); Object.assign(w, { name: 'X', e_teilung: true }); S.win = w; S.editIdx = -1; S.proj.tiefe = 'kurz'; S.qMass = null; S.screen = 'frage'; };
+    mk(); S.q = 'lage'; const ids = qCurrent().list.map((q) => q.id);
+    ids.forEach((id) => { mk(); S.q = id; render(true); const b = document.querySelector('.qmehr'); if (!b) return; const kap = qCurrent().q.kap, vorher = qSichtbar(S.win).map((q) => q.id); b.click(); const neu = qCurrent().list.filter((q) => q.kap === kap && vorher.indexOf(q.id) < 0).map((q) => q.id); out.push({ id: id, q: S.q, erste: neu[0], n: neu.length }); });
+    return out;
+  });
+  ok(mz.length >= 5 && mz.every((x) => x.n > 0 && x.q === x.erste), '„Mehr zu …“ führt zur ersten dazugeholten Frage des Kapitels, „Weiter“ dann der Reihe nach (' + mz.map((x) => x.id + ' → ' + x.q).join(', ') + ')');
+  // Tiefe-Pille auf einer Frage, die es in der niedrigeren Tiefe nicht gibt: weiter hinter der Stelle, nicht bei „Welche Form?“
+  const tzW = [];
+  for (const [von, t0, t1, weg] of [['griffM', 'genau', 'kurz', 'weiter'], ['oberfl', 'genau', 'normal', 'browser'], ['griff', 'normal', 'kurz', 'zurueck']]) {
+    await frageB(von, {}, t0); await p.click('.qdock .qtiefe'); await p.waitForTimeout(300);
+    await p.click('[data-act="tiefe"][data-v="' + t1 + '"]'); await p.waitForTimeout(200);
+    if (weg === 'weiter') await p.click('.qnav .btn.primary'); else if (weg === 'zurueck') await p.click('.qnav [data-act="qprev"]'); else await p.evaluate(() => history.back());
+    await p.waitForTimeout(450);
+    tzW.push(await p.evaluate((v) => { const alle = qList(S.win).map((q) => q.id), sicht = qSichtbar(S.win).map((q) => q.id).filter((x) => x !== 'tiefe'), j = alle.indexOf(v); return { von: v, q: S.q, soll: sicht.find((x) => alle.indexOf(x) > j), screen: S.screen }; }, von));
+  }
+  ok(tzW.every((x) => x.screen === 'frage' && x.q === x.soll && x.q !== 'form'), 'Tiefe-Pille auf einer Frage, die es dann nicht mehr gibt: Weiter, Zurück und die Zurück-Taste führen zur nächsten sichtbaren Frage dahinter (' + tzW.map((x) => x.von + ' → ' + x.q).join(', ') + ')');
+  // Angefangenes Fenster beim Senden (Kundenlink): Hinweis auf „Prüfen“, Rückfrage statt stillem Senden, Zurück-Taste schließt sie
+  const ctxE = await browser.newContext(telefon), pE = await neueSeite(ctxE);
+  await pE.goto(BASE + '/app/#k-nach22-Fensterbau_Elster.' + b64u('Fensterbau Elster') + '.' + b64u('Familie Star'), { waitUntil: 'networkidle' }); await pE.waitForTimeout(300);
+  await pE.evaluate(() => { const k = demoProject()[0]; k.name = 'Küche'; S.windows = [k]; persist(); const w = demoProject()[1]; w.name = 'Bad'; delete w.wid; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); entwurfJetzt(); S.win = baseWin(); go('blatt'); });
+  await pE.waitForTimeout(400);
+  const eS0 = await pE.evaluate(() => ({ karte: (document.querySelector('.ek-warn') || {}).textContent || '', knoepfe: document.querySelectorAll('.ek-warn [data-act="entwurf-weiter"], .ek-warn [data-act="entwurf-weg"]').length }));
+  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400);
+  const eS1 = await pE.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); return { titel: sh ? sh.querySelector('h2').textContent : '', ak: sh ? sh.querySelectorAll('h2 .ak').length : 0, fokus: !!sh && sh.contains(document.activeElement), sent: !!S.sent }; });
+  await pE.evaluate(() => history.back()); await pE.waitForTimeout(450);
+  const eS2 = await pE.evaluate(() => ({ blatt: !!document.querySelector('.sheet[aria-modal="true"]'), screen: S.screen, sent: !!S.sent }));
+  await pE.click('.bb .btn.primary'); await pE.waitForTimeout(400); await pE.click('.sheet [data-act="send-ohne"]'); await pE.waitForSelector('[data-screen="gesendet"]'); await pE.waitForTimeout(300);
+  const eS3 = await pE.evaluate(() => ({ sent: !!S.sent, entwurf: Object.keys(localStorage).filter((k) => /\.entwurf$/.test(k)).length }));
+  ok(/„Bad“ ist angefangen und nicht gespeichert/.test(eS0.karte) && /nicht mit an Fensterbau Elster/.test(eS0.karte) && eS0.knoepfe === 2 && eS1.titel === 'Bad fehlt noch' && eS1.ak === 1 && eS1.fokus && !eS1.sent && !eS2.blatt && eS2.screen === 'blatt' && !eS2.sent && eS3.sent && !eS3.entwurf,
+    'Angefangenes Fenster beim Senden: „Prüfen“ nennt es mit Fortsetzen und Verwerfen, „Senden“ fragt erst nach (die Zurück-Taste schließt die Frage), „Ohne … senden“ räumt den Entwurf weg');
+  sauber(pE, 'Senden mit angefangenem Fenster: keine Fehler');
+  await ctxE.close();
+  // Führung, letzter Schritt: die Box „Für den Fensterbauer“ steht im Vorschaublatt (vorher traf sie die Regel des Farbblatts .fb)
+  const ctxT = await browser.newContext(telefon), pT = await neueSeite(ctxT);
+  await pT.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await pT.click('.hero [data-act="tour-start"]'); await pT.waitForTimeout(400);
+  await pT.evaluate(() => tourGehe(TOUR.length - 1)); await pT.waitForTimeout(1200);
+  const tbB = await pT.evaluate(() => { const b = document.querySelector('.tb-box.tb-fb'), bl = b && b.closest('.tb-blatt'); if (!b || !bl) return null; const r = b.getBoundingClientRect(), rb = bl.getBoundingClientRect(); return { drin: r.left >= rb.left && r.right <= rb.right && r.top >= rb.top && r.bottom <= rb.bottom, pos: getComputedStyle(b).position, alt: document.querySelectorAll('.tb-box.fb').length }; });
+  ok(tbB && tbB.drin && tbB.pos === 'static' && !tbB.alt, 'Führung, letzter Schritt: „Für den Fensterbauer“ steht im Vorschaublatt, nicht über dem Titel');
+  sauber(pT, 'Führung bis zum Aufmaßblatt: keine Fehler');
+  await ctxT.close();
+  // Zurück-Taste bei offener KI-Einwilligung: schließt sie wie „Ohne KI weiter“, der Schritt darunter bleibt
+  const ctxK = await browser.newContext(telefon), pK = await neueSeite(ctxK);
+  await pK.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const jpegK = Buffer.from(await pK.evaluate(() => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 600, 800); g.fillStyle = '#a9c8e8'; g.fillRect(150, 150, 300, 500); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
+  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await pK.click('.bb .btn.primary');
+  await pK.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
+  await pK.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpegK });
+  const kiOffen = await pK.waitForSelector('.fx-dialog', { timeout: 5000 }).then(() => true, () => false);
+  await pK.evaluate(() => history.back()); await pK.waitForTimeout(500);
+  const kiZu = await pK.evaluate(() => ({ dlg: !!document.querySelector('.fx-dialog'), screen: S.screen, ja: !!(window.FotoKI && window.FotoKI.eingewilligt()) }));
+  ok(kiOffen && !kiZu.dlg && kiZu.screen === 'fotos' && !kiZu.ja, 'Zurück-Taste bei offener KI-Einwilligung: schließt sie wie „Ohne KI weiter“, der Schritt Fotos bleibt (' + JSON.stringify(kiZu) + ')');
+  await ctxK.close();
+  sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
+  await ctx.close();
 }
 
 await browser.close();

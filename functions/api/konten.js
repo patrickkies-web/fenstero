@@ -2,13 +2,16 @@
    Die Regeln (Zählung, Buchung, Nachbesserung) stehen in web/assets/modell.js und sind dieselben wie im Browser; hier führt sie der Server aus,
    deshalb kann ein Browser sie nicht umgehen. Das Konto eines Betriebs ist ein JSON-Dokument (siehe speicher.js). */
 import '../../web/assets/modell.js';
+import '../../web/assets/einladung.js'; // Einladungsseite des Betriebs: Prüfen der Einstellungen, öffentliches Profil zum Link
 import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt, live } from './umgebung.js';
 import { GRENZEN, zuText, langerCode, kennung, ohneBild, metaMischen, zeitKappen } from './entwurf.js';
 import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
 import { NB_STAND } from './recht.js';
 import { ablage, linkOrdner, fotoIds, fotosLinkAufraeumen } from './fotos.js';
+import { eingangMelden } from './benachrichtigung.js';
 
 const X = () => globalThis.Abrechnung;
+const EIN = () => globalThis.Einladung;
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
 /* Am eingegangenen Aufmaß: welche seiner Fotos beim Server liegen (namen: Dateien im Ordner des Links; null: Ablage antwortet gerade
    nicht, dann ohne Angabe, und der Betriebsbereich versucht alle genannten) */
@@ -171,9 +174,17 @@ export const KONTO = {
   'GET /api/konto': async (ctx) => { await mitBetrieb(ctx); return aendern(ctx, () => ({})); },
   'PATCH /api/konto': async (ctx) => {
     await mitBetrieb(ctx); const b = ctx.body || {};
+    /* Einladungsseite (Strang S4): Logo als verkleinerte Data-URL (der Browser rechnet SVG in ein Pixelbild um), Einstellungen und Farbe
+       des Zeichens; alles wird vor dem Speichern geprüft, ein ungültiger Teil ändert nichts */
+    const logo = b.logo !== undefined ? EIN().bild(b.logo, EIN().MAX.logo) : undefined;
+    if (logo === null) throw new ApiFehler('Das Logo ließ sich nicht übernehmen. Bitte als PNG, JPG oder SVG hochladen.');
+    const ef = [], einladung = b.einladung !== undefined ? EIN().einstellungen(b.einladung, ef) : undefined;
+    if (ef.length) throw new ApiFehler(ef[0]);
+    if (b.col !== undefined && !FARBEN.includes(b.col)) throw new ApiFehler('Diese Farbe gibt es nicht.');
     return aendern(ctx, (a) => {
+      if (logo !== undefined) a.logo = logo; if (einladung !== undefined) a.einladung = einladung; if (b.col !== undefined) a.col = b.col;
       if (b.ap !== undefined) a.ap = str(b.ap, 80); if (b.tel !== undefined) a.tel = str(b.tel, 40); if (b.mail !== undefined && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(b.mail))) a.mail = str(b.mail, 120).toLowerCase();
-      if (b.abzug) { a.abzug = { seite: Math.max(0, Math.min(60, parseInt(b.abzug.seite, 10) || 0)), oben: Math.max(0, Math.min(60, parseInt(b.abzug.oben, 10) || 0)) }; }
+      if (b.abzug) { const z = (k) => Math.max(0, Math.min(60, parseInt(b.abzug[k], 10) || 0)); a.abzug = { seite: z('seite'), oben: z('oben'), unten: z('unten'), untenT: z('untenT') }; } // unten: Fenster (Fensterbankanschluss), untenT: Türen (Schwelle)
       if (b.prefs) { a.prefs = a.prefs || {}; Object.keys(b.prefs).slice(0, 10).forEach((k2) => { a.prefs[k2] = !!b.prefs[k2]; }); }
       if (b.gelesen) (a.notif || []).forEach((n) => { n.new = false; });
       if (b.gelesenIndex !== undefined && a.notif && a.notif[+b.gelesenIndex]) a.notif[+b.gelesenIndex].new = false;
@@ -272,7 +283,7 @@ export const KONTO = {
     const l = (row.daten.links || []).find((x) => x.code === code), a = row.daten;
     /* zu: abgelaufen (auch wenn die Zeit noch nicht angewendet wurde), deaktiviert oder schon eingegangen */
     const zu = X().linkZu(l), status = zu === 'abgelaufen' ? 'abgelaufen' : l.status;
-    return { ok: true, betrieb: row.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, row.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now(), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: !!l.du, expires: l.expires || '', ap: a.ap || '', grenzen: GRENZEN };
+    return { ok: true, betrieb: row.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, row.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now(), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: !!l.du, expires: l.expires || '', ap: a.ap || '', auftritt: EIN().auftritt(a, a.col), grenzen: GRENZEN };
   },
   /* Geöffnet: der Betrieb bekommt einen Hinweis; beim ersten Öffnen beginnen die 60 Tage, die der Kunde Zeit hat */
   'POST /api/link/:code/fortschritt': async (ctx) => {
@@ -321,6 +332,8 @@ export const KONTO = {
     if (!r.ok) throw new ApiFehler(r.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : r.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400, r.art === 'schon' && r.l && X().linkZu(r.l) === 'eingegangen' ? { zu: 'eingegangen', runde: r.l.runde || 1, seit: r.l.eingegangenAt || 0 } : undefined); // schon da: die App zeigt „schon erledigt“
     const nb = r.art === 'nb' || r.art === 'nb-neu';
     zaehlen(ctx, nb ? 'ereignis:nachbesserung' : 'ereignis:aufmass_gesendet');
+    /* E-Mail an den Betrieb, wenn er sie unter „Benachrichtigungen“ nicht abgeschaltet hat (benachrichtigung.js) */
+    if (r.l) ctx.waitUntil(eingangMelden(ctx, row, r, nb).catch(() => false));
     /* Fotos, die kein Fenster des eingegangenen Aufmaßes mehr nennt, sind überholt (neu fotografiert, Fenster gelöscht) */
     if (r.l && r.l.aufmass) ctx.waitUntil(fotosLinkAufraeumen(ctx.k, code, fotoIds(r.l.aufmass.windows)).catch(() => 0));
     /* Zwischenstand als gesendet vermerken (für die Zentrale und das Aufräumen) und auf den gesendeten Stand bringen, außer bei einer

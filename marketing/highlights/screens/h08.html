@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h08 · Kunde misst · Zwei Fotos je Fenster.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Ausschnitt so breit, wie die Höhe zwischen Chips und Fußzeile erlaubt. Maßstab etwa 1,88 Story-px je App-px:
+     Wasserwaage etwa 28 px, „KI fertig“ und „Von innen · Beispiel“ etwa 24 px (vorher im Telefonrahmen 1,08, also 15 bis 16 px). */
+  .h08-fotos { width: 716px }
+</style>
+</head>
+<body>
+<!-- h08 Inhalt Kapitel „Kunde misst“ (2/3): echter Ausschnitt aus Schritt 2 Fotos der Kunden-App (Link Fensterbau Brandt, Familie Weber):
+     die beiden Fotokacheln „Von innen“ und „Von außen“ mit der Plakette „KI fertig“ und darunter die Wasserwaage
+     „Dein Foto ist mit 0,4° fast waagerecht. Passt.“, rundum 10 App-px App-Grund. Kein Telefonrahmen mehr: Darin war der App-Text nur 15 bis 18 px groß.
+     Aufnahme: aufnahmen/h08-fotos.png (378 × 343 CSS-px, Faktor 3), erzeugt mit werkzeug/aufnahmen-kunde.mjs (Telefon 390 × 844).
+     BEISPIEL GEKENNZEICHNET: Die Kacheln zeigen die gezeichneten Beispielfotos der App (demoPhotoUrl) mit der festen Beispielauswertung AI.DEMO
+     (Neigung 0,4° und „KI fertig“ sind Festwerte, app.js:1294). Darum tragen sie wie in der App die Kennzeichnung „· Beispiel“ (demo: true, app.js:1676,
+     so setzt sie auch useDemo() in app.js:3608). Echte Fensterfotos über input[data-in="photo"] samt echter KI-Auswertung gingen nicht: Es liegen keine
+     echten Fensterfotos vor, und der Testserver läuft mit KI_ATTRAPPE ohne ANTHROPIC_API_KEY. Liegen beide vor, die Aufnahme so neu erzeugen und
+     die Kennzeichnung entfällt von selbst.
+     Die App duzt den Kunden, die Texte des Screens siezen. Der Lead nennt „innen und außen“ nicht mehr, das steht schon im Kicker.
+     Belege: web/assets/app.js:1684 („Schritt 2 von 6 · Fotos“, je ein Foto innen und außen), app.js:1682 (Wasserwaage aus dem Foto, „fast waagerecht. Passt.“),
+     app.js:1684 und 1552 (KI liest Rollladenkasten, Laibung, Fensterbänke, Fassade), web/assets/portal.js:455 (CAPS: KI liest Rollladenkasten, Anschlag,
+     Fensterbänke, Fassade), Chip „Vertauschte Maße fallen auf“: web/assets/modell.js:183-190 massPruef (Seitenverhältnis der Handmaße gegen das
+     Foto, Ergebnis „tausch“), app.js:1700 („Sie merkt, wenn Breite und Höhe vertauscht sind.“), app.js:1936 („Breite und Höhe vertauscht?“).
+     Bewusst nicht „Maße gegen Foto geprüft“: Geprüft wird nur das Seitenverhältnis, keine Millimeter. -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Kunde misst · 2/3</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Fotos innen und außen</p>
+      <h2 class="ef-display">Zwei <span class="ef-gruen">Fotos</span><br>je Fenster.</h2>
+      <p class="ef-lead">Die KI liest daraus Rollladenkasten, Anschlag, Fensterbänke und Fassade.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">Wasserwaage im Bild</li>
+        <li class="ef-chip">Vertauschte Maße fallen auf</li>
+      </ul>
+    </div>
+    <figure class="ef-ausschnitt ef-ausschnitt--grund h08-fotos"><img src="../aufnahmen/h08-fotos.png" alt="Kunden-App, Schritt 2 Fotos: zwei Kacheln mit den gezeichneten Beispielfotos der App, gekennzeichnet als Von innen · Beispiel und Von außen · Beispiel, jeweils mit der Plakette KI fertig, darunter die Wasserwaage: Dein Foto ist mit 0,4 Grad fast waagerecht. Passt."></figure>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 2 von 3">
+      <li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

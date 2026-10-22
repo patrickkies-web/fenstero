@@ -21,9 +21,11 @@ import { ZENTRALE, aufraeumen } from './zentrale.js';
 import { ENTWURF } from './entwurf.js';
 import { EIGENE, kontenDa } from './eigene.js';
 import { WIDERRUF, widerrufeNachholen } from './widerruf.js';
+import { erinnerungenSenden } from './benachrichtigung.js';
 import { FOTOS } from './fotos.js';
 import { attrappePost, attrappeAus } from './post.js';
 import { zaehlen, mitWerbung, werbungAus } from './statistik.js';
+import '../../web/assets/ral.js'; // Farben (RAL, Holzdekore) für modell.js auch im Worker-Bundle, siehe ral.js
 import '../../web/assets/modell.js';
 import { indexnow } from '../seo.js';
 
@@ -56,7 +58,7 @@ export async function api(request, env, ctx0) {
        eine Störung des Mailversands nach bzw. beendet sie */
     if (pfad === '/api/test/post' && k.post && k.post.attrappe) { const st = url.searchParams.get('stoerung'); if (st !== null) attrappeAus.an = st === '1'; return json({ ok: true, post: attrappePost, stoerung: attrappeAus.an }); }
     /* nur lokal mit DATEN_ATTRAPPE=1 und MAIL_ATTRAPPE=1: das Nachholen des täglichen Laufs sofort ausführen */
-    if (pfad === '/api/test/nachholen' && k.datenAttrappe && k.post && k.post.attrappe) { const sp0 = speicher(k); return json({ ok: true, vertrag: await bestaetigungenNachholen(k, sp0, env), widerruf: await widerrufeNachholen(k, sp0) }); }
+    if (pfad === '/api/test/nachholen' && k.datenAttrappe && k.post && k.post.attrappe) { const sp0 = speicher(k); return json({ ok: true, vertrag: await bestaetigungenNachholen(k, sp0, env), widerruf: await widerrufeNachholen(k, sp0), erinnerung: await erinnerungenSenden(k, sp0, env) }); }
     if (pfad === '/api/ki') {
       if (request.method === 'GET' || request.method === 'HEAD') return kiGet({ request, env });
       if (request.method === 'POST') { const r = await kiPost({ request, env }); if (r.status === 200) warte(zaehlen(k, speicher(k), mitWerbung(['ereignis:ki_foto'], werbungAus(request))).catch(() => false)); return r; }
@@ -102,7 +104,7 @@ export async function geplant(env, cron) {
   if (r && r.rechnungen) await zaehlen(k, sp, new Array(r.rechnungen).fill('ereignis:sammelrechnung')).catch(() => false);
   let weg = null; try { weg = await aufraeumen(k, sp); } catch (e) { weg = { ok: false }; }
   let nach = null;
-  if (taeglich) { nach = {}; try { nach.vertrag = await bestaetigungenNachholen(k, sp, env); } catch (e) { nach.vertrag = { ok: false }; } try { nach.widerruf = await widerrufeNachholen(k, sp); } catch (e) { nach.widerruf = { ok: false }; } }
+  if (taeglich) { nach = {}; try { nach.vertrag = await bestaetigungenNachholen(k, sp, env); } catch (e) { nach.vertrag = { ok: false }; } try { nach.widerruf = await widerrufeNachholen(k, sp); } catch (e) { nach.widerruf = { ok: false }; } try { nach.erinnerung = await erinnerungenSenden(k, sp, env); } catch (e) { nach.erinnerung = { ok: false }; } } // Erinnerung an offene Links (benachrichtigung.js)
   /* täglicher Lauf: nach einer Veröffentlichung die geänderten Seiten per IndexNow melden (functions/seo.js, nur mit Freigabe) */
   let suche = null; if (cron && cron !== CRON_ABRECHNUNG) { try { suche = await indexnow(env); } catch (e) { suche = { ok: false }; } }
   console.log('Abrechnungslauf', JSON.stringify(r), 'Aufräumen', JSON.stringify(weg), 'Nachholen', JSON.stringify(nach), 'IndexNow', JSON.stringify(suche));

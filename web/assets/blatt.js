@@ -1,6 +1,6 @@
 'use strict';
 /* eeziframes · Aufmaßblatt als PDF: ein Zeichner für drei Ausgaben
-   Blatt.pdf(e)      -> Blob (null, wenn jsPDF fehlt)
+   Blatt.pdf(e)      -> Blob (null, wenn jsPDF oder das Modell fehlt)
    Blatt.schrift()   -> Promise; lädt vor dem ersten Blatt jsPDF, den QR-Code und die eingebettete Schrift (blatt-schrift.js) einmal nach,
                         danach sofort; vor jedem Blatt.pdf() abwarten
 
@@ -8,25 +8,27 @@
      variante: 'kunde' | 'fensterbauer' | 'betrieb',
         kunde:        das Blatt des Hauseigentümers für seine Unterlagen (Du), mit Seite für den Fensterbauer am Ende
         fensterbauer: dasselbe Aufmaß, so wie es der Hauseigentümer einem Betrieb schickt (Sie), mit Seite für den Fensterbauer
-        betrieb:      aus dem Betriebsbereich, in den Farben des Betriebs, mit Bestellmaß-Vorschlag, ohne Werbung
-     fenster: [Fenster wie in der App], projekt: { name, ort, tel, mail, erreich, gebaeude, baujahr, total, zeit, budget, foerd, notiz },
-     kunde: { name, kontakt, adresse } (betrieb), betrieb: { name, col, abzug: { seite, oben }, nr, eingegangen } (betrieb),
-     code, portalUrl, portalKurz, appKurz, qr: window.qrcode (für die Seite an den Fensterbauer),
-     h: { derive(w), lab(gruppe, key), col(key) -> [Name, Code, Hex], orn(key), th(mm), num(v) }
-   } */
+        betrieb:      aus dem Betriebsbereich, mit Namen und Logo des Betriebs, Bestellmaß-Vorschlag und Stand der Klärungsliste, ohne Werbung
+     fenster: [Fenster wie in der App], projekt: { name, ort, tel, mail, erreich, gebaeude, baujahr, total, zeit, budget, foerd, foerdweg, notiz, notizen },
+     kunde: { name, kontakt, adresse, mehr: [[Beschriftung, Wert]] (vom Kunden eingetragen: Telefon, E-Mail, Erreichbar) } (betrieb), betrieb: { name, logo: { data, w, h, grund }, abzug: { seite, oben, unten, untenT }, nr, eingegangen } (betrieb),
+     klaerung: [Punkte aus AW.klaerung] (betrieb, sonst gerechnet), klaerStand: { id: { ok, notiz, wann } } (betrieb),
+     code, portalUrl, portalKurz, qr: window.qrcode (für die Seite an den Fensterbauer), fotos: { Kennung: { data, w, h } }, beispiel,
+     h: { derive(w), lab(gruppe, key), … } (ältere Aufrufer; gerechnet wird mit window.AW aus modell.js)
+   }
+   Gestaltung (docs/GESTALTUNG.md, Aufmaßblatt): weißes Papier, Tinte #161616, Kopfband in der Farbe der Bühne #161616 mit Namen und
+   Logo des Betriebs bzw. der Marke, Inter 500/700/800, Kicker in Versalien, grüne Haken, Chips mit Rand, Karten mit Rand ohne Fläche,
+   Orange und Blau nur in der Zeichnung. Aufbau: Seite 1 Übersicht und Klärungsliste, danach je Position eine Seite (Zeichnung mit
+   Maßketten aus AW.plan, Maße, Wünsche, Einbausituation, Fotos), am Ende Überblick, Tabelle und (für Hauseigentümer) der Aufmaß-Code. */
 window.Blatt = (() => {
-  const W = 210, H = 297, M = 14, RM = 18, XR = W - RM, CW = XR - M, BOTTOM = H - 16, STREIFEN = 8;
-  const INK = '#1d1d1f', INK2 = '#3a3a3f', GREY = '#5f5f64', MO_T = '#b3401e', LINE = '#d9d9de', PAPER = '#f5f5f7', ACC = '#0071e3', MO = '#d4502b', EL = '#0071e3', OK = '#1f7a3d', WARN = '#a85a00', GLASS = '#d6e6f4', WALL = '#efece6', LAIB = '#ddd7cc', LAIB2 = '#cfc8bb';
+  const W = 210, H = 297, M = 14, BOTTOM = H - 16;
+  /* Druckpalette */
+  const INK = '#161616', INK2 = '#3a3a3f', GREY = '#68686d', LINE = '#d9d9de', BUEHNE = '#161616', HELL = '#f1f0ea', HELL2 = '#b9b8b3', GRUEN = '#8fd694', GRUEN_T = '#2e7d3a', WARN = '#a85a00', WARN_P = '#f0b35a', MO_T = '#b3401e', EL_T = '#3d63c9', MO = '#ff8a5b', EL = '#7aa2ff', GLASS = '#d6e6f4';
   const rgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16, (n >> 8) & 255, n & 255]; };
-  const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[  ]/g, ' '));
-  const TYP = { F: 'Fest', D: 'Dreh', K: 'Kipp', DK: 'Dreh-Kipp', S: 'Schiebeflügel', X: 'Faltflügel', P: 'Gehflügel', PS: 'PSK-Flügel' };
+  /* Zeichen, die Inter im eingebetteten Ausschnitt nicht hat, werden ersetzt */
+  const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[    ]/g, ' ').replace(/[‐‑‒]/g, '-').replace(/­/g, '').replace(/≥/g, 'ab ').replace(/≤/g, 'bis ').replace(/[←-↓]/g, '-').replace(/✓/g, ''));
   const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
-  const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' ? w.bt : null) || {};
   const ARTNAME = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
-  /* Gemeinsame Regeln (modell.js): offene Wünsche, Pflichtthemen, Förderwerte, Klärungsliste, Fachangaben der KI */
   const A = () => window.AW || null;
-  const OT = 'offen, bitte beraten';
-  const offen = (w, k) => { const a = A(); return a ? a.istOffen(w, k) : !!(w.offen && w.offen[k]); };
   const ERREICH = { vm: 'vormittags', nm: 'nachmittags', ab: 'abends' };
   const BASIS = document.currentScript && document.currentScript.src ? document.currentScript.src.replace(/[^/]*$/, '') : '/assets/';
   /* jsPDF (etwa 360 KB) und der QR-Code kommen erst mit dem ersten Blatt, nicht mit der Seite: Startseite und App laden schneller */
@@ -50,43 +52,42 @@ window.Blatt = (() => {
   }
 
   function pdf(e) {
-    const J = window.jspdf && window.jspdf.jsPDF; if (!J) return null;
+    const J = window.jspdf && window.jspdf.jsPDF, AW = A(); if (!J || !AW) return null;
     const doc = new J({ unit: 'mm', format: 'a4', compress: true });
-    const h = e.h, V = e.variante || 'kunde', wins = e.fenster || [], pr = e.projekt || {}, kd = e.kunde || {}, bt = e.betrieb || {}, ab = bt.abzug || { seite: 15, oben: 15 };
-    const BRAND = V === 'betrieb' ? (bt.col || ACC) : '#000000';
-    const sie = V !== 'kunde';
+    const V = e.variante || 'kunde', wins = e.fenster || [], pr = e.projekt || {}, kd = e.kunde || {}, bt = e.betrieb || {}, ab = AW.abzugVon(bt.abzug);
+    const sie = V !== 'kunde', EIGENE = V !== 'betrieb', STREIFEN = EIGENE ? 8 : 0, XR = W - (EIGENE ? 18 : 14), CW = XR - M;
     /* Adresse der Website: die, unter der eeziframes gerade läuft (nach einem Domainwechsel stimmt sie von selbst) */
     const HOST = e.portalKurz || (typeof location !== 'undefined' && location.host) || 'eeziframes';
-    /* Schrift: Maven Pro, wenn geladen, sonst Helvetica */
-    const F = window.BlattSchrift ? (() => {
+    /* Schrift: Inter wie auf der Website (500 Text, 700 Listen, 800 Überschriften), sonst Helvetica */
+    const F = window.BlattSchrift && window.BlattSchrift.medium ? (() => {
       try {
-        doc.addFileToVFS('MavenPro-Black.ttf', window.BlattSchrift.black); doc.addFont('MavenPro-Black.ttf', 'MavenBlack', 'normal');
-        doc.addFileToVFS('MavenPro-Bold.ttf', window.BlattSchrift.bold); doc.addFont('MavenPro-Bold.ttf', 'MavenBold', 'normal');
-        doc.addFileToVFS('MavenPro-Medium.ttf', window.BlattSchrift.medium); doc.addFont('MavenPro-Medium.ttf', 'MavenMedium', 'normal');
-        return { black: ['MavenBlack', 'normal'], bold: ['MavenBold', 'normal'], normal: ['MavenMedium', 'normal'], mono: ['courier', 'normal'] };
+        doc.addFileToVFS('Inter-Medium.ttf', window.BlattSchrift.medium); doc.addFont('Inter-Medium.ttf', 'InterMedium', 'normal');
+        doc.addFileToVFS('Inter-Bold.ttf', window.BlattSchrift.bold); doc.addFont('Inter-Bold.ttf', 'InterBold', 'normal');
+        doc.addFileToVFS('Inter-ExtraBold.ttf', window.BlattSchrift.extra); doc.addFont('Inter-ExtraBold.ttf', 'InterExtraBold', 'normal');
+        return { extra: ['InterExtraBold', 'normal'], bold: ['InterBold', 'normal'], normal: ['InterMedium', 'normal'], mono: ['courier', 'normal'] };
       } catch (err) { return null; }
     })() : null;
-    const FONTS = F || { black: ['helvetica', 'bold'], bold: ['helvetica', 'bold'], normal: ['helvetica', 'normal'], mono: ['courier', 'normal'] };
+    const FONTS = F || { extra: ['helvetica', 'bold'], bold: ['helvetica', 'bold'], normal: ['helvetica', 'normal'], mono: ['courier', 'normal'] };
     const font = (k, size, color) => { const f = FONTS[k] || FONTS.normal; doc.setFont(f[0], f[1]); if (size) doc.setFontSize(size); if (color) doc.setTextColor.apply(doc, rgb(color)); };
     const fill = (c) => doc.setFillColor.apply(doc, rgb(c)), stroke = (c) => doc.setDrawColor.apply(doc, rgb(c));
     const tw = (s) => doc.getTextWidth(t(s));
-    const wrap = (s, w) => doc.splitTextToSize(t(s), w);
+    const wrap = (s, w) => doc.splitTextToSize(t(s), Math.max(4, w));
     /* Beschriftungen: ein langes zusammengesetztes Wort, das nicht in die Spalte passt, an der Fuge trennen statt mitten im Wort */
-    const FUGE = { Absturzsicherung: 'Absturz', Einbruchschutz: 'Einbruch', Insektenschutz: 'Insekten', Sonnenschutz: 'Sonnen', Fensterbank: 'Fenster', Förderwert: 'Förder', Insektenschutzgewebe: 'Insekten', Rollladenpanzer: 'Rollladen', Kindersicherung: 'Kinder', Abstandhalter: 'Abstand', Fensteröffner: 'Fenster', Rahmenansicht: 'Rahmen', Abdeckleisten: 'Abdeck', Lichtschlitze: 'Licht', Fenstergitter: 'Fenster' };
+    const FUGE = { Absturzsicherung: 'Absturz', Einbruchschutz: 'Einbruch', Insektenschutz: 'Insekten', Sonnenschutz: 'Sonnen', Fensterbank: 'Fenster', Förderwert: 'Förder', Maueröffnung: 'Mauer', Rohbauöffnung: 'Rohbau', Fensterbänke: 'Fenster', Insektenschutzgewebe: 'Insekten', Rollladenpanzer: 'Rollladen', Kindersicherung: 'Kinder', Abstandhalter: 'Abstand', Fensteröffner: 'Fenster', Rahmenansicht: 'Rahmen', Abdeckleisten: 'Abdeck', Lichtschlitze: 'Licht', Fenstergitter: 'Fenster' };
     const wrapK = (s, w) => wrap(String(s).split(' ').map((wd) => (FUGE[wd] && tw(wd) > w ? FUGE[wd] + '-\n' + wd.slice(FUGE[wd].length) : wd)).join(' '), w);
-    const txt = (s, x, y, o) => doc.text(t(s), x, y, o);
-    /* Marke: immer klein, auch in Versalzeilen; Wortmarke „eezi“ in Black, „frames“ in Medium */
+    const txt = (s, x, y0, o) => doc.text(t(s), x, y0, o);
+    /* Marke: immer klein, auch in Versalzeilen; Wortmarke „eezi“ in ExtraBold, „frames“ in Medium */
     const VERSAL = (s) => String(s).split(/(eeziframes|eezi)/).map((x, i) => (i % 2 ? x : x.toUpperCase())).join('');
-    const wortmarke = (x, y0, size, col) => { font('black', size, col); txt('eezi', x, y0); const w1 = tw('eezi'); font('normal', size, col); txt('frames', x + w1, y0); return w1 + tw('frames'); };
+    const wortmarke = (x, y0, size, col) => { font('extra', size, col); txt('eezi', x, y0); const w1 = tw('eezi'); font('normal', size, col); txt('frames', x + w1, y0); return w1 + tw('frames'); };
     const alpha = (a) => { try { doc.setGState(new doc.GState({ opacity: a })); } catch (err) { /* ohne Transparenz */ } };
-    const rr = (x, y, w, h2, r, mode) => doc.roundedRect(x, y, w, h2, r, r, mode || 'F');
-    const dash = (on) => { try { doc.setLineDashPattern(on ? [1.1, 0.9] : [], 0); } catch (err) { /* ok */ } };
-    const num = h.num, th = h.th;
+    const rr = (x, y0, w, h2, r, mode) => doc.roundedRect(x, y0, w, h2, r, r, mode || 'F');
+    const dash = (d) => { try { doc.setLineDashPattern(d || [], 0); } catch (err) { /* ok */ } };
+    const num = AW.num, th = AW.th;
     const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), nF = wins.reduce((a, x) => a + (num(x.fotos) || 0), 0);
     /* „ausgewertet“ nur, wo die Auswertung auch im Blatt steht (Befund oder Fachangaben); sonst ehrlich nur die Zahl der Fotos */
     const nA = wins.reduce((a, x) => a + (x.ki && ((x.ki.rows || []).length || (x.ki.fach && Object.keys(x.ki.fach).length)) ? num(x.fotos) || 0 : 0), 0);
     const fotoText = !nF ? 'ohne Fotos' : nA === nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' ausgewertet' : nA ? nA + ' von ' + nF + ' Fotos ausgewertet' : nF + (nF === 1 ? ' Foto' : ' Fotos');
-    const komplett = wins.length > 0 && wins.every((x) => { const d = h.derive(x); return d.moW && d.moH && d.elW && d.elH; });
+    const komplett = wins.length > 0 && wins.every((x) => !AW.massLuecken(x).length);
     const heute = (() => { try { return new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }); } catch (err) { return ''; } })();
     const titelName = V === 'betrieb' ? (kd.name || 'Kunde') : (pr.name || '');
     const laufTitel = (V === 'betrieb' ? 'Aufmaß · ' : 'Aufmaßblatt · ') + (titelName || (V === 'kunde' ? 'Dein Aufmaß' : 'Fenster-Aufmaß'));
@@ -94,6 +95,7 @@ window.Blatt = (() => {
     /* Kennung des Aufmaßes: kurz, aus dem Code gebildet, steht auf jeder Seite (eine einzelne Seite bleibt zuordenbar) */
     const kennung = e.beispiel ? 'AM-BEISPIEL' : V === 'betrieb' && bt.nr ? String(bt.nr) : (() => { const q = String(e.code || (pr.name || '') + heute + wins.length); let a = 2166136261; for (let i = 0; i < q.length; i++) { a ^= q.charCodeAt(i); a = Math.imul(a, 16777619); } const Z = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o = ''; for (let i = 0; i < 6; i++) o += Z[(a >>> (i * 5)) & 31]; return 'AM-' + o; })();
     try { doc.setDocumentProperties({ title: laufTitel, subject: 'Fenster-Aufmaß ' + kennung + (titelName ? ' · ' + titelName : ''), author: V === 'betrieb' ? (bt.name || 'eeziframes') : 'eeziframes', keywords: 'Aufmaß, Fenster, Maße in mm, ' + kennung, creator: 'eeziframes' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
+    const kl = Array.isArray(e.klaerung) ? e.klaerung : AW.klaerung(wins, pr), stand = e.klaerStand || {}, geklaert = (r) => !!(stand[r.id] && stand[r.id].ok);
 
     /* ---------- Seitenrahmen ---------- */
     let y = 0;
@@ -110,42 +112,56 @@ window.Blatt = (() => {
       fill(hell ? '#000000' : '#ffffff');
       ZEICHEN.forEach((pts) => doc.lines(pts.slice(1).map((p, i) => [(p[0] - pts[i][0]) * u, (p[1] - pts[i][1]) * u]), x + pts[0][0] * u, y0 + pts[0][1] * u, [1, 1], 'F', true));
     }
+    /* Logo des Betriebs (aus dem Betriebskonto) auf dem dunklen Band: dunkle Logos auf hellem Feld, helle direkt; ohne Logo die Initiale */
+    const logoFmt = (d) => (/^data:image\/png/i.test(d) ? 'PNG' : /^data:image\/jpe?g/i.test(d) ? 'JPEG' : '');
+    function betriebZeichen(x, cy, hoehe) {
+      const lg = bt.logo && bt.logo.data && logoFmt(bt.logo.data) && bt.logo.w > 0 && bt.logo.h > 0 ? bt.logo : null;
+      if (lg) {
+        const r = lg.w / lg.h, hh = hoehe, ww = Math.min(hoehe * 3.6, hh * r), h2 = ww / r, pad = lg.grund === 'dunkel' ? 0 : hoehe * 0.12, padX = pad * 1.6;
+        if (pad) { fill('#ffffff'); rr(x, cy - h2 / 2 - pad, ww + 2 * padX, h2 + 2 * pad, Math.min(2.4, hoehe * 0.2)); }
+        try { doc.addImage(lg.data, logoFmt(lg.data), x + padX, cy - h2 / 2, ww, h2); return ww + 2 * padX; } catch (err) { /* ohne Logo weiter */ }
+      }
+      const r = hoehe / 2; fill(HELL); doc.circle(x + r, cy, r, 'F'); font('extra', hoehe * 1.55, BUEHNE); txt(initial(bt.name), x + r, cy + hoehe * 0.19, { align: 'center' });
+      return hoehe;
+    }
     const kopfband = (gross) => {
-      const bh = gross ? 24 : 9;
-      fill(BRAND); doc.rect(0, 0, W, bh, 'F');
+      const bh = gross ? 28 : 11;
+      fill(BUEHNE); doc.rect(0, 0, W, bh, 'F');
       if (V === 'betrieb') {
-        const r = gross ? 6.5 : 2.8, cx = M + r, cy = bh / 2;
-        fill('#ffffff'); doc.circle(cx, cy, r, 'F');
-        font('black', gross ? 13 : 6, BRAND); txt(initial(bt.name), cx, cy + (gross ? 4.6 : 2.1), { align: 'center' });
-        font('bold', gross ? 15 : 8, '#ffffff'); txt(bt.name || 'Betrieb', cx + r + (gross ? 5 : 2.5), cy + (gross ? 5.2 : 2.8));
-        font('normal', gross ? 8 : 6.8, '#ffffff'); alpha(0.85); txt(gross ? 'Aufmaß · erfasst vom Kunden mit eeziframes' : laufTitel + ' · ' + kennung, XR, cy + (gross ? 1 : 2.3), { align: 'right' }); alpha(1);
-        if (gross) { font('normal', 8, '#ffffff'); alpha(0.8); txt([bt.nr, bt.eingegangen ? 'eingegangen ' + bt.eingegangen : heute].filter(Boolean).join(' · '), XR, cy + 6, { align: 'right' }); alpha(1); }
+        const zw = betriebZeichen(M, bh / 2, gross ? 14 : 6.4), nx = M + zw + (gross ? 5 : 3);
+        /* rechts Kennung und Eingang; links bleibt nur der Platz bis dorthin, damit ein breites Logo nichts überdeckt */
+        const kicker = VERSAL('Aufmaß · ' + kennung), stand = [bt.eingegangen ? 'eingegangen ' + bt.eingegangen : '', heute].filter(Boolean).join(' · ');
+        let rw = 70;
+        if (gross) { font('bold', 7.2); rw = tw(kicker) + kicker.length * 0.55; font('normal', 8); rw = Math.max(rw, tw(stand)) + 6; }
+        const frei = XR - nx - rw;
+        const bname = bt.name || 'Ihr Betrieb'; let gn = gross ? 15 : 8.6; font('extra', gn, '#ffffff');
+        while (gn > (gross ? 10.5 : 7) && tw(bname) > frei) { gn -= 0.5; font('extra', gn); } // langer Name neben breitem Logo: kleiner statt abgeschnitten
+        txt(wrap(bname, frei)[0], nx, bh / 2 + (gross ? -0.6 : 1.1));
+        if (gross) { font('normal', 7.6, HELL2); const sub = 'Aufmaß Ihres Kunden · übermittelt mit eeziframes'; txt(tw(sub) <= frei ? sub : wrap('Übermittelt mit eeziframes', frei)[0], nx, bh / 2 + 5); }
+        if (gross) { font('bold', 7.2, GRUEN); txt(kicker, XR, bh / 2 - 1.6, { align: 'right', charSpace: 0.55 }); font('normal', 8, HELL2); txt(stand, XR, bh / 2 + 4, { align: 'right' }); }
+        else { font('normal', 6.8, HELL2); txt(laufTitel + ' · ' + kennung, XR, bh / 2 + 1.1, { align: 'right' }); }
       } else {
-        marke(M, gross ? 5 : 1.6, gross ? 14 : 5.8, true);
-        wortmarke(M + (gross ? 19 : 7.8), gross ? 17.2 : 6.6, gross ? 16 : 8, '#ffffff');
-        font('normal', gross ? 8 : 6.5, '#ffffff'); alpha(0.78);
-        if (gross) { txt('AUFMASSBLATT · ' + kennung, XR, 10, { align: 'right', charSpace: 0.6 }); txt(heute, XR, 15.5, { align: 'right' }); }
-        else txt(laufTitel + ' · ' + heute + ' · ' + kennung, XR, 6.3, { align: 'right' });
-        alpha(1);
+        marke(M, gross ? 7 : 2.6, gross ? 14 : 5.8, true);
+        wortmarke(M + (gross ? 19 : 7.8), gross ? 17 : 7.1, gross ? 16 : 8, '#ffffff');
+        if (gross) { font('bold', 7.2, GRUEN); txt('AUFMASSBLATT · ' + kennung, XR, 12, { align: 'right', charSpace: 0.55 }); font('normal', 8, HELL2); txt(heute, XR, 17.5, { align: 'right' }); }
+        else { font('normal', 6.6, HELL2); txt(laufTitel + ' · ' + heute + ' · ' + kennung, XR, 7, { align: 'right' }); }
       }
       doc.setTextColor.apply(doc, rgb(INK));
       return bh;
     };
-    const neueSeite = () => { doc.addPage(); y = kopfband(false) + 10; };
-    const EIGENE = V !== 'betrieb', EIGENE_H = 46;
+    const neueSeite = () => { doc.addPage(); y = kopfband(false) + 9; };
     const seiteNr = () => doc.getCurrentPageInfo().pageNumber;
-    const unten = () => (EIGENE && seiteNr() === 2 ? BOTTOM - EIGENE_H - 6 : BOTTOM);
-    const platz = (h2) => { if (y + h2 > unten()) neueSeite(); };
-    let codeSeite = 2, fbBox = null;
-    /* Senkrechter Markenstreifen am rechten Rand jeder Seite: Werbung, die nicht abtrennbar ist */
+    const unten = () => BOTTOM;
+    const platz = (h2) => { if (y + h2 > unten()) { neueSeite(); return true; } return false; };
+    let codeSeite = 0, fbBox = null;
+    /* Senkrechter Markenstreifen am rechten Rand (nur in den Blättern der Hauseigentümer): Hinweis, der sich nicht abtrennen lässt */
     const streifen = (bandH) => {
+      if (!STREIFEN) return;
       const x0 = W - STREIFEN, y0 = bandH, y1 = H - 12, len = y1 - y0;
-      fill(BRAND); doc.rect(x0, y0, STREIFEN, len, 'F');
-      const text = V === 'betrieb'
-        ? String(bt.name || 'Betrieb').toUpperCase() + '  ·  Aufmaß Ihres Kunden  ·  erstellt mit eeziframes  ·  ' + HOST
-        : 'eeziframes  ·  Fenster ausmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen, Seite ' + codeSeite + '  ·  3 Projekte kostenlos';
-      let size = 6.8; font('bold', size, '#ffffff');
-      while (tw(text) > len - 16 && size > 5.2) { size -= 0.2; font('bold', size, '#ffffff'); }
+      fill(BUEHNE); doc.rect(x0, y0, STREIFEN, len, 'F');
+      const text = 'eeziframes  ·  Fenster ausmessen. Selbst. eezi.  ·  ' + HOST + '  ·  Für Fensterbauer: Aufmaß per Code in Ihr Konto holen' + (codeSeite ? ', Seite ' + codeSeite : '') + '  ·  3 Projekte kostenlos';
+      let size = 6.8; font('bold', size, HELL);
+      while (tw(text) > len - 16 && size > 5.2) { size -= 0.2; font('bold', size, HELL); }
       const tl = tw(text), ty = y1 - 9 - (len - 16 - tl) / 2;
       txt(text, x0 + STREIFEN / 2 + size * 0.12, ty, { angle: 90 });
       marke(x0 + 1.2, y1 - 7.2, STREIFEN - 2.4, true);
@@ -153,10 +169,20 @@ window.Blatt = (() => {
     /* Beispiel aus der Führung: schräg „Beispiel“ über jeder Seite, damit es nicht als echtes Aufmaß durchgeht */
     const wasserzeichen = () => {
       const a = 34 * Math.PI / 180, s = 'BEISPIEL';
-      font('black', 96, '#b42318'); alpha(0.07);
+      font('extra', 96, '#b42318'); alpha(0.07);
       const l = tw(s), cxw = W / 2, cyw = H / 2 + 12;
       txt(s, cxw - Math.cos(a) * l / 2, cyw + Math.sin(a) * l / 2, { angle: 34 });
       alpha(1);
+    };
+    /* Fußzeile links: nur so lang, wie neben der Seitenzahl Platz ist; erst fällt der Zusatz weg, dann der Host, zuletzt wird der Name gekürzt */
+    const fussLinks = (frei) => {
+      const name = String(bt.name || 'Ihr Betrieb').replace(/\s+/g, ' ').trim(), passt = (x) => tw(x) <= frei;
+      const varianten = V === 'betrieb'
+        ? [[name, 'Aufmaß übermittelt mit eeziframes', HOST, 'Vor der Fertigung Feinaufmaß vor Ort.'], [name, 'Aufmaß übermittelt mit eeziframes', HOST], [name, 'übermittelt mit eeziframes'], [name]]
+        : [['Erstellt mit eeziframes', HOST, 'Vor der Fertigung Feinaufmaß vor Ort.'], ['Erstellt mit eeziframes', HOST], ['Erstellt mit eeziframes']];
+      for (let k = 0; k < varianten.length; k++) { const s2 = varianten[k].join(' · '); if (passt(s2)) return s2; }
+      let kurz = name; while (kurz.length > 1 && !passt(kurz + '...')) kurz = kurz.slice(0, -1);
+      return kurz.trim() + '...';
     };
     const fuss = () => {
       const n = doc.getNumberOfPages();
@@ -164,10 +190,10 @@ window.Blatt = (() => {
         doc.setPage(i);
         stroke(LINE); doc.setLineWidth(0.25); doc.line(M, H - 11.5, XR, H - 11.5);
         font('normal', 7.2, GREY);
-        txt(V === 'betrieb' ? 'Erstellt mit eeziframes für ' + (bt.name || 'Ihren Betrieb') + ' · ' + HOST + ' · Vor der Fertigung Feinaufmaß vor Ort.' : 'Erstellt mit eeziframes · ' + HOST + ' · Vor der Fertigung Feinaufmaß vor Ort.', M, H - 7.2);
-        txt(kennung + ' · Seite ' + i + ' von ' + n, XR, H - 7.2, { align: 'right' });
-        streifen(i === 1 ? 24 : 9);
-        if (i === 2 && EIGENE) eigeneKunden(BOTTOM - EIGENE_H);
+        const rechts = kennung + ' · Seite ' + i + ' von ' + n;
+        txt(fussLinks(XR - M - tw(rechts) - 4), M, H - 7.2);
+        txt(rechts, XR, H - 7.2, { align: 'right' });
+        streifen(i === 1 ? 28 : 11);
         if (e.beispiel) wasserzeichen();
       }
       if (fbBox) { doc.setPage(1); fbBox(); }
@@ -185,444 +211,421 @@ window.Blatt = (() => {
         return true;
       } catch (err) { return false; }
     }
+
     /* ---------- Bausteine ---------- */
-    const eyebrow = (s, x, y0, color) => { font('bold', 7, color || ACC); txt(VERSAL(s), x, y0, { charSpace: 0.5 }); };
-    const pille = (s, cx, cy, color, size) => { font('bold', size || 6.6); const w = tw(s) + 3.4, hh = (size || 6.6) * 0.62; fill(color); rr(cx - w / 2, cy - hh / 2, w, hh, hh / 2); doc.setTextColor(255, 255, 255); txt(s, cx, cy + hh * 0.33, { align: 'center' }); return w; };
-    const chip = (s, x, y0, bg, fg, size) => { font('bold', size || 7.5); const w = tw(s) + 5, hh = (size || 7.5) * 0.8; fill(bg); rr(x, y0, w, hh, hh / 2); doc.setTextColor.apply(doc, rgb(fg)); txt(s, x + 2.5, y0 + hh * 0.7); return w; };
-    const swatch = (hex, x, cy, r) => { fill(hex); stroke(LINE); doc.setLineWidth(0.25); doc.circle(x, cy, r || 1.6, 'FD'); };
-    /* Maßlinie mit Endstrichen und Beschriftung in einer Pille */
-    function mass(x1, y1, x2, y2, label, color, gestrichelt, pillOffset) {
-      stroke(color); doc.setLineWidth(0.35); dash(!!gestrichelt);
-      doc.line(x1, y1, x2, y2); dash(false);
-      const horiz = Math.abs(y2 - y1) < 0.01, tick = 1.4;
-      if (horiz) { doc.line(x1, y1 - tick, x1, y1 + tick); doc.line(x2, y2 - tick, x2, y2 + tick); }
-      else { doc.line(x1 - tick, y1, x1 + tick, y1); doc.line(x2 - tick, y2, x2 + tick, y2); }
-      if (label) pille(label, (x1 + x2) / 2 + (pillOffset ? pillOffset[0] : 0), (y1 + y2) / 2 + (pillOffset ? pillOffset[1] : 0), color === MO ? MO_T : color, 8.2);
-    }
-    /* Die Fensterzeichnung: Wand, Maueröffnung mit Laibung, Element mit Flügeln, Symbole, Sprossen, Griffe, Fensterbank; dazu die Maße */
-    function zeichnung(w, bx, by, bw, bh, alle) {
-      const d = h.derive(w), mo = w.mo || {};
-      const moW = d.moW || (d.elW ? d.elW + 80 : 1200), moH = d.moH || (d.elH ? d.elH + 70 : 1400);
-      const elW = d.elW || moW - 80, elH = d.elH || moH - 70, tuer = istTuer(w), art = w.art || 'fenster', bru = tuer ? 0 : num(w.bru);
-      const randL = alle ? (bru ? 27 : 17) : 16, randR = alle ? 27 : 17, randO = alle ? 16 : 13, randU = alle ? (bru ? 25 : 13) : 14;
-      const innenW = bw - randL - randR, innenH = bh - randO - randU;
-      const s = Math.min(innenW / moW, innenH / moH);
-      const ow = moW * s, oh = moH * s, ox = bx + randL + (innenW - ow) / 2, oy = by + randO + (innenH - oh) / 2;
-      /* Wand um die Öffnung, dann die Öffnung mit Laibung */
-      const wr = Math.min(10, ow * 0.1, oh * 0.1);
-      fill(WALL); doc.rect(ox - wr, oy - wr, ow + 2 * wr, oh + 2 * wr, 'F');
-      fill(LAIB); stroke(INK); doc.setLineWidth(0.4); doc.rect(ox, oy, ow, oh, 'FD');
-      const lt = Math.max(1, Math.min(ow, oh) * 0.045); fill(LAIB2); doc.rect(ox, oy, ow, lt, 'F'); doc.rect(ox, oy, lt, oh, 'F');
-      /* Element: mittig, unten auf der Fensterbank */
-      const ew = Math.min(elW, moW * 0.985) * s, eh = Math.min(elH, moH * 0.985) * s, ex = ox + (ow - ew) / 2, ey = oy + oh - eh - lt * 0.5;
-      const fc = (h.farbe ? h.farbe(w, 'aussen') : h.col(w.fa))[2], f = Math.max(1.1, ew * 0.055);
-      fill(fc); stroke(INK); doc.setLineWidth(0.45); doc.rect(ex, ey, ew, eh, 'FD');
-      let ix = ex + f, iy = ey + f; const iw = ew - 2 * f; let ih = eh - 2 * f;
-      const da = w.richtung === 'aussen';
-      const glas = (gx, gy, gw, gh) => { fill(GLASS); doc.rect(gx, gy, gw, gh, 'F'); alpha(0.55); fill('#ffffff'); doc.triangle(gx, gy + gh, gx, gy + gh * 0.4, gx + gw * 0.6, gy, 'F'); alpha(1); stroke(INK); doc.setLineWidth(0.25); doc.rect(gx, gy, gw, gh, 'S'); };
-      const symbol = (gx, gy, gw, gh, typ, din) => {
-        stroke(INK); doc.setLineWidth(0.3); alpha(0.5); dash(da);
-        if (typ === 'D' || typ === 'DK') { if (din === 'L') { doc.line(gx, gy, gx + gw, gy + gh / 2); doc.line(gx, gy + gh, gx + gw, gy + gh / 2); } else { doc.line(gx + gw, gy, gx, gy + gh / 2); doc.line(gx + gw, gy + gh, gx, gy + gh / 2); } }
-        if (typ === 'K' || typ === 'DK') { doc.line(gx, gy + gh, gx + gw / 2, gy); doc.line(gx + gw, gy + gh, gx + gw / 2, gy); }
-        dash(false); alpha(1);
-      };
-      if (w.ol) { const oh2 = ih * 0.26; glas(ix, iy, iw, oh2); symbol(ix, iy, iw, oh2, w.olT || 'K', 'L'); iy += oh2 + f * 0.7; ih -= oh2 + f * 0.7; }
-      /* Unterlicht: festes Feld unten, Glas oder Paneel */
-      if (w.ul && art === 'fenster') { const uh = Math.min(ih * 0.5, Math.max(ih * 0.18, ih * (num(w.ulH) || 400) / (elH || 1400))); if (w.ulA === 'paneel') { fill('#c9c9c6'); stroke(INK); doc.setLineWidth(0.25); doc.rect(ix, iy + ih - uh, iw, uh, 'FD'); } else glas(ix, iy + ih - uh, iw, uh); ih -= uh + f * 0.7; }
-      const S = w.sashes && w.sashes.length ? w.sashes : [{ t: 'DK', din: 'L' }], n = S.length, gap = tuer ? f * 0.2 : w.teilung === '2s' ? f * 0.3 : f * 0.85, sw = (iw - gap * (n - 1)) / n;
-      S.forEach((sa, i) => {
-        const fest = sa.t === 'F' || art === 'fest', sx = ix + i * (sw + gap), g = fest && art !== 'hst' ? 0 : Math.max(0.9, sw * (fest ? 0.06 : 0.085));
-        if (!fest || art === 'hst') { fill(fc); stroke(INK); doc.setLineWidth(0.3); doc.rect(sx, iy, sw, ih, 'FD'); }
-        const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ih - 2 * g;
-        glas(gx, gy, gw, gh);
-        (w.bars || []).filter((b) => b.s === i).forEach((b) => { stroke(fc === '#f1f0ea' ? '#b9b4a8' : fc); doc.setLineWidth(Math.max(0.5, gw * 0.035)); if (b.d === 'v') doc.line(gx + gw * b.p, gy, gx + gw * b.p, gy + gh); else doc.line(gx, gy + gh * b.p, gx + gw, gy + gh * b.p); });
-        if (sa.t === 'S' || sa.t === 'PS') { const dir = sa.din === 'L' ? 1 : -1, cx = gx + gw / 2, cy = gy + gh * 0.6, al = gw * 0.22; stroke(INK); doc.setLineWidth(0.35); alpha(0.6); doc.line(cx - dir * al, cy, cx + dir * al, cy); doc.line(cx + dir * al, cy, cx + dir * al - dir * 1.6, cy - 1.4); doc.line(cx + dir * al, cy, cx + dir * al - dir * 1.6, cy + 1.4); alpha(1); if (sa.t === 'PS') symbol(gx, gy, gw, gh, 'K', sa.din); }
-        else if (sa.t !== 'X') symbol(gx, gy, gw, gh, sa.t === 'P' ? 'D' : sa.t, sa.din);
-        if (sa.t === 'D' || sa.t === 'DK' || sa.t === 'P') { const hx = sa.din === 'L' ? sx + sw - g * 0.5 : sx + g * 0.5, hl = Math.min(ih * 0.16, 9), hw = Math.max(0.8, g * 0.7); fill('#4a4a4f'); rr(hx - hw / 2, iy + ih / 2 - hl / 2, hw, hl, hw / 2); }
-        if (sa.t === 'S' || sa.t === 'PS') { const hx = sa.din === 'L' ? sx + g * 0.5 : sx + sw - g * 0.5, hl = Math.min(ih * (sa.t === 'PS' ? 0.12 : 0.2), sa.t === 'PS' ? 8 : 12), hw = Math.max(0.9, g * 0.8); fill('#4a4a4f'); rr(hx - hw / 2, iy + ih * 0.52 - hl / 2, hw, hl, hw / 2); }
-        if (sa.t === 'K') { const hl = Math.min(sw * 0.16, 9), hw = Math.max(0.8, g * 0.7); fill('#4a4a4f'); rr(sx + sw / 2 - hl / 2, iy + g * 0.2, hl, hw, hw / 2); }
-      });
-      if (tuer) {
-        /* Schwelle und Fußboden statt Fensterbank */
-        fill('#c9ccd0'); stroke(INK); doc.setLineWidth(0.3); doc.rect(ex, ey + eh - Math.max(0.8, f * 0.5), ew, Math.max(0.8, f * 0.5), 'FD');
-        stroke(INK); doc.setLineWidth(0.6); doc.line(ox - wr - 4, oy + oh, ox + ow + wr + 4, oy + oh);
-        stroke(GREY); doc.setLineWidth(0.3); for (let hx = ox - wr - 2; hx < ox + ow + wr + 4; hx += 4) doc.line(hx, oy + oh, hx - 2, oy + oh + 2);
-        font('normal', 7.4, GREY); txt('Fußboden', ox + ow + wr + 3, oy + oh + 4.8, { align: 'right' });
-      } else {
-        /* Fensterbank */
-        const fb = h.lab('fba', w.fba); fill(fb === 'Naturstein' ? '#cfc8bb' : '#c9ccd0'); stroke(INK); doc.setLineWidth(0.3); doc.rect(ox - ow * 0.025, oy + oh - lt * 0.5, ow * 1.05, lt * 0.5 + 1, 'FD');
-      }
-      if (!alle) {
-        /* Vier Maße wie im Startbild der App */
-        if (d.moH) mass(ox - 7, oy, ox - 7, oy + oh, th(d.moH) + ' mm', MO);
-        if (d.moW) mass(ox, oy + oh + 7.5, ox + ow, oy + oh + 7.5, th(d.moW) + ' mm', MO);
-        if (d.elH) mass(ex + ew + 7, ey, ex + ew + 7, ey + eh, th(d.elH) + ' mm', EL);
-        if (d.elW) mass(ex, ey - 6.5, ex + ew, ey - 6.5, th(d.elW) + ' mm', EL);
-        return;
-      }
-      /* Alle acht Handmaße: Breiten oben, Mitte, unten; Höhen links, Mitte, rechts; Element Breite und Höhe */
-      const L = (k) => (num(mo[k]) ? th(mo[k]) : '–');
-      mass(ox, oy - 5.5, ox + ow, oy - 5.5, 'oben ' + L('wt'), MO);
-      mass(ox, oy + oh + 6.5, ox + ow, oy + oh + 6.5, 'unten ' + L('wb'), MO);
-      mass(ox + lt, oy + oh / 2, ox + ow - lt, oy + oh / 2, 'Mitte ' + L('wm'), MO, true, [0, 4.5]);
-      mass(ox - 6.5, oy, ox - 6.5, oy + oh, 'links ' + L('hl'), MO, false, [0, -oh * 0.22]);
-      mass(ox + ow + 6.5, oy, ox + ow + 6.5, oy + oh, 'rechts ' + L('hr'), MO, false, [0, -oh * 0.22]);
-      mass(ox + ow / 2, oy + lt, ox + ow / 2, oy + oh - lt, 'Mitte ' + L('hm'), MO, true, [0, -oh * 0.24]);
-      if (d.elW) mass(ex, oy - 12.5, ex + ew, oy - 12.5, 'Element ' + th(d.elW), EL);
-      if (d.elH) mass(ox + ow + 16, ey, ox + ow + 16, ey + eh, 'Element ' + th(d.elH), EL, false, [0, eh * 0.22]);
-      if (bru) {
-        const fy = Math.min(oy + oh + 21, oy + oh + bru * s), flx = ox - 22, frx = ox + ow + 10;
-        stroke(INK); doc.setLineWidth(0.6); doc.line(flx, fy, frx, fy);
-        stroke(GREY); doc.setLineWidth(0.3); for (let hx = flx + 2; hx < frx; hx += 4) doc.line(hx, fy, hx - 2, fy + 2);
-        mass(ox - 16, oy + oh, ox - 16, fy, 'Brüstung ' + th(bru), INK);
-        font('normal', 7.4, GREY); txt('Fußboden', frx - 1, fy + 4.8, { align: 'right' });
-      }
-    }
-    /* Kleines Fenster für Tabellen */
-    function mini(w, x, y0, s) {
-      const d = h.derive(w), a = (d.elW || 1000) / (d.elH || 1200), bw = a >= 1 ? s : s * a, bh = a >= 1 ? s / a : s;
-      ansicht(w, x + (s - bw) / 2, y0 + (s - bh) / 2, bw, bh);
-    }
-    /* Fenster in gegebener Größe: Rahmen, Flügel, Oberlicht */
-    function ansicht(w, bx, by, bw, bh) {
-      const fc = (h.farbe ? h.farbe(w, 'aussen') : h.col(w.fa))[2];
-      fill(fc); stroke(INK); doc.setLineWidth(0.3); doc.rect(bx, by, bw, bh, 'FD');
-      const f = Math.max(0.5, bw * 0.08); let ix = bx + f, iy = by + f; const iw = bw - 2 * f; let ih = bh - 2 * f;
-      if (w.ol) { const oh = ih * 0.26; fill(GLASS); doc.rect(ix, iy, iw, oh, 'FD'); iy += oh + f * 0.7; ih -= oh + f * 0.7; }
-      const S = w.sashes && w.sashes.length ? w.sashes : [{ t: 'DK' }], n = S.length, gap = w.teilung === '2s' ? f * 0.25 : f * 0.8, sw = (iw - gap * (n - 1)) / n;
-      S.forEach((sa, i) => { fill(GLASS); doc.setLineWidth(0.2); doc.rect(ix + i * (sw + gap), iy, sw, ih, 'FD'); });
-    }
-    const teilungText = (w) => {
-      /* Seitenteile zählen nicht als Flügel, sie stehen dahinter */
-      const st = (w.sashes || []).filter((x) => x.st).length, n = ((w.sashes || []).length - st) || 1, art = w.art || 'fenster';
-      const seiten = st ? ', ' + (st === 2 ? '2 Seitenteile' : 'Seitenteil ' + (w.seiten === 'links' ? 'links' : 'rechts')) + (num(w.seitenB) ? ' je ' + th(w.seitenB) + ' mm' : '') : '';
-      if (art === 'fest') return n + (n === 1 ? ' Feld' : ' Felder') + ', fest verglast';
-      const ol = w.ol ? ', ' + (h.lab('olT', w.olT) || 'Oberlicht') : '';
-      if (art === 'hst') return 'Hebe-Schiebe-Tür, ' + n + (n === 1 ? ' Teil' : ' Teile') + ', ' + (h.lab('hstSchema', (w.hst || {}).schema) || 'Schema A').split(' (')[0] + ol;
-      if (art === 'fsw') return 'Faltschiebewand, ' + n + ' Flügel, ' + (h.lab('fswSchema', (w.fsw || {}).schema) || 'Paket links') + ol;
-      if (art === 'psk') return 'PSK-Tür, ' + n + ' Teile, ' + ((w.psk || {}).schema === 'C' ? '2 Schiebeflügel mittig' : (w.psk || {}).richtung === 'L' ? 'Schiebeflügel links' : 'Schiebeflügel rechts');
-      if (art === 'balkon') return 'Balkontür, ' + n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : '') + seiten + ol + (w.paneel === 'paneel' ? ', unten Paneel' : '');
-      return n + ' Flügel' + (w.teilung === '2s' ? ', Stulp' : w.teilung === '2p' ? ', mit Pfosten' : w.teilung === '3' || w.teilung === '4' ? ', Mitte fest' : '') + seiten + ol + (w.ul ? ', ' + (h.lab('ul', w.ulA) || 'Unterlicht') + ' ' + th(w.ulH) + ' mm' : '');
+    const kicker = (s, x, y0, color, o) => { font('bold', (o && o.size) || 7.2, color || GRUEN_T); txt(VERSAL(s), x, y0, Object.assign({ charSpace: 0.55 }, o && o.align ? { align: o.align } : {})); };
+    /* Haken: grüner Kreis mit dunklem Haken (wie die Haken-Chips der Website) */
+    const haken = (cx, cy, r) => { fill(GRUEN); doc.circle(cx, cy, r, 'F'); stroke(INK); doc.setLineWidth(Math.max(0.25, r * 0.28)); doc.lines([[r * 0.38, r * 0.4], [r * 0.72, -r * 0.82]], cx - r * 0.5, cy + r * 0.02, [1, 1], 'S', false); };
+    const punkt = (cx, cy, r, c) => { fill(c || WARN_P); doc.circle(cx, cy, r, 'F'); };
+    /* Chip: Pille mit Rand; art 'ok' mit Haken, 'warn' mit Punkt */
+    const chip = (s, x, y0, art, size) => {
+      size = size || 7.6; font('bold', size); const hh = size * 0.84, ic = art ? hh * 0.62 : 0, w = tw(s) + 5 + ic;
+      stroke(LINE); doc.setLineWidth(0.35); fill('#ffffff'); rr(x, y0, w, hh, hh / 2, 'FD');
+      if (art === 'ok') haken(x + 2.5 + ic / 2 - 0.3, y0 + hh / 2, ic * 0.42); else if (art === 'warn') punkt(x + 2.5 + ic / 2 - 0.3, y0 + hh / 2, ic * 0.28);
+      doc.setTextColor.apply(doc, rgb(INK)); txt(s, x + 2.5 + ic, y0 + hh * 0.68); return w;
     };
-    const oeffnungText = (w) => (h.opening ? h.opening(w) : (w.sashes || []).map((x) => TYP[x.t] + (x.t === 'D' || x.t === 'DK' ? (x.din === 'L' ? ' DIN links' : ' DIN rechts') : '')).join(' · ')) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ' · nach außen' : '');
-    const sonneText = (w) => (h.sonne ? h.sonne(w) : (h.lab('roll', w.roll) || 'keiner') + (w.roll === 'aufsatz' || w.roll === 'vorbau' ? ', ' + h.lab('antrieb', w.antrieb) : ''));
-    const innenText = (w) => (h.innen ? h.innen(w) : (!w.iart || w.iart === 'keiner' ? 'keiner' : (h.lab('iart', w.iart) || w.iart) + ', ' + (h.lab('ifarbe', w.ifarbe) || '')));
-    const griffText = (w) => (w.art === 'fest' ? 'ohne Griff' : offen(w, 'griff') ? OT : (w.art === 'hst' ? (h.lab('hstGriff', w.griff) || 'Hebegriff') : (h.lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + (h.griffFarbe ? h.griffFarbe(w) : (h.lab('gf', w.gf) || 'weiß') + (w.wunschGf ? ', Wunsch: ' + w.wunschGf : '')))) + (w.art === 'balkon' ? '; außen ' + (offen(w, 'griffA') ? OT : h.lab('griffA', (w.bt || {}).griffA) || 'kein Griff') : '');
-    const rahmen = (w, seite) => (h.farbe ? h.farbe(w, seite) : farbe(seite === 'innen' ? (w.gleich ? w.fa : w.fi) : w.fa));
-    const montageText = (w) => (offen(w, 'montage') ? 'nach Vorschlag des Fensterbauers' : [w.neu ? (w.durchbruch !== false ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung');
-    /* Schwelle bzw. Fensterbank in Worten, offen berücksichtigt */
-    const schwelleText = (w) => (w.art === 'psk' ? 'mit Schwelle (PSK)' : offen(w, 'schwelle') ? OT : h.lab('schwelle', tuerCfg(w).schwelle) || 'flache Schwelle');
-    const bankText = (w, k) => (offen(w, k) ? OT : h.lab(k, w[k]) || 'behalten');
-    const rcText = (w) => { const a = A(); return a ? a.rcText(w) : h.lab('rc', w.rc) || 'Basisschutz'; };
-    const bestell = (w) => { const d = h.derive(w); return d.moW && d.moH ? th(d.moW - 2 * ab.seite) + ' × ' + th(d.moH - ab.oben) + ' mm' : '–'; };
-    const farbe = (k) => h.col(k);
-    /* Karte mit Titel und Zeilen [Begriff, Wert, { swatch, bold, col }]; opt.lw = Breite der Begriffsspalte, opt.spalten = 2 für zwei Spalten */
-    function zeilenH(rows, w, opt) {
-      const lw = opt.lw || 26; let hh = 0;
-      rows.forEach((r) => { font('normal', opt.fs || 8); const v = wrap(r[1], w - lw - 4 - (r[2] && r[2].swatch ? 5.5 : 0)); font('normal', (opt.fs || 8) - 0.6); const k = wrapK(r[0], lw - 2); hh += Math.max(v.length, k.length, 1) * ((opt.fs || 8) * 0.46) + 1.5; });
-      return hh;
-    }
-    function karteH(rows, w, titel, opt) {
-      opt = opt || {};
-      if (opt.spalten === 2) { const m = Math.ceil(rows.length / 2), cw2 = (w - 8) / 2 - 2; return (titel ? 9 : 4) + Math.max(zeilenH(rows.slice(0, m), cw2, opt), zeilenH(rows.slice(m), cw2, opt)) + 3; }
-      return (titel ? 9 : 4) + zeilenH(rows, w - 8, opt) + 3;
-    }
-    function zeilen(rows, x, y0, w, opt) {
-      const lw = opt.lw || 26, fs = opt.fs || 8; let yy = y0;
+    const swatch = (hex, x, cy, r) => { fill(hex); stroke(LINE); doc.setLineWidth(0.25); doc.circle(x, cy, r || 1.6, 'FD'); };
+    /* Karte: weiß, Rand wie die Karten der Website (2 px), optional ein Strich links in Warnfarbe */
+    const karteRand = (x, y0, w, h2, o) => { o = o || {}; stroke(o.rand || LINE); doc.setLineWidth(o.dick || 0.5); fill('#ffffff'); rr(x, y0, w, h2, 2.6, 'FD'); if (o.strich) { fill(o.strich); doc.rect(x + 0.25, y0 + 2.2, 1.1, h2 - 4.4, 'F'); } };
+    /* Zeilen [Begriff, Wert, { swatch, bold, col, offen }], Begriffsspalte lw */
+    const ZL = (fs) => fs * 0.44;
+    function zeilenH(rows, w, o) { const lw = o.lw || 26, fs = o.fs || 8; let hh = 0; rows.forEach((r) => { font('normal', fs); const v = wrap(r[1], w - lw - (r[2] && (r[2].swatch || r[2].offen) ? 4.5 : 0)); font('normal', fs - 0.6); const k = wrapK(r[0], lw - 2); hh += Math.max(v.length, k.length, 1) * ZL(fs) + 1.3; }); return hh; }
+    function zeilen(rows, x, y0, w, o) {
+      const lw = o.lw || 26, fs = o.fs || 8; let yy = y0;
       rows.forEach((r) => {
-        font('normal', fs - 0.6, GREY); const kl = wrapK(r[0], lw - 2); txt(kl, x, yy + 3);
-        let vx = x + lw; if (r[2] && r[2].swatch) { swatch(r[2].swatch, vx + 1.8, yy + 2, 1.7); vx += 5.5; }
-        font(r[2] && r[2].bold ? 'bold' : 'normal', fs, r[2] && r[2].col ? r[2].col : INK); const v = wrap(r[1], w - (vx - x)); txt(v, vx, yy + 3);
-        yy += Math.max(v.length, kl.length, 1) * (fs * 0.46) + 1.5;
+        const x2 = r[2] || {};
+        font('normal', fs - 0.6, GREY); const kl2 = wrapK(r[0], lw - 2); txt(kl2, x, yy + 3);
+        let vx = x + lw;
+        if (x2.swatch) { swatch(x2.swatch, vx + 1.7, yy + 2, 1.6); vx += 4.5; } else if (x2.offen) { punkt(vx + 1.2, yy + 2, 0.95); vx += 4.5; }
+        font(x2.bold || x2.offen ? 'bold' : 'normal', fs, x2.col || (x2.offen ? WARN : INK)); const v = wrap(r[1], w - (vx - x)); txt(v, vx, yy + 3);
+        yy += Math.max(v.length, kl2.length, 1) * ZL(fs) + 1.3;
       });
       return yy - y0;
     }
-    function karte(x, y0, w, titel, rows, opt) {
-      opt = opt || {};
-      const hh = Math.max(opt.minH || 0, karteH(rows, w, titel, opt));
-      fill(opt.bg || '#ffffff'); stroke(opt.rand || LINE); doc.setLineWidth(0.3); rr(x, y0, w, hh, 3, 'FD');
-      let yy = y0 + 5.2;
-      if (titel) { eyebrow(titel, x + 4, yy, opt.titelCol || GREY); yy += 5.2; }
-      if (opt.spalten === 2) { const m = Math.ceil(rows.length / 2), cw2 = (w - 8) / 2 - 2; zeilen(rows.slice(0, m), x + 4, yy, cw2, opt); zeilen(rows.slice(m), x + 4 + cw2 + 4, yy, cw2, opt); }
-      else zeilen(rows, x + 4, yy, w - 8, opt);
-      return hh;
+    /* Notiz des Kunden: Zitat mit Strich links, Stelle darüber */
+    const notizH = (n, w) => { font('normal', 8); return 3.6 + wrap('„' + n[1] + '“', w - 5).length * ZL(8) + 1.6; };
+    function notiz(n, x, y0, w) {
+      const hh = notizH(n, w); fill(INK); doc.rect(x, y0 + 0.6, 0.7, hh - 1.8, 'F');
+      font('bold', 6.8, GREY); txt(VERSAL(n[2] === 'notiz' ? (sie ? 'Notiz des Kunden' : 'Deine Notiz') : (sie ? 'Notiz des Kunden zu ' : 'Deine Notiz zu ') + n[0]), x + 3, y0 + 2.4, { charSpace: 0.3 });
+      font('normal', 8, INK); txt(wrap('„' + n[1] + '“', w - 5), x + 3, y0 + 5.8); return hh;
     }
-    function sektion(titel, sub) { platz(16); font('black', 16, INK); txt(titel, M, y); if (sub) { font('normal', 8.5, GREY); txt(sub, XR, y, { align: 'right' }); } stroke(INK); doc.setLineWidth(0.5); doc.line(M, y + 3, XR, y + 3); y += 10; }
-    /* Kachel mit Symbol, Titel und Text */
-    const kachel = (x, y0, w, hh, titel, text, ico, col) => {
-      fill('#ffffff'); stroke(LINE); doc.setLineWidth(0.3); rr(x, y0, w, hh, 3, 'FD');
-      fill(col); alpha(0.12); doc.circle(x + 9, y0 + 9, 5.5, 'F'); alpha(1);
-      ico(x + 9, y0 + 9);
-      font('bold', 9.5, INK); const tl = wrap(titel, w - 20); txt(tl, x + 17, y0 + 8.4);
-      font('normal', 7.4, GREY); txt(wrap(text, w - 21), x + 17, y0 + 13.2 + (tl.length - 1) * 4, { lineHeightFactor: 1.25 });
-    };
-    const icoRuler = (col) => (ix, iy) => { stroke(col); doc.setLineWidth(0.6); rr(ix - 4, iy - 1.6, 8, 3.2, 0.6, 'S'); for (let k = -2.4; k <= 2.4; k += 1.6) doc.line(ix + k, iy - 1.6, ix + k, iy - 0.4); };
-    const icoCam = (col) => (ix, iy) => { stroke(col); doc.setLineWidth(0.6); rr(ix - 4, iy - 2.4, 8, 5.4, 1, 'S'); doc.circle(ix, iy + 0.4, 1.5, 'S'); doc.line(ix - 1.5, iy - 2.4, ix - 0.8, iy - 3.4); doc.line(ix + 1.5, iy - 2.4, ix + 0.8, iy - 3.4); };
-    const icoWish = () => (ix, iy) => { swatch('#383e42', ix - 2.6, iy - 0.8, 1.5); swatch('#f1f0ea', ix + 0.4, iy - 1.6, 1.5); swatch(GLASS, ix + 1.6, iy + 1.6, 1.5); };
-    const icoBest = (col) => (ix, iy) => { stroke(col); doc.setLineWidth(0.6); doc.rect(ix - 3.6, iy - 3, 7.2, 6, 'S'); dash(true); doc.rect(ix - 2.4, iy - 1.8, 4.8, 3.6, 'S'); dash(false); };
-    const icoLink = (col) => (ix, iy) => { stroke(col); doc.setLineWidth(0.7); doc.lines([[3.2, -3.2], [4, 4], [-3.2, 3.2]], ix - 5.2, iy + 1.2, [1, 1], 'S', false); doc.line(ix - 1, iy - 1, ix + 2.2, iy + 2.2); };
-    const icoCube = (col) => (ix, iy) => { stroke(col); doc.setLineWidth(0.6); doc.lines([[3.6, -2], [3.6, 2], [0, 4.2], [-3.6, 2], [-3.6, -2], [0, -4.2]], ix - 3.6, iy - 2.1, [1, 1], 'S', true); doc.line(ix - 3.6, iy - 2.1, ix, iy); doc.line(ix + 3.6, iy - 2.1, ix, iy); doc.line(ix, iy, ix, iy + 4.2); };
-    const icoLoop = (col) => (ix, iy) => { stroke(col); doc.setLineWidth(0.7); doc.circle(ix, iy, 3.3, 'S'); fill('#ffffff'); doc.rect(ix - 4, iy - 4.2, 3.2, 3.2, 'F'); fill(col); doc.triangle(ix - 1.4, iy - 3.4, ix - 1.4, iy - 1.2, ix + 0.6, iy - 2.3, 'F'); };
-    const schritte = (x, y0, w, liste) => liste.forEach((st, i) => { const sx = x + i * (w / liste.length); fill(INK); doc.circle(sx + 4, y0 + 4, 4, 'F'); font('black', 9, '#ffffff'); txt(String(i + 1), sx + 4, y0 + 5.4, { align: 'center' }); font('bold', 9, INK); txt(st[0], sx + 11, y0 + 3.6); font('normal', 7.4, GREY); txt(wrap(st[1], w / liste.length - 14), sx + 11, y0 + 7.6); });
+    /* Überschrift eines Abschnitts: Kicker, Überschrift mit Punkt, Linie */
+    function sektion(k, titel, rechts) { platz(18); kicker(k, M, y); y += 7; font('extra', 15, INK); txt(titel, M, y); if (rechts) { font('normal', 8.4, GREY); txt(rechts, XR, y, { align: 'right' }); } stroke(INK); doc.setLineWidth(0.5); doc.line(M, y + 2.6, XR, y + 2.6); y += 8; }
 
-    /* ---------- Aufbau nach Leserichtung (Begründung und Quellen: docs/GESTALTUNG.md, Abschnitt Aufmaßblatt) ----------
-       Seite 1: Kopf mit Kennung, eine Zeile Zusammenfassung, der Weg (was schon erledigt ist, der eine nächste Schritt),
-       daran angeschlossen die Box für den Fensterbauer, dann beginnt Position 1 – Seite 1 lässt sich nicht weglassen.
-       Seite 2 unten: eeziframes für die eigenen Kunden des Fensterbauers. Danach je Position eine Seite, am Ende Überblick und Code. */
+    /* ---------- Zeichnung aus modell.js (AW.plan): dieselben Teile wie im Betriebsbereich, hier mit jsPDF ---------- */
+    function planZeichnen(pl, x0, y0) {
+      pl.teile.forEach((p) => {
+        if (p.t === 'poly') {
+          if (p.o != null && p.o < 1) alpha(p.o);
+          const mode = p.f && p.s ? 'FD' : p.f ? 'F' : 'S';
+          if (p.f) fill(p.f); if (p.s) { stroke(p.s); doc.setLineWidth(Math.max(0.05, p.w)); } dash(p.d);
+          if (p.r) rr(x0 + p.p[0][0], y0 + p.p[0][1], p.p[1][0] - p.p[0][0], p.p[2][1] - p.p[1][1], p.r, mode);
+          else doc.lines(p.p.slice(1).map((q, k) => [q[0] - p.p[k][0], q[1] - p.p[k][1]]), x0 + p.p[0][0], y0 + p.p[0][1], [1, 1], mode, true);
+          dash(null); if (p.o != null && p.o < 1) alpha(1);
+        } else if (p.t === 'line') {
+          if (p.o != null && p.o < 1) alpha(p.o);
+          stroke(p.s); doc.setLineWidth(Math.max(0.05, p.w)); dash(p.d);
+          doc.line(x0 + p.p[0][0], y0 + p.p[0][1], x0 + p.p[1][0], y0 + p.p[1][1]);
+          dash(null); if (p.o != null && p.o < 1) alpha(1);
+        } else if (p.t === 'text') {
+          font(p.b >= 800 ? 'extra' : p.b >= 700 ? 'bold' : 'normal', p.g / 0.3528, p.c);
+          const w2 = tw(p.s), x = x0 + p.x, yy = y0 + p.y, versatz = p.g * 0.36;
+          if (p.bg) { const bw = w2 + p.g * 0.6, bh = p.g * 1.25; fill(p.bg); if (p.r) rr(x - bh / 2, yy - bw / 2, bh, bw, bh / 2); else rr(x - bw / 2, yy - bh / 2, bw, bh, bh / 2); }
+          if (p.r) txt(p.s, x + versatz, yy + w2 / 2, { angle: 90 });
+          else txt(p.s, p.a === 'middle' ? x - w2 / 2 : p.a === 'end' ? x - w2 : x, yy + versatz);
+        }
+      });
+    }
+    /* Kleines Fenster für Tabellen: nur das Element, in den Rahmen s × s eingepasst */
+    function mini(w, x, y0, s) { const pl = AW.plan(w, { nurElement: true, b: s, h: s, fs: 1.4 }); planZeichnen(pl, x, y0 + (s - pl.h) / 2); }
+    const oeffnungText = (w) => AW.opening(w) + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ' · nach außen' : '');
+    const offen = (w, k) => AW.istOffen(w, k);
+    const OT = AW.OFFEN_TEXT;
+
+    /* ---------- Seite 1: Übersicht ---------- */
     const FS = 8.4;
-    y = kopfband(true) + 11;
-    const gebText = [h.lab('gebaeude', pr.gebaeude), pr.baujahr ? 'Baujahr ' + pr.baujahr : ''].filter(Boolean).join(', ');
+    y = kopfband(true) + 10;
+    const gebText = [AW.lab('gebaeude', pr.gebaeude), pr.baujahr ? 'Baujahr ' + pr.baujahr : ''].filter(Boolean).join(', ');
     if (V === 'betrieb') {
-      eyebrow('Aufmaß vom Kunden · fürs Angebot', M, y, BRAND); y += 8;
-      font('black', 26, INK); txt(kd.name || 'Kunde', M, y + 2); y += 9;
-      font('normal', 10.5, INK2); txt([kd.adresse, gebText].filter(Boolean).join(' · ') || 'Objekt ohne Adresse', M, y + 2); y += 9;
+      kicker('Aufmaß vom Kunden · fürs Angebot', M, y); y += 9;
+      font('extra', 24, INK); txt(wrap((kd.name || 'Kunde') + '.', CW)[0], M, y); y += 7;
+      font('normal', 10, INK2); txt(wrap([kd.adresse, gebText].filter(Boolean).join(' · ') || 'Objekt ohne Adresse', CW)[0], M, y); y += 6;
     } else {
-      eyebrow(V === 'kunde' ? 'Dein Fenster-Aufmaß' : 'Fenster-Aufmaß Ihres Kunden', M, y); y += 8;
-      font('black', 26, INK); txt(V === 'kunde' ? (pr.name ? pr.name + '.' : 'Dein Aufmaß.') : (pr.name || 'Aufmaß für Ihr Angebot') + '.', M, y + 2); y += 9;
-      font('normal', 10.5, INK2); txt([pr.ort, gebText].filter(Boolean).join(' · ') || 'Selbst gemessen, Schritt für Schritt geführt', M, y + 2); y += 9;
+      kicker(V === 'kunde' ? 'Dein Fenster-Aufmaß' : 'Fenster-Aufmaß Ihres Kunden', M, y); y += 9;
+      font('extra', 24, INK); txt(wrap(V === 'kunde' ? (pr.name ? pr.name + '.' : 'Dein Aufmaß.') : (pr.name || 'Aufmaß für Ihr Angebot') + '.', CW)[0], M, y); y += 7;
+      font('normal', 10, INK2); txt(wrap([pr.ort, gebText].filter(Boolean).join(' · ') || 'Selbst gemessen, Schritt für Schritt geführt', CW)[0], M, y); y += 6;
     }
-    /* Eine Zeile Zusammenfassung: Umfang und Vollständigkeit */
+    /* Eine Zeile Zusammenfassung: Umfang und Vollständigkeit, als Chips mit Haken */
     let cx = M;
-    [[wins.length + (wins.length === 1 ? ' Position' : ' Positionen'), INK, '#ffffff'], [nE + (nE === 1 ? ' Element' : ' Elemente'), PAPER, INK], [fotoText, PAPER, INK], [komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett ? '#e8f5ec' : '#fff4e5', komplett ? OK : WARN], ['alle Maße in mm', PAPER, INK]].forEach((c) => { cx += chip(c[0], cx, y, c[1], c[2], 8) + 2.5; });
+    [[wins.length + (wins.length === 1 ? ' Position' : ' Positionen'), 'ok'], [nE + (nE === 1 ? ' Element' : ' Elemente'), 'ok'], [fotoText, nF ? 'ok' : 'warn'], [komplett ? 'alle Maße vollständig' : 'Maße teilweise offen', komplett ? 'ok' : 'warn'], ['alle Maße in mm', '']].forEach((c) => { const w2 = chip(c[0], cx, y, c[1]); cx += w2 + 2.2; });
     y += 12;
+    const fw = AW.foerdWeg(pr), tot = num(pr.total);
+    /* Wie genau geplant wurde (Detailtiefe): beim Kunden „Deine Planung“, sonst „Geplant“ mit „nach Ihrem Standard“ */
+    const tiefeT = AW.tiefeKopf ? AW.tiefeKopf(wins, pr, sie) : '';
+    const eck = [['Gebäude', gebText || '–'], ['Fenster im Haus', tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'], ['Zeitraum', AW.lab('zeit', pr.zeit) || '–'], ['Budget', AW.lab('budget', pr.budget) || '–'], ['Förderung', fw && fw !== 'keine' ? AW.lab('foerdweg', fw) || fw : 'keine Angabe']].concat(tiefeT ? [[V === 'kunde' ? 'Deine Planung' : 'Geplant', tiefeT]] : []);
     const kontaktZ = [['Name', pr.name || '–'], ['Ort', pr.ort || '–'], ['Telefon', pr.tel || '–'], ['E-Mail', pr.mail || '–'], ['Erreichbar', ERREICH[pr.erreich] || '–']].filter((r) => r[1] !== '–');
-    /* Die Nachricht steht auf Seite 1 höchstens dreizeilig, damit Position 1 dort in jedem Fall Platz hat; ist sie länger, steht sie vollständig nach Position 1 */
-    const ekWert = (V !== 'betrieb' ? CW - 82 - 5 : (CW - 5) / 2) - 8 - (V !== 'betrieb' ? 25 : 26) - 4;
-    let nachricht = pr.notiz ? '„' + pr.notiz + '“' : '', nachrichtLang = false;
-    if (nachricht) {
-      font('normal', FS);
-      if (wrap(nachricht, ekWert).length > 3) {
-        const anhang = ' …“ (vollständig nach Pos. 1)';
-        let s = wrap(nachricht, ekWert).slice(0, 3).join(' ');
-        while (s.length > 1 && wrap(s + anhang, ekWert).length > 3) s = s.replace(/\s*\S+$/, '');
-        nachricht = s.replace(/[\s,.;:–-]+$/, '') + anhang; nachrichtLang = true;
-      }
-    }
-    const fw = A() ? A().foerdWeg(pr) : (pr.foerd ? 'offen' : '');
-    /* Klärungsliste: oben als eine Zeile (höchstens drei Zeilen hoch, damit Position 1 auf Seite 1 bleibt), ausführlich nach Position 1 */
-    const klAlle = A() && A().klaerung ? A().klaerung(wins, pr).map((r) => [r.k, r.v, r.art === 'pflicht' ? { bold: true } : null]) : [];
-    let klKurz = '';
-    if (klAlle.length) {
-      font('bold', FS);
-      const teile = A().klaerKurz(wins, pr), zeilenMax = nachricht ? 3 : 4;
-      let n = teile.length; const txt = (k) => teile.slice(0, k).join(', ') + (k < teile.length ? ' und ' + (teile.length - k) + ' weitere' : '') + ' · Einzelheiten nach Pos. 1';
-      while (n > 1 && wrap(txt(n), ekWert).length > zeilenMax) n--;
-      klKurz = txt(n);
-    }
-    const eck = [['Gebäude', gebText || '–'], ['Fenster im Haus', num(pr.total) ? nE + ' von ' + pr.total + (nE > num(pr.total) / 3 ? ' · Lüftungskonzept erforderlich (DIN 1946-6)' : '') : '–'], ['Zeitraum', h.lab('zeit', pr.zeit) || '–'], ['Budget', (h.lab('budget', pr.budget) || '–') + (fw && fw !== 'keine' ? ' · Förderung: ' + (h.lab('foerdweg', fw) || fw) : '')]].concat(klKurz ? [['Zu klären', klKurz, { bold: true, col: WARN }]] : [], nachricht ? [['Nachricht', nachricht]] : []);
     if (V !== 'betrieb') {
       /* Der Weg: vier Schritte erledigt (Haken und Wort), der fünfte ist der nächste. Ehrlich gezählt: fehlt etwas, steht es offen da. */
-      const fertigF = komplett, wegS = [
+      const wegS = [
         { t: 'Fotografiert', d: nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ', von der KI gelesen' : 'ohne Fotos', ok: nF > 0 },
-        { t: 'Gemessen', d: fertigF ? '8 Maße je Fenster, von Hand' : 'Maße teilweise offen', ok: fertigF },
+        { t: 'Gemessen', d: komplett ? '8 Maße je Fenster, von Hand' : 'Maße teilweise offen', ok: komplett },
         { t: 'Wünsche festgelegt', d: 'Teilung, Farbe, Glas, Extras', ok: wins.length > 0 },
         { t: 'Aufmaßblatt erstellt', d: 'am ' + heute, ok: true },
         { t: V === 'kunde' ? 'Jetzt senden' : 'Ihr Schritt: Angebot', d: V === 'kunde' ? 'an beliebig viele Fensterbauer, Angebote vergleichen' : 'auf Grundlage dieses Blatts', jetzt: true }
       ];
-      const erledigt = wegS.filter((x) => x.ok).length, sw5 = CW / 5, r5 = 3.6, wy = y + 9;
-      eyebrow((V === 'kunde' ? 'Dein Weg zu neuen Fenstern' : 'Was Ihr Kunde schon erledigt hat') + ' · ' + erledigt + ' von 5 Schritten erledigt', M, y + 1, INK2);
-      wegS.forEach((x, i) => { if (i === 4) return; const x1 = M + i * sw5 + 2 * r5 + 1.5, x2 = M + (i + 1) * sw5 - 1.5; stroke(x.ok && (wegS[i + 1].ok || wegS[i + 1].jetzt) ? OK : LINE); doc.setLineWidth(0.7); dash(i === 3); doc.line(x1, wy, x2, wy); dash(false); });
+      const erledigt = wegS.filter((x) => x.ok).length, sw5 = CW / 5, r5 = 3.4, wy = y + 8;
+      kicker((V === 'kunde' ? 'Dein Weg zu neuen Fenstern' : 'Was Ihr Kunde schon erledigt hat') + ' · ' + erledigt + ' von 5 Schritten erledigt', M, y + 1, INK2);
+      wegS.forEach((x, i) => { if (i === 4) return; const x1 = M + i * sw5 + 2 * r5 + 1.5, x2 = M + (i + 1) * sw5 - 1.5; stroke(x.ok && (wegS[i + 1].ok || wegS[i + 1].jetzt) ? INK : LINE); doc.setLineWidth(0.6); dash(i === 3 ? [1.1, 0.9] : null); doc.line(x1, wy, x2, wy); dash(null); });
       wegS.forEach((x, i) => {
         const x0 = M + i * sw5, mx = x0 + r5;
-        if (x.jetzt) { fill('#ffffff'); stroke(INK); doc.setLineWidth(0.9); doc.circle(mx, wy, r5, 'FD'); fill(INK); doc.circle(mx, wy, 1.4, 'F'); }
-        else if (x.ok) { fill(OK); doc.circle(mx, wy, r5, 'F'); stroke('#ffffff'); doc.setLineWidth(0.8); doc.lines([[1.2, 1.3], [2.4, -2.8]], mx - 1.7, wy + 0.1, [1, 1], 'S', false); }
-        else { fill('#ffffff'); stroke(WARN); doc.setLineWidth(0.8); doc.circle(mx, wy, r5, 'FD'); font('black', 8, WARN); txt('!', mx, wy + 2.8, { align: 'center' }); }
+        if (x.jetzt) { fill('#ffffff'); stroke(INK); doc.setLineWidth(0.9); doc.circle(mx, wy, r5, 'FD'); fill(INK); doc.circle(mx, wy, 1.3, 'F'); }
+        else if (x.ok) haken(mx, wy, r5);
+        else { fill('#ffffff'); stroke(WARN); doc.setLineWidth(0.8); doc.circle(mx, wy, r5, 'FD'); font('extra', 8, WARN); txt('!', mx, wy + 2.8, { align: 'center' }); }
         font('bold', 9, INK); txt(wrap(x.t, sw5 - 3)[0], x0, wy + 9);
         font('normal', 7.8, x.ok || x.jetzt ? INK2 : WARN); txt(wrap((x.ok ? 'Erledigt · ' : x.jetzt ? '' : 'Offen · ') + x.d, sw5 - 4).slice(0, 2), x0, wy + 13, { lineHeightFactor: 1.2 });
       });
-      y = wy + 22;
+      y = wy + 21;
       /* Links Eckdaten, rechts die Box für den Fensterbauer, mit einer Spitze am letzten Schritt angeschlossen */
       const fbW = 82, ekW = CW - fbW - 5, fbX = XR - fbW, oFb = { lw: 19, fs: 8 }, oEk = { lw: 25, fs: FS };
       const fbZeilen = (seite) => kontaktZ.concat([['Maße', 'in mm, Breite × Höhe, Ansicht von innen; Maueröffnung: kleinstes von drei Maßen'], ['Digital', '„Code vom Kunden einfügen“ in eeziframes, Code auf Seite ' + seite + '; die ersten 3 Projekte sind frei'], ['Danach', 'Angebot, vor der Fertigung Feinaufmaß vor Ort']]);
       const fbTitel = V === 'kunde' ? 'Für deinen Fensterbauer' : 'Für Sie als Fensterbauer';
-      const hFb = karteH(fbZeilen(99), fbW, fbTitel, oFb), hEk = karteH(eck, ekW, 'x', oEk), hb = Math.max(hFb, hEk);
-      karte(M, y, ekW, 'Eckdaten zum Projekt', eck, Object.assign({ minH: hb }, oEk));
+      const hFb = 11 + zeilenH(fbZeilen(99), fbW - 8, oFb) + 3, hEk = 11 + zeilenH(eck, ekW - 8, oEk) + 3, hb = Math.max(hFb, hEk);
+      karteRand(M, y, ekW, hb); kicker('Eckdaten zum Projekt', M + 4, y + 6, GREY); zeilen(eck, M + 4, y + 9, ekW - 8, oEk);
       const by0 = y, sx = M + 4 * sw5 + r5;
       fbBox = () => {
-        fill('#ffffff'); stroke(INK); doc.setLineWidth(0.4); rr(fbX, by0, fbW, hb, 3, 'FD');
+        karteRand(fbX, by0, fbW, hb, { rand: INK, dick: 0.5 });
         /* Spitze zum Schritt „an den Fensterbauer“ */
-        fill('#ffffff'); doc.triangle(sx - 2.6, by0 + 0.25, sx + 2.6, by0 + 0.25, sx, by0 - 2.8, 'F'); stroke(INK); doc.line(sx - 2.6, by0, sx, by0 - 2.8); doc.line(sx, by0 - 2.8, sx + 2.6, by0);
-        let yy = by0 + 5.2; eyebrow(fbTitel, fbX + 4, yy, INK); yy += 5.2;
-        zeilen(fbZeilen(codeSeite), fbX + 4, yy, fbW - 8, oFb);
+        fill('#ffffff'); doc.triangle(sx - 2.6, by0 + 0.25, sx + 2.6, by0 + 0.25, sx, by0 - 2.8, 'F'); stroke(INK); doc.setLineWidth(0.5); doc.line(sx - 2.6, by0, sx, by0 - 2.8); doc.line(sx, by0 - 2.8, sx + 2.6, by0);
+        kicker(fbTitel, fbX + 4, by0 + 6, INK); zeilen(fbZeilen(codeSeite || 99), fbX + 4, by0 + 9, fbW - 8, oFb);
       };
-      y += hb + 7;
+      y += hb + 9;
     } else {
-      const halb = (CW - 5) / 2, oB = { lw: 24, fs: FS };
-      const kb = [['Kontakt', kd.kontakt || '–'], ['Objekt', kd.adresse || '–']];
-      const hk = karte(M, y, halb, 'Ihr Kunde', kb, oB), he = karte(M + halb + 5, y, halb, 'Eckdaten zum Projekt', eck, { lw: 26, fs: FS });
-      y += Math.max(hk, he) + 7;
+      /* Ihr Kunde und Eckdaten nebeneinander, dann die Übersicht aller Positionen mit Bestellmaß */
+      const halb = (CW - 5) / 2, oB = { lw: 22, fs: FS }, kb = [['Kunde', kd.name || '–'], ['Kontakt', kd.kontakt || '–']].concat((Array.isArray(kd.mehr) ? kd.mehr : []).filter((r) => r && r[1]).slice(0, 3).map((r) => [String(r[0]), String(r[1])]), [['Objekt', kd.adresse || '–']]);
+      const hk = 11 + zeilenH(kb, halb - 8, oB) + 3, he = 11 + zeilenH(eck, halb - 8, { lw: 26, fs: FS }) + 3, hm = Math.max(hk, he);
+      karteRand(M, y, halb, hm); kicker('Ihr Kunde', M + 4, y + 6, GREY); zeilen(kb, M + 4, y + 9, halb - 8, oB);
+      karteRand(M + halb + 5, y, halb, hm); kicker('Eckdaten zum Projekt', M + halb + 9, y + 6, GREY); zeilen(eck, M + halb + 9, y + 9, halb - 8, { lw: 26, fs: FS });
+      y += hm + 9;
+      uebersichtKurz();
     }
 
-    const klTitel = V === 'kunde' ? 'Noch zu klären, dein Fensterbauer berät dich' : 'Mit dem Kunden zu klären', oKl = { lw: 30, fs: 8, bg: '#fff8eb', rand: '#efd9ad', titelCol: WARN };
+    /* Übersicht für den Betrieb auf Seite 1: Pos., Zeichnung, Fenster, Öffnung, Element, Bestellmaß, Stück */
+    function uebersichtKurz() {
+      sektion(wins.length + (wins.length === 1 ? ' Position' : ' Positionen') + ' · ' + nE + (nE === 1 ? ' Element' : ' Elemente') + ' · mit Bestellmaß', 'Übersicht.', 'Maße in mm · Breite × Höhe');
+      const cols = [['Pos.', 9], ['', 12], ['Fenster', CW - 9 - 12 - 26 - 26 - 34 - 10], ['Öffnung', 26], ['Element', 26], ['Bestellmaß', 34], ['Stk.', 10]];
+      const cX = []; let ax = M; cols.forEach((c) => { cX.push(ax); ax += c[1]; });
+      const kopf = () => { font('bold', 6.8, GREY); cols.forEach((c, k) => { if (c[0]) txt(VERSAL(c[0]), cX[k] + (k === cols.length - 1 ? c[1] - 1 : 0), y, { align: k === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 }); }); y += 2; stroke(INK); doc.setLineWidth(0.4); doc.line(M, y, XR, y); y += 0.5; };
+      kopf();
+      wins.forEach((w, i) => {
+        const d = AW.derive(w), b = AW.bestellmass(w, ab), rh = 12;
+        if (y + rh > unten()) { neueSeite(); kopf(); }
+        const ty = y + rh / 2 + 1.2;
+        font('extra', 9.4, INK); txt(String(i + 1), cX[0] + 1, ty);
+        mini(w, cX[1], y + 1.5, 9);
+        font('bold', 8.6, INK); txt(wrap(w.name || 'Fenster', cols[2][1] - 3)[0], cX[2], ty - 1.6);
+        font('normal', 7.2, INK2); txt(wrap([ARTNAME[w.art] || 'Fenster', AW.lab('etage', w.etage) || 'EG', (w.art || 'fenster') === 'fenster' || w.art === 'balkon' ? AW.oeffnungKurz(w).split(' · ').filter((x) => /Flügel|Seitenteil/.test(x)).join(' · ') : ''].filter(Boolean).join(' · '), cols[2][1] - 3)[0], cX[2], ty + 2.4);
+        font('normal', 8.4, INK2); txt(d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) : '–', cX[3], ty); txt(d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) : '–', cX[4], ty);
+        font('extra', 9, INK); txt(b ? th(b.b) + ' × ' + th(b.h) : '–', cX[5], ty); if (b && b.warn.length) { punkt(cX[5] + tw(th(b.b) + ' × ' + th(b.h)) + 2, ty - 1.1, 0.9); }
+        font('normal', 8.4, INK); txt(String(num(w.anzahl) || 1), XR - 1, ty, { align: 'right' });
+        y += rh; stroke(LINE); doc.setLineWidth(0.2); doc.line(M, y, XR, y);
+      });
+      font('normal', 7.4, GREY); const lg = wrap('Bestellmaß: Ihr Abzug von der Maueröffnung (' + ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten bei Fenstern' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten bei Türen' : '') + '). Punkt: vor Ort prüfen, Hinweis bei der Position. Verbindlich bleibt Ihr Feinaufmaß.', CW);
+      txt(lg, M, y + 4, { lineHeightFactor: 1.25 }); y += 4 + lg.length * 3.2 + 6;
+    }
 
-    /* ---------- Positionen: Position 1 beginnt auf Seite 1 ---------- */
-    /* Karte über die volle Breite; muss sie geteilt werden, gehen mindestens zwei Zeilen auf die nächste Seite, nie eine allein */
-    function teilbar(rows, titel, titel2, o, hh) {
-      if (y + hh > unten() && y + 30 < unten() && rows.length > 3) {
-        let teil = [], rest = rows.slice();
-        while (rest.length > 1 && y + karteH(teil.concat([rest[0]]), CW, titel, o) <= unten()) teil.push(rest.shift());
-        if (rest.length < 2 && teil.length > 2) rest.unshift(teil.pop());
-        if (teil.length) { karte(M, y, CW, titel, teil, o); y += karteH(teil, CW, titel, o) + 4; }
-        neueSeite(); karte(M, y, CW, titel2, rest, o); y += karteH(rest, CW, 'x', o) + 4;
-      } else { platz(hh); karte(M, y, CW, titel, rows, o); y += hh + 4; }
+    /* ---------- Klärungsliste: nach Gruppen, je Punkt Position, was, warum; im Betrieb mit Stand ---------- */
+    const klTitel = V === 'kunde' ? 'Noch zu klären, dein Fensterbauer berät dich' : 'Mit dem Kunden zu klären';
+    /* Ein Punkt als Tabellenzeile: Kästchen (geklärt: grüner Haken), links die Position, rechts was zu klären ist und warum */
+    const KL_K = 38;
+    function klaerPunktH(r, w) {
+      const vw = w - KL_K - 8;
+      font('bold', 7.6); const k = wrap(r.k, KL_K - 2).length; font(r.gruppe === 'pflicht' ? 'bold' : 'normal', 8.4); const v = wrap(r.v, vw).length; font('normal', 7.2); const g = r.warum ? wrap(r.warum, vw).length : 0;
+      const nz = stand[r.id] && stand[r.id].notiz ? (font('normal', 7.6), wrap('Ihre Notiz: ' + stand[r.id].notiz, vw).length) : 0;
+      return 1.2 + Math.max(k * 3.2, v * 3.65 + g * 3.05 + nz * 3.3 + (geklaert(r) ? 3.2 : 0)) + 2;
+    }
+    function klaerPunkt(r, x, y0, w) {
+      const ok = geklaert(r), vx = x + 8 + KL_K, vw = w - KL_K - 8;
+      if (ok) haken(x + 2, y0 + 3.1, 2); else { stroke(INK2); doc.setLineWidth(0.35); fill('#ffffff'); rr(x, y0 + 1.1, 4, 4, 0.8, 'FD'); }
+      font('bold', 7.6, INK2); txt(wrap(r.k, KL_K - 2), x + 7, y0 + 4, { lineHeightFactor: 1.15 });
+      let yy = y0 + 4;
+      font(r.gruppe === 'pflicht' ? 'bold' : 'normal', 8.4, ok ? GREY : INK); const v = wrap(r.v, vw); txt(v, vx, yy, { lineHeightFactor: 1.25 }); yy += v.length * 3.65;
+      if (r.warum) { font('normal', 7.2, GREY); const g = wrap(r.warum, vw); txt(g, vx, yy - 0.4, { lineHeightFactor: 1.2 }); yy += g.length * 3.05; }
+      if (ok) { font('bold', 7.2, GRUEN_T); txt('geklärt' + (stand[r.id].wann ? ', ' + stand[r.id].wann : ''), vx, yy - 0.2); yy += 3.2; }
+      if (stand[r.id] && stand[r.id].notiz) { font('normal', 7.6, INK2); txt(wrap('Ihre Notiz: ' + stand[r.id].notiz, vw), vx, yy - 0.2); }
+    }
+    function klaerListe() {
+      if (!kl.length) {
+        platz(22); kicker(klTitel, M, y); y += 4; karteRand(M, y, CW, 12); haken(M + 6, y + 6, 2.2); font('normal', 8.6, INK2); txt('Nichts offen: keine Pflichtthemen, keine offenen Wünsche, keine Hinweise aus den Fotos.', M + 11, y + 7.2); y += 18; return;
+      }
+      const iw = CW - 18, gruppen = AW.klaerGruppen(kl), n = kl.filter(geklaert).length;
+      let titel = klTitel, start = null;
+      const kopf = (fort) => { kicker(fort ? titel + ', Fortsetzung' : titel, M, y, WARN); font('normal', 8, GREY); txt(V === 'betrieb' ? n + ' von ' + kl.length + ' geklärt' : kl.length + (kl.length === 1 ? ' Punkt' : ' Punkte'), XR, y, { align: 'right' }); y += 3.5; start = y; y += 3; };
+      const schliessen = () => { karteRand(M, start, CW, y - start + 1, { strich: WARN_P }); };
+      /* Karte zuerst messen und zeichnen, dann den Inhalt darüber: so bleibt der Rand unter dem Text */
+      const zeichnen = [];
+      const flush = () => { schliessen(); zeichnen.forEach((f) => f()); zeichnen.length = 0; };
+      if (y + 30 > unten()) neueSeite();
+      kopf(false);
+      gruppen.forEach((g) => {
+        const gh = 6.5;
+        g.punkte.forEach((r, k) => {
+          const ph = klaerPunktH(r, iw) + (k === 0 ? gh : 0);
+          if (y + ph > unten() - 2) { flush(); neueSeite(); kopf(true); }
+          if (k === 0 || zeichnen.length === 0) { const yy = y; zeichnen.push(() => { font('bold', 6.8, GREY); txt(VERSAL(g.titel) + '  ·  ' + g.punkte.length, M + 6, yy + 3.6, { charSpace: 0.4 }); }); y += gh; }
+          const yy = y; zeichnen.push(() => klaerPunkt(r, M + 6, yy, iw)); y += klaerPunktH(r, iw);
+        });
+        y += 1.5;
+      });
+      flush(); y += 7;
+    }
+    klaerListe();
+
+    /* ---------- Je Position eine Seite: Kopf, Zeichnung mit Maßen, Maße, Wünsche in Gruppen, Einbausituation, Fotos ---------- */
+    function masseZeilen(w) {
+      const d = AW.derive(w), mo = w.mo || {}, L = (k) => (num(mo[k]) ? th(mo[k]) : '–'), luecken = AW.massLuecken(w), dev = Math.max(d.devW, d.devH);
+      return [[w.neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' + (w.neu ? ', Wunsch' : ', kleinstes') : 'nicht gemessen', d.moW && d.moH ? { bold: true, col: MO_T } : { offen: true }]]
+        .concat(w.neu ? [] : [['Breiten', 'oben ' + L('wt') + ' · Mitte ' + L('wm') + ' · unten ' + L('wb'), /Breite/.test(luecken.join()) ? { offen: true } : null], ['Höhen', 'links ' + L('hl') + ' · Mitte ' + L('hm') + ' · rechts ' + L('hr'), /Höhe/.test(luecken.join()) ? { offen: true } : null]],
+          !w.neu ? [['Außer Winkel', dev > 5 ? 'bis ' + dev + ' mm, das kleinste Maß zählt' : 'unter 5 mm', dev > 10 ? { offen: true } : null]] : [],
+          [[istTuer(w) ? 'Türelement' : 'Element', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' : 'nicht gemessen', d.elW && d.elH ? { bold: true, col: EL_T } : { offen: true }],
+            ['Brüstung', istTuer(w) ? 'bodentief' : AW.bruDa(w) ? (num(w.bru) ? th(w.bru) + ' mm' : 'bodentief') : '–'], ['Laibung innen', num(w.laib) ? th(w.laib) + ' mm' : '–'], ['Lage', (AW.lab('etage', w.etage) || 'EG') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
+            ['Einbau', w.neu ? 'neue Öffnung, Wunschmaße' : 'Austausch' + (AW.ohneFotos(w) ? ', ohne Fotos' : '')]]);
     }
     function position(w, i) {
-      const d = h.derive(w), fa = rahmen(w, 'aussen'), fi = rahmen(w, 'innen'), n = num(w.anzahl) || 1;
-      platz(70);
-      /* Kopf wie eine Zeile im Lieferschein: Nummer, Raum, Art, Öffnung, Element */
-      y += 7;
-      fill(INK); rr(M, y - 7, 13, 13, 3); font('black', 11, '#ffffff'); txt(String(i + 1), M + 6.5, y + 0.6, { align: 'center' });
-      font('black', 19, INK); txt(wrap(w.name || (ARTNAME[w.art] || 'Fenster') + ' ' + (i + 1), CW - 90)[0], M + 17, y + 0.4);
-      /* Datenzeile: so viele Angaben, wie ganz hineinpassen (nach Wichtigkeit geordnet), nie mitten im Wort abgeschnitten */
-      font('normal', 8.8, INK2);
-      let datenZ = '', voll = false;
-      [ARTNAME[w.art] || 'Fenster', oeffnungText(w).split(' · ').slice(0, 2).join(' · '), h.lab('etage', w.etage) || 'EG', n > 1 ? n + ' Stück' : '1 Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos', w.neu ? 'Neue Öffnung, Wunschmaße' : d.moW && d.elW ? 'alle 8 Handmaße' : 'Maße unvollständig'].forEach((teil) => { if (voll) return; const z = datenZ ? datenZ + ' · ' + teil : teil; if (tw(z) <= CW - 88) datenZ = z; else voll = true; });
-      txt(datenZ, M + 17, y + 6.4);
-      if (V === 'betrieb') {
-        fill(BRAND); rr(XR - 66, y - 8, 66, 18, 3); font('bold', 6.8, '#ffffff'); alpha(0.9); txt('BESTELLMASS-VORSCHLAG', XR - 62, y - 3.2, { charSpace: 0.4 }); alpha(1); font('black', 12.5, '#ffffff'); txt(bestell(w), XR - 62, y + 3.4);
-        font('normal', 6.8, '#ffffff'); alpha(0.9); txt('Öffnung minus ' + ab.seite + ' mm je Seite, minus ' + ab.oben + ' mm oben', XR - 62, y + 7.6); alpha(1);
-      } else if (d.moW && d.moH) {
-        font('bold', 7, INK2); txt(w.neu ? 'ROHBAUÖFFNUNG' : 'MAUERÖFFNUNG', XR, y - 3.4, { align: 'right', charSpace: 0.4 }); font('black', 12.5, MO_T); txt(th(d.moW) + ' × ' + th(d.moH) + ' mm', XR, y + 3.2, { align: 'right' });
-        font('normal', 8.4, INK2); txt('Element ' + th(d.elW) + ' × ' + th(d.elH) + ' mm', XR, y + 7.6, { align: 'right' });
+      neueSeite();
+      const d = AW.derive(w), n = num(w.anzahl) || 1, b = AW.bestellmass(w, ab), Wn = AW.wuensche(w, pr), name = w.name || (ARTNAME[w.art] || 'Fenster') + ' ' + (i + 1);
+      const fort = () => { neueSeite(); font('bold', 9, INK2); txt('Pos. ' + (i + 1) + ' · ' + name + ', Fortsetzung', M, y); y += 6; };
+      const platzP = (h2) => { if (y + h2 > unten()) fort(); };
+      /* Kopf wie eine Zeile im Lieferschein: Nummer, Raum, Art, Öffnung; rechts dunkel hervorgehoben das Bestellmaß bzw. die Maueröffnung */
+      fill(INK); rr(M, y - 1, 12, 12, 2.4); font('extra', 12, '#ffffff'); txt(String(i + 1), M + 6, y + 7.2, { align: 'center' });
+      const boxW = 64;
+      font('extra', 17, INK); txt(wrap(name, CW - boxW - 22)[0], M + 16, y + 5);
+      font('normal', 8.4, INK2);
+      let datenZ = '';
+      [ARTNAME[w.art] || 'Fenster', AW.oeffnungKurz(w), AW.lab('etage', w.etage) || 'EG', n + ' Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos'].forEach((teil) => { const z = datenZ ? datenZ + ' · ' + teil : teil; if (tw(z) <= CW - boxW - 22) datenZ = z; }); // passt ein Teil nicht (lange Öffnung einer Tür), fehlt nur er
+      txt(datenZ, M + 16, y + 10);
+      fill(BUEHNE); rr(XR - boxW, y - 2, boxW, 15, 2.6);
+      if (V === 'betrieb') { kicker('Bestellmaß-Vorschlag', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(b ? b.text : '–', XR - boxW + 4, y + 8.4); font('normal', 6.4, HELL2); txt(wrap(b ? b.formel : 'ohne Maueröffnung kein Vorschlag', boxW - 8)[0], XR - boxW + 4, y + 11.6); }
+      else { kicker(w.neu ? 'Rohbauöffnung' : 'Maueröffnung', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' : 'nicht gemessen', XR - boxW + 4, y + 8.4); font('normal', 6.6, HELL2); txt('Element ' + (d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm' : 'nicht gemessen'), XR - boxW + 4, y + 11.6); }
+      y += 17;
+      /* Was bei dieser Position zu klären ist: in einer Zeile, Einzelheiten in der Liste vorn */
+      const hier = kl.filter((r) => r.pos === i || (Array.isArray(r.pos) && r.pos.indexOf(i) >= 0)).filter((r) => !geklaert(r));
+      if (hier.length) {
+        const namen = hier.map((r) => r.kurz || 'offene Wünsche').filter((x, k, a) => a.indexOf(x) === k);
+        font('bold', 8, WARN); const z = wrap('Zu klären: ' + namen.join(', ') + ' (Einzelheiten in der Liste vorn)', CW - 5);
+        punkt(M + 1.2, y - 1, 1); txt(z, M + 4, y); y += z.length * 3.6 + 2.5;
       }
-      y += 13;
-      /* Was unter der Zeichnung folgt, wird vorab gemessen: Karten, Lage auf dem Foto, KI, Notiz */
-      const masse = [[w.neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' + (w.neu ? ' (Wunsch)' : '') : 'noch nicht gemessen', { bold: true, col: MO_T }], ['Breiten', 'oben ' + th(w.mo && w.mo.wt) + ' · Mitte ' + th(w.mo && w.mo.wm) + ' · unten ' + th(w.mo && w.mo.wb)], ['Höhen', 'links ' + th(w.mo && w.mo.hl) + ' · Mitte ' + th(w.mo && w.mo.hm) + ' · rechts ' + th(w.mo && w.mo.hr)], w.neu ? ['Maßart', 'Wunschmaß des Kunden, Rohbau nach Statik'] : ['Außer Winkel', d.devW > 5 || d.devH > 5 ? 'bis ' + Math.max(d.devW, d.devH) + ' mm, kleinstes zählt' : 'unter 5 mm'], ['Element', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm, mit Rahmen' : 'noch nicht gemessen', { bold: true, col: EL }], ['Brüstung', num(w.bru) ? th(w.bru) + ' mm' : '–'], ['Laibung innen', num(w.laib) ? th(w.laib) + ' mm' : '–']].concat(V === 'betrieb' ? [['Bestellmaß', bestell(w), { bold: true, col: BRAND }]] : []);
-      const OFF = { col: WARN };
-      const glasT = (offen(w, 'glas') ? OT : h.lab('glas', w.glas) || '3-fach') + (offen(w, 'glasfn') ? ', Extras offen' : (w.glasfn || []).length ? ', ' + w.glasfn.map((g) => h.lab('glasfn', g) + (g === 'sicht' ? ' (' + h.orn(w.orn) + ')' : '')).join(', ') : '');
-      const ausf = [['Element', ARTNAME[w.art] || 'Fenster'], ['Teilung', teilungText(w)], ['Öffnung', oeffnungText(w)], ['Form', h.lab('form', w.form) || 'Rechteck'], ['Material', offen(w, 'material') ? OT : h.lab('material', w.material) || 'Kunststoff', offen(w, 'material') ? OFF : null], ['Farbe außen', h.farbeZeile ? h.farbeZeile(w, 'aussen') : fa[0] + ' (' + fa[1] + ')' + (w.wunschA ? ', Wunsch: ' + w.wunschA : ''), { swatch: fa[2] }], ['Farbe innen', w.gleich ? fi[0] + ', wie außen' : h.farbeZeile ? h.farbeZeile(w, 'innen') : fi[0] + ' (' + fi[1] + ')' + (w.wunschI ? ', Wunsch: ' + w.wunschI : ''), { swatch: fi[2] }], ['Glas', glasT, offen(w, 'glas') || offen(w, 'glasfn') ? OFF : null], ['Sprossen', (w.bars || []).length ? (offen(w, 'spross') ? 'Art offen' : h.lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + h.lab('aufseite', w.aufSeite) + ')' : '')) + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück' : 'keine'], ['Griff', griffText(w)], ['Einbruchschutz', rcText(w)]]
-        .concat(A() && A().absturzFrage(w) ? [['Absturzsicherung', A().absturzText(w), w.absturz ? null : OFF]] : [], A() && A().uwZiel(w, pr) ? [['Förderwert', A().uwText(A().uwZiel(w, pr)), { bold: true }]] : []);
-      const extras = [['Sonnenschutz außen', sonneText(w)], ['Sonnenschutz innen', innenText(w)], ['Insektenschutz', offen(w, 'insekt') ? OT : h.lab('insekt', w.insekt) || 'keiner']].concat(istTuer(w) ? [['Schwelle', schwelleText(w)]].concat(w.art === 'balkon' ? [['Fußboden', (w.bt || {}).boden === 'neu' ? 'wird erneuert' : 'bleibt, wie er ist']] : []) : [['Fensterbank innen', bankText(w, 'fbi'), offen(w, 'fbi') ? OFF : null], ['Fensterbank außen', bankText(w, 'fba'), offen(w, 'fba') ? OFF : null]]).concat([['Montage', montageText(w)]]);
-      const cw3 = (CW - 8) / 3, o3 = { lw: 21, fs: 8.2 }, karten = [['Maße', masse], ['Ausführung', ausf], ['Extras', extras]];
-      const hs = karten.map((k) => karteH(k[1], cw3, k[0], o3)), hmax = Math.max.apply(null, hs);
-      const mitBild = !!(w.neu && w.plan && w.plan.bild && /^data:image\/jpeg/.test(w.plan.bild));
-      const bw0 = mitBild ? w.plan.bw || 3 : 3, bh0 = mitBild ? w.plan.bh || 4 : 4, iw2 = Math.min(CW - 8, 78 * bw0 / bh0), ih2 = iw2 * bh0 / bw0, bildH = ih2 + 14;
-      /* Einbausituation aus den Fotos: Befunde, Hinweise für Angebot und Montage, Prüfpunkte fürs Feinaufmaß */
-      const ki = w.ki && w.ki.rows ? w.ki.rows : [], hints = w.ki && w.ki.hints ? w.ki.hints : [], pruefen = w.ki && w.ki.pruefen ? w.ki.pruefen : [];
-      const fz = A() ? A().fachZeile(w) : '', mz = A() ? A().massZeile(w) : '', mp = A() ? A().massPruef(w) : null;
-      const kiRows = (fz ? [['Auf einen Blick', fz, { bold: true }]] : []).concat(mz ? [['Maße und Foto', mz, mp ? { bold: true, col: WARN } : null]] : [], ki.map((r) => [r[0], r[1]]), hints.map((hh2, k) => ['Hinweis ' + (k + 1), hh2, { bold: true, col: WARN }]), pruefen.map((t) => ['Vor Ort prüfen', t]));
-      const kiTitel = 'Einbausituation aus den Fotos (KI, ' + (w.fotos || 0) + (w.fotos === 1 ? ' Foto' : ' Fotos') + ')', o2 = { lw: 25, fs: 8.2, spalten: 2, bg: '#eef5fd', rand: '#cfe0f5', titelCol: '#0a5bb5' };
-      const kiH = kiRows.length ? karteH(kiRows, CW, kiTitel, o2) : 0;
-      /* Weitere Ausstattung: nur die Detailangaben, die gewählt sind (sonst gilt der Standard des Fensterbauers), zweispaltig und teilbar */
-      const detRows = A() && A().detailRows ? A().detailRows(w) : [], detTitel = 'Weitere Ausstattung', oD = { lw: 34, fs: 8.2, spalten: 2 };
-      const detH = detRows.length ? karteH(detRows, CW, detTitel, oD) : 0;
-      const notizRows = w.notiz ? [[sie ? 'Notiz des Kunden' : 'Deine Notiz', '„' + w.notiz + '“']] : [], oN = { lw: 26, fs: FS, bg: '#fffbe8', rand: '#f2e2a4' };
-      const notizH = notizRows.length ? karteH(notizRows, CW, '', oN) : 0;
-      /* Fotos des Kunden (innen, außen), so wie sie angekommen sind: nebeneinander, gleich hoch (e.fotos: Kennung → { data, w, h }) */
+      /* Erst messen, was nach der Zeichnung kommt (Wünsche, Gruppen, Einbausituation, Fotos), damit die Position auf ihre Seite passt:
+         die Zeichnung wird so hoch, wie Platz bleibt (72 bis 118 mm); reicht auch das nicht, geht der Rest auf die nächste Seite */
+      const zw = Math.round(CW * 0.6), rx = M + zw + 5, rw = CW - zw - 5, oM = { lw: 21, fs: 7.8 };
+      const mz = masseZeilen(w), bWarn = V === 'betrieb' && b && b.warnText ? b.warnText : '', notM = Wn.notizen.masse;
+      const mH = 10 + zeilenH(mz, rw - 8, oM) + (bWarn ? (font('normal', 7.6), wrap(bWarn, rw - 12).length * 3.4 + 3) : 0) + notM.reduce((s2, x) => s2 + notizH(x, rw - 8) + 1, 0) + 2;
+      font('bold', 10.4); const satz = wrap(Wn.satz + '.', CW), allg = Wn.notizen.allgemein;
+      const wH = 5.5 + satz.length * 4.6 + (Wn.offen.length ? 9 : 0) + allg.reduce((s2, x) => s2 + notizH(x, CW) + 1.5, 0) + 2;
+      const sp = (CW - 6) / 2, oG = { lw: 23, fs: 8 };
+      /* Standard des Fensterbauers: Zeilen, die nicht gefragt wurden, grau; je Gruppe eine Zeile mit den Angaben nach Standard */
+      const stdT = (t) => (sie ? String(t).replace(AW.STD_TEXT, 'nach Ihrem Standard') : t);
+      const gRows = (g) => g.zeilen.map((z) => [z.k, stdT(z.t), z.offen ? { offen: true } : z.std ? { col: GREY } : z.hex ? { swatch: z.hex } : null]);
+      const stdText = (g) => (g.standard && g.standard.length ? (sie ? 'Nach Ihrem Standard: ' : 'Nach Standard des Fensterbauers: ') + g.standard.join(', ') : '');
+      const stdH = (g, w2) => (stdText(g) ? (font('normal', 7.2), wrap(stdText(g), w2).length * 3.1 + 1.6) : 0);
+      const gH = (g) => 6 + zeilenH(gRows(g), sp, oG) + stdH(g, sp) + g.notizen.reduce((s2, x) => s2 + notizH(x, sp) + 1, 0) + 2.4;
+      const G = Wn.gruppen, hs = G.map(gH), sum = (a, b2) => hs.slice(a, b2).reduce((s2, x) => s2 + x, 0);
+      let best = Infinity; for (let k = 1; k < G.length; k++) best = Math.min(best, Math.max(sum(0, k), sum(k, G.length))); // Höhe ausgewogen in zwei Spalten
+      const kiR = AW.kiRows(w).map((r) => [r[0], r[1], r[0] === 'Hinweis' || r[0] === 'Vor Ort prüfen' || (r[0] === 'Maße und Foto' && AW.massPruef(w)) ? { offen: true } : r[0] === 'Auf einen Blick' ? { bold: true } : null]);
       const fotos = ['in', 'out'].map((s2) => ({ s: s2, f: w.bilder && e.fotos ? e.fotos[w.bilder[s2]] : null })).filter((x) => x.f && /^data:image\/jpeg/.test(String(x.f.data || '')) && x.f.w > 0 && x.f.h > 0);
-      const FH = 56, fotoH = fotos.length ? FH + 15 : 0;
-      let nach = hmax, luecke = 5;
-      if (detH) { nach += luecke + detH; luecke = 4; }
-      if (mitBild) { nach += luecke + bildH + 2; luecke = 4; }
-      if (fotoH) { nach += luecke + fotoH; luecke = 4; }
-      if (kiH) { nach += luecke + kiH; luecke = 4; }
-      if (notizH) nach += luecke + notizH;
-      /* Zeichnung über die volle Breite, so hoch wie Platz ist (78 bis 108 mm, auf Seite 1 notfalls 64 mm, damit sie nie in den Fuß ragt).
-         Passt die ganze Position mit einer kleineren Zeichnung auf die Seite, wird die Zeichnung kleiner, statt einen Rest allein auf die nächste Seite zu schieben. */
-      const minZ = seiteNr() === 1 ? 64 : 78, ganz = unten() - y - 5 - nach;
-      let zh = Math.max(minZ, Math.min(108, unten() - y - 4));
-      if (ganz < zh && ganz >= minZ) zh = ganz;
-      fill(PAPER); rr(M, y, CW, zh, 4);
-      font('normal', 7.4, INK2); txt('Alle Maße in mm · Breite × Höhe · Ansicht von innen', M + 5, y + 5.2);
-      zeichnung(w, M + 2, y + 3, CW - 4, zh - 10, true);
-      font('normal', 7.4, INK2); swatch(MO, M + 6, y + zh - 4.4, 1.4); txt(w.neu ? 'Rohbauöffnung, Wunschmaß' : 'Maueröffnung, von Hand', M + 9, y + zh - 3.4); swatch(EL, M + 52, y + zh - 4.4, 1.4); txt((istTuer(w) ? 'Türelement' : 'Element') + ' mit Rahmen (Beschriftung „Element“)', M + 55, y + zh - 3.4);
-      const hinweise = [w.neu ? 'Sturz und Statik prüfen' : '', w.richtung === 'aussen' && !istTuer(w) ? 'gestrichelt: öffnet nach außen' : '', num(w.laib) ? 'Laibung ' + th(w.laib) : '', num(w.wand) ? 'Wand ' + th(w.wand) : '', h.lab('anschlag', w.anschlag) && w.anschlag !== 'ohne' ? h.lab('anschlag', w.anschlag) : ''].filter(Boolean).join(' · ');
-      if (hinweise) txt(hinweise, XR - 6, y + 5.2, { align: 'right' });
-      if (d.devW > 5 || d.devH > 5) { font('bold', 7.4, WARN); txt('bis ' + Math.max(d.devW, d.devH) + ' mm außer Winkel, das kleinste Maß zählt', XR - 6, y + zh - 3.4, { align: 'right' }); }
-      y += zh + 5;
-      /* Drei Karten nebeneinander */
-      platz(hmax);
-      karten.forEach((k, j) => { const x = M + j * (cw3 + 4); karte(x, y, cw3, k[0], k[1], o3); });
-      y += hmax + 5;
-      if (detRows.length) teilbar(detRows, detTitel, 'Weitere Ausstattung, Fortsetzung', oD, detH);
-      /* Neue Öffnung: das Foto mit der eingezeichneten Lage */
-      if (mitBild) {
-        platz(bildH + 2);
-        fill(PAPER); rr(M, y, CW, bildH, 4);
-        font('bold', 7, INK2); txt('LAGE AUF DEM FOTO', M + 5, y + 5.2, { charSpace: 0.4 }); font('normal', 7.6, INK2); txt((sie ? 'vom Kunden' : 'von dir') + ' eingezeichnet, Foto ' + (w.plan.seite === 'out' ? 'von außen' : 'von innen'), XR - 5, y + 5.2, { align: 'right' });
-        try { doc.addImage(w.plan.bild, 'JPEG', M + (CW - iw2) / 2, y + 8.5, iw2, ih2); } catch (err) { /* ohne Bild weiter */ }
-        y += bildH + 4;
+      const nzF = Wn.notizen.fotos, mitBild = !!(w.neu && w.plan && w.plan.bild && /^data:image\/jpeg/.test(w.plan.bild)), oK = { lw: 24, fs: 7.6 };
+      const half = Math.ceil(kiR.length / 2), lsp = [kiR.slice(0, half), kiR.slice(half)], kH = kiR.length ? Math.max(zeilenH(lsp[0], sp, oK), zeilenH(lsp[1], sp, oK)) : 0;
+      const FH = 48, kiBlock = (kiR.length ? 6 + kH + 3 : 0) + nzF.reduce((s2, x) => s2 + notizH(x, CW) + 1.5, 0) + (fotos.length ? FH + 12 + (kiR.length ? 0 : 6) : 0);
+      const bw0 = mitBild ? w.plan.bw || 3 : 3, bh0 = mitBild ? w.plan.bh || 4 : 4, iw2 = Math.min(CW - 8, 64 * bw0 / bh0), ih2 = iw2 * bh0 / bw0, bildH = mitBild ? ih2 + 12 : 0;
+      const rest = wH + best + 3 + kiBlock + bildH, ziel = unten() - y - 7 - rest;
+      /* Passt alles nicht einmal mit kleiner Zeichnung, geht die Einbausituation geschlossen auf die nächste Seite und die Zeichnung bleibt groß */
+      const ohneKi = unten() - y - 7 - (rest - kiBlock - bildH), kiWeiter = ziel < 72 && (kiBlock + bildH) > 0;
+      const zMax = !kiWeiter ? Math.max(72, Math.min(118, ziel)) : Math.max(84, Math.min(118, ohneKi)), pl = AW.plan(w, { b: zw - 6, h: zMax - 13, fs: 3 }), zh = Math.max(pl.h + 13, mH);
+      /* Zeichnung links, Maße rechts */
+      platzP(zh);
+      karteRand(M, y, zw, zh);
+      planZeichnen(pl, M + 3, y + 3 + Math.max(0, (zh - 13 - pl.h) / 2));
+      /* Legende mit Wort, Farbe nie allein */
+      const ly = y + zh - 3.6, moL = w.neu ? 'Rohbauöffnung, Wunschmaß' : 'Maueröffnung, von Hand'; font('normal', 7, INK2);
+      fill(MO); doc.rect(M + 4, ly - 1.6, 5, 0.9, 'F'); txt(moL, M + 10.5, ly);
+      const lx2 = M + 10.5 + tw(moL) + 5; fill(EL); doc.rect(lx2, ly - 1.6, 5, 0.9, 'F'); txt('Element', lx2 + 6.5, ly);
+      txt('Ansicht von innen · mm' + (w.richtung === 'aussen' && !istTuer(w) && w.art !== 'fest' ? ' · gestrichelt: nach außen' : ''), M + zw - 4, ly, { align: 'right' });
+      karteRand(rx, y, rw, zh); kicker('Maße von Hand', rx + 4, y + 6, GREY);
+      let ry = y + 9 + zeilen(mz, rx + 4, y + 9, rw - 8, oM);
+      if (bWarn) { punkt(rx + 5.2, ry + 2.2, 1); font('normal', 7.6, WARN); const wl = wrap(bWarn, rw - 12); txt(wl, rx + 8, ry + 3); ry += wl.length * 3.4 + 3; }
+      notM.forEach((x) => { ry += notiz(x, rx + 4, ry + 1, rw - 8) + 1; });
+      y += zh + 7;
+      /* Wünsche des Kunden: ein Satz, offene Punkte, dann die Gruppen in zwei Spalten */
+      platzP(wH + Math.min(best, 40));
+      kicker(sie ? 'Wünsche des Kunden' : 'Deine Wünsche', M, y); y += 5.5;
+      font('bold', 10.4, INK); txt(satz, M, y, { lineHeightFactor: 1.25 }); y += satz.length * 4.6;
+      if (Wn.offen.length) { let ox = M; font('bold', 6.8, GREY); txt('NOCH OFFEN', ox, y + 3.6, { charSpace: 0.4 }); ox += tw('NOCH OFFEN') + 8; Wn.offen.forEach((x) => { font('bold', 7.2); const cw2 = tw(x) + 9; if (ox + cw2 > XR) { y += 7; ox = M; } ox += chip(x, ox, y, 'warn', 7.2) + 2; }); y += 9; }
+      allg.forEach((x) => { platzP(notizH(x, CW)); y += notiz(x, M, y, CW) + 1.5; });
+      y += 2;
+      function gruppe(g, x, y0, w2) {
+        font('bold', 6.8, GREY); txt(VERSAL(g.titel), x, y0 + 3.2, { charSpace: 0.4 }); stroke(LINE); doc.setLineWidth(0.25); doc.line(x, y0 + 4.6, x + w2, y0 + 4.6);
+        let yy = y0 + 5.4 + zeilen(gRows(g), x, y0 + 5.4, w2, oG);
+        if (stdText(g)) { font('normal', 7.2, GREY); const sl = wrap(stdText(g), w2); txt(sl, x, yy + 2.6, { lineHeightFactor: 1.2 }); yy += stdH(g, w2); }
+        g.notizen.forEach((x2) => { yy += notiz(x2, x, yy + 1, w2) + 1; });
       }
+      /* Gruppen zweispaltig: passen die übrigen Gruppen auf diese Seite, ausgewogen links und rechts; sonst (viele Detailangaben)
+         fließen sie erst links bis zum Seitenende, dann rechts, und auf der nächsten Seite wieder ausgewogen. Nie eine Gruppe geteilt,
+         keine halbe Seite leer */
+      const strich = (top, h2) => { stroke(LINE); doc.setLineWidth(0.25); doc.line(M + sp + 3, top + 1, M + sp + 3, top + h2 - 3); };
+      let offenG = G.slice(), frisch = false;
+      while (offenG.length) {
+        const hr0 = offenG.map(gH), summe = (a, b2) => hr0.slice(a, b2).reduce((s2, x) => s2 + x, 0);
+        let tk = offenG.length, bb = summe(0, offenG.length); for (let k = 1; k < offenG.length; k++) { const m2 = Math.max(summe(0, k), summe(k, offenG.length)); if (m2 < bb) { bb = m2; tk = k; } }
+        if (y + bb <= unten()) {
+          let hl = 0, hr = 0;
+          offenG.slice(0, tk).forEach((g) => { gruppe(g, M, y + hl, sp); hl += gH(g); });
+          offenG.slice(tk).forEach((g) => { gruppe(g, M + sp + 6, y + hr, sp); hr += gH(g); });
+          if (hr) strich(y, Math.max(hl, hr));
+          y += Math.max(hl, hr); break;
+        }
+        const top = y, yy = [y, y]; let col = 0, i = 0;
+        while (i < offenG.length) {
+          const h = gH(offenG[i]);
+          if (yy[col] + h > unten()) {
+            if (col === 0 && top + h <= unten()) { col = 1; continue; }
+            if (i === 0 && frisch) { gruppe(offenG[0], M, top, sp); yy[0] += h; i = 1; } // höher als eine ganze Seite: trotzdem setzen, sonst hinge es fest
+            break;
+          }
+          gruppe(offenG[i], M + col * (sp + 6), yy[col], sp); yy[col] += h; i++;
+        }
+        if (yy[1] > top) strich(top, Math.max(yy[0], yy[1]) - top);
+        y = Math.max(yy[0], yy[1]); offenG = offenG.slice(i);
+        if (offenG.length) { fort(); frisch = true; }
+      }
+      y += 3;
+      /* Einbausituation aus den Fotos: Befund der KI zweispaltig, Hinweise und Prüfpunkte markiert, darunter die Fotos */
+      const kiTitel = 'Einbausituation aus den Fotos' + (w.ki ? ' (KI, ' + (w.fotos || 0) + (w.fotos === 1 ? ' Foto)' : ' Fotos)') : '');
+      if (kiWeiter && kiBlock > 0 && y + 6 + Math.min(kH, 30) + (fotos.length ? FH + 12 : 0) > unten()) fort();
+      if (kiR.length) {
+        if (y + 6 + kH > unten()) {
+          /* passt der Befund nicht mehr, geht er ganz auf die nächste Seite, einspaltig bei Bedarf über mehrere */
+          fort(); kicker(kiTitel, M, y + 3, GREY); y += 6;
+          if (y + kH > unten()) kiR.forEach((r) => { const hh = zeilenH([r], CW, oK); platzP(hh); zeilen([r], M, y, CW, oK); y += hh; });
+          else { zeilen(lsp[0], M, y, sp, oK); zeilen(lsp[1], M + sp + 6, y, sp, oK); y += kH; }
+        } else { kicker(kiTitel, M, y + 3, GREY); y += 6; zeilen(lsp[0], M, y, sp, oK); zeilen(lsp[1], M + sp + 6, y, sp, oK); y += kH; }
+        y += 3;
+      }
+      nzF.forEach((x) => { platzP(notizH(x, CW)); y += notiz(x, M, y, CW) + 1.5; });
       if (fotos.length) {
-        platz(fotoH + 2);
-        fill(PAPER); rr(M, y, CW, fotoH, 4);
-        font('bold', 7, INK2); txt(sie ? 'FOTOS DES KUNDEN' : 'DEINE FOTOS', M + 5, y + 5.2, { charSpace: 0.4 }); font('normal', 7.6, INK2); txt(kiRows.length ? 'daraus die Einbausituation unten' : sie ? 'vom Kunden aufgenommen' : 'von dir aufgenommen', XR - 5, y + 5.2, { align: 'right' });
-        const zw = (CW - 16) / 2;
+        platzP(FH + 12 + (kiR.length ? 0 : 6));
+        if (!kiR.length) { kicker(kiTitel, M, y + 3, GREY); y += 6; }
+        const zb = (CW - 6) / 2;
         fotos.forEach((x, k) => {
-          const fx = M + 5 + k * (zw + 6), r = x.f.w / x.f.h; let iw = zw, ih = iw / r; if (ih > FH) { ih = FH; iw = ih * r; }
-          try { doc.addImage(x.f.data, 'JPEG', fx + (zw - iw) / 2, y + 8.5 + (FH - ih) / 2, iw, ih); } catch (err) { /* ohne Bild weiter */ }
-          font('bold', 7.2, INK2); txt(x.s === 'in' ? 'Von innen' : 'Von außen', fx + zw / 2, y + 8.5 + FH + 4.4, { align: 'center' });
+          const fx = M + k * (zb + 6), r = x.f.w / x.f.h; let iw = zb - 3, ih = iw / r; if (ih > FH) { ih = FH; iw = ih * r; }
+          stroke(LINE); doc.setLineWidth(0.5); rr(fx, y, zb, FH + 8, 2.6, 'S');
+          try { doc.addImage(x.f.data, 'JPEG', fx + (zb - iw) / 2, y + 1.5 + (FH - ih) / 2, iw, ih); } catch (err) { /* ohne Bild weiter */ }
+          font('bold', 7.2, INK2); txt(x.s === 'in' ? 'Von innen' : 'Von außen', fx + zb / 2, y + FH + 5.6, { align: 'center' });
         });
-        y += fotoH + 4;
+        y += FH + 12;
       }
-      /* Aus den Fotos */
-      if (kiRows.length) teilbar(kiRows, kiTitel, 'Einbausituation (KI), Fortsetzung', o2, kiH);
-      if (notizRows.length) { platz(notizH); karte(M, y, CW, '', notizRows, oN); y += notizH + 4; }
+      if (mitBild) {
+        platzP(bildH);
+        kicker('Lage auf dem Foto, ' + (sie ? 'vom Kunden' : 'von dir') + ' eingezeichnet', M, y + 3, GREY); y += 5;
+        try { doc.addImage(w.plan.bild, 'JPEG', M + (CW - iw2) / 2, y, iw2, ih2); } catch (err) { /* ohne Bild weiter */ }
+        y += ih2 + 5;
+      }
     }
 
-    /* ---------- Überblick (ab zwei Positionen): Tabelle, Ausstattung, alle im selben Maßstab ---------- */
-    const cols = V === 'betrieb' ? [['Pos.', 9], ['Fenster', 34], ['Öffnung', 23], ['Element', 23], ['Bestellmaß', 24], ['Öffnungsart', 27], ['Farbe außen', 28], ['Stk.', 10]] : [['Pos.', 9], ['Fenster', 40], ['Öffnung', 25], ['Element', 25], ['Öffnungsart', 28], ['Farbe außen', 30], ['Glas', 13], ['Stk.', 8]];
-    const colX = []; let ax = M; cols.forEach((c) => { colX.push(ax); ax += c[1]; });
-    const zellen = (w) => { const d = h.derive(w), fa = rahmen(w, 'aussen'); return V === 'betrieb'
-      ? [String(0), '', (d.moW ? th(d.moW) + ' × ' + th(d.moH) : '–'), (d.elW ? th(d.elW) + ' × ' + th(d.elH) : '–'), bestell(w).replace(' mm', ''), oeffnungText(w), fa[0], String(num(w.anzahl) || 1)]
-      : [String(0), '', (d.moW ? th(d.moW) + ' × ' + th(d.moH) : '–'), (d.elW ? th(d.elW) + ' × ' + th(d.elH) : '–'), oeffnungText(w), fa[0], offen(w, 'glas') ? 'offen' : h.lab('glas', w.glas) || '3-fach', String(num(w.anzahl) || 1)]; };
-    const fIdx = V === 'betrieb' ? 6 : 5;
-    const zeileH = (w) => { font('normal', 8.2); const lines = zellen(w).map((c, k) => wrap(c, cols[k][1] - (k === fIdx ? 7 : 3))); return Math.max(12, Math.max.apply(null, lines.map((l) => l.length)) * 3.6 + 5); };
-    const legendeText = 'Maueröffnung: von drei Breiten und drei Höhen zählt das kleinste Maß; Abweichungen stehen bei der Position. Element: das sichtbare Fenster mit Rahmen. Öffnungssymbole: Linien beginnen an der Bandseite, die Spitze zeigt zum Griff; Dreieck mit Spitze oben = Kipp. ' + (V === 'betrieb' ? 'Bestellmaß: Vorschlag aus Ihrem Abzug, verbindlich bleibt Ihr Feinaufmaß.' : 'Das Bestellmaß legt der Fensterbauer beim Feinaufmaß fest.');
-    const uebersichtH = () => { font('normal', 7.6); return 13 + wins.reduce((a, w) => a + zeileH(w), 0) + 4 + wrap(legendeText, CW).length * 3.3 + 8; };
-    function uebersicht() {
-      sektion('Übersicht', wins.length + ' Positionen · ' + nE + (nE === 1 ? ' Element' : ' Elemente') + (V === 'betrieb' ? ' · Bestellmaß = Öffnung minus Abzug' : ' · alle Maße in mm'));
-      const tabKopf = () => { font('bold', 7.2, INK2); cols.forEach((c, k) => txt(c[0].toUpperCase(), colX[k] + (k === cols.length - 1 ? c[1] - 1 : 0), y, { align: k === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 })); y += 2; stroke(INK); doc.setLineWidth(0.5); doc.line(M, y, XR, y); y += 1; };
+    /* ---------- Überblick am Ende (ab zwei Positionen): Tabelle, Ausstattung, Zahlen, alle im selben Maßstab ---------- */
+    const legendeText = 'Maueröffnung: von drei Breiten und drei Höhen zählt das kleinste Maß; Abweichungen stehen bei der Position. Element: das sichtbare Fenster mit Rahmen. Öffnungssymbole: Linien beginnen an der Bandseite, die Spitze zeigt zum Griff; Dreieck mit Spitze oben = Kipp; F = fest. ' + (V === 'betrieb' ? 'Bestellmaß: Vorschlag aus Ihrem Abzug, verbindlich bleibt Ihr Feinaufmaß.' : 'Das Bestellmaß legt der Fensterbauer beim Feinaufmaß fest.');
+    function tabelle() {
+      sektion(wins.length + ' Positionen · ' + nE + (nE === 1 ? ' Element' : ' Elemente'), 'Übersicht.', 'alle Maße in mm');
+      const cols = [['Pos.', 9], ['Fenster', CW - 9 - 23 - 23 - 31 - 30 - 13 - 8], ['Öffnung', 23], ['Element', 23], ['Öffnungsart', 31], ['Farbe außen', 30], ['Glas', 13], ['Stk.', 8]];
+      const colX = []; let ax = M; cols.forEach((c) => { colX.push(ax); ax += c[1]; });
+      const zellen = (w) => { const d = AW.derive(w); return ['', '', d.moW ? th(d.moW) + ' × ' + th(d.moH) : '–', d.elW ? th(d.elW) + ' × ' + th(d.elH) : '–', oeffnungText(w), AW.farbe(w, 'aussen')[0], offen(w, 'glas') ? 'offen' : AW.lab('glas', w.glas) || '3-fach', String(num(w.anzahl) || 1)]; };
+      const zeileH = (w) => { font('normal', 8); const lines = zellen(w).map((c, k) => wrap(c, cols[k][1] - (k === 5 ? 6 : 3))); return Math.max(12, Math.max.apply(null, lines.map((l) => l.length)) * 3.5 + 5); };
+      const tabKopf = () => { font('bold', 6.8, GREY); cols.forEach((c, k) => txt(VERSAL(c[0]), colX[k] + (k === cols.length - 1 ? c[1] - 1 : 0), y, { align: k === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 })); y += 2; stroke(INK); doc.setLineWidth(0.4); doc.line(M, y, XR, y); y += 0.5; };
       tabKopf();
       wins.forEach((w, i) => {
-        const fa = rahmen(w, 'aussen'), cells = zellen(w); cells[0] = String(i + 1);
-        font('normal', 8.2); const lines = cells.map((c, k) => wrap(c, cols[k][1] - (k === fIdx ? 7 : 3))), rh = zeileH(w);
+        const fa = AW.farbe(w, 'aussen'), cells = zellen(w), rh = zeileH(w);
+        font('normal', 8); const lines = cells.map((c, k) => wrap(c, cols[k][1] - (k === 5 ? 6 : 3)));
         if (y + rh > unten()) { neueSeite(); tabKopf(); }
-        if (i % 2 === 0) { fill('#fafafa'); doc.rect(M, y, CW, rh, 'F'); }
         const ty = y + rh / 2 + 1.2;
-        font('black', 9.4, INK); txt(String(i + 1), colX[0] + 1, ty);
+        font('extra', 9.4, INK); txt(String(i + 1), colX[0] + 1, ty);
         mini(w, colX[1], y + (rh - 8.5) / 2, 8.5);
-        font('bold', 8.4, INK); txt(wrap(w.name || 'Fenster', cols[1][1] - 13)[0], colX[1] + 11, ty - 1.6);
-        font('normal', 7.2, INK2); txt([h.lab('etage', w.etage) || 'EG', num(w.bru) ? 'Brüstung ' + th(w.bru) : '', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : ''].filter(Boolean).join(' · '), colX[1] + 11, ty + 2.2);
+        font('bold', 8.2, INK); txt(wrap(w.name || 'Fenster', cols[1][1] - 13)[0], colX[1] + 11, ty - 1.6);
+        font('normal', 7, INK2); txt(wrap([AW.lab('etage', w.etage) || 'EG', num(w.bru) ? 'Brüstung ' + th(w.bru) : '', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : ''].filter(Boolean).join(' · '), cols[1][1] - 13)[0], colX[1] + 11, ty + 2.2);
         cells.forEach((c, k) => {
           if (k < 2) return;
-          const bold = (V === 'betrieb' && k === 4) || k === 2, last = k === cells.length - 1, ly = ty - (lines[k].length - 1) * 1.8;
-          font(bold ? 'bold' : 'normal', 8.2, V === 'betrieb' && k === 4 ? BRAND : k === 2 ? MO_T : INK);
-          if (k === fIdx) { swatch(fa[2], colX[k] + 1.6, ty - 1, 1.5); txt(lines[k], colX[k] + 4.4, ly); }
+          const last = k === cells.length - 1, ly = ty - (lines[k].length - 1) * 1.75;
+          font(k === 2 ? 'bold' : 'normal', 8, k === 2 ? MO_T : (k === 6 && c === 'offen') ? WARN : INK);
+          if (k === 5) { if (offen(w, 'fa')) { punkt(colX[k] + 1.6, ty - 1, 1); font('bold', 8, WARN); txt('offen', colX[k] + 4.4, ty); } else { swatch(fa[2], colX[k] + 1.6, ty - 1, 1.5); txt(lines[k], colX[k] + 4.4, ly); } }
           else txt(lines[k], colX[k] + (last ? cols[k][1] - 1 : 0), ly, { align: last ? 'right' : 'left' });
         });
         y += rh; stroke(LINE); doc.setLineWidth(0.2); doc.line(M, y, XR, y);
       });
       y += 4;
-      font('normal', 7.6, INK2); const lg = wrap(legendeText, CW); txt(lg, M, y + 2.5, { lineHeightFactor: 1.25 }); y += lg.length * 3.3 + 8;
+      font('normal', 7.4, INK2); const lg = wrap(legendeText, CW); txt(lg, M, y + 2.5, { lineHeightFactor: 1.25 }); y += lg.length * 3.2 + 8;
     }
     function ausstattung() {
       const halb = (CW - 5) / 2;
       const gleich = (fn, sonst) => { const v = wins.map(fn); return v.length && v.every((x) => x === v[0]) ? v[0] : (sonst || 'unterschiedlich, siehe Positionen'); };
-      const flaeche = wins.reduce((a, x) => { const d = h.derive(x); return a + (d.elW && d.elH ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
-      const groesste = wins.reduce((best, x) => { const d = h.derive(x); return !best || d.elW * d.elH > best.a ? { a: d.elW * d.elH, n: x.name || 'Fenster', d: d } : best; }, null);
-      const etagen = wins.map((x) => h.lab('etage', x.etage) || 'EG').filter((v, k, a) => a.indexOf(v) === k).join(', ');
-      const ausst = [['Material', gleich((x) => (offen(x, 'material') ? 'offen' : h.lab('material', x.material) || 'Kunststoff'))], ['Farbe außen', gleich((x) => rahmen(x, 'aussen')[0] + (rahmen(x, 'aussen')[0].indexOf(rahmen(x, 'aussen')[1]) < 0 ? ' (' + rahmen(x, 'aussen')[1] + ')' : ''))], ['Farbe innen', gleich((x) => rahmen(x, 'innen')[0])], ['Glas', gleich((x) => (offen(x, 'glas') ? 'offen' : h.lab('glas', x.glas) || '3-fach') + (offen(x, 'glasfn') ? ', Extras offen' : (x.glasfn || []).length ? ', ' + x.glasfn.map((g) => h.lab('glasfn', g)).join(', ') : ''))], ['Sprossen', gleich((x) => ((x.bars || []).length ? (offen(x, 'spross') ? 'Art offen' : h.lab('spross', x.spross)) : 'keine'))], ['Sonnenschutz außen', gleich((x) => sonneText(x))], ['Sonnenschutz innen', gleich((x) => innenText(x))], ['Insektenschutz', gleich((x) => (offen(x, 'insekt') ? 'offen' : h.lab('insekt', x.insekt) || 'keiner'))], ['Fensterbank', gleich((x) => (istTuer(x) ? 'Tür, Schwelle ' + schwelleText(x) : 'innen ' + bankText(x, 'fbi') + ', außen ' + bankText(x, 'fba')))], ['Montage', gleich((x) => montageText(x))]];
-      const zahlen = [['Positionen', String(wins.length)], ['Elemente', String(nE)], ['Fensterfläche', flaeche ? 'etwa ' + flaeche.toFixed(1).replace('.', ',') + ' m² (Element, alle Stück)' : '–'], ['Größtes Element', groesste && groesste.d.elW ? groesste.n + ', ' + th(groesste.d.elW) + ' × ' + th(groesste.d.elH) + ' mm' : '–'], ['Geschosse', etagen || '–'], ['Fotos', nF ? nF + ', von der KI ausgewertet' : 'keine'], ['Maße', komplett ? 'alle 8 Handmaße je Fenster' : wins.filter((x) => { const d = h.derive(x); return !(d.moW && d.elW); }).length + ' Position(en) ohne vollständige Maße', { col: komplett ? OK : WARN, bold: true }]].concat(V === 'betrieb' ? [['Ihr Abzug', ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben']] : []);
-      const oA = { lw: 27, fs: FS }, oZ = { lw: 28, fs: FS }, ha = karteH(ausst, halb, 'x', oA), hz = karteH(zahlen, halb, 'x', oZ);
-      platz(Math.max(ha, hz));
-      karte(M, y, halb, 'Ausstattung im Überblick', ausst, oA); karte(M + halb + 5, y, halb, 'Zahlen', zahlen, oZ);
-      y += Math.max(ha, hz) + 6;
+      const flaeche = wins.reduce((a, x) => { const d = AW.derive(x); return a + (d.elW && d.elH ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
+      const groesste = wins.reduce((best, x) => { const d = AW.derive(x); return !best || d.elW * d.elH > best.a ? { a: d.elW * d.elH, n: x.name || 'Fenster', d: d } : best; }, null);
+      const etagen = wins.map((x) => AW.lab('etage', x.etage) || 'EG').filter((v, k, a) => a.indexOf(v) === k).join(', ');
+      const ausst = [['Material', gleich((x) => (offen(x, 'material') ? 'offen' : AW.lab('material', x.material) || 'Kunststoff'))], ['Farbe außen', gleich((x) => (AW.istOffen(x, 'fa') ? 'offen' : AW.farbe(x, 'aussen')[0]))], ['Farbe innen', gleich((x) => AW.farbe(x, 'innen')[0])], ['Glas', gleich((x) => (offen(x, 'glas') ? 'offen' : AW.lab('glas', x.glas) || '3-fach') + (offen(x, 'glasfn') ? ', Extras offen' : (x.glasfn || []).length ? ', ' + x.glasfn.map((g) => AW.lab('glasfn', g)).join(', ') : ''))], ['Sprossen', gleich((x) => ((x.bars || []).length ? (offen(x, 'spross') ? 'Art offen' : AW.lab('spross', x.spross)) : 'keine'))], ['Sonnenschutz außen', gleich((x) => (offen(x, 'sart') ? 'offen' : AW.sonne(x)))], ['Sonnenschutz innen', gleich((x) => (offen(x, 'iart') ? 'offen' : AW.innen(x)))], ['Insektenschutz', gleich((x) => (offen(x, 'insekt') ? 'offen' : AW.lab('insekt', x.insekt) || 'keiner'))], ['Montage', gleich((x) => AW.montageText(x))]];
+      const zahlen = [['Positionen', String(wins.length)], ['Elemente', String(nE)], ['Fensterfläche', flaeche ? 'etwa ' + flaeche.toFixed(1).replace('.', ',') + ' m² (Element, alle Stück)' : '–'], ['Größtes Element', groesste && groesste.d.elW ? groesste.n + ', ' + th(groesste.d.elW) + ' × ' + th(groesste.d.elH) + ' mm' : '–'], ['Geschosse', etagen || '–'], ['Fotos', nF ? nF + (nA ? ', von der KI ausgewertet' : '') : 'keine'], ['Maße', komplett ? 'alle 8 Handmaße je Fenster' : wins.filter((x) => AW.massLuecken(x).length).length + ' Position(en) mit Lücken', komplett ? null : { offen: true }]].concat(V === 'betrieb' ? [['Ihr Abzug', ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten (Fenster)' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten (Türen)' : '')]] : []);
+      const oA = { lw: 27, fs: FS }, oZ = { lw: 28, fs: FS }, ha = 11 + zeilenH(ausst, halb - 8, oA) + 3, hz = 11 + zeilenH(zahlen, halb - 8, oZ) + 3, hh = Math.max(ha, hz);
+      platz(hh);
+      karteRand(M, y, halb, hh); kicker('Ausstattung im Überblick', M + 4, y + 6, GREY); zeilen(ausst, M + 4, y + 9, halb - 8, oA);
+      karteRand(M + halb + 5, y, halb, hh); kicker('Zahlen', M + halb + 9, y + 6, GREY); zeilen(zahlen, M + halb + 9, y + 9, halb - 8, oZ);
+      y += hh + 7;
     }
     /* Alle Elemente im selben Maßstab */
-    const massstabMasse = () => { const maxH = wins.reduce((a, x) => Math.max(a, h.derive(x).elH || 1200), 0), maxW = wins.reduce((a, x) => Math.max(a, h.derive(x).elW || 1000), 0), perRow = Math.min(wins.length, 6), slot = (CW - 8) / perRow, zeilenN = Math.ceil(wins.length / perRow), sc = Math.min(30 / maxH, (slot - 10) / maxW), rowH = maxH * sc + 17; return { maxH: maxH, perRow: perRow, slot: slot, sc: sc, rowH: rowH, gh: 12 + zeilenN * rowH + 2 }; };
-    const massstabH = () => massstabMasse().gh + 6;
     function massstab() {
-      const mm = massstabMasse(), maxH = mm.maxH, perRow = mm.perRow, slot = mm.slot, sc = mm.sc, rowH = mm.rowH, gh = mm.gh;
+      const maxH = wins.reduce((a, x) => Math.max(a, AW.derive(x).elH || 1200), 0), maxW = wins.reduce((a, x) => Math.max(a, AW.derive(x).elW || 1000), 0), perRow = Math.min(wins.length, 6), slot = (CW - 8) / perRow, zeilenN = Math.ceil(wins.length / perRow), sc = Math.min(30 / maxH, (slot - 10) / maxW), rowH = maxH * sc + 17, gh = 12 + zeilenN * rowH + 2;
       platz(gh);
-      fill('#ffffff'); stroke(LINE); doc.setLineWidth(0.3); rr(M, y, CW, gh, 3, 'FD');
-      eyebrow('Alle Elemente im selben Maßstab', M + 4, y + 5.2, INK2);
+      karteRand(M, y, CW, gh); kicker('Alle Elemente im selben Maßstab', M + 4, y + 6, GREY);
       wins.forEach((w, k) => {
-        const d = h.derive(w), ww = (d.elW || 1000) * sc, wh = (d.elH || 1200) * sc, r = Math.floor(k / perRow), c = k % perRow;
+        const d = AW.derive(w), ww = (d.elW || 1000) * sc, wh = (d.elH || 1200) * sc, r = Math.floor(k / perRow), c = k % perRow;
         const cx0 = M + 4 + c * slot + slot / 2, base = y + 10 + r * rowH + maxH * sc;
-        ansicht(w, cx0 - ww / 2, base - wh, ww, wh);
-        font('bold', 7.6, INK); txt(wrap((k + 1) + ' · ' + (w.name || 'Fenster'), slot - 4)[0], cx0, base + 4.4, { align: 'center' });
-        font('normal', 7.2, INK2); txt(d.elW ? th(d.elW) + ' × ' + th(d.elH) + ((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stk.' : '') : 'Maße offen', cx0, base + 8, { align: 'center' });
+        const pl = AW.plan(w, { nurElement: true, b: ww, h: wh, fs: 1.4 }); planZeichnen(pl, cx0 - ww / 2, base - pl.h);
+        font('bold', 7.4, INK); txt(wrap((k + 1) + ' · ' + (w.name || 'Fenster'), slot - 4)[0], cx0, base + 4.4, { align: 'center' });
+        font('normal', 7, INK2); txt(d.elW ? th(d.elW) + ' × ' + th(d.elH) + ((num(w.anzahl) || 1) > 1 ? ' · ' + w.anzahl + ' Stk.' : '') : 'Maße offen', cx0, base + 8, { align: 'center' });
       });
       y += gh + 6;
     }
@@ -631,12 +634,12 @@ window.Blatt = (() => {
       if (!e.code && !e.beispiel) return;
       platz(70);
       codeSeite = seiteNr();
-      sektion('Aufmaß digital übernehmen', 'für Fensterbauer, kostenlos bis 3 Projekte');
+      sektion('Für Fensterbauer · kostenlos bis 3 Projekte', 'Aufmaß digital übernehmen.');
       const qs = 28, qx = XR - qs;
-      [['Kostenlos registrieren', HOST + ' oder den QR-Code scannen'], ['„Code vom Kunden einfügen“', 'den Aufmaß-Code unten einsetzen, Leerzeichen und Umbrüche stören nicht'], ['Projekt ist da', 'mit Positionen, 3-D-Ansicht und Bestellmaß nach Ihrem Abzug']].forEach((st, k) => { fill(INK); doc.circle(M + 4, y + 4 + k * 10.5, 4, 'F'); font('black', 9, '#ffffff'); txt(String(k + 1), M + 4, y + 5.4 + k * 10.5, { align: 'center' }); font('bold', 9.2, INK); txt(st[0], M + 11, y + 3.4 + k * 10.5); font('normal', 8, INK2); txt(st[1], M + 11, y + 7.6 + k * 10.5); });
+      [['Kostenlos registrieren', HOST + ' oder den QR-Code scannen'], ['„Code vom Kunden einfügen“', 'den Aufmaß-Code unten einsetzen, Leerzeichen und Umbrüche stören nicht'], ['Projekt ist da', 'je Position mit Zeichnung, Klärungsliste und Bestellmaß nach Ihrem Abzug']].forEach((st, k) => { fill(INK); doc.circle(M + 4, y + 4 + k * 10.5, 4, 'F'); font('extra', 9, '#ffffff'); txt(String(k + 1), M + 4, y + 5.4 + k * 10.5, { align: 'center' }); font('bold', 9.2, INK); txt(st[0], M + 11, y + 3.4 + k * 10.5); font('normal', 8, INK2); txt(st[1], M + 11, y + 7.6 + k * 10.5); });
       qr(qx, y - 2, qs); font('normal', 7.2, INK2); txt('Scannen: Anmeldung', qx + qs / 2, y + qs + 2, { align: 'center' });
       y += 36;
-      if (!e.code) { fill(PAPER); rr(M, y, CW, 17, 3); eyebrow('Aufmaß-Code für eeziframes', M + 4, y + 5.6, INK); font('normal', 8.2, INK2); txt('Im echten Aufmaßblatt steht hier der Aufmaß-Code. In diesem Beispiel bleibt er leer.', M + 4, y + 11.6); y += 20; return; }
+      if (!e.code) { karteRand(M, y, CW, 17); kicker('Aufmaß-Code für eeziframes', M + 4, y + 6, INK); font('normal', 8.2, INK2); txt('Im echten Aufmaßblatt steht hier der Aufmaß-Code. In diesem Beispiel bleibt er leer.', M + 4, y + 12); y += 21; return; }
       /* Courier, damit sich der Code aus jedem PDF-Programm sauber kopieren lässt */
       font('mono', 6.2); const zeilen2 = doc.splitTextToSize(e.code, CW - 8), zh2 = 2.7;
       let k = 0, erster = true;
@@ -644,60 +647,34 @@ window.Blatt = (() => {
         const frei = Math.floor((unten() - y - (erster ? 12 : 8)) / zh2);
         if (frei < 6) { neueSeite(); continue; }
         const teil = zeilen2.slice(k, k + frei), hh = teil.length * zh2 + (erster ? 12 : 8);
-        fill(PAPER); rr(M, y, CW, hh, 3);
-        if (erster) { eyebrow('Aufmaß-Code für eeziframes', M + 4, y + 5.2, INK); font('normal', 7.2, INK2); txt('Enthält Maße, Wünsche und Fotoauswertung aller Positionen. Als Text markieren und kopieren.', XR - 4, y + 5.2, { align: 'right' }); }
+        karteRand(M, y, CW, hh);
+        if (erster) { kicker('Aufmaß-Code für eeziframes', M + 4, y + 5.6, INK); font('normal', 7.2, INK2); txt('Maße, Wünsche und Fotoauswertung aller Positionen; als Text markieren und kopieren.', XR - 4, y + 5.6, { align: 'right' }); }
         font('mono', 6.2, '#3a3a3f'); let cy2 = y + (erster ? 10.6 : 6);
         teil.forEach((z) => { txt(z, M + 4, cy2); cy2 += zh2; });
         y += hh + 3; k += teil.length; erster = false;
       }
     }
-    /* Seite 2 unten, für Fensterbauer: eeziframes für die eigenen Kunden. Gestaltet wie normaler Inhalt, nicht wie Werbung. */
-    function eigeneKunden(y0) {
-      fill(PAPER); stroke(LINE); doc.setLineWidth(0.3); rr(M, y0, CW, EIGENE_H, 3.5, 'FD');
+    /* Für Fensterbauer: eeziframes für die eigenen Kunden. Gestaltet wie normaler Inhalt, nicht wie Werbung. */
+    const EIGENE_H = 46;
+    function eigeneKunden() {
+      platz(EIGENE_H + 4);
+      const y0 = y;
+      karteRand(M, y0, CW, EIGENE_H);
       const qs = 25, qx = XR - qs - 5, qy = y0 + 5, tx = M + 5, tw2 = qx - tx - 6;
-      eyebrow('Für Fensterbauer · Aufmaße Ihrer eigenen Kunden', tx, y0 + 6.6, INK);
-      font('black', 11.5, INK); const t1 = wrap('Ihre Kunden messen selbst. Sie fahren erst zum Feinaufmaß.', tw2); txt(t1, tx, y0 + 12.8, { lineHeightFactor: 1.1 });
+      kicker('Für Fensterbauer · Aufmaße Ihrer eigenen Kunden', tx, y0 + 6.6, GRUEN_T);
+      font('extra', 11.5, INK); const t1 = wrap('Ihre Kunden messen selbst. Sie fahren erst zum Feinaufmaß.', tw2); txt(t1, tx, y0 + 12.8, { lineHeightFactor: 1.1 });
       let yy = y0 + 12.8 + t1.length * 4.6 + 0.6;
       font('normal', 8, INK2); const t2 = wrap('Projekt in eeziframes anlegen, Aufmaß-Link per WhatsApp oder E-Mail schicken. Zurück kommt ein Aufmaß wie dieses: 8 Maße je Fenster, Fotos mit Auswertung, alle Wünsche, Bestellmaß nach Ihrem Abzug, das Blatt mit Ihrem Logo.', tw2); txt(t2, tx, yy, { lineHeightFactor: 1.22 }); yy += t2.length * 3.45 + 1.6;
       font('bold', 8, INK); txt('3 Projekte kostenlos · danach 9 € netto je Projekt mit eingegangenem Aufmaß · keine Grundgebühr', tx, yy); yy += 4.2;
       font('normal', 7, GREY); txt(wrap('Zum Vergleich: Eine Meisterstunde kostet im Schnitt 65,14 € netto (Preisatlas Handwerk 2024).', tw2)[0], tx, yy);
       qr(qx, qy, qs); font('normal', 7, INK2); txt('Scannen: Projekt anlegen', qx + qs / 2, qy + qs + 3.4, { align: 'center' }); font('bold', 7, INK); txt(HOST, qx + qs / 2, qy + qs + 6.8, { align: 'center' });
+      y += EIGENE_H + 6;
     }
 
-    if (wins.length) position(wins[0], 0);
+    if (wins.length) wins.forEach((w, i) => position(w, i));
     else { font('normal', 10, GREY); txt('Noch kein Fenster erfasst.', M, y + 6); y += 12; }
-    /* Klärungsliste nach Position 1: passt sie nicht mehr auf diese Seite, aber auf eine neue, dorthin; ist sie länger als eine Seite,
-       wird sie geteilt (nie eine Zeile allein, Titel „Fortsetzung“) */
-    if (klAlle.length) {
-      const frisch = BOTTOM - 19, ganz = karteH(klAlle, CW, klTitel, oKl);
-      let rest = klAlle.slice(), titel = klTitel;
-      if (y + ganz > unten() && (ganz <= frisch || unten() - y < 40)) neueSeite();
-      while (rest.length) {
-        const teil = [];
-        while (rest.length && y + karteH(teil.concat([rest[0]]), CW, titel, oKl) <= unten()) teil.push(rest.shift());
-        if (rest.length === 1 && teil.length > 2) rest.unshift(teil.pop());
-        if (!teil.length) teil.push(rest.shift());
-        const hk2 = karteH(teil, CW, titel, oKl); karte(M, y, CW, titel, teil, oKl); y += hk2 + 4;
-        titel = klTitel + ', Fortsetzung';
-        if (rest.length) neueSeite();
-      }
-    }
-    /* Lange Nachricht: auf Seite 1 gekürzt, hier vollständig */
-    if (nachrichtLang) { const rows = [[sie ? 'Nachricht des Kunden' : 'Deine Nachricht', '„' + pr.notiz + '“']], oM = { lw: 26, fs: FS, bg: '#fffbe8', rand: '#f2e2a4' }, hM = karteH(rows, CW, '', oM); platz(hM); karte(M, y, CW, '', rows, oM); y += hM + 4; }
-    /* Seite 2 gibt es immer (unten steht die Box für Fensterbauer); passt der Überblick noch darüber, steht er dort */
-    if (EIGENE && doc.getNumberOfPages() < 2) neueSeite();
-    let ueberblickDa = false;
-    /* Was auf der Seite nach Position 1 noch Platz hat (Seite 2 über der Box, oder die Seite mit der Klärungsliste):
-       zuerst die Übersicht, sonst alle Elemente im selben Maßstab. Position 2 beginnt danach auf einer neuen Seite. */
-    let massstabDa = false;
-    if (wins.length > 1 && seiteNr() >= 2) {
-      /* Abstand zur Karte darüber: die Überschrift steht auf der Grundlinie y */
-      if (y + 7 + uebersichtH() <= unten()) { y += 7; uebersicht(); ueberblickDa = true; }
-      if (y + massstabH() <= unten()) { massstab(); massstabDa = true; }
-    }
-    wins.slice(1).forEach((w, k) => { neueSeite(); position(w, k + 1); });
-    if (wins.length > 1) { if (!ueberblickDa) { neueSeite(); uebersicht(); } ausstattung(); if (!massstabDa) massstab(); }
-    if (EIGENE) { if (seiteNr() < 3 || y + 80 > unten()) neueSeite(); codeTeil(); }
+    if (wins.length > 1) { neueSeite(); if (EIGENE) tabelle(); ausstattung(); massstab(); }
+    if (EIGENE) { if (wins.length <= 1 || y + 90 > unten()) neueSeite(); codeTeil(); eigeneKunden(); }
 
     fuss();
     return doc.output('blob');

@@ -10,7 +10,7 @@ dazugehören, steht in docs/BILDER.md.
   3. web/bilder/foto/<name>.webp einchecken.
 
 Jedes Bild wird mittig auf das Format seines Platzes beschnitten, verkleinert und als WebP geschrieben (Qualität 82).
-Fehlt ein Original, entsteht ein Platzhalter (dunkle Karte, Fensterumriss, Name des Platzes), damit die Seite schon steht;
+Fehlt ein Original, entsteht ein neutraler Platzhalter ohne Text (dunkle Fläche, Fenster, Licht am Boden), damit die Seite steht;
 ein vorhandenes Foto wird nie durch einen Platzhalter ersetzt. Mit --platzhalter werden alle Platzhalter neu geschrieben."""
 import pathlib
 import sys
@@ -74,30 +74,23 @@ def zuschneiden(im, w, h):
 
 
 def platzhalter(name, w, h):
-    """dunkle Karte mit Fensterumriss: zeigt, wo ein Foto hinkommt, und sagt welches"""
+    """neutrales Bild ohne Text, bis das Foto da ist: Licht fällt durch ein Fenster in einen dunklen Raum, wie im Zeichen.
+    Keine Beschriftung, keine Dateipfade, kein Verweis auf Prompts: Besucher sehen eine ruhige Fläche, kein Baustellenschild."""
     im = Image.new('RGB', (w, h), FLAECHE)
     d = ImageDraw.Draw(im)
-    s = w / 1200  # Maßstab
-    r = round(28 * s)
-    # Fenster mit Kreuz
-    fw, fh = round(w * 0.42), round(h * 0.38)
-    fx, fy = (w - fw) // 2, round(h * 0.22)
-    d.rounded_rectangle((fx, fy, fx + fw, fy + fh), radius=round(10 * s), outline=LINIE2, width=round(6 * s))
-    d.line((fx + fw // 2, fy, fx + fw // 2, fy + fh), fill=LINIE2, width=round(6 * s))
-    d.line((fx, fy + fh // 2, fx + fw, fy + fh // 2), fill=LINIE2, width=round(6 * s))
+    s = min(w, h) / 1000  # Maßstab
+    fw, fh = round(w * 0.30), round(h * 0.36)
+    fx, fy = round(w * 0.56) - fw // 2, round(h * 0.16)
+    # Lichtfläche auf dem Boden unter dem Fenster
+    boden = fy + fh + round(h * 0.16)
+    d.polygon([(fx, fy + fh), (fx + fw, fy + fh), (fx + fw - round(w * 0.12), boden + round(h * 0.18)), (fx - round(w * 0.30), boden + round(h * 0.18))], fill='#242424')
+    # Fenster: Rahmen, Glas etwas heller, Kreuz
+    d.rectangle((fx, fy, fx + fw, fy + fh), fill='#262626')
+    d.rounded_rectangle((fx, fy, fx + fw, fy + fh), radius=round(8 * s), outline=LINIE2, width=max(4, round(8 * s)))
+    d.line((fx + fw // 2, fy, fx + fw // 2, fy + fh), fill=LINIE2, width=max(3, round(6 * s)))
+    d.line((fx, fy + fh // 2, fx + fw, fy + fh // 2), fill=LINIE2, width=max(3, round(6 * s)))
     # Fensterbank
-    d.rectangle((fx - round(30 * s), fy + fh, fx + fw + round(30 * s), fy + fh + round(14 * s)), fill=LINIE2)
-    # Kicker, Titel, Name
-    k = schrift('Bold', round(26 * s))
-    t = schrift('ExtraBold', round(64 * s))
-    n = schrift('Medium', round(30 * s))
-    y = fy + fh + round(90 * s)
-    d.text((w // 2, y), 'F O T O   F O L G T', font=k, fill=SIGNAL, anchor='ma')
-    d.text((w // 2, y + round(44 * s)), 'Hier kommt ein Bild hin.', font=t, fill=TEXT, anchor='ma')
-    d.text((w // 2, y + round(44 * s) + round(86 * s)), f'fotos-roh/{name}.jpg  ·  {w} × {h}', font=n, fill=NEBEN, anchor='ma')
-    d.text((w // 2, y + round(44 * s) + round(130 * s)), 'Motiv und Prompt: docs/BILDER.md', font=n, fill=NEBEN, anchor='ma')
-    # Rand wie eine Karte
-    d.rounded_rectangle((3, 3, w - 4, h - 4), radius=r, outline=LINIE, width=6)
+    d.rectangle((fx - round(24 * s), fy + fh, fx + fw + round(24 * s), fy + fh + round(12 * s)), fill=LINIE2)
     return im
 
 

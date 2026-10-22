@@ -4,7 +4,7 @@
    den oberen Teil von Seite 1 aus: Kopf in der Farbe des Betriebs, Kunde, Position 1 mit Bestellmaß-Vorschlag und Zeichnung.
      web/bilder/tour-aufmassblatt-<abzug>.webp   920 px breit (doppelte Pixeldichte für etwa 460 px)
      web/bilder/tour-aufmassblatt.json           Fingerabdruck der Eingaben, Maße der Bilder
-   Ändern sich blatt.js, die Schrift, jsPDF, modell.js oder die Daten der Tour, stimmt der Fingerabdruck nicht mehr; dann meldet
+   Ändern sich blatt.js, die Schrift, jsPDF, modell.js, ral.js (Farbnamen) oder die Daten der Tour, stimmt der Fingerabdruck nicht mehr; dann meldet
    scripts/pruefen.mjs das, und dieses Skript erzeugt die Bilder neu:
      PW_PFAD=/opt/node-tools node scripts/tour-bild.mjs          (startet einen eigenen Server; BASE=… nimmt einen laufenden)
    Braucht pdftoppm (poppler-utils) und Python mit Pillow. */
@@ -18,7 +18,7 @@ import { execFileSync, spawn } from 'child_process';
 
 const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const AUSSCHNITT = { seite: 1, oben: 0, hoehe: 0.67, breite: 920, dpi: 240, qualitaet: 82 };
-const QUELLEN = ['web/assets/blatt.js', 'web/assets/blatt-schrift.js', 'web/vendor/jspdf.umd.min.js', 'web/assets/modell.js'];
+const QUELLEN = ['web/assets/blatt.js', 'web/assets/blatt-schrift.js', 'web/vendor/jspdf.umd.min.js', 'web/assets/modell.js', 'web/assets/ral.js'];
 /* Die Daten der Tour ohne Funktionen, so wie window.TourBeispiel.blatt(15, 'eeziframes.com', false) sie liefert */
 export const DATEN_AUS_SEITE = "JSON.stringify(window.TourBeispiel.blatt(15, 'eeziframes.com', false), (k, v) => (typeof v === 'function' ? undefined : v))";
 export function fingerabdruck(daten) {

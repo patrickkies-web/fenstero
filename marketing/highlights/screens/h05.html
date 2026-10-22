@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h05 · Link · Absender: Sie.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Klick-Badge und Kicker in einer Zeile */
+  .h-zeile { display: flex; align-items: center; gap: 28px }
+  /* Ausschnitt .sharecard (Aufnahme 540 × 1100, Faktor 3): --s = Story-px je CSS-px; Marke 4 steht auf Höhe der Knopfreihe */
+  .h-stapel { --s: 1.71; grid-template-columns: auto auto; justify-content: start; align-items: start; flex: none }
+  .h-stapel > .ef-marke { margin-top: calc(49px * var(--s) - 36px) }
+  .h-teilen { width: calc(476px * var(--s)) }
+</style>
+</head>
+<body>
+<!-- Kapitel Link, Inhalt (h05): echte Aufnahme der Karte „Aufmaß-Link schicken“ für das in h04 angelegte Projekt „Familie Neumann“
+     (werkzeug/link-aufnahmen.mjs). Textfeld per CSS auf volle Höhe, Text unverändert; Linkzeile und Sie/Du/Tage-Schalter entfallen. -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Link · 3/4</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <div class="h-zeile">
+        <span class="ef-klick">Klick 4 von 4</span>
+        <p class="ef-kicker">Link schicken</p>
+      </div>
+      <h2 class="ef-display">Absender:<br><span class="ef-gruen">Sie.</span></h2>
+      <p class="ef-lead">Die Nachricht ist vorformuliert und trägt Ihren Namen. Sie geht über Ihr WhatsApp, per SMS oder E-Mail.</p>
+    </div>
+    <div class="ef-schritte h-stapel">
+      <span class="ef-marke">4</span>
+      <figure class="ef-ausschnitt h-teilen"><img src="../aufnahmen/h05-teilen.png" alt="Knöpfe WhatsApp, SMS, E-Mail und Text kopieren, darunter das Feld „Nachricht“: Guten Tag Familie Neumann, für Ihr Fensterangebot brauchen wir die Maße Ihrer Fenster. Mit diesem Link messen Sie sie selbst, Schritt für Schritt erklärt, etwa fünf Minuten pro Fenster. Ein Konto brauchen Sie nicht. Viele Grüße Jens Brandt, Fensterbau Brandt."></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 3 von 4">
+      <li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

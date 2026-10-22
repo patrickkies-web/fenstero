@@ -1,0 +1,72 @@
+
+Diese Linie legt fest, wie eeziframes auf Instagram aussieht und spricht: eine dunkle Bühne, große Headlines in Inter und ein grünes Signal für das, was zählt. Sie gilt für Einzelbilder, Karussells und Story-Grafiken.
+
+## Markenkern
+
+- eeziframes ersetzt die Anfahrt zum Erstaufmaß: Der Fensterbauer schickt einen Aufmaß-Link, der Kunde misst selbst, Schritt für Schritt geführt, und der Betrieb bekommt Maße, Fotos, Öffnungsarten, Farben und Ausstattung sortiert nach Positionen.
+- Kernsatz: **Aufmaß ohne Anfahrt.**
+- Haltung: klar, ruhig, verbindlich. Gezeigt wird nur, was das Produkt kann oder die Nutzungsbedingungen zusagen.
+- Zielgruppen: Fensterbauer (Hauptzielgruppe) und Hauseigentümer. Beide werden gesiezt.
+
+## Formate
+
+- Feed 4:5, 1080 × 1350 px (`slide-w`, `slide-h`): Standard für Einzelbild und Karussell. Der Rand `pad-x` (84px) hält alles im 3:4-Ausschnitt des Profilrasters.
+- Karussell: Cover → eine Inhalts-Slide pro Aussage → Abschluss. 3 bis 10 Slides, am besten 4 bis 6.
+- Einzelbild: Aufbau wie das Cover, Fußzeile wie der Abschluss.
+- Story 9:16, 1080 × 1920 px: gleiche Bausteine; oben und unten je 250px frei lassen, weil dort Instagrams Bedienelemente liegen.
+
+## Raster
+
+- Jede Slide hat drei Zonen: Kopfzeile, Inhalt, Fußzeile. Ränder `pad-top` 84, `pad-x` 84, `pad-bottom` 80; die Zonen verteilen sich über die Höhe, dazwischen bleiben mindestens `gap-block` (48px) frei.
+- Inhalt = Textblock (zwischen Kicker, Headline und Lead je `gap-stack`) plus höchstens eine Karte (`gap-block` darüber).
+- Alles steht linksbündig. Zentriert werden nur Icons in Kacheln und Badges.
+- Wird es eng, Text kürzen oder die Karte vereinfachen – nie die Schrift verkleinern oder die Ränder verringern.
+
+## Farbe
+
+- `ground` ist immer der Hintergrund. `surface` gibt es nur als Karte, immer mit 2px-Rand in `line`.
+- Text: `text` für Headlines, Namen und Listenzeilen; `text-2` für Lead, Erklärsätze und Chips; `muted` nur für Labels und Nebenzeilen.
+- `accent` ist das Signal: Kicker, Haken, Fortschritt und genau ein Wort pro Headline. Nie für Fließtext, nie als Fläche hinter Text. `accent-soft` liegt hinter grünen Icons und unter positiven Chips.
+- `cream` gehört der Hauptaktion (CTA-Pill) und dem Avatar des Betriebs – eine cream-Fläche pro Slide.
+- `chat-out` und `chat-in` nur in Chat-Mockups.
+- Keine Verläufe, keine Schatten, keine weiteren Farben. Auch „Nein“ ist nicht rot: Ausschlüsse sind grau und tragen ein Kreuz.
+- Fotos (Fenster, Montage) nur innerhalb einer Karte mit `radius-card`, nie vollflächig hinter Text.
+
+## Schrift
+
+Eine Familie: Inter von Google Fonts in den Gewichten 500 bis 800, Fallback Helvetica Neue und Arial.
+
+| Stil | Größe | Wofür |
+| --- | --- | --- |
+| `display-xl` | 172px, 800 | Cover-Headline, 3 Zeilen, ein Wort in `accent` |
+| `display` | 128px, 800 | Headline auf Inhalts- und Abschluss-Slides, 2 Zeilen |
+| `title` | 56px, 800 | Betrieb, Kunde oder Ergebnis in Karten |
+| `lead`, `list` | 40px, 500 / 700 | Kernaussage unter der Headline; Listenzeilen |
+| `wordmark` | 38px, 800 | „eeziframes“ oben links |
+| `button` | 34px, 800 | CTA-Pill |
+| `card-body`, `item`, `meta` | 32 / 30 / 28px | Erklärsatz, Checkliste, Vorzeilen |
+| `kicker`, `chip` | 26px | Thema und Zählung in Versalien; Chips |
+| `label` | 22px, 800 | Thema rechts in der Kopfzeile, Versalien |
+
+- Headlines in 800 mit -0,04em Laufweite, mit Punkt am Ende, Zeilen von Hand umbrochen, ohne Silbentrennung.
+- Kicker und Label in Versalien mit Sperrung (+0,2em / +0,18em).
+- Nichts unter 26px außer `label`.
+- Zahlen als Ziffern („3 Projekte“, „4 Positionen“).
+
+## Bausteine
+
+- Grundlagen: Kopfzeile, Textblock. Elemente: Badge, Chip, Karte, Fusszeile. Vorlagen: SlideCover, SlideInhalt, SlideAbschluss.
+- Auf einem Design-Canvas lädt jedes Artboard `components/bundle.css`. Die Datei bringt alle Werte selbst mit und braucht keine weitere Datei. Slides werden aus den Klassen `ef-…` gebaut, wie in den drei Slide-Vorlagen; Texte stehen direkt im Markup.
+- Geht das nicht, die Werte aus `tokens.json` inline setzen.
+
+## Ikonografie
+
+- Strich-Icons im 24er-Raster, runde Enden und Ecken, `stroke="currentColor"`, Stärke 1,8 in der großen Kachel und 2,1 bis 2,8 in kleinen Badges.
+- Zeichen und Bedeutung: Schild mit Haken = Kundenschutz und Sicherheit, Haken = Zusage oder erledigt, Kreuz = gibt es nicht, Pfeil = weiterwischen, Link = Aufmaß-Link, Schloss = nur für Sie, Dokument = Angebot oder Aufmaßblatt.
+- Keine Emojis in Grafiken, keine gefüllten oder bunten Icons.
+- Die Icons sind nachgezeichnet und an die Website angelehnt; liegen die Original-Icons vor, ersetzen sie diese.
+- Ein Logo ist noch nicht hinterlegt. Bis dahin wird die Wortmarke „eeziframes“ im Stil `wordmark` gesetzt.
+
+## Sprache
+
+- Sie-Form, sachlich, ruhig, verbindlich.

@@ -25,14 +25,34 @@ img { max-width: 100% }
 /* Fragen: das Modell steht still. Es sitzt oben unter der Kopfzeile und ist bei jeder Frage gleich hoch und am gleichen Ort: die Höhe hängt
    nur vom Bildschirm ab (Höhe minus Navigation und Platz fürs Dock), nie von der Frage. Darunter das Dock mit Kicker, Frage, Satz und Eingabe;
    was nicht hineinpasst, scrollt im Dock, das Modell bleibt. --q-dock ist der Platz fürs Dock (38 % der Höhe, 240 bis 300 px). */
-.scr.fit[data-screen="frage"] { --q-dock: clamp(240px, 38%, 300px); height: 100%; min-height: 0; padding-top: 8px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: clamp(160px, calc(100% - 68px - var(--q-dock)), 600px) minmax(0, 1fr) auto; row-gap: 8px }
-.scr.fit[data-screen="frage"] > .w3d-stage { height: auto; min-height: 0; max-height: none }
+/* Darüber die Kapitelleiste (.qleiste, S1) mit fester Höhe: --q-leiste zieht sie samt Abstand von der Modellhöhe ab, damit das Modell
+   bei jeder Frage gleich hoch bleibt; unter 700 px Höhe ist sie ausgeblendet (dann über die Übersicht). */
+.scr.fit[data-screen="frage"] { --q-dock: clamp(240px, 38%, 300px); --q-leiste: 56px; height: 100%; min-height: 0; padding-top: 8px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "leiste" "buehne" "dock" "nav"; grid-template-rows: 48px clamp(160px, calc(100% - 68px - var(--q-dock) - var(--q-leiste)), 600px) minmax(0, 1fr) auto; row-gap: 8px }
+.scr.fit[data-screen="frage"] > .qleiste { grid-area: leiste; height: 48px; margin: 0 -16px; align-items: center }
+.scr.fit[data-screen="frage"] > .w3d-stage { grid-area: buehne; height: auto; min-height: 0; max-height: none }
+.scr.fit[data-screen="frage"] > .qdock { grid-area: dock }
+.scr.fit[data-screen="frage"] > .qnav { grid-area: nav }
+@media (max-height: 700px) { .scr.fit[data-screen="frage"] { --q-leiste: 0px; grid-template-areas: "buehne" "dock" "nav"; grid-template-rows: clamp(160px, calc(100% - 68px - var(--q-dock)), 600px) minmax(0, 1fr) auto } }
 .qdock { min-height: 0; display: flex; flex-direction: column; gap: 6px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; margin: 0 -16px; padding: 0 16px 2px }
 .qdock > * { flex-shrink: 0 }
 .qdock > .hd.compact { padding-top: 0 }
 /* Steht unten im Dock noch mehr als ein paar Pixel, blendet der untere Rand aus (.mehr, gesetzt beim Zeichnen, Scrollen und Drehen) */
 .qdock.mehr { -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent); mask-image: linear-gradient(#000 calc(100% - 28px), transparent) }
 .scr.fit[data-screen="frage"] > .qnav { margin-top: 0 }
+/* Zifferntasten für ein Maß in den Wünschen (S.qMass): statt der Navigation unten, kompakt; im Dock nur Name, Bereich und Wert.
+   Die Zeilen des Rasters bleiben, das Modell steht still. */
+.scr.fit[data-screen="frage"] > .keypad { grid-area: nav; gap: 6px }
+.scr.fit[data-screen="frage"] > .keypad button { min-height: 44px }
+.qm-ein { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 2px 0; outline: none }
+.qm-ein .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.qm-ein #qm-t { font-size: 17px; font-weight: 800; line-height: 1.2 }
+.qm-ein small { font-size: 13px; line-height: 1.3; color: var(--muted) } .qm-ein small.bad { color: var(--bad); font-weight: 600 }
+.qm-num { flex: 0 0 auto; display: flex; align-items: baseline; gap: 6px; padding-bottom: 2px; border-bottom: 2px solid var(--line2) }
+.qm-num b { font-size: 32px; line-height: 1.1; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap }
+.qm-num b.empty { color: var(--surface3) }
+.qm-num b::after { content: ''; display: inline-block; width: 2.5px; height: .82em; margin-left: 3px; vertical-align: -.08em; border-radius: 2px; background: var(--ink); animation: caret 1.05s steps(2, start) infinite }
+.qm-num .u { font-size: 17px; font-weight: 700; color: var(--muted) }
+@media (prefers-reduced-motion: reduce) { .qm-num b::after { animation: none } }
 /* Eingabe beim Messen */
 .ask { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 10px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring) }
 .ask .q { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; letter-spacing: -.01em }
@@ -198,9 +218,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .neu-frage b { font-size: 17px }
 .neu-frage .sub { color: var(--ink2) }
 .zu-karte .dc-ic { color: var(--ink2) }
-.lk-kopf { padding: 18px 4px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 10px }
-.lk-kopf .lk-from { margin: 0 }
-.lk-kopf .lk-for { margin: 0; font-size: 15px; line-height: 1.3; font-weight: 700; color: var(--muted) }
+.lk-kopf { padding: 18px 0 0 }
 .steps { display: flex; flex-direction: column; gap: 18px }
 .step { display: flex; gap: 14px }
 .step .n { flex: 0 0 32px; font-size: 32px; line-height: 1; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums }
@@ -261,11 +279,11 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .facts dt { color: var(--muted) } .facts dd { margin: 0; font-weight: 600; min-width: 0 }
 
 /* ---------- 3-D-Modell: der Raum ist das Bild, der Rahmen ein Hauch ---------- */
-.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, #e6e0d7, #d6cfc4); box-shadow: var(--ring); perspective: 1300px; perspective-origin: 50% 46%; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100% }
+.w3d-stage { position: relative; width: 100%; height: 360px; border-radius: var(--r4); overflow: hidden; background: linear-gradient(180deg, #e6e0d7, #d6cfc4); box-shadow: var(--ring); perspective: 1300px; perspective-origin: 50% 46%; touch-action: pan-y; user-select: none; -webkit-user-select: none; max-width: 100% }
 .w3d-stage.hero { height: 320px }
 .w3d-bg { position: absolute; inset: -28px; background-size: cover; background-position: center; filter: blur(20px) saturate(.5) brightness(.85); opacity: .3; pointer-events: none; animation: w3dbgin 1.2s ease-out both }
 @keyframes w3dbgin { from { opacity: 0; transform: scale(1.06) } to { opacity: .3; transform: none } }
-.w3d-cam { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .9s cubic-bezier(.4, .1, .2, 1) }
+.w3d-cam { position: absolute; left: calc(50% + var(--dimx, 0px)); top: calc(50% + var(--dimy, 0px)); width: 0; height: 0; transform-style: preserve-3d; transform: translate(var(--panx, 0px), var(--pany, 0px)) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .9s cubic-bezier(.4, .1, .2, 1) }
 .w3d-stage.is-drag .w3d-cam { transition: none }
 .w3d-sway, .w3d-world { transform-style: preserve-3d }
 .w3d-stage.is-live:not(.is-drag) .w3d-sway { animation: w3dsway 9s ease-in-out infinite alternate }
@@ -292,15 +310,16 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-pilz.is-on { display: block; animation: pilz-ein .32s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: calc(var(--i, 0) * 45ms) }
 @keyframes pilz-ein { from { opacity: 0; scale: .2 } to { opacity: 1; scale: 1 } }
 .no-anim .w3d-pilz { animation: none }
-.w3d-stage.mit-schloss .w3d-handle::after { content: ''; position: absolute; left: 50%; top: 0; width: 120%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #e9ecef 0 22%, #3a3e43 26%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) }
 .w3d-sym { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity .35s } .w3d-stage.show-sym .w3d-sym { opacity: 1 }
-.w3d-sash.is-fixed .w3d-handle { opacity: 0; transform: scale(.5) !important }
+/* Kein Griff: Festfeld, Faltflügel (außer dem Bediengriff am freien Ende), Standflügel am Stulp, „Ohne Griff“ und Hebe-Schiebe elektrisch */
+.w3d-sash.is-fixed:not(.mit-griff) .w3d-handle, .w3d-sash.is-steh .w3d-handle, .w3d-stage.ohne-griff .w3d-handle { opacity: 0; transform: scale(.5) !important }
+.w3d-sash.is-fixed:not(.mit-griff) .w3d-ros, .w3d-sash.is-steh .w3d-ros, .w3d-stage.ohne-griff .w3d-ros { opacity: 0 }
 .w3d-sash .w3d-f, .w3d-glass, .w3d-bar { pointer-events: auto }
 .w3d-sash { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .7, .2, 1), translate .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1) }
-.w3d-selring { display: none; position: absolute; left: 0; top: 0; box-sizing: border-box; border: 3px solid var(--accent); border-radius: 2px; pointer-events: none }
+.w3d-selring { display: none; position: absolute; left: 0; top: 0; box-sizing: border-box; border: 3px solid var(--el); border-radius: 2px; pointer-events: none }
 .w3d-sash.is-sel .w3d-selring { display: block; animation: ring-ein .25s var(--e-out) both }
 @keyframes ring-ein { from { opacity: 0 } to { opacity: 1 } }
-.w3d-selring.is-form { border: 0; border-radius: 0 } .w3d-selring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible } .w3d-selring polygon { fill: none; stroke: var(--accent); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke }
+.w3d-selring.is-form { border: 0; border-radius: 0 } .w3d-selring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible } .w3d-selring polygon { fill: none; stroke: var(--el); stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke }
 /* Formen: Laibung aus Streifen (Farbe je Blickrichtung, nach hinten etwas dunkler); bei allen Fenstern die Fuge zwischen Wand und Rahmen */
 .w3d-rs { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(0, 0, 0, .07)) }
 .w3d-fuge { background: linear-gradient(180deg, #8e8578, #7f7669) }
@@ -327,7 +346,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-sash.demo-F .w3d-glass::after { animation: w3d-glanz 1s var(--e-out) both }
 @keyframes w3d-glanz { 0% { opacity: 0; background-position: 130% 0 } 12%, 82% { opacity: .95 } 100% { opacity: 0; background-position: -30% 0 } }
 .w3d-griffa { position: absolute; left: 0; top: 0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .2); transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
-.w3d-handle { position: absolute; left: 0; top: 0; border-radius: 3px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .2); transition: transform .7s cubic-bezier(.3, .7, .2, 1), translate .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
+.w3d-handle { position: absolute; left: 0; top: 0; border-radius: 999px; box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .28); transition: transform .7s cubic-bezier(.3, .7, .2, 1), translate .7s cubic-bezier(.3, .7, .2, 1), width .7s, height .7s, opacity .3s, background .5s }
 .w3d-bar { position: absolute; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 1px 3px rgba(0, 0, 0, .2); z-index: 2; touch-action: none; transition: left .25s, top .25s, width .3s, height .3s, background .5s }
 .w3d-bar.is-sel { box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 0 0 2.5px var(--accent) }
 .w3d-roll { background: linear-gradient(180deg, #ededeb, #d2d2cf); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2) } .w3d-roll-b { background: #c9c9c6 } .w3d-roll-t { background: #f1f1ef } .w3d-roll-s { background: #d9d9d6 }
@@ -351,7 +370,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 /* Eine Bewegung zur Zeit: solange vorgeführt oder verwandelt wird, steht das sanfte Schwingen still */
 .w3d-stage.is-busy .w3d-sway, .w3d-stage.is-vorf .w3d-sway, .w3d-stage.is-demo .w3d-sway { animation-play-state: paused }
 .w3d-stage.is-demo .w3d-sash, .w3d-stage.is-demo .w3d-handle { transition: none !important }
-.w3d-band { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-leiste { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) } .w3d-schiene { border-radius: 1px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) }
+.w3d-band { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-leiste { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12) }
 .w3d-solar, .w3d-klappladen { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3) } .w3d-sicht-u { opacity: .9 }
 .w3d-mesh { background: repeating-linear-gradient(0deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(20, 20, 20, .16) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1.5px #55585c }
 .w3d-dim { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1), width .7s cubic-bezier(.3, .7, .2, 1), height .7s cubic-bezier(.3, .7, .2, 1), color .4s; pointer-events: none }
@@ -381,7 +400,7 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .w3d-lupe { position: absolute; right: 12px; bottom: 12px; width: 108px; height: 108px; border-radius: 50%; background: var(--paper); box-shadow: 0 0 0 2px var(--line2); pointer-events: none; z-index: 3 }
 .w3d-lupe svg { display: block; width: 100%; height: 100% }
 @media (max-height: 700px) { .w3d-lupe { width: 88px; height: 88px; right: 8px; bottom: 8px } }
-.w3d-hint { position: absolute; left: 12px; bottom: 10px; padding: 6px 10px; border-radius: var(--r1); background: rgba(22, 22, 22, .82); color: var(--ink); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); font-size: 13px; font-weight: 700; pointer-events: none }
+.w3d-hint { position: absolute; left: 12px; bottom: 10px; max-width: calc(100% - 24px); padding: 6px 10px; border-radius: var(--r1); background: rgba(22, 22, 22, .82); color: var(--ink); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); font-size: 13px; font-weight: 700; pointer-events: none }
 /* Neben der Lupe bleibt der Hinweis links und bricht notfalls um */
 .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 148px); line-height: 1.3 }
 @media (max-height: 700px) { .w3d-stage:has(.w3d-lupe) .w3d-hint { max-width: calc(100% - 120px) } }
@@ -425,9 +444,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .grip { width: 36px; height: 4px; border-radius: 2px; background: var(--line2); margin: 0 auto }
 .sheet-top { display: flex; justify-content: space-between; align-items: center; margin: 2px -8px 0; min-height: 44px }
 .xbtn { width: 44px; height: 44px; border: 0; border-radius: var(--r2); background: none; display: flex; align-items: center; justify-content: center; color: var(--ink) }
-.sheet h2 { margin: 0; font-size: 32px; line-height: 1.06; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; text-align: center }
+.sheet h2 { margin: 0; font-size: 32px; line-height: 1.06; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; text-align: left }
+.sheet h2:focus { outline: none }
 .sheet .ico.ico-l > svg { width: 150px; height: 150px; margin: 5px }
-.sheet .ico { width: 160px; height: 160px; margin: 20px auto; border-radius: var(--r4); background: var(--surface2); display: flex; align-items: center; justify-content: center; box-shadow: var(--ring) }
+.sheet .ico { width: 160px; height: 160px; margin: 20px 0; border-radius: var(--r4); background: var(--surface2); display: flex; align-items: center; justify-content: center; box-shadow: var(--ring) }
 .sheet p.x { margin: 0 0 14px; font-size: 17px; line-height: 1.6; text-wrap: pretty }
 .see { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; font-size: 15px; color: var(--muted) }
 .gindex { background: var(--surface2); border-radius: var(--r3); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--ring) }
@@ -519,18 +539,24 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qchips.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
 .qchips.grid2 .chip { width: 100%; padding: 0 8px; gap: 6px; overflow: hidden; text-overflow: ellipsis }
 .chip.big { min-height: var(--h1); padding: 0 16px; font-size: 15px; border-radius: var(--r2) }
-/* Zeilen mit Haken, wenn Beschriftungen lang sind: 44 px je Zeile */
+/* Zeilen mit Haken, wenn Beschriftungen lang sind: 44 px je Zeile. Mit Fachbegriff steckt jede Zeile in .qli (das i steht rechts
+   daneben, eigenes Ziel); dieselben Regeln gelten für die eingewickelten Knöpfe, die Trennlinie liegt dann unter der ganzen Zeile */
 .qlist { display: flex; flex-direction: column; border-radius: var(--r3); background: var(--surface); box-shadow: var(--ring); overflow: hidden }
-.qlist > button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px 0 16px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); text-align: left; transition: background var(--t2) }
+.qlist > button, .qlist > .qli > button[data-v] { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px 0 16px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); text-align: left; transition: background var(--t2) }
 .qlist > button:last-child { border-bottom: 0 }
-.qlist > button:active { background: var(--surface2) }
-.qlist > button .dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); margin-right: 10px; flex: 0 0 auto }
-.qlist > button .tx { flex: 1; min-width: 0; display: flex; align-items: center }
+.qlist > .qli { border-bottom: 1px solid var(--line) } .qlist > .qli:last-child { border-bottom: 0 }
+.qlist > .qli > button[data-v] { border-bottom: 0; padding-right: 4px }
+.qlist > .qli > .qci-i { align-self: center } .qli-platz { flex: 0 0 44px } /* Zeile ohne eigenen Begriff: Platz des i */
+.qlist > button:active, .qlist > .qli > button[data-v]:active { background: var(--surface2) }
+.qlist > button .dot, .qlist > .qli > button .dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); margin-right: 10px; flex: 0 0 auto }
+.qlist .ci { display: inline-flex; width: 20px; height: 20px; margin-right: 10px; flex: 0 0 auto } .qlist .ci svg { width: 20px; height: 20px }
+.qlist > button .tx, .qlist > .qli > button .tx { flex: 1; min-width: 0; display: flex; align-items: center }
 .qlist .mark { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px var(--line2); display: flex; align-items: center; justify-content: center; transition: background var(--t2), box-shadow var(--t2) }
 .qlist .mark svg { width: 12px; height: 12px; opacity: 0; transition: opacity var(--t1) }
-.qlist > button[aria-pressed="true"] { font-weight: 700 }
-.qlist > button[aria-pressed="true"] .mark { background: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink) } .qlist > button[aria-pressed="true"] .mark svg { opacity: 1 }
-.qlist > button[aria-pressed="true"] .tx { font-weight: 600 }
+.qlist > button[aria-pressed="true"], .qlist > .qli > button[aria-pressed="true"] { font-weight: 700 }
+.qlist > button[aria-pressed="true"] .mark, .qlist > .qli > button[aria-pressed="true"] .mark { background: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink) }
+.qlist > button[aria-pressed="true"] .mark svg, .qlist > .qli > button[aria-pressed="true"] .mark svg { opacity: 1 }
+.qlist > button[aria-pressed="true"] .tx, .qlist > .qli > button[aria-pressed="true"] .tx { font-weight: 600 }
 /* Farben: Tupfen in einer Reihe zum Wischen (38 px, Ziel 48 × 52), gewählt mit Ring; der Name der gewählten steht darunter (.qcur) */
 .qswatches { display: flex; gap: 4px; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scroll-padding-inline: 16px; scrollbar-width: none; scroll-snap-type: x proximity; mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent) }
 .qswatches::-webkit-scrollbar { display: none }
@@ -565,8 +591,6 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qoffen:active { background: var(--surface2) }
 /* Detailtiefe: oben die Tiefe als kleiner Knopf (Ziel 44 px, sichtbar eine Pille in der Zeile der Frage), die Wahl als drei Zeilen,
    am Ende eines Kapitels „Mehr zu …“ für das, was bei dieser Tiefe nicht gefragt wird */
-.qkopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0 }
-.qkopf .eyebrow { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .qtiefe { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 44px; margin: -14px -6px -14px 0; padding: 0 6px; border: 0; background: none; font: inherit; color: var(--ink2) }
 .qtiefe span { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 10px; border-radius: 12px; background: var(--seg); font-size: 13px; font-weight: 700; line-height: 1 }
 .qtiefe:active span { background: var(--surface2) }
@@ -619,6 +643,8 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 @media (hover: hover) { .stepper button:not([disabled]):hover { background: var(--surface3) } }
 .stepper b { width: 36px; text-align: center; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums }
 .stepper.weit b { width: 84px; white-space: nowrap }
+/* Der Wert im Stufenregler öffnet die Zifferntasten: als Feld erkennbar (Rand), 44 px hoch */
+.stepper .st-wert { width: auto; min-width: 88px; padding: 0 8px; border-radius: var(--r2); box-shadow: inset 0 0 0 1.5px var(--line2); font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap }
 /* Eigene Farbe: Textfeld unter jeder Farbwahl, links ein Tupfen in der erkannten Farbe (kariert, solange nichts erkannt ist) */
 .farbfeld { position: relative; flex: 0 0 auto; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 2px 0 12px; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring) }
 .farbfeld:focus-within { box-shadow: inset 0 0 0 2px var(--ink) }
@@ -651,15 +677,10 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qgroup > .note { margin-top: 2px }
 
 /* ---------- Kundenlink: Begrüßung durch den Betrieb, einmaliges Senden ---------- */
-.hero.lk { padding-top: 18px; align-items: flex-start }
-.lk-from { display: inline-flex; align-items: center; gap: 12px; margin: 0 0 18px; padding: 6px 16px 6px 6px; border-radius: 999px; background: var(--surface); box-shadow: var(--ring); text-align: left }
-.lk-av { width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 17px; flex: 0 0 auto }
-.lk-from small { display: block; font-size: 13px; font-weight: 700; color: var(--muted) }
-.lk-from b { display: block; font-size: 15px; font-weight: 800; line-height: 1.2 }
-.hero.lk .okmark { margin: 2px 0 14px; display: block }
-.hero.lk .cta { justify-content: flex-start }
+/* Kundenlink: die Startseiten (Einladung, gesendet, Nachbesserung, Link zu) bauen auf einladung.css auf; der Inhalt steht in
+   .ein-start-in, damit die Reihenfolge der Startbild-Regeln oben (order) hier nicht greift */
+.hero.lk { padding: 18px 0 4px; align-items: stretch }
 .lk-note { padding: 0 12px 8px }
-.hero .lk-for { margin: -10px 0 14px; font-size: 15px; line-height: 1.3; font-weight: 700; color: var(--muted) }
 div.wincard { cursor: default }
 .wincard.sent .ic { opacity: .75 } .wincard.sent .me { color: var(--ok) }
 
@@ -813,7 +834,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .tb-weg li.jetzt i::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #1d1d1f }
 .tb-boxen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
 .tb-box { padding: 9px 10px; border-radius: 6px; border: 1px solid #d9d9de; display: flex; flex-direction: column; gap: 3px; min-width: 0 }
-.tb-box.fb { border: 1.5px solid #1d1d1f }
+.tb-box.tb-fb { border: 1.5px solid #1d1d1f } /* nicht „.fb“: das ist das Farbblatt (position: fixed) */
 .tb-box p:not(.tb-eb) { margin: 0; font-size: 13px; line-height: 1.3; color: #3a3a3f }
 .tb-pos { padding-top: 10px; border-top: 1.5px solid #1d1d1f; display: flex; flex-direction: column; gap: 6px }
 .tb-zeich svg { display: block; width: 100%; height: auto; max-height: 170px }
@@ -840,3 +861,297 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .konto-zeile .wincard { flex: 1; min-width: 0 }
 .konto-weg { flex: 0 0 52px; min-height: 52px; border: 0; border-radius: var(--r3); background: var(--bad-soft); color: var(--bad); display: flex; align-items: center; justify-content: center; font: inherit; transition: transform var(--t1) }
 .konto-weg:active { transform: scale(.97) }
+
+/* ---------- S3 modell3d: Griffe, Sonnenschutz, Knöpfe und Zoom am 3-D-Modell ---------- */
+/* Griff: Rosette fest auf dem Profil, darüber der Hebel; Druckknopf an der Hebelwurzel, Schließzylinder in der Nabe. Knopf und
+   Zylinder sind eigene Flächen (Lage und Farbe aus app.js, Deckkraft inline), damit die WebGL-Bühne dieselben zeichnet */
+.w3d-ros { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(0, 0, 0, .3) }
+.w3d-hknopf, .w3d-hschloss { border-radius: 50%; box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) }
+.w3d-griffa.is-schloss { border-radius: 999px }
+.w3d-griffa.is-muschel { border-radius: 10px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .25) }
+/* Sonnenschutz: Führungsschienen, Lamellen mit C-Profil (Farbe je Stellung aus w3dSonne), Aufzugbänder, Endleiste mit Tiefe */
+.w3d-fs { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22) } .w3d-fs-s { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3) }
+.w3d-lam { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 0 rgba(0, 0, 0, .35) }
+/* Aufzugbänder des Raffstores (nicht die Bänder des Flügels, .w3d-band); Farbe inline aus w3dSonne */
+.w3d-aufzug { box-shadow: 0 0 0 .5px rgba(0, 0, 0, .25) }
+.w3d-behang-ub { box-shadow: none }
+/* Anschlagstopfen auf der Endleiste des Rollladens (eigene Flächen, Farbe inline) */
+.w3d-stopfen { border-radius: 2px 2px 0 0; box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .3) }
+.w3d-screen { box-shadow: inset 2px 0 0 rgba(0, 0, 0, .28), inset -2px 0 0 rgba(0, 0, 0, .28) }
+.w3d-roll-sl { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2) }
+/* Fahren: 1,8 s, die Lamellen folgen kurz nacheinander; Wenden 0,6 s. Bei weniger Bewegung ohne Übergang (siehe unten) */
+.w3d-stage.is-fahrt .w3d-lam, .w3d-stage.is-fahrt .w3d-aufzug, .w3d-stage.is-fahrt .w3d-behang, .w3d-stage.is-fahrt .w3d-behang-u, .w3d-stage.is-fahrt .w3d-stopfen, .w3d-stage.is-fahrt .w3d-innen, .w3d-stage.is-fahrt .w3d-innen-u { transition-duration: 1.8s; transition-timing-function: var(--e-io) }
+.w3d-stage.is-fahrt .w3d-lam { transition-delay: calc(var(--k, 0) * 12ms) }
+.w3d-stage.is-wende .w3d-lam, .w3d-stage.is-wende .w3d-aufzug { transition-duration: .6s; transition-timing-function: var(--e-io) }
+/* Knöpfe am Modell: dunkle Pillen wie der Hinweis, 2-px-Ring, kein Cream; Zoom oben rechts, Sonnenschutz unten rechts */
+.w3d-ctl { position: absolute; z-index: 4; display: flex; gap: 6px; pointer-events: none }
+.w3d-ctl > * { pointer-events: auto }
+.w3d-zoom { top: 10px; right: 10px }
+.w3d-sonne { right: 10px; bottom: 10px; align-items: center }
+.w3d-knopf { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: rgba(22, 22, 22, .82); color: var(--text); box-shadow: 0 0 0 2px var(--line2); font: inherit; font-size: 15px; font-weight: 700; line-height: 1; cursor: pointer; touch-action: manipulation; transition: transform var(--t1) var(--e-out), background var(--t2), box-shadow var(--t2) }
+.w3d-knopf.rund { width: 44px; padding: 0 }
+.w3d-knopf.eins { width: auto; padding: 0 14px; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums }
+.w3d-knopf[hidden] { display: none }
+.w3d-knopf:disabled { opacity: .45; cursor: default }
+.w3d-knopf:active:not(:disabled) { transform: scale(.96) }
+.w3d-knopf[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--text) }
+.w3d-knopf:focus-visible { outline: 2px solid var(--text); outline-offset: 2px }
+/* Mit Sonnenschutz-Knöpfen (unten rechts) steht die Beschriftung der Ansicht oben links, neben dem Zoom; die Bühne bleibt mindestens
+   220 px hoch. Niedrige Bühnen (is-niedrig, unter 200 px): nur Symbole, der Zoom rückt in dieselbe Reihe, die Beschriftung bekommt
+   die ganze Breite. In der Übersicht der Maße (dims-all) steht der Zoom oben links: oben in der Mitte steht das Schild der Breite,
+   unten das der unteren Breite und die Beschriftung, links in halber Höhe das Schild der Höhe */
+.w3d-stage.mit-sonne .w3d-hint { top: 10px; bottom: auto; max-width: calc(100% - 136px); line-height: 1.3 }
+.w3d-stage.mit-sonne.is-zoom .w3d-hint { max-width: calc(100% - 186px) }
+.scr.fit .w3d-stage.mit-sonne { min-height: 220px }
+.w3d-stage.is-niedrig .w3d-sonne .w3d-knopf { width: 44px; padding: 0 }
+.w3d-stage.is-niedrig .w3d-sonne .w3d-knopf span { display: none }
+.w3d-stage.is-niedrig.mit-sonne .w3d-zoom { top: auto; bottom: 10px; right: calc(16px + var(--sonne-n, 1) * 50px) }
+.w3d-stage.is-niedrig.mit-sonne .w3d-hint { max-width: calc(100% - 24px) }
+.w3d-stage.dims-all .w3d-zoom { right: auto; left: 10px }
+/* Scrollbare Seiten: senkrecht wischen scrollt (pan-y), auf festen Bildschirmen und gezoomt gehören alle Gesten dem Modell */
+.scr.fit .w3d-stage, .w3d-stage.is-zoom, .w3d-stage.is-pinch { touch-action: none }
+/* Gezoomt steht das Schwingen still; während der Geste ohne Übergang, per Knopf kurz und gleichmäßig */
+.w3d-stage.is-zoom .w3d-sway { animation: none }
+.w3d-stage.is-zooming .w3d-f, .w3d-stage.is-zooming .w3d-sash, .w3d-stage.is-zooming .w3d-dim, .w3d-stage.is-zooming .w3d-handle, .w3d-stage.is-zooming .w3d-cam, .w3d-stage.is-zooming .w3d-bar, .w3d-stage.is-zooming .w3d-griffa, .w3d-stage.is-drag.is-zoom .w3d-cam { transition: none !important }
+.w3d-stage.is-zoomanim .w3d-f, .w3d-stage.is-zoomanim .w3d-sash, .w3d-stage.is-zoomanim .w3d-dim, .w3d-stage.is-zoomanim .w3d-handle, .w3d-stage.is-zoomanim .w3d-bar, .w3d-stage.is-zoomanim .w3d-griffa { transition-duration: .38s !important; transition-timing-function: cubic-bezier(.3, .7, .2, 1) !important; transition-delay: 0s !important }
+.w3d-stage.is-zoomanim .w3d-cam { transition: transform .38s cubic-bezier(.3, .7, .2, 1) }
+@media (prefers-reduced-motion: reduce) {
+  .w3d-stage .w3d-lam, .w3d-stage .w3d-aufzug, .w3d-stage .w3d-stopfen, .w3d-stage .w3d-ros, .w3d-griffa, .w3d-knopf { transition: none !important }
+  .w3d-stage.is-zoomanim .w3d-f, .w3d-stage.is-zoomanim .w3d-sash, .w3d-stage.is-zoomanim .w3d-cam { transition: none !important }
+}
+/* Übersicht der Maße: doppelte Maße ausgeblendet, Schilder der Maueröffnung nach außen neben bzw. über die Linie */
+.w3d-dim.is-weg { display: none }
+.w3d-dim.ohne-schild .w3d-dim-lab { display: none }
+.w3d-dim.an-l .w3d-dim-lab { transform: translate(calc(-100% - 8px), -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
+.w3d-dim.an-r .w3d-dim-lab { transform: translate(8px, -50%) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
+.w3d-dim.an-o .w3d-dim-lab { transform: translate(-50%, calc(-100% - 8px)) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
+.w3d-dim.an-u .w3d-dim-lab { transform: translate(-50%, 8px) translateZ(26px) rotateY(calc(var(--ry) * -1)) rotateX(calc(var(--rx) * -1)) }
+/* Oberlichtöffner (kippbares Oberlicht) und Bedienung des Sonnenschutzes innen neben der Öffnung; Farben inline (app.js TEIL_BG),
+   Schlitz des Gurtwicklers, Wippe und Funk-Punkt des Tasters sind eigene Flächen */
+.w3d-olr { border-radius: 2px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .3) }
+.w3d-olh { border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .3) }
+.w3d-an-wickler { border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22), 0 1px 2px rgba(0, 0, 0, .2) }
+.w3d-an-schlitz { border-radius: 2px }
+.w3d-an-gurt { box-shadow: inset 1px 0 0 rgba(0, 0, 0, .15), inset -1px 0 0 rgba(0, 0, 0, .15) }
+.w3d-an-stange { border-radius: 2px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35) }
+.w3d-an-kurbel { border-radius: 999px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .35) }
+.w3d-an-taster { border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25), 0 1px 2px rgba(0, 0, 0, .2) }
+.w3d-an-wippe { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18) }
+.w3d-an-funk { border-radius: 50%; box-shadow: 0 0 0 1px #ffffff }
+
+/* ---------- S2 Farben: Farbwahl in den Fragen und Farbblatt „Alle Farben“ (app.js: qColor, qSwatch, qGriffFarbe, fbAuf; Farben aus ral.js) ----------
+   Oben die gewählte Farbe groß mit Name und Nummer, darunter ein Raster ohne Wischen (Rahmen 6 × 2 mit Nummer, Sonnenschutz und Griff 5 je Reihe
+   mit Namen), dann „Alle Farben“. Tupfen 44 px, im Blatt Farbfelder 52 px; auf dem dunklen Grund mit hellem Haarstrich, damit Schwarz sichtbar bleibt. */
+.fw-zeile { display: flex; align-items: center; gap: 12px; min-height: 44px }
+.fw-zeile .chip { flex: 0 0 auto }
+.fw-cur { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px }
+.fw-cur .tx, .fb-wahl-t .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.fw-cur b, .fb-wahl-t b { font-size: 17px; font-weight: 800; line-height: 1.2; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.fw-cur small, .fb-wahl-t small { font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--muted) }
+.fw-tupf { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16) }
+.fw-tupf.offen { background: transparent; box-shadow: none; border: 1.5px dashed var(--line2) }
+.fw-tupf.gross { width: 52px; height: 52px; border-radius: var(--r2) }
+.qswatches.fw-raster { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px 4px; overflow: visible; margin: 0; padding: 4px 0; mask-image: none; -webkit-mask-image: none; scroll-snap-type: none }
+.qswatches.fw-raster.fw-5 { grid-template-columns: repeat(5, minmax(0, 1fr)) }
+/* Farbwahl (S2) im Raster: Tupfen 44 px (Ziel nach dem Styleguide), darunter Name bzw. Nummer. Die Tupfen der Detailfragen und
+   Ornamente (qTupf, #46) bleiben kompakt mit 38 px und ohne Namen, der gewählte steht darunter (.qcur) */
+.fw-raster .qsw { width: auto; height: auto; min-width: 0; min-height: 44px; flex-direction: column; justify-content: flex-start; gap: 8px; padding-top: 3px }
+.fw-raster .qsw .c { width: 44px; height: 44px }
+.qsw .n { font-size: 13px; font-weight: 600; line-height: 1.15; color: var(--muted); text-align: center; max-width: 76px; height: 30px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; hyphens: manual }
+.qsw[aria-pressed="true"] .n { color: var(--ink); font-weight: 800 }
+.qsw.gesperrt .n { color: var(--muted); font-weight: 600 }
+.fw-raster .qsw .schloss { top: 25px }
+.fw-raster .qsw .c { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16) }
+.fw-raster .qsw[aria-pressed="true"] .c { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink) }
+.fw-raster .qsw .n { max-width: 100% }
+.fw-raster:not(.fw-5) .qsw .n { height: 16px; -webkit-line-clamp: 1; font-variant-numeric: tabular-nums }
+/* Detailfarben (#46): letzte Zelle „Alle Farben“ öffnet das Farbblatt */
+.fw-raster .fw-alle .c { display: flex; align-items: center; justify-content: center; background: var(--surface2); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line2) }
+.fw-raster .fw-alle .n { color: var(--ink) }
+.fw-mehr { display: flex; gap: 8px }
+.fw-mehr .chip { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.fw-mehr .chip .ci svg { width: 18px; height: 18px; margin: 1px }
+.fw-mehr .chip.gesperrt { opacity: .55 }
+.fw-hinweis { margin: -4px 0 0; padding: 0 4px; font-size: 13px; line-height: 1.35; color: var(--muted) }
+/* Farbblatt: liegt neben #app in derselben Spalte (höchstens 640 px), deckt unten 62 % ab, oben bleibt das Modell sichtbar und ungetönt */
+.fb { position: fixed; inset: 0; z-index: 65; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; pointer-events: none }
+.fb-weg { flex: 1 1 auto; min-height: 96px; border: 0; padding: 0; background: transparent; pointer-events: auto; cursor: default }
+.fb-blatt { flex: 0 0 auto; height: 62vh; height: 62dvh; max-height: calc(100% - 96px); overflow-y: auto; overscroll-behavior: contain; pointer-events: auto; display: flex; flex-direction: column; gap: 12px; padding: 0 16px calc(28px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-radius: var(--r4) var(--r4) 0 0; box-shadow: var(--float); outline: none; animation: sheet-up var(--t3) var(--e-out) both }
+.fb-kopf { position: sticky; top: 0; z-index: 2; display: flex; flex-direction: column; gap: 10px; margin: 0 -16px; padding: 8px 16px 12px; background: var(--surface); border-bottom: 2px solid var(--line) }
+.fb-kopf .grip { margin-bottom: 2px }
+.fb-wahl { display: flex; align-items: center; gap: 12px }
+.fb-wahl-t { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 12px }
+.fb-such { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 2px 0 14px; border-radius: var(--r2); background: var(--surface2); box-shadow: var(--ring); color: var(--muted) }
+.fb-such:focus-within { box-shadow: inset 0 0 0 2px var(--ink) }
+.fb-such svg { flex: 0 0 auto }
+.fb-such input { flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0; border: 0; background: transparent; font: inherit; font-size: 17px; color: var(--ink); outline: none; -webkit-appearance: none; appearance: none }
+.fb-such input::-webkit-search-cancel-button { display: none }
+.fb-such input::placeholder { color: var(--muted); opacity: 1 }
+.fb-fam { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none; mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 28px), transparent) }
+.fb-fam::-webkit-scrollbar { display: none }
+.fb-fam .chip { flex: 0 0 auto }
+.fb-hilfe { border-radius: var(--r2); background: var(--surface2); box-shadow: var(--ring) }
+.fb-hilfe summary { min-height: 44px; display: flex; align-items: center; padding: 0 14px; font-size: 15px; font-weight: 700; cursor: pointer; list-style: none }
+.fb-hilfe summary::-webkit-details-marker { display: none }
+.fb-hilfe summary::after { content: ''; width: 8px; height: 8px; margin-left: auto; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg) translateY(-2px); transition: transform var(--t2) var(--e-out) }
+.fb-hilfe[open] summary::after { transform: rotate(225deg) translateY(-2px) }
+.fb-hilfe ul { margin: 0; padding: 0 14px 12px 32px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.45; color: var(--ink2) }
+.fb-liste { display: flex; flex-direction: column }
+.fb-gr { margin: 14px 0 0; font-size: 13px; font-weight: 800; line-height: 1.3; letter-spacing: .18em; text-transform: uppercase; color: var(--muted) }
+.fb-liste > .fb-gr:first-child { margin-top: 2px }
+.fb-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 14px 6px; margin-top: 10px }
+.fb-f { min-width: 0; min-height: 44px; border: 0; padding: 0; background: none; font: inherit; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; transition: transform var(--t1) }
+.fb-f:active { transform: scale(.98) }
+.fb-f .c { width: 52px; height: 52px; border-radius: var(--r2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); transition: box-shadow var(--t2) }
+.fb-f[aria-pressed="true"] .c { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink) }
+.fb-f .nr { font-size: 13px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis }
+.fb-f .nm { max-width: 100%; min-height: 31px; font-size: 13px; font-weight: 500; line-height: 1.2; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; hyphens: manual }
+.fb-f[aria-pressed="true"] .nm, .fb-f.ohne .nm { color: var(--ink) }
+@media (hover: hover) { .fb-f:not([aria-pressed="true"]):hover .c { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16), 0 0 0 2px var(--line2) } }
+.fb-leer { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 8px 0 }
+.fb-leer p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink2) }
+.fb-leer b { color: var(--ink) }
+.fb .qoffen { margin-top: 16px; flex: 0 0 auto }
+@media (prefers-reduced-motion: reduce) { .fb-blatt { animation: none } .fb-hilfe summary::after, .fb-f { transition: none } }
+
+/* ---------- Strang S1 · Konfigurator: Notiz an jeder Stelle, Übersicht, Entwurf, Zifferntasten mit Pfeil, Foto groß, Begriffe ---------- */
+/* Werkzeuge oben rechts in jedem Schritt: Erklärung (i) und Notiz; die Eyebrow darf zweizeilig werden */
+.hd-zeile { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px }
+.hd-zeile .eyebrow { min-width: 0 }
+.eyebrow .nw { white-space: nowrap }
+/* Schmale Telefone: Neben i und „Notiz“ ist für „Schritt 2 von 6 ·“ in einer Zeile kein Platz; dann bricht auch innerhalb um, statt
+   unter die Knöpfe zu laufen */
+@media (max-width: 374px) { .hd-zeile .eyebrow .nw { white-space: normal } }
+/* Fragen bei schmalen Telefonen (unter 375 px): neben der Tiefe-Pille ist „Notiz“ nur der Stift (rund, 44 px, Name im aria-label),
+   damit „Material & Farbe ·“ in einer Zeile bleibt; umbrochen wird ab 340 px nur nach dem „·“ */
+@media (max-width: 374px) { .qdock .hd-tools .nz-knopf { width: 44px; padding: 0; justify-content: center } .qdock .hd-tools .nz-knopf span { display: none } }
+@media (min-width: 340px) and (max-width: 374px) { .qdock .hd-zeile .eyebrow .nw { white-space: nowrap } }
+.hd-tools { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; margin: -6px -6px -6px 0 }
+.hd-i { width: 44px; height: 44px; border: 0; border-radius: var(--pill); background: none; padding: 0; color: var(--muted); display: inline-flex; align-items: center; justify-content: center }
+.hd-i:active { transform: scale(.94) }
+.nz-knopf { position: relative; min-height: 44px; padding: 0 12px 0 10px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
+.nz-knopf.da { box-shadow: inset 0 0 0 2px var(--ink) }
+.nz-knopf:active { transform: scale(.97) }
+@media (hover: hover) { .nz-knopf:hover, .hd-i:hover { color: var(--ink) } .nz-knopf:hover { box-shadow: inset 0 0 0 2px var(--ink) } }
+/* Notiz-Blatt */
+.nz-blatt h2 { font-size: 24px; margin: 8px 0 0 }
+.nz-sub { margin: 10px 0 14px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: left; text-wrap: pretty }
+.nz-blatt textarea { width: 100%; min-height: 132px; padding: 12px 14px; border: 0; border-radius: var(--r2); background: var(--surface2); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 17px; line-height: 1.45; resize: vertical }
+.nz-blatt textarea:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink) }
+.nz-zahl { margin: 6px 2px 14px; font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums }
+.nz-knoepfe, .vl-knoepfe, .wo-knoepfe { display: flex; flex-direction: column; gap: 10px }
+.nz-knoepfe .btn, .vl-knoepfe .btn, .wo-knoepfe .btn { width: 100% }
+.nz-weg, .vl-weg { color: var(--bad) }
+/* Verlassen mit offenen Änderungen */
+.verlassen h2 { font-size: 24px; margin: 8px 0 0 }
+.vl-sub { margin: 10px 0 18px; font-size: 15px; line-height: 1.45; color: var(--ink2); text-align: left; text-wrap: pretty }
+.vl-ab, .wo-web { align-self: center; min-height: 44px; font-size: 15px }
+/* Übersicht: Schritte, Abschnitte der Wünsche, alle Fenster */
+.wohin h2 { font-size: 24px; margin: 8px 0 4px }
+.wo-k { margin: 18px 0 8px }
+.wo-schritte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+@media (min-width: 480px) { .wo-schritte { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+.wo-schritt { min-height: 52px; padding: 6px 8px; border: 0; border-radius: var(--r2); background: var(--surface2); color: var(--ink); font: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; text-align: left; min-width: 0 }
+.wo-schritt .wo-n { flex: 0 0 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line2); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--muted) }
+.wo-schritt.fertig .wo-n { box-shadow: none; background: var(--accent-soft) }
+.wo-schritt .wo-l { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.wo-schritt.jetzt { box-shadow: inset 0 0 0 2px var(--ink) }
+.wo-schritt[aria-disabled="true"] { opacity: .4 }
+.wo-schritt:active { transform: scale(.98) }
+.wo-abschnitte { display: flex; flex-wrap: wrap; gap: 8px }
+.wo-abschnitte .chip[aria-current="true"] { border-color: var(--ink) }
+.wo-fenster .wo-ic { flex: 0 0 44px; height: 44px; border-radius: var(--r1); background: var(--surface); display: inline-flex; align-items: center; justify-content: center }
+.wo-fenster button { justify-content: flex-start }
+.wo-fenster button > span:nth-child(2) { flex: 1; min-width: 0 }
+.wo-fenster button[aria-current="true"] { box-shadow: inset 3px 0 0 var(--ink) }
+.wo-knoepfe { margin-top: 20px }
+/* Kopfzeile: Übersicht und Begriffe rechts; am Telefon nur Symbole bei den Begriffen und kein Titel in der Mitte */
+.hdr-r { display: flex; align-items: center; gap: 0 }
+a.hdr-logo { color: inherit; text-decoration: none; min-height: 44px }
+@media (max-width: 479px) {
+  .hdr-r.zwei .hdr-gl span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+  .hdr-r.zwei .hdr-gl { padding: 0 10px; min-width: 44px; justify-content: center }
+  .hdr-row:has(.hdr-r.zwei) .hdr-title { display: none }
+}
+/* Untere Leiste: Pfeil zurück links, wie bei den Fragen */
+.bb .bb-zurueck { flex: 0 0 56px; padding: 0 }
+/* Zifferntasten: Pfeil zurück, 0, Löschen; darunter „Weiter“ über die ganze Breite */
+.keypad button.ok { grid-column: 1 / -1 }
+.keypad button.zur { color: var(--ink2) }
+/* Messanleitung: ganzer Text, nichts abgeschnitten */
+.ask .how { display: block; -webkit-line-clamp: unset; overflow: visible }
+/* Fotokachel mit Foto: Antippen öffnet die Großansicht */
+button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% }
+.tile-lupe { position: absolute; right: 10px; bottom: 10px; width: 36px; height: 36px; border-radius: 50%; background: color-mix(in srgb, var(--surface) 92%, transparent); color: var(--ink); display: flex; align-items: center; justify-content: center }
+.plan-gross { position: relative; display: block; width: 100%; border: 0; padding: 0; background: none; border-radius: var(--r2); overflow: hidden }
+.plan-gross .plan-bild { display: block }
+/* Großansicht eines Fotos: Zoom mit zwei Fingern, Doppeltipp, Knöpfe; nur hier ist touch-action aus */
+.fz { position: absolute; inset: 0; z-index: 70; display: flex; flex-direction: column; background: var(--ground); animation: fx-fade var(--t2) var(--e-out) both }
+.fz-kopf { flex: 0 0 auto; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 6px 0 16px; font-size: 17px }
+.fz-buehne { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; touch-action: none; display: flex; align-items: center; justify-content: center; background: #000; cursor: zoom-in }
+.fz-bild { max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: 50% 50%; user-select: none; -webkit-user-drag: none; will-change: transform }
+.fz-unten { flex: 0 0 auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)) }
+.fz-zoom { display: flex; align-items: center; justify-content: center; gap: 14px }
+.fz-k { width: 52px; height: 52px; border: 0; border-radius: 50%; background: var(--surface2); box-shadow: var(--ring); color: var(--ink); font: inherit; font-size: 24px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center }
+.fz-k:active { transform: scale(.95) }
+.fz-wert { min-width: 64px; text-align: center; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink2) }
+.fz-akt { justify-content: center }
+.fz-akt label.pill { cursor: pointer } .fz-akt label.pill input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
+/* Leiste der Abschnitte über der Frage: nur Namen und Haken */
+.qleiste { flex: 0 0 auto; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 6px -16px -4px; padding: 2px 16px;
+  /* Was in den Innenabstand rollt, blendet aus: kein harter Anschnitt am Rand, der Verlauf zeigt, dass es weitergeht */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent); mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent) }
+.qleiste::-webkit-scrollbar { display: none }
+.ql { position: relative; flex: 0 0 auto; min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--pill); background: var(--surface); box-shadow: inset 0 0 0 2px var(--line); color: var(--ink2); font: inherit; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap }
+.ql[aria-current="step"] { color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink) }
+.ql svg { width: 12px; height: 12px }
+@media (max-height: 700px) { .qleiste { display: none } }
+/* Optionen mit eigener Erklärung (i rechts im Chip bzw. neben der Zeile) */
+.qci { position: relative; min-width: 0 }
+.qci .chip { width: 100%; padding-right: 40px }
+/* Im Raster gilt sonst „.qchips.grid2 .chip“ (8 px rundum): Der Inhalt bleibt links vor dem i (9 px Luft zum Kreis). auswahl() nimmt
+   Chips nur, wenn jede Beschriftung ganz hineinpasst (chipPlatz), sonst Zeilen; das … ist nur die letzte Sicherung */
+.qchips.grid2 .qci .chip { padding: 0 40px 0 10px; justify-content: flex-start }
+.qci .chip .lb { min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.qci-i { width: 44px; height: 44px; border: 0; background: none; padding: 0; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto }
+.qci .qci-i { position: absolute; right: 0; top: 50%; transform: translateY(-50%) }
+.qci .qci-i svg, .qli .qci-i svg { width: 18px; height: 18px }
+.qci .chip[aria-pressed="true"] + .qci-i { color: var(--on-primary) }
+/* Auf dem gedrückten (cremefarbenen) Chip: Kreis hell, Ring und Zeichen dunkel, sonst ist das i ein dunkler Fleck */
+.qci .chip[aria-pressed="true"] + .qci-i svg > circle:first-child { fill: var(--primary) }
+.qli { display: flex; align-items: stretch; gap: 4px }
+.qli > button[data-v] { flex: 1 1 auto; min-width: 0 }
+/* Erklärung an Karten: Ziel 44 px (mehr Optionen tragen jetzt ein i) */
+.qinfo { width: 44px; height: 44px }
+/* Angefangenes Fenster auf der Startseite */
+.entwurf-karte { gap: 12px }
+.entwurf-karte .ek-zeile { display: flex; align-items: center; gap: 12px }
+.entwurf-karte .ic { flex: 0 0 56px; height: 56px; border-radius: var(--r2); background: var(--surface2); display: flex; align-items: center; justify-content: center }
+.entwurf-karte .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.entwurf-karte b { font-size: 17px; font-weight: 800 }
+.entwurf-karte small { font-size: 13px; color: var(--muted) }
+.entwurf-karte .ek-knoepfe { display: flex; align-items: center; gap: 16px }
+.entwurf-karte .btn { flex: 0 0 auto; padding: 0 22px }
+.entwurf-karte .ek-weg { min-height: 44px; font-size: 15px; color: var(--ink2) }
+/* Gespeichert: kleines Symbol statt Modell, „Wie geht es weiter?“ statt aller Angaben */
+.fertig-kopf { padding-top: 18px }
+/* Gespeichert: linksbündig wie die Köpfe im Betriebsbereich (Symbol, grüner Kicker, Name, Stand) */
+.center.fertig-kopf.links { text-align: left; padding: 18px 6px 0 }
+.fertig-ic { display: inline-flex; width: 104px; height: 104px; margin-bottom: 14px; border-radius: var(--r4); background: var(--surface2); box-shadow: var(--ring); align-items: center; justify-content: center }
+.fertig-stand { color: var(--ink2) }
+.weiter-karte { gap: 8px } .weiter-karte p { margin: 0 } .weiter-karte p:not(.eyebrow):not(.sub) { font-size: 17px; line-height: 1.5 }
+.ki-zahl .sub { margin: 0; display: flex; align-items: center; gap: 8px }
+/* Begriffe: Suche, Gruppen, Praxis-Tipp */
+.g-such { position: relative; display: block; margin-bottom: 6px }
+.g-such input { width: 100%; min-height: 48px; padding: 0 14px 0 42px; border: 0; border-radius: var(--pill); background: var(--surface2); box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink); font: inherit; font-size: 17px }
+.g-such input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink) }
+.g-such-ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); display: flex }
+.g-gruppe { margin-top: 18px } .g-gruppe > .eyebrow { margin: 0 4px 8px }
+.g-bezug > .eyebrow { color: var(--accent) }
+.g-leer { margin: 18px 4px 0 }
+.g-tipp { margin: 4px 0 16px; padding: 14px 16px; border-radius: var(--r2); background: var(--surface2); box-shadow: var(--ring); border-left: 3px solid var(--accent) }
+.g-tipp .eyebrow { color: var(--accent); margin-bottom: 6px } .g-tipp p:not(.eyebrow) { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink2) }
+@media (prefers-reduced-motion: reduce) { .fz, .fz-bild { animation: none !important; transition: none !important } }
+
+/* ---------- Integration: Karte „Angefangen“ auf der Einladungsseite (S1 und S4) unter dem Absender, mit Abstand wie der Kicker ---------- */
+.ein-start-in > .entwurf-karte { align-self: stretch; margin: 22px 0 0 }

@@ -48,9 +48,10 @@ export function fensterFp(w) {
   if (o.plan && typeof o.plan === 'object') { o.plan = Object.assign({}, o.plan); delete o.plan.bild; delete o.plan.bw; delete o.plan.bh; }
   return stabil(o);
 }
-/* Für die Zählung der Änderungen: ohne die Auswertung der Fotos, die Zahl der Fotos, ihre Kennungen und die Wahl „ohne Foto“ (gleiche Regel wie aenderungFp
-   in app.js). Eine Auswertung, die nach dem Speichern ankommt, oder ein neues Foto ist keine Änderung des Kunden */
-export function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; delete o.bilder; delete o.ohneFoto; return fensterFp(o); }
+/* Für die Zählung der Änderungen: ohne die Auswertung der Fotos, die Zahl der Fotos, ihre Kennungen, die Wahl „ohne Foto“ und die Notizen
+   je Stelle und die Tiefe, mit der das Fenster geplant wurde (gleiche Regel wie aenderungFp in app.js). Eine Auswertung, die nach dem
+   Speichern ankommt, ein neues Foto, eine Notiz an den Fensterbauer oder eine andere Tiefe ist keine Änderung am Fenster */
+export function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; delete o.bilder; delete o.ohneFoto; delete o.notizen; delete o.tiefe; return fensterFp(o); }
 export const ohneBild = (w) => { const o = Object.assign({}, w); if (o.plan && typeof o.plan === 'object' && o.plan.bild) o.plan = Object.assign({}, o.plan, { bild: '' }); return o; };
 export const kennung = (w) => String((w && w.wid) || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
 
