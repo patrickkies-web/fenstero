@@ -706,3 +706,110 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .toast { transition: opacity .2s } .winstack i { transition: none }
   a.tcard { transition: none } a.tcard:hover { transform: none }
 }
+
+/* ---------- Strang S5: Aufmaß beim Betrieb ----------
+   Kopf, „Mit dem Kunden zu klären“ zum Abhaken, Übersicht der Positionen, je Position Zeichnung (weiße Karte, Orange und Blau nur
+   dort), Bestellmaß, Wünsche in Gruppen mit Notizen des Kunden, Maße, Einbausituation; Foto groß mit Zoom. Größen 13 · 15 · 17 · 22. */
+.am5 .amhead { display: flex; flex-direction: column; gap: 14px }
+.am5 .amhead .kv { margin: 0 }
+.am-chips { gap: 6px }
+.am-chips .chip, .am-offen .chip { min-height: 36px; padding: 0 12px; font-size: 13px; cursor: default }
+.chip.warnung::before, .chip.offen::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); flex: 0 0 auto }
+.am5 .amacts { margin: 0; gap: 10px } .am5 .amacts .btn { flex: 1 1 220px }
+/* Klärungsliste */
+.klaer .kl-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+.klaer .kl-kopf .eyebrow { margin: 0 }
+.kl-stand { font-size: 15px; color: var(--text2) } .kl-stand b { color: var(--text) }
+.kl-balken { height: 6px; margin: 10px 0 4px; border-radius: var(--pill); background: var(--surface3); overflow: hidden }
+.kl-balken span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width var(--t3) var(--e-out) }
+.kl-g { margin-top: 14px }
+.kl-g h4 { margin: 0 0 4px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text2) }
+.kl-g h4 .n { min-width: 22px; height: 22px; padding: 0 6px; border-radius: var(--pill); background: var(--surface2); color: var(--text2); font-size: 13px; letter-spacing: 0; display: inline-flex; align-items: center; justify-content: center }
+.kl-liste { list-style: none; margin: 0; padding: 0 }
+.kl-z { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--line) }
+.kl-liste > .kl-z:first-child { border-top: 0 }
+.kl-haken { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line2); background: transparent; color: var(--line2); display: inline-flex; align-items: center; justify-content: center; padding: 0; transition: background var(--t1), border-color var(--t1), color var(--t1) }
+.kl-haken[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent) }
+@media (hover: hover) { .kl-haken:not([aria-pressed="true"]):hover { border-color: var(--text); color: var(--muted) } }
+.kl-punkt { width: 10px; height: 10px; margin: 8px 0 0 17px; border-radius: 50%; background: var(--warn) }
+.kl-t { min-width: 0 }
+.kl-t > p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--text) }
+.kl-z.pflicht .kl-t > p { font-weight: 700 }
+.kl-z.ok .kl-t > p { color: var(--muted) }
+.kl-k { display: block; margin-bottom: 2px; font-size: 13px; font-weight: 800; color: var(--text2) }
+.kl-t > small { display: block; margin-top: 2px; font-size: 13px; line-height: 1.4; color: var(--muted) }
+.kl-t > small.kl-ok { display: inline-flex; align-items: center; gap: 4px; color: var(--text2) } .kl-ok svg { color: var(--accent) }
+.kl-n { margin: 6px 0 0; display: flex; gap: 8px; font-size: 15px; color: var(--text2) } .kl-n svg { flex: 0 0 auto; margin-top: 2px; color: var(--muted) }
+.kl-nf { margin-top: 8px }
+.kl-akt { display: flex; flex-wrap: wrap; gap: 0 18px }
+.kl-akt .linkbtn { font-size: 15px; padding: 6px 0 }
+.klaer.leer .kl-nichts { margin: 8px 0 0; display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--text2) } .kl-nichts svg { flex: 0 0 auto; color: var(--accent) }
+/* Übersicht der Positionen */
+.am-tab { padding-top: 10px; padding-bottom: 12px }
+.am-tab-kopf, .am-zeile { display: grid; grid-template-columns: 48px minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); gap: 0 12px; align-items: center }
+.am-tab-kopf { padding: 6px 0; font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.am-tab-kopf span:first-child { grid-column: 1 / 3 }
+.am-zeile { width: 100%; min-height: 60px; padding: 8px 0; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 0 }
+.am-zeile .pic { width: 48px; height: 48px }
+.az-t { min-width: 0; display: flex; flex-direction: column; gap: 2px } .az-t b { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .az-t small { font-size: 13px; color: var(--muted) }
+.az-k { color: var(--text2); white-space: nowrap } .az-k::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--warn); vertical-align: 1px }
+.az-m { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text2) } .az-m small { display: none } .az-b b { color: var(--text); font-size: 15px }
+@media (hover: hover) { .am-zeile:hover .az-t b { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2) } }
+.am-tab-fuss { margin: 10px 0 0 }
+/* Position */
+.posc .pt span.pmarks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px }
+.posc .pbody { gap: 14px }
+.pos-klaer { padding: 12px 14px; border-radius: var(--r2); background: var(--surface2); box-shadow: inset 3px 0 0 var(--warn) }
+.pos-klaer .eyebrow { color: var(--warn); margin: 0 0 4px }
+.pos-klaer .kl-z { border-top-color: var(--line2) }
+.pos-plan { display: flex; flex-direction: column; gap: 10px }
+.zk { margin: 0; padding: 10px 10px 12px; border-radius: var(--r2); background: #ffffff }
+.zk svg { display: block; width: 100%; height: auto; max-height: 72vh }
+.zk-leg { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 6px 0; font-size: 13px; color: #3a3a3f }
+.zk-leg .lg { display: inline-flex; align-items: center; gap: 6px; font-weight: 700 }
+.zk-leg .lg::before { content: ''; width: 16px; height: 3px; border-radius: 2px; background: var(--mo) } .zk-leg .lg.el::before { background: var(--el) }
+.best.warn { border-left-color: var(--warn) }
+.best .best-warn span { font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text2) }
+.zk .zk-klein { display: none }
+.kl-fold > summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer }
+.kl-fold > summary::-webkit-details-marker { display: none }
+.kl-fold > summary h4 { margin: 0 }
+.kl-fold-t { flex: 1; font-size: 13px; color: var(--muted) }
+.kl-fold[open] > summary .pchev { transform: rotate(-135deg); margin: 4px 6px 0 0 }
+.best-warn { margin: 6px 0 0; display: flex; gap: 8px; font-size: 15px; color: var(--text2) } .best-warn svg { flex: 0 0 auto; margin-top: 2px; color: var(--warn) }
+.am-wunsch .eyebrow { margin: 0 0 6px }
+.am-wunsch .satz { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.45; color: var(--text) }
+.am-offen { margin: 10px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px }
+.am-offen > span:first-child { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+.am-gruppen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+.am-g { padding: 12px 14px; border-radius: var(--r2); box-shadow: inset 0 0 0 2px var(--line); min-width: 0 }
+.am-g > .eyebrow { margin: 0 0 6px }
+.am-dl { margin: 0; display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr); gap: 4px 12px; font-size: 15px }
+.am-dl dt { color: var(--muted); font-size: 13px; padding-top: 2px } .am-dl dd { margin: 0; color: var(--text); font-weight: 600; overflow-wrap: anywhere }
+.am-dl dd.offen::before, .am-dl dd.hinweis::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); vertical-align: 1px }
+.am-dl .sw { display: inline-block; width: 14px; height: 14px; margin-right: 6px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); vertical-align: -2px }
+.am-notiz { margin: 10px 0 0; padding: 10px 12px; display: flex; gap: 10px; border-radius: var(--r2); background: var(--surface2); font-size: 15px; line-height: 1.45; color: var(--text) }
+.am-notiz svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent) }
+.am-notiz small { display: block; font-size: 13px; color: var(--muted) }
+.am-masse, .am-ki { grid-column: 1 / -1 }
+.am-ki .pos-fotos { margin-bottom: 10px }
+/* Foto groß mit Zoom */
+.foto-gross.fz { position: relative; overflow: hidden; touch-action: none; cursor: zoom-in; user-select: none }
+.foto-gross.fz.gross { cursor: grab }
+.foto-gross.fz img { transition: transform var(--t2) var(--e-out); transform-origin: center center; -webkit-user-drag: none }
+.fz-pos { margin: -2px 0 10px }
+.fz-leiste { margin-top: 10px; gap: 10px; flex-wrap: wrap }
+.fz-zoom { display: inline-flex; align-items: center; gap: 6px } .fz-zoom .btn { min-width: 44px; padding: 0 12px; font-size: 17px }
+.fz-wert { min-width: 60px; text-align: center; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text2) }
+.nb-punkte .chips { margin-top: 4px }
+@media (max-width: 600px) {
+  .am-gruppen { grid-template-columns: minmax(0, 1fr) }
+  .am-tab-kopf { display: none }
+  .am-zeile { grid-template-columns: 44px minmax(0, 1fr) auto; grid-template-areas: 'pic t b' 'pic m1 m1' 'pic m2 m2'; gap: 2px 10px; padding: 10px 0 }
+  .am-zeile .pic { grid-area: pic; width: 44px; height: 44px; align-self: start } .am-zeile .az-t { grid-area: t } .am-zeile .az-b { grid-area: b; text-align: right; align-self: start }
+  .am-zeile .az-m:nth-child(3) { grid-area: m1 } .am-zeile .az-m:nth-child(4) { grid-area: m2 }
+  .az-m { font-size: 13px } .az-m small { display: inline; margin-right: 6px; font-size: 13px; color: var(--muted) } .az-b small { display: block; margin: 0 } .az-b b { font-size: 15px }
+  .am-dl { grid-template-columns: 84px minmax(0, 1fr); gap: 4px 10px }
+  .zk { padding: 6px 4px 10px } .zk .zk-gross { display: none } .zk .zk-klein { display: block }
+}
+@media (prefers-reduced-motion: reduce) { .foto-gross.fz img, .kl-balken span, .kl-haken { transition: none } }
