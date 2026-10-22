@@ -25,6 +25,10 @@ import '../../web/assets/modell.js';
 import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt, sbNeu } from './umgebung.js';
 import { nutzer } from './auth.js';
 import { langerCode } from './entwurf.js';
+import '../../web/assets/instanzregeln.js';
+import { linkAufloesen } from '../instanz/adapter.js';
+import { bremse, budget } from './bremse.js';
+import { instanzZaehlen } from './statistik.js';
 
 const X = () => globalThis.Abrechnung;
 /* Ablagen (private Buckets bei Supabase Storage, der Server legt sie beim ersten Gebrauch an). fotos: Fotos der Fenster (dazu die kleine
@@ -191,6 +195,7 @@ const KENNUNG = /^[A-Za-z0-9_-]{6,40}$/;
 export const FOTOS = {
   /* Kunde über den Link: solange der Link offen ist (auch während einer Nachbesserung), nicht nach dem Senden */
   'POST /api/link/:code/foto/:id': async (ctx) => {
+    if (ctx.instanz) return fotoInstanz(ctx);
     linkBremse(ctx.request);
     if (!erlaubt('foto:' + quelle(ctx.request), 240, 10 * 60 * 1000)) throw new ApiFehler('Gerade kommen zu viele Fotos. Bitte gleich noch einmal.', 429);
     const code = linkCode(ctx), id = idVon(ctx), u = bytesAus(ctx);
@@ -241,6 +246,31 @@ export const FOTOS = {
     return bild(u);
   }
 };
+
+/* Konfigurator-Instanz (Strang A, Bauplan §3 A.5, K1.3): keine anonyme Ablage. Nur Kennungen, die ein gespeichertes Fenster des
+   Zwischenstands nennt (dazu die kleine Fassung <id>k), erst ab einem gespeicherten Fenster, höchstens 2 × Fenster + 4 verschiedene
+   Fotos je Code; je Instanz und Tag GRENZEN.fotoTagInstanz (Alarm ab 500), je Anschluss die Bremse RL_FOTO */
+async function fotoInstanz(ctx) {
+  const inst = ctx.instanz, G = globalThis.Instanzregeln.GRENZEN;
+  linkBremse(ctx.request);
+  if (!(await bremse(ctx, 'FOTO', quelle(ctx.request))) || !erlaubt('foto:' + quelle(ctx.request), 240, 10 * 60 * 1000)) throw new ApiFehler('Gerade kommen zu viele Fotos. Bitte gleich noch einmal.', 429);
+  const id = idVon(ctx), u = bytesAus(ctx), aufl = await linkAufloesen(ctx, ctx.params.code), code = aufl.code;
+  const zu = X().linkZu(aufl.l);
+  if (zu) throw new ApiFehler(zu === 'eingegangen' ? 'Deine Anfrage ist schon angekommen.' : 'Dieser Link ist nicht mehr aktiv.', 410, { zu: zu });
+  const e = aufl.entwurf || (await ctx.sp.entwurfHolen(code)), wins = (e && e.daten && Array.isArray(e.daten.windows)) ? e.daten.windows : [];
+  if (!wins.length) throw new ApiFehler('Bitte das Fenster zuerst speichern, dann kommen die Fotos dazu.', 409, { ohneFenster: true });
+  const ids = fotoIds(wins), grund = ids.has(id) ? id : /k$/.test(id) && ids.has(id.slice(0, -1)) ? id.slice(0, -1) : '';
+  if (!grund) throw new ApiFehler('Dieses Foto gehört zu keinem gespeicherten Fenster.', 400);
+  const ab = ablageVon(ctx), o = linkOrdner(code), namen = (await ab.liste(o)).map((n) => n.replace(/\.jpg$/, '')), da = new Set(namen);
+  const klein = (n) => /k$/.test(n) && (da.has(n.slice(0, -1)) || ids.has(n.slice(0, -1)));
+  const gruende = new Set(namen.filter((n) => !klein(n)));
+  if (!gruende.has(grund) && gruende.size >= 2 * wins.length + G.fotosZusatz) throw new ApiFehler('Zu dieser Planung gibt es schon sehr viele Fotos.', 409, { voll: true });
+  const b = await budget(ctx, 'inst:' + inst.id8 + ':foto', G.fotoTagInstanz, { alarm: 500 });
+  if (!b.ok) throw new ApiFehler('Heute kommen ungewöhnlich viele Fotos. Bitte morgen noch einmal.', 429);
+  if (!(await ab.ablegen(datei(o, id), u))) throw new ApiFehler('Das Foto ließ sich gerade nicht ablegen. Bitte gleich noch einmal.', 502);
+  instanzZaehlen(ctx, inst, 'foto');
+  return { ok: true };
+}
 
 /* Aufräumen (zentrale.js, täglich): Fotos eingegangener Aufmaße 12 Monate nach dem Eingang löschen, höchstens max Links je Lauf.
    Das Aufmaß selbst bleibt; am Link steht danach fotosGeloescht (der Betriebsbereich sagt es statt eines leeren Rahmens) */

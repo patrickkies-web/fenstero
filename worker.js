@@ -4,11 +4,21 @@
    Ohne eingerichtete Schlüssel läuft die Website im Pilotmodus weiter; /api/status sagt der App, was da ist.
    Ausgelieferte Seiten zählt die eigene Statistik als Tageszähler (functions/api/statistik.js), ohne Cookies und ohne Kennungen.
    Seit den Konfigurator-Instanzen (docs/INSTANZEN.md) gibt es in wrangler.jsonc kein not_found_handling mehr: Fehlt eine Datei,
-   liefert dieser Worker selbst die Fehlerseite web/404.html mit Status 404 (je Host, Bauplan E23). Die Host-Weiche für die Instanzen
-   (functions/instanz/mandant.js) kommt mit Strang A; bis dahin ist jeder Host die Hauptdomain. */
+   liefert dieser Worker selbst die Fehlerseite web/404.html mit Status 404 (je Host, Bauplan E23).
+   Host-Weiche (Bauplan §3 A.1, E5): Die Hauptdomain (eeziframes.com, www, KANONISCH, …workers.dev, lokal, HAUPT_HOSTS) erkennt
+   functions/instanz/mandant.js ohne Datenbank und läuft wie bisher. Jeder andere Host gehört zu einer Konfigurator-Instanz und geht an
+   functions/instanz/seiten.js (App, Seiten und API nur nach Status und Positivliste). Gibt es noch keine Instanzen (keine Datenbank oder
+   schema.sql noch nicht erneut ausgeführt), bleibt jeder Host die Hauptdomain. Der Host kommt nur aus der Adresse der Anfrage, nie aus
+   Kopfzeilen wie X-Forwarded-Host.
+   queue(): Warteschlange EINGANG (falls gebunden, wrangler.jsonc): PDF und Mail eingegangener Anfragen (functions/api/eingang.js). */
 import { api, geplant } from './functions/api/router.js';
 import { behandeln, umleitung, SICHERHEIT, SPERRE } from './functions/seo.js';
 import { seitenaufruf } from './functions/api/statistik.js';
+import { hostVon, istHaupt, instanzVon } from './functions/instanz/mandant.js';
+import { ausliefern } from './functions/instanz/seiten.js';
+import { eingangVerarbeiten } from './functions/api/eingang.js';
+import { konfig } from './functions/api/umgebung.js';
+import { speicher } from './functions/api/speicher.js';
 
 /* Bereiche ohne Suchmaschinen und ohne Zwischenspeicher: Zentrale, Kundenkonto, Dashboard (laufen über run_worker_first durch den
    Worker, damit die Kopfzeilen sicher dran sind, auch wenn Cloudflare _headers an Antworten aus dem Worker nicht anwendet) */
@@ -33,6 +43,12 @@ async function datei(request, env) {
 
 export default {
   async fetch(request, env, ctx) {
+    /* Konfigurator-Instanz: eigener Weg, die Hauptdomain bleibt unberührt */
+    const host = hostVon(request);
+    if (!istHaupt(host, env)) {
+      const inst = await instanzVon(host, env, ctx);
+      if (inst !== undefined) return ausliefern(request, env, ctx, inst);
+    }
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/')) {
       const antwort = await api(request, env, ctx);
@@ -53,5 +69,20 @@ export default {
   },
   async scheduled(event, env, ctx) {
     ctx.waitUntil(geplant(env, event && event.cron));
+  },
+  /* Warteschlange EINGANG: je Nachricht { code, runde } PDF bauen und Mail an den Betrieb (idempotent über versand.runde/status);
+     ein Fehler stellt die Nachricht erneut zu, der Zehn-Minuten-Lauf holt ohnehin alles Offene nach */
+  async queue(batch, env, ctx) {
+    const k = konfig(env), sp = speicher(k);
+    for (const msg of (batch && batch.messages) || []) {
+      const b = (msg && msg.body) || {};
+      try {
+        if (sp && b.code) await eingangVerarbeiten(k, sp, String(b.code), Number(b.runde) || 0);
+        if (msg.ack) msg.ack();
+      } catch (e) {
+        console.log('Eingang aus der Warteschlange fehlgeschlagen', String(e && e.message ? e.message : e).slice(0, 160));
+        if (msg.retry) msg.retry();
+      }
+    }
   }
 };
