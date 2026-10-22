@@ -47,6 +47,7 @@
 // Standard mit dem Namen des Betriebs, keine Gesamtübersicht und ein Entwurf, der „Mehr zu …“ und die Tiefe behält.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
+import { createServer } from 'node:net';
 
 const require = createRequire(process.env.PW_PFAD ? process.env.PW_PFAD.replace(/\/?$/, '/') + 'x.js' : import.meta.url);
 const { chromium } = require('playwright-core');
@@ -57,6 +58,10 @@ const teil = (n) => !NUR || NUR.includes(String(n));
 const RECHT = await import('../functions/api/recht.js'); // Stand der AGB und Nutzungsbedingungen, Wortlaut der Zustimmung an der Kasse
 const KASSE = { agb: RECHT.AGB_STAND, zustimmung: RECHT.ZUSTIMMUNG };
 if (BILDER) mkdirSync(BILDER, { recursive: true });
+
+/* Freier Port für die zusätzlichen Testserver (Abschnitte 8, 10, 13, 14, 15, 17, 18, 19): Das Betriebssystem vergibt ihn. Zufällige Ports
+   aus einem festen Bereich trafen gelegentlich den eigenen Testserver (mit-server.mjs, etwa 8967) oder den eines anderen Laufs */
+const freierPort = () => new Promise((ja, nein) => { const s = createServer(); s.unref(); s.on('error', nein); s.listen(0, () => { const p = s.address().port; s.close(() => ja(p)); }); });
 
 let fehlerZahl = 0;
 const ok = (bed, text) => { if (bed) console.log('  ✓ ' + text); else { fehlerZahl++; console.log('  ✗ ' + text); } };
@@ -1066,7 +1071,7 @@ if (teil(8)) {
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
   let kind = null, BASE2 = process.env.BASE2 || '';
   if (!BASE2) {
-    let port = 8790 + Math.floor(Math.random() * 100); if (String(port) === String(process.env.SERVER_PORT)) port = port === 8889 ? 8790 : port + 1; BASE2 = 'http://localhost:' + port;
+    const port = await freierPort(); BASE2 = 'http://localhost:' + port;
     const skript = pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs');
     kind = cp.spawn(process.execPath, [skript], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
     kind.stderr.on('data', (d) => process.stderr.write('  [Server 2] ' + d));
@@ -1574,8 +1579,8 @@ if (teil(10)) {
   ok(/User-agent: \*\nDisallow: \/\n/.test(rb1.text) && sm1.status === 404 && ll1.status === 200 && ll1.h.get('x-robots-tag') === seo.SPERRE, 'Pilotphase: robots.txt sperrt alles, keine Sitemap, llms.txt mit noindex');
 
   /* e) Freigabe: dritter Testserver mit INDEXIERUNG=1 und KANONISCH */
-  /* nie der Port des Servers, unter dem die Suite selbst läuft (scripts/mit-server.mjs setzt SERVER_PORT) */
-  let port = 8890 + Math.floor(Math.random() * 100); if (String(port) === String(process.env.SERVER_PORT)) port = port === 8989 ? 8890 : port + 1;
+  /* ein freier Port, nie der des Servers, unter dem die Suite selbst läuft */
+  const port = await freierPort();
   const B3 = 'http://localhost:' + port, KAN = 'https://eeziframes.example';
   const kind = cp10.spawn(process.execPath, [path10.join(WURZEL, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', INDEXIERUNG: '1', KANONISCH: KAN }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (d) => process.stderr.write('  [Server 3] ' + d));
@@ -2277,7 +2282,7 @@ if (teil(13)) {
 
   // p) Oberfläche im Browser, auf einem eigenen Testserver mit Zentrale
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = 8890 + Math.floor(Math.random() * 90), B4 = 'http://localhost:' + port;
+  const port = await freierPort(), B4 = 'http://localhost:' + port;
   const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (dd) => process.stderr.write('  [Server 4] ' + dd));
   const aus4 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus4);
@@ -2679,7 +2684,7 @@ if (teil(14)) {
 
   // e) Kundenlink im Servermodus: Hinweis, Zwischenstand auf dem Server, anderes Gerät, deaktivierter Link
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = 8990 + Math.floor(Math.random() * 90), B5 = 'http://localhost:' + port;
+  const port = await freierPort(), B5 = 'http://localhost:' + port;
   const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (dd) => process.stderr.write('  [Server 5] ' + dd));
   const aus5 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus5);
@@ -2908,7 +2913,7 @@ if (teil(15)) {
 
   // e) Im Browser: Gast, sichern, zweites Gerät, Kauf nur mit Konto, Konto-Seite, abmelden, Link aus der E-Mail, abgelaufene Anmeldung
   const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = 9100 + Math.floor(Math.random() * 80), B6 = 'http://localhost:' + port;
+  const port = await freierPort(), B6 = 'http://localhost:' + port;
   const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', MAIL_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind.stderr.on('data', (dd) => process.stderr.write('  [Server 6] ' + dd));
   const aus6 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus6);
@@ -3729,7 +3734,7 @@ if (teil(17)) {
   const pilot17 = await fetch(BASE + '/api/widerruf', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Test', vertrag: 'Aufmaßblatt', mail: 'test@beispiel.de' }) }), pj17 = await pilot17.json();
   ok(pilot17.status === 503 && pj17.anders === true && /E-Mail oder Brief/.test(pj17.fehler), 'Widerruf ohne Mailversand und Datenbank: 503 mit Hinweis auf E-Mail oder Brief');
   /* d) eigener Testserver mit Mail- und Daten-Attrappe: Formular, Eingangsbestätigung, Kopie */
-  const port17 = 9300 + Math.floor(Math.random() * 80), B7 = 'http://localhost:' + port17;
+  const port17 = await freierPort(), B7 = 'http://localhost:' + port17;
   const kind17 = cp17.spawn(process.execPath, [path17.join(W17, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port17), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', MAIL_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind17.stderr.on('data', (dd) => process.stderr.write('  [Server 7] ' + dd));
   const aus17 = () => { try { kind17.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus17);
@@ -3878,7 +3883,7 @@ if (teil(18)) {
   console.log('18. KI-Auswertung kommt an, auch wenn schneller gespeichert oder gesendet wird');
   const cp18 = await import('node:child_process'), path18 = await import('node:path'), url18 = await import('node:url');
   const W18 = path18.resolve(path18.dirname(url18.fileURLToPath(import.meta.url)), '..');
-  const port18 = 9300 + Math.floor(Math.random() * 80), B18 = 'http://localhost:' + port18, stempel18 = Date.now().toString(36);
+  const port18 = await freierPort(), B18 = 'http://localhost:' + port18, stempel18 = Date.now().toString(36);
   /* eine echte Auswertung dauert 15 bis 30 Sekunden; hier 4 Sekunden je Foto, damit Speichern und Senden davor liegen */
   const kind18 = cp18.spawn(process.execPath, [path18.join(W18, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port18), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', KI_VERZOEGERUNG_MS: '4000' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind18.stderr.on('data', (d) => process.stderr.write('  [Server 18] ' + d));
@@ -4039,7 +4044,7 @@ if (teil(19)) {
   // d) im Browser: Kundenlink, Betriebsbereich, Konto auf zwei Geräten (eigener Testserver mit nachgestellter Datenbank)
   const cp19 = await import('node:child_process'), path19 = await import('node:path'), url19 = await import('node:url');
   const W19 = path19.resolve(path19.dirname(url19.fileURLToPath(import.meta.url)), '..');
-  const port19 = 9400 + Math.floor(Math.random() * 80), B19 = 'http://localhost:' + port19;
+  const port19 = await freierPort(), B19 = 'http://localhost:' + port19;
   const kind19 = cp19.spawn(process.execPath, [path19.join(W19, 'scripts/dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port19), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1' }), stdio: ['ignore', 'ignore', 'pipe'] });
   kind19.stderr.on('data', (d) => process.stderr.write('  [Server 19] ' + d));
   const aus19 = () => { try { kind19.kill(); } catch (e) { /* schon weg */ } };
