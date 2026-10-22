@@ -11,15 +11,21 @@
 <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/assets/gemeinsam.css">
+<link rel="stylesheet" href="/assets/einladung.css">
 <link rel="stylesheet" href="/assets/zentrale.css">
 </head>
 <body>
-<!-- Zentrale des Inhabers: Betriebe verwalten, Kennzahlen, eigene Statistik, Protokoll. Zugang nur mit ZENTRALE_PASSWORT
-     (Cloudflare-Secret), siehe docs/ZENTRALE.md. Diese Seite enthält keine Daten; alles kommt nach der Anmeldung von /api/zentrale/…. -->
+<!-- Zentrale des Inhabers: Bestellungen und Instanzen der Konfigurator-Pakete, Betriebe verwalten, Kennzahlen, eigene Statistik,
+     Protokoll. Zugang nur mit ZENTRALE_PASSWORT (Cloudflare-Secret), siehe docs/ZENTRALE.md. Diese Seite enthält keine Daten; alles kommt
+     nach der Anmeldung von /api/zentrale/…. pakete.js, instanzregeln.js und einladung.js liefern Paketnamen, Statusleiste, Kontrast und die
+     Vorschau der Startseite (dieselben Dateien wie Server und App). -->
 <div id="z" class="z-wurzel" aria-live="off">
   <main class="z-login"><div class="z-login-karte"><p class="z-text">Zentrale wird geladen …</p></div></main>
 </div>
 <noscript><p class="z-text" style="padding:16px">Die Zentrale braucht JavaScript.</p></noscript>
+<script src="/assets/pakete.js"></script>
+<script src="/assets/instanzregeln.js"></script>
+<script src="/assets/einladung.js"></script>
 <script src="/assets/zentrale.js"></script>
 </body>
 </html>
