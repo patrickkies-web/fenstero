@@ -643,11 +643,11 @@ if (teil(6)) {
   ok(fsw.n === 6 && fsw.t === 'XXXXXP' && fsw.geh && falt && ruhe, 'Faltschiebewand: 6 Flügel mit Gehflügel am Ende, die Wand faltet sich zum Paket und kommt zurück');
   await frage5('sart', { sart: 'keiner', roll: 'keiner' });
   await p5.click('.qpanel [data-act="sart"][data-v="raffstore"]'); await p5.waitForTimeout(600);
-  const so1 = await p5.evaluate(() => ({ roll: S.win.roll, behang: !!document.querySelector('[data-r="behang"]'), bg: (document.querySelector('[data-r="behang"]') || { style: {} }).style.background || '', kasten: (document.querySelector('[data-r="roll-f"]') || { style: {} }).style.background || '', fragen: qList(S.win).map((q) => q.id) }));
+  const so1 = await p5.evaluate(() => ({ roll: S.win.roll, lam: Array.from(document.querySelectorAll('.w3d-lam')).filter((l) => l.style.display !== 'none').length, bg: (document.querySelector('[data-r="lam-0"]') || { style: {} }).style.background || '', schienen: !!document.querySelector('[data-r="fs-l"]') && !!document.querySelector('[data-r="fs-r"]') && !!document.querySelector('[data-r="behang-u"]'), knopf: !!document.querySelector('[data-w3d="fahren"]') && !!document.querySelector('[data-w3d="wenden"]'), kasten: (document.querySelector('[data-r="roll-f"]') || { style: {} }).style.background || '', fragen: qList(S.win).map((q) => q.id) }));
   await frage5('sfarbe', { sart: 'raffstore', roll: 'aufsatz', sfarbe: 'silber' });
   await p5.click('.qpanel .qsw[data-v="anthrazit"]'); await p5.waitForTimeout(500);
-  const so2 = await p5.evaluate(() => ({ f: S.win.sfarbe, bg: document.querySelector('[data-r="behang"]').style.background, hint: document.querySelector('.w3d-hint').textContent, swatches: document.querySelectorAll('.qpanel .qsw').length }));
-  ok(so1.roll === 'aufsatz' && so1.behang && /repeating-linear-gradient/.test(so1.bg) && so1.fragen.includes('einbau') && so1.fragen.includes('sfarbe') && so1.fragen.includes('antrieb') && so2.f === 'anthrazit' && so2.bg !== so1.bg && /Anthrazit/.test(so2.hint) && so2.swatches === 7, 'Sonnenschutz außen: Raffstore hängt als Lamellen-Behang vor dem Fenster, sieben Farben färben Behang und Kasten, Einbau und Antrieb folgen');
+  const so2 = await p5.evaluate(() => ({ f: S.win.sfarbe, bg: document.querySelector('[data-r="lam-0"]').style.background, hint: document.querySelector('.w3d-hint').textContent, swatches: document.querySelectorAll('.qpanel .qsw').length }));
+  ok(so1.roll === 'aufsatz' && so1.lam >= 10 && /linear-gradient/.test(so1.bg) && so1.schienen && so1.knopf && so1.fragen.includes('einbau') && so1.fragen.includes('sfarbe') && so1.fragen.includes('antrieb') && so2.f === 'anthrazit' && so2.bg !== so1.bg && /Anthrazit/.test(so2.hint) && so2.swatches === 7, 'Sonnenschutz außen: Raffstore aus einzelnen Lamellen in Führungsschienen mit Endschiene vor dem Fenster, Knöpfe zum Fahren und Wenden, sieben Farben färben Lamellen und Kasten, Einbau und Antrieb folgen');
   await frage5('iart', { iart: 'keiner' });
   await p5.click('.qpanel [data-act="setw"][data-f="iart"][data-v="jalousie"]'); await p5.waitForTimeout(600);
   const inn = await p5.evaluate(() => ({ da: !!document.querySelector('[data-r="innen"]'), bg: document.querySelector('[data-r="innen"]').style.background, k: !!document.querySelector('[data-r="innen-k"]'), fragen: qList(S.win).map((q) => q.id) }));
@@ -707,6 +707,78 @@ if (teil(6)) {
   await foto(p5, 'app-neu-ergebnis');
   sauber(p5, 'Elementarten, Sonnenschutz und neue Öffnung ohne Fehler');
   await ctx5.close();
+
+  // 3-D-Modell: Griffe (Lage, Stulp, ohne Griff), Raffstore mit Knöpfen, Zoom und Maße in der Übersicht
+  const ctx7 = await browser.newContext(telefon), p7 = await neueSeite(ctx7);
+  await p7.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  const frage7 = async (id, set, art) => { await p7.evaluate(([id, set, art]) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set || {}); if (set.teilung) w.sashes = sashesFor(set.teilung); if (art === 'hst') w.sashes = hstFluegel(w.hst.schema, w.hst.richtung); S.win = w; S.q = id; S.selSash = 0; S.openSash = -1; S.screen = 'frage'; render(true); }, [id, set || {}, art || '']); await p7.waitForTimeout(600); };
+  const griffe7 = () => p7.evaluate(() => Array.from(document.querySelectorAll('#w3d .w3d-sash')).map((sa) => getComputedStyle(sa.querySelector('.w3d-handle')).opacity === '1' && getComputedStyle(sa.querySelector('.w3d-ros')).opacity === '1'));
+  /* Achse über dem Fußboden in mm (Fußboden = Unterkante der Öffnung bei Türen, sonst minus Brüstung) */
+  const achse7 = (i) => p7.evaluate((i) => { const st = document.getElementById('w3d'), r = W3DS.w3d, V = w3dCalc(r.w, Object.assign({}, r.o, { stageW: st.clientWidth, stageH: st.clientHeight, zoom: w3dZ(st, r.o) })), g = st._griffe[i]; return g ? { ueber: Math.round((V.moH * V.s / 2 - g[1]) / V.s), mitte: Math.round(V.pfB + (V.ulH ? V.ulH + 72 : 0) + V.sashH / 2) } : null; }, i);
+  await frage7('griff', { griff: 'ohne', teilung: '2p' });
+  const ohne7 = await griffe7();
+  await frage7('griff', { griff: 'motor' }, 'hst');
+  const motor7 = await griffe7(), taster7 = await p7.evaluate(() => getComputedStyle(document.querySelector('[data-r="an-taster"]')).opacity);
+  ok(ohne7.every((x) => !x) && motor7.every((x) => !x) && taster7 === '1', 'Griff „Ohne“ und Hebe-Schiebe elektrisch: kein Griff im Modell, elektrisch mit Wandtaster');
+  await frage7('stulp', { teilung: '2s', e_teilung: true });
+  const stulp7 = await p7.evaluate(() => ({ ids: qList(S.win).map((q) => q.id), s: S.win.sashes.map((x) => x.t + x.din + (x.steh ? 's' : '')).join(',') }));
+  const sg7 = await griffe7();
+  await p7.click('.qpanel [data-act="stulp"][data-v="L"]'); await p7.waitForTimeout(600);
+  const stulpL7 = await p7.evaluate(() => S.win.sashes.map((x) => x.t + x.din + (x.steh ? 's' : '')).join(',')), sgL7 = await griffe7();
+  ok(stulp7.ids.includes('stulp') && stulp7.ids.filter((id) => /^typ-/.test(id)).length === 1 && !stulp7.ids.some((id) => /^din-/.test(id)) && stulp7.s === 'DLs,DKR' && !sg7[0] && sg7[1] && stulpL7 === 'DKL,DRs' && sgL7[0] && !sgL7[1], 'Stulp: nur der Gehflügel hat einen Griff; gefragt wird, welcher Flügel zuerst aufgeht, die Bänder sitzen fest außen');
+  await frage7('material', { mo: { hm: 2700, hl: 2700, hr: 2700, wm: 1000, wt: 1000, wb: 1000 }, el: { h: 2660, w: 960 } }, 'balkon');
+  const tuer7 = await achse7(0);
+  await frage7('material', { teilung: '2p' });
+  const fen7 = await achse7(0);
+  ok(tuer7 && Math.abs(tuer7.ueber - 1050) <= 15 && fen7 && Math.abs(fen7.ueber - fen7.mitte) <= 15, 'Griffhöhe: an der Tür etwa 1.050 mm über dem Fußboden, am Fenster mittig im Flügel');
+  await frage7('griff', { griff: 'standard', teilung: '2p' }); await p7.waitForTimeout(1200);
+  const fokus7 = await p7.evaluate(() => { const st = document.getElementById('w3d'), r = st.getBoundingClientRect(), h = st.querySelector('[data-r="handle-0"]').getBoundingClientRect(); return { z: W3DZ.w3d.z, dx: Math.abs(h.left + h.width / 2 - r.left - r.width / 2) / r.width, dy: Math.abs(h.top - r.top - r.height / 2) / r.height, breit: h.width }; });
+  ok(fokus7.z > 2.4 && fokus7.dx < 0.2 && fokus7.dy < 0.3 && fokus7.breit >= 6, 'Frage nach dem Griff: die Kamera fährt auf den Griff, er ist gut zu sehen');
+  await frage7('sart', { sart: 'raffstore', roll: 'aufsatz' });
+  const lam7 = () => p7.evaluate(() => ({ t0: document.querySelector('[data-r="lam-0"]').style.transform, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), fahren: document.querySelector('[data-w3d="fahren"]').textContent, wenden: document.querySelector('[data-w3d="wenden"]').getAttribute('aria-pressed'), hoch: Math.min.apply(null, Array.from(document.querySelectorAll('#w3d .w3d-knopf')).filter((b) => !b.hidden).map((b) => b.getBoundingClientRect().height)) }));
+  const l07 = await lam7();
+  await p7.click('[data-w3d="wenden"]'); await p7.waitForTimeout(300);
+  const l17 = await lam7();
+  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(400);
+  const l27 = await lam7();
+  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(400);
+  const l37 = await lam7();
+  ok(/rotateX\(-52deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
+  await p7.evaluate(() => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; });
+  await frage7('material', { teilung: '2p' });
+  const zoomKn7 = await p7.evaluate(() => ({ da: !!document.querySelector('#w3d [data-w3d="plus"]') && !!document.querySelector('#w3d [data-w3d="minus"]'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, touch: getComputedStyle(document.getElementById('w3d')).touchAction, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  await p7.click('#w3d [data-w3d="plus"]'); await p7.waitForTimeout(500);
+  const zoom7 = await p7.evaluate(() => ({ z: W3DZ.w3d.z, cls: document.getElementById('w3d').classList.contains('is-zoom'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  await p7.click('#w3d [data-w3d="eins"]'); await p7.waitForTimeout(500);
+  const zoom7b = await p7.evaluate(() => ({ z: W3DZ.w3d.z, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  const cdp7 = await ctx7.newCDPSession(p7), bb7 = await (await p7.$('#w3d')).boundingBox(), cx7 = bb7.x + bb7.width / 2, cy7 = bb7.y + bb7.height / 2;
+  const finger7 = (type, pts) => cdp7.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p, i) => ({ x: p[0], y: p[1], id: i })) });
+  await finger7('touchStart', [[cx7 - 30, cy7], [cx7 + 30, cy7]]);
+  for (let k = 1; k <= 8; k++) { await finger7('touchMove', [[cx7 - 30 - k * 8, cy7], [cx7 + 30 + k * 8, cy7]]); await p7.waitForTimeout(16); }
+  await finger7('touchEnd', []); await p7.waitForTimeout(300);
+  const pinch7 = await p7.evaluate(() => W3DZ.w3d.z);
+  await frage7('sprossen', { teilung: '2p' });
+  const spross7 = await p7.evaluate(() => !document.querySelector('#w3d [data-r="zoom"]') && W3DZ.w3d.z === 1);
+  ok(zoomKn7.da && zoomKn7.eins && zoomKn7.touch === 'none' && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
+  const erg7 = await p7.evaluate(() => {
+    /* Bühne wie im Ergebnis (alle acht Maße, gleiche Werte je Richtung), außerhalb eines festen Bildschirms */
+    const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:16px;top:80px;width:358px;z-index:99'; document.body.appendChild(box);
+    const w = demoProject()[0]; w.mo = { hm: 1480, hl: 1480, hr: 1480, wm: 1250, wt: 1250, wb: 1250 }; w.el = { w: 1190, h: 1440 };
+    const o = { id: 'w3d-t7', view: 'result', dims: ['hl', 'hm', 'hr', 'wt', 'wm', 'wb', 'eh', 'ew'], labels: { hl: '1.480 mm', hm: '1.480 mm', hr: '1.480 mm', wt: '1.250 mm', wm: '1.250 mm', wb: '1.250 mm', eh: '1.440 mm', ew: '1.190 mm' }, stageH: 300, fitW: 0.56, fitH: 0.6, cls: 'dims-all' };
+    box.innerHTML = model(w, o); const st = box.querySelector('.w3d-stage'); st.classList.add('no-anim'); w3dApply(st, w, o);
+    const labs = Array.from(st.querySelectorAll('.w3d-dim:not(.is-weg) .w3d-dim-lab')).map((l) => l.getBoundingClientRect());
+    const schnitt = labs.some((a, i) => labs.some((b, j) => j > i && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom));
+    const r = { n: labs.length, schnitt: schnitt, touch: getComputedStyle(st).touchAction }; box.remove(); return r;
+  });
+  ok(erg7.n === 4 && !erg7.schnitt && erg7.touch === 'pan-y', 'Maße in der Übersicht: gleiche Maße stehen nur einmal, die Schilder überdecken sich nicht; auf scrollbaren Seiten scrollt senkrechtes Wischen über dem Modell die Seite');
+  sauber(p7, '3-D-Modell: Griffe, Raffstore, Zoom und Maße ohne Fehler');
+  await ctx7.close();
+  const ctx8 = await browser.newContext(Object.assign({}, telefon, { reducedMotion: 'reduce' })), p8 = await neueSeite(ctx8);
+  await p8.goto(BASE + '/app/', { waitUntil: 'networkidle' });
+  await p8.evaluate(() => { const w = demoProject()[0]; w.sart = 'raffstore'; w.roll = 'vorbau'; S.win = w; S.q = 'sart'; S.screen = 'frage'; render(true); }); await p8.waitForTimeout(600);
+  await p8.click('[data-w3d="fahren"]'); await p8.waitForTimeout(100);
+  ok(await p8.evaluate(() => { const st = document.getElementById('w3d'), l = st.querySelector('[data-r="lam-0"]'); return !st.classList.contains('is-fahrt') && getComputedStyle(l).transitionDuration.split(',').every((d) => parseFloat(d) === 0) && W3D_BEHANG.stand === 1; }), 'Weniger Bewegung: der Raffstore springt ohne Fahrt');
+  sauber(p8, 'Weniger Bewegung am Modell ohne Fehler'); await ctx8.close();
   sauber(p2, 'App-Logik ohne Fehler');
   await ctx2.close();
 }
