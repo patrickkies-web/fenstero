@@ -393,7 +393,8 @@ let BID = 1;
 const nid = () => 'b' + (BID++);
 function sashesFor(k) {
   if (k === '1') return [{ t: 'DK', din: 'L' }];
-  if (k === '2s') return [{ t: 'D', din: 'L' }, { t: 'DK', din: 'R' }];
+  /* Stulp: links der Standflügel (steh, Drehflügel ohne Griff, über Kantriegel bzw. Stulpgetriebe im Falz bedient), rechts der Gehflügel */
+  if (k === '2s') return [{ t: 'D', din: 'L', steh: true }, { t: 'DK', din: 'R' }];
   if (k === '3') return [{ t: 'DK', din: 'L' }, { t: 'F', din: 'L' }, { t: 'DK', din: 'R' }];
   if (k === '4') return [{ t: 'F', din: 'L' }, { t: 'F', din: 'L' }, { t: 'F', din: 'R' }, { t: 'F', din: 'R' }];
   return [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }];
@@ -409,13 +410,16 @@ function hstFluegel(schema, richtung) {
   if (schema === 'A3') return richtung === 'L' ? [S, F, F] : [F, F, S];
   return richtung === 'L' ? [S, F] : [F, S];
 }
-/* Faltschiebewand: n Faltflügel, der Gehflügel (Tür im Alltag) steht am Ende gegenüber dem Paket */
+/* Faltschiebewand: n Faltflügel, der Gehflügel (Tür im Alltag) steht am Ende gegenüber dem Paket. Bei „Beide Seiten“ ist das die Mitte,
+   wo die beiden Pakete zusammenstoßen: der letzte Flügel des linken Pakets, am Nachbarn angeschlagen, mit dem Griff zur Mitte */
 function fswFluegel(n, schema, geh) {
   n = Math.max(2, Math.min(7, num(n) || 3));
   const out = Array.from({ length: n }, (x, i) => ({ t: 'X', din: schema === 'rechts' ? 'R' : 'L' }));
-  if (geh && n > 1) { const i = schema === 'rechts' ? 0 : n - 1; out[i] = { t: 'P', din: schema === 'rechts' ? 'R' : 'L' }; }
+  if (geh && n > 1) { const i = schema === 'rechts' ? 0 : schema === 'geteilt' ? Math.ceil(n / 2) - 1 : n - 1; out[i] = { t: 'P', din: schema === 'rechts' ? 'R' : 'L' }; }
   return out;
 }
+/* Ohne Gehflügel bedient man die Faltwand am freien Ende der Kette: dieser Flügel trägt den Griff, auf der Seite, die zuletzt schließt */
+const fswBedien = (w) => { if (w.art !== 'fsw' || w.sashes.some((x) => x.t === 'P')) return -1; const n = w.sashes.length, sc = (w.fsw || {}).schema; return sc === 'rechts' ? 0 : sc === 'geteilt' ? Math.ceil(n / 2) - 1 : n - 1; };
 /* PSK-Tür: A = Schiebeflügel (kippbar) vor einem Festteil, A3 = vor zwei Festteilen; richtung = Seite, auf der der Flügel geschlossen steht */
 function pskFluegel(schema, richtung) {
   const S = { t: 'PS', din: richtung }, F = { t: 'F', din: richtung };
@@ -520,7 +524,9 @@ const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' 
 const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' ? w.bt : null) || {};
 const schwelleText = (k) => ({ flach: 'flache Schwelle', null: 'barrierefrei ohne Schwelle', standard: 'Standardschwelle' }[k] || 'flache Schwelle');
 /* Gehflügel der Balkontür: der erste Dreh-Kipp-Flügel, sonst der erste Drehflügel */
-const gehFluegel = (w) => { const dk = w.sashes.findIndex((x) => x.t === 'DK'); return dk >= 0 ? dk : w.sashes.findIndex((x) => x.t === 'D'); };
+const gehFluegel = (w) => { const dk = w.sashes.findIndex((x) => x.t === 'DK' && !x.steh); return dk >= 0 ? dk : w.sashes.findIndex((x) => x.t === 'D' && !x.steh); };
+/* Stulpfenster: nur der Gehflügel hat einen Griff, der Standflügel (der andere) wird erst danach über den Falz geöffnet */
+const stehFluegel = (w, i) => w.teilung === '2s' && w.sashes.length === 2 && w.art !== 'fest' && i !== gehFluegel(w);
 /* Offen statt Vorgabe (Regeln in modell.js): istOffen prüft auch, ob die Angabe zum Element gehört */
 const OT = 'offen, bitte beraten';
 const istOffen = (w, k) => AW.istOffen(w, k);
@@ -675,13 +681,14 @@ function w3dCalc(w, o) {
   const schw = tuer ? tuerCfg(w).schwelle : '', pfB = tuer ? (schw === 'null' ? 16 : schw === 'standard' ? 62 : 28) : W3D.PF;
   const laib = num(w.laib) || (w.ki && w.ki.laib) || 140, T = laib + fd + W3D.OUTD;
   const sw = o.stageW || 358, sh = o.stageH || 360;
-  const s = o.s || Math.min(sw * (o.fitW || 0.64) / moW, sh * (o.fitH || 0.7) / moH);
+  /* Zoom (w3dZoomSetzen) vergrößert den Maßstab und wird neu gelegt statt skaliert: so bleiben Kanten und Schilder scharf */
+  const zoom = Math.max(1, o.zoom || 1), s = (o.s || Math.min(sw * (o.fitW || 0.64) / moW, sh * (o.fitH || 0.7) / moH)) * zoom;
   const n = Math.max(1, w.sashes.length), pf = W3D.PF, sf = W3D.SF, mul = tuer && art !== 'balkon' ? 0 : w.teilung === '2s' ? 8 : W3D.MUL;
   const innerW = elW - 2 * pf, innerH = elH - pf - pfB, olH = w.ol ? Math.round(Math.min(innerH * 0.6, Math.max(innerH * 0.26, formSenke(w.form, innerW, innerH)))) : 0;
   const ulH = w.ul && art === 'fenster' && w.form !== 'rund' ? Math.round(clamp(num(w.ulH) || 400, 200, Math.max(200, (innerH - olH) * 0.55))) : 0;
   const sashH = innerH - (olH ? olH + mul : 0) - (ulH ? ulH + W3D.MUL : 0), sashW = (innerW - mul * (n - 1)) / n;
   return { s: s, moW: moW, moH: moH, elW: elW, elH: elH, laib: laib, T: T, fd: fd, pfB: pfB, tuer: tuer, art: art, n: n, pf: pf, sf: sf, mul: mul, innerW: innerW, innerH: innerH, olH: olH, ulH: ulH, sashH: sashH, sashW: sashW, haveMo: haveMo, haveEl: !!(d.elW && d.elH),
-    x0: -elW / 2, y0: moH / 2 - elH, wallW: moW + W3D.MARGIN_W, wallH: moH + W3D.MARGIN_H, showEl: o.showEl !== false, dims: o.dims || [], active: o.active || '' };
+    x0: -elW / 2, y0: moH / 2 - elH, wallW: moW + W3D.MARGIN_W / Math.sqrt(zoom), wallH: moH + W3D.MARGIN_H / Math.sqrt(zoom), zoom: zoom, showEl: o.showEl !== false, dims: o.dims || [], active: o.active || '' };
 }
 const px = (v) => (Math.round(v * 100) / 100) + 'px';
 const hole = (W, H, x1, y1, x2, y2) => 'polygon(evenodd, 0 0, ' + px(W) + ' 0, ' + px(W) + ' ' + px(H) + ', 0 ' + px(H) + ', 0 0, ' + px(x1) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y1) + ', ' + px(x2) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y2) + ', ' + px(x1) + ' ' + px(y1) + ')';
@@ -768,12 +775,13 @@ const IFARBE = { weiss: ['#f4f2ec', '#d4d1c8', '#ffffff'], creme: ['#e8dcc4', '#
 const sonneFarbe = (k) => SFARBE[k] || SFARBE.silber, innenFarbe = (k) => IFARBE[k] || IFARBE.weiss;
 const sonneAktiv = (w) => (w.sart === 'rollladen' || w.sart === 'raffstore' || w.sart === 'screen') && (w.roll === 'aufsatz' || w.roll === 'vorbau');
 const innenAktiv = (w) => !!w.iart && w.iart !== 'keiner';
-/* Behang außen: Rollladenpanzer (Lamellen 40 mm), Raffstore (gekantete Lamellen 80 mm), Screen (Gewebe, durchscheinend) */
+/* Behang außen als eine Fläche: Rollladenpanzer (Lamellen 40 mm), Screen (Gewebe, durchscheinend); der Raffstore hat einzelne Lamellen (w3dSonne) */
 function behangBg(w, s) {
   const c = sonneFarbeW(w), F = c[0], D = c[1], L = c[2];
-  if (w.sart === 'raffstore') return 'repeating-linear-gradient(180deg, ' + D + ' 0 ' + px(14 * s) + ', ' + F + ' ' + px(14 * s) + ' ' + px(50 * s) + ', ' + L + ' ' + px(50 * s) + ' ' + px(62 * s) + ', ' + F + ' ' + px(62 * s) + ' ' + px(80 * s) + ')';
   if (w.sart === 'screen') return 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), repeating-linear-gradient(180deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), ' + F;
-  return 'repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(2 * s + 0.6) + ', ' + F + ' ' + px(2 * s + 0.6) + ' ' + px(34 * s) + ', ' + D + ' ' + px(34 * s) + ' ' + px(40 * s) + ')';
+  /* Rollladenpanzer: Lamellen mit Lichtschlitzen (kleine dunkle Schlitze in der Fuge, alle 90 mm) */
+  const p40 = px(40 * s), schlitz = Math.max(0.5, 2.4 * s);
+  return 'radial-gradient(ellipse ' + px(Math.max(1.2, 8 * s)) + ' ' + px(schlitz) + ' at 50% ' + px(37 * s) + ', rgba(16, 16, 16, .4) 70%, transparent 100%) 0 0 / ' + px(90 * s) + ' ' + p40 + ', repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(2 * s + 0.6) + ', ' + F + ' ' + px(2 * s + 0.6) + ' ' + px(34 * s) + ', ' + D + ' ' + px(34 * s) + ' ' + p40 + ')';
 }
 /* Innen: Rollo (Stoff), Plissee (Falten 20 mm), Jalousie (Lamellen 25 mm mit Lichtspalt) */
 function innenBg(w, s) {
@@ -813,6 +821,8 @@ function w3dHTML(w, o) {
   h += faceEl('fuge', 'w3d-fuge'); // Einbaufuge rundum, sonst sieht man zwischen Rahmen und Laibung ins Leere
   if (!G) ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('el-side-' + k, 'w3d-frame w3d-side', ' style="background-color: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
   if (w.ol) h += faceEl('ol-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('ol-glass', 'w3d-glass') + faceEl('ol-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"') + faceEl('kf', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('kfb', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
+  /* Kippbares Oberlicht: Oberlichtöffner auf dem Blendrahmen (Stange und Hebel in Griffhöhe) */
+  if (w.ol) h += faceEl('olr', 'w3d-olr') + faceEl('olh', 'w3d-olh');
   /* Unterlicht: festes Feld unter den Flügeln, Glas oder Paneel, darüber der Kämpfer */
   if (V.ulH) h += faceEl('ul-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('ul-glass', 'w3d-glass w3d-ul') + faceEl('ul-pan-b', 'w3d-paneel w3d-back') + faceEl('ul-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"') + faceEl('kfu', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('kfub', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
   /* Schwelle: das untere Profil der Tür, Aluminium, mit Trittfläche */
@@ -827,18 +837,28 @@ function w3dHTML(w, o) {
     for (let k = 0; k < 8; k++) h += '<span class="w3d-f w3d-pilz" data-r="pz-' + i + '-' + k + '" style="--i: ' + k + '"></span>';
     h += faceEl('sf-out-' + i, 'w3d-frame w3d-sf w3d-back', ' style="background: ' + fout.bg + '"');
     ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('sfe-' + k + '-' + i, 'w3d-frame w3d-side w3d-sfe', ' style="background-color: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
-    h += '<div class="w3d-handle" data-r="handle-' + i + '" style="background: ' + hcol + '"></div>';
-    /* Balkontür: Griff außen (Ziehgriff mit Schnäpper oder abschließbar) auf der Außenseite des Gehflügels */
-    if (w.art === 'balkon') h += '<div class="w3d-griffa" data-r="ga-' + i + '" style="background: ' + hcol + '"></div>';
+    h += '<div class="w3d-f w3d-ros" data-r="hros-' + i + '" style="background: ' + hcol + '"></div><div class="w3d-handle" data-r="handle-' + i + '" style="background: ' + hcol + '"></div>';
+    /* Türen: Griff außen (Balkontür: Ziehgriff mit Schnäpper oder abschließbar; Schiebe- und Falttüren: Schließzylinder) auf der Außenseite */
+    if (V.tuer) h += '<div class="w3d-griffa" data-r="ga-' + i + '" style="background: ' + hcol + '"></div>';
     h += '<div class="w3d-selring" data-r="ring-' + i + '"></div>';
     h += '</div>';
   });
   h += '</div>';
-  if (w.roll === 'vorbau' || w.roll === 'aufsatz') h += faceEl('roll-f', 'w3d-roll') + faceEl('roll-b', 'w3d-roll w3d-roll-b') + faceEl('roll-t', 'w3d-roll w3d-roll-t') + faceEl('roll-l', 'w3d-roll w3d-roll-s') + faceEl('roll-r', 'w3d-roll w3d-roll-s');
-  /* Sonnenschutz außen: Behang halb herabgelassen, Endleiste unten; innen: Rollo, Plissee oder Jalousie vor dem Glas */
-  if (sonneAktiv(w)) h += faceEl('behang', 'w3d-behang') + faceEl('behang-u', 'w3d-behang-u');
+  /* Kasten bzw. Blende: Vorbau vor der Fassade (mit Schräge unten), Aufsatz in der Öffnung oben (außen überputzt, nur der Auslaufschlitz) */
+  if (w.roll === 'vorbau' || w.roll === 'aufsatz') h += faceEl('roll-f', 'w3d-roll') + faceEl('roll-sl', 'w3d-roll w3d-roll-sl') + faceEl('roll-b', 'w3d-roll w3d-roll-b') + faceEl('roll-t', 'w3d-roll w3d-roll-t') + faceEl('roll-l', 'w3d-roll w3d-roll-s') + faceEl('roll-r', 'w3d-roll w3d-roll-s');
+  /* Sonnenschutz außen: Führungsschienen links und rechts (Stirn und Innenseite), Behang mit Endleiste. Raffstore aus einzelnen
+     Lamellen mit Aufzugbändern, die sich unten auf der Endschiene zum Paket sammeln; Rollladen als Panzer mit Lichtschlitzen,
+     Screen als Gewebe mit Fallstab in ZIP-Schienen. Innen: Rollo, Plissee oder Jalousie vor dem Glas */
+  if (sonneAktiv(w)) {
+    h += faceEl('fs-l', 'w3d-fs') + faceEl('fs-l2', 'w3d-fs w3d-fs-s') + faceEl('fs-r', 'w3d-fs') + faceEl('fs-r2', 'w3d-fs w3d-fs-s');
+    if (w.sart === 'raffstore') { for (let k = 0; k < LAM_MAX; k++) h += '<div class="w3d-f w3d-lam" data-r="lam-' + k + '" style="--k: ' + k + '"></div>'; h += faceEl('band-l', 'w3d-band') + faceEl('band-r', 'w3d-band'); }
+    else h += faceEl('behang', 'w3d-behang' + (w.sart === 'screen' ? ' w3d-screen' : ''));
+    h += faceEl('behang-u', 'w3d-behang-u' + (w.sart === 'rollladen' ? ' mit-stopfen' : '')) + faceEl('behang-ub', 'w3d-behang-u w3d-behang-ub');
+  }
   if (innenAktiv(w)) h += faceEl('innen-k', 'w3d-innen-k') + faceEl('innen', 'w3d-innen') + faceEl('innen-u', 'w3d-innen-u');
   if (w.insekt && w.insekt !== 'keiner') h += faceEl('mesh', 'w3d-mesh');
+  /* Bedienung innen neben der Öffnung: Gurtwickler mit Gurtband, Kurbelstange, Wandtaster (w3dAntrieb) */
+  if (sonneAktiv(w) || w.art === 'hst') h += faceEl('an-gurt', 'w3d-an w3d-an-gurt') + faceEl('an-wickler', 'w3d-an w3d-an-wickler') + faceEl('an-stange', 'w3d-an w3d-an-stange') + faceEl('an-kurbel', 'w3d-an w3d-an-kurbel') + faceEl('an-taster', 'w3d-an w3d-an-taster');
   (V.dims || []).forEach((k) => { h += dimHTML(k, V.active === k); });
   h += '</div></div></div>';
   h += '<span class="w3d-hint" data-r="hint"' + (o.hint ? '' : ' hidden') + '>' + esc(o.hint || '') + '</span>';
@@ -888,7 +908,7 @@ function glasLupe(w) {
 const glasLupeKey = (w) => [w.glas, (w.glasfn || []).join(','), w.rc].join('|');
 const glasText = (w) => (w.glas === '2' ? '2 Scheiben · Ug ≈ 1,1' : '3 Scheiben · Ug ≈ 0,5 bis 0,7');
 /* Struktur-Signatur: solange sie gleich bleibt, wird die Bühne weiterverwendet und alles morpht mit Übergängen */
-function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? 1 : 0, innenAktiv(w) ? 1 : 0].join('|'); }
+function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? w.sart : 0, innenAktiv(w) ? 1 : 0].join('|'); }
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
   /* Nur schreiben, was sich geändert hat (der Vergleich mit dem gelesenen Stil schlägt bei Verläufen immer fehl) */
@@ -896,7 +916,8 @@ function w3dPaint(stage, w) {
   const fin = rahmenFarbe(w, 'innen'), fout = rahmenFarbe(w, 'aussen'), hcol = griffFarbe(w).bg;
   stage.classList.toggle('glas-sonne', w.glasfn.indexOf('sonne') >= 0); stage.classList.toggle('glas-sicht', w.glasfn.indexOf('sicht') >= 0);
   stage.style.setProperty('--orn', (ORN.find((o) => o.k === w.orn) || ORN[0]).bg); stage.setAttribute('data-scheiben', w.glas === '2' ? '2' : '3');
-  stage.classList.toggle('mit-schloss', w.rc === 'rc2' || w.griff === 'abschliessbar');
+  stage.classList.toggle('mit-schloss', w.rc === 'rc2' || w.griff === 'abschliessbar'); stage.classList.toggle('mit-knopf', w.griff === 'druckknopf');
+  stage.classList.toggle('ohne-griff', w.griff === 'ohne' || (w.griff === 'motor' && w.art === 'hst'));
   const bi = bank(w.fbi, 'innen'), ba = bank(w.fba, 'aussen');
   bg('wall-out', facadeBg(w.fassade)); bg('sill-t', bi.oben); bg('sill-f', bi.stirn); bg('sill-l', bi.stirn); bg('sill-r', bi.stirn); bg('sa-t1', ba.oben); bg('sa-t2', ba.oben); bg('sa-f', ba.stirn);
   bg('el-front', fin.bg); bg('el-back', fout.bg); bgc('el-side-l', fout.solid); bgc('el-side-r', fout.solid); bgc('el-side-t', fin.solid); bgc('el-side-b', fin.solid);
@@ -905,10 +926,17 @@ function w3dPaint(stage, w) {
   const paneel = w.ul && w.ulA === 'paneel', ug = q('ul-glass'), upb = q('ul-pan-b');
   if (ug) { ug.classList.toggle('w3d-glass', !paneel); ug.classList.toggle('w3d-paneel', paneel); ug.style.background = paneel ? fin.solid : ''; }
   if (upb) { upb.style.background = fout.solid; upb.style.opacity = paneel ? '' : '0'; }
-  if (sonneAktiv(w)) { const c = sonneFarbeW(w); bg('roll-f', 'linear-gradient(180deg, ' + c[2] + ', ' + c[0] + ' 30%, ' + c[1] + ')'); bg('roll-b', c[1]); bg('roll-t', c[2]); bg('roll-l', c[0]); bg('roll-r', c[0]); }
-  else { bg('roll-f', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
+  if (sonneAktiv(w)) {
+    /* Vorbau: Rollladenkasten mit gerundeter Front (Verlauf), Raffstore und Screen mit gerader Blende; Aufsatz: außen überputzt */
+    const c = sonneFarbeW(w), F = c[0], D = c[1], L = c[2];
+    if (w.roll === 'aufsatz') { bg('roll-f', facadeBg(w.fassade)); bg('roll-sl', 'transparent'); bg('roll-t', 'transparent'); bg('roll-l', 'transparent'); bg('roll-r', 'transparent'); }
+    else { bg('roll-f', w.sart === 'rollladen' ? 'linear-gradient(180deg, ' + L + ', ' + F + ' 34%, ' + D + ')' : 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 12% 86%, ' + D + ')'); bg('roll-sl', 'linear-gradient(180deg, ' + F + ', ' + D + ')'); bg('roll-b', D); bg('roll-t', L); bg('roll-l', F); bg('roll-r', F); }
+    ['fs-l', 'fs-r'].forEach((r) => bg(r, 'linear-gradient(90deg, ' + L + ', ' + F + ' 38%, ' + D + ')')); bg('fs-l2', D); bg('fs-r2', D);
+    bg('behang-u', 'linear-gradient(180deg, ' + L + ', ' + F + ' 45%, ' + D + ')'); bg('behang-ub', D);
+  }
+  else { bg('roll-f', ''); bg('roll-sl', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
-    bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol); bg('ga-' + i, hcol);
+    bg('mul-' + i, fin.bg); bg('mulb-' + i, fout.bg); bg('sf-in-' + i, fin.bg); bg('sf-out-' + i, fout.bg); bg('handle-' + i, hcol); bg('hros-' + i, hcol); bg('ga-' + i, hcol);
     bgc('sfe-l-' + i, fout.solid); bgc('sfe-r-' + i, fout.solid); bgc('sfe-t-' + i, fin.solid); bgc('sfe-b-' + i, fin.solid);
     const sash = q('sash-' + i); if (sash) { sash.classList.toggle('is-fixed', x.t === 'F' || x.t === 'X'); sash.classList.toggle('is-schiebe', x.t === 'S'); sash.setAttribute('data-t', x.t); sash.setAttribute('data-din', x.din); sash.style.setProperty('--sdir', x.din === 'L' ? '1' : '-1'); }
     const sv = q('sym-' + i); if (sv) { const p = symPaths(w, x); if (sv.getAttribute('data-k') !== x.t + x.din + w.richtung) { sv.innerHTML = p; sv.setAttribute('data-k', x.t + x.din + w.richtung); } }
@@ -935,7 +963,13 @@ function w3dApply(stage, w, o) {
   stage.querySelectorAll('.w3d-sash').forEach((sa) => { sa.classList.toggle('is-sel', !!o.selectable && +sa.getAttribute('data-sash') === o.selSash); });
   stage.querySelectorAll('.w3d-bar').forEach((b) => { b.classList.toggle('is-edit', !!o.editBars); b.classList.toggle('is-sel', !!o.editBars && b.getAttribute('data-bar') === o.selBar); });
   ensureDims(stage, o); w3dPaint(stage, w);
+  /* Zoom: neuer Bildschirm bzw. neue Frage setzt auf 1:1 zurück (bei Griff und Einbruchschutz fährt die Kamera danach hin) */
+  const zm = w3dZoomZustand(stage), zkey = o.zkey == null ? '' : o.zkey; let fokus = false;
+  if (zm.key !== zkey) { if (zm.z > 1.001 && !stage.classList.contains('no-anim')) w3dZoomAnim(stage, true); zm.key = zkey; zm.z = 1; zm.x = 0; zm.y = 0; fokus = !!o.fokus; }
+  if (o.rails || o.noZoom) { zm.z = 1; zm.x = 0; zm.y = 0; }
   const V = w3dLayout(stage, w, o, gr); layoutRails(stage, w, o, gr); stage._s = V ? V.s : 0.15;
+  w3dZoomKnoepfe(stage, o); w3dSonneKnoepfe(stage, w, o); w3dZoomZeigen(stage);
+  if (fokus) { clearTimeout(stage._fk); stage._fk = setTimeout(() => { const r = W3DS[stage.id]; if (r && r.o.zkey === zkey) w3dFokus(stage, r.w, r.o); }, ruhig() ? 0 : 420); }
   /* Solange sich die Geometrie verwandelt, steht das sanfte Schwingen still: eine Bewegung zur Zeit */
   const geo = V ? [V.moW, V.moH, V.elW, V.elH, V.olH, V.ulH, V.n, w.form, w.art].join('|') : '';
   if (stage._geo && stage._geo !== geo) { stage.classList.add('is-busy'); clearTimeout(stage._busy); stage._busy = setTimeout(() => stage.classList.remove('is-busy'), 820); }
@@ -949,7 +983,7 @@ function w3dApply(stage, w, o) {
 function w3dLayout(stage, w, o, gr) {
   if (!stage) return null;
   o = o || {};
-  const V = w3dCalc(w, Object.assign({}, o, { stageW: gr ? gr[0] : stage.clientWidth || 358, stageH: gr ? gr[1] : stage.clientHeight || 360 })), s = V.s;
+  const V = w3dCalc(w, Object.assign({}, o, { stageW: gr ? gr[0] : stage.clientWidth || 358, stageH: gr ? gr[1] : stage.clientHeight || 360, zoom: w3dZ(stage, o) })), s = V.s;
   const q = (r) => stage.querySelector('[data-r="' + r + '"]'), G = stage.getAttribute('data-struct') === 'g', form = G ? (w.form || 'rechteck') : 'rechteck';
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, sd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s, tuer = V.tuer;
   const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
@@ -1026,6 +1060,9 @@ function w3dLayout(stage, w, o, gr) {
     /* Kämpfer: der Riegel zwischen Oberlicht und Flügeln (fehlte bisher, man sah durch einen Spalt) */
     face(q('kf'), iw, mul, ix, iy + olH, z0, '', '0 0');
     face(q('kfb'), iw, mul, ix, iy + olH, z0 - fd, 'rotateY(180deg)', '50% 50%');
+    const olr = q('olr'), olh = q('olh'), kipp = w.olT === 'K', rb = Math.max(1.5, 12 * s), lw = Math.max(3, 22 * s), lh = Math.max(10, 110 * s), xr = x0 + elW - pf / 2, y1 = iy + olH * 0.5, y2 = sashTop + V.sashH * s * 0.45;
+    face(olr, rb, Math.max(0, y2 - y1), xr - rb / 2, y1, z0 + 2, '', '0 0'); face(olh, lw, lh, xr - lw / 2, y2 - lw / 2, z0 + 4, '', '0 0');
+    if (olr) olr.style.opacity = kipp ? '' : '0'; if (olh) olh.style.opacity = kipp ? '' : '0';
   }
   /* Unterlicht unter den Flügeln: Kämpfer, dann das feste Feld mit Glasleiste oder als Paneel */
   const ulH = V.ulH * s;
@@ -1044,6 +1081,7 @@ function w3dLayout(stage, w, o, gr) {
     face(q('mul-' + i), mul, sashH, mx, sashTop, z0, '', '0 0', c ? polyClip(c, mx, sashTop, mul, sashH) : null);
     face(q('mulb-' + i), mul, sashH, mx, sashTop, z0 - fd, 'rotateY(180deg)', '50% 50%', c ? polyClip(c, mx, sashTop, mul, sashH, mul) : null);
   }
+  const griffe = [];
   w.sashes.forEach((x, i) => {
     /* Hebe-Schiebe-Tür: das Festteil sitzt in der äußeren Laufebene mit eigenem Profil, der Schiebeflügel innen davor */
     const sash = q('sash-' + i), fixed = x.t === 'F', hstFest = fixed && V.art === 'hst', ssf = hstFest ? sf * 0.75 : fixed ? 3 : sf, left = ix + i * (sashW + mul), zS = hstFest ? -(fd - sd) : 0;
@@ -1092,70 +1130,188 @@ function w3dLayout(stage, w, o, gr) {
       if (G) { ring.classList.add('is-form'); ring.innerHTML = '<svg viewBox="0 0 ' + n1(sashW) + ' ' + n1(sashH) + '" preserveAspectRatio="none" aria-hidden="true"><polygon points="' + aus.map((p) => n1(p[0] - left) + ',' + n1(p[1] - sashTop)).join(' ') + '"></polygon></svg>'; }
       else if (ring.classList.contains('is-form')) { ring.classList.remove('is-form'); ring.innerHTML = ''; }
     }
-    /* Griff: der Drehpunkt sitzt auf halber Höhe, der Hebel hängt nach unten; bei Formen innerhalb der Glasfläche */
-    const hd = q('handle-' + i);
+    /* Griff: Rosette fest auf dem Flügelprofil, der Hebel dreht um die Achse in ihrer Mitte (so dreht er in der Vorführung sichtbar).
+       Seitlich auf der Mitte des Flügelprofils gegenüber den Bändern. Höhe (w3dGriffAchse): am Fenster mittig im geraden Teil des
+       Profils, an Türen und bodentiefen Fenstern etwa 1.050 mm über dem Fußboden; das Getriebe (etwa ± 250 mm um die Achse) liegt
+       immer im geraden Profil, nie im Bogen oder in der Schräge. Stulp: nur der Gehflügel hat einen Griff. */
+    const hd = q('handle-' + i), ro = q('hros-' + i), gl = w3dGriffLage(V, w, x, i, s, { G: G, gI: gI, left: left, sashTop: sashTop, sashW: sashW, sashH: sashH, sf: sf });
+    if (sash) { sash.classList.toggle('is-steh', gl.steh); sash.classList.toggle('mit-griff', gl.bedien); }
     if (hd) {
-      const hl = 135 * s, hw = Math.max(5, 22 * s);
+      hd.style.width = px(gl.lw); hd.style.height = px(gl.lh); hd.style.transformOrigin = gl.origin; hd.style.setProperty('--hw', px(Math.min(gl.lw, gl.lh)));
+      hd.style.translate = px(gl.lx) + ' ' + px(gl.ly) + ' 6px';
       hd.style.transform = 'none';
-      if (x.t === 'S') {
-        /* Hebegriff: lang, auf der Schließseite, Mitte etwa 1.050 mm über dem Boden */
-        const hhl = 320 * s, hhw = Math.max(6, 30 * s), hx = x.din === 'L' ? sf / 2 - hhw / 2 : sashW - sf / 2 - hhw / 2, ym = Math.max(hhl, Math.min(sashH - 180 * s, sashH - 1050 * s + hhl / 2));
-        hd.style.width = px(hhw); hd.style.height = px(hhl); hd.style.transformOrigin = '50% 50%';
-        hd.style.translate = px(hx) + ' ' + px(ym - hhl) + ' 6px';
-      } else if (x.t === 'PS') {
-        /* PSK: Griff wie am Fenster, auf der Schließseite, etwa 1.050 mm über dem Boden */
-        const hx = x.din === 'L' ? sf / 2 - hw / 2 : sashW - sf / 2 - hw / 2, ym = Math.max(hw, Math.min(sashH - hl - sf, sashH - 1050 * s));
-        hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transformOrigin = '50% ' + px(hw / 2);
-        hd.style.translate = px(hx) + ' ' + px(ym - hw / 2) + ' 5px';
-      } else if (x.t === 'K') {
-        const yt = G ? Math.max(0, gI.top(left + sashW / 2) - sashTop) : 0;
-        hd.style.width = px(hl); hd.style.height = px(hw); hd.style.transformOrigin = '50% 50%';
-        hd.style.translate = px(sashW / 2 - hl / 2) + ' ' + px(yt + Math.max(2, sf / 2 - hw / 2)) + ' 5px';
-      } else {
-        const hx = x.din === 'L' ? sashW - sf / 2 - hw / 2 : sf / 2 - hw / 2, xw = left + hx + hw / 2;
-        const yt = G ? Math.max(0, gI.top(xw) - sashTop) : 0, yb = G ? Math.min(sashH, gI.bot(xw) - sashTop) : sashH;
-        const ym = Math.max(yt + hw, Math.min(sashH / 2, yb - hl - sf / 2));
-        hd.style.width = px(hw); hd.style.height = px(hl); hd.style.transformOrigin = '50% ' + px(hw / 2);
-        hd.style.translate = px(hx) + ' ' + px(ym - hw / 2) + ' 5px';
-      }
     }
-    /* Griff außen der Balkontür: am Gehflügel, auf der Griffseite, außen vor dem Flügelrahmen */
+    face(ro, gl.rw, gl.rh, gl.ax - gl.rw / 2, gl.ay - gl.rh / 2, 3.5, '', '50% 50%');
+    if (ro) ro.style.borderRadius = px(Math.min(gl.rw, gl.rh) * 0.3);
+    griffe[i] = gl.sichtbar ? [left + gl.ax, sashTop + gl.ay, z0 + 6] : null;
+    /* Griff außen: Balkontür nach Wahl (Ziehgriff mit Schnäpper oder abschließbar), bei Hebe-Schiebe-, PSK- und Faltschiebetür nur
+       abschließbar (Schließzylinder auf der Außenseite des bedienten Flügels); auf derselben Höhe wie der Griff innen */
     const ga = q('ga-' + i);
     if (ga) {
-      const cfg = w.bt || {}, an = w.art === 'balkon' && i === gehFluegel(w) && cfg.griffA && cfg.griffA !== 'keiner', zg = cfg.griffA === 'ziehgriff';
-      const gw2 = Math.max(4, (zg ? 26 : 22) * s), gh2 = (zg ? 300 : 140) * s, hx2 = x.din === 'L' ? sashW - sf / 2 - gw2 / 2 : sf / 2 - gw2 / 2, ym2 = Math.max(0, Math.min(sashH - gh2, sashH - 1050 * s - gh2 / 2));
-      ga.style.width = px(gw2); ga.style.height = px(gh2); ga.style.transform = 'translate3d(' + px(hx2) + ', ' + px(ym2) + ', ' + px(-sd - 5) + ')'; ga.style.opacity = an ? '1' : '0';
+      const cfg = w.bt || {}, balkon = w.art === 'balkon', zg = balkon && cfg.griffA === 'ziehgriff';
+      const an = gl.sichtbar && (balkon ? i === gehFluegel(w) && !!cfg.griffA && cfg.griffA !== 'keiner' : w.griff === 'abschliessbar' && (x.t === 'S' || x.t === 'PS' || x.t === 'P' || gl.bedien));
+      const gw2 = Math.max(4, (zg ? 26 : 34) * s), gh2 = Math.max(12, (zg ? 300 : 150) * s), ym2 = clamp(gl.ay - gh2 / 2, 0, Math.max(0, sashH - gh2));
+      ga.style.width = px(gw2); ga.style.height = px(gh2); ga.style.transform = 'translate3d(' + px(gl.ax - gw2 / 2) + ', ' + px(ym2) + ', ' + px(-sd - 5) + ')'; ga.style.opacity = an ? '1' : '0';
+      ga.classList.toggle('is-schloss', !zg);
     }
     w.bars.filter((b) => b.s === i).forEach((b) => { w3dBarPos(q('bar-' + b.id), b, Math.max(2, w.breite * s)); });
   });
-  if (q('roll-f')) { const rh = 180 * s, rz = w.roll === 'vorbau' ? -T - 140 * s : -T, bw = moW + 80 * s, bx = -moW / 2 - 40 * s, by = -moH / 2 - rh, dp = -rz - T + 1; face(q('roll-f'), bw, rh, bx, by, rz, 'rotateY(180deg)', '50% 50%'); face(q('roll-b'), bw, dp, bx, -moH / 2, -T, 'rotateX(-90deg)', '0 0'); face(q('roll-t'), bw, dp, bx, by, -T, 'rotateX(-90deg)', '0 0'); face(q('roll-l'), dp, rh, bx, by, -T, 'rotateY(90deg)', '0 0'); face(q('roll-r'), dp, rh, bx + bw, by, -T, 'rotateY(90deg)', '0 0'); }
+  stage._griffe = griffe;
   if (q('mesh')) face(q('mesh'), iw, ih, ix, iy, z0 - fd - 6 * s, '', '0 0', G ? polyClip(gI.pts, ix, iy, iw, ih) : null);
-  /* Sonnenschutz außen: Behang zu 42 % herabgelassen, in der Ebene vor dem Rahmen (Aufsatz) bzw. vor der Fassade (Vorbau) */
-  const bh = q('behang');
-  if (bh) {
-    const zb = w.roll === 'vorbau' ? -T - 70 * s : -T + 2, bwB = moW + 20 * s, bxB = -moW / 2 - 10 * s, hB = moH * 0.42, uH = Math.max(3, 36 * s), c = sonneFarbeW(w);
-    face(bh, bwB, hB, bxB, -moH / 2, zb, '', '0 0'); bh.style.background = behangBg(w, s); bh.style.opacity = w.sart === 'screen' ? '.86' : '';
-    face(q('behang-u'), bwB, uH, bxB, -moH / 2 + hB, zb + 0.4, '', '0 0'); const bu = q('behang-u'); if (bu) bu.style.background = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')';
-  }
-  /* Sichtschutz innen: Kassette oben, Behang zu 38 % herab, Endleiste; vor dem Rahmen auf der Raumseite */
+  w3dSonne(stage, w, o, V, s, q); w3dAntrieb(w, V, s, q);
+  /* Sichtschutz innen: Kassette oben, Behang nach dem Stand der Knöpfe herab, Endleiste; vor dem Rahmen auf der Raumseite */
   const inn = q('innen');
   if (inn) {
-    const zi = z0 + 24 * s, bwI2 = iw + 12 * s, bxI2 = ix - 6 * s, kH = Math.max(3, (w.iart === 'rollo' ? 58 : 36) * s), hI = ih * 0.38, c = innenFarbeW(w);
+    const zi = z0 + 24 * s, bwI2 = iw + 12 * s, bxI2 = ix - 6 * s, kH = Math.max(3, (w.iart === 'rollo' ? 58 : 36) * s), hI = ih * clamp(+(o.behang || W3D_BEHANG).stand || 0, 0.03, 1), c = innenFarbeW(w);
     face(q('innen-k'), bwI2, kH, bxI2, iy - kH, zi, '', '0 0'); const ik = q('innen-k'); if (ik) ik.style.background = 'linear-gradient(180deg, ' + c[2] + ', ' + c[1] + ')';
     face(inn, bwI2, hI, bxI2, iy, zi - 0.4, '', '0 0'); inn.style.background = innenBg(w, s); inn.style.boxShadow = w.iart === 'jalousie' ? 'none' : '';
     face(q('innen-u'), bwI2, Math.max(2, 14 * s), bxI2, iy + hI, zi, '', '0 0'); const iu = q('innen-u'); if (iu) iu.style.background = c[1];
   }
-  /* Maßlinien in der Wandebene (Öffnung) oder Fensterebene (Element) */
+  /* Maßlinien in der Wandebene (Öffnung) oder Fensterebene (Element). Beim Messen liegen sie dort, wo gemessen wird (links, Mitte,
+     rechts). In der Übersicht (dims-all, nichts aktiv) gilt: gleiche Maße nur einmal, die Maueröffnung außerhalb der Öffnung
+     (Höhe links, Breite oben, Schild nach außen), das Element innen; so überdecken sich die Schilder nicht. */
   const DIM = { hm: ['v', 0, -moH / 2, moH, 4, 24], hl: ['v', -moW / 2 + 40 * s, -moH / 2, moH, 4, 78], hr: ['v', moW / 2 - 40 * s, -moH / 2, moH, 4, 78], wm: ['h', -moW / 2, 0, moW, 4, 22], wt: ['h', -moW / 2, -moH / 2 + 40 * s, moW, 4, 76], wb: ['h', -moW / 2, moH / 2 - 40 * s, moW, 4, 24], eh: ['v', x0 + elW * 0.72, y0, elH, z0 + 6, 58], ew: ['h', x0, y0 + elH * 0.4, elW, z0 + 6, 76] };
+  const uebersicht = !V.active && !!(o.cls && o.cls.indexOf('dims-all') >= 0), weg = {}, an = {};
+  if (uebersicht) {
+    const L = o.labels || {}, da = (ks) => ks.filter((k) => (V.dims || []).indexOf(k) >= 0), off = Math.max(10, 60 * s), unten = moH / 2 + off + (tuer ? 0 : 30 * s);
+    const hs = da(['hm', 'hl', 'hr']), ws = da(['wm', 'wt', 'wb']), gleich = (ks) => ks.every((k) => L[k] === L[ks[0]]);
+    if (hs.length && (hs.length === 1 || gleich(hs))) { hs.slice(1).forEach((k) => { weg[k] = 1; }); DIM[hs[0]] = ['v', -moW / 2 - off, -moH / 2, moH, 4, 50]; an[hs[0]] = 'l'; }
+    else { if (DIM.hl) { DIM.hl = ['v', -moW / 2 - off, -moH / 2, moH, 4, 50]; an.hl = 'l'; } if (DIM.hr) { DIM.hr = ['v', moW / 2 + off, -moH / 2, moH, 4, 50]; an.hr = 'r'; } }
+    if (ws.length && (ws.length === 1 || gleich(ws))) { ws.slice(1).forEach((k) => { weg[k] = 1; }); DIM[ws[0]] = ['h', -moW / 2, -moH / 2 - off, moW, 4, 50]; an[ws[0]] = 'o'; }
+    else { DIM.wt = ['h', -moW / 2, -moH / 2 - off, moW, 4, 50]; an.wt = 'o'; DIM.wb = ['h', -moW / 2, unten, moW, 4, 76]; an.wb = 'u'; }
+    DIM.eh = ['v', x0 + elW * 0.76, y0, elH, z0 + 6, 34]; DIM.ew = ['h', x0, y0 + elH * 0.8, elW, z0 + 6, 50];
+  }
   (V.dims || []).forEach((k) => {
     const D = DIM[k], de = q('dim-' + k); if (!D || !de) return;
     const vert = D[0] === 'v';
     de.style.width = px(vert ? 0 : D[3]); de.style.height = px(vert ? D[3] : 0);
     de.style.transform = 'translate3d(' + px(D[1]) + ', ' + px(D[2]) + ', ' + px(D[4]) + ')';
-    de.classList.toggle('v', vert); de.classList.toggle('h', !vert);
+    de.classList.toggle('v', vert); de.classList.toggle('h', !vert); de.classList.toggle('is-weg', !!weg[k]);
+    ['l', 'r', 'o', 'u'].forEach((a) => de.classList.toggle('an-' + a, an[k] === a));
     const lab = q('lab-' + k); if (lab) { lab.textContent = (o.labels && o.labels[k]) || '?'; if (vert) { lab.style.top = D[5] + '%'; lab.style.left = '0'; } else { lab.style.left = D[5] + '%'; lab.style.top = '0'; } }
   });
   return V;
+}
+/* Sonnenschutz außen. Stand des Behangs (0 = oben im Kasten, 1 = ganz unten) und Lamellenstellung (wend 0 = offen, 1 = zu) stellen
+   die Knöpfe am Modell; sie gelten nur für die Ansicht und werden nicht gespeichert.
+   Vorbau: Kasten bzw. Blende vor der Fassade, Schienen auf der Fassade neben der Öffnung, Behang davor bis auf die Außenbank.
+   Aufsatz: Kasten in der Öffnung oben, außen überputzt mit Auslaufschlitz; Schienen und Behang in der Laibung vor dem Rahmen.
+   Raffstore: Lamellen (80 mm, C-Profil, Abstand 72 mm, 8 mm Überlappung) an zwei Aufzugbändern; beim Hochfahren sammeln sie sich
+   flach auf der Endschiene und fahren mit ihr als Paket unter die Blende. */
+const LAM_MAX = 44;
+const W3D_BEHANG = { stand: 0.55, wend: 0 };
+function w3dSonne(stage, w, o, V, s, q) {
+  const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, z0 = -d, auf = w.roll === 'aufsatz';
+  const raff = w.sart === 'raffstore', screen = w.sart === 'screen', st = o.behang || W3D_BEHANG, stand = clamp(+st.stand || 0, 0, 1);
+  const c = sonneFarbeW(w), F = c[0], D = c[1], L = c[2], aus = (el) => { if (el) { el._k = ''; el.style.opacity = '0'; el.style.width = '0px'; el.style.height = '0px'; } };
+  const kH = (auf ? 200 : raff ? 150 : screen ? 130 : 180) * s, rail = raff ? [26, 30] : screen ? [30, 40] : [22, 40], rw = Math.max(2, rail[0] * s), rd = rail[1] * s;
+  /* Kasten */
+  if (q('roll-f')) {
+    ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => { const e = q(r); if (e) e.style.opacity = ''; });
+    if (auf) {
+      const dz = Math.max(1, T - d - fd), yb = -moH / 2 + kH, schlitz = (Math.max(3, 16 * rd / 26) + 3 * s) / dz * 100, mitte = (3 * s + rd / 2) / dz * 100;
+      face(q('roll-f'), moW, kH, -moW / 2, -moH / 2, -T + 0.5, 'rotateY(180deg)', '50% 50%'); q('roll-f').style.backfaceVisibility = 'hidden';
+      face(q('roll-b'), moW, dz, -moW / 2, yb, z0 - fd, 'rotateX(-90deg)', '0 0');
+      const rb = q('roll-b'), rbg = 'linear-gradient(180deg, #9a9083 0 ' + n1(mitte - schlitz / 2) + '%, #232426 ' + n1(mitte - schlitz / 2) + '% ' + n1(mitte + schlitz / 2) + '%, #a49a8d ' + n1(mitte + schlitz / 2) + '%)';
+      if (rb._bg !== rbg) { rb._bg = rbg; rb.style.background = rbg; }
+      ['roll-sl', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => aus(q(r)));
+    } else {
+      const kD = rd + 110 * s, bev = raff ? 0 : Math.min(kH * 0.3, 44 * s), bw = moW + 2 * (rw + 40 * s), bx = -bw / 2, by = -moH / 2 - kH;
+      face(q('roll-f'), bw, kH - bev, bx, by, -T - kD, 'rotateY(180deg)', '50% 50%'); q('roll-f').style.backfaceVisibility = '';
+      face(q('roll-sl'), bw, bev * Math.SQRT2, bx, by + kH - bev, -T - kD, 'rotateX(45deg)', '0 0'); if (!bev) aus(q('roll-sl'));
+      face(q('roll-b'), bw, kD - bev, bx, -moH / 2, -T, 'rotateX(-90deg)', '0 0');
+      face(q('roll-t'), bw, kD, bx, by, -T, 'rotateX(-90deg)', '0 0');
+      const seite = bev ? 'polygon(0 0, ' + px(kD) + ' 0, ' + px(kD) + ' ' + px(kH - bev) + ', ' + px(kD - bev) + ' ' + px(kH) + ', 0 ' + px(kH) + ')' : null;
+      face(q('roll-l'), kD, kH, bx, by, -T, 'rotateY(90deg)', '0 0', seite); face(q('roll-r'), kD, kH, bx + bw, by, -T, 'rotateY(90deg)', '0 0', seite);
+    }
+  }
+  if (!q('fs-l')) return;
+  /* Führungsschienen: Stirn nach außen und die Innenseite zur Öffnung hin */
+  const yTop = auf ? -moH / 2 + kH : -moH / 2, yEnd = moH / 2, len = Math.max(1, yEnd - yTop);
+  const zr = auf ? z0 - fd - 3 * s : -T, xl = auf ? -moW / 2 : -moW / 2 - rw, xr = auf ? moW / 2 - rw : moW / 2;
+  face(q('fs-l'), rw, len, xl, yTop, zr - rd, 'rotateY(180deg)', '50% 50%'); face(q('fs-r'), rw, len, xr, yTop, zr - rd, 'rotateY(180deg)', '50% 50%');
+  face(q('fs-l2'), rd, len, xl + rw, yTop, zr, 'rotateY(90deg)', '0 0'); face(q('fs-r2'), rd, len, xr, yTop, zr, 'rotateY(90deg)', '0 0');
+  /* Behang zwischen den Schienenmitten, in der Mitte der Schienentiefe */
+  const zb = zr - rd / 2, bw = auf ? moW - rw : moW + rw, bx = -bw / 2, uH = Math.max(3, (raff ? 45 : screen ? 30 : 38) * s), Hmax = Math.max(0, len - uH), dep = Math.max(2, rd * 0.7);
+  let e;
+  if (raff) {
+    const N = Math.min(LAM_MAX, Math.max(1, Math.ceil(Hmax / (72 * s)))), p = Math.max(72 * s, Hmax / N), lh = 80 * s, pk = Math.max(0.9, 7 * s);
+    const tilt = st.wend ? 6 : 52, dunkel = mischHex(D, '#000000', 0.3);
+    e = yTop + N * pk + stand * Math.max(0, Hmax - N * pk);
+    const lamBg = st.wend ? 'linear-gradient(180deg, ' + L + ' 0 7%, ' + F + ' 18% 60%, ' + D + ' 88%, ' + dunkel + ')' : 'linear-gradient(180deg, ' + L + ' 0 9%, ' + mischHex(F, '#ffffff', 0.16) + ' 30%, ' + F + ' 70%, ' + D + ')';
+    for (let k = 0; k < LAM_MAX; k++) {
+      const el = q('lam-' + k); if (!el) continue;
+      if (k >= N) { el.style.display = 'none'; continue; }
+      el.style.display = '';
+      const haengt = yTop + (k + 0.5) * p, paket = e - (N - k - 0.5) * pk, frei = haengt <= paket, cy = Math.min(haengt, paket);
+      face(el, bw, lh, bx, cy - lh / 2, zb, 'rotateX(' + (frei ? -tilt : -86) + 'deg)', '50% 50%');
+      if (el._bg !== lamBg) { el._bg = lamBg; el.style.background = lamBg; }
+    }
+    /* Aufzugbänder bei einem Sechstel und fünf Sechsteln der Breite, an der Außenkante der Lamellen */
+    const bz = zb - (lh / 2) * Math.sin(tilt * Math.PI / 180) - 0.6, bb = Math.max(1.2, 6 * s);
+    face(q('band-l'), bb, Math.max(0, e - yTop), bx + bw / 6 - bb / 2, yTop, bz, '', '0 0'); face(q('band-r'), bb, Math.max(0, e - yTop), bx + bw * 5 / 6 - bb / 2, yTop, bz, '', '0 0');
+  } else {
+    const bh = q('behang'); e = yTop + stand * Hmax;
+    if (bh) {
+      face(bh, bw, Math.max(0, e - yTop), bx, yTop, zb, '', '0 0'); bh.style.opacity = e - yTop < 0.5 ? '0' : screen ? '.86' : '';
+      const bgv = behangBg(w, s); if (bh._bg !== bgv) { bh._bg = bgv; bh.style.background = bgv; }
+    }
+  }
+  face(q('behang-u'), bw, uH, bx, e, zb - 0.4, '', '0 0');
+  face(q('behang-ub'), bw, dep, bx, e + uH, zb + dep / 2, 'rotateX(-90deg)', '0 0');
+}
+/* Bedienung innen neben der Öffnung: rechts an der Wand der Gurtwickler auf etwa 1.000 mm mit Gurtband aus der Wand über der Öffnung,
+   links in der Laibung die Kurbelstange mit Kurbel auf etwa 1.100 mm, Wandtaster auf 1.050 mm (elektrisch, Smart Home mit Funk-Punkt,
+   Hebe-Schiebe-Tür elektrisch). Fußboden: Tür auf der Schwelle, Fenster nach Brüstung, ohne Angabe 900 mm angenommen */
+function w3dAntrieb(w, V, s, q) {
+  const t = q('an-taster'); if (!t) return;
+  const moW = V.moW * s, moH = V.moH * s, bruTxt = String(w.bru == null ? '' : w.bru).trim(), boden = moH / 2 + (V.tuer ? 0 : bruTxt !== '' ? num(w.bru) : 900) * s;
+  const sonne = sonneAktiv(w), a = w.antrieb, gurt = sonne && a === 'gurt', kurbel = sonne && a === 'kurbel', taster = (sonne && (a === 'motor' || a === 'smart')) || (w.art === 'hst' && w.griff === 'motor');
+  const x = moW / 2 + 120 * s, ww = Math.max(4, 50 * s), wh = Math.max(10, 170 * s), yw = Math.min(boden - 1000 * s, moH / 2 - wh / 2), gb = Math.max(1.5, 22 * s), yo = -moH / 2 - 70 * s;
+  face(q('an-wickler'), ww, wh, x - ww / 2, yw - wh / 2, 1, '', '0 0');
+  face(q('an-gurt'), gb, Math.max(0, yw - wh / 2 - yo), x - gb / 2, yo, 1.2, '', '0 0');
+  const sb = Math.max(2, 16 * s), xs = -moW / 2 + 50 * s, ys = -moH / 2 + 40 * s, ye = Math.max(ys + 60 * s, Math.min(boden - 1100 * s, moH / 2 - 160 * s)), zs = -V.laib * s + 40 * s;
+  face(q('an-stange'), sb, Math.max(0, ye - ys), xs - sb / 2, ys, zs, '', '0 0');
+  face(q('an-kurbel'), Math.max(10, 130 * s), Math.max(3, 22 * s), xs, ye - Math.max(1.5, 11 * s), zs + 1, 'rotate(32deg)', '0 50%');
+  const tg = Math.max(7, 80 * s); face(t, tg, tg, x - tg / 2, boden - 1050 * s - tg / 2, 1, '', '0 0');
+  [['an-gurt', gurt], ['an-wickler', gurt], ['an-stange', kurbel], ['an-kurbel', kurbel], ['an-taster', taster]].forEach((r) => { const e = q(r[0]); if (e) e.style.opacity = r[1] ? '' : '0'; });
+  t.classList.toggle('is-funk', sonne && a === 'smart');
+}
+/* Lage des Griffs auf einem Flügel (Flügelkoordinaten in Pixeln): Achse (ax, ay), Hebel (lx, ly, lw, lh, Drehpunkt) und Rosette (rw, rh).
+   Fenster: Hebel hängt nach unten, Rosette etwa 30 × 75 mm, Hebel etwa 135 mm. Kipp: oben mittig, Hebel waagerecht.
+   Hebe-Schiebe: Achse etwa 1.050 mm über dem Boden, der lange Hebel (320 mm) zeigt geschlossen nach oben und dreht zum Heben nach unten. */
+function w3dGriffAchse(V, w, s, sashH, yt, yb, lang) {
+  const tuer = V.tuer, bruTxt = String(w.bru == null ? '' : w.bru).trim(), bodentief = !tuer && bruTxt !== '' && num(w.bru) < 400;
+  /* Abstand Fußboden bis Unterkante Flügel: Tür über der Schwelle, Fenster über Brüstung, Rahmen und Unterlicht */
+  const unter = tuer ? V.pfB : num(w.bru) + V.pfB + (V.ulH ? V.ulH + W3D.MUL : 0);
+  const lo = yt + Math.max(250 * s, 40 * s), hi = yb - Math.max(lang + 23 * s, 250 * s);
+  const ziel = tuer || bodentief ? sashH - (1050 - unter) * s : Math.max(sashH / 2, (yt + yb) / 2);
+  return lo <= hi ? clamp(ziel, lo, hi) : (yt + yb) / 2;
+}
+function w3dGriffLage(V, w, x, i, s, g) {
+  const sashW = g.sashW, sashH = g.sashH, sf = g.sf, G = g.G, gI = g.gI;
+  const steh = stehFluegel(w, i), bedien = fswBedien(w) === i, fest = (x.t === 'F' || x.t === 'X') && !bedien;
+  const ohne = w.griff === 'ohne' || (w.griff === 'motor' && w.art === 'hst');
+  const r = { steh: steh, bedien: bedien, sichtbar: !fest && !steh && !ohne };
+  /* Oberkante und Unterkante des Flügels an der Griffkante (bei Formen der gerade Teil des Profils) */
+  const kante = (xs) => { const xe = Math.max(0.5, Math.min(sashW - 0.5, xs)); return [G ? Math.max(0, gI.top(g.left + xe) - g.sashTop) : 0, G ? Math.min(sashH, gI.bot(g.left + xe) - g.sashTop) : sashH]; };
+  if (x.t === 'S') {
+    /* Schema C: zwei Schiebeflügel stoßen in der Mitte zusammen, die Griffe rücken je 40 mm vom Stoß weg */
+    const nb = w.sashes[x.din === 'L' ? i - 1 : i + 1], ein = nb && nb.t === 'S' ? 40 * s : 0;
+    const hw = Math.max(6, 30 * s), hl = 320 * s, ax = x.din === 'L' ? sf / 2 + ein : sashW - sf / 2 - ein;
+    const ay = clamp(sashH - (1050 - V.pfB) * s, hl, Math.max(hl, sashH - 150 * s));
+    return Object.assign(r, { ax: ax, ay: ay, lw: hw, lh: hl + hw / 2, lx: ax - hw / 2, ly: ay - hl, origin: '50% ' + px(hl), rw: Math.max(6, 36 * s), rh: Math.max(14, 96 * s) });
+  }
+  const hw = Math.max(4, 20 * s), hl = Math.max(16, 135 * s), rw = Math.max(5, 30 * s), rh = Math.max(11, 75 * s);
+  if (x.t === 'K') {
+    const k = kante(sashW / 2), ax = sashW / 2 - hl / 2 + hw / 2, ay = k[0] + sf / 2;
+    return Object.assign(r, { ax: ax, ay: ay, lw: hl, lh: hw, lx: ax - hw / 2, ly: ay - hw / 2, origin: px(hw / 2) + ' 50%', rw: rh, rh: rw });
+  }
+  /* Dreh, Dreh-Kipp, Gehflügel und der Bediengriff der Faltwand: Griff gegenüber den Bändern. PSK: auf der Schließseite wie bei
+     Hebe-Schiebe (din = Seite, auf der der Flügel geschlossen steht) */
+  const rechts = bedien ? (w.fsw || {}).schema !== 'rechts' : x.t === 'PS' ? x.din === 'R' : x.din === 'L';
+  const ax = rechts ? sashW - sf / 2 : sf / 2, k = kante(ax), ay = w3dGriffAchse(V, w, s, sashH, k[0], k[1], hl);
+  return Object.assign(r, { ax: ax, ay: ay, lw: hw, lh: hl, lx: ax - hw / 2, ly: ay - hw / 2, origin: '50% ' + px(hw / 2), rw: rw, rh: rh });
 }
 function w3dBarPos(be, b, bw) {
   if (!be) return;
@@ -1191,27 +1347,170 @@ function layoutRails(stage, w, o, gr) {
   w.bars.filter((b) => b.d === 'h' && b.s === 0).forEach((b) => { hv += '<button type="button" class="rh' + (base(b.id) === sel ? ' is-sel' : '') + '" data-rb="' + b.id + '" data-rs="0" style="top: ' + px(b.p * (bottom - top)) + '" aria-label="Waagerechte Sprosse verschieben"></button>'; });
   rv.innerHTML = hv;
 }
-/* Kamera drehen (Finger) und Flügel antippen */
+/* ---------- Zoom im Modell ----------
+   Je Bühne ein Faktor 1 bis 4 und eine Verschiebung (W3DZ, über render() hinweg; key = Bildschirm und Frage, ein neuer key setzt
+   zurück). Gezoomt wird über den Maßstab (w3dCalc), verschoben über --panx/--pany an der Kamera. Zwei Finger zoomen und schieben,
+   ein Finger schiebt (gezoomt) oder dreht (1:1), Strg/Cmd + Mausrad bzw. Trackpad zoomt, Doppeltipp schaltet 1 ↔ 2,5 an der Stelle,
+   dazu die Knöpfe + und − und „1:1“. In der Sprossenfrage (o.rails) ist der Zoom aus, weil die Regler neben dem Modell rechnen. */
+const W3DZ = {}, ZOOM_MAX = 4;
+const w3dZoomZustand = (stage) => W3DZ[stage.id || 'w3d'] || (W3DZ[stage.id || 'w3d'] = { z: 1, x: 0, y: 0, key: null });
+const w3dZ = (stage, o) => (!stage || (o && o.rails) || (o && o.noZoom) ? 1 : w3dZoomZustand(stage).z);
+const ZOOM_ICO = { plus: '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>', minus: '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>' };
+function w3dZoomKnoepfe(stage, o) {
+  let k = stage.querySelector('[data-r="zoom"]');
+  if (o.rails || o.noZoom) { if (k) k.remove(); return; }
+  if (!k) { stage.insertAdjacentHTML('beforeend', '<div class="w3d-ctl w3d-zoom" data-r="zoom"><button type="button" class="w3d-knopf rund eins" data-w3d="eins" aria-label="Ansicht zurücksetzen">1:1</button><button type="button" class="w3d-knopf rund" data-w3d="minus" aria-label="Verkleinern">' + ZOOM_ICO.minus + '</button><button type="button" class="w3d-knopf rund" data-w3d="plus" aria-label="Vergrößern">' + ZOOM_ICO.plus + '</button></div>'); k = stage.querySelector('[data-r="zoom"]'); }
+}
+/* Zustand zeigen: Verschiebung an die Kamera, Klassen und Knöpfe */
+function w3dZoomZeigen(stage) {
+  const zm = w3dZoomZustand(stage), an = zm.z > 1.001;
+  stage.style.setProperty('--panx', px(zm.x)); stage.style.setProperty('--pany', px(zm.y));
+  stage.classList.toggle('is-zoom', an);
+  const k = stage.querySelector('[data-r="zoom"]');
+  if (k) { const b = (r) => k.querySelector('[data-w3d="' + r + '"]'); b('eins').hidden = !an; b('minus').disabled = !an; b('plus').disabled = zm.z >= ZOOM_MAX - 0.001; }
+  /* Gezoomt verschiebt Ziehen, statt zu drehen: der Hinweis sagt es */
+  const reg = W3DS[stage.id], hint = stage.querySelector('[data-r="hint"]'), h0 = reg && reg.o.hint ? reg.o.hint : '';
+  if (hint && /Drehen ziehen/.test(h0)) hint.textContent = an ? 'Zum Verschieben ziehen' : h0;
+}
+/* Grenzen der Verschiebung: bei 1:1 keine, gezoomt bis etwa an den Rand des ungezoomten Bildes */
+function w3dPanGrenze(stage, zm) {
+  const W = stage.clientWidth || 358, H = stage.clientHeight || 360, gx = (zm.z - 1) * W * 0.56, gy = (zm.z - 1) * H * 0.56;
+  zm.x = zm.z <= 1.001 ? 0 : clamp(zm.x, -gx, gx); zm.y = zm.z <= 1.001 ? 0 : clamp(zm.y, -gy, gy);
+}
+/* Zoomen um einen Ankerpunkt (ax, ay relativ zur Bühnenmitte): der Punkt darunter bleibt stehen. sanft = kurzer Übergang */
+function w3dZoomSetzen(stage, z, ax, ay, sanft) {
+  const reg = W3DS[stage.id]; if (!reg || reg.o.rails || reg.o.noZoom) return;
+  const zm = w3dZoomZustand(stage), z1 = clamp(z, 1, ZOOM_MAX), k = z1 / zm.z;
+  zm.x = (ax || 0) - ((ax || 0) - zm.x) * k; zm.y = (ay || 0) - ((ay || 0) - zm.y) * k; zm.z = z1;
+  w3dPanGrenze(stage, zm);
+  w3dZoomAnim(stage, sanft);
+  w3dLayout(stage, reg.w, reg.o); w3dZoomZeigen(stage);
+}
+function w3dZoomAnim(stage, sanft) {
+  stage.classList.toggle('is-zoomanim', !!sanft && !ruhig()); stage.classList.toggle('is-zooming', !sanft);
+  clearTimeout(stage._zt); stage._zt = setTimeout(() => stage.classList.remove('is-zoomanim', 'is-zooming'), sanft ? 420 : 60);
+}
+/* Bildschirmlage eines Weltpunkts (Mitte der Bühne = 0) bei Verschiebung 0: Kamera drehen, dann Perspektive (1300 px, Ursprung 50 % 46 %) */
+function w3dProj(stage, p) {
+  const H = stage.clientHeight || 360, rx = parseFloat(stage.style.getPropertyValue('--rx')) || 0, ry = parseFloat(stage.style.getPropertyValue('--ry')) || 0;
+  const a = rx * Math.PI / 180, b = ry * Math.PI / 180, x1 = p[0] * Math.cos(b) + p[2] * Math.sin(b), z1 = -p[0] * Math.sin(b) + p[2] * Math.cos(b);
+  const y2 = p[1] * Math.cos(a) - z1 * Math.sin(a), z2 = p[1] * Math.sin(a) + z1 * Math.cos(a), f = W3D_PERSP / (W3D_PERSP - z2), oy = 0.04 * H;
+  return { x: x1, y: y2, f: f, oy: oy };
+}
+/* Kamera auf den Griff fahren (Fragen nach Griff, Griff-Farbe und Einbruchschutz): Griff des Gehflügels, sonst der erste sichtbare */
+function w3dFokus(stage, w, o) {
+  const reg = W3DS[stage.id]; if (!reg || !o.fokus || !document.body.contains(stage)) return;
+  const zm = w3dZoomZustand(stage), zz = o.fokus === 'rc' ? 1.9 : 2.6;
+  zm.z = zz; zm.x = 0; zm.y = 0;
+  w3dLayout(stage, reg.w, reg.o);
+  const G = stage._griffe || [], g = gehFluegel(w), p = G[g] || G.find((x) => !!x);
+  if (!p) { zm.z = 1; w3dLayout(stage, reg.w, reg.o); w3dZoomZeigen(stage); return; }
+  const r = w3dProj(stage, p);
+  zm.x = -r.x; zm.y = r.oy / r.f - r.oy - r.y;
+  w3dPanGrenze(stage, zm);
+  /* erst ohne Übergang zurück auf 1:1 legen, dann sichtbar hinfahren */
+  const ziel = { z: zm.z, x: zm.x, y: zm.y };
+  zm.z = 1; zm.x = 0; zm.y = 0; stage.classList.add('is-zooming'); w3dLayout(stage, reg.w, reg.o); w3dZoomZeigen(stage); void stage.offsetWidth; stage.classList.remove('is-zooming');
+  Object.assign(zm, ziel); w3dZoomAnim(stage, true); w3dLayout(stage, reg.w, reg.o); w3dZoomZeigen(stage);
+}
+/* Knöpfe am Sonnenschutz: Hoch- bzw. Herunterfahren, beim Raffstore Lamellen wenden. Nur Ansicht, nichts wird gespeichert */
+const PFEIL = (hoch) => '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="' + (hoch ? 'M3 10l5-5 5 5' : 'M3 6l5 5 5-5') + '" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const WENDE_ICO = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 5.5h11M2.5 10.5h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 3l-2.5 2.5L5 8M11 8l2.5 2.5L11 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function w3dSonneKnoepfe(stage, w, o) {
+  let k = stage.querySelector('[data-r="sonne"]');
+  const raff = o.sonne === 'aussen' && w.sart === 'raffstore', key = o.sonne + '|' + (raff ? 1 : 0);
+  if (!o.sonne) { if (k) k.remove(); return; }
+  if (!k || k.getAttribute('data-k') !== key) {
+    if (k) k.remove();
+    stage.insertAdjacentHTML('beforeend', '<div class="w3d-ctl w3d-sonne" data-r="sonne" data-k="' + key + '"><button type="button" class="w3d-knopf" data-w3d="fahren"></button>' + (raff ? '<button type="button" class="w3d-knopf" data-w3d="wenden" aria-pressed="false">' + WENDE_ICO + '<span>Lamellen wenden</span></button>' : '') + '</div>');
+    k = stage.querySelector('[data-r="sonne"]');
+  }
+  const unten = W3D_BEHANG.stand >= 0.999, f = k.querySelector('[data-w3d="fahren"]'), lab = unten ? 'Hochfahren' : 'Herunterfahren';
+  if (f.getAttribute('data-l') !== lab) { f.innerHTML = PFEIL(unten) + '<span>' + lab + '</span>'; f.setAttribute('data-l', lab); }
+  const wd = k.querySelector('[data-w3d="wenden"]'); if (wd) wd.setAttribute('aria-pressed', String(!!W3D_BEHANG.wend));
+}
+function w3dSonneFahren(stage, was) {
+  const reg = W3DS[stage.id]; if (!reg) return;
+  if (was === 'fahren') W3D_BEHANG.stand = W3D_BEHANG.stand >= 0.999 ? 0 : 1; else W3D_BEHANG.wend = W3D_BEHANG.wend ? 0 : 1;
+  /* Fahrt 1,8 s, Wenden 0,6 s; die Lamellen folgen kurz nacheinander. Bei weniger Bewegung springt der Behang */
+  stage.classList.remove('is-fahrt', 'is-wende'); void stage.offsetWidth;
+  if (!ruhig()) { stage.classList.add(was === 'fahren' ? 'is-fahrt' : 'is-wende'); clearTimeout(stage._ft); stage._ft = setTimeout(() => stage.classList.remove('is-fahrt', 'is-wende'), was === 'fahren' ? 2500 : 1000); }
+  w3dLayout(stage, reg.w, reg.o); w3dSonneKnoepfe(stage, reg.w, reg.o);
+  if (window.Haptik) window.Haptik.tick();
+}
+/* Kamera drehen, zoomen und verschieben (Finger, Maus, Rad), Flügel antippen, Knöpfe am Modell */
 function bindW3D(stage, getOpts) {
   if (!stage || stage.getAttribute('data-bound')) return;
   stage.setAttribute('data-bound', '1');
   const cur = (k, d) => { const v = parseFloat(stage.style.getPropertyValue(k)); return isNaN(v) ? d : v; };
-  let rx = 0, ry = 0;
+  const ptr = new Map(); let geste = null, tipp = null, rafId = 0;
+  const rel = (e) => { const r = stage.getBoundingClientRect(); return [e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2]; };
+  const zoomAus = () => { const o = getOpts() || {}; return !!(o.rails || o.noZoom); };
+  const scrollt = () => !stage.closest('.scr.fit') && !stage.classList.contains('is-zoom');
+  /* Zwei Finger: Abstand und Mitte zu Beginn merken; ab dann folgt der Punkt unter der Anfangsmitte der aktuellen Mitte */
+  const pinchStart = () => { const p = Array.from(ptr.values()), zm = w3dZoomZustand(stage); geste = { art: 'pinch', d0: Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]) || 1, m0: [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2], z0: zm.z, x0: zm.x, y0: zm.y }; stage.classList.add('is-pinch'); };
+  const pinchMove = () => {
+    const p = Array.from(ptr.values()); if (p.length < 2 || !geste || geste.art !== 'pinch') return;
+    const d = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]), m = [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2], zm = w3dZoomZustand(stage);
+    const z = clamp(geste.z0 * d / geste.d0, 1, ZOOM_MAX), k = z / geste.z0;
+    zm.z = z; zm.x = m[0] - (geste.m0[0] - geste.x0) * k; zm.y = m[1] - (geste.m0[1] - geste.y0) * k; w3dPanGrenze(stage, zm);
+    if (!rafId) rafId = requestAnimationFrame(() => { rafId = 0; const r = W3DS[stage.id]; stage.classList.add('is-zooming'); if (r) w3dLayout(stage, r.w, r.o); w3dZoomZeigen(stage); });
+  };
   stage.addEventListener('pointerdown', (e) => {
-    const o = getOpts() || {}, view = VIEWS[stage.getAttribute('data-view') || 'inside'];
-    if (e.target.closest('.rail')) return;
+    if (e.target.closest('.rail, .w3d-ctl')) return;
     if (e.button != null && e.button > 0) return;
-    rx = cur('--rx', view[0]); ry = cur('--ry', view[1]);
-    const sx = e.clientX, sy = e.clientY, rx0 = rx, ry0 = ry, hit = e.target.closest ? e.target.closest('[data-sash]') : null;
-    let moved = false;
+    const o = getOpts() || {}, view = VIEWS[stage.getAttribute('data-view') || 'inside'];
+    ptr.set(e.pointerId, rel(e));
     try { stage.setPointerCapture(e.pointerId); } catch (err) { /* ok */ }
-    const move = (ev) => { const dx = ev.clientX - sx, dy = ev.clientY - sy; if (!moved && Math.abs(dx) + Math.abs(dy) < 4) return; moved = true; stage.classList.add('is-drag'); ry = Math.max(view[1] - 40, Math.min(view[1] + 40, ry0 + dx * 0.35)); rx = Math.max(view[0] - 20, Math.min(view[0] + 20, rx0 - dy * 0.25)); stage.style.setProperty('--rx', rx + 'deg'); stage.style.setProperty('--ry', ry + 'deg'); };
+    if (ptr.size === 2 && !zoomAus()) { pinchStart(); return; }
+    if (ptr.size > 1) return;
+    const zm = w3dZoomZustand(stage), sx = e.clientX, sy = e.clientY, hit = e.target.closest ? e.target.closest('[data-sash]') : null;
+    const rx0 = cur('--rx', view[0]), ry0 = cur('--ry', view[1]), x0 = zm.x, y0 = zm.y, nurQuer = e.pointerType === 'touch' && scrollt();
+    geste = { art: 'eins', moved: false };
+    const g = geste;
+    const move = (ev) => {
+      if (ptr.has(ev.pointerId)) ptr.set(ev.pointerId, rel(ev));
+      if (geste && geste.art === 'pinch') return pinchMove();
+      if (geste !== g || ev.pointerId !== e.pointerId) return;
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      if (!g.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+      g.moved = true;
+      if (zm.z > 1.001) { zm.x = x0 + dx; zm.y = y0 + dy; w3dPanGrenze(stage, zm); stage.classList.add('is-drag'); w3dZoomZeigen(stage); return; }
+      stage.classList.add('is-drag');
+      const ry = Math.max(view[1] - 40, Math.min(view[1] + 40, ry0 + dx * 0.35)), rx = nurQuer ? rx0 : Math.max(view[0] - 20, Math.min(view[0] + 20, rx0 - dy * 0.25));
+      stage.style.setProperty('--rx', rx + 'deg'); stage.style.setProperty('--ry', ry + 'deg');
+    };
     const up = (ev) => {
+      ptr.delete(ev.pointerId);
+      if (geste && geste.art === 'pinch') { if (ptr.size < 2) { stage.classList.remove('is-pinch', 'is-zooming'); geste = { art: 'nach', moved: true }; } if (ptr.size) return; }
       stage.removeEventListener('pointermove', move); stage.removeEventListener('pointerup', up); stage.removeEventListener('pointercancel', up);
       stage.classList.remove('is-drag');
-      if (!moved && o.onSash && hit) o.onSash(+hit.getAttribute('data-sash'));
+      const war = geste; geste = null;
+      if (ev.type === 'pointercancel' || !war || war.moved || war !== g) { tipp = null; return; }
+      /* Doppeltipp: zweiter Tipp innerhalb von 320 ms nahe am ersten schaltet zwischen 1:1 und 2,5-fach */
+      const jetzt = Date.now(), pos = rel(ev);
+      if (!zoomAus() && tipp && jetzt - tipp.t < 320 && Math.hypot(pos[0] - tipp.p[0], pos[1] - tipp.p[1]) < 30) { tipp = null; const zz = w3dZoomZustand(stage); w3dZoomSetzen(stage, zz.z > 1.001 ? 1 : 2.5, pos[0], pos[1], true); return; }
+      tipp = { t: jetzt, p: pos };
+      if (o.onSash && hit) o.onSash(+hit.getAttribute('data-sash'));
     };
     stage.addEventListener('pointermove', move); stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+  });
+  /* Scrollbare Seiten: senkrecht wischen scrollt die Seite (touch-action: pan-y); zwei Finger und Verschieben im Zoom nicht */
+  stage.addEventListener('touchmove', (e) => { if (e.cancelable && !zoomAus() && (e.touches.length > 1 || stage.classList.contains('is-zoom'))) e.preventDefault(); }, { passive: false });
+  stage.addEventListener('wheel', (e) => {
+    if (zoomAus()) return;
+    const zm = w3dZoomZustand(stage);
+    if (e.ctrlKey || e.metaKey) { e.preventDefault(); const p = rel(e); w3dZoomSetzen(stage, zm.z * Math.exp(-clamp(e.deltaY, -60, 60) * 0.012), p[0], p[1], false); }
+    else if (zm.z > 1.001) { e.preventDefault(); zm.x -= e.deltaX; zm.y -= e.deltaY; w3dPanGrenze(stage, zm); w3dZoomAnim(stage, false); w3dZoomZeigen(stage); }
+  }, { passive: false });
+  stage.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-w3d]'); if (!b || !stage.contains(b)) return;
+    e.preventDefault(); e.stopPropagation();
+    const was = b.getAttribute('data-w3d'), zm = w3dZoomZustand(stage);
+    if (was === 'plus') w3dZoomSetzen(stage, Math.min(ZOOM_MAX, zm.z * 1.6), 0, 0, true);
+    else if (was === 'minus') w3dZoomSetzen(stage, zm.z / 1.6 < 1.15 ? 1 : zm.z / 1.6, 0, 0, true);
+    else if (was === 'eins') w3dZoomSetzen(stage, 1, 0, 0, true);
+    else if (was === 'fahren' || was === 'wenden') w3dSonneFahren(stage, was);
   });
 }
 /* Kamera weich auf eine Ansicht fahren */
@@ -1527,9 +1826,19 @@ const W3DS = {};
 /* Steht die Bühne mit gleicher Struktur schon da, geht nur die leere Hülle in den neuen Bildschirm; render() setzt die alte Bühne
    wieder ein. Das spart je Tippen das Zerlegen und Gestalten von einigen hundert Elementen. */
 function model(w, o) {
-  const id = o.id || 'w3d'; W3DS[id] = { w: w, o: o };
+  const id = o.id || 'w3d';
+  /* Zoom gilt je Bildschirm und Frage; in den Fragen kommen die Knöpfe am Sonnenschutz und die Fahrt zum Griff dazu */
+  if (o.zkey == null) o.zkey = S.screen + '|' + (S.screen === 'frage' ? S.q : '');
+  if (id === 'w3d' && S.screen === 'frage') Object.assign(o, w3dFrage(S.q, w, o));
+  W3DS[id] = { w: w, o: o };
   if (id === 'w3d') { const alt = document.getElementById('w3d'); if (alt && alt.getAttribute('data-sig') === w3dSig(w, o)) return w3dHuelle(w, o) + '</div>'; }
   return w3dHTML(w, o);
+}
+function w3dFrage(q, w, o) {
+  const r = {};
+  if (o.sonne == null) { if (['sart', 'einbau', 'sfarbe', 'antrieb'].indexOf(q) >= 0 && sonneAktiv(w)) r.sonne = 'aussen'; else if ((q === 'iart' || q === 'ifarbe') && innenAktiv(w)) r.sonne = 'innen'; }
+  if (o.fokus == null && (q === 'griff' || q === 'gf' || q === 'rc') && w.art !== 'fest') r.fokus = q === 'rc' ? 'rc' : 'griff';
+  return r;
 }
 /* Maße in Listen erst nach dem Freischalten (eigenes Aufmaß); beim Kundenlink bekommt sie der Betrieb, vorher nur „vollständig“ */
 const masseZeigen = () => !S.betrieb && FREI();
@@ -1832,7 +2141,7 @@ SCREENS.planmasse = () => {
   const row = (label, f, v, step, g, sub) => '<div class="row"><label><span class="lbl">' + esc(label) + (sub ? '<small class="sb">' + esc(sub) + '</small>' : '') + '</span><span class="val"><input type="text" inputmode="numeric" id="p-' + f + '" data-in="plan" data-f="' + f + '" value="' + (v === '' || v == null ? '' : esc(v)) + '"><span class="unit">mm</span></span></label>' + (g ? '<button type="button" class="ibtn" aria-label="Erklärung" data-act="gloss" data-k="' + g + '">' + ICON_I + '</button>' : '') + '<button type="button" class="rnd" aria-label="Weniger" data-act="plan-bump" data-f="' + f + '" data-v="' + (-step) + '">−</button><button type="button" class="rnd" aria-label="Mehr" data-act="plan-bump" data-f="' + f + '" data-v="' + step + '">+</button></div>';
   const warn = flaeche > (tuer ? 14 : w.art === 'fest' ? 9 : 5) ? noteBox('Sehr groß: ' + flaeche.toFixed(1).replace('.', ',') + ' m². Das geht, braucht aber einen kräftigen Sturz und meist eine Teilung. Dein Fensterbauer berät dazu.', null, 'warn') : '';
   const html = hd('Schritt 4 von 6 · Maße', 'Wie groß soll es werden?', 'Wunschmaße der Rohbauöffnung. Dein Fensterbauer prüft Sturz und Statik und legt das endgültige Maß fest.') +
-    model(w, { id: 'w3d', view: 'result', sway: true, stageH: 280, fitW: 0.56, fitH: 0.6, dims: ['hm', 'wm', 'eh', 'ew'], labels: messLabels(), bg: photoBg(), cls: 'dims-all', hint: 'Rot: Rohbauöffnung · Blau: Element' }) +
+    model(w, { id: 'w3d', view: 'result', sway: true, stageH: 280, fitW: 0.56, fitH: 0.6, dims: ['hm', 'wm', 'eh', 'ew'], labels: messLabels(), bg: photoBg(), cls: 'dims-all', hint: 'Orange: Rohbauöffnung · Blau: ' + elName() }) +
     '<div class="card"><p class="eyebrow">Wunschmaß Rohbauöffnung</p><div class="rows">' + row('Breite', 'w', d.moW, 50, 'rahmenmass') + row('Höhe', 'h', d.moH, 50) + (tuer ? '' : row('Brüstungshöhe', 'bru', w.bru, 50, 'bruestung', 'Boden bis Unterkante Öffnung')) + row('Wandstärke', 'wand', w.wand, 10, 'laibung', 'falls bekannt') + '</div>' +
     '<p class="sub">Das Element wird ' + FUGE + ' mm je Seite kleiner als die Öffnung: ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm.</p></div>' + warn +
     noteBox('Neue Öffnung in der Wand: Bei tragenden Wänden entscheidet die Statik über Sturz und Größe. Der Fachbetrieb bricht die Öffnung, setzt den Sturz und baut ein.', 'neuoeffnung');
@@ -1858,7 +2167,7 @@ function numDisplay(cur, id) { return '<div class="num"><b id="' + id + '" class
 function setNum(id, cur) { const b = document.getElementById(id), cm = document.getElementById(id + '-cm'); if (b) { b.textContent = cur ? thousand(cur) : '0'; b.classList.toggle('empty', !cur); } if (cm) cm.textContent = cmTxt(cur); }
 function messOpts(step, cur) {
   const dims = MESS.slice(0, S.mess.step + 1).map(dimKey), k = dimKey(step), labels = messLabels({ [k]: num(cur) ? thousand(cur) + ' mm' : '?' });
-  return { id: 'w3d', view: 'three', sway: true, showEl: S.mess.step >= 1, dims: dims, active: k, labels: labels, stageH: 'auto', bg: photoBg(), hint: step.who === 'mo' ? 'Rot: Maueröffnung' : 'Blau: ' + elName() };
+  return { id: 'w3d', view: 'three', sway: true, showEl: S.mess.step >= 1, dims: dims, active: k, labels: labels, stageH: 'auto', bg: photoBg(), hint: step.who === 'mo' ? 'Orange: Maueröffnung' : 'Blau: ' + elName() };
 }
 function liveWin(step, cur) {
   const w = JSON.parse(JSON.stringify(S.win)), v = num(cur);
@@ -2339,10 +2648,19 @@ function qList(w) {
   const material = { id: 'material', title: 'Welches Material?', sub: 'Bestimmt Preis, Pflege und Profilbreite.', kind: 'cards', group: 'material', val: w.material, act: 'setw', f: 'material', ico: ICO.material, view: 'inside', offen: 'material' };
   const form = { id: 'form', title: 'Welche Form?', sub: 'Antippen zeigt die Form am Modell.', kind: 'formen', group: 'form', val: w.form, act: 'form', ico: ICO.form, view: 'inside' };
   const schwelle = (o, act) => ({ id: 'schwelle', title: 'Welche Schwelle?', sub: 'Barrierefrei heißt ohne Schwelle, mit Rinne davor.', kind: 'cards', group: 'schwelle', val: o.schwelle, act: act, f: 'schwelle', ico: ICO.schwelle, view: 'bankInnen', g: 'schwelle', hint: lab('schwelle', o.schwelle), offen: 'schwelle' });
-  const fluegel = (typen) => w.sashes.forEach((x, i) => {
+  const fluegel = (typen) => {
+    /* Stulp: die Bänder sitzen außen (links DIN links, rechts DIN rechts), gefragt wird nur, welcher Flügel zuerst aufgeht und wie */
+    if (w.teilung === '2s' && n === 2) {
+      const g = Math.max(0, gehFluegel(w)), x = w.sashes[g];
+      L.push({ id: 'stulp', title: 'Welcher Flügel geht zuerst auf?', sub: 'Nur er hat einen Griff. Der andere geht erst danach auf, über einen Hebel im Falz.', kind: 'chips', group: 'stulp', opts: [{ k: 'L', label: 'Der linke' }, { k: 'R', label: 'Der rechte' }], val: g === 0 ? 'L' : 'R', act: 'stulp', view: 'inside', g: 'stulp', hint: 'Von innen gesehen' });
+      L.push({ id: 'typ-' + g, title: 'Wie öffnet er?', sub: 'Der Flügel mit dem Griff.', kind: 'cards', group: 'typ', opts: typen.filter((o) => o.k === 'D' || o.k === 'DK'), val: x.t, act: 'sash', f: 't', sash: g, ico: ICO.typ, view: 'inside', g: 'symbol', hint: 'Er schwingt so auf' });
+      return;
+    }
+    w.sashes.forEach((x, i) => {
     L.push({ id: 'typ-' + i, title: n > 1 ? 'Wie öffnet Flügel ' + (i + 1) + '?' : 'Wie soll es aufgehen?', sub: n > 1 ? 'Der markierte Flügel. Antippen wechselt.' : '', kind: 'cards', group: 'typ', opts: typen, val: x.t, act: 'sash', f: 't', sash: i, ico: ICO.typ, view: 'inside', g: 'symbol', hint: n > 1 ? 'Flügel ' + (i + 1) + ' von ' + n : 'Er schwingt so auf' });
     if (x.t === 'D' || x.t === 'DK') L.push({ id: 'din-' + i, title: n > 1 ? 'Scharniere von Flügel ' + (i + 1) + '?' : 'Scharniere links oder rechts?', sub: 'Von innen gesehen. Der Griff sitzt gegenüber.', kind: 'chips', group: 'din', val: x.din, act: 'sash', f: 'din', sash: i, view: 'inside', g: 'dinlr', hint: 'Der Griff wandert mit' });
-  });
+    });
+  };
   L.push({ id: 'lage', title: tuer ? 'Wo ist die Tür?' : art === 'fest' ? 'Wo ist die Verglasung?' : 'Wo ist das Fenster?', sub: 'Damit der Fensterbauer die Position zuordnen kann.', kind: 'lage', view: 'three' });
   /* Pflichtthema: im Obergeschoss bei niedriger Brüstung, bei Türen immer (außer mit Balkon davor) */
   if (AW.absturzFrage(w)) L.push(tuer
@@ -2412,7 +2730,7 @@ function qList(w) {
     const kasten = ki.rollladen && ki.rollladen !== 'keiner' ? 'Laut Foto vorhanden: ' + AW.lab('kasten', ki.rollladen) + '. ' : '';
     L.push({ id: 'einbau', title: 'Wo sitzt der Kasten?', sub: kasten + 'Unsicher? Dein Fensterbauer wählt den passenden.', kind: 'cards', group: 'einbau', val: w.roll, act: 'setw', f: 'roll', ico: ICO.einbau, view: 'outside', g: w.roll === 'vorbau' ? 'vorbau' : 'aufsatz', hint: 'Ansicht von außen', offen: 'einbau', offenLabel: 'Fensterbauer entscheidet', offenSub: 'nach den Fotos und vor Ort' });
     L.push({ id: 'sfarbe', title: 'Welche Farbe?', sub: w.sart === 'raffstore' ? 'Lamellen, Kasten und Schienen.' : w.sart === 'screen' ? 'Gewebe und Kasten.' : 'Panzer, Kasten und Führungsschienen.', kind: 'swatch', group: 'sfarbe', f: 'sfarbe', val: w.sfarbe, view: 'outside', hint: 'Ansicht von außen · ' + sonneName(w) });
-    L.push({ id: 'antrieb', title: 'Wie wird er bedient?', sub: w.antrieb === 'motor' || w.antrieb === 'smart' ? (ki.strom === true ? 'Laut Foto liegt am Fenster schon Strom.' : 'Elektrisch braucht Strom am Fenster, das klärt dein Fensterbauer.') : '', kind: 'chips', group: 'antrieb', val: w.antrieb, act: 'setw', f: 'antrieb', view: 'outside', hint: 'Ansicht von außen', offen: 'antrieb' });
+    L.push({ id: 'antrieb', title: 'Wie wird er bedient?', sub: w.antrieb === 'motor' || w.antrieb === 'smart' ? (ki.strom === true ? 'Laut Foto liegt am Fenster schon Strom.' : 'Elektrisch braucht Strom am Fenster, das klärt dein Fensterbauer.') : '', kind: 'chips', group: 'antrieb', val: w.antrieb, act: 'setw', f: 'antrieb', view: 'inside', hint: 'Ansicht von innen · ' + (lab('antrieb', w.antrieb) || 'Bedienung'), offen: 'antrieb' });
   }
   L.push({ id: 'insekt', title: 'Insektenschutz?', kind: 'cards', group: 'insekt', val: w.insekt, act: 'setw', f: 'insekt', ico: ICO.insekt, view: 'outside', g: 'insekt', hint: 'Ansicht von außen', offen: 'insekt' });
   L.push({ id: 'iart', title: 'Sicht- und Blendschutz innen?', sub: 'Rollo, Plissee oder Jalousie, gleich mitbestellt.', kind: 'cards', group: 'iart', val: w.iart, act: 'setw', f: 'iart', ico: ICO.innen, view: 'inside', g: 'innenschutz', hint: 'Ansicht von innen', offen: 'iart' });
@@ -2654,7 +2972,7 @@ function faltenZeigen() {
   const stage = document.getElementById('w3d'), reg = stage ? W3DS[stage.id] : null;
   if (!reg || reg.w.art !== 'fsw' || ruhig()) return;
   const w = reg.w, o = reg.o, q = (r) => stage.querySelector('[data-r="' + r + '"]');
-  const V = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360 })), s = V.s;
+  const V = w3dCalc(w, Object.assign({}, o, { stageW: stage.clientWidth || 358, stageH: stage.clientHeight || 360, zoom: w3dZ(stage, o) })), s = V.s;
   const sashW = V.sashW * s, n = w.sashes.length, schema = (w.fsw || {}).schema || 'links';
   const nl = schema === 'links' ? n : schema === 'rechts' ? 0 : Math.ceil(n / 2);
   /* Je Flügel eine Keyframe-Folge aus 27 Stützstellen der Scharnierbewegung (gerechnet, nicht geschätzt): Abstand zur Ruhelage
@@ -3771,6 +4089,7 @@ function act(name, el) {
     case 'qprev': return qStep(-1);
     case 'qwunsch': { S.qWunsch = !S.qWunsch; render(); const t = document.getElementById('t-wunsch'); if (t && S.qWunsch) t.focus(); return; }
     case 'ol-set': { w.ol = v !== 'nein'; if (v !== 'nein') w.olT = v; return render(); }
+    case 'stulp': { const g = v === 'L' ? 0 : 1, typ = (w.sashes[gehFluegel(w)] || {}).t === 'D' ? 'D' : 'DK'; w.sashes = [g === 0 ? { t: typ, din: 'L' } : { t: 'D', din: 'L', steh: true }, g === 1 ? { t: typ, din: 'R' } : { t: 'D', din: 'R', steh: true }]; S.selSash = g; S.openSash = g; render(); nachBild(() => oeffnungZeigen(g)); return; }
     case 'sash': { const i = Math.min(S.selSash, w.sashes.length - 1); w.sashes = w.sashes.map((s, j) => (j === i ? Object.assign({}, s, { [f]: v }) : s)); S.openSash = i; render(); nachBild(() => oeffnungZeigen(i, f === 'din' ? 'D' : null)); return; }
     case 'sash-tap': return onSashTap(+v);
     case 'teilung': { w.e_teilung = true; const sashes = sashesFor(v); w.teilung = v; w.sashes = sashes; mirrorBars(w); S.selSash = 0; S.selBar = null; S.openSash = -1; return render(); }
@@ -4063,7 +4382,7 @@ SCREENS.tour = () => {
     const m = t.mess || (t.mess = { k: 0, cur: '', fertig: true }), d = derive(w);
     if (m.fertig) {
       html = kopf('Vier Maße, das Modell wächst mit.', 'So misst du später selbst, Schritt für Schritt erklärt. In der Führung sind die Werte vorgegeben.') +
-        modell({ view: 'three', dims: ['hm', 'wm', 'eh', 'ew'], labels: messLabels(), cls: 'dims-all', hint: 'Rot: Maueröffnung · Blau: ' + elName() }) +
+        modell({ view: 'three', dims: ['hm', 'wm', 'eh', 'ew'], labels: messLabels(), cls: 'dims-all', hint: 'Orange: Maueröffnung · Blau: ' + elName() }) +
         '<div class="mess-in"><p class="eyebrow" style="color: var(--ok)">Alle Maße da</p><div class="done-list"><div><small>Öffnung Breite</small><b>' + thousand(d.moW) + ' mm</b></div><div><small>Öffnung Höhe</small><b>' + thousand(d.moH) + ' mm</b></div><div><small>' + esc(artName(w)) + ' Breite</small><b>' + thousand(d.elW) + ' mm</b></div><div><small>' + esc(artName(w)) + ' Höhe</small><b>' + thousand(d.elH) + ' mm</b></div></div>' +
         '<div class="msg ok">' + CHECK + '<span>Danach misst du die Ränder der Öffnung. Von drei Breiten und drei Höhen zählt das kleinste Maß, wie beim Fensterbauer.</span></div></div>' +
         '<div class="qrow"><button type="button" class="chip" data-act="tour-nochmal">Nochmal zeigen</button></div>';
@@ -4071,7 +4390,7 @@ SCREENS.tour = () => {
       const st = MESS[m.k], k = dimKey(st), labels = messLabels();
       labels[k] = num(m.cur) ? thousand(m.cur) + ' mm' : '?';
       html = kopf('Maß ' + (m.k + 1) + ' von 4 · ' + (st.who === 'mo' ? 'Maueröffnung' : elName()), 'Zollstock anlegen, Zahl eintippen, das Modell zieht die Maßlinie. Hier tippt sich das Maß selbst ein.') +
-        modell({ view: 'three', showEl: m.k >= 1, dims: MESS.slice(0, m.k + 1).map(dimKey), active: k, labels: labels, hint: st.who === 'mo' ? 'Rot: Maueröffnung' : 'Blau: ' + elName() }) +
+        modell({ view: 'three', showEl: m.k >= 1, dims: MESS.slice(0, m.k + 1).map(dimKey), active: k, labels: labels, hint: st.who === 'mo' ? 'Orange: Maueröffnung' : 'Blau: ' + elName() }) +
         '<div class="ask ' + st.who + '"><p class="q"><span>' + esc(tuerText(st.short)) + '</span><span class="badge">' + LOCK_S + 'vorgegeben</span></p><p class="how">' + esc(tuerText(st.text)) + '</p>' + numDisplay(m.cur, 'tour-num') + '</div>' +
         '<div class="tour-sperre">' + keypad('Weiter') + '<button type="button" class="ts-deckel" data-act="tour-schloss"><span>' + LOCK_S + 'Maße sind in der Führung vorgegeben</span></button></div>';
     }
