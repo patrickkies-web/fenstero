@@ -25,7 +25,8 @@ body.rg-seite { margin: 0; background: var(--paper); color: var(--ink); font-fam
 .rg ul, .rg ol { margin: 0 0 14px; padding-left: 22px }
 .rg li { margin-bottom: 6px }
 .rg strong, .rg b { color: var(--ink) }
-.rg a { color: var(--accent); text-underline-offset: 2px }
+.rg a { color: var(--ink); text-decoration-color: var(--line2); text-decoration-thickness: 1.5px; text-underline-offset: 3px } /* S6: Fließtext-Links in Schriftfarbe */
+@media (hover: hover) { .rg a:hover { text-decoration-color: var(--ink) } }
 .rg sub, .rg sup { font-size: 13px; line-height: 0 }
 .rg .eyebrow { margin-top: 8px }
 /* Kicker: die Zeile über dem h1 trägt das Signal (das Skript setzt .kicker, die Regel hält es auch ohne) */

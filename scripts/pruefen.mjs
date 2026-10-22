@@ -464,6 +464,18 @@ if (teil(5)) {
     await foto(page, name);
   }
   sauber(page, 'Rechtsseiten ohne Fehler');
+  /* S6: Links in Schriftfarbe statt Grün (Grün gehört Kicker, Haken und dem einen Wort), Fehlerseite linksbündig, Platzhalterfotos ohne
+     Text: eine ruhige Fläche statt „Foto folgt“ und Dateipfaden (scripts/fotos.py) */
+  const gruen5 = [];
+  for (const pfad of ['/impressum/', '/agb/', '/widerruf/', '/gibtsnicht', '/ratgeber/fenster-ausmessen/']) {
+    await page.goto(BASE + pfad, { waitUntil: 'networkidle' });
+    const r = await page.evaluate(() => ({ gruen: Array.from(document.querySelectorAll('main a, .kopf nav a, .rg a')).filter((a) => !a.closest('.rg-weg-liste, .rg-inhalt, .rg-fuss, .btn') && !a.classList.contains('btn') && getComputedStyle(a).color === 'rgb(143, 214, 148)').map((a) => a.textContent.trim().slice(0, 30)), mitte: !!document.querySelector('main.mitte') && getComputedStyle(document.querySelector('main.mitte')).textAlign === 'center' }));
+    if (r.gruen.length || r.mitte) gruen5.push(pfad + ' ' + JSON.stringify(r));
+  }
+  const fs5 = await import('node:fs'), url5 = await import('node:url');
+  const py5 = fs5.readFileSync(url5.fileURLToPath(new URL('./fotos.py', import.meta.url)), 'utf8'), ph5 = py5.slice(py5.indexOf('def platzhalter('), py5.indexOf('def main('));
+  ok(!gruen5.length && ph5.length > 100 && !/\.text\(|fotos-roh|BILDER\.md|Foto folgt/.test(ph5), 'Rechtsseiten, Fehlerseite und Ratgeber: Links in Schriftfarbe, Fehlerseite linksbündig; Platzhalterfotos ohne Text (scripts/fotos.py schreibt keine Beschriftung, keine Pfade)' + (gruen5.length ? ': ' + gruen5.join(' | ') : ''));
+  sauber(page, 'Links und Platzhalter ohne Fehler');
   await ctx.close();
 }
 
@@ -748,6 +760,73 @@ if (teil(6)) {
   await ctx5.close();
   sauber(p2, 'App-Logik ohne Fehler');
   await ctx2.close();
+
+  /* Betriebsbereich im Styleguide und ohne Sackgassen (Strang S6): Reihenfolge der Projektliste, Kennzahlen, Nachrichten-Vorschau,
+     Überschriften mit genau einem grünen Wort, eine Cream-Fläche je Bildschirm, Avatar in Cream, Ziele ab 44 px, Fußzeile auch
+     angemeldet, Zurück im Browser, Schalter nur mit Mailversand, Team als „geplant“, Gebäude wie in der App */
+  for (const [art, opts] of [['Schreibtisch', { viewport: { width: 1280, height: 900 }, locale: 'de-DE' }], ['Telefon', telefon]]) {
+    const c6 = await browser.newContext(opts), b6 = await neueSeite(c6);
+    await b6.goto('about:blank'); await b6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' });
+    await betrieb(b6, 'c1'); await b6.waitForTimeout(400);
+    const liste6 = await b6.evaluate(() => { const k = Array.from(document.querySelectorAll('.pcard')); const st = Array.from(document.querySelectorAll('.stat')).map((s) => s.querySelector('small').textContent + '=' + s.querySelector('b').getAttribute('data-count')); return { erste: k[0] && k[0].classList.contains('is-new') && /Familie Weber/.test(k[0].textContent), neuW: !!document.querySelector('.pcard.is-new .neu.badge.acc'), st: st, filter: Array.from(document.querySelectorAll('.lfilter .chip')).map((c) => c.getAttribute('data-v')).join(',') }; });
+    ok(liste6.erste && liste6.neuW && liste6.st.includes('Beim Kunden=2') && liste6.filter === 'alle,kunde,eingegangen', art + ': neu eingegangenes Aufmaß steht oben mit „Neu“ als Wort mit grünem Punkt, „Beim Kunden“ zählt nur verschickte Links (' + liste6.st.join(', ') + ')');
+    /* ein angelegtes, nie verschicktes Projekt: nicht „beim Kunden“, sondern eigener Satz und Filter, in der Liste nach den verschickten */
+    await b6.evaluate(() => { X.neuesProjekt(A(), { kunde: 'Familie Unverschickt', plan: ['Fenster', 'Haustür'], days: 14 }); render(); }); await b6.waitForTimeout(200);
+    const neu6 = await b6.evaluate(() => { const k = Array.from(document.querySelectorAll('.pcard .ti')).map((t) => t.textContent.trim()); return { beim: Array.from(document.querySelectorAll('.stat')).find((s) => /Beim Kunden/.test(s.textContent)).querySelector('b').getAttribute('data-count'), satz: !!document.querySelector('.l-neu [data-v="neu"]'), filter: !!document.querySelector('.lfilter [data-v="neu"]'), pos: k.indexOf('Familie Unverschickt'), schulze: k.indexOf('Frau Schulze') }; });
+    ok(neu6.beim === '2' && neu6.satz && neu6.filter && neu6.pos > neu6.schulze, art + ': angelegtes, nicht verschicktes Projekt zählt nicht als „beim Kunden“, steht als Satz und Filter „Nicht verschickt“ und nach den verschickten');
+    /* Projektnummer bricht nicht um, keine farbigen Randstreifen, Glocke ohne Orange */
+    const form6 = await b6.evaluate(() => ({ nr: Array.from(document.querySelectorAll('.pcard .nr')).every((n) => getComputedStyle(n).whiteSpace === 'nowrap' && n.getClientRects().length === 1), streifen: Array.from(document.querySelectorAll('.pcard')).some((k) => /inset 3px 0px 0px/.test(getComputedStyle(k).boxShadow)), orange: Array.from(document.querySelectorAll('.top .dot, .nitem .ic, .pcard')).some((e) => /255, 138, 91/.test(getComputedStyle(e).backgroundColor + getComputedStyle(e).boxShadow)) }));
+    ok(form6.nr && !form6.streifen && !form6.orange, art + ': Projektnummer in einer Zeile, keine farbigen Randstreifen, kein Zeichnungsorange in der Oberfläche');
+    /* Überschriften: jede sichtbare h2/h3 im Betriebsbereich mit Punkt (oder Fragezeichen) und genau einem grünen Wort; Kicker in Grün;
+       eine Cream-Fläche je Bildschirm (Cream-Pillen außerhalb der Kopfzeile); Fußzeile mit „Vertrag widerrufen“ auch angemeldet */
+    const schirme6 = [['links'], ['link', 'l3'], ['newlink'], ['notif'], ['abrechnung'], ['bprofil'], ['preise'], ['wie']];
+    const befund6 = [];
+    for (const [sc, id] of schirme6) {
+      const r = await b6.evaluate(([sc, id]) => { if (sc === 'newlink') S.nl = null; go(sc, id || undefined); const cream = 'rgb(241, 240, 234)', sichtbar = (e) => e.getClientRects().length > 0;
+        const h = Array.from(document.querySelectorAll('.scr h2, .scr h3')).filter(sichtbar).filter((x) => !x.closest('.posc, .klaer, .amhead, .lockcard, .ein-b-karte, .tour-buehne')), schlecht = h.filter((x) => x.querySelectorAll('.ak').length !== 1 || !/[.?!]$/.test(x.textContent.trim())).map((x) => x.textContent.trim());
+        const kicker = Array.from(document.querySelectorAll('.scr .h > .eyebrow, .scr .h > div > .eyebrow')).filter(sichtbar).every((e) => getComputedStyle(e).color === 'rgb(143, 214, 148)');
+        const pillen = Array.from(document.querySelectorAll('.scr .btn, .scr .chip.primary')).filter(sichtbar).filter((b) => getComputedStyle(b).backgroundColor === cream && !b.closest('.ein-telefon')).length;
+        const fuss = document.querySelector('.foot.schlank a.foot-widerruf[href="/widerruf/"]'), fr = fuss ? fuss.getBoundingClientRect() : null;
+        return { sc: sc + (id ? ':' + id : ''), schlecht: schlecht, kicker: kicker, pillen: pillen, fuss: !!fr && fr.height >= 44 && !!document.querySelector('.foot.schlank a[href="/impressum/"]') && !!document.querySelector('.foot.schlank a[href="/datenschutz/"]') }; }, [sc, id]);
+      if (r.schlecht.length || !r.kicker || r.pillen > 1 || !r.fuss) befund6.push(JSON.stringify(r));
+    }
+    ok(!befund6.length, art + ': ' + schirme6.length + ' Bildschirme mit grünem Kicker, Überschriften mit Punkt und genau einem grünen Wort, höchstens einer Cream-Pille und der Fußzeile samt „Vertrag widerrufen“' + (befund6.length ? ': ' + befund6.join(' | ') : ''));
+    /* Avatar in Cream, Ziele ab 44 px (Schalterzeilen, Chips, Kopf), Fokus in Eingaben in Schriftfarbe */
+    const ziel6 = await b6.evaluate(() => { go('bprofil'); const av = document.querySelector('.side .av'), avOk = !av || getComputedStyle(av).backgroundColor === 'rgb(241, 240, 234)', klein = []; go('newlink'); S.nl.step = 1; render(); document.querySelectorAll('.scr .chip, .top button, .top a').forEach((e) => { const r = e.getBoundingClientRect(); if (r.width && r.height < 44) klein.push(e.textContent.trim().slice(0, 20) + ':' + Math.round(r.height)); }); document.getElementById('nl-adresse').focus(); return { av: avOk, klein: klein }; });
+    await b6.waitForTimeout(350); ziel6.fokus = await b6.evaluate(() => getComputedStyle(document.getElementById('nl-adresse')).borderColor);
+    ok(ziel6.av && !ziel6.klein.length && ziel6.fokus === 'rgb(243, 242, 238)', art + ': Avatar des Betriebs in Cream, Chips und Kopfknöpfe ab 44 px, Fokus in Schriftfarbe' + (ziel6.klein.length ? ': ' + ziel6.klein.join(', ') : ''));
+    /* Nachrichten-Vorschau: „Viele Grüße“ bleibt hinter der Linkvorschau stehen */
+    const pv6 = await b6.evaluate(() => { const el = document.getElementById('pv-msg'); return el ? el.textContent : pvHTML({ kunde: 'Familie Weber', code: 'xxxxx', du: false }); });
+    ok(/Viele Grüße/.test(pv6) && /Aufmaß für Fensterbau Brandt/.test(pv6), art + ': Vorschau der Nachricht zeigt Linkvorschau und „Viele Grüße“');
+    /* Haustür geplant: Hinweis beim Anlegen und im Projekt „Vor Ort aufnehmen“; Gebäude wie in der App */
+    const hs6 = await b6.evaluate(() => { const hin = /misst Ihr Kunde in der App nicht/.test((document.querySelector('.nl-hinweis') || {}).textContent || '') || (S.nl.plan.includes('Haustür') ? false : (S.nl.plan.push('Haustür'), render(), /misst Ihr Kunde in der App nicht/.test((document.querySelector('.nl-hinweis') || {}).textContent || ''))); const geb = Array.from(document.querySelectorAll('[data-act="nl-set"][data-k="geb"]')).map((b) => b.getAttribute('data-v')); const l = A().links.find((x) => x.kunde === 'Familie Unverschickt'); go('link', l.id); return { hin: hin, geb: geb.join(','), vorort: /Vor Ort aufnehmen/.test((document.querySelector('.note.vorort') || {}).textContent || '') }; });
+    ok(hs6.hin && hs6.vorort && /denkmal/.test(hs6.geb) && /altbau/.test(hs6.geb), art + ': Gebäude mit Denkmalschutz und Altbau; Haustür geplant: Hinweis beim Anlegen und „Vor Ort aufnehmen“ im Projekt');
+    /* Mein Betrieb: ohne Mailversand keine Schalter (ein Satz statt Attrappe), Team als „geplant“ ohne Knopf, keine Prototyp-Meldung */
+    const bp6 = await b6.evaluate(() => { go('bprofil'); const t = document.querySelector('.scr').textContent; return { schalter: document.querySelectorAll('.scr .switch').length, satz: !!document.querySelector('.b-mail-pilot'), team: /geplant/.test(t) && !/Mitglied einladen|Prototyp/.test(t) }; });
+    const preis6 = await b6.evaluate(() => { go('preise'); return document.querySelector('.scr').textContent; });
+    ok(bp6.schalter === 0 && bp6.satz && bp6.team && !/Team mit Rollen|Rollen und Statistik/.test(preis6), art + ': Benachrichtigungen ohne Mailversand als Satz statt Schalter, Team „geplant“, Plus verspricht kein Team und keine Statistik');
+    /* Zurück im Browser: Projekt → Liste, Blatt schließt, zweiter Schritt → erster, auf der Liste verlässt Zurück die Seite */
+    await b6.evaluate(() => nav('links')); await b6.waitForTimeout(300);
+    const zst = () => b6.evaluate(() => ({ s: S.screen, sheet: S.sheet ? S.sheet.k : '', schritt: S.nl ? S.nl.step : null }));
+    await b6.click('.pcard >> nth=0'); await b6.waitForTimeout(250); const z1 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(350); const z2 = await zst();
+    await b6.click('.pcard >> nth=1'); await b6.waitForTimeout(250); await b6.evaluate(() => { S.sheet = { k: 'deact', id: S.sel }; render(); }); await b6.waitForTimeout(150);
+    await b6.goBack(); await b6.waitForTimeout(350); const z3 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(350); const z4 = await zst();
+    await b6.evaluate(() => { S.nl = null; }); await b6.click('.l-neu-knopf'); await b6.waitForTimeout(250); await b6.fill('#nl-kunde', 'Familie Zurück'); await b6.click('[data-act="nl-next"]'); await b6.waitForTimeout(250);
+    await b6.goBack(); await b6.waitForTimeout(350); const z5 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(350); const z6 = await zst();
+    await b6.goBack(); await b6.waitForTimeout(600);
+    ok(z1.s === 'link' && z2.s === 'links' && z3.s === 'link' && !z3.sheet && z4.s === 'links' && z5.s === 'newlink' && z5.schritt === 0 && z6.s === 'links' && b6.url() === 'about:blank', art + ': Zurück im Browser führt Schritt für Schritt zurück (Projekt, Blatt, neues Projekt) bis zur Projektliste und erst dann aus der Seite');
+    sauber(b6, art + ': Betriebsbereich im Styleguide ohne Fehler');
+    await c6.close();
+  }
+  /* Direktlink aus der E-Mail „Aufmaß eingegangen“: /#projekt-<id> öffnet nach der Anmeldung genau dieses Projekt */
+  const c6d = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), d6 = await neueSeite(c6d);
+  await d6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await betrieb(d6, 'c1'); await d6.waitForTimeout(200);
+  await d6.goto(BASE + '/#projekt-l2', { waitUntil: 'networkidle' }); await d6.waitForTimeout(400);
+  ok(await d6.evaluate(() => S.screen === 'link' && S.sel === 'l2' && location.hash === ''), 'Direktlink /#projekt-<id> öffnet das Projekt und räumt die Adresse auf');
+  sauber(d6, 'Direktlink ins Projekt ohne Fehler'); await c6d.close();
 }
 
 /* ---------- 7. Nachbesserung: gleiches Projekt, nichts doppelt gebucht, Grenzen ---------- */
@@ -1295,7 +1374,8 @@ if (teil(10)) {
   await page.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
   await page.click('.rg-cta a[href="/#tour"]'); await page.waitForLoadState('networkidle'); await page.waitForTimeout(600);
   const tour1 = await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour');
-  await page.evaluate(() => { tourEnde(); location.hash = 'tour'; }); await page.waitForTimeout(400);
+  await page.evaluate(() => tourEnde()); await page.waitForTimeout(300); // Tour beenden räumt den eigenen Eintrag im Verlauf ab (Zurück im Browser, S6)
+  await page.evaluate(() => { location.hash = 'tour'; }); await page.waitForTimeout(400);
   ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Link „Tour“ auf der Seite für Fensterbauer öffnet die Tour (/#tour), auch als Sprungmarke auf der Startseite');
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/#fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
@@ -3312,15 +3392,39 @@ if (teil(17)) {
     for (const [n, h] of Object.entries(vorl17)) {
       await sV.setContent(h.replace('{{ .Token }}', '4829137750').replace('{{ .Email }}', 'sehr.lange.adresse.fuer.den.test@fensterbau-beispiel.de'), { waitUntil: 'load' });
       const m = await sV.evaluate(() => { const c = document.querySelector('.code'), f = document.querySelector('.codefeld'); return { quer: document.documentElement.scrollWidth - innerWidth, zeilen: Math.round(c.getBoundingClientRect().height / parseFloat(getComputedStyle(c).lineHeight)), feld: getComputedStyle(f).backgroundColor, ziffern: getComputedStyle(c).color }; });
-      const erwartet = schema === 'dark' ? ['rgb(242, 241, 237)', 'rgb(17, 17, 16)'] : ['rgb(20, 20, 20)', 'rgb(255, 255, 255)'];
+      const erwartet = ['rgb(241, 240, 234)', 'rgb(22, 22, 22)']; // nur noch die dunkle Bühne (S6): Codefeld in Cream wie die Hauptaktion, hell und dunkel gleich
       if (m.quer > 0 || m.zeilen !== 1 || m.feld !== erwartet[0] || m.ziffern !== erwartet[1]) vorlFehler17.push(n + ' ' + schema + ': ' + JSON.stringify(m));
     }
     await cV.close();
   }
   const os17 = fs17.readFileSync(path17.join(W17, 'docs/ONLINE-STELLEN.md'), 'utf8');
   if (!os17.includes('supabase/vorlagen/anmeldecode.html') || !os17.includes('supabase/vorlagen/registrierung.html') || !os17.includes('`Anmeldecode für eeziframes: {{ .Token }}`')) vorlFehler17.push('Anleitung nennt Vorlagen oder Betreff nicht');
-  ok(!vorlFehler17.length, 'Anmelde-E-Mails (Supabase-Vorlagen): genau ein Code, keine Anmeldelinks, Bilder, Skripte oder fremden Adressen, Schrift ab 13 px, Wortmarke, ohne Anrede, mit Anbieter; 10 Stellen und lange Adresse bei 360 px ohne Querscrollen, Codefeld hell und dunkel wie der Primärknopf' + (vorlFehler17.length ? ': ' + vorlFehler17.join(' | ') : ''));
+  ok(!vorlFehler17.length, 'Anmelde-E-Mails (Supabase-Vorlagen): genau ein Code, keine Anmeldelinks, Bilder, Skripte oder fremden Adressen, Schrift ab 13 px, Wortmarke, ohne Anrede, mit Anbieter; 10 Stellen und lange Adresse bei 360 px ohne Querscrollen, Codefeld in Cream wie der Primärknopf, hell und dunkel gleich' + (vorlFehler17.length ? ': ' + vorlFehler17.join(' | ') : ''));
   ok(rgA._status === 400 && rgB._status === 400 && rgC._status === 409 && rgC.neuLaden && rgD.ok && rgD.konto.acc.bedingungen.fassung === RECHT.NB_STAND && rgD.konto.acc.bedingungen.unternehmer === true && rgD.konto.acc.bedingungen.avv === true && !isNaN(Date.parse(rgD.konto.acc.bedingungen.zeit)), 'Registrierung nur als Unternehmer mit Zustimmung zur geltenden Fassung der Nutzungsbedingungen samt AVV; Fassung und Zeitpunkt stehen am Konto');
+  /* k) Benachrichtigungen an Betriebe (S6, functions/api/benachrichtigung.js): „Aufmaß eingegangen“ sofort mit Link ins Projekt und
+     ohne Maße, abschaltbar unter „Mein Betrieb“; Erinnerung an offene Links einmal je Projekt nach 3 Tagen, nicht bei abgeschalteter
+     Erinnerung, nicht für angelegte, gemessene oder eingegangene Projekte */
+  const mailB17 = 'mb17-' + Date.now() + '@beispiel.de', tokB17 = 'test.' + Buffer.from(mailB17, 'utf8').toString('base64').replace(/=+$/, '');
+  const regB17 = await post17j('/api/konto/registrieren', { firma: 'Fensterbau Post ' + Date.now(), ap: 'Paula Post', tel: '0221 8' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, tokB17);
+  const wB17 = [{ name: 'Küche', w: 1230, h: 1410, el: { w: 1230, h: 1410 }, mo: { hm: 1440, hl: 1440, hr: 1440, wm: 1260, wt: 1260, wb: 1260 }, fotos: 0 }];
+  const pjB17 = await post17j('/api/konto/projekte', { kunde: 'Familie Brief', plan: ['Fenster'], days: 14 }, tokB17), lB17 = ((pjB17.konto || {}).acc || { links: [{}] }).links[0];
+  const amB17 = await post17j('/api/aufmass', { v: 1, b: lB17.code, w: wB17, p: { gebaeude: 'efh' } });
+  await new Promise((r) => setTimeout(r, 300));
+  const pB17 = ((await fetch(B7 + '/api/test/post').then((r) => r.json())).post || []).filter((m) => m.an === mailB17);
+  await fetch(B7 + '/api/konto', { method: 'PATCH', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + tokB17 }, body: JSON.stringify({ prefs: { mail: false, remind: true } }) });
+  const pj2B17 = await post17j('/api/konto/projekte', { kunde: 'Familie Still', plan: ['Fenster'], days: 14 }, tokB17), l2B17 = ((pj2B17.konto || {}).acc || { links: [{}] }).links[0];
+  const am2B17 = await post17j('/api/aufmass', { v: 1, b: l2B17.code, w: wB17.map((w) => Object.assign({}, w, { name: 'Bad' })), p: { gebaeude: 'efh' } });
+  await new Promise((r) => setTimeout(r, 300));
+  const p2B17 = ((await fetch(B7 + '/api/test/post').then((r) => r.json())).post || []).filter((m) => m.an === mailB17);
+  ok(regB17.ok && amB17.ok && am2B17.ok && pB17.length === 1 && /^Aufmaß eingegangen: Familie Brief/.test(pB17[0].betreff) && pB17[0].html.includes('/#projekt-' + lB17.id) && /1 Position/.test(pB17[0].html) && !/1\.2[36]0|1\.4[14]0/.test(pB17[0].html) && p2B17.length === 1, 'E-Mail an den Betrieb beim Eingang: Kunde, Anzahl, Link ins Projekt, keine Maße; abgeschaltet kommt keine');
+  await import(url17.pathToFileURL(path17.join(W17, 'web/assets/modell.js')).href);
+  const benM17 = await import(url17.pathToFileURL(path17.join(W17, 'functions/api/benachrichtigung.js')).href), XB17 = globalThis.Abrechnung, jetztB17 = Date.now();
+  const altB17 = XB17.datum(jetztB17 - 5 * 864e5), LB17 = (id, status, created, extra) => Object.assign({ id: id, code: 'c' + id, nr: 'P-' + id, kunde: 'Kunde ' + id, status: status, progress: 0, created: created, expires: XB17.dateIn(30, jetztB17), log: {} }, extra || {});
+  const erB17 = await sp17.betriebAnlegen({ auth_user: 'u-er17', mail: 'er17@beispiel.de', name: 'Erinnerung GmbH', plz: '50667', tel_norm: '02219917', name_norm: 'erinnerung17', daten: { ap: 'Eva Erin', mail: 'er17@beispiel.de', prefs: { mail: true, remind: true }, links: [LB17('a', 'gesendet', altB17), LB17('b', 'geoeffnet', altB17), LB17('c', 'gesendet', XB17.datum(jetztB17)), LB17('d', 'arbeit', altB17, { progress: 2 }), LB17('e', 'erstellt', altB17), LB17('f', 'eingegangen', altB17)] } });
+  await sp17.betriebAnlegen({ auth_user: 'u-aus17', mail: 'aus17@beispiel.de', name: 'Ohne Erinnerung GmbH', plz: '50667', tel_norm: '02219918', name_norm: 'ohneerinnerung17', daten: { mail: 'aus17@beispiel.de', prefs: { remind: false }, links: [LB17('g', 'gesendet', altB17)] } });
+  const er1B17 = await benM17.erinnerungenSenden(k17, sp17, {}), er2B17 = await benM17.erinnerungenSenden(k17, sp17, {});
+  const erMailsB17 = postM17.attrappePost.filter((m) => /^(er17|aus17)@/.test(m.an)), erNachB17 = await sp17.betriebHolen(erB17.id || (erB17[0] || {}).id);
+  ok(er1B17.gesendet >= 1 && er2B17.gesendet === 0 && erMailsB17.length === 1 && erMailsB17[0].an === 'er17@beispiel.de' && /2 Kunden haben noch nicht gemessen/.test(erMailsB17[0].betreff) && erMailsB17[0].html.includes('/#projekt-a') && erMailsB17[0].html.includes('/#projekt-b') && !erMailsB17[0].html.includes('/#projekt-c') && !!erNachB17 && erNachB17.daten.links.filter((l) => l.erinnert).map((l) => l.id).join(',') === 'a,b', 'Erinnerung an offene Links: einmal je Projekt nach 3 Tagen, nur verschickt oder geöffnet und ohne Maß, abschaltbar');
   aus17();
 }
 

@@ -8,6 +8,7 @@ import { GRENZEN, zuText, langerCode, kennung, ohneBild, metaMischen, zeitKappen
 import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
 import { NB_STAND } from './recht.js';
 import { ablage, linkOrdner, fotoIds, fotosLinkAufraeumen } from './fotos.js';
+import { eingangMelden } from './benachrichtigung.js';
 
 const X = () => globalThis.Abrechnung;
 const EIN = () => globalThis.Einladung;
@@ -331,6 +332,8 @@ export const KONTO = {
     if (!r.ok) throw new ApiFehler(r.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : r.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400, r.art === 'schon' && r.l && X().linkZu(r.l) === 'eingegangen' ? { zu: 'eingegangen', runde: r.l.runde || 1, seit: r.l.eingegangenAt || 0 } : undefined); // schon da: die App zeigt „schon erledigt“
     const nb = r.art === 'nb' || r.art === 'nb-neu';
     zaehlen(ctx, nb ? 'ereignis:nachbesserung' : 'ereignis:aufmass_gesendet');
+    /* E-Mail an den Betrieb, wenn er sie unter „Benachrichtigungen“ nicht abgeschaltet hat (benachrichtigung.js) */
+    if (r.l) ctx.waitUntil(eingangMelden(ctx, row, r, nb).catch(() => false));
     /* Fotos, die kein Fenster des eingegangenen Aufmaßes mehr nennt, sind überholt (neu fotografiert, Fenster gelöscht) */
     if (r.l && r.l.aufmass) ctx.waitUntil(fotosLinkAufraeumen(ctx.k, code, fotoIds(r.l.aufmass.windows)).catch(() => 0));
     /* Zwischenstand als gesendet vermerken (für die Zentrale und das Aufräumen) und auf den gesendeten Stand bringen, außer bei einer

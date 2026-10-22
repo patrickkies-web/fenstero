@@ -13,7 +13,7 @@ mit Rand. Unten jeweils eine Reihe Haken-Chips; Fließtext steht nie auf dem sic
    Platz für die Chips.
 2. Datei nach `fotos-roh/<name>.jpg` (oder .png, .webp) legen; der Ordner bleibt außerhalb von Git.
 3. `python3 scripts/fotos.py` erzeugt `web/bilder/foto/<name>.webp` in der richtigen Größe (WebP, Qualität 82, etwa 100 bis 250 KB).
-4. Einchecken und veröffentlichen. Die Seiten verweisen schon auf die Dateien; bis dahin steht dort ein Platzhalter („Foto folgt“).
+4. Einchecken und veröffentlichen. Die Seiten verweisen schon auf die Dateien; bis dahin steht dort ein neutraler Platzhalter ohne Text (dunkle Fläche, Fenster, Licht am Boden), damit Besucher weder „Foto folgt“ noch Dateipfade sehen. Nur die Platzhalter neu schreiben, ohne echte Fotos anzufassen: `python3 scripts/fotos.py` erzeugt sie nur dort, wo noch keine Datei liegt; `--platzhalter` überschreibt alle Plätze, auch echte Fotos.
 
 Für die beiden Startbilder der Startseite gilt: Das Foto wird nicht in eine Karte gesetzt, sondern per CSS beschnitten und an den
 Rändern ausgeblendet. Das Motiv steht darum am besten in der Mitte oder rechts davon, links und unten darf Raum sein, der im
