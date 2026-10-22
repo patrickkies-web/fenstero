@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Muster Cover (h01)</title>
+<link rel="stylesheet" href="vorlage.css">
+</head>
+<body>
+<!-- Muster Cover mit Foto: Foto randlos oben, Kopfzeile und Textblock darunter auf dem dunklen Grund.
+     Headline display-xl (172px), 3 Zeilen von Hand umbrochen, genau ein Wort in .ef-gruen.
+     Foto: Slot <id>-foto; fehlt bilder/<id>-foto.*, nimmt render.mjs data-ersatz. Bildausschnitt über --ef-fp. -->
+<main class="ef-buehne ef-buehne--foto">
+  <figure class="ef-foto" style="--ef-fp: 50% 0%">
+    <img data-slot="h01-foto" data-ersatz="bar-werkstatt.webp" src="../bilder/bar-werkstatt.webp" alt="Bär in Arbeitskleidung prüft an der Hobelbank ein Aufmaß auf dem Tablet.">
+  </figure>
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Warum · 1/2</span>
+  </header>
+  <div class="ef-text">
+    <p class="ef-kicker">Für Fensterbauer · Teil 1 von 6</p>
+    <h1 class="ef-display-xl">Aufmaß<br>ohne<br><span class="ef-gruen">Anfahrt.</span></h1>
+    <p class="ef-lead">Sie schicken einen Link. Ihr Kunde misst selbst, Schritt für Schritt geführt.</p>
+    <ul class="ef-chips">
+      <li class="ef-chip">Maße</li>
+      <li class="ef-chip">Fotos</li>
+      <li class="ef-chip">Öffnungsarten</li>
+      <li class="ef-chip">Positionen</li>
+    </ul>
+  </div>
+</main>
+</body>
+</html>

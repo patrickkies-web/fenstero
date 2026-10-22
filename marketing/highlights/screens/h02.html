@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h02 · Warum · 975 € oder 108 €.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* screen-lokal: Rechenkarte mit zwei Zeilen (vor Ort, mit eeziframes) und der Annahme darunter; Werte in text, nicht in Grün */
+  .h02-rechnung { display: flex; flex-direction: column; gap: 0 }
+  .h02-rechnung > * + * { margin-top: 0 }
+  .h02-posten { display: flex; flex-direction: column; gap: 6px }
+  .h02-posten + .h02-posten { margin-top: 32px; padding-top: 32px; border-top: var(--ef-border) solid var(--ef-line) }
+  .h02-betrag { font-variant-numeric: tabular-nums }
+  .h02-annahme { margin-top: 32px }
+</style>
+</head>
+<body>
+<!-- h02 Inhalt Kapitel „Warum“ (2/2): Rechnung „Rechnen Sie nach“ mit den Standardwerten des Rechners auf der Website (12 Erstaufmaße, 75 Min., 65 €),
+     gerechnet auf den Tarif, den das Preiskapitel zeigt (h19, h20): Start, keine Grundgebühr, 9 € netto je Projekt. Dieser Preis gilt dauerhaft, ohne Stichtag.
+     Eigene Karte statt Aufnahme: Der Rechner auf der Website zeigt den günstigsten Tarif (bei 12 Projekten Abo 10 mit Grundbetrag); das passte nicht zu
+     „Keine Grundgebühr“ im Preiskapitel. Die Karte nimmt dieselben Formeln und Texte wie der Rechner.
+     Belege: web/assets/portal.js:490-495 (roiCalc: Standardwerte 12, 75 Min., 65 €; „Vor Ort im Monat“, „… Stunden unterwegs und beim Kunden“, „Mit eeziframes“,
+     Annahme-Zeile), :497-502 (roiVals: 12 × 75 / 60 × 65 = 975 €, 15 Stunden; Start = n × projekt, Planzeile „12 Projekte × 9 € netto (Start)“),
+     functions/api/umgebung.js:100 (projekt: num(env.PREIS_PROJEKT, 9), ohne Stichtag), web/nutzungsbedingungen/index.html:44
+     (Start: keine Grundgebühr, danach 9 € je Projekt). 15 Stunden bei 8 Stunden je Arbeitstag = 1,9 Arbeitstage („fast 2“). -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Warum · 2/2</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Rechnen Sie nach</p>
+      <h2 class="ef-display">975&nbsp;€ oder<br><span class="ef-gruen">108&nbsp;€.</span></h2>
+      <p class="ef-lead">12 Erstaufmaße vor Ort kosten 15 Stunden<br>im Monat, fast 2 Arbeitstage. Rechnen Sie<br>mit Ihren Zahlen auf eeziframes.com.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip ef-chip--ohne">12 Termine im Monat</li>
+        <li class="ef-chip ef-chip--ohne">75 Min. mit Fahrt</li>
+        <li class="ef-chip ef-chip--ohne">65&nbsp;€ je Stunde</li>
+      </ul>
+    </div>
+    <div class="ef-karte h02-rechnung">
+      <div class="h02-posten">
+        <p class="ef-meta">Vor Ort im Monat</p>
+        <p class="ef-titel h02-betrag">975&nbsp;€</p>
+        <p class="ef-koerper">15 Stunden unterwegs und beim Kunden</p>
+      </div>
+      <div class="h02-posten">
+        <p class="ef-meta">Mit eeziframes im Monat, Tarif Start</p>
+        <p class="ef-titel h02-betrag">108&nbsp;€</p>
+        <p class="ef-koerper">12 Projekte × 9&nbsp;€ netto, keine Grundgebühr</p>
+      </div>
+      <p class="ef-meta h02-annahme">Annahme: Jedes Erstaufmaß ersetzt einen Termin fürs erste Angebot. Das Feinaufmaß vor der Fertigung bleibt.</p>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 2 von 2">
+      <li class="ef-fertig"></li><li class="ef-jetzt"></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>

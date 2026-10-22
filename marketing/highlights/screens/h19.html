@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h19 · Preise · Links kosten nichts.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+</head>
+<body>
+<!-- h19 Cover Kapitel „Preise“ (1/2). Foto randlos oben, weich in #161616 auslaufend, Text erst auf dem dunklen Grund darunter.
+     Foto-Slot h19-foto (Motiv laut storyboard.json: Bär in Arbeitskleidung lehnt mit Kaffeebecher am geparkten Firmentransporter im Hof
+     vor seiner Werkstatt, Fensterrahmen unter dem Vordach, späte Nachmittagssonne). Liegt bilder/h19-foto.(png|jpg|webp) vor, nimmt
+     render.mjs diese Datei, sonst das Ersatzfoto bilder/bar-werkstatt.webp (= web/bilder/foto/start-fensterbauer.webp, 1120 × 1400).
+     Besetzung: Bär = Fensterbauer, Betrieb. Nur dauerhaft gültige Preise, kein Einführungspreis, kein Abo-Preis auf diesem Screen.
+     Headline „Links kosten nichts.“: Projekte anlegen und Links verschicken ist in jedem Tarif kostenlos (nutzungsbedingungen:48, § 4 letzter
+     Satz: „Projekte anlegen, Links und Einladungslisten verschicken und Nachbesserungen kosten nichts.“). Was kostet, sagt die Lead.
+     Belege: web/nutzungsbedingungen/index.html:44 (§ 4 Start: keine Grundgebühr, die ersten 3 Projekte mit eingegangenem Aufmaß kostenlos,
+     danach 9 € je Projekt), functions/api/umgebung.js:100 (PREIS_PROJEKT 9, FREI_PROJEKTE 3; EINFUEHRUNG in umgebung.js:50 betrifft nur
+     Aufmaßblatt, Abo und Plus), nutzungsbedingungen:51-52 (§ 5 Abs. 1-2: berechnet erst bei Eingang eines Aufmaßes, für die kostenlosen
+     Projekte keine Zahlungsart), web/assets/portal.js:590 (Tarif Start: „Nachbesserungen inklusive“, „Zahlungsart erst ab dem 4. Projekt“),
+     portal.js:588 (Preisseite: „Ihr Kunde zahlt nichts und braucht kein Konto“, alle Preise netto), nutzungsbedingungen:79-88 (§ 11 Kundenschutz). -->
+<main class="ef-buehne ef-buehne--foto">
+  <figure class="ef-foto" style="--ef-fp: 50% 10%">
+    <img data-slot="h19-foto" data-video-fp="50% 11%" data-video-voll="85%" data-ersatz="bar-werkstatt.webp" src="../bilder/bar-werkstatt.webp" alt="Bär in Arbeitskleidung in seiner Werkstatt, hinter ihm lehnen fertige Fensterrahmen im Licht der Nachmittagssonne.">
+  </figure>
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Preise · 1/2</span>
+  </header>
+  <div class="ef-text">
+    <p class="ef-kicker">Teil 6 von 6 · Preise</p>
+    <h1 class="ef-display-xl">Links<br>kosten<br><span class="ef-gruen">nichts.</span></h1>
+    <p class="ef-lead">Sie zahlen erst, wenn ein Aufmaß eingeht. Die ersten 3&nbsp;Projekte sind frei, danach 9&nbsp;€ netto.</p>
+    <ul class="ef-chips">
+      <li class="ef-chip">Keine Grundgebühr</li>
+      <li class="ef-chip">Zahlungsart ab Projekt 4</li>
+      <li class="ef-chip">Nachbesserung kostenlos</li>
+      <li class="ef-chip">Ihr Kunde zahlt nichts</li>
+      <li class="ef-chip">Kundenschutz nach § 11</li>
+    </ul>
+  </div>
+</main>
+</body>
+</html>

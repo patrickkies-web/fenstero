@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h14 · Ergebnis · Aufmaß kommt sortiert.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+</head>
+<body>
+<!-- h14 Cover Kapitel „Ergebnis“ (1/5). Foto randlos oben, weich in #161616 auslaufend, Text erst auf dem dunklen Grund darunter.
+     Foto-Slot h14-foto (Motiv laut storyboard.json: Bär am Schreibtisch im Werkstattbüro mit Tablet und ausgedrucktem Aufmaßblatt).
+     Liegt bilder/h14-foto.(png|jpg|webp) vor, nimmt render.mjs diese Datei, sonst das Ersatzfoto bilder/bar-werkstatt.webp
+     (= web/bilder/foto/start-fensterbauer.webp, 1120 × 1400). Besetzung: Bär = Fensterbauer, Betrieb.
+     Belege: web/assets/portal.js:532 (So läuft es, Schritt 4 „Aufmaß kommt an: Sortiert nach Positionen, mit Bestellmaß-Vorschlag und
+     der Einbausituation aus den Fotos.“), portal.js:530 („… alles, was Sie für ein erstes Angebot brauchen … sortiert nach Positionen.“),
+     portal.js:764 (Karte „Mit dem Kunden zu klären“), portal.js:1227 (pdf-am: Aufmaßblatt als PDF). Keine 3-D-Ansicht im Betriebsbereich behauptet. -->
+<main class="ef-buehne ef-buehne--foto">
+  <figure class="ef-foto" style="--ef-fp: 50% 22%">
+    <img data-slot="h14-foto" data-video-fp="50% 22%" data-video-voll="93%" data-ersatz="bar-werkstatt.webp" src="../bilder/bar-werkstatt.webp" alt="Bär in Arbeitskleidung prüft in seiner Werkstatt ein eingegangenes Aufmaß auf dem Tablet, hinter ihm lehnen Fensterrahmen.">
+  </figure>
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Ergebnis · 1/5</span>
+  </header>
+  <div class="ef-text">
+    <p class="ef-kicker">Teil 5 von 6 · Ergebnis</p>
+    <h1 class="ef-display-xl">Aufmaß<br>kommt<br><span class="ef-gruen">sortiert.</span></h1>
+    <p class="ef-lead">Nach Positionen, mit Fotos und<br>Bestellmaß. Bereit fürs erste Angebot.</p>
+  </div>
+</main>
+</body>
+</html>

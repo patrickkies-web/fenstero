@@ -1,0 +1,191 @@
+/* eeziframes · Vorlage für Story-Screens (Instagram-Highlights), 1080 × 1920 px
+   Werte aus marketing/highlights/BEITRAGS-LINIE.txt (Instagram-Linie) und web/assets/gemeinsam.css.
+   Ein Screen lädt nur diese Datei. Alles ist mit ef- benannt; Aufbau siehe muster-*.html und README.md.
+   Regeln in Kürze: Bühne #161616, Inter 500 bis 800, Grün nur für Kicker, Haken, Fortschritt und genau ein Wort je Headline,
+   Cream nur für die eine Hauptaktion, Karten #1f1f1f mit 2px-Rand #2b2b2b, keine Verläufe und keine Schatten.
+   Einzige Ausnahme: das randlose Foto oben (.ef-foto) läuft weich in den Grund aus. Text steht nie auf dem sichtbaren Foto. */
+
+/* ---------- Schrift: Inter, lokal aus web/fonts (SIL OFL), kein Netz ---------- */
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-display: block; font-weight: 100 900;
+  src: url('../../../web/fonts/inter-latin-ext-wght-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-display: block; font-weight: 100 900;
+  src: url('../../../web/fonts/inter-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- Werte der Beitragslinie ---------- */
+:root {
+  /* Farben */
+  --ef-ground: #161616;          /* Bühne, immer der Hintergrund */
+  --ef-surface: #1f1f1f;         /* nur als Karte, immer mit 2px-Rand in line */
+  --ef-line: #2b2b2b;
+  --ef-text: #f3f2ee;            /* Headlines, Namen, Listenzeilen */
+  --ef-text-2: #c9c8c3;          /* Lead, Erklärsätze, Chips */
+  --ef-muted: #93928d;           /* nur Labels und Nebenzeilen */
+  --ef-accent: #8fd694;          /* Kicker, Haken, Fortschritt, genau ein Wort je Headline */
+  --ef-accent-soft: rgba(143, 214, 148, .14); /* hinter grünen Icons, Marken und positiven Chips */
+  --ef-cream: #f1f0ea;           /* eine Fläche je Screen: die Hauptaktion */
+  --ef-on-cream: #161616;
+
+  /* Format Story 9:16 und Sicherheitszonen */
+  --ef-w: 1080px; --ef-h: 1920px;
+  --ef-safe-top: 250px;          /* oben frei: Instagram-Kopf (Fortschritt, Profil) */
+  --ef-safe-bottom: 250px;       /* unten frei: Antwortfeld */
+  --ef-pad-x: 84px;              /* Rand links und rechts */
+  --ef-gap-block: 48px;          /* zwischen Kopfzeile, Inhalt, Karte, Fußzeile */
+  --ef-gap-stack: 28px;          /* zwischen Kicker, Headline, Lead, Chips */
+
+  /* Form */
+  --ef-r-card: 32px; --ef-r-inner: 18px; --ef-pill: 999px; --ef-border: 2px;
+
+  /* Schrift */
+  --ef-font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --ef-fs-display-xl: 172px;     /* Cover-Headline, 3 Zeilen */
+  --ef-fs-display: 128px;        /* Inhalt und Abschluss, 2 Zeilen */
+  --ef-fs-title: 56px;           /* Betrieb, Kunde, Ergebnis in Karten */
+  --ef-fs-lead: 40px;            /* Lead (500), Listenzeilen (700) */
+  --ef-fs-wordmark: 38px;
+  --ef-fs-button: 34px;
+  --ef-fs-card-body: 32px; --ef-fs-item: 30px; --ef-fs-meta: 28px;
+  --ef-fs-kicker: 26px; --ef-fs-chip: 26px;
+  --ef-fs-label: 22px;           /* einzige Größe unter 26px */
+  --ef-track-display: -0.04em; --ef-track-kicker: .2em; --ef-track-label: .18em;
+
+  /* Strich-Icons (24er-Raster, runde Enden) als Maske, Farbe kommt aus background */
+  --ef-i-haken: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");
+  --ef-i-kreuz: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E");
+  --ef-i-pfeil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E");
+  --ef-i-tippen: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8.5a5.5 5.5 0 0 1-5.5 5.5H11a5 5 0 0 1-4.3-2.4L4.3 13.4A1.4 1.4 0 0 1 6.6 12L8 14'/%3E%3C/svg%3E");
+}
+
+/* ---------- Grundlagen ---------- */
+*, *::before, *::after { box-sizing: border-box }
+html, body { margin: 0; padding: 0; width: var(--ef-w); height: var(--ef-h); overflow: hidden; background: var(--ef-ground) }
+body { font-family: var(--ef-font); font-weight: 500; color: var(--ef-text); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; hyphens: none; font-kerning: normal }
+h1, h2, h3, p, ul, ol, figure { margin: 0; padding: 0 }
+ul, ol { list-style: none }
+img { display: block; max-width: 100% }
+
+/* ---------- Bühne: 1080 × 1920, Inhalt nur innerhalb der Sicherheitszonen ----------
+   Kinder: .ef-kopf, .ef-inhalt, .ef-fuss. Sie verteilen sich über die Höhe, dazwischen mindestens gap-block. */
+.ef-buehne {
+  position: relative; width: var(--ef-w); height: var(--ef-h); overflow: hidden; background: var(--ef-ground);
+  padding: var(--ef-safe-top) var(--ef-pad-x) var(--ef-safe-bottom);
+  display: flex; flex-direction: column; justify-content: space-between; gap: var(--ef-gap-block);
+}
+/* Cover mit Foto: Foto randlos ab Oberkante, darunter Kopfzeile und Textblock auf dem dunklen Grund, unten 250px frei */
+.ef-buehne--foto { padding-top: 0; justify-content: flex-end }
+/* Cover ohne Foto: Textblock unten, Kopfzeile oben */
+.ef-buehne--cover .ef-inhalt { margin-top: auto }
+/* Inhalt oben statt mittig, wenn die Karte unten anliegen soll */
+.ef-buehne--oben { justify-content: flex-start }
+.ef-buehne--oben .ef-fuss { margin-top: auto }
+
+.ef-inhalt { display: flex; flex-direction: column; gap: var(--ef-gap-block); min-height: 0 }
+
+/* ---------- Kopfzeile: Wortmarke links, Label (Kapitel + Zählung) rechts ---------- */
+.ef-kopf { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 32px }
+.ef-wortmarke { font-size: var(--ef-fs-wordmark); line-height: 1.2; font-weight: 800; letter-spacing: -0.02em; color: var(--ef-text); white-space: nowrap }
+.ef-label { font-size: var(--ef-fs-label); line-height: 1.2; font-weight: 800; letter-spacing: var(--ef-track-label); text-transform: uppercase; color: var(--ef-muted); white-space: nowrap }
+
+/* ---------- Textblock: Kicker, Headline, Lead, Chips ---------- */
+.ef-text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--ef-gap-stack) }
+.ef-kicker { font-size: var(--ef-fs-kicker); line-height: 1.25; font-weight: 800; letter-spacing: var(--ef-track-kicker); text-transform: uppercase; color: var(--ef-accent) }
+.ef-display-xl, .ef-display { font-weight: 800; letter-spacing: var(--ef-track-display); color: var(--ef-text); white-space: nowrap }
+.ef-display-xl { font-size: var(--ef-fs-display-xl); line-height: .94; margin-left: -6px }
+.ef-display { font-size: var(--ef-fs-display); line-height: .96; margin-left: -4px }
+.ef-gruen { color: var(--ef-accent) }           /* genau ein Wort je Headline */
+.ef-lead { font-size: var(--ef-fs-lead); line-height: 1.3; font-weight: 500; color: var(--ef-text-2); text-wrap: pretty; max-width: 100% }
+.ef-text > .ef-chips { margin-top: 8px }
+
+/* weitere Textrollen */
+.ef-titel { font-size: var(--ef-fs-title); line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; color: var(--ef-text) }
+.ef-koerper { font-size: var(--ef-fs-card-body); line-height: 1.4; font-weight: 500; color: var(--ef-text-2) }
+.ef-meta { font-size: var(--ef-fs-meta); line-height: 1.35; font-weight: 500; color: var(--ef-muted) }
+.ef-zeile { font-size: var(--ef-fs-lead); line-height: 1.25; font-weight: 700; color: var(--ef-text) }  /* Listenzeile (list) */
+
+/* ---------- Chips mit grünem Haken (Strich-Icon) ---------- */
+.ef-chips { display: flex; flex-wrap: wrap; gap: 16px }
+.ef-chip {
+  display: inline-flex; align-items: center; gap: 12px; height: 64px; padding: 0 28px 0 20px;
+  border: var(--ef-border) solid var(--ef-line); border-radius: var(--ef-pill);
+  font-size: var(--ef-fs-chip); line-height: 1; font-weight: 700; color: var(--ef-text-2); white-space: nowrap;
+}
+.ef-chip::before { content: ''; flex: none; width: 30px; height: 30px; background: var(--ef-accent); -webkit-mask: var(--ef-i-haken) center / contain no-repeat; mask: var(--ef-i-haken) center / contain no-repeat }
+.ef-chip--positiv { background: var(--ef-accent-soft); border-color: transparent }
+.ef-chip--nein { color: var(--ef-muted) }        /* Ausschluss: grau mit Kreuz, nie rot */
+.ef-chip--nein::before { background: var(--ef-muted); -webkit-mask-image: var(--ef-i-kreuz); mask-image: var(--ef-i-kreuz) }
+.ef-chip--ohne { padding: 0 28px } .ef-chip--ohne::before { display: none }
+.ef-chips--spalte { flex-direction: column; align-items: flex-start }
+
+/* Checkliste (item 30px), wenn Chips zu breit werden: Haken links, Text darf umbrechen */
+.ef-haken { display: flex; flex-direction: column; gap: 20px }
+.ef-haken > li { position: relative; padding-left: 50px; font-size: var(--ef-fs-item); line-height: 1.3; font-weight: 600; color: var(--ef-text) }
+.ef-haken > li::before { content: ''; position: absolute; left: 0; top: .1em; width: 34px; height: 34px; background: var(--ef-accent); -webkit-mask: var(--ef-i-haken) center / contain no-repeat; mask: var(--ef-i-haken) center / contain no-repeat }
+
+/* ---------- Karte ---------- */
+.ef-karte { background: var(--ef-surface); border: var(--ef-border) solid var(--ef-line); border-radius: var(--ef-r-card); padding: 44px }
+.ef-karte > * + * { margin-top: 20px }
+
+/* ---------- Telefonrahmen für echte App-Aufnahmen: dunkler Rahmen, 2px line, große Radien, kein Schatten ----------
+   Breite über --ef-tel-b, sichtbare Höhe des Bildschirms über --ef-tel-h (schneidet unten ab), Ausschnitt über --ef-tel-pos. */
+.ef-telefon { flex: none; width: var(--ef-tel-b, 520px); padding: 14px; background: var(--ef-surface); border: var(--ef-border) solid var(--ef-line); border-radius: 68px }
+.ef-telefon > img { width: 100%; height: var(--ef-tel-h, auto); object-fit: cover; object-position: var(--ef-tel-pos, 50% 0); border-radius: 54px; background: var(--ef-ground) }
+
+/* ---------- Ausgeschnittenes Element als Karte: echter Bildausschnitt mit Rand und Radius der Karte ---------- */
+.ef-ausschnitt { position: relative; overflow: hidden; background: var(--ef-surface); border: var(--ef-border) solid var(--ef-line); border-radius: var(--ef-r-card) }
+.ef-ausschnitt > img { width: 100%; height: var(--ef-aus-h, auto); object-fit: cover; object-position: var(--ef-aus-pos, 50% 0) }
+.ef-ausschnitt--rand { padding: 24px } .ef-ausschnitt--rand > img { border-radius: var(--ef-r-inner) }
+.ef-ausschnitt--grund { background: var(--ef-ground) }   /* Ausschnitt von einer Fläche auf dem App-Grund */
+
+/* Stapel aus Ausschnitten, optional mit Marken links (je Zeile: Marke, dann Ausschnitt) */
+.ef-stapel { display: flex; flex-direction: column; gap: 24px }
+.ef-schritte { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 24px; row-gap: 24px; align-items: center }
+.ef-schritte > .ef-marke { justify-self: center }
+
+/* ---------- Marke (Ziffer im Kreis) und Klick-Badge (Pille), beide auf accent-soft ---------- */
+.ef-marke { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 72px; height: 72px; padding: 0; border-radius: var(--ef-pill); background: var(--ef-accent-soft); color: var(--ef-accent); font-size: 34px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums }
+.ef-marke--wort { padding: 0 24px; font-size: var(--ef-fs-chip) }
+.ef-klick { display: inline-flex; align-items: center; gap: 14px; height: 64px; padding: 0 28px 0 20px; border-radius: var(--ef-pill); background: var(--ef-accent-soft); color: var(--ef-accent); font-size: var(--ef-fs-chip); line-height: 1; font-weight: 800; white-space: nowrap }
+.ef-klick::before { content: ''; flex: none; width: 32px; height: 32px; background: currentColor; -webkit-mask: var(--ef-i-tippen) center / contain no-repeat; mask: var(--ef-i-tippen) center / contain no-repeat }
+
+/* ---------- Fortschrittspunkte: erledigt und aktuell in accent, offen in line ---------- */
+.ef-punkte { display: flex; align-items: center; gap: 14px }
+.ef-punkte > li { width: 16px; height: 16px; border-radius: var(--ef-pill); background: var(--ef-line) }
+.ef-punkte > li.ef-fertig { background: var(--ef-accent) }
+.ef-punkte > li.ef-jetzt { width: 56px; background: var(--ef-accent) }
+
+/* ---------- Foto-Kopf: randlos, ab Oberkante, unten weich in #161616 (wie .hero-foto in web/assets/portal.css) ----------
+   Das Foto nimmt die Höhe über dem Text ein und endet ganz transparent, bevor die Kopfzeile beginnt.
+   Bildausschnitt über --ef-fp (object-position), Länge der Ausblendung über --ef-foto-voll (bis dahin voll sichtbar). */
+.ef-foto { position: relative; flex: 1 1 0; min-height: 0; margin: 0 calc(-1 * var(--ef-pad-x)) calc(16px - var(--ef-gap-block)) }
+.ef-foto > img {
+  width: 100%; height: 100%; object-fit: cover; object-position: var(--ef-fp, 50% 0);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 var(--ef-foto-voll, 56%), rgba(0, 0, 0, .72) calc(var(--ef-foto-voll, 56%) + (100% - var(--ef-foto-voll, 56%)) * .3), rgba(0, 0, 0, .3) calc(var(--ef-foto-voll, 56%) + (100% - var(--ef-foto-voll, 56%)) * .62), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 var(--ef-foto-voll, 56%), rgba(0, 0, 0, .72) calc(var(--ef-foto-voll, 56%) + (100% - var(--ef-foto-voll, 56%)) * .3), rgba(0, 0, 0, .3) calc(var(--ef-foto-voll, 56%) + (100% - var(--ef-foto-voll, 56%)) * .62), transparent 100%);
+}
+
+/* ---------- Hauptaktion: Cream-Pille mit Pfeil im Kreis (eine je Screen) ---------- */
+.ef-cta { display: inline-flex; align-items: center; gap: 24px; height: 104px; padding: 0 16px 0 48px; border-radius: var(--ef-pill); background: var(--ef-cream); color: var(--ef-on-cream); font-size: var(--ef-fs-button); line-height: 1; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap }
+.ef-pf { position: relative; flex: none; width: 72px; height: 72px; border-radius: 50%; background: var(--ef-on-cream) }
+.ef-pf::before { content: ''; position: absolute; inset: 18px; background: var(--ef-cream); -webkit-mask: var(--ef-i-pfeil) center / contain no-repeat; mask: var(--ef-i-pfeil) center / contain no-repeat }
+
+/* ---------- Fußzeile: Fortschritt oder Hauptaktion links, Nebenzeile rechts ---------- */
+.ef-fuss { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 40px }
+.ef-fuss-text { font-size: var(--ef-fs-meta); line-height: 1.2; font-weight: 600; color: var(--ef-muted); white-space: nowrap }
+.ef-fuss-text--hell { color: var(--ef-text-2) }
+
+/* ---------- Nebeneinander: Telefon oder Ausschnitt links, Haken-Liste rechts ---------- */
+.ef-zeilen { display: flex; flex-direction: column; gap: 24px }
+.ef-split { display: flex; align-items: center; gap: 44px }
+.ef-split > :last-child { flex: 1 1 0; min-width: 0 }
+
+/* ---------- Highlight-Cover: großes Strich-Icon in accent auf accent-soft Kreis, mittig ----------
+   Instagram schneidet einen Kreis aus der Mitte; alles Wichtige liegt im Kreis. */
+.ef-hl { display: flex; align-items: center; justify-content: center; padding: 0 }
+.ef-hl-kreis { width: 760px; height: 760px; border-radius: 50%; background: var(--ef-accent-soft); color: var(--ef-accent); display: flex; align-items: center; justify-content: center }
+.ef-hl-kreis > svg { width: 420px; height: 420px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; overflow: visible }

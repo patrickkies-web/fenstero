@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>h17 · Ergebnis · Als PDF in Ihrer Farbe.</title>
+<link rel="stylesheet" href="../vorlage/vorlage.css">
+<style>
+  /* zwei Ausschnitte aus Seite 1 des Aufmaßblatts (pdftoppm -r 200, je 1560 px breit) über die volle Inhaltsbreite: Faktor etwa 0,58 */
+  .h17-stapel { flex: none }
+  .h17-stapel .ef-ausschnitt { background: #fff }
+</style>
+</head>
+<body>
+<!-- h17 Inhalt Kapitel „Ergebnis“ (4/5): zwei Ausschnitte aus Seite 1 des echten Aufmaßblatts für den Betrieb (Projekt l1 Familie Weber,
+     Download über [data-act="pdf-am"]), Datei aufnahmen/h17-aufmassblatt.pdf (6 Seiten, erzeugt mit werkzeug/ergebnis-aufnahmen.mjs).
+     Ausschnitte mit werkzeug/ergebnis-blatt-ausschnitt.mjs (pdftoppm -r 200, x 30 bis 1590):
+     aufnahmen/h17-blatt-kopf.png (y 0 bis 570: Kopf in der Betriebsfarbe von Fensterbau Brandt #0071e3, Familie Weber, Kennzahlen) und
+     aufnahmen/h17-blatt-pos1.png (y 1066 bis 1254: Position 1 Wohnzimmer mit Bestellmaß-Vorschlag). Dazwischen liegen auf dem Blatt
+     die Kästen „Ihr Kunde“ und „Eckdaten zum Projekt“; sie fehlen hier, damit Name und Bestellmaß groß genug zu lesen sind.
+     Belege: web/assets/blatt.js:56 (BRAND = Farbe des Betriebs bt.col), web/assets/portal.js:626 (Farbe bei der Registrierung),
+     blatt.js:602-609 („Alle Elemente im selben Maßstab“, Seite 2), blatt.js:167 (Fußzeile „Vor der Fertigung Feinaufmaß vor Ort.“),
+     portal.js:765 („PDF herunterladen“ und „Als Text kopieren“), portal.js:534 („Vor der Fertigung messen Sie einmal nach.“). -->
+<main class="ef-buehne">
+  <header class="ef-kopf">
+    <span class="ef-wortmarke">eeziframes</span>
+    <span class="ef-label">Ergebnis · 4/5</span>
+  </header>
+  <div class="ef-inhalt">
+    <div class="ef-text">
+      <p class="ef-kicker">Aufmaßblatt</p>
+      <h2 class="ef-display">Als PDF in<br>Ihrer <span class="ef-gruen">Farbe.</span></h2>
+      <p class="ef-lead">Je Position eine Zeichnung mit allen Maßen. Vor der Fertigung messen Sie einmal nach.</p>
+      <ul class="ef-chips">
+        <li class="ef-chip">Ihr Name im Kopf</li>
+        <li class="ef-chip">Alle Elemente im Maßstab</li>
+        <li class="ef-chip">Als Text kopieren</li>
+      </ul>
+    </div>
+    <div class="ef-stapel h17-stapel">
+      <figure class="ef-ausschnitt"><img src="../aufnahmen/h17-blatt-kopf.png" alt="Aufmaßblatt Seite 1, oberer Teil: blauer Kopf in der Betriebsfarbe mit Fensterbau Brandt, Aufmaß erfasst vom Kunden mit eeziframes, P-2026-031, eingegangen 10.10., 19:05. Darunter Aufmaß vom Kunden fürs Angebot, Familie Weber, Lindenstraße 14, 50823 Köln, Einfamilienhaus, Baujahr 1978, 4 Positionen, 5 Elemente, 8 Fotos ausgewertet, alle Maße vollständig, alle Maße in mm."></figure>
+      <figure class="ef-ausschnitt"><img src="../aufnahmen/h17-blatt-pos1.png" alt="Aufmaßblatt, Position 1 Wohnzimmer: Fenster, Dreh-Kipp DIN links, Fest, EG, 1 Stück, 2 Fotos. Blauer Kasten Bestellmaß-Vorschlag 1.759 × 1.394 mm, Öffnung minus 15 mm je Seite, minus 15 mm oben."></figure>
+    </div>
+  </div>
+  <footer class="ef-fuss">
+    <ol class="ef-punkte" aria-label="Screen 4 von 5">
+      <li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-fertig"></li><li class="ef-jetzt"></li><li></li>
+    </ol>
+    <span class="ef-fuss-text">eeziframes.com</span>
+  </footer>
+</main>
+</body>
+</html>
