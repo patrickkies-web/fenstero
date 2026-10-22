@@ -179,8 +179,12 @@
        dann gilt der Startwert als seine Wahl, nicht als Standard */
     const STD_THEMA = { griff: ['griffM', 'griffPos', 'kinder', 'stulpBed'], sfarbe: ['sfTeile', 'sfK', 'sfS'], fbi: ['fbiFarbe'], fba: ['fbaFarbe', 'fbaTiefe', 'fbaUeber', 'fbaKappe'], montage: ['leiste'] };
     const themaGewaehlt = (w, k) => (STD_THEMA[k] || []).some((d) => w[d] !== undefined && w[d] !== null && w[d] !== '');
+    /* Tiefe je Fenster: Die App merkt sich beim Speichern, wie genau dieses Fenster geplant wurde (w.tiefe, die tiefste Tiefe, mit der
+       der Kunde es gespeichert hat). Ändert er die Tiefe des Projekts danach für ein anderes Fenster, gilt für die schon gespeicherten
+       weiter ihre eigene; Fenster ohne Angabe (ältere Aufmaße) folgen dem Projekt */
+    const tiefeVon = (w, p) => (w && TIEFE_STUFE[w.tiefe] ? w.tiefe : p && TIEFE_STUFE[p.tiefe] ? p.tiefe : '');
     function nachTiefe(w, p) {
-      const t = TIEFE_STUFE[p && p.tiefe] || 2;
+      const t = TIEFE_STUFE[tiefeVon(w, p)] || 2;
       if (!w || t >= 2) return w;
       const o = Object.assign({}, w.offen || {}), std = {};
       Object.keys(START_OFFEN).forEach((k) => { if ((FRAGE_STUFE[k] || 1) > t && o[k] && !(w.offenWahl && w.offenWahl[k])) { delete o[k]; if ((k === 'einbau' ? kastenAktiv(w) : offenGilt(w, k)) && !themaGewaehlt(w, k)) std[k] = true; } });
@@ -639,7 +643,7 @@
       ];
       /* Detailangaben (AW.DETAIL, nur gewählte und passende) bei ihrer Gruppe; ohne Wahl gilt der Standard des Fensterbauers */
       G.forEach((g) => { g.standard = []; });
-      const mitTiefe = !!TIEFE_STUFE[p && p.tiefe];
+      const tw = tiefeVon(w, p), mitTiefe = !!TIEFE_STUFE[tw];
       DETAIL.forEach((d) => {
         if (!detailGilt(w, d.k)) return;
         const tx = d.zeile === false ? '' : detailText(w, d), g = G.find((y) => y.id === d.wg); if (!g) return;
@@ -668,11 +672,19 @@
       if (dg('oeffner')) t.push('elektrischer Fensteröffner');
       if (dg('luefter')) t.push(lab('luefter', w.luefter));
       const standard = []; G.forEach((g) => g.standard.forEach((x) => { if (standard.indexOf(x) < 0) standard.push(x); }));
-      return { satz: t.join(', '), offen: offenListe(w).map((k) => offenName(w, k)), tiefe: mitTiefe ? p.tiefe : '', standard: standard, gruppen: G, notizen: rest };
+      return { satz: t.join(', '), offen: offenListe(w).map((k) => offenName(w, k)), tiefe: mitTiefe ? tw : '', standard: standard, gruppen: G, notizen: rest };
     }
     /* Wie genau der Kunde geplant hat, für Kopf und Eckdaten: sie (Betrieb, Fensterbauer) „nach Ihrem Standard“, sonst neutral */
     const TIEFE_NAME = { kurz: 'Das Wichtigste', normal: 'Die üblichen Wünsche', genau: 'Alles im Detail' };
     const tiefeText = (t, sie) => (!TIEFE_NAME[t] ? '' : TIEFE_NAME[t] + (t === 'genau' ? ', jede Frage gestellt' : (t === 'kurz' ? ', alles Weitere nach ' : ', feine Details nach ') + (sie ? 'Ihrem Standard' : 'Standard des Fensterbauers')));
+    /* Für Kopf und Eckdaten des ganzen Aufmaßes: eine Tiefe für alle Fenster wie tiefeText, sonst je Tiefe die Positionen
+       („Das Wichtigste (Pos. 1), Alles im Detail (Pos. 2, 3); Weiteres nach Ihrem Standard“) */
+    function tiefeKopf(wins, p, sie) {
+      const je = {}; (wins || []).forEach((w, i) => { const t = tiefeVon(w, p); if (t) (je[t] = je[t] || []).push(i + 1); });
+      const ts = Object.keys(TIEFE_STUFE).filter((t) => je[t]);
+      if (ts.length < 2) return tiefeText(ts[0] || (p && p.tiefe), sie);
+      return ts.map((t) => TIEFE_NAME[t] + ' (Pos. ' + je[t].join(', ') + ')').join(', ') + (ts.some((t) => t !== 'genau') ? '; Weiteres nach ' + (sie ? 'Ihrem Standard' : 'Standard des Fensterbauers') : '');
+    }
     /* Öffnung in wenigen Worten (Übersichten, Kopf der Position): Flügel ohne Seitenteile, dazu Seitenteile, Oberlicht, Paneel */
     const festForm = (w) => w.form === 'rund' || w.form === 'dreieck';
     const fluegelZahl = (w) => (festForm(w) || w.art === 'fest' ? 0 : (w.sashes || sashesFor(w.teilung)).filter((x) => !x.st && x.t !== 'F').length);
@@ -955,7 +967,7 @@
     return { OPT: OPT, TYP: TYP, lab: lab, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
       DETAIL: DETAIL, detailGilt: detailGilt, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, rcText: rcText,
-      nachTiefe: nachTiefe, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
+      nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
       /* Strang S5: Aufmaß beim Betrieb und im PDF */
       sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
   })();

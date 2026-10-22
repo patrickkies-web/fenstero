@@ -301,7 +301,7 @@ window.Blatt = (() => {
     y += 12;
     const fw = AW.foerdWeg(pr), tot = num(pr.total);
     /* Wie genau geplant wurde (Detailtiefe): beim Kunden „Deine Planung“, sonst „Geplant“ mit „nach Ihrem Standard“ */
-    const tiefeT = AW.tiefeText ? AW.tiefeText(pr.tiefe, sie) : '';
+    const tiefeT = AW.tiefeKopf ? AW.tiefeKopf(wins, pr, sie) : '';
     const eck = [['Gebäude', gebText || '–'], ['Fenster im Haus', tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'], ['Zeitraum', AW.lab('zeit', pr.zeit) || '–'], ['Budget', AW.lab('budget', pr.budget) || '–'], ['Förderung', fw && fw !== 'keine' ? AW.lab('foerdweg', fw) || fw : 'keine Angabe']].concat(tiefeT ? [[V === 'kunde' ? 'Deine Planung' : 'Geplant', tiefeT]] : []);
     const kontaktZ = [['Name', pr.name || '–'], ['Ort', pr.ort || '–'], ['Telefon', pr.tel || '–'], ['E-Mail', pr.mail || '–'], ['Erreichbar', ERREICH[pr.erreich] || '–']].filter((r) => r[1] !== '–');
     if (V !== 'betrieb') {

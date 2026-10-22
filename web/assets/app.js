@@ -4093,10 +4093,17 @@ SCREENS.frage = () => {
     (designFertig ? '<button type="button" class="btn ghost anpassen" data-act="qnext">Anpassen</button><button type="button" class="btn primary" data-act="save">Speichern</button>' : '<button type="button" class="btn primary" data-act="qnext">' + (last ? sichern : 'Weiter') + '</button>') + '</div>';
   return { html: html, back: [c.i ? 'Zurück' : einstiegHier() ? 'Fenster' : 'Ergebnis', 'qprev'], fit: true, qpos: (c.i + 1) / n };
 };
-/* Kapitelleiste: das aktuelle Kapitel steht sichtbar in der Mitte (ohne Gleiten, die Leiste wird bei jedem Antippen neu gezeichnet) */
+/* Kapitelleiste: das aktuelle Kapitel steht ganz sichtbar, möglichst mittig, links beginnt ein ganzer Chip (ohne Gleiten, die Leiste wird
+   bei jedem Antippen neu gezeichnet) */
 function leisteZeigen() {
   const l = document.querySelector('.qleiste'), a = l && l.querySelector('[aria-current]'); if (!a || l.scrollWidth <= l.clientWidth) return;
-  const lr = l.getBoundingClientRect(), ar = a.getBoundingClientRect(); l.scrollLeft += (ar.left + ar.width / 2) - (lr.left + lr.width / 2);
+  const lr = l.getBoundingClientRect(), x = (el) => el.getBoundingClientRect().left - lr.left + l.scrollLeft, pad = parseFloat(getComputedStyle(l).paddingLeft) || 0, max = l.scrollWidth - l.clientWidth;
+  const mitte = x(a) + a.offsetWidth / 2 - l.clientWidth / 2;
+  /* Links steht ein ganzer Chip am Innenabstand: Kandidaten sind die Anfänge der Chips, das aktuelle Kapitel muss ganz zu sehen sein;
+     davon der, der der Mitte am nächsten liegt. Am Ende der Leiste (nichts passt) bleibt die Mitte, den Rand blendet app.css aus */
+  const ganz = (s) => x(a) - s >= pad - 1 && x(a) + a.offsetWidth - s <= l.clientWidth - pad + 1;
+  const kand = Array.from(l.children).map((c) => x(c) - pad).filter((s) => s >= 0 && s <= max + 1 && ganz(s));
+  l.scrollLeft = kand.length ? kand.reduce((b, s) => (Math.abs(s - mitte) < Math.abs(b - mitte) ? s : b)) : Math.max(0, Math.min(max, mitte));
 }
 /* Dock: Stelle merken und unten ausblenden, solange darunter noch etwas steht */
 const dockMehr = (d) => { if (d) d.classList.toggle('mehr', d.scrollHeight - d.clientHeight - d.scrollTop > 8); };
@@ -4584,7 +4591,7 @@ function fensterFp(w) { const o = Object.assign({}, w); delete o.wid; delete o.t
 /* Für die Zählung der Änderungen: ohne die Auswertung der Fotos, die Zahl der Fotos, ihre Kennungen, die Wahl „ohne Foto“ und die Notizen
    je Stelle. Eine Auswertung, die nach dem Speichern ankommt, ein neues Foto oder eine Notiz ist keine Änderung des Kunden (gleiche Regel
    wie auf dem Server) */
-function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; delete o.bilder; delete o.ohneFoto; delete o.notizen; return fensterFp(o); }
+function aenderungFp(w) { const o = Object.assign({}, w); delete o.ki; delete o.fotos; delete o.bilder; delete o.ohneFoto; delete o.notizen; delete o.tiefe; return fensterFp(o); }
 const neueWid = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const kopie = (o) => JSON.parse(JSON.stringify(o));
 const datumKurz = (ms) => { try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return ''; } };
@@ -5438,6 +5445,10 @@ function saveWin() {
   if (!nameDa(S.win)) return nameVerlangen(); // ohne Namen kein Speichern, auch nicht über „Speichern“ bei der Gestaltung
   S.designVorher = null; S.offenVorText = null; S.nameFehler = false;
   const jetzt = zeit(), w = Object.assign({}, S.win, { name: String(S.win.name).trim() });
+  /* Tiefe je Fenster (AW.tiefeVon): die tiefste, mit der der Kunde dieses Fenster gespeichert hat; ändert er die Tiefe danach für ein
+     anderes Fenster, bleibt hier, was er gefragt wurde. Zählt nicht als Änderung (aenderungFp) */
+  const tp = S.proj && TIEFE[S.proj.tiefe] ? S.proj.tiefe : '';
+  if (tp && !(TIEFE[w.tiefe] >= TIEFE[tp])) w.tiefe = tp;
   let hinweis = '';
   if (S.editIdx >= 0 && S.windows[S.editIdx]) {
     const alt = S.windows[S.editIdx], st = aendStand(alt, jetzt), anders = fensterFp(alt) !== fensterFp(w), zaehlt = aenderungFp(alt) !== aenderungFp(w);

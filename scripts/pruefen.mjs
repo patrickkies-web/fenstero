@@ -38,7 +38,8 @@
 // dazu das CSS-Modell des Umbaus in WebGL: Raffstore aus Lamellen mit Fahren und Wenden, Kleinteile als Flächen ohne Loch, Griffe nach
 // den Regeln, Zoom und Verschiebung wie die Maßlinien, Selbsttest nur bei 1:1.
 // Abschnitt 21 prüft die Detailtiefe (docs/GESTALTUNG.md): drei Tiefen mit wachsender Fragenzahl, Kapitel und „Mehr zu …“, Standard des
-// Fensterbauers ohne Klärung und ohne Zeile, Detailangaben im Code, Aufmaßblatt und Modell, RC2N/RC3, neue Formen und Bauarten im 3-D-Modell.
+// Fensterbauers ohne Klärung und ohne Zeile, Detailangaben im Code, Aufmaßblatt und Modell, RC2N/RC3, neue Formen und Bauarten im 3-D-Modell;
+// dazu die Tiefe je Fenster (ein im Wichtigsten geplantes Fenster bleibt dabei, auch wenn das nächste alles im Detail fragt).
 // Abschnitt 22 prüft den Konfigurator ohne Hürden: Der erste Tipp nach einem Textfeld zählt, Maßschilder bleiben in der Bühne,
 // Knöpfe am Sonnenschutz überdecken nichts, ein grünes Wort je Titel, Blätter linksbündig mit Fokus, Zurück nach „Wünsche ändern“;
 // dazu der Angleich an die Detailtiefe: ein Kapitelkonzept (Leiste, Kicker, Übersicht), Tiefe-Pille neben „Notiz“ mit Browser-Zurück,
@@ -4408,6 +4409,20 @@ if (teil(21)) {
   const sr21 = await a21.evaluate(() => { const w = Object.assign(demoProject()[0], { gitter: 'stab', leiste: 'beide', dicht: 'grau', sprFarbe: 'weiss', bars: [{ s: 0, d: 'h', p: 0.5 }] }); const k = specRows(w).map((r) => r.k); return { ab: QSTUFE === AW.FRAGE.stufe && QKAP === AW.FRAGE.kap, k: k, notiz: AW.notizStelle('griffM') }; });
   const ix21 = (n) => sr21.k.indexOf(n);
   ok(sr21.ab && ix21('Fenstergitter') > ix21('Einbruchschutz') && ix21('Fenstergitter') < ix21('Sonnenschutz') && ix21('Dichtung') > ix21('Sprossen') && ix21('Dichtung') < ix21('Griff') && ix21('Abdeckleisten') === ix21('Montage') + 1 && sr21.notiz === 'Griffmodell', 'Kapitel und Stufen aus AW.FRAGE; Markdown- und HTML-Export ordnen Detailzeilen bei ihrer Gruppe ein (Gitter nach dem Einbruchschutz, Dichtung bei Fenster, Abdeckleisten nach der Montage)');
+  /* Tiefe je Fenster: Pos. 1 im Wichtigsten gespeichert, danach Pos. 2 mit „Alles im Detail“. Pos. 1 behält ihre Tiefe: die nicht gefragte
+     Fensterbank außen ist kein „Weiß ich noch nicht“ und kein offener Punkt, der Kopf nennt beide Tiefen; eine andere Tiefe zählt nicht als Änderung */
+  const tj21 = await a21.evaluate(() => {
+    S.windows = []; S.proj.tiefe = 'kurz'; newWin(); Object.assign(S.win, { name: 'Küche', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
+    S.proj.tiefe = 'genau'; newWin(); Object.assign(S.win, { name: 'Bad', mo: { hm: 1480, hl: 1480, hr: 1480, wm: 1370, wt: 1370, wb: 1370 }, el: { w: 1230, h: 1410 }, w: 1230, h: 1410 }); saveWin();
+    const ws = S.windows, kl = AW.klaerung(ws, S.proj).map((r) => r.k + ':' + r.v).join('|');
+    const k1 = AW.wuensche(ws[0], S.proj), k2 = AW.wuensche(ws[1], S.proj);
+    const fp = aenderungFp(Object.assign({}, ws[0], { tiefe: 'genau' })) === aenderungFp(ws[0]);
+    const vor = { t: ws.map((w) => w.tiefe).join(), offen1: k1.offen.join(), offen2: k2.offen.join(), tiefe1: k1.tiefe, tiefe2: k2.tiefe, kl: kl, kopf: AW.tiefeKopf(ws, S.proj, true), kunde: AW.tiefeKopf(ws, S.proj, false), fp: fp };
+    S.editIdx = 0; S.win = kopie(ws[0]); saveWin(); // Pos. 1 mit „Alles im Detail“ erneut gespeichert: die tiefste Tiefe zählt, keine Änderung
+    return Object.assign(vor, { nach: S.windows[0].tiefe, aend: S.windows[0].aend });
+  });
+  const tjOk21 = tj21.t === 'kurz,genau' && !/Fensterbank außen/.test(tj21.offen1) && /Fensterbank außen/.test(tj21.offen2) && tj21.tiefe1 === 'kurz' && tj21.tiefe2 === 'genau' && !/Küche[^|]*Fensterbank außen/.test(tj21.kl) && tj21.kopf === 'Das Wichtigste (Pos. 1), Alles im Detail (Pos. 2); Weiteres nach Ihrem Standard' && /Standard des Fensterbauers$/.test(tj21.kunde) && tj21.fp && tj21.nach === 'genau' && !tj21.aend;
+  ok(tjOk21, 'Tiefe je Fenster: ein Fenster im Wichtigsten gespeichert behält seine Tiefe, wenn die nächste „Alles im Detail“ ist (keine ungefragte Fensterbank als „Weiß ich noch nicht“), der Kopf nennt beide Tiefen, erneut gespeichert zählt die tiefste, ohne Änderung' + (tjOk21 ? '' : ' (' + JSON.stringify(tj21) + ')'));
   sauber(a21, 'Detailtiefe ohne Fehler'); await ctx21.close();
 }
 
