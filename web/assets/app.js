@@ -2185,7 +2185,7 @@ const PORTAL_OPEN = PORTAL_URL;
 const PORTAL_KURZ = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + '#fensterbauer';
 const STORE = 'aufmass.v1';
-const PROJ0 = { gebaeude: 'efh', baujahr: '', total: '', zeit: '3m', budget: 'b0', foerd: false, foerdweg: '', name: '', ort: '', tel: '', mail: '', erreich: 'nm' };
+const PROJ0 = { gebaeude: 'efh', baujahr: '', total: '', zeit: '3m', budget: 'b0', foerd: false, foerdweg: '', name: '', ort: '', tel: '', mail: '', erreich: '' }; // erreich ohne Vorwahl: nur was der Kunde selbst tippt, steht auf dem Blatt
 const S = {
   screen: 'home', dir: 'fwd', betrieb: null, windows: [], win: baseWin(), editIdx: -1,
   photos: { in: null, out: null }, ai: { in: null, out: null }, aiOk: null,
@@ -2240,7 +2240,7 @@ function persist() {
   lokalSpeichern();
   entwurfPlanen();
 }
-function normProj(p) { if (p.zeit === 'sofort') p.zeit = 'asap'; if (p.zeit === 'offen') p.zeit = '12m'; if (p.gebaeude === 'altbau') p.gebaeude = 'efh'; return p; }
+function normProj(p) { if (S.betrieb) p.erreich = ''; /* der Kundenlink fragt nicht nach der Erreichbarkeit; ältere Entwürfe tragen noch die Vorwahl */ if (p.zeit === 'sofort') p.zeit = 'asap'; if (p.zeit === 'offen') p.zeit = '12m'; if (p.gebaeude === 'altbau') p.gebaeude = 'efh'; return p; }
 /* Ältere Aufmaße kennen nur roll (Rollladen): daraus wird der Sonnenschutz außen abgeleitet */
 function altAngleichen(w) { if ((!w.sart || w.sart === 'keiner') && (w.roll === 'aufsatz' || w.roll === 'vorbau')) w.sart = 'rollladen'; else if ((!w.sart || w.sart === 'keiner') && w.roll === 'behalten') w.sart = 'behalten'; return w; }
 function takeWindows(arr) {
