@@ -3,7 +3,7 @@
    Im Browser vor modell.js laden; modell.js holt sie sich auf dem Server selbst (require).
 
    Datenvertrag
-     RAL.finde(text | schlüssel) → Eintrag oder null. Erst der genaue Schlüssel ('7016', 'goak', 'db703'), sonn der eingetippte Text
+     RAL.finde(text | schlüssel) → Eintrag oder null. Erst der genaue Schlüssel ('7016', 'goak', 'db703'), sonst der eingetippte Text
        („RAL 7016“, „7016“, „Anthrazitgrau“, „DB 703“, „Golden Oak“, „Messing“, „#383E42“).
      Eintrag = { key, code, nr, name, label, hex, bg, art, familie, holz }
        key      so steht die Farbe im Fenster (w.fa, w.fi, w.sfarbe, w.ifarbe): RAL als Nummer '7016', Dekore und Sonderfarben als Kürzel
