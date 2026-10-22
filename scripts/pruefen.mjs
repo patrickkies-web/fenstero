@@ -454,8 +454,10 @@ if (teil(4)) {
   ok(alt4.h1 === 'Deine Fenster, dein Angebot.' && alt4.name === 'Fensterbau Brandt' && alt4.stil === null, 'Ältere Links ohne Profil gelten weiter: Du, Name aus dem Link, Initiale in Cream');
   // Integration S1 und S4: ein angefangenes Fenster (Entwurf) steht auf der Einladungsseite unter dem Absender, der Betrieb bleibt vorn
   await page.click('[data-act="new"]'); await page.waitForTimeout(300);
-  await page.evaluate(() => { const d = demoProject()[0]; ['mo', 'el', 'bru', 'teilung', 'sashes', 'art'].forEach((k) => { S.win[k] = JSON.parse(JSON.stringify(d[k])); }); S.win.name = 'Flur'; S.q = 'material'; go('frage'); }); await page.waitForTimeout(400);
-  await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(400);
+  await page.evaluate(() => { const d = demoProject()[0]; ['mo', 'el', 'bru', 'teilung', 'sashes', 'art'].forEach((k) => { S.win[k] = JSON.parse(JSON.stringify(d[k])); }); S.win.name = 'Flur'; S.q = 'material'; go('frage'); });
+  await page.waitForFunction(() => Object.keys(localStorage).some((k) => /\.entwurf$/.test(k) && /Flur/.test(localStorage.getItem(k))), null, { timeout: 5000 }).catch(() => {}); // Entwurf liegt (verzögert) im Browser
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForFunction(() => !!document.querySelector('.entwurf-karte') && document.getAnimations().every((a) => a.playState !== 'running' || a.effect.getTiming().iterations === Infinity), null, { timeout: 5000 }).catch(() => {}); // Blöcke stehen
   const ent4 = await page.evaluate(() => { const k = document.querySelector('.entwurf-karte'), ab = document.querySelector('.ein-start .ein-abs'), ki = document.querySelector('.ein-start-in > .eyebrow.kicker'); if (!k || !ab || !ki) return null; const rk = k.getBoundingClientRect(), ra = ab.getBoundingClientRect(), rki = ki.getBoundingClientRect(); return { reihe: ra.bottom <= rk.top && rk.bottom <= rki.top, flur: /Flur/.test(k.textContent) }; });
   ok(!!ent4 && ent4.reihe && ent4.flur, 'Einladungsseite mit angefangenem Fenster: Karte „Angefangen“ unter dem Absender und vor der Überschrift, ohne Überlappung');
   sauber(page, 'Einladungsseite ohne Fehler');
