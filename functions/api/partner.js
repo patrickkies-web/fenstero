@@ -42,7 +42,7 @@ import { PAKET_STAND, paketVerkaufStand, standText } from './recht.js';
 import { postDienst, mailRahmen, esc, mailOk } from './post.js';
 import { ablage } from './fotos.js';
 import { SICHERHEIT, SPERRE } from '../seo.js';
-import { empfaengerEinladen } from '../instanz/verwalten.js';
+import { empfaengerEinladen, cacheLeeren } from '../instanz/verwalten.js';
 import { uebergang, einrichtungUebernehmen, erstatten, eingangBestaetigen, inhaberMail, partnerMail, dateiAntwort, dateiPfad, paketVon, herkunft, schnipsel } from './bestellung.js';
 
 const P = () => globalThis.Pakete;
@@ -481,6 +481,7 @@ export const PARTNER = {
       /* entfernte Adressen weg, neue unbestätigt dazu; dann der Bestätigungslink je neuer Adresse (verwalten.js, Strang A) */
       const neue = neuListe.filter((x) => !vorher.some((y) => y.mail === x));
       await ctx.sp.instanzAendern(b.instanz, (z) => { const e = Object.assign({ mails: [] }, z.eingang); e.mails = (e.mails || []).filter((x) => neuListe.includes(x.mail)).concat(neue.map((m) => ({ mail: m, bestaetigt: null, eingeladen: null }))); z.eingang = e; });
+      await cacheLeeren(ctx, b.instanz).catch(() => false); // entfernte Adressen bekommen ab sofort nichts mehr
       for (const mail of neue) { try { await empfaengerEinladen(ctx, b.instanz, mail, 'eingang'); } catch (e) { console.log('Empfänger noch nicht eingeladen (verwalten.empfaengerEinladen)', String(e && e.message).slice(0, 80)); } }
       const jetztI = await ctx.sp.instanzHolen(b.instanz);
       ergebnis = (((jetztI && jetztI.eingang) || {}).mails || []).map((x) => ({ mail: x.mail, bestaetigt: !!x.bestaetigt }));

@@ -30,7 +30,7 @@ import { einrichtungBrutto } from './stripe.js';
 import { ablage } from './fotos.js';
 import { protokoll } from './zentrale.js';
 import { basis, HAUPTADRESSE } from '../seo.js';
-import { instanzStatus, instanzDatenLoeschen, cacheLeeren } from '../instanz/verwalten.js';
+import { instanzStatus, instanzDatenLoeschen, paketSetzen } from '../instanz/verwalten.js';
 
 const P = () => globalThis.Pakete;
 const R = () => globalThis.Instanzregeln;
@@ -491,7 +491,7 @@ export async function paketWechseln(ctx, id, ziel, o) {
   if (!b) {
     const inst = ctx.sp.instanzHolen ? await ctx.sp.instanzHolen(id) : null;
     if (inst && inst.bestellung) b = await ctx.sp.bestellungHolen(inst.bestellung);
-    else if (inst) { await ctx.sp.instanzAendern(inst.id, (z) => { z.paket = ziel; }); await cacheLeeren(ctx, inst.id).catch(() => false); await protokoll(ctx.sp, 'instanz', inst.betrieb, 'Paket gewechselt (ohne Bestellung): ' + P().PAKETE[ziel].name, { instanz: inst.id }); return { ok: true, paket: ziel }; }
+    else if (inst) { await paketSetzen(ctx, inst.id, ziel, 'ohne Bestellung'); return { ok: true, paket: ziel }; }
   }
   if (!b) throw new ApiFehler('Diese Bestellung gibt es nicht.', 404);
   return nacheinander('b:' + b.id, async () => {
@@ -500,7 +500,7 @@ export async function paketWechseln(ctx, id, ziel, o) {
     const alt = await aktuellesPaket(ctx, b);
     if (alt === ziel) return { ok: true, paket: ziel, gleich: true };
     const pa = P().preis(alt), pn = P().preis(ziel), oben = pn.monat > pa.monat, unbezahlt = b.status === 'offen' && !['bezahlt', 'laeuft'].includes((b.zahlung || {}).status);
-    if (b.instanz) { await ctx.sp.instanzAendern(b.instanz, (z) => { z.paket = ziel; }); await cacheLeeren(ctx, b.instanz).catch(() => false); }
+    if (b.instanz) await paketSetzen(ctx, b.instanz, ziel, 'Bestellung ' + (b.nr || b.id));
     let posten = false;
     if (b.abo && b.abo.id && b.abo_status !== 'beendet') await ctx.zd.paketAboAendern(b.abo.id, { paket: ziel, oben: oben });
     const p = await ctx.sp.partnerHolen(b.partner);

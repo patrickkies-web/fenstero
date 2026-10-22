@@ -408,10 +408,9 @@ export default async (h) => {
 
   /* ---------- 27.15 Instanz-Host: /partner/ und /api/partner/anmelden antworten 404 ---------- */
   const status = await h.api('plus.localhost', '/api/status');
-  if (status.json && status.json.instanz === true) {
-    const p1 = await h.api('plus.localhost', '/partner/'), p2 = await h.api('plus.localhost', '/api/partner/anmelden', { body: { mail: 'x@y.example' }, origin: true });
-    ok(p1.status === 404 && p2.status === 404, '27.15 Auf einem Instanz-Host antworten /partner/ und /api/partner/anmelden mit 404');
-  } else ok(true, '27.15 Instanz-Host: Guard in partner.js geprüft (oben, 404); die Host-Weiche (Strang A) ist in diesem Stand noch nicht da');
+  const p1 = await h.api('plus.localhost', '/partner/'), p2 = await h.api('plus.localhost', '/api/partner/anmelden', { body: { mail: 'x@y.example' }, origin: true });
+  const p3 = await h.api('plus.localhost', '/api/partner/stand'), p4 = await h.api('localhost', '/partner/');
+  ok(status.json && status.json.instanz === true && p1.status === 404 && p2.status === 404 && p3.status === 404 && !/eeziframes/i.test(p1.text) && p4.status === 200, '27.15 Auf einem Instanz-Host (Host-Weiche) antworten /partner/, /api/partner/anmelden und /api/partner/stand mit 404 ohne eeziframes; auf der Hauptdomain /partner/ 200');
 
   /* ---------- 27.14 Browser: Bestellung von „Paket wählen“ bis „Bezahlt“ (Zahlungs-Attrappe), Telefon und Schreibtisch ---------- */
   const basis = h.base('localhost');

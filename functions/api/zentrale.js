@@ -712,6 +712,7 @@ export async function aufraeumen(k, sp) {
       const [nutzer, rows, eig] = await Promise.all([anmeldungenAlle(k), sp.betriebeAlle(), sp.eigeneAlle ? sp.eigeneAlle() : null]);
       if (nutzer && Array.isArray(rows) && eig !== undefined) {
         const mit = new Set(rows.map((r) => r.auth_user).filter(Boolean)); // Anmeldungen mit Betrieb oder mit gesichertem Aufmaß bleiben
+        if (sp.geschuetzteNutzer) (await sp.geschuetzteNutzer()).forEach((u) => mit.add(u)); // Kundenkonten der Partner und Dashboard-Zugänge der Instanzen bleiben
         (eig || []).filter(lebt).forEach((e) => mit.add(e.nutzer));
         for (const u of nutzer) {
           const zuletzt = Math.max(Date.parse(u.erstellt || '') || jetzt, Date.parse(u.zuletzt || '') || 0);
@@ -750,6 +751,7 @@ export async function aufraeumen(k, sp) {
         if (out.entwuerfe + out.entwuerfeGeleert >= 200) break;
         let row = byId.get(e.betrieb);
         if (!row) { try { row = await sp.betriebHolen(e.betrieb); } catch (err) { out.ok = false; continue; } if (row) byId.set(row.id, row); } // die Liste kann gekürzt sein; bei einem Fehler nichts löschen
+        if (row && ((row.daten && row.daten.instanz) || (e.meta && e.meta.instanz))) continue; // Instanzen räumt anfragenAufraeumen auf (eingang.js); ohne Betriebszeile weg wie unten
         const l = row ? ((row.daten || {}).links || []).find((x) => x.code === e.code) : null, still = jetzt - (Date.parse(e.updated_at || '') || jetzt);
         if (!row || !l) { if (await sp.entwurfLoeschen(e.code)) { out.entwuerfe++; await fotosLinkLoeschen(k, e.code); } continue; } // Link weg: seine Fotos auch
         const zu = X().linkZu(l, jetzt), ein = Number(l.eingegangenAt) || 0;

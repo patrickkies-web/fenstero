@@ -133,7 +133,33 @@ web/assets/blatt.js (A):            Blatt.pdf({ variante: 'betrieb'|'anfrage', k
 web/assets/pakete.js, web/assets/instanzregeln.js (S0, fertig)
 ```
 
-Stubs werfen `ApiFehler` 501 („noch nicht gebaut“), bis ihr Strang sie baut; die Läufe der Cron-Weiche (`versandNachholen`, `anfragenAufraeumen`, `bestellungenLauf`, `instanzenPruefen`, `einladungenErinnern`) tun bis dahin nichts, `paketObjekt` sagt nein (Stripe-Webhooks landen beim Altbestand), `instanzVon` liefert `null` (jeder Host ist Hauptdomain), `paketeSeite` ändert nichts.
+Stubs werfen `ApiFehler` 501 („noch nicht gebaut“), bis ihr Strang sie baut; die Läufe der Cron-Weiche tun bis dahin nichts. Nach Welle 1 sind nur noch die Module von C (`zentrale-instanzen.js`, `zentrale-bestellungen.js`, `cloudflare.js` mit `instanzenPruefen`), E (`dashboard.js` mit `einladungenErinnern`) und F (`pakete-seite.js`, Datenschutz in `functions/instanz/recht.js`) Stubs.
+
+### Stand nach Welle 1 (A und D zusammengeführt)
+
+Zusätzliche Exporte, die C, E und F nutzen dürfen (Namen fest wie oben):
+
+```
+functions/instanz/verwalten.js (A):  paketSetzen(ctx, id, paket, grund)   nur von paketWechseln (bestellung.js) aufgerufen; schreibt Protokoll, leert Zwischenspeicher
+                                     instanzStatus(ctx, id, status, grund, { bis })   bis: Ende der Pause (höchstens FRISTEN.pauseMaxTage)
+                                     profilSetzen(ctx, id, einladung, { ap, tel, mail, abzug }) · empfaengerBestaetigen(ctx, id, mail, art)
+functions/instanz/mandant.js (A):    instanzAusZeile(t, host) · farbeVon(inst) → { farbe, akzent } (Kontrast über Instanzregeln.akzent)
+functions/api/eingang.js (A):        eingangAnstossen(ctx, code, runde) · instanzKontext(sp, id) (wie ctx.instanz, aus der Datenbank) ·
+                                     mailInhalt(k, inst, z, o) · loeschenAbFuer(m, art, jetzt) · absender(k, inst) · rahmenMarke(inst, logoCid)
+functions/api/blatt-server.js (A):   blattBauen(k, inst, z, o) → { bytes, … }
+functions/api/bestellung.js (D):     paketVon(b) (Paket der Bestellung, nach einem Wechsel abo.paket) · istPaketEreignis(ctx, ev) · dateiAntwort(k, b, did) ·
+                                     dateiPfad(b, d) · dateienLoeschen(k, b) · eingangBestaetigen(ctx, b, p) · partnerMail(ctx, p, betreff, inhalt, o) ·
+                                     inhaberMail(ctx, betreff, inhalt, antwortAn, o) · schnipsel(host) · herkunft(ctx)
+```
+
+Abläufe zwischen den Strängen (vom Integrator im Prozess über `worker.fetch` mit echten Hosts durchgespielt: bestellt → bezahlt → Instanz → Bestätigungslink → Vorschau → Freigabe → live → Anfrage mit PDF → Empfängerwechsel → Paketwechsel → Zahlungsausfall, Pause → Zahlung → Kündigung → Löschung):
+
+- **Instanz aus der Bestellung (C):** `instanzAnlegen(ctx, { slug, paket: paketVon(b), name, partner: b.partner, bestellung: b.id, eingang, zugang, recht, entwurf, betriebDaten })`, danach `bestellungen.instanz` setzen. `instanzAnlegen` schickt die Bestätigungslinks selbst (`einladungen` im Ergebnis).
+- **Status:** Der Status einer Instanz mit Bestellung folgt der Bestellung über `uebergang` (`Instanzregeln.instanz.statusFuer`); C ruft `instanzStatus` direkt nur für Instanzen ohne Bestellung (Demo).
+- **Paket:** nur `paketWechseln` (bestellung.js) → `paketSetzen` (verwalten.js); `instanzAendern` lehnt eine Paketänderung ab.
+- **Vorschau:** `vorschauToken(ctx, id, marke.v)` → `{ token, url, bis }`; C setzt `b.vorschau = { version: marke.v, bis, gesendet, link: url }`. Das Kundenkonto zeigt `link` und gibt genau diese `version` frei; „Live“ verlangt die Freigabe dieser Version oder einen Vermerk.
+- **Empfänger:** Das Kundenkonto schreibt neue Adressen unbestätigt an die Instanz und ruft `empfaengerEinladen`; die Bestätigung (`GET /api/instanz/bestaetigen?t=`, Hauptdomain) leert den Zwischenspeicher. Anfragen gehen nur an bestätigte Adressen.
+- **Aufräumen (zentrale.js):** Der tägliche Lauf der Zentrale lässt Zwischenstände von Instanzen (`meta.instanz` oder Betriebszeile mit `daten.instanz`) aus, die räumt `anfragenAufraeumen` auf; Anmeldungen aus `geschuetzteNutzer()` (Partner, Dashboard-Zugänge) löscht er nicht (aus C.8 vorgezogen).
 
 ### Router (functions/api/router.js)
 
