@@ -2151,7 +2151,7 @@ const AI = (function () {
   async function analyze(file, side, signal, onPart, neu) {
     const img = file && file.blob ? file : await shrink(file), res = { w: img.w, h: img.h, befund: null, errs: {} };
     try {
-      res.befund = readBefund(await sample.json('', { images: img.blob, signal: signal, aufgabe: neu ? 'wand' : 'einbau', seite: side }), side);
+      res.befund = readBefund(await sample.json('', { images: img.blob, signal: signal, aufgabe: neu ? 'wand' : 'einbau', seite: side, code: INST && S.betrieb ? S.betrieb.code : '' }), side); // Instanz: Code der Planung (functions/api/ki.js)
       if (!res.befund) res.errs.befund = 'error';
     } catch (e) {
       if (e && e.code === 'cancelled') throw e;
@@ -2185,6 +2185,117 @@ const PORTAL_OPEN = PORTAL_URL;
 const PORTAL_KURZ = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const RATGEBER_URL = new URL('ratgeber/fenster-ausmessen/', PORTAL_URL).href, FB_URL = PORTAL_URL + '#fensterbauer';
 const STORE = 'aufmass.v1';
+/* ---------- Konfigurator-Instanz: eigene Domain eines Fensterbauers (docs/INSTANZEN.md, Bauplan Strang B) ----------
+   window.KONFIG.instanz kommt vom Server (/config.js der Instanz); ohne INST ändert sich nichts. Mit INST ist die App immer im Modus
+   Kundenlink (S.betrieb gesetzt, Kundenschutz NUR_EIGENES): kostenlos, ohne Konto, ohne Preise, ohne Führung und ohne Pilot-Weg.
+   Website-Besucher bekommen ihren Code erst, wenn sie anfangen (POST /api/instanz/start); bis dahin hat S.betrieb keinen Code und
+   Speichern, Zwischenstand, Fotos und Fortschritt tun nichts. Der Code der laufenden Planung steht in localStorage
+   'instanz.<id8>.aktiv'; ein Code aus #k-… (Signature-Einladung, „auf anderem Gerät weitermachen“) hat Vorrang. Kontakt ist Pflicht,
+   nach dem Senden kommen Bestätigung und „Meine Anfrage als PDF“; sobald die Bestätigung verlassen wird, bleiben auf dem Gerät nur
+   Nummer, Datum und Betrieb (K1.16). Merkmale nur über INST.m (Pakete.oeffentlich), nie über den Namen des Pakets. */
+const INST = window.KONFIG && window.KONFIG.instanz && typeof window.KONFIG.instanz === 'object' && /^[a-z0-9]{8}$/.test(String(window.KONFIG.instanz.id || '')) ? window.KONFIG.instanz : null;
+const INST_M = INST ? INST.m || {} : {};
+const INST_KEY = INST ? 'instanz.' + INST.id : '';
+const INST_WEG = 'Gerade nicht erreichbar. Deine Planung bleibt auf diesem Gerät gespeichert, bitte gleich noch einmal.';
+const instLesen = (k) => { try { return localStorage.getItem(INST_KEY + '.' + k) || ''; } catch (e) { return ''; } };
+const instSchreiben = (k, v) => { try { if (v) localStorage.setItem(INST_KEY + '.' + k, v); else localStorage.removeItem(INST_KEY + '.' + k); } catch (e) { /* ohne Speicher */ } };
+/* Website-Besucher (virtueller Link der Instanz) oder Einladung (Signature, Kontakt kennt der Betrieb schon) */
+const instWebsite = () => !!(INST && S.betrieb && (S.betrieb.website || ['website', 'test', 'demo'].indexOf((LK_SERVER[S.betrieb.code] || {}).art) >= 0));
+function instanzBetrieb(code) {
+  return { code: /^[a-z0-9]{10}$/.test(String(code || '')) ? String(code) : '', name: INST.name || '', kunde: '', runde: 1, du: !!INST.du, hinweis: '', auftritt: null, website: true };
+}
+/* Profil der Startansicht: Auftritt vom Server, Firmenfarbe nur mit Merkmal farbe, Logo nur mit Merkmal logo; Telefon und E-Mail des
+   Betriebs, wenn die Startansicht keine zeigt (wie die Seite „gerade nicht erreichbar“) */
+function instProfil(roh) {
+  const E = window.Einladung, p = E.profil(Object.assign({}, INST.auftritt || {}, roh || {})), k = INST.kontakt || {};
+  p.col = INST_M.farbe ? E.hexFarbe(INST.farbe) || p.col : '';
+  p.logoUrl = INST_M.logo ? String(INST.logo || '') : '';
+  if (!p.tel && !p.mail) { p.tel = String(k.tel || '').slice(0, 40); p.mail = String(k.mail || '').slice(0, 120); }
+  return p;
+}
+/* Ausgabe der Instanz für Einladung.html/kopf/kontakt/fuss */
+function instOpt(o) {
+  const st = INST.start && typeof INST.start === 'object' ? INST.start : {};
+  return Object.assign({ kz: INST_M.kennzeichnung, website: instWebsite(), kopie: !!INST_M.kopieKunde, start: INST_M.startansicht ? st : {}, bilder: INST_M.fotos > 0 && Array.isArray(st.bilder) ? st.bilder : [], standardBild: true, ohneKopf: true }, o || {});
+}
+/* Code der Planung holen (einmal, auch bei Doppeltipp); danach gehört der Stand auf diesem Gerät zu diesem Code */
+let INST_START = null;
+function instanzStart() {
+  if (!INST || !S.betrieb) return Promise.resolve(false);
+  if (S.betrieb.code) return Promise.resolve(true);
+  if (INST_START) return INST_START;
+  INST_START = (async () => {
+    try {
+      const r = await fetch('/api/instanz/start', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: '{}' });
+      const j = await r.json().catch(() => null);
+      if (instZuPruefen(r, j)) return false;
+      if (!r.ok || !j || !j.ok || !/^[a-z0-9]{10}$/.test(String(j.code || ''))) { toast((j && j.fehler) || INST_WEG); return false; }
+      instanzCodeSetzen(j.code, j);
+      return true;
+    } catch (e) { toast(INST_WEG); return false; } finally { INST_START = null; }
+  })();
+  return INST_START;
+}
+function instanzCodeSetzen(code, j) {
+  instSchreiben('aktiv', code);
+  S.betrieb = Object.assign(instanzBetrieb(code), { name: (j && j.betrieb) || INST.name });
+  LK_SERVER[code] = { auftritt: window.Einladung ? window.Einladung.profil(Object.assign({}, (j && j.auftritt) || INST.auftritt || {})) : null, du: j && typeof j.du === 'boolean' ? j.du : !!INST.du, hinweis: '', art: 'website' };
+  clearTimeout(S.sync.timer); clearTimeout(S.sync.pruefTimer);
+  const bekannt = S.sync.bekannt || [], geloescht = S.sync.geloescht || {};
+  S.sync = syncNeu(); S.sync.geladen = true; S.sync.ok = !!SERVER.daten; S.sync.bekannt = bekannt; S.sync.geloescht = geloescht; // neu: nichts zu holen
+  persist(); // was schon auf dem Gerät liegt (nach „still neu“), geht unter dem neuen Code zum Server
+}
+/* Der Server kennt den Code nicht mehr (Zwischenstand ohne Fenster nach 24 Stunden, ohne Änderung nach 30 Tagen weg): still neu
+   beginnen; was auf diesem Gerät liegt, bleibt und gehört danach zum neuen Code */
+function instanzStillNeu() {
+  const alt = S.betrieb ? S.betrieb.code : '', hatDaten = S.windows.length > 0 || !!entwurfLesen();
+  const entwurf = alt ? (() => { try { return localStorage.getItem('aufmass.k.' + alt + '.entwurf'); } catch (e) { return null; } })() : null;
+  try { if (alt) { localStorage.removeItem('aufmass.k.' + alt); localStorage.removeItem('aufmass.k.' + alt + '.entwurf'); } } catch (e) { /* ok */ }
+  if (instLesen('aktiv') === alt) instSchreiben('aktiv', '');
+  S.betrieb = instanzBetrieb(''); S.linkZu = ''; S.linkZuText = ''; S.linkStatus = '';
+  if (!hatDaten) { S.windows = []; render(); return; }
+  instanzStart().then((ok) => { if (ok && entwurf) { try { localStorage.setItem(linkKey() + '.entwurf', entwurf); } catch (e) { /* ok */ } } render(); });
+}
+/* Liste der gesendeten Anfragen auf diesem Gerät: nur Nummer und Datum (K1.16) */
+function instGesendetListe() { try { const l = JSON.parse(instLesen('gesendet') || '[]'); return Array.isArray(l) ? l.filter((x) => x && typeof x === 'object').slice(0, 10) : []; } catch (e) { return []; } }
+function instGesendetMerken(nr, when, art) {
+  const l = instGesendetListe().filter((x) => x.nr !== nr);
+  l.unshift({ nr: String(nr || ''), when: Number(when) || Date.now(), test: art === 'test' });
+  instSchreiben('gesendet', JSON.stringify(l.slice(0, 10)));
+}
+/* Nach dem Senden, sobald die Bestätigung verlassen ist: Fenster, Angaben, Kontakt, Fotos und Zwischenstand von diesem Gerät löschen;
+   es bleiben Nummer, Datum und Betrieb (gerät geteilt, Kunde am fremden Rechner) */
+function instanzKuerzen() {
+  if (!INST || !S.betrieb || !S.sent || S.sent.kurz) return;
+  const ids = new Set(); S.windows.forEach((w) => bilderVon(w).forEach((id) => ids.add(id))); bilderVon(S.win).forEach((id) => ids.add(id));
+  if (ids.size) Fotos.weg(Array.from(ids));
+  try { localStorage.removeItem(linkKey() + '.entwurf'); } catch (e) { /* ok */ }
+  ['in', 'out'].forEach((k) => { const p = S.photos[k]; if (p && p.url && !p.demo) { try { URL.revokeObjectURL(p.url); } catch (e) { /* ok */ } } });
+  S.sent = { when: S.sent.when, nr: S.sent.nr || '', runde: S.sent.runde || 1, art: S.sent.art || '', uebertragen: true, kurz: true, anderswo: !!S.sent.anderswo };
+  S.windows = []; S.proj = Object.assign({}, PROJ0); S.win = baseWin(); S.editIdx = -1; S.photos = { in: null, out: null }; S.ai = { in: null, out: null }; S.nb = null; S.angelegt = 0;
+  S.sync.bekannt = []; S.sync.geloescht = {};
+  lokalSpeichern();
+}
+/* „Weitere Anfrage starten“: neuer Code, die gesendete bleibt beim Betrieb */
+function instanzWeitere() {
+  instanzKuerzen();
+  const alt = S.betrieb && S.betrieb.code;
+  if (alt) { try { localStorage.removeItem('aufmass.k.' + alt); } catch (e) { /* ok */ } }
+  instSchreiben('aktiv', '');
+  if (location.hash) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
+  S.betrieb = instanzBetrieb(''); loadLink();
+  return instanzStart().then((ok) => { if (ok) newWin(); else go('home'); });
+}
+/* „Auf diesem Gerät vergessen“: auch Nummer und Datum weg */
+function instanzVergessen() {
+  instanzKuerzen();
+  const alt = S.betrieb && S.betrieb.code;
+  if (alt) { try { localStorage.removeItem('aufmass.k.' + alt); localStorage.removeItem('aufmass.k.' + alt + '.entwurf'); } catch (e) { /* ok */ } }
+  instSchreiben('aktiv', ''); instSchreiben('gesendet', '');
+  if (location.hash) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
+  S.betrieb = instanzBetrieb(''); loadLink(); S.instGeraet = false;
+  go('home'); toast('Auf diesem Gerät vergessen.');
+}
 const PROJ0 = { gebaeude: 'efh', baujahr: '', total: '', zeit: '3m', budget: 'b0', foerd: false, foerdweg: '', name: '', ort: '', tel: '', mail: '', erreich: '' }; // erreich ohne Vorwahl: nur was der Kunde selbst tippt, steht auf dem Blatt
 const S = {
   screen: 'home', dir: 'fwd', betrieb: null, windows: [], win: baseWin(), editIdx: -1,
@@ -2225,6 +2336,7 @@ function kaufSicher() { return S.kauf ? Object.assign({}, S.kauf, { pw: '' }) : 
 function lokalSpeichern() {
   const b = new Set(S.sync.bekannt || []); S.windows.forEach((w) => { if (w.wid) b.add(w.wid); }); S.sync.bekannt = Array.from(b).slice(-200);
   if (vorschau()) return false;
+  if (S.betrieb && !S.betrieb.code) return false; // Instanz ohne Code: noch nichts angefangen
   try {
     if (S.betrieb) localStorage.setItem(linkKey(), JSON.stringify({ windows: S.windows, proj: S.proj, sent: S.sent, nb: S.nb || null, kauf: kaufSicher(), name: S.betrieb.name, angelegt: angelegt(), stand: S.stand || 0, projTs: S.projTs || 0, bekannt: S.sync.bekannt, geloescht: S.sync.geloescht, offen: !!S.sync.offen }));
     else {
@@ -2236,11 +2348,12 @@ function lokalSpeichern() {
 }
 /* Speichern: im Browser und beim Kundenlink zusätzlich als Zwischenstand auf dem Server (kurz gesammelt; die Fotos gehen getrennt, fotosHochladen) */
 function persist() {
+  if (INST && S.betrieb && !S.betrieb.code) { if (S.windows.length) instanzStart(); return; } // Instanz: erst mit Code (instanzStart speichert dann)
   entwurfStand(); // auch als Gast: Stand und „offen“ merken, damit nach dem Sichern alles hochgeht
   lokalSpeichern();
   entwurfPlanen();
 }
-function normProj(p) { if (S.betrieb) p.erreich = ''; /* der Kundenlink fragt nicht nach der Erreichbarkeit; ältere Entwürfe tragen noch die Vorwahl */ if (p.zeit === 'sofort') p.zeit = 'asap'; if (p.zeit === 'offen') p.zeit = '12m'; if (p.gebaeude === 'altbau') p.gebaeude = 'efh'; return p; }
+function normProj(p) { if (S.betrieb && !INST) p.erreich = ''; /* Instanz: die Website fragt danach (Kontakt) */ /* der Kundenlink fragt nicht nach der Erreichbarkeit; ältere Entwürfe tragen noch die Vorwahl */ if (p.zeit === 'sofort') p.zeit = 'asap'; if (p.zeit === 'offen') p.zeit = '12m'; if (p.gebaeude === 'altbau') p.gebaeude = 'efh'; return p; }
 /* Ältere Aufmaße kennen nur roll (Rollladen): daraus wird der Sonnenschutz außen abgeleitet */
 function altAngleichen(w) { if ((!w.sart || w.sart === 'keiner') && (w.roll === 'aufsatz' || w.roll === 'vorbau')) w.sart = 'rollladen'; else if ((!w.sart || w.sart === 'keiner') && w.roll === 'behalten') w.sart = 'behalten'; return w; }
 function takeWindows(arr) {
@@ -2371,6 +2484,7 @@ function toast(msg) { S.toast = msg; render(); clearTimeout(toastTimer); toastTi
 function render(fresh) {
   if (NEU_LADEN && RUHIG.includes(S.screen)) { location.reload(); return; } // Anmeldung in einem anderen Tab geändert (siehe unten)
   NACHZEICHNEN = false; clearTimeout(nachzeichnenTimer);
+  if (INST && S.sent && !S.sent.kurz && S.screen !== 'gesendet') instanzKuerzen(); // Bestätigung verlassen: nur Nummer und Datum bleiben
   const root = $app(), scroller = root.querySelector('.scroll'), keep = !fresh && scroller ? scroller.scrollTop : 0, fokus = fresh ? null : fokusMerken(root);
   const view = SCREENS[S.screen] ? SCREENS[S.screen]() : SCREENS.home();
   /* Angefangenes Fenster: „Fortsetzen“ auf der Startseite, über der Liste */
@@ -2384,8 +2498,8 @@ function render(fresh) {
   const backLabel = view.back ? view.back[0] : '';
   let h = '<header class="hdr"><div class="hdr-row">';
   /* Logo: im eigenen Aufmaß ein Link zur Startseite der Website; im Kundenlink steht der Betrieb vorn (Einladungsseite), eeziframes klein unten */
-  h += S.screen === 'home' ? (S.betrieb ? '<span></span>' : '<a class="hdr-logo" href="' + PORTAL_URL + '" aria-label="eeziframes, zur Startseite">' + LOGO(30) + '<span class="hdr-name">' + WM() + '</span></a>')
-    : (view.back ? '<button type="button" class="hdr-btn" data-act="back">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : '<span></span>');
+  h += S.screen === 'home' ? (S.betrieb ? (INST ? instKopf() : '<span></span>') : '<a class="hdr-logo" href="' + PORTAL_URL + '" aria-label="eeziframes, zur Startseite">' + LOGO(30) + '<span class="hdr-name">' + WM() + '</span></a>')
+    : (view.back ? '<button type="button" class="hdr-btn" data-act="back">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : INST && S.betrieb ? instKopf() : '<span></span>'); // Instanz: ohne Zurück (Bestätigung) Zeichen und Name
   h += '<span class="hdr-title">' + esc(title) + '</span>';
   /* rechts: Übersicht (Schritte, Fenster, Liste, Startseite) auf allen Bildschirmen außer der Startseite und der Führung, dazu die Begriffe */
   const wo = S.screen !== 'home' && S.screen !== 'tour';
@@ -2394,7 +2508,8 @@ function render(fresh) {
   else if (tourP) h += '<div class="prog" role="progressbar" aria-label="Führung" aria-valuemin="1" aria-valuemax="' + TOUR.length + '" aria-valuenow="' + (S.tour.i + 1) + '"><div style="width: ' + (tourP * 100) + '%"></div></div>';
   h += '</header>';
   const recht = !view.fit && view.html.indexOf('foot-links recht') < 0 ? rechtLinks() : '';
-  h += '<div class="scroll' + (view.fit ? ' fit' : '') + '" style="padding-top: ' + (wiz || tourP ? 56 : 52) + 'px"><div class="scr' + (view.fit ? ' fit' : '') + (view.cls ? ' ' + view.cls : '') + (S.dir === 'back' ? ' is-back' : '') + '" data-screen="' + S.screen + '">' + view.html + recht + '</div></div>';
+  const band = INST && INST.vorschau && !view.fit ? '<div class="inst-vorschau" role="note"><b>Vorschau</b> – noch nicht öffentlich. Was hier gesendet wird, ist eine Testanfrage.</div>' : '';
+  h += '<div class="scroll' + (view.fit ? ' fit' : '') + '" style="padding-top: ' + (wiz || tourP ? 56 : 52) + 'px"><div class="scr' + (view.fit ? ' fit' : '') + (view.cls ? ' ' + view.cls : '') + (S.dir === 'back' ? ' is-back' : '') + '" data-screen="' + S.screen + '">' + band + view.html + recht + '</div></div>';
   if (view.bar) h += '<div class="bb">' + (view.bar.zurueck ? '<button type="button" class="btn ghost bb-zurueck" data-act="back" aria-label="' + esc('Zurück' + (backLabel ? ': ' + backLabel : '')) + '">' + PFEIL_L + '</button>' : '') + (view.bar.sec ? '<button type="button" class="btn ghost" data-act="' + view.bar.secAct + '">' + esc(view.bar.sec) + '</button>' : '') + '<button type="button" class="btn ' + (view.bar.ghost ? 'ghost' : 'primary') + '" data-act="' + view.bar.act + '"' + (view.bar.v ? ' data-v="' + view.bar.v + '"' : '') + (view.bar.dis ? ' disabled' : '') + '>' + view.bar.label + '</button></div>';
   h += sheetsHTML();
   if (S.toast) h += '<div class="toast" role="status">' + esc(S.toast) + '</div>';
@@ -2609,13 +2724,16 @@ function tiefeVorgabe() {
 function lkDaten() {
   const b = S.betrieb || {}, s = LK_SERVER[b.code] || {}, E = window.Einladung;
   const du = typeof s.du === 'boolean' ? s.du : typeof b.du === 'boolean' ? b.du : true;
+  if (INST) return { name: b.name || INST.name || 'Ihr Fensterbauer', kunde: b.kunde || '', du: du, p: instProfil(s.auftritt || b.auftritt), hinweis: s.hinweis !== undefined ? s.hinweis : b.hinweis || '', bis: b.expires || '' };
   return { name: b.name || (du ? 'Dein Fensterbauer' : 'Ihr Fensterbauer'), kunde: b.kunde || '', du: du, p: s.auftritt || b.auftritt || E.profil({}), hinweis: s.hinweis !== undefined ? s.hinweis : b.hinweis || '', bis: b.expires || '' };
 }
-function linkHomeInhalt() {
+function linkHomeInhalt() { return INST ? instHome() : linkHomeInhaltAlt(); }
+/* I: Ausgabe einer Instanz (Einladung einer Signature-Instanz mit Nachbesserung, instHome); ohne I wie bisher */
+function linkHomeInhaltAlt(I) {
   const E = window.Einladung, d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), n = S.windows.length, sent = !!S.sent;
-  const kopf = (oben) => E.kopf({ name: name, p: d.p, oben: oben, unten: d.kunde ? 'für ' + d.kunde : '' });
-  const kontakt = () => E.kontakt({ name: name, p: d.p, du: du, bis: sent || S.linkZu ? '' : d.bis });
-  const fuss = E.fuss({ name: name, du: du });
+  const kopf = (oben) => E.kopf({ name: name, p: d.p, oben: oben, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I });
+  const kontakt = () => E.kontakt({ name: name, p: d.p, du: du, bis: sent || S.linkZu ? '' : d.bis, instanz: I });
+  const fuss = I ? '' : E.fuss({ name: name, du: du });
   const liste = (titel, karten) => '<section class="sec"><div class="sec-head"><h2 class="sec-title">' + titel + '</h2><span class="sub">' + n + (sent ? ' Fenster' : ' erfasst') + '</span></div><div style="display: flex; flex-direction: column; gap: 10px">' + karten + '</div></section>';
   const pf = '<span class="pf" aria-hidden="true"></span>';
   if (sent) {
@@ -2968,6 +3086,7 @@ SCREENS.fertig = () => {
   const zu = st.fest ? ' aria-disabled="true"' : '';
   const aend = st.fest ? noteBox(festText(st) + ' ' + (lk ? 'Änderungen klärst du direkt mit ' + esc(bn) + '.' : 'Brauchst du etwas anders, legst du es als neues Fenster an.'), null, 'warn')
     : !st.frei ? noteBox((st.kauf ? 'Seit dem Freischalten' : 'Seit dem ' + esc(datumKurz(st.bis))) + ' kannst du dieses Fenster noch ' + MAL[st.rest] + ' ändern. Jedes Speichern mit einer Änderung zählt.', null, 'warn')
+    : st.inst ? '<p class="sub aend-frei">Bis zum Senden kannst du dieses Fenster beliebig ändern.</p>'
     : st.nb ? '<p class="sub aend-frei">Während der Nachbesserung kannst du dieses Fenster frei ändern, darum hat ' + esc(bn) + ' gebeten.</p>'
     : '<p class="sub aend-frei">Bis zum ' + esc(datumKurz(st.bis)) + ' kannst du dieses Fenster beliebig ändern, danach noch viermal.</p>';
   const angaben = 'Maße, Wünsche' + (nz ? ', deine ' + (nz === 1 ? 'Notiz' : nz + ' Notizen') : '') + ' und die Auswertung der Fotos';
@@ -2978,11 +3097,11 @@ SCREENS.fertig = () => {
     /* Gezielt ein Thema nachschärfen: direkt zum Kapitel, in der gewählten Tiefe */
     (st.fest ? '' : '<div class="kap-sprung"><p class="qlabel">Direkt zu einem Thema</p><div class="kap-chips">' + KAPITEL.slice(1).map((k) => '<button type="button" class="chip" data-act="wuensche" data-v="' + k.k + '">' + esc(k.n) + '</button>').join('') + '</div></div>') +
     '<button type="button" class="pill voll" data-act="go" data-v="home">Alle Fenster ansehen (' + S.windows.length + ')</button>' +
-    (lk ? '<p class="sub center" style="padding: 0 10px">Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.</p>' : '');
+    (lk ? '<p class="sub center" style="padding: 0 10px">' + (instWebsite() ? 'Gespeichert, auch für später: Öffne diese Seite wieder, dann geht es weiter.' : 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.') + '</p>' : '');
   return { html: html, back: ['Aufmaß', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
 };
 /* Anfrage: zwei kurze Seiten im Link, drei ohne Link (dann mit Kontakt) */
-const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von 2' : 'Fürs Angebot · ' + step + ' von 3';
+const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von ' + (instWebsite() ? 3 : 2) : 'Fürs Angebot · ' + step + ' von 3'; // Instanz, Website: dazu der Kontakt
 /* Was der gewählte Förderweg bedeutet (Quellen: BAFA, BEG EM; § 35c EStG mit ESanMV; docs/GESTALTUNG.md) */
 const FOERD_HINWEIS = {
   bafa: '15 % Zuschuss vom BAFA. Ein Energieeffizienz-Experte begleitet den Antrag, gestellt wird er vor Beginn der Arbeiten; den Vertrag erst mit Förderklausel unterschreiben. Die Fenster müssen gut dämmen (Uw höchstens 0,95). Dein Fensterbauer plant das ein.',
@@ -3003,17 +3122,19 @@ SCREENS.anfrage = () => {
 };
 SCREENS.anfrage2 = () => {
   const pr = S.proj, lk = !!S.betrieb, bn = lk ? (S.betrieb.name || 'dein Fensterbauer') : '';
-  let html = hd(anfrageHead(2, lk), 'Zeit und Budget.', lk ? 'Freiwillig. Deine Kontaktdaten hat ' + esc(bn) + ' schon.' : 'Freiwillig, hilft beim Angebot.', '', '', schrittTools('zeitraum'));
+  const web = instWebsite(); // Instanz, Website: der Betrieb kennt den Kunden noch nicht, danach kommt der Kontakt
+  let html = hd(anfrageHead(2, lk), 'Zeit und Budget.', lk && !web ? 'Freiwillig. Deine Kontaktdaten hat ' + esc(bn) + ' schon.' : 'Freiwillig, hilft beim Angebot.', '', '', schrittTools('zeitraum'));
   html += '<div class="sec">' + secHead('Wann soll es losgehen?', 'zeitraum') + chips('zeit', pr.zeit, 'zeit', 'setp') + '</div>';
   html += '<div class="sec">' + secHead('Budget', 'budget') + chips('budget', pr.budget, 'budget', 'setp') + '</div>';
   /* Förderweg früh klären: Er ändert das Angebot (Zielwerte, Energieeffizienz-Experte, Bescheinigung) */
   const fw = AW.foerdWeg(pr);
   html += '<div class="sec">' + secHead('Förderung', 'foerderung') + chips('foerdweg', fw, 'foerdweg', 'setp') + '</div>';
   if (FOERD_HINWEIS[fw]) html += noteBox(FOERD_HINWEIS[fw]);
-  if (lk) { html += '<div class="sec">' + secHead('Nachricht an ' + bn, null, 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '<div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>'; return { html: html, back: ['Haus', 'anfrage'], cls: 'tight', bar: { label: 'Prüfen und senden', act: 'go', v: 'blatt', zurueck: true } }; }
+  if (lk) { html += '<div class="sec">' + secHead('Nachricht an ' + bn, null, web ? 'Freiwillig, zum Beispiel was dir wichtig ist.' : 'Freiwillig, zum Beispiel wann du erreichbar bist.') + '<div class="rows">' + textRow('Nachricht', 'notiz', 'z. B. Rollladen im Bad klemmt', 'text', 'p') + '</div></div>'; return { html: html, back: ['Haus', 'anfrage'], cls: 'tight', bar: web ? { label: 'Weiter', act: 'go', v: 'anfrage3', zurueck: true } : { label: 'Prüfen und senden', act: 'go', v: 'blatt', zurueck: true } }; }
   return { html: html, back: ['Haus', 'anfrage'], cls: 'tight', bar: { label: 'Weiter', act: 'go', v: 'anfrage3', zurueck: true } };
 };
 SCREENS.anfrage3 = () => {
+  if (instWebsite()) return instAnfrage3();
   const pr = S.proj;
   let html = hd(anfrageHead(3, false), 'Wie erreicht dich dein Fensterbauer?', 'Steht auf dem Aufmaßblatt, damit er sich mit dem Angebot melden kann. Alles freiwillig; das Blatt bekommt nur, wem du es gibst.', '', '', schrittTools('kontakt'));
   html += '<div class="sec"><div class="rows">' + textRow('Name', 'name', 'Vor- und Nachname', 'text', 'p') + textRow('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'p') + textRow('Telefon', 'tel', 'Für Rückfragen', 'tel', 'p') + textRow('E-Mail', 'mail', 'name@beispiel.de', 'email', 'p') + '</div></div>';
@@ -3041,6 +3162,7 @@ SCREENS.blatt = () => {
   /* Freigeschaltet: Das Aufmaßblatt gibt es als PDF (Herunterladen, Teilen), eine Gesamtansicht in der App gibt es nicht */
   if (paid) return SCREENS.teilen();
   if (S.sent && PILOT) return SCREENS.gesendet();
+  if (S.sent && INST) return instGesendet();
   if (S.sent) return { html: hd('Gesendet', 'Schon unterwegs.', esc(bn) + ' hat dein Aufmaß seit ' + esc(sentWhen()) + '.') + dateiCard(), back: ['Start', 'home'], bar: null };
   const voll = S.windows.filter((x) => derive(x).complete).length, fehlt = S.windows.length - voll;
   const html = hd('Prüfen', 'Alles vollständig?', 'Deine Fenster mit allen Maßen und Wünschen, dazu die Auswertung der Fotos, gehen nur an ' + esc(bn) + '. Tipp ein Fenster an, um es zu prüfen oder zu ändern.') +
@@ -3048,8 +3170,9 @@ SCREENS.blatt = () => {
     entwurfWarnung() +
     '<div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => checkCard(x, i)).join('') + '</div>' +
     (kiLaeuftFuer() ? kiLaeuftKarte('Die Auswertung der Fotos kommt gleich dazu. Wer jetzt sendet, wartet kurz, damit sie mitgeht.') : '') +
-    '<p class="sub" style="padding: 0 6px">Nach dem Absenden ist der Link erledigt. Ändern kannst du danach nur noch über ' + esc(bn) + '.</p>';
-  return { html: html, back: ['Zurück', 'anfrage2'], bar: { zurueck: true, label: S.kiWartet === 'senden' ? S.warteText || 'Einen Moment …' : (S.nb ? 'Erneut an ' : 'An ') + bn + ' senden', act: 'send', dis: !voll || S.kiWartet === 'senden' } };
+    (INST ? '<p class="sub" style="padding: 0 6px">Nach dem Senden bekommst du sofort eine Bestätigung' + (INST_M.kopieKunde ? ' und deine Anfrage als PDF' : '') + '. Ändern kannst du danach nur noch direkt mit ' + esc(bn) + '.</p>'
+      : '<p class="sub" style="padding: 0 6px">Nach dem Absenden ist der Link erledigt. Ändern kannst du danach nur noch über ' + esc(bn) + '.</p>');
+  return { html: html, back: ['Zurück', instWebsite() ? 'anfrage3' : 'anfrage2'], bar: { zurueck: true, label: S.kiWartet === 'senden' ? S.warteText || 'Einen Moment …' : (S.nb ? 'Erneut an ' : 'An ') + esc(bn) + ' senden', act: 'send', dis: !voll || S.kiWartet === 'senden' } };
 };
 /* Übersicht vor dem Senden: vollständig oder nicht, aber keine Maße und keine Wünsche zum Abfotografieren */
 function checkCard(x, i) {
@@ -3095,6 +3218,7 @@ const anzahlFenster = () => S.windows.reduce((a, x) => a + (num(x.anzahl) || 1),
 /* Karte für Startseite und Gesendet-Seite */
 function dateiCard() {
   const n = S.windows.length;
+  if (INST && S.betrieb) return INST_M.kopieKunde ? '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich</p><b>Deine Anfrage als PDF</b><small>Direkt nach dem Senden, mit allen Fenstern, Maßen, Wünschen und Fotos.</small></div></div></div>' : '';
   if (S.betrieb) { const bn = S.betrieb.name || 'dein Fensterbauer'; return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich?</p><b>Frag ' + esc(bn) + '</b><small>Dein Aufmaß gehört zu diesem Auftrag. ' + esc(bn) + ' hat das komplette Aufmaßblatt als PDF und gibt es dir gern mit dem Angebot.</small></div></div></div>'; }
   if (FREI()) return '<div class="card datei-card bought"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">' + (KUNDE_FREI() ? 'Für dich · kostenlos' : 'Freigeschaltet') + '</p><b>Dein Aufmaßblatt als PDF</b><small>' + n + (n === 1 ? ' Fenster' : ' Fenster') + ', alle Maße, Fotoauswertung und Wünsche, mit Code für den Fensterbauer.</small></div></div><span class="row" style="display: flex; gap: 8px; flex: 0 0 auto"><button type="button" class="btn ghost" data-act="teil-pdf">Teilen</button><button type="button" class="btn ghost" data-act="k-dl">Herunterladen</button></span></div>';
   return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Dein Aufmaßblatt · ' + euro(PREIS()) + '</p><b>Fertig gemessen? Dann freischalten.</b><small>Alle Maße, die Auswertung der Fotos und deine Wünsche als PDF, mit Code für jeden Fensterbauer. Einmal zahlen, für dieses Projekt.</small></div></div><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="go" data-v="teilen">Ansehen</button></div>';
@@ -4421,7 +4545,7 @@ function sendeFrageBlatt() {
   const name = entwurfName(o), bn = (S.betrieb && S.betrieb.name) || 'deinen Fensterbauer';
   return '<button type="button" class="sheet-bg" aria-label="Abbrechen" data-act="sende-frage-zu"></button><div class="sheet verlassen" role="alertdialog" aria-modal="true" aria-labelledby="sf-t" aria-describedby="sf-s"><div class="grip"></div>' +
     '<p class="eyebrow kicker" style="margin-top: 6px">Nicht gespeichert</p><h2 id="sf-t" tabindex="-1">' + (o.g ? 'Änderungen an ' + esc(name) + ' <span class="ak">fehlen</span> noch' : esc(name) + ' <span class="ak">fehlt</span> noch') + '</h2>' +
-    '<p class="vl-sub" id="sf-s">' + esc((o.g ? 'Deine Änderungen an „' + name + '“ liegen nur als Entwurf auf diesem Gerät.' : '„' + name + '“ ist angefangen und liegt nur als Entwurf auf diesem Gerät.') + ' Nach dem Absenden ist der Link erledigt, dann kommt ' + (o.g ? 'nichts davon' : 'es nicht') + ' mehr zu ' + bn + '.') + '</p>' +
+    '<p class="vl-sub" id="sf-s">' + esc((o.g ? 'Deine Änderungen an „' + name + '“ liegen nur als Entwurf auf diesem Gerät.' : '„' + name + '“ ist angefangen und liegt nur als Entwurf auf diesem Gerät.') + (INST ? ' Nach dem Senden kommt ' : ' Nach dem Absenden ist der Link erledigt, dann kommt ') + (o.g ? 'nichts davon' : 'es nicht') + ' mehr zu ' + bn + '.') + '</p>' +
     '<div class="vl-knoepfe"><button type="button" class="btn primary" data-act="entwurf-weiter">Erst fertig machen</button><button type="button" class="btn ghost vl-weg" data-act="send-ohne">' + esc(o.g ? 'Ohne die Änderungen senden' : 'Ohne „' + name + '“ senden') + '</button><button type="button" class="link vl-ab" data-act="sende-frage-zu">Abbrechen</button></div></div>';
 }
 function entwurfKarte() {
@@ -4495,7 +4619,7 @@ function wohinBlatt() {
     h += '<p class="eyebrow wo-k">' + (lk ? 'Deine Fenster für ' + esc(S.betrieb.name || 'deinen Fensterbauer') : 'Deine Fenster') + ' · ' + S.windows.length + '</p><div class="gindex wo-fenster">' + S.windows.map((x, i) => '<button type="button" data-act="wohin-fenster" data-i="' + i + '"' + (wiz && i === S.editIdx ? ' aria-current="true"' : '') + '><span class="wo-ic">' + svgIcon(miniWin(x), 36) + '</span><span><b>' + esc(x.name || 'Fenster ' + (i + 1)) + '</b><small>' + esc('Pos. ' + (i + 1) + ' · ' + fensterStatus(x)) + (wiz && i === S.editIdx ? ' · gerade offen' : '') + '</small></span>' + CHEV + '</button>').join('') + '</div>';
   }
   h += '<div class="wo-knoepfe">' + (wiz && nameDa(w) && fensterOffen() ? '<button type="button" class="btn primary" data-act="wohin-speichern">Speichern und zur Liste</button>' : '') +
-    '<button type="button" class="btn ghost" data-act="wohin-liste">' + (S.screen === 'home' ? 'Zur Liste' : lk ? 'Zur Startseite des Aufmaßes' : 'Zur Fensterliste') + '</button>' +
+    '<button type="button" class="btn ghost" data-act="wohin-liste">' + (S.screen === 'home' ? 'Zur Liste' : INST ? 'Zur Startseite' : lk ? 'Zur Startseite des Aufmaßes' : 'Zur Fensterliste') + '</button>' +
     (lk ? '' : '<button type="button" class="link wo-web" data-act="wohin-web">Zur Startseite von eeziframes</button>') + '</div></div>';
   return h;
 }
@@ -4617,11 +4741,12 @@ let DL = null, DLP = null;
 const GRENZE = { fenster: 50, freiTage: 7, aenderungen: 4 }, TAG_MS = 864e5;
 const angelegt = () => Math.max(Number(S.angelegt) || 0, S.windows.length);
 const neuMoeglich = () => angelegt() < GRENZE.fenster;
-const maxMsg = () => 'Ein Aufmaß umfasst höchstens ' + GRENZE.fenster + ' Fenster, gelöschte zählen mit. Gleiche Fenster zählst du über „Anzahl“' + (S.betrieb ? '; für ein weiteres Haus schickt dir ' + (S.betrieb.name || 'dein Fensterbauer') + ' gern einen eigenen Link.' : '; für ein weiteres Haus beginnst du ein neues Aufmaß.');
+const maxMsg = () => 'Ein Aufmaß umfasst höchstens ' + GRENZE.fenster + ' Fenster, gelöschte zählen mit. Gleiche Fenster zählst du über „Anzahl“' + (instWebsite() ? '; für ein weiteres Haus startest du nach dem Senden eine weitere Anfrage.' : S.betrieb ? '; für ein weiteres Haus schickt dir ' + (S.betrieb.name || 'dein Fensterbauer') + ' gern einen eigenen Link.' : '; für ein weiteres Haus beginnst du ein neues Aufmaß.');
 /* Stand der Änderungen an einem Fenster: frei (erste Woche, beim Kundenlink auch während einer Nachbesserung, um die der Betrieb
    gebeten hat), rest (Änderungen danach), fest */
 function aendStand(w, jetzt) {
   jetzt = jetzt || zeit();
+  if (INST && S.betrieb) return { frei: true, nb: false, bis: Infinity, kauf: false, n: Number(w && w.aend) || 0, rest: GRENZE.aenderungen, fest: false, inst: true }; // Instanz: keine Änderungszählung (functions/api/entwurf.js)
   const kaufAm = !S.betrieb && S.kauf && S.kauf.paid ? Number(S.kauf.when) || 0 : 0; // mit dem Kauf endet die freie Woche
   const t0 = Number(w && w.t0) || jetzt, woche = t0 + GRENZE.freiTage * TAG_MS, bis = kaufAm ? Math.min(woche, kaufAm) : woche, n = Number(w && w.aend) || 0;
   const nb = jetzt >= bis && !!(S.betrieb && S.nb), frei = jetzt < bis || nb;
@@ -4646,7 +4771,7 @@ function darfAendern() {
   toast(festText(st)); return false;
 }
 /* Kundenlink zu (abgelaufen, deaktiviert)? Dann nichts mehr ändern */
-function linkOffen() { if (!S.betrieb || !S.linkZu || S.linkZu === 'eingegangen') return true; toast(S.linkZuText || 'Dieser Link ist nicht mehr aktiv.'); return false; }
+function linkOffen() { if (!S.betrieb || !S.linkZu || S.linkZu === 'eingegangen') return true; toast(S.linkZuText || (INST ? 'Diese Planung ist nicht mehr aktiv.' : 'Dieser Link ist nicht mehr aktiv.')); return false; }
 
 /* ---------- Zwischenstand beim Kundenlink (Server) ----------
    Ohne Fotos und ohne das Bild der Lage. Der Server führt je Fenster zusammen (ts = letztes Speichern des Fensters gewinnt), die
@@ -4664,7 +4789,7 @@ function packFenster(w) {
 }
 const entwurfFp = () => stabil({ w: S.windows.map(packFenster), p: S.proj, a: angelegt() });
 const inhaltFp = () => stabil({ w: S.windows.map(fensterFp), p: S.proj }); // nur Angaben, ohne Zähler
-const entwurfAn = () => SERVER.daten && !S.sync.aus && !S.tour && (S.betrieb ? !vorschau() && !S.sent && !(S.linkZu && S.linkZu !== 'eingegangen') : kontoAn());
+const entwurfAn = () => SERVER.daten && !S.sync.aus && !S.tour && (S.betrieb ? !!S.betrieb.code && !vorschau() && !S.sent && !(S.linkZu && S.linkZu !== 'eingegangen') : kontoAn());
 /* Wohin der Zwischenstand geht: beim Kundenlink an den Link, beim eigenen Aufmaß mit Konto ins Konto (mit Anmeldung) */
 function syncZiel() {
   if (S.betrieb) return { art: 'link', pfad: '/api/link/' + encodeURIComponent(S.betrieb.code) + '/entwurf' };
@@ -4727,7 +4852,8 @@ function entwurfSenden(behalten) {
       const r = await res.json().catch(() => null);
       if (r) uhrStellen(r.jetzt, t1, Date.now());
       if (S.sync !== sync) return false; // inzwischen ein anderer Link oder das eigene Aufmaß
-      if (r && r.ok && r.aus) sync.aus = true;
+      if (instZuPruefen(res, r)) { sync.offen = true; sync.ok = false; lokalSpeichern(); }
+      else if (r && r.ok && r.aus) sync.aus = true;
       else if (r && r.ok) {
         /* Zusammengeführten Stand übernehmen, außer hier wurde während der Anfrage weiter geändert: dann nichts überschreiben, sondern
            gleich noch einmal senden; die nächste Antwort bringt den Stand */
@@ -4738,6 +4864,7 @@ function entwurfSenden(behalten) {
         if (ziel.art === 'konto') { bezahltUebernehmen(r.bezahlt); kontoListeMerken(); if (KS) kauf().konto = KS.mail; } // erst jetzt gehört es zu diesem Konto
         sync.ok = true; sync.zuletzt = Date.now();
         if (!sync.wieder) { sync.fp = entwurfFp(); sync.offen = false; } // inzwischen weiter geändert: bleibt offen
+        if (INST) setTimeout(fotosHochladen, 0); // Instanz: jetzt kennt der Server die Fenster, ihre Fotos dürfen hin
         lokalSpeichern();
       } else if (ziel.art === 'konto' && res.status === 410 && r && r.geloescht) weg = 'entfernt'; // auf einem anderen Gerät gelöscht
       else if (res.status === 410) {
@@ -5257,7 +5384,7 @@ const blobText = (blob) => new Promise((fertig) => { const fr = new FileReader()
 function fotoZiel() {
   if (S.tour || vorschau() || !SERVER.daten) return null;
   if (S.betrieb) {
-    if (S.sent || (S.linkZu && S.linkZu !== 'eingegangen')) return null;
+    if (S.sent || (S.linkZu && S.linkZu !== 'eingegangen') || !S.betrieb.code) return null;
     const code = S.betrieb.code;
     return { schluessel: 'link:' + code, pfad: (id) => '/api/link/' + encodeURIComponent(code) + '/foto/' + id, abruf: (p, init) => fetch(p, init), nurGespeichert: true };
   }
@@ -5267,22 +5394,42 @@ function fotoZiel() {
 /* Kennungen der Fotos dieses Aufmaßes: gespeicherte Fenster, dazu (ohne nurGespeichert) das gerade bearbeitete */
 function fotoIdsHier(nurGespeichert) { const s = new Set(); S.windows.forEach((w) => bilderVon(w).forEach((id) => s.add(id))); if (!nurGespeichert) bilderVon(S.win).forEach((id) => s.add(id)); return s; }
 const FotoSync = { laeuft: false, nochmal: false, fehler: 0, timer: 0, fertig: [] };
+/* Instanz: zu jedem Foto eine kleine Fassung <id>k (640 px, JPEG 0,7) fürs Aufmaßblatt im Worker (functions/api/blatt-server.js) */
+async function kleineFassung(blob) {
+  let u = ''; try { u = URL.createObjectURL(blob); } catch (e) { return ''; }
+  try {
+    const im = await new Promise((fertig, fehler) => { const i = new Image(); i.onload = () => fertig(i); i.onerror = fehler; i.src = u; });
+    const f = Math.min(1, 640 / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.max(1, Math.round(im.naturalWidth * f)), h = Math.max(1, Math.round(im.naturalHeight * f));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h);
+    const data = c.toDataURL('image/jpeg', 0.7);
+    return /^data:image\/jpeg;base64,/.test(data) ? data.slice(data.indexOf(',') + 1) : '';
+  } catch (e) { return ''; } finally { URL.revokeObjectURL(u); }
+}
+const fotoFassungen = (z) => (INST ? [['', z.schluessel], ['k', z.schluessel + ':k']] : [['', z.schluessel]]);
 async function fotosHochladen() {
   if (FotoSync.laeuft) { FotoSync.nochmal = true; return; }
   const z = fotoZiel(); if (!z) return;
   FotoSync.laeuft = true; clearTimeout(FotoSync.timer);
   try {
+    /* Instanz: Fotos nimmt der Server nur zu Fenstern, die im Zwischenstand stehen; also erst den Zwischenstand hinbringen */
+    if (INST && entwurfAn()) { if (S.sync.p) await S.sync.p.catch(() => false); if (S.sync.offen && S.sync.geladen) await entwurfSenden(); }
+    let spaeter = false;
     for (const id of fotoIdsHier(!!z.nurGespeichert)) {
       if (fotoZiel() === null || fotoZiel().schluessel !== z.schluessel) break; // inzwischen gesendet oder ein anderes Aufmaß
       const v = await Fotos.holen(id);
-      if (!v || !v.blob || (v.hoch && v.hoch[z.schluessel])) continue;
-      const text = await blobText(v.blob), bild = text.slice(text.indexOf(',') + 1);
-      if (!bild) continue;
-      const r = await z.abruf(z.pfad(id), { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ bild: bild }) });
-      if (r.ok) { await Fotos.vermerken(id, z.schluessel); FotoSync.fehler = 0; continue; }
-      if ([400, 403, 409, 410, 413].includes(r.status)) continue; // geht so nicht (Link zu, zu groß, voll): nicht endlos versuchen
-      throw new Error('Foto nicht angekommen (' + r.status + ')');
+      if (!v || !v.blob) continue;
+      for (const [zusatz, marke] of fotoFassungen(z)) {
+        if (v.hoch && v.hoch[marke]) continue;
+        const text = zusatz ? '' : await blobText(v.blob), bild = zusatz ? await kleineFassung(v.blob) : text.slice(text.indexOf(',') + 1);
+        if (!bild) continue;
+        const r = await z.abruf(z.pfad(id + zusatz), { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ bild: bild }) });
+        if (r.ok) { await Fotos.vermerken(id, marke); FotoSync.fehler = 0; continue; }
+        if (INST && (r.status === 409 || r.status === 400) && S.sync && (S.sync.offen || S.sync.laeuft)) { spaeter = true; continue; } // Zwischenstand noch unterwegs
+        if ([400, 403, 409, 410, 413].includes(r.status)) continue; // geht so nicht (Link zu, zu groß, voll): nicht endlos versuchen
+        throw new Error('Foto nicht angekommen (' + r.status + ')');
+      }
     }
+    if (spaeter && (FotoSync.spaet = (FotoSync.spaet || 0) + 1) <= 20) FotoSync.timer = setTimeout(fotosHochladen, 1500); else if (!spaeter) FotoSync.spaet = 0; // höchstens 20-mal auf den Zwischenstand warten
   } catch (e) {
     FotoSync.fehler++;
     FotoSync.timer = setTimeout(fotosHochladen, Math.min(60000, 1500 * Math.pow(2, FotoSync.fehler))); // nach einer Störung später noch einmal
@@ -5295,7 +5442,7 @@ async function fotosHochladen() {
 async function fotosOffen() {
   const z = fotoZiel(); if (!z) return 0;
   let n = 0;
-  for (const id of fotoIdsHier(true)) { if (FOTO_ARBEIT.has(id)) { n++; continue; } const v = await Fotos.holen(id); if (v && v.blob && !(v.hoch && v.hoch[z.schluessel])) n++; }
+  for (const id of fotoIdsHier(true)) { if (FOTO_ARBEIT.has(id)) { n++; continue; } const v = await Fotos.holen(id); if (v && v.blob && fotoFassungen(z).some((f) => !(v.hoch && v.hoch[f[1]]))) n++; }
   return n;
 }
 async function fotosAbwarten(ms) {
@@ -5616,7 +5763,17 @@ function act(name, el) {
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
     case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
-    case 'new': if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); return newWin();
+    case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());
+      if (INST && S.instZu) return go('home');
+      if (INST && S.betrieb && !S.betrieb.code) return instanzStart().then((ok) => { if (ok) newWin(); }); // Instanz: der Code kommt mit dem ersten Fenster
+      return newWin();
+    case 'inst-weitere': return instanzWeitere();
+    case 'inst-vergessen': return instanzVergessen();
+    case 'inst-pdf': return anfragePdf();
+    case 'inst-geraet': { S.instGeraet = !S.instGeraet; return render(); }
+    case 'inst-link-kopieren': { const t = instWeiterLink(); try { navigator.clipboard.writeText(t).then(() => toast('Link kopiert.'), () => toast('Kopieren geht hier nicht. Bitte den Link markieren und kopieren.')); } catch (e) { toast('Kopieren geht hier nicht. Bitte den Link markieren und kopieren.'); } return; }
+    case 'inst-link-teilen': { const t = instWeiterLink(); if (navigator.share) { navigator.share({ title: 'Fensterplanung bei ' + (INST.name || ''), url: t }).catch(() => {}); return; } return toast('Teilen geht hier nicht. Bitte den Link kopieren.'); }
+    case 'kontakt-weiter': { const f = kontaktPruefen(); if (f.fehlt) { S.kontaktFehler = Object.assign(f, { alle: true }); render(); const el = document.querySelector('.trow.bad input'); if (el) try { el.focus(); } catch (e) { /* ok */ } return toast('Bitte noch Name und Telefon oder E-Mail angeben.'); } S.kontaktFehler = null; return go('blatt'); }
     case 'open': return fensterOeffnen(+el.getAttribute('data-i'));
     case 'delwin': { if (!linkOffen()) return; if (S.editIdx < 0 || !S.windows[S.editIdx]) { S.editIdx = -1; go('home', 'back'); return toast('Dieses Fenster gibt es nicht mehr.'); } const weg = S.windows[S.editIdx]; if (weg.wid) { S.sync.geloescht[weg.wid] = zeit(); const alle = Object.keys(S.sync.geloescht); if (alle.length > 200) alle.sort((a, b) => S.sync.geloescht[a] - S.sync.geloescht[b]).slice(0, alle.length - 200).forEach((k) => { delete S.sync.geloescht[k]; }); } S.angelegt = angelegt(); S.windows.splice(S.editIdx, 1); S.editIdx = -1; persist(); entwurfWeg(weg.wid); Fotos.weg(bilderVon(weg).filter((id) => !S.windows.some((x) => bilderVon(x).includes(id)))); toast('Fenster gelöscht'); return go('home', 'back'); }
     case 'aufmass-neu': { S.neuFrage = true; return render(); }
@@ -5737,7 +5894,11 @@ function act(name, el) {
     }
     case 'glasfn': { w.glasfn = w.glasfn.indexOf(v) >= 0 ? w.glasfn.filter((x) => x !== v) : w.glasfn.concat([v]); entschieden(w, 'glasfn'); return render(); }
     case 'save': return saveWin();
-    case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (S.betrieb && entwurfLesen()) { S.sendeFrage = true; return render(); } return kiVorher('senden').then((weiter) => { if (!weiter || (S.betrieb && S.sent)) return; if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); go('gesendet'); }); }
+    case 'send': { if (vorschau()) return toast('Vorschau: Hier wird nichts gesendet.'); if (S.betrieb && S.sent) return go('gesendet'); if (!linkOffen()) return; if (!S.windows.some((x) => derive(x).complete)) return toast('Bitte erst ein Fenster vollständig messen'); if (S.betrieb && entwurfLesen()) { S.sendeFrage = true; return render(); }
+      if (INST && S.instZu) return go('home');
+      if (instWebsite() && kontaktPruefen().fehlt) { S.kontaktFehler = kontaktPruefen(); S.kontaktFehler.alle = true; toast('Bitte noch Name und Telefon oder E-Mail angeben.'); return go('anfrage3'); }
+      if (INST) return (SERVER.daten ? Promise.resolve(true) : statusHolen()).then((da) => { if (!da) return toast('Gerade nicht erreichbar. Deine Planung bleibt gespeichert, bitte gleich noch einmal senden.'); if (S.instWeg) { S.instWeg = false; linkPruefen(); } return kiVorher('senden').then((weiter) => { if (weiter && !S.sent) return sendenServer(); }); });
+      return kiVorher('senden').then((weiter) => { if (!weiter || (S.betrieb && S.sent)) return; if (SERVER.daten && S.betrieb) return sendenServer(); S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1 }; S.nb = null; S._feier = 'gesendet'; persist(); go('gesendet'); }); }
     case 'copyblatt': return copyText(curCode(), 'code-box', 'Code kopiert');
     case 'teil-copy': { copyText(curCode(), 'code-box', 'Code kopiert'); return act('teil-mark', el); }
     case 'teil-mark': return teilMark('betrieb');
@@ -6094,6 +6255,9 @@ function boot() {
   LINK_TOKEN = tokenAusAdresse(); // Anmeldelink: Schlüssel gleich aus Adresse und Verlauf nehmen, verarbeitet wird er in serverStart
   restore();
   S.betrieb = readHash();
+  /* Instanz: ohne #k-… die laufende Planung dieses Geräts (oder noch keine, dann kommt der Code beim ersten Fenster) */
+  if (INST && S.betrieb && !S.betrieb.name) S.betrieb.name = INST.name || '';
+  if (INST && !S.betrieb) S.betrieb = instanzBetrieb(instLesen('aktiv'));
   vorschauPruefen(S.betrieb);
   if (S.betrieb) loadLink();
   window.addEventListener('hashchange', () => {
@@ -6101,9 +6265,10 @@ function boot() {
     const fuehrung = location.hash === '#fuehrung';
     if (S.tour && !fuehrung) tourEnde(false, true);
     const b = readHash(), was = S.betrieb ? S.betrieb.code : '', now = b ? b.code : '';
-    if (was === now) { const neueRunde = !!(b && S.betrieb && (b.runde || 1) !== (S.betrieb.runde || 1)); if (b) S.betrieb = b; if (neueRunde) { loadLink(); S.screen = 'home'; render(true); if (SERVER.daten) linkPruefen(); return; } if (fuehrung) return tourStart(); return render(); } // andere Runde (Nachbesserungs-Link im selben Tab): neu laden
-    S.betrieb = b; vorschauPruefen(b); if (b) loadLink(); else { KS = kontoLesen(); loadOwn(); } S.screen = 'home'; render(true);
-    if (b && SERVER.daten) linkPruefen();
+    if (was === now) { const neueRunde = !!(b && S.betrieb && (b.runde || 1) !== (S.betrieb.runde || 1)); if (b) S.betrieb = INST ? Object.assign(b, { name: b.name || S.betrieb.name, website: !!S.betrieb.website }) : b; if (neueRunde) { loadLink(); S.screen = 'home'; render(true); if (SERVER.daten) linkPruefen(); return; } if (fuehrung) return tourStart(); return render(); } // andere Runde (Nachbesserungs-Link im selben Tab): neu laden
+    if (INST && b && !b.name) b.name = INST.name || '';
+    S.betrieb = b || (INST ? instanzBetrieb(instLesen('aktiv')) : null); vorschauPruefen(S.betrieb); if (S.betrieb) loadLink(); else { KS = kontoLesen(); loadOwn(); } S.screen = 'home'; render(true); // Instanz: nie das eigene Aufmaß
+    if (S.betrieb && S.betrieb.code && SERVER.daten) linkPruefen();
     if (fuehrung) tourStart();
   });
   const root = $app();
@@ -6145,8 +6310,12 @@ const WM = () => (window.Marke ? window.Marke.wort() : 'eeziframes');
 /* Rechtslinks unter jedem Bildschirm (render hängt sie an, wo sie fehlen; Messbildschirme ohne Platz zeigen sie im Glossar-Blatt):
    „Vertrag widerrufen“ zuerst und als Knopf (§ 356a BGB), dazu der Widerruf der KI-Einwilligung, sobald sie erteilt ist (Art. 7 Abs. 3
    DSGVO: so einfach wie die Erteilung) */
-function rechtLinks() {
+function rechtLinks(ohneKz) {
   const C = window.KONFIG || {}, ki = window.FotoKI && window.FotoKI.eingewilligt && window.FotoKI.eingewilligt();
+  /* Instanz: Impressum und Datenschutz des Betriebs, KI-Widerruf; kein Vertrag mit dem Endkunden (ohne Widerruf, AGB, Cookies),
+     darunter die Kennzeichnung des Pakets (ohneKz: die Seite trägt sie schon) */
+  if (INST) return '<div class="foot-links recht inst"><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>' + (ki ? '<button type="button" class="link" data-act="ki-widerrufen">KI-Einwilligung widerrufen</button>' : '') + '</div>' +
+    (ohneKz || !window.Einladung ? '' : window.Einladung.kennzeichnung(INST_M.kennzeichnung));
   return '<div class="foot-links recht"><a class="link widerruf" href="/widerruf/" target="_blank" rel="noopener">Vertrag widerrufen</a><a class="link" href="/agb/" target="_blank" rel="noopener">AGB</a><a class="link" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a><a class="link" href="/cookies/" target="_blank" rel="noopener">Cookies</a><a class="link" href="' + esc(C.impressum || '/impressum/') + '" target="_blank" rel="noopener">Impressum</a>' + (ki ? '<button type="button" class="link" data-act="ki-widerrufen">KI-Einwilligung widerrufen</button>' : '') + '</div>';
 }
 const SEND_IC = '<div class="okmark-l" data-lottie="senden"><span class="lottie-still"><svg class="okmark send" viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--accent-soft)"></circle><path d="M17 31l29-12-9 28-7-10z" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linejoin="round"></path><path d="M30 37l16-18" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round"></path></svg></span></div>';
@@ -6156,8 +6325,146 @@ function sendeText() {
   if (!S.betrieb || !PILOT) return 'Hallo ' + (bn || 'zusammen') + ', hier ist mein Übermittlungscode aus eeziframes:\n' + curCode();
   return 'Hallo' + (bn ? ' ' + bn : '') + ', hier ist mein Fenster-Aufmaß aus eeziframes (' + n + ' Fenster). Bitte bei eeziframes unter „Code vom Kunden einfügen“ einsetzen:\n' + curCode();
 }
+/* ---------- Konfigurator-Instanz: Kopf, Startseite, Kontakt, Bestätigung, PDF-Kopie (Bauplan Strang B) ---------- */
+/* Kopf auf der Startseite: Zeichen (Logo oder Initiale) und Name des Betriebs */
+function instKopf() {
+  const d = lkDaten(), E = window.Einladung;
+  return '<span class="hdr-inst">' + (E ? E.zeichen(d.name, d.p, 'klein') : '') + '<span class="hdr-name">' + esc(d.name) + '</span></span>';
+}
+/* Kontakt auf der Website einer Instanz: Name (mindestens 2 Zeichen) und Telefon (mindestens 6 Ziffern) oder E-Mail, dieselbe Regel
+   wie der Server (Instanzregeln.telOk/mailOk, functions/api/konten.js); ein angefangenes, falsches Feld zählt als Fehler */
+const telOkI = (t) => String(t || '').replace(/\D/g, '').length >= 6;
+const mailOkI = (m) => { const s = String(m || '').trim(); return /^[^\s@<>()",;]+@[^\s@<>()",;]+\.[^\s@<>()",;]{2,}$/.test(s) && !/\.invalid$/i.test(s); };
+function kontaktPruefen() {
+  const p = S.proj || {}, name = String(p.name || '').replace(/\s+/g, ' ').trim(), tel = String(p.tel || '').trim(), mail = String(p.mail || '').trim(), f = {};
+  if (name.length < 2) f.name = 'Bitte deinen Namen angeben.';
+  if (tel && !telOkI(tel)) f.tel = 'Bitte eine Telefonnummer mit mindestens 6 Ziffern eingeben.';
+  if (mail && !mailOkI(mail)) f.mail = 'Bitte eine gültige E-Mail-Adresse eingeben.';
+  if (!f.tel && !f.mail && !telOkI(tel) && !mailOkI(mail)) f.weg = 'Bitte eine Telefonnummer oder E-Mail-Adresse angeben.';
+  f.fehlt = !!(f.name || f.tel || f.mail || f.weg);
+  return f;
+}
+/* fehler: Text unter dem Feld; true markiert das Feld nur (der Text steht beim Nachbarfeld, „Telefon oder E-Mail“) */
+function kontaktFeld(label, field, ph, mode, auto, fehler, pflicht) {
+  const v = S.proj[field], id = 't-' + field;
+  if (fehler === true) return '<div class="trow bad"><span>' + esc(label) + '</span><input type="' + (mode === 'email' ? 'email' : mode === 'tel' ? 'tel' : 'text') + '" id="' + id + '" inputmode="' + (mode || 'text') + '" autocomplete="' + auto + '" data-in="p" data-f="' + field + '" value="' + esc(v || '') + '" placeholder="' + esc(ph || '') + '" aria-invalid="true" aria-describedby="t-mail-f"></div>';
+  return '<div class="trow' + (fehler ? ' bad' : '') + '"><span>' + esc(label) + (pflicht ? '<i class="pfl" aria-hidden="true"> *</i>' : '') + '</span><input type="' + (mode === 'email' ? 'email' : mode === 'tel' ? 'tel' : 'text') + '" id="' + id + '" inputmode="' + (mode || 'text') + '" autocomplete="' + auto + '" data-in="p" data-f="' + field + '" value="' + esc(v || '') + '" placeholder="' + esc(ph || '') + '"' + (fehler ? ' aria-invalid="true" aria-describedby="' + id + '-f"' : '') + (pflicht ? ' aria-required="true"' : '') + '>' + (fehler ? '<small class="trow-f" id="' + id + '-f">' + esc(fehler) + '</small>' : '') + '</div>';
+}
+function instAnfrage3() {
+  const pr = S.proj, d = lkDaten(), bn = d.name, C = window.KONFIG || {};
+  const f = S.kontaktFehler ? Object.assign(kontaktPruefen(), { alle: true }) : {};
+  let html = hd(anfrageHead(3, true), 'Wie erreicht dich ' + esc(bn) + '?', 'Name und Telefon oder E-Mail brauchen wir, damit ' + esc(bn) + ' sich mit dem Angebot melden kann. Deine Angaben gehen nur an ' + esc(bn) + '; mehr dazu im <a class="ulink" href="' + esc(C.datenschutz || '/datenschutz/') + '" target="_blank" rel="noopener">Datenschutz</a>.', '', '', schrittTools('kontakt'));
+  html += '<div class="sec"><div class="rows kontakt-felder">' + kontaktFeld('Name', 'name', 'Vor- und Nachname', 'text', 'name', f.name, true) + kontaktFeld('Telefon', 'tel', 'Für Rückfragen', 'tel', 'tel', f.tel || !!f.weg, false) + kontaktFeld('E-Mail', 'mail', 'name@beispiel.de', 'email', 'email', f.mail || f.weg, false) + kontaktFeld('PLZ und Ort', 'ort', 'z. B. 50667 Köln', 'text', 'postal-code address-level2', '', false) + '</div>' +
+    '<p class="sub kontakt-hinweis">* Pflicht. Dazu Telefon oder E-Mail, eins genügt.</p></div>';
+  html += '<div class="sec">' + secHead('Wann am besten erreichbar?', null, 'Freiwillig.') + chips('erreich', pr.erreich, 'erreich', 'setp') + '</div>';
+  return { html: html, back: ['Zurück', 'anfrage2'], cls: 'tight', bar: { label: 'Prüfen und senden', act: 'kontakt-weiter', zurueck: true } };
+}
+/* „Auf anderem Gerät weitermachen“: dieselbe Planung über https://<host>/#k-<code> */
+const instWeiterLink = () => location.origin + '/#k-' + (S.betrieb ? S.betrieb.code : '');
+function instWeiterKarte(du) {
+  const T = (sie, x) => (du ? x : sie), mit = SERVER.daten && S.betrieb && S.betrieb.code && !S.sync.aus;
+  let h = '<div class="card merk-karte inst-weiter"><p class="eyebrow">Jederzeit weitermachen</p><p>' + T('Ihre Planung ist auf diesem Gerät gespeichert. Öffnen Sie diese Seite einfach wieder, dann geht es weiter.', 'Deine Planung ist auf diesem Gerät gespeichert. Öffne diese Seite einfach wieder, dann geht es weiter.') + '</p>';
+  if (mit) {
+    h += '<div class="pill-row"><button type="button" class="pill" data-act="inst-geraet" aria-expanded="' + !!S.instGeraet + '">Auf anderem Gerät weitermachen</button></div>';
+    if (S.instGeraet) h += '<div class="inst-link"><input type="text" readonly value="' + esc(instWeiterLink()) + '" aria-label="Link zu dieser Planung"><div class="pill-row"><button type="button" class="pill" data-act="inst-link-kopieren">Link kopieren</button>' + (navigator.share ? '<button type="button" class="pill" data-act="inst-link-teilen">Teilen</button>' : '') + '</div><p class="sub">' + T('Wer diesen Link hat, sieht Ihre Planung. Geben Sie ihn nur an Personen weiter, denen Sie vertrauen.', 'Wer diesen Link hat, sieht deine Planung. Gib ihn nur an Personen weiter, denen du vertraust.') + '</p></div>';
+  }
+  return h + '</div>';
+}
+/* Startseite einer Instanz in allen Zuständen (erste Seite, Liste, gesendet, Planung nicht mehr da, Nachbesserung einer Einladung) */
+function instHome() {
+  const E = window.Einladung, d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), n = S.windows.length, web = instWebsite(), I = instOpt({ ohneKopf: web }), p = d.p;
+  const weg = S.instWeg ? noteBox(T('Gerade nicht erreichbar. Ihre Planung bleibt auf diesem Gerät gespeichert; gesendet wird, sobald die Verbindung wieder steht.', 'Gerade nicht erreichbar. Deine Planung bleibt auf diesem Gerät gespeichert; gesendet wird, sobald die Verbindung wieder steht.'), null, 'warn inst-weg') : '';
+  const kontakt = () => E.kontakt({ name: name, p: p, du: du, bis: web || S.sent || S.linkZu ? '' : d.bis, instanz: I });
+  const pf = '<span class="pf" aria-hidden="true"></span>', ok = '<div class="okmark-l" data-lottie="fertig"><span class="lottie-still"><svg class="okmark" viewBox="0 0 64 64" width="84" height="84" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>';
+  const liste = instGesendetListe();
+  if (S.instZu && !S.sent) return instZuSeite();
+  if (S.sent) {
+    const test = S.sent.art === 'test';
+    const html = '<section class="hero lk"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + esc(S.sent.nr || '') + '</p><h1>' + (S.sent.anderswo ? 'Schon <span class="ak">gesendet</span>.' : 'Danke, <span class="ak">gesendet</span>.') + '</h1>' +
+      '<p class="ein-lead">' + esc(name) + T(' hat Ihre Anfrage seit ', ' hat deine Anfrage seit ') + esc(sentWhen()) + T(' und meldet sich bei Ihnen.', ' und meldet sich bei dir.') + '</p>' +
+      '<div class="ein-cta"><button type="button" class="btn primary" data-act="inst-weitere">Weitere Anfrage starten' + pf + '</button></div></div></section>' + weg +
+      '<section class="card inst-geraet-karte"><p class="eyebrow">Auf diesem Gerät</p><p>' + T('Hier sind nur Nummer und Datum Ihrer Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.', 'Hier sind nur Nummer und Datum deiner Anfrage gespeichert; Maße, Fotos und Kontaktdaten sind von diesem Gerät gelöscht.') + '</p><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' +
+      kontakt() + rechtLinks();
+    return { html: html, bar: null };
+  }
+  if (S.linkZu && S.linkZu !== 'eingegangen') {
+    const html = '<section class="hero lk"><div class="ein-start-in">' + (web ? '' : E.kopf({ name: name, p: p, instanz: I })) + '<p class="eyebrow" style="color: var(--warn)">' + (S.linkZu === 'abgelaufen' ? 'Abgelaufen' : 'Nicht mehr aktiv') + '</p><h1>Hier geht es gerade nicht weiter.</h1><p class="ein-lead">' + esc(S.linkZuText || T('Bitte melden Sie sich bei ', 'Bitte melde dich bei ') + name + '.') + '</p>' +
+      '<div class="ein-cta"><button type="button" class="btn primary" data-act="inst-weitere">Neue Planung beginnen' + pf + '</button></div></div></section>' + kontakt() + rechtLinks();
+    return { html: html, bar: null };
+  }
+  if (S.nb) return linkHomeInhaltAlt(I);
+  if (n || angelegt() >= GRENZE.fenster) {
+    const html = weg + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + hd(T('Ihre Planung', 'Deine Planung'), T('Weiter, wo Sie waren.', 'Weiter, wo du warst.'), esc(aufmassStand())) +
+      '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">' + T('Ihre Fenster.', 'Deine Fenster.') + '</h2><span class="sub">' + n + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
+      (vorschau() ? '' : web ? instWeiterKarte(du) : linkMerk(name, du)) + kontakt() + rechtLinks();
+    return { html: html, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
+  }
+  const frueher = web && liste.length ? '<section class="card inst-frueher"><p class="eyebrow">' + T('Ihre Anfragen auf diesem Gerät', 'Deine Anfragen auf diesem Gerät') + '</p><ul class="inst-nr">' + liste.slice(0, 5).map((x) => { let t = ''; try { t = new Date(x.when).toLocaleDateString('de-DE'); } catch (e) { t = ''; } return '<li><b>' + esc((x.test ? 'Testanfrage ' : 'Anfrage ') + x.nr) + '</b><span>' + esc(t ? 'gesendet am ' + t : 'gesendet') + '</span></li>'; }).join('') + '</ul><div class="pill-row"><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>' : '';
+  const html = weg + E.html({ name: name, kunde: d.kunde, du: du, p: p, bis: web ? '' : d.bis, server: !!SERVER.daten, instanz: I }) + frueher + rechtLinks(true);
+  return { html: html, bar: null };
+}
+/* Die Instanz ist inzwischen pausiert, beendet oder wieder in Vorbereitung (Antwort der API, Status-Matrix §2.7), während die App offen
+   ist: wie die Seiten des Servers, in der Marke des Betriebs, mit Kontakt; die Planung bleibt auf dem Gerät */
+function instZuPruefen(res, j) {
+  if (!INST || !res || !j || (res.status !== 503 && res.status !== 410)) return false;
+  const st = String(j.status || '');
+  if (['pausiert', 'beendet', 'einrichtung'].indexOf(st) < 0) return false;
+  if (S.instZu !== st) { S.instZu = st; if (S.screen !== 'home') go('home', 'back'); else render(); }
+  return true;
+}
+function instZuSeite() {
+  const E = window.Einladung, d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), st = S.instZu, n = S.windows.length;
+  const t = st === 'pausiert' ? ['Gerade nicht erreichbar', 'Der Fensterplaner ist gerade nicht erreichbar.', esc(name) + T(' nimmt über diese Seite gerade keine Anfragen an. Für Ihre Anfrage erreichen Sie uns direkt.', ' nimmt über diese Seite gerade keine Anfragen an. Für deine Anfrage erreichst du uns direkt.')]
+    : st === 'einrichtung' ? ['In Vorbereitung', 'Hier entsteht gerade etwas.', T('Dieser Fensterplaner ist bald für Sie da. Bitte schauen Sie später noch einmal vorbei.', 'Dieser Fensterplaner ist bald für dich da. Bitte schau später noch einmal vorbei.')]
+      : ['Nicht mehr verfügbar', 'Diesen Fensterplaner gibt es nicht mehr.', T('Für Ihre Anfrage erreichen Sie ', 'Für deine Anfrage erreichst du ') + esc(name) + ' direkt.'];
+  const html = '<section class="hero lk"><div class="ein-start-in"><p class="eyebrow" style="color: var(--warn)">' + t[0] + '</p><h1>' + t[1] + '</h1><p class="ein-lead">' + t[2] + (n ? ' ' + T('Ihre Planung bleibt auf diesem Gerät gespeichert.', 'Deine Planung bleibt auf diesem Gerät gespeichert.') : '') + '</p></div></section>' +
+    (E ? E.kontakt({ name: name, p: d.p, du: du, instanz: instOpt() }) : '') + rechtLinks();
+  return { html: html, bar: null };
+}
+/* Bestätigung nach dem Senden: Nummer, „<Name> meldet sich“, Kontaktkarte, „Meine Anfrage als PDF“ (Merkmal kopieKunde), weitere Anfrage,
+   vergessen. Verlässt der Kunde sie, bleiben nur Nummer und Datum (render → instanzKuerzen) */
+function instGesendet() {
+  if (!S.sent || S.sent.kurz) return instHome();
+  const E = window.Einladung, d = lkDaten(), name = d.name, du = d.du, T = (sie, x) => (du ? x : sie), test = S.sent.art === 'test', web = instWebsite();
+  const ok = '<div class="okmark-l" data-lottie="fertig"><span class="lottie-still"><svg class="okmark" viewBox="0 0 64 64" width="78" height="78" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--ok-soft)"></circle><path class="tick" d="M19 33l9 9 18-20" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div>';
+  const html = '<section class="inst-danke"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(S.sent.nr || '') + '</span></p><h1>Danke, <span class="ak">gesendet</span>.</h1>' +
+      '<p class="ein-lead">' + esc(name) + T(' hat jetzt Ihre Maße, Fotos und Wünsche und meldet sich bei Ihnen.', ' hat jetzt deine Maße, Fotos und Wünsche und meldet sich bei dir.') + '</p></div></section>' +
+    (test ? noteBox('Vorschau: Das war eine Testanfrage. Sie geht mit „[Test]“ im Betreff an den Betrieb, zählt nicht mit und ist nach einem Tag gelöscht.', null, 'warn') : '') +
+    (INST_M.kopieKunde ? '<section class="card inst-pdf"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">' + T('Für Ihre Unterlagen', 'Für deine Unterlagen') + '</p><b>' + T('Ihre Anfrage als PDF', 'Deine Anfrage als PDF') + '</b><small>' + T('Alle Fenster mit Maßen, Wünschen und Fotos, dazu Ihre Angaben. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.', 'Alle Fenster mit Maßen, Wünschen und Fotos, dazu deine Angaben. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.') + '</small></div></div><div class="pill-row"><button type="button" class="btn primary" data-act="inst-pdf"' + (S.pdfLaeuft ? ' disabled' : '') + '>' + (S.pdfLaeuft ? 'PDF entsteht …' : 'Meine Anfrage als PDF') + '</button></div></section>' : '') +
+    '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(name) + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
+    (E ? E.kontakt({ name: name, p: d.p, du: du, instanz: instOpt({ website: web }) }) : '') +
+    '<section class="card inst-geraet-karte"><p class="eyebrow">Auf diesem Gerät</p><p>' + T('Sobald Sie diese Seite verlassen, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum Ihrer Anfrage.', 'Sobald du diese Seite verlässt, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum deiner Anfrage.') + '</p><div class="pill-row"><button type="button" class="pill" data-act="inst-weitere">Weitere Anfrage starten</button><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>';
+  return { html: html, cls: 'tight', bar: { label: 'Fertig', act: 'go', v: 'home', ghost: true } };
+}
+/* Logo der Instanz fürs PDF: Bild von /marke/<v>/logo.png als Data-URL mit Maßen */
+async function logoFuerBlatt(url) {
+  try {
+    const r = await fetch(url, { cache: 'force-cache' }); if (!r.ok) return null;
+    const blob = await r.blob(), data = await blobText(blob);
+    if (!/^data:image\/(png|jpeg|webp);base64,/.test(data)) return null;
+    const g = await new Promise((fertig) => { const i = new Image(); i.onload = () => fertig({ w: i.naturalWidth, h: i.naturalHeight }); i.onerror = () => fertig(null); i.src = data; });
+    return g && g.w > 0 ? { data: data, w: g.w, h: g.h, grund: (lkDaten().p || {}).grund === 'dunkel' ? 'dunkel' : 'hell' } : null;
+  } catch (e) { return null; }
+}
+/* „Meine Anfrage als PDF“: Blatt.pdf in der Variante anfrage (Marke der Instanz, ohne Bestellmaß und Werbung), Kennzeichnung nach Paket */
+async function anfragePdf() {
+  if (!INST || !S.sent || S.sent.kurz || !INST_M.kopieKunde) return toast('Die Kopie gibt es nur direkt nach dem Senden.');
+  if (S.pdfLaeuft) return;
+  S.pdfLaeuft = true; render();
+  try {
+    await blattSchrift();
+    const d = lkDaten(), pr = S.proj, fotos = await fotosFuerBlatt(S.windows), logo = INST_M.logo && INST.logo ? await logoFuerBlatt(INST.logo) : null;
+    const marke = { name: d.name, host: location.host || INST.host || '' }; if (logo) marke.logo = logo; if (INST_M.farbe && INST.farbe) marke.farbe = INST.farbe;
+    const kunde = { name: pr.name || '', kontakt: pr.tel || pr.mail || '', adresse: pr.ort || '', mehr: AW.kundeKontakt({ kontakt: pr.tel || pr.mail || '', aufmass: { proj: pr } }) };
+    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'anfrage', kennzeichnung: INST_M.kennzeichnung, marke: marke, nr: S.sent.nr || '', sie: !d.du, fenster: S.windows, projekt: pr, kunde: kunde, fotos: fotos, h: BLATT_H }) : null;
+    if (!pdf) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); return; }
+    await dateiSpeichern(pdf, 'Anfrage-' + (String(S.sent.nr || '').replace(/[^A-Za-z0-9-]/g, '') || 'Fenster') + '.pdf');
+  } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }
+  finally { S.pdfLaeuft = false; render(); }
+}
 const gesendetOrig = SCREENS.gesendet;
 SCREENS.gesendet = () => {
+  if (INST && S.betrieb) return instGesendet();
   if (!PILOT) return gesendetOrig();
   const bn = S.betrieb && S.betrieb.name ? S.betrieb.name : '', dat = bn || 'deinem Fensterbauer', nom = bn || 'dein Fensterbauer';
   const text = sendeText();
@@ -6177,9 +6484,16 @@ SCREENS.gesendet = () => {
 /* ---------- Server (Stufe 2): /api/status sagt, was eingerichtet ist ----------
    daten:   Aufmaße gehen direkt an den Betrieb, ohne Code-Umweg; der Link wird beim Öffnen geprüft
    zahlung: das Aufmaßblatt wird über Stripe bezahlt */
-async function serverStart() {
+async function statusHolen() {
   try { const r = await fetch('/api/status', { headers: { accept: 'application/json' }, cache: 'no-store' }); const j = r.ok ? await r.json() : null; if (j && j.ok) { SERVER.daten = !!j.daten; SERVER.konten = !!j.konten; SERVER.zahlung = !!j.zahlung; SERVER.attrappe = !!j.attrappe; SERVER.testmodus = !!j.testmodus; SERVER.preise = j.preise || null; if (window.Abrechnung && window.Abrechnung.setEinfuehrung) window.Abrechnung.setEinfuehrung(j.einfuehrung || null); SERVER.zahlarten = Array.isArray(j.zahlarten) ? j.zahlarten : null; SERVER.recht = j.recht || null; } } catch (e) { /* ohne Server weiter */ }
-  PILOT = !SERVER.daten;
+  return SERVER.daten;
+}
+async function serverStart() {
+  await statusHolen();
+  /* Instanz: nie der Pilot-Weg (Code per WhatsApp an eeziframes); ohne Antwort des Servers bleibt die Planung auf dem Gerät, gesendet
+     wird, sobald er wieder antwortet */
+  PILOT = INST ? false : !SERVER.daten;
+  if (INST && !SERVER.daten) { S.instWeg = true; render(); }
   setTimeout(() => { fotosHochladen(); fotosLokalAufraeumen(); }, 4000); // liegengebliebene Fotos nachschicken, Überholtes auf dem Gerät wegräumen
   if (SERVER.daten) document.querySelectorAll('.fx-pilot').forEach((e) => e.remove());
   const q = new URLSearchParams(location.search), bezahlt = q.get('bezahlt'), t = LINK_TOKEN; LINK_TOKEN = null;
@@ -6197,7 +6511,7 @@ async function serverStart() {
 /* Im Kundenlink: Stand beim Betrieb nachsehen (Name, Runde, abgelaufen) und melden, dass der Link geöffnet wurde. Nur „gibt es
    nicht“ (404) schließt den Link; ein Serverfehler oder die Bremse lassen weiterarbeiten. In der Vorschau des Betriebs: nur lesen */
 async function linkPruefen() {
-  if (!S.betrieb) return;
+  if (!S.betrieb || !S.betrieb.code) return;
   const code = S.betrieb.code, sync = S.sync;
   clearTimeout(sync.pruefTimer);
   try {
@@ -6205,16 +6519,26 @@ async function linkPruefen() {
     const r = await res.json().catch(() => null);
     if (r) uhrStellen(r.jetzt, t1, Date.now());
     if (!S.betrieb || S.betrieb.code !== code) return;
-    if (res.status === 404) { S.linkStatus = 'fehlt'; if (!S.sent) { S.linkZu = 'fehlt'; S.linkZuText = (r && r.fehler) || 'Diesen Link gibt es nicht (mehr). Bitte melde dich bei deinem Fensterbauer.'; } return render(); }
+    if (res.status === 404 && INST && S.betrieb.website && !S.sent) return instanzStillNeu(); // Planung der Website verfallen: still neu
+    if (res.status === 404) { S.linkStatus = 'fehlt'; if (!S.sent) { S.linkZu = 'fehlt'; S.linkZuText = INST ? 'Diese Planung gibt es hier nicht (mehr). Du kannst gleich eine neue beginnen.' : (r && r.fehler) || 'Diesen Link gibt es nicht (mehr). Bitte melde dich bei deinem Fensterbauer.'; } return render(); }
+    if (instZuPruefen(res, r)) return; // Instanz inzwischen pausiert, beendet oder wieder in Vorbereitung
     if (!r || !r.ok) { if (!vorschau()) entwurfLaden(); return; }
     S.betrieb.name = r.betrieb || S.betrieb.name; S.betrieb.kunde = r.kunde || S.betrieb.kunde; S.linkStatus = r.status; if (r.expires) S.betrieb.expires = r.expires;
     /* Einladungsseite: Profil des Betriebs, Anrede des Projekts und der Hinweis einer offenen Nachbesserung (einladung.js prüft alles) */
-    LK_SERVER[code] = { auftritt: window.Einladung ? window.Einladung.profil(Object.assign({ ap: r.ap }, r.auftritt || {})) : null, du: typeof r.du === 'boolean' ? r.du : undefined, hinweis: String(r.hinweis || '').slice(0, 300) };
+    LK_SERVER[code] = { auftritt: window.Einladung ? window.Einladung.profil(Object.assign({ ap: r.ap }, r.auftritt || {})) : null, du: typeof r.du === 'boolean' ? r.du : undefined, hinweis: String(r.hinweis || '').slice(0, 300), art: String(r.art || '') };
+    /* Instanz: eine Planung der Website (auch über „auf anderem Gerät weitermachen“) ist ab jetzt die laufende dieses Geräts; die Adresse
+       verliert den Code, damit er nicht aus Versehen weitergegeben wird */
+    if (INST && instWebsite()) {
+      S.betrieb.website = true; S.betrieb.name = r.betrieb || S.betrieb.name;
+      if (!S.sent && r.zu !== 'eingegangen') instSchreiben('aktiv', code);
+      if (/^#k-/.test(location.hash || '')) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
+    }
+    if (INST && r.nr && S.sent && !S.sent.nr) S.sent.nr = String(r.nr);
     if (!vorschau() && tiefeVorgabe()) persist();
     if (r.zu === 'eingegangen' && !S.sent) schonEingegangen(r.runde, S.sync.offen || weichtAb(S.nb && S.nb.vorher), r.seit);
     if (r.zu === 'abgelaufen' || r.zu === 'deaktiviert') { S.linkZu = r.zu; S.linkZuText = r.zuText || ''; }
     /* geöffnet melden: beim ersten Öffnen beginnen die 60 Tage, die neue Frist kommt zurück */
-    if (!S.sent && !S.linkZu) fortschritt('geoeffnet');
+    if (!S.sent && !S.linkZu && !instWebsite()) fortschritt('geoeffnet'); // Planungen der Website melden nichts (virtueller Link)
     render();
     entwurfLaden();
   } catch (e) {
@@ -6223,7 +6547,7 @@ async function linkPruefen() {
   }
 }
 function fortschritt(stufe, k) {
-  if (!SERVER.daten || !S.betrieb || vorschau()) return;
+  if (!SERVER.daten || !S.betrieb || !S.betrieb.code || vorschau() || instWebsite()) return;
   const code = S.betrieb.code;
   try { fetch('/api/link/' + encodeURIComponent(code) + '/fortschritt', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ stufe: stufe, k: k || 0 }) }).then((r) => r.json()).then((j) => { if (j && j.expires && S.betrieb && S.betrieb.code === code && j.expires !== S.betrieb.expires) { S.betrieb.expires = j.expires; if (S.screen === 'home') render(); } }).catch(() => {}); } catch (e) { /* ok */ }
 }
@@ -6239,20 +6563,24 @@ async function sendenServer() {
   if (abgleich) {
     if (!S.betrieb || S.betrieb.code !== code0) return;
     if (S.sent) { go('home'); return toast('Dein Aufmaß ist schon bei ' + (S.betrieb.name || 'deinem Fensterbauer') + '.'); }
-    if (S.linkZu && S.linkZu !== 'eingegangen') { go('home'); return toast(S.linkZuText || 'Dieser Link ist nicht mehr aktiv.'); }
+    if (S.linkZu && S.linkZu !== 'eingegangen') { go('home'); return toast(S.linkZuText || (INST ? 'Diese Planung ist nicht mehr aktiv.' : 'Dieser Link ist nicht mehr aktiv.')); }
     render(); return toast('Dein Aufmaß wurde mit einem anderen Gerät abgeglichen. Bitte kurz prüfen und noch einmal senden.');
   }
   if (!S.betrieb || S.betrieb.code !== code0 || S.sent) return;
   const o = JSON.parse(JSON.stringify(unpackProject(packProject(S.windows, S.proj, S.betrieb))));
   o.wm = S.windows.map((w) => ({ wid: w.wid || '', t0: Number(w.t0) || 0, aend: Number(w.aend) || 0, ts: Number(w.ts) || 0 })); o.stand = S.stand || 0; o.projTs = S.projTs || 0;
   try {
-    const r = await fetch('/api/aufmass', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(o) }).then((x) => x.json());
+    const res = await fetch('/api/aufmass', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(o) }), r = await res.json().catch(() => null);
+    if (instZuPruefen(res, r)) return toast(r.fehler || 'Der Fensterplaner nimmt gerade keine Anfragen an.');
     if (!S.betrieb || S.betrieb.code !== code0) return;
     if (r && !r.ok && r.zu === 'eingegangen') { schonEingegangen(r.runde, true, r.seit); go('home'); return toast(r.fehler); } // schon da (anderes Gerät)
     if (r && !r.ok && r.abgleichen) { S.sync.offen = true; await entwurfSenden(); if (!S.betrieb || S.betrieb.code !== code0) return; render(); return toast(r.fehler); } // anderes Gerät war schneller: zusammenführen, prüfen lassen
+    if (r && !r.ok && r.kontakt && INST) { S.kontaktFehler = kontaktPruefen(); S.kontaktFehler.alle = true; go('anfrage3'); return toast(r.fehler); } // Instanz: Kontakt ist Pflicht (Server prüft dasselbe)
     if (!r || !r.ok) return toast(r && r.fehler ? r.fehler : 'Senden hat nicht geklappt. Bitte gleich noch einmal.');
     clearTimeout(S.sync.timer); S.sync.offen = false;
-    S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1, uebertragen: true }; S.nb = null; S._feier = 'gesendet'; S.toast = ''; clearTimeout(toastTimer); persist(); go('gesendet');
+    S.sent = { when: Date.now(), code: packProject(S.windows, S.proj, S.betrieb), runde: S.nb && S.nb.runde ? S.nb.runde : 1, uebertragen: true }; S.nb = null; S._feier = 'gesendet'; S.toast = ''; clearTimeout(toastTimer);
+    if (INST) { S.sent.nr = String(r.nr || ''); S.sent.art = String(r.art || ''); instGesendetMerken(S.sent.nr, S.sent.when, S.sent.art); }
+    persist(); go('gesendet');
   } catch (e) { toast('Keine Verbindung. Bitte gleich noch einmal.'); }
 }
 boot();

@@ -124,3 +124,24 @@
 .ein-reg-vor { display: flex; flex-direction: column; gap: 10px; align-items: flex-start }
 .ein-b-karte .ein-abs { margin: 2px 0 }
 .ein-anrede { display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px }
+
+/* ---------- Konfigurator-Instanz (eigene Domain eines Fensterbauers, docs/INSTANZEN.md) ----------
+   Dieselbe Seite als Startansicht des Fensterplaners: über dem Kicker die Bildreihe des Betriebs (bis sechs Fotos, wischbar) bzw. das
+   Startbild; unten die Kennzeichnung nach dem Paket (deutlich mit Zeichen und Link, dezent als Text, sonst nichts). */
+.ein-start-in > .ein-bilder, .ein-start-in > .ein-bild { align-self: stretch; margin: 18px 0 0 }
+.ein-start-in > .ein-abs + .ein-bilder, .ein-start-in > .ein-abs + .ein-bild { margin-top: 22px }
+.ein-bilder { display: grid; grid-auto-flow: column; grid-auto-columns: 86%; gap: 10px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: var(--r3) }
+.ein-bilder::-webkit-scrollbar { display: none }
+.ein-bilder.eins { grid-auto-columns: 100% }
+.ein-bilder img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r3); background: var(--surface2); scroll-snap-align: start }
+.ein-bild { position: relative; margin: 0; border-radius: var(--r3); overflow: hidden; background: var(--surface) }
+.ein-bild img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 11; object-fit: cover; object-position: 50% 42% }
+.ein-bild::after { content: ''; position: absolute; inset: auto 0 0 0; height: 30%; background: linear-gradient(to bottom, transparent, var(--ground)); pointer-events: none }
+.ein-start-in > .ein-bilder + .eyebrow, .ein-start-in > .ein-bild + .eyebrow { margin-top: 22px }
+.ein-fuss.inst { border-top: 0; padding-top: 4px }
+.ein-kz { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted) }
+.ein-kz a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink2); font-weight: 700; text-decoration: none }
+.ein-kz a:hover span { text-decoration: underline }
+.ein-kz.dezent { font-size: 12px; font-weight: 600 }
+@media (min-width: 600px) { .ein-bilder { grid-auto-columns: calc(50% - 5px) } .ein-bilder.eins { grid-auto-columns: 100% } }
+.ein-start-in > .ein-bilder:first-child, .ein-start-in > .ein-bild:first-child { margin-top: 0 }
