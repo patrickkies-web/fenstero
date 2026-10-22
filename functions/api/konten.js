@@ -173,7 +173,7 @@ export const KONTO = {
     await mitBetrieb(ctx); const b = ctx.body || {};
     return aendern(ctx, (a) => {
       if (b.ap !== undefined) a.ap = str(b.ap, 80); if (b.tel !== undefined) a.tel = str(b.tel, 40); if (b.mail !== undefined && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(b.mail))) a.mail = str(b.mail, 120).toLowerCase();
-      if (b.abzug) { a.abzug = { seite: Math.max(0, Math.min(60, parseInt(b.abzug.seite, 10) || 0)), oben: Math.max(0, Math.min(60, parseInt(b.abzug.oben, 10) || 0)) }; }
+      if (b.abzug) { const z = (k) => Math.max(0, Math.min(60, parseInt(b.abzug[k], 10) || 0)); a.abzug = { seite: z('seite'), oben: z('oben'), unten: z('unten'), untenT: z('untenT') }; } // unten: Fenster (Fensterbankanschluss), untenT: Türen (Schwelle)
       if (b.prefs) { a.prefs = a.prefs || {}; Object.keys(b.prefs).slice(0, 10).forEach((k2) => { a.prefs[k2] = !!b.prefs[k2]; }); }
       if (b.gelesen) (a.notif || []).forEach((n) => { n.new = false; });
       if (b.gelesenIndex !== undefined && a.notif && a.notif[+b.gelesenIndex]) a.notif[+b.gelesenIndex].new = false;
