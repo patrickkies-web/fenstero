@@ -132,13 +132,18 @@ export default async (h) => {
     const weg = await pa.rufe('/api/partner/bestellungen/' + b.id + '/eingang', { mails: [NEU] });
     ok(eg.status === 200 && mailsAn(NEU, /bestätigen/i, m6).length === 1 && i.eingang.mails.length === 2 && !i.eingang.mails.find((e) => e.mail === NEU).bestaetigt && weg.status === 409, 'Empfänger: neue Adresse unbestätigt an der Instanz mit genau einer Bestätigungsmail; die letzte bestätigte Adresse bleibt (409)');
 
-    /* ---------- Paketwechsel (D) → Merkmale der Instanz (A), nur über paketSetzen ---------- */
+    /* ---------- Paketwechsel (D) → Merkmale der Instanz (A), nur über paketSetzen; nach unten erst zum Periodenende (Befund 10) ---------- */
     const pw = await best.paketWechseln(ctxD(), b.id, 'signature', { differenz: true });
     i = await sp.instanzHolen(inst.id);
     const cfgS = (await klient('http://brandt.localhost').rufe('/config.js')).text.replace(/\s/g, '');
-    const zur = await best.paketWechseln(ctxD(), b.id, 'plus', {}), iZ = await sp.instanzHolen(inst.id);
+    const zur = await best.paketWechseln(ctxD(), b.id, 'plus', {}), iZ = await sp.instanzHolen(inst.id), bZ = await sp.bestellungHolen(b.id), cfgZ = (await klient('http://brandt.localhost').rufe('/config.js')).text.replace(/\s/g, '');
     let verbot = null; try { await V.instanzAendern(ctxD(), inst.id, (z) => { z.paket = 'essential'; }); } catch (e) { verbot = e; }
-    ok(pw.ok && i.paket === 'signature' && /"dashboard":true/.test(cfgS) && zur.ok && iZ.paket === 'plus' && verbot && verbot.status === 400, 'Paketwechsel Plus → Signature → Plus über paketWechseln: /config.js zeigt die Merkmale sofort; instanzAendern lehnt eine Paketänderung ab');
+    ok(pw.ok && i.paket === 'signature' && /"dashboard":true/.test(cfgS) && verbot && verbot.status === 400, 'Paketwechsel Plus → Signature über paketWechseln: /config.js zeigt die Merkmale sofort; instanzAendern lehnt eine Paketänderung ab');
+    ok(zur.ok && zur.wechsel && iZ.paket === 'signature' && /"dashboard":true/.test(cfgZ) && bZ.abo.wechsel && bZ.abo.wechsel.paket === 'plus' && bZ.abo.wechsel.von === 'signature' && bZ.abo.wechsel.ab === bZ.abo.bis && bZ.abo.paket === 'plus' && bZ.verlauf.some((v) => /wirkt ab/.test(v.text)),
+      'Signature → Plus mit laufendem Abo: die Instanz bleibt bis zum Periodenende Signature (/config.js unverändert), die Bestellung merkt sich abo.wechsel { paket, von, ab = abo.bis }');
+    await best.bestellungenLauf(umg.konfig(envT(31)), sp, zd, envT(31));
+    const iW = await sp.instanzHolen(inst.id), bW = await sp.bestellungHolen(b.id), cfgW = (await klient('http://brandt.localhost').rufe('/config.js')).text.replace(/\s/g, '');
+    ok(iW.paket === 'plus' && !bW.abo.wechsel && bW.abo.paket === 'plus' && /"dashboard":false/.test(cfgW) && bW.verlauf.some((v) => /wirksam/.test(v.text)) && bW.status === 'live', 'Tageslauf nach dem Periodenende: Instanz Plus, Vormerkung weg, /config.js ohne Dashboard, Bestellung weiter live');
 
     /* ---------- Zahlungsausfall → Kulanz → Pause (503) → Zahlung → live ---------- */
     const sub = b.abo.id, partner = await sp.partnerHolen(b.partner);

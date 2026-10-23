@@ -313,6 +313,15 @@ export default async (h) => {
     await sp.bestellungAendern(bX.id, (z) => { z.instanz = iId; });
     const pw2 = await best.paketWechseln(ctxD(), bX.id, 'signature', {}), iNach = await sp.instanzHolen(iId);
     ok(pw.oben && pw.posten && pwAbo && pwAbo.p.items[0].price === preisPlus.id && pwAbo.p.proration_behavior === 'create_prorations' && pwPosten && pwPosten.p.amount === String((Pk.preis('plus').einrichtung - Pk.preis('essential').einrichtung) * 100) && pwPosten.p.metadata.art === 'paket' && !/betrieb/.test(pwPosten.roh) && pw2.ok && iNach.paket === 'signature' && (await sp.bestellungHolen(bX.id)).abo.paket === 'signature', '27.9 Paketwechsel: Abo-Preis des neuen Pakets (nach oben anteilig), Differenz der Einrichtung als Posten auf der nächsten Rechnung; mit Instanz ändert er instanzen.paket');
+    /* nach unten mit laufendem Abo (Befund 10): Stripe-Preis sofort ohne Ausgleich, die Instanz erst zum Periodenende (abo.bis) */
+    n0 = st.log.length;
+    const cW = ctxD(), pw3 = await best.paketWechseln(cW, bX.id, 'plus', {}); await Promise.all(cW.offen);
+    const iNach3 = await sp.instanzHolen(iId), bX3 = await sp.bestellungHolen(bX.id), pw3Abo = st.log.slice(n0).find((e) => e.method === 'POST' && e.pfad === '/subscriptions/' + bXn.abo.id), w3 = bX3.abo.wechsel || {};
+    const mail3 = mailsAn('ausfall@fenster27.example', /Ihr Paket: EEZI Essential Plus/).pop() || {};
+    ok(pw3.ok && !pw3.oben && pw3.wechsel && iNach3.paket === 'signature' && w3.paket === 'plus' && w3.von === 'signature' && w3.ab === bX3.abo.bis && Date.parse(w3.ab) > Date.now() + 20 * 864e5 && bX3.abo.paket === 'plus' && bX3.abo.monat === Pk.preis('plus').monat && pw3Abo && pw3Abo.p.items[0].price === preisPlus.id && pw3Abo.p.proration_behavior === 'none' && pw3Abo.p.metadata.paket === 'plus' && /bleibt Ihr Konfigurator im Paket/.test(mail3.html || '') && bX3.verlauf.some((v) => /wirkt ab/.test(v.text)),
+      '27.9 Paketwechsel nach unten mit laufendem Abo: Stripe-Preis sofort ohne Ausgleich (proration none), instanzen.paket bleibt bis zum Periodenende, Vormerkung abo.wechsel { paket, von, ab = abo.bis }, Mail „bis … bleibt“');
+    const pw4 = await best.paketWechseln(ctxD(), bX.id, 'plus', {});
+    ok(pw4.gleich === true && pw4.wechsel && (await sp.bestellungHolen(bX.id)).verlauf.filter((v) => /wirkt ab/.test(v.text)).length === 1, '27.9 Derselbe Wechsel noch einmal ist ein Leerlauf (gleich, kein zweiter Vermerk)');
     /* Empfänger der Anfragen ändern: mindestens eine bestätigte Adresse bleibt; neue bekommen einen Bestätigungslink */
     await sp.instanzAendern(iId, (z) => { z.eingang = { mails: [{ mail: 'alt@wechsel.example', bestaetigt: new Date().toISOString() }] }; });
     const e1 = await ab2.rufe('/api/partner/bestellungen/' + bX.id + '/eingang', { mails: ['neu@wechsel.example'] });
@@ -329,8 +338,11 @@ export default async (h) => {
     await lauf(4); await lauf(5); const nach5 = mailsAn(erMail, /wartet auf Ihre Freigabe/, mE).length;
     await lauf(8); const nach8 = mailsAn(erMail, /wartet auf Ihre Freigabe/, mE).length;
     const entErinnert = mailsAn(erMail, /noch nicht abgeschlossen/, mE).length;
+    const iVor31 = (await sp.instanzHolen(iId)).paket;
     await lauf(31);
     ok(nach2 === 0 && nach5 === 1 && nach8 === 2 && entErinnert === 1 && (await sp.bestellungHolen(bEnt.id)) === null && !!(await sp.bestellungHolen(bEr.id)), '27.10 Tageslauf: Erinnerung an die Freigabe nach 3 und 7 Tagen (je einmal); unbezahlter Entwurf nach 3 Tagen einmal erinnert, nach 30 Tagen ohne Änderung gelöscht');
+    const bX31 = await sp.bestellungHolen(bX.id), mail31 = mailsAn('ausfall@fenster27.example', /Ihr Paket: EEZI Essential Plus/).pop() || {};
+    ok(iVor31 === 'signature' && (await sp.instanzHolen(iId)).paket === 'plus' && !bX31.abo.wechsel && bX31.abo.paket === 'plus' && bX31.status === 'live' && bX31.verlauf.some((v) => v.von === 'system' && /wirksam \(Tageslauf\)/.test(v.text)) && /wie angekündigt/.test(mail31.html || ''), '27.10 Tageslauf nach dem Periodenende: der vorgemerkte Wechsel nach unten wird wirksam (Instanz Plus, Vormerkung weg, Verlauf, Mail); vorher blieb die Instanz Signature');
 
     /* ---------- 27.8 Altbestand: Betriebe unverändert, Paket-Ereignisse nie beim Altbestand, keine Posten in der Sammelrechnung ---------- */
     const betriebeNachher = JSON.stringify(((await sp.betriebeAlle()) || []).filter((b) => !(b.daten && b.daten.instanz)));
@@ -386,7 +398,8 @@ export default async (h) => {
     ok(d1.j.host === 'frei-fenster27.app' && d1.j.stand === 'frei' && d1.j.quelle === 'rdap' && d2.j.stand === 'vergeben' && d3.j.stand === 'frei' && d3.j.quelle === 'dns' && d4.j.stand === 'vergeben' && d4.j.quelle === 'dns' && /unverbindlich/.test(d1.j.text) && !abfragen.some((x) => /^rdap:.*\.de$/.test(x)) && d5.status === 400, '27.13 Domain-Hinweis: .app über RDAP (404 → wahrscheinlich frei, 200 → vergeben), .de über DoH (NXDOMAIN → frei), immer „unverbindlich“; eeziframes-Hosts abgewiesen');
 
     /* ---------- Selbststorno mit Erstattung (frisch), Entwurf verwerfen, Frage ohne Konto ---------- */
-    const so = klient(), soMail = 'storno@fenster27.example', bSo = await vorbereiten(so, soMail, 'essential');
+    const so = klient(), soMail = 'storno@fenster27.example', bSo = await vorbereiten(so, soMail, 'plus');
+    const uSo = await up(so, bSo.id, 'ap', PNG, 'ansprechpartner.png'), partnerSo = await sp.partnerNachMail(soMail), ablageB2 = () => fotos.ablage(k, 'bestellungen').alle();
     const sSo = sessionAus((await so.rufe('/api/partner/bestellungen/' + bSo.id + '/kasse', { zustimmung: ZUST })).j.url); st.abschliessen(sSo);
     await so.rufe('/api/partner/bestellungen/' + bSo.id + '/kasse/pruefen?session=' + sSo);
     const soAlt = await so.rufe('/api/partner/bestellungen/' + bSo.id + '/stornieren', {}, { env: mitZeit(20 * 60000) });
@@ -394,8 +407,20 @@ export default async (h) => {
     const soOk = await so.rufe('/api/partner/bestellungen/' + bSo.id + '/stornieren', {}); await so.warten();
     const refund = st.log.slice(n0).filter((e) => e.method === 'POST' && e.pfad === '/refunds'), bSoN = await sp.bestellungHolen(bSo.id);
     ok(soAlt.status === 401 && soAlt.j.frisch && soOk.status === 200 && refund.length === 1 && refund[0].p.payment_intent === bSoN.zahlung.pi && !refund[0].p.amount && bSoN.status === 'storniert' && bSoN.zahlung.status === 'erstattet' && mailsAn(soMail, /storniert/).length === 1, '27.6 Storno nach Zahlung nur mit frischer Anmeldung: volle Erstattung bei Stripe, Status storniert, Mail');
-    const ver = await so.rufe('/api/partner/bestellungen/' + (await so.rufe('/api/partner/bestellungen', { paket: 'plus', konfigurator: KONF() })).j.bestellung.id + '/stornieren', {});
+    /* Befund 9: Dateien einer stornierten Bestellung ohne Instanz. Ein verworfener Entwurf verliert sie sofort, ein bezahltes Storno nach
+       loeschenNachEndeTage Tagen im Tageslauf */
+    const bVer = (await so.rufe('/api/partner/bestellungen', { paket: 'plus', konfigurator: KONF() })).j.bestellung, uVer = await up(so, bVer.id, 'logo', PNG, 'logo.png');
+    const pfadSo = uSo.j.datei ? best.dateiPfad(bSoN, uSo.j.datei) : '', pfadVer = uVer.j.datei ? best.dateiPfad({ partner: partnerSo.id, id: bVer.id }, uVer.j.datei) : '', vorVer = !!pfadVer && ablageB2().includes(pfadVer);
+    const ver = await so.rufe('/api/partner/bestellungen/' + bVer.id + '/stornieren', {});
     ok(ver.status === 200 && ver.j.bestellung.status === 'storniert', '27.7 Entwurf verwerfen: offen → storniert');
+    const bVerN = await sp.bestellungHolen(bVer.id);
+    ok(uSo.status === 200 && uVer.status === 200 && vorVer && !ablageB2().includes(pfadVer) && !bVerN.dateien.length && bVerN.verlauf.some((v) => v.art === 'geloescht') && !ver.j.bestellung.dateien.length && ablageB2().includes(pfadSo) && bSoN.dateien.length === 1,
+      '27.7 Verworfener Entwurf: seine Datei ist sofort aus der Ablage „bestellungen“ weg (Vermerk „gelöscht“); die Datei der bezahlten, stornierten Bestellung bleibt vorerst');
+    await lauf(29);
+    const so29 = ablageB2().includes(pfadSo) && (await sp.bestellungHolen(bSo.id)).dateien.length === 1;
+    await lauf(40);
+    const bSo40 = await sp.bestellungHolen(bSo.id);
+    ok(so29 && !ablageB2().includes(pfadSo) && !bSo40.dateien.length && bSo40.verlauf.some((v) => v.art === 'geloescht' && /Storno/.test(v.text)) && bSo40.zahlung.status === 'erstattet' && bSo40.status === 'storniert', '27.10 Storno mit Erstattung ohne Instanz: 29 Tage nichts, nach 30 Tagen löscht der Tageslauf die Dateien (Vermerk „gelöscht“), Bestell- und Zahlungsdaten bleiben');
     const fr = klient(), mF = marke();
     const fr1 = await fr.rufe('/api/partner/frage', { name: 'Petra Fink', firma: 'Glaserei Fink', mail: 'petra@fink.example', text: 'Geht auch eine .de-Domain?', paket: 'plus' });
     const fr2 = await fr.rufe('/api/partner/frage', { name: 'Bot', mail: 'bot@spam.example', text: 'Kaufen Sie jetzt', fax: '0221 1' });
@@ -404,6 +429,22 @@ export default async (h) => {
     const fhtml = await formular.text();
     await fr.warten();
     ok(fr1.status === 200 && fr2.status === 200 && fr3.status === 400 && fr3.j.felder.mail && mailsAn(inhaber(), /Frage zu den Paketen/, mF).length === 2 && formular.status === 200 && /text\/html/.test(formular.headers.get('content-type')) && /Danke/.test(fhtml) && /frame-ancestors 'none'/.test(formular.headers.get('content-security-policy') || ''), '27.12 Frage ohne Konto (auch als Formular ohne JavaScript): Mail an den Inhaber, Honigtopf schickt nichts, Feldfehler 400');
+
+    /* ---------- 27.10 Aufbewahrung (Befund 21): Partner, Nachrichten und Bestellungen 3 Jahre nach dem Jahr des Vertragsendes ---------- */
+    const JAHR = 365.25 * 864e5;
+    const pfK = klient(), pfMail = 'frist@fenster27.example', bF = await vorbereiten(pfK, pfMail, 'essential');
+    await pfK.rufe('/api/partner/nachrichten', { text: 'Frage vor dem Ende' }); await pfK.warten();
+    await sp.bestellungAendern(bF.id, (z) => { z.status = 'beendet'; z.ende_am = new Date().toISOString(); });
+    const psK = klient(), psMail = 'spaet@fenster27.example', bS2 = await vorbereiten(psK, psMail, 'essential');
+    await sp.bestellungAendern(bS2.id, (z) => { z.status = 'beendet'; z.ende_am = new Date(Date.now() + 2 * JAHR).toISOString(); });
+    const pF = await sp.partnerNachMail(pfMail), pS = await sp.partnerNachMail(psMail), pX = await sp.partnerNachMail('ausfall@fenster27.example');
+    const nF0 = ((await sp.nachrichtenVon(pF.id)) || []).length, protVor = ((await sp.protokollLesen({ art: 'loeschen', anzahl: 50 })) || []).length;
+    const bisJahr3 = await lauf(3 * 365), bleibt3 = !!(await sp.partnerHolen(pF.id)) && !!(await sp.bestellungHolen(bF.id));
+    const lauf4 = await lauf(4 * 365 + 1);
+    const protNach = ((await sp.protokollLesen({ art: 'loeschen', anzahl: 50 })) || []).filter((e) => e.daten && e.daten.partner === pF.id);
+    ok(nF0 === 1 && bisJahr3 && !bisJahr3.partner && bleibt3 && lauf4.partner >= 1 && !(await sp.partnerHolen(pF.id)) && !(await sp.bestellungHolen(bF.id)) && !((await sp.nachrichtenVon(pF.id)) || []).length && protNach.length === 1 && /Aufbewahrung/.test(protNach[0].text),
+      '27.10 Aufbewahrung: 3 Jahre nach dem Ende bleibt alles; 4 Jahre später sind Partner, Bestellung und Nachrichten des beendeten Vertrags gelöscht, mit Protokolleintrag');
+    ok(!!(await sp.partnerHolen(pS.id)) && !!(await sp.bestellungHolen(bS2.id)) && !!(await sp.partnerHolen(pX.id)) && (await sp.bestellungHolen(bX.id)).status === 'live', '27.10 Aufbewahrung: ein Partner mit laufendem Abo und einer, dessen Vertrag erst vor 2 Jahren endete, bleiben samt Bestellung (Protokoll vorher ' + protVor + ' Einträge)');
   } finally { globalThis.fetch = fetchStripe; st.aus(); }
 
   /* ---------- 27.15 Instanz-Host: /partner/ und /api/partner/anmelden antworten 404 ---------- */

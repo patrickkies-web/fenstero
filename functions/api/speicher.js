@@ -425,6 +425,14 @@ function instanzAttrappe() {
     }),
     partnerFelder: async (id, patch) => { const r = PA.get(id); if (!r) return null; Object.assign(r, nurSpalten('partner', kopie(patch || {})), { updated_at: iso() }); return kopie(r); },
     partnerAlle: async () => Array.from(PA.values()).sort(nachDatum).map(kopie),
+    /* wie die Datenbank: Bestellungen sperren (restrict), Nachrichten gehen mit (cascade), Instanzen verlieren den Verweis (set null) */
+    partnerLoeschen: async (id) => {
+      if (!PA.has(id)) return false;
+      for (const b of BE.values()) if (b.partner === id) throw fehler409('Zu diesem Partner gibt es noch Bestellungen.', 'partner_bestellungen');
+      for (const [nid, x] of NA) if (x.partner === id) NA.delete(nid);
+      for (const i of I.values()) if (i.partner === id) i.partner = null;
+      return PA.delete(id);
+    },
     /* ---------- Bestellungen ---------- */
     bestellungHolen: async (id) => kopie(BE.get(id) || null),
     bestellungenVonPartner: async (pid) => Array.from(BE.values()).filter((b) => b.partner === pid).sort(nachDatum).map(kopie),
@@ -455,6 +463,7 @@ function instanzAttrappe() {
     rueckrufeOffen: async () => Array.from(NA.values()).filter((n) => n.art === 'rueckruf' && !(n.rueckruf && n.rueckruf.erledigt)).sort((x, y) => String(x.created_at).localeCompare(String(y.created_at))).map(kopie),
     nachrichtAendern: async (id, patch) => { const r = NA.get(id); if (!r) return null; const p = kopie(patch || {}); delete p.id; delete p.partner; delete p.created_at; Object.assign(r, p); return kopie(r); },
     nachrichtenAltLoeschen: async (pid, bis) => { const t = isoAus(bis); let n = 0; for (const [id, x] of NA) if ((!pid || x.partner === pid) && x.created_at < t) { NA.delete(id); n++; } return n; },
+    nachrichtenLoeschen: async (pid) => { let n = 0; for (const [id, x] of NA) if (x.partner === pid) { NA.delete(id); n++; } return n; },
     /* ---------- Aufräumen der Anmeldungen (zentrale.js): Partner und Dashboard-Zugänge bleiben ---------- */
     geschuetzteNutzer: async () => { const s = new Set(); for (const p of PA.values()) if (p.auth_user) s.add(p.auth_user); for (const i of I.values()) (i.zugang || []).forEach((z) => { if (z && z.uid) s.add(z.uid); }); return s; },
     /* ---------- dauerhafte Zähler (bremse.js budget), in der Tabelle statistik ---------- */
@@ -572,6 +581,8 @@ function instanzSupabase(sb, alle, eins, q) {
     partnerAendern: (id, fn) => aendern('partner', 'id', id, fn, 'Dieses Kundenkonto gibt es nicht.', partnerKonflikt),
     partnerFelder: async (id, patch) => { const r = await schreiben('partner?id=eq.' + q(id), { method: 'PATCH', body: Object.assign(nurSpalten('partner', patch || {}), { updated_at: new Date().toISOString() }), konfliktText: true }); if (r && r.konflikt) throw partnerKonflikt(r.text); return eins(r); },
     partnerAlle: async () => { const r = await alle('partner?select=*&order=created_at.desc,id.asc', true); return r === null ? undefined : r; },
+    /* bestellungen.partner ist on delete restrict (erst die Bestellungen löschen), partner_nachrichten cascade, instanzen.partner set null */
+    partnerLoeschen: async (id) => { const r = await schreiben('partner?id=eq.' + q(id), { method: 'DELETE', prefer: 'return=minimal', konfliktText: true }); if (r && r.konflikt) throw fehler409('Zu diesem Partner gibt es noch Bestellungen.', 'partner_bestellungen'); return true; },
     /* ---------- Bestellungen ---------- */
     bestellungHolen: (id) => einsLesen('bestellungen?id=eq.' + q(id) + '&select=*'),
     bestellungenVonPartner: (pid) => lesen('bestellungen?partner=eq.' + q(pid) + '&select=*&order=created_at.desc'),
@@ -594,6 +605,7 @@ function instanzSupabase(sb, alle, eins, q) {
     rueckrufeOffen: () => lesen('partner_nachrichten?art=eq.rueckruf&rueckruf->>erledigt=is.null&select=*&order=created_at.asc&limit=500'),
     nachrichtAendern: async (id, patch) => { const p = Object.assign({}, patch || {}); delete p.id; delete p.partner; delete p.created_at; return eins(await schreiben('partner_nachrichten?id=eq.' + q(id), { method: 'PATCH', body: p })); },
     nachrichtenAltLoeschen: async (pid, bis) => { const r = await schreiben('partner_nachrichten?created_at=lt.' + q(isoAus(bis)) + (pid ? '&partner=eq.' + q(pid) : '') + '&select=id', { method: 'DELETE' }); return Array.isArray(r) ? r.length : 0; },
+    nachrichtenLoeschen: async (pid) => { if (!pid) return 0; const r = await schreiben('partner_nachrichten?partner=eq.' + q(pid) + '&select=id', { method: 'DELETE' }); return Array.isArray(r) ? r.length : 0; },
     /* ---------- Aufräumen der Anmeldungen: Partner und Dashboard-Zugänge bleiben ---------- */
     geschuetzteNutzer: async () => {
       const s = new Set(), p = await alle('partner?auth_user=not.is.null&select=auth_user', true), i = await alle('instanzen?select=zugang', true);

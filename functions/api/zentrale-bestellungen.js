@@ -71,7 +71,7 @@ async function instanzAusBestellung(ctx, id, o) {
     const pd = p.daten || {}, w = b.wunsch || {}, k = w.konfigurator || {}, g = w.gestaltung || {}, f = Object.assign({}, pd, w.firma || {});
     const paket = paketVon(b), m = P().merkmale(paket), name = str(k.name || p.firma, 80);
     const recht = { firma: str(f.firma || p.firma, 120), rechtsform: str(f.rechtsform, 60), vertretung: str(f.vertretung, 200), strasse: str(f.strasse, 120), plz: str(f.plz || p.plz, 10), ort: str(f.ort, 80), land: 'DE',
-      tel: str(f.tel, 40), mail: String(p.mail || '').toLowerCase(), register: str(f.register, 160), ust: str(f.ust, 14), kammer: str(f.kammer, 160), beruf: str(f.beruf, 160), bundesland: R().BUNDESLAENDER[f.bundesland] ? f.bundesland : '', stand: tagBerlin(), quelle: 'bestellung' };
+      tel: str(f.tel, 40), mail: String(f.mailImpressum || p.mail || '').toLowerCase(), register: str(f.register, 160), ust: str(f.ust, 14), kammer: str(f.kammer, 160), beruf: str(f.beruf, 160), bundesland: R().BUNDESLAENDER[f.bundesland] ? f.bundesland : '', stand: tagBerlin(), quelle: 'bestellung' };
     const farbe = m.farbe && /^#[0-9a-f]{6}$/i.test(String((g.farben || [])[0] || '')) ? String(g.farben[0]).toLowerCase() : '';
     const entwurf = { name: name, titel: m.startansicht ? str(g.titel, R().GRENZEN.titel) : '', beschreibung: '', farbe: farbe, start: { kicker: '', ueberschrift: m.startansicht ? str(g.titel, 120) : '', text: '' }, bilder: {} };
     const betriebDaten = { ap: str(pd.ap, 80), tel: str(pd.tel, 40), mail: String((k.eingang || [])[0] || p.mail || '').toLowerCase(),
@@ -110,7 +110,8 @@ async function bestellungSicht(ctx, b) {
     id: b.id, nr: b.nr, status: b.status, statusTitel: RB().TITEL[b.status] || b.status, abo_status: b.abo_status, aboTitel: RB().ABO_TITEL[b.abo_status] || '', paket: i ? i.paket : paketVon(b), paket_bestellt: b.paket_bestellt,
     preise: b.preise || {}, wunsch: b.wunsch || {}, dateien: (b.dateien || []).map((d) => ({ id: d.id, art: d.art, name: d.name, typ: d.typ, bytes: d.bytes, zeit: d.zeit })),
     zahlung: { status: za.status || '', betrag_cent: za.betrag_cent || 0, erstattet_cent: za.erstattet_cent || 0, zeit: za.zeit || '', zahlungsmittel: !!za.pm, rechnung: za.rechnung || '', link: stripeLink(ctx.k, 'payments', za.pi) },
-    abo: { laeuft: !!ab.id, paket: ab.paket || '', monat: ab.monat || 0, seit: ab.seit || '', bis: ab.bis || '', kulanz_bis: ab.kulanz_bis || '', ende: ab.ende || '', kuendigt: !!ab.kuendigt, offeneRechnung: ab.offeneRechnung || '', grund: ab.grund || '', link: stripeLink(ctx.k, 'subscriptions', ab.id) },
+    abo: { laeuft: !!ab.id, paket: ab.paket || '', monat: ab.monat || 0, seit: ab.seit || '', bis: ab.bis || '', kulanz_bis: ab.kulanz_bis || '', ende: ab.ende || '', kuendigt: !!ab.kuendigt, offeneRechnung: ab.offeneRechnung || '', grund: ab.grund || '', link: stripeLink(ctx.k, 'subscriptions', ab.id),
+      wechsel: ab.wechsel && ab.wechsel.paket ? { paket: ab.wechsel.paket, von: ab.wechsel.von || '', ab: ab.wechsel.ab || '' } : null },
     vorschau: b.vorschau || {}, zustimmung: b.zustimmung || {}, verlauf: (b.verlauf || []).slice().reverse().slice(0, 100), notiz: b.notiz || '',
     created_at: b.created_at, updated_at: b.updated_at, bezahlt_am: b.bezahlt_am, live_am: b.live_am, pause_seit: b.pause_seit, ende_am: b.ende_am,
     partner: partnerKurz(p), kundeLink: p && p.stripe_customer ? stripeLink(ctx.k, 'customers', p.stripe_customer) : '', erreichbar: p ? jetztErreichbar((p.daten || {}).erreichbar, jetztAus(ctx.env)) : null,
@@ -254,7 +255,8 @@ export const ZENTRALE_BESTELLUNGEN = {
     await zugang(ctx); const b = await holen(ctx, ctx.params.id), body = ctx.body || {};
     if (!P().gueltig(body.paket)) throw new ApiFehler('Bitte ein Paket wählen.', 400);
     const r = await paketWechseln(ctx, b.id, body.paket, { differenz: !!body.differenz, wer: 'inhaber' });
-    return { ok: true, wechsel: { paket: r.paket, posten: !!r.posten }, bestellung: await bestellungSicht(ctx, await holen(ctx, b.id)) };
+    /* ab: nach unten mit laufendem Abo wirkt der Wechsel erst zum Periodenende (bestellung.js, Befund 10) */
+    return { ok: true, wechsel: { paket: r.paket, posten: !!r.posten, gleich: !!r.gleich, aufgehoben: !!r.aufgehoben, ab: r.wechsel && r.wechsel.ab ? r.wechsel.ab : '' }, bestellung: await bestellungSicht(ctx, await holen(ctx, b.id)) };
   },
   'POST /api/zentrale/bestellungen/:id/erstatten': async (ctx) => {
     await zugang(ctx); const b = await holen(ctx, ctx.params.id), body = ctx.body || {}, grund = str(body.grund, 200);
