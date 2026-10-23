@@ -3,6 +3,9 @@
    (docs/GESTALTUNG.md): 40 Titel und Preis (32 am Telefon) · 24 Paketname · 17 Text · 15 Nebentext · 13 Label. Eine Cream-Pille
    je Bildschirm: oben „Pakete ansehen“, bei den Paketen der Knopf des empfohlenen Pakets, unten „Frage senden“. */
 
+/* Sprungziele (Pakete ansehen, anfragen, Inhaltsverzeichnis) nicht unter dem klebenden Kopf */
+.rg h2[id], .rg h3[id], .vk-paket { scroll-margin-top: 76px }
+
 /* Hinweis „Vorläufige Preise“ / „Bestellung bald möglich“: Kasten mit Strich in Warnfarbe */
 .vk-hinweis { margin: 12px 0 16px; padding: 12px 16px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring), inset 4px 0 0 var(--warn); font-size: 15px }
 .rg .vk-hinweis { color: var(--ink2) }

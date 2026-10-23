@@ -2,7 +2,7 @@
 
 Jeder Fensteranbieter bekommt seinen eigenen Fenster-Konfigurator auf seiner eigenen Domain (z. B. `brandt-fenster.app`), in einem von drei Paketen: **Essential**, **Plus**, **Signature**. Alle Domains hängen am selben Worker wie eeziframes.com; je Kunde steht alles in der Datenbank und wird in der Zentrale gepflegt, nie im Code. eeziframes.com bleibt für das Aufmaß der Hauseigentümer, wie es ist, verkauft die Pakete und führt das Kundenkonto der Fensteranbieter (`/partner/`). Bestehende Betriebskonten und Kundenlinks laufen unverändert weiter.
 
-Diese Datei ist der Vertrag zwischen den Bausträngen (Teil 1, vom Fundament S0) und wird um den Betrieb ergänzt (Teil 2, Strang F: Einrichtung, Status, Fristen, Fehlerbilder). Grundlage ist der Bauplan vom 22.10.2026 (Entscheidungen E1–E30).
+Diese Datei ist der Vertrag zwischen den Bausträngen (Teil 1, vom Fundament S0) und beschreibt den Betrieb (Teil 2: Einrichtung je Kunde, Zustände, Fristen, Rechtstexte der Instanzen, Fehlerbilder). Bestellung und Geld: [BESTELLUNG.md](BESTELLUNG.md). Grundlage ist der Bauplan vom 22.10.2026 (Entscheidungen E1–E30).
 
 ## Teil 1: Verträge
 
@@ -238,4 +238,89 @@ Der lokale Testserver (`scripts/dev-server.mjs`) schickt jede Anfrage durch `wor
 
 ## Teil 2: Betrieb
 
-Folgt mit Strang F (Einrichtung je Kunde, Status und Fristen, Fehlerbilder). Bis dahin: Bauplan §4 „Manuelle Schritte des Inhabers“.
+Für den Inhaber: wie ein Kunde zu seinem Konfigurator kommt, was in welchem Zustand gilt, welche Fristen der Server von selbst einhält und was zu tun ist, wenn etwas hakt. Die Bestellung bis „Live“ und das Geld stehen in [BESTELLUNG.md](BESTELLUNG.md), die einmalige Einrichtung (Cloudflare, Resend, Stripe, Supabase) in [ONLINE-STELLEN.md](ONLINE-STELLEN.md), die Bedienung der Zentrale in [ZENTRALE.md](ZENTRALE.md).
+
+### Was der Kunde bekommt
+
+| | Essential | Plus | Signature |
+|---|---|---|---|
+| Konfigurator unter eigener Domain, Anfrage per Mail mit Aufmaßblatt-PDF | ja | ja | ja |
+| Gestaltung | eeziframes-Design, Name als Text | Logo, Firmenfarbe, bis 6 Fotos, eigene Startseite | wie Plus |
+| Hinweis auf eeziframes | „Powered by EEZIframes“ (verlinkt) | „Konfigurator von eeziframes“ im Fuß | keiner, auch nicht in PDF, Mails, Titel, Icons, Rechtstexten |
+| Suchmaschinen | noindex (ohne Disallow) | nur die Startseite | nur die Startseite |
+| Aufbewahrung der Anfragen auf dem Server | 30 Tage nach Zustellung | 30 Tage nach Zustellung | Vertragsdauer, Originalfotos 365 Tage |
+| Dashboard `/betrieb/` mit Einladungslinks und Fortschritt | nein | nein | ja, 5 Zugänge |
+
+Verbindlich ist `web/assets/pakete.js`; die Tabelle oben ist ein Auszug. Abweichungen für einzelne Kunden (Kulanz) stehen in `instanzen.abweichung` und gelten nur für bekannte Merkmale, nie für Paket, Name oder Preis.
+
+### Einrichtung je Kunde (Weg 1: Domain im eigenen Cloudflare-Konto)
+
+1. Mail „Bestellung bezahlt“ → Zentrale → Bestellungen → **Einrichtung beginnen**. Den Kunden zur Wunschzeit anrufen, Domain festlegen (die Zentrale zeigt „wahrscheinlich frei“).
+2. **Domain kaufen:** `.app`, `.com` usw. bei Cloudflare (Domain Registration → Register Domains, Auto-Verlängerung an); `.de` bei einem anderen Anbieter, dann in der Zentrale **Zone anlegen** und die zwei Nameserver beim Anbieter eintragen.
+3. **Instanz anlegen** (übernimmt Firma, Rechtsangaben, Empfänger, Zugänge und Gestaltungswünsche aus der Bestellung und schickt die Bestätigungslinks an die Empfänger).
+4. **Mit Konfigurator verbinden:** mit `CF_API_TOKEN` automatisch, sonst nach der Klick-Anleitung der Zentrale (Workers & Pages → fenstero → Einstellungen → Domains & Routes → Add → Custom Domain, Domain und `www.`; vorhandene A-, AAAA-, CNAME-Einträge für genau diese Namen löschen). Nie in `wrangler.jsonc` eintragen.
+5. In der Zone des Kunden: Web Analytics, Rocket Loader, E-Mail-Adressen-Verschleierung und Bot Fight Mode aus (setzen sonst Skripte oder Cookies, die in keinem Datenschutztext stehen).
+6. **Prüfen**, bis alles grün ist (Zertifikat, DNS, Antwort der Instanz auf `/api/instanz/ping`), dann **Domain gesichert**.
+7. Plus und Signature: **aus Bestellung übernehmen**, ansehen (Vorschau im Telefonrahmen), **Veröffentlichen**.
+8. **Rechtsangaben** ansehen (Impressum und Datenschutz entstehen daraus, siehe unten); **Testanfrage** schicken, bis „zugestellt“ dasteht.
+9. **Vorschau senden** → der Kunde gibt im Kundenkonto frei (oder Vermerk nach Telefonat).
+10. **Live schalten** (nur mit grüner Ampel). Das Abo startet von selbst, der Kunde bekommt den Link-Schnipsel für seine Website.
+
+Demo-Instanzen der Verkaufsseite: Custom Domains `demo-essential.eeziframes.com`, `demo-plus.eeziframes.com`, `demo-signature.eeziframes.com` am Worker, in der Zentrale je eine Instanz ohne Bestellung mit Schalter „Demo“ (Anfragen gehen an `MAIL_KONTAKT` und verschwinden nach `FRISTEN.testTage` Tag). Die Verkaufsseite verlinkt sie erst mit der Variable `PAKETE_DEMOS=1`, vorher führt „Konfigurator ausprobieren“ in die App.
+
+### Zustände und was sie bedeuten
+
+| Status | Startseite | Endkunde | Dashboard (Signature) | Wie man hinkommt |
+|---|---|---|---|---|
+| `einrichtung` | 503 „in Vorbereitung“; mit Vorschau-Link (Cookie `__Host-vorschau`) die echte Seite mit Band „Vorschau“, Anfragen als `[Test]` | nein (Vorschau: Test) | lesen, nur Profil schreiben | Instanz angelegt |
+| `aktiv` | ja | plant und sendet | alles | Live schalten |
+| `pausiert` | 503 mit Name und Kontakt des Betriebs | nein | lesen, nur Klärung, Stand, Notiz, gesehen | Zahlung offen nach Kulanz, Pause durch den Inhaber, Abo in Stripe gekündigt |
+| `beendet` | 410 neutral | nein | nein, nur Export | Pause länger als `FRISTEN.pauseMaxTage` Tage, Ende durch den Inhaber |
+
+Impressum und Datenschutz sind in jedem Zustand erreichbar. Eine laufende Planung bleibt beim Endkunden im Browser, wenn die Instanz pausiert; nach dem Fortsetzen kann er senden. Einzige Abfrage: `Instanzregeln.darf(status, bereich, { vorschau })`.
+
+### Fristen, die der Server einhält
+
+| Was | Frist | Wo |
+|---|---|---|
+| Website-Entwurf ohne Fenster | `entwurfLeerStunden` (24 Stunden) | `anfragenAufraeumen` (täglich) |
+| Website-Entwurf mit Fenster, nicht gesendet | `entwurfStillTage` (30 Tage ohne Änderung), samt Fotos | `anfragenAufraeumen` |
+| Anfrage Essential/Plus | `aufbewahrung` (30 Tage) nach bestätigter Zustellung, höchstens `unzustellbarTage` (60) ohne Zustellung | Resend-Webhook setzt `loeschen_ab`; `anfragenAufraeumen` |
+| Anfrage Signature | bis Vertragsende; Originalfotos `fotosSignatureTage` (365) | `anfragenAufraeumen` |
+| Fotolink in der Mail (Essential/Plus) | `fotoLinkTage` (14), nur auf dem Haupthost, Abruf protokolliert | `functions/api/instanz-api.js` |
+| Test- und Demo-Anfragen | `testTage` (1 Tag) | `anfragenAufraeumen` |
+| Vorschau-Link | `vorschauTage` (30) | Token `vorschau` |
+| Kulanz bei Zahlungsausfall, Pause, Löschung nach Ende | `kulanzTage` (14), `pauseMaxTage` (60), `loeschenNachEndeTage` (30) | `bestellungenLauf` (täglich) |
+| Sicherungen der Datenbank | 7 Tage (Supabase Pro) | Supabase |
+
+Die Zahlen sind Vorschläge bis zur Antwort des Inhabers (Bauplan §5.3) und stehen nur in `pakete.js` bzw. `instanzregeln.js`. Verkaufsseite, Paketbedingungen, AV-Vertrag, Datenschutz von eeziframes.com und Datenschutz jeder Instanz lesen sie von dort; nach einer Änderung `node scripts/bedingungen-pdf.mjs` laufen lassen (neue Fassung der Paketbedingungen, siehe [BESTELLUNG.md](BESTELLUNG.md)).
+
+**Löschliste beim Ende** (30 Tage nach `beendet`, `instanzDatenLoeschen`): alle Anfragen und Entwürfe, ihre Fotos, die abgelegten Aufmaßblätter, Logo und Bilder der Marke, die Dateien der Bestellung, die Anmeldungen der Dashboard-Zugänge, Zwischenspeicher (L1, KV), die Hosts der Instanz; die Domain wird gelöst (Auto-Verlängerung aus). Der AV-Vertrag (§ 11) sagt dasselbe zu.
+
+### Impressum und Datenschutz der Instanzen
+
+`functions/instanz/recht.js` baut beide Seiten aus `instanzen.recht` (Firma, Rechtsform, Vertretung, Anschrift, Telefon, E-Mail, Register, USt-IdNr., Kammer, Berufsbezeichnung, Bundesland). Die Zentrale meldet fehlende Pflichtangaben (`rechtVollstaendig`) in der Ampel; ohne sie geht keine Instanz live.
+
+- **Verantwortlich** ist der Betrieb, der technische Dienstleister sein Auftragsverarbeiter: bei Essential und Plus „eeziframes (Patrick Kies, …)“, bei Signature nur „unser technischer Dienstleister“. Die Unterauftragnehmer (Cloudflare, Supabase, Resend, Anthropic) stehen in jedem Paket mit Namen da.
+- Fristen aus `pakete.js`/`instanzregeln.js` je Paket, Speicher im Browser und die Cookies `__Host-vorschau` und (Signature) `__Host-betrieb`, KI nur mit Einwilligung, Rechte, Aufsichtsbehörde nach dem Bundesland des Betriebs (Tabelle `AUFSICHT` der 16 Landesbehörden; Anschriften vor dem Start einmal prüfen).
+- **Vorlage:** `VORLAGE = { stand, geprueft }`. Solange `geprueft: false`, steht unter beiden Seiten sichtbar „Vorlage vom …, anwaltliche Prüfung ausstehend“. Nach der Prüfung `geprueft: true` und den Stand setzen.
+
+### Fehlerbilder
+
+| Was du siehst | Ursache | Was tun |
+|---|---|---|
+| Ampel „Domain“ rot | DNS noch nicht umgestellt, Zertifikat noch nicht ausgestellt, alter A/CNAME-Eintrag | Nameserver prüfen, störende Einträge löschen (Zentrale bietet es an), nach 5–30 Minuten erneut prüfen |
+| Testanfrage bleibt „gesendet“, nie „zugestellt“ | `RESEND_WEBHOOK_SECRET` fehlt oder der Webhook bei Resend ist nicht eingerichtet | Webhook nach ONLINE-STELLEN.md einrichten; ohne ihn zählt „gesendet“ als zugestellt |
+| Anfrage „bounce“ oder „beschwerde“, Hinweis in der Übersicht | Empfängeradresse des Betriebs falsch oder voll | Betrieb anrufen, Empfänger im Kundenkonto oder in der Zentrale ändern (neue Adresse bestätigen lassen), **erneut senden** |
+| Versand „fehler“ nach 8 Versuchen | Resend gestört, `MAIL_ABSENDER_INSTANZ` nicht bestätigt | Resend-Dashboard ansehen, dann erneut senden |
+| Mail kam ohne PDF, mit Text und Link | PDF zu aufwendig für die Rechenzeit (Workers Free) oder Fehler im Zeichner | Workers Paid buchen; das Blatt reicht der Zehn-Minuten-Lauf nach (zwei Versuche) |
+| Seite der Instanz 503 „in Vorbereitung“ | Status `einrichtung` | Vorschau-Link nutzen oder live schalten |
+| Seite der Instanz 503 mit Kontakt | `pausiert` (Zahlung offen nach Kulanz, Pause) | Zahlung klären; mit Zahlung schaltet der Server von selbst frei |
+| Alle Instanzen 503 „Störung“ | Supabase nicht erreichbar und kein Stand im Zwischenspeicher | Supabase-Status prüfen; mit KV `INSTANZEN` bleiben bekannte Instanzen erreichbar |
+| Host zeigt die eeziframes-Startseite | Tabellen der Instanzen fehlen (`supabase/schema.sql` nicht erneut ausgeführt) | Schema ausführen |
+| Kunde findet seine Seite nicht bei Google | Essential ist bewusst noindex; Plus/Signature brauchen Zeit | Search Console beim Kunden, `sitemap.xml` der Instanz |
+| Paket-Kasse im Live-Modus zu | `PAKETE_OFFEN` fehlt oder `paketVerkaufStand()` vermisst etwas (Übersicht der Zentrale) | siehe [BESTELLUNG.md](BESTELLUNG.md), „Verkauf an- und ausschalten“ |
+
+### Später (nur entworfen)
+
+Weg 2: Subdomain beim Betrieb (`konfigurator.betrieb.de`) per CNAME über Cloudflare for SaaS (eigene Zone, Fallback-Origin, Worker-Route `*/*`, Host erst nach TXT-Nachweis). Tabelle (`weg = 'saas'`) und Weiche tragen das schon. Keine Einbettung per iframe, keine Mitarbeiter-Selbstverwaltung, keine Bestellung durch den Inhaber im Auftrag (E30).

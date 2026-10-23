@@ -18,7 +18,7 @@ export const STAND = '2026-10-21';
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-21' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-23' },
   { pfad: '/app/', prio: '0.9', stand: '2026-10-18' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-21' },
   { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-23' },
@@ -51,10 +51,10 @@ export const SEITEN = [
   { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-23' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-21' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-18' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-23' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-18' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-23' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
 ].concat(PAKETE_SEITEN);
 
