@@ -1,6 +1,6 @@
 /* eeziframes · Verkaufsseite der Konfigurator-Pakete (/fuer-fensterbauer/): Anfrageformular ohne Neuladen, Paket aus der Karte übernehmen;
-   unten die Bewegung der Landingpage (Reveal, Kennzahlen mit Ring, Scroll-Bühne, Zeichen in Schleife, Zeitleiste) mit den Hilfen aus
-   gemeinsam.js. Alles hängt an window.Verkauf.auf(wurzel, o). Die statische Seite ruft es am Ende dieser Datei mit document auf; die
+   unten die Bewegung der Landingpage (Reveal, Kennzahlen mit Ring, Scroll-Bühne, Zeichen in Schleife, Zeitleiste, Meldungskarten auf
+   dem Startbild) mit den Hilfen aus gemeinsam.js. Alles hängt an window.Verkauf.auf(wurzel, o). Die statische Seite ruft es am Ende dieser Datei mit document auf; die
    Startseite (portal.js, Ansicht „Fensterbauer“) bettet denselben Inhalt ein und ruft auf(behälter) nach jedem Aufbau, darum beziehen
    sich alle Abfragen auf die Wurzel, Zuhörer werden je Element nur einmal gebunden und Beobachter je Aufruf neu angelegt. o.still = true
    beim Neuaufbau desselben Bildschirms: Was im Bild steht, erscheint und läuft nicht noch einmal; was unterhalb wartet, bewegt sich beim
@@ -160,6 +160,50 @@
     else b.classList.add('vk-im-bild');
   }
 
+  /* Startbild: Meldungskarten (.vk-eingang in figure.vk-hero-foto) trudeln ein, als legten gerade Kunden ihre Projekte an. Ohne
+     JavaScript stehen alle drei (CSS); hier bekommt der Behälter .vk-lauf, dann je Runde (etwa 9 s): Karte für Karte von rechts (.vk-da,
+     ab 300 ms, 700 ms Abstand), gut 5 s stehen, gemeinsam ausblenden (.vk-weg, 400 ms), kurze Pause, von vorn. Läuft nur, solange die
+     figure im Bild ist (Beobachter je Aufruf, wie die Bühne); außerhalb stehen die Timer und die Karten sind leer. still (Neuaufbau
+     desselben Bildschirms, die Einbettung baut das Startbild neu) und das Bild steht schon im Bild: Die Karten, die im alten Behälter
+     standen, stehen sofort wieder (kein Überblenden), die Runde läuft mit den übrigen weiter; ohne alten Stand stehen alle drei.
+     Bei „weniger Bewegung“ bleibt alles stehen (kein .vk-lauf). */
+  var letzterEingang = null;
+  function meldungen(wurzel, still) {
+    var box = wurzel.querySelector('.vk-hero-foto .vk-eingang');
+    if (!box || box.__vkAn || ruhig()) return;
+    box.__vkAn = true;
+    var fig = box.closest('.vk-hero-foto'), karten = Array.prototype.slice.call(box.querySelectorAll('.vk-nachricht')), timer = [];
+    var vorher = letzterEingang; letzterEingang = box;
+    function spaeter(f, ms) { timer.push(setTimeout(function () { if (document.body.contains(box)) f(); }, ms)); }
+    function leer() { timer.forEach(clearTimeout); timer = []; karten.forEach(function (k) { k.classList.remove('vk-da', 'vk-weg'); }); }
+    /* eine Runde; die ersten `ab` Karten stehen sofort, die übrigen trudeln ein */
+    function runde(ab) {
+      leer();
+      karten.forEach(function (k, i) {
+        if (i < ab) k.classList.add('vk-da');
+        else spaeter(function () { k.classList.add('vk-da'); }, 300 + (i - ab) * 700);
+      });
+      var t = ab < karten.length ? 300 + (karten.length - 1 - ab) * 700 + 320 : 0;
+      spaeter(function () { karten.forEach(function (k) { k.classList.add('vk-weg'); }); }, t + 5000);
+      spaeter(function () { runde(0); }, t + 7000);
+    }
+    var r = fig.getBoundingClientRect(), sofort = !!still && r.top < window.innerHeight && r.bottom > 0;
+    var ab = !sofort ? 0 : vorher ? vorher.querySelectorAll('.vk-da:not(.vk-weg)').length : karten.length;
+    box.classList.add('vk-lauf');
+    karten.forEach(function (k, i) { if (i < ab) k.classList.add('vk-da'); });
+    if (kannIO) {
+      var erst = true;
+      var io = beobachten(new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) runde(erst ? ab : 0);
+          else leer();
+          erst = false;
+        });
+      }, { threshold: 0 }));
+      io.observe(fig);
+    } else runde(ab);
+  }
+
   function bewegung(wurzel, still) {
     beobachter.forEach(function (b) { b.disconnect(); }); beobachter = [];
     /* Neuaufbau desselben Bildschirms (still): Was im Bild steht oder schon vorbei ist, bleibt, wie es ist (kein Flackern); was noch
@@ -188,6 +232,7 @@
        gestartetes Element überspringt Lottie selbst */
     if (window.Lottie) window.Lottie.auf(wurzel);
     buehne(wurzel);
+    meldungen(wurzel, still);
 
     /* Zeitleiste: --sp von 0 (Liste kommt unten herein) bis 1 (Liste steht zu zwei Dritteln im Bild); Schritte, deren Symbol die gefüllte
        Linie erreicht hat, bekommen .vk-an (Symbol wird gezogen, verkauf.css). Linie: 30 px unter dem Rand der Liste bis 50 px über dem

@@ -98,7 +98,7 @@ Fotos des Betriebs, nie Bilder von eeziframes; Essential nutzt das eeziframes-De
 | Name | Format | Wo genau | Chips auf dem Foto | Priorität |
 |---|---|---|---|---|
 | `fb-anfrage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Was in jeder Anfrage steht“ (`#was-in-jeder-anfrage-steht`), nach dem ersten Absatz, vor der Liste | Maße · Fotos · Zeichnung · Klärungsliste | 1 |
-| `fb-kunden-planen` | 1200 × 1500 | Verkaufsseite, Abschnitt „Warum Kunden selbst planen“, rechts neben dem Text (1280), am Telefon unter der Überschrift | Abends · Auf dem Sofa · Ohne Termin | 1 |
+| `fb-kunden-planen` | Ihr Fachwissen im Wohnzimmer des Kunden, ohne hinzufahren: Vater und Tochter messen abends mit dem Handy, ein winziger Meister auf der Fensterbank zeigt, wo. Chips: Abends · Ohne Termin · Mit Anleitung · 5 Minuten je Fenster (Bild vom Inhaber, 23.10.) | A cosy living room in the evening; a father and his young daughter hold a smartphone up toward their large window, and on the windowsill stands a tiny fifteen-centimetre-tall master window maker in his early fifties with a short grey beard and a dark blue work jacket, pointing with a yellow folding rule at the window frame as if giving instructions, the family looking at him with delight, warm lamp light |
 | `fb-kundenschutz` | 1600 × 1000 | Verkaufsseite, Abschnitt „Ihre Kunden bleiben Ihre Kunden“, nach dem ersten Absatz | Ihre Marke · Ihre Domain · Ihre Daten | 2 |
 | `fb-pakete` | 1600 × 1000 | Verkaufsseite, direkt über den drei Paketkarten (`#pakete`) | Ihr Name · Ihre Farbe · Ihr Logo | 1 |
 | `fb-ablauf` | 1600 × 1000 | Verkaufsseite, Abschnitt „Von der Bestellung bis zum Livegang“, vor der Schrittliste | Bestellen · Einrichten · Freigeben · Live | 2 |
@@ -128,7 +128,7 @@ plain light grey studio background, photorealistic, no text.*
 
 | Name | Pointe (deutsch) | Prompt (Szene; die Figur dazu montieren) |
 |---|---|---|
-| `fuer-fensterbauer` (Startbild, 4:5) | Die Anfragen kommen von selbst: Der Meister liest Zeitung, Papierflieger segeln durchs Fenster und stapeln sich auf dem Tisch. | The master window maker leaning back in his workshop reading a newspaper, feet on the workbench, while dozens of white paper airplanes glide in through the open window and land in a neat growing stack on his desk, golden-hour light, sawdust in the air |
+| `fuer-fensterbauer` (Startbild, 4:5) | Der Kunde kann noch so weit weg sein, die Anfrage kommt an: Ein Astronaut misst in der Raumstation das runde Fenster, draußen die Erde, ein Papierflieger treibt zur Luke; links auf dem Bild trudeln derweil die Meldungskarten der Kunden ein (Overlay der Seite in HTML, nicht im Foto; der Astronaut gehört darum in die rechte Bildhälfte). (Wunsch des Inhabers: Astronaut; Variante mit dem Meister in der Werkstatt siehe Verlauf) | An astronaut in a white spacesuit floating weightlessly inside a space station module, measuring a round cupola window with a yellow folding rule in gloved hands, the Earth glowing blue outside the window, a smartphone drifting beside the helmet, and a white paper airplane floating away toward an open hatch, soft cool cabin light mixed with warm sunlight from the window, subject in the right half of the frame, the left third kept calm and dark (cabin wall) for overlay cards, empty space at the bottom |
 | `fb-anfrage` | Raten ist kein Aufmaß: Die Glaskugel zeigt die Einbausituation. | A fortune teller's table in a craftsman's workshop, a glowing crystal ball showing a sharp miniature of a window opening with brick wall, roller shutter box and measurement lines inside it, the master window maker looking in with raised eyebrows, velvet cloth, candles |
 | `fb-kunden-planen` | Termin um 9, Haus weg: Das Haus läuft auf Hühnerbeinen davon. | A small suburban house walking away on giant chicken legs down a quiet street at nine in the morning, the master window maker standing on the empty plot with a folding rule and a clipboard, looking after it, early light, slightly surreal but photorealistic |
 | `fb-kundenschutz` | Ihre Kunden bleiben Ihre: Die Konkurrenz wartet draußen. | Inside a small window showroom in warm light the master window maker shakes hands with a young family; outside the glass door three wolves in grey business suits with briefcases wait in the rain and cannot get in, the door locked with a large old key, evening |
@@ -145,3 +145,11 @@ Umsetzung wie im Karussell-Ablauf: Hintergrund (Szene ohne Figur), Figur, Montag
 2160 × 2700 px (4:5) bzw. 2400 × 1500 px (16:10), dann in `fotos-roh/<name>.jpg` und `python3 scripts/fotos.py`. Die fünf Karussell-Motive
 Wahrsagerin (`fb-anfrage`), Haus auf Hühnerbeinen (`fb-kunden-planen`) und Pantomime/Kreide (`fb-ablauf`) sind hier wiederverwendet; das
 Laserlabor und der Bär im Wasserfall passen zur alten Abrechnung je Aufmaß und bleiben den Karussells vorbehalten.
+
+Zweite Idee je Platz, falls das erste Motiv nicht gefällt (Wunsch des Inhabers vom 23.10.: je Prompt eine Alternative):
+
+| Name | Pointe (deutsch) | Prompt (Szene; die Figur dazu montieren) |
+|---|---|---|
+| `fb-kundenschutz` | Unter Ihrer Glasglocke: Niemand fischt Ihre Kunden ab. | The master window maker gently placing a large glass bell jar over a miniature family standing at a tiny kitchen table with a tiny window frame, on a wooden workbench; around the jar a crowd of anonymous hands in grey suit sleeves holding clipboards and business cards press against the glass and cannot reach in, warm workshop light, the family inside relaxed |
+| `fb-frage` | Ein Knopf, ein Rückruf. | A single oversized round red call button set into the brick wall of a tidy workshop, softly glowing; the master window maker's hand resting on it, inviting, the rest of the frame calm and empty, evening light through a window |
+

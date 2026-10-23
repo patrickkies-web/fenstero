@@ -110,6 +110,26 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 @keyframes vk-auf { to { opacity: 1 } }
 .vk-hero-foto .chip { min-height: 36px; padding: 0 12px; font-size: 13px; color: var(--text); background: rgba(22, 22, 22, .72); border-color: rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px) }
 .vk-hero-foto .chip.haken::before { width: 6px; height: 10px; border-width: 0 2px 2px 0 }
+/* Meldungskarten auf dem Startbild (.vk-eingang, aria-hidden: Illustration, der Inhalt steht sinngemäß im Text): Es sieht aus, als legten
+   gerade Kunden ihre Projekte an, während der Fensterbauer unterwegs ist. Links auf dem Foto, im oberen Drittel beginnend, schlank:
+   zwei Zeilen je Karte (Titel 15 fett, rechts daneben die Zeit 13; darunter eine Zeile 13), Innenabstand 6/7 px 10 px, am Schreibtisch
+   unter 56 px hoch, höchstens 300 px breit (bis 1199 px: 70 % des Streifens, am Telefon 60 % der Bildbreite, linksbündig), damit Kopf,
+   Arm, Zollstock und Bullauge des Astronauten in der rechten Bildhälfte frei bleiben. Am Telefon steht die Zeit in der zweiten Zeile und
+   .vk-nur-breit (Zusätze in der Zeile, der lange Teil der Eyebrow) entfällt, damit es bei zwei Zeilen bleibt. Fläche wie die Chips
+   (dunkel, durchscheinend, Weichzeichner, Ring), grüner Punkt 8 px. Ohne JavaScript stehen alle drei; verkauf.js setzt .vk-lauf (Karten
+   verborgen, bis sie .vk-da bekommen: 16 px von rechts in 320 ms) und .vk-weg (gemeinsames Ausblenden, 400 ms); bei „weniger Bewegung“
+   bleibt .vk-lauf aus. */
+.vk-hero-foto .vk-eingang { position: absolute; left: 16px; right: 16px; top: 22%; display: flex; flex-direction: column; align-items: flex-start; gap: 8px }
+.vk-hero-foto .vk-eingang .eyebrow { margin: 0 0 0 2px; width: max-content; max-width: calc(100% + 12px); letter-spacing: .12em; color: var(--text2); text-shadow: 0 1px 2px rgba(0, 0, 0, .6) }
+.vk-nachricht { width: min(100%, 300px); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 8px; align-items: center; padding: 6px 10px 7px; border-radius: var(--r3); background: rgba(22, 22, 22, .78); box-shadow: 0 0 0 2px rgba(255, 255, 255, .14); color: var(--text); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px) }
+.vk-nachricht::before { content: ""; grid-row: 1; grid-column: 1; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft) }
+.vk-nachricht b, .vk-nachricht > span, .vk-nachricht small { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.vk-nachricht b { grid-row: 1; grid-column: 2; font-size: 15px; line-height: 1.25; font-weight: 800 }
+.vk-nachricht > span { grid-row: 2; grid-column: 2 / -1; font-size: 13px; line-height: 1.35; color: var(--text2) }
+.vk-nachricht small { grid-row: 1; grid-column: 3; font-size: 13px; line-height: 1.3; color: var(--muted) }
+.vk-eingang.vk-lauf .vk-nachricht { opacity: 0; transform: translateX(16px); transition: none }
+.vk-eingang.vk-lauf .vk-nachricht.vk-da { opacity: 1; transform: none; transition: opacity var(--t3) var(--e-out), transform var(--t3) var(--e-out) }
+.vk-eingang.vk-lauf .vk-nachricht.vk-da.vk-weg { opacity: 0; transition: opacity .4s var(--e-io) }
 @media (min-width: 761px) {
   .vk-hero { grid-template-columns: minmax(0, 560px) minmax(0, 1fr); grid-template-rows: auto auto auto 1fr auto; column-gap: 40px; padding-top: clamp(12px, 2.5vw, 28px) }
   .vk-hero > .kicker { grid-area: 1 / 1 } .vk-hero > h1 { grid-area: 2 / 1 } .vk-hero > .rg-kurz { grid-area: 3 / 1 } .vk-hero > .rg-cta { grid-area: 4 / 1; align-self: start }
@@ -118,16 +138,33 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
   .vk-hero-foto img { position: absolute; inset: 0;
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); -webkit-mask-composite: source-in;
     mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); mask-composite: intersect }
-  .vk-hero-foto .chips { left: 34%; right: calc(var(--vk-rand) + 8px); bottom: 52px }
+  .vk-hero-foto .chips { left: 16px; right: calc(var(--vk-rand) + 8px); bottom: 52px; max-width: 340px; justify-content: flex-start }
   .vk-hero > .rg-inhalt ol { columns: 3 }
 }
+/* schmale Schreibtische: bis 999 px ist das Foto ein schmaler Streifen (weder Karten noch Chips haben dort Platz), bis 1199 px nehmen
+   die Karten in der kurzen Fassung (wie am Telefon, ohne .vk-nur-breit) 58 % des Streifens, das Bild bekommt Höhe für Karten und Chips */
+@media (min-width: 761px) and (max-width: 999px) { .vk-hero-foto .vk-eingang, .vk-hero-foto .chips { display: none } }
+@media (min-width: 1000px) and (max-width: 1199px) { .vk-hero-foto { min-height: clamp(500px, 42vw, 580px) } .vk-hero-foto .vk-eingang { top: 16% } .vk-nachricht { width: min(58%, 300px) } }
+/* kurze Fassung der Karten (Telefon und 1000–1199 px): Titel über die ganze Zeile, Zeit in der zweiten Zeile, Zusätze entfallen */
+@media (max-width: 760px), (min-width: 1000px) and (max-width: 1199px) {
+  .vk-hero-foto .vk-nur-breit { display: none }
+  .vk-nachricht b { grid-column: 2 / -1 }
+  .vk-nachricht > span { grid-column: 2 }
+  .vk-nachricht small { grid-row: 2; grid-column: 3 }
+}
 @media (max-width: 760px) {
-  .vk-hero-foto { order: -1; height: min(92vw, 440px); margin: 4px calc(-1 * var(--vk-rand)) -56px }
+  /* 500 px hoch (fast das 4:5 des Fotos): die drei Meldungskarten oben links auf 60 % der Breite (der Astronaut rechts bleibt frei),
+     die Chips (32 px) unten in der ausgeblendeten Zone */
+  .vk-hero-foto { order: -1; height: clamp(500px, 118vw, 520px); margin: 4px calc(-1 * var(--vk-rand)) -56px }
   .vk-hero-foto img { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%) }
   .vk-hero-foto .chips { bottom: 72px; justify-content: flex-start }
+  .vk-hero-foto .chip { min-height: 32px }
+  .vk-hero-foto .vk-eingang { top: 28px }
+  .vk-nachricht { width: min(60%, 300px) }
   .vk-hero > .kicker, .vk-hero > h1, .vk-hero > .rg-kurz, .vk-hero > .rg-cta, .vk-hero > .rg-inhalt { position: relative; z-index: 1 }
 }
 @media (max-width: 600px) { .vk-hero > .rg-cta .btn { flex: 1 1 100%; justify-content: center } }
+@media (max-width: 339px) { .vk-hero-foto .vk-eingang { display: none } } /* zu schmal für Karten und Chips übereinander */
 
 /* Kennzahlen: vier Zahlen in der Titelrolle, jede in einem Ring (SVG-Kreis, pathLength 100), der sich füllt, während die Zahl hochläuft
    (verkauf.js: 1400 ms, dann Einrasten); ohne JavaScript steht der Ring voll */
@@ -301,14 +338,15 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 
 /* Ablauf als Zeitleiste: Linie links, die sich beim Scrollen füllt (--sp aus Scroll.binden); je Schritt ein gezeichnetes Symbol (44 px,
    Linien mit pathLength 100), das gezogen wird, sobald die gefüllte Linie den Schritt erreicht (li.vk-an), die Nummer klein daneben
-   (13 px). Ohne JavaScript ist die Linie voll und jedes Symbol gezogen. */
+   (13 px). Ohne JavaScript ist die Linie voll und jedes Symbol gezogen. Stapel: Linien (0) unter den Symbolen (1), der Ring um den
+   Kreis (4 px in Grundfarbe) unterbricht die Linie, die Nummernplakette (2) liegt obenauf; li hat keinen eigenen Stapelkontext. */
 .rg .vk-ablauf { position: relative; margin: 18px 0 0; padding: 4px 0 0; --sp: 1 }
 .js .rg .vk-ablauf { --sp: 0 }
-.vk-ablauf::before, .vk-ablauf::after { content: ''; position: absolute; left: 21px; top: 30px; bottom: 50px; width: 2px; border-radius: 1px; background: var(--line) }
+.vk-ablauf::before, .vk-ablauf::after { content: ''; position: absolute; z-index: 0; left: 21px; top: 30px; bottom: 50px; width: 2px; border-radius: 1px; background: var(--line) }
 .vk-ablauf::after { bottom: auto; height: calc((100% - 80px) * var(--sp)); background: var(--accent) }
 .rg .vk-ablauf li { margin: 0 0 26px; padding-left: 64px; min-height: 52px }
 .rg .vk-ablauf li:last-child { margin-bottom: 0 }
-.vk-ablauf .vk-symbol { position: absolute; left: 0; top: 4px; width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); color: var(--ink); box-shadow: 0 0 0 4px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
+.vk-ablauf .vk-symbol { position: absolute; z-index: 1; left: 0; top: 4px; width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); color: var(--ink); box-shadow: 0 0 0 4px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
 .vk-ablauf .vk-symbol svg { display: block; width: 100%; height: 100% }
 .vk-ablauf .vk-sym { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round }
 .js .vk-ablauf li:not(.vk-an) .vk-sym { stroke-dasharray: 100; stroke-dashoffset: 100 }
@@ -317,7 +355,7 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 @keyframes vk-ziehen { from { stroke-dashoffset: 100 } to { stroke-dashoffset: 0 } }
 .vk-ablauf li.vk-an .vk-symbol, html:not(.js) .vk-ablauf .vk-symbol { background: var(--accent); color: var(--on-accent) }
 /* die Nummer: kleine Pille rechts unten am Symbol */
-.vk-ablauf li::before { z-index: 1; left: 30px; top: 30px; width: auto; min-width: 22px; height: 22px; padding: 0 5px; border-radius: var(--pill); background: var(--surface3); color: var(--ink); font-size: 13px; line-height: 1; box-shadow: 0 0 0 2px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
+.vk-ablauf li::before { z-index: 2; left: 30px; top: 30px; width: auto; min-width: 22px; height: 22px; padding: 0 5px; border-radius: var(--pill); background: var(--surface3); color: var(--ink); font-size: 13px; line-height: 1; box-shadow: 0 0 0 2px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
 .vk-ablauf li.vk-an::before, html:not(.js) .vk-ablauf li::before { background: var(--accent); color: var(--on-accent) }
 
 /* Wissen: fünf Karten in einer Reihe am Schreibtisch (sonst stünde eine allein in der zweiten) */
@@ -333,6 +371,8 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 .vk-bestellen .vk-bald, .vk-bestellen .vk-form { margin-top: 0 }
 .rg .vk-bestellen h3 { margin-top: 18px }
 @media (min-width: 901px) { .vk-bestellen { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 28px } .vk-bestellen > .foto-karte { position: sticky; top: 76px; max-width: none } }
+/* am Telefon stehen die Chips unter dem Bild (ratgeber.css); die drei dieser Karte passen bei 390 px in eine Zeile, wenn sie etwas enger sitzen */
+@media (max-width: 600px) { .rg .vk-frage-foto .chips { padding: 10px 10px 12px } .rg .vk-frage-foto .chip { padding: 0 10px } }
 
 /* Weniger Bewegung: Foto und Chips stehen, Haken gezogen, Zeitleiste voll und Symbole gezogen, Ring voll, Bühne ohne Überblenden
    (verkauf.js schaltet den Bildschirm hart um), kein Puls, kein Flieger, kein Konfetti; die Skripte lassen Zahlen, Zeichen und Reveal in Ruhe */
@@ -355,7 +395,10 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 .vk-einbettung[aria-busy="true"] { min-height: 60vh }
 .vk-einbettung h2 { margin-top: 0 }
 .vk-einbettung .vk-hero { padding-top: 0 }
-.vk-einbettung .vk-anfrage .vk-blatt, .vk-einbettung .vk-bestellen > .foto-karte { top: calc(var(--vk-kopf) + 16px) }
+/* klebende Karten unter der Kopfzeile des Portals, nur in den Breiten, in denen sie kleben: darunter ist die Fotokarte position: relative
+   (gemeinsam.css), ein top würde sie nach unten schieben */
+@media (min-width: 761px) { .vk-einbettung .vk-anfrage .vk-blatt { top: calc(var(--vk-kopf) + 16px) } }
+@media (min-width: 901px) { .vk-einbettung .vk-bestellen > .foto-karte { top: calc(var(--vk-kopf) + 16px) } }
 .vk-einbettung.vk-rueckfall .pakete-karte { margin-bottom: 0 }
 @media (min-width: 761px) {
   .vk-einbettung .vk-hero { padding-top: clamp(12px, 2.5vw, 28px) }

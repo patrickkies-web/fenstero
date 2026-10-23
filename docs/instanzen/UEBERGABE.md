@@ -26,15 +26,16 @@ Verbindlich sind:
 | Volle Prüfsuite nach der Nacharbeit, Abschnitte 1–30 | **1679 bestanden, 0 fehlgeschlagen** (Stand a2d202d) |
 | Verkaufsseite `/fuer-fensterbauer/` als Landingpage (Abschnitte, Scroll-Bewegung, Lottie-Zeichen marke/domain/dashboard, Bildplätze mit Platzhaltern) und Startseite: Ansicht „Fensterbauer“ bettet sie ein (23.10., Wunsch des Inhabers) | fertig; volle Suite auf dem Endstand **1683 bestanden, 0 fehlgeschlagen** (Lauf mit 1682/1, der eine Satz 30.W3 angepasst, Abschnitt 30 danach 136/0) |
 | Verkaufsseite, zweite Runde (23.10., Inhaber: „zu wenig Bewegung“): Scroll-Bühne mit Telefon zu „So funktioniert es“, Bewegtbild-Band `konfigurator` (10-s-Schleife), `farbwechsel` im Vorspann der Pakete, Zeichen in den Paketkarten, gezeichnete Symbole der Zeitleiste, Ringe um die Kennzahlen, alle Zeichen als Schleife im Bild | fertig; volle Suite **1683 bestanden, 0 fehlgeschlagen** |
-| Schlussprüfung, PR, Bericht an den Inhaber | PR nach main offen (nicht gemergt), Bericht übergeben |
+| Bilder der Verkaufsseite (23.10.): Startbild Astronaut in der Raumstation (vom Inhaber geliefert) mit Overlay aus drei eintrudelnden Meldungskarten und vier Chips auf der dunklen linken Bildhälfte; Bild „Warum Kunden selbst planen“ (winziger Meister auf der Fensterbank) mit vier Chips; Prompts für die übrigen zehn Plätze in `docs/BILDER.md` | fertig; Abschnitte 10, 29, 30 grün auf dem Endstand, Abschnitte 1 und 16 nach dem Merge von main (Konfigurator-Feinschliff) grün |
+| Schlussprüfung, PR, Bericht an den Inhaber | auf Wunsch des Inhabers („Stell deine updates mal online“) nach main gemergt (#48–#51), Bericht übergeben |
 
-Der Code ist **nicht** auf main. Merge erst nach Freigabe durch den Inhaber (Preise, Rechtstexte, Einrichtung bei Cloudflare, Stripe und Resend, siehe BAUPLAN §4). Der Stand ist so gebaut, dass ein Merge auch vorher gefahrlos ist: Ohne `PAKETE_OFFEN=1` kann niemand ein Paket kaufen, und Instanz-Domains gibt es erst, wenn der Inhaber eine anlegt.
+Der Code ist auf main; die Seite ist über den Cloudflare-Build von main online. Pakete bleiben trotzdem geschlossen: Ohne `PAKETE_OFFEN=1` kann niemand ein Paket kaufen, und Instanz-Domains gibt es erst, wenn der Inhaber eine anlegt. Vor dem Öffnen: Preise, Rechtstexte, Einrichtung bei Cloudflare, Stripe und Resend (BAUPLAN §4).
 
 ## Nächste Schritte
 
 1. Inhaber: PR ansehen und freigeben (Preise, Rechtstexte, Entscheidungen zu F1–F5 in `BAUPLAN.md` §5.3); Rechtstexte anwaltlich prüfen lassen, danach `VORLAGE.geprueft` in `functions/instanz/recht.js` setzen.
 2. Inhaber: manuelle Schritte aus `BAUPLAN.md` §4 (Cloudflare, Supabase-Schema, Resend, Stripe, Secrets).
-3. Offene Befunde mit „kann“ (11, 15, 17 Formularfeld) nachholen; Wortlaut in `PRUEFBEFUNDE.md`. Dazu die Bilder einbauen, sobald der Inhaber sie liefert (`docs/BILDER.md`, Abschnitt „Plätze für die Fensterbauer-Seiten“; Plätze 1–7 sind in der Verkaufsseite verdrahtet, dort stehen Platzhalter aus `scripts/fotos.py`; die Zeichen `domain` und `dashboard` warten noch auf einen Platz).
+3. Offene Befunde mit „kann“ (11, 15, 17 Formularfeld) nachholen; Wortlaut in `PRUEFBEFUNDE.md`. Dazu die restlichen Bilder einbauen, sobald der Inhaber sie liefert (`docs/BILDER.md`, Abschnitt „Plätze für die Fensterbauer-Seiten“: Startbild und `fb-kunden-planen` sind echt, die Plätze `fb-anfrage`, `fb-kundenschutz`, `fb-pakete`, `fb-ablauf`, `fb-frage` zeigen Platzhalter aus `scripts/fotos.py`; die Plätze 8–12 für Kundenkonto und Essential-Bestätigung sind noch nicht verdrahtet). Ablauf je Bild: Original nach `fotos-roh/<name>.png`, `python3 scripts/fotos.py`, Alternativtext prüfen.
 4. Entscheidung des Inhabers: Sollen auch die Zeitstempel des Altbestands (eeziframes.com, `stamp()`/`datum()` in modell.js) in deutscher Zeit entstehen? Heute laufen sie im Worker in UTC.
 5. Prüfsuite wie bisher:
    ```
