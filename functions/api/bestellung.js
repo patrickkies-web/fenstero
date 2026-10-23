@@ -31,9 +31,8 @@ import { einrichtungBrutto } from './stripe.js';
 import { ablage } from './fotos.js';
 import { protokoll } from './zentrale.js';
 import { basis, HAUPTADRESSE } from '../seo.js';
-import { instanzStatus, instanzDatenLoeschen, instanzAendern, paketSetzen } from '../instanz/verwalten.js';
+import { instanzStatus, instanzDatenLoeschen, instanzAendern, paketSetzen, anmeldungGebraucht } from '../instanz/verwalten.js';
 import { anmeldungLoeschen } from './auth.js';
-import { entfernt } from './eigene.js';
 
 const P = () => globalThis.Pakete;
 const R = () => globalThis.Instanzregeln;
@@ -762,17 +761,11 @@ export async function bestellungenLauf(k, sp, zd, env) {
    (FRISTEN.nachrichtenJahre). Fällig ist ein Partner, dessen Bestellungen alle beendet oder storniert sind und deren letztes Ende vor dem
    Jahresende liegt, das nachrichtenJahre Jahre nach dem Jahr des Endes vergangen ist (Ende 2026-03-05 → ab 2030-01-01); ein Partner ohne
    jede Bestellung nach derselben Frist ab dem Anlegen. Gelöscht werden Nachrichten, Bestellungen (Dateien sind dann längst weg, sonst
-   jetzt), die Partnerzeile und die Supabase-Anmeldung, sofern an ihr kein Betrieb, kein lebendes eigenes Aufmaß (eigene.js) und kein
-   Dashboard-Zugang hängt. Rechnungsbelege liegen bei Stripe (belegeJahre). Höchstens 20 je Lauf, je Partner ein Protokolleintrag. */
+   jetzt), die Partnerzeile und die Supabase-Anmeldung, sofern an ihr kein Betrieb, kein lebendes eigenes Aufmaß und kein Dashboard-Zugang
+   hängt (anmeldungGebraucht aus verwalten.js, wie beim Löschen einer Instanz). Rechnungsbelege liegen bei Stripe (belegeJahre). Höchstens 20 je Lauf, je Partner ein Protokolleintrag. */
 const jahrBerlin = (ms) => Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric' }).format(new Date(ms)));
 /* Frist vorbei: jetzt ≥ 1. Januar des Jahres (Jahr des Zeitpunkts + jahre + 1), deutsche Zeit */
 export const aufbewahrungVorbei = (iso, jahre, t) => { const ms = Date.parse(iso || ''); return !Number.isNaN(ms) && t >= Date.parse((jahrBerlin(ms) + jahre + 1) + '-01-01T00:00:00+01:00'); };
-const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
-async function anmeldungGebraucht(sp, uid) {
-  if (await sp.betriebNachAuth(uid)) return true;
-  if (sp.eigeneVonNutzer && ((await sp.eigeneVonNutzer(uid)) || []).some(lebt)) return true;
-  return ((await sp.instanzenAlle()) || []).some((i) => (i.zugang || []).some((z) => z && z.uid === uid));
-}
 export async function partnerAufraeumen(k, sp, env, o) {
   o = o || {};
   if (!sp || !sp.partnerAlle || !sp.partnerLoeschen) return { geloescht: 0, fehler: 0 };

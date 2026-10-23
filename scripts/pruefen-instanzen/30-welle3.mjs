@@ -207,6 +207,10 @@ export default async (h) => {
     const n2 = await X.api(HOST, '/api/konto/projekte', { cookie: ckD, origin: true, body: { kunde: 'Familie Offen', kontakt: 'offen-w3@beispiel.de' } });
     const l2 = n2.json && n2.json.konto ? n2.json.konto.acc.links.find((l) => l.id === n2.json.id) : null;
     const zuPlus = await za('/api/zentrale/instanzen/' + iid + '/paket', { paket: 'plus' });
+    /* nach unten wirkt der Wechsel erst zum Periodenende (bestellung.js paketWechseln, Befund 10): Vormerkung prüfen, Uhr hinter abo.bis, Tageslauf */
+    const { CRON_TAEGLICH } = await import(new URL('../../functions/api/router.js', import.meta.url).href);
+    const bVorgemerkt = ((await X.attrappe()).bestellungen || []).find((b) => b.id === b0.id) || {}, iVorgemerkt = ((await X.attrappe()).instanzen || []).find((i) => i.id === iid) || {};
+    await X.uhr(31); await X.geplant(CRON_TAEGLICH); await X.uhr(null);
     const q1 = await X.api(HOST, '/api/konto', { cookie: ckD }), q2 = await X.api(HOST, '/betrieb/'), q3 = await X.api(HOST, '/datenschutz/');
     const ctxO = await kontext(h.telefon), sO = await h.neueSeite(ctxO, BH);
     await sO.goto(BH + '/#k-' + (l2 ? l2.code : 'x'), { waitUntil: 'networkidle' }); await sO.waitForTimeout(500);
@@ -214,8 +218,8 @@ export default async (h) => {
     await fensterSpeichern(sO, 'Küche'); await sO.waitForSelector('.scr[data-screen="fertig"]');
     await einladungSenden(sO);
     const mO = (await T.warteMail((m) => an(m).includes(EIN) && /Familie Offen/.test((m.betreff || '') + (m.html || '')), 15000, { anhaenge: true }))[0];
-    ok(zuPlus.status === 200 && [403, 404].includes(q1.status) && q2.status === 404 && !/__Host-betrieb/.test(q3.text) && /eeziframes/.test(q3.text) && !!mO && (mO.anhaenge || []).some((a) => a.typ === 'application/pdf') && !mO.html.includes('/betrieb/#projekt-'),
-      'Paketwechsel auf Plus: Dashboard zu (' + q1.status + ', /betrieb/ ' + q2.status + '), Datenschutz ohne __Host-betrieb und mit eeziframes als Auftragsverarbeiter; die offene Einladung nimmt das Aufmaß an, Mail mit PDF ohne Dashboard-Knopf');
+    ok(zuPlus.status === 200 && bVorgemerkt.abo && bVorgemerkt.abo.wechsel && bVorgemerkt.abo.wechsel.paket === 'plus' && iVorgemerkt.paket === 'signature' && [403, 404].includes(q1.status) && q2.status === 404 && !/__Host-betrieb/.test(q3.text) && /eeziframes/.test(q3.text) && !!mO && (mO.anhaenge || []).some((a) => a.typ === 'application/pdf') && !mO.html.includes('/betrieb/#projekt-'),
+      'Paketwechsel auf Plus (bis zum Periodenende nur vorgemerkt, dann Tageslauf): Dashboard zu (' + q1.status + ', /betrieb/ ' + q2.status + '), Datenschutz ohne __Host-betrieb und mit eeziframes als Auftragsverarbeiter; die offene Einladung nimmt das Aufmaß an, Mail mit PDF ohne Dashboard-Knopf');
     h.sauber(sO, 'Einladung nach dem Paketwechsel ohne Fehler');
     const zuSig = await za('/api/zentrale/instanzen/' + iid + '/paket', { paket: 'signature' });
     await X.api(HOST, '/api/konto/anmelden', { body: { mail: TEAM }, origin: true });
