@@ -1,0 +1,87 @@
+diff --git a/scripts/pruefen-instanzen/28.mjs b/scripts/pruefen-instanzen/28.mjs
+index 35f1700..f8ba812 100644
+--- a/scripts/pruefen-instanzen/28.mjs
++++ b/scripts/pruefen-instanzen/28.mjs
+@@ -347,6 +347,11 @@ async function browserTeil(h, o) {
+     ok(!seiten.length, '28.15 ' + art + ': jeder Bildschirm und jedes Blatt ohne eeziframes, Abrechnung, Tarif, Zahlungsart, €, Tour, kostenlos' + (seiten.length ? ' – ' + seiten.join('; ') : ''));
+     const akz = await page.evaluate(() => ({ css: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim().toLowerCase(), k: String((window.KONFIG.instanz || {}).akzent || '').toLowerCase() }));
+     ok(akz.k && akz.css === akz.k, '28.15 ' + art + ': --accent ist die Farbe der Instanz (' + akz.css + ')');
++    /* Initiale in der Firmenfarbe: Seitenleiste, Karte unter „Betrieb“, „Ihre Initiale“ und die Telefonvorschau zeigen, was der Kunde sieht */
++    const iniFarben = async (scr) => { await page.evaluate((s) => window.go(s), scr); await page.waitForSelector('.scr[data-screen="' + scr + '"]'); return page.evaluate(() => Array.from(document.querySelectorAll('.ein-zeichen.ini')).map((e) => (e.closest('#ein-vor') ? 'vorschau' : e.closest('.ein-logo-vor') ? 'initiale' : e.closest('.ein-b-karte') ? 'karte' : 'leiste') + ' ' + getComputedStyle(e).backgroundColor)); };
++    const fHex = String((await page.evaluate(() => (window.KONFIG.instanz || {}).farbe)) || ''), fRgb = /^#[0-9a-f]{6}$/i.test(fHex) ? 'rgb(' + [1, 3, 5].map((i) => parseInt(fHex.slice(i, i + 2), 16)).join(', ') + ')' : '?';
++    const ini = (await iniFarben('bprofil')).concat(await iniFarben('einladung'));
++    ok(['vorschau', 'karte', 'initiale'].every((w) => ini.some((x) => x.startsWith(w + ' '))) && ini.every((x) => x.endsWith(' ' + fRgb)), '28.15 ' + art + ': Initiale in der Firmenfarbe ' + fHex + ' auch in Karte und Vorschau der Einladungsseite (' + ini.join(' · ') + ')');
+     const breit = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+     ok(breit, '28.15 ' + art + ': kein waagrechter Scroll');
+     if (art === 'desktop') {
+diff --git a/scripts/pruefen-instanzen/30.mjs b/scripts/pruefen-instanzen/30.mjs
+index e80fa3f..4323bfb 100644
+--- a/scripts/pruefen-instanzen/30.mjs
++++ b/scripts/pruefen-instanzen/30.mjs
+@@ -478,6 +478,9 @@ export default async (h) => {
+       const abo = await sK.evaluate(() => (document.querySelector('.p-abo') || {}).innerText || '');
+       await bild(sK, '04-kundenkonto-zahlung-offen-plus-1280', { ganz: true });
+       ok(/Zahlung offen/.test(abo) && /Kulanz|bis/.test(abo), 'plus: Kundenkonto zeigt „Zahlung offen“ mit Frist');
++      /* D.10: die offene Rechnung ist die nächste Aktion, als einziger Cream-Knopf; „Konfigurator öffnen“ ist ein Ring-Knopf */
++      const hk = await sK.evaluate(() => { const k = document.querySelector('.p-karte.hi'); return { h: ((k && k.querySelector('h2')) || {}).innerText || '', t: ((k && k.querySelector('.p-text')) || {}).innerText || '', cream: Array.from(document.querySelectorAll('.btn.primary')).map((b) => b.innerText.trim()), ring: Array.from((k && k.querySelectorAll('.btn.ghost')) || []).map((b) => b.innerText.trim()) }; });
++      ok(/Zahlung offen/.test(hk.h) && /bis \d{1,2}\. \S+ \d{4}, sonst pausieren wir/.test(hk.t) && hk.cream.length === 1 && hk.cream[0] === 'Offene Rechnung bezahlen' && hk.ring.includes('Konfigurator öffnen'), 'plus: Hauptkarte bei offener Zahlung mit Frist, Hauptknopf „Offene Rechnung bezahlen“, „Konfigurator öffnen“ als Ring-Knopf (' + hk.h + ' · ' + hk.cream.join(', ') + ' · ' + hk.ring.join(', ') + ')');
+       h.sauber(sK, 'plus: Kundenkonto mit offener Zahlung ohne Fehler');
+     }
+     await X.uhr(13); await X.geplant(CRON_TAEGLICH);
+diff --git a/web/assets/partner.js b/web/assets/partner.js
+index 3c2b990..358be1d 100644
+--- a/web/assets/partner.js
++++ b/web/assets/partner.js
+@@ -457,7 +457,12 @@
+       case 'bezahlt': return { text: 'Die Einrichtung ist bezahlt. Wir melden uns innerhalb eines Werktags zu Ihrer Wunschzeit.', knopf: S.konto.rueckruf ? '' : hauptknopf('Rückruf anfordern', 'rueckruf-auf') };
+       case 'einrichtung': case 'domain': return { text: b.status === 'domain' ? 'Ihre Domain ist gesichert' + (inst && inst.host ? ': ' + inst.host : '') + '. Als Nächstes gestalten wir Ihren Konfigurator und schicken Ihnen eine Vorschau.' : 'Wir richten Ihren Konfigurator ein. Logo, Fotos und Texte können Sie bis zur Freigabe ergänzen.', knopf: gestaltet(P.merkmale(b.paket)) ? hauptknopf('Wünsche ergänzen', 'wuensche') : (S.konto.rueckruf ? '' : hauptknopf('Rückruf anfordern', 'rueckruf-auf')) };
+       case 'freigabe': return { text: v.freigabe && v.freigabe.version === v.version ? 'Danke für Ihre Freigabe. Wir schalten Ihren Konfigurator jetzt live.' : 'Ihr Konfigurator ist fertig. Bitte sehen Sie ihn sich an und geben Sie ihn frei, oder sagen Sie uns, was wir ändern sollen.', knopf: v.freigabe && v.freigabe.version === v.version ? '' : (v.link ? '<a class="btn ghost" href="' + esc(v.link) + '" target="_blank" rel="noopener">Vorschau ansehen</a>' : '') + hauptknopf('Freigeben', 'freigeben') + '<button type="button" class="btn ghost" data-a="aendern">Änderung wünschen</button>' };
+-      case 'live': return { text: 'Ihr Konfigurator ist live' + (inst && inst.host ? ' unter ' + inst.host : '') + '.', knopf: inst && inst.host ? '<a class="btn primary" href="https://' + esc(inst.host) + '/" target="_blank" rel="noopener">Konfigurator öffnen<span class="pf" aria-hidden="true"></span></a>' + (inst.dashboard ? '<a class="btn ghost" href="https://' + esc(inst.host) + '/betrieb/" target="_blank" rel="noopener">Zum Dashboard</a>' : '') : '' };
++      case 'live': {
++        /* Kulanzfrist läuft: die offene Rechnung ist die nächste Aktion (Cream), der Konfigurator wird ein Ring-Knopf */
++        var offen = b.abo_status === 'zahlung_offen', rechnung = !offen ? '' : a.offeneRechnung ? '<a class="btn primary" href="' + esc(a.offeneRechnung) + '" target="_blank" rel="noopener">Offene Rechnung bezahlen<span class="pf" aria-hidden="true"></span></a>' : (S.konto.partner || {}).stripe ? hauptknopf('Im Kundenportal bezahlen', 'portal') : '';
++        return { titel: offen ? 'Zahlung offen' : '', text: offen ? 'Die Abbuchung für Ihr Abo hat nicht geklappt. Bitte bezahlen Sie die offene Rechnung' + (a.kulanz_bis ? ' bis ' + datum(a.kulanz_bis) : '') + ', sonst pausieren wir Ihren Konfigurator' + (inst && inst.host ? ' unter ' + inst.host : '') + '.' : 'Ihr Konfigurator ist live' + (inst && inst.host ? ' unter ' + inst.host : '') + '.',
++          knopf: rechnung + (inst && inst.host ? '<a class="btn ' + (offen ? 'ghost' : 'primary') + '" href="https://' + esc(inst.host) + '/" target="_blank" rel="noopener">Konfigurator öffnen' + (offen ? '' : '<span class="pf" aria-hidden="true"></span>') + '</a>' + (inst.dashboard ? '<a class="btn ghost" href="https://' + esc(inst.host) + '/betrieb/" target="_blank" rel="noopener">Zum Dashboard</a>' : '') : '') };
++      }
+       case 'pausiert': return { text: 'Ihr Konfigurator ist pausiert' + (a.kulanz_bis ? ' (Zahlung offen)' : '') + '. Ihre Kunden sehen in dieser Zeit nur Ihre Kontaktdaten.', knopf: a.offeneRechnung ? '<a class="btn primary" href="' + esc(a.offeneRechnung) + '" target="_blank" rel="noopener">Offene Rechnung bezahlen<span class="pf" aria-hidden="true"></span></a>' : '' };
+       case 'beendet': return { text: 'Ihr Konfigurator ist beendet' + (b.ende_am ? ' (seit ' + datum(b.ende_am) + ')' : '') + '.', knopf: '' };
+       case 'storniert': return { text: 'Diese Bestellung ist storniert.' + ((b.zahlung || {}).erstattet_cent ? ' Die Einrichtungsgebühr erstatten wir auf Ihr Zahlungsmittel.' : ''), knopf: '' };
+@@ -471,7 +476,7 @@
+     if (b.abo_status === 'aktiv' && a.bis) zeilen.push('Nächste Abbuchung am ' + datum(a.bis) + '.');
+     if (a.monat) zeilen.push(paketName(b.paket) + ': ' + euro(a.monat) + ' netto im Monat.');
+     return '<section class="p-karte" aria-labelledby="h-abo"><h2 class="p-h2" id="h-abo">Abo</h2><div class="p-abo"><span class="zustand">' + esc(b.abo_status === 'zahlung_offen' ? 'Zahlung offen' : t) + '</span>' + zeilen.map(function (z) { return '<p class="p-neben">' + esc(z) + '</p>'; }).join('') + '</div>' +
+-      (b.abo_status === 'zahlung_offen' && a.offeneRechnung ? '<p><a class="p-link" href="' + esc(a.offeneRechnung) + '" target="_blank" rel="noopener">Offene Rechnung bezahlen</a></p>' : '') + '</section>';
++      (b.abo_status === 'zahlung_offen' && a.offeneRechnung && ['live', 'pausiert'].indexOf(b.status) < 0 ? '<p><a class="p-link" href="' + esc(a.offeneRechnung) + '" target="_blank" rel="noopener">Offene Rechnung bezahlen</a></p>' : '') + '</section>'; // live und pausiert: Hauptknopf der Seite
+   }
+   function wunschKarte(b) {
+     var w = b.wunsch || {}, k = w.konfigurator || {}, g = w.gestaltung || {}, m = P.merkmale(b.paket) || {}, ergaenzbar = ['bezahlt', 'einrichtung', 'domain', 'freigabe'].indexOf(b.status) >= 0;
+@@ -535,7 +540,7 @@
+     seite('<div class="p-kopfblock"><p class="eyebrow kicker">Bestellung ' + esc(b.nr) + ' · ' + esc(paketName(b.paket)) + '</p><h1 class="p-titel">Ihr <span class="ak">Konfigurator</span>.</h1>' +
+       (nachLive || ende ? '' : statusleiste(b)) + '</div>' + meldung() + hinweis +
+       '<div class="p-raster zwei"><div class="p-spalte">' +
+-      (ende || b.status === 'pausiert' ? '' : '<section class="p-karte hi" aria-labelledby="h-jetzt"><h2 class="p-h2" id="h-jetzt">' + esc(b.status === 'live' ? 'Live' : RB.TITEL[b.status]) + '</h2><p class="p-text">' + esc(h.text) + '</p>' + (h.knopf ? '<div class="p-knoepfe">' + h.knopf + '</div>' : '') + '</section>') +
++      (ende || b.status === 'pausiert' ? '' : '<section class="p-karte hi" aria-labelledby="h-jetzt"><h2 class="p-h2" id="h-jetzt">' + esc(h.titel || (b.status === 'live' ? 'Live' : RB.TITEL[b.status])) + '</h2><p class="p-text">' + esc(h.text) + '</p>' + (h.knopf ? '<div class="p-knoepfe">' + h.knopf + '</div>' : '') + '</section>') +
+       (nachLive ? aboKarte(b) : '') + (b.status === 'pausiert' && h.knopf ? '<div class="p-knoepfe">' + h.knopf + '</div>' : '') + schnipselKarte(b) + nachrichtenKarte(b) + wunschKarte(b) +
+       '</div><div class="p-spalte">' + rueckrufKarte(b) + rechnungenKarte() + firmaKarte() + paketwechselKarte(b) +
+       '<section class="p-karte" aria-labelledby="h-pk"><h2 class="p-h3" id="h-pk">' + esc(paketName(b.paket)) + '</h2><p class="p-neben">Einrichtung ' + euro((b.preise || {}).einrichtung) + ' netto' + ((b.zahlung || {}).status === 'bezahlt' ? ', bezahlt' : '') + ' · monatlich ' + euro((b.abo || {}).monat || (b.preise || {}).monat) + ' netto ab dem Livegang' + (b.zustimmung ? ' · Paketbedingungen vom ' + esc(datum(b.zustimmung.stand)) : '') + '</p>' + (storno ? '<div>' + storno + '</div>' : '') + '</section>' +
+diff --git a/web/assets/portal.js b/web/assets/portal.js
+index a6a8e2a..5df8292 100644
+--- a/web/assets/portal.js
++++ b/web/assets/portal.js
+@@ -1164,7 +1164,15 @@ SCREENS.bprofil = () => {
+    Bedient wird über data-ein, data-ein-feld und data-ein-datei mit eigenen Zuhörern (unten), act() und onInput() bleiben unberührt. */
+ const EIN_UI = { acc: null, entwurf: null, du: null, laeuft: '' };
+ const EIN_FARBNAME = { '#0071e3': 'Blau', '#1f7a3d': 'Grün', '#a85a00': 'Ocker', '#6e3fc2': 'Violett', '#0b7285': 'Petrol', '#b3261e': 'Rot' };
+-const einAuftritt = (a) => (INST ? Object.assign(window.Einladung.auftritt(a || A(), INST.farbe || ''), { logoUrl: INST.logo || '' }) : window.Einladung.auftritt(a || A(), BC().col));
++/* Instanz: Firmenfarbe der Marke wie in der Seitenleiste und auf der Kundenseite (instProfil in app.js); auftritt() kennt nur FARBEN */
++const einAuftritt = (a) => {
++  const E = window.Einladung;
++  if (!INST) return E.auftritt(a || A(), BC().col);
++  const p = E.auftritt(a || A(), INST.farbe || '');
++  p.col = E.hexFarbe(INST.farbe) || p.col;
++  p.logoUrl = INST.logo || '';
++  return p;
++};
+ /* was beim Kunden ankommt: ohne Server weder Logo noch Foto */
+ const einSichtbar = (p) => (Server.online() ? p : Object.assign({}, p, { logo: '', foto: '' }));
+ /* Teil des Kundenlinks: die Anrede immer, im Pilotbetrieb das gekürzte Profil und der Hinweis einer Nachbesserung */
