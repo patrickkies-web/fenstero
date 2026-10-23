@@ -6598,6 +6598,9 @@ function boot() {
   verlaufBinden(); // Zurück-Taste des Browsers bleibt in der App
   render(true);
   if (location.hash === '#fuehrung' && !S.betrieb) tourStart();
+  /* Einstieg von der Website („Jetzt ausmessen“, /app/#ausmessen): gleich der erste Schritt statt der Startseite der App; ein angefangenes
+     Fenster wird fortgesetzt, ein Kundenlink hat Vorrang */
+  else if (location.hash === '#ausmessen' && !S.betrieb) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body); }
   serverStart();
   AI.init().then((ok) => { S.aiOk = ok; if (S.screen === 'fotos') render(); });
   DLP = (async () => { try { DL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { DL = null; } return DL; })();

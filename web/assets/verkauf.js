@@ -214,7 +214,7 @@
     /* Erscheinen beim Scrollen: gemeinsam.js setzt .rev (unsichtbar) und .in (sichtbar); ohne Beobachter sofort sichtbar. Gestaffelt wird
        je Gruppe (Karten einer Reihe, Punkte einer Liste): --rv zählt in der Gruppe, Reveal selbst staffelt nur, was beim Aufbau im Bild ist */
     if (window.Reveal) {
-      var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-zahl, .vk-bewegt, .vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-blatt, .vk-band > *, .vk-vorspann, .vk-paket, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
+      var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-zahl, .vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-blatt, .vk-band > *, .vk-vorspann, .vk-paket, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
       window.Reveal.auf(liste);
       if (!ruhig()) Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-zahlen, .vk-punkte, .vk-inhalt, .vk-pakete, .vk-ablauf, .vk-wissen, .vk-demos'), function (gruppe) {
         var k = 0;
