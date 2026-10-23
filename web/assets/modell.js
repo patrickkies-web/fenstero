@@ -32,6 +32,8 @@
       /* Fachangaben der KI aus den Fotos (ki.fach) */
       kasten: { einbau: 'Einbaukasten innen im Sturz', aufsatz: 'Aufsatzkasten auf dem Fenster', vorbau: 'Vorbaukasten außen', keiner: 'kein Kasten' },
       fassade: { putz: 'Putz', klinker: 'Klinker', wdvs: 'gedämmt (WDVS)', holz: 'Holz', sonstige: 'sonstige' },
+      /* Farbton der Fassade, vom Kunden am Modell gewählt (app.js FASSADE_TON: Putz und WDVS, Klinker, Holz teilen sich die Schlüssel) */
+      fassadeFarbe: { weiss: 'weiß', creme: 'creme', beige: 'beige', hellgrau: 'hellgrau', grau: 'grau', dunkel: 'dunkel', rot: 'rot', rotbunt: 'rotbunt', gelb: 'gelb', braun: 'braun', anthrazit: 'anthrazit', natur: 'natur' },
       bank: { naturstein: 'Naturstein', kunststoff: 'Kunststoff', holz: 'Holz', fliesen: 'Fliesen', aluminium: 'Aluminium', klinker: 'Klinker', faserzement: 'Faserzement', beton: 'Beton', keine: 'keine' },
       bruestung: { bodentief: 'bodentief', niedrig: 'niedrig', normal: 'normal' },
       ul: { nein: 'kein Unterlicht', glas: 'Unterlicht aus Glas, fest', paneel: 'Unterlicht als Paneel, gedämmt' },
@@ -85,6 +87,7 @@
       sfTeile: { gleich: 'wie der Behang', rahmen: 'wie der Fensterrahmen außen', eigen: 'eigene Farben' },
       lamelle: { c80: 'C-Lamelle 80 mm', z90: 'Z-Lamelle 90 mm', flach: 'Flachlamelle' },
       fuehrung: { schiene: 'Führungsschienen', seil: 'Seilführung' },
+      blende: { fassade: 'wie die Fassade (verputzt bzw. verblendet)', alu: 'Alu-Blende in der Farbe von Kasten und Schienen' },
       panzer: { kunststoff: 'Kunststoff', alu: 'Aluminium, ausgeschäumt' },
       schlitz: { ohne: 'ohne Lichtschlitze', mit: 'mit Lichtschlitzen' },
       transp: { licht: 'lichtdurchlässig', mittel: 'blendfrei', dunkel: 'verdunkelnd' },
@@ -241,6 +244,8 @@
       { k: 'sfTeile', s: 2, kap: 'sonne', n: 'Kasten und Schienen', gilt: sonneDa, design: true, text: (w) => (w.sfTeile === 'eigen' ? '' : lab('sfTeile', w.sfTeile)) },
       { k: 'sfK', s: 2, kap: 'sonne', n: 'Farbe Kasten', g: 'sfarbe', gilt: (w) => sonneDa(w) && w.sfTeile === 'eigen' && w.roll !== 'unterputz', design: true },
       { k: 'sfS', s: 2, kap: 'sonne', n: 'Farbe Schienen', g: 'sfarbe', gilt: (w) => sonneDa(w) && w.sfTeile === 'eigen', design: true },
+      /* Aufsatzkasten: die Blende außen vor dem Kasten ist verputzt bzw. verblendet wie die Fassade oder eine Alu-Blende in Kastenfarbe */
+      { k: 'blende', s: 2, kap: 'sonne', n: 'Blende des Aufsatzkastens', gilt: (w) => sonneDa(w) && w.roll === 'aufsatz', design: true },
       { k: 'klBauart', s: 2, kap: 'sonne', n: 'Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
       { k: 'klFarbe', s: 2, kap: 'sonne', n: 'Farbe Klappläden', gilt: (w) => w.sart === 'klappladen' && !istOffen(w, 'sart'), design: true },
       { k: 'lamelle', s: 3, kap: 'sonne', n: 'Lamellen', gilt: (w) => sonneDa(w) && w.sart === 'raffstore', design: true },
@@ -332,6 +337,24 @@
       if (w.art === 'balkon') { const b = w.bt || {}; return ol + fluegelText(S) + kvdText(w) + (w.paneel === 'paneel' ? ' · unten Paneel ' + th(w.paneelH || 400) + ' mm' : '') + ', ' + ov(w, 'schwelle', lab('schwelle', b.schwelle)); }
       return ol + fluegelText(S) + kvdText(w) + (w.ul ? ' · ' + lab('ul', w.ulA) + ' ' + th(w.ulH) + ' mm' : '');
     }
+    /* Aufteilung mehrteiliger Elemente (w.anteile, in der App am Regler): Prozent je Flügel bzw. Feld ohne Seitenteile, Summe 100 */
+    const anteileGueltig = (w, n) => { const a = w && w.anteile; return Array.isArray(a) && a.length === n && n >= 2 && a.every((x) => typeof x === 'number' && x > 0) && Math.abs(a.reduce((s, x) => s + x, 0) - 100) < 0.6; };
+    /* freie Breite für die Flügel (mm): lichte Rahmenbreite ohne Pfosten und Seitenteile, wie w3dCalc in app.js (Blendrahmen 62, Pfosten 72,
+       Stulp 8, schmale Ansicht 52 und 60, Türen ohne Pfosten); 0 ohne Elementbreite */
+    function teilFrei(w) {
+      const d = derive(w), elW = d.elW; if (!elW) return 0;
+      const S = w.sashes || sashesFor(w.teilung), n = S.length, tuer = istTuer(w), schmal = w.schmal === 'schmal' && detailGilt(w, 'schmal');
+      const pf = schmal ? 52 : 62, mul = tuer && w.art !== 'balkon' ? 0 : w.teilung === '2s' ? 8 : schmal ? 60 : 72, innerW = elW - 2 * pf, nSt = S.filter((x) => x.st).length, nFl = n - nSt, frei = innerW - mul * (n - 1);
+      const stB = nSt ? Math.max(150, Math.min(num(w.seitenB) || 400, Math.max(150, (frei - nFl * 300) / nSt))) : 0;
+      return Math.max(0, Math.round(frei - stB * nSt));
+    }
+    /* „40 / 60 % (480 / 720 mm, lichte Breite im Rahmen)“; leer bei gleicher Teilung */
+    function teilungText(w) {
+      const S = w.sashes || sashesFor(w.teilung), n = S.filter((x) => !x.st).length;
+      if (!anteileGueltig(w, n) || w.anteile.every((x) => Math.abs(x - 100 / n) < 0.15)) return '';
+      const frei = teilFrei(w), pz = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
+      return w.anteile.map(pz).join(' / ') + ' %' + (frei ? ' (' + w.anteile.map((x) => th(Math.round(frei * x / 100))).join(' / ') + ' mm, lichte Breite im Rahmen)' : '');
+    }
     /* Sonnenschutz außen in Worten; ältere Aufmaße kennen nur roll */
     function sonne(w) {
       if (istOffen(w, 'sart')) return OFFEN_TEXT;
@@ -345,6 +368,9 @@
     }
     const innen = (w) => (istOffen(w, 'iart') ? OFFEN_TEXT : !w.iart || w.iart === 'keiner' ? 'keiner' : lab('iart', w.iart) + ', ' + nameMitWunsch(w.wunschIf, optName('ifarbe', w.ifarbe, 'weiß')));
     const griffText = (w) => (w.art === 'fest' ? 'ohne Griff' : istOffen(w, 'griff') ? OFFEN_TEXT : istStd(w, 'griff') ? STD_TEXT : (w.art === 'hst' ? (lab('hstGriff', w.griff) || 'Hebegriff') : (lab('griff', w.griff) || 'Standard')) + (w.griff === 'ohne' || w.griff === 'motor' ? '' : ', ' + griffName(w)));
+    /* Fassade, wie der Kunde sie am Modell eingestellt hat (Zahnrad in der App): Art und Farbton; leer, wenn er nichts gewählt hat (dann
+       gilt, was die KI auf dem Foto sieht, fachZeile) */
+    const fassadeText = (w) => (w && w.e_fassade ? (lab('fassade', w.fassade) || 'Putz') + (w.fassadeFarbe && lab('fassadeFarbe', w.fassadeFarbe) ? ', ' + lab('fassadeFarbe', w.fassadeFarbe) : '') : '');
     const montageText = (w) => (istOffen(w, 'montage') ? 'nach Vorschlag des Fensterbauers' : istStd(w, 'montage') ? (w.neu ? 'Wanddurchbruch samt Sturz, sonst ' : '') + STD_TEXT : [w.neu ? (w.durchbruch !== false ? 'Wanddurchbruch samt Sturz' : '') : (w.demontage ? 'Altfenster ausbauen und entsorgen' : ''), w.ralm ? 'RAL-Montage' : '', w.putz ? 'Innenlaibung verputzen' : ''].filter(Boolean).join(', ') || 'nur Lieferung');
     const rcText = (w) => (istOffen(w, 'rc') ? OFFEN_TEXT : lab('rc', w.rc) || 'Basisschutz') + (w.erreichbar === 'ja' ? ' · leicht erreichbar' + (rcAb(w, 'rc2') ? '' : ', Polizei empfiehlt RC2') : w.erreichbar === 'nein' ? ' · nicht leicht erreichbar' : '');
     /* ---------- Pflichtthemen ----------
@@ -630,7 +656,7 @@
       const glasExtras = istOffen(w, 'glasfn') ? OFFEN_TEXT : (w.glasfn || []).map((g) => lab('glasfn', g) + (g === 'sicht' ? ' (' + lab('orn', w.orn) + ')' : '')).join(', ');
       const G = [
         { id: 'fenster', titel: 'Fenster', zeilen: [zeile('Element', (lab('art', art) || 'Fenster') + (w.neu ? ', neue Öffnung' : '')), zeile('Öffnung', opening(w) + (w.richtung === 'aussen' && !tuer && art !== 'fest' ? ', öffnet nach außen' : ''))]
-          .concat(w.form && w.form !== 'rechteck' ? [zeile('Form', lab('form', w.form))] : [], [zeile('Material', istOffen(w, 'material') ? OFFEN_TEXT : lab('material', w.material) || 'Kunststoff')],
+          .concat(teilungText(w) ? [zeile('Aufteilung', teilungText(w))] : [], w.form && w.form !== 'rechteck' ? [zeile('Form', lab('form', w.form))] : [], [zeile('Material', istOffen(w, 'material') ? OFFEN_TEXT : lab('material', w.material) || 'Kunststoff')],
             (w.bars || []).length ? [zeile('Sprossen', ov(w, 'spross', lab('spross', w.spross) + (w.spross === 'auf' ? ' (' + lab('aufseite', w.aufSeite) + ')' : '')) + ', ' + w.breite + ' mm, ' + w.bars.length + ' Stück')] : []) },
         { id: 'farbe', titel: 'Farbe', zeilen: [zeile('außen', farbZeile(w, 'aussen'), { hex: fa[2] }), zeile('innen', w.gleich ? 'wie außen' : farbZeile(w, 'innen'), { hex: fi[2] })] },
         { id: 'glas', titel: 'Glas', zeilen: [zeile('Verglasung', ov(w, 'glas', lab('glas', w.glas) || '3-fach'))].concat(glasExtras ? [zeile('Extras', glasExtras)] : [], z ? [zeile('Förderwert', uwText(z))] : []) },
@@ -639,7 +665,7 @@
         { id: 'insekt', titel: 'Insektenschutz', zeilen: [zeile('Insektenschutz', ov(w, 'insekt', lab('insekt', w.insekt) || 'keiner'))] },
         tuer ? { id: 'bank', titel: 'Schwelle und Boden', zeilen: [zeile('Schwelle', art === 'psk' ? 'mit Schwelle (PSK)' : ov(w, 'schwelle', lab('schwelle', tuerCfg(w).schwelle) || 'flache Schwelle'))].concat(art === 'balkon' ? [zeile('Fußboden', lab('boden', (w.bt || {}).boden || 'bleibt'))] : []) }
           : { id: 'bank', titel: 'Fensterbänke', zeilen: w.form === 'rund' ? [zeile('Fensterbänke', 'keine (rundes Fenster)')] : istStd(w, 'fbi') && istStd(w, 'fba') ? [zeile('Fensterbänke', STD_TEXT)] : [zeile('innen', ov(w, 'fbi', lab('fbi', w.fbi) || 'behalten')), zeile('außen', ov(w, 'fba', lab('fba', w.fba) || 'behalten'))] },
-        { id: 'montage', titel: 'Montage', zeilen: [zeile('Montage', montageText(w))] }
+        { id: 'montage', titel: 'Montage', zeilen: [zeile('Montage', montageText(w))].concat(fassadeText(w) ? [zeile('Fassade', fassadeText(w) + ' (Angabe des Kunden am Modell)')] : []) }
       ];
       /* Detailangaben (AW.DETAIL, nur gewählte und passende) bei ihrer Gruppe; ohne Wahl gilt der Standard des Fensterbauers */
       G.forEach((g) => { g.standard = []; });
@@ -833,8 +859,10 @@
       const gap = schiebe ? 0 : w.teilung === '2s' && art !== 'fest' ? Math.max(lw, sf * 0.12) : mul, sw0 = (iw - gap * (n - 1)) / n;
       /* Seitenteile (x.st) so breit wie gewählt (seitenB, wie w3dCalc in app.js), die Flügel teilen sich den Rest; Pfosten zwischen Seitenteil und Flügel */
       const nSt = S.filter((x) => x.st).length, gapSt = nSt ? Math.max(gap, mul) : gap, frei = iw - gapSt * (n - 1), nFl = n - nSt;
-      const stB = nSt ? Math.max(150 * s, Math.min((num(w.seitenB) || 400) * s, (frei - nFl * 300 * s) / nSt)) : 0, flB = nFl ? (frei - stB * nSt) / nFl : sw0;
-      const SW = S.map((x) => (nSt ? (x.st ? stB : flB) : sw0)), SX = []; SW.reduce((a, b, i) => { SX[i] = a; return a + b + (nSt ? gapSt : gap); }, ix);
+      const stB = nSt ? Math.max(150 * s, Math.min((num(w.seitenB) || 400) * s, (frei - nFl * 300 * s) / nSt)) : 0, freiFl = frei - stB * nSt, flB = nFl ? freiFl / nFl : sw0;
+      /* Aufteilung (w.anteile): die Flügel ohne Seitenteile nach Prozent, sonst gleich */
+      const ant = anteileGueltig(w, nFl) ? w.anteile : null; let kA = 0;
+      const SW = S.map((x) => (x.st ? stB : ant ? freiFl * ant[kA++] / 100 : nSt ? flB : sw0)), SX = []; SW.reduce((a, b, i) => { SX[i] = a; return a + b + (nSt ? gapSt : gap); }, ix);
       /* Paneel unten in der Balkontür (Detailangabe paneel, Höhe paneelH ab Unterkante Flügel) */
       const panH = art === 'balkon' && w.paneel === 'paneel' && detailGilt(w, 'paneel') ? Math.min(h0 * 0.6, Math.max(fs * 1.2, (num(w.paneelH) || 400) * s)) : 0;
       const gPos = detailGilt(w, 'griffPos') ? w.griffPos : '', griff2 = detailGilt(w, 'stulpBed') && w.stulpBed === 'griff' && mitGriff(w); // Stulp: zweiter Griff am Standflügel
@@ -950,8 +978,9 @@
       const spr = detailGilt(w, 'sprFarbe') && SPR_HEX[w.sprFarbe] ? SPR_HEX[w.sprFarbe] : fc === '#f1f0ea' ? '#b9b4a8' : fc;
       const pan = art === 'balkon' && w.paneel === 'paneel' && detailGilt(w, 'paneel') ? Math.min(ih * 0.45, ih * (num(w.paneelH) || 400) / (d.elH || 2100)) : 0;
       let sx = ix;
+      const ant = anteileGueltig(w, n - nSt) ? w.anteile : null; let kA = 0;
       S.forEach((x, i) => {
-        const sw = nSt ? (x.st ? stB : flB) : (iw - gap * (n - 1)) / n, fest = x.t === 'F' || art === 'fest' || !!x.st, g = fest ? 0 : Math.max(1.5, sw * 0.09);
+        const sw = x.st ? stB : ant ? (frei - stB * nSt) * ant[kA++] / 100 : nSt ? flB : (iw - gap * (n - 1)) / n, fest = x.t === 'F' || art === 'fest' || !!x.st, g = fest ? 0 : Math.max(1.5, sw * 0.09);
         const gS = w.ol ? { eckig: true } : formFn(form, ix, by + f, iw, bh - 2 * f);
         if (!fest) o += path(pfad(schnitt(gS, sx, iy, sw, ih)), fc, ink, 0.7);
         const gx = sx + g, gy = iy + g, gw = sw - 2 * g, gh = ih - 2 * g - (pan && !fest ? pan : 0), gG = w.ol ? { eckig: true } : formFn(form, ix + g, by + f + g, iw - 2 * g, bh - 2 * f - 2 * g);
@@ -966,7 +995,7 @@
     }
     return { OPT: OPT, TYP: TYP, lab: lab, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
       DETAIL: DETAIL, detailGilt: detailGilt, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
-      OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, rcText: rcText,
+      OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
       /* Strang S5: Aufmaß beim Betrieb und im PDF */
       sartVon: sartVon, kastenAktiv: kastenAktiv, KLAER_GRUPPEN: KLAER_GRUPPEN, klaerGruppen: klaerGruppen, notizenVon: notizenVon, notizGruppe: notizGruppe, massLuecken: massLuecken, wuensche: wuensche, abzugVon: abzugVon, bestellmass: bestellmass, ZF: ZF, plan: plan, zeichnungSVG: zeichnungSVG, textBreite: textBreite };
