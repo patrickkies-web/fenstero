@@ -15,6 +15,7 @@ import { budget, bremse } from './bremse.js';
 import { eingangAnstossen, loeschenAbFuer } from './eingang.js';
 import { alarmMail } from './ki.js';
 import { instanzZaehlen } from './statistik.js';
+import { KONTO_INSTANZ as DASH, umzugFuer, umzugFehler } from './dashboard.js';
 
 const X = () => globalThis.Abrechnung;
 const EIN = () => globalThis.Einladung;
@@ -58,7 +59,11 @@ async function angemeldet(ctx) {
   if (sperreVon(ctx.row)) throw sperrFehler(ctx.row);
   return n;
 }
-async function mitBetrieb(ctx) { await angemeldet(ctx); if (!ctx.row) throw new ApiFehler('Zu dieser Anmeldung gibt es noch keinen Betrieb. Bitte registrieren.', 404); return ctx.row; }
+async function mitBetrieb(ctx) {
+  const n = await angemeldet(ctx);
+  if (!ctx.row) { const u = await umzugFuer(ctx, n); if (u) throw umzugFehler(u); throw new ApiFehler('Zu dieser Anmeldung gibt es noch keinen Betrieb. Bitte registrieren.', 404); } // Dashboard-Zugang einer Instanz: dort anmelden (E5)
+  return ctx.row;
+}
 const zaehlen = (ctx, s) => { if (ctx.zaehlen) ctx.zaehlen(s); };
 /* Nach Code oder Link: Konto prüfen (Sperre), Zeit anwenden, Anmeldung vermerken (für die Zentrale: letzte Anmeldung, Anzahl) */
 async function anmeldungFertig(ctx, uid) {
@@ -132,7 +137,9 @@ async function aboUebernehmen(sp, zd, row, r) {
 
 export const KONTO = {
   /* --- Anmeldung --- */
+  /* Auf dem Host einer Konfigurator-Instanz (Signature-Dashboard) antwortet je Route functions/api/dashboard.js (KONTO_INSTANZ) */
   'POST /api/konto/anmelden': async (ctx) => {
+    if (ctx.instanz) return DASH.anmelden(ctx);
     if (!erlaubt('otp:' + quelle(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const r = await codeSenden(ctx.k, ctx.sp, ctx.body.mail, zurueck(ctx));
     zaehlen(ctx, 'ereignis:anmeldecode');
@@ -140,20 +147,25 @@ export const KONTO = {
   },
   /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… auf die Startseite, portal.js schickt beides her */
   'POST /api/konto/sitzung': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const b = ctx.body || {}, token = str(b.token, 4000), refresh = str(b.refresh, 400);
     const n = await nutzer(ctx.k, token); if (!n) throw new ApiFehler('Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.', 401);
     const frisch = await anmeldungFertig(ctx, n.id);
+    if (!frisch) { const u = await umzugFuer(ctx, n); if (u) throw umzugFehler(u); }
     return { ok: true, token: token, refresh: refresh, mail: n.mail, konto: frisch ? sicht(frisch) : null };
   },
   'POST /api/konto/bestaetigen': async (ctx) => {
+    if (ctx.instanz) return DASH.bestaetigen(ctx);
     if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const s = await codePruefen(ctx.k, ctx.sp, ctx.body.mail, ctx.body.code);
     const frisch = await anmeldungFertig(ctx, s.nutzer.id);
+    if (!frisch) { const u = await umzugFuer(ctx, s.nutzer); if (u) throw umzugFehler(u); } // Zugang zu einem Dashboard: Anmeldung dort
     return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail, konto: frisch ? sicht(frisch) : null };
   },
-  'POST /api/konto/erneuern': async (ctx) => { const s = await erneuern(ctx.k, ctx.body.refresh); if (!s) throw new ApiFehler('Bitte neu anmelden.', 401); return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail }; },
+  'POST /api/konto/erneuern': async (ctx) => { if (ctx.instanz) return DASH.gesperrt(ctx); const s = await erneuern(ctx.k, ctx.body.refresh); if (!s) throw new ApiFehler('Bitte neu anmelden.', 401); return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail }; },
   'POST /api/konto/registrieren': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     const n = await angemeldet(ctx); if (ctx.row) return { ok: true, konto: sicht(ctx.row), schon: true };
     const b = ctx.body || {}, firma = str(b.firma, 80), ap = str(b.ap, 80), tel = str(b.tel, 40), plz = str(b.plz, 5), col = FARBEN.includes(b.col) ? b.col : FARBEN[0];
     if (firma.length < 2) throw new ApiFehler('Bitte den Namen des Betriebs eingeben.');
@@ -177,8 +189,9 @@ export const KONTO = {
     return { ok: true, konto: sicht(row) };
   },
   /* --- Konto lesen und pflegen --- */
-  'GET /api/konto': async (ctx) => { await mitBetrieb(ctx); return aendern(ctx, () => ({})); },
+  'GET /api/konto': async (ctx) => { if (ctx.instanz) return DASH.lesen(ctx); await mitBetrieb(ctx); return aendern(ctx, () => ({})); },
   'PATCH /api/konto': async (ctx) => {
+    if (ctx.instanz) return DASH.aendern(ctx);
     await mitBetrieb(ctx); const b = ctx.body || {};
     /* Einladungsseite (Strang S4): Logo als verkleinerte Data-URL (der Browser rechnet SVG in ein Pixelbild um), Einstellungen und Farbe
        des Zeichens; alles wird vor dem Speichern geprüft, ein ungültiger Teil ändert nichts */
@@ -198,22 +211,26 @@ export const KONTO = {
   },
   /* --- Projekte --- */
   'POST /api/konto/projekte': async (ctx) => {
+    if (ctx.instanz) return DASH.projektNeu(ctx);
     await mitBetrieb(ctx);
     const out = await aendern(ctx, (a) => { const r = X().neuesProjekt(a, ctx.body || {}); if (!r.ok) throw new ApiFehler(r.msg); return { id: r.l.id }; });
     zaehlen(ctx, 'ereignis:projekt');
     return out;
   },
   'POST /api/konto/projekte/liste': async (ctx) => {
+    if (ctx.instanz) return DASH.projektListe(ctx);
     await mitBetrieb(ctx);
     const out = await aendern(ctx, (a) => { const neu = X().listeProjekte(a, (ctx.body || {}).text, !!(ctx.body || {}).du); if (!neu.length) throw new ApiFehler('Keine gültige Zeile gefunden. Beispiel: Familie Weber, 0171 2345678'); return { n: neu.length }; });
     zaehlen(ctx, new Array(out.n).fill('ereignis:projekt'));
     return out;
   },
   'PATCH /api/konto/projekte/:id': async (ctx) => {
+    if (ctx.instanz) return DASH.projektAendern(ctx);
     await mitBetrieb(ctx);
     return aendern(ctx, (a) => { const l = (a.links || []).find((x) => x.id === ctx.params.id); const r = X().projektAendern(l, ctx.body || {}); if (!r.ok) throw new ApiFehler(r.msg); return { msg: r.msg || '' }; });
   },
   'POST /api/konto/import': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const o = X().unpack((ctx.body || {}).code);
     if (!o) throw new ApiFehler('Code nicht lesbar. Bitte komplett kopieren, er beginnt mit AM1.');
     /* Fotos gibt es nur zum Code eines Kundenlinks (die App lädt sie beim Messen dorthin, fotos.js); ein Code ohne Link nennt keine,
@@ -234,6 +251,7 @@ export const KONTO = {
        der Preis wechselt bei Stripe ohne Ausgleich (der Monat ist bezahlt), die Kündigung über cancel_at_period_end
      - denselben Tarif wieder wählen, solange ein Wechsel vorgemerkt ist: nimmt den Wechsel bzw. die Kündigung zurück */
   'POST /api/konto/plan': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const plan = ['service', 'abo', 'plus'].includes((ctx.body || {}).plan) ? ctx.body.plan : 'service', a0 = ctx.row.daten || {}, alt = X().konto(a0), sub = ctx.row.stripe_subscription;
     const hoch = X().RANG[plan] > X().RANG[alt];
     if (hoch && plan !== 'service') {
@@ -260,6 +278,7 @@ export const KONTO = {
     });
   },
   'GET /api/konto/plan/pruefen': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const session = str(ctx.url.searchParams.get('session'), 120), planA = str(ctx.url.searchParams.get('plan'), 10);
     const r = await ctx.zd.aboLesen(session, planA); if (!r) throw new ApiFehler('Das Abo wurde nicht abgeschlossen.', 402);
     if (!gehoert(r, ctx.row)) throw new ApiFehler('Dieses Abo gehört zu einem anderen Konto.', 403);
@@ -268,12 +287,14 @@ export const KONTO = {
   },
   /* --- Zahlungsart --- */
   'POST /api/konto/zahlungsart': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const customer = await stripeKunde(ctx);
     const kasse = await ctx.zd.zahlungsartKasse({ id: ctx.row.id, customer: customer, zurueck: zurueck(ctx) });
     zaehlen(ctx, 'ereignis:zahlungsart_kasse');
     return { ok: true, url: kasse.url };
   },
   'GET /api/konto/zahlungsart/pruefen': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const session = str(ctx.url.searchParams.get('session'), 120);
     const r = await ctx.zd.zahlungsartLesen(session); if (!r) throw new ApiFehler('Keine Zahlungsart hinterlegt.', 402);
     if (!gehoert(r, ctx.row)) throw new ApiFehler('Diese Zahlungsart gehört zu einem anderen Konto.', 403);

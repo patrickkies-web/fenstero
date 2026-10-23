@@ -290,6 +290,10 @@ export async function ausliefern(request, env, ctx, inst) {
   }
   if (pfad === '/app' || pfad.startsWith('/app/')) return new Response(null, { status: 301, headers: { location: '/' + url.search, 'cache-control': 'public, max-age=3600' } });
   if (pfad === '/config.js') {
+    /* /config.js?betrieb=1 lädt nur die Hülle des Dashboards (Strang E): Sie braucht die Marke auch in Vorbereitung, Pause und nach dem
+       Ende (Export), solange das Paket ein Dashboard hat; die öffentliche App bleibt nach der Status-Matrix zu */
+    const fuerDashboard = url.searchParams.get('betrieb') === '1' && !!inst.m.dashboard;
+    if (fuerDashboard) return new Response(kopfOnly ? null : konfigJs(inst), { status: 200, headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff', 'X-Robots-Tag': SPERRE } });
     if (!R().darf(inst.status, 'seite', o)) return new Response('/* nicht verfügbar */\n', { status: 503, headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
     return new Response(kopfOnly ? null : konfigJs(inst), { status: 200, headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': inst.vorschau ? 'private, no-store' : 'public, max-age=60', 'x-content-type-options': 'nosniff', 'X-Robots-Tag': SPERRE } });
   }
