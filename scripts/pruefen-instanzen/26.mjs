@@ -5,11 +5,13 @@
 //   Bestätigungsmails), Domain-Fehler · 26.3 Domain mit Cloudflare (Zone, Nameserver, störende Einträge, Custom Domain für Domain und www,
 //   Mail-Schutz, Prüfung grün), ohne Token Anleitung, mit zweitem Faktor ohne frischen Code 403 · 26.4 Gestaltung: Bild im Entwurf,
 //   Veröffentlichen erhöht die Fassung, /marke/<v>/logo.png liefert ein Bild · 26.5 Ampel sperrt Live bei jeder fehlenden Bedingung,
-//   mit allem Abo und aktiv · 26.6 Pausieren, Fortsetzen, Beenden; Paketwechsel Essential → Plus → Signature ändert /config.js ·
-//   26.7 Zugänge · 26.8 Testanfrage, Versandliste, erneut senden · 26.9 Aufräumen schont Partner, Zugänge, Entwürfe; Löschschutz ·
-//   26.10 Übersicht und KPI · 26.11 Domain-Ablaufwarnung, Lösen bei „beendet“ · 26.12 Rückrufe und Nachrichten
+//   „Abo neu starten“ vor Live 409, mit allem Abo und aktiv, Suchmaschinen bei Plus frei (Essential nicht), Knopf „Fenster planen“ in der
+//   Live-Mail, E-Mail im Impressum aus wunsch.firma.mailImpressum · 26.6 Pausieren, Fortsetzen, Beenden; Paketwechsel Essential → Plus →
+//   Signature ändert /config.js · 26.7 Zugänge · 26.8 Testanfrage, Versandliste, erneut senden · 26.9 Aufräumen schont Partner, Zugänge,
+//   Entwürfe; Löschschutz · 26.10 Übersicht und KPI · 26.11 Domain-Ablaufwarnung, Lösen bei „beendet“ · 26.12 Rückrufe und Nachrichten
 // Teil B im Browser gegen den Testserver der Instanzen (h): eine Plus-Bestellung von „bezahlt“ bis „live“ in höchstens 20 Klicks,
-//   SVG-Logo aus der Bestellung als PNG, Schriftrollen, Zielgrößen und Telefonbreite der neuen Seiten.
+//   SVG-Logo aus der Bestellung als PNG; 26.6 Paketwechsel mit laufendem Abo (nach oben sofort, nach unten erst zum Periodenende, Uhr und
+//   Tageslauf des Testservers); Schriftrollen, Zielgrößen und Telefonbreite der neuen Seiten.
 import path from 'node:path';
 import fs from 'node:fs';
 import zlib from 'node:zlib';
@@ -40,6 +42,7 @@ async function teilA(h) {
   await imp('web/assets/pakete.js'); await imp('web/assets/instanzregeln.js');
   const worker = (await imp('worker.js')).default, post = await imp('functions/api/post.js'), spM = await imp('functions/api/speicher.js'), umg = await imp('functions/api/umgebung.js');
   const recht = await imp('functions/api/recht.js'), ze = await imp('functions/api/zentrale.js'), cfM = await imp('functions/api/cloudflare.js'), V = await imp('functions/instanz/verwalten.js');
+  const best = await imp('functions/api/bestellung.js'), stM = await imp('functions/api/stripe.js');
   const { cloudflareNachstellen } = await imp('scripts/cloudflare-attrappe.mjs');
   const WEB = path.join(WZ, 'web');
   const ASSETS = { fetch: async (r) => { const u = new URL(typeof r === 'string' ? r : r.url); let p = path.join(WEB, decodeURIComponent(u.pathname)); try { if (fs.statSync(p).isDirectory()) p = path.join(p, 'index.html'); } catch (e) { return new Response('', { status: 404 }); } if (!fs.existsSync(p)) return new Response('', { status: 404 }); return new Response(fs.readFileSync(p), { status: 200, headers: { 'content-type': /\.html$/.test(p) ? 'text/html; charset=utf-8' : 'application/octet-stream' } }); } };
@@ -118,8 +121,8 @@ async function teilA(h) {
     const iid = i1.j.instanz && i1.j.instanz.id, inst = iid ? await sp.instanzHolen(iid) : null, zeileB = inst ? await sp.betriebHolen(inst.betrieb) : null;
     const alleZurBestellung = ((await sp.instanzenAlle()) || []).filter((x) => x.bestellung === b0.id);
     ok(i1.status === 200 && i2.status === 200 && i3.j.schon === true && i2.j.instanz.id === iid && alleZurBestellung.length === 1 && (await sp.bestellungHolen(b0.id)).instanz === iid, '26.2 Instanz anlegen ist idempotent: zwei gleichzeitige Klicks und ein dritter ergeben genau eine Instanz an der Bestellung');
-    ok(inst && inst.paket === 'plus' && inst.status === 'einrichtung' && /^i-[0-9a-f]{32}@instanz\.invalid$/.test(zeileB.mail) && zeileB.daten.konto === 'instanz' && inst.recht.firma === 'Fensterbau Brandt ' + stempel + ' GmbH' && inst.recht.vertretung && inst.entwurf.farbe === '#2f6f4f' && inst.entwurf.titel === 'Fenster von Brandt' && (zeileB.daten.einladung || {}).begruessung === 'Willkommen bei Brandt',
-      '26.2 Instanz übernimmt Paket, Firma, Impressumsangaben, Farbe, Titel und Begrüßung; Betriebszeile mit Platzhalter auf .invalid');
+    ok(inst && inst.paket === 'plus' && inst.status === 'einrichtung' && /^i-[0-9a-f]{32}@instanz\.invalid$/.test(zeileB.mail) && zeileB.daten.konto === 'instanz' && inst.recht.firma === 'Fensterbau Brandt ' + stempel + ' GmbH' && inst.recht.vertretung && inst.recht.mail === MAIL && inst.entwurf.farbe === '#2f6f4f' && inst.entwurf.titel === 'Fenster von Brandt' && (zeileB.daten.einladung || {}).begruessung === 'Willkommen bei Brandt',
+      '26.2 Instanz übernimmt Paket, Firma, Impressumsangaben (E-Mail ohne eigene Angabe: die Anmeldeadresse), Farbe, Titel und Begrüßung; Betriebszeile mit Platzhalter auf .invalid');
     ok(mailsAn(EIN, /bestätigen/i, m0).length === 1, '26.2 genau eine Bestätigungsmail an die Eingangsadresse aus der Bestellung');
     const hFalsch = await z.api('/api/zentrale/instanzen/' + iid + '/host', { host: 'kein host' }), hEezi = await z.api('/api/zentrale/instanzen/' + iid + '/host', { host: 'kunde.eeziframes.com' });
     const demo = await z.api('/api/zentrale/instanzen', { paket: 'essential', name: 'Demo Essential ' + stempel, slug: 'demo26-' + stempel }), did = demo.j.instanz && demo.j.instanz.id;
@@ -171,6 +174,8 @@ async function teilA(h) {
     await z.api('/api/zentrale/bestellungen/' + b0.id + '/status', { nach: 'domain' });
     const sV = await z.api('/api/zentrale/bestellungen/' + b0.id + '/vorschau', {}), bV = sV.j.bestellung;
     ok(sV.status === 200 && bV.status === 'freigabe' && new RegExp('^https://' + HOST.replace(/\./g, '\\.') + '/\\?vorschau=').test(sV.j.link) && bV.vorschau.version === v1 && mailsAn(MAIL, /Freigabe/).length >= 1, '26.5 Vorschau senden: Link auf die Domain (30 Tage), Fassung = veröffentlichte, Status „Zur Freigabe“, Mail an den Partner');
+    const aboNeu = await z.api('/api/zentrale/bestellungen/' + b0.id + '/abo', { aktion: 'neu' }), bNeu = await sp.bestellungHolen(b0.id);
+    ok(aboNeu.status === 409 && /Live-Schalten/.test(aboNeu.j.fehler || '') && !(bNeu.abo || {}).id && !bNeu.abo_status, '26.5 „Abo neu starten“ im Status „Zur Freigabe“: 409, kein Abo (es startet erst beim Live-Schalten)');
     const fehltVon = async (vermerk) => { const r = await z.api('/api/zentrale/bestellungen/' + b0.id + '/live', { vermerk: vermerk || '' }); return { status: r.status, fehlt: r.j.fehlt || [] }; };
     const f1 = await fehltVon('');
     ok(f1.status === 409 && ['eingang', 'test', 'freigabe'].every((x) => f1.fehlt.includes(x)) && !f1.fehlt.includes('domain') && !f1.fehlt.includes('gestaltung'), '26.5 Ampel sperrt: Eingangsadresse unbestätigt, keine Testanfrage, keine Freigabe (' + f1.fehlt.join(', ') + ')');
@@ -189,7 +194,31 @@ async function teilA(h) {
     const fr = await pa.rufe('/api/partner/bestellungen/' + b0.id + '/freigabe', { aktion: 'freigeben', version: v1 });
     const mL = marke(), live = await z.api('/api/zentrale/bestellungen/' + b0.id + '/live', {});
     const bL = await sp.bestellungHolen(b0.id), iL = await sp.instanzHolen(iid), seite = await klient('https://' + HOST).rufe('/', null, { headers: { accept: 'text/html' } }), liveMail = mailsAn(MAIL, /live/i, mL).pop();
-    ok(fr.status === 200 && live.status === 200 && bL.status === 'live' && bL.abo_status === 'aktiv' && bL.abo.id && iL.status === 'aktiv' && seite.status === 200 && liveMail && /Fenster online planen und anfragen/.test(liveMail.html) && live.j.bestellung.schritt.aktion === '', '26.5 mit allem: Live schaltet das Abo (Attrappe), die Instanz ist aktiv, die Seite antwortet, der Partner bekommt den Schnipsel für seine Website');
+    ok(fr.status === 200 && live.status === 200 && bL.status === 'live' && bL.abo_status === 'aktiv' && bL.abo.id && iL.status === 'aktiv' && seite.status === 200 && liveMail && live.j.bestellung.schritt.aktion === '', '26.5 mit allem: Live schaltet das Abo (Attrappe), die Instanz ist aktiv, die Seite antwortet');
+    /* Befund 18: der Schnipsel ist ein Knopf „Fenster planen“ in der Firmenfarbe (44 px, rund, dunkle Schrift), nicht mehr ein Textlink */
+    const sn = best.schnipsel(HOST, { farbe: iL.marke.farbe }), snOhne = best.schnipsel(HOST);
+    ok(iL.marke.farbe === '#2f6f4f' && liveMail && liveMail.html.includes(post.esc(sn)) && /^<a href="https:\/\/[^"]+\/" rel="noopener" style="[^"]*"[^>]*>Fenster planen<\/a>$/.test(sn) && /display:inline-block/.test(sn) && /min-height:44px/.test(sn) && /border-radius:999px/.test(sn) && /background:#2f6f4f;color:#161616/.test(sn) && /font:700 16px/.test(sn) && /text-decoration:none/.test(sn) && /background:#161616;color:#ffffff/.test(snOhne) && !/Fenster online planen/.test(liveMail.html),
+      '26.5 Live-Mail: der Schnipsel ist ein Knopf „Fenster planen“ mit Inline-Stil (44 px, rund, Firmenfarbe mit dunkler Schrift; ohne Farbe dunkel mit weißer Schrift)');
+    /* Befund 3: Plus verspricht „Startseite in Suchmaschinen“, also schaltet der erste Livegang den Schalter; / ohne noindex */
+    ok(iL.indexierung === true && !seite.headers.get('x-robots-tag') && bL.verlauf.some((v) => v.intern && /Suchmaschinen freigegeben/.test(v.text)), '26.5 Erster Livegang bei Plus gibt die Startseite für Suchmaschinen frei: instanzen.indexierung true, / ohne X-Robots-Tag, interner Vermerk');
+
+    /* ---------- 26.5 Essential: Impressum-E-Mail aus der Bestellung (Befund 17), Suchmaschinen bleiben gesperrt (Befund 3), Schnipsel ohne Farbe ---------- */
+    const MAIL_E = 'esche26-' + stempel + '@fenster26.example', EHOST = 'esche-' + stempel + '.app', IMP_E = 'impressum-' + stempel + '@esche26.example';
+    const offenB = [], ctxB = () => ({ k: umg.konfig(ENV), env: ENV, sp: sp, zd: stM.zahlungsdienst(umg.konfig(ENV)), url: new URL('https://eeziframes.com'), request: new Request('https://eeziframes.com'), waitUntil: (p) => offenB.push(Promise.resolve(p).catch(() => false)), zaehlen: null });
+    const { b: bE0 } = await bestellen(MAIL_E, 'essential', 'Fensterbau Esche ' + stempel + ' GmbH', { name: 'Esche Fenster ' + stempel, domains: [EHOST], eingang: ['anfragen-' + stempel + '@esche26.example'] });
+    await z.api('/api/zentrale/bestellungen/' + bE0.id + '/status', { nach: 'einrichtung' });
+    await sp.bestellungAendern(bE0.id, (x) => { x.wunsch = Object.assign({}, x.wunsch, { firma: Object.assign({}, (x.wunsch || {}).firma, { mailImpressum: 'Impressum-' + stempel + '@esche26.example' }) }); });
+    const iEr = await z.api('/api/zentrale/bestellungen/' + bE0.id + '/instanz', {}), iE = iEr.j.instanz && iEr.j.instanz.id, instE = iE ? await sp.instanzHolen(iE) : null;
+    await z.api('/api/zentrale/instanzen/' + iE + '/host', { host: EHOST });
+    await sp.bestellungAendern(bE0.id, (x) => { x.status = 'freigabe'; x.vorschau = { version: 1, freigabe: { version: 1 } }; });
+    const mEs = marke(), liveE = await best.uebergang(ctxB(), bE0.id, 'live', { wer: 'inhaber' }).then((x) => x, (e) => e);
+    await Promise.all(offenB);
+    const iEL = await sp.instanzHolen(iE), seiteE = await klient('https://' + EHOST).rufe('/', null, { headers: { accept: 'text/html' } }), liveMailE = mailsAn(MAIL_E, /live/i, mEs).pop();
+    ok(iEr.status === 200 && instE && instE.recht.mail === IMP_E && instE.paket === 'essential', '26.5 Instanz aus einer Bestellung mit wunsch.firma.mailImpressum: im Impressum steht diese Adresse (klein geschrieben), nicht die Anmeldeadresse');
+    ok(liveE && liveE.status === 'live' && iEL.status === 'aktiv' && iEL.indexierung === false && seiteE.status === 200 && /noindex/.test(seiteE.headers.get('x-robots-tag') || '') && liveMailE && liveMailE.html.includes(post.esc(best.schnipsel(EHOST))) && /background:#161616/.test(best.schnipsel(EHOST)),
+      '26.5 Essential live: Suchmaschinen bleiben gesperrt (indexierung false, / mit noindex); der Schnipsel in der Live-Mail ist ohne Firmenfarbe dunkel');
+    const endeE = await z.api('/api/zentrale/instanzen/' + iE + '/status', { aktion: 'beenden', grund: 'Prüfung Essential beendet' });
+    ok(endeE.status === 200 && (await sp.bestellungHolen(bE0.id)).status === 'beendet', '26.5 Essential-Bestellung wieder beendet (Abo und Instanz beendet)');
 
     /* ---------- 26.6 Pause, Fortsetzen, Beenden; Paketwechsel ---------- */
     const cfg = async (host) => { const r = await klient('https://' + host).rufe('/config.js'); const m = /window\.KONFIG = (\{.*\});/.exec(r.text); return { status: r.status, k: m ? JSON.parse(m[1]) : null }; };
@@ -366,6 +395,28 @@ async function teilB(h) {
       '26.4 Browser: SVG-Logo aus der Bestellung als PNG mit Symbolen, Foto 16:9, Farbe aus der Bestellung, Vorschau im Telefonrahmen; nach dem Veröffentlichen liefert /marke/<v>/logo.png ein PNG und /config.js die neue Fassung');
     ok(klicks <= 20 && stand.status === 'aktiv', '26.4 Plus-Einrichtung im Browser von „bezahlt“ bis „live“ in ' + klicks + ' Klicks (höchstens 20)');
     h.sauber(page, '26 Browser: Zentrale ohne Konsolenfehler, CSP-Verstöße oder fremde Anfragen');
+
+    /* ---------- 26.6 Paketwechsel mit laufendem Abo (Befund 10): nach oben sofort, nach unten erst zum Periodenende ---------- */
+    const { CRON_TAEGLICH } = await import(pathToFileURL(path.join(h.WURZEL, 'functions/api/router.js')).href);
+    const Z = await srv.zentrale(), zb = (pfad, body) => Z.api(pfad, { body: body || {} });
+    const konfigVon = async () => { const r = await srv.api(HOST, '/config.js'); const m = /window\.KONFIG = (\{.*\});/.exec(r.text); return m ? JSON.parse(m[1]).instanz : null; };
+    const dashboard = async () => ({ seite: (await srv.api(HOST, '/betrieb/')).status, api: (await srv.api(HOST, '/api/konto')).status });
+    const zeileB = async () => ((await srv.attrappe()).bestellungen || []).find((x) => x.id === b0.id) || {}, zeileI = async () => ((await srv.attrappe()).instanzen || []).find((x) => x.id === iid) || {};
+    const letzteMail = async (re) => { for (let i = 0; i < 25; i++) { const m = (await srv.post()).filter((x) => x.an === MAIL && re.test(x.betreff || '')).pop(); if (m) return m; await new Promise((r) => setTimeout(r, 200)); } return {}; };
+    const hoch = await zb('/api/zentrale/bestellungen/' + b0.id + '/paket', { paket: 'signature', differenz: true }), dHoch = await dashboard(), kHoch = await konfigVon(), mailHoch = await letzteMail(/Ihr Paket: EEZI Signature/);
+    const runter = await zb('/api/zentrale/bestellungen/' + b0.id + '/paket', { paket: 'plus' }), bR = await zeileB(), iR = await zeileI(), dRunter = await dashboard(), kRunter = await konfigVon(), mailRunter = await letzteMail(/Ihr Paket: EEZI Essential Plus/);
+    const wR = (bR.abo || {}).wechsel || null, rb = (runter.json || {}).bestellung || {};
+    ok(hoch.status === 200 && dHoch.seite === 200 && dHoch.api !== 404 && kHoch && kHoch.m.dashboard === true && /ab jetzt im Paket/.test(mailHoch.html || '') && !(hoch.json.wechsel || {}).ab, '26.6 Plus → Signature mit laufendem Abo: sofort, Dashboard offen (/betrieb/ 200), /config.js mit Dashboard, Mail „ab jetzt“');
+    ok(runter.status === 200 && runter.json.wechsel && runter.json.wechsel.ab && iR.paket === 'signature' && kRunter && kRunter.m.dashboard === true && dRunter.seite === 200 && dRunter.api !== 404 && wR && wR.paket === 'plus' && wR.von === 'signature' && wR.ab === (bR.abo || {}).bis && Date.parse(wR.ab) > Date.now() + 20 * 864e5 && bR.abo.paket === 'plus' && rb.paket === 'signature' && rb.abo && rb.abo.wechsel && rb.abo.wechsel.paket === 'plus' && (bR.verlauf || []).some((v) => /wirkt ab/.test(v.text || '')) && /bleibt Ihr Konfigurator im Paket/.test(mailRunter.html || ''),
+      '26.6 Signature → Plus mit laufendem Abo: nur vorgemerkt (abo.wechsel { paket, von, ab = Periodenende }, abo.paket = Ziel); Instanz, /config.js und Dashboard bleiben Signature, Zentrale zeigt das Paket der Instanz, Verlauf „wirkt ab“, Mail „bis … bleibt“' + (runter.status !== 200 ? ' (' + runter.status + ' ' + JSON.stringify(runter.json).slice(0, 200) + ')' : ''));
+    const nochmal = await zb('/api/zentrale/bestellungen/' + b0.id + '/paket', { paket: 'plus' });
+    await srv.uhr(31); const lauf = await srv.geplant(CRON_TAEGLICH);
+    const bN = await zeileB(), iN = await zeileI(), dNach = await dashboard(), kNach = await konfigVon(), mailNach = await letzteMail(/Ihr Paket: EEZI Essential Plus/);
+    await srv.uhr(null);
+    ok(nochmal.status === 200 && (nochmal.json.wechsel || {}).gleich === true && iN.paket === 'plus' && !(bN.abo || {}).wechsel && (bN.abo || {}).paket === 'plus' && dNach.seite === 404 && dNach.api === 404 && kNach && kNach.m.dashboard === false && (bN.verlauf || []).some((v) => /wirksam/.test(v.text || '')) && /wie angekündigt/.test(mailNach.html || '') && bN.status === 'live',
+      '26.6 Uhr hinter das Periodenende, Tageslauf: Instanz Plus, Dashboard zu (404), /config.js ohne Dashboard, Vormerkung weg, Verlauf „wirksam“, kurze Mail; derselbe Wechsel noch einmal war ein Leerlauf' + (iN.paket !== 'plus' ? ' (' + JSON.stringify({ lauf: lauf, paket: iN.paket, abo: bN.abo }).slice(0, 300) + ')' : ''));
+    const wieder = await zb('/api/zentrale/bestellungen/' + b0.id + '/paket', { paket: 'signature' }), iW = await zeileI(), bW = await zeileB(), dWieder = await dashboard();
+    ok(wieder.status === 200 && !(wieder.json.wechsel || {}).ab && iW.paket === 'signature' && !(bW.abo || {}).wechsel && (bW.abo || {}).paket === 'signature' && dWieder.seite === 200, '26.6 Danach wieder nach oben: sofort Signature, Dashboard offen, keine Vormerkung');
 
     /* Gestaltung der neuen Seiten: Schriftrollen, Ziele ab 44 px, kein Querscrollen (wie Abschnitt 13) */
     const messen = (s) => s.evaluate(() => {

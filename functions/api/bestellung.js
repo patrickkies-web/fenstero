@@ -12,7 +12,8 @@
      aboStarten(ctx, id, { neu })                  Monatsabo beim Live-Schalten (idempotent: ein Abo je Bestellung)
      paketWechseln(ctx, id, paket, { differenz })  einzige Stelle, die instanzen.paket ändert, zusammen mit dem Preis des Abos
      aboSteuern(ctx, id, aktion, o)                kuendigen | zuruecknehmen | beenden | aussetzen | fortsetzen | kulanz | neu
-     bestellungenLauf(k, sp, zd, env)              täglich: Kulanz → Pause → Ende → Löschung, Erinnerungen, Abgleich mit Stripe
+     bestellungenLauf(k, sp, zd, env)              täglich: Kulanz → Pause → Ende → Löschung, vorgemerkter Paketwechsel, Erinnerungen,
+                                                   Abgleich mit Stripe, zuletzt partnerAufraeumen (Aufbewahrungsfrist nachrichtenJahre)
      erstatten(ctx, id, { cent, grund })           Einrichtung ganz oder teilweise erstatten
    Dazu: paketVon(b) (Paket einer Bestellung vor der Instanz), istPaketEreignis(ctx, ev) (auch Rückbuchungen und Abo-Rechnungen ohne
    Metadaten), dateiAntwort(k, b, did) (Upload sicher ausliefern, auch für die Zentrale), eingangBestaetigen, partnerMail, inhaberMail.
@@ -30,7 +31,9 @@ import { einrichtungBrutto } from './stripe.js';
 import { ablage } from './fotos.js';
 import { protokoll } from './zentrale.js';
 import { basis, HAUPTADRESSE } from '../seo.js';
-import { instanzStatus, instanzDatenLoeschen, paketSetzen } from '../instanz/verwalten.js';
+import { instanzStatus, instanzDatenLoeschen, instanzAendern, paketSetzen } from '../instanz/verwalten.js';
+import { anmeldungLoeschen } from './auth.js';
+import { entfernt } from './eigene.js';
 
 const P = () => globalThis.Pakete;
 const R = () => globalThis.Instanzregeln;
@@ -95,25 +98,36 @@ const kontaktZeilen = (p) => {
 };
 async function partnerVon(ctx, b) { try { return await ctx.sp.partnerHolen(b.partner); } catch (e) { return null; } }
 
-/* Texte je Statuswechsel an den Fensteranbieter (bezahlt hat eine eigene Mail, siehe einrichtungUebernehmen) */
-function statusText(ctx, b, nach, text, host) {
+/* Texte je Statuswechsel an den Fensteranbieter (bezahlt hat eine eigene Mail, siehe einrichtungUebernehmen); farbe: Firmenfarbe der
+   Instanz für den Knopf „Fenster planen“ */
+function statusText(ctx, b, nach, text, host, farbe) {
   const name = P().PAKETE[paketVon(b)] ? P().PAKETE[paketVon(b)].name : '';
   switch (nach) {
     case 'einrichtung': return ['Wir richten Ihren Konfigurator ein', absatz('wir haben mit der Einrichtung Ihres Konfigurators (' + esc(name) + ') begonnen. Wir melden uns zur abgesprochenen Zeit, um die Domain festzulegen.')];
     case 'domain': return ['Ihre Domain ist gesichert', absatz('die Domain für Ihren Konfigurator ist gesichert' + (host ? ': <b>' + esc(host) + '</b>' : '') + '. Als Nächstes gestalten wir ihn und schicken Ihnen eine Vorschau.')];
     case 'freigabe': return ['Ihr Konfigurator ist zur Freigabe bereit', absatz('Ihr Konfigurator ist fertig eingerichtet. Bitte sehen Sie ihn sich in der Vorschau an und geben Sie ihn in Ihrem Kundenkonto frei, oder sagen Sie uns, was wir ändern sollen.') + (b.vorschau && b.vorschau.link ? knopf(b.vorschau.link, 'Vorschau ansehen') : '')];
-    case 'live': return ['Ihr Konfigurator ist live', absatz('Ihr Konfigurator ist ab jetzt für Ihre Kunden erreichbar' + (host ? ' unter <b>https://' + esc(host) + '/</b>' : '') + '. Ab heute läuft Ihr Abo (' + esc(name) + ').') + (host ? absatz('So verlinken Sie ihn auf Ihrer Website:') + '<pre style="white-space:pre-wrap;font-size:13px;background:#f5f5f7;padding:12px;border-radius:8px">' + esc(schnipsel(host)) + '</pre>' : '')];
+    case 'live': return ['Ihr Konfigurator ist live', absatz('Ihr Konfigurator ist ab jetzt für Ihre Kunden erreichbar' + (host ? ' unter <b>https://' + esc(host) + '/</b>' : '') + '. Ab heute läuft Ihr Abo (' + esc(name) + ').') + (host ? absatz('So kommt der Knopf „Fenster planen“ auf Ihre Website (einfach in den HTML-Code einfügen):') + '<pre style="white-space:pre-wrap;font-size:13px;background:#f5f5f7;padding:12px;border-radius:8px">' + esc(schnipsel(host, { farbe: farbe })) + '</pre>' : '')];
     case 'pausiert': return ['Ihr Konfigurator ist pausiert', absatz('Ihr Konfigurator ist pausiert' + (b.abo && b.abo.grund === 'zahlung' ? ', weil die Zahlung für Ihr Abo noch offen ist' : '') + '. Ihre Kunden sehen in dieser Zeit nur Ihre Kontaktdaten.') + (b.abo && b.abo.offeneRechnung ? knopf(b.abo.offeneRechnung, 'Offene Rechnung bezahlen') : '')];
     case 'beendet': return ['Ihr Konfigurator ist beendet', absatz('Ihr Konfigurator ist beendet. Die Daten Ihrer Kunden löschen wir nach ' + R().FRISTEN.loeschenNachEndeTage + ' Tagen; bis dahin können Sie sie über uns exportieren.')];
     case 'storniert': return ['Ihre Bestellung ist storniert', absatz('Ihre Bestellung ' + esc(b.nr) + ' ist storniert.' + (b.zahlung && (b.zahlung.status === 'erstattet' || b.zahlung.erstattet_cent) ? ' Die Einrichtungsgebühr erstatten wir auf Ihr Zahlungsmittel; das dauert meist 5 bis 10 Tage.' : ''))];
     default: return null;
   }
 }
-/* Verlinkungs-Schnipsel für die Website des Betriebs */
-export const schnipsel = (host) => '<a href="https://' + host + '/" rel="noopener">Fenster online planen und anfragen</a>';
+/* Schnipsel für die Website des Betriebs: ein Knopf „Fenster planen“ mit Inline-Stil (Befund 18), damit er auf fremden Seiten nicht wie
+   Fließtext aussieht. o.farbe: Firmenfarbe #rrggbb (laut Bauplan hell genug für dunkle Schrift, Kontrast ≥ 4,5:1 gegen #161616);
+   ohne Farbe dunkler Knopf mit weißer Schrift. Zielhöhe 44 px wie im Styleguide. */
+export const schnipsel = (host, o) => {
+  const farbe = o && /^#[0-9a-f]{6}$/i.test(String(o.farbe || '')) ? String(o.farbe).toLowerCase() : '';
+  return '<a href="https://' + host + '/" rel="noopener" style="display:inline-block;min-height:44px;line-height:44px;padding:0 22px;border-radius:999px;background:' + (farbe || '#161616') + ';color:' + (farbe ? '#161616' : '#ffffff') + ';font:700 16px system-ui,sans-serif;text-decoration:none">Fenster planen</a>';
+};
 async function hauptHost(ctx, b) {
   if (!b.instanz || !ctx.sp.hostsVon) return '';
   try { const h = (await ctx.sp.hostsVon(b.instanz)) || []; const x = h.find((y) => y.haupt) || h[0]; return x ? x.host : ''; } catch (e) { return ''; }
+}
+/* Firmenfarbe der veröffentlichten Marke (für den Schnipsel in der Live-Mail) */
+async function markenFarbe(ctx, b) {
+  if (!b.instanz) return '';
+  try { const i = await ctx.sp.instanzHolen(b.instanz); return (i && i.marke && i.marke.farbe) || ''; } catch (e) { return ''; }
 }
 
 /* ===================== Kleines PDF (Rückfall für die Anlagen der Eingangsbestätigung) =====================
@@ -224,13 +238,27 @@ async function instanzFolgen(ctx, b, grund) {
     return false;
   }
 }
+/* Erster Livegang: Startseite für Suchmaschinen freigeben, wenn das Paket es vorsieht (Befund 3: Plus und Signature versprechen
+   „Startseite in Suchmaschinen“). Nur wenn der Schalter noch aus ist; beim Fortsetzen nach einer Pause nicht erneut (der Inhaber kann
+   ihn bewusst abgeschaltet haben). Essential bleibt gesperrt (Merkmal „nein“). */
+async function suchmaschinenFreigeben(ctx, b) {
+  if (!b.instanz) return false;
+  const i = await ctx.sp.instanzHolen(b.instanz), m = i ? P().merkmale(i.paket, i.abweichung) : null;
+  if (!i || !m || m.indexierung !== 'start' || i.indexierung) return false;
+  const r = await instanzAendern(ctx, i.id, (z) => { if (z.indexierung) return false; z.indexierung = true; });
+  if (r === false) return false;
+  await ctx.sp.bestellungAendern(b.id, (z) => { (z.verlauf = z.verlauf || []).push(eintrag(ctx, { intern: true, von: 'system', text: 'Suchmaschinen freigegeben (Startseite)' })); }).catch(() => null);
+  return true;
+}
 export async function uebergang(ctx, id, nach, o) {
   o = o || {};
   const wer = o.wer || 'inhaber', text = String(o.text || '').replace(/\s+/g, ' ').trim().slice(0, 1000);
   if (RB().STATUS.indexOf(nach) < 0) throw new ApiFehler('Unbekannter Status.', 400);
   if (nach === 'live') { const b0 = await holen(ctx, id); if (b0.status === 'freigabe') { liveVorbedingungen(ctx, b0, text); await aboStarten(ctx, id); } else if (!(b0.abo && b0.abo.id)) throw new ApiFehler('Das Abo läuft nicht; bitte zuerst neu starten.', 409, { fehlt: 'abo' }); }
-  const b = await nacheinander('b:' + id, async () => {
+  let von = '';
+  let b = await nacheinander('b:' + id, async () => {
     const b0 = await holen(ctx, id);
+    von = b0.status;
     const u = RB().uebergang(b0.status, nach, wer);
     if (!u) throw new ApiFehler('Von „' + titel(b0.status) + '“ geht es nicht nach „' + titel(nach) + '“.', 409, { von: b0.status, nach: nach });
     if (u.vermerk && text.length < 10) throw new ApiFehler('Bitte einen Vermerk mit mindestens 10 Zeichen angeben.', 400, { vermerk: true });
@@ -248,7 +276,15 @@ export async function uebergang(ctx, id, nach, o) {
     return neu;
   });
   await instanzFolgen(ctx, b, text);
-  const p = await partnerVon(ctx, b), host = await hauptHost(ctx, b), m = o.stumm ? null : statusText(ctx, b, nach, text, host);
+  if (nach === 'live' && von === 'freigabe') await suchmaschinenFreigeben(ctx, b).catch((e) => { console.log('Bestellung: Suchmaschinen nicht freigegeben', String(e && e.message ? e.message : e).slice(0, 120)); return false; });
+  /* Verworfener Entwurf (nie bezahlt): die Dateien gehen sofort (Befund 9); bezahlte Stornos behalten sie bis loeschenNachEndeTage
+     nach dem Storno (Tageslauf), falls es noch Rückfragen zur Erstattung gibt */
+  if (nach === 'storniert' && !['bezahlt', 'erstattet', 'laeuft'].includes((b.zahlung || {}).status) && (b.dateien || []).length) {
+    await dateienLoeschen(ctx.k, b);
+    const b2 = await ctx.sp.bestellungAendern(b.id, (z) => { z.dateien = []; (z.verlauf = z.verlauf || []).push(eintrag(ctx, { art: 'geloescht', intern: true, von: 'system', text: 'Dateien des verworfenen Entwurfs gelöscht' })); }).catch(() => null);
+    if (b2) b = b2;
+  }
+  const p = await partnerVon(ctx, b), host = await hauptHost(ctx, b), m = o.stumm ? null : statusText(ctx, b, nach, text, host, nach === 'live' ? await markenFarbe(ctx, b) : '');
   if (m && p) warte(ctx, partnerMail(ctx, p, m[0], absatz('Guten Tag' + (p.daten && p.daten.ap ? ' ' + esc(p.daten.ap) : '') + ',') + m[1] + knopf(kontoLink(ctx, b), 'Zum Kundenkonto'), { idempotenz: 'bestellung-' + b.id + '-' + nach + '-' + (b.verlauf || []).length }));
   await prot(ctx, b, 'Status ' + titel(nach) + (text ? ': ' + text : ''), { von: wer });
   return b;
@@ -391,6 +427,8 @@ async function aboBezahlt(ctx, b, obj) {
       if (p) warte(ctx, partnerMail(ctx, p, 'Zahlung eingegangen: Ihr Konfigurator ist wieder online', absatz('vielen Dank, die offene Zahlung ist eingegangen. Ihr Konfigurator ist wieder für Ihre Kunden erreichbar.') + knopf(kontoLink(ctx, neu), 'Zum Kundenkonto'), { idempotenz: 'bestellung-' + b.id + '-wieder-' + String(obj.id || '').slice(-14) }));
     }
   });
+  /* die Rechnung der neuen Periode: ein vorgemerkter Wechsel nach unten wird jetzt wirksam (außerhalb der Reihe, siehe wechselAnwenden) */
+  await wechselAnwenden(ctx, await holen(ctx, b.id), 'Rechnung bezahlt').catch(() => false);
   return true;
 }
 /* Abbuchung fehlgeschlagen: 14 Tage Kulanz ab dem ersten Fehlschlag (der Tageslauf pausiert danach), Mails an beide */
@@ -482,8 +520,13 @@ export async function aboStarten(ctx, id, o) {
 
 /* Paket wechseln: die einzige Stelle, die instanzen.paket ändert, zusammen mit dem Preis des Abos (Bauplan §2.1, E2). id: Bestellung
    oder Instanz. Nach oben sofort, Abo anteilig; mit o.differenz die Differenz der Einrichtung als Posten auf die nächste Rechnung (§5.3 F2).
-   Nach unten ebenfalls sofort, das Abo ohne Ausgleich (der laufende Monat ist bezahlt). Vor der Instanz merkt sich die Bestellung das
-   neue Paket (abo.paket, paketVon), solange sie offen ist, auch als bestelltes Paket mit neuem Preisstand. */
+   Nach unten mit laufendem Abo und Instanz erst zum Periodenende (Befund 10, Bauplan D.8): Der laufende Monat ist zum alten Preis
+   bezahlt, also behält die Instanz bis abo.bis das alte Paket (Signature-Dashboard bleibt offen); bei Stripe wechselt der Preis sofort
+   ohne Ausgleich, die nächste Rechnung kommt zum kleineren Preis. Die Bestellung merkt sich abo.wechsel = { paket, von, ab } und
+   abo.paket = Ziel; wirksam macht es der Tageslauf oder invoice.paid (wechselAnwenden). Ein Wechsel nach oben wirkt sofort und
+   ersetzt eine Vormerkung; zurück zum laufenden Paket hebt sie nur auf. Fehlt abo.bis, wirkt auch der Wechsel nach unten sofort.
+   Vor der Instanz merkt sich die Bestellung das neue Paket (abo.paket, paketVon), solange sie offen ist, auch als bestelltes Paket mit
+   neuem Preisstand. */
 export async function paketWechseln(ctx, id, ziel, o) {
   o = o || {};
   if (!P().gueltig(ziel)) throw new ApiFehler('Unbekanntes Paket.', 400);
@@ -497,22 +540,63 @@ export async function paketWechseln(ctx, id, ziel, o) {
   return nacheinander('b:' + b.id, async () => {
     b = await holen(ctx, b.id);
     if (['storniert', 'beendet'].includes(b.status)) throw new ApiFehler('Diese Bestellung ist ' + titel(b.status).toLowerCase() + '.', 409);
-    const alt = await aktuellesPaket(ctx, b);
-    if (alt === ziel) return { ok: true, paket: ziel, gleich: true };
+    const alt = await aktuellesPaket(ctx, b), a0 = b.abo || {}, anstehend = a0.wechsel && P().gueltig(a0.wechsel.paket) ? a0.wechsel : null, N = (p) => P().PAKETE[p].name;
+    if (alt === ziel && !anstehend) return { ok: true, paket: ziel, gleich: true };
+    if (anstehend && anstehend.paket === ziel) return { ok: true, paket: ziel, gleich: true, wechsel: anstehend, bestellung: b };
     const pa = P().preis(alt), pn = P().preis(ziel), oben = pn.monat > pa.monat, unbezahlt = b.status === 'offen' && !['bezahlt', 'laeuft'].includes((b.zahlung || {}).status);
-    if (b.instanz) await paketSetzen(ctx, b.instanz, ziel, 'Bestellung ' + (b.nr || b.id));
+    const aboLaeuft = !!(a0.id && b.abo_status !== 'beendet'), bisDa = !!a0.bis && Date.parse(a0.bis) > jetzt(ctx);
+    const aufheben = !!anstehend && ziel === alt;                                        // zurück zum laufenden Paket: nur die Vormerkung weg
+    const spaeter = !aufheben && !oben && aboLaeuft && !!b.instanz && bisDa;             // nach unten: erst zum Periodenende
+    const ab = spaeter ? a0.bis : null;
+    if (b.instanz && !spaeter && !aufheben) await paketSetzen(ctx, b.instanz, ziel, 'Bestellung ' + (b.nr || b.id));
     let posten = false;
-    if (b.abo && b.abo.id && b.abo_status !== 'beendet') await ctx.zd.paketAboAendern(b.abo.id, { paket: ziel, oben: oben });
+    if (aboLaeuft) {
+      /* nach oben über eine Vormerkung hinweg: zuerst zurück auf den bezahlten Preis (ohne Ausgleich), dann anteilig nach oben, sonst
+         rechnete Stripe die Gutschrift für den Rest des Monats vom kleineren, nie bezahlten Preis */
+      if (anstehend && oben && !aufheben) await ctx.zd.paketAboAendern(a0.id, { paket: alt, oben: false });
+      await ctx.zd.paketAboAendern(a0.id, { paket: ziel, oben: oben });
+    }
     const p = await ctx.sp.partnerHolen(b.partner);
-    if (oben && o.differenz && !unbezahlt && pn.einrichtung > pa.einrichtung && p && p.stripe_customer) { await ctx.zd.paketPosten({ customer: p.stripe_customer, cent: Math.round((pn.einrichtung - pa.einrichtung) * 100), text: 'Paketwechsel ' + P().PAKETE[alt].name + ' → ' + P().PAKETE[ziel].name + ': Differenz der Einrichtung', bestellung: b.id, schluessel: alt + '-' + ziel + '-' + ((b.verlauf || []).length) }); posten = true; }
+    if (oben && o.differenz && !unbezahlt && pn.einrichtung > pa.einrichtung && p && p.stripe_customer) { await ctx.zd.paketPosten({ customer: p.stripe_customer, cent: Math.round((pn.einrichtung - pa.einrichtung) * 100), text: 'Paketwechsel ' + N(alt) + ' → ' + N(ziel) + ': Differenz der Einrichtung', bestellung: b.id, schluessel: alt + '-' + ziel + '-' + ((b.verlauf || []).length) }); posten = true; }
+    const verlaufText = aufheben ? 'Paketwechsel nach ' + N(anstehend.paket) + ' aufgehoben, bleibt ' + N(ziel)
+      : spaeter ? 'Paketwechsel ' + N(alt) + ' → ' + N(ziel) + ' wirkt ab ' + datumText(ab) + ' (Periodenende; bis dahin bezahlt)'
+      : 'Paket gewechselt: ' + N(alt) + ' → ' + N(ziel) + (anstehend ? ', der vorgemerkte Wechsel nach ' + N(anstehend.paket) + ' entfällt' : '') + (posten ? ', Differenz der Einrichtung auf der nächsten Rechnung' : '') + (!oben && aboLaeuft && b.instanz && !bisDa ? ' (sofort, Periodenende unbekannt)' : '');
     const neu = await ctx.sp.bestellungAendern(b.id, (z) => {
       if (unbezahlt) { z.paket_bestellt = ziel; z.preise = P().preisStand(ziel, ctx.k.preise.mwst); }
-      z.abo = Object.assign({}, z.abo, { paket: ziel, monat: pn.monat });
-      (z.verlauf = z.verlauf || []).push(eintrag(ctx, { von: o.wer || 'inhaber', text: 'Paket gewechselt: ' + P().PAKETE[alt].name + ' → ' + P().PAKETE[ziel].name + (posten ? ', Differenz der Einrichtung auf der nächsten Rechnung' : '') }));
+      const za = Object.assign({}, z.abo, { paket: ziel, monat: pn.monat });
+      if (spaeter) za.wechsel = { paket: ziel, von: alt, ab: ab }; else delete za.wechsel;
+      z.abo = za;
+      (z.verlauf = z.verlauf || []).push(eintrag(ctx, { von: o.wer || 'inhaber', text: verlaufText }));
     });
-    if (p && !unbezahlt) warte(ctx, partnerMail(ctx, p, 'Ihr Paket: ' + P().PAKETE[ziel].name, absatz('Ihr Konfigurator läuft ab jetzt im Paket <b>' + esc(P().PAKETE[ziel].name) + '</b> (' + esc(euroText(pn.monat)) + ' netto im Monat' + (b.abo && b.abo.id ? ', ab der nächsten Abrechnung' : ', ab dem Livegang') + ').' + (posten ? ' Die Differenz der Einrichtungsgebühr (' + esc(euroText(pn.einrichtung - pa.einrichtung)) + ' netto) steht auf Ihrer nächsten Rechnung.' : '')) + knopf(kontoLink(ctx, neu), 'Zum Kundenkonto')));
-    await prot(ctx, neu, 'Paket gewechselt: ' + alt + ' → ' + ziel);
-    return { ok: true, paket: ziel, oben: oben, posten: posten, bestellung: neu };
+    if (p && !unbezahlt) {
+      const preis = esc(euroText(pn.monat)) + ' netto im Monat';
+      const satz = aufheben ? 'Ihr Konfigurator bleibt im Paket <b>' + esc(N(ziel)) + '</b> (' + preis + '); der angekündigte Wechsel nach ' + esc(N(anstehend.paket)) + ' entfällt.'
+        : spaeter ? 'Bis zum <b>' + esc(datumText(ab)) + '</b> bleibt Ihr Konfigurator im Paket <b>' + esc(N(alt)) + '</b> (dieser Monat ist bezahlt), ab dann läuft er im Paket <b>' + esc(N(ziel)) + '</b> (' + preis + '). Ihre nächste Rechnung kommt schon zum neuen Preis.'
+        : 'Ihr Konfigurator läuft ab jetzt im Paket <b>' + esc(N(ziel)) + '</b> (' + preis + (aboLaeuft ? ', ab der nächsten Abrechnung' : ', ab dem Livegang') + ').' + (posten ? ' Die Differenz der Einrichtungsgebühr (' + esc(euroText(pn.einrichtung - pa.einrichtung)) + ' netto) steht auf Ihrer nächsten Rechnung.' : '');
+      warte(ctx, partnerMail(ctx, p, 'Ihr Paket: ' + N(ziel), absatz(satz) + knopf(kontoLink(ctx, neu), 'Zum Kundenkonto')));
+    }
+    await prot(ctx, neu, aufheben ? 'Paketwechsel aufgehoben: bleibt ' + ziel : 'Paket gewechselt: ' + alt + ' → ' + ziel + (spaeter ? ' (wirkt ab ' + String(ab).slice(0, 10) + ')' : ''));
+    return { ok: true, paket: ziel, oben: oben, posten: posten, wechsel: spaeter ? neu.abo.wechsel : null, aufgehoben: aufheben, bestellung: neu };
+  });
+}
+/* Vorgemerkten Wechsel nach unten wirksam machen, sobald das Periodenende erreicht ist (Tageslauf, invoice.paid). Läuft außerhalb der
+   Reihe der Bestellung aufrufen (nacheinander), sonst warteten beide aufeinander. */
+async function wechselAnwenden(ctx, b, quelle) {
+  const w = b && b.abo && b.abo.wechsel;
+  if (!w || !P().gueltig(w.paket) || !w.ab || Date.parse(w.ab) > jetzt(ctx)) return false;
+  return nacheinander('b:' + b.id, async () => {
+    const b1 = await holen(ctx, b.id), w1 = (b1.abo || {}).wechsel;
+    if (!w1 || !P().gueltig(w1.paket) || ['storniert', 'beendet'].includes(b1.status)) return false;
+    const von = P().gueltig(w1.von) ? w1.von : '', name = P().PAKETE[w1.paket].name;
+    if (b1.instanz) await paketSetzen(ctx, b1.instanz, w1.paket, 'Paketwechsel zum Periodenende, Bestellung ' + (b1.nr || b1.id));
+    const neu = await ctx.sp.bestellungAendern(b1.id, (z) => {
+      const a = Object.assign({}, z.abo, { paket: w1.paket, monat: P().preis(w1.paket).monat }); delete a.wechsel; z.abo = a;
+      (z.verlauf = z.verlauf || []).push(eintrag(ctx, { von: 'system', text: 'Paketwechsel ' + (von ? P().PAKETE[von].name + ' → ' : '') + name + ' wirksam' + (quelle ? ' (' + quelle + ')' : '') }));
+    });
+    const p = await partnerVon(ctx, neu);
+    if (p) warte(ctx, partnerMail(ctx, p, 'Ihr Paket: ' + name, absatz('wie angekündigt läuft Ihr Konfigurator ab jetzt im Paket <b>' + esc(name) + '</b> (' + esc(euroText(P().preis(w1.paket).monat)) + ' netto im Monat).') + knopf(kontoLink(ctx, neu), 'Zum Kundenkonto'), { idempotenz: 'bestellung-' + b1.id + '-wechsel-' + String(w1.ab).slice(0, 10) }));
+    await prot(ctx, neu, 'Paketwechsel wirksam: ' + (von || '?') + ' → ' + w1.paket);
+    return true;
   });
 }
 
@@ -520,8 +604,9 @@ export async function paketWechseln(ctx, id, ziel, o) {
 export async function aboSteuern(ctx, id, aktion, o) {
   o = o || {};
   const wer = o.wer || 'inhaber';
-  if (aktion === 'neu') return aboStarten(ctx, id, { neu: true });
   const b = await holen(ctx, id), a = b.abo || {};
+  /* „Abo neu starten“ nur, wenn es schon einmal lief (live oder pausiert); vor dem Livegang startet es allein über uebergang(…, 'live') (Befund 22) */
+  if (aktion === 'neu') { if (!['live', 'pausiert'].includes(b.status)) throw new ApiFehler('Das Abo startet beim Live-Schalten.', 409, { status: b.status }); return aboStarten(ctx, id, { neu: true }); }
   if (aktion === 'kulanz') {
     const tage = Math.max(1, Math.min(30, Math.round(Number(o.tage) || 0)));
     const neu = await nacheinander('b:' + id, () => ctx.sp.bestellungAendern(id, (z) => { const ab = Object.assign({}, z.abo || {}), von = Math.max(jetzt(ctx), Date.parse(ab.kulanz_bis || '') || 0); ab.kulanz_bis = new Date(von + tage * TAG).toISOString(); z.abo = ab; (z.verlauf = z.verlauf || []).push(eintrag(ctx, { von: wer, text: 'Kulanz verlängert bis ' + datumText(ab.kulanz_bis) })); }));
@@ -591,17 +676,18 @@ export async function dateienLoeschen(k, b) {
 }
 
 /* ===================== Täglicher Lauf (router.js, CRON_TAEGLICH) =====================
-   Kulanz vorbei → pausiert · Pause länger als pauseMaxTage → Abo beenden, beendet · beendet + loeschenNachEndeTage → Instanzdaten und
-   Dateien löschen · Freigabe-Erinnerungen nach 3 und 7 Tagen · unbezahlte Entwürfe: nach 3 Tagen einmal erinnern, nach 30 Tagen ohne
-   Änderung löschen · Abgleich mit Stripe: offene Kassen der letzten 3 Tage, laufende Abos einmal je Woche. Höchstens 100 Bestellungen
-   mit Handlungsbedarf je Lauf, Fehler je Bestellung einzeln. */
+   Kulanz vorbei → pausiert · Pause länger als pauseMaxTage → Abo beenden, beendet · beendet (und storniert) + loeschenNachEndeTage →
+   Instanzdaten und Dateien löschen · vorgemerkter Paketwechsel zum Periodenende · Freigabe-Erinnerungen nach 3 und 7 Tagen · unbezahlte
+   Entwürfe: nach 3 Tagen einmal erinnern, nach 30 Tagen ohne Änderung löschen · Abgleich mit Stripe: offene Kassen der letzten 3 Tage,
+   laufende Abos einmal je Woche · zuletzt Partner nach der Aufbewahrungsfrist (partnerAufraeumen). Höchstens 100 Bestellungen mit
+   Handlungsbedarf je Lauf, Fehler je Bestellung einzeln. */
 export async function bestellungenLauf(k, sp, zd, env) {
   if (!sp || !sp.bestellungenListe) return { ok: true, ohneDaten: true };
   const alle = await sp.bestellungenListe({});
   if (alle === undefined) return { ok: true, ohneTabelle: true };
   const offen = [], ctx = { k: k, env: env || {}, sp: sp, zd: zd, url: null, request: null, waitUntil: (p) => offen.push(Promise.resolve(p).catch(() => false)), zaehlen: null };
   const t = jetzt(ctx), F = R().FRISTEN, alt = (iso, tage) => !!iso && Date.parse(iso) + tage * TAG < t;
-  const n = { pausiert: 0, beendet: 0, geloescht: 0, erinnert: 0, entwuerfe: 0, abgleich: 0, fehler: 0 };
+  const n = { pausiert: 0, beendet: 0, geloescht: 0, wechsel: 0, erinnert: 0, entwuerfe: 0, abgleich: 0, partner: 0, fehler: 0 };
   let bearbeitet = 0;
   for (const b of alle) {
     if (bearbeitet >= 100) break;
@@ -613,14 +699,19 @@ export async function bestellungenLauf(k, sp, zd, env) {
         if (a.id && b.abo_status !== 'beendet' && zd) { await zd.paketAboBeenden(a.id); await sp.bestellungAendern(b.id, (z) => { z.abo_status = 'beendet'; z.abo = Object.assign({}, z.abo, { ende: new Date(t).toISOString() }); }); }
         await uebergang(ctx, b.id, 'beendet', { wer: 'system', text: 'Pause länger als ' + F.pauseMaxTage + ' Tage' }); n.beendet++; continue;
       }
-      if ((b.status === 'beendet' || (b.status === 'storniert' && b.instanz)) && alt(b.ende_am, F.loeschenNachEndeTage) && !(b.verlauf || []).some((x) => x.art === 'geloescht')) {
+      /* beendet: Instanzdaten und Dateien; storniert: mit Instanz ebenso, ohne Instanz die Dateien (Befund 9; verworfene Entwürfe
+         verlieren sie schon beim Verwerfen, siehe uebergang) */
+      if ((b.status === 'beendet' || (b.status === 'storniert' && (b.instanz || (b.dateien || []).length))) && alt(b.ende_am, F.loeschenNachEndeTage) && !(b.verlauf || []).some((x) => x.art === 'geloescht')) {
         bearbeitet++;
         let instanzWeg = !b.instanz;
         if (b.instanz) { try { await instanzDatenLoeschen(ctx, b.instanz); instanzWeg = true; } catch (e) { instanzWeg = false; } }
         await dateienLoeschen(k, b);
-        await sp.bestellungAendern(b.id, (z) => { z.dateien = []; (z.verlauf = z.verlauf || []).push(eintrag(ctx, instanzWeg ? { art: 'geloescht', von: 'system', text: 'Instanzdaten und Dateien gelöscht (' + F.loeschenNachEndeTage + ' Tage nach Ende)' } : { art: 'hinweis', intern: true, von: 'system', text: 'Dateien gelöscht; Instanzdaten noch löschen (verwalten.instanzDatenLoeschen)' })); });
+        const text = b.instanz ? 'Instanzdaten und Dateien gelöscht (' + F.loeschenNachEndeTage + ' Tage nach Ende)' : 'Dateien gelöscht (' + F.loeschenNachEndeTage + ' Tage nach ' + (b.status === 'storniert' ? 'Storno' : 'Ende') + ')';
+        await sp.bestellungAendern(b.id, (z) => { z.dateien = []; (z.verlauf = z.verlauf || []).push(eintrag(ctx, instanzWeg ? { art: 'geloescht', von: 'system', text: text } : { art: 'hinweis', intern: true, von: 'system', text: 'Dateien gelöscht; Instanzdaten noch löschen (verwalten.instanzDatenLoeschen)' })); });
         n.geloescht++; continue;
       }
+      /* vorgemerkter Wechsel nach unten (Befund 10): am Periodenende bekommt die Instanz das kleinere Paket */
+      if (['live', 'pausiert'].includes(b.status) && a.wechsel && a.wechsel.ab && Date.parse(a.wechsel.ab) <= t) { bearbeitet++; if (await wechselAnwenden(ctx, b, 'Tageslauf')) n.wechsel++; continue; }
       if (b.status === 'freigabe' && v.gesendet && !(v.freigabe && v.freigabe.version === v.version)) {
         const stufe = F.freigabeErinnerung.filter((d) => alt(v.gesendet, d) && !(v.erinnert || []).includes(d)).pop();
         if (stufe) {
@@ -653,12 +744,60 @@ export async function bestellungenLauf(k, sp, zd, env) {
         if (l === null || (l && l.status === 'canceled')) await aboBeendet(ctx, b, 'abgleich');
         else if (l) {
           await sp.bestellungAendern(b.id, (z) => { z.abo = Object.assign({}, z.abo, { geprueft: new Date(t).toISOString(), bis: l.bis || (z.abo || {}).bis || null }); });
-          if (b.instanz) { const inst = await sp.instanzHolen(b.instanz).catch(() => null); if (inst && P().gueltig(inst.paket) && a.paket && inst.paket !== a.paket) { await zd.paketAboAendern(a.id, { paket: inst.paket, oben: false }); await sp.bestellungAendern(b.id, (z) => { z.abo = Object.assign({}, z.abo, { paket: inst.paket, monat: P().preis(inst.paket).monat }); (z.verlauf = z.verlauf || []).push(eintrag(ctx, { art: 'hinweis', intern: true, von: 'system', text: 'Abo-Preis an das Paket der Instanz angeglichen' })); }); } }
+          /* Paket der Instanz und Abo-Preis gehören zusammen; ein vorgemerkter Wechsel (abo.wechsel) ist dabei kein Widerspruch */
+          if (b.instanz && !a.wechsel) { const inst = await sp.instanzHolen(b.instanz).catch(() => null); if (inst && P().gueltig(inst.paket) && a.paket && inst.paket !== a.paket) { await zd.paketAboAendern(a.id, { paket: inst.paket, oben: false }); await sp.bestellungAendern(b.id, (z) => { z.abo = Object.assign({}, z.abo, { paket: inst.paket, monat: P().preis(inst.paket).monat }); (z.verlauf = z.verlauf || []).push(eintrag(ctx, { art: 'hinweis', intern: true, von: 'system', text: 'Abo-Preis an das Paket der Instanz angeglichen' })); }); } }
         }
         n.abgleich++; continue;
       }
     } catch (e) { n.fehler++; console.log('Bestellungslauf: Fehler bei', b.nr, String(e && e.message ? e.message : e).slice(0, 160)); }
   }
   await Promise.all(offen);
+  const pr = await partnerAufraeumen(k, sp, env, { bestellungen: alle }).catch((e) => { console.log('Bestellungslauf: Partner nicht aufgeräumt', String(e && e.message ? e.message : e).slice(0, 160)); return { geloescht: 0, fehler: 1 }; });
+  n.partner = pr.geloescht; n.fehler += pr.fehler || 0;
   return Object.assign({ ok: !n.fehler }, n);
+}
+
+/* ===================== Partner nach der Aufbewahrungsfrist löschen (Befund 21) =====================
+   Datenschutzerklärung: Angaben zu Vertrag und Bestellung und die Nachrichten bleiben bis zum Ende des 3. Jahres nach dem Vertragsende
+   (FRISTEN.nachrichtenJahre). Fällig ist ein Partner, dessen Bestellungen alle beendet oder storniert sind und deren letztes Ende vor dem
+   Jahresende liegt, das nachrichtenJahre Jahre nach dem Jahr des Endes vergangen ist (Ende 2026-03-05 → ab 2030-01-01); ein Partner ohne
+   jede Bestellung nach derselben Frist ab dem Anlegen. Gelöscht werden Nachrichten, Bestellungen (Dateien sind dann längst weg, sonst
+   jetzt), die Partnerzeile und die Supabase-Anmeldung, sofern an ihr kein Betrieb, kein lebendes eigenes Aufmaß (eigene.js) und kein
+   Dashboard-Zugang hängt. Rechnungsbelege liegen bei Stripe (belegeJahre). Höchstens 20 je Lauf, je Partner ein Protokolleintrag. */
+const jahrBerlin = (ms) => Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric' }).format(new Date(ms)));
+/* Frist vorbei: jetzt ≥ 1. Januar des Jahres (Jahr des Zeitpunkts + jahre + 1), deutsche Zeit */
+export const aufbewahrungVorbei = (iso, jahre, t) => { const ms = Date.parse(iso || ''); return !Number.isNaN(ms) && t >= Date.parse((jahrBerlin(ms) + jahre + 1) + '-01-01T00:00:00+01:00'); };
+const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
+async function anmeldungGebraucht(sp, uid) {
+  if (await sp.betriebNachAuth(uid)) return true;
+  if (sp.eigeneVonNutzer && ((await sp.eigeneVonNutzer(uid)) || []).some(lebt)) return true;
+  return ((await sp.instanzenAlle()) || []).some((i) => (i.zugang || []).some((z) => z && z.uid === uid));
+}
+export async function partnerAufraeumen(k, sp, env, o) {
+  o = o || {};
+  if (!sp || !sp.partnerAlle || !sp.partnerLoeschen) return { geloescht: 0, fehler: 0 };
+  const partner = await sp.partnerAlle(), alle = o.bestellungen || (await sp.bestellungenListe({}));
+  if (!Array.isArray(partner) || !Array.isArray(alle)) return { geloescht: 0, fehler: 0 };
+  const t = jetztAus(env), jahre = R().FRISTEN.nachrichtenJahre, je = new Map();
+  alle.forEach((b) => { if (!je.has(b.partner)) je.set(b.partner, []); je.get(b.partner).push(b); });
+  let geloescht = 0, fehler = 0;
+  for (const p of partner) {
+    if (geloescht >= 20) break;
+    const bs = je.get(p.id) || [];
+    const faellig = bs.length ? bs.every((b) => ['beendet', 'storniert'].includes(b.status) && aufbewahrungVorbei(b.ende_am, jahre, t)) : aufbewahrungVorbei(p.created_at, jahre, t);
+    if (!faellig) continue;
+    try {
+      for (const b of bs) { if ((b.dateien || []).length) await dateienLoeschen(k, b); await sp.bestellungLoeschen(b.id); }
+      if (sp.nachrichtenLoeschen) await sp.nachrichtenLoeschen(p.id);
+      await sp.partnerLoeschen(p.id);
+      let anmeldung = 'keine';
+      if (p.auth_user) {
+        if (await anmeldungGebraucht(sp, p.auth_user)) anmeldung = 'bleibt (Betrieb, Aufmaß oder Zugang)';
+        else { const r = await anmeldungLoeschen(k, p.auth_user).catch(() => ({ ok: false })); anmeldung = r.ok ? 'gelöscht' : 'nicht gelöscht'; if (!r.ok) fehler++; }
+      }
+      await protokoll(sp, 'loeschen', null, 'Partner ' + (p.firma || p.id) + ' nach Ablauf der Aufbewahrung (' + jahre + ' Jahre nach dem Vertragsende) gelöscht: ' + bs.length + ' Bestellungen, Nachrichten, Anmeldung ' + anmeldung, { partner: p.id, bestellungen: bs.map((b) => b.nr) });
+      geloescht++;
+    } catch (e) { fehler++; console.log('Bestellungslauf: Partner nicht gelöscht', p.id, String(e && e.message ? e.message : e).slice(0, 160)); }
+  }
+  return { geloescht: geloescht, fehler: fehler };
 }
