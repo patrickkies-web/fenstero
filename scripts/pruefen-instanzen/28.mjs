@@ -347,6 +347,11 @@ async function browserTeil(h, o) {
     ok(!seiten.length, '28.15 ' + art + ': jeder Bildschirm und jedes Blatt ohne eeziframes, Abrechnung, Tarif, Zahlungsart, €, Tour, kostenlos' + (seiten.length ? ' – ' + seiten.join('; ') : ''));
     const akz = await page.evaluate(() => ({ css: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim().toLowerCase(), k: String((window.KONFIG.instanz || {}).akzent || '').toLowerCase() }));
     ok(akz.k && akz.css === akz.k, '28.15 ' + art + ': --accent ist die Farbe der Instanz (' + akz.css + ')');
+    /* Initiale in der Firmenfarbe: Seitenleiste, Karte unter „Betrieb“, „Ihre Initiale“ und die Telefonvorschau zeigen, was der Kunde sieht */
+    const iniFarben = async (scr) => { await page.evaluate((s) => window.go(s), scr); await page.waitForSelector('.scr[data-screen="' + scr + '"]'); return page.evaluate(() => Array.from(document.querySelectorAll('.ein-zeichen.ini')).map((e) => (e.closest('#ein-vor') ? 'vorschau' : e.closest('.ein-logo-vor') ? 'initiale' : e.closest('.ein-b-karte') ? 'karte' : 'leiste') + ' ' + getComputedStyle(e).backgroundColor)); };
+    const fHex = String((await page.evaluate(() => (window.KONFIG.instanz || {}).farbe)) || ''), fRgb = /^#[0-9a-f]{6}$/i.test(fHex) ? 'rgb(' + [1, 3, 5].map((i) => parseInt(fHex.slice(i, i + 2), 16)).join(', ') + ')' : '?';
+    const ini = (await iniFarben('bprofil')).concat(await iniFarben('einladung'));
+    ok(['vorschau', 'karte', 'initiale'].every((w) => ini.some((x) => x.startsWith(w + ' '))) && ini.every((x) => x.endsWith(' ' + fRgb)), '28.15 ' + art + ': Initiale in der Firmenfarbe ' + fHex + ' auch in Karte und Vorschau der Einladungsseite (' + ini.join(' · ') + ')');
     const breit = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
     ok(breit, '28.15 ' + art + ': kein waagrechter Scroll');
     if (art === 'desktop') {

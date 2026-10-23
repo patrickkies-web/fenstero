@@ -1164,7 +1164,15 @@ SCREENS.bprofil = () => {
    Bedient wird über data-ein, data-ein-feld und data-ein-datei mit eigenen Zuhörern (unten), act() und onInput() bleiben unberührt. */
 const EIN_UI = { acc: null, entwurf: null, du: null, laeuft: '' };
 const EIN_FARBNAME = { '#0071e3': 'Blau', '#1f7a3d': 'Grün', '#a85a00': 'Ocker', '#6e3fc2': 'Violett', '#0b7285': 'Petrol', '#b3261e': 'Rot' };
-const einAuftritt = (a) => (INST ? Object.assign(window.Einladung.auftritt(a || A(), INST.farbe || ''), { logoUrl: INST.logo || '' }) : window.Einladung.auftritt(a || A(), BC().col));
+/* Instanz: Firmenfarbe der Marke wie in der Seitenleiste und auf der Kundenseite (instProfil in app.js); auftritt() kennt nur FARBEN */
+const einAuftritt = (a) => {
+  const E = window.Einladung;
+  if (!INST) return E.auftritt(a || A(), BC().col);
+  const p = E.auftritt(a || A(), INST.farbe || '');
+  p.col = E.hexFarbe(INST.farbe) || p.col;
+  p.logoUrl = INST.logo || '';
+  return p;
+};
 /* was beim Kunden ankommt: ohne Server weder Logo noch Foto */
 const einSichtbar = (p) => (Server.online() ? p : Object.assign({}, p, { logo: '', foto: '' }));
 /* Teil des Kundenlinks: die Anrede immer, im Pilotbetrieb das gekürzte Profil und der Hinweis einer Nachbesserung */

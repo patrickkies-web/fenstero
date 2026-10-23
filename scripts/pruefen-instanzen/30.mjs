@@ -478,6 +478,9 @@ export default async (h) => {
       const abo = await sK.evaluate(() => (document.querySelector('.p-abo') || {}).innerText || '');
       await bild(sK, '04-kundenkonto-zahlung-offen-plus-1280', { ganz: true });
       ok(/Zahlung offen/.test(abo) && /Kulanz|bis/.test(abo), 'plus: Kundenkonto zeigt „Zahlung offen“ mit Frist');
+      /* D.10: die offene Rechnung ist die nächste Aktion, als einziger Cream-Knopf; „Konfigurator öffnen“ ist ein Ring-Knopf */
+      const hk = await sK.evaluate(() => { const k = document.querySelector('.p-karte.hi'); return { h: ((k && k.querySelector('h2')) || {}).innerText || '', t: ((k && k.querySelector('.p-text')) || {}).innerText || '', cream: Array.from(document.querySelectorAll('.btn.primary')).map((b) => b.innerText.trim()), ring: Array.from((k && k.querySelectorAll('.btn.ghost')) || []).map((b) => b.innerText.trim()) }; });
+      ok(/Zahlung offen/.test(hk.h) && /bis \d{1,2}\. \S+ \d{4}, sonst pausieren wir/.test(hk.t) && hk.cream.length === 1 && hk.cream[0] === 'Offene Rechnung bezahlen' && hk.ring.includes('Konfigurator öffnen'), 'plus: Hauptkarte bei offener Zahlung mit Frist, Hauptknopf „Offene Rechnung bezahlen“, „Konfigurator öffnen“ als Ring-Knopf (' + hk.h + ' · ' + hk.cream.join(', ') + ' · ' + hk.ring.join(', ') + ')');
       h.sauber(sK, 'plus: Kundenkonto mit offener Zahlung ohne Fehler');
     }
     await X.uhr(13); await X.geplant(CRON_TAEGLICH);
