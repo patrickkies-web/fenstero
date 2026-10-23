@@ -2759,7 +2759,7 @@ function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' 
   /* nach dem Senden im Link: keine Maße mehr, die stehen im Aufmaßblatt */
   if (hide) { const anderswo = !!(S.sent && S.sent.anderswo); return '<div class="wincard sent"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (anderswo ? 'Auf diesem Gerät' : PILOT ? 'Abgeschlossen' : 'Übermittelt') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + '</span><span class="me">' + (anderswo ? 'Maßgeblich ist das Aufmaß, das angekommen ist' : 'Maße und Angaben stehen im Aufmaßblatt') + '</span></span></div>'; }
   /* Karte in der Übersicht: Nummer der Position am Bild, Name, Zeile mit Art, Geschoss, Stückzahl, Fotos und Notiz, darunter der Stand
-     als Punkt mit Text (vollständig, Maße offen, offene Wünsche mit Namen); Maße stehen nie in Listen */
+     als Punkt mit Text (vollständig, Maße offen, Zahl der offenen Wünsche); Maße und Wünsche stehen nie in Listen, auch nicht ihre Namen */
   const st = fensterStand(x), di = [lab('art', x.art || 'fenster'), x.etage ? lab('etage', x.etage) : '', x.anzahl > 1 ? x.anzahl + ' Stück' : '', x.fotos ? x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '', Object.keys(x.notizen || {}).length ? 'mit Notiz' : '', fest ? 'fest' : ''].filter(Boolean).join(' · ');
   return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic"><b class="pos" aria-label="Position ' + (i + 1) + '">' + (i + 1) + '</b>' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + esc(di) + '</span><span class="st ' + st.k + '"><i aria-hidden="true"></i>' + esc(st.text) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
 /* Startbild der App: Foto ohne Rahmen, das weich in den Grund ausläuft (app.css .hero-foto), mit den drei Schritten als Chips;
@@ -4904,11 +4904,11 @@ function fensterStatus(x) {
   const d = derive(x), n = AW.offenListe(AW.nachTiefe(x, S.proj)).length;
   return !d.complete || n ? (d.complete ? 'Maße vollständig' : 'Maße offen') + (n ? ', ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') : 'Vollständig';
 }
-/* Stand eines Fensters für die Übersicht: vollständig, Maße offen oder offene Wünsche (mit den ersten beiden Namen) */
+/* Stand eines Fensters für die Übersicht: vollständig, Maße offen oder die Zahl der offenen Wünsche; welche es sind, steht nie in Listen (Entscheidung des Inhabers) */
 function fensterStand(x) {
   const d = derive(x), offen = AW.offenListe(AW.nachTiefe(x, S.proj)), n = offen.length;
-  if (!d.complete) return { k: 'masse', text: 'Maße offen' + (n ? ', ' + n + (n === 1 ? ' Wunsch' : ' Wünsche') : '') };
-  if (n) return { k: 'wunsch', text: (n === 1 ? '1 Wunsch offen: ' : n + ' Wünsche offen: ') + offen.slice(0, 2).map((k) => AW.offenName(x, k)).join(', ') + (n > 2 ? ', …' : '') };
+  if (!d.complete) return { k: 'masse', text: 'Maße offen' + (n ? ' · ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') };
+  if (n) return { k: 'wunsch', text: n === 1 ? '1 Wunsch offen' : n + ' Wünsche offen' };
   return { k: 'voll', text: 'Vollständig' };
 }
 /* Kopf der Übersicht: „Deine Fenster.“ mit dem Stand in einem Satz und einem Balken (vollständige Fenster von allen), rechts „+ Fenster“;
@@ -6600,11 +6600,17 @@ function boot() {
   if (location.hash === '#fuehrung' && !S.betrieb) tourStart();
   /* Einstieg von der Website („Jetzt ausmessen“, /app/#ausmessen): gleich der erste Schritt statt der Startseite der App; ein angefangenes
      Fenster wird fortgesetzt, ein Kundenlink hat Vorrang */
-  else if (location.hash === '#ausmessen' && !S.betrieb) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body); }
+  else if (location.hash === '#ausmessen' && !S.betrieb) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } if (KS) { EINSTIEG_NEU = true; setTimeout(einstiegNach, 8000); } else einstiegNeu(); }
   serverStart();
   AI.init().then((ok) => { S.aiOk = ok; if (S.screen === 'fotos') render(); });
   DLP = (async () => { try { DL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { DL = null; } return DL; })();
 }
+/* Einstieg #ausmessen: ein angefangenes Fenster wird fortgesetzt, sonst beginnt ein neues. Mit gemerkter Anmeldung (KS) erst, nachdem
+   serverStart das Konto geprüft und kontoStart das zuletzt bearbeitete Aufmaß geladen hat (das setzt S.win zurück und würde ein gerade
+   begonnenes Fenster verwerfen); kommt der Server nicht, spätestens nach 8 s */
+let EINSTIEG_NEU = false;
+function einstiegNeu() { EINSTIEG_NEU = false; if (S.betrieb || S.tour) return; if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body); }
+const einstiegNach = () => { if (EINSTIEG_NEU) einstiegNeu(); };
 /* ---------- eeziframes im Netz: Pilotphase ohne Server ----------
    Solange kein Backend läuft, zeigt die App nur, was wirklich passiert:
    „Gesendet“ erst mit dem Code, keine Scheinzahlung, die Datei ist kostenlos.
@@ -6805,9 +6811,10 @@ async function serverStart() {
   const q = new URLSearchParams(location.search), bezahlt = q.get('bezahlt'), t = LINK_TOKEN; LINK_TOKEN = null;
   /* Anmeldung (Link aus der E-Mail oder gemerkte Anmeldung), auch nach einer Zahlung */
   const konto = async (gerendert) => {
-    if (kontoBereit()) { if (t) return kontoAusLink(t); if (KS) return kontoStart(); }
+    if (kontoBereit()) { if (t) return Promise.resolve(kontoAusLink(t)).then(einstiegNach, einstiegNach); if (KS) return kontoStart().then(einstiegNach, einstiegNach); }
     else if (t) toast('Die Anmeldung ist hier gerade nicht möglich. Bitte versuche es gleich noch einmal.');
     if (!gerendert) render();
+    einstiegNach(); // Einstieg #ausmessen mit gemerkter Anmeldung, aber ohne Konten auf dem Server
   };
   if (bezahlt) { history.replaceState(null, '', location.pathname + location.hash); if (!S.betrieb) { await kaufPruefen(bezahlt); return konto(true); } }
   if (SERVER.zahlung && !S.betrieb && S.kauf && S.kauf.wartet && !S.kauf.paid) { await kaufPruefen(S.kauf.wartet, true); return konto(true); }
