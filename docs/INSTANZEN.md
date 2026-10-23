@@ -58,9 +58,9 @@ Fehlt eine Tabelle, liefern lesende Funktionen `undefined`, schreibende werfen 5
 - Hosts: `hostsVon(instanz)`, `hostAnlegen(row)`, `hostAendern(host, patch)`, `hostLoeschen(host)`.
 - Anfragen: `anfrageHolen(code)`, `anfrageNachLid(betrieb, lid)`, `anfrageAnlegen(row)`, `anfrageAendern(code, fn)`, `anfragenVonBetrieb(betrieb, { kopf, seit })`, `anfragenStand(betrieb)` → `{ stand, anzahl }`, `anfrageNachMailId(id)`, `anfragenFaellig(jetzt)` (Versand offen und fällig, höchstens 50), `anfragenZuLoeschen(jetzt)`, `anfrageLoeschen(code)`.
 - Zwischenstände: `entwurfAnlegen(code, betrieb, meta)` legt nur neu an (Code vergeben: `null`), dazu wie bisher `entwurfHolen`, `entwurfAendern`, `entwuerfeVonBetrieb`.
-- Partner: `partnerHolen`, `partnerNachAuth`, `partnerNachMail`, `partnerAnlegen`, `partnerAendern(id, fn)`, `partnerFelder(id, patch)`, `partnerAlle`.
+- Partner: `partnerHolen`, `partnerNachAuth`, `partnerNachMail`, `partnerAnlegen`, `partnerAendern(id, fn)`, `partnerFelder(id, patch)`, `partnerAlle`, `partnerLoeschen(id)` (409, solange Bestellungen da sind; Nachrichten gehen mit, Instanzen verlieren den Verweis).
 - Bestellungen: `bestellungHolen`, `bestellungenVonPartner`, `bestellungAnlegen`, `bestellungAendern(id, fn)` (Verlauf höchstens 200 Einträge), `bestellungNachSession`, `bestellungNachPi`, `bestellungNachAbo`, `bestellungenListe({ status, seit })`, `bestellungLoeschen`.
-- Nachrichten: `nachrichtAnlegen`, `nachrichtenVon(pid, { bestellung, anzahl })`, `nachrichtenGelesen(pid, empfaenger)`, `rueckrufeOffen()`, `nachrichtAendern(id, patch)`, `nachrichtenAltLoeschen(pid, bis)`.
+- Nachrichten: `nachrichtAnlegen`, `nachrichtenVon(pid, { bestellung, anzahl })`, `nachrichtenGelesen(pid, empfaenger)`, `rueckrufeOffen()`, `nachrichtAendern(id, patch)`, `nachrichtenAltLoeschen(pid, bis)`, `nachrichtenLoeschen(pid)`.
 - `geschuetzteNutzer()` → Set der Anmeldungen von Partnern und Dashboard-Zugängen (Aufräumen der Zentrale löscht sie nie).
 - `zaehlerLesen(tag, schluessel[])`, `zaehlerErhoehen(tag, schluessel, n)` (dauerhafte Zähler in `statistik`).
 
@@ -112,11 +112,14 @@ POST /api/post/webhook  (Hauptdomain)                                  A: Resend
 ```
 functions/instanz/mandant.js (A):   hostVon(request), istHaupt(host, env), instanzVon(host, env, ctx), auftritt(inst), cacheVergessen(host)
 functions/instanz/seiten.js (A):    ausliefern(request, env, ctx, inst), kopf(html, inst, env), konfigJs(inst), icons(pfad, inst, env), robots(inst), fehlerSeite(status, inst)
-functions/instanz/adapter.js (A):   linkAufloesen(ctx, code) → { art: 'alt'|'anfrage'|'virtuell', row, l, anfrage?, entwurf? }, linkAendern(ctx, aufl, fn),
+functions/instanz/adapter.js (A):   linkAufloesen(ctx, code) → { art: 'alt'|'anfrage'|'virtuell', row, l, anfrage?, entwurf? }, linkAendern(ctx, aufl, fn, o) mit fn(a, l, jetzt),
                                     pseudoKonto(daten, l) → { konto: 'instanz', links: [l], book: [], notif: [], abzug, prefs, since } (fertig)
+                                    stempelBerlin(ms), datumBerlin(ms), zeitenBerlin(l, jetzt): Zeitstempel der Instanz-Anfragen in deutscher Zeit (Europe/Berlin);
+                                    der Altbestand (eeziframes.com) bleibt bei stamp()/datum() in der Uhr des Workers (UTC)
 functions/instanz/verwalten.js (A): instanzAnlegen(ctx, p), instanzAendern(ctx, id, fn), instanzStatus(ctx, id, status, grund), hostSetzen(ctx, id, host, o),
                                     hostEntfernen(ctx, id, host), hauptSetzen(ctx, id, host), markeVeroeffentlichen(ctx, id), bildAblegen(ctx, id, name, bytes, typ),
-                                    empfaengerEinladen(ctx, id, mail, art), vorschauToken(ctx, id, version), cacheLeeren(ctx, id), instanzDatenLoeschen(ctx, id)
+                                    empfaengerEinladen(ctx, id, mail, art), vorschauToken(ctx, id, version), cacheLeeren(ctx, id), instanzDatenLoeschen(ctx, id),
+                                    anmeldungGebraucht(sp, uid, { ohneInstanz, instanzen }) → bool (Betrieb, Partner, andere Instanz, lebende Aufmaße eines Hauseigentümers)
 functions/instanz/recht.js (F):     impressumSeite(inst), datenschutzSeite(inst), rechtVollstaendig(recht) → { ok, fehlt }   (Impressum fertig, Datenschutz vorläufig)
 functions/api/eingang.js (A):       eingangVerarbeiten(k, sp, code, runde), versandNachholen(k, sp), eingangErneut(ctx, code), probeEingang(ctx, instanzId),
                                     anfragenAufraeumen(k, sp), textPdf(titel, abschnitte), EINGANG (Routen)
@@ -363,3 +366,20 @@ Die Zahlen sind Vorschläge bis zur Antwort des Inhabers (Bauplan §5.3) und ste
 ### Später (nur entworfen)
 
 Weg 2: Subdomain beim Betrieb (`konfigurator.betrieb.de`) per CNAME über Cloudflare for SaaS (eigene Zone, Fallback-Origin, Worker-Route `*/*`, Host erst nach TXT-Nachweis). Tabelle (`weg = 'saas'`) und Weiche tragen das schon. Keine Einbettung per iframe, keine Mitarbeiter-Selbstverwaltung, keine Bestellung durch den Inhaber im Auftrag (E30).
+
+### Nacharbeit nach der Prüfung (23.10.2026, `docs/instanzen/PRUEFBEFUNDE.md`)
+
+- **Löschen (Befund 1):** `instanzDatenLoeschen` löscht die Anmeldung eines Dashboard-Zugangs nur, wenn `anmeldungGebraucht` nichts findet: Betrieb, Partner, andere Instanz, lebende Aufmaße eines Hauseigentümers (`eigene`). Dieselbe Prüfung nutzt `partnerAufraeumen`.
+- **Zeiten (Befund 4):** Alle Zeitstempel der Instanz-Anfragen (Link-Objekt, Mail, PDF, Dashboard) entstehen in deutscher Zeit (`adapter.js`: `stempelBerlin`, `datumBerlin`, `zeitenBerlin`). Der Altbestand bleibt bei `stamp()`/`datum()` (UTC im Worker); das entscheidet der Inhaber.
+- **Suchmaschinen (Befund 3):** Der erste Livegang (`uebergang(…, 'live')` aus `freigabe`) setzt `instanzen.indexierung = true`, wenn das Merkmal `indexierung` des Pakets `start` ist (Plus, Signature). Fortsetzen nach einer Pause setzt nichts; der Schalter unter „Betrieb“ bleibt zum Abschalten.
+- **Paketwechsel nach unten (Befund 10):** erst zum Periodenende. `bestellungen.abo.wechsel = { paket, von, ab }` (ISO), `abo.paket` ist schon das Ziel (Stripe-Preis sofort, ohne Ausgleich). `wechselAnwenden` (Tageslauf oder `invoice.paid`) ruft `paketSetzen`, sobald `ab` erreicht ist. Nach oben sofort, eine Vormerkung entfällt dabei. Kundenkonto (`abo.wechsel` in der Sicht) und Zentrale zeigen „wirkt ab …“.
+- **Dateien (Befund 9):** Ein verworfener, nie bezahlter Entwurf verliert seine Dateien sofort (`uebergang` nach `storniert`); stornierte Bestellungen ohne Instanz nach `loeschenNachEndeTage` im Tageslauf.
+- **Aufbewahrung (Befund 21):** `partnerAufraeumen` (am Ende von `bestellungenLauf`) löscht Partner, deren Bestellungen alle beendet oder storniert sind, nach `FRISTEN.nachrichtenJahre` (ab dem Jahresende des Vertragsendes): Nachrichten, Bestellungen, Partnerzeile, Anmeldung (wenn nicht gebraucht). Höchstens 20 je Lauf, Protokoll `loeschen`.
+- **Abo neu starten (Befund 22):** nur in `live` oder `pausiert`; aus `freigabe` startet das Abo allein über `uebergang(…, 'live')`.
+- **Webhook (Befund 19):** Resend-Ereignisse werden erst nach der Verarbeitung vermerkt (`ereignisBekannt` → verarbeiten → `ereignisNeu`), wie beim Stripe-Webhook; bei einer Störung antwortet der Server mit 500 und die Wiederholung wird verarbeitet.
+- **Dashboard (Befund 16):** Zeilen mit `art: 'test'` erscheinen nur im Status `einrichtung`; nach dem Livegang weder in der Liste noch einzeln (404) noch im Export.
+- **Frage ohne Konto (Befund 8):** landet im Kundenkonto nie als Nachricht des Partners, sondern als `von: 'system'` mit dem Vorsatz „Frage über das Formular ohne Anmeldung (Absender nicht bestätigt)“.
+- **Schnipsel (Befund 18):** `schnipsel(host, { farbe })` liefert einen Knopf „Fenster planen“ mit Inline-Stil (44 px, Firmenfarbe mit dunkler Schrift, sonst dunkel mit weißer Schrift).
+- **Impressum-E-Mail (Befund 17, teilweise):** `instanzAusBestellung` nimmt `wunsch.firma.mailImpressum`, sonst die Anmeldeadresse. Das Formularfeld im Bestellformular fehlt noch.
+- **Neutraler Absender (Befund 2), Rechtsvorlage (Befund 5):** siehe „Einrichtung je Kunde“ und die Live-Ampel (Punkte `absender` und `vorlage` sind Hinweise, sie sperren nicht; die Paket-Kasse bleibt im Live-Modus zu, bis die Vorlage anwaltlich geprüft ist, `paketVerkaufStand`).
+- **Offen (kann, wenig Aufwand, bewusst verschoben):** Befunde 11 (Hinweis „Bestellung bald möglich“ schon in Schritt 1), 13 (Kopf-Pille der Verkaufsseite als Ring-Knopf), 15 (Rückruf: vergangene Fenster und Feiertage), 17 (Formularfeld „E-Mail im Impressum“), 18 (Kundenkonto übergibt die Firmenfarbe an den Schnipsel).

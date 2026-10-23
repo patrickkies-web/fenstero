@@ -1,6 +1,35 @@
-# Prüfbefunde nach dem Instanzen-Bau (Stand e8d86a0)
+# Prüfbefunde nach dem Instanzen-Bau (Stand e8d86a0) und ihre Nacharbeit
 
-Zwei unabhängige Prüfer haben den Stand e8d86a0 geprüft (nur lesen und angreifen). Die Nacharbeit wurde begonnen, aber wegen des Wochenlimits abgebrochen; ihr ungetesteter Zwischenstand liegt als `nacharbeit-zwischenstand.patch` daneben. **Offen: alle `muss`- und `sollte`-Befunde beheben oder begründet ablehnen.**
+Zwei unabhängige Prüfer haben den Stand e8d86a0 geprüft (nur lesen und angreifen). Die Nacharbeit ist am 23.10.2026 auf dem Branch `claude/eager-sagan-2ey2vv` erfolgt (vier Gruppen in eigenen Worktrees, je Befund eine Regressionsprüfung, danach die volle Suite 1–30). Was je Befund geschah, steht hier; die Einzelheiten in `docs/INSTANZEN.md`, Abschnitt „Nacharbeit nach der Prüfung“.
+
+## Stand der Nacharbeit
+
+| Nr. | Gewicht | Stand | Was |
+|---|---|---|---|
+| 1 | muss | behoben | `anmeldungGebraucht` in verwalten.js: Anmeldung mit lebenden Aufmaßen eines Hauseigentümers bleibt (Prüfung 24.12) |
+| 2 | sollte | behoben, Entscheidung | Neutraler Absender bleibt optional (Bauplan §4, kostet eine zweite Domain): Texte in Paketbedingungen und Verkaufsseite sagen „sobald eingerichtet“ (Paketbedingungen Stand 2026-10-23), Ampel und Zentrale-Übersicht zeigen den Hinweis (26.5, 26.10, 29.4) |
+| 3 | sollte | behoben | Erster Livegang setzt `indexierung` bei Plus und Signature (26.5) |
+| 4 | sollte | behoben, Instanz-Zweig | Zeiten in Europe/Berlin in Link, Mail, PDF, Dashboard (24.2); Altbestand bleibt UTC, Entscheidung des Inhabers |
+| 5 | sollte | behoben | `paketVerkaufStand` verlangt die geprüfte Vorlage; Ampel-Hinweis `vorlage`, Zentrale-Übersicht zeigt, was fehlt (26.5, 26.10, 29.4) |
+| 6 | sollte | behoben | Zwischenstand übernommen und bestätigt (28.15) |
+| 7 | sollte | behoben | Zwischenstand übernommen und bestätigt (30, Teil 5) |
+| 8 | sollte | behoben | Frage ohne Anmeldung nur noch als `system` mit Vorsatz „Absender nicht bestätigt“; Datenschutztext angepasst (27.12) |
+| 9 | sollte | behoben | Dateien eines verworfenen Entwurfs sofort weg, stornierte ohne Instanz nach 30 Tagen (27.7, 27.10) |
+| 10 | sollte | behoben | Wechsel nach unten wirkt zum Periodenende (`abo.wechsel`), Stripe-Preis sofort ohne Ausgleich; Kundenkonto und Zentrale zeigen „wirkt ab“ (26.6, 27.9, 27.10, 30.W1, 30.W3) |
+| 11 | kann | offen | bewusst verschoben (Wochenlimit) |
+| 12 | kann | behoben | Fußhinweis 13 px (25.1) |
+| 13 | kann | offen | bewusst verschoben (Wochenlimit) |
+| 14 | kann | behoben | „Rückruf anfordern“ nur noch einmal (30, Teil 1) |
+| 15 | kann | offen | bewusst verschoben (Wochenlimit) |
+| 16 | kann | behoben | Testanfrage nach dem Livegang nicht mehr im Dashboard (28.14, 30 Teil 4) |
+| 17 | kann | teilweise | Server nimmt `wunsch.firma.mailImpressum` (26.2, 26.5); das Formularfeld fehlt noch |
+| 18 | kann | teilweise | Schnipsel ist ein Knopf „Fenster planen“ (26.5); das Kundenkonto übergibt die Firmenfarbe noch nicht (Mail tut es) |
+| 19 | kann | behoben | Webhook vermerkt erst nach der Verarbeitung (24.5) |
+| 20 | kann | behoben | `/404` und `/404/` in `run_worker_first` (23.3, 23.13) |
+| 21 | kann | behoben | `partnerAufraeumen`: Partner, Nachrichten, Bestellungen nach 3 Jahren ab Jahresende (27.10) |
+| 22 | kann | behoben | „Abo neu starten“ nur in live oder pausiert (26.5) |
+
+## Die Befunde im Wortlaut
 
 ## 1. [muss] server · Sicherheit, Geld, Daten
 
