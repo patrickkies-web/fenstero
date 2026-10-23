@@ -9,8 +9,15 @@ Dieser Skill hält fest, was der Inhaber von jedem sichtbaren Element erwartet. 
 docs/GESTALTUNG.md (Farben, Schrift, Größen, Bewegung), die dort verbindlich stehen. Seine Auftragsvorlage je Element steht in
 vorlage.md neben dieser Datei; fehlt in einem Auftrag ein Feld, sinnvoll annehmen und die Annahme im Ergebnis nennen.
 
+**Wie es aussehen soll, steht in designrichtung.md neben dieser Datei: vor jedem sichtbaren Element lesen.** Kurz: ruhig wie Apple,
+präzise wie ein Aufmaß, mit Licht und Tiefe wie in einer Raumstation; ein Held je Bildschirm, echtes Material, zwei Schriftstimmen,
+Licht nur mit Quelle. Dort stehen auch die Analyse seiner Vorbilder, die Bausteine und was auf der Seite für Fensterbauer daraus würde.
+
 ## 1. Grundhaltung
 
+- **Inhalt aus seinen Worten, Aussehen aus der Richtung.** Was ein Element zeigt und wo es steht, sagt er; wie es aussieht, bestimmt
+  designrichtung.md, auch wenn er es nicht eigens beschreibt. „Du weißt ja noch gar nicht, was ich will“ hieß: Er erwartet diesen Stil
+  von selbst.
 - **Bauen, was er beschreibt.** Nicht umdeuten, keine eigenen Abschnitte oder Inhalte erfinden. „Nicht zu viel interpretieren“ ist
   wörtlich gemeint. Was er nicht erwähnt, bleibt, wie es ist.
 - **Die Absicht verstehen.** Wozu ist das Element da? Auf der Seite für Fensterbauer soll ein Fensterbauer kaufen. Das Produkt ist ein
@@ -65,7 +72,7 @@ Seine Messlatte: Ein Fensterbauer soll an der Seite merken, dass eeziframes Webd
 
 ## 5. Ablauf je Element
 
-1. In einer Zeile sagen, was jetzt gebaut wird.
+1. In einer Zeile sagen, was jetzt gebaut wird und welcher Baustein der Designrichtung (Abschnitt 4 dort) es trägt.
 2. Material prüfen. Fehlt ein Bild oder Video, genau sagen, was gebraucht wird (Abschnitt 7), und bis dahin einen Platzhalter bauen,
    der den Effekt schon zeigt.
 3. Bei ambitionierten Elementen zwei bis drei Varianten als kurze Videos bauen; er wählt, danach nur noch Feinschliff.
@@ -75,7 +82,7 @@ Seine Messlatte: Ein Fensterbauer soll an der Seite merken, dass eeziframes Webd
 
 ## 6. Checkliste vor dem Zeigen
 
-- Wirkt es hochwertig und heutig, nicht wie ein Baukasten-Muster?
+- Wirkt es hochwertig und heutig, nicht wie ein Baukasten-Muster? Hält es die Prüfpunkte der Designrichtung (Abschnitt 7 dort)?
 - Telefon: Steht das Wichtige zusammen auf einem Bildschirm? Ist es mit dem Daumen bedienbar?
 - Verdeckt nichts das Hauptmotiv (Gesichter, Hauptobjekt, Details im Bild wie Papierflieger)?
 - Läuft die Bewegung flüssig und weich, und ist die ruhige Fassung vollständig?
@@ -99,9 +106,13 @@ das sofort sagen.
   ermitteln, dann beenden.
 - Bausteine der Verkaufsseite: functions/pakete-seite.js ändern, danach `node scripts/bedingungen-pdf.mjs`. Kopf und Fuß der Ratgeber und
   der Seiten für Fensterbauer: `node scripts/ratgeber-bausteine.mjs`.
-- Bilder und Videos: Playwright aus /opt/node-tools, Chromium unter /opt/pw-browsers/chromium (kein „playwright install“). Telefon-Video
-  mit recordVideo in 780 × 1688, dann `ffmpeg … -c:v libx264 -pix_fmt yuv420p -movflags +faststart` zu MP4. Der Browser rechnet ohne
-  Grafikchip: Wie flüssig es sich anfühlt, entscheidet der Test des Inhabers am eigenen Telefon.
+- Bilder und Videos: Playwright aus /opt/node-tools, Chromium unter /opt/pw-browsers/chromium (kein „playwright install“). Telefon-Video:
+  Chromium mit `--force-device-scale-factor=2` starten, Kontext 390 × 844 ohne `deviceScaleFactor`, recordVideo 780 × 1688, dann
+  `ffmpeg … -c:v libx264 -pix_fmt yuv420p -movflags +faststart` zu MP4. Mit `deviceScaleFactor` im Kontext liegt die Seite nur im linken
+  oberen Viertel des Videos. Bildschirmfotos über 16.384 Pixel Höhe bleiben unten weiß: Bildschirm für Bildschirm aufnehmen. Der Browser
+  rechnet ohne Grafikchip: Wie flüssig es sich anfühlt, entscheidet der Test des Inhabers am eigenen Telefon.
+- Renders aus unserem Fenstermodell: `/app/?gl=voll`, Beispielfenster `demoProject()[0]`, Blickwinkel über `--rx` und `--ry` an `#w3d`
+  (so entstanden stilkachel/modell-render.webp und app-frage.webp).
 - Prüfsuite: `NUR=… PW_PFAD=/opt/node-tools node scripts/pruefen.mjs`. Verkaufsseite: Abschnitte 2, 6, 10, 29, 30. Fenstermodell der App:
   20 und 22.
 - Doku nachziehen: docs/GESTALTUNG.md für die Gestaltung, docs/BILDER.md für Bildplätze.
@@ -111,6 +122,8 @@ das sofort sagen.
 - **Mag:** das Startbild der Fensterbauer-Seite mit Foto, eingeblendeten Benachrichtigungen und Haken-Chips unter der Überschrift; die
   Astronauten-Bildwelt; Leisten wie die Partner-Logoleisten anderer Seiten, aber hochwertig ausgearbeitet; Pakete am Telefon zum Wischen
   mit einem Beispielbild darunter, das sichtbar mitwischt; Lamellen und Fenstermodell mit viel Realismus.
+- **Vorbilder (23.10.2026):** „Apple-ähnlich“; Dropbox Dash × McLaren, textura.eu, KAGE (kryntixstudio), Axle (viktoroddy), ein
+  KI-Dashboard (juicelab), DE</HELPERS (seanaiux) und die Skills „Motion Design“ und „Design DNA“. Ausgewertet in designrichtung.md.
 - **Mag nicht:** das Bewegtbild Handy zu Briefumschlag; die Unterschrift „Vom Foto zum Aufmaßblatt, so sieht es Ihr Kunde.“; lange Texte
   und Inhaltsverzeichnisse auf der Verkaufsseite; überdimensionierte Desktop-Ansichten; flache Laufbänder und Effekte „von 2015“; lange
   Wartezeiten ohne Ergebnis; eigenmächtige Umdeutungen seiner Vorgaben.
