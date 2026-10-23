@@ -102,6 +102,8 @@ export const OHNE_INHALTSVERZEICHNIS = ['/fuer-fensterbauer/'];
    Cream-Pille bekommt den Pfeil im Kreis */
 const kicker = (h) => h.replace(/(<nav class="rg-pfad"[\s\S]*?<\/nav>\s*<p class=")eyebrow(">)/, '$1eyebrow kicker$2');
 const gruenesWort = (h) => h.replace(/<h1>([\s\S]*?)<\/h1>/, (m, innen) => {
+  /* Überschrift in Zeilen (Seite für Fensterbauer, Zeilenmaske): das grüne Wort steht dort schon in der letzten Zeile */
+  if (/class="vk-zeile"/.test(innen)) return m;
   const text = innen.replace(/<span class="ak">([\s\S]*?)<\/span>/g, '$1'), k = text.lastIndexOf(' ');
   return k < 0 ? m : '<h1>' + text.slice(0, k + 1) + '<span class="ak">' + text.slice(k + 1) + '</span></h1>';
 });

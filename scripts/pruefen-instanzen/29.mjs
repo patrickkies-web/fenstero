@@ -107,7 +107,7 @@ export default async (h) => {
 
   /* ---------- 29.3 Kopf der Verkaufsseite ---------- */
   const titelFb = (fb.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (fb.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
-  ok((fb.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titelFb) && titelFb.length <= 75 && beschr.length >= 70 && beschr.length <= 170 && /rel="canonical"/.test(vk.headers.link || '') && /<link rel="canonical" href="[^"]+\/fuer-fensterbauer\/">/.test(fb) && /Ihr eigener Fenster-Konfigurator, unter Ihrer <span class="ak">Marke<\/span>/.test(fb),
+  ok((fb.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titelFb) && titelFb.length <= 75 && beschr.length >= 70 && beschr.length <= 170 && /rel="canonical"/.test(vk.headers.link || '') && /<link rel="canonical" href="[^"]+\/fuer-fensterbauer\/">/.test(fb) && ((h1) => h1.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() === 'Ihr eigener Fenster-Konfigurator, unter Ihrer Marke.' && (h1.match(/<span class="ak">/g) || []).length === 1 && /<span class="ak">Marke\.<\/span>/.test(h1))((/<h1>([\s\S]*?)<\/h1>/.exec(fb) || [])[1] || ''),
     '29.3 Verkaufsseite: ein h1 mit einem grünen Wort, Titel mit Marke (' + titelFb.length + ' Zeichen), Beschreibung (' + beschr.length + ' Zeichen), Canonical');
   const abschnitte = ['die-idee', 'so-funktioniert-es', 'pakete', 'ablauf', 'demos', 'bestellen', 'haeufige-fragen'].filter((id) => !new RegExp('<h2 id="' + id + '">').test(fb));
   const leiste = RI.bestellung.LEISTE.map((s) => s.titel), ablauf = (/<!--pakete:ablauf-->([\s\S]*?)<!--\/pakete:ablauf-->/.exec(fb) || [])[1] || '';

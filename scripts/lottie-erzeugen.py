@@ -19,6 +19,11 @@ SURF = [0xec / 255, 0xeb / 255, 0xe6 / 255, 1]
 MO = [0xc2 / 255, 0x41 / 255, 0x0c / 255, 1]
 EL = [0x1d / 255, 0x4e / 255, 0xd8 / 255, 1]
 OK = [0x15 / 255, 0x73 / 255, 0x3a / 255, 1]
+# Beispiel-Firmenfarben für farbwechsel: bewusst keine Zeichnungs- oder Signalfarbe (nicht Blau, Orange, Grün), je mindestens 3:1 auf dem
+# dunklen Grund; keine Marker, gemeinsam.js lässt sie stehen
+WEINROT = [0xc2 / 255, 0x5a / 255, 0x66 / 255, 1]
+OCKER = [0xd4 / 255, 0xad / 255, 0x52 / 255, 1]
+FLIEDER = [0x9a / 255, 0x8b / 255, 0xd0 / 255, 1]
 
 E_OUT = ({"x": [0.2], "y": [0.7]}, {"x": [0.2], "y": [1]})   # o, i  (cubic-bezier(.2,.7,.2,1))
 E_IO = ({"x": [0.45], "y": [0]}, {"x": [0.2], "y": [1]})
@@ -406,7 +411,7 @@ def farbwechsel():
     L = []
     FY = -40                    # Mitte des Rahmens (128 × 104)
     CY, CX = 76, (-48, 0, 48)   # die drei Chips darunter
-    FARBEN = (EL, MO, OK)
+    FARBEN = (WEINROT, OCKER, FLIEDER)
     # Füllung je Farbe: ein flacher Strich (Band 18 breit, Gehrung in den Ecken) und der Pfosten. Je 2 s eine Farbe: der Pinsel tippt den
     # Chip an (Ring), steigt zum Rahmen und malt einmal herum; währenddessen blendet die Füllung per Deckkraft auf die neue Farbe
     # (neu 56…92, alt 64…100 je Abschnitt). Die dritte Farbe steht bei 0 und bei OP, damit die Schleife nicht springt.
