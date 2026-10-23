@@ -1,9 +1,9 @@
 /* eeziframes · Verkaufsseite der Konfigurator-Pakete (/fuer-fensterbauer/): Anfrageformular ohne Neuladen, Paket aus der Karte übernehmen;
-   unten die Bewegung der Landingpage (Reveal, Kennzahlen, Zeichen, Zeitleiste) mit den Hilfen aus gemeinsam.js.
-   Alles hängt an window.Verkauf.auf(wurzel, o). Die statische Seite ruft es am Ende dieser Datei mit document auf; die Startseite
-   (portal.js, Ansicht „Fensterbauer“) bettet denselben Inhalt ein und ruft auf(behälter) nach jedem Aufbau, darum beziehen sich alle
-   Abfragen auf die Wurzel, Zuhörer werden je Element nur einmal gebunden und Beobachter je Aufruf neu angelegt. o.still = true beim
-   Neuaufbau desselben Bildschirms: Was im Bild steht, erscheint und läuft nicht noch einmal; was unterhalb wartet, bewegt sich beim
+   unten die Bewegung der Landingpage (Reveal, Kennzahlen mit Ring, Scroll-Bühne, Zeichen in Schleife, Zeitleiste) mit den Hilfen aus
+   gemeinsam.js. Alles hängt an window.Verkauf.auf(wurzel, o). Die statische Seite ruft es am Ende dieser Datei mit document auf; die
+   Startseite (portal.js, Ansicht „Fensterbauer“) bettet denselben Inhalt ein und ruft auf(behälter) nach jedem Aufbau, darum beziehen
+   sich alle Abfragen auf die Wurzel, Zuhörer werden je Element nur einmal gebunden und Beobachter je Aufruf neu angelegt. o.still = true
+   beim Neuaufbau desselben Bildschirms: Was im Bild steht, erscheint und läuft nicht noch einmal; was unterhalb wartet, bewegt sich beim
    Scrollen wie beim ersten Mal.
    Ohne JavaScript schickt das Formular ganz normal ab (POST /api/partner/frage als Formular; der Server antwortet mit einer eigenen
    Seite). Mit JavaScript dieselbe Route als JSON: Fehler stehen am Feld (aria-invalid, Text darunter), der Dank ersetzt das Formular.
@@ -94,39 +94,70 @@
   /* ---------- Bewegung der Landingpage (23.10.2026) ----------
      Hilfen aus gemeinsam.js (Reveal, Scroll, Lottie, Feier); fehlt eine, bleibt die Seite so, wie sie ohne JavaScript ist: alles
      sichtbar, Zahlen stehen, Standbilder, Zeitleiste voll. Bei „weniger Bewegung“ läuft nichts.
-     - Reveal: Karten und Blöcke erscheinen, wenn sie ins Bild kommen (Katalog 1)
-     - Kennzahlen: laufen einmal von 0 hoch und rasten ein (Katalog 5 und 6)
-     - Zeichen der Schrittkarten: spielen nacheinander, nie zwei zugleich (Regel der Bewegtbilder); das erste Zeichen ist ein Standbild
-     - Zeitleiste des Ablaufs: die Linie füllt sich scrollgebunden (Katalog 9), erreichte Schritte werden grün
-     - „marke“ (Gruppe B, /assets/lottie/marke.json): spielt erst, wenn der Behälter data-lottie trägt (bis die Datei da ist, steht er
+     - Reveal: Karten und Blöcke erscheinen, wenn sie ins Bild kommen (Katalog 1), je Gruppe gestaffelt (--rv)
+     - Kennzahlen: laufen einmal von 0 hoch, der Ring um die Zahl füllt sich im selben Takt, dann Einrasten (Katalog 5 und 6)
+     - Zeichen: alle mit data-lottie laufen als Schleife (data-loop="1"); gemeinsam.js spielt nur, was im Bild ist, und pausiert draußen
+     - Bühne „So funktioniert es“: Scroll.binden über den Block liefert --sp; der aktive Schritt ist die Karte, deren Mitte der
+       Bildschirmmitte am nächsten liegt (data-schritt auf .vk-buehne, verkauf.css blendet die Bildschirme über); verlassene
+       Bildschirme fallen aus dem Fluss, darum laufen nur die Zeichen des gezeigten
+     - Zeitleiste des Ablaufs: die Linie füllt sich scrollgebunden (Katalog 9), erreichte Schritte werden grün und ihr Symbol gezogen
+     - „konfigurator“ und „farbwechsel“ (Gruppe B): spielen erst, wenn der Behälter data-lottie trägt (bis die Datei da ist, steht er
        mit data-lottie-bald, damit kein Aufruf ins Leere geht und die Prüfsuite keinen 404 meldet)
-     Die Beobachter des vorigen Aufrufs werden gelöst, damit ein Neuaufbau keine zweite Kette und kein zweites Hochlaufen startet. */
+     Die Beobachter des vorigen Aufrufs werden gelöst, damit ein Neuaufbau kein zweites Hochlaufen startet. */
   var beobachter = [];
   function beobachten(io) { beobachter.push(io); return io; }
 
-  /* Kennzahlen: von 0 bis zur Zahl in 750 ms (Kurve wie countUp der Startseite), dann Einrasten */
+  /* Kennzahlen: von 0 bis zur Zahl in 1400 ms (Kurve wie countUp der Startseite), der Ring füllt sich mit (pathLength 100), dann Einrasten */
   function hochlaufen(b) {
-    var zu = parseInt(b.getAttribute('data-zahl'), 10) || 0, t0 = performance.now(), dauer = 750;
+    var zu = parseInt(b.getAttribute('data-zahl'), 10) || 0, t0 = performance.now(), dauer = 1400;
+    var zahl = b.closest('.vk-zahl'), ring = zahl ? zahl.querySelector('.vk-ring-lauf') : null;
     (function schritt(t) {
       var k = Math.min(1, (t - t0) / dauer), e = 1 - Math.pow(1 - k, 3);
       b.textContent = String(Math.round(zu * e));
-      if (k < 1) requestAnimationFrame(schritt); else { b.textContent = String(zu); if (window.Feier) window.Feier.einrasten(b); }
+      if (ring) ring.style.strokeDashoffset = String(100 - 100 * e);
+      if (k < 1) requestAnimationFrame(schritt);
+      else { b.textContent = String(zu); if (ring) ring.style.strokeDashoffset = '0'; if (window.Feier) window.Feier.einrasten(b); }
     })(t0);
   }
 
-  /* Schrittkarten: die Zeichen der Reihe nach, jedes einmal; das nächste beginnt, wenn das vorige fertig ist (oder nach 6 s, falls
-     es außerhalb des Bildes pausiert). Bei „weniger Bewegung“ zeigt Lottie.spielen selbst das Endbild. */
-  function kette(karten, i) {
-    if (i >= karten.length) return;
-    var k = karten[i], weiter = false, name = k.getAttribute('data-zeichen');
-    var naechste = function () { if (weiter) return; weiter = true; kette(karten, i + 1); };
-    /* „senden“ endet leer (der Flieger ist weg): bei „weniger Bewegung“ bleibt das Standbild, sonst nach dem Flug zurück zum ersten Bild */
-    if (name === 'senden' && ruhig()) { naechste(); return; }
-    window.Lottie.spielen(k, name, {}).then(function (an) {
-      if (!an || ruhig()) { setTimeout(naechste, an ? 0 : 800); return; }
-      an.addEventListener('complete', function () { if (name === 'senden') { try { an.goToAndStop(0, true); } catch (e) { /* Spieler ohne goToAndStop */ } } naechste(); });
-      setTimeout(naechste, 6000);
+  /* Bühne: welcher Schritt zu sehen ist. Die Bildschirme (data-schirm) blenden über (.vk-an, 220 ms); der verlassene fällt danach aus dem
+     Fluss (.vk-da weg, display: none), damit seine Zeichen für gemeinsam.js nicht mehr im Bild sind und von selbst pausieren; nur die
+     Zeichen des gezeigten Bildschirms laufen. */
+  function schrittSetzen(buehne, n) {
+    if (buehne.getAttribute('data-schritt') === String(n)) return;
+    buehne.setAttribute('data-schritt', String(n));
+    Array.prototype.forEach.call(buehne.querySelectorAll('[data-schirm]'), function (s) {
+      if (s.getAttribute('data-schirm') === String(n)) { s.classList.add('vk-da'); void s.offsetWidth; s.classList.add('vk-an'); return; }
+      s.classList.remove('vk-an');
+      if (s.classList.contains('vk-da')) setTimeout(function () { if (!s.classList.contains('vk-an')) s.classList.remove('vk-da'); }, ruhig() ? 0 : 260);
     });
+  }
+  function schrittRechnen(buehne) {
+    var mitte = window.innerHeight / 2, best = 1, abstand = Infinity;
+    Array.prototype.forEach.call(buehne.querySelectorAll('.vk-schritte > li'), function (li, i) {
+      var r = li.getBoundingClientRect(), d = Math.abs((r.top + r.bottom) / 2 - mitte);
+      if (d < abstand) { abstand = d; best = i + 1; }
+    });
+    schrittSetzen(buehne, best);
+  }
+  var buehneRuhig = null;
+  function buehne(wurzel) {
+    var b = wurzel.querySelector('.vk-buehne');
+    if (!b) return;
+    if (window.Scroll && !ruhig()) {
+      window.Scroll.binden(b, function (p) { b.style.setProperty('--sp', p.toFixed(3)); schrittRechnen(b); });
+    } else {
+      /* ohne Scroll-Hilfe oder bei „weniger Bewegung“: der Bildschirm wechselt hart (Standbilder); ein Zuhörer für alle Aufrufe */
+      buehneRuhig = b;
+      if (!window.__vkBuehneHorcht) {
+        window.__vkBuehneHorcht = true;
+        window.addEventListener('scroll', function () { if (buehneRuhig && document.body.contains(buehneRuhig)) schrittRechnen(buehneRuhig); }, { passive: true });
+      }
+      schrittRechnen(b);
+    }
+    /* Flieger, Puls und Konfetti (CSS) laufen nur, solange die Bühne im Bild ist */
+    if (kannIO) { var io = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { b.classList.toggle('vk-im-bild', e.isIntersecting); }); }, { threshold: 0 })); io.observe(b); }
+    else b.classList.add('vk-im-bild');
   }
 
   function bewegung(wurzel, still) {
@@ -136,30 +167,32 @@
        auf (Serverstatus), die Bewegung der noch ungesehenen Abschnitte darf dabei nicht verloren gehen. */
     var unten = function (el) { return !still || el.getBoundingClientRect().top >= window.innerHeight; };
 
-    /* Erscheinen beim Scrollen: gemeinsam.js setzt .rev (unsichtbar) und .in (sichtbar); ohne Beobachter sofort sichtbar */
+    /* Erscheinen beim Scrollen: gemeinsam.js setzt .rev (unsichtbar) und .in (sichtbar); ohne Beobachter sofort sichtbar. Gestaffelt wird
+       je Gruppe (Karten einer Reihe, Punkte einer Liste): --rv zählt in der Gruppe, Reveal selbst staffelt nur, was beim Aufbau im Bild ist */
     if (window.Reveal) {
-      window.Reveal.auf(Array.prototype.filter.call(wurzel.querySelectorAll('.vk-zahl, .vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-blatt, .vk-band > *, .vk-vorspann, .vk-paket, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten));
+      var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-zahl, .vk-bewegt, .vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-blatt, .vk-band > *, .vk-vorspann, .vk-paket, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
+      window.Reveal.auf(liste);
+      if (!ruhig()) Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-zahlen, .vk-punkte, .vk-inhalt, .vk-pakete, .vk-ablauf, .vk-wissen, .vk-demos'), function (gruppe) {
+        var k = 0;
+        Array.prototype.forEach.call(gruppe.children, function (el) { if (el.classList.contains('rev') && el.getBoundingClientRect().top >= window.innerHeight) el.style.setProperty('--rv', String(Math.min(k++, 6))); });
+      });
     }
 
     var zahlen = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-zahl b[data-zahl]'), unten);
     if (zahlen.length && kannIO && !ruhig()) {
       var zio = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting) return; zio.unobserve(e.target); hochlaufen(e.target); }); }, { threshold: 0.6 }));
-      zahlen.forEach(function (b) { b.textContent = '0'; zio.observe(b); });
+      zahlen.forEach(function (b) { b.textContent = '0'; var z = b.closest('.vk-zahl'), r = z ? z.querySelector('.vk-ring-lauf') : null; if (r) r.style.strokeDashoffset = '100'; zio.observe(b); });
     }
 
-    var karten = Array.prototype.slice.call(wurzel.querySelectorAll('.vk-schritte [data-zeichen]'));
-    if (karten.length && window.Lottie && unten(karten[0])) {
-      if (kannIO && !ruhig()) {
-        var kio = beobachten(new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { kio.disconnect(); kette(karten, 0); } }, { threshold: 0.3 }));
-        kio.observe(karten[0]);
-      } else kette(karten, 0);
-    }
-    /* alles mit data-lottie (das Zeichen „marke“, sobald freigeschaltet); ein schon gestartetes Element überspringt Lottie selbst */
+    /* alle Zeichen mit data-lottie (Schrittkarten, Bühne, Paketkarten): Schleifen, die gemeinsam.js nur im Bild spielt; ein schon
+       gestartetes Element überspringt Lottie selbst */
     if (window.Lottie) window.Lottie.auf(wurzel);
+    buehne(wurzel);
 
-    /* Zeitleiste: --sp von 0 (Liste kommt unten herein) bis 1 (Liste steht zu zwei Dritteln im Bild); Schritte, die die gefüllte Linie
-       erreicht hat, bekommen .vk-an. Ohne Scroll-Bindung oder bei „weniger Bewegung“: voll und alle erreicht. Eine alte Bindung löst
-       Scroll selbst, sobald ihr Element nicht mehr im Dokument ist. */
+    /* Zeitleiste: --sp von 0 (Liste kommt unten herein) bis 1 (Liste steht zu zwei Dritteln im Bild); Schritte, deren Symbol die gefüllte
+       Linie erreicht hat, bekommen .vk-an (Symbol wird gezogen, verkauf.css). Linie: 30 px unter dem Rand der Liste bis 50 px über dem
+       Ende, die Symbolmitte liegt 26 px unter dem Rand des Schritts. Ohne Scroll-Bindung oder bei „weniger Bewegung“: voll und alle
+       erreicht. Eine alte Bindung löst Scroll selbst, sobald ihr Element nicht mehr im Dokument ist. */
     var ablauf = wurzel.querySelector('.vk-ablauf');
     if (ablauf) {
       var schritte = Array.prototype.slice.call(ablauf.children);
@@ -167,8 +200,8 @@
       if (!window.Scroll || ruhig()) voll();
       else window.Scroll.binden(ablauf, function (p) {
         ablauf.style.setProperty('--sp', p.toFixed(3));
-        var r = ablauf.getBoundingClientRect(), ende = r.top + 20 + (r.height - 56) * p;
-        schritte.forEach(function (x) { x.classList.toggle('vk-an', x.getBoundingClientRect().top + 16 <= ende + 1); });
+        var r = ablauf.getBoundingClientRect(), ende = r.top + 30 + (r.height - 80) * p;
+        schritte.forEach(function (x) { x.classList.toggle('vk-an', x.getBoundingClientRect().top + 26 <= ende + 1); });
       }, { von: 0.9, bis: 0.6 });
     }
   }
