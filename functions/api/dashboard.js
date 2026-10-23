@@ -28,7 +28,7 @@ import '../../web/assets/instanzregeln.js';
 import '../../web/assets/einladung.js';
 import { ApiFehler, json, erlaubt, quelle, hex } from './umgebung.js';
 import { codeSenden, codePruefen, codeErzeugen, nutzerAnlegen } from './auth.js';
-import { sitzungSetzen, sitzungPflicht, sitzungLoeschen } from './sitzung.js';
+import { sitzungSetzen, sitzungPflicht, sitzungLesen, sitzungLoeschen } from './sitzung.js';
 import { bremse, budget, budgetStand } from './bremse.js';
 import { postDienst, mailRahmen, esc, mailOk } from './post.js';
 import { absender, rahmenMarke, instanzKontext } from './eingang.js';
@@ -152,7 +152,11 @@ export async function dashboardSicht(ctx, o) {
   };
   return { id: row.id, company: { id: 'srv', name: inst.name, plz: row.plz || inst.plz || '', since: d.since || new Date(jetzt).getFullYear(), col: /^#[0-9a-f]{6}$/i.test(String(f || '')) ? f : '' }, acc: acc, stripe: null, stand: stand };
 }
-const antwortMitSicht = async (ctx, extra) => Object.assign({ ok: true, konto: await dashboardSicht(ctx) }, extra || {});
+/* Antwort nach einer Änderung: Betriebszeile frisch lesen (Meldungen an den Betrieb können sich mit geändert haben) */
+async function antwortMitSicht(ctx, extra) {
+  const row = await ctx.sp.betriebHolen(ctx.row.id).catch(() => null); if (row) ctx.row = row;
+  return Object.assign({ ok: true, konto: await dashboardSicht(ctx) }, extra || {});
+}
 
 /* ---------- Anmeldung ---------- */
 const FEHL_TEXT = 'Für diese Adresse wurde heute zu oft ein falscher Code eingegeben. Die Anmeldung ist bis Mitternacht gesperrt.';
@@ -216,7 +220,7 @@ async function codeBestaetigen(ctx) {
   }
   if (!ok) throw new ApiFehler('Diese Adresse hat keinen Zugang zu diesem Dashboard.', 403, { zugang: true });
   const cookie = await sitzungSetzen(ctx, 'betrieb', { sub: n.id, mail: n.mail });
-  if (ctx.zaehlen) ctx.zaehlen('ereignis:dashboard_anmeldung');
+  if (ctx.zaehlen) ctx.zaehlen(['ereignis:dashboard_anmeldung', 'inst:' + inst.id8 + ':login']); // Zähler je Instanz (statistik.js lässt inst: aus den eeziframes-Zahlen)
   /* Sicht wie nach einem Aufruf mit der neuen Sitzung */
   const zeile = await ctx.sp.instanzHolen(inst.id), row = await ctx.sp.betriebHolen(inst.betrieb);
   ctx.row = row; ctx.zeile = zeile; ctx.m = merkmaleVon(zeile); ctx.nutzer = { id: n.id, mail: n.mail };
@@ -331,6 +335,8 @@ export const KONTO_INSTANZ = {
   /* nicht auf Instanz-Hosts: Anmeldelink, Erneuern (Sitzung im Cookie), Registrierung, Code vom Kunden, Tarif, Zahlungsart */
   gesperrt: async () => { throw nichtDa(); },
   lesen: async (ctx) => {
+    /* ?start=1: erster Abruf beim Laden der Seite; ohne Sitzung kein Fehler, sondern { angemeldet: false } (dann die Anmeldung) */
+    if (ctx.url.searchParams.get('start') === '1') { nurInstanz(ctx); if (!(await sitzungLesen(ctx, 'betrieb'))) return { ok: true, angemeldet: false }; }
     await kontoVon(ctx, 'dashboardLesen');
     const stand = str(ctx.url.searchParams.get('stand'), 200);
     const k2 = await dashboardSicht(ctx, { stand: stand });

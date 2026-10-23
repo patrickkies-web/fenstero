@@ -179,7 +179,8 @@ const Server = {
   async startInst() {
     if (!this.an) { S.anmHinweis = 'Gerade nicht erreichbar. Bitte in ein paar Minuten noch einmal.'; this.fertig = true; render(); return false; }
     try {
-      const r = await this.api('/api/konto');
+      const r = await this.api('/api/konto?start=1');
+      if (r.angemeldet === false) { this.fertig = true; return true; } // keine Sitzung: die Anmeldung
       this.uebernehmen(r.konto); S.role = 'betrieb'; S.cur = this.id;
       this.sitzung = { mail: (((r.konto.acc.instanz || {}).zugang || []).find((z) => z.ich) || {}).mail || '' };
       if (['anmelden', 'beendet'].includes(S.screen)) S.screen = 'links';
@@ -1569,6 +1570,8 @@ function loginServer(s) {
     : '<div class="f' + (s.err ? ' has-err' : '') + '"><label for="lg-code">Code aus der E-Mail</label><input id="lg-code" data-in="lg:code" value="' + esc(s.code || '') + '" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456">' + (s.err ? '<small class="err">' + esc(s.err) + '</small>' : '<small>Geschickt an ' + esc(s.mail) + '. Steht in der E-Mail ein Link statt eines Codes, klicken Sie einfach darauf. Nichts angekommen? Auch im Spam-Ordner nachsehen.</small>') + '</div>';
   return '<h3>' + (reg ? akSatz('Konto für Ihren Betrieb.') : akSatz('Anmelden für Fensterbauer.')) + '</h3><p class="sub" style="margin: -4px 0 12px">' + (reg ? 'Zuerst Ihre E-Mail bestätigen, dann Ihren Betrieb eintragen. Die ersten ' + P().frei + ' Projekte sind kostenlos.' : 'Ein Kunde hat Ihnen ein eeziframes-Aufmaß geschickt? Mit dem Code von der Übersichtsseite holen Sie es nach der Anmeldung in Ihr Konto.') + '</p>' +
     '<form class="form" data-form="srvlogin" novalidate>' + feld + '<div class="row between">' + (schritt === 'code' ? '<button type="button" class="linkbtn" data-act="srv-mail">Andere E-Mail</button>' : '<span></span>') + '<button type="submit" class="btn primary">' + (schritt === 'mail' ? 'E-Mail schicken' : (reg ? 'Weiter' : 'Anmelden')) + '</button></div></form>' +
+    /* Adresse eines Dashboard-Zugangs (Konfigurator-Instanz) ohne Konto hier: der Weg zum eigenen Dashboard (Server: 409 umzug) */
+    (s.umzug && /^https?:\/\/[^/]+\/betrieb\/$/.test(s.umzug) ? '<p class="note"><a class="ulink" href="' + esc(s.umzug) + '">Zu Ihrem Dashboard: ' + esc(s.umzug.replace(/^https?:\/\//, '').replace(/\/$/, '')) + '</a></p>' : '') +
     '<p class="sub center" style="margin-top: 14px">Erst einmal ansehen? <button type="button" class="ulink" data-act="tour">Tour für Fensterbauer</button></p>';
 }
 const SHEETS = {
@@ -1600,7 +1603,7 @@ const BLATT_H = { derive: AW.derive, lab: AW.lab, num: AW.num, th: AW.th, col: A
 function amPDF(l, fotos, logo) {
   if (!window.Blatt || !l.aufmass) return null;
   const am = l.aufmass, c = BC(), a = A();
-  return window.Blatt.pdf({ variante: 'betrieb', kennzeichnung: INST ? INST.m.pdfKennzeichnung || 'keine' : undefined, fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse, mehr: kundeKontakt(l) }, betrieb: { name: c.name, col: c.col, logo: logo || null, abzug: AW.abzugVon(a.abzug), nr: l.nr, eingegangen: (l.log || {}).eingegangen }, klaerung: amKlaer(l), klaerStand: l.klaer || {}, portalKurz: location.host, h: BLATT_H, fotos: fotos || {} });
+  return window.Blatt.pdf({ variante: 'betrieb', kennzeichnung: INST ? (IA().m || {}).pdfKennzeichnung || 'keine' : undefined, fenster: am.windows || [], projekt: am.proj || {}, kunde: { name: l.kunde, kontakt: l.kontakt, adresse: l.adresse, mehr: kundeKontakt(l) }, betrieb: { name: c.name, col: c.col, logo: logo || null, abzug: AW.abzugVon(a.abzug), nr: l.nr, eingegangen: (l.log || {}).eingegangen }, klaerung: amKlaer(l), klaerStand: l.klaer || {}, portalKurz: location.host, h: BLATT_H, fotos: fotos || {} });
 }
 /* Logo aus dem Betriebskonto (Data-URL, auch WebP oder aus SVG gerechnet) fürs PDF als PNG, längste Kante höchstens 600 px */
 async function pdfLogo() {
