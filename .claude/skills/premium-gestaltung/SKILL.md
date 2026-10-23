@@ -11,7 +11,7 @@ vorlage.md neben dieser Datei; fehlt in einem Auftrag ein Feld, sinnvoll annehme
 
 **Wie es aussehen soll, steht in designrichtung.md neben dieser Datei: vor jedem sichtbaren Element lesen.** Kurz: ruhig wie Apple,
 präzise wie ein Aufmaß, mit Licht und Tiefe wie in einer Raumstation; ein Held je Bildschirm, echtes Material, zwei Schriftstimmen,
-Licht nur mit Quelle. Dort stehen auch die Analyse seiner Vorbilder, die Bausteine und was auf der Seite für Fensterbauer daraus würde.
+Licht nur mit Quelle. Dort stehen auch die Analyse seiner Vorbilder und die Bausteine des Stils.
 
 ## 1. Grundhaltung
 
@@ -111,8 +111,6 @@ das sofort sagen.
   `ffmpeg … -c:v libx264 -pix_fmt yuv420p -movflags +faststart` zu MP4. Mit `deviceScaleFactor` im Kontext liegt die Seite nur im linken
   oberen Viertel des Videos. Bildschirmfotos über 16.384 Pixel Höhe bleiben unten weiß: Bildschirm für Bildschirm aufnehmen. Der Browser
   rechnet ohne Grafikchip: Wie flüssig es sich anfühlt, entscheidet der Test des Inhabers am eigenen Telefon.
-- Renders aus unserem Fenstermodell: `/app/?gl=voll`, Beispielfenster `demoProject()[0]`, Blickwinkel über `--rx` und `--ry` an `#w3d`
-  (so entstanden stilkachel/modell-render.webp und app-frage.webp).
 - Prüfsuite: `NUR=… PW_PFAD=/opt/node-tools node scripts/pruefen.mjs`. Verkaufsseite: Abschnitte 2, 6, 10, 29, 30. Fenstermodell der App:
   20 und 22.
 - Doku nachziehen: docs/GESTALTUNG.md für die Gestaltung, docs/BILDER.md für Bildplätze.
