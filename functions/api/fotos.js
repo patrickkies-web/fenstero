@@ -29,6 +29,7 @@ import '../../web/assets/instanzregeln.js';
 import { linkAufloesen } from '../instanz/adapter.js';
 import { bremse, budget } from './bremse.js';
 import { instanzZaehlen } from './statistik.js';
+import { kontoFoto } from './dashboard.js'; // Signature-Dashboard: Fotos auf dem Instanz-Host (Strang E)
 
 const X = () => globalThis.Abrechnung;
 /* Ablagen (private Buckets bei Supabase Storage, der Server legt sie beim ersten Gebrauch an). fotos: Fotos der Fenster (dazu die kleine
@@ -213,6 +214,7 @@ export const FOTOS = {
   },
   /* Betrieb: nur Fotos, die sein eingegangenes Aufmaß nennt; gesperrt (kostenpflichtig, noch keine Zahlungsart) bleiben sie auf dem Server */
   'GET /api/konto/foto/:code/:id': async (ctx) => {
+    if (ctx.instanz) return kontoFoto(ctx); // Betrieb aus dem Host, Sitzung im Cookie, Projekt muss zu dieser Instanz gehören
     const n = await angemeldet(ctx, 'Bitte neu anmelden.'), code = linkCode(ctx), id = idVon(ctx);
     const row = await ctx.sp.betriebNachAuth(n.id); if (!row) throw new ApiFehler('Zu dieser Anmeldung gibt es noch keinen Betrieb.', 404);
     if (row.daten && row.daten.verwaltung && row.daten.verwaltung.sperre) throw new ApiFehler('Ihr Zugang zu eeziframes ist gesperrt.', 403, { gesperrt: true });

@@ -63,6 +63,8 @@ export default {
       if (seo.status === 200 || seo.status === 304) ctx.waitUntil(seitenaufruf(request, env).catch(() => false)); // 304: aus dem Browser-Cache, trotzdem ein Aufruf
       return seo;
     }
+    /* Das Dashboard der Signature-Instanzen (web/betrieb/) gibt es nur auf deren Domains; hier die Fehlerseite (Bauplan §3 A.1, E) */
+    if (/^\/betrieb(\/|$)/.test(url.pathname)) return sicher(await datei(new Request(new URL('/betrieb-gibt-es-hier-nicht', request.url).href, { method: request.method === 'HEAD' ? 'HEAD' : 'GET' }), env), true);
     /* alles andere: Datei aus web/, sonst die Fehlerseite */
     const antwort = await datei(request, env);
     return GESCHUETZT.test(url.pathname) ? sicher(antwort, true) : antwort;

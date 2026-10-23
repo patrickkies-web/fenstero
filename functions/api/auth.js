@@ -74,10 +74,10 @@ export async function erneuern(k, refresh) {
 
 /* Verwaltung der Anmeldungen für die Zentrale (Supabase Auth, Admin-Schnittstelle, nur mit dem geheimen Schlüssel).
    Ohne Supabase (Attrappe) gibt es keine eigenen Anmeldedaten: die Funktionen melden Erfolg bzw. eine leere Liste. */
-async function admin(k, pfad, method) {
+async function admin(k, pfad, method, body) {
   const kopf = { apikey: k.supabase.service, 'content-type': 'application/json' };
   if (!sbNeu(k.supabase.service)) kopf.Authorization = 'Bearer ' + k.supabase.service; // früherer service_role-Schlüssel (JWT)
-  const r = await fetch(k.supabase.url + '/auth/v1/admin/' + pfad, { method: method || 'GET', headers: kopf });
+  const r = await fetch(k.supabase.url + '/auth/v1/admin/' + pfad, { method: method || (body ? 'POST' : 'GET'), headers: kopf, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
   if (!r.ok && r.status !== 404) console.log('Supabase Auth (Verwaltung)', r.status, pfad.split('?')[0].replace(/[0-9a-f-]{36}/, '…'), JSON.stringify(data || {}).slice(0, 160));
   return { ok: r.ok, status: r.status, data: data };
@@ -88,6 +88,29 @@ export async function anmeldungLoeschen(k, uid) {
   if (!k.supabase || !uid) return { ok: true, attrappe: !k.supabase };
   const r = await admin(k, 'users/' + encodeURIComponent(uid), 'DELETE');
   return { ok: r.ok || r.status === 404, status: r.status };
+}
+/* Dashboard der Signature-Instanzen (dashboard.js, Bauplan §3 E.1): Die Anmeldung läuft per Code, den der Server selbst in der Marke
+   des Betriebs verschickt. Supabase erzeugt den Code über admin/generate_link (Art magiclink) und verschickt dabei nichts; geprüft
+   wird er wie jeder Code mit verify (codePruefen, Art email). Eine Redirect-URL je Domain braucht es so nicht.
+   nutzerAnlegen: Anmeldung für eine Zugangsadresse anlegen, gleich bestätigt; gibt es sie schon, ist das recht.
+   codeErzeugen: der Code für die Adresse oder null (dann der Rückfall codeSenden mit der Mail von Supabase).
+   Attrappe (DATEN_ATTRAPPE=1): der Code ist 123456, wie bei codeSenden. */
+export async function nutzerAnlegen(k, sp, mail) {
+  mail = String(mail || '').trim().toLowerCase();
+  if (!mailOk(mail)) throw new ApiFehler('Bitte eine gültige E-Mail-Adresse eingeben.');
+  if (!k.supabase) { if (sp && sp.nutzerMerken) sp.nutzerMerken(mail); return { ok: true, attrappe: true }; }
+  const r = await admin(k, 'users', 'POST', { email: mail, email_confirm: true });
+  if (r.ok && r.data && r.data.id) return { ok: true, id: r.data.id, neu: true };
+  if ([409, 422].includes(r.status) || (r.status === 400 && /already|exists|registered/i.test(JSON.stringify(r.data || {})))) return { ok: true, schon: true };
+  return { ok: false, status: r.status };
+}
+export async function codeErzeugen(k, sp, mail) {
+  mail = String(mail || '').trim().toLowerCase();
+  if (!mailOk(mail)) return null;
+  if (!k.supabase) { sp.codeMerken(mail, '123456'); console.log('[Attrappe] Anmeldecode für ' + mail + ': 123456'); return '123456'; }
+  let r; try { r = await admin(k, 'generate_link', 'POST', { type: 'magiclink', email: mail }); } catch (e) { return null; }
+  const d = (r && r.ok && r.data) || {}, otp = String(d.email_otp || (d.properties || {}).email_otp || '');
+  return /^\d{6,10}$/.test(otp) ? otp : null;
 }
 export async function anmeldungLesen(k, uid) {
   if (!k.supabase || !uid) return null;
