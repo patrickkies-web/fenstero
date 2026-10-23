@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paketbedingungen der Konfigurator-Pakete · eeziframes</title>
+<meta name="description" content="Paketbedingungen für den eigenen Fenster-Konfigurator von eeziframes (Essential, Plus, Signature) mit Vertrag zur Auftragsverarbeitung. Nur für Unternehmer.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/assets/recht.css"><meta name="stand" content="2026-10-22">
+</head>
+<body>
+<!-- ENTWURF zur anwaltlichen Prüfung (Bauplan §5.3 F1 bis F5). Offene Stellen sind als Platzhalter (mark mit Klasse ph) markiert;
+     solange es sie gibt, hält paketVerkaufStand() (functions/api/recht.js) die Paket-Kasse im Live-Modus von Stripe zu. Fassung =
+     PAKET_STAND in functions/api/recht.js; ändert sich der Text, bekommt er einen neuen Stand, und node scripts/bedingungen-pdf.mjs
+     schreibt die PDFs paketbedingungen-STAND.pdf und av-vertrag-STAND.pdf neu (gehen mit der Eingangsbestätigung an den Besteller).
+     Tabellen, Fristen und Stand kommen aus web/assets/pakete.js, web/assets/instanzregeln.js und recht.js (Bausteine aus
+     functions/pakete-seite.js). -->
+<header class="kopf"><div>
+  <a class="marke" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="wm" translate="no"><b>eezi</b>frames</span></a>
+  <nav><a href="/fuer-fensterbauer/">Pakete</a><a href="/partner/">Kundenkonto</a></nav>
+</div></header>
+<main>
+  <p class="klein">Für Unternehmer · Stand: <!--pakete:stand-->22. Oktober 2026<!--/pakete:stand--></p>
+  <h1>Paketbedingungen der Konfigurator-Pakete</h1>
+  <div class="karte">
+    <p><strong>Entwurf zur anwaltlichen Prüfung.</strong> Diese Fassung ist noch nicht anwaltlich geprüft <mark class="ph">[Freigabe der Fassung durch die Anwältin folgt]</mark>. Offene Stellen sind so markiert; solange es sie gibt, nehmen wir keine kostenpflichtigen Bestellungen an.</p>
+    <p><strong>Kurz gesagt:</strong> Sie bekommen Ihren eigenen Fenster-Konfigurator unter Ihrer Domain, wir richten ihn ein und betreiben ihn. Die Einrichtung zahlen Sie vorab, das Monatsabo beginnt mit dem Livegang und ist monatlich kündbar. Jede Anfrage Ihrer Kunden geht nur an Sie; wir verarbeiten sie in Ihrem Auftrag nach dem Vertrag zur Auftragsverarbeitung (Anlage, <a href="#avv">unten</a>).</p>
+  </div>
+
+  <h2 id="geltung">§ 1 Geltungsbereich, Vertragspartner</h2>
+  <p>(1) Diese Paketbedingungen gelten für Verträge über die Konfigurator-Pakete EEZI Essential, EEZI Essential Plus und EEZI Signature („Paket“) zwischen Patrick Kies, Postweg 35, 33442 Herzebrock-Clarholz, Telefon: <a href="tel:+4915256950998">0152 56950998</a>, E-Mail: <a href="mailto:ask@eeziframes.com">ask@eeziframes.com</a> („eeziframes“, „wir“) und dem Unternehmen, das ein Paket bestellt („Sie“).</p>
+  <p>(2) Die Pakete bieten wir nur Unternehmern im Sinne von § 14 BGB an, nicht Verbrauchern. Mit der Bestellung bestätigen Sie, dass Sie in Ausübung Ihrer gewerblichen oder selbständigen beruflichen Tätigkeit handeln.</p>
+  <p>(3) Allgemeine Geschäftsbedingungen von Ihnen gelten nicht, auch wenn wir ihnen nicht ausdrücklich widersprechen. Für ein bestehendes Betriebskonto auf eeziframes.com (Kundenlinks) gelten weiter die <a href="/nutzungsbedingungen/">Nutzungsbedingungen</a>; ein Paket ist ein eigener Vertrag daneben.</p>
+
+  <h2 id="leistungen">§ 2 Leistungen</h2>
+  <p>(1) Wir richten für Sie einen Fenster-Konfigurator unter einer eigenen Domain ein („Konfigurator“), betreiben ihn für die Dauer des Vertrags und leiten jede Anfrage, die Ihre Kunden dort senden, als E-Mail mit dem Aufmaßblatt als PDF an die E-Mail-Adressen weiter, die Sie bestätigt haben. Die Antwortadresse der E-Mail ist die Ihres Kunden.</p>
+  <p>(2) Was zu jedem Paket gehört, zeigt die folgende Übersicht. Die Angaben zu KI-Auswertungen und Anfragen sind Richtwerte je Konfigurator; werden sie deutlich überschritten (KI das Doppelte, Anfragen das Vierfache), dürfen wir die Annahme vorübergehend begrenzen, um Missbrauch abzuwehren, und sprechen Sie darauf an.</p>
+  <!--pakete:leistungen-->
+  <div class="tabelle"><table><thead><tr><th>Leistung</th><th>EEZI Essential</th><th>EEZI Essential Plus</th><th>EEZI Signature</th></tr></thead><tbody><tr><td>Eigene Domain<br><span class="klein">Ihr Konfigurator unter Ihrer eigenen Adresse, z. B. ihr-name-fenster.de</span></td><td data-k="EEZI Essential">ja</td><td data-k="EEZI Essential Plus">ja</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Voller Konfigurator<br><span class="klein">Planung mit 3-D-Modell, KI-Auswertung der Fotos, Klärungsliste und Zeichnung</span></td><td data-k="EEZI Essential">ja</td><td data-k="EEZI Essential Plus">ja</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Anfrage per E-Mail mit PDF<br><span class="klein">Jede Anfrage kommt mit dem fertigen Aufmaßblatt als PDF in Ihr Postfach</span></td><td data-k="EEZI Essential">ja</td><td data-k="EEZI Essential Plus">ja</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Gestaltung</td><td data-k="EEZI Essential">eeziframes-Design mit Ihrem Namen</td><td data-k="EEZI Essential Plus">in Ihrem Design</td><td data-k="EEZI Signature">in Ihrem Design</td></tr><tr><td>Ihr Logo<br><span class="klein">in der App, im Aufmaßblatt und in der E-Mail</span></td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">ja</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Ihre Firmenfarbe</td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">ja</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Fotos Ihres Betriebs<br><span class="klein">auf der Startseite</span></td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">6</td><td data-k="EEZI Signature">6</td></tr><tr><td>Eigene Startseite<br><span class="klein">Titel, Begrüßung und Text</span></td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">ja</td><td data-k="EEZI Signature">ja</td></tr><tr><td>App-Symbol</td><td data-k="EEZI Essential">eeziframes</td><td data-k="EEZI Essential Plus">Ihr Zeichen</td><td data-k="EEZI Signature">Ihr Zeichen</td></tr><tr><td>Hinweis auf eeziframes in der App</td><td data-k="EEZI Essential">„Powered by EEZIframes“</td><td data-k="EEZI Essential Plus">kleiner Hinweis im Fuß</td><td data-k="EEZI Signature">keiner</td></tr><tr><td>Hinweis auf eeziframes im Aufmaßblatt</td><td data-k="EEZI Essential">Untertitel und Fuß</td><td data-k="EEZI Essential Plus">nur im Fuß</td><td data-k="EEZI Signature">keiner</td></tr><tr><td>Rahmen der E-Mails</td><td data-k="EEZI Essential">eeziframes</td><td data-k="EEZI Essential Plus">Ihr Logo, Fußzeile von eeziframes</td><td data-k="EEZI Signature">ohne eeziframes</td></tr><tr><td>Absender der E-Mails</td><td data-k="EEZI Essential">Konfigurator-Postfach von eeziframes</td><td data-k="EEZI Essential Plus">Konfigurator-Postfach von eeziframes</td><td data-k="EEZI Signature">neutrales Postfach</td></tr><tr><td>eeziframes in Datenschutz und KI-Hinweis</td><td data-k="EEZI Essential">mit Namen</td><td data-k="EEZI Essential Plus">mit Namen</td><td data-k="EEZI Signature">als technischer Dienstleister</td></tr><tr><td>In Suchmaschinen</td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">Startseite</td><td data-k="EEZI Signature">Startseite</td></tr><tr><td>PDF-Kopie für Ihre Kunden</td><td data-k="EEZI Essential">ja</td><td data-k="EEZI Essential Plus">ja</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Originalfotos per Link</td><td data-k="EEZI Essential">14 Tage</td><td data-k="EEZI Essential Plus">14 Tage</td><td data-k="EEZI Signature">nein</td></tr><tr><td>Aufbewahrung der Anfragen</td><td data-k="EEZI Essential">30 Tage nach Zustellung</td><td data-k="EEZI Essential Plus">30 Tage nach Zustellung</td><td data-k="EEZI Signature">für die Vertragsdauer</td></tr><tr><td>Unterlagen jederzeit abrufbar</td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">nein</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Dashboard unter Ihrer Domain<br><span class="klein">geschützter Zugang für Ihr Team</span></td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">nein</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Persönliche Einladungslinks<br><span class="klein">Kunden gezielt einladen, auf Ihrer Domain</span></td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">nein</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Fortschritt sehen<br><span class="klein">eingeladen, in Bearbeitung, eingereicht</span></td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">nein</td><td data-k="EEZI Signature">ja</td></tr><tr><td>Zugänge zum Dashboard</td><td data-k="EEZI Essential">nein</td><td data-k="EEZI Essential Plus">nein</td><td data-k="EEZI Signature">5</td></tr><tr><td>KI-Auswertungen im Monat (Richtwert)</td><td data-k="EEZI Essential">600</td><td data-k="EEZI Essential Plus">1000</td><td data-k="EEZI Signature">2000</td></tr><tr><td>Anfragen am Tag (Richtwert)</td><td data-k="EEZI Essential">50</td><td data-k="EEZI Essential Plus">50</td><td data-k="EEZI Signature">100</td></tr></tbody></table></div>
+  <!--/pakete:leistungen-->
+  <p>(3) Wir entwickeln den Konfigurator laufend weiter und dürfen ihn ändern, solange der vereinbarte Umfang nicht wesentlich eingeschränkt wird.</p>
+  <p>(4) Nicht geschuldet sind Beratung, Angebote oder Aufmaß gegenüber Ihren Kunden. Die Maße im Aufmaßblatt sind Angaben Ihrer Kunden; vor der Fertigung messen Sie selbst nach (Feinaufmaß).</p>
+
+  <h2 id="vertragsschluss">§ 3 Bestellung und Vertragsschluss</h2>
+  <p>(1) Sie bestellen im Kundenkonto auf eeziframes.com/partner/. Nach dem Klick auf „Kostenpflichtig bestellen“ bestätigen wir den Eingang sofort per E-Mail, mit diesen Bedingungen und dem Vertrag zur Auftragsverarbeitung als PDF; die Eingangsbestätigung ist noch keine Annahme.</p>
+  <p>(2) Der Vertrag kommt zustande, sobald die Einrichtungsgebühr bei uns eingegangen ist; darüber informieren wir Sie per E-Mail.</p>
+  <p>(3) Vertragssprache ist Deutsch. Den Vertragstext speichern wir; Sie finden die Fassung Ihrer Bestellung in der Eingangsbestätigung und im Kundenkonto.</p>
+
+  <h2 id="preise">§ 4 Preise und Zahlung</h2>
+  <p>(1) Es gelten die Preise, die Ihnen bei der Bestellung angezeigt werden (Einrichtungsgebühr einmalig und Monatspreis). Alle Preise sind Nettopreise zuzüglich der gesetzlichen Umsatzsteuer.</p>
+  <p>(2) Die Einrichtungsgebühr zahlen Sie vorab über unseren Zahlungsdienst Stripe, per Karte oder SEPA-Lastschrift. Ihr Zahlungsmittel wird für die Monatsgebühr hinterlegt.</p>
+  <p>(3) Die Monatsgebühr beginnt mit dem Tag, an dem Ihr Konfigurator live geht, und wird monatlich im Voraus abgebucht. Rechnungen erhalten Sie per E-Mail und im Kundenkonto.</p>
+  <p>(4) Preisänderungen kündigen wir mindestens sechs Wochen vorher in Textform an. Sie können zum Zeitpunkt der Änderung kündigen; darauf weisen wir in der Ankündigung hin.</p>
+
+  <h2 id="einrichtung">§ 5 Einrichtung, Mitwirkung und Freigabe</h2>
+  <p>(1) Nach der Zahlung rufen wir Sie zu Ihrer Wunschzeit an, legen Ihren Konfigurator an, sichern die Domain (§ 6) und gestalten ihn nach Ihrem Paket. Den Stand sehen Sie in Ihrem Kundenkonto.</p>
+  <p>(2) Sie wirken mit: Ihre Angaben für Impressum und Datenschutzerklärung des Konfigurators sind vollständig und richtig, und Sie halten sie aktuell. Für Logo, Fotos, Texte und Farben, die Sie uns geben, haben Sie die nötigen Rechte; Sie räumen uns daran für die Dauer des Vertrags das einfache Recht ein, sie im Konfigurator, im Aufmaßblatt und in den E-Mails zu nutzen.</p>
+  <p>(3) Bevor Ihr Konfigurator öffentlich wird, schicken wir Ihnen einen Vorschau-Link. Sie geben die Vorschau im Kundenkonto frei oder nennen uns Ihre Änderungswünsche; live geht der Konfigurator erst mit Ihrer Freigabe oder nach Absprache mit Ihnen.</p>
+  <p>(4) Anfragen gehen nur an E-Mail-Adressen, die über einen Link in einer E-Mail an diese Adresse bestätigt sind. Ändern Sie Empfänger, gilt das für jede neue Adresse ebenso.</p>
+
+  <h2 id="domain">§ 6 Domain</h2>
+  <p>(1) Wir registrieren für Ihren Konfigurator eine Domain nach Ihrem Wunsch, sofern sie frei ist. Eine Domain mit einem Jahrespreis bis 25 € netto ist im Paket enthalten; teurere Domains nur nach Absprache.</p>
+  <p>(2) Inhaber der Domain sind wir, solange der Vertrag läuft. Nach dem Ende halten wir sie zwölf Monate und übertragen sie auf Ihren Wunsch an Sie oder einen Anbieter Ihrer Wahl, gegen eine Pauschale von <mark class="ph">[Pauschale für die Übertragung folgt]</mark>.</p>
+  <p>(3) Eine Domain, die Ihnen schon gehört, binden wir nur nach Absprache an.</p>
+
+  <h2 id="laufzeit">§ 7 Laufzeit, Kündigung und Paketwechsel</h2>
+  <p>(1) Das Monatsabo beginnt mit dem Livegang und läuft auf unbestimmte Zeit. Beide Seiten können es mit Wirkung zum Ende des laufenden Abrechnungsmonats kündigen, ohne Mindestlaufzeit. Kündigen können Sie im Kundenkonto oder in Textform.</p>
+  <p>(2) Bis wir mit der Einrichtung beginnen, können Sie die Bestellung im Kundenkonto stornieren; die Einrichtungsgebühr erstatten wir dann vollständig. Danach wird sie nicht erstattet.</p>
+  <p>(3) Ein größeres Paket bekommen Sie jederzeit auf Anfrage: Fällig wird die Differenz der Einrichtungsgebühren, der neue Monatspreis gilt ab dem Wechsel. Ein kleineres Paket gilt ab dem nächsten Abrechnungsmonat; Merkmale, die es nicht enthält (etwa das Dashboard), enden dann.</p>
+  <p>(4) Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt unberührt.</p>
+
+  <h2 id="zahlungsausfall">§ 8 Zahlungsausfall, Pause und Ende</h2>
+  <p>(1) Schlägt eine Abbuchung fehl, informieren wir Sie und versuchen es erneut. Ist die Zahlung nach <!--pakete:f-kulanzTage-->14<!--/pakete:f-kulanzTage--> Tagen nicht da, pausieren wir Ihren Konfigurator: Er zeigt dann nur Ihren Namen und Ihre Kontaktdaten und nimmt keine Anfragen an; ein Dashboard lässt sich nur noch lesen.</p>
+  <p>(2) Sobald die offene Zahlung eingegangen ist, schalten wir den Konfigurator wieder frei.</p>
+  <p>(3) Dauert eine Pause länger als <!--pakete:f-pauseMaxTage-->60<!--/pakete:f-pauseMaxTage--> Tage, endet der Vertrag. <!--pakete:f-loeschenNachEndeTage-->30<!--/pakete:f-loeschenNachEndeTage--> Tage nach dem Ende eines Vertrags, gleich aus welchem Grund, löschen wir alle Daten Ihres Konfigurators (Anlage, § 11); bis dahin können Sie mit Signature Ihre Daten exportieren.</p>
+
+  <h2 id="hinweis">§ 9 Hinweis auf eeziframes</h2>
+  <p>(1) Je nach Paket trägt der Konfigurator einen Hinweis auf eeziframes (Übersicht in § 2): bei Essential deutlich („Powered by EEZIframes“, verlinkt auf unsere Seite für Fensterbauer), bei Plus dezent im Fuß, bei Signature keinen.</p>
+  <p>(2) Als Referenz nennen wir Sie nur mit Ihrer Zustimmung.</p>
+
+  <h2 id="kundenschutz">§ 10 Kundenschutz</h2>
+  <p>(1) Ihr Konfigurator zeigt Ihren Kunden nur Ihren Betrieb: keine anderen Betriebe, keine Werbung, keine Preise von uns.</p>
+  <p>(2) Anfragen gehen ausschließlich an die von Ihnen bestätigten Adressen. Wir sprechen Ihre Kunden nicht an, verkaufen keine Anfragen und geben ihre Daten an niemanden weiter, außer an die Unterauftragnehmer aus der Anlage.</p>
+  <p>(3) Für eigene Zwecke nutzen wir nur Summen ohne Personenbezug, etwa die Zahl der Aufrufe und Anfragen je Konfigurator, um den Dienst zu betreiben, abzurechnen und zu verbessern.</p>
+
+  <h2 id="verfuegbarkeit">§ 11 Verfügbarkeit und Störungen</h2>
+  <p>(1) Wir bemühen uns um einen störungsfreien Betrieb rund um die Uhr. Ausgenommen sind angekündigte Wartungen und Störungen, die wir nicht zu vertreten haben, etwa bei unseren Dienstleistern. Eine bestimmte Verfügbarkeit sagen wir zu: <mark class="ph">[Verfügbarkeitszusage nach anwaltlicher Prüfung]</mark>.</p>
+  <p>(2) Kann eine Anfrage nicht zugestellt werden, versuchen wir es erneut, informieren Sie und halten die Anfrage für Sie bereit (Fristen in der Anlage).</p>
+
+  <h2 id="haftung">§ 12 Haftung</h2>
+  <p>(1) Wir haften unbeschränkt bei Vorsatz und grober Fahrlässigkeit, für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit und nach dem Produkthaftungsgesetz.</p>
+  <p>(2) Bei leichter Fahrlässigkeit haften wir nur für die Verletzung wesentlicher Vertragspflichten, deren Erfüllung die Durchführung des Vertrags erst ermöglicht und auf die Sie vertrauen dürfen, und nur für den vertragstypischen, vorhersehbaren Schaden, höchstens bis <mark class="ph">[Haftungshöchstbetrag folgt]</mark>.</p>
+  <p>(3) Für die Richtigkeit der Angaben Ihrer Kunden, insbesondere der Maße, haften wir nicht.</p>
+
+  <h2 id="datenschutz">§ 13 Datenschutz</h2>
+  <p>(1) Für die Daten Ihrer Kunden und Ihrer Mitarbeiter im Konfigurator sind Sie verantwortlich; wir verarbeiten sie in Ihrem Auftrag nach dem Vertrag zur Auftragsverarbeitung (Anlage), den Sie mit der Bestellung abschließen.</p>
+  <p>(2) Ihre eigenen Daten als unser Kunde (Kundenkonto, Bestellung, Zahlung, Nachrichten) verarbeiten wir als Verantwortlicher; Einzelheiten stehen in der <a href="/datenschutz/#pakete">Datenschutzerklärung</a>.</p>
+
+  <h2 id="aenderungen">§ 14 Änderungen dieser Bedingungen</h2>
+  <p>Änderungen dieser Bedingungen teilen wir Ihnen mindestens sechs Wochen vor ihrem Inkrafttreten in Textform mit. Widersprechen Sie nicht bis zum Inkrafttreten, gelten sie als angenommen; darauf weisen wir in der Mitteilung hin. Widersprechen Sie, können beide Seiten zum Zeitpunkt des Inkrafttretens kündigen.</p>
+
+  <h2 id="schluss">§ 15 Schlussbestimmungen</h2>
+  <p>(1) Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.</p>
+  <p>(2) Gerichtsstand für Streitigkeiten mit Kaufleuten ist <mark class="ph">[Gerichtsstand nach anwaltlicher Prüfung]</mark>.</p>
+  <p>(3) Ist eine Bestimmung unwirksam, bleibt der Vertrag im Übrigen wirksam.</p>
+
+  <h2 id="avv">Anlage: Vertrag zur Auftragsverarbeitung</h2>
+  <p>nach Art. 28 DSGVO zwischen Ihnen als Verantwortlichem („Auftraggeber“) und Patrick Kies, eeziframes, Postweg 35, 33442 Herzebrock-Clarholz, als Auftragsverarbeiter („Auftragnehmer“). Er gilt mit jedem Paketvertrag und endet mit ihm; die Pflichten zur Löschung (§ 11) gelten darüber hinaus.</p>
+
+  <h3 id="avv-gegenstand">§ 1 Gegenstand und Dauer</h3>
+  <p>Der Auftragnehmer betreibt für den Auftraggeber den Fenster-Konfigurator des Pakets und verarbeitet dabei personenbezogene Daten im Auftrag des Auftraggebers. Die Verarbeitung dauert so lange wie der Paketvertrag, zuzüglich der Fristen in § 11.</p>
+
+  <h3 id="avv-zweck">§ 2 Art und Zweck der Verarbeitung</h3>
+  <ul>
+    <li>Entgegennehmen und Speichern der Planungen und Anfragen, die Kunden des Auftraggebers im Konfigurator eingeben, samt Fotos;</li>
+    <li>Auswertung der Fotos durch eine KI, nur wenn der Kunde im Konfigurator eingewilligt hat;</li>
+    <li>Erzeugen des Aufmaßblatts als PDF und Versand der Anfrage per E-Mail an die bestätigten Adressen des Auftraggebers, mit Verfolgung der Zustellung;</li>
+    <li>bei Signature: Bereitstellen im Dashboard unter der Domain des Auftraggebers, persönliche Einladungslinks, Fortschritt, Ablage der Aufmaßblätter, Export;</li>
+    <li>Schutz vor Missbrauch (kurzzeitige Zählung je IP-Adresse) und Löschung nach den Fristen in § 11.</li>
+  </ul>
+
+  <h3 id="avv-daten">§ 3 Art der Daten und Kreis der Betroffenen</h3>
+  <p><strong>Betroffene:</strong> Interessenten und Kunden des Auftraggebers, die den Konfigurator nutzen; Mitarbeiter des Auftraggebers, deren Adressen Anfragen empfangen oder die einen Zugang zum Dashboard haben.</p>
+  <p><strong>Daten:</strong> Kontaktdaten (Name, Telefon, E-Mail, gewünschte Erreichbarkeit, auf Wunsch Adresse des Objekts), Planungsdaten (Fenster, Maße, Wünsche, Notizen), Fotos der Fenster (sie können Räume, Gegenstände oder Personen zeigen), Inhalte und Zustelldaten der E-Mails, technische Daten (IP-Adresse kurzzeitig, Zeitpunkte); bei Signature außerdem E-Mail-Adresse, Name und Anmeldezeiten der Dashboard-Zugänge. Besondere Kategorien nach Art. 9 DSGVO werden nicht erhoben.</p>
+
+  <h3 id="avv-weisungen">§ 4 Weisungen</h3>
+  <p>Der Auftragnehmer verarbeitet die Daten nur auf dokumentierte Weisung des Auftraggebers. Weisungen sind dieser Vertrag, die Einstellungen des Pakets und Ihre Angaben im Kundenkonto sowie Einzelweisungen in Textform. Hält der Auftragnehmer eine Weisung für rechtswidrig, sagt er es dem Auftraggeber unverzüglich.</p>
+
+  <h3 id="avv-vertraulichkeit">§ 5 Vertraulichkeit</h3>
+  <p>Wer beim Auftragnehmer Zugang zu den Daten hat, ist zur Vertraulichkeit verpflichtet. In die Anfragen sieht der Auftragnehmer nur, wenn der Auftraggeber darum bittet oder es zur Behebung einer Störung nötig ist; jeder Einblick wird protokolliert.</p>
+
+  <h3 id="avv-toms">§ 6 Technische und organisatorische Maßnahmen</h3>
+  <ul>
+    <li>Übertragung nur verschlüsselt (TLS); Datenbank und Dateien bei Supabase in Frankfurt am Main, verschlüsselt gespeichert, in nicht öffentlichen Ablagen, auf die nur der Server zugreift;</li>
+    <li>Trennung der Mandanten: Jede Anfrage gehört genau einem Konfigurator und ist nur über dessen Domain und dessen Dashboard erreichbar;</li>
+    <li>Zugang zur Verwaltung des Auftragnehmers mit Passwort und zweitem Faktor, Sitzungen nur im geschützten Cookie, Protokoll aller Eingriffe;</li>
+    <li>Anmeldung zum Dashboard nur mit Code per E-Mail an bestätigte Zugänge, eigene Sitzung je Domain;</li>
+    <li>Begrenzung von Anfragen je IP-Adresse und je Konfigurator gegen Missbrauch;</li>
+    <li>tägliche Sicherung der Datenbank durch Supabase, sieben Tage aufbewahrt; Löschung nach festen Fristen, automatisch (§ 11).</li>
+  </ul>
+
+  <h3 id="avv-unterauftragnehmer">§ 7 Unterauftragnehmer</h3>
+  <p>Der Auftraggeber genehmigt die folgenden Unterauftragnehmer. Neue oder geänderte kündigt der Auftragnehmer mindestens vier Wochen vorher in Textform an; der Auftraggeber kann aus wichtigem datenschutzrechtlichem Grund widersprechen und, falls keine Lösung gefunden wird, den Paketvertrag zum Wechsel kündigen.</p>
+  <div class="tabelle"><table>
+    <thead><tr><th>Unterauftragnehmer</th><th>Leistung</th><th>Ort, Übermittlung</th></tr></thead>
+    <tbody>
+      <tr><td>Cloudflare, Inc., San Francisco, USA</td><td data-k="Leistung">Auslieferung des Konfigurators, Server-Programm, Zwischenspeicher, Domain und DNS</td><td data-k="Ort, Übermittlung">weltweit verteilt; EU-US Data Privacy Framework, ergänzend Standardvertragsklauseln</td></tr>
+      <tr><td>Supabase Inc., USA</td><td data-k="Leistung">Datenbank, Ablage der Fotos und Aufmaßblätter, Anmeldung der Dashboard-Zugänge</td><td data-k="Ort, Übermittlung">Frankfurt am Main; Standardvertragsklauseln für Zugriffe aus Drittländern (Support)</td></tr>
+      <tr><td>Plus Five Five, Inc. (Resend), San Francisco, USA</td><td data-k="Leistung">Versand der E-Mails, Zustellprotokolle (30 Tage)</td><td data-k="Ort, Übermittlung">USA; EU-US Data Privacy Framework, ergänzend Standardvertragsklauseln</td></tr>
+      <tr><td>Anthropic Ireland, Limited, Dublin, Irland</td><td data-k="Leistung">KI-Auswertung der Fotos, nur mit Einwilligung des Kunden; keine Nutzung zum Training, Löschung spätestens nach 30 Tagen</td><td data-k="Ort, Übermittlung">Irland und USA; Standardvertragsklauseln</td></tr>
+    </tbody>
+  </table></div>
+  <p>Stripe (Stripe Payments Europe, Ltd., Dublin) verarbeitet nur die Zahlungsdaten des Auftraggebers als eigener Verantwortlicher und erhält keine Daten aus dem Konfigurator.</p>
+
+  <h3 id="avv-nennung">§ 8 Nennung gegenüber Betroffenen</h3>
+  <p>Der Auftraggeber darf den Auftragnehmer und die Unterauftragnehmer gegenüber Betroffenen nennen. Bei Signature nennt die Datenschutzerklärung des Konfigurators den Auftragnehmer nur als technischen Dienstleister, die Unterauftragnehmer aber mit Namen. Verlangt ein Betroffener Auskunft (Art. 15 DSGVO), nennt der Auftragnehmer dem Auftraggeber auf Anfrage die konkreten Empfänger, damit dieser sie mitteilen kann (EuGH, Urteil vom 12. Januar 2023, C-154/21).</p>
+
+  <h3 id="avv-unterstuetzung">§ 9 Unterstützung des Auftraggebers</h3>
+  <p>Der Auftragnehmer unterstützt den Auftraggeber bei Anfragen Betroffener (Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit) und bei seinen Pflichten nach Art. 32 bis 36 DSGVO. Einzelne Anfragen löscht oder exportiert er auf Weisung; mit Signature kann der Auftraggeber Anfragen selbst löschen und exportieren. Wendet sich ein Betroffener direkt an den Auftragnehmer, leitet er die Anfrage an den Auftraggeber weiter.</p>
+
+  <h3 id="avv-meldung">§ 10 Verletzungen des Schutzes</h3>
+  <p>Eine Verletzung des Schutzes personenbezogener Daten meldet der Auftragnehmer dem Auftraggeber unverzüglich nach Kenntnis, spätestens innerhalb von <mark class="ph">[Frist für Meldungen nach anwaltlicher Prüfung]</mark>, mit den Angaben nach Art. 33 Abs. 3 DSGVO, soweit sie vorliegen.</p>
+
+  <h3 id="avv-loeschung">§ 11 Speicher- und Löschfristen</h3>
+  <p>Der Auftragnehmer löscht die Daten nach diesen Fristen, ohne gesonderte Weisung; auf Weisung auch früher:</p>
+  <!--pakete:fristen-->
+  <div class="tabelle"><table><thead><tr><th>Daten</th><th>EEZI Essential</th><th>EEZI Essential Plus</th><th>EEZI Signature</th></tr></thead><tbody><tr><td>Gesendete Anfragen (Aufmaß, Kontakt, Aufmaßblatt)</td><td data-k="EEZI Essential">30 Tage nach bestätigter Zustellung der E-Mail</td><td data-k="EEZI Essential Plus">30 Tage nach bestätigter Zustellung der E-Mail</td><td data-k="EEZI Signature">bis zum Vertragsende</td></tr><tr><td>Originalfotos der Anfragen</td><td data-k="EEZI Essential">mit der Anfrage</td><td data-k="EEZI Essential Plus">mit der Anfrage</td><td data-k="EEZI Signature">365 Tage nach dem Eingang</td></tr><tr><td>Link auf die Originalfotos in der E-Mail</td><td data-k="EEZI Essential">14 Tage gültig</td><td data-k="EEZI Essential Plus">14 Tage gültig</td><td data-k="EEZI Signature">kein Link</td></tr><tr><td>Anfrage, deren E-Mail nie zugestellt wurde</td><td data-k="EEZI Essential">60 Tage nach dem Eingang</td><td data-k="EEZI Essential Plus">60 Tage nach dem Eingang</td><td data-k="EEZI Signature">60 Tage nach dem Eingang</td></tr><tr><td>Begonnene Planung ohne Fenster</td><td data-k="EEZI Essential">24 Stunden</td><td data-k="EEZI Essential Plus">24 Stunden</td><td data-k="EEZI Signature">24 Stunden</td></tr><tr><td>Begonnene Planung mit Fenster, nicht gesendet</td><td data-k="EEZI Essential">30 Tage nach der letzten Änderung</td><td data-k="EEZI Essential Plus">30 Tage nach der letzten Änderung</td><td data-k="EEZI Signature">30 Tage nach der letzten Änderung</td></tr><tr><td>Testanfragen (Vorschau, Demo)</td><td data-k="EEZI Essential">1 Tag</td><td data-k="EEZI Essential Plus">1 Tag</td><td data-k="EEZI Signature">1 Tag</td></tr><tr><td>Alle Daten der Instanz nach Vertragsende</td><td data-k="EEZI Essential">30 Tage nach dem Ende</td><td data-k="EEZI Essential Plus">30 Tage nach dem Ende</td><td data-k="EEZI Signature">30 Tage nach dem Ende</td></tr><tr><td>Sicherungskopien der Datenbank</td><td data-k="EEZI Essential">7 Tage (rollierend)</td><td data-k="EEZI Essential Plus">7 Tage (rollierend)</td><td data-k="EEZI Signature">7 Tage (rollierend)</td></tr></tbody></table></div>
+  <!--/pakete:fristen-->
+  <p>Nach dem Ende des Vertrags löscht der Auftragnehmer vollständig: alle Anfragen und begonnenen Planungen, ihre Fotos, die abgelegten Aufmaßblätter, Logo und Bilder des Konfigurators, die Dateien der Bestellung, die Anmeldungen der Dashboard-Zugänge, Zwischenspeicher, die Zuordnung der Domain und den Konfigurator selbst. In den Sicherungen sind gelöschte Daten nach spätestens sieben Tagen überschrieben. Auf Wunsch bestätigt der Auftragnehmer die Löschung in Textform.</p>
+
+  <h3 id="avv-nachweise">§ 12 Nachweise und Kontrollen</h3>
+  <p>Der Auftragnehmer stellt dem Auftraggeber die Informationen zur Verfügung, die zum Nachweis der Pflichten aus Art. 28 DSGVO nötig sind, und ermöglicht Überprüfungen nach rechtzeitiger Ankündigung während der üblichen Geschäftszeiten.</p>
+
+  <h3 id="avv-schluss">§ 13 Schlussbestimmungen</h3>
+  <p>Für die Haftung gilt Art. 82 DSGVO, im Übrigen § 12 der Paketbedingungen. Bei Widersprüchen geht dieser Vertrag den Paketbedingungen vor, soweit es um den Schutz personenbezogener Daten geht.</p>
+
+  <p class="klein">Stand: <!--pakete:stand-->22. Oktober 2026<!--/pakete:stand--> · Entwurf zur anwaltlichen Prüfung · Als PDF: <!--pakete:pdfs--><a href="/konfigurator-bedingungen/paketbedingungen-2026-10-22.pdf">Paketbedingungen</a> · <a href="/konfigurator-bedingungen/av-vertrag-2026-10-22.pdf">Vertrag zur Auftragsverarbeitung</a><!--/pakete:pdfs--></p>
+</main>
+<footer class="fuss"><a href="/">Startseite</a><a href="/fuer-fensterbauer/">Für Fensterbauer</a><a href="/partner/">Kundenkonto</a><a href="/agb/">AGB</a><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a><a href="/datenschutz/">Datenschutz</a><a href="/impressum/">Impressum</a><a class="widerruf-knopf" href="/widerruf/">Vertrag widerrufen</a></footer>
+</body>
+</html>

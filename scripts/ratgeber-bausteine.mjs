@@ -39,7 +39,7 @@ export const SEITEN_INFO = {
   '/ratgeber/fenster-angebot-vergleichen/': ['Angebote vergleichen', 'Checkliste und ein Beispiel, in dem das teurere Angebot das günstigere ist.'],
   '/ratgeber/ral-montage-fenster/': ['RAL-Montage', 'Innen luftdicht, in der Mitte gedämmt, außen schlagregendicht, einfach erklärt.'],
   '/ratgeber/lueftungskonzept-fenstertausch/': ['Lüftungskonzept', 'Wann es nach DIN 1946-6 nötig ist und was dabei herauskommt.'],
-  '/fuer-fensterbauer/': ['Aufmaß-App für Fensterbauer', 'Kunden messen per Link selbst, Sie bekommen Maße, Fotos und Einbausituation fürs erste Angebot.'],
+  '/fuer-fensterbauer/': ['Eigener Fenster-Konfigurator', 'Ihr Konfigurator unter Ihrer Domain, in drei Paketen; jede Anfrage kommt als Aufmaßblatt-PDF per E-Mail.'],
   '/fuer-fensterbauer/erstaufmass-feinaufmass/': ['Erstaufmaß und Feinaufmaß', 'Wofür welches Aufmaß da ist, wer misst und wie genau.'],
   '/fuer-fensterbauer/falsches-aufmass-haftung/': ['Falsches Aufmaß: Haftung', 'Wer haftet, wenn Fenster nicht passen, und wie Sie vorbeugen.'],
   '/fuer-fensterbauer/aufmass-kostenpflichtig/': ['Aufmaß kostenpflichtig?', 'Kostenloses Aufmaß, Anfahrtspauschale und was vorher vereinbart sein muss.'],
@@ -79,7 +79,9 @@ export const schrittVon = (pfad) => WEG.findIndex((s) => s.seiten.includes(pfad)
 /* Fußzeile: Ratgeber in der Reihenfolge des Wegs */
 export const GRUPPEN = [
   ['Ratgeber', [['/ratgeber/', 'Alle Ratgeber']].concat(WEG.flatMap((s) => s.seiten.map((p) => [p, name(p)])))],
-  ['Für Fensterbauer', FENSTERBAUER.map((p) => [p, name(p)]).concat([['/#tour', 'Tour für Fensterbauer']])],
+  /* Für Fensterbauer: die Verkaufsseite der Konfigurator-Pakete und das Wissen rund ums Aufmaß (die Tour des Betriebsbereichs wird nicht
+     mehr beworben, Bauplan E28; erreichbar bleibt sie über /#tour) */
+  ['Für Fensterbauer', FENSTERBAUER.map((p) => [p, name(p)]).concat([['/konfigurator-bedingungen/', 'Paketbedingungen']])],
   ['Mehr', [['/', 'Startseite'], ['/app/', 'App'], ['/agb/', 'AGB'], ['/nutzungsbedingungen/', 'Nutzungsbedingungen'], ['/datenschutz/', 'Datenschutz'], ['/cookies/', 'Cookies'], ['/impressum/', 'Impressum']]]
 ];
 export function fusszeile(eigen) {
