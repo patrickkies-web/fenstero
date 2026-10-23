@@ -21,7 +21,7 @@ export const SEITEN = [
   { pfad: '/', prio: '1.0', stand: '2026-10-21' },
   { pfad: '/app/', prio: '0.9', stand: '2026-10-18' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-18' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-23' },
   { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-21' },
@@ -44,11 +44,11 @@ export const SEITEN = [
   { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-21' },
+  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-23' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-21' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
   { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-18' },
@@ -160,13 +160,15 @@ const geld = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.',
 export function banner(pfad, env) {
   const tage = Math.max(1, Math.ceil((Date.parse(EINFUEHRUNG.ende) - jetztAus(env)) / 864e5)), rest = tage <= 1 ? 'Nur noch heute' : 'Noch ' + tage + ' Tage';
   const [, m, t] = EINFUEHRUNG.bis.split('-').map(Number), bis = t + '. ' + ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][m - 1];
-  const v = EINFUEHRUNG.vorher, d = EINFUEHRUNG.danach, betrieb = pfad.startsWith('/fuer-fensterbauer/');
-  const text = betrieb
-    ? '<b>Einführungspreise bis ' + bis + ':</b> Abo 10 für ' + geld(v.abo) + ', Plus für ' + geld(v.plus) + ' im Monat <span class="spaeter">· danach ' + geld(d.abo) + ' und ' + geld(d.plus) + '</span>'
-    : '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
-  return '<a class="einf-bar" href="' + (betrieb ? '/#fensterbauer' : '/app/') + '"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">' + (betrieb ? 'Preise ansehen' : 'Jetzt ausmessen') + ' →</span></span></a>';
+  /* Seiten für Fensterbauer: kein Band; sie verkaufen die Konfigurator-Pakete (functions/pakete-seite.js), die Tarife des Betriebsbereichs
+     werden nicht mehr beworben (Bauplan E28). In BANNER_SEITEN bleiben sie trotzdem: So kommen sie bis zum Stichtag ohne ETag und nie
+     als 304, denn paketeSeite() ändert ihren Inhalt je Umgebung (PAKETE_OFFEN). */
+  if (pfad.startsWith('/fuer-fensterbauer/')) return '';
+  const v = EINFUEHRUNG.vorher, d = EINFUEHRUNG.danach;
+  const text = '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
+  return '<a class="einf-bar" href="/app/"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">Jetzt ausmessen →</span></span></a>';
 }
-const mitBanner = (html, pfad, env) => (BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? html.replace(/<body[^>]*>/, (m) => m + '\n' + banner(pfad, env)) : html);
+const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>/, (m) => m + '\n' + b) : html; };
 
 /* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
 export function kopf(html, kan) {
@@ -201,7 +203,7 @@ export function llms(origin, env) {
   return [
     '# eeziframes',
     '',
-    '> eeziframes ist eine Aufmaß-App für Fenster, die im Browser läuft (Deutschland, Deutsch). Hauseigentümer messen ihre Fenster mit Zollstock und Handy selbst, Schritt für Schritt geführt, und erhalten ein Aufmaßblatt als PDF, das jeder Fensterbauer lesen kann. Fensterbauer laden ihre Kunden per Link ein und bekommen das Erstaufmaß fürs Angebot ohne Anfahrt.',
+    '> eeziframes ist eine Aufmaß-App für Fenster, die im Browser läuft (Deutschland, Deutsch). Hauseigentümer messen ihre Fenster mit Zollstock und Handy selbst, Schritt für Schritt geführt, und erhalten ein Aufmaßblatt als PDF, das jeder Fensterbauer lesen kann. Fensterbauer und Fensterhändler bekommen denselben Konfigurator als eigenen, unter ihrer Domain und ihrer Marke; jede Anfrage kommt als Aufmaßblatt-PDF per E-Mail.',
     '',
     'Wichtige Fakten:',
     '',
@@ -210,8 +212,8 @@ export function llms(origin, env) {
     '- Material, Farbe, Glas, Teilung, Öffnung und Sonnenschutz wählt man am 3-D-Modell. Unterstützt: Fenster (auch mit Ober- und Unterlicht), Balkon- und Terrassentüren, Festverglasungen, Hebe-Schiebe- und PSK-Türen, Faltschiebewände; Rollladen, Raffstore, Screen, Insekten- und Sichtschutz.',
     '- Was der Kunde noch nicht weiß, markiert er mit „Weiß ich noch nicht“, statt etwas Teures vorausgewählt zu bekommen; eine schon gespeicherte Gestaltung übernimmt er fürs nächste Fenster. Der Fensterbauer bekommt dazu eine Liste, was er mit dem Kunden klären muss: offene Wünsche, Absturzsicherung, Lüftungskonzept nach DIN 1946-6, Förderweg mit Uw-Zielwert.',
     '- Für Hauseigentümer: Messen, Fotos und 3-D-Modell kostenlos; das Aufmaßblatt als PDF kostet ' + eur(p.aufmass) + '; wer über den Link seines Fensterbauers misst, zahlt nichts.',
-    '- Für Fensterbauer (' + (p.mwst ? 'netto, zuzüglich Mehrwertsteuer' : 'ohne Mehrwertsteuer') + '): ' + p.frei + ' Projekte kostenlos, danach ' + eur(p.projekt) + ' je Projekt mit eingegangenem Aufmaß; Abo 10: ' + eur(p.abo.grund) + ' im Monat mit ' + p.abo.inkl + ' Projekten, jedes weitere ' + eur(p.abo.extra) + '; Plus: ' + eur(p.plus) + ' im Monat, unbegrenzt. Monatlich kündbar.',
-    ...(einf ? ['- Einführungspreise bis ' + einf.bisText + ': Aufmaßblatt ' + eur(p.aufmass) + ', Abo 10 ' + eur(p.abo.grund) + ', Plus ' + eur(p.plus) + ' im Monat; ab dem Folgetag ' + eur(einf.danach.aufmass) + ', ' + eur(einf.danach.abo) + ' und ' + eur(einf.danach.plus) + '.'] : []),
+    '- Für Fensterbauer und Fensterhändler (nur Unternehmer): der eigene Fenster-Konfigurator unter der eigenen Domain, in drei Paketen mit Einrichtung und festem Monatspreis, ohne Gebühr je Anfrage (Abschnitt „Konfigurator-Pakete für Fensteranbieter“ unten).',
+    ...(einf ? ['- Einführungspreis bis ' + einf.bisText + ': Aufmaßblatt ' + eur(p.aufmass) + '; ab dem Folgetag ' + eur(einf.danach.aufmass) + '.'] : []),
     '- Ohne Installation und ohne Konto zum Messen; läuft auf Handy, Tablet und Computer. Eingaben bleiben auf dem Gerät, bis man sie sichert (Konto mit E-Mail-Adresse und Code, ohne Passwort, nötig für das Aufmaßblatt) oder selbst weitergibt.',
     '- Das eigene Aufmaß reicht für ein Angebot. Vor der Fertigung misst der Fensterbauer nach (Feinaufmaß) und legt das Bestellmaß fest.',
     '- Der Name wird immer klein geschrieben: eeziframes.',
@@ -219,7 +221,7 @@ export function llms(origin, env) {
     '## Seiten',
     '',
     '- [App: Fenster ausmessen](' + u('/app/') + '): kostenlose Aufmaß-App im Browser, mit Führung zum Ausprobieren',
-    '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): Erstaufmaß ohne Anfahrt, Ablauf, Kundenschutz (der Kunde sieht im Link nur den eigenen Betrieb), Inhalt des Aufmaßes, Preise',
+    '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): eigener Fenster-Konfigurator unter der eigenen Domain, drei Pakete mit Preisen, Ablauf bis zum Livegang, Kundenschutz, Inhalt jeder Anfrage',
     '- [Ratgeber: in sechs Schritten zu neuen Fenstern](' + u('/ratgeber/') + '): prüfen, entscheiden, auswählen, ausmessen, vergleichen, einbauen',
     '- [Fenster beschlagen](' + u('/ratgeber/fenster-beschlagen/') + '): innen, außen oder zwischen den Scheiben, was es bedeutet und was hilft',
     '- [Fenster undicht oder es zieht](' + u('/ratgeber/fenster-undicht/') + '): Zugluft finden, Dichtung und Beschlag prüfen, wann ein Tausch nötig ist',
