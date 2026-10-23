@@ -138,13 +138,20 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
   .vk-hero-foto img { position: absolute; inset: 0;
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); -webkit-mask-composite: source-in;
     mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); mask-composite: intersect }
-  .vk-hero-foto .chips { left: 16px; right: calc(var(--vk-rand) + 8px); bottom: 52px; max-width: 300px; justify-content: flex-start }
+  .vk-hero-foto .chips { left: 16px; right: calc(var(--vk-rand) + 8px); bottom: 52px; max-width: 340px; justify-content: flex-start }
   .vk-hero > .rg-inhalt ol { columns: 3 }
 }
 /* schmale Schreibtische: bis 999 px ist das Foto ein schmaler Streifen (weder Karten noch Chips haben dort Platz), bis 1199 px nehmen
-   die Karten 70 % des Streifens und das Bild bekommt Höhe für Karten und Chips */
+   die Karten in der kurzen Fassung (wie am Telefon, ohne .vk-nur-breit) 58 % des Streifens, das Bild bekommt Höhe für Karten und Chips */
 @media (min-width: 761px) and (max-width: 999px) { .vk-hero-foto .vk-eingang, .vk-hero-foto .chips { display: none } }
-@media (min-width: 1000px) and (max-width: 1199px) { .vk-hero-foto { min-height: clamp(500px, 42vw, 580px) } .vk-hero-foto .vk-eingang { top: 16% } .vk-nachricht { width: min(70%, 300px) } }
+@media (min-width: 1000px) and (max-width: 1199px) { .vk-hero-foto { min-height: clamp(500px, 42vw, 580px) } .vk-hero-foto .vk-eingang { top: 16% } .vk-nachricht { width: min(58%, 300px) } }
+/* kurze Fassung der Karten (Telefon und 1000–1199 px): Titel über die ganze Zeile, Zeit in der zweiten Zeile, Zusätze entfallen */
+@media (max-width: 760px), (min-width: 1000px) and (max-width: 1199px) {
+  .vk-hero-foto .vk-nur-breit { display: none }
+  .vk-nachricht b { grid-column: 2 / -1 }
+  .vk-nachricht > span { grid-column: 2 }
+  .vk-nachricht small { grid-row: 2; grid-column: 3 }
+}
 @media (max-width: 760px) {
   /* 500 px hoch (fast das 4:5 des Fotos): die drei Meldungskarten oben links auf 60 % der Breite (der Astronaut rechts bleibt frei),
      die Chips (32 px) unten in der ausgeblendeten Zone */
@@ -153,11 +160,7 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
   .vk-hero-foto .chips { bottom: 72px; justify-content: flex-start }
   .vk-hero-foto .chip { min-height: 32px }
   .vk-hero-foto .vk-eingang { top: 28px }
-  .vk-hero-foto .vk-nur-breit { display: none }
   .vk-nachricht { width: min(60%, 300px) }
-  .vk-nachricht b { grid-column: 2 / -1 }
-  .vk-nachricht > span { grid-column: 2 }
-  .vk-nachricht small { grid-row: 2; grid-column: 3 }
   .vk-hero > .kicker, .vk-hero > h1, .vk-hero > .rg-kurz, .vk-hero > .rg-cta, .vk-hero > .rg-inhalt { position: relative; z-index: 1 }
 }
 @media (max-width: 600px) { .vk-hero > .rg-cta .btn { flex: 1 1 100%; justify-content: center } }
