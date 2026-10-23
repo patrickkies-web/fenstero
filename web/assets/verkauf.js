@@ -114,11 +114,13 @@
      es außerhalb des Bildes pausiert). Bei „weniger Bewegung“ zeigt Lottie.spielen selbst das Endbild. */
   function kette(karten, i) {
     if (i >= karten.length) return;
-    var k = karten[i], weiter = false;
+    var k = karten[i], weiter = false, name = k.getAttribute('data-zeichen');
     var naechste = function () { if (weiter) return; weiter = true; kette(karten, i + 1); };
-    window.Lottie.spielen(k, k.getAttribute('data-zeichen'), {}).then(function (an) {
+    /* „senden“ endet leer (der Flieger ist weg): bei „weniger Bewegung“ bleibt das Standbild, sonst nach dem Flug zurück zum ersten Bild */
+    if (name === 'senden' && ruhig()) { naechste(); return; }
+    window.Lottie.spielen(k, name, {}).then(function (an) {
       if (!an || ruhig()) { setTimeout(naechste, an ? 0 : 800); return; }
-      an.addEventListener('complete', naechste);
+      an.addEventListener('complete', function () { if (name === 'senden') { try { an.goToAndStop(0, true); } catch (e) { /* Spieler ohne goToAndStop */ } } naechste(); });
       setTimeout(naechste, 6000);
     });
   }
