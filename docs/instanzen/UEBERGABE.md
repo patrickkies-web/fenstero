@@ -23,7 +23,7 @@ Verbindlich sind:
 | Volle Prüfsuite auf `e8d86a0`, Abschnitte 1–30 | **1641 bestanden, 0 fehlgeschlagen** |
 | Prüfung durch zwei unabhängige Prüfer | fertig: 22 Befunde (1 muss, 9 sollte, 12 kann), siehe `PRUEFBEFUNDE.md` |
 | Nacharbeit der Befunde | fertig: 18 behoben, 2 bestätigt (6, 7), 1 teilweise (17), 3 bewusst verschoben (11, 13, 15), siehe Tabelle in `PRUEFBEFUNDE.md` |
-| Volle Prüfsuite nach der Nacharbeit, Abschnitte 1–30 | läuft, Ergebnis folgt im nächsten Commit |
+| Volle Prüfsuite nach der Nacharbeit, Abschnitte 1–30 | **1679 bestanden, 0 fehlgeschlagen** (Stand a2d202d) |
 | Schlussprüfung, PR, Bericht an den Inhaber | PR nach main offen (nicht gemergt), Bericht übergeben |
 
 Der Code ist **nicht** auf main. Merge erst nach Freigabe durch den Inhaber (Preise, Rechtstexte, Einrichtung bei Cloudflare, Stripe und Resend, siehe BAUPLAN §4). Der Stand ist so gebaut, dass ein Merge auch vorher gefahrlos ist: Ohne `PAKETE_OFFEN=1` kann niemand ein Paket kaufen, und Instanz-Domains gibt es erst, wenn der Inhaber eine anlegt.
