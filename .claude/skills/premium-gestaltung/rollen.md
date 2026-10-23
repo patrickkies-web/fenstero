@@ -46,3 +46,18 @@ Kleine Änderungen (Text, Abstand, Farbe) brauchen keine Rollenprüfung, nur die
 - Zusammenführen: Ein Muster zählt, wenn mehrere Rollen es unabhängig finden. Widersprechen sich Rollen, steht die Entscheidung mit
   Grund in designrichtung.md (2.5). Behauptungen der Rollen vor dem Übernehmen nachprüfen; ihre Zählungen weichen oft um ein, zwei
   Bilder ab.
+
+## 4. Jury: eine fertige Seite bewerten
+
+- **Besetzung.** Alle zwölf Rollen. Verwandte Rollen dürfen sich einen Hilfsagenten teilen, jede mit eigenem Urteil: Art Director mit
+  Fotograf, UX und Verkauf mit Fensterbauer, Typograf mit Layouter, Kontrast mit Frontend, Bewegung mit Animationsregisseur,
+  Markenstratege mit Hauseigentümerin.
+- **Grundlage.** Die Seite selbst (Vorschau-Server, Telefon 390 × 844 und Schreibtisch 1280 × 800, Bewegung als Bildfolge oder
+  Video), designrichtung.md und docs/GESTALTUNG.md. Jede Regel dort ist ein Prüfpunkt.
+- **Urteil je Rolle.** Jedes Kriterium der Rolle mit „erfüllt“, „teilweise“ oder „verfehlt“ und einem Beleg (Bildschirmnummer,
+  Messwert, Zeile im Quelltext). Dazu eine Note von 0 bis 10 und die drei größten Lücken mit Vorschlag und Aufwand (klein, mittel,
+  groß).
+- **Bestanden** hat eine Rolle mit Note 8 oder besser und ohne „verfehlt“ bei einem Kernpunkt der Designrichtung (Held, Klartext, eine
+  Handlung, Lesbarkeit, Licht mit Quelle, ruhige Fassung, Ehrlichkeit). Die Seite entspricht der Jury, wenn alle Rollen bestehen.
+- **Ehrlich bleiben.** Was die Rolle nur annimmt, steht als Annahme da. Lücken, die Inhalte des Inhabers betreffen (Texte, Preise,
+  Fotos), werden als Vorschlag an ihn formuliert, nicht als Fehler der Gestaltung.
