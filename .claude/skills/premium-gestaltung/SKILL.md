@@ -10,8 +10,9 @@ docs/GESTALTUNG.md (Farben, Schrift, Größen, Bewegung), die dort verbindlich s
 vorlage.md neben dieser Datei; fehlt in einem Auftrag ein Feld, sinnvoll annehmen und die Annahme im Ergebnis nennen.
 
 **Wie es aussehen soll, steht in designrichtung.md neben dieser Datei: vor jedem sichtbaren Element lesen.** Kurz: ruhig wie Apple,
-präzise wie ein Aufmaß, mit Licht und Tiefe wie in einer Raumstation; ein Held je Bildschirm, echtes Material, zwei Schriftstimmen,
-Licht nur mit Quelle. Dort stehen auch die Analyse seiner Vorbilder und die Bausteine des Stils.
+präzise wie ein Aufmaß, mit Licht und Tiefe wie in einer Raumstation; erst verstehen, dann erleben; ein Held je Bildschirm, echtes
+Material, zwei Schriftstimmen, Licht nur mit Quelle. Dort stehen auch die Analyse seiner 21 Vorbilder, verglichen aus fünf Rollen, und
+die Bausteine des Stils.
 
 ## 1. Grundhaltung
 
@@ -82,7 +83,7 @@ Seine Messlatte: Ein Fensterbauer soll an der Seite merken, dass eeziframes Webd
 
 ## 6. Checkliste vor dem Zeigen
 
-- Wirkt es hochwertig und heutig, nicht wie ein Baukasten-Muster? Hält es die Prüfpunkte der Designrichtung (Abschnitt 7 dort)?
+- Wirkt es hochwertig und heutig, nicht wie ein Baukasten-Muster? Hält es die Prüfpunkte der Designrichtung (Abschnitt 6 dort)?
 - Telefon: Steht das Wichtige zusammen auf einem Bildschirm? Ist es mit dem Daumen bedienbar?
 - Verdeckt nichts das Hauptmotiv (Gesichter, Hauptobjekt, Details im Bild wie Papierflieger)?
 - Läuft die Bewegung flüssig und weich, und ist die ruhige Fassung vollständig?
@@ -93,8 +94,8 @@ Seine Messlatte: Ein Fensterbauer soll an der Seite merken, dass eeziframes Webd
 ## 7. Material beim Inhaber anfragen
 
 Er erzeugt Bilder mit Flux und Videos mit Kling und lädt sie im Chat hoch. Anfragen immer mit: Zweck, Format und Pixelmaß, Freistellung
-(PNG mit Transparenz oder einfarbig grüner Hintergrund), Licht und Blickrichtung passend zum übrigen Bild, was nicht drin sein darf (Text,
-Wasserzeichen). Bei Videos zusätzlich: Länge, nahtlose Schleife (Start- und Endbild gleich), Kamera still, ruhige Bewegung, und ein Prompt
+(PNG mit Transparenz oder einfarbig grüner Hintergrund), Licht und Blickrichtung passend zum übrigen Bild, eine Makrotextur in Nahsicht
+und cremeweiße statt bläuliche Spitzlichter (designrichtung.md, 3.1 und 3.4), was nicht drin sein darf (Text, Wasserzeichen). Bei Videos zusätzlich: Länge, nahtlose Schleife (Start- und Endbild gleich), Kamera still, ruhige Bewegung, und ein Prompt
 auf Englisch zum Kopieren. Hochgeladene Dateien liegen unter /root/.claude/uploads/<Sitzung>/; kommt ein angekündigtes Bild nicht an,
 das sofort sagen.
 
@@ -120,8 +121,11 @@ das sofort sagen.
 - **Mag:** das Startbild der Fensterbauer-Seite mit Foto, eingeblendeten Benachrichtigungen und Haken-Chips unter der Überschrift; die
   Astronauten-Bildwelt; Leisten wie die Partner-Logoleisten anderer Seiten, aber hochwertig ausgearbeitet; Pakete am Telefon zum Wischen
   mit einem Beispielbild darunter, das sichtbar mitwischt; Lamellen und Fenstermodell mit viel Realismus.
-- **Vorbilder (23.10.2026):** „Apple-ähnlich“; Dropbox Dash × McLaren, textura.eu, KAGE (kryntixstudio), Axle (viktoroddy), ein
-  KI-Dashboard (juicelab), DE</HELPERS (seanaiux) und die Skills „Motion Design“ und „Design DNA“. Ausgewertet in designrichtung.md.
+- **Vorbilder (23.10.2026):** „Apple-ähnlich“. Erste Runde: Dropbox Dash × McLaren, textura.eu, KAGE (kryntixstudio), Axle
+  (viktoroddy), ein KI-Dashboard (juicelab), DE</HELPERS (seanaiux) und die Skills „Motion Design“ und „Design DNA“. Zweite Runde: Liquid
+  Glass (Figma), Dentora und Velour, eine Fahrdienst-App, Freshify, POUR/PLAY, Bluebird, lightup, eine Samurai-Parallaxe (Webflow,
+  Lottie), happy lemon, Dahlia und Ciao Energy (WebGL), mit dem Auftrag, alle mehrfach aus unterschiedlichen Rollen zu vergleichen und
+  die Gemeinsamkeiten in den Skill zu nehmen. Ausgewertet in designrichtung.md, Abschnitt 2.
 - **Mag nicht:** das Bewegtbild Handy zu Briefumschlag; die Unterschrift „Vom Foto zum Aufmaßblatt, so sieht es Ihr Kunde.“; lange Texte
   und Inhaltsverzeichnisse auf der Verkaufsseite; überdimensionierte Desktop-Ansichten; flache Laufbänder und Effekte „von 2015“; lange
   Wartezeiten ohne Ergebnis; eigenmächtige Umdeutungen seiner Vorgaben.
