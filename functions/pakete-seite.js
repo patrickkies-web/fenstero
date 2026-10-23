@@ -116,7 +116,8 @@ function vergleich(o, v) {
   Object.keys(M).forEach((s) => { if (M[s].vergleich && s !== 'preis') zeilen.push(zeile(M[s].titel, ms.map((m) => esc(wertText(s, m))))); });
   return '\n  <table class="rg-tab vk-vergleich">' + kopf + '<tbody>' + zeilen.join('') + '</tbody></table>\n  <p class="rg-klein">Alle Preise ' + steuerText(v) + ', nur für Unternehmer.' + (v.vorlaeufig ? ' Vorläufige Preise.' : '') + '</p>\n  ';
 }
-/* Ablauf von der Bestellung bis Live: die sechs Schritte der Statusleiste im Kundenkonto, in denselben Worten */
+/* Ablauf von der Bestellung bis Live: die sechs Schritte der Statusleiste im Kundenkonto, in denselben Worten; auf der Verkaufsseite
+   als Zeitleiste (verkauf.css .vk-ablauf: die Linie füllt sich beim Scrollen), ohne JavaScript die nummerierte Liste des Ratgebers */
 const ABLAUF = {
   offen: 'Sie wählen Ihr Paket und geben Firma, Wunsch-Domain und die E-Mail-Adressen für Ihre Anfragen an. Die Eingangsbestätigung mit den Paketbedingungen als PDF kommt sofort.',
   bezahlt: 'Sie zahlen die Einrichtungsgebühr vorab bei Stripe, per Karte oder SEPA-Lastschrift. Danach legen wir los.',
@@ -126,14 +127,15 @@ const ABLAUF = {
   live: 'Ihr Konfigurator ist öffentlich. Ab jetzt läuft das Monatsabo, und Sie bekommen einen Knopf „Fenster planen“ für Ihre Website.'
 };
 function ablauf() {
-  return '\n  <ol class="rg-schritte">' + R().bestellung.LEISTE.map((s) => '\n    <li><b>' + esc(s.titel) + '</b>' + esc(ABLAUF[s.status] || '') + '</li>').join('') + '\n  </ol>\n  ';
+  return '\n  <ol class="rg-schritte vk-ablauf">' + R().bestellung.LEISTE.map((s) => '\n    <li><b>' + esc(s.titel) + '</b>' + esc(ABLAUF[s.status] || '') + '</li>').join('') + '\n  </ol>\n  ';
 }
+/* Demos als Karten in Paketfarbe (verkauf.css: Essential dunkel, Plus und Signature mit Akzentstrich; ohne Demos der Weg in die App) */
 function demos(o, v) {
   if (v.demos) {
-    return '\n  <p>So sieht der Konfigurator bei Ihren Kunden aus, je Paket mit einem erfundenen Betrieb. Anfragen dort gehen an uns und verschwinden nach einem Tag.</p>\n  <div class="rg-karten">' +
-      P().LISTE.map((p) => '<a class="rg-karte" href="https://demo-' + p + '.eeziframes.com/" rel="noopener"><b>Demo ' + esc(P().PAKETE[p].name) + '</b><span>' + esc(kurzText(P().merkmale(p))) + '</span></a>').join('') + '</div>\n  ';
+    return '\n  <p>So sieht der Konfigurator bei Ihren Kunden aus, je Paket mit einem erfundenen Betrieb. Anfragen dort gehen an uns und verschwinden nach einem Tag.</p>\n  <div class="rg-karten vk-demos">' +
+      P().LISTE.map((p) => '<a class="rg-karte vk-demo vk-demo-' + p + '" href="https://demo-' + p + '.eeziframes.com/" rel="noopener"><b>Demo ' + esc(P().PAKETE[p].name) + '</b><span>' + esc(kurzText(P().merkmale(p))) + '</span></a>').join('') + '</div>\n  ';
   }
-  return '\n  <p>Die Live-Demos je Paket schalten wir in Kürze frei. Bis dahin probieren Sie den Konfigurator selbst aus: Es ist dieselbe App, mit der Hauseigentümer auf eeziframes.com ihre Fenster planen. Unter Ihrer Domain trägt sie Ihren Namen, zeigt keine Preise und schickt jede Anfrage an Sie.</p>\n  <div class="rg-karten"><a class="rg-karte" href="/app/"><b>Konfigurator ausprobieren</b><span>Ein Fenster planen, mit Fotos, Maßen und 3-D-Modell; ohne Konto.</span></a></div>\n  ';
+  return '\n  <p>Die Live-Demos je Paket schalten wir in Kürze frei. Bis dahin probieren Sie den Konfigurator selbst aus: Es ist dieselbe App, mit der Hauseigentümer auf eeziframes.com ihre Fenster planen. Unter Ihrer Domain trägt sie Ihren Namen, zeigt keine Preise und schickt jede Anfrage an Sie.</p>\n  <div class="rg-karten vk-demos"><a class="rg-karte vk-demo vk-demo-app" href="/app/"><b>Konfigurator ausprobieren</b><span>Ein Fenster planen, mit Fotos, Maßen und 3-D-Modell; ohne Konto.</span></a></div>\n  ';
 }
 function formular() {
   const optionen = '<option value="">Noch offen</option>' + P().LISTE.map((p) => '<option value="' + p + '">' + esc(P().PAKETE[p].name) + '</option>').join('');
