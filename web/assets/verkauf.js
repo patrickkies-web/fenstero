@@ -163,6 +163,7 @@
       var p0 = null;
       window.Scroll.binden(fig, function (p) { if (p0 === null) p0 = p; fig.style.setProperty('--py', Math.max(0, p - p0).toFixed(4)); });
     }
+    bullauge(fig);
     var stapel = fig.querySelector('.vk-stapel');
     if (!stapel || ruhig()) return;
     var reihe = Array.prototype.slice.call(stapel.querySelectorAll('.vk-nachricht')), uhr = null;
@@ -184,6 +185,72 @@
     function los() { if (!uhr) uhr = setInterval(weiter, 3400); }
     if (kannIO) { var io = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) los(); else stopp(); }); }, { threshold: 0 })); io.observe(fig); }
     else los();
+  }
+
+  /* ---------- Licht, Staub und Maßlinie am Bullauge (Designrichtung) ----------
+     Das Foto füllt seinen Ausschnitt mit object-fit: cover; punkt() rechnet einen Bildpunkt des Originals (1122 × 1402) in die Lage im
+     Ausschnitt um. ERDE ist der Blick durchs Bullauge im Foto fb-sessel. Daraus: --lx/--ly für die Mitte des Erdlichts, Lage und Höhe der
+     Maßlinie (am rechten Rand des sichtbaren Ausblicks; passt sie nicht hinein, bleibt sie weg), Staub im Lichtkegel zwischen Bullauge
+     und Astronaut. Die Maßlinie zeichnet sich einmal, nachdem das Foto eingezoomt ist und solange es im Bild ist; der Wert zählt mit.
+     Außerhalb des Bildes ruhen Staub und Licht (.vk-aus). Bei „weniger Bewegung“: Licht und Linie stehen fertig, kein Staub. */
+  var ERDE = { x0: 981, y0: 142, x1: 1119, y1: 526 };
+  function bullauge(fig) {
+    var img = fig.querySelector('.vk-hero-zoom img'), licht = fig.querySelector('.vk-licht'), staub = fig.querySelector('.vk-staub'), mass = fig.querySelector('.vk-mass');
+    if (!img) return;
+    var gezeichnet = false, t0 = performance.now();
+    function punkt(ix, iy) {
+      var W = img.clientWidth, H = img.clientHeight, nw = img.naturalWidth || 1122, nh = img.naturalHeight || 1402;
+      var k = Math.max(W / nw, H / nh), op = (getComputedStyle(img).objectPosition || '50% 50%').split(' ');
+      var ox = (W - nw * k) * (parseFloat(op[0]) / 100), oy = (H - nh * k) * (parseFloat(op[1] || op[0]) / 100);
+      return { x: ox + ix * k, y: oy + iy * k, W: W, H: H };
+    }
+    function legen() {
+      if (!document.body.contains(fig)) { window.removeEventListener('resize', legen); return; }
+      if (!img.clientWidth) return;
+      var a = punkt(ERDE.x0, ERDE.y0), b = punkt(ERDE.x1, ERDE.y1);
+      if (licht) { licht.style.setProperty('--lx', ((a.x + Math.min(b.x, a.W)) / 2).toFixed(1) + 'px'); licht.style.setProperty('--ly', ((a.y + b.y) / 2).toFixed(1) + 'px'); }
+      if (mass) {
+        var x = Math.min(b.x - 20, a.W - 16);
+        mass.style.setProperty('--mx', x.toFixed(1) + 'px');
+        mass.style.setProperty('--my', a.y.toFixed(1) + 'px');
+        mass.style.setProperty('--mh', (b.y - a.y).toFixed(1) + 'px');
+        mass.classList.toggle('vk-da', x - a.x >= 12);
+      }
+      if (staub && !staub.firstChild && !ruhig()) {
+        var p1 = punkt(560, 40), p2 = punkt(1090, 780), w = p1.W || 1, h = p1.H || 1;
+        for (var n = 0; n < 28; n++) {
+          var t = document.createElement('i'), r = Math.random;
+          var x0 = (p1.x + (p2.x - p1.x) * r()) / w * 100, y0 = (p1.y + (p2.y - p1.y) * Math.pow(r(), 1.3)) / h * 100;
+          t.style.cssText = '--s:' + (1 + r() * 1.6).toFixed(1) + 'px;--o:' + (0.2 + r() * 0.45).toFixed(2) + ';--d:' + (9 + r() * 8).toFixed(1) + 's;--v:-' + (r() * 9).toFixed(1) +
+            's;--dx:' + Math.round(-14 + r() * 28) + 'px;--dy:' + Math.round(-18 + r() * 22) + 'px;left:' + x0.toFixed(1) + '%;top:' + y0.toFixed(1) + '%';
+          staub.appendChild(t);
+        }
+      }
+    }
+    function zeichnen() {
+      if (gezeichnet || ruhig() || !mass || !mass.classList.contains('vk-da') || !document.body.contains(fig)) return;
+      gezeichnet = true;
+      var zahl = mass.querySelector('.vk-mass-wert b'), start = 0, D = 1400;
+      mass.style.setProperty('--mz', '0'); mass.style.setProperty('--me', '0'); mass.style.setProperty('--mw', '0');
+      requestAnimationFrame(function schritt(t) {
+        if (!start) start = t;
+        var q = Math.min(1, (t - start) / D), e = 1 - Math.pow(1 - q, 3);
+        mass.style.setProperty('--mz', e.toFixed(3));
+        mass.style.setProperty('--mw', Math.min(1, q * 3).toFixed(3));
+        mass.style.setProperty('--me', q >= 1 ? '1' : '0');
+        if (zahl) zahl.textContent = Math.round(1200 * e).toLocaleString('de-DE');
+        if (q < 1) requestAnimationFrame(schritt);
+      });
+    }
+    function bereit() { legen(); if (!ruhig()) setTimeout(function () { if (!fig.classList.contains('vk-aus')) zeichnen(); }, Math.max(0, 1700 - (performance.now() - t0))); }
+    if (img.complete && img.naturalWidth) bereit(); else img.addEventListener('load', bereit, { once: true });
+    window.addEventListener('resize', legen);
+    if (kannIO) {
+      var io = beobachten(new IntersectionObserver(function (es) {
+        es.forEach(function (e) { fig.classList.toggle('vk-aus', !e.isIntersecting); if (e.isIntersecting && img.naturalWidth) setTimeout(zeichnen, Math.max(0, 1700 - (performance.now() - t0))); });
+      }, { threshold: 0 }));
+      io.observe(fig);
+    }
   }
 
   /* ---------- Leisten unter dem Startbild ----------
@@ -224,8 +291,10 @@
       for (var i = 0; i < L.eintraege.length; i++) {
         var e = L.eintraege[i], c = e.x + e.b / 2 + tx;
         if (c < -e.b || c > L.w + e.b) continue;
-        var d = Math.min(1, Math.abs(c - mitte) / mitte);
+        var ds = Math.max(-1, Math.min(1, (c - mitte) / mitte)), d = Math.abs(ds);
         e.el.style.setProperty('--l', (1 - d * d).toFixed(2));
+        e.el.style.setProperty('--d', ds.toFixed(3));
+        e.el.style.setProperty('--a', (d * d).toFixed(3));
       }
     });
     if (weiter) leisteLauf = requestAnimationFrame(leisteSchritt);
@@ -335,6 +404,66 @@
     }
   }
 
+  /* ---------- Zahlenkacheln (Designrichtung) ----------
+     Die belegte Zahl zählt einmal hoch, wenn ihre Kachel zu 60 % im Bild steht (0,9 s, ausrollend), mit derselben Schreibweise wie im
+     HTML (Komma, Tausenderpunkt, gleich viele Nachkommastellen); Ziffern gleich breit, darum springt nichts. Bei „weniger Bewegung“ und
+     ohne Beobachter steht die Zahl wie im HTML. */
+  function zahlen(wurzel) {
+    if (ruhig() || !kannIO) return;
+    Array.prototype.forEach.call(wurzel.querySelectorAll('[data-zahl]'), function (el) {
+      if (el.__vkAn) return;
+      el.__vkAn = true;
+      var roh = el.getAttribute('data-zahl'), teile = roh.split(','), stellen = teile[1] ? teile[1].length : 0;
+      var ziel = parseFloat(roh.replace(/\./g, '').replace(',', '.'));
+      if (!isFinite(ziel)) return;
+      var fmt = function (v) { return v.toLocaleString('de-DE', { minimumFractionDigits: stellen, maximumFractionDigits: stellen }); };
+      if (el.getBoundingClientRect().top < window.innerHeight) return; // schon im Bild: nicht neu zählen
+      el.textContent = fmt(0);
+      var io = beobachten(new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          io.disconnect();
+          var t0 = 0;
+          requestAnimationFrame(function schritt(t) {
+            if (!t0) t0 = t;
+            var q = Math.min(1, (t - t0) / 900), k = 1 - Math.pow(1 - q, 3);
+            el.textContent = fmt(q < 1 ? ziel * k : ziel);
+            if (q < 1) requestAnimationFrame(schritt);
+          });
+        });
+      }, { threshold: 0.6 }));
+      io.observe(el.closest('li') || el);
+    });
+  }
+
+  /* ---------- Szene „Was in jeder Anfrage steht“ ----------
+     --sp von 0 (Szene kommt unten herein) bis 1 (oben hinaus): Aufmaßblatt und die kleinen Karten laufen leicht gegeneinander. */
+  function szene(wurzel) {
+    var sz = wurzel.querySelector('.vk-szene');
+    if (!sz || sz.__vkAn || !window.Scroll || ruhig()) return;
+    sz.__vkAn = true;
+    window.Scroll.binden(sz, function (p) { sz.style.setProperty('--sp', p.toFixed(3)); });
+  }
+
+  /* ---------- Lesefortschritt im Kopf der statischen Seite ----------
+     Der Maßstab an der Unterkante der Kopfzeile füllt sich grün mit dem Weg durch die Seite (--k von 0 bis 1). */
+  var kopfAn = false;
+  function fortschritt(wurzel) {
+    if (kopfAn || wurzel !== document) return;
+    var kopf = document.querySelector('.vk-seite .rg-kopf');
+    if (!kopf) return;
+    kopfAn = true;
+    var tick = false;
+    function rechnen() {
+      tick = false;
+      var d = document.documentElement, k = (window.pageYOffset || 0) / Math.max(1, d.scrollHeight - window.innerHeight);
+      kopf.style.setProperty('--k', Math.max(0, Math.min(1, k)).toFixed(4));
+    }
+    window.addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(rechnen); } }, { passive: true });
+    window.addEventListener('resize', rechnen);
+    rechnen();
+  }
+
   function bewegung(wurzel, still) {
     beobachter.forEach(function (b) { b.disconnect(); }); beobachter = [];
     /* Neuaufbau desselben Bildschirms (still): Was im Bild steht oder schon vorbei ist, bleibt, wie es ist (kein Flackern); was noch
@@ -345,9 +474,9 @@
     /* Erscheinen beim Scrollen: gemeinsam.js setzt .rev (unsichtbar) und .in (sichtbar); ohne Beobachter sofort sichtbar. Gestaffelt wird
        je Gruppe (Karten einer Reihe, Punkte einer Liste): --rv zählt in der Gruppe, Reveal selbst staffelt nur, was beim Aufbau im Bild ist */
     if (window.Reveal) {
-      var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-blatt, .vk-band > *, .vk-vorspann, .vk-pakete, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
+      var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-szene, .vk-anfrage .vk-blatt, .vk-band > :not(ul), .vk-gruende > li, .vk-zusagen > li, .vk-vorspann, .vk-pakete, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
       window.Reveal.auf(liste);
-      if (!ruhig()) Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-punkte, .vk-inhalt, .vk-ablauf, .vk-wissen, .vk-demos'), function (gruppe) {
+      if (!ruhig()) Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-punkte, .vk-inhalt, .vk-gruende, .vk-zusagen, .vk-ablauf, .vk-wissen, .vk-demos'), function (gruppe) {
         var k = 0;
         Array.prototype.forEach.call(gruppe.children, function (el) { if (el.classList.contains('rev') && el.getBoundingClientRect().top >= window.innerHeight) el.style.setProperty('--rv', String(Math.min(k++, 6))); });
       });
@@ -360,6 +489,9 @@
     startbild(wurzel);
     leisten(wurzel);
     pakete(wurzel);
+    zahlen(wurzel);
+    szene(wurzel);
+    fortschritt(wurzel);
 
     /* Zeitleiste: --sp von 0 (Liste kommt unten herein) bis 1 (Liste steht zu zwei Dritteln im Bild); Schritte, deren Symbol die gefüllte
        Linie erreicht hat, bekommen .vk-an (Symbol wird gezogen, verkauf.css). Linie: 30 px unter dem Rand der Liste bis 50 px über dem

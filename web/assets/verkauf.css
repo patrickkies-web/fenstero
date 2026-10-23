@@ -193,21 +193,44 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 /* Meldungen: schlanke Karten im Stil der App-Benachrichtigungen (dunkle Fläche mit Weichzeichner und Ring, grüner Punkt 8 px, Titel 15
    fett mit der Zeit 13 daneben, darunter eine Zeile 13), übereinander in einer Zelle: vorn die neueste, dahinter zwei ältere, kleiner
    und nur als Kante sichtbar (ihr Text ist ausgeblendet, damit nichts durchscheint) */
-.vk-hero-foto .vk-eingang { position: absolute; z-index: 2; top: 12px; right: 16px; width: min(58%, 236px); display: flex; flex-direction: column; gap: 8px; transform: translate3d(0, calc(var(--py, 0) * -60px), 0) }
+.vk-hero-foto .vk-eingang { position: absolute; z-index: 2; top: 12px; left: 16px; width: min(68%, 260px); display: flex; flex-direction: column; gap: 8px; transform: translate3d(0, calc(var(--py, 0) * -60px), 0) }
 .vk-hero-foto .vk-eingang .eyebrow { margin: 0 0 0 2px; letter-spacing: .12em; color: var(--text2); text-shadow: 0 1px 2px rgba(0, 0, 0, .7) }
 .vk-stapel { display: grid; padding-bottom: 17px }
-.vk-nachricht { grid-area: 1 / 1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 8px; align-items: center; padding: 7px 10px 8px; border-radius: var(--r3); background: rgba(24, 24, 24, .9); box-shadow: 0 0 0 2px rgba(255, 255, 255, .14), 0 12px 28px rgba(0, 0, 0, .38); color: var(--text); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform-origin: 50% 0; transition: transform .7s var(--e-out), opacity .7s var(--e-out) }
-.vk-nachricht::before { content: ""; grid-row: 1; grid-column: 1; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft) }
+/* Glas nach der Designrichtung: #1f1f1f zu 60 %, Weichzeichner 24 px, Lichtkante oben; das Erdlicht aus dem Bullauge (rechts) liegt
+   auf der Kante, die zu ihm zeigt (::after). Ohne backdrop-filter eine fast deckende Fläche. */
+.vk-nachricht { position: relative; grid-area: 1 / 1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 10px; align-items: center; padding: 10px 12px 11px; border-radius: var(--r3); background: rgba(31, 31, 31, .92); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 1px rgba(255, 255, 255, .07), 0 18px 40px rgba(0, 0, 0, .45); color: var(--text); transform-origin: 50% 0; transition: transform .7s var(--e-out), opacity .7s var(--e-out) }
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) { .vk-nachricht { background: rgba(31, 31, 31, .6); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%) } }
+.vk-nachricht::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(100deg, rgba(122, 162, 255, 0) 55%, rgba(122, 162, 255, .16)) }
+.vk-nachricht::before { content: ""; grid-row: 1; grid-column: 1; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px var(--ok-soft), 0 0 12px rgba(143, 214, 148, .5) }
 .vk-nachricht b, .vk-nachricht > span, .vk-nachricht small { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .45s var(--e-out) }
 .vk-nachricht b { grid-row: 1; grid-column: 2; font-size: 15px; line-height: 1.25; font-weight: 800 }
 .vk-nachricht > span { grid-row: 2; grid-column: 2 / -1; font-size: 13px; line-height: 1.35; color: var(--text2) }
 .vk-nachricht small { grid-row: 1; grid-column: 3; font-size: 13px; line-height: 1.3; color: var(--muted) }
 .vk-nachricht[data-pos="0"] { z-index: 3 }
-.vk-nachricht[data-pos="1"] { z-index: 2; transform: translateY(9px) scale(.94); opacity: .7 }
-.vk-nachricht[data-pos="2"] { z-index: 1; transform: translateY(17px) scale(.88); opacity: .4 }
+.vk-nachricht[data-pos="1"] { z-index: 2; transform: translateY(10px) scale(.94); opacity: .85 }
+.vk-nachricht[data-pos="2"] { z-index: 1; transform: translateY(19px) scale(.88); opacity: .6 }
 .vk-nachricht[data-pos="neu"] { z-index: 4; transform: translateY(-30px) scale(1.04); opacity: 0; transition: none }
 .vk-nachricht[data-pos="weg"] { z-index: 0; transform: translateY(24px) scale(.82); opacity: 0 }
 .vk-nachricht:not([data-pos="0"]):not([data-pos="neu"]) > *, .vk-nachricht:not([data-pos="0"]):not([data-pos="neu"])::before { opacity: 0 }
+/* Licht, Staub und Maßlinie (Designrichtung 23.10.2026) liegen in .vk-hero-zoom über dem Foto und bewegen sich mit ihm. verkauf.js
+   rechnet die Lage des Bullauges im Bildausschnitt aus (object-fit: cover) und setzt --lx/--ly (Mitte des Lichts) sowie Lage und Höhe
+   der Maßlinie. Erdlicht: weicher Kreis in Element-Blau mit „screen“, atmet langsam; Staub: feine helle Punkte im Lichtkegel, die
+   treiben; Maßlinie: Haarlinie in Orange mit Endstrichen wie in einer Bauzeichnung, zeichnet sich nach dem Bildzoom von oben nach unten,
+   der Wert zählt mit und steht gedreht auf dunklem Glas. Ohne JavaScript bleibt das Licht an seinem Platz, Staub und Maßlinie fehlen. */
+.vk-licht { position: absolute; left: calc(var(--lx, 92%) - 60%); top: calc(var(--ly, 26%) - 38%); width: 120%; height: 76%; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(closest-side, rgba(122, 162, 255, .2), rgba(122, 162, 255, 0)); animation: vk-atmen 8s var(--e-io) infinite alternate }
+@keyframes vk-atmen { from { opacity: .72 } to { opacity: 1 } }
+.vk-staub { position: absolute; inset: 0; pointer-events: none }
+.vk-staub i { position: absolute; width: var(--s); height: var(--s); border-radius: 50%; background: #e9eefc; opacity: var(--o); animation: vk-treiben var(--d) var(--e-io) infinite alternate; animation-delay: var(--v) }
+@keyframes vk-treiben { to { transform: translate3d(var(--dx), var(--dy), 0); opacity: calc(var(--o) * .35) } }
+.vk-hero-foto.vk-aus .vk-staub i, .vk-hero-foto.vk-aus .vk-licht { animation-play-state: paused }
+.vk-mass { display: none; position: absolute; left: var(--mx); top: var(--my); height: var(--mh); width: 0; pointer-events: none }
+.vk-mass.vk-da { display: block }
+.vk-mass i { position: absolute; left: -.75px; top: 0; width: 1.5px; height: 100%; background: var(--mo); transform-origin: 50% 0; transform: scaleY(var(--mz, 1)) }
+.vk-mass::before, .vk-mass::after { content: ""; position: absolute; left: -9px; width: 18px; height: 1.5px; background: var(--mo); box-shadow: 0 0 0 .5px rgba(0, 0, 0, .25) }
+.vk-mass::before { top: 0 }
+.vk-mass::after { bottom: 0; opacity: var(--me, 1) }
+.vk-mass-wert { position: absolute; left: 0; top: 50%; padding: 4px 10px; border-radius: var(--pill); white-space: nowrap; font-size: 13px; line-height: 1.3; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; color: var(--text); background: rgba(22, 22, 22, .62); box-shadow: inset 0 0 0 1px rgba(255, 138, 91, .5); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform: translate(-50%, -50%) rotate(-90deg); opacity: var(--mw, 1) }
+.vk-mass-wert b { font-weight: 600 }
 @media (min-width: 761px) {
   .vk-hero { grid-template-columns: minmax(0, 540px); align-content: center; min-height: clamp(620px, 56vw, 780px); padding: 16px 0 36px }
   .vk-hero > .kicker { margin-top: 0 }
@@ -469,11 +492,140 @@ html:not(.js) .vk-leiste::-webkit-scrollbar, .vk-leiste.vk-still::-webkit-scroll
 /* am Telefon stehen die Chips unter dem Bild (ratgeber.css); die drei dieser Karte passen bei 390 px in eine Zeile, wenn sie etwas enger sitzen */
 @media (max-width: 600px) { .rg .vk-frage-foto .chips { padding: 10px 10px 12px } .rg .vk-frage-foto .chip { padding: 0 10px } }
 
+/* ---------- Designrichtung (23.10.2026) ----------
+   Ruhig wie Apple, präzise wie ein Aufmaß (.claude/skills/premium-gestaltung/designrichtung.md). Jeder Abschnitt beginnt mit einer
+   Haarlinie und seiner Nummer in der Technikstimme (13 px, 600, gesperrt, Ziffern gleich breit); Überschriften in der Bühnenstimme
+   (32 px, am Schreibtisch 40); Lesetext 17 px grau, das Entscheidende hell; Auftritte 600 ms mit 24 px und 0,98, gestaffelt um 70 ms;
+   Glas nur über Fotos; Licht nur mit Quelle; Messraster unter technischen Flächen. */
+.vk-seite .rg, .vk-einbettung { counter-reset: vk-kap }
+.vk-teil, .vk-band { counter-increment: vk-kap; position: relative; margin-top: 96px; padding-top: 58px; border-top: 1px solid var(--line) }
+.vk-teil::before, .vk-band::before { content: counter(vk-kap, decimal-leading-zero); position: absolute; left: 0; top: 18px; font-size: 13px; line-height: 1.3; font-weight: 600; letter-spacing: .12em; font-variant-numeric: tabular-nums; color: var(--accent) }
+.vk-seite .rg h2, .vk-einbettung h2 { font-size: 32px; line-height: 1.05; letter-spacing: -.03em; margin-bottom: 16px }
+.vk-seite .rg > h2#quellen, .vk-einbettung > h2#quellen { margin-top: 96px; font-size: 24px; line-height: 1.2 }
+.vk-seite .eyebrow, .vk-einbettung .eyebrow { font-weight: 600; letter-spacing: .12em }
+.vk-seite .rev, .vk-einbettung .rev { transition-duration: 600ms; transition-delay: calc(var(--rv, var(--i, 0)) * 70ms) }
+.vk-seite .rev:not(.in), .vk-einbettung .rev:not(.in) { transform: translateY(24px) scale(.98) }
+.rg .vk-lead, .vk-band > p, .rg .vk-vorspann p, .vk-teil > p { font-size: 17px; line-height: 1.5; color: var(--text2); max-width: 60ch }
+.rg .vk-lead strong, .vk-band > p strong, .vk-teil > p strong, .rg .vk-kurz strong, .vk-hero > .rg-kurz strong { color: var(--text); font-weight: 700 }
+.vk-hero > .rg-kurz p { font-size: 17px; line-height: 1.5; color: var(--text2) }
+.rg .vk-recht { font-size: 13px; line-height: 1.5; color: var(--muted); max-width: 72ch }
+@media (min-width: 761px) {
+  .vk-teil, .vk-band { margin-top: 128px }
+  .vk-seite .rg h2, .vk-einbettung h2 { font-size: 40px; margin-bottom: 20px }
+}
+
+/* Messraster wie Millimeterpapier (fein alle 8 px, kräftig alle 40 px), zum Rand hin ausgeblendet */
+.vk-raster { background-image: linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px), linear-gradient(rgba(255, 255, 255, .02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .02) 1px, transparent 1px); background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px }
+
+/* Fotokarten: Chips als Glas über dem Bild, auch am Telefon */
+.vk-seite .foto-karte .chip, .vk-einbettung .foto-karte .chip { background: rgba(31, 31, 31, .6); border-color: rgba(255, 255, 255, .1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%) }
+@media (max-width: 600px) {
+  .vk-seite .rg .foto-karte.breit .chips, .vk-einbettung .foto-karte.breit .chips { position: absolute; padding: 0 }
+  .vk-seite .rg .foto-karte.breit .chip, .vk-einbettung .foto-karte.breit .chip { background: rgba(31, 31, 31, .6); border-color: rgba(255, 255, 255, .1); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%) }
+}
+
+/* Leiste 1 (Baustein Leiste): der Name trägt, das Zeichen ist klein (24 px); gewölbt wie eine Rolle: je Eintrag --d (−1 links bis 1 rechts,
+   verkauf.js) dreht ihn weg und macht ihn kleiner; oben in der Mitte ein Lichtschlitz in der Haarlinie, darunter ein weicher Lichtkegel,
+   in dem der Eintrag am hellsten steht */
+.rg .vk-leiste-a li { gap: 10px; padding: 0 26px; transform: perspective(700px) rotateY(calc(var(--d, 0) * -40deg)) scale(calc(1 - var(--a, 0) * .14)); transform-origin: 50% 50% }
+.vk-leiste-a svg { width: 24px; height: 24px }
+.rg .vk-leiste-b li { transform: perspective(700px) rotateY(calc(var(--d, 0) * -26deg)) scale(calc(1 - var(--a, 0) * .08)) }
+.rg .vk-leiste-a span { font-size: 17px }
+.vk-leiste-a::before { content: ""; position: absolute; z-index: 1; left: 50%; top: -1px; width: 140px; height: 1px; margin-left: -70px; background: linear-gradient(90deg, rgba(241, 240, 234, 0), var(--cream), rgba(241, 240, 234, 0)); box-shadow: 0 0 14px rgba(241, 240, 234, .55) }
+.vk-leiste-a::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 460px; margin-left: -230px; pointer-events: none; background: radial-gradient(60% 120% at 50% 0%, rgba(241, 240, 234, .09), rgba(241, 240, 234, 0) 72%) }
+/* Leiste 2: Cream-Band als Markengeste, die Zahl als Held; zwischen den Einträgen ein Stück Maßstab */
+.vk-leiste-mass { flex: 0 0 auto; width: 41px; height: 14px; margin-left: 22px; background: repeating-linear-gradient(90deg, rgba(22, 22, 22, .45) 0 1px, transparent 1px 8px) left bottom / 41px 7px no-repeat, linear-gradient(90deg, rgba(22, 22, 22, .8) 0 1px, transparent 1px) left bottom / 41px 14px no-repeat, linear-gradient(90deg, transparent 40px, rgba(22, 22, 22, .8) 40px) left bottom / 41px 14px no-repeat }
+@media (max-width: 760px) {
+  .rg .vk-leiste-a li { padding: 0 20px }
+  .rg .vk-leiste-a span { font-size: 15px }
+  .vk-leiste-mass { margin-left: 16px }
+}
+
+/* Die Idee: vier Kacheln mit Nummer in der Technikstimme */
+.rg .vk-punkte { counter-reset: vk-p; margin-top: 24px }
+.rg .vk-punkte li { counter-increment: vk-p; position: relative; padding: 50px 20px 20px; border-radius: var(--r4); color: var(--text2) }
+.rg .vk-punkte li::before { content: counter(vk-p, decimal-leading-zero); position: absolute; left: 20px; top: 18px; font-size: 13px; line-height: 1.3; font-weight: 600; letter-spacing: .12em; font-variant-numeric: tabular-nums; color: var(--muted) }
+.rg .vk-punkte strong { margin-bottom: 6px; color: var(--text) }
+
+/* So funktioniert es: Nummern in der Technikstimme; am Schreibtisch ein dunkles Gerät mit Insel im Studiolicht (Lichtschlitz oben,
+   weicher Kegel), darunter Messraster und ein weicher Bodenschatten */
+.vk-karte::before { content: counter(vk, decimal-leading-zero); min-width: 0; height: auto; padding: 0; background: none; font-weight: 600; letter-spacing: .12em; font-variant-numeric: tabular-nums; color: var(--muted) }
+.vk-buehne[data-schritt="1"] li:nth-child(1) .vk-karte::before, .vk-buehne[data-schritt="2"] li:nth-child(2) .vk-karte::before, .vk-buehne[data-schritt="3"] li:nth-child(3) .vk-karte::before, .vk-buehne[data-schritt="4"] li:nth-child(4) .vk-karte::before, .vk-buehne[data-schritt="5"] li:nth-child(5) .vk-karte::before { background: none; color: var(--accent) }
+@media (min-width: 761px) {
+  .vk-buehne-rechts::before { content: ""; position: absolute; left: -60px; right: -60px; top: -70px; bottom: -40px; pointer-events: none;
+    background: radial-gradient(50% 42% at 50% 0%, rgba(241, 240, 234, .12), rgba(241, 240, 234, 0) 100%), radial-gradient(40% 5% at 50% 98%, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0)), linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(rgba(255, 255, 255, .018) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .018) 1px, transparent 1px);
+    background-size: auto, auto, 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+    -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent); mask-image: radial-gradient(closest-side, #000 55%, transparent) }
+  .vk-telefon { background: var(--ground); box-shadow: 0 0 0 1px #3a3a3a, 0 0 0 9px #0b0b0b, 0 0 0 10px #2e2e2e, 0 40px 80px rgba(0, 0, 0, .65) }
+  .vk-telefon::before { top: 12px; width: 92px; height: 26px; margin-left: -46px; border-radius: 13px; background: #000 }
+}
+
+/* Was in jeder Anfrage steht (Baustein Medienkarte): die Szene mit dem echten Aufmaßblatt, gedreht im dunklen Rahmen, davor Maße und
+   Klärungsliste als kleine Karten; beim Scrollen laufen sie leicht gegeneinander (--sp aus verkauf.js). Am Telefon steht die Szene
+   über der Liste. */
+.vk-szene { position: relative; margin: 0; padding: 4px 0 176px }
+.vk-mk { margin: 0 }
+.vk-mk-blatt { width: 86%; margin-left: 0; transform: translateY(calc(var(--sp, .5) * -16px + 8px)) rotate(-2.5deg) }
+.vk-mk-rahmen { padding: 6px; border-radius: var(--r2); background: var(--surface2); box-shadow: var(--float) }
+.vk-mk-rahmen img { display: block; width: 100%; height: auto; border-radius: 7px }
+.vk-mk figcaption { display: flex; align-items: center; gap: 8px; margin: 12px 0 0 4px; font-size: 13px; line-height: 1.3; font-weight: 600; letter-spacing: .02em; color: var(--muted) }
+.vk-mk figcaption i { flex: 0 0 auto; width: 11px; height: 14px; border-radius: 2px; background: var(--mo) }
+.vk-mk-mass { position: absolute; right: 0; top: 9%; width: 62%; padding: 16px; border-radius: var(--r3); background: var(--surface); box-shadow: var(--float); transform: translateY(calc(var(--sp, .5) * 16px - 8px)) rotate(2deg) }
+.vk-mk-mass svg { display: block; width: 100%; height: 12px; margin-bottom: 10px; overflow: visible }
+.vk-mk-mass b { display: block; font-size: 24px; line-height: 1.1; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text) }
+.vk-mk-mass span { display: block; margin-top: 4px; font-size: 13px; font-weight: 600; letter-spacing: .02em; color: var(--muted) }
+.vk-szene .vk-blatt { position: absolute; left: 3%; bottom: 0; width: 80%; padding: 14px 16px 12px; box-shadow: var(--float); transform: translateY(calc(var(--sp, .5) * 22px - 11px)) rotate(-1deg) }
+.vk-szene .vk-blatt > .eyebrow { margin: 0 0 6px }
+.rg .vk-anfrage .vk-szene .vk-blatt { top: auto }
+@media (max-width: 760px) { .vk-anfrage .vk-szene { order: -1; margin-bottom: 8px } }
+@media (min-width: 761px) { .vk-anfrage .vk-szene { position: sticky; top: calc(var(--vk-kopf, 60px) + 24px) } }
+
+/* Warum Kunden selbst planen (Baustein Zahlenkachel): je Grund eine Kachel, die belegte Zahl als Held (zählt beim Auftritt hoch), eine
+   kleine Anzeige nur, wo der Text einen Anteil nennt (Ring aus Punkten, der Anteil in Grün) */
+.rg .vk-gruende { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px }
+.rg .vk-gruende li { position: relative; margin: 0; padding: 18px 20px 20px; border-radius: var(--r4); background: var(--surface); box-shadow: var(--ring); font-size: 15px; line-height: 1.5; color: var(--text2) }
+.vk-gruende .vk-zahl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 0 0 10px }
+.vk-gruende li:has(.vk-ring) .vk-zahl { padding-right: 60px }
+.vk-gruende .vk-zahl b { font-size: 32px; line-height: 1; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--text) }
+.vk-gruende .vk-zahl i { font-style: normal; font-size: 15px; font-weight: 700; color: var(--muted); white-space: nowrap }
+.vk-gruende .vk-ring { position: absolute; top: 16px; right: 18px; width: 48px; height: 48px; transform: rotate(-90deg) }
+.vk-gruende .vk-ring circle { fill: none; stroke-width: 2 }
+.vk-gruende .vk-ring .r0 { stroke: var(--line2); stroke-dasharray: 1.2 3.99 }
+.vk-gruende .vk-ring .r1 { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 1.2s var(--e-out) }
+.js .vk-gruende li.rev:not(.in) .vk-ring .r1 { stroke-dasharray: 0 200 }
+.rg .vk-gruende strong { color: var(--text) }
+@media (min-width: 601px) and (max-width: 760px) { .rg .vk-gruende { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (min-width: 761px) { .vk-gruende .vk-zahl b { font-size: 40px } }
+
+
+/* Kundenschutz: vier Zusagen als Kacheln mit Haken */
+.rg .vk-zusagen { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px }
+.rg .vk-zusagen li { position: relative; margin: 0; padding: 16px 18px 18px 50px; border-radius: var(--r4); background: var(--surface); box-shadow: var(--ring); font-size: 15px; line-height: 1.5; color: var(--text2) }
+.rg .vk-zusagen li::before { content: ""; position: absolute; left: 22px; top: 20px; width: 7px; height: 12px; border-right: 2.5px solid var(--accent); border-bottom: 2.5px solid var(--accent); transform: rotate(45deg) }
+.rg .vk-zusagen strong { display: block; color: var(--text); font-size: 17px; line-height: 1.35; margin-bottom: 2px }
+@media (min-width: 601px) { .rg .vk-zusagen { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+
+/* Ablauf (Baustein Kapitelanzeige): die Linie ist ein Maßstab mit Millimeterstrichen, die gefüllte Strecke leuchtet grün */
+.vk-ablauf::before { width: 12px; left: 21px; background: linear-gradient(90deg, var(--line) 0 2px, transparent 2px) left top / 12px 100% no-repeat, repeating-linear-gradient(180deg, var(--line) 0 1px, transparent 1px 8px) 2px 0 / 6px 100% no-repeat, repeating-linear-gradient(180deg, var(--line2) 0 1px, transparent 1px 40px) 2px 0 / 10px 100% no-repeat; border-radius: 0 }
+.vk-ablauf::after { box-shadow: 0 0 10px rgba(143, 214, 148, .55) }
+.vk-ablauf li::before { font-weight: 600; letter-spacing: .04em; font-variant-numeric: tabular-nums }
+
+/* Kopfzeile der Seite: feiner Maßstab an der Unterkante, der Lesefortschritt wächst grün mit (--k aus verkauf.js) */
+.vk-seite .rg-kopf::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 5px; pointer-events: none; background: linear-gradient(90deg, var(--accent), var(--accent)) left bottom / calc(var(--k, 0) * 100%) 2px no-repeat, repeating-linear-gradient(90deg, rgba(255, 255, 255, .14) 0 1px, transparent 1px 8px) left bottom / 100% 4px no-repeat }
+
+/* Weniger Bewegung: Rolle der Leiste flach, Szene ohne Gegenlauf, Ringe voll */
+@media (prefers-reduced-motion: reduce) {
+  .rg .vk-leiste-a li, .rg .vk-leiste-b li { transform: none }
+  .vk-mk-blatt { transform: rotate(-2.5deg) } .vk-mk-mass { transform: rotate(2deg) } .vk-szene .vk-blatt { transform: rotate(-1deg) }
+  .vk-gruende .vk-ring .r1 { transition: none }
+}
+
 /* Weniger Bewegung: Foto und Chips stehen, Haken gezogen, Zeitleiste voll und Symbole gezogen, Ring voll, Bühne ohne Überblenden
    (verkauf.js schaltet den Bildschirm hart um), kein Puls, kein Flieger, kein Konfetti; die Skripte lassen Zahlen, Zeichen und Reveal in Ruhe */
 @media (prefers-reduced-motion: reduce) {
   .vk-hero-zoom img, .vk-hero-zoom, .vk-hero-foto .vk-eingang, .vk-leiste-a li > svg, .vk-blatt.rev.in .vk-haken, .vk-tisch .vk-haken, .vk-mini-knopf::after, .vk-flug, .vk-konfetti i, .vk-ablauf .vk-sym { animation: none !important; transform: none !important }
   .vk-nachricht, .vk-nachricht > *, .vk-paket, .vk-pakete-zeiger, .vk-beispiel-bild > * { transition: none }
+  .vk-licht, .vk-staub i { animation: none !important }
   .vk-beispiel-bild > img, .vk-beispiel-bild > .vk-skizze { transform: none }
   .vk-blatt.rev .vk-haken, .js .vk-tisch .vk-haken, .js .vk-ablauf li:not(.vk-an) .vk-sym { stroke-dashoffset: 0 }
   .vk-ablauf li::before, .vk-ablauf .vk-symbol, .vk-karte, .vk-karte::before, .vk-schirm, .vk-telefon, .vk-tisch { transition: none }
