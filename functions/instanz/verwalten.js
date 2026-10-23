@@ -8,7 +8,8 @@
    API: instanzAnlegen(ctx, p) · instanzAendern(ctx, id, fn) · instanzStatus(ctx, id, status, grund, o) · paketSetzen(ctx, id, paket, grund) ·
         hostSetzen(ctx, id, host, o) · hostEntfernen(ctx, id, host) · hauptSetzen(ctx, id, host) · markeVeroeffentlichen(ctx, id) ·
         bildAblegen(ctx, id, name, bytes, typ) · profilSetzen(ctx, id, einladung, o) · empfaengerEinladen(ctx, id, mail, art) ·
-        empfaengerBestaetigen(ctx, id, mail, art) · vorschauToken(ctx, id, version) · cacheLeeren(ctx, id) · instanzDatenLoeschen(ctx, id)
+        empfaengerBestaetigen(ctx, id, mail, art) · vorschauToken(ctx, id, version) · cacheLeeren(ctx, id) · instanzDatenLoeschen(ctx, id) ·
+        anmeldungGebraucht(sp, uid, o)
    ctx: { k, env, sp, url?, waitUntil? } wie in den Routen (router.js). */
 import '../../web/assets/pakete.js';
 import '../../web/assets/instanzregeln.js';
@@ -18,6 +19,7 @@ import { tokenSignieren } from '../api/sitzung.js';
 import { postDienst, mailRahmen, esc } from '../api/post.js';
 import { ablage, fotosLinkLoeschen } from '../api/fotos.js';
 import { anmeldungLoeschen } from '../api/auth.js';
+import { entfernt } from '../api/eigene.js';
 import { basis, HAUPTADRESSE } from '../seo.js';
 import { cacheVergessen } from './mandant.js';
 import { bildTyp } from '../api/blatt-server.js';
@@ -279,10 +281,31 @@ export async function cacheLeeren(ctx, id) {
   return true;
 }
 
+/* ---------- Anmeldung noch gebraucht? ----------
+   Eine Anmeldung (Supabase Auth) kann zugleich ein Betrieb des Altbestands, ein Partner (Kundenkonto), ein Zugang einer anderen Instanz
+   oder ein Hauseigentümer-Konto mit gesicherten Aufmaßen sein (Tabelle eigene, B2C). Wer sie löscht, nimmt diesen Aufmaßen den Besitzer
+   (eigene.nutzer: on delete set null), und der tägliche Lauf der Zentrale löscht sie dann. Es zählt nur, was lebt: mit Besitzer und ohne
+   Löschmarke (wie lebt in zentrale.js). o.ohneInstanz: die Instanz, die gerade gelöscht wird; o.instanzen: alle Instanzen, falls schon
+   gelesen. Antwortet die Datenbank bei den Aufmaßen nicht, gilt die Anmeldung im Zweifel als gebraucht. */
+const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
+export async function anmeldungGebraucht(sp, uid, o) {
+  o = o || {};
+  if (!uid) return false;
+  if (await sp.betriebNachAuth(uid)) return true;
+  if (sp.partnerNachAuth && (await sp.partnerNachAuth(uid))) return true;
+  const instanzen = o.instanzen || (await sp.instanzenAlle()) || [];
+  if (instanzen.some((x) => x && x.id !== o.ohneInstanz && (Array.isArray(x.zugang) ? x.zugang : []).some((z) => z && z.uid === uid))) return true;
+  if (sp.eigeneVonNutzer) {
+    let eig; try { eig = await sp.eigeneVonNutzer(uid); } catch (e) { return true; }
+    if (Array.isArray(eig) && eig.some(lebt)) return true;
+  }
+  return false;
+}
+
 /* ---------- Löschen (K1.12, feste Liste; Aufrufer: bestellungenLauf nach loeschenNachEndeTage, Zentrale) ----------
    anfragen und ihre Zwischenstände samt Fotos (link/<code>), Zwischenstände des Betriebs (virtuelle Links), Bucket marke instanz/<id>/,
    Bucket blatt instanz/<id>/, Dateien der Bestellung (partner/<partner>/<bestellung>/), Anmeldungen der Dashboard-Zugänge (wenn sonst
-   ungenutzt), KV-Schlüssel und Hosts, zuletzt Instanz und Betriebszeile */
+   ungenutzt, anmeldungGebraucht), KV-Schlüssel und Hosts, zuletzt Instanz und Betriebszeile */
 export async function instanzDatenLoeschen(ctx, id) {
   const sp = ctx.sp, i = await sp.instanzHolen(id); if (!i) return { ok: true, schon: true };
   const out = { ok: true, anfragen: 0, entwuerfe: 0, anmeldungen: [], hosts: 0 };
@@ -292,12 +315,11 @@ export async function instanzDatenLoeschen(ctx, id) {
   for (const e of (await sp.entwuerfeVonBetrieb(i.betrieb)) || []) { await fotosLinkLoeschen(ctx.k, e.code); await sp.entwurfLoeschen(e.code); out.entwuerfe++; }
   const marke = ablage(ctx.k, 'marke'), blatt = ablage(ctx.k, 'blatt'), best = ablage(ctx.k, 'bestellungen');
   try { if (marke) await marke.ordnerLoeschen('instanz/' + id); if (blatt) await blatt.ordnerLoeschen('instanz/' + id); if (best && i.partner && i.bestellung) await best.ordnerLoeschen('partner/' + i.partner + '/' + i.bestellung); } catch (e) { out.ok = false; }
-  /* Anmeldungen der Zugänge, wenn sie zu keinem Betrieb, Partner oder einer anderen Instanz gehören */
-  const andere = ((await sp.instanzenAlle()) || []).filter((x) => x.id !== id);
+  /* Anmeldungen der Zugänge, wenn sie zu keinem Betrieb, Partner, keiner anderen Instanz und keinem Hauseigentümer-Konto mit Aufmaßen gehören */
+  const alle = (await sp.instanzenAlle()) || [];
   for (const z of Array.isArray(i.zugang) ? i.zugang : []) {
     if (!z || !z.uid) continue;
-    const genutzt = (await sp.betriebNachAuth(z.uid)) || (sp.partnerNachAuth && (await sp.partnerNachAuth(z.uid))) || andere.some((x) => (x.zugang || []).some((y) => y && y.uid === z.uid));
-    if (genutzt) continue;
+    if (await anmeldungGebraucht(sp, z.uid, { ohneInstanz: id, instanzen: alle })) continue;
     const r = await anmeldungLoeschen(ctx.k, z.uid).catch(() => ({ ok: false }));
     if (r.ok) out.anmeldungen.push(z.uid); else out.ok = false;
   }

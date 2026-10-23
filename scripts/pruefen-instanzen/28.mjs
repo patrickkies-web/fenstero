@@ -219,6 +219,13 @@ export default async (h) => {
   const x1 = await api(HOST, '/api/konto', { cookie }), x2 = await api(HOST, '/api/konto/export', { cookie }), x3 = await api(HOST, '/betrieb/'), x4 = await api(HOST, '/api/konto/projekte/' + l10.id, { method: 'PATCH', cookie, origin: true, body: { seen: true } });
   ok(x1.status === 410 && x1.json.beendet === true && x2.status === 200 && x3.status === 200 && x4.status === 410, '28.14 beendet: Dashboard 410, nur noch der Export (200)');
   await h.instanz('dash', { status: 'aktiv', ende_am: null });
+  /* Befund 16: die Testanfrage aus der Einrichtung (Zentrale, probeEingang) zählt nach dem Livegang nicht mehr als Projekt */
+  const probe14 = (await T.test({ lauf: 'probe', instanz: D.id })).lauf, zP14 = await T.zeile(probe14.code);
+  const kA14 = await api(HOST, '/api/konto', { cookie }), lA14 = ((kA14.json.konto || {}).acc || {}).links || [], pA14 = await api(HOST, '/api/konto/projekte/' + zP14.lid, { cookie });
+  await h.instanz('dash', { status: 'einrichtung' });
+  const kE14 = await api(HOST, '/api/konto', { cookie }), tE14 = (((kE14.json.konto || {}).acc || {}).links || []).find((l) => l.code === probe14.code);
+  await h.instanz('dash', { status: 'aktiv' });
+  ok(kA14.status === 200 && !lA14.some((l) => l.code === probe14.code) && pA14.status === 404 && !!tE14 && tE14.test === true && tE14.status === 'eingegangen', '28.14 Testanfrage aus der Einrichtung: nach dem Livegang weder in der Liste noch einzeln abrufbar (404), im Status einrichtung als „Test“ sichtbar (' + lA14.length + ' Projekte, einzeln ' + pA14.status + ')');
 
   /* ---------- 28.11 Herabstufen Signature → Plus ---------- */
   const n11 = await api(HOSTX, '/api/konto/projekte', { cookie: (await anmelden(HOSTX, 'team@dashx.example')).cookie, origin: true, body: { kunde: 'Familie Offen', kontakt: 'offen@beispiel.de' } });

@@ -17,6 +17,7 @@ import '../../web/assets/ral.js';
 import '../../web/assets/modell.js';
 import '../../web/assets/instanzregeln.js';
 import { ablage, linkOrdner } from './fotos.js';
+import { stempelBerlin } from '../instanz/adapter.js';
 
 const AW = () => globalThis.AW;
 const R = () => globalThis.Instanzregeln;
@@ -114,7 +115,8 @@ function eingabe(inst, z, variante) {
     klaerung: AW().klaerung(wins, pr, l), klaerStand: l.klaer || {},
     portalKurz: inst.haupthost || inst.host || '', kennzeichnung: (inst.m && inst.m.pdfKennzeichnung) || 'deutlich',
     nr: l.nr || '', fotos: {}, ausgabe: 'bytes',
-    betrieb: { name: name, nr: l.nr || '', eingegangen: (l.log || {}).eingegangen || '', abzug: inst.abzug }
+    /* Eingangszeit wie in Mail und Dashboard (log.eingegangen, deutsche Zeit); fehlt sie, aus eingegangen_at der Zeile */
+    betrieb: { name: name, nr: l.nr || '', eingegangen: (l.log || {}).eingegangen || (z && z.eingegangen_at ? stempelBerlin(Date.parse(z.eingegangen_at)) : ''), abzug: inst.abzug }
   };
 }
 

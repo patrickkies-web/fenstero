@@ -22,7 +22,7 @@ import { instanzZaehlen, tagBerlin } from './statistik.js';
 import { pruefStoerung } from '../instanz/mandant.js';
 import * as verwalten from '../instanz/verwalten.js';
 import { pruefPdf, eingangVerarbeiten, versandNachholen, anfragenAufraeumen, eingangErneut, probeEingang, instanzKontext } from './eingang.js';
-import { pseudoKonto } from '../instanz/adapter.js';
+import { pseudoKonto, zeitenBerlin } from '../instanz/adapter.js';
 
 const X = () => globalThis.Abrechnung;
 const AW = () => globalThis.AW;
@@ -107,7 +107,7 @@ export const INSTANZ_API = {
   'POST /api/instanz/test': async (ctx) => {
     if (!ctx.k.datenAttrappe || !ctx.k.post || !ctx.k.post.attrappe) throw new ApiFehler('not_found', 404);
     const b = ctx.body || {}, out = { ok: true };
-    if (b.stoerung) { if ('daten' in b.stoerung) pruefStoerung.an = !!b.stoerung.daten; if ('pdf' in b.stoerung) pruefPdf.art = String(b.stoerung.pdf || ''); out.stoerung = { daten: pruefStoerung.an, pdf: pruefPdf.art }; }
+    if (b.stoerung) { if ('daten' in b.stoerung) pruefStoerung.an = !!b.stoerung.daten; if ('anfragen' in b.stoerung) pruefStoerung.anfragen = !!b.stoerung.anfragen; if ('pdf' in b.stoerung) pruefPdf.art = String(b.stoerung.pdf || ''); out.stoerung = { daten: pruefStoerung.an, anfragen: pruefStoerung.anfragen, pdf: pruefPdf.art }; }
     if (b.anfrage && b.anfrage.code) {
       await ctx.sp.anfrageAendern(String(b.anfrage.code), (z) => { if (b.anfrage.versand) z.versand = Object.assign({}, z.versand || {}, b.anfrage.versand); if ('loeschen_ab' in b.anfrage) z.loeschen_ab = b.anfrage.loeschen_ab; if ('eingegangen_at' in b.anfrage) z.eingegangen_at = b.anfrage.eingegangen_at; });
       out.anfrage = await ctx.sp.anfrageHolen(String(b.anfrage.code));
@@ -119,15 +119,16 @@ export const INSTANZ_API = {
     /* Einladung wie im Signature-Dashboard (Strang E) anlegen bzw. eine Nachbesserung anfragen, damit sich der Eingang prüfen lässt */
     if (b.einladung && b.einladung.instanz) {
       const inst = await instanzKontext(ctx.sp, String(b.einladung.instanz)); if (!inst) throw new ApiFehler('not_found', 404);
-      const row = await ctx.sp.betriebHolen(inst.betrieb), a = pseudoKonto((row && row.daten) || {}, null), r = X().neuesProjekt(a, { kunde: b.einladung.kunde || 'Familie Einladung', days: 30, du: !!b.einladung.du, kontakt: b.einladung.kontakt || '' });
+      const jetzt = ctx.k.jetzt || Date.now(), row = await ctx.sp.betriebHolen(inst.betrieb), a = pseudoKonto((row && row.daten) || {}, null), r = X().neuesProjekt(a, { kunde: b.einladung.kunde || 'Familie Einladung', days: 30, du: !!b.einladung.du, kontakt: b.einladung.kontakt || '' }, jetzt);
       if (!r.ok) throw new ApiFehler(r.msg, 400);
-      const l = Object.assign(r.l, { nr: await ctx.sp.instanzNr(inst.id), instanz: true, status: 'gesendet' });
+      const l = Object.assign(zeitenBerlin(r.l, jetzt), { nr: await ctx.sp.instanzNr(inst.id), instanz: true, status: 'gesendet' });
       await ctx.sp.anfrageAnlegen({ code: l.code, instanz: inst.id, betrieb: inst.betrieb, lid: l.id, art: 'einladung', status: l.status, nr: l.nr, daten: l, versand: {} });
       out.einladung = l;
     }
     if (b.nachbesserung && b.nachbesserung.code) {
       let msg = '';
-      await ctx.sp.anfrageAendern(String(b.nachbesserung.code), (x) => { const a = pseudoKonto({}, x.daten); const r = X().nbAnfragen(a.links[0], b.nachbesserung.hinweis || ''); msg = r.msg; if (!r.ok) return false; x.daten = a.links[0]; });
+      const jetzt = ctx.k.jetzt || Date.now();
+      await ctx.sp.anfrageAendern(String(b.nachbesserung.code), (x) => { const a = pseudoKonto({}, x.daten), vorher = a.links[0].expires; const r = X().nbAnfragen(a.links[0], b.nachbesserung.hinweis || '', jetzt); msg = r.msg; if (!r.ok) return false; x.daten = zeitenBerlin(a.links[0], jetzt, { expiresVorher: vorher }); });
       out.nachbesserung = msg;
     }
     if (b.statistik) { const tag = tagBerlin(new Date(ctx.k.jetzt || Date.now())); out.statistik = ((await ctx.sp.statistikLesen(tag, tag)) || []).filter((r) => /^(inst|budget):/.test(r.schluessel)); }
