@@ -578,26 +578,9 @@ function afterRender(anim) {
     if (anim && io) { el.textContent = fmt === 'eur' ? eur(0) : '0'; const o = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { countUp(el, 0, to, fmt); o.disconnect(); } })); o.observe(el); return; }
     countUp(el, anim ? 0 : from, to, fmt);
   });
-  /* „So läuft es“: Die Bühne zeigt den Schritt, der gerade neben ihr steht (zwei Spalten: der Schritt auf Höhe der Bühnenmitte;
-     gestapelt auf dem Telefon: der erste Schritt unter der klebenden Bühne). Wird beim Scrollen nachgeführt, mit etwas Spiel gegen Flackern. */
-  const stage = document.getElementById('stage');
-  storyTick = null;
-  if (stage) {
-    const steps = Array.from(scr.querySelectorAll('.story-step'));
-    let aktiv = -1;
-    const setStep = (i) => { if (aktiv === i) return; aktiv = i; stage.setAttribute('data-step', String(i)); steps.forEach((st) => st.classList.toggle('on', +st.getAttribute('data-i') === i)); };
-    storyTick = () => {
-      if (!document.body.contains(stage)) { storyTick = null; return; }
-      const st = stage.getBoundingClientRect(), gestapelt = matchMedia('(max-width: 879px)').matches;
-      const linie = gestapelt ? st.bottom + 60 : st.top + st.height / 2;
-      const abstand = steps.map((s) => { const r = s.getBoundingClientRect(); return Math.abs((r.top + r.bottom) / 2 - linie); });
-      let best = 0; abstand.forEach((d, i) => { if (d < abstand[best]) best = i; });
-      if (aktiv >= 0 && best !== aktiv && abstand[best] > abstand[aktiv] - 16) best = aktiv;
-      setStep(best);
-    };
-    storyTick();
-    setTimeout(() => { if (storyTick) storyTick(); }, 400);
-  }
+  /* Ansicht Fensterbauer: die eingebettete Verkaufsseite füllen oder darauf verkauf.js starten (siehe „Einbettung der Verkaufsseite“) */
+  const vk = scr.querySelector('.vk-einbettung');
+  if (vk) einbettungAuf(vk, anim);
   const n = newNotif(), bell = document.querySelector('.top .ibtn:last-child');
   if (bell && n > lastNew) { bell.classList.add('ring'); const d = bell.querySelector('.dot'); if (d) d.classList.add('pop'); }
   lastNew = n;
@@ -619,10 +602,7 @@ function countUp(el, from, to, fmt) {
   const step = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = f(from + (to - from) * e); if (k < 1 && document.body.contains(el)) requestAnimationFrame(step); else el.textContent = f(to); };
   requestAnimationFrame(step);
 }
-let storyTick = null;
-window.addEventListener('resize', () => { if (storyTick) storyTick(); });
 window.addEventListener('scroll', () => {
-  if (storyTick) storyTick();
   const t = document.querySelector('.top'); if (t) t.classList.toggle('scrolled', window.scrollY > 6);
   document.querySelectorAll('.rv:not(.in)').forEach((el) => { if (el.getBoundingClientRect().top < window.innerHeight * 0.94) el.classList.add('in'); });
 }, { passive: true });
@@ -638,14 +618,6 @@ const CAPS = [
   ['shutter', 'Rollladen und Insektenschutz', 'Aufsatz oder Vorbau, Antrieb von Gurt bis Smart Home, Spann- oder Drehrahmen.'],
   ['sill', 'Montage und Klärungsliste', 'Fensterbänke, Ausbau, RAL-Montage, Putz. Dazu, was Sie mit dem Kunden klären: Absturzsicherung, Lüftung, Förderung, offene Wünsche.']
 ];
-function storyScenes() {
-  const win = '<svg viewBox="0 0 320 300" aria-hidden="true"><rect x="60" y="30" width="200" height="220" rx="3" fill="#fbfbfa" stroke="#1d1d1f" stroke-width="2"></rect><rect x="72" y="42" width="84" height="196" fill="#d9e8f7" stroke="#1d1d1f" stroke-width="1.2"></rect><rect x="164" y="42" width="84" height="196" fill="#d9e8f7" stroke="#1d1d1f" stroke-width="1.2"></rect><path d="M72 42 L156 140 L72 238 M72 238 L114 42 L156 238" fill="none" stroke="#1d1d1f" stroke-width=".8" opacity=".55"></path><rect x="150" y="128" width="5" height="24" rx="2" fill="#c9c3ba"></rect><rect x="165" y="128" width="5" height="24" rx="2" fill="#c9c3ba"></rect><path class="dim v" d="M34 30 V250 M28 30 H40 M28 250 H40" fill="none" stroke="var(--el)" stroke-width="2.5" stroke-linecap="round"></path><path class="dim h" d="M60 272 H260 M60 266 V278 M260 266 V278" fill="none" stroke="var(--el)" stroke-width="2.5" stroke-linecap="round"></path><g class="lab"><rect x="4" y="128" width="54" height="22" rx="11" fill="var(--el)"></rect><text x="31" y="143" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">1.410</text></g><g class="lab h"><rect x="133" y="282" width="54" height="22" rx="11" fill="var(--el)"></rect><text x="160" y="297" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">1.230</text></g></svg>';
-  const w = demoWins('weber');
-  return '<div class="sc sc-proj"><span class="pill">1 · Projekt</span><div class="mini form-mini"><p class="eyebrow">Neues Projekt</p><div class="fm"><small>Kunde</small><b class="ty" style="--n: 13">Familie Weber</b></div><div class="fm"><small>Objekt</small><b class="ty" style="--n: 26; --d: .9s">Lindenstraße 14, Köln</b></div><div class="fm-chips"><span class="badge acc">Einfamilienhaus</span><span class="badge acc">3 bis 5 Fenster</span><span class="badge acc">Fenster und Rollläden</span></div><span class="fm-btn">Projekt anlegen</span></div><p class="cap">Kunde, Adresse, grobe Eckdaten. Eine Minute.</p></div>' +
-    '<div class="sc sc-msg"><span class="pill">2 · Link</span><div class="phone small"><div class="ph-top"><span class="ph-av">B</span><span><b>Fensterbau Brandt</b><small>WhatsApp</small></span></div><div class="ph-body"><div class="bub out">Guten Tag Familie Weber, mit diesem Link messen Sie Ihre Fenster selbst:<span class="lp"><b>eeziframes · Aufmaß für Fensterbau Brandt</b><small>Ohne Konto, etwa 5 Minuten pro Fenster</small></span><i>09:13 ✓✓</i></div></div></div><p class="cap">Mit Ihrem Namen als Absender. Text vorformuliert.</p></div>' +
-    '<div class="sc sc-mess"><span class="pill">3 · Kunde misst</span>' + win + '<p class="cap">Im Browser, ohne Konto. Das Modell wächst beim Tippen.</p></div>' +
-    '<div class="sc sc-in"><span class="pill">4 · Eingang</span><div class="mini in-mini"><span class="ring"></span><span class="unlock">' + ICONS.check + ' Aufmaß eingegangen</span><p class="mt">Familie Weber · Köln-Ehrenfeld</p>' + w.slice(0, 2).map((x, i) => { const d = AW.derive(x); return '<div class="in-row">' + AW.svg(x, 34) + '<span><b>Pos. ' + (i + 1) + ' · ' + esc(x.name) + '</b><small>Öffnung ' + AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' · ' + esc(AW.opening(x)) + '</small></span></div>'; }).join('') + '<p class="mf">und 2 weitere Positionen, 8 Fotos, Bestellmaß-Vorschlag</p></div><p class="cap">Sie kalkulieren, bevor Sie losfahren.</p></div>';
-}
 /* ---------- Aufmaß beim Betrieb (Strang S5) ----------
    Eigenes Vorgehen für ein eingegangenes Aufmaß: Kopf mit Eckdaten, „Mit dem Kunden zu klären“ zum Abhaken (l.klaer), Übersicht aller
    Positionen (Zeichnung, Öffnung, Element, Bestellmaß), je Position aufklappbar: was hier zu klären ist, die Zeichnung mit Maßketten
@@ -786,8 +758,8 @@ function roiVals(n, t, r) {
   const best = Math.min(start, abo, plus);
   return { hours: String(hours).replace('.', ','), cost: cost, lm: best, plan: best === start ? n + ' Projekte × ' + p.projekt + ' € netto (Start)' : best === abo ? 'Abo 10: ' + p.abo.grund + ' € für ' + p.abo.inkl + ' Projekte' + (n > p.abo.inkl ? ' + ' + (n - p.abo.inkl) + ' × ' + p.abo.extra + ' €' : '') : 'Plus, Projekte unbegrenzt' };
 }
-/* Startseite in zwei Ansichten (Umschalter oben, siehe ansicht()): Hauseigentümer messen selbst, Fensterbauer bekommen das
-   Aufmaß ohne Anfahrt. Je Ansicht ein h1, nur ihre Knöpfe, am Ende der Weg in die andere Ansicht.
+/* Startseite in zwei Ansichten (Umschalter oben, siehe ansicht()): Hauseigentümer messen selbst, Fensterbauer sehen die
+   Paket-Landingpage /fuer-fensterbauer/ eingebettet. Je Ansicht ein h1, nur ihre Knöpfe, am Ende der Weg in die andere Ansicht.
    Aufbau wie die Beiträge auf Instagram (docs/GESTALTUNG.md): Kicker in Grün, Überschrift mit einem grünen Wort (das letzte),
    Cream-Pille mit Pfeil, daneben das Foto randlos und ohne Rahmen, weich in den Grund auslaufend, mit Haken-Chips darauf. */
 const worte = (satz) => { const w = satz.split(' '); return w.map((x, i) => '<span class="w' + (i === w.length - 1 ? ' ak' : '') + '" style="--i: ' + i + '">' + x + '</span>').join(' '); };
@@ -813,21 +785,65 @@ const wechsel = (zu) => zu === 'betrieb'
      Bestandsbetriebe mit Anmeldung bleibt erreichbar, wird aber nicht mehr mit Freiprojekten beworben */
   ? '<section class="owner wechsel"><div><p class="eyebrow kicker">Für Fensterbauer</p><h2>' + akSatz('Ihr eigener Fensterkonfigurator.', 2) + '</h2><p>Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt.</p></div><div class="row"><a class="btn primary" href="/fuer-fensterbauer/">Pakete ansehen<span class="pf" aria-hidden="true"></span></a><button type="button" class="btn ghost" data-act="ansicht" data-v="betrieb">Zur Ansicht für Fensterbauer</button></div></section>'
   : '<section class="owner wechsel"><div><p class="eyebrow kicker">Für Hauseigentümer</p><h2>' + akSatz('Ihre eigenen Fenster ausmessen?', 2) + '</h2><p>Messen geht kostenlos in der App, ohne Konto und Schritt für Schritt erklärt. Das Aufmaßblatt geht an jeden Fensterbauer.</p></div><div class="row"><button type="button" class="btn ghost" data-act="ansicht" data-v="kunde">Zur Ansicht für Hauseigentümer<span class="pf" aria-hidden="true"></span></button></div></section>';
+/* ---------- Einbettung der Verkaufsseite (Ansicht Fensterbauer) ----------
+   Eine Quelle: Die Paket-Landingpage bleibt die statische Seite /fuer-fensterbauer/ (Suchmaschinen, verkauf.css, verkauf.js). Die
+   Startseite lädt ihren Inhalt einmal je Seitenaufruf (fetch, gleiche Herkunft), nimmt main.rg ohne die Brotkrumen und setzt ihn in den
+   Behälter .vk-einbettung; danach startet verkauf.js darauf (Formular, Reveal, Zahlen, Zeichen, Zeitleiste). Liegt der Inhalt schon im
+   Speicher, steht er beim nächsten Aufbau sofort im HTML (kein Flackern, die Scrollposition bleibt, etwa beim Öffnen des Anmeldeblatts).
+   Fällt das Laden aus, steht die Karte „Pakete ansehen“ mit dem Link zur Seite, nie eine leere Fläche; der nächste Aufbau versucht es
+   wieder. Sprungmarken der Seite (#pakete, #bestellen …) scrollen innerhalb der Einbettung, ohne die Adresse zu ändern, denn Hashes
+   steuern auf der Startseite die Ansicht (ankerLink); der Abstand zur klebenden Kopfzeile wird gemessen, weil sie am Telefon zwei
+   Zeilen hoch ist. */
+const VK_SEITE = '/fuer-fensterbauer/';
+let vkHtml = null, vkLauf = null;
+function vkLaden() {
+  if (vkLauf) return vkLauf;
+  vkLauf = fetch(VK_SEITE, { credentials: 'same-origin', headers: { accept: 'text/html' } })
+    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then((t) => {
+      const main = new DOMParser().parseFromString(t, 'text/html').querySelector('main.rg');
+      if (!main) throw new Error('kein main.rg');
+      main.querySelectorAll('.rg-pfad').forEach((p) => p.remove());
+      vkHtml = main.innerHTML;
+      return vkHtml;
+    })
+    .catch(() => { vkLauf = null; return null; });
+  return vkLauf;
+}
+/* Rückfall: die frühere Teaser-Karte mit dem Weg zur Seite */
+const vkRueckfall = () => '<div class="card pakete-karte"><div><p class="eyebrow kicker">Neu für Fensterbauer</p><h2>' + akSatz('Ihr eigener Fensterkonfigurator.', 2) + '</h2><p>Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt.</p></div><a class="btn primary" href="' + VK_SEITE + '">Pakete ansehen<span class="pf" aria-hidden="true"></span></a></div>';
+const einbettung = () => '<section class="vk-einbettung rg" aria-label="Konfigurator-Pakete für Fensterbauer"' + (vkHtml ? '>' + vkHtml : ' aria-busy="true">') + '</section>';
+/* nach dem Aufbau (afterRender): Inhalt aus dem Speicher ist schon drin, also nur verkauf.js starten (ohne Bewegung, wenn derselbe
+   Bildschirm neu aufgebaut wurde); sonst laden und den Behälter füllen, der dann gerade im Bild steht */
+function einbettungAuf(el, anim) {
+  if (!el.hasAttribute('aria-busy')) { vkStarten(el, !anim); return; }
+  vkLaden().then((html) => {
+    const ziel = document.querySelector('.vk-einbettung[aria-busy="true"]'); if (!ziel) return;
+    ziel.removeAttribute('aria-busy');
+    if (!html) { ziel.classList.add('vk-rueckfall'); ziel.innerHTML = vkRueckfall(); return; }
+    ziel.innerHTML = html; vkStarten(ziel, false); kopfCta();
+  });
+}
+function vkStarten(el, still) {
+  /* verkauf.js lädt mit defer; kommt die Antwort früher, startet es beim DOMContentLoaded */
+  const starten = () => { if (window.Verkauf && document.body.contains(el)) window.Verkauf.auf(el, { still: still }); };
+  if (window.Verkauf || document.readyState !== 'loading') starten(); else document.addEventListener('DOMContentLoaded', starten, { once: true });
+  el.addEventListener('click', (e) => {
+    const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a) return;
+    const m = /^(?:\/fuer-fensterbauer\/)?#([A-Za-z][\w-]*)$/.exec(a.getAttribute('href') || ''); if (!m) return;
+    const ziel = el.querySelector('[id="' + m[1] + '"]'); if (!ziel) return;
+    e.preventDefault();
+    const top = document.querySelector('.top'), ab = (top ? top.getBoundingClientRect().height : 0) + 12;
+    window.scrollTo({ top: ziel.getBoundingClientRect().top + window.scrollY - ab, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    ziel.setAttribute('tabindex', '-1'); try { ziel.focus({ preventScroll: true }); } catch (x) { /* ok */ }
+  });
+}
 SCREENS.landing = () => {
+  /* Ansicht Fensterbauer: Hinweis zum Code vom Aufmaßblatt (?von=pdf), dann die eingebettete Paket-Landingpage (ihr h1 ist das einzige
+     dieser Ansicht), am Ende der Weg zu den Hauseigentümern. Die frühere Werbung für Aufmaß-Links (Tour, Rechner, „Holen Sie es in Ihr
+     Konto“) ist hier weg (Bauplan E28); Preise, Anmelden und „Kostenlos starten“ bleiben in der Kopfzeile für Bestandsbetriebe. */
   if (ansicht() === 'betrieb') return { title: 'eeziframes', html: '<div class="wrap">' + (vonPdf() ? '<div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div>' : '') +
-  /* Einstieg in die Konfigurator-Pakete (Verkaufsseite /fuer-fensterbauer/, Bauplan §3 E.7); die Registrierung für Aufmaß-Links bleibt
-     als Textlink im Startbild */
-  '<section class="card pakete-karte"><div><p class="eyebrow kicker">Neu für Fensterbauer</p><h2>' + akSatz('Ihr eigener Fensterkonfigurator.', 2) + '</h2><p>Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt.</p></div><a class="btn primary" href="/fuer-fensterbauer/">Pakete ansehen<span class="pf" aria-hidden="true"></span></a></section>' +
-  '<section class="hero b2b foto" data-ansicht="betrieb"><div><p class="eyebrow kicker">Das Erstaufmaß kommt zu Ihnen, ganz <span class="mk" translate="no">eezi</span></p><h1>' + worte('Aufmaß ohne Anfahrt.') + '</h1><p class="lead">Schicken Sie Ihren Kunden einen Aufmaß-Link statt hinzufahren. Ihr Kunde misst selbst, Schritt für Schritt geführt, und Sie bekommen alles, was Sie für ein erstes Angebot brauchen: Maße, Fotos, Öffnungsarten, Farben und Ausstattung, für jedes Fenster, sortiert nach Positionen.</p><div class="cta"><button type="button" class="btn big ghost" data-act="tour">' + icon('play', 18) + 'Tour starten</button></div><p class="hint"><button type="button" class="ulink" data-act="reg" data-v="betrieb">Kostenlos starten</button> · ' + P().frei + ' Projekte kostenlos · danach ' + P().projekt + ' € je Projekt oder im Abo · Ihr Kunde braucht kein Konto</p></div>' +
-  heroFoto('start-fensterbauer', 1120, 1400, 'Ein Bär in Arbeitskleidung sitzt in seiner Werkstatt an der Hobelbank und prüft ein Aufmaß auf dem Tablet, hinter ihm lehnen fertige Fensterrahmen', ['Maße', 'Fotos', 'Öffnungsarten', 'Positionen']) + '</section>' +
-  '<section class="sec"><div class="sec-head"><h2>' + akSatz('So läuft es.') + '</h2><button type="button" class="linkbtn" data-act="go" data-v="wie">Alle Details ›</button></div><div class="story"><div class="story-steps">' + [['Projekt anlegen', 'Kunde, Adresse und ein paar Eckdaten. Mehr braucht es nicht, in einer Minute erledigt. Oder gleich eine ganze Liste von Kunden einladen.'], ['Link schicken', 'Per WhatsApp, SMS oder E-Mail, mit Ihrem Namen als Absender. Die Nachricht ist vorformuliert.'], ['Ihr Kunde misst', 'Im Browser, ohne Konto und ohne Installation. Zwei Fotos und vier Maße je Fenster, jeder Schritt erklärt.'], ['Aufmaß kommt an', 'Sortiert nach Positionen, mit Bestellmaß-Vorschlag und der Einbausituation aus den Fotos. Passt etwas nicht, fragen Sie eine Nachbesserung an, kostenlos.']].map((st, i) => '<div class="story-step" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><h3>' + akSatz(mitPunkt(st[0])) + '</h3><p>' + st[1] + '</p></div>').join('') + '</div><div class="story-stage" data-step="0" id="stage">' + storyScenes() + '</div></div></section>' +
-  aufmassInhalt() +
-  '<section class="sec"><div class="sec-head"><h2>' + akSatz('So kommt es bei Ihnen an.', 4) + '</h2><span class="sub">Beispiel, Positionen zum Aufklappen</span></div><div class="card sample"><div class="sample-h"><span class="badge ok">' + icon('check', 12) + 'Aufmaß eingegangen</span><b>Familie Weber · Lindenstraße 14, Köln</b><span class="km-s">4 Positionen · 5 Elemente · 8 Fotos · Einfamilienhaus, Baujahr 1978</span></div>' + demoWins('weber').slice(0, 2).map((w, i) => posCard(w, i, null, i === 0)).join('') + '<p class="km-s">Vor der Fertigung messen Sie einmal nach. Fürs erste Angebot sparen Sie die Anfahrt.</p></div></section>' +
-  kundenschutz() +
-  '<section class="grid c2 trust"><div class="tcard"><span class="ci">' + icon('nouser', 22) + '</span><b>Für Ihren Kunden ohne Hürde</b><p>Er öffnet den Link im Browser und legt los. Kein Konto, keine App aus dem Store, keine Kosten. Seine Angaben gehen nur an Sie.</p></div><div class="tcard"><span class="ci">' + icon('euro', 22) + '</span><b>Abgerechnet wird je Projekt</b><p>' + P().frei + ' Projekte kostenlos, danach ' + P().projekt + ' € netto je Projekt mit eingegangenem Aufmaß. Oder im Abo: ' + P().abo.inkl + ' Projekte für ' + P().abo.grund + ' € im Monat, unbegrenzt mit Plus für ' + P().plus + ' €. Nachbesserungen kosten nichts.' + einfBetrieb() + '</p></div></section>' +
-  roiCalc() +
-  '<section class="owner"><div><p class="eyebrow kicker">Ein Kunde hat Ihnen ein <span class="mk" translate="no">eeziframes</span>-Aufmaß geschickt?</p><h2>' + akSatz('Holen Sie es in Ihr Konto.') + '</h2><p>Auf der letzten Seite des Aufmaßblatts steht ein Code. Kostenlos registrieren, „Code vom Kunden einfügen“, und das Aufmaß liegt als Projekt bei Ihnen: je Position mit Zeichnung und Bestellmaß, dazu die Klärungsliste und Nachbesserung per Link.</p></div><div class="row"><button type="button" class="btn primary" data-act="reg" data-v="betrieb">Kostenlos registrieren<span class="pf" aria-hidden="true"></span></button><button type="button" class="btn ghost" data-act="sheet" data-v="login">Anmelden</button></div></section>' +
-  wechsel('kunde') + '</div>' };
+  einbettung() + wechsel('kunde') + '</div>' };
   return { title: 'eeziframes', html: '<div class="wrap">' +
   '<section class="hero b2c foto" data-ansicht="kunde"><div><p class="eyebrow kicker">In Minuten zum Aufmaß für jeden Fensterbauer</p><h1>' + worte('Fenster ausmessen. Selbst. eezi.') + '</h1><p class="lead">Zwei Fotos, vier Maße mit dem Zollstock, jeder Schritt erklärt. Aus Ihren Zahlen wächst Ihr Fenster als 3-D-Modell, dazu Ihre Wünsche zu Material, Farbe, Glas und Rollladen. Messen, Fotos und 3-D-Modell sind kostenlos. Am Ende Ihr vollständiges Aufmaßblatt als PDF für ' + eur2(P().aufmass) + ', für jeden Fensterbauer lesbar.</p><div class="cta"><a class="btn big primary" href="' + APP_OPEN + '">' + (eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt ausmessen') + '<span class="pf" aria-hidden="true"></span></a><a class="btn big ghost" href="' + APP_OPEN + '#fuehrung">Führung starten</a></div>' + (eigenesAufmass() ? '<p class="hint fortsetzen">Ihr Aufmaß ist angefangen: ' + nW(eigenesAufmass(), 'Fenster', 'Fenster') + ' erfasst, gespeichert in diesem Browser.</p>' : '') + '<p class="hint">Führung: ein Fenster in zwei Minuten, ohne eigene Maße · kein Konto zum Messen · keine App aus dem Store</p></div>' +
   heroFoto('start-hauseigentuemer', 1250, 1250, 'Ein Waschbär steht auf einem Tritt und misst mit dem Zollstock die Maueröffnung eines Fensters, in der anderen Pfote das Handy', ['Maße', 'Öffnungsart', 'Farbe', 'Glas']) + '</section>' +

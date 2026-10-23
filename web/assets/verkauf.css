@@ -117,7 +117,7 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
   .vk-hero > .rg-inhalt ol { columns: 3 }
 }
 @media (max-width: 760px) {
-  .vk-hero-foto { order: -1; height: min(92vw, 440px); margin: 4px -16px -56px }
+  .vk-hero-foto { order: -1; height: min(92vw, 440px); margin: 4px calc(-1 * var(--vk-rand)) -56px }
   .vk-hero-foto img { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%) }
   .vk-hero-foto .chips { bottom: 72px; justify-content: flex-start }
   .vk-hero > .kicker, .vk-hero > h1, .vk-hero > .rg-kurz, .vk-hero > .rg-cta, .vk-hero > .rg-inhalt { position: relative; z-index: 1 }
@@ -231,3 +231,24 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
   .vk-ablauf li::before { transition: none }
 }
 @media print { .vk-hero-foto, .vk-zeichen, .vk-blatt, .vk-band > .foto-karte, .vk-bestellen > .foto-karte { display: none } }
+
+/* ---------- Einbettung in die Startseite (portal.js, Ansicht Fensterbauer) ----------
+   Derselbe Inhalt (main.rg ohne Brotkrumen) liegt dort in <section class="vk-einbettung rg"> innerhalb von .wrap der Startseite
+   (1040 px mit 20 px Rand, am Telefon 16 px): keine eigene Spalte, kein eigener Rand, das Startbild-Foto läuft bis an den Rand
+   des Bildschirms (--vk-rand aus dem Rand der Startseite). Die Kopfzeile ist die des Portals (60 px, bis 879 px mit dem Umschalter
+   als zweiter Zeile etwa 122 px), darum klebende Karten mit mehr Abstand; Sprungmarken scrollt portal.js selbst unter die Kopfzeile.
+   Beim Laden (aria-busy) hält der Behälter Platz, damit die Karte darunter nicht springt. */
+.vk-einbettung { --vk-pad: 20px; --vk-rand: max(var(--vk-pad), (100vw - 1000px) / 2); --vk-kopf: 60px; max-width: none; min-width: 0; margin: 0; padding: 0 }
+.vk-einbettung[aria-busy="true"] { min-height: 60vh }
+.vk-einbettung h2 { margin-top: 0 }
+.vk-einbettung .vk-hero { padding-top: 0 }
+.vk-einbettung .vk-blatt, .vk-einbettung .vk-bestellen > .foto-karte { top: calc(var(--vk-kopf) + 16px) }
+.vk-einbettung.vk-rueckfall .pakete-karte { margin-bottom: 0 }
+@media (min-width: 761px) {
+  .vk-einbettung .vk-hero { padding-top: clamp(12px, 2.5vw, 28px) }
+  /* bis unter die Kopfzeile: über den Abstand des Startbilds und den oberen Rand von .wrap hinaus */
+  .vk-einbettung .vk-hero-foto { margin-top: calc(-24px - clamp(12px, 2.5vw, 28px)) }
+  .banner + .vk-einbettung .vk-hero-foto { margin-top: 0 }
+}
+@media (max-width: 879px) { .vk-einbettung { --vk-kopf: 122px } }
+@media (max-width: 520px) { .vk-einbettung { --vk-pad: 16px } }
