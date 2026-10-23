@@ -31,7 +31,11 @@ Die drei Motive aus den Beiträgen können direkt wiederverwendet werden: der Wa
 | `start-fensterbauer` | 1120 × 1400 | Startseite, Ansicht Fensterbauer, randlos wie oben. **Da:** Bär in der Werkstatt mit Tablet | Maße · Fotos · Öffnungsarten · Positionen | 1 |
 | `app-start` | 1120 × 1400 | App, Startbild vor dem ersten Fenster. **Da:** drei Waschbären im Wohnzimmer (fotografieren, wünschen, zurücklehnen) | Fotografieren · Messen · Wünschen | 1 |
 | `gross` | 1200 × 1500 | Startseite Hauseigentümer, Abschnitt „Auch ganz groß.“ | Elementarten | 1 |
-| `fuer-fensterbauer` | 1200 × 1500 | Seite /fuer-fensterbauer/, oben | Maße · Fotos · Positionen · Bestellmaß | 1 |
+| `fb-station` | 1122 × 1402, WebP mit Alpha | Seite /fuer-fensterbauer/, oben: Hintergrund der Bühne (Raumstation mit Bullauge, ohne Astronaut). Das Glas des Bullauges ist freigeschnitten (Ellipse bei 95,7 % / 22,7 %, Halbachsen 8,6 % × 16,5 %), dahinter liegen `fb-sterne` und `fb-erde`. **Da** | Ihre Domain · Kunden planen selbst · PDF per E-Mail · Ihre Marke, Ihre Kunden | 1 |
+| `fb-astronaut` | 719 × 900, WebP mit Alpha | ebenda: freigestellter Astronaut, schwebt und treibt vor dem Gang, Tiefe beim Scrollen. **Da**; ein Video mit Atem und Kopfdrehung kann die Ebene später ersetzen | – | 1 |
+| `fb-erde` | 900 × 900, WebP mit Alpha | ebenda: Erdkugel hinter dem Bullauge, dreht und driftet. **Da** | – | 1 |
+| `fb-sterne` | 640 × 640, Kachel, verlustfrei | ebenda: Sternenhimmel hinter der Erde, aus Code erzeugt (PIL, fester Startwert). **Da** | – | 1 |
+| `fuer-fensterbauer` | 1200 × 1500 | nicht mehr eingebaut (früheres Startbild der Seite, Astronaut mit Zollstock); bleibt als Vorlage liegen | – | – |
 | `ratgeber` | 1600 × 1000 | Übersicht /ratgeber/, über dem Weg | Prüfen · Entscheiden · Auswählen · Ausmessen · Vergleichen · Einbauen | 2 |
 | `weg-pruefen` | 1600 × 1000 | Ratgeber, Schritt 1 (Übersicht; in den Seiten als Bild in „Nächster Schritt“) | – | 2 |
 | `weg-entscheiden` | 1600 × 1000 | Ratgeber, Schritt 2 | – | 2 |

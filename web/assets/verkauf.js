@@ -204,6 +204,18 @@
     } else runde(ab);
   }
 
+  /* Startbild: die Bühne mit Tiefe (verkauf.css .vk-kosmos). --sp (0 … 1) kommt aus Scroll.binden über die Figur: Astronaut und Erde
+     bleiben damit beim Scrollen hinter der Seite zurück; .vk-im-bild hält die Schleifen (Schweben, Erde, Sterne, Flieger) nur im Bild am
+     Laufen, außerhalb stehen sie. Die Scroll-Bindung je Figur nur einmal (eine alte löst Scroll selbst, wenn die Figur verschwindet),
+     der Beobachter je Aufruf neu wie bei der Bühne. */
+  function kosmos(wurzel) {
+    var fig = wurzel.querySelector('.vk-hero-foto');
+    if (!fig || !fig.querySelector('.vk-kosmos')) return;
+    if (!fig.__vkKosmos) { fig.__vkKosmos = true; if (window.Scroll) window.Scroll.binden(fig, function (p) { fig.style.setProperty('--sp', p.toFixed(3)); }); }
+    if (kannIO) { var io = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { fig.classList.toggle('vk-im-bild', e.isIntersecting); }); }, { threshold: 0 })); io.observe(fig); }
+    else fig.classList.add('vk-im-bild');
+  }
+
   function bewegung(wurzel, still) {
     beobachter.forEach(function (b) { b.disconnect(); }); beobachter = [];
     /* Neuaufbau desselben Bildschirms (still): Was im Bild steht oder schon vorbei ist, bleibt, wie es ist (kein Flackern); was noch
@@ -232,6 +244,7 @@
        gestartetes Element überspringt Lottie selbst */
     if (window.Lottie) window.Lottie.auf(wurzel);
     buehne(wurzel);
+    kosmos(wurzel);
     meldungen(wurzel, still);
 
     /* Zeitleiste: --sp von 0 (Liste kommt unten herein) bis 1 (Liste steht zu zwei Dritteln im Bild); Schritte, deren Symbol die gefüllte

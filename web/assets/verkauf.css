@@ -95,7 +95,15 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 /* Erscheinen (Katalog 1): auf dieser Seite 16 px statt 8 px aufwärts, 320 ms; die Staffelung je Gruppe setzt verkauf.js (--rv) */
 .vk-seite .rev:not(.in), .vk-einbettung .rev:not(.in) { transform: translateY(16px) }
 
-/* Startbild: Text links, rechts das Foto randlos bis an den Bildschirmrand, in den Grund ausgeblendet; „Auf dieser Seite“ darunter */
+/* Startbild: Text links, rechts die Bühne randlos bis an den Bildschirmrand, in den Grund ausgeblendet; „Auf dieser Seite“ darunter.
+   Die Bühne (.vk-kosmos, 23.10.2026) ist ein Bild aus Ebenen statt eines Fotos: hinten Sterne und die Erde, davor die Station mit
+   freigeschnittenem Bullauge (fb-station.webp mit Alpha, Ellipse bei 95,7 % / 22,7 %, Halbachsen 8,6 % × 16,5 %), darüber der
+   freigestellte Astronaut und zwei Papierflieger (Inline-SVG). Die Bühne hat das Seitenverhältnis der Station (1122 × 1402) und deckt
+   die Figur wie object-fit: cover, rechtsbündig (min-width und min-height mit aspect-ratio): Alle Ebenen liegen in Prozent der Bühne,
+   also an derselben Stelle des Bildes, egal wie die Figur beschnitten ist. Bewegung: Astronaut schwebt (zwei Schleifen mit
+   verschiedenen Perioden, 7,3 s und 11 s, darum wiederholt sich keine Lage), Erde dreht in 12 Minuten einmal und driftet, Sterne
+   ziehen, die Flieger fliegen auf Bahnen (offset-path) mit Wackeln; beim Scrollen bleiben Astronaut und Erde hinter der Seite zurück
+   (--sp aus Scroll.binden, verkauf.js). Alle Schleifen laufen nur im Bild (.vk-im-bild) und nie bei „weniger Bewegung“. */
 .vk-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); padding: 4px 0 0 }
 .vk-hero > .kicker { margin: 0 0 10px }
 .vk-hero > h1 { margin: 0 0 14px }
@@ -103,22 +111,52 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 .vk-hero > .rg-kurz .eyebrow { margin: 0 0 6px }
 .vk-hero > .rg-cta { margin: 0 0 10px }
 .vk-hero > .rg-inhalt { margin: 22px 0 0 }
-.vk-hero-foto { position: relative; margin: 0; pointer-events: none }
-.vk-hero-foto img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; animation: vk-fotoin 1.6s var(--e-out) both }
+.vk-hero-foto { position: relative; margin: 0; pointer-events: none; overflow: hidden }
+.vk-bild { position: absolute; inset: 0; overflow: hidden }
+.vk-kosmos { position: absolute; top: 0; right: 0; aspect-ratio: 1122 / 1402; min-width: 100%; min-height: 100%; background: #04060c; transform-origin: 72% 36%; animation: vk-fotoin 1.6s var(--e-out) both }
 @keyframes vk-fotoin { from { transform: scale(1.06) } to { transform: none } }
+.vk-kosmos > img { position: absolute; display: block }
+.vk-sterne { position: absolute; inset: -12%; background: url(/bilder/foto/fb-sterne.webp) 0 0 / 300px 300px repeat; animation: vk-sterne 140s ease-in-out infinite alternate }
+@keyframes vk-sterne { from { transform: translate(0, 0) } to { transform: translate(-4%, 2.5%) } }
+/* Erde: Mittelpunkt (1150, 820) im Bild, Radius 620 px: der Horizont läuft oben durchs Bullauge, leicht nach rechts steigend */
+.vk-erde-bahn { position: absolute; left: 47.2%; top: 14.3%; width: 110.5%; aspect-ratio: 1; animation: vk-erde-drift 46s ease-in-out infinite alternate }
+@keyframes vk-erde-drift { from { transform: translate(0, 0) } to { transform: translate(-2.2%, 1.4%) } }
+.vk-erde { width: 100%; height: 100%; inset: 0; animation: vk-erde-dreh 720s linear infinite }
+@keyframes vk-erde-dreh { to { transform: rotate(360deg) } }
+/* Glas: ein weicher Lichtschein im Ausschnitt des Bullauges */
+.vk-glas { position: absolute; left: 87.07%; top: 6.21%; width: 17.22%; height: 32.9%; border-radius: 50%; background: radial-gradient(ellipse at 28% 22%, rgba(255, 255, 255, .26), rgba(255, 255, 255, .07) 38%, transparent 68%) }
+.vk-station { inset: 0; width: 100%; height: 100% }
+/* Astronaut: 48 % der Bühnenbreite, im Gang vor Bullauge und Taschen; die Hülle trägt die Tiefe beim Scrollen, die Schicht darin das
+   Schweben, das Bild selbst das Treiben mit leichter Drehung; ein weicher Schatten löst ihn vom Hintergrund */
+.vk-astronaut { position: absolute; left: 46%; top: 30%; width: 48%; transform: translate(calc((var(--sp, .5) - .5) * 36px), calc((var(--sp, .5) - .5) * 150px)); will-change: transform }
+.vk-schweben { animation: vk-schweben 7.3s ease-in-out infinite alternate }
+@keyframes vk-schweben { from { transform: translateY(-14px) } to { transform: translateY(12px) } }
+.vk-astronaut img { display: block; width: 100%; height: auto; transform-origin: 50% 56%; filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .5)); animation: vk-treiben 11s ease-in-out infinite alternate }
+@keyframes vk-treiben { from { transform: translateX(-7px) rotate(-1.4deg) } to { transform: translateX(7px) rotate(1.6deg) } }
+/* Papierflieger: Bahnen in Bildkoordinaten (viewBox der Bühne); ohne offset-path gibt es keine Flieger; der innere Rahmen wackelt */
+.vk-flieger { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible }
+.vk-papier { display: none; opacity: 0; offset-rotate: auto; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .55)) }
+.vk-papier path { stroke: rgba(40, 36, 30, .35); stroke-width: .8; stroke-linejoin: round; paint-order: stroke }
+@supports (offset-path: path('M0 0 L1 1')) { .vk-papier { display: block } }
+.vk-papier-1 { offset-path: path('M -160 780 C 260 650, 540 740, 820 430 S 1190 170, 1320 110'); transform: scale(1.3); animation: vk-papierflug 17s cubic-bezier(.42, .1, .58, .92) 1.5s infinite }
+.vk-papier-2 { offset-path: path('M 1280 1000 C 900 1060, 620 920, 330 650 S -30 420, -170 300'); transform: scale(.95); animation: vk-papierflug 23s cubic-bezier(.42, .1, .58, .92) 9s infinite }
+@keyframes vk-papierflug { 0% { offset-distance: 0%; opacity: 0 } 5% { opacity: 1 } 58% { opacity: 1 } 66% { offset-distance: 100%; opacity: 0 } 100% { offset-distance: 100%; opacity: 0 } }
+.vk-wackel { animation: vk-wackel 1.9s ease-in-out infinite alternate }
+@keyframes vk-wackel { from { transform: rotate(-5deg) translateY(-3px) } to { transform: rotate(5deg) translateY(3px) } }
+/* mit JavaScript laufen die Schleifen nur, solange das Startbild im Bild ist */
+.js .vk-hero-foto:not(.vk-im-bild) :is(.vk-sterne, .vk-erde-bahn, .vk-erde, .vk-schweben, .vk-astronaut img, .vk-papier, .vk-wackel) { animation-play-state: paused }
 .vk-hero-foto .chips { position: absolute; left: 16px; right: 16px; bottom: 36px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; opacity: 0; animation: vk-auf var(--t3) .8s var(--e-out) forwards }
 @keyframes vk-auf { to { opacity: 1 } }
 .vk-hero-foto .chip { min-height: 36px; padding: 0 12px; font-size: 13px; color: var(--text); background: rgba(22, 22, 22, .72); border-color: rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px) }
 .vk-hero-foto .chip.haken::before { width: 6px; height: 10px; border-width: 0 2px 2px 0 }
 /* Meldungskarten auf dem Startbild (.vk-eingang, aria-hidden: Illustration, der Inhalt steht sinngemäß im Text): Es sieht aus, als legten
-   gerade Kunden ihre Projekte an, während der Fensterbauer unterwegs ist. Links auf dem Foto, im oberen Drittel beginnend, schlank:
-   zwei Zeilen je Karte (Titel 15 fett, rechts daneben die Zeit 13; darunter eine Zeile 13), Innenabstand 6/7 px 10 px, am Schreibtisch
-   unter 56 px hoch, höchstens 300 px breit (bis 1199 px: 70 % des Streifens, am Telefon 60 % der Bildbreite, linksbündig), damit Kopf,
-   Arm, Zollstock und Bullauge des Astronauten in der rechten Bildhälfte frei bleiben. Am Telefon steht die Zeit in der zweiten Zeile und
-   .vk-nur-breit (Zusätze in der Zeile, der lange Teil der Eyebrow) entfällt, damit es bei zwei Zeilen bleibt. Fläche wie die Chips
-   (dunkel, durchscheinend, Weichzeichner, Ring), grüner Punkt 8 px. Ohne JavaScript stehen alle drei; verkauf.js setzt .vk-lauf (Karten
-   verborgen, bis sie .vk-da bekommen: 16 px von rechts in 320 ms) und .vk-weg (gemeinsames Ausblenden, 400 ms); bei „weniger Bewegung“
-   bleibt .vk-lauf aus. */
+   gerade Kunden ihre Projekte an, während der Fensterbauer unterwegs ist. Links auf dem Bild, oben beginnend, schlank: zwei Zeilen je
+   Karte (Titel 15 fett, rechts daneben die Zeit 13; darunter eine Zeile 13), Innenabstand 6/7 px 10 px, am Schreibtisch unter 56 px
+   hoch, höchstens 300 px breit (bis 1199 px: 58 % des Streifens, am Telefon 60 % der Bildbreite, linksbündig), damit der Astronaut in
+   der Mitte und das Bullauge rechts frei bleiben. Am Telefon steht die Zeit in der zweiten Zeile und .vk-nur-breit (Zusätze in der
+   Zeile, der lange Teil der Eyebrow) entfällt, damit es bei zwei Zeilen bleibt. Fläche wie die Chips (dunkel, durchscheinend,
+   Weichzeichner, Ring), grüner Punkt 8 px. Ohne JavaScript stehen alle drei; verkauf.js setzt .vk-lauf (Karten verborgen, bis sie
+   .vk-da bekommen: 16 px von rechts in 320 ms) und .vk-weg (gemeinsames Ausblenden, 400 ms); bei „weniger Bewegung“ bleibt .vk-lauf aus. */
 .vk-hero-foto .vk-eingang { position: absolute; left: 16px; right: 16px; top: 22%; display: flex; flex-direction: column; align-items: flex-start; gap: 8px }
 .vk-hero-foto .vk-eingang .eyebrow { margin: 0 0 0 2px; width: max-content; max-width: calc(100% + 12px); letter-spacing: .12em; color: var(--text2); text-shadow: 0 1px 2px rgba(0, 0, 0, .6) }
 .vk-nachricht { width: min(100%, 300px); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 8px; align-items: center; padding: 6px 10px 7px; border-radius: var(--r3); background: rgba(22, 22, 22, .78); box-shadow: 0 0 0 2px rgba(255, 255, 255, .14); color: var(--text); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px) }
@@ -132,19 +170,20 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 .vk-eingang.vk-lauf .vk-nachricht.vk-da.vk-weg { opacity: 0; transition: opacity .4s var(--e-io) }
 @media (min-width: 761px) {
   .vk-hero { grid-template-columns: minmax(0, 560px) minmax(0, 1fr); grid-template-rows: auto auto auto 1fr auto; column-gap: 40px; padding-top: clamp(12px, 2.5vw, 28px) }
-  .vk-hero > .kicker { grid-area: 1 / 1 } .vk-hero > h1 { grid-area: 2 / 1 } .vk-hero > .rg-kurz { grid-area: 3 / 1 } .vk-hero > .rg-cta { grid-area: 4 / 1; align-self: start }
+  .vk-hero > .kicker { grid-area: 1 / 1; margin-top: clamp(16px, 6vw, 96px) } .vk-hero > h1 { grid-area: 2 / 1 } .vk-hero > .rg-kurz { grid-area: 3 / 1 } .vk-hero > .rg-cta { grid-area: 4 / 1; align-self: start }
   .vk-hero > .rg-inhalt { grid-column: 1 / -1; grid-row: 5 }
-  .vk-hero-foto { grid-column: 2; grid-row: 1 / 5; min-height: clamp(440px, 42vw, 580px); margin: -44px calc(-1 * var(--vk-rand)) 0 0 }
-  .vk-hero-foto img { position: absolute; inset: 0;
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); -webkit-mask-composite: source-in;
+  /* 50 % höher als das frühere Foto (440 bis 580 px) */
+  .vk-hero-foto { grid-column: 2; grid-row: 1 / 5; min-height: clamp(660px, 63vw, 870px); margin: -44px calc(-1 * var(--vk-rand)) 0 0 }
+  .vk-bild { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); -webkit-mask-composite: source-in;
     mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); mask-composite: intersect }
+  .vk-hero-foto .vk-eingang { top: 7% }
   .vk-hero-foto .chips { left: 16px; right: calc(var(--vk-rand) + 8px); bottom: 52px; max-width: 340px; justify-content: flex-start }
   .vk-hero > .rg-inhalt ol { columns: 3 }
 }
-/* schmale Schreibtische: bis 999 px ist das Foto ein schmaler Streifen (weder Karten noch Chips haben dort Platz), bis 1199 px nehmen
-   die Karten in der kurzen Fassung (wie am Telefon, ohne .vk-nur-breit) 58 % des Streifens, das Bild bekommt Höhe für Karten und Chips */
+/* schmale Schreibtische: bis 999 px ist die Bühne ein schmaler Streifen (weder Karten noch Chips haben dort Platz), bis 1199 px nehmen
+   die Karten in der kurzen Fassung (wie am Telefon, ohne .vk-nur-breit) 58 % des Streifens */
 @media (min-width: 761px) and (max-width: 999px) { .vk-hero-foto .vk-eingang, .vk-hero-foto .chips { display: none } }
-@media (min-width: 1000px) and (max-width: 1199px) { .vk-hero-foto { min-height: clamp(500px, 42vw, 580px) } .vk-hero-foto .vk-eingang { top: 16% } .vk-nachricht { width: min(58%, 300px) } }
+@media (min-width: 1000px) and (max-width: 1199px) { .vk-nachricht { width: min(58%, 300px) } }
 /* kurze Fassung der Karten (Telefon und 1000–1199 px): Titel über die ganze Zeile, Zeit in der zweiten Zeile, Zusätze entfallen */
 @media (max-width: 760px), (min-width: 1000px) and (max-width: 1199px) {
   .vk-hero-foto .vk-nur-breit { display: none }
@@ -153,11 +192,11 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
   .vk-nachricht small { grid-row: 2; grid-column: 3 }
 }
 @media (max-width: 760px) {
-  /* 500 px hoch (fast das 4:5 des Fotos): die drei Meldungskarten oben links auf 60 % der Breite (der Astronaut rechts bleibt frei),
-     die Chips (32 px) unten in der ausgeblendeten Zone */
-  .vk-hero-foto { order: -1; height: clamp(500px, 118vw, 520px); margin: 4px calc(-1 * var(--vk-rand)) -56px }
-  .vk-hero-foto img { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%) }
-  .vk-hero-foto .chips { bottom: 72px; justify-content: flex-start }
+  /* 50 % höher als das frühere Foto (500 px): die Bühne füllt fast den ersten Bildschirm; die drei Meldungskarten oben links auf 60 %
+     der Breite, der Astronaut in der Mitte, die Chips (32 px) unten in der ausgeblendeten Zone */
+  .vk-hero-foto { order: -1; height: clamp(720px, 185vw, 800px); margin: 4px calc(-1 * var(--vk-rand)) -64px }
+  .vk-bild { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 62%, transparent 94%); mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 62%, transparent 94%) }
+  .vk-hero-foto .chips { bottom: 84px; justify-content: flex-start }
   .vk-hero-foto .chip { min-height: 32px }
   .vk-hero-foto .vk-eingang { top: 28px }
   .vk-nachricht { width: min(60%, 300px) }
@@ -373,8 +412,10 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 /* Weniger Bewegung: Foto und Chips stehen, Haken gezogen, Zeitleiste voll und Symbole gezogen, Ring voll, Bühne ohne Überblenden
    (verkauf.js schaltet den Bildschirm hart um), kein Puls, kein Flieger, kein Konfetti; die Skripte lassen Zahlen, Zeichen und Reveal in Ruhe */
 @media (prefers-reduced-motion: reduce) {
-  .vk-hero-foto img, .vk-hero-foto .chips, .vk-blatt.rev.in .vk-haken, .vk-tisch .vk-haken, .vk-mini-knopf::after, .vk-flug, .vk-konfetti i, .vk-ablauf .vk-sym { animation: none !important }
+  .vk-kosmos, .vk-sterne, .vk-erde-bahn, .vk-erde, .vk-schweben, .vk-astronaut img, .vk-wackel, .vk-hero-foto .chips, .vk-blatt.rev.in .vk-haken, .vk-tisch .vk-haken, .vk-mini-knopf::after, .vk-flug, .vk-konfetti i, .vk-ablauf .vk-sym { animation: none !important }
   .vk-hero-foto .chips { opacity: 1 }
+  .vk-papier { display: none }
+  .vk-astronaut { transform: none }
   .vk-blatt.rev .vk-haken, .js .vk-tisch .vk-haken, .js .vk-ablauf li:not(.vk-an) .vk-sym { stroke-dashoffset: 0 }
   .vk-ablauf li::before, .vk-ablauf .vk-symbol, .vk-karte, .vk-karte::before, .vk-schirm, .vk-telefon, .vk-tisch { transition: none }
   .vk-karte { opacity: 1 }
