@@ -89,14 +89,23 @@ function hinweis(v) {
     (v.vorlaeufig ? 'Die Preise stehen noch nicht endgültig fest; es gilt der Preis, den Sie beim Bestellen sehen, und er bleibt für Ihren Vertrag fest.' : '') +
     (v.bestellen ? '' : (v.vorlaeufig ? ' ' : '') + 'Die Bestellung schalten wir in Kürze frei; fragen Sie gern schon jetzt <a href="#bestellen">unverbindlich an</a>.') + '</p>';
 }
-/* Zeichen je Paket über der Merkmalsliste (Schleife, verkauf.css .vk-paket-zeichen): domain (Essential), marke (Plus), dashboard
-   (Signature); das Standbild steht, bis der Spieler da ist, und ohne JavaScript */
-const ZEICHEN_STILL = {
-  domain: '<svg viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="22" y="38" width="196" height="44" rx="22"/><path d="M64 60h130"/><rect x="36" y="58" width="16" height="12" rx="2" fill="var(--ok)" stroke="none"/><path d="M38 58a6 6 0 0 1 12 0" stroke="var(--ok)" stroke-width="3"/><rect x="60" y="92" width="120" height="112" rx="6"/><path d="M120 92v112"/></svg>',
-  marke: '<svg viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="65" y="56" width="110" height="128" stroke="var(--el)" stroke-width="22" stroke-linejoin="miter"/><rect x="54" y="45" width="132" height="150" rx="4"/><rect x="76" y="67" width="88" height="106" rx="2"/><circle cx="54" cy="45" r="13" fill="var(--el)" stroke="var(--paper)"/><path d="M188 206l8 8 16-18" stroke="var(--ok)" stroke-width="5"/></svg>',
-  dashboard: '<svg viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="32" y="36" width="176" height="48" rx="8"/><circle cx="54" cy="60" r="8" fill="currentColor" stroke="none"/><path d="M74 53h78" stroke-opacity=".32" stroke-width="3.5"/><path d="M74 68h44" stroke-opacity=".18"/><rect x="32" y="96" width="176" height="48" rx="8"/><circle cx="54" cy="120" r="8" fill="var(--mo)" stroke="none"/><path d="M74 113h78" stroke-opacity=".32" stroke-width="3.5"/><path d="M74 128h106" stroke-opacity=".18" stroke-width="4"/><path d="M74 128h66" stroke="var(--mo)" stroke-width="4"/><rect x="32" y="156" width="176" height="48" rx="8"/><circle cx="54" cy="180" r="10" fill="var(--ok)" stroke="none"/><path d="M49 180l3.5 3.5 7-7.5" stroke="var(--paper)"/><path d="M74 173h78" stroke-opacity=".32" stroke-width="3.5"/><path d="M74 188h44" stroke-opacity=".18"/></svg>'
-};
-const paketZeichen = (m) => { const z = m.dashboard ? 'dashboard' : m.gestaltung === 'eigen' ? 'marke' : 'domain'; return '<span class="vk-zeichen vk-paket-zeichen" data-lottie="' + z + '" data-loop="1" aria-hidden="true"><span class="lottie-still">' + ZEICHEN_STILL[z] + '</span></span>'; };
+/* Beispielseite je Paket (Bereich unter der Karte, wischt am Telefon mit ihr): die Bilder liefert der Inhaber; liegt eines unter
+   web/bilder/beispiel/, steht sein Pfad hier und ersetzt die Skizze. Bis dahin zeigt eine Skizze ohne Text, wie weit die Seite die
+   Marke trägt, abgeleitet aus den Merkmalen (nie aus dem Namen): eeziframes-Design mit dem Hinweis „Powered by“, eigenes Design mit
+   Logo, Farbe und Foto des Betriebs, eigene Marke mit Dashboard. */
+const BEISPIEL_BILD = { essential: '', plus: '', signature: '' };
+const SCHLOSS = '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="5.5" width="7" height="5" rx="1.2"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5"/></svg>';
+const SK_FENSTER = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect class="g" x="6.5" y="9.5" width="11" height="21"/><rect class="g" x="22.5" y="9.5" width="11" height="21"/><rect x="4" y="7" width="32" height="26" rx="1.5"/><path d="M20 7v26"/><rect x="6.5" y="9.5" width="11" height="21" rx=".5"/><rect x="22.5" y="9.5" width="11" height="21" rx=".5"/><path class="s" d="M6.5 9.5 17.5 20 6.5 30.5M33.5 9.5 22.5 20 33.5 30.5M22.5 30.5 28 9.5 33.5 30.5"/></svg>';
+function skizze(m) {
+  const art = m.dashboard ? 'dashboard' : m.gestaltung === 'eigen' ? 'eigen' : 'standard';
+  const hinweis = m.kennzeichnung === 'deutlich' ? '<i class="sk-hinweis"></i>' : m.kennzeichnung === 'dezent' ? '<i class="sk-hinweis sk-leise"></i>' : '';
+  const rechts = m.dashboard ? '<span class="sk-dash"><i></i><i></i><i></i></span>' : m.fotos ? '<span class="sk-foto"></span>' : '<span class="sk-bild">' + SK_FENSTER + '</span>';
+  return '<div class="vk-skizze vk-skizze-' + art + '" aria-hidden="true"><i class="sk-kopf"></i><i class="sk-logo"></i><i class="sk-menue"></i><i class="sk-titel"></i><i class="sk-titel2"></i><i class="sk-text"></i><i class="sk-knopf"></i>' + rechts + '<i class="sk-fuss"></i>' + hinweis + '</div>';
+}
+function beispiel(p, m) {
+  const bild = BEISPIEL_BILD[p] ? '<img src="' + esc(BEISPIEL_BILD[p]) + '" alt="Beispielseite ' + esc(P().PAKETE[p].name) + '" loading="lazy" decoding="async">' : skizze(m);
+  return '<figure class="vk-beispiel"><figcaption class="eyebrow">Beispielseite</figcaption><div class="vk-beispiel-rahmen"><div class="vk-beispiel-leiste" aria-hidden="true"><i></i><i></i><i></i><span>' + SCHLOSS + 'ihr-name-fenster.de</span></div><div class="vk-beispiel-bild">' + bild + '</div></div></figure>';
+}
 function karten(o, v) {
   const liste = P().LISTE;
   const karte = (p, i) => {
@@ -105,15 +114,20 @@ function karten(o, v) {
       ? '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + ' bestellen</a>'
       : '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="#bestellen" data-paket="' + p + '">' + esc(kurzname(p)) + ' anfragen</a>';
     return '\n    <article class="vk-paket' + (emp ? ' vk-empfohlen' : '') + '" id="paket-' + p + '" aria-labelledby="paket-' + p + '-name">' +
-      (emp ? '<p class="vk-marke">Beliebt</p>' : '') +
+      (emp ? '<p class="vk-marke">Empfohlen</p>' : '') +
       '<h3 class="vk-name" id="paket-' + p + '-name">' + esc(P().PAKETE[p].name) + '</h3>' +
       '<p class="vk-kurz">' + esc(kurzText(m)) + '</p>' +
       '<p class="vk-preis"><b>' + geld(pr.monat) + '</b> im Monat</p>' +
       '<p class="vk-einr">dazu ' + geld(pr.einrichtung) + ' Einrichtung, einmalig vorab</p>' +
-      '<p class="vk-steuer">' + steuerText(v) + ' · nur für Unternehmer</p>' + paketZeichen(m) +
-      '<ul class="vk-liste">' + punkte(m).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' + knopf + '</article>';
+      '<p class="vk-steuer">' + steuerText(v) + ' · nur für Unternehmer</p>' +
+      '<button class="vk-mehr" type="button" aria-expanded="false" aria-controls="paket-' + p + '-liste" hidden>Leistungen ansehen</button>' +
+      '<ul class="vk-liste" id="paket-' + p + '-liste">' + punkte(m).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' +
+      '<div class="vk-paket-knoepfe">' + knopf + '</div>' +
+      beispiel(p, m) + '</article>';
   };
-  return hinweis(v) + '\n  <div class="vk-pakete">' + liste.map(karte).join('') + '\n  </div>\n  ';
+  /* Am Telefon: Leiste unter der Reihe, die zeigt, welches Paket in der Mitte steht; ohne JavaScript springen die Links zur Karte */
+  const nav = '\n  <nav class="vk-pakete-nav" aria-label="Paket wählen">' + liste.map((p, i) => '<a href="#paket-' + p + '" data-i="' + i + '"' + (i === EMPFOHLEN ? ' aria-current="true"' : '') + '>' + esc(kurzname(p)) + '</a>').join('') + '<i class="vk-pakete-zeiger" aria-hidden="true"></i></nav>';
+  return hinweis(v) + '\n  <div class="vk-pakete" data-vk-pakete data-start="' + EMPFOHLEN + '">' + liste.map(karte).join('') + '\n  </div>' + nav + '\n  ';
 }
 /* Vergleich aller Merkmale mit vergleich: true (Beschriftung aus MERKMALE) */
 function vergleich(o, v) {

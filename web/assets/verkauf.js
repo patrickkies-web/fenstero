@@ -95,7 +95,9 @@
      Hilfen aus gemeinsam.js (Reveal, Scroll, Lottie, Feier); fehlt eine, bleibt die Seite so, wie sie ohne JavaScript ist: alles
      sichtbar, Zahlen stehen, Standbilder, Zeitleiste voll. Bei „weniger Bewegung“ läuft nichts.
      - Reveal: Karten und Blöcke erscheinen, wenn sie ins Bild kommen (Katalog 1), je Gruppe gestaffelt (--rv)
-     - Kennzahlen: laufen einmal von 0 hoch, der Ring um die Zahl füllt sich im selben Takt, dann Einrasten (Katalog 5 und 6)
+     - Startbild: Tiefe beim Scrollen und der Stapel der Meldungen (startbild)
+     - Leisten unter dem Startbild: schweben in Dauerschleife, Scrollen schiebt mit (leisten)
+     - Pakete: am Telefon eine Reihe zum Wischen mit der Beispielseite darunter (pakete)
      - Zeichen: alle mit data-lottie laufen als Schleife (data-loop="1"); gemeinsam.js spielt nur, was im Bild ist, und pausiert draußen
      - Bühne „So funktioniert es“: Scroll.binden über den Block liefert --sp; der aktive Schritt ist die Karte, deren Mitte der
        Bildschirmmitte am nächsten liegt (data-schritt auf .vk-buehne, verkauf.css blendet die Bildschirme über); verlassene
@@ -106,19 +108,6 @@
      Die Beobachter des vorigen Aufrufs werden gelöst, damit ein Neuaufbau kein zweites Hochlaufen startet. */
   var beobachter = [];
   function beobachten(io) { beobachter.push(io); return io; }
-
-  /* Kennzahlen: von 0 bis zur Zahl in 1400 ms (Kurve wie countUp der Startseite), der Ring füllt sich mit (pathLength 100), dann Einrasten */
-  function hochlaufen(b) {
-    var zu = parseInt(b.getAttribute('data-zahl'), 10) || 0, t0 = performance.now(), dauer = 1400;
-    var zahl = b.closest('.vk-zahl'), ring = zahl ? zahl.querySelector('.vk-ring-lauf') : null;
-    (function schritt(t) {
-      var k = Math.min(1, (t - t0) / dauer), e = 1 - Math.pow(1 - k, 3);
-      b.textContent = String(Math.round(zu * e));
-      if (ring) ring.style.strokeDashoffset = String(100 - 100 * e);
-      if (k < 1) requestAnimationFrame(schritt);
-      else { b.textContent = String(zu); if (ring) ring.style.strokeDashoffset = '0'; if (window.Feier) window.Feier.einrasten(b); }
-    })(t0);
-  }
 
   /* Bühne: welcher Schritt zu sehen ist. Die Bildschirme (data-schirm) blenden über (.vk-an, 220 ms); der verlassene fällt danach aus dem
      Fluss (.vk-da weg, display: none), damit seine Zeichen für gemeinsam.js nicht mehr im Bild sind und von selbst pausieren; nur die
@@ -160,60 +149,190 @@
     else b.classList.add('vk-im-bild');
   }
 
-  /* Startbild: Meldungskarten (.vk-eingang in figure.vk-hero-foto) trudeln ein, als legten gerade Kunden ihre Projekte an. Ohne
-     JavaScript stehen alle drei (CSS); hier bekommt der Behälter .vk-lauf, dann je Runde (etwa 9 s): Karte für Karte von rechts (.vk-da,
-     ab 300 ms, 700 ms Abstand), gut 5 s stehen, gemeinsam ausblenden (.vk-weg, 400 ms), kurze Pause, von vorn. Läuft nur, solange die
-     figure im Bild ist (Beobachter je Aufruf, wie die Bühne); außerhalb stehen die Timer und die Karten sind leer. still (Neuaufbau
-     desselben Bildschirms, die Einbettung baut das Startbild neu) und das Bild steht schon im Bild: Die Karten, die im alten Behälter
-     standen, stehen sofort wieder (kein Überblenden), die Runde läuft mit den übrigen weiter; ohne alten Stand stehen alle drei.
-     Bei „weniger Bewegung“ bleibt alles stehen (kein .vk-lauf). */
-  var letzterEingang = null;
-  function meldungen(wurzel, still) {
-    var box = wurzel.querySelector('.vk-hero-foto .vk-eingang');
-    if (!box || box.__vkAn || ruhig()) return;
-    box.__vkAn = true;
-    var fig = box.closest('.vk-hero-foto'), karten = Array.prototype.slice.call(box.querySelectorAll('.vk-nachricht')), timer = [];
-    var vorher = letzterEingang; letzterEingang = box;
-    function spaeter(f, ms) { timer.push(setTimeout(function () { if (document.body.contains(box)) f(); }, ms)); }
-    function leer() { timer.forEach(clearTimeout); timer = []; karten.forEach(function (k) { k.classList.remove('vk-da', 'vk-weg'); }); }
-    /* eine Runde; die ersten `ab` Karten stehen sofort, die übrigen trudeln ein */
-    function runde(ab) {
-      leer();
-      karten.forEach(function (k, i) {
-        if (i < ab) k.classList.add('vk-da');
-        else spaeter(function () { k.classList.add('vk-da'); }, 300 + (i - ab) * 700);
-      });
-      var t = ab < karten.length ? 300 + (karten.length - 1 - ab) * 700 + 320 : 0;
-      spaeter(function () { karten.forEach(function (k) { k.classList.add('vk-weg'); }); }, t + 5000);
-      spaeter(function () { runde(0); }, t + 7000);
+  /* ---------- Startbild ----------
+     Tiefe: --py (0 beim Laden, wächst mit dem Weg, den die Figur nach oben wandert; Scroll.binden über die Figur) schiebt das Bild etwas
+     langsamer als die Seite und den Stapel der Meldungen etwas schneller (verkauf.css). Stapel: alle 3,4 s fällt die hinterste Meldung
+     als neueste von oben ein (data-pos „weg“, dann „neu“, dann 0), die anderen rücken nach hinten, die Zeiten altern mit. Läuft nur,
+     solange die Figur im Bild ist; bei „weniger Bewegung“ steht der Stapel wie im HTML. */
+  var ZEITEN = ['gerade eben', 'vor 4 Min.', 'vor 11 Min.'];
+  function startbild(wurzel) {
+    var fig = wurzel.querySelector('.vk-hero-foto');
+    if (!fig || fig.__vkAn) return;
+    fig.__vkAn = true;
+    if (window.Scroll && !ruhig()) {
+      var p0 = null;
+      window.Scroll.binden(fig, function (p) { if (p0 === null) p0 = p; fig.style.setProperty('--py', Math.max(0, p - p0).toFixed(4)); });
     }
-    var r = fig.getBoundingClientRect(), sofort = !!still && r.top < window.innerHeight && r.bottom > 0;
-    var ab = !sofort ? 0 : vorher ? vorher.querySelectorAll('.vk-da:not(.vk-weg)').length : karten.length;
-    box.classList.add('vk-lauf');
-    karten.forEach(function (k, i) { if (i < ab) k.classList.add('vk-da'); });
-    if (kannIO) {
-      var erst = true;
-      var io = beobachten(new IntersectionObserver(function (es) {
-        es.forEach(function (e) {
-          if (e.isIntersecting) runde(erst ? ab : 0);
-          else leer();
-          erst = false;
-        });
-      }, { threshold: 0 }));
-      io.observe(fig);
-    } else runde(ab);
+    var stapel = fig.querySelector('.vk-stapel');
+    if (!stapel || ruhig()) return;
+    var reihe = Array.prototype.slice.call(stapel.querySelectorAll('.vk-nachricht')), uhr = null;
+    function setzen() { reihe.forEach(function (k, i) { k.setAttribute('data-pos', String(i)); var z = k.querySelector('small'); if (z) z.textContent = ZEITEN[i] || ''; }); }
+    function stopp() { if (uhr) { clearInterval(uhr); uhr = null; } }
+    function weiter() {
+      if (!document.body.contains(stapel)) return stopp();
+      var hinten = reihe[reihe.length - 1];
+      hinten.setAttribute('data-pos', 'weg');
+      setTimeout(function () {
+        if (!document.body.contains(stapel)) return;
+        hinten.setAttribute('data-pos', 'neu');
+        var z = hinten.querySelector('small'); if (z) z.textContent = ZEITEN[0];
+        void hinten.offsetWidth;
+        reihe = [hinten].concat(reihe.slice(0, -1));
+        requestAnimationFrame(function () { requestAnimationFrame(setzen); });
+      }, 420);
+    }
+    function los() { if (!uhr) uhr = setInterval(weiter, 3400); }
+    if (kannIO) { var io = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) los(); else stopp(); }); }, { threshold: 0 })); io.observe(fig); }
+    else los();
   }
 
-  /* Startbild: die Bühne mit Tiefe (verkauf.css .vk-kosmos). --sp (0 … 1) kommt aus Scroll.binden über die Figur: Astronaut und Erde
-     bleiben damit beim Scrollen hinter der Seite zurück; .vk-im-bild hält die Schleifen (Schweben, Erde, Sterne, Flieger) nur im Bild am
-     Laufen, außerhalb stehen sie. Die Scroll-Bindung je Figur nur einmal (eine alte löst Scroll selbst, wenn die Figur verschwindet),
-     der Beobachter je Aufruf neu wie bei der Bühne. */
-  function kosmos(wurzel) {
-    var fig = wurzel.querySelector('.vk-hero-foto');
-    if (!fig || !fig.querySelector('.vk-kosmos')) return;
-    if (!fig.__vkKosmos) { fig.__vkKosmos = true; if (window.Scroll) window.Scroll.binden(fig, function (p) { fig.style.setProperty('--sp', p.toFixed(3)); }); }
-    if (kannIO) { var io = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { fig.classList.toggle('vk-im-bild', e.isIntersecting); }); }, { threshold: 0 })); io.observe(fig); }
-    else fig.classList.add('vk-im-bild');
+  /* ---------- Leisten unter dem Startbild ----------
+     Je Leiste (data-vk-leiste="rechts" | "links") eine Spur mit dem Satz der Einträge, geklont, bis die Spur die Breite der Leiste und
+     einen Satz mehr deckt (Klone aria-hidden). Eine gemeinsame Schleife läuft nur, solange eine Leiste im Bild ist: Grundgeschwindigkeit
+     30 px/s in der Richtung der Leiste, dazu der Weg des Bildlaufs (Faktor 0,42; abwärts in ihre Richtung, aufwärts zurück); die Spur
+     folgt weich (etwa 0,13 s), so federt der Schub aus. Mit der Maus über der Leiste fällt die Grundgeschwindigkeit auf ein Viertel. Je
+     Eintrag --l (1 in der Mitte, zu den Rändern 0) für die Helligkeit; die Lagen der Einträge werden einmal gemessen (und nach einer
+     Größenänderung), in der Schleife wird nur gerechnet und geschrieben. Die zweite Leiste lässt ihre Zahlen einmal einrollen (.vk-da),
+     wenn sie ins Bild kommt. Bei „weniger Bewegung“: keine Schleife, die Leiste steht (.vk-still) und lässt sich schieben. */
+  var LEISTEN = [], leisteLauf = 0, leisteT = 0, leisteY = 0, leisteMass = 0;
+  function leisteMessen(L) {
+    var satz = L.saetze[0];
+    L.breite = satz.offsetWidth; L.w = L.el.clientWidth;
+    while (L.breite > 0 && L.saetze.length * L.breite < L.w + L.breite * 1.1) {
+      var k = satz.cloneNode(true); k.setAttribute('aria-hidden', 'true'); L.spur.appendChild(k); L.saetze.push(k);
+    }
+    L.eintraege = [];
+    L.saetze.forEach(function (s) { Array.prototype.forEach.call(s.children, function (li, i) { li.style.setProperty('--i', String(i)); L.eintraege.push({ el: li, x: li.offsetLeft, b: li.offsetWidth }); }); });
+  }
+  function leisteSchritt(t) {
+    leisteLauf = 0;
+    var dt = leisteT ? Math.min(0.064, (t - leisteT) / 1000) : 0;
+    leisteT = t;
+    var y = window.pageYOffset || 0, dy = y - leisteY;
+    leisteY = y;
+    if (Math.abs(dy) > 600) dy = 0; // Sprung (Anker, Neuladen): kein Schub
+    var weiter = false;
+    LEISTEN = LEISTEN.filter(function (L) { return document.body.contains(L.el); });
+    LEISTEN.forEach(function (L) {
+      if (!L.sichtbar || !L.breite) return;
+      weiter = true;
+      L.halt += ((L.maus ? 0.75 : 0) - L.halt) * Math.min(1, dt * 4);
+      L.ziel += L.dir * (30 * (1 - L.halt) * dt + dy * 0.42);
+      L.pos += (L.ziel - L.pos) * (1 - Math.pow(0.0004, dt));
+      var m = ((L.pos % L.breite) + L.breite) % L.breite, tx = m - L.breite, mitte = L.w / 2;
+      L.spur.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,0,0)';
+      for (var i = 0; i < L.eintraege.length; i++) {
+        var e = L.eintraege[i], c = e.x + e.b / 2 + tx;
+        if (c < -e.b || c > L.w + e.b) continue;
+        var d = Math.min(1, Math.abs(c - mitte) / mitte);
+        e.el.style.setProperty('--l', (1 - d * d).toFixed(2));
+      }
+    });
+    if (weiter) leisteLauf = requestAnimationFrame(leisteSchritt);
+    else leisteT = 0;
+  }
+  function leisteStart() { if (!leisteLauf) { leisteY = window.pageYOffset || 0; leisteT = 0; leisteLauf = requestAnimationFrame(leisteSchritt); } }
+  function leisten(wurzel) {
+    Array.prototype.forEach.call(wurzel.querySelectorAll('[data-vk-leiste]'), function (el) {
+      if (el.__vkAn) return;
+      el.__vkAn = true;
+      var spur = el.querySelector('.vk-leiste-spur'), satz = spur && spur.querySelector('.vk-leiste-satz');
+      if (!satz) return;
+      var zahlen = el.classList.contains('vk-leiste-b');
+      if (ruhig()) { el.classList.add('vk-still'); if (zahlen) el.classList.add('vk-da'); return; }
+      var L = { el: el, spur: spur, saetze: [satz], dir: el.getAttribute('data-vk-leiste') === 'rechts' ? 1 : -1, pos: 0, ziel: 0, halt: 0, maus: false, sichtbar: !kannIO, breite: 0, w: 0, eintraege: [] };
+      leisteMessen(L);
+      LEISTEN.push(L);
+      el.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') L.maus = true; });
+      el.addEventListener('pointerleave', function () { L.maus = false; });
+      if (kannIO) {
+        var io = beobachten(new IntersectionObserver(function (es) {
+          es.forEach(function (e) { L.sichtbar = e.isIntersecting; if (e.isIntersecting) { if (zahlen) el.classList.add('vk-da'); leisteStart(); } });
+        }, { threshold: 0 }));
+        io.observe(el);
+      } else { if (zahlen) el.classList.add('vk-da'); leisteStart(); }
+    });
+    if (!leisteMass) {
+      leisteMass = 1;
+      var warte = null;
+      window.addEventListener('resize', function () { clearTimeout(warte); warte = setTimeout(function () { LEISTEN.forEach(leisteMessen); }, 150); });
+      /* Schriften nachgeladen: Breiten neu messen */
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { LEISTEN.forEach(leisteMessen); });
+    }
+  }
+
+  /* ---------- Paketreihe am Telefon ----------
+     Bis 760 px ist .vk-pakete eine Reihe mit Einrasten (verkauf.css); Karte und Beispielseite sind ein Stück, Wischen im Bild bewegt die
+     Pakete mit. Hier: Start beim empfohlenen Paket (data-start, beim Neuaufbau der Einbettung das zuletzt gezeigte), je Karte --d (Abstand
+     zur Mitte in Karten) und --a (|d| bis 1) für Zurücktreten und Gegenlauf der Skizze, in der Leiste darunter --p für den Zeiger und
+     aria-current für den Namen. Ein Tipp auf einen Namen rollt sanft zur Karte (ohne die Seite zu bewegen; der Klick geht nicht an
+     portal.js weiter). Einmal, wenn die Reihe zur Hälfte im Bild steht und noch niemand gewischt hat, laufen die Karten einmal ein Stück
+     nach links und federn zurück (.vk-wischen, verkauf.css): so sieht man, dass sie sich wischen lässt. „Leistungen ansehen“ klappt die
+     Listen aller drei Karten zugleich auf. */
+  var paketIndex = null;
+  function pakete(wurzel) {
+    var box = wurzel.querySelector('[data-vk-pakete]');
+    if (!box || box.__vkAn) return;
+    box.__vkAn = true;
+    var karten = Array.prototype.slice.call(box.querySelectorAll('.vk-paket'));
+    var nav = wurzel.querySelector('.vk-pakete-nav'), links = nav ? Array.prototype.slice.call(nav.querySelectorAll('a[data-i]')) : [];
+    var mq = window.matchMedia ? window.matchMedia('(max-width: 760px)') : { matches: false };
+    var start = parseInt(box.getAttribute('data-start'), 10) || 0, aktiv = -1, tick = false, beruehrt = false;
+    var mehr = Array.prototype.slice.call(box.querySelectorAll('.vk-mehr'));
+    mehr.forEach(function (b) {
+      b.hidden = false;
+      b.addEventListener('click', function () {
+        var auf = !box.classList.contains('vk-offen');
+        box.classList.toggle('vk-offen', auf);
+        mehr.forEach(function (x) { x.setAttribute('aria-expanded', String(auf)); x.textContent = auf ? 'Leistungen ausblenden' : 'Leistungen ansehen'; });
+      });
+    });
+    if (!karten.length) return;
+    function schritt() { return karten.length > 1 ? karten[1].offsetLeft - karten[0].offsetLeft : 1; }
+    function rechnen() {
+      tick = false;
+      if (!document.body.contains(box)) return; // Einbettung neu aufgebaut: diese Reihe gibt es nicht mehr
+      if (!mq.matches) { karten.forEach(function (k) { k.style.removeProperty('--a'); k.style.removeProperty('--d'); }); return; }
+      var st = schritt() || 1, mitte = box.scrollLeft + box.clientWidth / 2;
+      karten.forEach(function (k) {
+        var d = (k.offsetLeft + k.offsetWidth / 2 - mitte) / st;
+        k.style.setProperty('--d', d.toFixed(3));
+        k.style.setProperty('--a', Math.min(1, Math.abs(d)).toFixed(3));
+      });
+      var p = Math.max(0, Math.min(karten.length - 1, (mitte - karten[0].offsetLeft - karten[0].offsetWidth / 2) / st)), i = Math.round(p);
+      if (nav) nav.style.setProperty('--p', p.toFixed(3));
+      if (i !== aktiv) { aktiv = i; paketIndex = i; links.forEach(function (a, j) { a.setAttribute('aria-current', j === i ? 'true' : 'false'); }); }
+    }
+    function anstossen() { if (!tick) { tick = true; requestAnimationFrame(rechnen); } }
+    function zu(i, sanft) {
+      var k = karten[i];
+      if (k) box.scrollTo({ left: k.offsetLeft + k.offsetWidth / 2 - box.clientWidth / 2, behavior: sanft && !ruhig() ? 'smooth' : 'auto' });
+    }
+    box.addEventListener('scroll', anstossen, { passive: true });
+    window.addEventListener('resize', anstossen);
+    ['pointerdown', 'touchstart', 'wheel'].forEach(function (n) { box.addEventListener(n, function () { beruehrt = true; }, { passive: true }); });
+    links.forEach(function (a) {
+      a.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); beruehrt = true; zu(parseInt(a.getAttribute('data-i'), 10) || 0, true); });
+    });
+    if (mq.matches) zu(paketIndex !== null ? paketIndex : start, false);
+    rechnen();
+    var wechsel = function () { if (!document.body.contains(box)) return; if (mq.matches) zu(aktiv >= 0 ? aktiv : start, false); anstossen(); };
+    if (mq.addEventListener) mq.addEventListener('change', wechsel); else if (mq.addListener) mq.addListener(wechsel);
+    if (kannIO && !ruhig()) {
+      var hio = beobachten(new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting || !mq.matches) return;
+          hio.disconnect();
+          if (beruehrt) return;
+          setTimeout(function () {
+            if (beruehrt || !document.body.contains(box)) return;
+            box.classList.add('vk-wischen');
+            setTimeout(function () { box.classList.remove('vk-wischen'); }, 1200);
+          }, 450);
+        });
+      }, { threshold: 0.55 }));
+      hio.observe(box);
+    }
   }
 
   function bewegung(wurzel, still) {
@@ -226,26 +345,21 @@
     /* Erscheinen beim Scrollen: gemeinsam.js setzt .rev (unsichtbar) und .in (sichtbar); ohne Beobachter sofort sichtbar. Gestaffelt wird
        je Gruppe (Karten einer Reihe, Punkte einer Liste): --rv zählt in der Gruppe, Reveal selbst staffelt nur, was beim Aufbau im Bild ist */
     if (window.Reveal) {
-      var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-zahl, .vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-blatt, .vk-band > *, .vk-vorspann, .vk-paket, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
+      var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-blatt, .vk-band > *, .vk-vorspann, .vk-pakete, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
       window.Reveal.auf(liste);
-      if (!ruhig()) Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-zahlen, .vk-punkte, .vk-inhalt, .vk-pakete, .vk-ablauf, .vk-wissen, .vk-demos'), function (gruppe) {
+      if (!ruhig()) Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-punkte, .vk-inhalt, .vk-ablauf, .vk-wissen, .vk-demos'), function (gruppe) {
         var k = 0;
         Array.prototype.forEach.call(gruppe.children, function (el) { if (el.classList.contains('rev') && el.getBoundingClientRect().top >= window.innerHeight) el.style.setProperty('--rv', String(Math.min(k++, 6))); });
       });
-    }
-
-    var zahlen = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-zahl b[data-zahl]'), unten);
-    if (zahlen.length && kannIO && !ruhig()) {
-      var zio = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting) return; zio.unobserve(e.target); hochlaufen(e.target); }); }, { threshold: 0.6 }));
-      zahlen.forEach(function (b) { b.textContent = '0'; var z = b.closest('.vk-zahl'), r = z ? z.querySelector('.vk-ring-lauf') : null; if (r) r.style.strokeDashoffset = '100'; zio.observe(b); });
     }
 
     /* alle Zeichen mit data-lottie (Schrittkarten, Bühne, Paketkarten): Schleifen, die gemeinsam.js nur im Bild spielt; ein schon
        gestartetes Element überspringt Lottie selbst */
     if (window.Lottie) window.Lottie.auf(wurzel);
     buehne(wurzel);
-    kosmos(wurzel);
-    meldungen(wurzel, still);
+    startbild(wurzel);
+    leisten(wurzel);
+    pakete(wurzel);
 
     /* Zeitleiste: --sp von 0 (Liste kommt unten herein) bis 1 (Liste steht zu zwei Dritteln im Bild); Schritte, deren Symbol die gefüllte
        Linie erreicht hat, bekommen .vk-an (Symbol wird gezogen, verkauf.css). Linie: 30 px unter dem Rand der Liste bis 50 px über dem
