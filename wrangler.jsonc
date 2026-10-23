@@ -20,8 +20,9 @@
     // /api/… und die Seiten selbst laufen durch worker.js (Freigabe für Suchmaschinen, robots.txt, sitemap.xml, llms.txt, Bestätigung der Domain für Zoho,
     // dauerhafte Weiterleitung von /app auf /app/ usw.); dazu alles, was eine Konfigurator-Instanz je Domain anders ausliefert (Einstellungen /config.js,
     // Icons, Manifest, Bilder der Marke), die Zentrale, das Kundenkonto /partner/ und das Dashboard /betrieb/ (Kopfzeilen) und die Fehlerseite.
-    // Skripte, Bilder und Schriften kommen direkt
-    "run_worker_first": ["/api/*", "/", "/index.html", "/app/*", "/ratgeber/*", "/fuer-fensterbauer/*", "/impressum/*", "/datenschutz/*", "/agb/*", "/nutzungsbedingungen/*", "/cookies/*", "/widerruf/*", "/app", "/ratgeber", "/fuer-fensterbauer", "/impressum", "/datenschutz", "/agb", "/nutzungsbedingungen", "/cookies", "/widerruf", "/robots.txt", "/sitemap.xml", "/llms.txt", "/verifyforzoho.html", "/config.js", "/favicon.svg", "/apple-touch-icon.png", "/og.png", "/manifest.webmanifest", "/marke/*", "/betrieb", "/betrieb/*", "/zentrale", "/zentrale/*", "/partner", "/partner/*", "/konfigurator-bedingungen", "/konfigurator-bedingungen/*", "/404.html"]
+    // Auch /404 und /404/: html_handling liefert web/404.html sonst unter /404 mit Status 200 aus, auf Instanz-Domains also die eeziframes-Fehlerseite;
+    // durch den Worker bekommen sie ihre neutrale Seite, die Hauptdomain weiter die Datei (worker.js datei()). Skripte, Bilder und Schriften kommen direkt
+    "run_worker_first": ["/api/*", "/", "/index.html", "/app/*", "/ratgeber/*", "/fuer-fensterbauer/*", "/impressum/*", "/datenschutz/*", "/agb/*", "/nutzungsbedingungen/*", "/cookies/*", "/widerruf/*", "/app", "/ratgeber", "/fuer-fensterbauer", "/impressum", "/datenschutz", "/agb", "/nutzungsbedingungen", "/cookies", "/widerruf", "/robots.txt", "/sitemap.xml", "/llms.txt", "/verifyforzoho.html", "/config.js", "/favicon.svg", "/apple-touch-icon.png", "/og.png", "/manifest.webmanifest", "/marke/*", "/betrieb", "/betrieb/*", "/zentrale", "/zentrale/*", "/partner", "/partner/*", "/konfigurator-bedingungen", "/konfigurator-bedingungen/*", "/404.html", "/404", "/404/"]
   },
   // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU, PREIS_AUFMASS_CENT, MWST) bei jedem Deployment behalten
   "keep_vars": true,

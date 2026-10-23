@@ -71,7 +71,8 @@ function punkte(m) {
     const teile = [m.logo ? 'Ihr Logo' : '', m.farbe ? 'Ihre Firmenfarbe' : '', m.fotos ? 'bis zu ' + m.fotos + ' Fotos Ihres Betriebs' : '', m.startansicht ? 'eigene Startseite' : ''].filter(Boolean);
     out.push('In Ihrem Design: ' + teile.join(', '));
   } else out.push(M.gestaltung.werte[m.gestaltung]);
-  out.push(m.kennzeichnung === 'keine' ? 'Ohne Hinweis auf eeziframes, auch im PDF und in den E-Mails' : 'Hinweis auf eeziframes: ' + M.kennzeichnung.werte[m.kennzeichnung]);
+  /* Der neutrale Absender ist nach Bauplan §4 optional (zweite Domain): ehrlich „sobald eingerichtet“, bis dahin kommt die Mail vom Konfigurator-Postfach */
+  out.push(m.kennzeichnung === 'keine' ? 'Ohne Hinweis auf eeziframes für Ihre Kunden, auch im Aufmaßblatt' + (m.absender === 'neutral' ? '; E-Mails an Sie von einem neutralen Absender, sobald eingerichtet' : '') : 'Hinweis auf eeziframes: ' + M.kennzeichnung.werte[m.kennzeichnung]);
   if (m.indexierung === 'start') out.push('Startseite in Suchmaschinen');
   if (m.dashboard) out.push('Dashboard unter Ihrer Domain mit ' + m.zugaenge + ' Zugängen');
   if (m.einladungslinks) out.push('Persönliche Einladungslinks für Ihre Kunden');

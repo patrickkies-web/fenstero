@@ -131,6 +131,10 @@ export default async (h) => {
   const vs = await recht.paketVerkaufStand(umg.konfig({ STRIPE_SECRET_KEY: 'sk_live_pruefung29', MAIL_API_KEY: 're_pruefung29', MAIL_ABSENDER: 'kontakt@eeziframes.com', MWST: '19', SITZUNG_GEHEIMNIS: 'pruefung29-sitzung-geheimnis-mindestens-32-zeichen', SUPABASE_URL: 'https://x.supabase.co', SUPABASE_SERVICE_KEY: 'sb_secret_x' }), { ASSETS: assets }, 'https://pruefung29.example');
   ok(ph >= 3 && /Entwurf zur anwaltlichen Prüfung/.test(kb.text) && vertr.every((v) => v.entwurf) && !vs.bereit && vs.fehlt.some((x) => /Paketbedingungen/.test(x)) && !vs.fehlt.some((x) => /PDF fehlt/.test(x)) && RI.verkauf({ offen: true, live: true, bereit: vs.bereit }).kasse === false,
     '29.4 Entwurf: ' + ph + ' sichtbar markierte Platzhalter, „Entwurf zur anwaltlichen Prüfung“ auf der Seite und in den PDFs; solange sie da sind, hält paketVerkaufStand() die Live-Kasse zu (die PDFs sind da)');
+  ok(!VORLAGE_SICHTBAR(rechtI) || vs.fehlt.some((x) => /Vorlage .*Instanzen anwaltlich prüfen/.test(x)), '29.4 Befund 5: solange die Rechtsvorlage der Instanzen ungeprüft ist (VORLAGE.geprueft false), nennt paketVerkaufStand() sie und hält die Live-Kasse zu');
+  const sigKarte = (/<article class="vk-paket[^"]*" id="paket-signature"[\s\S]*?<\/article>/.exec(fb) || [''])[0], absZeile = (/<tr><td>Absender der E-Mails<\/td>[\s\S]*?<\/tr>/.exec(kb.text) || [''])[0];
+  ok(/sobald eingerichtet/.test(sigKarte) && !/auch im PDF und in den E-Mails/.test(sigKarte) && /sobald eingerichtet/.test(absZeile) && !/>neutrales Postfach</.test(absZeile),
+    '29.4 Befund 2: Verkaufsseite (Karte Signature) und Paketbedingungen (Zeile „Absender der E-Mails“) versprechen den neutralen Absender nur „sobald eingerichtet“');
   const leist = (/<!--pakete:leistungen-->([\s\S]*?)<!--\/pakete:leistungen-->/.exec(kb.text) || [])[1] || '';
   const fristTab = (/<!--pakete:fristen-->([\s\S]*?)<!--\/pakete:fristen-->/.exec(kb.text) || [])[1] || '';
   const zellen = (s) => s.replace(/<[^>]+>/g, ' ');

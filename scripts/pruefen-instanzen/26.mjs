@@ -38,7 +38,7 @@ async function teilA(h) {
   const WZ = h.WURZEL, ok = (b, t) => h.ok(b, t);
   const imp = (rel) => import(pathToFileURL(path.join(WZ, rel)).href);
   await imp('web/assets/pakete.js'); await imp('web/assets/instanzregeln.js');
-  const worker = (await imp('worker.js')).default, post = await imp('functions/api/post.js'), spM = await imp('functions/api/speicher.js'), umg = await imp('functions/api/umgebung.js');
+  const worker = (await imp('worker.js')).default, post = await imp('functions/api/post.js'), spM = await imp('functions/api/speicher.js'), umg = await imp('functions/api/umgebung.js'), rechtI = await imp('functions/instanz/recht.js');
   const recht = await imp('functions/api/recht.js'), ze = await imp('functions/api/zentrale.js'), cfM = await imp('functions/api/cloudflare.js'), V = await imp('functions/instanz/verwalten.js');
   const { cloudflareNachstellen } = await imp('scripts/cloudflare-attrappe.mjs');
   const WEB = path.join(WZ, 'web');
@@ -198,6 +198,12 @@ async function teilA(h) {
     const c0 = await cfg(DHOST), pw1 = await z.api('/api/zentrale/instanzen/' + did + '/paket', { paket: 'plus' }), c1 = await cfg(DHOST), pw2 = await z.api('/api/zentrale/instanzen/' + did + '/paket', { paket: 'signature' }), c2 = await cfg(DHOST);
     ok(dk0.status === 'einrichtung' && dPr.j.pruefung.ok && dLive.status === 200 && c0.k && c0.k.instanz.m.logo === false && c0.k.instanz.m.kennzeichnung === 'deutlich' && pw1.status === 200 && c1.k.instanz.m.logo === true && c1.k.instanz.m.dashboard === false && pw2.status === 200 && c2.k.instanz.m.dashboard === true && c2.k.instanz.m.kennzeichnung === 'keine',
       '26.6 Demo live ohne Bestellung; Paketwechsel Essential → Plus → Signature ändert /config.js sofort, ohne Code (Logo, Dashboard, Kennzeichnung)');
+    /* Befunde 2 und 5: Hinweise in der Ampel (ok: true, warn: true) sperren Live nicht; bereit hängt nur an den sperrenden Punkten */
+    const aSig = ((await z.api('/api/zentrale/instanzen/' + did)).j.instanz || {}).ampel || { punkte: [], fehlt: [] }, pAbs = aSig.punkte.find((p) => p.id === 'absender'), pVor = aSig.punkte.find((p) => p.id === 'vorlage');
+    ok(pAbs && pAbs.ok === true && pAbs.warn === true && /MAIL_ABSENDER_NEUTRAL/.test(pAbs.text) && /^nicht eingerichtet; Mails an den Betrieb kommen von \S+@\S+$/.test(pAbs.hinweis) && !aSig.fehlt.includes('absender') && aSig.bereit === aSig.punkte.filter((p) => !p.warn).every((p) => p.ok),
+      '26.5 Ampel (Befund 2): Signature ohne MAIL_ABSENDER_NEUTRAL zeigt den neutralen Absender als Hinweis mit der Ersatzadresse (' + (pAbs ? pAbs.hinweis : 'kein Punkt') + '), sperrt Live aber nicht');
+    ok(rechtI.VORLAGE.geprueft ? !pVor : pVor && pVor.ok === true && pVor.warn === true && /Vorlage vom .*Prüfung ausstehend/.test(pVor.hinweis) && !aSig.fehlt.includes('vorlage'),
+      '26.5 Ampel (Befund 5): die ungeprüfte Rechtsvorlage der Instanzen ist ein Hinweis mit Datum, der Live nicht sperrt');
     const p1 = await z.api('/api/zentrale/instanzen/' + iid + '/status', { aktion: 'pausieren', grund: 'Urlaub des Betriebs', bis: new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10) });
     const iP = await sp.instanzHolen(iid), bP = await sp.bestellungHolen(b0.id), sP = await klient('https://' + HOST).rufe('/', null, { headers: { accept: 'text/html' } });
     const p2 = await z.api('/api/zentrale/instanzen/' + iid + '/status', { aktion: 'fortsetzen' }), iF = await sp.instanzHolen(iid), bF = await sp.bestellungHolen(b0.id), sF = await klient('https://' + HOST).rufe('/', null, { headers: { accept: 'text/html' } });
@@ -259,6 +265,9 @@ async function teilA(h) {
     const instZeilen = rows.filter((r) => r.daten && r.daten.konto === 'instanz').length, zeileI = (betr.j.betriebe || []).find((x) => x.id === inst.betrieb) || {};
     ok(ue.status === 200 && ue.j.pakete && ue.j.pakete.live >= 1 && ue.j.pakete.mrr >= 39 && ue.j.pakete.je.plus >= 1 && ue.j.aufgaben && Array.isArray(ue.j.aufgaben.liste) && ue.j.kpi.betriebe === rows.length - instZeilen && zeileI.instanz === iid && typeof ue.j.kpi.mrr === 'number',
       '26.10 Übersicht: Pakete live und MRR Pakete getrennt vom bisherigen MRR, Aufgabenliste; Instanzkonten zählen nicht als Betriebe und sind in der Liste markiert');
+    const ei = await z.api('/api/zentrale/einstellungen'), pk26 = (ei.j && ei.j.pakete) || {};
+    ok(ei.status === 200 && pk26.neutral === '' && pk26.verkauf && Array.isArray(pk26.verkauf.fehlt) && (rechtI.VORLAGE.geprueft || pk26.verkauf.fehlt.some((x) => /Vorlage .*anwaltlich prüfen/.test(x))),
+      '26.10 Einstellungen „Konfigurator-Pakete“ (Befunde 2, 5): neutraler Absender (hier leer) und der Verkaufsstand mit der ungeprüften Rechtsvorlage sind sichtbar');
 
     /* ---------- 26.11 Ablaufwarnung, Lösen bei „beendet“ ---------- */
     const DH2 = 'ablauf26-' + stempel + '.app', d2 = await z.api('/api/zentrale/instanzen', { paket: 'essential', name: 'Ablauf ' + stempel, slug: 'ablauf26-' + stempel }), d2id = d2.j.instanz.id;

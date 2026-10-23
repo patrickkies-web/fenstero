@@ -112,7 +112,8 @@ export default async (h) => {
           logos: r('.ein-zeichen.logo img').length, bilder: r('.ein-bilder img').map((i) => ({ src: i.getAttribute('src'), ok: i.complete && i.naturalWidth > 0 })), standard: !!document.querySelector('.ein-bild img[src="/bilder/foto/app-start.webp"]'),
           akzent: cs.getPropertyValue('--accent').trim(), okFarbe: cs.getPropertyValue('--ok').trim(), konfig: window.KONFIG.instanz, icons: r('link[rel~="icon"], link[rel="apple-touch-icon"], link[rel="manifest"]').map((l) => l.getAttribute('href')).join(' '),
           kicker: (document.querySelector('.ein-start-in > .eyebrow.kicker') || {}).textContent || '', h1: (document.querySelector('.ein-start-in > h1') || {}).textContent || '',
-          code: localStorage.getItem('instanz.' + window.KONFIG.instanz.id + '.aktiv'), pille: (document.querySelector('.ein-cta .btn.primary') || {}).textContent || ''
+          code: localStorage.getItem('instanz.' + window.KONFIG.instanz.id + '.aktiv'), pille: (document.querySelector('.ein-cta .btn.primary') || {}).textContent || '',
+          kzPx: kz ? parseFloat(getComputedStyle(kz).fontSize) : 0
         };
       });
       st.quer = await waagrecht(s);
@@ -132,6 +133,7 @@ export default async (h) => {
     '25.1 Plus: Logo im Kopf und Fotos des Betriebs aus /marke/ (geladen)');
   ok(sp.akzent === sp.konfig.akzent && /^#[0-9a-f]{6}$/.test(sp.akzent) && kontrast(sp.akzent, '#161616') >= 4.5 && sp.okFarbe === '#8fd694', '25.1 Plus: --accent ist die Firmenfarbe (' + sp.akzent + ', aufgehellt auf ' + kontrast(sp.akzent || '#000000', '#161616').toFixed(2) + ':1), --ok bleibt grün');
   ok(sp.kz === 'Konfigurator von eeziframes' && !/Powered by/i.test(sp.text) && sp.kicker === 'Glaserei Star · seit 1987' && /Neue Fenster für Ihr Zuhause/.test(sp.h1) && /Planen Sie in Ruhe auf dem Sofa/.test(sp.text), '25.1 Plus: eigene Startansicht (Kicker, Überschrift, Text) und dezenter Fuß „Konfigurator von eeziframes“ ohne Link');
+  ok(sp.kzPx >= 13 && se.kzPx >= 13, '25.1 Plus (Befund 12): der dezente Fußhinweis ist mindestens 13 px groß (Plus ' + sp.kzPx + ' px, Essential ' + se.kzPx + ' px), nichts unter 13 px');
   ok(!eezi.test(ss.text) && !eezi.test(ss.titel) && !eezi.test(ss.icons) && !ss.kz && ss.kopfName === 'Fensterwerk Kranich' && ss.akzent === ss.konfig.akzent, '25.1 Signature: kein „eeziframes“ in Text, Titel und Icon-Adressen (' + ss.icons + ')');
   ok([se, sp, ss].every((x) => !x.code && /Erstes Fenster ausmessen/.test(x.pille)), '25.1 Beim Öffnen entsteht noch keine Planung (kein Code), die Cream-Pille führt zum ersten Fenster');
 

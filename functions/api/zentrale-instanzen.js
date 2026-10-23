@@ -23,7 +23,8 @@ import { ApiFehler, jetztAus } from './umgebung.js';
 import { zugang, daten, protokoll, frischerCode } from './zentrale.js';
 import * as V from '../instanz/verwalten.js';
 import { probeEingang, eingangErneut } from './eingang.js';
-import { rechtVollstaendig } from '../instanz/recht.js';
+import { rechtVollstaendig, VORLAGE } from '../instanz/recht.js';
+import { standText } from './recht.js';
 import { cloudflareDienst, anleitung, domainVerbinden, zoneAnlegen, domainPruefen, domainLoesen } from './cloudflare.js';
 import { paketWechseln, aboSteuern, uebergang } from './bestellung.js';
 import { ablage } from './fotos.js';
@@ -79,7 +80,7 @@ export async function testStand(ctx, i) {
 const markeGleich = (e, mk) => !e || JSON.stringify([e.name || '', e.titel || '', e.beschreibung || '', String(e.farbe || '').toLowerCase(), e.start || {}, e.bilder || {}]) === JSON.stringify([mk.name || '', mk.titel || '', mk.beschreibung || '', String(mk.farbe || '').toLowerCase(), mk.start || {}, mk.bilder || {}]);
 export async function ampel(ctx, i, b, hosts) {
   const m = merkmaleVon(i), haupt = (hosts || []).find((h) => h.haupt), mk = i.marke || {}, v = (b && b.vorschau) || {};
-  const recht = rechtVollstaendig(i.recht || {}), test = await testStand(ctx, i), zdStripe = !!(ctx.zd && ctx.zd.art === 'stripe');
+  const recht = rechtVollstaendig(i.recht || {}), test = await testStand(ctx, i), zdStripe = !!(ctx.zd && ctx.zd.art === 'stripe'), kI = (ctx.k && ctx.k.instanzen) || {};
   const pruef = (haupt && haupt.pruefung) || {};
   const punkte = [
     b ? { id: 'bezahlt', text: 'Einrichtung bezahlt', ok: ['bezahlt'].includes((b.zahlung || {}).status), hinweis: (b.zahlung || {}).status === 'laeuft' ? 'Lastschrift unterwegs' : '' } : null,
@@ -90,9 +91,13 @@ export async function ampel(ctx, i, b, hosts) {
     { id: 'test', text: 'Testanfrage zugestellt', ok: test.ok, hinweis: !test.da ? 'noch keine geschickt' : test.ok ? (test.ohneWebhook ? 'gesendet (ohne Zustellbestätigung, RESEND_WEBHOOK_SECRET fehlt)' : '') : 'Stand: ' + (test.status || 'offen') },
     b ? { id: 'freigabe', text: 'Freigabe der aktuellen Vorschau oder Vermerk', ok: !!(v.version && v.freigabe && v.freigabe.version === v.version && Number(v.version) === Number(mk.v)), vermerk: true, hinweis: !v.version ? 'Vorschau noch nicht gesendet' : Number(v.version) !== Number(mk.v) ? 'Vorschau zeigt Fassung ' + v.version + ', veröffentlicht ist ' + (mk.v || 0) + ': neu senden' : v.aenderung && v.aenderung.version === v.version && !(v.freigabe && v.freigabe.version === v.version) ? 'Änderung gewünscht' : !(v.freigabe && v.freigabe.version === v.version) ? 'wartet auf den Kunden' : '' } : null,
     b ? { id: 'zahlungsmittel', text: 'Zahlungsmittel für das Abo hinterlegt', ok: !!((b.zahlung || {}).pm) || !zdStripe, hinweis: (b.zahlung || {}).pm ? '' : zdStripe ? 'keins aus der Einrichtung' : 'Testmodus' } : null,
-    m.dashboard ? { id: 'zugang', text: 'Dashboard-Zugang bestätigt', ok: (Array.isArray(i.zugang) ? i.zugang : []).some((x) => x && x.bestaetigt && !x.aus), hinweis: (i.zugang || []).length ? 'Bestätigungslink noch nicht geklickt' : 'kein Zugang' } : null
+    m.dashboard ? { id: 'zugang', text: 'Dashboard-Zugang bestätigt', ok: (Array.isArray(i.zugang) ? i.zugang : []).some((x) => x && x.bestaetigt && !x.aus), hinweis: (i.zugang || []).length ? 'Bestätigungslink noch nicht geklickt' : 'kein Zugang' } : null,
+    /* Hinweise, die Live nicht sperren (ok: true, warn: true; die Zentrale zeigt sie gelb mit „Hinweis“): Der neutrale Absender bei Signature ist
+       nach Bauplan §4 optional (zweite Domain), die anwaltliche Prüfung der Rechtsvorlage sperrt nur die Paket-Kasse (paketVerkaufStand in recht.js) */
+    m.absender === 'neutral' ? { id: 'absender', text: 'Neutraler Absender ohne eeziframes (MAIL_ABSENDER_NEUTRAL)', ok: true, warn: !kI.neutral, hinweis: kI.neutral ? '' : 'nicht eingerichtet; Mails an den Betrieb kommen von ' + (kI.absender || (ctx.k && ctx.k.post && ctx.k.post.absender) || 'MAIL_ABSENDER') } : null,
+    !VORLAGE.geprueft ? { id: 'vorlage', text: 'Rechtsvorlage der Instanzen anwaltlich geprüft', ok: true, warn: true, hinweis: 'Vorlage vom ' + standText(VORLAGE.stand) + ', Prüfung ausstehend; die Paket-Kasse bleibt im Live-Modus zu' } : null
   ].filter(Boolean);
-  punkte.forEach((p) => { if (p.ok && !/Entwurf hat|ohne Zustellbestätigung/.test(p.hinweis || '')) p.hinweis = ''; });
+  punkte.forEach((p) => { if (p.ok && !p.warn && !/Entwurf hat|ohne Zustellbestätigung/.test(p.hinweis || '')) p.hinweis = ''; });
   return { punkte: punkte, bereit: punkte.every((p) => p.ok), fehlt: punkte.filter((p) => !p.ok).map((p) => p.id), test: test };
 }
 
