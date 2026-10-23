@@ -28,6 +28,8 @@ export function standText(iso) {
 /* Platzhalter in den Rechtstexten (<mark class="ph">[…]</mark>): je Ursprung fünf Minuten gemerkt */
 const SEITEN = ['/impressum/', '/agb/', '/datenschutz/', '/widerruf/', '/nutzungsbedingungen/'];
 const merk = new Map();
+/* Prüfung: gemerkte Ergebnisse vergessen (ein Abschnitt kann sonst den nächsten mit echten Seiten statt seiner Attrappe versorgen) */
+export const rechtstexteVergessen = () => merk.clear();
 /* seiten: andere Seitenliste (Paket-Kasse, paketVerkaufStand); ohne Angabe die Seiten des B2C-Kaufs */
 export async function rechtstexteFertig(env, origin, seiten) {
   if (!env || !env.ASSETS || !env.ASSETS.fetch) return { ok: true, ungeprueft: true }; // ohne Dateien (Prüfung im Speicher) nichts zu lesen

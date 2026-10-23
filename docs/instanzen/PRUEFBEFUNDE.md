@@ -23,7 +23,7 @@ Zwei unabhängige Prüfer haben den Stand e8d86a0 geprüft (nur lesen und angrei
 | 15 | kann | offen | bewusst verschoben (Wochenlimit) |
 | 16 | kann | behoben | Testanfrage nach dem Livegang nicht mehr im Dashboard (28.14, 30 Teil 4) |
 | 17 | kann | teilweise | Server nimmt `wunsch.firma.mailImpressum` (26.2, 26.5); das Formularfeld fehlt noch |
-| 18 | kann | teilweise | Schnipsel ist ein Knopf „Fenster planen“ (26.5); das Kundenkonto übergibt die Firmenfarbe noch nicht (Mail tut es) |
+| 18 | kann | behoben | Schnipsel ist ein Knopf „Fenster planen“ in der Firmenfarbe, in der Live-Mail und im Kundenkonto (26.5) |
 | 19 | kann | behoben | Webhook vermerkt erst nach der Verarbeitung (24.5) |
 | 20 | kann | behoben | `/404` und `/404/` in `run_worker_first` (23.3, 23.13) |
 | 21 | kann | behoben | `partnerAufraeumen`: Partner, Nachrichten, Bestellungen nach 3 Jahren ab Jahresende (27.10) |

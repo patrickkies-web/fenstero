@@ -160,9 +160,17 @@ export default async (h) => {
     const live0 = await c.rufe('/api/partner/bestellungen/' + bA.id + '/kasse', { zustimmung: ZUST }, { env: LIVE });
     const live1 = await c.rufe('/api/partner/bestellungen/' + bA.id + '/kasse', { zustimmung: ZUST }, { env: Object.assign({}, LIVE, { PAKETE_OFFEN: '1', ASSETS: ASSETS(false) }) });
     n0 = st.log.length;
-    const live2 = await c.rufe('/api/partner/bestellungen/' + bA.id + '/kasse', { zustimmung: ZUST }, { env: Object.assign({}, LIVE, { PAKETE_OFFEN: '1', MWST: '19', MAIL_API_KEY: 're_pruefung27', MAIL_ABSENDER: 'kontakt@eeziframes.com', ASSETS: ASSETS(true) }) });
+    /* Befund 5: solange die Rechtsvorlage der Instanzen ungeprüft ist (VORLAGE.geprueft false), bleibt die Kasse auch mit allem anderen zu */
+    const ALLES = Object.assign({}, LIVE, { PAKETE_OFFEN: '1', MWST: '19', MAIL_API_KEY: 're_pruefung27', MAIL_ABSENDER: 'kontakt@eeziframes.com', ASSETS: ASSETS(true) });
+    const rechtI = await import(pathToFileURL(path.join(WZ, 'functions/instanz/recht.js')).href), geprueft0 = rechtI.VORLAGE.geprueft;
+    if (recht.rechtstexteVergessen) recht.rechtstexteVergessen(); // Abschnitt 26 hat die echten Seiten (mit Platzhaltern) für diesen Ursprung gemerkt
+    rechtI.VORLAGE.geprueft = false;
+    const live2a = await c.rufe('/api/partner/bestellungen/' + bA.id + '/kasse', { zustimmung: ZUST }, { env: ALLES });
+    rechtI.VORLAGE.geprueft = true;
+    const live2 = await c.rufe('/api/partner/bestellungen/' + bA.id + '/kasse', { zustimmung: ZUST }, { env: ALLES });
+    rechtI.VORLAGE.geprueft = geprueft0;
     const standLive = await c.rufe('/api/partner/stand', null, { env: LIVE }), standTest = await c.rufe('/api/partner/stand');
-    ok(live0.status === 503 && live0.j.gesperrt && live0.j.bald && live1.status === 503 && live2.status === 200 && kassenLog(n0).length === 1 && standLive.j.verkauf.kasse === false && standLive.j.verkauf.vorlaeufig && standTest.j.verkauf.kasse === true && standTest.j.verkauf.bestellen === false, '27.5 Live-Modus: ohne PAKETE_OFFEN „Bestellung bald möglich“ (503), mit PAKETE_OFFEN erst mit Mailversand, MwSt., Paketbedingungen und PDFs; im Testmodus ist die Kasse offen, die Preise bleiben vorläufig');
+    ok(live0.status === 503 && live0.j.gesperrt && live0.j.bald && live1.status === 503 && live2a.status === 503 && live2a.j.bald && live2.status === 200 && kassenLog(n0).length === 1 && standLive.j.verkauf.kasse === false && standLive.j.verkauf.vorlaeufig && standTest.j.verkauf.kasse === true && standTest.j.verkauf.bestellen === false, '27.5 Live-Modus: ohne PAKETE_OFFEN „Bestellung bald möglich“ (503), mit PAKETE_OFFEN erst mit Mailversand, MwSt., Paketbedingungen, PDFs und anwaltlich geprüfter Rechtsvorlage der Instanzen; im Testmodus ist die Kasse offen, die Preise bleiben vorläufig (' + [live0.status, live1.status, live2a.status, live2.status].join('/') + ' · ' + JSON.stringify(live2a.j || {}).slice(0, 160) + ' · ' + JSON.stringify(live2.j || {}).slice(0, 160) + ')');
     const anfr = await c.rufe('/api/partner/bestellungen/' + bA.id + '/anfragen', {}); await c.warten();
     ok(anfr.status === 200 && mailsAn(inhaber(), /Anfrage zu einem Paket/).length >= 1, '27.5 Kasse noch zu: „Unverbindlich anfragen“ wird eine Nachricht mit Mail an den Inhaber');
 

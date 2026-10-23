@@ -124,7 +124,7 @@ async function hauptHost(ctx, b) {
   try { const h = (await ctx.sp.hostsVon(b.instanz)) || []; const x = h.find((y) => y.haupt) || h[0]; return x ? x.host : ''; } catch (e) { return ''; }
 }
 /* Firmenfarbe der veröffentlichten Marke (für den Schnipsel in der Live-Mail) */
-async function markenFarbe(ctx, b) {
+export async function markenFarbe(ctx, b) {
   if (!b.instanz) return '';
   try { const i = await ctx.sp.instanzHolen(b.instanz); return (i && i.marke && i.marke.farbe) || ''; } catch (e) { return ''; }
 }

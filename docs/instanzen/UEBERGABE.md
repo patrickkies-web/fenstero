@@ -22,7 +22,7 @@ Verbindlich sind:
 | Abschnitt 30: Ende zu Ende je Paket, von der Bestellung bis zur Löschung | fertig |
 | Volle Prüfsuite auf `e8d86a0`, Abschnitte 1–30 | **1641 bestanden, 0 fehlgeschlagen** |
 | Prüfung durch zwei unabhängige Prüfer | fertig: 22 Befunde (1 muss, 9 sollte, 12 kann), siehe `PRUEFBEFUNDE.md` |
-| Nacharbeit der Befunde | fertig: 17 behoben, 2 bestätigt (6, 7), 2 teilweise (17, 18), 3 bewusst verschoben (11, 13, 15), siehe Tabelle in `PRUEFBEFUNDE.md` |
+| Nacharbeit der Befunde | fertig: 18 behoben, 2 bestätigt (6, 7), 1 teilweise (17), 3 bewusst verschoben (11, 13, 15), siehe Tabelle in `PRUEFBEFUNDE.md` |
 | Volle Prüfsuite nach der Nacharbeit, Abschnitte 1–30 | läuft, Ergebnis folgt im nächsten Commit |
 | Schlussprüfung, PR, Bericht an den Inhaber | PR nach main offen (nicht gemergt), Bericht übergeben |
 
@@ -32,7 +32,7 @@ Der Code ist **nicht** auf main. Merge erst nach Freigabe durch den Inhaber (Pre
 
 1. Inhaber: PR ansehen und freigeben (Preise, Rechtstexte, Entscheidungen zu F1–F5 in `BAUPLAN.md` §5.3); Rechtstexte anwaltlich prüfen lassen, danach `VORLAGE.geprueft` in `functions/instanz/recht.js` setzen.
 2. Inhaber: manuelle Schritte aus `BAUPLAN.md` §4 (Cloudflare, Supabase-Schema, Resend, Stripe, Secrets).
-3. Offene Befunde mit „kann“ (11, 13, 15, 17 Formularfeld, 18 Firmenfarbe im Kundenkonto) nachholen; Wortlaut in `PRUEFBEFUNDE.md`.
+3. Offene Befunde mit „kann“ (11, 13, 15, 17 Formularfeld) nachholen; Wortlaut in `PRUEFBEFUNDE.md`. Dazu das Bildkonzept für die Fensterbauer-Seiten einbauen, sobald der Inhaber die Bilder liefert (`docs/BILDER.md`, Abschnitt „Plätze für die Fensterbauer-Seiten“).
 4. Entscheidung des Inhabers: Sollen auch die Zeitstempel des Altbestands (eeziframes.com, `stamp()`/`datum()` in modell.js) in deutscher Zeit entstehen? Heute laufen sie im Worker in UTC.
 5. Prüfsuite wie bisher:
    ```

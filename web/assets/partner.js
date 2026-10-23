@@ -528,7 +528,7 @@
   }
   function schnipselKarte(b) {
     if (!b.schnipsel) return '';
-    return '<section class="p-karte" aria-labelledby="h-sn"><h2 class="p-h2" id="h-sn">Auf Ihrer Website verlinken</h2><p class="p-neben">Diesen Link können Sie auf Ihrer Website einbauen, etwa als Knopf „Fenster online planen“.</p><label class="p-sr" for="f-schnipsel">Verlinkung zum Kopieren</label><textarea class="p-schnipsel" id="f-schnipsel" readonly rows="4">' + esc(b.schnipsel) + '</textarea><div class="p-knoepfe"><button type="button" class="btn ghost small" data-a="kopieren">Kopieren</button></div></section>';
+    return '<section class="p-karte" aria-labelledby="h-sn"><h2 class="p-h2" id="h-sn">Auf Ihrer Website verlinken</h2><p class="p-neben">Diesen Knopf „Fenster planen“ in Ihrer Firmenfarbe bauen Sie in Ihre Website ein: HTML-Code kopieren und an der passenden Stelle einfügen.</p><label class="p-sr" for="f-schnipsel">Verlinkung zum Kopieren</label><textarea class="p-schnipsel" id="f-schnipsel" readonly rows="4">' + esc(b.schnipsel) + '</textarea><div class="p-knoepfe"><button type="button" class="btn ghost small" data-a="kopieren">Kopieren</button></div></section>';
   }
   function paketwechselKarte(b) {
     if (['live', 'pausiert', 'einrichtung', 'domain', 'freigabe', 'bezahlt'].indexOf(b.status) < 0) return '';

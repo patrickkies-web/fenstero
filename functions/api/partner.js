@@ -43,7 +43,7 @@ import { postDienst, mailRahmen, esc, mailOk } from './post.js';
 import { ablage } from './fotos.js';
 import { SICHERHEIT, SPERRE } from '../seo.js';
 import { empfaengerEinladen, cacheLeeren } from '../instanz/verwalten.js';
-import { uebergang, einrichtungUebernehmen, erstatten, eingangBestaetigen, inhaberMail, partnerMail, dateiAntwort, dateiPfad, paketVon, herkunft, schnipsel } from './bestellung.js';
+import { uebergang, einrichtungUebernehmen, erstatten, eingangBestaetigen, inhaberMail, partnerMail, dateiAntwort, dateiPfad, paketVon, herkunft, schnipsel, markenFarbe } from './bestellung.js';
 
 const P = () => globalThis.Pakete;
 const R = () => globalThis.Instanzregeln;
@@ -106,7 +106,7 @@ async function bestellungSicht(ctx, b) {
     vorschau: { version: v.version || 0, bis: v.bis || '', link: v.link || '', gesendet: v.gesendet || '', freigabe: v.freigabe ? { version: v.freigabe.version, zeit: v.freigabe.zeit } : null, aenderung: v.aenderung ? { version: v.aenderung.version, zeit: v.aenderung.zeit } : null },
     zustimmung: b.zustimmung && b.zustimmung.zeit ? { stand: b.zustimmung.stand, zeit: b.zustimmung.zeit } : null,
     verlauf: (b.verlauf || []).filter((x) => x && !x.intern).map((x) => ({ zeit: x.zeit, status: x.status || '', text: x.text || '', von: x.von || '' })),
-    instanz: instanz, schnipsel: instanz && instanz.host && b.status === 'live' ? schnipsel(instanz.host) : '',
+    instanz: instanz, schnipsel: instanz && instanz.host && b.status === 'live' ? schnipsel(instanz.host, { farbe: await markenFarbe(ctx, b) }) : '', // Knopf in der Firmenfarbe (Befund 18)
     created_at: b.created_at, bezahlt_am: b.bezahlt_am, live_am: b.live_am, pause_seit: b.pause_seit, ende_am: b.ende_am
   };
 }

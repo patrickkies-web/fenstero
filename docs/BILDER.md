@@ -84,3 +84,43 @@ ohne Bildschirm wählen oder den Bildschirm leer lassen).
   dort bleiben die Zeichnungen.
 - Die Prüfsuite verlangt für Bilder in Ratgebern Breite, Höhe und einen Alternativtext ab 40 Zeichen; Fotos unter `/bilder/foto/`
   dürfen WebP sein, Zeichnungen bleiben SVG.
+
+## Plätze für die Fensterbauer-Seiten (Konfigurator-Pakete, Wunsch des Inhabers vom 23.10.2026)
+
+Die Seiten für Fensterbauer (Verkaufsseite, Bestellformular, Kundenkonto) sind textlastig. Damit die Aufmerksamkeit hält, bekommt
+jeder längere Abschnitt eine Bildkarte in derselben Bildsprache wie oben (ein Tier tut etwas Menschliches rund ums Fenster oder
+um den Betrieb). Die Bilder liefert der Inhaber nach den Prompts unten; bis dahin stehen Platzhalter. Einbau danach in drei
+Schritten: Platz in `scripts/fotos.py` (PLAETZE) eintragen, `python3 scripts/fotos.py` laufen lassen, `<figure class="foto-karte">`
+an der genannten Stelle (Verkaufsseite in `web/fuer-fensterbauer/index.html`, Kundenkonto in `web/assets/partner.js` beim Zeichnen der
+Seite). Die Zentrale bleibt ohne Bilder (Arbeitswerkzeug). Auf den Instanzen der Betriebe (Plus, Signature) stehen nur die eigenen
+Fotos des Betriebs, nie Bilder von eeziframes; Essential nutzt das eeziframes-Design und darf `app-start` wiederverwenden.
+
+| Name | Format | Wo genau | Chips auf dem Foto | Priorität |
+|---|---|---|---|---|
+| `fb-anfrage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Was in jeder Anfrage steht“ (`#was-in-jeder-anfrage-steht`), nach dem ersten Absatz, vor der Liste | Maße · Fotos · Zeichnung · Klärungsliste | 1 |
+| `fb-kunden-planen` | 1200 × 1500 | Verkaufsseite, Abschnitt „Warum Kunden selbst planen“, rechts neben dem Text (1280), am Telefon unter der Überschrift | Abends · Auf dem Sofa · Ohne Termin | 1 |
+| `fb-kundenschutz` | 1600 × 1000 | Verkaufsseite, Abschnitt „Ihre Kunden bleiben Ihre Kunden“, nach dem ersten Absatz | Ihre Marke · Ihre Domain · Ihre Daten | 2 |
+| `fb-pakete` | 1600 × 1000 | Verkaufsseite, direkt über den drei Paketkarten (`#pakete`) | Ihr Name · Ihre Farbe · Ihr Logo | 1 |
+| `fb-ablauf` | 1600 × 1000 | Verkaufsseite, Abschnitt „Von der Bestellung bis zum Livegang“, vor der Schrittliste | Bestellen · Einrichten · Freigeben · Live | 2 |
+| `fb-frage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Bestellen oder anfragen“, neben dem Frageformular (1280 links vom Formular, Telefon darüber) | Rückruf · Nachricht · Unverbindlich | 2 |
+| `partner-start` | 1200 × 1500 | Kundenkonto `/partner/`, Anmeldeseite vor der Code-Eingabe, rechts neben dem Text (1280), am Telefon oben | Essential · Plus · Signature | 1 |
+| `partner-gestaltung` | 1600 × 1000 | Bestellformular, Schritt „Gestaltung“ (Plus, Signature), über den Feldern | Logo · Farbe · Fotos · Text | 2 |
+| `partner-warten` | 1600 × 1000 | Kundenkonto, Hauptkarte in den Ständen „Bezahlt“, „In Einrichtung“, „Domain gesichert“, über dem Text | Wir richten ein · Vorschau · Freigabe | 2 |
+| `partner-live` | 1600 × 1000 | Kundenkonto, Hauptkarte im Stand „Live“, über dem Text | Live · Link für Ihre Website | 2 |
+| `instanz-danke` | 1600 × 1000 | Essential-Instanz, Bestätigung nach dem Senden (Plus und Signature zeigen hier ein eigenes Foto des Betriebs, falls vorhanden, sonst nichts) | Gesendet · PDF für dich · Der Betrieb meldet sich | 3 |
+
+Stil wie oben (gemeinsamer Prompt-Anhang), 16:10 für die breiten Plätze, 4:5 für `fb-kunden-planen` und `partner-start`.
+
+| Name | Motiv (deutsch) | Prompt |
+|---|---|---|
+| `fb-anfrage` | Ein Bernhardiner in Arbeitsweste sitzt in der Werkstatt am Tisch und hält ein frisch gedrucktes Aufmaßblatt mit einer einfachen Fensterzeichnung und Maßlinien; daneben ein Zollstock und eine Kaffeetasse. | A Saint Bernard dog in a craftsman's work vest sitting at a workshop table, holding a freshly printed sheet of paper that shows only a simple line drawing of a window with dimension lines, a yellow folding rule and a coffee mug beside it, window frames leaning against the wall behind |
+| `fb-kunden-planen` | Eine Waschbär-Familie sitzt abends auf dem Sofa, der große Waschbär tippt auf dem Handy, zwei kleine schauen zu; draußen Dämmerung, Lampe an. | A raccoon family on a beige sofa in the evening, the adult raccoon tapping on a smartphone with both paws, two small raccoons leaning in curiously, a floor lamp switched on, dusk outside the large window, cosy and relaxed |
+| `fb-kundenschutz` | Ein Bernhardiner steht hinter der Theke seines Ladens mit Fenstermustern an der Wand und reicht einem Waschbären die Pfote; draußen das Schaufenster. | A Saint Bernard dog behind the counter of a small window shop, white and anthracite window samples on the wall, shaking paws with a raccoon customer, the shop window and a quiet street in warm light behind them |
+| `fb-pakete` | Ein Chamäleon sitzt auf einem Fensterrahmen und nimmt genau dessen Farbe an (warmes Gelb), daneben zwei weitere Rahmen in Weiß und Anthrazit. | A chameleon sitting on a window frame and perfectly matching its warm yellow colour, two more window frames in white and anthracite standing next to it in a bright showroom, the chameleon looking proud, soft daylight |
+| `fb-ablauf` | Ein Bernhardiner und ein Biber stoßen an einem Schreibtisch mit Kaffeetassen an, zwischen ihnen ein Wandkalender mit wenigen markierten Tagen und ein weißer Fensterrahmen. | A Saint Bernard dog and a beaver clinking coffee mugs at an office desk, a wall calendar with a few marked days and a white window frame between them, afternoon light through a large office window, cheerful |
+| `fb-frage` | Ein Elefant mit kleiner Lesebrille sitzt im Büro und hält den Telefonhörer mit dem Rüssel, auf dem Tisch ein Notizblock und ein Fensterprospekt. | An elephant wearing small round reading glasses sitting at an office desk, holding a telephone handset with its trunk, a notepad and a window brochure on the desk, warm lamp light, friendly |
+| `partner-start` | Ein Bernhardiner steht stolz vor seiner Werkstatt, das Tor offen, drinnen Fensterrahmen, ein kleiner Lieferwagen davor; später Nachmittag. | A Saint Bernard dog standing proudly in front of its small window workshop, the gate open with white window frames visible inside, a small delivery van parked beside it, late-afternoon sun, no signs or lettering |
+| `partner-gestaltung` | Ein Fuchs hält einen Farbfächer vor eine Wand mit drei Probeanstrichen (Gelb, Petrol, Grün), neben ihm Fotos auf dem Tisch. | A red fox holding a colour fan deck up against a wall with three painted test patches in yellow, teal and green, a few printed photographs lying on the table, bright studio-like living room, concentrated |
+| `partner-warten` | Ein Faultier liegt entspannt in einer Hängematte am großen Fenster mit Kaffeetasse, draußen Garten; im Hintergrund arbeitet ein Biber an einem Fensterrahmen. | A sloth relaxing in a hammock by a large window with a coffee mug, a garden outside, in the blurred background a beaver carefully working on a white window frame, calm late-afternoon light |
+| `partner-live` | Ein Bär in Arbeitsjacke öffnet feierlich die Glastür seines Ladens, Sonnenlicht fällt herein, drinnen Fenstermuster. | A brown bear in a craftsman's jacket ceremoniously opening the glass front door of a small window shop, sunlight streaming in, window samples visible inside, welcoming gesture, no signs or lettering |
+| `instanz-danke` | Ein Waschbär lehnt sich zufrieden auf dem Sofa zurück, das Handy liegt auf dem Tisch, draußen Abendlicht. | A raccoon leaning back contentedly on a sofa with its paws behind its head, a smartphone lying face-down on the coffee table, warm evening light through the large window, job done |
