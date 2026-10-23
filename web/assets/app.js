@@ -1815,7 +1815,7 @@ function w3dSonne(stage, w, o, V, s, q) {
     /* Lamellentyp (Detailangabe lamelle): Höhe, Teilung und Profil. C-Lamelle 80 mm, Teilung 72 mm, gewölbt; Z-Lamelle 90 mm, Teilung
        80 mm, mit abgekanteten Rändern; Flachlamelle 60 mm, Teilung 52 mm, eben. _bieg wölbt die Lamelle im Licht der WebGL-Bühne */
     const N = Math.min(LAM_MAX, Math.max(1, Math.ceil(Hmax / (LT.p * s)))), p = Math.max(LT.p * s, Hmax / N), lh = LT.h * s, pk = Math.max(0.9, LT.pk * s);
-    const tilt = st.wend ? 6 : 52;
+    const tilt = st.wend ? 6 : 78;
     e = yTop + N * pk + stand * Math.max(0, Hmax - N * pk);
     const lamBg = lamelleBg(lm, !!st.wend, F, D, L);
     for (let k = 0; k < LAM_MAX; k++) {
@@ -2118,7 +2118,9 @@ function w3dFahrt(stage) {
     if (!document.body.contains(stage)) { FAHRT = null; B.pos = zu; return; }
     w3dSonneNeu(stage);
     if (f < 1) FAHRT.raf = requestAnimationFrame(schritt);
-    else { FAHRT = null; B.pos = zu; stage.classList.remove('is-fahrt'); }
+    /* is-fahrt bleibt bis zum nächsten Bild: so legen CSS-Modell und WebGL-Bühne auch die letzte Lage ohne Übergang (sonst gliche die
+       Bühne den letzten Schritt mit 0,7 s an, wenn Bilder selten kommen) */
+    else { FAHRT = null; B.pos = zu; requestAnimationFrame(() => { if (!FAHRT || FAHRT.stage !== stage) stage.classList.remove('is-fahrt'); }); }
   };
   FAHRT = { raf: requestAnimationFrame(schritt), stage: stage };
 }
@@ -2612,14 +2614,14 @@ function render(fresh) {
   if (S.screen === 'home' && view.html) { const ek = entwurfKarte(); if (ek) { const li = view.html.indexOf('<section class="sec liste"'), ki = view.html.indexOf('<p class="eyebrow kicker">'), ein = view.html.indexOf('ein-start-in'); view.html = li >= 0 ? view.html.slice(0, li) + ek + view.html.slice(li) : ein >= 0 && ki > ein ? view.html.slice(0, ki) + ek + view.html.slice(ki) : ek + view.html; } }
   const STEPS = stepsFor(S.win), si = STEPS.indexOf(S.screen), wiz = si >= 0;
   const qShare = S.screen === 'frage' && view.qpos ? view.qpos : 1;
-  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: 'Fenster', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', sichern: 'Konto', meinkonto: 'Konto', linkanmelden: 'Konto', tour: 'Führung' }[S.screen] || '');
+  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: '', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', sichern: 'Konto', meinkonto: 'Konto', linkanmelden: 'Konto', tour: 'Führung' }[S.screen] || '');
   const tourP = S.screen === 'tour' && S.tour ? (S.tour.i + 1) / TOUR.length : 0;
   const prevStage = root.querySelector('#w3d'), prevSig = prevStage ? prevStage.getAttribute('data-sig') : null, prevTop = prevStage ? prevStage.getBoundingClientRect().top : null;
   const backLabel = view.back ? view.back[0] : '';
   let h = '<header class="hdr"><div class="hdr-row">';
   /* Logo: im eigenen Aufmaß ein Link zur Startseite der Website; im Kundenlink steht der Betrieb vorn (Einladungsseite), eeziframes klein unten */
   h += S.screen === 'home' ? (S.betrieb ? (INST ? instKopf() : '<span></span>') : '<a class="hdr-logo" href="' + PORTAL_URL + '" aria-label="eeziframes, zur Startseite">' + LOGO(30) + '<span class="hdr-name">' + WM() + '</span></a>')
-    : (view.back ? '<button type="button" class="hdr-btn" data-act="back">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : INST && S.betrieb ? instKopf() : '<span></span>'); // Instanz: ohne Zurück (Bestätigung) Zeichen und Name
+    : (view.back ? '<button type="button" class="hdr-btn" data-act="' + (view.back[2] || 'back') + '">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : INST && S.betrieb ? instKopf() : '<span></span>'); // Instanz: ohne Zurück (Bestätigung) Zeichen und Name
   h += '<span class="hdr-title">' + esc(title) + '</span>';
   /* rechts: Übersicht (Schritte, Fenster, Liste, Startseite) auf allen Bildschirmen außer der Startseite und der Führung, dazu die Begriffe */
   const wo = S.screen !== 'home' && S.screen !== 'tour';
@@ -2756,7 +2758,10 @@ const masseZeigen = () => !S.betrieb && FREI();
 function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' : 'div', fest = aendStand(x).fest;
   /* nach dem Senden im Link: keine Maße mehr, die stehen im Aufmaßblatt */
   if (hide) { const anderswo = !!(S.sent && S.sent.anderswo); return '<div class="wincard sent"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (anderswo ? 'Auf diesem Gerät' : PILOT ? 'Abgeschlossen' : 'Übermittelt') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + '</span><span class="me">' + (anderswo ? 'Maßgeblich ist das Aufmaß, das angekommen ist' : 'Maße und Angaben stehen im Aufmaßblatt') + '</span></span></div>'; }
-  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + esc(fensterStatus(x)) + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + '</span><span class="me">' + esc(lab('art', x.art || 'fenster') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + (Object.keys(x.notizen || {}).length ? ' · mit Notiz' : '') + (fest ? ' · fest' : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
+  /* Karte in der Übersicht: Nummer der Position am Bild, Name, Zeile mit Art, Geschoss, Stückzahl, Fotos und Notiz, darunter der Stand
+     als Punkt mit Text (vollständig, Maße offen, offene Wünsche mit Namen); Maße stehen nie in Listen */
+  const st = fensterStand(x), di = [lab('art', x.art || 'fenster'), x.etage ? lab('etage', x.etage) : '', x.anzahl > 1 ? x.anzahl + ' Stück' : '', x.fotos ? x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '', Object.keys(x.notizen || {}).length ? 'mit Notiz' : '', fest ? 'fest' : ''].filter(Boolean).join(' · ');
+  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic"><b class="pos" aria-label="Position ' + (i + 1) + '">' + (i + 1) + '</b>' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + esc(di) + '</span><span class="st ' + st.k + '"><i aria-hidden="true"></i>' + esc(st.text) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
 /* Startbild der App: Foto ohne Rahmen, das weich in den Grund ausläuft (app.css .hero-foto), mit den drei Schritten als Chips;
    das Foto liegt in web/bilder/foto/ (docs/BILDER.md) */
 const FOTO_START = '<figure class="hero-foto"><img src="/bilder/foto/app-start.webp" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"><div class="chips"><span class="chip haken">Fotografieren</span><span class="chip haken">Messen</span><span class="chip haken">Wünschen</span></div></figure>';
@@ -2793,8 +2798,8 @@ function neuKnopf(label) {
 function homeAufmass() {
   const neu = S.neuFrage && kontoBereit() && KS ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Ein neues Aufmaß beginnen?</b><p class="sub">Dein bisheriges Aufmaß bleibt in deinem Konto, du findest es unter „Dein Konto“.</p><div class="pill-row"><button type="button" class="pill" data-act="aufmass-neu-ja">Neues Aufmaß beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>'
     : S.neuFrage ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Dieses Aufmaß auf diesem Gerät löschen?</b><p class="sub">Fenster, Angaben und die Freischaltung dieses Aufmaßes sind danach weg. Lade dein Aufmaßblatt vorher herunter, falls du es noch brauchst.</p><div class="pill-row"><button type="button" class="pill danger" data-act="aufmass-neu-ja">Löschen und neu beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>' : '';
-  const html = hd('Dein Aufmaß', 'Weiter, wo du warst.', esc(aufmassStand())) +
-    '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + S.windows.length + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + neu +
+  const html = uebersichtKopf() +
+    '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + neu +
     kontoKarte() +
     (S.windows.length ? dateiCard() : '') +
     '<section class="card erklaert"><p class="eyebrow kicker">So funktioniert\'s</p><h2 class="sec-title">Zollstock statt Rätselraten.</h2><div class="steps">' +
@@ -2880,8 +2885,8 @@ function linkHomeInhaltAlt(I) {
     return { html: html2, bar: null };
   }
   if (n || angelegt() >= GRENZE.fenster) {
-    const html4 = '<div class="lk-kopf">' + E.kopf({ name: name, p: d.p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '' }) + '</div>' + hd(T('Ihr Aufmaß', 'Dein Aufmaß'), T('Weiter, wo Sie waren.', 'Weiter, wo du warst.'), esc(aufmassStand())) +
-      '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">' + T('Ihre Fenster.', 'Deine Fenster.') + '</h2><span class="sub">' + n + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
+    const html4 = '<div class="lk-kopf">' + E.kopf({ name: name, p: d.p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '' }) + '</div>' + uebersichtKopf(T) +
+      '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
       (vorschau() ? '' : linkMerk(name, du)) + kontakt() + fuss + rechtLinks();
     return { html: html4, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
   }
@@ -3220,7 +3225,7 @@ SCREENS.fertig = () => {
     (st.fest ? '' : '<div class="kap-sprung"><p class="qlabel">Direkt zu einem Thema</p><div class="kap-chips">' + KAPITEL.slice(1).map((k) => '<button type="button" class="chip" data-act="wuensche" data-v="' + k.k + '">' + esc(k.n) + '</button>').join('') + '</div></div>') +
     '<button type="button" class="pill voll" data-act="go" data-v="home">Alle Fenster ansehen (' + S.windows.length + ')</button>' +
     (lk ? '<p class="sub center" style="padding: 0 10px">' + (instWebsite() ? 'Gespeichert, auch für später: Öffne diese Seite wieder, dann geht es weiter.' : 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.') + '</p>' : '');
-  return { html: html, back: ['Aufmaß', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
+  return { html: html, back: ['Fenster', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
 };
 /* Anfrage: zwei kurze Seiten im Link, drei ohne Link (dann mit Kontakt) */
 const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von ' + (instWebsite() ? 3 : 2) : 'Fürs Angebot · ' + step + ' von 3'; // Instanz, Website: dazu der Kontakt
@@ -4485,7 +4490,9 @@ SCREENS.frage = () => {
   }
   const html = leiste + stage + '<div class="qdock">' + title + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + '<div class="qnav"><button type="button" class="btn ghost" data-act="qprev" aria-label="Zurück">' + '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>' +
     (designFertig ? '<button type="button" class="btn ghost anpassen" data-act="qnext">Anpassen</button><button type="button" class="btn primary" data-act="save">Speichern</button>' : '<button type="button" class="btn primary" data-act="qnext">' + (last ? sichern : 'Weiter') + '</button>') + '</div>';
-  return { html: html, back: [c.i ? 'Zurück' : einstiegHier() ? 'Fenster' : 'Ergebnis', 'qprev'], fit: true, qpos: (c.i + 1) / n };
+  /* Oben „Fenster“: zur Übersicht aller Fenster (liste, mit Rückfrage bei ungespeicherten Änderungen); der Pfeil unten in der Leiste und die
+     Zurück-Taste des Telefons gehen eine Frage zurück (qprev) */
+  return { html: html, back: ['Fenster', 'qprev', 'liste'], fit: true, qpos: (c.i + 1) / n };
 };
 /* Kapitelleiste: das aktuelle Kapitel steht ganz sichtbar, möglichst mittig, links beginnt ein ganzer Chip (ohne Gleiten, die Leiste wird
    bei jedem Antippen neu gezeichnet) */
@@ -4896,6 +4903,27 @@ function wohinBlatt() {
 function fensterStatus(x) {
   const d = derive(x), n = AW.offenListe(AW.nachTiefe(x, S.proj)).length;
   return !d.complete || n ? (d.complete ? 'Maße vollständig' : 'Maße offen') + (n ? ', ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') : 'Vollständig';
+}
+/* Stand eines Fensters für die Übersicht: vollständig, Maße offen oder offene Wünsche (mit den ersten beiden Namen) */
+function fensterStand(x) {
+  const d = derive(x), offen = AW.offenListe(AW.nachTiefe(x, S.proj)), n = offen.length;
+  if (!d.complete) return { k: 'masse', text: 'Maße offen' + (n ? ', ' + n + (n === 1 ? ' Wunsch' : ' Wünsche') : '') };
+  if (n) return { k: 'wunsch', text: (n === 1 ? '1 Wunsch offen: ' : n + ' Wünsche offen: ') + offen.slice(0, 2).map((k) => AW.offenName(x, k)).join(', ') + (n > 2 ? ', …' : '') };
+  return { k: 'voll', text: 'Vollständig' };
+}
+/* Kopf der Übersicht: „Deine Fenster.“ mit dem Stand in einem Satz und einem Balken (vollständige Fenster von allen), rechts „+ Fenster“;
+   ohne Fenster der Satz aus aufmassStand. T: Sie-Form im Kundenlink */
+function uebersichtKopf(T) {
+  const F = T || ((sie, du) => du), n = S.windows.length;
+  let stand = esc(aufmassStand());
+  if (n) {
+    const st = S.windows.map(fensterStand), voll = st.filter((s) => s.k === 'voll').length, masse = st.filter((s) => s.k === 'masse').length, wunsch = st.filter((s) => s.k === 'wunsch').length;
+    const satz = voll === n ? (n === 1 ? F('Ihr Fenster ist vollständig.', 'Dein Fenster ist vollständig.') : 'Alle ' + n + ' Fenster sind vollständig.')
+      : voll + ' von ' + n + ' vollständig' + (masse ? ' · ' + masse + ' ohne Maße' : '') + (wunsch ? ' · ' + wunsch + ' mit offenen Wünschen' : '');
+    stand = '<span class="ueb-zeile">' + esc(satz) + '</span><span class="ueb-prog" role="progressbar" aria-label="Vollständige Fenster" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + voll + '"><i style="width: ' + Math.round(voll / n * 100) + '%"></i></span>';
+  }
+  const neu = n && neuMoeglich() && linkOffen() ? '<button type="button" class="pill hd-neu" data-act="new">' + PLUS + 'Fenster</button>' : '';
+  return hd(F('Ihr Aufmaß', 'Dein Aufmaß'), F('Ihre Fenster.', 'Deine Fenster.'), stand, '', '', neu);
 }
 /* Browser- und Telefon-Zurück: ein Eintrag im Verlauf fängt die Zurück-Taste ab; die Adresse (auch #k-…) bleibt gleich. FALLE_URL ist
    die Adresse, an der die Falle steht: Ein Sprung zu einer anderen Adresse (Link im selben Tab, Hash) ist kein Zurück der App */
@@ -6032,6 +6060,8 @@ function act(name, el) {
       return render();
     }
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
+    /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
+    case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
     case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());

@@ -204,6 +204,19 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .wincard .ti { font-size: 17px; font-weight: 800; letter-spacing: -.01em }
 .wincard .di { font-size: 15px; color: var(--ink2) }
 .wincard .me { font-size: 13px; color: var(--muted) }
+/* Übersicht aller Fenster: Nummer der Position als Plakette am Bild, Stand als Punkt mit Text, im Kopf der Balken und „+ Fenster“ */
+.wincard .ic { position: relative }
+.wincard .pos { position: absolute; left: -7px; top: -7px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 800; letter-spacing: 0; line-height: 1; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--surface) }
+.wincard .st { display: flex; align-items: flex-start; gap: 6px; margin-top: 2px; font-size: 13px; line-height: 1.35; font-weight: 700; color: var(--ink2); min-width: 0 }
+.wincard .st > i { flex: 0 0 auto; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--muted) }
+.wincard .st.voll { color: var(--ok) } .wincard .st.voll > i { background: var(--ok) }
+.wincard .st.masse { color: var(--warn) } .wincard .st.masse > i { background: var(--warn) }
+.wincard .st.wunsch > i { background: var(--accent) }
+.hd .ueb-zeile { display: block }
+.hd .ueb-prog { display: block; height: 6px; margin-top: 12px; border-radius: 3px; background: var(--line); overflow: hidden }
+.hd .ueb-prog > i { display: block; height: 100%; border-radius: 3px; background: var(--ok); transition: width .4s var(--e-out) }
+.hd-tools .pill.hd-neu { min-height: 36px; padding: 0 12px 0 8px; font-size: 14px; gap: 4px; margin: 0 }
+.hd-tools .pill.hd-neu svg { width: 16px; height: 16px }
 .dashed { min-height: 56px; border: 2px dashed var(--line2); border-radius: var(--r3); background: transparent; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: border-color var(--t2), background var(--t2) }
 .dashed:active { background: var(--surface) }
 /* Angefangenes Aufmaß: Liste oben, Grenzen, Hinweise zum Weitermachen (app.js: homeAufmass, linkHome, fertig) */
