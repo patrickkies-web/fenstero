@@ -1164,16 +1164,24 @@ function bankFarbig(b, k) {
 }
 const KAPPE = { kunststoff: 'linear-gradient(180deg, #74787d, #5d6166)', gleit: 'linear-gradient(180deg, #4a4e52, #33373a)' };
 /* Behang außen als eine Fläche: Rollladenpanzer (Lamellen 40 mm), Screen (Gewebe, durchscheinend); der Raffstore hat einzelne Lamellen (w3dSonne) */
+/* Teilung des Rollladenpanzers in mm: Kunststofflamellen 40, Alu-Lamellen 37 (ausgeschäumt) */
+const panzerTeilung = (w) => (w.sart === 'rollladen' && dg(w, 'panzer') && w.panzer === 'alu' ? 37 : 40);
 function behangBg(w, s) {
   const c = sonneFarbeW(w), F = c[0], D = c[1], L = c[2];
-  /* Lichtschlitze: je Lamelle eine Reihe kurzer Schlitze an der Unterkante (als Punktreihe, 40 mm Raster wie der Panzer) */
-  if (w.sart === 'rollladen' && dg(w, 'schlitz') && w.schlitz === 'mit') return 'radial-gradient(circle at 50% 80%, rgba(20, 20, 20, .55) 0 ' + px(Math.max(0.5, 2.6 * s)) + ', transparent ' + px(Math.max(0.8, 3.4 * s)) + ') 0 0 / ' + px(Math.max(2.5, 14 * s)) + ' ' + px(40 * s) + ', repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(2 * s + 0.6) + ', ' + F + ' ' + px(2 * s + 0.6) + ' ' + px(34 * s) + ', ' + D + ' ' + px(34 * s) + ' ' + px(40 * s) + ')';
-  if (w.sart === 'rollladen' && dg(w, 'panzer') && w.panzer === 'alu') return 'repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(3 * s + 0.6) + ', ' + F + ' ' + px(3 * s + 0.6) + ' ' + px(30 * s) + ', ' + D + ' ' + px(30 * s) + ' ' + px(37 * s) + ')';
   if (w.sart === 'screen') return 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), repeating-linear-gradient(180deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), ' + F;
-  /* Rollladenpanzer: Lamellen 40 mm; Lichtschlitze nur, wenn gewählt (Detailangabe schlitz, oben), als Punktreihe, die auch die WebGL-Bühne liest */
-  const p40 = px(40 * s);
-  return 'repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(2 * s + 0.6) + ', ' + F + ' ' + px(2 * s + 0.6) + ' ' + px(34 * s) + ', ' + D + ' ' + px(34 * s) + ' ' + p40 + ')';
+  /* Rollladenpanzer, je Lamelle (40 mm, Alu 37 mm): oben die Lichtkante, darunter der helle Rücken der gewölbten Lamelle, nach unten dunkler,
+     an der Unterkante der Schatten des Hakens und die schmale Lichtfuge zur nächsten Lamelle. Die WebGL-Bühne wölbt dazu jede Lamelle
+     im Licht (_relief in w3dSonne, gleiche Teilung). Lichtschlitze (Detailangabe schlitz): je Lamelle eine Reihe kurzer Schlitze */
+  const P = panzerTeilung(w), p = (f) => px(P * f * s), kante = px(Math.max(0.6, 1.6 * s)), dunkel = mischHex(D, '#000000', 0.42), hell = mischHex(F, '#ffffff', 0.14), glanz = mischHex(L, '#ffffff', 0.35);
+  const panzer = 'repeating-linear-gradient(180deg, ' + glanz + ' 0 ' + kante + ', ' + hell + ' ' + kante + ' ' + p(0.22) + ', ' + F + ' ' + p(0.38) + ' ' + p(0.66) + ', ' + D + ' ' + p(0.84) + ' ' + p(0.9) + ', ' + dunkel + ' ' + p(0.9) + ' ' + p(0.955) + ', ' + L + ' ' + p(0.955) + ' ' + p(1) + ')';
+  if (w.sart === 'rollladen' && dg(w, 'schlitz') && w.schlitz === 'mit') return 'radial-gradient(circle at 50% 80%, rgba(20, 20, 20, .55) 0 ' + px(Math.max(0.5, 2.6 * s)) + ', transparent ' + px(Math.max(0.8, 3.4 * s)) + ') 0 0 / ' + px(Math.max(2.5, 14 * s)) + ' ' + p(1) + ', ' + panzer;
+  return panzer;
 }
+/* Führungsschiene: zur Öffnung hin die Einlaufrinne mit Bürstendichtung (dunkel), außen die Lichtkante; links und rechts gespiegelt (die Flächen
+   stehen um 180° gedreht, bei der linken liegt die Rinne am örtlichen Anfang, bei der rechten am Ende). Seilführung: Edelstahlseil */
+const schieneBg = (r, links, seil) => (seil ? 'linear-gradient(90deg, #7d838a, #e4e7ea 50%, #7d838a)' : 'linear-gradient(' + (links ? 90 : 270) + 'deg, ' + mischHex(r[1], '#000000', 0.45) + ' 0 9%, ' + r[1] + ' 9% 20%, ' + r[0] + ' 20% 64%, ' + r[2] + ' 64% 82%, ' + r[0] + ' 82%)');
+/* Endschiene: oben die Lichtkante, unten beim Rollladen die Gummilippe (Anschlagprofil), beim Raffstore und Screen die dunkle Unterkante */
+const endleisteBg = (b, rollo) => (rollo ? 'linear-gradient(180deg, ' + b[2] + ' 0 10%, ' + b[0] + ' 10% 58%, ' + b[1] + ' 58% 78%, #2a2b2d 78% 100%)' : 'linear-gradient(180deg, ' + b[2] + ' 0 12%, ' + b[0] + ' 12% 66%, ' + b[1] + ' 66% 88%, ' + mischHex(b[1], '#000000', 0.4) + ' 88%)');
 /* Innen: Rollo (Stoff), Plissee (Falten 20 mm), Jalousie (Lamellen 25 mm mit Lichtspalt) */
 function innenBg(w, s) {
   const c = innenFarbeW(w), F = c[0], D = c[1], L = c[2];
@@ -1261,7 +1269,7 @@ function w3dHTML(w, o) {
      Screen als Gewebe mit Fallstab in ZIP-Schienen. Innen: Rollo, Plissee oder Jalousie vor dem Glas */
   if (sonneAktiv(w)) {
     h += faceEl('fs-l', 'w3d-fs') + faceEl('fs-l2', 'w3d-fs w3d-fs-s') + faceEl('fs-r', 'w3d-fs') + faceEl('fs-r2', 'w3d-fs w3d-fs-s');
-    if (w.sart === 'raffstore') { for (let k = 0; k < LAM_MAX; k++) h += '<div class="w3d-f w3d-lam" data-r="lam-' + k + '" style="--k: ' + k + '"></div>'; h += faceEl('band-l', 'w3d-aufzug') + faceEl('band-r', 'w3d-aufzug'); }
+    if (w.sart === 'raffstore') { for (let k = 0; k < LAM_MAX; k++) h += '<div class="w3d-f w3d-lam" data-r="lam-' + k + '" style="--k: ' + k + '"></div>'; h += faceEl('band-l', 'w3d-aufzug') + faceEl('band-r', 'w3d-aufzug'); ['kord-lv', 'kord-lh', 'kord-rv', 'kord-rh'].forEach((k) => { h += faceEl(k, 'w3d-aufzug w3d-kordel'); }); }
     else h += faceEl('behang', 'w3d-behang' + (w.sart === 'screen' ? ' w3d-screen' : ''));
     h += faceEl('behang-u', 'w3d-behang-u') + faceEl('behang-ub', 'w3d-behang-u w3d-behang-ub');
     /* Rollladen: Anschlagstopfen auf der Endleiste (halten den Panzer oben am Kasten) */
@@ -1362,10 +1370,10 @@ function w3dPaint(stage, w) {
        Revisionsfuge unten (Detailangabe blende) */
     const aluBl = w.roll === 'aufsatz' && dg(w, 'blende') && w.blende === 'alu';
     if (w.roll === 'aufsatz') { bg('roll-f', aluBl ? 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 10% 84%, ' + D + ' 88% 91%, ' + mischHex(D, '#000000', 0.35) + ' 91% 93.5%, ' + F + ' 93.5%)' : facadeBg(w.fassade, fassadeTon(w))); bg('roll-sl', 'transparent'); bg('roll-t', 'transparent'); bg('roll-l', 'transparent'); bg('roll-r', 'transparent'); }
-    else { bg('roll-f', w.sart === 'rollladen' ? 'linear-gradient(180deg, ' + L + ', ' + F + ' 34%, ' + D + ')' : 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 12% 86%, ' + D + ')'); bg('roll-sl', 'linear-gradient(180deg, ' + F + ', ' + D + ')'); bg('roll-b', D); bg('roll-t', L); bg('roll-l', F); bg('roll-r', F); }
-    const sb = seil ? 'linear-gradient(90deg, #7d838a, #e4e7ea 50%, #7d838a)' : 'linear-gradient(90deg, ' + r[2] + ', ' + r[0] + ' 38%, ' + r[1] + ')';
-    ['fs-l', 'fs-r'].forEach((x) => bg(x, sb)); bg('fs-l2', seil ? '#9aa0a6' : r[1]); bg('fs-r2', seil ? '#9aa0a6' : r[1]);
-    bg('behang-u', 'linear-gradient(180deg, ' + b[2] + ', ' + b[0] + ' 45%, ' + b[1] + ')'); bg('behang-ub', b[1]);
+    /* Vorbau: Rundkasten des Rollladens mit der Fuge des Revisionsdeckels, eckige Blende bei Raffstore und Screen */
+    else { bg('roll-f', w.sart === 'rollladen' ? 'linear-gradient(180deg, ' + L + ' 0 2%, ' + F + ' 14% 56%, ' + D + ' 60% 61.5%, ' + mischHex(F, '#ffffff', 0.18) + ' 61.5% 63%, ' + F + ' 66% 82%, ' + D + ')' : 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 12% 86%, ' + D + ')'); bg('roll-sl', 'linear-gradient(180deg, ' + F + ', ' + D + ')'); bg('roll-b', D); bg('roll-t', L); bg('roll-l', F); bg('roll-r', F); }
+    bg('fs-l', schieneBg(r, true, seil)); bg('fs-r', schieneBg(r, false, seil)); bg('fs-l2', seil ? '#9aa0a6' : r[1]); bg('fs-r2', seil ? '#9aa0a6' : r[1]);
+    bg('behang-u', endleisteBg(b, w.sart === 'rollladen')); bg('behang-ub', b[1]);
   }
   else { bg('roll-f', ''); bg('roll-sl', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
@@ -1410,6 +1418,16 @@ function w3dOberflaeche(stage, w, fin, fout) {
   const fF = dg(w, 'fbiFarbe') ? w.fbiFarbe : '', bi = fF === 'granit' ? 'granit' : fF === 'holz' ? 'holz' : fF === 'weiss' || fF === 'marmor' ? '' : BANK_ART[w.fbi] || '', ba = w.fba === 'alu' ? 'alu' : '';
   ['sill-t', 'sill-f', 'sill-l', 'sill-r'].forEach((r) => setz(r, bi)); ['sa-t1', 'sa-t2', 'sa-f'].forEach((r) => setz(r, ba)); ['sa-l', 'sa-r'].forEach((r) => setz(r, ba && !(dg(w, 'fbaKappe') && w.fbaKappe !== 'alu') ? 'alu' : ''));
   setz('wall-out', FASSADE_ART[w.fassade] || 'putz', null, null, fassadeArtC(w));
+  /* Sonnenschutz: Lamellen des Raffstores, Schienen, Endschiene und Vorbaukasten aus Aluminium (gebürstet im Licht, alub: feine Struktur auf dem
+     Verlauf, mehr Glanz); der Rollladenpanzer nur, wenn Aluminium gewählt ist, die Seilführung bleibt Edelstahl */
+  if (sonneAktiv(w)) {
+    const raff = w.sart === 'raffstore', seil = raff && dg(w, 'fuehrung') && w.fuehrung === 'seil', aluP = w.sart === 'rollladen' && dg(w, 'panzer') && w.panzer === 'alu';
+    ['fs-l', 'fs-r', 'fs-l2', 'fs-r2'].forEach((r) => setz(r, seil ? '' : 'alub'));
+    ['behang-u', 'behang-ub'].forEach((r) => setz(r, 'alub'));
+    setz('behang', aluP ? 'alub' : '');
+    if (raff) for (let k = 0; k < LAM_MAX; k++) setz('lam-' + k, 'alub');
+    if (w.roll === 'vorbau') ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => setz(r, 'alub'));
+  }
   /* Aufsatzkasten: die Blende ist Teil der Fassade (überputzt, Klinker oder Holz), ihr Muster setzt w3dSonne in der Wand fort;
      die Unterseite mit dem Auslaufschlitz ist feiner Putz */
   const aufsatz = sonneAktiv(w) && w.roll === 'aufsatz';
@@ -1815,6 +1833,9 @@ function w3dSonne(stage, w, o, V, s, q) {
     face(q('band-l'), bb, Math.max(0, e - yTop), bx + bw / 6 - bb / 2, yTop, bz, '', '0 0'); face(q('band-r'), bb, Math.max(0, e - yTop), bx + bw * 5 / 6 - bb / 2, yTop, bz, '', '0 0');
     const AUFZUG = 'repeating-linear-gradient(180deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 5px), #d9d7d0';
     ['band-l', 'band-r'].forEach((r) => { const el = q(r); if (el && el._bg !== AUFZUG) { el._bg = AUFZUG; el.style.background = AUFZUG; } });
+    /* Leiterkordeln nahe den Enden: je Seite eine Schnur vor und eine hinter den Lamellen (sie tragen und wenden die Lamellen) */
+    const kb = Math.max(0.8, 2.2 * s), kz = (lh / 2) * Math.sin(tilt * Math.PI / 180) + 0.5, KORDEL = '#d4d2cb';
+    [['kord-lv', bx + bw * 0.035, zb - kz], ['kord-lh', bx + bw * 0.035, zb + kz], ['kord-rv', bx + bw * 0.965, zb - kz], ['kord-rh', bx + bw * 0.965, zb + kz]].forEach((k) => { const el = q(k[0]); if (!el) return; face(el, kb, Math.max(0, e - yTop), k[1] - kb / 2, yTop, k[2], '', '0 0'); if (el._bg !== KORDEL) { el._bg = KORDEL; el.style.background = KORDEL; } });
   } else {
     const bh = q('behang'); e = yTop + stand * Hmax;
     if (bh) {
@@ -1822,6 +1843,8 @@ function w3dSonne(stage, w, o, V, s, q) {
       const tr = screen && dg(w, 'transp') ? w.transp : '', op = tr === 'licht' ? '.72' : tr === 'dunkel' ? '.97' : '.86';
       face(bh, bw, Math.max(0, e - yTop), bx, yTop, zb, '', '0 0'); bh.style.opacity = e - yTop < 0.5 ? '0' : screen ? op : '';
       const bgv = behangBg(w, s); if (bh._bg !== bgv) { bh._bg = bgv; bh.style.background = bgv; }
+      /* WebGL: jede Lamelle des Panzers gewölbt im Licht (Teilung wie der Verlauf, Neigung der Normale ±0,42), der Screen bleibt glatt */
+      bh._relief = screen ? null : [panzerTeilung(w) * s, 0.42, 0, 0];
     }
   }
   face(q('behang-u'), bw, uH, bx, e, zb - 0.4, '', '0 0');
@@ -1848,10 +1871,11 @@ const LAMELLE = { c80: { h: 80, p: 72, pk: 7, bieg: 22 }, z90: { h: 90, p: 80, p
 /* Verlauf über die Lamellenhöhe: C-Profil hell oben und zur Kante hin dunkel; Z-Profil mit zwei abgekanteten Rändern; flach fast gleichmäßig.
    Gewendet (zu) steht die Lamelle fast senkrecht, das Licht fällt flacher */
 function lamelleBg(lm, zu, F, D, L) {
-  const dunkel = mischHex(D, '#000000', 0.3), hell = mischHex(F, '#ffffff', 0.16);
-  if (lm === 'z90') return 'linear-gradient(180deg, ' + D + ' 0 5%, ' + L + ' 5% 11%, ' + (zu ? F : hell) + ' 24%, ' + F + ' 78%, ' + D + ' 89%, ' + L + ' 89% 94%, ' + dunkel + ' 94%)';
-  if (lm === 'flach') return 'linear-gradient(180deg, ' + L + ' 0 5%, ' + (zu ? F : hell) + ' 14%, ' + F + ' 86%, ' + D + ')';
-  return zu ? 'linear-gradient(180deg, ' + L + ' 0 7%, ' + F + ' 18% 60%, ' + D + ' 88%, ' + dunkel + ')' : 'linear-gradient(180deg, ' + L + ' 0 9%, ' + hell + ' 30%, ' + F + ' 70%, ' + D + ')';
+  /* Bördelkanten: oben ein schmaler Lichtsaum, unten der dunkle Umschlag mit einer feinen Lichtlinie darunter */
+  const dunkel = mischHex(D, '#000000', 0.3), hell = mischHex(F, '#ffffff', 0.16), saum = mischHex(L, '#ffffff', 0.4);
+  if (lm === 'z90') return 'linear-gradient(180deg, ' + D + ' 0 4%, ' + saum + ' 4% 7%, ' + L + ' 7% 12%, ' + (zu ? F : hell) + ' 25%, ' + F + ' 76%, ' + D + ' 86%, ' + L + ' 88% 93%, ' + dunkel + ' 94%)';
+  if (lm === 'flach') return 'linear-gradient(180deg, ' + saum + ' 0 3%, ' + L + ' 3% 8%, ' + (zu ? F : hell) + ' 16%, ' + F + ' 84%, ' + D + ' 95%, ' + dunkel + ')';
+  return zu ? 'linear-gradient(180deg, ' + saum + ' 0 3%, ' + L + ' 3% 9%, ' + F + ' 20% 58%, ' + D + ' 86%, ' + dunkel + ' 95%, ' + D + ')' : 'linear-gradient(180deg, ' + saum + ' 0 3%, ' + L + ' 3% 10%, ' + hell + ' 30%, ' + F + ' 68%, ' + D + ' 90%, ' + dunkel + ' 96%, ' + L + ')';
 }
 /* Bedienung innen neben der Öffnung: an der Wand der Gurtwickler auf etwa 1.000 mm mit Gurtband aus der Wand über der Öffnung,
    in der Laibung die Kurbelstange mit Kurbel auf etwa 1.100 mm, Wandtaster auf 1.050 mm (elektrisch und Smart Home mit Funk-Punkt,

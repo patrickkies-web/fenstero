@@ -894,6 +894,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
 .w3d-lam { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 0 rgba(0, 0, 0, .35) }
 /* Aufzugbänder des Raffstores (nicht die Bänder des Flügels, .w3d-band); Farbe inline aus w3dSonne */
 .w3d-aufzug { box-shadow: 0 0 0 .5px rgba(0, 0, 0, .25) }
+.w3d-kordel { box-shadow: none; opacity: .92 } /* Leiterkordeln des Raffstores, vor und hinter den Lamellen */
 .w3d-behang-ub { box-shadow: none }
 /* Anschlagstopfen auf der Endleiste des Rollladens (eigene Flächen, Farbe inline) */
 .w3d-stopfen { border-radius: 2px 2px 0 0; box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .3) }
