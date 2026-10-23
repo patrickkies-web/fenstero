@@ -1023,6 +1023,61 @@
     AW.NOTIZ_MAX = NOTIZ_MAX; AW.notizStelle = notizStelle; AW.notizSauber = notizSauber; AW.notizListe = notizListe;
   })();
 
+  /* ---------- Aufmaß als Text (Konfigurator-Instanzen, Strang A; Vorlage war aufmassText im Betriebsbereich, portal.js) ----------
+     Ein eingegangenes Aufmaß (Link-Objekt l mit l.aufmass) als Text: zum Kopieren im Betriebsbereich und als Textteil der Mail, mit der
+     eine Anfrage beim Betrieb ankommt (functions/api/eingang.js). Gleicher Aufbau wie im Betriebsbereich: Kopf, Kontakt, Klärungsliste,
+     je Position Bestellmaß-Vorschlag, Wünsche, Maße, Einbausituation.
+     o: { abzug (Abzug des Betriebs für den Bestellmaß-Vorschlag, ohne Angabe der übliche, false = ohne Vorschlag), fuss (letzte Zeile; Vorgabe wie im Betriebsbereich, '' = keine) } */
+  (function () {
+    const kundeKontakt = (l) => {
+      const pr = (l && l.aufmass && l.aufmass.proj) || {}, k = String((l && l.kontakt) || ''), roh = (x) => String(x || '').replace(/[\s/().-]/g, '').toLowerCase();
+      return [pr.tel && roh(pr.tel) !== roh(k) ? ['Telefon', pr.tel] : null, pr.mail && roh(pr.mail) !== roh(k) ? ['E-Mail', pr.mail] : null, AW.OPT.erreich[pr.erreich] ? ['Erreichbar', AW.OPT.erreich[pr.erreich]] : null].filter(Boolean);
+    };
+    const ihrStd = (t) => String(t || '').replace(AW.STD_TEXT, 'nach Ihrem Standard');
+    function posMasse(w) {
+      const d = AW.derive(w), mo = w.mo || {}, t = (k) => (AW.num(mo[k]) ? AW.th(mo[k]) : '–'), dev = Math.max(d.devW, d.devH);
+      return [[w.neu ? 'Rohbauöffnung' : 'Maueröffnung', d.moW && d.moH ? AW.th(d.moW) + ' × ' + AW.th(d.moH) + ' mm' + (w.neu ? ', Wunschmaß' : ', kleinstes Maß') : 'nicht gemessen']]
+        .concat(w.neu ? [] : [['Breiten', 'oben ' + t('wt') + ' · Mitte ' + t('wm') + ' · unten ' + t('wb')], ['Höhen', 'links ' + t('hl') + ' · Mitte ' + t('hm') + ' · rechts ' + t('hr')]],
+          !w.neu && dev > 5 ? [['Außer Winkel', 'bis ' + dev + ' mm, das kleinste Maß zählt']] : [],
+          [[AW.istTuer(w) ? 'Türelement' : 'Element', d.elW && d.elH ? AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm mit Rahmen' + (w.neu ? ', gerechnet' : '') : 'nicht gemessen'],
+            ['Lage', (AW.lab('etage', w.etage) || 'EG') + (AW.istTuer(w) ? ', bodentief' : AW.bruDa(w) ? (AW.num(w.bru) ? ', Brüstung ' + AW.th(w.bru) + ' mm' : ', bodentief') : ', Brüstung nicht gemessen') + (AW.num(w.laib) ? ', Laibung innen ' + AW.th(w.laib) + ' mm' : '') + (AW.num(w.wand) ? ', Wand ' + AW.th(w.wand) + ' mm' : '')],
+            ['Einbau', w.neu ? 'neue Öffnung, Lage ' + (AW.ohneFotos(w) ? 'nicht eingezeichnet' : 'auf dem Foto eingezeichnet') : 'Austausch' + (AW.ohneFotos(w) ? ', ohne Fotos' : '')]]);
+    }
+    function aufmassText(l, o) {
+      o = o || {};
+      const am = l.aufmass || {}, pr = am.proj || {}, wins = am.windows || [], ab = o.abzug === false ? null : AW.abzugVon(o.abzug), out = [], tot = AW.num(pr.total), nE = am.elemente || wins.reduce((s2, w) => s2 + (AW.num(w.anzahl) || 1), 0);
+      const kl = AW.klaerung(wins, pr, l), ok = (id) => !!(l.klaer && l.klaer[id] && l.klaer[id].ok), notiz = (id) => (l.klaer && l.klaer[id] && l.klaer[id].notiz) || '';
+      out.push('Aufmaß · ' + l.kunde + (l.nr ? ' · ' + l.nr : ''), [l.adresse, AW.lab('gebaeude', pr.gebaeude) + (pr.baujahr ? ', Baujahr ' + pr.baujahr : '')].filter(Boolean).join(' · '), 'Eingegangen: ' + ((l.log || {}).eingegangen || '') + ' · Zeitraum: ' + (AW.lab('zeit', pr.zeit) || '–') + ' · Budget: ' + (AW.lab('budget', pr.budget) || '–'));
+      const kk = kundeKontakt(l); if (l.kontakt || kk.length) out.push('Kontakt: ' + [l.kontakt].concat(kk.map((r) => r[0] + ' ' + r[1])).filter(Boolean).join(' · '));
+      out.push('Fenster im Haus: ' + (tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'));
+      if (pr.notiz) out.push('Nachricht vom Kunden: ' + pr.notiz);
+      const fw = AW.foerdWeg(pr); if (fw) out.push('Förderung: ' + AW.lab('foerdweg', fw));
+      if (AW.tiefeKopf(wins, pr, true)) out.push('Geplant: ' + AW.tiefeKopf(wins, pr, true));
+      if (kl.length) {
+        out.push('', 'Mit dem Kunden zu klären: ' + kl.filter((r) => ok(r.id)).length + ' von ' + kl.length + ' geklärt');
+        AW.klaerGruppen(kl).forEach((g) => { out.push('  ' + g.titel); g.punkte.forEach((r) => { out.push('  [' + (ok(r.id) ? 'x' : ' ') + '] ' + r.k + ': ' + r.v + (r.warum ? ' (' + r.warum + ')' : '')); if (notiz(r.id)) out.push('      Notiz: ' + notiz(r.id)); }); });
+      }
+      out.push('');
+      wins.forEach((w, i) => {
+        const b = ab ? AW.bestellmass(w, ab) : null, W = AW.wuensche(w, pr), N = (n) => '    Notiz des Kunden' + (n[2] === 'notiz' ? '' : ' zu ' + n[0]) + ': „' + n[1] + '“';
+        out.push('Pos. ' + (i + 1) + ' · ' + (w.name || 'Fenster') + ' · ' + (AW.num(w.anzahl) || 1) + ' Stück');
+        if (b) out.push('  Bestellmaß-Vorschlag: ' + b.text + ' (' + b.formel + ')' + (b.warnText ? '. ' + b.warnText : ''));
+        out.push('  Wunsch: ' + W.satz + '.');
+        if (W.offen.length) out.push('  Noch offen: ' + W.offen.join(', '));
+        W.notizen.allgemein.forEach((n) => out.push(N(n)));
+        W.gruppen.forEach((g) => { out.push('  ' + g.titel + ': ' + g.zeilen.map((z) => (g.zeilen.length > 1 || z.k !== g.titel ? z.k + ' ' : '') + ihrStd(z.t)).join('; ')); if (g.standard.length) out.push('    Nach Ihrem Standard: ' + g.standard.join(', ')); g.notizen.forEach((n) => out.push(N(n))); });
+        out.push('  Maße: ' + posMasse(w).map((r) => r[0] + ' ' + r[1]).join('; '));
+        W.notizen.masse.concat(W.notizen.fotos).forEach((n) => out.push(N(n)));
+        AW.kiRows(w).forEach((r) => out.push('  Einbausituation, ' + r[0] + ': ' + r[1]));
+        out.push('');
+      });
+      const fuss = o.fuss === undefined ? 'Erfasst mit eeziframes. Vor der Fertigung Feinaufmaß vor Ort.' : o.fuss;
+      if (fuss) out.push(fuss);
+      return out.join('\n').replace(/\n+$/, '');
+    }
+    AW.aufmassText = aufmassText; AW.kundeKontakt = kundeKontakt;
+  })();
+
   /* ---------- Abrechnung ---------- */
   const Abrechnung = (() => {
     /* Preise netto für Betriebe, brutto für Hauseigentümer; aus /config.js bzw. vom Server (/api/status) überschreibbar */
@@ -1044,8 +1099,10 @@
       const e = einfuehrung(), v = e && e.danach ? e.danach[k] : null;
       return v == null ? '' : 'Einführungspreis bis ' + einfBis() + ', danach ' + (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.', ',')) + ' €';
     }
-    const RANG = { service: 0, abo: 1, plus: 2 };
-    const PLAN_NAME = { service: 'Start', abo: 'Abo 10', plus: 'Plus' };
+    /* instanz: Konto einer Konfigurator-Instanz (docs/INSTANZEN.md). Ihre Anfragen sind im Paket enthalten: gebucht wird 0 €, gesperrt wird
+       nie, ein Tarifwechsel gibt es nicht (das Paket wechselt nur über die Bestellung), und die Sammelrechnung übergeht sie */
+    const RANG = { service: 0, abo: 1, plus: 2, instanz: 3 };
+    const PLAN_NAME = { service: 'Start', abo: 'Abo 10', plus: 'Plus', instanz: 'Paket' };
     const planName = (k) => PLAN_NAME[k] || PLAN_NAME.service;
     const konto = (a) => (RANG[a.konto] !== undefined ? a.konto : 'service');
     const NB_MAX = 2, NB_TAGE = 30;
@@ -1116,7 +1173,8 @@
       const am = l.aufmass || {}, sub = [((l.log || {}).eingegangen || stamp(now)), l.nr, am.windows ? nW(am.windows.length, 'Position', 'Positionen') : '', extra ? 'anderes Aufmaß in Runde ' + extra : ''].filter(Boolean).join(' · ');
       let betrag = 0, badge, inkl = false;
       const k = konto(a);
-      if (k === 'plus') badge = 'inklusive (Plus)';
+      if (k === 'instanz') badge = 'im Paket';
+      else if (k === 'plus') badge = 'inklusive (Plus)';
       else if (k === 'abo') {
         const genutzt = aboGenutzt(a, now);
         if (genutzt < PREISE.abo.inkl) { badge = 'inklusive (Abo, ' + (genutzt + 1) + ' von ' + PREISE.abo.inkl + ')'; inkl = true; }
@@ -1148,6 +1206,7 @@
     }
     /* Tarif wechseln: nach oben sofort (Monat wird gebucht), nach unten zum Monatsende vorgemerkt. Rückgabe: was passiert ist */
     function planWechsel(a, k, now) {
+      if (konto(a) === 'instanz' || k === 'instanz') return { art: 'paket', msg: 'Das Paket wechselt nur über die Bestellung.' };
       const alt = konto(a); k = RANG[k] !== undefined ? k : 'service';
       if (k === alt) { if (a.downgrade) { a.downgrade = null; return { art: 'bleibt', msg: planName(k) + ' läuft weiter' }; } return { art: 'gleich', msg: planName(k) + ' ist schon Ihr Tarif' }; }
       if (RANG[k] > RANG[alt]) {
@@ -1262,12 +1321,14 @@
     /* ---------- Eingang eines Aufmaß-Codes (aus der App direkt oder eingefügt): neues Projekt, Nachbesserung oder Teil-Nachbesserung ---------- */
     function importCode(a, o, now, via) {
       now = now || Date.now(); a.links = a.links || [];
+      /* Konfigurator-Instanz: der Kunde fragt dort selbst an und nennt seine Erreichbarkeit selbst, auch mit Code (Strang A) */
+      const ausLink = !!(o && o.b) && konto(a) !== 'instanz';
       if (!o || !Array.isArray(o.w)) return { ok: false, art: 'fehler', msg: 'Code nicht lesbar. Bitte komplett kopieren, er beginnt mit AM1.' };
       let l = o.b ? a.links.find((x) => x.code === o.b) : null;
       if (o.b && !l) return { ok: false, art: 'fremd', msg: 'Dieser Code gehört zu keinem Ihrer Projekte.' };
       if (l && l.status === 'eingegangen' && !(l.nb && l.nb.offen && (o.r || 1) >= l.nb.runde)) return { ok: false, art: 'schon', l: l, msg: l.nb && l.nb.offen ? 'Dieser Code ist noch die alte Fassung. Der Kunde muss das Aufmaß über den Nachbesserungs-Link erneut abschicken.' : 'Dieses Aufmaß ist schon eingegangen. Für eine Korrektur fragen Sie im Projekt eine Nachbesserung an.' };
       if (l && l.status === 'eingegangen') {
-        const fp2 = fingerprint(o), wins2 = (o.w || []).map(fromApp), am2 = aufmassOf(wins2, fromAppProj(o.p || {}, !!o.b)); am2.fp = fp2;
+        const fp2 = fingerprint(o), wins2 = (o.w || []).map(fromApp), am2 = aufmassOf(wins2, fromAppProj(o.p || {}, ausLink)); am2.fp = fp2;
         const q = ueberschneidung(l.aufmass, am2), neu = q === 0, gleich = !!(l.aufmass && l.aufmass.fp === fp2);
         (l.vorher = l.vorher || []).push({ runde: l.runde || 1, when: (l.log || {}).eingegangen || '', aufmass: l.aufmass });
         /* Kunde ohne gespeicherte Angaben (anderes Gerät) schickt nur die betroffenen Fenster: passende Positionen ersetzen, übrige behalten */
@@ -1283,7 +1344,7 @@
       const war = l && l.status === 'abgelaufen', wins = (o.w || []).map(fromApp), p = o.p || {};
       if (!l) { l = { id: newId('l'), code: newCode(), nr: nextNr(a, now), kunde: String(p.name || 'Kunde ohne Projekt').slice(0, 60), kontakt: String(p.tel || p.mail || '').slice(0, 80), adresse: String(p.ort || '').slice(0, 120), geb: '', fz: '', plan: [], note: 'direkt vom Kunden, per Code übernommen', created: datum(now), expires: dateIn(14, now), status: 'gesendet', progress: 0, via: 'Code', du: false, log: { erstellt: stamp(now), gesendet: stamp(now) } }; a.links.unshift(l); }
       l.seen = false; l.log = l.log || {}; l.log.gesendet = l.log.gesendet || stamp(now); l.log.geoeffnet = l.log.geoeffnet || stamp(now); l.log.arbeit = l.log.arbeit || stamp(now);
-      const am = aufmassOf(wins, fromAppProj(p, !!o.b)); am.fp = fp;
+      const am = aufmassOf(wins, fromAppProj(p, ausLink)); am.fp = fp;
       const r = receiveAufmass(a, l, am, via || 'Code', now);
       return { ok: true, art: 'neu', l: l, feier: r.ok ? 'eingang' : '', locked: !r.ok, notif: r.notif, msg: r.ok ? (war ? 'Link war abgelaufen, Aufmaß trotzdem übernommen: ' : 'Aufmaß übernommen: ') + l.kunde : 'Aufmaß übernommen. Zum Ansehen Zahlungsart hinterlegen' };
     }

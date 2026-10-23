@@ -9,6 +9,13 @@ import { codeSenden, codePruefen, erneuern, nutzer } from './auth.js';
 import { NB_STAND } from './recht.js';
 import { ablage, linkOrdner, fotoIds, fotosLinkAufraeumen } from './fotos.js';
 import { eingangMelden } from './benachrichtigung.js';
+import '../../web/assets/instanzregeln.js';
+import { linkAufloesen, linkAendern, pseudoKonto, stempelBerlin, datumBerlin, zeitenBerlin } from '../instanz/adapter.js';
+import { budget, bremse } from './bremse.js';
+import { eingangAnstossen, loeschenAbFuer } from './eingang.js';
+import { alarmMail } from './ki.js';
+import { instanzZaehlen } from './statistik.js';
+import { KONTO_INSTANZ as DASH, umzugFuer, umzugFehler } from './dashboard.js';
 
 const X = () => globalThis.Abrechnung;
 const EIN = () => globalThis.Einladung;
@@ -52,7 +59,11 @@ async function angemeldet(ctx) {
   if (sperreVon(ctx.row)) throw sperrFehler(ctx.row);
   return n;
 }
-async function mitBetrieb(ctx) { await angemeldet(ctx); if (!ctx.row) throw new ApiFehler('Zu dieser Anmeldung gibt es noch keinen Betrieb. Bitte registrieren.', 404); return ctx.row; }
+async function mitBetrieb(ctx) {
+  const n = await angemeldet(ctx);
+  if (!ctx.row) { const u = await umzugFuer(ctx, n); if (u) throw umzugFehler(u); throw new ApiFehler('Zu dieser Anmeldung gibt es noch keinen Betrieb. Bitte registrieren.', 404); } // Dashboard-Zugang einer Instanz: dort anmelden (E5)
+  return ctx.row;
+}
 const zaehlen = (ctx, s) => { if (ctx.zaehlen) ctx.zaehlen(s); };
 /* Nach Code oder Link: Konto prüfen (Sperre), Zeit anwenden, Anmeldung vermerken (für die Zentrale: letzte Anmeldung, Anzahl) */
 async function anmeldungFertig(ctx, uid) {
@@ -126,7 +137,9 @@ async function aboUebernehmen(sp, zd, row, r) {
 
 export const KONTO = {
   /* --- Anmeldung --- */
+  /* Auf dem Host einer Konfigurator-Instanz (Signature-Dashboard) antwortet je Route functions/api/dashboard.js (KONTO_INSTANZ) */
   'POST /api/konto/anmelden': async (ctx) => {
+    if (ctx.instanz) return DASH.anmelden(ctx);
     if (!erlaubt('otp:' + quelle(ctx.request), 8, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const r = await codeSenden(ctx.k, ctx.sp, ctx.body.mail, zurueck(ctx));
     zaehlen(ctx, 'ereignis:anmeldecode');
@@ -134,20 +147,25 @@ export const KONTO = {
   },
   /* Anmeldelink aus der E-Mail: Supabase leitet mit #access_token=…&refresh_token=… auf die Startseite, portal.js schickt beides her */
   'POST /api/konto/sitzung': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const b = ctx.body || {}, token = str(b.token, 4000), refresh = str(b.refresh, 400);
     const n = await nutzer(ctx.k, token); if (!n) throw new ApiFehler('Der Anmeldelink ist abgelaufen oder schon benutzt. Bitte fordern Sie einen neuen an.', 401);
     const frisch = await anmeldungFertig(ctx, n.id);
+    if (!frisch) { const u = await umzugFuer(ctx, n); if (u) throw umzugFehler(u); }
     return { ok: true, token: token, refresh: refresh, mail: n.mail, konto: frisch ? sicht(frisch) : null };
   },
   'POST /api/konto/bestaetigen': async (ctx) => {
+    if (ctx.instanz) return DASH.bestaetigen(ctx);
     if (!erlaubt('otpv:' + quelle(ctx.request), 15, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Versuche. Bitte in zehn Minuten noch einmal.', 429);
     const s = await codePruefen(ctx.k, ctx.sp, ctx.body.mail, ctx.body.code);
     const frisch = await anmeldungFertig(ctx, s.nutzer.id);
+    if (!frisch) { const u = await umzugFuer(ctx, s.nutzer); if (u) throw umzugFehler(u); } // Zugang zu einem Dashboard: Anmeldung dort
     return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail, konto: frisch ? sicht(frisch) : null };
   },
-  'POST /api/konto/erneuern': async (ctx) => { const s = await erneuern(ctx.k, ctx.body.refresh); if (!s) throw new ApiFehler('Bitte neu anmelden.', 401); return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail }; },
+  'POST /api/konto/erneuern': async (ctx) => { if (ctx.instanz) return DASH.gesperrt(ctx); const s = await erneuern(ctx.k, ctx.body.refresh); if (!s) throw new ApiFehler('Bitte neu anmelden.', 401); return { ok: true, token: s.token, refresh: s.refresh, mail: s.nutzer.mail }; },
   'POST /api/konto/registrieren': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     const n = await angemeldet(ctx); if (ctx.row) return { ok: true, konto: sicht(ctx.row), schon: true };
     const b = ctx.body || {}, firma = str(b.firma, 80), ap = str(b.ap, 80), tel = str(b.tel, 40), plz = str(b.plz, 5), col = FARBEN.includes(b.col) ? b.col : FARBEN[0];
     if (firma.length < 2) throw new ApiFehler('Bitte den Namen des Betriebs eingeben.');
@@ -171,8 +189,9 @@ export const KONTO = {
     return { ok: true, konto: sicht(row) };
   },
   /* --- Konto lesen und pflegen --- */
-  'GET /api/konto': async (ctx) => { await mitBetrieb(ctx); return aendern(ctx, () => ({})); },
+  'GET /api/konto': async (ctx) => { if (ctx.instanz) return DASH.lesen(ctx); await mitBetrieb(ctx); return aendern(ctx, () => ({})); },
   'PATCH /api/konto': async (ctx) => {
+    if (ctx.instanz) return DASH.aendern(ctx);
     await mitBetrieb(ctx); const b = ctx.body || {};
     /* Einladungsseite (Strang S4): Logo als verkleinerte Data-URL (der Browser rechnet SVG in ein Pixelbild um), Einstellungen und Farbe
        des Zeichens; alles wird vor dem Speichern geprüft, ein ungültiger Teil ändert nichts */
@@ -192,22 +211,26 @@ export const KONTO = {
   },
   /* --- Projekte --- */
   'POST /api/konto/projekte': async (ctx) => {
+    if (ctx.instanz) return DASH.projektNeu(ctx);
     await mitBetrieb(ctx);
     const out = await aendern(ctx, (a) => { const r = X().neuesProjekt(a, ctx.body || {}); if (!r.ok) throw new ApiFehler(r.msg); return { id: r.l.id }; });
     zaehlen(ctx, 'ereignis:projekt');
     return out;
   },
   'POST /api/konto/projekte/liste': async (ctx) => {
+    if (ctx.instanz) return DASH.projektListe(ctx);
     await mitBetrieb(ctx);
     const out = await aendern(ctx, (a) => { const neu = X().listeProjekte(a, (ctx.body || {}).text, !!(ctx.body || {}).du); if (!neu.length) throw new ApiFehler('Keine gültige Zeile gefunden. Beispiel: Familie Weber, 0171 2345678'); return { n: neu.length }; });
     zaehlen(ctx, new Array(out.n).fill('ereignis:projekt'));
     return out;
   },
   'PATCH /api/konto/projekte/:id': async (ctx) => {
+    if (ctx.instanz) return DASH.projektAendern(ctx);
     await mitBetrieb(ctx);
     return aendern(ctx, (a) => { const l = (a.links || []).find((x) => x.id === ctx.params.id); const r = X().projektAendern(l, ctx.body || {}); if (!r.ok) throw new ApiFehler(r.msg); return { msg: r.msg || '' }; });
   },
   'POST /api/konto/import': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const o = X().unpack((ctx.body || {}).code);
     if (!o) throw new ApiFehler('Code nicht lesbar. Bitte komplett kopieren, er beginnt mit AM1.');
     /* Fotos gibt es nur zum Code eines Kundenlinks (die App lädt sie beim Messen dorthin, fotos.js); ein Code ohne Link nennt keine,
@@ -228,6 +251,7 @@ export const KONTO = {
        der Preis wechselt bei Stripe ohne Ausgleich (der Monat ist bezahlt), die Kündigung über cancel_at_period_end
      - denselben Tarif wieder wählen, solange ein Wechsel vorgemerkt ist: nimmt den Wechsel bzw. die Kündigung zurück */
   'POST /api/konto/plan': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const plan = ['service', 'abo', 'plus'].includes((ctx.body || {}).plan) ? ctx.body.plan : 'service', a0 = ctx.row.daten || {}, alt = X().konto(a0), sub = ctx.row.stripe_subscription;
     const hoch = X().RANG[plan] > X().RANG[alt];
     if (hoch && plan !== 'service') {
@@ -254,6 +278,7 @@ export const KONTO = {
     });
   },
   'GET /api/konto/plan/pruefen': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const session = str(ctx.url.searchParams.get('session'), 120), planA = str(ctx.url.searchParams.get('plan'), 10);
     const r = await ctx.zd.aboLesen(session, planA); if (!r) throw new ApiFehler('Das Abo wurde nicht abgeschlossen.', 402);
     if (!gehoert(r, ctx.row)) throw new ApiFehler('Dieses Abo gehört zu einem anderen Konto.', 403);
@@ -262,12 +287,14 @@ export const KONTO = {
   },
   /* --- Zahlungsart --- */
   'POST /api/konto/zahlungsart': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const customer = await stripeKunde(ctx);
     const kasse = await ctx.zd.zahlungsartKasse({ id: ctx.row.id, customer: customer, zurueck: zurueck(ctx) });
     zaehlen(ctx, 'ereignis:zahlungsart_kasse');
     return { ok: true, url: kasse.url };
   },
   'GET /api/konto/zahlungsart/pruefen': async (ctx) => {
+    if (ctx.instanz) return DASH.gesperrt(ctx);
     await mitBetrieb(ctx); const session = str(ctx.url.searchParams.get('session'), 120);
     const r = await ctx.zd.zahlungsartLesen(session); if (!r) throw new ApiFehler('Keine Zahlungsart hinterlegt.', 402);
     if (!gehoert(r, ctx.row)) throw new ApiFehler('Diese Zahlungsart gehört zu einem anderen Konto.', 403);
@@ -276,6 +303,7 @@ export const KONTO = {
   },
   /* --- Aus der App: Link prüfen, Fortschritt melden, Aufmaß direkt senden (ohne Anmeldung, der Link-Code ist der Schlüssel) --- */
   'GET /api/link/:code': async (ctx) => {
+    if (ctx.instanz) return linkInstanz(ctx);
     linkBremse(ctx.request);
     const code = str(ctx.params.code, 12).toLowerCase(); if (!/^[a-z0-9]{3,12}$/.test(code)) throw linkUnbekannt(ctx.request, 'Kein gültiger Link.');
     const row = await ctx.sp.betriebNachCode(code); if (!row) throw linkUnbekannt(ctx.request);
@@ -287,6 +315,7 @@ export const KONTO = {
   },
   /* Geöffnet: der Betrieb bekommt einen Hinweis; beim ersten Öffnen beginnen die 60 Tage, die der Kunde Zeit hat */
   'POST /api/link/:code/fortschritt': async (ctx) => {
+    if (ctx.instanz) return fortschrittInstanz(ctx);
     linkBremse(ctx.request);
     const code = str(ctx.params.code, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw linkUnbekannt(ctx.request);
     if (!erlaubt('fort:' + code, 60, 10 * 60 * 1000) || sperreVon(row)) return { ok: true };
@@ -297,6 +326,7 @@ export const KONTO = {
     return { ok: true, expires: expires };
   },
   'POST /api/aufmass': async (ctx) => {
+    if (ctx.instanz) return aufmassInstanz(ctx);
     const o = ctx.body || {}; if (!o || !Array.isArray(o.w) || !o.b) throw new ApiFehler('Kein Aufmaß im Versand.');
     if (!erlaubt('am:' + quelle(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
     const code = str(o.b, 12).toLowerCase(); const row = await ctx.sp.betriebNachCode(code); if (!row) throw new ApiFehler('Dieser Link gehört zu keinem Projekt mehr.', 404);
@@ -353,6 +383,115 @@ export const KONTO = {
   }
 };
 
+/* ---------- Konfigurator-Instanzen (Strang A, Bauplan §3 A.4, A.7; docs/INSTANZEN.md) ----------
+   Auf dem Host einer Instanz (ctx.instanz) laufen Link, Fortschritt und Eingang über den Adapter (functions/instanz/adapter.js): Website-
+   Besucher haben bis zum Senden einen virtuellen Link (nur Zwischenstand), Signature-Einladungen eine Zeile in anfragen. Nichts davon
+   gerät in die Abrechnung je Aufmaß (Konto 'instanz', modell.js). */
+const RI = () => globalThis.Instanzregeln;
+const TAG_MS = 864e5;
+const istoString = (t) => new Date(t).toISOString();
+async function linkInstanz(ctx) {
+  linkBremse(ctx.request);
+  if (!(await bremse(ctx, 'LINK', quelle(ctx.request)))) throw new ApiFehler('Zu viele Anfragen. Bitte gleich noch einmal.', 429);
+  const inst = ctx.instanz, aufl = await linkAufloesen(ctx, ctx.params.code), l = aufl.l;
+  const zu = X().linkZu(l), status = zu === 'abgelaufen' ? 'abgelaufen' : l.status;
+  return { ok: true, betrieb: inst.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, inst.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now(), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: l.du !== undefined ? !!l.du : !!inst.du, expires: l.expires || '', ap: (inst.auftritt || {}).ap || '', auftritt: inst.auftritt, grenzen: GRENZEN, instanz: true, art: aufl.art === 'virtuell' ? 'website' : (aufl.anfrage || {}).art || 'website', nr: l.nr || '' };
+}
+/* Virtuelle Links melden nichts; Einladungen (Signature) wie Kundenlinks, die Meldung landet im Dashboard. Zeiten in deutscher Zeit
+   (zeitenBerlin: Geöffnet, Frist; der Worker rechnet in UTC) */
+async function fortschrittInstanz(ctx) {
+  linkBremse(ctx.request);
+  const aufl = await linkAufloesen(ctx, ctx.params.code);
+  if (aufl.art !== 'anfrage' || !erlaubt('fort:' + aufl.code, 60, 10 * 60 * 1000)) return { ok: true };
+  const b = ctx.body || {}; let expires = '';
+  await linkAendern(ctx, aufl, (a, l, jetzt) => { const vorher = l.expires, r = X().fortschritt(l, b.stufe, b.k, jetzt); zeitenBerlin(l, jetzt, { expiresVorher: vorher }); expires = l.expires || ''; if (!r) return false; if (r === 'geoeffnet') melden(a, { when: stempelBerlin(jetzt), t: (l.kunde || 'Ihr Kunde') + ' hat den Link geöffnet', s: 'Projekt ' + (l.nr || '') + ', noch keine Maße eingetragen.', to: ['link', l.id] }); return true; });
+  return { ok: true, expires: expires };
+}
+const zeileText = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n);
+async function aufmassInstanz(ctx) {
+  const inst = ctx.instanz, k = ctx.k, o = ctx.body || {};
+  if (!o || !Array.isArray(o.w) || !o.b) throw new ApiFehler('Kein Aufmaß im Versand.');
+  if (!erlaubt('am:' + quelle(ctx.request), 30, 10 * 60 * 1000)) throw new ApiFehler('Zu viele Sendungen. Bitte gleich noch einmal.', 429);
+  const code = str(o.b, 12).toLowerCase(), aufl = await linkAufloesen(ctx, code);
+  let art = RI().anfrageArt(inst.status, { vorschau: inst.vorschau });
+  if (!art) throw new ApiFehler('Der Fensterplaner nimmt gerade keine Anfragen an.', 503);
+  if (art === 'website' && inst.demo) art = 'demo';
+  if (o.w.length > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster.', 400);
+  const jetzt = Date.now(), wm = Array.isArray(o.wm) && o.wm.length === o.w.length ? o.wm.map((x) => ({ wid: kennung(x), t0: Number(x && x.t0) || 0, aend: Number(x && x.aend) || 0, ts: zeitKappen(x && x.ts, jetzt) })) : null, standB = zeitKappen(o.stand, jetzt);
+  const projTsB = zeitKappen(o.projTs, jetzt);
+  delete o.wm; delete o.stand; delete o.projTs;
+  /* Kontakt ist Pflicht für jede Anfrage über die Website (der Betrieb kennt den Kunden sonst nicht) */
+  const p = o.p && typeof o.p === 'object' ? o.p : {}, name = zeileText(p.name, 60), tel = zeileText(p.tel, 40), mail = zeileText(p.mail, 80).toLowerCase();
+  if (aufl.art === 'virtuell' && (name.length < 2 || !(RI().telOk(tel) || RI().mailOk(mail)))) throw new ApiFehler('Bitte Namen und eine Telefonnummer oder E-Mail-Adresse angeben, damit ' + inst.name + ' sich melden kann.', 400, { kontakt: true });
+  if (aufl.art === 'virtuell') {
+    /* je Anschluss höchstens GRENZEN.anfragenIpTag Anfragen am Tag; je Instanz Alarm beim Richtwert, Schluss beim Vierfachen (E12) */
+    if (!erlaubt('anf:' + quelle(ctx.request), RI().GRENZEN.anfragenIpTag, TAG_MS)) throw new ApiFehler('Von diesem Anschluss kamen heute schon viele Anfragen. Bitte melden Sie sich direkt bei ' + inst.name + '.', 429);
+    if (art !== 'test') {
+      const richt = Math.max(1, Number(inst.m.anfragenTag) || 50), b = await budget(ctx, 'inst:' + inst.id8 + ':anfragen', richt * 4, { alarm: richt });
+      if (b.alarm) ctx.waitUntil(alarmMail(k, 'Viele Anfragen bei ' + inst.name, inst.name + ' (' + inst.haupthost + ') hat heute schon ' + b.stand + ' Anfragen bekommen (Richtwert ' + richt + '). Beim Vierfachen nimmt die Instanz bis morgen keine mehr an.'));
+      if (!b.ok) throw new ApiFehler('Heute kommen ungewöhnlich viele Anfragen. Bitte melden Sie sich direkt bei ' + inst.name + '.', 429);
+    }
+  }
+  const zw = ctx.sp.entwurfHolen ? await ctx.sp.entwurfHolen(code).catch(() => undefined) : undefined;
+  if (zw && Object.keys((zw.meta || {}).fenster || {}).length && (!wm || wm.some((x) => !x.wid))) throw new ApiFehler('Bitte die Seite neu laden und noch einmal senden.', 400);
+  if (zw && wm) { const ids = new Set(Object.keys((zw.meta || {}).fenster || {})); wm.forEach((x) => { if (x.wid) ids.add(x.wid); }); if (Math.max(ids.size, Number((zw.meta || {}).angelegt) || 0) > GRENZEN.fenster) throw new ApiFehler('Ein Aufmaß umfasst höchstens ' + GRENZEN.fenster + ' Fenster, gelöschte zählen mit.', 400); }
+  if (zw && wm && !o.m && X().linkZu(aufl.l) !== 'eingegangen') {
+    const d = zw.daten || {}, hier = new Map(wm.map((x) => [x.wid, x]));
+    const veraltet = (d.windows || []).some((w) => { const x = hier.get(kennung(w)); return !x || (Number(w.ts) || 0) > x.ts; }) || (Number(d.projTs) || 0) > projTsB;
+    if (veraltet) throw new ApiFehler('Ein anderes Gerät hat inzwischen etwas geändert. Bitte kurz prüfen und noch einmal senden.', 409, { abgleichen: true });
+  }
+  o.v = 1; o.b = code;
+  const ab = ablage(k);
+  let namen = ab ? null : new Set();
+  if (ab && (fotoIds(o.w).size || o.m)) { try { namen = new Set(await ab.liste(linkOrdner(code))); } catch (e) { namen = null; } }
+  const basis = (/(^|\.)localhost$/.test(ctx.url.hostname) ? ctx.url.protocol + '//' + ctx.url.host : 'https://' + inst.haupthost);
+  /* Eingangszeit: die Uhr des Servers (k.jetzt) für Zeile und Link-Objekt; im Link-Objekt in deutscher Zeit, der Worker rechnet in UTC
+     (stempelBerlin, zeitenBerlin; sonst stünde sie im PDF, in der Mail und im Dashboard ein bis zwei Stunden falsch) */
+  const jetztK = k.jetzt || jetzt, eingangAt = istoString(jetztK);
+  let r = null;
+  if (aufl.art === 'virtuell') {
+    /* in einem Schreibvorgang: Nummer, Link-Objekt, Eingang, Versand offen (K2.4) */
+    const row0 = ctx.sp.betriebHolen ? await ctx.sp.betriebHolen(inst.betrieb) : null;
+    const nr = art === 'test' ? 'TEST-' + code.slice(0, 6).toUpperCase() : await ctx.sp.instanzNr(inst.id);
+    const l = { id: X().newId('l'), code: code, nr: nr, kunde: name, kontakt: tel || mail, adresse: zeileText(p.ort, 120), geb: '', fz: '', plan: [], note: '', created: datumBerlin(jetztK), expires: '', status: 'arbeit', progress: 0, via: 'Website', quelle: inst.host, host: inst.haupthost, art: art, du: !!inst.du, instanz: true, log: { erstellt: stempelBerlin(jetztK) } };
+    const a = pseudoKonto((row0 && row0.daten) || {}, l);
+    r = X().importCode(a, o, jetztK, 'Website');
+    if (!r.ok) throw new ApiFehler(r.art === 'schon' || r.art === 'doppelt' ? 'Diese Anfrage ist schon angekommen.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400);
+    zeitenBerlin(r.l, jetztK); r.l.log.eingegangen = stempelBerlin(jetztK);
+    if (r.l && r.l.aufmass) fotosVermerken(r.l.aufmass, namen);
+    await ctx.sp.anfrageAnlegen({ code: code, instanz: inst.id, betrieb: inst.betrieb, lid: l.id, art: art, status: 'eingegangen', nr: nr, daten: a.links[0], versand: { runde: 1, status: 'offen', versuche: 0, n: 0, basis: basis }, eingegangen_at: eingangAt, loeschen_ab: loeschenAbFuer(inst.m, art, jetztK) })
+      .catch((e) => { throw e && e.status === 409 ? new ApiFehler('Diese Anfrage ist schon angekommen.', 409) : e; });
+  } else {
+    /* Einladung oder Nachbesserung: über das Pseudo-Konto (linkAendern schreibt die Stempel in deutsche Zeit um), Versand der neuen
+       Runde im selben Schreibvorgang */
+    let fehl = null;
+    await linkAendern(ctx, aufl, (a, l, jz) => {
+      const res = X().importCode(a, o, jz, 'App');
+      if (!res.ok) { fehl = res; return false; }
+      if (res.l && res.l.aufmass) fotosVermerken(res.l.aufmass, namen);
+      r = res; return true;
+    }, { zeile: (z) => { const v = z.versand || {}; z.status = 'eingegangen'; z.eingegangen_at = eingangAt; z.versand = { runde: (r.l && r.l.runde) || 1, status: 'offen', versuche: 0, n: 0, basis: v.basis || basis }; z.loeschen_ab = loeschenAbFuer(inst.m, z.art, jetztK); } });
+    if (fehl) throw new ApiFehler(fehl.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : fehl.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : fehl.msg, fehl.art === 'schon' || fehl.art === 'doppelt' ? 409 : 400, fehl.art === 'schon' && fehl.l && X().linkZu(fehl.l) === 'eingegangen' ? { zu: 'eingegangen', runde: fehl.l.runde || 1, seit: fehl.l.eingegangenAt || 0 } : undefined);
+  }
+  const nb = r.art === 'nb' || r.art === 'nb-neu', runde = (r.l && r.l.runde) || 1;
+  if (art !== 'test') instanzZaehlen(ctx, inst, 'anfrage');
+  /* PDF und Mail an den Betrieb: über die Warteschlange, ohne sie nach der Antwort (eingang.js) */
+  await eingangAnstossen(ctx, code, runde);
+  if (r.l && r.l.aufmass) ctx.waitUntil(fotosLinkAufraeumen(k, code, fotoIdsMitKlein(r.l.aufmass.windows)).catch(() => 0));
+  if (ctx.sp.entwurfAendern) ctx.waitUntil(ctx.sp.entwurfAendern(code, inst.betrieb, (e) => {
+    if (!e.version && !wm) return false;
+    if (wm && !o.m) {
+      if ((Number(e.stand) || 0) < standB || !((e.daten || {}).windows || []).length) { e.daten = { windows: o.w.map((w, i) => Object.assign(ohneBild(w), wm[i])), proj: o.p || {}, projTs: projTsB }; e.stand = Math.max(Number(e.stand) || 0, standB); }
+      e.meta = metaMischen(e.meta || {}, wm, 0, jetzt);
+    }
+    e.meta = Object.assign({}, e.meta || {}, { gesendet: runde, gesendetAm: new Date().toISOString() });
+    return true;
+  }).catch(() => false));
+  return { ok: true, nr: (r.l && r.l.nr) || '', betrieb: inst.name, runde: runde, nachbesserung: nb, art: art };
+}
+/* Die kleinen Fassungen (<id>k) gehören zum Foto und bleiben beim Aufräumen nach dem Senden */
+const fotoIdsMitKlein = (wins) => { const s = fotoIds(wins); Array.from(s).forEach((id) => s.add(id + 'k')); return s; };
+
 /* Alle zwei Wochen (Cron): offene Projektbuchungen je Betrieb als Sammelrechnung bei Stripe anlegen; Abos rechnet Stripe selbst ab.
    Ein Fehler bei einem Betrieb hält die anderen nicht auf. Was Stripe schon berechnet hat (Speichern danach fehlgeschlagen), wird nur nachgetragen.
    nurId: nur dieser Betrieb (Zentrale, „jetzt abrechnen“). */
@@ -361,6 +500,7 @@ export async function abrechnungslauf(k, sp, zd, nurId) {
   if (live(k) && !k.mwstGesetzt) return { ok: false, grund: 'MWST nicht festgelegt (0 oder 19): keine Sammelrechnungen', rechnungen: 0, fehler: 0, meldung: 'Umsatzsteuer festlegen: Variable MWST bei Cloudflare (0 = Kleinunternehmer, 19 = 19 %).' };
   const rows = nurId ? [await sp.betriebHolen(nurId)].filter((r) => r && r.stripe_customer) : await sp.betriebeMitKunde(); let n = 0, fehler = 0, meldung = '';
   for (const row of rows) {
+    if (row.daten && row.daten.instanz) continue; // Konfigurator-Instanzen rechnen nie je Aufmaß ab (Paket, Bauplan §3 A.12)
     const offen = ((row.daten || {}).book || []).filter((b) => b.kind === 'aufmass' && b.status === 'offen' && b.betrag > 0);
     if (!offen.length || !(row.daten || {}).pay) continue;
     try {

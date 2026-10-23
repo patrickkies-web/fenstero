@@ -15,6 +15,7 @@ import { nutzer } from './auth.js';
 import { kontenDa, eigenesBezahlt, kaufNachweis, entfernt } from './eigene.js';
 import { kaufBestaetigen } from './bestaetigung.js';
 import { AGB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
+import { istPaketEreignis, paketEreignis } from './bestellung.js';
 
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n || 200);
 const kennungOk = (s) => /^[A-Za-z0-9_-]{6,40}$/.test(s);
@@ -109,7 +110,10 @@ export const ZAHLUNG = {
       ev = { id: ev.id, type: String(ev.type).replace(/^v1\./, ''), data: { object: voll || {} } };
     }
     const obj = ev.data && ev.data.object ? ev.data.object : {};
-    if ((ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') && obj.mode === 'payment') {
+    /* Konfigurator-Pakete (bestellung.js): Objekte mit metadata.art einrichtung/paket, Abos und Rückbuchungen der Pakete; nie ein
+       Betrieb oder ein Aufmaßblatt. Alles andere läuft unverändert weiter */
+    if (await istPaketEreignis(ctx, ev)) { if (ctx.sp) await paketEreignis(ctx, ev); }
+    else if ((ev.type === 'checkout.session.completed' || ev.type === 'checkout.session.async_payment_succeeded') && obj.mode === 'payment') {
       const kennung = (obj.metadata && obj.metadata.kennung) || obj.client_reference_id || '';
       const z = { session: obj.id, kennung: kennung, mail: (obj.customer_details && obj.customer_details.email) || obj.customer_email || '', betragCent: obj.amount_total || 0, zustimmung: zustimmungAus(obj.metadata) };
       if (kennungOk(kennung) && obj.payment_status === 'paid' && obj.metadata && obj.metadata.art === 'aufmass') {

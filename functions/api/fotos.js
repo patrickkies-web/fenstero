@@ -25,46 +25,66 @@ import '../../web/assets/modell.js';
 import { ApiFehler, erlaubt, quelle, linkBremse, linkUnbekannt, sbNeu } from './umgebung.js';
 import { nutzer } from './auth.js';
 import { langerCode } from './entwurf.js';
+import '../../web/assets/instanzregeln.js';
+import { linkAufloesen } from '../instanz/adapter.js';
+import { bremse, budget } from './bremse.js';
+import { instanzZaehlen } from './statistik.js';
+import { kontoFoto } from './dashboard.js'; // Signature-Dashboard: Fotos auf dem Instanz-Host (Strang E)
 
 const X = () => globalThis.Abrechnung;
-const BUCKET = 'fotos';
+/* Ablagen (private Buckets bei Supabase Storage, der Server legt sie beim ersten Gebrauch an). fotos: Fotos der Fenster (dazu die kleine
+   Fassung <id>k, 640 px, für das Aufmaßblatt der Instanzen); marke: veröffentlichte Bilder einer Instanz (instanz/<id>/<v>/<name>);
+   bestellungen: Uploads aus dem Bestellformular (partner/<partner>/<bestellung>/<datei>); blatt: abgelegte Aufmaßblätter (Signature,
+   instanz/<id>/<code>-<runde>.pdf). Siehe docs/INSTANZEN.md */
+export const ABLAGEN = {
+  fotos: { bucket: 'fotos', typen: ['image/jpeg'], max: 1000000 },
+  marke: { bucket: 'marke', typen: ['image/png', 'image/jpeg', 'image/webp'], max: 2000000 },
+  bestellungen: { bucket: 'bestellungen', typen: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'application/pdf'], max: 1000000 },
+  blatt: { bucket: 'blatt', typen: ['application/pdf'], max: 10000000 }
+};
 export const FOTO_MAX = 1000000;            // Bytes je Foto; die App schickt meist 0,2 bis 0,6 MB
 export const FOTOS_JE_ABLAGE = 160;         // je Link bzw. je eigenem Aufmaß: 50 Fenster mit je zwei Fotos und neu fotografierte
 export const FOTO_TAGE = 365;               // Fotos eines eingegangenen Aufmaßes beim Betrieb: 12 Monate nach dem Eingang
-export const FOTO_ID = /^b[a-z0-9]{12,24}$/;
+export const FOTO_ID = /^b[a-z0-9]{12,24}k?$/; // …k: kleine Fassung desselben Fotos (Instanzen)
 const TAG = 864e5;
 const ZU_GROSS = 'Dieses Foto lässt sich nicht übertragen.';
-const attrappeDaten = new Map();
+const attrappeDaten = new Map(), attrappeArten = { fotos: attrappeDaten };
 
 /* Kennungen der Fotos, die die Fenster nennen */
 export const fotoIds = (wins) => { const s = new Set(); (wins || []).forEach((w) => { const b = w && w.bilder; if (b && typeof b === 'object') ['in', 'out'].forEach((k) => { if (FOTO_ID.test(String(b[k] || ''))) s.add(b[k]); }); }); return s; };
 
-/* ---------- Ablage: Supabase Storage oder Attrappe ---------- */
-export function ablage(k) {
-  if (k.supabase) return supabaseAblage(k);
-  if (k.datenAttrappe) return attrappeAblage();
+/* ---------- Ablage: Supabase Storage oder Attrappe; art: fotos (Vorgabe) | marke | bestellungen | blatt ---------- */
+export function ablage(k, art) {
+  const a = ABLAGEN[art || 'fotos']; if (!a) throw new Error('Unbekannte Ablage ' + art);
+  if (k.supabase) return supabaseAblage(k, a);
+  if (k.datenAttrappe) return attrappeAblage(art || 'fotos', a);
   return null;
 }
-function attrappeAblage() {
+/* typ: Medientyp der Datei (Vorgabe: der erste erlaubte, bei Fotos image/jpeg); nicht erlaubte Typen und zu große Dateien legt die
+   Ablage nicht ab (false) */
+const passt = (a, bytes, typ) => { const n = bytes ? (bytes.byteLength != null ? bytes.byteLength : bytes.length) : 0; return a.typen.includes(typ) && n > 0 && n <= a.max; };
+function attrappeAblage(art, a) {
+  const daten = attrappeArten[art] || (attrappeArten[art] = new Map());
   const unter = (ordner) => String(ordner).replace(/\/?$/, '/');
   return {
     art: 'attrappe',
-    async ablegen(pfad, bytes) { attrappeDaten.set(pfad, bytes); return true; },
-    async holen(pfad) { return attrappeDaten.get(pfad) || null; },
-    async liste(ordner) { const p = unter(ordner); return Array.from(attrappeDaten.keys()).filter((x) => x.startsWith(p) && !x.slice(p.length).includes('/')).map((x) => x.slice(p.length)); },
-    async loeschen(pfade) { pfade.forEach((p) => attrappeDaten.delete(p)); return true; },
-    async ordnerLoeschen(ordner) { const p = unter(ordner); for (const x of Array.from(attrappeDaten.keys())) if (x.startsWith(p)) attrappeDaten.delete(x); return true; },
+    async ablegen(pfad, bytes, typ) { if (!passt(a, bytes, typ || a.typen[0])) return false; daten.set(pfad, bytes); return true; },
+    async holen(pfad) { return daten.get(pfad) || null; },
+    async liste(ordner) { const p = unter(ordner); return Array.from(daten.keys()).filter((x) => x.startsWith(p) && !x.slice(p.length).includes('/')).map((x) => x.slice(p.length)); },
+    async loeschen(pfade) { pfade.forEach((p) => daten.delete(p)); return true; },
+    async ordnerLoeschen(ordner) { const p = unter(ordner); for (const x of Array.from(daten.keys())) if (x.startsWith(p)) daten.delete(x); return true; },
     /* nur für die Prüfung */
-    alle: () => Array.from(attrappeDaten.keys())
+    alle: () => Array.from(daten.keys())
   };
 }
-function supabaseAblage(k) {
+function supabaseAblage(k, ab) {
+  const BUCKET = ab.bucket;
   const basis = k.supabase.url + '/storage/v1/';
   const kopf = (extra) => { const h = Object.assign({ apikey: k.supabase.service }, extra || {}); if (!sbNeu(k.supabase.service)) h.Authorization = 'Bearer ' + k.supabase.service; return h; };
   const url = (p) => String(p).split('/').map(encodeURIComponent).join('/');
   let bucketDa = false;
   async function bucketAnlegen() {
-    const r = await fetch(basis + 'bucket', { method: 'POST', headers: kopf({ 'content-type': 'application/json' }), body: JSON.stringify({ id: BUCKET, name: BUCKET, public: false, file_size_limit: FOTO_MAX, allowed_mime_types: ['image/jpeg'] }) });
+    const r = await fetch(basis + 'bucket', { method: 'POST', headers: kopf({ 'content-type': 'application/json' }), body: JSON.stringify({ id: BUCKET, name: BUCKET, public: false, file_size_limit: ab.max, allowed_mime_types: ab.typen }) });
     const t = await r.text().catch(() => '');
     if (r.ok || r.status === 409 || /already exists|duplicate/i.test(t)) { bucketDa = true; return true; }
     console.log('Fotoablage: Bucket nicht angelegt', r.status, t.slice(0, 160)); return false;
@@ -83,9 +103,11 @@ function supabaseAblage(k) {
   }
   const a = {
     art: 'supabase',
-    async ablegen(pfad, bytes) {
+    async ablegen(pfad, bytes, typ) {
+      typ = typ || ab.typen[0];
+      if (!passt(ab, bytes, typ)) return false;
       for (let i = 0; i < 2; i++) {
-        const r = await fetch(basis + 'object/' + BUCKET + '/' + url(pfad), { method: 'POST', headers: kopf({ 'content-type': 'image/jpeg', 'x-upsert': 'true', 'cache-control': 'max-age=31536000' }), body: bytes });
+        const r = await fetch(basis + 'object/' + BUCKET + '/' + url(pfad), { method: 'POST', headers: kopf({ 'content-type': typ, 'x-upsert': 'true', 'cache-control': 'max-age=31536000' }), body: bytes });
         if (r.ok) return true;
         const t = await r.text().catch(() => '');
         if (i === 0 && !bucketDa && /bucket/i.test(t) && /not.?found/i.test(t)) { if (await bucketAnlegen()) continue; }
@@ -174,6 +196,7 @@ const KENNUNG = /^[A-Za-z0-9_-]{6,40}$/;
 export const FOTOS = {
   /* Kunde über den Link: solange der Link offen ist (auch während einer Nachbesserung), nicht nach dem Senden */
   'POST /api/link/:code/foto/:id': async (ctx) => {
+    if (ctx.instanz) return fotoInstanz(ctx);
     linkBremse(ctx.request);
     if (!erlaubt('foto:' + quelle(ctx.request), 240, 10 * 60 * 1000)) throw new ApiFehler('Gerade kommen zu viele Fotos. Bitte gleich noch einmal.', 429);
     const code = linkCode(ctx), id = idVon(ctx), u = bytesAus(ctx);
@@ -191,6 +214,7 @@ export const FOTOS = {
   },
   /* Betrieb: nur Fotos, die sein eingegangenes Aufmaß nennt; gesperrt (kostenpflichtig, noch keine Zahlungsart) bleiben sie auf dem Server */
   'GET /api/konto/foto/:code/:id': async (ctx) => {
+    if (ctx.instanz) return kontoFoto(ctx); // Betrieb aus dem Host, Sitzung im Cookie, Projekt muss zu dieser Instanz gehören
     const n = await angemeldet(ctx, 'Bitte neu anmelden.'), code = linkCode(ctx), id = idVon(ctx);
     const row = await ctx.sp.betriebNachAuth(n.id); if (!row) throw new ApiFehler('Zu dieser Anmeldung gibt es noch keinen Betrieb.', 404);
     if (row.daten && row.daten.verwaltung && row.daten.verwaltung.sperre) throw new ApiFehler('Ihr Zugang zu eeziframes ist gesperrt.', 403, { gesperrt: true });
@@ -224,6 +248,31 @@ export const FOTOS = {
     return bild(u);
   }
 };
+
+/* Konfigurator-Instanz (Strang A, Bauplan §3 A.5, K1.3): keine anonyme Ablage. Nur Kennungen, die ein gespeichertes Fenster des
+   Zwischenstands nennt (dazu die kleine Fassung <id>k), erst ab einem gespeicherten Fenster, höchstens 2 × Fenster + 4 verschiedene
+   Fotos je Code; je Instanz und Tag GRENZEN.fotoTagInstanz (Alarm ab 500), je Anschluss die Bremse RL_FOTO */
+async function fotoInstanz(ctx) {
+  const inst = ctx.instanz, G = globalThis.Instanzregeln.GRENZEN;
+  linkBremse(ctx.request);
+  if (!(await bremse(ctx, 'FOTO', quelle(ctx.request))) || !erlaubt('foto:' + quelle(ctx.request), 240, 10 * 60 * 1000)) throw new ApiFehler('Gerade kommen zu viele Fotos. Bitte gleich noch einmal.', 429);
+  const id = idVon(ctx), u = bytesAus(ctx), aufl = await linkAufloesen(ctx, ctx.params.code), code = aufl.code;
+  const zu = X().linkZu(aufl.l);
+  if (zu) throw new ApiFehler(zu === 'eingegangen' ? 'Deine Anfrage ist schon angekommen.' : 'Dieser Link ist nicht mehr aktiv.', 410, { zu: zu });
+  const e = aufl.entwurf || (await ctx.sp.entwurfHolen(code)), wins = (e && e.daten && Array.isArray(e.daten.windows)) ? e.daten.windows : [];
+  if (!wins.length) throw new ApiFehler('Bitte das Fenster zuerst speichern, dann kommen die Fotos dazu.', 409, { ohneFenster: true });
+  const ids = fotoIds(wins), grund = ids.has(id) ? id : /k$/.test(id) && ids.has(id.slice(0, -1)) ? id.slice(0, -1) : '';
+  if (!grund) throw new ApiFehler('Dieses Foto gehört zu keinem gespeicherten Fenster.', 400);
+  const ab = ablageVon(ctx), o = linkOrdner(code), namen = (await ab.liste(o)).map((n) => n.replace(/\.jpg$/, '')), da = new Set(namen);
+  const klein = (n) => /k$/.test(n) && (da.has(n.slice(0, -1)) || ids.has(n.slice(0, -1)));
+  const gruende = new Set(namen.filter((n) => !klein(n)));
+  if (!gruende.has(grund) && gruende.size >= 2 * wins.length + G.fotosZusatz) throw new ApiFehler('Zu dieser Planung gibt es schon sehr viele Fotos.', 409, { voll: true });
+  const b = await budget(ctx, 'inst:' + inst.id8 + ':foto', G.fotoTagInstanz, { alarm: 500 });
+  if (!b.ok) throw new ApiFehler('Heute kommen ungewöhnlich viele Fotos. Bitte morgen noch einmal.', 429);
+  if (!(await ab.ablegen(datei(o, id), u))) throw new ApiFehler('Das Foto ließ sich gerade nicht ablegen. Bitte gleich noch einmal.', 502);
+  instanzZaehlen(ctx, inst, 'foto');
+  return { ok: true };
+}
 
 /* Aufräumen (zentrale.js, täglich): Fotos eingegangener Aufmaße 12 Monate nach dem Eingang löschen, höchstens max Links je Lauf.
    Das Aufmaß selbst bleibt; am Link steht danach fotosGeloescht (der Betriebsbereich sagt es statt eines leeren Rahmens) */

@@ -15,6 +15,9 @@
   function put(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function fehler(code) { var e = new Error(code); e.code = code; return e; }
+  function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  /* Konfigurator-Instanz (eigene Domain eines Fensterbauers, docs/INSTANZEN.md): KONFIG.instanz vom Server; ohne bleibt alles wie bisher */
+  var INST = C.instanz && typeof C.instanz === 'object' ? C.instanz : null;
 
   /* ---------- KI: gleiche Schnittstelle wie bisher (limits, json) ---------- */
   var bereitP = null;
@@ -39,9 +42,12 @@
   function frage() {
     return new Promise(function (resolve) {
       var bg = el('div', 'fx-bg');
+      /* Instanz: neutral im Namen des Betriebs; eeziframes nur, wo das Paket es nennt (rechtNennung 'name'), sonst „technischer Dienstleister“ */
+      var weg = !INST ? 'an unseren Dienstleister Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). eeziframes speichert deine Fotos nicht; Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.'
+        : (INST.m && INST.m.rechtNennung === 'name' ? 'über eeziframes, den technischen Dienstleister von ' + esc(INST.name) + ',' : 'über unseren technischen Dienstleister') + ' an den KI-Dienst Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). Für die Auswertung werden sie dort nicht gespeichert: Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.';
       var box = el('div', 'fx-dialog',
         '<h2 id="fx-t">Fotos von der KI auswerten lassen?</h2>' +
-        '<p>Die KI liest auf deinen Fotos die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade und was dein Fensterbauer sonst noch wissen muss. Dafür werden die Fotos verkleinert an unseren Dienstleister Anthropic übertragen und dort ausgewertet (Anthropic Ireland, Ltd.; verarbeitet auch in den USA). eeziframes speichert deine Fotos nicht; Anthropic nutzt sie nicht zum Training und löscht sie nach eigenen Angaben spätestens nach 30 Tagen.</p>' +
+        '<p>Die KI liest auf deinen Fotos die Einbausituation: Rollladenkasten, Laibung, Fensterbänke, Fassade und was ' + (INST ? esc(INST.name) : 'dein Fensterbauer') + ' sonst noch wissen muss. Dafür werden die Fotos verkleinert ' + weg + '</p>' +
         '<p class="fx-klein">Ohne KI geht es auch, dann fehlen nur die Zusatzinfos aus den Fotos. Deine Einwilligung kannst du jederzeit widerrufen: unten in der App über „KI-Einwilligung widerrufen“. Mehr dazu in der <a href="' + C.datenschutz + '" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>' +
         '<div class="fx-knoepfe"><button type="button" class="fx-ja">Ja, auswerten</button><button type="button" class="fx-nein">Ohne KI weiter</button></div>');
       box.setAttribute('role', 'dialog');
@@ -90,7 +96,8 @@
         if (o.signal && o.signal.aborted) throw fehler('cancelled');
         return base64(o.images);
       }).then(function (bild) {
-        var url = C.ki + '?aufgabe=' + (o.aufgabe === 'wand' ? 'wand' : 'einbau') + '&seite=' + (o.seite === 'out' ? 'out' : 'in');
+        /* auf der Domain einer Instanz nur mit dem Code der Planung (functions/api/ki.js, Grenzen je Code) */
+        var url = C.ki + '?aufgabe=' + (o.aufgabe === 'wand' ? 'wand' : 'einbau') + '&seite=' + (o.seite === 'out' ? 'out' : 'in') + (/^[a-z0-9]{10}$/.test(String(o.code || '')) ? '&code=' + o.code : '');
         return fetch(url, { method: 'POST', headers: { 'content-type': 'text/plain', accept: 'application/json' }, body: bild, signal: o.signal });
       }).then(function (r) {
         return r.json().catch(function () { return null; }).then(function (j) {

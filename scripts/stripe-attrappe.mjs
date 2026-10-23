@@ -10,13 +10,16 @@
 //   - Abos haben einen Status; nur laufende zählen. Listen mit has_more und starting_after
 //   - Idempotency-Key: dieselbe Anfrage noch einmal liefert dasselbe Objekt; läuft sie noch, antwortet Stripe mit 409
 //   - Steuersätze: exklusiv kommt die Steuer dazu, inklusiv steckt sie im Betrag
+//   - Konfigurator-Pakete (Abschnitt 27): Kunden mit Anschrift und USt-IdNr., Kassen mit setup_future_usage (die Zahlung hinterlässt
+//     ein Zahlungsmittel und mit invoice_creation eine bezahlte Rechnung), Abos per POST /subscriptions mit default_payment_method
+//     und pause_collection, Erstattungen, Rechnungen je Kunde, Kundenportal (Konfiguration und Sitzung)
 // webhook(…) baut ein unterschriebenes Ereignis wie Stripe (Stripe-Signature: t=…,v1=HMAC-SHA256).
 import { createHmac } from 'node:crypto';
 
 export function stripeNachstellen() {
   const echt = globalThis.fetch, log = [];
-  const db = { kunden: new Map(), preise: [], steuern: [], kassen: new Map(), abos: new Map(), rechnungen: new Map(), posten: new Map(), idem: new Map(), zahlarten: new Map() };
-  let nr = 0, fehlerBei = null, rechnungNr = 0;
+  const db = { kunden: new Map(), preise: [], steuern: [], kassen: new Map(), abos: new Map(), rechnungen: new Map(), posten: new Map(), idem: new Map(), zahlarten: new Map(), erstattungen: [], portale: [], portalSitzungen: [] };
+  let nr = 0, fehlerBei = null, rechnungNr = 0, aboStatusNeu = null;
   const neueId = (p) => p + '_test_' + String(++nr).padStart(6, '0');
   const lesen = (text) => {
     const out = {};
@@ -43,7 +46,7 @@ export function stripeNachstellen() {
     }
     return total;
   }
-  const rechnungSicht = (inv) => Object.assign(kopie(inv), { total: summe(inv), lines: { data: Array.from(db.posten.values()).filter((it) => it.invoice === inv.id).map(kopie) } });
+  const rechnungSicht = (inv) => Object.assign(kopie(inv), { total: inv.total != null && !Array.from(db.posten.values()).some((it) => it.invoice === inv.id) ? inv.total : summe(inv), lines: { data: Array.from(db.posten.values()).filter((it) => it.invoice === inv.id).map(kopie) } });
   const pm = (art) => { const z = art === 'card' ? { id: neueId('pm'), object: 'payment_method', type: 'card', card: { brand: 'visa', last4: '4242' } } : { id: neueId('pm'), object: 'payment_method', type: 'sepa_debit', sepa_debit: { country: 'DE', last4: '3000' } }; db.zahlarten.set(z.id, z); return z; };
 
   function behandeln(method, pfad, p, kopf) {
@@ -59,8 +62,8 @@ export function stripeNachstellen() {
     }
     if (method === 'GET' && pfad === '/prices') { const keys = p.lookup_keys ? Object.values(p.lookup_keys) : null; return antwort(200, liste(db.preise.filter((x) => (!keys || keys.includes(x.lookup_key)) && (p.active === undefined || String(x.active) === p.active)).slice(0, zahl(p.limit) || 10))); }
     /* Kunden */
-    if (method === 'POST' && pfad === '/customers') { const c = { id: neueId('cus'), object: 'customer', email: p.email, name: p.name, description: p.description, metadata: p.metadata || {}, preferred_locales: p.preferred_locales ? Object.values(p.preferred_locales) : [], invoice_settings: Object.assign({ default_payment_method: null, footer: null }, p.invoice_settings || {}), balance: 0 }; db.kunden.set(c.id, c); return antwort(200, c); }
-    if (method === 'POST' && (m = /^\/customers\/([^/]+)$/.exec(pfad))) { const c = db.kunden.get(m[1]); if (!c) return fehler(404, 'No such customer: ' + m[1]); if (p.invoice_settings) Object.assign(c.invoice_settings, p.invoice_settings); return antwort(200, c); }
+    if (method === 'POST' && pfad === '/customers') { const c = { id: neueId('cus'), object: 'customer', email: p.email, name: p.name, description: p.description, phone: p.phone || null, address: p.address || null, tax_ids: p.tax_id_data ? Object.values(p.tax_id_data) : [], metadata: p.metadata || {}, preferred_locales: p.preferred_locales ? Object.values(p.preferred_locales) : [], invoice_settings: Object.assign({ default_payment_method: null, footer: null }, p.invoice_settings || {}), balance: 0 }; db.kunden.set(c.id, c); return antwort(200, c); }
+    if (method === 'POST' && (m = /^\/customers\/([^/]+)$/.exec(pfad))) { const c = db.kunden.get(m[1]); if (!c) return fehler(404, 'No such customer: ' + m[1]); if (p.invoice_settings) Object.assign(c.invoice_settings, p.invoice_settings); ['email', 'name', 'phone', 'address'].forEach((k) => { if (p[k] !== undefined) c[k] = p[k]; }); if (p.metadata) Object.assign(c.metadata, p.metadata); return antwort(200, c); }
     /* Kassen */
     if (method === 'POST' && pfad === '/checkout/sessions') {
       if (p.customer && !db.kunden.has(p.customer)) return fehler(400, 'No such customer: ' + p.customer);
@@ -89,8 +92,32 @@ export function stripeNachstellen() {
       if (p.metadata) Object.assign(s.metadata, p.metadata);
       if (p.default_payment_method) { const z = db.zahlarten.get(p.default_payment_method); if (!z) return fehler(400, 'No such PaymentMethod: ' + p.default_payment_method); s.default_payment_method = kopie(z); }
       if (p.default_tax_rates) s.default_tax_rates = Object.values(p.default_tax_rates);
+      if (p.pause_collection !== undefined) s.pause_collection = p.pause_collection && typeof p.pause_collection === 'object' ? { behavior: p.pause_collection.behavior } : null;
+      if (p.proration_behavior) s._proration = p.proration_behavior;
       return antwort(200, s);
     }
+    if (method === 'POST' && pfad === '/subscriptions') {
+      if (!db.kunden.has(p.customer)) return fehler(400, 'No such customer: ' + p.customer);
+      const posten = p.items ? Object.values(p.items) : [], preis = posten[0] && db.preise.find((x) => x.id === posten[0].price);
+      if (!preis) return fehler(400, 'No such price: ' + (posten[0] && posten[0].price));
+      const zahlart = p.default_payment_method ? db.zahlarten.get(p.default_payment_method) : null;
+      if (p.default_payment_method && !zahlart) return fehler(400, 'No such PaymentMethod: ' + p.default_payment_method);
+      const ende = Math.floor(Date.now() / 1000) + 30 * 86400, status = aboStatusNeu || 'active';
+      const inv = { id: neueId('in'), object: 'invoice', customer: p.customer, status: status === 'active' ? 'paid' : 'open', number: 'EEZI-' + String(++rechnungNr).padStart(4, '0'), currency: 'eur', total: preis.unit_amount, hosted_invoice_url: 'https://invoice.stripe.com/i/' + nr, metadata: {}, created: Math.floor(Date.now() / 1000) };
+      db.rechnungen.set(inv.id, inv);
+      const sub = { id: neueId('sub'), object: 'subscription', customer: p.customer, status: status, cancel_at_period_end: false, pause_collection: null, metadata: p.metadata || {}, default_tax_rates: p.default_tax_rates ? Object.values(p.default_tax_rates) : [], default_payment_method: zahlart ? kopie(zahlart) : null, current_period_end: ende, off_session: p.off_session === 'true', payment_behavior: p.payment_behavior || null, items: { data: [{ id: neueId('si'), price: kopie(preis), current_period_end: ende }] }, latest_invoice: inv.id };
+      db.abos.set(sub.id, sub);
+      const out = Object.assign(kopie(sub), { default_payment_method: zahlart ? zahlart.id : null });
+      if (p.expand && Object.values(p.expand).includes('latest_invoice.payment_intent')) out.latest_invoice = Object.assign(kopie(inv), { payment_intent: { id: neueId('pi'), object: 'payment_intent', status: status === 'active' ? 'succeeded' : 'requires_action' } });
+      return antwort(200, out);
+    }
+    if (method === 'DELETE' && (m = /^\/subscriptions\/([^/]+)$/.exec(pfad))) { const s = db.abos.get(m[1]); if (!s) return fehler(404, 'No such subscription: ' + m[1]); if (s.status === 'canceled') return fehler(400, 'This subscription has already been canceled.'); s.status = 'canceled'; return antwort(200, kopie(s)); }
+    /* Erstattungen, Rechnungen je Kunde, Kundenportal */
+    if (method === 'POST' && pfad === '/refunds') { const r = { id: neueId('re'), object: 'refund', payment_intent: p.payment_intent, amount: p.amount ? zahl(p.amount) : null, status: 'succeeded', metadata: p.metadata || {} }; db.erstattungen.push(r); return antwort(200, r); }
+    if (method === 'GET' && pfad === '/invoices') return antwort(200, liste(Array.from(db.rechnungen.values()).filter((x) => (!p.customer || x.customer === p.customer)).reverse().slice(0, zahl(p.limit) || 10).map((x) => rechnungSicht(Object.assign({}, x, { _p: undefined })))));
+    if (method === 'GET' && pfad === '/billing_portal/configurations') return antwort(200, liste(db.portale.filter((x) => p.active === undefined || String(x.active) === p.active)));
+    if (method === 'POST' && pfad === '/billing_portal/configurations') { const c = { id: neueId('bpc'), object: 'billing_portal.configuration', active: true, features: p.features || {}, business_profile: p.business_profile || {}, metadata: p.metadata || {} }; db.portale.push(c); return antwort(200, c); }
+    if (method === 'POST' && pfad === '/billing_portal/sessions') { if (!db.kunden.has(p.customer)) return fehler(400, 'No such customer: ' + p.customer); if (p.configuration && !db.portale.some((x) => x.id === p.configuration)) return fehler(400, 'No such configuration: ' + p.configuration); const se = { id: neueId('bps'), object: 'billing_portal.session', customer: p.customer, configuration: p.configuration || null, return_url: p.return_url, url: 'https://billing.stripe.com/p/session/' + nr }; db.portalSitzungen.push(se); return antwort(200, se); }
     /* Rechnungen und Posten */
     if (method === 'POST' && pfad === '/invoices') {
       if (!db.kunden.has(p.customer)) return fehler(400, 'No such customer: ' + p.customer);
@@ -160,9 +187,14 @@ export function stripeNachstellen() {
       o = o || {}; const k = db.kassen.get(id); if (!k) throw new Error('Kasse fehlt: ' + id);
       k.status = 'complete'; k.customer_details = { email: k.customer_email || (k.customer && db.kunden.get(k.customer).email) || null };
       if (k.mode === 'payment') {
-        const li = k._p.line_items[0], betrag = li.price_data ? zahl(li.price_data.unit_amount) : (db.preise.find((x) => x.id === li.price) || {}).unit_amount;
+        const li = k._p.line_items[0], netto = li.price_data ? zahl(li.price_data.unit_amount) : (db.preise.find((x) => x.id === li.price) || {}).unit_amount;
+        /* exklusive Steuer kommt dazu (Einrichtung der Pakete), inklusive steckt im Betrag (Aufmaßblatt) */
+        const steuer = (li.tax_rates ? Object.values(li.tax_rates) : []).map((t) => db.steuern.find((x) => x.id === t)).filter((t) => t && !t.inclusive).reduce((sum, t) => sum + Math.round(netto * t.percentage / 100), 0);
+        const betrag = o.betrag != null ? o.betrag : netto + steuer;
         k.amount_total = betrag; k.payment_status = o.zahlung === 'processing' ? 'unpaid' : 'paid';
-        k.payment_intent = { id: neueId('pi'), object: 'payment_intent', status: o.zahlung === 'processing' ? 'processing' : 'succeeded' };
+        const zahlart = (k._p.payment_intent_data && k._p.payment_intent_data.setup_future_usage) || o.art ? pm(o.art || 'card') : null;
+        k.payment_intent = { id: neueId('pi'), object: 'payment_intent', status: o.zahlung === 'processing' ? 'processing' : 'succeeded', payment_method: zahlart ? zahlart.id : null, customer: k.customer, metadata: (k._p.payment_intent_data || {}).metadata || {} };
+        if (k._p.invoice_creation && k._p.invoice_creation.enabled === 'true' && k.payment_status === 'paid' && (k._p.metadata || {}).art === 'einrichtung') { const inv = { id: neueId('in'), object: 'invoice', customer: k.customer, status: 'paid', number: 'EEZI-' + String(++rechnungNr).padStart(4, '0'), currency: 'eur', total: betrag, hosted_invoice_url: 'https://invoice.stripe.com/i/' + nr, invoice_pdf: 'https://pay.stripe.com/invoice/' + nr + '/pdf', metadata: (k._p.invoice_creation.invoice_data || {}).metadata || {}, created: Math.floor(Date.now() / 1000) }; db.rechnungen.set(inv.id, inv); k.invoice = inv.id; }
       }
       if (k.mode === 'setup') k.setup_intent = { id: neueId('seti'), object: 'setup_intent', status: 'succeeded', payment_method: pm(o.art) };
       if (k.mode === 'subscription') {
@@ -172,6 +204,15 @@ export function stripeNachstellen() {
       }
       return kopie(Object.assign({}, k, { _p: undefined, subscription: k.subscription, setup_intent: k.setup_intent ? k.setup_intent.id : null, payment_intent: k.payment_intent ? k.payment_intent.id : null }));
     },
+    /* Lastschrift unterwegs → gutgeschrieben (checkout.session.async_payment_succeeded) bzw. zurückgegeben (…_failed) */
+    zahlungEingang(id, o) {
+      o = o || {}; const k = db.kassen.get(id); if (!k || !k.payment_intent) throw new Error('Kasse ohne Zahlung: ' + id);
+      if (o.fehl) { k.payment_intent.status = 'requires_payment_method'; return kopie(Object.assign({}, k, { _p: undefined, payment_intent: k.payment_intent.id })); }
+      k.payment_status = 'paid'; k.payment_intent.status = 'succeeded';
+      return kopie(Object.assign({}, k, { _p: undefined, payment_intent: k.payment_intent.id }));
+    },
+    /* Status neuer Abos (POST /subscriptions): null = active, sonst z. B. 'incomplete' (3-D-Secure nötig) */
+    aboStatus(st) { aboStatusNeu = st || null; },
     /* Abo bei Stripe beenden (wie nach Kündigung oder erfolglosem Mahnen) */
     aboBeenden(id) { const sub = db.abos.get(id); if (!sub) throw new Error('Abo fehlt: ' + id); sub.status = 'canceled'; return kopie(sub); },
     /* Guthaben eines Kunden (in Cent), etwa aus einer anteiligen Gutschrift */

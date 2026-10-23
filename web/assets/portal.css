@@ -818,3 +818,21 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
   .zk { padding: 6px 4px 10px } .zk .zk-gross { display: none } .zk .zk-klein { display: block }
 }
 @media (prefers-reduced-motion: reduce) { .foto-gross.fz img, .kl-balken span, .kl-haken { transition: none } }
+
+/* ---------- Signature-Dashboard unter der Domain einer Instanz (portal.js INST, Hülle web/betrieb/index.html, Strang E) ----------
+   Zeichen und Name des Betriebs statt der Wortmarke, Anmeldung als eigene Karte, Hinweise zum Status, Liste der Eingangsadressen */
+.b-laden { padding: 32px 16px; text-align: center; color: var(--ink2) }
+.b-logo { gap: 10px } .b-logo .ein-zeichen { flex: 0 0 auto } .b-name { font-weight: 800; letter-spacing: -.02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.side .logo.b-logo { display: flex; align-items: center; gap: 10px; text-align: left } .side .logo.b-logo > span:last-child { min-width: 0; overflow-wrap: break-word; hyphens: auto }
+/* Logo als Bild (meist breit): über dem Namen statt daneben, sonst bricht der Name mitten im Wort */
+.side .logo.b-logo:has(.ein-zeichen.logo) { flex-direction: column; align-items: flex-start; gap: 8px }
+.side .logo.b-logo .ein-zeichen.logo.klein img { max-width: 72px }
+.b-anmelden { padding-top: 24px } .b-anm-karte { display: grid; gap: 14px; padding: 22px } .b-anm-karte h2 { margin: 6px 0 0 } .b-anm-karte .sub { margin: 0 }
+.b-live { display: flex; gap: 8px; align-items: center } .b-live svg { color: var(--ok); flex: 0 0 auto }
+.b-liste { list-style: none; margin: 8px 0 10px; padding: 0; display: grid; gap: 6px } .b-liste li { font-weight: 700; overflow-wrap: anywhere }
+.b-status { margin-bottom: 16px }
+.b-fuss .foot-links { justify-content: center }
+@media (max-width: 520px) { .b-logo .b-name { max-width: 52vw } }
+/* Startseite, Ansicht Fensterbauer: Einstieg in die Konfigurator-Pakete über dem Startbild */
+.pakete-karte { display: flex; gap: 14px 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 18px 20px; margin-bottom: 18px }
+.pakete-karte > div { flex: 1 1 320px; min-width: 0 } .pakete-karte h2 { margin: 4px 0 6px; font-size: 24px; line-height: 1.2 } .pakete-karte p:not(.eyebrow) { margin: 0; color: var(--ink2) }

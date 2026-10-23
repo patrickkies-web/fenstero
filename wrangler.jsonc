@@ -1,11 +1,14 @@
 /* eeziframes auf Cloudflare Workers: was gebaut und wie es ausgeliefert wird.
-   - Die Website liegt in web/: statische Dateien, Kopfzeilen aus web/_headers, Fehlerseite web/404.html.
+   - Die Website liegt in web/: statische Dateien, Kopfzeilen aus web/_headers, Fehlerseite web/404.html (liefert worker.js).
    - /api/… läuft durch worker.js (functions/api/router.js): KI-Auswertung, Kauf des Aufmaßblatts (Stripe),
      Konten der Betriebe (Supabase), Eingang von Aufmaßen aus der App. Die Seiten selbst, robots.txt und sitemap.xml
      ebenfalls (functions/seo.js): Freigabe für Suchmaschinen über die Variable INDEXIERUNG, Canonical über KANONISCH.
    - "name" muss genau so heißen wie der Worker im Cloudflare-Dashboard (Workers & Pages).
-   Schlüssel (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SECRET_KEY, FREISCHALT_GEHEIMNIS)
-   gehören nur ins Dashboard (Einstellungen → Variablen und Geheimnisse, Typ Secret), nie hierher. Liste aller Variablen: functions/api/umgebung.js */
+   Schlüssel (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SECRET_KEY, FREISCHALT_GEHEIMNIS, SITZUNG_GEHEIMNIS)
+   gehören nur ins Dashboard (Einstellungen → Variablen und Geheimnisse, Typ Secret), nie hierher. Liste aller Variablen: functions/api/umgebung.js
+   und docs/INSTANZEN.md.
+   REGEL: Hier stehen nie "routes" und nie "custom_domain". Die Domains der Konfigurator-Instanzen hängt die Zentrale (bzw. der Inhaber im
+   Dashboard) als Custom Domains an den Worker; ein Deployment mit routes würde sie überschreiben (docs/INSTANZEN.md, Bauplan K2.18). */
 {
   "name": "fenstero",
   "main": "worker.js",
@@ -13,16 +16,35 @@
   "assets": {
     "directory": "./web",
     "binding": "ASSETS",
-    "not_found_handling": "404-page",
+    // Kein not_found_handling: Fehlt eine Datei, liefert worker.js die Fehlerseite selbst (auf den Domains der Instanzen eine neutrale)
     // /api/… und die Seiten selbst laufen durch worker.js (Freigabe für Suchmaschinen, robots.txt, sitemap.xml, llms.txt, Bestätigung der Domain für Zoho,
-    // dauerhafte Weiterleitung von /app auf /app/ usw.); Skripte, Bilder und Schriften kommen direkt
-    "run_worker_first": ["/api/*", "/", "/index.html", "/app/*", "/ratgeber/*", "/fuer-fensterbauer/*", "/impressum/*", "/datenschutz/*", "/agb/*", "/nutzungsbedingungen/*", "/cookies/*", "/widerruf/*", "/app", "/ratgeber", "/fuer-fensterbauer", "/impressum", "/datenschutz", "/agb", "/nutzungsbedingungen", "/cookies", "/widerruf", "/robots.txt", "/sitemap.xml", "/llms.txt", "/verifyforzoho.html"]
+    // dauerhafte Weiterleitung von /app auf /app/ usw.); dazu alles, was eine Konfigurator-Instanz je Domain anders ausliefert (Einstellungen /config.js,
+    // Icons, Manifest, Bilder der Marke), die Zentrale, das Kundenkonto /partner/ und das Dashboard /betrieb/ (Kopfzeilen) und die Fehlerseite.
+    // Auch /404 und /404/: html_handling liefert web/404.html sonst unter /404 mit Status 200 aus, auf Instanz-Domains also die eeziframes-Fehlerseite;
+    // durch den Worker bekommen sie ihre neutrale Seite, die Hauptdomain weiter die Datei (worker.js datei()). Skripte, Bilder und Schriften kommen direkt
+    "run_worker_first": ["/api/*", "/", "/index.html", "/app/*", "/ratgeber/*", "/fuer-fensterbauer/*", "/impressum/*", "/datenschutz/*", "/agb/*", "/nutzungsbedingungen/*", "/cookies/*", "/widerruf/*", "/app", "/ratgeber", "/fuer-fensterbauer", "/impressum", "/datenschutz", "/agb", "/nutzungsbedingungen", "/cookies", "/widerruf", "/robots.txt", "/sitemap.xml", "/llms.txt", "/verifyforzoho.html", "/config.js", "/favicon.svg", "/apple-touch-icon.png", "/og.png", "/manifest.webmanifest", "/marke/*", "/betrieb", "/betrieb/*", "/zentrale", "/zentrale/*", "/partner", "/partner/*", "/konfigurator-bedingungen", "/konfigurator-bedingungen/*", "/404.html", "/404", "/404/"]
   },
   // Variablen aus dem Dashboard (z. B. KI_MODELL_GENAU, PREIS_AUFMASS_CENT, MWST) bei jedem Deployment behalten
   "keep_vars": true,
   // Sammelrechnungen für Betriebe am 1. und 15. jeden Monats um 3 Uhr UTC; Aufräumen (Protokoll nach Frist, liegengebliebene Kassen,
-  // Anmeldungen ohne Betrieb, Zwischenstände erledigter Kundenlinks) jeden Tag um 4:17 Uhr UTC (worker.js → scheduled → geplant)
-  "triggers": { "crons": ["0 3 1,15 * *", "17 4 * * *"] },
+  // Anmeldungen ohne Betrieb, Zwischenstände erledigter Kundenlinks) und die Tagesläufe der Konfigurator-Instanzen jeden Tag um 4:17 Uhr UTC;
+  // alle 10 Minuten das Nachholen des Versands eingegangener Anfragen der Instanzen (worker.js → scheduled → geplant, Weiche in functions/api/router.js)
+  "triggers": { "crons": ["0 3 1,15 * *", "17 4 * * *", "*/10 * * * *"] },
+  // Bremsen je IP-Adresse bzw. Code (functions/api/bremse.js): Rate Limiting von Cloudflare, ohne Vorbereitung im Dashboard (namespace_id ist
+  // eine frei gewählte Zahl je Konto). Fehlt ein Binding oder antwortet es nicht, zählt bremse.js im Arbeitsspeicher mit denselben Grenzen.
+  "ratelimits": [
+    { "name": "RL_LINK", "namespace_id": "4101", "simple": { "limit": 60, "period": 60 } },
+    { "name": "RL_START", "namespace_id": "4102", "simple": { "limit": 10, "period": 60 } },
+    { "name": "RL_FOTO", "namespace_id": "4103", "simple": { "limit": 60, "period": 60 } },
+    { "name": "RL_KI", "namespace_id": "4104", "simple": { "limit": 20, "period": 60 } },
+    { "name": "RL_OTP", "namespace_id": "4105", "simple": { "limit": 5, "period": 60 } },
+    { "name": "RL_FORM", "namespace_id": "4106", "simple": { "limit": 5, "period": 60 } }
+  ],
+  // Noch nicht gebunden (der Code läuft ohne sie): KV-Namensraum INSTANZEN (Spiegel der Instanzdaten, falls Supabase kurz ausfällt) und
+  // Warteschlange EINGANG (PDF und Mail eingegangener Anfragen). Beide legt der Inhaber im Dashboard an (docs/INSTANZEN.md, Einrichtung);
+  // erst danach kommen sie mit ihren Kennungen in einem eigenen Commit hierher:
+  //   "kv_namespaces": [{ "binding": "INSTANZEN", "id": "<Kennung aus dem Dashboard>" }],
+  //   "queues": { "producers": [{ "binding": "EINGANG", "queue": "eezi-eingang" }], "consumers": [{ "queue": "eezi-eingang", "max_batch_size": 5, "max_retries": 8 }] }
   // Fehlermeldungen (console.log) bleiben zur Fehlersuche ein paar Tage im Dashboard; Zugriffsprotokolle je Aufruf (Adresse, Kopfzeilen)
   // schreibt Cloudflare nicht, so wie es die Datenschutzerklärung sagt (Abschnitt 2)
   "observability": { "enabled": true, "logs": { "invocation_logs": false } }

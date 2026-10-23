@@ -5,10 +5,16 @@
                         danach sofort; vor jedem Blatt.pdf() abwarten
 
    e = {
-     variante: 'kunde' | 'fensterbauer' | 'betrieb',
+     variante: 'kunde' | 'fensterbauer' | 'betrieb' | 'anfrage',
         kunde:        das Blatt des Hauseigentümers für seine Unterlagen (Du), mit Seite für den Fensterbauer am Ende
         fensterbauer: dasselbe Aufmaß, so wie es der Hauseigentümer einem Betrieb schickt (Sie), mit Seite für den Fensterbauer
         betrieb:      aus dem Betriebsbereich, mit Namen und Logo des Betriebs, Bestellmaß-Vorschlag und Stand der Klärungsliste, ohne Werbung
+        anfrage:      Kopie für den Endkunden einer Konfigurator-Instanz in der Marke des Betriebs (e.marke): wie betrieb, aber ohne Abzug und
+                      Bestellmaß, ohne Projekt-QR, ohne Werbeseiten; Anrede Du, mit e.sie Sie (docs/INSTANZEN.md)
+     kennzeichnung: 'deutlich' (Vorgabe: eeziframes im Untertitel und im Fuß) | 'dezent' (nur im Fuß) | 'keine' (nirgends, auch nicht
+                    als Autor oder Ersteller); gilt für betrieb und anfrage, die Blätter der Hauseigentümer tragen immer die Marke,
+     marke: { name, logo: { data, w, h, grund }, farbe, host } (anfrage: Name, Logo und Domain der Instanz), nr (Nummer der Anfrage),
+     ausgabe: 'bytes' liefert Uint8Array statt Blob (Server, functions/api/blatt-server.js), fotoHinweis: Zeile in den Eckdaten,
      fenster: [Fenster wie in der App], projekt: { name, ort, tel, mail, erreich, gebaeude, baujahr, total, zeit, budget, foerd, foerdweg, notiz, notizen },
      kunde: { name, kontakt, adresse, mehr: [[Beschriftung, Wert]] (vom Kunden eingetragen: Telefon, E-Mail, Erreichbar) } (betrieb), betrieb: { name, logo: { data, w, h, grund }, abzug: { seite, oben, unten, untenT }, nr, eingegangen } (betrieb),
      klaerung: [Punkte aus AW.klaerung] (betrieb, sonst gerechnet), klaerStand: { id: { ok, notiz, wann } } (betrieb),
@@ -18,8 +24,11 @@
    Gestaltung (docs/GESTALTUNG.md, Aufmaßblatt): weißes Papier, Tinte #161616, Kopfband in der Farbe der Bühne #161616 mit Namen und
    Logo des Betriebs bzw. der Marke, Inter 500/700/800, Kicker in Versalien, grüne Haken, Chips mit Rand, Karten mit Rand ohne Fläche,
    Orange und Blau nur in der Zeichnung. Aufbau: Seite 1 Übersicht und Klärungsliste, danach je Position eine Seite (Zeichnung mit
-   Maßketten aus AW.plan, Maße, Wünsche, Einbausituation, Fotos), am Ende Überblick, Tabelle und (für Hauseigentümer) der Aufmaß-Code. */
-window.Blatt = (() => {
+   Maßketten aus AW.plan, Maße, Wünsche, Einbausituation, Fotos), am Ende Überblick, Tabelle und (für Hauseigentümer) der Aufmaß-Code.
+   Läuft im Browser (window.Blatt) und ohne DOM im Worker (globalThis.Blatt, functions/api/blatt-server.js): jsPDF, die Schrift und das
+   Modell liegen dann auf globalThis, Datum immer in deutscher Zeit. */
+(typeof globalThis !== 'undefined' ? globalThis : window).Blatt = (() => {
+  const G = typeof globalThis !== 'undefined' ? globalThis : window;
   const W = 210, H = 297, M = 14, BOTTOM = H - 16;
   /* Druckpalette */
   const INK = '#161616', INK2 = '#3a3a3f', GREY = '#68686d', LINE = '#d9d9de', BUEHNE = '#161616', HELL = '#f1f0ea', HELL2 = '#b9b8b3', GRUEN = '#8fd694', GRUEN_T = '#2e7d3a', WARN = '#a85a00', WARN_P = '#f0b35a', MO_T = '#b3401e', EL_T = '#3d63c9', MO = '#ff8a5b', EL = '#7aa2ff', GLASS = '#d6e6f4';
@@ -28,9 +37,9 @@ window.Blatt = (() => {
   const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[    ]/g, ' ').replace(/[‐‑‒]/g, '-').replace(/­/g, '').replace(/≥/g, 'ab ').replace(/≤/g, 'bis ').replace(/[←-↓]/g, '-').replace(/✓/g, ''));
   const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
   const ARTNAME = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
-  const A = () => window.AW || null;
+  const A = () => G.AW || null;
   const ERREICH = { vm: 'vormittags', nm: 'nachmittags', ab: 'abends' };
-  const BASIS = document.currentScript && document.currentScript.src ? document.currentScript.src.replace(/[^/]*$/, '') : '/assets/';
+  const BASIS = typeof document !== 'undefined' && document.currentScript && document.currentScript.src ? document.currentScript.src.replace(/[^/]*$/, '') : '/assets/';
   /* jsPDF (etwa 360 KB) und der QR-Code kommen erst mit dem ersten Blatt, nicht mit der Seite: Startseite und App laden schneller */
   const VENDOR = BASIS.replace(/assets\/$/, 'vendor/');
   const geladen = {};
@@ -45,25 +54,32 @@ window.Blatt = (() => {
   };
   function schrift() {
     return Promise.all([
-      skript(VENDOR + 'jspdf.umd.min.js', () => !!(window.jspdf && window.jspdf.jsPDF)),
-      skript(VENDOR + 'qrcode.js', () => typeof window.qrcode === 'function'),
-      skript(BASIS + 'blatt-schrift.js', () => !!window.BlattSchrift)
+      skript(VENDOR + 'jspdf.umd.min.js', () => !!(G.jspdf && G.jspdf.jsPDF)),
+      skript(VENDOR + 'qrcode.js', () => typeof G.qrcode === 'function'),
+      skript(BASIS + 'blatt-schrift.js', () => !!G.BlattSchrift)
     ]).then((r) => r[2]);
   }
 
   function pdf(e) {
-    const J = window.jspdf && window.jspdf.jsPDF, AW = A(); if (!J || !AW) return null;
+    const J = G.jspdf && G.jspdf.jsPDF, AW = A(); if (!J || !AW) return null;
     const doc = new J({ unit: 'mm', format: 'a4', compress: true });
-    const V = e.variante || 'kunde', wins = e.fenster || [], pr = e.projekt || {}, kd = e.kunde || {}, bt = e.betrieb || {}, ab = AW.abzugVon(bt.abzug);
-    const sie = V !== 'kunde', EIGENE = V !== 'betrieb', STREIFEN = EIGENE ? 8 : 0, XR = W - (EIGENE ? 18 : 14), CW = XR - M;
-    /* Adresse der Website: die, unter der eeziframes gerade läuft (nach einem Domainwechsel stimmt sie von selbst) */
-    const HOST = e.portalKurz || (typeof location !== 'undefined' && location.host) || 'eeziframes';
+    const V = e.variante || 'kunde', wins = e.fenster || [], pr = e.projekt || {}, kd = e.kunde || {};
+    /* BKOPF: Kopf und Seite 1 in der Marke eines Betriebs (betrieb, anfrage); BEST: mit Bestellmaß und Stand der Klärung (nur betrieb);
+       EIGENE: Blätter der Hauseigentümer mit Markenstreifen, Code-Seite und Seite für Fensterbauer */
+    const BKOPF = V === 'betrieb' || V === 'anfrage', BEST = V === 'betrieb', ANF = V === 'anfrage';
+    const bt = ANF ? Object.assign({}, e.marke || {}, e.betrieb || {}, { nr: e.nr || (e.betrieb || {}).nr || '' }) : e.betrieb || {}, ab = AW.abzugVon(bt.abzug);
+    const KZ = ['dezent', 'keine'].indexOf(e.kennzeichnung) >= 0 ? e.kennzeichnung : 'deutlich';
+    const sie = ANF ? !!e.sie : V !== 'kunde', EIGENE = !BKOPF, STREIFEN = EIGENE ? 8 : 0, XR = W - (EIGENE ? 18 : 14), CW = XR - M;
+    /* Adresse der Website: die, unter der eeziframes gerade läuft (nach einem Domainwechsel stimmt sie von selbst); bei der Kopie einer
+       Anfrage die Domain der Instanz */
+    const HOST = (ANF && bt.host) || e.portalKurz || (typeof location !== 'undefined' && location.host) || (KZ === 'keine' ? '' : 'eeziframes');
     /* Schrift: Inter wie auf der Website (500 Text, 700 Listen, 800 Überschriften), sonst Helvetica */
-    const F = window.BlattSchrift && window.BlattSchrift.medium ? (() => {
+    const BS = G.BlattSchrift;
+    const F = BS && BS.medium ? (() => {
       try {
-        doc.addFileToVFS('Inter-Medium.ttf', window.BlattSchrift.medium); doc.addFont('Inter-Medium.ttf', 'InterMedium', 'normal');
-        doc.addFileToVFS('Inter-Bold.ttf', window.BlattSchrift.bold); doc.addFont('Inter-Bold.ttf', 'InterBold', 'normal');
-        doc.addFileToVFS('Inter-ExtraBold.ttf', window.BlattSchrift.extra); doc.addFont('Inter-ExtraBold.ttf', 'InterExtraBold', 'normal');
+        doc.addFileToVFS('Inter-Medium.ttf', BS.medium); doc.addFont('Inter-Medium.ttf', 'InterMedium', 'normal');
+        doc.addFileToVFS('Inter-Bold.ttf', BS.bold); doc.addFont('Inter-Bold.ttf', 'InterBold', 'normal');
+        doc.addFileToVFS('Inter-ExtraBold.ttf', BS.extra); doc.addFont('Inter-ExtraBold.ttf', 'InterExtraBold', 'normal');
         return { extra: ['InterExtraBold', 'normal'], bold: ['InterBold', 'normal'], normal: ['InterMedium', 'normal'], mono: ['courier', 'normal'] };
       } catch (err) { return null; }
     })() : null;
@@ -88,13 +104,15 @@ window.Blatt = (() => {
     const nA = wins.reduce((a, x) => a + (x.ki && ((x.ki.rows || []).length || (x.ki.fach && Object.keys(x.ki.fach).length)) ? num(x.fotos) || 0 : 0), 0);
     const fotoText = !nF ? 'ohne Fotos' : nA === nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' ausgewertet' : nA ? nA + ' von ' + nF + ' Fotos ausgewertet' : nF + (nF === 1 ? ' Foto' : ' Fotos');
     const komplett = wins.length > 0 && wins.every((x) => !AW.massLuecken(x).length);
-    const heute = (() => { try { return new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }); } catch (err) { return ''; } })();
-    const titelName = V === 'betrieb' ? (kd.name || 'Kunde') : (pr.name || '');
-    const laufTitel = (V === 'betrieb' ? 'Aufmaß · ' : 'Aufmaßblatt · ') + (titelName || (V === 'kunde' ? 'Dein Aufmaß' : 'Fenster-Aufmaß'));
+    const heute = (() => { try { return new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' }); } catch (err) { return ''; } })();
+    const titelName = BKOPF ? (kd.name || pr.name || 'Kunde') : (pr.name || '');
+    const laufTitel = (ANF ? (sie ? 'Ihre Anfrage · ' : 'Deine Anfrage · ') : BEST ? 'Aufmaß · ' : 'Aufmaßblatt · ') + (titelName || (V === 'kunde' ? 'Dein Aufmaß' : 'Fenster-Aufmaß'));
     const initial = (name) => (String(name || 'F').replace(/^(Fensterbau|Glaserei|Schreinerei|Tischlerei)\s+/i, '').slice(0, 1).toUpperCase() || 'F');
     /* Kennung des Aufmaßes: kurz, aus dem Code gebildet, steht auf jeder Seite (eine einzelne Seite bleibt zuordenbar) */
-    const kennung = e.beispiel ? 'AM-BEISPIEL' : V === 'betrieb' && bt.nr ? String(bt.nr) : (() => { const q = String(e.code || (pr.name || '') + heute + wins.length); let a = 2166136261; for (let i = 0; i < q.length; i++) { a ^= q.charCodeAt(i); a = Math.imul(a, 16777619); } const Z = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o = ''; for (let i = 0; i < 6; i++) o += Z[(a >>> (i * 5)) & 31]; return 'AM-' + o; })();
-    try { doc.setDocumentProperties({ title: laufTitel, subject: 'Fenster-Aufmaß ' + kennung + (titelName ? ' · ' + titelName : ''), author: V === 'betrieb' ? (bt.name || 'eeziframes') : 'eeziframes', keywords: 'Aufmaß, Fenster, Maße in mm, ' + kennung, creator: 'eeziframes' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
+    const kennung = e.beispiel ? 'AM-BEISPIEL' : BKOPF && bt.nr ? String(bt.nr) : (() => { const q = String(e.code || (pr.name || '') + heute + wins.length); let a = 2166136261; for (let i = 0; i < q.length; i++) { a ^= q.charCodeAt(i); a = Math.imul(a, 16777619); } const Z = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o = ''; for (let i = 0; i < 6; i++) o += Z[(a >>> (i * 5)) & 31]; return 'AM-' + o; })();
+    /* Autor und Ersteller: bei kennzeichnung 'keine' nur der Betrieb, nie eeziframes */
+    const ohneEezi = BKOPF && KZ === 'keine';
+    try { doc.setDocumentProperties({ title: laufTitel, subject: 'Fenster-Aufmaß ' + kennung + (titelName ? ' · ' + titelName : ''), author: BKOPF ? (bt.name || (ohneEezi ? '' : 'eeziframes')) : 'eeziframes', keywords: 'Aufmaß, Fenster, Maße in mm, ' + kennung, creator: ohneEezi ? (bt.name || '') : 'eeziframes' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
     const kl = Array.isArray(e.klaerung) ? e.klaerung : AW.klaerung(wins, pr), stand = e.klaerStand || {}, geklaert = (r) => !!(stand[r.id] && stand[r.id].ok);
 
     /* ---------- Seitenrahmen ---------- */
@@ -113,7 +131,7 @@ window.Blatt = (() => {
       ZEICHEN.forEach((pts) => doc.lines(pts.slice(1).map((p, i) => [(p[0] - pts[i][0]) * u, (p[1] - pts[i][1]) * u]), x + pts[0][0] * u, y0 + pts[0][1] * u, [1, 1], 'F', true));
     }
     /* Logo des Betriebs (aus dem Betriebskonto) auf dem dunklen Band: dunkle Logos auf hellem Feld, helle direkt; ohne Logo die Initiale */
-    const logoFmt = (d) => (/^data:image\/png/i.test(d) ? 'PNG' : /^data:image\/jpe?g/i.test(d) ? 'JPEG' : '');
+    const logoFmt = (d) => (/^data:image\/png/i.test(d) ? 'PNG' : /^data:image\/jpe?g/i.test(d) ? 'JPEG' : /^data:image\/webp/i.test(d) ? 'WEBP' : '');
     function betriebZeichen(x, cy, hoehe) {
       const lg = bt.logo && bt.logo.data && logoFmt(bt.logo.data) && bt.logo.w > 0 && bt.logo.h > 0 ? bt.logo : null;
       if (lg) {
@@ -127,7 +145,7 @@ window.Blatt = (() => {
     const kopfband = (gross) => {
       const bh = gross ? 28 : 11;
       fill(BUEHNE); doc.rect(0, 0, W, bh, 'F');
-      if (V === 'betrieb') {
+      if (BKOPF) {
         const zw = betriebZeichen(M, bh / 2, gross ? 14 : 6.4), nx = M + zw + (gross ? 5 : 3);
         /* rechts Kennung und Eingang; links bleibt nur der Platz bis dorthin, damit ein breites Logo nichts überdeckt */
         const kicker = VERSAL('Aufmaß · ' + kennung), stand = [bt.eingegangen ? 'eingegangen ' + bt.eingegangen : '', heute].filter(Boolean).join(' · ');
@@ -137,7 +155,11 @@ window.Blatt = (() => {
         const bname = bt.name || 'Ihr Betrieb'; let gn = gross ? 15 : 8.6; font('extra', gn, '#ffffff');
         while (gn > (gross ? 10.5 : 7) && tw(bname) > frei) { gn -= 0.5; font('extra', gn); } // langer Name neben breitem Logo: kleiner statt abgeschnitten
         txt(wrap(bname, frei)[0], nx, bh / 2 + (gross ? -0.6 : 1.1));
-        if (gross) { font('normal', 7.6, HELL2); const sub = 'Aufmaß Ihres Kunden · übermittelt mit eeziframes'; txt(tw(sub) <= frei ? sub : wrap('Übermittelt mit eeziframes', frei)[0], nx, bh / 2 + 5); }
+        if (gross) {
+          font('normal', 7.6, HELL2);
+          const was = ANF ? (sie ? 'Ihre Anfrage' : 'Deine Anfrage') : 'Aufmaß Ihres Kunden', sub = KZ === 'deutlich' ? was + ' · ' + (ANF ? 'erstellt' : 'übermittelt') + ' mit eeziframes' : was;
+          txt(tw(sub) <= frei ? sub : wrap(KZ === 'deutlich' ? 'Übermittelt mit eeziframes' : was, frei)[0], nx, bh / 2 + 5);
+        }
         if (gross) { font('bold', 7.2, GRUEN); txt(kicker, XR, bh / 2 - 1.6, { align: 'right', charSpace: 0.55 }); font('normal', 8, HELL2); txt(stand, XR, bh / 2 + 4, { align: 'right' }); }
         else { font('normal', 6.8, HELL2); txt(laufTitel + ' · ' + kennung, XR, bh / 2 + 1.1, { align: 'right' }); }
       } else {
@@ -177,9 +199,12 @@ window.Blatt = (() => {
     /* Fußzeile links: nur so lang, wie neben der Seitenzahl Platz ist; erst fällt der Zusatz weg, dann der Host, zuletzt wird der Name gekürzt */
     const fussLinks = (frei) => {
       const name = String(bt.name || 'Ihr Betrieb').replace(/\s+/g, ' ').trim(), passt = (x) => tw(x) <= frei;
-      const varianten = V === 'betrieb'
-        ? [[name, 'Aufmaß übermittelt mit eeziframes', HOST, 'Vor der Fertigung Feinaufmaß vor Ort.'], [name, 'Aufmaß übermittelt mit eeziframes', HOST], [name, 'übermittelt mit eeziframes'], [name]]
-        : [['Erstellt mit eeziframes', HOST, 'Vor der Fertigung Feinaufmaß vor Ort.'], ['Erstellt mit eeziframes', HOST], ['Erstellt mit eeziframes']];
+      const mit = ANF ? 'Erstellt mit eeziframes' : 'Aufmaß übermittelt mit eeziframes', h0 = HOST ? [HOST] : [];
+      const varianten = BKOPF && KZ === 'keine'
+        ? [[name].concat(h0, ['Vor der Fertigung Feinaufmaß vor Ort.']), [name].concat(h0), [name]]
+        : BKOPF
+          ? [[name, mit].concat(h0, ['Vor der Fertigung Feinaufmaß vor Ort.']), [name, mit].concat(h0), [name, ANF ? 'erstellt mit eeziframes' : 'übermittelt mit eeziframes'], [name]]
+          : [['Erstellt mit eeziframes', HOST, 'Vor der Fertigung Feinaufmaß vor Ort.'], ['Erstellt mit eeziframes', HOST], ['Erstellt mit eeziframes']];
       for (let k = 0; k < varianten.length; k++) { const s2 = varianten[k].join(' · '); if (passt(s2)) return s2; }
       let kurz = name; while (kurz.length > 1 && !passt(kurz + '...')) kurz = kurz.slice(0, -1);
       return kurz.trim() + '...';
@@ -286,8 +311,8 @@ window.Blatt = (() => {
     const FS = 8.4;
     y = kopfband(true) + 10;
     const gebText = [AW.lab('gebaeude', pr.gebaeude), pr.baujahr ? 'Baujahr ' + pr.baujahr : ''].filter(Boolean).join(', ');
-    if (V === 'betrieb') {
-      kicker('Aufmaß vom Kunden · fürs Angebot', M, y); y += 9;
+    if (BKOPF) {
+      kicker(ANF ? (sie ? 'Ihre Anfrage' : 'Deine Anfrage') + (bt.name ? ' bei ' + bt.name : '') : 'Aufmaß vom Kunden · fürs Angebot', M, y); y += 9;
       font('extra', 24, INK); txt(wrap((kd.name || 'Kunde') + '.', CW)[0], M, y); y += 7;
       font('normal', 10, INK2); txt(wrap([kd.adresse, gebText].filter(Boolean).join(' · ') || 'Objekt ohne Adresse', CW)[0], M, y); y += 6;
     } else {
@@ -304,7 +329,8 @@ window.Blatt = (() => {
     const tiefeT = AW.tiefeKopf ? AW.tiefeKopf(wins, pr, sie) : '';
     const eck = [['Gebäude', gebText || '–'], ['Fenster im Haus', tot ? nE + ' von ' + tot + ' werden getauscht' : 'nicht angegeben'], ['Zeitraum', AW.lab('zeit', pr.zeit) || '–'], ['Budget', AW.lab('budget', pr.budget) || '–'], ['Förderung', fw && fw !== 'keine' ? AW.lab('foerdweg', fw) || fw : 'keine Angabe']].concat(tiefeT ? [[V === 'kunde' ? 'Deine Planung' : 'Geplant', tiefeT]] : []);
     const kontaktZ = [['Name', pr.name || '–'], ['Ort', pr.ort || '–'], ['Telefon', pr.tel || '–'], ['E-Mail', pr.mail || '–'], ['Erreichbar', ERREICH[pr.erreich] || '–']].filter((r) => r[1] !== '–');
-    if (V !== 'betrieb') {
+    if (e.fotoHinweis) eck.push(['Fotos', String(e.fotoHinweis)]);
+    if (!BKOPF) {
       /* Der Weg: vier Schritte erledigt (Haken und Wort), der fünfte ist der nächste. Ehrlich gezählt: fehlt etwas, steht es offen da. */
       const wegS = [
         { t: 'Fotografiert', d: nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ', von der KI gelesen' : 'ohne Fotos', ok: nF > 0 },
@@ -341,9 +367,9 @@ window.Blatt = (() => {
       y += hb + 9;
     } else {
       /* Ihr Kunde und Eckdaten nebeneinander, dann die Übersicht aller Positionen mit Bestellmaß */
-      const halb = (CW - 5) / 2, oB = { lw: 22, fs: FS }, kb = [['Kunde', kd.name || '–'], ['Kontakt', kd.kontakt || '–']].concat((Array.isArray(kd.mehr) ? kd.mehr : []).filter((r) => r && r[1]).slice(0, 3).map((r) => [String(r[0]), String(r[1])]), [['Objekt', kd.adresse || '–']]);
+      const halb = (CW - 5) / 2, oB = { lw: 22, fs: FS }, kb = [[ANF ? 'Name' : 'Kunde', kd.name || '–'], ['Kontakt', kd.kontakt || '–']].concat((Array.isArray(kd.mehr) ? kd.mehr : []).filter((r) => r && r[1]).slice(0, 3).map((r) => [String(r[0]), String(r[1])]), [['Objekt', kd.adresse || '–']]);
       const hk = 11 + zeilenH(kb, halb - 8, oB) + 3, he = 11 + zeilenH(eck, halb - 8, { lw: 26, fs: FS }) + 3, hm = Math.max(hk, he);
-      karteRand(M, y, halb, hm); kicker('Ihr Kunde', M + 4, y + 6, GREY); zeilen(kb, M + 4, y + 9, halb - 8, oB);
+      karteRand(M, y, halb, hm); kicker(ANF ? (sie ? 'Ihre Angaben' : 'Deine Angaben') : 'Ihr Kunde', M + 4, y + 6, GREY); zeilen(kb, M + 4, y + 9, halb - 8, oB);
       karteRand(M + halb + 5, y, halb, hm); kicker('Eckdaten zum Projekt', M + halb + 9, y + 6, GREY); zeilen(eck, M + halb + 9, y + 9, halb - 8, { lw: 26, fs: FS });
       y += hm + 9;
       uebersichtKurz();
@@ -351,8 +377,9 @@ window.Blatt = (() => {
 
     /* Übersicht für den Betrieb auf Seite 1: Pos., Zeichnung, Fenster, Öffnung, Element, Bestellmaß, Stück */
     function uebersichtKurz() {
-      sektion(wins.length + (wins.length === 1 ? ' Position' : ' Positionen') + ' · ' + nE + (nE === 1 ? ' Element' : ' Elemente') + ' · mit Bestellmaß', 'Übersicht.', 'Maße in mm · Breite × Höhe');
-      const cols = [['Pos.', 9], ['', 12], ['Fenster', CW - 9 - 12 - 26 - 26 - 34 - 10], ['Öffnung', 26], ['Element', 26], ['Bestellmaß', 34], ['Stk.', 10]];
+      sektion(wins.length + (wins.length === 1 ? ' Position' : ' Positionen') + ' · ' + nE + (nE === 1 ? ' Element' : ' Elemente') + (BEST ? ' · mit Bestellmaß' : ''), 'Übersicht.', 'Maße in mm · Breite × Höhe');
+      /* ohne Bestellmaß (Kopie für den Endkunden): die Spalte bleibt leer und schmal */
+      const bmB = BEST ? 34 : 0, cols = [['Pos.', 9], ['', 12], ['Fenster', CW - 9 - 12 - 26 - 26 - bmB - 10], ['Öffnung', 26], ['Element', 26], [BEST ? 'Bestellmaß' : '', bmB], ['Stk.', 10]];
       const cX = []; let ax = M; cols.forEach((c) => { cX.push(ax); ax += c[1]; });
       const kopf = () => { font('bold', 6.8, GREY); cols.forEach((c, k) => { if (c[0]) txt(VERSAL(c[0]), cX[k] + (k === cols.length - 1 ? c[1] - 1 : 0), y, { align: k === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 }); }); y += 2; stroke(INK); doc.setLineWidth(0.4); doc.line(M, y, XR, y); y += 0.5; };
       kopf();
@@ -365,16 +392,16 @@ window.Blatt = (() => {
         font('bold', 8.6, INK); txt(wrap(w.name || 'Fenster', cols[2][1] - 3)[0], cX[2], ty - 1.6);
         font('normal', 7.2, INK2); txt(wrap([ARTNAME[w.art] || 'Fenster', AW.lab('etage', w.etage) || 'EG', (w.art || 'fenster') === 'fenster' || w.art === 'balkon' ? AW.oeffnungKurz(w).split(' · ').filter((x) => /Flügel|Seitenteil/.test(x)).join(' · ') : ''].filter(Boolean).join(' · '), cols[2][1] - 3)[0], cX[2], ty + 2.4);
         font('normal', 8.4, INK2); txt(d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) : '–', cX[3], ty); txt(d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) : '–', cX[4], ty);
-        font('extra', 9, INK); txt(b ? th(b.b) + ' × ' + th(b.h) : '–', cX[5], ty); if (b && b.warn.length) { punkt(cX[5] + tw(th(b.b) + ' × ' + th(b.h)) + 2, ty - 1.1, 0.9); }
+        if (BEST) { font('extra', 9, INK); txt(b ? th(b.b) + ' × ' + th(b.h) : '–', cX[5], ty); if (b && b.warn.length) { punkt(cX[5] + tw(th(b.b) + ' × ' + th(b.h)) + 2, ty - 1.1, 0.9); } }
         font('normal', 8.4, INK); txt(String(num(w.anzahl) || 1), XR - 1, ty, { align: 'right' });
         y += rh; stroke(LINE); doc.setLineWidth(0.2); doc.line(M, y, XR, y);
       });
-      font('normal', 7.4, GREY); const lg = wrap('Bestellmaß: Ihr Abzug von der Maueröffnung (' + ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten bei Fenstern' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten bei Türen' : '') + '). Punkt: vor Ort prüfen, Hinweis bei der Position. Verbindlich bleibt Ihr Feinaufmaß.', CW);
+      font('normal', 7.4, GREY); const lg = !BEST ? wrap('Maueröffnung: das kleinste von drei Maßen. Element: das sichtbare Fenster mit Rahmen. Vor der Fertigung misst ' + (bt.name || 'der Fensterbauer') + ' vor Ort nach.', CW) : wrap('Bestellmaß: Ihr Abzug von der Maueröffnung (' + ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten bei Fenstern' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten bei Türen' : '') + '). Punkt: vor Ort prüfen, Hinweis bei der Position. Verbindlich bleibt Ihr Feinaufmaß.', CW);
       txt(lg, M, y + 4, { lineHeightFactor: 1.25 }); y += 4 + lg.length * 3.2 + 6;
     }
 
     /* ---------- Klärungsliste: nach Gruppen, je Punkt Position, was, warum; im Betrieb mit Stand ---------- */
-    const klTitel = V === 'kunde' ? 'Noch zu klären, dein Fensterbauer berät dich' : 'Mit dem Kunden zu klären';
+    const klTitel = V === 'kunde' ? 'Noch zu klären, dein Fensterbauer berät dich' : ANF ? (sie ? 'Noch zu klären, wir beraten Sie gern' : 'Noch zu klären, wir beraten dich gern') : 'Mit dem Kunden zu klären';
     /* Ein Punkt als Tabellenzeile: Kästchen (geklärt: grüner Haken), links die Position, rechts was zu klären ist und warum */
     const KL_K = 38;
     function klaerPunktH(r, w) {
@@ -444,7 +471,7 @@ window.Blatt = (() => {
       [ARTNAME[w.art] || 'Fenster', AW.oeffnungKurz(w), AW.lab('etage', w.etage) || 'EG', n + ' Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos'].forEach((teil) => { const z = datenZ ? datenZ + ' · ' + teil : teil; if (tw(z) <= CW - boxW - 22) datenZ = z; }); // passt ein Teil nicht (lange Öffnung einer Tür), fehlt nur er
       txt(datenZ, M + 16, y + 10);
       fill(BUEHNE); rr(XR - boxW, y - 2, boxW, 15, 2.6);
-      if (V === 'betrieb') { kicker('Bestellmaß-Vorschlag', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(b ? b.text : '–', XR - boxW + 4, y + 8.4); font('normal', 6.4, HELL2); txt(wrap(b ? b.formel : 'ohne Maueröffnung kein Vorschlag', boxW - 8)[0], XR - boxW + 4, y + 11.6); }
+      if (BEST) { kicker('Bestellmaß-Vorschlag', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(b ? b.text : '–', XR - boxW + 4, y + 8.4); font('normal', 6.4, HELL2); txt(wrap(b ? b.formel : 'ohne Maueröffnung kein Vorschlag', boxW - 8)[0], XR - boxW + 4, y + 11.6); }
       else { kicker(w.neu ? 'Rohbauöffnung' : 'Maueröffnung', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' : 'nicht gemessen', XR - boxW + 4, y + 8.4); font('normal', 6.6, HELL2); txt('Element ' + (d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm' : 'nicht gemessen'), XR - boxW + 4, y + 11.6); }
       y += 17;
       /* Was bei dieser Position zu klären ist: in einer Zeile, Einzelheiten in der Liste vorn */
@@ -677,6 +704,7 @@ window.Blatt = (() => {
     if (EIGENE) { if (wins.length <= 1 || y + 90 > unten()) neueSeite(); codeTeil(); eigeneKunden(); }
 
     fuss();
+    if (e.ausgabe === 'bytes') return new Uint8Array(doc.output('arraybuffer'));
     return doc.output('blob');
   }
   return { pdf: pdf, schrift: schrift };

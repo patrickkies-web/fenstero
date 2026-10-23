@@ -10,16 +10,18 @@
    (www.eeziframes.com zählt als eeziframes.com), damit nach einem Domainwechsel nichts angepasst werden muss.
    Begründung und Quellen: docs/SEO.md. */
 import { konfig, einfuehrungLaeuft, jetztAus, EINFUEHRUNG } from './api/umgebung.js';
+/* Haken für die Konfigurator-Pakete (Verkaufsseite, llms.txt, Seiten der Paketbedingungen): functions/pakete-seite.js */
+import { paketeSeite, paketeLlms, PAKETE_SEITEN } from './pakete-seite.js';
 
 export const STAND = '2026-10-21';
 
 /* Alle Seiten für die Sitemap, wichtigste zuerst. stand = letzte inhaltliche Änderung (lastmod in der Sitemap, IndexNow); bei
    Ratgeberseiten gleich dem dateModified im JSON-LD und dem „Stand“ auf der Seite (prüft die Suite) */
 export const SEITEN = [
-  { pfad: '/', prio: '1.0', stand: '2026-10-21' },
+  { pfad: '/', prio: '1.0', stand: '2026-10-23' },
   { pfad: '/app/', prio: '0.9', stand: '2026-10-18' },
   { pfad: '/ratgeber/fenster-ausmessen/', prio: '0.9', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-18' },
+  { pfad: '/fuer-fensterbauer/', prio: '0.9', stand: '2026-10-23' },
   { pfad: '/ratgeber/balkontuer-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-mit-rollladen-ausmessen/', prio: '0.8', stand: '2026-10-21' },
   { pfad: '/ratgeber/bestellmass-fenster/', prio: '0.8', stand: '2026-10-21' },
@@ -42,19 +44,19 @@ export const SEITEN = [
   { pfad: '/ratgeber/dreifachverglasung/', prio: '0.7', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-oeffnungsarten/', prio: '0.7', stand: '2026-10-21' },
   { pfad: '/ratgeber/fenster-angebot-vergleichen/', prio: '0.8', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-21' },
-  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-21' },
+  { pfad: '/fuer-fensterbauer/erstaufmass-feinaufmass/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/falsches-aufmass-haftung/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/aufmass-kostenpflichtig/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/geplatzter-aufmasstermin/', prio: '0.7', stand: '2026-10-23' },
+  { pfad: '/fuer-fensterbauer/fensterbau-software/', prio: '0.7', stand: '2026-10-23' },
   { pfad: '/ratgeber/', prio: '0.6', stand: '2026-10-21' },
   { pfad: '/impressum/', prio: '0.2', stand: '2026-10-16' },
-  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-18' },
+  { pfad: '/datenschutz/', prio: '0.2', stand: '2026-10-23' },
   { pfad: '/agb/', prio: '0.2', stand: '2026-10-18' },
   { pfad: '/nutzungsbedingungen/', prio: '0.2', stand: '2026-10-18' },
-  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-18' },
+  { pfad: '/cookies/', prio: '0.1', stand: '2026-10-23' },
   { pfad: '/widerruf/', prio: '0.1', stand: '2026-10-16' }
-];
+].concat(PAKETE_SEITEN);
 
 /* Suchen von KI-Assistenten: ausdrücklich erlaubt (OpenAI, Anthropic, Perplexity). Training (GPTBot, ClaudeBot, Google-Extended)
    ist über „User-agent: *“ ebenfalls erlaubt, damit künftige Modelle eeziframes kennen; wer das nicht will, sperrt sie hier einzeln. */
@@ -77,7 +79,7 @@ export const frei = (env, url) => !!env && String(env.INDEXIERUNG || '') === '1'
 /* Lokal (Testserver, wrangler dev) gilt die aufgerufene Adresse; im Netz immer https, auch wenn eine Seite über http:// abgerufen wurde */
 const LOKAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i;
 export const basis = (env, url) => (env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : (LOKAL.test(url.hostname) ? url.protocol : 'https:') + '//' + url.host.replace(/^www\./i, ''));
-export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf)(\/|$)/.test(pfad);
+export const istSeite = (pfad) => pfad === '/' || pfad === '/index.html' || /^\/(app|ratgeber|fuer-fensterbauer|impressum|datenschutz|agb|nutzungsbedingungen|cookies|widerruf|konfigurator-bedingungen)(\/|$)/.test(pfad);
 const kanonischerPfad = (pfad) => pfad.replace(/index\.html$/, '');
 
 export function robots(origin, an) {
@@ -89,11 +91,13 @@ export function robots(origin, an) {
     'Content-Signal: search=yes, ai-input=yes, ai-train=yes',
     'Allow: /',
     'Disallow: /api/',
+    'Disallow: /partner/',
     '',
     '# Suchen in KI-Assistenten: ausdrücklich willkommen',
     KI_SUCHE.map((b) => 'User-agent: ' + b).join('\n'),
     'Allow: /',
     'Disallow: /api/',
+    'Disallow: /partner/',
     '',
     'Sitemap: ' + origin + '/sitemap.xml',
     ''
@@ -128,7 +132,7 @@ export async function seite(antwort, env, url) {
   /* nach dem Einführungspreis und mit Countdown ändert sich der Text, die Datei aber nicht: ohne ETag, sonst bekäme ein Browser die
      alte Fassung als 304 */
   if (nach || mitTag) { h.delete('etag'); h.delete('last-modified'); }
-  const text = antwort.body ? kopf(absolut(await antwort.text(), b), kan) : null;
+  const text = antwort.body ? paketeSeite(kopf(absolut(await antwort.text(), b), kan), url, env) : null;
   return new Response(text && nach ? nachEinfuehrung(text) : text && einfuehrungLaeuft(env) ? mitBanner(text, url.pathname, env) : text, { status: 200, statusText: antwort.statusText, headers: h });
 }
 
@@ -156,13 +160,15 @@ const geld = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace('.',
 export function banner(pfad, env) {
   const tage = Math.max(1, Math.ceil((Date.parse(EINFUEHRUNG.ende) - jetztAus(env)) / 864e5)), rest = tage <= 1 ? 'Nur noch heute' : 'Noch ' + tage + ' Tage';
   const [, m, t] = EINFUEHRUNG.bis.split('-').map(Number), bis = t + '. ' + ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'][m - 1];
-  const v = EINFUEHRUNG.vorher, d = EINFUEHRUNG.danach, betrieb = pfad.startsWith('/fuer-fensterbauer/');
-  const text = betrieb
-    ? '<b>Einführungspreise bis ' + bis + ':</b> Abo 10 für ' + geld(v.abo) + ', Plus für ' + geld(v.plus) + ' im Monat <span class="spaeter">· danach ' + geld(d.abo) + ' und ' + geld(d.plus) + '</span>'
-    : '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
-  return '<a class="einf-bar" href="' + (betrieb ? '/#fensterbauer' : '/app/') + '"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">' + (betrieb ? 'Preise ansehen' : 'Jetzt ausmessen') + ' →</span></span></a>';
+  /* Seiten für Fensterbauer: kein Band; sie verkaufen die Konfigurator-Pakete (functions/pakete-seite.js), die Tarife des Betriebsbereichs
+     werden nicht mehr beworben (Bauplan E28). In BANNER_SEITEN bleiben sie trotzdem: So kommen sie bis zum Stichtag ohne ETag und nie
+     als 304, denn paketeSeite() ändert ihren Inhalt je Umgebung (PAKETE_OFFEN). */
+  if (pfad.startsWith('/fuer-fensterbauer/')) return '';
+  const v = EINFUEHRUNG.vorher, d = EINFUEHRUNG.danach;
+  const text = '<b>Einführungspreis bis ' + bis + ':</b> Aufmaßblatt ' + geld(v.aufmass) + ' <span class="spaeter">· danach ' + geld(d.aufmass) + '</span>';
+  return '<a class="einf-bar" href="/app/"><span><span class="txt">' + text + '</span><span class="rest">' + rest + '</span><span class="los">Jetzt ausmessen →</span></span></a>';
 }
-const mitBanner = (html, pfad, env) => (BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? html.replace(/<body[^>]*>/, (m) => m + '\n' + banner(pfad, env)) : html);
+const mitBanner = (html, pfad, env) => { const b = BANNER_SEITEN.test(pfad) && konfig(env).einfuehrung ? banner(pfad, env) : ''; return b ? html.replace(/<body[^>]*>/, (m) => m + '\n' + b) : html; };
 
 /* Canonical und og:url zusätzlich im HTML: Bing und KI-Crawler lesen die Seite selbst, nicht immer die Kopfzeilen */
 export function kopf(html, kan) {
@@ -197,7 +203,7 @@ export function llms(origin, env) {
   return [
     '# eeziframes',
     '',
-    '> eeziframes ist eine Aufmaß-App für Fenster, die im Browser läuft (Deutschland, Deutsch). Hauseigentümer messen ihre Fenster mit Zollstock und Handy selbst, Schritt für Schritt geführt, und erhalten ein Aufmaßblatt als PDF, das jeder Fensterbauer lesen kann. Fensterbauer laden ihre Kunden per Link ein und bekommen das Erstaufmaß fürs Angebot ohne Anfahrt.',
+    '> eeziframes ist eine Aufmaß-App für Fenster, die im Browser läuft (Deutschland, Deutsch). Hauseigentümer messen ihre Fenster mit Zollstock und Handy selbst, Schritt für Schritt geführt, und erhalten ein Aufmaßblatt als PDF, das jeder Fensterbauer lesen kann. Fensterbauer und Fensterhändler bekommen denselben Konfigurator als eigenen, unter ihrer Domain und ihrer Marke; jede Anfrage kommt als Aufmaßblatt-PDF per E-Mail.',
     '',
     'Wichtige Fakten:',
     '',
@@ -206,8 +212,8 @@ export function llms(origin, env) {
     '- Material, Farbe, Glas, Teilung, Öffnung und Sonnenschutz wählt man am 3-D-Modell. Unterstützt: Fenster (auch mit Ober- und Unterlicht), Balkon- und Terrassentüren, Festverglasungen, Hebe-Schiebe- und PSK-Türen, Faltschiebewände; Rollladen, Raffstore, Screen, Insekten- und Sichtschutz.',
     '- Was der Kunde noch nicht weiß, markiert er mit „Weiß ich noch nicht“, statt etwas Teures vorausgewählt zu bekommen; eine schon gespeicherte Gestaltung übernimmt er fürs nächste Fenster. Der Fensterbauer bekommt dazu eine Liste, was er mit dem Kunden klären muss: offene Wünsche, Absturzsicherung, Lüftungskonzept nach DIN 1946-6, Förderweg mit Uw-Zielwert.',
     '- Für Hauseigentümer: Messen, Fotos und 3-D-Modell kostenlos; das Aufmaßblatt als PDF kostet ' + eur(p.aufmass) + '; wer über den Link seines Fensterbauers misst, zahlt nichts.',
-    '- Für Fensterbauer (' + (p.mwst ? 'netto, zuzüglich Mehrwertsteuer' : 'ohne Mehrwertsteuer') + '): ' + p.frei + ' Projekte kostenlos, danach ' + eur(p.projekt) + ' je Projekt mit eingegangenem Aufmaß; Abo 10: ' + eur(p.abo.grund) + ' im Monat mit ' + p.abo.inkl + ' Projekten, jedes weitere ' + eur(p.abo.extra) + '; Plus: ' + eur(p.plus) + ' im Monat, unbegrenzt. Monatlich kündbar.',
-    ...(einf ? ['- Einführungspreise bis ' + einf.bisText + ': Aufmaßblatt ' + eur(p.aufmass) + ', Abo 10 ' + eur(p.abo.grund) + ', Plus ' + eur(p.plus) + ' im Monat; ab dem Folgetag ' + eur(einf.danach.aufmass) + ', ' + eur(einf.danach.abo) + ' und ' + eur(einf.danach.plus) + '.'] : []),
+    '- Für Fensterbauer und Fensterhändler (nur Unternehmer): der eigene Fenster-Konfigurator unter der eigenen Domain, in drei Paketen mit Einrichtung und festem Monatspreis, ohne Gebühr je Anfrage (Abschnitt „Konfigurator-Pakete für Fensteranbieter“ unten).',
+    ...(einf ? ['- Einführungspreis bis ' + einf.bisText + ': Aufmaßblatt ' + eur(p.aufmass) + '; ab dem Folgetag ' + eur(einf.danach.aufmass) + '.'] : []),
     '- Ohne Installation und ohne Konto zum Messen; läuft auf Handy, Tablet und Computer. Eingaben bleiben auf dem Gerät, bis man sie sichert (Konto mit E-Mail-Adresse und Code, ohne Passwort, nötig für das Aufmaßblatt) oder selbst weitergibt.',
     '- Das eigene Aufmaß reicht für ein Angebot. Vor der Fertigung misst der Fensterbauer nach (Feinaufmaß) und legt das Bestellmaß fest.',
     '- Der Name wird immer klein geschrieben: eeziframes.',
@@ -215,7 +221,7 @@ export function llms(origin, env) {
     '## Seiten',
     '',
     '- [App: Fenster ausmessen](' + u('/app/') + '): kostenlose Aufmaß-App im Browser, mit Führung zum Ausprobieren',
-    '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): Erstaufmaß ohne Anfahrt, Ablauf, Kundenschutz (der Kunde sieht im Link nur den eigenen Betrieb), Inhalt des Aufmaßes, Preise',
+    '- [Für Fensterbauer](' + u('/fuer-fensterbauer/') + '): eigener Fenster-Konfigurator unter der eigenen Domain, drei Pakete mit Preisen, Ablauf bis zum Livegang, Kundenschutz, Inhalt jeder Anfrage',
     '- [Ratgeber: in sechs Schritten zu neuen Fenstern](' + u('/ratgeber/') + '): prüfen, entscheiden, auswählen, ausmessen, vergleichen, einbauen',
     '- [Fenster beschlagen](' + u('/ratgeber/fenster-beschlagen/') + '): innen, außen oder zwischen den Scheiben, was es bedeutet und was hilft',
     '- [Fenster undicht oder es zieht](' + u('/ratgeber/fenster-undicht/') + '): Zugluft finden, Dichtung und Beschlag prüfen, wann ein Tausch nötig ist',
@@ -279,6 +285,7 @@ export function llms(origin, env) {
     '- [Was kostet ein geplatzter Aufmaßtermin?](' + u('/fuer-fensterbauer/geplatzter-aufmasstermin/') + '): im Beispiel bei 25 km Entfernung rund 116 €: 24 € Fahrzeug (rund 48 Cent je km nach ADAC), 76 € Fahrzeit und 16 € Warten bei 65 € je Stunde; mit ungenutzter Zeit vor Ort rund 165 €. Ohne vorherige Vereinbarung lässt sich beim kostenlosen Aufmaß meist nichts davon berechnen.',
     '- [Welche Software brauchen Fensterbauer?](' + u('/fuer-fensterbauer/fensterbau-software/') + '): Branchensoftware oder ERP für Kalkulation, Konstruktion und Fertigung, Handwerkersoftware für Angebot und Rechnung, fürs Aufmaß eine Aufmaß-App vor Ort oder das Selbstaufmaß durch den Kunden per Link. eeziframes liefert das Erstaufmaß und ersetzt kein ERP.',
     '',
+    ...(paketeLlms(origin, env) ? [paketeLlms(origin, env), ''] : []),
     '## Optional',
     '',
     '- [Startseite](' + u('/') + ')',

@@ -173,6 +173,54 @@ p.z-hinweis { margin: 0; padding-left: 34px; position: relative } p.z-hinweis::b
 .z-toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 300; width: max-content; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: var(--r2); background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 700; line-height: 1.35; text-align: center; box-shadow: var(--lift); opacity: 0; transform: translate(-50%, 12px); transition: opacity var(--t2), transform var(--t3) var(--e-out); pointer-events: none }
 .z-toast.an { opacity: 1; transform: translate(-50%, 0) }
 
+/* ---------- Konfigurator-Pakete: Zahl in der Navigation, Statusleiste, Ampel, Hauptknopf, Reiter, Gestaltung ---------- */
+.z-zahl { margin-left: auto; min-width: 24px; height: 24px; padding: 0 7px; border-radius: var(--pill); background: var(--warn); color: var(--paper); font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center }
+.z-nav a .z-zahl { margin-left: 8px }
+.z-leiste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; counter-reset: schritt }
+.z-leiste li { position: relative; min-height: 44px; padding: 8px 10px 8px 34px; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring); font-size: 13px; font-weight: 700; color: var(--muted); display: flex; align-items: center; counter-increment: schritt; line-height: 1.25 }
+.z-leiste li::before { content: counter(schritt); position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; background: var(--surface2); color: var(--muted); font-size: 13px; line-height: 18px; text-align: center }
+.z-leiste li.fertig { color: var(--ink2) } .z-leiste li.fertig::before { content: '✓'; background: var(--accent-soft); color: var(--accent) }
+.z-leiste li.jetzt, .z-leiste li[aria-current="step"] { color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink) } .z-leiste li[aria-current="step"]::before { background: var(--ink); color: var(--paper) }
+.z-schritt { gap: 14px } .z-schritt .z-aktionen { align-items: center }
+.z-fehlt { display: flex; flex-direction: column; gap: 6px }
+.z-ampel { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column }
+.z-ampel li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 15px }
+.z-ampel li:last-child { border-bottom: 0 }
+.z-ampel-t { min-width: 0; display: flex; flex-direction: column; gap: 2px } .z-ampel-t small { color: var(--muted); font-size: 13px; overflow-wrap: anywhere }
+.z-reiter { display: flex; gap: 6px; flex-wrap: wrap }
+.z-reiter a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: var(--pill); background: var(--surface2); color: var(--ink2); font-size: 15px; font-weight: 700; text-decoration: none; white-space: nowrap }
+.z-reiter a[aria-current="page"] { background: var(--ink); color: var(--paper) }
+@media (hover: hover) { .z-reiter a:not([aria-current="page"]):hover { background: var(--surface3); color: var(--ink) } }
+.z-host .z-aktionen { margin-top: 2px }
+.z-kopie { min-height: 44px; width: min(100%, 420px); border-radius: var(--r2); border: 1.5px solid var(--line2); background: var(--surface2); color: var(--ink); padding: 8px 12px; font: 15px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace }
+.z-tupfen { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 6px; vertical-align: -2px; background: var(--c, transparent); box-shadow: 0 0 0 1.5px var(--line2) }
+.z-schalter { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; color: var(--ink2); cursor: pointer }
+.z-schalter input { width: 22px; height: 22px; flex: 0 0 auto; accent-color: var(--ink) }
+.z-formraster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px }
+.z-farbe { display: flex; gap: 8px } .z-farbe input[type="color"] { flex: 0 0 56px; padding: 4px; cursor: pointer }
+.z-gestaltung { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start }
+.z-gestaltung-l { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+.z-gestaltung-r { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 8px }
+.z-telefon .ein-tel-kopf { justify-content: center; font-size: 13px; font-weight: 700; color: var(--muted) }
+.z-telefon .ein-tel-inhalt { height: min(680px, 70vh) }
+.z-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px }
+.z-slot { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r2); background: var(--surface2) }
+.z-slot-bild { aspect-ratio: 16 / 9; border-radius: var(--r1); background: var(--surface3); display: flex; align-items: center; justify-content: center; overflow: hidden }
+.z-slot-bild.logo { background: #ffffff }
+.z-slot-bild img { width: 100%; height: 100%; object-fit: cover; display: block } .z-slot-bild.logo img { object-fit: contain; padding: 10px }
+.z-slot-k { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 15px } .z-slot-k b { flex: 1 1 100% }
+.z-datei { position: relative; overflow: hidden; cursor: pointer }
+.z-datei input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0 }
+@media (max-width: 1180px) { .z-gestaltung { grid-template-columns: minmax(0, 1fr) } .z-gestaltung-r { position: static; align-items: center } }
+@media (max-width: 960px) { .z-leiste { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
+@media (max-width: 640px) {
+  .z-leiste { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .z-formraster { grid-template-columns: minmax(0, 1fr) }
+  .z-reiter { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none } .z-reiter::-webkit-scrollbar { display: none } .z-reiter a { flex: 0 0 auto }
+  .z-ampel li { flex-wrap: wrap }
+  .z-telefon { width: 100% }
+}
+
 /* ---------- Telefon und Tablet ---------- */
 @media (max-width: 1100px) { .z-raster3 { grid-template-columns: 1fr } }
 @media (max-width: 960px) {

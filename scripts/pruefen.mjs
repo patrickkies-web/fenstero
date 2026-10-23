@@ -45,6 +45,10 @@
 // dazu der Angleich an die Detailtiefe: ein Kapitelkonzept (Leiste, Kicker, Übersicht), Tiefe-Pille neben „Notiz“ mit Browser-Zurück,
 // Notiz und i an jeder Detailfrage, RAL-Farbwahl bei den Detailfarben, Zifferntasten für die neuen Maße, Stulp mit Seitenteilen,
 // Standard mit dem Namen des Betriebs, keine Gesamtübersicht und ein Entwurf, der „Mehr zu …“ und die Tiefe behält.
+// Abschnitte 23 bis 30 prüfen die Konfigurator-Instanzen in drei Paketen (docs/INSTANZEN.md); sie stehen je in einem Modul unter
+// scripts/pruefen-instanzen/ und laufen gegen einen eigenen Testserver mit Attrappen (Hilfsobjekt h, scripts/pruefen-instanzen/hilfe.mjs).
+// 23 Mandant, Routing, Schutz (vorneweg 23-fundament.mjs: Pakete, Regeln, Speicher, Sitzungen, Post, Bremsen, Testserver) · 24 Eingang ·
+// 25 App im Instanz-Modus · 26 Zentrale · 27 Kundenkonto und Bestellung · 28 Signature-Dashboard · 29 Verkaufsseite, Recht · 30 Ende zu Ende.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -1541,7 +1545,7 @@ if (teil(10)) {
   for (const s of seo.SEITEN) {
     const r = await roh(s.pfad);
     const titel = (r.text.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
-    const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/'].includes(s.pfad), ld = ldjson(r.text);
+    const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/'].includes(s.pfad), ld = ldjson(r.text);
     ok(r.status === 200 && (r.text.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
     ok(!/<meta name="robots"/.test(r.text) && r.h.get('x-robots-tag') === seo.SPERRE && !!r.h.get('content-security-policy') && r.h.get('link') === '<' + BASE + s.pfad + '>; rel="canonical"', s.pfad + ': Pilotphase per Kopfzeile noindex (kein Meta-Tag), CSP und Canonical vom Worker');
     if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + '/og.png', s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut');
@@ -1561,12 +1565,15 @@ if (teil(10)) {
   ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fenster ausmessen\. Selbst\. eezi\./.test(await page.locator('h1').first().textContent()), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero)');
   const fuss = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
+  /* Die Seite für Fensterbauer verkauft die Konfigurator-Pakete (Bauplan E28); Tour und Registrierung des Betriebsbereichs bleiben
+     über /#tour und /#fensterbauer erreichbar, werden dort aber nicht mehr beworben */
   await page.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
-  await page.click('.rg-cta a[href="/#tour"]'); await page.waitForLoadState('networkidle'); await page.waitForTimeout(600);
-  const tour1 = await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour');
+  const fbAlt = await page.evaluate(() => document.querySelectorAll('a[href="/#tour"], a[href="/#fensterbauer"], a[href$="/#tour"], a[href$="/#fensterbauer"]').length + (/Kostenlos starten/.test(document.body.innerText) ? 1 : 0));
+  await page.goto(BASE + '/#tour', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
+  const tour1 = fbAlt === 0 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour');
   await page.evaluate(() => tourEnde()); await page.waitForTimeout(300); // Tour beenden räumt den eigenen Eintrag im Verlauf ab (Zurück im Browser, S6)
   await page.evaluate(() => { location.hash = 'tour'; }); await page.waitForTimeout(400);
-  ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Link „Tour“ auf der Seite für Fensterbauer öffnet die Tour (/#tour), auch als Sprungmarke auf der Startseite');
+  ok(tour1 && await page.evaluate(() => S.screen === 'tour' && location.hash !== '#tour'), 'Seite für Fensterbauer ohne Tour, Registrierung und „Kostenlos starten“ des Betriebsbereichs; /#tour öffnet die Tour weiterhin, auch als Sprungmarke auf der Startseite');
   await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   ok(await page.locator('.vorab').count() === 0 && await page.locator('a[href$="/ratgeber/fenster-ausmessen/"]').count() >= 1 && await page.locator('a[href$="/#fensterbauer"]').count() >= 1, 'App mit JavaScript: Textfassung weg, Anleitung verlinkt, Fensterbauer kommen in ihre Ansicht');
   sauber(page, 'Startseite und App mit Textfassung ohne Fehler');
@@ -1584,7 +1591,8 @@ if (teil(10)) {
         const groessen = new Set(), klein = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n;
         while ((n = w.nextNode())) { if (!n.textContent.trim()) continue; const el = n.parentElement; if (el.closest('script, style')) continue; groessen.add(parseFloat(getComputedStyle(el).fontSize)); }
         document.querySelectorAll('.rg-kopf a, .rg-fuss a, .rg-cta a, .rg-karte, .rg-frage summary').forEach((a) => { const r = a.getBoundingClientRect(); if (r.width && r.height && (r.height < 44 || r.width < 44)) klein.push((a.textContent || '').trim().slice(0, 24) + ' ' + Math.round(r.width) + '×' + Math.round(r.height)); });
-        const t = document.body.innerText;
+        /* Paketnamen (EEZI Essential, EEZI Signature) und das zitierte Zeichen „Powered by EEZIframes“ sind vorgegeben (Bauplan §2b, E27) */
+        const t = document.body.innerText.replace(/EEZI (Essential|Signature)\b/g, '').replace(/Powered by EEZIframes/g, '');
         return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm') };
       });
       const erlaubt = gname === 'Telefon' ? [13, 15, 17, 24, 32] : [13, 15, 17, 24, 40];
@@ -1631,9 +1639,10 @@ if (teil(10)) {
   ok(ausDatei['X-Robots-Tag'] === seo.SPERRE && Object.entries(seo.SICHERHEIT).every(([k, v]) => ausDatei[k] === v) && Object.keys(ausDatei).every((k) => k === 'X-Robots-Tag' || k in seo.SICHERHEIT), 'Kopfzeilen in functions/seo.js und web/_headers stimmen überein');
   const dateien = [], such = (d, rel) => { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) such(path10.join(d, e.name), rel + e.name + '/'); else if (e.name === 'index.html') dateien.push(rel); } };
   such(path10.join(WURZEL, 'web'), '/');
-  const oeffentlich = dateien.filter((p) => p !== '/zentrale/');
+  const oeffentlich = dateien.filter((p) => p !== '/zentrale/' && p !== '/partner/' && p !== '/betrieb/'); // nicht öffentlich: Zentrale, Kundenkonto der Fensteranbieter, Dashboard der Instanzen (nur auf deren Domains)
   ok(oeffentlich.length === seo.SEITEN.length && oeffentlich.every((p) => seo.SEITEN.some((s) => s.pfad === p)), 'Sitemap kennt jede öffentliche Seite in web/ (' + oeffentlich.length + ')');
   ok(dateien.includes('/zentrale/') && !seo.SEITEN.some((s) => s.pfad.startsWith('/zentrale')) && !seo.istSeite('/zentrale/') && !seo.llms('https://eeziframes.com', {}).includes('zentrale'), 'Zentrale des Inhabers: nicht in Sitemap und llms.txt, keine Seite für Suchmaschinen');
+  ok(dateien.includes('/partner/') && !seo.SEITEN.some((s) => s.pfad.startsWith('/partner')) && !seo.istSeite('/partner/') && /Disallow: \/partner\//.test(seo.robots('https://eeziframes.com', true)), 'Kundenkonto der Fensteranbieter (/partner/): nicht in der Sitemap, keine Seite für Suchmaschinen, in robots.txt gesperrt');
   const routen = JSON.parse((fs10.readFileSync(path10.join(WURZEL, 'wrangler.jsonc'), 'utf8').match(/"run_worker_first":\s*(\[[^\]]*\])/) || [])[1] || '[]');
   const passt = (r, p) => (r.endsWith('*') ? p.startsWith(r.slice(0, -1)) : p === r);
   ok(seo.SEITEN.every((s) => seo.istSeite(s.pfad) && routen.some((r) => passt(r, s.pfad))) && ['/robots.txt', '/sitemap.xml', '/llms.txt'].every((p) => routen.includes(p)), 'Worker übernimmt alle Seiten, robots.txt, sitemap.xml und llms.txt (run_worker_first in wrangler.jsonc)');
@@ -1646,7 +1655,7 @@ if (teil(10)) {
      Zentrale, Logo.svg in App und Betriebsbereich; das PDF mit denselben Punkten; das Bild für die E-Mails (scripts/marke-bilder.mjs) */
   const gem10 = fs10.readFileSync(path10.join(WURZEL, 'web/assets/gemeinsam.js'), 'utf8'), innen10 = (gem10.match(/var LOGO_INNEN = '([^']*)';/) || [])[1] || '';
   const statisch10 = '<svg viewBox="0 0 64 64" aria-hidden="true">' + innen10 + '</svg>', seiten10 = [];
-  (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep) && !seo.BESTAETIGUNG['/' + e.name]) seiten10.push(f); } })(path10.join(WURZEL, 'web'));
+  (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep) && !f.includes(path10.sep + 'betrieb' + path10.sep) && !seo.BESTAETIGUNG['/' + e.name]) seiten10.push(f); } })(path10.join(WURZEL, 'web')); // Dashboard der Instanzen: Marke des Betriebs, ohne eeziframes
   const ohneZeichen10 = seiten10.filter((f) => !fs10.readFileSync(f, 'utf8').includes(statisch10)).map((f) => path10.relative(WURZEL, f));
   const lies10 = (f) => fs10.readFileSync(path10.join(WURZEL, f), 'utf8'), bl10 = lies10('web/assets/blatt.js');
   ok(/fi-strahl/.test(innen10) && seiten10.length >= 19 && !ohneZeichen10.length && lies10('web/favicon.svg').includes(innen10) && lies10('web/assets/zentrale.js').includes(innen10) && ['[26.4, 12.2]', '[57, 17.6]', '[44.2, 41]', '[11.7, 64]'].every((s) => bl10.includes(s)) && !/fi-fluegel|rx="16" fill="#000"/.test(seiten10.map((f) => fs10.readFileSync(f, 'utf8')).join('') + gem10) && /ZEICHEN_PNG = 'iVBOR/.test(lies10('functions/api/marke.js')), 'Das neue Zeichen steht überall gleich: ' + seiten10.length + ' Seiten, Favicon, Zentrale, App und Betriebsbereich, im PDF mit denselben Punkten, als Bild für die E-Mails' + (ohneZeichen10.length ? '; fehlt in ' + ohneZeichen10.join(', ') : ''));
@@ -1655,8 +1664,14 @@ if (teil(10)) {
   const konf = {}; new Function('window', fs10.readFileSync(path10.join(WURZEL, 'web/config.js'), 'utf8'))(konf);
   const pr = konf.KONFIG.preise, fb = (await roh('/fuer-fensterbauer/')).text, ab = (await roh('/ratgeber/aufmassblatt-fenster/')).text, fa = (await roh('/ratgeber/fenster-ausmessen/')).text;
   const neuPreis = await Promise.all(['balkontuer-ausmessen', 'fenster-mit-rollladen-ausmessen', 'din-links-rechts', 'bruestungshoehe-fenster'].map(async (n) => (await roh('/ratgeber/' + n + '/')).text));
-  ok([eur(pr.projekt) + ' netto', eur(pr.abo.grund) + ' im Monat', 'jedes weitere ' + eur(pr.abo.extra), eur(pr.plus) + ' im Monat', 'ersten ' + pr.frei + ' Projekte'].every((t) => fb.includes(t)) && [start.text, app.text, ab, fb, fa, ...neuPreis].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten wie in config.js, auch in den neuen Ratgebern (' + [pr.aufmass, pr.projekt, pr.abo.grund, pr.plus].map(eur).join(', ') + ')');
-  ok(/<h2 id="kundenschutz">Kundenschutz: Ihr Kunde bleibt Ihr Kunde<\/h2>/.test(fb) && ['Nur Ihr Betrieb:', 'Nur in Ihr Konto:', 'Keine Kopie von uns:', 'Kein Weiterverkauf:'].every((s) => fb.includes(s)) && fb.includes('href="/nutzungsbedingungen/#kundenschutz"') && fb.includes('Kann mir ein anderer Betrieb über eeziframes den Kunden abwerben?'), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen, Verweis auf § 11 der Nutzungsbedingungen und die Frage zum Abwerben');
+  /* Seite für Fensterbauer: die Paketpreise aus web/assets/pakete.js (Abschnitt 29 prüft sie im Einzelnen), keine Tarife des
+     Betriebsbereichs (Projektpreis, Abo 10, Plus); der Preis des Aufmaßblatts für Hauseigentümer bleibt auf Startseite, App und Ratgeber */
+  await import(new URL('../web/assets/pakete.js', import.meta.url).href);
+  const PK = globalThis.Pakete, pkEur = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')) + '\u202f€';
+  const fbPakete = PK.LISTE.every((x) => fb.includes(pkEur(PK.preis(x).monat)) && fb.includes(pkEur(PK.preis(x).einrichtung)) && fb.includes(PK.PAKETE[x].name));
+  const fbAlteTarife = ['Abo 10', eur(pr.projekt) + ' netto', 'jedes weitere ' + eur(pr.abo.extra), 'ersten ' + pr.frei + ' Projekte', 'Kostenlos starten'].filter((x) => fb.includes(x));
+  ok(fbPakete && !fbAlteTarife.length && [start.text, app.text, ab, fa, ...neuPreis].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten: Aufmaßblatt wie in config.js (' + eur(pr.aufmass) + ', auch in den neuen Ratgebern), Seite für Fensterbauer mit den Paketpreisen aus pakete.js und ohne die Tarife des Betriebsbereichs' + (fbAlteTarife.length ? ' (noch da: ' + fbAlteTarife.join(', ') + ')' : ''));
+  ok(/<h2 id="kundenschutz">Ihre Kunden bleiben Ihre Kunden<\/h2>/.test(fb) && ['Nur Ihr Betrieb:', 'Nur an Sie:', 'In Ihrem Auftrag:', 'Kein Weiterverkauf:'].every((x) => fb.includes(x)) && fb.includes('href="/konfigurator-bedingungen/#kundenschutz"') && /<h2 id="kundenschutz">/.test(fs10.readFileSync(path10.join(WURZEL, 'web/konfigurator-bedingungen/index.html'), 'utf8')), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen und Verweis auf § 10 der Paketbedingungen');
   /* g) Domains: www zählt als Hauptdomain, die Cloudflare-Testadresse bleibt gesperrt (functions/seo.js direkt geprüft) */
   const probe = async (adresse, env) => { const r = await seo.behandeln(new Request(adresse), env, async () => new Response('<!doctype html><title>x</title><meta property="og:image" content="/og.png">', { headers: { 'content-type': 'text/html; charset=utf-8' } })); return { robots: r.headers.get('x-robots-tag'), link: r.headers.get('link'), text: await r.text() }; };
   const www = await probe('https://www.eeziframes.com/ratgeber/', { INDEXIERUNG: '1' }), wdev = await probe('https://fenstero.beispiel.workers.dev/ratgeber/', { INDEXIERUNG: '1' });
@@ -1678,8 +1693,10 @@ if (teil(10)) {
     const roh10 = fs10.readFileSync(datei, 'utf8');
     const aus = async (jetzt) => { const r = await seo.behandeln(new Request('https://eeziframes.com' + s10.pfad, { headers: { 'if-none-match': '"alt"' } }), { INDEXIERUNG: '1', JETZT: jetzt }, async (req) => (req.headers.get('if-none-match') ? new Response(null, { status: 304, headers: { etag: '"alt"' } }) : new Response(roh10, { headers: { 'content-type': 'text/html; charset=utf-8', etag: '"alt"' } }))); return { status: r.status, etag: r.headers.get('etag'), text: r.status === 200 ? await r.text() : '' }; };
     const vor = await aus(VOR), nach = await aus(NACH), recht = ['/agb/', '/nutzungsbedingungen/'].includes(s10.pfad);
-    const mitBanner = /^\/(ratgeber|fuer-fensterbauer)\//.test(s10.pfad);
-    if (mitBanner ? (vor.status !== 200 || vor.etag || !/<a class="einf-bar" href="[^"]+"><span><span class="txt"><b>Einführungspreise? bis 17\. November:<\/b>[\s\S]*?<span class="rest">Nur noch heute<\/span>/.test(vor.text)) : vor.status !== 304) einfFehler.push(s10.pfad + (mitBanner ? ' (vorher kein Banner mit Countdown oder alte Fassung aus dem Browser-Cache möglich)' : ' (vorher kein 304)'));
+    /* Seiten für Fensterbauer: kein Band mehr (sie verkaufen die Pakete), aber wie der Ratgeber ohne ETag, weil der Worker ihre
+       Bausteine je Umgebung einsetzt (functions/pakete-seite.js) */
+    const mitBanner = /^\/ratgeber\//.test(s10.pfad), ohneBand = /^\/fuer-fensterbauer\//.test(s10.pfad);
+    if (ohneBand ? (vor.status !== 200 || vor.etag || /einf-bar/.test(vor.text)) : mitBanner ? (vor.status !== 200 || vor.etag || !/<a class="einf-bar" href="[^"]+"><span><span class="txt"><b>Einführungspreise? bis 17\. November:<\/b>[\s\S]*?<span class="rest">Nur noch heute<\/span>/.test(vor.text)) : vor.status !== 304) einfFehler.push(s10.pfad + (ohneBand ? ' (vorher Banner oder ETag)' : mitBanner ? ' (vorher kein Banner mit Countdown oder alte Fassung aus dem Browser-Cache möglich)' : ' (vorher kein 304)'));
     if (/einf-bar/.test(nach.text)) einfFehler.push(s10.pfad + ' (Banner nach dem Stichtag)');
     if (nach.status !== 200 || (nach.etag && !recht)) einfFehler.push(s10.pfad + ' (danach alte Fassung aus dem Browser-Cache möglich)');
     if (recht) { if (!/7,99 € bei Kauf bis einschließlich 17\. November 2026|49 € im Monat bei Abschluss bis einschließlich 17\. November 2026/.test(nach.text) || !/12,99 €|69 € im Monat bei Abschluss ab dem 18\. November 2026/.test(nach.text)) einfFehler.push(s10.pfad + ' (nennt nicht beide Zeiträume)'); continue; }
@@ -1687,9 +1704,9 @@ if (teil(10)) {
     if (/7,99/.test(roh10) && !/12,99/.test(nach.text)) einfFehler.push(s10.pfad + ' (neuer Preis fehlt)');
   }
   const startRoh = fs10.readFileSync(path10.join(WURZEL, 'web/index.html'), 'utf8'), fbRoh = fs10.readFileSync(path10.join(WURZEL, 'web/fuer-fensterbauer/index.html'), 'utf8');
-  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && /Einführungspreis bis 17\. November 2026, danach 119&nbsp;€/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB und Nutzungsbedingungen nennen beide Zeiträume' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
+  ok(!einfFehler.length && /class="einf"> \(Einführungspreis bis 17\. November 2026, danach 12,99&nbsp;€\)/.test(startRoh) && !/Einführungspreis|class="einf"/.test(fbRoh), 'Einführungspreis auf den Seiten: vorher mit Hinweis, ab dem Stichtag reguläre Preise ohne Hinweis und ohne ETag (kein veralteter Stand aus dem Browser-Cache); AGB und Nutzungsbedingungen nennen beide Zeiträume; die Seite für Fensterbauer hat keinen Einführungspreis mehr' + (einfFehler.length ? ' (' + einfFehler.join(', ') + ')' : ''));
   const llVor = seo.llms('https://eeziframes.com', { JETZT: VOR }), llNach = seo.llms('https://eeziframes.com', { JETZT: NACH });
-  ok(/Einführungspreise bis 17\.11\.2026/.test(llVor) && !/Einführungspreis/.test(llNach) && llNach.includes('12,99 €') && llNach.includes('119 € im Monat'), 'llms.txt: Einführungspreise mit Stichtag, danach nur die regulären Preise');
+  ok(/Einführungspreis bis 17\.11\.2026/.test(llVor) && !/Einführungspreis/.test(llNach) && llNach.includes('12,99 €') && llNach.includes(PK.preis('essential').monat + ' € im Monat') && !/Abo 10|119 € im Monat/.test(llVor + llNach), 'llms.txt: Einführungspreis des Aufmaßblatts mit Stichtag, danach nur der reguläre Preis; für Fensterbauer die Paketpreise, keine Tarife des Betriebsbereichs');
 
   /* h) Ratgeber rund ums Aufmaß: Stand je Seite, Abbildungen, keine Eingaben, IndexNow, llms.txt, Glossar der App */
   const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1754,7 +1771,8 @@ if (teil(10)) {
   /* Ratgeber ohne Eingaben: keine Formulare, keine leeren Tabellen zum Ausfüllen, keine Vorlage zum Ausdrucken, kein Rechner (das Aufmaß entsteht in der App) */
   const eingabeFehler = [];
   for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x))) {
-    const t = (await roh(pf)).text;
+    /* die Seite für Fensterbauer darf ihr Anfrageformular für die Pakete haben (POST /api/partner/frage), sonst nichts zum Ausfüllen */
+    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="vk-form" method="post" action="\/api\/partner\/frage" data-vk-frage>[\s\S]*?<\/form>/ : /^$/, '');
     if (/<(form|input|select|textarea)\b|contenteditable|rg-leer|rechner\.js|<td><\/td>/i.test(t)) eingabeFehler.push(pf);
   }
   const ohneRechner = (await fetch(BASE + '/assets/rechner.js')).status === 404, bm = (await roh('/ratgeber/bestellmass-fenster/')).text, ab2 = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
@@ -4756,6 +4774,24 @@ if (teil(22)) {
   await ctxK.close();
   sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
   await ctx.close();
+}
+
+/* ---------- 23–30. Konfigurator-Instanzen (docs/INSTANZEN.md) ----------
+   Je Abschnitt ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu <n>-<name>.mjs, die vorher laufen): export default async (h) => {}.
+   h (scripts/pruefen-instanzen/hilfe.mjs) bringt einen eigenen Testserver mit Attrappen und den Instanzen essential.localhost,
+   plus.localhost, signature.localhost und signature2.localhost mit. Ein Fehler im Modul zählt als fehlgeschlagene Prüfung. */
+const INSTANZ_TEILE = [23, 24, 25, 26, 27, 28, 29, 30].filter((n) => teil(n));
+if (INSTANZ_TEILE.length) {
+  const inst = await import('./pruefen-instanzen/hilfe.mjs');
+  let h = null;
+  try { h = await inst.hilfe({ browser, ok, neueSeite, sauber, foto, telefon, BASE, freierPort }); } catch (e) { ok(false, 'Instanz-Testserver startet: ' + (e && e.message)); }
+  for (const n of h ? INSTANZ_TEILE : []) {
+    console.log(n + '. ' + inst.TITEL[n]);
+    for (const m of inst.module(n)) {
+      try { await (await import(m.url)).default(h); } catch (e) { ok(false, 'scripts/pruefen-instanzen/' + m.datei + ' läuft durch: ' + String(e && e.stack ? e.stack : e).split('\n').slice(0, 3).join(' | ')); }
+    }
+  }
+  if (h) h.aufraeumen();
 }
 
 await browser.close();
