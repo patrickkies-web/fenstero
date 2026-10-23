@@ -98,7 +98,7 @@ Fotos des Betriebs, nie Bilder von eeziframes; Essential nutzt das eeziframes-De
 | Name | Format | Wo genau | Chips auf dem Foto | Priorität |
 |---|---|---|---|---|
 | `fb-anfrage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Was in jeder Anfrage steht“ (`#was-in-jeder-anfrage-steht`), nach dem ersten Absatz, vor der Liste | Maße · Fotos · Zeichnung · Klärungsliste | 1 |
-| `fb-kunden-planen` | 1200 × 1500 | Verkaufsseite, Abschnitt „Warum Kunden selbst planen“, rechts neben dem Text (1280), am Telefon unter der Überschrift | Abends · Auf dem Sofa · Ohne Termin | 1 |
+| `fb-kunden-planen` | Ihr Fachwissen im Wohnzimmer des Kunden, ohne hinzufahren: Vater und Tochter messen abends mit dem Handy, ein winziger Meister auf der Fensterbank zeigt, wo. Chips: Abends · Ohne Termin · Mit Anleitung · 5 Minuten je Fenster (Bild vom Inhaber, 23.10.) | A cosy living room in the evening; a father and his young daughter hold a smartphone up toward their large window, and on the windowsill stands a tiny fifteen-centimetre-tall master window maker in his early fifties with a short grey beard and a dark blue work jacket, pointing with a yellow folding rule at the window frame as if giving instructions, the family looking at him with delight, warm lamp light |
 | `fb-kundenschutz` | 1600 × 1000 | Verkaufsseite, Abschnitt „Ihre Kunden bleiben Ihre Kunden“, nach dem ersten Absatz | Ihre Marke · Ihre Domain · Ihre Daten | 2 |
 | `fb-pakete` | 1600 × 1000 | Verkaufsseite, direkt über den drei Paketkarten (`#pakete`) | Ihr Name · Ihre Farbe · Ihr Logo | 1 |
 | `fb-ablauf` | 1600 × 1000 | Verkaufsseite, Abschnitt „Von der Bestellung bis zum Livegang“, vor der Schrittliste | Bestellen · Einrichten · Freigeben · Live | 2 |
