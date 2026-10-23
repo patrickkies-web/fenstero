@@ -1432,7 +1432,7 @@ function w3dOberflaeche(stage, w, fin, fout) {
      die Unterseite mit dem Auslaufschlitz ist feiner Putz */
   const aufsatz = sonneAktiv(w) && w.roll === 'aufsatz';
   const aluBl = aufsatz && dg(w, 'blende') && w.blende === 'alu';
-  setz('roll-f', aufsatz && !aluBl ? FASSADE_ART[w.fassade] || 'putz' : '', null, null, aufsatz && !aluBl ? fassadeArtC(w) : ''); setz('roll-b', aufsatz ? 'putzfein' : '');
+  if (!(sonneAktiv(w) && w.roll === 'vorbau')) { setz('roll-f', aufsatz && !aluBl ? FASSADE_ART[w.fassade] || 'putz' : '', null, null, aufsatz && !aluBl ? fassadeArtC(w) : ''); setz('roll-b', aufsatz ? 'putzfein' : ''); } // der Vorbaukasten behält sein Aluminium
 }
 /* Maßlinien nachziehen: fehlende anlegen, überzählige entfernen */
 function ensureDims(stage, o) {
@@ -3199,7 +3199,8 @@ SCREENS.ergebnis = () => {
   const html = hd('Schritt 5 von 6 · Ergebnis', neu ? 'Dein Wunsch steht.' : 'Dein Aufmaß steht.', neu ? 'Rohbauöffnung und Element als Wunschmaße' + (w.plan && w.plan.bild ? ', die Lage auf deinem Foto' : '') + '. Das endgültige Maß legt der Fachbetrieb nach der Statik fest.' : 'Maueröffnung und ' + esc(elName()) + ', so wie der Fensterbauer sie fürs Angebot braucht.', '', '', schrittTools('rahmenmass')) + model(w, { id: 'w3d', view: 'result', sway: true, dims: ['hm', 'wm', 'eh', 'ew'], labels: messLabels(), stageH: 300, fitW: 0.56, fitH: 0.6, cls: 'dims-all', bg: photoBg(), hint: 'Zum Drehen ziehen' }) + res + massHinweis + teaser +
     (neu && w.plan && w.plan.bild ? '<div class="card plan-card"><p class="eyebrow">Lage auf deinem Foto</p><button type="button" class="plan-gross" data-act="foto-gross" data-v="plan" aria-label="Lage auf dem Foto groß ansehen"><img class="plan-bild" src="' + w.plan.bild + '" alt="Foto der Wand mit eingezeichneter Lage"><span class="tile-lupe" aria-hidden="true">' + LUPE_S + '</span></button><div class="pill-row"><button type="button" class="pill" data-act="go" data-v="zeichnen">Lage ändern</button><button type="button" class="pill" data-act="go" data-v="planmasse">Maße ändern</button></div></div>' : '') +
     '<details class="card fold"><summary><span>Falls zur Hand<small>Brüstungshöhe und Laibungstiefe, sonst beim Feinaufmaß</small></span></summary><div class="fold-body"><div class="rows">' + fieldRow('Brüstungshöhe', 'bru', 'mm', 10, 'bruestung') + fieldRow('Laibungstiefe innen', 'laib', 'mm', 5, 'laibung', ki && ki.laib && !w.e_laib ? 'KI-Schätzung' : '') + '</div></div></details>';
-  return { html: html, back: einstiegHier() ? ['Fenster', 'fertig'] : neu ? ['Maße', 'planmasse'] : ['Ränder', 'rest'], cls: 'tight', bar: { label: istTuer(w) ? 'Weiter: Wunschtür' : 'Weiter: Wünsche', act: 'wuensche', zurueck: true } };
+  /* über „Maße ändern“ geöffnet: oben „Fenster“ zur Übersicht aller Fenster (wie in den Wünschen), die Zurück-Taste zur Seite des Fensters */
+  return { html: html, back: einstiegHier() ? ['Fenster', 'fertig', 'liste'] : neu ? ['Maße', 'planmasse'] : ['Ränder', 'rest'], cls: 'tight', bar: { label: istTuer(w) ? 'Weiter: Wunschtür' : 'Weiter: Wünsche', act: 'wuensche', zurueck: true } };
 };
 
 /* ---------- Wunschfenster: das Modell wird konfiguriert ---------- */
@@ -6556,6 +6557,9 @@ async function dateiSpeichern(data, name) {
 }
 function boot() {
   LINK_TOKEN = tokenAusAdresse(); // Anmeldelink: Schlüssel gleich aus Adresse und Verlauf nehmen, verarbeitet wird er in serverStart
+  /* Einstieg von der Website (#ausmessen): den Anker gleich aus der Adresse nehmen, bevor verlaufBinden die Falle stellt (sonst bliebe er im Verlauf und jeder Neuladen begänne wieder ein Fenster) */
+  const ausmessen = location.hash === '#ausmessen';
+  if (ausmessen) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
   restore();
   S.betrieb = readHash();
   /* Instanz: ohne #k-… die laufende Planung dieses Geräts (oder noch keine, dann kommt der Code beim ersten Fenster) */
@@ -6600,7 +6604,7 @@ function boot() {
   if (location.hash === '#fuehrung' && !S.betrieb) tourStart();
   /* Einstieg von der Website („Jetzt ausmessen“, /app/#ausmessen): gleich der erste Schritt statt der Startseite der App; ein angefangenes
      Fenster wird fortgesetzt, ein Kundenlink hat Vorrang */
-  else if (location.hash === '#ausmessen' && !S.betrieb) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } if (KS) { EINSTIEG_NEU = true; setTimeout(einstiegNach, 8000); } else einstiegNeu(); }
+  else if (ausmessen && !S.betrieb) { if (KS) { EINSTIEG_NEU = true; setTimeout(einstiegNach, 8000); } else einstiegNeu(); }
   serverStart();
   AI.init().then((ok) => { S.aiOk = ok; if (S.screen === 'fotos') render(); });
   DLP = (async () => { try { DL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { DL = null; } return DL; })();
@@ -6706,8 +6710,8 @@ function instHome() {
   }
   if (S.nb) return linkHomeInhaltAlt(I);
   if (n || angelegt() >= GRENZE.fenster) {
-    const html = weg + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + hd(T('Ihre Planung', 'Deine Planung'), T('Weiter, wo Sie waren.', 'Weiter, wo du warst.'), esc(aufmassStand())) +
-      '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">' + T('Ihre Fenster.', 'Deine Fenster.') + '</h2><span class="sub">' + n + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
+    const html = weg + (web ? '' : '<div class="lk-kopf">' + E.kopf({ name: name, p: p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '', instanz: I }) + '</div>') + uebersichtKopf(T) +
+      '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
       (vorschau() ? '' : web ? instWeiterKarte(du) : linkMerk(name, du)) + kontakt() + rechtLinks();
     return { html: html, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
   }
