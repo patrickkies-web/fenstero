@@ -31,7 +31,9 @@ Die drei Motive aus den Beiträgen können direkt wiederverwendet werden: der Wa
 | `start-fensterbauer` | 1120 × 1400 | Startseite, Ansicht Fensterbauer, randlos wie oben. **Da:** Bär in der Werkstatt mit Tablet | Maße · Fotos · Öffnungsarten · Positionen | 1 |
 | `app-start` | 1120 × 1400 | App, Startbild vor dem ersten Fenster. **Da:** drei Waschbären im Wohnzimmer (fotografieren, wünschen, zurücklehnen) | Fotografieren · Messen · Wünschen | 1 |
 | `gross` | 1200 × 1500 | Startseite Hauseigentümer, Abschnitt „Auch ganz groß.“ | Elementarten | 1 |
-| `fuer-fensterbauer` | 1200 × 1500 | Seite /fuer-fensterbauer/, oben | Maße · Fotos · Positionen · Bestellmaß | 1 |
+| `fb-sessel` | 1122 × 1402 | Seite /fuer-fensterbauer/, oben (Startbild, randlos; Telefon oben, Schreibtisch rechts). Astronaut im Sessel am Bullauge, misst das Fenster mit dem gelben Zollstock; Papierflieger, Handy und Bleistift schweben. **Da** (vom Inhaber, 23.10.2026) | Ihre Domain · Kunden planen selbst · PDF per E-Mail · Ihre Marke, Ihre Kunden (unter der Überschrift) | 1 |
+| `tour-aufmassblatt-15` | 920 × 872 | Seite /fuer-fensterbauer/, Abschnitt „Was in jeder Anfrage steht“: die Szene mit dem echten Aufmaßblatt (erzeugt von `scripts/tour-bild.mjs` für die Führung; der Abzug 15 muss darum erhalten bleiben) | – | – |
+| `fuer-fensterbauer` | 1200 × 1500 | nicht mehr eingebaut (früheres Startbild der Seite, Astronaut mit Zollstock); bleibt als Vorlage liegen | – | – |
 | `ratgeber` | 1600 × 1000 | Übersicht /ratgeber/, über dem Weg | Prüfen · Entscheiden · Auswählen · Ausmessen · Vergleichen · Einbauen | 2 |
 | `weg-pruefen` | 1600 × 1000 | Ratgeber, Schritt 1 (Übersicht; in den Seiten als Bild in „Nächster Schritt“) | – | 2 |
 | `weg-entscheiden` | 1600 × 1000 | Ratgeber, Schritt 2 | – | 2 |

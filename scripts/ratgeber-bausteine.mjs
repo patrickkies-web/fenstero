@@ -96,6 +96,8 @@ export const FUSS = /<footer class="rg-fuss[^"]*">[\s\S]*?<\/footer>/;
 const slug = (t) => t.replace(/<[^>]+>/g, '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   .replace(/&[a-z]+;/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').split('-').slice(0, 6).join('-') || 'abschnitt';
 const OHNE_INHALT = ['Weiterlesen', 'Quellen', 'Dein Weg zu neuen Fenstern'];
+/* Seiten ohne „Auf dieser Seite“: die Verkaufsseite für Fensterbauer ist eine Landingpage, unter ihrem Startbild folgen direkt die Leisten */
+export const OHNE_INHALTSVERZEICHNIS = ['/fuer-fensterbauer/'];
 /* Bildsprache der Beiträge, alles idempotent: die Zeile über dem h1 wird zum Kicker, das letzte Wort des h1 grün, die erste
    Cream-Pille bekommt den Pfeil im Kreis */
 const kicker = (h) => h.replace(/(<nav class="rg-pfad"[\s\S]*?<\/nav>\s*<p class=")eyebrow(">)/, '$1eyebrow kicker$2');
@@ -143,7 +145,7 @@ export function baue(pfad, html) {
     .concat(imWeg ? ['<li><a href="#weg">Dein Weg: Schritt ' + (schrittVon(pfad) + 1) + ' von ' + WEG.length + '</a></li>'] : []);
   const inhalt = '\n  <nav class="rg-inhalt" aria-label="Auf dieser Seite"><p class="eyebrow">Auf dieser Seite · ' + lesezeit(main) + ' Min. Lesezeit</p><ol>' + eintraege.join('') + '</ol></nav>';
   /* nach dem ersten Knopfblock; folgt dort eine Fotokarte (Startbild), erst nach ihr */
-  main = main.replace(/(<div class="rg-cta">[\s\S]*?<\/div>(?:\s*<figure class="foto-karte[^"]*">[\s\S]*?<\/figure>)?)/, (x) => x + inhalt);
+  if (!OHNE_INHALTSVERZEICHNIS.includes(pfad)) main = main.replace(/(<div class="rg-cta">[\s\S]*?<\/div>(?:\s*<figure class="foto-karte[^"]*">[\s\S]*?<\/figure>)?)/, (x) => x + inhalt);
   if (imWeg) main = main.replace(/(\n\s*)<h2([^>]*)>Weiterlesen<\/h2>/, (x) => wegBlock(pfad) + x);
   return h.replace(m[0], () => main).replace(FUSS, () => fusszeile(pfad));
 }

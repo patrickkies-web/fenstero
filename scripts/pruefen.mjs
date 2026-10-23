@@ -172,9 +172,9 @@ if (teil(2)) {
   ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Ihr eigener Fenster-Konfigurator/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
   ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
   ok(await pa.locator('.vk-einbettung .vk-paket').count() === 3 && await pa.locator('.vk-einbettung form[data-vk-frage]').count() === 1 && await pa.locator('.vk-einbettung .vk-ablauf').count() === 1 && await pa.locator('.vk-einbettung .rg-pfad').count() === 0, 'Einbettung: drei Paketkarten, das Anfrageformular und der Ablauf sind da, die Brotkrumen der Seite nicht');
-  await pa.click('.vk-einbettung .rg-inhalt a[href="#pakete"]'); await pa.waitForTimeout(900);
+  await pa.click('.vk-einbettung .rg-cta a[href="#pakete"]'); await pa.waitForTimeout(900);
   const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), t = document.querySelector('.top').getBoundingClientRect(), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, unterKopf: !!r && r.top >= t.bottom - 1 && r.top < t.bottom + 80 }; });
-  ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Sprungmarke „Die Pakete“ im Inhaltsverzeichnis scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
+  ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   ok((await zustand()).a === 'Fensterbauer', 'Gewählte Ansicht bleibt nach dem Neuladen');
   await pa.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
@@ -1762,7 +1762,8 @@ if (teil(10)) {
   for (const [pf, , alt] of bauSeiten) {
     if (pf === '/ratgeber/') { if (!bau.WEG.every((x, k) => alt.includes('<h2 id="schritt-' + (k + 1) + '">')) || !imWeg.concat(bau.FENSTERBAUER).every((u) => alt.includes('href="' + u + '"'))) wegFehler.push(pf); continue; }
     const inhalt = (alt.match(/<nav class="rg-inhalt"[\s\S]*?<\/nav>/) || [''])[0];
-    if (!/Auf dieser Seite · \d+ Min\. Lesezeit/.test(inhalt) || (inhalt.match(/<li>/g) || []).length < 3) wegFehler.push(pf + ' (Auf dieser Seite)');
+    if (bau.OHNE_INHALTSVERZEICHNIS.includes(pf)) { if (inhalt) wegFehler.push(pf + ' (Landingpage ohne „Auf dieser Seite“)'); }
+    else if (!/Auf dieser Seite · \d+ Min\. Lesezeit/.test(inhalt) || (inhalt.match(/<li>/g) || []).length < 3) wegFehler.push(pf + ' (Auf dieser Seite)');
     if (imWeg.includes(pf) && ((alt.match(/aria-current="step"/g) || []).length !== 1 || !/class="rg-karte rg-weiter"/.test(alt))) wegFehler.push(pf + ' (Weg)');
   }
   ok(!bauFehler.length && !ohneHeimat.length && !wegFehler.length && bauSeiten.length >= 30, 'Leseführung aller Ratgeber (' + bauSeiten.length + ' Seiten, scripts/ratgeber-bausteine.mjs): „Auf dieser Seite“ mit Lesezeit, Weg in sechs Schritten mit „Nächster Schritt“, Übersicht als Weg, gleiche Fußzeile mit jeder Seite' + (bauFehler.length ? ' (nicht neu gebaut: ' + bauFehler.join(', ') + ')' : '') + (ohneHeimat.length ? ' (ohne Platz im Weg oder in der Fußzeile: ' + ohneHeimat.join(', ') + ')' : '') + (wegFehler.length ? ' (' + wegFehler.join(', ') + ')' : ''));
