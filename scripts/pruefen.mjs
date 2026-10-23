@@ -160,23 +160,29 @@ if (teil(2)) {
   // Ansicht: Umschalter oben, Anker, Knöpfe nur für die gewählte Zielgruppe
   const ctxA = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const pa = await neueSeite(ctxA);
-  const zustand = () => pa.evaluate(() => ({ a: ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()), b2c: !!document.querySelector('.hero.b2c'), b2b: !!document.querySelector('.hero.b2b'), top: [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }));
+  const zustand = () => pa.evaluate(() => ({ a: ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()), b2c: !!document.querySelector('.hero.b2c'), b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .vk-hero'), still: document.querySelector('.top').classList.contains('cta-still'), top: [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }));
+  /* Ansicht Fensterbauer: portal.js lädt die Paket-Landingpage /fuer-fensterbauer/ nach und bettet sie ein; darauf warten */
+  const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .vk-hero, .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
   await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   let z = await zustand();
-  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && z.h1.length === 1 && /Fenster ausmessen/.test(z.h1[0]) && z.top.includes('Fenster ausmessen') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Umschalter oben, nur Inhalte für Hauseigentümer, Knopf „Fenster ausmessen“, kein Anmelden oder Starten für Betriebe');
+  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fenster ausmessen/.test(z.h1[0]) && z.top.includes('Fenster ausmessen') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Umschalter oben, nur Inhalte für Hauseigentümer, Knopf „Fenster ausmessen“, kein Anmelden oder Starten für Betriebe');
   ok(await pa.locator('.top a.btn.primary[href$="/app/"]').count() === 1 && await pa.locator('.wechsel [data-act="ansicht"][data-v="betrieb"]').count() === 1 && await pa.locator('a.tcard[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Fenster ausmessen“ führt in die App, Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
-  await pa.click('.top .ansicht [data-v="betrieb"]'); await pa.waitForTimeout(400);
+  await pa.click('.top .ansicht [data-v="betrieb"]'); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.b2b && !z.b2c && z.h1.length === 1 && /Aufmaß ohne Anfahrt/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen'), 'Ansicht Fensterbauer: Anker #fensterbauer, nur Inhalte für Betriebe, „Anmelden“ und „Kostenlos starten“');
+  ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Ihr eigener Fenster-Konfigurator/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
   ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
+  ok(await pa.locator('.vk-einbettung .vk-paket').count() === 3 && await pa.locator('.vk-einbettung form[data-vk-frage]').count() === 1 && await pa.locator('.vk-einbettung .vk-ablauf').count() === 1 && await pa.locator('.vk-einbettung .rg-pfad').count() === 0, 'Einbettung: drei Paketkarten, das Anfrageformular und der Ablauf sind da, die Brotkrumen der Seite nicht');
+  await pa.click('.vk-einbettung .rg-inhalt a[href="#pakete"]'); await pa.waitForTimeout(900);
+  const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), t = document.querySelector('.top').getBoundingClientRect(), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, unterKopf: !!r && r.top >= t.bottom - 1 && r.top < t.bottom + 80 }; });
+  ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Sprungmarke „Die Pakete“ im Inhaltsverzeichnis scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   ok((await zustand()).a === 'Fensterbauer', 'Gewählte Ansicht bleibt nach dem Neuladen');
   await pa.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   z = await zustand();
-  ok(z.a === 'Hauseigentümer' && z.b2c, 'Anker /#hauseigentuemer öffnet die Ansicht für Hauseigentümer');
-  await pa.goto(BASE + '/#betriebe', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
+  ok(z.a === 'Hauseigentümer' && z.b2c && !z.vk, 'Anker /#hauseigentuemer öffnet die Ansicht für Hauseigentümer');
+  await pa.goto(BASE + '/#betriebe', { waitUntil: 'networkidle' }); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.b2b && z.hash === '#fensterbauer', 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
+  ok(z.a === 'Fensterbauer' && z.vk && z.hash === '#fensterbauer', 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
   await pa.click('.top [data-act="go"][data-v="preise"]'); await pa.waitForTimeout(300);
   z = await zustand();
   ok(z.screen === 'preise' && z.a === 'Fensterbauer', 'Preise gehören zur Ansicht Fensterbauer, der Umschalter zeigt es');
@@ -188,6 +194,14 @@ if (teil(2)) {
   z = await zustand();
   ok(z.a === 'Fensterbauer' && await pa.locator('.banner.vonpdf').count() === 1, 'Über den QR-Code eines Aufmaßblatts: Ansicht Fensterbauer mit Hinweis zum Code');
   sauber(pa, 'Ansichten ohne Fehler');
+  /* Rückfall: liefert /fuer-fensterbauer/ keinen Inhalt (hier per Umleitung der Anfrage auf 500 nachgestellt), steht die Karte mit dem
+     Link zur Seite, nie eine leere Fläche */
+  const pf = await neueSeite(ctxA);
+  await pf.route('**/fuer-fensterbauer/', (r) => r.fulfill({ status: 500, contentType: 'text/html', body: 'Störung' }));
+  await pf.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await pf.waitForTimeout(500);
+  ok(await pf.locator('.vk-einbettung.vk-rueckfall a[href="/fuer-fensterbauer/"]').count() === 1 && await pf.locator('.vk-einbettung .vk-hero, .vk-einbettung[aria-busy]').count() === 0 && await pf.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1, 'Rückfall ohne Verkaufsseite: Karte „Pakete ansehen“ mit Link zur Seite statt leerer Fläche');
+  pf.probleme = pf.probleme.filter((p) => !/HTTP 500: .*\/fuer-fensterbauer\/$|status of 500/.test(p)); // die nachgestellte Störung selbst (Antwort und Konsolenzeile)
+  sauber(pf, 'Rückfall ohne Fehler');
   await ctxA.close();
 
   const mob = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' });
@@ -588,12 +602,13 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Aufmaß ohne Anfahrt/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen oder Führung, nichts für Betriebe');
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForTimeout(400);
+  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Fenster-Konfigurator, unter Ihrer Marke/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen oder Führung, nichts für Betriebe');
+  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .vk-hero', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
-  ok(/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c').count() === 0, 'Startseite, Ansicht Fensterbauer: Aufmaß ohne Anfahrt, nichts für Hauseigentümer');
+  ok(/Ihr eigener Fenster-Konfigurator, unter Ihrer Marke/.test(startB) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start + startB), 'Kein Marktplatz mehr auf der Startseite');
-  ok(await page.locator('#kundenschutz').count() === 1 && await page.locator('#kundenschutz a[href="/nutzungsbedingungen/#kundenschutz"]').count() === 1 && /Ihr Kunde bleibt Ihr Kunde\./.test(startB) && (startB.match(/Nur Ihr Betrieb|Nur in Ihr Konto|Keine Kopie von uns|Kein Weiterverkauf/g) || []).length === 4, 'Startseite für Betriebe: Abschnitt Kundenschutz mit vier Zusagen und Verweis auf § 11 der Nutzungsbedingungen');
+  /* der Kundenschutz steht jetzt in der eingebetteten Verkaufsseite (Band „Ihre Kunden bleiben Ihre Kunden“, Zusagen der Paketbedingungen) */
+  ok(await page.locator('.vk-einbettung #kundenschutz').count() === 1 && await page.locator('.vk-einbettung a[href="/konfigurator-bedingungen/#kundenschutz"]').count() === 1 && /Ihre Kunden bleiben Ihre Kunden/.test(startB) && (startB.match(/Nur Ihr Betrieb:|Nur an Sie:|In Ihrem Auftrag:|Kein Weiterverkauf:/g) || []).length === 4, 'Startseite für Fensterbauer: Abschnitt Kundenschutz mit vier Zusagen und Verweis auf die Paketbedingungen');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
   await ctx.close();
@@ -1005,7 +1020,7 @@ if (teil(6)) {
   const masz6 = (sel) => z6.evaluate((sel) => Array.from(document.querySelectorAll(sel)).filter((e) => e.getClientRects().length).map((e) => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }), sel);
   const logo6 = await masz6('.top .logo-s.neben-zurueck');
   await z6.evaluate(() => { S.reg = null; nav('landing'); }); await z6.waitForTimeout(300);
-  await z6.click('.hero.b2b [data-act="tour"]'); await z6.waitForSelector('.tourw'); await z6.waitForTimeout(300);
+  await z6.evaluate(() => { location.hash = 'tour'; }); await z6.waitForSelector('.tourw'); await z6.waitForTimeout(300); // die Ansicht wirbt nicht mehr für die Tour, der Anker /#tour öffnet sie weiterhin
   await z6.click('.tour-schritte [data-v="3"]'); await z6.waitForTimeout(250); // erledigte Schritte mit Haken, offene mit Zahl
   const tour6 = await masz6('.tour-schritte button');
   ok(logo6.length === 1 && logo6[0][0] >= 44 && logo6[0][1] >= 44 && tour6.length === 8 && tour6.every((g) => g[0] >= 44 && g[1] >= 44), 'Telefon: Logo neben „Zurück“ in der Registrierung (' + logo6.map((g) => g.join('×')).join() + ') und alle Schrittknöpfe der Tour (' + tour6.map((g) => g[0]).join(', ') + ' px breit) mindestens 44 px');
@@ -1410,8 +1425,9 @@ if (teil(9)) {
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
   const fuehrungDa = await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1;
   await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForTimeout(300);
-  ok(fuehrungDa && await page.locator('.hero.b2b [data-act="tour"]').count() === 1, 'Startseite: „Führung starten“ in der Ansicht für Hauseigentümer, „Tour starten“ in der für Fensterbauer');
-  const ohneDemo = async (wo) => { const t = await page.evaluate(() => document.body.innerText); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
+  ok(fuehrungDa && await page.locator('.vk-einbettung').count() === 1 && await page.locator('.hero.b2b [data-act="tour"]').count() === 0, 'Startseite: „Führung starten“ in der Ansicht für Hauseigentümer; die Ansicht für Fensterbauer zeigt die Paket-Landingpage und wirbt nicht mehr für die Tour (sie bleibt über „Anmelden“ und /#tour erreichbar)');
+  /* ohne die eingebettete Verkaufsseite: ihre „Live-Demos“ sind echte Konfigurator-Instanzen der Pakete, keine Demo-Konten */
+  const ohneDemo = async (wo) => { const t = await page.evaluate(() => { const b = document.body.cloneNode(true); b.querySelectorAll('.vk-einbettung').forEach((e) => e.remove()); return b.textContent; }); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
   ok(await ohneDemo('Startseite') === true, 'Startseite ohne Demo-Konten und Beispiel-Registrierung');
   await page.click('.top [data-act="sheet"][data-v="login"]'); await page.waitForTimeout(300);
   ok(await ohneDemo('Anmelden') === true && await page.locator('.sheet [data-act="tour"]').count() === 1, 'Anmelden: keine Demo-Zugänge mehr, dafür der Weg in die Tour');
@@ -1421,7 +1437,7 @@ if (teil(9)) {
   // Tour für Fensterbauer: acht Schritte, je ein Fakt mit Quelle, Vorgegebenes gesperrt, nichts wird gespeichert
   await page.evaluate(() => { S.reg = null; nav('landing'); }); await page.waitForTimeout(300);
   const vorTour = await page.evaluate(() => JSON.stringify({ acc: S.acc, logins: S.logins }));
-  await page.click('.hero.b2b [data-act="tour"]'); await page.waitForSelector('.tourw'); await page.waitForTimeout(300);
+  await page.evaluate(() => { location.hash = 'tour'; }); await page.waitForSelector('.tourw'); await page.waitForTimeout(300); // Einstieg über den Anker, die Ansicht wirbt nicht mehr für die Tour
   const ids = [];
   for (let i = 0; i < 8; i++) {
     const st = await page.evaluate(() => ({ id: TOUR[S.tour.i], fakt: !!document.querySelector('.tour-fakt .tf-q'), merk: document.querySelectorAll('.tour-merk li').length, schritte: document.querySelectorAll('.tour-schritte button').length }));
@@ -3619,8 +3635,10 @@ if (teil(16)) {
   const pt5 = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf5p, '-'])).toString('utf8'); } catch (e) { return ''; } };
   const raw5 = fs16.readFileSync(pdf5p).toString('latin1'), s5t1 = pt5(1), s5all = pt5(0);
   ok(pdf5.logo && pdf5.mit > pdf5.ohne && /InterExtraBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5t1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /BESTELLMASS-VORSCHLAG/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Inter, Seite 1 mit Übersicht und Klärungsliste samt Stand, Notiz des Kunden an der Stelle, Bestellmaß mit Abzug unten');
-  const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html; S.ansicht = vorher; return h; });
-  ok(/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && !/3-D-Ansicht/.test(land5) && /Zeichnung und Bestellmaß/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: übernommen wird das Aufmaß mit Zeichnung und Bestellmaß je Position');
+  /* Die Ansicht Fensterbauer bettet seit dem 23.10.2026 die Paket-Landingpage ein (ihr 3-D-Modell gehört zur Planung des Kunden im
+     Konfigurator); die frühere Werbung „Holen Sie es in Ihr Konto“ ist weg, was ankommt, nennt „So funktioniert es“ */
+  const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html + '\n' + SCREENS.wie().html; S.ansicht = vorher; return h; });
+  ok(/class="vk-einbettung rg"/.test(land5) && !/3-D-Ansicht/.test(land5) && !/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && /Bestellmaß-Vorschlag je Position/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: die Ansicht Fensterbauer bettet die Paket-Landingpage ein, „So funktioniert es“ nennt das Aufmaßblatt mit Bestellmaß-Vorschlag je Position');
   /* Nacharbeit portal: Fußzeile des PDF bei 60 Zeichen Firmenname, Kontakt des Kunden im Kopf und im PDF, Zwischentitel, Fotos im Pilotbetrieb */
   const lang5 = await s5.evaluate(async () => {
     const c = BC(), alt = c.name, l = A().links.find((x) => x.id === 'l1'); c.name = 'Fensterbau und Glaserei Mustermann-Schmidt GmbH & Co. KG Köln';

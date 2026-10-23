@@ -22,8 +22,9 @@ Verbindlich sind:
 | Abschnitt 30: Ende zu Ende je Paket, von der Bestellung bis zur Löschung | fertig |
 | Volle Prüfsuite auf `e8d86a0`, Abschnitte 1–30 | **1641 bestanden, 0 fehlgeschlagen** |
 | Prüfung durch zwei unabhängige Prüfer | fertig: 22 Befunde (1 muss, 9 sollte, 12 kann), siehe `PRUEFBEFUNDE.md` |
-| Nacharbeit der Befunde | fertig: 18 behoben, 2 bestätigt (6, 7), 1 teilweise (17), 3 bewusst verschoben (11, 13, 15), siehe Tabelle in `PRUEFBEFUNDE.md` |
+| Nacharbeit der Befunde | fertig: 19 behoben, 2 bestätigt (6, 7), 1 teilweise (17), 2 bewusst verschoben (11, 15), siehe Tabelle in `PRUEFBEFUNDE.md` |
 | Volle Prüfsuite nach der Nacharbeit, Abschnitte 1–30 | **1679 bestanden, 0 fehlgeschlagen** (Stand a2d202d) |
+| Verkaufsseite `/fuer-fensterbauer/` als Landingpage (Abschnitte, Scroll-Bewegung, Lottie-Zeichen marke/domain/dashboard, Bildplätze mit Platzhaltern) und Startseite: Ansicht „Fensterbauer“ bettet sie ein (23.10., Wunsch des Inhabers) | fertig; volle Suite auf dem Endstand **1683 bestanden, 0 fehlgeschlagen** (Lauf mit 1682/1, der eine Satz 30.W3 angepasst, Abschnitt 30 danach 136/0) |
 | Schlussprüfung, PR, Bericht an den Inhaber | PR nach main offen (nicht gemergt), Bericht übergeben |
 
 Der Code ist **nicht** auf main. Merge erst nach Freigabe durch den Inhaber (Preise, Rechtstexte, Einrichtung bei Cloudflare, Stripe und Resend, siehe BAUPLAN §4). Der Stand ist so gebaut, dass ein Merge auch vorher gefahrlos ist: Ohne `PAKETE_OFFEN=1` kann niemand ein Paket kaufen, und Instanz-Domains gibt es erst, wenn der Inhaber eine anlegt.
@@ -32,7 +33,7 @@ Der Code ist **nicht** auf main. Merge erst nach Freigabe durch den Inhaber (Pre
 
 1. Inhaber: PR ansehen und freigeben (Preise, Rechtstexte, Entscheidungen zu F1–F5 in `BAUPLAN.md` §5.3); Rechtstexte anwaltlich prüfen lassen, danach `VORLAGE.geprueft` in `functions/instanz/recht.js` setzen.
 2. Inhaber: manuelle Schritte aus `BAUPLAN.md` §4 (Cloudflare, Supabase-Schema, Resend, Stripe, Secrets).
-3. Offene Befunde mit „kann“ (11, 13, 15, 17 Formularfeld) nachholen; Wortlaut in `PRUEFBEFUNDE.md`. Dazu das Bildkonzept für die Fensterbauer-Seiten einbauen, sobald der Inhaber die Bilder liefert (`docs/BILDER.md`, Abschnitt „Plätze für die Fensterbauer-Seiten“).
+3. Offene Befunde mit „kann“ (11, 15, 17 Formularfeld) nachholen; Wortlaut in `PRUEFBEFUNDE.md`. Dazu die Bilder einbauen, sobald der Inhaber sie liefert (`docs/BILDER.md`, Abschnitt „Plätze für die Fensterbauer-Seiten“; Plätze 1–7 sind in der Verkaufsseite verdrahtet, dort stehen Platzhalter aus `scripts/fotos.py`; die Zeichen `domain` und `dashboard` warten noch auf einen Platz).
 4. Entscheidung des Inhabers: Sollen auch die Zeitstempel des Altbestands (eeziframes.com, `stamp()`/`datum()` in modell.js) in deutscher Zeit entstehen? Heute laufen sie im Worker in UTC.
 5. Prüfsuite wie bisher:
    ```

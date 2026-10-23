@@ -18,7 +18,7 @@ Zwei unabhängige Prüfer haben den Stand e8d86a0 geprüft (nur lesen und angrei
 | 10 | sollte | behoben | Wechsel nach unten wirkt zum Periodenende (`abo.wechsel`), Stripe-Preis sofort ohne Ausgleich; Kundenkonto und Zentrale zeigen „wirkt ab“ (26.6, 27.9, 27.10, 30.W1, 30.W3) |
 | 11 | kann | offen | bewusst verschoben (Wochenlimit) |
 | 12 | kann | behoben | Fußhinweis 13 px (25.1) |
-| 13 | kann | offen | bewusst verschoben (Wochenlimit) |
+| 13 | kann | behoben | mit dem Umbau der Verkaufsseite: im Kopf ein Ring-Knopf, Cream nur im Startbild (29.2 Browser, 10) |
 | 14 | kann | behoben | „Rückruf anfordern“ nur noch einmal (30, Teil 1) |
 | 15 | kann | offen | bewusst verschoben (Wochenlimit) |
 | 16 | kann | behoben | Testanfrage nach dem Livegang nicht mehr im Dashboard (28.14, 30 Teil 4) |

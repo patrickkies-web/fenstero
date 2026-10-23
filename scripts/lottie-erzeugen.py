@@ -3,8 +3,10 @@
 damit der leichte Spieler (web/vendor/lottie_light.min.js) sie ohne eval unter der strengen CSP abspielt.
 Farben sind Marker (die hellen Tokens); gemeinsam.js tauscht sie beim Laden gegen die aktuellen Tokens, auch im dunklen Modus.
    python3 scripts/lottie-erzeugen.py web/assets/lottie
-Fünf Zeichen: messen (drei Maße, das kleinste zählt), fotos (der Sucher liest das Fenster), senden (der Flieger),
-eingang (ein Aufmaß landet im Projekt), fertig (Kreis, Haken, vier Striche). Regeln in docs/GESTALTUNG.md."""
+Acht Zeichen: messen (drei Maße, das kleinste zählt), fotos (der Sucher liest das Fenster), senden (der Flieger),
+eingang (ein Aufmaß landet im Projekt), fertig (Kreis, Haken, vier Striche); für die Verkaufsseite marke (Rahmen in Tinte,
+Pinsel in Blau, Logo-Marke, Haken), domain (Adresszeile, Schloss wird grün, die Seite wächst), dashboard (drei Karten, drei Stände).
+Regeln in docs/GESTALTUNG.md."""
 import json, math, sys, os
 
 FR = 60
@@ -207,10 +209,109 @@ def fertig():
         L.append(layer("strich" + str(n), [s], 3 + n, OP))
     return anim("fertig", L, OP)
 
+# ---------------------------------------------------------------- Verkaufsseite: drei Zeichen zu den Paketen
+# Farben wechseln nie als Keyframe (gemeinsam.js tauscht nur statische Farben gegen die Tokens): wo etwas „grün wird“,
+# liegen zwei gleiche Formen übereinander und die neue blendet ein, die alte danach aus.
+def flach(s):
+    """Pinsel: gerade Enden und Gehrung, damit der breite Strich den Rahmen bis in die Ecken füllt"""
+    s["lc"] = 1; s["lj"] = 1; return s
+def ueberblenden(t0, t1, op):
+    """Deckkraft für den Farbwechsel: die neue Form 0→100 ab t0, die alte 100→0 leicht versetzt (nie beide halb durchsichtig)"""
+    alt = kfm([(0, 100, 'hold'), (t0 + 8, 100, E_OUT), (t1 + 8, 0, 'hold'), (op, 0)])
+    neu = kfm([(0, 0, 'hold'), (t0, 0, E_OUT), (t1, 100, 'hold'), (op, 100)])
+    return alt, neu
+
+# ---------------------------------------------------------------- marke: Rahmen in Tinte, Pinsel in Blau, Logo-Marke, Haken (einmal, 2,8 s)
+def marke():
+    OP = 168
+    L = []
+    # Pinselstrich unter der Tinte: ein breiter, flacher Strich läuft einmal um das Profil (Band zwischen Außenkante und Glas, 22 breit);
+    # er setzt in der Mitte der Oberkante an, damit jede Ecke eine Gehrung ist und kein Zwickel frei bleibt
+    pinsel = group([path([(0, -64), (55, -64), (55, 64), (-55, 64), (-55, -64)], closed=True), flach(stroke(EL, 22)),
+                    trim(0, kf([(56, 0), (104, 100)], E_IO))], "pinsel")
+    L.append(layer("pinsel", [pinsel], 1, OP))
+    # Rahmen in Tinte: Außenkante, dann die Glasöffnung; beide werden gezogen
+    aussen = group([rect(132, 150, 0, 0, 4), stroke(INK, 4), trim(0, kf([(2, 0), (38, 100)], E_IO))], "aussen")
+    glas = group([rect(88, 106, 0, 0, 2), stroke(INK, 4), trim(0, kf([(22, 0), (54, 100)], E_IO))], "glas")
+    L.append(layer("rahmen", [aussen, glas], 2, OP))
+    # Logo-Marke: Kreis in Blau mit Papierrand auf der Ecke oben links, rastet aus 1,06 ein
+    logo = group([ellipse(26, 26), fill(EL), stroke(PAPER, 4)], "logo",
+                 s=kfm([(104, [0, 0], E_OUT), (118, [106, 106], E_OUT), (126, [100, 100], 'hold'), (OP, [100, 100])]))
+    L.append(layer("logo", [logo], 3, OP, p=(120 - 66, 120 - 75)))
+    # Haken in Grün rechts unten, kurz gezogen
+    haken = group([path([(-12, 0), (-4, 8), (12, -10)]), stroke(OK, 5), trim(0, kf([(130, 0), (150, 100)]))], "haken")
+    L.append(layer("haken", [haken], 4, OP, p=(120 + 80, 120 + 86)))
+    return anim("marke", L, OP)
+
+# ---------------------------------------------------------------- domain: Adresszeile, ein Strich tippt, Schloss wird grün, die Seite wächst (einmal, 3 s)
+def domain():
+    OP = 180
+    L = []
+    Y = -60   # Mitte der Adresszeile
+    # Adresszeile: Pille in Tinte, wird gezogen
+    zeile = group([rect(196, 44, 0, Y, 22), stroke(INK, 4), trim(0, kf([(2, 0), (40, 100)], E_IO))], "zeile")
+    L.append(layer("zeile", [zeile], 1, OP))
+    # Eingabe: ein Strich wächst von links nach rechts (kein Text); davor blinkt die Einfügemarke und erlischt nach dem Tippen
+    tippen = group([path([(-56, Y), (74, Y)]), stroke(INK, 4), trim(0, kf([(44, 0), (96, 100)], E_IO))], "tippen")
+    L.append(layer("tippen", [tippen], 2, OP))
+    marke_ = group([path([(0, -9), (0, 9)]), stroke(INK, 3)], "einfuegemarke")
+    L.append(layer("einfuegemarke", [marke_], 3, OP,
+                   p=kfm([(44, [120 - 50, 120 + Y, 0], E_IO), (96, [120 + 80, 120 + Y, 0], 'hold'), (OP, [120 + 80, 120 + Y, 0])]),
+                   o=kfm([(0, 0, 'hold'), (18, 100, 'hold'), (30, 0, 'hold'), (40, 100, 'hold'), (102, 100, 'hold'), (112, 0, 'hold'), (OP, 0)])))
+    # Schloss links in der Zeile: der Körper rastet ein, der Bügel wird gezogen; am Ende wird es grün (zwei Farben überblendet)
+    def schloss(c):
+        koerper = group([rect(16, 12, 0, 4, 2), fill(c)], "koerper",
+                        s=kfm([(96, [0, 0], E_OUT), (108, [106, 106], E_OUT), (116, [100, 100], 'hold'), (OP, [100, 100])]))
+        k = 3.31   # Bezier-Handle für einen Halbkreis mit Radius 6
+        buegel = group([path([(-6, -2), (0, -8), (6, -2)], tang=([[0, 0], [-k, 0], [0, -k]], [[0, -k], [k, 0], [0, 0]])),
+                        stroke(c, 3), trim(0, kf([(104, 0), (120, 100)]))], "buegel")
+        return [koerper, buegel]
+    alt, neu = ueberblenden(148, 164, OP)
+    L.append(layer("schloss", schloss(INK), 4, OP, p=(120 - 76, 120 + Y), o=alt))
+    L.append(layer("schloss_ok", schloss(OK), 5, OP, p=(120 - 76, 120 + Y), o=neu))
+    # die Seite wächst aus der Zeile heraus: ein Fensterrahmen, oben verankert, wächst nach unten; der Pfosten wird mitgezogen
+    r = rect(120, 112, 0, 56, 6)
+    r["s"] = kf([(110, [120, 0]), (150, [120, 112])]); r["p"] = kf([(110, [0, 0]), (150, [0, 56])])
+    rahmen = group([r, stroke(INK, 4)], "rahmen")
+    pfosten = group([path([(0, 0), (0, 112)]), stroke(INK, 4), trim(0, kf([(110, 0), (150, 100)]))], "pfosten")
+    L.append(layer("seite", [rahmen, pfosten], 6, OP, p=(120, 120 + Y + 32), o=kfm([(110, 0, E_OUT), (116, 100, 'hold'), (OP, 100)])))
+    return anim("domain", L, OP)
+
+# ---------------------------------------------------------------- dashboard: drei Karten, drei Stände (eingeladen, in Bearbeitung, eingereicht) (einmal, 2,8 s)
+def dashboard():
+    OP = 168
+    L = []
+    for n, y in enumerate((-60, 0, 60)):
+        t0 = 6 + n * 12
+        # Karte mit Rand, Statuspunkt in Tinte und zwei Zeilen; erscheint 8 px aufwärts, gestaffelt
+        karte = group([rect(176, 48, 0, 0, 8), fill(PAPER)], "karte")
+        rand = group([rect(176, 48, 0, 0, 8), stroke(INK, 3)], "rand")
+        punkt = group([ellipse(16, 16, -66, 0), fill(INK)], "punkt")
+        zeile = group([path([(-46, -7), (32, -7)]), stroke(INK, 3.5, 32)], "zeile")
+        teile = [karte, rand, punkt, zeile]
+        if n != 1: teile.append(group([path([(-46, 8), (-2, 8)]), stroke(INK, 3, 18)], "zeile2"))
+        L.append(layer("karte" + str(n), teile, 1 + n, OP,
+                       p=kfm([(t0, [120, 120 + y + 8, 0], E_OUT), (t0 + 20, [120, 120 + y, 0], 'hold'), (OP, [120, 120 + y, 0])]),
+                       o=kfm([(t0, 0, E_OUT), (t0 + 16, 100, 'hold'), (OP, 100)])))
+    # zweite Karte: der Punkt wird orange und ein Balken läuft an
+    orange = group([ellipse(16, 16), fill(MO)], "orange",
+                   s=kfm([(70, [100, 100], E_OUT), (80, [112, 112], E_OUT), (90, [100, 100], 'hold'), (OP, [100, 100])]),
+                   o=kfm([(70, 0, E_OUT), (82, 100, 'hold'), (OP, 100)]))
+    L.append(layer("bearbeitung", [orange], 4, OP, p=(120 - 66, 120)))
+    spur = group([path([(-46, 8), (60, 8)]), stroke(INK, 4, 18)], "spur", o=kfm([(76, 0, E_OUT), (86, 100, 'hold'), (OP, 100)]))
+    balken = group([path([(-46, 8), (60, 8)]), stroke(MO, 4), trim(0, kf([(86, 0), (130, 62)]))], "balken")
+    L.append(layer("balken", [spur, balken], 5, OP))
+    # dritte Karte: der Punkt wird grün und größer, ein Haken in Papier wird gezogen
+    gruen = group([ellipse(20, 20), fill(OK)], "gruen",
+                  s=kfm([(100, [0, 0], E_OUT), (114, [116, 116], E_OUT), (124, [100, 100], 'hold'), (OP, [100, 100])]))
+    haken = group([path([(-5, 0), (-1.5, 3.5), (5.5, -4)]), stroke(PAPER, 3), trim(0, kf([(112, 0), (130, 100)]))], "haken")
+    L.append(layer("eingereicht", [gruen, haken], 6, OP, p=(120 - 66, 120 + 60)))
+    return anim("dashboard", L, OP)
+
 if __name__ == '__main__':
     ziel = sys.argv[1]
     os.makedirs(ziel, exist_ok=True)
-    for f in (messen, fotos, senden, eingang, fertig):
+    for f in (messen, fotos, senden, eingang, fertig, marke, domain, dashboard):
         d = f()
         p = os.path.join(ziel, f.__name__ + '.json')
         json.dump(d, open(p, 'w'), separators=(',', ':'))

@@ -1,7 +1,8 @@
 /* eeziframes · Verkaufsseite der Konfigurator-Pakete (/fuer-fensterbauer/), lädt nach ratgeber.css.
-   Bausteine aus functions/pakete-seite.js: Paketkarten, Vergleich, Bestellen und Anfrageformular. Rollen wie im Ratgeber
-   (docs/GESTALTUNG.md): 40 Titel und Preis (32 am Telefon) · 24 Paketname · 17 Text · 15 Nebentext · 13 Label. Eine Cream-Pille
-   je Bildschirm: oben „Pakete ansehen“, bei den Paketen der Knopf des empfohlenen Pakets, unten „Frage senden“. */
+   Bausteine aus functions/pakete-seite.js: Paketkarten, Vergleich, Ablauf, Demos, Bestellen und Anfrageformular. Rollen wie im Ratgeber
+   (docs/GESTALTUNG.md): 40 Titel, Preis und Kennzahl (32 am Telefon) · 24 Zwischentitel und Paketname · 17 Text · 15 Nebentext · 13 Label.
+   Eine Cream-Pille je Bildschirm: im Startbild „Pakete ansehen“ (im Kopf nur ein Ring-Knopf), bei den Paketen der Knopf des
+   empfohlenen Pakets, unten „Frage senden“. Die Abschnitte der Landingpage stehen im zweiten Teil dieser Datei. */
 
 /* Sprungziele (Pakete ansehen, anfragen, Inhaltsverzeichnis) nicht unter dem klebenden Kopf */
 .rg h2[id], .rg h3[id], .vk-paket { scroll-margin-top: 76px }
@@ -75,3 +76,179 @@
   .vk-form { padding: 14px }
 }
 @media print { .vk-form, .vk-knoepfe, .vk-paket .btn { display: none } }
+
+/* ---------- Landingpage mit Rhythmus (23.10.2026) ----------
+   Dieselben Texte wie im Ratgeber-Layout, aber als Abschnitte: Startbild mit randlosem Foto, Kennzahlen, Schrittkarten mit
+   gezeichneten Zeichen (Lottie), Aufmaßblatt-Miniatur, zwei Bildbänder, Pakete, Zeitleiste, Demos, Bestellen mit Foto.
+   Spalte 1040 px statt 820 (Kopf und Fuß ziehen mit). Ohne JavaScript ist alles sichtbar: .rev setzt nur gemeinsam.js,
+   die Zeichen zeigen ihr Standbild, die Zeitleiste ist voll. Bei „weniger Bewegung“ läuft nichts (Block am Ende). */
+body.vk-seite { overflow-x: hidden; overflow-x: clip }
+.vk-seite .rg-kopf > div, .vk-seite .rg, .vk-seite .rg-fuss > div { max-width: 1040px }
+/* Abstand vom rechten Spaltenrand bis zum Bildschirmrand: so weit läuft das Startbild-Foto aus */
+.vk-seite .rg { --vk-rand: max(16px, (100vw - 1040px) / 2) }
+.vk-seite .rg h2 { margin-top: 0 }
+.vk-teil, .vk-band { margin-top: 56px }
+.rg .vk-lead { max-width: 64ch }
+
+/* Startbild: Text links, rechts das Foto randlos bis an den Bildschirmrand, in den Grund ausgeblendet; „Auf dieser Seite“ darunter */
+.vk-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); padding: 4px 0 0 }
+.vk-hero > .kicker { margin: 0 0 10px }
+.vk-hero > h1 { margin: 0 0 14px }
+.vk-hero > .rg-kurz { margin: 0 0 20px; padding: 0; max-width: 60ch; background: none; box-shadow: none }
+.vk-hero > .rg-kurz .eyebrow { margin: 0 0 6px }
+.vk-hero > .rg-cta { margin: 0 0 10px }
+.vk-hero > .rg-inhalt { margin: 22px 0 0 }
+.vk-hero-foto { position: relative; margin: 0; pointer-events: none }
+.vk-hero-foto img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; animation: vk-fotoin 1.6s var(--e-out) both }
+@keyframes vk-fotoin { from { transform: scale(1.06) } to { transform: none } }
+.vk-hero-foto .chips { position: absolute; left: 16px; right: 16px; bottom: 36px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; opacity: 0; animation: vk-auf var(--t3) .8s var(--e-out) forwards }
+@keyframes vk-auf { to { opacity: 1 } }
+.vk-hero-foto .chip { min-height: 36px; padding: 0 12px; font-size: 13px; color: var(--text); background: rgba(22, 22, 22, .72); border-color: rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px) }
+.vk-hero-foto .chip.haken::before { width: 6px; height: 10px; border-width: 0 2px 2px 0 }
+@media (min-width: 761px) {
+  .vk-hero { grid-template-columns: minmax(0, 560px) minmax(0, 1fr); grid-template-rows: auto auto auto 1fr auto; column-gap: 40px; padding-top: clamp(12px, 2.5vw, 28px) }
+  .vk-hero > .kicker { grid-area: 1 / 1 } .vk-hero > h1 { grid-area: 2 / 1 } .vk-hero > .rg-kurz { grid-area: 3 / 1 } .vk-hero > .rg-cta { grid-area: 4 / 1; align-self: start }
+  .vk-hero > .rg-inhalt { grid-column: 1 / -1; grid-row: 5 }
+  .vk-hero-foto { grid-column: 2; grid-row: 1 / 5; min-height: clamp(440px, 42vw, 580px); margin: -44px calc(-1 * var(--vk-rand)) 0 0 }
+  .vk-hero-foto img { position: absolute; inset: 0;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent 0, #000 38%), linear-gradient(to bottom, transparent 0, #000 12%, #000 72%, transparent 100%); mask-composite: intersect }
+  .vk-hero-foto .chips { left: 34%; right: calc(var(--vk-rand) + 8px); bottom: 52px }
+  .vk-hero > .rg-inhalt ol { columns: 3 }
+}
+@media (max-width: 760px) {
+  .vk-hero-foto { order: -1; height: min(92vw, 440px); margin: 4px calc(-1 * var(--vk-rand)) -56px }
+  .vk-hero-foto img { position: absolute; inset: 0; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 0, #000 10%, #000 58%, transparent 92%) }
+  .vk-hero-foto .chips { bottom: 72px; justify-content: flex-start }
+  .vk-hero > .kicker, .vk-hero > h1, .vk-hero > .rg-kurz, .vk-hero > .rg-cta, .vk-hero > .rg-inhalt { position: relative; z-index: 1 }
+}
+@media (max-width: 600px) { .vk-hero > .rg-cta .btn { flex: 1 1 100%; justify-content: center } }
+
+/* Kennzahlen: vier Zahlen in der Titelrolle, die einmal hochlaufen, wenn sie ins Bild kommen (verkauf.js) */
+.vk-zahlen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 20px; margin: 26px 0 0; padding: 20px 0 22px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line) }
+.vk-zahl { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.rg .vk-zahl b { font-size: 40px; line-height: 1.05; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums }
+.rg .vk-zahl span { font-size: 15px; line-height: 1.35; color: var(--ink2) }
+@media (max-width: 600px) { .vk-zahlen { grid-template-columns: repeat(2, minmax(0, 1fr)) } .rg .vk-zahl b { font-size: 32px } }
+
+/* Die Idee: vier Karten, der fette Satzanfang als Titel */
+.rg .vk-punkte { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+.rg .vk-punkte li { margin: 0; padding: 16px 18px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring); font-size: 15px; line-height: 1.5 }
+.rg .vk-punkte strong { display: block; margin-bottom: 4px; font-size: 17px; line-height: 1.35 }
+@media (max-width: 600px) { .rg .vk-punkte { grid-template-columns: minmax(0, 1fr) } }
+
+/* So funktioniert es: Schrittkarten nebeneinander, am Telefon untereinander; oben das gezeichnete Zeichen (Standbild, bis der
+   Spieler da ist; die Zeichen spielen nacheinander, nie zwei zugleich), die Nummer als Pille rechts oben */
+.rg .vk-schritte { list-style: none; counter-reset: vk; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(188px, 1fr)); gap: 12px }
+.rg .vk-schritte li { counter-increment: vk; position: relative; margin: 0; padding: 16px 16px 18px; background: var(--surface); border-radius: var(--r3); box-shadow: var(--ring); display: flex; flex-direction: column; gap: 8px }
+.vk-schritte li::before { content: counter(vk); position: absolute; top: 14px; right: 14px; box-sizing: border-box; min-width: 28px; height: 28px; padding: 0 9px; border-radius: var(--pill); background: var(--surface2); color: var(--ink); font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center }
+.rg .vk-schritte b { font-size: 17px; line-height: 1.3; color: var(--ink) }
+.rg .vk-schritte .vk-text { font-size: 15px; line-height: 1.45; color: var(--ink2) }
+.vk-zeichen { display: block; width: 120px; height: 120px; margin: 0 0 4px; color: var(--ink) }
+.vk-zeichen > svg, .vk-zeichen .lottie-still > svg { display: block; width: 100%; height: 100% }
+@media (max-width: 600px) { .rg .vk-schritte li { flex-direction: row; flex-wrap: wrap; align-items: flex-start; column-gap: 14px } .vk-schritte .vk-zeichen { width: 88px; height: 88px; margin: 0 } .rg .vk-schritte b { flex: 1 1 0; min-width: 0; margin-top: 10px; padding-right: 36px } .rg .vk-schritte .vk-text { flex-basis: 100% } }
+
+/* Was in jeder Anfrage steht: links die Liste mit Haken, rechts die Miniatur eines Aufmaßblatts (Karte mit Kopfzeile, einer Position
+   und der Klärungsliste; die drei Haken werden nacheinander gezogen, wenn die Karte ins Bild kommt) */
+.vk-anfrage { display: grid; gap: 20px 36px; align-items: start; margin-top: 14px }
+@media (min-width: 761px) { .vk-anfrage { grid-template-columns: minmax(0, 1fr) minmax(0, 400px) } .vk-blatt { position: sticky; top: 76px } }
+.rg .vk-inhalt { list-style: none; margin: 0; padding: 0 }
+.rg .vk-inhalt li { position: relative; margin: 0; padding: 10px 0 10px 30px; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 1.45 }
+.rg .vk-inhalt li:last-child { border-bottom: 0 }
+.vk-inhalt li::before { content: ''; position: absolute; left: 4px; top: 15px; width: 7px; height: 13px; border-right: 2.5px solid var(--accent); border-bottom: 2.5px solid var(--accent); transform: rotate(45deg) }
+.rg .vk-inhalt b { display: block; font-size: 17px; line-height: 1.35 }
+.vk-blatt { padding: 16px 18px 18px; background: var(--surface); border-radius: var(--r4); box-shadow: var(--ring) }
+.vk-blatt-kopf { display: flex; flex-direction: column; gap: 2px; padding-bottom: 12px; border-bottom: 1px solid var(--line) }
+.vk-blatt-kopf .eyebrow { margin: 0 0 4px; color: var(--accent) }
+.vk-blatt-kopf b { font-size: 15px; color: var(--ink) }
+.vk-blatt-meta { font-size: 13px; color: var(--muted) }
+.vk-blatt-pos { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line) }
+.vk-blatt-skizze { flex: 0 0 auto; width: 48px; height: 54px; border-radius: 6px }
+.vk-blatt-pos div { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.vk-blatt-pos b { font-size: 15px; color: var(--ink) }
+.vk-blatt-pos span { font-size: 13px; line-height: 1.4; color: var(--ink2) }
+.vk-blatt > .eyebrow { margin: 14px 0 8px }
+.rg .vk-klaerung { list-style: none; margin: 0; padding: 0 }
+.rg .vk-klaerung li { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 15px; color: var(--ink) }
+.vk-kasten { flex: 0 0 auto; display: inline-flex; width: 22px; height: 22px; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--line2) }
+.vk-kasten svg { width: 22px; height: 22px }
+/* die Haken: ohne JavaScript gezogen; mit Reveal erst leer, dann nacheinander (Katalog 3) */
+.vk-blatt.rev .vk-haken { stroke-dasharray: 24; stroke-dashoffset: 24 }
+.vk-blatt.rev.in .vk-haken { animation: vk-haken .45s var(--e-out) forwards }
+.vk-blatt.rev.in li:nth-child(1) .vk-haken { animation-delay: .5s } .vk-blatt.rev.in li:nth-child(2) .vk-haken { animation-delay: .95s } .vk-blatt.rev.in li:nth-child(3) .vk-haken { animation-delay: 1.4s }
+@keyframes vk-haken { to { stroke-dashoffset: 0 } }
+
+/* Bänder mit wechselnder Seite: Text und Fotokarte (Platzhalter, bis der Inhaber die Bilder liefert; docs/BILDER.md) */
+.vk-band { display: grid; gap: 14px 36px; align-items: center }
+.vk-band > .foto-karte { margin: 4px 0 6px }
+@media (min-width: 761px) {
+  .vk-band { grid-template-columns: minmax(0, 1fr) minmax(0, 380px); grid-template-areas: 'titel foto' 'text foto' }
+  .vk-band-um { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); grid-template-areas: 'foto titel' 'foto lead' 'foto text' }
+  .vk-band > h2 { grid-area: titel; align-self: end } .vk-band > p { grid-area: lead } .vk-band > ul { grid-area: text; align-self: start } .vk-band > .foto-karte { grid-area: foto; max-width: none; margin: 0 }
+}
+.rg .vk-band ul { margin-bottom: 0 }
+
+/* Pakete: Vorspann mit dem Zeichen „marke“, darunter die Karten (unverändert), der Vergleich zum Aufklappen */
+.vk-vorspann { display: flex; align-items: center; gap: 18px; margin: 6px 0 18px }
+.vk-vorspann .vk-zeichen { flex: 0 0 auto; width: 96px; height: 96px; margin: 0 }
+.rg .vk-vorspann p { margin: 0; max-width: 56ch }
+.vk-vergleich-auf { margin: 18px 0 14px }
+.vk-vergleich-auf > div .rg-tab { margin-top: 4px }
+@media (max-width: 600px) { .vk-vorspann { align-items: flex-start } .vk-vorspann .vk-zeichen { width: 72px; height: 72px } }
+
+/* Ablauf als Zeitleiste: Linie links, die sich beim Scrollen füllt (--sp aus Scroll.binden), die Nummer wird grün, wenn die Linie
+   sie erreicht; der letzte Schritt bekommt einen Haken. Ohne JavaScript ist die Linie voll. */
+.rg .vk-ablauf { position: relative; margin: 18px 0 0; padding: 4px 0 0; --sp: 1 }
+.js .rg .vk-ablauf { --sp: 0 }
+.vk-ablauf::before, .vk-ablauf::after { content: ''; position: absolute; left: 15px; top: 20px; bottom: 36px; width: 2px; border-radius: 1px; background: var(--line) }
+.vk-ablauf::after { bottom: auto; height: calc((100% - 56px) * var(--sp)); background: var(--accent) }
+.rg .vk-ablauf li { margin: 0 0 24px; padding-left: 52px }
+.rg .vk-ablauf li:last-child { margin-bottom: 0 }
+.vk-ablauf li::before { background: var(--surface2); color: var(--ink); box-shadow: 0 0 0 4px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
+.vk-ablauf li.vk-an::before, html:not(.js) .vk-ablauf li::before { background: var(--accent); color: var(--on-accent) }
+.vk-ablauf li:last-child.vk-an::before { color: transparent }
+.vk-ablauf li:last-child.vk-an::after { content: ''; position: absolute; left: 12px; top: 8px; width: 6px; height: 11px; border-right: 2.5px solid var(--on-accent); border-bottom: 2.5px solid var(--on-accent); transform: rotate(45deg); animation: fx-einrasten var(--t2) var(--e-out) both }
+
+/* Wissen: fünf Karten in einer Reihe am Schreibtisch (sonst stünde eine allein in der zweiten) */
+.rg .vk-wissen { grid-template-columns: repeat(auto-fit, minmax(188px, 1fr)) }
+
+/* Demos: Karten in Paketfarbe, Essential dunkel, Plus und Signature mit Akzentstrich */
+.vk-demos .vk-demo-plus, .vk-demos .vk-demo-signature { box-shadow: var(--ring), inset 4px 0 0 var(--accent) }
+@media (hover: hover) { .vk-demos .vk-demo-plus:hover, .vk-demos .vk-demo-signature:hover { box-shadow: var(--lift), inset 4px 0 0 var(--accent) } }
+
+/* Bestellen: Foto neben dem Formular (am Schreibtisch links, klebt beim Scrollen), am Telefon darüber */
+.vk-bestellen { display: grid; gap: 16px; margin-top: 14px; align-items: start }
+.vk-bestellen > .foto-karte { margin: 0 }
+.vk-bestellen .vk-bald, .vk-bestellen .vk-form { margin-top: 0 }
+.rg .vk-bestellen h3 { margin-top: 18px }
+@media (min-width: 901px) { .vk-bestellen { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 28px } .vk-bestellen > .foto-karte { position: sticky; top: 76px; max-width: none } }
+
+/* Weniger Bewegung: Foto und Chips stehen, Haken gezogen, Zeitleiste voll (die Skripte lassen Zahlen, Zeichen und Reveal in Ruhe) */
+@media (prefers-reduced-motion: reduce) {
+  .vk-hero-foto img, .vk-hero-foto .chips, .vk-blatt.rev.in .vk-haken, .vk-ablauf li:last-child.vk-an::after { animation: none !important }
+  .vk-hero-foto .chips { opacity: 1 }
+  .vk-blatt.rev .vk-haken { stroke-dashoffset: 0 }
+  .vk-ablauf li::before { transition: none }
+}
+@media print { .vk-hero-foto, .vk-zeichen, .vk-blatt, .vk-band > .foto-karte, .vk-bestellen > .foto-karte { display: none } }
+
+/* ---------- Einbettung in die Startseite (portal.js, Ansicht Fensterbauer) ----------
+   Derselbe Inhalt (main.rg ohne Brotkrumen) liegt dort in <section class="vk-einbettung rg"> innerhalb von .wrap der Startseite
+   (1040 px mit 20 px Rand, am Telefon 16 px): keine eigene Spalte, kein eigener Rand, das Startbild-Foto läuft bis an den Rand
+   des Bildschirms (--vk-rand aus dem Rand der Startseite). Die Kopfzeile ist die des Portals (60 px, bis 879 px mit dem Umschalter
+   als zweiter Zeile etwa 122 px), darum klebende Karten mit mehr Abstand; Sprungmarken scrollt portal.js selbst unter die Kopfzeile.
+   Beim Laden (aria-busy) hält der Behälter Platz, damit die Karte darunter nicht springt. */
+.vk-einbettung { --vk-pad: 20px; --vk-rand: max(var(--vk-pad), (100vw - 1000px) / 2); --vk-kopf: 60px; max-width: none; min-width: 0; margin: 0; padding: 0 }
+.vk-einbettung[aria-busy="true"] { min-height: 60vh }
+.vk-einbettung h2 { margin-top: 0 }
+.vk-einbettung .vk-hero { padding-top: 0 }
+.vk-einbettung .vk-blatt, .vk-einbettung .vk-bestellen > .foto-karte { top: calc(var(--vk-kopf) + 16px) }
+.vk-einbettung.vk-rueckfall .pakete-karte { margin-bottom: 0 }
+@media (min-width: 761px) {
+  .vk-einbettung .vk-hero { padding-top: clamp(12px, 2.5vw, 28px) }
+  /* bis unter die Kopfzeile: über den Abstand des Startbilds und den oberen Rand von .wrap hinaus */
+  .vk-einbettung .vk-hero-foto { margin-top: calc(-24px - clamp(12px, 2.5vw, 28px)) }
+  .banner + .vk-einbettung .vk-hero-foto { margin-top: 0 }
+}
+@media (max-width: 879px) { .vk-einbettung { --vk-kopf: 122px } }
+@media (max-width: 520px) { .vk-einbettung { --vk-pad: 16px } }
