@@ -3,9 +3,11 @@
 damit der leichte Spieler (web/vendor/lottie_light.min.js) sie ohne eval unter der strengen CSP abspielt.
 Farben sind Marker (die hellen Tokens); gemeinsam.js tauscht sie beim Laden gegen die aktuellen Tokens, auch im dunklen Modus.
    python3 scripts/lottie-erzeugen.py web/assets/lottie
-Acht Zeichen: messen (drei Maße, das kleinste zählt), fotos (der Sucher liest das Fenster), senden (der Flieger),
+Zehn Zeichen: messen (drei Maße, das kleinste zählt), fotos (der Sucher liest das Fenster), senden (der Flieger),
 eingang (ein Aufmaß landet im Projekt), fertig (Kreis, Haken, vier Striche); für die Verkaufsseite marke (Rahmen in Tinte,
-Pinsel in Blau, Logo-Marke, Haken), domain (Adresszeile, Schloss wird grün, die Seite wächst), dashboard (drei Karten, drei Stände).
+Pinsel in Blau, Logo-Marke, Haken), domain (Adresszeile, Schloss wird grün, die Seite wächst), dashboard (drei Karten, drei Stände),
+konfigurator (vom Foto zum Aufmaßblatt: Telefon, Sucher, Maße, Element, Flieger, Umschlag, Blatt mit Haken; Schleife, 480 × 300)
+und farbwechsel (ein Rahmen, drei Farbchips, der Pinsel wandert, die Füllung blendet über; Schleife).
 Regeln in docs/GESTALTUNG.md."""
 import json, math, sys, os
 
@@ -308,10 +310,145 @@ def dashboard():
     L.append(layer("eingereicht", [gruen, haken], 6, OP, p=(120 - 66, 120 + 60)))
     return anim("dashboard", L, OP)
 
+# ---------------------------------------------------------------- Verkaufsseite, zwei Schleifen (Band unter den Kennzahlen, Vorspann der Pakete)
+# Beide laufen nahtlos: jeder Wert steht bei 0 und bei OP gleich. Der Schluss der Geschichte steht darum bei 0 schon im Bild und
+# blendet erst aus (bei „weniger Bewegung“ zeigt der Spieler das letzte Bild, und das soll die ganze Geschichte sein). Eine Skala, die
+# erst später aus 0 wächst, steht bis dahin auf 100 (Hold), sonst wäre die Form am Anfang der Runde weg und die Schleife spränge.
+
+# ---------------------------------------------------------------- konfigurator: vom Foto zum Aufmaßblatt (Schleife, 10 s, 480 × 300)
+def konfigurator():
+    OP = 600
+    L = []
+    TX, TY = 118, 150        # Mitte des Telefons
+    SX, SY = TX, TY - 4      # Mitte des Bildschirms (Maueröffnung, Sucher, Maße, Element)
+    UX, UY = 356, 186        # Mitte des Umschlags
+    def aus_dann(t0, t1):
+        """Deckkraft einer Form, die am Schluss der Runde steht: bei 0 da, bis 40 ausgeblendet, ab t0 wieder eingeblendet"""
+        return kfm([(0, 100, 'hold'), (4, 100, E_IN), (40, 0, 'hold'), (t0, 0, E_OUT), (t1, 100, 'hold'), (OP, 100)])
+    # Bühne links: das Telefon in Tinte (Lautsprecher, Balken unten), steht die ganze Zeit
+    telefon = group([rect(124, 232, 0, 0, 18), stroke(INK, 5)], "telefon")
+    details = group([path([(-14, -100), (14, -100)]), path([(-18, 100), (18, 100)]), stroke(INK, 4, 45)], "details")
+    L.append(layer("telefon", [telefon, details], 1, OP, p=(TX, TY)))
+    # 1. die Maueröffnung in Orange, das Motiv des Fotos
+    oeffnung = group([rect(76, 98, 0, 0, 2), stroke(MO, 4)], "oeffnung")
+    L.append(layer("oeffnung", [oeffnung], 2, OP, p=(SX, SY), o=aus_dann(44, 60)))
+    # 2. der Sucher (vier Ecken) legt sich um die Öffnung, nach dem Blitz ist er weg
+    ecken = []
+    for sx, sy in [(-1, -1), (1, -1), (1, 1), (-1, 1)]:
+        x, y = sx * 50, sy * 61
+        ecken.append(path([(x, y - sy * 16), (x, y), (x - sx * 16, y)]))
+    sucher = group(ecken + [stroke(INK, 4.5)], "sucher", s=kf([(46, [128, 128]), (86, [100, 100])]))
+    L.append(layer("sucher", [sucher], 3, OP, p=(SX, SY),
+                   o=kfm([(0, 0, 'hold'), (46, 0, E_OUT), (62, 100, 'hold'), (100, 100, E_IN), (112, 0, 'hold'), (OP, 0)])))
+    # 3. der Blitz: ein weißer Kreis, vier Bilder lang (weiß bleibt weiß, keine Markerfarbe)
+    blitz = group([ellipse(104, 104), fill([1, 1, 1, 1])], "blitz")
+    L.append(layer("blitz", [blitz], 4, OP, p=(SX, SY),
+                   o=kfm([(0, 0, 'hold'), (88, 0, E_OUT), (92, 100, 'hold'), (96, 100, E_IN), (100, 0, 'hold'), (OP, 0)])))
+    # 4. drei Breiten mit Endstrichen, nacheinander gezogen; die mittlere ist die kürzeste; alle weichen dem Element
+    masse = [(-38, -36, 38, 104), (-31, 0, 31, 130), (-38, 36, 36, 156)]
+    for n, (x1, y, x2, t0) in enumerate(masse):
+        linie = group([path([(x1, y), (x2, y)]), stroke(INK, 4), trim(0, kf([(t0, 0), (t0 + 24, 100)]))], "linie")
+        ticks = group([path([(x1, y - 6), (x1, y + 6)]), path([(x2, y - 6), (x2, y + 6)]), stroke(INK, 4, kf([(t0 + 18, 0), (t0 + 28, 100)]))], "ticks")
+        L.append(layer("mass" + str(n), [linie, ticks], 5 + n, OP, p=(SX, SY),
+                       o=kfm([(0, 0, 'hold'), (t0, 100, 'hold'), (212, 100, E_IN), (228, 0, 'hold'), (OP, 0)])))
+    punkt = group([ellipse(12, 12), fill(OK)], "punkt",
+                  s=kfm([(188, [0, 0], E_OUT), (200, [118, 118], E_OUT), (208, [100, 100], 'hold'), (OP, [100, 100])]))
+    L.append(layer("kleinstes", [punkt], 8, OP, p=(SX, SY), o=kfm([(0, 0, 'hold'), (188, 100, 'hold'), (212, 100, E_IN), (228, 0, 'hold'), (OP, 0)])))
+    # 5. das Element in Blau wächst in der Öffnung, der Pfosten und die zwei Flügel werden gezogen
+    el_rahmen = group([rect(66, 88, 0, 0, 2), stroke(EL, 4.5)], "rahmen",
+                      s=kfm([(0, [100, 100], 'hold'), (216, [0, 0], E_OUT), (244, [104, 104], E_OUT), (256, [100, 100], 'hold'), (OP, [100, 100])]))
+    # (die Trims stehen bei 0 auf 100, wie die Skalen: am Anfang der Runde ist alles gezeichnet)
+    pfosten = group([path([(0, -44), (0, 44)]), stroke(EL, 4.5), trim(0, kfm([(0, 100, 'hold'), (246, 0, E_OUT), (266, 100, 'hold'), (OP, 100)]))], "pfosten")
+    fluegel = group([rect(24, 76, -17, 0, 1), rect(24, 76, 17, 0, 1), stroke(EL, 3, 55), trim(0, kfm([(0, 100, 'hold'), (256, 0, E_OUT), (290, 100, 'hold'), (OP, 100)]))], "fluegel")
+    L.append(layer("element", [el_rahmen, pfosten, fluegel], 9, OP, p=(SX, SY), o=aus_dann(214, 222)))
+    # 6. der Papierflieger startet aus dem Telefon und fliegt im Bogen nach rechts in den Umschlag; sein Weg bleibt gepunktet stehen
+    P0, P2 = (126, 100), (352, 176)
+    TO, TI = [70, -70], [-60, -100]
+    bahn = group([path([P0, P2], tang=([[0, 0], TI], [TO, [0, 0]])), stroke(INK, 3, 42, dash=(0.1, 9)),
+                  trim(0, kf([(292, 0), (372, 100)], E_IO))], "bahn")
+    L.append(layer("bahn", [bahn], 10, OP, p=(0, 0), o=kfm([(0, 0, 'hold'), (292, 100, 'hold'), (382, 100, E_IN), (402, 0, 'hold'), (OP, 0)])))
+    # Umschlag rechts: die Klappe hinten; davor (weiter oben in der Ebenenfolge) die Tasche, die den unteren Teil des Blatts verdeckt
+    klappe = group([path([(-56, -37), (0, -78), (56, -37)]), stroke(INK, 4)], "klappe")
+    L.append(layer("klappe", [klappe], 11, OP, p=(UX, UY)))
+    # 7. das Blatt gleitet aus dem Umschlag nach oben: Papier mit Tintenlinien und einer kleinen Fensterskizze
+    karte = group([rect(84, 100, 0, 0, 4), fill(PAPER)], "karte")
+    rand = group([rect(84, 100, 0, 0, 4), stroke(INK, 3.5)], "rand")
+    zeilen = group([path([(-28, -6), (28, -6)]), path([(-28, 8), (14, 8)]), path([(-28, 22), (22, 22)]), stroke(INK, 3.5, 32)], "zeilen")
+    skizze = group([rect(28, 22, 0, -28, 2), path([(0, -39), (0, -17)]), stroke(INK, 2.5, 60)], "skizze")
+    L.append(layer("blatt", [karte, rand, zeilen, skizze], 12, OP,
+                   p=kfm([(0, [UX, 118, 0], 'hold'), (382, [UX, 202, 0], E_OUT), (432, [UX, 112, 0], E_OUT), (442, [UX, 118, 0], 'hold'), (OP, [UX, 118, 0])]),
+                   o=aus_dann(382, 394)))
+    koerper = path([(18, -18), (5.4, 18), (-1.8, 1.8), (-18, -5.4)], closed=True)
+    flieger_f = group([koerper, fill(PAPER)], "fuell")
+    flieger_u = group([koerper, path([(18, -18), (-1.8, 1.8)]), stroke(INK, 4)], "umriss")
+    pos = kfm([(0, [P0[0], P0[1], 0], 'hold'), (292, [P0[0], P0[1], 0], E_IO), (372, [P2[0], P2[1], 0], 'hold'), (OP, [P2[0], P2[1], 0])])
+    pos["k"][1]["to"] = TO + [0]; pos["k"][1]["ti"] = TI + [0]
+    L.append(layer("flieger", [flieger_f, flieger_u], 13, OP, p=pos,
+                   r=kfm([(292, 8, E_IO), (335, 36, E_IO), (372, 84, 'hold'), (OP, 84)]),
+                   o=kfm([(0, 0, 'hold'), (284, 0, E_OUT), (292, 100, 'hold'), (378, 100, 'hold'), (380, 0, 'hold'), (OP, 0)])))
+    tasche = group([rect(112, 74, 0, 0, 6), fill(PAPER)], "tasche")
+    tasche_rand = group([rect(112, 74, 0, 0, 6), path([(-56, -37), (0, 6), (56, -37)]), stroke(INK, 4)], "tasche_rand")
+    L.append(layer("tasche", [tasche, tasche_rand], 14, OP, p=(UX, UY)))
+    # 8. ein grüner Haken auf dem Blatt (Plakette wie bei „eingang“), ein Ring läuft aus (Puls), dann Ruhe bis zum Ende der Runde
+    plakette = group([ellipse(26, 26), fill(OK)], "plakette",
+                     s=kfm([(0, [100, 100], 'hold'), (446, [0, 0], E_OUT), (460, [116, 116], E_OUT), (470, [100, 100], 'hold'), (OP, [100, 100])]))
+    haken = group([path([(-6, 0), (-2, 4), (6, -5)]), stroke(PAPER, 3.5), trim(0, kfm([(0, 100, 'hold'), (458, 0, E_OUT), (474, 100, 'hold'), (OP, 100)]))], "haken")
+    L.append(layer("plakette", [plakette, haken], 15, OP, p=(UX + 42, 68), o=aus_dann(446, 450)))
+    puls = group([ellipse(26, 26), stroke(OK, 3)], "puls",
+                 s=kfm([(0, [100, 100], 'hold'), (474, [100, 100], E_OUT), (520, [260, 260], 'hold'), (OP, [260, 260])]),
+                 o=kfm([(0, 0, 'hold'), (474, 0, E_OUT), (482, 70, E_IN), (520, 0, 'hold'), (OP, 0)]))
+    L.append(layer("puls", [puls], 16, OP, p=(UX + 42, 68)))
+    return anim("konfigurator", L, OP, w=480, h=300)
+
+# ---------------------------------------------------------------- farbwechsel: ein Rahmen, drei Farbchips, der Pinsel wandert (Schleife, 6 s)
+def farbwechsel():
+    OP = 360
+    L = []
+    FY = -40                    # Mitte des Rahmens (128 × 104)
+    CY, CX = 76, (-48, 0, 48)   # die drei Chips darunter
+    FARBEN = (EL, MO, OK)
+    # Füllung je Farbe: ein flacher Strich (Band 18 breit, Gehrung in den Ecken) und der Pfosten. Je 2 s eine Farbe: der Pinsel tippt den
+    # Chip an (Ring), steigt zum Rahmen und malt einmal herum; währenddessen blendet die Füllung per Deckkraft auf die neue Farbe
+    # (neu 56…92, alt 64…100 je Abschnitt). Die dritte Farbe steht bei 0 und bei OP, damit die Schleife nicht springt.
+    def band(c):
+        b = group([path([(-55, FY - 43), (55, FY - 43), (55, FY + 43), (-55, FY + 43)], closed=True), flach(stroke(c, 18))], "band")
+        return [b, group([rect(12, 68, 0, FY), fill(c)], "pfosten")]
+    deck = [kfm([(0, 0, 'hold'), (56, 0, E_OUT), (92, 100, 'hold'), (184, 100, E_OUT), (220, 0, 'hold'), (OP, 0)]),
+            kfm([(0, 0, 'hold'), (176, 0, E_OUT), (212, 100, 'hold'), (304, 100, E_OUT), (340, 0, 'hold'), (OP, 0)]),
+            kfm([(0, 100, 'hold'), (64, 100, E_OUT), (100, 0, 'hold'), (296, 0, E_OUT), (332, 100, 'hold'), (OP, 100)])]
+    for n, c in enumerate(FARBEN):
+        L.append(layer("fuellung" + str(n), band(c), 1 + n, OP, o=deck[n]))
+    # Rahmen in Tinte: Außenkante und zwei Flügel
+    rahmen = group([rect(128, 104, 0, FY, 4), rect(40, 68, -26, FY, 1), rect(40, 68, 26, FY, 1), stroke(INK, 4)], "rahmen")
+    L.append(layer("rahmen", [rahmen], 4, OP))
+    # die Chips, je ein Ring in Tinte für den aktiven (rastet beim Antippen aus 1,08 ein, zieht sich beim nächsten Antippen zurück)
+    for n, c in enumerate(FARBEN):
+        L.append(layer("chip" + str(n), [group([ellipse(24, 24), fill(c)], "chip")], 5 + n, OP, p=(120 + CX[n], 120 + CY)))
+    ringe = [kfm([(0, [0, 0], 'hold'), (28, [0, 0], E_OUT), (38, [108, 108], E_OUT), (42, [100, 100], 'hold'), (140, [100, 100], E_IN), (152, [0, 0], 'hold'), (OP, [0, 0])]),
+             kfm([(0, [0, 0], 'hold'), (148, [0, 0], E_OUT), (158, [108, 108], E_OUT), (162, [100, 100], 'hold'), (260, [100, 100], E_IN), (272, [0, 0], 'hold'), (OP, [0, 0])]),
+             kfm([(0, [100, 100], 'hold'), (20, [100, 100], E_IN), (32, [0, 0], 'hold'), (268, [0, 0], E_OUT), (278, [108, 108], E_OUT), (282, [100, 100], 'hold'), (OP, [100, 100])])]
+    for n in range(3):
+        ring = group([ellipse(36, 36), stroke(INK, 3)], "ring", s=ringe[n])
+        L.append(layer("ring" + str(n), [ring], 8 + n, OP, p=(120 + CX[n], 120 + CY)))
+    # der Pinsel-Pfeil: Stiel, Zwinge und Spitze in Tinte, zeigt nach unten. Je Abschnitt: von der Unterkante des Rahmens zum Chip,
+    # antippen, zurück zum Rahmen und einmal im Uhrzeigersinn um das Band (Spitze auf der Bandmitte), am Ende unten in der Mitte warten
+    stiel = group([path([(0, -26), (0, -10)]), stroke(INK, 5)], "stiel")
+    kopf = group([rect(12, 6, 0, -7), path([(-6, -4), (6, -4), (4, 3), (0, 8), (-4, 3)], closed=True), fill(INK)], "kopf")
+    def am(x, y): return [120 + x, 120 + y - 8, 0]          # Spitze auf dem Punkt (x, y)
+    BC, BL, TL, TR, BR = am(0, FY + 43), am(-55, FY + 43), am(-55, FY - 43), am(55, FY - 43), am(55, FY + 43)
+    weg = []
+    for n in range(3):
+        b = 120 * n
+        weg += [(b, BC, E_IO), (b + 26, am(CX[n], CY - 20), E_OUT), (b + 32, am(CX[n], CY - 16), E_OUT), (b + 38, am(CX[n], CY - 20), E_IO),
+                (b + 54, BC, LIN), (b + 62, BL, LIN), (b + 75, TL, LIN), (b + 92, TR, LIN), (b + 105, BR, LIN), (b + 114, BC, 'hold')]
+    weg.append((OP, BC))
+    L.append(layer("pinsel", [stiel, kopf], 11, OP, p=kfm(weg)))
+    return anim("farbwechsel", L, OP)
+
 if __name__ == '__main__':
     ziel = sys.argv[1]
     os.makedirs(ziel, exist_ok=True)
-    for f in (messen, fotos, senden, eingang, fertig, marke, domain, dashboard):
+    for f in (messen, fotos, senden, eingang, fertig, marke, domain, dashboard, konfigurator, farbwechsel):
         d = f()
         p = os.path.join(ziel, f.__name__ + '.json')
         json.dump(d, open(p, 'w'), separators=(',', ':'))
