@@ -1,3 +1,177 @@
+# 4. Übergreifender Vergleich
+
+[← Übersicht](README.md)
+
+Phase 4: Erst nachdem für jedes Bild ein Expertenkonsens vorlag, wurden alle 15 Einzeldefinitionen gemeinsam betrachtet. Abschnitt 4.1 ist aus den Rohdaten berechnet (daten/statistik.json); die Abschnitte ab 4.2 deuten diese Zahlen.
+
+## 4.1 Statistische Auswertung (berechnet)
+
+Grundlage sind die Konsens-Mediane je Referenz. **Vorhanden** heißt Median ≥ 1. **Auswertbar** heißt: mindestens 4 der 8 Experten gaben einen Wert. **Typische Intensität** ist der Median der auswertbaren Konsenswerte (mit Nullen), daneben der Median dort, wo das Merkmal vorhanden ist. **Streuung**: Spannweite und Quartile (Q1–Q3) der Konsenswerte. **Konsenssicherheit**: hoch bei mindestens 10 auswertbaren Referenzen, mittlerer Expertenspannweite ≤ 1,5 und höchstens 25 % Urteilen mit niedriger Konfidenz; mittel bei mindestens 6 Referenzen, Spannweite ≤ 2,5 und höchstens 50 % niedriger Konfidenz; sonst niedrig. Kategorien: Kernmerkmal ≥ 75 %, wiederkehrend 40–74 %, individuell < 40 % der auswertbaren Referenzen.
+
+**Zwei Lesarten der Häufigkeit.** Nach der Vorgabe zählt ein Merkmal als vorhanden, sobald es erkennbar ist (Median ≥ 1). So gezählt erreichen fast alle statischen Dimensionen die Schwelle für ein Kernmerkmal, weil nahezu jedes Design etwas Tiefe, Licht oder Material hat. Trennschärfer ist deshalb die zweite Spalte „deutlich ausgeprägt“ (Median ≥ 2, also mindestens moderat): Sie zeigt, welche Mittel die Designs tatsächlich prägen. Beide Kategorien stehen nebeneinander.
+
+**Zeitliche Dimensionen (8, 9, 10, 16, 17).** Ein Wert wurde nur bei einem Beleg im Standbild vergeben (Belegregel); auswertbar sind deshalb fast nur Bilder, in denen das Merkmal sichtbar vorkommt. Ihre Häufigkeit von bis zu 100 % ist eine Folge dieser Auswahl und **kein** Befund über die Sammlung. Bei weniger als 5 auswertbaren Referenzen ist die Kategorie als „nicht belastbar“ markiert.
+
+| Dimension | Typ | vorhanden (≥ 1) | Kategorie (≥ 1) | deutlich ausgeprägt (≥ 2) | Kategorie (≥ 2) | Typ. Intensität (alle / wo vorhanden) | Streuung (Min–Max, Q1–Q3) | Expertenspannweite Ø | niedrige Konfidenz | Konsenssicherheit | nicht auswertbar |
+|---|---|---|---|---|---|:-:|:-:|:-:|:-:|:-:|---|
+| 1 Räumliche Tiefe | statisch | 15 von 15 = 100 % | Kernmerkmal | 15 von 15 = 100 % | Kernmerkmal | 3 / 3 | 2–4, 2,75–3 | 0,2 | 0 % | hoch | — |
+| 2 Materialität | statisch | 15 von 15 = 100 % | Kernmerkmal | 11 von 15 = 73 % | Wiederkehrendes Merkmal | 2 / 2 | 1–4, 1,5–3 | 0,33 | 1 % | hoch | — |
+| 3 Lichtgestaltung | statisch | 15 von 15 = 100 % | Kernmerkmal | 11 von 15 = 73 % | Wiederkehrendes Merkmal | 2 / 2 | 1–3, 1,5–3 | 0,47 | 14 % | hoch | — |
+| 4 Schatten und Unschärfe | statisch | 15 von 15 = 100 % | Kernmerkmal | 11 von 15 = 73 % | Wiederkehrendes Merkmal | 2 / 2 | 1–3, 1,75–2,25 | 0,73 | 28 % | mittel | — |
+| 5 Geometrie und Formgebung | statisch | 15 von 15 = 100 % | Kernmerkmal | 14 von 15 = 93 % | Kernmerkmal | 2 / 2 | 1–3, 2–2 | 0,6 | 0 % | hoch | — |
+| 6 Komposition | statisch | 15 von 15 = 100 % | Kernmerkmal | 15 von 15 = 100 % | Kernmerkmal | 3 / 3 | 2–3, 3–3 | 0,53 | 6 % | hoch | — |
+| 7 3D-Integration | statisch | 13 von 15 = 87 % | Kernmerkmal | 11 von 15 = 73 % | Wiederkehrendes Merkmal | 3 / 3 | 0–4, 1,5–4 | 0,4 | 3 % | hoch | — |
+| 8 Animation und Bewegung | zeitlich | 4 von 4 = 100 % | Kernmerkmal (nicht belastbar, n = 4) | 4 von 4 = 100 % | Kernmerkmal (nicht belastbar, n = 4) | 2 / 2 | 2–3, 2–2,25 | 0,5 | 76 % | niedrig | 01, 02, 03, 05, 08, 10, 11, 12, 13, 14, 15 |
+| 9 Scroll-Inszenierung | zeitlich | 5 von 5 = 100 % | Kernmerkmal | 5 von 5 = 100 % | Kernmerkmal | 2 / 2 | 2–2, 2–2 | 0,8 | 100 % | niedrig | 01, 02, 03, 05, 08, 10, 11, 12, 13, 14 |
+| 10 Mikrointeraktionen | zeitlich | 1 von 1 = 100 % | Kernmerkmal (nicht belastbar, n = 1) | 0 von 1 = 0 % | Individuelles Stilmittel (nicht belastbar, n = 1) | 1 / 1 | 1–1, 1–1 | 0 | 100 % | niedrig | 01, 02, 03, 04, 05, 06, 07, 08, 10, 11, 12, 13, 14, 15 |
+| 11 Bildintegration | statisch | 15 von 15 = 100 % | Kernmerkmal | 14 von 15 = 93 % | Kernmerkmal | 2 / 2 | 1–4, 2–3 | 0,67 | 8 % | hoch | — |
+| 12 Oberflächendetails | statisch | 13 von 15 = 87 % | Kernmerkmal | 10 von 15 = 67 % | Wiederkehrendes Merkmal | 2 / 2 | 0–3, 1–2 | 0,27 | 36 % | mittel | — |
+| 13 Dynamische Hintergründe | gemischt | 13 von 15 = 87 % | Kernmerkmal | 4 von 15 = 27 % | Individuelles Stilmittel | 1 / 1 | 0–2, 1–1,5 | 0,6 | 33 % | mittel | — |
+| 14 Morphing und Formtransformation | gemischt | 8 von 15 = 53 % | Wiederkehrendes Merkmal | 1 von 15 = 7 % | Individuelles Stilmittel | 1 / 1 | 0–2, 0–1 | 0,2 | 40 % | mittel | — |
+| 15 Perspektive und Kameraführung | gemischt | 14 von 15 = 93 % | Kernmerkmal | 7 von 15 = 47 % | Wiederkehrendes Merkmal | 1 / 1,5 | 0–3, 1–2 | 0,33 | 17 % | hoch | — |
+| 16 Physikbasierte Interaktionen | zeitlich | 1 von 1 = 100 % | Kernmerkmal (nicht belastbar, n = 1) | 0 von 1 = 0 % | Individuelles Stilmittel (nicht belastbar, n = 1) | 1 / 1 | 1–1, 1–1 | 1 | 100 % | niedrig | 01, 02, 03, 04, 05, 06, 08, 09, 10, 11, 12, 13, 14, 15 |
+| 17 Übergänge und Szenenwechsel | zeitlich | 3 von 3 = 100 % | Kernmerkmal (nicht belastbar, n = 3) | 2 von 3 = 67 % | Wiederkehrendes Merkmal (nicht belastbar, n = 3) | 2 / 2 | 1–3, 1,5–2,5 | 0,67 | 83 % | niedrig | 01, 02, 03, 05, 06, 08, 09, 10, 11, 12, 13, 14 |
+| 18 Dynamische Typografie | gemischt | 15 von 15 = 100 % | Kernmerkmal | 9 von 15 = 60 % | Wiederkehrendes Merkmal | 2 / 2 | 1–4, 1–3 | 0,33 | 4 % | hoch | — |
+
+Stark ausgeprägt (Median ≥ 3) je Dimension: 1 Räumliche Tiefe 11 von 15 · 2 Materialität 6 von 15 · 3 Lichtgestaltung 6 von 15 · 4 Schatten und Unschärfe 3 von 15 · 5 Geometrie und Formgebung 2 von 15 · 6 Komposition 13 von 15 · 7 3D-Integration 9 von 15 · 8 Animation und Bewegung 1 von 4 · 9 Scroll-Inszenierung 0 von 5 · 10 Mikrointeraktionen 0 von 1 · 11 Bildintegration 7 von 15 · 12 Oberflächendetails 1 von 15 · 13 Dynamische Hintergründe 0 von 15 · 14 Morphing und Formtransformation 0 von 15 · 15 Perspektive und Kameraführung 2 von 15 · 16 Physikbasierte Interaktionen 0 von 1 · 17 Übergänge und Szenenwechsel 1 von 3 · 18 Dynamische Typografie 7 von 15.
+
+### Konsens-Mediane je Referenz und Dimension
+
+| Dimension | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 10 | 11 | 12 | 13 | 14 | 15 |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 1 Räumliche Tiefe | 2 | 2 | 3 | 3 | 3 | 3 | 2,5 | 3 | 3 | 3 | 2 | 3 | 3 | 3 | 4 |
+| 2 Materialität | 4 | 1 | 3 | 2 | 3 | 1 | 2 | 2 | 3 | 4 | 1 | 3 | 2 | 2 | 1 |
+| 3 Lichtgestaltung | 2 | 2 | 2 | 1 | 3 | 1 | 1 | 2 | 3 | 3 | 1 | 3 | 3 | 2 | 3 |
+| 4 Schatten und Unschärfe | 3 | 2 | 3 | 2 | 2 | 1 | 2 | 2 | 1 | 2 | 1,5 | 3 | 2,5 | 2 | 1,5 |
+| 5 Geometrie und Formgebung | 2,5 | 2 | 2 | 2 | 2 | 3 | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 3 | 2 |
+| 6 Komposition | 2 | 3 | 3 | 3 | 3 | 2 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| 7 3D-Integration | 1 | 1 | 2 | 2 | 4 | 0 | 3 | 3 | 4 | 4 | 0,5 | 4 | 3 | 4 | 4 |
+| 8 Animation und Bewegung | NB | NB | NB | 3 | NB | 2 | 2 | NB | 2 | NB | NB | NB | NB | NB | NB |
+| 9 Scroll-Inszenierung | NB | NB | NB | 2 | NB | 2 | 2 | NB | 2 | NB | NB | NB | NB | NB | 2 |
+| 10 Mikrointeraktionen | NB | NB | NB | NB | NB | NB | NB | NB | 1 | NB | NB | NB | NB | NB | NB |
+| 11 Bildintegration | 1 | 2 | 4 | 3 | 3 | 2 | 3 | 3 | 2 | 3 | 2 | 2 | 2 | 3 | 2 |
+| 12 Oberflächendetails | 2 | 0,5 | 2 | 1 | 2 | 0 | 1 | 1 | 2 | 3 | 2 | 2 | 2 | 2 | 2 |
+| 13 Dynamische Hintergründe | 0,5 | 1 | 2 | 1 | 1 | 1 | 1 | 0 | 2 | 1 | 1 | 1 | 2 | 1 | 2 |
+| 14 Morphing und Formtransformation | 1 | 0 | 1 | 2 | 1 | 1 | 1 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 |
+| 15 Perspektive und Kameraführung | 0 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 2,5 | 2 | 1 | 2 | 2 | 3 | 3 |
+| 16 Physikbasierte Interaktionen | NB | NB | NB | NB | NB | NB | 1 | NB | NB | NB | NB | NB | NB | NB | NB |
+| 17 Übergänge und Szenenwechsel | NB | NB | NB | 3 | NB | NB | 2 | NB | NB | NB | NB | NB | NB | NB | 1 |
+| 18 Dynamische Typografie | 1 | 1 | 3 | 4 | 3 | 1,5 | 3 | 3 | 2 | 1 | 2 | 1 | 3 | 1 | 4 |
+
+### Gegenprobe: 14 unabhängige Designs
+
+Referenz 04 und 07 sind zwei Standbilder derselben Website aus demselben Reel. Zählt man sie als ein Design (Mittel beider Mediane), ergibt sich:
+
+| Dimension | vorhanden (14 Designs) | Kategorie (≥ 1) | deutlich ausgeprägt (14 Designs) | Kategorie (≥ 2) | Typ. Intensität | Abweichung zur Zählung mit 15 |
+|---|---|---|---|---|:-:|---|
+| 1 Räumliche Tiefe | 14 von 14 = 100 % | Kernmerkmal | 14 von 14 = 100 % | Kernmerkmal | 3 | keine |
+| 2 Materialität | 14 von 14 = 100 % | Kernmerkmal | 10 von 14 = 71 % | Wiederkehrendes Merkmal | 2 | keine |
+| 3 Lichtgestaltung | 14 von 14 = 100 % | Kernmerkmal | 11 von 14 = 79 % | Kernmerkmal | 2 | ≥ 2: Wiederkehrendes Merkmal → Kernmerkmal |
+| 4 Schatten und Unschärfe | 14 von 14 = 100 % | Kernmerkmal | 10 von 14 = 71 % | Wiederkehrendes Merkmal | 2 | keine |
+| 5 Geometrie und Formgebung | 14 von 14 = 100 % | Kernmerkmal | 13 von 14 = 93 % | Kernmerkmal | 2 | keine |
+| 6 Komposition | 14 von 14 = 100 % | Kernmerkmal | 14 von 14 = 100 % | Kernmerkmal | 3 | keine |
+| 7 3D-Integration | 12 von 14 = 86 % | Kernmerkmal | 10 von 14 = 71 % | Wiederkehrendes Merkmal | 3 | keine |
+| 8 Animation und Bewegung | 3 von 3 = 100 % | Kernmerkmal (nicht belastbar, n = 3) | 3 von 3 = 100 % | Kernmerkmal (nicht belastbar, n = 3) | 2 | ≥ 1: Kernmerkmal (nicht belastbar, n = 4) → Kernmerkmal (nicht belastbar, n = 3); ≥ 2: Kernmerkmal (nicht belastbar, n = 4) → Kernmerkmal (nicht belastbar, n = 3) |
+| 9 Scroll-Inszenierung | 4 von 4 = 100 % | Kernmerkmal (nicht belastbar, n = 4) | 4 von 4 = 100 % | Kernmerkmal (nicht belastbar, n = 4) | 2 | ≥ 1: Kernmerkmal → Kernmerkmal (nicht belastbar, n = 4); ≥ 2: Kernmerkmal → Kernmerkmal (nicht belastbar, n = 4) |
+| 10 Mikrointeraktionen | 1 von 1 = 100 % | Kernmerkmal (nicht belastbar, n = 1) | 0 von 1 = 0 % | Individuelles Stilmittel (nicht belastbar, n = 1) | 1 | keine |
+| 11 Bildintegration | 14 von 14 = 100 % | Kernmerkmal | 13 von 14 = 93 % | Kernmerkmal | 2 | keine |
+| 12 Oberflächendetails | 12 von 14 = 86 % | Kernmerkmal | 10 von 14 = 71 % | Wiederkehrendes Merkmal | 2 | keine |
+| 13 Dynamische Hintergründe | 12 von 14 = 86 % | Kernmerkmal | 4 von 14 = 29 % | Individuelles Stilmittel | 1 | keine |
+| 14 Morphing und Formtransformation | 7 von 14 = 50 % | Wiederkehrendes Merkmal | 0 von 14 = 0 % | Individuelles Stilmittel | 0,5 | keine |
+| 15 Perspektive und Kameraführung | 13 von 14 = 93 % | Kernmerkmal | 7 von 14 = 50 % | Wiederkehrendes Merkmal | 1,5 | keine |
+| 16 Physikbasierte Interaktionen | 1 von 1 = 100 % | Kernmerkmal (nicht belastbar, n = 1) | 0 von 1 = 0 % | Individuelles Stilmittel (nicht belastbar, n = 1) | 1 | keine |
+| 17 Übergänge und Szenenwechsel | 2 von 2 = 100 % | Kernmerkmal (nicht belastbar, n = 2) | 1 von 2 = 50 % | Wiederkehrendes Merkmal (nicht belastbar, n = 2) | 1,75 | ≥ 1: Kernmerkmal (nicht belastbar, n = 3) → Kernmerkmal (nicht belastbar, n = 2); ≥ 2: Wiederkehrendes Merkmal (nicht belastbar, n = 3) → Wiederkehrendes Merkmal (nicht belastbar, n = 2) |
+| 18 Dynamische Typografie | 14 von 14 = 100 % | Kernmerkmal | 8 von 14 = 57 % | Wiederkehrendes Merkmal | 2 | keine |
+
+### Tendenzen der Expertenrollen
+
+Mittelwert aller numerischen Urteile je Rolle, Anteil NB und Anteil niedriger Konfidenz – zur Einordnung systematischer Unterschiede zwischen den Perspektiven.
+
+| Rolle | Ø Wert | Anteil NB | Anteil „niedrig“ | Urteile |
+|---|:-:|:-:|:-:|:-:|
+| E1 Creative Director | 2,03 | 23 % | 19 % | 270 |
+| E2 Senior Visual Designer | 2,11 | 23 % | 21 % | 270 |
+| E3 UI/UX Design Architect | 2,01 | 23 % | 20 % | 270 |
+| E4 3D Artist & Rendering Specialist | 2,13 | 23 % | 17 % | 270 |
+| E5 Motion & Interaction Designer | 2,05 | 22 % | 22 % | 270 |
+| E6 Creative Frontend Developer | 2 | 22 % | 19 % | 270 |
+| E7 Digital Compositing Artist | 2,08 | 23 % | 18 % | 270 |
+| E8 Wahrnehmungspsychologe / UX Researcher | 2,06 | 23 % | 22 % | 270 |
+
+### Kombinationen von Merkmalen
+
+Rangkorrelation (Spearman ρ) der Konsens-Mediane über alle Referenzen, in denen beide Dimensionen auswertbar sind (mindestens 8). Hohe positive Werte: Die Merkmale treten gemeinsam stark oder gemeinsam schwach auf. Bei 15 Bildern ist das ein Hinweis, kein Beweis. Bei Dimensionen mit kaum Streuung (z. B. 6 Komposition, 1 Räumliche Tiefe: fast alle Referenzen beim selben Wert) sind ρ-Werte instabil und nicht inhaltlich zu deuten.
+
+| Dimensionspaar | n | ρ | beide vorhanden |
+|---|:-:|:-:|:-:|
+| 3 Lichtgestaltung + 7 3D-Integration | 15 | 0,76 | 13 von 15 |
+| 3 Lichtgestaltung + 12 Oberflächendetails | 15 | 0,65 | 13 von 15 |
+| 7 3D-Integration + 15 Perspektive und Kameraführung | 15 | 0,65 | 12 von 15 |
+| 1 Räumliche Tiefe + 7 3D-Integration | 15 | 0,61 | 13 von 15 |
+| 2 Materialität + 12 Oberflächendetails | 15 | 0,61 | 13 von 15 |
+| 3 Lichtgestaltung + 15 Perspektive und Kameraführung | 15 | 0,57 | 14 von 15 |
+| 7 3D-Integration + 12 Oberflächendetails | 15 | 0,57 | 12 von 15 |
+| 2 Materialität + 4 Schatten und Unschärfe | 15 | 0,55 | 15 von 15 |
+| 6 Komposition + 7 3D-Integration | 15 | 0,54 | 13 von 15 |
+| 13 Dynamische Hintergründe + 15 Perspektive und Kameraführung | 15 | 0,54 | 13 von 15 |
+| 1 Räumliche Tiefe + 3 Lichtgestaltung | 15 | 0,51 | 15 von 15 |
+| 6 Komposition + 11 Bildintegration | 15 | 0,5 | 15 von 15 |
+| 1 Räumliche Tiefe + 15 Perspektive und Kameraführung | 15 | 0,49 | 14 von 15 |
+| 6 Komposition + 15 Perspektive und Kameraführung | 15 | 0,48 | 14 von 15 |
+| 1 Räumliche Tiefe + 13 Dynamische Hintergründe | 15 | 0,47 | 13 von 15 |
+
+Schwächste bzw. gegenläufige Paare:
+
+| Dimensionspaar | n | ρ | beide vorhanden |
+|---|:-:|:-:|:-:|
+| 5 Geometrie und Formgebung + 6 Komposition | 15 | -0,67 | 15 von 15 |
+| 14 Morphing und Formtransformation + 15 Perspektive und Kameraführung | 15 | -0,56 | 7 von 15 |
+| 5 Geometrie und Formgebung + 18 Dynamische Typografie | 15 | -0,38 | 15 von 15 |
+| 6 Komposition + 14 Morphing und Formtransformation | 15 | -0,3 | 8 von 15 |
+| 2 Materialität + 18 Dynamische Typografie | 15 | -0,26 | 15 von 15 |
+| 7 3D-Integration + 14 Morphing und Formtransformation | 15 | -0,26 | 7 von 15 |
+| 4 Schatten und Unschärfe + 15 Perspektive und Kameraführung | 15 | -0,26 | 14 von 15 |
+| 3 Lichtgestaltung + 14 Morphing und Formtransformation | 15 | -0,24 | 8 von 15 |
+
+### Profilähnlichkeit und Clusterung der Referenzen
+
+Abstand zweier Referenzen = mittlere absolute Differenz ihrer Konsens-Mediane über die statischen und gemischten Dimensionen (1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 18), die bei beiden auswertbar sind (0 = identisches Profil, 4 = maximal verschieden). Zusammenführung nach mittlerem Abstand (Average Linkage).
+
+| Ref. | ähnlichste Referenzen (Abstand) |
+|---|---|
+| 01 | 02 (0,88), 03 (0,92), 12 (0,92) |
+| 02 | 11 (0,5), 06 (0,69), 08 (0,73) |
+| 03 | 05 (0,46), 13 (0,5), 07 (0,58) |
+| 04 | 07 (0,27), 08 (0,46), 03 (0,62) |
+| 05 | 10 (0,38), 07 (0,42), 13 (0,42) |
+| 06 | 11 (0,65), 02 (0,69), 07 (0,85) |
+| 07 | 04 (0,27), 08 (0,27), 05 (0,42) |
+| 08 | 07 (0,27), 04 (0,46), 05 (0,46) |
+| 09 | 12 (0,35), 13 (0,46), 15 (0,46) |
+| 10 | 05 (0,38), 12 (0,38), 14 (0,54) |
+| 11 | 02 (0,5), 06 (0,65), 07 (0,73) |
+| 12 | 09 (0,35), 10 (0,38), 05 (0,46) |
+| 13 | 05 (0,42), 09 (0,46), 03 (0,5) |
+| 14 | 12 (0,46), 10 (0,54), 09 (0,58) |
+| 15 | 09 (0,46), 13 (0,54), 05 (0,73) |
+
+Zusammenführungsschritte:
+
+1. {04} + {07} bei Abstand 0,27
+2. {09} + {12} bei Abstand 0,35
+3. {08} + {04, 07} bei Abstand 0,37
+4. {05} + {10} bei Abstand 0,38
+5. {09, 12} + {05, 10} bei Abstand 0,48
+6. {02} + {11} bei Abstand 0,5
+7. {03} + {13} bei Abstand 0,5
+8. {14} + {05, 09, 10, 12} bei Abstand 0,55
+9. {04, 07, 08} + {03, 13} bei Abstand 0,61
+10. {06} + {02, 11} bei Abstand 0,67
+11. {15} + {05, 09, 10, 12, 14} bei Abstand 0,72
+12. {03, 04, 07, 08, 13} + {05, 09, 10, 12, 14, 15} bei Abstand 0,77
+13. {01} + {02, 06, 11} bei Abstand 0,97
+14. {03, 04, 05, 07, 08, 09, 10, 12, 13, 14, 15} + {01, 02, 06, 11} bei Abstand 1,03
+
 ## 4.2 Die 18 Dimensionen im Vergleich
 
 **Lesehinweis.** Häufigkeit, typische Intensität, Streuung, Expertenspannweite, Anteil niedriger Konfidenz und Konsenssicherheit stammen unverändert aus Abschnitt 4.1 (Haupttabelle, Zeile „stark ausgeprägt“, Gegenprobe). Der Nenner sind immer die auswertbaren Referenzen; NB zählt nicht als 0. Für die Einordnung gilt die Lesart „deutlich ausgeprägt“ (Median ≥ 2): **universelles Grundprinzip** bei ≥ 75 %, **wiederkehrendes Mittel** bei 40–74 %, **individuelles Stilmittel** bei < 40 %. Innerhalb jeder Dimension wird das abstrakte Prinzip von der konkreten Technik getrennt, denn oft ist das Prinzip breit und die Technik an wenige Referenzen gebunden. Kennzeichnung: **(B)** Beobachtung aus den Konsensprofilen, **(I)** Interpretation, **(H)** technische Hypothese ohne Beleg im Bild. Eigene Zählungen nennen immer Referenzliste und Nenner.
@@ -45,7 +219,7 @@
   - *Material der UI-Fläche:* Mattglas mit Hintergrundunschärfe und heller 1-px-Kante in Ref 01 (Glas als Thema, randbegrenzte Brechung, Farbübertrag zwischen Objekten), Ref 03 (zwei Glaskarten neben einer opaken), Ref 12 (Karte und Panel), Ref 14 (Milchglaskachel). Nur Transluzenz ohne nachweisbare Unschärfe: Ref 02 (Pillen, Karte), Ref 13 (Buttons auf Violett).
   - *Material des Bildobjekts vor materialloser UI:* Ref 04 (Mattschwarz, Metall, Pulver), Ref 05 (Craquelé-Schale, transluzente Scheiben, Rauch- und Opalglas), Ref 07 (Rauchglas, gerändeltes Metall), Ref 08 (porige Schale mit Etiketten), Ref 09 (Hochglanzschwarz, Chromscheibe), Ref 10 (fünf Oberflächen bei gleicher Grundform: Dünnfilm mit Tropfen, Körnung, Satin, Membran, Glanzfolie), Ref 12 (Lack- bzw. Metallbänder).
   - *Ohne Materialanmutung:* Ref 06 (Vektorflächen mit Binnenverläufen), Ref 11 (Flachfarben), Ref 15 (matt, stilisiert), Ref 02 (Material nur als Fotoinhalt).
-  - Beide Logiken zusammen nur in Ref 03 und 12. Höchstwert 4: Ref 01 und 10.
+  - Beide Logiken zusammen, Mattglas in der UI und Material im Bildmotiv, nur in Ref 03 (gläsernes 3D-Schloss, Wirbelkugel), Ref 12 (Lack- bzw. Metallbänder) und Ref 14 (nasser Spiegelboden, verglaste Bahnhofsfront). Höchstwert 4: Ref 01 und 10.
 - **Hypothese (H):** `backdrop-filter: blur()` mit rgba-Füllung und 1-px-Kontur (Ref 01, 03, 12, 14); vorgerendertes physikalisch basiertes Rendering mit Transmission, Clearcoat, Iridescence (Ref 05, 09, 10, 12).
 - **Einordnung:** wiederkehrendes Mittel. Breiter ist nur das **Materialgefälle** (I): Wo Material auftritt, sitzt es im Motiv oder in einer vermittelnden Glasschicht. Eigene UI-Materialien wie Metall oder Relief fehlen fast ganz; Ausnahmen sind die „leicht kissenartig erhabenen“ Kacheln in Ref 05 und die Glow-Kacheln in Ref 13. Glas mit belegter Unschärfe ist mit 4 von 15 = 27 % ein individuelles Stilmittel.
 - **Funktion (I):** Material macht den Fokusträger körperlich und begehrlich; das Gefälle zur matten UI lässt ihn als einzigen Körper der Fläche erscheinen.
@@ -176,7 +350,7 @@
   - *Technische Mikroschicht aus Punkten, Rastern, Monospace und Drahtgittern:* Ref 01 (Konstruktionsraster, Hilfskreis), Ref 10 (Pixelsymbol, Index), Ref 11 (Punktraster), Ref 13 (Punktziffern, Schraffuren, Drahtgitter), Ref 14 (Punktringe).
   - *Feindetail nur im Objekt:* Ref 04 (Pulverkörnung), Ref 05 (Craquelé), Ref 07 (Rändelung, Skala), Ref 08 (Poren, Etiketten), Ref 09 (Rillen, Fasen), Ref 10 (Tropfen, Steppnähte), Ref 12 (Glanzkanten), Ref 15 (Grashalme; die Detaildichte nimmt zum Vordergrund zu).
   - *Glatt ohne Detail:* Ref 02, 06. *Körnung oder Rauschen:* in keiner Referenz belegt (Titelkörnung in Ref 11 unsicher).
-- **Interpretation (I):** Sitzt das Detail nur im Objekt, bleibt der Wert bei 1 (Ref 04, 07, 08); kommt eine Linien- oder Punktschicht in der UI hinzu, steigt er auf 2 oder mehr.
+- **Interpretation (I):** Ob in der UI eine Linien- oder Punktschicht liegt, bestimmt den Wert nicht. Ref 05, 09 und 15 stehen oben nur unter „Feindetail nur im Objekt“ und erreichen trotzdem 2; Ref 04 und 07 haben Haarlinien in der UI und bleiben bei 1.
 - **Hypothese (H):** 1-px-Border oder `inset box-shadow` in halbtransparentem Weiß; Normal- und Bump-Maps im Render; Punktraster als Musterfüllung.
 - **Einordnung:** wiederkehrendes Mittel. Die technische Mikroschicht für sich ist ein individuelles Stilmittel (eigene Zählung 5 von 15 = 33 %, Gegenprobe 5 von 14 = 36 %).
 - **Funktion (I):** Feindetail setzt Präzision gegen weiche oder plastische Flächen. Dass keine Körnung zu sehen ist, ist wegen der Kompression **kein** Befund.
@@ -215,7 +389,7 @@
 - **Hypothese (H):** Perspektivkamera mit moderater Brennweite in der 3D-Szene; keine CSS-3D-Transformation der UI.
 - **Einordnung:** wiederkehrendes Mittel einer Teilgruppe (Cluster B, 4.3). Universell ist das Prinzip dahinter: Perspektive gehört ins Bild, die Bedienschicht bleibt orthogonal (eigene Zählung 15 von 15, Gegenprobe 14 von 14). Kamerafahrten sind unbelegt.
 - **Funktion (I):** Die Kamera gibt der Szene Standpunkt und Blickrichtung (Ref 14: freie Textzone; Ref 15: Schwellenblick), ohne die Bedienung zu verzerren.
-- **Datenlage:** Bei 9 schräg abgefilmten Quellen ist Design- von Aufnahmeperspektive nur eingeschränkt trennbar, etwa die asymmetrische Höhe der Dosenreihe in Ref 09.
+- **Datenlage:** 9 Quellen sind perspektivisch verzerrt (Ref 02, 04, 07, 08, 09, 10, 13, 14, 15). Bei den 7 schräg abgefilmten bzw. als Laptop- oder Monitorszene gefilmten (Ref 04, 07, 08, 09, 10, 14, 15) ist Design- von Aufnahmeperspektive nur eingeschränkt trennbar, etwa die asymmetrische Höhe der Dosenreihe in Ref 09. Ref 02 (Präsentations-Render mit gekippten Mockups) und Ref 13 (gerendertes Monitor-Mockup) sind nicht abgefilmt.
 
 ### 4.2.16 Physikbasierte Interaktionen (zeitlich)
 
@@ -239,7 +413,7 @@
   - *Riesenschrift als Tiefenebene hinter dem Objekt, teilweise verdeckt:* Ref 03 (Didone mit Deckkraftverlauf), Ref 04 (angeschnitten, mehrfarbig, in Einzelzeichen zerlegt), Ref 05 (monolineare Schreibschrift mit Strahlenstrichen), Ref 07 (geteilte Headline, Objekt als Trenner), Ref 13 (Riesenwort nach unten ausgeblendet; Präsentationsfolie), Ref 15 (Raumschrift zwischen Architektur und Gras; die Punze des G dient als Bildfenster).
   - *Riesenschrift vor dem Objekt:* Ref 08 (beidseitig angeschnitten, Wort wiederholt).
   - *Riesenschrift flach über einem Foto:* Ref 11 (eingebettetes Kraken-Beispiel). *Schrift als Textur auf einem 3D-Körper:* Ref 09 (CIAO um die Dose gewickelt).
-  - *Konventionelle Headline flach neben dem Bild:* Ref 01 (Hierarchie nur über den Tonwert), Ref 02 (Treppensatz), Ref 06 (sehr fett), Ref 10 (Monospace mit Glow), Ref 12 (dünne geometrische Grotesk), Ref 14 (dünne Headline gegen fette Kennzahlen).
+  - *Konventionelle Headline flach neben dem Bild:* Ref 01 (Hierarchie nur über den Tonwert), Ref 02 (Treppensatz), Ref 06 (sehr fett), Ref 10 (Monospace mit Glow), Ref 12 (geometrische Grotesk in normalem Schnitt, Hierarchie über den Schriftgrad), Ref 14 (dünne Headline gegen fette Kennzahlen).
   - *Feste Rolle je Schriftgattung:* Monospace für technische Bezeichner (Ref 10, 11), Punktziffern für Kennzahlen (Ref 13).
 - **Hypothese (H):** Live-Text mit viewportbasierter Größe unter einem Alpha-Asset; `mask-image` oder `background-clip: text` für die Ausblendung (Ref 03, 13); Textmesh oder Tiefenmaske (Ref 15); UV-Textur auf dem Zylinder (Ref 09). Live-Text oder Bildschrift ist in allen Fällen offen.
 - **Einordnung:** wiederkehrendes Mittel. Raumschrift ist die Signatur von Cluster A und tritt nur zusammen mit D7 ≥ 2 auf (4.3). „Laut“ ist keine Schriftgattung: Die lauten Fälle reichen von Didone über Retro-Display und Schreibschrift bis zur geometrischen Grotesk (I). Universell ist nur der Maßstabssprung (4.4, Frage 1).
@@ -305,7 +479,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
 
 - **Gemeinsam (B):** vor allem das Fehlen: kein 3D (D7 1 / 0 / 0,5), keine UI-Materialität (D2 je 1), wenig gestaltetes Licht (D3 2 / 1 / 1), wenig Feindetail (D12 0,5 / 0 / 2), keine Raumschrift (D18 1 / 1,5 / 2). Tiefe entsteht aus dem Bildinhalt oder flacher Verdeckung: fotografische Schärfentiefe (Ref 02), ineinandergeschobene Vektorkulissen (Ref 06), überlappende Bildkarten mit einem Schatten (Ref 11).
 - **Interpretation (I):** C hat keinen gemeinsamen positiven Stil. Medium und Konstruktion sind verschieden (Foto-Split-Hero, Vektor-Parallax-Kulisse, Präsentationsfolie). Jedes Mitglied hat einen näheren Verwandten außerhalb:
-  - Ref 02 ↔ Ref 14: großes gerundetes Bildpanel, UI ohne Kopfleiste direkt auf dem Bild, Bild mit freier Textzone. Rechnerisch trennt sie vor allem D7 (1 gegen 4), also das Medium.
+  - Ref 02 ↔ Ref 14: großes gerundetes Bildpanel, Headline und CTA ohne Box direkt auf dem Bild, Bild mit freier Textzone. Logo und Navigation stehen nur in Ref 02 auf dem Foto; in Ref 14 liegen sie außerhalb des Panels auf dem Seitengrund. Rechnerisch trennt sie vor allem D7 (1 gegen 4), also das Medium.
   - Ref 06 ↔ Ref 04 und 15: gleiche Kulissenlogik aus gestaffelten Ebenen mit Überlauf über den Rand, in Vektor, Foto bzw. Render.
   - Ref 11 ↔ Ref 13: beides Karussellfolien, die ein fremdes Design präsentieren.
 
@@ -359,7 +533,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
 | Großer Maßstabssprung zwischen Hauptelement und Klein-UI, ohne Zwischenstufen | alle außer Ref 01 (Tonwert), 14 (Gewicht), 13 (Grenzfall, Sprung nur in der Präsentationsfolie) | 12 von 15 = 80 % | 11 von 14 = 79 % |
 | Großzügiger Negativraum (geschätzte Proportionen) | alle außer Ref 09 (Lichtzonen statt Leere), 13, 14 (dichte Raster) | 12 von 15 = 80 % | 11 von 14 = 79 % |
 
-**Entscheidungen bei abweichenden Zählungen.** Verdeckung wirkt in 14 von 15 Referenzen *mit* (zusätzlich Ref 02 mit der Video-Karte über der Vordergrundhand und Ref 14 mit der UI über der Bildbühne); *primär* trägt sie die Tiefe nur in 12. Maßgeblich ist hier die strengere Lesart. Beim Maßstabssprung zählt Ref 09 mit: Die Fokushierarchie zwischen den Dosen entsteht zwar über den Tonwert (Hauptdose nur etwa 1,2-fach größer), der Sprung zwischen Szene und winziger UI-Schrift ist aber eindeutig. Ref 02 zählt mit („starker Größensprung zur kleinen Subline“).
+**Entscheidungen bei abweichenden Zählungen.** Verdeckung wirkt in 14 von 15 Referenzen *mit* (zusätzlich Ref 02 mit der Video-Karte über der Vordergrundhand und Ref 14 mit der UI über der Bildbühne); *primär* trägt sie die Tiefe nur in 12. Maßgeblich ist hier die strengere Lesart. Beim Maßstabssprung zählt Ref 09 mit: Die Fokushierarchie zwischen den Dosen entsteht zwar über den Tonwert (Hauptdose nur etwa 1,2-fach größer), der Sprung zwischen Szene und winziger UI-Schrift ist aber eindeutig. Ref 02 zählt mit („starker Größensprung zur kleinen Subline“). Ref 04 und 15 zählen ebenfalls mit, obwohl ihre Profile drei Größenstufen nennen (Ref 04: Navigationsschrift rund 2 %, Headline rund 10 %, Riesenlettern 15–20 % der Höhe; Ref 15: monumentales Wort, mittlere Versal-Headline, Mikrolabels). Eine mittlere Headline gilt hier, wie bei den übrigen Referenzen mit Headline neben dem Hauptelement, nicht als Zwischenstufe. Für Ref 15 nennt das Profil aber ausdrücklich die Kapitelziffern als Zwischenstufe; ob das eine Zwischenstufe im Sinne dieser Definition ist, bleibt eine Definitionsfrage. Ohne Ref 15 ergäben sich 11 von 15 = 73 % (Gegenprobe 10 von 14 = 71 %), und das Merkmal wäre wiederkehrend statt universell.
 
 **Website-Heros (Nenner 11: Ref 02, 03, 04, 06, 07, 08, 09, 10, 12, 14, 15):** kein Schlagschatten 11 von 11, Bild als Bühne 11 von 11; Verdeckung primär nur 8 von 11 = 73 %.
 
@@ -404,7 +578,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
 | Deckkraftverlauf der Riesenschrift | Ref 03, 13 | 2 von 15 = 13 % | 2 von 14 = 14 % |
 | Rahmenbruch über eine Containerkante | Ref 05 | 1 von 15 = 7 % | 1 von 14 = 7 % |
 
-**Signature-Techniken einzelner Referenzen (B), je 1 von 15:** Teilüberdeckung als eingebauter Vorher-nachher-Vergleich (Ref 01); Laschenkarte mit inversem Radius in einer Glasreihe (Ref 03); Szenenwechsel mit zerlegten, mehrfarbigen Lettern unter stehender Kopfzeile (Ref 04/07); Strahlenstriche im Schriftzug als Echo des gerenderten Lichts (Ref 05); Levitationsklammer aus Emitter und Sockel, Schrift als Dosenetikett (Ref 09); Material-Explosionsansicht mit angedockter HUD-Annotation (Ref 10); abgestufte Glasunschärfe als Tiefencode (Ref 12); Glow-Kacheln mit Sättigungsgefälle (Ref 13); Anschnitt durch Verdeckung statt Maske am Mond (Ref 15).
+**Signature-Techniken einzelner Referenzen (B), je 1 von 15:** Teilüberdeckung als eingebauter Vorher-nachher-Vergleich (Ref 01); Laschenkarte mit inversem Radius in einer Glasreihe (Ref 03); Szenenwechsel mit zerlegten, mehrfarbigen Lettern unter stehender Kopfzeile (Ref 04/07); Strahlenstriche im Schriftzug als Echo des gerenderten Lichts (Ref 05); Levitationsklammer aus Emitter und Sockel, Schrift als Dosenetikett (Ref 09); Material-Explosionsansicht mit angedockter HUD-Annotation (Ref 10); abgestufte Glasunschärfe als Tiefencode (Ref 12); Glow-Kacheln mit Sättigungsgefälle (Ref 13); Punze als Bildfenster und Anschnitt durch Verdeckung statt Maske am Mond (Ref 15).
 
 ### 4. Welche technischen Gestaltungsmuster werden kombiniert?
 
@@ -424,7 +598,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
 5. **Bildbühne im gerundeten Container** mit Pillen-UI direkt auf dem Bild und einer im Bild freigehaltenen Textzone: Ref 02, 14 (2 von 15).
 6. **Kulissenbühne** aus gestaffelten Ebenen mit Überlauf über den Rand: Ref 04, 06, 15 (3 von 15).
 
-**Brückenreferenzen (B/I):** Ref 03 (Sandwich + Glas), Ref 05 (Sandwich + Vitrine), Ref 12 (Vitrine + Glas + Kamera-Szene), Ref 14 (Kamera-Szene + Glas + Bildbühne), Ref 15 (Kamera-Szene + Sandwich + Kulisse). Die Bündel sind kombinierbare Bausteine, keine getrennten Stile. Nicht belegt ist die Kombination Glas + Raumschrift: Sie tritt nur in Ref 03 auf.
+**Brückenreferenzen (B/I):** Ref 03 (Sandwich + Glas), Ref 04 (Sandwich + Kulisse), Ref 05, 07 und 08 (Sandwich + Vitrine), Ref 09 und teilweise Ref 10 (Vitrine + Kamera-Szene), Ref 12 (Vitrine + Glas + Kamera-Szene), Ref 14 (Kamera-Szene + Glas + Bildbühne), Ref 15 (Kamera-Szene + Sandwich + Kulisse). Die Bündel sind kombinierbare Bausteine, keine getrennten Stile. Nicht belegt ist die Kombination Glas + Raumschrift: Sie tritt nur in Ref 03 auf.
 
 **Hypothese (H):** Fast alle Designs lassen sich als Ebenenstapel aus Hintergrund, optionaler Live-Textebene, Freisteller bzw. Render und HTML-UI-Schicht denken; ob Echtzeit-3D oder vorgerenderte Assets vorliegen, ist in keiner Referenz belegt.
 
@@ -456,10 +630,10 @@ Gleiche Wirkung entsteht in der Sammlung regelmäßig über verschiedene Mechani
 - **Fluide Form gegen Kamera-Raum** (ρ D14 + D15 = −0,56). Fluide Formcharaktere treten überwiegend in frontalen Entwürfen auf (6 von 8 mit D15 ≤ 1: Ref 01, 03, 04, 05, 06, 07), aber auch mit Perspektive in Ref 10 und 13 (je D15 = 2); die Kamera-Szenen Ref 09, 12, 14, 15 sind formstarr. ρ belegt eine Tendenz, keine Ausschließlichkeit.
 - **Ausgeprägtes Formsystem gegen Typo-Bühne** (ρ D5 + D18 = −0,38). Wo Schrift die Bühne trägt, tritt das UI-Formsystem zurück (Ref 04 ohne erkennbares Radiensystem, Ref 15 ohne Radien); wo ein ausgeprägtes Formsystem ordnet, bleibt die Headline konventionell (Ref 14: D5 3, D18 1; Ref 06: D5 3, D18 1,5).
 - **Unschärfe gegen Kamera** (ρ D4 + D15 = −0,26). Hohe Unschärfe in frontalen Entwürfen (Ref 01: 3/0, Ref 03: 3/1), Kamera-Szenen unschärfearm (Ref 09: 1/2,5, Ref 15: 1,5/3). Ausnahmen Ref 12 und 14, wo Glas über der Szene liegt.
-- **Glas gegen opake Fläche.** Transluzente UI in 6 von 15; opak und flach in Ref 04, 05, 07, 08, 09, 10, 11; ohne UI-Flächen Ref 06, 15. Transluzente UI gehört zu keinem Cluster (Ref 01; Ref 02 in C; Ref 03, 13 in A; Ref 12, 14 in B).
+- **Glas gegen opake Fläche.** Transluzente UI in 6 von 15; opak und flach in Ref 04, 05, 07, 08, 09, 11; ohne UI-Flächen Ref 06, 10, 15. Transluzente UI gehört zu keinem Cluster (Ref 01; Ref 02 in C; Ref 03, 13 in A; Ref 12, 14 in B).
 - **Dichte gegen Leere.** Dichte Raster in Ref 13, 14; Gliederung über Lichtzonen statt Leere in Ref 09. Viel Leere in Ref 10 (Negativraum 70–75 %), Ref 01 (55–60 %), Ref 07 (über die Hälfte), Ref 15 (40–45 %), Ref 12 (rund 40 %), Ref 03 (35–40 %); alle Werte geschätzt.
 - **Einzelfokus gegen Zweipoligkeit.** Zwei Pole auf einer Diagonale in Ref 01, 04, 06, 11; verteilte Salienz in Ref 13, 14. Ref 01 verbindet Zweipoligkeit mit Einzelfokus: Der einzigartige Reiz (das einzige Farbfeld unter Glas, Frage 2) sitzt im oberen rechten der beiden Pole. Ein einzigartiger Reiz und zwei Gewichtspole können also zusammen vorkommen.
-- **Achse gegen Diagonale** (8 zu 7 von 15) und **Formecho gegen Formkontrast** (Echo: Ref 07, 09, 12; Kontrast: Ref 05, 10, 15). Beides sind gleichwertige Alternativen, keine Rangfolge.
+- **Achse gegen Diagonale** (8 zu 7 von 15) und **Formecho gegen Formkontrast** (Echo: Ref 07, 09, 12; Kontrast: Ref 04, 05, 06, 08, 15 mit organischer gegen geometrische Form wie in 4.2.5, dazu Ref 10 mit gewellten, gesteppten Lagen gegen die rechtwinklige UI). Beides sind gleichwertige Alternativen, keine Rangfolge.
 - **Gestaltung gegen Lesbarkeit.** In 12 von 15 Profilen werden Lesbarkeits- oder Kontrastrisiken ausdrücklich benannt (Ref 01, 02, 03, 04, 05, 07, 08, 09, 10, 12, 13, 15; Gegenprobe 11 von 14). Sie folgen aus den Grundprinzipien selbst: Der Maßstabssprung macht die UI-Schrift winzig, Text steht ohne Box auf dem Bild, und Kulissenschrift ist bewusst kontrastarm (Ref 03 geschätzt etwa 1,3:1; Ref 04, 13). Das ist ein systematischer Zielkonflikt der Sammlung, kein Gestaltungsprinzip.
 - **Nicht deutbar:** ρ D5 + D6 = −0,67 und D6 + D14 = −0,3, laut 4.1 instabil wegen der geringen Streuung von D6.
 
@@ -486,7 +660,7 @@ Kriterium: Ein **universelles Grundprinzip** ist in der maßgeblichen Lesart Ker
 4. **Bild und Seite bilden einen Raum.** D11 deutlich 14 von 15 = 93 % (alle außer Ref 01), Gegenprobe 13 von 14 = 93 %. Bild als Bühne statt gerahmter Bildbeigabe 13 von 15 = 87 % (alle außer Ref 01, 11), Gegenprobe 12 von 14 = 86 %.
 5. **Ein geschlossenes Formsystem je Design, gleich welcher Form.** D5 deutlich 14 von 15 = 93 % (alle außer Ref 11), Gegenprobe 13 von 14 = 93 %. Konsistentes UI-Formsystem 13 von 13 auswertbaren (NB: Ref 04, 06). Häufigste Ausprägung ist die Vollrundung, mit 11 von 13 = 85 % (Gegenprobe ebenso) selbst Kernmerkmal; die radienlosen Systeme in Ref 10 und 15 belegen aber, dass die Konsequenz das Prinzip ist.
 6. **Kein Schlagschatten als tragendes Tiefenmittel.** 12 von 15 = 80 % (Ausnahmen Ref 01, 05, 11, jeweils weich und auf hellen Flächen), Gegenprobe 11 von 14 = 79 %; unter den Website-Heros 11 von 11.
-7. **Hierarchie über einen großen Maßstabssprung ohne Zwischenstufen.** 12 von 15 = 80 % (Ausnahmen Ref 01 Tonwert, Ref 14 Gewicht, Ref 13 Grenzfall), Gegenprobe 11 von 14 = 79 %.
+7. **Hierarchie über einen großen Maßstabssprung ohne Zwischenstufen.** 12 von 15 = 80 % (Ausnahmen Ref 01 Tonwert, Ref 14 Gewicht, Ref 13 Grenzfall), Gegenprobe 11 von 14 = 79 %. Ref 15 zählt nach einer Definitionsentscheidung mit (4.4, Frage 1); ohne Ref 15 wären es 11 von 15 = 73 %, also ein wiederkehrendes Mittel.
 8. **Großzügiger Negativraum.** 12 von 15 = 80 % (Ausnahmen Ref 09, 13, 14), Gegenprobe 11 von 14 = 79 %; beruht auf geschätzten Proportionen.
 
 Die Punkte 2 (Verdeckung), 6, 7 und 8 liegen an der Schwelle: Eine Referenz weniger, und sie wären wiederkehrend.
@@ -503,14 +677,14 @@ Die Punkte 2 (Verdeckung), 6, 7 und 8 liegen an der Schwelle: Eine Referenz weni
 8. **Formreim vom Objekt in die Bedienelemente.** 3 von 15 = 20 % (Ref 07, 09, 12).
 9. **Deckkraftverlauf der Riesenschrift.** 2 von 15 = 13 % (Ref 03, 13).
 10. **Rahmenbruch über eine Containerkante.** 1 von 15 = 7 % (Ref 05).
-11. **Signature-Techniken, je 1 von 15:** Teilüberdeckung als Vorher-nachher-Vergleich (Ref 01), Laschenkarte mit inversem Radius (Ref 03), Szenenwechsel mit zerlegten Lettern (Ref 04/07), Strahlenstriche im Schriftzug (Ref 05), Levitationsklammer und Schrift als Dosenetikett (Ref 09), Material-Explosionsansicht mit HUD-Annotation (Ref 10), abgestufte Glasunschärfe als Tiefencode (Ref 12), Glow-Kacheln mit Sättigungsgefälle (Ref 13), Punze als Bildfenster (Ref 15).
+11. **Signature-Techniken, je 1 von 15:** Teilüberdeckung als Vorher-nachher-Vergleich (Ref 01), Laschenkarte mit inversem Radius (Ref 03), Szenenwechsel mit zerlegten Lettern (Ref 04/07), Strahlenstriche im Schriftzug (Ref 05), Levitationsklammer und Schrift als Dosenetikett (Ref 09), Material-Explosionsansicht mit HUD-Annotation (Ref 10), abgestufte Glasunschärfe als Tiefencode (Ref 12), Glow-Kacheln mit Sättigungsgefälle (Ref 13), Punze als Bildfenster und Anschnitt durch Verdeckung statt Maske am Mond (Ref 15).
 
 ## 4.6 Grenzen dieser Auswertung
 
 - **Simulierte Perspektiven, keine unabhängigen Fachleute.** Die acht Expertenrollen sind simuliert. Sie stammen aus demselben Sprachmodell, arbeiten mit denselben Belegregeln und sehen dasselbe Bildmaterial. Ihre Übereinstimmung ist sehr hoch: Die Rollenmittel liegen bei 2,00–2,13, der NB-Anteil bei 22–23 %, der Anteil niedriger Konfidenz bei 17–22 % (4.1, Tendenzen der Expertenrollen); die mittlere Expertenspannweite liegt je Dimension bei 0 bis 1, in den statischen und gemischten Dimensionen bei 0,2–0,73. Diese Übereinstimmung zeigt die **Konsistenz der Methode**, nicht die Bestätigung durch unabhängige Urteile. Ein Fehler, den das Modell systematisch macht – etwa ein Kompressionsartefakt als Gestaltung zu lesen oder einen gemeinsamen Deutungsrahmen anzulegen –, erscheint in allen acht Rollen gleich und erzeugt keine Streuung. Ein Beispiel für den gemeinsamen Rahmen: 13 von 15 Kurzprofilen bzw. Kernidentitäten beschreiben das Design mit „Bühne“, „Vitrine“ oder „Kulisse“ (alle außer Ref 01, 02). Das ist gemeinsames Vokabular, kein achtfach unabhängiger Befund.
 - **Was das für die Konsenssicherheit bedeutet.** Das Kriterium „mittlere Expertenspannweite ≤ 1,5“ erfüllt jede Dimension (Höchstwert 1 bei D16); es trennt in diesen Daten nie. „Hoch“, „mittel“ und „niedrig“ hängen deshalb faktisch nur an der Zahl der auswertbaren Referenzen und am Anteil niedriger Konfidenz, und Letzterer ist eine Selbsteinschätzung desselben Modells. „Konsenssicherheit hoch“ heißt also: Die Methode liefert aus denselben Belegen reproduzierbar denselben Wert. Es heißt nicht: Unabhängige Fachleute kämen zum selben Urteil. Die Werte sind als Obergrenze zu lesen. Eine echte Übereinstimmungsprüfung bräuchte unabhängige menschliche Bewertungen oder wenigstens eine blinde Wiederholung mit einem anderen Modell. Nützlich bleibt die Abstufung trotzdem: Wo sie „mittel“ oder „niedrig“ meldet (D4, D12, D13, D14 und alle zeitlichen Dimensionen), ist schon das Modell selbst unsicher.
 - **Standbilder.** Die fünf zeitlichen Dimensionen sind mit n = 4, 5, 1, 1 und 3 auswertbaren Referenzen praktisch nicht beurteilbar; ihre Häufigkeiten sind eine Auswahl durch die Belegregel. In den gemischten Dimensionen D13, D14, D15 und D18 ist nur der statische Anteil bewertet; „dynamisch“, „Morphing“, „Kamerafahrt“ und „Kinetik“ sind nirgends belegt. Fehlende Werte heißen „nicht beurteilbar“, nicht „nicht vorhanden“.
-- **Abfotografierte Bildschirme.** 9 von 15 Quellen sind perspektivisch verzerrt. Proportionen, Radien und Abstände sind Schätzungen; das betrifft unmittelbar die Zählungen zu Negativraum und Maßstabssprung. Umgebungslicht verfälscht Farbe und Licht (Ref 09, 14, 15), Moiré überlagert Ref 10, Kompression verdeckt Körnung, feine Schatten und Unschärferadien. Daher stammen die hohen Anteile niedriger Konfidenz in D4 (28 %), D13 (33 %) und D12 (36 %).
+- **Abgefilmte und perspektivisch verzerrte Bildschirme.** 9 von 15 Quellen sind perspektivisch verzerrt, 7 davon schräg abgefilmt bzw. als Laptop- oder Monitorszene gefilmt (Ref 04, 07, 08, 09, 10, 14, 15); Ref 02 und 13 sind gerenderte Präsentationen mit gekippten Mockups. Proportionen, Radien und Abstände sind Schätzungen; das betrifft unmittelbar die Zählungen zu Negativraum und Maßstabssprung. Umgebungslicht verfälscht Farbe und Licht (Ref 09, 14, 15), Moiré überlagert Ref 10, Kompression verdeckt Körnung, feine Schatten und Unschärferadien. Daher stammen die hohen Anteile niedriger Konfidenz in D4 (28 %), D13 (33 %) und D12 (36 %).
 - **Präsentationsebenen.** Kippung und Stapelung (Ref 02), Präsentationsrahmen (Ref 05), Folien (Ref 11, 13) gehören nicht zum eigentlichen Design. Bei Ref 13 stammen die Werte von D1, D7, D15 und D18 weitgehend aus der Präsentationsszene, Ref 11 ist eine Meta-Referenz. Beide beeinflussen Clusterlage und Bündelzählung.
 - **Dublette Ref 04/07.** Sie verschiebt D3 (73 % mit 15 Bildern, 79 % mit 14 Designs) und lässt den einzigen deutlichen Fall von D14 verschwinden. Cluster A schrumpft als Designs auf vier. Die ρ-Werte und die Clusterung enthalten die Dublette ungemittelt; ihr Abstand von 0,27 zeigt, wie groß Unterschiede allein durch zwei Zustände desselben Designs werden.
 - **Kleine Stichprobe.** Bei 15 Bildern entspricht eine Referenz 6,7 Prozentpunkten. 11 von 15 (73 %) ist wiederkehrend, 12 von 15 (80 %) Kernmerkmal; vier der acht universellen Grundprinzipien hängen an einer einzigen Referenz. ρ ist bei n = 15 ein Hinweis, kein Beweis. Die Clusterung gewichtet alle 13 Dimensionen gleich und sortiert faktisch nach D7.
