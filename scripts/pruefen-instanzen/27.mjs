@@ -429,6 +429,18 @@ export default async (h) => {
     const fhtml = await formular.text();
     await fr.warten();
     ok(fr1.status === 200 && fr2.status === 200 && fr3.status === 400 && fr3.j.felder.mail && mailsAn(inhaber(), /Frage zu den Paketen/, mF).length === 2 && formular.status === 200 && /text\/html/.test(formular.headers.get('content-type')) && /Danke/.test(fhtml) && /frame-ancestors 'none'/.test(formular.headers.get('content-security-policy') || ''), '27.12 Frage ohne Konto (auch als Formular ohne JavaScript): Mail an den Inhaber, Honigtopf schickt nichts, Feldfehler 400');
+    /* Befund 8: Wer die Adresse eines Partners kennt, darf über das Formular keine Nachricht „des Partners“ in dessen Konto legen (Rückruf GmbH hat einen offenen Rückruf) */
+    const ang = klient(), angriff = await ang.rufe('/api/partner/frage', { name: 'Angreifer', mail: 'rueckruf@fenster27.example', text: 'Bitte kündigen Sie mein Abo sofort.' }); await ang.warten();
+    const nachAngriff = (await r2.rufe('/api/partner/nachrichten')).j.nachrichten || [], ausFormular = nachAngriff.filter((x) => /kündigen Sie mein Abo/.test(x.text)), offeneRRdanach = (await sp.rueckrufeOffen()).filter((x) => x.partner === pRR.id);
+    ok(angriff.status === 200 && !nachAngriff.some((x) => x.von === 'partner' && /kündigen Sie mein Abo/.test(x.text)) && ausFormular.length === 1 && ausFormular[0].von === 'system' && ausFormular[0].art === 'frage' && /^Frage über das Formular ohne Anmeldung \(Absender nicht bestätigt\): Bitte kündigen/.test(ausFormular[0].text) && offeneRRdanach.length === 1,
+      '27.12 Befund 8: Frage ohne Anmeldung mit der Adresse eines Partners landet nur als „system“ mit Vorsatz „Absender nicht bestätigt“ im Konto, nie als Nachricht des Partners; offene Rückrufe unberührt (' + JSON.stringify(ausFormular.map((x) => [x.von, x.art, x.text.slice(0, 60)])) + ')');
+    /* Befund 10 (Anzeige): ein vorgemerkter Wechsel nach unten (abo.wechsel, von Gruppe B gesetzt) kommt im Kundenkonto an; ohne Vormerkung null */
+    const we = klient(); await we.anmelden('wechsel@fenster27.example'); await we.rufe('/api/partner/firma', Object.assign({}, FIRMA, { firma: 'Wechsel GmbH' }));
+    const neuW = await we.rufe('/api/partner/bestellungen', { paket: 'plus', konfigurator: KONF() }), bVor = neuW.j.bestellung || { id: 'fehlt' }, ohneW = bVor.abo || {};
+    if (neuW.status === 200) await sp.bestellungAendern(bVor.id, (z) => { z.abo = Object.assign({}, z.abo, { wechsel: { paket: 'essential', von: 'plus', ab: '2026-12-01T00:00:00.000Z' } }); });
+    const bWs = ((await we.rufe('/api/partner')).j.bestellungen || []).find((x) => x.id === bVor.id) || {};
+    ok(neuW.status === 200 && ohneW.wechsel === null && bWs.abo && bWs.abo.wechsel && bWs.abo.wechsel.paket === 'essential' && bWs.abo.wechsel.von === 'plus' && bWs.abo.wechsel.ab === '2026-12-01T00:00:00.000Z',
+      '27.9 Befund 10 (Anzeige): bestellungSicht reicht abo.wechsel { paket, von, ab } durch, ohne Vormerkung null (' + neuW.status + ' ' + JSON.stringify(neuW.status === 200 ? bWs.abo && bWs.abo.wechsel : neuW.j).slice(0, 200) + ')');
 
     /* ---------- 27.10 Aufbewahrung (Befund 21): Partner, Nachrichten und Bestellungen 3 Jahre nach dem Jahr des Vertragsendes ---------- */
     const JAHR = 365.25 * 864e5;

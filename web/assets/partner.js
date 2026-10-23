@@ -475,6 +475,8 @@
     if (b.abo_status === 'gekuendigt' && a.ende) zeilen.push('Gekündigt zum ' + datum(a.ende) + '.');
     if (b.abo_status === 'aktiv' && a.bis) zeilen.push('Nächste Abbuchung am ' + datum(a.bis) + '.');
     if (a.monat) zeilen.push(paketName(b.paket) + ': ' + euro(a.monat) + ' netto im Monat.');
+    /* Wechsel nach unten ist vorgemerkt und wirkt erst zum Periodenende (Befund 10) */
+    if (a.wechsel && a.wechsel.paket) zeilen.push('Wechsel zu ' + paketName(a.wechsel.paket) + (a.wechsel.ab ? ' ab ' + datum(a.wechsel.ab) : ' zum Ende des Abrechnungsmonats') + '.');
     return '<section class="p-karte" aria-labelledby="h-abo"><h2 class="p-h2" id="h-abo">Abo</h2><div class="p-abo"><span class="zustand">' + esc(b.abo_status === 'zahlung_offen' ? 'Zahlung offen' : t) + '</span>' + zeilen.map(function (z) { return '<p class="p-neben">' + esc(z) + '</p>'; }).join('') + '</div>' +
       (b.abo_status === 'zahlung_offen' && a.offeneRechnung && ['live', 'pausiert'].indexOf(b.status) < 0 ? '<p><a class="p-link" href="' + esc(a.offeneRechnung) + '" target="_blank" rel="noopener">Offene Rechnung bezahlen</a></p>' : '') + '</section>'; // live und pausiert: Hauptknopf der Seite
   }
@@ -501,7 +503,9 @@
   function rueckrufKarte(b) {
     var r = S.konto.rueckruf, st = S.stand || {};
     if (r) return '<section class="p-karte" aria-labelledby="h-rr"><h2 class="p-h2" id="h-rr">Rückruf</h2><p class="p-text">Wir rufen Sie an: <b>' + esc(tagText(r.rueckruf.tag)) + ', ' + esc(r.rueckruf.fenster.replace('-', '–')) + ' Uhr</b> unter ' + esc(r.rueckruf.tel) + '.</p><div class="p-knoepfe"><button type="button" class="p-link" data-a="rueckruf-weg" data-v="' + esc(r.id) + '">Zurückziehen</button></div></section>';
-    if (!S.rueckrufOffen) return '<section class="p-karte" aria-labelledby="h-rr"><h2 class="p-h2" id="h-rr">Rückruf</h2><p class="p-neben">Lieber sprechen? Wählen Sie einen Werktag und ein Zeitfenster, wir rufen Sie an.</p><div class="p-knoepfe"><button type="button" class="btn ghost" data-a="rueckruf-auf">Rückruf anfordern</button></div></section>';
+    /* Steht „Rückruf anfordern“ schon als Hauptknopf der Seite, bleibt hier nur der Text, sonst stünde der Knopf doppelt (Befund 14) */
+    var imHaupt = !!b && /data-a="rueckruf-auf"/.test(hauptaktion(b).knopf || '');
+    if (!S.rueckrufOffen) return '<section class="p-karte" aria-labelledby="h-rr"><h2 class="p-h2" id="h-rr">Rückruf</h2><p class="p-neben">Lieber sprechen? ' + (imHaupt ? 'Über „Rückruf anfordern“ oben wählen Sie' : 'Wählen Sie') + ' einen Werktag und ein Zeitfenster, wir rufen Sie an.</p>' + (imHaupt ? '' : '<div class="p-knoepfe"><button type="button" class="btn ghost" data-a="rueckruf-auf">Rückruf anfordern</button></div>') + '</section>';
     var w = S.rr || {}, fe = function (k) { return fehlerZu('rr.' + k); };
     return '<section class="p-karte" aria-labelledby="h-rr"><h2 class="p-h2" id="h-rr">Rückruf anfordern</h2><form class="p-form" data-form="rueckruf" novalidate>' +
       '<div class="p-f' + (fe('tag') ? ' fehlt' : '') + '"><label for="f-rr-tag">Tag</label><select id="f-rr-tag" data-rr="tag">' + (st.werktage || []).map(function (t) { return '<option value="' + t + '"' + (w.tag === t ? ' selected' : '') + '>' + esc(tagText(t)) + '</option>'; }).join('') + '</select>' + (fe('tag') ? '<p class="p-fehler">' + esc(fe('tag')) + '</p>' : '') + '</div>' +
@@ -528,8 +532,10 @@
   }
   function paketwechselKarte(b) {
     if (['live', 'pausiert', 'einrichtung', 'domain', 'freigabe', 'bezahlt'].indexOf(b.status) < 0) return '';
-    var andere = P.LISTE.filter(function (x) { return x !== b.paket; });
-    return '<section class="p-karte" aria-labelledby="h-pw"><h2 class="p-h2" id="h-pw">Paket wechseln</h2><p class="p-neben">Wir stellen um und melden uns mit den Kosten; nach oben wird die Differenz der Einrichtung fällig.</p><form class="p-form" data-form="paketwechsel" novalidate><div class="p-f"><label for="f-pw">Neues Paket</label><select id="f-pw" data-x="paketNeu">' + andere.map(function (x) { return '<option value="' + x + '"' + (S.paketNeu === x ? ' selected' : '') + '>' + esc(paketName(x) + ' · ' + euro(P.preis(x).monat) + ' im Monat') + '</option>'; }).join('') + '</select></div><div class="p-knoepfe"><button type="button" class="btn ghost" data-a="paketwechsel">Wechsel anfragen</button></div></form></section>';
+    var andere = P.LISTE.filter(function (x) { return x !== b.paket; }), w = (b.abo || {}).wechsel;
+    /* nach unten wirkt der Wechsel erst zum Periodenende (Befund 10); ein vorgemerkter Wechsel steht hier und in der Abo-Karte */
+    return '<section class="p-karte" aria-labelledby="h-pw"><h2 class="p-h2" id="h-pw">Paket wechseln</h2><p class="p-neben">Wir stellen um und melden uns mit den Kosten; nach oben wird die Differenz der Einrichtung fällig, nach unten wirkt der Wechsel zum Ende des Abrechnungsmonats.</p>' +
+      (w && w.paket ? '<p class="p-neben">Vorgemerkt: Wechsel zu ' + esc(paketName(w.paket)) + (w.ab ? ' ab ' + esc(datum(w.ab)) : '') + '.</p>' : '') + '<form class="p-form" data-form="paketwechsel" novalidate><div class="p-f"><label for="f-pw">Neues Paket</label><select id="f-pw" data-x="paketNeu">' + andere.map(function (x) { return '<option value="' + x + '"' + (S.paketNeu === x ? ' selected' : '') + '>' + esc(paketName(x) + ' · ' + euro(P.preis(x).monat) + ' im Monat') + '</option>'; }).join('') + '</select></div><div class="p-knoepfe"><button type="button" class="btn ghost" data-a="paketwechsel">Wechsel anfragen</button></div></form></section>';
   }
   function bestellungSeite() {
     var b = bestellung(S.route.id);

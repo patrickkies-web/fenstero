@@ -100,7 +100,9 @@ async function bestellungSicht(ctx, b) {
     id: b.id, nr: b.nr, paket: instanz ? instanz.paket : paketVon(b), paket_bestellt: b.paket_bestellt, status: b.status, abo_status: b.abo_status, preise: b.preise || {},
     wunsch: b.wunsch || {}, dateien: (b.dateien || []).map((d) => ({ id: d.id, art: d.art, name: d.name, typ: d.typ, bytes: d.bytes, zeit: d.zeit })),
     zahlung: { status: za.status || '', betrag_cent: za.betrag_cent || 0, erstattet_cent: za.erstattet_cent || 0, zeit: za.zeit || '', zahlungsmittel: !!za.pm },
-    abo: { seit: a.seit || '', bis: a.bis || '', kulanz_bis: a.kulanz_bis || '', ende: a.ende || '', offeneRechnung: a.offeneRechnung || '', kuendigt: !!a.kuendigt, paket: a.paket || '', monat: a.monat || 0, laeuft: !!a.id },
+    abo: { seit: a.seit || '', bis: a.bis || '', kulanz_bis: a.kulanz_bis || '', ende: a.ende || '', offeneRechnung: a.offeneRechnung || '', kuendigt: !!a.kuendigt, paket: a.paket || '', monat: a.monat || 0, laeuft: !!a.id,
+      /* vorgemerkter Wechsel nach unten (wirkt erst zum Periodenende, Befund 10): das Kundenkonto zeigt „Wechsel zu … ab …“ */
+      wechsel: a.wechsel && a.wechsel.paket ? { paket: a.wechsel.paket, von: a.wechsel.von || '', ab: a.wechsel.ab || '' } : null },
     vorschau: { version: v.version || 0, bis: v.bis || '', link: v.link || '', gesendet: v.gesendet || '', freigabe: v.freigabe ? { version: v.freigabe.version, zeit: v.freigabe.zeit } : null, aenderung: v.aenderung ? { version: v.aenderung.version, zeit: v.aenderung.zeit } : null },
     zustimmung: b.zustimmung && b.zustimmung.zeit ? { stand: b.zustimmung.stand, zeit: b.zustimmung.zeit } : null,
     verlauf: (b.verlauf || []).filter((x) => x && !x.intern).map((x) => ({ zeit: x.zeit, status: x.status || '', text: x.text || '', von: x.von || '' })),
@@ -199,6 +201,8 @@ async function domainPruefen(host) {
 const DOMAIN_TEXT = { frei: 'wahrscheinlich frei', vergeben: 'schon vergeben', unklar: 'gerade nicht prüfbar' };
 
 /* ---------- Frage ohne Konto (Verkaufsseite) ---------- */
+/* Vorsatz im Kundenkonto: Das Formular prüft die Adresse nicht; wer sie kennt, könnte sich sonst als Partner ausgeben (Befund 8) */
+const FRAGE_VORSATZ = 'Frage über das Formular ohne Anmeldung (Absender nicht bestätigt): ';
 async function frageAnnehmen(ctx) {
   const b = ctx.body || {};
   if (!(await bremse(ctx, 'RL_FORM', 'frage:' + quelle(ctx.request)))) throw new ApiFehler('Zu viele Anfragen. Bitte in einer Minute noch einmal.', 429);
@@ -209,7 +213,8 @@ async function frageAnnehmen(ctx) {
   if (text.length < 3) f.text = 'Bitte schreiben Sie kurz Ihre Frage.';
   if (Object.keys(f).length) throw feldFehler(f);
   let gespeichert = false;
-  try { const p = await ctx.sp.partnerNachMail(mail); if (p) { await ctx.sp.nachrichtAnlegen({ partner: p.id, von: 'partner', art: 'frage', text: text }); gespeichert = true; } } catch (e) { gespeichert = false; }
+  /* nie von 'partner': Der Eintrag im Konto ist ein Hinweis des Systems, keine Nachricht des Partners (Zentrale: Badge „System“, Konto: „eeziframes (automatisch)“) */
+  try { const p = await ctx.sp.partnerNachMail(mail); if (p) { await ctx.sp.nachrichtAnlegen({ partner: p.id, von: 'system', art: 'frage', text: FRAGE_VORSATZ + text }); gespeichert = true; } } catch (e) { gespeichert = false; }
   const r = await inhaberMail(ctx, 'Frage zu den Paketen: ' + (firma || name), zeilenTab([['Name', esc(name)], ['Firma', esc(firma || '–')], ['E-Mail', esc(mail)], ['Telefon', esc(tel || '–')], ['Paket', esc(paket ? P().PAKETE[paket].name : '–')]]) + absatz(esc(text).replace(/\n/g, '<br>')), mail);
   if (!(r && r.ok) && !gespeichert) throw new ApiFehler('Ihre Frage ließ sich gerade nicht übermitteln. Bitte schreiben Sie uns eine E-Mail (Adresse im Impressum).', 503);
   if (ctx.zaehlen) ctx.zaehlen('ereignis:paket_frage');
