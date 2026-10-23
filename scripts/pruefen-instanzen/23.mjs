@@ -73,7 +73,7 @@ export default async (h) => {
   await h.instanz('plus', { indexierung: false }); await h.instanz('signature', { indexierung: false });
   const MATRIX = [['/', 200], ['/index.html', 200], ['/app/', 301], ['/app', 301], ['/config.js', 200], ['/favicon.svg', 200], ['/manifest.webmanifest', 200], ['/impressum/', 200], ['/datenschutz/', 200], ['/impressum', 301], ['/robots.txt', 200],
     ['/sitemap.xml', 404], ['/ratgeber/', 404], ['/ratgeber/fenster-ausmessen/', 404], ['/fuer-fensterbauer/', 404], ['/agb/', 404], ['/widerruf/', 404], ['/cookies/', 404], ['/nutzungsbedingungen/', 404], ['/zentrale/', 404], ['/partner/', 404], ['/llms.txt', 404],
-    ['/verifyforzoho.html', 404], ['/404.html', 404], ['/gibts-nicht', 404], ['/assets/app.js', 200], ['/fonts/fonts.css', 200], ['/vendor/jspdf.umd.min.js', 200], ['/assets/gibts-nicht.js', 404], ['/marke/1/logo.png', 404]];
+    ['/verifyforzoho.html', 404], ['/404.html', 404], ['/404', 404], ['/gibts-nicht', 404], ['/assets/app.js', 200], ['/fonts/fonts.css', 200], ['/vendor/jspdf.umd.min.js', 200], ['/assets/gibts-nicht.js', 404], ['/marke/1/logo.png', 404]];
   for (const p of ['essential', 'plus', 'signature']) {
     const host = I[p].host, falsch = [];
     for (const [pfad, soll] of MATRIX) { const r = await h.api(host, pfad); if (r.status !== soll) falsch.push(pfad + ' ' + r.status); if (soll === 404 && !/\.(js|css)$/.test(pfad) && eezi.test(r.text)) falsch.push(pfad + ' nennt eeziframes'); }
@@ -254,7 +254,7 @@ export default async (h) => {
   /* ---------- 23.13 wrangler.jsonc ---------- */
   const wr = lies('wrangler.jsonc'), wrCode = wr.replace(/^\/\*[\s\S]*?\*\//, '').split('\n').map((x) => x.replace(/^\s*\/\/.*$/, '')).join('\n');
   const rwf = JSON.parse((wr.match(/"run_worker_first":\s*(\[[^\]]*\])/) || [])[1] || '[]');
-  ok(!/"routes"|"route"|"custom_domain"/.test(wrCode) && !/not_found_handling/.test(wrCode) && ['/config.js', '/favicon.svg', '/apple-touch-icon.png', '/og.png', '/manifest.webmanifest', '/marke/*', '/betrieb', '/betrieb/*', '/404.html', '/'].every((p) => rwf.includes(p)), '23.13 wrangler.jsonc: keine routes/custom_domain, kein not_found_handling, die Pfade der Instanzen laufen durch den Worker');
+  ok(!/"routes"|"route"|"custom_domain"/.test(wrCode) && !/not_found_handling/.test(wrCode) && ['/config.js', '/favicon.svg', '/apple-touch-icon.png', '/og.png', '/manifest.webmanifest', '/marke/*', '/betrieb', '/betrieb/*', '/404.html', '/404', '/404/', '/'].every((p) => rwf.includes(p)), '23.13 wrangler.jsonc: keine routes/custom_domain, kein not_found_handling, die Pfade der Instanzen laufen durch den Worker, auch /404 und /404/ (Befund 20: sonst liefert html_handling die eeziframes-Fehlerseite mit 200)');
 
   /* ---------- 23.14 Manifest je Instanz ---------- */
   const mE = JSON.parse((await h.api(I.essential.host, '/manifest.webmanifest')).text), mSr = await h.api(I.signature.host, '/manifest.webmanifest'), mS = JSON.parse(mSr.text);

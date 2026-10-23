@@ -13,7 +13,8 @@
      web/assets/instanzregeln.js (FRISTEN), dieselben wie im AV-Vertrag (functions/pakete-seite.js fristenZeilen).
    - Alle Werte laufen durch esc().
    - VORLAGE: Fassung der Vorlage. Solange sie nicht anwaltlich geprüft ist (geprueft: false), steht unter beiden Seiten sichtbar
-     „Vorlage vom …, anwaltliche Prüfung ausstehend“ (Bauplan §5.3 F4); nach der Prüfung geprueft: true und den Stand setzen. */
+     „Vorlage vom …, anwaltliche Prüfung ausstehend“ (Bauplan §5.3 F4); solange hält paketVerkaufStand (api/recht.js) die Paket-Kasse im
+     Live-Modus zu und die Live-Ampel (api/zentrale-instanzen.js) zeigt einen Hinweis. Nach der Prüfung geprueft: true und den Stand setzen. */
 import '../../web/assets/pakete.js';
 import '../../web/assets/instanzregeln.js';
 import { ANBIETER } from '../api/anbieter.js';

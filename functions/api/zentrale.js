@@ -27,7 +27,7 @@ import { fotosLinkLoeschen, fotosEigenesLoeschen, fotosNutzerLoeschen, fotosAltL
 /* Aufmaß eines Hauseigentümers mit Besitzer, keine Löschmarke (eigene.js) */
 const lebt = (e) => !!(e && e.nutzer && !entfernt(e));
 import { auswerten, tagBerlin, tagPlus, tageZwischen, tageListe, browserName, systemName, zaehlen } from './statistik.js';
-import { verkaufStand } from './recht.js';
+import { verkaufStand, paketVerkaufStand } from './recht.js';
 import { live } from './umgebung.js';
 import { aufgabenListe, paketeKennzahlen } from './zentrale-bestellungen.js';
 /* Betriebszeile einer Konfigurator-Instanz (docs/INSTANZEN.md): kein Altbestand, zählt nicht in dessen Kennzahlen, wird über die Instanz
@@ -698,7 +698,9 @@ export const ZENTRALE = {
       hinweise: k.hinweise, zentrale: { zweiFaktor: !!k.zentrale.totp, totpFehler: k.zentrale.totpFehler, sitzungBis: p.exp },
       preise: k.preise, indexierung: k.indexierung,
       /* Konfigurator-Pakete: was für Verkauf, Domains, Sitzungen und Zustellung eingerichtet ist (Bauplan §4) */
-      pakete: { offen: !!k.paketeOffen, cloudflare: !!(ctx.env && String(ctx.env.CF_API_TOKEN || '').trim() && /^[0-9a-f]{32}$/i.test(String(ctx.env.CF_ACCOUNT_ID || '').trim())), sitzung: !!(k.sitzung && k.sitzung.geheimnis && !k.sitzung.attrappe), absender: (k.instanzen || {}).absender || '', webhook: !!((k.instanzen || {}).webhook && !(k.instanzen || {}).webhookAttrappe) },
+      pakete: { offen: !!k.paketeOffen, cloudflare: !!(ctx.env && String(ctx.env.CF_API_TOKEN || '').trim() && /^[0-9a-f]{32}$/i.test(String(ctx.env.CF_ACCOUNT_ID || '').trim())), sitzung: !!(k.sitzung && k.sitzung.geheimnis && !k.sitzung.attrappe), absender: (k.instanzen || {}).absender || '', neutral: (k.instanzen || {}).neutral || '', webhook: !!((k.instanzen || {}).webhook && !(k.instanzen || {}).webhookAttrappe),
+        /* was vor dem Verkauf mit echtem Geld fehlt (recht.js paketVerkaufStand: Platzhalter, PDFs, Rechtsvorlage der Instanzen) */
+        verkauf: await paketVerkaufStand(k, ctx.env, ctx.url.origin).catch(() => null) },
       links: { stripe: s ? 'https://dashboard.stripe.com/' + (s.test ? 'test/' : '') : '', supabase: projekt ? 'https://supabase.com/dashboard/project/' + projekt : '', cloudflare: 'https://dash.cloudflare.com/?to=/:account/workers/services/view/fenstero/production/settings' }
     };
   },

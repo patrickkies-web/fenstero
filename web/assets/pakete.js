@@ -83,7 +83,7 @@
     kennzeichnung: { titel: 'Hinweis auf eeziframes in der App', art: 'wahl', werte: { deutlich: '„Powered by EEZIframes“', dezent: 'kleiner Hinweis im Fuß', keine: 'keiner' }, vergleich: true },
     pdfKennzeichnung: { titel: 'Hinweis auf eeziframes im Aufmaßblatt', art: 'wahl', werte: { deutlich: 'Untertitel und Fuß', dezent: 'nur im Fuß', keine: 'keiner' } },
     mailKennzeichnung: { titel: 'Rahmen der E-Mails', art: 'wahl', werte: { deutlich: 'eeziframes', dezent: 'Ihr Logo, Fußzeile von eeziframes', keine: 'ohne eeziframes' } },
-    absender: { titel: 'Absender der E-Mails', art: 'wahl', werte: { instanz: 'Konfigurator-Postfach von eeziframes', neutral: 'neutrales Postfach' } },
+    absender: { titel: 'Absender der E-Mails', art: 'wahl', werte: { instanz: 'Konfigurator-Postfach von eeziframes', neutral: 'neutrales Postfach ohne eeziframes, sobald eingerichtet; bis dahin das Konfigurator-Postfach' } },
     rechtNennung: { titel: 'eeziframes in Datenschutz und KI-Hinweis', art: 'wahl', werte: { name: 'mit Namen', kategorie: 'als technischer Dienstleister' } },
     indexierung: { titel: 'In Suchmaschinen', art: 'wahl', werte: { nein: 'nein', start: 'Startseite' }, vergleich: true },
     kopieKunde: { titel: 'PDF-Kopie für Ihre Kunden', art: 'janein' },

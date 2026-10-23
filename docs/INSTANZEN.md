@@ -300,7 +300,9 @@ Verbindlich ist `web/assets/pakete.js`; die Tabelle oben ist ein Auszug. Abweich
 7. Plus und Signature: **aus Bestellung übernehmen**, ansehen (Vorschau im Telefonrahmen), **Veröffentlichen**.
 8. **Rechtsangaben** ansehen (Impressum und Datenschutz entstehen daraus, siehe unten); **Testanfrage** schicken, bis „zugestellt“ dasteht.
 9. **Vorschau senden** → der Kunde gibt im Kundenkonto frei (oder Vermerk nach Telefonat).
-10. **Live schalten** (nur mit grüner Ampel). Das Abo startet von selbst, der Kunde bekommt den Link-Schnipsel für seine Website.
+10. **Live schalten** (nur mit grüner Ampel; gelbe Punkte mit „Hinweis“ sperren nicht). Das Abo startet von selbst, der Kunde bekommt den Link-Schnipsel für seine Website; bei Plus und Signature setzt das Live-Schalten die Freigabe für Suchmaschinen (`indexierung`) von selbst.
+
+Signature: Die Mails an den Betrieb kommen vom neutralen Postfach `MAIL_ABSENDER_NEUTRAL` (eigene Domain ohne eeziframes, bei Resend bestätigt; Bauplan §4, optional). Solange die Variable fehlt, kommen sie von `MAIL_ABSENDER_INSTANZ` (sonst `MAIL_ABSENDER`); die Live-Ampel zeigt das als gelben Hinweis, die Zentrale unter Einstellungen → „Konfigurator-Pakete“ („Neutraler Absender“), und Verkaufsseite und Paketbedingungen versprechen den neutralen Absender nur „sobald eingerichtet“. Ebenso ein Hinweis, bis sie anwaltlich geprüft ist: die Rechtsvorlage der Instanzen (`VORLAGE` in `functions/instanz/recht.js`); sie sperrt nur die Paket-Kasse im Live-Modus (`paketVerkaufStand`, Liste „fehlt“ in denselben Einstellungen).
 
 Demo-Instanzen der Verkaufsseite: Custom Domains `demo-essential.eeziframes.com`, `demo-plus.eeziframes.com`, `demo-signature.eeziframes.com` am Worker, in der Zentrale je eine Instanz ohne Bestellung mit Schalter „Demo“ (Anfragen gehen an `MAIL_KONTAKT` und verschwinden nach `FRISTEN.testTage` Tag). Die Verkaufsseite verlinkt sie erst mit der Variable `PAKETE_DEMOS=1`, vorher führt „Konfigurator ausprobieren“ in die App.
 
