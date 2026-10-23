@@ -89,6 +89,14 @@ function hinweis(v) {
     (v.vorlaeufig ? 'Die Preise stehen noch nicht endgültig fest; es gilt der Preis, den Sie beim Bestellen sehen, und er bleibt für Ihren Vertrag fest.' : '') +
     (v.bestellen ? '' : (v.vorlaeufig ? ' ' : '') + 'Die Bestellung schalten wir in Kürze frei; fragen Sie gern schon jetzt <a href="#bestellen">unverbindlich an</a>.') + '</p>';
 }
+/* Zeichen je Paket über der Merkmalsliste (Schleife, verkauf.css .vk-paket-zeichen): domain (Essential), marke (Plus), dashboard
+   (Signature); das Standbild steht, bis der Spieler da ist, und ohne JavaScript */
+const ZEICHEN_STILL = {
+  domain: '<svg viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="22" y="38" width="196" height="44" rx="22"/><path d="M64 60h130"/><rect x="36" y="58" width="16" height="12" rx="2" fill="var(--ok)" stroke="none"/><path d="M38 58a6 6 0 0 1 12 0" stroke="var(--ok)" stroke-width="3"/><rect x="60" y="92" width="120" height="112" rx="6"/><path d="M120 92v112"/></svg>',
+  marke: '<svg viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="65" y="56" width="110" height="128" stroke="var(--el)" stroke-width="22" stroke-linejoin="miter"/><rect x="54" y="45" width="132" height="150" rx="4"/><rect x="76" y="67" width="88" height="106" rx="2"/><circle cx="54" cy="45" r="13" fill="var(--el)" stroke="var(--paper)"/><path d="M188 206l8 8 16-18" stroke="var(--ok)" stroke-width="5"/></svg>',
+  dashboard: '<svg viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="32" y="36" width="176" height="48" rx="8"/><circle cx="54" cy="60" r="8" fill="currentColor" stroke="none"/><path d="M74 53h78" stroke-opacity=".32" stroke-width="3.5"/><path d="M74 68h44" stroke-opacity=".18"/><rect x="32" y="96" width="176" height="48" rx="8"/><circle cx="54" cy="120" r="8" fill="var(--mo)" stroke="none"/><path d="M74 113h78" stroke-opacity=".32" stroke-width="3.5"/><path d="M74 128h106" stroke-opacity=".18" stroke-width="4"/><path d="M74 128h66" stroke="var(--mo)" stroke-width="4"/><rect x="32" y="156" width="176" height="48" rx="8"/><circle cx="54" cy="180" r="10" fill="var(--ok)" stroke="none"/><path d="M49 180l3.5 3.5 7-7.5" stroke="var(--paper)"/><path d="M74 173h78" stroke-opacity=".32" stroke-width="3.5"/><path d="M74 188h44" stroke-opacity=".18"/></svg>'
+};
+const paketZeichen = (m) => { const z = m.dashboard ? 'dashboard' : m.gestaltung === 'eigen' ? 'marke' : 'domain'; return '<span class="vk-zeichen vk-paket-zeichen" data-lottie="' + z + '" data-loop="1" aria-hidden="true"><span class="lottie-still">' + ZEICHEN_STILL[z] + '</span></span>'; };
 function karten(o, v) {
   const liste = P().LISTE;
   const karte = (p, i) => {
@@ -102,7 +110,7 @@ function karten(o, v) {
       '<p class="vk-kurz">' + esc(kurzText(m)) + '</p>' +
       '<p class="vk-preis"><b>' + geld(pr.monat) + '</b> im Monat</p>' +
       '<p class="vk-einr">dazu ' + geld(pr.einrichtung) + ' Einrichtung, einmalig vorab</p>' +
-      '<p class="vk-steuer">' + steuerText(v) + ' · nur für Unternehmer</p>' +
+      '<p class="vk-steuer">' + steuerText(v) + ' · nur für Unternehmer</p>' + paketZeichen(m) +
       '<ul class="vk-liste">' + punkte(m).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' + knopf + '</article>';
   };
   return hinweis(v) + '\n  <div class="vk-pakete">' + liste.map(karte).join('') + '\n  </div>\n  ';
@@ -126,8 +134,19 @@ const ABLAUF = {
   freigabe: 'Sie sehen Ihren Konfigurator vorab über einen Vorschau-Link, schicken eine Testanfrage und geben ihn im Kundenkonto frei oder wünschen Änderungen.',
   live: 'Ihr Konfigurator ist öffentlich. Ab jetzt läuft das Monatsabo, und Sie bekommen einen Knopf „Fenster planen“ für Ihre Website.'
 };
+/* Symbole der Zeitleiste je Status (Strichzeichnung 44 px, jede Linie mit pathLength 100, damit verkauf.css sie ziehen kann):
+   Bestellt = Blatt mit Haken, Bezahlt = Karte, In Einrichtung = Schraubenschlüssel, Domain gesichert = Schloss, Zur Freigabe = Auge, Live = Fahne */
+const SYMBOLE = {
+  offen: '<path class="vk-sym" pathLength="100" d="M14 8h11l7 7v21H14z"/><path class="vk-sym" pathLength="100" d="M25 8v7h7"/><path class="vk-sym" pathLength="100" d="M18 25l4 4 7-8"/>',
+  bezahlt: '<rect class="vk-sym" pathLength="100" x="9" y="13" width="26" height="18" rx="3"/><path class="vk-sym" pathLength="100" d="M9 19h26"/><path class="vk-sym" pathLength="100" d="M14 26h6"/>',
+  einrichtung: '<path class="vk-sym" pathLength="100" d="M30 9a7 7 0 0 0-8.6 8.6L10.6 28.4a3 3 0 1 0 4.2 4.2l10.8-10.8A7 7 0 0 0 34.2 13l-4.4 4.4-3.6-1-1-3.6z"/>',
+  domain: '<rect class="vk-sym" pathLength="100" x="12" y="20" width="20" height="15" rx="3"/><path class="vk-sym" pathLength="100" d="M16 20v-4a6 6 0 0 1 12 0v4"/><path class="vk-sym" pathLength="100" d="M22 26v4"/>',
+  freigabe: '<path class="vk-sym" pathLength="100" d="M6 22c4-7 10-10 16-10s12 3 16 10c-4 7-10 10-16 10S10 29 6 22z"/><circle class="vk-sym" pathLength="100" cx="22" cy="22" r="4"/>',
+  live: '<path class="vk-sym" pathLength="100" d="M13 36V8"/><path class="vk-sym" pathLength="100" d="M13 10h18l-4 6 4 6H13"/>'
+};
+const symbol = (status) => '<span class="vk-symbol" aria-hidden="true"><svg viewBox="0 0 44 44">' + (SYMBOLE[status] || '') + '</svg></span>';
 function ablauf() {
-  return '\n  <ol class="rg-schritte vk-ablauf">' + R().bestellung.LEISTE.map((s) => '\n    <li><b>' + esc(s.titel) + '</b>' + esc(ABLAUF[s.status] || '') + '</li>').join('') + '\n  </ol>\n  ';
+  return '\n  <ol class="rg-schritte vk-ablauf">' + R().bestellung.LEISTE.map((s) => '\n    <li>' + symbol(s.status) + '<b>' + esc(s.titel) + '</b>' + esc(ABLAUF[s.status] || '') + '</li>').join('') + '\n  </ol>\n  ';
 }
 /* Demos als Karten in Paketfarbe (verkauf.css: Essential dunkel, Plus und Signature mit Akzentstrich; ohne Demos der Weg in die App) */
 function demos(o, v) {
