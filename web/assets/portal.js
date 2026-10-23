@@ -437,7 +437,8 @@ function render() {
   const backBtn = '<button type="button" class="back" data-act="back" aria-label="Zurück"><svg width="10" height="17" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Zurück</span></button>';
   const logo = INST ? '<span class="logo-s b-logo">' + instZeichen() + WM() + '</span>' : '<button type="button" class="logo-s" data-act="nav" data-v="landing" aria-label="Zur Startseite"><span class="lm">' + LOGO(32) + '</span>' + WM() + '</button>';
   /* Einführungspreis: Banner ganz oben, für Besucher je nach Ansicht, angemeldet nur im Tarif Start (gemeinsam.js EinfBanner) */
-  const einfZeigen = !INST && S.screen !== 'tour' && (out || X.konto(A()) === 'service'), einfArt = out ? ansicht() : 'betrieb';
+  /* Einführungspreise der Aufmaß-Links: nicht über der eingebetteten Paket-Landingpage (Ansicht Fensterbauer auf der Startseite), dort gelten die Pakete; auf Preise und für Konten mit Tarif weiter */
+  const einfZeigen = !INST && S.screen !== 'tour' && (out || X.konto(A()) === 'service') && !(out && S.screen === 'landing' && ansicht() === 'betrieb'), einfArt = out ? ansicht() : 'betrieb';
   h += '<div class="main">' + (einfZeigen ? window.EinfBanner(einfArt, einfArt === 'kunde' ? { href: APP_OPEN } : { act: 'go', v: 'preise' }) : '') + '<header class="top' + (out ? ' mit-ansicht' : '') + '">' + (canBack ? backBtn + (out ? logo.replace('class="logo-s"', 'class="logo-s neben-zurueck"') : '') : out ? logo : '') + (out && !INST ? umschalter() : '') + (out && S.screen === 'landing' ? '<div class="top-h"></div>' : '<h1>' + esc(view.title || TITLES[S.screen] || '') + '</h1>');
   /* Knöpfe nur für die gewählte Ansicht: Hauseigentümer messen in der App, Fensterbauer melden sich an oder starten ein Konto */
   if (out && INST) h += '';
