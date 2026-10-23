@@ -32,7 +32,7 @@ import { sitzungSetzen, sitzungPflicht, sitzungLesen, sitzungLoeschen } from './
 import { bremse, budget, budgetStand } from './bremse.js';
 import { postDienst, mailRahmen, esc, mailOk } from './post.js';
 import { absender, rahmenMarke, instanzKontext } from './eingang.js';
-import { linkAendern, pseudoKonto } from '../instanz/adapter.js';
+import { linkAendern, pseudoKonto, zeitenBerlin, datumBerlin } from '../instanz/adapter.js';
 import { profilSetzen } from '../instanz/verwalten.js';
 import { ablage, linkOrdner, fotoIds, fotosLinkLoeschen, FOTO_ID } from './fotos.js';
 import { HAUPTADRESSE } from '../seo.js';
@@ -93,6 +93,9 @@ export async function kontoVon(ctx, bereich) {
 /* Felder des Betriebskontos, die der Browser nie sieht: Abrechnung, Tarif, Stripe, Verwaltung der Zentrale, Rohdaten der Instanz */
 const OHNE = ['book', 'rechnungen', 'pay', 'freeUsed', 'freeQuota', 'dupOf', 'downgrade', 'aboBezahlt', 'aboSitzung', 'bedingungen', 'verwaltung', 'instanz', 'konto', 'plan', 'links', 'logo', 'col', 'angemeldet', 'anmeldungen', 'zuletzt'];
 const OFFEN = ['erstellt', 'gesendet', 'geoeffnet', 'arbeit'];
+/* Die Testanfrage aus der Einrichtung (Zentrale, art test) gehört nur in die Vorschau: Nach dem Livegang zählt sie weder in der Liste noch
+   in den Zählern mit und ist auch einzeln nicht mehr abrufbar (sie wird ohnehin nach einem Tag gelöscht) */
+const sichtbar = (z, zeile) => !(z && z.art === 'test' && zeile && zeile.status !== 'einrichtung');
 /* Zwischenstände des Betriebs (nur meta und Zeiten): Fortschritt der Einladungen, anonyme Zahl laufender Website-Planungen */
 async function entwuerfe(ctx, betrieb) {
   if (!ctx.sp.entwuerfeVonBetrieb) return [];
@@ -126,7 +129,7 @@ export async function dashboardSicht(ctx, o) {
   const vollNach = new Map((voll || []).map((z) => [z.code, z]));
   const codes = new Set();
   const nachCode = new Map(ents.map((e) => [e.code, e]));
-  const links = (kopf || []).filter((z) => z.instanz === zeile.id).sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || ''))).map((z0) => {
+  const links = (kopf || []).filter((z) => z.instanz === zeile.id && sichtbar(z, zeile)).sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || ''))).map((z0) => {
     codes.add(z0.code);
     const z = vollNach.get(z0.code) || z0, l = linkAusZeile(z, jetzt, vollNach.has(z0.code));
     const e = nachCode.get(z0.code);
@@ -258,7 +261,7 @@ export const umzugFehler = (url) => new ApiFehler('Ihr Dashboard liegt unter Ihr
 /* ---------- Projekte ---------- */
 async function zeileZuProjekt(ctx, id) {
   const z = await ctx.sp.anfrageNachLid(ctx.row.id, String(id || ''));
-  if (!z || z.instanz !== ctx.zeile.id) throw new ApiFehler('Projekt nicht gefunden.', 404);
+  if (!z || z.instanz !== ctx.zeile.id || !sichtbar(z, ctx.zeile)) throw new ApiFehler('Projekt nicht gefunden.', 404);
   return z;
 }
 /* Neues Projekt (Einladung) als Zeile in anfragen: Nummer aus instanz_nr, Code einmalig über Anfragen und Zwischenstände */
@@ -266,7 +269,7 @@ async function einladungAnlegen(ctx, f) {
   const inst = ctx.instanz, row = ctx.row, jetzt = jetztVon(ctx);
   const a = pseudoKonto(row.daten || {}, null), r = X().neuesProjekt(a, f, jetzt);
   if (!r.ok) throw new ApiFehler(r.msg);
-  const l = r.l;
+  const l = zeitenBerlin(r.l, jetzt); // Angelegt und Ablauf in deutscher Zeit (der Worker rechnet in UTC)
   l.nr = await ctx.sp.instanzNr(inst.id); l.host = inst.haupthost; l.art = 'einladung'; l.instanz = true;
   for (let i = 0; i < 6; i++) {
     const code = i ? X().newCode() : l.code;
@@ -293,7 +296,7 @@ async function projektAendern(ctx) {
   const z = await zeileZuProjekt(ctx, ctx.params.id), p = {};
   felder.forEach((k2) => { p[k2] = b[k2]; }); if (p.gesendet) p.via = b.via;
   let msg = '';
-  await linkAendern(ctx, { art: 'anfrage', code: z.code, l: z.daten || {}, anfrage: z }, (a, l) => { const r = X().projektAendern(l, p, jetztVon(ctx)); if (!r.ok) throw new ApiFehler(r.msg); msg = r.msg || ''; });
+  await linkAendern(ctx, { art: 'anfrage', code: z.code, l: z.daten || {}, anfrage: z }, (a, l, jz) => { const r = X().projektAendern(l, p, jz); if (!r.ok) throw new ApiFehler(r.msg); msg = r.msg || ''; });
   return antwortMitSicht(ctx, { msg: msg });
 }
 /* Anfrage löschen (Art. 17 DSGVO, Spam): Bestätigung mit der Projektnummer; Zeile, Fotos, Zwischenstand, abgelegte Blätter und
@@ -316,7 +319,7 @@ async function exportieren(ctx) {
   await kontoVon(ctx, 'export');
   const row = ctx.row, zeile = ctx.zeile, inst = ctx.instanz, d = row.daten || {}, jetzt = jetztVon(ctx);
   const profil = {}; ['einladung', 'ap', 'tel', 'mail', 'abzug', 'prefs', 'since'].forEach((k2) => { if (d[k2] !== undefined) profil[k2] = d[k2]; });
-  const projekte = ((await ctx.sp.anfragenVonBetrieb(row.id, {})) || []).filter((z) => z.instanz === zeile.id).map((z) => ({ code: z.code, nr: z.nr || '', art: z.art, status: z.status, angelegt: z.created_at, eingegangen: z.eingegangen_at || null, projekt: z.daten || {} }));
+  const projekte = ((await ctx.sp.anfragenVonBetrieb(row.id, {})) || []).filter((z) => z.instanz === zeile.id && sichtbar(z, zeile)).map((z) => ({ code: z.code, nr: z.nr || '', art: z.art, status: z.status, angelegt: z.created_at, eingegangen: z.eingegangen_at || null, projekt: z.daten || {} }));
   const daten = {
     export: 'Dashboard ' + inst.name, erstellt: iso(jetzt), domain: inst.haupthost,
     betrieb: { name: inst.name, plz: row.plz || '', profil: profil, meldungen: Array.isArray(d.notif) ? d.notif : [] },
@@ -427,7 +430,7 @@ export async function einladungenErinnern(k, sp, env) {
       absatz('<span style="font-size:13px;color:#6e6e73">Wir erinnern je Projekt nur einmal. Abschalten können Sie das im Dashboard unter „Betrieb · Benachrichtigungen“.</span>'), '', { marke: rahmenMarke(inst) });
     let r = null; try { r = await pd.senden({ an: inst.eingang.mails.map((x) => x.mail), betreff: titel, html: html, von: absender(k, inst) }); } catch (e) { r = null; }
     if (!r || !r.ok) { fehler++; continue; }
-    const heute = X().datum(jetzt);
+    const heute = datumBerlin(jetzt);
     for (const z of offen) { try { await sp.anfrageAendern(z.code, (x) => { x.daten = Object.assign({}, x.daten || {}, { erinnert: heute }); }); } catch (e) { fehler++; } }
     gesendet++;
   }

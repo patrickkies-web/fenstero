@@ -24,8 +24,8 @@ import { postDienst, mailRahmen, esc, mailOk } from './post.js';
 import { ablage, linkOrdner, fotoIds, fotosLinkLoeschen } from './fotos.js';
 import { tokenSignieren } from './sitzung.js';
 import { blattBauen, logoLaden, base64 } from './blatt-server.js';
-import { instanzAusZeile } from '../instanz/mandant.js';
-import { pseudoKonto } from '../instanz/adapter.js';
+import { instanzAusZeile, pruefStoerung } from '../instanz/mandant.js';
+import { pseudoKonto, stempelBerlin, datumBerlin, zeitenBerlin } from '../instanz/adapter.js';
 export { textPdf } from './blatt-server.js';
 
 const X = () => globalThis.Abrechnung;
@@ -214,7 +214,7 @@ export async function eingangVerarbeiten(k, sp, code, runde, o) {
   /* Signature: Aufmaßblatt ablegen (Unterlagen jederzeit) und im Dashboard melden */
   if (pdf && inst.m.pdfAblage) { const ab = ablage(k, 'blatt'); if (ab) { try { await ab.ablegen('instanz/' + inst.id + '/' + code + '-' + (v.runde || 1) + '.pdf', pdf.bytes, 'application/pdf'); patch.abgelegt = true; } catch (e) { patch.abgelegt = false; } } }
   if (inst.m.dashboard && !nachtrag && z.art !== 'test' && sp.betriebAendern) {
-    try { await sp.betriebAendern(inst.betrieb, (a) => { a.notif = [{ when: X().stamp(), new: true, t: ((l.runde || 1) > 1 ? 'Nachbesserung: ' : 'Neue Anfrage: ') + (l.kunde || 'Kunde'), s: X().nW(((l.aufmass || {}).windows || []).length, 'Position', 'Positionen') + (l.nr ? ' · ' + l.nr : ''), to: ['link', l.id] }].concat(a.notif || []).slice(0, 200); }); } catch (e) { /* Meldung ist Zugabe */ }
+    try { await sp.betriebAendern(inst.betrieb, (a) => { a.notif = [{ when: stempelBerlin(jetzt), new: true, t: ((l.runde || 1) > 1 ? 'Nachbesserung: ' : 'Neue Anfrage: ') + (l.kunde || 'Kunde'), s: X().nW(((l.aufmass || {}).windows || []).length, 'Position', 'Positionen') + (l.nr ? ' · ' + l.nr : ''), to: ['link', l.id] }].concat(a.notif || []).slice(0, 200); }); } catch (e) { /* Meldung ist Zugabe */ }
   }
   return ende(patch, { ok: true, id: res.id, pdf: !!pdf, nachtrag: nachtrag, vorab: !pdf && nachholen });
 }
@@ -263,10 +263,11 @@ export async function probeEingang(ctx, instanzId) {
   for (let i = 0; i < 5 && !code; i++) { const c = X().newCode(); if (!(await sp.anfrageHolen(c)) && !(await sp.entwurfHolen(c))) code = c; }
   if (!code) throw new ApiFehler('Kein freier Code, bitte noch einmal.', 503);
   const w = AW().mk({ name: 'Wohnzimmer', mo: { wt: 1232, wm: 1230, wb: 1231, hl: 1412, hm: 1410, hr: 1411 }, el: { w: 1200, h: 1380 }, teilung: '2', etage: 'eg' });
-  const l = { id: X().newId('l'), code: code, nr: 'TEST-' + code.slice(0, 6).toUpperCase(), kunde: 'Testanfrage', kontakt: 'test@beispiel.de', adresse: inst.recht.ort || '', created: X().datum(), expires: '', status: 'arbeit', progress: 0, via: 'Test', art: 'test', instanz: true, log: { erstellt: X().stamp() } };
+  const l = { id: X().newId('l'), code: code, nr: 'TEST-' + code.slice(0, 6).toUpperCase(), kunde: 'Testanfrage', kontakt: 'test@beispiel.de', adresse: inst.recht.ort || '', created: datumBerlin(jetzt), expires: '', status: 'arbeit', progress: 0, via: 'Test', art: 'test', instanz: true, log: { erstellt: stempelBerlin(jetzt) } };
   const a = pseudoKonto((row && row.daten) || {}, l);
-  const r = X().importCode(a, { b: code, v: 1, w: [w], p: { name: 'Testanfrage', mail: 'test@beispiel.de', tel: '0221 000000', notiz: 'Testanfrage aus der Einrichtung. Sie wird nach einem Tag gelöscht.' } }, undefined, 'Test');
+  const r = X().importCode(a, { b: code, v: 1, w: [w], p: { name: 'Testanfrage', mail: 'test@beispiel.de', tel: '0221 000000', notiz: 'Testanfrage aus der Einrichtung. Sie wird nach einem Tag gelöscht.' } }, jetzt, 'Test');
   if (!r.ok) throw new ApiFehler('Testanfrage nicht angelegt: ' + r.msg, 500);
+  zeitenBerlin(r.l, jetzt); // Eingangszeit in deutscher Zeit
   await sp.anfrageAnlegen({ code: code, instanz: inst.id, betrieb: inst.betrieb, lid: l.id, art: 'test', status: 'eingegangen', nr: l.nr, daten: a.links[0], versand: { runde: 1, status: 'offen', versuche: 0, n: 0, basis: ctx.url && /(^|\.)localhost$/.test(ctx.url.hostname) && inst.haupthost ? ctx.url.protocol + '//' + inst.haupthost + (ctx.url.port ? ':' + ctx.url.port : '') : 'https://' + inst.haupthost }, eingegangen_at: iso(jetzt), loeschen_ab: loeschenAbFuer(inst.m, 'test', jetzt) });
   const e = await eingangVerarbeiten(k, sp, code, 1);
   return { ok: true, code: code, ergebnis: e, versand: (await sp.anfrageHolen(code)).versand };
@@ -326,6 +327,48 @@ async function svixPruefen(geheim, id, ts, signaturen, roh, jetzt) {
   return false;
 }
 export { svixPruefen };
+/* Prüfung: Störung der Datenbank beim Schreiben nachstellen (pruefStoerung.anfragen, nur mit der Daten-Attrappe) */
+const gestoerterSpeicher = (sp) => Object.assign(Object.create(sp), { anfrageAendern: async () => { throw new Error('Störung der Datenbank (Prüfung)'); } });
+/* Ein Ereignis von Resend verarbeiten: Zustellung, Bounce, Beschwerde, Verzögerung. Jeder Schritt ist wiederholbar (Abgleich über
+   v.id === mailId), deshalb darf dasselbe Ereignis nach einem Fehler noch einmal kommen */
+async function postEreignis(ctx, sp, ev) {
+  const typ = String(ev.type || ''), mailId = String((ev.data || {}).email_id || '');
+  const z = mailId ? await sp.anfrageNachMailId(mailId) : null;
+  if (!z) return { ok: true, unbekannt: true };
+  const k = ctx.k, jetzt = jetztVon(k), pd = postDienst(k);
+  const inst = await instanzKontext(sp, z.instanz), m = (inst && inst.m) || {};
+  if (typ === 'email.delivered') {
+    await sp.anfrageAendern(z.code, (x) => {
+      const v = x.versand || {}; if (v.id !== mailId) return false;
+      v.zugestellt = iso(jetzt);
+      if (v.status === 'gesendet' || v.status === 'bounce') v.status = 'zugestellt';
+      if (v.status === 'zugestellt' && typeof m.aufbewahrung === 'number' && x.art !== 'test' && x.art !== 'demo') x.loeschen_ab = iso(jetzt + m.aufbewahrung * TAG);
+      x.versand = v;
+    });
+    return { ok: true, status: 'zugestellt' };
+  }
+  if (typ === 'email.bounced') {
+    let nochmal = false;
+    await sp.anfrageAendern(z.code, (x) => {
+      const v = x.versand || {}; if (v.id !== mailId) return false;
+      if (!v.bounceNochmal) { nochmal = true; x.versand = { runde: v.runde || 1, status: 'offen', versuche: 0, n: (v.n || 0) + 1, basis: v.basis, ohneFotos: true, pdfGeht: !!v.pdfGeht, pdfVersuche: 0, bounce: iso(jetzt), bounceNochmal: true }; }
+      else { v.status = 'bounce'; v.bounce = iso(jetzt); x.versand = v; }
+    });
+    await hinweis(sp, 'instanz_versand', z.betrieb, 'Anfrage ' + (z.nr || z.code) + (inst ? ' bei ' + inst.name : '') + ' kam nicht an (Bounce)' + (nochmal ? ', neuer Versuch ohne Fotos' : ''), { code: z.code, status: 'bounce' });
+    if (pd) ctx.waitUntil(pd.senden({ an: pd.kontakt, betreff: 'Anfrage nicht zugestellt: ' + (inst ? inst.name : '') + ' · ' + (z.nr || z.code), html: mailRahmen('Anfrage nicht zugestellt', absatz('Die Mail zur Anfrage ' + esc(z.nr || z.code) + (inst ? ' an ' + esc(inst.name) + ' (' + esc(inst.haupthost) + ')' : '') + ' kam beim Empfänger nicht an. ' + (nochmal ? 'Der Server versucht es einmal ohne Fotos.' : 'Bitte die Eingangsadresse in der Zentrale prüfen.')), pd.kontakt) }).catch(() => false));
+    return { ok: true, status: nochmal ? 'offen' : 'bounce', nochmal: nochmal };
+  }
+  if (typ === 'email.complained') {
+    await sp.anfrageAendern(z.code, (x) => { const v = x.versand || {}; if (v.id !== mailId) return false; v.status = 'beschwerde'; v.beschwerde = iso(jetzt); x.versand = v; });
+    await hinweis(sp, 'instanz_versand', z.betrieb, 'Beschwerde (Spam) zur Anfrage ' + (z.nr || z.code) + (inst ? ' bei ' + inst.name : ''), { code: z.code, status: 'beschwerde' });
+    return { ok: true, status: 'beschwerde' };
+  }
+  if (typ === 'email.delivery_delayed') {
+    await sp.anfrageAendern(z.code, (x) => { const v = x.versand || {}; if (v.id !== mailId) return false; v.verzoegert = iso(jetzt); x.versand = v; });
+    return { ok: true, status: 'verzoegert' };
+  }
+  return { ok: true, ignoriert: typ };
+}
 export const EINGANG = {
   'POST /api/post/webhook': async (ctx) => {
     if (ctx.instanz) throw new ApiFehler('not_found', 404);
@@ -333,42 +376,13 @@ export const EINGANG = {
     const h = ctx.request.headers, id = h.get('svix-id') || '', ts = h.get('svix-timestamp') || '', sig = h.get('svix-signature') || '';
     if (!(await svixPruefen(geheim, id, ts, sig, ctx.roh || '', Date.now()))) throw new ApiFehler('Signatur ungültig.', 400);
     if (!ctx.sp) throw new ApiFehler('Nicht eingerichtet.', 503);
-    if (!(await ctx.sp.ereignisNeu('svix:' + id.slice(0, 100)))) return { ok: true, doppelt: true };
-    const ev = ctx.body || {}, typ = String(ev.type || ''), mailId = String((ev.data || {}).email_id || '');
-    const z = mailId ? await ctx.sp.anfrageNachMailId(mailId) : null;
-    if (!z) return { ok: true, unbekannt: true };
-    const k = ctx.k, jetzt = jetztVon(k), pd = postDienst(k);
-    const inst = await instanzKontext(ctx.sp, z.instanz), m = (inst && inst.m) || {};
-    if (typ === 'email.delivered') {
-      await ctx.sp.anfrageAendern(z.code, (x) => {
-        const v = x.versand || {}; if (v.id !== mailId) return false;
-        v.zugestellt = iso(jetzt);
-        if (v.status === 'gesendet' || v.status === 'bounce') v.status = 'zugestellt';
-        if (v.status === 'zugestellt' && typeof m.aufbewahrung === 'number' && x.art !== 'test' && x.art !== 'demo') x.loeschen_ab = iso(jetzt + m.aufbewahrung * TAG);
-        x.versand = v;
-      });
-      return { ok: true, status: 'zugestellt' };
-    }
-    if (typ === 'email.bounced') {
-      let nochmal = false;
-      await ctx.sp.anfrageAendern(z.code, (x) => {
-        const v = x.versand || {}; if (v.id !== mailId) return false;
-        if (!v.bounceNochmal) { nochmal = true; x.versand = { runde: v.runde || 1, status: 'offen', versuche: 0, n: (v.n || 0) + 1, basis: v.basis, ohneFotos: true, pdfGeht: !!v.pdfGeht, pdfVersuche: 0, bounce: iso(jetzt), bounceNochmal: true }; }
-        else { v.status = 'bounce'; v.bounce = iso(jetzt); x.versand = v; }
-      });
-      await hinweis(ctx.sp, 'instanz_versand', z.betrieb, 'Anfrage ' + (z.nr || z.code) + (inst ? ' bei ' + inst.name : '') + ' kam nicht an (Bounce)' + (nochmal ? ', neuer Versuch ohne Fotos' : ''), { code: z.code, status: 'bounce' });
-      if (pd) ctx.waitUntil(pd.senden({ an: pd.kontakt, betreff: 'Anfrage nicht zugestellt: ' + (inst ? inst.name : '') + ' · ' + (z.nr || z.code), html: mailRahmen('Anfrage nicht zugestellt', absatz('Die Mail zur Anfrage ' + esc(z.nr || z.code) + (inst ? ' an ' + esc(inst.name) + ' (' + esc(inst.haupthost) + ')' : '') + ' kam beim Empfänger nicht an. ' + (nochmal ? 'Der Server versucht es einmal ohne Fotos.' : 'Bitte die Eingangsadresse in der Zentrale prüfen.')), pd.kontakt) }).catch(() => false));
-      return { ok: true, status: nochmal ? 'offen' : 'bounce', nochmal: nochmal };
-    }
-    if (typ === 'email.complained') {
-      await ctx.sp.anfrageAendern(z.code, (x) => { const v = x.versand || {}; if (v.id !== mailId) return false; v.status = 'beschwerde'; v.beschwerde = iso(jetzt); x.versand = v; });
-      await hinweis(ctx.sp, 'instanz_versand', z.betrieb, 'Beschwerde (Spam) zur Anfrage ' + (z.nr || z.code) + (inst ? ' bei ' + inst.name : ''), { code: z.code, status: 'beschwerde' });
-      return { ok: true, status: 'beschwerde' };
-    }
-    if (typ === 'email.delivery_delayed') {
-      await ctx.sp.anfrageAendern(z.code, (x) => { const v = x.versand || {}; if (v.id !== mailId) return false; v.verzoegert = iso(jetzt); x.versand = v; });
-      return { ok: true, status: 'verzoegert' };
-    }
-    return { ok: true, ignoriert: typ };
+    /* Jedes Ereignis nur einmal; vermerkt wird es erst nach der Verarbeitung, wie beim Stripe-Webhook (zahlung.js): Scheitert das
+       Schreiben (Datenbank kurz weg), antwortet der Server mit einem Fehler, Resend stellt später erneut zu, und die Wiederholung wird
+       verarbeitet statt als doppelt abgewiesen. Sonst gingen Zustellung, Bounce oder Beschwerde verloren. */
+    const ereignis = 'svix:' + id.slice(0, 100);
+    if (await ctx.sp.ereignisBekannt(ereignis)) return { ok: true, doppelt: true };
+    const out = await postEreignis(ctx, pruefStoerung.anfragen && ctx.k.datenAttrappe ? gestoerterSpeicher(ctx.sp) : ctx.sp, ctx.body || {});
+    await ctx.sp.ereignisNeu(ereignis);
+    return out;
   }
 };

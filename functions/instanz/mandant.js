@@ -55,8 +55,9 @@ function l1Setzen(host, wert, ttl) {
   if (L1.size > MAX_L1) { for (const k of L1.keys()) { if (L1.size <= MAX_L1 * 0.9) break; L1.delete(k); } }
 }
 export function cacheVergessen(host) { if (host) L1.delete(String(host).toLowerCase().replace(/^www\./, '')); else L1.clear(); return true; }
-/* nur für die Prüfung (Störung der Datenbank nachstellen, POST /api/instanz/test): */
-export const pruefStoerung = { an: false };
+/* nur für die Prüfung (POST /api/instanz/test): an = Datenbank beim Lesen der Instanz gestört (roh unten); anfragen = Schreiben einer
+   Anfrage gestört (Resend-Webhook, eingang.js); beides nur mit der Daten-Attrappe */
+export const pruefStoerung = { an: false, anfragen: false };
 
 async function kvLesen(env, host) {
   if (!env || !env.INSTANZEN || typeof env.INSTANZEN.get !== 'function') return null;

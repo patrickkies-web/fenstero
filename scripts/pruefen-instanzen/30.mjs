@@ -412,6 +412,8 @@ export default async (h) => {
       pruefe(d0.s === 'links' && !!codeMail && !eezi.test(codeMail.html + codeMail.betreff + codeMail.von.name) && cookies.some((c) => /betrieb$/.test(c.name) && c.httpOnly) && !/betrieb=/.test(d0.cookie) && d0.titel.includes(S9.name) && !eezi.test(d0.text + d0.titel + d0.html.replace(/href="https:\/\/eeziframes\.com\/partner\/"/g, '')) && d0.text.includes(S9.nr),
         'signature: Anmeldung im Dashboard ' + BH + '/betrieb/ per Code (Mail ohne eeziframes), Sitzung im HttpOnly-Cookie, Website-Anfrage ' + S9.nr + ' in der Liste; eeziframes nirgends im Text und im Quelltext nur als Ziel des Links „Vertrag, Rechnungen und Support“ (Kundenkonto des Betriebs, Bauplan E.6)',
         () => ({ s: d0.s, code: !!codeMail, codeEezi: codeMail ? eezi.test(codeMail.html + codeMail.betreff + codeMail.von.name) : null, cookies: cookies.map((c) => c.name + (c.httpOnly ? ':h' : '')), js: d0.cookie, titel: d0.titel, eezi: (d0.html.match(/.{0,60}eeziframes.{0,60}/gi) || []).slice(0, 4).concat((d0.text.match(/.{0,40}eeziframes.{0,40}/gi) || []).slice(0, 2)), nr: d0.text.includes(S9.nr) }));
+      /* Befund 16: die Testanfrage aus der Einrichtung (Teil 2) zählt nach dem Livegang nicht mehr als Projekt */
+      ok(!/Testanfrage/.test(d0.text), 'signature: die Testanfrage aus der Einrichtung steht nach dem Livegang nicht mehr im Dashboard');
       /* Einladung anlegen, Link auf der eigenen Domain, „Eingeladen“ */
       await sD.evaluate(() => go('newlink')); await sD.waitForSelector('#nl-kunde');
       await sD.fill('#nl-kunde', 'Familie Ulme'); await sD.click('[data-act="nl-next"]');

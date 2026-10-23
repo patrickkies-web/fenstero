@@ -2,6 +2,8 @@
 // 24.1 Pflichtkontakt, Zeile, Nummern, doppelt · 24.2 Mail mit PDF je Paket · 24.3 Störung und Nachholen · 24.4 Warteschlange · 24.5 Resend-Webhook
 // · 24.6 40 Fotos · 24.7 blatt.js ohne DOM · 24.8 Fotoseite · 24.9 Aufbewahrung · 24.10 erneut senden · 24.11 Nachbesserung · 24.12 Löschen
 // · 24.13 PDF scheitert (Fehler, Abbruch durch Cloudflare, abgeschaltet): Mail mit Text und Link, Blatt nachgereicht
+// Nacharbeit der Prüfbefunde: 24.2 Eingangszeit in deutscher Zeit (Befund 4) · 24.5 Webhook vermerkt erst nach der Verarbeitung (Befund 19)
+// · 24.12 Anmeldung eines Hauseigentümers mit Aufmaßen bleibt (Befund 1)
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -20,6 +22,10 @@ export default async (h) => {
   const pdfText = (b64) => { const f = path.join(ordner, crypto.randomUUID() + '.pdf'); fs.writeFileSync(f, Buffer.from(b64, 'base64')); try { return cp.execFileSync('pdftotext', ['-layout', f, '-']).toString('utf8'); } catch (e) { return ''; } };
   const pdfDaten = (m) => { const i = (m.anhaenge || []).findIndex((a) => a.typ === 'application/pdf'); return i >= 0 && m.anhangDaten ? m.anhangDaten[i] : ''; };
   const iso = () => new Date().toISOString();
+  /* Zeit in Europe/Berlin über Intl (nicht die Uhr des Testrechners), in den Formaten von modell.js: 'TT.MM., HH:MM' und 'TT.MM.JJJJ' */
+  const berlinTeile = (ms) => { const o = {}; new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(ms)).forEach((p) => { o[p.type] = p.value; }); return o; };
+  const berlin = (ms) => { const o = berlinTeile(ms); return o.day + '.' + o.month + '., ' + (o.hour === '24' ? '00' : o.hour) + ':' + o.minute; };
+  const berlinTag = (ms) => { const o = berlinTeile(ms); return o.day + '.' + o.month + '.' + o.year; };
   const umg = await import(pathToFileURL(path.join(W, 'functions/api/umgebung.js')).href);
   const GEHEIM = umg.konfig({ DATEN_ATTRAPPE: '1' }).instanzen.webhook;
   const webhook = async (ev, o) => {
@@ -66,6 +72,10 @@ export default async (h) => {
   ok(/\/api\/instanz\/fotos\/[a-z0-9]{10}\?t=/.test(E.m.html) && /\/api\/instanz\/fotos\//.test(Pp.m.html) && !/\/api\/instanz\/fotos\//.test(Sg.m.html) && Sg.m.html.includes(h.base('signature.localhost') + '/betrieb/#projekt-') && !E.m.html.includes('/betrieb/#projekt-'), '24.2 Fotolink nur Essential/Plus, Dashboard-Knopf nur Signature (' + h.base('signature.localhost') + '/betrieb/#projekt-…)');
   const ab1 = await h.attrappe();
   ok(ab1.ablage.blatt.includes('instanz/' + I.signature.id + '/' + Sg.a.code + '-1.pdf') && !ab1.ablage.blatt.some((x) => x.includes(E.a.code)), '24.2 Signature: Aufmaßblatt im Bucket blatt abgelegt (pdfAblage), Essential nicht');
+  /* Befund 4: Eingangszeit in deutscher Zeit (der Worker rechnet in UTC); dieselbe Zeichenkette in der Zeile, im Mailtext und im PDF */
+  const zE4 = await T.zeile(E.a.code), ms4 = Date.parse(zE4.eingegangen_at), soll4 = berlin(ms4), lg4 = zE4.daten.log || {};
+  const imPdf4 = new RegExp('eingegangen\\s+' + soll4.replace(/[.,]/g, '\\$&').replace(/ /g, '\\s+'));
+  ok(/^\d{2}\.\d{2}\., \d{2}:\d{2}$/.test(soll4) && lg4.eingegangen === soll4 && lg4.erstellt === soll4 && zE4.daten.created === berlinTag(ms4) && E.m.html.includes('Eingegangen: ' + soll4) && imPdf4.test(E.text), '24.2 Eingangszeit in deutscher Zeit (' + soll4 + ', Europe/Berlin aus eingegangen_at, nicht UTC): log.eingegangen, log.erstellt und created der Zeile, „Eingegangen: …“ im Mailtext und im PDF' + (lg4.eingegangen === soll4 ? '' : ' (Zeile: ' + lg4.eingegangen + ')'));
   await h.instanz('essential', { eingang: { mails: [{ mail: 'anfragen@essential.example', bestaetigt: iso(), eingeladen: iso() }] } });
 
   /* ---------- 24.3 Störung des Mailversands ---------- */
@@ -108,6 +118,13 @@ export default async (h) => {
   ok(b1.json.nochmal === true && zPb.versand.status === 'offen' && zPb.versand.ohneFotos === true && bounceMail.length >= 1 && zPn.versand.status === 'gesendet' && zPn.versand.n === 1 && neuMail.length === 2 && b2.json.status === 'bounce' && zPb2.versand.status === 'bounce', '24.5 Webhook bounced: Hinweis, Mail an den Inhaber, einmal neuer Versuch ohne Fotos; beim zweiten Bounce bleibt „bounce“');
   const zS = await T.zeile(Sg.a.code), c1 = await webhook({ type: 'email.complained', data: { email_id: zS.versand.id } }), z1d = await T.zeile(e1.code), dl = await webhook({ type: 'email.delivery_delayed', data: { email_id: z1d.versand.id } });
   ok(c1.json.status === 'beschwerde' && (await T.zeile(Sg.a.code)).versand.status === 'beschwerde' && dl.json.status === 'verzoegert' && !!(await T.zeile(e1.code)).versand.verzoegert, '24.5 Webhook complained → beschwerde, delivery_delayed nur vermerkt');
+  /* Befund 19: vermerkt wird ein Ereignis erst nach der Verarbeitung; scheitert das Schreiben, wird die Wiederholung von Resend verarbeitet */
+  const z19 = await T.warteZeile(e2.code, (z) => (z.versand || {}).status === 'gesendet'), id19 = 'msg_' + crypto.randomUUID(), ev19 = { type: 'email.delivered', data: { email_id: ((z19 || {}).versand || {}).id } };
+  await T.test({ stoerung: { anfragen: true } });
+  const s19 = await webhook(ev19, { id: id19 });
+  await T.test({ stoerung: { anfragen: false } });
+  const w19 = await webhook(ev19, { id: id19 }), w19b = await webhook(ev19, { id: id19 }), z19n = await T.zeile(e2.code);
+  ok(!!ev19.data.email_id && s19.status === 500 && w19.status === 200 && w19.json.status === 'zugestellt' && !w19.json.doppelt && z19n.versand.status === 'zugestellt' && w19b.json.doppelt === true, '24.5 Webhook bei gestörter Datenbank: Fehler 500, nichts vermerkt; die Wiederholung derselben svix-id wird verarbeitet (zugestellt), erst die nächste ist doppelt (' + [s19.status, w19.status, w19.json && w19.json.status, w19b.json && w19b.json.doppelt].join(' ') + ')');
 
   /* ---------- 24.6 40 Fotos ---------- */
   const seite = await h.neueSeite(await h.browser.newContext());
@@ -191,7 +208,15 @@ export default async (h) => {
   /* ---------- 24.12 instanzDatenLoeschen ---------- */
   const lo = (await h.saat({ instanzen: [{ slug: 'loeschprobe', paket: 'signature', name: 'Löschprobe Fenster', plz: '50667' }] })).loeschprobe;
   const uid = 'uid-loesch-' + Date.now().toString(36);
-  await h.instanz('loeschprobe', { zugang: [{ mail: 'team@loeschprobe.example', uid: uid, name: 'Team', rolle: 'inhaber', bestaetigt: iso(), zuletzt: null, aus: false }] });
+  /* Befund 1: Zugänge, deren Anmeldung zugleich ein Hauseigentümer-Konto ist (B2C, Tabelle eigene): mit gesichertem Aufmaß bleibt die
+     Anmeldung, mit nur gelöschtem Aufmaß (Löschmarke) nicht. uid der Attrappe wie in auth.js: 'u_' + hashN(mail), Token 'test.<base64>' */
+  const hashN = (s) => String(s).split('').reduce((x, c) => (x * 31 + c.charCodeAt(0)) >>> 0, 7), uidVon = (m) => 'u_' + hashN(m).toString(36), tok = (m) => 'test.' + Buffer.from(m, 'utf8').toString('base64').replace(/=+$/, '');
+  const st12 = Date.now().toString(36), mailHaus = 'haus-' + st12 + '@beispiel.de', mailWeg = 'weg-' + st12 + '@beispiel.de';
+  const kunde = (m, pfad, body) => h.api('localhost', pfad, { body: body, origin: true, headers: { authorization: 'Bearer ' + tok(m) } });
+  const aufmass12 = () => ({ windows: [{ wid: 'w1', name: 'Fenster' }], proj: {}, stand: Date.now() });
+  const sH = await kunde(mailHaus, '/api/kunde/aufmass/haus' + st12, aufmass12()), sW = await kunde(mailWeg, '/api/kunde/aufmass/weg' + st12, aufmass12()), sWl = await kunde(mailWeg, '/api/kunde/aufmass/weg' + st12 + '/loeschen', {});
+  const zug = (mail, u, rolle) => ({ mail: mail, uid: u, name: 'Team', rolle: rolle || 'team', bestaetigt: iso(), zuletzt: null, aus: false });
+  await h.instanz('loeschprobe', { zugang: [zug('team@loeschprobe.example', uid, 'inhaber'), zug(mailHaus, uidVon(mailHaus)), zug(mailWeg, uidVon(mailWeg))] });
   const loA = await mitFoto(lo.host, 96, { p: Object.assign(T.kontakt(96), { name: 'Familie Löschen' }) }), loV = (await T.start(lo.host)).json.code;
   await T.warteZeile(loA.code, (z) => z.versand.status === 'gesendet');
   const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52, 0, 0, 0, 32, 0, 0, 0, 32, 8, 6, 0, 0, 0]), Buffer.alloc(40)]).toString('base64');
@@ -199,6 +224,7 @@ export default async (h) => {
   const vorL = await h.attrappe(), hatteMarke = vorL.ablage.marke.some((p) => p.startsWith('instanz/' + lo.id + '/')), hatteBlatt = vorL.ablage.blatt.some((p) => p.startsWith('instanz/' + lo.id + '/'));
   const res = (await T.test({ verwalten: { fn: 'instanzDatenLoeschen', args: [lo.id] } })).verwalten, nachL = await h.attrappe();
   const rest = ['marke', 'blatt', 'fotos'].flatMap((b) => nachL.ablage[b].filter((p) => p.startsWith('instanz/' + lo.id) || p.startsWith('link/' + loA.code) || p.startsWith('link/' + loV)));
+  ok(sH.status === 200 && sW.status === 200 && sWl.status === 200 && res.anmeldungen.includes(uid) && res.anmeldungen.includes(uidVon(mailWeg)) && !res.anmeldungen.includes(uidVon(mailHaus)), '24.12 Anmeldungen der Zugänge: ohne alles und mit nur gelöschtem Aufmaß gelöscht, der Hauseigentümer mit gesichertem Aufmaß (eigene, B2C) behält seine Anmeldung (anmeldungGebraucht; ' + res.anmeldungen.length + ' gelöscht)');
   ok(hatteMarke && hatteBlatt && res.ok && res.anmeldungen.includes(uid) && !rest.length && !nachL.instanzen.some((i) => i.id === lo.id) && !nachL.hosts.some((x) => x.host === lo.host) && !nachL.anfragen.some((a) => a.code === loA.code) && !nachL.entwuerfe.some((e) => e.code === loV || e.code === loA.code) && !nachL.betriebe.some((b) => b.id === lo.betrieb) && (await h.api(lo.host, '/')).status === 404, '24.12 instanzDatenLoeschen: kein Pfad instanz/<id>, kein link/<code> der Instanz, Anfragen, Zwischenstände, Hosts, Instanz, Betriebszeile und Zugangs-Anmeldungen gelöscht' + (rest.length ? ' (übrig: ' + rest.join(', ') + ')' : ''));
 
   /* ---------- 24.13 PDF scheitert: Mail mit Text und Link, Blatt nachgereicht ---------- */

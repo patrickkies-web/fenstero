@@ -10,7 +10,7 @@ import { NB_STAND } from './recht.js';
 import { ablage, linkOrdner, fotoIds, fotosLinkAufraeumen } from './fotos.js';
 import { eingangMelden } from './benachrichtigung.js';
 import '../../web/assets/instanzregeln.js';
-import { linkAufloesen, linkAendern, pseudoKonto } from '../instanz/adapter.js';
+import { linkAufloesen, linkAendern, pseudoKonto, stempelBerlin, datumBerlin, zeitenBerlin } from '../instanz/adapter.js';
 import { budget, bremse } from './bremse.js';
 import { eingangAnstossen, loeschenAbFuer } from './eingang.js';
 import { alarmMail } from './ki.js';
@@ -397,13 +397,14 @@ async function linkInstanz(ctx) {
   const zu = X().linkZu(l), status = zu === 'abgelaufen' ? 'abgelaufen' : l.status;
   return { ok: true, betrieb: inst.name, kunde: l.kunde || '', status: status, zu: zu, zuText: zu ? zuText(zu, inst.name) : '', runde: l.nb && l.nb.offen ? l.nb.runde : (l.runde || 1), seit: l.eingegangenAt || 0, jetzt: Date.now(), hinweis: l.nb && l.nb.offen ? l.nb.hinweis || '' : '', du: l.du !== undefined ? !!l.du : !!inst.du, expires: l.expires || '', ap: (inst.auftritt || {}).ap || '', auftritt: inst.auftritt, grenzen: GRENZEN, instanz: true, art: aufl.art === 'virtuell' ? 'website' : (aufl.anfrage || {}).art || 'website', nr: l.nr || '' };
 }
-/* Virtuelle Links melden nichts; Einladungen (Signature) wie Kundenlinks, die Meldung landet im Dashboard */
+/* Virtuelle Links melden nichts; Einladungen (Signature) wie Kundenlinks, die Meldung landet im Dashboard. Zeiten in deutscher Zeit
+   (zeitenBerlin: Geöffnet, Frist; der Worker rechnet in UTC) */
 async function fortschrittInstanz(ctx) {
   linkBremse(ctx.request);
   const aufl = await linkAufloesen(ctx, ctx.params.code);
   if (aufl.art !== 'anfrage' || !erlaubt('fort:' + aufl.code, 60, 10 * 60 * 1000)) return { ok: true };
   const b = ctx.body || {}; let expires = '';
-  await linkAendern(ctx, aufl, (a, l) => { const r = X().fortschritt(l, b.stufe, b.k); expires = l.expires || ''; if (!r) return false; if (r === 'geoeffnet') melden(a, { t: (l.kunde || 'Ihr Kunde') + ' hat den Link geöffnet', s: 'Projekt ' + (l.nr || '') + ', noch keine Maße eingetragen.', to: ['link', l.id] }); return true; });
+  await linkAendern(ctx, aufl, (a, l, jetzt) => { const vorher = l.expires, r = X().fortschritt(l, b.stufe, b.k, jetzt); zeitenBerlin(l, jetzt, { expiresVorher: vorher }); expires = l.expires || ''; if (!r) return false; if (r === 'geoeffnet') melden(a, { when: stempelBerlin(jetzt), t: (l.kunde || 'Ihr Kunde') + ' hat den Link geöffnet', s: 'Projekt ' + (l.nr || '') + ', noch keine Maße eingetragen.', to: ['link', l.id] }); return true; });
   return { ok: true, expires: expires };
 }
 const zeileText = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n);
@@ -444,28 +445,32 @@ async function aufmassInstanz(ctx) {
   let namen = ab ? null : new Set();
   if (ab && (fotoIds(o.w).size || o.m)) { try { namen = new Set(await ab.liste(linkOrdner(code))); } catch (e) { namen = null; } }
   const basis = (/(^|\.)localhost$/.test(ctx.url.hostname) ? ctx.url.protocol + '//' + ctx.url.host : 'https://' + inst.haupthost);
-  const eingangAt = istoString(k.jetzt || jetzt);
+  /* Eingangszeit: die Uhr des Servers (k.jetzt) für Zeile und Link-Objekt; im Link-Objekt in deutscher Zeit, der Worker rechnet in UTC
+     (stempelBerlin, zeitenBerlin; sonst stünde sie im PDF, in der Mail und im Dashboard ein bis zwei Stunden falsch) */
+  const jetztK = k.jetzt || jetzt, eingangAt = istoString(jetztK);
   let r = null;
   if (aufl.art === 'virtuell') {
     /* in einem Schreibvorgang: Nummer, Link-Objekt, Eingang, Versand offen (K2.4) */
     const row0 = ctx.sp.betriebHolen ? await ctx.sp.betriebHolen(inst.betrieb) : null;
     const nr = art === 'test' ? 'TEST-' + code.slice(0, 6).toUpperCase() : await ctx.sp.instanzNr(inst.id);
-    const l = { id: X().newId('l'), code: code, nr: nr, kunde: name, kontakt: tel || mail, adresse: zeileText(p.ort, 120), geb: '', fz: '', plan: [], note: '', created: X().datum(), expires: '', status: 'arbeit', progress: 0, via: 'Website', quelle: inst.host, host: inst.haupthost, art: art, du: !!inst.du, instanz: true, log: { erstellt: X().stamp() } };
+    const l = { id: X().newId('l'), code: code, nr: nr, kunde: name, kontakt: tel || mail, adresse: zeileText(p.ort, 120), geb: '', fz: '', plan: [], note: '', created: datumBerlin(jetztK), expires: '', status: 'arbeit', progress: 0, via: 'Website', quelle: inst.host, host: inst.haupthost, art: art, du: !!inst.du, instanz: true, log: { erstellt: stempelBerlin(jetztK) } };
     const a = pseudoKonto((row0 && row0.daten) || {}, l);
-    r = X().importCode(a, o, undefined, 'Website');
+    r = X().importCode(a, o, jetztK, 'Website');
     if (!r.ok) throw new ApiFehler(r.art === 'schon' || r.art === 'doppelt' ? 'Diese Anfrage ist schon angekommen.' : r.msg, r.art === 'schon' || r.art === 'doppelt' ? 409 : 400);
+    zeitenBerlin(r.l, jetztK); r.l.log.eingegangen = stempelBerlin(jetztK);
     if (r.l && r.l.aufmass) fotosVermerken(r.l.aufmass, namen);
-    await ctx.sp.anfrageAnlegen({ code: code, instanz: inst.id, betrieb: inst.betrieb, lid: l.id, art: art, status: 'eingegangen', nr: nr, daten: a.links[0], versand: { runde: 1, status: 'offen', versuche: 0, n: 0, basis: basis }, eingegangen_at: eingangAt, loeschen_ab: loeschenAbFuer(inst.m, art, k.jetzt || jetzt) })
+    await ctx.sp.anfrageAnlegen({ code: code, instanz: inst.id, betrieb: inst.betrieb, lid: l.id, art: art, status: 'eingegangen', nr: nr, daten: a.links[0], versand: { runde: 1, status: 'offen', versuche: 0, n: 0, basis: basis }, eingegangen_at: eingangAt, loeschen_ab: loeschenAbFuer(inst.m, art, jetztK) })
       .catch((e) => { throw e && e.status === 409 ? new ApiFehler('Diese Anfrage ist schon angekommen.', 409) : e; });
   } else {
-    /* Einladung oder Nachbesserung: über das Pseudo-Konto, Versand der neuen Runde im selben Schreibvorgang */
+    /* Einladung oder Nachbesserung: über das Pseudo-Konto (linkAendern schreibt die Stempel in deutsche Zeit um), Versand der neuen
+       Runde im selben Schreibvorgang */
     let fehl = null;
-    await linkAendern(ctx, aufl, (a) => {
-      const res = X().importCode(a, o, undefined, 'App');
+    await linkAendern(ctx, aufl, (a, l, jz) => {
+      const res = X().importCode(a, o, jz, 'App');
       if (!res.ok) { fehl = res; return false; }
       if (res.l && res.l.aufmass) fotosVermerken(res.l.aufmass, namen);
       r = res; return true;
-    }, { zeile: (z) => { const v = z.versand || {}; z.status = 'eingegangen'; z.eingegangen_at = eingangAt; z.versand = { runde: (r.l && r.l.runde) || 1, status: 'offen', versuche: 0, n: 0, basis: v.basis || basis }; z.loeschen_ab = loeschenAbFuer(inst.m, z.art, k.jetzt || jetzt); } });
+    }, { zeile: (z) => { const v = z.versand || {}; z.status = 'eingegangen'; z.eingegangen_at = eingangAt; z.versand = { runde: (r.l && r.l.runde) || 1, status: 'offen', versuche: 0, n: 0, basis: v.basis || basis }; z.loeschen_ab = loeschenAbFuer(inst.m, z.art, jetztK); } });
     if (fehl) throw new ApiFehler(fehl.art === 'schon' ? 'Dieses Aufmaß ist schon angekommen.' : fehl.art === 'doppelt' ? 'Dieses Aufmaß ist schon da.' : fehl.msg, fehl.art === 'schon' || fehl.art === 'doppelt' ? 409 : 400, fehl.art === 'schon' && fehl.l && X().linkZu(fehl.l) === 'eingegangen' ? { zu: 'eingegangen', runde: fehl.l.runde || 1, seit: fehl.l.eingegangenAt || 0 } : undefined);
   }
   const nb = r.art === 'nb' || r.art === 'nb-neu', runde = (r.l && r.l.runde) || 1;
