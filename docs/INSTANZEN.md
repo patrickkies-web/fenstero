@@ -133,7 +133,7 @@ web/assets/blatt.js (A):            Blatt.pdf({ variante: 'betrieb'|'anfrage', k
 web/assets/pakete.js, web/assets/instanzregeln.js (S0, fertig)
 ```
 
-Stubs werfen `ApiFehler` 501 („noch nicht gebaut“), bis ihr Strang sie baut; die Läufe der Cron-Weiche tun bis dahin nichts. Nach Welle 1 sind nur noch die Module von C (`zentrale-instanzen.js`, `zentrale-bestellungen.js`, `cloudflare.js` mit `instanzenPruefen`), E (`dashboard.js` mit `einladungenErinnern`) und F (`pakete-seite.js`, Datenschutz in `functions/instanz/recht.js`) Stubs.
+Stubs werfen `ApiFehler` 501 („noch nicht gebaut“), bis ihr Strang sie baut; die Läufe der Cron-Weiche tun bis dahin nichts. Nach Welle 1 sind nur noch die Module von C (`zentrale-instanzen.js`, `zentrale-bestellungen.js`, `cloudflare.js` mit `instanzenPruefen`), E (`dashboard.js` mit `einladungenErinnern`) und F (`pakete-seite.js`, Datenschutz in `functions/instanz/recht.js`) Stubs. Seit Welle 3 ist kein Stub mehr übrig.
 
 ### Stand nach Welle 1 (A und D zusammengeführt)
 
@@ -173,6 +173,40 @@ Verträge, die E und F nutzen dürfen (vom Integrator im echten Ablauf geprüft:
 - **Zentrale (C):** Zugänge `instanzen.zugang[] = { mail, name, rolle: 'inhaber'|'team', uid: null, bestaetigt, zuletzt, aus }` (anlegen, aus, an, löschen; Bestätigung über `empfaengerEinladen(…, 'zugang')`, A); E bindet `uid` und setzt `zuletzt`. Testanfrage der Zentrale: `instanzen.eingang.test = { code, zeit, status, zugestellt }`. Hauptknopf und Ampel: `GET /api/zentrale/bestellungen/:id` (`schritt`, `ampel`); Aufgaben der Übersicht: `GET /api/zentrale/aufgaben`.
 - **Cloudflare (C):** `CF_API_TOKEN` (Secret) und `CF_ACCOUNT_ID` (Variable) liest `functions/api/cloudflare.js`; `umgebung.js` meldet in den Hinweisen, wenn nur einer der beiden Werte gesetzt ist. Ohne beide zeigt die Zentrale die Klick-Anleitung.
 - **Initiale (Favicon, Zeichen):** erster Buchstabe oder erste Ziffer des Namens ohne Zusatz wie „Fensterbau“, in `einladung.js` und `seiten.js` gleich.
+
+### Stand nach Welle 3 (E und F zusammengeführt)
+
+Verträge, vom Integrator im echten Ablauf geprüft (`scripts/pruefen-instanzen/30-welle3.mjs`, eigener Testserver mit `PAKETE_OFFEN=1`, Chromium auf `*.localhost`, API mit Kopfzeile `Host`): Verkaufsseite → Bestellformular mit dem Paket → Signature-Bestellung mit Dashboard-Zugang → Zentrale übernimmt den Zugang in die Instanz → Bestätigungslink → Anmeldung im Dashboard in der Vorbereitung → live → Einladung im Dashboard → Kunde plant und sendet in der App → Mail mit PDF und Knopf ins Dashboard → Nachbesserung und zweite Runde → Impressum und Datenschutz aus den Angaben der Bestellung → Zugang aus und an → Paketwechsel Signature → Plus → Signature → Hauptdomain mit Umzug ins Dashboard.
+
+**Dashboard (E)** auf dem Haupthost einer Instanz mit `m.dashboard` (sonst 404 wie eine unbekannte Route):
+
+```
+GET  /betrieb/                                Hülle web/betrieb/index.html (CSP, noindex, no-store); /betrieb → 301; Alias-Host → 301 auf den Haupthost
+GET  /config.js?betrieb=1                     Marke für die Hülle in jedem Status, solange das Paket ein Dashboard hat (seiten.js)
+POST /api/konto/anmelden { mail }             immer dieselbe Antwort; einen Code bekommen nur bestätigte, eingeschaltete Zugänge (Mail in der Marke)
+POST /api/konto/bestaetigen { mail, code }    → Cookie __Host-betrieb (aud = Host), uid am Zugang gebunden, kein Token in der Antwort
+GET  /api/konto?start=1                       ohne Sitzung { ok, angemeldet: false } statt 401 (erster Abruf der Hülle)
+GET  /api/konto[?stand=]                      Sicht ohne Abrechnungsfelder; { gleich: true }, solange nichts geändert ist; GET schreibt nie
+PATCH /api/konto                              Profil (Einladungsseite, Kontakt, Bestellmaß, Benachrichtigungen); logo, col → 403
+POST /api/konto/projekte · /projekte/liste    Einladungen (m.einladungslinks, Status aktiv): Zeile in anfragen, art einladung, Nummer aus instanz_nr
+PATCH /api/konto/projekte/:id                 über linkAendern, Felder nach der Status-Matrix (pausiert: klaer, stage, memo, seen)
+GET  /api/konto/projekte/:id                  ein eingereichtes Projekt voll nachladen (älter als 30 Tage kommt es in der Sicht nur als Kopf)
+POST /api/konto/projekte/:id/loeschen { bestaetigung: <Projektnummer> }   Zeile, Fotos, Zwischenstand, Blätter, Meldungen; Protokoll ohne Kundendaten
+GET  /api/konto/export                        JSON zum Herunterladen (ohne uid, ohne verwaltung), auch „beendet“ bis zur Löschung
+GET  /api/konto/foto/:code/:id                Fotos der eigenen Instanz
+POST /api/konto/abmelden                      löscht das Cookie
+404 auf Instanz-Hosts: registrieren, sitzung, erneuern, plan*, zahlungsart*, import
+Hauptdomain: Zugangsadresse ohne Betriebskonto → 409 { umzug: 'https://<host>/betrieb/' } (portal.js: „Zu Ihrem Dashboard“); /betrieb* → 404
+```
+
+- **Mail an den Betrieb (A):** bei `m.dashboard` mit dem Knopf `https://<host>/betrieb/#projekt-<id>`; die Hülle springt nach der Anmeldung dorthin. Ohne Dashboard (nach einem Wechsel auf Plus) kommt die Mail ohne Knopf, offene Einladungen nehmen ihr Aufmaß weiter an.
+- **Erinnerung (täglicher Lauf `einladungenErinnern`):** Einladungen „verschickt“ oder „geöffnet“ ohne Planung, älter als `FRISTEN.einladungErinnernTage` (3), einmal je Projekt (`daten.erinnert`) an die bestätigten Eingangsadressen, mit Links ins Dashboard; abschaltbar mit `prefs.remind = false`.
+- **Zugänge:** Die Bestellung (D) nennt sie in `konfigurator.zugang`, die Zentrale (C) übernimmt sie beim Anlegen der Instanz und schaltet sie an, aus oder löscht sie; bestätigt wird über `GET /api/instanz/bestaetigen?t=` (A). E bindet `uid` und setzt `zuletzt`. Entzug, ein Paket ohne Dashboard und jeder neue Status wirken beim nächsten Aufruf (das offene Dashboard meldet ab).
+- **portal.js im Instanz-Modus** (`INST` aus `KONFIG.instanz`): Links `https://<host>/#k-<code>`, „Als Kunde öffnen“ `https://<host>/?vorschau=1#k-<code>`; Fuß mit `/impressum/` und `/datenschutz/` der Instanz (F) und `acc.instanz.kundenkonto` = `https://eeziframes.com/partner/` (D, „Vertrag, Rechnungen und Support“).
+- **Verkaufsseite (F):** `functions/pakete-seite.js` setzt die Bausteine je Umgebung ein: ohne `PAKETE_OFFEN` „Bestellung bald möglich“ mit Anfrageformular (`POST /api/partner/frage`, D, auch ohne JavaScript), mit `PAKETE_OFFEN=1` Knöpfe auf `/partner/#bestellen/<paket>` (partner.js wählt das Paket vor); `PAKETE_DEMOS=1` verlinkt die Demo-Instanzen.
+- **Fassung der Paketbedingungen:** `PAKET_STAND` (functions/api/recht.js) steht gleich in `GET /api/partner/stand`, in `<meta name="stand">` von `/konfigurator-bedingungen/` und in den Namen der beiden PDFs; die Kasse verlangt genau diese Fassung. `node scripts/bedingungen-pdf.mjs` schreibt Bausteine und PDFs, `--pruefen` vergleicht.
+- **Recht je Instanz (F):** `impressumSeite(inst)` und `datenschutzSeite(inst)` aus `instanzen.recht` (bei Instanzen aus einer Bestellung die Firma der Bestellung) und den Merkmalen; ein Paketwechsel ändert die Texte sofort (`__Host-betrieb` nur mit Dashboard, eeziframes mit Namen nur bei `rechtNennung: 'name'`).
+- **Startseite eeziframes.com (E.7):** Ansicht Hauseigentümer: Kasten „Für Fensterbauer“ → `/fuer-fensterbauer/` (dazu der Weg in die Ansicht für Bestandsbetriebe); Ansicht Fensterbauer: Karte „Pakete ansehen“. Registrierung und Tour des Betriebsbereichs bleiben über `/#fensterbauer` und `/#tour` erreichbar.
 
 ### Router (functions/api/router.js)
 
@@ -218,7 +252,7 @@ HMAC-SHA-256 über `SITZUNG_GEHEIMNIS` (mindestens 32 Zeichen; ohne gibt es wede
 
 ### Umgebung
 
-Neu in `konfig(env)`: `k.paketeOffen` (`PAKETE_OFFEN=1`), `k.sitzung.geheimnis` (`SITZUNG_GEHEIMNIS`), `k.jetzt` (Zeit der Anfrage, mit `JETZT`). Weitere Variablen der Stränge (bei ihrer Einführung in `umgebung.js` eintragen): `MAIL_ABSENDER_INSTANZ`, `MAIL_ABSENDER_NEUTRAL`, `RESEND_WEBHOOK_SECRET` (A), `INSTANZ_CACHE_MS`, `HAUPT_HOSTS`, `KI_TAG_MAX` (A), `CF_API_TOKEN`, `CF_ACCOUNT_ID` (C). Bindungen: `RL_*` (wrangler.jsonc), später `INSTANZEN` (KV) und `EINGANG` (Queue).
+Neu in `konfig(env)`: `k.paketeOffen` (`PAKETE_OFFEN=1`), `k.sitzung.geheimnis` (`SITZUNG_GEHEIMNIS`), `k.jetzt` (Zeit der Anfrage, mit `JETZT`). Weitere Variablen der Stränge (bei ihrer Einführung in `umgebung.js` eintragen): `MAIL_ABSENDER_INSTANZ`, `MAIL_ABSENDER_NEUTRAL`, `RESEND_WEBHOOK_SECRET` (A), `INSTANZ_CACHE_MS`, `HAUPT_HOSTS`, `KI_TAG_MAX` (A), `CF_API_TOKEN`, `CF_ACCOUNT_ID` (C), `PAKETE_DEMOS` (F, Live-Demos auf der Verkaufsseite). Bindungen: `RL_*` (wrangler.jsonc), später `INSTANZEN` (KV) und `EINGANG` (Queue).
 
 ### Prüfung (scripts/pruefen.mjs, Abschnitte 23–30)
 
@@ -290,6 +324,7 @@ Impressum und Datenschutz sind in jedem Zustand erreichbar. Eine laufende Planun
 | Fotolink in der Mail (Essential/Plus) | `fotoLinkTage` (14), nur auf dem Haupthost, Abruf protokolliert | `functions/api/instanz-api.js` |
 | Test- und Demo-Anfragen | `testTage` (1 Tag) | `anfragenAufraeumen` |
 | Vorschau-Link | `vorschauTage` (30) | Token `vorschau` |
+| Erinnerung an offene Einladungen (Signature) | `einladungErinnernTage` (3), einmal je Projekt | `einladungenErinnern` (täglich) |
 | Kulanz bei Zahlungsausfall, Pause, Löschung nach Ende | `kulanzTage` (14), `pauseMaxTage` (60), `loeschenNachEndeTage` (30) | `bestellungenLauf` (täglich) |
 | Sicherungen der Datenbank | 7 Tage (Supabase Pro) | Supabase |
 

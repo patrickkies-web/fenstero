@@ -41,6 +41,9 @@
                               zählen ohnehin einzeln, alles andere als „Kampagne (andere)“), siehe functions/api/statistik.js
      PAKETE_OFFEN             1 = Konfigurator-Pakete werden verkauft (Verkaufsseite mit „Paket bestellen“, Paket-Kasse auch im Live-Modus);
                               ohne: vorläufige Preise, Anfrageformular statt Bestellung, Paket-Kasse im Live-Modus zu (instanzregeln.js verkauf)
+     PAKETE_DEMOS             1 = die Verkaufsseite verlinkt die Live-Demos https://demo-<paket>.eeziframes.com/ (erst setzen, wenn die
+                              drei Demo-Instanzen in der Zentrale angelegt und verbunden sind, Bauplan §4); ohne: „Konfigurator ausprobieren“
+                              führt in die App /app/ (gelesen in functions/pakete-seite.js)
      Konfigurator-Instanzen (docs/INSTANZEN.md):
      MAIL_ABSENDER_INSTANZ    Absender der Anfragen an die Betriebe, z. B. anfragen@post.eeziframes.com (eigene Subdomain bei Resend,
                               eigener Ruf, E9); ohne: MAIL_ABSENDER

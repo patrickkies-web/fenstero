@@ -201,8 +201,8 @@ export default async (h) => {
   const dokus = ['README.md'].concat(fs.readdirSync(path.join(WZ, 'docs')).filter((f) => f.endsWith('.md')).map((f) => 'docs/' + f));
   const fehlt = [];
   for (const d of dokus) {
-    /* Zeilen der Tabelle „Wellen und Dateibesitz“ nennen auch Dateien von Strängen, die noch nicht zusammengeführt sind */
-    const t = lies(d).split('\n').filter((z) => !/^\| (0|Welle \d|Schluss) \|/.test(z)).join('\n'), basis = path.dirname(path.join(WZ, d));
+    /* seit Welle 3 sind alle Stränge zusammengeführt: auch die Tabelle „Wellen und Dateibesitz“ nennt nur vorhandene Dateien */
+    const t = lies(d), basis = path.dirname(path.join(WZ, d));
     for (const m of t.matchAll(/\]\(([^)\s#]+)(#[^)\s]*)?\)/g)) { const z = m[1]; if (/^(https?:|mailto:|tel:)/.test(z)) continue; if (!fs.existsSync(path.resolve(basis, z)) && !fs.existsSync(path.join(WZ, z.replace(/^\//, '')))) fehlt.push(d + ' → ' + z); }
     for (const m of t.matchAll(/`((?:docs|scripts|functions|web|supabase)\/[A-Za-z0-9_./-]+\.(?:md|mjs|js|html|css|sql|json|jsonc|py))`/g)) { if (!fs.existsSync(path.join(WZ, m[1])) && !/<|\*/.test(m[1])) fehlt.push(d + ' → ' + m[1]); }
   }
