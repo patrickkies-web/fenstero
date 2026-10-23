@@ -4907,7 +4907,7 @@ function fensterStatus(x) {
 /* Stand eines Fensters für die Übersicht: vollständig, Maße offen oder die Zahl der offenen Wünsche; welche es sind, steht nie in Listen (Entscheidung des Inhabers) */
 function fensterStand(x) {
   const d = derive(x), offen = AW.offenListe(AW.nachTiefe(x, S.proj)), n = offen.length;
-  if (!d.complete) return { k: 'masse', text: 'Maße offen' + (n ? ', ' + n + (n === 1 ? ' Wunsch' : ' Wünsche') : '') };
+  if (!d.complete) return { k: 'masse', text: 'Maße offen' + (n ? ' · ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') };
   if (n) return { k: 'wunsch', text: n === 1 ? '1 Wunsch offen' : n + ' Wünsche offen' };
   return { k: 'voll', text: 'Vollständig' };
 }
