@@ -98,8 +98,8 @@ Er erzeugt Bilder mit Flux und Videos mit Kling und lädt sie im Chat hoch. Anfr
 (PNG mit Transparenz oder direkt vor #161616, nicht vor Grün), Licht von rechts oben mit 4800 bis 5800 K, Kamera und Makrotextur nach
 designrichtung.md 3.4 (dort auch Prompt-Bausteine; „golden hour“ macht die Bilder orange), was nicht drin sein darf (Text,
 Wasserzeichen). Gelieferte Bilder vor dem Einbau mit bildlicht.py messen. Bei Videos zusätzlich: Länge, nahtlose Schleife (Start-
-und Endbild gleich), Kamera still, ruhige Bewegung, und ein Prompt auf Englisch zum Kopieren. Hochgeladene Dateien liegen unter /root/.claude/uploads/<Sitzung>/; kommt ein angekündigtes Bild nicht an,
-das sofort sagen.
+und Endbild gleich), Kamera still, ruhige Bewegung, und ein Prompt auf Englisch zum Kopieren. Hochgeladene Dateien liegen unter
+/root/.claude/uploads/<Sitzung>/; kommt ein angekündigtes Bild nicht an, das sofort sagen.
 
 ## 8. Werkzeuge im Projekt
 
