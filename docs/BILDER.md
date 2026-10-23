@@ -145,3 +145,11 @@ Umsetzung wie im Karussell-Ablauf: Hintergrund (Szene ohne Figur), Figur, Montag
 2160 × 2700 px (4:5) bzw. 2400 × 1500 px (16:10), dann in `fotos-roh/<name>.jpg` und `python3 scripts/fotos.py`. Die fünf Karussell-Motive
 Wahrsagerin (`fb-anfrage`), Haus auf Hühnerbeinen (`fb-kunden-planen`) und Pantomime/Kreide (`fb-ablauf`) sind hier wiederverwendet; das
 Laserlabor und der Bär im Wasserfall passen zur alten Abrechnung je Aufmaß und bleiben den Karussells vorbehalten.
+
+Zweite Idee je Platz, falls das erste Motiv nicht gefällt (Wunsch des Inhabers vom 23.10.: je Prompt eine Alternative):
+
+| Name | Pointe (deutsch) | Prompt (Szene; die Figur dazu montieren) |
+|---|---|---|
+| `fb-kundenschutz` | Unter Ihrer Glasglocke: Niemand fischt Ihre Kunden ab. | The master window maker gently placing a large glass bell jar over a miniature family standing at a tiny kitchen table with a tiny window frame, on a wooden workbench; around the jar a crowd of anonymous hands in grey suit sleeves holding clipboards and business cards press against the glass and cannot reach in, warm workshop light, the family inside relaxed |
+| `fb-frage` | Ein Knopf, ein Rückruf. | A single oversized round red call button set into the brick wall of a tidy workshop, softly glowing; the master window maker's hand resting on it, inviting, the rest of the frame calm and empty, evening light through a window |
+
