@@ -1164,16 +1164,24 @@ function bankFarbig(b, k) {
 }
 const KAPPE = { kunststoff: 'linear-gradient(180deg, #74787d, #5d6166)', gleit: 'linear-gradient(180deg, #4a4e52, #33373a)' };
 /* Behang außen als eine Fläche: Rollladenpanzer (Lamellen 40 mm), Screen (Gewebe, durchscheinend); der Raffstore hat einzelne Lamellen (w3dSonne) */
+/* Teilung des Rollladenpanzers in mm: Kunststofflamellen 40, Alu-Lamellen 37 (ausgeschäumt) */
+const panzerTeilung = (w) => (w.sart === 'rollladen' && dg(w, 'panzer') && w.panzer === 'alu' ? 37 : 40);
 function behangBg(w, s) {
   const c = sonneFarbeW(w), F = c[0], D = c[1], L = c[2];
-  /* Lichtschlitze: je Lamelle eine Reihe kurzer Schlitze an der Unterkante (als Punktreihe, 40 mm Raster wie der Panzer) */
-  if (w.sart === 'rollladen' && dg(w, 'schlitz') && w.schlitz === 'mit') return 'radial-gradient(circle at 50% 80%, rgba(20, 20, 20, .55) 0 ' + px(Math.max(0.5, 2.6 * s)) + ', transparent ' + px(Math.max(0.8, 3.4 * s)) + ') 0 0 / ' + px(Math.max(2.5, 14 * s)) + ' ' + px(40 * s) + ', repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(2 * s + 0.6) + ', ' + F + ' ' + px(2 * s + 0.6) + ' ' + px(34 * s) + ', ' + D + ' ' + px(34 * s) + ' ' + px(40 * s) + ')';
-  if (w.sart === 'rollladen' && dg(w, 'panzer') && w.panzer === 'alu') return 'repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(3 * s + 0.6) + ', ' + F + ' ' + px(3 * s + 0.6) + ' ' + px(30 * s) + ', ' + D + ' ' + px(30 * s) + ' ' + px(37 * s) + ')';
   if (w.sart === 'screen') return 'repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), repeating-linear-gradient(180deg, rgba(0, 0, 0, .08) 0 1px, transparent 1px ' + px(Math.max(2.5, 18 * s)) + '), ' + F;
-  /* Rollladenpanzer: Lamellen 40 mm; Lichtschlitze nur, wenn gewählt (Detailangabe schlitz, oben), als Punktreihe, die auch die WebGL-Bühne liest */
-  const p40 = px(40 * s);
-  return 'repeating-linear-gradient(180deg, ' + L + ' 0 ' + px(2 * s + 0.6) + ', ' + F + ' ' + px(2 * s + 0.6) + ' ' + px(34 * s) + ', ' + D + ' ' + px(34 * s) + ' ' + p40 + ')';
+  /* Rollladenpanzer, je Lamelle (40 mm, Alu 37 mm): oben die Lichtkante, darunter der helle Rücken der gewölbten Lamelle, nach unten dunkler,
+     an der Unterkante der Schatten des Hakens und die schmale Lichtfuge zur nächsten Lamelle. Die WebGL-Bühne wölbt dazu jede Lamelle
+     im Licht (_relief in w3dSonne, gleiche Teilung). Lichtschlitze (Detailangabe schlitz): je Lamelle eine Reihe kurzer Schlitze */
+  const P = panzerTeilung(w), p = (f) => px(P * f * s), kante = px(Math.max(0.6, 1.6 * s)), dunkel = mischHex(D, '#000000', 0.42), hell = mischHex(F, '#ffffff', 0.14), glanz = mischHex(L, '#ffffff', 0.35);
+  const panzer = 'repeating-linear-gradient(180deg, ' + glanz + ' 0 ' + kante + ', ' + hell + ' ' + kante + ' ' + p(0.22) + ', ' + F + ' ' + p(0.38) + ' ' + p(0.66) + ', ' + D + ' ' + p(0.84) + ' ' + p(0.9) + ', ' + dunkel + ' ' + p(0.9) + ' ' + p(0.955) + ', ' + L + ' ' + p(0.955) + ' ' + p(1) + ')';
+  if (w.sart === 'rollladen' && dg(w, 'schlitz') && w.schlitz === 'mit') return 'radial-gradient(circle at 50% 80%, rgba(20, 20, 20, .55) 0 ' + px(Math.max(0.5, 2.6 * s)) + ', transparent ' + px(Math.max(0.8, 3.4 * s)) + ') 0 0 / ' + px(Math.max(2.5, 14 * s)) + ' ' + p(1) + ', ' + panzer;
+  return panzer;
 }
+/* Führungsschiene: zur Öffnung hin die Einlaufrinne mit Bürstendichtung (dunkel), außen die Lichtkante; links und rechts gespiegelt (die Flächen
+   stehen um 180° gedreht, bei der linken liegt die Rinne am örtlichen Anfang, bei der rechten am Ende). Seilführung: Edelstahlseil */
+const schieneBg = (r, links, seil) => (seil ? 'linear-gradient(90deg, #7d838a, #e4e7ea 50%, #7d838a)' : 'linear-gradient(' + (links ? 90 : 270) + 'deg, ' + mischHex(r[1], '#000000', 0.45) + ' 0 9%, ' + r[1] + ' 9% 20%, ' + r[0] + ' 20% 64%, ' + r[2] + ' 64% 82%, ' + r[0] + ' 82%)');
+/* Endschiene: oben die Lichtkante, unten beim Rollladen die Gummilippe (Anschlagprofil), beim Raffstore und Screen die dunkle Unterkante */
+const endleisteBg = (b, rollo) => (rollo ? 'linear-gradient(180deg, ' + b[2] + ' 0 10%, ' + b[0] + ' 10% 58%, ' + b[1] + ' 58% 78%, #2a2b2d 78% 100%)' : 'linear-gradient(180deg, ' + b[2] + ' 0 12%, ' + b[0] + ' 12% 66%, ' + b[1] + ' 66% 88%, ' + mischHex(b[1], '#000000', 0.4) + ' 88%)');
 /* Innen: Rollo (Stoff), Plissee (Falten 20 mm), Jalousie (Lamellen 25 mm mit Lichtspalt) */
 function innenBg(w, s) {
   const c = innenFarbeW(w), F = c[0], D = c[1], L = c[2];
@@ -1261,7 +1269,7 @@ function w3dHTML(w, o) {
      Screen als Gewebe mit Fallstab in ZIP-Schienen. Innen: Rollo, Plissee oder Jalousie vor dem Glas */
   if (sonneAktiv(w)) {
     h += faceEl('fs-l', 'w3d-fs') + faceEl('fs-l2', 'w3d-fs w3d-fs-s') + faceEl('fs-r', 'w3d-fs') + faceEl('fs-r2', 'w3d-fs w3d-fs-s');
-    if (w.sart === 'raffstore') { for (let k = 0; k < LAM_MAX; k++) h += '<div class="w3d-f w3d-lam" data-r="lam-' + k + '" style="--k: ' + k + '"></div>'; h += faceEl('band-l', 'w3d-aufzug') + faceEl('band-r', 'w3d-aufzug'); }
+    if (w.sart === 'raffstore') { for (let k = 0; k < LAM_MAX; k++) h += '<div class="w3d-f w3d-lam" data-r="lam-' + k + '" style="--k: ' + k + '"></div>'; h += faceEl('band-l', 'w3d-aufzug') + faceEl('band-r', 'w3d-aufzug'); ['kord-lv', 'kord-lh', 'kord-rv', 'kord-rh'].forEach((k) => { h += faceEl(k, 'w3d-aufzug w3d-kordel'); }); }
     else h += faceEl('behang', 'w3d-behang' + (w.sart === 'screen' ? ' w3d-screen' : ''));
     h += faceEl('behang-u', 'w3d-behang-u') + faceEl('behang-ub', 'w3d-behang-u w3d-behang-ub');
     /* Rollladen: Anschlagstopfen auf der Endleiste (halten den Panzer oben am Kasten) */
@@ -1362,10 +1370,10 @@ function w3dPaint(stage, w) {
        Revisionsfuge unten (Detailangabe blende) */
     const aluBl = w.roll === 'aufsatz' && dg(w, 'blende') && w.blende === 'alu';
     if (w.roll === 'aufsatz') { bg('roll-f', aluBl ? 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 10% 84%, ' + D + ' 88% 91%, ' + mischHex(D, '#000000', 0.35) + ' 91% 93.5%, ' + F + ' 93.5%)' : facadeBg(w.fassade, fassadeTon(w))); bg('roll-sl', 'transparent'); bg('roll-t', 'transparent'); bg('roll-l', 'transparent'); bg('roll-r', 'transparent'); }
-    else { bg('roll-f', w.sart === 'rollladen' ? 'linear-gradient(180deg, ' + L + ', ' + F + ' 34%, ' + D + ')' : 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 12% 86%, ' + D + ')'); bg('roll-sl', 'linear-gradient(180deg, ' + F + ', ' + D + ')'); bg('roll-b', D); bg('roll-t', L); bg('roll-l', F); bg('roll-r', F); }
-    const sb = seil ? 'linear-gradient(90deg, #7d838a, #e4e7ea 50%, #7d838a)' : 'linear-gradient(90deg, ' + r[2] + ', ' + r[0] + ' 38%, ' + r[1] + ')';
-    ['fs-l', 'fs-r'].forEach((x) => bg(x, sb)); bg('fs-l2', seil ? '#9aa0a6' : r[1]); bg('fs-r2', seil ? '#9aa0a6' : r[1]);
-    bg('behang-u', 'linear-gradient(180deg, ' + b[2] + ', ' + b[0] + ' 45%, ' + b[1] + ')'); bg('behang-ub', b[1]);
+    /* Vorbau: Rundkasten des Rollladens mit der Fuge des Revisionsdeckels, eckige Blende bei Raffstore und Screen */
+    else { bg('roll-f', w.sart === 'rollladen' ? 'linear-gradient(180deg, ' + L + ' 0 2%, ' + F + ' 14% 56%, ' + D + ' 60% 61.5%, ' + mischHex(F, '#ffffff', 0.18) + ' 61.5% 63%, ' + F + ' 66% 82%, ' + D + ')' : 'linear-gradient(180deg, ' + L + ' 0 3%, ' + F + ' 12% 86%, ' + D + ')'); bg('roll-sl', 'linear-gradient(180deg, ' + F + ', ' + D + ')'); bg('roll-b', D); bg('roll-t', L); bg('roll-l', F); bg('roll-r', F); }
+    bg('fs-l', schieneBg(r, true, seil)); bg('fs-r', schieneBg(r, false, seil)); bg('fs-l2', seil ? '#9aa0a6' : r[1]); bg('fs-r2', seil ? '#9aa0a6' : r[1]);
+    bg('behang-u', endleisteBg(b, w.sart === 'rollladen')); bg('behang-ub', b[1]);
   }
   else { bg('roll-f', ''); bg('roll-sl', ''); bg('roll-b', ''); bg('roll-t', ''); bg('roll-l', ''); bg('roll-r', ''); }
   w.sashes.forEach((x, i) => {
@@ -1410,6 +1418,16 @@ function w3dOberflaeche(stage, w, fin, fout) {
   const fF = dg(w, 'fbiFarbe') ? w.fbiFarbe : '', bi = fF === 'granit' ? 'granit' : fF === 'holz' ? 'holz' : fF === 'weiss' || fF === 'marmor' ? '' : BANK_ART[w.fbi] || '', ba = w.fba === 'alu' ? 'alu' : '';
   ['sill-t', 'sill-f', 'sill-l', 'sill-r'].forEach((r) => setz(r, bi)); ['sa-t1', 'sa-t2', 'sa-f'].forEach((r) => setz(r, ba)); ['sa-l', 'sa-r'].forEach((r) => setz(r, ba && !(dg(w, 'fbaKappe') && w.fbaKappe !== 'alu') ? 'alu' : ''));
   setz('wall-out', FASSADE_ART[w.fassade] || 'putz', null, null, fassadeArtC(w));
+  /* Sonnenschutz: Lamellen des Raffstores, Schienen, Endschiene und Vorbaukasten aus Aluminium (gebürstet im Licht, alub: feine Struktur auf dem
+     Verlauf, mehr Glanz); der Rollladenpanzer nur, wenn Aluminium gewählt ist, die Seilführung bleibt Edelstahl */
+  if (sonneAktiv(w)) {
+    const raff = w.sart === 'raffstore', seil = raff && dg(w, 'fuehrung') && w.fuehrung === 'seil', aluP = w.sart === 'rollladen' && dg(w, 'panzer') && w.panzer === 'alu';
+    ['fs-l', 'fs-r', 'fs-l2', 'fs-r2'].forEach((r) => setz(r, seil ? '' : 'alub'));
+    ['behang-u', 'behang-ub'].forEach((r) => setz(r, 'alub'));
+    setz('behang', aluP ? 'alub' : '');
+    if (raff) for (let k = 0; k < LAM_MAX; k++) setz('lam-' + k, 'alub');
+    if (w.roll === 'vorbau') ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => setz(r, 'alub'));
+  }
   /* Aufsatzkasten: die Blende ist Teil der Fassade (überputzt, Klinker oder Holz), ihr Muster setzt w3dSonne in der Wand fort;
      die Unterseite mit dem Auslaufschlitz ist feiner Putz */
   const aufsatz = sonneAktiv(w) && w.roll === 'aufsatz';
@@ -1797,7 +1815,7 @@ function w3dSonne(stage, w, o, V, s, q) {
     /* Lamellentyp (Detailangabe lamelle): Höhe, Teilung und Profil. C-Lamelle 80 mm, Teilung 72 mm, gewölbt; Z-Lamelle 90 mm, Teilung
        80 mm, mit abgekanteten Rändern; Flachlamelle 60 mm, Teilung 52 mm, eben. _bieg wölbt die Lamelle im Licht der WebGL-Bühne */
     const N = Math.min(LAM_MAX, Math.max(1, Math.ceil(Hmax / (LT.p * s)))), p = Math.max(LT.p * s, Hmax / N), lh = LT.h * s, pk = Math.max(0.9, LT.pk * s);
-    const tilt = st.wend ? 6 : 52;
+    const tilt = st.wend ? 6 : 78;
     e = yTop + N * pk + stand * Math.max(0, Hmax - N * pk);
     const lamBg = lamelleBg(lm, !!st.wend, F, D, L);
     for (let k = 0; k < LAM_MAX; k++) {
@@ -1815,6 +1833,9 @@ function w3dSonne(stage, w, o, V, s, q) {
     face(q('band-l'), bb, Math.max(0, e - yTop), bx + bw / 6 - bb / 2, yTop, bz, '', '0 0'); face(q('band-r'), bb, Math.max(0, e - yTop), bx + bw * 5 / 6 - bb / 2, yTop, bz, '', '0 0');
     const AUFZUG = 'repeating-linear-gradient(180deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 5px), #d9d7d0';
     ['band-l', 'band-r'].forEach((r) => { const el = q(r); if (el && el._bg !== AUFZUG) { el._bg = AUFZUG; el.style.background = AUFZUG; } });
+    /* Leiterkordeln nahe den Enden: je Seite eine Schnur vor und eine hinter den Lamellen (sie tragen und wenden die Lamellen) */
+    const kb = Math.max(0.8, 2.2 * s), kz = (lh / 2) * Math.sin(tilt * Math.PI / 180) + 0.5, KORDEL = '#d4d2cb';
+    [['kord-lv', bx + bw * 0.035, zb - kz], ['kord-lh', bx + bw * 0.035, zb + kz], ['kord-rv', bx + bw * 0.965, zb - kz], ['kord-rh', bx + bw * 0.965, zb + kz]].forEach((k) => { const el = q(k[0]); if (!el) return; face(el, kb, Math.max(0, e - yTop), k[1] - kb / 2, yTop, k[2], '', '0 0'); if (el._bg !== KORDEL) { el._bg = KORDEL; el.style.background = KORDEL; } });
   } else {
     const bh = q('behang'); e = yTop + stand * Hmax;
     if (bh) {
@@ -1822,6 +1843,8 @@ function w3dSonne(stage, w, o, V, s, q) {
       const tr = screen && dg(w, 'transp') ? w.transp : '', op = tr === 'licht' ? '.72' : tr === 'dunkel' ? '.97' : '.86';
       face(bh, bw, Math.max(0, e - yTop), bx, yTop, zb, '', '0 0'); bh.style.opacity = e - yTop < 0.5 ? '0' : screen ? op : '';
       const bgv = behangBg(w, s); if (bh._bg !== bgv) { bh._bg = bgv; bh.style.background = bgv; }
+      /* WebGL: jede Lamelle des Panzers gewölbt im Licht (Teilung wie der Verlauf, Neigung der Normale ±0,42), der Screen bleibt glatt */
+      bh._relief = screen ? null : [panzerTeilung(w) * s, 0.42, 0, 0];
     }
   }
   face(q('behang-u'), bw, uH, bx, e, zb - 0.4, '', '0 0');
@@ -1848,10 +1871,11 @@ const LAMELLE = { c80: { h: 80, p: 72, pk: 7, bieg: 22 }, z90: { h: 90, p: 80, p
 /* Verlauf über die Lamellenhöhe: C-Profil hell oben und zur Kante hin dunkel; Z-Profil mit zwei abgekanteten Rändern; flach fast gleichmäßig.
    Gewendet (zu) steht die Lamelle fast senkrecht, das Licht fällt flacher */
 function lamelleBg(lm, zu, F, D, L) {
-  const dunkel = mischHex(D, '#000000', 0.3), hell = mischHex(F, '#ffffff', 0.16);
-  if (lm === 'z90') return 'linear-gradient(180deg, ' + D + ' 0 5%, ' + L + ' 5% 11%, ' + (zu ? F : hell) + ' 24%, ' + F + ' 78%, ' + D + ' 89%, ' + L + ' 89% 94%, ' + dunkel + ' 94%)';
-  if (lm === 'flach') return 'linear-gradient(180deg, ' + L + ' 0 5%, ' + (zu ? F : hell) + ' 14%, ' + F + ' 86%, ' + D + ')';
-  return zu ? 'linear-gradient(180deg, ' + L + ' 0 7%, ' + F + ' 18% 60%, ' + D + ' 88%, ' + dunkel + ')' : 'linear-gradient(180deg, ' + L + ' 0 9%, ' + hell + ' 30%, ' + F + ' 70%, ' + D + ')';
+  /* Bördelkanten: oben ein schmaler Lichtsaum, unten der dunkle Umschlag mit einer feinen Lichtlinie darunter */
+  const dunkel = mischHex(D, '#000000', 0.3), hell = mischHex(F, '#ffffff', 0.16), saum = mischHex(L, '#ffffff', 0.4);
+  if (lm === 'z90') return 'linear-gradient(180deg, ' + D + ' 0 4%, ' + saum + ' 4% 7%, ' + L + ' 7% 12%, ' + (zu ? F : hell) + ' 25%, ' + F + ' 76%, ' + D + ' 86%, ' + L + ' 88% 93%, ' + dunkel + ' 94%)';
+  if (lm === 'flach') return 'linear-gradient(180deg, ' + saum + ' 0 3%, ' + L + ' 3% 8%, ' + (zu ? F : hell) + ' 16%, ' + F + ' 84%, ' + D + ' 95%, ' + dunkel + ')';
+  return zu ? 'linear-gradient(180deg, ' + saum + ' 0 3%, ' + L + ' 3% 9%, ' + F + ' 20% 58%, ' + D + ' 86%, ' + dunkel + ' 95%, ' + D + ')' : 'linear-gradient(180deg, ' + saum + ' 0 3%, ' + L + ' 3% 10%, ' + hell + ' 30%, ' + F + ' 68%, ' + D + ' 90%, ' + dunkel + ' 96%, ' + L + ')';
 }
 /* Bedienung innen neben der Öffnung: an der Wand der Gurtwickler auf etwa 1.000 mm mit Gurtband aus der Wand über der Öffnung,
    in der Laibung die Kurbelstange mit Kurbel auf etwa 1.100 mm, Wandtaster auf 1.050 mm (elektrisch und Smart Home mit Funk-Punkt,
@@ -2094,7 +2118,9 @@ function w3dFahrt(stage) {
     if (!document.body.contains(stage)) { FAHRT = null; B.pos = zu; return; }
     w3dSonneNeu(stage);
     if (f < 1) FAHRT.raf = requestAnimationFrame(schritt);
-    else { FAHRT = null; B.pos = zu; stage.classList.remove('is-fahrt'); }
+    /* is-fahrt bleibt bis zum nächsten Bild: so legen CSS-Modell und WebGL-Bühne auch die letzte Lage ohne Übergang (sonst gliche die
+       Bühne den letzten Schritt mit 0,7 s an, wenn Bilder selten kommen) */
+    else { FAHRT = null; B.pos = zu; requestAnimationFrame(() => { if (!FAHRT || FAHRT.stage !== stage) stage.classList.remove('is-fahrt'); }); }
   };
   FAHRT = { raf: requestAnimationFrame(schritt), stage: stage };
 }
@@ -2588,14 +2614,14 @@ function render(fresh) {
   if (S.screen === 'home' && view.html) { const ek = entwurfKarte(); if (ek) { const li = view.html.indexOf('<section class="sec liste"'), ki = view.html.indexOf('<p class="eyebrow kicker">'), ein = view.html.indexOf('ein-start-in'); view.html = li >= 0 ? view.html.slice(0, li) + ek + view.html.slice(li) : ein >= 0 && ki > ein ? view.html.slice(0, ki) + ek + view.html.slice(ki) : ek + view.html; } }
   const STEPS = stepsFor(S.win), si = STEPS.indexOf(S.screen), wiz = si >= 0;
   const qShare = S.screen === 'frage' && view.qpos ? view.qpos : 1;
-  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: 'Fenster', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', sichern: 'Konto', meinkonto: 'Konto', linkanmelden: 'Konto', tour: 'Führung' }[S.screen] || '');
+  const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: '', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', sichern: 'Konto', meinkonto: 'Konto', linkanmelden: 'Konto', tour: 'Führung' }[S.screen] || '');
   const tourP = S.screen === 'tour' && S.tour ? (S.tour.i + 1) / TOUR.length : 0;
   const prevStage = root.querySelector('#w3d'), prevSig = prevStage ? prevStage.getAttribute('data-sig') : null, prevTop = prevStage ? prevStage.getBoundingClientRect().top : null;
   const backLabel = view.back ? view.back[0] : '';
   let h = '<header class="hdr"><div class="hdr-row">';
   /* Logo: im eigenen Aufmaß ein Link zur Startseite der Website; im Kundenlink steht der Betrieb vorn (Einladungsseite), eeziframes klein unten */
   h += S.screen === 'home' ? (S.betrieb ? (INST ? instKopf() : '<span></span>') : '<a class="hdr-logo" href="' + PORTAL_URL + '" aria-label="eeziframes, zur Startseite">' + LOGO(30) + '<span class="hdr-name">' + WM() + '</span></a>')
-    : (view.back ? '<button type="button" class="hdr-btn" data-act="back">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : INST && S.betrieb ? instKopf() : '<span></span>'); // Instanz: ohne Zurück (Bestätigung) Zeichen und Name
+    : (view.back ? '<button type="button" class="hdr-btn" data-act="' + (view.back[2] || 'back') + '">' + (view.back[1] === 'tour-ende' ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>' : '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>') + '<span>' + esc(backLabel) + '</span></button>' : INST && S.betrieb ? instKopf() : '<span></span>'); // Instanz: ohne Zurück (Bestätigung) Zeichen und Name
   h += '<span class="hdr-title">' + esc(title) + '</span>';
   /* rechts: Übersicht (Schritte, Fenster, Liste, Startseite) auf allen Bildschirmen außer der Startseite und der Führung, dazu die Begriffe */
   const wo = S.screen !== 'home' && S.screen !== 'tour';
@@ -2732,7 +2758,10 @@ const masseZeigen = () => !S.betrieb && FREI();
 function winCard(x, i, live, hide) { const d = derive(x), tag = live ? 'button' : 'div', fest = aendStand(x).fest;
   /* nach dem Senden im Link: keine Maße mehr, die stehen im Aufmaßblatt */
   if (hide) { const anderswo = !!(S.sent && S.sent.anderswo); return '<div class="wincard sent"><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + (anderswo ? 'Auf diesem Gerät' : PILOT ? 'Abgeschlossen' : 'Übermittelt') + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + '</span><span class="me">' + (anderswo ? 'Maßgeblich ist das Aufmaß, das angekommen ist' : 'Maße und Angaben stehen im Aufmaßblatt') + '</span></span></div>'; }
-  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic">' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="pos">POS. ' + (i + 1) + '</span><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + esc(fensterStatus(x)) + (x.anzahl > 1 ? ' · ' + x.anzahl + ' Stück' : '') + '</span><span class="me">' + esc(lab('art', x.art || 'fenster') + (x.fotos ? ' · ' + x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '') + (Object.keys(x.notizen || {}).length ? ' · mit Notiz' : '') + (fest ? ' · fest' : '')) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
+  /* Karte in der Übersicht: Nummer der Position am Bild, Name, Zeile mit Art, Geschoss, Stückzahl, Fotos und Notiz, darunter der Stand
+     als Punkt mit Text (vollständig, Maße offen, offene Wünsche mit Namen); Maße stehen nie in Listen */
+  const st = fensterStand(x), di = [lab('art', x.art || 'fenster'), x.etage ? lab('etage', x.etage) : '', x.anzahl > 1 ? x.anzahl + ' Stück' : '', x.fotos ? x.fotos + (x.fotos === 1 ? ' Foto' : ' Fotos') : '', Object.keys(x.notizen || {}).length ? 'mit Notiz' : '', fest ? 'fest' : ''].filter(Boolean).join(' · ');
+  return '<' + tag + (live ? ' type="button"' : '') + ' class="wincard"' + (live ? ' data-act="open" data-i="' + i + '"' : '') + '><span class="ic"><b class="pos" aria-label="Position ' + (i + 1) + '">' + (i + 1) + '</b>' + svgIcon(miniWin(x), 56) + '</span><span class="tx"><span class="ti">' + esc(x.name || 'Fenster ' + (i + 1)) + '</span><span class="di">' + esc(di) + '</span><span class="st ' + st.k + '"><i aria-hidden="true"></i>' + esc(st.text) + '</span></span>' + (live ? CHEV : '') + '</' + tag + '>'; }
 /* Startbild der App: Foto ohne Rahmen, das weich in den Grund ausläuft (app.css .hero-foto), mit den drei Schritten als Chips;
    das Foto liegt in web/bilder/foto/ (docs/BILDER.md) */
 const FOTO_START = '<figure class="hero-foto"><img src="/bilder/foto/app-start.webp" width="1120" height="1400" alt="Drei Waschbären im Wohnzimmer: einer fotografiert mit dem Handy die Maueröffnung samt Zollstock, einer tippt auf dem Sofa seine Wünsche an, einer lehnt sich zufrieden zurück" fetchpriority="high" decoding="async"><div class="chips"><span class="chip haken">Fotografieren</span><span class="chip haken">Messen</span><span class="chip haken">Wünschen</span></div></figure>';
@@ -2769,8 +2798,8 @@ function neuKnopf(label) {
 function homeAufmass() {
   const neu = S.neuFrage && kontoBereit() && KS ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Ein neues Aufmaß beginnen?</b><p class="sub">Dein bisheriges Aufmaß bleibt in deinem Konto, du findest es unter „Dein Konto“.</p><div class="pill-row"><button type="button" class="pill" data-act="aufmass-neu-ja">Neues Aufmaß beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>'
     : S.neuFrage ? '<div class="card neu-frage"><p class="eyebrow">Neues Aufmaß</p><b>Dieses Aufmaß auf diesem Gerät löschen?</b><p class="sub">Fenster, Angaben und die Freischaltung dieses Aufmaßes sind danach weg. Lade dein Aufmaßblatt vorher herunter, falls du es noch brauchst.</p><div class="pill-row"><button type="button" class="pill danger" data-act="aufmass-neu-ja">Löschen und neu beginnen</button><button type="button" class="pill" data-act="aufmass-neu-nein">Abbrechen</button></div></div>' : '';
-  const html = hd('Dein Aufmaß', 'Weiter, wo du warst.', esc(aufmassStand())) +
-    '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">Deine Fenster.</h2><span class="sub">' + S.windows.length + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + neu +
+  const html = uebersichtKopf() +
+    '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' + neu +
     kontoKarte() +
     (S.windows.length ? dateiCard() : '') +
     '<section class="card erklaert"><p class="eyebrow kicker">So funktioniert\'s</p><h2 class="sec-title">Zollstock statt Rätselraten.</h2><div class="steps">' +
@@ -2856,8 +2885,8 @@ function linkHomeInhaltAlt(I) {
     return { html: html2, bar: null };
   }
   if (n || angelegt() >= GRENZE.fenster) {
-    const html4 = '<div class="lk-kopf">' + E.kopf({ name: name, p: d.p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '' }) + '</div>' + hd(T('Ihr Aufmaß', 'Dein Aufmaß'), T('Weiter, wo Sie waren.', 'Weiter, wo du warst.'), esc(aufmassStand())) +
-      '<section class="sec liste"><div class="sec-head"><h2 class="sec-title">' + T('Ihre Fenster.', 'Deine Fenster.') + '</h2><span class="sub">' + n + ' erfasst</span></div><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
+    const html4 = '<div class="lk-kopf">' + E.kopf({ name: name, p: d.p, klein: true, unten: d.kunde ? 'für ' + d.kunde : '' }) + '</div>' + uebersichtKopf(T) +
+      '<section class="sec liste"><div class="liste-in">' + S.windows.map((x, i) => winCard(x, i, true)).join('') + neuKnopf() + '</div></section>' +
       (vorschau() ? '' : linkMerk(name, du)) + kontakt() + fuss + rechtLinks();
     return { html: html4, bar: n ? { label: 'Weiter zum Absenden', act: 'go', v: 'anfrage' } : null };
   }
@@ -3196,7 +3225,7 @@ SCREENS.fertig = () => {
     (st.fest ? '' : '<div class="kap-sprung"><p class="qlabel">Direkt zu einem Thema</p><div class="kap-chips">' + KAPITEL.slice(1).map((k) => '<button type="button" class="chip" data-act="wuensche" data-v="' + k.k + '">' + esc(k.n) + '</button>').join('') + '</div></div>') +
     '<button type="button" class="pill voll" data-act="go" data-v="home">Alle Fenster ansehen (' + S.windows.length + ')</button>' +
     (lk ? '<p class="sub center" style="padding: 0 10px">' + (instWebsite() ? 'Gespeichert, auch für später: Öffne diese Seite wieder, dann geht es weiter.' : 'Gespeichert, auch für später: Über den Link von ' + esc(bn) + ' kommst du jederzeit zurück.') + '</p>' : '');
-  return { html: html, back: ['Aufmaß', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
+  return { html: html, back: ['Fenster', 'home'], bar: { label: lk ? 'Zum Absenden' : 'Zum Aufmaßblatt', act: 'go', v: 'anfrage', sec: 'Weiteres Fenster', secAct: 'new' } };
 };
 /* Anfrage: zwei kurze Seiten im Link, drei ohne Link (dann mit Kontakt) */
 const anfrageHead = (step, lk) => lk ? 'Fast fertig · ' + step + ' von ' + (instWebsite() ? 3 : 2) : 'Fürs Angebot · ' + step + ' von 3'; // Instanz, Website: dazu der Kontakt
@@ -4461,7 +4490,9 @@ SCREENS.frage = () => {
   }
   const html = leiste + stage + '<div class="qdock">' + title + '<div class="qpanel" data-q="' + q.id + '">' + panel + '</div></div>' + '<div class="qnav"><button type="button" class="btn ghost" data-act="qprev" aria-label="Zurück">' + '<svg width="11" height="19" viewBox="0 0 11 19" aria-hidden="true"><path d="M9.5 1.5L2 9.5l7.5 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>' +
     (designFertig ? '<button type="button" class="btn ghost anpassen" data-act="qnext">Anpassen</button><button type="button" class="btn primary" data-act="save">Speichern</button>' : '<button type="button" class="btn primary" data-act="qnext">' + (last ? sichern : 'Weiter') + '</button>') + '</div>';
-  return { html: html, back: [c.i ? 'Zurück' : einstiegHier() ? 'Fenster' : 'Ergebnis', 'qprev'], fit: true, qpos: (c.i + 1) / n };
+  /* Oben „Fenster“: zur Übersicht aller Fenster (liste, mit Rückfrage bei ungespeicherten Änderungen); der Pfeil unten in der Leiste und die
+     Zurück-Taste des Telefons gehen eine Frage zurück (qprev) */
+  return { html: html, back: ['Fenster', 'qprev', 'liste'], fit: true, qpos: (c.i + 1) / n };
 };
 /* Kapitelleiste: das aktuelle Kapitel steht ganz sichtbar, möglichst mittig, links beginnt ein ganzer Chip (ohne Gleiten, die Leiste wird
    bei jedem Antippen neu gezeichnet) */
@@ -4872,6 +4903,27 @@ function wohinBlatt() {
 function fensterStatus(x) {
   const d = derive(x), n = AW.offenListe(AW.nachTiefe(x, S.proj)).length;
   return !d.complete || n ? (d.complete ? 'Maße vollständig' : 'Maße offen') + (n ? ', ' + n + (n === 1 ? ' Wunsch offen' : ' Wünsche offen') : '') : 'Vollständig';
+}
+/* Stand eines Fensters für die Übersicht: vollständig, Maße offen oder offene Wünsche (mit den ersten beiden Namen) */
+function fensterStand(x) {
+  const d = derive(x), offen = AW.offenListe(AW.nachTiefe(x, S.proj)), n = offen.length;
+  if (!d.complete) return { k: 'masse', text: 'Maße offen' + (n ? ', ' + n + (n === 1 ? ' Wunsch' : ' Wünsche') : '') };
+  if (n) return { k: 'wunsch', text: (n === 1 ? '1 Wunsch offen: ' : n + ' Wünsche offen: ') + offen.slice(0, 2).map((k) => AW.offenName(x, k)).join(', ') + (n > 2 ? ', …' : '') };
+  return { k: 'voll', text: 'Vollständig' };
+}
+/* Kopf der Übersicht: „Deine Fenster.“ mit dem Stand in einem Satz und einem Balken (vollständige Fenster von allen), rechts „+ Fenster“;
+   ohne Fenster der Satz aus aufmassStand. T: Sie-Form im Kundenlink */
+function uebersichtKopf(T) {
+  const F = T || ((sie, du) => du), n = S.windows.length;
+  let stand = esc(aufmassStand());
+  if (n) {
+    const st = S.windows.map(fensterStand), voll = st.filter((s) => s.k === 'voll').length, masse = st.filter((s) => s.k === 'masse').length, wunsch = st.filter((s) => s.k === 'wunsch').length;
+    const satz = voll === n ? (n === 1 ? F('Ihr Fenster ist vollständig.', 'Dein Fenster ist vollständig.') : 'Alle ' + n + ' Fenster sind vollständig.')
+      : voll + ' von ' + n + ' vollständig' + (masse ? ' · ' + masse + ' ohne Maße' : '') + (wunsch ? ' · ' + wunsch + ' mit offenen Wünschen' : '');
+    stand = '<span class="ueb-zeile">' + esc(satz) + '</span><span class="ueb-prog" role="progressbar" aria-label="Vollständige Fenster" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + voll + '"><i style="width: ' + Math.round(voll / n * 100) + '%"></i></span>';
+  }
+  const neu = n && neuMoeglich() && linkOffen() ? '<button type="button" class="pill hd-neu" data-act="new">' + PLUS + 'Fenster</button>' : '';
+  return hd(F('Ihr Aufmaß', 'Dein Aufmaß'), F('Ihre Fenster.', 'Deine Fenster.'), stand, '', '', neu);
 }
 /* Browser- und Telefon-Zurück: ein Eintrag im Verlauf fängt die Zurück-Taste ab; die Adresse (auch #k-…) bleibt gleich. FALLE_URL ist
    die Adresse, an der die Falle steht: Ein Sprung zu einer anderen Adresse (Link im selben Tab, Hash) ist kein Zurück der App */
@@ -6008,6 +6060,8 @@ function act(name, el) {
       return render();
     }
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
+    /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
+    case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
     case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());
@@ -6544,6 +6598,9 @@ function boot() {
   verlaufBinden(); // Zurück-Taste des Browsers bleibt in der App
   render(true);
   if (location.hash === '#fuehrung' && !S.betrieb) tourStart();
+  /* Einstieg von der Website („Jetzt ausmessen“, /app/#ausmessen): gleich der erste Schritt statt der Startseite der App; ein angefangenes
+     Fenster wird fortgesetzt, ein Kundenlink hat Vorrang */
+  else if (location.hash === '#ausmessen' && !S.betrieb) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } if (entwurfLesen()) entwurfFortsetzen(); else act('new', document.body); }
   serverStart();
   AI.init().then((ok) => { S.aiOk = ok; if (S.screen === 'fotos') render(); });
   DLP = (async () => { try { DL = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { DL = null; } return DL; })();

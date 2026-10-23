@@ -602,7 +602,7 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Fenster-Konfigurator, unter Ihrer Marke/.test(start) && await page.locator('.hero.b2c a[href$="/app/"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen oder Führung, nichts für Betriebe');
+  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Fenster-Konfigurator, unter Ihrer Marke/.test(start) && await page.locator('.hero.b2c a[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
   await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .vk-hero', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
   ok(/Ihr eigener Fenster-Konfigurator, unter Ihrer Marke/.test(startB) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
@@ -847,7 +847,7 @@ if (teil(6)) {
   const l27 = await lam7();
   await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(2600);
   const l37 = await lam7();
-  ok(/rotateX\(-52deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
+  ok(/rotateX\(-78deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
   await p7.evaluate(() => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; });
   await frage7('material', { teilung: '2p' });
   const zoomKn7 = await p7.evaluate(() => ({ da: !!document.querySelector('#w3d [data-w3d="plus"]') && !!document.querySelector('#w3d [data-w3d="minus"]'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, touch: getComputedStyle(document.getElementById('w3d')).touchAction, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width), netz: parseFloat(document.querySelector('#w3d [data-r="mesh"]').style.width) }));
@@ -2656,12 +2656,12 @@ if (teil(14)) {
     await page.goto(BASE + '/app/', { waitUntil: 'networkidle' });
     await fensterAnlegen(page, [['Wohnzimmer', 1230, 1410], ['Küche', 1010, 1210], ['Bad', 610, 810]]); await page.waitForTimeout(400);
     const h1 = await page.evaluate(() => { const l = document.querySelector('.liste-in'), c = document.querySelectorAll('.liste-in .wincard'); return { h1: document.querySelector('.hd h1').textContent, n: c.length, oben: l ? Math.round(l.getBoundingClientRect().top) : 9999, karten: Array.from(c).map((x) => x.textContent).join(' | '), hero: !!document.querySelector('.hero'), bar: document.querySelector('.bb .btn.primary').textContent, angelegt: angelegt(), wids: S.windows.every((w) => w.wid && w.t0 && w.aend === 0) }; });
-    ok(h1.h1 === 'Weiter, wo du warst.' && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Weiter, wo du warst.“, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
+    ok(h1.h1 === 'Deine Fenster.' && h1.n === 3 && h1.oben < 500 && !h1.hero && h1.bar === 'Aufmaßblatt fertigstellen' && h1.angelegt === 3 && h1.wids, 'Angefangenes Aufmaß: „Deine Fenster.“ mit Stand und Balken, die Liste steht oben (ab ' + h1.oben + ' px) statt unter dem Startbild, kein „Fenster ausmessen“ mehr');
     ok(/vollständig/i.test(h1.karten) && !/\d\.\d{3}\s×\s\d/.test(h1.karten) && !/\d mm/.test(h1.karten), 'Liste vor dem Freischalten: nur der Stand („Vollständig“) statt Zahlen');
     await foto(page, 'app-aufmass-fortsetzen');
     await page.click('.liste-in .wincard[data-i="0"]'); await page.waitForSelector('[data-screen="fertig"]'); await page.waitForTimeout(200);
     const f0 = await page.evaluate(() => ({ fold: document.querySelectorAll('details.fold .kv').length, zu: !document.querySelector('.zu-karte') && !/Alle Angaben/.test(document.querySelector('.scr').textContent) && /Wie geht es weiter/.test((document.querySelector('.weiter-karte') || {}).textContent || '') && document.querySelectorAll('.btn.primary').length === 1, fakten: document.querySelector('.center p:not(.eyebrow)').textContent, frei: (document.querySelector('.aend-frei') || {}).textContent || '', zurueck: document.querySelector('.hdr-btn[data-act="back"]').textContent, alle: !!document.querySelector('.pill.voll[data-v="home"]') }));
-    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Aufmaß' && f0.alle, 'Fenster gespeichert: keine Übersicht „Alle Angaben“ und keine Maße, dafür „Wie geht es weiter?“ und nur eine Hauptaktion; Hinweis auf 7 Tage freies Ändern; zurück heißt „Aufmaß“, dazu „Alle Fenster ansehen“');
+    ok(f0.fold === 0 && f0.zu && !/\d mm/.test(f0.fakten) && /beliebig ändern, danach noch viermal/.test(f0.frei) && f0.zurueck === 'Fenster' && f0.alle, 'Fenster gespeichert: keine Übersicht „Alle Angaben“ und keine Maße, dafür „Wie geht es weiter?“ und nur eine Hauptaktion; Hinweis auf 7 Tage freies Ändern; zurück heißt „Fenster“ (zur Übersicht), dazu „Alle Fenster ansehen“');
     await foto(page, 'app-fenster-gesperrt');
     const mFertig = await messenApp(page);
     await page.evaluate(() => go('teilen')); await page.waitForTimeout(300);
@@ -2692,7 +2692,7 @@ if (teil(14)) {
     await page.evaluate(() => { for (let k = 0; k < 3; k++) { S.win = kopie(S.windows[0]); S.editIdx = 0; act('delwin', document.body); } go('home'); }); await page.waitForTimeout(250);
     const leerGrenze = await page.evaluate(() => ({ n: S.windows.length, a: angelegt(), h1: (document.querySelector('.hd h1') || {}).textContent || '', stand: (document.querySelector('.hd .sub, .hd p:not(.eyebrow)') || {}).textContent || '', neu: !!document.querySelector('.note.grenze [data-act="aufmass-neu"]'), bar: !!document.querySelector('.bb') }));
     await page.evaluate(() => { S.editIdx = -1; go('fertig'); act('delwin', document.body); }); await page.waitForTimeout(100);
-    ok(leerGrenze.n === 0 && leerGrenze.a === 50 && leerGrenze.h1 === 'Weiter, wo du warst.' && /kein Fenster erfasst/.test(leerGrenze.stand) && leerGrenze.neu && !leerGrenze.bar && await page.evaluate(() => /gibt es nicht mehr/.test(S.toast) && S.screen === 'home'), 'An der Grenze und alles gelöscht: kein Startbild mit totem Knopf, sondern die Erklärung mit „Neues Aufmaß beginnen“; Löschen eines verschwundenen Fensters meldet sich ehrlich');
+    ok(leerGrenze.n === 0 && leerGrenze.a === 50 && leerGrenze.h1 === 'Deine Fenster.' && /kein Fenster erfasst/.test(leerGrenze.stand) && leerGrenze.neu && !leerGrenze.bar && await page.evaluate(() => /gibt es nicht mehr/.test(S.toast) && S.screen === 'home'), 'An der Grenze und alles gelöscht: kein Startbild mit totem Knopf, sondern die Erklärung mit „Neues Aufmaß beginnen“; Löschen eines verschwundenen Fensters meldet sich ehrlich');
     await page.click('.note.grenze [data-act="aufmass-neu"]'); await page.waitForSelector('.neu-frage');
     await page.click('[data-act="aufmass-neu-ja"]'); await page.waitForTimeout(250);
     ok(await page.evaluate(() => S.windows.length === 0 && angelegt() === 0 && !FREI() && /Erstes Fenster ausmessen/.test(document.body.textContent)), 'Für ein weiteres Haus: neues Aufmaß nach Rückfrage, die Freischaltung gilt nur für das alte');
@@ -2765,7 +2765,7 @@ if (teil(14)) {
     const c2 = await browser.newContext(telefon), s2 = await neueSeite(c2, B5);
     await s2.goto(url, { waitUntil: 'networkidle' }); await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
     const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), a: angelegt(), merk: (document.querySelector('.merk-karte') || {}).textContent || '', h1: (document.querySelector('.hd h1') || {}).textContent, karten: document.querySelector('.liste-in').textContent, bar: document.querySelector('.bb .btn.primary').textContent }));
-    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Weiter, wo Sie waren.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
+    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.a === 2 && zwei.h1 === 'Ihre Fenster.' && /auch für ein anderes Gerät/.test(zwei.merk) && /Der Link gilt bis/.test(zwei.merk) && zwei.bar === 'Weiter zum Absenden', 'Anderes Gerät, leerer Speicher: dieselbe Liste aus dem Zwischenstand, Hinweis „jederzeit weitermachen“ mit Gültigkeit');
     ok(/vollständig/i.test(zwei.karten) && !/\d mm/.test(zwei.karten), 'Kundenlink: in der Liste keine Maße (die bekommt der Betrieb)');
     await s2.click('.liste-in .wincard[data-i="0"]'); await s2.waitForSelector('[data-screen="fertig"]');
     ok(await s2.locator('details.fold .kv').count() === 0 && await s2.locator('.zu-karte').count() === 0 && /gehen mit deinem Aufmaß an Fensterbau Weitermachen/.test(await s2.locator('.weiter-karte').textContent()) && await s2.locator('[data-act="k-start"]').count() === 0, 'Kundenlink: keine Liste aller Angaben vor dem Senden, kein Kaufknopf');
@@ -3015,7 +3015,7 @@ if (teil(15)) {
     await anmelden(s2, mail6, false);
     await s2.waitForFunction(() => S.windows.length === 2, null, { timeout: 8000 }); await s2.waitForTimeout(300);
     const zwei = await s2.evaluate(() => ({ namen: S.windows.map((w) => w.name).join(','), h1: document.querySelector('.hd h1').textContent, karte: (document.querySelector('.konto-karte') || {}).textContent || '' }));
-    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.h1 === 'Weiter, wo du warst.' && /Gesichert/.test(zwei.karte), 'Anderes Gerät nach dem Anmelden: dasselbe Aufmaß, „Weiter, wo du warst.“');
+    ok(zwei.namen === 'Wohnzimmer,Küche' && zwei.h1 === 'Deine Fenster.' && /Gesichert/.test(zwei.karte), 'Anderes Gerät nach dem Anmelden: dasselbe Aufmaß, „Deine Fenster.“');
     await s2.evaluate(() => { S.win = kopie(S.windows[0]); S.editIdx = 0; S.win.name = 'Wohnzimmer links'; saveWin(); go('home'); }); await ruhig(s2);
     await s1.reload({ waitUntil: 'networkidle' }); await s1.waitForFunction(() => S.windows[0] && S.windows[0].name === 'Wohnzimmer links', null, { timeout: 8000 });
     ok(true, 'Änderung auf dem zweiten Gerät ist nach dem Neuladen auch auf dem ersten da');
@@ -4337,9 +4337,14 @@ if (teil(20)) {
   ok(s3a.gl && s3a.lam >= 10 && s3a.fs && s3a.zug && !s3a.alt && s3a.deckt > 0.5, 'WebGL: Raffstore wie im CSS-Modell aus einzelnen Lamellen, mit Führungsschienen, Endschiene und Aufzugbändern mit eigener Farbe (' + s3a.lam + ' Lamellen)');
   const lam20 = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const n = Buehne3D.pruef.rollen(st).filter((r) => /^lam-\d+$/.test(r)).length, z = 'lam-' + (n - 1), l0 = Buehne3D.pruef.matrix(st, 'lam-0'), lz = Buehne3D.pruef.matrix(st, z), e0 = st.querySelector('[data-r="lam-0"]'), ez = st.querySelector('[data-r="' + z + '"]'); return { n: n, rot: l0 ? l0[6] : 0, y: lz ? lz[13] : 0, w0: e0._tf && e0._tf.zt ? e0._tf.zt.d : 0, wz: ez._tf && ez._tf.zt ? [ez._tf.zt.d, ez._tf.zt.v] : [0, 0], pos: W3D_BEHANG.pos, fahrt: st.classList.contains('is-fahrt') }; });
   const m20a = await lam20();
-  await g5.click('#w3d [data-w3d="wenden"]'); await g5.waitForTimeout(2000);
+  /* Ohne Grafikchip kommen Bilder der Bühne selten (SwiftShader, teils unter einem Bild je Sekunde): nach dem Wenden und während der Fahrt
+     wird je 100 ms ein Bild angestoßen (pruef.zeit, ohne auf den Grafikchip zu warten), wie es ein flüssiger Bildlauf von selbst täte */
+  const bildAnstossen = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.zeit(st); return st.classList.contains('is-fahrt'); });
+  await g5.click('#w3d [data-w3d="wenden"]'); await bildAnstossen(); await g5.waitForTimeout(2000);
   const m20b = await lam20();
-  await g5.click('#w3d [data-w3d="fahren"]'); await g5.waitForTimeout(3500);
+  await g5.click('#w3d [data-w3d="fahren"]');
+  for (let i = 0; i < 80; i++) { await g5.waitForTimeout(100); if (!(await bildAnstossen())) break; }
+  await g5.waitForTimeout(500);
   const m20c = await lam20();
   /* die Fahrt legt app.js bildweise und ohne Übergang (w3dFahrt): die letzte Lage kam sofort (d 1, kein Versatz), danach steht der Behang unten */
   ok(Math.abs(m20b.rot - m20a.rot) > 0.3 && m20b.w0 === 600 && m20c.y > m20b.y + 5 && m20c.wz[0] <= 1 && m20c.wz[1] === 0 && m20c.pos === 1 && !m20c.fahrt, 'WebGL: „Lamellen wenden“ dreht die Lamellen (0,6 s), „Herunterfahren“ fährt sie bildweise mit der Endschiene aus dem Paket (ohne Übergang und Versatz je Lamelle), wie im CSS-Modell');
@@ -4829,7 +4834,13 @@ if (teil(22)) {
   await p.click('#w3d [data-w3d="fahren"]'); await p.waitForTimeout(500);
   const fs7a = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, stand: W3D_BEHANG.stand, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), delay: getComputedStyle(document.querySelector('[data-r="lam-5"]')).transitionDelay }));
   await p.waitForTimeout(1900);
-  const fs7b = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), lam0: /rotateX\(-52deg\)/.test(document.querySelector('[data-r="lam-0"]').style.transform) }));
+  const fs7b = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), lam0: /rotateX\(-78deg\)/.test(document.querySelector('[data-r="lam-0"]').style.transform) }));
+  /* Detailschärfe (Lamellen mit Bördelkanten aus gebürstetem Aluminium, Leiterkordeln vor und hinter den Lamellen, Schienen mit Einlaufrinne, Rollladenpanzer mit Wölbung je Lamelle und Gummilippe an der Endschiene) */
+  const fs8a = await p.evaluate(() => { const q = (r) => document.querySelector('[data-r="' + r + '"]'), l = q('lam-0'), k = q('kord-lv'), kh = q('kord-rh'); return { art: l._art, stops: (l.style.background.match(/rgb\(/g) || []).length, kord: !!k && parseFloat(k.style.width) > 0 && parseFloat(k.style.height) > 0 && k.className.indexOf('w3d-kordel') >= 0, kordZ: k && kh ? parseFloat(k.style.transform.split(',')[2]) < parseFloat(kh.style.transform.split(',')[2]) : false, fsl: /^linear-gradient\(90deg/.test(q('fs-l').style.background), fsr: /^linear-gradient\(270deg/.test(q('fs-r').style.background), uArt: q('behang-u')._art }; });
+  await frageB('panzer', { sart: 'rollladen', roll: 'vorbau', panzer: 'alu' }, 'genau'); await p.waitForTimeout(500);
+  const fs8b = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, neig: b._relief && b._relief[1], stops: (b.style.background.match(/rgb\(/g) || []).length, rep: /^repeating-linear-gradient\(/.test(b.style.background), lippe: /rgb\(42, 43, 45\)/.test(st.querySelector('[data-r="behang-u"]').style.background) }; });
+  await frageB('schlitz', { sart: 'rollladen', roll: 'vorbau', schlitz: 'mit' }, 'genau'); await p.waitForTimeout(500);
+  const fs8c = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, schlitz: /^radial-gradient\(/.test(b.style.background) && /repeating-linear-gradient\(/.test(b.style.background) }; });
   ok(fs1.key >= 40 && fs1.key <= 44 && fs1.zur === 'Zurück' && fs1.zurH === fs1.key && fs1.ok >= 44 && fs1.stage >= 220, 'Feinschliff, Zifferntasten beim Messen: Tasten ' + fs1.key + ' px mit „Zurück“ als beschriftetem Knopf, „Weiter“ ' + fs1.ok + ' px, das Modell ' + fs1.stage + ' px hoch');
   ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
   ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
@@ -4839,6 +4850,8 @@ if (teil(22)) {
   ok(fs6a.da && fs6a.h >= 44 && fs6b.blatt && fs6b.chips === 4 && fs6b.toene === 6 && fs6b.ry === 152 && fs6c.f === 'klinker' && fs6c.t === 'rotbunt' && fs6c.e && fs6c.wall && fs6c.toene === 6 && fs6c.text === 'Klinker, rotbunt' && /Fassade laut Kunde: Klinker, rotbunt/.test(fs6c.rows) && !fs6d.blatt && fs6d.q === 'fa' && fs6d.fokus === 'haus',
     'Feinschliff, Haus am Zahnrad: Blatt mit vier Arten und sechs Tönen, Kamera von außen, Klinker rotbunt färbt die Wand sofort und steht im Blatt als Angabe des Kunden; Escape schließt und gibt den Fokus ans Zahnrad');
   ok(fs7a.fahrt && fs7a.stand === 1 && fs7a.pos > 0.05 && fs7a.pos < 0.95 && fs7a.delay === '0s' && !fs7b.fahrt && fs7b.pos === 1 && fs7b.u > fs7a.u && fs7b.lam0, 'Feinschliff, Raffstore fährt als Ganzes: bildweise aus dem Stand (nach 0,5 s unterwegs, ohne Versatz je Lamelle), nach der Fahrt unten mit offenen Lamellen (' + (+fs7a.pos).toFixed(2) + ')');
+  ok(fs8a.art === 'alub' && fs8a.stops >= 7 && fs8a.kord && fs8a.kordZ && fs8a.fsl && fs8a.fsr && fs8a.uArt === 'alub' && fs8b.art === 'alub' && fs8b.relief === 37 && fs8b.neig > 0.3 && fs8b.stops >= 7 && fs8b.rep && fs8b.lippe && fs8c.art === '' && fs8c.relief === 40 && fs8c.schlitz,
+    'Feinschliff, Detailschärfe am Sonnenschutz: Lamellen mit Bördelkanten aus gebürstetem Aluminium und Leiterkordeln vor und hinter den Lamellen, Schienen mit Einlaufrinne zur Öffnung; Rollladenpanzer je Lamelle gewölbt (Alu 37 mm, Kunststoff 40 mm, Lichtschlitze darüber) mit Gummilippe an der Endschiene (' + JSON.stringify([fs8a, fs8b, fs8c]) + ')');
   sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
   await ctx.close();
 }

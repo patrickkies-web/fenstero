@@ -180,10 +180,6 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 
 /* Großes Bewegtbild unter den Kennzahlen: breites Band 16:10, Fläche mit Ring, darin das Zeichen „konfigurator“ (Gruppe B; bis die Datei
    da ist, trägt der Behälter data-lottie-bald und zeigt das Standbild), darunter eine Zeile */
-.vk-bewegt { margin: 24px 0 0 }
-.vk-bewegt .vk-bewegt-bild { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; padding: clamp(16px, 4vw, 40px); background: var(--surface); border-radius: var(--r4); box-shadow: var(--ring); color: var(--ink); overflow: hidden }
-.vk-bewegt .vk-bewegt-bild > svg, .vk-bewegt .vk-bewegt-bild .lottie-still > svg, .vk-bewegt .vk-bewegt-bild .lottie-still { display: block; width: 100%; height: 100% }
-.rg .vk-bewegt figcaption { margin: 10px 0 0; font-size: 15px; line-height: 1.45; color: var(--ink2) }
 
 /* Die Idee: vier Karten, der fette Satzanfang als Titel */
 .rg .vk-punkte { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
@@ -383,7 +379,7 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
   .vk-ablauf li::before, .vk-ablauf .vk-symbol, .vk-karte, .vk-karte::before, .vk-schirm, .vk-telefon, .vk-tisch { transition: none }
   .vk-karte { opacity: 1 }
 }
-@media print { .vk-hero-foto, .vk-zeichen, .vk-bewegt, .vk-buehne-rechts, .vk-blatt, .vk-band > .foto-karte, .vk-bestellen > .foto-karte { display: none } }
+@media print { .vk-hero-foto, .vk-zeichen, .vk-buehne-rechts, .vk-blatt, .vk-band > .foto-karte, .vk-bestellen > .foto-karte { display: none } }
 
 /* ---------- Einbettung in die Startseite (portal.js, Ansicht Fensterbauer) ----------
    Derselbe Inhalt (main.rg ohne Brotkrumen) liegt dort in <section class="vk-einbettung rg"> innerhalb von .wrap der Startseite
