@@ -138,7 +138,7 @@
 .ein-bild img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 11; object-fit: cover; object-position: 50% 42% }
 .ein-bild::after { content: ''; position: absolute; inset: auto 0 0 0; height: 30%; background: linear-gradient(to bottom, transparent, var(--ground)); pointer-events: none }
 .ein-start-in > .ein-bilder + .eyebrow, .ein-start-in > .ein-bild + .eyebrow { margin-top: 22px }
-.ein-fuss.inst { border-top: 0; padding-top: 4px }
+.ein-fuss.inst { border-top: 0; padding-top: 4px; align-items: center; text-align: center } /* mittig wie Impressum und Datenschutz darunter */
 .ein-kz { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted) }
 .ein-kz a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink2); font-weight: 700; text-decoration: none }
 .ein-kz a:hover span { text-decoration: underline }

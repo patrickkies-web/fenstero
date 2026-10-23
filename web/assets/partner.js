@@ -277,7 +277,7 @@
     var block = function (titel, k2, paare) { return '<section class="p-karte"><div class="p-block-kopf"><h2 class="p-h3">' + esc(titel) + '</h2>' + aendern(k2) + '</div><dl class="p-kv">' + paare.filter(Boolean).map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1] || '–') + '</dd>'; }).join('') + '</dl></section>'; };
     var tage = (e.tage || []).map(function (t) { return (TAGE.find(function (x) { return x[0] === t; }) || [t, t])[1]; }).join(', ');
     return block('Paket', 'paket', [['Paket', paketName(f.paket)], ['Einrichtung', euro(P.preis(f.paket).einrichtung) + ' netto, einmalig, vorab'], ['Monatlich', euro(P.preis(f.paket).monat) + ' netto, ab dem Livegang']]) +
-      block('Unternehmen', 'firma', [['Firma', fi.firma + (fi.rechtsform ? ' (' + fi.rechtsform + ')' : '')], ['Anschrift', fi.strasse + ', ' + fi.plz + ' ' + fi.ort], ['Ansprechpartner', fi.ap + (fi.rolle ? ', ' + fi.rolle : '')], ['Telefon', fi.tel], ['Erreichbar', tage ? tage + ', ' + e.von + '–' + e.bis + ' Uhr' : ''], ['Vertreten durch', fi.vertretung], fi.ust ? ['USt-IdNr.', fi.ust] : null]) +
+      block('Unternehmen', 'firma', [['Firma', fi.firma + (fi.rechtsform && fi.firma.toLowerCase().indexOf(fi.rechtsform.toLowerCase()) < 0 ? ' (' + fi.rechtsform + ')' : '')], ['Anschrift', fi.strasse + ', ' + fi.plz + ' ' + fi.ort], ['Ansprechpartner', fi.ap + (fi.rolle ? ', ' + fi.rolle : '')], ['Telefon', fi.tel], ['Erreichbar', tage ? tage + ', ' + e.von + '–' + e.bis + ' Uhr' : ''], ['Vertreten durch', fi.vertretung], fi.ust ? ['USt-IdNr.', fi.ust] : null]) +
       block('Konfigurator', 'konfigurator', [['Name', k.name], ['Wunsch-Domains', k.domains.filter(Boolean).join(', ') || (k.vorschlaege ? 'Bitte Vorschläge' : '')], ['Anfragen an', k.eingang.filter(Boolean).join(', ')], m.dashboard ? ['Zugänge', (k.zugang || []).filter(Boolean).join(', ')] : null]) +
       (gestaltet(m) ? block('Gestaltung', 'gestaltung', [m.logo ? ['Logo', ((b && b.dateien) || []).some(function (d) { return d.art === 'logo'; }) ? 'hochgeladen' : g.logoFolgt ? 'folgt' : 'noch keins'] : null, m.farbe ? ['Farben', (g.farben || []).filter(Boolean).join(', ')] : null, m.fotos ? ['Fotos', String(((b && b.dateien) || []).filter(function (d) { return d.art === 'foto'; }).length)] : null, m.startansicht ? ['Überschrift', g.titel] : null]) : '');
   }
@@ -519,7 +519,7 @@
   }
   function schnipselKarte(b) {
     if (!b.schnipsel) return '';
-    return '<section class="p-karte" aria-labelledby="h-sn"><h2 class="p-h2" id="h-sn">Auf Ihrer Website verlinken</h2><p class="p-neben">Diesen Link können Sie auf Ihrer Website einbauen, etwa als Knopf „Fenster online planen“.</p><label class="p-sr" for="f-schnipsel">Verlinkung zum Kopieren</label><textarea class="p-schnipsel" id="f-schnipsel" readonly rows="3">' + esc(b.schnipsel) + '</textarea><div class="p-knoepfe"><button type="button" class="btn ghost small" data-a="kopieren">Kopieren</button></div></section>';
+    return '<section class="p-karte" aria-labelledby="h-sn"><h2 class="p-h2" id="h-sn">Auf Ihrer Website verlinken</h2><p class="p-neben">Diesen Link können Sie auf Ihrer Website einbauen, etwa als Knopf „Fenster online planen“.</p><label class="p-sr" for="f-schnipsel">Verlinkung zum Kopieren</label><textarea class="p-schnipsel" id="f-schnipsel" readonly rows="4">' + esc(b.schnipsel) + '</textarea><div class="p-knoepfe"><button type="button" class="btn ghost small" data-a="kopieren">Kopieren</button></div></section>';
   }
   function paketwechselKarte(b) {
     if (['live', 'pausiert', 'einrichtung', 'domain', 'freigabe', 'bezahlt'].indexOf(b.status) < 0) return '';
@@ -731,7 +731,12 @@
   });
   wurzel.addEventListener('input', function (ev) {
     var t = ev.target;
-    if (t.hasAttribute('data-f')) { wertSetzen(t.getAttribute('data-f'), t.value); formMerken(); }
+    if (t.hasAttribute('data-f')) {
+      wertSetzen(t.getAttribute('data-f'), t.value); formMerken();
+      /* eingetippte Farbe: das Farbfeld daneben zeigt sie gleich mit */
+      var fm = /^gestaltung\.farben\.(\d)$/.exec(t.getAttribute('data-f')), wahl = fm && document.querySelector('input[data-farbe="' + fm[1] + '"]');
+      if (wahl && /^#[0-9a-f]{6}$/i.test(t.value.trim())) wahl.value = t.value.trim().toLowerCase();
+    }
     else if (t.hasAttribute('data-farbe')) { var i = Number(t.getAttribute('data-farbe')); S.f.gestaltung.farben[i] = t.value; var x = document.getElementById(fid('gestaltung.farben.' + i)); if (x) x.value = t.value; formMerken(); }
     else if (t.hasAttribute('data-x')) { var k = t.getAttribute('data-x'); S[k] = t.value; }
     else if (t.hasAttribute('data-rr')) { S.rr = S.rr || {}; S.rr[t.getAttribute('data-rr')] = t.value; }

@@ -268,7 +268,9 @@ h.instanz(sel, patch), h.saat({ instanzen }), h.attrappe(), h.post({ anhaenge })
 h.uhr(tage) / h.uhr(null), h.geplant(cron), h.server(env) (weiterer Testserver, z. B. { QUEUE_ATTRAPPE: '1' } oder { PAKETE_OFFEN: '1' })
 ```
 
-Der lokale Testserver (`scripts/dev-server.mjs`) schickt jede Anfrage durch `worker.js`, nimmt die Adresse aus der Kopfzeile `Host`, liefert über `env.ASSETS` bei fehlender Datei 404 ohne Fehlerseite (wie Cloudflare ohne `not_found_handling`), stellt mit `QUEUE_ATTRAPPE=1` die Warteschlange `EINGANG` nach (ruft `worker.queue` direkt) und hat nur mit `DATEN_ATTRAPPE=1` die Prüfhilfen `/__scheduled?cron=`, `/__jetzt?tage=`, `/__saat`, `/__instanz`, `/__attrappe`, `/__sitzung` (nie im Worker).
+Der lokale Testserver (`scripts/dev-server.mjs`) schickt jede Anfrage durch `worker.js`, nimmt die Adresse aus der Kopfzeile `Host`, liefert über `env.ASSETS` bei fehlender Datei 404 ohne Fehlerseite (wie Cloudflare ohne `not_found_handling`), stellt mit `QUEUE_ATTRAPPE=1` die Warteschlange `EINGANG` nach (ruft `worker.queue` direkt) und hat nur mit `DATEN_ATTRAPPE=1` die Prüfhilfen `/__scheduled?cron=`, `/__jetzt?tage=`, `/__saat`, `/__instanz`, `/__attrappe`, `/__sitzung` (nie im Worker). Mit `ZAHLUNG_ATTRAPPE=1` (ohne Stripe) stellt `POST /__stripe` ein Stripe-Ereignis der Pakete zu wie der Webhook (`{ type: 'invoice.payment_failed', object: { subscription } }` → `paketEreignis`), damit Zahlungsausfall, Kulanz und Pause im Browser prüfbar sind.
+
+Abschnitt 30 (`30.mjs`, nach den Vertragsprüfungen `30-welle1|2|3.mjs`) geht den ganzen Weg je Paket auf einem eigenen Testserver mit `PAKETE_OFFEN=1` und ohne Standard-Instanzen: Bestellung im Browser, Einrichtung in der Zentrale (`essential|plus|signature.localhost`), Freigabe, Live, Anfrage vom Telefon mit Fotos, RAL-Farbe und Notiz, Mail mit PDF, Signature-Dashboard mit Einladung, dann Zahlungsausfall bis zur Löschung über `JETZT`. Mit `BILDER30=<Ordner>` legt er die Bildschirmfotos ab (Telefon und 1280, dazu PDF Seite 1 und die Mail an den Betrieb).
 
 ## Teil 2: Betrieb
 

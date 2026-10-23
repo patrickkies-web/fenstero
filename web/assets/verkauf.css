@@ -27,6 +27,12 @@
 .rg .vk-liste li { position: relative; margin: 0 0 8px; padding-left: 24px; font-size: 15px; line-height: 1.4 }
 .vk-liste li::before { content: ''; position: absolute; left: 3px; top: 3px; width: 6px; height: 11px; border-right: 2.5px solid var(--accent); border-bottom: 2.5px solid var(--accent); transform: rotate(45deg) }
 .vk-paket .btn { width: 100%; text-decoration: none }
+/* Schreibtisch: die Karten teilen sich die Zeilen (Name, Text, Preis, Einrichtung, Steuer, Liste, Knopf), so stehen Preise und Knöpfe
+   auf einer Höhe, auch wenn ein Text eine Zeile länger ist („Beliebt“ liegt absolut und zählt nicht mit) */
+@media (min-width: 761px) {
+  .vk-pakete { grid-template-rows: repeat(7, auto) }
+  .vk-paket { display: grid; grid-row: span 7; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); row-gap: 0 }
+}
 .rg .vk-paket .btn.ghost { color: var(--ink) }
 .rg .vk-paket .btn.primary, .rg .vk-knoepfe .btn.primary, .rg .vk-form .btn.primary { color: var(--on-primary) }
 @media (max-width: 760px) {

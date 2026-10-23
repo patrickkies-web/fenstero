@@ -148,7 +148,7 @@ a.p-link { color: var(--text) }
 .p-rechnungen .nr { font-weight: 700; flex: 1 1 10em; min-width: 0 }
 .p-abo { display: flex; flex-direction: column; gap: 6px }
 .p-abo .zustand { font-size: 22px; font-weight: 800; letter-spacing: -.02em }
-.p-schnipsel { width: 100%; min-height: 72px; border-radius: var(--r2); border: 2px solid var(--line2); background: var(--surface2); color: var(--text); padding: 10px 12px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; resize: none }
+.p-schnipsel { width: 100%; min-height: 72px; field-sizing: content; border-radius: var(--r2); border: 2px solid var(--line2); background: var(--surface2); color: var(--text); padding: 10px 12px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; resize: none }
 .p-danke { align-items: flex-start }
 .p-danke .okmark-l { margin: 0 }
 .p-uebersicht { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px }

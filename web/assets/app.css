@@ -1189,3 +1189,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .inst-pdf .dc-row { flex: 0 0 auto }
 .hdr-row:has(.hdr-r.zwei) .hdr-inst { max-width: calc(100% - 200px) }
 .hdr-row:has(.hdr-r.zwei) .hdr-inst .hdr-name { font-size: 15px }
+/* Telefon mit Logo: der Name daneben darf zweizeilig werden; mit zwei Knöpfen rechts trägt das Logo allein die Marke (sonst bliebe nur „Glase…“) */
+@media (max-width: 480px) {
+  .hdr-inst:has(.ein-zeichen.logo) .hdr-name { font-size: 15px; line-height: 1.15; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2 }
+  .hdr-row:has(.hdr-r.zwei) .hdr-inst:has(.ein-zeichen.logo) .hdr-name { display: none }
+}

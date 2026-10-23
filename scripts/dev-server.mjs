@@ -15,6 +15,8 @@
 //     POST /__saat                                 Instanzen essential, plus, signature, signature2 (*.localhost) anlegen; Body { instanzen: […] }
 //     POST /__instanz                              { host | id | slug, patch } Felder einer Instanz setzen
 //     GET  /__attrappe                             Inhalt der Attrappe zu den Instanzen, Ablagen und Warteschlange
+//     POST /__stripe                               Stripe-Ereignis der Konfigurator-Pakete wie über den Webhook (nur ZAHLUNG_ATTRAPPE=1):
+//                                                  { type: 'invoice.payment_failed', object: { subscription: 'sub_test_…' } }
 //     GET  /__sitzung?bereich=…  /__sitzung/lesen?bereich=…   Sitzung zum Prüfen ausstellen bzw. lesen (sitzung.js)
 //   ANTHROPIC_API_KEY=… STRIPE_SECRET_KEY=… SUPABASE_URL=… SUPABASE_SECRET_KEY=…   echte Dienste (Schlüssel nie ins Repo schreiben)
 //
@@ -63,6 +65,8 @@ const { konfig } = await import(pathToFileURL(path.join(ROOT, 'functions/api/umg
 const { speicher, attrappeStand } = await import(pathToFileURL(path.join(ROOT, 'functions/api/speicher.js')).href);
 const { ablage, ABLAGEN } = await import(pathToFileURL(path.join(ROOT, 'functions/api/fotos.js')).href);
 const sitzung = await import(pathToFileURL(path.join(ROOT, 'functions/api/sitzung.js')).href);
+const { zahlungsdienst } = await import(pathToFileURL(path.join(ROOT, 'functions/api/stripe.js')).href);
+const { istPaketEreignis, paketEreignis } = await import(pathToFileURL(path.join(ROOT, 'functions/api/bestellung.js')).href);
 
 /* _headers lesen: Zeile ohne Einzug = Pfad (mit * am Ende), eingerückt = Kopfzeile, „! Name“ nimmt eine Kopfzeile wieder weg */
 const regeln = [];
@@ -175,6 +179,17 @@ async function dev(request, url) {
     case '/__saat': return devJson({ ok: true, instanzen: await saat(body) });
     case '/__instanz': { const r = await instanzSetzen(body); return r ? devJson({ ok: true, instanz: r }) : devJson({ ok: false, fehler: 'unbekannt' }, 404); }
     case '/__attrappe': return devJson(Object.assign({ ok: true }, attrappeStand(), { ablage: Object.fromEntries(Object.keys(ABLAGEN).map((a) => [a, ablage(konfig(env), a).alle()])), queue: queueLog }));
+    /* Stripe-Ereignis der Konfigurator-Pakete wie über den Webhook (zahlung.js → bestellung.js paketEreignis), nur mit der Zahlungs-Attrappe:
+       ohne Stripe gibt es kein Webhook-Geheimnis. Body { type, object }, z. B. invoice.payment_failed mit { subscription: <Abo der Bestellung> } */
+    case '/__stripe': {
+      if (env.ZAHLUNG_ATTRAPPE !== '1' || env.STRIPE_SECRET_KEY) return devJson({ ok: false, fehler: 'nur mit ZAHLUNG_ATTRAPPE=1 ohne Stripe' }, 400);
+      const k = konfig(env), c = neuerCtx(), sp = speicher(k);
+      const ctx = { k, env, sp, zd: zahlungsdienst(k), request, url, body: null, roh: '', params: {}, waitUntil: c.waitUntil, instanz: null, zaehlen: () => {} };
+      const ev = { id: 'evt_dev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), type: String(body.type || ''), data: { object: body.object || {} } };
+      const paket = await istPaketEreignis(ctx, ev), ergebnis = paket ? await paketEreignis(ctx, ev) : null;
+      await Promise.all(c.offen);
+      return devJson({ ok: true, paket, ergebnis });
+    }
     case '/__sitzung': { const ctx = { k: konfig(env), env, request, url }; const b = url.searchParams.get('bereich') || 'betrieb'; return devJson({ ok: true }, 200, { 'set-cookie': await sitzung.sitzungSetzen(ctx, b, { sub: url.searchParams.get('sub') || 'pruef-nutzer', mail: 'pruef@beispiel.example' }) }); }
     case '/__sitzung/lesen': { const ctx = { k: konfig(env), env, request, url }; return devJson({ ok: true, sitzung: await sitzung.sitzungLesen(ctx, url.searchParams.get('bereich') || 'betrieb') }); }
     default: return null;

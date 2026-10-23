@@ -116,7 +116,7 @@ export function mailInhalt(k, inst, z, o) {
     absatz(o.pdf === 'nachtrag' ? esc(pdfSatz) : esc(kunde) + (nb ? ' hat die Anfrage ' + esc(l.nr || '') + ' nachgebessert: ' : ' hat über Ihren Fensterplaner eine Anfrage geschickt: ') + esc(pos) + (nFotos ? ', ' + esc(X().nW(nFotos, 'Foto', 'Fotos')) : '') + (l.nr && !nb ? ', Nummer ' + esc(l.nr) : '') + '.') +
     (o.pdf === 'nachtrag' ? '' : tabelle) +
     (pr.notiz && o.pdf !== 'nachtrag' ? absatz('<b>Nachricht:</b> ' + esc(pr.notiz)) : '') +
-    (offen.length && o.pdf !== 'nachtrag' ? absatz('<b>' + esc(X().nW(offen.length, 'Punkt', 'Punkte')) + ' mit dem Kunden zu klären</b>, zum Beispiel: ' + esc(offen.slice(0, 3).map((r) => r.k + ': ' + r.v).join('; ')) + (offen.length > 3 ? ' …' : '') + '.') : '') +
+    (offen.length && o.pdf !== 'nachtrag' ? absatz('<b>' + esc(X().nW(offen.length, 'Punkt', 'Punkte')) + ' mit dem Kunden zu klären</b>, zum Beispiel: ' + esc(offen.slice(0, 3).map((r) => r.k + ': ' + String(r.v).replace(/[\s.;:]+$/, '')).join('; ')) + (offen.length > 3 ? '; …' : '.')) : '') +
     (o.pdf === 'nachtrag' ? '' : absatz(esc(pdfSatz))) +
     (o.link ? knopf(o.link.url, o.link.text) : '') +
     (pr.mail && o.pdf !== 'nachtrag' ? absatz('<span style="font-size:13px;color:#6e6e73">Antworten Sie einfach auf diese E-Mail, sie geht direkt an ' + esc(kunde) + '.</span>') : '') +
