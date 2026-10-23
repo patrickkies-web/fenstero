@@ -25,6 +25,7 @@ Verbindlich sind:
 | Nacharbeit der Befunde | fertig: 19 behoben, 2 bestätigt (6, 7), 1 teilweise (17), 2 bewusst verschoben (11, 15), siehe Tabelle in `PRUEFBEFUNDE.md` |
 | Volle Prüfsuite nach der Nacharbeit, Abschnitte 1–30 | **1679 bestanden, 0 fehlgeschlagen** (Stand a2d202d) |
 | Verkaufsseite `/fuer-fensterbauer/` als Landingpage (Abschnitte, Scroll-Bewegung, Lottie-Zeichen marke/domain/dashboard, Bildplätze mit Platzhaltern) und Startseite: Ansicht „Fensterbauer“ bettet sie ein (23.10., Wunsch des Inhabers) | fertig; volle Suite auf dem Endstand **1683 bestanden, 0 fehlgeschlagen** (Lauf mit 1682/1, der eine Satz 30.W3 angepasst, Abschnitt 30 danach 136/0) |
+| Verkaufsseite, zweite Runde (23.10., Inhaber: „zu wenig Bewegung“): Scroll-Bühne mit Telefon zu „So funktioniert es“, Bewegtbild-Band `konfigurator` (10-s-Schleife), `farbwechsel` im Vorspann der Pakete, Zeichen in den Paketkarten, gezeichnete Symbole der Zeitleiste, Ringe um die Kennzahlen, alle Zeichen als Schleife im Bild | fertig; volle Suite **1683 bestanden, 0 fehlgeschlagen** |
 | Schlussprüfung, PR, Bericht an den Inhaber | PR nach main offen (nicht gemergt), Bericht übergeben |
 
 Der Code ist **nicht** auf main. Merge erst nach Freigabe durch den Inhaber (Preise, Rechtstexte, Einrichtung bei Cloudflare, Stripe und Resend, siehe BAUPLAN §4). Der Stand ist so gebaut, dass ein Merge auch vorher gefahrlos ist: Ohne `PAKETE_OFFEN=1` kann niemand ein Paket kaufen, und Instanz-Domains gibt es erst, wenn der Inhaber eine anlegt.
