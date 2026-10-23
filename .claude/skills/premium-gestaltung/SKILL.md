@@ -77,7 +77,8 @@ Seine Messlatte: Ein Fensterbauer soll an der Seite merken, dass eeziframes Webd
 2. Material prüfen. Fehlt ein Bild oder Video, genau sagen, was gebraucht wird (Abschnitt 7), und bis dahin einen Platzhalter bauen,
    der den Effekt schon zeigt.
 3. Bei ambitionierten Elementen zwei bis drei Varianten als kurze Videos bauen; er wählt, danach nur noch Feinschliff.
-4. Bauen, dann selbst prüfen: Bilder bei 390 und 1280, bei Bewegung ein Telefon-Video (Abschnitt 8), Checkliste (Abschnitt 6).
+4. Bauen, dann selbst prüfen: Bilder bei 390 und 1280, bei Bewegung ein Telefon-Video (Abschnitt 8), Checkliste (Abschnitt 6). Neue
+   Elemente zusätzlich aus den passenden Rollen in rollen.md (Abschnitt 2 dort), neue Vorbilder aus allen.
 5. Liefern: Video und Bilder schicken, dann drei kurze Listen: gebaut, selbst entschieden, brauche ich von dir.
 6. Einchecken auf dem Arbeitszweig. Online (main) nur auf seinen ausdrücklichen Wunsch, danach den Cloudflare-Build prüfen.
 
