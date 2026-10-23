@@ -10,9 +10,9 @@ docs/GESTALTUNG.md (Farben, Schrift, Größen, Bewegung), die dort verbindlich s
 vorlage.md neben dieser Datei; fehlt in einem Auftrag ein Feld, sinnvoll annehmen und die Annahme im Ergebnis nennen.
 
 **Wie es aussehen soll, steht in designrichtung.md neben dieser Datei: vor jedem sichtbaren Element lesen.** Kurz: ruhig wie Apple,
-präzise wie ein Aufmaß, mit Licht und Tiefe wie in einer Raumstation; erst verstehen, dann erleben; ein Held je Bildschirm, echtes
-Material, zwei Schriftstimmen, Licht nur mit Quelle. Dort stehen auch die Analyse seiner 21 Vorbilder, verglichen aus fünf Rollen, und
-die Bausteine des Stils.
+präzise wie ein Aufmaß, mit Licht und Tiefe wie in einer Raumstation; erst verstehen, dann erleben; eigene Zeichen vor Trends; ein
+Held je Bildschirm, echtes Material, Licht nur mit Quelle. Die Analyse seiner 21 Vorbilder steht in vorbilder.md, die zwölf Rollen und
+die Jury, die fertige Seiten bewertet, in rollen.md.
 
 ## 1. Grundhaltung
 
@@ -95,9 +95,10 @@ Seine Messlatte: Ein Fensterbauer soll an der Seite merken, dass eeziframes Webd
 ## 7. Material beim Inhaber anfragen
 
 Er erzeugt Bilder mit Flux und Videos mit Kling und lädt sie im Chat hoch. Anfragen immer mit: Zweck, Format und Pixelmaß, Freistellung
-(PNG mit Transparenz oder einfarbig grüner Hintergrund), Licht und Blickrichtung passend zum übrigen Bild, eine Makrotextur in Nahsicht
-und cremeweiße statt bläuliche Spitzlichter (designrichtung.md, 3.1 und 3.4), was nicht drin sein darf (Text, Wasserzeichen). Bei Videos zusätzlich: Länge, nahtlose Schleife (Start- und Endbild gleich), Kamera still, ruhige Bewegung, und ein Prompt
-auf Englisch zum Kopieren. Hochgeladene Dateien liegen unter /root/.claude/uploads/<Sitzung>/; kommt ein angekündigtes Bild nicht an,
+(PNG mit Transparenz oder direkt vor #161616, nicht vor Grün), Licht von rechts oben mit 4800 bis 5800 K, Kamera und Makrotextur nach
+designrichtung.md 3.4 (dort auch Prompt-Bausteine; „golden hour“ macht die Bilder orange), was nicht drin sein darf (Text,
+Wasserzeichen). Gelieferte Bilder vor dem Einbau mit bildlicht.py messen. Bei Videos zusätzlich: Länge, nahtlose Schleife (Start-
+und Endbild gleich), Kamera still, ruhige Bewegung, und ein Prompt auf Englisch zum Kopieren. Hochgeladene Dateien liegen unter /root/.claude/uploads/<Sitzung>/; kommt ein angekündigtes Bild nicht an,
 das sofort sagen.
 
 ## 8. Werkzeuge im Projekt
@@ -115,6 +116,8 @@ das sofort sagen.
   rechnet ohne Grafikchip: Wie flüssig es sich anfühlt, entscheidet der Test des Inhabers am eigenen Telefon.
 - Prüfsuite: `NUR=… PW_PFAD=/opt/node-tools node scripts/pruefen.mjs`. Verkaufsseite: Abschnitte 2, 6, 10, 29, 30. Fenstermodell der App:
   20 und 22.
+- Messen: `python3 -I .claude/skills/premium-gestaltung/farbanteil.py bild.png` (Farb- und Lichtanteile eines Bildschirmfotos) und
+  `python3 -I .claude/skills/premium-gestaltung/bildlicht.py bild.webp` (Schwarz, Lichtfarbe, Schatten und Clipping eines Bildes).
 - Doku nachziehen: docs/GESTALTUNG.md für die Gestaltung, docs/BILDER.md für Bildplätze.
 
 ## 9. Was er bisher gesagt hat
@@ -126,7 +129,8 @@ das sofort sagen.
   (viktoroddy), ein KI-Dashboard (juicelab), DE</HELPERS (seanaiux) und die Skills „Motion Design“ und „Design DNA“. Zweite Runde: Liquid
   Glass (Figma), Dentora und Velour, eine Fahrdienst-App, Freshify, POUR/PLAY, Bluebird, lightup, eine Samurai-Parallaxe (Webflow,
   Lottie), happy lemon, Dahlia und Ciao Energy (WebGL), mit dem Auftrag, alle mehrfach aus unterschiedlichen Rollen zu vergleichen und
-  die Gemeinsamkeiten in den Skill zu nehmen. Ausgewertet in designrichtung.md, Abschnitt 2.
+  die Gemeinsamkeiten in den Skill zu nehmen; danach alle noch einmal auf Proportionen, Kontraste, Schriften und Animationen, mit
+  weiteren Rollen. Ausgewertet in vorbilder.md, die Regeln daraus in designrichtung.md.
 - **Mag nicht:** das Bewegtbild Handy zu Briefumschlag; die Unterschrift „Vom Foto zum Aufmaßblatt, so sieht es Ihr Kunde.“; lange Texte
   und Inhaltsverzeichnisse auf der Verkaufsseite; überdimensionierte Desktop-Ansichten; flache Laufbänder und Effekte „von 2015“; lange
   Wartezeiten ohne Ergebnis; eigenmächtige Umdeutungen seiner Vorgaben.

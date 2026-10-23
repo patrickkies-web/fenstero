@@ -2,7 +2,8 @@
 
 Stand 23.10.2026. Ein Element, eine Seite oder neue Vorbilder werden aus mehreren Rollen geprüft, jede mit eigenen Kriterien. Die
 Rollen sind Blickwinkel, keine echten Personen: Ihre Urteile sind begründete Annahmen. Es entscheiden Messungen, die Prüfsuite und der
-Test des Inhabers am eigenen Telefon. Was die Rollen an den 21 Vorbildern gefunden haben, steht in designrichtung.md, Abschnitt 2.
+Test des Inhabers am eigenen Telefon. Was die Rollen an den 21 Vorbildern gefunden haben, steht in vorbilder.md, die Regeln daraus in
+designrichtung.md.
 
 ## 1. Die Rollen
 
@@ -44,7 +45,7 @@ Kleine Änderungen (Text, Abstand, Farbe) brauchen keine Rollenprüfung, nur die
 - Bericht nach festem Schema, höchstens 900 Wörter: Prüfkriterien, Messwerte je Bild, Gemeinsamkeiten mit Anzahl und Nummern,
   Spannweite, prüfbare Regeln mit Zahlen im Markenrahmen, was nicht übernehmen, Fehler in designrichtung.md, Prüffragen.
 - Zusammenführen: Ein Muster zählt, wenn mehrere Rollen es unabhängig finden. Widersprechen sich Rollen, steht die Entscheidung mit
-  Grund in designrichtung.md (2.5). Behauptungen der Rollen vor dem Übernehmen nachprüfen; ihre Zählungen weichen oft um ein, zwei
+  Grund in designrichtung.md (2.1). Behauptungen der Rollen vor dem Übernehmen nachprüfen; ihre Zählungen weichen oft um ein, zwei
   Bilder ab.
 
 ## 4. Jury: eine fertige Seite bewerten

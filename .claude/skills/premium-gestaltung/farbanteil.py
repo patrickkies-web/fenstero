@@ -1,4 +1,4 @@
-"""Farb- und Lichtanteile eines Bildschirmfotos messen (Designrichtung, Abschnitte 2, 3.1 und 6).
+"""Farb- und Lichtanteile eines Bildschirmfotos messen (vorbilder.md, 2; designrichtung.md, 3.1 und 6).
 
 Aufruf: python3 -I farbanteil.py bild.png [weitere.png ...]
 Misst je Bild drei Farbanteile der Fläche:
