@@ -30,7 +30,7 @@ export default async (h) => {
   ok(vk.status === 200 && karten.length === Pk.LISTE.length && karten.map((k) => k.p).join() === Pk.LISTE.join() && karten.every(karteOk), '29.1 Verkaufsseite: drei Paketkarten mit Monats- und Einrichtungspreis aus pakete.js (' + Pk.LISTE.map((p) => Pk.preis(p).monat + '/' + Pk.preis(p).einrichtung).join(', ') + ' €), „zzgl. MwSt.“ und „nur für Unternehmer“ bei jedem Preis');
   const vgl = (/<table class="rg-tab vk-vergleich">[\s\S]*?<\/table>/.exec(fb) || [''])[0];
   const titelVgl = Object.keys(Pk.MERKMALE).filter((s) => Pk.MERKMALE[s].vergleich && s !== 'preis').map((s) => Pk.MERKMALE[s].titel);
-  ok(Pk.LISTE.every((p) => vgl.includes(eur(Pk.preis(p).monat)) && vgl.includes(eur(Pk.preis(p).einrichtung))) && titelVgl.every((t) => vgl.includes('<td>' + t + '</td>')) && /Alle Preise netto zzgl\. MwSt\., nur für Unternehmer\./.test(fb), '29.1 Vergleich: alle Merkmale mit „vergleich“ aus pakete.js (' + titelVgl.length + '), Preise je Paket, Hinweis netto und nur für Unternehmer');
+  ok(Pk.LISTE.every((p) => vgl.includes(eur(Pk.preis(p).monat)) && vgl.includes(eur(Pk.preis(p).einrichtung))) && titelVgl.every((t) => vgl.includes('<th scope="row">' + t + '</th>')) && /Alle Preise netto zzgl\. MwSt\., nur für Unternehmer\./.test(fb), '29.1 Vergleich: alle Merkmale mit „vergleich“ aus pakete.js (' + titelVgl.length + '), Preise je Paket, Hinweis netto und nur für Unternehmer');
   const ld = ldjson(fb).find((x) => x && x['@type'] === 'SoftwareApplication' && Array.isArray(x.offers));
   const ldOk = !!ld && ld.offers.length === 3 && Pk.LISTE.every((p, i) => {
     const o = ld.offers[i], pr = Pk.preis(p), spez = o.priceSpecification || [];

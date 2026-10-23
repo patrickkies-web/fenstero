@@ -154,8 +154,9 @@ function karten(o, v) {
 /* Vergleich aller Merkmale mit vergleich: true (Beschriftung aus MERKMALE) */
 function vergleich(o, v) {
   const liste = P().LISTE, M = P().MERKMALE, ms = liste.map((p) => P().merkmale(p));
-  const kopf = '<thead><tr><th>Merkmal</th>' + liste.map((p) => '<th>' + esc(kurzname(p)) + '</th>').join('') + '</tr></thead>';
-  const zeile = (titel, werte) => '<tr><td>' + esc(titel) + '</td>' + werte.map((w, i) => '<td data-k="' + esc(kurzname(liste[i])) + '">' + w + '</td>').join('') + '</tr>';
+  const kopf = '<thead><tr><th scope="col">Merkmal</th>' + liste.map((p) => '<th scope="col">' + esc(kurzname(p)) + '</th>').join('') + '</tr></thead>';
+  /* der Merkmalsname ist Zeilenkopf (th scope="row"), damit Vorleseprogramme jeden Wert seinem Merkmal zuordnen */
+  const zeile = (titel, werte) => '<tr><th scope="row">' + esc(titel) + '</th>' + werte.map((w, i) => '<td data-k="' + esc(kurzname(liste[i])) + '">' + w + '</td>').join('') + '</tr>';
   const zeilen = [zeile('Monatlich, ' + (v.mwst ? 'netto' : 'ohne USt.'), ms.map((m) => geld(m.preis.monat))), zeile('Einrichtung, einmalig vorab', ms.map((m) => geld(m.preis.einrichtung)))];
   Object.keys(M).forEach((s) => { if (M[s].vergleich && s !== 'preis') zeilen.push(zeile(M[s].titel, ms.map((m) => esc(wertText(s, m))))); });
   return '\n  <table class="rg-tab vk-vergleich">' + kopf + '<tbody>' + zeilen.join('') + '</tbody></table>\n  <p class="rg-klein">Alle Preise ' + steuerText(v) + ', nur für Unternehmer.' + (v.vorlaeufig ? ' Vorläufige Preise.' : '') + '</p>\n  ';

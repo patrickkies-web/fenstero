@@ -12,6 +12,8 @@
 (function () {
   'use strict';
   var MAIL = /^[^\s@<>()",;]+@[^\s@<>()",;]+\.[^\s@<>()",;]{2,}$/;
+  /* Kontakt aus dem Impressum, als Link in den Fehlermeldungen des Formulars */
+  var KONTAKT = '<a href="mailto:ask@eeziframes.com">ask@eeziframes.com</a>';
   function ruhig() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
   var kannIO = 'IntersectionObserver' in window;
 
@@ -82,11 +84,12 @@
           if (x.status === 200 && x.j.ok) return danke();
           meldung.textContent = '';
           if (x.j.felder) return fehlerZeigen(x.j.felder);
-          meldung.textContent = x.j.fehler || 'Ihre Frage ließ sich gerade nicht senden. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie uns eine E-Mail (Adresse im Impressum).';
+          if (x.j.fehler) meldung.textContent = x.j.fehler;
+          else meldung.innerHTML = 'Ihre Frage ließ sich gerade nicht senden. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie an ' + KONTAKT + '.';
         })
         .catch(function () {
           knopf.disabled = false;
-          meldung.textContent = 'Keine Verbindung. Bitte versuchen Sie es gleich noch einmal; Ihre Angaben bleiben stehen.';
+          meldung.innerHTML = 'Keine Verbindung. Bitte versuchen Sie es gleich noch einmal; Ihre Angaben bleiben stehen. Oder schreiben Sie an ' + KONTAKT + '.';
         });
     });
   }
@@ -152,7 +155,7 @@
 
   /* ---------- Halt-Knopf (WCAG 2.2.2) ----------
      Was länger als 5 s von selbst läuft (Leisten samt Schub, Meldungen, Staub, Wiegen, Lottie-Zeichen, Puls, Flug), hält ein Knopf an;
-     es gibt ihn im Startbild an der Meldung und an Leiste 1, beide schalten dasselbe. Die Wahl gilt für die ganze Seite (html.vk-halt,
+     es gibt ihn im Startbild an der Meldung und an Leiste 1, beide schalten dasselbe. Die Wahl gilt für die ganze Seite (html.vk-angehalten,
      verkauf.css) und bleibt gespeichert (localStorage vk.halt), auch in der Einbettung. Bei „weniger Bewegung“ läuft nichts, dann
      bleibt der Knopf verborgen. */
   var HALT = 'vk.halt', halt = false, haltHoerer = [];
@@ -160,16 +163,16 @@
   function haltSetzen(an) {
     halt = !!an;
     try { if (halt) localStorage.setItem(HALT, '1'); else localStorage.removeItem(HALT); } catch (e) { /* ok */ }
-    document.documentElement.classList.toggle('vk-halt', halt);
-    Array.prototype.forEach.call(document.querySelectorAll('.vk-halt'), function (b) { b.setAttribute('aria-pressed', String(halt)); });
+    document.documentElement.classList.toggle('vk-angehalten', halt);
+    Array.prototype.forEach.call(document.querySelectorAll('button.vk-halt'), function (b) { b.setAttribute('aria-pressed', String(halt)); });
     if (window.Lottie && window.Lottie.halten) window.Lottie.halten(halt);
     haltHoerer.forEach(function (f) { try { f(halt); } catch (e) { /* ok */ } });
   }
   function haltKnoepfe(wurzel) {
     if (ruhig()) return;
-    document.documentElement.classList.toggle('vk-halt', halt);
+    document.documentElement.classList.toggle('vk-angehalten', halt);
     if (halt && window.Lottie && window.Lottie.halten) window.Lottie.halten(true);
-    Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-halt'), function (b) {
+    Array.prototype.forEach.call(wurzel.querySelectorAll('button.vk-halt'), function (b) {
       b.hidden = false;
       b.setAttribute('aria-pressed', String(halt));
       if (b.__vkAn) return;

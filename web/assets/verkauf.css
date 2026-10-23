@@ -129,8 +129,10 @@ details.vk-hinweis summary::after { content: ""; position: absolute; right: 4px;
 details.vk-hinweis[open] summary::after { margin-top: -2px; transform: rotate(-135deg) }
 .rg details.vk-hinweis p { margin: 0 0 12px; font-size: 15px; line-height: 1.5 }
 
-/* Vergleich: erste Spalte breiter, Werte ruhig */
-.vk-vergleich td:first-child { width: 34% }
+/* Vergleich: erste Spalte breiter, Werte ruhig; der Merkmalsname ist Zeilenkopf und sieht aus wie die erste Spalte des Ratgebers */
+.vk-vergleich tbody th { width: 34%; font-size: 15px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--ink); overflow-wrap: break-word; hyphens: auto }
+.vk-vergleich tr:last-child th { border-bottom: 0 }
+@media (max-width: 600px) { .vk-vergleich tbody th { display: block; width: auto; padding: 0; border: 0 } }
 
 /* Bestellen: Knöpfe je Paket, „bald möglich“ als Karte */
 .vk-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 10px }
@@ -222,7 +224,7 @@ body.vk-seite { --vk-rand: max(16px, min(124px, 31.25vw - 276px), (100vw - 1032p
 /* Meldung: Glas nach der Designrichtung (#1f1f1f zu 72 %, Weichzeichner 24 px, Lichtkante oben in Weiß), grüner Punkt 8 px, Titel 15
    fett, darunter eine Zeile 13 mit der Zeit in --text2. Vorn die neueste; am Schreibtisch zwei ältere als Kanten dahinter, am Telefon
    nur die vordere (dort fehlt der Platz über dem Flieger). Ohne backdrop-filter eine fast deckende Fläche. */
-.vk-eingang { position: absolute; z-index: 2; top: 6px; left: var(--vk-rand); width: 220px; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; transform: translate3d(0, calc(var(--py, 0) * -16px), 0) }
+.vk-eingang { position: absolute; z-index: 2; top: 6px; left: var(--vk-rand); width: 220px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; transform: translate3d(0, calc(var(--py, 0) * -16px), 0) }
 .vk-eingang-kopf { display: flex; align-items: center; gap: 4px; height: 32px }
 .vk-eingang .eyebrow { margin: 0 0 0 2px; color: var(--text2); text-shadow: 0 1px 2px rgba(0, 0, 0, .7); white-space: nowrap }
 .vk-stapel { display: grid }
@@ -240,8 +242,8 @@ body.vk-seite { --vk-rand: max(16px, min(124px, 31.25vw - 276px), (100vw - 1032p
 .vk-nachricht[data-pos="neu"] { z-index: 4; transform: translateY(-24px) scale(1.04); opacity: 0; transition: none }
 .vk-nachricht[data-pos="weg"] { z-index: 0; transform: translateY(20px) scale(.82); opacity: 0 }
 .vk-nachricht:not([data-pos="0"]):not([data-pos="neu"]) > *, .vk-nachricht:not([data-pos="0"]):not([data-pos="neu"])::before { opacity: 0 }
-/* Halt-Knopf (WCAG 2.2.2): rund, 44 px Ziel, sichtbar 32 px; hält alles an, was länger als 5 s läuft (verkauf.js, html.vk-halt) */
-.vk-halt { position: relative; flex: 0 0 auto; width: 44px; height: 44px; margin: -6px -6px -6px 0; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--text); cursor: pointer; -webkit-tap-highlight-color: transparent }
+/* Halt-Knopf (WCAG 2.2.2): rund, 44 px Ziel, sichtbar 32 px; hält alles an, was länger als 5 s läuft (verkauf.js, html.vk-angehalten) */
+.vk-halt { position: relative; z-index: 5; flex: 0 0 auto; width: 44px; height: 44px; margin: -6px -6px -6px 0; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--text); cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent }
 .vk-halt[hidden] { display: none }
 .vk-halt::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: rgba(22, 22, 22, .8); box-shadow: inset 0 0 0 1.5px #93928d; transition: transform 150ms var(--e-out) }
 .vk-halt:active::before { transform: scale(.94) }
@@ -319,7 +321,7 @@ body.vk-seite { --vk-rand: max(16px, min(124px, 31.25vw - 276px), (100vw - 1032p
 .js .vk-hero-foto .vk-licht, .js .vk-hero-foto .vk-staub { opacity: 0; transition: opacity 900ms var(--e-out) }
 .js .vk-hero-foto.vk-hell .vk-licht, .js .vk-hero-foto.vk-hell .vk-staub { opacity: 1 }
 /* angehalten (Halt-Knopf): Schleifen stehen, wo sie gerade sind */
-html.vk-halt .vk-staub i, html.vk-halt .vk-leiste-a li > svg, html.vk-halt .vk-mini-knopf::after, html.vk-halt .vk-flug, html.vk-halt .vk-konfetti i { animation-play-state: paused !important }
+html.vk-angehalten .vk-staub i, html.vk-angehalten .vk-leiste-a li > svg, html.vk-angehalten .vk-mini-knopf::after, html.vk-angehalten .vk-flug, html.vk-angehalten .vk-konfetti i { animation-play-state: paused !important }
 
 /* ---------- Zwei Leisten unter dem Startbild (23.10.2026) ----------
    Wie die Logoleisten anderer Seiten: Einträge schweben in Dauerschleife waagerecht durchs Bild, die erste von links nach rechts, die
@@ -738,7 +740,9 @@ html:not(.js) .vk-leiste-fenster::-webkit-scrollbar, .vk-leiste.vk-still .vk-lei
 .vk-ablauf li::before { font-weight: 600; letter-spacing: .04em; font-variant-numeric: tabular-nums }
 
 /* Kopfzeile der Seite: feiner Maßstab an der Unterkante, der Lesefortschritt wächst grün mit (--k aus verkauf.js) */
-.vk-seite .rg-kopf::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 5px; pointer-events: none; background: linear-gradient(90deg, var(--accent), var(--accent)) left bottom / calc(var(--k, 0) * 100%) 2px no-repeat, repeating-linear-gradient(90deg, rgba(255, 255, 255, .14) 0 1px, transparent 1px 8px) left bottom / 100% 4px no-repeat }
+.vk-seite .rg-kopf::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 5px; pointer-events: none; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .14) 0 1px, transparent 1px 8px) left bottom / 100% 4px no-repeat }
+/* die grüne Strecke wächst per scaleX (nur transform, kein Neuzeichnen beim Scrollen) */
+.vk-seite .rg-kopf::before { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; background: var(--accent); transform: scaleX(var(--k, 0)); transform-origin: 0 50% }
 
 /* Weniger Bewegung: Rolle der Leiste flach, Szene ohne Gegenlauf, Ringe voll */
 @media (prefers-reduced-motion: reduce) {
