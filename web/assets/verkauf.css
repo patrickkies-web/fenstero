@@ -325,14 +325,15 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 
 /* Ablauf als Zeitleiste: Linie links, die sich beim Scrollen füllt (--sp aus Scroll.binden); je Schritt ein gezeichnetes Symbol (44 px,
    Linien mit pathLength 100), das gezogen wird, sobald die gefüllte Linie den Schritt erreicht (li.vk-an), die Nummer klein daneben
-   (13 px). Ohne JavaScript ist die Linie voll und jedes Symbol gezogen. */
+   (13 px). Ohne JavaScript ist die Linie voll und jedes Symbol gezogen. Stapel: Linien (0) unter den Symbolen (1), der Ring um den
+   Kreis (4 px in Grundfarbe) unterbricht die Linie, die Nummernplakette (2) liegt obenauf; li hat keinen eigenen Stapelkontext. */
 .rg .vk-ablauf { position: relative; margin: 18px 0 0; padding: 4px 0 0; --sp: 1 }
 .js .rg .vk-ablauf { --sp: 0 }
-.vk-ablauf::before, .vk-ablauf::after { content: ''; position: absolute; left: 21px; top: 30px; bottom: 50px; width: 2px; border-radius: 1px; background: var(--line) }
+.vk-ablauf::before, .vk-ablauf::after { content: ''; position: absolute; z-index: 0; left: 21px; top: 30px; bottom: 50px; width: 2px; border-radius: 1px; background: var(--line) }
 .vk-ablauf::after { bottom: auto; height: calc((100% - 80px) * var(--sp)); background: var(--accent) }
 .rg .vk-ablauf li { margin: 0 0 26px; padding-left: 64px; min-height: 52px }
 .rg .vk-ablauf li:last-child { margin-bottom: 0 }
-.vk-ablauf .vk-symbol { position: absolute; left: 0; top: 4px; width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); color: var(--ink); box-shadow: 0 0 0 4px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
+.vk-ablauf .vk-symbol { position: absolute; z-index: 1; left: 0; top: 4px; width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); color: var(--ink); box-shadow: 0 0 0 4px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
 .vk-ablauf .vk-symbol svg { display: block; width: 100%; height: 100% }
 .vk-ablauf .vk-sym { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round }
 .js .vk-ablauf li:not(.vk-an) .vk-sym { stroke-dasharray: 100; stroke-dashoffset: 100 }
@@ -341,7 +342,7 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 @keyframes vk-ziehen { from { stroke-dashoffset: 100 } to { stroke-dashoffset: 0 } }
 .vk-ablauf li.vk-an .vk-symbol, html:not(.js) .vk-ablauf .vk-symbol { background: var(--accent); color: var(--on-accent) }
 /* die Nummer: kleine Pille rechts unten am Symbol */
-.vk-ablauf li::before { z-index: 1; left: 30px; top: 30px; width: auto; min-width: 22px; height: 22px; padding: 0 5px; border-radius: var(--pill); background: var(--surface3); color: var(--ink); font-size: 13px; line-height: 1; box-shadow: 0 0 0 2px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
+.vk-ablauf li::before { z-index: 2; left: 30px; top: 30px; width: auto; min-width: 22px; height: 22px; padding: 0 5px; border-radius: var(--pill); background: var(--surface3); color: var(--ink); font-size: 13px; line-height: 1; box-shadow: 0 0 0 2px var(--ground); transition: background var(--t2) var(--e-out), color var(--t2) var(--e-out) }
 .vk-ablauf li.vk-an::before, html:not(.js) .vk-ablauf li::before { background: var(--accent); color: var(--on-accent) }
 
 /* Wissen: fünf Karten in einer Reihe am Schreibtisch (sonst stünde eine allein in der zweiten) */
@@ -357,6 +358,8 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 .vk-bestellen .vk-bald, .vk-bestellen .vk-form { margin-top: 0 }
 .rg .vk-bestellen h3 { margin-top: 18px }
 @media (min-width: 901px) { .vk-bestellen { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 28px } .vk-bestellen > .foto-karte { position: sticky; top: 76px; max-width: none } }
+/* am Telefon stehen die Chips unter dem Bild (ratgeber.css); die drei dieser Karte passen bei 390 px in eine Zeile, wenn sie etwas enger sitzen */
+@media (max-width: 600px) { .rg .vk-frage-foto .chips { padding: 10px 10px 12px } .rg .vk-frage-foto .chip { padding: 0 10px } }
 
 /* Weniger Bewegung: Foto und Chips stehen, Haken gezogen, Zeitleiste voll und Symbole gezogen, Ring voll, Bühne ohne Überblenden
    (verkauf.js schaltet den Bildschirm hart um), kein Puls, kein Flieger, kein Konfetti; die Skripte lassen Zahlen, Zeichen und Reveal in Ruhe */
@@ -379,7 +382,10 @@ body.vk-seite { overflow-x: hidden; overflow-x: clip }
 .vk-einbettung[aria-busy="true"] { min-height: 60vh }
 .vk-einbettung h2 { margin-top: 0 }
 .vk-einbettung .vk-hero { padding-top: 0 }
-.vk-einbettung .vk-anfrage .vk-blatt, .vk-einbettung .vk-bestellen > .foto-karte { top: calc(var(--vk-kopf) + 16px) }
+/* klebende Karten unter der Kopfzeile des Portals, nur in den Breiten, in denen sie kleben: darunter ist die Fotokarte position: relative
+   (gemeinsam.css), ein top würde sie nach unten schieben */
+@media (min-width: 761px) { .vk-einbettung .vk-anfrage .vk-blatt { top: calc(var(--vk-kopf) + 16px) } }
+@media (min-width: 901px) { .vk-einbettung .vk-bestellen > .foto-karte { top: calc(var(--vk-kopf) + 16px) } }
 .vk-einbettung.vk-rueckfall .pakete-karte { margin-bottom: 0 }
 @media (min-width: 761px) {
   .vk-einbettung .vk-hero { padding-top: clamp(12px, 2.5vw, 28px) }
