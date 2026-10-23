@@ -163,9 +163,12 @@ export default async (h) => {
       await s.waitForSelector('.p-danke');
       const danke = await s.textContent('.p-danke h1');
       await s.click('[data-a="konto"]'); await s.waitForSelector('.p-verlauf');
-      const konto = await s.evaluate(() => ({ aktuell: ((document.querySelector('.p-verlauf li[aria-current="step"]') || {}).textContent || '').trim(), hash: location.hash, quer: document.documentElement.scrollWidth > window.innerWidth + 1 }));
+      const konto = await s.evaluate(() => ({ aktuell: ((document.querySelector('.p-verlauf li[aria-current="step"]') || {}).textContent || '').trim(), hash: location.hash, quer: document.documentElement.scrollWidth > window.innerWidth + 1,
+        rueckrufKnoepfe: Array.from(document.querySelectorAll('button, a.btn')).filter((x) => x.innerText.trim() === 'Rückruf anfordern').length }));
       P.bid = konto.hash.replace('#bestellung/', '');
       await bild(s, '04-kundenkonto-bezahlt-' + P.p + '-' + P.geraet, { ganz: true });
+      /* Befund 14: die nächste Aktion steht einmal als Hauptknopf, die Rückruf-Karte wiederholt sie nicht */
+      ok(konto.rueckrufKnoepfe === 1, P.p + ': Kundenkonto „Bezahlt“ mit genau einem Knopf „Rückruf anfordern“ (gezählt: ' + konto.rueckrufKnoepfe + ')');
       const b = await bestellungVon(P.bid), preis = Pk.preis(P.p);
       const bOk = { paket: gewaehlt === P.p, domain: zus.includes(P.domain), preis: new RegExp('(^|\\D)' + preis.einrichtung + '\\s?€').test(zus), danke: /bezahlt/.test(danke), leiste: /Bezahlt/.test(konto.aktuell), quer: !konto.quer, status: !!b && b.status === 'bezahlt' && b.paket_bestellt === P.p, eingang: !!b && ((b.wunsch.konfigurator || {}).eingang || [])[0] === P.ein };
       ok(Object.values(bOk).every(Boolean),
