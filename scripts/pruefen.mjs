@@ -842,9 +842,10 @@ if (teil(6)) {
   const l07 = await lam7();
   await p7.click('[data-w3d="wenden"]'); await p7.waitForTimeout(300);
   const l17 = await lam7();
-  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(400);
+  /* die Fahrt läuft bildweise (0,8 s von der Mitte nach unten, 1,8 s über den ganzen Weg): erst nach dem Ende stehen die Lamellen am Ziel */
+  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(1500);
   const l27 = await lam7();
-  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(400);
+  await p7.click('[data-w3d="fahren"]'); await p7.waitForTimeout(2600);
   const l37 = await lam7();
   ok(/rotateX\(-52deg\)/.test(l07.t0) && l07.wenden === 'false' && l17.wenden === 'true' && /rotateX\(-6deg\)/.test(l17.t0) && /Hochfahren/.test(l27.fahren) && l27.u > l07.u && /Herunterfahren/.test(l37.fahren) && /rotateX\(-86deg\)/.test(l37.t0) && l37.u < l07.u && l07.hoch >= 44, 'Raffstore: Lamellen wenden (zu und offen), herunter- und hochfahren, oben liegen die Lamellen als Paket; Knöpfe ab 44 px');
   await p7.evaluate(() => { W3D_BEHANG.stand = 0.55; W3D_BEHANG.wend = 0; });
@@ -4334,13 +4335,14 @@ if (teil(20)) {
   await zeige20('sart', { sart: 'raffstore', roll: 'vorbau' });
   const s3a = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return { gl: st.classList.contains('gl'), lam: R.filter((r) => /^lam-\d+$/.test(r)).length, fs: ['fs-l', 'fs-r', 'fs-l2', 'fs-r2', 'behang-u'].every((r) => R.includes(r)), zug: R.includes('band-l') && R.includes('band-r'), alt: R.some((r) => /^schiene-|^behang$/.test(r)), deckt: Buehne3D.pruef.deckt(st, 'band-l') }; });
   ok(s3a.gl && s3a.lam >= 10 && s3a.fs && s3a.zug && !s3a.alt && s3a.deckt > 0.5, 'WebGL: Raffstore wie im CSS-Modell aus einzelnen Lamellen, mit Führungsschienen, Endschiene und Aufzugbändern mit eigener Farbe (' + s3a.lam + ' Lamellen)');
-  const lam20 = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const n = Buehne3D.pruef.rollen(st).filter((r) => /^lam-\d+$/.test(r)).length, z = 'lam-' + (n - 1), l0 = Buehne3D.pruef.matrix(st, 'lam-0'), lz = Buehne3D.pruef.matrix(st, z), e0 = st.querySelector('[data-r="lam-0"]'), ez = st.querySelector('[data-r="' + z + '"]'); return { n: n, rot: l0 ? l0[6] : 0, y: lz ? lz[13] : 0, w0: e0._tf && e0._tf.zt ? e0._tf.zt.d : 0, wz: ez._tf && ez._tf.zt ? [ez._tf.zt.d, ez._tf.zt.v] : [0, 0] }; });
+  const lam20 = () => g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const n = Buehne3D.pruef.rollen(st).filter((r) => /^lam-\d+$/.test(r)).length, z = 'lam-' + (n - 1), l0 = Buehne3D.pruef.matrix(st, 'lam-0'), lz = Buehne3D.pruef.matrix(st, z), e0 = st.querySelector('[data-r="lam-0"]'), ez = st.querySelector('[data-r="' + z + '"]'); return { n: n, rot: l0 ? l0[6] : 0, y: lz ? lz[13] : 0, w0: e0._tf && e0._tf.zt ? e0._tf.zt.d : 0, wz: ez._tf && ez._tf.zt ? [ez._tf.zt.d, ez._tf.zt.v] : [0, 0], pos: W3D_BEHANG.pos, fahrt: st.classList.contains('is-fahrt') }; });
   const m20a = await lam20();
   await g5.click('#w3d [data-w3d="wenden"]'); await g5.waitForTimeout(2000);
   const m20b = await lam20();
   await g5.click('#w3d [data-w3d="fahren"]'); await g5.waitForTimeout(3500);
   const m20c = await lam20();
-  ok(Math.abs(m20b.rot - m20a.rot) > 0.3 && m20b.w0 === 600 && m20c.y > m20b.y + 5 && m20c.wz[0] === 1800 && m20c.wz[1] === (m20c.n - 1) * 12, 'WebGL: „Lamellen wenden“ dreht die Lamellen (0,6 s), „Herunterfahren“ fährt sie aus dem Paket (1,8 s, je Lamelle 12 ms später), wie im CSS-Modell');
+  /* die Fahrt legt app.js bildweise und ohne Übergang (w3dFahrt): die letzte Lage kam sofort (d 1, kein Versatz), danach steht der Behang unten */
+  ok(Math.abs(m20b.rot - m20a.rot) > 0.3 && m20b.w0 === 600 && m20c.y > m20b.y + 5 && m20c.wz[0] <= 1 && m20c.wz[1] === 0 && m20c.pos === 1 && !m20c.fahrt, 'WebGL: „Lamellen wenden“ dreht die Lamellen (0,6 s), „Herunterfahren“ fährt sie bildweise mit der Endschiene aus dem Paket (ohne Übergang und Versatz je Lamelle), wie im CSS-Modell');
   /* Kleinteile als Flächen: Stopfen, Schlitz im Gurtwickler, Wippe und Funk-Punkt am Taster; der Wickler stanzt kein Loch */
   await zeige20('sart', { sart: 'rollladen', roll: 'vorbau' });
   const stopf20 = await g5.evaluate(() => { const st = document.getElementById('w3d'); Buehne3D.pruef.pixel(st); const R = Buehne3D.pruef.rollen(st); return R.includes('stopf-l') && R.includes('stopf-r') && R.includes('behang'); });
@@ -4405,8 +4407,8 @@ if (teil(20)) {
   await g7.click('#w3d [data-w3d="wenden"]'); await g7.waitForTimeout(80);
   const tw20 = await g7.evaluate(() => getComputedStyle(document.querySelector('#w3d [data-r="lam-3"]')).transitionDuration);
   await g7.waitForTimeout(900); await g7.click('#w3d [data-w3d="fahren"]'); await g7.waitForTimeout(80);
-  const tf20 = await g7.evaluate(() => { const cs = getComputedStyle(document.querySelector('#w3d [data-r="lam-3"]')); return [cs.transitionDuration, cs.transitionDelay]; });
-  ok(/0\.6s/.test(tw20) && /1\.8s/.test(tf20[0]) && /0\.036s/.test(tf20[1]), 'CSS-Modell: Wenden 0,6 s, Fahren 1,8 s mit 12 ms je Lamelle, wie in der WebGL-Bühne (' + tw20 + ' | ' + tf20.join(' ') + ')');
+  const tf20 = await g7.evaluate(() => { const cs = getComputedStyle(document.querySelector('#w3d [data-r="lam-3"]')); return [cs.transitionDuration, cs.transitionDelay, document.getElementById('w3d').classList.contains('is-fahrt'), W3D_BEHANG.pos < W3D_BEHANG.stand]; });
+  ok(/0\.6s/.test(tw20) && /^0s/.test(tf20[0]) && /^0s/.test(tf20[1]) && tf20[2] && tf20[3], 'CSS-Modell: Wenden 0,6 s als Übergang, Fahren bildweise ohne Übergang und ohne Versatz je Lamelle (is-fahrt), wie in der WebGL-Bühne (' + tw20 + ' | ' + tf20.join(' ') + ')');
   sauber(g7, 'Kleinteile im CSS-Modell ohne Fehler'); await c20g.close();
   /* Selbsttest: ein gezoomter erster Blick (Glas oben links) schaltet die WebGL-Bühne nicht ab */
   const c20f = await browser.newContext(ctx20), g6 = await neueSeite(c20f);
@@ -4790,6 +4792,53 @@ if (teil(22)) {
   const kiZu = await pK.evaluate(() => ({ dlg: !!document.querySelector('.fx-dialog'), screen: S.screen, ja: !!(window.FotoKI && window.FotoKI.eingewilligt()) }));
   ok(kiOffen && !kiZu.dlg && kiZu.screen === 'fotos' && !kiZu.ja, 'Zurück-Taste bei offener KI-Einwilligung: schließt sie wie „Ohne KI weiter“, der Schritt Fotos bleibt (' + JSON.stringify(kiZu) + ')');
   await ctxK.close();
+  /* Feinschliff am Modell (23.10.2026, docs/GESTALTUNG.md): Zifferntasten kleiner mit „Zurück“, Dock rollt nach, Kamera bleibt am Griff,
+     Aufsatzkasten auf dem Rahmen samt Blende, Aufteilung am Regler, Haus am Zahnrad, Raffstore-Fahrt als Ganzes */
+  await p.evaluate(() => { S.verlassen = null; S.wohin = false; S.notiz = null; S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await p.waitForTimeout(400);
+  const fs1 = await p.evaluate(() => { const k = document.querySelector('.keypad [data-v="5"]').getBoundingClientRect(), z = document.querySelector('.keypad .zur'), st = document.getElementById('w3d').getBoundingClientRect(); return { key: Math.round(k.height), zur: z.textContent.trim(), zurH: Math.round(z.getBoundingClientRect().height), stage: Math.round(st.height), ok: Math.round(document.querySelector('.keypad .ok').getBoundingClientRect().height) }; });
+  await frageB('rc', { erreichbar: '' }, 'normal');
+  const fs2a = await p.evaluate(() => document.querySelector('.qdock').scrollTop);
+  await p.click('.qpanel [data-act="erreichbar"][data-v="ja"]'); await p.waitForTimeout(1200);
+  const fs2 = await p.evaluate(() => { const d = document.querySelector('.qdock'), b = document.querySelector('.qpanel .qlabel'); return { top: Math.round(d.scrollTop), sicht: !!b && b.getBoundingClientRect().top < d.getBoundingClientRect().bottom - 20 }; });
+  await frageB('griff', { griff: 'standard', teilung: '2p', sashes: [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }] }, 'normal'); await p.waitForTimeout(1300);
+  const fs3a = await p.evaluate(() => ({ z: W3DZ.w3d.z, x: Math.round(W3DZ.w3d.x), y: Math.round(W3DZ.w3d.y) }));
+  await p.click('.qnav [data-act="qnext"]'); await p.waitForTimeout(150);
+  const fs3b = await p.evaluate(() => ({ q: S.q, z: W3DZ.w3d.z, x: Math.round(W3DZ.w3d.x), y: Math.round(W3DZ.w3d.y) })); await p.waitForTimeout(900);
+  const fs3c = await p.evaluate(() => ({ q: S.q, z: W3DZ.w3d.z }));
+  const fs4 = await p.evaluate(() => { const w = demoProject()[0]; w.sart = 'raffstore'; w.roll = 'aufsatz'; const V = w3dCalc(w, {}); w.sart = 'rollladen'; const V2 = w3dCalc(w, {}); w.roll = 'vorbau'; const V3 = w3dCalc(w, {}); return { raff: V.moH - V.elH, kasten: V.kastenH, roll: V2.moH - V2.elH, vorbau: V3.moH - V3.elH, blende: AW.DETAIL.some((d) => d.k === 'blende') && AW.detailGilt(Object.assign(w, { roll: 'aufsatz' }), 'blende') && !AW.detailGilt(Object.assign(w, { roll: 'vorbau' }), 'blende') }; });
+  await frageB('teilung', { teilung: '2p', e_teilung: true, sashes: [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }] }, 'normal');
+  const fs5a = await p.evaluate(() => { const r = document.querySelectorAll('.qteil-r'), w = document.querySelectorAll('.qteil .st-wert'); return { regler: r.length, werte: w.length, f: w[0] ? w[0].getAttribute('data-f') : '', gleich: /alle gleich breit/.test(document.querySelector('.qteile .qlabel').textContent) }; });
+  await p.evaluate(() => { const r = document.querySelector('.qteil-r'); r.value = '35'; r.dispatchEvent(new Event('input', { bubbles: true })); r.dispatchEvent(new Event('change', { bubbles: true })); }); await p.waitForTimeout(400);
+  const fs5b = await p.evaluate(() => { const V = w3dCalc(S.win, {}); return { anteile: JSON.stringify(S.win.anteile), sw: V.sw.map((x) => Math.round(x)).join('/'), text: AW.teilungText(S.win), gleichChip: !!document.querySelector('[data-act="teil-gleich"]') }; });
+  await p.click('.qteil .st-wert[data-f="teil:0"]'); await p.waitForTimeout(300);
+  for (const z of ['6', '0', '0']) await p.click('.keypad [data-v="' + z + '"]');
+  await p.click('.keypad [data-v="ok"]'); await p.waitForTimeout(400);
+  const fs5c = await p.evaluate(() => { const V = w3dCalc(S.win, {}); return { sw0: Math.round(V.sw[0]), summe: Math.round(S.win.anteile.reduce((s, x) => s + x, 0) * 10) / 10, mass: !S.qMass, wert: document.querySelector('.qteil .st-wert[data-f="teil:0"] b').textContent }; });
+  await p.click('[data-act="teil-gleich"]'); await p.waitForTimeout(300);
+  const fs5d = await p.evaluate(() => ({ weg: S.win.anteile === undefined, gleich: /alle gleich breit/.test(document.querySelector('.qteile .qlabel').textContent) }));
+  await frageB('fa', {}, 'normal'); await p.waitForTimeout(300);
+  const fs6a = await p.evaluate(() => { const b = document.querySelector('#w3d [data-w3d="haus"]'); return { da: !!b && !b.hidden, h: b ? Math.round(b.getBoundingClientRect().height) : 0 }; });
+  await p.click('#w3d [data-w3d="haus"]'); await p.waitForTimeout(400);
+  const fs6b = await p.evaluate(() => ({ blatt: !!document.querySelector('.fb-haus'), chips: document.querySelectorAll('.fb-haus [data-hs="art"]').length, toene: document.querySelectorAll('.fb-haus [data-hs="farbe"]').length, ry: parseFloat(document.getElementById('w3d').style.getPropertyValue('--ry')) }));
+  await p.click('.fb-haus [data-hs="art"][data-v="klinker"]'); await p.click('.fb-haus [data-hs="farbe"][data-v="rotbunt"]'); await p.waitForTimeout(300);
+  const fs6c = await p.evaluate(() => ({ f: S.win.fassade, t: S.win.fassadeFarbe, e: S.win.e_fassade, wall: /rgb\(142, 74, 56\)|#8e4a38/i.test(document.querySelector('[data-r="wall-out"]').style.background), toene: document.querySelectorAll('.fb-haus [data-hs="farbe"]').length, text: AW.fassadeText(S.win), rows: specRows(S.win).find((r) => r.k === 'Einbau').v }));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(400);
+  const fs6d = await p.evaluate(() => ({ blatt: !!document.querySelector('.fb-haus'), q: S.q, fokus: document.activeElement && document.activeElement.getAttribute('data-w3d') }));
+  await frageB('sart', { sart: 'raffstore', roll: 'aufsatz' }, 'normal'); await p.waitForTimeout(400);
+  await p.evaluate(() => { W3D_BEHANG.stand = 0; W3D_BEHANG.pos = 0; render(true); }); await p.waitForTimeout(400);
+  await p.click('#w3d [data-w3d="fahren"]'); await p.waitForTimeout(500);
+  const fs7a = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, stand: W3D_BEHANG.stand, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), delay: getComputedStyle(document.querySelector('[data-r="lam-5"]')).transitionDelay }));
+  await p.waitForTimeout(1900);
+  const fs7b = await p.evaluate(() => ({ fahrt: document.getElementById('w3d').classList.contains('is-fahrt'), pos: W3D_BEHANG.pos, u: parseFloat(document.querySelector('[data-r="behang-u"]').style.transform.split(',')[1]), lam0: /rotateX\(-52deg\)/.test(document.querySelector('[data-r="lam-0"]').style.transform) }));
+  ok(fs1.key >= 40 && fs1.key <= 44 && fs1.zur === 'Zurück' && fs1.zurH === fs1.key && fs1.ok >= 44 && fs1.stage >= 220, 'Feinschliff, Zifferntasten beim Messen: Tasten ' + fs1.key + ' px mit „Zurück“ als beschriftetem Knopf, „Weiter“ ' + fs1.ok + ' px, das Modell ' + fs1.stage + ' px hoch');
+  ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
+  ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
+  ok(fs4.raff === 230 && fs4.kasten === 230 && fs4.roll === 200 && fs4.vorbau < 100 && fs4.blende, 'Feinschliff, Aufsatzkasten: das Element endet 230 mm (Raffstore) bzw. 200 mm (Rollladen) unter der Öffnung, beim Vorbau nicht; die Blende ist eine Detailangabe nur beim Aufsatzkasten');
+  ok(fs5a.regler === 1 && fs5a.werte === 2 && fs5a.f === 'teil:0' && fs5a.gleich && fs5b.anteile === '[35,65]' && +fs5b.sw.split('/')[0] < +fs5b.sw.split('/')[1] && /35 \/ 65 %/.test(fs5b.text) && fs5b.gleichChip && fs5c.sw0 === 600 && fs5c.summe === 100 && fs5c.mass && fs5c.wert === '600 mm' && fs5d.weg && fs5d.gleich,
+    'Feinschliff, Aufteilung: Regler je Pfosten mit Breiten in mm und Prozent, Ziehen setzt 35 / 65 (Modell und Blatt folgen), Eintippen von 600 mm stellt den Flügel, „Gleich verteilen“ setzt zurück (' + fs5b.sw + ')');
+  ok(fs6a.da && fs6a.h >= 44 && fs6b.blatt && fs6b.chips === 4 && fs6b.toene === 6 && fs6b.ry === 152 && fs6c.f === 'klinker' && fs6c.t === 'rotbunt' && fs6c.e && fs6c.wall && fs6c.toene === 6 && fs6c.text === 'Klinker, rotbunt' && /Fassade laut Kunde: Klinker, rotbunt/.test(fs6c.rows) && !fs6d.blatt && fs6d.q === 'fa' && fs6d.fokus === 'haus',
+    'Feinschliff, Haus am Zahnrad: Blatt mit vier Arten und sechs Tönen, Kamera von außen, Klinker rotbunt färbt die Wand sofort und steht im Blatt als Angabe des Kunden; Escape schließt und gibt den Fokus ans Zahnrad');
+  ok(fs7a.fahrt && fs7a.stand === 1 && fs7a.pos > 0.05 && fs7a.pos < 0.95 && fs7a.delay === '0s' && !fs7b.fahrt && fs7b.pos === 1 && fs7b.u > fs7a.u && fs7b.lam0, 'Feinschliff, Raffstore fährt als Ganzes: bildweise aus dem Stand (nach 0,5 s unterwegs, ohne Versatz je Lamelle), nach der Fahrt unten mit offenen Lamellen (' + (+fs7a.pos).toFixed(2) + ')');
   sauber(p, 'Konfigurator ohne Hürden: keine Fehler');
   await ctx.close();
 }

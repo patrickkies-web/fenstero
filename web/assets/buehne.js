@@ -185,10 +185,12 @@ window.Buehne3D = (function () {
     'float rausch(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);}' +
     'float sicht(vec2 P,float groesse){float w=length(gFw);return 1.0-smoothstep(groesse*0.35,groesse*0.9,w);}' +
     'vec3 putz(vec2 P,vec3 c,float k,float st){float a=sicht(P,1.2*k),b=sicht(P,4.0*k);float n=(rausch(P/(1.2*k))-0.5)*a*0.55+(rausch(P/(4.0*k)+7.3)-0.5)*b+(rausch(P/(22.0*k)+3.1)-0.5)*0.6;return c*(1.0+st*n);}' +
-    'vec3 klinker(vec2 P,float k){float C=81.0*k,L=250.0*k,j=10.0*k;float r=floor(P.y/C);float x=P.x+mod(r,2.0)*L*0.5;float s=floor(x/L);vec2 q=vec2(mod(x,L),mod(P.y,C));' +
+    /* Klinker im Grundton b (uArtC aus app.js, Farbwahl am Zahnrad): je Stein etwas heller oder dunkler, zum Rand hin dunkler; die Fuge
+       hellgrau, bei hellen Steinen etwas dunkler als der Stein, damit der Verband lesbar bleibt */
+    'vec3 klinker(vec2 P,vec3 b,float k){float C=81.0*k,L=250.0*k,j=10.0*k;float r=floor(P.y/C);float x=P.x+mod(r,2.0)*L*0.5;float s=floor(x/L);vec2 q=vec2(mod(x,L),mod(P.y,C));' +
     'float aa=length(gFw)*0.7;float m=1.0-min(smoothstep(j-aa,j+aa,q.x),smoothstep(j-aa,j+aa,q.y));' +
-    'float v=hash(vec2(s,r)*1.37+0.5);vec3 st=mix(vec3(0.62,0.29,0.2),vec3(0.78,0.42,0.3),v)*(0.93+0.12*rausch(P/(9.0*k)));float e=min(q.x-j,q.y-j);st*=mix(0.84,1.0,smoothstep(0.0,6.0*k,e));' +
-    'vec3 mo=vec3(0.74,0.7,0.65)*(0.92+0.1*rausch(P/(2.5*k)));vec3 c=mix(st,mo,m);vec3 mittel=mix(vec3(0.69,0.36,0.25),vec3(0.74,0.7,0.65),0.2);return mix(mittel,c,sicht(P,C*0.5));}' +
+    'float v=hash(vec2(s,r)*1.37+0.5);vec3 st=b*mix(0.82,1.12,v)*(0.93+0.12*rausch(P/(9.0*k)));float e=min(q.x-j,q.y-j);st*=mix(0.84,1.0,smoothstep(0.0,6.0*k,e));' +
+    'float hell=smoothstep(0.55,0.72,(b.r+b.g+b.b)/3.0);vec3 fuge=mix(vec3(0.74,0.7,0.65),b*0.84,hell);vec3 mo=fuge*(0.92+0.1*rausch(P/(2.5*k)));vec3 c=mix(st,mo,m);vec3 mittel=mix(b*0.97,fuge,0.2);return mix(mittel,c,sicht(P,C*0.5));}' +
     'vec3 granit(vec2 P,vec3 c,float k){float fw=length(gFw);float g=max(0.8*k,0.9*fw);float n1=rausch(P/g),n2=rausch(P/(g*1.3)+17.0),n3=rausch(P/(g*2.2)+5.0),n4=rausch(P/(12.0*k)+3.0);' +
     'c*=0.93+0.12*n4;c=mix(c,c*0.78,smoothstep(0.55,0.75,n3)*0.5);c=mix(c,vec3(0.2,0.19,0.18),smoothstep(0.8,0.9,n1)*0.6);c=mix(c,vec3(0.96,0.95,0.94),smoothstep(0.8,0.9,n2)*0.5);return c;}' +
     'vec3 holz(vec2 P,vec3 c,float k,bool senk){vec2 q=senk?P.yx:P;float u=q.y/k;float wp=rausch(vec2(q.x/(90.0*k),u/9.0))*7.0+rausch(vec2(q.x/(22.0*k),u/3.0))*1.5;' +
@@ -214,14 +216,17 @@ window.Buehne3D = (function () {
     '\n#ifdef SCHNITT\nif(uSide>0.5&&fs<0.0)discard;if(uSide<-0.5&&fs>0.0)discard;\n#endif\n' +
     'vec2 P=vP;vec4 c=uBase;for(int i=4;i>=0;i--){if(i>=uNL)continue;vec4 l=lage(i,P);c=l+c*(1.0-l.a);}' +
     'int art=int(uArt.x+0.5);if(art>0&&c.a>0.0){float k=uArt.y;vec3 b=art>=2?uArtC:c.rgb/c.a;vec3 r=b;vec2 Q=P+uArtO;' +
-    'if(art==1)r=putz(Q,b,k,uArt.w);else if(art==2)r=klinker(Q,k);else if(art==3)r=granit(Q,b,k);else if(art==5)r=alu(Q,b,k);else if(art==6)r=bretter(Q,b,k);' +
+    'if(art==1)r=putz(Q,b,k,uArt.w);else if(art==2)r=klinker(Q,b,k);else if(art==3)r=granit(Q,b,k);else if(art==5)r=alu(Q,b,k);else if(art==6)r=bretter(Q,b,k);' +
     'else if(art==4){bool senk=uArt.z>1.5;if(uBand.z>uBand.x){float dt=P.y/max(uBand.y,1e-3),db=(uWH.y-P.y)/max(uWH.y-uBand.w,1e-3),dl=P.x/max(uBand.x,1e-3),dr=(uWH.x-P.x)/max(uWH.x-uBand.z,1e-3);senk=min(dl,dr)<min(dt,db);}r=holz(P,b,k,senk);}' +
     'c.rgb=r*c.a;}' +
     'float aaP=max(length(gFw)*0.7,1e-3);' +
     'if(uFx.x>0.0){float d=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));vec4 k=uIn*(1.0-smoothstep(uFx.x-aaP,uFx.x+aaP,d));c=k+c*(1.0-k.a);}' +
     'if(uFx.y>0.0){vec2 h=uWH*0.5;vec2 q=abs(P-h)-(h-uFx.y);float sd=length(max(q,0.0))+min(max(q.x,q.y),0.0)-uFx.y;c*=1.0-smoothstep(-aaP,aaP,sd);}' +
     'c=uTint*c.a+c*(1.0-uTint.a);' +
-    'float ao=1.0;for(int i=0;i<4;i++){vec4 a=uAo[i];if(a.w<=0.0)continue;float q=a.x<0.5?P.x:P.y;float d=(q-a.y)*a.z;if(d<-1.0)continue;d=max(d,0.0);float r=uAoR.x;float f=1.0-clamp(d/r,0.0,1.0);ao*=1.0-a.w*f*f;}' +
+    /* Verschattung: je Kante ein Band (uAo, bis vier), oder (uAoR.y) rund um ein Rechteck (uAo[0] = Loch, uAo[1].x = Stärke): weich auch über die
+       Ecken, keine Linie in Verlängerung der Lochkante (Kontaktschatten um die Maueröffnung und die Rahmenöffnung) */
+    'float ao=1.0;if(uAoR.y>0.5){vec4 rb=uAo[0];vec2 ce=(rb.xy+rb.zw)*0.5,hs=(rb.zw-rb.xy)*0.5;vec2 qq=abs(P-ce)-hs;float dd=length(max(qq,0.0));float f=1.0-clamp(dd/uAoR.x,0.0,1.0);ao*=1.0-uAo[1].x*f*f;}' +
+    'else{for(int i=0;i<4;i++){vec4 a=uAo[i];if(a.w<=0.0)continue;float q=a.x<0.5?P.x:P.y;float d=(q-a.y)*a.z;if(d<-1.0)continue;d=max(d,0.0);float r=uAoR.x;float f=1.0-clamp(d/r,0.0,1.0);ao*=1.0-a.w*f*f;}}' +
     'if(uFade.y>0.0)c*=1.0-smoothstep(uFade.x,uFade.y,P.y);' +
     'c*=uOp;\n#ifdef SCHNITT\nif(uFx.z>0.0){if(c.a<uFx.z)discard;}\n#endif\n' +
     'if(uLi.x>0.5){if(fs<0.0)N=-N;N=normalize(N+kante(vP));float d1=max(dot(N,uL1),0.0),d2=max(dot(N,uL2),0.0);vec3 amb=mix(uGnd,uSky,0.5-0.5*N.y);' +
@@ -702,8 +707,8 @@ window.Buehne3D = (function () {
   /* metall: Eisenglimmer (DB 701 bis 703), eloxal: gebürstetes, eloxiertes Aluminium (Sonderfarben aus dem Farbblatt, app.js SONDER_OBERFL) */
   const OBERFL = { matt: { glanz: [0.012, 8] }, glatt: { glanz: [0.1, 22] }, struktur: { art: [1, 0.035] }, holz: { art: [1, 0.06], glanz: [0.02, 10] }, metall: { glanz: [0.3, 30], art: [1, 0.02] }, eloxal: { glanz: [0.26, 24], art: [5, 1] } };
   const VARIANTE = new WeakMap();
-  function variante(st, pf, of, kf) {
-    const key = (pf || '') + '|' + (of || '') + '|' + (kf || '');
+  function variante(st, pf, of, kf, ac) {
+    const key = (pf || '') + '|' + (of || '') + '|' + (kf || '') + '|' + (ac || '');
     let m = VARIANTE.get(st); if (!m) { m = new Map(); VARIANTE.set(st, m); }
     let v = m.get(key); if (v) return v;
     v = Object.assign({}, st);
@@ -711,6 +716,8 @@ window.Buehne3D = (function () {
     const O = OBERFL[of];
     if (O) { if (O.glanz) v.glanz = O.glanz; if (O.art && !st.art) { v.art = O.art; v.artFarbe = mittelfarbe(st.bg); } }
     if (kf && st.kante) v.kante = [st.kante[0], vormul(farbe(kf))];
+    /* Grundton der Struktur (Klinker, Holzfassade) aus app.js (_artC) statt der Mittelfarbe des Hintergrunds */
+    if (ac && v.art) { const f = farbe(ac); if (f) v.artFarbe = f.slice(0, 3); }
     m.set(key, v); return v;
   }
   /* Hintergrund einer Fläche: was app.js geschrieben hat (roh), sonst der Klassenwert */
@@ -728,7 +735,8 @@ window.Buehne3D = (function () {
     const art = el._art || (role === 'wall-in' || ist('w3d-rev') ? (ist('w3d-rs') && el._bgc === 'transparent' ? '' : 'putzfein') : '');
     const kk = ERSTE(el, KLASSEN_KANTE), st = stoff(bg, kk, ERSTE(el, KLASSEN_GLANZ), art);
     const pf = kk === 'w3d-frame' ? stage._profil : '', of = kk === 'w3d-frame' || kk === 'w3d-side' ? el._oberfl || stage._oberfl : '';
-    return pf || of || el._kante ? variante(st, pf, of, el._kante) : st;
+    const ac = el._artC || '';
+    return pf || of || el._kante || ac ? variante(st, pf, of, el._kante, ac) : st;
   }
 
   /* ---------- Szene lesen ---------- */
@@ -752,13 +760,14 @@ window.Buehne3D = (function () {
     if (!world) return { items: items, picks: picks };
     const demo = stage.classList.contains('is-vorf') || stage.classList.contains('is-demo');
     const sym = stage.classList.contains('show-sym') ? 1 : 0;
-    /* Übergänge wie in app.css: Zoom per Knopf kurz (is-zoomanim, geht vor), Sonnenschutz fahren 1,8 s mit 12 ms Versatz je Lamelle
-       (is-fahrt), Lamellen wenden 0,6 s (is-wende), sonst 0,7 s */
+    /* Übergänge wie in app.css: Zoom per Knopf kurz (is-zoomanim, geht vor), Lamellen wenden 0,6 s (is-wende), sonst 0,7 s.
+       Das Fahren des Sonnenschutzes legt app.js bildweise und ohne Übergang (is-fahrt, _f.n), damit Endschiene und Lamellen zusammenbleiben */
     const sc = stage.classList, zoomAnim = sc.contains('is-zoomanim'), fahrt = sc.contains('is-fahrt'), wende = sc.contains('is-wende'), TF = zoomAnim ? T_ZOOM : T_FORM;
-    const zeit = (c, el) => {
+    const SOFORT = { d: 1, k: E_IO, v: 0 };
+    const zeit = (c) => {
       if (zoomAnim || (!fahrt && !wende)) return TF;
       const lam = c.contains('w3d-lam');
-      if (fahrt && (lam || c.contains('w3d-aufzug') || c.contains('w3d-behang') || c.contains('w3d-behang-u') || c.contains('w3d-stopfen') || c.contains('w3d-innen') || c.contains('w3d-innen-u'))) return { d: 1800, k: E_IO, v: lam ? (parseFloat(el.style.getPropertyValue('--k')) || 0) * 12 : 0 };
+      if (fahrt && (lam || c.contains('w3d-aufzug') || c.contains('w3d-behang') || c.contains('w3d-behang-u') || c.contains('w3d-stopfen') || c.contains('w3d-innen') || c.contains('w3d-innen-u'))) return SOFORT;
       if (wende && (lam || c.contains('w3d-aufzug'))) return T_WENDE;
       return TF;
     };
@@ -825,7 +834,7 @@ window.Buehne3D = (function () {
       const lage = role === 'floor-out' || role === 'wall-out' || role.indexOf('sa-') === 0 ? 2 : role === 'floor-in' || role.indexOf('sill-') === 0 ? 1 : 0;
       /* seite: nur von vorn sichtbar wie backface-visibility: hidden (Blende des Aufsatzkastens nur von außen) */
       const vorn = role === 'floor-in' || el.style.backfaceVisibility === 'hidden';
-      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 1.2, f.H * 3] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand || c.contains('w3d-rev') || c.contains('w3d-rs'), vor: vor, ao: ao && ao.k, aoR: ao && ao.r };
+      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 1.2, f.H * 3] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand || c.contains('w3d-rev') || c.contains('w3d-rs'), vor: vor, ao: ao && ao.k, aoR: ao && ao.r, aoRect: !!(ao && ao.rect) };
       /* Lamellen mit C-Profil: die Normale neigt sich über die Höhe der Lamelle (_bieg Grad je Kante), so fängt die Wölbung Licht */
       if (el._bieg) { const nb = (g) => { const m = mul(Mf, RX(g)), a = ap(m, 0, 0, 1), z0 = ap(m, 0, 0, 0); return norm([a[0] - z0[0], a[1] - z0[1], a[2] - z0[2]]); }; it.n1 = nb(-el._bieg); it.n2 = nb(el._bieg); it.nAchse = 1; }
       items.push(it);
@@ -969,14 +978,19 @@ window.Buehne3D = (function () {
   const falzPartner = (role) => FALZ[role] || (role.indexOf('sf-in-') === 0 ? 'sf-out-' + role.slice(6) : role.indexOf('mul-') === 0 ? 'mulb-' + role.slice(4) : '');
   function aoFuer(role, f, stage) {
     const v = stage._v; if (!v) return null;
-    const d = v.d, fd = v.fd, r = Math.max(4, fd * 0.9), dF = d + 1 + HAUCH;
-    let k = null;
+    const d = v.d, fd = v.fd, r = Math.max(4, fd * 0.9), dF = d + 1 + HAUCH, s = v.s || 0.2, loch = f.c && f.c.t === 'hole' ? f.c.r : null;
+    let k = null, rr = r, rect = false;
     if (role === 'rev-t' || role === 'rev-b') k = [[0, 0, 1, 0.24], [0, f.W, -1, 0.24], [1, dF, -1, 0.3], [1, d + fd, 1, 0.3]];
     else if (role === 'rev-l' || role === 'rev-r') k = [[1, 0, 1, 0.24], [1, f.H, -1, 0.24], [0, dF, -1, 0.3], [0, d + fd, 1, 0.3]];
     else if (role.indexOf('rs-') === 0) k = [[1, dF, -1, 0.3], [1, d + fd, 1, 0.3]];
     else if (role === 'sill-t') k = [[1, f.H, -1, 0.32]];
     else if (role === 'sa-t1') k = [[1, 0, 1, 0.32]];
-    return k ? { k: k, r: r } : null;
+    /* Kontaktschatten (eine Stufe mehr Tiefe): der Falz des Flügels auf dem Glas (oben am stärksten), das Flügelprofil auf dem Blendrahmen
+       rund um dessen Öffnung, die Laibung auf der Wand rund um die Maueröffnung; alles weich, nichts hyperrealistisch */
+    else if (role.indexOf('glass-') === 0 || role === 'ol-glass' || role === 'ul-glass') { k = [[0, 0, 1, 0.26], [0, f.W, -1, 0.26], [1, 0, 1, 0.36], [1, f.H, -1, 0.16]]; rr = Math.max(3, 34 * s); }
+    else if (loch && (role === 'el-front' || role === 'el-back' || role === 'ol-front' || role === 'ol-back' || role === 'ul-front' || role === 'ul-back')) { k = [[loch[0], loch[1], loch[2], loch[3]], [0.16, 0, 0, 0]]; rr = Math.max(2, 24 * s); rect = true; }
+    else if (loch && (role === 'wall-in' || role === 'wall-out')) { k = [[loch[0], loch[1], loch[2], loch[3]], [0.13, 0, 0, 0]]; rr = Math.max(4, 90 * s); rect = true; }
+    return k ? { k: k, r: rr, rect: rect } : null;
   }
 
   /* ---------- Licht ---------- */
@@ -1214,7 +1228,7 @@ window.Buehne3D = (function () {
       const c = fc; if (c && c.t === 'hole' && st.art[0] === 4) gl.uniform4f(u.uBand, c.r[0], c.r[1], c.r[2], c.r[3]); else gl.uniform4f(u.uBand, 0, 0, 0, 0);
     } else gl.uniform4f(u.uArt, 0, 0, 0, 0);
     AO.fill(0); if (it.ao) it.ao.forEach((a, i) => { if (i < 4) AO.set(a, i * 4); });
-    gl.uniform4fv(u.uAo, AO); gl.uniform2f(u.uAoR, it.aoR || 1, 0);
+    gl.uniform4fv(u.uAo, AO); gl.uniform2f(u.uAoR, it.aoR || 1, it.aoRect ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, it.erst, it.zahl);
   }
 
