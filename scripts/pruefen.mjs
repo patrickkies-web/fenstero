@@ -1619,6 +1619,50 @@ if (teil(10)) {
     await c.close();
   }
 
+  /* c2) Seite für Fensterbauer, Abnahme der Einigung der Rollen (23.10.2026): Pille im ersten Bildschirm, Meldung über keinem Bilddetail,
+     Zahlen nach einem Sprung richtig, Halt-Knopf, kein Querscrollen bei 320 px, Fokus nicht unter der Kopfzeile */
+  {
+    const c = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE', isMobile: true, hasTouch: true }), sp = await neueSeite(c);
+    await sp.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' }); await sp.waitForTimeout(2600);
+    const kopf = await sp.evaluate(() => {
+      const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
+      const img = r('.vk-hero-zoom img'), k = img.width / 1122, meldung = [...document.querySelectorAll('.vk-nachricht')].find((x) => x.getAttribute('data-pos') === '0');
+      /* Bilddetails des Fotos fb-sessel in Bildpunkten des Originals (verkauf.css, Kopfkommentar) */
+      const D = { Flieger: [400, 155, 530, 225], Handy: [395, 385, 485, 480], Gesicht: [555, 280, 760, 480], Zollstock: [860, 255, 1030, 600], Bullauge: [890, 60, 1122, 640] };
+      const m = meldung ? meldung.getBoundingClientRect() : null, kz = r('.vk-eingang-kopf');
+      const ueber = Object.keys(D).filter((n) => [m, kz].some((b) => b && b.left < img.left + D[n][2] * k && img.left + D[n][0] * k < b.right && b.top < img.top + D[n][3] * k && img.top + D[n][1] * k < b.bottom));
+      return { pille: r('.vk-hero .btn.primary').top, preis: r('.vk-preiszeile').bottom, ueber, halt: !!document.querySelector('.vk-hero .vk-halt:not([hidden])') };
+    });
+    ok(kopf.pille >= 460 && kopf.pille <= 600 && kopf.preis <= 700 && !kopf.ueber.length, 'Fensterbauer, Telefon 390 × 844: Pille im ersten Bildschirm (Oberkante ' + Math.round(kopf.pille) + ' px), Preiszeile endet bei ' + Math.round(kopf.preis) + ' px, die Meldung liegt über keinem Bilddetail' + (kopf.ueber.length ? ' (überdeckt: ' + kopf.ueber.join(', ') + ')' : ''));
+    /* Halt-Knopf: hält Leisten und Schleifen an, bleibt nach dem Neuladen gespeichert */
+    /* die Leiste läuft nur im Bild: erst hinscrollen, dann am Knopf im Startbild (noch im Bild) anhalten */
+    await sp.evaluate(() => window.scrollTo(0, 220)); await sp.waitForTimeout(700);
+    const vorher = await sp.evaluate(() => getComputedStyle(document.querySelector('.vk-leiste-a .vk-leiste-spur')).transform);
+    await sp.click('.vk-hero .vk-halt'); await sp.waitForTimeout(150);
+    const t1 = await sp.evaluate(() => getComputedStyle(document.querySelector('.vk-leiste-a .vk-leiste-spur')).transform); await sp.waitForTimeout(700);
+    const t2 = await sp.evaluate(() => getComputedStyle(document.querySelector('.vk-leiste-a .vk-leiste-spur')).transform);
+    await sp.reload({ waitUntil: 'networkidle' }); await sp.waitForTimeout(400);
+    const nachLaden = await sp.evaluate(() => document.documentElement.classList.contains('vk-angehalten') && [...document.querySelectorAll('button.vk-halt')].every((b) => b.getAttribute('aria-pressed') === 'true'));
+    await sp.click('.vk-hero .vk-halt'); await sp.waitForTimeout(150);
+    const wieder = await sp.evaluate(() => !document.documentElement.classList.contains('vk-angehalten') && !localStorage.getItem('vk.halt'));
+    ok(kopf.halt && vorher !== 'none' && t1 === t2 && nachLaden && wieder, 'Fensterbauer: Halt-Knopf im Startbild hält die Leisten an (Spur steht), die Wahl bleibt nach dem Neuladen (aria-pressed), ein zweiter Druck lässt alles weiterlaufen');
+    /* Zahlen: nach einem Sprung in den Abschnitt steht nach 1,3 s überall der Endwert */
+    await sp.goto(BASE + '/fuer-fensterbauer/#warum-kunden-selbst-planen', { waitUntil: 'networkidle' }); await sp.waitForTimeout(1300);
+    const zahlen = await sp.evaluate(() => [...document.querySelectorAll('[data-zahl]')].map((b) => { const r = b.getBoundingClientRect(), z = b.querySelector('.vk-ziffer > span'); return { soll: b.getAttribute('data-zahl'), ist: b.textContent, im: r.top < innerHeight && r.bottom > 0, steht: !b.classList.contains('vk-wartet') && (!z || getComputedStyle(z).transform === 'none' || /matrix\(1, 0, 0, 1, 0, 0\)/.test(getComputedStyle(z).transform)) }; }));
+    ok(zahlen.length === 4 && zahlen.every((z) => z.soll === z.ist) && zahlen.filter((z) => z.im).every((z) => z.steht), 'Fensterbauer: Zahlenkacheln zeigen nach einem Sprung den Endwert (' + zahlen.map((z) => z.ist).join(', ') + '), nichts zählt hoch, nichts steht halb');
+    /* Fokus: ein Ziel weiter oben, per Tastatur angesteuert, landet unter der Kopfzeile */
+    await sp.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)); await sp.waitForTimeout(300);
+    const fokus = await sp.evaluate(() => { const z = document.querySelector('#pakete'); const a = z.closest('section').querySelector('a, summary, button:not([hidden])'); a.focus(); const k = document.querySelector('.rg-kopf').getBoundingClientRect(); return { oben: a.getBoundingClientRect().top, kopf: k.bottom }; });
+    ok(fokus.oben >= fokus.kopf - 1, 'Fensterbauer: der Fokus landet nicht unter der klebenden Kopfzeile (Ziel bei ' + Math.round(fokus.oben) + ' px, Kopfzeile bis ' + Math.round(fokus.kopf) + ' px)');
+    sauber(sp, 'Fensterbauer: Abnahme ohne Fehler');
+    await c.close();
+    const c3 = await browser.newContext({ viewport: { width: 320, height: 640 }, locale: 'de-DE' }), s3 = await neueSeite(c3);
+    await s3.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' }); await s3.waitForTimeout(400);
+    const quer320 = await s3.evaluate(async () => { let q = false; for (let y = 0; y < document.documentElement.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 40)); if (document.documentElement.scrollWidth > innerWidth + 1) q = true; } return q; });
+    ok(!quer320, 'Fensterbauer bei 320 px: kein Querscrollen über die ganze Seite');
+    await c3.close();
+  }
+
   /* d) Pilotphase: alles gesperrt */
   const rb1 = await roh('/robots.txt'), sm1 = await roh('/sitemap.xml'), ll1 = await roh('/llms.txt');
   ok(/User-agent: \*\nDisallow: \/\n/.test(rb1.text) && sm1.status === 404 && ll1.status === 200 && ll1.h.get('x-robots-tag') === seo.SPERRE, 'Pilotphase: robots.txt sperrt alles, keine Sitemap, llms.txt mit noindex');

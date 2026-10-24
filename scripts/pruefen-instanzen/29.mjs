@@ -30,7 +30,7 @@ export default async (h) => {
   ok(vk.status === 200 && karten.length === Pk.LISTE.length && karten.map((k) => k.p).join() === Pk.LISTE.join() && karten.every(karteOk), '29.1 Verkaufsseite: drei Paketkarten mit Monats- und Einrichtungspreis aus pakete.js (' + Pk.LISTE.map((p) => Pk.preis(p).monat + '/' + Pk.preis(p).einrichtung).join(', ') + ' €), „zzgl. MwSt.“ und „nur für Unternehmer“ bei jedem Preis');
   const vgl = (/<table class="rg-tab vk-vergleich">[\s\S]*?<\/table>/.exec(fb) || [''])[0];
   const titelVgl = Object.keys(Pk.MERKMALE).filter((s) => Pk.MERKMALE[s].vergleich && s !== 'preis').map((s) => Pk.MERKMALE[s].titel);
-  ok(Pk.LISTE.every((p) => vgl.includes(eur(Pk.preis(p).monat)) && vgl.includes(eur(Pk.preis(p).einrichtung))) && titelVgl.every((t) => vgl.includes('<td>' + t + '</td>')) && /Alle Preise netto zzgl\. MwSt\., nur für Unternehmer\./.test(fb), '29.1 Vergleich: alle Merkmale mit „vergleich“ aus pakete.js (' + titelVgl.length + '), Preise je Paket, Hinweis netto und nur für Unternehmer');
+  ok(Pk.LISTE.every((p) => vgl.includes(eur(Pk.preis(p).monat)) && vgl.includes(eur(Pk.preis(p).einrichtung))) && titelVgl.every((t) => vgl.includes('<th scope="row">' + t + '</th>')) && /Alle Preise netto zzgl\. MwSt\., nur für Unternehmer\./.test(fb), '29.1 Vergleich: alle Merkmale mit „vergleich“ aus pakete.js (' + titelVgl.length + '), Preise je Paket, Hinweis netto und nur für Unternehmer');
   const ld = ldjson(fb).find((x) => x && x['@type'] === 'SoftwareApplication' && Array.isArray(x.offers));
   const ldOk = !!ld && ld.offers.length === 3 && Pk.LISTE.every((p, i) => {
     const o = ld.offers[i], pr = Pk.preis(p), spez = o.priceSpecification || [];
@@ -107,7 +107,7 @@ export default async (h) => {
 
   /* ---------- 29.3 Kopf der Verkaufsseite ---------- */
   const titelFb = (fb.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (fb.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
-  ok((fb.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titelFb) && titelFb.length <= 75 && beschr.length >= 70 && beschr.length <= 170 && /rel="canonical"/.test(vk.headers.link || '') && /<link rel="canonical" href="[^"]+\/fuer-fensterbauer\/">/.test(fb) && /Ihr eigener Fenster-Konfigurator, unter Ihrer <span class="ak">Marke<\/span>/.test(fb),
+  ok((fb.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titelFb) && titelFb.length <= 75 && beschr.length >= 70 && beschr.length <= 170 && /rel="canonical"/.test(vk.headers.link || '') && /<link rel="canonical" href="[^"]+\/fuer-fensterbauer\/">/.test(fb) && ((h1) => h1.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() === 'Ihr eigener Fenster-Konfigurator, unter Ihrer Marke.' && (h1.match(/<span class="ak">/g) || []).length === 1 && /<span class="ak">Marke\.<\/span>/.test(h1))((/<h1>([\s\S]*?)<\/h1>/.exec(fb) || [])[1] || ''),
     '29.3 Verkaufsseite: ein h1 mit einem grünen Wort, Titel mit Marke (' + titelFb.length + ' Zeichen), Beschreibung (' + beschr.length + ' Zeichen), Canonical');
   const abschnitte = ['die-idee', 'so-funktioniert-es', 'pakete', 'ablauf', 'demos', 'bestellen', 'haeufige-fragen'].filter((id) => !new RegExp('<h2 id="' + id + '">').test(fb));
   const leiste = RI.bestellung.LEISTE.map((s) => s.titel), ablauf = (/<!--pakete:ablauf-->([\s\S]*?)<!--\/pakete:ablauf-->/.exec(fb) || [])[1] || '';

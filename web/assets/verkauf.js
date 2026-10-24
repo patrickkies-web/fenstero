@@ -12,6 +12,8 @@
 (function () {
   'use strict';
   var MAIL = /^[^\s@<>()",;]+@[^\s@<>()",;]+\.[^\s@<>()",;]{2,}$/;
+  /* Kontakt aus dem Impressum, als Link in den Fehlermeldungen des Formulars */
+  var KONTAKT = '<a href="mailto:ask@eeziframes.com">ask@eeziframes.com</a>';
   function ruhig() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
   var kannIO = 'IntersectionObserver' in window;
 
@@ -82,11 +84,12 @@
           if (x.status === 200 && x.j.ok) return danke();
           meldung.textContent = '';
           if (x.j.felder) return fehlerZeigen(x.j.felder);
-          meldung.textContent = x.j.fehler || 'Ihre Frage ließ sich gerade nicht senden. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie uns eine E-Mail (Adresse im Impressum).';
+          if (x.j.fehler) meldung.textContent = x.j.fehler;
+          else meldung.innerHTML = 'Ihre Frage ließ sich gerade nicht senden. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie an ' + KONTAKT + '.';
         })
         .catch(function () {
           knopf.disabled = false;
-          meldung.textContent = 'Keine Verbindung. Bitte versuchen Sie es gleich noch einmal; Ihre Angaben bleiben stehen.';
+          meldung.innerHTML = 'Keine Verbindung. Bitte versuchen Sie es gleich noch einmal; Ihre Angaben bleiben stehen. Oder schreiben Sie an ' + KONTAKT + '.';
         });
     });
   }
@@ -116,9 +119,10 @@
     if (buehne.getAttribute('data-schritt') === String(n)) return;
     buehne.setAttribute('data-schritt', String(n));
     Array.prototype.forEach.call(buehne.querySelectorAll('[data-schirm]'), function (s) {
-      if (s.getAttribute('data-schirm') === String(n)) { s.classList.add('vk-da'); void s.offsetWidth; s.classList.add('vk-an'); return; }
+      if (s.getAttribute('data-schirm') === String(n)) { s.classList.remove('vk-weg'); s.classList.add('vk-da'); void s.offsetWidth; s.classList.add('vk-an'); return; }
+      if (s.classList.contains('vk-an')) s.classList.add('vk-weg');
       s.classList.remove('vk-an');
-      if (s.classList.contains('vk-da')) setTimeout(function () { if (!s.classList.contains('vk-an')) s.classList.remove('vk-da'); }, ruhig() ? 0 : 260);
+      if (s.classList.contains('vk-da')) setTimeout(function () { if (!s.classList.contains('vk-an')) s.classList.remove('vk-da', 'vk-weg'); }, ruhig() ? 0 : 340);
     });
   }
   function schrittRechnen(buehne) {
@@ -149,55 +153,90 @@
     else b.classList.add('vk-im-bild');
   }
 
+  /* ---------- Halt-Knopf (WCAG 2.2.2) ----------
+     Was länger als 5 s von selbst läuft (Leisten samt Schub, Meldungen, Staub, Wiegen, Lottie-Zeichen, Puls, Flug), hält ein Knopf an;
+     es gibt ihn im Startbild an der Meldung und an Leiste 1, beide schalten dasselbe. Die Wahl gilt für die ganze Seite (html.vk-angehalten,
+     verkauf.css) und bleibt gespeichert (localStorage vk.halt), auch in der Einbettung. Bei „weniger Bewegung“ läuft nichts, dann
+     bleibt der Knopf verborgen. */
+  var HALT = 'vk.halt', halt = false, haltHoerer = [];
+  try { halt = localStorage.getItem(HALT) === '1'; } catch (e) { /* ok */ }
+  function haltSetzen(an) {
+    halt = !!an;
+    try { if (halt) localStorage.setItem(HALT, '1'); else localStorage.removeItem(HALT); } catch (e) { /* ok */ }
+    document.documentElement.classList.toggle('vk-angehalten', halt);
+    Array.prototype.forEach.call(document.querySelectorAll('button.vk-halt'), function (b) { b.setAttribute('aria-pressed', String(halt)); });
+    if (window.Lottie && window.Lottie.halten) window.Lottie.halten(halt);
+    haltHoerer.forEach(function (f) { try { f(halt); } catch (e) { /* ok */ } });
+  }
+  function haltKnoepfe(wurzel) {
+    if (ruhig()) return;
+    document.documentElement.classList.toggle('vk-angehalten', halt);
+    if (halt && window.Lottie && window.Lottie.halten) window.Lottie.halten(true);
+    Array.prototype.forEach.call(wurzel.querySelectorAll('button.vk-halt'), function (b) {
+      b.hidden = false;
+      b.setAttribute('aria-pressed', String(halt));
+      if (b.__vkAn) return;
+      b.__vkAn = true;
+      b.addEventListener('click', function () { haltSetzen(!halt); });
+    });
+  }
+
   /* ---------- Startbild ----------
-     Tiefe: --py (0 beim Laden, wächst mit dem Weg, den die Figur nach oben wandert; Scroll.binden über die Figur) schiebt das Bild etwas
-     langsamer als die Seite und den Stapel der Meldungen etwas schneller (verkauf.css). Stapel: alle 3,4 s fällt die hinterste Meldung
-     als neueste von oben ein (data-pos „weg“, dann „neu“, dann 0), die anderen rücken nach hinten, die Zeiten altern mit. Läuft nur,
-     solange die Figur im Bild ist; bei „weniger Bewegung“ steht der Stapel wie im HTML. */
+     Auftritt nach dem Zeitplan des Kopfs (Designrichtung 3.5; verkauf.css, .vk-auftritt): Foto 0 ms, Kicker 100, die drei Zeilen der
+     Überschrift aus der Maske 180/260/340, Chips ab 500, Pille 660, erste Meldung 900, Maßlinie 1500, Licht und Staub 2400. Die
+     Meldungen fallen einmal nacheinander ein (alle 4,8 s, eine Runde), danach steht vorn „Neue Anfrage“ wie ohne JavaScript; die Zeiten
+     altern mit. Tiefe: --py (0 beim Laden, wächst mit dem Weg, den die Figur nach oben wandert) schiebt das Foto etwas langsamer als die
+     Seite und die Meldung etwas schneller. Beim Neuaufbau (still) und bei „weniger Bewegung“ steht alles fertig. */
   var ZEITEN = ['gerade eben', 'vor 4 Min.', 'vor 11 Min.'];
-  function startbild(wurzel) {
-    var fig = wurzel.querySelector('.vk-hero-foto');
+  function startbild(wurzel, still) {
+    var fig = wurzel.querySelector('.vk-hero-foto'), hero = wurzel.querySelector('.vk-hero');
     if (!fig || fig.__vkAn) return;
     fig.__vkAn = true;
+    var bewegt = !ruhig() && !still;
+    if (hero && bewegt) hero.classList.add('vk-auftritt');
     if (window.Scroll && !ruhig()) {
       var p0 = null;
       window.Scroll.binden(fig, function (p) { if (p0 === null) p0 = p; fig.style.setProperty('--py', Math.max(0, p - p0).toFixed(4)); });
     }
-    bullauge(fig);
+    bullauge(fig, bewegt);
     var stapel = fig.querySelector('.vk-stapel');
-    if (!stapel || ruhig()) return;
-    var reihe = Array.prototype.slice.call(stapel.querySelectorAll('.vk-nachricht')), uhr = null;
-    function setzen() { reihe.forEach(function (k, i) { k.setAttribute('data-pos', String(i)); var z = k.querySelector('small'); if (z) z.textContent = ZEITEN[i] || ''; }); }
-    function stopp() { if (uhr) { clearInterval(uhr); uhr = null; } }
-    function weiter() {
-      if (!document.body.contains(stapel)) return stopp();
-      var hinten = reihe[reihe.length - 1];
-      hinten.setAttribute('data-pos', 'weg');
-      setTimeout(function () {
-        if (!document.body.contains(stapel)) return;
-        hinten.setAttribute('data-pos', 'neu');
-        var z = hinten.querySelector('small'); if (z) z.textContent = ZEITEN[0];
-        void hinten.offsetWidth;
-        reihe = [hinten].concat(reihe.slice(0, -1));
-        requestAnimationFrame(function () { requestAnimationFrame(setzen); });
-      }, 420);
+    if (!stapel || !bewegt) return;
+    /* Reihenfolge des Einfallens: die hinterste zuerst, so steht am Ende die vordere des HTML vorn */
+    var karten = Array.prototype.slice.call(stapel.querySelectorAll('.vk-nachricht')), folge = karten.slice().reverse(), gezeigt = [], n = 0, uhr = null, faellig = 0, rest = 0;
+    karten.forEach(function (k) { k.setAttribute('data-pos', 'neu'); });
+    function setzen() { gezeigt.forEach(function (k, i) { k.setAttribute('data-pos', String(i)); var z = k.querySelector('small'); if (z) z.textContent = ZEITEN[i] || ''; }); }
+    function einfallen() {
+      uhr = null;
+      if (!document.body.contains(stapel)) return;
+      var k = folge[n++];
+      gezeigt.unshift(k);
+      void k.offsetWidth;
+      requestAnimationFrame(function () { requestAnimationFrame(setzen); });
+      if (n < folge.length) planen(4800);
     }
-    function los() { if (!uhr) uhr = setInterval(weiter, 3400); }
-    if (kannIO) { var io = beobachten(new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) los(); else stopp(); }); }, { threshold: 0 })); io.observe(fig); }
-    else los();
+    function planen(ms) { faellig = performance.now() + ms; if (!halt) uhr = setTimeout(einfallen, ms); else rest = ms; }
+    haltHoerer.push(function (an) {
+      if (!document.body.contains(stapel) || n >= folge.length) return;
+      if (an && uhr) { clearTimeout(uhr); uhr = null; rest = Math.max(0, faellig - performance.now()); }
+      else if (!an && !uhr) planen(rest || 600);
+    });
+    planen(900);
   }
 
-  /* ---------- Licht, Staub und Maßlinie am Bullauge (Designrichtung) ----------
-     Das Foto füllt seinen Ausschnitt mit object-fit: cover; punkt() rechnet einen Bildpunkt des Originals (1122 × 1402) in die Lage im
-     Ausschnitt um. ERDE ist der Blick durchs Bullauge im Foto fb-sessel. Daraus: --lx/--ly für die Mitte des Erdlichts, Lage und Höhe der
-     Maßlinie (am rechten Rand des sichtbaren Ausblicks; passt sie nicht hinein, bleibt sie weg), Staub im Lichtkegel zwischen Bullauge
-     und Astronaut. Die Maßlinie zeichnet sich einmal, nachdem das Foto eingezoomt ist und solange es im Bild ist; der Wert zählt mit.
-     Außerhalb des Bildes ruhen Staub und Licht (.vk-aus). Bei „weniger Bewegung“: Licht und Linie stehen fertig, kein Staub. */
+  /* ---------- Licht, Staub und Maßlinie am Bullauge ----------
+     Das Foto liegt mit seinem Seitenverhältnis in .vk-hero-zoom; punkt() rechnet einen Bildpunkt des Originals (1122 × 1402) in die Lage
+     darin um (auch für object-fit: cover, falls die Einbettung es so zeigt). ERDE ist der Blick durchs Bullauge. Daraus: --lx/--ly für
+     die Mitte des Halos, Lage und Höhe der Maßlinie (am rechten Rand des Ausblicks, rechts vom Zollstock; passt sie nicht hinein, bleibt
+     sie weg) und Staub im Lichtkegel zwischen Bullauge und Astronaut (x 760–1090, y 150–700, nie unter der Meldung). Die Maßlinie
+     zeichnet sich einmal ab 1,5 s in 900 ms, der Wert läuft mit; bis dahin ist sie verborgen (.vk-wartet), so springt nichts zurück.
+     Licht und Staub kommen bei 2,4 s (.vk-hell). Außerhalb des Bildes ruht der Staub (.vk-aus). */
   var ERDE = { x0: 981, y0: 142, x1: 1119, y1: 526 };
-  function bullauge(fig) {
+  function bullauge(fig, bewegt) {
     var img = fig.querySelector('.vk-hero-zoom img'), licht = fig.querySelector('.vk-licht'), staub = fig.querySelector('.vk-staub'), mass = fig.querySelector('.vk-mass');
     if (!img) return;
-    var gezeichnet = false, t0 = performance.now();
+    var gezeichnet = !bewegt, t0 = performance.now();
+    if (mass && bewegt) mass.classList.add('vk-wartet');
+    if (bewegt) setTimeout(function () { fig.classList.add('vk-hell'); }, 2400); else fig.classList.add('vk-hell');
     function punkt(ix, iy) {
       var W = img.clientWidth, H = img.clientHeight, nw = img.naturalWidth || 1122, nh = img.naturalHeight || 1402;
       var k = Math.max(W / nw, H / nh), op = (getComputedStyle(img).objectPosition || '50% 50%').split(' ');
@@ -210,44 +249,46 @@
       var a = punkt(ERDE.x0, ERDE.y0), b = punkt(ERDE.x1, ERDE.y1);
       if (licht) { licht.style.setProperty('--lx', ((a.x + Math.min(b.x, a.W)) / 2).toFixed(1) + 'px'); licht.style.setProperty('--ly', ((a.y + b.y) / 2).toFixed(1) + 'px'); }
       if (mass) {
-        var x = Math.min(b.x - 20, a.W - 16);
+        var sichtbar = fig.getBoundingClientRect().right - img.getBoundingClientRect().left, x = Math.min(b.x - 20, a.W - 16, sichtbar - 16);
         mass.style.setProperty('--mx', x.toFixed(1) + 'px');
         mass.style.setProperty('--my', a.y.toFixed(1) + 'px');
         mass.style.setProperty('--mh', (b.y - a.y).toFixed(1) + 'px');
         mass.classList.toggle('vk-da', x - a.x >= 12);
       }
       if (staub && !staub.firstChild && !ruhig()) {
-        var p1 = punkt(560, 40), p2 = punkt(1090, 780), w = p1.W || 1, h = p1.H || 1;
-        for (var n = 0; n < 28; n++) {
+        var p1 = punkt(760, 150), p2 = punkt(1090, 700), w = p1.W || 1, h = p1.H || 1;
+        for (var n = 0; n < 22; n++) {
           var t = document.createElement('i'), r = Math.random;
-          var x0 = (p1.x + (p2.x - p1.x) * r()) / w * 100, y0 = (p1.y + (p2.y - p1.y) * Math.pow(r(), 1.3)) / h * 100;
-          t.style.cssText = '--s:' + (1 + r() * 1.6).toFixed(1) + 'px;--o:' + (0.2 + r() * 0.45).toFixed(2) + ';--d:' + (9 + r() * 8).toFixed(1) + 's;--v:-' + (r() * 9).toFixed(1) +
-            's;--dx:' + Math.round(-14 + r() * 28) + 'px;--dy:' + Math.round(-18 + r() * 22) + 'px;left:' + x0.toFixed(1) + '%;top:' + y0.toFixed(1) + '%';
+          var x0 = (p1.x + (p2.x - p1.x) * r()) / w * 100, y0 = (p1.y + (p2.y - p1.y) * Math.pow(r(), 1.2)) / h * 100;
+          t.style.cssText = '--s:' + (1 + r() * 1.6).toFixed(1) + 'px;--o:' + (0.2 + r() * 0.4).toFixed(2) + ';--d:' + (9 + r() * 8).toFixed(1) + 's;--v:-' + (r() * 9).toFixed(1) +
+            's;--dx:' + Math.round(-12 + r() * 24) + 'px;--dy:' + Math.round(-14 + r() * 18) + 'px;left:' + x0.toFixed(1) + '%;top:' + y0.toFixed(1) + '%';
           staub.appendChild(t);
         }
       }
     }
     function zeichnen() {
-      if (gezeichnet || ruhig() || !mass || !mass.classList.contains('vk-da') || !document.body.contains(fig)) return;
+      if (gezeichnet || !mass || !mass.classList.contains('vk-da') || !document.body.contains(fig)) return;
       gezeichnet = true;
-      var zahl = mass.querySelector('.vk-mass-wert b'), start = 0, D = 1400;
-      mass.style.setProperty('--mz', '0'); mass.style.setProperty('--me', '0'); mass.style.setProperty('--mw', '0');
+      var zahl = mass.querySelector('.vk-mass-wert b'), start = 0, D = 900, ende = zahl ? zahl.textContent : '';
+      function setz(z, e, w) { mass.style.setProperty('--mz', z); mass.style.setProperty('--me', e); mass.style.setProperty('--mw', w); }
+      setz('0', '0', '0');
+      mass.classList.remove('vk-wartet');
       requestAnimationFrame(function schritt(t) {
         if (!start) start = t;
         var q = Math.min(1, (t - start) / D), e = 1 - Math.pow(1 - q, 3);
-        mass.style.setProperty('--mz', e.toFixed(3));
-        mass.style.setProperty('--mw', Math.min(1, q * 3).toFixed(3));
-        mass.style.setProperty('--me', q >= 1 ? '1' : '0');
-        if (zahl) zahl.textContent = Math.round(1200 * e).toLocaleString('de-DE');
+        setz(e.toFixed(3), q >= 1 ? '1' : '0', Math.min(1, q * 3).toFixed(3));
+        if (zahl) zahl.textContent = q >= 1 ? ende : Math.round(1200 * e).toLocaleString('de-DE');
         if (q < 1) requestAnimationFrame(schritt);
+        else ['--mz', '--me', '--mw'].forEach(function (v) { mass.style.removeProperty(v); });
       });
     }
-    function bereit() { legen(); if (!ruhig()) setTimeout(function () { if (!fig.classList.contains('vk-aus')) zeichnen(); }, Math.max(0, 1700 - (performance.now() - t0))); }
+    function spaeter() { setTimeout(function () { if (!fig.classList.contains('vk-aus')) zeichnen(); }, Math.max(0, 1500 - (performance.now() - t0))); }
+    function bereit() { legen(); if (bewegt) spaeter(); }
     if (img.complete && img.naturalWidth) bereit(); else img.addEventListener('load', bereit, { once: true });
     window.addEventListener('resize', legen);
     if (kannIO) {
       var io = beobachten(new IntersectionObserver(function (es) {
-        es.forEach(function (e) { fig.classList.toggle('vk-aus', !e.isIntersecting); if (e.isIntersecting && img.naturalWidth) setTimeout(zeichnen, Math.max(0, 1700 - (performance.now() - t0))); });
+        es.forEach(function (e) { fig.classList.toggle('vk-aus', !e.isIntersecting); if (e.isIntersecting && img.naturalWidth && bewegt) spaeter(); });
       }, { threshold: 0 }));
       io.observe(fig);
     }
@@ -256,8 +297,9 @@
   /* ---------- Leisten unter dem Startbild ----------
      Je Leiste (data-vk-leiste="rechts" | "links") eine Spur mit dem Satz der Einträge, geklont, bis die Spur die Breite der Leiste und
      einen Satz mehr deckt (Klone aria-hidden). Eine gemeinsame Schleife läuft nur, solange eine Leiste im Bild ist: Grundgeschwindigkeit
-     30 px/s in der Richtung der Leiste, dazu der Weg des Bildlaufs (Faktor 0,42; abwärts in ihre Richtung, aufwärts zurück); die Spur
-     folgt weich (etwa 0,13 s), so federt der Schub aus. Mit der Maus über der Leiste fällt die Grundgeschwindigkeit auf ein Viertel. Je
+     30 px/s in der Richtung der Leiste, dazu ein Schub aus dem Bildlauf (Faktor 0,42 auf die Geschwindigkeit, höchstens 120 px/s;
+     abwärts in ihre Richtung, aufwärts zurück), der weich einsetzt und in 600 ms abklingt. Mit der Maus über der Leiste fällt die
+     Grundgeschwindigkeit auf ein Viertel; der Halt-Knopf hält die Spur ganz an. Je
      Eintrag --l (1 in der Mitte, zu den Rändern 0) für die Helligkeit; die Lagen der Einträge werden einmal gemessen (und nach einer
      Größenänderung), in der Schleife wird nur gerechnet und geschrieben. Die zweite Leiste lässt ihre Zahlen einmal einrollen (.vk-da),
      wenn sie ins Bild kommt. Bei „weniger Bewegung“: keine Schleife, die Leiste steht (.vk-still) und lässt sich schieben. */
@@ -273,6 +315,7 @@
   }
   function leisteSchritt(t) {
     leisteLauf = 0;
+    if (halt) { leisteT = 0; return; }
     var dt = leisteT ? Math.min(0.064, (t - leisteT) / 1000) : 0;
     leisteT = t;
     var y = window.pageYOffset || 0, dy = y - leisteY;
@@ -284,8 +327,10 @@
       if (!L.sichtbar || !L.breite) return;
       weiter = true;
       L.halt += ((L.maus ? 0.75 : 0) - L.halt) * Math.min(1, dt * 4);
-      L.ziel += L.dir * (30 * (1 - L.halt) * dt + dy * 0.42);
-      L.pos += (L.ziel - L.pos) * (1 - Math.pow(0.0004, dt));
+      /* Schub aus dem Bildlauf: höchstens 120 px/s dazu, weich an und in 600 ms wieder abgeklungen; angehalten steht die Spur */
+      var soll = dt > 0 ? Math.max(-120, Math.min(120, dy / dt * 0.42)) : 0;
+      L.schub += (soll - L.schub) * (1 - Math.exp(-dt / (Math.abs(soll) > Math.abs(L.schub) ? 0.12 : 0.2)));
+      if (!halt) L.pos += L.dir * (30 * (1 - L.halt) + L.schub) * dt;
       var m = ((L.pos % L.breite) + L.breite) % L.breite, tx = m - L.breite, mitte = L.w / 2;
       L.spur.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,0,0)';
       for (var i = 0; i < L.eintraege.length; i++) {
@@ -301,6 +346,7 @@
     else leisteT = 0;
   }
   function leisteStart() { if (!leisteLauf) { leisteY = window.pageYOffset || 0; leisteT = 0; leisteLauf = requestAnimationFrame(leisteSchritt); } }
+  haltHoerer.push(function (an) { if (!an && LEISTEN.length) leisteStart(); });
   function leisten(wurzel) {
     Array.prototype.forEach.call(wurzel.querySelectorAll('[data-vk-leiste]'), function (el) {
       if (el.__vkAn) return;
@@ -309,7 +355,7 @@
       if (!satz) return;
       var zahlen = el.classList.contains('vk-leiste-b');
       if (ruhig()) { el.classList.add('vk-still'); if (zahlen) el.classList.add('vk-da'); return; }
-      var L = { el: el, spur: spur, saetze: [satz], dir: el.getAttribute('data-vk-leiste') === 'rechts' ? 1 : -1, pos: 0, ziel: 0, halt: 0, maus: false, sichtbar: !kannIO, breite: 0, w: 0, eintraege: [] };
+      var L = { el: el, spur: spur, saetze: [satz], dir: el.getAttribute('data-vk-leiste') === 'rechts' ? 1 : -1, pos: 0, schub: 0, halt: 0, maus: false, sichtbar: !kannIO, breite: 0, w: 0, eintraege: [] };
       leisteMessen(L);
       LEISTEN.push(L);
       el.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') L.maus = true; });
@@ -404,35 +450,24 @@
     }
   }
 
-  /* ---------- Zahlenkacheln (Designrichtung) ----------
-     Die belegte Zahl zählt einmal hoch, wenn ihre Kachel zu 60 % im Bild steht (0,9 s, ausrollend), mit derselben Schreibweise wie im
-     HTML (Komma, Tausenderpunkt, gleich viele Nachkommastellen); Ziffern gleich breit, darum springt nichts. Bei „weniger Bewegung“ und
-     ohne Beobachter steht die Zahl wie im HTML. */
+  /* ---------- Zahlenkacheln (Einigung A2) ----------
+     Der Endwert steht immer im HTML, nichts zählt hoch. Jede Ziffer liegt in einer Maske (.vk-ziffer); kommt die Kachel zu 15 % ins Bild,
+     rollen die Ziffern von unten herein (600 ms, je Ziffer 30 ms später), Komma, Punkt und Einheit stehen. Liegt die Kachel beim Aufruf
+     unter dem Bildrand, warten die Ziffern in ihrer Maske (.vk-wartet); steht sie schon im Bild, bleibt die Zahl einfach stehen. Bei
+     „weniger Bewegung“ und ohne Beobachter rollt nichts. */
   function zahlen(wurzel) {
     if (ruhig() || !kannIO) return;
     Array.prototype.forEach.call(wurzel.querySelectorAll('[data-zahl]'), function (el) {
       if (el.__vkAn) return;
       el.__vkAn = true;
-      var roh = el.getAttribute('data-zahl'), teile = roh.split(','), stellen = teile[1] ? teile[1].length : 0;
-      var ziel = parseFloat(roh.replace(/\./g, '').replace(',', '.'));
-      if (!isFinite(ziel)) return;
-      var fmt = function (v) { return v.toLocaleString('de-DE', { minimumFractionDigits: stellen, maximumFractionDigits: stellen }); };
-      if (el.getBoundingClientRect().top < window.innerHeight) return; // schon im Bild: nicht neu zählen
-      el.textContent = fmt(0);
+      var z = 0, kachel = el.closest('li') || el;
+      if (kachel.getBoundingClientRect().top < window.innerHeight) return;
+      el.innerHTML = el.textContent.replace(/\d/g, function (d) { return '<span class="vk-ziffer"><span style="--z:' + (z++) + '">' + d + '</span></span>'; });
+      el.classList.add('vk-wartet');
       var io = beobachten(new IntersectionObserver(function (es) {
-        es.forEach(function (e) {
-          if (!e.isIntersecting) return;
-          io.disconnect();
-          var t0 = 0;
-          requestAnimationFrame(function schritt(t) {
-            if (!t0) t0 = t;
-            var q = Math.min(1, (t - t0) / 900), k = 1 - Math.pow(1 - q, 3);
-            el.textContent = fmt(q < 1 ? ziel * k : ziel);
-            if (q < 1) requestAnimationFrame(schritt);
-          });
-        });
-      }, { threshold: 0.6 }));
-      io.observe(el.closest('li') || el);
+        es.forEach(function (e) { if (!e.isIntersecting) return; io.disconnect(); el.classList.remove('vk-wartet'); el.classList.add('vk-rollt'); });
+      }, { threshold: 0.15 }));
+      io.observe(kachel);
     });
   }
 
@@ -464,6 +499,33 @@
     rechnen();
   }
 
+  /* ---------- Auftritt der Abschnitte (Zeitplan Abschnitt, Einigung E2) ----------
+     Einmal, wenn 15 % im Bild sind: Haarlinie (600 ms), Nummer (80, 320), Überschrift aus der Maske (120, 600), Lesetext (280, 600); die
+     Karten erscheinen über Reveal. Was beim Aufruf schon im Bild steht oder vorbei ist, bleibt, wie es ist. */
+  function abschnitte(wurzel, unten) {
+    if (ruhig() || !kannIO) return;
+    var io = beobachten(new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (!e.isIntersecting) return; io.unobserve(e.target); e.target.classList.remove('vk-vor'); e.target.classList.add('vk-auf'); });
+    }, { threshold: 0.15 }));
+    Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-teil, .vk-band'), function (t) {
+      if (t.__vkAuf || !unten(t) || t.getBoundingClientRect().top < window.innerHeight * 0.85) return;
+      t.__vkAuf = true;
+      t.classList.add('vk-vor');
+      io.observe(t);
+    });
+  }
+
+  /* ---------- Tiefenwechsel (Designrichtung 3.5) ----------
+     Im letzten Fünftel seines Wegs durchs Bild tritt das Medium zurück: auf 0,97 und Deckkraft 0,5 (Foto im Band, Aufmaßblatt der Szene). */
+  function tiefe(wurzel) {
+    if (!window.Scroll || ruhig()) return;
+    Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-band > .foto-karte img, .vk-szene .vk-mk-rahmen'), function (el) {
+      if (el.__vkTiefe) return;
+      el.__vkTiefe = true;
+      window.Scroll.binden(el, function (p) { var t = Math.max(0, (p - 0.8) / 0.2); el.style.scale = t ? (1 - 0.03 * t).toFixed(4) : ''; el.style.opacity = t ? (1 - 0.5 * t).toFixed(3) : ''; });
+    });
+  }
+
   function bewegung(wurzel, still) {
     beobachter.forEach(function (b) { b.disconnect(); }); beobachter = [];
     /* Neuaufbau desselben Bildschirms (still): Was im Bild steht oder schon vorbei ist, bleibt, wie es ist (kein Flackern); was noch
@@ -475,18 +537,18 @@
        je Gruppe (Karten einer Reihe, Punkte einer Liste): --rv zählt in der Gruppe, Reveal selbst staffelt nur, was beim Aufbau im Bild ist */
     if (window.Reveal) {
       var liste = Array.prototype.filter.call(wurzel.querySelectorAll('.vk-punkte > li, .vk-schritte > li, .vk-inhalt > li, .vk-anfrage .vk-szene, .vk-anfrage .vk-blatt, .vk-band > :not(ul), .vk-gruende > li, .vk-zusagen > li, .vk-vorspann, .vk-pakete, .vk-ablauf > li, .vk-demos > .rg-karte, .vk-bestellen > *, .vk-wissen > .rg-karte'), unten);
+      /* versetzt wird nur je Zeile: was beim Scrollen hereinkommt, erscheint ohne Staffel, so kommt eine Reihe zusammen */
       window.Reveal.auf(liste);
-      if (!ruhig()) Array.prototype.forEach.call(wurzel.querySelectorAll('.vk-punkte, .vk-inhalt, .vk-gruende, .vk-zusagen, .vk-ablauf, .vk-wissen, .vk-demos'), function (gruppe) {
-        var k = 0;
-        Array.prototype.forEach.call(gruppe.children, function (el) { if (el.classList.contains('rev') && el.getBoundingClientRect().top >= window.innerHeight) el.style.setProperty('--rv', String(Math.min(k++, 6))); });
-      });
     }
+    abschnitte(wurzel, unten);
+    tiefe(wurzel);
 
     /* alle Zeichen mit data-lottie (Schrittkarten, Bühne, Paketkarten): Schleifen, die gemeinsam.js nur im Bild spielt; ein schon
        gestartetes Element überspringt Lottie selbst */
     if (window.Lottie) window.Lottie.auf(wurzel);
     buehne(wurzel);
-    startbild(wurzel);
+    haltKnoepfe(wurzel);
+    startbild(wurzel, still);
     leisten(wurzel);
     pakete(wurzel);
     zahlen(wurzel);

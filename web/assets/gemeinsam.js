@@ -192,9 +192,10 @@
      Marker gegen die aktuellen Tokens getauscht, so stimmen sie auch im dunklen Modus. Gespielt wird nur, was im Bild ist;
      bei „weniger Bewegung“ steht das Endbild. Spieler: vendor/lottie_light.min.js (SVG, ohne Ausdrücke, MIT).
      Lottie.auf(wurzel)            alle [data-lottie="name"] darin starten (data-loop="1" für Schleifen)
-     Lottie.spielen(el, name, o)   ein Element gezielt; o.loop, o.langsam (Geschwindigkeit) */
+     Lottie.spielen(el, name, o)   ein Element gezielt; o.loop, o.langsam (Geschwindigkeit)
+     Lottie.halten(an)             alle anhalten bzw. weiterlaufen lassen */
   var LOTTIE_MARKER = { ink: [20, 20, 20], paper: [243, 242, 238], surface2: [236, 235, 230], mo: [194, 65, 12], el: [29, 78, 216], ok: [21, 115, 58] };
-  var lottieDaten = {}, lottieIO = null;
+  var lottieDaten = {}, lottieIO = null, lottieHalt = false;
   /* Ablage der Dateien neben dieser Datei (assets/lottie/), damit es auch unter einem anderen Pfad läuft */
   var LOTTIE_BASE = (function () { try { var sc = document.currentScript; return sc && sc.src ? new URL('lottie/', sc.src).href : '/assets/lottie/'; } catch (e) { return '/assets/lottie/'; } })();
   function tokenFarbe(name) {
@@ -242,7 +243,7 @@
       if (ruhig()) { an.goToAndStop(Math.max(0, an.totalFrames - 1), true); return an; }
       /* nur spielen, wenn es im Bild ist; Schleifen pausieren außerhalb */
       if ('IntersectionObserver' in window) {
-        if (!lottieIO) lottieIO = new IntersectionObserver(function (es) { es.forEach(function (e) { var a = e.target._lottie; if (!a) return; if (e.isIntersecting) { if (a.isPaused && !(a.__fertig)) a.play(); } else if (!a.isPaused) a.pause(); }); }, { threshold: 0.2 });
+        if (!lottieIO) lottieIO = new IntersectionObserver(function (es) { es.forEach(function (e) { var a = e.target._lottie; if (!a) return; e.target.__imBild = e.isIntersecting; if (e.isIntersecting) { if (a.isPaused && !(a.__fertig) && !lottieHalt) a.play(); } else if (!a.isPaused) a.pause(); }); }, { threshold: 0.2 });
         lottieIO.observe(ziel);
       } else an.play();
       if (!o.loop) an.addEventListener('complete', function () { an.__fertig = true; });
@@ -256,7 +257,16 @@
         lottieSpielen(e, e.getAttribute('data-lottie'), { loop: e.getAttribute('data-loop') === '1', langsam: parseFloat(e.getAttribute('data-tempo') || '') || 0 });
       });
     },
-    bereit: function () { return !!window.lottie; }
+    bereit: function () { return !!window.lottie; },
+    /* Lottie.halten(true) hält alle laufenden Zeichen an und lässt keines neu starten (Halt-Knopf der Verkaufsseite); false lässt die
+       im Bild weiterlaufen */
+    halten: function (an) {
+      lottieHalt = !!an;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-lottie-an="1"]'), function (el) {
+        var a = el._lottie; if (!a) return;
+        if (lottieHalt) { if (!a.isPaused) a.pause(); } else if (a.isPaused && !a.__fertig && el.__imBild !== false) a.play();
+      });
+    }
   };
 
   /* ---------- Haptik: ein kurzes Tippen am Gerät, wo etwas einrastet ----------
