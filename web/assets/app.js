@@ -2658,6 +2658,7 @@ function render(fresh) {
     const on = r.querySelector('[aria-pressed="true"]'); if (!on) return;
     const rr = r.getBoundingClientRect(), ro = on.getBoundingClientRect(); if (ro.right > rr.right - 24 || ro.left < rr.left + 8) r.scrollLeft += ro.left - rr.left - (rr.width - ro.width) / 2;
   });
+  if (S.screen === 'start') startNachzeichnen(root, neu);
   lastScreen = S.screen;
   if (fokus && !neu) fokusZurueck(root, fokus);
   blattFokus(root, fokus, neu);
@@ -2904,19 +2905,48 @@ function startWin(w) {
 /* Start: Stelle als zwei ruhige Karten ohne Symbol (das Modell darüber zeigt das Element), Element als Reihe zum Wischen mit Bildern aus
    dem eigenen Konfigurator (web/bilder/app/element-<art>.webp, scripts/element-bilder.mjs); am Schreibtisch 3 × 2 */
 function startKarten(group, cur, act, cls) {
-  const bild = (o) => cls === 'start-arten' ? '<span class="sa-bild"><img src="/bilder/app/element-' + o.k + '.webp" width="272" height="192" alt="" decoding="async"></span>' : cls === 'stelle' ? '' : svgIcon(ICO[group](o.k), 44);
+  const haken = '<span class="sa-haken" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5.5 10.4l3 3 6-6.6" pathLength="1"></path></svg></span>';
+  const bild = (o) => cls === 'start-arten' ? '<span class="sa-bild"><img src="/bilder/app/element-' + o.k + '.webp" width="272" height="192" alt="" decoding="async">' + haken + '</span>' : cls === 'stelle' ? '' : svgIcon(ICO[group](o.k), 44);
   return '<div class="qcards' + (cls ? ' ' + cls : '') + (cls === 'start-arten' ? ' reihe' : '') + '" role="group">' + OPT[group].map((o) => '<div class="qo"><button type="button" class="qopt" data-act="' + act + '" data-v="' + o.k + '" aria-pressed="' + (o.k === cur) + '">' + bild(o) + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + '</span></button>' + (optG(group, o) ? '<button type="button" class="qinfo" aria-label="' + esc('Erklärung: ' + o.label) + '" data-act="gloss" data-k="' + optG(group, o) + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
 }
 /* Am Schreibtisch steht die Bühne groß neben der Wahl; das Element bekommt dort weniger vom Bild, sonst wirkt es überdimensioniert */
 const breitStart = () => { try { return matchMedia('(min-width: 1024px)').matches; } catch (e) { return false; } };
+/* Nach dem Zeichnen des Starts: beim ersten Öffnen (nicht beim Zurückkommen) treten Bühne, Kopf und Wahl gestaffelt auf (.ist-neu);
+   die eben gewählte Karte rastet ein und zieht ihren Haken (.frisch), nur sie, nicht bei jedem Neuzeichnen; in der Reihe der Elemente
+   bewegen sich die Bilder beim Wischen leicht gegen die Reihe (höchstens 10 px), als lägen die Fenster hinter ihrer Karte. */
+let startWahlVorher = null, startAuftritt = false;
+function startNachzeichnen(root, neu) {
+  const scr = root.querySelector('.scr[data-screen="start"]'); if (!scr) return;
+  if (neu && S.dir !== 'back' && !ruhig() && !startAuftritt) { scr.classList.add('ist-neu'); startAuftritt = true; } // einmal je Besuch, nicht bei jedem weiteren Fenster
+  const jetzt = { art: S.win.art || 'fenster', stelle: S.win.neu ? 'neu' : 'ersatz' };
+  if (startWahlVorher && !neu) {
+    if (jetzt.art !== startWahlVorher.art) { const k = scr.querySelector('.qopt[data-act="art"][aria-pressed="true"]'); if (k) k.classList.add('frisch'); }
+    if (jetzt.stelle !== startWahlVorher.stelle) { const k = scr.querySelector('.qopt[data-act="situation"][aria-pressed="true"]'); if (k) k.classList.add('frisch'); }
+  }
+  startWahlVorher = jetzt;
+  const reihe = scr.querySelector('.qcards.start-arten'); if (!reihe || ruhig()) return;
+  const bilder = Array.from(reihe.querySelectorAll('.sa-bild img'));
+  let warte = 0;
+  const tiefe = () => {
+    warte = 0;
+    if (reihe.scrollWidth <= reihe.clientWidth + 1) { bilder.forEach((b) => { b.style.transform = ''; }); return; }
+    const rr = reihe.getBoundingClientRect(), mitte = rr.left + rr.width / 2;
+    const lagen = bilder.map((b) => { const r = b.parentNode.getBoundingClientRect(); return Math.max(-1, Math.min(1, (r.left + r.width / 2 - mitte) / rr.width)); });
+    bilder.forEach((b, i) => { b.style.transform = 'translate3d(' + (-lagen[i] * 10).toFixed(2) + 'px, 0, 0) scale(1.14)'; });
+  };
+  reihe.addEventListener('scroll', () => { if (!warte) warte = requestAnimationFrame(tiefe); }, { passive: true });
+  tiefe();
+}
 SCREENS.start = () => {
   const w = S.win, art = w.art || 'fenster', o = OPT.art.find((x) => x.k === art) || OPT.art[0];
   /* Aufbau wie die Fragen: das Element als Held oben (dunkles Studio, Licht von rechts oben), darunter die zwei Angaben */
-  const html = hd('Schritt 1 von 6', 'Was planst du?', 'Zwei Angaben, dann geht es zu den Fotos.', 'start-hd', '', schrittTools('elementart')) +
-    model(startWin(w), { id: 'w3d', view: 'three', sway: true, stageH: 220, fitW: breitStart() ? 0.6 : 0.8, fitH: breitStart() ? 0.6 : 0.76, cls: 'studio', hint: o.label + (istTuer(w) ? ' · bodentief' : '') }) +
-    '<div class="start-wahl"><div class="qgroup"><p class="eyebrow">Die Stelle</p>' + startKarten('situation', w.neu ? 'neu' : 'ersatz', 'situation', 'stelle') +
+  /* Am Telefon steht die Bühne randlos oben und läuft nach unten in den Grund aus; Kicker und Überschrift beginnen im Auslauf (wie das
+     Startbild der Website). Die Überschrift steht in einer Zeilenmaske (.zl), aus der sie beim ersten Öffnen aufsteigt. */
+  const kopf = hd('Schritt 1 von 6', 'Was planst du?', 'Zwei Angaben, dann geht es zu den Fotos.', 'start-hd', '', schrittTools('elementart')).replace('<h1>', '<h1><span class="zl">').replace('</h1>', '</span></h1>');
+  const html = model(startWin(w), { id: 'w3d', view: 'three', sway: true, stageH: breitStart() ? 236 : 320, fitW: breitStart() ? 0.6 : 0.62, fitH: breitStart() ? 0.6 : 0.5, cls: 'studio', hint: o.label + (istTuer(w) ? ' · bodentief' : '') }) + kopf +
+    '<div class="start-wahl"><div class="qgroup"><p class="eyebrow">Ersetzen oder neu</p>' + startKarten('situation', w.neu ? 'neu' : 'ersatz', 'situation', 'stelle') +
     (w.neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung') : '') + '</div>' +
-    '<div class="qgroup"><p class="eyebrow">Das Element</p>' + startKarten('art', art, 'art', 'start-arten') + '</div></div>';
+    '<div class="qgroup"><div class="qkopf"><p class="eyebrow">Welche Art</p><span class="qzahl">' + OPT.art.length + ' zur Wahl</span></div>' + startKarten('art', art, 'art', 'start-arten') + '</div></div>';
   return { html: html, back: ['Aufmaß', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos', zurueck: true } };
 };
 /* ---------- Fotos ---------- */
