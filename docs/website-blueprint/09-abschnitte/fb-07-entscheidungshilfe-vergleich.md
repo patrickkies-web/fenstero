@@ -96,9 +96,9 @@ direkt auf dem Grund, ohne Karte. Ordnungslinie ist die linke Spaltenkante (G5);
 | y (px) | Element | Maß | Schrift, Farbe |
 |---|---|---|---|
 | 24–68 | Verkaufsstand, zwei Zeilen | 358 × 44 | 15/22 `--text2`; „Vorläufige Preise.“ 700 `--text` |
-| 92 | Haarlinie | 358 × 1 | `--line2` |
-| 93–145 | Zusammenfassung, Text ab x 16; „+“ 24 × 24 bei x 350–374 | 358 × 52 | 17/700 `--text`; Zeichen `--text2` |
-| 145 | Haarlinie | 358 × 1 | `--line2` |
+| 92 | Haarlinie | 358 × 1 | `--line` (K-33) |
+| 93–145 | Zusammenfassung, Text ab x 16; „+“ 24 × 24 bei x 350–374; Innenabstand 15 oben und unten | 358 × 52 (zweizeilig 74, wie `fb-13`) | 17/22 700 `--text`; Zeichen `--text2` |
+| 145 | Haarlinie | 358 × 1 | `--line` (K-33) |
 | 194 | Kennwort „VERTRAG IN KÜRZE“ (`fb-08`) | – | – |
 
 Zugeklappt ≈ 146 px ≈ 0,17 BH (ZA plant 0,25). Bei 390 × 664 stehen Kartenende, Block und Anfang des Festblocks zugleich im Bild.
@@ -125,7 +125,7 @@ Hauptelement (ZA: „Held: keiner“). Darüber steht meist noch das Kartenende 
 **Verhältnisse.** Zugeklappt, Bildschirm 844 mit Kartenende, Block und Festblock-Anfang: Text ≈ 20 %, Linien und Zeile ≈ 7 %, freier Grund
 ≥ 60 %. Abstände 8 : 24 : 48 = 1 : 3 : 6 (G6).
 
-**Schreibtisch 1280 × 800** (12 Spalten zu 64,67 px, Abstand 24, Spalte 1040 ab x 120)
+**Schreibtisch 1280 × 800** (12 Spalten zu 64,67 px, Rinne 24 nach K-12, Spalte 1040 ab x 120)
 
 | y (px) | Element | Spalten (x) |
 |---|---|---|
@@ -135,7 +135,8 @@ Hauptelement (ZA: „Held: keiner“). Darüber steht meist noch das Kartenende 
 | danach | Gruppenköpfe über 1–12; Zeilen 44 px (11/11), Titel 15/600 in 1–3, Werte 15/500 je 3 Spalten; „in allen drei“ über 4–12; Richtwerte-Satz und Fußsatz in 1–8 | – |
 
 Aufgeklappt ≈ 1.430 px ≈ 1,8 BH. Die Paketspalten fluchten nicht mit den Karten (je 4 Spalten), weil die Beschriftung drei Spalten braucht
-(10.4 C); die Reihenfolge ist dieselbe. **1024 × 768:** Spalte 944 ab x 40, Beschriftung und Pakete je 218 px, Kopf klebt bei 64.
+(10.4 C); die Reihenfolge ist dieselbe. **1024 × 768** (K-13): Rand 32, Spalte 960 ab x 32, 12 Spalten à 58 px, Rinne 24; Beschriftung
+und Pakete je 222 px (3 Spalten) bei x 32 · 278 · 524 · 770; Verkaufsstand in 1–8 (x 32–664); Kopf klebt bei 64.
 
 **Interaktive Komponente.** Genau eine: die Zusammenfassung, volle Breite, 52 px, Text an der Ordnungslinie, Zeichen rechts im mittleren
 Daumenbereich, wenn der Block in der Bildschirmmitte steht.
@@ -145,10 +146,10 @@ Daumenbereich, wenn der Block in der Bildschirmmitte steht.
 | Wert | Start | Begründung |
 |---|---|---|
 | Tabelle unter 640 px | `table`, `thead`, `tbody` als Block; `tr` als Raster `repeat(3, minmax(0, 1fr))`, `column-gap: 5px`; Titel und `colspan="3"` über `1 / -1`; in „In allen Paketen“ Titel `1 / 3`, Wert `3` | drei Pakete, drei Spalten, kein Querscrollen (R9); funktionale Abweichung vom 4-Spalten-Raster, das als Außenmaß (358 px) bleibt |
-| Tabelle ab 640 px | `repeat(4, minmax(0, 1fr))`, `column-gap: 24px` | 242 px bei 1040, 218 px bei 944 = 3 von 12 Spalten |
+| Tabelle ab 640 px | `repeat(4, minmax(0, 1fr))`; `column-gap: 16px` bis 1023 px, `24px` ab 1024 px | Rinnen nach K-12: bei 768 (Rand 24) 168 px = 2 von 8 Spalten; ab 1024 242 px bei 1040, 222 px bei 960 = 3 von 12 Spalten |
 | Zeilen | Telefon 8/8, Schreibtisch 11/11, Zeilenhöhe 22 | kompakt am Telefon, 44 px am Schreibtisch |
 | Klebender Kopf | `position: sticky; top: var(--kopf-h)` (56 / 64), Grund `--ground` | Kopfhöhe nach `rh-01-kopf` |
-| Zusammenfassung | `min-height: var(--h2)`, links ohne Innenabstand, Haarlinien `--line2` | T9; DG-AB-19 |
+| Zusammenfassung | `min-height: var(--h2)`, links ohne Innenabstand, oben und unten 15 px, Schrift 17/22: einzeilig 52 px, zweizeilig 74 px; Haarlinien `--line` | T9; DG-AB-19; K-33 wie `fb-13` |
 | Zustandszeichen | 24 × 24, zwei Striche 14 × 2 px als `border` in `currentColor` | Bestand ist ein grünes Schriftzeichen (`ratgeber.css:131`); Grün bleibt Signal (G8) |
 | Umbruch | `hyphens: auto; overflow-wrap: break-word` (`lang="de"` vorhanden) | 116-px-Zellen, 200 % Text |
 | Ziffern | `font-variant-numeric: tabular-nums` | „Ziffern in Reih und Glied“ (DR 1) |
@@ -169,7 +170,7 @@ Stufe 1 „ruhig“, Dialekt C (flach); keine Signature, weder informierend noch
 | 3D-Objekte, Perspektive | keine | 0 | frontal (DNA Nr. 1) |
 | Bildintegration | keine Bilder; das Beispielbild der Karte steht darüber | 0 | Bild zeigt (`fb-06`), Tabelle benennt |
 | Oberflächendetails | Technikstimme für Gruppenköpfe, gleich breite Ziffern, Zeichen aus zwei 2-px-Strichen | 1 | „präzise wie ein Aufmaß“ (DR 1) |
-| Animation | Öffnen über Deckkraft 220 ms; „+“ wird „–“ über Deckkraft 150 ms | 1 | Rückmeldung ohne Bewegung der Bedienschicht (G1) |
+| Animation | Öffnen über Deckkraft 220 ms (`--t2`); „+“ wird „–“ über Deckkraft 150 ms (`--t1`); Kurve `--e-out` (K-4) | 1 | Rückmeldung ohne Bewegung der Bedienschicht (G1) |
 | Typografie | Klein-Stufe 13–17, Stufen über Gewicht und Tonwert | 1 | überfliegbar (Q34); Unterschiede über Tonwert lesbar |
 | Überlagerungen | nur der klebende Kopf | 1 | Orientierung |
 | Interaktive Effekte | Hover = Kontur und Farbe, aktiv = Füllung `--surface`, Fokus 2 px | 1 | ein Kanal je Zustand wie überall (SG 10.7/8) |
@@ -207,11 +208,11 @@ Erwartete Aufmerksamkeit aus Komposition und Forschung (RE E1–E3; Q34), nicht 
 | Auslöser | Reaktion | Dauer, Kurve | Verfahren | Weniger Bewegung |
 |---|---|---|---|---|
 | Scrollen | keine Bewegung; geöffnet klebt der Tabellenkopf | – | CSS `position: sticky` | gleich |
-| Tipp, Klick, Enter, Leertaste auf die Zusammenfassung | öffnet; Höhe sofort, Inhalt Deckkraft 0 → 1 (wie die Fragen, DG-E-14 A) | 220 ms (`--t2`), `cubic-bezier(.2, 0, 0, 1)` (`--kurve-ein`) | `details`; `@keyframes` auf `.vk-vgl-inhalt` unter `[open]` | sofort |
-| dito | „+“ wird „–“: senkrechter Strich Deckkraft 1 → 0, kein Drehen (G1) | 150 ms (`--t1`) | Übergang auf `opacity` | sofort |
-| Schließen | Inhalt weg, „–“ wird „+“; Seite bleibt stehen (Scroll-Verankerung) | 150 ms | nativ | gleich |
-| Hover (`pointer: fine`) | untere Haarlinie `--line2` → `--muted`, Zeichen `--text2` → `--text` | 160 ms, `--kurve-ein` | Übergang auf Farbe | gleich |
-| Drücken | Fläche `--surface`; keine Skalierung (SG 10.7/3) | 150 ms | `:active` | gleich |
+| Tipp, Klick, Enter, Leertaste auf die Zusammenfassung | öffnet; Höhe sofort, Inhalt Deckkraft 0 → 1 (wie die Fragen, DG-E-14 A) | 220 ms (`--t2`), `--e-out` (K-4) | `details`; `@keyframes` auf `.vk-vgl-inhalt` unter `[open]` | sofort |
+| dito | „+“ wird „–“: senkrechter Strich Deckkraft 1 → 0, kein Drehen (G1) | 150 ms (`--t1`), `--e-out` | Übergang auf `opacity` | sofort |
+| Schließen | Inhalt sofort weg (nativ), „–“ wird „+“ (Strich 0 → 1); Seite bleibt stehen (Scroll-Verankerung) | Strich 150 ms (`--t1`), `--e-out` | nativ; Übergang auf `opacity` | gleich |
+| Hover (`hover: hover`, `pointer: fine`) | Linie unter der Zeile `--line` → `--line2`, Zeichen `--text2` → `--text` (K-33, wie `fb-13`) | 150 ms (`--t1`), `--e-out` | Übergang auf Farbe; Linie über `:has(> summary:hover)` | gleich |
+| Drücken | Fläche `--surface` erscheint sofort, geht mit 150 ms zurück; keine Skalierung (SG 10.7/3) | 0 ms; zurück 150 ms (`--t1`), `--e-out` (K-4) | `:active` | gleich |
 | Fokus | 2 px `--text`, Abstand 2, Radius 12 | – | `:focus-visible` | gleich |
 | Link auf `#vergleich` in der Wurzel | öffnen, dann die Zeile an den Bildschirmanfang rollen, Hash unverändert (in `/#fensterbauer` gehört er der Ansicht) | Browser-Glättung | `scrollIntoView({block: 'start'})` in `Verkauf.auf`, Merker `det.__vkAn` | `behavior: 'auto'` |
 | Adresse mit `#vergleich` (eigenständige Seite) | beim Binden öffnen | – | dito | – |
@@ -227,7 +228,8 @@ enthalten“ (≈ 104 px bei 15/500, geschätzt) passt knapp, sonst bricht es sa
 Kartenende und Festblock-Anfang im Bild; geöffnet bleiben 564 px für Zeilen. **Querformat 844 × 390:** vierspaltige Tabelle, Kopf bei 56.
 
 **Schreibtisch 1280 × 800.** Verkaufsstand in Spalten 1–8, Zeile über 1–12, vierspaltige Tabelle mit 44-px-Zeilen; nichts größer als 17 px
-(SKILL:28). **1024 × 768:** dieselbe Struktur in 944 px, Werte bei Bedarf zweizeilig. **640–1023 px:** vierspaltig, Kopf bei 56.
+(SKILL:28). **1024 × 768:** dieselbe Struktur in 960 px ab x 32 (K-13), Werte bei Bedarf zweizeilig. **640–1023 px:** vierspaltig, Rand
+24, Rinne 16 (K-12), Kopf bei 56.
 
 **Einbettung `/#fensterbauer`.** Identisch; Kopfhöhe aus `--kopf-h`; Bindung idempotent bei jedem `Verkauf.auf`; offen oder zu wird nicht
 gespeichert. **200 % Text, 400 % Zoom:** Zellen brechen um, der Kopf darf zweizeilig werden, kein Querscrollen.
@@ -250,8 +252,8 @@ braucht die Tabelle echte Zeilenköpfe und Rollen (`table`, `rowgroup`, `row`, `
 **Rückfall bis zur Freigabe:** Bestandsmarkup (Tabelle ohne weiteres Attribut, Zeilentitel als `<td>`), die Rollen setzt `verkauf.js`.
 
 **CSS-Techniken.** Grid für `tr`; `position: sticky` am `thead`; Umbruch bei 640 px; `@media (pointer: fine)`; `prefers-reduced-motion: reduce`
-(keine Einblendung); `prefers-contrast: more` (Haarlinien `--muted`); `forced-colors: active` (Striche als `border` in `CanvasText`); Tokens mit
-Rückfallwert, z. B. `var(--kurve-ein, cubic-bezier(.2, 0, 0, 1))`, solange B.5 nicht in `gemeinsam.css` steht.
+(keine Einblendung); `prefers-contrast: more` (Haarlinien `--muted`); `forced-colors: active` (Striche als `border` in `CanvasText`); nur
+Bestands-Tokens `--t1`, `--t2`, `--e-out` aus `gemeinsam.css:30` (K-4), keine SG-Kurven.
 
 **Assets.** Keine; nur Variante H-07-5 nutzt die Miniatur 96 × 72 aus 10.4 H (per Skript aus dem Beispielbild).
 

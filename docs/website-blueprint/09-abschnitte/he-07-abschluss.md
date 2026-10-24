@@ -45,7 +45,7 @@ Kopf“): Bildband randlos oben, h2 im Auslauf des Bands, darunter Preiszeile, d
 | 0–200 | Bildband, x 0–390 (randlos), Z 20 | 390 × 200; Maske: 0–24 einblenden, 24–128 voll, 128–200 ausblenden |
 | 176–243 | h2, zwei Zeilen „Das erste Fenster“ / „ausmessen.“, Zeile 1 ≈ 261 px breit; überdeckt den Bandfuß um 24 px | 32 / 1,05 |
 | 259–295 | Preiszeile, zwei Zeilen, Zeile 2 ≈ 307 px | 13 / 18 |
-| 319–371 | Cream-Pille, volle Spaltenbreite | 358 × 52 |
+| 319–371 | Cream-Pille, volle Spaltenbreite (Abschluss, nicht Bühne: 11.6.2 K-30) | 358 × 52 |
 | 383–401 | nur bei angefangenem Aufmaß: Zeile 13 / 18 | ≈ 313 px |
 | Ende | 371 bzw. 401 px = 0,44–0,48 BH; danach 96 px bis zur Wechselkarte (DG G6) | – |
 
@@ -72,7 +72,7 @@ Band ab Spalte 6 (x 563) randlos bis zum Fensterrand; 1024 = 6 : 6 (Begründung 
 | Abstände | h2 → Preiszeile 16, Preiszeile → Pille 24, Pille → Fortsetzen-Zeile 12 | GEST-Raster 4 px; Gruppe : Gruppe ≈ 1 : 3 (DG G6) |
 | Bühnenstimme | Inter 800, 32 / 40 px, Zeilenabstand 1,05, Laufweite −0,03 em, `text-wrap: balance` | DG 2.2.18 |
 | Preiszeile | 13 px, 500, `--muted`, Beträge und „kostenlos“ 700 in `--text`, `tabular-nums` | wie H1 (ZA); DG-E-6 offen |
-| Pille | `--h2` 52 px, Schrift 17 / 700, `.pf` 28 px | GEST Kontrollhöhen; DG G2 |
+| Pille | `--h2` 52 px, Schrift 17 / 700, gefüllter Pfeilkreis `.pf` 28 px rechts | GEST Kontrollhöhen; DG G2; Pfeilkreis nur an der Cream (11.6.2 K-31) |
 
 ## D. Anwendung der Design-DNA
 
@@ -124,11 +124,11 @@ ist, dann in den Fuß. Kein Element zeigt zurück nach oben (E-4 sinngemäß).
 | Ereignis | Verhalten | Dauer, Kurve | Begründung |
 |---|---|---|---|
 | Scrollen | natives Scrollen; Band und Text stehen still, keine Parallaxe, kein Scrollbezug | – | T11 „keine außer Zustand“; E-13; GEST:41 |
-| Erscheinen | kein Auftritt; der Abschnitt ist von der Klasse `.rv` ausgenommen (`portal.js:575`) | – | DG Dosierregel 1; DG-AB-2 |
+| Erscheinen | kein Auftritt; die Bedienschicht steht ab dem ersten Bild, der Abschnitt ist von der Klasse `.rv` ausgenommen (`portal.js:575`). Auch die Fortsetzen-Zeile wird nicht eingeblendet: Sie entsteht beim Aufbau aus `eigenesAufmass()`, nicht nach einer Eingabe | – | Bedienschicht ohne Auftritt (11.7.2 K-6); DG Dosierregel 1; DG-AB-2 |
 | Laden des Bands | `loading="lazy"`; der Browser lädt mit seinem Vorlauf lange vor Sichtkontakt; bis dahin Grund in reservierter Höhe | – | kein Sprung (CLS) |
-| Hover (Zeiger) | Füllung der Pille → `--primary-hover` | 150 ms, `--e-out` | Zustand über Füllung (DG G1) |
+| Hover (Zeiger, nur `hover: hover`) | innere 2-px-Kontur `--on-primary` 24 % (`box-shadow: inset`), Füllung bleibt `--primary` | 150 ms, `--e-out` | Hover ist Kontur, innen, damit sie nicht mit dem äußeren Fokusring verwechselt wird (11.6.2 K-2; DG 2.4.1) |
 | Fokus | 2-px-Kontur `--ink`, Abstand 2 px (`gemeinsam.css:41`), sofort | 0 ms | sichtbar 3 : 1 |
-| Drücken | Füllung `--primary-hover`, **keine** Skalierung: `transform: none` gegen `gemeinsam.css:65` | sofort | Bedienschicht formstabil (G1) |
+| Drücken | Füllung `--primary-druck` (`#e2e1db`); keine Deckkraftänderung, **keine** Skalierung: `transform: none` gegen `gemeinsam.css:65` | sofort, zurück 150 ms `--e-out` | Druck ist Füllung (11.6.2 K-2); Bedienschicht formstabil (G1) |
 | Klick | Seitenwechsel in die App (gleiche Herkunft), keine Übergangsanimation | – | die App übernimmt den Ladezustand |
 | Kopf | `kopfCta()` schaltet den Kopfknopf auf Ring, solange die Pille im Bild ist | wie Bestand | ZA N3 |
 | weniger Bewegung | identisch (es bewegt sich nichts) | – | ruhige Fassung = Endbild |
@@ -167,7 +167,8 @@ keinen Puffer und erzwängen eine dritte Zeile.
 - `abschlussHE()` in `portal.js`: liefert den Abschnitt; Aufruf nach H6, vor `wechsel('betrieb')`.
 - `preiszeileHE()` als eine Quelle für H1, H7 und die Textfassung `st-05`: zwei Zeilen, Beträge aus `Abrechnung.preise().aufmass`,
   Einführung aus `.einfuehrung()`; Datum als „17.11.2026“ aus `einfuehrung().bis`.
-- CSS-Block `.he-abschluss` in `portal.css`; Ausnahme in `afterRender`: Elemente mit `data-ruhig` erhalten kein `.rv`.
+- CSS-Block `.he-abschluss` in `portal.css`; Bedienschicht ohne `.rv` (11.7.2 K-6, gilt auf jeder Seite); bis das site-weit umgesetzt ist,
+  Ausnahme in `afterRender`: Elemente mit `data-ruhig` erhalten kein `.rv`.
 - `scripts/fotos.py`: Eintrag „Ausschnitt“ mit relativem Rechteck, Quelle das Original in `fotos-roh/`, sonst die Website-Datei; Eintrag in
   docs/BILDER.md.
 
@@ -200,7 +201,9 @@ Keine `id` am Abschnitt (GEST:191, Sprung beim Laden); die Fortsetzen-Zeile ist 
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 64%, transparent 100%);
           mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 64%, transparent 100%) }
 .he-abschluss .text { position: relative; z-index: 30; margin-top: -24px }
-.he-abschluss .btn { width: 100%; margin-top: 24px } .he-abschluss .btn:active { transform: none }
+.he-abschluss .btn { width: 100%; margin-top: 24px; transition: background var(--t1) var(--e-out), box-shadow var(--t1) var(--e-out) }
+@media (hover: hover) { .he-abschluss .btn.primary:hover { background: var(--primary); box-shadow: inset 0 0 0 2px rgb(22 22 22 / .24) } } /* K-2: --on-primary 24 % */
+.he-abschluss .btn:active { transform: none; transition-duration: 0s } .he-abschluss .btn.primary:active { background: var(--primary-druck) }
 @media (min-width: 1024px) {
   .he-abschluss { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; min-height: 280px }
   .he-abschluss .text { grid-column: 1 / span 6; margin: 0 }
@@ -222,7 +225,8 @@ Keine `id` am Abschnitt (GEST:191, Sprung beim Laden); die Fortsetzen-Zeile ist 
 | Original des Startfotos, ≥ 2.000 px breit | für scharfe Darstellung bei doppelter Pixeldichte (717 CSS-px × 2 = 1.434 > 1.250) | – | beim Inhaber anfragen (optional) |
 | Variante [H]: dieselbe Öffnung mit eingesetztem Fenster (KA-IA-11) | 1250 × 1250 WebP, gleiche Kamera, Figur und Lichtrichtung, ohne Text und Wasserzeichen | – | beim Inhaber (Flux), nur nach Freigabe |
 
-**Animationstechnik:** keine; CSS-Übergang `background-color` 150 ms an der Pille (Technikstufe „Leicht“, SKILL:56).
+**Animationstechnik:** keine; CSS-Übergänge an der Pille: `box-shadow` 150 ms (Hover), `background-color` beim Drücken sofort und
+150 ms zurück (K-2; Technikstufe „Leicht“, SKILL:56).
 
 **Leistung:** kein JavaScript außer dem Erzeugen des HTML; Band lazy und am Schreibtisch aus dem Cache; Maske auf einem 390 × 200 großen
 Element ist billig, kein `filter: blur()`; feste Höhen gegen Layoutverschiebung. **Datenrisiko:** Ohne Server bleibt `aufmass: 7.99` nach dem
@@ -264,8 +268,13 @@ zwischen zwei Wegen; Unsichere finden die Führung in H1, H4 und im Menü.
   nötig.** Begründung: Ende mit Start statt Wechsel (EA H-D12).
 - GEST:34: Außerhalb der Startbilder stehen Fotos in einer Fotokarte; das Band läuft randlos aus (DG-AB-9). **Abweichung von bestehender
   Regel – Freigabe durch den Inhaber nötig.** Begründung: SG 10.6 Regel 1 (Bild als Raum, keine gerahmte Beigabe).
-- GEST:38: Blöcke erscheinen 8 px aufwärts; H7 erscheint nicht (DG-AB-2, E-13). **Abweichung von bestehender Regel – Freigabe durch den Inhaber
-  nötig.** Begründung: Neben Preis und Knopf beginnt keine Bewegung.
+- GEST:39 Katalog 1: Blöcke erscheinen 8 px aufwärts; H7 erscheint nicht, wie die Bedienschicht jeder Seite (11.7.2 K-6; DG-AB-2, E-13).
+  **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (DS-AB-8). Begründung: Neben Preis und Knopf beginnt keine
+  Bewegung; ein Einblenden beim Scrollen wäre ein zweiter Träger und ohne JavaScript ein Risiko.
+- `gemeinsam.css:15`, `:65`: Cream-Hover als innere 2-px-Kontur `--on-primary` 24 % statt Weiß `--primary-hover`, Druck als Füllung
+  `--primary-druck` (`#e2e1db`) ohne `scale(.98)` (11.6.2 K-2). **Abweichung von bestehender Umsetzung (`--primary-hover`) – Freigabe durch
+  den Inhaber nötig** (DS-AB-3; neuer Farbwert DS-AB-7). Begründung: ein Kanal für Hover (Kontur), Druck über Füllung, Bedienschicht
+  formstabil (SG 10.7/3).
 - Ohne Freigabe nötig, funktional begründet: Auslauf per `mask-image` statt eingebackenem Alpha (SG 10.6, Umsetzung), weil am Schreibtisch
-  dieselbe Datei aus dem Cache dient und der Auslauf je Breite verschieden ist; Drücken ohne `scale(.98)` (G1), site-weit mit DG zu klären.
+  dieselbe Datei aus dem Cache dient und der Auslauf je Breite verschieden ist.
 - Offen: Preiszeile 13 px oder 15 px (DG-E-6; Zeile 2 passt auch in 15 px mit ≈ 354 px); Anrede (EA O-13).

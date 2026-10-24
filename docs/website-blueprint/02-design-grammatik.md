@@ -476,8 +476,9 @@ der DNA ist das die technische Mikroschicht (Signature, 5 von 15, Bedingung „t
 - **DNA.** n = 5; belegt ist nur die Ankündigung (Scroll-Hinweis mit Linie, Kapitelziffern), statisch das Fortsetzungssignal 8 von 15;
   Mechanik Neuentwurf; Scrollen transformiert nie die Bedienschicht; der erste Bildschirm ist ohne Scrollen vollständig (DNA 5.6.9).
 - **Übersetzung.** **[V]** Natives Scrollen, Scrolltempo nie verändert (DR 3.5). **[V]** Scrollgekoppelt sind nur Bildebenen: Tiefe im
-  Startbild (Foto Faktor 0,85–0,9, Glasschicht 1,0), Stationen der Produktdemonstration, Schichten der Explosionsansicht, Versatz der
-  Leiste nach Scrolltempo. **[V]** Am Telefon keine Anheftstrecke (DG-AB-13); am Schreibtisch ≤ 1,5 Bildschirmhöhen, davon ≥ ⅓ Ruhe im
+  Startbild V1 (einziger Ort, weil Tiefe der Bildebenen nur in Stufe 4 steht: Bildgruppe aus Foto, Erdlicht, Maßlinie und Glas-Stapel mit
+  Faktor 0,88 auf allen Breiten, Bedienschicht 1,0; endet, sobald die Leiste die Bildschirmmitte erreicht; H1 ohne Tiefe; Designsystem
+  11.7.4, Festlegung K-9), Stationen der Produktdemonstration, Schichten der Explosionsansicht, Versatz der Leiste nach Scrolltempo. **[V]** Am Telefon keine Anheftstrecke (DG-AB-13); am Schreibtisch ≤ 1,5 Bildschirmhöhen, davon ≥ ⅓ Ruhe im
   Endzustand. **[V]** Abschnittsnummern 01 bis n in der Technikstimme an jeder Abschnitts-Haarlinie der Verkaufsseite (GEST:450) und der
   Ansicht Hauseigentümer sind die Kapitelstruktur (in der DNA Signature, Ref 15; Einsatz nur dort, 2.3.17);
   ein fortlaufend wachsender Lesefortschritt im Kopf ist eine bewegte Bedienlinie und bleibt Hypothese (DG-E-7, DG-AB-15).
@@ -489,9 +490,12 @@ der DNA ist das die technische Mikroschicht (Signature, 5 von 15, Bedingung „t
 
 - **DNA.** n = 1; belegt ist die statische Grammatik: Rang und Zustand ohne Zusatzfarbe (≥ 7 von 15) über Deckkraft, Sättigung,
   Füllung gegen Kontur, Glas gegen opak; Pfeil im Kreis 6 von 15 (DNA 5.6.10).
-- **Übersetzung.** **[V]** Ein Kanal für „aktiv“: **Füllung** (gewählt = Cream gefüllt, sonst Ring; so schon in Segmenten und Chips,
-  GEST:24). Ein Kanal für Hover: **Kontur** hellt auf (`--lift` `#3a3a3a`, GEST:32). Fokus getrennt: formfolgende Kontur 2 px mit 3:1,
-  nie verdeckt. **[V]** Drücken ohne Skalierung (DNA-B B.3.7). **[V]** Wischreihe der Pakete: Karten folgen dem Finger, native Trägheit,
+- **Übersetzung.** **[V]** Ein Kanal für „aktiv“: **Füllung**. Gewählt = Füllung `--surface3` plus innere 2-px-Kontur `--text`
+  (sie trägt die 3:1 gegen jeden Untergrund, auch über Glas), Schrift 700 `--text`; nicht gewählt = ohne Fläche, Schrift 500 `--text2`;
+  **nie Cream**, weil Cream genau einmal je Bildschirm die Hauptaktion ist (SKILL:71). „Erledigt“ ist kein „gewählt“: Haken `--accent`
+  vor dem Wort, die Fläche bleibt (Designsystem 11.6.3, Festlegung K-3). Abweichung von bestehender Regel (GEST:24, `gemeinsam.css:82`,
+  `:90`: gewählt in Cream) – Freigabe durch den Inhaber nötig (DS-AB-4). Ein Kanal für Hover: **Kontur** hellt auf (`--lift` `#3a3a3a`,
+  GEST:32). Fokus getrennt: formfolgende Kontur 2 px mit 3:1, nie verdeckt. **[V]** Drücken ohne Skalierung (DNA-B B.3.7). **[V]** Wischreihe der Pakete: Karten folgen dem Finger, native Trägheit,
   `scroll-snap`, kein Überschwingen (DG-AB-4). **[H]** Haptik-Tipp beim Einrasten (`Haptik.tick`, vorhanden, TD 3.1) ist offen (DG-E-9).
 - **Intensität.** 1 überall, EN 2 (Namensleiste mit gleitendem Zeiger, Wischreihe).
 - **Nicht übernommen.** Schein als Zustand; Hover-Tilt; magnetische Knöpfe; eigener Cursor (Ref 12, unsicher); Pfeil, der beim Hover
@@ -712,7 +716,7 @@ in die App in den ersten 844 px (RE R12).
 | Typografie | Kicker 13 Technikstimme grün; h1 32/40 Bühnenstimme, wörtlich nach Prüfsuite mit grünem „Marke“; Chips 13/700; Knopftexte 17 fett; Preiszeile 13 Technikstimme. Größen 32 · 17 · 13 = zwei Textstufen (Headline, Klein-Stufe) neben dem Foto. ≤ 40 Wörter. | Eyebrow und h1 wörtlich (Prüfsuite); sonst wie V1 |
 | Material | Foto trägt Material; Glas als einzige vermittelnde Schicht: `#1f1f1f` 60 %, Unschärfe 24 px, Sättigung 100 % (DG-AB-17), Radius 18, 1-px-Kante in Zeichnungsblau an der dem Bullauge zugewandten Kante. Gleichzeitig höchstens zwei Glasflächen am Telefon, drei am Schreibtisch (SG 10.9): Nur die vorderste Meldung trägt Live-Unschärfe, die zwei hinteren, nur als Kante sichtbaren tragen die nicht deckende Ersatzfüllung; der Wert der Maßlinie auf dunklem Glas ist die zweite Fläche | Foto; Glas nur im Umschalter |
 | Licht | Intensität 3: Quelle Bullauge; Lichtfarbe Blau einzig im Bildschirm; Lichtrichtung des Fotos gilt für die Ansicht | Intensität 2: Tageslicht in der Öffnung, warm aus dem Foto; keine zusätzliche CSS-Lichtfläche |
-| Bewegung | Laden nacheinander, nie zwei Träger zugleich (SG 10.8: gleichzeitig bewegte Träger 1; SG 10.10 Nr. 14): Foto 0–0,9 s (Deckkraft, Zoom 1,04 → 1); Glas-Nachrichten fallen bei 0,9 / 1,6 / 2,3 s ein (je 600 ms); danach zeichnet sich die Maßlinie in 1,2 s, Wert zählt mit (Bildschicht); Stand nach 4,1 s (< 5 s). Scrollen: Foto bleibt zurück (Faktor 0,85–0,9), Glasschicht 1,0; am Telefon nur, solange Meldungen und Maßwert dabei ohne Live-Unschärfe stehen (Ersatzfüllung) oder nachdem sie den Bildschirm verlassen haben, weil Glas über bewegtem Motiv am Telefon entfällt (SG 10.8 und 10.10, Mobil). Bedienschicht: steht ab dem ersten Bild (LCP) ohne Einblenden; das einmalige Einblenden über Deckkraft gilt erst für Folgeabschnitte. | Foto 900 ms; sonst keine Bewegung |
+| Bewegung | Laden nacheinander, nie zwei Träger zugleich (SG 10.8: gleichzeitig bewegte Träger 1; SG 10.10 Nr. 14): Foto 0–0,9 s (Deckkraft, Zoom 1,04 → 1); Glas-Nachrichten fallen bei 0,9 / 1,6 / 2,3 s ein (je 600 ms); danach zeichnet sich die Maßlinie in 1,2 s, Wert zählt mit (Bildschicht); Stand nach 4,1 s (< 5 s). Scrollen: die Bildgruppe (Foto, Erdlicht, Maßlinie und Glas-Stapel) bleibt zurück (Faktor 0,88, höchstens 32 px), die Bedienschicht läuft mit 1,0; gilt auf allen Breiten, weil sich in der Gruppe unter dem Glas nichts bewegt (kein Glas über bewegtem Motiv, SG 10.8 und 10.10, Mobil); die Tiefe endet, sobald die Oberkante der Leiste die Bildschirmmitte erreicht, über 48 px weich (K-9). Bedienschicht: steht ab dem ersten Bild (LCP) ohne Einblenden; das einmalige Einblenden über Deckkraft gilt erst für Folgeabschnitte. | Foto 900 ms; sonst keine Bewegung; keine Tiefe der Bildebenen beim Scrollen, auch nicht am Schreibtisch (Stufe 3; K-9) |
 | Signature | inszenierend: Glas mit Hintergrundunschärfe und Lichtübertrag des Erdlichts (beide am Fokusträger; damit ist das Budget der Stufe 4 von zwei ausgeschöpft, 2.4.2); informierend: Maßlinie. Staub im Lichtkegel (Partikel im Motiv) nur als Variante **anstelle** des Lichtübertrags, im Telefon-Video zu prüfen | inszenierend: Glas des Umschalters; informierend: keine |
 | Telefon 390 × 844 | Kopf 0–56 über dem Foto; Foto y 0–556 (66 % der Höhe; IA plant y 56–556, DG-E-11); Glas-Stapel rechts oben y ≈ 72–160, Breite ≈ 220 px (56 %), Papierflieger links bleibt frei (GEST:447); Kicker y ≈ 456 im Auslauf; h1 drei Zeilen y ≈ 476–577; Chips eine Zeile y ≈ 593–629, flach `#262626`, wo kein Bild darunter liegt; Cream-Pille + Ring y ≈ 645–697 (Daumenbereich); Preiszeile y ≈ 709–725; Leiste ab y ≈ 760 angeschnitten (≈ 10 %). | Foto y 0–520; Eyebrow y ≈ 420; h1 y ≈ 440–541; Preiszeile y ≈ 560; Cream-Pille y ≈ 600–652; Ring daneben; Folgesektion ab y ≈ 760 |
 | Schreibtisch 1280 | Kopf 64; Text über 5 von 12 Spalten (x ≈ 120–533), Foto ab x ≈ 553 bis an den Bildschirmrand (≈ 57 % Breite), y 0–760; h1 40 px; Pille im ersten Bildschirm; 1024: Foto ab 44 % (GEST:447) | entsprechend; Foto rechts randlos |
@@ -894,13 +898,13 @@ Einsatz: V14 kompakte Paketwahl; H6 Messaufforderung; H7 Wechselkarte. Stufe 2.
 | Merkmal | Regel |
 |---|---|
 | Ebenenaufbau | 0 Grund → 20 Held → 30 drei Zeilen à 56 px (Kurzname, Monatspreis, Einrichtung, Knopf) bzw. Satz und Pille. |
-| Held | **[H]** derselbe Ausschnitt des Startbilds (Bullauge mit Erdlicht bzw. Öffnung im Rohbau) als ruhige Klammer am Seitenende, 100 % Breite, 240 px hoch, ausgeblendet (DG-H-8). H7: die helle Wechselkarte ist der Held ihrer Ansicht. |
+| Held | **[H]** derselbe Ausschnitt des Startbilds (Bullauge mit Erdlicht bzw. Öffnung im Rohbau) als ruhige Klammer am Seitenende, 100 % Breite, 240 px hoch, ausgeblendet (DG-H-8). H7: Die Wechselkarte ist kein Held und keine helle Karte, sondern eine dunkle Fläche `--surface` mit 2-px-Ring `--line`, ohne Licht und ohne Bild; sie ist nur die einzige Fläche über Grundniveau ihres Bildschirms und nie ein zweiter Hellwert neben der Cream (Designsystem 11.4.2, Festlegung K-40, nach `st-04`). |
 | Typografie | h2 32/40; Zeilen 17 fett und 15; H7 Kicker 13, Satz 17. |
 | Licht | aus dem Bildausschnitt, ohne zusätzliche CSS-Lichtfläche. |
 | Bewegung | keine außer Zustand. |
 | Signature | keine. |
 | Telefon | Held oben, Zeilen darunter; eine Cream-Pille am empfohlenen Paket; Ring „Frage stellen“. |
-| Nicht | Seitenende mit Quellen und Linkliste (PA 1.9/4); zweite Cream-Pille in der hellen Karte (IA-AB-9). |
+| Nicht | Seitenende mit Quellen und Linkliste (PA 1.9/4); zweite Cream-Pille in der Wechselkarte (IA-AB-9); Wechselkarte in Papierweiß oder Cream-nah (K-40). |
 
 ### 2.3.14 T12 Unterseite
 
@@ -969,7 +973,7 @@ Fassung B (Stufe 3), stünden V1 bis V5 als fünf Abschnitte der Stufe ≥ 3 hin
 Fassung A, oder das Riesenwort wandert an eine andere Stelle (DG-E-3).
 
 **Startseite, Ansicht Hauseigentümer** (IA 5.4.3): H1 T1 · 3 → H2 T4 · 3 → H3 T7 · 2 → H4 Ratgeber-Weg (sechs Kacheln 2 × 3, „Ausmessen“
-als Ankerkachel; Stufe 2) → H5 T9 · 1 → H6 T11 · 2 → H7 T11 · 2.
+als Ankerkachel, nach Freigabe H5-AB-1 in Papierweiß `--papier` ohne Ring, sonst `--surface` wie die übrigen; K-40; Stufe 2) → H5 T9 · 1 → H6 T11 · 2 → H7 T11 · 2.
 
 **Ansicht Fensterbauer auf `/`:** dieselbe Folge wie die Verkaufsseite (Einbettung, SKILL:63–64); jedes Element funktioniert mit zwei Wurzeln
 und nach Neuaufbau.
@@ -988,7 +992,7 @@ Jede Zeile ist **[V]**; „neu“ markiert Regeln, die heute nicht in GEST oder 
 | Bereich | Konstante |
 |---|---|
 | Konstruktion | Grund → (Kulisse) → ein Fokusträger → flache Bedienschicht; Z-Stufen 0/10/20/25/30/40 (neu); 3–6 Ebenen, am Telefon 3–4; mindestens eine Verdeckung; Bildschicht und Bedienschicht nach G1 (neu) |
-| Farbe | Tokens aus `gemeinsam.css:9–32`, keine neuen Farben; Grund `#161616`; Cream nur Hauptaktion, eine Cream-Fläche je Bildschirm; Grün nur Signal, ein Wort je Überschrift; Orange/Blau nur in Zeichnungen; ≥ 80 % unbunt, ≤ 5 % kräftig, > 0,3 % farbig je Bildschirm |
+| Farbe | Tokens aus `gemeinsam.css:9–32`, keine neuen Farben; Grund `#161616`; Flächen über Grundniveau `--surface` (`#1f1f1f`); Papierweiß (`--papier`) nur für Papier (Aufmaßblatt, Zeichnungskarte) und die Ankerkachel in `he-05` nach Freigabe H5-AB-1, nie zwei Papierflächen im selben Bildschirm (K-40); Cream nur Hauptaktion, eine Cream-Fläche je Bildschirm; Grün nur Signal, ein Wort je Überschrift; Orange/Blau nur in Zeichnungen; ≥ 80 % unbunt, ≤ 5 % kräftig, > 0,3 % farbig je Bildschirm |
 | Licht | nur mit Quelle im Bild; eine Lichtfarbe und eine Lichtrichtung je Bildschirm (neu: Richtung als Token); ein Helligkeitszentrum hinter dem Anker; keine leuchtende Bedienfläche |
 | Schatten | keiner auf dunklem Grund; Lichtkante 1 px statt `--float` (neu, DG-AB-1); Begleitschatten nur auf heller Fläche |
 | Schrift | Inter; Skala 13, 15, 17, 24, 40 (Telefon 32); Bühnenstimme, Technikstimme, Lesetext; ≤ 3 Größenstufen je Ansicht (neu); Headline ≤ 3 Zeilen; Lesetext ≤ 3 Zeilen je Block auf Verkaufsflächen |
@@ -996,7 +1000,7 @@ Jede Zeile ist **[V]**; „neu“ markiert Regeln, die heute nicht in GEST oder 
 | Raum | linke Spaltenkante als Ordnungslinie; Seitenrand 16 px, Spalte 1040 px; Abschnittsabstand 96/128 px; ≥ 33 % frei im ersten Bildschirm; ein Held je Bildschirm; Fortsetzungssignal am Fuß jedes ersten Bildschirms |
 | Bild | randlos auslaufend oder freigestellt; nie Fotokarte als Hauptbild (neu, DG-AB-9); kein Platzhalter als Hauptbild; Text nur in ruhigen Zonen; „Beispiel“ an jedem erfundenen Material |
 | Glas | nur über Bildinhalt; Füllung 55–65 % unter Kleintext, Unschärfe 24 px, Sättigung 100 % (neu), 1-px-Kante, kein Schatten; gleichzeitig ≤ 2 Flächen am Telefon, ≤ 3 am Schreibtisch (gestapelte Meldungen zählen einzeln); am Telefon kein Glas über bewegtem Motiv; Ersatz und deckende Fassung nach SG 10.3 |
-| Bedienschicht | frontal, flach, matt, formstabil; Zustände: aktiv = Füllung, Hover = Kontur, Fokus = 2-px-Kontur 3:1; Einblenden nur über Deckkraft (neu, DG-AB-2); keine Skalierung, kein Versatz, kein Zählen (neu) |
+| Bedienschicht | frontal, flach, matt, formstabil; Zustände: aktiv = Füllung (gewählt = `--surface3` mit innerer 2-px-Kontur `--text`, Schrift 700; nie Cream; K-3, DS-AB-4), Hover = Kontur, Fokus = 2-px-Kontur 3:1; Einblenden nur über Deckkraft (neu, DG-AB-2); keine Skalierung, kein Versatz, kein Zählen (neu) |
 | Bewegung | Physik nur in der Bildschicht; ein bewegter Träger je Ansicht, auch beim Laden nacheinander statt gleichzeitig; Ein-Drittel-Regel; autonome Bewegung endet ≤ 5 s (neu, DG-AB-5); natives Scrollen; Schleifen nur im Bild; ruhige Fassung = Endbild; Kurven der Bedienschicht `--e-out`/`--e-io` ohne Überschwingen (Federn bis 3 % nur in der Bildschicht) |
 | Dauern | Zustand 150 ms (Rückmeldung 220 ms), Panel und Einblenden 320 ms, Motiv-Auftritt 600 ms, großer Motiv-Auftritt 900 ms, Szenenwechsel im Motiv 500–900 ms (DG-AB-16) |
 | Technik | keine fremden Server, Bibliotheken mit Lizenz in `web/vendor/`; leichtestes Verfahren; Ersatzstufen 0/1/2; ohne JavaScript lesbar und bedienbar; Budgets nach 2.1.9 |
@@ -1018,7 +1022,7 @@ Schärfestaffelung).
 | Licht (Intensität 0–4) | 0–1 | 1, nur im Bild | 2, am Motiv mit sichtbarer Quelle | 3, Quelle im Bild, Lichtraum oder Lichtübertrag |
 | Material | – | 1 | 2–3 | 2–3, Glas vermittelnd |
 | Glasflächen | 0 | 0 (Glas-Chips nur über Foto) | ≤ 1 | ≤ 2 Telefon, ≤ 3 Schreibtisch |
-| Bewegung | Zustand; Einblenden über Deckkraft | + nutzergeführt (Wischen) und einmalige Motivbewegung | + scrollgekoppelte Motivbewegung, Physik im Motiv | + Ladeauftritt 900 ms, Tiefe der Bildebenen (0,8–1,0), reaktive Umgebung |
+| Bewegung | Zustand; Einblenden über Deckkraft | + nutzergeführt (Wischen) und einmalige Motivbewegung | + scrollgekoppelte Motivbewegung, Physik im Motiv | + Ladeauftritt 900 ms, Tiefe der Bildebenen (Spanne 0,8–1,0; auf der Website nur V1 mit 0,88, K-9), reaktive Umgebung |
 | informierende Signaturen | 0 | ≤ 1 | ≤ 1 | ≤ 1 |
 | inszenierende Signaturen | 0 | 0 | 1 | ≤ 2, am selben Fokusträger (belegt: Ref 03, 12) |
 | Technikstufe (SKILL:55–59) | 1 | 1 | 1; 2 mit Ersatz möglich | 2 als Standard, wo Tiefe oder Licht den Unterschied machen (SKILL:59), immer mit Ersatzfassung; am Telefon erst nach bestandener Leistungsprüfung (SG 10.8, Mobil) |
@@ -1140,7 +1144,7 @@ Jede Zeile: **Abweichung von bestehender Regel – Freigabe durch den Inhaber n�
 | DG-AB-12 | „Kartenreihen. Um 2 bis 4° gedreht, 8 bis 24 px versetzt … Schatten `--float`“ (DR 3.3) | Drehung nur für reine Bildkarten ohne Bedienelemente (`aria-hidden` oder Bild mit `alt`), mit Lichtkante statt Schatten | keine räumlich transformierte Bedienschicht (Nr. 1); Nr. 6 | neu |
 | DG-AB-13 | „Am Telefon hält eine feste Bühne bis zu zwei Bildschirmhöhen“ (DR 3.5) | Am Telefon keine Anheftstrecke; am Schreibtisch ≤ 1,5 Bildschirmhöhen mit ≥ ⅓ Ruhe | SG 10.7, Mobil (Neuentwurf); kürzere Wege zu den Paketen (EA H-D2) | EA AB-10 |
 | DG-AB-14 | empfohlene Karte mit „einem leichten grünen Schein oben“ (GEST:452) | entfällt; Hervorhebung über Cream-Ring, Kontur-Pille „Empfohlen“ und den einzigen Cream-Knopf | kein Leuchten ohne Quelle (DR:196); Nr. 10 | EA AB-5 |
-| DG-AB-15 | „Parallaxe, Neigen per Maus und Lesefortschritt gibt es nicht“ (GEST:41, :448) | Parallaxe der Bildebenen (Faktor 0,8–1,0) zulässig, Bedienschicht ohne Versatz; Lesefortschritt nur als Zustand (Abschnittsnummer aktiv) oder nach Freigabe als begründete Ausnahme (DG-E-7); Neigen per Maus bleibt ausgeschlossen | Tiefe beim Scrollen und Lesefortschritt sind heute schon gebaut (`verkauf.js:158–166`, `:448–465`; PA-Frage 27); SG 10.7/13 lässt Bildparallaxe zu, DNA-B B.3.12 verlangt für eine laufende Linie eine Ausnahme | löst PA-Frage 27 |
+| DG-AB-15 | „Parallaxe, Neigen per Maus und Lesefortschritt gibt es nicht“ (GEST:41, :448) | Parallaxe der Bildebenen zulässig, nur in Stufe 4, also nur in V1 (Faktor 0,88; K-9), Bedienschicht ohne Versatz; Lesefortschritt nur als Zustand (Abschnittsnummer aktiv) oder nach Freigabe als begründete Ausnahme (DG-E-7); Neigen per Maus bleibt ausgeschlossen | Tiefe beim Scrollen und Lesefortschritt sind heute schon gebaut (`verkauf.js:158–166`, `:448–465`; PA-Frage 27); SG 10.7/13 lässt Bildparallaxe zu, DNA-B B.3.12 verlangt für eine laufende Linie eine Ausnahme | löst PA-Frage 27 |
 | DG-AB-16 | „Drei Dauern 150 · 220 · 320 ms … Katalog, mehr gibt es nicht“ (GEST:38) | Website: Zustand 150, Rückmeldung 220, Panel und Einblenden 320 ms; Motiv 600 und 900 ms; Szenenwechsel im Motiv 500–900 ms | DR 3.5 nutzt 600/900 ms schon; SG 10.7 trennt UI-Dauern von Motivdauern | löst PA-Frage 27 |
 | DG-AB-17 | Glas mit „Sättigung 140 %“ (DR 3.1) | Sättigung 100 % | SG 10.3 und 10.9: 90–100 %, keine Anhebung (Ref 01 zeigt eher Entsättigung); DNA-B B.3.9 und PROMPT nennen die Anhebung als Fehler. In SG ist der Wert ein Vorschlag, daher Empfehlung | neu |
 | DG-AB-18 | „Je Seite bricht mindestens einmal etwas aus seinem Rahmen“ (DR 3.3; DR 6 als Prüffrage) | Rahmenbruch höchstens einmal je Seite und nur auf Verkaufsseite und Ansicht Hauseigentümer; Ratgeber, Unterseiten und App-Einstieg ohne | Der Rahmenbruch ist in der DNA ein Signature-Effekt aus einer Referenz (Ref 05, 1 von 15; SG 10.6/12 [Optional]); als Pflicht je Seite stünde er pauschal überall, auch in Abschnitten der Stufe 1 und 2 ohne inszenierende Signature (2.4.2) | neu |
