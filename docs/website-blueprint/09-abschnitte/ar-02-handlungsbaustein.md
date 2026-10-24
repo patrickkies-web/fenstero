@@ -41,7 +41,7 @@ Ziel. Die App setzt dort ein angefangenes Fenster fort (`web/assets/app.js:6560-
 | Knopf | F: **Textentwurf** „Konfigurator für Fensterbauer“; F-P: „Pakete ansehen“ | „Fenster ausmessen“ | „Fenster ausmessen“ (Ring, ohne Pfeil) | IA 5.4.4 e; `web/fuer-fensterbauer/index.html:63`; Kopf `rh-01` B |
 | Zustand „angefangen“ | – | „Aufmaß fortsetzen“ → `/app/` | gleich | `appEinstieg()`, `eigenesAufmass()` (`web/assets/portal.js:16-20`) |
 
-Rund 25 Wörter je Block. Anrede: Fachartikel Sie, Ratgeber du (SI 3.8). Nach dem 17.11.2026 entfernt der Server den Zusatz und setzt
+20 (F) bis 31 (R) Wörter je Block. Anrede: Fachartikel Sie, Ratgeber du (SI 3.8). Nach dem 17.11.2026 entfernt der Server den Zusatz und setzt
 12,99 € ein (`functions/seo.js:139-147`), die Zeile heißt dann „Aufmaßblatt **12,99 €**“.
 
 **Abweichungen von ZA, begründet.** (1) Der IA-Satz „Ihr eigener Fenster-Konfigurator: Ihre Kunden planen unter Ihrer Domain, Sie
@@ -87,7 +87,7 @@ Lesen liegt sie im unteren Drittel, im Daumenbereich.
 
 **Schreibtisch 1280 × 800.** Artikelspalte 788 px (x 246–1034), 12 Spalten à 43,7 px, Fuge 24. Haarlinie über 12 Spalten; Kicker, Satz,
 Preiszeile über Spalte 1–8 (517 px ≈ 60 Zeichen); Pille in eigener Breite ab Spalte 1; Spalte 9–12 frei. Lagen R: Haarlinie 502, Satz
-544–595, Preis 603–639, Pille 663–715 (237 × 52), Inhaltsverzeichnis ab 755, also im ersten Bildschirm. F: Pille 323 × 52, Block 169 px.
+544–595, Preis 603–639, Pille 663–715 (237 × 52), Inhaltsverzeichnis ab 755; A-2 steht im ersten Bildschirm. F: Pille 323 × 52, Block 169 px.
 Text : Pille : Freiraum ≈ 23 : 5 : 72.
 
 **Technische Startwerte**
@@ -251,28 +251,28 @@ eigenes Skript, CLS 0.
 
 ## I. Conversion-Begründung
 
-**Position.** A-2 steht dort, wo die Frage beantwortet ist („Kurz gesagt“) und bevor 5–10 Bildschirme Fließtext beginnen. Wer nur die
-Antwort wollte, sieht den nächsten Schritt, bevor er geht. A-6 fängt alle ab, die bis zum Ende gelesen haben, also die mit der meisten
-Information (EA 4.3.4/7; ZA A-6). Dazwischen liegt kein weiterer Cream-Aufruf; so bleibt es bei einer klaren Handlung je Lesephase.
+**Position.** A-2 steht, wo die Frage beantwortet ist und bevor 5–10 Bildschirme Fließtext beginnen: Wer nur die Antwort wollte, sieht den
+nächsten Schritt, bevor er geht. A-6 erreicht alle, die zu Ende gelesen haben, also die mit der meisten Information (EA 4.3.4/7).
+Dazwischen kein weiterer Cream-Aufruf: eine klare Handlung je Lesephase.
 
-**Gestaltung.** Der fette Satzanfang antwortet in drei bis fünf Wörtern auf die Nutzerfrage. Die Preiszeile nimmt die Preisfrage vorweg,
-bevor die App ohne eigenes Startbild direkt mit dem Messen beginnt (R13). Ein Ziel je Artikelart beendet die heutige Streuung (`/app/`,
-`/app/#ausmessen`, Anker, Nachbarartikel; CP 3, SI 3.8).
+**Gestaltung.** Der fette Satzanfang beantwortet die Nutzerfrage in drei bis fünf Wörtern; die Preiszeile klärt den Preis, bevor die App
+ohne Startbild ins Messen springt (R13). Ein Ziel je Artikelart beendet die heutige Streuung (`/app/`, `/app/#ausmessen`, Anker,
+Nachbarartikel; CP 3, SI 3.8).
 
-**Informationsmenge.** Rund 25 Wörter. Der Artikel liefert das Argument, der Baustein nur den Übergang. Ein zweiter Knopf würde die
-Entscheidung wieder öffnen; Weiterlesen bleibt über das Inhaltsverzeichnis direkt darunter möglich.
+**Informationsmenge.** 20 bis 31 Wörter: Der Artikel liefert das Argument, der Baustein den Übergang. Ein zweiter Knopf würde die
+Entscheidung wieder öffnen; Weiterlesen bleibt über das Inhaltsverzeichnis direkt darunter.
 
 **Beitrag zur Zielhandlung:** FB-1 → Seite für Fensterbauer (Weg zu Z1a), FB-2 → `#pakete`, HE-2 bis HE-4 → Z2a, HE-1 → späterer
-Wiedereinstieg über den Weg.
+Einstieg über den Weg.
 
 | Nr. | Annahme [H] | Prüfweg | Rückfall |
 |---|---|---|---|
-| H-AR2-1 | Ein Satz mit Knopf führt mehr Fachartikel-Leser zur Seite für Fensterbauer als heute zwei Knöpfe ohne Satz | Aufrufe von `/fuer-fensterbauer/` aus Fachartikeln. Heute zählt die Statistik interne Herkunft nicht (`functions/api/statistik.js:149`); möglich wäre ein Zähler `?von=artikel-oben|-ende` nach dem Muster von `?von=pdf` (`:142`), Entscheidung des Inhabers (EA O-2) | heutiger Doppelknopf |
+| H-AR2-1 | Ein Satz mit Knopf führt mehr Fachartikel-Leser zur Seite für Fensterbauer als heute zwei Knöpfe ohne Satz | Interne Herkunft zählt die Statistik heute nicht (`functions/api/statistik.js:148`); möglich wäre ein Zähler `?von=artikel-oben` bzw. `-ende` nach dem Muster `?von=pdf` (`:142`), Entscheidung des Inhabers (EA O-2) | heutiger Doppelknopf |
 | H-AR2-2 | Leser, die mit sichtbarem Preis direkt in den ersten Messschritt springen, brechen nicht häufiger ab als über das App-Startbild | Vorgänge „Kasse geöffnet“ je Woche vorher und nachher | Ziel `/app/` |
 | H-AR2-3 | Der Ring in „Prüfen“ wirkt nicht aufdringlich und kostet keine späteren Starts | Lesetest, Urteil des Inhabers | Cream wie R oder Ziel `/app/#fuehrung` |
 | H-AR2-4 | Ein einheitlicher Satz trägt so gut wie themenbezogene Knopftexte („Öffnungsart am 3-D-Modell wählen“) | Lesetest | dritte Spalte in `SEITEN_INFO` für einen eigenen Satz (≤ 20 Wörter, belegt) |
 | H-AR2-5 | Der grüne Kicker wird als Angebot gelesen, nicht als Teil des Artikels | Lesetest | Kicker **Textentwurf** „In eigener Sache“ |
-| H-AR2-6 | Ein Bildausschnitt des Ziels (72 × 72, Radius 12, links neben dem Kicker) erhöht die Wiedererkennung auf der Zielseite | Telefon-Video, Urteil des Inhabers | ohne Bild (Grundfassung) |
+| H-AR2-6 | Ein Bildausschnitt (72 × 72, Radius 12, links neben Kicker und Satz) macht den Baustein als Angebot erkennbar: Fachartikel mit dem Startfoto der Zielseite (`fb-sessel`), Ratgeber mit dem Messmotiv der Startseite (`start-hauseigentuemer`) | Telefon-Video, Urteil des Inhabers | ohne Bild (Grundfassung) |
 
 **Freigaben und offene Punkte**
 

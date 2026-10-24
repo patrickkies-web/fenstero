@@ -44,15 +44,15 @@ PK und PS:33; sobald das Kapitel vorliegt, gilt es.
 | h2, Rückfall ohne bedienbare Probe (C′, B′, „E mit Standbildern“) | „Ihr Konfigurator, Ihr Paket.“, grün „Paket“ | Textentwurf |
 | Lead A / B | „Paket wählen und unverbindlich anfragen.“ / „Paket wählen, im Kundenkonto bestellen.“ | Textentwurf aus VK:221, PS:192 |
 | Spaltenköpfe | „BEISPIEL“ über der Vorschau, „IM MONAT“ über den Preisen | Textentwurf |
-| Zeile | Kurzname · Monatspreis / („Empfohlen“) · „199 € einmalig“ | Werte aus PK; „einmalig“ Textentwurf (Card: „Einrichtung, einmalig vorab“) |
+| Zeile | Kurzname · Monatspreis / („Empfohlen“) · „199 € einmalig“ | Werte aus PK; „einmalig“ Textentwurf (Karte: „Einrichtung, einmalig vorab“) |
 | Steuerzeile | „Einrichtung einmalig vorab. Alle Preise netto zzgl. MwSt., nur für Unternehmer. Vorläufige Preise.“ | erster Satz Textentwurf, Rest PS:139 |
 | Zugänglicher Name je Zeile | „Essential Plus, 39 € im Monat, 199 € einmalig, empfohlen, anfragen“ (B: „bestellen“) | Textentwurf |
-| Vorlesetext der Vorschau | „Beispiel: Startansicht in EEZI Essential Plus, Fensterplaner von Fensterbau Brandt, mit Zeichen und Farbe des Betriebs, kleiner Hinweis auf eeziframes im Fuß.“ (Essential: „im eeziframes-Design, ‚Powered by EEZIframes‘ im Fuß“; Signature: „ohne Hinweis auf eeziframes“) | Textentwurf |
+| Vorlesetext der Vorschau | „Beispiel: Startansicht in EEZI Essential Plus, Fensterplaner von Fensterbau Brandt, mit Zeichen und Farbe des Betriebs.“ (je Stufe angepasst, mit dem Namen aus 01) | Textentwurf |
 
 Rund 30 Wörter plus Zahlen.
 
-**B.3 Interaktionen:** genau eine Art: Tipp auf eine von drei Zeilen. A: Paket ins Formular, Sprung zu `#frage`. B: Seitenwechsel ins
-Kundenkonto. Am Schreibtisch zusätzlich [H]: Zeiger oder Fokus auf einer Zeile zeigt deren Markenstufe in der Vorschau.
+**B.3 Interaktionen:** Tipp auf eine von drei Zeilen (A: Paket ins Formular, Sprung zu `#frage`; B: ins Kundenkonto). Am Schreibtisch
+[H]: Zeiger oder Fokus auf einer Zeile zeigt deren Markenstufe in der Vorschau.
 
 **B.4 Vorhandene Komponenten:** `.btn` mit `.big` (56 px), `.primary`, `.ghost`, `.pf` (GC:56-76); `.ak`, `.num` (GC:47-48);
 Abschnittsrahmen `.vk-teil` (VC:501-502); Paketvorwahl über `a[data-paket]` (VJ:28-36, erweitert in fb-09); Zustand „gewählt“ je Wurzel
@@ -98,8 +98,8 @@ Abschnitt mit Haarlinie bei y ≈ 200.
 | Cream | Fläche `--primary`, Schrift `--on-primary` (15,8 : 1), untere Zeile `rgba(22,22,22,.72)` = #535351 (6,8 : 1), `.pf` wie GC:74 |
 | Ring | transparent, Innenkontur 2 px `--muted` (5,8 : 1; DNA-B Regel 12, DG-E-10), Schrift `--text`, untere Zeile `--text2` (10,8 : 1) |
 
-Warum so: Mit „im Monat“ und „Einrichtung“ in der Zeile passen Name, Preise und „Empfohlen“ nicht in 170 px (gemessen 212–240 px). Der
-Spaltenkopf „IM MONAT“ und „einmalig“ tragen dieselbe Information in der Technikstimme; die Steuerzeile nennt „Einrichtung“.
+Warum so: Mit „im Monat“ und „Einrichtung“ in der Zeile passen Name, Preise und „Empfohlen“ nicht in 170 px (gemessen ≈ 210–240 px).
+Spaltenkopf und „einmalig“ tragen dieselbe Information; die Steuerzeile nennt „Einrichtung“.
 
 **C.4 Vorschau (Bildschicht)**
 
@@ -117,11 +117,11 @@ Spaltenkopf „IM MONAT“ und „einmalig“ tragen dieselbe Information in der
 | Bild | Standardbild (`app-start`, fb-03) | erstes Foto des Beispielbetriebs (fb-06 Assets); bis dahin Verlauf wie `.sk-foto` (VC:66-67) | wie Plus |
 | Fuß | „Powered by EEZIframes“ mit Zeichen | „Konfigurator von eeziframes“ | leer |
 
-  Alle drei auf dunklem App-Grund, weil eine Instanz die Firmenfarbe nur als Akzent trägt (PK:24); die helle Skizzenpalette
-  `vk-skizze-eigen` (VC:78) zeigte eine Gestaltung, die es nicht gibt, und wäre neben der Cream ein zweiter großer Hellwert. Eine
-  Beispielfarbe für Plus und Signature, weil es einen Beispielbetrieb gibt (G7); fb-06 nutzt für seine Aufnahmen dieselbe.
-- **Anschlussstrich:** 12 × 1 px `--muted` von der Vorschau (x 112) zur Zeile, deren Stufe sie zeigt, auf halber Zeilenhöhe. Ohne Wahl ist
-  das die mittlere Zeile bei y 277, zugleich die Mitte der Vorschau: Objekt und Handlung liegen auf einer Achse.
+  Alle drei auf dunklem App-Grund, weil eine Instanz die Firmenfarbe nur als Akzent trägt (PK:24); die helle Skizzenpalette (VC:78)
+  zeigte eine Gestaltung, die es nicht gibt, und wäre neben der Cream ein zweiter Hellwert. Eine Beispielfarbe, weil es einen
+  Beispielbetrieb gibt (G7); fb-06 nutzt dieselbe.
+- **Anschlussstrich:** 12 × 1 px `--muted` von der Vorschau (x 112) zur Zeile, deren Stufe sie zeigt, auf halber Zeilenhöhe; ohne Wahl
+  bei y 277, der Mitte der Vorschau: Objekt und Handlung auf einer Achse.
 
 **C.5 Verhältnisse.** Im Abschnitt (358 × 425): Vorschau ≈ 12 %, Zeilen ≈ 28 %, Text ≈ 29 %, frei ≈ 31 %; im Ruhestand-Bildschirm frei
 geschätzt ≥ 40 % (SG 10.1/3). Größenhierarchie: Vorschau 192 px gegen Versalhöhe der Bedienschrift (≈ 12,4 px bei 17 px) ≈ 15-fach, h2 32
@@ -141,8 +141,6 @@ kleinem Fokusträger.
 | h2 | 32/35 (ab 761 px 40/44), 800, −.03em, `text-wrap: balance` | SKILL:69; wie fb-03 |
 | Lead | 17/26, 500, `--text2` | Lesestapel |
 | Technikstimme | 13/17, 600, Versalien, .12em, `--muted`, `aria-hidden` | wie Kapitelzeile VC:502, grau statt grün: ein grünes Wort |
-| Raster | `grid-template-columns: 96px minmax(0,1fr)`, `column-gap: 12px`, `row-gap: 8px` | Z: 96 × 192 |
-| Zeilenstapel | `grid-template-rows: repeat(3, 56px)`, `gap: 12px` | Z: 3 × 56 + 2 × 12 |
 | Steuerzeile | 13/18, 500, `--muted` (5,8 : 1) | Nebengröße, kleiner als Preise (EA AB-4) |
 
 ## D. Anwendung der Design-DNA
@@ -165,10 +163,9 @@ Stufe 2 gedrosselt.
 | interaktive Effekte | Zustände über Füllung und Kontur; Vorschau folgt Zeiger oder Fokus [H] | 1 | Rückmeldung ohne Ablenkung |
 
 **Signature:** keine inszenierende (Dosierregel 1); informierend nur der Anschlussstrich (≤ 1).
-**Bewusst weggelassen:** Bullauge-Band als Held (DG T11, DG-H-8; EV 7.5.5: zweiter Held), Vorschau in jeder Zeile (EV 7.5.3; Z Festlegung
-8), Karte um den Abschluss (KD: opakes Eigenmaterial um die Bedienschicht), Ring „Anderes Paket wählen“ (KD; E-4), Ring „Frage stellen“
-(DG T11; Z: kein zusätzlicher Ring; Festlegung I-8), Auftritt, Glas, Lichtraum, Parallaxe, Unterschiedszeilen und Merkmale (stehen in 04),
-Etikett „Ihre Wahl“ (Textlast; die Cream erklärt sich, weil der Besucher selbst getippt hat).
+**Bewusst weggelassen:** Bullauge-Band (DG T11; EV 7.5.5: zweiter Held), Vorschau je Zeile (Z Festlegung 8), Karte um den Abschluss
+(KD), Ring „Anderes Paket wählen“ (E-4), Ring „Frage stellen“ (DG T11; Z: kein zusätzlicher Ring), Auftritt, Glas, Lichtraum,
+Parallaxe, Merkmale (stehen in 04), Etikett „Ihre Wahl“ (wer getippt hat, weiß es).
 **Auslegung zu bestätigen:** Cream und Grün im Bildschirm der Vorschau sind Produktinhalt (wie fb-03 D); ihre Cream-Fläche (≈ 80 × 12 px)
 ist ein Fünfzehntel der Cream-Zeile. Rückfall bei zwei Flecken im Blinzeltest: Bildschirminhalt mit 80 % Deckkraft.
 
@@ -198,7 +195,7 @@ nach 96 px Grund die Brotkrumen-Haarlinie bzw. die Wechselkarte. Nichts sonst ze
 | Zeiger oder Fokus auf Zeile [H] | Vorschau zeigt deren Stufe (Deckkraft-Überblendung), Strich folgt; Verlassen der Liste: nach 150 ms zurück zur Cream-Zeile | 220 ms `--e-out` | Bildschicht, nutzergeführt (E-13) |
 | Fokus | 2-px-Kontur `--ink`, Abstand 2, folgt der Pille | sofort | SG 10.9 |
 | Drücken | Cream `#e2e1db`, Ring `--surface3`; keine Skalierung (`transform: none` gegen GC:65) | 150 ms | DNA-B B.3.7; wie fb-06 |
-| Tipp, Zustand A | Paket setzen, Sprung `behavior: 'auto'` zu `#frage`, Fokus auf die h3, Hinweis am Paketfeld (fb-09 F); eigenständig nativer Ankersprung mit Verlaufseintrag, „Zurück“ führt in den Abschluss (Z 8.2.7) | sofort | ≈ 4 BH Weg: weiches Scrollen dauerte und ließe Ablauf-Marken und Anhänge vorbeiziehen |
+| Tipp, Zustand A | Paket setzen, Sprung `behavior: 'auto'` zu `#frage`, Fokus auf die h3, Hinweis am Paketfeld (fb-09 F); eigenständig nativer Ankersprung, „Zurück“ führt in den Abschluss (Z 8.2.7) | sofort | ≈ 4 BH: weiches Scrollen ließe Ablauf-Marken und Anhänge vorbeiziehen |
 | Einbettung | `data-sprung="direkt"`, weil der Handler (portal.js:841) sonst `smooth` scrollt; Anker `#fensterbauer` bleibt | – | GEST:193 |
 | Tipp, Zustand B | Seitenwechsel `/partner/#bestellen/<paket>`; der Name aus 01 geht nicht mit (Z 8.3.2 d) | – | – |
 | Gesendet (A; `vk:gesendet`, Merker `vk-anfrage-gesendet`, fb-09) | Lead und Zeilen `hidden`, Dank-Satz 17 (VJ:65) sichtbar, Vorschau zeigt das gesendete Paket (Festlegung I-3) | 0 ms | keine zweite Aufforderung nach dem Senden |
@@ -228,16 +225,15 @@ Zeilen wachsen in der Höhe (`min-height` 56), Vorschau bleibt oben bündig. **3
 | 175–399 | drei Zeilen 504 × 64, Abstand 16, Innenabstand 0 18 0 28, Spalte 4–9 | 388–892 |
 | 415–451 | Steuerzeile, zwei Zeilen, Spalte 4–9 | 388–892 |
 
-Die Vorschau ist höher als der Zeilenstapel (Maßstabssprung); die Steuerzeile füllt den Raum neben ihrem unteren Teil. Anschlussstrich
-108 px als Führungslinie wie in 03. Spalten 10–12 bleiben frei. Abschnitt 495 px (0,62 BH). Die Überblendung bei Zeiger [H] ist aktiv.
+Die Vorschau ist höher als der Zeilenstapel (Maßstabssprung), die Steuerzeile steht neben ihrem unteren Teil. Anschlussstrich 108 px als
+Führungslinie wie in 03; Spalten 10–12 bleiben frei; Abschnitt 495 px (0,62 BH); Überblendung bei Zeiger [H] aktiv.
 
 **Schreibtisch 1024.** Inhalt x 32–992, Spalten à 58, Abstand 24. h2 einzeilig über Spalte 1–10; Vorschau 160 × 320 bei x 32; Zeilen
 Spalte 4–9 (x 278–770, 492 × 64); Strich 86 px.
 
 ## H. Technische Umsetzung
 
-**Bestehend:** PS (`karten()`, `geld`, `kurzname`, `EMPFOHLEN`, `steuerText`, `verkaufFuer`), PK, VJ (`formular`, `Verkauf.auf`,
-`ruhig`), VC (`.vk-teil`), GC (`.btn`, `.pf`, Tokens), EIN (`initiale`, `kennzeichnung`), `web/assets/portal.js` (Einbettung).
+**Bestehend:** wie B.4, dazu PS `verkaufFuer`, VJ `Verkauf.auf`, EIN `initiale`, `kennzeichnung`.
 
 **Neu:**
 
@@ -259,7 +255,7 @@ Spalte 4–9 (x 278–770, 492 × 64); Strich 86 px.
 <section class="vk-teil vk-abschluss" data-abschnitt="fb-15-abschluss" aria-labelledby="vk-abschluss-titel">
   <h2 id="vk-abschluss-titel">Aus der Probe wird Ihr <span class="ak">Konfigurator</span>.</h2>
   <p class="vk-abschluss-lead">Paket wählen und unverbindlich anfragen.</p>
-  <div class="vk-wahl" data-zeigt="plus">
+  <div class="vk-wahl">
     <p class="vk-tech vk-wahl-bsp" aria-hidden="true">Beispiel</p>
     <p class="vk-tech vk-wahl-monat" aria-hidden="true">im Monat</p>
     <div class="vk-mini">
@@ -271,10 +267,10 @@ Spalte 4–9 (x 278–770, 492 × 64); Strich 86 px.
       <li><a class="btn big ghost vk-zeile" href="#frage" data-paket="essential" data-sprung="direkt">
         <b class="vk-z-name">Essential</b><span class="vk-z-preis num">29 €<span class="vk-sr"> im Monat</span></span>
         <span class="vk-z-einr num">99 € einmalig</span><span class="vk-sr">, anfragen</span><i class="vk-z-pf" aria-hidden="true"></i></a></li>
-      <!-- Plus: class="btn big primary vk-zeile", <span class="vk-z-marke">Empfohlen</span>, <span class="pf"> -->
+      <!-- Plus: class="btn big primary vk-zeile" data-zeigt, <span class="vk-z-marke">Empfohlen</span>, <span class="pf"> -->
     </ul>
+    <p class="vk-abschluss-steuer">Einrichtung einmalig vorab. Alle Preise netto zzgl. MwSt., nur für Unternehmer. Vorläufige Preise.</p>
   </div>
-  <p class="vk-abschluss-steuer">Einrichtung einmalig vorab. Alle Preise netto zzgl. MwSt., nur für Unternehmer. Vorläufige Preise.</p>
   <p class="vk-abschluss-dank" hidden>Danke, Ihre Frage ist da. …</p>
 </section>
 ```
@@ -288,25 +284,37 @@ Die Vorschau enthält keine `.btn`, keine IDs und kein `h1` (Knöpfe der Miniatu
 ```css
 .vk-abschluss { counter-increment: none; padding-top: 24px }
 .vk-abschluss::before { content: none }
+.vk-tech { margin: 0; font-size: 13px; line-height: 17px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
 .vk-wahl { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 12px; row-gap: 8px; margin-top: 24px }
 .vk-mini { grid-area: 2 / 1; position: relative; width: 96px; height: 192px; border-radius: 14px; padding: 3px; background: var(--surface) }
 .vk-mini-stufe { position: absolute; inset: 3px; overflow: clip; border-radius: 11px; background: var(--ground); transition: opacity var(--t2) var(--e-out) }
 .vk-mini-box { width: 280px; height: 579px; transform: scale(.3214); transform-origin: 0 0; pointer-events: none }
 .vk-zeilen { grid-area: 2 / 2; display: grid; grid-template-rows: repeat(3, 56px); gap: 12px; margin: 0; padding: 0; list-style: none; container-type: inline-size }
 .vk-zeile { display: grid; grid-template: "n p f" 20px "m e f" 16px / minmax(0, 1fr) auto 28px; gap: 2px 8px; align-content: center;
-  justify-content: stretch; width: 100%; padding: 0 14px 0 22px; text-align: left; border: 2px solid transparent; transition: background-color var(--t1) var(--e-out), box-shadow var(--t1) var(--e-out) }
-.vk-zeile:active { transform: none }
+  justify-content: stretch; width: 100%; padding: 0 14px 0 22px; text-align: left; outline: 2px solid transparent; outline-offset: -2px; transition: background-color var(--t1) var(--e-out), box-shadow var(--t1) var(--e-out) }
+.vk-zeile:active { transform: none } .vk-zeile.primary:active { background: #e2e1db } .vk-zeile.ghost:active { background: var(--surface3) }
+.vk-zeile:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px }
 .vk-z-name { grid-area: n } .vk-z-preis { grid-area: p } .vk-z-marke { grid-area: m } .vk-z-einr { grid-area: e } .vk-zeile .pf, .vk-z-pf { grid-area: f; margin: 0 }
 .vk-z-preis, .vk-z-einr { justify-self: end } .vk-z-einr, .vk-z-marke { font-size: 13px; line-height: 16px }
 .vk-zeile.ghost { box-shadow: inset 0 0 0 2px var(--muted) }
 .vk-wahl-bsp { grid-area: 1 / 1 } .vk-wahl-monat { grid-area: 1 / 2; justify-self: end; margin-right: 50px }
 .vk-zeile.primary .vk-z-einr, .vk-zeile.primary .vk-z-marke { color: rgba(22, 22, 22, .72) }
+.vk-zeile[data-zeigt]::before { content: ''; position: absolute; left: calc(-1 * var(--strich, 12px)); top: 50%; width: var(--strich, 12px); height: 1px; background: var(--muted) }
+.vk-abschluss-steuer { grid-column: 1 / -1; margin: 8px 0 0; font-size: 13px; line-height: 18px; color: var(--muted) }
 @container (max-width: 249px) { .vk-zeile { grid-template-columns: minmax(0, 1fr) auto 0 } .vk-zeile .pf { display: none } }
 @media (max-width: 351px) { .vk-mini, .vk-wahl-bsp { display: none } .vk-wahl { grid-template-columns: minmax(0, 1fr) } .vk-zeilen { grid-column: 1 } }
+@media (min-width: 1024px) {
+  .vk-wahl { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 8px; --strich: 86px }
+  .vk-mini { grid-area: 2 / 1 / 4 / 4; width: 160px; height: 320px; padding: 5px; border-radius: 23px } .vk-mini-stufe { inset: 5px; border-radius: 18px }
+  .vk-mini-box { transform: scale(.5357) } .vk-wahl-bsp { grid-column: 1 / 4 } .vk-wahl-monat, .vk-zeilen, .vk-abschluss-steuer { grid-column: 4 / 10 }
+  .vk-zeilen { grid-template-rows: repeat(3, 64px); gap: 16px } .vk-zeile { padding: 0 18px 0 28px } .vk-wahl-monat { margin-right: 54px }
+  .vk-abschluss-steuer { grid-row: 3; align-self: start } .vk-abschluss h2 { max-width: none } }
+@media (min-width: 1280px) { .vk-wahl { column-gap: 32px; --strich: 108px } }
 @media (prefers-reduced-motion: reduce) { .vk-mini-stufe { transition: none } }
 ```
 
-Der Rand `transparent` macht die Cream-Zeile in erzwungenen Farben als Knopf sichtbar.
+Die transparente Kontur (`outline`) macht die Cream-Zeile in erzwungenen Farben als Knopf sichtbar, ohne die Maße zu ändern; der Fokus
+überschreibt sie (die Regel steht nach GC:38 und braucht deshalb die eigene `:focus-visible`-Zeile).
 
 **Assets**
 
@@ -328,9 +336,9 @@ senden“ ≈ 3 BH); kein Querscrollen bei 320–390 px; Einbettung, ohne JavaSc
 
 ## I. Conversion-Begründung
 
-**Position.** Wer bis hier liest, hat Probe, Preise, Risiko, Ablauf, Kundenschutz und Fragen gesehen (S1–S5). Gerade dort fehlt heute die
-Handlung (PA 1.9). Der Abschluss fängt Besucher auf, die nach S5 entschieden haben (EA H-D7 [H]), ohne sie fünf Bildschirme zurückzuschicken,
-um das Paket erneut zu suchen.
+**Position.** Wer bis hier liest, hat Probe, Preise, Risiko, Ablauf, Kundenschutz und Fragen gesehen (S1–S5); gerade dort fehlt heute die
+Handlung (PA 1.9). Der Abschluss fängt Besucher auf, die nach S5 entschieden haben (EA H-D7 [H]), ohne sie fünf Bildschirme zurück zu den
+Karten zu schicken.
 **Gestaltung.** Dieselben Preise und dieselbe Empfehlung wie in 04 öffnen keine neue Entscheidung. Die Cream folgt der ausdrücklichen Wahl
 (E-3) und sonst „Empfohlen“; die Vorschau holt das Gerät aus 01 zurück und zeigt die Markenstufe als Ergebnis. Ein Tipp setzt das Paket ins
 Formular.
@@ -347,11 +355,10 @@ Entscheidung wieder öffnen.
 | A4-H5 | Der direkte Sprung hält die Orientierung besser als weiches Scrollen | Beobachtung am Telefon | `smooth` |
 | A4-H6 | Die Überblendung am Schreibtisch hilft beim Vergleich und lenkt nicht ab | Sichtprüfung des Inhabers | Vorschau fest |
 
-**Festlegungen I:** I-1 Zeilenaufbau (C.3); I-2 die Wahl ist das zuletzt ausdrücklich gesetzte Paket aus Kartenknopf, A4-Zeile, Gesprächsweg
-(setzt zurück) und Paketfeld, nie das zuletzt angesehene (erweitert E-3 um zwei ausdrückliche Handlungen; erfüllt die Empfehlung von fb-08);
-I-3 Zustand „gesendet“; I-4 Vorschau als skalierte Miniatur aus fb-03 mit ehrlicher Markenstufe; I-5 eine Beispielfarbe; I-6 Schreibtisch
-mit einzeiliger h2 und höherer Vorschau; I-7 unter 352 px ohne Vorschau; I-8 kein Ring „Frage stellen“, Unentschlossene haben Gesprächsweg
-(04.3) und Kopf-Ring. Ohne Empfehlung (EA O-5) gibt es vor einer Wahl keine Cream.
+**Festlegungen I:** I-1 Zeilenaufbau (C.3); I-2 die Wahl ist das zuletzt ausdrücklich gesetzte Paket (Kartenknopf, A4-Zeile, Paketfeld;
+Gesprächsweg setzt zurück), nie das zuletzt angesehene: erweitert E-3 um zwei ausdrückliche Handlungen, erfüllt fb-08; I-3 Zustand
+„gesendet“; I-4, I-5 Vorschau und Beispielfarbe (C.4); I-6 Schreibtisch (G); I-7 unter 352 px ohne Vorschau; I-8 kein Ring „Frage
+stellen“ (Unentschlossene: Gesprächsweg in 04.3, Kopf-Ring). Ohne Empfehlung (EA O-5) gibt es vor einer Wahl keine Cream.
 
 **Freigaben**
 
