@@ -14,7 +14,7 @@
 - kein zweites Helligkeits- oder Sättigungszentrum und keines abseits des Fokusträgers;
 - nicht mehr als drei Verlaufszonen;
 - keine flächigen Mesh- oder Blob-Verläufe als Seitengrund;
-- keine Partikel oder Muster unter Lesetext (Ref 02 Scrim; Ref 12 stärkere Unschärfe, „wo Text Ruhe braucht“).
+- keine Partikel und kein kontraststarkes Muster unter Lesetext (Ref 02 Scrim; Ref 12 stärkere Unschärfe, „wo Text Ruhe braucht“); ein kontrastarmes Haarlinienraster hinter dem Titel ist belegt (Ref 01).
 
 Eine Bewegung, die Aufmerksamkeit vom Objekt abzieht, widerspricht Prinzip 3 (Ableitung).
 
@@ -153,7 +153,7 @@ Technisch (Hypothesen): Live-Text mit viewportbasierter Größe unter einem Alph
 1. Raumschrift braucht ein plastisches Gegenüber. Sie kommt nur bei D7 ≥ 2 vor (7 von 7), bei D7 ≤ 1 in 0 von 4.
 2. Zusätzliche Zwischengrößen lösen die Hierarchie auf; belegt sind höchstens drei weit gespreizte Stufen (Ref 04, 15).
 3. Schrift konkurriert als Träger mit dem Formsystem (ρ D5 + D18 = −0,38) und mit dem Material (ρ D2 + D18 = −0,26). Beides voll auszuspielen ist nur in Ref 03 und 05 belegt.
-4. Kulissenschrift darf kontrastarm sein, bedeutungstragender Text nie. Die Profile nennen für Kleintexte mindestens 4,5:1 (Ableitung aus den Regeln von Ref 03, 04, 05).
+4. Kulissenschrift darf kontrastarm sein, bedeutungstragender Text nie. Die Profile nennen für Kleintexte mindestens 4,5:1 (Regeln von Ref 03 und 05; Ref 04 fordert ohne Zahl, bedeutungstragenden Text nie unter die Kontrastgrenzen fallen zu lassen).
 5. Bedienschrift wird nie perspektivisch verzerrt (Prinzip 1). Schrift im Raum bleibt kameraparallel (Ref 15) oder wird Textur des Objekts (Ref 09).
 
 **Einordnung.**
