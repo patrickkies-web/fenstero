@@ -37,7 +37,7 @@ Eine Bewegung, die Aufmerksamkeit vom Objekt abzieht, widerspricht Prinzip 3 (Ab
 **Zulässige Variationen.** Ort (Objekt, Schrift, Illustration, Materialrand) und Medium (Render, Font, Vektor) sind frei. Cluster A trägt fluide Form in der Display-Schrift (Ref 04, 07) und in Nebenobjekten (Ref 03). Cluster B ist formstarr bis auf das Exponat (Ref 05, 10). Cluster C bleibt geometrisch bis auf illustrative Massen (Ref 06). Ein ganz formstarres Design ist gleichwertig (7 von 15).
 
 **Grenzen.**
-1. Morphing prägt nie: deutlich ausgeprägt in 1 von 15, in der Gegenprobe in 0 von 14. Blob-Flächen als Grund (0 von 15), flüssige Container oder sich verformende Karten verlassen die Sammlung.
+1. Morphing prägt praktisch nie: deutlich ausgeprägt nur in 1 von 15 (Ref 04, Übergangsframe), in der Gegenprobe in 0 von 14. Blob-Flächen als Grund (0 von 15), flüssige Container oder sich verformende Karten verlassen die Sammlung.
 2. Die Bedienschicht verformt sich nicht (0 von 15); das Formsystem bleibt geschlossen (4.5, Prinzip 5).
 3. Verformung in einer Kamera-Szene widerspricht der Tendenz der Sammlung: Die Kamera-Szenen Ref 09, 12, 14 und 15 sind formstarr, ρ D14 + D15 = −0,56. 6 der 8 Referenzen mit D14 ≥ 1 haben D15 ≤ 1; Ausnahmen sind Ref 10 und 13.
 4. Animiertes Morphing wäre ein Neuentwurf. Es müsste auf das Motiv beschränkt bleiben und in einem lesbaren Endzustand enden (Ableitung). Ref 04 zeigt, wie ein stehender Zwischenzustand Schrift unlesbar macht.
@@ -125,7 +125,7 @@ Dauer, Easing und Auslöser sind nicht belegt; Zahlenwerte wären Neuentwurf.
 **Einordnung.**
 - *Verbindliche DNA:* keine. Die Dimension ist zeitlich, n = 3, effektiv 2 Belege.
 - *Variable Ausgestaltung:* das Fortsetzungssignal „der Raum geht weiter“, belegt als Standbildmerkmal, nicht als Übergang: Randanschnitt oder Rahmenbruch (8 von 15 = 53 %, Gegenprobe 7 von 14 = 50 %), darunter die überdeckende Folgesektion (Ref 12).
-- *Optionaler Signature-Effekt:* der Szenenwechsel mit zerlegten Lettern unter stehender Kopfzeile (belegt: Ref 04/07, 1 von 15), die Kapitelinszenierung ab 00 (belegt nur als Ankündigung: Ref 15) und der ausdrückliche Scroll-Hinweis (belegt, statisch: Ref 09, 15; 5.6.9). Jede konkrete Übergangstechnik ist Neuentwurf.
+- *Optionaler Signature-Effekt:* der Szenenwechsel mit zerlegten Lettern unter stehender Kopfzeile (belegt: Ref 04/07, 1 von 15), die Kapitelinszenierung ab 00 mit Ziffernleiste (belegt, statisch, nur als Ankündigung: Ref 15) und der ausdrückliche Scroll-Hinweis (belegt, statisch: Ref 09, 15; 5.6.9). Jede konkrete Übergangstechnik ist Neuentwurf.
 
 ### 5.6.18 Dynamische Typografie
 

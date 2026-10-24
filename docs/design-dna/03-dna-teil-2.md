@@ -53,7 +53,7 @@
 **Einordnung.**
 - *Verbindliche DNA:* keine (zeitliche Dimension, Konsenssicherheit niedrig).
 - *Variable Ausgestaltung:* ein Fortsetzungssignal „der Raum geht weiter“ am Rand der Bühne, statisch belegt als Randanschnitt oder Rahmenbruch in 8 von 15 = 53 % (Gegenprobe 7 von 14 = 50 %); seine Form (Anschnitt, Überdeckung, Hinweis) wechselt. Die Scroll-Mechanik dahinter ist Neuentwurf.
-- *Optionaler Signature-Effekt:* ausdrücklicher Scroll-Hinweis mit Fortschrittslinie (belegt, statisch: 2 von 15 = 13 %, Ref 09, 15; eigene Zählung), Kapitelstruktur mit Ziffernleiste (belegt, statisch: Ref 15), Parallax-Kulisse (belegt nur als Ebenenstruktur: Ref 06), Szenenwechsel unter stehender Kopfzeile (belegt: Ref 04/07), scrollgekoppelte Kamerafahrt (Neuentwurf, unbelegt).
+- *Optionaler Signature-Effekt:* ausdrücklicher Scroll-Hinweis mit Fortschrittslinie (belegt, statisch: 2 von 15 = 13 %, Ref 09, 15; eigene Zählung), Kapitelstruktur mit Ziffernleiste (belegt, statisch, nur als Ankündigung: Ref 15), Parallax-Kulisse (belegt nur als Ebenenstruktur: Ref 06), Szenenwechsel unter stehender Kopfzeile (belegt: Ref 04/07), scrollgekoppelte Kamerafahrt (Neuentwurf, unbelegt).
 
 ### 5.6.10 Mikrointeraktionen
 
