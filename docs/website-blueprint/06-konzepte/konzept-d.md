@@ -163,7 +163,7 @@ flowchart LR
 | Wert | Woher | Wohin | Speicherung | Ohne Eingabe, ohne JavaScript |
 |---|---|---|---|---|
 | Firmenname | Feld in 01, höchstens 60 Zeichen | 01, 04, 05 (Bild), 07 (Feld Firma), Abschluss | nur im Arbeitsspeicher der Seite; für den Neuaufbau der Einbettung (`Verkauf.auf`, SKILL:63-64) zusätzlich `sessionStorage` dieses Tabs [H]; nichts wird gesendet, bevor das Formular abgeschickt wird | „Fensterbau Brandt · Beispiel“ |
-| Probe | Wahlknöpfe in 02 | 02 (Bild), 03 (Karte) | wie oben | Balkontür, Raffstore „Weiß ich noch nicht“, Anthrazitgrau |
+| Probe | Wahlknöpfe in 02 | 02 (Bild), 03 (Karte) | wie oben | Balkontür, Sonnenschutz „Weiß ich noch nicht“, Anthrazitgrau |
 | Paket | Namensleiste, Karte | 07 (Paketfeld), Abschluss | wie oben | das empfohlene Paket (O-5) |
 
 **[V]** Was der Besucher eingibt, verlässt den Browser nur über das Anfrageformular und nur, wenn er es absendet. Ob die
@@ -244,10 +244,12 @@ gegenüber IA (≈ 0,5 Bildschirme) ist die Probe.
   **Textentwurf** „Selbst ausprobieren“ → `#so-funktioniert-es`; Preiszeile 13 px, **Textentwurf** (IA V1): „Ab 29 € im Monat, netto, plus
   Einrichtung · vorläufige Preise“. Rund 32 Wörter in der Bedienschicht, dazu die Meldungen.
 - **Telefon:** Kopf 0–56 flächenlos mit Scrim (DG T0), nur Logo und Menü (der Ring erscheint erst, wenn „Pakete ansehen“ aus dem Bild ist,
-  IA N4). Foto y 0–556 (66 % der Höhe), unteres Viertel in `#161616` ausgeblendet. Glas-Stapel 220 px breit oben über einer ruhigen
-  Bildzone, die weder Bullauge noch Gesicht, Papierflieger oder Telefon verdeckt (SKILL:87; Lage am echten Foto prüfen). Kicker y ≈ 456,
-  h1 drei Zeilen y ≈ 476–577, Chips eine Zeile y ≈ 593–629, Cream (x 16–188) und Ring (x 200–374) nebeneinander y ≈ 645–697, Preiszeile
-  y ≈ 709–725, Leiste ab y ≈ 760 angeschnitten.
+  IA N4). Foto y 0–520 (62 % der Höhe), unteres Viertel in `#161616` ausgeblendet. Glas-Stapel 220 px breit oben über einer ruhigen
+  Bildzone, die weder Bullauge noch Gesicht, Papierflieger oder Telefon verdeckt (SKILL:87; Lage am echten Foto prüfen). Kicker y ≈ 420,
+  h1 drei Zeilen y ≈ 440–541 (rund 100 px im Fotoauslauf), Chips eine Zeile y ≈ 557–593, Cream y ≈ 609–661 und Ring y ≈ 673–725
+  untereinander an der linken Kante (nebeneinander passen beide Knopftexte in 17 px fett nicht in 358 px), Preiszeile y ≈ 737–753, Leiste
+  ab y ≈ 776 angeschnitten (8 %). Das Foto ist 20 px kürzer als in IA V1 geplant (500 px wären es dort); beides weicht von GEST:447 ab
+  (IA-AB-12).
 - **Schreibtisch:** Text links über 5 von 12 Spalten (x ≈ 120–533), Foto rechts ab x ≈ 553 bis an den Fensterrand; Leiste ab y ≈ 700
   angeschnitten (12 %).
 - **Ohne JavaScript, ruhig:** Foto, Text, Knöpfe, drei stehende Meldungen; keine Maßlinie, kein Zoom.
@@ -287,17 +289,18 @@ gegenüber IA (≈ 0,5 Bildschirme) ist die Probe.
 - **Inhalt:** h2 **Textentwurf** „So funktioniert es: planen wie Ihr Kunde“, grün „Kunde“. Lead **Textentwurf**: „Drei Griffe wie im
   Konfigurator. Fotos und Maße kommen dort dazu.“ Schrittanzeige in der Technikstimme „SCHRITT 1 / 3 · ELEMENT“ mit drei Strichmarken.
   Gerät mit dem Konfigurator unter dem Namen aus 01; im Bildschirm das gerenderte Fenster aus der eigenen Bühne. Drei Wahlschritte nur mit
-  Optionen, die es gibt (R14; `web/assets/modell.js:17`, `:108`): (1) Element „Fenster“, „Balkontür“, „Hebe-Schiebe-Tür“; (2) Sonnenschutz
+  Optionen, die es gibt (R14; Elementarten `README.md:3`, Raffstore als Sonnenschutzart `web/assets/app.js:1368`, Farben
+  `web/assets/modell.js:108`, „Weiß ich noch nicht“ `web/index.html:60`): (1) Element „Fenster“, „Balkontür“, „Hebe-Schiebe-Tür“; (2) Sonnenschutz
   „Ohne“, „Raffstore“, „Weiß ich noch nicht“; (3) Farbe außen „Verkehrsweiß“, „Anthrazitgrau“, „Golden Oak“. Ring „Weiter“, im dritten
   Schritt Ring **Textentwurf** „Probeanfrage senden“; danach zeigt das Gerät die Bestätigung des Konfigurators, und eine Statuszeile
-  (**Textentwurf**) sagt: „Probe gesendet, verschickt wurde nichts. Was bei Ihnen ankäme: Kapitel 03.“ mit Link. Zeile zu F-10 (VK:242
+  (**Textentwurf**) sagt: „Probe gesendet, verschickt wurde nichts. Was bei Ihnen ankäme: Kapitel 03.“ mit Link. Zeile zu F-10 (VK:240
   gekürzt): „Ihr Kunde sieht nur Ihren Betrieb: keine Preise, keine Werbung, keine anderen Betriebe.“ Ablaufzeile in der Technikstimme
   (aus VK:87-93): „LINK · PLANEN · SENDEN · AUFMASSBLATT BEI IHNEN · ANGEBOT UND FEINAUFMASS“, die aktive Station hell.
 - **Telefon:** Gerät 300 × 400 an derselben Stelle wie in 01 (x 45–345), darunter drei Wahlpillen in einer Zeile (je ≥ 44 px hoch, bei
   200 % Text zweizeilig), darunter Ring „Weiter“; Gerät ≈ 36 % der Fläche, Bedienung ≈ 12 %. Kein Anheften.
 - **Schreibtisch:** Die Geräte-Bühne aus 01 klebt weiter; das Browserfenster tritt über Tonwert zurück (60 %), das Telefon zeigt die
   Schritte; Wahlknöpfe und Text links.
-- **Ohne JavaScript:** drei Standbilder untereinander (Balkontür, Raffstore „Weiß ich noch nicht“, Anthrazitgrau) mit je einer Zeile;
+- **Ohne JavaScript:** drei Standbilder untereinander (Balkontür, Sonnenschutz „Weiß ich noch nicht“, Anthrazitgrau) mit je einer Zeile;
   keine Knöpfe. **Ruhig:** Bildwechsel als Schnitt oder ≤ 200 ms Überblendung; Raffstore steht im Endbild.
 
 **Live-Demos** `#demos` (Anhang zu 02, ohne Kapitelnummer)
@@ -414,7 +417,7 @@ gegenüber IA (≈ 0,5 Bildschirme) ist die Probe.
   „Beispiel“; nach dem dritten Wert markiert ein Etikett „kleinstes Maß“ 1.231 mm. Satz 17 px aus `web/index.html:59`: „Je Fenster drei
   Breiten und drei Höhen der Maueröffnung, dazu das Rahmenmaß. Es zählt das kleinste Maß, Abweichungen werden markiert.“ Cream „Jetzt
   ausmessen“ → `/app/#ausmessen`.
-- **Telefon:** Karte 358 × 300 (Papierweiß ist der einzige Hellwert), Knöpfe in einer Zeile darunter, Satz drei Zeilen, Cream ≈ y 1.380
+- **Telefon:** Karte 358 × 300 (Papierweiß ist der einzige Hellwert), Knöpfe in einer Zeile darunter, Satz drei Zeilen, Cream ≈ y 1.390
   (Bildschirm 2). **Schreibtisch:** Karte rechts 560 × 470 (7 Spalten), Text und Knöpfe links.
 - **Ohne JavaScript, ruhig:** alle drei Linien mit Werten, das kleinste markiert.
 
@@ -429,9 +432,9 @@ gegenüber IA (≈ 0,5 Bildschirme) ist die Probe.
 
 ## Unterscheidungsmerkmale
 
-1. **Erster Bildschirm.** Am Telefon wie die Ausgangsbasis gebaut (Foto 66 % der Höhe, Text im unteren Drittel), aber mit zwei
-   gleich großen Wegen nebeneinander im Daumenbereich (Cream „Pakete ansehen“ und Ring „Selbst ausprobieren“, je ≈ 45 % der Breite,
-   y 645–697) statt eines Rings, der die Seite verlässt. Die Meldungen erzählen die Paketwirklichkeit (Anfrage, PDF, Klärungsliste) und
+1. **Erster Bildschirm.** Am Telefon wie die Ausgangsbasis gebaut (Foto 62 % der Höhe, Text im unteren Drittel), aber mit zwei
+   Wegen untereinander im Daumenbereich (Cream „Pakete ansehen“ y ≈ 609–661, Ring „Selbst ausprobieren“ y ≈ 673–725), von denen der
+   zweite auf der Seite bleibt, statt eines Rings, der die Seite verlässt. Die Meldungen erzählen die Paketwirklichkeit (Anfrage, PDF, Klärungsliste) und
    enden nach drei. Am Schreibtisch Split 5 : 7; das Telefon im Foto ist schon der spätere Hauptdarsteller.
 2. **Informationsdichte.** ≈ 13 Telefon-Bildschirme; in den Kapiteln 01 bis 04 höchstens etwa 40 Wörter je Bildschirm, weil Wahl und
    Vorschau Text ersetzen; in 05 bis 07 bis etwa 60. Die Merkmalsliste der Pakete schrumpft von 17 Vergleichszeilen (heute) auf sechs
@@ -505,8 +508,8 @@ Ansichtstyp nach PROMPT (a Bühne, b Arbeitsansicht); Stufe nach DG 2.4.2; Inten
 | H3 In der App | a | 2 | C | mittlerer App-Bildschirm | – | Reihe mit Anschnitt | Wischen nativ | Stufe 1 |
 | H4–H8 | a/b | 1–2 | C | wie IA | – | – | – | Stufe 0/1 |
 
-**Rhythmus** (DG 2.3.17/6 und Dosierregel 2): Verkaufsseite 4 · 2 · 3 · 2 · 1 · 3 · 2 · 2 · 2 · 1 · 1 · 1 · 2. Höchstens ein Abschnitt der
-Stufe ≥ 3 folgt auf einen anderen der Stufe ≥ 3 nie direkt; zwei Stufe-4-Abschnitte gibt es nicht. Ansicht Hauseigentümer: 3 · 2 · 2 · 2 ·
+**Rhythmus** (DG 2.3.17/6 und Dosierregel 2): Verkaufsseite 4 · 2 · 3 · 2 · 1 · 3 · 2 · 2 · 2 · 1 · 1 · 1 · 2. Kein Abschnitt der
+Stufe ≥ 3 folgt direkt auf einen anderen der Stufe ≥ 3; es gibt nur einen Abschnitt der Stufe 4. Ansicht Hauseigentümer: 3 · 2 · 2 · 2 ·
 2 · 1 · 2 · 2, Höchststufe 3 (Dosierregel 5).
 
 ### Signature-Effekte nur gezielt
@@ -553,11 +556,11 @@ mitwischt; Fenstermodell und Lamellen mit viel Realismus (Kapitel 02).
 
 Jede Zeile: **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig.** Übernommen und angewandt aus EA und IA: AB-2, AB-4,
 AB-5, AB-6, AB-7, AB-8, AB-9, AB-10, AB-11, IA-AB-1, IA-AB-3, IA-AB-4, IA-AB-6, IA-AB-8, IA-AB-9, IA-AB-10, IA-AB-12; aus DG: DG-AB-1 bis
-DG-AB-5, DG-AB-8 bis DG-AB-17, DG-AB-19.
+DG-AB-5, DG-AB-8 bis DG-AB-19.
 
 | Nr. | Bestehende Regel | Vorschlag in D | Begründung | Rückfall ohne Freigabe |
 |---|---|---|---|---|
-| D-AB-1 | „Anfrageformular (die einzige Eingabe auf den Seiten für Fensterbauer)“ (GEST:455); Prüfsuite lässt auf `/fuer-fensterbauer/` außer `vk-form` kein `input` zu (`scripts/pruefen.mjs:1789-1797`) | Feld „Ihr Firmenname“ in Kapitel 01, ohne `form`, ohne Versand; die Prüfsuite bekommt eine bewusste Ausnahme genau für dieses Feld | „unter Ihrer Marke“ wird am eigenen Namen sichtbar (D-H-1, D-H-2); Name wandert ins Formular (RE E17) | D ohne Eingabe: fester Beispielbetrieb, alles andere bleibt |
+| D-AB-1 | „Anfrageformular (die einzige Eingabe auf den Seiten für Fensterbauer)“ (GEST:455); Prüfsuite lässt auf `/fuer-fensterbauer/` außer `vk-form` kein `input` zu (`scripts/pruefen.mjs:1789-1797`) | Feld „Ihr Firmenname“ in Kapitel 01, ohne `form`, ohne Versand; die Prüfsuite bekommt eine bewusste Ausnahme genau für dieses Feld | „unter Ihrer Marke“ wird am eigenen Namen sichtbar (D-H-1, D-H-2); Name wandert ins Formular (RE E17). Auch wenn das Feld erst per Skript entstünde und die statische Prüfung es nicht sähe, bliebe es eine Abweichung von GEST:455 | D ohne Eingabe: fester Beispielbetrieb, alles andere bleibt |
 | D-AB-2 | Paketkarte mit eigener „Beispielseite“ unten in der Karte; „Karte und Beispiel sind ein Stück“ (GEST:452) | Karten ohne eigenes Bild, eine gemeinsame Vorschau unter der Reihe, die beim Wischen sichtbar mitwischt | erfüllt SKILL:121-122 wörtlich; Karte ≈ 300 statt ≤ 640 px hoch; die Vorschau trägt den eigenen Namen | Bild je Karte wie IA K19 |
 | D-AB-3 | Leistungen als Liste mit grünen Haken in der Karte (GEST:452) | Unterschiede als Anmerkungen an der Vorschau, keine Hakenliste | RE E8, T7; geht weiter als IA-AB-11 | drei bis vier Haken je Karte (IA-AB-11) |
 | D-AB-4 | Ring „Konfigurator ausprobieren“ im Startbild und Karte in „Live-Demos“ führen in die App (VK:63, :210; GEST:447) | Ring **Textentwurf** „Selbst ausprobieren“ → Kapitel 02; App nur als Nebenweg im Anhang „Live-Demos“ mit Hinweis „mit Preis“ | EA PAK B7; R14 | Ring wie IA V1 |
@@ -567,9 +570,9 @@ DG-AB-5, DG-AB-8 bis DG-AB-17, DG-AB-19.
 | D-AB-8 | „Parallaxe, Neigen per Maus und Lesefortschritt gibt es nicht“ (GEST:41, :448) | Kapitelanzeige „04 / 07“ im Kopf als Zustand, keine laufende Linie | DG-E-7 B; DG-AB-15 | ohne Anzeige |
 | D-AB-9 | „Abschnitte in dieser Reihenfolge“ (GEST:447) | Folge der sieben Kapitel | eigene Dramaturgie; erweitert EA AB-3 | – |
 | D-AB-10 | Geräte-Bühne „Studiolicht von oben, weicher Bodenschatten“ (DR Baustein 8); „Schatten wirft nur, was schwebt: … Geräte“ (DR 3.1) | Gerät ohne Schatten; Lichtkante 1 px, Verankerung über Anschnitt und Lichtraum | DNA Nr. 6; SG 10.4/7; DG-AB-1 | – |
-| D-AB-11 | Meldungen „Neue Anfrage → Projekt angelegt → Bereit fürs Angebot“, alle 3,4 s neu (GEST:447) | drei Meldungen, die enden; Wortlaut nach dem Paketweg: Anfrage, PDF, Klärungsliste (**Textentwurf**) | EA AB-8; „Projekte bei eeziframes anlegen“ ist kein Thema mehr (SKILL:25) | bisheriger Wortlaut, endend |
+| D-AB-11 | Meldungen „Neue Anfrage → Projekt angelegt → Bereit fürs Angebot“, alle 3,4 s neu (GEST:447) | drei Meldungen, die enden; Wortlaut nach dem Paketweg: Anfrage, PDF, Klärungsliste (**Textentwurf**) | EA AB-8; „Projekt angelegt“ beschreibt den Weg mit Projekten, der kein Thema mehr ist (SKILL:25; BAUPLAN:657 E28); Pakete liefern jede Anfrage als E-Mail mit PDF (PB:38 § 2 (1)) | bisheriger Wortlaut, endend |
 | D-AB-12 | Ansicht Hauseigentümer mit „Kennzahlen, ‚Was im Aufmaß steckt‘, Ratgeber als Karten“ (GEST:192) | Probemessung und App-Wischreihe statt Karten; sonst IA | SKILL:41 (echtes Material statt Symbole); RE E6 | Bildfolge nach IA H2 |
-| D-AB-13 | DR 3.2 „Riesenschrift … höchstens einmal je Seite“ und DR 3.3 „Je Seite bricht mindestens einmal etwas aus seinem Rahmen“ | kein Riesenwort; Rahmenbruch am Telefon nur schwach (Gerät ragt ≤ 10 % über die Kapitelkante) | DG-AB-18; Rhythmus; die Ausdruckslast liegt bei der Probe | – |
+| D-AB-13 | DR 3.3 „Je Seite bricht mindestens einmal etwas aus seinem Rahmen“; DR 6 als Prüffrage | erfüllt am Schreibtisch über den Flug des Telefons; am Telefon nur schwach (Gerät ragt ≤ 10 % über die Kapitelkante) | DG-AB-18; am Telefon keine Anheftstrecke und keine Parallaxe über eine Ebene hinaus (SG 10.7, Mobil), ein echter Flug ist dort nicht möglich | am Telefon ohne Rahmenbruch |
 
 Zu prüfen, ohne dass eine Regel bricht: Die Firmenfarbe in der Vorschau (Plus, Signature) ist Bildinhalt einer Beispielseite, keine
 Markenfarbe von eeziframes; sie muss ≥ 4,5 : 1 gegen `#161616` erreichen (wie `Instanzregeln.akzent`, GEST:460) und den Anteil
@@ -592,14 +595,14 @@ Markenfarbe von eeziframes; sie muss ≥ 4,5 : 1 gegen `#161616` erreichen (wie 
 3. **Erste Information.** Kicker „Für Fensterbauer und Fensterhändler“, dann das h1 (32 px, drei Zeilen), dann drei Chips, dann die
    Preiszeile 13 px. Wer nur das liest, weiß: für Betriebe, eigener Konfigurator unter eigener Marke, ab 29 € im Monat (R12).
 4. **Position des Hauptmotivs.** Telefon: Bullauge im rechten Viertel des Fotos (≈ x 290–390, y 120–330), Astronaut diagonal davor, Foto
-   oben über 66 % der Höhe; Text im unteren Drittel an der linken Kante. Schreibtisch: Foto rechts über ≈ 57 % der Breite bis an den Rand,
+   oben über 62 % der Höhe; Text im unteren Drittel an der linken Kante. Schreibtisch: Foto rechts über ≈ 57 % der Breite bis an den Rand,
    Bullauge oben rechts, Text links über fünf Spalten.
 5. **Layoutveränderung beim Scrollen.** Telefon: vom Foto oben mit Text darunter (Diagonale) über das Band der Leiste zur Achse: In 01, 02
    und im Vorschau-Block von 04 steht das Gerät mittig bzw. rechts, Kopf und Bedienung an der linken Kante darüber und darunter; ab 05
    wieder linke Kante und flache Flächen. Schreibtisch: Der Split 5 : 7 bleibt durchgehend, die rechte Spalte wechselt ihren Inhalt:
    Foto → klebende Geräte-Bühne (01, 02, zusammen ≈ 2,2 Bildschirmhöhen, je Szene ≤ 1,2 mit ≥ ⅓ Ruhe) → Blatt (03, eigene Szene ≤ 1,5) →
    über die volle Spalte Kartenreihe und Vorschau (04) → Held (05) → Formular zweispaltig (07).
-6. **Einleitung des Folgeabschnitts.** Telefon: Die Leiste schneidet bei y ≈ 760 an (10 %). Das Gerät in 01 kommt in der Schräglage des
+6. **Einleitung des Folgeabschnitts.** Telefon: Die Leiste schneidet bei y ≈ 776 an (8 %). Das Gerät in 01 kommt in der Schräglage des
    Telefons im Foto herein (−14° → 0°, Größe 0,94 → 1, mit Trägheit über die ersten 40 % seines Wegs) und ragt unten ≤ 10 % über die
    Kapitelkante; jedes Kapitel öffnet mit Haarlinie und Kapitelzeile in Grün; 02 endet mit dem Knopf, der nach 03 führt; 03 endet mit der
    Brücke „Wie sehr soll er Ihre Marke tragen?“. Schreibtisch: Das Telefon im Foto löst sich beim Scrollen (0 bis 0,7 Bildschirmhöhen) aus
@@ -623,26 +626,26 @@ Markenfarbe von eeziframes; sie muss ≥ 4,5 : 1 gegen `#161616` erreichen (wie 
 ### G.2 Startseite, Bildschirme 1 und 2 (Standardansicht Hauseigentümer)
 
 1. **Erster Seitenaufruf.** Kopf 56 px (Logo, Ring „Fenster ausmessen“, solange die Cream-Pille im Bild ist, Menü); Glas-Umschalter
-   y 68–112 über dem Foto; Foto `start-hauseigentuemer.webp` y 0–500 blendet in 900 ms ein; Eyebrow und h1 stehen sofort (kein
+   y 68–112 über dem Foto; Foto `start-hauseigentuemer.webp` y 0–480 blendet in 900 ms ein; Eyebrow und h1 stehen sofort (kein
    Wort-für-Wort-Aufbau, DG 2.2.8). Keine Bänder vor dem Foto (IA R1).
 2. **Aufmerksamkeitserzeuger.** Tageslicht in der Maueröffnung rechts (Anker); der Waschbär mit Zollstock zeigt durch seine Handlung zur
    Öffnung (RE E3).
 3. **Erste Information.** Eyebrow und h1 wörtlich, Lead zwei Zeilen „Zwei Fotos und die Maße mit dem Zollstock, jeder Schritt erklärt.“
    (IA H1), Preiszeile **Textentwurf** IA H1.
 4. **Position des Hauptmotivs.** Öffnung im rechten Drittel (≈ x 260–390, y 60–480), Figur rechts der Mitte; Text links unten
-   (Eyebrow y ≈ 404, h1 y ≈ 424–525, Lead y ≈ 541–585).
+   (Eyebrow zwei Zeilen y ≈ 380–412, h1 y ≈ 424–525, Lead y ≈ 541–585).
 5. **Layoutveränderung beim Scrollen.** Bildschirm 2 wechselt vom Foto als Bühne zur weißen Zeichnungskarte als Held über die volle Breite
    (358 × 300), Bedienung darunter an der linken Kante.
-6. **Einleitung des Folgeabschnitts.** Bei y ≈ 760 schneiden Haarlinie, Kapitelzeile „01 · PROBEMESSUNG“ und die Oberkante der weißen
-   Karte an (10 %).
+6. **Einleitung des Folgeabschnitts.** Bei y ≈ 776 schneiden Haarlinie, Kapitelzeile „01 · PROBEMESSUNG“ und die Oberkante der weißen
+   Karte an (8 %).
 7. **Einsatz von Tiefe und Material.** Bildschirm 1: Grund, Foto, Glas-Umschalter, Bedienschicht. Bildschirm 2: Papierweiß als einziger
    Hellwert auf dunklem Grund, orange Maßlinien als Bedeutungsfarbe; Wert-Etiketten liegen über den Linien (Verdeckung).
 8. **Bewusste Reduktion.** Kein CSS-Licht, keine Parallaxe, kein Band; Bildschirm 2 trägt nur Karte, drei Knöpfe, einen Satz und eine
    Pille.
 9. **Zeitpunkt und Art der Angebotsdarstellung.** Preiszeile im ersten Bildschirm (vor dem 18.11.2026 mit Einführungspreis, danach
    „Aufmaßblatt 12,99 €“); vollständig in H4 bei ≈ Bildschirm 3,5.
-10. **Hinführung zur Handlung.** Bildschirm 1: Cream „Jetzt ausmessen“ (y ≈ 605–657) und Ring „Führung starten“ nebeneinander.
-    Bildschirm 2: nach der Probemessung Cream „Jetzt ausmessen“ (y ≈ 1.380) → `/app/#ausmessen`.
+10. **Hinführung zur Handlung.** Bildschirm 1: Cream „Jetzt ausmessen“ (y ≈ 601–653), darunter Ring „Führung starten“ (y ≈ 665–717),
+    Preiszeile y ≈ 729–763. Bildschirm 2: nach der Probemessung Cream „Jetzt ausmessen“ (y ≈ 1.390) → `/app/#ausmessen`.
 
 ---
 
@@ -654,7 +657,7 @@ Bereich in Bildschirmhöhen ab Seitenanfang; Abschnitte überlappen im Anschnitt
 
 | Bereich | sichtbare Inhalte | visuelles Hauptobjekt | Kamera, räumliche Komposition | Bewegung und Übergang | Informationshierarchie | Handlungsaufforderung | Funktion in der Kaufentscheidung |
 |---|---|---|---|---|---|---|---|
-| 0–1,0 | Kopf, Foto, Meldungen, Kicker, h1, Chips, Knöpfe, Preiszeile, Anschnitt Leiste | Bullauge mit Erdlicht | Foto oben 66 %, Diagonale Anker oben rechts → Text unten links; 4 Ebenen | Ladeauftritt 0–4,1 s, dann Stand; Foto ohne Parallaxe | h1 32 > Knöpfe 17 > Chips, Preiszeile 13 | Cream „Pakete ansehen“, Ring „Selbst ausprobieren“, y 645–697 | S1 zuordnen; Preissignal; Schnellweg W2 |
+| 0–1,0 | Kopf, Foto, Meldungen, Kicker, h1, Chips, Knöpfe, Preiszeile, Anschnitt Leiste | Bullauge mit Erdlicht | Foto oben 62 %, Diagonale Anker oben rechts → Text unten links; 4 Ebenen | Ladeauftritt 0–4,1 s, dann Stand; Foto ohne Parallaxe | h1 32 > Knöpfe 17 > Chips, Preiszeile 13 | Cream „Pakete ansehen“ y ≈ 609–661, darunter Ring „Selbst ausprobieren“ | S1 zuordnen; Preissignal; Schnellweg W2 |
 | 0,9–1,1 | Leiste Elementarten | mittleres Element | Band über beide Ränder | Versatz nach Scrolltempo, Trägheit ≤ 1,2 s | Name 15 fett | – | Breite des Konfigurators (F-14 teilweise) |
 | 1,2–2,4 | Kapitel 01: h2, Lead, Feld, Gerät, Punkte | Gerät mit „Fensterplaner von …“ | Achse, Gerät 77 % der Breite, Lichtraum dahinter | Gerät dreht beim Eintritt in die Senkrechte; Bildschirm geht einmal an; Name blendet beim Tippen über; Kopf zeigt „01 / 07“ | h2 > Gerät > Feld > Punkte | Feld; keine Cream; Kopf-Ring „Pakete ansehen“ | S2 verstehen: eigene Marke, Domain, kein Programmierauftrag |
 | 2,5–3,9 | Kapitel 02 und Live-Demos | Gerät mit Fenstermodell | Achse, Gerät an derselben Stelle wie in 01 | auf Tippen: Bildwechsel 500 ms, Raffstore fährt einmal; keine Scrollkopplung | Schrittanzeige > Gerät > Wahl > Zeile „nur Ihr Betrieb“ | Ring „Weiter“ bzw. „Probeanfrage senden“; Ring Demos | S3 sehen: was der Kunde erlebt (F-10, F-22, F-34) |
@@ -687,7 +690,7 @@ Bereich in Bildschirmhöhen ab Seitenanfang; Abschnitte überlappen im Anschnitt
 
 | Bereich | sichtbare Inhalte | visuelles Hauptobjekt | Kamera, räumliche Komposition | Bewegung und Übergang | Informationshierarchie | Handlungsaufforderung | Funktion |
 |---|---|---|---|---|---|---|---|
-| 0–1,0 | Kopf, Glas-Umschalter, Foto, Eyebrow, h1, Lead, Knöpfe, Preiszeile, Anschnitt H2 | Licht in der Maueröffnung | Foto oben 59 %, Text unten links | Foto 900 ms, sonst Ruhe | h1 32 > Lead 17 > Preiszeile 13 | Cream „Jetzt ausmessen“, Ring „Führung starten“ | B1 zuordnen, Zutrauen, Preis |
+| 0–1,0 | Kopf, Glas-Umschalter, Foto, Eyebrow, h1, Lead, Knöpfe, Preiszeile, Anschnitt H2 | Licht in der Maueröffnung | Foto oben 57 %, Text unten links | Foto 900 ms, sonst Ruhe | h1 32 > Lead 17 > Preiszeile 13 | Cream „Jetzt ausmessen“, Ring „Führung starten“ | B1 zuordnen, Zutrauen, Preis |
 | 0,9–1,7 | Probemessung | weiße Zeichnung | Karte volle Breite, Bedienung darunter | Tipp: Linie zeichnet sich, Wert zählt; Etikett „kleinstes Maß“ als Zustand | h2 > Zeichnung > Satz | Knöpfe „Oben“, „Mitte“, „Unten“; Cream „Jetzt ausmessen“ | B1/B2: H-01 „Schaffe ich das?“ |
 | 1,8–2,7 | App-Wischreihe | mittlerer App-Bildschirm | Reihe mit Anschnitt | Wischen nativ | Bild > Zeile 15 | – | B2: was am Ende herauskommt |
 | 2,8–3,5 | Kosten und Daten | Preise 24 px | Zeilen an gemeinsamer Kante | – | Preise > Vertrauenszeilen | – | B2/B3 (H-02 bis H-04) |
@@ -700,7 +703,7 @@ Bereich in Bildschirmhöhen ab Seitenanfang; Abschnitte überlappen im Anschnitt
 
 | Bereich | Abweichung vom Telefon |
 |---|---|
-| 0–1,0 | Split 5 : 7, Foto rechts randlos; Umschalter neben dem Logo statt über dem Foto |
+| 0–1,0 | Split 5 : 7, Foto rechts randlos; Umschalter neben dem Logo statt über dem Foto; Cream und Ring nebeneinander |
 | 1,0–1,8 | Probemessung als Split: Zeichnung rechts 560 × 470, Knöpfe und Satz links |
 | 1,8–2,6 | App-Bildschirme vier nebeneinander statt Wischreihe; keine Leiste nötig |
 | 2,6–4,5 | wie IA (Zeilen, eine Reihe Ratgeber-Kacheln, Fragen 820 px, Abschluss, Wechselkarte) |
