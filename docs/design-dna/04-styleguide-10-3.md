@@ -21,18 +21,17 @@ Die Konsenssicherheit ist eine Obergrenze (simulierte Expertenrollen, 4.6). Radi
 ### Regeln
 
 1. **[Pflicht]** Buttons, Karten, Navigation und Felder tragen kein opakes Eigenmaterial: kein Metall, kein Relief, keine Prägung, keine Kissenform, keinen Glanz, keine Spiegelung und keine Bildtextur als Füllung (Nr. 9). Glas fällt nicht darunter (Regel 6).
-2. **[Pflicht]** Keine vollflächige Textur (Korn, Rauschen, Papier, Stoff, Ornament) auf der Bedienschicht oder unter Lesetext; Grund- und UI-Flächen bleiben glatt (Nr. 9 und 11, Grenze aus 5.6.12).
+2. **[Pflicht]** Keine vollflächige Textur (Korn, Rauschen, Papier, Stoff, Ornament) auf der Bedienschicht oder unter Lesetext; Grund- und UI-Flächen bleiben glatt. Sichtbares Korn ist auch sonst ausgeschlossen, als Overlay ebenso wie als Gestaltungsmittel im Grund (Nr. 9 und 11, Grenze aus 5.6.12: Körnung bleibt mangels Beleg außerhalb).
 3. **[Pflicht]** Konturen der Bedienschicht sind haarfein und wirken als Kante, nie als Rahmen; Figur-Grund-Kanten entstehen ohne tragenden Schlagschatten (Nr. 6; Rahmen aus 5.3).
 4. **[Pflicht]** Fixationspunkt, Schriftebene und Lesetext werden nie weichgezeichnet; Unschärfe liegt nur hinter Glas, an Begleitelementen oder in Motivteilen abseits des Fixationspunkts (Rahmen aus 5.3).
 5. **[Variabel]** Material als Ausdrucksträger ist frei (11 von 15). Wird es eingesetzt, hat es einen Hauptträger, den Fokusträger oder die Glasschicht; Art (Glas, Metall, Lack/Kunststoff, Matt, organisch), Medium (Render, Foto) und Intensität 1–4 sind frei. Zwei gleichrangige Materialträger sind ausgeschlossen (Ableitung).
 6. **[Variabel]** UI-Flächen sind opak und flach oder transluzent (6 von 15). Glas braucht mindestens eine Fläche direkt über gesättigtem Bildinhalt (Regel in Ref 03); Glas ganz ohne sichtbar gefilterten Inhalt ist ausgeschlossen (Ableitung). Jede Glasfläche hat eine helle Haarkante und keinen Schlagschatten.
-7. **[Variabel]** Material darf Rang codieren: opak für Rang oder aktiv, transluzent für sekundär (Ref 02, 03, 14). Je Produkt gilt ein Kanal, überall gleich (siehe 10.7).
+7. **[Variabel]** Material darf Rang codieren: opak für Rang oder aktiv, transluzent für sekundär (Ref 02, 03, 14). Je Produkt gilt ein Kanal für Rang bzw. „aktiv“ und einer für Hover, jeder überall gleich; der Fokus ist davon getrennt immer eine Kontur (siehe 10.7, Regel 8).
 8. **[Variabel]** Art (Glas, Tiefe, Verlauf) und Intensität der Unschärfe sind frei; Glasunschärfe hat höchstens zwei Stufen je Ansicht, die stärkere liegt unter Text (Ref 12). Unschärfe trennt Ebenen und verwischt nie die ganze Fläche (Ableitung; Schärfestufen der Tiefe siehe 10.2).
-9. **[Optional]** Glas mit Hintergrundunschärfe (Ref 01, 03, 12, 14), abgestuft auf mehreren Ebenen (Ref 12). Bedingung: Regel 6; deckende Ersatzfüllung.
+9. **[Optional]** Glas mit Hintergrundunschärfe (Ref 01, 03, 12, 14), abgestuft auf mehreren Ebenen (Ref 12). Bedingung: Regel 6; ohne `backdrop-filter` eine nicht deckende Ersatzfüllung wie ein Scrim, deckend nur bei reduzierter Transparenz oder erhöhtem Kontrast.
 10. **[Optional]** Material als Thema, Explosionsansicht (Ref 01, 10), Farbübertrag oder Randbrechung (Ref 01). Bedingung: ein Objekt bzw. Glas über gesättigter Fläche; Verzerrung nur am Rand; die Bedienschicht bleibt materiallos.
 11. **[Optional]** Gerichteter Verlaufs-Blur statt Bildkante (Ref 03). Bedingung: Freisteller auf gleichem Grund, Fixationspunkt scharf.
 12. **[Optional]** Technische Mikroschicht und kontrastarmes Raster (Ref 01, 10, 11, 13, 14). Bedingung: technikbetonter Inhalt, haarfein, nie unter Fließtext.
-13. **[Optional]** Korn ist Neuentwurf (nicht beobachtet) und kein Signature-Effekt: nur als unsichtbares Dithering gegen Streifen in großen Verläufen oder als Eigenschaft eines Bildassets.
 
 ### Umsetzung (Vorschlag)
 
@@ -41,7 +40,7 @@ Alle Werte sind Vorschläge. Belegt sind Bauweise und Verhältnisse, kaum Zahlen
 - **Glas:** `backdrop-filter: blur()`, halbtransparente Füllung, 1-px-Kante (Hypothese der Profile Ref 01, 03, 12, 14). Text liegt im Glaselement über dem Filter, nie unter `filter: blur()`. Sättigungsanhebung ist verbreitet, aber nicht erforderlich; Ref 01 zeigt eher Entsättigung. Randbrechung ist optional (SVG-Filter oder Shader, siehe 10.8).
 - **Motivmaterial:** im Render oder Foto eingebacken (PBR mit Transmission, Clearcoat, Iridescence; Hypothese zu Ref 05, 09, 10, 12), als Bild mit Alphakanal; Glanz nie per CSS an UI-Flächen.
 - **Raster:** CSS-Verlaufsmuster mit 1-CSS-px-Linien oder Punkten, Maß aus dem Layoutraster (siehe 10.1).
-- **Korn gegen Streifen:** ins Verlaufsbild einbacken, nicht als Overlay-Ebene (Streifen in dunklen Verläufen zeigt Ref 12, wahrscheinlich Kompressionsartefakt).
+- **Korn gegen Streifen** (Neuentwurf, kein Signature-Effekt): nur als unsichtbares Dithering in großen Verläufen, ins Verlaufsbild einbacken, nicht als Overlay-Ebene (Streifen in dunklen Verläufen zeigt Ref 12, wahrscheinlich Kompressionsartefakt).
 
 ```css
 .glas {
@@ -53,7 +52,7 @@ Alle Werte sind Vorschläge. Belegt sind Bauweise und Verhältnisse, kaum Zahlen
 }
 .glas--text { --glas-blur: var(--blur-stark); --glas-fuellung: var(--fuellung-text); }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glas { background: rgb(var(--glas-ton) / var(--fuellung-deckend)); }
+  .glas { background: rgb(var(--glas-ton) / var(--fuellung-ersatz)); } /* nicht deckend, wie ein Scrim; Text erreicht 4,5:1 */
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .glas { -webkit-backdrop-filter: none; backdrop-filter: none;
@@ -78,8 +77,8 @@ Alle Werte sind Vorschläge. Belegt sind Bauweise und Verhältnisse, kaum Zahlen
 | Abhebung Glas vom Grund | 1,05–1,1:1 (Ref 01) | frei, wenn Inhalt das Element erkennbar macht; sonst Kante ≥ 3:1 | Ref 01; WCAG 1.4.11 |
 | Hintergrundraster | etwa 1,2:1 (Ref 01, Näherung) | 1 CSS-px, ≤ 1,3:1, nie unter Fließtext | Ref 01, 11 |
 | Sichtbares Korn | 0 von 15 belegt | keines | 5.6.12 |
-| Dithering in Verläufen | nicht beobachtet | ± 1–2 von 255 Tonwerten, eingebacken | Neuentwurf (nicht beobachtet) |
-| Materialbewegung (Glanz, Brechung, Glasverformung) | nicht belegt | Ruhezustand statisch (siehe 10.7) | Neuentwurf (nicht beobachtet) |
+| Dithering in Verläufen | nicht beobachtet | ± 1–2 von 255 Tonwerten, eingebacken | Neuentwurf |
+| Materialbewegung (Glanz, Brechung, Glasverformung) | nicht belegt | Ruhezustand statisch (siehe 10.7); Glas der Bedienschicht verformt sich nie, auch nicht animiert | Neuentwurf (nicht beobachtet); 10.5, Regel 3 |
 
 ### Mobil und Barrierefreiheit
 
@@ -87,14 +86,14 @@ Alle Werte sind Vorschläge. Belegt sind Bauweise und Verhältnisse, kaum Zahlen
 - **Kontrast:** Text auf Glas erreicht 4,5:1, großer Text 3:1, gegen die ungünstigste Partie des ungefilterten Untergrunds (Regel Ref 12). Ist eine Kante die einzige Grenze eines Bedienelements, braucht sie 3:1 (1.4.11). Transparenz ist nie das einzige Zustandssignal (1.4.1).
 - **Systemeinstellungen:** Bei `prefers-reduced-transparency` (wo unterstützt) und `prefers-contrast: more` wird Glas deckend; unter `forced-colors: active` bleibt die 1-px-Kante als Grenze sichtbar.
 - **Tastatur:** Der Fokusring liegt über Glas und Grund, hat gegen beide 3:1 und wird von keiner Ebene verdeckt (2.4.7, 2.4.11).
-- **Weniger Bewegung:** Materialien sind statisch. Wandernde Glanzlichter, zeigergeführte Brechung oder sich verformendes Glas sind Neuentwurf (nicht beobachtet) und entfallen unter `prefers-reduced-motion: reduce`.
+- **Weniger Bewegung:** Materialien sind statisch. Wandernde Glanzlichter oder zeigergeführte Brechung sind Neuentwurf (nicht beobachtet) und entfallen unter `prefers-reduced-motion: reduce`. Glas der Bedienschicht verformt sich nie, auch nicht animiert (10.5, Regel 3; 10.10, Nr. 4).
 - **Leistung:** `backdrop-filter` kostet GPU-Leistung (Profile Ref 01, 02, 03, 12, 13): Glasflächen klein halten, Blur-Radius nie animieren, Material und Glanz ins Asset backen, Korn nicht als große Overlay-Datei laden.
 
 ### Prüffragen
 
 1. Ist die Bedienschicht frei von Metall, Relief, Glanz, Kissenform und vollflächiger Textur, mit Glas als einziger Ausnahme?
 2. Hat die Ansicht höchstens einen Material-Hauptträger (Fokusträger oder Glasschicht), und tritt eine Glasschicht neben einem Materialmotiv nur vermittelnd hinzu?
-3. Falls Glas eingesetzt wird: Liegt mindestens eine Glasfläche direkt über gesättigtem Bildinhalt, und hat jede Glasfläche Haarkante, keinen Schlagschatten und eine deckende Ersatzfüllung?
+3. Falls Glas eingesetzt wird: Liegt mindestens eine Glasfläche direkt über gesättigtem Bildinhalt, und hat jede Glasfläche Haarkante, keinen Schlagschatten und eine Ersatzfüllung (ohne `backdrop-filter` nicht deckend, bei reduzierter Transparenz oder erhöhtem Kontrast deckend)?
 4. Sind Fixationspunkt, Schriftebene und Lesetext scharf, und erreicht Text auf Glas 4,5:1 gegen die ungünstigste Partie des Untergrunds?
 5. Sind Konturen, Raster und Mikroschicht haarfein, liegt kein Raster unter Fließtext, und ist kein Korn sichtbar?
 6. Bleibt die Ansicht ohne `backdrop-filter`, mit reduzierter Transparenz und unter `forced-colors` lesbar und bedienbar?

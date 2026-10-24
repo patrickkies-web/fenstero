@@ -20,12 +20,12 @@ Regeln 1 und 3 setzen DNA-Prinzip Nr. 1 und 5 um; Regeln 2, 4 und 5 sind Nutzbar
 
 1. **[Pflicht]** Die Bedienschicht ist DOM: echter Text und fokussierbare Elemente, nie in Canvas, Video oder Bild gerendert, nie mit `perspective` oder 3D-Transformation.
 2. **[Pflicht]** Leichtestes ausreichendes Verfahren: Jeder Effekt nutzt die Spalte „erforderlich“ der Matrix; ein schwereres Verfahren braucht eine dokumentierte Begründung (Interaktion oder Zustandszahl, die vorgerendert nicht abbildbar ist).
-3. **[Pflicht]** Laufzeit-Rendering und Bewegung wirken nur in Motiv und Grund; die Bedienschicht wird davon nicht mitbewegt, gekippt oder verformt, ihre Zustandswechsel nutzen nur die Kanäle der Tabelle (5.6.8, 5.6.10).
+3. **[Pflicht]** Laufzeit-Rendering wirkt nur in Motiv und Grund, Bewegung nur im Motiv (der Grund steht still, siehe 10.7 und 10.10); die Bedienschicht wird davon nicht mitbewegt, gekippt oder verformt, ihre Zustandswechsel nutzen nur die Kanäle der Tabelle (5.6.8, 5.6.10).
 4. **[Pflicht]** Jede Fassung, auch ohne JavaScript, ohne WebGL und bei „weniger Bewegung“, zeigt dieselbe Ebenenfolge mit Anker und Maßstabssprung als Standbild (Ableitung, 5.3 „Bewegung“).
 5. **[Pflicht]** Das LCP-Element ist Text oder Bild, nie ein Canvas und nie ein Video ohne Poster; die Budgets der Tabelle gelten.
 6. **[Variabel]** Medium des Fokusträgers: Standbild, Videoschleife, Bildfolge oder Echtzeit-3D. Spielraum: Standbild ist Voreinstellung; Bewegtmedium nur an genau einem Träger je Ansicht (Nr. 3); Echtzeit-3D nur nach Regel 9.
 7. **[Variabel]** Freistellung über Alphakanal oder über Grundgleichheit (Asset auf exakt dem Seitengrund gerendert). Bei Video auf einfarbigem Grund ist Grundgleichheit vorzuziehen; Farbgleichheit von Video und CSS-Grund auf Zielgeräten prüfen.
-8. **[Optional]** Glas per `backdrop-filter` (Ref 01, 03, 12, 14), mindestens eine Fläche direkt über gesättigtem Inhalt (Regel in Ref 03), mit deckender Ersatzfüllung über `@supports`. Randbrechung (Ref 01) nur mit Rückfall auf reinen Blur.
+8. **[Optional]** Glas per `backdrop-filter` (Ref 01, 03, 12, 14), mindestens eine Fläche direkt über gesättigtem Inhalt (Regel in Ref 03), mit nicht deckender Ersatzfüllung über `@supports` (deckend nur bei reduzierter Transparenz oder erhöhtem Kontrast, siehe 10.3). Randbrechung (Ref 01) nur mit Rückfall auf reinen Blur.
 9. **[Optional]** Echtzeit-3D (WebGL, etwa Three.js oder eine Spline-Laufzeitszene; Neuentwurf, nicht beobachtet) nur, wenn Nutzer Objekt oder Kamera stetig steuern (Drehen, Konfigurieren, Kamerafahrt mit vielen Zwischenzuständen); nachgeladen nach LCP, abgeschaltet bei zu geringer Bildrate.
 10. **[Optional]** Scrollgekoppelte Szenen, Parallax und Vektoranimation (Neuentwurf; Ankündigung belegt in Ref 09, 15, Ebenenstruktur in Ref 06): zuerst CSS, Bibliothek nur nach Matrix; jede Szene endet in einem lesbaren Ruhezustand (Ref 04).
 
@@ -37,20 +37,21 @@ Alle Zuordnungen und Werte sind Vorschläge; außer den genannten Belegen ist al
 
 | Effekt (Beleg) | Erforderlich | Optional, nur wenn … | Ersatzfassung |
 |---|---|---|---|
-| Ebenenstapel, Typo-Bild-Sandwich (Ref 03, 04, 05, 07, 08, 13, 15) | Live-Text, Alpha-Bild (AVIF/WebP), CSS-Stapel (`z-index`, `overflow: hidden`, `mask-image`) | – | entfällt (statisch) |
-| Glas mit Unschärfe (Ref 01, 03, 12, 14) | `backdrop-filter`, halbtransparente Füllung, 1-px-Kante | SVG-Filter oder Shader für Randbrechung | deckende Füllung |
+| Ebenenstapel, Typo-Bild-Sandwich (Ref 03, 04, 05, 07, 08, 13, 15) | Live-Text, Alpha-Bild (AVIF/WebP), CSS-Stapel (`z-index`, `overflow: clip`) | `mask-image` nur für den Deckkraftverlauf der Kulissenschrift (Ref 03, 13) | entfällt (statisch) |
+| Glas mit Unschärfe (Ref 01, 03, 12, 14) | `backdrop-filter`, halbtransparente Füllung, 1-px-Kante | SVG-Filter oder Shader für Randbrechung | nicht deckende Ersatzfüllung ohne Unschärfe; deckend nur bei reduzierter Transparenz oder erhöhtem Kontrast (10.3) |
 | Fokusträger, Vitrine (Ref 05, 07, 08, 09, 10, 12) | Offline-Render als Standbild | Video mit Alpha (zwei Kodierungen, je Browser prüfen); Echtzeit-3D nach Regel 9 | Standbild bzw. Poster |
 | Lichtraum, Lichthof (Ref 03, 09, 12, 15) | CSS-Verläufe oder im Asset eingebacken | Shader-Fläche in einer Echtzeitszene | Verlauf statisch |
 | Emissives Licht mit Bloom (Ref 05, 09, 12, 14, 15) | im Render eingebacken | Nachbearbeitung (Post-Processing) nur in Echtzeitszene | eingebacken |
 | Bewegung im Motiv (Ort belegt: Ref 04/07, 09) | Videoschleife, stumm, `playsinline` | Bildfolge auf Canvas für Scroll-Kopplung; Lottie für Vektorkulissen; Rive bei interaktiven Zuständen | Poster = Endzustand |
-| Szenenwechsel, Kamerafahrt (Hypothese Ref 04, 15) | CSS `animation-timeline` mit `@supports`, Rückfall per IntersectionObserver | GSAP ScrollTrigger beim Anheften (Pinning) mehrerer Ebenen; Echtzeit-Kamera nach Regel 9 | Szenen als Abschnitte im Endzustand |
+| Szenenwechsel, Kamerafahrt (Hypothese Ref 04, 15) | ausgelöster Wechsel: IntersectionObserver plus CSS-Übergang; scrollgekoppelt: CSS `animation-timeline` mit `@supports`, Rückfall per IntersectionObserver | GSAP ScrollTrigger beim Anheften (Pinning) mehrerer Ebenen; Echtzeit-Kamera nach Regel 9 | Szenen als Abschnitte im Endzustand |
 | Zustandswechsel (statisch: Ref 02, 03, 12, 14) | CSS-Übergang auf `opacity`, `filter`, Füllung | – | sofortiger Wechsel |
-| Scroll-Hinweis mit Linie (Ref 09, 15) | HTML/CSS, Linie per `scaleX` | – | statische Linie |
+| Scroll-Hinweis mit Linie (Ref 09, 15) | HTML/CSS, statische Linie | – (eine Fortschrittsanimation wäre Neuentwurf, nicht beobachtet, und bräuchte eine begründete Ausnahme von 10.10, Nr. 14) | entfällt (statisch) |
 
 **Ersatzfassungen in drei Stufen** (Neuentwurf):
 
 - *Stufe 0, statisch:* HTML, CSS, Bilder; gilt ohne JavaScript, bei `prefers-reduced-motion: reduce`, bei `Save-Data` und vor dem Nachladen (Regel 4).
-- *Stufe 1, Standard:* zusätzlich Videoschleifen, CSS-Scroll-Animationen, Glas; Voreinstellung am Telefon.
+- *Stufe 1, Standard:* zusätzlich Videoschleifen und CSS-Scroll-Animationen; Voreinstellung am Telefon.
+- *Glas* hängt nicht an den Stufen: Es gilt auch in Stufe 0 und bei „weniger Bewegung“ und wird nur bei `prefers-reduced-transparency`, `prefers-contrast: more` oder fehlendem `backdrop-filter` ersetzt (siehe 10.3).
 - *Stufe 2, Echtzeit:* WebGL nach dem LCP, nur wenn ein Kontext mit `failIfMajorPerformanceCaveat` entsteht und die gemessene Bildrate die Schwelle hält; sonst Rückfall auf Stufe 1 mit dem Poster des aktuellen Zustands. `deviceMemory` und `hardwareConcurrency` taugen nur als Vorfilter (nicht in jedem Browser).
 
 **Laufzeit.** Schleifen und Render-Loops pausieren außerhalb des Viewports (IntersectionObserver) und in verborgenen Tabs (`visibilitychange`); Medien reservieren ihren Platz (`aspect-ratio`); Bibliotheken werden selbst ausgeliefert und erst in ihrer Stufe geladen (dynamischer Import).
@@ -62,13 +63,13 @@ Alle Zuordnungen und Werte sind Vorschläge; außer den genannten Belegen ist al
 | Übertragung bis LCP, komprimiert | nicht beobachtet | ≤ 350 KB mobil | Neuentwurf |
 | JavaScript erster Bildschirm, komprimiert | nicht beobachtet | ≤ 100 KB, ohne 3D-Bibliothek | Neuentwurf |
 | Nachgeladenes 3D-Paket (Bibliothek, Modell, Texturen) | nicht beobachtet | ≤ 1,5 MB mobil, ≤ 3 MB Desktop | Neuentwurf |
-| Videoschleife im Hero | nur Hypothese (Ref 04/07, 09) | 4–10 s; ≤ 1,5 MB mobil, ≤ 4 MB Desktop | Neuentwurf |
+| Videoschleife im Hero | nur Hypothese (Ref 04/07, 09) | 4–10 s (Strom und Partikel ab 4 s, Schweben und Drehen 6–10 s wie 10.7); ≤ 1,5 MB mobil, ≤ 4 MB Desktop | Neuentwurf |
 | Bildfolge für Scroll-Kopplung | Hypothese Ref 04 | ≤ 60 Bilder und ≤ 3 MB mobil, ≤ 120 Bilder Desktop | Neuentwurf; Speicherrisiko laut Profil Ref 04 |
-| Gleichzeitig sichtbare Blur-Flächen | höchstens 2 (Ref 01, 03, 12) | ≤ 2 mobil, ≤ 3 Desktop | Ref 01/03/12; GPU-Risiko laut Profilen |
+| Gleichzeitig sichtbare Blur-Flächen | höchstens 2 (Ref 01, 03, 12) | ≤ 2 mobil, ≤ 3 Desktop | 2 belegt (Ref 01, 03, 12), 3 am Desktop Neuentwurf; GPU-Risiko laut Profilen |
 | Gleichzeitig bewegte Träger | 1 (Ref 04/07, 09) | 1 je Ansicht | Nr. 3 |
 | Pixeldichte im Canvas | nicht beobachtet | ≤ 1,5 mobil, ≤ 2 Desktop | Neuentwurf |
 | Bildrate Echtzeit | nicht beobachtet | Ziel 60 fps; Rückfall bei Median-Framezeit > 25 ms über 2 s | Neuentwurf |
-| Animierte Eigenschaften der UI | Zustandskanäle statisch belegt (5.6.10) | `opacity`, `filter`, Farbe, Füllung; keine Zwischengrößen, kein `perspective` | Nr. 1, 5, 7 |
+| Animierte Eigenschaften der UI | Zustandskanäle statisch belegt (5.6.10) | Zustand: `opacity`, `filter` (Sättigung), Farbe, Füllung, Kontur; Ein- und Austritt nur über `opacity`; kein `transform` (kein Versatz, keine Skalierung, auch nicht beim Drücken), kein `perspective`, keine 3D-Funktionen | Nr. 1, 5, 7; wie 10.7 und 10.10, Nr. 14 |
 
 Die Tabelle geht in die Zahlensammlung 10.9 ein.
 

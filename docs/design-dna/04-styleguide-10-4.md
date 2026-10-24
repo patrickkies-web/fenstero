@@ -9,7 +9,7 @@ Licht gehört dem Motiv und bündelt den Fokus über Ausschließlichkeit: ein Li
 - **Schatten.** Ein Schlagschatten als tragendes Tiefenmittel fehlt in 12 von 15 = 80 % (Gegenprobe 11 von 14; Konsenssicherheit D4 mittel, Schwellenfall). Die Ausnahmen Ref 01, 05 und 11 setzen ihn weich und nur auf heller Fläche (3 von 3). Maßstab ist Ref 01 (unverzerrter Screenshot): großflächig, weit nach unten versetzt, etwa 5–7 Tonwerte dunkler (Näherung). Der Objektschatten in Ref 05 (bis etwa 40 % unter dem Umfeld, geschätzt) bleibt Einzelfall. Sonst erscheint Schatten als Eigenschatten im Render (Ref 09, 10, 12, 14) oder gezeichnet (Ref 06). Verankert wird ohne Kontaktschatten in 7 von 15 = 47 % (Ref 07, 08, 09, 10, 12, 13, 15).
 - **Streuung und Weichheit.** Alle belegten Schlagschatten sind weich und großflächig; einen harten Schatten zeigt keine Referenz (eigene Durchsicht). Radien sind nicht messbar. D4 (deutlich 11 von 15) speist sich überwiegend aus Unschärfe (siehe 10.2, 10.3); Expertenspannweite Ø 0,73, die höchste der statischen Dimensionen, niedrige Konfidenz 28 %.
 - **Licht am Motiv.** D3 deutlich 11 von 15 = 73 % (Gegenprobe 11 von 14 = 79 %, Grenzfall); Konsenssicherheit hoch. Licht ist in 10 von 15 auf das Hauptmotiv beschränkt oder dort am stärksten (Ref 02, 03, 05, 07, 08, 09, 10, 12, 14, 15). Stufen: eingebackenes Studiolicht (Ref 04, 07, 08, 10), Kantenlicht an dunklen Körpern (Ref 09, 10), selbstleuchtende Quelle mit Lichthof (5 von 15: Ref 05, 09, 12, 14, 15). Ein zonierter Lichtraum mit einem Zentrum und höchstens drei Zonen steht in 4 von 15 hinter dem Motiv (Ref 03, 09, 12, 15; geschätzt). Licht als Fokusreiz: Wärme (Ref 03, 05), Tonwertumkehr (Ref 09), Helligkeit (Ref 12, 15).
-- **Leuchten in der Bedienschicht.** Kein Licht als UI-Flächenmittel in 14 von 15 = 93 %; die Ausnahme, die Glow-Kacheln in Ref 13, führt Kapitel 5 als nicht DNA-konform. Belegt sind nur kleine Säume: Ref 05 (Aktivquadrat), Ref 09 (Pille, evtl. Hover-Zustand), Ref 13 (aktiver Reiter), Ref 10 (Headline, evtl. Kamera-Überstrahlung). Emissives Licht steht überwiegend auf dunklem Grund (4 von 7 gegen 1 von 6), ohne Regel zu sein (Ref 05, 13).
+- **Leuchten in der Bedienschicht.** Kein Licht als UI-Flächenmittel in 14 von 15 = 93 %; die Ausnahme, die Glow-Kacheln in Ref 13, führt Kapitel 5 als nicht DNA-konform. Belegt sind nur kleine Säume: Ref 05 (Aktivquadrat), Ref 09 (Pille, evtl. Hover-Zustand), Ref 13 (aktiver Reiter), Ref 10 (Headline, evtl. Kamera-Überstrahlung). Emissives Licht steht überwiegend auf dunklem Grund (3 von 7 gegen 1 von 6; Ref 14 fotografisch gemischt), ohne Regel zu sein (Ref 05, 13).
 - **Figur-Grund-Trennung.** Hell über weichen Schatten oder Kantensaum (Ref 01, 05, 11), dunkel über Kantenlicht, Lichtkante oder Lichtsaum (Ref 08, 09, 10, 12). Haarfeine Lichtkante oder Kontur statt Schatten in 6 von 15 = 40 % (Ref 01, 03, 10, 11, 12, 14; Konsenssicherheit D12 mittel).
 - **Beleuchtungsrichtung** (eigene Zuordnung aus den D3/D4-Beobachtungen, Konfidenz niedrig). Eine gemeinsame Richtung gibt es nicht: von oben Ref 01, 06, 08, 09 (Ref 10 Hypothese), seitlich Ref 02, 03, 05, 07, aus dem Motiv Ref 12, 15, diffus Ref 04, 11, 13, 14. Die Richtung sitzt im Asset; nur Ref 01 gibt UI-Elementen eine (Saum oben heller, Schatten senkrecht darunter). Umgebungslicht und Displayspiegelung verfälschen Ref 04, 07, 09, 14, 15.
 - **Reflexion.** Glanz- und Spitzlichter oder Spiegelungen liegen am Motiv in 10 von 15 (Ref 02, 03, 04, 05, 07, 08, 09, 10, 12, 14; eigene Zählung). In der UI erscheint Reflexion nur als heller Glaskantensaum (Ref 01, 03, 12) und Farbübertrag (Ref 01); Glanz an opaker UI fehlt in 13 von 15 (Nr. 9). Bloom ist von Kamera-Überstrahlung nicht zu trennen (Ref 08, 09, 10).
@@ -22,7 +22,7 @@ Licht gehört dem Motiv und bündelt den Fokus über Ausschließlichkeit: ein Li
 3. **[Pflicht]** Keine Fläche der Bedienschicht leuchtet: kein flächiger Glow, kein Leuchtverlauf als Füllung von Buttons, Karten oder Text (Nr. 10).
 4. **[Pflicht]** Bedienelemente tragen keinen Glanz, keine Spiegelung und keinen Metallreflex (Nr. 9). Eine haarfeine Glaskante ist zulässig.
 5. **[Pflicht]** Der Grund hat höchstens ein Helligkeitszentrum, und zwar hinter dem Fokusträger, und höchstens drei Lichtzonen (Nr. 11).
-6. **[Variabel]** Gestaltetes Licht ist frei in Quelle (Studio im Asset, emissiv, gezeichnet, fotografisch) und Intensität (1–3). Wird es eingesetzt, sitzt es am Hauptmotiv; mehrere gleich helle Lichtkerne sind ausgeschlossen (Ableitung). Ein Render der Stufe 4 bekommt gestaltetes Licht (6 von 6 mit D3 ≥ 2).
+6. **[Variabel]** Gestaltetes Licht ist frei in Quelle (Studio im Asset, emissiv, gezeichnet, fotografisch) und Intensität (1–3). Wird es eingesetzt, sitzt es am Hauptmotiv; mehrere gleich helle Lichtkerne sind ausgeschlossen (Ableitung). Ein Render der Stufe 4 bekommt gestaltetes Licht (6 von 6 mit D3 ≥ 2; Rahmen aus 5.3, als Ausschluss 10.10, Nr. 9).
 7. **[Variabel]** Die Figur-Grund-Trennung folgt dem Grundton: auf heller Fläche Begleitschatten oder Kantensaum, auf dunkler Fläche Licht (Kantenlicht, Lichtkante, Lichtsaum), nie Schatten.
 8. **[Variabel]** Eine haarfeine Lichtkante oder Kontur darf den Schatten ersetzen (6 von 15); sie bleibt Kante, nie Rahmen.
 9. **[Variabel]** Die Lichtrichtung ist frei, je Ansicht aber genau eine: Schatten, Kantensaum und Glanzlichter widersprechen sich nicht (Ableitung aus Ref 01).
@@ -45,15 +45,15 @@ Alle Werte sind Vorschläge. Radien, Deckkraft und Stärken sind in den Referenz
 
 ```css
 .flaeche-hell   { box-shadow: 0 var(--schatten-y) var(--schatten-r) var(--schatten-spread) rgb(var(--schattenton) / var(--schatten-alpha)); }
-.flaeche-dunkel { box-shadow: inset 0 1px 0 rgb(var(--lichtton) / var(--kante-alpha)); border: 1px solid transparent; }
-.grund-licht    { background: radial-gradient(circle at var(--anker-x) var(--anker-y), var(--grund-zentrum), var(--grund) 45%, var(--grund-rand)); }
+.flaeche-dunkel { box-shadow: inset 0 1px 0 rgb(var(--kante-ton) / var(--kante-alpha)); border: 1px solid transparent; }
+.grund-licht    { background: radial-gradient(circle at var(--anker-x) var(--anker-y), rgb(var(--farbe-grund-zentrum)), rgb(var(--farbe-grund)) 45%, rgb(var(--farbe-grund-rand))); }
 ```
 
 | Parameter | beobachtet | Vorschlag | Ableitung |
 |---|---|---|---|
 | Schattenstufen je Ansicht | keine Elevation (5.5); Schatten nur auf heller Fläche (3 von 3) | 1, nur auf heller Fläche; sonst `none` | Nr. 6, Ableitung |
 | Stärke des Begleitschattens | etwa 5–7 Tonwerte dunkler (Ref 01, Näherung) | dunkelste Stelle ≤ etwa 8 von 255 Tonwerten unter dem Umfeld; Deckkraft 4–8 % | aus Ref 01 |
-| Versatz | senkrecht, weit nach unten (Ref 01); gering (Ref 11) | x = 0; y = 10–15 % der Elementhöhe | Neuentwurf |
+| Versatz | senkrecht, weit nach unten, stärkste Abdunklung etwa ¼–⅓ der Formhöhe unter der Form (Ref 01, Näherung); gering (Ref 11) | x = 0; y = 10–25 % der Elementhöhe (aufliegende Karte eher 10 %, schwebende Form bis 25 %) | Obergrenze aus Ref 01, Untergrenze aus Ref 11; Werte Neuentwurf |
 | Weichzeichnung | großer Radius (Ref 01, 11) | 2–3 × y-Versatz | Verhältnis aus Ref 01/11, Werte Neuentwurf |
 | Ausdehnung (spread) | nicht beobachtet | −25 % des y-Versatzes | Neuentwurf |
 | Objektschatten | Ref 05 bis etwa 40 % dunkler (geschätzt) | Obergrenze, nur im Asset | Einzelfall |
@@ -74,7 +74,7 @@ Alle Werte sind Vorschläge. Radien, Deckkraft und Stärken sind in den Referenz
 - **Tastatur:** Der Fokus ist eine sichtbare Kontur mit mindestens 3:1, kein Schein allein, und keine Ebene verdeckt ihn (2.4.7, 2.4.11).
 - **Systemeinstellungen:** Unter `forced-colors: active` entfällt `box-shadow`; die transparente 1-px-Kontur hält die Grenze sichtbar. `prefers-contrast: more` verstärkt die Lichtkante zur Kontur und flacht den Lichtraum ab. Im Dunkelmodus entfällt der Begleitschatten, die Lichtkante übernimmt (Regel 7).
 - **Weniger Bewegung:** Unter `prefers-reduced-motion: reduce` pulsiert kein Licht, folgt keinem Zeiger und ändert sich nicht beim Scrollen. Jede Lichtbewegung ist Neuentwurf (nicht beobachtet).
-- **Leistung:** Licht und Bloom ins Asset backen; statt `box-shadow` die Deckkraft einer vorbereiteten Schattenebene animieren; am Telefon schwächere Leuchtinseln weglassen, den Kern behalten.
+- **Leistung:** Licht und Bloom ins Asset backen; Schatten werden nicht animiert; am Telefon schwächere Leuchtinseln weglassen, den Kern behalten.
 
 ### Prüffragen
 

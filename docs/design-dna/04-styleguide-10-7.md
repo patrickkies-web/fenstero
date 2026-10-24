@@ -25,7 +25,7 @@ Bewegung ist eine Zugabe und trägt die Gestaltung nie. Wenn sich etwas bewegt, 
 5. **[Pflicht]** Bei Übergängen bleiben Kopfzeile und Ordnungsachse stehen (Ref 04/07; Nr. 3).
 6. **[Pflicht]** Der Start, der Endzustand jeder Szene und die Fassung für „weniger Bewegung“ sind vollständig komponiert und lesbar. Kein Inhalt ist nur über Bewegung erreichbar (Ableitung).
 7. **[Pflicht]** Jede Bewegung jenseits von Farb- oder Deckkraftwechseln hat eine Fassung für „weniger Bewegung“ (Profilregel Ref 04; Nutzbarkeitsanforderung).
-8. **[Variabel]** Der Kanal für Zustandswechsel ist frei: Deckkraft, Sättigung, Füllung gegen Kontur oder Glas gegen opak. Je Produkt gibt es einen Kanal für „aktiv“ und einen für Hover und Fokus, beide überall gleich (statische Codierung: siehe Abschnitt zu den Bedienelementen).
+8. **[Variabel]** Der Kanal für Zustandswechsel ist frei: Deckkraft, Sättigung, Füllung gegen Kontur oder Glas gegen opak. Je Produkt gibt es einen Kanal für „aktiv“ und einen für Hover, beide überall gleich (statische Codierung: siehe 10.9, „Rang und Zustand“ und „Rang über Deckkraft“, sowie 10.3, Regel 7). Der Fokus ist davon getrennt: immer eine formfolgende, unverdeckte Kontur von mindestens 2 px mit 3:1 (10.9, „Fokusanzeige“).
 9. **[Variabel]** Art, Medium (Video, Bildsequenz, Echtzeit) und Auslöser (Zeit, Scrollen, Zeiger) der Motivbewegung sind frei. Sie setzt am Ausdrucksträger des Dialekts an: in A an Schrift- und Objektebene, in B an Körper oder Kamera, in C an den Kulissen. Belegt ist nur der Ort, alles Weitere ist Neuentwurf (nicht beobachtet).
 10. **[Variabel]** Die erste Ansicht ist ohne Scrollen vollständig und zeigt am Rand ein Fortsetzungssignal (Anschnitt, Überdeckung oder Hinweis).
 11. **[Optional]** Ein Scroll-Hinweis mit Fortschrittslinie oder Kapitelziffern (Ref 09, 15) passt zu Seiten, die als Szenenfolge gebaut sind. Er bleibt Klein-UI an der Ordnungslinie.
@@ -35,7 +35,7 @@ Bewegung ist eine Zugabe und trägt die Gestaltung nie. Wenn sich etwas bewegt, 
 
 ### Umsetzung (Vorschlag)
 
-Alle Werte für Zeit, Kurve und Weite sind **Neuentwurf (nicht beobachtet)**, denn die Standbilder enthalten keine. Sie folgen aus dem Grundsatz „Bedienschicht ruhig, Motiv trägt“: In der UI sind Bewegungen kurz und klein, im Motiv langsam.
+Alle Verhaltensvorgaben dieses Abschnitts (Technik, Scrollen, Motiv, Übergänge und Physik) und alle Werte für Zeit, Kurve und Weite sind **Neuentwurf (nicht beobachtet)**, denn die Standbilder enthalten keine; belegt ist nur, was die Tabelle als „Beleg“ führt. Sie folgen aus dem Grundsatz „Bedienschicht ruhig, Motiv trägt“: In der UI sind Bewegungen kurz und klein, im Motiv langsam.
 
 - **Technik.** Erforderlich sind nur CSS-Übergänge auf `opacity`, `transform` und Farbe sowie die Abfrage `prefers-reduced-motion`. GSAP, Lottie, WebGL, View Transitions und `animation-timeline: view()` sind optional; die DNA braucht keine davon.
 - **Scrollen.** Die Seite scrollt nativ, ohne übernommene Scrollsteuerung (scroll hijacking). Eine angeheftete Szene (pinning) rastet in ihrem Endzustand ein, bevor sie die Seite freigibt. Inhalte sind auch ohne Skript sichtbar.
@@ -50,13 +50,13 @@ Werte für die Sammlung in 10.9:
 | Dauerbewegte Träger je Ansicht | je Beleg einer | ≤ 1 | Nr. 3 |
 | Räumliche Transformation der UI | 0 von 15 | keine | Nr. 1 |
 | Überschwingen der UI | 0 von 15 fluide UI | keines (Bezier-Werte 0–1) | Nr. 5 |
-| Skalierung der UI | nicht beobachtet | 1,0; beim Drücken ≥ 0,97 | Nr. 7; Neuentwurf |
-| Versatz beim Einblenden der UI | nicht beobachtet | ≤ 8 px | Neuentwurf |
+| Skalierung der UI | nicht beobachtet | keine (1,0), auch nicht beim Drücken | Nr. 7; Regel 3; 10.10, Nr. 14 |
+| Versatz beim Einblenden der UI | nicht beobachtet | keiner; Ein- und Ausblenden nur über Deckkraft | Grundsatz; 10.10, Nr. 14 |
 | Dauer des Zustandswechsels | nicht beobachtet | 120–200 ms (160) | Neuentwurf |
 | Ein- und Ausblenden (Menü, Panel) | nicht beobachtet | 200–300 ms | Neuentwurf |
-| Einblenden eines Folgeabschnitts | nicht beobachtet | 300–500 ms, ≤ 16 px, einmalig | Neuentwurf |
+| Einblenden eines Folgeabschnitts | nicht beobachtet | 300–500 ms, nur Deckkraft, einmalig | Neuentwurf |
 | Szenenwechsel im Motiv | Aufbau Ref 04/07, Dauer nicht | 500–900 ms | Neuentwurf; Lesbarkeit aus Ref 04 |
-| Motivschleife | Hypothese zu Ref 09 | 6–12 s; Schweben ≤ 2 % der Objekthöhe | Neuentwurf |
+| Motivschleife (Schweben, Drehen) | Hypothese zu Ref 09 | Periode 6–10 s; Schweben ≤ 2 % der Objekthöhe | Neuentwurf; Obergrenze wie Videoschleife in 10.8 |
 | Kurve für Eintritt und Zustand | nicht beobachtet | `cubic-bezier(0.2, 0, 0, 1)` | Neuentwurf |
 | Kurve für Austritt | nicht beobachtet | `cubic-bezier(0.4, 0, 1, 1)` | Neuentwurf |
 | Kurve für Szene und Schweben | nicht beobachtet | `cubic-bezier(0.65, 0, 0.35, 1)` | Neuentwurf |
@@ -64,15 +64,15 @@ Werte für die Sammlung in 10.9:
 | Anheftstrecke je Szene | nicht beobachtet | ≤ 1,5 Viewporthöhen, ≥ ⅓ davon Ruhe | Neuentwurf; Ref 04 |
 | Scroll-Hinweis | Klein-UI mit Haarlinie (Ref 09, 15) | ruhend, in Größe der Bedienschrift | Beleg; Nr. 7 |
 | Selbstlauf ohne Pause | nicht beobachtet | ≤ 5 s | WCAG 2.2.2 |
-| Fassung „weniger Bewegung“ | gefordert (Ref 04) | Überblendung ≤ 200 ms oder Schnitt | Profilregel; WCAG 2.3.3 |
+| Fassung „weniger Bewegung“ | gefordert (Ref 04) | Überblendung ≤ 200 ms oder Schnitt | Profilregel Ref 04, 06; WCAG 2.3.3 (Stufe AAA), eigene Vorgabe über AA hinaus |
 
 ### Mobil und Barrierefreiheit
 
 - **Mobil (0 von 15 belegt, Neuentwurf).** Ab 360 px Breite gibt es kein Parallax über eine Ebene hinaus und keine Anheftstrecken. Eine Kamerafahrt wird zum Standbild. Motivvideos sind komprimiert, haben ein Poster und werden erst nach dem ersten Rendern geladen. Kein Zustand hängt am Hover. Ziele messen mindestens 24 × 24 CSS-px (WCAG 2.5.8), empfohlen sind 44 px.
 - **Weniger Bewegung.** Unter `prefers-reduced-motion: reduce` laufen keine Schleifen, kein Parallax, kein Anheften und keine Scroll-Kopplung. Szenenwechsel werden zur kurzen Überblendung oder zum Schnitt; Farb- und Deckkraftwechsel bleiben. Unabhängig davon ist selbstlaufende Bewegung über 5 s pausierbar (2.2.2), und nichts blitzt öfter als dreimal pro Sekunde (2.3.1).
 - **Lesbarkeit.** Bedeutungstragender Text bewegt sich nicht, solange er gelesen werden soll, und unterschreitet in keinem Zwischenzustand 4,5:1 (großer Text 3:1). Ausgenommen ist nur die Kulissenschrift.
-- **Tastatur.** Jede Zeigeraktion (Chevron, Hotspot, Karussell) ist per Tastatur erreichbar; Ref 09 benennt das als Risiko. Der Fokus ist als Kontur oder Füllung mit mindestens 3:1 sichtbar (1.4.11) und unverdeckt (2.4.11). Dekorebenen bekommen `pointer-events: none` und `aria-hidden`.
-- **Leistung.** Animiert werden nur `transform` und `opacity`, nie `backdrop-filter` oder Schatten auf großen Flächen. Bewegung außerhalb des Sichtbereichs hält an. Animationen verschieben kein Layout, das LCP-Element ist das statische Motiv oder Poster, und das INP bleibt unter 200 ms.
+- **Tastatur.** Jede Zeigeraktion (Chevron, Hotspot, Karussell) ist per Tastatur erreichbar; Ref 09 benennt das als Risiko. Der Fokus ist unabhängig vom Hover-Kanal eine formfolgende Kontur von mindestens 2 px mit mindestens 3:1 (1.4.11), unverdeckt (2.4.11). Dekorebenen bekommen `pointer-events: none` und `aria-hidden`.
+- **Leistung.** Motiv, Ebenen und große Flächen animieren nur `transform` und `opacity`, nie `backdrop-filter`, `filter` oder Schatten. Zustandswechsel kleiner Bedienelemente dürfen zusätzlich Farbe, Füllung, Kontur und `filter` (Sättigung) überblenden (siehe 10.8). Bewegung außerhalb des Sichtbereichs hält an. Animationen verschieben kein Layout, das LCP-Element ist das statische Motiv oder Poster, und das INP bleibt unter 200 ms.
 
 ### Prüffragen
 
@@ -81,4 +81,4 @@ Werte für die Sammlung in 10.9:
 3. Trägt jeder Ruhezustand die volle Komposition mit lesbarem Text, auch in der Fassung „weniger Bewegung“?
 4. Schaltet `prefers-reduced-motion: reduce` Schleifen, Parallax, Anheften und Scroll-Kopplung ab, und lässt sich Selbstlauf über 5 s pausieren?
 5. Ist jede Interaktion per Tastatur und Touch erreichbar, mit sichtbarem Fokus und ohne Abhängigkeit vom Hover?
-6. Animieren alle Effekte nur `transform` und `opacity`, und bleiben LCP und Inhalte ohne Skript intakt?
+6. Animieren Motiv, Ebenen und große Flächen nur `transform` und `opacity` (kleine Bedienelemente zusätzlich Farbe, Füllung, Kontur, Sättigung), und bleiben LCP und Inhalte ohne Skript intakt?

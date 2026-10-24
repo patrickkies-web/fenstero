@@ -26,10 +26,10 @@ Die Konsenssicherheit ist eine Obergrenze (simulierte Expertenrollen, 4.6). 9 vo
 5. **[Variabel]** Ein Bildobjekt darf vor Inhaltsflächen treten (Karten, Kulissenschrift; Ref 05, 08), nie vor Navigation, Hauptaktion, Lesetext oder ein fokussiertes Element (Ableitung aus der Regel in Ref 04, die Navigationszone freizuhalten).
 6. **[Variabel]** Bildperspektive frontal, fotografisch oder als virtuelle Kamera mit moderatem Sichtfeld; Kameraachse und Fluchtpunkt auf der Ordnungslinie, Textzone frei.
 7. **[Pflicht]** Genau ein Fokusträger bildet den räumlichen Schwerpunkt; kein Begleitelement konkurriert mit ihm um Lage oder Reiz. Wie er dominiert (Lage, Reiz, Schärfe), ist frei. Der Grund bleibt untergeordnet (siehe 10.4).
-8. **[Variabel]** Raumschrift nur mit plastischem Gegenüber, als ein Wort im Riesengrad. Verdeckung trifft nur Binnenbuchstaben oder Buchstabenteile; Anschnitt am Rand höchstens an einem Wortende, außer das Wort wiederholt sich vollständig (Ref 08).
+8. **[Variabel]** Raumschrift nur mit plastischem Gegenüber (Rahmen aus 5.3; als Ausschluss 10.10, Nr. 9), als ein Wort im Riesengrad. Verdeckung trifft nur Binnenbuchstaben oder Buchstabenteile; Anschnitt am Rand höchstens an einem Wortende, außer das Wort wiederholt sich vollständig (Ref 08).
 9. **[Pflicht]** Fokusträger und Schriftebenen bleiben scharf. Kontrastarme Kulissenschrift trägt nie allein Bedeutung; ihr Inhalt steht zusätzlich als lesbarer, zugänglicher Text bereit (5.5; WCAG 2.2, 1.4.3).
 10. **[Optional]** Bild-Wort-Ergänzung (Ref 03, 05, 07, 08), Deckkraftverlauf der Kulissenschrift (Ref 03, 13), Punze als Bildfenster (Ref 15). Bedingung: Regeln 8 und 9 sind erfüllt.
-11. **[Optional]** Schärfestaffelung an Begleitelementen, Repoussoir, Dunst mit zur Ferne abnehmendem Kontrast (nur in Kamera-Szenen, Regel Ref 15), fünf bis sechs Ebenen in einer Kamera-Szene (Ref 15). Bedingung: Kein Vordergrund verdeckt Text.
+11. **[Optional]** Schärfestaffelung an Begleitelementen, Repoussoir, Dunst mit zur Ferne abnehmendem Kontrast (nur in Kamera-Szenen, Regel Ref 15), fünf bis sechs Ebenen, wenn die Reihenfolge eindeutig bleibt (Ref 15; Vorschlag: vorzugsweise in einer Kamera-Szene, Ableitung aus Ref 15). Bedingung: Kein Vordergrund verdeckt Text.
 12. **[Optional]** Bewegte Tiefe (Parallaxe, Kamerafahrt) ist Neuentwurf (nicht beobachtet): Sie bewegt nur Bildebenen, die Bedienschicht ruht, und der Ruhezustand trägt als Standbild die volle Komposition (siehe 10.7).
 
 ### Umsetzung (Vorschlag)
@@ -42,7 +42,7 @@ Alle Werte sind Vorschläge; „Neuentwurf“ heißt ohne Beleg.
 
 | Parameter | beobachtet | Vorschlag | Ableitung |
 |---|---|---|---|
-| Ebenen je Ansicht | 3–6; mindestens 3 in 15 von 15 | 3–4; 5–6 nur in einer Kamera-Szene | Ref 15; über 6 nicht belegt |
+| Ebenen je Ansicht | 3–6; mindestens 3 in 15 von 15 | 3–4; 5–6, wenn die Reihenfolge eindeutig bleibt (vorzugsweise in einer Kamera-Szene) | Ref 15, 5.4; „Kamera-Szene“ Ableitung aus Ref 15; über 6 nicht belegt |
 | Z-Stufen | Grund → Schrift → Freisteller → (Vordergrund) → UI | 0 / 10 / 20 / 25 / 30 / 40 | Reihenfolge belegt, Zahlen Neuentwurf (wie 10.1, plus Vordergrund) |
 | Sichtbare Verdeckungen | primär in 12 von 15 | mindestens 1 je Ansicht | Prinzip Nr. 2 |
 | 3D-Transformation der UI | 0 von 15 | keine | Prinzip Nr. 1 |
@@ -50,7 +50,7 @@ Alle Werte sind Vorschläge; „Neuentwurf“ heißt ohne Beleg.
 | Schärfestufen | bis 3 (Ref 02, 08) | höchstens 3, Fokus und Schrift scharf | Ref 02, 08 |
 | Versalhöhe der Raumschrift | 15–20 % (Ref 04), rund 1/5 (Ref 08), rund 1/3 (Ref 15) der Bildschirmhöhe | 15–33 % der Bühnenhöhe (Desktop) | Spanne der Belege |
 | Breite der Raumschrift | fast volle Breite (Ref 03, 15), 3/4 der Kartenbreite (Ref 05) | 75–100 % der Bühnenbreite oder randabfallend | Ref 03, 05, 15 |
-| Verdeckter Anteil am Wort | 1 Buchstabe plus Teile zweier von 8 (Ref 03), Teil eines Buchstabens (Ref 07), 2 von 7 fragmentarisch (Ref 05) | höchstens etwa ein Viertel der Buchstaben wesentlich verdeckt, Wortanfang erkennbar | Ref 03, 05, 07 |
+| Verdeckter Anteil am Wort | 1 Buchstabe plus Teile zweier von 8 (Ref 03), Teil eines Buchstabens (Ref 07), 2 von 7 fragmentarisch (Ref 05) | höchstens etwa ein Viertel der Buchstaben wesentlich verdeckt; Wortanfang und Wortende bleiben erkennbar, erster und letzter Buchstabe höchstens teilweise verdeckt (z. B. Fuß oder Randpartie) | Ref 03, 05, 07; Anfang und Ende aus der Regel Ref 05 |
 | Verdeckung an der Unterkante | Gras über den Buchstabenfüßen (Ref 15) | höchstens unteres Viertel der Versalhöhe | Neuentwurf, angelehnt an Ref 15 |
 | Vordergrund (Repoussoir) | unteres Fünftel bis Viertel (Ref 15) | Randstreifen bis 25 % der Höhe oder Breite | Ref 15 |
 | Kontrast der Kulissenschrift | etwa 1,3:1 (Ref 03) | unter 3:1 nur redundant und `aria-hidden`; als Überschrift mindestens 3:1 (großer Text) | Ref 03; WCAG 1.4.3 |

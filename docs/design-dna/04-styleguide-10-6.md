@@ -2,7 +2,7 @@
 
 ### Grundsatz
 
-Das Bild wird nicht eingesetzt, es bildet den Raum, in dem die Oberfläche steht. Motiv und Seite teilen Grund, Licht und Ebenenfolge, ohne sichtbare Kante, Saum oder deckende Textbox. Genau ein Körper oder eine Szene trägt Plastik, Material und Licht; die Bedienschicht liegt flach und lesbar darüber.
+Das Bild wird nicht eingesetzt, es bildet den Raum, in dem die Oberfläche steht. Motiv und Seite teilen Grund, Licht und Ebenenfolge, ohne sichtbare Kante, Freistellsaum oder deckende Textbox. Plastik, Material und Licht sind frei; wo sie eingesetzt werden, trägt sie genau ein Körper oder eine Szene, Material auch eine Glasschicht. Die Bedienschicht liegt flach und lesbar darüber.
 
 ### Beobachtet in den Referenzen
 
@@ -20,23 +20,23 @@ Die Konsenssicherheit ist eine Obergrenze (simulierte Expertenrollen, 4.6). 9 vo
 
 ### Regeln
 
-Regeln 1–5 setzen DNA-Prinzip Nr. 1, 3, 4 und 6 um; Regel 6 ist Nutzbarkeitsvorgabe.
+Regeln 1, 2, 4 und 5 setzen DNA-Prinzip Nr. 1, 4 und 6 um; Regel 3 übernimmt den Rahmen „ein Körper als Fokus“ aus 5.3; Regel 6 ist Nutzbarkeitsvorgabe.
 
 1. **[Pflicht]** Das Hauptbild bildet den Raum der Ansicht: kantenlos (Freisteller, vollflächige Szene) oder in einem Container, dessen Bild für die Bedienschicht komponiert ist. Ein gerahmtes Bild neben dem Text ist als Hauptbild unzulässig.
-2. **[Pflicht]** Zwischen Asset und Seite ist kein Grundsprung, Saum, Hof oder Halo sichtbar.
-3. **[Pflicht]** Genau ein Körper oder eine Szene trägt Plastik, Material, Licht und Feindetail; Nebenkörper sind über Größe oder Tonwert untergeordnet.
+2. **[Pflicht]** Zwischen Asset und Seite ist kein Grundsprung sichtbar und kein Rest des Aufnahmegrunds als Saum, Hof oder Halo. Ausgenommen sind gestaltete Lichtsäume, Lichthöfe und Lichtübertrag nach 10.4 (Ref 08; Regel Ref 05).
+3. **[Variabel]** Ein plastischer Körper oder eine Szene ist frei (11 von 15; Ref 02 und 06 kommen ohne aus). Wird einer eingesetzt, dann genau einer als Fokus; Nebenkörper sind über Größe oder Tonwert untergeordnet. Material, Licht und Feindetail sitzen, wo eingesetzt, an diesem Fokusträger; Material darf stattdessen in einer Glasschicht sitzen (10.3, Regel 5).
 4. **[Pflicht]** Perspektive und Plastik bleiben im Bild; die Bedienschicht wird nie mit dem Objekt gedreht, gekippt oder verformt (siehe 10.2).
 5. **[Pflicht]** Kein Objekt wird über einen tragenden Schlagschatten verankert (siehe 10.4).
-6. **[Pflicht]** Text liegt ohne deckende Box auf dem Bild und erreicht 4,5:1 (große Schrift 3:1) gegen die ungünstigste Bildpartie dahinter, über freie Bildzone, Scrim, flächenlose Rand-UI oder Luminanzkontrast.
+6. **[Pflicht]** Text liegt ohne deckende Box auf dem Bild und erreicht 4,5:1 (große Schrift 3:1) gegen die ungünstigste Bildpartie dahinter, über freie Bildzone, Scrim, flächenlose Rand-UI oder Luminanzkontrast. Ausnahme: Unter reduzierter Transparenz oder erhöhtem Kontrast darf Glas deckend werden (10.3); dort geht die Mindestanforderung vor.
 7. **[Variabel]** Das Übergangsmittel ist frei: Grundgleichheit, gemeinsame Lichtstimmung, Reflexfarben oder gerichteter Auslauf. Kantenlos ist Voreinstellung, der gerundete Container die seltenere Fassung (Radius aus dem Formsystem, siehe 10.5).
-8. **[Variabel]** Medium (Foto, Render, Vektor) und Plastizität sind frei. Ein Render der Stufe 4 steht nur in gestaltetem Licht; Lichtrichtung und Farbstimmung des Assets passen zum Grund (Ref 06, 09, 12).
+8. **[Variabel]** Medium (Foto, Render, Vektor) und Plastizität sind frei, ebenso ein bewegtes Motiv (siehe 10.7, Regel 9: belegt ist nur der Ort, Ref 04/07, 09; Art, Medium und Auslöser sind Neuentwurf, nicht beobachtet). Ein Render der Stufe 4 steht nur in gestaltetem Licht (Rahmen aus 5.3, als Ausschluss 10.10, Nr. 9); Lichtrichtung und Farbstimmung des Assets passen zum Grund (Ref 06, 09, 12).
 9. **[Variabel]** Das Verankerungsmittel ist frei: Anschnitt, Überdeckung, Vordergrund, Lichtsaum, Klammer oder Grundgleichheit. Ein weicher Objektschatten ist nur auf heller Fläche als Begleitmittel zulässig (Ref 05).
 10. **[Variabel]** Masken sind geometrisch und stammen aus dem Formsystem; organische Konturen entstehen im Alphakanal des Assets oder durch Verdeckung.
 11. **[Variabel]** Das Objekt darf vor Karten und Kulissenschrift treten (Ref 05, 08), nie vor Navigation, Hauptaktion, Lesetext oder ein fokussiertes Element.
 12. **[Optional]** Rahmenbruch über eine Containerkante (Ref 05). Bedingung: genau ein Objekt an genau einer Kante, Bedienelemente bleiben im Rahmen.
 13. **[Optional]** Gerichteter Auslauf statt Bildkante (Ref 03). Bedingung: Freisteller auf gleichem oder lichtgleichem Grund, Fokuspunkt scharf.
 14. **[Optional]** Bildpanel im gerundeten Container (Ref 02, 14) oder Punze als Bildfenster (Ref 15). Bedingung: Die Textzone ist im Bild freigehalten.
-15. **[Optional]** Bewegtes Motiv oder Bild-Reveal per Maske: Neuentwurf (nicht beobachtet), nur am Fokusträger, Standbild als Endzustand (siehe 10.7, 10.8).
+15. **[Optional]** Bild-Reveal per Maske: Neuentwurf (nicht beobachtet), nur am Fokusträger, Standbild als Endzustand (siehe 10.7, 10.8).
 
 ### Umsetzung (Vorschlag)
 
@@ -78,8 +78,8 @@ Alle Werte sind Vorschläge; „Neuentwurf“ heißt ohne Beleg.
 ### Prüffragen
 
 1. Bildet das Hauptbild den Raum der Ansicht, statt als gerahmte Beigabe neben dem Text zu stehen?
-2. Ist zwischen Asset und Seite bei 100 % und 200 % Zoom und am Telefon kein Saum, Halo oder Grundsprung sichtbar?
-3. Trägt genau ein Körper oder eine Szene Plastik, Material und Licht, verankert ohne tragenden Schlagschatten?
+2. Ist zwischen Asset und Seite bei 100 % und 200 % Zoom und am Telefon kein Grundsprung und kein Rest des Aufnahmegrunds als Saum oder Halo sichtbar (gestaltetes Licht nach 10.4 ausgenommen)?
+3. Gibt es höchstens einen plastischen Körper oder eine Szene als Fokus, mit untergeordneten Nebenkörpern, verankert ohne tragenden Schlagschatten?
 4. Erreicht jeder Text auf dem Bild ohne deckende Box 4,5:1 (große Schrift 3:1) gegen die ungünstigste Bildpartie?
 5. Bleiben Navigation, Hauptaktion, Lesetext und Fokus unverdeckt, und sind Bildebenen für Zeiger durchlässig?
 6. Hat jedes Hauptbild bei 360 px einen eigenen Zuschnitt ohne horizontalen Scroll, und hält das Fokus-Asset sein Budget?

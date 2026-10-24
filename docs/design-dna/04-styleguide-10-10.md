@@ -18,7 +18,7 @@ Ausgeschlossen ist, was die Konstruktion aus Kapitel 5 umkehrt: eine räumliche,
 
 ### Ausschlüsse
 
-Nr. 1–14 setzen die verbindliche DNA (5.2) als Verbot um; Nr. 15–20 sind Nutzbarkeitsvorgaben dieses Styleguides, gestützt auf WCAG 2.2 AA und Core Web Vitals statt auf die Referenzen.
+Nr. 1–8 und 11–14 setzen die verbindliche DNA (5.2) als Verbot um, Nr. 9 und 10 Rahmen aus 5.3; Nr. 15–20 sind Nutzbarkeitsvorgaben dieses Styleguides, gestützt auf WCAG 2.2 AA und Core Web Vitals statt auf die Referenzen. Nr. 18 geht mit der Fassung „weniger Bewegung“ als eigene Vorgabe über AA hinaus (Profilregeln Ref 04, 06; WCAG 2.3.3, Stufe AAA).
 
 1. **[Pflicht]** Keine räumliche Transformation der Bedienschicht: keine Kippung, kein Tilt beim Überfahren, kein 3D-Flip, keine perspektivische Bedienschrift, auch nicht in Zwischenzuständen. *Grund:* 15 von 15 frontal (Nr. 1).
 2. **[Pflicht]** Kein Schlagschatten als Elevation oder Tiefenträger, kein Neumorphismus. *Spielraum:* **[Optional]** ein weicher, blasser Begleitschatten auf heller Fläche neben Verdeckung (siehe 10.4). *Grund:* Nr. 6.
@@ -26,10 +26,10 @@ Nr. 1–14 setzen die verbindliche DNA (5.2) als Verbot um; Nr. 15–20 sind Nut
 4. **[Pflicht]** Keine fluiden, federnden oder sich dehnenden Bedienelemente, keine zweite Formfamilie, höchstens vier Radienstufen, höchstens ein bewusster Bruch je Ansicht. *Grund:* Nr. 5; Obergrenzen als Ableitung (siehe 10.5).
 5. **[Pflicht]** Kein zweiter Akzentreiz, der mit dem Fixationsanker konkurriert; Zustände laufen über Deckkraft, Sättigung, Füllung gegen Kontur oder Glas gegen opak. *Grund:* Fokus über einen einzigartigen Reiz in 10 von 15; Ableitung aus Nr. 3.
 6. **[Pflicht]** Keine einschichtige Fläche, keine Ebenen ohne eindeutige Stapelfolge, höchstens sechs Ebenen. *Grund:* Nr. 2; mehr als sechs Ebenen nicht belegt (siehe 10.2).
-7. **[Pflicht]** Kein Hauptbild als gerahmte Beigabe neben dem Text, keine deckende Box hinter Text auf dem Bild. *Grund:* Nr. 4.
+7. **[Pflicht]** Kein Hauptbild als gerahmte Beigabe neben dem Text, keine deckende Box hinter Text auf dem Bild. Ausgenommen ist die deckende Glasfüllung bei reduzierter Transparenz oder erhöhtem Kontrast (10.3); dort geht die Mindestanforderung vor. *Grund:* Nr. 4.
 8. **[Pflicht]** Kein dominanter Grund: keine Mesh- oder Blob-Verläufe, kein zweites Helligkeitszentrum, höchstens drei Verlaufszonen, keine Partikel und kein kontraststarkes Muster unter Lesetext. *Grund:* Nr. 11.
-9. **[Pflicht]** Keine Raumschrift ohne plastisches Gegenüber, kein Render der Stufe 4 ohne gestaltetes Licht. *Grund:* 7 von 7 bzw. 6 von 6 (5.6.7).
-10. **[Pflicht]** Kein weichgezeichneter Fixationspunkt, keine weichgezeichnete Schriftebene, keine Unschärfe als gleichmäßige Flächenstimmung. *Grund:* 0 von 7 (5.6.4).
+9. **[Pflicht]** Keine Raumschrift ohne plastisches Gegenüber, kein Render der Stufe 4 ohne gestaltetes Licht. *Grund:* Rahmen aus 5.3 („Rolle der Schrift“, „Plastischer Körper“); 7 von 7 bzw. 6 von 6 (5.6.7).
+10. **[Pflicht]** Kein weichgezeichneter Fixationspunkt, keine weichgezeichnete Schriftebene, keine Unschärfe als gleichmäßige Flächenstimmung. *Grund:* Rahmen aus 5.3 („Unschärfe“); 0 von 7 (5.6.4).
 11. **[Pflicht]** Kein Layout ohne Ordnungslinie und kein Feld gleichrangiger Kacheln ohne Anker. *Spielraum:* **[Optional]** Bento-Raster nur mit erhaltenem Anker und Negativraum. *Grund:* Nr. 3 und 8; Ref 13 und 14 erfüllen die Bedingung nicht.
 12. **[Pflicht]** Keine gleichmäßige Größenskala und keine Zwischengrößen; zwischen Hauptelement und Klein-UI steht höchstens eine Headline. *Grund:* Nr. 7.
 13. **[Pflicht]** Keine Bühne mit deutlich weniger als etwa einem Drittel freier Fläche. *Grund:* Nr. 8 (Ableitung aus geschätzten Werten).
@@ -37,7 +37,7 @@ Nr. 1–14 setzen die verbindliche DNA (5.2) als Verbot um; Nr. 15–20 sind Nut
 15. **[Pflicht]** Kontrast: Bedeutungstragender Text erreicht 4,5:1, großer Text 3:1, Bedienelementkonturen und Fokusanzeige 3:1 (WCAG 1.4.3, 1.4.11), jeweils gegen die ungünstigste Stelle des Untergrunds. Nur rein dekorative Kulissenschrift ist ausgenommen.
 16. **[Pflicht]** Text bleibt Text: Bedienschrift und Headline stehen als Live-Text im DOM, Dekorschrift ist für Hilfstechnik verborgen, reine Icons haben einen zugänglichen Namen oder ein sichtbares Label.
 17. **[Pflicht]** Tastatur: Jede Funktion ist per Tastatur erreichbar, der Fokus sichtbar und unverdeckt (2.4.7, 2.4.11), und nichts hängt allein am Überfahren. Dekorebenen fangen keine Zeigerereignisse.
-18. **[Pflicht]** Weniger Bewegung: `prefers-reduced-motion: reduce` zeigt Endzustände; Selbstlauf über 5 s ist pausierbar, nichts blitzt öfter als dreimal pro Sekunde (2.2.2, 2.3.1; siehe 10.7).
+18. **[Pflicht]** Weniger Bewegung: `prefers-reduced-motion: reduce` zeigt Endzustände (eigene Vorgabe über AA hinaus: Profilregeln Ref 04, 06; WCAG 2.3.3, Stufe AAA); Selbstlauf über 5 s ist pausierbar, nichts blitzt öfter als dreimal pro Sekunde (2.2.2, 2.3.1, beide Stufe A; siehe 10.7).
 19. **[Pflicht]** Responsivität: Ab 360 px gilt eine eigene Komposition; bis 320 CSS-px gibt es kein horizontales Scrollen (1.4.10), 200 % Textgröße bleibt verlustfrei (1.4.4), Ziele messen mindestens 24 × 24 px (2.5.8).
 20. **[Pflicht]** Leistung: Die Budgets aus 10.8 gelten. Ein Effekt, der sie reißt, fällt auf seine Ersatzfassung zurück.
 
@@ -49,7 +49,7 @@ Die Prüfverfahren sind Neuentwurf (nicht beobachtet); die Referenzen liefern nu
 2. **Standbildprobe:** Bildschirmfotos jedes Ruhezustands, ohne JavaScript und mit `prefers-reduced-motion: reduce`; Anker, Ordnungslinie und Maßstabssprung müssen in jedem Bild erkennbar sein (Nr. 11–14).
 3. **Unschärfeprobe:** Ansicht in Graustufen stark weichzeichnen. Es bleibt genau ein dominanter Fleck, der Anker (Nr. 5, 8, 11).
 4. **Kontrastmessung:** von Hand mit Pipette, denn automatische Prüfer erfassen Text auf Bildern nicht: gegen die ungünstigste Bildpartie unter jeder Glyphe, bei Glas dahinter (Profilregel Ref 12), bei Video an Stichbildern etwa alle 0,5 s.
-5. **Codesperre:** Stylelint-Regeln gegen `perspective`, `rotateX/Y`, `skew` und `box-shadow` mit Versatz in UI-Komponenten, gegen `transition: all` und gegen animiertes `width`, `height`, `top` und `left` (Nr. 1–4).
+5. **Codesperre:** Stylelint-Regeln gegen `perspective`, `rotateX/Y`, `skew` und gegen `box-shadow` in UI-Komponenten außer `none` und den Tokens aus 10.4 (Begleitschatten, Lichtkante, Schein als Zustand), gegen `transition: all` und gegen animiertes `width`, `height`, `top` und `left` (Nr. 1–4).
 6. **Tastatur- und Breitendurchlauf:** Tabulator durch die ganze Seite; Breiten 360, 390, 768, 1280 und 1440 px; Zoom 200 % und 400 %.
 7. **Leistung:** wie 10.8, Labor- und Feldwerte.
 
@@ -59,15 +59,15 @@ Die Prüfverfahren sind Neuentwurf (nicht beobachtet); die Referenzen liefern nu
 | Tragender Schlagschatten an UI | 0 von 11 Website-Heros | keiner; Begleitschatten siehe 10.4 | Nr. 6 |
 | Leuchtende UI-Flächen | 1 von 15 (Ref 13), nicht konform | 0; Saum an ≤ 1 Element | Nr. 10 |
 | Radienstufen der UI | ≤ 4 (Ref 14) | ≤ 4 | Beleg; Ableitung |
-| Ebenen je Ansicht | 3–6 | 3–6 | Beleg; > 6 Ableitung |
+| Ebenen je Ansicht | 3–6 | 3–4; 5–6, wenn die Reihenfolge eindeutig bleibt (vorzugsweise in einer Kamera-Szene); > 6 ausgeschlossen | Beleg (wie 10.1, 10.2); > 6 Ableitung |
 | Helligkeitszentren / Verlaufszonen im Grund | höchstens 1 / 3 (Ableitung aus D13 < 3) | 1 hinter dem Anker / ≤ 3 | Nr. 11 |
 | Freie Fläche im Hero | 35–40 % bis 70–75 % (geschätzt) | ≥ 33 % | Untergrenze Ref 03, gerundet |
 | Maßstabssprung Hauptelement : Bedienschrift | ab etwa 3× (Ref 06, 02, geschätzt) | ≥ 3× | Ableitung |
-| Kontrast bedeutungstragender Text | Profilregel 4,5:1 (Ref 03, 05) | ≥ 4,5:1; groß (≥ 24 px oder ≥ 18,7 px fett) ≥ 3:1 | WCAG 1.4.3 |
+| Kontrast bedeutungstragender Text | Profilregel 4,5:1 (Ref 03, 05) | ≥ 4,5:1; groß (≥ 24 px oder ≥ 18,66 px fett) ≥ 3:1 | WCAG 1.4.3 |
 | Kontrast Kulissenschrift | etwa 1,3:1 (Ref 03, geschätzt) | frei, nur wenn rein dekorativ | 5.5 |
 | Kontrast Konturen und Fokus | nicht beobachtet | ≥ 3:1 | WCAG 1.4.11 |
 | Fokusanzeige | in 0 von 15 sichtbar | Kontur ≥ 2 px, unverdeckt | Neuentwurf; WCAG 2.4.7, 2.4.11 |
-| Kleinste Schrift | Bedienschrift „winzig“ (Maßstabssprung) | Mikrolabel ≥ 12 px, Fließtext ≥ 16 px | Neuentwurf |
+| Kleinste Schrift | Bedienschrift „winzig“ (Maßstabssprung) | Fließtext ≥ 16 px; Bedienschrift und Mikrolabel ≥ 14 px und ≥ Fließtext ÷ 1,25 | Neuentwurf; wie 10.1 und 10.9 |
 | Zielgröße | nicht beobachtet | ≥ 24 × 24 px, empfohlen 44 px | WCAG 2.5.8; wie 10.7 |
 | Kleinste Breite | 0 von 15 mobil | Komposition ab 360 px, Reflow bis 320 px | Neuentwurf; WCAG 1.4.10 |
 | Textvergrößerung | nicht beobachtet | 200 % ohne Verlust | WCAG 1.4.4 |

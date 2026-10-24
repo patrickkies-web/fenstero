@@ -68,7 +68,7 @@ Alles Folgende ist Vorschlag. Belegt sind nur Relationen; absolute Pixelwerte si
 - **Trefferfläche und Zoom.** WCAG 2.2 AA verlangt mindestens 24 × 24 CSS-px (2.5.8), vorgeschlagen sind 44 px. Kleine Pfeilkreise in Karten (wie Ref 03) bekommen eine vergrößerte Trefferfläche. Pillen wachsen mit dem Text (`min-height` statt fester Höhe) für 200 % Zoom und Umfließen bei 320 CSS-px (1.4.4, 1.4.10).
 - **Fokus und Kontur.** Der Fokusring folgt der Form (`outline` folgt in aktuellen Browsern dem `border-radius`) und hat mindestens 3:1 (2.4.7, 1.4.11). `clip-path` und `mask` schneiden ihn ab; bei der Laschenkarte liegt er daher auf einem inneren Element. Ist ein Element nur über seine Kontur erkennbar (Haarlinienbox, Glaspille), braucht sie mindestens 3:1 gegen den Grund; bei `forced-colors: active` erhalten Pillen und Karten einen Rahmen.
 - **Anschnitt.** Bei 360 px neu prüfen: Wort erkennbar, nichts Bedienbares außerhalb.
-- **Weniger Bewegung.** Formwechsel zwischen Zuständen (etwa Pille zu Kreis) sind Neuentwurf (nicht beobachtet) und entfallen bei `prefers-reduced-motion: reduce` zugunsten eines sofortigen Wechsels.
+- **Weniger Bewegung.** Formwechsel zwischen Zuständen (etwa Pille zu Kreis) sind Neuentwurf (nicht beobachtet) und geschehen immer als sofortiger Wechsel ohne Interpolation, nicht erst bei `prefers-reduced-motion: reduce`. Eine animierte Verformung von Bedienelementen oder UI-Glas ist ausgeschlossen (Regel 3; 10.7, Regel 2; 10.10, Nr. 4).
 - **Leistung.** `border-radius` ist praktisch kostenlos; `clip-path`, `mask` und `corner-shape` nur auf wenigen Elementen je Ansicht; organische Formen im Asset vorrendern statt zur Laufzeit berechnen (siehe 10.8).
 
 ### Prüffragen
