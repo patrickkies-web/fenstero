@@ -1284,28 +1284,55 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
   .hdr-row:has(.hdr-r.zwei) .hdr-inst:has(.ein-zeichen.logo) .hdr-name { display: none }
 }
 
-/* ---------- Start (Schritt 1, 24.10.2026): das Element als Held oben, darunter Stelle und Element ----------
-   Wie die Fragen: das Modell steht oben und zeigt jede Wahl sofort. Die Bühne ist ein dunkles Studio (Wand #1f1f1f bis #262626, Licht
-   in Cream von rechts oben, Laibung und Boden gedämpft), damit das Fenster das Hellste ist. Die Elemente als Reihe zum Wischen mit
-   Bildern aus dem eigenen Konfigurator (scripts/element-bilder.mjs), am Schreibtisch 3 × 2 neben der Bühne. */
+/* ---------- Start (Schritt 1, 24.10.2026): das Element als Held, darunter Stelle und Element ----------
+   Telefon: die Bühne randlos oben als dunkles Studio (Wand #262626 bis #1f1f1f, Licht in Cream von rechts oben, Laibung, Fuge und Boden
+   gedämpft), nach unten weich in den Grund ausgeblendet; Kicker und Überschrift beginnen im Auslauf, wie das Startbild der Website.
+   Darunter „Die Stelle“ als zwei Karten und „Das Element“ als Reihe zum Wischen mit Bildern aus dem eigenen Modell
+   (scripts/element-bilder.mjs). Schreibtisch: Bühne als Karte links, Kopf und Wahl rechts, Elemente 3 × 2.
+   Bewegung: Auftritt nur beim ersten Öffnen (.ist-neu; Bühne 900 ms aus 1,04, Kicker 600 ms, Überschrift aus der Zeilenmaske 600 ms,
+   Satz und Gruppen je 600 ms aufsteigend, versetzt 60 ms); die eben gewählte Karte rastet ein und zieht ihren Haken (.frisch, 220 ms);
+   Bilder in der Reihe mit Tiefe beim Wischen (app.js, startNachzeichnen). Bei „weniger Bewegung“ steht alles. */
 .scr[data-screen="start"] { gap: 16px }
-.scr[data-screen="start"] > .hd { padding-top: 10px }
 .scr[data-screen="start"] .qgroup { gap: 8px }
-.scr[data-screen="start"] > .hd p:not(.eyebrow) { margin-top: 6px }
 .start-wahl { display: flex; flex-direction: column; gap: 16px }
+.start-hd h1 { overflow: clip; padding-bottom: .14em; margin-bottom: -.14em }
+.start-hd h1 .zl { display: block }
+
 .w3d-stage.studio { background: #1c1c1c; box-shadow: var(--ring) }
-.w3d-stage.studio .w3d-wall-in { background: radial-gradient(ellipse 75% 65% at 74% 14%, rgba(241, 240, 234, .1), rgba(241, 240, 234, 0) 64%), linear-gradient(180deg, #262626, #1f1f1f) }
+.w3d-stage.studio .w3d-wall-in { background: radial-gradient(ellipse 75% 65% at 74% 14%, rgba(241, 240, 234, .11), rgba(241, 240, 234, 0) 64%), linear-gradient(180deg, #262626, #1f1f1f) }
 .w3d-stage.studio .w3d-rev-t { background: linear-gradient(180deg, #2b2b2b, #232323) }
 .w3d-stage.studio .w3d-rev-l { background: linear-gradient(90deg, #4b4a46, #3b3a37) }
 .w3d-stage.studio .w3d-rev-r { background: linear-gradient(90deg, #2e2e2d, #262626) }
-.w3d-stage.studio .w3d-floor-in { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .24) 0 1px, transparent 1px 34px), linear-gradient(180deg, #36322d, #2a2724) }
 .w3d-stage.studio .w3d-fuge { background: linear-gradient(180deg, #3a3936, #2e2d2b) }
 .w3d-stage.studio .w3d-wall-out { background: #2a2a2a !important }
+.w3d-stage.studio .w3d-floor-in { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .24) 0 1px, transparent 1px 34px), linear-gradient(180deg, #36322d, #2a2724) }
 .w3d-stage.studio .w3d-zoom { display: none }
 .w3d-stage.studio .w3d-hint { left: 12px; bottom: 12px; background: rgba(22, 22, 22, .86); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 1px rgba(255, 255, 255, .08) }
 
+@media (max-width: 1023px) {
+  .scr[data-screen="start"] > .w3d-stage.studio { height: clamp(200px, calc(100vh - 548px), 320px) !important; height: clamp(200px, calc(100svh - 548px), 320px) !important; width: auto; max-width: none; margin: 0 -16px; border-radius: 0; box-shadow: none; -webkit-mask-image: linear-gradient(180deg, #000 0, #000 58%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 58%, transparent 100%) }
+  .scr[data-screen="start"] > .w3d-stage.studio .w3d-hint { top: 12px; bottom: auto; right: auto }
+  .scr[data-screen="start"] > .start-hd { position: relative; z-index: 1; margin-top: -76px; padding-top: 0 }
+  .scr[data-screen="start"] > .start-hd p:not(.eyebrow) { margin-top: 6px }
+}
+
+/* Kopf der Gruppe: Name links, bei der Reihe rechts die Anzahl, damit klar ist, dass es mehr gibt */
+.start-wahl .qkopf { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 0 6px }
+.start-wahl .qkopf .eyebrow { padding: 0 }
+.start-wahl .qzahl { font-size: 13px; font-weight: 600; letter-spacing: .02em; color: var(--muted) }
+@media (min-width: 1024px) { .start-wahl .qzahl { display: none } }
+
+/* Gewählt: Haken im Kreis (Grün als Signal), bei der eben gewählten Karte gezogen */
+.sa-haken { position: absolute; display: none; width: 24px; height: 24px; border-radius: 50%; background: rgba(22, 22, 22, .86); box-shadow: 0 0 0 1px rgba(255, 255, 255, .12) }
+.sa-haken svg { display: block; width: 24px; height: 24px; fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round }
+.qopt[aria-pressed="true"] .sa-haken { display: block }
+.qopt.frisch .sa-haken path { stroke-dasharray: 1; animation: sa-zug 220ms var(--e-out) both 40ms }
+.qopt.frisch { animation: sa-rast 220ms var(--e-out) both }
+@keyframes sa-zug { from { stroke-dashoffset: 1 } to { stroke-dashoffset: 0 } }
+@keyframes sa-rast { from { transform: scale(.97) } to { transform: none } }
+
 /* Stelle: zwei Karten nebeneinander, Name und eine Zeile, das i rechts */
-.qcards.stelle .qopt { min-height: 64px; padding: 10px 34px 10px 14px; flex-direction: row; align-items: center; justify-content: flex-start; text-align: left }
+.qcards.stelle .qopt { position: relative; min-height: 64px; padding: 10px 34px 10px 14px; flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; overflow: visible }
 .qcards.stelle .qopt .tx { align-items: flex-start; gap: 2px }
 .qcards.stelle .qopt .lbl { font-size: 15px; line-height: 1.25; white-space: normal }
 .qcards.stelle .qopt .sb { white-space: normal; line-height: 1.3 }
@@ -1313,17 +1340,39 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .qcards.stelle .qinfo svg { width: 20px; height: 20px }
 
 /* Element: Karten mit Bild, Name und Erklärung; Nachbarn angeschnitten, die erste bündig mit dem Text */
-.qcards.start-arten { gap: 8px; padding: 2px 16px 4px; scroll-padding-inline: 16px; scroll-snap-type: x proximity }
+.qcards.start-arten { gap: 8px; padding: 12px 16px 4px; margin-top: -10px; scroll-padding-inline: 16px; scroll-snap-type: x proximity }
 .qcards.start-arten .qo { flex: 0 0 136px; scroll-snap-align: start }
 .qcards.start-arten .qopt { min-height: 0; padding: 0 0 10px; gap: 8px; align-items: stretch; text-align: left; justify-content: flex-start; background: var(--surface) }
 .qcards.start-arten .sa-bild { position: relative; display: block; height: 88px; margin: 0; overflow: hidden; border-radius: 16px 16px 4px 4px; background: #1c1c1c }
-.qcards.start-arten .sa-bild img { display: block; width: 100%; height: 100%; object-fit: cover }
-.qcards.start-arten .qopt[aria-pressed="true"] .sa-bild img { transform: scale(1.04) }
+.qcards.start-arten .sa-bild img { display: block; width: 100%; height: 100%; object-fit: cover; will-change: transform }
+.qcards.start-arten .sa-haken { top: 8px; left: 8px }
 .qcards.start-arten .qopt .tx { align-items: flex-start; gap: 2px; padding: 0 12px }
 .qcards.start-arten .qopt .lbl { font-size: 15px; line-height: 1.25; white-space: normal; text-overflow: clip; -webkit-hyphens: auto; hyphens: auto }
 .qcards.start-arten .qopt .sb { white-space: normal; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-overflow: clip }
 .qcards.start-arten .qinfo { width: 44px; height: 44px; padding: 8px 8px 0 0; color: rgba(243, 242, 238, .72) }
 .qcards.start-arten .qopt[aria-pressed="true"] + .qinfo { color: var(--ink) }
+@media (hover: hover) and (pointer: fine) {
+  .qcards.start-arten .qopt { transition: transform var(--t1) var(--e-out), border-color var(--t2), background var(--t2) }
+  .qcards.start-arten .qopt:hover { transform: translateY(-2px) }
+  .qcards.start-arten .qopt:active { transform: scale(.97) }
+  .qcards.start-arten .sa-bild img { transition: transform var(--t2) var(--e-out) }
+  .qcards.start-arten .qopt:hover .sa-bild img { transform: scale(1.04) }
+}
+
+/* Auftritt beim ersten Öffnen */
+.scr[data-screen="start"].ist-neu { animation: none }
+.ist-neu > .w3d-stage { animation: st-buehne 900ms var(--e-out) both }
+.ist-neu > .start-hd .eyebrow { animation: st-auf 600ms var(--e-out) both 60ms }
+.ist-neu > .start-hd h1 .zl { animation: st-zeile 600ms var(--e-out) both 120ms }
+.ist-neu > .start-hd p:not(.eyebrow) { animation: st-auf 600ms var(--e-out) both 180ms }
+.ist-neu > .start-hd .hd-tools { animation: st-ein 600ms var(--e-out) both 180ms }
+.ist-neu > .start-wahl > .qgroup:first-child { animation: st-auf 600ms var(--e-out) both 240ms }
+.ist-neu > .start-wahl > .qgroup:last-child { animation: st-auf 600ms var(--e-out) both 300ms }
+@keyframes st-buehne { from { opacity: 0; transform: scale(1.04) } to { opacity: 1; transform: none } }
+@keyframes st-auf { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
+@keyframes st-zeile { from { transform: translateY(105%) } to { transform: none } }
+@keyframes st-ein { from { opacity: 0 } to { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .ist-neu > *, .ist-neu .zl, .ist-neu .eyebrow, .ist-neu p, .qopt.frisch, .qopt.frisch .sa-haken path { animation: none !important } }
 
 @media (min-width: 1024px) {
   .scr[data-screen="start"] { max-width: 1132px !important; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "buehne kopf" "buehne wahl" "recht recht"; grid-template-rows: auto 1fr auto; column-gap: 40px; row-gap: 20px; align-items: start }
