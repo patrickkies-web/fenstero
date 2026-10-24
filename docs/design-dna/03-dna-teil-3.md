@@ -10,7 +10,7 @@
 
 **Zulässige Variationen.** Frei sind Grundton, Verlaufsart (keine, linear, radial, zoniert) und Medium (CSS, Bild, 3D-Umgebung). Cluster A arbeitet mit Vollfläche oder zweigeteilter Kulisse (Ref 04, 07, 08), selten mit einem Lichthof (Ref 03). Cluster B nutzt einen dunklen Grund mit radialem Lichtraum (Ref 09, 12), eine atmosphärische Szene (Ref 15) oder Grundgleichheit (Ref 10). Cluster C bleibt bei einachsigem Verlauf oder Vollfläche (Ref 02, 06, 11). Ein kontrastarmes Raster ist zulässig (Ref 01, 11).
 
-**Grenzen.** Die Identität bricht, sobald der Grund selbst prägt; kein Design erreicht den Wert 3. Als Schwellen gelten (Ableitung aus den Belegen):
+**Grenzen.** Die Identität bricht, sobald der Grund zum eigenständigen Hauptmittel wird; den Wert 3 erreicht kein Design. Als Schwellen gelten (Ableitung aus den Belegen):
 - kein zweites Helligkeits- oder Sättigungszentrum und keines abseits des Fokusträgers;
 - nicht mehr als drei Verlaufszonen;
 - keine flächigen Mesh- oder Blob-Verläufe als Seitengrund;
@@ -19,9 +19,10 @@
 Eine Bewegung, die Aufmerksamkeit vom Objekt abzieht, widerspricht Prinzip 3 (Ableitung).
 
 **Einordnung.**
-- *Verbindliche DNA:* Der Grund ist dem Fokusträger untergeordnet und prägt nie selbst. Hier gilt eine begründete Ausnahme von der 75-%-Regel: Es handelt sich um eine Obergrenze, nicht um ein Mittel, das vorkommen muss. Alle 15 Referenzen halten sie ein (stark 0 von 15), und sie folgt aus den universellen Prinzipien 3 und 8. Konsenssicherheit: mittel.
-- *Variable Ausgestaltung:* ein ruhiger Grund als Normalfall (11 von 15 = 73 %, wiederkehrend); dazu Grundton, Verlaufsart und Medium.
-- *Optionaler Signature-Effekt:* ein Lichtraum-Verlauf hinter dem Objekt (Ref 03, 09, 15) und Verlaufskacheln (Ref 13), zusammen deutlich ausgeprägt in 4 von 15 = 27 %; Dunst mit Partikeln (Ref 15). Ein bewegter Grund ist nur als Neuentwurf möglich.
+- *Verbindliche DNA:* Der Grund ist dem Fokusträger untergeordnet und wird nie zum stark ausgeprägten Eigenmittel (Wert ≥ 3 in 0 von 15). Hier gilt eine begründete Ausnahme von der 75-%-Regel: Es handelt sich um eine Obergrenze, nicht um ein Mittel, das vorkommen muss. Alle 15 Referenzen halten sie ein, und sie folgt aus den universellen Prinzipien 3 und 8. Konsenssicherheit: mittel.
+- *Variable Ausgestaltung:* ein ruhiger Grund als Normalfall (11 von 15 = 73 %, Gegenprobe 10 von 14 = 71 %, wiederkehrend); dazu Grundton (hell, dunkel oder fotografisch), Verlaufsart und Medium.
+- *Optionaler Signature-Effekt:* ein zonierter Lichtraum hinter dem Fokusträger (4 von 15 = 27 %: Ref 03, 09, 12, 15; vgl. 5.6.3), als deutlich ausgeprägter Grund in Ref 03, 09 und 15; Dunst mit Partikeln (Ref 15). Ein bewegter Grund ist nur als Neuentwurf möglich.
+- *Nicht DNA-konform:* Die Verlaufskacheln von Ref 13 zählen zu den 4 von 15 mit deutlichem D13 (Ref 03, 09, 13, 15; Gegenprobe 4 von 14 = 29 %), liegen aber in der Bedienschicht. Als leuchtende UI-Flächen widersprechen sie 5.6.2 und 5.6.3; dieselben Kacheln sind dort als Glow-Kacheln ausgeschlossen.
 
 ### 5.6.14 Morphing und Formtransformation
 
@@ -38,7 +39,7 @@ Eine Bewegung, die Aufmerksamkeit vom Objekt abzieht, widerspricht Prinzip 3 (Ab
 **Grenzen.**
 1. Morphing prägt nie: deutlich ausgeprägt in 1 von 15, in der Gegenprobe in 0 von 14. Blob-Flächen als Grund (0 von 15), flüssige Container oder sich verformende Karten verlassen die Sammlung.
 2. Die Bedienschicht verformt sich nicht (0 von 15); das Formsystem bleibt geschlossen (4.5, Prinzip 5).
-3. In Kamera-Szenen bricht Verformung die Tendenz. Ref 09, 12, 14 und 15 sind formstarr, ρ D14 + D15 = −0,56. 6 der 8 Referenzen mit D14 ≥ 1 haben D15 ≤ 1; Ausnahmen sind Ref 10 und 13.
+3. Verformung in einer Kamera-Szene widerspricht der Tendenz der Sammlung: Die Kamera-Szenen Ref 09, 12, 14 und 15 sind formstarr, ρ D14 + D15 = −0,56. 6 der 8 Referenzen mit D14 ≥ 1 haben D15 ≤ 1; Ausnahmen sind Ref 10 und 13.
 4. Animiertes Morphing wäre ein Neuentwurf. Es müsste auf das Motiv beschränkt bleiben und in einem lesbaren Endzustand enden (Ableitung). Ref 04 zeigt, wie ein stehender Zwischenzustand Schrift unlesbar macht.
 
 **Einordnung.**
@@ -52,6 +53,8 @@ Eine Bewegung, die Aufmerksamkeit vom Objekt abzieht, widerspricht Prinzip 3 (Ab
 - *Frontal ohne Szenenperspektive:* Ref 01 (einziger Wert 0), Ref 06 sowie Ref 04, 05, 07, 08 (Produkt auf Augenhöhe oder leicht erhöht).
 - *Fotografischer Standpunkt:* Ref 03 (Profil auf Augenhöhe), Ref 02 (extreme Nahaufnahme), Ref 11 (Über-die-Schulter-Einstellung).
 - *Virtuelle Perspektivkamera mit moderatem Sichtfeld:* Ref 12 (nahezu frontal), Ref 09 (auf Höhe der Mitteldose, Objektbogen mit Größenabnahme), Ref 10 (erhöhte Dreiviertel-Aufsicht), Ref 14 (erhöhte Schrägaufsicht), Ref 15 (niedrige Zentralperspektive).
+
+Sonderfall ist Ref 13: Der Wert 2 stammt aus dem leicht gekippten Gerät der Präsentationsszene, nicht aus dem Design.
 
 Die Kameraachse liegt auf der Layoutachse (Ref 09, 15). Den Standpunkt wählen die Designs passend zur Oberfläche, so bleibt in Ref 14 eine ruhige Bodenzone als Textgrund frei. Ein Vordergrund rahmt die Szene in Ref 02, 06, 13, 14, 15. Kamerafahrten sind nicht belegt.
 
@@ -72,8 +75,8 @@ Die Kameraachse liegt auf der Layoutachse (Ref 09, 15). Den Standpunkt wählen d
 
 **Einordnung.**
 - *Verbindliche DNA:* eine frontale, orthogonale Bedienschicht; Perspektive gibt es nur im Bild. Belegt durch 4.5, Prinzip 1: 15 von 15 = 100 %, Gegenprobe 14 von 14. Konsenssicherheit: hoch.
-- *Variable Ausgestaltung:* deutliche Bildperspektive (7 von 15 = 47 %, wiederkehrend); Stufe und Standpunkt als Cluster-Dialekt.
-- *Optionaler Signature-Effekt:* Raumszene als Hauptmittel (Wert 3 bei Ref 14 und 15, 2 von 15 = 13 %), Repoussoir (eigene Zählung 5 von 15 = 33 %) und ein perspektivischer Objektbogen (Ref 09). Kamerabewegung ist nur als Neuentwurf möglich.
+- *Variable Ausgestaltung:* deutliche Bildperspektive (7 von 15 = 47 %, Gegenprobe 7 von 14 = 50 %, wiederkehrend); Stufe und Standpunkt als Cluster-Dialekt.
+- *Optionaler Signature-Effekt:* Raumszene als Hauptmittel (Wert 3 bei Ref 14 und 15, 2 von 15 = 13 %), Repoussoir (eigene Zählung 5 von 15 = 33 %: Ref 02, 06, 13, 14, 15) und ein perspektivischer Objektbogen (Ref 09). Kamerabewegung ist nur als Neuentwurf möglich.
 
 ### 5.6.16 Physikbasierte Interaktionen
 
@@ -121,8 +124,8 @@ Dauer, Easing und Auslöser sind nicht belegt; Zahlenwerte wären Neuentwurf.
 
 **Einordnung.**
 - *Verbindliche DNA:* keine. Die Dimension ist zeitlich, n = 3, effektiv 2 Belege.
-- *Variable Ausgestaltung:* die statische Anschlusslogik „der Raum geht weiter“, belegt als Standbildmerkmal, nicht als Übergang. Dazu gehören Randanschnitt oder Rahmenbruch (8 von 15 = 53 %, Gegenprobe 7 von 14 = 50 %), die überdeckende Folgesektion (Ref 12) und der Scroll-Hinweis (Ref 09, 15).
-- *Optionaler Signature-Effekt:* der Szenenwechsel mit zerlegten Lettern unter stehender Kopfzeile (belegt: Ref 04/07, 1 von 15) und die Kapitelinszenierung ab 00 (Ref 15, nur angekündigt). Jede konkrete Übergangstechnik ist Neuentwurf.
+- *Variable Ausgestaltung:* das Fortsetzungssignal „der Raum geht weiter“, belegt als Standbildmerkmal, nicht als Übergang: Randanschnitt oder Rahmenbruch (8 von 15 = 53 %, Gegenprobe 7 von 14 = 50 %), darunter die überdeckende Folgesektion (Ref 12).
+- *Optionaler Signature-Effekt:* der Szenenwechsel mit zerlegten Lettern unter stehender Kopfzeile (belegt: Ref 04/07, 1 von 15), die Kapitelinszenierung ab 00 (belegt nur als Ankündigung: Ref 15) und der ausdrückliche Scroll-Hinweis (belegt, statisch: Ref 09, 15; 5.6.9). Jede konkrete Übergangstechnik ist Neuentwurf.
 
 ### 5.6.18 Dynamische Typografie
 
@@ -135,7 +138,7 @@ Sonderfälle sind Riesenschrift flach über dem Foto (Ref 11) und Schrift als Te
 **Häufigkeit und Intensität.** Vorhanden: 15 von 15 = 100 %, Kernmerkmal. Deutlich ausgeprägt: 9 von 15 = 60 %, wiederkehrendes Merkmal (Ref 03, 04, 05, 07, 08, 09, 11, 13, 15); stark: 7 von 15, Wert 4 bei Ref 04 und 15. Gegenprobe: 14 von 14 bzw. 8 von 14 = 57 %. Typische Intensität 2 / 2; Streuung 1–4, Q1–Q3 1–3; Expertenspannweite Ø 0,33; niedrige Konfidenz 4 %. Konsenssicherheit: hoch. Clustermedian A 3, B 1,5, C 1,5. Raumschrift (≥ 3): 7 von 15 = 47 %, Gegenprobe 6 von 14 = 43 %.
 
 **Charakteristische Umsetzungsmethoden.** Gestalterisch:
-- ein Sandwich aus Grund, Riesenwort, Freisteller und flacher UI (Ref 03, 04, 05, 07, 13, 15);
+- ein Typo-Bild-Sandwich mit dem Objekt vor dem Riesenwort: Grund, Riesenwort, Freisteller bzw. Render, flache UI (Ref 03, 04, 05, 07, 13, 15; Schrift vor dem Objekt nur Ref 08);
 - eine geteilte Headline mit dem Objekt als Trenner auf gemeinsamer Grundlinie (Ref 07);
 - feste Rollen je Schriftgattung (Monospace für Bezeichner in Ref 10, 11; Punktziffern für Kennzahlen in Ref 13);
 - Hierarchie über Tonwert (Ref 01) oder Gewicht (Ref 14) statt über Größe.
@@ -155,5 +158,5 @@ Technisch (Hypothesen): Live-Text mit viewportbasierter Größe unter einem Alph
 
 **Einordnung.**
 - *Verbindliche DNA:* Hierarchie über einen großen Maßstabssprung ohne Zwischenstufen (4.5, Prinzip 7: 12 von 15 = 80 %, Gegenprobe 11 von 14 = 79 %). Der Wert liegt an der Schwelle, weil Ref 15 nur nach einer Definitionsentscheidung mitzählt. Dazu gehört eine frontale, unverzerrte Bedienschrift (Prinzip 1, 15 von 15). Konsenssicherheit: hoch.
-- *Variable Ausgestaltung:* die Rolle als Kulisse oder Etikett (deutlich 9 von 15 = 60 %; Raumschrift 7 von 15 = 47 %), die Schriftgattung und die Cluster-Dialekte (A Raumschrift, B und C flach).
-- *Optionaler Signature-Effekt:* Bild-Wort-Ergänzung (Ref 03, 05, 07, 08; 4 von 15 = 27 %), Deckkraftverlauf (2 von 15 = 13 %), Punze als Bildfenster (Ref 15), Strahlenstriche im Schriftzug (Ref 05), Schrift als Objekttextur (Ref 09) und zerlegte Lettern (Ref 04). Kinetische Schrift ist unbelegt und nur als Neuentwurf möglich.
+- *Variable Ausgestaltung:* die Rolle als Kulisse oder Etikett (D18 deutlich 9 von 15 = 60 %, Gegenprobe 8 von 14 = 57 %; Raumschrift 7 von 15 = 47 %, Gegenprobe 6 von 14 = 43 %), die Schriftgattung und die Cluster-Dialekte (A Raumschrift, B und C flach).
+- *Optionaler Signature-Effekt:* Bild-Wort-Ergänzung (Ref 03, 05, 07, 08; 4 von 15 = 27 %), Deckkraftverlauf der Kulissenschrift (2 von 15 = 13 %: Ref 03, 13), Punze als Bildfenster (Ref 15), Strahlenstriche im Schriftzug (Ref 05), Schrift als Objekttextur (Ref 09) und zerlegte Lettern (Ref 04). Kinetische Schrift ist unbelegt und nur als Neuentwurf möglich.

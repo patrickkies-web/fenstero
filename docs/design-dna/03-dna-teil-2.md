@@ -1,6 +1,6 @@
 ### 5.6.7 3D-Integration
 
-**Typische Ausprägung.** Ein einzelner plastischer Körper – freigestelltes Objekt oder Szene – steht unter einer flachen, frontalen Bedienschicht. Die Dreidimensionalität liegt ausschließlich im Bildmaterial; in keiner Referenz wird die UI räumlich transformiert. Der Körper dominiert nicht über Fläche, sondern über Ausschließlichkeit: In den Objekt-Varianten belegt er rund ein Achtel (Ref 08) bis knapp ein Drittel (Ref 07), in Ref 10 12–15 % der Fläche (alle geschätzt), trägt aber als einziges Element Material, Licht und Detail. Nur Szenen füllen den Großteil des Viewports (Ref 14 rund zwei Drittel, geschätzt; Ref 15 vollflächig).
+**Typische Ausprägung.** Ein einzelner plastischer Körper – freigestelltes Objekt oder Szene – steht hinter einer flachen, frontalen Bedienschicht (nur in Ref 05 tritt das Objekt vor die UI, 5.6.1). Die Dreidimensionalität liegt ausschließlich im Bildmaterial; in keiner Referenz wird die UI räumlich transformiert. Der Körper dominiert nicht über Fläche, sondern über Ausschließlichkeit: In den Objekt-Varianten belegt er rund ein Achtel (Ref 08) bis knapp ein Drittel (Ref 07), in Ref 10 12–15 % der Fläche (alle geschätzt), trägt aber als einziges Element Material, Licht und Detail. Nur Szenen füllen den Großteil des Viewports (Ref 14 rund zwei Drittel, geschätzt; Ref 15 vollflächig).
 
 **Häufigkeit und Intensität.** Vorhanden (≥ 1) 13 von 15 = 87 % (Kernmerkmal); deutlich ausgeprägt (≥ 2) 11 von 15 = 73 % (wiederkehrendes Merkmal; nicht erreicht von Ref 01, 02, 06, 11); stark 9 von 15, Wert 4 bei Ref 05, 09, 10, 12, 14, 15. Gegenprobe 12 von 14 = 86 % bzw. 10 von 14 = 71 %, keine Kategorieverschiebung. Typische Intensität 3 / 3; Spannweite 0–4, Q1–Q3 1,5–4, die breiteste Verteilung aller Dimensionen und zweigipflig: Wo 3D vorkommt, prägt es stark. Expertenspannweite Ø 0,4, niedrige Konfidenz 3 %; Konsenssicherheit hoch.
 
@@ -10,12 +10,12 @@
 
 **Zulässige Variationen.** Stufe und Medium dürfen wechseln: Cluster A mit mittlerer Plastizität (D7 2–3) als Ebene im Typo-Bild-Sandwich bei frontaler Kamera; Cluster B mit vollem Render (D7 = 4 in allen sechs) in gestaltetem Licht und mit Perspektive im Bild. Cluster C und Ref 01 kommen mit Foto, Vektortonstufen oder 2D-Glaseffekten aus (D7 0–1), weil die Tiefe als Ebenenordnung erhalten bleibt (D1 deutlich 15 von 15).
 
-**Grenzen.** Die Identität bricht, sobald (1) die Bedienschicht räumlich transformiert wird (0 von 15), (2) mehrere Körper gleichrangig konkurrieren (Fokus über einen einzigartigen Reiz in 10 von 15), (3) ein Render der Stufe 4 ohne gestaltetes Licht steht – alle 6 Referenzen mit D7 = 4 haben D3 ≥ 2 (eigene Zählung aus der Mediantabelle), oder (4) die UI selbst plastisch modelliert wird; das kommt höchstens angedeutet vor (Ref 05, leicht kissenartige Kacheln). Raumschrift (D18 ≥ 3) braucht ein plastisches Gegenüber: 7 von 7 Fällen bei D7 ≥ 2.
+**Grenzen.** Die Identität bricht, sobald (1) die Bedienschicht räumlich transformiert wird (0 von 15), (2) mehrere Körper gleichrangig konkurrieren und der eindeutige Fixationsanker verloren geht (Prinzip 3, 15 von 15; Fokus über einen einzigartigen Reiz in 10 von 15), (3) ein Render der Stufe 4 ohne gestaltetes Licht steht – alle 6 Referenzen mit D7 = 4 haben D3 ≥ 2 (eigene Zählung aus der Mediantabelle), oder (4) die UI selbst plastisch modelliert wird; das kommt höchstens angedeutet vor (Ref 05, leicht kissenartige Kacheln). Raumschrift (D18 ≥ 3) braucht ein plastisches Gegenüber: 7 von 7 Fällen bei D7 ≥ 2.
 
 **Einordnung.**
 - *Verbindliche DNA:* frontale, nicht räumlich transformierte Bedienschicht; 15 von 15 = 100 %, Gegenprobe 14 von 14, universelles Prinzip 1 (4.5); Konsenssicherheit hoch.
-- *Variable Ausgestaltung:* ein plastischer Hauptkörper (deutlich 11 von 15 = 73 %, Konsens hoch) mit wechselnder Stufe und wechselndem Medium; freigestelltes Einzelobjekt als Fokus (7 von 15 = 47 %); Vitrine (6 von 15 = 40 %); „Plastik nur im Motiv“ (streng 7 von 15 = 47 %, weit 11 von 15 = 73 %). Cluster A und B sind die zwei Dialekte.
-- *Optionaler Signature-Effekt:* 3D-Szene mit Kamera und Lichtraum (4 von 15 = 27 %), Formreim Objekt → Bedienelemente (3 von 15 = 20 %), Rahmenbruch über eine Containerkante (Ref 05), Levitationsklammer (Ref 09), Material-Explosionsansicht (Ref 10). Echtzeit-3D ist eine mögliche Technik, keine Eigenschaft der Sammlung.
+- *Variable Ausgestaltung:* ein plastischer Hauptkörper (deutlich 11 von 15 = 73 %, Gegenprobe 10 von 14 = 71 %, Konsenssicherheit hoch) mit wechselnder Stufe und wechselndem Medium; freigestelltes Einzelobjekt als Fokus (7 von 15 = 47 %, Gegenprobe 7 von 14 = 50 %); Vitrine (6 von 15 = 40 %: Ref 05, 07, 08, 09, 10, 12); „Plastik nur im Motiv“ (streng 7 von 15 = 47 %, Gegenprobe 6 von 14 = 43 %; weit 11 von 15 = 73 %, Gegenprobe 10 von 14 = 71 %). Cluster A und B sind die zwei Dialekte mit Körper, Cluster C und Ref 01 kommen ohne ihn aus.
+- *Optionaler Signature-Effekt:* 3D-Szene mit Kamera und Lichtraum (4 von 15 = 27 %: Ref 09, 12, 14, 15), Formreim Objekt → Bedienelemente (3 von 15 = 20 %: Ref 07, 09, 12), Rahmenbruch über eine Containerkante (Ref 05), Levitationsklammer (Ref 09), Material-Explosionsansicht (Ref 10). Echtzeit-3D ist eine mögliche Technik, keine Eigenschaft der Sammlung.
 
 ### 5.6.8 Animation und Bewegung
 
@@ -29,12 +29,12 @@
 
 **Zulässige Variationen.** Ableitung/Neuentwurf: Art der Bewegung (Drehen, Schweben, Partikel, Szenenwechsel), Medium (Video, Bildsequenz, Echtzeit) und Auslöser (Zeit, Scroll, Zeiger) sind frei, solange die Bewegung am Ausdrucksträger des Dialekts ansetzt: in Cluster A an Schrift- und Objektebene des Sandwichs (belegt nur Ref 04/07), in Cluster B am Render-Körper oder an der Kamera (belegt nur Ref 09), in Cluster C an den Kulissenebenen (Ref 06, nur Struktur).
 
-**Grenzen.** Ableitung aus verbindlichen statischen Prinzipien: Kein Bewegungszustand darf die Bedienschicht räumlich transformieren (frontal in 15 von 15). Mehrere gleichzeitig bewegte Träger widersprechen dem Fokus über einen einzigartigen Reiz (10 von 15) und lösen die eine Ausdruckslast auf. Jeder Ruhezustand muss als Standbild die volle Komposition tragen, weil die gesamte DNA aus Standbildern gewonnen ist. Schwellen für Dauer, Tempo oder Easing lassen sich aus den Daten nicht begründen; jede Zahl dazu wäre Neuentwurf.
+**Grenzen.** Ableitung aus verbindlichen statischen Prinzipien: Kein Bewegungszustand darf die Bedienschicht räumlich transformieren (frontal in 15 von 15). Mehrere gleichzeitig bewegte Träger widersprechen dem eindeutigen Fixationsanker (Prinzip 3, 15 von 15) und lösen die eine Ausdruckslast auf. Jeder Ruhezustand muss als Standbild die volle Komposition tragen, weil die gesamte DNA aus Standbildern gewonnen ist. Schwellen für Dauer, Tempo oder Easing lassen sich aus den Daten nicht begründen; jede Zahl dazu wäre Neuentwurf.
 
 **Einordnung.**
 - *Verbindliche DNA:* keine (zeitliche Dimension, n = 4, Konsenssicherheit niedrig). Die Grenze zur frontalen Bedienschicht stammt aus D7 und D15, nicht aus D8.
-- *Variable Ausgestaltung:* Bewegung im Motiv bei ruhender Bedienschicht als vorläufige Richtung – belegt in zwei unabhängigen Designs (Ref 04/07, 09), strukturell in Ref 06, nicht belastbar.
-- *Optionaler Signature-Effekt:* Szenenwechsel mit zerlegten Lettern unter stehender Kopfzeile (Ref 04/07, 1 von 15), Bewegungsunschärfe als eingefrorener Materialstrom (Ref 04, 07), Lottie-Ebenen vor und hinter dem Titel (Ref 06), Schwebe- oder Rotationsschleife des Hauptkörpers (Ref 09, Hypothese).
+- *Variable Ausgestaltung:* Bewegung im Motiv bei ruhender Bedienschicht als vorläufige Richtung – belegt in zwei unabhängigen Designs (Ref 04/07 Materialstrom und Zwischenzustand, Ref 09 Doppelkonturen nur an den Dosen), strukturell in Ref 06, nicht belastbar (n = 4). Art, Medium und Auslöser der Bewegung sind Neuentwurf.
+- *Optionaler Signature-Effekt:* Szenenwechsel mit zerlegten Lettern unter stehender Kopfzeile (belegt: Ref 04/07, 1 von 15), Bewegungsunschärfe als eingefrorener Materialstrom (belegt: Ref 04 Pulverstrahl, Ref 07 Bohnen), Lottie-Ebenen vor und hinter dem Titel (belegt nur als Struktur: Ref 06), Schwebe- oder Rotationsschleife des Hauptkörpers (Neuentwurf; Hypothese zu Ref 09).
 
 ### 5.6.9 Scroll-Inszenierung
 
@@ -52,8 +52,8 @@
 
 **Einordnung.**
 - *Verbindliche DNA:* keine (zeitliche Dimension, Konsenssicherheit niedrig).
-- *Variable Ausgestaltung:* ein Fortsetzungssignal am Rand der Bühne, statisch belegt als Randanschnitt oder Rahmenbruch in 8 von 15 = 53 % (Gegenprobe 7 von 14 = 50 %); seine Form (Anschnitt, Überdeckung, Hinweis) wechselt.
-- *Optionaler Signature-Effekt:* ausdrücklicher Scroll-Hinweis mit Fortschrittslinie (2 von 15 = 13 %: Ref 09, 15; eigene Zählung), Kapitelstruktur mit Ziffernleiste (Ref 15), Parallax-Kulisse (Ref 06, nur Struktur), Szenenwechsel unter stehender Kopfzeile (Ref 04/07), scrollgekoppelte Kamerafahrt (Ableitung, unbelegt).
+- *Variable Ausgestaltung:* ein Fortsetzungssignal „der Raum geht weiter“ am Rand der Bühne, statisch belegt als Randanschnitt oder Rahmenbruch in 8 von 15 = 53 % (Gegenprobe 7 von 14 = 50 %); seine Form (Anschnitt, Überdeckung, Hinweis) wechselt. Die Scroll-Mechanik dahinter ist Neuentwurf.
+- *Optionaler Signature-Effekt:* ausdrücklicher Scroll-Hinweis mit Fortschrittslinie (belegt, statisch: 2 von 15 = 13 %, Ref 09, 15; eigene Zählung), Kapitelstruktur mit Ziffernleiste (belegt, statisch: Ref 15), Parallax-Kulisse (belegt nur als Ebenenstruktur: Ref 06), Szenenwechsel unter stehender Kopfzeile (belegt: Ref 04/07), scrollgekoppelte Kamerafahrt (Neuentwurf, unbelegt).
 
 ### 5.6.10 Mikrointeraktionen
 
@@ -65,14 +65,14 @@
 
 **Funktion für die Gesamtwirkung.** Ableitung: Feedback über dieselben Kanäle wie die statische Zustandscodierung hält die Bedienschicht als eine ruhige Familie zusammen und zieht den Blick nicht vom Ausdrucksträger ab.
 
-**Zulässige Variationen.** Ableitung/Neuentwurf: Der Kanal darf je Dialekt wechseln – Schein passt zu lichtgeführten Entwürfen (Cluster B; statisch belegt nur in Ref 13), Füllungswechsel zu Pillensystemen (Ref 02, 14), Deckkraft zu Glasflächen (Ref 03), Formwechsel von Kontur zu Fläche zu radienlosen Systemen (Ref 10, 15).
+**Zulässige Variationen.** Ableitung/Neuentwurf: Der Kanal darf je Dialekt wechseln – ein kleiner Schein passt zu lichtgeführten Entwürfen (Cluster B; statisch belegt nur in Ref 13 aus Cluster A, Ansätze in Ref 05 und 09), aber nur als Saum, nie als leuchtende Fläche (5.6.3); Füllungswechsel passt zu Pillensystemen (Ref 02, 14), Deckkraft zu Glasflächen (Ref 03), Formwechsel von Kontur zu Fläche zu radienlosen Systemen (Ref 10, 15).
 
-**Grenzen.** Ableitung aus belegten statischen Prinzipien: Feedback darf (1) Bedienelemente nicht räumlich kippen oder drehen (frontal 15 von 15), (2) keinen harten Schlagschatten als Anhebung einsetzen (kein tragender Schlagschatten 12 von 15), (3) keine zweite Akzentfarbe einführen, die mit dem einzigartigen Fokusreiz konkurriert (10 von 15), (4) Elemente nicht auf Zwischengrößen skalieren, die den Maßstabssprung aufweichen (12 von 15). Zeitwerte und Skalierungsfaktoren sind aus den Daten nicht begründbar.
+**Grenzen.** Ableitung aus belegten statischen Prinzipien: Feedback darf (1) Bedienelemente nicht räumlich kippen oder drehen (frontal 15 von 15), (2) keinen harten Schlagschatten als Anhebung einsetzen (kein tragender Schlagschatten 12 von 15), (3) keine zweite Akzentfarbe einführen, die mit dem Fixationsanker konkurriert (Prinzip 3, 15 von 15; Fokus über einen einzigartigen Reiz 10 von 15), (4) Elemente nicht auf Zwischengrößen skalieren, die den Maßstabssprung aufweichen (12 von 15), (5) keine leuchtende Fläche als Zustand einsetzen (Licht als Flächenmittel der Bedienschicht nur in Ref 13; 5.6.3). Zeitwerte und Skalierungsfaktoren sind aus den Daten nicht begründbar.
 
 **Einordnung.**
 - *Verbindliche DNA:* keine (n = 1, Konsenssicherheit niedrig).
-- *Variable Ausgestaltung (Ableitung aus statischen Befunden):* Zustandswechsel über Deckkraft, Sättigung, Füllung/Kontur oder Schein statt über neue Farben (statisch mindestens 7 von 15); Pfeil im Kreis als Handlungszeichen (6 von 15 = 40 %, statisch, eigentlich Teil des Formsystems D5).
-- *Optionaler Signature-Effekt:* Schein als Zustand (Ref 13), Leuchtsaum an der Pille (Ref 09), Hotspot auf dem 3D-Objekt mit angedockter Annotation (Ref 10, Hypothese), eigener Cursor (Ref 12, unsicher).
+- *Variable Ausgestaltung (Ableitung aus statischen Befunden):* Rang und Zustand ohne Zusatzfarbe (statisch belegt in mindestens 7 von 15 = 47 %); als Kanal für Zustandswechsel abgeleitet: Deckkraft, Sättigung, Füllung/Kontur oder Glas gegen opak; Pfeil im Kreis als Handlungszeichen (6 von 15 = 40 %: Ref 02, 03, 05, 07, 13, 14; statisch, eigentlich Teil des Formsystems D5).
+- *Optionaler Signature-Effekt:* Schein als Zustand, begrenzt auf einen Saum an genau einem aktiven Element (statisch belegt: Ref 13 Reiter; Ansätze Ref 05 Aktivquadrat, Ref 09 Leuchtsaum an der Pille, dort offen, ob Hover-Zustand), Hotspot auf dem 3D-Objekt mit angedockter Annotation (Neuentwurf; Hypothese zu Ref 10), eigener Cursor (Neuentwurf; Hypothese zu Ref 12, unsicher).
 
 ### 5.6.11 Bildintegration
 
@@ -89,9 +89,9 @@
 **Grenzen.** Die Identität geht verloren, (1) wenn das Hauptbild zur gerahmten Beigabe neben dem Text wird – außerhalb der Bühnenlogik liegen nur Ref 01 (kein Bildmotiv) und Ref 11 (Präsentationsfolie mit gerahmten Bildkarten); (2) wenn zwischen Asset und Seite ein sichtbarer Grundsprung, Saum oder Hof bleibt, also das Gegenteil der Grundgleichheit; (3) wenn Text auf dem Bild eine deckende Box braucht, statt über Scrim, freie Bildzone, flächenlose Rand-UI oder Luminanzkontrast lesbar zu werden (Ref 02, 14, 15, 04). Die in 12 von 15 Profilen benannten Kontrastrisiken sind ein Zielkonflikt, keine DNA.
 
 **Einordnung.**
-- *Verbindliche DNA:* „Bild und Seite bilden einen Raum“ – deutlich 14 von 15 = 93 %, Gegenprobe 93 %, Konsens hoch, universelles Prinzip 4 (4.5); dazu Bild als Bühne statt gerahmter Beigabe (13 von 15 = 87 %).
-- *Variable Ausgestaltung:* streng kantenlose Integration (10 von 15 = 67 %); Grundgleichheit von Seite und Bild (6 von 15 = 40 %, eigene Zählung aus 4.2.11); Freisteller im Typo-Bild-Sandwich (7 von 15 = 47 %); Wahl zwischen Container und randloser Bühne.
-- *Optionaler Signature-Effekt:* Glas über Bildinhalt (mit belegter Hintergrundunschärfe 4 von 15 = 27 %), Bildpanel im gerundeten Container (2 von 15 = 13 %: Ref 02, 14), gerichteter Auslauf (Ref 03), Rahmenbruch über eine Containerkante (1 von 15, Ref 05), Bild-Wort-Ergänzung (4 von 15 = 27 %), Punze als Bildfenster (Ref 15).
+- *Verbindliche DNA:* „Bild und Seite bilden einen Raum“ – deutlich 14 von 15 = 93 %, Gegenprobe 13 von 14 = 93 %, Konsenssicherheit hoch, universelles Prinzip 4 (4.5); dazu Bild als Bühne statt gerahmter Beigabe (13 von 15 = 87 %, Gegenprobe 12 von 14 = 86 %).
+- *Variable Ausgestaltung:* streng kantenlose Integration (10 von 15 = 67 %, Gegenprobe 9 von 14 = 64 %) als Regelfall, der gerundete Container als seltenere Fassung (Signature); Grundgleichheit von Seite und Bild (6 von 15 = 40 %: Ref 04, 07, 08, 09, 10, 12; eigene Zählung aus 4.2.11); Typo-Bild-Sandwich mit verschränktem Objekt (7 von 15 = 47 %, Gegenprobe 6 von 14 = 43 %; 5.6.18).
+- *Optionaler Signature-Effekt:* Glas mit belegter Hintergrundunschärfe über gesättigtem Inhalt (4 von 15 = 27 %: Ref 01, 03, 12, 14; über einem Bildmotiv nur Ref 03, 12, 14), Bildpanel im gerundeten Container (2 von 15 = 13 %: Ref 02, 14), gerichteter Auslauf (Ref 03), Rahmenbruch über eine Containerkante (1 von 15, Ref 05), Bild-Wort-Ergänzung (4 von 15 = 27 %: Ref 03, 05, 07, 08), Punze als Bildfenster (Ref 15).
 
 ### 5.6.12 Oberflächendetails
 
@@ -108,6 +108,6 @@
 **Grenzen.** Stufe 3 erreicht nur Ref 10, und zwar über das Objekt; die dichteste UI-Mikroschicht (Ref 13: Punktziffern, Schraffuren, Strichraster) bleibt bei 2. Die Identität kippt deshalb, wenn Detail die Fläche statt den Fokus besetzt – vollflächige Texturen, Ornamente, Relief- oder Prägeflächen in der Bedienschicht (eigene UI-Materialien fehlen fast ganz; Ausnahmen Ref 05 und 13, 4.2.2) – oder wenn Konturen so kräftig werden, dass sie als Rahmen statt als Kante wirken (belegt sind nur haarfeine Linien; Stärken geschätzt). Detail ersetzt in der Sammlung den Schlagschatten; wo beides vorkommt, ist der Schatten weich und liegt auf hellem Grund (Ref 01, 11).
 
 **Einordnung.**
-- *Verbindliche DNA:* keine eigene (deutlich 67 %, Konsens mittel). Als Randbedingung gilt Prinzip 6 aus 4.5: Figur-Grund-Kanten entstehen ohne tragenden Schlagschatten (12 von 15 = 80 %, Gegenprobe 11 von 14 = 79 %).
-- *Variable Ausgestaltung:* deutliches Feindetail am Fokusträger oder an den UI-Kanten (10 von 15 = 67 %, Gegenprobe 71 %); haarfeine Lichtkante oder Kontur statt Schatten (6 von 15 = 40 %, eigene Zählung aus 4.2.12).
-- *Optionaler Signature-Effekt:* technische Mikroschicht (5 von 15 = 33 %, Gegenprobe 5 von 14 = 36 %), Punktziffern (Ref 13), Punktringe (Ref 14), HUD-Annotation mit Pixelsymbol (Ref 10), Konstruktionsraster mit Hilfskreis (Ref 01), Leuchtsaum an der Pille (Ref 09). Körnung bleibt mangels Beleg außerhalb.
+- *Verbindliche DNA:* keine eigene (deutlich 10 von 15 = 67 %, Konsenssicherheit mittel). Als Randbedingung gilt Prinzip 6 aus 4.5: Figur-Grund-Kanten entstehen ohne tragenden Schlagschatten (12 von 15 = 80 %, Gegenprobe 11 von 14 = 79 %).
+- *Variable Ausgestaltung:* deutliches Feindetail am Fokusträger oder an den UI-Kanten (10 von 15 = 67 %, Gegenprobe 10 von 14 = 71 %); haarfeine Lichtkante oder Kontur statt Schatten (6 von 15 = 40 %: Ref 01, 03, 10, 11, 12, 14; eigene Zählung aus 4.2.12).
+- *Optionaler Signature-Effekt:* technische Mikroschicht (5 von 15 = 33 %: Ref 01, 10, 11, 13, 14; Gegenprobe 5 von 14 = 36 %), Punktziffern (Ref 13), Punktringe (Ref 14), HUD-Annotation mit Pixelsymbol (Ref 10), sichtbares Konstruktionsraster mit Hilfskreis (Ref 01; 5.6.6), Leuchtsaum an der Pille als kleiner Saum (Ref 09; 5.6.3). Körnung bleibt mangels Beleg außerhalb.
