@@ -1,6 +1,6 @@
 # Referenz 05 – lightup – Leuchten-Shop
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt.
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -17,7 +17,7 @@
 - **Einschränkungen der Aufnahme:** Standbild eines vermutlich animierten Reels: Bewegungen (z. B. Leuchte, Karussellwechsel, Übergänge, Hover-Zustände) und das Timing sind nicht beurteilbar; Video- bzw. JPEG-Kompression: weiche Kanten, Detailverlust bei kleinen Icons und Texten; Strichstärken und Schriftart der Beschriftungen nicht sicher bestimmbar; Farbwerte nur näherungsweise ermittelbar (Kompression, unbekanntes Farbprofil und Display); Instagram-Overlays verdecken Teile des rechten Kartenrands (Herz beim rechten Pfeil-Button, Kommentarblase an der unteren rechten Ecke); Bild ist auf den Designbereich beschnitten: Originalformat des Reels, eventuelle Caption und Kontoangaben fehlen; Beschriftung auf der gelben Karte durch geringen Kontrast kaum lesbar; Reale Bildschirmgröße, Raster, Maßstab und responsives Verhalten unbekannt; ob realisierte Website oder reines Konzept-Render, ist nicht feststellbar; Bedeutung einzelner Kachel-Icons (z. B. duschkopfähnliches Symbol) und Funktion der zwei gelb gefüllten gegenüber den cremeweißen Kacheln nicht eindeutig
 - **Korrekturen zur Vorab-Notiz:** Im Wesentlichen zutreffend. Präzisierungen: (1) Es ist kein durchgehendes Panel. Es sind zwei aneinanderstoßende Karten mit schmaler Fuge (wenige Pixel, Hintergrund scheint durch): links türkis mit großen Radien nur an den linken Ecken, rechts gelb mit großen Radien nur an den rechten Ecken. Zusammen ergeben sie die Silhouette eines abgerundeten Rechtecks. (2) Die Schreibschrift läuft vollständig HINTER der Lampe, nicht durch sie hindurch. Die hängenden Scheiben verdecken den Mittelteil, sodass „g“ und „h“ nur in Fragmenten sichtbar sind (Oberlänge, Unterschleife). Lesbar sind „li“ und „tup“, „lightup“ ist erschlossen. (3) Die „Blatt-Elemente“ sind runde, gewellte Scheiben (seerosen- bzw. kapuzinerkressenähnlich) in Grün, Hellgrün und Bernstein/Orange. Sie hängen an dünnen Fäden unter dem Schirm und wirken von innen durchleuchtet. Die Risse im Schirm leuchten goldgelb, der Unterrand ist gezackt aufgebrochen. (4) Die Lampe hängt an einem dünnen Kabel, das über die Oberkante der Karte hinaus bis fast zum oberen Bildrand reicht. (5) Das Karussell zeigt vier Pendelleuchten, die vierte (rosa-violettes Glas) liegt bereits auf der gelben Karte. Das Karussell läuft also über die Fuge. Jede Leuchte trägt die Beschriftung „Suprematic Lighting“. Rechts und links sitzt je ein weißer runder Pfeil-Button. (6) Im Hinweis fehlen: ein gelbes Einkaufstaschen-Symbol und ein hellblaues Herz oben rechts auf der türkisen Karte. (7) „Rechts Symbolkacheln“ meint ein 2×3-Raster auf der gelben Karte: drei cremeweiße und zwei gelbe Kacheln sowie „•••“ ohne Kachel. (8) Das aktive Element links ist ein blauviolettes abgerundetes Quadrat mit Pendelleuchten-Symbol. (9) „Leuchten-Shop“ ist eine Ableitung aus Einkaufstasche und Produktkarussell, im Bild nicht ausdrücklich benannt.
 
-## 2. Unabhängige Expertenbewertungen (Phase 2)
+## 2. Bewertungen der acht simulierten Perspektiven (Phase 2)
 
 ### 2.1 Bewertungsmatrix
 
@@ -189,7 +189,7 @@ Wahrnehmungspsychologisch ist das Design als klare Aufmerksamkeitskaskade gebaut
 
 **Technische Umsetzung:** 3D-Rendering der Leuchten mit physikalisch basierten Materialien und HDRI-Umgebung (naheliegend: Die Umgebungsspiegelung im Rauchglas, die Transluzenz der Scheiben und das Eigenlicht in den Rissen entsprechen typischen Render-Ergebnissen.) · Compositing freigestellter Renders über ein flaches UI-Layout im Design- oder Bildbearbeitungsprogramm (naheliegend: Saubere Alphakanten, Schrift unter dem Objekt, Objekt über die Kartenkante hinaus und eine weiche Schattenebene sprechen für einen Ebenenstapel.) · Animation des Konzepts als Video in einem Motion- oder Compositing-Programm (möglich: Der Reel-Kontext deutet auf Bewegtbild hin, das Standbild belegt es aber nicht.) · Webumsetzung mit Echtzeit-3D (WebGL) statt vorgerenderter Bilder (spekulativ: Plastische Produkte ließen sich interaktiv darstellen; im Bild findet sich dafür kein Hinweis.) · Veröffentlichung als Instagram-Beitrag (belegt: Das Instagram-Herz mit Zähler 1.774 und die Kommentarblase mit 48 sind im Bild sichtbar.)
 
-## 3. Expertenkonsens (Phase 3)
+## 3. Konsens der simulierten Perspektiven (Phase 3)
 
 ### 3.1 Konsens je Dimension
 

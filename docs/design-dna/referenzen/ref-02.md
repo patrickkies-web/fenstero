@@ -1,6 +1,6 @@
 # Referenz 02 – Dentora und gestapelte Website-Mockups
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt.
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -17,7 +17,7 @@
 - **Einschränkungen der Aufnahme:** Geringe Auflösung (974 × 711 px) und sichtbare JPEG-Kompressionsartefakte: Kanten von Schrift und Icons sind weich, Schriftart nur ungefähr bestimmbar; Durch die perspektivische Kippung sind absolute Maße, Abstände, Ausrichtungen, Zeilenabstände und Schriftgrößen nicht messbar, nur relativ abschätzbar; Das untere Drittel der Dentora-Fläche ist unscharf und läuft in Weiß aus: unterer Hero-Abschluss, unteres Element Mitte und eventuelle weitere Inhalte nicht beurteilbar; Die Bewertungszeile der Video-Karte ist unlesbar, das Icon unten rechts in der Karte unkenntlich; Ob die Navigations-Pillen echten Glas- bzw. Hintergrund-Unschärfe-Effekt haben oder nur halbtransparent sind, ist nicht feststellbar; Farben sind durch Render, Abtönung und Kompression möglicherweise verfälscht. Exakte Farbwerte sind nicht ableitbar; Standbild: Hover-Zustände, Animationen, Videoverhalten, Scrollverlauf und Interaktion nicht beurteilbar; Nur Desktop-Hero sichtbar: übrige Seitenabschnitte und mobile bzw. responsive Darstellung unbekannt; Rechter Rand der Dentora-Fläche wird von der hinteren Ebene überlagert bzw. angeschnitten. Ob „LOVED/CART“ und die Icon-Kreise zur FreshMart- oder VELOUR-Ebene gehören, ist unsicher
 - **Korrekturen zur Vorab-Notiz:** Im Kern zutreffend. Präzisierungen: (1) Nur die Pillen „Services“, „About Us“, „Testimonial“ und „Contact“ sind halbtransparent grau. „Home“ ist eine deckend weiße Pille mit dunkler Schrift (aktiver Zustand). Ob ein echter Glas-/Backdrop-Blur-Effekt vorliegt, lässt sich bei dieser Auflösung nicht feststellen. (2) Im Hinweis fehlt die zweite weiße Pille „Book a Call“ oben rechts (sekundärer CTA). (3) Der Kreis im Haupt-CTA ist eher hell petrol- bzw. türkisblau als reinblau. Die Beschriftung lautet wörtlich „Book a Appointment“ (sic). (4) Die Headline ist zweizeilig, die zweite Zeile („Dental Care“) ist deutlich nach rechts eingerückt. Darunter steht eine zweizeilige Subline. (5) Die Video-Karte enthält ein Thumbnail mit Play-Symbol, eine zweizeilige Caption und eine kaum lesbare Bewertungszeile. (6) „Randlos“ gilt nur innerhalb der Dentora-Fläche: Das Foto füllt die abgerundete Karte vollständig aus und ist links dunkel abgetönt. (7) Zur Präsentationsebene gehören neben der Kippung auch der weiße Auslauf und die Unschärfe im unteren Drittel. Diese sind nicht Teil der Website. (8) Das Hamburger-Symbol oben links gehört zur FreshMart-Ebene, nicht zu Dentora. Ob „LOVED/CART“ sowie die Icon-Kreise (Suche, Tasche, Nutzer) zur FreshMart- oder zur VELOUR-Ebene gehören, ist nicht sicher zuzuordnen.
 
-## 2. Unabhängige Expertenbewertungen (Phase 2)
+## 2. Bewertungen der acht simulierten Perspektiven (Phase 2)
 
 ### 2.1 Bewertungsmatrix
 
@@ -189,7 +189,7 @@ Aus wahrnehmungspsychologischer Sicht ist der Dentora-Hero ein klar strukturiert
 
 **Technische Umsetzung:** Vollflächiges Hintergrundbild (object-fit: cover) in einem Container mit großem border-radius, darüber links ein Abdunklungsverlauf (linear-gradient) (naheliegend: Abgerundete Fläche und Tonwertgefälle hinter dem Text sind sichtbar. Das ist die Standardlösung für lesbaren Text auf Fotos.) · Navigation und CTAs als Pillen mit border-radius: 9999px, inaktive Zustände mit rgba-Hintergrund (naheliegend: Gleichförmige Kapselformen und halbtransparente Flächen mit deckendem aktivem Zustand sind klar erkennbar. Ein zusätzlicher backdrop-filter ist möglich, aber nicht nachweisbar.) · Video-Karte als absolut positioniertes Overlay mit Play-Button, der ein Video-Modal oder ein Inline-Video öffnet (möglich: Thumbnail mit zentralem Play-Symbol und Caption liegt über dem Hauptfoto. Das Verhalten beim Klick ist nicht sichtbar.) · Statischer Entwurf in einem Gestaltungswerkzeug, präsentiert über eine Mockup-Vorlage mit Kippung, Stapelung und weißem Auslauf (möglich: Mehrere fiktive Marken sind gestapelt und gekippt, unten läuft das Bild in Weiß aus. Kein Werkzeug ist im Bild benannt.) · Hauptfoto KI-generiert oder stark retuschiertes Stockbild (spekulativ: Rötliche Schlieren am Kinn, sehr glatte Haut und gleichförmige Zahnform sind Indizien, aber kein Beleg.)
 
-## 3. Expertenkonsens (Phase 3)
+## 3. Konsens der simulierten Perspektiven (Phase 3)
 
 ### 3.1 Konsens je Dimension
 

@@ -1,6 +1,6 @@
 # Referenz 03 – Bluebird – Innovation & Security
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt.
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -17,7 +17,7 @@
 - **Einschränkungen der Aufnahme:** Geringe effektive Auflösung (Design ca. 1100 × 610 px) und Kompressions- bzw. Videostandbild-Unschärfe: Kleintexte (Fließtext unter der Headline, Kartentexte, Navigation) sind nur eingeschränkt lesbar; Schriftarten sind nicht sicher bestimmbar (Wortmarke nur grob als Didone-artige Serife, UI als Grotesk); Farbwerte sind durch Kompression und mögliche Plattform-Farbverarbeitung verfälscht und nur Näherungswerte; Genaue Werte für Transparenz, Weichzeichnung, Radien, Konturstärken und Abstände sind nur schätzbar; Standbild: Bewegung, Animationen (z. B. Vogel, Parallax, Einblendungen), Hover-Zustände und Scrollverhalten sind nicht beurteilbar; Nur der erste Bildschirm ist sichtbar: Folgeabschnitte, Gesamtseite und Mobil- bzw. Responsive-Ansicht sind unbekannt; Ob das Vogelbild ein echtes Foto oder ein KI- bzw. Render-Bild ist, ist nicht feststellbar; Ob es sich um eine Live-Website oder ein Konzept-Shot handelt, ist nicht feststellbar; Das Herz-Symbol berührt den unteren rechten Designrand nur minimal; Designinhalt wird dadurch nicht verdeckt
 - **Korrekturen zur Vorab-Notiz:** Im Kern richtig. Folgendes ist ungenau oder fehlt: (1) Die drei Karten liegen nicht „unten rechts“, sondern unten von der Bildmitte bis an den rechten Rand. Die linke Karte überdeckt den unteren Vogelkörper. (2) Nur die linke und die rechte Karte sind Glaskarten. Die mittlere ist opak weiß/milchig und hat eine gestufte Laschenform: Der linke Teil mit der Kugel ragt höher, rechts liegt eine konkave Aussparung um den runden Pfeil-Button. (3) Das Schloss ist ein 3D-Glasschloss mit Schildsymbol und Häkchen. Daneben stehen die Label-Pille „Perfect Security“ und der Text „AI ensures total protection“. Die Kugel ist blau, glänzend und hat eine Wirbelstruktur. (4) „BLUEBIRD“ ist nur teilweise sichtbar: Der Vogelkopf verdeckt das „E“ sowie Teile von „U“ und „B“. Der Schriftzug ist sehr hell, fast weiß, und läuft nach unten transparent aus. Der Vogel steht vor dem Schriftzug, ist im Profil nach rechts gewandt, unten angeschnitten und läuft dort unscharf in den Hintergrund aus. (5) Avatar-Pille: Vier überlappende runde Porträtfotos sitzen links an einer Glas-/Konturpille mit „Active Users +323“. (6) Ergänzung: Der Hinweis nennt die Kopfzeile nicht (Logo als weiße Vogelsilhouette oben links, zentrierte Textnavigation, weiße Pille „Resources“ oben rechts). Unter der Headline steht zusätzlich ein zweizeiliger Fließtext. Die Pillen-Buttons sind „Our Solutions“ (blau, mit weißem Kreis und Chevron) und „Contact us“ (weiß). (7) Farbklima: Die Fläche ist hellblau-grau, links unten liegt ein dunklerer blau-grauer Verlauf. Im Vogelfoto steht ein warmes Orange als Streiflicht.
 
-## 2. Unabhängige Expertenbewertungen (Phase 2)
+## 2. Bewertungen der acht simulierten Perspektiven (Phase 2)
 
 ### 2.1 Bewertungsmatrix
 
@@ -187,7 +187,7 @@ Wahrnehmungspsychologisch arbeitet das Design mit wenigen starken Salienzsignale
 
 **Technische Umsetzung:** Ebenenstapel aus Textebene, freigestelltem Bild mit Alphakanal und UI-Ebene über absolute Positionierung und Stapelreihenfolge (naheliegend: Dass der Vogel das „E“ verdeckt und die Karte über dem Vogelkörper liegt, setzt eine feste Ebenenreihenfolge voraus.) · Glaskarten über Hintergrundweichzeichnung (z. B. backdrop-filter: blur) mit halbtransparenter Füllung und heller Haarlinie (naheliegend: Der Vogel erscheint durch die linke Karte weichgezeichnet, die Kartenkanten sind hell abgesetzt.) · Vertikale Verlaufsmasken für das Auslaufen von Vogel und Wortmarke (mask-image bzw. Verlaufsfüllung des Textes) (naheliegend: Beide Elemente laufen gleichmäßig nach unten aus, ohne harte Kante, und verschmelzen mit dem Hintergrund.) · Stufenkarte mit inversem Radius als SVG-Pfad, clip-path oder Maskenkombination (möglich: Die konkave Aussparung um den runden Pfeil-Button lässt sich mit einfachen Eckenradien nicht erzeugen.) · 3D-Objekte und eventuell der Vogel als vorgerenderte bzw. generierte Bilder; das Ganze möglicherweise ein statischer Konzept-Shot statt einer Live-Seite (spekulativ: Schloss und Kugel zeigen Render-typische Glanzlichter. Hinweise auf Echtzeit-3D oder auf eine laufende Website fehlen im Bild.)
 
-## 3. Expertenkonsens (Phase 3)
+## 3. Konsens der simulierten Perspektiven (Phase 3)
 
 ### 3.1 Konsens je Dimension
 

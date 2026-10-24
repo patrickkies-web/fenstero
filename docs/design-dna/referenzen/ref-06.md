@@ -1,6 +1,6 @@
 # Referenz 06 – Samurai-Landingpage im Webflow-Designer
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt.
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -17,7 +17,7 @@
 - **Einschränkungen der Aufnahme:** Standbild aus einem Video: Parallax-Verhalten, Lottie-Animationen, Scroll-Tiefe und Timing sind nicht beurteilbar, obwohl die Caption gerade die Tiefenwirkung betont; Arbeitsfläche rechts angeschnitten: Gesamtbreite des Layouts, vollständige Headline, Ausrichtung (links oder zentriert), Raster und etwaige Buttons sind nicht erkennbar; Baumkrone und Äste links vom Navigator-Rand angeschnitten; Logo-Signet oben angeschnitten; Instagram-Overlays (Aktionssymbole, Webflow-Kachel, Account-Zeile, Caption) verdecken Teile von Headline, Fließtext und Navigator (section-3/-5); Ebenen stars, castle und standing-samurai sind im sichtbaren Ausschnitt nicht als Motiv identifizierbar; unklar, ob außerhalb des Ausschnitts, verdeckt oder im Designer an anderer Position; Designer-Ansicht statt Live-Seite: Positionen interaktionsgesteuerter Ebenen können vom Live-Zustand abweichen; Breakpoint/Viewport-Breite nicht erkennbar; Video-Kompression und Skalierung: Feinheiten der Verläufe, Kanten, Typo-Rendering und exakte Farbwerte sind unzuverlässig; die Schriftart ist nicht sicher bestimmbar; Kein Moiré oder Spiegelungen (direkte Bildschirmaufnahme), aber der Ausschnitt ist im Reel gezoomt, also mit reduzierter effektiver Auflösung; Frühere bzw. andere Abschnitte (Hero mit Lottie, section-3 bis -5) sind nicht sichtbar und nicht beurteilbar
 - **Korrekturen zur Vorab-Notiz:** Im Kern stimmt der Hinweis. Es fehlen aber Angaben, und die Ebenenstruktur ist ungenau wiedergegeben: 1) Die Aufnahme ist ein Smartphone-Bildschirmfoto (iOS-Statusleiste) eines Instagram-Collab-Reels. Das Reel zeigt eine direkte, vergrößerte und angeschnittene Bildschirmaufnahme des Webflow-Designers. Der Bildschirm ist nicht abfotografiert. 2) Navigator, Abschnitt 1: hero-title (H1), hero-btn-bg und „Div Block 6“ sind Kinder von title-part und liegen nicht direkt in samurai-lp-section-1. „hero-lottie-front“ kommt zweimal vor (zuerst abgeschnitten als „hero-lottie-front...“, später noch einmal), beide mit einem Symbol aus Cursor und Verbotszeichen. An samurai-lp-section-1 steht ein Blitz-Symbol. Darüber liegen „Body“ und „samurai-lp-nav“. 3) Abschnitt 2: samurai-lp-section-2 ist ausgewählt und enthält neben parallax-section-2 auch ein „Container“-Element. Darunter folgen samurai-lp-section-3 bis -5, teilweise verdeckt. 4) Arbeitsfläche: Der Grund ist nicht einfarbig dunkelblau, sondern ein vertikaler Verlauf von Schwarz oben zu dunklem Navy unten. Darüber liegt ein schwarzer Streifen mit einem angeschnittenen weißen, runden Logo-Signet, oberhalb der blauen Webflow-Markierung „samurai-lp-section-2“. Die Baumkrone ist rosa und mehrlagig, Stamm und Äste sind violett. Die Wolke ist türkis mit Verlauf ins Hellere. 5) Die Headline lautet „Ente[r] … of th[e]“. Sie ist rechts angeschnitten und teilweise von Instagram-Symbolen verdeckt. Auch der Fließtext ist nur in Bruchstücken lesbar. 6) Die Ebenen stars, castle und standing-samurai sind im sichtbaren Ausschnitt der Arbeitsfläche nicht als Motiv erkennbar. Belegt sind sie nur durch ihre Namen im Navigator.
 
-## 2. Unabhängige Expertenbewertungen (Phase 2)
+## 2. Bewertungen der acht simulierten Perspektiven (Phase 2)
 
 ### 2.1 Bewertungsmatrix
 
@@ -187,7 +187,7 @@ Wahrnehmungspsychologisch beruht der Ausschnitt auf einer klaren Figur-Grund-Tre
 
 **Technische Umsetzung:** Aufbau im Webflow Designer (belegt: Webflow-Oberfläche mit Navigator, Moduswahl „Design“ und Arbeitsflächen-Label „samurai-lp-section-2“ sind im Bild sichtbar.) · Webflow-Interaktion am Hero-Abschnitt (naheliegend: Blitz-Symbol an samurai-lp-section-1 im Navigator, das in Webflow üblicherweise eine angelegte Interaktion markiert.) · Lottie-Animationen als Vorder- und Hintergrundebenen im Hero (naheliegend: Ebenennamen hero-lottie-front und hero-lottie-back um title-part; Collab-Beitrag mit lottie.files als zusätzliches schwaches Indiz.) · Parallax über freigestellte Illustrationsebenen mit scrollgesteuert unterschiedlicher Verschiebung (naheliegend: Container parallax-section-2 mit sechs separat benannten Motivebenen, die nahtlos auf dem Verlaufsgrund liegen.) · Scroll-Steuerung über eine externe Skriptbibliothek per Custom Code (spekulativ: Alternative zu nativen Webflow-Interaktionen; im Bild gibt es keinen Hinweis darauf.)
 
-## 3. Expertenkonsens (Phase 3)
+## 3. Konsens der simulierten Perspektiven (Phase 3)
 
 ### 3.1 Konsens je Dimension
 

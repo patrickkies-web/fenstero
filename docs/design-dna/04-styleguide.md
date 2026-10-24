@@ -6,7 +6,12 @@ Dieses Kapitel übersetzt die gemeinsame Design-DNA aus Kapitel 5 in prüfbare R
 
 ## Wofür er gilt
 
-- **Gegenstand.** Oberflächen, die nach der DNA gestaltet werden: erste Bildschirme (Hero) von Websites und Landingpages, ihre Folgeabschnitte und App-Ansichten mit einer Bühne. Belegt sind nur Desktop-Heros. Folgeabschnitte, Mobilfassung (0 von 15 Referenzen), Bewegung und Interaktion sind Ableitung oder Neuentwurf und als solche gekennzeichnet.
+- **Gegenstand.** Oberflächen, die nach der DNA gestaltet werden: erste Bildschirme (Hero) von Websites und Landingpages, ihre Folgeabschnitte und App-Ansichten; welche Regeln verbindlich sind, bestimmt der Ansichtstyp. Belegt sind nur Desktop-Heros. Folgeabschnitte, Mobilfassung (0 von 15 Referenzen), Bewegung und Interaktion sind Ableitung oder Neuentwurf und als solche gekennzeichnet.
+- **Ansichtstypen** (Neuentwurf nach dem Praxistest; gleichlautend in Ergebnis B, B.1, und Ergebnis C). Jeder Bildschirm und Abschnitt erhält genau einen Typ. Weil die DNA nur an Bühnen belegt ist, lockert die Einteilung sie nicht, sondern begrenzt ihren Geltungsbereich.
+  - *Bühnenansicht* (Hero, Start, Detail, Folgeabschnitt mit Bühne): Jede [Pflicht]-Regel gilt.
+  - *Arbeitsansicht* (Liste, Suche, Formular, Einstellungen, Textabschnitt ohne Bühne): [Pflicht] bleiben die Regeln zu Nr. 1, 4–6 und 9–11, die Ordnungslinie aus Nr. 3 (10.1, Regel 1), 10.1, Regeln 5 und 6, der scharfe Fokusträger und die scharfe Schrift (10.10, Nr. 10) und alle Mindestanforderungen. Ebenenzahl und Verdeckung (Nr. 2), der eine Fixationsanker (Nr. 3), der Maßstabssprung (Nr. 7), der Negativraum (Nr. 8) und die Fläche des Fokusträgers sind Ziel, nicht Pflicht. Listen gleichrangiger Zeilen sind erlaubt; zeitkritische Inhalte (etwa eine Frist) gehen dem Anker vor und stehen ohne Scrollen.
+  - *Vorübergehender Zustand* (Panel, Sheet, Dialog, offene Tastatur, Laden, Leer, Fehler): [Pflicht] bleiben die Regeln zu Nr. 1, 5, 6, 9 und 10 und alle Mindestanforderungen.
+  - In jedem Typ gelten die Einmal-Grenzen (10.9: von jedem Einmal-Element höchstens eines) und 10.7, Regeln 4, 6 und 7. Die Ausschlüsse in 10.10 gelten, soweit sie die verbindlichen Regeln des Typs betreffen. Die Marke [Pflicht] meint in Arbeitsansicht und vorübergehendem Zustand nur diese Regeln. Prüffragen und Abnahme prüfen ein Ziel mit; dort genügt ein begründetes „nein“.
 - **Marken- und farbneutral.** Der Styleguide schreibt keine Farbtöne, Schriftarten, Marken oder Motive vor. Farbe erscheint nur als Funktion: Anteil, Kontrast, Akzentrolle, Rang. Die Werte einer Marke liegen in einer eigenen Token-Schicht, die austauschbar bleibt (10.9).
 - **Mindestanforderungen für jede Variante.** WCAG 2.2 AA für Text, Bedienelemente und Fokus; eine eigene Komposition ab 360 px und Umfließen bis 320 px; die Leistungsbudgets aus 10.8. Eindrucksvolle Gestaltung darf Nutzbarkeit nicht verhindern: Im Konflikt weicht der Effekt, nie die Mindestanforderung (10.10).
 - **Nicht Gegenstand.** Inhalte, Texte, Informationsarchitektur, Markenwerte und einzelne Seiten.
@@ -87,7 +92,7 @@ Alle Proportionen sind Schätzungen: 9 von 15 Quellen sind perspektivisch verzer
 3. **[Pflicht]** Mindestens ein Drittel des ersten Bildschirms bleibt freier, ruhiger Grund (Nr. 8): frei von Text, Bedienelementen und dominanten Motivteilen; ruhige Szenenflächen (Himmel, Boden, Dunst) zählen als frei (Ref 15: 40–45 %).
 4. **[Pflicht]** Das Hauptelement (Kulissenschrift, Objekt oder Szene) ist bei jeder Breite mindestens dreimal so groß wie die Bedienschrift. Dazwischen steht höchstens eine Headline; je Ansicht gibt es höchstens drei Größenstufen (Ableitung).
 5. **[Pflicht]** Lesestapel und Bedienschicht liegen neben dem Anker, nie auf ihm. Die Navigation sitzt in einer schmalen Randzone, die frei von Kulissenschrift und Objekt bleibt (Regel Ref 04).
-6. **[Pflicht]** Verdeckung trifft nur Bild, Kulisse und Inhaltsflächen (Karten; Ref 05, 08). Navigation, Hauptaktion, bedeutungstragender Text sowie Bedienziele samt Trefferfläche und Fokusrahmen bleiben unverdeckt; ein verdecktes Kulissenwort bleibt über Anfang und Ende lesbar (5.6.18).
+6. **[Pflicht]** Verdeckung trifft nur Bild, Kulisse und Inhaltsflächen (Karten; Ref 05, 08). Inhaltsflächen, die der Fokusträger überdecken darf, liegen auf einer eigenen Stufe unter Kulisse und Fokusträger, nicht in der Bedienschicht (Umsetzung, Ebenen). Navigation, Hauptaktion, bedeutungstragender Text sowie Bedienziele samt Trefferfläche und Fokusrahmen bleiben unverdeckt; ein verdecktes Kulissenwort bleibt über Anfang und Ende lesbar (5.6.18).
 7. **[Variabel]** Ordnungsfigur: Achse, Achsenkreuz, Split oder Diagonale, gleichwertig; Band-, Zonen- oder Kartenraster als Träger. Spielraum: eine Figur je Ansicht.
 8. **[Variabel]** Schrift als Kulisse oder Etikett, zwei oder drei Größenstufen; innerhalb einer Stufe zusätzliche Abstufung über Tonwert (Ref 01) oder Gewicht (Ref 14).
 9. **[Variabel]** Eine oder zwei Schriftfamilien; eine dritte nur mit fester, wiederkehrender Rolle (Bezeichner, Kennzahlen).
@@ -101,7 +106,7 @@ Alle Proportionen sind Schätzungen: 9 von 15 Quellen sind perspektivisch verzer
 Alle Werte sind Vorschläge. „Abgeleitet“ heißt: aus den geschätzten Proportionen der genannten Referenzen gerundet. „Neuentwurf“ heißt: ohne Beleg in der Sammlung.
 
 - **Raster.** Erforderlich für den Effekt ist nur, dass Ordnungslinie, Textkanten und Bedienschicht auf denselben Linien liegen. Ein Spaltenraster ist dafür Werkzeug, kein Stilmerkmal (Neuentwurf): 12 Spalten ab 1024 px, 8 ab 640 px, 4 darunter; CSS Grid mit benannten Linien, `subgrid` optional. Der Fokusträger liegt als eigene Ebene im selben Grid-Bereich (`grid-area`), damit er beim Umbruch mitwandert.
-- **Ebenen.** Feste Stapelwerte (Neuentwurf): Grund 0, Kulisse 10, Fokusträger 20, Vordergrund 25 (siehe 10.2), Bedienschicht 30, Navigation und Overlays 40; der Hero erhält `isolation: isolate`. Dekorebenen bekommen `pointer-events: none` (Regel Ref 06).
+- **Ebenen.** Feste Stapelwerte (Neuentwurf): Grund 0, Inhaltsflächen, die der Fokusträger überdecken darf (Karten; Ref 05, 08), 5, Kulisse 10, Fokusträger 20, Vordergrund 25 (siehe 10.2), Bedienschicht 30, Navigation und Overlays 40; der Hero erhält `isolation: isolate`. Dekorebenen bekommen `pointer-events: none` (Regel Ref 06).
 - **Schriftgrade.** Fließende Grade per `clamp()` mit rem-Anteil, damit sie zoombar bleiben (Werte in der Tabelle); Zeilenlänge über `max-width` in `ch`.
 - **Prüfverfahren.** Blinzeltest (Screenshot stark weichgezeichnet) für Anker und freie Fläche; Flächenanteile über Begrenzungsrahmen am eigenen Screenshot schätzen.
 
@@ -116,7 +121,7 @@ Alle Werte sind Vorschläge. „Abgeleitet“ heißt: aus den geschätzten Propo
 | Fläche des Fokusträgers | etwa ⅛ (Ref 08) bis rund 40 % (Ref 02) | 15–35 % | abgeleitet aus Ref 03, 07, 08, 10 |
 | Textfläche ohne Kulisse | Headline 5–8 % (Ref 10, 12), Navigation unter 3 % (Ref 04) | höchstens 15 % | Summe aus Ref 04, 10, 12, aufgerundet |
 | Größenstufen | 2 (Ref 07) bis 3 (Ref 04, 15) | 2–3; Grade innerhalb der Klein-UI höchstens 1,25-fach gespreizt | 5.6.18; Faktor Neuentwurf |
-| Sprung Hauptelement : Bedienschrift | rund 3-fach (Ref 06) bis 5–10-fach (Ref 04, 07) | mindestens 3-fach; Desktop etwa 5–12-fach | Ref 04, 06, 07; Obergrenze Neuentwurf |
+| Sprung Hauptelement : Bedienschrift | rund 3-fach (Ref 06) bis 5–10-fach (Ref 04, 07) | mindestens 3-fach, keine Obergrenze; Messregel in 10.9 | Ref 04, 06, 07; Untergrenze Ableitung (5.2, Nr. 7); Obergrenze nach dem Praxistest gestrichen |
 | Headline : Fließtext | 3-fach (Ref 06) bis 4–5-fach (Ref 11) | Desktop 3–4,5-fach, mobil mindestens 2,25-fach | Ref 02, 06, 11; mobil Neuentwurf |
 | Grad der Kulissenschrift | Wort über ¾ bis volle Breite (Ref 03, 05, 15) | Wort über 75–100 % der Bühnenbreite: Grad = Zielbreite ÷ Wortbreite in em (etwa `calc(0.85 * 100cqi / 4.5)` bei 4,5 em Wortbreite, Rückfall `vw`), mindestens 4rem; Versalhöhe höchstens ⅓ der Bühnenhöhe (10.2) | abgeleitet aus Ref 03, 05, 15; Formel Neuentwurf |
 | Headline-Grad | nicht messbar | `clamp(calc(2.25 * var(--grad-text)), 1.5rem + 3vw, 4.5rem)`: Untergrenze an den Fließtextgrad gekoppelt, damit mobil 2,25-fach auch bei 18 px Fließtext gilt | Neuentwurf, auf obige Verhältnisse abgestimmt |
@@ -175,7 +180,7 @@ Die Konsenssicherheit ist eine Obergrenze (simulierte Expertenrollen, 4.6). 9 vo
 2. **[Pflicht]** Die Tiefe ist vorrangig an mindestens einer sichtbaren Verdeckung ablesbar (Ausnahme: Regel 3); ein Schlagschatten trägt sie nie (siehe 10.4).
 3. **[Variabel]** Statt Verdeckung darf die Bildoptik (Schärfezonen, Größenabnahme, Dunst) staffeln, wenn das Bildmedium sie liefert (Ref 02, 09, 14). Drei bis vier Ebenen; Verdeckung einseitig oder beidseitig, Richtung frei.
 4. **[Pflicht]** Die Bedienschicht ist frontal und orthogonal: keine 3D-Transformation, keine Kippung, keine perspektivische Schrift, kein Tilt bei Hover oder Zeigerbewegung.
-5. **[Variabel]** Ein Bildobjekt darf vor Inhaltsflächen treten (Karten, Kulissenschrift; Ref 05, 08), nie vor Navigation, Hauptaktion, Lesetext oder ein fokussiertes Element (Ableitung aus der Regel in Ref 04, die Navigationszone freizuhalten).
+5. **[Variabel]** Ein Bildobjekt darf vor Inhaltsflächen treten (Karten, Kulissenschrift; Ref 05, 08), nie vor Navigation, Hauptaktion, Lesetext oder ein fokussiertes Element (Ableitung aus der Regel in Ref 04, die Navigationszone freizuhalten). Karten, die es überdeckt, liegen auf einer eigenen Stufe unter Kulisse und Motiv, nicht in der Bedienschicht (Umsetzung).
 6. **[Variabel]** Bildperspektive frontal, fotografisch oder als virtuelle Kamera mit moderatem Sichtfeld. In Achsenentwürfen liegt die Kameraachse auf der Layoutachse (Ref 09, 15); sonst ist der Standpunkt frei, die Textzone bleibt frei (5.3).
 7. **[Pflicht]** Genau ein Fokusträger bildet den räumlichen Schwerpunkt; kein Begleitelement konkurriert mit ihm um Lage oder Reiz. Wie er dominiert (Lage, Reiz, Schärfe), ist frei. Der Grund bleibt untergeordnet (siehe 10.4).
 8. **[Variabel]** Raumschrift nur mit plastischem Gegenüber (Rahmen aus 5.3; als Ausschluss 10.10, Nr. 9), als ein Wort im Riesengrad. Verdeckung trifft nur Binnenbuchstaben oder Buchstabenteile; Anschnitt am Rand höchstens an einem Wortende, außer der Schriftzug wiederholt sich als Band, sodass das Wort aus den Fragmenten erkennbar bleibt (Ref 08: Name als Laufband „…ppy lemon happ…“, an beiden Rändern angeschnitten, kein Exemplar vollständig).
@@ -188,14 +193,14 @@ Die Konsenssicherheit ist eine Obergrenze (simulierte Expertenrollen, 4.6). 9 vo
 
 Alle Werte sind Vorschläge; „Neuentwurf“ heißt ohne Beleg.
 
-- **Ebenen als Z-Tokens.** Feste Stufen statt freier `z-index`-Werte, abgestimmt auf 10.1: `--z-grund: 0`, `--z-kulisse: 10`, `--z-motiv: 20`, `--z-vordergrund: 25`, `--z-ui: 30`, `--z-overlay: 40`. Die Reihenfolge folgt Ref 03, 04, 05, 07, 13, 15, der Vordergrund Ref 13 und 15; die Zahlen sind Neuentwurf. Für Schrift vor Objekt (Ref 08) tauschen Kulisse und Motiv. Die Bühne erhält `isolation: isolate`, die Ebenen liegen in einer Rasterzelle (`grid-area: 1 / 1`).
+- **Ebenen als Z-Tokens.** Feste Stufen statt freier `z-index`-Werte, abgestimmt auf 10.1: `--z-grund: 0`, `--z-inhalt: 5`, `--z-kulisse: 10`, `--z-motiv: 20`, `--z-vordergrund: 25`, `--z-ui: 30`, `--z-overlay: 40`. Die Reihenfolge folgt Ref 03, 04, 05, 07, 13, 15, der Vordergrund Ref 13 und 15, die Inhaltsstufe Ref 05 (Karte → Schriftzug → Leuchte) und Ref 08 (Karten → Zitrone → Großschrift); die Zahlen sind Neuentwurf. Auf `--z-inhalt` liegen nur Karten, die das Motiv überdecken darf; ihre Bedienziele und Fokusrahmen bleiben unverdeckt (10.1, Regel 6). Für Schrift vor Objekt (Ref 08) tauschen Kulisse und Motiv; die Inhaltsstufe bleibt unter beiden. Zählregel: Gezählt werden die sichtbaren Bildebenen (Grund, Kulisse, Motiv, Vordergrund) plus die Bedienschicht als eine Ebene; Navigation und Overlays gehören zur Bedienschicht, Nebenkörper zur Motivebene, Karten unter dem Motiv zählen als eigene Ebene, Scrim und Lichtraum zählen nicht mit. Die Bühne erhält `isolation: isolate`, die Ebenen liegen in einer Rasterzelle (`grid-area: 1 / 1`).
 - **Verdeckung.** Freisteller mit Alphakanal über Live-Text (Hypothese aus den Profilen; Formate siehe 10.6, 10.8). Ebenen über der UI erhalten `pointer-events: none` (Regel Ref 06).
 - **Raumschrift.** Ein Wort als Live-Text, Größe aus der Bühnenbreite (`clamp()` mit `vw`); Anschnitt per `overflow: clip` an der Bühne, nie am Dokument; Ausblendung per `mask-image`, nie per `filter: blur()`.
 
 | Parameter | beobachtet | Vorschlag | Ableitung |
 |---|---|---|---|
 | Ebenen je Ansicht | 3–6; mindestens 3 in 15 von 15 | 3–4; 5–6, wenn die Reihenfolge eindeutig bleibt (vorzugsweise in einer Kamera-Szene) | Ref 15, 5.4; „Kamera-Szene“ Ableitung aus Ref 15; über 6 nicht belegt |
-| Z-Stufen | Grund → Schrift → Freisteller → (Vordergrund) → UI | 0 / 10 / 20 / 25 / 30 / 40 | Reihenfolge belegt, Zahlen Neuentwurf (wie 10.1, plus Vordergrund) |
+| Z-Stufen | Grund → Schrift → Freisteller → (Vordergrund) → UI; Karten unter Schrift und Objekt in Ref 05, 08 | 0 / 5 / 10 / 20 / 25 / 30 / 40; 5 nur für Karten, die das Motiv überdecken darf (eigene Ebene) | Reihenfolge belegt, Zahlen Neuentwurf (wie 10.1, plus Vordergrund); Inhaltsstufe ergänzt nach Praxistest |
 | Sichtbare Verdeckungen | primär in 12 von 15 | mindestens 1 je Ansicht | Prinzip Nr. 2 |
 | 3D-Transformation der UI | 0 von 15 | keine | Prinzip Nr. 1 |
 | Vertikales Sichtfeld der Bildkamera | „moderat“ (Ref 09, 10, 12, 15), „eher lang“ (Ref 05), nur qualitativ | 15–40° (≈ 33–90 mm Kleinbild) | Neuentwurf: übersetzt „moderat“ in eine Zahl |
@@ -533,7 +538,7 @@ Regeln 1, 2, 4 und 5 setzen DNA-Prinzip Nr. 1, 4 und 6 um; Regel 3 übernimmt de
 8. **[Variabel]** Medium (Foto, Render, Vektor) und Plastizität sind frei, ebenso ein bewegtes Motiv (siehe 10.7, Regel 9: belegt ist nur der Ort, Ref 04/07, 09; Art, Medium und Auslöser sind Neuentwurf, nicht beobachtet). Ein Render der Stufe 4 steht nur in gestaltetem Licht (Rahmen aus 5.3, als Ausschluss 10.10, Nr. 9); Lichtrichtung und Farbstimmung des Assets passen zum Grund (Ref 06, 09, 12).
 9. **[Variabel]** Das Verankerungsmittel ist frei: Anschnitt, Überdeckung, Vordergrund, Lichtsaum, Klammer oder Grundgleichheit. Ein weicher Objektschatten ist nur auf heller Fläche als Begleitmittel zulässig (Ref 05).
 10. **[Variabel]** Masken sind geometrisch und stammen aus dem Formsystem; organische Konturen entstehen im Alphakanal des Assets oder durch Verdeckung.
-11. **[Variabel]** Das Objekt darf vor Karten und Kulissenschrift treten (Ref 05, 08), nie vor Navigation, Hauptaktion, Lesetext oder ein fokussiertes Element.
+11. **[Variabel]** Das Objekt darf vor Karten und Kulissenschrift treten (Ref 05, 08), nie vor Navigation, Hauptaktion, Lesetext oder ein fokussiertes Element. Überdeckte Karten liegen auf der Inhaltsstufe unter Kulisse und Motiv (10.2, Umsetzung).
 12. **[Optional]** Rahmenbruch über eine Containerkante (Ref 05). Bedingung: genau ein Objekt an genau einer Kante, Bedienelemente bleiben im Rahmen.
 13. **[Optional]** Gerichteter Auslauf statt Bildkante (Ref 03). Bedingung: Freisteller auf gleichem oder lichtgleichem Grund, Fokuspunkt scharf.
 14. **[Optional]** Bildpanel im gerundeten Container (Ref 02, 14) oder Punze als Bildfenster (Ref 15). Bedingung: Die Textzone ist im Bild freigehalten.
@@ -609,7 +614,7 @@ Bewegung ist eine Zugabe und trägt die Gestaltung nie. Wenn sich etwas bewegt, 
 
 1. **[Pflicht]** Kein Zustand (Hover, Fokus, Scrollen, Übergang) verändert die Bedienschicht räumlich: kein Kippen, Drehen, 3D-Flip, Tilt (Nr. 1).
 2. **[Pflicht]** Bedienelemente verformen sich nicht und federn nicht nach (kein overshoot) (Nr. 5; 0 von 15).
-3. **[Pflicht]** Zustandsfeedback nutzt keinen Schlagschatten, keine leuchtende Fläche, keine zweite Akzentfarbe und keine Skalierung auf Zwischengrößen (Nr. 3, 6, 7, 10).
+3. **[Pflicht]** Zustandsfeedback nutzt keinen Schlagschatten, keine leuchtende Fläche, keine zweite Akzentfarbe und keine Skalierung auf Zwischengrößen (Nr. 3, 6, 7, 10). Ausgenommen ist nur die Signalfarbe für Fehler und Warnung unter den Bedingungen aus 10.10, Nr. 5.
 4. **[Pflicht]** Dauerbewegung (Schleife, Strom, Schweben) hat je Ansicht höchstens einen Träger, und das ist das Motiv. Die Bedienschicht steht still. Ein Szenenwechsel darf die Ebenen eines Sandwichs gemeinsam tauschen (Nr. 3, 11). Ein bewegter Grund ist Neuentwurf (nicht beobachtet) und nur zulässig, wenn er nicht mit dem Motiv als zweiter bewegter Träger konkurriert (Nr. 3) und die Obergrenzen aus Nr. 11 hält.
 5. **[Pflicht]** Bei Übergängen bleiben Kopfzeile und Ordnungsachse stehen (Ref 04/07; Nr. 3).
 6. **[Pflicht]** Der Start, der Endzustand jeder Szene und die Fassung für „weniger Bewegung“ sind vollständig komponiert und lesbar. Kein Inhalt ist nur über Bewegung erreichbar (Ableitung).
@@ -629,7 +634,8 @@ Alle Verhaltensvorgaben dieses Abschnitts (Technik, Scrollen, Motiv, Übergänge
 - **Technik.** Erforderlich sind nur CSS-Übergänge auf `opacity`, `transform` und Farbe sowie die Abfrage `prefers-reduced-motion`. GSAP, Lottie, WebGL, View Transitions und `animation-timeline: view()` sind optional; die DNA braucht keine davon.
 - **Scrollen.** Die Seite scrollt nativ, ohne übernommene Scrollsteuerung (scroll hijacking). Eine angeheftete Szene (pinning) rastet in ihrem Endzustand ein, bevor sie die Seite freigibt. Inhalte sind auch ohne Skript sichtbar.
 - **Motiv.** Eine vorgerenderte Schleife oder Bildsequenz mit dem Ruhezustand als Poster hat Vorrang vor Echtzeit-3D, denn Echtzeit ist nicht belegt.
-- **Übergänge und Physik.** Seitenwechsel laufen höchstens als Überblendung (crossfade), und die Kopfzeile bekommt einen eigenen `view-transition-name`. Die UI hat keine Feder (spring); Karussells nutzen `scroll-snap`.
+- **Übergänge und Physik.** Seitenwechsel laufen als Überblendung (crossfade), und die Kopfzeile bekommt einen eigenen `view-transition-name`. Nur der Fokusträger darf dabei als gemeinsames Element gleiten und gleichmäßig skalieren, ohne Überschwingen; das ist Bewegung im Motiv und eine Ausnahme zu 10.10, Nr. 14. Die UI hat keine Feder (spring); Karussells nutzen `scroll-snap`.
+- **Direkte Manipulation und Sheet.** Direkte Manipulation ist keine Bewegung der Bedienschicht im Sinn von 10.10, Nr. 14: Ein Element darf dem Finger 1:1 in der Ebene folgen (Ziehen, Wischen, Sheet, Karussell mit `scroll-snap`), ohne Kippung, Skalierung, Feder oder Überschwingen. Ein plattformübliches Sheet darf in der Ebene einfahren (Ausnahme zur Deckkraftregel für Menü und Panel); bei „weniger Bewegung“ erscheint es nur über Deckkraft.
 
 Werte für die Sammlung in 10.9:
 
@@ -640,9 +646,12 @@ Werte für die Sammlung in 10.9:
 | Räumliche Transformation der UI | 0 von 15 | keine | Nr. 1 |
 | Überschwingen der UI | 0 von 15 fluide UI | keines (Bezier-Werte 0–1) | Nr. 5 |
 | Skalierung der UI | nicht beobachtet | keine (1,0), auch nicht beim Drücken | Nr. 7; Regel 3; 10.10, Nr. 14 |
-| Versatz beim Einblenden der UI | nicht beobachtet | keiner; Ein- und Ausblenden nur über Deckkraft | Grundsatz; 10.10, Nr. 14 |
+| Versatz beim Einblenden der UI | nicht beobachtet | keiner; Ein- und Ausblenden nur über Deckkraft; Ausnahme: plattformübliches Sheet | Grundsatz; 10.10, Nr. 14 |
 | Dauer des Zustandswechsels | nicht beobachtet | 120–200 ms (160) | Neuentwurf |
 | Ein- und Ausblenden (Menü, Panel) | nicht beobachtet | 200–300 ms | Neuentwurf |
+| Sheet (plattformüblich) | nicht beobachtet | fährt in 200–300 ms in der Ebene ein, ohne Feder und Überschwingen; bei „weniger Bewegung“ nur Deckkraft | Neuentwurf, ergänzt nach Praxistest; Ausnahme zu 10.10, Nr. 14 |
+| Direkte Manipulation | nicht beobachtet | Element folgt dem Finger 1:1 in der Ebene, ohne Kippung, Skalierung, Feder oder Überschwingen | Neuentwurf, ergänzt nach Praxistest; Abgrenzung zu 10.10, Nr. 14 |
+| Seitenwechsel | nicht beobachtet | Überblendung 200–300 ms; nur der Fokusträger darf als gemeinsames Element gleiten und gleichmäßig skalieren; Kopfzeile und Ordnungsachse stehen | Neuentwurf, ergänzt nach Praxistest; Ausnahme zu 10.10, Nr. 14 |
 | Einblenden eines Folgeabschnitts | nicht beobachtet | 300–500 ms, nur Deckkraft, einmalig | Neuentwurf |
 | Szenenwechsel im Motiv | Aufbau Ref 04/07, Dauer nicht | 500–900 ms | Neuentwurf; Lesbarkeit aus Ref 04 |
 | Motivschleife (Schweben, Drehen) | Hypothese zu Ref 09 | Periode 6–10 s; Schweben ≤ 2 % der Objekthöhe | Neuentwurf; Obergrenze wie Videoschleife in 10.8 |
@@ -653,12 +662,12 @@ Werte für die Sammlung in 10.9:
 | Anheftstrecke je Szene | nicht beobachtet | ≤ 1,5 Viewporthöhen, ≥ ⅓ davon Ruhe | Neuentwurf; Ref 04 |
 | Scroll-Hinweis | Klein-UI mit Haarlinie (Ref 09, 15) | ruhend, in Größe der Bedienschrift | Beleg; Nr. 7 |
 | Selbstlauf ohne Pause | nicht beobachtet | ≤ 5 s | WCAG 2.2.2 |
-| Fassung „weniger Bewegung“ | gefordert (Ref 04) | Überblendung ≤ 200 ms oder Schnitt | Profilregel Ref 04, 06; WCAG 2.3.3 (Stufe AAA), eigene Vorgabe über AA hinaus |
+| Fassung „weniger Bewegung“ | gefordert (Ref 04) | Szenen- und Seitenwechsel als Überblendung ≤ 200 ms oder Schnitt; Sheets nur über Deckkraft | Profilregel Ref 04, 06; WCAG 2.3.3 (Stufe AAA), eigene Vorgabe über AA hinaus |
 
 ### Mobil und Barrierefreiheit
 
 - **Mobil (0 von 15 belegt, Neuentwurf).** Ab 360 px Breite gibt es kein Parallax über eine Ebene hinaus und keine Anheftstrecken. Eine Kamerafahrt wird zum Standbild. Motivvideos sind komprimiert, haben ein Poster und werden erst nach dem ersten Rendern geladen. Kein Zustand hängt am Hover. Ziele messen mindestens 24 × 24 CSS-px (WCAG 2.5.8), empfohlen sind 44 px.
-- **Weniger Bewegung.** Unter `prefers-reduced-motion: reduce` laufen keine Schleifen, kein Parallax, kein Anheften und keine Scroll-Kopplung. Szenenwechsel werden zur kurzen Überblendung oder zum Schnitt; Farb- und Deckkraftwechsel bleiben. Unabhängig davon ist selbstlaufende Bewegung über 5 s pausierbar (2.2.2), und nichts blitzt öfter als dreimal pro Sekunde (2.3.1).
+- **Weniger Bewegung.** Unter `prefers-reduced-motion: reduce` laufen keine Schleifen, kein Parallax, kein Anheften und keine Scroll-Kopplung. Szenen- und Seitenwechsel werden zur kurzen Überblendung oder zum Schnitt, Sheets erscheinen nur über Deckkraft; Farb- und Deckkraftwechsel bleiben. Unabhängig davon ist selbstlaufende Bewegung über 5 s pausierbar (2.2.2), und nichts blitzt öfter als dreimal pro Sekunde (2.3.1).
 - **Lesbarkeit.** Bedeutungstragender Text bewegt sich nicht, solange er gelesen werden soll, und unterschreitet in keinem Zwischenzustand 4,5:1 (großer Text 3:1). Ausgenommen ist nur die Kulissenschrift.
 - **Tastatur.** Jede Zeigeraktion (Chevron, Hotspot, Karussell) ist per Tastatur erreichbar; Ref 09 benennt das als Risiko. Der Fokus ist unabhängig vom Hover-Kanal eine formfolgende Kontur von mindestens 2 px mit mindestens 3:1 (1.4.11), unverdeckt (2.4.11). Dekorebenen bekommen `pointer-events: none` und `aria-hidden`.
 - **Leistung.** Motiv, Ebenen und große Flächen animieren nur `transform` und `opacity`, nie `backdrop-filter`, `filter` oder Schatten. Zustandswechsel kleiner Bedienelemente dürfen zusätzlich Farbe, Füllung, Kontur und `filter` (Sättigung) überblenden (siehe 10.8). Bewegung außerhalb des Sichtbereichs hält an. Animationen verschieben kein Layout, das LCP-Element ist das statische Motiv oder Poster, und das INP bleibt unter 200 ms.
@@ -735,7 +744,7 @@ Alle Zuordnungen und Werte sind Vorschläge; außer den genannten Belegen ist al
 |---|---|---|---|
 | Echtzeit-3D | 0 von 15 belegt | nur nach Regel 9 | 5.5 „Kein 3D-Look“ |
 | LCP / INP / CLS (75. Perzentil, mobil) | nicht beobachtet | ≤ 2,5 s / ≤ 200 ms / ≤ 0,1 | Schwellen „gut“ der Core Web Vitals (externe Norm) |
-| Übertragung bis LCP, komprimiert | nicht beobachtet | ≤ 350 KB mobil | Neuentwurf |
+| Übertragung bis LCP, komprimiert | nicht beobachtet | ≤ 350 KB mobil, ≤ 600 KB Desktop | Neuentwurf; Desktop ergänzt nach Praxistest (Fokus-Asset am Desktop bis 400 KB) |
 | JavaScript erster Bildschirm, komprimiert | nicht beobachtet | ≤ 100 KB, ohne 3D-Bibliothek | Neuentwurf |
 | Nachgeladenes 3D-Paket (Bibliothek, Modell, Texturen) | nicht beobachtet | ≤ 1,5 MB mobil, ≤ 3 MB Desktop | Neuentwurf |
 | Videoschleife im Hero | nur Hypothese (Ref 04/07, 09) | 4–10 s (Strom und Partikel ab 4 s, Schweben und Drehen 6–10 s wie 10.7); ≤ 1,5 MB mobil, ≤ 4 MB Desktop | Neuentwurf |
@@ -775,7 +784,7 @@ Die Tabelle geht in die Zahlensammlung 10.9 ein.
 
 Dieser Abschnitt führt alle Zahlen des Styleguides an einer Stelle zusammen. Gemessen ist keine davon: Die Referenzen sind Standbilder, 9 von 15 Quellen sind perspektivisch verzerrt, 0 von 15 zeigen eine Mobilansicht. Belegt sind Verhältnisse, Reihenfolgen und Obergrenzen, keine Pixel. Jeder Vorschlag ist deshalb ein Startwert, den man am eigenen Bildschirm gegen die Regel prüft, aus der er stammt; maßgeblich ist die Regel, nicht die Zahl. Farbe erscheint nur als Funktion (Anteil, Kontrast, Akzentrolle), nie als Farbton. Kollidiert ein Effektwert mit einer Mindestanforderung (WCAG 2.2 AA, Leistungsbudget), weicht der Effekt. Weicht ein Abschnitt von dieser Sammlung ab, gilt 10.9; die Abschnitte 10.1 bis 10.8 und 10.10 sind auf diesen Stand angeglichen.
 
-**Lesehinweis.** „Beobachtet“ enthält nur Qualitatives oder ausdrücklich geschätzte Verhältnisse mit Referenz; „Näherung“ heißt geschätzt am unverzerrten Bildschirmfoto Ref 01. „Vorschlag“ ist der Umsetzungswert in CSS-Pixeln (px) bzw. rem (1rem = 16 px). In der Spalte „Ableitung“ heißt *abgeleitet*: aus geschätzten Verhältnissen gerundet; *Ableitung*: aus einem Prinzip geschlossen; *Neuentwurf*: ohne Beleg, eigene Entscheidung; *Neuentwurf (nicht beobachtet)*: zeitliches Verhalten, das Standbilder nicht zeigen; *Norm*: WCAG 2.2 oder Core Web Vitals. „Ergänzt in 10.9“ markiert Werte, die nur hier stehen. Die Werte setzen keine besondere Technik voraus; was für einen Effekt erforderlich und was optional ist, regelt die Matrix in 10.8.
+**Lesehinweis.** „Beobachtet“ enthält nur Qualitatives oder ausdrücklich geschätzte Verhältnisse mit Referenz; „Näherung“ heißt geschätzt am unverzerrten Bildschirmfoto Ref 01. „Vorschlag“ ist der Umsetzungswert in CSS-Pixeln (px) bzw. rem (1rem = 16 px). In der Spalte „Ableitung“ heißt *abgeleitet*: aus geschätzten Verhältnissen gerundet; *Ableitung*: aus einem Prinzip geschlossen; *Neuentwurf*: ohne Beleg, eigene Entscheidung; *Neuentwurf (nicht beobachtet)*: zeitliches Verhalten, das Standbilder nicht zeigen; *Norm*: WCAG 2.2 oder Core Web Vitals. „Ergänzt in 10.9“ markiert Werte, die nur hier stehen. „Ergänzt nach Praxistest“ markiert Neuentwürfe, die nach dem Praxistest des Design-Prompts (Ergebnis C) hinzukamen. Die Werte setzen keine besondere Technik voraus; was für einen Effekt erforderlich und was optional ist, regelt die Matrix in 10.8.
 
 ### Fläche und Komposition
 
@@ -783,7 +792,7 @@ Dieser Abschnitt führt alle Zahlen des Styleguides an einer Stelle zusammen. Ge
 |---|---|---|---|---|
 | Ordnungslinien je Ansicht | eine primäre in 15 von 15; eingerückte Zweitlinie Ref 02, 03, 11 | 1 primäre, höchstens 1 eingerückte | Regeln Ref 03, 11 | 10.1 |
 | Einzug der Zweitlinie | etwa 2–3 % der Breite (Ref 11, geschätzt) | 2–4 % der Breite (etwa eine halbe Rasterspalte) | abgeleitet aus Ref 11 | 10.1 |
-| Seitenrand | gemeinsame Außenkante bei etwa 7 % der Breite (Ref 11, Folie, geschätzt) | `clamp(1rem, 5vw, 6rem)`: rund 18 px bei 360 px, 5 % am Desktop | Neuentwurf, angelehnt an Ref 11 (etwa 7 %); mobil Neuentwurf; ergänzt in 10.9 | 10.9 |
+| Seitenrand | gemeinsame Außenkante bei etwa 7 % der Breite (Ref 11, Folie, geschätzt) | `clamp(1rem, 5vw, 6rem)` ab 640 px, 5 % am Desktop; unter 640 px 16 oder 20 px (Startwert 20 px), weil die Formel dort 18 px (360 px) bzw. 19,5 px (390 px) ergäbe und die 4-px-Basis verließe | Neuentwurf, angelehnt an Ref 11 (etwa 7 %); ergänzt in 10.9; Mobilwert Neuentwurf, ergänzt nach Praxistest | 10.9 |
 | Spaltenraster | nicht messbar | 12 Spalten ab 1024 px, 8 ab 640 px, 4 darunter; Spaltenabstand 16–32 px | Neuentwurf | 10.1 |
 | Kopfzeile | dünner Streifen: etwa 5 % der Höhe (Ref 12), etwa 6 % der Fläche (Ref 03), unter einem Zehntel (Ref 14), geschätzt | höchstens 8 % der Viewporthöhe; die Zielgröße der Bedienelemente geht vor | abgeleitet aus Ref 03, 12, 14 | 10.1 |
 | Breite der Lesezone | etwa ¼ (Ref 03), ⅓ (Ref 15) bis 40 % (Ref 02) der Breite, geschätzt | 25–42 % (3–5 von 12 Spalten); mobil volle Inhaltsbreite | abgeleitet aus Ref 02, 03, 15; mobil Neuentwurf | 10.1 |
@@ -791,8 +800,8 @@ Dieser Abschnitt führt alle Zahlen des Styleguides an einer Stelle zusammen. Ge
 | Fläche des Fokusträgers (Objekt) | etwa ⅛ (Ref 08), 12–15 % (Ref 10), 20–25 % (Ref 03), ¼ bis knapp ⅓ (Ref 07), geschätzt | 15–35 % | abgeleitet aus Ref 03, 07, 08, 10 | 10.1, 10.6 |
 | Fläche einer Szene | rund ⅔ (Ref 14), vollflächig (Ref 15), geschätzt | 60–100 %, Textzone im Bild frei | Ref 14, 15 | 10.6 |
 | Textfläche ohne Kulissenschrift | Headline 6–8 % (Ref 10), Headline-Block etwa ein Zwanzigstel (Ref 12), Navigation unter 3 % (Ref 04), geschätzt | höchstens 15 % | Summe aus Ref 04, 10, 12, aufgerundet | 10.1 |
-| Textmenge erster Bildschirm | Kernaussage ein- (Ref 07, 08), zwei- (Ref 01, 02, 14) oder dreizeilig (Ref 10, 12, 15); ein bis zwei Handlungsaufrufe | Headline höchstens 3 Zeilen; höchstens etwa 40 Wörter außerhalb der Navigation; 1 primärer, höchstens 1 sekundärer Handlungsaufruf | Zeilenzahl aus den Belegen; Wortzahl Neuentwurf | 10.1 |
-| Zeilenlänge Fließtext | nicht messbar | 45–75 Zeichen (`max-width` in `ch`) | Neuentwurf (Konvention) | 10.1 |
+| Textmenge erster Bildschirm | Kernaussage ein- (Ref 07, 08), zwei- (Ref 01, 02, 14) oder dreizeilig (Ref 10, 12, 15); ein bis zwei Handlungsaufrufe | Headline höchstens 3 Zeilen, aus Inhaltsdaten (Titel, Namen) bis 5 Zeilen (siehe Headline : Fließtext); höchstens etwa 40 Wörter außerhalb der Navigation; 1 primärer, höchstens 1 sekundärer Handlungsaufruf | Zeilenzahl aus den Belegen; Wortzahl Neuentwurf; Ausnahme für Inhaltsdaten Neuentwurf, ergänzt nach Praxistest | 10.1 |
+| Zeilenlänge Fließtext | nicht messbar | 45–75 Zeichen (`max-width` in `ch`); unter 640 px mindestens 35 Zeichen, weil bei 360 px Breite nach Abzug des Seitenrands je nach Schrift und Grad nur rund 35–40 Zeichen passen | Neuentwurf (Konvention); Mobilwert Neuentwurf, ergänzt nach Praxistest | 10.1 |
 | Anschnitt der Folgesektion | im unteren Viertel (Ref 12, geschätzt) | 8–25 % der Viewporthöhe | Ref 12; Untergrenze Neuentwurf | 10.1 |
 
 ### Abstände und Überlagerung
@@ -813,9 +822,9 @@ Dieser Abschnitt führt alle Zahlen des Styleguides an einer Stelle zusammen. Ge
 | Parameter | beobachtet in den Referenzen | Vorschlag (Wert/Bereich) | Ableitung | Abschnitt |
 |---|---|---|---|---|
 | Größenstufen je Ansicht | zwei (Ref 07) oder drei weit gespreizte (Ref 04, 15); Ref 15 zusätzlich mit den Kapitelziffern als Zwischenstufe (Definitionsfrage, 4.4, Frage 1) | 2–3 | Ableitung aus Nr. 7 | 10.1 |
-| Hauptelement : Bedienschrift | rund dreifach (Ref 06) bzw. drei- bis vierfach (Ref 02) als kleinste Sprünge; fünf- bis zehnfach (Ref 07); Navigation rund 2 %, Riesenlettern 15–20 % der Höhe (Ref 04); geschätzt | mindestens 3-fach bei jeder Breite, Desktop etwa 5–12-fach; gemessen Versalhöhe zu Versalhöhe (ist das Hauptelement ein Objekt, Objekthöhe zu Versalhöhe; dann gilt nur die Untergrenze) | Ref 02, 04, 06, 07; Obergrenze Neuentwurf; Messregel ergänzt in 10.9 | 10.1, 10.10 |
+| Hauptelement : Bedienschrift | rund dreifach (Ref 06) bzw. drei- bis vierfach (Ref 02) als kleinste Sprünge; fünf- bis zehnfach (Ref 07); Navigation rund 2 %, Riesenlettern 15–20 % der Höhe (Ref 04); geschätzt | mindestens 3-fach bei jeder Breite, keine Obergrenze; gemessen wird zur Versalhöhe der Bedienschrift: bei Schrift die Versalhöhe, bei einem Objekt die Objekthöhe, bei einer Szene die Höhe des Ankers in der Szene | Ref 02, 04, 06, 07; Messregel ergänzt in 10.9, Szene ergänzt nach Praxistest; die frühere Obergrenze (Desktop etwa 5–12-fach, Neuentwurf) ist gestrichen, weil Kulissenschrift (Versalhöhe 15–33 % der Bühne) und Objekt (15–35 % der Fläche) sie regelmäßig überschreiten | 10.1, 10.10 |
 | Kulissenschrift : Headline | Riesenlettern 15–20 % gegen Headline rund 10 % der Höhe (Ref 04); Wortmarke etwa fünffache Headline-Versalhöhe (Ref 03); Headline ⅐ bis ⅛ der Buchstabenhöhe (Ref 15); geschätzt | mindestens 1,5-fach, typisch 2–8-fach | abgeleitet aus Ref 03, 04, 15; ergänzt in 10.9 | 10.9 |
-| Headline : Fließtext | rund dreifach (Ref 06), drei- bis vierfach (Ref 02), vier- bis fünffach (Ref 11), geschätzt | Desktop 3–4,5-fach, mobil mindestens 2,25-fach | Ref 02, 06, 11; mobil Neuentwurf | 10.1 |
+| Headline : Fließtext | rund dreifach (Ref 06), drei- bis vierfach (Ref 02), vier- bis fünffach (Ref 11), geschätzt | Desktop 3–4,5-fach, mobil mindestens 2,25-fach; Ausnahme für Headlines aus Inhaltsdaten (Titel, Namen): Umbruch bis 5 Zeilen oder einmalig mindestens 1,75-fach; sie bleibt eine Größenstufe und wird nie gekürzt oder abgeschnitten | Ref 02, 06, 11; mobil Neuentwurf; Ausnahme Neuentwurf, ergänzt nach Praxistest | 10.1 |
 | Spreizung unterhalb der Headline | eine sachliche Stufe für alles Funktionale (Regel Ref 07) | kleinster zu größtem Grad höchstens 1,25-fach | Nr. 7; Faktor Neuentwurf | 10.1 |
 | Fließtext | nicht messbar | 16–18 px | Neuentwurf | 10.1, 10.10 |
 | Bedienschrift und Mikrolabel | Bedienschrift „winzig“; Scroll-Hinweis in kleinen Versalien (Ref 09, 15) | mindestens 14 px und mindestens Fließtext ÷ 1,25; Versal-Mikrolabel mit Laufweite +0,06 bis +0,12 em | Neuentwurf; Laufweite ergänzt in 10.9 | 10.1, 10.10 |
@@ -831,8 +840,8 @@ Dieser Abschnitt führt alle Zahlen des Styleguides an einer Stelle zusammen. Ge
 
 | Parameter | beobachtet in den Referenzen | Vorschlag (Wert/Bereich) | Ableitung | Abschnitt |
 |---|---|---|---|---|
-| Ebenen je Ansicht | drei bis sechs; mindestens drei in 15 von 15; sechs nur Ref 15 | 3–4; 5–6, wenn die Reihenfolge eindeutig bleibt (vorzugsweise in einer Kamera-Szene); mehr als 6 ausgeschlossen | Beleg (5.4, Ref 15); „Kamera-Szene“ Ableitung aus Ref 15; > 6 Ableitung | 10.1, 10.2, 10.10 |
-| Stapelfolge (Z-Stufen) | Grund → Schrift → Freisteller → (Vordergrund) → Bedienschicht (Ref 03, 04, 05, 07, 13, 15); Schrift vor Objekt nur Ref 08 | 0 Grund, 10 Kulisse, 20 Motiv, 25 Vordergrund, 30 Bedienschicht, 40 Navigation und Overlays; für Ref-08-Fälle tauschen Kulisse und Motiv | Reihenfolge belegt; Zahlen Neuentwurf | 10.1, 10.2 |
+| Ebenen je Ansicht | drei bis sechs; mindestens drei in 15 von 15; sechs nur Ref 15 | 3–4; 5–6, wenn die Reihenfolge eindeutig bleibt (vorzugsweise in einer Kamera-Szene); mehr als 6 ausgeschlossen; gezählt werden die sichtbaren Bildebenen (Grund, Kulisse, Motiv, Vordergrund) plus die Bedienschicht als eine Ebene: Navigation und Overlays gehören zur Bedienschicht, Nebenkörper zur Motivebene, Karten unter dem Motiv zählen als eigene Ebene, Scrim und Lichtraum zählen nicht mit | Beleg (5.4, Ref 15); „Kamera-Szene“ Ableitung aus Ref 15; > 6 Ableitung; Zählregel Neuentwurf, ergänzt nach Praxistest | 10.1, 10.2, 10.10 |
+| Stapelfolge (Z-Stufen) | Grund → Schrift → Freisteller → (Vordergrund) → Bedienschicht (Ref 03, 04, 05, 07, 13, 15); Schrift vor Objekt nur Ref 08; Objekt vor Karten: Ref 05 (Karte → Schriftzug → Leuchte), Ref 08 (Karten → Zitrone → Großschrift) | 0 Grund, 5 Inhaltsflächen, die das Motiv überdecken darf (Karten; eigene Ebene, Bedienziele und Fokusrahmen bleiben unverdeckt), 10 Kulisse, 20 Motiv, 25 Vordergrund, 28 Scrim (zwischen Bild und Text, zählt bei der Ebenenzahl nicht mit), 30 Bedienschicht, 40 Navigation und Overlays; für Ref-08-Fälle tauschen Kulisse und Motiv, die Inhaltsstufe bleibt unter beiden | Reihenfolge belegt; Zahlen Neuentwurf; Scrim- und Inhaltsstufe ergänzt nach Praxistest | 10.1, 10.2, 10.6 |
 | Sichtbare Verdeckungen | primäres Tiefenmittel in 12 von 15 | mindestens 1 je Ansicht; ersatzweise Bildoptik (Ref 02, 09, 14) | Nr. 2 | 10.2 |
 | Schärfestufen | bis drei (Ref 02, 08) | höchstens 3; Fokusträger und Schrift immer scharf | Ref 02, 08 | 10.2, 10.3 |
 | Tiefenunschärfe an Begleitelementen | Schärfestaffelung in 5 von 15 (Ref 02, 04, 08, 13, 14); Radien nicht messbar | leicht etwa 0,3–0,6 %, stark etwa 1–2 % der Bühnenbreite; im Asset eingebacken, auf kleinen Ebenen optional `filter: blur()` | Stufen Ref 02, 08; Radien Neuentwurf; ergänzt in 10.9 | 10.9 |
@@ -915,7 +924,10 @@ Belegt sind nur der Ort der Bewegung und die Zahl der bewegten Träger (Ref 04/0
 | Ort der Bewegung | nur im Motiv; Bedienschicht in 0 von 4 auswertbaren bewegt (Ref 04/07, 09) | nur Motivebenen; Bedienschicht steht still; bewegter Grund nur als Neuentwurf, ohne Konkurrenz zum Motiv und innerhalb von Nr. 11 | Beleg; Nr. 1; bewegter Grund Neuentwurf (nicht beobachtet), Nr. 3 und 11 | 10.7, 10.8 |
 | Dauerbewegte Träger je Ansicht | je Beleg einer (Ref 04/07, 09) | höchstens 1 | Nr. 3 | 10.7, 10.8 |
 | Zustandswechsel (Hover, Fokus, aktiv) | statische Kanäle belegt: Deckkraft (Ref 02), Glas gegen opak (Ref 03), Sättigung (Ref 12), Füllung gegen Kontur (Ref 14); Verhalten nicht belegt | 120–200 ms (Standard 160 ms); nur Deckkraft, Sättigung, Farbe, Füllung, Kontur | Kanäle belegt; Dauer Neuentwurf (nicht beobachtet) | 10.7, 10.8 |
-| Ein- und Ausblenden (Menü, Panel) | nicht beobachtet | 200–300 ms; nur Deckkraft, kein Versatz | Neuentwurf (nicht beobachtet); 10.10, Nr. 14 | 10.7 |
+| Ein- und Ausblenden (Menü, Panel) | nicht beobachtet | 200–300 ms; nur Deckkraft, kein Versatz; Ausnahme: plattformübliches Sheet (nächste Zeile) | Neuentwurf (nicht beobachtet); 10.10, Nr. 14 | 10.7 |
+| Sheet (plattformüblich) | nicht beobachtet | fährt in 200–300 ms in der Ebene ein, ohne Feder und Überschwingen; bei „weniger Bewegung“ nur Deckkraft | Neuentwurf (nicht beobachtet), ergänzt nach Praxistest; Ausnahme zu 10.10, Nr. 14 | 10.7 |
+| Direkte Manipulation | nicht beobachtet | Element folgt dem Finger 1:1 in der Ebene (Ziehen, Wischen, Sheet, Karussell mit `scroll-snap`), ohne Kippung, Skalierung, Feder oder Überschwingen; gilt nicht als Bewegung der Bedienschicht | Neuentwurf (nicht beobachtet), ergänzt nach Praxistest; Abgrenzung zu 10.10, Nr. 14 | 10.7 |
+| Seitenwechsel | nicht beobachtet | Überblendung 200–300 ms; nur der Fokusträger darf als gemeinsames Element gleiten und gleichmäßig skalieren (Bewegung im Motiv), ohne Überschwingen; Kopfzeile und Ordnungsachse stehen | Neuentwurf (nicht beobachtet), ergänzt nach Praxistest; Ausnahme zu 10.10, Nr. 14 | 10.7 |
 | Austritt | nicht beobachtet | etwa ¾ der Eintrittsdauer | Neuentwurf (nicht beobachtet); ergänzt in 10.9 | 10.9 |
 | Einblenden eines Folgeabschnitts | nicht beobachtet | 300–500 ms, nur Deckkraft, einmalig | Neuentwurf (nicht beobachtet) | 10.7 |
 | Druckrückmeldung | nicht beobachtet | keine Skalierung; Rückmeldung über die Zustandskanäle (Deckkraft, Sättigung, Farbe, Füllung, Kontur) | Neuentwurf (nicht beobachtet); 10.10, Nr. 14 | 10.7, 10.8 |
@@ -925,10 +937,10 @@ Belegt sind nur der Ort der Bewegung und die Zahl der bewegten Träger (Ref 04/0
 | Kurve für Szene und Schweben | nicht beobachtet | `cubic-bezier(0.65, 0, 0.35, 1)` | Neuentwurf (nicht beobachtet) | 10.7 |
 | Szenenwechsel im Motiv | Aufbau belegt: Kopfzeile steht, Wort und Motiv werden getauscht (Ref 04/07); stehender Zwischenzustand unlesbar (Ref 04) | 500–900 ms, ohne stehenden Zwischenzustand | Dauer Neuentwurf (nicht beobachtet); Lesbarkeit aus Ref 04 | 10.7 |
 | Motivschleife (Schweben, Drehen) | Hypothese zu Ref 09 | Periode 6–10 s; Schweben ≤ 2 % der Objekthöhe | Neuentwurf (nicht beobachtet) | 10.7, 10.8 |
-| Parallax-Faktor | sechs Ebenen ohne Werte, nur als Struktur (Ref 06) | Bildebenen 0,8–1,0 der Scrollgeschwindigkeit; Text und Bedienschicht 1,0; mobil höchstens eine Ebene | Neuentwurf (nicht beobachtet) | 10.2, 10.7 |
+| Parallax-Faktor | sechs Ebenen ohne Werte, nur als Struktur (Ref 06) | Bildebenen 0,8–1,0 der Scrollgeschwindigkeit, Vordergrund 1,0–1,2; Text, Scrim und Bedienschicht 1,0; mobil höchstens eine Ebene | Neuentwurf (nicht beobachtet); Vordergrund und Scrim ergänzt nach Praxistest | 10.2, 10.7 |
 | Anheftstrecke je Szene | nicht beobachtet | ≤ 1,5 Viewporthöhen, davon ≥ ⅓ Ruhe im Endzustand; mobil keine | Neuentwurf (nicht beobachtet) | 10.7 |
 | Scroll-Hinweis | Klein-UI in Versalien mit Haarlinie (Ref 09, 15) | ruhend, in Größe der Bedienschrift, an der Ordnungslinie | Beleg; Nr. 7 | 10.7 |
-| Fassung „weniger Bewegung“ | gefordert (Profilregeln Ref 04, 06); in Ref 04, 06, 07, 09, 15 fehlend oder nicht prüfbar | keine Schleife, kein Parallax, kein Anheften, keine Scroll-Kopplung, kein Versatz; Szenen als Überblendung ≤ 200 ms oder Schnitt; Farb- und Deckkraftwechsel bleiben | Profilregeln Ref 04, 06; WCAG 2.3.3 (Stufe AAA), eigene Vorgabe über AA hinaus | 10.7 |
+| Fassung „weniger Bewegung“ | gefordert (Profilregeln Ref 04, 06); in Ref 04, 06, 07, 09, 15 fehlend oder nicht prüfbar | keine Schleife, kein Parallax, kein Anheften, keine Scroll-Kopplung, kein Versatz; Szenen- und Seitenwechsel als Überblendung ≤ 200 ms oder Schnitt; Sheets nur über Deckkraft; Farb- und Deckkraftwechsel bleiben | Profilregeln Ref 04, 06; WCAG 2.3.3 (Stufe AAA), eigene Vorgabe über AA hinaus | 10.7 |
 | Selbstlauf und Blitze | nicht beobachtet | jede Bewegung, die länger als 5 s läuft, also jede Schleife, hat eine sichtbare Pause; höchstens 3 Blitze je Sekunde | Norm WCAG 2.2.2, 2.3.1 | 10.7, 10.10 |
 
 ### Effektbudget, Zählgrenzen und Farbe als Funktion
@@ -945,9 +957,10 @@ Die Intensitäten stehen auf der Skala 0–4 der Analyse (Kapitel 4 und 5). Sie 
 | Formsystem | typisch 2; 3 nur Ref 06, 14 | 2; 3 nur mit konventioneller Headline | Zielkonflikt ρ D5 + D18 = −0,38 | 10.5 |
 | Verformung | deutlich 1 von 15 (Übergangsframe Ref 04), Gegenprobe 0 von 14 | Bedienschicht 0; im Motiv eingefroren | 5.6.14 | 10.5 |
 | Einmal-Elemente je Ansicht | Fixationsanker und Fokusträger (Ausnahmen Ref 13, 14); ein Formbruch (Ref 03); ein Rahmenbruch (Ref 05); ein Helligkeitszentrum; ein aktiver Schein-Saum (Ref 13) | je genau bzw. höchstens 1: Anker, Fokusträger, Formbruch, Rahmenbruch, dominanter Lichtkern, Helligkeitszentrum, Schein-Saum, bewegter Träger, Schattenstufe | Nr. 3, 5, 6, 11; Ableitung | 10.1–10.7 |
+| Signature-Effekte ([Optional]) je Ansicht | mehrere je Referenz, etwa sieben in Ref 03 (5.4) | höchstens 2, jeder mit erfüllter Bedingung | Neuentwurf gegen Effektfülle, strenger als die Belege; ergänzt nach Praxistest | 10.9 |
 | Akzentrolle | Fokus über einen einzigartigen Reiz in 10 von 15; Farbe oder Farbtemperatur als dieser Reiz in Ref 01, 03, 05, 08, 10 | genau eine Akzentrolle; der Fokusreiz (Sättigung, Wärme, Helligkeit oder Tonwert) liegt allein am Fixationsanker | Nr. 3; 5.5 | 10.7, 10.10 |
 | Anteil der Akzentrolle in der Bedienschicht | punktuell, wenige Prozent (Ref 14, geschätzt); ein einziger gesättigter Akzent (Ref 01) | höchstens etwa 5 % der Ansicht, auf Hauptaktion und aktiven Zustand begrenzt | abgeleitet aus Ref 01, 14; Wert Neuentwurf; ergänzt in 10.9 | 10.9 |
-| Rang und Zustand | ohne Zusatzfarbe in mindestens 7 von 15 | über Deckkraft, Sättigung, Füllung gegen Kontur oder Glas gegen opak; keine zweite Akzentfarbe; Farbe nie einziges Signal | Beleg; Norm WCAG 1.4.1 | 10.7 |
+| Rang und Zustand | ohne Zusatzfarbe in mindestens 7 von 15 | über Deckkraft, Sättigung, Füllung gegen Kontur oder Glas gegen opak; keine zweite Akzentfarbe; Ausnahme: eine Signalfarbe nur für Fehler und Warnung, unter den Bedingungen aus 10.10, Nr. 5; Farbe nie einziges Signal | Beleg; Norm WCAG 1.4.1; Signalfarbe Neuentwurf, ergänzt nach Praxistest (5.3 schließt nur eine zweite Akzentfarbe aus, die mit dem Anker konkurriert) | 10.7, 10.10 |
 | Grundton | hell 6, dunkel 7, fotografisch gemischt 2 von 15 | frei; Figur-Grund-Trennung folgt ihm: hell Begleitschatten oder Kantensaum, dunkel Licht | 5.5 | 10.4 |
 
 ### Barrierefreiheit
@@ -968,7 +981,7 @@ Die Intensitäten stehen auf der Skala 0–4 der Analyse (Kapitel 4 und 5). Sie 
 | Parameter | beobachtet in den Referenzen | Vorschlag (Wert/Bereich) | Ableitung | Abschnitt |
 |---|---|---|---|---|
 | LCP / INP / CLS (75. Perzentil, mobil) | nicht beobachtbar | ≤ 2,5 s / ≤ 200 ms / ≤ 0,1 | Norm Core Web Vitals | 10.8, 10.10 |
-| Übertragung bis LCP, komprimiert | nicht beobachtbar | ≤ 350 KB mobil | Neuentwurf | 10.8 |
+| Übertragung bis LCP, komprimiert | nicht beobachtbar | ≤ 350 KB mobil, ≤ 600 KB Desktop | Neuentwurf; Desktop ergänzt nach Praxistest | 10.8 |
 | Fokus-Asset | nicht beobachtbar | ≤ 200 KB mobil, ≤ 400 KB Desktop; bis 2 × Darstellungsbreite in 3–4 `srcset`-Stufen; nie verzögert geladen | Neuentwurf | 10.6 |
 | JavaScript erster Bildschirm, komprimiert | nicht beobachtbar | ≤ 100 KB, ohne 3D-Bibliothek | Neuentwurf | 10.8 |
 | Videoschleife im Hero | nur Hypothese (Ref 04/07, 09); Poster nötig (Profile Ref 04, 07) | 4–10 s; ≤ 1,5 MB mobil, ≤ 4 MB Desktop; Poster als Endzustand | Neuentwurf | 10.8 |
@@ -1006,8 +1019,9 @@ Die Werte werden als CSS-Custom-Properties in drei Schichten geführt. Die **Mar
   --grad-headline: clamp(calc(2.25 * var(--grad-text)), 1.5rem + 3vw, 4.5rem);
 
   --radius-full: 9999px; --radius-l: 1.75rem; --radius-s: .625rem;
-  --z-grund: 0; --z-kulisse: 10; --z-motiv: 20;
-  --z-vordergrund: 25; --z-ui: 30; --z-overlay: 40;
+  --z-grund: 0; --z-inhalt: 5;               /* Karten, die das Motiv überdecken darf */
+  --z-kulisse: 10; --z-motiv: 20;
+  --z-vordergrund: 25; --z-scrim: 28; --z-ui: 30; --z-overlay: 40;
 
   --blur-leicht: 12px; --blur-stark: 32px;
   --glas-blur: var(--blur-leicht);           /* .glas--text setzt --blur-stark */
@@ -1024,7 +1038,7 @@ Die Werte werden als CSS-Custom-Properties in drei Schichten geführt. Die **Mar
   --kurve-szene: cubic-bezier(.65, 0, .35, 1);
 }
 @media (max-width: 639px) {
-  :root { --radius-l: 1.125rem; }
+  :root { --radius-l: 1.125rem; --rand: 1.25rem; }   /* Rand 16 oder 20 px */
 }
 @media (prefers-reduced-motion: reduce) {
   :root { --dauer-szene: 200ms; }
@@ -1064,7 +1078,7 @@ Nr. 1–8 und 11–13 setzen die verbindliche DNA (5.2) als Verbot um, Nr. 14 is
 2. **[Pflicht]** Kein Schlagschatten als Elevation oder Tiefenträger, kein Neumorphismus. *Spielraum:* **[Optional]** ein weicher, blasser Begleitschatten auf heller Fläche neben Verdeckung (siehe 10.4). *Grund:* Nr. 6.
 3. **[Pflicht]** Keine Bedienelemente aus Metall, Relief, Glanz oder Kissenform und keine leuchtenden Flächen in der Bedienschicht. *Spielraum:* **[Optional]** ein Leuchtsaum an genau einem aktiven Element. *Grund:* Nr. 9 und 10; Ref 13 als Gegenbeispiel.
 4. **[Pflicht]** Keine fluiden, federnden oder sich dehnenden Bedienelemente, keine zweite Formfamilie, höchstens vier Radienstufen, höchstens ein bewusster Bruch je Ansicht. *Grund:* Nr. 5; Obergrenzen als Ableitung (siehe 10.5).
-5. **[Pflicht]** Kein zweiter Akzentreiz, der mit dem Fixationsanker konkurriert; Zustände laufen über Deckkraft, Sättigung, Füllung gegen Kontur oder Glas gegen opak. *Grund:* Fokus über einen einzigartigen Reiz in 10 von 15; Ableitung aus Nr. 3.
+5. **[Pflicht]** Kein zweiter Akzentreiz, der mit dem Fixationsanker konkurriert; Zustände laufen über Deckkraft, Sättigung, Füllung gegen Kontur oder Glas gegen opak. *Begründete Ausnahme (Neuentwurf, ergänzt nach Praxistest):* eine Signalfarbe nur für Fehler und Warnung. Sie erscheint nur im betroffenen Zustand, nie in der Ruhekomposition, immer zusammen mit Symbol und Text und mit mindestens 4,5:1; sie ist keine zweite Akzentrolle und konkurriert deshalb nicht mit dem Anker (5.3, Zustandscodierung). *Grund:* Fokus über einen einzigartigen Reiz in 10 von 15; Ableitung aus Nr. 3.
 6. **[Pflicht]** Keine einschichtige Fläche, keine Ebenen ohne eindeutige Stapelfolge, höchstens sechs Ebenen. *Grund:* Nr. 2; mehr als sechs Ebenen nicht belegt (siehe 10.2).
 7. **[Pflicht]** Kein Hauptbild als gerahmte Beigabe neben dem Text, keine deckende Box hinter Text auf dem Bild. Ausgenommen ist die deckende Glasfüllung bei reduzierter Transparenz oder erhöhtem Kontrast (10.3); dort geht die Mindestanforderung vor. *Grund:* Nr. 4.
 8. **[Pflicht]** Kein dominanter Grund: keine Mesh- oder Blob-Verläufe, kein zweites Helligkeitszentrum, höchstens drei Verlaufszonen, keine Partikel und kein kontraststarkes Muster unter Lesetext. *Grund:* Nr. 11.
@@ -1073,7 +1087,7 @@ Nr. 1–8 und 11–13 setzen die verbindliche DNA (5.2) als Verbot um, Nr. 14 is
 11. **[Pflicht]** Kein Layout ohne Ordnungslinie und kein Feld gleichrangiger Kacheln ohne Anker. *Spielraum:* **[Optional]** Bento-Raster nur mit erhaltenem Anker und Negativraum. *Grund:* Nr. 3 und 8; Ref 13 und 14 erfüllen die Bedingung nicht.
 12. **[Pflicht]** Keine gleichmäßige Größenskala und keine Zwischengrößen; zwischen Hauptelement und Klein-UI steht höchstens eine Headline. *Grund:* Nr. 7.
 13. **[Pflicht]** Keine Bühne mit deutlich weniger als etwa einem Drittel freier Fläche. *Grund:* Nr. 8 (Ableitung aus geschätzten Werten).
-14. **[Pflicht]** Keine Bewegung der Bedienschicht über Zustandswechsel hinaus, kein stehender Zwischenzustand mit unlesbarer Schrift (belegt: Ref 04/07, 09 bzw. Ref 04); kein zweiter bewegter Träger (auch kein bewegter Grund, der mit dem Motiv konkurriert; ein bewegter Grund ist sonst Neuentwurf nach 10.7, Regel 4), kein springender Rahmen, kein Ruhezustand ohne volle Komposition (Ableitung aus Nr. 1 und 3; siehe 10.7).
+14. **[Pflicht]** Keine Bewegung der Bedienschicht über Zustandswechsel hinaus, kein stehender Zwischenzustand mit unlesbarer Schrift (belegt: Ref 04/07, 09 bzw. Ref 04); kein zweiter bewegter Träger (auch kein bewegter Grund, der mit dem Motiv konkurriert; ein bewegter Grund ist sonst Neuentwurf nach 10.7, Regel 4), kein springender Rahmen, kein Ruhezustand ohne volle Komposition (Ableitung aus Nr. 1 und 3; siehe 10.7). *Gekennzeichnete Ausnahmen (Neuentwurf, nicht beobachtet, ergänzt nach Praxistest):* Direkte Manipulation ist keine Bewegung im Sinn dieses Ausschlusses; ein Element darf dem Finger 1:1 in der Ebene folgen (Ziehen, Wischen, Sheet, Karussell mit `scroll-snap`). Ein plattformübliches Sheet darf in 200–300 ms in der Ebene einfahren, bei „weniger Bewegung“ nur über Deckkraft. Beim Seitenwechsel (Überblendung 200–300 ms) darf der Fokusträger als gemeinsames Element gleiten und gleichmäßig skalieren; das ist Bewegung im Motiv. Alle drei laufen ohne Kippung, Feder oder Überschwingen, und Kopfzeile und Ordnungsachse bleiben stehen (Werte in 10.9).
 15. **[Pflicht]** Kontrast: Bedeutungstragender Text erreicht 4,5:1, großer Text 3:1, Bedienelementkonturen und Fokusanzeige 3:1 (WCAG 1.4.3, 1.4.11), jeweils gegen die ungünstigste Stelle des Untergrunds. Nur rein dekorative Kulissenschrift ist ausgenommen.
 16. **[Pflicht]** Text bleibt Text: Bedienschrift und Headline stehen als Live-Text im DOM, Dekorschrift ist für Hilfstechnik verborgen, reine Icons haben einen zugänglichen Namen oder ein sichtbares Label.
 17. **[Pflicht]** Tastatur: Jede Funktion ist per Tastatur erreichbar, der Fokus sichtbar und unverdeckt (2.4.7, 2.4.11), und nichts hängt allein am Überfahren. Dekorebenen fangen keine Zeigerereignisse.

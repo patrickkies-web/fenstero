@@ -1,6 +1,6 @@
 # Referenz 01 – Liquid-Glass-Komponenten (Figma-Tutorial)
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt.
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -17,7 +17,7 @@
 - **Einschränkungen der Aufnahme:** Nur ein Ausschnitt des Beitrags: Gesamtformat (z. B. 9:16), Bereiche über, links neben und unter dem Ausschnitt sowie mögliche weitere Inhalte unter „How to create“ fehlen; Standbild: Bewegung und Animation (z. B. Schalterbewegung, Verhalten der Glaseffekte in Bewegung) nicht beurteilbar; unklar, ob Cover oder Videoframe; Zustand und Aufbau des Schalters (Knopf oder Spur, an oder aus) nicht eindeutig bestimmbar; Plattform-Overlay liegt über dem rechten Rand (Bereich zwischen Glas-Pille und Bildrand) und verdeckt dort eventuell Rasterdetails; JPEG-Kompression: feine Verläufe, Rasterlinien und Glaskanten leicht verrauscht; Farbwerte nur Näherungen; Grad der beabsichtigten Weichzeichnung (Logo, Grün unter Glas) nicht exakt von Bildqualität trennbar, wegen der scharfen übrigen Kanten aber überwiegend als Gestaltung erkennbar; Schriftart nicht sicher bestimmbar; Originalauflösung und Maßstab unbekannt; alle Pixelangaben beziehen sich auf die Aufnahme mit 1206×865 px; Kein Moiré, keine Spiegelung, keine Perspektivverzerrung (direktes Bildschirmfoto)
 - **Korrekturen zur Vorab-Notiz:** Im Wesentlichen zutreffend. Präzisierungen und Korrekturen: (1) Schalter: Das gläserne Element ist kein kleiner Knopf. Es ist eine große mattierte Pille (ca. 600×300 px) und damit größer als die grüne Form, eine Pille von ca. 375×210 px. Die Glas-Pille überdeckt etwa die rechten vier Fünftel der grünen Form, unbedeckt bleibt nur deren linkes, gerundetes Ende (sattes Grün). Ob Knopf und Spur gemeint sind und welcher Zustand (an/aus) dargestellt ist, lässt sich nicht eindeutig sagen. „Toggle“ ist nur eine Anmutung. Unter dem Glas wirkt das Grün aufgehellt und weichgezeichnet, an der linken Glaskante oben und unten verzerrt (Lichtbrechung). (2) Rasterlinien: Die waagerechten Linien laufen über die ganze Breite, senkrechte Linien gibt es nur ab etwa der Bildmitte nach rechts (x ≈ 594/746/898/1050 px, Abstand ca. 152 px). Ober- und Unterkante sowie die Mittelachse beider Glasformen liegen auf Rasterlinien. (3) Runder Button: Das Figma-Logo ist leicht unscharf, darunter liegen farbige Schimmer. Am rechten Rand zeigt sich ein grünlicher Reflex, innen ein schwacher konzentrischer Ring. Der Hilfskreis ist eine dünne graue Linie, konzentrisch zum Button. (4) Titel: zwei getrennte Zeilen „Liquid Glass“ / „How to create“ ohne Gedankenstrich, gleiche Schriftgröße, linksbündig. (5) „Figma-Tutorial“ und „Vorschaubild“ sind Schlussfolgerungen. Das Wort „Figma“ steht nirgends, nur das Logo ist zu sehen. Ob es ein Cover oder ein Standbild aus dem Video ist, lässt sich nicht feststellen.
 
-## 2. Unabhängige Expertenbewertungen (Phase 2)
+## 2. Bewertungen der acht simulierten Perspektiven (Phase 2)
 
 ### 2.1 Bewertungsmatrix
 
@@ -190,7 +190,7 @@ Aus wahrnehmungspsychologischer Sicht funktioniert das Bild als Demonstrationsan
 
 **Technische Umsetzung:** Hintergrundunschärfe (Backdrop Blur) mit halbtransparenter heller Füllung für die Glasflächen (naheliegend: Das Grün unter dem Glas ist aufgehellt, entsättigt und weichgezeichnet, die Rasterlinien scheinen nur schwach und unscharf durch.) · Heller innerer Kantenschein bzw. Innenschatten, dazu weicher Schlagschatten mit großem Radius und geringer Deckkraft (naheliegend: Schmale Lichtsäume an allen Glaskanten und diffuse Abdunklung unter beiden Formen sind sichtbar.) · Verzerrungs- bzw. Brechungseffekt an der Glaskante, z. B. über eine Verschiebungskarte oder einen eingebauten Glaseffekt eines Designwerkzeugs (möglich: Das Grün ist entlang der linken Glaskante oben und unten schlierenartig verzogen, was eine reine Weichzeichnung nicht erzeugt.) · Weichgezeichnete, farbige Kopie des Logos als Leuchten unter der Glasfläche (möglich: Unter den Logoformen liegen farbige, unscharfe Schimmer, die über einen einfachen Schatten hinausgehen.) · Erstellung in Figma (spekulativ: Das Figma-Logo im Button deutet auf das Thema des Tutorials hin, belegt aber nicht das verwendete Werkzeug. Ein Name oder eine Editoroberfläche ist nicht sichtbar.)
 
-## 3. Expertenkonsens (Phase 3)
+## 3. Konsens der simulierten Perspektiven (Phase 3)
 
 ### 3.1 Konsens je Dimension
 

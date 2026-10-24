@@ -172,6 +172,8 @@ Zusammenführungsschritte:
 13. {01} + {02, 06, 11} bei Abstand 0,97
 14. {03, 04, 05, 07, 08, 09, 10, 12, 13, 14, 15} + {01, 02, 06, 11} bei Abstand 1,03
 
+**Gleichstand in Schritt 5.** Exakt gerechnet liegen {09, 12} + {05, 10} und {13} + {09, 12} gleich weit auseinander (je 25/52 = 0,4808). Die dokumentierte Folge entspricht der Gleitkommarechnung, in der das erste Paar nur um einen Rundungsfehler (≈ 10⁻¹⁶) kleiner ausfällt. Eine inhaltliche Auflösungsregel liegt nicht zugrunde; die Wahl ist willkürlich. Mit der anderen Wahl lauten die Schritte ab 5: 5. {13} + {09, 12} bei 0,48 · 6. {02} + {11} bei 0,5 · 7. {05, 10} + {09, 12, 13} bei 0,5 · 8. {14} + {05, 09, 10, 12, 13} bei 0,58 · 9. {03} + {04, 07, 08} bei 0,6 · 10. {06} + {02, 11} bei 0,67 · 11. {15} + {05, 09, 10, 12, 13, 14} bei 0,69 · 12. {03, 04, 07, 08} + {05, 09, 10, 12, 13, 14, 15} bei 0,79; die Schritte 13 und 14 bleiben gleich. **Ref 13 ist damit rechnerisch nicht eindeutig zugeordnet:** in der dokumentierten Lösung zu A, in der anderen zu B. Die übrigen Gleichstände (Schritt 1: {07} + {08} ebenfalls 0,27; Schritte 6 und 7 je 0,5) ändern das Ergebnis nicht.
+
 ## 4.2 Die 18 Dimensionen im Vergleich
 
 **Lesehinweis.** Häufigkeit, typische Intensität, Streuung, Expertenspannweite, Anteil niedriger Konfidenz und Konsenssicherheit stammen unverändert aus Abschnitt 4.1 (Haupttabelle, Zeile „stark ausgeprägt“, Gegenprobe). Der Nenner sind immer die auswertbaren Referenzen; NB zählt nicht als 0. Für die Einordnung gilt die Lesart „deutlich ausgeprägt“ (Median ≥ 2): **universelles Grundprinzip** bei ≥ 75 %, **wiederkehrendes Mittel** bei 40–74 %, **individuelles Stilmittel** bei < 40 %. Innerhalb jeder Dimension wird das abstrakte Prinzip von der konkreten Technik getrennt, denn oft ist das Prinzip breit und die Technik an wenige Referenzen gebunden. Kennzeichnung: **(B)** Beobachtung aus den Konsensprofilen, **(I)** Interpretation, **(H)** technische Hypothese ohne Beleg im Bild. Eigene Zählungen nennen immer Referenzliste und Nenner.
@@ -421,16 +423,16 @@ Zusammenführungsschritte:
 
 ## 4.3 Stilcluster
 
-**Grundlage (B).** Die Average-Linkage-Clusterung in 4.1 misst den mittleren Abstand der Konsens-Mediane über die 13 statischen und gemischten Dimensionen. Ein Schnitt zwischen Schritt 11 (0,72) und Schritt 12 (0,77) ergibt drei Cluster und einen Einzelgänger:
+**Grundlage (B).** Die Average-Linkage-Clusterung in 4.1 misst den mittleren Abstand der Konsens-Mediane über die 13 statischen und gemischten Dimensionen. Ein Schnitt zwischen Schritt 11 (0,72) und Schritt 12 (0,77) ergibt in der dokumentierten Lösung drei Cluster und einen Einzelgänger:
 
 | Gruppe | Mitglieder | Zusammenführung | D7-Stufe |
 |---|---|---|:-:|
-| Cluster A | Ref 03, 04, 07, 08, 13 | {04, 07} 0,27 → +08 0,37; {03, 13} 0,5; vereint 0,61 | 2–3 |
+| Cluster A | Ref 03, 04, 07, 08, 13 (13 rechnerisch nicht eindeutig) | {04, 07} 0,27 → +08 0,37; {03, 13} 0,5; vereint 0,61 | 2–3 |
 | Cluster B | Ref 05, 09, 10, 12, 14, 15 | {09, 12} 0,35; {05, 10} 0,38; vereint 0,48; +14 0,55; +15 0,72 | 4 |
 | Cluster C | Ref 02, 06, 11 | {02, 11} 0,5; +06 0,67 | 0–1 |
 | Einzelgänger | Ref 01 | zu C erst bei 0,97 | 1 |
 
-A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
+A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03. Wegen des Gleichstands in Schritt 5 (4.1) ist eine zweite Lösung rechnerisch gleichwertig: Ref 13 gehört dann zu B, also A = {03, 04, 07, 08} und B = {05, 09, 10, 12, 13, 14, 15}; Ref 15 kommt bei 0,69 zu B, A und B verschmelzen bei 0,79. C und Ref 01 bleiben unverändert. Die Clustermediane unten gelten für die dokumentierte Lösung; mit Ref 13 in B verschieben sich einzelne um höchstens 0,5.
 
 **Clustermediane (eigene Berechnung** als Median der Konsens-Mediane der Mitglieder aus 4.1; D5, D6 und D13 haben in A, B und C denselben Median 2, 3 bzw. 1 und fehlen deshalb):
 
@@ -447,7 +449,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
 | 15 Perspektive und Kamera | 1 | 2,25 | 1 | 0 |
 | 18 Dynamische Typografie | 3 | 1,5 | 1,5 | 1 |
 
-**Was die Rechnung sortiert (B/I).** Die Gruppen fallen exakt mit den Stufen von D7 zusammen (Median-Tabelle in 4.1): D7 ≤ 1 bei Ref 01, 02, 06, 11; D7 2–3 bei Ref 03, 04, 07, 08, 13; D7 = 4 bei Ref 05, 09, 10, 12, 14, 15. In der Gegenprobe ergibt das Mittel von Ref 04 und 07 den Wert 2,5; die Zuordnung hält. Die Clusterung folgt damit den Dimensionen mit der größten Streuung (D7, D18, D2, D3). D1, D5 und D6 streuen kaum und bilden das gemeinsame Fundament aller Gruppen (I).
+**Was die Rechnung sortiert (B/I).** In der dokumentierten Lösung fallen die Gruppen mit den Stufen von D7 zusammen (Median-Tabelle in 4.1): D7 ≤ 1 bei Ref 01, 02, 06, 11; D7 2–3 bei Ref 03, 04, 07, 08, 13; D7 = 4 bei Ref 05, 09, 10, 12, 14, 15. In der gleichwertigen zweiten Lösung gilt das für 14 von 15 Referenzen; Ausnahme ist Ref 13 (D7 = 3) in B. In der Gegenprobe ergibt das Mittel von Ref 04 und 07 den Wert 2,5; die Zuordnung hält. Die Clusterung folgt damit den Dimensionen mit der größten Streuung (D7, D18, D2, D3). D1, D5 und D6 streuen kaum und bilden das gemeinsame Fundament aller Gruppen (I).
 
 ### Cluster A – Typo-Bild-Sandwich mit freigestelltem Objekt (Ref 03, 04, 07, 08, 13)
 
@@ -468,7 +470,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
   - {09, 12} bei 0,35: *dunkle Lichtbühne.* Ein zentrales Objekt mit Emitter bzw. Leuchtkern; Ref 09 „Licht statt Fläche“, Ref 12 „Lichtkern-Dramaturgie“.
   - Ref 14 (0,55) und Ref 15 (0,72): *Raum statt Objekt.* Die beiden einzigen Referenzen mit D15 = 3 zeigen eine Umgebung mit Kamera, kein Exponat.
 - **Gemeinsam (B):**
-  - D7 = 4 in allen sechs; B ist genau die Menge aller Referenzen mit D7 = 4.
+  - D7 = 4 in allen sechs; B ist in der dokumentierten Lösung genau die Menge aller Referenzen mit D7 = 4.
   - Licht als eigenes Gestaltungsmittel: D3 = 3 in 5 von 6 (Ausnahme Ref 14 mit 2). Material D2-Median 3; Ausnahme Ref 15, bewusst matt (D2 = 1).
   - Perspektive im Bild (D15-Median 2,25), Bedienebene frontal. Ref 12: „Das Interface bleibt frontal und unverzerrt.“
   - Detail am Objekt (D12-Median 2). Schrift zurückgenommen (D18-Median 1,5): flach neben dem Objekt in Ref 10, 12, 14; Etikett auf der Dose in Ref 09.
@@ -490,7 +492,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
 
 ### Grenzfälle
 
-- **Ref 13 (A):** Die Werte D1 = 3, D7 = 3, D15 = 2 und D18 = 3 stützen sich weitgehend auf die Präsentationsszene (Riesenwort, gekippter Monitor, defokussierter Vordergrund). Das Dashboard selbst ist ein flaches Bento-Raster mit Glow-Kacheln und steht Ref 14 näher. Die nächsten rechnerischen Nachbarn liegen in B (Ref 05 mit 0,42, Ref 09 mit 0,46).
+- **Ref 13 (A):** Die Werte D1 = 3, D7 = 3, D15 = 2 und D18 = 3 stützen sich weitgehend auf die Präsentationsszene (Riesenwort, gekippter Monitor, defokussierter Vordergrund). Das Dashboard selbst ist ein flaches Bento-Raster mit Glow-Kacheln und steht Ref 14 näher. Die nächsten rechnerischen Nachbarn liegen in B (Ref 05 mit 0,42, Ref 09 mit 0,46). Die Zuordnung ist rechnerisch nicht eindeutig: In Schritt 5 liegt {13} genauso weit von {09, 12} entfernt wie {05, 10} (je 0,48, 4.1); bei der anderen Wahl gehört Ref 13 zu B.
 - **Ref 05 (B):** rechnerisch bei Ref 10 (0,38), mit D18 = 3 aber ein Typo-Sandwich wie A; die Leuchte verdeckt die Mitte der Wortmarke. Ref 05 ist nächster Nachbar von Ref 03 und 13 und damit das Scharnier zwischen A und B. Einziges helles Mitglied von B und einzige Referenz, in der ein Bildobjekt einen Schatten auf die Fläche wirft.
 - **Ref 15 (B):** zuletzt aufgenommen (0,72). Verbindet das 3D-Bündel (D7 = 4, D15 = 3, D1 = 4 als einziger Wert 4) mit der stärksten Raumschrift (D18 = 4); qualitativ eine Synthese aus A und B.
 - **Ref 08 (A):** qualitativ zugleich Vitrine wie Ref 05 und 10 (ein Objekt, „Materialgefälle zwischen Objekt und Interface“); einziges dunkles Mitglied von A.
@@ -499,7 +501,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03.
 
 ### Tragweite der Clusterung
 
-- **Trennschärfe (B):** A und B trennen sich schwach. Sie verschmelzen bei 0,77, kaum später als Ref 15 in B aufgenommen wird (0,72), und zwei nächste Nachbarn liegen über die Grenze hinweg (Ref 03 → 05, Ref 13 → 05); bei Ref 05 folgen auf den nächsten Nachbarn Ref 10 (0,38) die A-Mitglieder Ref 07 und 13 (je 0,42). Deutlich ist nur die Abspaltung von {C, 01} bei 1,03. Zwei Standbilder desselben Designs (Ref 04, 07) liegen 0,27 auseinander; Abstände dieser Größe sind also Messrauschen.
+- **Trennschärfe (B):** A und B trennen sich schwach. Sie verschmelzen bei 0,77, kaum später als Ref 15 in B aufgenommen wird (0,72); in der gleichwertigen zweiten Lösung (Ref 13 in B, 4.1) bei 0,79 gegen 0,69. Zwei nächste Nachbarn liegen über die Grenze hinweg (Ref 03 → 05, Ref 13 → 05; in der zweiten Lösung nur Ref 03 → 05); bei Ref 05 folgen auf den nächsten Nachbarn Ref 10 (0,38) die A-Mitglieder Ref 07 und 13 (je 0,42). Deutlich ist nur die Abspaltung von {C, 01} bei 1,03. Zwei Standbilder desselben Designs (Ref 04, 07) liegen 0,27 auseinander; Abstände dieser Größe sind also Messrauschen.
 - **Bauprinzipien quer zu den Clustern (I, eigene Zuordnung, nicht exklusiv):**
 
 | Bauprinzip | Referenzen | Cluster |

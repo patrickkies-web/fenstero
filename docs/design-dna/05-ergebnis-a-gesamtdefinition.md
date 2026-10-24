@@ -40,12 +40,12 @@ Konstitutiv sind die acht universellen Grundprinzipien aus 4.5, die mit 15 Bilde
 
 Die Clusterung über die 13 statischen und gemischten Dimensionen, geschnitten zwischen 0,72 und 0,77, ergibt drei Cluster und einen Einzelgänger:
 
-- **A – Typo-Bild-Sandwich** (Ref 03, 04, 07, 08, 13; als Designs 4): Raumschrift ist eine eigene Ebene und mit einem Freisteller verschränkt (D18 ≥ 3 in 5 von 5). Die Kamera ist frontal, die Plastizität mittel (D7 2–3).
+- **A – Typo-Bild-Sandwich** (Ref 03, 04, 07, 08, 13; als Designs 4; Ref 13 rechnerisch nicht eindeutig zugeordnet, siehe unten): Raumschrift ist eine eigene Ebene und mit einem Freisteller verschränkt (D18 ≥ 3 in 5 von 5). Die Kamera ist frontal, die Plastizität mittel (D7 2–3).
 - **B – Plastischer Hauptdarsteller im gestalteten Licht** (Ref 05, 09, 10, 12, 14, 15): D7 = 4 in 6 von 6, Licht als eigenes Mittel (D3 = 3 in 5 von 6), Perspektive im Bild (D15-Median 2,25).
 - **C – Flache Lösung** (Ref 02, 06, 11): Tiefe aus Schärfentiefe, Vektorkulissen oder flacher Überlappung (D7-Median 0,5). C hat keinen gemeinsamen positiven Stil.
 - **Ref 01 – Materialstudie** (D2 = 4): erst bei 0,97 an C angeschlossen. Ihr Mittel, Glas über gesättigtem Grund, tritt in Ref 03, 12 und 14 als Nebenschicht auf.
 
-**Was trennt.** Die Gruppen fallen exakt mit den Stufen der Plastizität zusammen (D7 ≤ 1, 2–3, 4), also weitgehend mit dem Medium. A und B verschmelzen bei 0,77, kaum später als Ref 15 in B aufgenommen wird (0,72). Deutlich ist nur die Abspaltung von {C, Ref 01} bei 1,03. Der Abstand der Dublette 04/07 (0,27) zeigt die Größenordnung des Messrauschens.
+**Was trennt.** Die Gruppen folgen den Stufen der Plastizität (D7 ≤ 1, 2–3, 4), also weitgehend dem Medium. Vollständig gilt das nur für eine von zwei rechnerisch gleichwertigen Lösungen: Im fünften Zusammenführungsschritt liegen zwei Paare gleich weit auseinander (je 0,48), und je nach Wahl gehört Ref 13 (D7 = 3) zu A oder zu B. A und B verschmelzen bei 0,77, kaum später als Ref 15 in B aufgenommen wird (0,72); mit Ref 13 in B liegen die Werte bei 0,79 und 0,69. Deutlich ist nur die Abspaltung von {C, Ref 01} bei 1,03. Der Abstand der Dublette 04/07 (0,27) zeigt die Größenordnung des Messrauschens.
 
 **Gemeinsame Invarianten.** D5 (Median 2), D6 (3) und D13 (1) haben in A, B und C denselben Clustermedian; D1 liegt bei 3, 3 und 2. Die Ausnahmen zu den konstitutiven Merkmalen verteilen sich über alle Gruppen: Ref 13 in A, Ref 05, 09 und 14 in B, Ref 11 in C. Kein Dialekt hat also eine eigene Grammatik. Die Bauprinzipien liegen quer zu den Clustern und lassen sich kombinieren: Typo-Bild-Sandwich 7 von 15 (A und B), Vitrine 6 von 15 (A und B), Kulissenbühne 3 von 15 (A, B und C). Übergreifend gilt die Tendenz „eine Ausdruckslast, ein Träger“ (Ref 03, 05 und 15 tragen zwei); Raumschrift und Material konkurrieren um diese Last (ρ D2 + D18 = −0,26, bei n = 15 ein Hinweis).
 

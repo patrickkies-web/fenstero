@@ -1,6 +1,6 @@
 # Referenz 08 – happy lemon – Portfolio
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt.
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -17,7 +17,7 @@
 - **Einschränkungen der Aufnahme:** Schräger Aufnahmewinkel mit perspektivischer Verzerrung (rechte Seite näher an der Kamera): Größen, Abstände und Proportionen von Karten, Schrift und Rändern sind nicht exakt bestimmbar; Anschnitt links, rechts und oben: erster Navigationspunkt, erste und vierte Karte, CTA-Text, Großschrift, Autorenzeile und Social-Bereich sind unvollständig; ob das Logo mittig sitzt, ist nicht bestimmbar; Ohne Browserleiste unbekannt: Viewport-Breite bzw. Breakpoint und Inhalte unterhalb des Heros; Standbild: Animationen (schwebende Zitrone, Blätter, Parallax, mögliches Laufband der Großschrift), Hover- und Scroll-Verhalten sowie ein mögliches horizontales Blättern der Kartenreihe nicht beurteilbar; Überstrahlungen und weiße Reflexe auf der Zitrone; ob der gelbe Lichtschein Teil des Designs oder Bloom der Kamera ist, ist unklar; Art der Zitrone (3D-Render, Foto-Freisteller oder Video) nicht sicher feststellbar; Geringe Auflösung, Unschärfe und Videokompression: Kleintexte in den Karten und auf den Etiketten kaum lesbar, Schriftart nicht exakt bestimmbar; Farbwerte durch Monitor und Kamera verfälscht (Schwarzwert, Gelbsättigung, Pastelltöne); Reel-Symbole überdecken Teile des Designs (Herz über „p“, Sprechblase über LinkedIn-Symbol)
 - **Korrekturen zur Vorab-Notiz:** Im Grundsatz stimmt der Hinweis. Ergänzungen und Korrekturen: (1) Es ist kein direktes Foto, sondern ein Bildschirmfoto eines Kurzvideos (vermutlich Instagram-Reel), das den Monitor schräg abfilmt. (2) Die Zitrone liegt vor den Karten, aber nicht vor der Großschrift: Die weißen Buchstaben „o“ und „n“ von „lemon“ überdecken den unteren Teil der Zitrone. Auch das unscharfe Blatt am „le“ liegt hinter der Schrift. (3) Auf der Zitrone kleben mehrere runde Etiketten: zwei rote (eines mit Pfeil- bzw. Play-Symbol, eines mit Wassermelonen-Motiv und weißer Schrift), ein weißes mit gelber Comicfigur und unleserlicher Schrift, dazu ein blaues Element am linken Rand. Um die Zitrone liegt ein gelber Lichtschein. Ob es ein 3D-Render, ein freigestelltes Foto oder ein Video ist, lässt sich nicht sicher sagen. (4) Navigation: Links vor „Services“ steht ein angeschnittener Punkt „…k“ (vermutlich „Work“). (5) Die Autorenzeile ist angeschnitten: „…eated by“ / „…ndrew Ehrensperger“. (6) Im Hinweis fehlt der Social-Bereich rechts unten: „soc…“ mit LinkedIn- und X-Symbol, ein drittes Symbol ist angeschnitten. (7) Zur Plattform-Oberfläche gehört neben dem Herz „12,3 Tsd.“ auch die Kommentar-Sprechblase „99“, die das LinkedIn-Symbol teilweise verdeckt. Ein Mauszeiger rechts neben der Analytics-Karte ist ebenfalls irrelevant. (8) Kartenreihe: Vier Karten sind sichtbar, die erste und die vierte (mint) sind angeschnitten. Die Karten haben unterschiedliche Grundtöne. (9) Das Logo ist eine kleine Zitronenfigur mit Gesicht (geschlossene, lächelnde Augen).
 
-## 2. Unabhängige Expertenbewertungen (Phase 2)
+## 2. Bewertungen der acht simulierten Perspektiven (Phase 2)
 
 ### 2.1 Bewertungsmatrix
 
@@ -188,7 +188,7 @@ Wahrnehmungspsychologisch arbeitet der Hero mit einer klaren Salienzhierarchie: 
 
 **Technische Umsetzung:** Ebenenaufbau mit absolut positionierten Elementen und z-index-Stapelung (Karten, Zitrone, Großschrift) auf einfarbigem Grund (naheliegend: Die sichtbare Verdeckungsreihenfolge lässt sich direkt über die Stapelreihenfolge in HTML/CSS erzeugen.) · Unscharfe Blätter als vorab weichgezeichnete Assets oder per CSS filter: blur() (naheliegend: Scharfe und unscharfe Blätter stehen nebeneinander; das spricht für gezielt gesetzte Unschärfe statt Aufnahmefehler.) · Zitrone als Bild oder Video mit Alphakanal, Lichtschein über drop-shadow-Filter oder radialen Verlauf (möglich: Saubere Freistellung und fehlender Kontaktschatten passen zu einem Freisteller; der Glow kann jedoch auch Kamera-Überstrahlung sein.) · Zitrone als Echtzeit-3D-Modell in einer WebGL-Szene zwischen HTML-Ebenen (möglich: Plastizität und Schwebewirkung passen zu 3D; ein Beleg (Editor, Bewegung, Rotation) fehlt im Material.) · Großschrift als wiederholter Text in überbreitem Container mit overflow hidden, gegebenenfalls als Laufband per Keyframe-Animation (möglich: Wiederholung „…ppy lemon happ…“ und beidseitiger Anschnitt sprechen dafür; Bewegung ist aus dem Standbild nicht belegt.)
 
-## 3. Expertenkonsens (Phase 3)
+## 3. Konsens der simulierten Perspektiven (Phase 3)
 
 ### 3.1 Konsens je Dimension
 
