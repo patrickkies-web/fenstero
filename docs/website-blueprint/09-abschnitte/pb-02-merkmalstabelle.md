@@ -91,8 +91,8 @@ Die drei Spalten teilen die vier Telefonspalten in Drittel (je 1⅓), weil drei 
 **C.3 Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 64,7 px, Rinne 24, Kopf 64 px. Die Breite gibt die Seite vor
 (`re-01`, parallel in Phase I entstanden); die Tabelle wählt ihre Form selbst nach der Breite ihres Containers:
 
-- **Vier Spalten (08), Tabelle ≥ 700 px:** ohne die Abschnittsliste aus `re-01` [H] Spalten 1–9 (x 120–894, 774 px), wie dort die
-  Cookie-Tabelle. Spaltenstarts auf dem Raster: Merkmal Spalte 1 (x 120, Text 242 px), Essential Spalte 4 (x 386), Plus Spalte 6
+- **Vier Spalten (08), Tabelle ≥ 700 px:** ohne die Abschnittsliste aus `re-01` [H] Spalten 1–9 wie dort die Cookie-Tabelle
+  (x 120–894; 9 × 64,7 + 8 × 24 = 774 px). Spaltenstarts auf dem Raster: Merkmal Spalte 1 (x 120, Text 242 px), Essential Spalte 4 (x 386), Plus Spalte 6
   (x 563), Signature Spalte 8 (x 741), Werte je 153 px Text. `table-layout: fixed`, `col` 34,4 % · 23 % · 23 % · 19,6 %, Zellpolster
   rechts 24 px außer in der letzten Spalte; Kopfband 44 px.
 - **Festlegung I-2, Tabelle < 700 px:** Steht rechts die klebende Abschnittsliste (`re-01` [H] ab acht h2; die Paketbedingungen haben
@@ -124,7 +124,7 @@ bleibt leer. Keine interaktive Komponente im Abschnitt; die einzige Handlung ist
 | Wert | Start | Begründung |
 |---|---|---|
 | Klebekante | `top: var(--kopf-h)` (56 / ab 1024: 64) | sitzt bündig unter dem opaken Kopf (`rh-01` C.6) |
-| Kopfband | 40 px Telefon, 44 px Schreibtisch, Hintergrund `--bg` deckend | Zeilen verschwinden sauber darunter; T12 verbietet halbtransparente Köpfe |
+| Kopfband | 40 px unter 480 px Tabellenbreite, sonst 44 px; Hintergrund `--bg` deckend | Zeilen verschwinden sauber darunter; T12 verbietet halbtransparente Köpfe |
 | Formgrenzen | Container ≥ 480 px → volle Namen; ≥ 700 px → vier Spalten | Wertspalte ≥ 140 px Text, Merkmal ≥ 220 px |
 | Zeilenabstand | 21 px (1,4) | kurze Phrasen in schmalen Spalten; Fließtext bleibt 1,6 |
 | Silbentrennung | `hyphens: auto`, `overflow-wrap: break-word` | 200 % Text und 320 px ohne Überlauf (`lang="de"`, PB:2) |
@@ -192,7 +192,7 @@ Erwartete, nicht gemessene Aufmerksamkeit.
 | Sprung `#merkmale` | landet über `scroll-padding-top: calc(var(--kopf-h) + 12px)` (`rh-01`); Absatz (2) oben, Kopfband ≈ 250 px darunter |
 | Weniger Bewegung | identisch, es bewegt sich nichts |
 | Ohne JavaScript | identisch |
-| Drucken | Vier-Spalten-Fassung, `thead` wiederholt je Seite, nicht klebend |
+| Drucken | Form nach Druckbreite, Kopf nicht klebend; das verbindliche Druckstück bleibt das PDF |
 
 Begründung: Arbeitsfläche ohne Auftritt (E-13). „Bewegung mit Tiefe und Physik“ (SKILL:43) gilt den Bildträgern der Verkaufsflächen;
 im Vertrag stört jede Bewegung das Lesen.
@@ -280,7 +280,7 @@ meldet „aktuell“. Die Gestaltungsprüfung (`scripts/pruefen.mjs:1602-1620`) 
 **H.5 Assets.** Keine.
 
 **H.6 Leistung.** Kein Skript, kein Bild, ≈ 1,5 KB CSS; `sticky` läuft im Compositor. Risiko: Container-Query mit klebendem Kind in
-Chrome, Safari, Firefox prüfen; Rückfall `@media (min-width: 720px)`.
+Chrome, Safari, Firefox prüfen; Rückfall: dieselben zwei Grenzen als Media Queries auf die Seitenbreite, je nach Lage der Abschnittsliste.
 
 **H.7 Barrierefreiheit.** Kopfzellen mit `scope`, ausdrückliche Rollen, Name und Beschreibung über vorhandene Texte; Vorleser hören „EEZI
 Essential Plus, ja“. Keine Information nur über Farbe. Keine fokussierbaren Elemente in der Tabelle, also verdeckt das Band keinen Fokus
