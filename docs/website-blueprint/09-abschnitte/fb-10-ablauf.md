@@ -91,19 +91,19 @@ Zweitlinie x = 56 (SG 10.1/1 erlaubt eine) und liegen bewusst nicht auf dem 4-Sp
 | y | Element | x | Maß |
 |---|---|---|---|
 | 0 | Haarlinie 1 px `--line` | 16–374 | 96 px nach 05 |
-| 16–33 | Kapitelzeile | 16 | 13 px |
-| 45–113 | h2, zwei Zeilen „Von der Bestellung“ (283 px) / „bis zum Livegang“ (262 px) | 16–374 | 32/34, `text-wrap: balance` |
-| 137–173 | Kennzahl „3 bis 5 Werktage“ (251 px) | 16–267 | 32/36, Abstand 24 |
-| 177–225 | Begleitsatz, zwei Zeilen (335 / 244 px) | 16–374 | 15/24, Abstand 4 |
-| 249–889 | Maßstab, 640 px hoch | 16–48 | Abstand 24 |
-| 249–329 | 01: Wort 249–273, Satz 273–297, Fakt 305–329 | ab 56 | Block 80 |
-| 353–457 | 02: Wort, Satz, Hinweis 409–433, Fakt 433–457 | ab 56 | Block 104 |
-| 481 | Grenzlinie; Fundstelle „§ 7 (2)“ mit Ziel 459–503 | 16–317; 325–374 | Lücke 48 statt 24 |
-| 505–585 | 03: Wort, Satz, Grenze 561–585 | ab 56 | 80 |
-| 609–657 | 04: Wort, Satz | ab 56 | 48 |
-| 681–761 | 05: Wort, Satz, Fakt 737–761 | ab 56 | 80 |
-| 785–889 | 06: Wort, Satz, Fakten 841–889 | ab 56 | 104 |
-| 889 | Ende, ≈ 1,05 BH | | dann 96 px bis 06.2 |
+| 16–32 | Kapitelzeile | 16 | 13/16, Abstand 16 (K-15) |
+| 44–112 | h2, zwei Zeilen „Von der Bestellung“ (283 px) / „bis zum Livegang“ (262 px) | 16–374 | 32/34 (K-18), Abstand 12 (K-15), `text-wrap: balance` |
+| 136–170 | Kennzahl „3 bis 5 Werktage“ (251 px) | 16–267 | 32/34 (K-18), Abstand 24 |
+| 174–222 | Begleitsatz, zwei Zeilen (335 / 244 px) | 16–374 | 15/24, Abstand 4 |
+| 246–886 | Maßstab, 640 px hoch | 16–48 | Abstand 24 |
+| 246–326 | 01: Wort 246–270, Satz 270–294, Fakt 302–326 | ab 56 | Block 80 |
+| 350–454 | 02: Wort, Satz, Hinweis 406–430, Fakt 430–454 | ab 56 | Block 104 |
+| 478 | Grenzlinie; Fundstelle „§ 7 (2)“ mit Ziel 456–500 | 16–317; 325–374 | Lücke 48 statt 24 |
+| 502–582 | 03: Wort, Satz, Grenze 558–582 | ab 56 | 80 |
+| 606–654 | 04: Wort, Satz | ab 56 | 48 |
+| 678–758 | 05: Wort, Satz, Fakt 734–758 | ab 56 | 80 |
+| 782–886 | 06: Wort, Satz, Fakten 838–886 | ab 56 | 104 |
+| 886 | Ende, ≈ 1,05 BH | | dann 96 px bis 06.2 |
 
 Alle Zeilen 24 px hoch, alle Lücken 8, 24 oder 48 px: Jeder Block ist ein Vielfaches von 8, jede Marke liegt bei 12 + 8n px unter der
 Oberkante des Maßstabs und damit auf einem Feinstrich.
@@ -124,7 +124,7 @@ von 03 („Ab hier …“): Die Grenze ist ein Ort auf dem Maßstab, nicht ein S
 7 × 12 px, Strich 2,5 px `--accent`, hängend bei x 45–52 zwischen Achse und Text, damit alle Texte an x 56 fluchten; Hinweis und Grenze
 ohne Haken in `--text2` (EA S5: „die Grenze ohne Haken“).
 
-**Proportionen** (Abschnittsfläche 390 × 889): ≈ 38 % Textflächen, ≈ 7 % Maßstab und Grenzlinie, ≈ 55 % frei. Der Maßstab ist schmal,
+**Proportionen** (Abschnittsfläche 390 × 886): ≈ 38 % Textflächen, ≈ 7 % Maßstab und Grenzlinie, ≈ 55 % frei. Der Maßstab ist schmal,
 trägt aber 72 % der Abschnittshöhe; der Bildanteil der Stufe 2 (20–50 %, DG 2.4.2) wird über die Ausdehnung, nicht die Fläche erreicht,
 wie DG T8 es mit dem Maßstab als Held vorsieht.
 
@@ -132,13 +132,13 @@ wie DG T8 es mit dem Maßstab als Held vorsieht.
 der 15-px-Schrift; SG 10.1/4). Anker ist die Kennzahl mit dem Maßstabskopf darunter: die einzige Zahl in Titelgröße, die einzige senkrechte
 Struktur; die h2 ist die eine erlaubte Headline davor.
 
-**Schreibtisch 1280, 12 Spalten** (1040 px ab x 120; Spalte 57,3, Abstand 32), Split 5 : 7 (08 8.3.2 c):
+**Schreibtisch 1280, 12 Spalten** (1040 px ab x 120; Spalte 64,67, Rinne 24, K-12), Split 5 : 7 (08 8.3.2 c):
 
-- Spalten 1–5 (x 120–535): Kapitelzeile y 24–41, h2 40/44 zweizeilig y 57–145 (353 px), Kennzahl 40/44 y 177–221 (314 px), Begleitsatz
-  15/24 zweizeilig y 229–277. Darunter bleibt die Spalte frei.
-- Spalten 6–12 (x 567–1160): Maßstab x 567–599 (Achse x 591), Texte ab x 607 (553 px, alle Sätze und Fakten einzeilig). Oberkante des
-  Maßstabs auf Höhe der h2 (y 57). Blöcke 80 · 104 · Grenze 48 · 80 · 48 · 80 · 104; Ende y ≈ 697 (0,87 BH bei 800, ganz in einem Bildschirm
-  unter dem 64-px-Kopf). Grenzlinie x 567–1103, Fundstelle x 1111–1160.
+- Spalten 1–5 (x 120–539): Kapitelzeile 13/16 y 16–32, h2 40/42 zweizeilig y 44–128 (353 px; Abstände 16 und 12 nach K-15, Zeile nach
+  K-18), Kennzahl 40/42 y 160–202 (314 px), Begleitsatz 15/24 zweizeilig y 210–258. Darunter bleibt die Spalte frei.
+- Spalten 6–12 (x 563–1160): Maßstab x 563–595 (Achse x 587), Texte ab x 603 (557 px, alle Sätze und Fakten einzeilig). Oberkante des
+  Maßstabs auf Höhe der h2 (y 44). Blöcke 80 · 104 · Grenze 48 · 80 · 48 · 80 · 104; Ende y ≈ 684 (0,86 BH bei 800, ganz in einem Bildschirm
+  unter dem 64-px-Kopf). Grenzlinie x 563–1103, Fundstelle x 1111–1160.
 
 **Technische Startwerte**
 
@@ -146,9 +146,9 @@ Struktur; die h2 ist die eine erlaubte Headline davor.
 |---|---|---|
 | Abstand zwischen Abschnitten | 96 / 128 px | G6 |
 | Abstände innen | 4 (Kennzahl–Satz) · 8 (Satz–Fakt) · 24 (Blöcke) · 48 (Grenze) | 1 : 3 : 6 (SG-Rahmenmaße) |
-| h2 | Inter 800, −0,03 em, Zeilenhöhe 1,05 / 1,1 | wie `verkauf.css:503` |
-| Kennzahl | 32/36 bzw. 40/44, 800, −0,03 em, `tabular-nums`, `white-space: nowrap` | Titelrolle (GEST:451) |
-| Technikstimme | 13 px, 600, Versalien, +0,12 em, `tabular-nums` | DG-E-6: 13 nur für Versal-Labels und Nummern |
+| h2 | Inter 800, −0,03 em, 32/34 px (Telefon und Zwischengröße), 40/42 px ab 1024 | K-18 (11.3.1): 1,05 auf ganze Pixel |
+| Kennzahl | 32/34 bzw. 40/42 (ab 1024), 800, −0,03 em, `tabular-nums`, `white-space: nowrap` | Titelrolle (GEST:451); Zahl als Held nach 11.3.1, K-18 |
+| Technikstimme | 13 px, 600, Versalien, +0,12 em, `tabular-nums` (Kapitelzeile, Ziffern) | K-20 (11.3.3; DG-E-6): 13 nur Technikstimme, jeder Satz 15 px; die Sätze stehen schon in 15, keine Umstellung nötig (DS-AB-2) |
 | Wort / Satz / Fakt | 17 fett, Zeilenhöhe 24/17; 15, Zeilenhöhe 1,6 (= 24 px) | 8-px-Takt; DNA Zeile 1,5–1,6 |
 | Maßstabsband | 40 px (x 16–56) | 08 („x 16–40“, Texte „ab x 56“) |
 | Radien | keine | Formfamilie radienlos-rechtwinklig im ganzen Abschnitt |
@@ -185,7 +185,7 @@ Parallaxe; Lesefortschritt im Kopf (DG-AB-15); Anbieterblock (in 05).
 | F10-AB-1 | Ablauf als Zeitleiste mit gezeichneten Symbolen, Linie füllt sich scrollgebunden (GEST:447, :448) | Maßstab ohne Symbole, Marken wechseln als Zustand | SKILL:41; SG 10.10/14 und DNA-B B.3.12 (laufende Linie nur als begründete Ausnahme); bereits 8.4.1 Nr. 10, DG-AB-15 |
 | F10-AB-2 | DR Baustein 7: „der Fortschritt wächst grün mit“ | kein wachsender Strich | wie F10-AB-1 |
 | F10-AB-3 | grüner Schein am gefüllten Strich (`verkauf.css:610`) | entfällt | DNA Nr. 10, SG 10.10/3 |
-| F10-AB-4 | Schritte erscheinen 24 px aufwärts (GEST:448) | kein Auftritt | ein bewegter Träger je Ansicht (SG 10.7/4); Teil von DG-AB-2 |
+| F10-AB-4 | Schritte erscheinen 24 px aufwärts (GEST:448) | kein Auftritt, auch kein Einblenden über Deckkraft | ein bewegter Träger je Ansicht (SG 10.7/4); Teil von DG-AB-2; Bedienschicht ohne Auftritt nach K-6 (11.7.2), gebündelt in DS-AB-8 |
 
 ## E. Visual Attention Architecture (erwartet, nicht gemessen)
 
@@ -207,11 +207,11 @@ Parallaxe; Lesefortschritt im Kopf (DG-AB-15); Anbieterblock (in 05).
 
 | Auslöser | Was | Dauer, Kurve | Verfahren | Weniger Bewegung |
 |---|---|---|---|---|
-| Abschnitt kommt ins Bild | nichts; alles steht ab dem ersten Bild | – | `.vk-ablauf > li` aus der Reveal-Liste nehmen (`verkauf.js:477`) | gleich |
-| Mitte der Wortzeile passiert die Bildschirmmitte abwärts | Marke `--text2` → `--accent`, Ziffer `--muted` → `--accent` | 220 ms, `--e-out` | IntersectionObserver auf jedes `b`, `rootMargin: 0px 0px -50% 0px` | alle Marken erreicht, ohne Übergang |
-| dieselbe Mitte aufwärts | zurück auf neutral | 160 ms (Austritt ≈ ¾) | derselbe Beobachter | – |
+| Abschnitt kommt ins Bild | nichts; alles steht ab dem ersten Bild, kein Einblenden (K-6, 11.7.2) | – | `.vk-ablauf > li` aus der Reveal-Liste nehmen (`verkauf.js:477`) | gleich |
+| Mitte der Wortzeile passiert die Bildschirmmitte abwärts | Marke `--text2` → `--accent`, Ziffer `--muted` → `--accent` | 220 ms `--t2`, `--e-out` | IntersectionObserver auf jedes `b`, `rootMargin: 0px 0px -50% 0px` | alle Marken erreicht, ohne Übergang |
+| dieselbe Mitte aufwärts | zurück auf neutral | 165 ms `--t2-aus`, `--e-in` (Austritt ≈ ¾, K-4) | derselbe Beobachter | – |
 | erster Aufruf des Beobachters, Sprung über Anker, Neuaufbau mit `o.still` | Zustand sofort, ohne Übergang | 0 | Klasse `vk-still` für zwei Frames | – |
-| Zeiger über Fundstelle | Unterstrich `--line2` → `--ink` | 220 ms | `.link:hover`, nur `(hover: hover)` | bleibt |
+| Zeiger über Fundstelle | Unterstrich `--line2` → `--ink` | 150 ms `--t1`, `--e-out` (K-4; heute `--t2` in `gemeinsam.css:67`) | `.link:hover`, nur `(hover: hover)` | bleibt |
 | Fokus | Kontur 2 px `--ink`, Abstand 2 px | – | `:focus-visible` | bleibt |
 | Tippen auf Fundstelle | gleiche Registerkarte, `/konfigurator-bedingungen/#laufzeit` | – | normaler Link | – |
 
@@ -221,26 +221,33 @@ keine Schleife, kein Hover am Maßstab.
 
 **Begründung.** Hier wird geprüft, nicht gestaunt: Stufe 2, eine informierende Signature, Farbwechsel als einziger Kanal (SG 10.7/3, /8).
 Bewegung mit Tiefe und Physik (SKILL:44) liegt in V1, V2, 02, 03 und am Wischen der Karten; eine weitere Bewegung hinter dem Formular
-würde Ruhe gegen Effekt tauschen. 220 ms folgen DG T8 und GEST (die DNA nennt 120–200 ms; Dauern nach DG-AB-16). Ruhige Fassung und
+würde Ruhe gegen Effekt tauschen. 220 ms folgen DG T8 und GEST (die DNA nennt 120–200 ms; Dauern nach DG-AB-16); Dauern und Kurven
+nur aus den Tokens nach K-4 (11.7.1), keine SG-Kurve. Ruhige Fassung und
 Fassung ohne JavaScript zeigen das Endbild: alle Marken grün (DG T8).
 
 ## G. Responsive Design
 
-**Telefon 390 × 844 (zuerst).** Eine Spalte wie in C. Nach dem Sprung über Menü oder Kopf (`scroll-margin-top: 120px` am h2) steht die
-Haarlinie bei y ≈ 72: Bei 844 px sind h2, Kennzahl und die Schritte 01 bis 05 samt Fakt im Bild, Marke 01 ist sofort erreicht; bei 664 px
-reicht der erste Bildschirm bis zum Satz von 03, die Grenzlinie (Bildschirm-y ≈ 553) ist dabei. Nichts klebt, nichts scrollt quer.
+**Telefon 390 × 844 (zuerst).** Eine Spalte wie in C. Nach dem Sprung über Menü oder Kopf (`scroll-margin-top: 116px` am h2 = Kopf 56
++ 16 + 16 + 16 + 12, K-15) steht die Haarlinie bei y = 72, 16 px unter dem Kopf: Bei 844 px sind h2, Kennzahl und die Schritte 01 bis 05
+samt Fakt im Bild, Marke 01 ist sofort erreicht; bei 664 px reicht der erste Bildschirm bis zum Grenzsatz von 03, die Grenzlinie
+(Bildschirm-y ≈ 550) ist dabei. Nichts klebt, nichts scrollt quer.
 **360 px:** Texte 288 px breit; „Live nur mit Ihrer Freigabe oder Absprache.“ und der Begleitsatz brechen eine Zeile mehr, die Marken
 folgen ihren Wörtern, weil sie am Schritt hängen, nicht an festen y. **320 px:** Grenzlinie verkürzt sich auf x 16–247. **200 % Text:**
 Zeilenhöhen ohne Einheit, Lagen in `lh`; der Maßstab wächst mit.
 
-**Schreibtisch 1280 × 800.** Split 5 : 7 wie in C; der Abschnitt steht ganz in einem Bildschirm; `scroll-margin-top: 152px`.
+**Schreibtisch 1280 × 800.** Split 5 : 7 wie in C; der Abschnitt steht ganz in einem Bildschirm; `scroll-margin-top: 124px` (Kopf 64,
+K-15), die Haarlinie steht nach dem Sprung bei y = 80.
 
-**Schreibtisch 1024 × 768.** Spalte 922 px (x 51–973, 12 Spalten à 47,5, Abstand 32). Split **6 : 6**, damit die h2 in 40 px zweizeilig
-bleibt (5 Spalten = 365 px, „Von der Bestellung“ braucht 353 px): links x 51–496, rechts Maßstab x 528–560 (Achse x 552), Texte ab
-x 568 (405 px, alles einzeilig). Höhe ≈ 697 px (0,91 BH).
+**Schreibtisch 1024 × 768.** Rand 32 px, Spalte 960 px (x 32–992, 12 Spalten à 58, Rinne 24; K-12, K-13). Split **5 : 7** wie bei 1280:
+Fünf Spalten sind jetzt 386 px breit, „Von der Bestellung“ braucht in 40 px 353 px, die h2 bleibt also zweizeilig, und die Bedingung für
+6 : 6 (11.1.3: nur wenn die h2 in fünf Spalten dreizeilig bräche) ist nicht erfüllt. Links x 32–418, rechts Maßstab x 442–474 (Achse
+x 466), Texte ab x 482 (510 px, alles einzeilig), Grenzlinie x 442–935, Fundstelle x 943–992. Höhe ≈ 684 px (0,89 BH);
+`scroll-margin-top: 124px`.
 
-**761–1023 px:** 6 : 6 nach Containerbreite; ab 960 px Spaltenbreite 5 : 7 (`@container`). **Unter 761 px:** Telefonkomposition, Inhalt
-höchstens 600 px an der linken Ordnungslinie.
+**640–1023 px (Zwischengröße):** Telefonkomposition in einer Spalte an der Ordnungslinie x = 24 (Rand 24, Rinne 16; 11.2.1), Maßstab
+x 24–64, Texte ab x 64, Inhalt höchstens 600 px breit; h2 und Kennzahl bleiben 32/34; `scroll-margin-top: 116px`. **Unter 640 px:**
+Telefonkomposition wie in C. Der Split beginnt erst am Umbruchpunkt 1024 px; weitere Bildschirm- oder Containerschwellen hat der Abschnitt
+nicht (K-11).
 
 ## H. Technische Umsetzung
 
@@ -262,11 +269,13 @@ unverändert, eine Quelle je Wahrheit); `web/assets/verkauf.css:461-477`, `:609-
 2. **CSS** (`verkauf.css`, ersetzt den Ablauf-Teil): `ol` mit `padding-left: 40px`, `position: relative`. `::before` = Achse und Striche als
    drei Hintergrundschichten (`linear-gradient` für die Achse, zwei `repeating-linear-gradient` mit 8 bzw. 40 px Periode, Startversatz 4 px);
    `::after` = zwei Endzeichen. Marke als `li::before` mit `border-top: 2px solid var(--marke)`, `left: -22px`, `top: calc(.5lh - 1px)`,
-   `transition: border-color var(--t2) var(--e-out)`; Ziffer absolut bei `left: -40px`, `background: var(--ground)`. Standard (ohne JS):
+   `transition: border-color var(--t2) var(--e-out)`, ohne `.erreicht` (Rückweg) `var(--t2-aus) var(--e-in)` (beide Tokens neu in
+   `gemeinsam.css` nach 11.7.1, K-4); Ziffer absolut bei `left: -40px`, `background: var(--ground)`. Standard (ohne JS):
    `--marke: var(--accent)`; mit `.vk-aktiv` am `ol` und ohne `.erreicht` am `li`: `--marke: var(--text2)`, Ziffer `--muted`. Haken als
    `.vk-fakt.ja::before` bei `left: -11px`. Grenzlinie als `.vk-bis::after` (`left: -40px; right: 57px; bottom: -24px; height: 1px`,
    Strich-Punkt als `repeating-linear-gradient(90deg, …)` mit 18 px Periode), Fundstelle absolut `right: 0; bottom: -46px; min-height: 44px`;
-   `.vk-bis` mit `margin-bottom: 48px`; `b` als Block 17/24 fett (die Regel aus `ratgeber.css:56` entfällt mit der Klasse). Split über `display: grid` und `@container`.
+   `.vk-bis` mit `margin-bottom: 48px`; `b` als Block 17/24 fett (die Regel aus `ratgeber.css:56` entfällt mit der Klasse). Split über `display: grid` ab `@media (min-width: 1024px)`
+   (Spalten 1–5 und 6–12, `column-gap: 24px`, Rand 32 px bis 1103 px; K-11 bis K-13), darunter eine Spalte mit Rand 16 bzw. 24 px.
 3. **JS** `ablauf(wurzel, o)` in `verkauf.js`, aufgerufen aus `Verkauf.auf` statt `:496-509`: einmal je `ol` (`__vkAblauf`), vorigen
    Beobachter trennen (Einbettung baut neu auf, SKILL:63-64); bei `ruhig()` oder ohne IntersectionObserver nichts tun (CSS-Standard =
    Endbild); sonst `.vk-aktiv` setzen, `b` jedes Schritts beobachten, `.erreicht` setzen bzw. entfernen; erster Aufruf unter `vk-still`.

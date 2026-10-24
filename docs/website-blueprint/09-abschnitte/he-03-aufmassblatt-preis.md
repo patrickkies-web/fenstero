@@ -5,7 +5,8 @@ Seite: Startseite `/#hauseigentuemer` (Ansicht Hauseigentümer) · Position: 3 v
 Phase I, Section-by-Section Visual Design Specification. Stand 24.10.2026. Planungsdokument: Das Repository wurde nur gelesen. Kürzel und
 Kennzeichnungen wie in [08-zielarchitektur.md](../08-zielarchitektur.md) (**[V]** verbindlich, **[H]** Hypothese mit Rückfall,
 **Textentwurf**, `Datei:Zeile` als Beleg). `10-paketentscheidung.md` liegt nicht vor; dieser Abschnitt nennt keine Paketpreise (IA 5.6;
-EA O-25). Alle Lagen und Wirkungen sind geplant, nicht gemessen.
+EA O-25). Alle Lagen und Wirkungen sind geplant, nicht gemessen. Angeglichen an [11-designsystem.md](../11-designsystem.md): K-4, K-6,
+K-13, K-16, K-17, K-24, K-25, K-32, K-36.
 
 **Festlegungen gegenüber 08 (mit Begründung):**
 
@@ -39,7 +40,7 @@ EA O-25). Alle Lagen und Wirkungen sind geplant, nicht gemessen.
 | 1 | Kapitelzeile | „02 · DAS AUFMASSBLATT“ | **Textentwurf** (08) |
 | 2 | h2 | „Was im Aufmaß steckt.“, das Wort „Aufmaß“ grün | wörtlich, `web/assets/portal.js:779` (`akSatz(…, 2)`) |
 | 3 | Zusatz | „je Fenster, wie beim Termin vor Ort“ | wörtlich, `portal.js:779` |
-| 4 | Kennzeichnung | „BEISPIEL“ | G7 |
+| 4 | Kennzeichnung | „BEISPIEL“ | G7; einzige Form am Material: Etikett nach K-36 (a) |
 | 5 | Blatt | Seite 1 der Kundenfassung mit Kopfband und Marke, „Dein Fenster-Aufmaß“, „Familie Weber.“, Haken-Chips, Weg „4 von 5“, Eckdaten | `web/assets/blatt.js:319-343`; Beispieldaten `portal.js:1504` |
 | 6 | Etikett | „EINMALIG“ / „7,99 €“, ab 18.11.2026 „12,99 €“ | **Textentwurf** nach AGB:55, `web/assets/app.js:3368`. Der Preis kommt aus `Abrechnung.preise().aufmass` (`web/assets/modell.js:1117`; `web/config.js:12`, `:14`) |
 | 7 | Preiszeile 1 | „0 €“ · „Messen, Fotos, 3-D-Modell“ | **Textentwurf**, `web/index.html:61`; AGB:32 |
@@ -78,20 +79,20 @@ Raster am Telefon: 4 Spalten zu je 77,5 px mit 16 px Abstand. Der Betrag belegt 
 | y | Element | Maß, Satz |
 |---|---|---|
 | 0 | Haarlinie | 1 px `--line2`, x 16–374 |
-| 16–32 | Kapitelzeile | 13/16, 800, Versalien, .18em, `--accent` |
+| 16–32 | Kapitelzeile | Technikstimme Versal 13/16, 600, +0,12 em, `tabular-nums`; Nummer „02“ `--accent`, „· DAS AUFMASSBLATT“ `--muted` (K-16, K-17) |
 | 44–116 | h2 | 32/36, 800, `--text`, zwei Zeilen („Was im Aufmaß / steckt.“) |
 | 120–140 | Zusatz | 15/20, 500, `--text2` |
 | 164–464 | Szene 358 × 300 | Bühne mit gestapelten Ebenen (H.3) |
-| 164–180 | „BEISPIEL“ | 13/16 Technikstimme, `--muted`, x 16 |
+| 164–180 | „BEISPIEL“ | Etikett nach K-36 (a), oben links am Material, 8 px über der Blattkante, x 16: Technikstimme Versal 13/16, 600, +0,12 em, `--muted` (steht auf dem Grund, nicht auf dem Bild) |
 | 188–463 | Blatt | 290 × 275 (81 % der Inhaltsbreite), x 16–306, um −2° um seine Mitte gedreht; Auslauf über das untere Viertel (y 395–463) |
-| 360–436 | Etikett | 152 × 76, x 194–346: oberer Rand bei 62,5 % der Blatthöhe, ragt 40 px (26 % seiner Breite) über die rechte Blattkante |
+| 360–436 | Etikett | 152 × 76, x 194–346: oberer Rand bei 62,5 % der Blatthöhe, ragt 40 px (26 % seiner Breite) über die rechte Blattkante. „EINMALIG“ in der Technikstimme Versal 13/16, 600, +0,12 em, darunter der Preis (32 px) |
 | 488–512 | Preiszeile 1 | Betrag 17/24, 800, `tabular-nums`; Beschriftung 15/24 `--text` |
 | 520–564 | Preiszeile 2 | zweite Zeile 15/22 `--text2` |
 | 572–596 | Preiszeile 3 | wie Zeile 1 |
 | 604–624 | Endpreis | 15/20 `--muted`, x 16, volle Breite |
-| 656–672 | Katalogkopf | 13/16 Technikstimme, `--muted` |
+| 656–672 | Katalogkopf | Technikstimme Versal 13/16, 600, +0,12 em, `--muted` |
 | 680–848 | Katalog | 7 Zeilen zu 24 px. Haken 16 px bei x 16, Name 15/20, 700, bei x 40. 1-px-Haarlinien `--line` dazwischen |
-| 872–908 | Chips | Pillen 36 px hoch, 15 px, innen 14 px, Abstand 8, `--surface` mit 2-px-Ring. Wischzeile von x 16 bis zum Rand, die letzten 24 px ausgeblendet |
+| 872–908 | Chips | Anzeige-Chips nach K-32: 36 px hoch, `--surface2` ohne Rand, 13/700 (nach Freigabe DG-E-6 15/700), innen 12 px, Abstand 8, Radius voll. Wischzeile von x 16 bis zum Rand, die letzten 24 px ausgeblendet |
 | 932–972 | Grenze | 15/20 `--text2`, zwei Zeilen |
 | 972–1.068 | Abstand zu H4 | 96 px |
 
@@ -118,13 +119,13 @@ Z 30 Bedienschicht neben der Szene, nie auf ihr → Z 40 Kopf.
 |---|---|---|---|
 | Tiefe, Z-Achse | Vier Ebenen. Das Etikett verdeckt das Blatt, das Blatt läuft in den Grund aus | D1 2 | Preis und Ergebnis lesen sich als ein Gegenstand |
 | Material, Transparenz | Papier und Druck aus dem echten PDF-Zeichner; Etikett opak `#1f1f1f`, ohne Glas | D2 2 | echtes Material statt Symbole (SKILL:41) |
-| Licht, Schatten | Kein eigenes Licht. Am Etikett eine 1-px-Lichtkante (Weiß 14 %, an Ober- und rechter Kante 24 %; Hausrichtung oben rechts, DG 2.2.0). Darunter ein blasser Begleitschatten nur auf dem Papier [H] (−5 / 6 px, Unschärfe 16, 7 %; DG 2.2.4) | D3 1, D4 1 | Kontrast über das Papierweiß. Das Licht bleibt den Bühnen H1 und V1 vorbehalten |
+| Licht, Schatten | Kein eigenes Licht; Richtung nach dem Haus-Token `--licht-x: -0.6; --licht-y: 0.8` (von oben rechts, K-24). Am Etikett eine 1-px-Lichtkante rundum `--kante-alpha` (14 %), an Ober- und rechter Kante `--kante-licht` (24 %). Darunter ein blasser Begleitschatten nur auf dem Papier [H] nach K-25: v = 10 % der Etiketthöhe = 7,6 px in Lichtrichtung, also −4,6 / 6,1 px, Weichzeichnung 19 px (2,5 × v), Ausdehnung −1,9 px, `--ground` 6 %; am Schreibtisch (Etikett 92 px hoch) −5,5 / 7,4 px, 23 px, −2,3 px | D3 1, D4 1 | Kontrast über das Papierweiß. Das Licht bleibt den Bühnen H1 und V1 vorbehalten |
 | Formen | Papier rechtwinklig; Etikett Radius 12; Chips als Pillen; Preise ohne Kacheln | D5 2 | Formkontrast: technisches Objekt gegen runde Bedienschicht |
 | 3D-Objekte | keine; das Blatt ist ein flaches Objekt, nur in der Ebene gedreht | D7 1 | ruhige Stufe 2 nach der Zeichnung in H2 |
 | Bildintegration | Das Blatt ist Objekt der Szene; die Papierkante ist Objektkante, ohne Fotokarte. Unten läuft es aus | D11 3 (Ausdrucksträger) | ein Raum (DNA Nr. 4) |
 | Oberflächendetails | Haken in den Farben des PDFs, Haarlinien wie die Tabelle im Blatt, `tabular-nums` | D12 2 | Präzision wie ein Aufmaß, Wiedererkennung von Blatt und Liste |
 | Animation | Das Blatt legt sich einmal ab, danach folgt das Etikett (F) | D8 1, D16 1 | Bewegung mit Sinn: zuerst das Produkt, dann das Preisschild |
-| Typografie | Inter; ein grünes Wort; Technikstimme für Kapitel, Kennzeichnung und Katalogkopf | D18 2 | |
+| Typografie | Inter; ein grünes Wort; Technikstimme (Versal 600, +0,12 em, K-17) für Kapitel, Kennzeichnung, „EINMALIG“ und Katalogkopf | D18 2 | |
 | Überlagerungen | nur das Etikett über dem Blatt (≤ 15 %) | – | |
 | Perspektive | keine; die Bedienschicht bleibt frontal | D15 0 | |
 | Interaktive Effekte | keine am Motiv; die Chips folgen dem Finger | D10 1 | |
@@ -134,7 +135,8 @@ Lichtraum, Maßlinie (steht in H2), Scroll-Kopplung, Countdown (R13), Strichsymb
 und „Handy zu Briefumschlag“ (SKILL:125).
 
 **Verbindlich [V]:** G1–G9; das Etikett gehört zur Bildschicht (`aria-hidden`), der Preis steht zusätzlich als Text; eine Fassung des
-Katalogs; „Beispiel“ am Material; Bewegung nur im Motiv; ruhige Fassung = Endbild.
+Katalogs; „Beispiel“ am Material in genau einer Form (Etikett, K-36 a); Bewegung nur im Motiv; Bedienschicht ohne Auftritt (K-6);
+ruhige Fassung = Endbild.
 **Experimentell [H]:** Begleitschatten, Ablegen mit nachfolgendem Etikett, mitlaufende Szene am Schreibtisch, Varianten V-1 bis V-3.
 
 ## E. Visual Attention Architecture (erwartet, nicht gemessen)
@@ -161,9 +163,9 @@ einem dunklen Maßstab neu an; der Wechsel von hell zu dunkel trennt die Kapitel
 
 | Element | Auslöser | Verlauf | Dauer, Kurve | Begründung |
 |---|---|---|---|---|
-| Blatt (Bildschicht) | Die Oberkante erreicht 70 % der Fensterhöhe (IntersectionObserver, `rootMargin 0 0 -30% 0`) | Bewegung aus der Lichtrichtung: von `translate(14px,-19px) rotate(-3.2deg)` nach `rotate(-2deg)`, also 24 px entlang (0,6 / −0,8). Deckkraft 0 → 1 | 600 ms, Deckkraft 300 ms; `cubic-bezier(.2,0,0,1)` | Motiv-Auftritt (DG-AB-16). Die Kurve verzögert stark und setzt weich auf. Das Ablegen zeigt Trägheit ohne Federn: Papier prallt nicht |
-| Etikett (Bildschicht) | 360 ms nach dem Blatt, wenn das Blatt ≈ 90 % seines Wegs hinter sich hat | 8 px entlang derselben Richtung, Deckkraft 0 → 1 | 320 ms, gleiche Kurve; Ende bei 680 ms | Teil desselben Trägers, nacheinander statt gleichzeitig (SG 10.7/4) |
-| Text (Bedienschicht) | beim Eintritt ins Bild (`Reveal.auf`) | nur Deckkraft, einmal | 320 ms, `--e-out` | DG-AB-2. Der Preisblock kommt erst nach dem Blatt ins Bild (bei 844 und 664) und folgt so von selbst |
+| Blatt (Bildschicht) | Die Oberkante erreicht 70 % der Fensterhöhe (IntersectionObserver, `rootMargin 0 0 -30% 0`) | Bewegung aus der Lichtrichtung: von `translate(14px,-19px) rotate(-3.2deg)` nach `rotate(-2deg)`, also 24 px entlang (0,6 / −0,8). Deckkraft 0 → 1 | 600 ms (`--t-motiv`), Deckkraft 320 ms (`--t3`); `--e-out` (K-4) | Motiv-Auftritt (DG-AB-16). Die Kurve verzögert stark und setzt weich auf. Das Ablegen zeigt Trägheit ohne Federn: Papier prallt nicht |
+| Etikett (Bildschicht) | 280 ms nach dem Blatt, wenn das Blatt mit `--e-out` ≈ 90 % seines Wegs hinter sich hat | 8 px entlang derselben Richtung, Deckkraft 0 → 1 | 320 ms (`--t3`), gleiche Kurve; Ende bei 600 ms (K-4: 680 → 600 ms) | Teil desselben Trägers, nacheinander statt gleichzeitig (SG 10.7/4) |
+| Text, Preisblock, Katalog, Chips (Bedienschicht) | – | kein Auftritt: steht ab dem ersten Bild, auch wenn der Abschnitt ins Bild scrollt | – | Festlegung K-6 (11.7.2): Ein Einblenden beim Scrollen wäre neben dem Ablegen ein zweiter Träger und ohne JavaScript ein Risiko. Einblenden (220 ms Deckkraft) gibt es nur für Inhalte, die nach einer Eingabe neu erscheinen; H3 hat keine. Der Preisblock kommt ohnehin erst nach dem Blatt ins Bild (bei 844 und 664). **Abweichung von bestehender Regel** (GEST:39 Katalog 1) – **Freigabe durch den Inhaber nötig** (DS-AB-8) |
 | Chips | Wischen | Der Finger führt 1 : 1, native Trägheit, `scroll-snap-type: x proximity` | – | ohne Überschwingen und ohne automatischen Einlauf (DG-AB-4) |
 
 - **Hover und Klick:** keine am Blatt und am Etikett. Neigen per Maus bleibt ausgeschlossen (DG-AB-15), und die Bildschicht trägt keine
@@ -180,7 +182,8 @@ einem dunklen Maßstab neu an; der Wechsel von hell zu dunkel trennt die Kapitel
 - Bei 664 px realer Höhe und Scrollstand ≈ 1.446 steht die Haarlinie direkt unter dem Kopf. Dann sind Szene, Etikett und alle drei
   Preiszeilen zusammen sichtbar (Ende bei Fenster-y 652).
 - Bei 360 px: Blatt `min(290px, 81%)` = 266 × 252, das Etikett bleibt 152 × 76 (Überdeckung 12,7 %). Preiszeile 3 darf zweizeilig werden.
-- Von 640 bis 1023 px gilt dieselbe Stapelfolge, die Szene höchstens 420 px breit, linksbündig.
+- Von 640 bis 1023 px gilt dieselbe Stapelfolge mit 24 px Seitenrand (Ordnungslinie x = 24, K-13), die Szene höchstens 420 px breit,
+  linksbündig.
 
 **Schreibtisch 1280 × 800:**
 
@@ -193,13 +196,15 @@ einem dunklen Maßstab neu an; der Wechsel von hell zu dunkel trennt die Kapitel
   die Szene steht oben bündig.
 - Der Abschnitt ist ≈ 0,97 BH hoch.
 
-**Schreibtisch 1024:** Inhalt 922 px (Rand 51). Links 370 px, h2 40 passt mit „Was im Aufmaß“ in die erste Zeile. Rechts 528 px, Blatt
+**Schreibtisch 1024:** Rand 32 px, Spalte 960 px, 12 Spalten à 58 px mit 24 px Rinne (K-12, K-13; wie der Kopf in `rh-01`). Links
+Spalten 1–5, x 32–418 (386 px); h2 40 passt mit „Was im Aufmaß“ in die erste Zeile. Rechts Spalten 6–12, x 442–992 (550 px), Blatt
 360 × 342, Etikett 184 × 92 (Überdeckung ≈ 8 %).
 
 ## H. Technische Umsetzung
 
 **H.1 Bestehende Komponenten:** `web/assets/portal.js` (Aufbau der Ansicht `:851-858`; `aufmassInhalt`, `CAPS`, `grossSection`,
-`b2cVisual` werden ersetzt); `web/assets/gemeinsam.js:178` (`Reveal`, mit einer Klasse nur für Deckkraft nach DG-AB-2);
+`b2cVisual` werden ersetzt); `web/assets/gemeinsam.js:178` (`Reveal` wird in H3 nicht gebraucht: Die Bedienschicht hat keinen Auftritt,
+K-6; die Szene bindet einen eigenen Observer, H.5);
 `web/assets/gemeinsam.css` (Tokens, `.eyebrow`, `.chip`); `web/assets/modell.js:1117-1130` (Preise, Stichtag);
 `functions/seo.js:138-150` (Textfassung wechselt am Stichtag von selbst); `web/index.html:61`, `:72` (Textfassung).
 
@@ -217,12 +222,13 @@ Katalog, z. B. `web/assets/aufmass-inhalt.js` mit `{ name, nameKunde, text }`. S
   -webkit-mask-image: linear-gradient(#000 75%, transparent); mask-image: linear-gradient(#000 75%, transparent); }
 .he3-etikett { position: absolute; left: calc(100% - 0.74 * 152px); top: 62.5%; width: max-content; min-width: 152px; min-height: 76px;
   padding: 12px 16px; border-radius: 12px; background: var(--surface);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / .24), inset -1px 0 0 rgb(255 255 255 / .24),
-              inset 0 0 0 1px rgb(255 255 255 / .14), -5px 6px 16px -2px rgb(22 22 22 / .07); }
+  /* Lichtkante K-24; Begleitschatten K-25: v = 7,6 px, Farbe --ground 6 % */
+  box-shadow: inset 0 1px 0 var(--kante-licht), inset -1px 0 0 var(--kante-licht),
+              inset 0 0 0 1px var(--kante-alpha), -4.6px 6.1px 19px -1.9px rgb(22 22 22 / .06); }
 .he3-szene.rev:not(.in) .he3-blatt { opacity: 0; transform: translate(14px, -19px) rotate(-3.2deg); }
 .he3-szene.rev:not(.in) .he3-etikett { opacity: 0; transform: translate(5px, -6px); }
-.he3-szene.in .he3-blatt { transition: transform 600ms cubic-bezier(.2,0,0,1), opacity 300ms cubic-bezier(.2,0,0,1); }
-.he3-szene.in .he3-etikett { transition: transform 320ms cubic-bezier(.2,0,0,1) 360ms, opacity 320ms cubic-bezier(.2,0,0,1) 360ms; }
+.he3-szene.in .he3-blatt { transition: transform var(--t-motiv) var(--e-out), opacity var(--t3) var(--e-out); }
+.he3-szene.in .he3-etikett { transition: transform var(--t3) var(--e-out) 280ms, opacity var(--t3) var(--e-out) 280ms; }
 @media (prefers-reduced-motion: reduce) { .he3-szene * { transition: none !important; } }
 ```
 
@@ -258,7 +264,8 @@ auf Preiszeile 2 (IA-O-9). Das Blatt enthält „8 Maße je Fenster“ (`blatt.j
 | „Was im Aufmaß steckt“ mit Kacheln; Bildplatz `gross` (GEST:192) | echtes Blatt mit Liste | SKILL:41; Platzhalter | IA-AB-5, IA-AB-8 |
 | Einführungspreis nur im Band (GEST:14) | Stichtag in Preiszeile 2 | R13 | IA-AB-6, auf H3 erweitert |
 | Kontrollhöhe 44 für Chips (GEST:32) | 36 px | nicht bedienbar, soll nicht wie ein Knopf wirken; Rückfall 44 | neu |
-| `--float`, Erscheinen 8 px, drei Dauern (GEST:24, :38, :39) | Lichtkante, nur Deckkraft, 600 ms im Motiv | DNA Nr. 1, 6 | DG-AB-1, -2, -16 |
+| `--float`, Erscheinen 8 px, drei Dauern (GEST:24, :38, :39) | Lichtkante, Bedienschicht ohne Auftritt (K-6), 600 ms im Motiv | DNA Nr. 1, 6; ein Träger je Ansicht | DG-AB-1, -2, -16, DS-AB-8 |
+| Kicker in Versalien mit Sperrung .18em, 800 (GEST:26; `gemeinsam.css:44`) | Kapitelzeile, „BEISPIEL“, „EINMALIG“ und Katalogkopf 600, +0,12 em | Technikstimme (K-16, K-17) | DS-AB-1 |
 | Fotokarte, Kartendrehung ±7° beim Scrollen (GEST:34, :41) | Blatt als Objekt, statisch | DNA Nr. 4 | DG-AB-9, IA-AB-5 |
 
 ## I. Conversion-Begründung

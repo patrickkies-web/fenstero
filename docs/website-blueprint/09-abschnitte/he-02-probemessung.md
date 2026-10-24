@@ -148,7 +148,7 @@ die Cream sichtbar ist (08 N3, `kopfCta`). **Übergang:** vom Papier der Zeichnu
 | Tipp | Wert-Pille | Deckkraft 0 → 1 (150 ms); Zahl = Endwert × Fortschritt, ganze mm | 640 ms, wie Linie | Wert zählt nur in der Bildschicht (DG-AB-3) |
 | Tipp, ab 560 ms | Endstrich rechts | Deckkraft 0 → 1, Maßstab 0,6 → 1,03 → 1 **[H]**; Rückfall 0,6 → 1 ohne Überschwingen | 220 ms, Feder ≤ 3 % (Rückfall `--e-out`) | Einrasten (G1; DR 3.5); Feder auf Tipp statt fingergeführt, deshalb Hypothese (K-37) |
 | dritter Wert fertig + 120 ms | längere Linien, ihre Pillen | Deckkraft 1 → 0,35 bzw. 0,6 (Text bleibt ≈ 4,8 : 1) | 320 ms, `--e-io` | Sprache des Zeichens `messen` |
-| + 120 ms | Pille „Mitte“ | weiß → `--ground` (Überblendung zweier Pillen) | 220 ms | Rang über Füllung |
+| + 120 ms | Pille „Mitte“ | `--papier` → `--ground` (Überblendung zweier Pillen) | 220 ms | Rang über Füllung |
 | + 240 ms | Etikett | Deckkraft 0 → 1, `translateY` 4 → 0 | 320 ms, `--e-out` | Abschluss ≤ 600 ms |
 | Tipp auf gedrückten Knopf | Linie, Pille, ggf. Etikett | `scaleX` 1 → 0 zur linken Laibung, Deckkraft → 0, übrige Linien zurück auf 1 | 220 ms, `--kurve-aus` | Abgang kürzer als Auftritt (DR 3.5); wiederholbar |
 
