@@ -2901,16 +2901,22 @@ function startWin(w) {
   const v = Object.assign(baseWin(), { w: m[0], h: m[1], mo: { hm: m[1] + 70, hl: m[1] + 70, hr: m[1] + 70, wm: m[0] + 140, wt: m[0] + 140, wb: m[0] + 140 }, el: { h: m[1], w: m[0] }, bru: m[2], laib: 140, fa: w.fa, fi: w.fi, offen: kopie(w.offen || {}), material: w.material, neu: w.neu, hst: w.hst, fsw: w.fsw, bt: w.bt, psk: w.psk });
   artSetzen(v, w.art || 'fenster'); return v;
 }
+/* Start: Stelle als zwei ruhige Karten ohne Symbol (das Modell darüber zeigt das Element), Element als Reihe zum Wischen mit Bildern aus
+   dem eigenen Konfigurator (web/bilder/app/element-<art>.webp, scripts/element-bilder.mjs); am Schreibtisch 3 × 2 */
 function startKarten(group, cur, act, cls) {
-  return '<div class="qcards' + (cls ? ' ' + cls : '') + '" role="group">' + OPT[group].map((o) => '<div class="qo"><button type="button" class="qopt" data-act="' + act + '" data-v="' + o.k + '" aria-pressed="' + (o.k === cur) + '">' + svgIcon(ICO[group](o.k), 44) + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + '</span></button>' + (optG(group, o) ? '<button type="button" class="qinfo" aria-label="' + esc('Erklärung: ' + o.label) + '" data-act="gloss" data-k="' + optG(group, o) + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
+  const bild = (o) => cls === 'start-arten' ? '<span class="sa-bild"><img src="/bilder/app/element-' + o.k + '.webp" width="272" height="192" alt="" decoding="async"></span>' : cls === 'stelle' ? '' : svgIcon(ICO[group](o.k), 44);
+  return '<div class="qcards' + (cls ? ' ' + cls : '') + (cls === 'start-arten' ? ' reihe' : '') + '" role="group">' + OPT[group].map((o) => '<div class="qo"><button type="button" class="qopt" data-act="' + act + '" data-v="' + o.k + '" aria-pressed="' + (o.k === cur) + '">' + bild(o) + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + '</span></button>' + (optG(group, o) ? '<button type="button" class="qinfo" aria-label="' + esc('Erklärung: ' + o.label) + '" data-act="gloss" data-k="' + optG(group, o) + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
 }
+/* Am Schreibtisch steht die Bühne groß neben der Wahl; das Element bekommt dort weniger vom Bild, sonst wirkt es überdimensioniert */
+const breitStart = () => { try { return matchMedia('(min-width: 1024px)').matches; } catch (e) { return false; } };
 SCREENS.start = () => {
   const w = S.win, art = w.art || 'fenster', o = OPT.art.find((x) => x.k === art) || OPT.art[0];
-  const html = hd('Schritt 1 von 6 · Start', 'Was planst du?', 'Zwei Angaben, dann führt dich die App passend durch Fotos, Maße und Wünsche.', '', '', schrittTools('elementart')) +
-    '<div class="qgroup"><p class="eyebrow">Die Stelle</p>' + startKarten('situation', w.neu ? 'neu' : 'ersatz', 'situation') +
+  /* Aufbau wie die Fragen: das Element als Held oben (dunkles Studio, Licht von rechts oben), darunter die zwei Angaben */
+  const html = hd('Schritt 1 von 6', 'Was planst du?', 'Zwei Angaben, dann geht es zu den Fotos.', 'start-hd', '', schrittTools('elementart')) +
+    model(startWin(w), { id: 'w3d', view: 'three', sway: true, stageH: 220, fitW: breitStart() ? 0.6 : 0.8, fitH: breitStart() ? 0.6 : 0.76, cls: 'studio', hint: o.label + (istTuer(w) ? ' · bodentief' : '') }) +
+    '<div class="start-wahl"><div class="qgroup"><p class="eyebrow">Die Stelle</p>' + startKarten('situation', w.neu ? 'neu' : 'ersatz', 'situation', 'stelle') +
     (w.neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung') : '') + '</div>' +
-    '<div class="qgroup"><p class="eyebrow">Das Element</p>' + startKarten('art', art, 'art', 'liste') + '</div>' +
-    model(startWin(w), { id: 'w3d', view: 'three', sway: true, stageH: 230, fitW: 0.76, fitH: 0.7, hint: o.label + (istTuer(w) ? ' · bodentief' : '') });
+    '<div class="qgroup"><p class="eyebrow">Das Element</p>' + startKarten('art', art, 'art', 'start-arten') + '</div></div>';
   return { html: html, back: ['Aufmaß', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos', zurueck: true } };
 };
 /* ---------- Fotos ---------- */
