@@ -144,7 +144,7 @@ Erwartet aus Kontrast, Größe und Lage, nicht gemessen.
 | Auslöser | Verhalten | Dauer, Kurve | „Weniger Bewegung“ | Begründung |
 |---|---|---|---|---|
 | Laden | Foto Deckkraft 0,35 → 1 und Maßstab 1,03 → 1 gemeinsam, Ursprung am Anker (Waschbär an der Öffnung, ≈ 70 % 30 %): die Kamera „setzt sich“; Start nach `img.decode()`, nur wenn die Bühne beim Laden im Bild ist; Text steht ab dem ersten Bild | 900 ms (`--t-buehne`), `--e-out` | Foto sofort voll | **Festlegung K-7**; ein Träger (E-2); Start bei 0,35, damit das Foto sofort als LCP zählt |
-| Logo-Licht | geht beim Laden nicht an, weil `/` einen Bühnen-Ladeauftritt hat; danach nur bei Berührung | 1,6 s bei Berührung | ruhig | **Festlegung K-8** (ersetzt I-5): ein Auftritt im ersten Bildschirm (`rh-01`) |
+| Logo-Licht | geht beim Laden nicht an, weil `/` einen Bühnen-Ladeauftritt hat; nur bei Berührung | wie `rh-01` | ruhig | **Festlegung K-8** (ersetzt I-5): ein Auftritt im ersten Bildschirm (`rh-01`) |
 | erste Eingabe im Auftritt (Scrollen > 4 px, Wischen, Rad, Taste) | Laufendes per Deckkraft in den Endzustand | 220 ms (`--t2`) | – | K-7; nichts springt (SKILL:48) |
 | Scrollen | keine Bewegung, auf allen Breiten | – | – | **Festlegung K-9**: Tiefe der Bildebenen nur in Stufe 4, H1 ist Stufe 3 |
 | Hover (`hover: hover`) | Cream: innere 2-px-Kontur `--on-primary` 24 %; Ring: Kontur `--muted` → `--text`; nicht gewähltes Segment: Kontur `--line2` | 150 ms (`--t1`), `--e-out` | bleibt | Hover = Kontur (K-2, K-1, 11.6.3); Dauer K-4 |
@@ -218,7 +218,7 @@ bis x 300 plus 16 px), y 0–28 % nur Decke und Wand mit weichem Tonwertverlauf;
 „Same scene as the reference photo, camera pulled back and up: calm plaster ceiling above, raccoon smaller and right of centre, window opening
 with daylight at the right edge, stool and floor in soft shadow. Photorealistic, warm daylight from the upper right, no text, no watermark.“
 
-**H.5 Leistung:** LCP (H.2); `backdrop-filter` nur auf 260 × 44 px; `decoding="async"`, Start erst nach `decode()`; `will-change` nur während
+**H.5 Leistung:** LCP (H.2); `backdrop-filter` nur auf 284 × 44 px; `decoding="async"`, Start erst nach `decode()`; `will-change` nur während
 der 900 ms; CLS ≤ 0,1 über feste Maße; bis LCP ≤ 350 KB.
 
 **H.6 Barrierefreiheit:** DOM-Folge Umschalter → Eyebrow → h1 → Lead → Preiszeile → Cream → Ring; Umschalter als Gruppe „Ansicht“ mit
@@ -245,13 +245,23 @@ keine fremden Server.
 | Nr. | Annahme | Prüfweg | Rückfall |
 |---|---|---|---|
 | H-he01-1 | Foto 420 px mit kleinerem Waschbären trägt die Wirkung (H-E7) | Telefon-Video bei 844 und 664, Urteil des Inhabers | Foto 460 px, Lead entfällt (Aussage in H2) |
-| H-he01-2 | Der Auftritt wirkt als „Licht geht an“, nicht als Verzögerung | Telefon-Video | nur Deckkraft, 600 ms |
+| H-he01-2 | Der Auftritt wirkt als „Licht geht an“, nicht als Verzögerung | Telefon-Video | Startdeckkraft 0,5, gemeinsam für alle Bühnen (DS-H-6, K-7) |
 | H-he01-3 | „Führung starten“ wird ohne Erklärzeile als „erst zusehen“ verstanden | Lesetest | Zeile 13 px „ein Fenster in zwei Minuten, ohne eigene Maße“ (`portal.js:852`) |
 | H-he01-4 | Die Preiszeile über den Knöpfen hält nicht vom Start ab | Gespräche; später Trichter (EA O-2) | Preiszeile unter die Knöpfe |
 | H-he01-5 | Fensterbauer finden den Umschalter oben links (IA-H-4) | Gespräche | Zeile über dem Foto, Foto 376 px |
-| H-he01-6 | Parallaxe 0,9 am Schreibtisch gibt Tiefe ohne Unruhe | Video 1280 | statisch |
+| H-he01-6 | entfällt: keine Parallaxe in Stufe 3 (K-9) | – | – |
 
-**Freigaben:** Telefonzuschnitt (H.4); Sperrung der Eyebrow (C.5); I-2 Kopfknopf ausgeblendet statt Ring: **Abweichung von bestehender Regel
-– Freigabe durch den Inhaber nötig** (GEST:192, :399 `kopfCta`; Grund: dasselbe Ziel nicht zweimal im ersten Bildschirm); gewähltes Segment
-als Kontur statt Cream: **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (GEST „Farbe“; Grund: eine Cream je
-Bildschirm, IA K03); dazu die geführten IA-AB-3, IA-AB-5, IA-AB-6, KA-AB-6 und E-AB-1 sinngemäß.
+**Freigaben:** Telefonzuschnitt (H.4); I-2 Kopfknopf ausgeblendet statt Ring: **Abweichung von bestehender Regel – Freigabe durch den
+Inhaber nötig** (GEST:192, :399 `kopfCta`; Grund: dasselbe Ziel nicht zweimal im ersten Bildschirm). Aus dem Designsystem (11.B), jeweils
+**Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig**:
+
+- Eyebrow 600/+0,12 em statt 800/0,18 em (K-17, DS-AB-1; GEST:26); Grund: Technikstimme, SG-Spanne.
+- Cream-Hover als innere Kontur statt `--primary-hover`, Druck `--primary-druck` statt Skalierung (K-2, DS-AB-3 und DS-AB-7 für den neuen
+  Wert `#e2e1db`; `gemeinsam.css:15`, `:65`); Grund: Hover = Kontur, Bedienschicht formstabil.
+- gewähltes Segment als `--surface3` mit Tintenkontur statt Cream (K-3, DS-AB-4; GEST:24); Grund: eine Cream je Bildschirm (SKILL:71).
+- Umbruchpunkte 640 und 1024 statt „eine Spalte bis 760 px“ (K-11, DS-AB-6; GEST:462); Grund: prüfbare Zahl von Kompositionen.
+- kein Logo-Licht beim Laden (K-8, DS-AB-9; GEST:7); Grund: ein Auftritt im ersten Bildschirm.
+- Ring-Kontur `--muted` statt `--line2` (K-1, DS-AB-10; GEST:24, `gemeinsam.css:58`); Grund: die Kontur ist die einzige Grenze des Knopfs
+  und braucht 3:1.
+
+Dazu die geführten IA-AB-3, IA-AB-5, IA-AB-6, KA-AB-6 und E-AB-1 sinngemäß.

@@ -72,7 +72,7 @@ Eine Zeitangabe bekommt erst nach O-11 einen Platz (13 px rechts am Ende des Ma�
 | Element | A: y | B: y | Maß, Ausrichtung |
 |---|---|---|---|
 | Haarlinie | 0 | 0 | 1 px `--line`, x 16–374 |
-| Kapitelzeile | 17–33 | 17–33 | 13 px, „03“ grün, Rest `--muted` |
+| Kapitelzeile | 17–33 | 17–33 | Technikstimme Versal 13/16, 600, +0,12 em, `tabular-nums`; Nummer „03“ `--accent`, Punkt und Wort `--muted` (11.3.1, K-16) |
 | h2 | 45–112 | 45–112 | 32 px, zwei Zeilen, Umbruch nach „Fotografieren.“ |
 | Etikett | – | 137–153 | 13 px `--muted` |
 | Miniaturen | – | 161–320 | 4 × 77,5 × 159 auf den Spaltenanfängen; untere 32 px in den Grund ausgeblendet |
@@ -88,7 +88,7 @@ Eine Zeitangabe bekommt erst nach O-11 einen Platz (13 px rechts am Ende des Ma�
 Technikstimme `--muted` (y 30–46) und das Wort 15 px fett `--text` (y 48–64). Rechts am Ende ein Schrägstrich 45°, 10 px, wie das
 Endzeichen einer Maßkette. Er liest sich wie ein bedruckter Zollstock, nicht wie ein Symbol.
 
-**Miniaturen (B).** Seitenverhältnis 390 : 800, Radius 8 px, oben eine Lichtkante 1 px Weiß 24 %, kein Schatten, Maske
+**Miniaturen (B).** Seitenverhältnis 390 : 800, Radius 12 px (`--r2`) auf allen Breiten, ohne Verkleinerung am Telefon (11.6.1, K-22), oben eine Lichtkante 1 px Weiß 24 %, kein Schatten, Maske
 `linear-gradient(#000 80%, transparent)`, frontal. Folge: Fotos · Messen · eine Wunschwahl (Vorschlag Farbe) · Aufmaßblatt.
 
 **Proportionen** der Abschnittsfläche: B ≈ 30 % Bild, 38 % Text und Bedienung, 32 % frei; A ≈ 15 % Bild, 48 % Text, 37 % frei. A liegt unter
@@ -97,12 +97,12 @@ dem Bildanteil der Stufe 2 (20–50 %, DG 2.4.2): Grund, B bald zu bauen.
 **Größen [V].** Drei Stufen (DG 2.2.18): h2 32/40 · Klein-Stufe 13–17 · nicht textlicher Held. Der Maßstab ist rund sechsmal so hoch wie
 die Versalhöhe der 15-px-Wörter (SG 10.1/4).
 
-**Schreibtisch 1280, 12 Spalten** in 1040 px (Spalte 57,3, Abstand 32, Beginn x 120):
+**Schreibtisch 1280, 12 Spalten** in 1040 px (Spalte 64,67, Rinne 24, Beginn x 120; 11.2.1, K-12):
 
-- **B (wie 08):** links Spalten 1–5 (x 120–535) der Bedienstapel; rechts Spalten 6–12 (x 567–1160) Etikett, vier Miniaturen 130 × 267 im
-  Subraster mit 24 px Abstand, darunter Maßstab 593 × 64; Etikett auf Höhe der Kapitelzeile.
-- **A (Abweichung von 08):** Ein 593 px breiter Maßstab ließe die rechte Hälfte zu über vier Fünfteln leer (Mangel aus PA 1.8). Er läuft
-  deshalb als Band über alle 12 Spalten (1040 × 64, y 160–224), Stationen auf den Spalten 1, 4, 7, 10 (x 120, 388, 656, 924). Ab y 256 links
+- **B (wie 08):** links Spalten 1–5 (x 120–539) der Bedienstapel; rechts Spalten 6–12 (x 563–1160) Etikett, vier Miniaturen 131 × 269 im
+  Subraster mit 24 px Abstand, darunter Maßstab 597 × 64; Etikett auf Höhe der Kapitelzeile.
+- **A (Abweichung von 08):** Ein 597 px breiter Maßstab ließe die rechte Hälfte zu über vier Fünfteln leer (Mangel aus PA 1.8). Er läuft
+  deshalb als Band über alle 12 Spalten (1040 × 64, y 160–224), Stationen auf den Spalten 1, 4, 7, 10 (x 120, 386, 652, 918). Ab y 256 links
   (Spalten 1–5) Lesestapel und Ring, rechts (7–12) Haken und Link: links der Ablauf, rechts die Daten.
 
 **Startwerte**
@@ -114,8 +114,8 @@ die Versalhöhe der 15-px-Wörter (SG 10.1/4).
 | Technikstimme | 13 px, 600, Versalien, +0,12 em, `tabular-nums` | DG 2.2.18 |
 | Lesestapel | 17 px, 500, 1,45, `--text2` | G2 |
 | Haken | 15 px, 500, 1,45, `--text2`, Schlüsselwörter 700 `--text`; Haken 7 × 12, 2,5 px `--accent` | `gemeinsam.css:97` |
-| Ring | 52 px, Pille, Kontur 2 px `--line2`, 17 px fett | `.btn.ghost` |
-| Radien | 8 (Miniatur Telefon), 12 (Schreibtisch), Pille | GEST; ≤ 4 Werte (SG 10.5/2) |
+| Ring | 52 px, Pille, innere Kontur 2 px `--muted` (≈ 5,8 : 1), 17 px fett | `.btn.ghost`; 11.6.2, K-1 (H4-AB-4) |
+| Radien | 12 (`--r2`, Miniatur auf allen Breiten), Pille | 11.6.1, K-22 (H4-AB-5) |
 
 ## D. Anwendung der Design-DNA
 
@@ -128,7 +128,7 @@ die Versalhöhe der 15-px-Wörter (SG 10.1/4).
 | 3-D (B 1, A 0) | nur als Bild: das Modell in Miniatur 02/03 | keine Ladelast |
 | Bildintegration (B 2) | ohne Rahmen, in den Grund ausgeblendet (DNA Nr. 4) | ein Raum mit der Seite |
 | Oberflächendetails (2) | Strichrhythmus 8/40, Endschrägstrich, Lichtkante | Mikrodetails ohne Fläche (SKILL:47) |
-| Animation (1) | einmal Deckkraft, Miniaturen gestaffelt (F) | Folge 01 → 04 wird spürbar |
+| Animation (B 1, A 0) | nur die Miniaturen einmal über Deckkraft, gestaffelt (F); Bedienschicht und Maßstab stehen ab dem ersten Bild (K-6) | Folge 01 → 04 wird spürbar |
 | Typografie (2) | Bühnen- und Technikstimme, Lesetext, ein grünes Wort | zwei Stimmen (DR 3.2) |
 | Überlagerungen (1) | nur die 8-px-Verdeckung; nie Text auf Bild | Lesbarkeit (SG 10.1/6) |
 | Perspektive (0) | frontal; H3 trägt schon das gedrehte Blatt | keine Wiederholung |
@@ -145,9 +145,11 @@ wachsende Marken und sich zeichnende Linien (8.3.11, DG T8, Ergebnis B B.3.12); 
 
 | Nr. | Regel | Vorschlag | Begründung |
 |---|---|---|---|
-| H4-AB-1 | DR 3.5: Auftritt 24 px und 0,98 → 1; drei Bewegungsebenen je Szene | nur Deckkraft, eine Ebene | Absicherungsfläche der Stufe 2, ein bewegter Träger je Ansicht (SG 10.7/4); erweitert DG-AB-2 |
+| H4-AB-1 | GEST:39 Katalog 1: Erscheinen 8 px aufwärts; DR 3.5: Auftritt 24 px und 0,98 → 1; drei Bewegungsebenen je Szene | Bedienschicht und Maßstab ohne Auftritt, auch ohne Deckkraft-Einblenden (K-6); nur die Miniaturen (B) einmal über Deckkraft, eine Ebene | Absicherungsfläche der Stufe 2, ein bewegter Träger je Ansicht (SG 10.7/4); ohne JavaScript sichtbar; = DS-AB-8, erweitert DG-AB-2 |
 | H4-AB-2 | DR 4, Baustein 7: „der Fortschritt wächst grün mit“ | Marken neutral, ohne Fortschritt | der Ablauf geschieht in der App, nicht beim Lesen; 8.3.11 |
 | H4-AB-3 | GEST:24, :32; DR 4, Baustein 2: Schatten `--float` | Lichtkante statt Schatten | DNA Nr. 6 (= DG-AB-1) |
+| H4-AB-4 | GEST:24: `--muted` nur für Labels und Nebenzeilen; `gemeinsam.css:58`: Ghost-Rand `--line2` | Ring-Kontur 2 px `--muted`, Hover → `--text` (K-1) | die Kontur ist die einzige Grenze des Knopfs und braucht 3 : 1 (WCAG 1.4.11); = DS-AB-10 |
+| H4-AB-5 | GEST:32: Radien 8 · 12 · 18 · 24 | Miniatur 12 auf allen Breiten statt 8 am Telefon (K-22) | höchstens vier Radien, keine Verkleinerung am Telefon; = DS-AB-5 |
 
 ## E. Visual Attention Architecture
 
@@ -170,16 +172,16 @@ Erwartete Aufmerksamkeit aus Kontrast, Größe und Lage, nicht gemessen.
 
 | Auslöser | Was | Dauer, Kurve | Verfahren | Weniger Bewegung |
 |---|---|---|---|---|
-| 15 % sichtbar, einmal | Bedienschicht Deckkraft 0 → 1, ohne Versatz | 320 ms, `--e-out` | `Reveal.auf`, Klasse ohne `translateY` | sofort sichtbar |
-| gleicher Auslöser | Miniaturen 01–04 Deckkraft, versetzt 0/80/160/240 ms, Maßstab mit 01 | je 400 ms, `cubic-bezier(.2, 0, 0, 1)`; ≤ 640 ms | `transition-delay: calc(var(--i) * 80ms)` | sofort sichtbar |
-| Zeiger über Ring / Link | Kontur bzw. Unterstrich `--line2` → `--ink` | 150 ms | `.btn.ghost:hover`, `.link:hover`, nur `(hover: hover)` | bleibt |
-| Ring gedrückt | Füllung `--surface2` | sofort | ohne das geerbte `scale(.98)` (SG 10.7/3) | bleibt |
-| Fokus | Kontur 2 px `--ink`, Abstand 2 px, folgt der Pille | – | `:focus-visible` | bleibt |
+| erstes Bild | Bedienschicht (Text, Ring, Link) und Maßstab stehen, kein Auftritt (11.7.2, K-6) | – | kein `Reveal` an diesen Elementen | – |
+| 15 % sichtbar, einmal (nur B) | Miniaturen 01–04 Deckkraft, versetzt 0/80/160/240 ms | je 600 ms `--t-motiv`, `--e-out`; ≤ 840 ms | `Reveal.auf`, `transition-delay: calc(var(--i) * 80ms)` | sofort sichtbar |
+| Zeiger über Ring / Link | Ring-Kontur `--muted` → `--text`, Unterstrich `--line2` → `--text` | 150 ms `--t1`, `--e-out` | `.btn.ghost:hover`, `.link:hover`, nur `(hover: hover)` | bleibt |
+| Ring gedrückt | Füllung `--surface2` | erscheint sofort (0 ms), zurück in 150 ms `--t1` | ohne das geerbte `scale(.98)` (SG 10.7/3) | bleibt |
+| Fokus | `outline: 2px solid var(--text)`, Abstand 2 px, folgt der Pille | – | `:focus-visible` | bleibt |
 | Tippen | `/app/#fuehrung` bzw. `/datenschutz/#fotos-ki`, gleiche Registerkarte | – | Link | – |
 
 Keine Scroll-Kopplung, Parallaxe, Schleife; kein Hover an den Miniaturen. **Begründung:** Wer hier Vertrauen fasst, soll lesen, nicht
-zusehen; Physik hat die Ansicht beim Tippen in H2 und beim Ablegen des Blatts in H3. 80 ms Versatz liegt in DR 3.5 (60–90 ms). Liegt der
-Abschnitt beim Laden schon im Bild, erscheint er ohne Übergang.
+zusehen; Physik hat die Ansicht beim Tippen in H2 und beim Ablegen des Blatts in H3. 80 ms Versatz liegt in DR 3.5 (60–90 ms), zusammen
+240 ms (≤ 400 ms, 11.7.1). Liegen die Miniaturen beim Laden schon im Bild, erscheinen sie ohne Übergang. Fassung A hat keinen Auftritt.
 
 ## G. Responsive Design
 
@@ -189,17 +191,17 @@ der Satz unter den Ring (`flex-wrap`). Bei 320 px (Spalten 60 px) bleibt „Wün
 Textgröße wechseln die Stationen per `@container (max-width: 24em)` auf 2 × 2; nichts scrollt quer.
 
 **Schreibtisch 1280 × 800.** B im Split 5 : 7, A als Band mit zwei Spalten darunter (C). h2 40 px zweizeilig (≈ 390 px, passt in 5 Spalten).
-Höhe A ≈ 390 px (0,49 BH), B ≈ 460 px; Miniaturen 130 px breit, nichts überdimensioniert.
+Höhe A ≈ 390 px (0,49 BH), B ≈ 460 px; Miniaturen 131 px breit, nichts überdimensioniert.
 
-**Schreibtisch 1024 × 768.** Spalte 922 px, 12 Spalten à 47,5 px. In 5 Spalten (365 px) bräche die h2 dreizeilig, deshalb **B im Split 6 : 6**
-(je 445 px, Miniaturen 99 × 203, Abstand 16). A: Band 922 × 64, Stationen auf 1, 4, 7, 10, Haken über 7–12.
+**Schreibtisch 1024 × 768.** Spalte 960 px (Rand 32), 12 Spalten à 58 px, Rinne 24 (11.2.1). In 5 Spalten (386 px) bräche die h2 dreizeilig,
+deshalb **B im Split 6 : 6** (je 468 px, Miniaturen 105 × 215, Abstand 16). A: Band 960 × 64, Stationen auf 1, 4, 7, 10, Haken über 7–12.
 
 **640–1023 px:** Telefonstapel, Inhaltsbreite höchstens 600 px an der linken Ordnungslinie.
 
 ## H. Technische Umsetzung
 
 **Bestehend.** `web/assets/portal.js` zeichnet die Ansicht (Aufbau um `:852`): H4 als eigener Baustein, Stil in `web/assets/portal.css`;
-Knöpfe, Links, Haken, Technikstimme aus `gemeinsam.css`; Einblenden über `Reveal.auf`. Die Textfassung `web/index.html` (st-05) erhält
+Knöpfe, Links, Haken, Technikstimme aus `gemeinsam.css`; Einblenden nur der Miniaturen (B) über `Reveal.auf`. Die Textfassung `web/index.html` (st-05) erhält
 denselben Inhalt als h2, `ol`, `ul` und zwei Links, ohne Maßstab und Bilder.
 
 **Neu.**
@@ -209,7 +211,7 @@ denselben Inhalt als h2, `ol`, `ul` und zwei Links, ohne Maßstab und Bilder.
   auf einem `aria-hidden`-Element; Marken als `border-left: 2px` der `li`, damit sie bei `forced-colors` bleiben. Raster
   `repeat(4, 1fr)`, Abstand 16; die Miniaturen nutzen dieselben Spalten (`subgrid`).
 - `.ablauf-bilder` (B): `img` mit `alt=""` (Inhalt steht im Wort), `width`/`height`, `aspect-ratio: 390 / 800`, `loading="lazy"`,
-  `srcset` 260w/520w, `sizes="(min-width: 1280px) 130px, (min-width: 1024px) 100px, 20vw"`.
+  `srcset` 260w/520w, `sizes="(min-width: 1280px) 131px, (min-width: 1024px) 105px, 20vw"`.
 - `.vertrauen-haken`: `ul`, Haken über `li::before`.
 - Bindung idempotent (Merker an der Wurzel), weil `portal.js` die Ansicht beim Umschalten neu aufbaut.
 - `web/datenschutz/index.html`: `id="fotos-ki"` an der h2 von Abschnitt 5, ohne Textänderung.
@@ -226,8 +228,8 @@ denselben Inhalt als h2, `ol`, `ul` und zwei Links, ohne Maßstab und Bilder.
 **Leistungsrisiken.** Gering: A ohne Datei, B ≈ 60 KB verzögert mit reserviertem Platz. Risiko ist die Alterung der Bildschirme bei
 App-Änderungen (EV H-E9 sinngemäß); Prüfung über den Fingerabdruck.
 
-**Barrierefreiheit.** Lesereihenfolge = DOM-Reihenfolge, der Held hat keine Fokusziele. Die Ring-Kontur erreicht nur 1,6 : 1, die Beschriftung
-kennzeichnet den Knopf; bei `prefers-contrast: more` Kontur `--text2`. Ziele ≥ 44 px, `scroll-padding-top` ≥ 56 px. Ohne JavaScript gilt die
+**Barrierefreiheit.** Lesereihenfolge = DOM-Reihenfolge, der Held hat keine Fokusziele. Die Ring-Kontur `--muted` erreicht ≈ 5,8 : 1 und
+damit die 3 : 1 für die einzige Grenze des Knopfs (WCAG 1.4.11; K-1); bei `prefers-contrast: more` Kontur `--text2`. Ziele ≥ 44 px, `scroll-padding-top` ≥ 56 px. Ohne JavaScript gilt die
 Textfassung. Schriftgrößen nur 13, 15, 17, 32, 40; H4 in die Größenprüfung der Prüfsuite aufnehmen, die die Startseite heute auslässt
 (TD 5.4).
 
@@ -255,4 +257,4 @@ der leise Weg für Unsichere.
 | H4-H4 | „ABLAUF UND DATEN“ trägt besser als „DATEN UND KONTO“ | Sichtprüfung des Inhabers | Wortlaut 08 |
 | H4-H5 | Ein vierter Haken zu H-07 nimmt einen weiteren Zweifel | Lesetest | drei Haken |
 
-**Offen:** Textentwürfe und H4-AB-1 bis -3 freigeben; Zeitangabe (O-11); Anrede (O-13); Auswahl der Führungsbildschirme.
+**Offen:** Textentwürfe und H4-AB-1 bis -5 freigeben; Zeitangabe (O-11); Anrede (O-13); Auswahl der Führungsbildschirme.

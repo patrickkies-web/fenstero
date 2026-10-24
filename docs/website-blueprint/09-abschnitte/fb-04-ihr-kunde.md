@@ -45,10 +45,10 @@ Spezifikation, wo 08 offen ist oder anders lautet (mit Begründung).
 | Beschriftungen | „ELEMENT“, „SONNENSCHUTZ“ | Textentwurf (08) |
 | Wahlzeilen | „Fenster“, „Balkontür“, „Hebe-Schiebe-Tür“ · „Ohne“, „Raffstore“, „Weiß ich noch nicht“ | Bestand |
 | Unterzeile an „Weiß ich noch nicht“ | „für die Klärungsliste“ | Textentwurf (VK:130), Festlegung I |
-| im Gerätebildschirm | „BEISPIEL“ | G7 |
+| im Gerätebildschirm | „BEISPIEL“ | G7; Etikett oben links, einzige Kennzeichnung des Materials (11.6.6, K-36 a) |
 | Schlusszeile | „Ihr Kunde sieht nur Ihren Betrieb: keine Preise, keine Werbung, keine anderen Betriebe.“ | gekürzt VK:240 (08) |
 | Ansage (nur Vorlesen) | „Vorschau: Balkontür mit Raffstore.“ · „Vorschau: Fenster. Sonnenschutz offen, steht beim Betrieb auf der Klärungsliste.“ | Textentwurf |
-| ohne JavaScript | „Fenster, ohne Sonnenschutz · Beispiel“ · „Dasselbe Fenster mit Raffstore“ | Textentwurf |
+| ohne JavaScript | „Fenster, ohne Sonnenschutz“ · „Dasselbe Fenster mit Raffstore“; „Beispiel“ steht als Etikett auf beiden Bildern, nicht in der Unterschrift (K-36) | Textentwurf |
 
 **Interaktion:** zwei Gruppen à drei Knöpfe mit `aria-pressed`; ein Tipp ändert sofort das Bild. Voreinstellung „Fenster“ und „Weiß ich
 noch nicht“ (Festlegung I: In der App bleibt eine Frage ohne Wahl offen, `app.js:701`; 03 zeigt so auch ohne Bedienung „mit dem Kunden zu
@@ -71,45 +71,47 @@ zweispaltiger Bedienblock, dessen Mittelkante die einzige eingerückte Zweitlini
 | Haarlinie 1 px `--line` | 16–374 | 0 | 4 Sp. |
 | Kapitelzeile 13 px | 16 | 17–33 | – |
 | h2 32 px, eine Zeile (gemessen 224,5 px breit) | 16 | 45–79 | – |
-| Lead 17 px, zwei Zeilen | 16–374 | 91–144 | 4 Sp. |
-| Gerät 300 × 420, sichtbar die unteren 240 px | 45–345 | 168–408 | ≈ 3,5 Sp., Achse |
-| Lichtfleck, Ellipse 360 × 192 | 15–375 | 288–480 | Zentrum (195, 384) |
-| Beschriftungen 13 px | 16 / 203 | 432–448 | je 2 Sp. |
-| Wahlzeilen 171 × 52, Abstand 8 | 16–187 / 203–374 | 456–628 | je 2 Sp. |
-| Schlusszeile 15 px, zwei Zeilen | 16–374 | 652–696 | 4 Sp. |
-| Abstand zu 03 | – | 696–792 | 96 (G6) |
+| Lead 17/26 px, zwei Zeilen | 16–374 | 91–143 | 4 Sp. |
+| Gerät 300 × 420 (Baustein K-23), sichtbar die unteren 240 px | 45–345 | 167–407 | ≈ 3,5 Sp., Achse |
+| Lichtfleck, Ellipse 360 × 192 | 15–375 | 287–479 | Zentrum (195, 383) |
+| Beschriftungen 13/16 px | 16 / 203 | 431–447 | je 2 Sp. |
+| Wahlzeilen 171 × 52, Abstand 8 | 16–187 / 203–374 | 455–627 | je 2 Sp. |
+| Schlusszeile 15/22 px, zwei Zeilen | 16–374 | 651–695 | 4 Sp. |
+| Abstand zu 03 | – | 695–791 | 96 (G6) |
 
 **Größenhierarchie [V]:** Gerät 240 px = 16 × Bedienschrift (≥ 3×, SG 10.1/4); h2 32; Lead 17; Klein-UI 15 und 13 (Spreizung 1,15 ≤ 1,25, SG
 10.1 Tabelle) – drei Stufen. **Flächen (Überschlag):** Bild ≈ 36 % (Gerät 26 %, sichtbares Licht ≈ 10 %), Bedienung und Text ≈ 24 %,
 frei ≈ 40 % (Untergrenze Stufe 3; am Bildschirmfoto prüfen). **Ebenen:** Hintergrund Z 0 (Grund `#161616`, Lichtfleck) → Mittelgrund Z 20
 (Gerät mit Render und Bildfolge) → Vordergrund Z 30 (Bedienschicht, nie auf dem Gerät, SG 10.1/5) → Seitenkopf Z 40. Verdeckungen: Der
 Körper verdeckt die obere Hälfte des Lichts, die Maske das obere Gerät (Anschnitt als Verankerung, B.3.2). **Arbeitslage:** Gerät und beide
-Gruppen umfassen 460 px (y 168–628) und stehen auch bei 390 × 664 (608 px unter dem Kopf) zusammen im Bild, die Gruppen im Daumenbereich;
+Gruppen umfassen 460 px (y 167–627) und stehen auch bei 390 × 664 (608 px unter dem Kopf) zusammen im Bild, die Gruppen im Daumenbereich;
 bei 844 schneidet 03 dann ≈ 90 px an (11 %, DG 2.3.17/2).
 
-**Schreibtisch 1280 × 800** – 12 Spalten à 64,7 px, Abstand 24, Spalte x 120–1160, Split 5 : 7.
+**Schreibtisch 1280 × 800** – 12 Spalten à 64,67 px, Rinne 24 (K-12), Spalte x 120–1160, Split 5 : 7 (Text x 120–539, Bild ab x 563).
 
 | Element | x | y | Maß |
 |---|---|---|---|
 | Haarlinie | 120–1160 | 0 | 12 Sp. |
-| Kapitelzeile, h2 40 px (eine Zeile), Lead | 120–539 | 17–152 | Sp. 1–5 |
-| Gruppen, Zeilen 197,5 × 52 | 120–317 / 342–539 | 176–372 | je 2,5 Sp. |
-| Schlusszeile | 120–539 | 396–440 | Sp. 1–5 |
-| Gerät 320 × 448, sichtbar unten 320 | 702–1022 | 52–372 | Achse Sp. 6–12 |
-| Lichtfleck 384 × 256 | 670–1054 | 218–474 | Zentrum (862, 346) |
+| Kapitelzeile 13/16, h2 40/42 (eine Zeile), Lead 17/26 | 120–539 | 17–151 | Sp. 1–5 |
+| Gruppen, Zeilen 197,5 × 52 | 120–317 / 342–539 | 175–371 | je 2,5 Sp. |
+| Schlusszeile | 120–539 | 395–439 | Sp. 1–5 |
+| Gerät 320 × 448 (Baustein K-23 × 1,067: Rand 11, Radien 47/36, Auslauf 51), sichtbar unten 320 | 702–1022 | 51–371 | Achse Sp. 6–12 |
+| Lichtfleck 384 × 256 | 670–1054 | 217–473 | Zentrum (862, 345) |
 
-Geräteunterkante und letzte Wahlzeile fluchten auf y 372: Bedienung und Gegenstand stehen auf einer Bodenlinie. Abschnitt ≈ 440 px hoch,
-kein Anheften (E-8); Gerät nur 7 % größer als am Telefon (SKILL:28).
+Geräteunterkante (Ende des Auslaufs) und letzte Wahlzeile fluchten auf y 371: Bedienung und Gegenstand stehen auf einer Bodenlinie.
+Abschnitt ≈ 440 px hoch, kein Anheften (E-8); Gerät nur 7 % größer als am Telefon (SKILL:28).
 
-**Weitere Startwerte:** Maske oben `mask-image` 48 px (1280: 56) statt harter Kante · Licht drei Stopps: Cream 12 %, 5 % bei 45 %, 0 % (≤ 12 %,
-08; SG 10.4/5) · Lichtfleck = 1,2 × Gerätebreite (SG 10.4: 1–1,5 ×) · Zeile `min-height` 52, Pille, Innenabstand 12, Text 15/600 · Innenabstände
+**Weitere Startwerte:** Maske oben `mask-image` 48 px (1280: 56) statt harter Kante, unten der Auslauf des Gerätebausteins 48 px (1280: 51;
+K-23) · Licht drei Stopps: Cream 12 %, 5 % bei 45 %, 0 % (≤ 12 %, 08; SG 10.4/5) · Lichtfleck = 1,2 × Gerätebreite (SG 10.4: 1–1,5 ×) ·
+Zeile `min-height` 52, Pille, Innenabstand 12, Text 15/22, 500, gewählt 700 (K-3, K-19) · Innenabstände
 16 · 12 · 12 · 24 · 24 · 8 · 24 (1 : 3 : 6, G6) · Abschnittsabstand 96 / 128.
 
 **Abweichungen von 08 (Festlegung I):**
 
 1. **Gruppen nebeneinander** statt untereinander à 358 × 52. Untereinander reichen Gerät und zweite Gruppe 680 px weit; bei 664 px Höhe
    fehlt beim Tipp auf „Raffstore“ ein Drittel des Geräts, die Antwort geschieht außerhalb des Blicks (SKILL:86). Gemessen: „Weiß ich noch
-   nicht“ ist bei 15/600 127 px breit, verfügbar 147 px (bei 360 px Breite 132). Rückfall: untereinander (G).
+   nicht“ ist bei 15/600 127 px breit, verfügbar 147 px (bei 360 px Breite 132). Gewählt steht es nach K-3 in 700; die Breite ist dafür
+   nachzumessen (geschätzt ≈ 131 px, bei 360 px knapp). Rückfall: untereinander (G).
 2. **Lichtzentrum 24 px über der Geräteunterkante** statt 30–40 % der Gerätehöhe darunter: SG 10.4/5 [Pflicht] verlangt das
    Helligkeitszentrum hinter dem Fokusträger, und `--muted` (13 px) hätte im Kern nur ≈ 4,2 : 1. Sichtbar bleibt das Licht unter und vor dem
    Gerät, wie X6 es wollte.
@@ -121,20 +123,20 @@ Budget Stufe 3: eine inszenierende Signature = Lichtraum (zweiter und letzter Li
 | Eigenschaft | Ausgestaltung | Intensität | Beitrag |
 |---|---|---|---|
 | Tiefe | drei Ebenen plus Kopf; Gerät verdeckt Licht; Anschnitt oben | D1 2 | Gerät steht im Raum, nicht auf einer Karte |
-| Material | nur im Render: Putz, Profil, Glas, Alu-Lamellen; Körper matt `--ground`, 1-px-Ring `--line2`; kein Glas, kein Eigenmaterial an Knöpfen (Nr. 9) | D2 3 im Bild | echtes Produkt als Beweis (SKILL:41) |
-| Licht, Schatten | Quelle Bildschirm; Lichtfleck Cream vorn und unten; rundum 1-px-Lichtkante `--kante-alpha` .14; kein Schatten (Nr. 6); Lichtwert je Bild (F) | D3 2 | Licht antwortet auf die Wahl |
-| Formen | Zeilen `--pill`; Gerät Radius 40, Bildschirm 32 als Teil des Motivs | D5 2 | ein Formsystem |
+| Material | nur im Render: Putz, Profil, Glas, Alu-Lamellen; Gerät als derselbe Baustein wie in 01 (K-23): Körper matt, Rand 10 px `--surface`, Lichtkante statt Ring; kein Glas, kein Eigenmaterial an Knöpfen (Nr. 9) | D2 3 im Bild | echtes Produkt als Beweis (SKILL:41) |
+| Licht, Schatten | Quelle Bildschirm; Lichtfleck Cream vorn und unten; Lichtkante 1 px rundum `--kante-alpha` 14 %, Ober- und rechte Kante `--kante-licht` 24 % (Haus-Token `--licht-x` −0,6, `--licht-y` 0,8; K-24), sichtbar an den Seiten, oben und unten in Maske und Auslauf; kein Schatten (Nr. 6); Lichtwert je Bild (F) | D3 2 | Licht antwortet auf die Wahl |
+| Formen | Zeilen `--pill`; Gerät Außenradius 44, Bildschirm 34 (K-23, wie 01) als Teil des Motivs | D5 2 | ein Formsystem |
 | 3-D-Objekte | vorgerenderte Standbilder und Bildfolge aus `buehne.js`, Voreinstellung „Vitrine“ (EV X6); kein Echtzeit-3-D, getippte Wahl ist keine stetige Steuerung (SG 10.8/9) | D7 2 im Bild | Realismus der Lamellen (SKILL:122) |
 | Bildintegration | Render als Bildschirminhalt, Gerät frei auf dem Grund (Nr. 4) | – | ein Raum |
-| Oberflächendetails | Lichtkante, Haarlinie, „BEISPIEL“ 13 px oben links im Bildschirm, 12 px unter dem Maskenende | D12 1 | ehrlich (G7) |
+| Oberflächendetails | Lichtkante, Haarlinie, Etikett „BEISPIEL“ oben links im Bildschirm, 12 px unter dem Maskenende, Technikstimme Versal 13/16, `--text2` (auf Bild; K-36 a) | D12 1 | ehrlich (G7) |
 | Animation | Überblendung, Raffstore-Fahrt, Licht folgt (F) | D8 2 | nur als Antwort (SKILL:45) |
-| Typografie | Bühnenstimme 32/800, −0,03 em, 1,05; Technikstimme 13/600 Versalien 0,12 em, grün nur die Kapitelzeile; Lesetext 17/500 `--text2`, Schlüsselwörter `--text`; Zeilen 15/600 | D18 0 | zwei Stimmen, drei Stufen |
+| Typografie | Bühnenstimme 32/800, −0,03 em, 1,05; Technikstimme Versal 13/16, 600, +0,12 em, `tabular-nums`, an der Kapitelzeile grün nur die Nummer, Punkt und Wort `--muted` (K-16); Lesetext 17/26, 500 `--text2`, Schlüsselwörter `--text`; Zeilen 15/22, 500 `--text2`, gewählt 700 `--text` (K-3, K-19) | D18 0 | zwei Stimmen, drei Stufen |
 | Überlagerungen | nur Gerät über Licht, nichts auf dem Gerät | – | Anker frei |
-| Perspektive | Gerät frontal 0°; im Render Kamera frontal auf die Elementmitte, lange Brennweite, Licht von oben (`--licht-y` 1) | D15 0 | Bilder vergleichbar |
+| Perspektive | Gerät frontal 0°; im Render Kamera frontal auf die Elementmitte, lange Brennweite, Licht von oben rechts nach Haus-Token (`--licht-x` −0,6, `--licht-y` 0,8; K-24), wie alle Renders der Seite | D15 0 | Bilder vergleichbar |
 | Interaktive Effekte | Knopf → Bild und Licht; Gerät ohne Trefferfläche (KD [V] 6) | D10 1 | Ursache und Wirkung getrennt |
 
-**Bildfeld im Render:** Element samt Kasten im Rechteck x 10–90 %, y 42–94 % des Bilds, proportional, unten bündig – am Telefon liegen die
-oberen 39,8 % des Bilds verdeckt oder in der Maske. Farben wie die Voreinstellung der App; eine Farbe als dritter Griff entfällt (H-E1).
+**Bildfeld im Render:** Element samt Kasten im Rechteck x 10–90 %, y 42–85 % des Bilds, proportional, unten bündig auf 85 % – am Telefon
+liegen die oberen 40 % des Bilds verdeckt oder in der Maske, die unteren 15 % (48 von 320 px) im Auslauf des Geräts (K-23). Farben wie die Voreinstellung der App; eine Farbe als dritter Griff entfällt (H-E1).
 
 **Bewusst weggelassen:** Glas, Messraster, Maßlinie, Explosion (03), Schritt- und Kapitelanzeige, Lottie, Flieger, Konfetti, Puls,
 Parallaxe, Scrollkopplung, Anheften, Bodenschatten, Staub, Echtzeit-3-D, Selbstvorführung, „Setzen um 8 px“ (KD; höchstens zwei Reaktionen je
@@ -149,6 +151,8 @@ Tipp), Cream. Die Ausdruckslast liegt bei der Reaktion des Produkts (RE E3).
 | Geräte-Bühne mit Bodenschatten (DR 4 Nr. 8, 3.1; `verkauf.css:559`) | Lichtkante und Lichtfleck | DNA Nr. 6 | DG-AB-1 |
 | Auftritt 24 px aufwärts, 0,98 → 1 (GEST:448) | Bedienschicht ohne Auftritt | SG 10.7/1–2 | DG-AB-2 |
 | „Licht atmet in 6 bis 10 s“ (DR 3.5) | Licht ändert sich nur auf Eingabe | autonome Bewegung ≤ 5 s | DG-AB-5 |
+| `--muted` „nur für Labels und Nebenzeilen“ (GEST:24); Ghost-Rand `--line2` (`gemeinsam.css:58`) | Wahlzeilen als Ring: innere 2-px-Kontur `--muted`, Hover `--text`, Druck `--surface2` | die Kontur ist die einzige Grenze der Zeile und braucht 3 : 1 (WCAG 1.4.11); `--line2` hat 1,6 : 1 | 11.6.2 K-1; DS-AB-10 |
+| gewählt in Cream (GEST:24; `gemeinsam.css:82`, `:90`) | gewählt = Füllung `--surface3` plus innere 2-px-Kontur `--text`, Schrift 700 `--text` | eine Cream je Bildschirm (SKILL:71); ein Zustandsbild für die ganze Website | 11.6.3 K-3; DS-AB-4 |
 
 Keine Abweichung von GEST:455: `button` ist keine Eingabe; `scripts/pruefen.mjs:1789-1797` sucht nur `form`, `input`, `select`, `textarea`.
 
@@ -156,11 +160,12 @@ Keine Abweichung von GEST:455: `button` ist keine Eingabe; `scripts/pruefen.mjs:
 
 Erwartete, **nicht gemessene** Aufmerksamkeit:
 
-1. Beim Hereinscrollen grüne Kapitelzeile und h2 an der Ordnungslinie, dann der Lead.
+1. Beim Hereinscrollen Kapitelzeile mit grüner Nummer und h2 an der Ordnungslinie, dann der Lead.
 2. **Primär:** das Fensterglas im unteren Drittel des Gerätebildschirms – hellster Wert der Ansicht (Spitzlichter im Render); der
    Lichtfleck erreicht höchstens `#303030`. Gerät und Licht bilden das einzige Helligkeitszentrum.
-3. **Sekundär:** die zwei gewählten Zeilen, Füllung `--muted` (5,8 : 1 gegen den Grund); die vier übrigen nur Kontur `--line2` (1,6 : 1) mit
-   Text `--text2`. Die Füllung zeigt den Zustand und lädt zum Umschalten ein.
+3. **Sekundär:** die zwei gewählten Zeilen, Füllung `--surface3` mit innerer 2-px-Kontur `--text` und Schrift 700 `--text` (K-3); die vier
+   übrigen ohne Fläche, nur Kontur `--muted` (≈ 5,8 : 1, K-1) mit Schrift 500 `--text2`. Die Füllung zeigt den Zustand und lädt zum
+   Umschalten ein.
 4. Unterzeile „für die Klärungsliste“, Schlusszeile.
 
 **Handlungsaufruf:** bewusst keiner, keine Cream im Bild; einziger dauerhafter Handlungsträger ist der Kopf-Ring „Pakete ansehen“ (8.2.2),
@@ -180,8 +185,8 @@ Lichtraum; die Wahl kehrt in 03 als Karte „Aus Ihrer Probe“ wieder – die P
 | Elementart bei Raffstore | Überblendung der Raffstore-Standbilder | 500 ms | 120 ms |
 | Tipp während der Fahrt | Fahrt hält, Überblendung zum neuen Ziel; der letzte Tipp gilt | 220 ms `--t2` | Schnitt |
 | Abschnitt verlässt das Bild | Sprung ins Endbild, Schleife stoppt | – | – |
-| Hover (`hover: hover`) | Kontur `--line2` → `--muted`, Hand-Zeiger | 150 ms | gleich |
-| Drücken / Fokus | Füllung `--surface2`, keine Skalierung (SG 10.7/3) / Kontur 2 px `--text`, Abstand 2, `:focus-visible` | sofort | gleich |
+| Hover (`hover: hover`) | nicht gewählte Zeile: Kontur `--muted` → `--text` (K-1), Hand-Zeiger | 150 ms | gleich |
+| Drücken / Fokus | Füllung `--surface2`, keine Skalierung (SG 10.7/3) / Umriss außen 2 px `--text`, Abstand 2 (`outline`), `:focus-visible` | sofort | gleich |
 
 **Lichtwert je Bild:** mittlere Helligkeit des Standbilds, linear auf 6–12 % abgebildet, beim Erzeugen per Skript berechnet, als `data-licht`
 hinterlegt (mehr Glas = mehr Licht, Lamellen = weniger); umgesetzt als `opacity` der Lichtebene (Wert ÷ 12). Startwerte für Platzhalter:
@@ -192,8 +197,9 @@ echte Fahrt (1,8 s, `buehne.js:14`) wie in 08 und behält den Versatz von 12 ms 
 Höchstens zwei Reaktionen je Tipp (Bild, Licht). Richtung: Raffstore oben → unten und zurück; Überblendung und Licht ohne Richtung. Die
 Bedienschicht bewegt sich nie (G1), hat keinen Auftritt und ist von `Reveal` ausgenommen – sofort bedienbar.
 
-**Ohne JavaScript:** Gerät mit „Fenster, ohne Sonnenschutz · Beispiel“; an Stelle der Gruppen eine zweite Abbildung 171 × 138 (Radius 18,
-2-px-Ring) „Dasselbe Fenster mit Raffstore“ – zwei Standbilder mit je einer Zeile (08); Gruppen `hidden`. **Rückfall der Bildfolge:**
+**Ohne JavaScript:** Gerät mit Etikett „BEISPIEL“ und Unterschrift „Fenster, ohne Sonnenschutz“; an Stelle der Gruppen eine zweite
+Abbildung 171 × 138 (Radius 18, 2-px-Ring) „Dasselbe Fenster mit Raffstore“ mit demselben Etikett oben links (K-36 a) – zwei Standbilder mit
+je einer Zeile (08); Gruppen `hidden`. **Rückfall der Bildfolge:**
 Überblendung 500 ms bei fehlender Bildfolge, `Save-Data` oder Median-Bildzeit über 25 ms. **Auslegung zu bestätigen:** Bildfolge auf Tippen
 = Antwort, keine zweite inszenierende Signature (08); sonst immer Überblendung.
 
@@ -203,30 +209,34 @@ Bedienschicht bewegt sich nie (G1), hat keinen Auftritt und ist von `Reveal` aus
 stehen in 460 px bei 844 und 664 zusammen im Bild, bedient mit dem Daumen in der unteren Hälfte. Bei 360 px Breite Spalten à 156 px, alles
 einzeilig. Ist der Bedienblock schmaler als `20em` (Inhalt unter 320 px, also Bildschirm unter ≈ 352 px, und bei 200 % Text), untereinander wie 08
 (358 × 52, Abstand 8); dann darf das Gerät beim Tippen oben herauslaufen (Reflow vor Effekt, G9). Zeilen wachsen mit dem Text, kein
-Querscrollen. **640–1023 px:** wie Telefon, Spalte höchstens 560 px, mittig.
+Querscrollen. **640–1023 px:** wie Telefon, Rand 24, Rinne 16, Ordnungslinie x 24 (K-12, K-13); Kopf, Bedienblock und Schlusszeile
+höchstens 560 px breit und linksbündig, das Gerät auf der Achse dieses Blocks (bei 768: x 24–584, Achse x 304).
 
 **Schreibtisch 1280:** Split 5 : 7 nach C; alles in einem 800-px-Bildschirm, 03 schneidet in der Arbeitslage ≈ 168 px an (21 %); h2 40,
-nichts angeheftet. **1024:** Spalte x 48–976; links 5 Spalten (x 48–421), Gruppen à 178 px; Gerät 300 × 420, sichtbar 300, Mitte x 710,
-y 72–372; Lichtfleck 360 × 240, Zentrum (710, 348).
+nichts angeheftet. **1024:** Rand 32, Spalte x 32–992, 12 Spalten à 58 px, Rinne 24 (K-13); links Spalten 1–5 (x 32–418), Gruppen à
+181 px (x 32–213 / 237–418); Gerät 300 × 420 (Baustein K-23), sichtbar 300, Achse Sp. 6–12 (x 442–992), Mitte x 717, y 71–371; Lichtfleck
+360 × 240, Zentrum (717, 347).
 
 ## H. Technische Umsetzung
 
-**Bestehend:** Gerätekörper aus `verkauf.css:346-347`, mit 01 geteilt als `.vk-geraet`; `Verkauf.auf`/`bewegung()`, `beobachten()`,
-`ruhig()` aus `verkauf.js`; Tokens `--t1`, `--t2`, `--e-out`, `--e-io`, `--pill`, `--line2`, `--muted`, `--surface2` (keine neuen).
+**Bestehend:** Gerätekörper aus `verkauf.css:346-347`, mit 01 geteilt als `.vk-geraet` (Maße nach K-23); `Verkauf.auf`/`bewegung()`,
+`beobachten()`, `ruhig()` aus `verkauf.js`; Tokens `--t1`, `--t2`, `--e-out`, `--e-io`, `--pill`, `--surface`, `--surface2`, `--surface3`,
+`--muted`, `--text`, `--text2`, `--accent` (keine neuen in diesem Abschnitt); Lichtkante mit `--kante-alpha`/`--kante-licht` aus 11.5.4.
 **Neu:** HTML in VK an Stelle von Zeile 84–119, Block `.vk-probe*` in `verkauf.css`, Funktion `probe(wurzel, still)` in `verkauf.js` an
 Stelle von `buehne()`. Kein `input`. Die h2 trägt nur `id`, weil `29.mjs:112` genau `<h2 id="so-funktioniert-es">` sucht.
 
 ```html
 <section class="vk-teil vk-probe" data-probe>
-  <p class="vk-kapitel">02 · Ihr Kunde</p>
+  <p class="vk-kapitel"><span class="vk-nr">02</span> · Ihr Kunde</p>
   <h2 id="so-funktioniert-es">So <span class="ak">funktioniert</span> es</h2>
   <p class="vk-lead">…</p>
   <figure class="vk-probe-buehne">
     <div class="vk-probe-licht" aria-hidden="true"></div>
     <div class="vk-probe-ausschnitt"><div class="vk-geraet">
       <img class="vk-probe-bild" src="/bilder/probe/fenster-ohne.webp" width="600" height="640" alt="…" decoding="async" loading="lazy">
-      <canvas class="vk-probe-folge" aria-hidden="true" hidden></canvas></div></div>
-    <figcaption class="vk-probe-ohnejs">Fenster, ohne Sonnenschutz · Beispiel</figcaption>
+      <canvas class="vk-probe-folge" aria-hidden="true" hidden></canvas>
+      <span class="vk-etikett">Beispiel</span></div></div>
+    <figcaption class="vk-probe-ohnejs">Fenster, ohne Sonnenschutz</figcaption>
   </figure>
   <div class="vk-probe-gruppen" hidden>
     <div role="group" aria-labelledby="probe-element"><p id="probe-element">Element</p>
@@ -242,11 +252,16 @@ Stelle von `buehne()`. Kein `input`. Die h2 trägt nur `id`, weil `29.mjs:112` g
 
 **CSS:** Bedienblock `display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px` (Schreibtisch 24); jede Gruppe `grid-row: span 4;
 grid-template-rows: subgrid; row-gap: 8px` (gleich hohe Zeilen über beide Gruppen); `container-type: inline-size`, `@container (inline-size <
-20em)` → eine Spalte. Ausschnitt `height: 240px; overflow: clip; mask-image: linear-gradient(#0000, #000 48px)`, Gerät unten bündig.
+20em)` → eine Spalte. Ausschnitt `height: 240px; overflow: clip; mask-image: linear-gradient(#0000, #000 48px)`, Gerät unten bündig; das
+Gerät selbst wie in 01 `width: 300px; height: 420px; mask-image: linear-gradient(#000 calc(100% - 48px), transparent)`, Rand 10 px
+`--surface`, Radien 44/34, Lichtkante als `::before` mit 1-px-Rand (`--kante-alpha`, oben und rechts `--kante-licht`), kein Schatten (K-23,
+K-24). Kapitelzeile 13/16, 600, +0,12 em, Versal, `tabular-nums`, `--muted`, `.vk-nr` `--accent` (K-16).
 Licht als eigenes Element 360 × 192, mittig, Oberkante 120 px (= 240 − 24 − 96), `radial-gradient(closest-side, rgb(241 240 234 / .12),
 rgb(241 240 234 / .05) 45%, transparent)`, `pointer-events: none`, ragt in den Bedienblock. Zeigt das Telefon-Video Streifen: als WebP mit
-±1 Tonwert Rauschen einbacken (B.2). Zeile nicht gewählt `background: none; box-shadow: inset 0 0 0 2px var(--line2); color: var(--text2)`,
-gewählt `background: var(--muted); color: var(--ground)`. Schrift ausdrücklich 15 px, `small` 13 px (sonst 13,33 bzw. 12,5 px, SKILL:69).
+±1 Tonwert Rauschen einbacken (B.2). Zeile nicht gewählt `background: none; box-shadow: inset 0 0 0 2px var(--muted); color: var(--text2);
+font-weight: 500`, Hover `box-shadow: inset 0 0 0 2px var(--text)`, Druck `background: var(--surface2)`; gewählt `background:
+var(--surface3); box-shadow: inset 0 0 0 2px var(--text); color: var(--text); font-weight: 700` (K-1, K-3). Schrift ausdrücklich 15/22 px,
+`small` 13/16 px (sonst 13,33 bzw. 12,5 px, SKILL:69; K-19).
 
 **JavaScript:** `probe()` bindet je Element einmal (`data-probe-an`), entfernt `hidden`, setzt `.vk-probe--an`, liest den Zustand aus
 `sessionStorage` `vk.probe` (`try/catch`); mit `o.still` ohne Bewegung (Neuaufbau in `/#fensterbauer`, SKILL:63-64). Jede Wahl schreibt
@@ -270,9 +285,11 @@ selbst (SKILL:41). Bildplätze in `docs/BILDER.md` nachtragen.
 bei Median-Bildzeit über 25 ms für die Sitzung nur Überblendung (KA). Feste Maße gegen Layoutverschiebung; LCP unberührt (Bildschirm 3–4).
 Last ≈ 200 KB Standbilder plus 450 KB je geladener Folge, innerhalb SG 10.8 (≤ 60 Bilder, ≤ 3 MB). **Barrierefreiheit:** zwei benannte
 `role="group"`, Knöpfe `type="button"` mit `aria-pressed`; höfliche Ansage `role="status"`; `alt` beschreibt den Zustand; Fokusfolge =
-DOM; Ziele 171 × 52; Kontraste `--text2` auf Grund 10 : 1, `--muted` 5,8 : 1, gewählt `--ground` auf `--muted` 5,8 : 1, Füllung gegen Grund
-5,8 : 1 (WCAG 1.4.11); Zustand über Form (Fläche gegen Kontur), nicht nur Farbe; `forced-colors`: gewählt `Highlight`/`HighlightText`;
-`scroll-padding-top` ≥ 56 px.
+DOM; Ziele 171 × 52; Kontraste `--text2` auf Grund 10 : 1, Kontur `--muted` gegen Grund 5,8 : 1 (einzige Grenze, WCAG 1.4.11), gewählt
+`--text` auf `--surface3` 12,1 : 1, Kontur `--text` gegen Grund 16,2 : 1 (die Füllung `--surface3` allein hätte nur 1,3 : 1, darum trägt
+die Kontur den Zustand); Zustand über Fläche, Konturton und Gewicht (500 gegen 700), nicht nur Farbe; `forced-colors`: gewählt
+`Highlight`/`HighlightText`; `scroll-padding-top` 72 px (Schreibtisch 80), am h2 `scroll-margin-top` 116 px (Schreibtisch 124), damit die
+Haarlinie nach dem Sprung 16 px unter dem Kopf steht (K-15).
 
 ## I. Conversion-Begründung
 

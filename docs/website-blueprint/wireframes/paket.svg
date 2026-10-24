@@ -1,0 +1,1552 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2600 6420" width="2600" height="6420" font-family="system-ui, sans-serif">
+<title>Wireframe 04 · Paketentscheidung (Konzept P1 „Wischreihe mit Markenbild“)</title>
+<desc>Planungs-Wireframe der Kaufentscheidung auf /fuer-fensterbauer/ nach 10-paketentscheidung.md 10.4 und den Abschnitten fb-06, fb-07, fb-08, fb-09: Telefon 390 × 844 zuerst, Schreibtisch 1280 × 800, Karten, Hervorhebung, Vergleich, Knöpfe, Rückmeldung nach der Wahl und Weg zum Bestellen. Graustufen, Orange = Cream der echten Seite (Handlung), Blau = Tiefe und Licht. Maße in CSS-Pixeln 1 : 1, geplant.</desc>
+<style>
+  text { font-family: system-ui, sans-serif; fill: #1a1a1a; }
+  .s12 { font-size: 12px; } .s13 { font-size: 13px; } .s15 { font-size: 15px; } .s17 { font-size: 17px; }
+  .s20 { font-size: 20px; } .s32 { font-size: 32px; } .s40 { font-size: 40px; }
+  .w5 { font-weight: 500; } .w6 { font-weight: 600; } .w7 { font-weight: 700; } .w8 { font-weight: 800; }
+  .t2 { fill: #4d4d4d; } .mu { fill: #6e6e6e; } .wh { fill: #ffffff; } .cta { fill: #d9480f; } .tief { fill: #1c7ed6; }
+  .caps { letter-spacing: 0.12em; }
+  .num { font-variant-numeric: tabular-nums; }
+  .an { font-size: 12px; font-weight: 500; fill: #262626; }
+  .anb { font-size: 12px; font-weight: 700; fill: #1a1a1a; }
+  .lab { font-size: 13px; font-weight: 700; fill: #1a1a1a; }
+  .hd { font-size: 20px; font-weight: 700; fill: #1a1a1a; }
+  .hl { stroke: #c4c4c4; stroke-width: 1; fill: none; }
+  .hl2 { stroke: #a9a9a9; stroke-width: 1; fill: none; }
+  .ring { fill: none; stroke: #a8a8a8; stroke-width: 2; }
+  .ringc { fill: none; stroke: #d9480f; stroke-width: 2; }
+  .rk { fill: none; stroke: #6e6e6e; stroke-width: 2; }
+  .gr { stroke: #1a1a1a; stroke-width: 1.5; stroke-dasharray: 1.5 2.5; fill: none; }
+  .bl { stroke: #1c7ed6; fill: none; }
+  .hyp { fill: none; stroke: #6e6e6e; stroke-width: 1.2; stroke-dasharray: 5 4; }
+  .bk { stroke: #3a3a3a; stroke-width: 1.4; fill: none; stroke-dasharray: 7 5; }
+  .ld { stroke: #1a1a1a; stroke-width: 1; fill: none; }
+  .tk { stroke: #8a8a8a; stroke-width: 1; }
+  .haken { stroke: #1a1a1a; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+<defs>
+  <pattern id="bildmuster" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="10" height="10" fill="#cfcfcf"/>
+    <line x1="0" y1="0" x2="0" y2="10" stroke="#bdbdbd" stroke-width="4"/>
+  </pattern>
+  <pattern id="fotomuster" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+    <rect width="8" height="8" fill="#b4b4b4"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#9c9c9c" stroke-width="3"/>
+  </pattern>
+  <clipPath id="clip-fenster" clipPathUnits="userSpaceOnUse"><rect x="2" y="360" width="306" height="230"/></clipPath>
+  <clipPath id="clip-strip" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="390" height="2070"/></clipPath>
+  <clipPath id="clip-b1" clipPathUnits="userSpaceOnUse"><rect x="0" y="240" width="390" height="700"/></clipPath>
+  <clipPath id="clip-screen" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="390" height="844"/></clipPath>
+  <clipPath id="clip-dfenster" clipPathUnits="userSpaceOnUse"><path d="M0 0 H282.7 V200 A12 12 0 0 1 270.7 212 H12 A12 12 0 0 1 0 200 Z"/></clipPath>
+  <clipPath id="clip-d2" clipPathUnits="userSpaceOnUse"><rect x="543" y="0" width="641" height="520"/></clipPath>
+  <marker id="pfeil" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#1a1a1a"/>
+  </marker>
+  <marker id="pfeilb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#1c7ed6"/>
+  </marker>
+
+  <!-- Gemeinsamer Rahmen einer Telefon-Karte (Kartenkoordinaten: Kartenoberkante y 0, linke Kante x 0, Breite 310, Höhe 877) -->
+  <g id="pk-rahmen">
+    <rect x="2" y="336" width="306" height="24" fill="#b9b9b9"/>
+    <circle cx="13" cy="348" r="3" fill="#8a8a8a"/><circle cx="23" cy="348" r="3" fill="#8a8a8a"/><circle cx="33" cy="348" r="3" fill="#8a8a8a"/>
+    <rect x="44" y="339" width="216" height="18" rx="9" fill="#dedede"/>
+    <rect x="52" y="346" width="7" height="6" rx="1" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
+    <path d="M53.5 346 v-1.6 a2 2 0 0 1 4 0 v1.6" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
+    <text x="65" y="352.5" class="s12 w5">ihr-name-fenster.de <tspan class="mu">· Beispiel</tspan></text>
+    <line x1="2" y1="336.75" x2="308" y2="336.75" stroke="#1c7ed6" stroke-width="1.5"/>
+    <rect x="2" y="360" width="306" height="230" fill="#d9d9d9"/>
+    <text x="20" y="622.5" class="s13 w6 mu caps">GESTALTUNG</text>
+    <line x1="20" y1="654.5" x2="290" y2="654.5" class="hl2"/>
+    <text x="20" y="670.5" class="s13 w6 mu caps">HINWEIS AUF EEZIFRAMES</text>
+    <line x1="20" y1="702.5" x2="290" y2="702.5" class="hl2"/>
+    <text x="20" y="718.5" class="s13 w6 mu caps">IN SUCHMASCHINEN</text>
+    <line x1="20" y1="750.5" x2="290" y2="750.5" class="hl2"/>
+    <text x="20" y="766.5" class="s13 w6 mu caps">FÜR IHR TEAM</text>
+    <line x1="20" y1="813.5" x2="290" y2="813.5" class="hl2"/>
+    <text x="20" y="840.5" class="s15 w6">Leistungen ansehen</text>
+    <path d="M272 832 l6 6 l6 -6" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  </g>
+
+  <!-- EEZI Essential, Telefon -->
+  <g id="pk-ess-basis">
+    <rect x="0" y="0" width="310" height="877" rx="24" fill="#ffffff"/>
+    <text x="20" y="42" class="s17 w7">EEZI Essential</text>
+    <text x="20" y="72" class="s15 w5 t2">Wenn Ihr Name genügt: der volle</text>
+    <text x="20" y="94" class="s15 w5 t2">Konfigurator im eeziframes-Design.</text>
+    <text x="20" y="147" class="s32 w8 num">29 €</text>
+    <text x="97" y="147" class="s15 w5 mu">im Monat</text>
+    <text x="20" y="172" class="s15 w5 t2">ab Livegang, monatlich kündbar</text>
+    <text x="20" y="202" class="s15 w5 t2"><tspan class="w6" fill="#1a1a1a">99 € Einrichtung</tspan>, einmalig vorab:</text>
+    <text x="20" y="224" class="s15 w5 t2">Anruf, Domain, Gestaltung, Vorschau</text>
+    <text x="20" y="248" class="s13 w5 mu">netto zzgl. MwSt. · nur für Unternehmer</text>
+    <rect x="21" y="269" width="268" height="50" rx="25" class="rk"/>
+    <text x="42" y="300" class="s17 w7">Essential anfragen</text>
+    <use href="#pk-rahmen"/>
+    <text x="20" y="644" class="s15 w5">eeziframes-Design, Ihr Name</text>
+    <text x="20" y="692" class="s15 w5">„Powered by EEZIframes“</text>
+    <text x="20" y="740" class="s15 w5">nein</text>
+    <text x="20" y="788" class="s15 w5">nicht enthalten</text>
+  </g>
+  <g id="pk-ess-bild">
+    <rect x="-22" y="360" width="354" height="230" fill="#d9d9d9"/>
+    <rect x="2" y="360" width="306" height="28" fill="#c6c6c6"/>
+    <text x="32" y="378.5" class="s12 w7">Fensterbau Brandt</text>
+    <path d="M286 369 h12 M286 374 h12 M286 379 h12" stroke="#5a5a5a" stroke-width="2"/>
+    <rect x="12" y="404" width="148" height="12" fill="#7a7a7a"/>
+    <rect x="12" y="422" width="108" height="12" fill="#7a7a7a"/>
+    <rect x="12" y="444" width="140" height="6" fill="#a8a8a8"/>
+    <rect x="12" y="456" width="122" height="6" fill="#a8a8a8"/>
+    <rect x="12" y="474" width="92" height="24" rx="12" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+    <rect x="178" y="398" width="118" height="110" fill="#ebebeb" stroke="#8a8a8a" stroke-width="1.5"/>
+    <path d="M237 398 V508 M178 398 L237 453 L178 508 M296 398 L237 453 L296 508" fill="none" stroke="#a6a6a6" stroke-width="1"/>
+    <rect x="2" y="562" width="306" height="28" fill="#cdcdcd"/>
+    <rect x="214" y="571" width="86" height="11" rx="2" fill="#6f6f6f"/>
+  </g>
+  <g id="pk-ess-linien">
+    <path d="M20 618 H14 V376 H23.5 M20 666 H8 V578.5 H253" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+    <path d="M20 618 H14 V376 H23.5 M20 666 H8 V578.5 H253" fill="none" stroke="#444444" stroke-width="1"/>
+    <circle cx="26.5" cy="376" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+    <circle cx="256" cy="578.5" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+  </g>
+  <g id="pk-ess-ring">
+    <rect x="1" y="1" width="308" height="875" rx="23" class="ring"/>
+  </g>
+  <g id="pk-ess-oben"><use href="#pk-ess-linien"/><use href="#pk-ess-ring"/></g>
+
+  <!-- EEZI Essential Plus, Telefon (empfohlen) -->
+  <g id="pk-plus-basis">
+    <rect x="0" y="0" width="310" height="877" rx="24" fill="#ffffff"/>
+    <text x="20" y="42" class="s17 w7">EEZI Essential Plus</text>
+    <text x="20" y="72" class="s15 w5 t2">Wenn Ihre Kunden Ihr Logo, Ihre</text>
+    <text x="20" y="94" class="s15 w5 t2">Farbe und Ihre Fotos sehen sollen.</text>
+    <text x="20" y="147" class="s32 w8 num">39 €</text>
+    <text x="97" y="147" class="s15 w5 mu">im Monat</text>
+    <text x="20" y="172" class="s15 w5 t2">ab Livegang, monatlich kündbar</text>
+    <text x="20" y="202" class="s15 w5 t2"><tspan class="w6" fill="#1a1a1a">199 € Einrichtung</tspan>, einmalig vorab:</text>
+    <text x="20" y="224" class="s15 w5 t2">Anruf, Domain, Gestaltung, Vorschau</text>
+    <text x="20" y="248" class="s13 w5 mu">netto zzgl. MwSt. · nur für Unternehmer</text>
+    <rect x="20" y="268" width="270" height="52" rx="26" fill="#d9480f"/>
+    <text x="42" y="300" class="s17 w7 wh">Essential Plus anfragen</text>
+    <circle cx="268" cy="294" r="14" fill="#ffffff"/>
+    <path d="M261.5 294 H274 M270 290 L274 294 L270 298" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+    <use href="#pk-rahmen"/>
+    <text x="20" y="644" class="s15 w5">Ihr Logo, Ihre Farbe, bis 6 Fotos</text>
+    <text x="20" y="692" class="s15 w5">kleiner Hinweis im Fuß</text>
+    <text x="20" y="740" class="s15 w5">Startseite</text>
+    <text x="20" y="788" class="s15 w5">nicht enthalten</text>
+  </g>
+  <g id="pk-plus-bild">
+    <rect x="-22" y="360" width="354" height="230" fill="#d9d9d9"/>
+    <rect x="2" y="360" width="306" height="28" fill="#8f8f8f"/>
+    <rect x="22" y="366" width="62" height="16" rx="3" fill="#f2f2f2"/>
+    <text x="55" y="378.5" text-anchor="middle" class="s12 w6">Beispiel</text>
+    <path d="M286 369 h12 M286 374 h12 M286 379 h12" stroke="#f2f2f2" stroke-width="2"/>
+    <rect x="12" y="404" width="148" height="12" fill="#7a7a7a"/>
+    <rect x="12" y="422" width="108" height="12" fill="#7a7a7a"/>
+    <rect x="12" y="444" width="140" height="6" fill="#a8a8a8"/>
+    <rect x="12" y="456" width="122" height="6" fill="#a8a8a8"/>
+    <rect x="12" y="474" width="92" height="24" rx="12" fill="#8f8f8f"/>
+    <rect x="172" y="398" width="128" height="122" fill="url(#fotomuster)"/>
+    <rect x="216" y="451" width="40" height="18" rx="3" fill="#ededed"/>
+    <text x="236" y="464" text-anchor="middle" class="s12 w6">Foto</text>
+    <rect x="2" y="562" width="306" height="28" fill="#cdcdcd"/>
+    <rect x="258" y="574" width="34" height="9" rx="2" fill="#9a9a9a"/>
+  </g>
+  <g id="pk-plus-linien">
+    <path d="M20 618 H14 V376 H23.5 M20 666 H8 V578.5 H271" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+    <path d="M20 618 H14 V376 H23.5 M20 666 H8 V578.5 H271" fill="none" stroke="#444444" stroke-width="1"/>
+    <circle cx="26.5" cy="376" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+    <circle cx="274" cy="578.5" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+  </g>
+  <g id="pk-plus-ring">
+    <rect x="1" y="1" width="308" height="875" rx="23" class="ringc"/>
+    <rect x="20" y="-14" width="122" height="28" rx="14" fill="#eeeeee" stroke="#d9480f" stroke-width="2"/>
+    <text x="81" y="4.6" text-anchor="middle" class="s13 w7 caps cta">EMPFOHLEN</text>
+  </g>
+  <g id="pk-plus-oben"><use href="#pk-plus-linien"/><use href="#pk-plus-ring"/></g>
+
+  <!-- EEZI Signature, Telefon -->
+  <g id="pk-sig-basis">
+    <rect x="0" y="0" width="310" height="877" rx="24" fill="#ffffff"/>
+    <text x="20" y="42" class="s17 w7">EEZI Signature</text>
+    <text x="20" y="72" class="s15 w5 t2">Wenn Ihre Kunden eeziframes nicht</text>
+    <text x="20" y="94" class="s15 w5 t2">sehen sollen, mit Dashboard.</text>
+    <text x="20" y="147" class="s32 w8 num">64 €</text>
+    <text x="98" y="147" class="s15 w5 mu">im Monat</text>
+    <text x="20" y="172" class="s15 w5 t2">ab Livegang, monatlich kündbar</text>
+    <text x="20" y="202" class="s15 w5 t2"><tspan class="w6" fill="#1a1a1a">279 € Einrichtung</tspan>, einmalig vorab:</text>
+    <text x="20" y="224" class="s15 w5 t2">Anruf, Domain, Gestaltung, Vorschau</text>
+    <text x="20" y="248" class="s13 w5 mu">netto zzgl. MwSt. · nur für Unternehmer</text>
+    <rect x="21" y="269" width="268" height="50" rx="25" class="rk"/>
+    <text x="42" y="300" class="s17 w7">Signature anfragen</text>
+    <use href="#pk-rahmen"/>
+    <text x="20" y="644" class="s15 w5">Ihr Logo, Ihre Farbe, bis 6 Fotos</text>
+    <text x="20" y="692" class="s15 w5">keiner</text>
+    <text x="20" y="740" class="s15 w5">Startseite</text>
+    <text x="20" y="788" class="s15 w5">Dashboard, Einladungslinks, 5 Zugänge</text>
+  </g>
+  <g id="pk-sig-bild">
+    <rect x="-22" y="360" width="354" height="230" fill="#d9d9d9"/>
+    <rect x="2" y="360" width="306" height="28" fill="#8f8f8f"/>
+    <rect x="22" y="366" width="62" height="16" rx="3" fill="#f2f2f2"/>
+    <text x="55" y="378.5" text-anchor="middle" class="s12 w6">Beispiel</text>
+    <path d="M286 369 h12 M286 374 h12 M286 379 h12" stroke="#f2f2f2" stroke-width="2"/>
+    <rect x="12" y="404" width="148" height="12" fill="#7a7a7a"/>
+    <rect x="12" y="422" width="108" height="12" fill="#7a7a7a"/>
+    <rect x="12" y="444" width="140" height="6" fill="#a8a8a8"/>
+    <rect x="12" y="456" width="122" height="6" fill="#a8a8a8"/>
+    <rect x="12" y="474" width="92" height="24" rx="12" fill="#8f8f8f"/>
+    <rect x="172" y="398" width="128" height="122" fill="url(#fotomuster)"/>
+    <rect x="216" y="451" width="40" height="18" rx="3" fill="#ededed"/>
+    <text x="236" y="464" text-anchor="middle" class="s12 w6">Foto</text>
+    <rect x="2" y="562" width="306" height="28" fill="#cdcdcd"/>
+  </g>
+  <g id="pk-sig-linien">
+    <path d="M20 618 H14 V376 H23.5 M20 666 H8 V578.5 H271" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+    <path d="M20 618 H14 V376 H23.5 M20 666 H8 V578.5 H271" fill="none" stroke="#444444" stroke-width="1"/>
+    <circle cx="26.5" cy="376" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+    <circle cx="274" cy="578.5" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1" stroke-dasharray="2 2"/>
+  </g>
+  <g id="pk-sig-ring">
+    <rect x="1" y="1" width="308" height="875" rx="23" class="ring"/>
+  </g>
+  <g id="pk-sig-oben"><use href="#pk-sig-linien"/><use href="#pk-sig-ring"/></g>
+
+  <!-- Kopf Telefon 390 × 56 -->
+  <g id="kopf-tel">
+    <rect x="0" y="0" width="390" height="56" fill="#e2e2e2"/>
+    <line x1="0" y1="55.5" x2="390" y2="55.5" class="hl2"/>
+    <rect x="16" y="14" width="28" height="28" rx="7" fill="#9a9a9a"/>
+    <text x="52" y="34" class="s17 w7">eeziframes</text>
+    <path d="M343 23 H361 M343 33 H361" stroke="#1a1a1a" stroke-width="2"/>
+  </g>
+</defs>
+
+<rect x="0" y="0" width="2600" height="6420" fill="#ffffff"/>
+
+<!-- ===================== Titel ===================== -->
+<g id="titel">
+  <text x="60" y="70" class="s32 w8">Wireframe 04 · Paketentscheidung</text>
+  <text x="60" y="102" class="s17 w6">Konzept P1 „Wischreihe mit Markenbild“ – empfohlen und spezifiziert in 10-paketentscheidung.md (10.4)</text>
+  <text x="60" y="130" class="s15 w5 t2">Seite /fuer-fensterbauer/, identisch eingebettet in /#fensterbauer · Kapitel 04 „Ihre Marke“ zwischen 03 „Ihr Postfach“ und 05 „Ihre Anfrage“</text>
+  <text x="60" y="152" class="s15 w5 t2">Bausteine fb-06 (Kopf, Namensleiste, Karten) · fb-07 (Verkaufsstand, Vergleich) · fb-08 (Festblock, Gesprächsweg) · Rückmeldung in fb-09 bzw. /partner/</text>
+  <text x="60" y="174" class="s15 w5 t2">Grundfassung: Plus empfohlen (O-5 offen) · Zustand A (Anfrage, heute) mit Hinweisen auf Zustand B (Bestellung, PAKETE_OFFEN=1)</text>
+  <text x="60" y="196" class="s15 w5 t2">Planungsstand 24.10.2026 · nichts gebaut, kein Bestand verändert · Telefon 390 × 844 zuerst, dann Schreibtisch 1280 × 800</text>
+  <text x="60" y="236" class="lab">Teile dieses Blatts</text>
+  <text x="60" y="256" class="s13 w5">A Telefon, ganzes Kapitel · B1 Wischen und Ebenen · B2 Vergleich aufgeklappt · B3 Knöpfe, Zustände, Wahl</text>
+  <text x="60" y="274" class="s13 w5">C Schreibtisch · C2 Vergleich aufgeklappt · D1, D2 Rückmeldung nach der Wahl · D3 Weg zum Bestellen (Zustand B) · E offene Punkte</text>
+  <text x="60" y="310" class="lab">Dosierung der Design-DNA in diesem Kapitel</text>
+  <text x="60" y="330" class="s13 w5">04.1 Karten Stufe 2 „klar“, Dialekt C (flach), ein Bildträger je Karte · 04.2 Vergleich Stufe 1 · 04.3 Festblock Stufe 1 (Rhythmus 2 · 1 · 1)</text>
+  <text x="60" y="348" class="s13 w5">Keine inszenierende Signature; eine informierende (Leitlinien am Datenblatt). Physik nur in der Bildschicht.</text>
+  <text x="60" y="366" class="s13 w5">Bewusst weggelassen: Glas, Lichtquelle, Schatten, grüner Schein, Skalierung, Auftritte beim Scrollen, Lottie-Vorspann, hochzählende Preise.</text>
+</g>
+
+<!-- ===================== Legende ===================== -->
+<g id="legende">
+  <rect x="1240" y="24" width="1320" height="350" rx="12" fill="#fafafa" stroke="#cfcfcf"/>
+  <text x="1264" y="54" class="s15 w7">Legende</text>
+
+  <rect x="1264" y="70" width="44" height="24" fill="#eeeeee" stroke="#999999"/>
+  <text x="1320" y="87" class="an">Grund, Ebene Z 0 – auf der echten Seite dunkel (#161616)</text>
+  <rect x="1265" y="107" width="42" height="22" rx="8" fill="#ffffff" stroke="#a8a8a8" stroke-width="2"/>
+  <text x="1320" y="123" class="an">Karte und Bedienschicht, Ebene Z 30, Ring 2 px (echt #1f1f1f)</text>
+  <rect x="1264" y="142" width="44" height="24" fill="url(#bildmuster)" stroke="#999999"/>
+  <text x="1320" y="159" class="an">Bildschicht Z 20: Beispielbild = Aufnahme der Startansicht (fehlt noch)</text>
+  <rect x="1264" y="178" width="44" height="24" fill="#e2e2e2"/>
+  <line x1="1264" y1="201.5" x2="1308" y2="201.5" class="hl2"/>
+  <text x="1320" y="195" class="an">Kopf, Ebene Z 40, klebt oben</text>
+  <text x="1264" y="231" class="s15 w7">Aa</text><text x="1286" y="231" class="s15 w7 t2">Aa</text><text x="1308" y="231" class="s15 w7 mu">Aa</text>
+  <text x="1336" y="231" class="an">Textstufen --text · --text2 · --muted</text>
+  <line x1="1264" y1="258.5" x2="1300" y2="258.5" class="hl"/>
+  <text x="1310" y="263" class="s13 w7">Wort</text>
+  <line x1="1310" y1="267" x2="1343" y2="267" class="gr"/>
+  <text x="1356" y="263" class="an">Haarlinie 1 px · gepunktet unterstrichen = grünes Signal der Marke (Kapitelnummer,</text>
+  <text x="1356" y="279" class="an">ein Wort je h2, Haken) – im Wireframe ohne Farbe</text>
+  <line x1="1264" y1="306" x2="1308" y2="306" class="bk"/>
+  <text x="1320" y="310" class="an">Bildschirmkante (Telefon 844 und reale Höhe 664, Schreibtisch 800)</text>
+
+  <rect x="1920" y="68" width="64" height="28" rx="14" fill="#d9480f"/>
+  <circle cx="1970" cy="82" r="10" fill="#ffffff"/>
+  <path d="M1965 82 H1975 M1971 78 L1975 82 L1971 86" fill="none" stroke="#1a1a1a" stroke-width="1.6"/>
+  <text x="1996" y="80" class="an">Akzent Handlung = Cream der echten Seite: Hauptaktion (genau ein Cream-Knopf</text>
+  <text x="1996" y="96" class="an">je Bildschirm), dazu Cream-Ring und Kontur-Pille „Empfohlen“ der empfohlenen Karte</text>
+  <rect x="1921" y="113" width="62" height="26" rx="13" class="rk"/>
+  <text x="1996" y="131" class="an">Ring-Knopf: Nebenaktion, 2-px-Kontur --muted (K-1), ohne Pfeilkreis</text>
+  <line x1="1920" y1="160" x2="1984" y2="160" stroke="#1c7ed6" stroke-width="1.5"/>
+  <text x="1922" y="176" class="s12 w7 tief">Z 20</text>
+  <text x="1996" y="164" class="an">Akzent Tiefe und Licht: Ebenen, Lichtkante, Verdeckung, Bewegung der</text>
+  <text x="1996" y="180" class="an">Bildschicht (Nachlauf, Feder) – nie für Bedienelemente</text>
+  <rect x="1920" y="198" width="64" height="26" class="hyp"/>
+  <text x="1952" y="216" text-anchor="middle" class="s12 w7 mu">[H]</text>
+  <text x="1996" y="216" class="an">Hypothese oder Variante mit Rückfall – nicht verbindlich; [V] = verbindliche Regel</text>
+  <circle cx="1932" cy="250" r="9" fill="#1a1a1a"/>
+  <text x="1932" y="254.5" text-anchor="middle" class="s12 w7 wh">1</text>
+  <line x1="1944" y1="250" x2="1984" y2="250" class="ld"/>
+  <text x="1996" y="254" class="an">Anmerkung; der Leitstrich zeigt auf die Höhe des Elements</text>
+  <text x="1920" y="290" class="s12 w7">TE</text>
+  <text x="1996" y="290" class="an">Textentwurf: neuer Wortlaut aus belegten Fakten, Freigabe durch den Inhaber nötig</text>
+
+  <line x1="1264" y1="326.5" x2="2536" y2="326.5" class="hl"/>
+  <text x="1264" y="346" class="an">Maßstab 1 : 1 in CSS-Pixeln · Lagen geplant (10.4 C, fb-06 bis fb-09), nicht gemessen · Textbreiten in Inter gemessen · J-R, J-H, J-AB, J-O = Nummern aus 10-paketentscheidung.md · K-n = Festlegungen aus 11-designsystem.md</text>
+  <text x="1264" y="363" class="an">AB = Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig · Name, Wortmarke und Logo bleiben · keine erfundenen Belege, Preise aus web/assets/pakete.js</text>
+</g>
+
+<!-- ===================== A · Telefon, ganzes Kapitel ===================== -->
+<text x="60" y="440" class="hd">A · Telefon 390 × 844 – Kapitel 04 vom Sprung auf #pakete bis zum Übergang nach 05 (Zustand A)</text>
+<g id="A" transform="translate(200 470)">
+  <rect x="0" y="0" width="390" height="2070" fill="#eeeeee"/>
+
+  <!-- Kapitelkopf -->
+  <line x1="16" y1="72.5" x2="374" y2="72.5" class="hl"/>
+  <text x="16" y="101" class="s13 w6 mu caps">04 · IHRE MARKE</text>
+  <line x1="16" y1="105" x2="34" y2="105" class="gr"/>
+  <text x="16" y="145" class="s32 w8">Die Pakete</text>
+  <line x1="74" y1="152" x2="182" y2="152" class="gr"/>
+  <text x="16" y="181" class="s17 w5 t2">Ein Konfigurator, drei Stufen <tspan class="w6" fill="#1a1a1a">Ihrer Marke</tspan>. In</text>
+  <text x="16" y="206" class="s17 w5 t2">allen: eigene Domain, jede Anfrage als PDF,</text>
+  <text x="16" y="231" class="s17 w5 t2">keine Gebühr je Anfrage.</text>
+
+  <!-- Namensleiste -->
+  <rect x="17" y="256" width="356" height="50" rx="25" fill="none" stroke="#c4c4c4" stroke-width="2"/>
+  <rect x="142" y="260" width="106" height="42" rx="21" fill="#c8c8c8" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="74" y="276" text-anchor="middle" class="s13 w6 t2">Essential</text>
+  <text x="74" y="295" text-anchor="middle" class="s15 w7 t2 num">29 €</text>
+  <text x="195" y="276" text-anchor="middle" class="s13 w6">Essential Plus</text>
+  <text x="195" y="295" text-anchor="middle" class="s15 w7 num">39 €</text>
+  <text x="316" y="276" text-anchor="middle" class="s13 w6 t2">Signature</text>
+  <text x="316" y="295" text-anchor="middle" class="s15 w7 t2 num">64 €</text>
+
+  <!-- Kartenreihe: Nachbarn angeschnitten, Bildschirmrand schneidet -->
+  <g clip-path="url(#clip-strip)">
+    <g transform="translate(-282 331)" opacity="0.66">
+      <use href="#pk-ess-basis"/>
+      <g clip-path="url(#clip-fenster)"><use href="#pk-ess-bild"/></g>
+      <use href="#pk-ess-oben"/>
+    </g>
+    <g transform="translate(40 331)">
+      <use href="#pk-plus-basis"/>
+      <g clip-path="url(#clip-fenster)"><use href="#pk-plus-bild"/></g>
+      <use href="#pk-plus-oben"/>
+    </g>
+    <g transform="translate(362 331)" opacity="0.66">
+      <use href="#pk-sig-basis"/>
+      <g clip-path="url(#clip-fenster)"><use href="#pk-sig-bild"/></g>
+      <use href="#pk-sig-oben"/>
+    </g>
+  </g>
+
+  <!-- fb-07: Verkaufsstand, Vergleich zugeklappt -->
+  <text x="16" y="1248.4" class="s15 w5 t2"><tspan class="w7" fill="#1a1a1a">Vorläufige Preise.</tspan> Preisstand 22. Oktober 2026.</text>
+  <text x="16" y="1270.4" class="s15 w5 t2">Es gilt der Preis, den Sie beim Bestellen sehen.</text>
+  <line x1="16" y1="1300.5" x2="374" y2="1300.5" class="hl"/>
+  <text x="16" y="1333" class="s17 w7">Alle Merkmale im Vergleich</text>
+  <path d="M355 1327 H369 M362 1320 V1334" stroke="#4d4d4d" stroke-width="2"/>
+  <line x1="16" y1="1353.5" x2="374" y2="1353.5" class="hl"/>
+
+  <!-- fb-08: Festblock, Gesprächsweg, Rechtshinweis -->
+  <text x="16" y="1414" class="s13 w6 mu caps">VERTRAG UND KÜNDIGUNG</text>
+  <path d="M23.5 1444 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="48" y="1449.4" class="s15 w5">Vertrag erst mit Eingang Ihrer Zahlung.</text>
+  <path d="M23.5 1474 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="48" y="1479.4" class="s15 w5">Bis zum Beginn der Einrichtung stornieren</text>
+  <text x="48" y="1501.4" class="s15 w5">Sie mit voller Erstattung.</text>
+  <text x="48" y="1527.4" class="s15 w5 t2">Danach wird die Einrichtungsgebühr nicht</text>
+  <text x="48" y="1549.4" class="s15 w5 t2">erstattet.</text>
+  <path d="M23.5 1574 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="48" y="1579.4" class="s15 w5">Live erst mit Ihrer Freigabe der Vorschau.</text>
+  <path d="M23.5 1604 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="48" y="1609.4" class="s15 w5">Monatsabo erst ab dem Livegang.</text>
+  <path d="M23.5 1634 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="48" y="1639.4" class="s15 w5">Monatlich kündbar, ohne Mindestlaufzeit.</text>
+  <text x="16" y="1688" class="s15 w7">Paketbedingungen mit AV-Vertrag</text>
+  <line x1="16" y1="1692" x2="266" y2="1692" stroke="#1a1a1a" stroke-width="1.5"/>
+  <text x="16" y="1717.8" class="s13 w5 mu">Entwurf zur anwaltlichen Prüfung ·</text>
+  <text x="16" y="1733.8" class="s13 w5 mu">Fassung vom 23. Oktober 2026</text>
+  <text x="16" y="1777.4" class="s15 w7">Unsicher, welches Paket passt?</text>
+  <rect x="17" y="1792" width="242" height="50" rx="25" fill="none" stroke="#6e6e6e" stroke-width="2"/>
+  <text x="38" y="1823" class="s17 w7">Rückruf oder Nachricht</text>
+  <text x="16" y="1881" class="s13 w5 mu">Angebot nur für Unternehmer im Sinne von § 14 BGB,</text>
+  <text x="16" y="1901" class="s13 w5 mu">nicht für Verbraucher. Alle Preise netto zzgl. MwSt. Ihr</text>
+  <text x="16" y="1921" class="s13 w5 mu">Kunde zahlt nichts.</text>
+
+  <!-- Übergang zu 05 -->
+  <line x1="16" y1="2023.5" x2="374" y2="2023.5" class="hl"/>
+  <text x="16" y="2052" class="s13 w6 mu caps">05 · IHRE ANFRAGE</text>
+  <line x1="16" y1="2056" x2="34" y2="2056" class="gr"/>
+
+  <!-- Kopf (Z 40) mit ausgeblendetem Ring -->
+  <use href="#kopf-tel"/>
+  <rect x="176" y="6" width="150" height="44" rx="22" fill="none" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="2 3"/>
+  <text x="251" y="32" text-anchor="middle" class="s12 w5 mu">Ring ausgeblendet</text>
+
+  <!-- Bildschirm und Rahmen -->
+  <rect x="0" y="0" width="390" height="2070" fill="none" stroke="#9a9a9a" stroke-width="1"/>
+  <rect x="-1" y="-1" width="392" height="846" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="-56" y1="664" x2="392" y2="664" class="bk"/>
+
+  <!-- Lineal (y nach dem Sprung, CSS-Pixel) -->
+  <g class="lineal">
+    <line x1="-10" y1="0" x2="-2" y2="0" class="tk"/><text x="-14" y="4" text-anchor="end" class="s12 w5 mu">0</text>
+    <line x1="-10" y1="56" x2="-2" y2="56" class="tk"/><text x="-14" y="60" text-anchor="end" class="s12 w5 mu">56</text>
+    <line x1="-10" y1="72" x2="-2" y2="72" class="tk"/><text x="-14" y="76" text-anchor="end" class="s12 w5 mu">72</text>
+    <line x1="-10" y1="116" x2="-2" y2="116" class="tk"/><text x="-14" y="120" text-anchor="end" class="s12 w5 mu">116</text>
+    <line x1="-10" y1="162" x2="-2" y2="162" class="tk"/><text x="-14" y="166" text-anchor="end" class="s12 w5 mu">162</text>
+    <line x1="-10" y1="255" x2="-2" y2="255" class="tk"/><text x="-14" y="259" text-anchor="end" class="s12 w5 mu">255</text>
+    <line x1="-10" y1="307" x2="-2" y2="307" class="tk"/><text x="-14" y="311" text-anchor="end" class="s12 w5 mu">307</text>
+    <line x1="-10" y1="331" x2="-2" y2="331" class="tk"/><text x="-14" y="335" text-anchor="end" class="s12 w5 mu">331</text>
+    <line x1="-10" y1="387" x2="-2" y2="387" class="tk"/><text x="-14" y="391" text-anchor="end" class="s12 w5 mu">387</text>
+    <line x1="-10" y1="447" x2="-2" y2="447" class="tk"/><text x="-14" y="451" text-anchor="end" class="s12 w5 mu">447</text>
+    <line x1="-10" y1="509" x2="-2" y2="509" class="tk"/><text x="-14" y="513" text-anchor="end" class="s12 w5 mu">509</text>
+    <line x1="-10" y1="583" x2="-2" y2="583" class="tk"/><text x="-14" y="587" text-anchor="end" class="s12 w5 mu">583</text>
+    <line x1="-10" y1="599" x2="-2" y2="599" class="tk"/><text x="-14" y="603" text-anchor="end" class="s12 w5 mu">599</text>
+    <line x1="-10" y1="651" x2="-2" y2="651" class="tk"/><text x="-14" y="649" text-anchor="end" class="s12 w5 mu">651</text>
+    <line x1="-10" y1="667" x2="-2" y2="667" class="tk"/><text x="-14" y="677" text-anchor="end" class="s12 w5 mu">667</text>
+    <line x1="-10" y1="691" x2="-2" y2="691" class="tk"/><text x="-14" y="695" text-anchor="end" class="s12 w5 mu">691</text>
+    <line x1="-10" y1="844" x2="-2" y2="844" class="tk"/><text x="-14" y="848" text-anchor="end" class="s12 w7">844</text>
+    <line x1="-10" y1="921" x2="-2" y2="921" class="tk"/><text x="-14" y="925" text-anchor="end" class="s12 w5 mu">921</text>
+    <line x1="-10" y1="937" x2="-2" y2="937" class="tk"/><text x="-14" y="941" text-anchor="end" class="s12 w5 mu">937</text>
+    <line x1="-10" y1="1132" x2="-2" y2="1132" class="tk"/><text x="-14" y="1136" text-anchor="end" class="s12 w5 mu">1132</text>
+    <line x1="-10" y1="1208" x2="-2" y2="1208" class="tk"/><text x="-14" y="1212" text-anchor="end" class="s12 w5 mu">1208</text>
+    <line x1="-10" y1="1232" x2="-2" y2="1232" class="tk"/><text x="-14" y="1236" text-anchor="end" class="s12 w5 mu">1232</text>
+    <line x1="-10" y1="1300" x2="-2" y2="1300" class="tk"/><text x="-14" y="1304" text-anchor="end" class="s12 w5 mu">1300</text>
+    <line x1="-10" y1="1353" x2="-2" y2="1353" class="tk"/><text x="-14" y="1357" text-anchor="end" class="s12 w5 mu">1353</text>
+    <line x1="-10" y1="1401" x2="-2" y2="1401" class="tk"/><text x="-14" y="1405" text-anchor="end" class="s12 w5 mu">1401</text>
+    <line x1="-10" y1="1433" x2="-2" y2="1433" class="tk"/><text x="-14" y="1437" text-anchor="end" class="s12 w5 mu">1433</text>
+    <line x1="-10" y1="1511" x2="-2" y2="1511" class="tk"/><text x="-14" y="1515" text-anchor="end" class="s12 w5 mu">1511</text>
+    <line x1="-10" y1="1645" x2="-2" y2="1645" class="tk"/><text x="-14" y="1645" text-anchor="end" class="s12 w5 mu">1645</text>
+    <line x1="-10" y1="1661" x2="-2" y2="1661" class="tk"/><text x="-14" y="1667" text-anchor="end" class="s12 w5 mu">1661</text>
+    <line x1="-10" y1="1705" x2="-2" y2="1705" class="tk"/><text x="-14" y="1709" text-anchor="end" class="s12 w5 mu">1705</text>
+    <line x1="-10" y1="1761" x2="-2" y2="1761" class="tk"/><text x="-14" y="1765" text-anchor="end" class="s12 w5 mu">1761</text>
+    <line x1="-10" y1="1791" x2="-2" y2="1791" class="tk"/><text x="-14" y="1795" text-anchor="end" class="s12 w5 mu">1791</text>
+    <line x1="-10" y1="1843" x2="-2" y2="1843" class="tk"/><text x="-14" y="1847" text-anchor="end" class="s12 w5 mu">1843</text>
+    <line x1="-10" y1="1867" x2="-2" y2="1867" class="tk"/><text x="-14" y="1871" text-anchor="end" class="s12 w5 mu">1867</text>
+    <line x1="-10" y1="1927" x2="-2" y2="1927" class="tk"/><text x="-14" y="1931" text-anchor="end" class="s12 w5 mu">1927</text>
+    <line x1="-10" y1="2023" x2="-2" y2="2023" class="tk"/><text x="-14" y="2027" text-anchor="end" class="s12 w5 mu">2023</text>
+  </g>
+
+  <!-- Bildschirm-Klammern und Blöcke -->
+  <path d="M-56 0 H-60 V664 H-56" class="ld"/>
+  <text transform="translate(-64 332) rotate(-90)" text-anchor="middle" class="s12 w6">reale Höhe 664 (EV X9)</text>
+  <path d="M-78 0 H-82 V844 H-78" class="ld"/>
+  <text transform="translate(-86 422) rotate(-90)" text-anchor="middle" class="s12 w6">Bildschirm 1 nach dem Sprung · 390 × 844</text>
+  <path d="M-100 72 H-104 V1208 H-100" class="ld"/>
+  <text transform="translate(-108 640) rotate(-90)" text-anchor="middle" class="s12 w7">04.1 · fb-06 · Stufe 2 · Kopf, Namensleiste, Kartenreihe</text>
+  <path d="M-100 1232 H-104 V1353 H-100" class="ld"/>
+  <text transform="translate(-108 1292) rotate(-90)" text-anchor="middle" class="s12 w7">04.2 · fb-07 · Stufe 1</text>
+  <path d="M-100 1401 H-104 V1927 H-100" class="ld"/>
+  <text transform="translate(-108 1664) rotate(-90)" text-anchor="middle" class="s12 w7">04.3 · fb-08 · Stufe 1 · Festblock, Gesprächsweg</text>
+
+  <!-- Anmerkungen A -->
+  <g class="anm">
+    <circle cx="392" cy="28" r="2.5" fill="#1a1a1a"/><polyline points="392,28 416,28 428,16 431,16" class="ld"/>
+    <circle cx="440" cy="16" r="9" fill="#1a1a1a"/><text x="440" y="20.5" text-anchor="middle" class="s12 w7 wh">1</text>
+    <text x="456" y="20" class="an">Kopf 56 · Ebene Z 40 · Logo links, Menü rechts (rh-01).</text>
+    <text x="456" y="36" class="an">Ring „Paket anfragen“ ausgeblendet, solange die Reihe im Bild ist</text>
+    <text x="456" y="52" class="an">(J-AB-9: Abweichung, Freigabe durch den Inhaber nötig).</text>
+
+    <circle cx="392" cy="132" r="2.5" fill="#1a1a1a"/><polyline points="392,132 416,132 428,88 431,88" class="ld"/>
+    <circle cx="440" cy="88" r="9" fill="#1a1a1a"/><text x="440" y="92.5" text-anchor="middle" class="s12 w7 wh">2</text>
+    <text x="456" y="92" class="an">[V] Kapitelkopf (G2): Haarlinie y 72 · Kapitelzeile 13, Technikstimme,</text>
+    <text x="456" y="108" class="an">„04“ grün · h2 32/800 „Die Pakete“, „Pakete“ grün, id=pakete (Bestand).</text>
+    <text x="456" y="124" class="an">scroll-margin-top 116: Haarlinie steht nach dem Sprung unter dem Kopf.</text>
+
+    <circle cx="392" cy="200" r="2.5" fill="#1a1a1a"/><polyline points="392,200 416,200 428,164 431,164" class="ld"/>
+    <circle cx="440" cy="164" r="9" fill="#1a1a1a"/><text x="440" y="168.5" text-anchor="middle" class="s12 w7 wh">3</text>
+    <text x="456" y="168" class="an">Lead 17, drei Zeilen (TE; „Ihrer Marke“ --text 600): das Gemeinsame</text>
+    <text x="456" y="184" class="an">aller Pakete steht einmal hier, nicht in jeder Karte (J-R10).</text>
+
+    <circle cx="392" cy="281" r="2.5" fill="#1a1a1a"/><polyline points="392,281 416,281 428,232 431,232" class="ld"/>
+    <circle cx="440" cy="232" r="9" fill="#1a1a1a"/><text x="440" y="236.5" text-anchor="middle" class="s12 w7 wh">4</text>
+    <text x="456" y="236" class="an">[V] Namensleiste „Paketübersicht“ 358 × 52: Segmente 116 × 52, Kurzname</text>
+    <text x="456" y="252" class="an">13 + Monatspreis 15, Zeiger 108 × 44 (--surface3 + 2-px-Kontur, K-3).</text>
+    <text x="456" y="268" class="an">Alle Preise ohne Wischen (J-R2, J-AB-6); wählt nicht (E-3; [H] J-H16).</text>
+
+    <circle cx="392" cy="331" r="2.5" fill="#1a1a1a"/><polyline points="392,331 416,331 428,302 431,302" class="ld"/>
+    <circle cx="440" cy="302" r="9" fill="#1a1a1a"/><text x="440" y="306.5" text-anchor="middle" class="s12 w7 wh">5</text>
+    <text x="456" y="306" class="an">[V] Hervorhebung genau einer Karte (J-R8): Cream-Ring 2 px + Kontur-</text>
+    <text x="456" y="322" class="an">Pille „Empfohlen“ 122 × 28, Mitte auf der Kartenkante (Verdeckung) +</text>
+    <text x="456" y="338" class="an">einziger Cream-Knopf. Kein Schein, keine größere Karte, keine Skalierung.</text>
+
+    <circle cx="392" cy="395" r="2.5" fill="#1a1a1a"/><polyline points="392,395 416,395 428,368 431,368" class="ld"/>
+    <circle cx="440" cy="368" r="9" fill="#1a1a1a"/><text x="440" y="372.5" text-anchor="middle" class="s12 w7 wh">6</text>
+    <text x="456" y="372" class="an">Paketname 17/700 statt 24 (J-AB-1, K-21) · „Wenn“-Satz 15, zwei Zeilen:</text>
+    <text x="456" y="388" class="an">TE, sachlicher Grund der Empfehlung ([H] J-H15; Rückfall kurzText()).</text>
+
+    <circle cx="376" cy="440" r="2.5" fill="#1a1a1a"/><polyline points="376,440 416,440 428,416 431,416" class="ld"/>
+    <circle cx="440" cy="416" r="9" fill="#1a1a1a"/><text x="440" y="420.5" text-anchor="middle" class="s12 w7 wh">7</text>
+    <text x="456" y="420" class="an">[V] Nachbarn je 28 px angeschnitten, nur Deckkraft 0,66 (J-AB-2); Reihe</text>
+    <text x="456" y="436" class="an">beginnt an der empfohlenen Karte (J-R4), Leiste bleibt aufsteigend.</text>
+
+    <circle cx="392" cy="515" r="2.5" fill="#1a1a1a"/><polyline points="392,515 416,515 428,466 431,466" class="ld"/>
+    <circle cx="440" cy="466" r="9" fill="#1a1a1a"/><text x="440" y="470.5" text-anchor="middle" class="s12 w7 wh">8</text>
+    <text x="456" y="470" class="an">[V] Preisblock ohne Trennlinie (J-R5): Preis 32/800 tabular-nums +</text>
+    <text x="456" y="486" class="an">„im Monat“ 15 --muted · „ab Livegang, monatlich kündbar“ (TE) ·</text>
+    <text x="456" y="502" class="an">Einrichtung mit Inhalt, Betrag fett (TE, J-R13) · Steuerzeile 13.</text>
+    <text x="456" y="518" class="an">[H] J-H1: vor dem Knopf höchstens vier Textbausteine.</text>
+
+    <circle cx="392" cy="625" r="2.5" fill="#1a1a1a"/><polyline points="392,625 416,625 428,558 431,558" class="ld"/>
+    <circle cx="440" cy="558" r="9" fill="#1a1a1a"/><text x="440" y="562.5" text-anchor="middle" class="s12 w7 wh">9</text>
+    <text x="456" y="562" class="an">[V] Knopf 270 × 52 direkt unter dem Preisblock (J-R12), Cream mit</text>
+    <text x="456" y="578" class="an">Pfeilkreis 28 (K-31). A: „Essential Plus anfragen“ → #frage, Paket ·</text>
+    <text x="456" y="594" class="an">B: „… bestellen“ → /partner/#bestellen/plus. Endet bei y 651, also</text>
+    <text x="456" y="610" class="an">auch bei 664 px Höhe im ersten Bildschirm (13 px Reserve).</text>
+
+    <circle cx="392" cy="679" r="2.5" fill="#1a1a1a"/><polyline points="392,679 416,679 428,648 431,648" class="ld"/>
+    <circle cx="440" cy="648" r="9" fill="#1a1a1a"/><text x="440" y="652.5" text-anchor="middle" class="s12 w7 wh">10</text>
+    <text x="456" y="652" class="an">[V] Beispielbild = Held der Karte, Bildschicht Z 20 (J-R10): Leiste 24</text>
+    <text x="456" y="668" class="an">mit Adresspille „ihr-name-fenster.de · Beispiel“ (K-36), oben Lichtkante</text>
+    <text x="456" y="684" class="an">1 px --kante-alpha (Licht von oben rechts, K-24) als einziges Lichtdetail.</text>
+
+    <circle cx="392" cy="806" r="2.5" fill="#1a1a1a"/><polyline points="392,806 416,806 428,738 431,738" class="ld"/>
+    <circle cx="440" cy="738" r="9" fill="#1a1a1a"/><text x="440" y="742.5" text-anchor="middle" class="s12 w7 wh">11</text>
+    <text x="456" y="742" class="an">Bildfenster 306 × 230 (4 : 3), Bildebene 354 breit (je 24 px Rand,</text>
+    <text x="456" y="758" class="an">Festl. I-2). Gleicher Betrieb, Ausschnitt, Belichtung in allen drei</text>
+    <text x="456" y="774" class="an">Karten (J-R9). Bei 844 sind 177 von 254 px sichtbar (Fortsetzung).</text>
+    <text x="456" y="790" class="an">Beim Wischen läuft die Bildebene nach, Feder ≤ 3 % → B1.</text>
+
+    <circle cx="392" cy="1034" r="2.5" fill="#1a1a1a"/><polyline points="392,1034 416,1034 428,976 431,976" class="ld"/>
+    <circle cx="440" cy="976" r="9" fill="#1a1a1a"/><text x="440" y="980.5" text-anchor="middle" class="s12 w7 wh">12</text>
+    <text x="456" y="980" class="an">[V] Datenblatt (dl), dieselben vier Zeilen in allen Karten (J-R10, E-6):</text>
+    <text x="456" y="996" class="an">Kennwort 13 Versalien --muted, Wert 15. Leitlinien Z 25 = einzige</text>
+    <text x="456" y="1012" class="an">informierende Signature: GESTALTUNG → Logo, HINWEIS → Kennzeichnung</text>
+    <text x="456" y="1028" class="an">im Fuß ([H] J-H12, Rückfall ohne Leitlinien).</text>
+
+    <circle cx="392" cy="1166" r="2.5" fill="#1a1a1a"/><polyline points="392,1166 416,1166 428,1146 431,1146" class="ld"/>
+    <circle cx="440" cy="1146" r="9" fill="#1a1a1a"/><text x="440" y="1150.5" text-anchor="middle" class="s12 w7 wh">13</text>
+    <text x="456" y="1150" class="an">„Leistungen ansehen“ 270 × 44 öffnet die Listen aller drei Karten</text>
+    <text x="456" y="1166" class="an">(Unterschiede zuerst, J-R11). Karte 310 × 877, alle drei gleich hoch.</text>
+
+    <circle cx="392" cy="1254" r="2.5" fill="#1a1a1a"/><polyline points="392,1254 416,1254 428,1236 431,1236" class="ld"/>
+    <circle cx="440" cy="1236" r="9" fill="#1a1a1a"/><text x="440" y="1240.5" text-anchor="middle" class="s12 w7 wh">14</text>
+    <text x="456" y="1240" class="an">[V] Verkaufsstand 15, zwei Zeilen, kleiner als jeder Preis (J-R18,</text>
+    <text x="456" y="1256" class="an">J-AB-5, TE). „… bleibt für Ihren Vertrag fest“ entfällt bis J-O-2.</text>
+
+    <circle cx="392" cy="1327" r="2.5" fill="#1a1a1a"/><polyline points="392,1327 416,1327 428,1310 431,1310" class="ld"/>
+    <circle cx="440" cy="1310" r="9" fill="#1a1a1a"/><text x="440" y="1314.5" text-anchor="middle" class="s12 w7 wh">15</text>
+    <text x="456" y="1314" class="an">[V] Vergleich zugeklappt (J-R19): Zeile 52 zwischen Haarlinien, „+“</text>
+    <text x="456" y="1330" class="an">rechts. Aufgeklappt → B2 (Telefon) und C2 (Schreibtisch).</text>
+
+    <circle cx="392" cy="1500" r="2.5" fill="#1a1a1a"/><polyline points="392,1500 416,1500 428,1426 431,1426" class="ld"/>
+    <circle cx="440" cy="1426" r="9" fill="#1a1a1a"/><text x="440" y="1430.5" text-anchor="middle" class="s12 w7 wh">16</text>
+    <text x="456" y="1430" class="an">[V] Festblock (fb-08), flach ohne Karte: Titel 13 · fünf belegte Fakten</text>
+    <text x="456" y="1446" class="an">15 mit grünem Haken, zeitlich geordnet · Grenze ohne Haken in --text2</text>
+    <text x="456" y="1462" class="an">direkt bei der Storno-Zeile (R8, J-R21; TE). 10.4 B nennt als Titel</text>
+    <text x="456" y="1478" class="an">„VERTRAG IN KÜRZE“ – Wortlaut offen.</text>
+
+    <circle cx="392" cy="1697" r="2.5" fill="#1a1a1a"/><polyline points="392,1697 416,1697 428,1674 431,1674" class="ld"/>
+    <circle cx="440" cy="1674" r="9" fill="#1a1a1a"/><text x="440" y="1678.5" text-anchor="middle" class="s12 w7 wh">17</text>
+    <text x="456" y="1678" class="an">Link 44 „Paketbedingungen mit AV-Vertrag“ · Standzeile 13 (Zustand A).</text>
+    <text x="456" y="1694" class="an">Gemessen 414 px &gt; 358 px: zweizeilig, alles darunter +16 px gegenüber</text>
+    <text x="456" y="1710" class="an">fb-08 C.2 (offen).</text>
+
+    <circle cx="392" cy="1817" r="2.5" fill="#1a1a1a"/><polyline points="392,1817 416,1817 428,1786 431,1786" class="ld"/>
+    <circle cx="440" cy="1786" r="9" fill="#1a1a1a"/><text x="440" y="1790.5" text-anchor="middle" class="s12 w7 wh">18</text>
+    <text x="456" y="1790" class="an">[V] Gesprächsweg (J-R20): Frage 15/700 + Ring 52, Rand 2 px --muted,</text>
+    <text x="456" y="1806" class="an">ohne Pfeilkreis → #frage mit Paket „Noch offen“. „Rückruf“ erst nach</text>
+    <text x="456" y="1822" class="an">J-O-10, sonst TE „Frage stellen“; 10.4 B: „… Fragen Sie uns“ – offen.</text>
+
+    <circle cx="392" cy="1897" r="2.5" fill="#1a1a1a"/><polyline points="392,1897 416,1897 428,1874 431,1874" class="ld"/>
+    <circle cx="440" cy="1874" r="9" fill="#1a1a1a"/><text x="440" y="1878.5" text-anchor="middle" class="s12 w7 wh">19</text>
+    <text x="456" y="1878" class="an">Rechtshinweis 13, drei Zeilen (VK:188, TE) · 96 px Ruhe, dann Kapitel</text>
+    <text x="456" y="1894" class="an">05 „Ihre Anfrage“ mit dem Formular (#frage) → D1.</text>
+  </g>
+</g>
+
+<!-- ===================== B1 · Wischen und Ebenen ===================== -->
+<text x="1120" y="440" class="hd">B1 · Telefon: während des Wischens von Plus zu Signature (Ausschnitt y 240–940)</text>
+<g id="B1" transform="translate(1120 230)">
+  <g clip-path="url(#clip-b1)">
+    <rect x="0" y="240" width="390" height="700" fill="#eeeeee"/>
+    <rect x="17" y="256" width="356" height="50" rx="25" fill="none" stroke="#c4c4c4" stroke-width="2"/>
+    <rect x="196.5" y="260" width="106" height="42" rx="21" fill="#c8c8c8" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="74" y="276" text-anchor="middle" class="s13 w6 t2">Essential</text>
+    <text x="74" y="295" text-anchor="middle" class="s15 w7 t2 num">29 €</text>
+    <text x="195" y="276" text-anchor="middle" class="s13 w6">Essential Plus</text>
+    <text x="195" y="295" text-anchor="middle" class="s15 w7 num">39 €</text>
+    <text x="316" y="276" text-anchor="middle" class="s13 w6 t2">Signature</text>
+    <text x="316" y="295" text-anchor="middle" class="s15 w7 t2 num">64 €</text>
+    <g transform="translate(-105 331)" opacity="0.85">
+      <use href="#pk-plus-basis"/>
+      <g clip-path="url(#clip-fenster)"><use href="#pk-plus-bild" x="18"/></g>
+      <path d="M20 618 H14 V376 H41.5 M20 666 H8 V578.5 H289" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+      <path d="M20 618 H14 V376 H41.5 M20 666 H8 V578.5 H289" fill="none" stroke="#444444" stroke-width="1"/>
+      <circle cx="44.5" cy="376" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+      <circle cx="292" cy="578.5" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+      <use href="#pk-plus-ring"/>
+    </g>
+    <g transform="translate(217 331)" opacity="0.81">
+      <use href="#pk-sig-basis"/>
+      <g clip-path="url(#clip-fenster)"><use href="#pk-sig-bild" x="18"/></g>
+      <path d="M20 618 H14 V376 H41.5 M20 666 H8 V578.5 H289" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+      <path d="M20 618 H14 V376 H41.5 M20 666 H8 V578.5 H289" fill="none" stroke="#444444" stroke-width="1"/>
+      <circle cx="44.5" cy="376" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1"/>
+      <circle cx="292" cy="578.5" r="3" fill="#f4f4f4" stroke="#444444" stroke-width="1" stroke-dasharray="2 2"/>
+      <use href="#pk-sig-ring"/>
+    </g>
+    <!-- Nachlauf der Bildebene (blau) -->
+    <line x1="237" y1="691" x2="237" y2="921" stroke="#1c7ed6" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <line x1="221" y1="705" x2="235" y2="705" stroke="#1c7ed6" stroke-width="1.5" marker-end="url(#pfeilb)"/>
+    <text x="240" y="934" class="s12 w7 tief">Nachlauf +18 px</text>
+    <!-- Finger -->
+    <circle cx="334" cy="820" r="22" fill="#ffffff" fill-opacity="0.7" stroke="#1a1a1a" stroke-width="1.5"/>
+    <line x1="314" y1="820" x2="268" y2="820" stroke="#1a1a1a" stroke-width="2" marker-end="url(#pfeil)"/>
+    <rect x="262" y="848" width="104" height="18" rx="4" fill="#ffffff" fill-opacity="0.85"/>
+    <text x="268" y="861" class="s12 w7">Finger nach links</text>
+  </g>
+  <rect x="0" y="240" width="390" height="700" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+</g>
+<text x="1120" y="1192" class="an">Momentaufnahme bei 45 % zwischen Plus und Signature: Reihe −145 px,</text>
+<text x="1120" y="1208" class="an">Deckkraft 0,85 und 0,81, Zeiger zwischen den Segmenten (aria-current</text>
+<text x="1120" y="1224" class="an">bleibt bis zur Rundung bei Plus). Die Bildebenen bleiben +18 px zurück</text>
+<text x="1120" y="1240" class="an">(blau); die Bedienschicht steht über dem Bild und federt nie.</text>
+
+<!-- Ebenenschnitt -->
+<text x="1560" y="490" class="lab">Ebenen der Kartenreihe (Schnitt, Schema, nicht maßstäblich)</text>
+<g id="ebenen">
+  <line x1="1566" y1="806" x2="1566" y2="520" stroke="#1c7ed6" stroke-width="1.5" marker-end="url(#pfeilb)"/>
+  <text x="1560" y="822" class="s12 w7 tief">Z</text>
+  <polygon points="1580,800 1820,800 1880,756 1640,756" fill="#eeeeee" stroke="#8a8a8a"/>
+  <polygon points="1580,740 1820,740 1880,696 1640,696" fill="url(#bildmuster)" stroke="#8a8a8a"/>
+  <polygon points="1598,740 1838,740 1898,696 1658,696" fill="none" stroke="#1c7ed6" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <line x1="1700" y1="718" x2="1724" y2="718" stroke="#1c7ed6" stroke-width="1.5" marker-start="url(#pfeilb)" marker-end="url(#pfeilb)"/>
+  <polygon points="1580,680 1820,680 1880,636 1640,636" fill="none" stroke="#8a8a8a" stroke-dasharray="4 3"/>
+  <polyline points="1620,670 1612,670 1640,646 1700,646" fill="none" stroke="#444444"/>
+  <circle cx="1703" cy="646" r="3" fill="none" stroke="#444444"/>
+  <polygon points="1580,620 1820,620 1880,576 1640,576" fill="#ffffff" stroke="#d9480f" stroke-width="1.5"/>
+  <polygon points="1660,612 1760,612 1772,602 1672,602" fill="#d9480f"/>
+  <polygon points="1580,560 1820,560 1880,516 1640,516" fill="#e2e2e2" stroke="#8a8a8a"/>
+  <text x="1900" y="542" class="an"><tspan class="anb tief">Z 40</tspan> Kopf: klebt, verdeckt beim Scrollen alles darunter</text>
+  <text x="1900" y="602" class="an"><tspan class="anb tief">Z 30</tspan> Bedienschicht: Karte, Text, Pille, Leiste, Knöpfe; Kartenring über den Bildkanten</text>
+  <text x="1900" y="662" class="an"><tspan class="anb tief">Z 25</tspan> Leitlinien und Marker (SVG, aria-hidden, pointer-events: none)</text>
+  <text x="1900" y="722" class="an"><tspan class="anb tief">Z 20</tspan> Beispielbild: Leiste, Bildfenster, Bildebene ± 24 px – einzige Ebene mit Physik</text>
+  <text x="1900" y="782" class="an"><tspan class="anb tief">Z 0</tspan> Grund #161616, ohne Licht und Raster</text>
+</g>
+
+<!-- Feder -->
+<text x="1560" y="846" class="lab">Rückkehr der Bildebene nach dem Einrasten (fb-06 F, 10.4 F)</text>
+<g id="feder">
+  <line x1="1620" y1="980" x2="1990" y2="980" stroke="#6e6e6e"/>
+  <line x1="1620" y1="980" x2="1620" y2="856" stroke="#6e6e6e"/>
+  <line x1="1616" y1="860" x2="1620" y2="860" stroke="#6e6e6e"/><text x="1612" y="864" text-anchor="end" class="s12 w5 mu">24 px</text>
+  <line x1="1616" y1="920" x2="1620" y2="920" stroke="#6e6e6e"/><text x="1612" y="924" text-anchor="end" class="s12 w5 mu">12</text>
+  <text x="1612" y="984" text-anchor="end" class="s12 w5 mu">0</text>
+  <line x1="1680" y1="980" x2="1680" y2="984" stroke="#6e6e6e"/><line x1="1740" y1="980" x2="1740" y2="984" stroke="#6e6e6e"/>
+  <line x1="1800" y1="980" x2="1800" y2="984" stroke="#6e6e6e"/><line x1="1860" y1="980" x2="1860" y2="984" stroke="#6e6e6e"/>
+  <line x1="1920" y1="980" x2="1920" y2="984" stroke="#6e6e6e"/><line x1="1980" y1="980" x2="1980" y2="984" stroke="#6e6e6e"/>
+  <text x="1620" y="998" text-anchor="middle" class="s12 w5 mu">0</text>
+  <text x="1680" y="998" text-anchor="middle" class="s12 w5 mu">100</text>
+  <text x="1740" y="998" text-anchor="middle" class="s12 w5 mu">200</text>
+  <text x="1800" y="998" text-anchor="middle" class="s12 w5 mu">300</text>
+  <text x="1860" y="998" text-anchor="middle" class="s12 w5 mu">400</text>
+  <text x="1920" y="998" text-anchor="middle" class="s12 w5 mu">500</text>
+  <text x="1980" y="998" text-anchor="middle" class="s12 w5 mu">600 ms</text>
+  <path d="M1620 860 L1635 865 L1650 877.2 L1665 892.8 L1680 909.3 L1695 925.1 L1710 939.3 L1725 951.3 L1740 961.1 L1755 968.6 L1770 974.3 L1785 978.2 L1800 980.8 L1830 983.2 L1846.8 983.4 L1860 983.3 L1890 982.6 L1920 981.6 L1980 980.4" fill="none" stroke="#1c7ed6" stroke-width="2" stroke-linejoin="round"/>
+  <line x1="1872" y1="980" x2="1872" y2="904" stroke="#8a8a8a" stroke-dasharray="3 3"/>
+  <circle cx="1846.8" cy="983.4" r="3" fill="#1c7ed6"/>
+  <text x="1704" y="874" class="s12 w5 tief">Punkt: Überschwingen 2,8 % (−0,7 px) bei ≈ 380 ms</text>
+  <text x="1704" y="890" class="s12 w5">gestrichelt: eingeschwungen nach ≈ 420 ms (K-37)</text>
+</g>
+<text x="2040" y="878" class="an">[V] Bedienschicht folgt dem Finger 1 : 1 und rastet mittig ein, ohne Über-</text>
+<text x="2040" y="894" class="an">schwingen (scroll-snap, nativ); Nachbarn nur über Deckkraft 1 → 0,66.</text>
+<text x="2040" y="910" class="an">Bildebene: Versatz = Wischgeschwindigkeit (px/ms) × 8, gekappt auf ± 24 px,</text>
+<text x="2040" y="926" class="an">gegen die Wischrichtung; Rückkehr als gedämpfte Feder ζ 0,75, 2 Hz (K-37).</text>
+<text x="2040" y="942" class="an">Nur solange die Reihe im Bild ist; requestAnimationFrame, nur transform;</text>
+<text x="2040" y="958" class="an">Leitlinien wandern mit. Weniger Bewegung: kein Nachlauf.</text>
+<text x="2040" y="974" class="an">[H] J-H13: Wirkung per Telefon-Video mit und ohne Feder prüfen;</text>
+<text x="2040" y="990" class="an">Rückfall: Gegenlauf nach Position (Bestand --d).</text>
+
+<!-- ===================== B2 · Vergleich aufgeklappt ===================== -->
+<text x="1120" y="1290" class="hd">B2 · Telefon: Vergleich aufgeklappt (fb-07) – Gruppen, klebender Kopf, kein Querscrollen</text>
+<text x="1120" y="1318" class="lab">B2a · direkt nach dem Öffnen</text>
+<text x="1580" y="1318" class="lab">B2b · weitergelesen: Tabellenkopf klebt bei top 56</text>
+
+<g id="B2a" transform="translate(1120 1330)">
+  <g clip-path="url(#clip-screen)">
+    <rect x="0" y="0" width="390" height="844" fill="#eeeeee"/>
+    <text x="16" y="88.4" class="s15 w5 t2"><tspan class="w7" fill="#1a1a1a">Vorläufige Preise.</tspan> Preisstand 22. Oktober 2026.</text>
+    <text x="16" y="110.4" class="s15 w5 t2">Es gilt der Preis, den Sie beim Bestellen sehen.</text>
+    <line x1="16" y1="140.5" x2="374" y2="140.5" class="hl"/>
+    <text x="16" y="173" class="s17 w7">Alle Merkmale im Vergleich</text>
+    <line x1="355" y1="167" x2="369" y2="167" stroke="#4d4d4d" stroke-width="2"/>
+    <line x1="16" y1="193.5" x2="374" y2="193.5" class="hl"/>
+    <text x="16" y="236.5" class="s15 w7">Essential</text>
+    <text x="137" y="236.5" class="s15 w7">Essential Plus</text>
+    <text x="258" y="236.5" class="s15 w7">Signature</text>
+    <line x1="16" y1="253.5" x2="374" y2="253.5" class="hl2"/>
+
+    <text x="16" y="282.6" class="s13 w6 mu caps">KOSTEN</text>
+    <text x="16" y="319.4" class="s15 w6">Monatlich, netto</text>
+    <text x="16" y="343.4" class="s15 w5 num">29 €</text><text x="137" y="343.4" class="s15 w5 num">39 €</text><text x="258" y="343.4" class="s15 w5 num">64 €</text>
+    <line x1="16" y1="357.5" x2="374" y2="357.5" class="hl"/>
+    <text x="16" y="381.4" class="s15 w6">Einrichtung, einmalig vorab</text>
+    <text x="16" y="405.4" class="s15 w5 num">99 €</text><text x="137" y="405.4" class="s15 w5 num">199 €</text><text x="258" y="405.4" class="s15 w5 num">279 €</text>
+    <line x1="16" y1="419.5" x2="374" y2="419.5" class="hl"/>
+    <rect x="10" y="422" width="370" height="57" class="hyp"/>
+    <text x="16" y="443.4" class="s15 w6">Erstes Jahr: Einrichtung und 12 Monate</text>
+    <text x="16" y="467.4" class="s15 w5 num">447 €</text><text x="137" y="467.4" class="s15 w5 num">667 €</text><text x="258" y="467.4" class="s15 w5 num">1.047 €</text>
+    <text x="374" y="467.4" text-anchor="end" class="s12 w7 mu">[H]</text>
+    <line x1="16" y1="481.5" x2="374" y2="481.5" class="hl"/>
+
+    <text x="16" y="518.6" class="s13 w6 mu caps">IN ALLEN PAKETEN</text>
+    <text x="16" y="556.4" class="s15 w6">Eigene Domain</text><text x="258" y="556.4" class="s15 w5 t2">in allen drei</text>
+    <line x1="16" y1="571.5" x2="374" y2="571.5" class="hl"/>
+    <text x="16" y="596.4" class="s15 w6">Voller Konfigurator</text><text x="258" y="596.4" class="s15 w5 t2">in allen drei</text>
+    <line x1="16" y1="611.5" x2="374" y2="611.5" class="hl"/>
+    <text x="16" y="636.4" class="s15 w6">Anfrage per E-Mail mit PDF</text><text x="258" y="636.4" class="s15 w5 t2">in allen drei</text>
+    <line x1="16" y1="651.5" x2="374" y2="651.5" class="hl"/>
+
+    <text x="16" y="688.6" class="s13 w6 mu caps">IHRE MARKE</text>
+    <text x="16" y="725.4" class="s15 w6">Gestaltung</text>
+    <text x="16" y="749.4" class="s15 w5">eeziframes-</text><text x="16" y="771.4" class="s15 w5">Design mit</text><text x="16" y="793.4" class="s15 w5">Ihrem Namen</text>
+    <text x="137" y="749.4" class="s15 w5">in Ihrem</text><text x="137" y="771.4" class="s15 w5">Design</text>
+    <text x="258" y="749.4" class="s15 w5">in Ihrem</text><text x="258" y="771.4" class="s15 w5">Design</text>
+    <line x1="16" y1="807.5" x2="374" y2="807.5" class="hl"/>
+    <text x="16" y="831.4" class="s15 w6">Ihr Logo</text>
+    <text x="16" y="855.4" class="s15 w5 mu">nicht enthalten</text><text x="137" y="855.4" class="s15 w5">ja</text><text x="258" y="855.4" class="s15 w5">ja</text>
+  </g>
+  <use href="#kopf-tel"/>
+  <rect x="177" y="7" width="148" height="42" rx="21" class="rk"/>
+  <text x="251" y="33" text-anchor="middle" class="s15 w7">Paket anfragen</text>
+  <rect x="-1" y="-1" width="392" height="846" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+</g>
+
+<g id="B2b" transform="translate(1580 1330)">
+  <g clip-path="url(#clip-screen)">
+    <rect x="0" y="0" width="390" height="844" fill="#eeeeee"/>
+    <text x="16" y="94.4" class="s15 w6">Fotos Ihres Betriebs</text>
+    <text x="16" y="118.4" class="s15 w5 mu">nicht enthalten</text><text x="137" y="118.4" class="s15 w5">bis 6</text><text x="258" y="118.4" class="s15 w5">bis 6</text>
+    <line x1="16" y1="132.5" x2="374" y2="132.5" class="hl"/>
+    <text x="16" y="156.4" class="s15 w6">Hinweis auf eeziframes in der App</text>
+    <text x="16" y="180.4" class="s15 w5">„Powered by</text><text x="16" y="202.4" class="s15 w5">EEZIframes“</text>
+    <text x="137" y="180.4" class="s15 w5">kleiner Hinweis</text><text x="137" y="202.4" class="s15 w5">im Fuß</text>
+    <text x="258" y="180.4" class="s15 w5">keiner</text>
+    <line x1="16" y1="216.5" x2="374" y2="216.5" class="hl"/>
+
+    <text x="16" y="253.6" class="s13 w6 mu caps">GEFUNDEN WERDEN</text>
+    <text x="16" y="290.4" class="s15 w6">In Suchmaschinen</text>
+    <text x="16" y="314.4" class="s15 w5">nein</text><text x="137" y="314.4" class="s15 w5">Startseite</text><text x="258" y="314.4" class="s15 w5">Startseite</text>
+    <line x1="16" y1="328.5" x2="374" y2="328.5" class="hl"/>
+
+    <text x="16" y="365.6" class="s13 w6 mu caps">FÜR IHR TEAM</text>
+    <text x="16" y="402.4" class="s15 w6">Dashboard unter Ihrer Domain</text>
+    <text x="16" y="426.4" class="s15 w5 mu">nicht enthalten</text><text x="137" y="426.4" class="s15 w5 mu">nicht enthalten</text><text x="258" y="426.4" class="s15 w5">ja</text>
+    <line x1="16" y1="440.5" x2="374" y2="440.5" class="hl"/>
+    <text x="16" y="464.4" class="s15 w6">Persönliche Einladungslinks</text>
+    <text x="16" y="488.4" class="s15 w5 mu">nicht enthalten</text><text x="137" y="488.4" class="s15 w5 mu">nicht enthalten</text><text x="258" y="488.4" class="s15 w5">ja</text>
+    <line x1="16" y1="502.5" x2="374" y2="502.5" class="hl"/>
+    <text x="16" y="526.4" class="s15 w6">Fortschritt sehen</text>
+    <text x="16" y="550.4" class="s15 w5 mu">nicht enthalten</text><text x="137" y="550.4" class="s15 w5 mu">nicht enthalten</text><text x="258" y="550.4" class="s15 w5">ja</text>
+    <line x1="16" y1="564.5" x2="374" y2="564.5" class="hl"/>
+    <text x="16" y="588.4" class="s15 w6">Zugänge zum Dashboard</text>
+    <text x="16" y="612.4" class="s15 w5 mu">nicht enthalten</text><text x="137" y="612.4" class="s15 w5 mu">nicht enthalten</text><text x="258" y="612.4" class="s15 w5 num">5</text>
+    <line x1="16" y1="626.5" x2="374" y2="626.5" class="hl"/>
+
+    <text x="16" y="663.6" class="s13 w6 mu caps">DATEN</text>
+    <text x="16" y="700.4" class="s15 w6">Aufbewahrung der Anfragen</text>
+    <text x="16" y="724.4" class="s15 w5">30 Tage nach</text><text x="16" y="746.4" class="s15 w5">Zustellung</text>
+    <text x="137" y="724.4" class="s15 w5">30 Tage nach</text><text x="137" y="746.4" class="s15 w5">Zustellung</text>
+    <text x="258" y="724.4" class="s15 w5">für die</text><text x="258" y="746.4" class="s15 w5">Vertragsdauer</text>
+    <line x1="16" y1="760.5" x2="374" y2="760.5" class="hl"/>
+
+    <text x="16" y="797.6" class="s13 w6 mu caps">RICHTWERTE</text>
+    <text x="16" y="834.4" class="s15 w6">Anfragen am Tag</text>
+    <text x="16" y="858.4" class="s15 w5 num">50</text><text x="137" y="858.4" class="s15 w5 num">50</text><text x="258" y="858.4" class="s15 w5 num">100</text>
+
+    <!-- klebender Tabellenkopf, deckend -->
+    <rect x="0" y="56" width="390" height="44" fill="#eeeeee"/>
+    <text x="16" y="83.5" class="s15 w7">Essential</text>
+    <text x="137" y="83.5" class="s15 w7">Essential Plus</text>
+    <text x="258" y="83.5" class="s15 w7">Signature</text>
+    <line x1="16" y1="99.5" x2="374" y2="99.5" class="hl2"/>
+  </g>
+  <use href="#kopf-tel"/>
+  <rect x="177" y="7" width="148" height="42" rx="21" class="rk"/>
+  <text x="251" y="33" text-anchor="middle" class="s15 w7">Paket anfragen</text>
+  <path d="M396 57 H402 V99 H396" stroke="#1c7ed6" stroke-width="1.5" fill="none"/>
+  <rect x="-1" y="-1" width="392" height="846" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+</g>
+
+<!-- Anmerkungen B2 -->
+<g class="anm">
+  <polyline points="1982,1408 2004,1408 2010,1400 2015,1400" class="ld"/>
+  <circle cx="2024" cy="1400" r="9" fill="#1a1a1a"/><text x="2024" y="1404.5" text-anchor="middle" class="s12 w7 wh">1</text>
+  <text x="2040" y="1404" class="an">[V] Tabellenkopf 3 × 116 × 44, deckungsgleich mit der Namensleiste; klebt</text>
+  <text x="2040" y="1420" class="an">bei top 56 unter dem Seitenkopf, Grund deckend, überdeckt die Zeilen</text>
+  <text x="2040" y="1436" class="an">(<tspan class="anb tief">einzige Verdeckung</tspan>, DNA Nr. 2). Kurzname 15/700, versteckt „EEZI “.</text>
+
+  <circle cx="1972" cy="1575" r="2.5" fill="#1a1a1a"/><polyline points="1972,1575 2004,1575 2010,1556 2015,1556" class="ld"/>
+  <circle cx="2024" cy="1556" r="9" fill="#1a1a1a"/><text x="2024" y="1560.5" text-anchor="middle" class="s12 w7 wh">2</text>
+  <text x="2040" y="1560" class="an">[V] Sieben Gruppen (J-R7, Festl. I-2): Kosten · In allen Paketen · Ihre Marke</text>
+  <text x="2040" y="1576" class="an">· Gefunden werden · Für Ihr Team · Daten · Richtwerte. Gruppenkopf 13</text>
+  <text x="2040" y="1592" class="an">Versalien --muted, 24 px Abstand. [H] J-H3: schneller und richtiger gelesen.</text>
+
+  <circle cx="1972" cy="1748" r="2.5" fill="#1a1a1a"/><polyline points="1972,1748 2004,1748 2010,1720 2015,1720" class="ld"/>
+  <circle cx="2024" cy="1720" r="9" fill="#1a1a1a"/><text x="2024" y="1724.5" text-anchor="middle" class="s12 w7 wh">3</text>
+  <text x="2040" y="1724" class="an">[V] Zeile: Titel 15/600 über die volle Breite, darunter drei Werte 15/500</text>
+  <text x="2040" y="1740" class="an">in Zellen à 116 px (Text ≤ 108). „nicht enthalten“ statt „nein“ in --muted:</text>
+  <text x="2040" y="1756" class="an">der Tonwert zeigt die zwei Achsen (Marke, Team), keine Spalte hervorgehoben.</text>
+
+  <text x="2040" y="1820" class="anb">B2a, gestrichelt:</text>
+  <text x="2040" y="1836" class="an">[H] J-H4: Zeile „Erstes Jahr: Einrichtung und 12 Monate“, 447 / 667 /</text>
+  <text x="2040" y="1852" class="an">1.047 € netto, aus preis() gerechnet; Schalter ERSTES_JAHR (J-O-11).</text>
+  <text x="2040" y="1868" class="an">„In allen Paketen“: eine gemeinsame Zelle „in allen drei“ (Festl. I-3).</text>
+
+  <text x="2040" y="1908" class="anb">Verhalten:</text>
+  <text x="2040" y="1924" class="an">[V] Tipp öffnet: Inhalt Deckkraft 0 → 1 in 220 ms, „+“ wird „–“ in 150 ms,</text>
+  <text x="2040" y="1940" class="an">Höhe sofort, Seite bleibt stehen. Keine Links oder Knöpfe in der Tabelle.</text>
+  <text x="2040" y="1956" class="an">Kopf-Ring „Paket anfragen“ wieder sichtbar, sobald die Reihe zu weniger</text>
+  <text x="2040" y="1972" class="an">als 50 % im Bild ist (J-AB-9). Aufgeklappt ≈ 1.810 px; Fußsatz „Alle</text>
+  <text x="2040" y="1988" class="an">Preise netto zzgl. MwSt., nur für Unternehmer. Vorläufige Preise.“</text>
+
+  <circle cx="1972" cy="2046" r="2.5" fill="#1a1a1a"/><polyline points="1972,2046 2004,2046 2010,2034 2015,2034" class="ld"/>
+  <circle cx="2024" cy="2034" r="9" fill="#1a1a1a"/><text x="2024" y="2038.5" text-anchor="middle" class="s12 w7 wh">4</text>
+  <text x="2040" y="2038" class="an">Mehrzeilige Werte wachsen um je 22 px (hyphens: auto). Kein Querscrollen,</text>
+  <text x="2040" y="2054" class="an">auch geöffnet; bei 360 px Breite Zellen ≈ 106 px.</text>
+</g>
+
+<!-- ===================== B3 · Knöpfe ===================== -->
+<text x="1120" y="2230" class="hd">B3 · Knöpfe: Formen, Zustände, Wahl (Telefon 270 × 52; Schreibtisch 282,7 × 52)</text>
+<g id="B3">
+  <text x="1120" y="2262" class="lab">Formen</text>
+  <rect x="1120" y="2274" width="270" height="52" rx="26" fill="#d9480f"/>
+  <text x="1142" y="2306" class="s17 w7 wh">Essential Plus anfragen</text>
+  <circle cx="1368" cy="2300" r="14" fill="#ffffff"/>
+  <path d="M1362 2300 H1374 M1370 2296 L1374 2300 L1370 2304" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="1120" y="2346" class="an">Cream + Pfeilkreis 28 (K-31): Hauptaktion,</text>
+  <text x="1120" y="2362" class="an">genau einmal je Bildschirm (J-R12)</text>
+
+  <rect x="1421" y="2275" width="268" height="50" rx="25" class="rk"/>
+  <text x="1440" y="2306" class="s17 w7">Signature anfragen</text>
+  <text x="1420" y="2346" class="an">Ring 2 px --muted (K-1), ohne Pfeilkreis:</text>
+  <text x="1420" y="2362" class="an">Nachbarkarten, auch am Schreibtisch</text>
+
+  <rect x="1721" y="2275" width="242" height="50" rx="25" fill="none" stroke="#6e6e6e" stroke-width="2"/>
+  <text x="1742" y="2306" class="s17 w7">Rückruf oder Nachricht</text>
+  <text x="1720" y="2346" class="an">Gesprächsweg: Rand 2 px --muted</text>
+  <text x="1720" y="2362" class="an">(≥ 3 : 1), ohne Pfeilkreis (fb-08)</text>
+
+  <rect x="2010" y="2274" width="270" height="52" rx="26" fill="#d9480f"/>
+  <text x="2032" y="2306" class="s17 w7 wh">Essential Plus bestellen</text>
+  <circle cx="2258" cy="2300" r="14" fill="#ffffff"/>
+  <path d="M2252 2300 H2264 M2260 2296 L2264 2300 L2260 2304" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="2004" y="2334" width="286" height="54" class="hyp"/>
+  <text x="2012" y="2355" class="s15 w5 t2">Erst Ihre Angaben, bezahlt wird im</text>
+  <text x="2012" y="2377" class="s15 w5 t2">letzten Schritt.</text>
+  <text x="2298" y="2300" class="an">Zustand B</text>
+  <text x="2298" y="2355" class="an">Satz [H] J-H6 (TE),</text>
+  <text x="2298" y="2371" class="an">Rückfall ohne Satz</text>
+
+  <text x="1120" y="2430" class="lab">Zustände</text>
+  <text x="1120" y="2454" class="anb">Ruhe</text>
+  <text x="1420" y="2454" class="anb">Hover (nur pointer: fine), 150 ms (K-4)</text>
+  <text x="1720" y="2454" class="anb">Druck (:active), 150 ms</text>
+  <text x="2020" y="2454" class="anb">Fokus (Tastatur): 2 px --text, Abstand 2</text>
+
+  <rect x="1120" y="2466" width="270" height="52" rx="26" fill="#d9480f"/>
+  <text x="1142" y="2498" class="s17 w7 wh">Essential Plus anfragen</text>
+  <circle cx="1368" cy="2492" r="14" fill="#ffffff"/>
+  <path d="M1362 2492 H1374 M1370 2488 L1374 2492 L1370 2496" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="1420" y="2466" width="270" height="52" rx="26" fill="#d9480f"/>
+  <rect x="1423" y="2469" width="264" height="46" rx="23" fill="none" stroke="#1a1a1a" stroke-opacity="0.24" stroke-width="2"/>
+  <text x="1442" y="2498" class="s17 w7 wh">Essential Plus anfragen</text>
+  <circle cx="1668" cy="2492" r="14" fill="#ffffff"/>
+  <path d="M1662 2492 H1674 M1670 2488 L1674 2492 L1670 2496" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="1720" y="2466" width="270" height="52" rx="26" fill="#a93a0b"/>
+  <text x="1742" y="2498" class="s17 w7 wh">Essential Plus anfragen</text>
+  <circle cx="1968" cy="2492" r="14" fill="#ffffff"/>
+  <path d="M1962 2492 H1974 M1970 2488 L1974 2492 L1970 2496" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="2020" y="2466" width="270" height="52" rx="26" fill="#d9480f"/>
+  <rect x="2016" y="2462" width="278" height="60" rx="30" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="2042" y="2498" class="s17 w7 wh">Essential Plus anfragen</text>
+  <circle cx="2268" cy="2492" r="14" fill="#ffffff"/>
+  <path d="M2262 2492 H2274 M2270 2488 L2274 2492 L2270 2496" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="2310" y="2488" class="an">Cream: innere Kontur</text>
+  <text x="2310" y="2504" class="an">beim Hover, dunkler</text>
+  <text x="2310" y="2520" class="an">beim Druck</text>
+
+  <rect x="1121" y="2537" width="268" height="50" rx="25" class="rk"/>
+  <text x="1140" y="2568" class="s17 w7">Signature anfragen</text>
+  <rect x="1421" y="2537" width="268" height="50" rx="25" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="1440" y="2568" class="s17 w7">Signature anfragen</text>
+  <rect x="1721" y="2537" width="268" height="50" rx="25" fill="#d6d6d6" stroke="#6e6e6e" stroke-width="2"/>
+  <text x="1740" y="2568" class="s17 w7">Signature anfragen</text>
+  <rect x="2021" y="2537" width="268" height="50" rx="25" class="rk"/>
+  <rect x="2016" y="2532" width="278" height="60" rx="30" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="2040" y="2568" class="s17 w7">Signature anfragen</text>
+  <text x="2310" y="2558" class="an">Ring: Kontur --text beim</text>
+  <text x="2310" y="2574" class="an">Hover, Füllung --surface2</text>
+  <text x="2310" y="2590" class="an">beim Druck</text>
+  <text x="1120" y="2620" class="an">[V] Zustände nur über Füllung, Kontur und Farbe – nie Skalierung, Versatz oder Anheben (SG 10.7/3). Karte am Schreibtisch bei Hover: Ring --muted.</text>
+
+  <text x="1120" y="2648" class="lab">Nach der Wahl – Beispiel: Tipp auf „Signature anfragen“ (Zustand je Wurzel in sessionStorage)</text>
+  <rect x="1120" y="2680" width="270" height="134" rx="20" fill="#ffffff"/>
+  <rect x="1121" y="2681" width="268" height="132" rx="19" class="ring"/>
+  <text x="1140" y="2716" class="s17 w7">EEZI Essential</text>
+  <text x="1140" y="2738" class="s15 w6">29 € <tspan class="w5 mu">im Monat</tspan></text>
+  <rect x="1141" y="2751" width="228" height="50" rx="25" class="rk"/>
+  <text x="1158" y="2782" class="s17 w7">Essential anfragen</text>
+
+  <rect x="1420" y="2680" width="270" height="134" rx="20" fill="#ffffff"/>
+  <rect x="1421" y="2681" width="268" height="132" rx="19" class="ringc"/>
+  <rect x="1440" y="2666" width="122" height="28" rx="14" fill="#ffffff" stroke="#d9480f" stroke-width="2"/>
+  <text x="1501" y="2684.6" text-anchor="middle" class="s13 w7 caps cta">EMPFOHLEN</text>
+  <text x="1440" y="2716" class="s17 w7">EEZI Essential Plus</text>
+  <text x="1440" y="2738" class="s15 w6">39 € <tspan class="w5 mu">im Monat</tspan></text>
+  <rect x="1441" y="2751" width="228" height="50" rx="25" class="rk"/>
+  <text x="1458" y="2782" class="s17 w7">Essential Plus anfragen</text>
+
+  <rect x="1720" y="2680" width="270" height="134" rx="20" fill="#ffffff"/>
+  <rect x="1721" y="2681" width="268" height="132" rx="19" class="ring"/>
+  <text x="1740" y="2716" class="s17 w7">EEZI Signature</text>
+  <text x="1740" y="2738" class="s15 w6">64 € <tspan class="w5 mu">im Monat</tspan></text>
+  <rect x="1740" y="2750" width="230" height="52" rx="26" fill="#d9480f"/>
+  <text x="1756" y="2782" class="s17 w7 wh">Signature anfragen</text>
+  <circle cx="1948" cy="2776" r="14" fill="#ffffff"/>
+  <path d="M1942 2776 H1954 M1950 2772 L1954 2776 L1950 2780" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="1114" y="2658" width="882" height="166" class="hyp"/>
+
+  <text x="2030" y="2690" class="an">[H] J-H8 · J-AB-8 (Abweichung, Freigabe durch den</text>
+  <text x="2030" y="2706" class="an">Inhaber nötig): Nach dem Tipp trägt das gewählte Paket</text>
+  <text x="2030" y="2722" class="an">den Cream-Knopf in der Reihe und im Abschluss fb-15;</text>
+  <text x="2030" y="2738" class="an">Pille „Empfohlen“ und Cream-Ring bleiben an Plus. Weiter</text>
+  <text x="2030" y="2754" class="an">genau eine Cream-Fläche je Bildschirm. Rückfall: Cream</text>
+  <text x="2030" y="2770" class="an">bleibt am empfohlenen Paket. Der Gesprächsweg („Noch</text>
+  <text x="2030" y="2786" class="an">offen“) löscht die Wahl; dann gilt wieder „Empfohlen“</text>
+  <text x="2030" y="2802" class="an">(fb-08 F, E-3).</text>
+</g>
+
+<!-- ===================== C · Schreibtisch ===================== -->
+<defs>
+  <g id="db-ess">
+    <rect x="0" y="0" width="282.7" height="212" fill="#d9d9d9"/>
+    <rect x="0" y="0" width="282.7" height="26" fill="#c6c6c6"/>
+    <text x="30" y="17.5" class="s12 w7">Fensterbau Brandt</text>
+    <path d="M260 8 h12 M260 13 h12 M260 18 h12" stroke="#5a5a5a" stroke-width="2"/>
+    <rect x="10" y="40" width="138" height="11" fill="#7a7a7a"/>
+    <rect x="10" y="57" width="100" height="11" fill="#7a7a7a"/>
+    <rect x="10" y="77" width="128" height="6" fill="#a8a8a8"/>
+    <rect x="10" y="88" width="112" height="6" fill="#a8a8a8"/>
+    <rect x="10" y="104" width="84" height="22" rx="11" fill="#ffffff" stroke="#8a8a8a"/>
+    <rect x="164" y="36" width="108" height="100" fill="#ebebeb" stroke="#8a8a8a" stroke-width="1.5"/>
+    <path d="M218 36 V136 M164 36 L218 86 L164 136 M272 36 L218 86 L272 136" fill="none" stroke="#a6a6a6"/>
+    <rect x="0" y="184" width="282.7" height="28" fill="#cdcdcd"/>
+    <rect x="198" y="193" width="78" height="10" rx="2" fill="#6f6f6f"/>
+  </g>
+  <g id="db-plus">
+    <rect x="0" y="0" width="282.7" height="212" fill="#d9d9d9"/>
+    <rect x="0" y="0" width="282.7" height="26" fill="#8f8f8f"/>
+    <rect x="20" y="5" width="62" height="16" rx="3" fill="#f2f2f2"/>
+    <text x="53" y="17.5" text-anchor="middle" class="s12 w6">Beispiel</text>
+    <path d="M260 8 h12 M260 13 h12 M260 18 h12" stroke="#f2f2f2" stroke-width="2"/>
+    <rect x="10" y="40" width="138" height="11" fill="#7a7a7a"/>
+    <rect x="10" y="57" width="100" height="11" fill="#7a7a7a"/>
+    <rect x="10" y="77" width="128" height="6" fill="#a8a8a8"/>
+    <rect x="10" y="88" width="112" height="6" fill="#a8a8a8"/>
+    <rect x="10" y="104" width="84" height="22" rx="11" fill="#8f8f8f"/>
+    <rect x="158" y="34" width="118" height="114" fill="url(#fotomuster)"/>
+    <rect x="197" y="82" width="40" height="18" rx="3" fill="#ededed"/>
+    <text x="217" y="95" text-anchor="middle" class="s12 w6">Foto</text>
+    <rect x="0" y="184" width="282.7" height="28" fill="#cdcdcd"/>
+    <rect x="238" y="194" width="32" height="9" rx="2" fill="#9a9a9a"/>
+  </g>
+  <g id="db-sig">
+    <rect x="0" y="0" width="282.7" height="212" fill="#d9d9d9"/>
+    <rect x="0" y="0" width="282.7" height="26" fill="#8f8f8f"/>
+    <rect x="20" y="5" width="62" height="16" rx="3" fill="#f2f2f2"/>
+    <text x="53" y="17.5" text-anchor="middle" class="s12 w6">Beispiel</text>
+    <path d="M260 8 h12 M260 13 h12 M260 18 h12" stroke="#f2f2f2" stroke-width="2"/>
+    <rect x="10" y="40" width="138" height="11" fill="#7a7a7a"/>
+    <rect x="10" y="57" width="100" height="11" fill="#7a7a7a"/>
+    <rect x="10" y="77" width="128" height="6" fill="#a8a8a8"/>
+    <rect x="10" y="88" width="112" height="6" fill="#a8a8a8"/>
+    <rect x="10" y="104" width="84" height="22" rx="11" fill="#8f8f8f"/>
+    <rect x="158" y="34" width="118" height="114" fill="url(#fotomuster)"/>
+    <rect x="197" y="82" width="40" height="18" rx="3" fill="#ededed"/>
+    <text x="217" y="95" text-anchor="middle" class="s12 w6">Foto</text>
+    <rect x="0" y="184" width="282.7" height="28" fill="#cdcdcd"/>
+  </g>
+  <!-- Browserleiste Schreibtisch, Ursprung = linke Innenkante der Karte, y 558 -->
+  <g id="db-leiste">
+    <path d="M0 582 V570 A12 12 0 0 1 12 558 H270.7 A12 12 0 0 1 282.7 570 V582 Z" fill="#b9b9b9"/>
+    <circle cx="12" cy="570" r="3" fill="#8a8a8a"/><circle cx="22" cy="570" r="3" fill="#8a8a8a"/><circle cx="32" cy="570" r="3" fill="#8a8a8a"/>
+    <rect x="42" y="561" width="200" height="18" rx="9" fill="#dedede"/>
+    <rect x="50" y="568" width="7" height="6" rx="1" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
+    <path d="M51.5 568 v-1.6 a2 2 0 0 1 4 0 v1.6" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
+    <text x="63" y="574.5" class="s12 w5">ihr-name-fenster.de <tspan class="mu">· Beispiel</tspan></text>
+    <line x1="12" y1="558.75" x2="270.7" y2="558.75" stroke="#1c7ed6" stroke-width="1.5"/>
+  </g>
+</defs>
+
+<text x="60" y="2890" class="hd">C · Schreibtisch 1280 × 800 – nach dem Sprung auf #pakete (scroll-margin-top 124), Zustand A</text>
+<g id="C" transform="translate(200 2930)">
+  <rect x="0" y="0" width="1280" height="1950" fill="#eeeeee"/>
+
+  <!-- Kapitelkopf -->
+  <line x1="120" y1="80.5" x2="1160" y2="80.5" class="hl"/>
+  <text x="120" y="108.8" class="s13 w6 mu caps">04 · IHRE MARKE</text>
+  <line x1="120" y1="113" x2="138" y2="113" class="gr"/>
+  <text x="120" y="160" class="s40 w8">Die Pakete</text>
+  <line x1="193" y1="168" x2="328" y2="168" class="gr"/>
+  <text x="474.7" y="147" class="s17 w5 t2">Ein Konfigurator, drei Stufen <tspan class="w6" fill="#1a1a1a">Ihrer Marke</tspan>. In allen: eigene Domain, jede Anfrage als</text>
+  <text x="474.7" y="172.5" class="s17 w5 t2">PDF, keine Gebühr je Anfrage.</text>
+
+  <!-- Karte EEZI Essential -->
+  <rect x="120" y="208" width="330.7" height="1046" rx="24" fill="#ffffff"/>
+  <text x="144" y="250.5" class="s17 w7">EEZI Essential</text>
+  <text x="144" y="280.4" class="s15 w5 t2">Wenn Ihr Name genügt: der volle</text>
+  <text x="144" y="302.4" class="s15 w5 t2">Konfigurator im eeziframes-Design.</text>
+  <text x="144" y="360.6" class="s40 w8 num">29 €</text>
+  <text x="240" y="360.6" class="s15 w5 mu">im Monat</text>
+  <text x="144" y="386.4" class="s15 w5 t2">ab Livegang, monatlich kündbar</text>
+  <text x="144" y="416.4" class="s15 w5 t2"><tspan class="w6" fill="#1a1a1a">99 € Einrichtung</tspan>, einmalig vorab:</text>
+  <text x="144" y="438.4" class="s15 w5 t2">Anruf, Domain, Gestaltung, Vorschau</text>
+  <text x="144" y="461.8" class="s13 w5 mu">netto zzgl. MwSt. · nur für Unternehmer</text>
+  <rect x="145" y="483" width="280.7" height="50" rx="25" class="rk"/>
+  <text x="166" y="514" class="s17 w7">Essential anfragen</text>
+  <use href="#db-leiste" x="144"/>
+  <g transform="translate(144 582)" clip-path="url(#clip-dfenster)"><use href="#db-ess"/></g>
+  <text x="144" y="826.5" class="s13 w6 mu caps">GESTALTUNG</text>
+  <text x="144" y="848.4" class="s15 w5">eeziframes-Design, Ihr Name</text>
+  <line x1="144" y1="858.5" x2="426.7" y2="858.5" class="hl2"/>
+  <text x="144" y="874.5" class="s13 w6 mu caps">HINWEIS AUF EEZIFRAMES</text>
+  <text x="144" y="896.4" class="s15 w5">„Powered by EEZIframes“</text>
+  <line x1="144" y1="906.5" x2="426.7" y2="906.5" class="hl2"/>
+  <text x="144" y="922.5" class="s13 w6 mu caps">IN SUCHMASCHINEN</text>
+  <text x="144" y="944.4" class="s15 w5">nein</text>
+  <line x1="144" y1="954.5" x2="426.7" y2="954.5" class="hl2"/>
+  <text x="144" y="970.5" class="s13 w6 mu caps">FÜR IHR TEAM</text>
+  <text x="144" y="992.4" class="s15 w5">nicht enthalten</text>
+  <path d="M144 822 H138 V596.8 H141.6 M144 870 H132 V783.4 H375.6" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+  <path d="M144 822 H138 V596.8 H141.6 M144 870 H132 V783.4 H375.6" fill="none" stroke="#444444"/>
+  <circle cx="166.6" cy="596.8" r="3" fill="#f4f4f4" stroke="#444444"/>
+  <circle cx="378.6" cy="783.4" r="3" fill="#f4f4f4" stroke="#444444"/>
+  <rect x="121" y="209" width="328.7" height="1044" rx="23" class="ring"/>
+
+  <!-- Karte EEZI Essential Plus (empfohlen) -->
+  <rect x="474.7" y="208" width="330.7" height="1046" rx="24" fill="#ffffff"/>
+  <text x="498.7" y="250.5" class="s17 w7">EEZI Essential Plus</text>
+  <text x="498.7" y="280.4" class="s15 w5 t2">Wenn Ihre Kunden Ihr Logo, Ihre Farbe</text>
+  <text x="498.7" y="302.4" class="s15 w5 t2">und Ihre Fotos sehen sollen.</text>
+  <text x="498.7" y="360.6" class="s40 w8 num">39 €</text>
+  <text x="595.7" y="360.6" class="s15 w5 mu">im Monat</text>
+  <text x="498.7" y="386.4" class="s15 w5 t2">ab Livegang, monatlich kündbar</text>
+  <text x="498.7" y="416.4" class="s15 w5 t2"><tspan class="w6" fill="#1a1a1a">199 € Einrichtung</tspan>, einmalig vorab:</text>
+  <text x="498.7" y="438.4" class="s15 w5 t2">Anruf, Domain, Gestaltung, Vorschau</text>
+  <text x="498.7" y="461.8" class="s13 w5 mu">netto zzgl. MwSt. · nur für Unternehmer</text>
+  <rect x="498.7" y="482" width="282.7" height="52" rx="26" fill="#d9480f"/>
+  <text x="520.7" y="514" class="s17 w7 wh">Essential Plus anfragen</text>
+  <circle cx="759.4" cy="508" r="14" fill="#ffffff"/>
+  <path d="M753.4 508 H765.4 M761.4 504 L765.4 508 L761.4 512" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <use href="#db-leiste" x="498.7"/>
+  <g transform="translate(498.7 582)" clip-path="url(#clip-dfenster)"><use href="#db-plus"/></g>
+  <text x="498.7" y="826.5" class="s13 w6 mu caps">GESTALTUNG</text>
+  <text x="498.7" y="848.4" class="s15 w5">Ihr Logo, Ihre Farbe, bis 6 Fotos</text>
+  <line x1="498.7" y1="858.5" x2="781.4" y2="858.5" class="hl2"/>
+  <text x="498.7" y="874.5" class="s13 w6 mu caps">HINWEIS AUF EEZIFRAMES</text>
+  <text x="498.7" y="896.4" class="s15 w5">kleiner Hinweis im Fuß</text>
+  <line x1="498.7" y1="906.5" x2="781.4" y2="906.5" class="hl2"/>
+  <text x="498.7" y="922.5" class="s13 w6 mu caps">IN SUCHMASCHINEN</text>
+  <text x="498.7" y="944.4" class="s15 w5">Startseite</text>
+  <line x1="498.7" y1="954.5" x2="781.4" y2="954.5" class="hl2"/>
+  <text x="498.7" y="970.5" class="s13 w6 mu caps">FÜR IHR TEAM</text>
+  <text x="498.7" y="992.4" class="s15 w5">nicht enthalten</text>
+  <path d="M498.7 822 H492.7 V596.8 H518.3 M498.7 870 H486.7 V783.4 H747.3" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+  <path d="M498.7 822 H492.7 V596.8 H518.3 M498.7 870 H486.7 V783.4 H747.3" fill="none" stroke="#444444"/>
+  <circle cx="521.3" cy="596.8" r="3" fill="#f4f4f4" stroke="#444444"/>
+  <circle cx="750.3" cy="783.4" r="3" fill="#f4f4f4" stroke="#444444"/>
+  <rect x="475.7" y="209" width="328.7" height="1044" rx="23" class="ringc"/>
+  <rect x="498.7" y="194" width="122" height="28" rx="14" fill="#eeeeee" stroke="#d9480f" stroke-width="2"/>
+  <text x="559.7" y="212.6" text-anchor="middle" class="s13 w7 caps cta">EMPFOHLEN</text>
+
+  <!-- Karte EEZI Signature -->
+  <rect x="829.3" y="208" width="330.7" height="1046" rx="24" fill="#ffffff"/>
+  <text x="853.3" y="250.5" class="s17 w7">EEZI Signature</text>
+  <text x="853.3" y="280.4" class="s15 w5 t2">Wenn Ihre Kunden eeziframes nicht</text>
+  <text x="853.3" y="302.4" class="s15 w5 t2">sehen sollen, mit Dashboard.</text>
+  <text x="853.3" y="360.6" class="s40 w8 num">64 €</text>
+  <text x="951.3" y="360.6" class="s15 w5 mu">im Monat</text>
+  <text x="853.3" y="386.4" class="s15 w5 t2">ab Livegang, monatlich kündbar</text>
+  <text x="853.3" y="416.4" class="s15 w5 t2"><tspan class="w6" fill="#1a1a1a">279 € Einrichtung</tspan>, einmalig vorab:</text>
+  <text x="853.3" y="438.4" class="s15 w5 t2">Anruf, Domain, Gestaltung, Vorschau</text>
+  <text x="853.3" y="461.8" class="s13 w5 mu">netto zzgl. MwSt. · nur für Unternehmer</text>
+  <rect x="854.3" y="483" width="280.7" height="50" rx="25" class="rk"/>
+  <text x="875.3" y="514" class="s17 w7">Signature anfragen</text>
+  <use href="#db-leiste" x="853.3"/>
+  <g transform="translate(853.3 582)" clip-path="url(#clip-dfenster)"><use href="#db-sig"/></g>
+  <text x="853.3" y="826.5" class="s13 w6 mu caps">GESTALTUNG</text>
+  <text x="853.3" y="848.4" class="s15 w5">Ihr Logo, Ihre Farbe, bis 6 Fotos</text>
+  <line x1="853.3" y1="858.5" x2="1136" y2="858.5" class="hl2"/>
+  <text x="853.3" y="874.5" class="s13 w6 mu caps">HINWEIS AUF EEZIFRAMES</text>
+  <text x="853.3" y="896.4" class="s15 w5">keiner</text>
+  <line x1="853.3" y1="906.5" x2="1136" y2="906.5" class="hl2"/>
+  <text x="853.3" y="922.5" class="s13 w6 mu caps">IN SUCHMASCHINEN</text>
+  <text x="853.3" y="944.4" class="s15 w5">Startseite</text>
+  <line x1="853.3" y1="954.5" x2="1136" y2="954.5" class="hl2"/>
+  <text x="853.3" y="970.5" class="s13 w6 mu caps">FÜR IHR TEAM</text>
+  <text x="853.3" y="992.4" class="s15 w5">Dashboard, Einladungslinks, 5</text>
+  <text x="853.3" y="1014.4" class="s15 w5">Zugänge</text>
+  <path d="M853.3 822 H847.3 V596.8 H872.9 M853.3 870 H841.3 V783.4 H1101.9" fill="none" stroke="#f4f4f4" stroke-width="3" opacity="0.6"/>
+  <path d="M853.3 822 H847.3 V596.8 H872.9 M853.3 870 H841.3 V783.4 H1101.9" fill="none" stroke="#444444"/>
+  <circle cx="875.9" cy="596.8" r="3" fill="#f4f4f4" stroke="#444444"/>
+  <circle cx="1104.9" cy="783.4" r="3" fill="#f4f4f4" stroke="#444444" stroke-dasharray="2 2"/>
+  <rect x="830.3" y="209" width="328.7" height="1044" rx="23" class="ring"/>
+
+  <!-- Leistungslisten (offen, gekürzt) -->
+  <g fill="#c9c9c9">
+    <path d="M147 1053 l4 4 l7 -8 M147 1079 l4 4 l7 -8 M147 1105 l4 4 l7 -8 M147 1131 l4 4 l7 -8 M147 1157 l4 4 l7 -8" class="haken" stroke-width="2"/>
+    <rect x="168" y="1049" width="226" height="9"/><rect x="168" y="1075" width="190" height="9"/><rect x="168" y="1101" width="232" height="9"/><rect x="168" y="1127" width="170" height="9"/><rect x="168" y="1153" width="210" height="9"/>
+    <path d="M501.7 1053 l4 4 l7 -8 M501.7 1079 l4 4 l7 -8 M501.7 1105 l4 4 l7 -8 M501.7 1131 l4 4 l7 -8 M501.7 1157 l4 4 l7 -8" class="haken" stroke-width="2"/>
+    <rect x="522.7" y="1049" width="236" height="9"/><rect x="522.7" y="1075" width="200" height="9"/><rect x="522.7" y="1101" width="226" height="9"/><rect x="522.7" y="1127" width="186" height="9"/><rect x="522.7" y="1153" width="214" height="9"/>
+    <path d="M856.3 1053 l4 4 l7 -8 M856.3 1079 l4 4 l7 -8 M856.3 1105 l4 4 l7 -8 M856.3 1131 l4 4 l7 -8 M856.3 1157 l4 4 l7 -8" class="haken" stroke-width="2"/>
+    <rect x="877.3" y="1049" width="240" height="9"/><rect x="877.3" y="1075" width="222" height="9"/><rect x="877.3" y="1101" width="196" height="9"/><rect x="877.3" y="1127" width="236" height="9"/><rect x="877.3" y="1153" width="204" height="9"/>
+  </g>
+  <rect x="100" y="1180" width="1080" height="24" fill="#ffffff"/>
+  <line x1="100" y1="1180" x2="1180" y2="1180" stroke="#8a8a8a" stroke-dasharray="6 4"/>
+  <line x1="100" y1="1204" x2="1180" y2="1204" stroke="#8a8a8a" stroke-dasharray="6 4"/>
+  <text x="640" y="1196.5" text-anchor="middle" class="s12 w6">Liste gekürzt dargestellt (Signature 10 Punkte, ≈ 22 Zeilen) – alle Karten gleich hoch (subgrid)</text>
+  <!-- Demo-Links nur mit PAKETE_DEMOS=1 -->
+  <rect x="138" y="1209" width="118" height="26" class="hyp"/>
+  <text x="144" y="1225" class="s15 w6">Demo ansehen</text><line x1="144" y1="1229" x2="244" y2="1229" stroke="#1a1a1a" stroke-width="1.5"/>
+  <rect x="492.7" y="1209" width="118" height="26" class="hyp"/>
+  <text x="498.7" y="1225" class="s15 w6">Demo ansehen</text><line x1="498.7" y1="1229" x2="598.7" y2="1229" stroke="#1a1a1a" stroke-width="1.5"/>
+  <rect x="847.3" y="1209" width="118" height="26" class="hyp"/>
+  <text x="853.3" y="1225" class="s15 w6">Demo ansehen</text><line x1="853.3" y1="1229" x2="953.3" y2="1229" stroke="#1a1a1a" stroke-width="1.5"/>
+
+  <!-- fb-07 -->
+  <text x="120" y="1294.4" class="s15 w5 t2"><tspan class="w7" fill="#1a1a1a">Vorläufige Preise.</tspan> Preisstand 22. Oktober 2026. Es gilt der Preis, den Sie beim</text>
+  <text x="120" y="1316.4" class="s15 w5 t2">Bestellen sehen.</text>
+  <line x1="120" y1="1346.5" x2="1160" y2="1346.5" class="hl"/>
+  <text x="120" y="1379" class="s17 w7">Alle Merkmale im Vergleich</text>
+  <path d="M1141 1373 H1155 M1148 1366 V1380" stroke="#4d4d4d" stroke-width="2"/>
+  <line x1="120" y1="1399.5" x2="1160" y2="1399.5" class="hl"/>
+
+  <!-- fb-08 -->
+  <text x="120" y="1459.8" class="s13 w6 mu caps">VERTRAG UND KÜNDIGUNG</text>
+  <path d="M127.5 1490 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="152" y="1495.4" class="s15 w5">Vertrag erst mit Eingang Ihrer Zahlung.</text>
+  <path d="M127.5 1520 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="152" y="1525.4" class="s15 w5">Bis zum Beginn der Einrichtung stornieren Sie mit voller</text>
+  <text x="152" y="1547.4" class="s15 w5">Erstattung.</text>
+  <text x="152" y="1573.4" class="s15 w5 t2">Danach wird die Einrichtungsgebühr nicht erstattet.</text>
+  <path d="M127.5 1598 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="152" y="1603.4" class="s15 w5">Live erst mit Ihrer Freigabe der Vorschau.</text>
+  <path d="M127.5 1628 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="152" y="1633.4" class="s15 w5">Monatsabo erst ab dem Livegang.</text>
+  <path d="M127.5 1658 l4.5 4.5 l8 -9" class="haken"/>
+  <text x="152" y="1663.4" class="s15 w5">Monatlich kündbar, ohne Mindestlaufzeit.</text>
+  <text x="120" y="1712" class="s15 w7">Paketbedingungen mit AV-Vertrag</text>
+  <line x1="120" y1="1716" x2="370" y2="1716" stroke="#1a1a1a" stroke-width="1.5"/>
+  <text x="120" y="1741.8" class="s13 w5 mu">Entwurf zur anwaltlichen Prüfung · Fassung vom 23. Oktober 2026</text>
+  <rect x="646" y="1480" width="76" height="190" class="hyp"/>
+  <text x="652" y="1495.4" class="s13 w6 mu num">§ 3 (2)</text>
+  <text x="652" y="1525.4" class="s13 w6 mu num">§ 7 (2)</text>
+  <text x="652" y="1603.4" class="s13 w6 mu num">§ 5 (3)</text>
+  <text x="652" y="1633.4" class="s13 w6 mu num">§ 4 (3)</text>
+  <text x="652" y="1663.4" class="s13 w6 mu num">§ 7 (1)</text>
+  <text x="829.3" y="1463.4" class="s15 w7">Unsicher, welches Paket passt?</text>
+  <rect x="830.3" y="1478" width="242" height="50" rx="25" fill="none" stroke="#6e6e6e" stroke-width="2"/>
+  <text x="851" y="1509" class="s17 w7">Rückruf oder Nachricht</text>
+  <text x="120" y="1782.6" class="s13 w5 mu">Angebot nur für Unternehmer im Sinne von § 14 BGB, nicht für Verbraucher. Alle Preise netto</text>
+  <text x="120" y="1802.6" class="s13 w5 mu">zzgl. MwSt. Ihr Kunde zahlt nichts.</text>
+  <line x1="120" y1="1905.5" x2="1160" y2="1905.5" class="hl"/>
+  <text x="120" y="1933.8" class="s13 w6 mu caps">05 · IHRE ANFRAGE</text>
+  <line x1="120" y1="1938" x2="138" y2="1938" class="gr"/>
+
+  <!-- Kopf Schreibtisch (Z 40) -->
+  <rect x="0" y="0" width="1280" height="64" fill="#e2e2e2"/>
+  <line x1="0" y1="63.5" x2="1280" y2="63.5" class="hl2"/>
+  <rect x="120" y="16" width="32" height="32" rx="8" fill="#9a9a9a"/>
+  <text x="162" y="38" class="s17 w7">eeziframes</text>
+  <text x="581" y="37" class="s15 w6">So funktioniert es</text>
+  <text x="739" y="37" class="s15 w6">Ablauf</text>
+  <text x="816" y="37" class="s15 w6">Fragen</text>
+  <text x="915" y="37" class="s15 w6">Anmelden</text>
+  <rect x="1010" y="10" width="150" height="44" rx="22" fill="none" stroke="#9a9a9a" stroke-dasharray="2 3"/>
+  <text x="1085" y="36" text-anchor="middle" class="s12 w5 mu">Ring ausgeblendet</text>
+
+  <!-- Rahmen -->
+  <rect x="0" y="0" width="1280" height="1950" fill="none" stroke="#9a9a9a"/>
+  <rect x="-1" y="-1" width="1282" height="802" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+
+  <!-- Lineal -->
+  <g>
+    <line x1="-10" y1="0" x2="-2" y2="0" class="tk"/><text x="-14" y="4" text-anchor="end" class="s12 w5 mu">0</text>
+    <line x1="-10" y1="64" x2="-2" y2="64" class="tk"/><text x="-14" y="66" text-anchor="end" class="s12 w5 mu">64</text>
+    <line x1="-10" y1="80" x2="-2" y2="80" class="tk"/><text x="-14" y="84" text-anchor="end" class="s12 w5 mu">80</text>
+    <line x1="-10" y1="124" x2="-2" y2="124" class="tk"/><text x="-14" y="128" text-anchor="end" class="s12 w5 mu">124</text>
+    <line x1="-10" y1="168" x2="-2" y2="168" class="tk"/><text x="-14" y="172" text-anchor="end" class="s12 w5 mu">168</text>
+    <line x1="-10" y1="194" x2="-2" y2="194" class="tk"/><text x="-14" y="196" text-anchor="end" class="s12 w5 mu">194</text>
+    <line x1="-10" y1="208" x2="-2" y2="208" class="tk"/><text x="-14" y="212" text-anchor="end" class="s12 w5 mu">208</text>
+    <line x1="-10" y1="256" x2="-2" y2="256" class="tk"/><text x="-14" y="260" text-anchor="end" class="s12 w5 mu">256</text>
+    <line x1="-10" y1="308" x2="-2" y2="308" class="tk"/><text x="-14" y="310" text-anchor="end" class="s12 w5 mu">308</text>
+    <line x1="-10" y1="324" x2="-2" y2="324" class="tk"/><text x="-14" y="328" text-anchor="end" class="s12 w5 mu">324</text>
+    <line x1="-10" y1="368" x2="-2" y2="368" class="tk"/><text x="-14" y="372" text-anchor="end" class="s12 w5 mu">368</text>
+    <line x1="-10" y1="400" x2="-2" y2="400" class="tk"/><text x="-14" y="404" text-anchor="end" class="s12 w5 mu">400</text>
+    <line x1="-10" y1="444" x2="-2" y2="444" class="tk"/><text x="-14" y="446" text-anchor="end" class="s12 w5 mu">444</text>
+    <line x1="-10" y1="466" x2="-2" y2="466" class="tk"/><text x="-14" y="468" text-anchor="end" class="s12 w5 mu">466</text>
+    <line x1="-10" y1="482" x2="-2" y2="482" class="tk"/><text x="-14" y="486" text-anchor="end" class="s12 w5 mu">482</text>
+    <line x1="-10" y1="534" x2="-2" y2="534" class="tk"/><text x="-14" y="538" text-anchor="end" class="s12 w5 mu">534</text>
+    <line x1="-10" y1="558" x2="-2" y2="558" class="tk"/><text x="-14" y="560" text-anchor="end" class="s12 w5 mu">558</text>
+    <line x1="-10" y1="582" x2="-2" y2="582" class="tk"/><text x="-14" y="586" text-anchor="end" class="s12 w5 mu">582</text>
+    <line x1="-10" y1="794" x2="-2" y2="794" class="tk"/>
+    <line x1="-10" y1="800" x2="-2" y2="800" class="tk"/><text x="-14" y="804" text-anchor="end" class="s12 w7">800</text>
+    <line x1="-10" y1="810" x2="-2" y2="810" class="tk"/>
+    <line x1="-10" y1="1027" x2="-2" y2="1027" class="tk"/><text x="-14" y="1029" text-anchor="end" class="s12 w5 mu">1027</text>
+    <line x1="-10" y1="1043" x2="-2" y2="1043" class="tk"/><text x="-14" y="1047" text-anchor="end" class="s12 w5 mu">1043</text>
+    <line x1="-10" y1="1254" x2="-2" y2="1254" class="tk"/><text x="-14" y="1258" text-anchor="end" class="s12 w7">K</text>
+    <line x1="-10" y1="1278" x2="-2" y2="1278" class="tk"/><text x="-14" y="1282" text-anchor="end" class="s12 w5 mu">K+24</text>
+    <line x1="-10" y1="1346" x2="-2" y2="1346" class="tk"/><text x="-14" y="1350" text-anchor="end" class="s12 w5 mu">K+92</text>
+    <line x1="-10" y1="1399" x2="-2" y2="1399" class="tk"/><text x="-14" y="1403" text-anchor="end" class="s12 w5 mu">K+145</text>
+    <line x1="-10" y1="1447" x2="-2" y2="1447" class="tk"/><text x="-14" y="1451" text-anchor="end" class="s12 w5 mu">K+193</text>
+    <line x1="-10" y1="1745" x2="-2" y2="1745" class="tk"/><text x="-14" y="1749" text-anchor="end" class="s12 w5 mu">K+491</text>
+    <line x1="-10" y1="1769" x2="-2" y2="1769" class="tk"/><text x="-14" y="1773" text-anchor="end" class="s12 w5 mu">K+515</text>
+    <line x1="-10" y1="1809" x2="-2" y2="1809" class="tk"/><text x="-14" y="1813" text-anchor="end" class="s12 w5 mu">K+555</text>
+    <line x1="-10" y1="1905" x2="-2" y2="1905" class="tk"/><text x="-14" y="1909" text-anchor="end" class="s12 w5 mu">K+651</text>
+  </g>
+  <path d="M-56 0 H-60 V800 H-56" class="ld"/>
+  <text transform="translate(-64 400) rotate(-90)" text-anchor="middle" class="s12 w6">Bildschirm 1 nach dem Sprung · 1280 × 800</text>
+  <path d="M-78 80 H-82 V1254 H-78" class="ld"/>
+  <text transform="translate(-86 667) rotate(-90)" text-anchor="middle" class="s12 w7">04.1 · fb-06 · Stufe 2 · Kopf und drei Karten</text>
+  <path d="M-78 1278 H-82 V1399 H-78" class="ld"/>
+  <text transform="translate(-86 1338) rotate(-90)" text-anchor="middle" class="s12 w7">04.2 · fb-07</text>
+  <path d="M-78 1447 H-82 V1809 H-78" class="ld"/>
+  <text transform="translate(-86 1628) rotate(-90)" text-anchor="middle" class="s12 w7">04.3 · fb-08 · Stufe 1</text>
+
+  <!-- Anmerkungen C -->
+  <g class="anm">
+    <circle cx="1168" cy="32" r="2.5" fill="#1a1a1a"/><polyline points="1168,32 1310,32 1318,28 1327,28" class="ld"/>
+    <circle cx="1336" cy="28" r="9" fill="#1a1a1a"/><text x="1336" y="32.5" text-anchor="middle" class="s12 w7 wh">1</text>
+    <text x="1352" y="32" class="an">Kopf 64 · Ebene Z 40 · Navigation rechts. Ring „Paket anfragen“ ausgeblendet, solange die Reihe im Bild ist</text>
+    <text x="1352" y="48" class="an">(J-AB-9: Abweichung, Freigabe durch den Inhaber nötig).</text>
+
+    <circle cx="1168" cy="140" r="2.5" fill="#1a1a1a"/><polyline points="1168,140 1310,140 1318,100 1327,100" class="ld"/>
+    <circle cx="1336" cy="100" r="9" fill="#1a1a1a"/><text x="1336" y="104.5" text-anchor="middle" class="s12 w7 wh">2</text>
+    <text x="1352" y="104" class="an">[V] Kapitelkopf: h2 40/800 in Spalten 1–4; Lead 17, zwei Zeilen, in Spalten 5–12 – seine linke Kante ist die linke</text>
+    <text x="1352" y="120" class="an">Kante der Plus-Karte (x 474,7). Haarlinie über alle 12 Spalten (1040 px ab x 120, Spalte 64,67, Abstand 24).</text>
+    <text x="1352" y="136" class="an">Am Schreibtisch keine Namensleiste und kein Umschalter „Leistungen ansehen“.</text>
+
+    <circle cx="1168" cy="226" r="2.5" fill="#1a1a1a"/><polyline points="1168,226 1310,226 1318,182 1327,182" class="ld"/>
+    <circle cx="1336" cy="182" r="9" fill="#1a1a1a"/><text x="1336" y="186.5" text-anchor="middle" class="s12 w7 wh">3</text>
+    <text x="1352" y="186" class="an">[V] Drei Karten zu je 4 Spalten: 330,7 breit, Abstand 24, Innenabstand 24, Innenbreite 282,7; aufsteigend Essential ·</text>
+    <text x="1352" y="202" class="an">Plus · Signature (J-R3). Acht Zeilen über subgrid auf gleicher Höhe: Pille/Name, Satz, Preisblock, Knopf, Bild,</text>
+    <text x="1352" y="218" class="an">Datenblatt, Liste, Demo (J-R6). Reihe wird ab 900 px Breite zu drei Spalten (Festl. 10-4).</text>
+
+    <circle cx="1168" cy="276" r="2.5" fill="#1a1a1a"/><polyline points="1168,276 1310,276 1318,256 1327,256" class="ld"/>
+    <circle cx="1336" cy="256" r="9" fill="#1a1a1a"/><text x="1336" y="260.5" text-anchor="middle" class="s12 w7 wh">4</text>
+    <text x="1352" y="260" class="an">[V] Hervorhebung nur an Plus: Cream-Ring, Kontur-Pille (x 498,7–620,7, y 194–222), einziger Cream-Knopf (J-R8).</text>
+    <text x="1352" y="276" class="an">Paketname 17/700 (J-AB-1, K-21); „Wenn“-Satz 15, zwei Zeilen (TE) als Grund. Keine größere Karte, kein Schein.</text>
+
+    <circle cx="1168" cy="400" r="2.5" fill="#1a1a1a"/><polyline points="1168,400 1310,400 1318,360 1327,360" class="ld"/>
+    <circle cx="1336" cy="360" r="9" fill="#1a1a1a"/><text x="1336" y="364.5" text-anchor="middle" class="s12 w7 wh">5</text>
+    <text x="1352" y="364" class="an">[V] Preisblock y 324–466: Preis 40/800 tabular-nums + „im Monat“, Bindung (TE), Einrichtung mit Inhalt (TE,</text>
+    <text x="1352" y="380" class="an">zweizeilig), Steuerzeile 13 – alle drei Preise auf einer Höhe, vergleichbar ohne Wischen (J-R2, J-R6).</text>
+
+    <circle cx="1168" cy="508" r="2.5" fill="#1a1a1a"/><polyline points="1168,508 1310,508 1318,470 1327,470" class="ld"/>
+    <circle cx="1336" cy="470" r="9" fill="#1a1a1a"/><text x="1336" y="474.5" text-anchor="middle" class="s12 w7 wh">6</text>
+    <text x="1352" y="474" class="an">[V] Knöpfe 282,7 × 52 bei y 482–534: Cream nur an Plus, daneben zwei Ring-Knöpfe gleicher Größe (nur die Füllung</text>
+    <text x="1352" y="490" class="an">unterscheidet; Pfeilkreis 28, K-31). A „… anfragen“ → #frage mit Paket; B „… bestellen“ → /partner/#bestellen/&lt;paket&gt;. Hover nur bei</text>
+    <text x="1352" y="506" class="an">pointer: fine – Karte Ring --muted, Ring-Knopf Kontur --text, Cream innere Kontur; Datenblattzeile hebt ihren</text>
+    <text x="1352" y="522" class="an">Marker im Bild hervor (Deckkraft 40 → 100 %). Kein Anheben, keine Skalierung.</text>
+
+    <circle cx="1168" cy="676" r="2.5" fill="#1a1a1a"/><polyline points="1168,676 1310,676 1318,620 1327,620" class="ld"/>
+    <circle cx="1336" cy="620" r="9" fill="#1a1a1a"/><text x="1336" y="624.5" text-anchor="middle" class="s12 w7 wh">7</text>
+    <text x="1352" y="624" class="an">[V] Beispielbilder 282,7 × 212 + Leiste 24 bei y 558–794: alle drei vollständig im ersten Bildschirm – der Bildvergleich,</text>
+    <text x="1352" y="640" class="an">den das Telefon nur nacheinander zeigt. Gleiche Aufnahme und Belichtung (J-R9); Lichtkante oben (blau, K-24).</text>
+    <text x="1352" y="656" class="an">Essential: der helle Startknopf im Bild kann als zweiter heller Fleck wirken (DG-H-12) – Blinzeltest, sonst Ausschnitt</text>
+    <text x="1352" y="672" class="an">ohne hellen Knopf. Leitlinien: Kanal links der Innenkante, analog Telefon.</text>
+
+    <circle cx="1168" cy="800" r="2.5" fill="#1a1a1a"/><polyline points="1168,800 1310,800 1318,760 1327,760" class="ld"/>
+    <circle cx="1336" cy="760" r="9" fill="#1a1a1a"/><text x="1336" y="764.5" text-anchor="middle" class="s12 w7 wh">8</text>
+    <text x="1352" y="764" class="an">Bildschirmkante 800: Preise, Knöpfe und Bilder aller drei Karten liegen darüber (J-R2, EA S4). 1024 × 768: dieselbe</text>
+    <text x="1352" y="780" class="an">Struktur in 944 px (Karten 298,7), Bilder zu ≈ 78 % im ersten Bildschirm.</text>
+
+    <circle cx="1168" cy="992" r="2.5" fill="#1a1a1a"/><polyline points="1168,992 1310,992 1318,890 1327,890" class="ld"/>
+    <circle cx="1336" cy="890" r="9" fill="#1a1a1a"/><text x="1336" y="894.5" text-anchor="middle" class="s12 w7 wh">9</text>
+    <text x="1352" y="894" class="an">[V] Datenblatt, vier gleiche Zeilen wie am Telefon.</text>
+    <text x="1352" y="910" class="an">Gemessen: „Dashboard, Einladungslinks, 5 Zugänge“</text>
+    <text x="1352" y="926" class="an">284 px &gt; 282,7 px → zweizeilig, die Zeile wächst über</text>
+    <text x="1352" y="942" class="an">subgrid in allen Karten um 22 px (1005 → 1027).</text>
+    <text x="1352" y="958" class="an">Kürzung oder Umbruch offen.</text>
+
+    <circle cx="1168" cy="1110" r="2.5" fill="#1a1a1a"/><polyline points="1168,1110 1310,1110 1318,1090 1327,1090" class="ld"/>
+    <circle cx="1336" cy="1090" r="9" fill="#1a1a1a"/><text x="1336" y="1094.5" text-anchor="middle" class="s12 w7 wh">10</text>
+    <text x="1352" y="1094" class="an">Leistungsliste am Schreibtisch offen (Bestand),</text>
+    <text x="1352" y="1110" class="an">Unterschiede zuerst (J-R11); hier gekürzt.</text>
+    <text x="1352" y="1126" class="an">K = Kartenunterkante; darunter Lagen relativ zu K.</text>
+
+    <circle cx="1168" cy="1220" r="2.5" fill="#1a1a1a"/><polyline points="1168,1220 1310,1220 1318,1210 1327,1210" class="ld"/>
+    <circle cx="1336" cy="1210" r="9" fill="#1a1a1a"/><text x="1336" y="1214.5" text-anchor="middle" class="s12 w7 wh">11</text>
+    <text x="1352" y="1214" class="an">[H] J-H7: „Demo ansehen“ nur mit PAKETE_DEMOS=1.</text>
+
+    <circle cx="1168" cy="1305" r="2.5" fill="#1a1a1a"/><polyline points="1168,1305 1310,1305 1318,1290 1327,1290" class="ld"/>
+    <circle cx="1336" cy="1290" r="9" fill="#1a1a1a"/><text x="1336" y="1294.5" text-anchor="middle" class="s12 w7 wh">12</text>
+    <text x="1352" y="1294" class="an">[V] Verkaufsstand in Spalten 1–8 (höchstens</text>
+    <text x="1352" y="1310" class="an">64 Zeichen je Zeile); Vergleich als Zeile über</text>
+    <text x="1352" y="1326" class="an">Spalten 1–12, zugeklappt; aufgeklappt → C2.</text>
+
+    <circle cx="1168" cy="1560" r="2.5" fill="#1a1a1a"/><polyline points="1168,1560 1310,1560 1318,1470 1327,1470" class="ld"/>
+    <circle cx="1336" cy="1470" r="9" fill="#1a1a1a"/><text x="1336" y="1474.5" text-anchor="middle" class="s12 w7 wh">13</text>
+    <text x="1352" y="1474" class="an">[V] Festblock in Spalten 1–6 (Text 476 px).</text>
+    <text x="1352" y="1490" class="an">Gesprächsweg in Spalten 9–12, oben bündig mit</text>
+    <text x="1352" y="1506" class="an">dem Titel, fluchtet mit der dritten Karte: das</text>
+    <text x="1352" y="1522" class="an">„oder“ auf einen Blick. Rechtshinweis Spalten 1–8.</text>
+    <text x="1352" y="1538" class="an">[H] H-08-4: Paragrafenspalte in Spalte 7 (gestrichelt).</text>
+
+    <circle cx="1168" cy="1905" r="2.5" fill="#1a1a1a"/><polyline points="1168,1905 1310,1905 1318,1880 1327,1880" class="ld"/>
+    <circle cx="1336" cy="1880" r="9" fill="#1a1a1a"/><text x="1336" y="1884.5" text-anchor="middle" class="s12 w7 wh">14</text>
+    <text x="1352" y="1884" class="an">96 px Ruhe, dann 05 „Ihre Anfrage“: Formular</text>
+    <text x="1352" y="1900" class="an">zweispaltig, nach dem Sprung h3 bei y 76 → D2.</text>
+  </g>
+</g>
+
+<!-- ===================== D1 · Rückmeldung Telefon ===================== -->
+<text x="2100" y="3770" class="hd">D1 · Rückmeldung nach der Wahl</text>
+<text x="2100" y="3794" class="lab">Telefon, Zustand A, nach Tipp auf „Essential Plus anfragen“</text>
+<g id="D1" transform="translate(2120 3810)">
+  <g clip-path="url(#clip-screen)">
+    <rect x="0" y="0" width="390" height="844" fill="#eeeeee"/>
+    <text x="16" y="93.2" class="s17 w8">Paket unverbindlich anfragen</text>
+    <rect x="16" y="116" width="48" height="36" fill="url(#bildmuster)" stroke="#8a8a8a"/>
+    <rect x="16" y="116" width="48" height="7" fill="#8f8f8f"/>
+    <text x="76" y="130.4" class="s15 w7">Ihre Wahl: EEZI Essential Plus</text>
+    <text x="76" y="148.8" class="s13 w5 t2">39 € im Monat ab Livegang · 199 € Einrichtung</text>
+    <text x="76" y="164.8" class="s13 w5 t2">einmalig · netto</text>
+    <text x="76" y="195" class="s15 w7">Paket ändern</text>
+    <line x1="76" y1="199" x2="173" y2="199" stroke="#1a1a1a" stroke-width="1.5"/>
+    <text x="16" y="243.5" class="s15 w7">Paket</text>
+    <rect x="16.5" y="256.5" width="357" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <text x="32" y="288" class="s17 w5">EEZI Essential Plus</text>
+    <path d="M344 278 l6 6 l6 -6" fill="none" stroke="#4d4d4d" stroke-width="2"/>
+    <text x="16" y="339.5" class="s15 w7">Ihr Name</text>
+    <rect x="16.5" y="352.5" width="357" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <text x="16" y="435.5" class="s15 w7">Firma <tspan class="w5 mu">(freiwillig)</tspan></text>
+    <rect x="16.5" y="448.5" width="357" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <text x="16" y="531.5" class="s15 w7">E-Mail</text>
+    <rect x="16.5" y="544.5" width="357" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <text x="16" y="627.5" class="s15 w7">Telefon für Rückruf <tspan class="w5 mu">(freiwillig)</tspan></text>
+    <rect x="16.5" y="640.5" width="357" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <text x="16" y="723.5" class="s15 w7">Ihre Frage oder Ihr Wunsch</text>
+    <rect x="16.5" y="736.5" width="357" height="119" rx="12" fill="none" stroke="#6e6e6e"/>
+  </g>
+  <use href="#kopf-tel"/>
+  <rect x="176" y="6" width="150" height="44" rx="22" fill="none" stroke="#9a9a9a" stroke-dasharray="2 3"/>
+  <text x="251" y="32" text-anchor="middle" class="s12 w5 mu">Ring ausgeblendet</text>
+  <rect x="-1" y="-1" width="392" height="846" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="392" y1="88" x2="396" y2="88" class="ld"/><circle cx="405" cy="88" r="9" fill="#1a1a1a"/><text x="405" y="92.5" text-anchor="middle" class="s12 w7 wh">2</text>
+  <line x1="392" y1="140" x2="396" y2="140" class="ld"/><circle cx="405" cy="140" r="9" fill="#1a1a1a"/><text x="405" y="144.5" text-anchor="middle" class="s12 w7 wh">3</text>
+  <line x1="392" y1="282" x2="396" y2="282" class="ld"/><circle cx="405" cy="282" r="9" fill="#1a1a1a"/><text x="405" y="286.5" text-anchor="middle" class="s12 w7 wh">3</text>
+</g>
+<text x="2120" y="4676" class="an">↓ Cream „Frage senden“ 358 × 52 folgt unter der Kante</text>
+<text x="2120" y="4692" class="an">und kommt beim Ausfüllen ins Bild (fb-09 E).</text>
+<text x="2120" y="4724" class="anb">Ablauf nach dem Tipp auf den Kartenknopf (J-R23, 10.4 F)</text>
+<text x="2120" y="4740" class="an"><tspan class="anb">1</tspan> Taste 150 ms dunkler (:active), keine Skalierung.</text>
+<text x="2120" y="4756" class="an"><tspan class="anb">2</tspan> Seite rollt nativ glatt zu #frage (weniger Bewegung: Sprung).</text>
+<text x="2120" y="4772" class="an"><tspan class="anb">3</tspan> Auswahlzeile blendet in 220 ms ein, Paket im Feld gesetzt,</text>
+<text x="2134" y="4788" class="an">Fokus auf die h3, aria-live: „EEZI Essential Plus ausgewählt“.</text>
+<text x="2120" y="4804" class="an"><tspan class="anb">4</tspan> Im Hintergrund trägt das gewählte Paket den Cream-Knopf in</text>
+<text x="2134" y="4820" class="an">Reihe und Abschluss ([H] J-H8, J-AB-8). Kein Konfetti, kein Haken.</text>
+<text x="2120" y="4844" class="an">Offen: fb-09 setzt statt der Auswahlzeile nur den Hinweis „bei den</text>
+<text x="2120" y="4860" class="an">Paketen gewählt“ unter das Paketfeld; Ziel von „Paket ändern“ nennt</text>
+<text x="2120" y="4876" class="an">10.4 B nicht. Lagen der Auswahlzeile geschätzt (10.4 B ohne Pixel).</text>
+
+<!-- ===================== C2 · Schreibtisch, Vergleich aufgeklappt ===================== -->
+<text x="60" y="4960" class="hd">C2 · Schreibtisch: Vergleich aufgeklappt (Ausschnitt, fb-07)</text>
+<g id="C2" transform="translate(200 4990)">
+  <rect x="100" y="-12" width="1080" height="716" fill="#eeeeee"/>
+  <line x1="120" y1="0.5" x2="1160" y2="0.5" class="hl"/>
+  <text x="120" y="33" class="s17 w7">Alle Merkmale im Vergleich</text>
+  <line x1="1141" y1="26" x2="1155" y2="26" stroke="#4d4d4d" stroke-width="2"/>
+  <line x1="120" y1="52.5" x2="1160" y2="52.5" class="hl"/>
+  <text x="386" y="95.5" class="s15 w7">Essential</text>
+  <text x="652" y="95.5" class="s15 w7">Essential Plus</text>
+  <text x="918" y="95.5" class="s15 w7">Signature</text>
+  <line x1="120" y1="112.5" x2="1160" y2="112.5" class="hl2"/>
+  <path d="M1164 69 H1170 V111 H1164" stroke="#1c7ed6" stroke-width="1.5" fill="none"/>
+
+  <text x="120" y="141.6" class="s13 w6 mu caps">KOSTEN</text>
+  <text x="120" y="181.4" class="s15 w6">Monatlich, netto</text>
+  <text x="386" y="181.4" class="s15 w5 num">29 €</text><text x="652" y="181.4" class="s15 w5 num">39 €</text><text x="918" y="181.4" class="s15 w5 num">64 €</text>
+  <line x1="120" y1="198.5" x2="1160" y2="198.5" class="hl"/>
+  <text x="120" y="225.4" class="s15 w6">Einrichtung, einmalig vorab</text>
+  <text x="386" y="225.4" class="s15 w5 num">99 €</text><text x="652" y="225.4" class="s15 w5 num">199 €</text><text x="918" y="225.4" class="s15 w5 num">279 €</text>
+  <line x1="120" y1="242.5" x2="1160" y2="242.5" class="hl"/>
+  <rect x="114" y="245" width="1052" height="61" class="hyp"/>
+  <text x="120" y="269.4" class="s15 w6">Erstes Jahr: Einrichtung und 12</text>
+  <text x="120" y="291.4" class="s15 w6">Monate</text>
+  <text x="386" y="269.4" class="s15 w5 num">447 €</text><text x="652" y="269.4" class="s15 w5 num">667 €</text><text x="918" y="269.4" class="s15 w5 num">1.047 €</text>
+  <text x="1156" y="269.4" text-anchor="end" class="s12 w7 mu">[H]</text>
+  <line x1="120" y1="308.5" x2="1160" y2="308.5" class="hl"/>
+
+  <text x="120" y="345.6" class="s13 w6 mu caps">IN ALLEN PAKETEN</text>
+  <text x="120" y="385.4" class="s15 w6">Eigene Domain</text><text x="386" y="385.4" class="s15 w5 t2">in allen drei</text>
+  <line x1="120" y1="402.5" x2="1160" y2="402.5" class="hl"/>
+  <text x="120" y="429.4" class="s15 w6">Voller Konfigurator</text><text x="386" y="429.4" class="s15 w5 t2">in allen drei</text>
+  <line x1="120" y1="446.5" x2="1160" y2="446.5" class="hl"/>
+  <text x="120" y="473.4" class="s15 w6">Anfrage per E-Mail mit PDF</text><text x="386" y="473.4" class="s15 w5 t2">in allen drei</text>
+  <line x1="120" y1="490.5" x2="1160" y2="490.5" class="hl"/>
+
+  <text x="120" y="527.6" class="s13 w6 mu caps">IHRE MARKE</text>
+  <text x="120" y="567.4" class="s15 w6">Gestaltung</text>
+  <text x="386" y="567.4" class="s15 w5">eeziframes-Design mit Ihrem</text><text x="386" y="589.4" class="s15 w5">Namen</text>
+  <text x="652" y="567.4" class="s15 w5">in Ihrem Design</text><text x="918" y="567.4" class="s15 w5">in Ihrem Design</text>
+  <line x1="120" y1="606.5" x2="1160" y2="606.5" class="hl"/>
+  <text x="120" y="633.4" class="s15 w6">Ihr Logo</text>
+  <text x="386" y="633.4" class="s15 w5 mu">nicht enthalten</text><text x="652" y="633.4" class="s15 w5">ja</text><text x="918" y="633.4" class="s15 w5">ja</text>
+  <line x1="120" y1="650.5" x2="1160" y2="650.5" class="hl"/>
+  <text x="120" y="682" class="s12 w5 mu">… weiter: Ihre Firmenfarbe · Eigene Startseite · Fotos · Hinweis auf eeziframes · Gefunden werden · Für Ihr Team · Daten · Richtwerte · Fußsatz (aufgeklappt ≈ 1.430 px)</text>
+</g>
+<text x="300" y="5722" class="an">[V] Kopf klebt bei top 64 (Grund deckend, blau markiert). Beschriftung Spalten 1–3, Pakete je 3 Spalten (x 386 · 652 · 918) – sie fluchten nicht mit den Karten (je 4 Spalten),</text>
+<text x="300" y="5738" class="an">die Reihenfolge ist dieselbe. Zeilen 44 px (11/11), Gruppenköpfe über Spalten 1–12, „in allen drei“ über Spalten 4–12; keine Hervorhebung der empfohlenen Spalte; 1024 × 768: Spalten je 218 px.</text>
+<text x="300" y="5754" class="an">[H] Zeile „Erstes Jahr“ (J-H4, abschaltbar, J-O-11) · [H] H-07-5: Miniaturen der Beispielbilder 48 × 36 im Kopf – Variante, nicht Grundfassung.</text>
+
+<!-- ===================== D2 · Rückmeldung Schreibtisch ===================== -->
+<text x="1460" y="4960" class="hd">D2 · Rückmeldung am Schreibtisch, Zustand A</text>
+<g id="D2" transform="translate(917 4990)">
+  <g clip-path="url(#clip-d2)">
+    <rect x="543" y="0" width="641" height="520" fill="#eeeeee"/>
+    <rect x="543" y="0" width="641" height="64" fill="#e2e2e2"/>
+    <line x1="543" y1="63.5" x2="1184" y2="63.5" class="hl2"/>
+    <text x="581" y="37" class="s15 w6">So funktioniert es</text>
+    <text x="739" y="37" class="s15 w6">Ablauf</text>
+    <text x="816" y="37" class="s15 w6">Fragen</text>
+    <text x="915" y="37" class="s15 w6">Anmelden</text>
+    <rect x="1010" y="10" width="150" height="44" rx="22" fill="none" stroke="#9a9a9a" stroke-dasharray="2 3"/>
+    <text x="1085" y="36" text-anchor="middle" class="s12 w5 mu">Ring ausgeblendet</text>
+    <text x="567" y="93.2" class="s17 w8">Paket unverbindlich anfragen</text>
+    <rect x="567" y="116" width="48" height="36" fill="url(#bildmuster)" stroke="#8a8a8a"/>
+    <rect x="567" y="116" width="48" height="7" fill="#8f8f8f"/>
+    <text x="627" y="130.4" class="s15 w7">Ihre Wahl: EEZI Essential Plus</text>
+    <text x="627" y="148.8" class="s13 w5 t2">39 € im Monat ab Livegang · 199 € Einrichtung einmalig · netto</text>
+    <text x="627" y="179" class="s15 w7">Paket ändern</text>
+    <line x1="627" y1="183" x2="724" y2="183" stroke="#1a1a1a" stroke-width="1.5"/>
+    <text x="567" y="227.5" class="s15 w7">Paket</text>
+    <rect x="567.5" y="240.5" width="592" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <text x="583" y="272" class="s17 w5">EEZI Essential Plus</text>
+    <path d="M1130 262 l6 6 l6 -6" fill="none" stroke="#4d4d4d" stroke-width="2"/>
+    <text x="567" y="323.5" class="s15 w7">Ihr Name</text>
+    <text x="871.5" y="323.5" class="s15 w7">Firma <tspan class="w5 mu">(freiwillig)</tspan></text>
+    <rect x="567.5" y="336.5" width="288" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <rect x="871.5" y="336.5" width="288" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <text x="567" y="419.5" class="s15 w7">E-Mail</text>
+    <text x="871.5" y="419.5" class="s15 w7">Telefon für Rückruf <tspan class="w5 mu">(freiwillig)</tspan></text>
+    <rect x="567.5" y="432.5" width="288" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+    <rect x="871.5" y="432.5" width="288" height="51" rx="12" fill="none" stroke="#6e6e6e"/>
+  </g>
+  <rect x="543" y="0" width="641" height="520" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+</g>
+<text x="2130" y="5004" class="an">Ausschnitt der rechten Spalte (Spalten 6–12,</text>
+<text x="2130" y="5020" class="an">x 567–1160); links stehen h2 und Lead von 05</text>
+<text x="2130" y="5036" class="an">unverändert (fb-09 C.4).</text>
+<text x="2130" y="5060" class="an">Gleiche Rückmeldung wie D1: Auswahlzeile über</text>
+<text x="2130" y="5076" class="an">den Feldern, Paket gesetzt, Fokus auf die h3 bei</text>
+<text x="2130" y="5092" class="an">y 76, aria-live. Danach steht alles bis zur</text>
+<text x="2130" y="5108" class="an">Anbieterzeile in einem 800-px-Bildschirm.</text>
+<text x="2130" y="5124" class="an">Felder zweispaltig (je 288,5 px, Abstand 16).</text>
+<text x="2130" y="5148" class="an">Lagen der Auswahlzeile geschätzt; Miniatur</text>
+<text x="2130" y="5164" class="an">48 × 36 (Asset 96 × 72 aus dem Beispielbild,</text>
+<text x="2130" y="5180" class="an">10.4 H).</text>
+
+<!-- ===================== D3 · Zustand B ===================== -->
+<text x="60" y="5830" class="hd">D3 · Weg zum Bestellen in Zustand B (PAKETE_OFFEN=1): vom Kartenknopf ins Kundenkonto</text>
+<g id="D3a" transform="translate(100 5860)">
+  <path d="M0 380 V24 A24 24 0 0 1 24 0 H286 A24 24 0 0 1 310 24 V380 Z" fill="#ffffff"/>
+  <path d="M1 380 V24 A23 23 0 0 1 24 1 H286 A23 23 0 0 1 309 24 V380" class="ringc"/>
+  <line x1="0" y1="380" x2="310" y2="380" stroke="#8a8a8a" stroke-dasharray="6 4"/>
+  <rect x="20" y="-14" width="122" height="28" rx="14" fill="#ffffff" stroke="#d9480f" stroke-width="2"/>
+  <text x="81" y="4.6" text-anchor="middle" class="s13 w7 caps cta">EMPFOHLEN</text>
+  <text x="20" y="42" class="s17 w7">EEZI Essential Plus</text>
+  <text x="20" y="92" class="s32 w8 num">39 €</text>
+  <text x="97" y="92" class="s15 w5 mu">im Monat</text>
+  <text x="20" y="118" class="s15 w5 t2">ab Livegang, monatlich kündbar</text>
+  <text x="20" y="146" class="s15 w5 t2"><tspan class="w6" fill="#1a1a1a">199 € Einrichtung</tspan>, einmalig vorab:</text>
+  <text x="20" y="168" class="s15 w5 t2">Anruf, Domain, Gestaltung, Vorschau</text>
+  <text x="20" y="190" class="s13 w5 mu">netto zzgl. MwSt. · nur für Unternehmer</text>
+  <rect x="20" y="206" width="270" height="52" rx="26" fill="#d9480f"/>
+  <text x="42" y="238" class="s17 w7 wh">Essential Plus bestellen</text>
+  <circle cx="268" cy="232" r="14" fill="#ffffff"/>
+  <path d="M262 232 H274 M270 228 L274 232 L270 236" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <rect x="14" y="266" width="282" height="54" class="hyp"/>
+  <text x="20" y="287" class="s15 w5 t2">Erst Ihre Angaben, bezahlt wird im</text>
+  <text x="20" y="309" class="s15 w5 t2">letzten Schritt.</text>
+  <rect x="2" y="330" width="306" height="24" fill="#b9b9b9"/>
+  <line x1="2" y1="330.75" x2="308" y2="330.75" stroke="#1c7ed6" stroke-width="1.5"/>
+  <rect x="44" y="333" width="216" height="18" rx="9" fill="#dedede"/>
+  <text x="65" y="346.5" class="s12 w5">ihr-name-fenster.de · Beispiel</text>
+  <rect x="2" y="354" width="306" height="26" fill="#8f8f8f"/>
+  <rect x="22" y="359" width="62" height="16" rx="3" fill="#f2f2f2"/>
+  <text x="53" y="371.5" text-anchor="middle" class="s12 w6">Beispiel</text>
+</g>
+<text x="100" y="6262" class="an">Kartenknopf in Zustand B: „… bestellen“, Cream nur an</text>
+<text x="100" y="6278" class="an">der empfohlenen Karte; Satz [H] J-H6 (TE), gestrichelt.</text>
+
+<text x="440" y="5900" class="anb">Tipp auf „Essential Plus bestellen“</text>
+<text x="440" y="5916" class="an">Seitenwechsel im selben Tab zu</text>
+<text x="440" y="5932" class="an">/partner/#bestellen/plus (J-R24)</text>
+<text x="440" y="5948" class="an">Überblendung der Seite 240 ms</text>
+<line x1="430" y1="5975" x2="772" y2="5975" stroke="#1a1a1a" stroke-width="2" marker-end="url(#pfeil)"/>
+<text x="440" y="6008" class="s12 w7 tief">[H] J-H10 Übergang</text>
+<text x="440" y="6024" class="s12 w5 tief">Das getippte Beispielbild gleitet 320 ms,</text>
+<text x="440" y="6040" class="s12 w5 tief">cubic-bezier(.2, 0, 0, 1), als einziges</text>
+<text x="440" y="6056" class="s12 w5 tief">gemeinsames Element in die Miniatur</text>
+<text x="440" y="6072" class="s12 w5 tief">(View Transitions, nur wo unterstützt;</text>
+<text x="440" y="6088" class="s12 w5 tief">weniger Bewegung: ohne Übergang).</text>
+<path d="M410 6227 C640 6240, 760 6180, 816 5998" fill="none" stroke="#1c7ed6" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#pfeilb)"/>
+
+<g id="D3b" transform="translate(800 5860)">
+  <rect x="0" y="0" width="390" height="380" fill="#eeeeee"/>
+  <rect x="0" y="0" width="390" height="56" fill="#e2e2e2"/>
+  <line x1="0" y1="55.5" x2="390" y2="55.5" class="hl2"/>
+  <text x="16" y="33" class="s13 w6">Kopf von /partner/ (eigener Kopf, Bestand)</text>
+  <text x="16" y="84" class="s13 w6 mu">Schritt 1 von 6</text>
+  <rect x="16" y="100" width="48" height="36" fill="url(#bildmuster)" stroke="#8a8a8a"/>
+  <rect x="16" y="100" width="48" height="7" fill="#8f8f8f"/>
+  <text x="76" y="123" class="s15 w7">EEZI Essential Plus</text>
+  <rect x="10" y="148" width="370" height="76" class="hyp"/>
+  <text x="18" y="168" class="s15 w5 t2">Heute fällig: 199 € netto, einmalig. Ab</text>
+  <text x="18" y="190" class="s15 w5 t2">Livegang: 39 € im Monat. Monatlich</text>
+  <text x="18" y="212" class="s15 w5 t2">kündbar.</text>
+  <text x="16" y="252" class="s12 w5 mu">übrige Inhalte von Schritt 1 (Bestand, web/assets/partner.js)</text>
+  <rect x="16" y="266" width="300" height="9" fill="#c9c9c9"/>
+  <rect x="16" y="284" width="250" height="9" fill="#c9c9c9"/>
+  <rect x="16" y="302" width="210" height="9" fill="#c9c9c9"/>
+  <rect x="-1" y="-1" width="392" height="382" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="0" y1="380" x2="390" y2="380" stroke="#eeeeee" stroke-width="3"/>
+  <line x1="0" y1="380" x2="390" y2="380" stroke="#8a8a8a" stroke-dasharray="6 4"/>
+</g>
+<text x="800" y="6262" class="an">/partner/#bestellen/plus, Schritt 1 (Schema; Aufbau von /partner/</text>
+<text x="800" y="6278" class="an">nicht Teil dieses Wireframes). Bestätigung [H] J-H9 (TE), J-O-13.</text>
+
+<text x="60" y="6310" class="an">[V] J-R24: ein Ziel je Zustand – B: /partner/#bestellen/&lt;paket&gt; im selben Tab; kein Rücklink nach oben in der Entscheidungsfläche (E-4); der Knopf ist ein normaler Link.</text>
+<text x="60" y="6326" class="an">[V] J-R22: Was die Bestellung verlangt (Angaben fürs Impressum, Wunsch-Domain, bis drei Empfängeradressen, bei Plus und Signature Logo und Fotos, nachreichbar), steht in Zustand B in 05 vor dem Wechsel.</text>
+<text x="60" y="6342" class="an">Brutto steht erst in der Bestellübersicht vor der Zahlung (Bestand). Schritt 1 fragt heute das Paket erneut ab; [H] J-H9 ersetzt das durch die Bestätigung mit Zahlen (Rückfall: Schritt 1 wie heute).</text>
+
+<!-- ===================== E · Offene Punkte ===================== -->
+<text x="1560" y="5830" class="hd">E · Offene Punkte und Freigaben (Auswahl)</text>
+<g id="E">
+  <text x="1560" y="5866" class="an"><tspan class="anb">1</tspan> J-O-1 / O-5: Welches Paket empfohlen wird; Grundfassung Plus. Wird Signature empfohlen, beginnt die Reihe am Telefon</text>
+  <text x="1574" y="5882" class="an">rechts außen, und nur Plus schaut herein.</text>
+  <text x="1560" y="5904" class="an"><tspan class="anb">2</tspan> Rückmeldung in 05: Auswahlzeile mit Preisen (10.4 B, J-R23) oder nur Hinweis „bei den Paketen gewählt“ am Paketfeld</text>
+  <text x="1574" y="5920" class="an">(fb-09) – abstimmen; Ziel des Links „Paket ändern“ festlegen.</text>
+  <text x="1560" y="5942" class="an"><tspan class="anb">3</tspan> Wortlaut 10.4 B ↔ fb-08: Festblock-Titel „Vertrag in Kürze“ oder „Vertrag und Kündigung“; Ring „… Fragen Sie uns“ oder</text>
+  <text x="1574" y="5958" class="an">„Rückruf oder Nachricht“ (J-O-10, Rückruf nur nach Bestätigung des Inhabers).</text>
+  <text x="1560" y="5980" class="an"><tspan class="anb">4</tspan> Gemessen in Inter: Standzeile 414 px &gt; 358 px (Telefon zweizeilig, +16 px); „Dashboard, Einladungslinks, 5 Zugänge“</text>
+  <text x="1574" y="5996" class="an">284 px &gt; 270 bzw. 282,7 px (Datenblatt der Signature-Karte zweizeilig).</text>
+  <text x="1560" y="6018" class="an"><tspan class="anb">5</tspan> Freigaben J-AB-1 bis J-AB-10, je „Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig“: Paketname 17 statt 24 ·</text>
+  <text x="1574" y="6034" class="an">Nachbarn ohne Skalierung · kein Einlauf mit Federn · kein grüner Schein · Verkaufsstand als Satz · Namensleiste oben mit Preisen ·</text>
+  <text x="1574" y="6050" class="an">Vergleich gruppiert · Cream folgt der Wahl · Kopf-Ring ausgeblendet · kein Vorspann „farbwechsel“.</text>
+  <text x="1560" y="6072" class="an"><tspan class="anb">6</tspan> J-O-11 Zeile „Erstes Jahr“ · J-O-2 Preisbindung · J-O-3 Umsatzsteuer · J-O-6 Kündigungswortlaut · J-O-9 PAKETE_OFFEN, PAKETE_DEMOS.</text>
+  <text x="1560" y="6094" class="an"><tspan class="anb">7</tspan> Material: drei Beispielbilder fehlen (BEISPIEL_BILD), Fotos des Beispielbetriebs „Fensterbau Brandt“ (J-O-8); bis dahin die</text>
+  <text x="1574" y="6110" class="an">Skizze ohne Text als Platzhalter, der Nachlauf und Leitlinien schon zeigt.</text>
+  <text x="1560" y="6132" class="an"><tspan class="anb">8</tspan> 12-storyboard.md lag nicht vor. 11-designsystem.md kam während der Arbeit hinzu und ist eingearbeitet: K-1 Ring --muted, K-3 Zeiger,</text>
+  <text x="1574" y="6148" class="an">K-4 Zustände 150 ms, K-21 Paketnamen 17/700, K-24 Licht von oben rechts, K-31 Pfeilkreis 28, K-33 Haarlinien, K-37 Feder 420 ms.</text>
+  <text x="1560" y="6170" class="an"><tspan class="anb">9</tspan> K-20: Sätze in 13 px (Steuerzeile, Standzeile, Rechtshinweis) wechseln erst nach Freigabe von DS-AB-2 auf 15 px; hier noch 13.</text>
+</g>
+
+<line x1="60" y1="6372.5" x2="2540" y2="6372.5" class="hl"/>
+<text x="60" y="6394" class="an">Quellen: docs/website-blueprint/10-paketentscheidung.md (10.1–10.5) · 09-abschnitte/fb-06, fb-07, fb-08, fb-09 · 08-zielarchitektur.md 8.3.2 · 11-designsystem.md (K-n) · docs/design-dna/04-styleguide.md · .claude/skills/premium-gestaltung/SKILL.md</text>
+<text x="60" y="6410" class="an">Simulierte Perspektiven sind eine Analysemethode, keine Nutzerstudie; dieses Blatt enthält keine Aussagen zu Conversion-Wahrscheinlichkeiten. Preise und Fristen aus web/assets/pakete.js und den Paketbedingungen.</text>
+</svg>
