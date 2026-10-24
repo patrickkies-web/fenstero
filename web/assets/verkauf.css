@@ -276,8 +276,8 @@ body.vk-seite { --vk-rand: max(16px, min(124px, 31.25vw - 276px), (100vw - 1032p
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 8.5%, #000 31.5%, transparent 40%); mask-image: linear-gradient(to bottom, transparent 0, #000 8.5%, #000 31.5%, transparent 40%) }
   .vk-hero-foto .vk-nur-breit { display: none }
   .vk-nachricht small { grid-column: 3 }
-  /* die Meldung endet 8 px vor dem Bullauge (bei 320 px 204 statt 220 px breit) */
-  .vk-eingang { width: min(220px, calc(71.4vw - 24px)) }
+  /* die Meldung endet mindestens 8 px vor dem Bullauge (240 px bei 390, 204 px bei 320) */
+  .vk-eingang { width: min(240px, calc(71.4vw - 24px)) }
 }
 @media (max-width: 340px) { .vk-hero > .kicker { letter-spacing: .1em } }
 @media (max-width: 359px) { .vk-ganz { white-space: normal } }
