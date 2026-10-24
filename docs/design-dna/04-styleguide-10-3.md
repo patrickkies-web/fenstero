@@ -64,7 +64,7 @@ Alle Werte sind Vorschläge. Belegt sind Bauweise und Verhältnisse, kaum Zahlen
 | Parameter | beobachtet | Vorschlag | Ableitung |
 |---|---|---|---|
 | Opakes UI-Material | fehlt in 13 von 15 | keines | Nr. 9 |
-| Materialträger je Ansicht | ein Fokusträger; Glas plus Motiv nur Ref 03, 12, 14 | 1 Hauptträger, Glas nur vermittelnd | Ableitung aus 5.3 |
+| Material-Hauptträger je Ansicht | einer oder keiner; Glas plus Materialmotiv nur Ref 03, 12, 14 | ≤ 1, Glas daneben nur vermittelnd | Ableitung aus 5.3 |
 | Oberflächen an einem Objekt | bis 5 (Ref 10) | ≤ 5, nur am Fokusträger | Ref 10 |
 | Glasflächen mit Unschärfe, gleichzeitig sichtbar | ≤ 2 (Ref 01, 03, 12) | ≤ 2 mobil, ≤ 3 Desktop | wie 10.8 |
 | Stufen der Glasunschärfe | 2 (Ref 12) | ≤ 2; stark ≥ 2 × leicht | Stufenzahl Ref 12, Verhältnis Neuentwurf |
@@ -93,8 +93,8 @@ Alle Werte sind Vorschläge. Belegt sind Bauweise und Verhältnisse, kaum Zahlen
 ### Prüffragen
 
 1. Ist die Bedienschicht frei von Metall, Relief, Glanz, Kissenform und vollflächiger Textur, mit Glas als einziger Ausnahme?
-2. Gibt es genau einen Materialträger (Fokusträger oder Glasschicht) und keinen gleichrangigen zweiten?
-3. Liegt mindestens eine Glasfläche direkt über gesättigtem Bildinhalt, und hat jede Glasfläche Haarkante, keinen Schlagschatten und eine deckende Ersatzfüllung?
+2. Hat die Ansicht höchstens einen Material-Hauptträger (Fokusträger oder Glasschicht), und tritt eine Glasschicht neben einem Materialmotiv nur vermittelnd hinzu?
+3. Falls Glas eingesetzt wird: Liegt mindestens eine Glasfläche direkt über gesättigtem Bildinhalt, und hat jede Glasfläche Haarkante, keinen Schlagschatten und eine deckende Ersatzfüllung?
 4. Sind Fixationspunkt, Schriftebene und Lesetext scharf, und erreicht Text auf Glas 4,5:1 gegen die ungünstigste Partie des Untergrunds?
 5. Sind Konturen, Raster und Mikroschicht haarfein, liegt kein Raster unter Fließtext, und ist kein Korn sichtbar?
 6. Bleibt die Ansicht ohne `backdrop-filter`, mit reduzierter Transparenz und unter `forced-colors` lesbar und bedienbar?
