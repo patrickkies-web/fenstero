@@ -4,7 +4,7 @@ Stand: 24.10.2026. Teil der planerischen Neukonzeption nach MASTER-PROMPT V4. Di
 Forschung, ordnet ihre Belastbarkeit ein und leitet daraus Hypothesen für zwei Seiten ab:
 
 - **B2B:** die Verkaufsseite für Fensterbauer `/fuer-fensterbauer/` (auch eingebettet in die Startseite, Ansicht „Fensterbauer“;
-  docs/GESTALTUNG.md Z. 191 und Z. 441–456). Produkt: der Fenster-Konfigurator unter Marke und Domain des Betriebs in drei Paketen
+  docs/GESTALTUNG.md Z. 193 und Z. 441–456). Produkt: der Fenster-Konfigurator unter Marke und Domain des Betriebs in drei Paketen
   (`web/assets/pakete.js` Z. 43–66: EEZI Essential 29 €/Monat + 99 € Einrichtung, EEZI Essential Plus 39 € + 199 €, EEZI Signature
   64 € + 279 €, netto, vorläufig laut Z. 7 und Z. 16).
 - **B2C:** die Einstiegsseite für Hauseigentümer (Startseite, Ansicht „Hauseigentümer“, docs/GESTALTUNG.md Z. 192): Messen, Fotos und
@@ -230,7 +230,7 @@ Sekundärhinweis].
 werden: Komplexität des Angebots, Schwierigkeit der Aufgabe, Unsicherheit der Präferenz, Entscheidungsziel (Chernev et al. 2015) [Q3].
 **Evidenz.** [Empirisch], Feldexperiment und zwei Metaanalysen mit gegenteiligem Schwerpunkt. Status A (Metaanalysen), S (Jam-Studie).
 **Hypothese B2B.** Drei Pakete sind keine große Auswahl. Last entsteht durch Merkmalsfülle (die Vergleichstabelle aus `MERKMALE` in
-`web/assets/pakete.js` Z. 70 ff.) und durch Präferenzunsicherheit: Ein Fensterbauer weiß vor dem Kauf nicht, ob er Dashboard,
+`web/assets/pakete.js` Z. 71 ff.) und durch Präferenzunsicherheit: Ein Fensterbauer weiß vor dem Kauf nicht, ob er Dashboard,
 neutrale Absender oder Einladungslinks braucht. Hilfe: wenige Unterscheidungsmerkmale je Paket nennen, Vergleich zugeklappt lassen
 (Bestand, Z. 454), Fragen „Welches Paket passt?“ beantworten.
 **Hypothese B2C.** Die App fragt rund 90 Dinge ab (docs/GESTALTUNG.md Z. 171). Die Moderatoren nach Chernev sind hier hoch
@@ -316,7 +316,7 @@ schätzen den bereinigten Effekt auf d = 0,08 bis 0,31 und nennen Voreinstellung
 **Evidenz.** [Empirisch], Metaanalysen und Reanalysen. Status A (Johnson & Goldstein: S).
 **Hypothese B2B.** Zwei Ebenen: (1) Auf der Verkaufsseite ist Plus faktisch voreingestellt (W-13). (2) Im Produkt setzt der Betrieb
 selbst Voreinstellungen: „Standard des Fensterbauers“ und „Vorgabe des Betriebs“ für die Planungstiefe (docs/GESTALTUNG.md Z. 176,
-Z. 182). Nach Levav et al. (W-30) verändern Voreinstellungen im Konfigurator, was Kunden bestellen. Das ist ein belegbares
+Z. 183). Nach Levav et al. (W-30) verändern Voreinstellungen im Konfigurator, was Kunden bestellen. Das ist ein belegbares
 Verkaufsargument, sofern diese Funktion in den Paketen enthalten ist; ob „Vorgabe des Betriebs“ auch in den Instanzen gilt, ist eine
 offene Frage.
 **Hypothese B2C.** Die mittlere Tiefe ist Vorgabe (Z. 173). Das senkt Abbrüche wahrscheinlich, ohne die Wahl zu nehmen.
@@ -350,7 +350,7 @@ Countdown-Timer, teils mit Angeboten, die nach Ablauf weiter galten (Mathur et a
 (`web/fuer-fensterbauer/index.html` Z. 174) ist das Gegenteil von Dringlichkeit; ob es die Anfragebereitschaft senkt, ist unbekannt.
 **Hypothese B2C.** Der Einführungspreis endet wirklich am 17.11.2026 (`web/config.js` Z. 14). Ein schlichter Hinweis mit Datum ist
 ehrlich; ein laufender Countdown wäre nach Mathur et al. ein typisches Dringlichkeitsmuster und widerspräche „Fein, nicht laut“
-(SKILL.md Z. 48). Nach dem Stichtag muss der Hinweis verschwinden (der Code sieht das vor: `web/assets/portal.js` Z. 442).
+(SKILL.md Z. 48). Nach dem Stichtag muss der Hinweis verschwinden (der Code sieht das vor: `EinfBanner` liefert danach nichts mehr, `web/assets/gemeinsam.js` Z. 327).
 
 ## 5. Vertrauen und Glaubwürdigkeit
 
@@ -495,7 +495,7 @@ zum Halten von Telefonen: 49 % einhändig, 36 % gestützt, 15 % zweihändig, unt
 Status S für die Verteilung).
 **Bezug Bestand.** Ziele ab 44 px (SKILL.md Z. 71) erfüllen 2.5.8 und 2.5.5. Die Paketreihe am Telefon wird gewischt; darunter erlaubt
 eine Namensleiste das Antippen (docs/GESTALTUNG.md Z. 452, `verkauf.js` Z. 384), das erfüllt 2.5.7 voraussichtlich. Die Kopfzeile klebt
-(docs/GESTALTUNG.md Z. 189, Z. 428).
+(docs/GESTALTUNG.md Z. 190, Z. 428).
 **Hypothese B2B.** Prüfpunkt 2.4.11: Beim Tabben durch das Anfrageformular darf die klebende Kopfzeile (am Telefon mit eigener Zeile
 für den Umschalter) kein fokussiertes Feld ganz verdecken. Hauptknöpfe im Daumenbereich (untere Bildschirmhälfte) sind bei
 einhändiger Nutzung leichter erreichbar.
@@ -618,7 +618,7 @@ die Statistik schon erfasst oder leicht erfassen könnte (Umsetzung ist nicht Te
 2. Wird die Einrichtungsgebühr bei Kündigung im ersten Monat erstattet? Ohne Angabe darf keine Risikoumkehr über die Kündbarkeit
    hinaus behauptet werden.
 3. Können Betriebe in den Paketen (Instanzen) Voreinstellungen setzen („Standard des Fensterbauers“, „Vorgabe des Betriebs“,
-   Startfenster)? docs/GESTALTUNG.md Z. 182 beschreibt das für „Mein Betrieb · Einladungsseite“ im Betriebsbereich; für Instanzen fand
+   Startfenster)? docs/GESTALTUNG.md Z. 183 beschreibt das für „Mein Betrieb · Einladungsseite“ im Betriebsbereich; für Instanzen fand
    ich keine Aussage.
 4. Gilt das BFSG für den Verkauf des Aufmaßblatts, und greift die Ausnahme für Kleinstunternehmen? Rechtsfrage.
 5. Wann sind E-Mail und Telefon in Impressum und Rechtstexten vollständig? Vertrauensfaktor laut W-20.
@@ -737,7 +737,7 @@ Kein Volltext gelesen (Abschnitt 0).
   averted gaze can enhance advertising effectiveness. Frontiers in Psychology 5:166. https://pmc.ncbi.nlm.nih.gov/articles/PMC3941030 — A
 - [Q45] Nielsen, J. (um 2010, Datum N). Photos as Web Content („Not All Images Are the Same“). Nielsen Norman Group.
   https://www.nngroup.com/articles/photos-as-web-content/ — A/S
-- [Q46] (nicht verwendet; NN/g zu automatisch weiterschaltenden Karussells nur über Sekundärquelle gefunden:
+- [Q46] (nicht als Beleg verwendet; NN/g zu automatisch weiterschaltenden Karussells nur über Sekundärquelle gefunden:
   https://designsystem.qld.gov.au/about/exploring-our-decisions/carousels — N)
 - [Q47] Höffler, T. N. & Leutner, D. (2007). Instructional animation versus static pictures: A meta-analysis. Learning and
   Instruction 17(6), 722–738. https://www.leibniz-ipn.de/en/research/publications/instructional-animation-versus-static-pictures-a-meta-analysis — A;

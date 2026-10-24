@@ -176,7 +176,7 @@ Querscrollen: keine Seite ist breiter als 390 px (gemessen `scrollWidth` = 390).
 
 ## 3. Ansicht Fensterbauer `/#fensterbauer` (erste drei Bildschirme)
 
-Der Inhalt ist die eingebettete Verkaufsseite (portal.js lädt `main.rg` von /fuer-fensterbauer/, web/assets/portal.js:791 bis 799). Die
+Der Inhalt ist die eingebettete Verkaufsseite (portal.js lädt `main.rg` von /fuer-fensterbauer/, web/assets/portal.js:792 bis 800). Die
 drei Bildschirme zeigen denselben Inhalt wie V1 bis V3 unten; anders sind Kopf, Pilotleiste und fehlende Brotkrumen.
 
 ### F1
@@ -240,7 +240,7 @@ Projekte anlegen, „kein Thema mehr“.
 
 - **Sichtbar:** „Kurz gesagt“ mit drei Zeilen (fett: „ohne ihn programmieren zu lassen“, „Aufmaßblatt-PDF“), Cream „Pakete ansehen“,
   umrandet „Konfigurator ausprobieren“. Leiste A mit kleinen Fenstersymbolen und Namen („Schräge Fenster“, „Dreh-Kipp-…“), Leiste B als
-  helles Band mit Zahlen („3 Pakete, ein Konfigurator“, angeschnitten „5 Minuten …“) und Maßstabsstrichen (index.html:64 bis 71). Danach
+  helles Band mit Zahlen („3 Pakete, ein Konfigurator“, angeschnitten „5 Minuten …“) und Maßstabsstrichen (index.html:66 bis 71). Danach
   „01 – Die Idee: der Fenster-Konfigurator Ihrer Wahl“ mit Lesetext (fett: „zu teuer“, „deren Marke“, „unter Ihrer Domain“). Unter dem
   Kopf eine feine grüne Linie mit Strichen (Lesefortschritt, web/assets/verkauf.css:613).
 - **Hierarchie:** Das helle Band ist die hellste Fläche der ganzen Seite. **Deutung:** Es zieht den Blick stärker als die Pille darüber.
@@ -327,7 +327,7 @@ Projekte anlegen, „kein Thema mehr“.
 ![Verkaufsseite, Bildschirm 10](screens/mobil-fuer-fensterbauer-10.jpg)
 
 - **Sichtbar:** Chip „Ihre Daten“, vier Karten mit Haken: „Nur Ihr Betrieb“, „Nur an Sie“, „In Ihrem Auftrag“, „Kein Weiterverkauf“
-  (index.html:160 bis 167). Unten der Kicker „06“.
+  (index.html:163 bis 166). Unten der Kicker „06“.
 - **Hierarchie:** vier gleich gewichtete Textkarten; klare, kurze Zusagen.
 - **Handlungsaufforderungen:** nur der Kopfknopf.
 - **Bildanteil:** unbunt 99 %, farbig 0 %.
