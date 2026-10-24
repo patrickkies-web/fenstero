@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 5243" width="2000" height="5243" font-family="system-ui, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 5333" width="2000" height="5333" font-family="system-ui, sans-serif">
 <title>Wireframe Produktdarstellung</title>
 <desc>eeziframes, Seite für Fensterbauer: Kapitel 01 Ihr Name, 02 Ihr Kunde, 03 Ihr Postfach als Wireframe für Telefon 390 × 844 und Schreibtisch 1280 × 800, mit Ebenen, Proportionen und Interaktionszuständen. Grundlage 08-zielarchitektur.md 8.3.2 und 09-abschnitte/fb-03, fb-04, fb-05. Planungsstand 24.10.2026, nichts gebaut.</desc>
 <defs>
@@ -60,7 +60,7 @@
   <clipPath id="cpP2"><rect x="0" y="0" width="390" height="490"/></clipPath>
   <clipPath id="cpP3"><rect x="0" y="0" width="390" height="510"/></clipPath>
 </defs>
-<rect width="2000" height="5243" fill="#f1f1f1"/>
+<rect width="2000" height="5333" fill="#f1f1f1"/>
 <g id="blattkopf">
 <text x="40" y="60" font-size="32" font-weight="800" fill="#1d1d1d">Wireframe Produktdarstellung</text>
 <text x="40" y="92" font-size="16" xml:space="preserve"><tspan font-weight="500" fill="#1d1d1d">Seite für Fensterbauer, Kapitel 01 Ihr Name · 02 Ihr Kunde · 03 Ihr Postfach: der Konfigurator unter Marke und Domain des Betriebs, vom Kunden bis zur Anfrage im Postfach.</tspan></text>
@@ -169,7 +169,7 @@
 <g id="t01" transform="translate(0,236)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <text x="16" y="29" font-size="13" font-weight="600" fill="#b8b8b8" letter-spacing="1.6" text-decoration="underline">01</text>
-<text x="33.2" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6"> · IHR NAME</text>
+<text x="38" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6">· IHR NAME</text>
 <rect x="135.3" y="16" width="26" height="17" rx="3" fill="none" stroke="#939393" stroke-dasharray="2 2"/>
 <text x="148.3" y="29" font-size="12" font-weight="700" fill="#939393" text-anchor="middle">TE</text>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Idee: der Fenster-</tspan></text>
@@ -221,7 +221,7 @@
 <g id="t02" transform="translate(0,1256)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <text x="16" y="29" font-size="13" font-weight="600" fill="#b8b8b8" letter-spacing="1.6" text-decoration="underline">02</text>
-<text x="35.8" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6"> · IHR KUNDE</text>
+<text x="40.6" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6">· IHR KUNDE</text>
 <rect x="146.1" y="16" width="26" height="17" rx="3" fill="none" stroke="#939393" stroke-dasharray="2 2"/>
 <text x="159.1" y="29" font-size="12" font-weight="700" fill="#939393" text-anchor="middle">TE</text>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">So </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">funktioniert</tspan><tspan font-weight="800" fill="#f3f3f3"> es</tspan></text>
@@ -269,7 +269,7 @@
 <g id="t03" transform="translate(0,2048)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <text x="16" y="29" font-size="13" font-weight="600" fill="#b8b8b8" letter-spacing="1.6" text-decoration="underline">03</text>
-<text x="36" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6"> · IHR POSTFACH</text>
+<text x="40.8" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6">· IHR POSTFACH</text>
 <rect x="175.2" y="16" width="26" height="17" rx="3" fill="none" stroke="#939393" stroke-dasharray="2 2"/>
 <text x="188.2" y="29" font-size="12" font-weight="700" fill="#939393" text-anchor="middle">TE</text>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Was in jeder </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Anfrage</tspan></text>
@@ -377,7 +377,7 @@
 <g id="t04" transform="translate(0,3178)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <text x="16" y="29" font-size="13" font-weight="600" fill="#b8b8b8" letter-spacing="1.6" text-decoration="underline">04</text>
-<text x="36.4" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6"> · IHRE MARKE</text>
+<text x="41.2" y="29" font-size="13" font-weight="600" fill="#939393" letter-spacing="1.6">· IHRE MARKE</text>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Pakete</tspan></text>
 </g>
 <rect x="0" y="3200" width="390" height="60" fill="url(#fadeEnd)"/>
@@ -711,7 +711,7 @@
 <g transform="translate(0,268)">
 <line x1="120" y1="0.5" x2="1160" y2="0.5" stroke="#3a3a3a" stroke-width="2"/>
 <rect x="120" y="22.2" width="17.2" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="137.2" y="22.2" width="92.1" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="142" y="22.2" width="87.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="120" y="79" font-size="40" letter-spacing="-1.2" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Idee: der Fenster-Konfigurator</tspan></text>
 <text x="120" y="121" font-size="40" letter-spacing="-1.2" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Ihrer </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Wahl</tspan></text>
 <rect x="120" y="171.4" width="21.2" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -798,8 +798,8 @@
 <rect x="869" y="478.8" width="193" height="8.7" rx="4.3" fill="#161616" fill-opacity="0.72"/>
 <rect x="563" y="375" width="220" height="450" rx="32" fill="#232323"/>
 <rect x="570" y="382" width="206" height="436" rx="25" fill="#161616"/>
-<path d="M563,700 V407 " fill="none" stroke="#4DA3FF" stroke-width="2" stroke-opacity="0.45"/>
-<path d="M563,407 A32,32 0 0 1 595,375 H751 A32,32 0 0 1 783,407 V700" fill="none" stroke="#4DA3FF" stroke-width="3"/>
+<path d="M563,407 V793 A32,32 0 0 0 595,825 H751 A32,32 0 0 0 783,793" fill="none" stroke="#4DA3FF" stroke-width="2" stroke-opacity="0.45"/>
+<path d="M563,407 A32,32 0 0 1 595,375 H751 A32,32 0 0 1 783,407 V793" fill="none" stroke="#4DA3FF" stroke-width="3"/>
 <rect x="583" y="393" width="180" height="22" rx="11" fill="#2c2c2c"/>
 <rect x="596" y="400.2" width="124.8" height="7.5" rx="3.8" fill="#c9c9c9" fill-opacity="0.72"/>
 <rect x="583" y="425" width="28" height="28" rx="7" fill="#d5d5d5"/>
@@ -813,13 +813,12 @@
 <rect x="597" y="638.2" width="167.3" height="7.5" rx="3.8" fill="#161616" fill-opacity="0.72"/>
 <rect x="584" y="667" width="178" height="30" rx="15" fill="none" stroke="#555555" stroke-width="2"/>
 <rect x="597" y="678.2" width="112.5" height="7.5" rx="3.8" fill="#c9c9c9" fill-opacity="0.72"/>
-<rect x="563" y="770" width="220" height="55" fill="url(#fadeDown)"/>
 <rect x="600" y="375" width="183" height="150" fill="none" stroke="#4DA3FF" stroke-width="3" stroke-dasharray="10 7"/>
 </g>
 <g transform="translate(0,1221)">
 <line x1="120" y1="0.5" x2="1160" y2="0.5" stroke="#3a3a3a" stroke-width="2"/>
 <rect x="120" y="22.2" width="19.8" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="139.8" y="22.2" width="100.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="144.6" y="22.2" width="95.5" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="120" y="79" font-size="40" letter-spacing="-1.2" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">So </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">funktioniert</tspan><tspan font-weight="800" fill="#f3f3f3"> es</tspan></text>
 <rect x="120" y="107.4" width="39" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
 <rect x="163.5" y="107.4" width="45.5" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
@@ -883,7 +882,7 @@
 <g transform="translate(0,1789)">
 <line x1="120" y1="0.5" x2="1160" y2="0.5" stroke="#3a3a3a" stroke-width="2"/>
 <rect x="120" y="22.2" width="20" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="140" y="22.2" width="129.2" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="144.8" y="22.2" width="124.4" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="120" y="79" font-size="40" letter-spacing="-1.2" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Was in jeder </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Anfrage</tspan><tspan font-weight="800" fill="#f3f3f3"> steht</tspan></text>
 <rect x="120" y="127.4" width="37.6" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
 <rect x="162.1" y="127.4" width="43.6" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -999,7 +998,7 @@
 <g transform="translate(0,2677)">
 <line x1="120" y1="0.5" x2="1160" y2="0.5" stroke="#3a3a3a" stroke-width="2"/>
 <rect x="120" y="22.2" width="20.4" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="140.4" y="22.2" width="110.8" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="145.2" y="22.2" width="106" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="120" y="79" font-size="40" letter-spacing="-1.2" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Pakete</tspan></text>
 </g>
 <rect x="0" y="2700" width="1280" height="60" fill="url(#fadeEnd)"/>
@@ -1138,7 +1137,7 @@
 <g transform="translate(960,1984.0) scale(0.5)"><g clip-path="url(#cpP1)"><g transform="translate(0,-190)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="17.2" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="33.2" y="20.2" width="92.1" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="38" y="20.2" width="87.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Idee: der Fenster-</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Konfigurator Ihrer </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Wahl</tspan></text>
 <rect x="16" y="133.4" width="21.2" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -1237,7 +1236,7 @@
 <g transform="translate(1210,1984.0) scale(0.5)"><g clip-path="url(#cpP1)"><g transform="translate(0,-190)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="17.2" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="33.2" y="20.2" width="92.1" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="38" y="20.2" width="87.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Idee: der Fenster-</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Konfigurator Ihrer </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Wahl</tspan></text>
 <rect x="16" y="133.4" width="21.2" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -1346,7 +1345,7 @@
 <g transform="translate(1460,1984.0) scale(0.5)"><g clip-path="url(#cpP1)"><g transform="translate(0,-190)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="17.2" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="33.2" y="20.2" width="92.1" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="38" y="20.2" width="87.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Idee: der Fenster-</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Konfigurator Ihrer </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Wahl</tspan></text>
 <rect x="16" y="133.4" width="21.2" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -1451,7 +1450,7 @@
 <g transform="translate(1710,1984.0) scale(0.5)"><g clip-path="url(#cpP1)"><g transform="translate(0,-190)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="17.2" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="33.2" y="20.2" width="92.1" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="38" y="20.2" width="87.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Die Idee: der Fenster-</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Konfigurator Ihrer </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Wahl</tspan></text>
 <rect x="16" y="133.4" width="21.2" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -1550,7 +1549,7 @@
 <g transform="translate(960,2514.0) scale(0.5)"><g clip-path="url(#cpP2)"><g transform="translate(0,-150)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="19.8" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="35.8" y="20.2" width="100.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.6" y="20.2" width="95.5" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">So </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">funktioniert</tspan><tspan font-weight="800" fill="#f3f3f3"> es</tspan></text>
 <rect x="16" y="97.4" width="39" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
 <rect x="59.5" y="97.4" width="45.5" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
@@ -1618,7 +1617,7 @@
 <g transform="translate(1210,2514.0) scale(0.5)"><g clip-path="url(#cpP2)"><g transform="translate(0,-150)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="19.8" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="35.8" y="20.2" width="100.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.6" y="20.2" width="95.5" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">So </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">funktioniert</tspan><tspan font-weight="800" fill="#f3f3f3"> es</tspan></text>
 <rect x="16" y="97.4" width="39" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
 <rect x="59.5" y="97.4" width="45.5" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
@@ -1699,7 +1698,7 @@
 <g transform="translate(1460,2514.0) scale(0.5)"><g clip-path="url(#cpP2)"><g transform="translate(0,-150)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="19.8" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="35.8" y="20.2" width="100.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.6" y="20.2" width="95.5" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">So </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">funktioniert</tspan><tspan font-weight="800" fill="#f3f3f3"> es</tspan></text>
 <rect x="16" y="97.4" width="39" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
 <rect x="59.5" y="97.4" width="45.5" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
@@ -1767,7 +1766,7 @@
 <g transform="translate(1710,2514.0) scale(0.5)"><g clip-path="url(#cpP2)"><g transform="translate(0,-150)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="19.8" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="35.8" y="20.2" width="100.3" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.6" y="20.2" width="95.5" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">So </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">funktioniert</tspan><tspan font-weight="800" fill="#f3f3f3"> es</tspan></text>
 <rect x="16" y="97.4" width="39" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
 <rect x="59.5" y="97.4" width="45.5" height="9.9" rx="4.9" fill="#f3f3f3" fill-opacity="0.72"/>
@@ -1854,7 +1853,7 @@
 <g transform="translate(960,2935.0) scale(0.5)"><g clip-path="url(#cpP3)"><g transform="translate(0,-180)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="20" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="36" y="20.2" width="129.2" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.8" y="20.2" width="124.4" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Was in jeder </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Anfrage</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">steht</tspan></text>
 <rect x="16" y="133.4" width="37.6" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -1935,7 +1934,7 @@
 <g transform="translate(1210,2935.0) scale(0.5)"><g clip-path="url(#cpP3)"><g transform="translate(0,-180)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="20" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="36" y="20.2" width="129.2" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.8" y="20.2" width="124.4" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Was in jeder </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Anfrage</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">steht</tspan></text>
 <rect x="16" y="133.4" width="37.6" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -2064,7 +2063,7 @@
 <g transform="translate(1460,2935.0) scale(0.5)"><g clip-path="url(#cpP3)"><g transform="translate(0,-180)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="20" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="36" y="20.2" width="129.2" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.8" y="20.2" width="124.4" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Was in jeder </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Anfrage</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">steht</tspan></text>
 <rect x="16" y="133.4" width="37.6" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -2197,7 +2196,7 @@
 <g transform="translate(1710,2935.0) scale(0.5)"><g clip-path="url(#cpP3)"><g transform="translate(0,-180)">
 <line x1="16" y1="0.5" x2="374" y2="0.5" stroke="#3a3a3a" stroke-width="1"/>
 <rect x="16" y="20.2" width="20" height="7.5" rx="3.8" fill="#b8b8b8" fill-opacity="0.72"/>
-<rect x="36" y="20.2" width="129.2" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
+<rect x="40.8" y="20.2" width="124.4" height="7.5" rx="3.8" fill="#939393" fill-opacity="0.72"/>
 <text x="16" y="72" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">Was in jeder </tspan><tspan font-weight="800" fill="#f3f3f3" text-decoration="underline">Anfrage</tspan></text>
 <text x="16" y="106" font-size="32" letter-spacing="-1" xml:space="preserve"><tspan font-weight="800" fill="#f3f3f3">steht</tspan></text>
 <rect x="16" y="133.4" width="37.6" height="9.9" rx="4.9" fill="#c9c9c9" fill-opacity="0.72"/>
@@ -2403,64 +2402,60 @@
 <text x="1554" y="3718" font-size="12" font-weight="600" fill="#939393">Feld mit Wert</text>
 <rect x="1554.5" y="3728.5" width="170" height="51" rx="12" fill="#161616" stroke="#939393" stroke-width="1"/>
 <text x="1568" y="3760" font-size="17" font-weight="500" fill="#f3f3f3">{Name}</text>
-<text x="1750" y="3724" font-size="12" xml:space="preserve"><tspan font-weight="400" fill="#c9c9c9">Textziel 15/700,</tspan></text>
-<text x="1750" y="3740" font-size="12" xml:space="preserve"><tspan font-weight="400" fill="#c9c9c9">Unterstreichung 1,5 px --line2</tspan></text>
-<text x="1750" y="3756" font-size="12" xml:space="preserve"><tspan font-weight="400" fill="#c9c9c9">→ --text (hier orange).</tspan></text>
-<text x="1750" y="3772" font-size="12" xml:space="preserve"><tspan font-weight="400" fill="#c9c9c9">Wahlzeile nach K-1, K-3. Feld</tspan></text>
-<text x="1750" y="3788" font-size="12" xml:space="preserve"><tspan font-weight="400" fill="#c9c9c9">nach K-35: Rand 1 px --muted,</tspan></text>
-<text x="1750" y="3804" font-size="12" xml:space="preserve"><tspan font-weight="400" fill="#c9c9c9">17 px gegen Zoom unter iOS.</tspan></text>
-<text x="40" y="3868" font-size="20" font-weight="800" fill="#1d1d1d">D · Ebenen, Tiefe und Dosierung</text>
-<text x="40" y="3892" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">Schnitt durch die Z-Stufen je Kapitel (Z 8.3.0): Grund → genau ein Fokusträger → flache, frontale Bedienschicht; Tiefe über Verdeckung, Auslauf und Tonwert, nie über Schlagschatten auf dunklem Grund.</tspan></text>
-<rect x="40" y="3928" width="1920" height="176" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
-<text x="60" y="3954" font-size="15" font-weight="700" fill="#1d1d1d">Rhythmus der Intensitätsstufen (DG 2.4.2) und Signature-Budget</text>
-<rect x="80" y="3988" width="60" height="64" rx="3" fill="#bdbdbd"/>
-<text x="80" y="3982" font-size="12" font-weight="600" fill="#4d4d4d">Stufe 4</text>
-<text x="80" y="4072" font-size="13" font-weight="700" fill="#4d4d4d">V1</text>
-<text x="80" y="4090" font-size="12" font-weight="400" fill="#4d4d4d">Glas, Lichtübertrag</text>
-<circle cx="154" cy="3994.0" r="8" fill="url(#licht)"/><circle cx="154" cy="3994.0" r="3" fill="#4DA3FF"/>
-<rect x="230" y="4004" width="60" height="48" rx="3" fill="#bdbdbd"/>
-<text x="230" y="3998" font-size="12" font-weight="600" fill="#4d4d4d">Stufe 3</text>
-<text x="230" y="4072" font-size="13" font-weight="700" fill="#4d4d4d">V2</text>
-<text x="230" y="4090" font-size="12" font-weight="400" fill="#4d4d4d">Schärfestaffelung</text>
-<rect x="380" y="4020" width="60" height="32" rx="3" fill="#1d1d1d"/>
-<text x="380" y="4014" font-size="12" font-weight="600" fill="#1d1d1d">Stufe 2</text>
-<text x="380" y="4072" font-size="13" font-weight="700" fill="#1d1d1d">01</text>
-<text x="380" y="4090" font-size="12" font-weight="400" fill="#4d4d4d">keine</text>
-<rect x="530" y="4004" width="60" height="48" rx="3" fill="#1d1d1d"/>
-<text x="530" y="3998" font-size="12" font-weight="600" fill="#1d1d1d">Stufe 3</text>
-<text x="530" y="4072" font-size="13" font-weight="700" fill="#1d1d1d">02</text>
-<text x="530" y="4090" font-size="12" font-weight="400" fill="#4d4d4d">Lichtraum</text>
-<circle cx="604" cy="4010.0" r="8" fill="url(#licht)"/><circle cx="604" cy="4010.0" r="3" fill="#4DA3FF"/>
-<rect x="680" y="4004" width="60" height="48" rx="3" fill="#1d1d1d"/>
-<text x="680" y="3998" font-size="12" font-weight="600" fill="#1d1d1d">Stufe 3</text>
-<text x="680" y="4072" font-size="13" font-weight="700" fill="#1d1d1d">03</text>
-<text x="680" y="4090" font-size="12" font-weight="400" fill="#4d4d4d">Explosionsansicht</text>
-<rect x="830" y="4020" width="60" height="32" rx="3" fill="#bdbdbd"/>
-<text x="830" y="4014" font-size="12" font-weight="600" fill="#4d4d4d">Stufe 2</text>
-<text x="830" y="4072" font-size="13" font-weight="700" fill="#4d4d4d">04.1</text>
-<text x="830" y="4090" font-size="12" font-weight="400" fill="#4d4d4d">keine</text>
-<text x="1000" y="3982" font-size="13" xml:space="preserve"><tspan font-weight="700" fill="#1d1d1d">Dosierregeln [V]: </tspan><tspan font-weight="400" fill="#4d4d4d">höchstens zwei Abschnitte der Stufe ≥ 3 in Folge (02, 03) · Lichtorte V1 und 02 (blau), dazwischen 01 als Ruhestelle · jede</tspan></text>
-<text x="1000" y="4000" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">inszenierende Signature einmal je Seite · ein bewegter Träger je Ansicht: V2 ruht, dann geht der Bildschirm in 01 an; in 03 erst Auftritt, dann</tspan></text>
-<text x="1000" y="4018" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">Explosion, dann Linien · Entscheidungsflächen ab 04 höchstens Stufe 2 · keine Cream der Seite in 01 bis 03.</tspan></text>
+<text x="960" y="3820" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">Textziel 15/700, Unterstreichung 1,5 px --line2 → --text (hier orange als Handlungsaufforderung) · Wahlzeile nach K-1 und K-3 · Feld nach K-35: Rand 1 px --muted,</tspan></text>
+<text x="960" y="3836" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">Schrift 17 px gegen Zoom unter iOS · Druck jeweils Füllung --surface2, sofort.</tspan></text>
+<text x="40" y="3918" font-size="20" font-weight="800" fill="#1d1d1d">D · Ebenen, Tiefe und Dosierung</text>
+<text x="40" y="3942" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">Schnitt durch die Z-Stufen je Kapitel (Z 8.3.0): Grund → genau ein Fokusträger → flache, frontale Bedienschicht; Tiefe über Verdeckung, Auslauf und Tonwert, nie über Schlagschatten auf dunklem Grund.</tspan></text>
+<rect x="40" y="3978" width="1920" height="176" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
+<text x="60" y="4004" font-size="15" font-weight="700" fill="#1d1d1d">Rhythmus der Intensitätsstufen (DG 2.4.2) und Signature-Budget</text>
+<rect x="80" y="4038" width="60" height="64" rx="3" fill="#bdbdbd"/>
+<text x="80" y="4032" font-size="12" font-weight="600" fill="#4d4d4d">Stufe 4</text>
+<text x="80" y="4122" font-size="13" font-weight="700" fill="#4d4d4d">V1</text>
+<text x="80" y="4140" font-size="12" font-weight="400" fill="#4d4d4d">Glas, Lichtübertrag</text>
+<circle cx="154" cy="4044.0" r="8" fill="url(#licht)"/><circle cx="154" cy="4044.0" r="3" fill="#4DA3FF"/>
+<rect x="230" y="4054" width="60" height="48" rx="3" fill="#bdbdbd"/>
+<text x="230" y="4048" font-size="12" font-weight="600" fill="#4d4d4d">Stufe 3</text>
+<text x="230" y="4122" font-size="13" font-weight="700" fill="#4d4d4d">V2</text>
+<text x="230" y="4140" font-size="12" font-weight="400" fill="#4d4d4d">Schärfestaffelung</text>
+<rect x="380" y="4070" width="60" height="32" rx="3" fill="#1d1d1d"/>
+<text x="380" y="4064" font-size="12" font-weight="600" fill="#1d1d1d">Stufe 2</text>
+<text x="380" y="4122" font-size="13" font-weight="700" fill="#1d1d1d">01</text>
+<text x="380" y="4140" font-size="12" font-weight="400" fill="#4d4d4d">keine</text>
+<rect x="530" y="4054" width="60" height="48" rx="3" fill="#1d1d1d"/>
+<text x="530" y="4048" font-size="12" font-weight="600" fill="#1d1d1d">Stufe 3</text>
+<text x="530" y="4122" font-size="13" font-weight="700" fill="#1d1d1d">02</text>
+<text x="530" y="4140" font-size="12" font-weight="400" fill="#4d4d4d">Lichtraum</text>
+<circle cx="604" cy="4060.0" r="8" fill="url(#licht)"/><circle cx="604" cy="4060.0" r="3" fill="#4DA3FF"/>
+<rect x="680" y="4054" width="60" height="48" rx="3" fill="#1d1d1d"/>
+<text x="680" y="4048" font-size="12" font-weight="600" fill="#1d1d1d">Stufe 3</text>
+<text x="680" y="4122" font-size="13" font-weight="700" fill="#1d1d1d">03</text>
+<text x="680" y="4140" font-size="12" font-weight="400" fill="#4d4d4d">Explosionsansicht</text>
+<rect x="830" y="4070" width="60" height="32" rx="3" fill="#bdbdbd"/>
+<text x="830" y="4064" font-size="12" font-weight="600" fill="#4d4d4d">Stufe 2</text>
+<text x="830" y="4122" font-size="13" font-weight="700" fill="#4d4d4d">04.1</text>
+<text x="830" y="4140" font-size="12" font-weight="400" fill="#4d4d4d">keine</text>
+<text x="1000" y="4032" font-size="13" xml:space="preserve"><tspan font-weight="700" fill="#1d1d1d">Dosierregeln [V]: </tspan><tspan font-weight="400" fill="#4d4d4d">höchstens zwei Abschnitte der Stufe ≥ 3 in Folge (02, 03) · Lichtorte V1 und 02 (blau), dazwischen 01 als Ruhestelle · jede</tspan></text>
+<text x="1000" y="4050" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">inszenierende Signature einmal je Seite · ein bewegter Träger je Ansicht: V2 ruht, dann geht der Bildschirm in 01 an; in 03 erst Auftritt, dann</tspan></text>
+<text x="1000" y="4068" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#4d4d4d">Explosion, dann Linien · Entscheidungsflächen ab 04 höchstens Stufe 2 · keine Cream der Seite in 01 bis 03.</tspan></text>
 <g id="ebenen">
-<text x="40" y="4154" font-size="15" font-weight="700" fill="#1d1d1d">01 Ihr Name · drei Ebenen plus Kopf</text>
-<g transform="matrix(0.3,0,0.1650,0.0960,106,4496)">
+<text x="40" y="4204" font-size="15" font-weight="700" fill="#1d1d1d">01 Ihr Name · drei Ebenen plus Kopf</text>
+<g transform="matrix(0.3,0,0.1650,0.0960,106,4546)">
 <rect x="0" y="0" width="390" height="924" fill="#161616" stroke="#6a6a6a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 </g>
-<text x="98" y="4512" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 0</text>
-<line x1="303.2" y1="4540.4" x2="385.5" y2="4540.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="389.5" y="4544.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Grund #161616, nichts sonst</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,106,4392)">
+<text x="98" y="4562" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 0</text>
+<line x1="303.2" y1="4590.4" x2="385.5" y2="4590.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="389.5" y="4594.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Grund #161616, nichts sonst</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,106,4442)">
 <rect x="0" y="0" width="390" height="924" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="45" y="202" width="300" height="420" rx="44" fill="#3a3a3a" stroke="#4DA3FF" stroke-width="2" vector-effect="non-scaling-stroke"/>
 <rect x="71" y="312" width="248" height="140" rx="12" fill="#6a6a6a"/>
 <rect x="71" y="536" width="248" height="36" rx="18" fill="#bdbdbd"/>
 </g>
-<text x="98" y="4408" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 20</text>
-<line x1="303.2" y1="4436.4" x2="385.5" y2="4436.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="389.5" y="4440.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Gerät 300 × 420 mit Startansicht, ohne</tspan></text>
-<text x="389.5" y="4456.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Trefferfläche; Lichtkante oben (blau)</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,106,4288)">
+<text x="98" y="4458" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 20</text>
+<line x1="303.2" y1="4486.4" x2="385.5" y2="4486.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="389.5" y="4490.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Gerät 300 × 420 mit Startansicht, ohne</tspan></text>
+<text x="389.5" y="4506.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Trefferfläche; Lichtkante oben (blau)</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,106,4338)">
 <rect x="0" y="0" width="390" height="924" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="16" y="16" width="120" height="16" rx="8" fill="#8a8a8a"/>
 <rect x="16" y="45" width="320" height="30" rx="10" fill="#8a8a8a"/>
@@ -2472,36 +2467,36 @@
 <rect x="16" y="858" width="340" height="56" rx="10" fill="#8a8a8a"/>
 <rect x="16" y="640" width="210" height="24" rx="12" fill="#F08A24"/>
 </g>
-<text x="98" y="4304" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 30</text>
-<line x1="303.2" y1="4332.4" x2="385.5" y2="4332.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="389.5" y="4336.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kapitelzeile, h2, Lead, Textziel (orange),</tspan></text>
-<text x="389.5" y="4352.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">drei Punkte; berührt das Gerät nie</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,106,4184)">
+<text x="98" y="4354" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 30</text>
+<line x1="303.2" y1="4382.4" x2="385.5" y2="4382.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="389.5" y="4386.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kapitelzeile, h2, Lead, Textziel (orange),</tspan></text>
+<text x="389.5" y="4402.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">drei Punkte; berührt das Gerät nie</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,106,4234)">
 <rect x="0" y="0" width="390" height="924" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="0" y="0" width="390" height="56" fill="#6a6a6a"/>
 <rect x="169" y="7" width="148" height="42" rx="21" fill="#F08A24"/>
 </g>
-<text x="98" y="4200" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 40</text>
-<line x1="303.2" y1="4228.4" x2="385.5" y2="4228.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="389.5" y="4232.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf 56 px, klebt; Ring „Pakete ansehen“</tspan></text>
-<text x="680" y="4154" font-size="15" font-weight="700" fill="#1d1d1d">02 Ihr Kunde · drei Ebenen plus Kopf, Licht</text>
-<g transform="matrix(0.3,0,0.1650,0.0960,746,4496)">
+<text x="98" y="4250" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 40</text>
+<line x1="303.2" y1="4278.4" x2="385.5" y2="4278.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="389.5" y="4282.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf 56 px, klebt; Ring „Pakete ansehen“</tspan></text>
+<text x="680" y="4204" font-size="15" font-weight="700" fill="#1d1d1d">02 Ihr Kunde · drei Ebenen plus Kopf, Licht</text>
+<g transform="matrix(0.3,0,0.1650,0.0960,746,4546)">
 <rect x="0" y="0" width="390" height="696" fill="#161616" stroke="#6a6a6a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 <ellipse cx="195" cy="384" rx="180" ry="96" fill="url(#licht)"/>
 </g>
-<text x="738" y="4512" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 0</text>
-<line x1="924.4" y1="4529.4" x2="987.8" y2="4529.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="991.8" y="4533.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Grund mit Lichtfleck (Cream ≤ 12 %)</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,746,4392)">
+<text x="738" y="4562" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 0</text>
+<line x1="924.4" y1="4579.4" x2="987.8" y2="4579.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="991.8" y="4583.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Grund mit Lichtfleck (Cream ≤ 12 %)</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,746,4442)">
 <rect x="0" y="0" width="390" height="696" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="45" y="168" width="300" height="240" rx="40" fill="#3a3a3a" stroke="#4DA3FF" stroke-width="2" vector-effect="non-scaling-stroke"/>
 <rect x="110" y="246" width="170" height="126" rx="4" fill="#9a9a9a"/>
 </g>
-<text x="738" y="4408" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 20</text>
-<line x1="924.4" y1="4425.4" x2="987.8" y2="4425.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="991.8" y="4429.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Gerät oben angeschnitten, Render; verdeckt die</tspan></text>
-<text x="991.8" y="4445.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">obere Hälfte des Lichts</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,746,4288)">
+<text x="738" y="4458" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 20</text>
+<line x1="924.4" y1="4475.4" x2="987.8" y2="4475.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="991.8" y="4479.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Gerät oben angeschnitten, Render; verdeckt die</tspan></text>
+<text x="991.8" y="4495.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">obere Hälfte des Lichts</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,746,4338)">
 <rect x="0" y="0" width="390" height="696" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="16" y="16" width="120" height="16" rx="8" fill="#8a8a8a"/>
 <rect x="16" y="45" width="260" height="32" rx="10" fill="#8a8a8a"/>
@@ -2515,53 +2510,53 @@
 <rect x="203" y="576" width="171" height="52" rx="10" fill="#8a8a8a"/>
 <rect x="16" y="656" width="340" height="36" rx="10" fill="#8a8a8a"/>
 </g>
-<text x="738" y="4304" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 30</text>
-<line x1="924.4" y1="4321.4" x2="987.8" y2="4321.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="991.8" y="4325.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">h2, Lead, zwei Wahlgruppen, Schlusszeile; nie</tspan></text>
-<text x="991.8" y="4341.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">auf dem Gerät</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,746,4184)">
+<text x="738" y="4354" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 30</text>
+<line x1="924.4" y1="4371.4" x2="987.8" y2="4371.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="991.8" y="4375.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">h2, Lead, zwei Wahlgruppen, Schlusszeile; nie</tspan></text>
+<text x="991.8" y="4391.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">auf dem Gerät</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,746,4234)">
 <rect x="0" y="0" width="390" height="696" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="0" y="0" width="390" height="56" fill="#6a6a6a"/>
 </g>
-<text x="738" y="4200" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 40</text>
-<line x1="924.4" y1="4217.4" x2="987.8" y2="4217.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="991.8" y="4221.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf</tspan></text>
-<text x="1320" y="4154" font-size="15" font-weight="700" fill="#1d1d1d">03 Ihr Postfach · fünf Stufen plus Kopf</text>
-<g transform="matrix(0.3,0,0.1650,0.0960,1386,4704)">
+<text x="738" y="4250" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 40</text>
+<line x1="924.4" y1="4267.4" x2="987.8" y2="4267.4" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="991.8" y="4271.9" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf</tspan></text>
+<text x="1320" y="4204" font-size="15" font-weight="700" fill="#1d1d1d">03 Ihr Postfach · fünf Stufen plus Kopf</text>
+<g transform="matrix(0.3,0,0.1650,0.0960,1386,4754)">
 <rect x="0" y="0" width="390" height="1034" fill="#161616" stroke="#6a6a6a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 <rect x="0" y="178" width="390" height="516" fill="url(#raster40)"/>
 </g>
-<text x="1378" y="4720" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 0</text>
-<line x1="1592.3" y1="4753.6" x2="1683.6" y2="4753.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="1687.6" y="4758.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Grund mit Messraster (≤ 1,3 : 1)</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,1386,4600)">
+<text x="1378" y="4770" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 0</text>
+<line x1="1592.3" y1="4803.6" x2="1683.6" y2="4803.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="1687.6" y="4808.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Grund mit Messraster (≤ 1,3 : 1)</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,1386,4650)">
 <rect x="0" y="0" width="390" height="1034" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="128" y="202" width="242" height="150" rx="18" fill="#3a3a3a"/>
 </g>
-<text x="1378" y="4616" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 5</text>
-<line x1="1592.3" y1="4649.6" x2="1683.6" y2="4649.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="1687.6" y="4654.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Einzeiler-Karte „KONTAKTFORMULAR“</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,1386,4496)">
+<text x="1378" y="4666" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 5</text>
+<line x1="1592.3" y1="4699.6" x2="1683.6" y2="4699.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="1687.6" y="4704.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Einzeiler-Karte „KONTAKTFORMULAR“</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,1386,4546)">
 <rect x="0" y="0" width="390" height="1034" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="118" y="266" width="256" height="243" rx="3" fill="#c3c3c3" stroke="#8a8a8a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 <rect x="109" y="291" width="256" height="243" rx="3" fill="#dbdbdb" stroke="#8a8a8a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 <rect x="100" y="315" width="256" height="243" rx="3" fill="#f3f3f3" stroke="#6a6a6a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 </g>
-<text x="1378" y="4512" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 20</text>
-<line x1="1592.3" y1="4545.6" x2="1683.6" y2="4545.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="1687.6" y="4550.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Klärung, Fotos, Blatt: Versatz bis 20 %</tspan></text>
-<text x="1687.6" y="4566.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">der Blatthöhe, −2°</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,1386,4392)">
+<text x="1378" y="4562" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 20</text>
+<line x1="1592.3" y1="4595.6" x2="1683.6" y2="4595.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="1687.6" y="4600.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Klärung, Fotos, Blatt: Versatz bis 20 %</tspan></text>
+<text x="1687.6" y="4616.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">der Blatthöhe, −2°</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,1386,4442)">
 <rect x="0" y="0" width="390" height="1034" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="138" y="542" width="236" height="96" rx="12" fill="#3a3a3a" stroke="#4DA3FF" stroke-width="2" vector-effect="non-scaling-stroke"/>
 <line x1="80" y1="278" x2="118" y2="278" stroke="#8a8a8a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 <line x1="64" y1="303" x2="109" y2="303" stroke="#8a8a8a" stroke-width="1" vector-effect="non-scaling-stroke"/>
 </g>
-<text x="1378" y="4408" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 25</text>
-<line x1="1592.3" y1="4441.6" x2="1683.6" y2="4441.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="1687.6" y="4446.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Karte „Aus Ihrer Probe“ und</tspan></text>
-<text x="1687.6" y="4462.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Führungslinien</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,1386,4288)">
+<text x="1378" y="4458" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 25</text>
+<line x1="1592.3" y1="4491.6" x2="1683.6" y2="4491.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="1687.6" y="4496.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Karte „Aus Ihrer Probe“ und</tspan></text>
+<text x="1687.6" y="4512.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Führungslinien</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,1386,4338)">
 <rect x="0" y="0" width="390" height="1034" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="16" y="16" width="150" height="16" rx="8" fill="#8a8a8a"/>
 <rect x="16" y="45" width="300" height="64" rx="10" fill="#8a8a8a"/>
@@ -2575,108 +2570,108 @@
 <rect x="16" y="935" width="340" height="36" rx="10" fill="#8a8a8a"/>
 <rect x="16" y="1002" width="280" height="22" rx="11" fill="#F08A24"/>
 </g>
-<text x="1378" y="4304" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 30</text>
-<line x1="1592.3" y1="4337.6" x2="1683.6" y2="4337.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="1687.6" y="4342.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Beschriftungen, Dateiname, h2, Lead,</tspan></text>
-<text x="1687.6" y="4358.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Begriffe, Umschalter, Textziel (orange)</tspan></text>
-<g transform="matrix(0.3,0,0.1650,0.0960,1386,4184)">
+<text x="1378" y="4354" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 30</text>
+<line x1="1592.3" y1="4387.6" x2="1683.6" y2="4387.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="1687.6" y="4392.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Beschriftungen, Dateiname, h2, Lead,</tspan></text>
+<text x="1687.6" y="4408.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Begriffe, Umschalter, Textziel (orange)</tspan></text>
+<g transform="matrix(0.3,0,0.1650,0.0960,1386,4234)">
 <rect x="0" y="0" width="390" height="1034" fill="#ffffff" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" opacity="0.92" vector-effect="non-scaling-stroke"/>
 <rect x="0" y="0" width="390" height="56" fill="#6a6a6a"/>
 </g>
-<text x="1378" y="4200" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 40</text>
-<line x1="1592.3" y1="4233.6" x2="1683.6" y2="4233.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
-<text x="1687.6" y="4238.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf</tspan></text>
+<text x="1378" y="4250" font-size="13" font-weight="700" fill="#4DA3FF" text-anchor="end">Z 40</text>
+<line x1="1592.3" y1="4283.6" x2="1683.6" y2="4283.6" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="1687.6" y="4288.1" font-size="12.5" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf</tspan></text>
 </g>
-<text x="40" y="4640.7" font-size="15" font-weight="700" fill="#1d1d1d">Flächenanteile im komponierten Telefon-Bildschirm (Überschlag aus fb-03/04/05 C.4; geplant, nicht gemessen)</text>
-<text x="40" y="4681.7" font-size="13" font-weight="700" fill="#1d1d1d">01 Ihr Name</text>
-<rect x="160" y="4662.7" width="402.8" height="28" fill="#3a3a3a"/>
-<text x="168" y="4681.7" font-size="12" font-weight="600" fill="#f3f3f3">Gerät 38 %</text>
-<rect x="562.8" y="4662.7" width="159" height="28" fill="#8a8a8a"/>
-<text x="570.8" y="4681.7" font-size="12" font-weight="600" fill="#1d1d1d">Text ≈ 15 %</text>
-<rect x="721.8" y="4662.7" width="498.2" height="28" fill="#dcdcdc"/>
-<text x="1212" y="4681.7" font-size="12" font-weight="600" fill="#1d1d1d" text-anchor="end">frei ≈ 47 %</text>
-<text x="40" y="4721.7" font-size="13" font-weight="700" fill="#1d1d1d">02 Ihr Kunde</text>
-<rect x="160" y="4702.7" width="381.6" height="28" fill="#3a3a3a"/>
-<text x="168" y="4721.7" font-size="12" font-weight="600" fill="#f3f3f3">Bild ≈ 36 % (Gerät 26, Licht ≈ 10)</text>
-<rect x="541.6" y="4702.7" width="254.4" height="28" fill="#8a8a8a"/>
-<text x="549.6" y="4721.7" font-size="12" font-weight="600" fill="#1d1d1d">Bedienung, Text ≈ 24 %</text>
-<rect x="796" y="4702.7" width="424" height="28" fill="#dcdcdc"/>
-<text x="1212" y="4721.7" font-size="12" font-weight="600" fill="#1d1d1d" text-anchor="end">frei ≈ 40 %</text>
-<text x="40" y="4761.7" font-size="13" font-weight="700" fill="#1d1d1d">03 Ihr Postfach</text>
-<rect x="160" y="4742.7" width="424" height="28" fill="#3a3a3a"/>
-<text x="168" y="4761.7" font-size="12" font-weight="600" fill="#f3f3f3">Szene ≈ 40 % (Blatt 19)</text>
-<rect x="584" y="4742.7" width="127.2" height="28" fill="#8a8a8a"/>
-<text x="592" y="4761.7" font-size="12" font-weight="600" fill="#1d1d1d">Text ≈ 12 %</text>
-<rect x="711.2" y="4742.7" width="508.8" height="28" fill="#dcdcdc"/>
-<text x="1212" y="4761.7" font-size="12" font-weight="600" fill="#1d1d1d" text-anchor="end">frei ≈ 48 %</text>
-<line x1="866.7" y1="4654.7" x2="866.7" y2="4776.7" stroke="#4DA3FF" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="872.7" y="4790.7" font-size="12" font-weight="600" fill="#4DA3FF">Grenze: mindestens ⅓ frei (SG 10.1/3)</text>
-<text x="40" y="4863.3" font-size="20" font-weight="800" fill="#1d1d1d">E · Verbindliche Regeln, Hypothesen und Freigaben dieses Blatts</text>
-<rect x="40" y="4883.3" width="620" height="320" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
-<text x="60" y="4911.3" font-size="15" font-weight="700" fill="#1d1d1d">Verbindlich [V]</text>
-<circle cx="64" cy="4930.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="4935.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Telefon 390 × 844 zuerst; am Schreibtisch nichts überdimensioniert (h2 40, Spalte</tspan></text>
-<text x="74" y="4952.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">1040).</tspan></text>
-<circle cx="64" cy="4968.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="4973.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Eine Cream-Fläche je Bildschirm: in 01 bis 03 keine Cream der Seite; Kaufweg über den</tspan></text>
-<text x="74" y="4990.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf-Ring.</tspan></text>
-<circle cx="64" cy="5006.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="5011.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Ein bewegter Träger je Ansicht; autonome Bewegung endet nach ≤ 5 s; Schleifen nur im</tspan></text>
-<text x="74" y="5028.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Bild.</tspan></text>
-<circle cx="64" cy="5044.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="5049.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Am Telefon kein Anheften; ruhige Fassung = Endbild; ohne JavaScript lesbar und</tspan></text>
-<text x="74" y="5066.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">bedienbar.</tspan></text>
-<circle cx="64" cy="5082.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="5087.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Schriftgrößen nur 13, 15, 17, 24, 32 (40 am Schreibtisch); Ziele ≥ 44 px; kein</tspan></text>
-<text x="74" y="5104.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Querscrollen.</tspan></text>
-<circle cx="64" cy="5120.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="5125.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Pflicht-h2 #die-idee und #so-funktioniert-es wörtlich; Pflichtsätze in 01 wörtlich.</tspan></text>
-<circle cx="64" cy="5141.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="5146.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Gewählt = Füllung --surface3 mit Tinte-Kontur, nie Cream (K-3); Rinne 24 px am</tspan></text>
-<text x="74" y="5163.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Schreibtisch (K-12).</tspan></text>
-<circle cx="64" cy="5179.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="5184.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">„Beispiel“ an jedem erfundenen Material: Fensterbau Brandt, Familie Weber, P-BEISPIEL.</tspan></text>
-<circle cx="64" cy="5200.8" r="2.5" fill="#4d4d4d"/>
-<text x="74" y="5205.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Keine fremden Server: Bilder und Bildfolgen unter eigener Herkunft (/bilder/probe/…).</tspan></text>
-<rect x="690" y="4883.3" width="620" height="320" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
-<text x="710" y="4911.3" font-size="15" font-weight="700" fill="#1d1d1d">Hypothesen [H] mit Rückfall (nicht gemessen)</text>
-<circle cx="714" cy="4930.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="4935.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-E2: Das Namensfeld wird geöffnet und hilft beim Verstehen → Rückfall ohne Feld.</tspan></text>
-<circle cx="714" cy="4951.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="4956.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-E9: Die verdichtete Miniatur gilt als echtes Produkt → Rückfall Aufnahme ohne</tspan></text>
-<text x="724" y="4973.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Namen.</tspan></text>
-<circle cx="714" cy="4989.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="4994.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-E1: Zwei Griffe genügen, kein spürbarer Umweg → Rückfall zwei Standbilder.</tspan></text>
-<circle cx="714" cy="5010.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="5015.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-04-1: Gruppen nebeneinander sind sicherer → Rückfall untereinander.</tspan></text>
-<circle cx="714" cy="5031.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="5036.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-04-3: Die Lamellenfahrt wirkt als Qualität → Rückfall Überblendung.</tspan></text>
-<circle cx="714" cy="5052.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="5057.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">DG-H-5: Die Explosionsansicht erklärt schneller als eine Liste → Rückfall stehendes</tspan></text>
-<text x="724" y="5074.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Endbild.</tspan></text>
-<circle cx="714" cy="5090.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="5095.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Der Einzeiler wirkt nicht herabsetzend → Rückfall Blatt allein; Karte wird mit 02</tspan></text>
-<text x="724" y="5112.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">verbunden → Rückfall ohne Karte.</tspan></text>
-<circle cx="714" cy="5128.8" r="2.5" fill="#4d4d4d"/>
-<text x="724" y="5133.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">1,23 BH in 03 halten die Pakete auf Bildschirm 5 bei 844 → Rückfall Begriffe nur im</tspan></text>
-<text x="724" y="5150.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Umschalter (−176 px).</tspan></text>
-<rect x="1340" y="4883.3" width="620" height="320" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
-<text x="1360" y="4911.3" font-size="15" font-weight="700" fill="#1d1d1d">Freigabe durch den Inhaber nötig</text>
-<circle cx="1364" cy="4930.8" r="2.5" fill="#4d4d4d"/>
-<text x="1374" y="4935.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Abweichungen: E-AB-8, E-AB-2, E-AB-10, DG-AB-1, DG-AB-2, DG-AB-5, DG-AB-13,</tspan></text>
-<text x="1374" y="4952.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">DS-AB-1, DS-AB-2, DS-AB-4, DS-AB-8, DS-AB-10 sowie GEST:447, :448, :450, :455 (je</tspan></text>
-<text x="1374" y="4969.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kapitel unter ⚠).</tspan></text>
-<circle cx="1364" cy="4985.8" r="2.5" fill="#4d4d4d"/>
-<text x="1374" y="4990.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Auslegung: Cream und Grün im Gerät sind Produktinhalt, keine Signale der Seite.</tspan></text>
-<circle cx="1364" cy="5006.8" r="2.5" fill="#4d4d4d"/>
-<text x="1374" y="5011.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Auslegung: Bildfolge auf Tippen ist Antwort auf eine Eingabe, keine zweite</tspan></text>
-<text x="1374" y="5028.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">inszenierende Signature.</tspan></text>
-<circle cx="1364" cy="5044.8" r="2.5" fill="#4d4d4d"/>
-<text x="1374" y="5049.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Material: Renderings „Vitrine“ aus der eigenen Bühne (Materialprobe), zwei Schichtbilder</tspan></text>
-<text x="1374" y="5066.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">des Beispiel-PDF per Skript; Look-Abnahme am eigenen Telefon.</tspan></text>
-<circle cx="1364" cy="5082.8" r="2.5" fill="#4d4d4d"/>
-<text x="1374" y="5087.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Wortlaut aller mit „Textentwurf“ markierten Texte.</tspan></text>
-<circle cx="1364" cy="5103.8" r="2.5" fill="#4d4d4d"/>
-<text x="1374" y="5108.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Simulierte Expertenperspektiven sind eine Analysemethode, keine Nutzerstudie; das</tspan></text>
-<text x="1374" y="5125.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Blatt behauptet keine Wirkung.</tspan></text>
+<text x="40" y="4690.7" font-size="15" font-weight="700" fill="#1d1d1d">Flächenanteile im komponierten Telefon-Bildschirm (Überschlag aus fb-03/04/05 C.4; geplant, nicht gemessen)</text>
+<text x="40" y="4731.7" font-size="13" font-weight="700" fill="#1d1d1d">01 Ihr Name</text>
+<rect x="160" y="4712.7" width="402.8" height="28" fill="#3a3a3a"/>
+<text x="168" y="4731.7" font-size="12" font-weight="600" fill="#f3f3f3">Gerät 38 %</text>
+<rect x="562.8" y="4712.7" width="159" height="28" fill="#8a8a8a"/>
+<text x="570.8" y="4731.7" font-size="12" font-weight="600" fill="#1d1d1d">Text ≈ 15 %</text>
+<rect x="721.8" y="4712.7" width="498.2" height="28" fill="#dcdcdc"/>
+<text x="1212" y="4731.7" font-size="12" font-weight="600" fill="#1d1d1d" text-anchor="end">frei ≈ 47 %</text>
+<text x="40" y="4771.7" font-size="13" font-weight="700" fill="#1d1d1d">02 Ihr Kunde</text>
+<rect x="160" y="4752.7" width="381.6" height="28" fill="#3a3a3a"/>
+<text x="168" y="4771.7" font-size="12" font-weight="600" fill="#f3f3f3">Bild ≈ 36 % (Gerät 26, Licht ≈ 10)</text>
+<rect x="541.6" y="4752.7" width="254.4" height="28" fill="#8a8a8a"/>
+<text x="549.6" y="4771.7" font-size="12" font-weight="600" fill="#1d1d1d">Bedienung, Text ≈ 24 %</text>
+<rect x="796" y="4752.7" width="424" height="28" fill="#dcdcdc"/>
+<text x="1212" y="4771.7" font-size="12" font-weight="600" fill="#1d1d1d" text-anchor="end">frei ≈ 40 %</text>
+<text x="40" y="4811.7" font-size="13" font-weight="700" fill="#1d1d1d">03 Ihr Postfach</text>
+<rect x="160" y="4792.7" width="424" height="28" fill="#3a3a3a"/>
+<text x="168" y="4811.7" font-size="12" font-weight="600" fill="#f3f3f3">Szene ≈ 40 % (Blatt 19)</text>
+<rect x="584" y="4792.7" width="127.2" height="28" fill="#8a8a8a"/>
+<text x="592" y="4811.7" font-size="12" font-weight="600" fill="#1d1d1d">Text ≈ 12 %</text>
+<rect x="711.2" y="4792.7" width="508.8" height="28" fill="#dcdcdc"/>
+<text x="1212" y="4811.7" font-size="12" font-weight="600" fill="#1d1d1d" text-anchor="end">frei ≈ 48 %</text>
+<line x1="866.7" y1="4704.7" x2="866.7" y2="4826.7" stroke="#4DA3FF" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="872.7" y="4840.7" font-size="12" font-weight="600" fill="#4DA3FF">Grenze: mindestens ⅓ frei (SG 10.1/3)</text>
+<text x="40" y="4913.3" font-size="20" font-weight="800" fill="#1d1d1d">E · Verbindliche Regeln, Hypothesen und Freigaben dieses Blatts</text>
+<rect x="40" y="4933.3" width="620" height="360" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
+<text x="60" y="4961.3" font-size="15" font-weight="700" fill="#1d1d1d">Verbindlich [V]</text>
+<circle cx="64" cy="4980.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="4985.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Telefon 390 × 844 zuerst; am Schreibtisch nichts überdimensioniert (h2 40, Spalte</tspan></text>
+<text x="74" y="5002.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">1040).</tspan></text>
+<circle cx="64" cy="5018.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5023.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Eine Cream-Fläche je Bildschirm: in 01 bis 03 keine Cream der Seite; Kaufweg über den</tspan></text>
+<text x="74" y="5040.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kopf-Ring.</tspan></text>
+<circle cx="64" cy="5056.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5061.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Ein bewegter Träger je Ansicht; autonome Bewegung endet nach ≤ 5 s; Schleifen nur im</tspan></text>
+<text x="74" y="5078.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Bild.</tspan></text>
+<circle cx="64" cy="5094.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5099.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Am Telefon kein Anheften; ruhige Fassung = Endbild; ohne JavaScript lesbar und</tspan></text>
+<text x="74" y="5116.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">bedienbar.</tspan></text>
+<circle cx="64" cy="5132.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5137.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Schriftgrößen nur 13, 15, 17, 24, 32 (40 am Schreibtisch); Ziele ≥ 44 px; kein</tspan></text>
+<text x="74" y="5154.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Querscrollen.</tspan></text>
+<circle cx="64" cy="5170.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5175.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Pflicht-h2 #die-idee und #so-funktioniert-es wörtlich; Pflichtsätze in 01 wörtlich.</tspan></text>
+<circle cx="64" cy="5191.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5196.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Gewählt = Füllung --surface3 mit Tinte-Kontur, nie Cream (K-3); Rinne 24 px am</tspan></text>
+<text x="74" y="5213.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Schreibtisch (K-12).</tspan></text>
+<circle cx="64" cy="5229.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5234.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">„Beispiel“ an jedem erfundenen Material: Fensterbau Brandt, Familie Weber, P-BEISPIEL.</tspan></text>
+<circle cx="64" cy="5250.8" r="2.5" fill="#4d4d4d"/>
+<text x="74" y="5255.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Keine fremden Server: Bilder und Bildfolgen unter eigener Herkunft (/bilder/probe/…).</tspan></text>
+<rect x="690" y="4933.3" width="620" height="360" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
+<text x="710" y="4961.3" font-size="15" font-weight="700" fill="#1d1d1d">Hypothesen [H] mit Rückfall (nicht gemessen)</text>
+<circle cx="714" cy="4980.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="4985.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-E2: Das Namensfeld wird geöffnet und hilft beim Verstehen → Rückfall ohne Feld.</tspan></text>
+<circle cx="714" cy="5001.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="5006.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-E9: Die verdichtete Miniatur gilt als echtes Produkt → Rückfall Aufnahme ohne</tspan></text>
+<text x="724" y="5023.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Namen.</tspan></text>
+<circle cx="714" cy="5039.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="5044.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-E1: Zwei Griffe genügen, kein spürbarer Umweg → Rückfall zwei Standbilder.</tspan></text>
+<circle cx="714" cy="5060.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="5065.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-04-1: Gruppen nebeneinander sind sicherer → Rückfall untereinander.</tspan></text>
+<circle cx="714" cy="5081.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="5086.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">H-04-3: Die Lamellenfahrt wirkt als Qualität → Rückfall Überblendung.</tspan></text>
+<circle cx="714" cy="5102.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="5107.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">DG-H-5: Die Explosionsansicht erklärt schneller als eine Liste → Rückfall stehendes</tspan></text>
+<text x="724" y="5124.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Endbild.</tspan></text>
+<circle cx="714" cy="5140.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="5145.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Der Einzeiler wirkt nicht herabsetzend → Rückfall Blatt allein; Karte wird mit 02</tspan></text>
+<text x="724" y="5162.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">verbunden → Rückfall ohne Karte.</tspan></text>
+<circle cx="714" cy="5178.8" r="2.5" fill="#4d4d4d"/>
+<text x="724" y="5183.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">1,23 BH in 03 halten die Pakete auf Bildschirm 5 bei 844 → Rückfall Begriffe nur im</tspan></text>
+<text x="724" y="5200.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Umschalter (−176 px).</tspan></text>
+<rect x="1340" y="4933.3" width="620" height="360" rx="10" fill="#ffffff" stroke="#cfcfcf" stroke-width="1"/>
+<text x="1360" y="4961.3" font-size="15" font-weight="700" fill="#1d1d1d">Freigabe durch den Inhaber nötig</text>
+<circle cx="1364" cy="4980.8" r="2.5" fill="#4d4d4d"/>
+<text x="1374" y="4985.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Abweichungen: E-AB-8, E-AB-2, E-AB-10, DG-AB-1, DG-AB-2, DG-AB-5, DG-AB-13,</tspan></text>
+<text x="1374" y="5002.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">DS-AB-1, DS-AB-2, DS-AB-4, DS-AB-8, DS-AB-10 sowie GEST:447, :448, :450, :455 (je</tspan></text>
+<text x="1374" y="5019.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Kapitel unter ⚠).</tspan></text>
+<circle cx="1364" cy="5035.8" r="2.5" fill="#4d4d4d"/>
+<text x="1374" y="5040.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Auslegung: Cream und Grün im Gerät sind Produktinhalt, keine Signale der Seite.</tspan></text>
+<circle cx="1364" cy="5056.8" r="2.5" fill="#4d4d4d"/>
+<text x="1374" y="5061.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Auslegung: Bildfolge auf Tippen ist Antwort auf eine Eingabe, keine zweite</tspan></text>
+<text x="1374" y="5078.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">inszenierende Signature.</tspan></text>
+<circle cx="1364" cy="5094.8" r="2.5" fill="#4d4d4d"/>
+<text x="1374" y="5099.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Material: Renderings „Vitrine“ aus der eigenen Bühne (Materialprobe), zwei Schichtbilder</tspan></text>
+<text x="1374" y="5116.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">des Beispiel-PDF per Skript; Look-Abnahme am eigenen Telefon.</tspan></text>
+<circle cx="1364" cy="5132.8" r="2.5" fill="#4d4d4d"/>
+<text x="1374" y="5137.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Wortlaut aller mit „Textentwurf“ markierten Texte.</tspan></text>
+<circle cx="1364" cy="5153.8" r="2.5" fill="#4d4d4d"/>
+<text x="1374" y="5158.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Simulierte Expertenperspektiven sind eine Analysemethode, keine Nutzerstudie; das</tspan></text>
+<text x="1374" y="5175.3" font-size="13" xml:space="preserve"><tspan font-weight="400" fill="#1d1d1d">Blatt behauptet keine Wirkung.</tspan></text>
 </svg>

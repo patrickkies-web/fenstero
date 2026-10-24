@@ -4,7 +4,9 @@ Seite: Startseite `/`, Ansicht Hauseigentümer `/#hauseigentuemer` (Standardansi
 
 ID `he-01-startbild`. Phase I, Stand 24.10.2026; Planung, nichts gebaut. Kürzel wie in [08-zielarchitektur.md](../08-zielarchitektur.md).
 **[V]** verbindlich, **[H]** Hypothese mit Rückfall, **Textentwurf** = neuer Wortlaut zur Freigabe, **Festlegung I-n** = Entscheidung dieser
-Spezifikation, wo 08 offen ist. Alle Lagen sind geplant, nicht gemessen.
+Spezifikation, wo 08 offen ist. Alle Lagen sind geplant, nicht gemessen. Angeglichen an [11-designsystem.md](../11-designsystem.md):
+wo diese Spezifikation früher anders plante, steht jetzt der Wert der **Festlegung K-n**; I-3, I-4 und I-5 sind durch K-39, K-26 und K-8
+ersetzt.
 
 ## A. Abschnitt und Funktion
 
@@ -56,23 +58,23 @@ Stichtagstausch `functions/seo.js:139-171`.
 ## C. Exakte Layoutkomposition
 
 **C.1 Grundstruktur.** Eine Bühne als Rasterzelle, alle Ebenen in `grid-area: 1 / 1` (SG B.2). Telefon: 4 Spalten à 77,5 px, Rand und
-Abstand 16 px; Foto randlos über die volle Breite; Lesestapel und Knöpfe über Spalte 1–4 an der Ordnungslinie x = 16 (G5); Umschalter über
-Spalte 1–3. Asymmetrisch-diagonal: Anker (Waschbär an der Öffnung) oben rechts, zweiter Pol (Cream) unten links (G3; SG 10.1/2).
+Abstand 16 px; Foto randlos über die volle Breite; Lesestapel über Spalte 1–4, Knöpfe nach Inhalt (K-30), beide an der Ordnungslinie
+x = 16 (G5); Umschalter 284 px ab x 16 (K-29). Asymmetrisch-diagonal: Anker (Waschbär an der Öffnung) oben rechts, zweiter Pol (Cream) unten links (G3; SG 10.1/2).
 
 **C.2 Telefon 390 × 844** (mit Telefonzuschnitt nach H.4)
 
 | Element | Z | x | y | Maß, Stil |
 |---|---|---|---|---|
 | Kopf: Logo, Menü | 40 | 16–146, 330–374 | 0–56 | Ziele 44 × 44, flächenlos über Scrim |
-| Scrim | 28 | 0–390 | 0–120 | `#161616` 64 % bis y 56, dann bis 0 |
+| Scrim | 28 | 0–390 | 0–96 | `#161616`, Stopps 0/24/48/72/96 px mit 100/75/45/15/0 % der Startdeckkraft 60 % (bis 75 %, C.5; K-26) |
 | Foto | 20 | 0–390 | 0–420 | opak bis y 276, Auslauf bis y 396 |
-| Umschalter (Glas) | 30 | 16–276 | 68–112 | 260 × 44, Segmente 142 und 118 px |
-| Eyebrow | 30 | 16–≈ 320 | 320–355 | 13/600, Versalien, zwei Zeilen, `--accent` |
+| Umschalter (Glas) | Fläche 25, Inhalt und Trefferfläche 30 | 16–300 | 68–112 | Spur 284 × 44, Segmente 150 und 126 × 36, 4 px Einzug, Schrift 15/20 (K-29, K-39) |
+| Eyebrow | 30 | 16–≈ 320 | 320–355 | 13/600, +0,12 em, Versalien, zwei Zeilen, `--accent` |
 | h1 | 30 | 16–320 | 363–430 | 32/800, −0,03 em, Zeilenhöhe 1,05, zwei Zeilen, „eezi.“ `--accent` |
 | Lead | 30 | 16–374 | 442–490 | 17/500, Zeilenhöhe 24 px, `--text2` |
 | Preiszeile | 30 | 16–≈ 340 | 506–542 | 13/600, `tabular-nums`, 0,02 em, Zeilenhöhe 18 px, `--text2`, Beträge `--text` |
-| Cream | 30 | 16–374 | 550–602 | 358 × 52 |
-| Ring | 30 | 16–374 | 614–666 | 358 × 52, 2-px-Kontur `--line2` |
+| Cream | 30 | 16–238 | 550–602 | 222 × 52, linksbündig; gleich breit wie der Ring nach dem längeren Text („Jetzt ausmessen“ mit Pfeilkreis, wie am Schreibtisch 222 px; im Zustand „fortsetzen“ nach „Aufmaß fortsetzen“), mindestens 212 px (K-30) |
+| Ring | 30 | 16–238 | 614–666 | 222 × 52, innere 2-px-Kontur `--muted` (K-1) |
 | Anschnitt H2 | – | 16–374 | ab 776 | Abschnittsende 680 + 96 px (G6); Haarlinie und „01 · PROBEMESSUNG“, 8 % |
 
 Abstände 8 (Eyebrow → h1, Preiszeile → Cream), 12 (h1 → Lead, Cream → Ring), 16 (Lead → Preiszeile): Botschaft und Handlung sind zwei
@@ -81,13 +83,15 @@ Gruppen, die Preiszeile steht über den Knöpfen (EV 7.5.10).
 **C.3 Verhältnisse.** Foto 50 % der Höhe bei 844 (63 % bei 664), davon opak 33 %; Lesestapel und Handlung 41 %; Überlappung mit dem Auslauf
 y 320–396, Fotodeckkraft hinter der Eyebrow ≤ 25 %. Waschbär ≈ 170 px hoch (Ohren y ≈ 120, Füße ≤ 290); Waschbär, Laibung und Öffnung
 ≈ 240 × 190 px = 28 % der Fotofläche. Sprung Anker : Versalhöhe der Bedienschrift ≈ 18-fach (SG 10.1/4); h1 : Lead = 1,9 liegt unter dem
-SG-Vorschlag 2,25, bindend ist die Skala des Inhabers (SKILL:69), der Sprung entsteht über das Foto (G4). Frei ≈ 37 % (Schätzung, ≥ ⅓);
+SG-Vorschlag 2,25, bindend ist die Skala des Inhabers (SKILL:69), der Sprung entsteht über das Foto (G4). Frei ≈ 41 % (Schätzung, ≥ ⅓;
+mit Knöpfen nach K-30 rund 4 Punkte mehr als bei voller Breite);
 Text als Begrenzungsrahmen ≈ 17 %, Prüfpunkt gegen den SG-Vorschlag 15 %. Größenstufen 32 · 17 · 13 (15 im Umschalter zählt zur Klein-Stufe,
 DG 2.2.18).
 
-**C.4 Ebenen.** Z0 Grund → Z20 Foto → Z28 Scrim → Z30 Bedienschicht mit Umschalter → Z40 Kopf. Vordergrund: Bedienschicht und Glas;
-Mittelgrund: Waschbär an der Laibung; Hintergrund: Raum und Tageslicht. **Festlegung I-3:** Umschalter in Z30 statt Z25 (08), weil
-Bedienziele nicht zur Bildschicht gehören (G1); Glas ist die zulässige Materialausnahme der Bedienschicht (SG 10.3/1, /6).
+**C.4 Ebenen.** Z0 Grund → Z20 Foto → Z25 Glasfläche des Umschalters → Z28 Scrim → Z30 Bedienschicht mit Inhalt und Trefferfläche des
+Umschalters → Z40 Kopf. Vordergrund: Bedienschicht und Glas; Mittelgrund: Waschbär an der Laibung; Hintergrund: Raum und Tageslicht.
+**Festlegung K-39** (ersetzt I-3): Die Glasfläche liegt als vermittelnde Bildschicht auf Z25, Segmenttext und Trefferflächen auf Z30; so
+gehören Bedienziele zur Bedienschicht (G1), und die Ebenenzählung bleibt gleich.
 
 **C.5 Technische Startwerte**
 
@@ -95,10 +99,10 @@ Bedienziele nicht zur Bildschicht gehören (G1); Glas ist die zulässige Materia
 |---|---|---|
 | Fotorahmen | 390 × 420, `object-fit: cover`, `object-position: 50% 0` | E-1; E-AB-1 sinngemäß |
 | Auslauf | `mask-image: linear-gradient(#000 0 276px, rgb(0 0 0/.5) 298px, rgb(0 0 0/.22) 318px, rgb(0 0 0/.07) 350px, transparent 396px)` | Auslauf über das untere Drittel (DG 2.2.11); Eyebrow 4,5:1 |
-| Scrim | `linear-gradient(rgb(22 22 22/.64) 0 56px, transparent 120px)` | **Festlegung I-4:** DG T0 (60 % → 0 über 96 px) hielte die Kopfelemente über heller Decke nicht bei 4,5:1 |
-| Glas | Füllung `rgb(31 31 31/.6)`, bis .65 falls nötig; `backdrop-filter: blur(24px)` ohne Sättigung; Kante 1 px `rgb(243 242 238/.14)`, oben und rechts .24; Pille; kein Schatten | DG-AB-17; SG 10.3; Licht aus der Öffnung rechts (DG-E-8) |
-| Segmente | 15/600 `--text`; gewählt: 2-px-Kontur `--text` mit 4 px Einzug, Text 700; Trefferfläche je 44 px hoch | „in Tinte“ (IA K03); Zustand 3:1 |
-| Eyebrow | Sperrung 0,12 em | DG 2.2.18; **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (GEST: 0,18 em): SG-Spanne 0,06–0,12 em; Rückfall 0,18 em, ebenfalls zweizeilig |
+| Scrim | `linear-gradient(rgb(22 22 22/.6) 0, rgb(22 22 22/.45) 24px, rgb(22 22 22/.27) 48px, rgb(22 22 22/.09) 72px, transparent 96px)`; Startdeckkraft bis .75 (Stopps .75/.56/.34/.11/0), wenn Logo und Menüzeichen über der hellen Decke des Zuschnitts sonst 4,5:1 bzw. 3:1 verfehlen | **Festlegung K-26** (ersetzt I-4): eine Scrim-Form auf allen Bühnen; die helle Decke wird über die Startdeckkraft abgefangen, nicht über eine eigene Form |
+| Glas | Füllung `rgb(31 31 31/.6)`, bis .65 falls nötig; `backdrop-filter: blur(24px)` ohne Sättigung; Kante 1 px rundum `--kante-alpha` (14 %), Ober- und rechte Kante `--kante-licht` (24 %); Pille; kein Schatten | DG-AB-17; SG 10.3; Haus-Token `--licht-x` −0,6, `--licht-y` 0,8 (K-24), Licht aus der Öffnung oben rechts (DG-E-8) |
+| Segmente | 15/20; nicht gewählt ohne Fläche, 500 `--text2`; gewählt: Füllung `--surface3` plus innere 2-px-Kontur `--text`, Schrift 700 `--text`, nie Cream; 4 px Einzug in der Spur; Trefferfläche je 44 px hoch | **Festlegung K-3**: Kontur in Tinte trägt 3:1 auch über Glas, Füllung ist der Kanal „aktiv“ |
+| Eyebrow | 600, Sperrung +0,12 em; einziger Rückfall +0,08 em bei 360 px Breite, wenn die Zeile sonst umbricht | **Festlegung K-17**; **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (DS-AB-1; GEST:26: 800, 0,18 em): Technikstimme, SG-Spanne 0,06–0,12 em; ohne Freigabe 800/0,18 em, ebenfalls zweizeilig |
 
 ## D. Anwendung der Design-DNA
 
@@ -118,7 +122,8 @@ Bedienziele nicht zur Bildschicht gehören (G1); Glas ist die zulässige Materia
 | Interaktive Effekte | Zustände über Füllung und Kontur; keine Skalierung beim Drücken (SG 10.7/3; heute `gemeinsam.css:65`) | 1 | ruhig |
 
 **Budget:** inszenierend 1 (Glas), informierend 0 (DG 2.4.2). **Bewusst weggelassen:** Maßlinien im Foto (EV 7.5.10: H2 trägt die Messung),
-Lichtübertrag und Rahmenbruch (B-AB-9), Glas-Meldungen, Partikel, Raumschrift, Parallaxe am Telefon, Echtzeit-3D, Haken-Chips, Kennzahlen.
+Lichtübertrag und Rahmenbruch (B-AB-9), Glas-Meldungen, Partikel, Raumschrift, Parallaxe auf allen Breiten (K-9: nur Stufe 4),
+Logo-Licht beim Laden (K-8), Echtzeit-3D, Haken-Chips, Kennzahlen.
 
 ## E. Visual Attention Architecture
 
@@ -126,9 +131,10 @@ Erwartet aus Kontrast, Größe und Lage, nicht gemessen.
 
 - **Primär:** Gesicht des Waschbären mit Handy, daneben Zollstock und helle Laibung (höchster Detail- und Hell-Dunkel-Kontrast).
 - **Sekundär:** h1 (größter Text, hell auf dunklem Auslauf), dann die Cream als einzige große helle Fläche der unteren Hälfte.
-- **Reihenfolge:** Figur → h1 → Lead → Preiszeile → Cream → Ring; Umschalter peripher (oben links, ohne Füllung).
+- **Reihenfolge:** Figur → h1 → Lead → Preiszeile → Cream → Ring; Umschalter peripher (oben links, kleinflächig, gewähltes Segment
+  `--surface3` ohne Cream).
 - **Kontraste:** Tageslicht oben rechts und Cream unten links bilden eine Diagonale vom Motiv zur Handlung; Grün < 1 % der Fläche.
-- **CTA:** Cream 358 × 52 = 5,6 % der Fläche, y 550–602 = 65–71 % der Höhe bei 844, 83–91 % bei 664; Daumenbereich.
+- **CTA:** Cream 222 × 52 = 3,5 % der Fläche, y 550–602 = 65–71 % der Höhe bei 844, 83–91 % bei 664; Daumenbereich.
 - **Ablenkungen:** Glas neben dem Kopf (Schutzabstand ≥ 16 px); helle Decke (Scrim); „für jeden Fensterbauer“ kann Fensterbauer ansprechen
   (Umschalter sichtbar); Kopfknopf mit gleichem Ziel (I-2); keine weiße Karte von H2 im ersten Bildschirm.
 - **Übergang:** Haarlinie und Kapitelzeile bei y 776 schneiden 8 % an; vom warmen Foto zur weißen Zeichnung in H2 als Wechsel ohne Bewegung.
@@ -137,15 +143,15 @@ Erwartet aus Kontrast, Größe und Lage, nicht gemessen.
 
 | Auslöser | Verhalten | Dauer, Kurve | „Weniger Bewegung“ | Begründung |
 |---|---|---|---|---|
-| Laden | Foto Deckkraft 0,35 → 1, Maßstab 1,03 → 1, Ursprung 70 % 30 %: die Kamera „setzt sich“ zur Öffnung; Text steht ab dem ersten Bild | 900 ms, `cubic-bezier(.2, 0, 0, 1)`, verzögernd | Foto sofort voll | ein Träger (E-2); Start bei 0,35, damit das Foto sofort als LCP zählt |
-| ab 900 ms | Licht im Logo geht an (GEST:7) | 1,6 s | ruhig | **Festlegung I-5:** nacheinander (SG 10.7/4), Ende nach 2,5 s |
-| erstes Scrollen im Auftritt | Endzustand | sofort | – | E-2 |
-| Scrollen | Telefon: keine Bewegung. Schreibtisch [H]: Foto bleibt zurück, Faktor 0,9, bis H1 endet | scrollgekoppelt | keine | kein Glas über bewegtem Motiv (SG 10.8); Tiefe (SKILL:43) |
-| Hover (`hover: hover`) | Cream → `--primary-hover`; Ring-Kontur → `--text`; Segment-Füllung `rgb(243 242 238/.08)` | 160 ms, wie oben | bleibt | Zustand über Füllung, Kontur (SG 10.7/8) |
-| Drücken | Füllung dunkler, keine Skalierung | 120 ms | bleibt | SG 10.7/3 |
+| Laden | Foto Deckkraft 0,35 → 1 und Maßstab 1,03 → 1 gemeinsam, Ursprung am Anker (Waschbär an der Öffnung, ≈ 70 % 30 %): die Kamera „setzt sich“; Start nach `img.decode()`, nur wenn die Bühne beim Laden im Bild ist; Text steht ab dem ersten Bild | 900 ms (`--t-buehne`), `--e-out` | Foto sofort voll | **Festlegung K-7**; ein Träger (E-2); Start bei 0,35, damit das Foto sofort als LCP zählt |
+| Logo-Licht | geht beim Laden nicht an, weil `/` einen Bühnen-Ladeauftritt hat; danach nur bei Berührung | 1,6 s bei Berührung | ruhig | **Festlegung K-8** (ersetzt I-5): ein Auftritt im ersten Bildschirm (`rh-01`) |
+| erste Eingabe im Auftritt (Scrollen > 4 px, Wischen, Rad, Taste) | Laufendes per Deckkraft in den Endzustand | 220 ms (`--t2`) | – | K-7; nichts springt (SKILL:48) |
+| Scrollen | keine Bewegung, auf allen Breiten | – | – | **Festlegung K-9**: Tiefe der Bildebenen nur in Stufe 4, H1 ist Stufe 3 |
+| Hover (`hover: hover`) | Cream: innere 2-px-Kontur `--on-primary` 24 %; Ring: Kontur `--muted` → `--text`; nicht gewähltes Segment: Kontur `--line2` | 150 ms (`--t1`), `--e-out` | bleibt | Hover = Kontur (K-2, K-1, 11.6.3); Dauer K-4 |
+| Drücken | Cream: Füllung `--primary-druck` (`#e2e1db`); Ring: Füllung `--surface2`; keine Deckkraftänderung, keine Skalierung | sofort, zurück 150 ms (`--t1`) | bleibt | **Festlegung K-2**; SG 10.7/3 |
 | Fokus | 2-px-Kontur `--text`, Abstand 2 px, unverdeckt | sofort | bleibt | WCAG 2.4.7, 2.4.11 |
-| Umschalter | Überblendung der Ansicht; Kopf und Umschalter stehen; Sprung an den Anfang ohne Scroll-Animation | 240 ms Deckkraft | Schnitt | SG 10.7/5; Variante [H]: Foto blendet 700 ms zum Astronauten (KA-IA-9) |
-| Cream verlässt das Bild | Kopfknopf erscheint, bei Rückkehr weg | 220 / 165 ms Deckkraft | ohne Übergang | I-2 |
+| Umschalter | Segment wechselt den Zustand, dann Neuaufbau und Sprung an den Anfang ohne Gleiten; die neue Ansicht blendet ein, danach ihr eigener Foto-Auftritt (K-7); Kopf und Umschalter stehen; gleich für Wechselkarte und Menü | Segment 150 ms (`--t1`), Einblenden 220 ms (`--t2`) Deckkraft | Schnitt | **Festlegung K-5**; die Variante KA-IA-9 (Foto blendet 700 ms zum Astronauten) entfällt |
+| Cream verlässt das Bild | Kopfknopf erscheint, bei Rückkehr weg | 220 ms `--e-out` / 165 ms `--e-in` Deckkraft | ohne Übergang | I-2; K-4 |
 
 Bewegung nur zur Ruhe hin, keine Schleife, Bedienschicht ohne Versatz. Variante [H] nach DR 3.5 („drei Ebenen je Szene“): das Tageslicht als
 aus dem Foto geschnittene Ebene folgt 50 ms später; braucht ein Masken-Asset, Rückfall Grundfassung.
@@ -158,7 +164,8 @@ aus dem Foto geschnittene Ebene folgt 50 ms später; braucht ein Masken-Asset, R
   (40 px, nur ohne Server) liegt die Cream bei 590–642, noch im Bild.
 - **360 px:** h1-Zeile 1 (304 px) und Preiszeile Teil 2 (323 px) passen in 328 px; Foto verliert seitlich je 15 px.
 - **320 px:** h1 dreizeilig, kein Querscrollen, E-1 nicht zugesichert; bei 200 % Text fließt der Stapel nach unten (Mindesthöhen).
-- **640–1023 px:** Telefonkomposition, Text ≤ 560 px, Foto volle Breite × 520 px aus dem Schreibtisch-Asset; ab 768 px Umschalter im Kopf.
+- **640–1023 px:** Telefonkomposition mit Rand 24 px (Ordnungslinie x = 24, K-13), Text ≤ 560 px, h1 32 px, Foto volle Breite × 520 px
+  aus dem Schreibtisch-Asset; Umschalter bleibt Glas über dem Foto (x 24–308) und steht erst ab 1024 px im Kopf (K-11; bisher ab 768 px).
 
 **Schreibtisch 1280 × 800:** Split 5 : 7 (12 Spalten à 64,7 px, Abstand 24, Spalte 1040 px ab x 120).
 
@@ -170,8 +177,9 @@ aus dem Foto geschnittene Ebene folgt 50 ms später; braucht ein Masken-Asset, R
 | Handlung | Cream x 120–342, Ring x 354–531, nebeneinander y 499–551 |
 | Anschluss | Abschnittsende 576; Haarlinie H2 bei y 704 über dem Auslauf, Anschnitt 12 % |
 
-**1024 × 768:** Rand 48; Text über Spalte 1–6 (x 48–452); Foto ab x 450 (44 %, DG T1), links über 120 px ausgeblendet; h1 zweizeilig
-(380 px); Knöpfe nebeneinander (403 px), sonst Umbruch; Anschnitt H2 ≈ 12 %.
+**1024 × 768:** Rand 32, Spalte 960, 12 Spalten à 58 px, Rinne 24 (K-13); Text über Spalte 1–5 (x 32–418); Foto ab Spalte 6
+(x 442, 43 %, DG T1), links über 120 px ausgeblendet; h1 40 px zweizeilig (380 px; 40 px ab 1024, K-11); Knöpfe nebeneinander (403 px,
+x 32–435: der Ring endet in der Rinne vor dem Foto, wie `fb-01` G.3), sonst Umbruch; Anschnitt H2 ≈ 12 %.
 
 ## H. Technische Umsetzung
 
@@ -185,13 +193,14 @@ aus dem Foto geschnittene Ebene folgt 50 ms später; braucht ein Masken-Asset, R
   Grund: Heute erscheint das Startbild erst nach rund 547 KB synchronen Skripts (TD 1.4); Ziel LCP ≤ 2,5 s, ≤ 100 KB Skript im ersten
   Bildschirm (SG 10.8). `.hero.b2c`, `p.eyebrow` und die h1 bleiben (Prüfsuite).
 - `.seg.glas` für das Telefon; ohne JavaScript zwei Links auf `#hauseigentuemer` und `#fensterbauer`.
-- `Startbild.auf(wurzel)` (≤ 2 KB): Auftritt nach `img.decode()`, Abbruch beim ersten Scrollen, Kopfknopf über IntersectionObserver;
+- `Startbild.auf(wurzel)` (≤ 2 KB): Auftritt nach `img.decode()`, bei der ersten Eingabe (Scrollen > 4 px, Wischen, Rad, Taste) in 220 ms
+  per Deckkraft in den Endzustand (K-7), Kopfknopf über IntersectionObserver;
   idempotent bei Neuaufbau (SKILL:63-64).
 
 **H.3 CSS:** Bühne `display: grid; isolation: isolate; overflow: clip`; `<picture>` mit `media="(max-width: 639px)"` für den Zuschnitt,
 `width`/`height`, `fetchpriority="high"`, Preload mit `media`; `mask-image` nie animiert; Glas mit `@supports`-Rückfall `rgb(31 31 31/.8)`,
 deckend `.95` bei `prefers-reduced-transparency` und `prefers-contrast: more`; Auftritt nur unter `.js` und
-`prefers-reduced-motion: no-preference`; Schreibtisch-Parallaxe über `animation-timeline: scroll()` in `@supports`, sonst statisch.
+`prefers-reduced-motion: no-preference`; keine Parallaxe (K-9).
 
 **H.4 Assets**
 
@@ -202,11 +211,12 @@ deckend `.95` bei `prefers-reduced-transparency` und `prefers-contrast: more`; A
 | Schreibtisch | `start-hauseigentuemer.webp`; optional 2000 × 2000 ≤ 400 KB für Pixeldichte 2 | vorhanden; optional anfragen |
 
 **Warum ein Zuschnitt:** Im Bestandsfoto liegen Ohren und Augen des Waschbären bei 420 px Höhe auf y ≈ 60–125, x ≈ 180–245; der Umschalter
-(16–276 × 68–112) verdeckte das Gesicht (SKILL:87, geprüft am Modellbild). Vorgaben in Anteilen des Bildes: Ruhezone x 0–79 %, y 0–28 % nur
-Decke und Wand mit weichem Tonwertverlauf; Ohren ab 29 %, Füße bis 69 %, Kopf x 38–62 %; erhobene Pfote über 28 % nur rechts von 79 %;
-Öffnung mit Tageslicht x ≥ 77 %; Tritt und Boden unter 66 % verschattet, detailarm; Licht von rechts; kein Text, kein Wasserzeichen. Prompt:
+(16–300 × 68–112) verdeckte das Gesicht (SKILL:87, geprüft am Modellbild). Vorgaben in Anteilen des Bildes: Ruhezone x 0–81 % (Umschalter
+bis x 300 plus 16 px), y 0–28 % nur Decke und Wand mit weichem Tonwertverlauf; Ohren ab 29 %, Füße bis 69 %, Kopf x 38–62 %; erhobene Pfote
+über 28 % nur rechts von 81 %; Öffnung mit Tageslicht x ≥ 77 %; Tritt und Boden unter 66 % verschattet, detailarm; Licht von oben rechts
+(Haus-Token `--licht-x` −0,6, `--licht-y` 0,8, K-24), wie aus der Öffnung im Bestandsfoto; kein Text, kein Wasserzeichen. Prompt:
 „Same scene as the reference photo, camera pulled back and up: calm plaster ceiling above, raccoon smaller and right of centre, window opening
-with daylight at the right edge, stool and floor in soft shadow. Photorealistic, warm daylight from the right, no text, no watermark.“
+with daylight at the right edge, stool and floor in soft shadow. Photorealistic, warm daylight from the upper right, no text, no watermark.“
 
 **H.5 Leistung:** LCP (H.2); `backdrop-filter` nur auf 260 × 44 px; `decoding="async"`, Start erst nach `decode()`; `will-change` nur während
 der 900 ms; CLS ≤ 0,1 über feste Maße; bis LCP ≤ 350 KB.
