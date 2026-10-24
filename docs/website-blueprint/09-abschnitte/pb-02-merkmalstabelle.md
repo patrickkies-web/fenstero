@@ -5,8 +5,10 @@ Seite: `/konfigurator-bedingungen/` (Paketbedingungen) · Position: 2 (P-2 nach 
 ID `pb-02-merkmalstabelle`. Phase I, Stand 24.10.2026. Reine Planung: Das Repository wurde gelesen, nichts gebaut oder geändert.
 Kennzeichnungen wie in 08 (**[V]**, **[H]**, **Textentwurf**, **Festlegung I**, **Abweichung … Freigabe nötig**). Grundlage: 08 8.3.6,
 EV 7.5.8, EA AB-6, IA K20, DG 2.3.14 (T12), 2.4, DG-E-1, SG 10.1, 10.5, 10.10, Ergebnis B, SKILL, GEST:419, :432. `PB` =
-`web/konfigurator-bedingungen/index.html`. `10-paketentscheidung.md` liegt nicht vor; die Tabelle enthält keine Preise
-(`functions/pakete-seite.js:217` filtert `name` und `preis`) und folgt Änderungen an `web/assets/pakete.js` von selbst.
+`web/konfigurator-bedingungen/index.html`. `10-paketentscheidung.md` (verbindlich für Pakete) berührt den Abschnitt dreimal:
+`web/assets/pakete.js` bleibt unverändert (10.4 H); der Vergleich in `fb-07` bekommt denselben klebenden Kopf aus drei Kurznamen mit
+Zellen à 114 px (J-R7, 10.4 G), dem diese Tabelle folgt; „nicht enthalten“ statt „nein“ gilt nur dort, nicht im Vertrag (H.1). Preise
+enthält die Tabelle nicht (`functions/pakete-seite.js:217` filtert `name` und `preis`).
 
 ## A. Abschnitt und Funktion
 
@@ -39,7 +41,7 @@ Kurznamen „Essential“, „Essential Plus“, „Signature“ sind Bestand: `
 Verkaufsseite (`:135`) und im Vertragstext selbst („bei Essential deutlich …“, PB:80). Rahmen: h2 „§ 2 Leistungen“ `#leistungen` (PB:37)
 und Absatz (2) mit dem Richtwert-Vorbehalt (PB:39), der für die letzten zwei Zeilen gilt.
 
-Zeilen, die die Maße bestimmen (Telefon, Wertspalte 111 px, 15 px):
+Zeilen, die die Maße bestimmen (Telefon, Wertspalte 114 px, 15 px):
 
 | Zeile | längster Wert (Bestand) | Zeilen |
 |---|---|---|
@@ -77,20 +79,28 @@ Bild. Ordnungslinie ist die linke Textkante der Seite (x 16 bzw. x 120), an der 
 | Element | Lage und Maß |
 |---|---|
 | Kopfband | volle Inhaltsbreite, 40 px hoch (13/18 + 11 + 11), klebt bei `top: var(--kopf-h)` = 56 → Band y 56–96; Unterkante 1 px `--line2` über x 16–374 |
-| Spaltenköpfe | „Essential“ ab x 16, „Essential Plus“ ab x 139, „Signature“ ab x 263, je 111 px breit, linksbündig; „Essential Plus“ ≈ 90 px, einzeilig. „Leistung“ und das Präfix „EEZI “ visuell verborgen, im DOM und für Vorleser vorhanden |
-| Merkmalszeile | Polster 12 oben, 12 unten; Zeilenkopf über volle 358 px; Erläuterung direkt darunter (gleiche Zelle); 6 px Abstand; drei Werte in 3 × 111,3 px mit 12 px Rinne, Spalten bündig mit den Köpfen; Unterkante 1 px `--line` |
+| Spaltenköpfe | „Essential“ ab x 16, „Essential Plus“ ab x 138, „Signature“ ab x 260, je 114 px breit, linksbündig; „Essential Plus“ ≈ 90 px, einzeilig. „Leistung“ und das Präfix „EEZI “ visuell verborgen, im DOM und für Vorleser vorhanden |
+| Merkmalszeile | Polster 12 oben, 12 unten; Zeilenkopf über volle 358 px; Erläuterung direkt darunter (gleiche Zelle); 6 px Abstand; drei Werte in 3 × 114 px mit 8 px Rinne, Spalten bündig mit den Köpfen; Unterkante 1 px `--line` |
 | Höhen | Grundzeile 72 px (Kopf 21 + 6 + Wert 21 + 24); + 21 je Erläuterungs- oder Wertzeile; Absender 219 px; 5–7 Zeilen je Bildschirm (664 − 56 − 40 = 568 px) |
 
-Die drei Spalten teilen die vier Telefonspalten in Drittel (je 1⅓), weil drei gleichrangige Pakete gleich breit sein müssen. 08 nennt
-≈ 114 px bei 8 px Rinne; 12 px (111 px) trennt den Flattersatz benachbarter Spalten sichtbar, die längsten Wörter passen weiter. Die
-Länge übersteigt die ≈ 2 BH aus 08, weil 25 Zeilen mit drei Werten ohne Streichung nicht kürzer werden; heute (`recht.css:60-70`, jeder
-Wert mit eigenem Etikett) sind es nach den CSS-Werten geschätzt ≈ 5.500 px ≈ 8 BH.
+Die drei Spalten teilen die vier Telefonspalten in Drittel (je 1⅓), weil drei gleichrangige Pakete gleich breit sein müssen; 114 px bei
+8 px Rinne wie in 08 und im Vergleich von `fb-07` (10.4 G), damit beide Tabellen dasselbe Raster zeigen. Die längsten Wörter passen
+(B.1). Die Länge übersteigt die ≈ 2 BH aus 08, weil 25 Zeilen mit drei Werten ohne Streichung nicht kürzer werden; heute
+(`recht.css:60-70`, jeder Wert mit eigenem Etikett) sind es nach den CSS-Werten geschätzt ≈ 5.500 px ≈ 8 BH.
 
-**C.3 Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 64,7 px, Rinne 24, Kopf 64 px. Die Tabelle nimmt die Textspalte
-der Seite ein: Spalten 1–9 (x 120–894, 774 px), damit sie mit dem Vertragstext fluchtet; die Spalten 10–12 bleiben frei. Spaltenstarts
-auf dem Raster: Merkmal Spalte 1 (x 120, Text 242 px), Essential Spalte 4 (x 386), Plus Spalte 6 (x 563), Signature Spalte 8 (x 741),
-Wertspalten je 153 px Text. Umsetzung als `table-layout: fixed`, `col` 34,4 % · 23 % · 23 % · 19,6 %, Zellpolster rechts 24 px außer in
-der letzten Spalte. Volle Paketnamen im Kopf („EEZI Essential Plus“ ≈ 122 px, einzeilig).
+**C.3 Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 64,7 px, Rinne 24, Kopf 64 px. Die Breite gibt die Seite vor
+(`re-01`, parallel in Phase I entstanden); die Tabelle wählt ihre Form selbst nach der Breite ihres Containers:
+
+- **Vier Spalten (08), Tabelle ≥ 700 px:** ohne die Abschnittsliste aus `re-01` [H] Spalten 1–9 (x 120–894, 774 px), wie dort die
+  Cookie-Tabelle. Spaltenstarts auf dem Raster: Merkmal Spalte 1 (x 120, Text 242 px), Essential Spalte 4 (x 386), Plus Spalte 6
+  (x 563), Signature Spalte 8 (x 741), Werte je 153 px Text. `table-layout: fixed`, `col` 34,4 % · 23 % · 23 % · 19,6 %, Zellpolster
+  rechts 24 px außer in der letzten Spalte; Kopfband 44 px.
+- **Festlegung I-2, Tabelle < 700 px:** Steht rechts die klebende Abschnittsliste (`re-01` [H] ab acht h2; die Paketbedingungen haben
+  15), bleibt nur die Lesespalte 1–7 (x 120–717, 597 px). Vier Spalten drückten die Werte dort auf ≈ 107 px Text, schmaler als am
+  Telefon. Deshalb gilt die Telefonkomposition, nur breiter: Zeilenkopf über 597 px, drei Wertspalten à 194 px (Rinne 8, Starts x 120,
+  322, 523), Kopfband 44 px. Abweichung von 08 („Schreibtisch: vier Spalten“) aus Platzgründen.
+
+Volle Paketnamen ab 480 px Tabellenbreite („EEZI Essential Plus“ ≈ 122 px, einzeilig).
 
 **C.4 Größenhierarchie und Schrift.** In der Tabelle zwei Größen; Rang über Gewicht und Tonwert (DG-E-1, Lösung C für Unterseiten).
 
@@ -115,7 +125,7 @@ bleibt leer. Keine interaktive Komponente im Abschnitt; die einzige Handlung ist
 |---|---|---|
 | Klebekante | `top: var(--kopf-h)` (56 / ab 1024: 64) | sitzt bündig unter dem opaken Kopf (`rh-01` C.6) |
 | Kopfband | 40 px Telefon, 44 px Schreibtisch, Hintergrund `--bg` deckend | Zeilen verschwinden sauber darunter; T12 verbietet halbtransparente Köpfe |
-| Umbruchgrenze | Container ≥ 640 px → vier Spalten | Merkmal braucht ≥ 200 px, Werte ≥ 130 px |
+| Formgrenzen | Container ≥ 480 px → volle Namen; ≥ 700 px → vier Spalten | Wertspalte ≥ 140 px Text, Merkmal ≥ 220 px |
 | Zeilenabstand | 21 px (1,4) | kurze Phrasen in schmalen Spalten; Fließtext bleibt 1,6 |
 | Silbentrennung | `hyphens: auto`, `overflow-wrap: break-word` | 200 % Text und 320 px ohne Überlauf (`lang="de"`, PB:2) |
 | Linien | `border` 1 px, nicht `box-shadow` | bleibt unter `forced-colors` sichtbar |
@@ -140,10 +150,9 @@ erlaubt.“
 | Interaktive Effekte | keine | 0 | nichts in der Tabelle ist bedienbar, also reagiert nichts |
 
 **Bewusst weggelassen:** Karte mit Ring (kostet am Telefon ≥ 24 px Breite); Färbung von „ja“/„nein“ und grüne Haken (Wertung im
-Vertragstext; „Originalfotos per Link: nein“ sähe bei Signature wie ein Mangel aus, obwohl dort Unterlagen gespeichert werden);
-hervorgehobene Spalte „Empfohlen“ (gehört zu `fb-06`); Gruppentitel (neuer Text im Vertrag) und Lücken ohne Titel; Filter „nur
-Unterschiede“ (leistet `fb-07`); Zebrastreifen; Hover; eine Kopfkante, die erst beim Kleben erscheint (bräuchte Skript). Glas, Licht und
-Signature schließt T12 aus.
+Vertrag; „Originalfotos per Link: nein“ sähe bei Signature wie ein Mangel aus, obwohl dort Unterlagen gespeichert werden); Spalte
+„Empfohlen“ (gehört zu `fb-06`); Gruppentitel (neuer Vertragstext); Filter „nur Unterschiede“ (leistet `fb-07`); Zebrastreifen; Hover;
+eine Kopfkante erst beim Kleben (bräuchte Skript). Glas, Licht und Signature schließt T12 aus.
 
 **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig (PB-AB-1):** GEST:432 verlangt Tabellen als „Karte mit Ring“ und am
 Telefon „Karten untereinander … Spaltentitel aus `data-k`“. Hier: keine Karte, am Telefon drei Spalten unter klebendem Kopf. Grund: 08
@@ -152,7 +161,7 @@ heutige Kartenform (`data-k` bleibt im Markup). In 08 8.4.5 nachtragen.
 
 **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig (PB-AB-2):** GEST:419 und :432 setzen Spaltenköpfe in Versalien.
 Hier: Paketnamen in ihrer Schreibweise (SKILL:71), Sperrung .02 em wie „Maße und Dateinamen“ der Technikstimme (DR:100-101). Grund:
-„ESSENTIAL PLUS“ braucht bei 13/600 ≈ 118–125 px und bräche in 111 px um; der Kopf würde 57 statt 40 px hoch. Rückfall: Versalien,
+„ESSENTIAL PLUS“ braucht bei 13/600 ≈ 118–125 px und bräche in 114 px um; der Kopf würde 57 statt 40 px hoch. Rückfall: Versalien,
 zweizeiliger Kopf.
 
 E-8 („am Telefon keine Anheftstrecke“) betrifft Bühnenszenen mit scrollgekoppelter Bewegung (SG 10.7); der klebende Spaltenkopf ist eine
@@ -185,34 +194,36 @@ Erwartete, nicht gemessene Aufmerksamkeit.
 | Ohne JavaScript | identisch |
 | Drucken | Vier-Spalten-Fassung, `thead` wiederholt je Seite, nicht klebend |
 
-Begründung: Arbeitsfläche ohne Auftritt (E-13; DG Dosierregel 1). Die Forderung „Bewegung mit Tiefe und Physik“ (SKILL:43) gilt den
-Bildträgern der Verkaufsflächen; im Vertrag stört jede Bewegung das Lesen.
+Begründung: Arbeitsfläche ohne Auftritt (E-13). „Bewegung mit Tiefe und Physik“ (SKILL:43) gilt den Bildträgern der Verkaufsflächen;
+im Vertrag stört jede Bewegung das Lesen.
 
 ## G. Responsive Design
 
-**Telefon 390 × 844 (Hauptansicht, eigene Komposition).** Wie C.2. Bei 360: Spalten 103 px, „Vertragsdauer“ passt knapp, sonst trennt
-`hyphens`. Bei 320 (WCAG 1.4.10): Spalten 90 px, Silbentrennung greift, kein Querscrollen [V]. Bei 200 % Text bricht „Essential Plus“
-zweizeilig, das Band wächst auf ≈ 58 px (zusammen mit dem Kopf 114 px = 17 % von 664). Telefon quer (844 × 390): Containerbreite
-812 → Vier-Spalten-Fassung; Kopf klebt nicht (Fenster < 600 px).
+**Telefon 390 × 844 (Hauptansicht, eigene Komposition).** Wie C.2. Bei 360: Spalten 104 px, „Vertragsdauer“ passt knapp, sonst trennt
+`hyphens`. Bei 320 (WCAG 1.4.10): Spalten 91 px, Silbentrennung greift, kein Querscrollen [V]. Bei 200 % Text bricht „Essential Plus“
+zweizeilig, das Band wächst auf ≈ 58 px (zusammen mit dem Kopf 114 px = 17 % von 664). Telefon quer (844 × 390): Container ≈ 812 px
+→ vier Spalten; Kopf klebt nicht (Fenster < 600 px).
 
-**Schreibtisch 1280.** Wie C.3: 774 px, Raster 1/4/6/8, volle Namen, Band 44 px bei y 64–108, Zellpolster 14 oben und unten. Tabelle
-≈ 1.900–2.000 px hoch (Schätzung), weil Erläuterungen in 242 px zwei- bis dreizeilig laufen.
+**Schreibtisch 1280.** Wie C.3. Kopfband bei y 64–108, also 13,5 % der Höhe. Tabelle ≈ 1.900–2.200 px hoch (Schätzung): in vier Spalten
+laufen die Erläuterungen in 242 px zwei- bis dreizeilig, in der Lesespalte die Werte in 194 px bis fünfzeilig (Absender).
 
-**Schreibtisch 1024.** Rand 32, Spalte 960, Spalten ≈ 58, Rinne 24; Tabelle über Spalten 1–9 = 714 px. Merkmal 222 px Text, Werte je
-140 px; „EEZI Essential Plus“ bleibt einzeilig. Prozentwerte wie bei 1280 (Abweichung vom Raster ≤ 2 px).
+**Schreibtisch 1024.** Rand 32, Spalte 960, Spalten ≈ 58, Rinne 24. Mit Abschnittsliste Lesespalte 1–7 = 550 px → Telefonkomposition,
+Werte je 178 px. Ohne Liste Spalten 1–9 = 714 px → vier Spalten, Merkmal 222 px Text, Werte je 140 px; Prozentwerte wie bei 1280
+(Abweichung vom Raster ≤ 2 px).
 
 ## H. Technische Umsetzung
 
 **H.1 Geänderte Dateien.**
 
-- `functions/pakete-seite.js` `leistungen()`: Klasse `merkmale` statt `tabelle`; `colgroup`; ARIA-Rollen (Tabellenrollen gehen in
-  Safari bei geändertem `display` sonst verloren); erste Zelle als `th scope="row"`; Präfix als `<span class="eezi">EEZI </span>`.
-  `data-k` bleibt (Rückfall PB-AB-1). Danach `node scripts/bedingungen-pdf.mjs`.
-- PB:39: `id="merkmale"` am Absatz (2). Kein Text ändert sich; `bloecke()` liest nur Text, die Prüfsumme bleibt, die PDFs bleiben gültig.
-- `web/assets/recht.css` (oder die gemeinsame Unterseiten-CSS, sobald `re-01` sie festlegt): Block `.merkmale`. Der Rahmen braucht
-  `overflow: visible`; das heutige `overflow-x: auto` (`recht.css:55`) machte ihn zum Scrollcontainer, und `sticky` wirkte nicht (SG 10.5:
-  `clip` statt `hidden`).
-- `fristen()` kann dieselbe Klasse bekommen (Entscheidung in `pb-03`).
+- `functions/pakete-seite.js` `leistungen()`: Klasse `merkmale` statt `tabelle`, `colgroup`, ARIA-Rollen (sonst verliert Safari bei
+  geändertem `display` die Tabellenrollen), erste Zelle `th scope="row"`, Präfix `<span class="eezi">EEZI </span>`; `data-k` bleibt
+  (Rückfall PB-AB-1). Danach `node scripts/bedingungen-pdf.mjs`.
+- `wertText()` (`:47-57`) bleibt für `leistungen()` unverändert [V]. Die von 10.4 H verlangte Fassung „nicht enthalten“ statt „nein“
+  bei Zahlen (Zeile 51) gilt nur in `vergleich()`, als Parameter oder eigene Hilfsfunktion. Sonst änderte sich der Vertragstext (Fotos
+  bei Essential, Zugänge bei Essential und Plus), die Prüfsumme bräche, und `PAKET_STAND` bräuchte eine neue, geprüfte Fassung.
+- PB:39: `id="merkmale"` am Absatz (2). `bloecke()` liest nur Text: Prüfsumme und PDFs bleiben gültig.
+- `web/assets/recht.css` (oder die Unterseiten-CSS aus `re-01`): Block `.merkmale` ohne `overflow-x: auto` (`recht.css:55`), sonst wird
+  der Rahmen Scrollcontainer und `sticky` wirkt nicht (SG 10.5). `fristen()` kann dieselbe Klasse bekommen (Entscheidung in `pb-03`).
 
 **H.2 Markup (Kern).**
 
@@ -236,11 +247,15 @@ zweizeilig, das Band wächst auf ≈ 58 px (zusammen mit dem Kopf 114 px = 17 % 
 .merkmale thead{display:block;position:sticky;top:var(--kopf-h);z-index:1;background:var(--bg);border-bottom:1px solid var(--line2)}
 .merkmale thead th{font-size:13px;line-height:18px;font-weight:600;letter-spacing:.02em;color:var(--muted);padding:11px 0}
 .merkmale tbody{display:block}
-.merkmale tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:12px}
+.merkmale tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:8px}
 .merkmale tbody tr{row-gap:6px;padding:12px 0;border-bottom:1px solid var(--line)}
 .merkmale tbody th{grid-column:1/-1}
 .merkmale thead th:first-child,.merkmale .eezi{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-@container (min-width:640px){
+@container (min-width:480px){
+  .merkmale .eezi{position:static;width:auto;height:auto;overflow:visible;clip-path:none}
+  .merkmale thead th{padding-block:13px}
+}
+@container (min-width:700px){
   .merkmale table{display:table;table-layout:fixed;border-collapse:separate;border-spacing:0}
   .merkmale thead{display:table-header-group;position:static;border:0}
   .merkmale tbody{display:table-row-group} .merkmale tr{display:table-row;padding:0;border:0}
@@ -250,7 +265,7 @@ zweizeilig, das Band wächst auf ≈ 58 px (zusammen mit dem Kopf 114 px = 17 % 
   .merkmale thead th:first-child,.merkmale .eezi{position:static;width:auto;height:auto;overflow:visible;clip-path:none}
   .merkmale col:nth-child(1){width:34.4%} .merkmale col:nth-child(2),.merkmale col:nth-child(3){width:23%}
 }
-@media (min-height:600px){@container (min-width:640px){.merkmale thead th{position:sticky;top:var(--kopf-h);z-index:1}}}
+@media (min-height:600px){@container (min-width:700px){.merkmale thead th{position:sticky;top:var(--kopf-h);z-index:1}}}
 @media print{.merkmale thead,.merkmale thead th{position:static}}
 ```
 

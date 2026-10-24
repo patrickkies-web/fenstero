@@ -3,9 +3,8 @@
 Seite: `/fuer-fensterbauer/` (eingebettet in `/#fensterbauer`) · Position: 8 von 15 (dritter Block von Kapitel 04 „Ihre Marke“, nach 04.2 Entscheidungshilfe und Vergleich, vor 05 Ihre Anfrage) · Intensitätsstufe: 1 ruhig (Typ T6 ohne Held, Arbeitsansicht)
 
 Phase I, Planungsdokument; das Repository wurde nur gelesen. Kürzel wie in [08-zielarchitektur.md](../08-zielarchitektur.md) (Z), dazu
-PB = `web/konfigurator-bedingungen/index.html`, VK = `web/fuer-fensterbauer/index.html`, PS = `functions/pakete-seite.js`. **[V]**
-verbindlich, **[H]** Hypothese mit Rückfall. Alle Lagen sind geplant, nicht gemessen. `10-paketentscheidung.md` liegt nicht vor; Preise und
-Paketwahl berührt dieser Block nicht.
+PB = `web/konfigurator-bedingungen/index.html`, VK = `web/fuer-fensterbauer/index.html`, PS = `functions/pakete-seite.js`. **[H]** Hypothese
+mit Rückfall. Lagen sind geplant, nicht gemessen. Preise und Paketwahl berührt der Block nicht (`10-paketentscheidung.md` liegt nicht vor).
 
 ## A. Abschnitt und Funktion
 
@@ -55,7 +54,6 @@ Paketwahl berührt dieser Block nicht.
 | Frage | „Unsicher, welches Paket passt?“ | Textentwurf (Z; KB VB2) |
 | Ring | „Rückruf oder Nachricht“ | Textentwurf (Z; KB VB2) |
 | Rechtshinweis | „Angebot nur für Unternehmer im Sinne von § 14 BGB, nicht für Verbraucher. Alle Preise {steuerText}. Ihr Kunde zahlt nichts.“ | Satz 1 und 3 wörtlich VK:188, Satz 2 Textentwurf |
-| Paragrafen (nur ab 1024, [H]) | „§ 3 (2)“, „§ 7 (2)“, „§ 5 (3)“, „§ 4 (3)“, „§ 7 (1)“ | Bestand (Gliederung PB) |
 
 Sichtbar sind in Zustand A rund 75 Wörter, davon 45 im Festblock.
 
@@ -108,11 +106,10 @@ Zweitlinie (SG 10.1/1). Der Ring sitzt in den Spalten 1–3 (x 16–260).
 | Ring | 16–≈ 260 | 422–474 | 52 px, Schrift 17/700 (`.btn`), Rand 2 px `--muted` |
 | Rechtshinweis | 16–374 | 498–558 | 13/20, 500, `--muted`, drei Zeilen |
 
-Der Block ist ≈ 558 px hoch (0,66 BH; Z plant 0,55). Die ≈ 94 px mehr kommen aus dem 44-px-Ziel des Links, der Standzeile, dem Titel und der
-zweizeiligen Grenze. 05 rückt dadurch um ≈ 94 px nach unten; ob das Formular bei 664 px in Bildschirm 9 bleibt, entscheidet die
-Bildschirmzählung (EV X9). Rückfall in dieser Folge: Titel nur für Vorleseprogramme (−32 px), dann „Ihr Kunde zahlt nichts.“ streichen
-(−20 px). Bei 664 px Höhe passen alle 558 px in die 608 px unter dem Kopf: Fakten, Grenze und Gesprächsweg sind in einem Bildschirm
-zusammen sichtbar (SKILL:86).
+Höhe ≈ 558 px (0,66 BH; Z plant 0,55). Das Mehr von ≈ 94 px kommt aus dem 44-px-Linkziel, der Standzeile, dem Titel und der zweizeiligen
+Grenze und schiebt 05 entsprechend nach unten; ob das Formular bei 664 px in Bildschirm 9 bleibt, zeigt die Bildschirmzählung (EV X9).
+Rückfall: Titel nur für Vorleseprogramme (−32 px), dann „Ihr Kunde zahlt nichts.“ streichen (−20 px). Bei 664 px passt der ganze Block in
+die 608 px unter dem Kopf, Fakten, Grenze und Gesprächsweg stehen zusammen in einem Bildschirm (SKILL:86).
 
 **C.3 Verhältnisse und Hierarchie**
 
@@ -122,19 +119,17 @@ zusammen sichtbar (SKILL:86).
   kurzen Zeilen und in den Gruppenabständen.
 - **Abstände (G6, 1 : 3 : 6):** 8 px zwischen den Fakten (eine Gruppe), 4 px Fakt → Grenze, 16 px Liste → Link, 24 px zwischen den Gruppen,
   48 px zu 04.2, 96 px zu 05.
-- **Asymmetrie:** alles linksbündig, Flatterrand rechts, nichts zentriert (GEST Aufbau; G5).
-- **Ebenen:** Hintergrund 0 Grund `#161616` · Mittelgrund leer (kein Bild, Z 20 unbesetzt) · Vordergrund 30 Bedienschicht · 40 Kopf beim
-  Überscrollen.
-- **Interaktive Elemente:** Der Link liegt bei ≈ 37–42 % der Blockhöhe, der Ring bei ≈ 76–85 %. Steht der Block mittig im Bildschirm, liegt der
-  Ring im unteren Drittel, also im Daumenbereich.
+- **Asymmetrie und Ebenen:** alles linksbündig mit Flatterrand, nichts zentriert (G5). Hintergrund 0 Grund `#161616`, Mittelgrund leer (Z 20
+  unbesetzt), Vordergrund 30 Bedienschicht, darüber 40 Kopf beim Überscrollen.
+- **Interaktive Elemente:** Link bei ≈ 55–63 % der Blockhöhe, Ring bei ≈ 76–85 %. Steht der Block mittig im Bildschirm, liegt der Ring im
+  unteren Drittel, im Daumenbereich.
 
 **C.4 Technische Startwerte**
 
 | Wert | Start | Begründung |
 |---|---|---|
 | Zeilenhöhe der Fakten | 22 px (≈ 1,47) | 4-px-Raster; die DNA nennt 1,5–1,6 für Fließtext. Listen mit kurzen Zeilen brauchen weniger, `.vk-liste` hat heute 1,4 |
-| Textbreite Telefon | 326 px ≈ 43 Zeichen | DNA unter 640 px ≥ 35 Zeichen |
-| Textbreite Schreibtisch | 6 Spalten, 476 px ≈ 62 Zeichen | DNA 45–75 |
+| Textbreite | Telefon 326 px ≈ 43 Zeichen; Schreibtisch 476 px ≈ 62 Zeichen | DNA: unter 640 px ≥ 35, sonst 45–75 Zeichen |
 | Haken | 6 × 11 px, Strich 2,5 px `--accent`, gedreht um 45°, Mitte auf der ersten Zeile | Bestand `.vk-liste li::before` (`web/assets/verkauf.css:35`) |
 | Ring-Rand | 2 px `--muted` statt `--line2` | `--line2` erreicht ≈ 1,6 : 1 und verfehlt die 3 : 1 für die einzige Grenze des Knopfs (DG-E-10) |
 | Schrift 13 px bei Titel, Standzeile, Rechtshinweis | 13 | Abweichung von der DNA (Bedienschrift ≥ 14 px, B.5), funktional begründet: Markenskala und Prüfsuite lassen nur 13/15/17/24/40 (32) zu (SKILL:69); Kontrast ≥ 5,8 : 1. Den Sprung ≥ 3× verfehlt die Arbeitsansicht zulässig (DG-E-1 C) |
@@ -146,8 +141,8 @@ Nr. 1, 3, 5, 6, 9, 10 und 11. Variable Mittel sind hier fast alle auf 0 gestellt
 
 | Eigenschaft | Ausgestaltung | Intensität (0–4) | Wirkung und Beitrag zur Funktion |
 |---|---|:-:|---|
-| Tiefe, Z-Achse | zwei Ebenen: Grund und Bedienschicht; der Kopf überdeckt beim Scrollen (Nr. 2 nur Ziel) | 0 | Nichts wirkt inszeniert, wo es um Verbindlichkeit geht |
-| Material, Transparenz | kein Glas, keine Kartenfläche, opaker Grund | 0 | Glas bleibt dem Startbild vorbehalten (Dosierregel 3). Ohne Karte konkurriert der Block nicht mit den Paketkarten |
+| Tiefe, Z-Achse | zwei Ebenen, Grund und Bedienschicht; der Kopf überdeckt beim Scrollen (Nr. 2 nur Ziel) | 0 | nichts Inszeniertes, wo es um Verbindlichkeit geht |
+| Material, Transparenz | kein Glas, keine Kartenfläche, opaker Grund | 0 | Glas gehört dem Startbild (Dosierregel 3); ohne Karte keine Konkurrenz zu den Paketkarten |
 | Licht, Schatten | keines; kein Schein am Ring, kein Schatten | 0 | Nr. 6, 10: Fakten sollen nicht „beworben“ wirken |
 | Formen | Vollrundung nur am Ring (Pille, `--pill`); Haken als Strichform; kein Formbruch | 1 | eine Formfamilie (Nr. 5); der Ring reimt sich auf die Kartenknöpfe darüber |
 | 3D-Objekte, Bildintegration | keine | 0 | DG-E-1: der Held fehlt bewusst; das Platzhalterbild alter Art kommt nicht zurück |
@@ -158,11 +153,9 @@ Nr. 1, 3, 5, 6, 9, 10 und 11. Variable Mittel sind hier fast alle auf 0 gestellt
 | Perspektive | frontal | 0 | Nr. 1 |
 | Interaktive Effekte | Zustände über Kontur und Füllung, 220 ms | 1 | Rückmeldung ohne Versatz oder Skalierung (SG 10.7/1-3) |
 
-**Bewusst weggelassen:** Kachel oder Karte um den Festblock (sie würde mit den Paketkarten um Gewicht konkurrieren). Gezogene Haken per
-Lottie (die gehören dem Kundenschutz in 06.2; zwei Haken-Zeichnungen wären doppelt). Schild-, Schloss- oder Siegel-Symbole (wirken wie
-erfundene Belege, SKILL:49). Pfeil im Kreis am Ring (gehört der Hauptaktion, B.3.7). Grünes Wort im Titel (hier ist keine Überschrift mit
-grünem Wort vorgesehen). Einblenden beim Scrollen, Hervorhebung der Grenze in Warnfarbe (sie ist eine Bedingung, kein Fehler; Warnfarbe
-gibt es nur für Fehler, B.5).
+**Bewusst weggelassen:** Karte um den Festblock (Konkurrenz zu den Paketkarten); gezogene Haken per Lottie (gehören 06.2); Schild-, Schloss-
+oder Siegel-Symbole (wirken wie erfundene Belege, SKILL:49); Pfeil im Kreis am Ring (gehört der Hauptaktion, B.3.7); grünes Wort im Titel;
+Einblenden beim Scrollen; Warnfarbe an der Grenze (sie ist eine Bedingung, kein Fehler, B.5).
 
 ## E. Visual Attention Architecture
 
@@ -172,8 +165,8 @@ Erwartete Aufmerksamkeit aus Gestaltungsregeln, nicht gemessen.
   im Block. Sie wirkt als typografischer Anker anstelle eines Bildes.
 - **Sekundärer Fokus:** der Ring. Er ist die einzige umrandete Fläche und die größte Schrift im Block. Er gewinnt gegen den Kartenknopf
   darüber nicht, weil er nur Kontur hat und keine Cream-Fläche (Rang über Füllung, B.3.7).
-- **Erwartete Reihenfolge:** Titel (klein, leise) → Zeile 1 → Bruch im Hakenrhythmus bei der Grenze (gewollt: die Ausnahme fällt auf) →
-  Zeilen 3–5 → Link → Frage → Ring → Rechtshinweis (wird überflogen, ist aber erreichbar).
+- **Erwartete Reihenfolge:** Titel → Zeile 1 → Bruch im Hakenrhythmus bei der Grenze (gewollt) → Zeilen 3–5 → Link → Frage → Ring →
+  Rechtshinweis (überflogen, aber erreichbar).
 
 | Paar | Kontrast (berechnet) | Rolle |
 |---|---|---|
@@ -183,8 +176,8 @@ Erwartete Aufmerksamkeit aus Gestaltungsregeln, nicht gemessen.
 | Titel, Standzeile, Rechtshinweis `--muted` | ≈ 5,8 : 1 | Nebenzeilen, AA erfüllt |
 | Ring-Rand `--muted` | ≈ 5,8 : 1 | Grenze des Bedienelements ≥ 3 : 1 |
 
-- **CTA:** keine Cream in diesem Block. Die Cream des Bildschirms gehört dem Knopf der empfohlenen Karte (über dem Block, zum Teil noch im
-  Bild) und danach „Frage senden“ in 05. Der Ring ist der zweite Weg, nicht die Hauptaktion.
+- **CTA:** keine Cream im Block; sie gehört dem Knopf der empfohlenen Karte darüber und danach „Frage senden“ in 05. Der Ring ist der zweite
+  Weg, nicht die Hauptaktion.
 - **Mögliche Ablenkungen:** (1) Der Kopf-Ring „Paket anfragen“ (rh-01) hat dasselbe Ziel, setzt das Paket aber nicht um und liegt außerhalb
   der Daumenzone; das bleibt so. (2) Der Link führt von der Seite weg, für FB-6 und Mitentscheider gewollt; zurück über den Kopf-Ring dort.
   (3) Ein geöffneter Vergleich in 04.2 schiebt den Block um ≈ 12 Zeilen nach unten, aber nie hinter das Formular.
@@ -196,21 +189,19 @@ Erwartete Aufmerksamkeit aus Gestaltungsregeln, nicht gemessen.
 | Ereignis | Verhalten | Dauer, Kurve | Begründung |
 |---|---|---|---|
 | Scrollen | nichts bewegt sich, nichts erscheint; der Inhalt steht ab dem ersten Bild | – | Z; Dosierregel 1; SG 10.7/4 (Bedienschicht steht still) |
-| Hover Ring (nur `@media (hover: hover)`) | Rand `--muted` → `--text` | 220 ms `--e-out` (Bestand `.btn`) | Zustand über Kontur (SG 10.7/8) |
+| Hover Ring (nur `@media (hover: hover)`) | Rand `--muted` → `--text` | 220 ms `--e-out` (Tokens `--t2`, `--e-out`) | Zustand über Kontur (SG 10.7/8) |
 | Hover Link | Unterstreichung `--line2` → `--text` | 220 ms (Bestand `.link`) | gleich |
 | Drücken Ring | Füllung transparent → `--surface2`, **ohne** `scale(.98)` | 220 ms | SG 10.7/3: keine Skalierung (wie fb-01) |
 | Fokus | Umriss 2 px `--text`, Abstand 2 px, folgt der Pillenform | sofort | WCAG 2.4.7, 1.4.11 |
 | Tipp Ring | `select[name="paket"]` = „“ („Noch offen“) über den vorhandenen Zuhörer; dann Sprung zu `#frage` | eingebettet: weiches Scrollen über den Handler (`web/assets/portal.js:835-842`), bei „weniger Bewegung“ `auto`; eigenständig: nativer Sprung | Bestand, keine neue Bewegung; die Seite entscheidet weiches Scrollen einheitlich (rh-01, rh-02), nicht dieser Block |
 | Nach dem Sprung | Fokus auf h3 `#frage` (eingebettet schon so, `tabindex="-1"`); eigenständige Seite: `tabindex="-1"` am h3 in 05 setzen, damit Vorleseprogramme dort landen | – | Schnittstelle zu fb-09 |
-| Tipp Link | Seitenwechsel im selben Tab | Browser | – |
 
 - **Charakteristik:** ruhig, ohne Richtung, ohne räumliche Veränderung. Bewegung mit Tiefe und Physik (SKILL:43) trägt nebenan die Wischreihe
   in 04.1; hier wäre sie eine Verkaufsgeste, wo Vertrauen entstehen soll.
 - **Weniger Bewegung:** identisch; nur der eingebettete Sprung ist sofort (Bestand). Farbwechsel bleiben.
 - **Ohne JavaScript:** alles steht, der Ring springt nativ zu `#frage`. Das Paketfeld steht ohnehin auf „Noch offen“ (erste Option).
-- **Weitergetragener Zustand, Empfehlung an fb-15:** Der Tipp auf den Ring heißt „unsicher“ und löscht deshalb auch eine frühere Kartenwahl.
-  Er schreibt „Noch offen“ in denselben Zustand wie die Kartenknöpfe; der Abschluss fällt dann auf „Empfohlen“ zurück (E-3: die letzte
-  ausdrückliche Wahl gilt).
+- **Zustand, Empfehlung an fb-15:** Der Ring heißt „unsicher“ und löscht eine frühere Kartenwahl; der Abschluss fällt dann auf „Empfohlen“
+  zurück (E-3: die letzte ausdrückliche Wahl gilt).
 
 ## G. Responsive Design
 
@@ -226,13 +217,13 @@ unter den Kopf. **360:** Zeile 3 kann umbrechen (+22 px), der Ring bleibt 244 px
 | Element | Spalten | x | y ab Blockbeginn |
 |---|---|---|---|
 | Titel, Festblock, Link, Standzeile | 1–6 | 120–628 | 48–346 (Zeile 2 zweizeilig, die übrigen und die Grenze einzeilig) |
-| Paragrafenspalte [H] | 7 | 717–782 | je auf der ersten Zeile des Fakts, 13/22, Technikstimme, `tabular-nums`, `--muted` |
+| Paragrafenspalte [H] | 7 | 652–717 | je auf der ersten Zeile des Fakts, 13/22, Technikstimme, `tabular-nums`, `--muted` |
 | Gesprächsweg | 9–12 (fluchtet mit der dritten Karte in 04.1) | 829–1160 | Frage 48–70, Ring 78–130, Breite ≈ 244 px, linksbündig |
 | Freiraum | 9–12 | – | 130–346 |
-| Rechtshinweis | 1–8, höchstens 72 Zeichen | 120–≈ 590 | 370–410 (2 Zeilen) |
+| Rechtshinweis | 1–8, höchstens 72 Zeichen | 120–≈ 700 | 370–410 (2 Zeilen) |
 
-Höhe ≈ 410 px (0,51 BH bei 800). Der Gesprächsweg steht oben bündig mit dem Titel und neben den Fakten. So sieht man das „oder“ auf einen
-Blick: selbst entscheiden links, sprechen rechts. Nichts wird vergrößert (SKILL:28). Die Schriften bleiben 13/15/17, der Ring bleibt 52 px.
+Höhe ≈ 410 px (0,51 BH bei 800). Der Gesprächsweg steht oben bündig mit dem Titel neben den Fakten: Das „oder“ ist auf einen Blick zu
+sehen. Nichts wird vergrößert (SKILL:28); Schriften 13/15/17, Ring 52 px.
 
 **G.4 Schreibtisch 1024.** Inhalt 992 px (x 16–1008), Spalte 60,7 px, Abstand 24 (wie fb-03). Festblock in Spalten 1–6 (x 16–500, Text
 452 px), Paragrafen in Spalte 7 (x 524–585), Gesprächsweg in Spalten 9–12 (x 693–1008, Ring ≈ 244 von 315 px), Rechtshinweis in Spalten
@@ -242,18 +233,19 @@ Blick: selbst entscheiden links, sprechen rechts. Nichts wird vergrößert (SKIL
 
 **H.1 Bestand, wiederverwendet**
 
-- PS: `BLOECKE`, `bausteineEinsetzen` (`:249-259`), `verkaufFuer` (`:40-43`), `steuerText` (`:44`), `stand`/`standText` (`:245`;
-  `functions/api/recht.js:22-25`), Formular mit „Noch offen“ (`:173-174`).
-- `web/assets/verkauf.js:28-36`: Ein Klick auf `a[data-paket]` setzt das Paketfeld. Mit `data-paket=""` ergibt das „Noch offen“; es braucht
-  keine neue Bindung, und das Verhalten ist in der Einbettung idempotent (`wurzel.__vkPaket`).
-- `web/assets/portal.js:835-842`: Sprung zu `#frage` in der Einbettung, mit Fokus und Rücksicht auf „weniger Bewegung“.
-- `web/assets/gemeinsam.css:55-67`: `.btn`, `.btn.ghost`, `.link`. `web/assets/verkauf.css:8` (`scroll-margin-top: 76px` für `h3[id]`),
-  `:33-35` (Haken-Muster), `:511` (`.vk-recht`: 13 px, `--muted`, `max-width: 72ch`).
-- VK:188: Der Absatz `.vk-recht` wird durch den Baustein ersetzt. Abonnement ab Livegang und Link stehen künftig im Festblock.
+- PS: `BLOECKE`, `bausteineEinsetzen` (`:249-259`), `verkaufFuer` (`:40-43`), `steuerText` (`:44`), `stand` (`:245`), Formular (`:173-174`).
+- `web/assets/verkauf.js:28-36`: `a[data-paket=""]` setzt „Noch offen“, ohne neue Bindung, in der Einbettung idempotent (`wurzel.__vkPaket`).
+- `web/assets/portal.js:835-842`: Sprung zu `#frage` in der Einbettung mit Fokus und „weniger Bewegung“.
+- `web/assets/gemeinsam.css:55-67` (`.btn`, `.btn.ghost`, `.link`); `web/assets/verkauf.css:8` (`scroll-margin-top: 76px`), `:33-35`
+  (Haken-Muster), `:511` (`.vk-recht`).
+- VK:188: Der Absatz `.vk-recht` wird durch den Baustein ersetzt; Abo ab Livegang und Link stehen künftig im Festblock.
 
 **H.2 Neu: Baustein `festblock`** in PS (Eintrag in `BLOECKE`), in VK als `<!--pakete:festblock--><!--/pakete:festblock-->` hinter dem
 Verkaufsstand von 04.2. Danach `node scripts/bedingungen-pdf.mjs`, sonst schlägt Prüfsuite 29.1 fehl (Bausteine in `web/` aktuell).
-Serverseitig erzeugt, je Umgebung (Zustand, Steuertext, Stand), ohne JavaScript vollständig.
+Serverseitig erzeugt und ohne JavaScript vollständig. Variabel sind zwei Stellen: Standzeile = (`!v.bestellen` ? „Entwurf zur
+anwaltlichen Prüfung · “ : „“) + „Fassung vom “ + `standText(PAKET_STAND)`; Rechtshinweis Satz 2 = „Alle Preise “ + `steuerText(v)` + „.“.
+Alle Selektoren tragen wie in `verkauf.css` ein `.rg` davor, damit sie gegen `ratgeber.css` (etwa `.rg h3`, `.rg ul`) gewinnen; das gilt
+auch in der Einbettung (`main.rg`).
 
 ```html
 <div class="vk-festblock">
@@ -280,6 +272,7 @@ Serverseitig erzeugt, je Umgebung (Zustand, Steuertext, Stand), ohne JavaScript 
 
 ```css
 .vk-festblock { display: grid; row-gap: 24px; margin-top: 48px }
+.vk-festblock > * { margin: 0 }
 .vk-fest-titel { margin: 0 0 16px; font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
 .vk-fest-liste { list-style: none; margin: 0; padding: 0; display: grid; row-gap: 8px }
 .vk-fest-liste li { position: relative; padding-left: 32px; font-size: 15px; line-height: 22px; font-weight: 500; color: var(--text) }
@@ -351,9 +344,10 @@ setzt DG-AB-2 (kein Versatz der Bedienschicht) und DG-E-10 (Ringrand) voraus und
 | H-08-1 | Zeitliche Folge und Grenze direkt bei der Storno-Zeile werden besser verstanden als die Grenze am Ende | Lesetest mit Fensterbauern: „Bis wann bekommen Sie die Einrichtung zurück?“ | Folge wie Z, Grenze zuletzt |
 | H-08-2 | Der Titel hilft beim Überfliegen und kostet keinen Bildschirm | Bildschirmzählung bei 664 px; Lesetest | Titel nur für Vorleseprogramme |
 | H-08-3 | „Entwurf zur anwaltlichen Prüfung“ schreckt weniger ab, als es Vertrauen schafft | Gespräche (FB-6, Mitentscheider) | nur „Fassung vom …“ |
-| H-D14 | Der leise Gesprächsweg nimmt Passungsfragen auf, ohne Anfragen mit Paket zu verdrängen | Anteil der Anfragen mit „Noch offen“ (Paketfeld vorhanden); Verhältnis zu Anfragen mit Paket | Ring „Frage stellen“ oder entfernen |
+| H-D14 | Der leise Gesprächsweg nimmt Passungsfragen auf, ohne Anfragen mit Paket zu verdrängen | Anteil der Anfragen mit „Noch offen“ (Paketfeld vorhanden); Verhältnis zu Anfragen mit Paket | Ring **Textentwurf** „Frage stellen“ oder entfernen |
 | H-08-4 | Die Paragrafenspalte am Schreibtisch stärkt die Prüfbarkeit für FB-6 | Gespräche | weglassen |
 | H-08-5 | Die Kurzfassungen der Zeilen werden so verstanden wie die Sätze aus EA 4.3.1 | Lesetest | Langfassung EA 4.3.1 |
 
 Voraussetzung für das Wort „Rückruf“: Der Inhaber bestätigt, dass er auf Wunsch anruft. In 05 sollte das Telefonfeld den Rückruf nennen,
-**Textentwurf** „Telefon (freiwillig, für einen Rückruf)“; das entscheidet fb-09. Ohne Bestätigung heißt der Ring „Frage stellen“.
+**Textentwurf** „Telefon (freiwillig, für einen Rückruf)“; das entscheidet fb-09. Ohne Bestätigung heißt der Ring **Textentwurf** „Frage
+stellen“.
