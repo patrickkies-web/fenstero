@@ -1,6 +1,6 @@
 # Referenz 09 – Ciao Energy – Launch-Website
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | NB | NB | NB | NB | NB | NB | NB | NB | **NB** | — | 8 |
 | 18 Dynamische Typografie | 2* | 2 | 1 | 2* | 1 | 2* | 2 | 1 | **2** | 1–2 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -255,7 +255,7 @@ Aus wahrnehmungspsychologischer Sicht arbeitet die Startansicht mit wenigen, seh
 - Interpretation: Scrollen ist als nächster Schritt der Inszenierung angelegt; die fortschrittsartigen Linien lassen eine geführte, scrollgekoppelte Abfolge erwarten, belegen sie aber nicht.
 - Technische Hypothese: Scrollposition steuert Kamera, Karussell oder Fortschrittslinie, etwa per Scroll-Scrubbing (Hypothese).
 - Nicht prüfbar: Was beim Scrollen geschieht (Parallax, Sticky-Szene, Scrubbing oder normaler Seitenfluss); Funktion beider Linien.
-- Bewertungsunterschied: E1, E2, E3 werten 1, E4 bis E8 werten 2. Ursache ist die Belegregel: Der Scroll-Hinweis allein belegt nur, dass Scrollen vorgesehen ist; die 2 stützt sich zusätzlich auf zwei fortschrittsartige Linien als mögliche Fortschrittsanzeige nach Regel (d). Die 2 ist knapp besser begründet, aber nur mit niedriger Konfidenz; höher trägt der Beleg nicht.
+- Bewertungsunterschied: E1, E2, E3 werten 1, E4 bis E8 werten 2. Ursache ist die Belegregel: Der Scroll-Hinweis allein belegt nur, dass Scrollen vorgesehen ist; die 2 stützt sich zusätzlich auf zwei fortschrittsartige Linien als mögliche Fortschrittsanzeige nach [Regel (d)](../README.md#34-belegregeln). Die 2 ist knapp besser begründet, aber nur mit niedriger Konfidenz; höher trägt der Beleg nicht.
 
 **10 Mikrointeraktionen** · Median **1** (Experten 1–1, NB 3) · Konfidenz niedrig
 
@@ -263,7 +263,7 @@ Aus wahrnehmungspsychologischer Sicht arbeitet die Startansicht mit wenigen, seh
 - Interpretation: Belegt ist eine Cursorreaktion über einem Karussell-Steuerelement, also Klickbarkeit; gestaltetes Hover-, Klick- oder Ziehfeedback ist nicht sichtbar.
 - Technische Hypothese: Chevrons als klickbare DOM-Elemente mit Pointer-Cursor über der 3D-Ebene (Hypothese).
 - Nicht prüfbar: Ob die Hand Systemzeiger oder Icon ist; Hover-, Klick- und Ziehfeedback; ob der Leuchtsaum der Schaltfläche ein Hover-Zustand ist.
-- Bewertungsunterschied: Auffällig: E1, E3, E8 werten NB, E2 und E4 bis E7 werten 1. Ursache ist die Lesart der Belegregel. Die eine Seite wertet den Zeiger im Pointer-Zustand als sichtbaren Cursor mit Hover-Zustand (Regel d), die andere als bloße Affordanz ohne gestaltetes Feedback. Knapp besser begründet ist die 1 als Untergrenze: Der Zeiger sitzt asymmetrisch nur am rechten Chevron, was für den echten Systemzeiger spricht. Mehr als subtil trägt der Beleg nicht; die NB-Lesart bleibt legitim.
+- Bewertungsunterschied: Auffällig: E1, E3, E8 werten NB, E2 und E4 bis E7 werten 1. Ursache ist die Lesart der Belegregel. Die eine Seite wertet den Zeiger im Pointer-Zustand als sichtbaren Cursor mit Hover-Zustand ([Regel d](../README.md#34-belegregeln)), die andere als bloße Affordanz ohne gestaltetes Feedback. Knapp besser begründet ist die 1 als Untergrenze: Der Zeiger sitzt asymmetrisch nur am rechten Chevron, was für den echten Systemzeiger spricht. Mehr als subtil trägt der Beleg nicht; die NB-Lesart bleibt legitim.
 
 **11 Bildintegration** · Median **2** (Experten 2–3, NB 0) · Konfidenz niedrig
 
@@ -341,9 +341,9 @@ Aus wahrnehmungspsychologischer Sicht arbeitet die Startansicht mit wenigen, seh
 
 **Unterschiedliche Einschätzungen**
 
-- **D10 Mikrointeraktionen: Hand-Zeiger als Beleg:** E1, E3, E8: NB. Zeiger und Chevrons sind Affordanzen ohne sichtbares gestaltetes Feedback, ob es der Systemzeiger ist, bleibt unsicher. E2, E4, E5, E6, E7: 1. Der Zeiger im Pointer-Zustand über dem Chevron belegt eine Cursorreaktion. – begründete Mehrheitsmeinung: 1 als Untergrenze mit niedriger Konfidenz. Der weiße Zeiger sitzt nur am rechten Chevron, diese Asymmetrie spricht für den echten Systemzeiger, also einen tatsächlichen Hover-Zustand nach Regel (d). Gestaltetes Feedback am Element ist nicht beurteilbar, die NB-Lesart bleibt legitim.
+- **D10 Mikrointeraktionen: Hand-Zeiger als Beleg:** E1, E3, E8: NB. Zeiger und Chevrons sind Affordanzen ohne sichtbares gestaltetes Feedback, ob es der Systemzeiger ist, bleibt unsicher. E2, E4, E5, E6, E7: 1. Der Zeiger im Pointer-Zustand über dem Chevron belegt eine Cursorreaktion. – begründete Mehrheitsmeinung: 1 als Untergrenze mit niedriger Konfidenz. Der weiße Zeiger sitzt nur am rechten Chevron, diese Asymmetrie spricht für den echten Systemzeiger, also einen tatsächlichen Hover-Zustand nach [Regel (d)](../README.md#34-belegregeln). Gestaltetes Feedback am Element ist nicht beurteilbar, die NB-Lesart bleibt legitim.
 - **D15 Perspektive und Kameraführung:** E1, E2, E3, E6: 2. Sie sehen eine konventionelle frontale Produktbühnen-Perspektive, die durch die Schrägaufnahme verunklart ist. E4, E5, E7, E8: 3. Der bewusste Kamerastandpunkt auf Objekthöhe und der gekippte Ring prägen die Wirkung. – nicht auflösbar: Am Bild bestätigt ist eine designinterne Neigung (rechte Dosengruppe deutlich höher, Browserleiste fast waagerecht), was zur 3 tendiert. Ob es eine feste Einstellung oder eine eingefrorene Drehphase ist, lässt das Standbild offen. Der Median 2,5 bildet den Stand ab.
-- **D9 Scroll-Inszenierung:** E1, E2, E3: 1, belegt ist nur der explizite Hinweis. E4 bis E8: 2, Hinweis plus fortschrittsartige Linien sprechen für eine scrollgeführte Abfolge. – begründete Mehrheitsmeinung: 2 mit niedriger Konfidenz. Scroll-Hinweis und mögliche Fortschrittsanzeige sind zusammen ein Beleg nach Regel (d). Die Funktion der Linien bleibt unsicher, höher trägt der Beleg nicht.
+- **D9 Scroll-Inszenierung:** E1, E2, E3: 1, belegt ist nur der explizite Hinweis. E4 bis E8: 2, Hinweis plus fortschrittsartige Linien sprechen für eine scrollgeführte Abfolge. – begründete Mehrheitsmeinung: 2 mit niedriger Konfidenz. Scroll-Hinweis und mögliche Fortschrittsanzeige sind zusammen ein Beleg nach [Regel (d)](../README.md#34-belegregeln). Die Funktion der Linien bleibt unsicher, höher trägt der Beleg nicht.
 - **D18 Dynamische Typografie:** E3, E5, E8: 1, räumliche Schrift nur als Produktetikett, die UI ist flach. E1, E2, E4, E6, E7: 2, die perspektivisch gewickelte, angeschnittene Riesenschrift und der extreme Größenkontrast wirken als Bildmittel. – begründete Mehrheitsmeinung: 2, weil die Dimension perspektivische und angeschnittene Schrift sowie typografische Kontraste ausdrücklich statisch zählt. Einschränkung: Die Schrift ist Teil des Motivs, keine eigenständige Textebene.
 - **D11 Bildintegration:** E7: 3, wegen Farb- und Lichtabgleich, Sockelspiegelung und fehlender Freistellkanten. E1 bis E6 und E8: 2. – begründete Mehrheitsmeinung: 2. In einer gemeinsamen 3D-Szene entsteht die Einbettung weitgehend von selbst, eine Montage ist nicht nachweisbar, Kanten und Spiegelung sind wegen der Kompression nicht prüfbar.
 - **Kamerahöhe in der Szene:** E1: Scheibe und Sockel von oben gesehen. E7: leicht erhöhter Kamerablick. E2, E3, E4, E8: Kamera etwa auf Höhe der Mitteldose, Scheibe von unten, Sockel von oben. – begründete Mehrheitsmeinung: Im vergrößerten Ausschnitt zeigt die Scheibe ihre Unterseite mit einem nach unten gewölbten Zentralteil, der Sockel seine Oberseite. Die Kamera liegt also zwischen beiden, etwa auf Höhe der Mitteldose.

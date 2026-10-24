@@ -1,6 +1,6 @@
 # Referenz 15 – KAGE – Hidden Realms of Kyoto
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | 1* | 1* | 1* | 1* | 2* | 1* | 1* | 1* | **1** | 1–2 | 0 |
 | 18 Dynamische Typografie | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | **4** | 4–4 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -337,7 +337,7 @@ Aus wahrnehmungspsychologischer Sicht arbeitet der Einstieg mit gesteuerter Auff
 - Alle acht beschreiben Low-Key-Licht mit wenigen warmen, selbstleuchtenden Inseln auf der Mittelachse (D3 = 3), dazu den Mond als Gegenakzent oben rechts.
 - Alle acht lesen eine frontale Zentralperspektive aus niedriger Kamera als Schwellenblick vor dem Tor (D15 = 3) und klammern den Aufnahmewinkel des Laptops aus.
 - Der Mondanschnitt entsteht durch Verdeckung mit einer dunklen Dachsilhouette, nicht durch Formverwandlung; Morphing ist statisch nicht vorhanden (D14 = 0, einhellig).
-- Scroll-Inszenierung einheitlich 2, gestützt allein auf „SCROLL TO ENTER“, „CHAPTER 00“ und die Ziffern 01–04 (Belegregel d); die Mechanik bleibt offen. D10 und D16 einhellig NB, D8 bei sieben von acht NB.
+- Scroll-Inszenierung einheitlich 2, gestützt allein auf „SCROLL TO ENTER“, „CHAPTER 00“ und die Ziffern 01–04 ([Belegregel d](../README.md#34-belegregeln)); die Mechanik bleibt offen. D10 und D16 einhellig NB, D8 bei sieben von acht NB.
 - Materialien sind matt und zurückgenommen (sieben von acht: D2 = 1); Detail konzentriert sich im Vordergrundgras und am Mond, Architektur und Schrift bleiben glatt (D12 = 2, einhellig).
 - Die Bedienschicht liegt flächenlos an den Rändern, arbeitet mit kleinen, gesperrten Versalien und lässt die Bildmitte als Bühne frei.
 - Gemeinsame Schwächen: sehr kleine, gesperrte Labels auf unruhigem Grund mit fraglicher Lesbarkeit; das Wortband über die volle Breite ist im Hochformat schwer übertragbar; hohe GPU-Last durch Gras, Partikel und Glow.

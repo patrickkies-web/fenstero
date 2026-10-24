@@ -204,13 +204,13 @@ Zusammenführungsschritte:
 - **Häufigkeit:** vorhanden 15 von 15 = 100 % (Kernmerkmal); deutlich ausgeprägt 15 von 15 = 100 % (Kernmerkmal); stark ausgeprägt 11 von 15. Gegenprobe 14 von 14, keine Abweichung.
 - **Intensität und Streuung:** typisch 3 / 3; Spannweite 2–4, Q1–Q3 2,75–3. Expertenspannweite Ø 0,2 (gemeinsam mit D14 der niedrigste Wert der statischen und gemischten Dimensionen), niedrige Konfidenz 0 %. **Konsenssicherheit: hoch.**
 - **Technische Ausprägung (B):**
-  - *Verdeckung in beide Richtungen (Sandwich):* Das Motiv verdeckt eine hintere Ebene und wird selbst überdeckt. Ref 03 (Wortmarke – Vogel – Glaskarte), Ref 04 (Riesenschrift – Geräteteile und Strahl – Headline und Pfeil), Ref 08 (Karten – Zitrone – Großschrift), Ref 13 (Riesenwort – Monitor – defokussierter Vordergrund; Präsentationsebene), Ref 15 (Architektur – Riesenwort – Gras und Zweige), Ref 06 (Äste zwischen den Teilschichten der Kronen).
+  - *Verdeckung in beide Richtungen (Sandwich):* Das Motiv verdeckt eine hintere Ebene und wird selbst überdeckt. Ref 03 (Wortmarke – Vogel – Glaskarte), Ref 04 (Riesenschrift – Geräteteile und Strahl – Headline und Pfeil), Ref 08 (Karten – Zitrone – Großschrift), Ref 13 (Riesenwort – Monitor – defokussierter Vordergrund; Präsentationsebene), Ref 15 (Architektur – Riesenwort – Gras und Zweige), Ref 06 (Äste zwischen den Teilschichten der Kronen). Das sind 6 von 15 = 40 %; ohne die Präsentationsebene von Ref 13 bleiben 5 von 15 = 33 % (Gegenprobe 5 von 14 = 36 %).
   - *Einseitige Verdeckung:* Ref 05 (Leuchte vor der Schrift und über der Kartenkante), Ref 07 (Teilverdeckung des „P“), Ref 10 (Lagen verdecken einander), Ref 12 (Glasflächen und Folgesektion über dem Objekt).
   - *Flache Stapel ohne optische Tiefenmittel:* Ref 01 (vier Ebenen, blasser Schatten), Ref 11 (Kartenpaar, Schatten nur an der Überlappung).
   - *Bildoptik statt Verdeckung:* Ref 02 (drei Schärfezonen im Foto), Ref 09 (perspektivischer Bogen mit Größenabnahme), Ref 14 (Schärfestaffelung und Dunst im Render).
   - *Zusatzmittel:* Schärfestaffelung (Ref 02, 04, 08, 13, 14), Glas als Tiefencode (Ref 01, 03, 12, 14), atmosphärische Perspektive (Ref 14, 15). Den Höchstwert 4 hat nur Ref 15: fünf bis sechs Ebenen, Dunst und Zentralperspektive wirken zusammen.
 - **Hypothese (H):** absolut positionierte Ebenen in fester Stapelreihenfolge (z-index), Freisteller mit Alphakanal (Ref 03, 04, 05, 07, 08); in Ref 15 Tiefenpuffer einer 3D-Szene oder 2D-Maske.
-- **Einordnung:** universelles Grundprinzip. Universell ist Tiefe als **Ebenenordnung**. Verdeckung ist dabei das primäre Mittel in 12 von 15 Referenzen (eigene Zählung: alle außer Ref 02, 09, 14; Gegenprobe 11 von 14 = 79 %). Schärfe, Glas, Kamera und Dunst sind Techniken einzelner Teilgruppen.
+- **Einordnung:** universelles Grundprinzip. Universell ist Tiefe als **Ebenenordnung**. Verdeckung ist dabei das primäre Mittel in 12 von 15 Referenzen (eigene Zählung: alle außer Ref 02, 09, 14; Gegenprobe 11 von 14 = 79 %). Bei Ref 13 trägt die Verdeckung nur die Präsentationsszene, das Dashboard selbst bleibt flach; ohne sie sind es 11 von 15 = 73 % (Gegenprobe 10 von 14 = 71 %), also ein Grenzfall zwischen Grundprinzip und wiederkehrendem Mittel. Ref 11 zählt ohne die Folie nur noch über das Riesenwort vor Foto und Figur im eingebetteten Kraken-Entwurf. Schärfe, Glas, Kamera und Dunst sind Techniken einzelner Teilgruppen.
 - **Funktion (I):** Tiefe macht die Fläche zur Bühne, auf der Motiv, Schrift und Bedienschicht eine eindeutige Vorder-hinter-Ordnung haben.
 
 ### 4.2.2 Materialität
@@ -454,7 +454,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03. Wegen d
 ### Cluster A – Typo-Bild-Sandwich mit freigestelltem Objekt (Ref 03, 04, 07, 08, 13)
 
 - **Gemeinsam (B):**
-  - Riesenschrift ist eine eigene Ebene im Stapel und mit einem Objekt verschränkt; alle fünf haben D18 ≥ 3.
+  - Riesenschrift ist eine eigene Ebene im Stapel und mit einem Objekt verschränkt; alle fünf haben D18 ≥ 3 (Ref 13 nur über das Riesenwort der Präsentationsfolie).
   - Hoher Bildanteil ohne Bildkante (D11-Median 3) in 4 von 5: Ref 03 „Motiv ohne Bildkante“, Ref 04 „Kulisse als Seitenhintergrund“, Ref 07 und 08 Freisteller ohne Schatten. Ausnahme Ref 13: Bildschirmersetzung im Mockup (D11 = 2).
   - Plastizität mittlerer Stufe (D7 2–3). Das Licht ist Studiolicht am Objekt (D3-Median 2; Ref 04 und 07 nur 1). Bei Ref 04, 07, 08 halten die Profile fest, dass Foto und Render nicht unterscheidbar sind.
   - Frontale Kamera (D15-Median 1): Tiefe entsteht aus Verdeckung, nicht aus Perspektive.
@@ -510,10 +510,10 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03. Wegen d
 | Vitrine: ein plastisches Objekt, Material und Licht nur dort | Ref 05, 07, 08, 09, 10, 12 | A + B |
 | Bildpanel mit aufgelegter UI | Ref 02, 14 | C + B |
 | Kulissenbühne aus gestaffelten Ebenen mit Überlauf | Ref 04, 06, 15 | A + C + B |
-| Raster oder Kachel als Träger | Ref 11, 13, 14; abgeschwächt 03, 05, 08 | C + A + B |
+| Raster oder Kachel als Träger | Ref 11 (Präsentationsebene), 13, 14; abgeschwächt 03, 05, 08 | C + A + B |
 | Materialstudie | Ref 01 | Einzelgänger |
 
-- **Kreuzung D7 × D18 (eigene Zuordnung aus 4.1):** Raumschrift (D18 ≥ 3) tritt nur bei D7 ≥ 2 auf, in 7 von 7 Fällen (Ref 03, 04, 05, 07, 08, 13, 15). Jede Referenz der mittleren D7-Stufe hat Raumschrift (5 von 5). Bei D7 = 4 sind es nur 2 von 6 (Ref 05, 15), bei D7 ≤ 1 keine (0 von 4). **Interpretation:** Raumschrift braucht ein plastisches Gegenüber, ein Render-Hauptdarsteller macht sie aber nicht nötig.
+- **Kreuzung D7 × D18 (eigene Zuordnung aus 4.1):** Raumschrift (D18 ≥ 3) tritt nur bei D7 ≥ 2 auf, in 7 von 7 Fällen (Ref 03, 04, 05, 07, 08, 13, 15). Jede Referenz der mittleren D7-Stufe hat Raumschrift (5 von 5). Bei D7 = 4 sind es nur 2 von 6 (Ref 05, 15), bei D7 ≤ 1 keine (0 von 4). Ohne die Präsentationsszene von Ref 13, aus der dort D7 = 3 und D18 = 3 weitgehend stammen, sind es 6 von 6 bzw. 4 von 4; das Muster bleibt. **Interpretation:** Raumschrift braucht ein plastisches Gegenüber, ein Render-Hauptdarsteller macht sie aber nicht nötig.
 - **Ergebnis (I):** Die Rechnung misst vor allem, *wie plastisch das Hauptmotiv gerendert ist*, und damit zu einem guten Teil das Medium (Foto, Render, Vektor). Die Bauweise bildet sie nur begrenzt ab; die Sammlung lässt sich besser als Baukasten weniger kombinierbarer Bauprinzipien beschreiben. Über die Bewegungssprache der Cluster ist nichts aussagbar: Die wenigen zeitlichen Belege verteilen sich auf A (Ref 04, 07), B (Ref 09, 15) und C (Ref 06).
 
 ## 4.4 Die sieben Leitfragen
@@ -541,7 +541,7 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03. Wegen d
 
 ### 2. Was kehrt regelmäßig wieder?
 
-**Dimensionen (B):** D2 Materialität, D3 Licht, D4 Schatten und Unschärfe, D7 3D (je 11 von 15 = 73 %), D12 Oberflächendetails (10 von 15 = 67 %), D18 Dynamische Typografie (9 von 15 = 60 %), D15 Perspektive (7 von 15 = 47 %). Das sind genau die effektstarken Mittel. D3 wird nur durch die Dublette nicht zum Kernmerkmal.
+**Dimensionen (B):** D2 Materialität, D3 Licht, D4 Schatten und Unschärfe, D7 3D (je 11 von 15 = 73 %), D12 Oberflächendetails (10 von 15 = 67 %), D18 Dynamische Typografie (9 von 15 = 60 %), D15 Perspektive (7 von 15 = 47 %). Das sind genau die effektstarken Mittel. D3 wird nur durch die Dublette nicht zum Kernmerkmal. Bei Ref 13 stammen D7, D15 und D18 weitgehend aus der Präsentationsszene (4.3, Grenzfälle). Ohne sie sind es bei D7 10 von 15 = 67 % (Gegenprobe 9 von 14 = 64 %), bei D15 6 von 15 = 40 % (Gegenprobe 6 von 14 = 43 %, damit genau an der Schwelle) und bei D18, sofern das Dashboard allein unter 2 fällt, 8 von 15 = 53 % (Gegenprobe 7 von 14 = 50 %). Die Einordnung als wiederkehrend bleibt in allen drei Fällen.
 
 **Dimensionsübergreifend (eigene Zählungen):**
 
@@ -553,15 +553,17 @@ A und B verschmelzen bei 0,77, beide zusammen mit {C, 01} erst bei 1,03. Wegen d
 | Bild ohne jede Bildkante | Ref 03, 04, 05, 06, 07, 08, 09, 10, 12, 15 | 10 von 15 = 67 % | 9 von 14 = 64 % |
 | Pillen-Bedienelemente | Ref 01, 02, 03, 07, 09, 11, 12, 13, 14 (NB: 04, 06) | 9 von 13 = 69 % | 9 von 13 = 69 % |
 | Senkrechte Achse als Gerüst | Ref 03, 04, 07, 08, 09, 12, 13, 15 | 8 von 15 = 53 % | 7 von 14 = 50 % |
-| Asymmetrisch-diagonale Balance | Ref 01, 02, 05, 06, 10, 11, 14 | 7 von 15 = 47 % | 7 von 14 = 50 % |
+| Asymmetrisch-diagonale Balance | Ref 01, 02, 05, 06, 10, 11 (Präsentationsebene), 14 | 7 von 15 = 47 %; ohne Präsentationsebenen 6 von 15 = 40 % | 7 von 14 = 50 % bzw. 6 von 14 = 43 % |
 | Randanschnitt am Viewport- oder Abschnittsrand oder Rahmenbruch | Ref 04, 05, 06, 07, 08, 09, 12, 15 | 8 von 15 = 53 % | 7 von 14 = 50 % |
-| Raumschrift (D18 ≥ 3) | Ref 03, 04, 05, 07, 08, 13, 15 | 7 von 15 = 47 % | 6 von 14 = 43 % |
+| Raumschrift (D18 ≥ 3) | Ref 03, 04, 05, 07, 08, 13 (Präsentationsebene), 15 | 7 von 15 = 47 %; ohne Präsentationsebenen 6 von 15 = 40 % | 6 von 14 = 43 % bzw. 5 von 14 = 36 % |
 | Freigestelltes plastisches Einzelobjekt als Fokus | Ref 03, 05, 07, 08, 09, 10, 12 | 7 von 15 = 47 % | 7 von 14 = 50 % |
-| Verdeckung in beide Richtungen (Sandwich) | Ref 03, 04, 06, 08, 13, 15 | 6 von 15 = 40 % | 6 von 14 = 43 % |
+| Verdeckung in beide Richtungen (Sandwich) | Ref 03, 04, 06, 08, 13 (Präsentationsebene), 15 | 6 von 15 = 40 %; ohne Präsentationsebenen 5 von 15 = 33 % | 6 von 14 = 43 % bzw. 5 von 14 = 36 % |
 | Transluzente UI-Flächen | Ref 01, 02, 03, 12, 13, 14 | 6 von 15 = 40 % | 6 von 14 = 43 % |
-| Karten- oder Kachelraster als Träger | Ref 03, 05, 08, 11, 13, 14 (Bento im engeren Sinn nur 13, 14) | 6 von 15 = 40 % | 6 von 14 = 43 % |
+| Karten- oder Kachelraster als Träger | Ref 03, 05, 08, 11 (Präsentationsebene), 13, 14 (Bento im engeren Sinn nur 13, 14) | 6 von 15 = 40 %; ohne Präsentationsebenen 5 von 15 = 33 % | 6 von 14 = 43 % bzw. 5 von 14 = 36 % |
 
 **Entscheidungen.** Bei „Plastik nur im Motiv“ zählt Glas als UI-Material, weil D2 es so bewertet; deshalb stehen Ref 03, 12, 14 nur in der weiten Lesart. Kleine Säume, deren Gestaltungsabsicht offen ist (Headline-Glow in Ref 10, möglicherweise Kamera-Überstrahlung; Leuchtsaum der Pille in Ref 09, möglicherweise ein Hover-Zustand), brechen das Prinzip nicht. Gegenpole sind Ref 01 (das Material *ist* die UI), Ref 13 (Glow-Kacheln) und die flach-grafischen Ref 06 und 11. Beim Einzelfokus ist Ref 14 nicht erfüllt, weil sich die Gewichte laut Profil auf „drei Pole“ verteilen. Ref 14 und 02 zählen nicht zum Randanschnitt: Ihr Bild läuft nur innerhalb eines gerundeten Containers aus, ohne einen Rand zu überschreiten.
+
+**Präsentationsebenen.** Nach der Abgrenzung in der Gesamtsichtung gehören die Karussellfolie von Ref 11 und die Präsentationsszene von Ref 13 nicht zum eigentlichen Website- bzw. App-Design. Zeilen, in denen eine dieser Referenzen nur über diese Fläche zählt, sind markiert und zusätzlich ohne sie gerechnet: Bei Ref 11 stammen Diagonale und Zonenraster aus der Folie, bei Ref 13 Riesenwort und beidseitige Verdeckung aus der Szene; Pillen, Achse und transluzente Flächen von Ref 13 liegen im Dashboard und zählen weiter. Beidseitige Verdeckung und Kachelraster fallen damit auf 5 von 15 = 33 % (Gegenprobe 5 von 14 = 36 %) und sind Grenzfälle zum individuellen Stilmittel. Raumschrift liegt mit 6 von 15 = 40 % genau an der Schwelle, in der Gegenprobe mit 5 von 14 = 36 % darunter, und ist ebenfalls ein Grenzfall. Die Diagonale bleibt mit 6 von 15 = 40 % (Gegenprobe 6 von 14 = 43 %) wiederkehrend.
 
 ### 3. Was kennzeichnet nur einzelne Designs?
 

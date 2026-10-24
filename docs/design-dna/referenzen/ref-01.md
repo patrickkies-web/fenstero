@@ -1,6 +1,6 @@
 # Referenz 01 – Liquid-Glass-Komponenten (Figma-Tutorial)
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | NB | NB | NB | NB | NB | NB | NB | NB | **NB** | — | 8 |
 | 18 Dynamische Typografie | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | **1** | 1–1 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -230,7 +230,7 @@ Aus wahrnehmungspsychologischer Sicht funktioniert das Bild als Demonstrationsan
 - Interpretation: Ein geschlossenes Kreis- und Kapselsystem macht das Bild weich und einheitlich. Die Formen selbst sind Standardvokabular aktueller System-Oberflächen, nicht eigenständig.
 - Technische Hypothese: Rechtecke mit maximalem Eckradius und Ellipsen, am Raster ausgerichtet; Hilfskreis als Kontur ohne Füllung.
 - Nicht prüfbar: Ob Kreisbögen oder Superellipsen verwendet sind; ob sich die Formen im Video dehnen oder verschmelzen.
-- Bewertungsunterschied: Echter Lesartunterschied, Median 2,5. E1, E2, E3 und E5 (3) gewichten Konsequenz, Überlagerung und Größenumkehr des Pillensystems, das die Skala ausdrücklich als prägende Formensprache nennt. E4, E6, E7 und E8 (2) gewichten, dass es Standardformen ohne eigenständige Konturen, Masken oder Anschnitte sind. Beide Positionen sind am Bild belegt; nicht auflösbar.
+- Bewertungsunterschied: Echter Lesartunterschied, Median 2,5. E1, E2, E3 und E5 (3) gewichten Konsequenz, Überlagerung und Größenumkehr des Pillensystems, das die [Skala](../README.md#d5-geometrie-und-formgebung) ausdrücklich als prägende Formensprache nennt. E4, E6, E7 und E8 (2) gewichten, dass es Standardformen ohne eigenständige Konturen, Masken oder Anschnitte sind. Beide Positionen sind am Bild belegt; nicht auflösbar.
 
 **6 Komposition** · Median **2** (Experten 2–3, NB 0) · Konfidenz mittel
 
@@ -345,7 +345,7 @@ Aus wahrnehmungspsychologischer Sicht funktioniert das Bild als Demonstrationsan
 **Unterschiedliche Einschätzungen**
 
 - **Räumliche Tiefe (D1): Gewicht der Staffelung:** E8: 3, weil Verdeckung, Schatten und Unschärfe übereinstimmende, robuste Tiefenhinweise liefern. E1–E7: 2, flache Staffelung im Dienst des Materials. – begründete Mehrheitsmeinung: 2. Die Schatten sind nur etwa 5–7 Tonwerte dunkler, es gibt keine Perspektive und keine atmosphärische Staffelung; die Tiefe ist Voraussetzung des Glaseffekts, trägt aber nicht die Gestaltung.
-- **Geometrie und Formgebung (D5): prägendes System oder Standardformen:** E1, E2, E3, E5: 3 (konsequentes, geschlossenes Kapselsystem, Überlagerung, Größenumkehr). E4, E6, E7, E8: 2 (Standard-UI-Grundformen ohne eigenständige Konturen, Masken oder Anschnitte). – nicht auflösbar: Die Skala nennt ein Pillensystem ausdrücklich als prägende Formensprache, verlangt aber zugleich Eigenständigkeit. Beides trifft teilweise zu; der Median 2,5 bildet den Grenzfall ab.
+- **Geometrie und Formgebung (D5): prägendes System oder Standardformen:** E1, E2, E3, E5: 3 (konsequentes, geschlossenes Kapselsystem, Überlagerung, Größenumkehr). E4, E6, E7, E8: 2 (Standard-UI-Grundformen ohne eigenständige Konturen, Masken oder Anschnitte). – nicht auflösbar: Die [Skala](../README.md#d5-geometrie-und-formgebung) nennt ein Pillensystem ausdrücklich als prägende Formensprache, verlangt aber zugleich Eigenständigkeit. Beides trifft teilweise zu; der Median 2,5 bildet den Grenzfall ab.
 - **Komposition (D6): Ausprägung bewusster Kompositionsmittel:** E2, E8: 3 (gebaute Diagonale, klarer Fokuspunkt, Fluchten). E1, E3, E4, E5, E6, E7: 2 (ruhige, konventionelle Zwei-Zonen-Ordnung mit maßvoller Spannung). – begründete Mehrheitsmeinung: 2. Die Mittel sind deutlich, aber konventionell; Spannung entsteht fast nur aus der Teilüberdeckung, und der Zuschnitt lässt die Gesamtbalance offen.
 - **Bildintegration (D11): Zählt die Glasverrechnung des Untergrunds?:** E7: 2 (Glas sampelt und verschiebt den Untergrund nahtlos, hohe Integrationsqualität). Übrige: 1 (nur das kleine Logo ist eingebettet). – begründete Mehrheitsmeinung: 1. Die Verrechnung des Untergrunds ist bereits unter D2 und D4 bewertet; doppelte Zählung wäre nicht sachgerecht.
 - **Dynamische Hintergründe (D13): Ist das Raster eine Texturfläche?:** E1, E2, E7, E8: 0 (einfarbig, keine Verläufe, kein Mesh, keine Partikel). E3, E4, E5, E6: 1 (statisches Linienraster als subtile Hintergrundstruktur). – nicht auflösbar: Es ist eine Lesartfrage bei 4:4. Etwas besser begründet ist 0, weil das Raster unter D6 und D12 bereits erfasst ist; 1 bleibt als weite Lesart von „Texturfläche“ vertretbar.

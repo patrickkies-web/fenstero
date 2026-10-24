@@ -1,6 +1,6 @@
 # Referenz 11 – Design-DNA-Folie mit Deno und Breachen
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | NB | NB | NB | NB | 1* | NB | NB | NB | **NB** | 1–1 | 7 |
 | 18 Dynamische Typografie | 2 | 2 | 2 | 3 | 2 | 2 | 3 | 3 | **2** | 2–3 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -312,7 +312,7 @@ Aus wahrnehmungspsychologischer Sicht ist die Folie eine streng geführte Lesean
 - Interpretation: Belegt ist eine Sequenz, nicht ihre Übergangsgestaltung. Den Wechsel übernimmt vermutlich das Wischen der Plattform.
 - Technische Hypothese: —
 - Nicht prüfbar: Gestaltung der Folienübergänge sowie Seiten- und Szenenwechsel beider Websites.
-- Bewertungsunterschied: E5 gibt 1, weil die Fortschrittsanzeige nach Belegregel (d) eine Szenenfolge belegt. Die übrigen sieben geben NB. Die Anzeige belegt aber nur, dass es mehrere Folien gibt, nicht wie sie wechseln. Das Wischen ist Plattformverhalten und liegt außerhalb der Abgrenzung. NB ist besser begründet.
+- Bewertungsunterschied: E5 gibt 1, weil die Fortschrittsanzeige nach [Belegregel (d)](../README.md#34-belegregeln) eine Szenenfolge belegt. Die übrigen sieben geben NB. Die Anzeige belegt aber nur, dass es mehrere Folien gibt, nicht wie sie wechseln. Das Wischen ist Plattformverhalten und liegt außerhalb der Abgrenzung. NB ist besser begründet.
 
 **18 Dynamische Typografie** · Median **2** (Experten 2–3, NB 0) · Konfidenz mittel
 
@@ -342,7 +342,7 @@ Aus wahrnehmungspsychologischer Sicht ist die Folie eine streng geführte Lesean
 - **D4 Schatten und Unschärfe: Stufe 1 oder 2:** E1, E4, E7, E8: 2 (messbarer, weicher Schatten von Kraken auf Deno macht die Staffelung lesbar). E2, E3, E5, E6: 1 (die Trennung leisten Rahmen und Helligkeitskontrast, Schatten wirken auf dem Dunkelgrund kaum). – nicht auflösbar: Nachgemessen ist der Schatten an der Überlappung deutlich (ca. 235 → 175), an anderer Stelle nur schwach (unter und rechts von Kraken) oder gar nicht (um Deno). Echter Grenzfall, der Median 1,5 bildet ihn ab.
 - **D7 3D-Integration: zählt das räumliche Kraken-Foto?:** E1, E4, E5, E8: 1 (fotografisch-plastische Figur im Kraken-Hero). E2, E3, E6, E7: 0 (keine 3D-Objekte oder Transformationen, das Foto ist ein flacher Bildgrund). – nicht auflösbar: Es ist ein definitorischer Grenzfall. Die strengere Lesart (0) passt besser zur Konstruktion, weil das Foto nicht freigestellt ist und das Motiv zweitrangig ist. Der Median 0,5 ist sachgerecht.
 - **D18 Dynamische Typografie: Stufe 2 oder 3:** E1, E2, E3, E5, E6: 2 (Riesenschrift als Bildebene, aber ohne räumliche Verschränkung). E4, E7, E8: 3 (das Riesenwort ersetzt das Bildmotiv und ist der stärkste Kontrastpunkt). – begründete Mehrheitsmeinung: 2. Die Riesenschrift liegt flach in einem verkleinerten Beispiel, ohne Verdeckung, Anschnitt oder Perspektive. Ihre Fokusfunktion ist ein Kompositionsmerkmal (D6).
-- **D17 Übergänge: genügt die Fortschrittsanzeige als Beleg?:** E5: 1 (Paginierung und „04 / 07“ belegen eine Szenenfolge nach Belegregel d). E1, E2, E3, E4, E6, E7, E8: NB (Sequenz belegt, Übergangsgestaltung nicht). – begründete Mehrheitsmeinung: NB. Die Anzeige belegt nur, dass eine Folge existiert. Der Wechsel ist Plattform-Wischen und liegt außerhalb der Abgrenzung.
+- **D17 Übergänge: genügt die Fortschrittsanzeige als Beleg?:** E5: 1 (Paginierung und „04 / 07“ belegen eine Szenenfolge nach [Belegregel d](../README.md#34-belegregeln)). E1, E2, E3, E4, E6, E7, E8: NB (Sequenz belegt, Übergangsgestaltung nicht). – begründete Mehrheitsmeinung: NB. Die Anzeige belegt nur, dass eine Folge existiert. Der Wechsel ist Plattform-Wischen und liegt außerhalb der Abgrenzung.
 - **Panelschein: gestaltet oder Kompressionssaum:** E1, E2, E4, E5, E6, E7, E8: gestalteter, sehr schwacher warmer Schein (Konfidenz mittel). E3: unsicher (Konfidenz niedrig). – begründete Mehrheitsmeinung: gestaltet. Nachgemessen gibt es an mehreren Kanten einen gleichmäßigen, leicht rötlichen Anstieg (ca. 17–18 auf 25–29), der für einen Glow spricht. Er bleibt aber nahe der Wahrnehmungsschwelle.
 - **Rolle des fast weißen Deno-Blocks:** E1, E2, E7, E8: Schwäche, die Leuchtdichte konkurriert mit dem Titel und zieht frühe Fixationen ab. E3, E5, E6: bewusster Hell-Dunkel-Kontrast, der den Stilvergleich trägt. – nicht auflösbar: Der Kontrast ist gewollt und hat zugleich eine Nebenwirkung auf die Hierarchie. Wie stark sie ist, ließe sich nur mit Blickverlaufsdaten entscheiden.
 - **Leselinie: Z-Diagonale oder F-Muster:** E1, E2, E4, E6, E7: Diagonale vom Titel oben links über Deno zu „BREACHEN“ unten rechts. E8: F-förmige Abtastbahn entlang der linken Kante, durch die Diagonale im Panel unterbrochen. – begründete Mehrheitsmeinung: Die Diagonale bestimmt das Panel. E8s F-Bahn beschreibt die Textzonen (Kopf, Aufzählung) und widerspricht dem nicht.

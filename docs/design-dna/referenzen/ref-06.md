@@ -1,6 +1,6 @@
 # Referenz 06 – Samurai-Landingpage im Webflow-Designer
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | NB | NB | NB | NB | NB | NB | NB | NB | **NB** | — | 8 |
 | 18 Dynamische Typografie | 1 | 2* | 1 | 2* | 1 | 2 | 2 | 1 | **1,5** | 1–2 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -248,7 +248,7 @@ Wahrnehmungspsychologisch beruht der Ausschnitt auf einer klaren Figur-Grund-Tre
 **8 Animation und Bewegung** · Median **2** (Experten 2–2, NB 0) · Konfidenz niedrig
 
 - Beobachtung: Navigator in samurai-lp-section-1: hero-lottie-front… und hero-lottie-front mit Cursor-Verbotssymbol, dazwischen title-part, danach hero-lottie-back. An der Section steht ein Blitz-Symbol (Interaktion). Im Bild keine Bewegungsunschärfe und keine Zwischenzustände.
-- Interpretation: Beleg über die Werkzeugoberfläche (Regel c): Animationsebenen vor und hinter dem Titelblock sind strukturell angelegt. Art, Umfang und Timing der Bewegung bleiben unbekannt.
+- Interpretation: Beleg über die Werkzeugoberfläche ([Regel c](../README.md#34-belegregeln)): Animationsebenen vor und hinter dem Titelblock sind strukturell angelegt. Art, Umfang und Timing der Bewegung bleiben unbekannt.
 - Technische Hypothese: Lottie-Animationen in Wrapper-Elementen, gestartet oder gesteuert über eine Webflow-Interaktion. Im Navigator erscheint der Elementtyp nur als generische Box.
 - Nicht prüfbar: Easing, Dauer, Loop und Auslöser; ob es echte Lottie-Elemente sind. Die Caption „A little depth goes a long way“ und der Collab mit lottie.files sind nur schwache Indizien.
 
@@ -337,7 +337,7 @@ Wahrnehmungspsychologisch beruht der Ausschnitt auf einer klaren Figur-Grund-Tre
 - Es gibt keine Schlagschatten, keine Unschärfe, keine atmosphärische Perspektive, kein Grain und keine Textur. Alle Ebenen sind gleich scharf und gleich gesättigt (D4 und D12 höchstens 1).
 - Keine 3D-Objekte; Räumlichkeit entsteht als 2,5D (D7: sieben von acht Experten 0).
 - Der Hintergrund ist ein ruhiger Vertikalverlauf von Schwarz zu Navy, statisch nur schwach dynamisch (D13 einstimmig 1).
-- Die zeitlichen Werte stützen sich nur auf den Navigator (Belegregel c): Animation einstimmig 2, Scroll-Inszenierung mindestens 2. Mikrointeraktionen, Physik und Übergänge einstimmig NB.
+- Die zeitlichen Werte stützen sich nur auf den Navigator ([Belegregel c](../README.md#34-belegregeln)): Animation einstimmig 2, Scroll-Inszenierung mindestens 2. Mikrointeraktionen, Physik und Übergänge einstimmig NB.
 - Webflow Designer ist belegt. Lottie-Animationen und Parallax-Steuerung gelten nur als naheliegend, weil Lottie-Elementtyp und Auslöser im Bild nicht sichtbar sind. Caption und lottie.files-Collab gelten allen als schwache Indizien.
 - Der Text steht ohne Überlagerung mit der Illustration und schafft über einen extremen Größen- und Gewichtskontrast eine klare Hierarchie.
 - Das Cursor-Verbotssymbol an den hero-lottie-front-Ebenen deutet vermutlich auf deaktivierte Zeigerereignisse hin. Diese Hypothese nennen mehrere Experten unabhängig voneinander.

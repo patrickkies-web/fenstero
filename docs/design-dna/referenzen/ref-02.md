@@ -1,6 +1,6 @@
 # Referenz 02 – Dentora und gestapelte Website-Mockups
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | NB | NB | NB | NB | NB | NB | NB | NB | **NB** | — | 8 |
 | 18 Dynamische Typografie | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | **1** | 1–1 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -273,7 +273,7 @@ Aus wahrnehmungspsychologischer Sicht ist der Dentora-Hero ein klar strukturiert
 - Interpretation: Integration über Bildausschnitt, Negativraum und Scrim statt über Maskierung oder Compositing: nahtlos, aber technisch zurückhaltend.
 - Technische Hypothese: img oder background-image mit object-fit: cover in Container mit border-radius und overflow: hidden; linear-gradient-Scrim links; Thumbnail als eigenes Bild.
 - Nicht prüfbar: Ob die Abtönung Overlay, Grading oder unscharfe Vordergrundfigur ist; ob der Hintergrund ein Video ist; Bildausschnitte auf anderen Breakpoints.
-- Bewertungsunterschied: E2, E3, E6 (3) bewerten, wie stark das Foto den Hero trägt. Die Mehrheit (2) bewertet die Integrationstechnik selbst (Freistellung, Compositing, Maskierung, Übergänge). Laut Skala zählt die Ausprägung des Mittels, nicht die Bedeutung des Fotos. Vorhanden sind randlose Füllung, Eckmaske und weicher Scrim, aber keine Freistellung und keine verschränkten Ebenen. 2 ist besser begründet.
+- Bewertungsunterschied: E2, E3, E6 (3) bewerten, wie stark das Foto den Hero trägt. Die Mehrheit (2) bewertet die Integrationstechnik selbst (Freistellung, Compositing, Maskierung, Übergänge). Laut [Skala](../README.md#d11-bildintegration) zählt die Ausprägung des Mittels, nicht die Bedeutung des Fotos. Vorhanden sind randlose Füllung, Eckmaske und weicher Scrim, aber keine Freistellung und keine verschränkten Ebenen. 2 ist besser begründet.
 
 **12 Oberflächendetails** · Median **0,5** (Experten 0–1, NB 0) · Konfidenz niedrig
 

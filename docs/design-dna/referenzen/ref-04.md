@@ -1,6 +1,6 @@
 # Referenz 04 – POUR / PLAY – Szene „Pour“
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | 3* | 3* | 3 | 3 | 3 | 3 | 3* | 3* | **3** | 3–3 | 0 |
 | 18 Dynamische Typografie | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | **4** | 4–4 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -250,7 +250,7 @@ Aus wahrnehmungspsychologischer Sicht arbeitet das Design mit einem bewussten Ko
 - Interpretation: Der Hero ist auf zeitliche Zustände angelegt; Rieseln, Fallen und Buchstabenwechsel sind Motiv und Erzählmittel zugleich.
 - Technische Hypothese: Hintergrundvideo oder Bildsequenz für das Motiv, dazu buchstabenweise animierte Textebenen (Opazität, Position, Farbe); nur Hypothese.
 - Nicht prüfbar: Easing, Dauer, Bewegungspfade; ob die Animation in der Website oder im Reel-Schnitt entsteht. Die Caption „Coffee Shop Website“ ist nur schwaches Indiz.
-- Bewertungsunterschied: E1 (2) bleibt vorsichtig, weil der Wechsel auch im Reel-Schnitt entstehen könnte; die übrigen (3) stützen sich auf den Zwischenzustand und den Zweitframe (Belegregel a und b). 3 ist belegt; die Herkunft der Bewegung bleibt offen.
+- Bewertungsunterschied: E1 (2) bleibt vorsichtig, weil der Wechsel auch im Reel-Schnitt entstehen könnte; die übrigen (3) stützen sich auf den Zwischenzustand und den Zweitframe ([Belegregel a und b](../README.md#34-belegregeln)). 3 ist belegt; die Herkunft der Bewegung bleibt offen.
 
 **9 Scroll-Inszenierung** · Median **2** (Experten 2–3, NB 0) · Konfidenz niedrig
 
@@ -356,7 +356,7 @@ Aus wahrnehmungspsychologischer Sicht arbeitet das Design mit einem bewussten Ko
 - **Kameraführung (D15):** E4, E7: 2, filmischer Nahausschnitt mit hereinragenden Objekten. Übrige: 1, konventionelle frontale Produktperspektive. – begründete Mehrheitsmeinung: 1; kein inszenierter Winkel, Raum entsteht über Ebenen.
 - **Physikbasierte Bewegung (D16):** E3, E6: 1, das schwerkraftgetreue Rieseln ist physikalische Bewegung. E1, E2, E4, E5, E7, E8: NB, Physik nur als Motivinhalt. – begründete Mehrheitsmeinung: NB; Feder-, Trägheits- oder Elastikverhalten des Interface ist nicht belegt.
 - **Scroll-Kopplung (D9):** E6: 3, der tiefer stehende Scrollbalken belegt den scrollgesteuerten Szenenwechsel. Übrige: 2, nur Indiz. – begründete Mehrheitsmeinung: 2 mit niedriger Konfidenz; der Balken zeigt Scrollfortschritt, nicht die Kopplung des Szenenwechsels.
-- **Stärke der Animation (D8):** E1: 2, vorsichtig wegen möglichem Reel-Schnitt. Übrige: 3, Zwischenzustand und Zweitframe belegen animierte Zustände. – begründete Mehrheitsmeinung: 3; Belegregel a und b sind erfüllt, die Herkunft der Bewegung bleibt offen.
+- **Stärke der Animation (D8):** E1: 2, vorsichtig wegen möglichem Reel-Schnitt. Übrige: 3, Zwischenzustand und Zweitframe belegen animierte Zustände. – begründete Mehrheitsmeinung: 3; [Belegregel a und b](../README.md#34-belegregeln) sind erfüllt, die Herkunft der Bewegung bleibt offen.
 - **Herkunft des Materials:** E6: möglicherweise generativ erzeugtes Mockup-Video (verformte Glyphen, sinnlose Buchstabenfolgen). E1, E2, E3, E5, E7, E8: eventuell Motion-Design-Mockup oder Reel-Schnitt. E4: vorgerenderte 3D-Szene möglich. – nicht auflösbar: Glyphenauffälligkeiten können ebenso aus Kompression und Überblendung stammen; am Standbild nicht unterscheidbar.
 - **Art des Übergangs:** E6: Opazitäts-Crossfade (X-förmige Doppelbelichtung). E7: rechteckige Clip-Masken (gerade Schnittkanten an „y“ und „g“). E1, E4: Schrift löst sich eventuell in Partikel auf (spekulativ). E2: Mosaik- oder Blockübergang möglich. – nicht auflösbar: doppelte Konturen sprechen für eine Überblendung, gerade Kanten für Masken; beides kann zugleich vorliegen oder Kompressionsartefakt sein.
 - **Hierarchie im Zwischenframe:** E2: starke, sofort lesbare Rangordnung. E3: Headline, Riesenschrift und Buchstabenstapel gleich laut, Fokus geht verloren. E8: Luminanzkontrast trennt Atmosphäre (Pfirsich) und Information („POUR“), im Übergang steigt aber die Komplexität. – nicht auflösbar: Das Prinzip (Luminanz plus Größe) ist erkennbar; ob es im Endzustand ruhig funktioniert, zeigt das Standbild nicht.

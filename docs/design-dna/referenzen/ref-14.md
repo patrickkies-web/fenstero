@@ -1,6 +1,6 @@
 # Referenz 14 – Axle – Mobilitätsplattform
 
-[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
+[← Übersicht](../README.md) · Phase 1 bis 3 für dieses Bild. Werte 0–4, NB = nicht beurteilbar; * = Urteil mit Konfidenz „niedrig“. Mediane sind berechnet, nicht geschätzt. Skalenanker, Belegregeln (a)–(d), NB-Regel und Rollen: [Methode](../README.md#3-methode). Die acht Perspektiven sind simulierte Rollen desselben Sprachmodells, keine realen und keine unabhängigen Fachleute (siehe [4.6](../02-vergleich.md#46-grenzen-dieser-auswertung)).
 
 ## 1. Neutrale Bestandsaufnahme (Phase 1)
 
@@ -42,7 +42,7 @@
 | 17 Übergänge und Szenenwechsel | NB | NB | NB | NB | NB | NB | NB | NB | **NB** | — | 8 |
 | 18 Dynamische Typografie | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | **1** | 1–1 | 0 |
 
-⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2 oder geteilte Einschätzung der Beurteilbarkeit), erläutert in Abschnitt 3.1.
+⚑ = auffälliger Bewertungsunterschied (Spannweite ≥ 2, oder mindestens zwei Experten mit NB neben mindestens zwei Zahlenwerten), erläutert in Abschnitt 3.1.
 
 ### 2.2 Die acht Perspektiven
 
@@ -350,7 +350,7 @@ Aus wahrnehmungspsychologischer Sicht baut das Design auf einen starken Bildanke
 - **Schatten und Unschärfe (D4):** E4: 3 (Backdrop-Blur, Tiefenunschärfe, unscharfer Balken). Alle übrigen: 2. – begründete Mehrheitsmeinung: 2. Die Balkenunschärfe ist nicht von Kompression trennbar, und die UI hat keine Schatten.
 - **Geometrie (D5) und Komposition (D6):** E7: je 2, das System ist konsistent, aber konventionell bzw. vom Raster dominiert. Alle übrigen: 3. – begründete Mehrheitsmeinung: 3. Die Skala misst die Ausprägung, nicht die Originalität; Rundformlogik, Größenkontraste und die gezielte Textplatzierung bestimmen das Design durchgehend.
 - **3D-Integration (D7): Bühne oder gerahmte Bildplatte:** E2, E7: 3, weil die Szene eine gerahmte Platte hinter flacher UI ist. E1, E3, E4, E5, E6, E8: 4, ohne die Szene wäre es ein anderes Design. – begründete Mehrheitsmeinung: 4. Nach der Skalendefinition ist das entscheidend, dass das Design ohne die Szene ein austauschbares Dashboard wäre.
-- **Animation (D8): Teilgefüllter, weicher Balken als Beleg:** E4: 1, möglicher Zwischenzustand einer Füllanimation. E1, E2, E3, E5, E6, E7, E8: NB. – begründete Mehrheitsmeinung: NB. Die Kantenunschärfe ist nicht von Kompression trennbar, und die Diskrepanz lässt sich ebenso als Datenfehler erklären; damit ist die Belegregel (a) nicht erfüllt.
+- **Animation (D8): Teilgefüllter, weicher Balken als Beleg:** E4: 1, möglicher Zwischenzustand einer Füllanimation. E1, E2, E3, E5, E6, E7, E8: NB. – begründete Mehrheitsmeinung: NB. Die Kantenunschärfe ist nicht von Kompression trennbar, und die Diskrepanz lässt sich ebenso als Datenfehler erklären; damit ist die [Belegregel (a)](../README.md#34-belegregeln) nicht erfüllt.
 - **Dynamische Hintergründe (D13): Ist der Seitengrund flach?:** E1, E2, E6: 0, flach hellgrau. E3, E4, E7: 1, weichgezeichneter Bildgrund hinter den Kacheln. E5, E8: 1, weiche Verläufe (Himmel, Kachel). – nicht auflösbar: Am Bild zeigen schmale Randstreifen und die Fläche hinter der Glaskachel unscharfe dunkle Vertikalen mit Lichtpunkten, die sich aber nicht sicher von Spiegelung oder Kompression trennen lassen. Der Himmelsverlauf zählt nicht. Der Median 1 ist nur schwach getragen.
 - **Perspektive und Kamera (D15):** E2, E7: 2, statischer, eher frontaler Blick, die UI ist frontal. E1, E3, E4, E5, E6, E8: 3, der Kamerastandpunkt prägt Modellwirkung und Blickführung. Brennweite: E5 leicht weitwinklig, E4 normal bis leicht tele mit Shift. – begründete Mehrheitsmeinung: 3, weil der Standpunkt Fokus, Modellanmutung und Textzone erzeugt. Die Brennweite ist nicht auflösbar, weil die Schrägaufnahme die Ablesung verhindert.
 - **Echter Hintergrund-Blur der Glasflächen:** E3, E4, E7: In der Emissions-Kachel scheinen unscharfe Bildinhalte durch, also Backdrop-Blur. E1, E2, E6, E8: offen, ob echter Blur oder nur Deckkraft. – begründete Mehrheitsmeinung (am Bild gestützt): In der Kachel sind unscharfe Formen hinter scharfem Inhalt sichtbar, eine Hintergrundweichzeichnung ist dort wahrscheinlich. Für die Nav- und CTA-Pillen ist das nicht prüfbar.
