@@ -4,7 +4,8 @@ Seite: Startseite `/`, Ansicht Hauseigentümer (`/#hauseigentuemer`) · Position
 
 Phase I (MASTER-PROMPT V4), Stand 24.10.2026; das Repository wurde nur gelesen. Kürzel wie in
 [08-zielarchitektur.md](../08-zielarchitektur.md) (Z), dazu DNA-B = `docs/design-dna/05-ergebnis-b-styleguide.md`, SG =
-`docs/design-dna/04-styleguide.md`, DR = `.claude/skills/premium-gestaltung/designrichtung.md`. **[V]** verbindlich, **[H]** Hypothese mit
+`docs/design-dna/04-styleguide.md`, DR = `.claude/skills/premium-gestaltung/designrichtung.md`, Abschnittsnummern 11.x und K-n =
+[11-designsystem.md](../11-designsystem.md). **[V]** verbindlich, **[H]** Hypothese mit
 Rückfall, **Textentwurf** braucht Freigabe, **Festlegung I** = Entscheidung dieses Dokuments. Maße und Lagen sind geplant, Wirkung ist
 erwartet, nichts davon gemessen.
 
@@ -15,7 +16,7 @@ erwartet, nichts davon gemessen.
 | Merkmal | Festlegung |
 |---|---|
 | Name, ID | „Aus dem Ratgeber: Weg in sechs Schritten“, `he-05-ratgeber-weg` (`08-zielarchitektur.md:959`) |
-| Lage | Telefon 451 px ≈ 0,53 Bildschirmhöhen (BH), ab y ≈ 3.550: Bildschirm 6 bei realen 664 px, Bildschirm 5 bei 844 px. Davor H4 mit Ring „Führung starten“, danach H6 (Fragen, Stufe 1) und H7 (Cream „Jetzt ausmessen“) |
+| Lage | Telefon 467 px ≈ 0,55 Bildschirmhöhen (BH), ab y ≈ 3.550: Bildschirm 6 bei realen 664 px, Bildschirm 5 bei 844 px. Davor H4 mit Ring „Führung starten“, danach H6 (Fragen, Stufe 1) und H7 (Cream „Jetzt ausmessen“) |
 | Ziel | Unentschlossene in den Weg der Ratgeber führen statt an die Suche verlieren (U5 statt Absprung, `04-entscheidungsarchitektur.md:86`) |
 | Nutzerfrage | „Ich bin noch nicht so weit, wo fange ich an?“ (Z :959) |
 | Gruppen | HE-1, HE-2, HE-4 (EA :145–148); HE-5, die vor dem Messen lesen wollen (Z :464) |
@@ -26,7 +27,6 @@ erwartet, nichts davon gemessen.
 
 | Element | Wortlaut | Herkunft | Ziel |
 |---|---|---|---|
-| Kapitelzeile | „SECHS SCHRITTE ZU NEUEN FENSTERN“ | **Textentwurf** aus h1 und `og:title` der Übersicht (`web/ratgeber/index.html:68`, `:11`) | – |
 | h2 | „Aus dem Ratgeber.“, grün „Ratgeber.“ | Bestand `web/assets/portal.js:857` (`akSatz`, `:314`) | – |
 | Kachel, Zeile 1 | „Schritt 1“ … „Schritt 6“ | Bestand `scripts/ratgeber-bausteine.mjs:120` | – |
 | Kachel, Zeile 2 | Prüfen · Entscheiden · Auswählen · Ausmessen · Vergleichen · Einbauen | Bestand `WEG`, `ratgeber-bausteine.mjs:51-58` | – |
@@ -34,7 +34,7 @@ erwartet, nichts davon gemessen.
 | Ankerkachel 4, Zeile 3 | „Messanleitung“ | **Textentwurf**; die Ratgeber sind Messanleitungen (GEST:22) | `/ratgeber/fenster-ausmessen/` (= `WEG[3].seiten[0]`) |
 | Linkzeile | „Alle Ratgeber ›“ | Bestand `portal.js:857` | `/ratgeber/` |
 
-Rund 25 Wörter statt heute ≈ 135 in neun Karten (`bestand/seiten-und-inhalte.md:226`). Ohne Anrede, weil sie offen ist (EA O-13); die
+Rund 20 Wörter statt heute ≈ 135 in neun Karten (`bestand/seiten-und-inhalte.md:226`). Ohne Anrede, weil sie offen ist (EA O-13); die
 heutigen Karten mischen „du“ und „Sie“ (`bestand/browser-mobil.md:128`).
 
 **Festlegung I-1: Die Ankerkachel führt auf die Messanleitung, nicht auf `#schritt-4`** (Z nennt `#schritt-1` bis `-6` und „sie führt zur
@@ -53,7 +53,7 @@ Tipp führt. **Rückfall:** `#schritt-4` mit „8 Ratgeber“ und angepasster Pr
 
 ## C. Exakte Layoutkomposition
 
-**Grundstruktur [V]:** Kopf (Haarlinie, Kapitelzeile, h2) → Held (Kachelfeld 2 × 3, genau eine Ankerkachel) → Handlung (Linkzeile), nach
+**Grundstruktur [V]:** Kopf (Haarlinie, h2; ohne Kapitelzeile, K-16) → Held (Kachelfeld 2 × 3, genau eine Ankerkachel) → Handlung (Linkzeile), nach
 G2 (`02-design-grammatik.md:656`). Kein Lesestapel; die Kacheln sind die Antwort. Ordnungsfigur: Kachelraster an der linken Kante, „eine
 Kachel ist Anker, alle anderen sind Klein-UI“ (SG 10.1/11, `04-styleguide.md:100`).
 
@@ -62,46 +62,48 @@ Kachel ist Anker, alle anderen sind Klein-UI“ (SG 10.1/11, `04-styleguide.md:1
 | Element | x | y | Breite × Höhe | Satz |
 |---|---|---|---|---|
 | Haarlinie | 16–374 | 0 | 358 × 1 | `--line` `#2b2b2b` |
-| Kapitelzeile | 16 | 17–33 | eine Zeile | 13/16, Inter 600, Versalien, Sperrung 0,12 em, `--muted` (Technikstimme, DR:100) |
-| h2 | 16 | 45–79 | eine Zeile, ≈ 305 px | 32/1,05, Inter 800, −0,03 em, `--text`, „Ratgeber.“ `--accent` |
-| Reihe 1: Kachel 1, 2 | 16 · 201 | 103–191 | je 173 × 88 (Spalten 1–2, 3–4) | – |
-| Reihe 2: Kachel 3, **4 (Anker)** | 16 · 201 | 203–291 | je 173 × 88 | – |
-| Reihe 3: Kachel 5, 6 | 16 · 201 | 303–391 | je 173 × 88 | – |
-| Linkzeile | 16 | 407–451 | Ziel 44 hoch | 17, Inter 700, Unterstreichung 1,5 px `--line2` |
+| h2 | 16 | 25–59 | eine Zeile, ≈ 305 px; 24 px unter der Haarlinie (`--a-gruppen`, keine Kapitelzeile, K-16) | 32/1,05, Inter 800, −0,03 em, `--text`, „Ratgeber.“ `--accent` |
+| Reihe 1: Kachel 1, 2 | 16 · 201 | 83–183 | je 173 × 100 (Spalten 1–2, 3–4) | – |
+| Reihe 2: Kachel 3, **4 (Anker)** | 16 · 201 | 195–295 | je 173 × 100 | – |
+| Reihe 3: Kachel 5, 6 | 16 · 201 | 307–407 | je 173 × 100 | – |
+| Linkzeile | 16 | 423–467 | Ziel 44 hoch | 17, Inter 700, Unterstreichung 1,5 px `--line2` |
 
-**Kachel innen.** Polsterung 12; „SCHRITT n“ 13/16 Technikstimme mit `tabular-nums`; 4 px; Name 17/22 Inter 700; 2 px; dritte Zeile 13/16
-Inter 500. `min-height: 88px`, nie feste Höhe.
+**Kachel innen.** Polsterung 16, Ankerkachel 20 (11.6.4); Inhalt senkrecht mittig, damit Kachel 3 und Anker in Reihe 2 auf einer Linie
+beginnen; „SCHRITT n“ 13/16 Technikstimme mit `tabular-nums`; 4 px; Name 17/22 Inter 700; 2 px; dritte Zeile 13/16 Inter 500.
+`min-height: 100px` (Inhalt 60 px plus 2 × 20 im Anker, alle Reihen gleich hoch), nie feste Höhe.
 
 | | Kachel 1–3, 5, 6 | Ankerkachel 4 |
 |---|---|---|
-| Fläche | `--surface` `#1f1f1f`, Ring 2 px `--line` | Papierweiß `#ffffff`, ohne Ring (H5-AB-1) |
-| Zeile 1 und 3 | `--muted` `#93928d`, 5,3 : 1 | `#161616` bei Deckkraft 0,72 (≈ `#575757`), 7,2 : 1 |
-| Zeile 2 | `--text` `#f3f2ee`, 14,7 : 1 | `#161616`, 18,1 : 1 |
-| Bild | – | Messausschnitt rechts randlos, 56 × 88; Text rechts auf 64 px Abstand begrenzt |
+| Fläche | `--surface` `#1f1f1f`, Ring 2 px `--line` | `--papier` `#ffffff`, ohne Ring (H5-AB-1; K-40, 11.4.2) |
+| Zeile 1 und 3 | `--muted` `#93928d`, 5,3 : 1 | `--tinte-papier` `#141414` bei Deckkraft 0,72 (≈ `#565656`), 7,3 : 1 |
+| Zeile 2 | `--text` `#f3f2ee`, 14,7 : 1 | `--tinte-papier` `#141414`, 18,4 : 1 |
+| Bild | – | Messausschnitt rechts randlos, 40 × 100; Text rechts auf 48 px Abstand begrenzt, innen also 105 px („Ausmessen“ 97,4 px, „Messanleitung“ 91 px; Laufweiten aus `web/fonts/inter-latin-wght-normal.woff2` berechnet) |
 
 **Messausschnitt** (Bildebene in der Ankerkachel, `aria-hidden`). Inline-SVG `viewBox="0 0 72 96"`, `preserveAspectRatio="xMaxYMid slice"`,
 von der Kachelrundung beschnitten. Nach `messpunkte.svg:5-12`: rechts Wandstreifen `#ecebe6` (x 54–72), an seiner Kante die Laibung,
-Linie `#c2410c` 2,5 px; drei Maßlinien `#c2410c` 2 px bei y 30 / 48 / 66 bis an die Laibung, Pfeilspitze rechts, linkes Ende über 14 px
-ausgeblendet. Ohne Schrift und Zahl. Lesart: drei Breiten bis an die Laibung, der Gedanke der Probemessung aus H2.
+Linie `--mo-papier` (`#c2410c`, 11.4.1) 2,5 px; drei Maßlinien `--mo-papier` 2 px bei y 30 / 48 / 66 bis an die Laibung, Pfeilspitze
+rechts, linkes Ende über die linken 14 px des Elements ausgeblendet (Maske, gilt bei 40 wie bei 72 px Breite). Ohne Schrift und Zahl und
+ohne Blau: Ein Blau auf Papier ist nicht festgelegt, die Fläche zeigt nur die Maueröffnung (11.4.1). Lesart: drei Breiten bis an die
+Laibung, der Gedanke der Probemessung aus H2.
 
-**Verhältnisse.** Kachelfeld 64 % der Abschnittshöhe; Fläche: Kacheln ≈ 57 %, Kopf und Link ≈ 10 %, frei ≈ 33 %. Ankerkachel = ⅙ des
-Felds, ≈ 4,6 % des Bildschirms; ihr Bild misst das 9-Fache der Versalhöhe der Bedienschrift (SG 10.1/4). Genau drei Größenstufen
+**Verhältnisse.** Kachelfeld 69 % der Abschnittshöhe; Fläche: Kacheln ≈ 62 %, Kopf und Link ≈ 9 %, frei ≈ 29 %. Ankerkachel = ⅙ des
+Felds, ≈ 5,3 % des Bildschirms; ihr Bild misst in der Höhe rund das 10-Fache der Versalhöhe der Bedienschrift (SG 10.1/4). Genau drei Größenstufen
 32 · 17 · 13 [V]; die Linkzeile trägt deshalb 17 statt der 15 von `.linkbtn`.
 
 **Ausrichtung, Symmetrie.** Alles fluchtet auf x = 16 (G5). Das Feld ist symmetrisch; die helle Kachel rechts in der Mitte bricht die
 Symmetrie über den Tonwert, nicht über die Größe, damit die Lesefolge 1 2 / 3 4 / 5 6 bleibt.
 
 **Ebenen.** Z 0 Grund `#161616` → Z 30 Kopf, Kacheln, Link → in der Ankerkachel die beschnittene Zeichnung (Text daneben, nie darauf) →
-Z 40 klebender Seitenkopf. **Bedienung:** jede Kachel ist ganz Ziel (173 × 88); steht die h2 oben im Bild, liegen Reihe 2, 3 und Link im
+Z 40 klebender Seitenkopf. **Bedienung:** jede Kachel ist ganz Ziel (173 × 100); steht die h2 oben im Bild, liegen Reihe 2, 3 und Link im
 unteren Drittel, im Daumenbereich.
 
 | Startwert | Begründung |
 |---|---|
 | Fuge 12 px in beiden Richtungen | DR 3.3 (`designrichtung.md:115`); Reihenabstand = Spaltenabstand (DNA-B B.3.10). **Festlegung I-2:** Z rechnet mit 16 px (171 px Breite); 12 px spart 8 px Höhe |
-| Radius 12 (`--r2`) | Kacheln nach DG-AB-8 (`02-design-grammatik.md:1136`); heute 18 in `.rg-weg-liste` |
-| innen 16 · 12 · 24 · 16 | Verhältnis innerhalb : zwischen Gruppen ≈ 1 : 3 (G6); 24 px vor dem Held |
+| Radius 12 (`--r2`) auf allen Breiten; Polsterung Kachel 16, Ankerkachel 20 | 11.6.1, K-22 und 11.6.4: Kachel und Ankerkachel 12, keine Verkleinerung am Telefon (DG-AB-8, `02-design-grammatik.md:1136`); heute 18 in `.rg-weg-liste`. Abweichung von bestehender Regel (GEST:32 „Radien 8 · 12 · 18 · 24“) – Freigabe durch den Inhaber nötig (DS-AB-5) |
+| innen 24 · 24 · 16 | Haarlinie → h2 24 (`--a-gruppen`, ohne Kapitelzeile, 11.2.2), h2 → Held 24, Held → Link 16 |
 | Abschnittsabstand 96 / 128 px | G6 [V] |
-| Kapitelzeile ohne Nummer | **Festlegung I-3:** H2–H4 tragen „01“–„03“ (Z :992, :1010, :1026); H5 ist Zubringer, kein Kapitel der Messgeschichte, daher wie die Anhänge ohne Nummer (E-AB-10 sinngemäß) und ohne Grün |
+| keine Kapitelzeile | **Festlegung I-3** (angepasst an K-16, 11.3.1): H2–H4 tragen „01“–„03“ (Z :992, :1010, :1026); H5 ist Zubringer, kein Kapitel der Messgeschichte, trägt daher keine Nummer und nach K-16 auch keine Kapitelzeile; die h2 folgt 24 px unter der Haarlinie |
 
 ## D. Anwendung der Design-DNA
 
@@ -118,7 +120,7 @@ flache Bedienschicht, eine Formfamilie, ruhiger Grund, Unverdecktheit, Bewegung 
 | Bildintegration | nur der Messausschnitt, in der Sprache der Anleitung (weiße Karte, Orange = Maueröffnung, GEST:24, :34) | 1 | Held nicht rein textlich (G4); Reim auf H2 |
 | Oberflächendetails | Haarlinie, Versalien mit Sperrung, gleich breite Ziffern, Unterstreichung 1,5 px | 1 | Präzision im Kleinen |
 | Animation | einmal die drei Maßlinien zeichnen [H] | 1 | führt den Blick zum Anker; Endbild trägt allein |
-| Typografie | Bühnenstimme h2, Technikstimme Kapitel- und Kachelzeilen, Namen 17/700 | 2 | ein grünes Wort, drei Stufen |
+| Typografie | Bühnenstimme h2, Technikstimme Kachelzeile „SCHRITT n“, Namen 17/700 | 2 | ein grünes Wort, drei Stufen |
 | Überlagerungen | keine über Text oder Ziel | 0 | DNA-B B.1/10 |
 | Perspektive | frontal | 0 | SG 10.7/1 |
 | interaktive Effekte | Hover = Kontur, gedrückt = Füllung, Fokus = 2-px-Kontur | 1 | Rückmeldung ohne Bewegung (DG 2.4.1) |
@@ -133,11 +135,17 @@ Z :1085), ein Bild je Kachel (sechs Reize), Glas, Licht, Schweben, Parallaxe, Sc
 direkt davor hat einen), Kurztexte je Schritt (H5-H5).
 
 **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig (H5-AB-1).** Regel: Flächen sind `#1f1f1f` mit Ring; der einzige
-Hellwert der Bedienung ist Cream für die Hauptaktion (GEST:24, :32). Vorschlag: Ankerkachel in Papierweiß `#ffffff` als Rollen-Token
-`--blatt` (vorhandener Wert `--primary-hover`, `gemeinsam.css:15`; Zeichnungskarten `ratgeber.css:79`). Begründung: Cream bleibt allein
-„Jetzt ausmessen“ (H1, H2, H7); die Kachel führt zum Lesen; Cream am Held schließt G3 aus; Papierweiß ist die Farbe der Ratgeber-Zeichnungen.
-**Rückfall:** Cream wie `li[aria-current]` (`ratgeber.css:115`); auf Bildschirm 6 steht keine andere Cream, die von H7 ≈ 1.100 px tiefer
-(Prüfpunkt).
+Hellwert der Bedienung ist Cream für die Hauptaktion (GEST:24, :32); keine neuen Farben (GEST:24). Vorschlag nach 11.4.1 und K-40
+(11.4.2): Ankerkachel in Papierweiß als Rollen-Token `--papier` `#ffffff` (vorhandener Wert `--primary-hover`, `gemeinsam.css:15`;
+Zeichnungskarten `ratgeber.css:79`), Zeichnung in `--mo-papier` `#c2410c`, Schrift in `--tinte-papier` `#141414` (Werte aus
+`web/bilder/messpunkte.svg`; `--mo` erreicht auf Weiß nur ≈ 2,3 : 1); keine lokal definierten Farbwerte. Die Rollen-Tokens sind dieselbe
+Freigabe wie DS-AB-7 und P-AB-2. Begründung: Cream bleibt allein „Jetzt ausmessen“ (H1, H2, H7); die Kachel führt zum Lesen; Cream am Held
+schließt G3 aus; Papierweiß ist die Farbe der Ratgeber-Zeichnungen und nach K-40 nur Papier und dieser Ankerkachel vorbehalten.
+**Rückfall** ohne Freigabe (K-40: Flächen über Grundniveau sind `--surface`): Ankerkachel `--surface` wie die übrigen, Rang über Ring 2 px
+`--muted` statt `--line` und den Messausschnitt; keine Cream, sie bleibt der Hauptaktion. **Prüfpunkt K-40** (nie zwei Papierflächen im
+selben Bildschirm): Papierweiß trägt davor nur Miniatur 04 in H4 (Fassung B, y 161–320 ab der Haarlinie von H4), 698 px über der
+Ankerkachel; bei 664 px (608 px unter dem Kopf sichtbar) nie zugleich im Bild, bei 844 px (788 px sichtbar) höchstens mit den Rändern
+beider; Prüfung im Telefon-Video, sonst gilt der Rückfall.
 
 ## E. Visual Attention Architecture
 
@@ -160,8 +168,8 @@ Erwartet, nicht gemessen.
 |---|---|---|---|---|
 | Scrollen | nativ; nichts heftet, koppelt oder tritt auf | – | gleich | ein Träger je Ansicht (E-2); GEST:39 |
 | Ankerkachel zu ≥ 50 % im Bild [H] | die drei Maßlinien zeichnen sich nacheinander zur Laibung, dann die Pfeilspitzen | je Linie 320 ms, Versatz 90 ms, Spitze 150 ms Deckkraft, gesamt ≈ 650 ms, Start 200 ms nach Eintritt, `--e-out`; `stroke-dashoffset` 1 → 0 bei `pathLength="1"`, ein `IntersectionObserver`, einmal je Aufruf | Endbild sofort | Motiv-Auftritt in der Bildschicht (DG 2.4.1); erzählt „messen“ (SKILL:45) |
-| Hover (`hover: hover`) | dunkle Kachel: Ring `--line` → `--line2`; Anker: innerer Ring 2 px `rgba(22,22,22,.28)` | 150 ms, `--e-out` | gleich | Hover = Kontur; ohne das `translateY` von `portal.css:357` (SG 10.7/1) |
-| Drücken (`:active`) | `--surface` → `--surface2`; Anker `#ffffff` → `--cream` | 150 ms | gleich | aktiv = Füllung, keine Skalierung |
+| Hover (`hover: hover`) | dunkle Kachel: Ring `--line` → `--line2`; Anker: innerer Ring 2 px `--tinte-papier` mit 28 % | 150 ms, `--e-out` | gleich | Hover = Kontur; ohne das `translateY` von `portal.css:357` (SG 10.7/1) |
+| Drücken (`:active`) | `--surface` → `--surface2`; Anker `--papier` → `--cream` | 150 ms | gleich | aktiv = Füllung, keine Skalierung |
 | Fokus | 2 px `--ink`, Abstand 2, folgt dem Radius | `:focus-visible` (`gemeinsam.css:38`) | gleich | ≥ 3 : 1 auf beiden Grundtönen |
 | Klick | Navigation; `#schritt-n` springt in der Übersicht | `<a href>` | Sprung ohne Glätten | ohne JavaScript bedienbar |
 
@@ -172,27 +180,32 @@ Telefon-Video).
 ## G. Responsive Design
 
 **Telefon 390 × 844 (zuerst, eigene Komposition).** Wie C. Bei realen 664 px steht der ganze Abschnitt in einem Bildschirm. Unter 168 px
-Kachelbreite (Viewport < 360 px) entfällt der Messausschnitt per Container-Abfrage, der Anker trägt dann Tonwert und Text; bei 320 px
-messen die Kacheln 142 px, „Entscheiden“ (≈ 106 px) passt. Bei 200 % Text wachsen die Kacheln in der Höhe, nichts wird abgeschnitten.
+Kachelbreite (Viewport < 380 px, also auch bei 360 px mit 158 px breiten Kacheln) entfällt der Messausschnitt per Container-Abfrage, der
+Anker trägt dann Tonwert und Text (innen 118 px bei 360, 98 px bei 320). Bei 320 px messen die Kacheln 138 px, innen 106 px: „Entscheiden“
+(102,5 px) passt, „Ausmessen“ (97,4 px) im Anker knapp (Prüfpunkt). Bei 200 % Text wachsen die Kacheln in der Höhe, nichts wird abgeschnitten.
 
-**Schreibtisch 1280 × 800.** Spalte 1040, 12 Spalten zu 64,7 px, Fuge 24. Kapitelzeile und h2 40/1,05 über Spalten 1–8, „Alle Ratgeber ›“
-rechtsbündig an Spalte 12 auf der Grundlinie der h2 (wie heute `.sec-head`). 24 px darunter eine Reihe über Spalten 1–12, Fuge 12, im
-Verhältnis 1 : 1 : 1 : 1,5 : 1 : 1: fünf Kacheln 151 × 96, Anker 226 × 96, Polsterung 16, Messausschnitt 72 × 96. Der breitere Anker folgt
-DG-AB-11 (`02-design-grammatik.md:1139`); Z (:1039) sagt nur „eine Reihe aus sechs Kacheln“. Höhe ≈ 207 px ≈ 0,26 BH (SKILL:28).
+**Schreibtisch 1280 × 800.** Spalte 1040, 12 Spalten zu 64,7 px, Fuge 24. h2 40/1,05 über Spalten 1–8 (keine Kapitelzeile, K-16), „Alle
+Ratgeber ›“ rechtsbündig an Spalte 12 auf der Grundlinie der h2 (wie heute `.sec-head`). 24 px darunter eine Reihe über Spalten 1–12, Fuge
+12, im Verhältnis 1 : 1 : 1 : 1,5 : 1 : 1: fünf Kacheln 151 × 100, Anker 226 × 100, Polsterung 16, im Anker 20, Messausschnitt 72 × 100.
+Der breitere Anker folgt DG-AB-11 (`02-design-grammatik.md:1139`); Z (:1039) sagt nur „eine Reihe aus sechs Kacheln“. Höhe ≈ 191 px
+≈ 0,24 BH (SKILL:28).
 
-**Schreibtisch 1024 × 768.** Inhalt 984 px (Rand 20 wie `.wrap`): Kacheln 142 × 96, Anker 213 × 96. Zwischen 600 und 900 px Containerbreite
-3 × 2 gleich breit, darunter 2 × 3.
+**Schreibtisch 1024 × 768.** Rand 32, Spalte 960, 12 Spalten zu 58 px, Rinne 24 (11.2.1, K-13; wie der Kopf in `rh-01`); h2 über Spalten
+1–8 (x 32–664), „Alle Ratgeber ›“ rechtsbündig an x 992. Die Reihe über 960 px: Kacheln 138 × 100 (innen 106 px, „Entscheiden“ 102,5 px),
+Anker 208 × 100 (Text 100 px neben dem 72 px breiten Messausschnitt, „Ausmessen“ 97,4 px); beides knapp, Prüfpunkt; Rückfall: Schwelle der
+Reihe von 900 auf 1000 px Containerbreite, dann steht bei 1024 das Feld 3 × 2. **Zwischengröße 640–1023 px** (Rand 24, Inhalt Breite − 48,
+11.2.1): ab 600 px Containerbreite 3 × 2 gleich breit (bei 768: Kacheln 232 × 100), darunter 2 × 3.
 
 ## H. Technische Umsetzung
 
 **Bestehend:** siehe B; Quelle der Daten ist `WEG` (`scripts/ratgeber-bausteine.mjs:51-58`), Abschnitt in `SCREENS.landing`
 (`portal.js:857`), Tokens `gemeinsam.css:10-30`. **Neu:** Modifikator `.rg-weg-liste.weg-start` mit `li.anker` in `portal.css`; Konstante
-`RATGEBER_WEG` statt `RATGEBER` in `portal.js`; Token `--blatt`; Inline-SVG `messausschnitt` (≈ 0,6 KB). Kein `aria-current`, denn auf der
+`RATGEBER_WEG` statt `RATGEBER` in `portal.js`; Rollen-Tokens `--papier`, `--mo-papier`, `--tinte-papier` aus 11.4.1 (keine lokalen
+Farbwerte); Inline-SVG `messausschnitt` (≈ 0,6 KB). Kein `aria-current`, denn auf der
 Startseite ist kein Schritt der aktuelle.
 
 ```html
 <section class="sec he-weg" aria-labelledby="he-weg-h">
-  <p class="kapitel">Sechs Schritte zu neuen Fenstern</p>
   <h2 id="he-weg-h">Aus dem <span class="ak">Ratgeber.</span></h2>
   <ol class="rg-weg-liste weg-start">
     <li><a href="/ratgeber/#schritt-1"><span class="n">Schritt 1</span><b>Prüfen</b><span class="t">3 Ratgeber</span></a></li>
@@ -206,19 +219,19 @@ Startseite ist kein Schritt der aktuelle.
 ```
 
 ```css
-.he-weg { container: weg / inline-size; border-top: 1px solid var(--line); padding-top: 16px; }
+.he-weg { container: weg / inline-size; border-top: 1px solid var(--line); padding-top: 24px; } /* h2 24 px unter der Haarlinie, K-16 */
 .weg-start { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @container weg (min-width: 600px) { .weg-start { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @container weg (min-width: 900px) { .weg-start { grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr 1fr; } }
 .weg-start li { container-type: inline-size; }
-.weg-start a { position: relative; overflow: clip; min-height: 88px; padding: 12px; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring); }
+.weg-start a { position: relative; overflow: clip; display: flex; flex-direction: column; justify-content: center; min-height: 100px; padding: 16px; border-radius: var(--r2); background: var(--surface); box-shadow: var(--ring); } /* K-22: 12 auf allen Breiten; Kachel innen 16 (11.6.4) */
 .weg-start .n { font-weight: 600; letter-spacing: .12em; color: var(--muted); font-variant-numeric: tabular-nums; } /* statt Grün 800, ratgeber.css:112 */
 .weg-start .t { font-size: 13px; color: var(--muted); }
-.weg-start .anker a { background: var(--blatt); box-shadow: none; color: var(--on-primary); padding-right: 64px; }
-.weg-start .anker .n, .weg-start .anker .t { color: var(--on-primary); opacity: .72; }
-.messausschnitt { position: absolute; inset: 0 0 0 auto; width: 56px; height: 100%; pointer-events: none; }
-@container weg (min-width: 900px) { .weg-start a { min-height: 96px; padding: 16px; } .weg-start .anker a { padding-right: 88px; } .messausschnitt { width: 72px; } }
-@container (max-width: 167px) { .messausschnitt { display: none; } .weg-start .anker a { padding-right: 12px; } }
+.weg-start .anker a { background: var(--papier); box-shadow: none; color: var(--tinte-papier); padding: 20px 48px 20px 20px; } /* Ankerkachel innen 20 */
+.weg-start .anker .n, .weg-start .anker .t { color: var(--tinte-papier); opacity: .72; }
+.messausschnitt { position: absolute; inset: 0 0 0 auto; width: 40px; height: 100%; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px); mask-image: linear-gradient(90deg, transparent, #000 14px); }
+@container weg (min-width: 900px) { .weg-start .anker a { padding-right: 88px; } .messausschnitt { width: 72px; } }
+@container (max-width: 167px) { .messausschnitt { display: none; } .weg-start .anker a { padding-right: 20px; } }
 @media (forced-colors: active) { .weg-start a { border: 2px solid CanvasText; } }
 ```
 
@@ -236,7 +249,7 @@ Kopf der Übersicht den angesprungenen Schritt nicht verdeckt (die Regel fehlt h
 **Animation:** CSS-Übergang auf `stroke-dashoffset` und `opacity`. JavaScript setzt die Startklasse nur, wenn die Kachel beim Aufbau
 unter dem Bild liegt und keine reduzierte Bewegung verlangt ist; sonst steht das Endbild. **Leistung:** kein Bild, ≈ 2 KB HTML und SVG,
 ≈ 1 KB CSS, neun Karten entfallen; kein Einfluss auf LCP, keine Layoutverschiebung. **Barrierefreiheit:** `ol` meldet „Liste, 6
-Einträge“; Linkname etwa „Schritt 4 Ausmessen Messanleitung“; Tab-Folge h2 → Kacheln 1–6 → Link; Ziele ≥ 142 × 88; der Anker unterscheidet
+Einträge“; Linkname etwa „Schritt 4 Ausmessen Messanleitung“; Tab-Folge h2 → Kacheln 1–6 → Link; Ziele ≥ 138 × 100; der Anker unterscheidet
 sich auch durch Wortlaut und Bild; der Ring der dunklen Kacheln ist Schmuck, erkennbar sind sie am Text; Fokus ≈ 16 : 1.
 
 ## I. Conversion-Begründung
@@ -244,7 +257,7 @@ sich auch durch Wortlaut und Bild; der Ring der dunklen Kacheln ist Schmuck, erk
 **Position.** Nach H2 bis H4 hatten Entschlossene drei Wege in die App (Cream in H1 und H2, Ring in H4); wer weiterscrollt, ist eher
 unentschlossen. H5 bietet ihm einen eigenen Weg statt des Absprungs, danach schließen Fragen (H6) und Messaufforderung (H7) die Ansicht,
 sie endet also mit dem Start (EA H-D12). **Gestaltung.** Ein heller Anker auf dem Schritt, an dem eeziframes ansetzt; die anderen fünf
-zeigen, dass der Weg vorher beginnt und danach weitergeht, ohne zu werben. **Menge.** Sechs Ziele zu drei kurzen Zeilen, 0,53 BH statt
+zeigen, dass der Weg vorher beginnt und danach weitergeht, ohne zu werben. **Menge.** Sechs Ziele zu drei kurzen Zeilen, 0,55 BH statt
 neun Karten auf ≈ 1,5 Bildschirmen, die „wie eine Blog-Übersicht“ wirken (`bestand/browser-mobil.md:135-136`; SKILL:29). **Beitrag.** U5,
 über den App-Knopf des Artikels mittelbar Z2a (HE-2: „U5, dann Z2a“, EA :146).
 
@@ -256,4 +269,5 @@ neun Karten auf ≈ 1,5 Bildschirmen, die „wie eine Blog-Übersicht“ wirken 
 | H5-H4 | Das einmalige Zeichnen lenkt, ohne als Schmuck zu wirken | Telefon-Video bei 844 und 664, Urteil des Inhabers | statisch |
 | H5-H5 | Zahlen genügen zur Selbstverortung; Kurztexte aus `WEG.text` („Beschlagen, undicht, wie alt?“) wären nicht klarer | Lesetest mit beiden Fassungen | Kurztext statt Zahl, Kacheln ≈ 112 px hoch |
 
-**Freigaben:** H5-AB-1, Festlegungen I-1 bis I-3, Textentwürfe (Kapitelzeile, „n Ratgeber“, „Messanleitung“), Prüfsuite (IA-O-9).
+**Freigaben:** H5-AB-1 (= DS-AB-7, P-AB-2), DS-AB-5 (Radien), Festlegungen I-1 bis I-3, Textentwürfe („n Ratgeber“, „Messanleitung“),
+Prüfsuite (IA-O-9).

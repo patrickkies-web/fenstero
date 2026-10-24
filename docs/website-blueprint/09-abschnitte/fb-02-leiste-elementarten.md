@@ -60,10 +60,11 @@ Einbettung), `ruhig()` (:15), `beobachten()` (:110), `Verkauf.auf` (:515); `web/
 Renderings, das mittlere 1,25-fach und scharf unter einem Lichtkegel, darunter ein einziger feststehender Namensplatz. Symmetrisch um die
 senkrechte Bildschirmachse; zulässig, weil das Motiv mittig steht (G5). Die Ordnungslinie x = 16 bleibt unberührt, weil das Band keinen
 Lesetext trägt. **Rasterbezug:** Telefon 4 Spalten in 358 px (Rinne 16): Mittelkachel x 150–240 symmetrisch über der Fuge zwischen Spalte
-2 und 3. Schreibtisch 12 Spalten in 1040 px (x 120–1160): Mittelkachel x 580–700 über der Fuge zwischen Spalte 6 und 7. Die übrigen
-Kacheln folgen der Teilung des Bandes, nicht den Spalten.
+2 und 3. Zwischengröße (640–1023 px, K-11) 8 Spalten, Rinne 16, Rand 24: bei 768 Mittelkachel x 339–429 über der Fuge zwischen
+Spalte 4 und 5. Schreibtisch breit (ab 1104 px) 12 Spalten in 1040 px (bei 1280 x 120–1160): Mittelkachel x 580–700 über der Fuge
+zwischen Spalte 6 und 7; bei 1024 (Spalte 960, x 32–992) x 452–572. Die übrigen Kacheln folgen der Teilung des Bandes, nicht den Spalten.
 
-| Maß (px) | Telefon (bis 760 px Breite) | Schreibtisch (ab 761 px) | Begründung |
+| Maß (px) | Telefon und Zwischengröße (bis 1023 px Breite) | Schreibtisch (ab 1024 px) | Begründung |
 |---|---|---|---|
 | Bandhöhe | 144 | 176 | DG T2 |
 | Haarlinien | 1 px `--line` bei y 0 und y 143, volle Breite | y 0 und y 175 | DG T2 |
@@ -71,12 +72,12 @@ Kacheln folgen der Teilung des Bandes, nicht den Spalten.
 | Mittelkachel | 90 × 90, Bildzone y 14–104 | 120 × 120, y 16–136 | 1,25-fach (DG T2) |
 | Namensplatz | y 112–132, Inter 15/20, 700, `--text`, mittig, ≤ 240 breit | y 144–168, 17/24 | DG T2; längster Name „Hebe-Schiebe-Tür“ ≈ 140 px |
 | Lichtschlitz | 120 × 1 in der oberen Haarlinie, x 135–255 | 160 × 1, x 560–720 | 1,33 × Mittelkachel |
-| Kegel | radialer Verlauf, Halbachsen 68 × 150, Mitte im Schlitz, um 10° nach links unten geneigt | 90 × 184 | Lichthof 1,5 × Fokusträger (SG 10.9) |
-| Unschärfe am Rand | 2 (0,51 % von 390) | 4 (0,31 % von 1280, 0,39 % von 1024) | DG 2.2.4: 0,3–0,6 % |
+| Kegel | radialer Verlauf, Halbachsen 68 × 150, Mitte im Schlitz, um 10° nach links unten geneigt | 90 × 184 | Lichthof 1,5 × Fokusträger (SG 10.9); Richtung wie K-24 (oben rechts → links unten), die flachere Neigung folgt dem Keil aus V1 als eigener sichtbarer Quelle |
+| Unschärfe am Rand | 2 (0,51 % von 390; Zwischengröße 0,20–0,31 %, unter der Spanne, Prüfpunkt Bild bei 768) | 4 (0,31 % von 1280, 0,39 % von 1024) | DG 2.2.4: 0,3–0,6 % |
 | Wölbung | `perspective: 700px`, bis ±36° | 900px, bis ±36° | Bestand ±40°; bei 36° bleiben 81 % der Breite, die Form bleibt lesbar |
 | Randmaske | äußere 24 blenden aus | äußere 64 | DG T2 |
-| sichtbar | 4 Kacheln ganz, 2 angeschnitten | 9–10 (1024: 8) | – |
-| Abstand bis Haarlinie von 01 | 48 | 64 | Festlegung V2-2 |
+| sichtbar | 4 Kacheln ganz, 2 angeschnitten (768: 7 ganz, 2 angeschnitten) | 9–10 (1024: 8) | – |
+| Abstand bis Haarlinie von 01 | 96 | 128 | Festlegung V2-2 nach K-14 (11.1.6); Rückfall [H] 48/64 |
 
 **Verhältnisse.** Im Band am Telefon ≈ 42 % Bild, 5 % Text, 53 % frei; am Schreibtisch ≈ 43 %, 1 %, 56 %. Größenhierarchie:
 Mittelkachel > übrige Kacheln (1,25 : 1) > Name. Die Mittelkachel bleibt mit 90 px weit unter dem Fokusträger von V1 (Foto 420 px hoch),
@@ -87,9 +88,12 @@ Schärfe) → 25 Lichtschlitz und Kegel, `mix-blend-mode: screen`, ohne Trefferf
 Deckkraft) → 40 Kopf läuft darüber. Am Schreibtisch überdeckt das deckende Band den ausgeblendeten Fuß des Startfotos auf 56 px (y 704–760;
 DG 2.3.17/4).
 
-**Festlegung V2-2.** 08 und EV planen 01 fast ohne Abstand unter der Leiste (≈ 24 px), G6 verlangt 96/128 px zwischen Abschnitten. Die
-Leiste ist ein Band des Übergangs, kein Kapitel; 48/64 px trennen ihre volle Haarlinie klar von der Spalten-Haarlinie von 01 (x 16–374)
-und verschieben die Pakete am Telefon nur um ≈ 0,03 BH (weiter Bildschirm 5 bei 844, 6 bei 664).
+**Festlegung V2-2** (an K-14 angeglichen). 08 und EV planen 01 fast ohne Abstand unter der Leiste (≈ 24 px), G6 verlangt 96/128 px
+zwischen Abschnitten. Nach Festlegung K-14 (11.1.6) folgt der Abstand der Überschriftenebene: Vor der Haarlinie von 01, die eine h2
+eröffnet, stehen 96 px (Schreibtisch 128), auch direkt nach dem Band; die frühere Ausnahme von 48/64 px für das Band als Übergang entfällt.
+Der Abstand trennt die volle Haarlinie des Bandes klar von der Spalten-Haarlinie von 01 (x 16–374). Kosten gegenüber 48 px ≈ 0,06 BH;
+die Pakete bleiben bei 844 px auf Bildschirm 5. Rückfall [H] (DS-H-4): 48/64 px, wenn das Telefon-Video zwischen Band und 01 ein Loch
+zeigt.
 
 ## D. Anwendung der Design-DNA
 
@@ -97,7 +101,7 @@ und verschieben die Pakete am Telefon nur um ≈ 0,03 BH (weiter Bildschirm 5 be
 |---|---|---|---|
 | Tiefe, Z-Achse | vier Ebenen wie in C; Tiefe aus Wölbung, Größe, Deckkraft und Schärfe zur Mitte hin; Verdeckung: Kegel über Mittelkachel, Band über Fotofuß (Schreibtisch) | 2 | die Mitte liegt vorn, der Rand hinten: eine Rolle, kein Laufband |
 | Material, Transparenz | echtes Material nur im Render (Profile, Glas mit Spiegelung, Lamellen); Band ohne Eigenmaterial, kein Glas | 2 | „Echtes Material statt Symbole“ (SKILL:41) |
-| Licht, Schatten | eine Quelle: Lichtschlitz in der Haarlinie als Ende des Erdlicht-Keils aus V1, Zeichnungsblau `--el`; Schlitz in der Mitte 50 %, Kegel 12 % → 5 % → 0 (3 Stopps), höchstens halb so hell wie der Lichtkern im Bullauge; kein Schatten | 1 | V1 und V2 werden ein Lichtweg (H-E5); das Licht markiert die Mitte |
+| Licht, Schatten | eine Quelle: Lichtschlitz in der Haarlinie als Ende des Erdlicht-Keils aus V1, Zeichnungsblau `--el`; Schlitz in der Mitte 50 %, Kegel 12 % → 5 % → 0 (3 Stopps), höchstens halb so hell wie der Lichtkern im Bullauge; kein Schatten; keine Lichtkante, weil im Band nichts schwebt (K-24, 11.5.4); Renders im Haus-Licht nach K-24 | 1 | V1 und V2 werden ein Lichtweg (H-E5); das Licht markiert die Mitte |
 | Formen | Renderings rechtwinklig und technisch; keine Kachelflächen, Ringe oder Radien um die Bilder | 2 | Formkontrast zur runden Bedienschicht; Bilder lesen als Objekte, nicht als Knöpfe |
 | 3D-Objekte | vorgerenderte Standbilder aus der eigenen Bühne, frontal; keine Echtzeit-3D (DG 2.2.7 [V]) | 2 | Leistungsbeweis aus dem eigenen Produkt |
 | Bildintegration | freigestellt mit Alphakanal auf `#161616`, Kante 1–2 px ohne Saum | 2 | Bild und Seite ein Raum |
@@ -130,7 +134,7 @@ Erwartete, nicht gemessene Aufmerksamkeit.
 - **CTA.** Keiner im Band. Bis Scrollstand ≈ 540 ist die Cream von V1 im Bild, danach erscheint der Kopf-Ring „Pakete ansehen“ (08).
 - **Ablenkungen und Gegenmittel.** Flackernde Namen (Name blendet bei Tempo aus, F); grelle Rahmen (Belichtungsgrenze, H); doppelte
   Elemente am Schreibtisch (≥ 12 Einträge); der Keil über dem Text von V1 (regelt fb-01).
-- **Übergang.** Untere Haarlinie → 48 px → Spalten-Haarlinie und Kapitelzeile „01 · IHR NAME“. Die Bewegung geht erst an den
+- **Übergang.** Untere Haarlinie → 96 px (K-14) → Spalten-Haarlinie und Kapitelzeile „01 · IHR NAME“. Die Bewegung geht erst an den
   Gerätebildschirm von 01 über, wenn die Leiste ruht (E-2).
 
 ## F. Interaktions- und Bewegungsverhalten
@@ -144,18 +148,18 @@ bei 844 px den Rand bei Scrollstand ≈ 250, die Leiste die Mitte erst bei ≈ 2
    (DG-AB-15). Mit fb-01 abzustimmen.
 2. Sie endet, wenn das Gerät von 01 (Schreibtisch: dessen Bühne) zu 50 % im Bild ist. Das Gerät tritt ohne eigene Bewegung ein (08) und
    ist kein zweiter Träger; sein Bildschirm geht erst nach dem Ereignis `vk:leiste-ruht` an.
-3. Ergebnis bei 390 × 844: Fenster 0 bis ≈ 460 px, ≈ 190 px Versatz, zwei Wechsel unter dem Kegel (Dreh-Kipp-Fenster → Zweiflügelig →
-   Balkontür) plus Auslauf; bei 664 px Höhe ≈ 2,7 Wechsel. Zurückscrollen in das Fenster koppelt wieder.
+3. Ergebnis bei 390 × 844 (96 px bis 01 nach K-14): Fenster 0 bis ≈ 510 px, ≈ 215 px Versatz, zwei Wechsel unter dem Kegel
+   (Dreh-Kipp-Fenster → Zweiflügelig → Balkontür) plus Auslauf; bei 664 px Höhe ≈ 2,9 Wechsel. Zurückscrollen in das Fenster koppelt wieder.
 
 | Verhalten | Verfahren und Werte | Begründung |
 |---|---|---|
 | Laden | keine eigene Bewegung; Schlitz und Kegel erscheinen mit dem Foto von V1 (0–0,9 s, Deckkraft); Nr. 1 steht unter dem Kegel | das Licht geht einmal an, als ein Lichtweg; autonome Bewegung bleibt bei V1 (≤ 5 s) |
 | Scrollen | Ziel += −0,42 · Δy je Bild (abwärts wandert die Reihe nach links); Sprünge über 600 px ohne Schub (Bestand `verkauf.js:276`); Ziel höchstens 2 Teilungen vor der Lage | Faktor DG T2; links: die nächste Art kommt von rechts wie beim Blättern (**Festlegung V2-4**) |
-| Trägheit | die Lage folgt dem Ziel als kritisch gedämpfte Feder, ω = 9 s⁻¹: bei gleichmäßigem Scrollen ≈ 0,22 s Nachlauf, nach dem Loslassen ≈ 0,5 s Auslauf, kein Überschwingen | Trägheit statt linearem Gleiten (SKILL:43); ruhig (SKILL:48) |
-| Einrasten | ruht die Eingabe 150 ms, wird das Ziel die nächste Kachelmitte (dieselbe Feder); spätestens 1,2 s nach der letzten Eingabe steht die Reihe exakt | die Mitte steht nie halb im Licht; Auslauf ≤ 1,2 s (DG T2) |
+| Trägheit | die Lage folgt dem Ziel nach dem Modell Trägheit (K-37, 11.7.5): kritisch gedämpft, ζ = 1, ω = 9 s⁻¹; bei gleichmäßigem Scrollen ≈ 0,22 s Nachlauf, nach dem Loslassen ≈ 0,5 s Auslauf, kein Überschwingen; keine Feder (sie bleibt fingergeführten Bildebenen vorbehalten) | Trägheit statt linearem Gleiten (SKILL:43); ruhig (SKILL:48); K-37 |
+| Einrasten | ruht die Eingabe 150 ms, wird das Ziel die nächste Kachelmitte (dieselbe Trägheit, ohne Überschwingen); spätestens 1,2 s nach der letzten Eingabe steht die Reihe exakt | die Mitte steht nie halb im Licht; Auslauf ≤ 1,2 s (DG T2) |
 | je Kachel | d = Abstand Kachelmitte–Bandmitte ÷ halbe Bandbreite (−1…1), u = Abstand in Teilungen. Größe 0,8 + 0,2 · max(0, 1 − \|u\|); `rotateY(d · −36°)`, die äußere Kante weicht zurück; Deckkraft 1 − 0,6 · d²; weiche Fassung mit Deckkraft smoothstep(0,25; 0,75; \|d\|) | drei Schärfezonen; nur `transform` und `opacity` (SG 10.7) |
 | Name | gilt für die Kachel mit kleinstem \|u\|; Wechsel als Überblendung am selben Ort: alt 150 ms aus (`cubic-bezier(.4, 0, 1, 1)`), neu 220 ms ein (`--e-out`) nach 60 ms; über 2,5 Teilungen/s blendet der Name in 150 ms aus und kehrt beim Abklingen zurück | Bedienschicht nur Deckkraft (G1); nichts blinkt |
-| Wischen, Ziehen | `touch-action: pan-y`; waagerecht ab 8 px, wenn \|Δx\| > 1,5 · \|Δy\|; die Reihe folgt 1 : 1; beim Loslassen Tempo der letzten 80 ms (≤ 1.200 px/s), Abklingen τ = 0,3 s, dann Einrasten; auch außerhalb des Kopplungsfensters | direkte Manipulation (SG 10.7) |
+| Wischen, Ziehen | `touch-action: pan-y`; waagerecht ab 8 px, wenn \|Δx\| > 1,5 · \|Δy\|; die Reihe folgt 1 : 1; beim Loslassen Abwurf nach K-37: Tempo der letzten 80 ms (≤ 1.200 px/s), Abklingen τ = 0,3 s, dann Einrasten mit Trägheit, kein Federn beim Zurückschnappen; auch außerhalb des Kopplungsfensters | direkte Manipulation (SG 10.7) |
 | Tippen, Klicken | eine seitliche Kachel gleitet in 480 ms (`--e-io`) unter den Kegel; die Mittelkachel reagiert nicht; kein Zeiger-Cursor | Zugang für die Maus ohne Wischen |
 | Tastatur | Reihe `tabindex="0"`; ← → eine Teilung (320 ms, `--e-io`), Pos1/Ende erste/letzte Art; Fokus 2 px `--text`, 2 px innen | WCAG 2.1.1, 2.4.7 |
 | Hover | keiner | kein Zustand am Hover |
@@ -171,7 +175,9 @@ entfällt; Schlitz und Kegel stehen als stilles Licht. Bandhöhe gleich, kein La
 **Telefon 390 × 844 (zuerst, eigene Komposition).** Das Band steht bei Ankunft im unteren Fünftel, 33 px unter dem Ring „Selbst
 ausprobieren“ (y 657). Sichtbar: Mittelkachel x 150–240, je eine ganze Nachbarkachel (x 54–126, 264–336), außen je eine angeschnittene
 unter der Maske. Das Band liegt im Daumenbereich; Wischen dort stört das senkrechte Scrollen nicht (`pan-y`). Bei 360 px Breite gelten dieselben
-Werte (3,75 Kacheln, Unschärfe 0,56 %).
+Werte (3,75 Kacheln, Unschärfe 0,56 %). **Zwischengröße 640–1023 px (K-11):** Telefonwerte wie die gestapelte Komposition von V1
+(`fb-01` G.1); das Band wächst nur in der Breite, bei 768 Mittelkachel x 339–429, sieben ganze und zwei angeschnittene Kacheln. Die
+Bandmaße wechseln mit Titel und Abständen erst bei 1024 px.
 
 **Schreibtisch 1280 × 800.** Volle Fensterbreite, 176 px, Oberkante y ≈ 704 unter Cream und Ring, 96 px im ersten Bildschirm, überdeckt den
 ausgeblendeten Fotofuß auf 56 px. Mittelkachel 120 px bei x 580–700, je Seite vier bis fünf Kacheln, die äußeren unter der Maske; Name
@@ -181,7 +187,7 @@ ausgeblendeten Fotofuß auf 56 px. Mittelkachel 120 px bei x 580–700, je Seite
 ## H. Technische Umsetzung
 
 **Umbau.** Markup VK:66–72 (Leiste B entfällt); `verkauf.css:260–312` und `:527–542` ersetzen; in `leisten()` Grundlauf, Hover, Wiegen
-und `vk-leiste-b` heraus, Kopplungsfenster, Feder, Einrasten, Wischen, Tasten, Namensplatz und Ruhe-Ereignis neu. Die Schleife läuft nur,
+und `vk-leiste-b` heraus, Kopplungsfenster, Trägheit (K-37), Einrasten, Wischen, Tasten, Namensplatz und Ruhe-Ereignis neu. Die Schleife läuft nur,
 solange das Band im Bild ist und sich etwas bewegt (Start durch passives `scroll` oder Zeiger, Stopp nach dem Einrasten). Je
 Kachel `style.transform` und `style.opacity` direkt schreiben, Lagen einmal messen (wie heute), Kacheln außerhalb überspringen,
 `will-change: transform` nur während der Bewegung.
@@ -191,7 +197,7 @@ Kachel `style.transform` und `style.opacity` direkt schreiben, Lagen einmal mess
   <div class="vk-leiste-reihe" tabindex="0"><ul class="vk-leiste-satz">
     <li><span class="vk-el-bild"><img src="/bilder/elementarten/dreh-kipp-fenster-180.webp"
       srcset="/bilder/elementarten/dreh-kipp-fenster-180.webp 180w, /bilder/elementarten/dreh-kipp-fenster.webp 240w"
-      sizes="(max-width: 760px) 90px, 120px" width="90" height="90" alt="" decoding="async" fetchpriority="low"></span>
+      sizes="(max-width: 1023px) 90px, 120px" width="90" height="90" alt="" decoding="async" fetchpriority="low"></span>
       <span class="vk-el-name">Dreh-Kipp-Fenster</span></li>
     <!-- Nr. 2 bis 14 -->
   </ul></div>
@@ -202,14 +208,15 @@ Kachel `style.transform` und `style.opacity` direkt schreiben, Lagen einmal mess
 Die weiche Fassung (`…-weich.webp`) setzt das Skript nach `load` als zweites Bild in `.vk-el-bild`; beide Bilder liegen in einem gedrehten
 Träger. `.vk-el-name` ist in der bewegten Fassung nur für Screenreader da, aber mit 15 px gesetzt, weil die Prüfsuite Schriftgrößen auch
 versteckt misst (SKILL:69–70). Klone tragen `aria-hidden` und `inert`. Band: `position: relative; z-index: 1; overflow: clip; contain:
-layout paint; background: var(--ground)`. Schlitz und Kegel als `::before`/`::after` mit `pointer-events: none`; die Neigung ist ein festes
+layout paint; background: var(--ground)`; die Bandmaße wechseln über `@media (min-width: 1024px)` (Layout-Umbruchpunkt K-11),
+ohne eigene Schwelle. Schlitz und Kegel als `::before`/`::after` mit `pointer-events: none`; die Neigung ist ein festes
 `skewX(-10deg)`, nicht animiert.
 
 **Assets (selbst erzeugbar, Freigabe durch den Inhaber).**
 
 | Art | Format, Maß | Vorgaben | Quelle |
 |---|---|---|---|
-| 14 Renderings, scharf | WebP mit Alpha, 240 × 240 und 180 × 180 px, je ≈ 6–12 KB | das Element allein, ohne Wand, Boden, Schatten, Text; frontal, Kamera auf Elementmitte, leichte Aufsicht, Sichtfeld 15–40°; längere Seite = 80 % der Kachel; Licht von oben rechts (DG 2.2.0), Glas mit blauer Spiegelung; hellster Wert ≤ `#c9c8c3`; Farbe und Ausstattung wie die Voreinstellung der App, für alle gleich; Kante 1–2 px ohne Saum | eigene Bühne (`web/assets/buehne.js`), Aufnahmeweg wie `marketing/highlights/aufnahmen/h11-*` bis `h13-*` (Stand 21.10.2026 veraltet, neu aufnehmen) |
+| 14 Renderings, scharf | WebP mit Alpha, 240 × 240 und 180 × 180 px, je ≈ 6–12 KB | das Element allein, ohne Wand, Boden, Schatten, Text; frontal, Kamera auf Elementmitte, leichte Aufsicht, Sichtfeld 15–40°; längere Seite = 80 % der Kachel; Licht nach Haus-Token K-24 (`--licht-x: -0.6; --licht-y: 0.8`, von oben rechts nach links unten; DG 2.2.0), wie alle Renders aus derselben Bühne; Glas mit blauer Spiegelung; hellster Wert ≤ `#c9c8c3`; Farbe und Ausstattung wie die Voreinstellung der App, für alle gleich; Kante 1–2 px ohne Saum | eigene Bühne (`web/assets/buehne.js`), Aufnahmeweg wie `marketing/highlights/aufnahmen/h11-*` bis `h13-*` (Stand 21.10.2026 veraltet, neu aufnehmen) |
 | 14 weiche Fassungen | gleiche Maße; Unschärfe eingebacken, 10 px bei 240, 5 px bei 180 | ergibt 4 bzw. 2 px in der Darstellung | aus den scharfen erzeugt |
 
 Erster Bildschirm am Telefon: Foto 82 KB plus sechs sichtbare Renderings ≈ 50 KB, unter 300 KB (DR 3.6); LCP bleibt das Foto.
@@ -245,7 +252,7 @@ R4 weniger als 12 Einträge: Teilung am Schreibtisch 160 px, damit kein Element 
 | zwei Wechsel im Kopplungsfenster reichen | Video bei 844 und 664 | Fensterende bei 70 % Gerätesichtbarkeit |
 | die Leiste kostet keinen Weg zu den Paketen | nach dem Start Scrolltiefe bis `#pakete` mit und ohne Leiste vergleichen | Leiste entfällt am Telefon |
 
-**Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (GEST:450–451):
+**Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (GEST:450–451; Punkt 6 GEST:462):
 
 1. Nur noch eine Leiste; die Cream-Kennzahlen-Leiste entfällt (E-AB-6). Grund: offene Zahlen (EA O-10, O-11), zweite Cream-Fläche
    (DG-AB-7).
@@ -256,3 +263,5 @@ R4 weniger als 12 Einträge: Teilung am Schreibtisch 160 px, damit kein Element 
 4. Renderings statt 24-px-Zeichnungen (KA-AB-4). Grund: echtes Material (SKILL:41).
 5. Abwärts läuft die Reihe nach links statt „von links nach rechts“, ohne Trennpunkte (Festlegung V2-4). Grund: Blätterrichtung, ruhigeres
    Bild.
+6. Die Bandmaße wechseln bei 1024 px statt bei 760/761 px; bis 1023 px gelten die Telefonwerte (K-11, DS-AB-6; GEST:462 „eine Spalte bis
+   760 px“). Grund: zwei Layout-Umbruchpunkte, 640 und 1024 px, halten die Zahl der Kompositionen prüfbar (SG 10.9).

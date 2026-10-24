@@ -80,9 +80,10 @@ B.1): Linie und flache Bedienschicht Pflicht, Anker und Maßstabssprung nicht; H
 | **Ende 676** | **0,80 BH**, danach 96 px bis A3 | ZA plant 0,65 BH mit acht einzeiligen Zeilen; gemessen brechen fünf Fragen bei 318 px zweizeilig (Festlegung fb-13) |
 
 **Zeile.** `summary` 358 px breit, Text x 16–334 (318 px), Innenabstand 15 px oben und unten: einzeilig 52 px (Kontrollhöhe `--h2`),
-zweizeilig 74 px. Zeichen „+“ im Feld 24 × 24 rechts bündig (x 350–374), zwei gezeichnete Striche 14 × 2 px (x 355–369), Mitte auf
-der **ersten** Fragezeile (Zeilenoberkante + 26), damit es bei zweizeiligen Fragen am Satzanfang bleibt. Antwort 15 px unter der Frage,
-358 px breit, höchstens fünf Zeilen à 25,5 px, 24 px bis zur nächsten Linie; offene Zeile 204 bzw. 226 px.
+zweizeilig 74 px; Frage 17/22 (Bedientext, K-19). Zeichen „+“ im Feld 24 × 24 rechts bündig (x 350–374), zwei gezeichnete Striche
+14 × 2 px (x 355–369), Mitte auf der **ersten** Fragezeile (Zeilenoberkante + 26), damit es bei zweizeiligen Fragen am Satzanfang bleibt.
+Antwort 15 px unter der Frage, 358 px breit, höchstens fünf Zeilen à 26 px (Lesetext 17/26, K-19), 24 px bis zur nächsten Linie; offene
+Zeile 206 bzw. 228 px. Haarlinie `--line`, weil die Liste auf `--ground` steht (K-33).
 
 **Verhältnisse.** Textzeilen ≈ 35 %, Bild 0 %, Freiraum ≈ 65 % der Fläche. Drei Größen 32 · 17 · 15; Sprung h2 : Frage 1,9 (zulässig nach
 DG-E-1 C). Rang über den Tonwert gegen `#161616`: Frage `--text` 16,2 : 1, Antwort `--text2` 10,8 : 1, Zeichen `--muted` 5,8 : 1,
@@ -94,10 +95,11 @@ Verdeckung. Bedienziele: jede Zeile über die volle Breite, der Link unten im Da
 **Schreibtisch 1280 × 800, 12 Spalten** in 1040 px (x 120–1160; Spalte 64,7, Abstand 24 wie A1, damit die rechten Spalten beider
 Anhänge fluchten), Split 5 : 7 wie die übrige Seite (ZA 8.3.2 c):
 
-- Haarlinie über alle 12 Spalten (y 0); h2 40 px / 1,05 in den Spalten 1–5 (x 120–539), y 32–74 (Innenabstand 32 nach fb-12).
-- Liste in den Spalten 6–12 (x 563–1160, 597 px) ab y 32 **ohne** eigene obere Linie; acht einzeilige Zeilen je 52 + 1 → y 32–456;
+- Haarlinie über alle 12 Spalten (y 0); h2 40 px / 1,05 in den Spalten 1–5 (x 120–539), y 24–66 (Haarlinie → 24 → h2 auf allen
+  Breiten, K-15; wie fb-12).
+- Liste in den Spalten 6–12 (x 563–1160, 597 px) ab y 24 **ohne** eigene obere Linie; acht einzeilige Zeilen je 52 + 1 → y 24–448;
   Grundlinie der ersten Frage ≈ 2 px über der der h2. Antworten 597 px, drei bis vier Zeilen (≈ 68 Zeichen).
-- Weiterweg in den Spalten 6–12, y 472–516. Spalten 1–5 unter der h2 bleiben frei. Ende ≈ 516 px (0,65 BH); keine Anheftung (ZA 8.3.2 c).
+- Weiterweg in den Spalten 6–12, y 464–508. Spalten 1–5 unter der h2 bleiben frei. Ende ≈ 508 px (0,64 BH); keine Anheftung (ZA 8.3.2 c).
 
 **Split statt einer Spalte ≤ 820 px (Festlegung fb-13).** 820 px ergäben ≈ 95 Zeichen je Antwortzeile gegen 45–75 aus DG T9; im Split
 sind es ≈ 68, alle Fragen einzeilig, der Abschnitt ≈ 170 px kürzer.
@@ -112,10 +114,10 @@ sind es ≈ 68, alle Fragen einzeilig, der Abschnitt ≈ 170 px kürzer.
 | Formen | radienlose Zeilen, Haarlinien als Gegenform, kein Formbruch (SG 10.5/5) | Liste statt Kachelfeld; Vollrundung der Knöpfe bleibt |
 | 3D, Bild, Perspektive, Überlagerung | keine (0) | Stufe 1 (DG 2.4.2) |
 | Oberflächendetails | „+“ aus zwei 2-px-Strichen statt Schriftzeichen; ruhig `--muted`, offen `--accent` als aktive Marke (G3) | Präzision wie ein Aufmaß: exakt mittig, gleich stark |
-| Typografie | h2 Bühnenstimme 32/40; Fragen 17/700 `--text`, 1,3; Antworten 17/500 `--text2`, 1,5, ≤ 60 ch; Link 15/700 | Rang über Gewicht und Tonwert |
+| Typografie | h2 Bühnenstimme 32/40; Fragen 17/22, 700 `--text` (Bedientext); Antworten 17/26, 500 `--text2` (Lesetext), ≤ 60 ch; Link 15/22, 700 (Textziel); K-19 | Rang über Gewicht und Tonwert |
 | Farbe | ein grünes Wort in der h2; Grün im Zeichen nur offen | gemessen auf einem Bildschirm nur mit diesem Abschnitt: farbig 0,4 % (G8: > 0,3 %), ohne das Wort 0,1 % |
 | Animation | Antwort 220 ms Deckkraft; senkrechter Strich 150 ms | Rückmeldung am Ort des Tippens |
-| interaktive Effekte | Überfahren: Zeichen `--text`, Linie `--line2`; Fokus 2 px `--text` | nur Farbe, Kontur, Deckkraft (G1) |
+| interaktive Effekte | Überfahren: Zeichen `--text`, Linie `--line2` (K-33); Fokus 2 px `--text`, an der Zeile −2 px innen (K-34) | nur Farbe, Kontur, Deckkraft (G1) |
 
 **Bewusst weggelassen:** Nummer, Kicker, Auftritt beim Scrollen (E-13; die Zeilen kommen nicht in die Reveal-Liste `verkauf.js:477`),
 Drehen des „+“ (G1), Federn, Symbole je Frage, „Alle öffnen“, exklusives Akkordeon. Bewegung mit Tiefe und Physik (SKILL:43) tragen V1,
@@ -139,15 +141,15 @@ Erwartet, nicht gemessen.
 | Auslöser | Reaktion | Dauer, Kurve | Verfahren | weniger Bewegung |
 |---|---|---|---|---|
 | Scrollen | nichts | – | natives Scrollen | gleich |
-| Überfahren (`hover: hover`, `pointer: fine`) | Zeichen `--muted` → `--text`; Linie unter der Zeile `--line` → `--line2` | 150 ms `--e-out` | CSS; Linie über `.rg-frage:has(> summary:hover)` | Farbwechsel bleibt |
+| Überfahren (`hover: hover`, `pointer: fine`) | Zeichen `--muted` → `--text`; Linie unter der Zeile `--line` → `--line2` (K-33) | 150 ms `--e-out` | CSS; Linie über `.rg-frage:has(> summary:hover)` | Farbwechsel bleibt |
 | Tippen, Klick, Enter, Leertaste | öffnet: Höhe sofort, Antwort Deckkraft 0 → 1, senkrechter Strich 1 → 0, Zeichen `--accent` | 220 ms `--e-out`; Strich 150 ms | natives `details`, Keyframes auf `[open] > div` | sofort, ohne Einblenden |
 | erneut | schließt: Antwort sofort weg, Strich 150 ms zurück | 150 ms | nativ | sofort |
 | mehrere Fragen | bleiben unabhängig offen (kein `name`) | – | – | – |
-| Sprung `#haeufige-fragen` | h2 96 px (Schreibtisch 112 px) unter der Oberkante, wie A1 | – | `scroll-margin-top` aus fb-12 | gleich |
-| Sprung `#hf-…` | Frage öffnet sich, 76 px unter der Oberkante | – | `gemeinsam.js` (H) | gleich |
+| Sprung `#haeufige-fragen` | h2 96 px (Schreibtisch 104 px) unter der Oberkante, Haarlinie 16 px unter dem Kopf, wie A1 | – | `scroll-margin-top` 96/104 px aus fb-12 (K-15) | gleich |
+| Sprung `#hf-…` | Frage öffnet sich, ihre Oberkante 72 px (Schreibtisch 80 px) unter der Oberkante, 16 px unter dem Kopf (Kopf + 16, K-15) | – | `gemeinsam.js` (H) | gleich |
 | Weiterweg | Paket „Noch offen“, Sprung zu `#frage` | – | `verkauf.js:28-35` | gleich |
 | Link in Antwort | Unterstreichung `--line2` → `--text` | 150 ms | CSS | gleich |
-| Tastaturfokus | Kontur 2 px `--text`, Abstand 2 px | sofort | `gemeinsam.css:38` | gleich |
+| Tastaturfokus | Kontur 2 px `--text`; an der Zeile (`summary` über die volle Listenbreite, stößt an die Haarlinien) Abstand −2 px innen, ohne Radius wie die Zeile; am Weiterweg und an Links in Antworten Abstand 2 px außen, formfolgend; nie verdeckt (K-34) | sofort | `gemeinsam.css:38`, an der Zeile überschrieben (H) | gleich |
 
 **Begründung.** Die Bedienschicht zeigt nur Zustände (G1; SG 10.10 Nr. 14); 220 ms ist die Rückmeldungs-, 150 ms die Zustandsdauer der
 Website (DG 2.4.1). Ein exklusives Akkordeon schlösse eine obere Zeile, und die angetippte rutschte unter dem Finger weg. Das Öffnen folgt
@@ -166,10 +168,13 @@ und sieben Fragen; Frage 8 und Weiterweg folgen nach kurzem Scrollen. **360 px:*
 kein Querscrollen. **200 % Text:** Zeilen wachsen über `min-height`, das Zeichen bleibt per `top: calc(15px + .65em - 1px)` auf der
 ersten Fragezeile.
 
-**640–1023 px.** Telefonkomposition, Liste und Weiterweg höchstens 640 px breit an der Ordnungslinie; h2 40 px ab 761 px.
+**640–1023 px.** Telefonkomposition mit Seitenrand 24 px (Ordnungslinie x 24, 11.2.1), Liste und Weiterweg höchstens 640 px breit an
+der Ordnungslinie; h2 40 px ab 761 px.
 
-**Schreibtisch 1280 und 1024.** Split wie in C. Bei 1024: Inhalt x 16–1008, Spaltenabstand 24, h2 in Spalten 1–5 (x 16–415), Liste in
-6–12 (x 439–1008, 569 px); die Frage zu Kundenlinks bricht zweizeilig, Ende ≈ 538 px. Nichts über 40 px (SKILL:28).
+**Schreibtisch 1280 und 1024.** Split wie in C. Bei 1024: Seitenrand 32 px, Inhalt x 32–992 (960 px, 12 Spalten à 58 px, Rinne 24, wie
+der Kopf in `rh-01`; K-13), h2 in Spalten 1–5 (x 32–418), Liste in 6–12 (x 442–992, 550 px, Fragetext 510 px); die Frage zu Kundenlinks
+(≈ 532 px Vorschub in Inter 700) bricht zweizeilig, die übrigen bleiben einzeilig (längste ≈ 414 px), Ende ≈ 530 px. Nichts über 40 px
+(SKILL:28).
 
 **Einbettung `/#fensterbauer`.** Gleich: `ratgeber.css` lädt auch auf `/` (`web/index.html:24`). Die Vorwahl hängt am delegierten Klick je
 Wurzel (`verkauf.js:28-29`, idempotent), `details` sind nativ, also auch nach einem Neuaufbau bedienbar; `portal.js:1962-1976` reagiert
@@ -204,17 +209,19 @@ nur Größen 13/15/17/24/32/40.
 ```css
 .rg-frage { margin: 0; border-bottom: 1px solid var(--line) }
 .rg-frage:first-child, :not(.rg-frage) + .rg-frage { border-top: 1px solid var(--line) }
-.rg-frage[id] { scroll-margin-top: 76px }
+.rg-frage[id] { scroll-margin-top: 72px }   /* Kopf 56 + 16 (K-15) */
 .rg-frage summary { position: relative; display: block; min-height: var(--h2); padding: 15px 40px 15px 0; font-size: 17px;
-  line-height: 1.3; font-weight: 700; color: var(--text); list-style: none; cursor: pointer; -webkit-tap-highlight-color: transparent }
+  line-height: calc(22 / 17); font-weight: 700; color: var(--text); list-style: none; cursor: pointer;   /* 17/22 (K-19) */
+  -webkit-tap-highlight-color: transparent }
 .rg-frage summary::-webkit-details-marker { display: none }
+.rg-frage summary:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 0 }   /* Zeile über volle Breite (K-34) */
 .rg-frage summary::before, .rg-frage summary::after { content: ''; position: absolute; right: 5px; top: calc(15px + .65em - 1px);
   width: 14px; border-top: 2px solid var(--muted); transition: opacity var(--t1) var(--e-out), border-color var(--t1) var(--e-out) }
 .rg-frage summary::after { transform: rotate(90deg) }   /* steht fest, wird nie animiert */
 .rg-frage[open] summary::before, .rg-frage[open] summary::after { border-color: var(--accent) }
 .rg-frage[open] summary::after { opacity: 0 }
 .rg-frage > div { padding: 0 0 24px }
-.rg-frage > div p { margin: 0 0 12px; max-width: 60ch; font-size: 17px; line-height: 1.5; color: var(--text2) }
+.rg-frage > div p { margin: 0 0 12px; max-width: 60ch; font-size: 17px; line-height: calc(26 / 17); color: var(--text2) }   /* 17/26 (K-19) */
 .rg-frage > div p:last-child { margin-bottom: 0 }
 .rg-frage > div strong { color: var(--text); font-weight: 700 }
 .rg-frage[open] > div { animation: rg-frage-ein var(--t2) var(--e-out) }
@@ -225,11 +232,13 @@ nur Größen 13/15/17/24/32/40.
   .rg-frage > div a:hover { text-decoration-color: var(--text) } }
 @media (prefers-reduced-motion: reduce) {
   .rg-frage[open] > div { animation: none } .rg-frage summary::before, .rg-frage summary::after { transition: none } }
+@media (min-width: 1024px) { .rg-frage[id] { scroll-margin-top: 80px } }   /* Kopf 64 + 16 (K-15) */
 ```
 
-**CSS, Abschnitt (`verkauf.css`).** `.vk-anhang` unverändert aus fb-12 (Haarlinie, Abstand 96/128, Innenabstand 24/32, h2 32/40 mit
-16/20 px darunter, Sprungabstand 96/112); damit dieser gegen `.rg h2[id]` (`verkauf.css:8`, höhere Spezifität) gewinnt, als
-`.rg .vk-anhang > h2[id]` schreiben. Neu: `.hf-liste { margin-top: 24px } .hf-weiter { margin: 16px 0 0; font-size: 15px }`; 640–1023 px `max-width: 640px` für Liste und
+**CSS, Abschnitt (`verkauf.css`).** `.vk-anhang` unverändert aus fb-12 (Haarlinie, Abstand 96/128, Innenabstand 24 auf allen Breiten =
+Haarlinie → 24 → h2, h2 32/40 mit 16/20 px darunter, Sprungabstand am h2 96/104; K-15); damit dieser gegen `.rg h2[id]` (`verkauf.css:8`,
+höhere Spezifität) gewinnt, als `.rg .vk-anhang > h2[id]` schreiben. Neu: `.hf-liste { margin-top: 24px } .hf-weiter { margin: 16px 0 0;
+font-size: 15px; line-height: calc(22 / 15) }` (15/22, K-19); 640–1023 px `max-width: 640px` für Liste und
 Weiterweg; ab 1024 px `.hf { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start } .hf > h2 { grid-column: 1 / span 5; grid-row: 1 / span 2 } .hf-liste, .hf-weiter { grid-column: 6 / -1 }
 .hf-liste { margin-top: 0 } .hf-liste > .rg-frage:first-child { border-top: 0 }`.
 
@@ -257,7 +266,9 @@ Selbst entschieden, ohne Regelbruch: Fragen 700 statt 800 (`gemeinsam.css`: 700 
 
 **Folgen für das Muster.** `he-06` rendert heute `details.fq` mit `.pchev` und Antworten in 15 px (`portal.js:894`) und übernimmt
 `details.rg-frage`, ohne `id="haeufige-fragen"` (sonst doppelter Anker in der Einbettung). Ratgeber übernehmen die Darstellung, nicht die
-Fünf-Zeilen-Grenze (DR 3.2: Längeres gehört in Ratgeber und Fragen). A3 nutzt die Zeile ohne JSON-LD. Danach GEST:435 nachziehen.
+Fünf-Zeilen-Grenze (DR 3.2: Längeres gehört in Ratgeber und Fragen). A3 nutzt die Zeile ohne JSON-LD. Haarlinien jeder Fragenliste nach
+K-33: `--line` auf `--ground` (wie hier), `--line2` auf `--surface`; Hover überall Linie unter der Zeile → `--line2`, Zeichen → `--text`,
+Zeile 52 / 74 px; die Zeile `#vergleich` (`fb-07`) übernimmt das. Danach GEST:435 nachziehen.
 
 ## I. Conversion-Begründung
 

@@ -191,11 +191,15 @@ erreichbar. Von 360 bis 389 px werden die Spalten 164 px breit, es brechen mehr 
 steht alles in einer Spalte: Containerabfrage in em (`@container fuss (max-width: 22.5em)`), damit die Textvergrößerung sie auslöst; die
 E-Mail bekommt `overflow-wrap: anywhere`. Bis 320 px scrollt nichts seitlich (SG 10.10 Nr. 19).
 
-**640–1023 px (8 Spalten):** Jede Gruppe läuft über die volle Breite mit zwei Spalten à 4; Zone 2 Marke 1–4 · E-Mail 5–8; die Rechtszeile
-fließt über 1–8, der Knopf steht in einer eigenen Zeile.
+**640–1023 px (8 Spalten, Rand 24 px, Rinne 16 px; 11.2.1):** Jede Gruppe läuft über die volle Breite mit zwei Spalten à 4; Zone 2
+Marke 1–4 · E-Mail 5–8; die Rechtszeile fließt über 1–8, der Knopf steht in einer eigenen Zeile.
 
-**Schreibtisch 1024:** Raster wie bei 1280 in 922 px (Rand 51 px); Spalten à 212 px, „Eigener Fenster-Konfigurator“ bricht zweizeilig um
-(Zeile 48); die Rechtszeile darf zweizeilig fließen. **1280:** wie C.2. **Ab 1440:** Die Spalte bleibt 1040 px.
+**Schreibtisch 1024 (11.2.1, K-13):** Rand 32 px, Spalte 960 px (x 32–992), 12 Spalten à 58 px, Rinne 24 px, wie der Kopf in `rh-01`;
+Spaltenkanten x 32 / 278 / 524 / 770, die vier Listen also je 222 px (3 × 58 + 2 × 24). Der längste Eintrag „Anleitung Fenster
+ausmessen“ misst bei 15 px Inter 500 ≈ 212 px und bleibt einzeilig; bricht er bei anderer Schriftfassung doch um, wird die Zeile 48 px
+hoch. Die Rechtszeile (≈ 487 px) hat über Spalten 4–9 nur 468 px und fließt zweizeilig; der Pilotsatz rückt dann 44 px tiefer. Bis
+1103 px wächst die Spalte mit (Breite − 64). **Ab 1104 px:** Spalte 1040 px mittig. **1280:** wie C.2. **Ab 1440:** Die Spalte bleibt
+1040 px.
 
 ## H. Technische Umsetzung
 
@@ -240,6 +244,8 @@ und nutzt deshalb Tokens mit Ersatzwert (`var(--text2, #c9c8c3)`), weil `recht.c
 .rg-fuss a.rg-widerruf { display: inline-flex; padding: 0 16px; border: 2px solid var(--text, #f3f2ee); border-radius: 999px;
   font-weight: 700; color: var(--text, #f3f2ee) }
 .rg-pfad li + li::before { content: "›" / ""; color: var(--line2, #3a3a3a); margin: 0 8px }
+@media (min-width: 640px) { .rg-fuss { padding-inline: 24px } }
+@media (min-width: 1024px) { .rg-fuss { padding-inline: max(32px, (100% - 1040px) / 2) } } /* K-13: 960 bei 1024, 1040 ab 1104 */
 @container fuss (max-width: 22.5em) { .fuss-gruppe { grid-template-columns: 1fr } }
 @media print { .rg-fuss, .rg-pfad { display: none } }
 ```

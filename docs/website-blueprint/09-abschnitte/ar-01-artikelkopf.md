@@ -60,7 +60,7 @@ folgt in `ar-02`. Z verlangt `ar-02` „direkt nach ‚Kurz gesagt‘“; die Ze
 nie zwischen Antwort und Handlungsbaustein. **Festlegung I:** DOM-Folge = Folge am Telefon (Eyebrow, h1, Zeichnung, „Kurz gesagt“).
 Linksbündig an der Ordnungslinie (G5), asymmetrisch mit Flatterrand; am Telefon eine Spalte, am Schreibtisch Text links, Blatt rechts.
 
-**Der Held** ist die führende Zeichnung als weißes Blatt: Papierweiß `#ffffff` ist der einzige Fokusreiz (G3). Die Blattkante ist die
+**Der Held** ist die führende Zeichnung als weißes Blatt: Papierweiß `--papier` (`#ffffff`, 11.4.1) ist der einzige Fokusreiz (G3). Die Blattkante ist die
 Objektkante, ohne Ring oder Rahmen; kein gerahmtes Bild neben Text (SG 10.6/1), sondern ein Gegenstand auf dem Grund wie in `he-02`.
 
 ### C.1 Telefon 390 × 844 (4 Spalten à 77,5 px, Abstand 16, Rand 16; alles über Spalten 1–4, x 16–374)
@@ -68,18 +68,18 @@ Objektkante, ohne Ring oder Rahmen; kein gerahmtes Bild neben Text (SG 10.6/1), 
 | y (Seite) | Element | Maß | Satz |
 |---|---|---|---|
 | 0–56 | Kopf `rh-01` | opak, Haarlinie unten | – |
-| 60–104 | Brotkrumen | Zeile 44, Text bei 72–92 | 13/20, 600; Links `--muted`, Trenner „›“ `--line2` |
-| 112–132 | Eyebrow | eine Zeile (Fachartikel: zwei, Umbruch nach „·“) | Technikstimme 13/20, 600, Versalien +0,12 em, `--accent`; Datum in eigener Schreibweise +0,02 em, `tabular-nums` (DR:100) |
-| 144–245 | h1 | 3 Zeilen à 33,6 (2–4 je Titel) | Bühnenstimme 32/1,05, 800, −0,03 em, `text-wrap: balance`; letztes Wort `--accent` |
-| 269–567 | Blatt (Held) | 358 × 298 (je Zeichnung 246–328), Radius 18 | `#ffffff`, keine Kontur, kein Schatten |
-| 575–619 | Unterschrift | 1–2 Zeilen à 22 | 15/22, 500, `--muted` |
-| 643–663 | „KURZ GESAGT“ | eine Zeile | Technikstimme 13/20, `--muted` |
-| 671–997 | Antwort | 12 Zeilen à 27,2 (10–18 je Artikel), 358 breit, ≈ 42 Zeichen je Zeile | 17/1,6, 500, `--text2`; `strong` in `--text`, 700 |
-| ab 1.029 | `ar-02` | Abstand 32, Haarlinie (Festlegung in `ar-02`) | – |
+| 60–104 | Brotkrumen | Zeile 44, Text bei 74–90 | 13/16 (Technikstimme einzeilig, K-19), 600; Links `--muted`, Trenner „›“ `--line2` |
+| 112–128 | Eyebrow | eine Zeile (Fachartikel: zwei à 18, Umbruch nach „·“; alles darunter rückt um 20 px) | Technikstimme Versal 13/16, zweizeilig 13/18 (K-19), 600, +0,12 em, `--accent`; Datum in eigener Schreibweise +0,02 em, `tabular-nums` (DR:100) |
+| 140–241 | h1 | 3 Zeilen à 33,6 (2–4 je Titel) | Bühnenstimme 32/1,05, 800, −0,03 em, `text-wrap: balance`; letztes Wort `--accent` |
+| 265–563 | Blatt (Held) | 358 × 298 (je Zeichnung 246–328), Radius 24 (auf allen Breiten, K-22) | `--papier` (`#ffffff`), keine Kontur, kein Schatten |
+| 571–615 | Unterschrift | 1–2 Zeilen à 22 | Nebentext 15/22, 500, `--muted` |
+| 639–655 | „KURZ GESAGT“ | eine Zeile | Technikstimme Versal 13/16, `--muted` |
+| 663–987 | Antwort | 12 Zeilen à 27 (10–18 je Artikel), 358 breit, ≈ 42 Zeichen je Zeile | Fließtext lang 17/27 (K-19), 500, `--text2`; `strong` in `--text`, 700 |
+| ab 1.019 | `ar-02` | Abstand 32, Haarlinie (Festlegung in `ar-02`) | – |
 
 Bei 664 px realer Höhe sind Blatt, Unterschrift und „KURZ GESAGT“ vollständig im Bild, die Antwort schneidet an (Fortsetzungssignal, DG
 2.3.17/2). Bei 844 px stehen sechs Zeilen der Antwort im Bild. Mit vierzeiligem Titel und der höchsten Zeichnung (440) endet das Blatt bei
-y 630, also ebenfalls im ersten Bildschirm.
+y 627, also ebenfalls im ersten Bildschirm.
 
 ### C.2 Schreibtisch 1280 × 800 (Spalte 1040, x 120–1160; 12 Spalten à 64,67, Abstand 24)
 
@@ -87,17 +87,17 @@ y 630, also ebenfalls im ersten Bildschirm.
 |---|---|---|---|
 | 0–64 | Kopf `rh-01` | 1–12 | – |
 | 72–116 | Brotkrumen | ab 1, x 120 | wie Telefon, ganzer Pfad |
-| 140–160 | Eyebrow | 1–6, x 120–628 | wie Telefon |
-| 172–298 | h1 | 1–6 | 40/1,05; 3 Zeilen bei ≈ 25 Zeichen je Zeile |
-| 322–342 | „KURZ GESAGT“ | 1–6 | – |
-| 350–595 | Antwort | 1–6, 508 px, ≈ 60 Zeichen je Zeile | 9 Zeilen à 27,2 |
+| 140–156 | Eyebrow | 1–6, x 120–628 | wie Telefon, einzeilig 13/16 |
+| 168–294 | h1 | 1–6 | 40/1,05; 3 Zeilen bei ≈ 25 Zeichen je Zeile |
+| 318–334 | „KURZ GESAGT“ | 1–6 | 13/16 |
+| 342–585 | Antwort | 1–6, 508 px, ≈ 60 Zeichen je Zeile | 9 Zeilen à 27 (17/27) |
 | 140–489 | Blatt | 8–12, x 741–1160, 419 × 349 (288–384), Radius 24 | Oberkante fluchtet mit der Eyebrow |
 | 497–541 | Unterschrift | 8–12 | 2 Zeilen |
-| ab 635 | `ar-02` (Abstand 40) | ab 1, x 120 | im ersten Bildschirm angeschnitten (165 px ≈ 21 %) |
+| ab 625 | `ar-02` (Abstand 40) | ab 1, x 120 | im ersten Bildschirm angeschnitten (175 px ≈ 22 %) |
 
 Spalte 7 (x 652–717) bleibt Luft zwischen Text und Papier: Text : Luft : Blatt = 6 : 1 : 5. Mit 419 px bleibt das Blatt unter seiner
 Ausgangsbreite 480, die Beschriftung bei 15,7 px; nichts ist überdimensioniert (SKILL:28; GEST:433). **Festlegung I:** Ordnungslinie
-x 120 wie Kopf (`rh-01`) und Fuß (`rh-03`), Spalte 1040 nach DG G6. **Schnittstelle zu `ar-02` und `ar-03`:** Beide übernehmen
+x 120 wie Kopf (`rh-01`) und Fuß (`rh-03`), Spalte 1040 nach DG G6; bei 1024 px x 32 (Rand 32, Spalte 960, K-13). **Schnittstelle zu `ar-02` und `ar-03`:** Beide übernehmen
 diese Linie; empfohlen Spalten 1–7 (597 px, ≤ 75 Zeichen). `ar-02` rechnet bisher mit der 820er-Spalte (x 118–906 bei 1024) und mit
 „Kurz gesagt“ als Karte; beides ist an diese Spezifikation anzugleichen. Die Haarlinie von `ar-02` trennt dann Antwort und Handlung.
 
@@ -118,10 +118,10 @@ diese Linie; empfohlen Spalten 1–7 (597 px, ≤ 75 Zeichen). `ar-02` rechnet b
 
 | Wert | Start | Grund |
 |---|---|---|
-| Abstände | Brotkrumen → Eyebrow 8 · Eyebrow → h1 12 · h1 → Blatt 24 · Blatt → Unterschrift 8 · Unterschrift → „Kurz gesagt“ 24 · Label → Antwort 8 | G2; Verhältnis 1 : 3 (G6). Die 44-px-Zeile der Brotkrumen bringt 12 px Luft mit, sichtbar wirken ≈ 20 |
-| Radius des Blatts | 18 unter 640 px, 24 darüber | DG-AB-8 (voll · 24 · 18 · 12); DNA-B B.5 `--radius-l` mobil 18. Die SVG-Inhalte beginnen 16 Einheiten (≥ 11,9 px) vom Rand; ein Eckradius 24 schneidet erst ab 7 px diagonal und trifft keinen Inhalt |
+| Abstände | Brotkrumen → Eyebrow 8 · Eyebrow → h1 12 · h1 → Blatt 24 · Blatt → Unterschrift 8 · Unterschrift → „Kurz gesagt“ 24 · Label → Antwort 8 | G2; Verhältnis 1 : 3 (G6). Die 44-px-Zeile der Brotkrumen bringt 14 px Luft mit, sichtbar wirken ≈ 22 |
+| Radius des Blatts | 24 auf allen Breiten (`--r4`) | K-22 (11.6.1): Papierkarte 24, keine Verkleinerung am Telefon (DG-AB-8: voll · 24 · 18 · 12); DNA-B B.5 (`--radius-l` mobil 18) ist damit überholt. Die SVG-Inhalte beginnen 16 Einheiten (≥ 11,9 px bei 358, ≥ 10,9 px bei 328 Breite) vom Rand; ein Eckradius 24 schneidet erst ab 7 px diagonal und trifft keinen Inhalt |
 | Blattbreite Telefon | volle 358 px | GEST:433: Beschriftung bei 358 px ≥ 13 px (18 × 358/480 = 13,4) |
-| Antwort | höchstens `68ch`, Zeilenhöhe 1,6 | SG 45–75 Zeichen; Fließtext 1,5–1,6 (Bestand `ratgeber.css:6`) |
+| Antwort | höchstens `68ch`, Zeilenhöhe 27 px | SG 45–75 Zeichen; K-19 (11.3.1): Fließtext lang 17/27 auf Ratgebern und Fachartikeln, weil „Kurz gesagt“ 10–18 Zeilen hat und Lesetext 17/26 auf drei Zeilen je Block begrenzt ist (Bestand `ratgeber.css:6`: 1,6 = 27,2) |
 | Bild laden | `fetchpriority="high"`, nie `loading="lazy"` | am Telefon das größte Element (LCP) |
 
 ## D. Anwendung der Design-DNA
@@ -131,10 +131,10 @@ diese Linie; empfohlen Spalten 1–7 (597 px, ≤ 75 Zeichen). `ar-02` rechnet b
 | Tiefe, Z-Achse | drei Ebenen; Verdeckung nur durch den klebenden Kopf beim Scrollen. Eine gestellte Verdeckung (Antwort über dem Blattfuß) entfällt, weil die Zeichnungen bis an ihren Rand Inhalt tragen (SG 10.1/6) | 1 | flach mit Absicht: Lesefläche |
 | Material, Transparenz | Papier als einziges Material, deckend; kein Glas (Stufe 2: 0) | 1 | „präzise wie ein Aufmaß“ (DR 1): ein Blatt, kein Bild |
 | Licht, Schatten | keines. Keine Lichtquelle im Bild, also kein Licht (DG 2.4.1); kein Schatten auf dunklem Grund, keine Lichtkante, weil nichts schwebt | 0 | Kontrast 18 : 1 statt Effekt |
-| Formen | ein Rechteck mit Radius 18/24; keine Pillen im Abschnitt; die Haarlinie gibt der Kopf | 1 | ruhige, geschlossene Form |
+| Formen | ein Rechteck mit Radius 24 auf allen Breiten (K-22); keine Pillen im Abschnitt; die Haarlinie gibt der Kopf | 1 | ruhige, geschlossene Form |
 | 3D-Objekte | keine (das 3-D-Modell aus `web/assets/buehne.js` würde mit dem Lesen konkurrieren und braucht eine Signature) | 0 | – |
-| Bildintegration | Blatt mit eigener Kante; Weiß des SVG (`<rect fill="#ffffff">`) und Kartengrund `#fff` sind gleich, also keine innere Naht | – | kein Grundsprung, kein Saum (SG 10.6/2) |
-| Oberflächendetails | Mikroschicht aus der Zeichnung (Maßpfeile, Orange = Maueröffnung, Blau = Element, GEST:433); gleich breite Ziffern im Datum; Trenner „›“ | 2 im Bild, 1 sonst | Präzision als Inhalt, keine Signature (DG 2.3.15) |
+| Bildintegration | Blatt mit eigener Kante; Weiß des SVG (`<rect fill="#ffffff">`) und Kartengrund `--papier` (`#ffffff`) sind gleich, also keine innere Naht | – | kein Grundsprung, kein Saum (SG 10.6/2) |
+| Oberflächendetails | Mikroschicht aus der Zeichnung (Maßpfeile; Orange `--mo-papier` = Maueröffnung, Schrift `--tinte-papier`; Blau = Element nur als Bestandswert der SVG, siehe H „Zeichnungsfarben“; GEST:433); gleich breite Ziffern im Datum; Trenner „›“ | 2 im Bild, 1 sonst | Präzision als Inhalt, keine Signature (DG 2.3.15) |
 | Animation | keine | 0 | Z 8.3.5; GEST:426 |
 | Typografie | Bühnenstimme h1, Technikstimme Eyebrow und Label, Lesetext 17 „wie bei Apple“ (DR:103) | – | zwei Stimmen, drei Größenstufen |
 | Farbe | ≥ 95 % unbunt; Grün nur Eyebrow und ein Wort (G8); Orange und Blau nur als Linien im Blatt (≤ 2 %); keine Cream | – | Signal ohne Lärm; `farbanteil.py` > 0,3 % farbig durch das Grün |
@@ -185,19 +185,19 @@ Begründung: Ratgeber sind Lesetext ohne Bewegung (GEST:426; DG 2.3.15; Z 8.3.5)
 - **Brotkrumen [H, Festlegung I]:** Unter 640 px ist das letzte Glied (die eigene Seite) nur für Vorleser da. Es wiederholt die h1, die
   32 px darunter steht. Sichtbar bleibt „Startseite › Ratgeber“ in einer 44-px-Zeile. Ganz gezeigt bräche der Pfad bei allen fünf
   Fachartikeln um, etwa „Startseite › Für Fensterbauer › Erstaufmaß und Feinaufmaß“ (≈ 410 px; Schätzung bei 13 px, 600), bei den
-  Ratgebern knapp nicht. Rückfall: Umbruch in eine zweite Zeile mit 20 px.
+  Ratgebern knapp nicht. Rückfall: Umbruch in eine zweite Zeile (13/18 mehrzeilig, K-19).
 - **Einführungsband** (nur Ratgeber, bis 17.11.2026): ≈ 96 px über dem Kopf (Bildschirmfoto `bestand/screens/mobil-ratgeber-01.jpg`).
-  Alles rückt um 96 px nach unten, das Blatt endet bei y ≈ 663 und bleibt bei 664 gerade noch ganz im Bild.
+  Alles rückt um 96 px nach unten, das Blatt endet bei y ≈ 659 und bleibt bei 664 gerade noch ganz im Bild.
 - **360–389 px:** Das Blatt wird 328 px breit, die Beschriftung 12,3 px (unter GEST:433). Das ist eine bekannte Grenze der Zeichnungen; die
   Abhilfe ist Zoomen, kein Eingriff. **320 px:** kein seitliches Scrollen; h1 bricht mit `overflow-wrap: break-word`, Brotkrumen ebenso.
 - **200 % Text:** Die Antwort fließt um, das Blatt bleibt unverändert, nichts wird abgeschnitten.
 
-**640–1023 px (8 Spalten, Rand `clamp(16px, 5vw, 96px)`):** Stapel wie am Telefon. Das Blatt nimmt die Spalten 1–6 ein, höchstens 480 px,
+**640–1023 px (8 Spalten, Rinne 16, Rand 24 nach K-13):** Stapel wie am Telefon. Das Blatt nimmt die Spalten 1–6 ein, höchstens 480 px,
 mit Radius 24; die Antwort höchstens `68ch`. Das Telefon quer (844 × 390) fällt in diese Stufe.
 
-**Schreibtisch 1024 × 768 (Spalte 922, Rand 51; 12 Spalten à 54,83):** Text in den Spalten 1–6 (x 51–500, 449 px), Blatt in 8–12
-(x 603–973, 370 × 308, Beschriftung 13,9 px). h1 3 Zeilen bis 172–298, Antwort 10 Zeilen bis y 622, Blatt bis 448, Unterschrift bis 500.
-`ar-02` beginnt bei y 662 und ist 106 px (14 %) angeschnitten.
+**Schreibtisch 1024 × 768 (Spalte 960, Rand 32 nach K-13; 12 Spalten à 58, Rinne 24):** Text in den Spalten 1–6 (x 32–500, 468 px),
+Blatt in 8–12 (x 606–992, 386 × 322, je Zeichnung 265–354, Beschriftung 14,5 px). h1 3 Zeilen 168–294, Antwort 10 Zeilen bis y 612, Blatt
+bis 462, Unterschrift bis 514. `ar-02` beginnt bei y 652 und ist 116 px (15 %) angeschnitten.
 
 **Schreibtisch 1280 × 800:** wie C.2. **Ab 1440:** Die Spalte bleibt 1040 und steht mittig.
 
@@ -237,23 +237,24 @@ Inhaltsverzeichnis auf. `header` innerhalb von `main` ist keine Banner-Landmarke
 
 ```css
 body.rg-artikel { --rand: 16px }
-@media (min-width: 640px) { body.rg-artikel { --rand: clamp(16px, 5vw, 96px) } }
+@media (min-width: 640px) { body.rg-artikel { --rand: 24px } }
+@media (min-width: 1024px) { body.rg-artikel { --rand: 32px } }
 body.rg-artikel main.rg, body.rg-artikel .rg-pfad { max-width: calc(1040px + 2 * var(--rand)); margin: 0 auto; padding-inline: var(--rand) }
 body.rg-artikel .rg-pfad { padding-top: 4px }
 @media (max-width: 639px) { body.rg-artikel .rg-pfad li[aria-current] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
 .rg .rg-artikelkopf { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 8px }
-.rg .rg-artikelkopf > .eyebrow, .rg .rg-kurz .eyebrow { margin: 0; font: 600 13px/20px var(--font); letter-spacing: .12em }
+.rg .rg-artikelkopf > .eyebrow, .rg .rg-kurz .eyebrow { margin: 0; font: 600 13px/16px var(--font); letter-spacing: .12em }
 .rg .rg-artikelkopf > .eyebrow { color: var(--accent) }
+@media (max-width: 639px) { body.rg-artikel:has(.rg-pfad a[href="/fuer-fensterbauer/"]) .rg-artikelkopf > .eyebrow { line-height: 18px } }
 .rg-artikelkopf time { text-transform: none; letter-spacing: .02em; font-variant-numeric: tabular-nums }
 .rg-artikelkopf .nw { white-space: nowrap }
 .rg .rg-artikelkopf h1 { margin: 12px 0 0; font-size: 32px; line-height: 1.05; letter-spacing: -.03em; text-wrap: balance; overflow-wrap: break-word }
 .rg .rg-artikelkopf .rg-bild { margin: 24px 0 0 }
-.rg .rg-artikelkopf .rg-bild img { width: 100%; max-width: 480px; border-radius: 18px; background: #fff; box-shadow: none }
+.rg .rg-artikelkopf .rg-bild img { width: 100%; max-width: 480px; border-radius: var(--r4); background: var(--papier); box-shadow: none }
 .rg .rg-artikelkopf figcaption { margin-top: 8px; font-size: 15px; line-height: 22px }
 .rg .rg-artikelkopf .rg-kurz { margin: 24px 0 0; padding: 0; background: none; border-radius: 0; box-shadow: none }
 .rg .rg-artikelkopf .rg-kurz .eyebrow { margin-bottom: 8px; color: var(--muted) }
-.rg .rg-artikelkopf .rg-kurz p + p { max-width: 68ch }
-@media (min-width: 640px) { .rg .rg-artikelkopf .rg-bild img { border-radius: 24px } }
+.rg .rg-artikelkopf .rg-kurz p + p { max-width: 68ch; line-height: 27px }
 @media (min-width: 1024px) {
   body.rg-artikel .rg-pfad { padding-top: 8px }
   .rg .rg-artikelkopf { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto auto 1fr; column-gap: 24px; margin-top: 24px }
@@ -267,13 +268,23 @@ body.rg-artikel .rg-pfad { padding-top: 4px }
 ```
 
 Die Zeile `1fr` nimmt die Höhe des Blatts auf, Eyebrow und h1 werden nicht gedehnt. Die Selektoren beginnen mit `.rg`, damit sie die
-Vorlage (`ratgeber.css:18-33`, `:161-164`) sicher überschreiben. Der Rand am Schreibtisch ergibt 1280 → x 120–1160 und 1024 → 922 px
-Spalte, wie in `rh-03`. Die Telefonregel für das letzte Brotkrumenglied gilt nur auf Artikeln; auf `/fuer-fensterbauer/` (Brotkrumen über
+Vorlage (`ratgeber.css:18-33`, `:161-164`) sicher überschreiben. Der Rand folgt K-13 (11.2.1): 640–1023 → 24 px, 1024 → x 32–992
+(Spalte 960, wie der Kopf in `rh-01`), ab 1104 mittig, 1280 → x 120–1160. Die zweizeilige Eyebrow der Fachartikel (nur unter 640 px)
+bekommt 13/18 über `:has()`; ohne `:has()` bleibt sie bei 16 px Zeilenabstand, sonst unverändert. Die Telefonregel für das letzte Brotkrumenglied gilt nur auf Artikeln; auf `/fuer-fensterbauer/` (Brotkrumen über
 dem Fuß, `rh-03`) bleibt der Pfad vollständig.
 
 **Prüfsuite (IA-O-9):** `pruefen.mjs:1610` um `.rg-pfad a` erweitern (44-px-Ziele). Neu in Abschnitt 10: Jeder Artikel hat
 `header.rg-artikelkopf` mit der Folge Eyebrow → h1 → `figure.rg-bild` → `.rg-kurz`; das Kopfbild ohne `loading="lazy"`;
 `time[datetime]` = `dateModified` = Datum in „Stand“; erfundene Werte in der Kopfzeichnung haben „Beispiel“ in Bild oder Unterschrift.
+
+**Zeichnungsfarben auf Papier (11.4.1):** Der Kartengrund ist der Rollen-Token `--papier` (`#ffffff`, neu in `gemeinsam.css`). Die 28
+SVG werden als `<img>` geladen und tragen ihre Farben selbst, CSS wirkt nicht hinein. Ihr Orange `#c2410c` (23 Dateien) und ihre Schrift
+`#141414` (alle 28) sind genau `--mo-papier` und `--tinte-papier`; `--mo` `#ff8a5b` steht auf Papier nirgends (auf Weiß nur ≈ 2,3 : 1).
+Blau: 27 Dateien (alle außer `messpunkte.svg`) zeichnen das Element in `#1d4ed8`; ein Blau auf Papier legt 11.4.1 nicht fest. Der
+Artikelkopf setzt selbst kein Blau und färbt die Bestandszeichnungen nicht um: Fünf davon (`din-links-rechts`, `fenster-oeffnungsarten`,
+`fensterbank`, `geplatzter-termin`, `verglasung`) haben kein Orange und verlören ohne Blau ihre einzige Bedeutungsfarbe. **Offen für das
+Designsystem:** ein Token für Blau auf Papier, naheliegend der Bestandswert `#1d4ed8`. Die Rollen-Tokens sind eine **Abweichung von
+bestehender Regel (GEST:24 „keine weiteren Farben“) – Freigabe durch den Inhaber nötig** (DS-AB-7; = H5-AB-1, P-AB-2).
 
 **Assets:** keine neuen. Die 28 SVG liegen vor (480 × 330–440, weißer Grund eingebaut, keine Freistellung nötig). Fassung „Foto“
 (Z 8.3.5: „oder ein echtes Foto randlos“) nur, wenn der Inhaber für einen Artikel ein echtes Foto der Bildwelt liefert: WebP 1600 × 1000,
@@ -304,8 +315,8 @@ Zeichnung vor der Antwort (sinnvolle Folge nach WCAG 1.3.2, kein fokussierbares 
 | Annahme [H] | Prüfweg | Rückfall |
 |---|---|---|
 | H-AR1-1: Am Telefon beantwortet die Zeichnung vor „Kurz gesagt“ die Frage nicht schlechter als Text zuerst | Lesetest am Telefon des Inhabers mit drei Artikeln; später eigene Statistik: Anteil, der `ar-02` erreicht | AR1-AB-1 Rückfall |
-| H-AR1-2: Die Antwort ohne Kartenfläche wird als Antwort erkannt | Sichtprüfung, Blinzeltest bei 390 × 844 | Karte `--surface` mit Ring, Radius 18/24 |
-| H-AR1-3: Das weiße Blatt blendet bei geringer Helligkeit nicht | Telefon des Inhabers, Dunkelmodus des Geräts, abends | Papierton `#f5f4ef` im ersten `rect` der 28 SVG und als Kartengrund |
+| H-AR1-2: Die Antwort ohne Kartenfläche wird als Antwort erkannt | Sichtprüfung, Blinzeltest bei 390 × 844 | Karte `--surface` mit Ring, Radius 24 (K-22) |
+| H-AR1-3: Das weiße Blatt blendet bei geringer Helligkeit nicht | Telefon des Inhabers, Dunkelmodus des Geräts, abends | Papierton `#f5f4ef` im ersten `rect` der 28 SVG und als Kartengrund statt `--papier` (neuer Farbton, Freigabe nötig) |
 | H-AR1-4: Am Schreibtisch wird die Antwort links trotz des Blatts rechts gelesen | Sichtprüfung bei 1280 und 1024 | Stapel wie am Telefon, Blatt 480 px links |
 | H-AR1-5: Das verborgene letzte Brotkrumenglied stört nicht | Sichtprüfung, Vorleser | zweite Zeile |
 | H-AR1-6: Die Unterschrift zwischen h1 und Antwort ändert die Suchergebnis-Ausschnitte nicht nachteilig | Search Console über vier Wochen, Ausschnitte der Referenzartikel | DOM-Folge Antwort vor Zeichnung, Telefon-Reihenfolge über `grid-template-areas` |

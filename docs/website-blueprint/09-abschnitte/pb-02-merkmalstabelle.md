@@ -125,7 +125,7 @@ bleibt leer. Keine interaktive Komponente im Abschnitt; die einzige Handlung ist
 |---|---|---|
 | Klebekante | `top: var(--kopf-h)` (56 / ab 1024: 64) | sitzt bündig unter dem opaken Kopf (`rh-01` C.6) |
 | Kopfband | 40 px unter 480 px Tabellenbreite, sonst 44 px; Hintergrund `--bg` deckend | Zeilen verschwinden sauber darunter; T12 verbietet halbtransparente Köpfe |
-| Formgrenzen | Container ≥ 480 px → volle Namen; ≥ 700 px → vier Spalten | Wertspalte ≥ 140 px Text, Merkmal ≥ 220 px |
+| Formgrenzen | Container ≥ 480 px → volle Namen; ≥ 700 px → vier Spalten (Containerabfrage, keine Bildschirmschwelle; 11.2.1, K-11) | Wertspalte ≥ 140 px Text, Merkmal ≥ 220 px |
 | Zeilenabstand | 21 px (1,4) | kurze Phrasen in schmalen Spalten; Fließtext bleibt 1,6 |
 | Silbentrennung | `hyphens: auto`, `overflow-wrap: break-word` | 200 % Text und 320 px ohne Überlauf (`lang="de"`, PB:2) |
 | Linien | `border` 1 px, nicht `box-shadow` | bleibt unter `forced-colors` sichtbar |
@@ -187,7 +187,7 @@ Erwartete, nicht gemessene Aufmerksamkeit.
 | Fall | Verhalten |
 |---|---|
 | Scrollen | nativ, ohne Kopplung. Kopfband klebt bei `--kopf-h`, solange der Tabellenkörper darunter liegt, und verlässt das Bild mit dem Tabellenende (CSS `position: sticky`, keine Dauer, keine Kurve) |
-| Niedriges Fenster | in der Vier-Spalten-Fassung klebt der Kopf nur ab 600 px Fensterhöhe; die Telefonfassung klebt immer, weil ohne Kopf die Spalten nicht zuzuordnen sind |
+| Niedriges Fenster | in der Vier-Spalten-Fassung klebt der Kopf nur ab 600 px Fensterhöhe (Höhenbedingung, kein Layout-Umbruchpunkt; K-11 regelt nur Breiten); die Telefonfassung klebt immer, weil ohne Kopf die Spalten nicht zuzuordnen sind |
 | Hover, Klick, Tipp | keine Wirkung; Text markier- und kopierbar, Kopieren liefert die volle Tabelle mit „EEZI …“ |
 | Sprung `#merkmale` | landet über `scroll-padding-top: calc(var(--kopf-h) + 12px)` (`rh-01`); Absatz (2) oben, Kopfband ≈ 250 px darunter |
 | Weniger Bewegung | identisch, es bewegt sich nichts |
@@ -201,8 +201,13 @@ im Vertrag stört jede Bewegung das Lesen.
 
 **Telefon 390 × 844 (Hauptansicht, eigene Komposition).** Wie C.2. Bei 360: Spalten 104 px, „Vertragsdauer“ passt knapp, sonst trennt
 `hyphens`. Bei 320 (WCAG 1.4.10): Spalten 91 px, Silbentrennung greift, kein Querscrollen [V]. Bei 200 % Text bricht „Essential Plus“
-zweizeilig, das Band wächst auf ≈ 58 px (zusammen mit dem Kopf 114 px = 17 % von 664). Telefon quer (844 × 390): Container ≈ 812 px
-→ vier Spalten; Kopf klebt nicht (Fenster < 600 px).
+zweizeilig, das Band wächst auf ≈ 58 px (zusammen mit dem Kopf 114 px = 17 % von 664). Die Telefonkomposition der Seite gilt bis
+639 px; die Schwellen 480 und 700 px fragt die Tabelle als Containerbreite ab, nicht als Bildschirmbreite (11.2.1, K-11).
+
+**Zwischengröße 640–1023 px (K-11: 8 Spalten, Rand 24; Lesespalte höchstens 640 px und Abschnittsliste als `details` nach `re-01`).**
+Container 592 px bei 640, ab 688 px Breite 640 px → Telefonkomposition mit vollen Namen und 44-px-Band, Werte je 192 bzw. 208 px; der
+Kopf klebt wie am Telefon. Telefon quer (844 × 390) gehört dazu: Container 640 px, Seitenkopf 56 + Band 44 = 100 px ≈ 26 % von 390.
+Abweichung von bestehender Regel (GEST:462 „eine Spalte bis 760 px“) – Freigabe durch den Inhaber nötig (DS-AB-6).
 
 **Schreibtisch 1280.** Wie C.3. Kopfband bei y 64–108, also 13,5 % der Höhe. Tabelle ≈ 1.900–2.200 px hoch (Schätzung): in vier Spalten
 laufen die Erläuterungen in 242 px zwei- bis dreizeilig, in der Lesespalte die Werte in 194 px bis fünfzeilig (Absender).
@@ -280,7 +285,9 @@ meldet „aktuell“. Die Gestaltungsprüfung (`scripts/pruefen.mjs:1602-1620`) 
 **H.5 Assets.** Keine.
 
 **H.6 Leistung.** Kein Skript, kein Bild, ≈ 1,5 KB CSS; `sticky` läuft im Compositor. Risiko: Container-Query mit klebendem Kind in
-Chrome, Safari, Firefox prüfen; Rückfall: dieselben zwei Grenzen als Media Queries auf die Seitenbreite, je nach Lage der Abschnittsliste.
+Chrome, Safari, Firefox prüfen; Rückfall ohne eigene Bildschirmschwellen (K-11: Komponentenschwellen nur als Containerabfrage):
+Kurznamen unter 640 px, volle Namen ab dem Layout-Umbruchpunkt 640 px, auf allen Breiten die Telefonkomposition. Die Vier-Spalten-Form
+entfällt dann; auf dieser Seite steht ab 1024 px ohnehin die Abschnittsliste (15 h2), unter 1024 px die Lesespalte ≤ 640 px.
 
 **H.7 Barrierefreiheit.** Kopfzellen mit `scope`, ausdrückliche Rollen, Name und Beschreibung über vorhandene Texte; Vorleser hören „EEZI
 Essential Plus, ja“. Keine Information nur über Farbe. Keine fokussierbaren Elemente in der Tabelle, also verdeckt das Band keinen Fokus

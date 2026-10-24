@@ -72,35 +72,35 @@ Explosionsansicht und die Übernahme der Wahl aus 02 in die Karte. Kein Hotspot,
 Textziel (G2). Die Szene ist ein kleiner Split: links eine Beschriftungsspalte an der Ordnungslinie x = 16, rechts der Papierstapel.
 Asymmetrisch, schwer nach rechts oben; Beschriftungsspalte und der Raum neben dem Einzeiler bleiben Negativraum.
 
-**C.2 Telefon 390 × 844, Lagen relativ zur Haarlinie (y = 0); 4 Spalten à 77,5 px, Abstand 16**
+**C.2 Telefon 390 × 844, Lagen relativ zur Haarlinie (y = 0); 4 Spalten à 77,5 px, Rinne 16; Abschnittskopf nach K-15**
 
 | y | Element | Breite · x | Schrift |
 |---|---|---|---|
 | 0 | Haarlinie 1 px `--line` | 358 · 16–374 | 96 px Abstand zu 02 |
-| 16–33 | Kapitelzeile | links | 13/17, 600, .12em, `--accent` |
-| 45–115 | h2, zwei Zeilen | 358 | 32/35, 800 |
-| 127–178 | Lead, zwei Zeilen | 358 | 17/25,5, 500, `--text2` |
-| 202–670 | Szene (C.3) | 358 | – |
-| 694–870 | Begriffe: 3 Zeilen à zwei (Spalten 1–2 und 3–4), der 7. über die volle Breite, je 44 | 358 | 15/18, 700, `--text` |
-| 870–914 | Umschalter, Trefferfläche 358 × 44, „+“ rechts | 16–374 | 15, 700, `--text2` |
-| 930–974 | Feinaufmaß, zwei Zeilen | 358 | 15/22, 500, `--text2`, „Feinaufmaß“ `--text` |
-| 990–1034 | Textziel mit Pfeil 16 px, Trefferfläche 358 × 44 | links | 17, 700, Unterstreichung 1 px `--muted`, Versatz 6 |
+| 16–32 | Kapitelzeile, 16 px unter der Haarlinie | links | Technikstimme Versal 13/16, 600, +0,12 em, `tabular-nums`; „03“ `--accent`, „· IHR POSTFACH“ `--muted` (K-16) |
+| 44–112 | h2, zwei Zeilen, 12 px unter der Kapitelzeile | 358 | 32/34, 800, −0,03 em (K-18) |
+| 124–175 | Lead, zwei Zeilen | 358 | 17/25,5, 500, `--text2` |
+| 199–667 | Szene (C.3) | 358 | – |
+| 691–867 | Begriffe: 3 Zeilen à zwei (Spalten 1–2 und 3–4), der 7. über die volle Breite, je 44 | 358 | 15/18, 700, `--text` |
+| 867–911 | Umschalter, Trefferfläche 358 × 44, „+“ rechts | 16–374 | 15, 700, `--text2` |
+| 927–971 | Feinaufmaß, zwei Zeilen | 358 | 15/22, 500, `--text2`, „Feinaufmaß“ `--text` |
+| 987–1031 | Textziel mit Pfeil 16 px, Trefferfläche 358 × 44 | links | 17, 700, Unterstreichung 1 px `--muted`, Versatz 6 |
 
-Gesamthöhe ≈ 1.034 px = 1,23 BH (Z: 1,20). Offen wächst die Liste um ≈ 560 px.
+Gesamthöhe ≈ 1.031 px = 1,22 BH (Z: 1,20). Offen wächst die Liste um ≈ 560 px.
 
-**C.3 Szene (x 0 = Seite x 16, y 0 = Seite y 202); Blatt b = 256, h = 243 (920 : 872)**
+**C.3 Szene (x 0 = Seite x 16, y 0 = Seite y 199); Blatt b = 256, h = 243 (920 : 872)**
 
 | Element | x | y | Maß | Z |
 |---|---|---|---|---|
 | Messraster | −16 bis 374, randlos | −24 bis 492 | fein 8, kräftig 40 px | 0 |
-| Einzeiler-Karte | 112–354 | 0–150 | 242 × 150, Radius 18; Textband y 0–56 | 5 |
+| Einzeiler-Karte | 112–354 | 0–150 | 242 × 150, Radius 24 (`--r4`, Karte mit Ring, K-22); Textband y 0–56 | 5 |
 | Schicht 3 „Klärung“ (L3) | 102–358 (Ruhe 84–340) | 64–307 (Ruhe 113–356) | b × h, Versatz +7,2 % / −20 % | 20 hinten |
 | Schicht 2 „Fotos“ (L2) | 93–349 (Ruhe 84–340) | 89–332 (Ruhe 113–356) | b × h, Versatz +3,6 % / −10 % | 20 Mitte |
 | Blatt, Seite 1 („Maße“) | 84–340 | 113–356 | b × h; Stapelgruppe um −2° gedreht | 20 vorn |
-| „KLÄRUNG“ | 0–67 | 68–84 | Linie auf y 76 bis zur Kante von L3 | 30, Linie 25 |
-| „FOTOS“ | 0–48 | 93–109 | Linie auf y 101 bis zur Kante von L2 | 30, Linie 25 |
-| „MASSE“ | 0–48 | 302–318 | Linie auf y 310 zur Klammer x 76, y 280–339 (Tabellenzeilen) | 30, Linie 25 |
-| Karte „Aus Ihrer Probe“ | 122–358 | 340–436 | 236 × 96, Radius 12; liegt ≈ 14 px auf der Blattunterkante | 25 |
+| „KLÄRUNG“ | 0–71 | 68–84 | Linie auf y 76 bis zur Kante von L3 | 30, Linie 25 |
+| „FOTOS“ | 0–51 | 93–109 | Linie auf y 101 bis zur Kante von L2 | 30, Linie 25 |
+| „MASSE“ | 0–51 | 302–318 | Linie auf y 310 zur Klammer x 76, y 280–339 (Tabellenzeilen) | 30, Linie 25 |
+| Karte „Aus Ihrer Probe“ | 122–358 | 340–436 | 236 × 96, Radius 12 (`--r2`, Etikett auf Papier, K-22); liegt ≈ 14 px auf der Blattunterkante | 25 |
 | Dateiname | 0–290 | 452–468 | Zeichen 12 × 14, Text ab x 20 | 30 |
 
 Von L3 und L2 sind nur die Bänder über dem Blatt (25 bzw. 24 px) und je ein 9-px-Streifen rechts sichtbar. Die Schichtbilder beginnen
@@ -120,16 +120,16 @@ fester Abdunklung (statisches `::after`, kein `filter`).
 
 | Wert | Start | Begründung |
 |---|---|---|
-| h2 | genau `<h2 id="was-in-jeder-anfrage-steht">Was in jeder <span class="ak">Anfrage</span> steht</h2>`; `scroll-margin-top: 116px` | wie `fb-03` |
-| Blattbreite | Telefon `--b: clamp(180px, calc((100vw - 116px) / 1.072), 330px)`; ab 761 px `clamp(300px, calc((Szenenspalte - 120px) / 1.072), 400px)`; `--h: calc(var(--b) * .9478)` | 116 px für Beschriftungen und Versatz |
-| Versatz, Drehung | L2 `translate(3.6%, -10%)`, L3 `translate(7.2%, -20%)` (Prozent der eigenen Größe); `rotate(-2deg)` an der Stapelgruppe; Papier Radius 3 px | DG T5 (≤ 20 % der Blatthöhe); keine Kippung (SG 10.7/1) |
+| h2 | genau `<h2 id="was-in-jeder-anfrage-steht">Was in jeder <span class="ak">Anfrage</span> steht</h2>`; `scroll-margin-top: 116px`, ab 1024 px `124px` (`scroll-padding-top` 72/80 px seitenweit) | K-15: nach dem Sprung steht die Haarlinie 16 px unter dem Kopf |
+| Blattbreite | Telefon und Zwischengröße `--b: clamp(180px, calc((100vw - 116px) / 1.072), 330px)`; ab 1024 px `clamp(300px, calc((Szenenspalte - 120px) / 1.072), 400px)` (bei 1024: (550 − 120) / 1,072 → 400); `--h: calc(var(--b) * .9478)` | 116 px für Beschriftungen und Versatz; Umbruchpunkte nach K-11 |
+| Versatz, Drehung | L2 `translate(3.6%, -10%)`, L3 `translate(7.2%, -20%)` (Prozent der eigenen Größe); `rotate(-2deg)` an der Stapelgruppe; Papier Radius 3 px (Motivradius, zählt nach K-22 nicht) | DG T5 (≤ 20 % der Blatthöhe); keine Kippung (SG 10.7/1) |
 | Lichtkante am Blatt | 1 px oben `rgba(243,242,238,.24)`, an den Seiten des Kopfbands `.14` | Kopfband ist `#161616` wie der Grund (BL:34 `BUEHNE`); sonst verschwindet die Oberkante |
-| Einzeiler-Karte | `--surface`, Ring 2 px `--line`, Radius `--r3`, Innenabstand 16; Kicker 13/16 600 .06em `--muted`; Zeile 15/22 500 `--text2`, `white-space: nowrap` | hintere Ebene leiser als das Blatt |
-| Karte „Aus Ihrer Probe“ | `--surface`, Ring 2 px `--line2`, innen 1-px-Lichtkante oben `.24`; `box-shadow: 0 4px 16px -4px rgb(22 22 22 / .06)` | Begleitschatten nur auf Papier sichtbar (DG 2.2.4; SG 10.4/11) |
-| Karteninhalt | Kicker 13/16 600 .08em `--muted`; Element 15/22 700 `--text`; Zeile 15/22 500 `--text2`; Kästchen 14 px, Rand 2 px `--text2`, Radius 3 | Kästchen wie in der Klärungsliste (BL:415) |
-| Beschriftungen | 13/16, 600, Versalien, .08em, `--text2` | Technikstimme (DG-E-6) |
+| Einzeiler-Karte | `--surface`, Ring 2 px `--line`, Radius `--r4` (24 px, K-22), Innenabstand 16; Kicker 13/16 600 +0,12 em `--muted` (K-17); Zeile 15/22 500 `--text2`, `white-space: nowrap` | hintere Ebene leiser als das Blatt |
+| Karte „Aus Ihrer Probe“ | `--surface`, Ring 2 px `--line2`, innen 1-px-Lichtkante oben `.24`; Begleitschatten nach K-25: Telefon (Höhe 96, v = 9,6) `box-shadow: -5.8px 7.7px 24px -2.4px rgb(22 22 22 / .06)`, Schreibtisch (Höhe 100, v = 10) `-6px 8px 25px -2.5px rgb(22 22 22 / .06)` | Begleitschatten nur auf Papier sichtbar (DG 2.2.4; SG 10.4/11); K-25: v = 10 % der Kartenhöhe in Lichtrichtung, x = −0,6 · v, y = 0,8 · v, Weichzeichnung 2,5 × v, Ausdehnung −25 % von v, `--ground` 6 % |
+| Karteninhalt | Kicker 13/16 600 +0,12 em `--muted` (K-17); Element 15/22 700 `--text`; Zeile 15/22 500 `--text2`; Kästchen 14 px, Rand 2 px `--text2`, Radius 3 (Motivradius wie im Blatt, zählt nach K-22 nicht) | Kästchen wie in der Klärungsliste (BL:415) |
+| Beschriftungen | 13/16, 600, Versalien, +0,12 em (K-17), `--text2` | Technikstimme (DG-E-6) |
 | Führungslinien | SVG 1 px `--muted`, Endpunkt Ø 4 px `--text2` auf der Papierkante; Klammer mit 4-px-Enden | haarfeine Annotation (DNA 5.4) |
-| Messraster | Verläufe, fein `rgba(255,255,255,.035)`, kräftig `.05`, Linien an x = 16 ausgerichtet; Maske radial um die Blattmitte, unter Beschriftungen und Dateiname 0 | ≤ 1,3 : 1, nie unter Text (DG 2.2.13) |
+| Messraster | Verläufe, fein `rgba(255,255,255,.035)`, kräftig `.05`, Linien an der Ordnungslinie ausgerichtet (Telefon x = 16, Zwischengröße x = 24); Maske radial um die Blattmitte, unter Beschriftungen und Dateiname 0 | ≤ 1,3 : 1, nie unter Text (DG 2.2.13) |
 | Begriffe | `ul` mit 7 `li` (`b` Titel, `span` Satz); Raster `repeat(2, minmax(0,1fr))`, Abstand 16; 7. Eintrag `grid-column: 1 / -1`; Haarlinie `--line` über jeder Zeile | eine Fassung des Katalogs |
 | Umschalter | `<button type="button">` mit ausdrücklich `font-size: 15px` | Knöpfe erben sonst 13,33 px (SKILL:70) |
 
@@ -155,7 +155,10 @@ Stufe 3 ist damit voll.
 Maueröffnung, `gemeinsam.css:17`).
 **Abweichungen von bestehender Regel – Freigabe durch den Inhaber nötig:** Szene ohne „gedreht im Rahmen“ und ohne Bestellmaß- und
 Klärungs-Karte, die gegeneinander laufen (GEST:450; folgt Z 8.4.1, Zeile 6); kein Schatten am Schwebenden (DR 3.3, Baustein 2; DG-AB-1,
-EA AB-7); Liste ohne 24-px-Auftritt (GEST:447; DG-AB-2); Kapitelzeile mit Kapitelwort (E-AB-10).
+EA AB-7); Liste ohne 24-px-Auftritt (GEST:447; DG-AB-2); Kapitelzeile mit Kapitelwort (E-AB-10); Versalzeilen (Kapitelzeile, Kicker,
+Beschriftungen) 600 und +0,12 em statt 800 und .18em, weil eine Sperrung für die ganze Technikstimme gilt und die Zeilen einzeilig bleiben
+(GEST:26; K-17, DS-AB-1); Text und Szene bis 1023 px untereinander, Split erst ab 1024 statt ab 761 px, weil zwei Umbruchpunkte die Zahl
+der Kompositionen prüfbar halten (GEST:462; K-11, DS-AB-6). Die Radien 24 und 12 stehen auch in GEST:32.
 **Abweichungen von Z (Festlegungen dieser Spezifikation):** Blatt am Telefon 256 statt 330 px, weil die Beschriftungen neben dem Anker stehen
 müssen (SG 10.1/5) und der Versatz 7,2 % braucht; mit 19 % bleibt es in der Spanne der Stufe 3. Einzeiler rechts oben statt links, weil links
 die Beschriftungen stehen. Karte am Blattrand statt über dem unteren Drittel, weil dort die Tabelle mit den Maßen liegt. Lead gekürzt, weil
@@ -177,13 +180,14 @@ VK:80 bei 358 px vier Zeilen hätte (G2: höchstens drei). Ein Umschalter statt 
 ## F. Interaktions- und Bewegungsverhalten
 
 Ein bewegter Träger: erst Auftritt, dann Explosion, dann Linien, nie gleichzeitig (SG 10.7/4, E-2). Die Bedienschicht bewegt sich nicht.
-Charakter: ruhig, gleitend, ohne Feder und Abprallen, wie ein Stapel Papier, der sich auffächert.
+Charakter: ruhig, gleitend, ohne Feder und Abprallen, wie ein Stapel Papier, der sich auffächert. Physik nach K-37, Modell Trägheit
+(kritisch gedämpft, ζ = 1, kein Überschwingen); die Feder bleibt fingergeführten Bildebenen vorbehalten.
 
 | Ereignis | Verhalten | Dauer, Kurve | Begründung |
 |---|---|---|---|
 | Blattoberkante erreicht 72 % der Bildhöhe (`IntersectionObserver`, `rootMargin: 0px 0px -28% 0px`) | Wrapper mit Stapel und Karte: Deckkraft 0 → 1, `translateY(-24px → 0)`; Dateiname nur Deckkraft | 600 ms, `--e-out` | Auftritt aus der Lichtrichtung (oben) |
 | Blattmitte wandert von 70 % auf 45 % der Bildhöhe | Zielwert p von 0 auf 1, nur vorwärts (`p = max(p, neu)`); bis zum Ende des Auftritts p = 0 | ≈ 210 px Scrollweg bei 844 | scrollgeführt (DG T5), ohne Anheften (E-8) |
-| jedes Bild, solange sich etwas bewegt | `q += (p − q) · (1 − e^(−dt/τ))`, τ = 140 ms für L2, 200 ms für L3; Transform direkt setzen; Schleife endet bei \|p − q\| < 0,002 | – | Trägheit nach Scrolltempo, gestaffelte Ruhe ohne Überschwingen (DG 2.2.16) |
+| jedes Bild, solange sich etwas bewegt | Trägheit nach K-37 als gestaffelte Glättung erster Ordnung: `q += (p − q) · (1 − e^(−dt/τ))`, τ = 140 ms für L2, 200 ms für L3; Transform direkt setzen; Schleife endet bei \|p − q\| < 0,002 | – | Trägheit nach Scrolltempo, gestaffelte Ruhe ohne Überschwingen (DG 2.2.16; K-37) |
 | Scrollen ruht 200 ms bei 0,35 ≤ p < 1 | p = 1 | ≈ 600 ms | Endzustand immer komponiert (SG 10.7/6), auch nach Menüsprung |
 | q von L3 ≥ 0,98 | Beschriftungen Deckkraft 0 → 1; Linien zeichnen sich (`stroke-dashoffset`), Klärung, Fotos, Maße je 60 ms versetzt | 160 bzw. 320 ms, `--e-out` | Text bewegt sich nicht, er erscheint |
 | Rückwärtsscrollen | nichts; der Stapel bleibt offen | – | kein Flackern beim Lesen |
@@ -199,22 +203,26 @@ Charakter: ruhig, gleitend, ohne Feder und Abprallen, wie ein Stapel Papier, der
 
 **Telefon 390 × 844 (Hauptansicht, zuerst).** Komposition C.2 und C.3. Im Endzustand stehen bei 844 Lead, ganze Szene und die erste
 Begriffszeile zusammen im Bild, bei 664 die ganze Szene. 360 px: b ≈ 228, Szene proportional kleiner, Schriften gleich. 320 px: b ≈ 190;
-der Einzeiler darf zweizeilig werden, das Textband wächst auf 76 px, die Lagen darunter rücken über `--band` mit. 471–760 px: b = 330,
-Szene links an der Ordnungslinie. 200 % Textgröße: Beschriftungsspalte `max-content`, b aus der Restbreite (Container-Einheiten); kein
+der Einzeiler darf zweizeilig werden (Containerabfrage an der Stapelzelle, nicht am Bildschirm; K-11), das Textband wächst auf 76 px, die
+Lagen darunter rücken über `--band` mit. 471–639 px: b = 330, Szene links an der Ordnungslinie. 200 % Textgröße: Beschriftungsspalte `max-content`, b aus der Restbreite (Container-Einheiten); kein
 Querscrollen, `overflow-x: clip` am Abschnitt fängt die gedrehten Ecken ab.
 
-**Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 57,3 px, Abstand 32; Kopf 64 px.
+**Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 64,67 px, Rinne 24 (K-12); Kopf 64 px.
 
-- Kopfzone: Haarlinie über 12 Spalten, Kapitelzeile, h2 40/44 einzeilig über die Spalten 1–8.
-- Ab y 121 links Spalten 1–5 (x 120–535): Lead zweizeilig, 32 px tiefer Begriffe 2 × 199 px, Umschalter, Feinaufmaß, Textziel (Ende
-  y ≈ 545). Rechts Spalten 6–12 (x 567–1160): Szene, Oberkante auf Höhe des Leads.
-- Szene (eigene Koordinaten): Beschriftungen x 567–667; b = 400, h = 379; Blatt x 700–1100, ab y 142; L2 +14/−38, L3 +29/−76; Einzeiler
-  300 × 200 bei x 825–1125, y 0–200; „KLÄRUNG“ y 77–93, „FOTOS“ y 115–131, „MASSE“ y 441–457 mit Klammer y 403–495; Karte 280 × 100 bei
-  x 849–1129, y 507–607; Dateiname y 623–639. Abschnitt ≈ 760 px = 0,95 BH.
+- Kopfzone (K-15): Haarlinie über 12 Spalten, Kapitelzeile y 16–32, h2 40/42 (K-18) einzeilig y 44–86 über die Spalten 1–8.
+- Ab y 118 links Spalten 1–5 (x 120–539): Lead zweizeilig, 32 px tiefer Begriffe 2 × 201,7 px (Abstand 16), Umschalter, Feinaufmaß,
+  Textziel (Ende y ≈ 542). Rechts Spalten 6–12 (x 563–1160): Szene, Oberkante auf Höhe des Leads.
+- Szene (eigene Koordinaten): Beschriftungen x 563–663; b = 400, h = 379; Blatt x 696–1096, ab y 142; L2 +14/−38, L3 +29/−76; Einzeiler
+  300 × 200 bei x 821–1121, y 0–200; „KLÄRUNG“ y 77–93, „FOTOS“ y 115–131, „MASSE“ y 441–457 mit Klammer y 403–495; Karte 280 × 100 bei
+  x 845–1125, y 507–607; Dateiname y 623–639. Abschnitt ≈ 760 px = 0,95 BH.
 - Ohne Anheften (Festlegung 8, Z 8.3.2 c), damit die Pakete bei ≈ 4,0 BH beginnen; unter der linken Spalte bleiben ≈ 215 px frei.
 
-**Schreibtisch 1024.** Inhalt 992 px (x 16–1008), Spalten 60,7 px, Abstand 24. Text Spalten 1–5 (x 16–415), Szene Spalten 6–12 (x 439–1008):
-Beschriftungen 96 px, b = 400, Stapel bis x 988, sonst wie 1280. Zwischen 761 und 1023 px folgt b der Formel aus C.6, alle Lagen aus b und h.
+**Schreibtisch 1024.** Rand 32, Spalte 960 (x 32–992), 12 Spalten à 58 px, Rinne 24 (K-13). Text Spalten 1–5 (x 32–418), Szene Spalten
+6–12 (x 442–992): Beschriftungen 96 px (x 442–538), b = 400 (Formel C.6), Blatt x 562–962, Stapel bis x 991, die gedrehte Ecke ragt ≈ 7 px
+in den Rand; h2 40/42, sonst wie 1280.
+
+**Zwischengröße 640–1023 px.** Rand 24, 8 Spalten, Rinne 16 (K-11, K-13): Komposition des Telefons ohne Split, Ordnungslinie x = 24,
+b = 330, Szene links an der Ordnungslinie, h2 32/34; alle Lagen aus b und h wie C.3.
 
 ## H. Technische Umsetzung
 
@@ -242,7 +250,8 @@ aus dem Reveal (`:477-479`). Dazu `gemeinsam.js` (`Scroll.binden`, `ruhig`) und 
 5. **Prüfsuite:** neue Elemente nur in 13, 15, 17, 32/40 px; keine weitere Cream; die sieben Titel gleich VK:124-130.
 
 **CSS:** Szene `grid-template-columns: max-content 1fr`, Stapelzelle `container-type: inline-size`, Schichten absolut in einem Kasten mit
-`aspect-ratio: 920 / 872`; Lagen per `calc()` aus `--b`, `--h`, `--band`; ab 761 px 12-Spalten-Raster, Text `1 / 6`, Szene `6 / 13`; nur
+`aspect-ratio: 920 / 872`; Lagen per `calc()` aus `--b`, `--h`, `--band`; ab 1024 px 12-Spalten-Raster mit Rinne 24 (K-11, K-12), Text
+`1 / 6`, Szene `6 / 13`, darunter einspaltig (640–1023 px Rand 24); nur
 `transform` und `opacity` animiert; `contain: layout paint`; kein `backdrop-filter`.
 
 **Assets:**
@@ -281,7 +290,7 @@ Linien und Kästchen ≥ 3 : 1; keine Information nur in der Bewegung.
   - Die Karte wird mit der Probe in 02 verbunden. Prüfweg: Frage „Woher kommt ‚Balkontür‘?“. Rückfall: ohne Karte.
   - Drei Beschriftungen genügen, obwohl die Tabelle nicht lesbar ist. Prüfweg: Telefon-Video. Rückfall: Blatt 330 px, Beschriftungen als
     Legende unter der Szene.
-  - 1,23 BH verschieben die Pakete nicht über Bildschirm 5 bei 844 (EA H-D2). Prüfweg: Bildschirmzählung am Prototyp. Rückfall: Begriffe nur
+  - 1,22 BH verschieben die Pakete nicht über Bildschirm 5 bei 844 (EA H-D2). Prüfweg: Bildschirmzählung am Prototyp. Rückfall: Begriffe nur
     im Umschalter (−176 px).
 - **Vorschlag, nicht Teil der Grundfassung:** ein Link „Ganzes Beispiel-PDF“, erzeugt mit TB, für Fensterbauer, die das Blatt lesen wollen;
   entscheidet der Inhaber (SKILL:26).

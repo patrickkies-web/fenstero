@@ -5,7 +5,7 @@ Seite: Kundenkonto `/partner/` (noindex) · Position: 1 (einziger Inhaltsabschni
 ID `pa-01-anmelde-weiche` · Phase I, 24.10.2026, reine Planung (gelesen, nichts gebaut oder geändert) · **[V]** verbindlich, **[H]**
 Hypothese mit Rückfall, **Textentwurf** neuer Wortlaut mit Freigabe, **Festlegung I** Entscheidung dieser Spezifikation · Grundlage: 08
 8.3.8, 8.3.11; IA 5.3.2, 5.4.4 d; EA W10, W11; DG 2.3.14, 2.4.1–2.4.2, DG-E-1; DNA-B B.1–B.6; SG 10.7; 10-paketentscheidung J-R24 (ein Ziel je Zustand) ·
-Lagen in CSS-Pixeln ab Oberkante, Textbreiten in Inter aus `web/fonts/` gemessen.
+angeglichen an DS 11 (K-13, K-22, K-31, K-34, K-35) · Lagen in CSS-Pixeln ab Oberkante, Textbreiten in Inter aus `web/fonts/` gemessen.
 
 ## A. Abschnitt und Funktion
 
@@ -69,10 +69,13 @@ Weiche als flächenlose Zeilenliste zwischen Haarlinien. Die Karte ist die einzi
 folgt darunter, weil der berechtigte Besucher sein Formular zuerst sehen soll; wer falsch ist, merkt es an der h1. Kein Held, kein Bild
 (T12); asymmetrisch, Block links, Luft rechts.
 
-**Raster.** Telefon: 4 Spalten à 77,5 px, Rinne 16, Rand 16; alles über die Spalten 1–4 (x 16–374). Schreibtisch: Das Konto behält
-seine zentrierte Spalte `.p-schmal` (728 px Inhalt, bei 1280 x 276–1004), damit Kopf und Ordnungslinie beim Wechsel zu Bestellformular
-und Übersicht stehen bleiben (SG 10.7, Regel 5). Sie gilt als 12-Spalten-Raster (46 px, Rinne 16); der Block belegt die Spalten 1–9
-(542 px, x 276–818), 10–12 bleiben frei. Das 1040er-Raster der Website würde die Achse der Konto-Ansichten verlegen (Festlegung I).
+**Raster.** Telefon: 4 Spalten à 77,5 px, Rinne 16, Rand 16; alles über die Spalten 1–4 (x 16–374). Ab 640 px gilt das Raster der
+Website (K-11, K-13; DS 11.1.7 „dasselbe Raster und dieselbe Ordnungslinie“): 640–1023 px Rand 24; 1024–1103 px Rand 32, Spalte 960,
+12 Spalten à 58 px, Rinne 24 (wie der Kopf in `rh-01`); ab 1104 px Spalte 1040 mittig (bei 1280 x 120–1160). Der Block beginnt an der
+Ordnungslinie in Spalte 1 und bleibt 542 px breit; er endet in Spalte 7 (bei 1024 x 32–574, bei 1280 x 120–662), die Spalten 8–12 bleiben
+frei. Kein Split, deshalb keine eigene Textspalte 1–5 (x 32–418). Das Raster ersetzt die zentrierte Kontospalte `.p-schmal` (728 px
+Inhalt; bei 1024 läge der Rand bei 148 px) in allen Ansichten des Kontos, damit die Ordnungslinie beim Wechsel zu Bestellformular und
+Übersicht stehen bleibt (SG 10.7, Regel 5).
 
 **Abstände.** Kicker → h1 8, h1 → Lead 12, Lead → Karte 24, Karte → Weiche 24; in der Karte Rand 20, Label → Feld 6, Feld → Knopf 16
 (Bestand). Das ergibt innen 8 und 12, zwischen Gruppen 24 (G6, 4-px-Raster).
@@ -94,6 +97,10 @@ Daumenbereich, und die Cream ist die einzige gefüllte Fläche.
 **Technische Startwerte** (in `partner.css`, nur Tokens aus `gemeinsam.css`):
 
 ```css
+.p-seite { max-width: 1104px; padding-inline: 16px; }              /* Raster der Website, alle Konto-Ansichten (K-11, K-13) */
+@media (min-width: 640px) { .p-seite { padding-inline: 24px; } }
+@media (min-width: 1024px) { .p-seite { padding-inline: 32px; } }  /* 1024: x 32–992; ab 1104: 1040 mittig */
+.p-schmal { max-width: 1104px; }                                   /* statt 760 */
 .p-anmelden { width: 100%; max-width: 542px; }                    /* Block; Telefon 358 */
 .p-anmelden .p-kopfblock { gap: 0; }
 .p-anmelden .p-titel { margin-top: 8px; }
@@ -115,7 +122,7 @@ a.p-wz .z { font-weight: 700; color: var(--text); text-decoration: underline 1.5
 .p-wz .pfad { color: var(--text); }
 @media (hover: hover) { a.p-wz:hover .z { text-decoration-color: var(--text); } a.p-wz:hover svg { color: var(--text); } }
 a.p-wz:active { background: var(--surface2); }
-a.p-wz:focus-visible { outline: 2px solid var(--text); outline-offset: 0; border-radius: var(--r2); }
+a.p-wz:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: var(--r2); }  /* Zeile über volle Listenbreite (K-34) */
 ```
 
 **Begründungen.** 542 statt heute 728 px: Ein E-Mail-Feld über 690 px ist überdimensioniert (SKILL:28), und 542 ist die schmalste
@@ -130,14 +137,14 @@ Unterstreichung und Chevron. `margin: 0 -8px` hält den Text an der Ordnungslini
 | Tiefe, Z-Achsen | drei Ebenen (Grund, Kartenfläche, Bedienschicht), darüber der klebende Kopf | 1 | Ruhe; Verdeckung ist in der Arbeitsansicht Ziel, nicht Pflicht |
 | Material, Transparenz | Karte matt und opak, 2-px-Ring; kein Glas (ohne Bild ausgeschlossen, DG 2.4.1), kein Relief, kein Glanz (DNA Nr. 9) | 0 | die Arbeitsfläche tritt zurück |
 | Licht, Schatten | keines; kein Schatten an der Karte (Nr. 6, DG-AB-1), kein Schein an der Cream (Nr. 10) | 0 | der Hellwert der Cream bleibt der einzige Reiz |
-| Formen | eine Familie: Pille (Cream), Radius 18 (Karte), 12 (Feld, Druckfläche der Zeilen), dazu Haarlinien | 1 | dieselben Formen wie im übrigen Konto (DG-AB-8) |
+| Formen | eine Familie: Pille (Cream), Radius 18 (Karte; Kontoskala nach GEST:32, von K-22 ausgenommen, DS 11.6.1), 12 (Feld, Druckfläche und Fokus der Zeilen, wie `--r2` in K-22), dazu Haarlinien; auf allen Breiten gleich, keine Verkleinerung am Telefon | 1 | dieselben Formen wie im übrigen Konto (DG-AB-8) |
 | 3D-Objekte, Perspektive | keine, alles frontal (Nr. 1) | 0 | – |
 | Bildintegration | kein Bild, Bildanteil 0 (T12) | 0 | nichts konkurriert mit der Wahl |
-| Oberflächendetails | Haarlinien zwischen den Zeilen, Chevron 8 × 14 in `--muted`, Unterstreichung 1,5 px mit 4 px Abstand, `/betrieb/` hell als Pfad, Pfeil im Kreis nur in der Cream | 1 | Präzision im Detail (designrichtung.md:17) ohne Zierrat |
+| Oberflächendetails | Haarlinien zwischen den Zeilen, Chevron 8 × 14 in `--muted` an den internen Zeilenzielen W1 und W3 (K-31), Unterstreichung 1,5 px mit 4 px Abstand, `/betrieb/` hell als Pfad, gefüllter Pfeilkreis 28 px (`.pf`) nur in der Cream (K-31) | 1 | Präzision im Detail (designrichtung.md:17) ohne Zierrat |
 | Animation | nur Zustände; Codefeld blendet über Deckkraft ein (F) | 1 | E-13: Arbeitsfläche ohne Auftritt |
 | Typografie | Betriebsbereichsskala; Kicker grün in Versalien, ein grünes Wort in der h1; Fragen 500 `--text2`, Antworten 700 `--text` | 1 | Frage und Antwort sind ohne Farbe unterscheidbar |
 | Überlagerungen | keine | 0 | – |
-| Interaktive Effekte | Hover: Unterstreichung und Chevron hellen auf; aktiv: Füllung; Fokus: 2-px-Kontur; keine Skalierung (DNA-B B.3) | 1 | eindeutige Rückmeldung, Bedienschicht steht |
+| Interaktive Effekte | Hover: Unterstreichung und Chevron hellen auf; aktiv: Füllung; Fokus: 2-px-Kontur `--text`, formfolgend, an den Zeilen −2 px innen, an Feld und Cream 2 px außen (Bestand `gemeinsam.css:38`; K-34); keine Skalierung (DNA-B B.3) | 1 | eindeutige Rückmeldung, Bedienschicht steht |
 
 **Signature:** keine (08 8.3.11: Kundenkonto Stufe 1, Budget 0).
 
@@ -151,8 +158,10 @@ ebenso drei Karten oder Reiter für die drei Konten (gleichrangige Flächen ohne
 | PA-AB-1 | „Ein Held je Bildschirm“ (designrichtung.md:14, :57, :204) | kein Held, die Karte ist Anker | T12; DG-E-1 C; ein Bild ohne Aussage wäre Füllung |
 | PA-AB-2 | „Je Seite bricht mindestens einmal etwas aus seinem Rahmen“ (designrichtung.md:112) | nicht auf dieser Seite | DG-AB-18 |
 
-Skala, Grün, Cream, Ziele und Ring folgen GEST:28, :458. **Nachbar, nicht Teil dieses Abschnitts:** Der Kopf des Kontos ist halbtransparent
-mit Unschärfe (`partner.css:9`); T12 und DG-AB-10 verlangen ihn über Inhalt opak. Das ist mit dem Kopf zu entscheiden.
+Skala, Grün, Cream, Ziele und Ring folgen GEST:28, :458; ebenso Kartenradius 18 (GEST:32) und Feldhöhe 48 px (`partner.css:93`): Das
+Designsystem nimmt die Kontoskala ausdrücklich von K-22 (11.6.1) und K-35 (Feld 52 px, 11.6.9) aus, DS-AB-5 betrifft diese Seite nicht.
+**Nachbar, nicht Teil dieses Abschnitts:** Der Kopf des Kontos ist halbtransparent mit Unschärfe (`partner.css:9`); T12 und DG-AB-10
+verlangen ihn über Inhalt opak. Sein Logo steht bei x 16, nicht an der Ordnungslinie (K-13). Beides ist mit dem Kopf zu entscheiden.
 
 ## E. Visual Attention Architecture (erwartet, nicht gemessen)
 
@@ -174,7 +183,7 @@ mit Unschärfe (`partner.css:9`); T12 und DG-AB-10 verlangen ihn über Inhalt op
 | Code schicken | Cream gesperrt mit Ladekreis, `aria-live` „Code verschickt an …“ (`:138`); Codefeld und Hinweis blenden ein, Fokus ins Codefeld (`:139`) | 220 ms Deckkraft, `--e-out` | Bedienschicht nur über Deckkraft (G1) | sofort; Ladekreis steht |
 | Eingabefehler | Rand und Fläche in Fehlerfarbe, Satz 13/700, Fokus ins Feld (neu: heute geht er beim Neuzeichnen verloren, `:136`, `:143`) | sofort | DG-AB-3, kein Rütteln | gleich |
 | Serverfehler | `.p-fehlerliste` mit `role="alert"` über dem Knopf; Fokus zurück auf die Cream | sofort | Ansage ohne Bewegung | gleich |
-| Zeilen W1, W3 | Hover (`hover: hover`): Unterstreichung `--line2` → `--text`, Chevron `--muted` → `--text`; Drücken: Füllung `--surface2` (x 8–382); Fokus: 2 px `--text`, Abstand 0, Radius 12 | 150 ms, `--e-out`; Fokus sofort | Hover über Linie, aktiv = Füllung, Fokus ≥ 3 : 1 | gleich |
+| Zeilen W1, W3 | Hover (`hover: hover`): Unterstreichung `--line2` → `--text`, Chevron `--muted` → `--text`; Drücken: Füllung `--surface2` (x 8–382); Fokus: 2 px `--text`, Abstand −2 px innen (Zeile über volle Listenbreite an den Haarlinien, K-34), Radius 12 | 150 ms, `--e-out`; Fokus sofort | Hover über Linie, aktiv = Füllung, Fokus ≥ 3 : 1 | gleich |
 | Cream drücken | `--primary-hover`, ohne Skalierung (hebt `gemeinsam.css:65` hier auf) | 150 ms | DNA-B B.3 | gleich |
 | W1 | Seitenwechsel nach `/#anmelden`; dort steigt das Anmeldeblatt auf (Katalog 7 des Betriebsbereichs) | wie Ziel | – | wie Ziel |
 | W3 | A: Seitenwechsel zu `/fuer-fensterbauer/#pakete`. B: Ankerwechsel zum Bestellformular, Schritt 1, Fokus auf die h1, Rollen nach oben (Bestand `:600`) | – | – | ohne Rollen (Bestand) |
@@ -207,17 +216,17 @@ Ganzes um.
 | y | Element | x |
 |---|---|---|
 | 0–64 | Kopf des Kontos (Logo x 16, Bestand) | – |
-| 88–105 | Kicker | x 276 |
+| 88–105 | Kicker | x 120 (Ordnungslinie, Spalte 1) |
 | 113–147 | h1 30/34 | 241 px |
 | 159–210 | Lead, zwei Zeilen | 542 px |
-| 234–413 | Karte 542 × 179; Feld 502 × 48; Cream ≈ 199 × 52 links | x 276–818 |
-| 437–573 | Weiche: drei einzeilige Zeilen à 44 px mit Haarlinien | x 276–818, Chevron x 810–818 |
+| 234–413 | Karte 542 × 179; Feld 502 × 48; Cream ≈ 199 × 52 links | x 120–662 |
+| 437–573 | Weiche: drei einzeilige Zeilen à 44 px mit Haarlinien | x 120–662, Chevron x 654–662 |
 | ≈ 704–800 | Fuß | Bestand |
 
 Code-Schritt: Cream links, Link daneben, Weiche endet bei ≈ 706. Frei ≈ 70 %; die Schrift endet bei 30.
 
-**1024 × 768:** Kontospalte x 148–876, Block x 148–690, gleiche y-Werte; die Weiche endet bei 573. **521–759 px:** Block bis 542 px,
-Knöpfe nebeneinander.
+**1024 × 768:** Rand 32, Spalte x 32–992 (12 Spalten à 58 px, Rinne 24; K-13), Block x 32–574, gleiche y-Werte; die Weiche endet bei 573.
+**640–1023 px:** Rand 24, Block ab x 24 bis 542 px. **521–639 px:** Rand 16, Block bis 542 px. Knöpfe nebeneinander ab 521 px.
 
 ## H. Technische Umsetzung
 

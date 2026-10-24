@@ -4,7 +4,7 @@ Seite: Startseite `/`, Ansicht Fensterbauer (Rahmen, nur mit `?von=pdf`) · Posi
 
 ID `st-03-hinweis-von-pdf` · Phase I, Planung, nichts gebaut · [V] verbindlich, [H] Hypothese mit Rückfall · Lagen in CSS-Pixeln ab
 Oberkante der Seite; Telefon in der Einbettung, deren Bildfeld um 52 px Kopfraum wächst (`fb-01-startbild` F.5) · abgestimmt mit
-`fb-01-startbild` und `st-02-umschalter` · „Festlegung I“ = Entscheidung dieser Phase.
+`fb-01-startbild` und `st-02-umschalter`; angeglichen an DS 11 (K-22, K-29, K-31, K-39) · „Festlegung I“ = Entscheidung dieser Phase.
 
 ## A. Abschnitt und Funktion
 
@@ -60,14 +60,15 @@ links eine Spalte Bedienung auf ruhiger Wand, rechts das Bild.
 | 40 | Kopf | 0–390 | 0–56 | flächenlos |
 | 20 | Bildfeld (Foto) | 0–390 | 0–472 | 52 Kopfraum + 420, unteres Viertel ausgeblendet (fb-01) |
 | 22 | Scrim | 0–390 | 0–96 | `#161616` 60 % → 0 (st-02 C.1) |
-| 25 | Umschalter | 16–300 | 68–112 | 284 × 44, Ersatzfüllung 80 % (st-02 C.4) |
-| 25/30 | **Karte** (Fläche/Inhalt) | 16–252 | 136–242 | 236 × 106, Radius 18; Spalte 1 bis gut Mitte 3 |
+| 25/30 | Umschalter (Fläche/Inhalt und Trefferflächen, K-39) | 16–300 | 68–112 | 284 × 44 (K-29), Ersatzfüllung 80 % (st-02 C.4) |
+| 25/30 | **Karte** (Fläche/Inhalt und Trefferfläche, K-39) | 16–252 | 136–242 | 236 × 106, Radius 18 (`--r3`, Glas, K-22); Spalte 1 bis gut Mitte 3 |
 | 30 | Kicker · h1 · Chips · Preiszeile · Cream | 16–374 | 372–645 | unverändert (fb-01 F.5) |
 | – | Platz des Rings | 16–228 | 657–709 | leer; V1 behält seine Höhe, V2 bleibt ab ≈ 742 |
 
 **Karte innen:** Innenabstand oben 12, seitlich 16. Titel 15/700, Zeilenhöhe 20, zwei Zeilen „Sie halten ein eeziframes-“ / „Aufmaß in
 der Hand?“ (in Inter gemessen 163 und 141 px bei 204 px Satzbreite) → 12–52. Abstand 10. Handlungszeile 62–106: 44 px hoch, volle
-Kartenbreite, Oberkante als 1-px-Haarlinie, Beschriftung 15/700 ab x + 16 (≈ 144 px), Chevron 8 × 14 rechts mit 16 px Randabstand.
+Kartenbreite, Oberkante als 1-px-Haarlinie, Beschriftung 15/700 ab x + 16 (≈ 144 px), Chevron 8 × 14 `--muted` rechts mit 16 px
+Randabstand, kein Pfeilkreis (der gehört nur der Cream, K-31).
 
 **Begründung der Maße [V].** Die Karte füllt die Stapelzone, die fb-01 C.3 vom Zuschnitt verlangt (Bildfeld x 0–252, y 60–190 = Seite
 y 112–242), abzüglich der 24 px Abstand zum Umschalter, die st-02 C.4 fordert (bei 12 px läsen sich beide als eine Gruppe). 08 erlaubte
@@ -91,18 +92,18 @@ liegt; die Code-Zeile ist eine gezielte Zweithandlung für den, der sie sucht.
 | deckend | `.95` bei `prefers-reduced-transparency` oder `prefers-contrast: more` | SG 10.9 |
 | Kante | innen 1 px `--text` 14 %; rechts 1 px `--el` 24 % | st-02 C.2; fb-01 C.5; Licht von rechts (Bullauge) |
 | Haarlinie | 1 px `--text` 14 % | wie Kante |
-| Radius | 18 (`--r3`); Handlungszeile unten 18 | Radien voll · 24 · 18 · 12 (DG-AB-8); wie die ersetzten Meldungen |
-| Schrift | Titel und Beschriftung `--text` #f3f2ee; Chevron `--text2` | ≥ 12 : 1 auf der Ersatzfüllung auch über 50-%-Lichtern |
+| Radius | 18 (`--r3`) auf allen Breiten; Handlungszeile unten 18 | K-22 (11.6.1): voll · 24 · 18 · 12 ohne Verkleinerung, Glas 18; wie die ersetzten Meldungen; 18 und 12 stehen auch in GEST:32, kein Bruch |
+| Schrift | Titel und Beschriftung `--text` #f3f2ee; Chevron `--muted` (K-31) | Schrift ≥ 12 : 1 auf der Ersatzfüllung auch über 50-%-Lichtern; Chevron ≈ 4,3 : 1 (Grafik, ≥ 3 : 1) |
 | Schatten, Schein | keine | DG-AB-1; DNA Nr. 6, 10 |
 
 ## D. Anwendung der Design-DNA
 
 | Eigenschaft | Ausgestaltung | Intensität 0–4 | Wirkung, Beitrag |
 |---|---|---|---|
-| Tiefe, Z-Achse | Fläche Z 25 über dem Foto (20), Inhalt 30, Kopf 40; sichtbare Verdeckung der Wand; V1 bleibt bei vier Ebenen | 1 | gehört in die Szene, nicht davor |
+| Tiefe, Z-Achse | Fläche Z 25 über dem Foto (20), Inhalt und Trefferfläche 30 (K-39), Kopf 40; sichtbare Verdeckung der Wand; V1 bleibt bei vier Ebenen | 1 | gehört in die Szene, nicht davor |
 | Material, Transparenz | Ersatzfüllung ohne Live-Unschärfe, Wand scheint zu 15 % durch | 1 | eine Familie mit dem Umschalter; Glasbudget von V1 bleibt bewusst ungenutzt |
 | Licht, Schatten | keine Quelle; rechte Kante nimmt das Erdlicht auf | 1 | verankert die Karte im Licht des Ankers |
-| Formen | Rechteck Radius 18 wie die Meldungen, keine Pille | 1 | Pillen bleiben Cream und Umschalter |
+| Formen | Rechteck Radius 18 wie die Meldungen (Familie Glas, K-22), keine Pille | 1 | Pillen bleiben Cream und Umschalter |
 | Bildintegration | im Foto, Foto randlos; kein Bild des Blatts (das zeigt 03) | – | keine Doppelung |
 | Oberflächendetails | Lichtkante, Haarlinie, Chevron | 1 | Präzision ohne Zierrat |
 | Typografie | Lesestimme fett 15; keine Technikstimme, kein Grün | – | die Frage ordnet selbst ein |
@@ -138,9 +139,9 @@ Leiste führen in V2. FB-4 erkennt sein Blatt in 03 wieder.
 | Ladeauftritt V1 | Foto 0–0,9 s wie fb-01 F.1; ohne Meldungen und „BEISPIEL“ zeichnet sich die Maßlinie schon 0,9–2,1 s statt 2,9–4,1 s | 1.200 ms, Kurve wie Bestand | sonst 2 s Leerlauf; weiter nur ein Träger zugleich (E-2) |
 | erste Eingabe | Laufendes in 220 ms in den Endzustand | 220 ms, Deckkraft | fb-01 F.1; E-2 |
 | Scrollen | Karte 1 : 1 mit der Seite, Bildgruppe 0,88 (fb-01 F.2); kein Materialwechsel nötig, weil ohne Unschärfe | – | Bedienschicht ohne Versatz (G1) |
-| Zeiger über der Handlungszeile (`hover: hover`) | 1-px-Kontur `--text` 40 % innen, Chevron `--text2` → `--text` | 150 ms, `--e-out` | Hover = Kontur (DG 2.4.1) |
+| Zeiger über der Handlungszeile (`hover: hover`) | 1-px-Kontur `--text` 40 % innen, Chevron `--muted` → `--text` (K-31) | 150 ms, `--e-out` | Hover = Kontur (DG 2.4.1) |
 | Drücken | Füllung `--surface2` | 150 ms | aktiv = Füllung, keine Skalierung (SG 10.9) |
-| Fokus | 2-px-Kontur `--text`, Abstand −3 px (innen, weil die Zeile an der Kartenkante liegt), Radien folgen | sofort | ≥ 3 : 1 |
+| Fokus | 2-px-Kontur `--text`, Abstand −3 px (innen, weil die Zeile an der Kartenkante liegt), Radius 12 (`--r2`, Fokus von Zeilen, K-22; liegt innerhalb der 18er-Kartenecke) | sofort | ≥ 3 : 1 |
 | Auslösen | vorhandenes Blatt öffnet (Anmelden/Registrieren bzw. Code einfügen) | wie heute | keine neue Mechanik |
 | Karte höher als 120 px (Textgröße, 320 px Breite) | Wechsel in den Rückfall „Zeile“ (G) | Schnitt | nichts überdeckt Gesicht oder Lesestapel |
 
@@ -156,14 +157,15 @@ prüfen (fb-01 G.1). Bis 760 px gilt diese Fassung, Ordnungslinie ab 640 px x 20
 
 **Rückfall „Zeile“** – zugleich Testvariante und Fassung bei Ladefehler der Einbettung (`vkRueckfall()`, `portal.js:818`; dort vor der
 Ersatzkarte): im Platz des Rings, x 16–374, y 657–701, flächenlos: „Aufmaß in der Hand?“ 15/500 `--text2` (davor unsichtbar „Sie halten
-ein eeziframes-“), dann Knopf „Per Code übernehmen“ 15/700 `--text` mit Chevron, Ziel 44 px, zusammen ≈ 300 px. V1 bleibt unverändert,
+ein eeziframes-“), dann Knopf „Per Code übernehmen“ 15/700 `--text` mit Chevron 8 × 14 `--muted` (K-31), Ziel 44 px, zusammen ≈ 300 px. V1 bleibt unverändert,
 E-1 hält; bei 664 liegt die Zeile knapp unter dem Rand (H-ST3-3). **Abweichung von 08** (dort: „eigene Zeile über dem Foto ≤ 96 px, Foto
 360 px“): Nachgerechnet senkt eine Zeile unter dem Kopf die Fotounterkante um 92 px statt 36; E-1 hielte nur, wenn der Lesestapel 152 px
 ins Foto griffe, und dem Helden blieben neben dem Umschalter ≈ 120 px.
 
 **Schreibtisch 1280 × 800 (eigenständig, ab 1200 px).** Die Karte liegt oben in der Textspalte, nicht im Foto: Bedienschicht an der
 Ordnungslinie (G5), Glas nur über Bild, und die Stapelzone am Schreibtisch (fb-01 C.4, ≈ 220 × 64 über dem Kopf der Figur) trüge 86 px
-nicht; E-1 drückt hier nicht. Hauskarte opak `#1f1f1f`, 2-px-Ring `--line`, Radius 18, ohne Lichtkante (keine Quelle daneben). Breite nach
+nicht; E-1 drückt hier nicht. Opake Fassung des Glas-Bausteins: `#1f1f1f`, 2-px-Ring `--line`, Radius 18 (`--r3`) wie am Telefon – sie
+ersetzt die Glas-Meldung und bleibt in der Familie Glas, wird also nicht zur Karte mit 24 (K-22, 11.6.1); ohne Lichtkante (keine Quelle daneben). Breite nach
 Inhalt ≈ 336 px (Titel einzeilig 304 px + 2 × 16), höchstens 5 Spalten (x 120–533); Höhe 86 (12 · 20 · 10 · 44). Der Textblock bleibt
 senkrecht mittig zwischen Kopf und Leiste (fb-01 C.4), verlängert um Karte und 48 px Zonenabstand: Karte y ≈ 175–261, Kicker ≈ 309,
 h1 337–421, Chips 445–481, Preiszeile 497–514, Cream 538–590. Foto (x 553–1280) ohne Stapel und ohne Karte; Umschalter im Kopf (st-02
@@ -192,8 +194,9 @@ ab, :167-168) und das Startbild-Markup `web/fuer-fensterbauer/index.html:54-64` 
    </aside>
    ```
 
-3. CSS in `verkauf.css` (nur `.vk-einbettung`): Telefonfassung `position: absolute; top: 136px; left: 16px; width: 236px; z-index: 30`,
-   Fläche, Kante, Haarlinie nach C; `.vk-hero[data-vonpdf] .rg-cta .btn.ghost { display: none }` bei unveränderter Mindesthöhe von V1.
+3. CSS in `verkauf.css` (nur `.vk-einbettung`): Telefonfassung `position: absolute; top: 136px; left: 16px; width: 236px` ohne eigenen
+   `z-index`; Fläche und Kante nach C als `::before` mit `z-index: var(--z-vermittelnd)` (25), Titel und Knopf `position: relative;
+   z-index: var(--z-ui)` (30), wie `st-02` (K-39); Haarlinie nach C; `.vk-hero[data-vonpdf] .rg-cta .btn.ghost { display: none }` bei unveränderter Mindesthöhe von V1.
    Splitfassung (ab 761 px): `position: static`, erstes Element der Textspalte im Raster von V1, `width: fit-content; max-width: 413px;
    margin-bottom: 48px`, opak. `portal.css:139` (`.banner.vonpdf`) entfällt.
 4. `verkauf.js`: bei `[data-vonpdf]` Maßlinie ab 0,9 s; `ResizeObserver` an der Karte, Höhe > 120 px → `data-fassung="zeile"`.

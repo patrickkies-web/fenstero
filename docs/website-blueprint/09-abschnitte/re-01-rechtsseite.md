@@ -5,7 +5,8 @@ Seite: Rechtsseiten (Muster: Impressum, Datenschutz, Cookies, AGB, Nutzungsbedin
 ID `re-01-rechtsseite`, Phase I, Stand 24.10.2026. Reine Planung: Das Repository wurde gelesen, gebaut oder geändert wurde nichts.
 Kennzeichnungen wie in 08: **[V]** verbindlich, **[H]** Hypothese mit Rückfall, **Textentwurf** (Freigabe nötig), **Festlegung I**
 (Entscheidung dieser Spezifikation, wo 08 offen ist). Grundlage: 08 (8.2.2, 8.2.5, 8.3.0, 8.3.7, 8.3.11), DG 2.3.1, 2.3.14, 2.4.1,
-DG-E-1 C, DG-AB-8, SG „Wofür er gilt“, 10.1, 10.7, 10.10 Nr. 5, Ergebnis B (B.1, B.5), SKILL, GEST:26, :29, :408, :429–438, :455.
+DG-E-1 C, DG-AB-8, SG „Wofür er gilt“, 10.1, 10.7, 10.10 Nr. 5, Ergebnis B (B.1, B.5), SKILL, GEST:26, :29, :408, :429–438, :455;
+Designsystem `11-designsystem.md` (K-6, K-11, K-13, K-17, K-18, K-19, K-22, K-35), das bei Widersprüchen vorgeht.
 `10-paketentscheidung.md` liegt nicht vor; der Abschnitt nennt keine Preise, Preise im Wortlaut der Rechtstexte bleiben unberührt.
 
 ## A. Abschnitt und Funktion
@@ -76,41 +77,42 @@ dokumentierte Ausnahme DG-E-1 C für Lese- und Arbeitsflächen (Hierarchie über
 20 Karten mit Ring → 30 Text, Tabelle, Formular → 40 Kopf. Im ersten Bildschirm ≈ 45 % Schrift, 0 % Bild, der Rest Grund (Schätzung).
 Maßstabssprung (32/17 = 1,9) und Luft sind in der Arbeitsansicht Ziel, nicht Pflicht (SG).
 
-**Größen [V] (08 8.3.7; GEST:29).** h1 32 px am Telefon, 40 px ab 640 px (Bühnenstimme: 800, −0,03 em, Zeilenhöhe 1,05) · h2 24 px, 800,
-1,25 · h3 17 px, 800, `--text` (Gewicht statt neuem Grad) · Text 17 px, 500, `--text2`, 1,6; `strong` 700 `--text` · Nebentext 15 px
-`--muted` · Label 13 px Technikstimme (600, Versalien, 0,12 em, `tabular-nums`). Fünf Grade in drei Gruppen: Titel (32/40, 24), Lesestufe
-(17), Kleinstufe (13–15).
+**Größen [V] (08 8.3.7; GEST:29; 11.3.1).** h1 32/34 px bis 1023 px, 40/42 px ab 1024 px (Bühnenstimme: 800, −0,03 em; ganze Pixel
+nach K-18, Umbruch nach 11.2.1) · h2 24/30 px, 800 · h3 17/22 px, 700, `--text` (Bedientext; Gewicht statt neuem Grad) · Text 17/27 px,
+500, `--text2` (Fließtext lang, K-19); `strong` 700 `--text` · Nebentext 15/22 px `--muted` · Label 13/16 px, mehrzeilig 13/18
+Technikstimme (600, Versalien, +0,12 em, `tabular-nums`; K-17). Fünf Grade in drei Gruppen: Titel (32/40, 24), Lesestufe (17),
+Kleinstufe (13–15).
 
 ### C.1 Telefon 390 × 844 (4 Spalten, Spalte x 16–374 = 358 px)
 
 | y (px) | Element | Maß, Lage | Satz |
 |---|---|---|---|
 | 0–56 | Kopf neutral | opak, Haarlinie | `rh-01` |
-| 80–100 | Kicker | ab x 16 | 13/20, `--accent` |
-| 108–142 | h1 einzeilig (zweizeilig bis 176) | volle Spalte | 32/34 `--text` |
-| +8 | Geltungszeile, dann Verweiszeile | je bis 2 Zeilen à 22 | 15 `--muted`, Link `--text` |
+| 80–96 | Kicker | ab x 16 | 13/16, 600, +0,12 em, `--accent` |
+| 104–138 | h1 einzeilig (zweizeilig bis 172) | volle Spalte | 32/34 `--text` |
+| +8 | Geltungszeile, dann Verweiszeile | je bis 2 Zeilen à 22 | 15/22 `--muted`, Link `--text` |
 | +24 | Hervorhebungskarte | x 16–374, Radius 24, Rand 2 px `--line`, Polster 20 | 17/27 |
-| +24 | Abschnittsliste [H] | 52-px-Zeile zwischen Haarlinien | 17/700 |
+| +24 | Abschnittsliste [H] | 52-px-Zeile zwischen Haarlinien | 17/22, 700 |
 | +48 | Haarlinie, 16, h2 | x 16–374 | 24/30 |
 | +12 | Absätze (Abstand 12), Listen (Einzug 20, Abstand 8) | | 17/27 |
 
-Impressum: Anschrift y 166–314, „Kontakt“ ab 362; der erste Bildschirm zeigt Kicker, h1, Anschrift, Kontakt und den Beginn von
-„Verantwortlich für den Inhalt“. Datenschutz: „Kurz gesagt“ reicht von y 166 bis ≈ 1.156 (≈ 1,5 BH); ihr Anschnitt ist das
+Impressum: Anschrift y 162–310, „Kontakt“ ab 358; der erste Bildschirm zeigt Kicker, h1, Anschrift, Kontakt und den Beginn von
+„Verantwortlich für den Inhalt“. Datenschutz: „Kurz gesagt“ reicht von y 162 bis ≈ 1.152 (≈ 1,5 BH); ihr Anschnitt ist das
 Fortsetzungssignal.
 
 **`/widerruf/` (mit Textentwurf):**
 
 | y (px) | Element | Maß | Satz |
 |---|---|---|---|
-| 80–100 · 108–142 | Kicker · h1 | | wie oben |
-| 158–293 · 305–350 | Einleitung (5 Zeilen) · Hinweis Widerrufsbelehrung (2 Zeilen) | | 17/27 · 15 `--muted` |
-| 374 | Formularkarte, Polster 20, innen x 36–354 | Radius 24 | – |
-| 394–474 | Label „Ihr Name“ · Feld | 318 × 52 | 15/700 · 17 |
-| 498–683 | Label · Textfeld 3 Zeilen · Hilfe | 318 × 104 | 15/700 · 17 · 15 |
-| 707–787 | Label E-Mail · Feld | 318 × 52 | |
-| 811–863 | Cream „Widerruf bestätigen“ | 318 × 52, volle Kartenbreite | 17/700 |
-| 879–947 · 967 | Datenschutzsatz (3 Zeilen) · Kartenende | | 15 `--muted` |
-| 1.015 | Haarlinie, h2 „Andere Wege“ | | 24 |
+| 80–96 · 104–138 | Kicker · h1 | | wie oben |
+| 154–289 · 301–346 | Einleitung (5 Zeilen) · Hinweis Widerrufsbelehrung (2 Zeilen) | | 17/27 · 15/22 `--muted` |
+| 370 | Formularkarte, Polster 20, innen x 36–354 | Radius 24 | – |
+| 390–470 | Label „Ihr Name“ · Feld (1 px `--muted`, Radius 12) | 318 × 52 | 15/20 700 · 17/24 500 |
+| 494–679 | Label · Textfeld 3 Zeilen · Hilfe | 318 × 104 | 15/20 700 · 17/24 · 15/21 |
+| 703–783 | Label E-Mail · Feld | 318 × 52 | |
+| 807–859 | Cream „Widerruf bestätigen“ | 318 × 52, volle Kartenbreite | 17/22, 700 |
+| 875–943 · 963 | Datenschutzsatz (3 Zeilen) · Kartenende | | 15/22 `--muted` |
+| 1.011 | Haarlinie, h2 „Andere Wege“ | | 24/30 |
 
 Bei der realen Höhe von ≈ 664 px stehen Formularbeginn und erstes Feld im ersten Bildschirm, der Knopf nach ≈ ½ Bildschirm. Das erfüllt
 „zeitkritische Inhalte ohne Scrollen“ der Arbeitsansicht für den Beginn der Handlung. Die Cream-Pille ist die einzige der Seite.
@@ -120,23 +122,24 @@ Bei der realen Höhe von ≈ 664 px stehen Formularbeginn und erstes Feld im ers
 | y (px) | Element | Spalten, x |
 |---|---|---|
 | 0–64 | Kopf neutral: Logo 120–250 · „Für Fensterbauer“ 839–989 · „Fenster ausmessen“ 993–1160 | `rh-01` |
-| 112–132 · 140–182 | Kicker · h1 40/42 | ab Spalte 1; h1 höchstens 1–8 (685 px) |
-| 190–212 | Geltungszeile | 1–7 |
-| ab 236 | Karte, Textkörper, Formular | **Lesespalte 1–7: x 120–717 = 597 px**, ≈ 70 Zeichen |
-| ab 236 | Abschnittsliste [H], klebt bei `top: 88px` | 9–12: x 829–1160 = 331 px |
+| 112–128 · 136–178 | Kicker 13/16 · h1 40/42 | ab Spalte 1; h1 höchstens 1–8 (685 px) |
+| 186–208 | Geltungszeile | 1–7 |
+| ab 232 | Karte (Polster 24), Textkörper, Formular | **Lesespalte 1–7: x 120–717 = 597 px**, ≈ 70 Zeichen |
+| ab 232 | Abschnittsliste [H], klebt bei `top: 88px` | 9–12: x 829–1160 = 331 px |
 | – | Tabelle (Cookies, ohne Abschnittsliste) | 1–9: x 120–847 = 727 px |
 | – | Formular: Felder in Kartenbreite (549 px), Knopf mindestens 240 × 52, linksbündig | 1–7 |
 
 Spalte 8 ist Luft; ohne Abschnittsliste bleiben 8–12 frei (≈ 40 %), ruhiger Grund statt Lücke. 597 px halten die Obergrenze von 820 px
 (GEST:429) und die Zeilenlänge 45–75 Zeichen (SG 10.1). **1024 × 768:** Rand 32, Spalte 960, Spalten 58 px; Lesespalte 550 px, Liste x 688–992.
+Die Spalte 1040 steht ab 1104 px Breite mittig, darunter mit 32 px Rand (K-11, K-13).
 
 ### C.3 Startwerte
 
 | Wert | Start | Begründung |
 |---|---|---|
 | Abstände | Absatz 12 · Liste 8 · vor h3 24 · vor Haarlinie mit h2 48, danach 16 · um Karten 24 | G6, 1 : 3 : 6 |
-| Karten, Tabelle | Radius 24 (heute 20 bzw. 16), `border: 2px solid var(--line)` | DG-AB-8; GEST:32; Rand statt `box-shadow`, der unter `forced-colors` verschwindet |
-| Felder | 52 hoch, Radius 12, Polster 0 14 (Textfeld 12 14, mindestens 104), 17 px, Rand 2 px `--muted`, Fläche `--ground` | 08; GEST:455. Der heutige Rand `#3a3a3a` erreicht auf `#1f1f1f` nur ≈ 1,4 : 1, `--muted` ≈ 5,3 : 1 (WCAG 1.4.11; RE R10) |
+| Karten, Tabelle | Radius 24 (`--r4`) auf allen Breiten, keine Verkleinerung am Telefon (heute 20 bzw. 16), `border: 2px solid var(--line)`, Polster 20, ab 1024 px 24 (11.6.4) | K-22 (11.6.1); DG-AB-8; Abweichung von GEST:32 – Freigabe durch den Inhaber nötig (DS-AB-5); Rand statt `box-shadow`, der unter `forced-colors` verschwindet |
+| Felder | 52 hoch, Radius 12 (`--r2`), Polster 0 16 (Textfeld 12 16, mindestens 104), 17/24 500, `border: 1px solid var(--muted)`, Fläche `--ground`; Hover Umriss → `--text2`; Fehler 2 px `--bad` mit Satz | K-35 (11.6.9; hier bisher 2 px); 08; GEST:455. Der heutige Rand `#3a3a3a` erreicht auf `#1f1f1f` nur ≈ 1,4 : 1, `--muted` ≈ 5,3 : 1 (WCAG 1.4.11; RE R10); `border` bleibt unter `forced-colors` |
 | Ziele | ≥ 44 px; Links im Fließtext ausgenommen | SKILL:71; WCAG 2.5.8 „inline“ |
 | Trennung | Generator setzt `&shy;` in Wörter über 14 Zeichen in h1 und h2 („Geschäfts&shy;bedingungen“, „Nutzungs&shy;bedingungen“, „Verbraucher&shy;streit&shy;beilegung“); Fließtext `hyphens: auto`; überall `overflow-wrap: break-word` | „Geschäftsbedingungen“ in 32 px/800 ≈ 365 px > 358 px: sonst seitliches Scrollen (Prüfsuite Abschnitt 5) |
 | Sprungziele | `scroll-padding-top` nach `rh-01` (Kopf + 12); `h2[id], .karte[id] { scroll-margin-top: 17px }` | die Haarlinie über dem Ziel bleibt sichtbar (N12) |
@@ -151,10 +154,10 @@ Anker, Sprung, Luft sind Ziel (SG). Stufe 1, keine Signature, auch keine informi
 | Tiefe, Z-Achse | Grund 0, Karten 20, Text 30, Kopf 40; einzige Verdeckung: der opake Kopf über dem scrollenden Text | 0–1 | flaches Dokument, nichts lenkt vom Lesen ab |
 | Material, Transparenz | Karten matt `#1f1f1f`, Felder vertieft in `--ground`; kein Glas, kein halbtransparenter Kopf (T12) | 0 | Fläche nur als Gruppe: Hervorhebung, Formular, Tabelle |
 | Licht, Schatten | keines, keine Lichtkante, nichts schwebt (Nr. 6, 10) | 0 | – |
-| Formen | eine Familie: Vollrundung (Knopf), 24 (Karten, Tabelle), 12 (Felder); Haarlinien 1 px | 1 | Formular und Fuß sprechen die Form der Verkaufsseite |
+| Formen | eine Familie: Vollrundung (Knopf), 24 (Karten, Tabelle), 12 (Felder), auf allen Breiten gleich (K-22); Haarlinien 1 px | 1 | Formular und Fuß sprechen die Form der Verkaufsseite |
 | 3D-Objekte, Bild | keine; ein Bild ohne Inhalt wäre ein Platzhalter als Hauptbild (DG 2.4.1) | 0 | Ernst des Rechtstexts |
 | Oberflächendetails | Haarlinie über jedem h2; **Festlegung I:** Ordnungsnummer im h2 („§ 8“, „9.“) als `span` in `--muted`, gleicher Grad, `tabular-nums`; Sprungziel (`:target`) mit grüner Haarlinie bzw. Ring `--text2` (RE-AB-3); Tabellenköpfe und `data-k` in der Technikstimme | 1 | „präzise wie ein Aufmaß“ (DR): Paragrafen schnell finden, ohne Kapitelziffern als Signature (DG 2.3.17/1) |
-| Animation | keine, nur Zustände (E-13) | 0 | – |
+| Animation | keine, nur Zustände (E-13; K-6) | 0 | – |
 | Typografie | Bühnenstimme nur im h1; `code` behält die System-Monospace als feste Rolle „Bezeichner“ (Bestand; SG 10.1/9) | – | Hierarchie über Gewicht und Tonwert (DG-E-1 C) |
 | Farbe | ≥ 98 % unbunt; Grün nur Kicker und Zielmarke; Cream nur am Knopf auf `/widerruf/`; `--bad` (≈ 6,5 : 1 auf `#1f1f1f`) nur im Fehler, mit Symbol und Satz (SG 10.10 Nr. 5); `--warn` nur in `mark.ph` (Paketbedingungen) | – | Farbe = Funktion |
 | Überlagerungen, Perspektive, interaktive Effekte | keine; frontal; Zustände über Farbe, Kontur, Füllung (G1) | 0 | – |
@@ -181,15 +184,15 @@ Beobachter, die Liste bleibt statisch).
 
 | Auslöser | Element | Verhalten | Dauer, Kurve | weniger Bewegung |
 |---|---|---|---|---|
-| Laden, Scrollen | alles | steht sofort, kein Auftritt (E-13); Sprungziele sofort lesbar | – | gleich |
+| Laden, Scrollen | alles | steht ab dem ersten Bild, kein Auftritt, auch kein Deckkraft-Einblenden (E-13; K-6, 11.7.2; Abweichung von GEST:39 Katalog 1 – Freigabe durch den Inhaber nötig, DS-AB-8); Sprungziele sofort lesbar | – | gleich |
 | Hover (`hover: hover`) | Inline-Link | Unterstreichung 1,5 px, Abstand 3, `--line2` → `--text` (GEST:408) | 150 ms `--e-out` | gleich |
-| Hover | Listeneintrag · Feld | `--muted` → `--text` · Rand → `--text2` | 150 ms | gleich |
+| Hover | Listeneintrag · Feld | `--muted` → `--text` · Umriss 1 px → `--text2` (K-35) | 150 ms | gleich |
 | Fokus | alle Ziele | Kontur 2 px `--text`, Abstand 2, nie unter dem Kopf | sofort | gleich |
 | Tipp in der Abschnittsliste | Sprung | ohne Gleiten (`behavior: auto`): über bis zu 30 BH wäre Gleiten lang und ungenau; Ziel mit `:target`-Marke | sofort | gleich |
 | Tipp „Alle Abschnitte“ | `details` | öffnet nativ; „+“ wird „–“ (24-px-Striche, Muster `fb-13`) | sofort | gleich |
-| Absenden mit Lücken | Formular | Rand `--bad`, Satz mit Symbol darunter, Fokus aufs erste Feld; kein Rütteln (DG-AB-3; GEST:455); Fehler verschwindet beim Tippen (`widerruf.js:25`) | sofort | gleich |
+| Absenden mit Lücken | Formular | Rand 2 px `--bad`, Satz mit Symbol darunter, Fokus aufs erste Feld; kein Rütteln (DG-AB-3; GEST:455); Fehler verschwindet beim Tippen (`widerruf.js:25`) | sofort | gleich |
 | Senden | Knopf | `disabled`, „Wird gesendet …“, Deckkraft 0,6 (Bestand) | sofort | gleich |
-| Erfolg | Bestätigung | **Festlegung I:** Einleitung, Hinweis und Formular verborgen, Karte direkt unter dem h1, Fokus darauf | Deckkraft 0 → 1, 220 ms `--e-out` | ohne Blende |
+| Erfolg | Bestätigung | **Festlegung I:** Einleitung, Hinweis und Formular verborgen, Karte direkt unter dem h1, Fokus darauf; einziges Einblenden der Seite, weil der Dank nach einer Eingabe neu erscheint (K-6) | Deckkraft 0 → 1, 220 ms `--e-out` | ohne Blende |
 | Drucken | Seite | Kopf, Fuß, Menü, Abschnittsliste fallen weg; weißer Grund, schwarze Schrift, Karten mit 1-px-Rand `#999` (wie `ratgeber.css:166-172`); damit ist die Bestätigung druckbar, wie sie es anbietet (`widerruf.js:47`) | – | – |
 
 Grund: Stufe 1, Bedienschicht nur mit Zuständen (G1; SG 10.7/1–3), Bewegung nur mit Sinn (SKILL:45). Ohne JavaScript bleibt alles
@@ -199,12 +202,15 @@ bedienbar; die Bestätigung kommt dann als Seite vom Server.
 
 **Telefon 390 × 844 (zuerst):** wie C.1, eine Spalte, Abschnittsliste als `details` nach der Karte, Felder und Knopf in Kartenbreite; der
 Knopf liegt nach dem Scrollen im unteren Daumenbereich. Bei offener Tastatur liegt über dem Feld nur der 56-px-Kopf. **360 px:** Spalte
-328 px, die Trennstellen tragen die langen Titel. **320 px und 200 % Text:** kein seitliches Scrollen; Tabellen als Zeilenblöcke mit
-`data-k`-Titel (Bestand bis 600 px); E-Mail-Adressen und `code` mit `overflow-wrap: anywhere`.
+328 px, die Trennstellen tragen die langen Titel; Kicker bleiben bei +0,12 em einzeilig, Rückfall +0,08 em nur, wenn eine Zeile sonst
+umbricht (K-17). **320 px und 200 % Text:** kein seitliches Scrollen; Tabellen unter 640 px als Zeilenblöcke mit `data-k`-Titel (heute
+bis 600 px); E-Mail-Adressen und `code` mit `overflow-wrap: anywhere`.
 
-**640–1023 px:** Lesespalte höchstens 640 px an der Ordnungslinie, h1 40 px, Abschnittsliste als `details`, Tabelle dreispaltig ab 601 px.
+**640–1023 px (8 Spalten, Rand 24):** Lesespalte höchstens 640 px an der Ordnungslinie, h1 bleibt 32/34 px (40/42 erst ab 1024 px,
+11.2.1), Abschnittsliste als `details`, Tabelle dreispaltig ab 640 px (Layout-Umbruchpunkt statt der Bestandsschwelle 601 px; K-11,
+Abweichung von GEST:462 – Freigabe durch den Inhaber nötig, DS-AB-6).
 
-**Schreibtisch 1280 und 1024:** wie C.2. Bei mindestens acht h2 steht rechts die klebende Liste: ein Eintrag je h2, 15 px, Zeilen 44 px,
+**Schreibtisch 1280 und 1024:** wie C.2. Bei mindestens acht h2 steht rechts die klebende Liste: ein Eintrag je h2, 15/22 px, Zeilen 44 px,
 `--muted`, Haarlinien dazwischen, Kopf „ABSCHNITTE“ in der Technikstimme. Höher als der Bildschirm (Nutzungsbedingungen, 17 Einträge bei
 768 px), scrollt sie in sich (`max-height: calc(100vh - 112px)`, `overscroll-behavior: contain`). Nichts ist überdimensioniert.
 
@@ -235,21 +241,24 @@ Knopf liegt nach dem Scrollen im unteren Daumenbereich. Bei offener Tastatur lie
 ```
 
 ```css
-.re { max-width: 1040px; margin: 0 auto; padding: 24px 16px 0 }
-.re-kicker { margin: 0 0 8px; font: 600 13px/20px var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--accent) }
-.re h1 { max-width: 685px; margin: 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; overflow-wrap: break-word }
-.re-text { max-width: 40rem; hyphens: auto }
-.re h2 { margin: 48px 0 12px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 24px; line-height: 1.25; scroll-margin-top: 17px }
+.re { box-sizing: border-box; max-width: 1104px; margin: 0 auto; padding: 24px 16px 0 }   /* Spalte 1040 mittig ab 1104 px (K-11) */
+.re-kicker { margin: 0 0 8px; font: 600 13px/16px var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--accent) }   /* K-17, K-19 */
+.re h1 { max-width: 685px; margin: 0; font-size: 32px; line-height: 34px; font-weight: 800; letter-spacing: -.03em; overflow-wrap: break-word }   /* K-18 */
+.re-text { max-width: 40rem; hyphens: auto; font-size: 17px; line-height: 27px }   /* Fließtext lang, K-19 */
+.re h2 { margin: 48px 0 12px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 24px; line-height: 30px; scroll-margin-top: 17px }
+.re h3 { font-size: 17px; line-height: 22px; font-weight: 700 }   /* Bedientext, K-19 */
 .re h2:target { border-top-color: var(--accent) }                 /* RE-AB-3; Rückfall var(--text) */
 .re-nr { color: var(--muted); font-variant-numeric: tabular-nums }
 .re .karte { margin: 24px 0; padding: 20px; border: 2px solid var(--line); border-radius: 24px; background: var(--surface) }
-.feld input { min-height: 52px; padding: 0 14px } .feld textarea { min-height: 104px; padding: 12px 14px }
-.feld input, .feld textarea { border: 2px solid var(--muted); border-radius: 12px; background: var(--ground); font-size: 17px }
-.feld [aria-invalid="true"] { border-color: var(--bad) }
+.feld input { min-height: 52px; padding: 0 16px } .feld textarea { min-height: 104px; padding: 12px 16px }
+.feld input, .feld textarea { border: 1px solid var(--muted); border-radius: 12px; background: var(--ground); font: 500 17px/24px var(--font) }   /* K-35 */
+.feld [aria-invalid="true"] { border: 2px solid var(--bad) }
 .re-inhalt { display: none }
-@media (min-width: 640px) { .re h1 { font-size: 40px } }
+@media (min-width: 640px) { .re { padding-inline: 24px } }
 @media (min-width: 1024px) {
-  .re { padding-top: 48px }
+  .re { padding: 48px 32px 0 }
+  .re h1 { font-size: 40px; line-height: 42px }
+  .re .karte { padding: 24px }
   .re-raster { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px }
   .re-text { grid-column: 1 / span 7; grid-row: 1 }
   .re-inhalt { display: block; grid-column: 9 / span 4; grid-row: 1; position: sticky; top: 88px; align-self: start }
@@ -295,9 +304,14 @@ Abschnitt 17 (`:3785-3850`) prüft Wortlaute, `id` und `method="post" action="/a
 
 | Nr. | Bestehend | Vorschlag | Begründung | Rückfall |
 |---|---|---|---|---|
-| RE-AB-1 | Kicker 800, gesperrt 0,18 em (GEST:26; `recht.css`) | Technikstimme 600, 0,12 em | wie `fb-01` I-AB-2; „ANGABEN NACH § 5 DDG“ bleibt einzeilig | 0,18 em |
+| RE-AB-1 (= DS-AB-1) | Kicker 800, gesperrt 0,18 em (GEST:26; `recht.css`) | Technikstimme 600, +0,12 em, 13/16; Rückfall +0,08 em nur bei 360 px, wenn die Zeile sonst umbricht (K-17) | wie `fb-01` I-AB-2; im Designsystem für jede Versalzeile gebündelt; „ANGABEN NACH § 5 DDG“ bleibt einzeilig | 800 / 0,18 em |
 | RE-AB-2 | „Headlines mit Punkt am Ende … genau ein Wort je Headline in Grün“ (GEST:26) | Überschriften der Rechtsseiten ohne grünes Wort und ohne Schlusspunkt, wie im Bestand | Namen von Rechtsdokumenten und Paragrafen; ein grünes „Impressum“ wäre Schmuck; Grün trägt der Kicker | grünes Wort nur im h1, wo eines trägt |
 | RE-AB-3 | „Grün als Signal: Kicker, Haken, genau ein Wort je Überschrift“ (SKILL:68) | grüne Haarlinie am Sprungziel (`:target`) | aktive Marke als Signal (G8), statisch, nur nach einem Sprung | Haarlinie in `--text` |
 
+Dazu gelten die im Designsystem gebündelten Abweichungen (11, Anhang 11.B), jede ebenfalls eine **Abweichung von bestehender Regel –
+Freigabe durch den Inhaber nötig**: DS-AB-1 (Versalzeilen 600, +0,12 em; = RE-AB-1), DS-AB-5 (Radien voll · 24 · 18 · 12 auf allen
+Breiten statt GEST:32), DS-AB-6 (Umbruchpunkte 640 und 1024 px statt „eine Spalte bis 760 px“, GEST:462), DS-AB-8 (Bedienschicht ohne
+Auftritt statt „Erscheinen 8 px aufwärts“, GEST:39 Katalog 1).
+
 Festlegungen I zur Kenntnis: Kicker und Geltung getrennt; Paragrafennummer in `--muted`; Bestätigung ersetzt die Einleitung; Sprünge ohne
-Gleiten; Feldrand `--muted` wegen des Kontrasts.
+Gleiten; Feldrand 1 px `--muted` wegen des Kontrasts (K-35).

@@ -305,7 +305,7 @@ Am Telefon wischt man durch die Pakete, das Bild wischt mit und läuft physikali
 | Aspekt | Telefon 390 × 844 | Schreibtisch 1280 × 800 |
 |---|---|---|
 | Ebenen | 0 Grund `#161616` → 20 Beispielbild im Browserrahmen (Bildschicht) → 30 Karte `#1f1f1f` mit 2-px-Ring, Text, Knopf, Namensleiste → 40 Kopf | gleich |
-| Proportionen | Kopfzone y 72–239 (Kapitelzeile, h2 32, Lead 3 Zeilen); Namensleiste 358 × 52 bei y 255–307; Karte 310 breit, ≈ 824 hoch; Preisblock und Knopf bis y 651; Bild 306 × 254 ab y 667 (≈ 31 % der Kartenhöhe, volle Kartenbreite) | h2 Spalten 1–4, Lead Spalten 5–12 auf derselben Höhe; drei Karten zu 4 Spalten (330,7 px); Knopf bis y 534; Bilder 282,7 × 236 bei y 558–794 |
+| Proportionen | Kopfzone y 72–239 (Kapitelzeile, h2 32, Lead 3 Zeilen); Namensleiste 358 × 52 bei y 255–307; Karte 310 × 877 (in `fb-06` gemessen, Designsystem K-38); Preisblock und Knopf bis y 651; Bild 306 × 254 ab y 667 (≈ 29 % der Kartenhöhe, volle Kartenbreite) | h2 Spalten 1–4, Lead Spalten 5–12 auf derselben Höhe; drei Karten zu 4 Spalten (330,7 px); Knopf bis y 534; Bilder 282,7 × 236 bei y 558–794 |
 | Kartengrößen | alle gleich breit; Nachbarn schauen 28 px herein, nur über Deckkraft zurückgenommen (0,66) | alle gleich breit und hoch (`subgrid`) |
 | Hervorhebung | Plus: Cream-Ring, Kontur-Pille „Empfohlen“, einziger Cream-Knopf; Reihe beginnt dort | gleich; Mitte der Reihe |
 | Vergleich | Namensleiste mit allen drei Preisen; Datenblatt mit vier gleichen Zeilen je Karte; Vergleich zugeklappt darunter | Zeilen auf gleicher Höhe; Vergleich darunter über 12 Spalten |
@@ -501,7 +501,7 @@ Lesetest zeigt, dass Bilder von 306 × 254 die Markenstufe nicht erkennbar mache
 | Link 44 | „Paketbedingungen mit AV-Vertrag“ → `/konfigurator-bedingungen/` | VK:188 | Bestand, gekürzt |
 | Gesprächsweg, Ring 52 | „Unsicher, welches Paket passt? Fragen Sie uns“ → `#frage`, Paket „Noch offen“; darunter 15: „Per Nachricht oder Rückruf, Antwort in der Regel innerhalb eines Werktags.“ | `functions/pakete-seite.js:174`, `:194`, `:196` | **Textentwurf** (Werktag ungemessen, O-8; Rückruf nur über das Formular, O-9) |
 | Rechtshinweis 13 | „Angebot nur für Unternehmer im Sinne von § 14 BGB, nicht für Verbraucher. Ihr Kunde zahlt nichts.“ | VK:188 | **Textentwurf** (gekürzt; der Rest steht im Festblock) |
-| Auswahlzeile in `fb-09` (Zustand A) | „Ihre Wahl: EEZI Essential Plus“ (15 fett) · „39 € im Monat ab Livegang · 199 € Einrichtung einmalig · netto“ (13) · Link 44 „Paket ändern“ | `web/assets/pakete.js:42-67` | **Textentwurf** |
+| Auswahlzeile in `fb-09` (Zustand A) | „Ihre Wahl: EEZI Essential Plus“ (15/700, K-21) · „39 € im Monat ab Livegang · 199 € Einrichtung einmalig · netto“ (13) · Link 44 „Paket ändern“ | `web/assets/pakete.js:42-67` | **Textentwurf** |
 | Bestätigung in `/partner/` Schritt 1 (Zustand B) | „Heute fällig: 199 € netto, einmalig. Ab Livegang: 39 € im Monat. Monatlich kündbar.“ | `web/assets/partner.js:278`; PB:69 | **Textentwurf** [H, J-H9] |
 
 **Festlegung 10-2.** Die Unterschiedszeile der Karte aus ZA 04.1 („+10 € gegenüber Essential: Ihr Design“) wird Variante (J-H5). Grund:
@@ -530,43 +530,43 @@ Ränder hinaus)
 
 | y (px) | Element | Maß | Ebene |
 |---|---|---|---|
-| 0–56 | Kopf, Ring ausgeblendet, solange die Reihe im Bild ist (J-AB-9) | 390 × 56 | 40 |
+| 0–56 | Kopf; Ring ausgeblendet, solange Namensleiste oder Kartenreihe das Band unter dem Kopf bis 60 % der Bildhöhe schneidet (K-28, J-AB-9) | 390 × 56 | 40 |
 | 72 | Haarlinie | 358 × 1 | 30 |
 | 88–104 | Kapitelzeile 13, Technikstimme, grün „04“ | – | 30 |
 | 116–150 | h2 32 „Die Pakete“ | eine Zeile | 30 |
 | 162–239 | Lead 17, drei Zeilen | 358 breit | 30 |
 | 255–307 | Namensleiste: drei Segmente 116 × 52, Abstand 5; Zeiger 116 × 52 als Füllung `#262626` | 358 × 52 | 30 |
-| 317–345 | Pille „Empfohlen“, links auf x = 60, Mitte auf der Kartenoberkante | ≈ 104 × 28 | 30 |
+| 317–345 | Pille „Empfohlen“, x 60–182, Mitte auf der Kartenoberkante | 122 × 28 | 30 |
 | 331 | Kartenoberkante; Karte x 40–350, Nachbarn x −274…28 und 362…674 (je 28 px sichtbar) | 310 breit | 30 |
-| 355–379 | Paketname 17 fett | – | 30 |
+| 356–378 | Paketname Bedientext 17/22, 700 (K-21) | – | 30 |
 | 387–431 | „Wenn“-Satz 15, zwei Zeilen, `--text2` | 270 breit | 30 |
 | 447–485 | Preis 32/800 + „im Monat“ 15 `--muted` auf der Grundlinie | – | 30 |
 | 487–509 | Bindung 15 | eine Zeile | 30 |
 | 517–561 | Einrichtung 15, zwei Zeilen | – | 30 |
 | 565–583 | Steuerzeile 13 | – | 30 |
 | 599–651 | Knopf, x 60–330 | 270 × 52 | 30 |
-| 667–921 | Beispielbild über die volle Kartenbreite: Leiste 24 + Bild 306 × 230 (4 : 3), x 42–348 | 306 × 254 | 20 |
-| 933–1083 | Datenblatt: vier Zeilen, Kennwort-Spalte 96 (13 Versalien), Wertspalte 166 (15), Haarlinien zwischen den Zeilen | 270 × ≈ 150 | 30 (Leitlinien 25) |
-| 1095–1139 | „Leistungen ansehen“ | 270 × 44 | 30 |
-| ≈ 1155 | Kartenunterkante (Karte ≈ 824 hoch; Signature gleich hoch, weil alle Karten dieselben Zeilen haben) | – | – |
+| 667–921 | Beispielbild über die volle Kartenbreite: Browserleiste 24 px `--surface2` (`#262626`, K-38) + Bildfenster 306 × 230 (4 : 3), x 42–348 | 306 × 254 | 20 |
+| 937–1132 | Datenblatt: vier Zeilen à 48, je Zeile Kennwort 13 Versalien oben, Wert 15 darunter (gestapelt, `fb-06` Festlegung I-1), drei Haarlinien zwischen den Zeilen | 270 × 195 | 30 (Leitlinien 25) |
+| 1144–1188 | „Leistungen ansehen“ | 270 × 44 | 30 |
+| 1208 | Kartenunterkante (Innenabstand unten 20; Karte 877 hoch, in `fb-06` gemessen, K-38; Signature gleich hoch, weil alle Karten dieselben Zeilen haben) | – | – |
 | +24 | Verkaufsstand 15, zwei Zeilen | 358 × 44 | 30 |
 | +24 | Vergleich, Zeile 52 mit Haarlinien oben und unten, „+“ als 24-px-Strich rechts | 358 × 52 | 30 |
 | +48 | Festblock: Kennwort 13, fünf Haken-Zeilen und die Grenze (≈ 8 Zeilen à 22), Link 44 | 358 × ≈ 240 | 30 |
 | +24 | Gesprächsweg: Ring, darunter eine Zeile 15 | 358 × 52 + 22 | 30 |
 | +16 | Rechtshinweis 13, zwei bis drei Zeilen | 358 × ≈ 54 | 30 |
 
-Kapitel 04 insgesamt ≈ 1.700 px ≈ 2,0 BH (ZA plant 1,9 BH). **Prüfung bei 390 × 664:** Der Knopf der empfohlenen Karte endet bei y 651 und
+Kapitel 04 insgesamt ≈ 1.740 px ≈ 2,1 BH (ZA plant 1,9 BH). **Prüfung bei 390 × 664:** Der Knopf der empfohlenen Karte endet bei y 651 und
 steht im ersten Bildschirm nach dem Sprung (13 px Reserve). **Bei 844:** Vom Beispielbild sind 177 von 254 px sichtbar (y 667–844); die
-Fortsetzung ist angekündigt (SG 10.7/10). **Bei 360 px Breite:** Karte 280, Innenbreite 240; „Wenn“-Satz und Einrichtung werden dreizeilig,
-der Knopf rutscht auf y ≈ 695 (bei 844 sichtbar, bei 664 nicht); zulässig, weil 390 die Hauptansicht ist.
+Fortsetzung ist angekündigt (SG 10.7/10). **Bei 360 px Breite:** Karte 280, Innenbreite 240; die Texte bleiben zweizeilig (in `fb-06` gemessen),
+der Knopf steht bei y ≈ 599–651 (K-38).
 
 **Größenhierarchie.** Drei Stufen je Ansicht (SG 10.1/4): (1) Zahl 32 (h2 und Preis teilen die Stufe) neben dem nicht-textlichen Held
-Beispielbild; (2) Lesestufe 17 und 15; (3) Mikrostufe 13. Der Paketname steht in 17 fett statt 24 (J-AB-1; DG-E-2 A), weil 24 sonst eine
-vierte Stufe zwischen Preis und Lesetext öffnet. Maßstabssprung am Telefon: Bildhöhe 254 zu Versalhöhe der Bedienschrift (≈ 9,5 px bei 13)
+Beispielbild; (2) Lesestufe 17 und 15; (3) Mikrostufe 13. Der Paketname steht in 17/700 statt 24 (J-AB-1; DG-E-2 A), weil 24 sonst eine
+vierte Stufe zwischen Preis und Lesetext öffnet und nie neben 32/40 steht; 700, nicht 800, weil 800 Titel und Zahl vorbehalten ist (K-21). Maßstabssprung am Telefon: Bildhöhe 254 zu Versalhöhe der Bedienschrift (≈ 9,5 px bei 13)
 ≈ 27-fach; Preis 32 zu 13 ≈ 2,5-fach (textlich unter 3, deshalb trägt das Bild den Sprung, G4).
 
-**Verhältnisse.** Karte: Preisblock mit Knopf ≈ 39 % der Kartenhöhe, Bild ≈ 31 %, Datenblatt und Umschalter ≈ 24 %, Innenabstände der
-Rest. Bildschirm nach dem Sprung (geplant, geschätzt): Bild ≈ 15 %, Text und Bedienelemente ≈ 35 %, ruhige Fläche (Grund und Kartenfläche
+**Verhältnisse.** Karte (877 px, K-38): Preisblock mit Knopf ≈ 36 % der Kartenhöhe, Bild ≈ 29 %, Datenblatt und Umschalter ≈ 29 %,
+Innenabstände ≈ 6 %. Bildschirm nach dem Sprung (geplant, geschätzt): Bild ≈ 15 %, Text und Bedienelemente ≈ 35 %, ruhige Fläche (Grund und Kartenfläche
 ohne Inhalt) ≈ 50 %. Nach rund 150 px Scrollen steht das Bild ganz im Bild, dann ≈ 24 % Bild. Abstände 8 (innerhalb einer Gruppe) : 16
 (zwischen Gruppen) : 24 bis 48 (zwischen Zonen) ≈ 1 : 2 : 3–6 (SG 10.9, Abstände).
 
@@ -591,15 +591,15 @@ Bildschirms; Umschalter am Kartenende; Vergleich, Link und Gesprächsweg unterei
 | 124–168 | h2 40 | 1–4 |
 | 128–179 | Lead 17, zwei Zeilen; linke Kante = linke Kante der Plus-Karte | 5–12 |
 | 208 | Kartenoberkanten; Karten x 120–450,7 · 474,7–805,3 · 829,3–1160 | 1–4 · 5–8 · 9–12 |
-| 232–256 | Paketname 17 | je Karte |
+| 233–255 | Paketname 17/22, 700 (K-21) | je Karte |
 | 264–308 | „Wenn“-Satz 15, zwei Zeilen (Innenbreite 282,7) | je Karte |
 | 324–368 | Preis 40/800 | je Karte |
 | 370–392 | Bindung 15 | je Karte |
 | 400–444 | Einrichtung 15 | je Karte |
 | 448–466 | Steuerzeile 13 | je Karte |
 | 482–534 | Knopf 282,7 × 52 | je Karte |
-| 558–794 | Beispielbild in der Innenbreite: Leiste 24 + Bild 282,7 × 212 | je Karte |
-| 806–… | Datenblatt, Leistungsliste offen (Bestand), Demo-Link | je Karte |
+| 558–794 | Beispielbild in der Innenbreite: Browserleiste 24 `--surface2` (`#262626`, K-38) + Bildfenster 282,7 × 212 | je Karte |
+| 810–1005 · ab 1021 | Datenblatt (vier Zeilen à 48, K-38) · Leistungsliste offen (Bestand), dann Demo-Link | je Karte |
 
 Danach: Verkaufsstand Spalten 1–8; Vergleich Spalten 1–12 (Beschriftung Spalten 1–3, Pakete je 3 Spalten); Festblock Spalten 1–6,
 daneben Spalten 7–12 Gesprächsweg und Rechtshinweis, oben bündig mit dem Festblock. Keine Namensleiste. Die drei Bilder stehen im ersten
@@ -635,12 +635,12 @@ Stufe 2 „klar“, Dialekt C (flache Lösung) mit einem Bildträger je Karte; E
 |---|---|:-:|---|---|---|
 | Tiefe, Z-Achse (D1) | drei Ebenen plus Kopf; Verdeckung über Pille, Adresszeile, Anschnitt der Nachbarn | 2 | ganze Fläche | Raum ohne Effekt; die Karte liegt eindeutig über dem Bild | trennt Bild (zeigen) von Bedienung (entscheiden), G1 |
 | Material, Transparenz (D2) | Material nur im Bild: echte Bildschirmaufnahme der Startansicht; Karten matt `#1f1f1f`; kein Glas | 1 | Beispielbild | „echtes Material statt Symbole“ (SKILL:41) | belegt, was der Kunde des Betriebs sieht |
-| Licht, Schatten (D3, D4) | keine Lichtquelle, kein Schatten auf dunklem Grund; 1-px-Lichtkante oben am Browserrahmen (Weiß 14 %, `--kante-alpha`), Lichtrichtung von oben (`--licht-y: 1`) | 0–1 | Oberkante jedes Bildrahmens | ruhig; das Licht der Seite gehört V1 und 02 | kein Blickziel konkurriert mit Preis und Knopf |
+| Licht, Schatten (D3, D4) | keine Lichtquelle, kein Schatten auf dunklem Grund; Lichtkante am Browserrahmen nach K-24: 1 px rundum `--kante-alpha` (14 %), Ober- und rechte Kante `--kante-licht` (24 %); Lichtrichtung nach Haus-Token oben rechts (`--licht-x` −0,6, `--licht-y` 0,8) | 0–1 | Kanten jedes Bildrahmens | ruhig; das Licht der Seite gehört V1 und 02 | kein Blickziel konkurriert mit Preis und Knopf |
 | Formen (D5) | Vollrundung für Pillen, Knöpfe, Segmente; Radius 24 für Karten, 12 für Bildrahmen; keine Formänderung bei Zuständen | 2 | überall | ein geschlossenes Formsystem (DNA Nr. 5) | Knöpfe und Segmente sind als bedienbar erkennbar |
 | 3D-Objekte (D7) | keine | 0 | – | bewusst flach | Konzentration auf Zahlen |
 | Bildintegration (D11) | Bild als Panel im gerundeten Container (B.3.4), am Telefon über die volle Kartenbreite; gleiche Aufnahme, gleiche Belichtung für alle drei (J-R9) | 2 | unter dem Knopf | die drei Bilder lesen sich als Zustände einer Ansicht | Markenstufe sehen statt lesen (SKILL:29) |
 | Oberflächendetails (D12) | Datenblatt mit Haarlinien; zwei Leitlinien (1 px, `--muted` 40 %) mit Markierungsring 6 px vom Kennwort zur Stelle im Bild: „Gestaltung“ → Kopf der Startansicht, „Hinweis auf eeziframes“ → Fuß | 2 | unter und im Bild | Präzision wie in einer Bauzeichnung (DR 1; Ref 10 Annotation) | verbindet Wort und Bild; erklärt, wo „Powered by“ sitzt (F-24) |
-| Animation (D8, D16) | nur nutzergeführt: Karte folgt dem Finger; Bild läuft nach und kehrt mit gedämpfter Feder zurück (≤ 24 px, ≤ 3 %); Zeiger der Namensleiste folgt | 1 | Reihe, Bild, Leiste | „Trägheit und Federn“ (SKILL:43) nur in der Bildschicht | zeigt, dass Bild und Karte ein Stück sind (SKILL:122) |
+| Animation (D8, D16) | nur nutzergeführt: Karte folgt dem Finger; Bild läuft nach und kehrt mit gedämpfter Feder zurück (Modell „Feder“ nach K-37: ≤ 24 px, ≤ 3 %, Einschwingen ≈ 420 ms); Zeiger der Namensleiste folgt | 1 | Reihe, Bild, Leiste | „Trägheit und Federn“ (SKILL:43) nur in der Bildschicht | zeigt, dass Bild und Karte ein Stück sind (SKILL:122) |
 | Typografie (D18) | Zahl als Held 32/40, 800, `tabular-nums`; zwei Stimmen: Bühnenstimme (h2, Preis), Technikstimme (Kapitelzeile, Kennwörter des Datenblatts, Adresszeile) | 2 | Preisblock, Datenblatt | klare Leselinie Preis → Knopf | Preise vergleichbar über die Karten |
 | Überlagerungen | Pille auf dem Kartenrand; „Beispiel“ in der Adresszeile über dem Bild; Leitlinien über dem Bild | 1 | Kartenoberkante, Bild | flach, frontal | Empfehlung und Kennzeichnung als Beispiel sind eindeutig zugeordnet (G7) |
 | Perspektive (D15) | keine; Bildrahmen frontal, nicht gekippt | 0 | – | vermeidet die Anmutung gekippter Geräteschablonen | Bilder bleiben vergleichbar |
@@ -664,7 +664,7 @@ Erwartete Aufmerksamkeit aus Komposition und Forschung (RE E1–E3; Q14), nicht 
 - **Kontraste:** Text `#f3f2ee` auf `#1f1f1f` ≈ 15 : 1; `--text2` und `--muted` ≥ 4,5 : 1; Cream-Füllung mit dunkler Schrift; Grün nur im
   h2-Wort, in der Kapitelzeile und an den Haken des Festblocks.
 - **Position und Gewicht des CTA:** ein Cream-Knopf je Bildschirm; Ring-Knöpfe der Nachbarn sind außerhalb des Bildes; der Kopf-Ring ist
-  ausgeblendet (J-AB-9). Am Schreibtisch zwei Ring-Knöpfe neben dem Cream-Knopf, gleich groß, nur die Füllung unterscheidet.
+  ausgeblendet (K-28, J-AB-9). Am Schreibtisch zwei Ring-Knöpfe neben dem Cream-Knopf, gleich groß, nur die Füllung unterscheidet.
 - **Mögliche Ablenkungen:** (1) Im Beispielbild der Essential-Stufe steht der Startknopf der App im eeziframes-Design; im Bild ist er
   ≈ 40 × 10 px groß, kann aber im Blinzeltest als zweiter heller Fleck wirken (DG-H-12) – prüfen, notfalls Aufnahme ohne hellen Knopf im
   sichtbaren Ausschnitt. (2) Das Datenblatt mit vier Zeilen ist textreich; es steht unter dem Bild und erst nach dem Knopf. (3) Die
@@ -676,14 +676,15 @@ Erwartete Aufmerksamkeit aus Komposition und Forschung (RE E1–E3; Q14), nicht 
 
 | Auslöser | Reaktion | Ebene | Dauer, Kurve | Verfahren | Weniger Bewegung | Begründung |
 |---|---|---|---|---|---|---|
-| Scrollen durch das Kapitel | keine Bewegung; Kopf-Ring blendet aus, solange die Reihe zu ≥ 50 % im Bild ist, und wieder ein | 40 | 220 ms, `--kurve-ein` | IntersectionObserver, `opacity` | sofort | E-13; eine Handlung je Bildschirm |
+| Ankersprung auf `#pakete` (Startbild-Cream „Pakete ansehen“, Kopf-Ring, Menü) | Seite steht sofort am Kapitelanfang, danach Fokus auf die h2 „Die Pakete“ (`tabindex="-1"`) | Seite | sofort | `behavior: 'auto'` | gleich | K-10: dazwischen liegen scrollgekoppelte Szenen (Leiste, Lichtraum, Explosionsansicht); glattes Rollen spielte sie nacheinander ab |
+| Scrollen durch das Kapitel | keine Bewegung. Kopf-Ring nach K-28: erscheint, wenn die Startbild-Cream unter dem Kopf verschwindet; ausgeblendet, solange Namensleiste oder Kartenreihe das Band unter dem Kopf bis 60 % der Bildhöhe schneidet, in Zustand A und B; danach in Zustand A „Paket anfragen“ → `#frage` (Textwechsel 100 + 120 ms), ausgeblendet an 05; Kontur `--muted` (K-1), Druck Füllung `--surface2` (K-2) | 40 | ein 220 ms (`--t2`) `--e-out`, aus 165 ms (`--t2-aus`) `--e-in` | IntersectionObserver auf Namensleiste und Reihe, `opacity` | sofort | E-13; eine Handlung je Bildschirm |
 | Wischen der Reihe | Karte folgt dem Finger 1 : 1, rastet auf die Mitte, ohne Überschwingen; Nachbarn über Deckkraft (1 → 0,66) | 30 | nativ | `scroll-snap`, `--a` aus `verkauf.js` | gleich (natives Scrollen) | SG 10.7, „Direkte Manipulation“ |
-| Wischen der Reihe | Beispielbild läuft entgegen der Wischrichtung nach: Versatz = Wischgeschwindigkeit (px/ms) × 8, gekappt auf ± 24 px; Rückkehr als gedämpfte Feder, Dämpfungsgrad 0,75 (Überschwingen ≈ 2,8 %), Eigenfrequenz ≈ 2 Hz, Einschwingen ≈ 450 ms | 20 | Feder | `requestAnimationFrame`, `transform: translate3d`, nur solange die Reihe im Bild ist | kein Nachlauf | SKILL:43, :121-122; DG T7; Federn ≤ 3 % nur in der Bildschicht (G1) |
+| Wischen der Reihe | Beispielbild läuft entgegen der Wischrichtung nach: Versatz = Wischgeschwindigkeit (px/ms) × 8, gekappt auf ± 24 px; Rückkehr als gedämpfte Feder nach K-37 (Modell „Feder“, nur für diese fingergeführte Bildebene): ζ = 0,75 (Überschwingen ≈ 2,8 %, ≤ 3 %), f = 2 Hz (ω ≈ 12,6 s⁻¹), Einschwingen ≈ 420 ms | 20 | Feder | `requestAnimationFrame`, `transform: translate3d`, nur solange die Reihe im Bild ist | kein Nachlauf | SKILL:43, :121-122; DG T7; Federn ≤ 3 % nur in der Bildschicht (G1) |
 | Wischen der Reihe | Zeiger der Namensleiste folgt dem Fortschritt; `aria-current` wechselt bei der Rundung | 30 | 1 : 1 | `--p`, `transform: translateX` | gleich | Bestand (`verkauf.js:371-373`) |
-| Tipp auf ein Segment | Reihe rollt zur Karte, die Seite bleibt stehen | 30 | Browser-Glättung, ≈ 300–500 ms | `scrollTo({behavior: 'smooth'})` | `auto` | Bestand (`verkauf.js:376-379`, `:383-385`) |
+| Tipp auf ein Segment | Reihe rollt zur Karte, die Seite bleibt stehen | 30 | Browser-Glättung, ≈ 300–500 ms | `scrollTo({behavior: 'smooth'})` | `auto` | Bestand (`verkauf.js:376-379`, `:383-385`); waagerecht in der Reihe, glatt zulässig nach K-10 |
 | Hover (Schreibtisch, `pointer: fine`) | Karte: Ring wird 2-px-Kontur `--muted` (≥ 3 : 1); Ring-Knopf: Kontur `--text`; Cream-Knopf: innere Kontur 2 px `--on-primary` 24 %; Datenblattzeile hebt ihre Markierung im Bild hervor (Deckkraft 40 → 100 %) | 30 / 25 | 160 ms, `--kurve-ein` | CSS-Übergang auf Farbe und Kontur | gleich (Farbwechsel bleiben) | Hover = Kontur (DG 2.4.1); kein Anheben |
 | Tipp auf den Kartenknopf | Taste: Füllung dunkler | 30 | 150 ms | `:active` | gleich | Zustand ohne Skalierung (SG 10.7/3) |
-| – Zustand A | Seite rollt zu `#frage`; Paket im Feld gesetzt (Bestand); Auswahlzeile erscheint über den Feldern; Fokus auf h3 „Paket unverbindlich anfragen“ (`tabindex="-1"`, `focus({preventScroll: true})` nach dem Rollen); `aria-live` sagt „EEZI Essential Plus ausgewählt“; Cream wandert im Hintergrund an Karte und Abschluss dieses Pakets (J-AB-8) | 30 | Rollen nativ glatt; Auswahlzeile 220 ms Deckkraft | `scrollIntoView`, Zustand je Wurzel in `sessionStorage` (`try/catch`) | Sprung ohne Glättung, Zeile sofort | E-3; J-R23; RE E11 |
+| – Zustand A | Seite rollt zu `#frage`; Paket im Feld gesetzt (Bestand); Auswahlzeile erscheint über den Feldern; Fokus auf h3 „Paket unverbindlich anfragen“ (`tabindex="-1"`, `focus({preventScroll: true})` nach dem Rollen); `aria-live` sagt „EEZI Essential Plus ausgewählt“; Cream wandert im Hintergrund an Karte und Abschluss dieses Pakets (J-AB-8) | 30 | Rollen nativ glatt (zulässig nach K-10: zwischen Karte und `#frage` liegen nur `fb-07`, `fb-08`, keine scrollgekoppelte Szene); Auswahlzeile 220 ms Deckkraft | `scrollIntoView`, Zustand je Wurzel in `sessionStorage` (`try/catch`) | Sprung ohne Glättung, Zeile sofort | E-3; J-R23; RE E11 |
 | – Zustand B | Seitenwechsel zu `/partner/#bestellen/<paket>` im selben Tab; Überblendung der Seite; [H] das gewählte Beispielbild gleitet als einziges gemeinsames Element in die Miniatur von Schritt 1 und skaliert gleichmäßig | Seite / 20 | Überblendung 240 ms; Gleiten 320 ms, `cubic-bezier(.2, 0, 0, 1)` | View Transitions zwischen Dokumenten (`@view-transition { navigation: auto; }`, `view-transition-name: paket-wahl`), nur wo unterstützt | ohne Übergang | SG 10.7, „Übergänge und Physik“; J-H10 |
 | „Leistungen ansehen“ | Listen aller drei Karten öffnen; Höhe sofort, Inhalt blendet ein; Beschriftung wechselt; `aria-expanded` | 30 | 220 ms Deckkraft | Bestand (`verkauf.js:350-357`) | sofort | DG-E-14 A |
 | Vergleich öffnen | `details` öffnet; Höhe sofort, Tabelle blendet ein; Tabellenkopf klebt am Telefon unter dem Kopf (`top: 56px`) | 30 | 220 ms Deckkraft | `details`, `position: sticky` | sofort | ZA 04.2 |
@@ -726,7 +727,7 @@ Struktur, keine eigene Variante.
 | | `beispiel()` 105–107, `BEISPIEL_BILD` 96 | Bilder je Paket eintragen; Adresszeile „ihr-name-fenster.de · Beispiel“; `figcaption` nur für Vorleseprogramme |
 | | `EMPFOHLEN` 33 | bleibt Konstante, bis O-5 entschieden ist; der „Wenn“-Satz ersetzt die Begründung über die Position |
 | | danach | `node scripts/bedingungen-pdf.mjs` (SKILL, Abschnitt 8) |
-| `web/assets/verkauf.js` | `pakete()` 340–404 | Feder-Nachlauf des Bildes; Einlauf-Hinweis `.vk-wischen` entfernen (Zeilen 390–404); Breakpoint 899; Cream nach Wahl; Kopf-Ring ausblenden |
+| `web/assets/verkauf.js` | `pakete()` 340–404 | Feder-Nachlauf des Bildes (K-37); Einlauf-Hinweis `.vk-wischen` entfernen (Zeilen 390–404); Breakpoint 899; Cream nach Wahl; Kopf-Ring nach K-28 |
 | | `formular()` 25–35 | Auswahlzeile, Fokus, `aria-live` |
 | `web/assets/verkauf.css` | 8, 21–41, 85–91 | `scroll-margin-top`; kein Schein (Zeile 23); keine Skalierung der Nachbarn (Zeile 91); Pille als Kontur; Datenblatt; Bild über die Kartenbreite am Telefon; `@view-transition` |
 | `web/assets/partner.js` | Schritt 1, `schrittPaket()`; Vorwahl 612–616 | [H] Bestätigung mit Zahlen statt erneuter Wahl; Miniatur mit `view-transition-name` |
@@ -746,7 +747,7 @@ Kopf-Ring; Bestätigung in Schritt 1 des Kundenkontos.
 | Asset | Art | Format, Maß | Freistellung | Quelle |
 |---|---|---|---|---|
 | Beispielbild je Paket (3) | Bildschirmaufnahme der Startansicht des Beispielbetriebs in der Markenstufe (Essential: eeziframes-Design mit Namen und „Powered by“; Plus: Logo, Farbe, Fotos, kleiner Hinweis; Signature: ohne Hinweis) | aufgenommen 1280 × 960, ausgegeben 660 × 495 (2-fach der größten Anzeige 306 × 230 bzw. 282,7 × 212), AVIF ≤ 35 KB und WebP ≤ 50 KB | rechteckig, nicht freigestellt | per Skript mit Playwright aus `web/assets/einladung.js` (vorhanden, `/opt/node-tools`); Logo als neutrales Monogramm „Beispiel“ statt eines erfundenen Logos (EV X6) |
-| Fotos des Beispielbetriebs (bis 6, für Plus und Signature) | Werkstatt, Fenster im Einbau, Musterfenster; erkennbar erfunden, keine echte Firma, keine erkennbaren Personen | 1200 × 900, JPEG oder WebP | keine | beim Inhaber anzufragen (Flux), ohne Text, Logos, Wasserzeichen; Licht warm, von oben links |
+| Fotos des Beispielbetriebs (bis 6, für Plus und Signature) | Werkstatt, Fenster im Einbau, Musterfenster; erkennbar erfunden, keine echte Firma, keine erkennbaren Personen | 1200 × 900, JPEG oder WebP | keine | beim Inhaber anzufragen (Flux), ohne Text, Logos, Wasserzeichen; Licht warm, von oben rechts nach Haus-Token (`--licht-x` −0,6, `--licht-y` 0,8; K-24) |
 | Bild des Dashboards (optional, Signature) | Aufnahme `/betrieb/` mit Beispieldaten, für eine spätere Miniatur in der Team-Zeile | 660 × 440 | keine | per Skript (vorhanden); offen nach O-12 |
 | Miniatur für Auswahlzeile und Kundenkonto | aus dem Beispielbild abgeleitet | 96 × 72 (2-fach von 48 × 36) | keine | aus Asset 1 |
 | Name des Beispielbetriebs | „Fensterbau Brandt“ aus `web/assets/einladung.js:172` | – | – | Bestätigung durch den Inhaber, eine Beispielfirma auf der ganzen Website (G7; PA-Frage 25) |
@@ -775,7 +776,7 @@ Tastatur: Tab erreicht Segmente, Knöpfe, Umschalter in Lesereihenfolge, die Rei
 
 | Nr. | bestehende Regel | Vorschlag | Begründung | Rückfall | bereits geführt als |
 |---|---|---|---|---|---|
-| J-AB-1 | „24 Zwischentitel und Paketname“ (GEST:449) | Paketname 17 fett | höchstens drei Größenstufen je Ansicht (SG 10.1/4); der Preis ist die Titelstufe | Name 24 als dokumentierte Ausnahme (DG-E-2 C) | DG-E-2 A |
+| J-AB-1 | „24 Zwischentitel und Paketname“ (GEST:449) | Paketname 17/700 (K-21) | höchstens drei Größenstufen je Ansicht (SG 10.1/4); der Preis ist die Titelstufe | Name 24 als dokumentierte Ausnahme (DG-E-2 C) | DG-E-2 A |
 | J-AB-2 | Nachbarkarten „bis 5 % kleiner, blasser“ (GEST:452) | nur Deckkraft | keine Skalierung der Bedienschicht (SG 10.7/3) | – | DG T7 |
 | J-AB-3 | „Einmal … laufen die Karten ein Stück nach links und federn zurück“ (GEST:452) | entfällt; Anschnitt der Nachbarn zeigt das Wischen | Bedienelemente federn nicht (SG 10.7/2); E-13 | – | AB-9, DG-AB-4 |
 | J-AB-4 | empfohlene Karte mit „leichtem grünen Schein oben“ (GEST:452) | entfällt | kein Licht als Flächenmittel der Bedienschicht (DNA Nr. 10) | – | AB-5, E-AB-9 |
@@ -783,7 +784,7 @@ Tastatur: Tab erreicht Segmente, Knöpfe, Umschalter in Lesereihenfolge, die Rei
 | J-AB-6 | „darunter eine Leiste mit den drei Namen“ (GEST:452) | über der Reihe, mit Monatspreisen | R9: alle Preise ohne Wischen | – | AB-11 |
 | J-AB-7 | Vergleich mit allen Merkmalen ungegliedert (GEST:454) | gruppiert, gleiche Zeilen zusammengefasst | Lesbarkeit (Q34); Prüfsuite bleibt erfüllt | ungegliedert | AB-6 |
 | J-AB-8 | „bei den Paketen der Knopf des empfohlenen Pakets“ als Cream (GEST:456) | nach einem Tipp auf einen Kartenknopf trägt das gewählte Paket den Cream-Knopf in Reihe und Abschluss; „Empfohlen“ bleibt an Plus | Folge der gewählten Absicht statt Gegenlenkung; gleiche Regel wie im Abschluss (E-3) | Cream bleibt am empfohlenen Paket | neu |
-| J-AB-9 | „im Kopf der Seite nur ein Ring-Knopf“ (GEST:456) | der Ring blendet aus, solange die Reihe im Bild ist | eine Handlung je Bildschirm; der Ring „Pakete ansehen“ wäre dort sinnlos | Ring bleibt sichtbar | neu |
+| J-AB-9 | „im Kopf der Seite nur ein Ring-Knopf“ (GEST:456) | der Ring blendet aus, solange Namensleiste oder Kartenreihe das Band unter dem Kopf bis 60 % der Bildhöhe schneidet (Zustand A und B), danach in Zustand A „Paket anfragen“ (K-28) | eine Handlung je Bildschirm; der Ring „Pakete ansehen“ wäre dort sinnlos | Ring bleibt sichtbar | neu |
 | J-AB-10 | Vorspann der Pakete „mit dem Zeichen `farbwechsel`“ als Schleife (GEST:447) | entfällt | Entscheidungsfläche ohne Dauerbewegung (DG Dosierregel 1); das Beispielbild trägt die Aussage | Zeichen als Standbild | neu |
 
 ### I. Conversion-Begründung

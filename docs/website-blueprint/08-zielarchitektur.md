@@ -384,13 +384,16 @@ IA sie offen ließ und E jede Kapitelanzeige im Kopf ausschließt (Ü15).
 
 ### 8.2.4 Umschalter und Wechselkarte (`st-02-umschalter`, `st-04-wechselkarte`)
 
-- **Ort:** nur auf `/`. Schreibtisch: Segment neben dem Logo (GEST:190). Telefon: Glas-Segment 260 × 44 px über dem Foto des Startbilds,
-  x 16–276, y 68–112; es scrollt mit der Seite weg und steht zusätzlich im Menü (IA-AB-3). Damit beginnt das Foto direkt unter dem Kopf
-  statt bei y = 268 (PA 1.8).
+- **Ort:** nur auf `/`. Schreibtisch: Segment neben dem Logo (GEST:190). Telefon: Glas-Segment 284 × 44 px über dem Foto des Startbilds,
+  x 16–300, y 68–112 (Segmente 150 und 126 × 36 px, 4 px Einzug, Schrift 15/20; Maße nach `st-02`, K-29 in 11.6.3); es scrollt mit der
+  Seite weg und steht zusätzlich im Menü (IA-AB-3). Damit beginnt das Foto direkt unter dem Kopf statt bei y = 268 (PA 1.8).
+- **Ebenen (K-39, 11.5.1):** Glasfläche der Spur auf Z 25 zwischen Foto und Bedienschicht; Wörter, Segmentzustand und Trefferflächen auf
+  Z 30.
 - **Verhalten bleibt [V]:** Anker `#hauseigentuemer`, `#fensterbauer`, `#betriebe`; Wechsel ohne Verlaufseintrag; Wahl im Browser
   gespeichert; Wechsel springt an den Anfang der Ansicht (GEST:191).
-- **Gestaltung:** Glas `#1f1f1f` 60 %, Unschärfe 24 px, Sättigung 100 % (DG-AB-17), 1-px-Kante, kein Schatten; gewähltes Segment in Tinte,
-  nie als zweite Cream-Pille (GEST:190). Prüfpunkt: Erwartung der Prüfsuite an den Umschalter (`scripts/pruefen.mjs:213`) mit dem
+- **Gestaltung:** Glas `#1f1f1f` 60 %, Unschärfe 24 px, Sättigung 100 % (DG-AB-17), 1-px-Kante, kein Schatten; Zustände nach K-3
+  (11.6.3): gewählt = Füllung `--surface3` mit innerer 2-px-Kontur `--text`, Schrift 700 `--text`; nicht gewählt ohne Fläche, Schrift 500
+  `--text2`; nie als zweite Cream-Pille (GEST:190; Abweichung DS-AB-4 von GEST:24 „gewählt in Cream“ – Freigabe durch den Inhaber nötig). Prüfpunkt: Erwartung der Prüfsuite an den Umschalter (`scripts/pruefen.mjs:213`) mit dem
   Glas-Segment abgleichen (IA-O-9). Reihenfolge „Hauseigentümer · Fensterbauer“ bleibt, bis IA-O-10 entschieden ist.
 - **Wechselkarte** am Ende jeder Ansicht als zweiter, leiser Wechsel (GEST:192-193): Hauseigentümer → Fensterbauer mit **Textentwurf**
   (aus KD, EV 7.5.10) „Für Fensterbauer · Dieses Werkzeug, unter Ihrer Marke.“ und Ring **Textentwurf** „Zur Seite für Fensterbauer“
@@ -905,7 +908,7 @@ ihr Titel beginnt mit „Fenster selbst ausmessen“, IA 5.1.2). Fensterbauer ko
 | Nr. | ID | Rahmenteil | Ziel | Nutzerfrage | vorbereitete Entscheidung | Gewicht | Stufe · Typ |
 |---|---|---|---|---|---|---|---|
 | R1 | `st-01-baender` | Hinweisband | Stand der Seite melden | – | – | 0 px; 40 px nur ohne Server | 1 · K04 |
-| R2 | `rh-01-kopf` + `st-02-umschalter` | Kopf mit Glas-Umschalter | Orientierung, Zielgruppe wählen | „Bin ich in der richtigen Ansicht?“ | Ansicht wechseln oder bleiben | 56 px Kopf; Glas 260 × 44 im Foto | 1 · T0; Glas zählt im Budget des Startbilds |
+| R2 | `rh-01-kopf` + `st-02-umschalter` | Kopf mit Glas-Umschalter | Orientierung, Zielgruppe wählen | „Bin ich in der richtigen Ansicht?“ | Ansicht wechseln oder bleiben | 56 px Kopf; Glas 284 × 44 im Foto (K-29) | 1 · T0; Glas zählt im Budget des Startbilds |
 | R3 | `st-03-hinweis-von-pdf` | Hinweis zum Aufmaßblatt (nur Ansicht Fensterbauer mit `?von=pdf`) | FB-4 abholen | „Was mache ich mit diesem Blatt, bekomme ich solche Anfragen auch unter meinem Namen?“ | Code übernehmen (Service) oder weiter zur Seite | ≤ 168 px im Foto, kein eigener Platz | Teil von V1 (Stufe 4) |
 | R4 | – | Ansicht | Hauseigentümer H1–H7 (8.3.4) oder Fensterbauer (8.3.2, eingebettet) | – | – | – | – |
 | R5 | `st-04-wechselkarte` | Wechselkarte am Ende jeder Ansicht | leiser Wechsel | „Ich bin eigentlich Fensterbauer bzw. will eigene Fenster messen“ | Ansicht wechseln | 0,30 BH | 2 · T11 |
@@ -926,10 +929,13 @@ ihr Titel beginnt mit „Fenster selbst ausmessen“, IA 5.1.2). Fensterbauer ko
   (`portal.js:849`); eine Zeile 13 **Textentwurf** (aus PB:44, AGB:35) „Das Blatt ist ein PDF, lesbar ohne Konto. Das Feinaufmaß bleibt bei
   Ihnen.“; Link-Zeile 44 px „Aufmaß per Code übernehmen“ → Anmeldung bzw. Registrierung im Betriebsbereich (AGB:33 § 2 (2); Ziel und Ton nach
   EA O-4, ohne „Die ersten 3 Aufmaße sind frei“, falls der Altbestand neuen Betrieben nicht mehr angeboten wird). Keine Cream; das Startbild
-  behält seine. Die Beispiel-Meldungen braucht FB-4 nicht, er hält das echte Blatt in der Hand. Prüfpunkt: verdeckt nichts vom Hauptmotiv
+  behält seine. Glasfläche auf Z 25, Titel, Zeile und Link-Zeile samt Trefferfläche auf Z 30 (K-39, 11.5.1). Die Beispiel-Meldungen
+  braucht FB-4 nicht, er hält das echte Blatt in der Hand. Prüfpunkt: verdeckt nichts vom Hauptmotiv
   (SKILL:87). **Rückfall:** Hinweis als eigene Zeile über dem Foto (≤ 96 px), Foto dann 360 px hoch, damit E-1 hält.
-- **`st-04-wechselkarte`:** helle Karte 358 × ≈ 200 px als einzige helle Fläche und Held ihrer Ansicht (T11); Kicker 13, Satz 17, Ring 52
-  (Texte in 8.2.4); keine Cream (IA-AB-9).
+- **`st-04-wechselkarte`:** dunkle, opake Karte `--surface` (`#1f1f1f`) mit Ring 2 px `--line`, 358 × ≈ 200 px, als einzige Fläche über
+  Grundniveau in ihrem Bildschirm (K-40, 11.4.2; so ist „hell“ in GEST:192-193, IA K06 und DG T11 zu lesen); kein Papierweiß, das bleibt
+  Papier und der Ankerkachel in H5 vorbehalten. Primär nur im Bildschirm ohne H7 bzw. A4; neben deren Cream ist sie sekundär (ein Held je
+  Bildschirm, G3). Kicker 13, Satz 17, Ring 52 (Texte in 8.2.4); keine Cream (IA-AB-9).
 - **`st-05-textfassung`:** gleiche Abschnittsfolge wie die Ansicht Hauseigentümer (K08): H1 bis H7 in Textform, die Probemessung als
   Zeichnung mit allen drei Werten und dem Satz aus `web/index.html:59`, danach Steckbrief „eeziframes auf einen Blick“
   (`web/index.html:69-80`), Block „Für Fensterbauer“ mit VK:61 und Links auf `/fuer-fensterbauer/` und `#pakete`, drei bis vier Fragen.
@@ -970,7 +976,8 @@ Rhythmus 3 · 2 · 2 · 2 · 2 · 1 · 2 · 2: Höchststufe 3, nie zwei Abschnit
 
 - **Held:** Waschbär an der Maueröffnung im Foto `start-hauseigentuemer.webp`, Foto 390 × 420 (y 0–420), unteres Viertel in den Grund
   ausgeblendet; Anker = Tageslicht in der Öffnung; Fokusträger ≈ 25–35 % der Fläche.
-- **Ebenen:** 0 Grund → 20 Foto → 25 Glas-Umschalter 260 × 44 (x 16–276, y 68–112) → 30 Bedienschicht → 40 Kopf flächenlos über Scrim.
+- **Ebenen:** 0 Grund → 20 Foto → 25 Glasfläche des Umschalters 284 × 44 (x 16–300, y 68–112) → 30 Bedienschicht samt Wörtern und
+  Trefferflächen des Umschalters (K-39) → 40 Kopf flächenlos über Scrim.
 - **Bedienschicht:** Eyebrow 13 „In Minuten zum Aufmaß für jeden Fensterbauer“ (y ≈ 330) · h1 32 in zwei Zeilen „Fenster ausmessen. Selbst.
   eezi.“, grün „eezi.“ (y ≈ 350–426; beide wörtlich, Prüfsuite) · Lead 17 in zwei Zeilen **Textentwurf** (IA H1, aus `web/index.html:58`)
   „Zwei Fotos und die Maße mit dem Zollstock, jeder Schritt erklärt.“ (y ≈ 442–488) · Preiszeile 13 in zwei Zeilen **Textentwurf** (aus
@@ -1032,7 +1039,8 @@ Rhythmus 3 · 2 · 2 · 2 · 2 · 1 · 2 · 2: Höchststufe 3, nie zwei Abschnit
 
 **H5 `he-05-ratgeber-weg` · Stufe 2 · K35**
 
-- **Held:** Ankerkachel „4 Ausmessen“ (hell hervorgehoben, sie führt zur App) in einem Raster 2 × 3 aus Kacheln je 171 × 88 px: Ziffer 13
+- **Held:** Ankerkachel „4 Ausmessen“ (hervorgehoben, sie führt zur App; nach Freigabe H5-AB-1 in Papierweiß `--papier` ohne Ring, sonst
+  `--surface` mit Ring 2 px `--muted`; nie neben einer zweiten Papierfläche im selben Bildschirm, K-40 in 11.4.2) in einem Raster 2 × 3 aus Kacheln je 171 × 88 px: Ziffer 13
   Technikstimme, Name 17, Zahl der Artikel 13 (Prüfen 3, Entscheiden 3, Auswählen 6, Ausmessen 8, Vergleichen 1, Einbauen 2) →
   `/ratgeber/#schritt-1` bis `#schritt-6`.
 - **Bedienschicht:** h2 „Aus dem Ratgeber.“ (`portal.js:857`); Link „Alle Ratgeber“. Flach, keine Signature.
