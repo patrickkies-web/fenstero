@@ -1,0 +1,826 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2620 1960" width="2620" height="1960" font-family="system-ui, sans-serif">
+<title>V1 Startbild – Hero-Komposition der Seite für Fensterbauer (Wireframe Phase L)</title>
+<desc>Schreibtisch 1280 × 800 und Telefon 390 × 844 im Maßstab 1 : 1 nebeneinander, mit Ebenen der Z-Achse, Proportionen in Prozent, Blickpfad als nummerierte Pfeile, CTA-Lage und Lichtquelle. Grundlage: docs/website-blueprint/09-abschnitte/fb-01-startbild.md (C.2–C.5, E, F), 08-zielarchitektur.md 8.3.2 b, 09-abschnitte/rh-01-kopf.md, 09-abschnitte/fb-02-leiste-elementarten.md. Planungsdokument, Lagen geplant, nicht gemessen.</desc>
+
+<defs>
+  <style>
+    .tg rect { fill: #f3f3f0; stroke: #111; stroke-width: 1; }
+    .tg text { font-size: 12px; font-weight: 700; fill: #111; text-anchor: middle; }
+    .bp circle { fill: #fff; stroke: #111; stroke-width: 2.5; }
+    .bp text { font-size: 14px; font-weight: 800; fill: #111; text-anchor: middle; }
+    .bpw { fill: none; stroke: #fff; stroke-width: 3; marker-end: url(#pfeilW); }
+    .bph { fill: none; stroke: #111; stroke-width: 7; stroke-opacity: .55; }
+    .dim { fill: none; stroke: #555; stroke-width: 1; }
+    .dt { font-size: 12px; fill: #333; }
+    .dtm { font-size: 12px; fill: #333; text-anchor: middle; }
+    .ld { fill: none; stroke: #f3f3f0; stroke-width: 1; stroke-dasharray: 2 2; }
+    .h17 { font-size: 17px; font-weight: 800; fill: #1a1a1a; }
+    .t13 { font-size: 13px; fill: #2a2a2a; }
+    .t13b { font-size: 13px; font-weight: 700; fill: #1a1a1a; }
+    .t12 { font-size: 12px; fill: #4a4a4a; }
+    .zl { font-size: 13px; font-weight: 800; fill: #1a1a1a; text-anchor: middle; }
+    .zs { font-size: 12px; fill: #4a4a4a; text-anchor: middle; }
+    .bl { font-size: 12px; fill: #3566d6; }
+    .blb { font-size: 12px; font-weight: 700; fill: #3566d6; }
+  </style>
+
+  <clipPath id="clipD"><rect x="0" y="0" width="1280" height="800"/></clipPath>
+  <clipPath id="clipP"><rect x="0" y="0" width="390" height="844"/></clipPath>
+  <clipPath id="clipDV2"><rect x="0" y="704" width="1280" height="96"/></clipPath>
+  <clipPath id="clipPV2"><rect x="0" y="690" width="390" height="154"/></clipPath>
+
+  <!-- Fotomasken: Schreibtisch links 553 → 844 ein, unten ab 562 (74 %) aus; Telefon ab 315 (75 %) aus -->
+  <linearGradient id="gDl" gradientUnits="userSpaceOnUse" x1="553" y1="0" x2="844" y2="0">
+    <stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/>
+  </linearGradient>
+  <linearGradient id="gDu" gradientUnits="userSpaceOnUse" x1="0" y1="562" x2="0" y2="760">
+    <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
+  </linearGradient>
+  <linearGradient id="gPu" gradientUnits="userSpaceOnUse" x1="0" y1="315" x2="0" y2="420">
+    <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
+  </linearGradient>
+  <mask id="mDl" maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="800"><rect x="0" y="0" width="1280" height="800" fill="url(#gDl)"/></mask>
+  <mask id="mDu" maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="800"><rect x="0" y="0" width="1280" height="800" fill="url(#gDu)"/></mask>
+  <mask id="mPu" maskUnits="userSpaceOnUse" x="0" y="0" width="390" height="844"><rect x="0" y="0" width="390" height="844" fill="url(#gPu)"/></mask>
+
+  <!-- Akzent 2 (Licht, Tiefe): ein Blau; im Wireframe zur Sichtbarkeit verstärkt -->
+  <radialGradient id="gErde" cx=".4" cy=".35" r=".75">
+    <stop offset="0" stop-color="#9dbaff"/><stop offset=".55" stop-color="#4a7fe6"/><stop offset="1" stop-color="#22407f"/>
+  </radialGradient>
+  <radialGradient id="gErdlicht">
+    <stop offset="0" stop-color="#4a7fe6" stop-opacity=".55"/><stop offset=".5" stop-color="#4a7fe6" stop-opacity=".18"/><stop offset="1" stop-color="#4a7fe6" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="gKeilD" gradientUnits="userSpaceOnUse" x1="1229" y1="238" x2="640" y2="792">
+    <stop offset="0" stop-color="#4a7fe6" stop-opacity=".4"/><stop offset="1" stop-color="#4a7fe6" stop-opacity=".2"/>
+  </linearGradient>
+  <linearGradient id="gKeilP" gradientUnits="userSpaceOnUse" x1="345" y1="155" x2="195" y2="762">
+    <stop offset="0" stop-color="#4a7fe6" stop-opacity=".4"/><stop offset="1" stop-color="#4a7fe6" stop-opacity=".2"/>
+  </linearGradient>
+  <radialGradient id="gKegel">
+    <stop offset="0" stop-color="#4a7fe6" stop-opacity=".32"/><stop offset="1" stop-color="#4a7fe6" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="gScrim" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="96">
+    <stop offset="0" stop-color="#0d0d0d" stop-opacity=".6"/><stop offset="1" stop-color="#0d0d0d" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="gSvF" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#3a3a3a"/><stop offset=".75" stop-color="#3a3a3a"/><stop offset="1" stop-color="#3a3a3a" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="gSvS" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#0d0d0d" stop-opacity=".9"/><stop offset="1" stop-color="#0d0d0d" stop-opacity=".05"/>
+  </linearGradient>
+  <pattern id="schraffur" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="8" height="8" fill="#e4e4e0"/><line x1="0" y1="0" x2="0" y2="8" stroke="#c4c4bf" stroke-width="3"/>
+  </pattern>
+  <filter id="weich" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9"/></filter>
+
+  <marker id="pfeilW" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto">
+    <path d="M0 0L10 5L0 10Z" fill="#fff" stroke="#111" stroke-width="1.2"/>
+  </marker>
+  <marker id="pfeilK" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0 0L10 5L0 10Z" fill="#333"/>
+  </marker>
+  <marker id="pfeilB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+    <path d="M0 0L10 5L0 10Z" fill="#3566d6"/>
+  </marker>
+
+  <symbol id="kachel" viewBox="0 0 100 100">
+    <rect x="1" y="1" width="98" height="98" rx="12" fill="#363636" stroke="#858585" stroke-width="2"/>
+    <rect x="24" y="16" width="52" height="68" fill="none" stroke="#a5a5a5" stroke-width="3"/>
+    <path d="M50 16V84M24 50H76" stroke="#a5a5a5" stroke-width="3"/>
+  </symbol>
+  <symbol id="sonne" viewBox="-16 -16 32 32">
+    <circle r="5" fill="#4a7fe6" stroke="#fff" stroke-width="1"/>
+    <path d="M0-9V-14M0 9V14M-9 0H-14M9 0H14M6.4-6.4L9.9-9.9M-6.4 6.4L-9.9 9.9M6.4 6.4L9.9 9.9M-6.4-6.4L-9.9-9.9" stroke="#4a7fe6" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+</defs>
+
+<rect width="2620" height="1960" fill="#f3f3f0"/>
+
+<!-- ============ Kopf des Blatts ============ -->
+<text x="110" y="58" font-size="30" font-weight="800" fill="#1a1a1a">V1 Startbild · Hero-Komposition der Seite für Fensterbauer</text>
+<text x="110" y="88" font-size="15" fill="#4a4a4a">Wireframe Phase L · /fuer-fensterbauer/ (eingebettet auch /#fensterbauer) · Stufe 4 inszeniert, Typ T1 Bühne · Gewicht 0,82 Bildschirmhöhen · Planungsdokument, nichts programmiert</text>
+<text x="110" y="110" font-size="13" fill="#6b6b6b">Grundlage: 09-abschnitte/fb-01-startbild.md (C.2–C.5, E, F), 08-zielarchitektur.md 8.3.2 b, 09-abschnitte/rh-01-kopf.md, 09-abschnitte/fb-02-leiste-elementarten.md · 11-designsystem.md und 12-storyboard.md lagen nicht vor · Lagen geplant, nicht gemessen · Stand 24.10.2026</text>
+
+<!-- ============ Schreibtisch: Überschrift und Maße ============ -->
+<text x="110" y="146" font-size="20" font-weight="800" fill="#1a1a1a">Schreibtisch 1280 × 800</text>
+<text x="370" y="146" font-size="13" fill="#4a4a4a">12 Spalten in 1040 px (x 120–1160) · Split 5 : 7 · Maßstab 1 : 1</text>
+
+<!-- Breitenmaße (y 176 / 206 / 236), x global = lokal + 110 -->
+<path class="dim" d="M110 170V182M663 170V182M1390 170V182M110 176H1390"/>
+<text class="dtm" x="386" y="171">Textzone 553 · 43 % B</text>
+<text class="dtm" x="1026" y="171">Bildzone 727 · 57 % B</text>
+<path class="dim" d="M230 200V212M813 200V212M230 206H813M1010 200V212M1230 200V212M1010 206H1230M1246 200V212M1390 200V212M1246 206H1390"/>
+<text class="dtm" x="521" y="201">h1 583 · 45,5 % B</text>
+<text class="dtm" x="1120" y="201">Stapel 220 · 17,2 % B</text>
+<text class="dtm" x="1318" y="201">Bullauge 11 % B</text>
+<path class="dim" d="M110 230V242M230 230V242M110 236H230M643 230V242M230 236H643M663 230V242M663 236H1390M1390 230V242"/>
+<text class="dtm" x="170" y="231">Rand 120 · 9,4 %</text>
+<text class="dtm" x="436" y="231">Textspalte 5 Sp. · 413 · 32 % B</text>
+<text class="dtm" x="1026" y="231">Foto randlos 553–1280 · 727 · 56,8 % B</text>
+
+<!-- Höhenmaße links (gedrehte Beschriftung), y global = lokal + 250 -->
+<path class="dim" d="M90 250H102M90 314H102M90 491H102M90 772H102M90 954H102M90 1050H102M96 250V1050"/>
+<text class="dtm" transform="translate(90 282) rotate(-90)">Kopf 8 %</text>
+<text class="dtm" transform="translate(90 402) rotate(-90)">177 · 22 %</text>
+<text class="dtm" transform="translate(90 631) rotate(-90)">Textblock 281 · 35 % H</text>
+<text class="dtm" transform="translate(90 863) rotate(-90)">182 · 23 %</text>
+<text class="dtm" transform="translate(90 1002) rotate(-90)">V2 96 · 12 %</text>
+<path class="dim" d="M60 250H72M60 812H72M60 1010H72M66 250V1010"/>
+<text class="dtm" transform="translate(60 531) rotate(-90)">Foto deckend 0–562 · 70 % H</text>
+<text class="dtm" transform="translate(60 911) rotate(-90)">Auslauf 198</text>
+<path class="dim" d="M30 250H42M30 1010H42M36 250V1010"/>
+<text class="dtm" transform="translate(30 630) rotate(-90)">Foto 0–760 · 95 % H (Leiste deckt den Fuß ab 704)</text>
+
+<!-- ============ Schreibtisch 1280 × 800 ============ -->
+<g id="schreibtisch" transform="translate(110 250)">
+  <g clip-path="url(#clipD)">
+    <!-- Z 0 Grund (r) -->
+    <rect width="1280" height="800" fill="#1a1a1a"/>
+    <!-- Z 0 Lichtkeil (q) -->
+    <polygon points="1187.9,194.3 1270.1,281.7 708.5,864.8 571.5,719.2" fill="url(#gKeilD)" filter="url(#weich)"/>
+    <!-- Z 20 Foto (f) mit Maske links und unten -->
+    <g mask="url(#mDl)"><g mask="url(#mDu)">
+      <rect x="553" y="0" width="727" height="760" fill="#343434"/>
+      <rect x="553" y="0" width="226" height="760" fill="#292929"/>
+      <path d="M620 0V760M700 0V760M553 180H779M553 420H779" stroke="#323232" stroke-width="2"/>
+      <rect x="779" y="0" width="357" height="114" fill="#3b3b3b"/>
+      <path d="M779 30H1136M779 60H1136M779 90H1136M870 0V114M960 0V114M1050 0V114" stroke="#474747" stroke-width="2"/>
+      <ellipse cx="975" cy="196" rx="86" ry="88" fill="#3d3d3d" stroke="#4a4a4a" stroke-width="3"/>
+      <!-- Bullauge mit Ausblick (g) -->
+      <ellipse cx="1240" cy="240" rx="104" ry="185" fill="#4b4b4b" stroke="#7a7a7a" stroke-width="2"/>
+      <ellipse cx="1240" cy="238" rx="62" ry="137" fill="url(#gErde)"/>
+      <!-- Figur (i) -->
+      <path d="M872 332C905 302 992 298 1036 320L1104 378C1150 416 1212 470 1250 540L1280 596V760H850C838 640 836 520 846 432C850 382 858 352 872 332Z" fill="#5f5f5f" stroke="#7a7a7a" stroke-width="2"/>
+      <path d="M1012 344C1062 322 1104 290 1130 230" stroke="#5f5f5f" stroke-width="40" stroke-linecap="round" fill="none"/>
+      <path d="M1046 426C1088 414 1124 402 1156 388" stroke="#5f5f5f" stroke-width="36" stroke-linecap="round" fill="none"/>
+      <circle cx="1134" cy="220" r="19" fill="#6e6e6e"/>
+      <circle cx="1162" cy="384" r="18" fill="#6e6e6e"/>
+      <path d="M1150 194L1202 344" stroke="#9c9c9c" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="947" cy="268" rx="58" ry="62" fill="#585858" stroke="#848484" stroke-width="2"/>
+      <ellipse cx="955" cy="336" rx="72" ry="18" fill="none" stroke="#7a7a7a" stroke-width="3"/>
+      <!-- Schwebendes (j): Papierflieger, Handy, Bleistift -->
+      <path d="M772 138L851 117L806 154L812 140Z" fill="#8e8e8e"/>
+      <rect x="770" y="282" width="38" height="58" rx="5" transform="rotate(-28 789 311)" fill="#3a3a3a" stroke="#8a8a8a" stroke-width="2"/>
+      <path d="M804 416L860 467" stroke="#8e8e8e" stroke-width="6" stroke-linecap="round"/>
+    </g></g>
+    <!-- Z 20 Erdlicht (g), steht still -->
+    <ellipse cx="1229" cy="238" rx="160" ry="200" fill="url(#gErdlicht)"/>
+    <!-- Z 20 Maßlinie (h), Wertpille als zweite Glasfläche -->
+    <path d="M1258 101V375M1249 101H1267M1249 375H1267" stroke="#d0d0d0" stroke-width="1.5"/>
+    <rect x="1246" y="196" width="24" height="84" rx="12" fill="#161616" fill-opacity=".75" stroke="#bdbdbd" stroke-opacity=".6"/>
+    <text transform="translate(1262.5 238) rotate(-90)" text-anchor="middle" font-size="13" font-weight="600" fill="#e6e6e6">1.200 mm</text>
+    <!-- Z 25 Glas-Stapel (d, e), Endbild: Meldung 3 vorn -->
+    <text x="900" y="89" font-size="13" font-weight="600" letter-spacing="1.56" fill="#c4c4c4">BEISPIEL</text>
+    <rect x="913.2" y="124.7" width="193.6" height="56.3" rx="16" fill="#262626" fill-opacity=".6" stroke="#4a4a4a" stroke-opacity=".7"/>
+    <rect x="906.6" y="111.8" width="206.8" height="60.2" rx="17" fill="#282828" fill-opacity=".85" stroke="#4d4d4d"/>
+    <rect x="900" y="98" width="220" height="64" rx="18" fill="#2c2c2c" fill-opacity=".93" stroke="#555"/>
+    <path d="M918 98.5H1102" stroke="#fff" stroke-opacity=".35"/>
+    <path d="M1102 98.5A17.5 17.5 0 0 1 1119.5 116V144A17.5 17.5 0 0 1 1102 161.5" stroke="#4a7fe6" stroke-width="1.5" fill="none"/>
+    <circle cx="916" cy="117" r="6" fill="none" stroke="#d6d6d6" stroke-opacity=".3" stroke-width="4"/>
+    <circle cx="916" cy="117" r="4" fill="#d6d6d6"/>
+    <text x="930" y="122" font-size="15" font-weight="800" fill="#f2f2f2">Klärungsliste</text>
+    <text x="930" y="143" font-size="13" font-weight="500" fill="#c8c8c8">2 Punkte offen</text>
+    <!-- V2 Leiste (s), deckt den ausgeblendeten Fotofuß; Lichtkeil läuft darüber -->
+    <rect x="0" y="704" width="1280" height="176" fill="#1a1a1a"/>
+    <g clip-path="url(#clipDV2)">
+      <polygon points="1187.9,194.3 1270.1,281.7 708.5,864.8 571.5,719.2" fill="url(#gKeilD)" filter="url(#weich)"/>
+      <ellipse cx="640" cy="704" rx="90" ry="184" transform="rotate(10 640 704)" fill="url(#gKegel)"/>
+    </g>
+    <path d="M0 704.5H1280" stroke="#4a4a4a"/>
+    <use href="#kachel" x="-60" y="732" width="96" height="96" opacity=".3"/>
+    <use href="#kachel" x="68" y="732" width="96" height="96" opacity=".4"/>
+    <use href="#kachel" x="196" y="732" width="96" height="96" opacity=".5"/>
+    <use href="#kachel" x="324" y="732" width="96" height="96" opacity=".65"/>
+    <use href="#kachel" x="452" y="732" width="96" height="96" opacity=".8"/>
+    <use href="#kachel" x="580" y="720" width="120" height="120"/>
+    <use href="#kachel" x="732" y="732" width="96" height="96" opacity=".8"/>
+    <use href="#kachel" x="860" y="732" width="96" height="96" opacity=".65"/>
+    <use href="#kachel" x="988" y="732" width="96" height="96" opacity=".5"/>
+    <use href="#kachel" x="1116" y="732" width="96" height="96" opacity=".4"/>
+    <use href="#kachel" x="1244" y="732" width="96" height="96" opacity=".3"/>
+    <path d="M560 705H720" stroke="#4a7fe6" stroke-width="2.5"/>
+    <!-- Z 28 Scrim (c) -->
+    <rect width="1280" height="96" fill="url(#gScrim)"/>
+    <!-- Z 30 Bedienschicht -->
+    <text x="120" y="254" font-size="13" font-weight="600" fill="#d9d9d9" textLength="342" lengthAdjust="spacing">FÜR FENSTERBAUER UND FENSTERHÄNDLER</text>
+    <path d="M120 259.5H462" stroke="#d9d9d9" stroke-width="1.5" stroke-dasharray="2 3"/>
+    <g font-size="40" font-weight="800" fill="#f2f2f2">
+      <text x="120" y="302" textLength="366" lengthAdjust="spacing">Ihr eigener Fenster-</text>
+      <text x="120" y="344" textLength="452" lengthAdjust="spacing">Konfigurator, unter Ihrer</text>
+      <text x="580" y="344" textLength="119.5" lengthAdjust="spacing">Marke</text>
+    </g>
+    <path d="M580 351H699.5" stroke="#f2f2f2" stroke-width="2" stroke-dasharray="2 3"/>
+    <g font-size="13" font-weight="700" fill="#ececec">
+      <rect x="120" y="377" width="109.9" height="36" rx="18" fill="#2e2e2e"/>
+      <path d="M130 396L132.5 399.5L136 390" stroke="#d9d9d9" stroke-width="2" fill="none"/>
+      <text x="144" y="400">Ihre Domain</text>
+      <rect x="235.9" y="377" width="101.7" height="36" rx="18" fill="#2e2e2e"/>
+      <path d="M245.9 396L248.4 399.5L251.9 390" stroke="#d9d9d9" stroke-width="2" fill="none"/>
+      <text x="259.9" y="400">Ihre Marke</text>
+      <rect x="343.6" y="377" width="127.5" height="36" rx="18" fill="#2e2e2e"/>
+      <path d="M353.6 396L356.1 399.5L359.6 390" stroke="#d9d9d9" stroke-width="2" fill="none"/>
+      <text x="367.6" y="400">PDF per E-Mail</text>
+    </g>
+    <text x="120" y="442" font-size="13" font-weight="600" textLength="336" lengthAdjust="spacing"><tspan fill="#f2f2f2">Ab 29 € im Monat</tspan><tspan fill="#9b9b9b"> netto, plus Einrichtung · vorläufig</tspan></text>
+    <!-- CTA primär (o) und Ring (p) -->
+    <rect x="120" y="470" width="212" height="52" rx="26" fill="#e8890c"/>
+    <text x="144" y="502" font-size="17" font-weight="700" fill="#161616">Pakete ansehen</text>
+    <circle cx="304" cy="496" r="13" fill="none" stroke="#161616" stroke-width="1.6"/>
+    <path d="M297 496H310M305 491L310 496L305 501" stroke="#161616" stroke-width="1.8" fill="none"/>
+    <rect x="345" y="471" width="210" height="50" rx="25" fill="none" stroke="#9b9b9b" stroke-width="2"/>
+    <text x="450" y="502" text-anchor="middle" font-size="17" font-weight="700" fill="#ececec">Selbst ausprobieren</text>
+    <text x="236" y="549" font-size="13" font-weight="700" fill="#e8890c">CTA primär · 212 × 52 · x 120–332, y 470–522</text>
+    <!-- Z 40 Kopf (a, b) -->
+    <rect x="121" y="17" width="30" height="30" rx="7" fill="#0d0d0d" stroke="#e6e6e6" stroke-width="1.5"/>
+    <text x="162" y="39" font-size="17" fill="#f2f2f2" textLength="88" lengthAdjust="spacingAndGlyphs"><tspan font-weight="900">eezi</tspan><tspan font-weight="500">frames</tspan></text>
+    <g font-size="15" font-weight="600" fill="#d0d0d0">
+      <text x="581" y="37">So funktioniert es</text>
+      <text x="739" y="37">Ablauf</text>
+      <text x="816" y="37">Fragen</text>
+      <text x="915" y="37">Anmelden</text>
+    </g>
+    <rect x="1011" y="11" width="148" height="42" rx="21" fill="none" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="1075" y="37" text-anchor="middle" font-size="13" font-weight="700" fill="#8a8a8a">Pakete ansehen</text>
+  </g>
+
+  <!-- Lichtquelle -->
+  <use href="#sonne" x="1213" y="222" width="32" height="32"/>
+
+  <!-- Elementmarken (Schlüssel in der Tabelle) -->
+  <g class="tg" transform="translate(258 23)"><rect width="18" height="18" rx="4"/><text x="9" y="13">a</text></g>
+  <g class="tg" transform="translate(1138 23)"><rect width="18" height="18" rx="4"/><text x="9" y="13">b</text></g>
+  <g class="tg" transform="translate(300 70)"><rect width="18" height="18" rx="4"/><text x="9" y="13">c</text></g>
+  <g class="tg" transform="translate(994 75)"><rect width="18" height="18" rx="4"/><text x="9" y="13">d</text></g>
+  <g class="tg" transform="translate(1124 150)"><rect width="18" height="18" rx="4"/><text x="9" y="13">e</text></g>
+  <g class="tg" transform="translate(575 590)"><rect width="18" height="18" rx="4"/><text x="9" y="13">f</text></g>
+  <g class="tg" transform="translate(1150 120)"><rect width="18" height="18" rx="4"/><text x="9" y="13">g</text></g>
+  <g class="tg" transform="translate(1250 382)"><rect width="18" height="18" rx="4"/><text x="9" y="13">h</text></g>
+  <g class="tg" transform="translate(938 336)"><rect width="18" height="18" rx="4"/><text x="9" y="13">i</text></g>
+  <g class="tg" transform="translate(752 160)"><rect width="18" height="18" rx="4"/><text x="9" y="13">j</text></g>
+  <g class="tg" transform="translate(474 240)"><rect width="18" height="18" rx="4"/><text x="9" y="13">k</text></g>
+  <g class="tg" transform="translate(712 325)"><rect width="18" height="18" rx="4"/><text x="9" y="13">l</text></g>
+  <g class="tg" transform="translate(480 386)"><rect width="18" height="18" rx="4"/><text x="9" y="13">m</text></g>
+  <g class="tg" transform="translate(466 428)"><rect width="18" height="18" rx="4"/><text x="9" y="13">n</text></g>
+  <g class="tg" transform="translate(314 450)"><rect width="18" height="18" rx="4"/><text x="9" y="13">o</text></g>
+  <g class="tg" transform="translate(538 450)"><rect width="18" height="18" rx="4"/><text x="9" y="13">p</text></g>
+  <g class="tg" transform="translate(760 650)"><rect width="18" height="18" rx="4"/><text x="9" y="13">q</text></g>
+  <g class="tg" transform="translate(16 600)"><rect width="18" height="18" rx="4"/><text x="9" y="13">r</text></g>
+  <g class="tg" transform="translate(16 708)"><rect width="18" height="18" rx="4"/><text x="9" y="13">s</text></g>
+
+  <!-- Blickpfad (erwartet) -->
+  <path class="bph" d="M1203 141L1145 94"/><path class="bpw" d="M1203 141L1145 94"/>
+  <path class="bph" d="M1124 97L959 255"/><path class="bpw" d="M1124 97L959 255"/>
+  <path class="bph" d="M930 254Q520 200 114 226"/><path class="bpw" d="M930 254Q520 200 114 226"/>
+  <path class="bph" d="M98 242V480"/><path class="bpw" d="M98 242V480"/>
+  <path class="bph" d="M111 505L627 757"/><path class="bpw" d="M111 505L627 757"/>
+  <circle cx="98" cy="395" r="3.5" fill="#fff" stroke="#111"/>
+  <circle cx="98" cy="437" r="3.5" fill="#fff" stroke="#111"/>
+  <g class="bp" transform="translate(1215 150)"><circle r="15"/><text y="5">1</text></g>
+  <g class="bp" transform="translate(1132 84)"><circle r="15"/><text y="5">2a</text></g>
+  <g class="bp" transform="translate(947 268)"><circle r="15"/><text y="5">2b</text></g>
+  <g class="bp" transform="translate(98 226)"><circle r="15"/><text y="5">3</text></g>
+  <g class="bp" transform="translate(98 496)"><circle r="15"/><text y="5">4</text></g>
+  <g class="bp" transform="translate(640 765)"><circle r="15"/><text y="5">5</text></g>
+
+  <rect x="0.5" y="0.5" width="1279" height="799" fill="none" stroke="#8a8a8a"/>
+</g>
+
+<!-- Z-Leiter unter dem Schreibtisch -->
+<text x="110" y="1076" font-size="13" fill="#2a2a2a"><tspan font-weight="800">Z-Stufen (beide Breiten gleich): </tspan>Z 40 Kopf a b · Z 30 Bedienschicht k–p · Z 28 Scrim c · Z 25 Glas d e (dazu Wertpille von h) · Z 20 Bild f g h i j · Z 0 Grund q r · V2 eigener Abschnitt s</text>
+
+<!-- Notizen rechts neben dem Schreibtisch -->
+<g transform="translate(1402 0)">
+  <text class="t12" x="0" y="272"><tspan font-weight="700" fill="#1a1a1a">b · Kopf-Ring</tspan></text>
+  <text class="t12" x="0" y="289">verborgen, bis die</text>
+  <text class="t12" x="0" y="306">Cream unter dem</text>
+  <text class="t12" x="0" y="323">Kopf ist (N4)</text>
+  <text class="blb" x="0" y="470">g · Lichtquelle</text>
+  <text class="bl" x="0" y="487">Erdlicht im Bullauge</text>
+  <text class="bl" x="0" y="504">(im Bild, Z 20)</text>
+  <text class="bl" x="0" y="521">Licht fällt nach</text>
+  <text class="bl" x="0" y="538">unten links:</text>
+  <text class="bl" x="0" y="555">x −0,6 · y 0,8</text>
+  <path d="M118 575L64 647" stroke="#3566d6" stroke-width="3" marker-end="url(#pfeilB)"/>
+  <use href="#sonne" x="110" y="560" width="22" height="22"/>
+  <text class="bl" x="0" y="680">keine Schatten,</text>
+  <text class="bl" x="0" y="697">kein Textschatten</text>
+</g>
+
+<!-- ============ Telefon: Überschrift und Maße ============ -->
+<text x="1586" y="146" font-size="20" font-weight="800" fill="#1a1a1a">Telefon 390 × 844</text>
+<text x="1788" y="146" font-size="13" fill="#4a4a4a">zuerst · 4 Spalten, Rand 16</text>
+
+<!-- Breitenmaße, x global = lokal + 1720 -->
+<path class="dim" d="M1736 170V182M1948 170V182M1736 176H1948"/>
+<text class="dtm" x="1842" y="171">Cream / Ring 212 · 54 % B</text>
+<path class="dim" d="M1736 200V212M1956 200V212M1736 206H1956M1980 200V212M2110 200V212M1980 206H2110"/>
+<text class="dtm" x="1846" y="201">Stapel 220 · 56 % B</text>
+<text class="dtm" x="2045" y="201">Bullauge 33 % B</text>
+<path class="dim" d="M1720 230V242M1736 230V242M2094 230V242M2110 230V242M1720 236H2110"/>
+<text class="dtm" x="1915" y="231">Inhalt 358 · 91,8 % B · Spalte 77,5, Rinne 16</text>
+
+<!-- Höhenmaße links, y global = lokal + 250 -->
+<path class="dim" d="M1700 250H1712M1700 306H1712M1700 570H1712M1700 907H1712M1700 940H1712M1700 1084H1712M1706 250V306M1706 570V907M1706 940V1084"/>
+<text class="dtm" transform="translate(1700 278) rotate(-90)">6,6 %</text>
+<text class="dtm" transform="translate(1700 738) rotate(-90)">Textblock 337 · 40 % H</text>
+<text class="dtm" transform="translate(1700 1012) rotate(-90)">V2 144 · 17 %</text>
+<path class="dim" d="M1670 250H1682M1670 565H1682M1670 670H1682M1676 250V670"/>
+<text class="dtm" transform="translate(1670 407) rotate(-90)">Foto deckend 315 · 37 %</text>
+<text class="dtm" transform="translate(1670 617) rotate(-90)">Auslauf</text>
+<path class="dim" d="M1640 250H1652M1640 670H1652M1646 250V670"/>
+<text class="dtm" transform="translate(1640 460) rotate(-90)">Foto 0–420 · 50 % H</text>
+<path class="dim" d="M1610 250H1622M1610 914H1622M1616 250V914"/>
+<text class="dtm" transform="translate(1610 582) rotate(-90)">bei 390 × 664 sichtbar · 79 %: Kicker bis Ring</text>
+<path class="dim" d="M1580 250H1592M1580 1094H1592M1586 250V1094"/>
+<text class="dtm" transform="translate(1580 672) rotate(-90)">844 · 100 % H</text>
+<path d="M1600 914H1720" stroke="#555" stroke-dasharray="8 6"/>
+
+<!-- ============ Telefon 390 × 844 ============ -->
+<g id="telefon" transform="translate(1720 250)">
+  <g clip-path="url(#clipP)">
+    <!-- Z 0 Grund (r) und Lichtkeil (q) -->
+    <rect width="390" height="844" fill="#1a1a1a"/>
+    <polygon points="286.8,140.6 403.2,169.4 292.1,786 97.9,738" fill="url(#gKeilP)" filter="url(#weich)"/>
+    <!-- Z 20 Foto (f), Telefonzuschnitt nach C.3 -->
+    <g mask="url(#mPu)">
+      <rect width="390" height="420" fill="#343434"/>
+      <rect width="390" height="56" fill="#252525"/>
+      <path d="M0 28H390M90 0V56M190 0V56M290 0V56" stroke="#2f2f2f" stroke-width="2"/>
+      <rect x="0" y="60" width="252" height="130" fill="#3a3a3a"/>
+      <path d="M50 60V190M110 60V190M170 60V190M230 60V190M0 100H252M0 150H252" stroke="#444" stroke-width="2"/>
+      <ellipse cx="345" cy="155" rx="85" ry="92" fill="#4b4b4b" stroke="#7a7a7a" stroke-width="2"/>
+      <ellipse cx="345" cy="155" rx="60" ry="68" fill="url(#gErde)"/>
+      <path d="M198 302C214 280 290 274 322 292L372 330C384 340 390 350 390 362V420H166C160 380 170 330 198 302Z" fill="#5f5f5f" stroke="#7a7a7a" stroke-width="2"/>
+      <path d="M300 294C314 252 304 190 292 132" stroke="#5f5f5f" stroke-width="26" stroke-linecap="round" fill="none"/>
+      <path d="M318 312C328 292 332 272 334 248" stroke="#5f5f5f" stroke-width="24" stroke-linecap="round" fill="none"/>
+      <circle cx="289" cy="122" r="13" fill="#6e6e6e"/>
+      <circle cx="335" cy="240" r="13" fill="#6e6e6e"/>
+      <path d="M282 108L338 250" stroke="#9c9c9c" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="258" cy="235" rx="38" ry="36" fill="#585858" stroke="#848484" stroke-width="2"/>
+      <ellipse cx="262" cy="282" rx="46" ry="11" fill="none" stroke="#7a7a7a" stroke-width="3"/>
+      <path d="M38 214L100 202L66 230L70 216Z" fill="#8e8e8e"/>
+      <rect x="122" y="236" width="26" height="42" rx="4" transform="rotate(-25 135 257)" fill="#3a3a3a" stroke="#8a8a8a" stroke-width="2"/>
+      <path d="M140 294L188 280" stroke="#8e8e8e" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <!-- Z 20 Erdlicht (g) und Maßlinie (h) -->
+    <circle cx="345" cy="155" r="128" fill="url(#gErdlicht)"/>
+    <path d="M374 87V223M365 87H383M365 223H383" stroke="#d0d0d0" stroke-width="1.5"/>
+    <rect x="362" y="113" width="24" height="84" rx="12" fill="#161616" fill-opacity=".75" stroke="#bdbdbd" stroke-opacity=".6"/>
+    <text transform="translate(378.5 155) rotate(-90)" text-anchor="middle" font-size="13" font-weight="600" fill="#e6e6e6">1.200 mm</text>
+    <!-- Z 25 Glas-Stapel (d, e) -->
+    <text x="18" y="85" font-size="13" font-weight="600" letter-spacing="1.56" fill="#c4c4c4">BEISPIEL</text>
+    <rect x="29.2" y="120.7" width="193.6" height="56.3" rx="16" fill="#262626" fill-opacity=".6" stroke="#4a4a4a" stroke-opacity=".7"/>
+    <rect x="22.6" y="107.8" width="206.8" height="60.2" rx="17" fill="#282828" fill-opacity=".85" stroke="#4d4d4d"/>
+    <rect x="16" y="94" width="220" height="64" rx="18" fill="#2c2c2c" fill-opacity=".93" stroke="#555"/>
+    <path d="M34 94.5H218" stroke="#fff" stroke-opacity=".35"/>
+    <path d="M218 94.5A17.5 17.5 0 0 1 235.5 112V140A17.5 17.5 0 0 1 218 157.5" stroke="#4a7fe6" stroke-width="1.5" fill="none"/>
+    <circle cx="32" cy="113" r="6" fill="none" stroke="#d6d6d6" stroke-opacity=".3" stroke-width="4"/>
+    <circle cx="32" cy="113" r="4" fill="#d6d6d6"/>
+    <text x="46" y="118" font-size="15" font-weight="800" fill="#f2f2f2">Klärungsliste</text>
+    <text x="46" y="139" font-size="13" font-weight="500" fill="#c8c8c8">2 Punkte offen</text>
+    <!-- V2 Leiste (s) -->
+    <g clip-path="url(#clipPV2)">
+      <polygon points="286.8,140.6 403.2,169.4 292.1,786 97.9,738" fill="url(#gKeilP)" filter="url(#weich)"/>
+      <ellipse cx="195" cy="690" rx="68" ry="150" transform="rotate(10 195 690)" fill="url(#gKegel)"/>
+    </g>
+    <path d="M0 690.5H390M0 833.5H390" stroke="#4a4a4a"/>
+    <use href="#kachel" x="-42" y="713" width="72" height="72" opacity=".4"/>
+    <use href="#kachel" x="54" y="713" width="72" height="72" opacity=".75"/>
+    <use href="#kachel" x="150" y="704" width="90" height="90"/>
+    <use href="#kachel" x="264" y="713" width="72" height="72" opacity=".75"/>
+    <use href="#kachel" x="360" y="713" width="72" height="72" opacity=".4"/>
+    <path d="M135 691H255" stroke="#4a7fe6" stroke-width="2.5"/>
+    <text x="195" y="817" text-anchor="middle" font-size="15" font-weight="700" fill="#bdbdbd">Name der Elementart</text>
+    <!-- Z 28 Scrim (c) -->
+    <rect width="390" height="96" fill="url(#gScrim)"/>
+    <!-- Z 30 Bedienschicht -->
+    <text x="16" y="333" font-size="13" font-weight="600" fill="#d9d9d9" textLength="342" lengthAdjust="spacing">FÜR FENSTERBAUER UND FENSTERHÄNDLER</text>
+    <path d="M16 338.5H358" stroke="#d9d9d9" stroke-width="1.5" stroke-dasharray="2 3"/>
+    <g font-size="32" font-weight="800" fill="#f2f2f2">
+      <text x="16" y="370" textLength="293" lengthAdjust="spacing">Ihr eigener Fenster-</text>
+      <text x="16" y="404" textLength="199" lengthAdjust="spacing">Konfigurator,</text>
+      <text x="16" y="437" textLength="154" lengthAdjust="spacing">unter Ihrer</text>
+      <text x="178.4" y="437" textLength="95.6" lengthAdjust="spacing">Marke</text>
+    </g>
+    <path d="M178.4 442.5H274" stroke="#f2f2f2" stroke-width="2" stroke-dasharray="2 3"/>
+    <g font-size="13" font-weight="700" fill="#ececec">
+      <rect x="16" y="461" width="109.9" height="36" rx="18" fill="#2e2e2e"/>
+      <path d="M26 480L28.5 483.5L32 474" stroke="#d9d9d9" stroke-width="2" fill="none"/>
+      <text x="40" y="484">Ihre Domain</text>
+      <rect x="131.9" y="461" width="101.7" height="36" rx="18" fill="#2e2e2e"/>
+      <path d="M141.9 480L144.4 483.5L147.9 474" stroke="#d9d9d9" stroke-width="2" fill="none"/>
+      <text x="155.9" y="484">Ihre Marke</text>
+      <rect x="239.6" y="461" width="127.5" height="36" rx="18" fill="#2e2e2e"/>
+      <path d="M249.6 480L252.1 483.5L255.6 474" stroke="#d9d9d9" stroke-width="2" fill="none"/>
+      <text x="263.6" y="484">PDF per E-Mail</text>
+    </g>
+    <text x="16" y="522" font-size="13" font-weight="600" textLength="336" lengthAdjust="spacing"><tspan fill="#f2f2f2">Ab 29 € im Monat</tspan><tspan fill="#9b9b9b"> netto, plus Einrichtung · vorläufig</tspan></text>
+    <rect x="16" y="541" width="212" height="52" rx="26" fill="#e8890c"/>
+    <text x="40" y="573" font-size="17" font-weight="700" fill="#161616">Pakete ansehen</text>
+    <circle cx="200" cy="567" r="13" fill="none" stroke="#161616" stroke-width="1.6"/>
+    <path d="M193 567H206M201 562L206 567L201 572" stroke="#161616" stroke-width="1.8" fill="none"/>
+    <rect x="17" y="606" width="210" height="50" rx="25" fill="none" stroke="#9b9b9b" stroke-width="2"/>
+    <text x="122" y="637" text-anchor="middle" font-size="17" font-weight="700" fill="#ececec">Selbst ausprobieren</text>
+    <text x="322" y="572" font-size="13" font-weight="700" fill="#e8890c">CTA</text>
+    <!-- Z 40 Kopf (a, b) -->
+    <rect x="17" y="15" width="26" height="26" rx="6" fill="#0d0d0d" stroke="#e6e6e6" stroke-width="1.5"/>
+    <text x="52" y="34" font-size="17" fill="#f2f2f2" textLength="88" lengthAdjust="spacingAndGlyphs"><tspan font-weight="900">eezi</tspan><tspan font-weight="500">frames</tspan></text>
+    <rect x="176.75" y="6.75" width="148.5" height="42.5" rx="21" fill="none" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="240" y="33" text-anchor="middle" font-size="13" font-weight="700" fill="#8a8a8a">Pakete ansehen</text>
+    <rect x="343" y="22" width="18" height="2" fill="#e6e6e6"/>
+    <rect x="343" y="32" width="18" height="2" fill="#e6e6e6"/>
+    <!-- Unterkante bei 390 × 664 -->
+    <path d="M0 664H390" stroke="#fff" stroke-opacity=".8" stroke-width="1.5" stroke-dasharray="8 6"/>
+  </g>
+
+  <use href="#sonne" x="324" y="152" width="32" height="32"/>
+
+  <!-- Elementmarken -->
+  <g class="tg" transform="translate(142 19)"><rect width="18" height="18" rx="4"/><text x="9" y="13">a</text></g>
+  <g class="tg" transform="translate(302 19)"><rect width="18" height="18" rx="4"/><text x="9" y="13">b</text></g>
+  <g class="tg" transform="translate(150 58)"><rect width="18" height="18" rx="4"/><text x="9" y="13">c</text></g>
+  <g class="tg" transform="translate(100 71)"><rect width="18" height="18" rx="4"/><text x="9" y="13">d</text></g>
+  <g class="tg" transform="translate(240 96)"><rect width="18" height="18" rx="4"/><text x="9" y="13">e</text></g>
+  <g class="tg" transform="translate(196 182)"><rect width="18" height="18" rx="4"/><text x="9" y="13">f</text></g>
+  <g class="tg" transform="translate(276 70)"><rect width="18" height="18" rx="4"/><text x="9" y="13">g</text></g>
+  <g class="tg" transform="translate(350 228)"><rect width="18" height="18" rx="4"/><text x="9" y="13">h</text></g>
+  <g class="tg" transform="translate(230 276)"><rect width="18" height="18" rx="4"/><text x="9" y="13">i</text></g>
+  <g class="tg" transform="translate(8 240)"><rect width="18" height="18" rx="4"/><text x="9" y="13">j</text></g>
+  <path class="ld" d="M361 328H394M314 361H394M370 479H394M355 518H394" stroke="#888"/>
+  <g class="tg" transform="translate(394 319)"><rect width="18" height="18" rx="4"/><text x="9" y="13">k</text></g>
+  <g class="tg" transform="translate(394 352)"><rect width="18" height="18" rx="4"/><text x="9" y="13">l</text></g>
+  <g class="tg" transform="translate(394 470)"><rect width="18" height="18" rx="4"/><text x="9" y="13">m</text></g>
+  <g class="tg" transform="translate(394 509)"><rect width="18" height="18" rx="4"/><text x="9" y="13">n</text></g>
+  <g class="tg" transform="translate(234 558)"><rect width="18" height="18" rx="4"/><text x="9" y="13">o</text></g>
+  <g class="tg" transform="translate(234 622)"><rect width="18" height="18" rx="4"/><text x="9" y="13">p</text></g>
+  <g class="tg" transform="translate(300 668)"><rect width="18" height="18" rx="4"/><text x="9" y="13">q</text></g>
+  <g class="tg" transform="translate(350 600)"><rect width="18" height="18" rx="4"/><text x="9" y="13">r</text></g>
+  <g class="tg" transform="translate(8 694)"><rect width="18" height="18" rx="4"/><text x="9" y="13">s</text></g>
+
+  <!-- Blickpfad (erwartet) -->
+  <path class="bph" d="M310 124L267 130"/><path class="bpw" d="M310 124L267 130"/>
+  <path class="bph" d="M251 147L257 219"/><path class="bpw" d="M251 147L257 219"/>
+  <path class="bph" d="M272 244C340 268 386 306 381 345S366 372 352 380"/><path class="bpw" d="M272 244C340 268 386 306 381 345S366 372 352 380"/>
+  <path class="bph" d="M350 407C388 440 392 520 314 558"/><path class="bpw" d="M350 407C388 440 392 520 314 558"/>
+  <path class="bph" d="M292 580L204 735"/><path class="bpw" d="M292 580L204 735"/>
+  <g class="bp" transform="translate(325 122)"><circle r="15"/><text y="5">1</text></g>
+  <g class="bp" transform="translate(250 132)"><circle r="15"/><text y="5">2a</text></g>
+  <g class="bp" transform="translate(258 235)"><circle r="15"/><text y="5">2b</text></g>
+  <g class="bp" transform="translate(340 392)"><circle r="15"/><text y="5">3</text></g>
+  <g class="bp" transform="translate(300 567)"><circle r="15"/><text y="5">4</text></g>
+  <g class="bp" transform="translate(195 749)"><circle r="15"/><text y="5">5</text></g>
+
+  <rect x="0.5" y="0.5" width="389" height="843" fill="none" stroke="#8a8a8a"/>
+</g>
+
+<!-- ============ Z-Achse: Seitenansicht Telefon ============ -->
+<text x="2150" y="146" class="h17">Z-Achse · Seitenansicht Telefon</text>
+<text x="2150" y="164" class="t12">y wie links (1 : 1) · Abstand der Stufen nicht maßstäblich</text>
+<path d="M2165 190H2600" stroke="#333" stroke-width="1.5" marker-end="url(#pfeilK)"/>
+<text x="2165" y="184" class="t12">hinten</text>
+<text x="2590" y="184" class="t12" text-anchor="end">vorn · Betrachter</text>
+<text class="zl" x="2185" y="214">Z 0</text><text class="zs" x="2185" y="230">Grund</text>
+<text class="zl" x="2260" y="214">Z 20</text><text class="zs" x="2260" y="230">Bild</text>
+<text class="zl" x="2335" y="214">Z 25</text><text class="zs" x="2335" y="230">Glas</text>
+<text class="zl" x="2410" y="214">Z 28</text><text class="zs" x="2410" y="230">Scrim</text>
+<text class="zl" x="2485" y="214">Z 30</text><text class="zs" x="2485" y="230">Bedienung</text>
+<text class="zl" x="2560" y="214">Z 40</text><text class="zs" x="2560" y="230">Kopf</text>
+<path d="M2150 914H2610" stroke="#888" stroke-dasharray="8 6"/>
+<text x="2606" y="908" class="t12" text-anchor="end">664</text>
+
+<!-- V2 als eigener Abschnitt -->
+<rect x="2172" y="940" width="420" height="144" fill="url(#schraffur)" stroke="#aaa"/>
+<text x="2382" y="1006" class="t13b" text-anchor="middle">V2 Leiste, eigene Ebenen</text>
+<text x="2382" y="1024" class="t12" text-anchor="middle">Grund · Kacheln · Kegel · Name</text>
+<g class="tg" transform="translate(2280 1040)"><rect width="18" height="18" rx="4"/><text x="9" y="13">s</text></g>
+
+<!-- Z 0 -->
+<rect x="2180" y="250" width="10" height="690" fill="#1a1a1a"/>
+<rect x="2194" y="580" width="8" height="432" fill="#4a7fe6" fill-opacity=".75"/>
+<g class="tg" transform="translate(2208 330)"><rect width="18" height="18" rx="4"/><text x="9" y="13">r</text></g>
+<g class="tg" transform="translate(2208 760)"><rect width="18" height="18" rx="4"/><text x="9" y="13">q</text></g>
+<!-- Z 20 -->
+<rect x="2255" y="250" width="10" height="420" fill="url(#gSvF)"/>
+<path d="M2270 313V497M2276 337V473M2282 360V670M2288 450V550" stroke="#777" stroke-width="2"/>
+<path d="M2270 313H2292M2276 337H2292M2282 360H2292M2288 450H2292" stroke="#999" stroke-width="1"/>
+<g class="tg" transform="translate(2270 252)"><rect width="18" height="18" rx="4"/><text x="9" y="13">f</text></g>
+<g class="tg" transform="translate(2294 304)"><rect width="18" height="18" rx="4"/><text x="9" y="13">g</text></g>
+<g class="tg" transform="translate(2294 328)"><rect width="18" height="18" rx="4"/><text x="9" y="13">h</text></g>
+<g class="tg" transform="translate(2294 352)"><rect width="18" height="18" rx="4"/><text x="9" y="13">i</text></g>
+<g class="tg" transform="translate(2294 441)"><rect width="18" height="18" rx="4"/><text x="9" y="13">j</text></g>
+<use href="#sonne" x="2244" y="389" width="32" height="32"/>
+<path d="M2252 418Q2215 480 2201 572" stroke="#3566d6" stroke-width="1.5" stroke-dasharray="5 4" fill="none" marker-end="url(#pfeilB)"/>
+<!-- Z 25 -->
+<rect x="2330" y="322" width="10" height="16" fill="#777"/>
+<rect x="2330" y="344" width="10" height="83" fill="#555"/>
+<path d="M2340.5 344V427" stroke="#4a7fe6" stroke-width="2"/>
+<rect x="2345" y="363" width="6" height="84" fill="none" stroke="#777" stroke-dasharray="3 2"/>
+<g class="tg" transform="translate(2356 316)"><rect width="18" height="18" rx="4"/><text x="9" y="13">d</text></g>
+<g class="tg" transform="translate(2356 360)"><rect width="18" height="18" rx="4"/><text x="9" y="13">e</text></g>
+<g class="tg" transform="translate(2356 420)"><rect width="18" height="18" rx="4"/><text x="9" y="13">h</text></g>
+<!-- Z 28 -->
+<rect x="2405" y="250" width="10" height="96" fill="url(#gSvS)"/>
+<g class="tg" transform="translate(2420 288)"><rect width="18" height="18" rx="4"/><text x="9" y="13">c</text></g>
+<!-- Z 30 -->
+<rect x="2480" y="570" width="10" height="16" fill="#777"/>
+<rect x="2480" y="594" width="10" height="101" fill="#555"/>
+<rect x="2480" y="711" width="10" height="36" fill="#777"/>
+<rect x="2480" y="759" width="10" height="17" fill="#777"/>
+<rect x="2480" y="791" width="10" height="52" fill="#e8890c"/>
+<rect x="2481" y="856" width="8" height="50" fill="none" stroke="#777" stroke-width="2"/>
+<g class="tg" transform="translate(2496 569)"><rect width="18" height="18" rx="4"/><text x="9" y="13">k</text></g>
+<g class="tg" transform="translate(2496 636)"><rect width="18" height="18" rx="4"/><text x="9" y="13">l</text></g>
+<g class="tg" transform="translate(2496 720)"><rect width="18" height="18" rx="4"/><text x="9" y="13">m</text></g>
+<g class="tg" transform="translate(2496 759)"><rect width="18" height="18" rx="4"/><text x="9" y="13">n</text></g>
+<g class="tg" transform="translate(2496 808)"><rect width="18" height="18" rx="4"/><text x="9" y="13">o</text></g>
+<g class="tg" transform="translate(2496 872)"><rect width="18" height="18" rx="4"/><text x="9" y="13">p</text></g>
+<!-- Z 40 -->
+<rect x="2555" y="250" width="10" height="56" fill="#333"/>
+<rect x="2569" y="256" width="6" height="44" fill="none" stroke="#777" stroke-dasharray="3 2"/>
+<g class="tg" transform="translate(2582 252)"><rect width="18" height="18" rx="4"/><text x="9" y="13">a</text></g>
+<g class="tg" transform="translate(2582 282)"><rect width="18" height="18" rx="4"/><text x="9" y="13">b</text></g>
+
+<!-- Tiefe beim Scrollen -->
+<path d="M2255 1098V1104H2350V1098" stroke="#3566d6" stroke-width="1.5" fill="none"/>
+<text x="2302" y="1120" class="blb" text-anchor="middle">× 0,88</text>
+<path d="M2480 1098V1104H2565V1098" stroke="#333" stroke-width="1.5" fill="none"/>
+<text x="2522" y="1120" class="t13b" text-anchor="middle">× 1,0</text>
+<text x="2150" y="1146" class="t12">Scrollen: Bildgruppe (f–j und e) folgt mit 0,88, max. 32 px;</text>
+<text x="2150" y="1163" class="t12">Bedienschicht 1,0; Kopf klebt; die Tiefe endet vor der Leiste.</text>
+
+<!-- ============ Tabelle ============ -->
+<text x="110" y="1224" class="h17">Elemente, Z-Stufen und Lagen</text>
+<text x="380" y="1224" class="t12">px im jeweiligen Bildschirm · Anteile an Breite (B) oder Höhe (H) · TE = Textentwurf</text>
+<g class="t13b">
+  <text x="146" y="1252">Z</text>
+  <text x="186" y="1252">Element und Inhalt</text>
+  <text x="760" y="1252">Schreibtisch 1280 × 800</text>
+  <text x="1130" y="1252">Telefon 390 × 844</text>
+</g>
+<path d="M110 1260H1500" stroke="#555"/>
+
+<g class="t13">
+  <!-- a -->
+  <g class="tg" transform="translate(116 1268)"><rect width="18" height="18" rx="4"/><text x="9" y="13">a</text></g>
+  <text x="146" y="1281" font-weight="700">40</text>
+  <text x="186" y="1277">Kopf: Logo; Schreibtisch Sprungmarken „So funktioniert es“ · „Ablauf“ ·</text>
+  <text x="186" y="1292">„Fragen“ und „Anmelden“; Telefon Menü</text>
+  <text x="760" y="1277">0–1280 × 0–64 · 8 % H · Logo 120–250</text>
+  <text x="760" y="1292">Links 569–1002 · Ziele y 10–54</text>
+  <text x="1130" y="1277">0–390 × 0–56 · 6,6 % H · Logo 16–140</text>
+  <text x="1130" y="1292">Menü 330–374</text>
+  <path d="M110 1298H1500" stroke="#d8d8d3"/>
+  <!-- b -->
+  <g class="tg" transform="translate(116 1302)"><rect width="18" height="18" rx="4"/><text x="9" y="13">b</text></g>
+  <text x="146" y="1315" font-weight="700">40</text>
+  <text x="186" y="1311">Kopf-Ring „Pakete ansehen“ → #pakete: verborgen; erscheint erst, wenn die</text>
+  <text x="186" y="1326">Cream unter dem Kopf verschwunden ist (N4)</text>
+  <text x="760" y="1311">1010–1160 × 10–54 (150 × 44)</text>
+  <text x="1130" y="1311">176–326 × 6–50 (150 × 44)</text>
+  <path d="M110 1332H1500" stroke="#d8d8d3"/>
+  <!-- c -->
+  <g class="tg" transform="translate(116 1336)"><rect width="18" height="18" rx="4"/><text x="9" y="13">c</text></g>
+  <text x="146" y="1349" font-weight="700">28</text>
+  <text x="186" y="1345">Scrim #161616 60 % → 0; der Kopf liegt flächenlos darüber</text>
+  <text x="760" y="1345">0–1280 × 0–96 · 12 % H</text>
+  <text x="1130" y="1345">0–390 × 0–96 · 11,4 % H</text>
+  <path d="M110 1366H1500" stroke="#d8d8d3"/>
+  <!-- d -->
+  <g class="tg" transform="translate(116 1370)"><rect width="18" height="18" rx="4"/><text x="9" y="13">d</text></g>
+  <text x="146" y="1383" font-weight="700">25</text>
+  <text x="186" y="1379">Kennzeichnung „BEISPIEL“, 13/600, Versalien, Sperrung 0,12 em</text>
+  <text x="760" y="1379">x 900 · y 76–92</text>
+  <text x="1130" y="1379">x 18 · y 72–88</text>
+  <path d="M110 1400H1500" stroke="#d8d8d3"/>
+  <!-- e -->
+  <g class="tg" transform="translate(116 1404)"><rect width="18" height="18" rx="4"/><text x="9" y="13">e</text></g>
+  <text x="146" y="1417" font-weight="700">25</text>
+  <text x="186" y="1413">Glas-Stapel: 3 Meldungen 220 × 64, Radius 18 (TE); nur die vordere mit</text>
+  <text x="186" y="1428">Unschärfe 24 px; Lichtkante oben Weiß 10 %, rechts --el 24 % (zur Quelle)</text>
+  <text x="760" y="1413">900–1120 × 98–162, Kanten bis 181</text>
+  <text x="760" y="1428">17,2 % B · über Stationsdecke und Kopf</text>
+  <text x="1130" y="1413">16–236 × 94–158, Kanten bis 177</text>
+  <text x="1130" y="1428">56 % B · Spalte 1 bis Mitte Spalte 3</text>
+  <path d="M110 1434H1500" stroke="#d8d8d3"/>
+  <!-- f -->
+  <g class="tg" transform="translate(116 1438)"><rect width="18" height="18" rx="4"/><text x="9" y="13">f</text></g>
+  <text x="146" y="1451" font-weight="700">20</text>
+  <text x="186" y="1447">Foto fb-sessel.webp, randlos; folgt beim Scrollen mit 0,88 (max. 32 px);</text>
+  <text x="186" y="1462">Ladeauftritt 0–0,9 s; Kopfzone dunkel und ruhig</text>
+  <text x="760" y="1447">553–1280 × 0–760 · 57 % B · 95 % H · Zoom 1,1</text>
+  <text x="760" y="1462">Maske links 553–844, unten ab 562 (74 %)</text>
+  <text x="1130" y="1447">0–390 × 0–420 · 100 % B · 50 % H</text>
+  <text x="1130" y="1462">ab 315 (75 %) in den Grund · Zuschnitt C.3</text>
+  <path d="M110 1468H1500" stroke="#d8d8d3"/>
+  <!-- g -->
+  <g class="tg" transform="translate(116 1472)"><rect width="18" height="18" rx="4"/><text x="9" y="13">g</text></g>
+  <text x="146" y="1485" font-weight="700">20</text>
+  <text x="186" y="1481">Bullauge mit Erdlicht: Lichtquelle und einzige gesättigte Fläche;</text>
+  <text x="186" y="1496">Erdlicht radial 1,5 × Bullauge, --el 16 % → 0, steht still</text>
+  <text x="760" y="1481">Ring ≈ 1136–1280 · Ausblick 1180–1280 × 101–375</text>
+  <text x="760" y="1496">Mitte des Erdlichts ≈ 1229 / 238</text>
+  <text x="1130" y="1481">Mitte 345 / 155 · Ø 160–180 · Erdlicht r ≈ 128</text>
+  <text x="1130" y="1496">rechts ≈ ⅕ angeschnitten · Ausblick ≥ 60 px</text>
+  <path d="M110 1502H1500" stroke="#d8d8d3"/>
+  <!-- h -->
+  <g class="tg" transform="translate(116 1506)"><rect width="18" height="18" rx="4"/><text x="9" y="13">h</text></g>
+  <text x="146" y="1519" font-weight="700">20</text>
+  <text x="186" y="1515">Maßlinie 1,5 px, Endstriche 18 px, Wert „1.200 mm“ um −90°; die Wertpille</text>
+  <text x="186" y="1530">(Unschärfe 12 px) ist die zweite Glasfläche (Z 25)</text>
+  <text x="760" y="1515">x ≈ 1258 · y 101–375</text>
+  <text x="1130" y="1515">x ≈ 374 · y 87–223</text>
+  <path d="M110 1536H1500" stroke="#d8d8d3"/>
+  <!-- i -->
+  <g class="tg" transform="translate(116 1540)"><rect width="18" height="18" rx="4"/><text x="9" y="13">i</text></g>
+  <text x="146" y="1553" font-weight="700">20</text>
+  <text x="186" y="1549">Figur im Foto: Gesicht mit Blick nach rechts oben zum Bullauge,</text>
+  <text x="186" y="1564">Hände mit Zollstock am Bullaugenrand</text>
+  <text x="760" y="1549">Gesicht ≈ 886–1008 × 207–328</text>
+  <text x="760" y="1564">Hände ≈ 1093–1200 × 193–421</text>
+  <text x="1130" y="1549">Gesicht 220–295 × 200–270</text>
+  <text x="1130" y="1564">Hände 270–340 × 110–250 · mit Bullauge ≈ 210 × 300</text>
+  <path d="M110 1570H1500" stroke="#d8d8d3"/>
+  <!-- j -->
+  <g class="tg" transform="translate(116 1574)"><rect width="18" height="18" rx="4"/><text x="9" y="13">j</text></g>
+  <text x="146" y="1587" font-weight="700">20</text>
+  <text x="186" y="1583">Schwebendes im Foto: Papierflieger, Handy, Bleistift;</text>
+  <text x="186" y="1598">nie unter Stapel oder Kicker</text>
+  <text x="760" y="1583">≈ 762–862 × 117–471</text>
+  <text x="760" y="1598">Handy ≈ 60 px rechts der h1-Zeile 2</text>
+  <text x="1130" y="1583">30–190 × 200–300</text>
+  <path d="M110 1604H1500" stroke="#d8d8d3"/>
+  <!-- k -->
+  <g class="tg" transform="translate(116 1608)"><rect width="18" height="18" rx="4"/><text x="9" y="13">k</text></g>
+  <text x="146" y="1621" font-weight="700">30</text>
+  <text x="186" y="1617">Kicker „Für Fensterbauer und Fensterhändler“ (VK:56), 13/600,</text>
+  <text x="186" y="1632">Versalien 0,12 em, grün</text>
+  <text x="760" y="1617">120–462 × 241–257</text>
+  <text x="1130" y="1617">16–358 × 320–336 · eine Zeile, 342 px</text>
+  <path d="M110 1638H1500" stroke="#d8d8d3"/>
+  <!-- l -->
+  <g class="tg" transform="translate(116 1642)"><rect width="18" height="18" rx="4"/><text x="9" y="13">l</text></g>
+  <text x="146" y="1655" font-weight="700">30</text>
+  <text x="186" y="1651">h1 „Ihr eigener Fenster-Konfigurator, unter Ihrer Marke“ (VK:57, wörtlich),</text>
+  <text x="186" y="1666">800, −0,03 em, „Marke“ grün; einzige h1</text>
+  <text x="760" y="1651">40 px, 2 Zeilen · 120–703 × 269–353</text>
+  <text x="760" y="1666">45,5 % B</text>
+  <text x="1130" y="1651">32 px, 3 Zeilen · 16–374 × 344–445</text>
+  <path d="M110 1672H1500" stroke="#d8d8d3"/>
+  <!-- m -->
+  <g class="tg" transform="translate(116 1676)"><rect width="18" height="18" rx="4"/><text x="9" y="13">m</text></g>
+  <text x="146" y="1689" font-weight="700">30</text>
+  <text x="186" y="1685">Chips „Ihre Domain“ · „Ihre Marke“ (TE) · „PDF per E-Mail“, 36 px hoch,</text>
+  <text x="186" y="1700">13/700, Haken grün, flach #262626 ohne Rand</text>
+  <text x="760" y="1685">120–471 × 377–413</text>
+  <text x="1130" y="1685">16–367 × 461–497</text>
+  <path d="M110 1706H1500" stroke="#d8d8d3"/>
+  <!-- n -->
+  <g class="tg" transform="translate(116 1710)"><rect width="18" height="18" rx="4"/><text x="9" y="13">n</text></g>
+  <text x="146" y="1723" font-weight="700">30</text>
+  <text x="186" y="1719">Preiszeile (TE) „Ab 29 € im Monat netto, plus Einrichtung · vorläufig“, 13/600;</text>
+  <text x="186" y="1734">29 € aus web/assets/pakete.js, „· vorläufig“ nur solange VORLAEUFIG</text>
+  <text x="760" y="1719">120–456 × 429–446</text>
+  <text x="1130" y="1719">16–352 × 509–526</text>
+  <path d="M110 1740H1500" stroke="#d8d8d3"/>
+  <!-- o -->
+  <g class="tg" transform="translate(116 1744)"><rect width="18" height="18" rx="4"/><text x="9" y="13">o</text></g>
+  <text x="146" y="1757" font-weight="700">30</text>
+  <text x="186" y="1753" fill="#b35f00" font-weight="700">CTA primär: Cream „Pakete ansehen“ → #pakete (VK:63), 52 px, 17/700,</text>
+  <text x="186" y="1768">Pfeil im Kreis; die einzige Cream-Fläche im Bildschirm</text>
+  <text x="760" y="1753">120–332 × 470–522 · 212 × 52</text>
+  <text x="760" y="1768">1,1 % der Fläche (gerechnet)</text>
+  <text x="1130" y="1753">16–228 × 541–593 · 212 × 52</text>
+  <text x="1130" y="1768">3,4 % der Fläche · bei 664 ganz sichtbar</text>
+  <path d="M110 1774H1500" stroke="#d8d8d3"/>
+  <!-- p -->
+  <g class="tg" transform="translate(116 1778)"><rect width="18" height="18" rx="4"/><text x="9" y="13">p</text></g>
+  <text x="146" y="1791" font-weight="700">30</text>
+  <text x="186" y="1787">Ring „Selbst ausprobieren“ (TE) → #die-idee, 52 px, Rand 2 px --muted,</text>
+  <text x="186" y="1802">gleich breit wie die Cream, klar nachrangig</text>
+  <text x="760" y="1787">344–556 × 470–522 · 12 px neben der Cream</text>
+  <text x="1130" y="1787">16–228 × 605–657 · 12 px unter der Cream</text>
+  <path d="M110 1808H1500" stroke="#d8d8d3"/>
+  <!-- q -->
+  <g class="tg" transform="translate(116 1812)"><rect width="18" height="18" rx="4"/><text x="9" y="13">q</text></g>
+  <text x="146" y="1825" font-weight="700">0</text>
+  <text x="186" y="1821">Lichtkeil (Lichtübertrag) von der Mitte des Ausblicks zur Mitte der Leiste,</text>
+  <text x="186" y="1836">120 → 200 px breit, --el 12 % → 6 %, weiche Ränder; einziger Rahmenbruch</text>
+  <text x="760" y="1821">1229 / 238 → 640 / 792</text>
+  <text x="760" y="1836">Winkel aus Bullauge und Leistenmitte (H.1)</text>
+  <text x="1130" y="1821">345 / 155 → 195 / 762 · ≈ 14° zur Senkrechten</text>
+  <text x="1130" y="1836">sichtbar ab y ≈ 330, ragt 72 px in V2</text>
+  <path d="M110 1842H1500" stroke="#d8d8d3"/>
+  <!-- r -->
+  <g class="tg" transform="translate(116 1846)"><rect width="18" height="18" rx="4"/><text x="9" y="13">r</text></g>
+  <text x="146" y="1859" font-weight="700">0</text>
+  <text x="186" y="1859">Grund #161616, deckend</text>
+  <text x="760" y="1859">0–1280 × 0–800</text>
+  <text x="1130" y="1859">0–390 × 0–690</text>
+  <path d="M110 1876H1500" stroke="#d8d8d3"/>
+  <!-- s -->
+  <g class="tg" transform="translate(116 1880)"><rect width="18" height="18" rx="4"/><text x="9" y="13">s</text></g>
+  <text x="146" y="1893" font-weight="700">–</text>
+  <text x="186" y="1889">V2 Leiste Elementarten (fb-02), angeschnitten: Mittelkachel unter dem</text>
+  <text x="186" y="1904">Lichtschlitz, Haarlinien oben und unten; Fortsetzungssignal</text>
+  <text x="760" y="1889">ab y 704 (fb-01: ≈ 700) · 176 hoch</text>
+  <text x="760" y="1904">Anschnitt 96 = 12 % H · Mittelkachel 580–700</text>
+  <text x="1130" y="1889">690–834 · 144 hoch · 17 % H</text>
+  <text x="1130" y="1904">Mittelkachel 150–240 × 704–794</text>
+  <path d="M110 1912H1500" stroke="#555"/>
+</g>
+
+<!-- ============ Legende ============ -->
+<g transform="translate(1560 0)">
+  <text x="0" y="1224" class="h17">Legende</text>
+  <rect x="0" y="1240" width="36" height="22" fill="#1a1a1a" stroke="#8a8a8a"/>
+  <text x="48" y="1250" class="t13">Bildschirm im Maßstab 1 : 1; Graustufen zeigen die Helligkeit</text>
+  <text x="48" y="1266" class="t13">(dunkle Bühne #161616, Foto schematisch)</text>
+  <rect x="0" y="1282" width="36" height="16" rx="8" fill="#e8890c"/>
+  <text x="48" y="1295" class="t13">Akzent 1 – Handlungsaufforderung (Cream-Pille, real #f1f0ea)</text>
+  <rect x="0" y="1312" width="36" height="16" fill="#4a7fe6" fill-opacity=".45"/>
+  <path d="M0 1320H36" stroke="#4a7fe6" stroke-width="2"/>
+  <text x="48" y="1320" class="t13">Akzent 2 – Licht und Tiefe: Erdlicht, Lichtkeil, Lichtkante,</text>
+  <text x="48" y="1336" class="t13">Scrollfaktor; im Bild verstärkt, Sollwerte in der Tabelle</text>
+  <use href="#sonne" x="4" y="1348" width="28" height="28"/>
+  <text x="48" y="1360" class="t13">Lichtquelle: Erdlicht im Bullauge; Licht fällt nach unten links</text>
+  <text x="48" y="1376" class="t13">(--licht-x −0,6 · --licht-y 0,8); keine Schatten</text>
+  <rect x="0" y="1390" width="36" height="24" fill="#1a1a1a"/>
+  <g class="bp" transform="translate(12 1402)"><circle r="9"/><text y="4" style="font-size:12px">1</text></g>
+  <path d="M22 1402H33" stroke="#fff" stroke-width="2"/>
+  <text x="48" y="1407" class="t13">Erwarteter Blickpfad [H], nummeriert; nicht gemessen</text>
+  <g class="tg" transform="translate(9 1424)"><rect width="18" height="18" rx="4"/><text x="9" y="13">a</text></g>
+  <text x="48" y="1438" class="t13">Element; Z-Stufe und Lage in der Tabelle, Z-Achse rechts oben</text>
+  <rect x="1" y="1455" width="34" height="18" rx="9" fill="none" stroke="#777" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="48" y="1469" class="t13">verborgen oder späterer Zustand (Kopf-Ring)</text>
+  <path d="M0 1494H36" stroke="#555" stroke-width="1.5" stroke-dasharray="8 6"/>
+  <text x="48" y="1499" class="t13">Unterkante des Bildschirms bei 390 × 664</text>
+  <path d="M0 1526H36" stroke="#333" stroke-width="2" stroke-dasharray="2 3"/>
+  <text x="48" y="1530" class="t13">im Entwurf grün (--accent): Kicker, „Marke“, Haken</text>
+  <path class="dim" d="M0 1554V1566M36 1554V1566M0 1560H36"/>
+  <text x="48" y="1564" class="t13">Maß in px · Anteil an Breite (B) oder Höhe (H)</text>
+  <text x="0" y="1588" class="t12">Gezeichnet: Endbild nach dem Ladeauftritt (ab 4,1 s) = ruhige Fassung.</text>
+  <text x="0" y="1605" class="t12">Texte wörtlich aus VK:55–63, außer Textentwurf (TE): Chip „Ihre Marke“, Preiszeile,</text>
+  <text x="0" y="1622" class="t12">Ring „Selbst ausprobieren“, Meldungen. Nicht gezeichnet: 1024 (G.3), Einbettung</text>
+  <text x="0" y="1639" class="t12">/#fensterbauer (+52 px, F.5), ?von=pdf (st-03).</text>
+
+  <text x="0" y="1672" class="h17">Blickpfad – erwartet, nicht gemessen</text>
+  <text x="0" y="1698" class="t13"><tspan font-weight="800">1</tspan>  Erdlicht im Bullauge: einziger Farbreiz, hellste Stelle</text>
+  <text x="0" y="1717" class="t13"><tspan font-weight="800">2a</tspan>  erste Meldung (ab 0,9 s) neben dem Anker, <tspan font-weight="800">2b</tspan>  Gesicht</text>
+  <text x="0" y="1736" class="t13"><tspan font-weight="800">3</tspan>  h1 als Leseeinstieg; der Kicker darüber ordnet zu</text>
+  <text x="0" y="1755" class="t13"><tspan font-weight="800">4</tspan>  über Chips und Preiszeile zur Cream (zweiter Pol); Ring nachrangig</text>
+  <text x="0" y="1774" class="t13"><tspan font-weight="800">5</tspan>  Lichtkeil und Leistenanschnitt führen nach unten in V2</text>
+  <text x="0" y="1793" class="t13">Diagonale: Anker oben rechts → Lesestapel unten links an x 16 / 120.</text>
+  <text x="0" y="1812" class="t13">Blinzeltest-Ziel: zwei Flecken – Erde (farbig) und Cream (hell).</text>
+
+  <text x="0" y="1852" class="h17">Ladeauftritt – nur Bildschicht, nacheinander</text>
+  <text x="0" y="1876" class="t13">Foto 0–0,9 s · Meldungen 0,9 / 1,6 / 2,3 s · Maßlinie 2,9–4,1 s · dann Stand.</text>
+  <text x="0" y="1895" class="t13">Erste Eingabe: Endzustand in 220 ms. Bedienschicht steht ab dem ersten Bild.</text>
+</g>
+
+<!-- ============ Proportionen, Abweichungen, Annahmen ============ -->
+<g transform="translate(2100 0)">
+  <text x="0" y="1224" class="h17">Proportionen (Schätzung, am Bildschirmfoto prüfen)</text>
+  <g class="t13b"><text x="0" y="1250">Fläche</text><text x="230" y="1250">Telefon</text><text x="380" y="1250">Schreibtisch</text></g>
+  <path d="M0 1257H500" stroke="#555"/>
+  <g class="t13">
+    <text x="0" y="1275">Foto</text><text x="230" y="1275">50 %</text><text x="380" y="1275">≈ 54 %</text>
+    <text x="0" y="1294">Figur + Bullauge (Fokusträger)</text><text x="230" y="1294">≈ 19 % (664: 24 %)</text><text x="380" y="1294">–</text>
+    <text x="0" y="1313">Textfläche (Rahmen)</text><text x="230" y="1313">≈ 12 % (≤ 15 %)</text><text x="380" y="1313">≈ 11 %</text>
+    <text x="0" y="1332">Cream (Akzent ≤ 5 %)</text><text x="230" y="1332">3,4 %</text><text x="380" y="1332">1,1 %</text>
+    <text x="0" y="1351">frei (≥ 33 %)</text><text x="230" y="1351">≈ 35–40 %</text><text x="380" y="1351">≈ 40 %</text>
+    <text x="0" y="1370">Text : Bild</text><text x="230" y="1370">gestapelt</text><text x="380" y="1370">5 : 7 ≈ 43 : 57</text>
+    <text x="0" y="1389">Schriftstufen</text><text x="230" y="1389">32 · 17 · 13</text><text x="380" y="1389">40 · 17 · 13</text>
+  </g>
+  <path d="M0 1397H500" stroke="#d8d8d3"/>
+  <text x="0" y="1415" class="t13">Abstände Kicker → Leiste: Telefon 8 · 16 · 12 · 15 · 12 · 33,</text>
+  <text x="0" y="1433" class="t13">Schreibtisch 12 · 24 · 16 · 24 · 182 (4-px-Raster).</text>
+  <text x="0" y="1451" class="t13">Signature: Glas und Lichtübertrag (inszenierend 2), Maßlinie (1).</text>
+
+  <text x="0" y="1492" class="h17">Abweichung von bestehender Regel –</text>
+  <text x="0" y="1512" class="h17">Freigabe durch den Inhaber nötig</text>
+  <text x="0" y="1530" class="t12">aus fb-01 I.4 wiedergegeben; dieses Wireframe fügt keine neue hinzu</text>
+  <g class="t13">
+    <text x="0" y="1551"><tspan font-weight="700">E-AB-1</tspan> Telefonfoto 420 px statt 540–640 px (GEST:447)</text>
+    <text x="0" y="1569"><tspan font-weight="700">E-AB-3</tspan> Ring „Selbst ausprobieren“ → #die-idee statt #demos</text>
+    <text x="0" y="1587"><tspan font-weight="700">E-AB-4, DG-AB-5</tspan> Meldungen einmal als Paketweg, ohne Schleife</text>
+    <text x="0" y="1605"><tspan font-weight="700">E-AB-5</tspan> drei Chips, kein Kasten „Kurz gesagt“</text>
+    <text x="0" y="1623"><tspan font-weight="700">I-AB-1</tspan> nur „BEISPIEL“, ohne Zeitangaben</text>
+    <text x="0" y="1641"><tspan font-weight="700">I-AB-2</tspan> Kicker-Sperrung 0,12 em statt 0,18 em (GEST:26)</text>
+    <text x="0" y="1659"><tspan font-weight="700">DG-AB-1, -15, -17</tspan> Lichtkante statt --float, Bildtiefe 0,88,</text>
+    <text x="0" y="1677">Sättigung 100 % statt 140 %</text>
+    <text x="0" y="1695">Name, Wortmarke und Logo bleiben.</text>
+  </g>
+
+  <text x="0" y="1736" class="h17">Zu prüfende Annahmen [H] mit Rückfall</text>
+  <g class="t13">
+    <text x="0" y="1760"><tspan font-weight="700">DG-H-12</tspan> Cream konkurriert nicht mit dem Anker → sonst Erdlicht bis 20 %</text>
+    <text x="0" y="1778"><tspan font-weight="700">H-E7</tspan> 420 px Foto tragen bei 844 und 664 → sonst 480 px</text>
+    <text x="0" y="1796"><tspan font-weight="700">H-E5</tspan> Lichtkeil liest als Markenfaden → sonst entfällt er</text>
+    <text x="0" y="1814"><tspan font-weight="700">T1</tspan> Preissignal im ersten Bildschirm → sonst unter die Knöpfe</text>
+    <text x="0" y="1832"><tspan font-weight="700">I-H-1</tspan> Meldungen lesen als „Anfragen kommen bei mir an“ → sonst zwei</text>
+    <text x="0" y="1850"><tspan font-weight="700">I-H-2</tspan> Ring nicht als App-Start gelesen → sonst „Kundensicht ansehen“</text>
+    <text x="0" y="1868"><tspan font-weight="700">DG-H-4</tspan> Lichtkante statt Schatten trägt das Schweben → sonst 1,5-fach</text>
+    <text x="0" y="1895" class="t12">Blickpfad und Anteile sind Analyse, keine Nutzerstudie und keine Messung.</text>
+  </g>
+</g>
+</svg>

@@ -1,0 +1,1648 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="9244" viewBox="0 0 1920 9244" font-family="system-ui, sans-serif">
+<title>Desktop-Wireframe Startseite</title>
+<desc>Strukturelles Desktop-Wireframe 1280 der Startseite / mit beiden Ansichten, Raster und Ebenen (Phase L).</desc>
+
+<defs>
+  <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="10" stroke="#ffffff" stroke-opacity="0.11" stroke-width="2"/>
+  </pattern>
+  <pattern id="hatchL" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="10" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2"/>
+  </pattern>
+  <pattern id="hatchD" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+    <line x1="0" y1="0" x2="0" y2="10" stroke="#000000" stroke-opacity="0.16" stroke-width="2"/>
+  </pattern>
+  <pattern id="raster" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M0 0H40M0 0V40" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1"/>
+    <path d="M8 0V40M16 0V40M24 0V40M32 0V40M0 8H40M0 16H40M0 24H40M0 32H40" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+  </pattern>
+  <radialGradient id="licht" cx="50%" cy="50%" r="50%">
+    <stop offset="0" stop-color="#4c8dff" stop-opacity="0.62"/>
+    <stop offset="0.55" stop-color="#4c8dff" stop-opacity="0.22"/>
+    <stop offset="1" stop-color="#4c8dff" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="keil" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#4c8dff" stop-opacity="0.34"/>
+    <stop offset="1" stop-color="#4c8dff" stop-opacity="0.12"/>
+  </linearGradient>
+  <linearGradient id="fadeL" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#1c1c1c" stop-opacity="1"/>
+    <stop offset="1" stop-color="#1c1c1c" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="fadeB" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1c1c1c" stop-opacity="0"/>
+    <stop offset="1" stop-color="#1c1c1c" stop-opacity="1"/>
+  </linearGradient>
+  <linearGradient id="fadeT" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1c1c1c" stop-opacity="1"/>
+    <stop offset="1" stop-color="#1c1c1c" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#000000" stop-opacity="0.55"/>
+    <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+  </linearGradient>
+  <marker id="pfeil" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0L10 5L0 10z" fill="#5f5f5f"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="1920" height="9244" fill="#ffffff"/>
+<text x="40.0" y="52.0" font-size="30" font-weight="800" fill="#222222" text-anchor="start" >Desktop-Wireframe · Startseite</text>
+<text x="40.0" y="80.0" font-size="14" font-weight="400" fill="#5f5f5f" text-anchor="start" >/ · eine Adresse, zwei Ansichten · Schreibtisch 1280 × 800 · Phase L · Stand 24.10.2026</text>
+<text x="40.0" y="100.0" font-size="14" font-weight="400" fill="#5f5f5f" text-anchor="start" >Teil 1: Ansicht Hauseigentümer (Standard, /#hauseigentuemer) vollständig. Teil 2: Ansicht Fensterbauer (/#fensterbauer) mit Kopf, Startbild, Zustand ?von=pdf und Ende.</text>
+<text x="40.0" y="120.0" font-size="13" font-weight="400" fill="#5f5f5f" text-anchor="start" >Grundlage: 08-zielarchitektur.md 8.3.3–8.3.4 · 09-abschnitte/he-01 bis he-07, st-02 bis st-04, rh-01, rh-03, fb-01 F.5 (Abschnitte „Schreibtisch“) ·</text>
+<text x="40.0" y="138.0" font-size="13" font-weight="400" fill="#5f5f5f" text-anchor="start" >11-designsystem.md (Raster K-12, Abstände K-14/K-15, Kapitelzeile K-16, „gewählt“ K-3, Umschalter K-29, Wechselkarte K-40) · Design-DNA 03/04. 12-storyboard.md lag nicht vor.</text>
+<text x="40.0" y="186.0" font-size="17" font-weight="800" fill="#222222" text-anchor="start" >Legende</text>
+<rect x="40.0" y="204.0" width="860.0" height="432.0" rx="8" fill="#1c1c1c" />
+<rect x="58.0" y="220.0" width="44.0" height="30.0" fill="#1c1c1c" stroke="#777777" stroke-width="1" />
+<text x="114.0" y="233.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Hintergrund · Z 0</text>
+<text x="114.0" y="248.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Grund #161616, deckend (dazu ggf. Raster, Lichtkeil)</text>
+<rect x="58.0" y="266.0" width="44.0" height="30.0" fill="none" stroke="#888888" stroke-width="1" stroke-dasharray="4 3" />
+<text x="80.0" y="287.0" font-size="15" font-weight="800" fill="#666666" text-anchor="middle" >Aa</text>
+<text x="114.0" y="279.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Riesenschrift</text>
+<text x="114.0" y="294.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Ebene vorgesehen, hier nicht belegt (ZA 8.3.11)</text>
+<rect x="58.0" y="312.0" width="44.0" height="30.0" fill="#4b4b4b" />
+<rect x="58.0" y="312.0" width="44.0" height="30.0" fill="url(#hatch)" />
+<text x="114.0" y="325.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Held · Bildschicht Z 20</text>
+<text x="114.0" y="340.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Foto, Render, Gerät, Beispielbild (schraffiert)</text>
+<rect x="58.0" y="358.0" width="44.0" height="30.0" fill="#e9e9e9" />
+<text x="114.0" y="371.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Papierweiß (Bildschicht)</text>
+<text x="114.0" y="386.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Aufmaßblatt, Zeichnungskarte: einziger Hellwert</text>
+<rect x="58.0" y="404.0" width="44.0" height="30.0" rx="8" fill="#ffffff" stroke="#4c8dff" stroke-width="1.5" fill-opacity="0.16"/>
+<text x="114.0" y="417.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Glas · Z 25</text>
+<text x="114.0" y="432.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Hintergrundunschärfe; nur über Bild, ≤ 2 je Bildschirm</text>
+<ellipse cx="80" cy="465" rx="28" ry="20" fill="url(#licht)"/>
+<text x="114.0" y="463.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Licht</text>
+<text x="114.0" y="478.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Licht mit Quelle; Blau = Hinweis, Farbe steht dabei</text>
+<rect x="59.0" y="497.0" width="42.0" height="28.0" rx="8" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="114.0" y="509.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Bedienschicht · Z 30</text>
+<text x="114.0" y="524.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Karte #1f1f1f mit 2-px-Ring, Text, Knöpfe</text>
+<rect x="58.0" y="542.0" width="44.0" height="30.0" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="4 4" opacity="0.6" />
+<text x="114.0" y="555.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Kopf · Z 40</text>
+<text x="114.0" y="570.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >64 px, klebt; auf Bühnen flächenlos über Scrim</text>
+<rect x="488.0" y="223.0" width="44.0" height="24.0" rx="12" fill="#f08c2e" />
+<text x="544.0" y="233.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Cream · Hauptaktion</text>
+<text x="544.0" y="248.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >eine Cream-Fläche je Bildschirm (SKILL:71)</text>
+<rect x="489.0" y="270.0" width="42.0" height="22.0" rx="11" fill="none" stroke="#f08c2e" stroke-width="2" />
+<text x="544.0" y="279.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Ring · Nebenhandlung</text>
+<text x="544.0" y="294.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >2-px-Kontur; gestrichelt = zustandsabhängig</text>
+<text x="488.0" y="331.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Link →</text>
+<line x1="488.0" y1="337.0" x2="532.0" y2="337.0" stroke="#949494" stroke-width="1" />
+<text x="544.0" y="325.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Textziel, Link</text>
+<text x="544.0" y="340.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >Trefferfläche 44 px</text>
+<rect x="488.0" y="361.0" width="44.0" height="24.0" rx="8" fill="none" stroke="#949494" stroke-width="1" />
+<text x="544.0" y="371.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Eingabefeld</text>
+<text x="544.0" y="386.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >52 px, Kontur ≥ 3 : 1</text>
+<text x="488.0" y="425.0" font-size="15" font-weight="800" fill="#efefef" text-anchor="start"><tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Wort</tspan></text>
+<text x="544.0" y="417.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Grünes Signalwort</text>
+<text x="544.0" y="432.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >unterstrichen = grün (ein Wort je Überschrift)</text>
+<line x1="488.0" y1="465.0" x2="532.0" y2="465.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="544.0" y="463.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Haarlinie</text>
+<text x="544.0" y="478.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >1 px; Satzbau Haarlinie → Kapitelzeile → h2</text>
+<rect x="488.0" y="496.0" width="8.0" height="30.0" fill="#ffffff" opacity="0.08" />
+<line x1="488.0" y1="496.0" x2="488.0" y2="526.0" stroke="#ffffff" stroke-width="1" opacity="0.25" />
+<rect x="499.0" y="496.0" width="8.0" height="30.0" fill="#ffffff" opacity="0.08" />
+<line x1="499.0" y1="496.0" x2="499.0" y2="526.0" stroke="#ffffff" stroke-width="1" opacity="0.25" />
+<rect x="510.0" y="496.0" width="8.0" height="30.0" fill="#ffffff" opacity="0.08" />
+<line x1="510.0" y1="496.0" x2="510.0" y2="526.0" stroke="#ffffff" stroke-width="1" opacity="0.25" />
+<rect x="521.0" y="496.0" width="8.0" height="30.0" fill="#ffffff" opacity="0.08" />
+<line x1="521.0" y1="496.0" x2="521.0" y2="526.0" stroke="#ffffff" stroke-width="1" opacity="0.25" />
+<text x="544.0" y="509.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Raster 1280</text>
+<text x="544.0" y="524.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >12 Spalten à 64,67, Rinne 24, x 120–1160</text>
+<line x1="488.0" y1="557.0" x2="532.0" y2="557.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.6" />
+<text x="544.0" y="555.0" font-size="13" font-weight="700" fill="#f0f0f0" text-anchor="start" >Bildschirmgrenze</text>
+<text x="544.0" y="570.0" font-size="12" font-weight="400" fill="#b8b8b8" text-anchor="start" >alle 800 px (1280 × 800)</text>
+<text x="40.0" y="666.0" font-size="13" font-weight="700" fill="#222222" text-anchor="start" >Etiketten:</text>
+<rect x="114.0" y="652.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="121.0" y="666.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<text x="152.7" y="666.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >Textentwurf (neuer Wortlaut, Freigabe)</text>
+<rect x="407.1" y="652.0" width="32.7" height="20" rx="4" fill="#fff6c8" stroke="#111111" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="414.1" y="666.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >AB</text>
+<text x="445.8" y="666.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig</text>
+<rect x="892.8" y="652.0" width="31.6" height="20" rx="4" fill="#ffffff" stroke="#111111" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="899.8" y="666.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >[H]</text>
+<text x="930.4" y="666.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >Hypothese / experimentell, mit Rückfall</text>
+<text x="40.0" y="694.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >Maßstab 1 : 1 (1 SVG-px = 1 CSS-px bei 1280 × 800). Schrift im Wireframe system-ui; Größen wie spezifiziert</text>
+<text x="40.0" y="711.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >(13 · 15 · 17 · 24 · 40). Graustufen; Orange nur für Handlungsaufforderungen, Blau nur für Tiefe, Glas und Licht.</text>
+<text x="40.0" y="728.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >Lagen sind geplant, nicht gemessen; „≈“ = geschätzt. Beschriftungen rechts: Ebenen je Abschnitt in der Reihenfolge</text>
+<text x="40.0" y="745.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >Hintergrund · Riesenschrift · Held · Glas · Licht, darunter Bedienschicht, Signature und Bewegung.</text>
+<text x="960.0" y="186.0" font-size="17" font-weight="800" fill="#222222" text-anchor="start" >Schichtmodell · Schnitt durch H1 Startbild</text>
+<rect x="960.0" y="204.0" width="850.0" height="432.0" rx="8" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<polygon points="990,596 1290,596 1350,562 1050,562" fill="#1c1c1c" fill-opacity="1" stroke="#555555" stroke-width="1.5"/>
+<text x="1060.0" y="584.0" font-size="13" font-weight="700" fill="#ffffff" text-anchor="start" >Z 0 Hintergrund</text>
+<line x1="1362.0" y1="579.0" x2="1378.0" y2="579.0" stroke="#b0b0b0" stroke-width="1" />
+<text x="1386.0" y="576.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund #161616; kein Lichtkeil, kein Raster</text>
+<polygon points="996,546 1296,546 1356,512 1056,512" fill="#ffffff" fill-opacity="1" stroke="#9a9a9a" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="1066.0" y="534.0" font-size="13" font-weight="700" fill="#222222" text-anchor="start" >Riesenschrift</text>
+<line x1="1368.0" y1="529.0" x2="1378.0" y2="529.0" stroke="#b0b0b0" stroke-width="1" />
+<text x="1386.0" y="526.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >nicht belegt: Riesenwort auf der Startseite bewusst nicht eingesetzt</text>
+<text x="1386.0" y="541.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >(ZA 8.3.11)</text>
+<polygon points="1002,496 1302,496 1362,462 1062,462" fill="#4b4b4b" fill-opacity="1" stroke="#333333" stroke-width="1.5"/>
+<polygon points="1002,496 1302,496 1362,462 1062,462" fill="url(#hatch)"/>
+<text x="1072.0" y="484.0" font-size="13" font-weight="700" fill="#ffffff" text-anchor="start" >Z 20 Held</text>
+<line x1="1374.0" y1="479.0" x2="1378.0" y2="479.0" stroke="#b0b0b0" stroke-width="1" />
+<text x="1386.0" y="476.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Foto Waschbär an der Maueröffnung, 728 × 760, Auslauf links und</text>
+<text x="1386.0" y="491.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >unten</text>
+<polygon points="1008,446 1308,446 1368,412 1068,412" fill="#d9e6ff" fill-opacity="0.9" stroke="#4c8dff" stroke-width="1.5"/>
+<text x="1078.0" y="434.0" font-size="13" font-weight="700" fill="#222222" text-anchor="start" >Z 25 Glas</text>
+<line x1="1380.0" y1="429.0" x2="1378.0" y2="429.0" stroke="#b0b0b0" stroke-width="1" />
+<text x="1386.0" y="426.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >am Schreibtisch keines; am Telefon nur der Umschalter 260 × 44</text>
+<text x="1386.0" y="441.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >über dem Foto</text>
+<polygon points="1014,396 1314,396 1374,362 1074,362" fill="#4c8dff" fill-opacity="0.35" stroke="#4c8dff" stroke-width="1.5"/>
+<text x="1084.0" y="384.0" font-size="13" font-weight="700" fill="#222222" text-anchor="start" >Licht</text>
+<line x1="1386.0" y1="379.0" x2="1378.0" y2="379.0" stroke="#b0b0b0" stroke-width="1" />
+<text x="1386.0" y="376.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Tageslicht in der Öffnung, Quelle im Foto; kein zusätzlicher</text>
+<text x="1386.0" y="391.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Lichtraum (Höchststufe 3)</text>
+<polygon points="1020,346 1320,346 1380,312 1080,312" fill="#2b2b2b" fill-opacity="1" stroke="#111111" stroke-width="1.5"/>
+<text x="1090.0" y="334.0" font-size="13" font-weight="700" fill="#ffffff" text-anchor="start" >Z 30 Bedienschicht</text>
+<line x1="1392.0" y1="329.0" x2="1378.0" y2="329.0" stroke="#b0b0b0" stroke-width="1" />
+<text x="1386.0" y="326.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Eyebrow, h1 40, Lead, Preiszeile, Cream „Jetzt ausmessen“ +</text>
+<text x="1386.0" y="341.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Ring „Führung starten“</text>
+<polygon points="1026,296 1326,296 1386,262 1086,262" fill="#ffffff" fill-opacity="1" stroke="#444444" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="1096.0" y="284.0" font-size="13" font-weight="700" fill="#222222" text-anchor="start" >Z 40 Kopf</text>
+<line x1="1398.0" y1="279.0" x2="1378.0" y2="279.0" stroke="#b0b0b0" stroke-width="1" />
+<text x="1386.0" y="276.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >64 px: Logo, Umschalter als Fläche, „Ratgeber“, Kopfknopf</text>
+<text x="40.0" y="816.0" font-size="17" font-weight="800" fill="#222222" text-anchor="start" >Seitenrhythmus (Länge maßstäblich zur Gesamthöhe, Tönung = Intensitätsstufe 1–4)</text>
+<rect x="40.0" y="832.0" width="277.5" height="40.0" fill="#6c6c69" />
+<text x="179.2" y="857.0" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H1</text>
+<rect x="318.5" y="832.0" width="191.2" height="40.0" fill="#9d9d99" />
+<text x="414.6" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >H2</text>
+<rect x="561.3" y="832.0" width="307.5" height="40.0" fill="#9d9d99" />
+<text x="715.6" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >H3</text>
+<rect x="920.4" y="832.0" width="153.3" height="40.0" fill="#9d9d99" />
+<text x="997.6" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >H4</text>
+<rect x="1125.3" y="832.0" width="72.6" height="40.0" fill="#9d9d99" />
+<text x="1162.1" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >H5</text>
+<rect x="1249.5" y="832.0" width="92.3" height="40.0" fill="#c9c9c6" />
+<text x="1296.2" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >H6</text>
+<rect x="1393.5" y="832.0" width="125.6" height="40.0" fill="#9d9d99" />
+<text x="1456.8" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >H7</text>
+<rect x="1570.7" y="832.0" width="73.8" height="40.0" fill="#9d9d99" />
+<text x="1608.1" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >R5</text>
+<rect x="1696.1" y="832.0" width="182.9" height="40.0" fill="#c9c9c6" />
+<text x="1788.0" y="857.0" font-size="12" font-weight="700" fill="#222222" text-anchor="middle" >Fuß</text>
+<text x="40.0" y="894.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="start" >Ansicht Hauseigentümer: ≈ 4.652 px ≈ 5,8 Bildschirmhöhen (ZA-Überschlag ≈ 4,5 BH). Höchststufe 3; Rhythmus 3 · 2 · 2 · 2 · 2 · 1 · 2 · 2; Cream in H1, H2, H7.</text>
+<text x="40" y="1004" font-size="20" font-weight="800" fill="#222222">Teil 1 · Ansicht Hauseigentümer (Standard)</text>
+<text x="40" y="1026" font-size="13" fill="#5f5f5f">Kopf, H1–H7, Wechselkarte, Fuß · Lagen in CSS-Pixeln ab Seitenanfang</text>
+<g transform="translate(150,1112)">
+<rect x="0.0" y="0.0" width="1280.0" height="4692.0" fill="#1c1c1c" />
+<rect x="120.0" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="208.7" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="297.3" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="386.0" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="474.7" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="563.3" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="652.0" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="740.7" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="829.3" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="918.0" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="1006.7" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<rect x="1095.3" y="0.0" width="64.7" height="4692.0" fill="#ffffff" opacity="0.03" />
+<clipPath id="clipH1"><rect x="552" y="0" width="728" height="760"/></clipPath>
+<rect x="552.0" y="0.0" width="728.0" height="760.0" fill="#4b4b4b" />
+<rect x="552.0" y="0.0" width="728.0" height="760.0" fill="url(#hatch)" />
+<g clip-path="url(#clipH1)">
+<rect x="1150.0" y="0.0" width="140.0" height="511.0" fill="#8a8a8a" />
+<rect x="1150.0" y="0.0" width="140.0" height="511.0" fill="url(#hatchL)" />
+<circle cx="1225" cy="230" r="300" fill="url(#licht)"/>
+<line x1="1098.0" y1="0.0" x2="1098.0" y2="535.0" stroke="#e0e0e0" stroke-width="5" />
+<path d="M800 571 C 790 470, 820 380, 860 300 C 880 230, 900 150, 960 120 C 1010 110, 1040 140, 1090 90 L 1110 110 C 1080 190, 1060 260, 1040 330 C 1060 420, 1090 500, 1100 571 Z" fill="#5c5c5c" stroke="#d0d0d0" stroke-width="1.5" stroke-dasharray="6 4"/>
+<circle cx="952" cy="170" r="45" fill="#666666" stroke="#d0d0d0" stroke-width="1.5" stroke-dasharray="6 4"/>
+<rect x="1012.0" y="205.0" width="46.0" height="76.0" rx="6" fill="#2a2a2a" stroke="#bdbdbd" stroke-width="1" />
+<rect x="737.0" y="553.0" width="346.0" height="207.0" fill="none" stroke="#bdbdbd" stroke-width="1" stroke-dasharray="5 4" />
+</g>
+<rect x="552.0" y="0.0" width="148.0" height="760.0" fill="url(#fadeL)" />
+<rect x="552.0" y="600.0" width="728.0" height="160.0" fill="url(#fadeB)" />
+<rect x="0.0" y="0.0" width="1280.0" height="104.0" fill="url(#scrim)" />
+<rect x="0.5" y="0.5" width="1279.0" height="63.0" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+<rect x="120.0" y="16.0" width="32.0" height="32.0" rx="8" fill="#d6d6d6" />
+<text x="162.0" y="38.0" font-size="17" font-weight="800" fill="#efefef" text-anchor="start" >eeziframes</text>
+<rect x="284.0" y="10.0" width="284.0" height="44.0" rx="22" fill="#2b2b2b" stroke="#7a7a7a" stroke-width="1" />
+<rect x="289.0" y="15.0" width="148.0" height="34.0" rx="17" fill="#3a3a3a" stroke="#efefef" stroke-width="2" />
+<text x="363.0" y="37.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Hauseigentümer</text>
+<text x="501.0" y="37.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="middle" >Fensterbauer</text>
+<text x="882.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >Ratgeber</text>
+<rect x="985.0" y="10.0" width="175.0" height="44.0" rx="22" fill="none" stroke="#f08c2e" stroke-width="2" stroke-dasharray="6 4" />
+<text x="1072.5" y="37.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Fenster ausmessen</text>
+<text x="120.0" y="245.0" font-size="13" font-weight="600" fill="#bdbdbd" text-anchor="start" >In Minuten zum Aufmaß für jeden Fensterbauer</text>
+<text x="120.0" y="314.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Fenster ausmessen.</text>
+<text x="120.0" y="356.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Selbst. <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">eezi.</tspan></text>
+<text x="120.0" y="397.1" font-size="17" font-weight="400" fill="#bdbdbd" text-anchor="start" >Zwei Fotos und die Maße mit dem Zollstock,</text>
+<text x="120.0" y="421.1" font-size="17" font-weight="400" fill="#bdbdbd" text-anchor="start" >jeder Schritt erklärt.</text>
+<text x="120.0" y="466.0" font-size="13" font-weight="400" text-anchor="start"><tspan fill="#efefef" font-weight="700">Messen kostenlos, ohne Konto</tspan><tspan fill="#949494" font-weight="500"> · Aufmaßblatt 7,99 € bis 17.11.2026,</tspan></text>
+<text x="120.0" y="484.0" font-size="13" font-weight="400" text-anchor="start"><tspan fill="#949494" font-weight="500">danach 12,99 €</tspan></text>
+<rect x="120.0" y="499.0" width="222.0" height="52.0" rx="26.0" fill="#f08c2e" />
+<text x="142.0" y="531.1" font-size="17" font-weight="700" fill="#1a1a1a" text-anchor="start" >Jetzt ausmessen</text>
+<circle cx="314.0" cy="525.0" r="14" fill="#1a1a1a" opacity="0.85"/>
+<text x="314.0" y="530.0" font-size="15" font-weight="700" fill="#f08c2e" text-anchor="middle" >→</text>
+<rect x="355.0" y="500.0" width="175.0" height="50.0" rx="25.0" fill="none" stroke="#f08c2e" stroke-width="2" />
+<text x="442.5" y="531.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="middle" >Führung starten</text>
+<line x1="120.0" y1="576.0" x2="539.0" y2="576.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="2 4" opacity="0.5" />
+<rect x="284.0" y="68.0" width="434.0" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="291.0" y="82.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z40 KOPF 64 · Umschalter als flache Fläche, kein Glas (st-02 G.3)</text>
+<rect x="864.6" y="66.0" width="407.4" height="20" rx="4" fill="#ffffff" stroke="#f08c2e" stroke-width="1"/>
+<text x="871.6" y="80.5" font-size="12" font-weight="700" fill="#7a3d00" text-anchor="start" >Kopfknopf: Cream erst, wenn keine Cream im Inhalt sichtbar ist</text>
+<rect x="120.0" y="206.0" width="400.0" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="127.0" y="220.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z30 BEDIENSCHICHT · Split 5 : 7 an der Ordnungslinie x 120</text>
+<rect x="80.0" y="381.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="395.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="452.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="466.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="120.0" y="429.0" width="299.6" height="20" rx="4" fill="#fff6c8" stroke="#111111" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="127.0" y="443.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >AB IA-AB-6: Preiszeile im Startbild statt Band</text>
+<rect x="120.0" y="584.0" width="356.2" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="127.0" y="598.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Abschnittsende 576 · H2 schneidet bei 704 an (≈ 12 %)</text>
+<rect x="943.4" y="466.0" width="328.6" height="20" rx="4" fill="#4c8dff" stroke="#4c8dff" stroke-width="1"/>
+<text x="950.4" y="480.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="start" >LICHT · Tageslicht in der Öffnung (Quelle im Foto)</text>
+<rect x="939.8" y="490.0" width="332.2" height="20" rx="4" fill="#ffffff" stroke="#4c8dff" stroke-width="1"/>
+<text x="946.8" y="504.5" font-size="12" font-weight="700" fill="#0b3a99" text-anchor="start" >Glas: am Schreibtisch keines (Umschalter im Kopf)</text>
+<rect x="893.8" y="514.0" width="378.2" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="900.8" y="528.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z20 HELD · Foto start-hauseigentuemer.webp · 728 × 760</text>
+<rect x="904.3" y="538.0" width="367.7" height="20" rx="4" fill="#ffffff" stroke="#111111" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="911.3" y="552.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Figur und Öffnung frei · [H] Foto bleibt zurück, Faktor 0,9</text>
+<rect x="0.0" y="-48.0" width="1280.0" height="40.0" fill="none" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="5 4" />
+<text x="16.0" y="-23.0" font-size="13" font-weight="600" fill="#5f5f5f" text-anchor="start" >st-01 Hinweisband: entfällt auf /; nur ohne Server die Pilotleiste 40 px über dem Kopf</text>
+<line x1="120.0" y1="704.0" x2="1160.0" y2="704.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="733.2" font-size="13" font-weight="600" fill="#949494" text-anchor="start"><tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">01</tspan> · PROBEMESSUNG</text>
+<text x="120.0" y="784.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Dreimal messen.</text>
+<text x="120.0" y="826.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Das kleinste <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">zählt.</tspan></text>
+<text x="120.0" y="878.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" letter-spacing="0.12em" >BREITE MESSEN</text>
+<text x="478.0" y="878.0" font-size="13" font-weight="600" fill="#949494" text-anchor="end" >0 / 3</text>
+<rect x="121.0" y="891.0" width="112.0" height="42.0" rx="21" fill="none" stroke="#606060" stroke-width="2" />
+<text x="177.0" y="917.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Oben</text>
+<rect x="243.0" y="891.0" width="112.0" height="42.0" rx="21" fill="none" stroke="#606060" stroke-width="2" />
+<text x="299.0" y="917.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Mitte</text>
+<rect x="365.0" y="891.0" width="112.0" height="42.0" rx="21" fill="none" stroke="#606060" stroke-width="2" />
+<text x="421.0" y="917.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Unten</text>
+<text x="120.0" y="975.0" font-size="17" font-weight="400" text-anchor="start"><tspan fill="#bdbdbd" font-weight="500">Je Fenster </tspan><tspan fill="#efefef" font-weight="700">drei Breiten und drei Höhen</tspan><tspan fill="#bdbdbd" font-weight="500"> der</tspan></text>
+<text x="120.0" y="1002.9" font-size="17" font-weight="400" fill="#bdbdbd" text-anchor="start" >Maueröffnung, dazu das Rahmenmaß. Es zählt das</text>
+<text x="120.0" y="1028.5" font-size="17" font-weight="400" fill="#bdbdbd" text-anchor="start" >kleinste Maß, Abweichungen werden markiert.</text>
+<rect x="120.0" y="1067.0" width="200.0" height="52.0" rx="26.0" fill="#f08c2e" />
+<text x="142.0" y="1099.1" font-size="17" font-weight="700" fill="#1a1a1a" text-anchor="start" >Jetzt ausmessen</text>
+<circle cx="292.0" cy="1093.0" r="14" fill="#1a1a1a" opacity="0.85"/>
+<text x="292.0" y="1098.0" font-size="15" font-weight="700" fill="#f08c2e" text-anchor="middle" >→</text>
+<rect x="600.0" y="720.0" width="560.0" height="470.0" rx="24" fill="#f4f4f2" />
+<text x="625.0" y="756.0" font-size="13" font-weight="700" fill="#3d3d3a" text-anchor="start" letter-spacing="0.12em" >BEISPIEL</text>
+<rect x="625.0" y="783.0" width="510.0" height="357.0" fill="#e2e1dc" />
+<rect x="758.0" y="811.0" width="357.0" height="276.0" fill="#f4f4f2" stroke="#6a6a6a" stroke-width="2" />
+<rect x="774.0" y="823.0" width="325.0" height="251.0" fill="#dfe4ea" stroke="#3d3d3a" stroke-width="2" />
+<line x1="936.0" y1="823.0" x2="936.0" y2="1074.0" stroke="#3d3d3a" stroke-width="2" />
+<rect x="744.0" y="1087.0" width="385.0" height="12.0" rx="2" fill="#a8a79f" />
+<line x1="758.0" y1="848.0" x2="1115.0" y2="848.0" stroke="#4a4a4a" stroke-width="2" />
+<line x1="758.0" y1="840.0" x2="758.0" y2="856.0" stroke="#4a4a4a" stroke-width="2" />
+<line x1="1115.0" y1="840.0" x2="1115.0" y2="856.0" stroke="#4a4a4a" stroke-width="2" />
+<rect x="894.0" y="836.0" width="84.0" height="24.0" rx="12" fill="#ffffff" stroke="#4a4a4a" stroke-width="1" />
+<text x="936.0" y="853.0" font-size="13" font-weight="600" fill="#141414" text-anchor="middle" >1.236 mm</text>
+<text x="746.0" y="853.0" font-size="13" font-weight="600" fill="#3d3d3a" text-anchor="end" >Oben</text>
+<line x1="758.0" y1="948.0" x2="1115.0" y2="948.0" stroke="#4a4a4a" stroke-width="2" />
+<line x1="758.0" y1="940.0" x2="758.0" y2="956.0" stroke="#4a4a4a" stroke-width="2" />
+<line x1="1115.0" y1="940.0" x2="1115.0" y2="956.0" stroke="#4a4a4a" stroke-width="2" />
+<rect x="894.0" y="936.0" width="84.0" height="24.0" rx="12" fill="#ffffff" stroke="#4a4a4a" stroke-width="1" />
+<text x="936.0" y="953.0" font-size="13" font-weight="600" fill="#141414" text-anchor="middle" >1.231 mm</text>
+<text x="746.0" y="953.0" font-size="13" font-weight="600" fill="#3d3d3a" text-anchor="end" >Mitte</text>
+<line x1="758.0" y1="1048.0" x2="1115.0" y2="1048.0" stroke="#4a4a4a" stroke-width="2" />
+<line x1="758.0" y1="1040.0" x2="758.0" y2="1056.0" stroke="#4a4a4a" stroke-width="2" />
+<line x1="1115.0" y1="1040.0" x2="1115.0" y2="1056.0" stroke="#4a4a4a" stroke-width="2" />
+<rect x="894.0" y="1036.0" width="84.0" height="24.0" rx="12" fill="#ffffff" stroke="#4a4a4a" stroke-width="1" />
+<text x="936.0" y="1053.0" font-size="13" font-weight="600" fill="#141414" text-anchor="middle" >1.234 mm</text>
+<text x="746.0" y="1053.0" font-size="13" font-weight="600" fill="#3d3d3a" text-anchor="end" >Unten</text>
+<rect x="857.0" y="966.0" width="158.0" height="24.0" rx="4" fill="#1c1c1c" />
+<text x="936.0" y="983.0" font-size="13" font-weight="600" fill="#efefef" text-anchor="middle" >KLEINSTES MASS</text>
+<rect x="815.1" y="1198.0" width="344.9" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="822.1" y="1212.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z20 HELD · Zeichnungskarte 560 × 470, Papierweiß</text>
+<rect x="782.9" y="1222.0" width="377.1" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="789.9" y="1236.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Maßlinien mit Wert (informierend) · Orange = Maueröffnung</text>
+<rect x="80.0" y="720.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="734.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="754.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="768.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="330.0" y="1075.0" width="345.9" height="20" rx="4" fill="#ffffff" stroke="#111111" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="337.0" y="1089.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Prüfpunkt: nur 568 px unter der Cream von H1 (&lt; 800)</text>
+<rect x="330.0" y="1099.0" width="213.7" height="20" rx="4" fill="#ffffff" stroke="#111111" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="337.0" y="1113.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >→ laut ZA dann Ring statt Cream</text>
+<line x1="60.0" y1="525.0" x2="60.0" y2="1093.0" stroke="#f08c2e" stroke-width="1.5" stroke-dasharray="4 3" />
+<line x1="54.0" y1="525.0" x2="66.0" y2="525.0" stroke="#f08c2e" stroke-width="1.5" />
+<line x1="54.0" y1="1093.0" x2="66.0" y2="1093.0" stroke="#f08c2e" stroke-width="1.5" />
+<text x="52.0" y="809.0" font-size="13" font-weight="700" fill="#f08c2e" text-anchor="end" >568</text>
+<line x1="120.0" y1="1318.0" x2="1160.0" y2="1318.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1347.2" font-size="13" font-weight="600" fill="#949494" text-anchor="start"><tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">02</tspan> · DAS AUFMASSBLATT</text>
+<text x="120.0" y="1399.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Was im <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Aufmaß</tspan></text>
+<text x="120.0" y="1443.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">steckt.</text>
+<text x="120.0" y="1475.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >je Fenster, wie beim Termin vor Ort</text>
+<text x="120.0" y="1522.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >0 €</text>
+<text x="208.0" y="1521.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Messen, Fotos, 3-D-Modell</text>
+<text x="120.0" y="1556.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >7,99 €</text>
+<text x="208.0" y="1555.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Aufmaßblatt als PDF, einmalig</text>
+<text x="208.0" y="1577.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >bis 17.11.2026, danach 12,99 €</text>
+<text x="120.0" y="1612.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >0 €</text>
+<text x="208.0" y="1611.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >über den Link eines Fensterbauers</text>
+<text x="120.0" y="1644.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >Endpreise inkl. MwSt., ohne weitere Kosten.</text>
+<text x="120.0" y="1694.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" letter-spacing="0.12em" >JE POSITION IM BLATT</text>
+<line x1="120.0" y1="1705.0" x2="539.0" y2="1705.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1724.0" font-size="15" font-weight="500" fill="#efefef" text-anchor="start" >Maueröffnung</text>
+<line x1="120.0" y1="1733.0" x2="539.0" y2="1733.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1752.0" font-size="15" font-weight="500" fill="#efefef" text-anchor="start" >Fensterelement</text>
+<line x1="120.0" y1="1761.0" x2="539.0" y2="1761.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1780.0" font-size="15" font-weight="500" fill="#efefef" text-anchor="start" >Fotos und Einbausituation</text>
+<line x1="120.0" y1="1789.0" x2="539.0" y2="1789.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1808.0" font-size="15" font-weight="500" fill="#efefef" text-anchor="start" >Teilung und Öffnung</text>
+<line x1="120.0" y1="1817.0" x2="539.0" y2="1817.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1836.0" font-size="15" font-weight="500" fill="#efefef" text-anchor="start" >Material, Farbe, Glas</text>
+<line x1="120.0" y1="1845.0" x2="539.0" y2="1845.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1864.0" font-size="15" font-weight="500" fill="#efefef" text-anchor="start" >Sonnenschutz und Montage</text>
+<line x1="120.0" y1="1873.0" x2="539.0" y2="1873.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="1892.0" font-size="15" font-weight="500" fill="#efefef" text-anchor="start" >Was noch zu klären ist</text>
+<line x1="120.0" y1="1901.0" x2="539.0" y2="1901.0" stroke="#5c5c5c" stroke-width="1" />
+<rect x="120.0" y="1925.0" width="79.8" height="36.0" rx="18" fill="#363636" />
+<text x="134.0" y="1948.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Fenster</text>
+<rect x="207.8" y="1925.0" width="92.4" height="36.0" rx="18" fill="#363636" />
+<text x="221.8" y="1948.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Balkontür</text>
+<rect x="308.2" y="1925.0" width="133.4" height="36.0" rx="18" fill="#363636" />
+<text x="322.2" y="1948.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Festverglasung</text>
+<rect x="120.0" y="1969.0" width="149.9" height="36.0" rx="18" fill="#363636" />
+<text x="134.0" y="1992.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Hebe-Schiebe-Tür</text>
+<rect x="277.9" y="1969.0" width="85.6" height="36.0" rx="18" fill="#363636" />
+<text x="291.9" y="1992.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >PSK-Tür</text>
+<rect x="371.5" y="1969.0" width="145.6" height="36.0" rx="18" fill="#363636" />
+<text x="385.5" y="1992.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Faltschiebewand</text>
+<text x="120.0" y="2045.4" font-size="15" font-weight="400" fill="#bdbdbd" text-anchor="start" >Grundlage für Angebote, kein Bestellmaß: Vor der</text>
+<text x="120.0" y="2067.4" font-size="15" font-weight="400" fill="#bdbdbd" text-anchor="start" >Fertigung misst der Fachbetrieb selbst nach.</text>
+<g transform="rotate(-2 821 1562)">
+<rect x="611.0" y="1363.0" width="420.0" height="398.0" fill="#e9e9e9" />
+<rect x="611.0" y="1363.0" width="420.0" height="46.0" fill="#242424" />
+<text x="627.0" y="1392.0" font-size="12" font-weight="700" fill="#e0e0e0" text-anchor="start" >eeziframes · Dein Fenster-Aufmaß</text>
+<text x="627.0" y="1440.0" font-size="24" font-weight="800" fill="#2a2a2a" text-anchor="start" >Familie Weber.</text>
+<rect x="627.0" y="1458.0" width="96.0" height="22.0" rx="11" fill="#cfcfcf" />
+<rect x="731.0" y="1458.0" width="96.0" height="22.0" rx="11" fill="#cfcfcf" />
+<rect x="835.0" y="1458.0" width="96.0" height="22.0" rx="11" fill="#cfcfcf" />
+<text x="627.0" y="1510.0" font-size="12" font-weight="600" fill="#444444" text-anchor="start" >Weg zu neuen Fenstern · 4 von 5</text>
+<rect x="627.0" y="1520.0" width="388.0" height="6.0" rx="3" fill="#bdbdbd" />
+<rect x="627.0" y="1520.0" width="310.0" height="6.0" rx="3" fill="#7a7a7a" />
+<rect x="627.0" y="1548.0" width="340.0" height="8.0" rx="3" fill="#b8b8b8" />
+<rect x="627.0" y="1572.0" width="260.0" height="8.0" rx="3" fill="#b8b8b8" />
+<rect x="627.0" y="1596.0" width="340.0" height="8.0" rx="3" fill="#b8b8b8" />
+<rect x="627.0" y="1620.0" width="260.0" height="8.0" rx="3" fill="#b8b8b8" />
+<rect x="627.0" y="1644.0" width="340.0" height="8.0" rx="3" fill="#b8b8b8" />
+<text x="1015.0" y="1748.0" font-size="12" font-weight="700" fill="#555555" text-anchor="end" >BEISPIEL</text>
+</g>
+<rect x="605.0" y="1661.0" width="432.0" height="110.0" fill="url(#fadeB)" />
+<rect x="895.0" y="1612.0" width="184.0" height="92.0" rx="12" fill="#2b2b2b" />
+<line x1="907.0" y1="1612.5" x2="1067.0" y2="1612.5" stroke="#d0d0d0" stroke-width="1" />
+<line x1="1078.5" y1="1624.0" x2="1078.5" y2="1692.0" stroke="#bdbdbd" stroke-width="1" />
+<text x="915.0" y="1636.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" letter-spacing="0.12em" >EINMALIG</text>
+<text x="915.0" y="1684.0" font-size="40" font-weight="800" fill="#efefef" text-anchor="start" >7,99 €</text>
+<rect x="846.7" y="1778.0" width="313.3" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="853.7" y="1792.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z20 HELD · echtes Aufmaßblatt 420 × 398, −2°</text>
+<rect x="789.2" y="1802.0" width="370.8" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="796.2" y="1816.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z25 Preisetikett 184 × 92, opak, ragt 26 % über die Kante</text>
+<rect x="846.5" y="1826.0" width="313.5" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="853.5" y="1840.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >kein Licht, kein Glas · Kontrast über Papierweiß</text>
+<rect x="800.4" y="1850.0" width="359.6" height="20" rx="4" fill="#ffffff" stroke="#111111" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="807.4" y="1864.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >[H] Szene sticky top 112 neben dem Katalog (≈ 310 px)</text>
+<rect x="80.0" y="1334.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="1348.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="1505.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="1519.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="1631.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="1645.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="1681.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="1695.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="1875.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="1889.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="2031.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="2045.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<line x1="120.0" y1="2226.0" x2="1160.0" y2="2226.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="2255.2" font-size="13" font-weight="600" fill="#949494" text-anchor="start"><tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">03</tspan> · ABLAUF UND DATEN</text>
+<text x="120.0" y="2307.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Fotografieren. Messen.</text>
+<text x="120.0" y="2351.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start"><tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Wünschen.</tspan></text>
+<line x1="120.0" y1="2386.5" x2="1160.0" y2="2386.5" stroke="#7a7a7a" stroke-width="1" />
+<line x1="120.0" y1="2386.0" x2="120.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="128.0" y1="2386.0" x2="128.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="136.0" y1="2386.0" x2="136.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="144.0" y1="2386.0" x2="144.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="152.0" y1="2386.0" x2="152.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="160.0" y1="2386.0" x2="160.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="168.0" y1="2386.0" x2="168.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="176.0" y1="2386.0" x2="176.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="184.0" y1="2386.0" x2="184.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="192.0" y1="2386.0" x2="192.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="200.0" y1="2386.0" x2="200.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="208.0" y1="2386.0" x2="208.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="216.0" y1="2386.0" x2="216.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="224.0" y1="2386.0" x2="224.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="232.0" y1="2386.0" x2="232.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="240.0" y1="2386.0" x2="240.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="248.0" y1="2386.0" x2="248.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="256.0" y1="2386.0" x2="256.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="264.0" y1="2386.0" x2="264.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="272.0" y1="2386.0" x2="272.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="280.0" y1="2386.0" x2="280.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="288.0" y1="2386.0" x2="288.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="296.0" y1="2386.0" x2="296.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="304.0" y1="2386.0" x2="304.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="312.0" y1="2386.0" x2="312.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="320.0" y1="2386.0" x2="320.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="328.0" y1="2386.0" x2="328.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="336.0" y1="2386.0" x2="336.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="344.0" y1="2386.0" x2="344.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="352.0" y1="2386.0" x2="352.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="360.0" y1="2386.0" x2="360.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="368.0" y1="2386.0" x2="368.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="376.0" y1="2386.0" x2="376.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="384.0" y1="2386.0" x2="384.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="392.0" y1="2386.0" x2="392.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="400.0" y1="2386.0" x2="400.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="408.0" y1="2386.0" x2="408.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="416.0" y1="2386.0" x2="416.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="424.0" y1="2386.0" x2="424.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="432.0" y1="2386.0" x2="432.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="440.0" y1="2386.0" x2="440.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="448.0" y1="2386.0" x2="448.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="456.0" y1="2386.0" x2="456.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="464.0" y1="2386.0" x2="464.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="472.0" y1="2386.0" x2="472.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="480.0" y1="2386.0" x2="480.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="488.0" y1="2386.0" x2="488.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="496.0" y1="2386.0" x2="496.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="504.0" y1="2386.0" x2="504.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="512.0" y1="2386.0" x2="512.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="520.0" y1="2386.0" x2="520.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="528.0" y1="2386.0" x2="528.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="536.0" y1="2386.0" x2="536.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="544.0" y1="2386.0" x2="544.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="552.0" y1="2386.0" x2="552.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="560.0" y1="2386.0" x2="560.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="568.0" y1="2386.0" x2="568.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="576.0" y1="2386.0" x2="576.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="584.0" y1="2386.0" x2="584.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="592.0" y1="2386.0" x2="592.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="600.0" y1="2386.0" x2="600.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="608.0" y1="2386.0" x2="608.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="616.0" y1="2386.0" x2="616.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="624.0" y1="2386.0" x2="624.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="632.0" y1="2386.0" x2="632.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="640.0" y1="2386.0" x2="640.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="648.0" y1="2386.0" x2="648.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="656.0" y1="2386.0" x2="656.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="664.0" y1="2386.0" x2="664.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="672.0" y1="2386.0" x2="672.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="680.0" y1="2386.0" x2="680.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="688.0" y1="2386.0" x2="688.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="696.0" y1="2386.0" x2="696.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="704.0" y1="2386.0" x2="704.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="712.0" y1="2386.0" x2="712.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="720.0" y1="2386.0" x2="720.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="728.0" y1="2386.0" x2="728.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="736.0" y1="2386.0" x2="736.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="744.0" y1="2386.0" x2="744.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="752.0" y1="2386.0" x2="752.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="760.0" y1="2386.0" x2="760.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="768.0" y1="2386.0" x2="768.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="776.0" y1="2386.0" x2="776.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="784.0" y1="2386.0" x2="784.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="792.0" y1="2386.0" x2="792.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="800.0" y1="2386.0" x2="800.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="808.0" y1="2386.0" x2="808.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="816.0" y1="2386.0" x2="816.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="824.0" y1="2386.0" x2="824.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="832.0" y1="2386.0" x2="832.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="840.0" y1="2386.0" x2="840.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="848.0" y1="2386.0" x2="848.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="856.0" y1="2386.0" x2="856.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="864.0" y1="2386.0" x2="864.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="872.0" y1="2386.0" x2="872.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="880.0" y1="2386.0" x2="880.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="888.0" y1="2386.0" x2="888.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="896.0" y1="2386.0" x2="896.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="904.0" y1="2386.0" x2="904.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="912.0" y1="2386.0" x2="912.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="920.0" y1="2386.0" x2="920.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="928.0" y1="2386.0" x2="928.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="936.0" y1="2386.0" x2="936.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="944.0" y1="2386.0" x2="944.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="952.0" y1="2386.0" x2="952.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="960.0" y1="2386.0" x2="960.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="968.0" y1="2386.0" x2="968.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="976.0" y1="2386.0" x2="976.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="984.0" y1="2386.0" x2="984.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="992.0" y1="2386.0" x2="992.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1000.0" y1="2386.0" x2="1000.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="1008.0" y1="2386.0" x2="1008.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1016.0" y1="2386.0" x2="1016.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1024.0" y1="2386.0" x2="1024.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1032.0" y1="2386.0" x2="1032.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1040.0" y1="2386.0" x2="1040.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="1048.0" y1="2386.0" x2="1048.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1056.0" y1="2386.0" x2="1056.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1064.0" y1="2386.0" x2="1064.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1072.0" y1="2386.0" x2="1072.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1080.0" y1="2386.0" x2="1080.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="1088.0" y1="2386.0" x2="1088.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1096.0" y1="2386.0" x2="1096.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1104.0" y1="2386.0" x2="1104.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1112.0" y1="2386.0" x2="1112.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1120.0" y1="2386.0" x2="1120.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<line x1="1128.0" y1="2386.0" x2="1128.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1136.0" y1="2386.0" x2="1136.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1144.0" y1="2386.0" x2="1144.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1152.0" y1="2386.0" x2="1152.0" y2="2398.0" stroke="#5a5a5a" stroke-width="1" />
+<line x1="1160.0" y1="2386.0" x2="1160.0" y2="2410.0" stroke="#949494" stroke-width="1" />
+<rect x="120.0" y="2386.0" width="2.0" height="64.0" fill="#bdbdbd" />
+<text x="130.0" y="2429.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >01</text>
+<text x="130.0" y="2447.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Fotos</text>
+<rect x="388.0" y="2386.0" width="2.0" height="64.0" fill="#bdbdbd" />
+<text x="398.0" y="2429.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >02</text>
+<text x="398.0" y="2447.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Maße</text>
+<rect x="656.0" y="2386.0" width="2.0" height="64.0" fill="#bdbdbd" />
+<text x="666.0" y="2429.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >03</text>
+<text x="666.0" y="2447.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Wünsche</text>
+<rect x="924.0" y="2386.0" width="2.0" height="64.0" fill="#bdbdbd" />
+<text x="934.0" y="2429.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >04</text>
+<text x="934.0" y="2447.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Blatt</text>
+<line x1="1154.0" y1="2391.0" x2="1166.0" y2="2379.0" stroke="#bdbdbd" stroke-width="1.5" />
+<text x="120.0" y="2500.4" font-size="17" font-weight="400" fill="#bdbdbd" text-anchor="start" >Unklares darf offen bleiben. Weitermachen geht</text>
+<text x="120.0" y="2524.9" font-size="17" font-weight="400" fill="#bdbdbd" text-anchor="start" >später, im selben Browser.</text>
+<rect x="121.0" y="2556.0" width="198.0" height="50.0" rx="25.0" fill="none" stroke="#f08c2e" stroke-width="2" />
+<text x="220.0" y="2587.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="middle" >Führung starten</text>
+<text x="336.0" y="2575.7" font-size="13" font-weight="400" fill="#949494" text-anchor="start" >Mit Beispielfotos,</text>
+<text x="336.0" y="2595.7" font-size="13" font-weight="400" fill="#949494" text-anchor="start" >ohne eigene Maße.</text>
+<path d="M652.0 2493.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="676.0" y="2498.0" font-size="15" font-weight="400" text-anchor="start"><tspan fill="#bdbdbd" font-weight="500">Fotos und Eingaben bleiben </tspan><tspan fill="#efefef" font-weight="700">ohne Konto</tspan><tspan fill="#bdbdbd" font-weight="500"> auf dem Gerät.</tspan></text>
+<path d="M652.0 2523.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="676.0" y="2528.0" font-size="15" font-weight="400" text-anchor="start"><tspan fill="#bdbdbd" font-weight="500">Die KI wertet Fotos </tspan><tspan fill="#efefef" font-weight="700">nur mit Einwilligung</tspan><tspan fill="#bdbdbd" font-weight="500"> aus.</tspan></text>
+<path d="M652.0 2553.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="676.0" y="2558.0" font-size="15" font-weight="400" text-anchor="start"><tspan fill="#bdbdbd" font-weight="500">Zum Kauf: E-Mail und Code, </tspan><tspan fill="#efefef" font-weight="700">kein Passwort</tspan><tspan fill="#bdbdbd" font-weight="500">.</tspan></text>
+<text x="652.0" y="2599.4" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Mehr zu Fotos und KI →</text>
+<line x1="652.0" y1="2605.4" x2="835.4" y2="2605.4" stroke="#949494" stroke-width="1" />
+<rect x="746.4" y="2358.0" width="413.6" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="753.4" y="2372.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z20 HELD · Maßstab 1040 × 64 (Fassung A, Festlegung he-04)</text>
+<rect x="893.5" y="2460.0" width="266.5" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="900.5" y="2474.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE · Stationen, Haken, Lesestapel, Link</text>
+<rect x="560.0" y="2246.0" width="241.5" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="567.0" y="2260.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE · 08: „03 · DATEN UND KONTO“</text>
+<rect x="80.0" y="2482.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="2496.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="80.0" y="2571.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="2585.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="600.0" y="2482.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="607.0" y="2496.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<line x1="120.0" y1="2744.0" x2="1160.0" y2="2744.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="2803.0" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Aus dem <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Ratgeber.</tspan></text>
+<text x="1160.0" y="2803.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="end" >Alle Ratgeber ›</text>
+<line x1="1039.1" y1="2809.0" x2="1160.0" y2="2809.0" stroke="#949494" stroke-width="1" />
+<rect x="120.0" y="2834.0" width="151.0" height="96.0" rx="18" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="136.0" y="2860.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >Schritt 1</text>
+<text x="136.0" y="2885.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Prüfen</text>
+<text x="136.0" y="2909.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >3 Ratgeber</text>
+<rect x="283.0" y="2834.0" width="151.0" height="96.0" rx="18" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="299.0" y="2860.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >Schritt 2</text>
+<text x="299.0" y="2885.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Entscheiden</text>
+<text x="299.0" y="2909.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >3 Ratgeber</text>
+<rect x="446.0" y="2834.0" width="151.0" height="96.0" rx="18" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="462.0" y="2860.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >Schritt 3</text>
+<text x="462.0" y="2885.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Auswählen</text>
+<text x="462.0" y="2909.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >6 Ratgeber</text>
+<rect x="609.0" y="2834.0" width="226.0" height="96.0" rx="18" fill="#4a4a4a" stroke="#e0e0e0" stroke-width="2" />
+<clipPath id="clipAnker"><rect x="609" y="2834" width="226" height="96" rx="18"/></clipPath>
+<g clip-path="url(#clipAnker)">
+<rect x="763.0" y="2834.0" width="72.0" height="96.0" fill="#6a6a6a" />
+<rect x="763.0" y="2834.0" width="72.0" height="96.0" fill="url(#hatchL)" />
+</g>
+<text x="625.0" y="2860.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >Schritt 4</text>
+<text x="625.0" y="2885.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Ausmessen</text>
+<text x="625.0" y="2909.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >8 Ratgeber</text>
+<rect x="847.0" y="2834.0" width="151.0" height="96.0" rx="18" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="863.0" y="2860.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >Schritt 5</text>
+<text x="863.0" y="2885.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Vergleichen</text>
+<text x="863.0" y="2909.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >1 Ratgeber</text>
+<rect x="1010.0" y="2834.0" width="151.0" height="96.0" rx="18" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="1026.0" y="2860.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" >Schritt 6</text>
+<text x="1026.0" y="2885.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Einbauen</text>
+<text x="1026.0" y="2909.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >2 Ratgeber</text>
+<rect x="80.0" y="2875.0" width="32.7" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="87.0" y="2889.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE</text>
+<rect x="609.0" y="2938.0" width="599.4" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="616.0" y="2952.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Ankerkachel 226 × 96 mit Messausschnitt 72 × 96 (Bildebene); Papierweiß nur nach H5-AB-1</text>
+<line x1="120.0" y1="3058.0" x2="1160.0" y2="3058.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="3117.0" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Häufige <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Fragen</tspan></text>
+<text x="563.0" y="3114.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Kann ich meine Fenster selbst ausmessen?</text>
+<line x1="1141.0" y1="3108.0" x2="1155.0" y2="3108.0" stroke="#949494" stroke-width="2" />
+<line x1="1148.0" y1="3101.0" x2="1148.0" y2="3115.0" stroke="#949494" stroke-width="2" />
+<line x1="563.0" y1="3134.5" x2="1160.0" y2="3134.5" stroke="#5c5c5c" stroke-width="1" />
+<text x="563.0" y="3167.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Was kostet eeziframes?</text>
+<line x1="1141.0" y1="3161.0" x2="1155.0" y2="3161.0" stroke="#949494" stroke-width="2" />
+<line x1="1148.0" y1="3154.0" x2="1148.0" y2="3168.0" stroke="#949494" stroke-width="2" />
+<line x1="563.0" y1="3187.5" x2="1160.0" y2="3187.5" stroke="#5c5c5c" stroke-width="1" />
+<text x="563.0" y="3220.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Wie kommt mein Aufmaß zum Fensterbauer?</text>
+<line x1="1141.0" y1="3214.0" x2="1155.0" y2="3214.0" stroke="#949494" stroke-width="2" />
+<line x1="1148.0" y1="3207.0" x2="1148.0" y2="3221.0" stroke="#949494" stroke-width="2" />
+<line x1="563.0" y1="3240.5" x2="1160.0" y2="3240.5" stroke="#5c5c5c" stroke-width="1" />
+<text x="563.0" y="3273.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="start" >Brauche ich ein Konto oder eine App aus dem Store?</text>
+<line x1="1141.0" y1="3267.0" x2="1155.0" y2="3267.0" stroke="#949494" stroke-width="2" />
+<line x1="1148.0" y1="3260.0" x2="1148.0" y2="3274.0" stroke="#949494" stroke-width="2" />
+<line x1="563.0" y1="3293.5" x2="1160.0" y2="3293.5" stroke="#5c5c5c" stroke-width="1" />
+<rect x="120.0" y="3150.0" width="253.7" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="127.0" y="3164.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Gestaltung wie fb-13 (Lage abgeleitet)</text>
+<line x1="120.0" y1="3422.0" x2="1160.0" y2="3422.0" stroke="#5c5c5c" stroke-width="1" />
+<clipPath id="clipH7"><rect x="563" y="3422" width="717" height="320"/></clipPath>
+<rect x="563.0" y="3422.0" width="717.0" height="320.0" fill="#4b4b4b" />
+<rect x="563.0" y="3422.0" width="717.0" height="320.0" fill="url(#hatch)" />
+<g clip-path="url(#clipH7)">
+<rect x="1143.0" y="3422.0" width="137.0" height="290.0" fill="#8a8a8a" />
+<circle cx="1210" cy="3562" r="220" fill="url(#licht)" opacity="0.6"/>
+<line x1="1087.0" y1="3422.0" x2="1087.0" y2="3742.0" stroke="#e0e0e0" stroke-width="4" />
+<circle cx="947" cy="3562" r="45" fill="#666666" stroke="#d0d0d0" stroke-width="1.5" stroke-dasharray="6 4"/>
+<rect x="1003.0" y="3597.0" width="42.0" height="70.0" rx="6" fill="#2a2a2a" stroke="#bdbdbd" stroke-width="1" />
+</g>
+<rect x="563.0" y="3422.0" width="287.0" height="320.0" fill="url(#fadeL)" />
+<rect x="563.0" y="3422.0" width="717.0" height="51.0" fill="url(#fadeT)" />
+<rect x="563.0" y="3646.0" width="717.0" height="96.0" fill="url(#fadeB)" />
+<text x="120.0" y="3511.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Das <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">erste</tspan> Fenster</text>
+<text x="120.0" y="3553.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">ausmessen.</text>
+<text x="120.0" y="3591.0" font-size="13" font-weight="400" text-anchor="start"><tspan fill="#efefef" font-weight="700">Messen kostenlos, ohne Konto</tspan><tspan fill="#949494" font-weight="500"> · Aufmaßblatt 7,99 € bis 17.11.2026,</tspan></text>
+<text x="120.0" y="3609.0" font-size="13" font-weight="400" text-anchor="start"><tspan fill="#949494" font-weight="500">danach 12,99 €</tspan></text>
+<rect x="120.0" y="3636.0" width="218.0" height="52.0" rx="26.0" fill="#f08c2e" />
+<text x="142.0" y="3668.1" font-size="17" font-weight="700" fill="#1a1a1a" text-anchor="start" >Jetzt ausmessen</text>
+<circle cx="310.0" cy="3662.0" r="14" fill="#1a1a1a" opacity="0.85"/>
+<text x="310.0" y="3667.0" font-size="15" font-weight="700" fill="#f08c2e" text-anchor="middle" >→</text>
+<rect x="850.8" y="3712.0" width="421.2" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="857.8" y="3726.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z20 HELD · Bildband 717 × 320 aus dem Foto von H1 (Klammer)</text>
+<rect x="478.7" y="3442.0" width="60.3" height="20" rx="4" fill="#ffffff" stroke="#8a8a8a" stroke-width="1"/>
+<text x="485.7" y="3456.5" font-size="12" font-weight="700" fill="#333333" text-anchor="start" >TE · h2</text>
+<rect x="350.0" y="3652.0" width="103.4" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="357.0" y="3666.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >eine Handlung</text>
+<rect x="120.0" y="3870.0" width="419.0" height="189.0" rx="24" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="152.0" y="3915.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" letter-spacing="0.12em" >FÜR FENSTERBAUER</text>
+<text x="152.0" y="3945.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start">Dieses Werkzeug, unter Ihrer <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Marke.</tspan></text>
+<rect x="153.0" y="3976.0" width="261.0" height="50.0" rx="25.0" fill="none" stroke="#f08c2e" stroke-width="2" />
+<text x="283.5" y="4007.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="middle" >Zur Seite für Fensterbauer</text>
+<rect x="563.0" y="3890.0" width="346.9" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="570.0" y="3904.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >st-04 · Karte 419 × 189, opak; Sp. 6–12 bewusst leer</text>
+<rect x="563.0" y="3914.0" width="383.1" height="20" rx="4" fill="#fff6c8" stroke="#111111" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="570.0" y="3928.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >TE · AB IA-AB-9: ein Ring statt Cream, schaltet die Ansicht</text>
+<line x1="120.0" y1="4187.0" x2="1160.0" y2="4187.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="4235.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Für Hauseigentümer</text>
+<text x="652.0" y="4235.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Für Fensterbauer</text>
+<text x="120.0" y="4275.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Fenster ausmessen</text>
+<text x="120.0" y="4319.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Führung starten</text>
+<text x="120.0" y="4363.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Gesichertes Aufmaß öffnen</text>
+<text x="386.0" y="4275.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Ratgeber</text>
+<text x="386.0" y="4319.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Anleitung Fenster ausmessen</text>
+<text x="652.0" y="4275.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Eigener Fenster-Konfigurator</text>
+<text x="652.0" y="4319.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Konfigurator-Pakete</text>
+<text x="652.0" y="4363.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Paketbedingungen</text>
+<text x="652.0" y="4407.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Anmelden</text>
+<text x="918.0" y="4275.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Erstaufmaß und Feinaufmaß</text>
+<text x="918.0" y="4319.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Falsches Aufmaß: Haftung</text>
+<text x="918.0" y="4363.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Aufmaß kostenpflichtig?</text>
+<text x="918.0" y="4407.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Geplatzter Aufmaßtermin</text>
+<text x="918.0" y="4451.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Fensterbau-Software</text>
+<line x1="120.0" y1="4492.0" x2="1160.0" y2="4492.0" stroke="#5c5c5c" stroke-width="1" />
+<rect x="120.0" y="4526.0" width="24.0" height="24.0" rx="6" fill="#d6d6d6" />
+<text x="152.0" y="4544.0" font-size="17" font-weight="800" fill="#efefef" text-anchor="start" >eeziframes</text>
+<text x="386.0" y="4543.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Impressum · AGB · Nutzungsbedingungen · Datenschutz · Cookies</text>
+<rect x="918.0" y="4516.0" width="170.0" height="44.0" rx="22" fill="none" stroke="#8a8a8a" stroke-width="2" />
+<text x="1003.0" y="4543.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Vertrag widerrufen</text>
+<text x="120.0" y="4587.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >ask@eeziframes.com</text>
+<text x="386.0" y="4587.0" font-size="13" font-weight="500" fill="#949494" text-anchor="start" >nur ohne Server: „Pilotphase: Konto und Projekte liegen in diesem Browser.“</text>
+<rect x="799.7" y="4195.0" width="360.3" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="806.7" y="4209.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >kurz, ohne Brotkrumen · Kontext Hauseigentümer zuerst</text>
+<line x1="120.0" y1="0.0" x2="120.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="184.7" y1="0.0" x2="184.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="208.7" y1="0.0" x2="208.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="273.3" y1="0.0" x2="273.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="297.3" y1="0.0" x2="297.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="362.0" y1="0.0" x2="362.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="386.0" y1="0.0" x2="386.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="450.7" y1="0.0" x2="450.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="474.7" y1="0.0" x2="474.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="539.3" y1="0.0" x2="539.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="563.3" y1="0.0" x2="563.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="628.0" y1="0.0" x2="628.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="652.0" y1="0.0" x2="652.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="716.7" y1="0.0" x2="716.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="740.7" y1="0.0" x2="740.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="805.3" y1="0.0" x2="805.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="829.3" y1="0.0" x2="829.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="894.0" y1="0.0" x2="894.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="918.0" y1="0.0" x2="918.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="982.7" y1="0.0" x2="982.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1006.7" y1="0.0" x2="1006.7" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1071.3" y1="0.0" x2="1071.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1095.3" y1="0.0" x2="1095.3" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1160.0" y1="0.0" x2="1160.0" y2="4692.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<rect x="-150.0" y="0.0" width="150.0" height="4692.0" fill="#f2f2f0" />
+<line x1="-12.0" y1="0.0" x2="0.0" y2="0.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="4.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >0</text>
+<line x1="-6.0" y1="100.0" x2="0.0" y2="100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="200.0" x2="0.0" y2="200.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="300.0" x2="0.0" y2="300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="400.0" x2="0.0" y2="400.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="404.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >400</text>
+<line x1="-6.0" y1="500.0" x2="0.0" y2="500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="600.0" x2="0.0" y2="600.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="700.0" x2="0.0" y2="700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="800.0" x2="0.0" y2="800.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="804.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >800</text>
+<line x1="-6.0" y1="900.0" x2="0.0" y2="900.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="1000.0" x2="0.0" y2="1000.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="1100.0" x2="0.0" y2="1100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="1200.0" x2="0.0" y2="1200.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="1204.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >1200</text>
+<line x1="-6.0" y1="1300.0" x2="0.0" y2="1300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="1400.0" x2="0.0" y2="1400.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="1500.0" x2="0.0" y2="1500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="1600.0" x2="0.0" y2="1600.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="1604.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >1600</text>
+<line x1="-6.0" y1="1700.0" x2="0.0" y2="1700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="1800.0" x2="0.0" y2="1800.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="1900.0" x2="0.0" y2="1900.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="2000.0" x2="0.0" y2="2000.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="2004.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >2000</text>
+<line x1="-6.0" y1="2100.0" x2="0.0" y2="2100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="2200.0" x2="0.0" y2="2200.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="2300.0" x2="0.0" y2="2300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="2400.0" x2="0.0" y2="2400.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="2404.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >2400</text>
+<line x1="-6.0" y1="2500.0" x2="0.0" y2="2500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="2600.0" x2="0.0" y2="2600.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="2700.0" x2="0.0" y2="2700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="2800.0" x2="0.0" y2="2800.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="2804.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >2800</text>
+<line x1="-6.0" y1="2900.0" x2="0.0" y2="2900.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="3000.0" x2="0.0" y2="3000.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="3100.0" x2="0.0" y2="3100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="3200.0" x2="0.0" y2="3200.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="3204.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >3200</text>
+<line x1="-6.0" y1="3300.0" x2="0.0" y2="3300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="3400.0" x2="0.0" y2="3400.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="3500.0" x2="0.0" y2="3500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="3600.0" x2="0.0" y2="3600.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="3604.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >3600</text>
+<line x1="-6.0" y1="3700.0" x2="0.0" y2="3700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="3800.0" x2="0.0" y2="3800.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="3900.0" x2="0.0" y2="3900.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="4000.0" x2="0.0" y2="4000.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="4004.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >4000</text>
+<line x1="-6.0" y1="4100.0" x2="0.0" y2="4100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="4200.0" x2="0.0" y2="4200.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="4300.0" x2="0.0" y2="4300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="4400.0" x2="0.0" y2="4400.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="4404.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >4400</text>
+<line x1="-6.0" y1="4500.0" x2="0.0" y2="4500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="4600.0" x2="0.0" y2="4600.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="0.0" y1="800.0" x2="1280.0" y2="800.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="819.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 2</text>
+<line x1="0.0" y1="1600.0" x2="1280.0" y2="1600.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="1619.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 3</text>
+<line x1="0.0" y1="2400.0" x2="1280.0" y2="2400.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="2419.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 4</text>
+<line x1="0.0" y1="3200.0" x2="1280.0" y2="3200.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="3219.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 5</text>
+<line x1="0.0" y1="4000.0" x2="1280.0" y2="4000.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="4019.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 6</text>
+<rect x="-146.0" y="26.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="41.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H1</text>
+<rect x="-146.0" y="706.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="721.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H2</text>
+<rect x="-146.0" y="1320.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="1335.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H3</text>
+<rect x="-146.0" y="2228.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="2243.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H4</text>
+<rect x="-146.0" y="2746.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="2761.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H5</text>
+<rect x="-146.0" y="3060.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="3075.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H6</text>
+<rect x="-146.0" y="3424.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="3439.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >H7</text>
+<rect x="-146.0" y="3872.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="3887.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >R5</text>
+<rect x="-146.0" y="4189.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="4204.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >Fuß</text>
+<line x1="1222.0" y1="578.0" x2="1222.0" y2="702.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="578.0" x2="1228.0" y2="578.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="702.0" x2="1228.0" y2="702.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="644.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="1192.0" x2="1222.0" y2="1316.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="1192.0" x2="1228.0" y2="1192.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="1316.0" x2="1228.0" y2="1316.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="1258.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="2100.0" x2="1222.0" y2="2224.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="2100.0" x2="1228.0" y2="2100.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="2224.0" x2="1228.0" y2="2224.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="2166.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="2618.0" x2="1222.0" y2="2742.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="2618.0" x2="1228.0" y2="2618.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="2742.0" x2="1228.0" y2="2742.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="2684.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="2932.0" x2="1222.0" y2="3056.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="2932.0" x2="1228.0" y2="2932.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="3056.0" x2="1228.0" y2="3056.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="2998.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="3296.0" x2="1222.0" y2="3420.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="3296.0" x2="1228.0" y2="3296.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="3420.0" x2="1228.0" y2="3420.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="3362.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="3744.0" x2="1222.0" y2="3868.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="3744.0" x2="1228.0" y2="3744.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="3868.0" x2="1228.0" y2="3868.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="3810.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="4061.0" x2="1222.0" y2="4185.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="4061.0" x2="1228.0" y2="4061.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="4185.0" x2="1228.0" y2="4185.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="4127.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<rect x="1300.0" y="-52.0" width="444.0" height="176.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="-52.0" x2="1300.0" y2="124.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="-27.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R1 · st-01-baender · Hinweisband</text>
+<text x="1310.0" y="-10.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 1 · 0 px; 40 px nur ohne Server</text>
+<text x="1310.0" y="12.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="12.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="28.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="28.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="44.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="44.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="60.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="60.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="76.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="76.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="98.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Einführungsband entfällt auf / (Preis steht in der Preiszeile von H1,</text>
+<text x="1310.0" y="114.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   IA-AB-6). Quelle: 08 8.3.3</text>
+<line x1="1282.0" y1="-28.0" x2="1298.0" y2="-38.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="138.0" width="444.0" height="304.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="138.0" x2="1300.0" y2="442.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="163.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R2 · rh-01-kopf + st-02-umschalter · Kopf</text>
+<text x="1310.0" y="180.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 1 · T0 · 64 px · Z 40, klebt · Kontext Hauseigentümer auf /</text>
+<text x="1310.0" y="202.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="202.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >auf der Bühne flächenlos über Scrim, danach opak</text>
+<text x="1310.0" y="218.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="218.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="234.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="234.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="250.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="250.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >– (am Schreibtisch Umschalter als Fläche #1f1f1f</text>
+<text x="1412.0" y="266.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >im Kopf, x 284–568; Glas nur am Telefon über dem</text>
+<text x="1412.0" y="282.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Foto)</text>
+<text x="1310.0" y="298.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="298.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="320.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Logo · Umschalter „Hauseigentümer | Fensterbauer“ (Segmente 150</text>
+<text x="1310.0" y="336.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   und 126) · „Ratgeber“ · Kopfknopf „Fenster ausmessen“ 175 × 44,</text>
+<text x="1310.0" y="352.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Cream erst, wenn keine Cream im Inhalt sichtbar ist.</text>
+<text x="1310.0" y="368.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >„Für Fensterbauer“ entfällt hier, weil der Umschalter dasselbe Ziel</text>
+<text x="1310.0" y="384.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   trägt (rh-01, st-02 Festlegung I).</text>
+<text x="1310.0" y="400.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Maße des Umschalters nach st-02 (K-29: 284 × 44); Lage im Kopf</text>
+<text x="1310.0" y="416.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   nach st-02 G.3, rh-01 nennt 274–545, he-01 266–526 (abzugleichen).</text>
+<text x="1310.0" y="432.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 09/rh-01 C; 09/st-02 G.3</text>
+<line x1="1282.0" y1="32.0" x2="1298.0" y2="152.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="456.0" width="444.0" height="320.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="456.0" x2="1300.0" y2="776.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="481.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >H1 · he-01-startbild · Startbild</text>
+<text x="1310.0" y="498.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 3 · T1 · Foto x 552–1280, y 0–760 · Split 5 : 7 · Abschnittsende</text>
+<text x="1310.0" y="514.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >576</text>
+<text x="1310.0" y="536.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="536.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund #161616</text>
+<text x="1310.0" y="552.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="552.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >– (bewusst nicht)</text>
+<text x="1310.0" y="568.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="568.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Foto Waschbär an der Maueröffnung, 728 × 760,</text>
+<text x="1412.0" y="584.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >links 552–700 und unten 600–760 ausgeblendet;</text>
+<text x="1412.0" y="600.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Anker = Tageslicht in der Öffnung</text>
+<text x="1310.0" y="616.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="616.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >– am Schreibtisch (Telefon: Glas-Umschalter 260 ×</text>
+<text x="1412.0" y="632.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >44 über dem Foto)</text>
+<text x="1310.0" y="648.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="648.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Tageslicht in der Öffnung, Quelle im Foto</text>
+<text x="1310.0" y="670.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Bedienschicht: Eyebrow 13 · h1 40 zweizeilig (wörtlich, grün „eezi.“)</text>
+<text x="1310.0" y="686.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   · Lead 17 · Preiszeile 13 über den Knöpfen · Cream „Jetzt</text>
+<text x="1310.0" y="702.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   ausmessen“ und Ring „Führung starten“ nebeneinander, y 499–551.</text>
+<text x="1310.0" y="718.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Signature: inszenierend 1 nur am Telefon (Glas); am Schreibtisch 0.</text>
+<text x="1310.0" y="734.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Bewegung: Foto 900 ms Deckkraft, Zoom 1,03 → 1; Text steht ab dem</text>
+<text x="1310.0" y="750.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   ersten Bild; [H] Foto bleibt beim Scrollen zurück (0,9).</text>
+<text x="1310.0" y="766.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 09/he-01 G</text>
+<line x1="1282.0" y1="300.0" x2="1298.0" y2="470.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="790.0" width="444.0" height="304.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="790.0" x2="1300.0" y2="1094.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="815.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >H2 · he-02-probemessung · 01 Probemessung</text>
+<text x="1310.0" y="832.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 2 · T4 interaktiv · ≈ 486 px · Split 5 : 7</text>
+<text x="1310.0" y="854.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="854.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="870.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="870.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="886.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="886.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Zeichnungskarte 560 × 470 (Papierweiß),</text>
+<text x="1412.0" y="902.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Maueröffnung von innen; einziger Hellwert</text>
+<text x="1310.0" y="918.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="918.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="934.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="934.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="956.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Bedienschicht: Legende „BREITE MESSEN · 0 / 3“, drei Knöpfe 114</text>
+<text x="1310.0" y="972.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   × 44 (aria-pressed), Satz 17 (wörtlich web/index.html:59), Cream</text>
+<text x="1310.0" y="988.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   „Jetzt ausmessen“.</text>
+<text x="1310.0" y="1004.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Signature: informierend Maßlinie mit Wert. Bewegung: je Tipp</text>
+<text x="1310.0" y="1020.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   zeichnet sich eine Linie, ihr Wert zählt mit (Bildschicht); danach</text>
+<text x="1310.0" y="1036.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Etikett „KLEINSTES MASS“.</text>
+<text x="1310.0" y="1052.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Prüfpunkt: Abstand der Cream zur Cream von H1 am Schreibtisch nur</text>
+<text x="1310.0" y="1068.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   568 px.</text>
+<text x="1310.0" y="1084.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 09/he-02 C</text>
+<line x1="1282.0" y1="764.0" x2="1298.0" y2="804.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="1314.0" width="444.0" height="276.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="1314.0" x2="1300.0" y2="1590.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="1339.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >H3 · he-03-aufmassblatt-preis · 02 Was im Aufmaß</text>
+<text x="1310.0" y="1359.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >steckt</text>
+<text x="1310.0" y="1376.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 2 · T5-artig, statisch · ≈ 780 px · Split 5 : 7</text>
+<text x="1310.0" y="1398.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="1398.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="1414.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="1414.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="1430.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="1430.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >echtes Aufmaßblatt (Kundenfassung) 420 × 398,</text>
+<text x="1412.0" y="1446.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >−2°, unten ausgeblendet</text>
+<text x="1310.0" y="1462.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="1462.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >– (Preisetikett opak #1f1f1f)</text>
+<text x="1310.0" y="1478.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="1478.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >– (1-px-Lichtkante am Etikett)</text>
+<text x="1310.0" y="1500.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Bedienschicht links: Zusatz, drei Preiszeilen (Betragsspalte 80),</text>
+<text x="1310.0" y="1516.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Endpreis, Katalog 7 × 28, Elementarten als Chips in zwei Reihen,</text>
+<text x="1310.0" y="1532.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Grenze. Keine eigene Handlung, kein Countdown.</text>
+<text x="1310.0" y="1548.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Bewegung: Blatt legt sich einmal ab (600 ms, 24 px aus</text>
+<text x="1310.0" y="1564.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Lichtrichtung).</text>
+<text x="1310.0" y="1580.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 09/he-03 C</text>
+<line x1="1282.0" y1="1378.0" x2="1298.0" y2="1328.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="2222.0" width="444.0" height="256.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="2222.0" x2="1300.0" y2="2478.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="2247.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >H4 · he-04-ablauf-daten · 03 Ablauf und Daten</text>
+<text x="1310.0" y="2264.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 2 · T8-artig · ≈ 390 px · Fassung A (ohne App-Bildschirme)</text>
+<text x="1310.0" y="2286.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="2286.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="2302.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="2302.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="2318.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="2318.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Maßstab als Band 1040 × 64, Stationen auf Sp. 1,</text>
+<text x="1412.0" y="2334.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >4, 7, 10</text>
+<text x="1310.0" y="2350.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="2350.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="2366.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="2366.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="2388.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Darunter links Lesestapel und Ring „Führung starten“, rechts drei</text>
+<text x="1310.0" y="2404.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Haken und Link (links der Ablauf, rechts die Daten).</text>
+<text x="1310.0" y="2420.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Fassung B (Ziel): Split 5 : 7, rechts vier Miniaturen 130 × 267 und</text>
+<text x="1310.0" y="2436.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Maßstab 593 × 64; Höhe ≈ 460.</text>
+<text x="1310.0" y="2452.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Bewegung: nur einmaliges Einblenden über Deckkraft. Quelle:</text>
+<text x="1310.0" y="2468.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   09/he-04 C</text>
+<line x1="1282.0" y1="2286.0" x2="1298.0" y2="2236.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="2740.0" width="444.0" height="192.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="2740.0" x2="1300.0" y2="2932.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="2765.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >H5 · he-05-ratgeber-weg</text>
+<text x="1310.0" y="2782.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 2 · K35 · ≈ 186 px · ohne Kapitelzeile (K-16)</text>
+<text x="1310.0" y="2804.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="2804.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="2820.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="2820.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="2836.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="2836.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Ankerkachel „4 Ausmessen“ 226 × 96 mit</text>
+<text x="1412.0" y="2852.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Messausschnitt</text>
+<text x="1310.0" y="2868.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="2868.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="2884.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="2884.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="2906.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Sechs Kacheln in einer Reihe (1 : 1 : 1 : 1,5 : 1 : 1), Fuge 12 →</text>
+<text x="1310.0" y="2922.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   /ratgeber/#schritt-n; flach, keine Signature. Quelle: 09/he-05 G</text>
+<line x1="1282.0" y1="2794.0" x2="1298.0" y2="2754.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="3054.0" width="444.0" height="176.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="3054.0" x2="1300.0" y2="3230.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="3079.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >H6 · he-06-haeufige-fragen</text>
+<text x="1310.0" y="3096.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 1 · T9 · ≈ 236 px · Split 5 : 7</text>
+<text x="1310.0" y="3118.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="3118.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="3134.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="3134.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="3150.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="3150.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >keiner</text>
+<text x="1310.0" y="3166.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="3166.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="3182.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="3182.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="3204.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Vier Fragen, in Ansicht und Textfassung gleich; „Was kostet</text>
+<text x="1310.0" y="3220.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   eeziframes?“ nennt nur Messen und Aufmaßblatt. Quelle: 08 8.3.4 H6</text>
+<line x1="1282.0" y1="3108.0" x2="1298.0" y2="3068.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="3418.0" width="444.0" height="208.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="3418.0" x2="1300.0" y2="3626.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="3443.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >H7 · he-07-abschluss · Messaufforderung</text>
+<text x="1310.0" y="3460.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 2 · T11 · 320 px · Spiegel des Startbilds</text>
+<text x="1310.0" y="3482.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="3482.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="3498.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="3498.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="3514.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="3514.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Bildband 717 × 320 aus dem Startfoto, links 40 %,</text>
+<text x="1412.0" y="3530.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >oben 16 %, unten ab 70 % ausgeblendet</text>
+<text x="1310.0" y="3546.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="3546.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="3562.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="3562.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >– (Tageslicht nur als Bildinhalt)</text>
+<text x="1310.0" y="3584.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Bedienschicht: h2 40, Preiszeile, eine Cream „Jetzt ausmessen“; der</text>
+<text x="1310.0" y="3600.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Ring „Führung starten“ steht in H1 und H4. Bewegung: keine.</text>
+<text x="1310.0" y="3616.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 09/he-07 G</text>
+<line x1="1282.0" y1="3482.0" x2="1298.0" y2="3432.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="3866.0" width="444.0" height="176.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="3866.0" x2="1300.0" y2="4042.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="3891.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R5 · st-04-wechselkarte · Wechsel zu Fensterbauer</text>
+<text x="1310.0" y="3908.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 2 · T11 · 189 px · Sp. 1–5</text>
+<text x="1310.0" y="3930.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="3930.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="3946.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="3946.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="3962.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="3962.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >die Karte selbst (einziger Gegenstand)</text>
+<text x="1310.0" y="3978.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="3978.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="3994.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="3994.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="4016.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Kicker 13, Satz 17, Ring 52; die Karte ist nicht klickbar. Schaltet die</text>
+<text x="1310.0" y="4032.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Ansicht und springt an den Anfang. Quelle: 09/st-04 C</text>
+<line x1="1282.0" y1="3930.0" x2="1298.0" y2="3880.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="4183.0" width="444.0" height="208.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="4183.0" x2="1300.0" y2="4391.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="4208.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R6 · rh-03-brotkrumen-fuss · kurz</text>
+<text x="1310.0" y="4225.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 1 · T0 · ≈ 465 px · ohne Brotkrumen</text>
+<text x="1310.0" y="4247.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="4247.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="4263.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="4263.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="4279.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="4279.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="4295.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="4295.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="4311.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="4311.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="4333.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Gruppe Hauseigentümer zuerst (Messen, Lesen), dann Fensterbauer;</text>
+<text x="1310.0" y="4349.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Rechtszeile; „Vertrag widerrufen“; Pilotsatz nur ohne Server.</text>
+<text x="1310.0" y="4365.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >R7 st-05-textfassung: gleiche Folge als Text ohne JavaScript (nicht</text>
+<text x="1310.0" y="4381.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   gezeichnet). Quelle: 09/rh-03 C.2; 08 8.3.3</text>
+<line x1="1282.0" y1="4227.0" x2="1298.0" y2="4197.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+</g>
+<text x="40" y="5876" font-size="20" font-weight="800" fill="#222222">Teil 2 · Ansicht Fensterbauer, erster Bildschirm</text>
+<text x="40" y="5898" font-size="13" fill="#5f5f5f">Startseite mit Umschalter auf „Fensterbauer“: eingebettete Seite für Fensterbauer</text>
+<g transform="translate(150,5924)">
+<rect x="0.0" y="0.0" width="1280.0" height="920.0" fill="#1c1c1c" />
+<rect x="120.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="208.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="297.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="386.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="474.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="563.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="652.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="740.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="829.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="918.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="1006.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="1095.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<clipPath id="clipFoto1"><rect x="553" y="0" width="727" height="760"/></clipPath>
+<rect x="553.0" y="0.0" width="727.0" height="760.0" fill="#4b4b4b" />
+<rect x="553.0" y="0.0" width="727.0" height="760.0" fill="url(#hatch)" />
+<g clip-path="url(#clipFoto1)">
+<circle cx="1236" cy="248" r="270" fill="url(#licht)"/>
+<ellipse cx="1240" cy="248" rx="112" ry="172" fill="#6e6e6e" stroke="#c9c9c9" stroke-width="3"/>
+<ellipse cx="1240" cy="248" rx="112" ry="172" fill="url(#hatchL)"/>
+<path d="M842 713 C 820 560, 840 400, 900 330 C 940 300, 1040 300, 1120 250 L 1170 210 L 1196 330 L 1180 470 C 1220 520, 1264 600, 1264 713 Z" fill="#5a5a5a" stroke="#cfcfcf" stroke-width="1.5" stroke-dasharray="6 4"/>
+<circle cx="948" cy="268" r="50" fill="#666666" stroke="#cfcfcf" stroke-width="1.5" stroke-dasharray="6 4"/>
+<polygon points="769,128 851,141 792,157" fill="#d0d0d0"/>
+<rect x="764.0" y="280.0" width="44.0" height="58.0" rx="6" fill="#2a2a2a" stroke="#bdbdbd" stroke-width="1" />
+<line x1="797.0" y1="410.0" x2="861.0" y2="471.0" stroke="#d0d0d0" stroke-width="4" />
+<line x1="1262.0" y1="92.0" x2="1262.0" y2="404.0" stroke="#e0e0e0" stroke-width="1.5" />
+<line x1="1253.0" y1="92.0" x2="1271.0" y2="92.0" stroke="#e0e0e0" stroke-width="1.5" />
+<line x1="1253.0" y1="404.0" x2="1271.0" y2="404.0" stroke="#e0e0e0" stroke-width="1.5" />
+</g>
+<rect x="553.0" y="0.0" width="291.0" height="760.0" fill="url(#fadeL)" />
+<rect x="553.0" y="562.0" width="727.0" height="198.0" fill="url(#fadeB)" />
+<g transform="rotate(-90 1262 248)"><rect x="1222" y="237" width="80" height="22" rx="11" fill="#ffffff" fill-opacity="0.16" stroke="#4c8dff" stroke-width="1.5"/><text x="1262" y="252.5" font-size="13" font-weight="600" fill="#efefef" text-anchor="middle">1.200 mm</text></g>
+<rect x="0.0" y="0.0" width="1280.0" height="104.0" fill="url(#scrim)" />
+<text x="902.0" y="88.0" font-size="13" font-weight="600" fill="#bdbdbd" text-anchor="start" letter-spacing="0.12em" >BEISPIEL</text>
+<rect x="913.0" y="117.0" width="194.0" height="56.0" rx="16" fill="#333333" opacity="0.6" />
+<rect x="906.0" y="108.0" width="207.0" height="60.0" rx="17" fill="#333333" opacity="0.85" />
+<rect x="900.0" y="98.0" width="220.0" height="64.0" rx="18" fill="#ffffff" stroke="#4c8dff" stroke-width="1.5" fill-opacity="0.16"/>
+<circle cx="916" cy="119" r="4" fill="#d8d8d8"/>
+<text x="928.0" y="124.0" font-size="15" font-weight="800" fill="#efefef" text-anchor="start" >Neue Anfrage</text>
+<text x="928.0" y="145.0" font-size="13" font-weight="500" fill="#bdbdbd" text-anchor="start" >Familie Weber · 4 Positionen</text>
+<rect x="900.0" y="186.0" width="276.9" height="20" rx="4" fill="#ffffff" stroke="#4c8dff" stroke-width="1"/>
+<text x="907.0" y="200.5" font-size="12" font-weight="700" fill="#0b3a99" text-anchor="start" >Z25 GLAS · Meldungsstapel 3 × 220 × 64</text>
+<rect x="900.0" y="210.0" width="111.5" height="20" rx="4" fill="#fff6c8" stroke="#111111" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="907.0" y="224.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >TE · AB E-AB-4</text>
+<text x="120" y="253.0" font-size="13" font-weight="600" fill="#bdbdbd" letter-spacing="0.12em"><tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">FÜR FENSTERBAUER UND FENSTERHÄNDLER</tspan></text>
+<text x="120.0" y="304.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Ihr eigener Fenster-</text>
+<text x="120.0" y="346.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Konfigurator, unter Ihrer <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Marke</tspan></text>
+<rect x="120.0" y="377.0" width="112.0" height="36.0" rx="18" fill="#363636" />
+<path d="M131.0 395.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="148.0" y="400.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Ihre Domain</text>
+<rect x="238.0" y="377.0" width="106.0" height="36.0" rx="18" fill="#363636" />
+<path d="M249.0 395.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="266.0" y="400.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Ihre Marke</text>
+<rect x="350.0" y="377.0" width="121.0" height="36.0" rx="18" fill="#363636" />
+<path d="M361.0 395.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="378.0" y="400.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >PDF per E-Mail</text>
+<text x="120.0" y="442.0" font-size="13" font-weight="400" text-anchor="start"><tspan fill="#efefef" font-weight="600">Ab 29 € im Monat</tspan><tspan fill="#949494" font-weight="600"> netto, plus Einrichtung · vorläufig</tspan></text>
+<rect x="120.0" y="470.0" width="212.0" height="52.0" rx="26.0" fill="#f08c2e" />
+<text x="142.0" y="502.1" font-size="17" font-weight="700" fill="#1a1a1a" text-anchor="start" >Pakete ansehen</text>
+<circle cx="304.0" cy="496.0" r="14" fill="#1a1a1a" opacity="0.85"/>
+<text x="304.0" y="501.0" font-size="15" font-weight="700" fill="#f08c2e" text-anchor="middle" >→</text>
+<rect x="345.0" y="471.0" width="210.0" height="50.0" rx="25.0" fill="none" stroke="#f08c2e" stroke-width="2" />
+<text x="450.0" y="502.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="middle" >Selbst ausprobieren</text>
+<rect x="0.0" y="704.0" width="1280.0" height="176.0" fill="#1c1c1c" />
+<clipPath id="clipV2_2"><rect x="0" y="704" width="1280" height="176"/></clipPath>
+<g clip-path="url(#clipV2_2)">
+<ellipse cx="640" cy="704" rx="90" ry="184" transform="rotate(10 640 704)" fill="url(#licht)" opacity="0.8"/>
+<g opacity="0.28">
+<rect x="-48.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="-48.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.4">
+<rect x="80.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="80.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.55">
+<rect x="208.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="208.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.72">
+<rect x="336.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="336.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.9">
+<rect x="464.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="464.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.9">
+<rect x="720.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="720.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.72">
+<rect x="848.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="848.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.55">
+<rect x="976.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="976.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.4">
+<rect x="1104.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="1104.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.28">
+<rect x="1232.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="1232.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<rect x="580.0" y="720.0" width="120.0" height="120.0" rx="8" fill="#5d5d5d" />
+<rect x="580.0" y="720.0" width="120.0" height="120.0" rx="8" fill="url(#hatchL)" />
+<rect x="580.0" y="720.0" width="120.0" height="120.0" rx="8" fill="none" stroke="#d0d0d0" stroke-width="1.5" />
+<rect x="0.0" y="704.0" width="64.0" height="176.0" fill="url(#fadeL)" />
+<rect x="1216" y="704" width="64" height="176" fill="url(#fadeL)" transform="rotate(180 1248 792)"/>
+</g>
+<line x1="0.0" y1="704.5" x2="1280.0" y2="704.5" stroke="#5c5c5c" stroke-width="1" />
+<line x1="0.0" y1="879.5" x2="1280.0" y2="879.5" stroke="#5c5c5c" stroke-width="1" />
+<line x1="560.0" y1="705.0" x2="720.0" y2="705.0" stroke="#4c8dff" stroke-width="3" />
+<text x="640.0" y="866.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="middle" >Hebe-Schiebe-Tür</text>
+<polygon points="1237,377 1163,283 578,698 702,854" fill="url(#keil)" opacity="0.4" stroke="#4c8dff" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="0.0" y="0.0" width="1280.0" height="104.0" fill="url(#scrim)" />
+<rect x="0.5" y="0.5" width="1279.0" height="63.0" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+<rect x="120.0" y="16.0" width="32.0" height="32.0" rx="8" fill="#d6d6d6" />
+<text x="162.0" y="38.0" font-size="17" font-weight="800" fill="#efefef" text-anchor="start" >eeziframes</text>
+<rect x="284.0" y="10.0" width="284.0" height="44.0" rx="22" fill="#2b2b2b" stroke="#7a7a7a" stroke-width="1" />
+<rect x="439.0" y="15.0" width="124.0" height="34.0" rx="17" fill="#3a3a3a" stroke="#efefef" stroke-width="2" />
+<text x="363.0" y="37.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="middle" >Hauseigentümer</text>
+<text x="501.0" y="37.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Fensterbauer</text>
+<text x="596.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >So funktioniert es</text>
+<text x="744.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >Ablauf</text>
+<text x="808.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >Fragen</text>
+<text x="915.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >Anmelden</text>
+<rect x="1011.0" y="11.0" width="148.0" height="42.0" rx="21.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-dasharray="6 4" />
+<text x="1085.0" y="37.4" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Pakete ansehen</text>
+<rect x="284.0" y="68.0" width="409.5" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="291.0" y="82.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Umschalter: „Fensterbauer“ aktiv · Sprungmarken x ≈ 600–868</text>
+<rect x="977.3" y="640.0" width="294.7" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="984.3" y="654.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z20 HELD · Foto wie auf /fuer-fensterbauer/</text>
+<rect x="120.0" y="206.0" width="331.6" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="127.0" y="220.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Z30 BEDIENSCHICHT · wie Seite für Fensterbauer</text>
+<line x1="120.0" y1="0.0" x2="120.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="184.7" y1="0.0" x2="184.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="208.7" y1="0.0" x2="208.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="273.3" y1="0.0" x2="273.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="297.3" y1="0.0" x2="297.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="362.0" y1="0.0" x2="362.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="386.0" y1="0.0" x2="386.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="450.7" y1="0.0" x2="450.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="474.7" y1="0.0" x2="474.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="539.3" y1="0.0" x2="539.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="563.3" y1="0.0" x2="563.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="628.0" y1="0.0" x2="628.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="652.0" y1="0.0" x2="652.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="716.7" y1="0.0" x2="716.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="740.7" y1="0.0" x2="740.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="805.3" y1="0.0" x2="805.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="829.3" y1="0.0" x2="829.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="894.0" y1="0.0" x2="894.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="918.0" y1="0.0" x2="918.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="982.7" y1="0.0" x2="982.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1006.7" y1="0.0" x2="1006.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1071.3" y1="0.0" x2="1071.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1095.3" y1="0.0" x2="1095.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1160.0" y1="0.0" x2="1160.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<rect x="-150.0" y="0.0" width="150.0" height="920.0" fill="#f2f2f0" />
+<line x1="-12.0" y1="0.0" x2="0.0" y2="0.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="4.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >0</text>
+<line x1="-6.0" y1="100.0" x2="0.0" y2="100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="200.0" x2="0.0" y2="200.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="300.0" x2="0.0" y2="300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="400.0" x2="0.0" y2="400.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="404.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >400</text>
+<line x1="-6.0" y1="500.0" x2="0.0" y2="500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="600.0" x2="0.0" y2="600.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="700.0" x2="0.0" y2="700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="800.0" x2="0.0" y2="800.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="804.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >800</text>
+<line x1="-6.0" y1="900.0" x2="0.0" y2="900.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="0.0" y1="800.0" x2="1280.0" y2="800.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="819.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 2</text>
+<rect x="-146.0" y="26.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="41.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >V1</text>
+<rect x="-146.0" y="706.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="721.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >V2</text>
+<rect x="1300.0" y="-4.0" width="444.0" height="288.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="-4.0" x2="1300.0" y2="284.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="21.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R2 + R4 · Ansicht Fensterbauer auf / (/#fensterbauer)</text>
+<text x="1310.0" y="38.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Einbettung der Seite für Fensterbauer (portal.js lädt sie, Verkauf.auf) ·</text>
+<text x="1310.0" y="54.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 4 · T1</text>
+<text x="1310.0" y="76.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="76.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund; Lichtkeil wie V1</text>
+<text x="1310.0" y="92.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="92.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="108.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="108.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Foto Astronaut 727 × 760 wie V1</text>
+<text x="1310.0" y="124.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="124.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Meldungsstapel (am Schreibtisch keine</text>
+<text x="1412.0" y="140.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Umschalter-Glasfläche)</text>
+<text x="1310.0" y="156.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="156.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Erdlicht → Keil bis V2</text>
+<text x="1310.0" y="178.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Unterschied zur eigenen Seite: Kopf mit Umschalter x 284–568,</text>
+<text x="1310.0" y="194.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Sprungmarken x ≈ 600–868 (st-02 G.3), „Anmelden“, Ring bis 1160;</text>
+<text x="1310.0" y="210.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Fuß ohne Brotkrumen; am Ende Wechselkarte zu Hauseigentümer.</text>
+<text x="1310.0" y="226.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Alles darunter (V2 bis A4) ist dieselbe Quelle wie</text>
+<text x="1310.0" y="242.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   desktop-fensterbauer.svg; jedes Element muss nach einem</text>
+<text x="1310.0" y="258.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Neuaufbau gleich funktionieren (SKILL:63-64).</text>
+<text x="1310.0" y="274.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 08 8.3.3; 09/fb-01 F.5; 09/st-02 G.3</text>
+<line x1="1282.0" y1="32.0" x2="1298.0" y2="10.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+</g>
+<text x="40" y="6916" font-size="20" font-weight="800" fill="#222222">Teil 2 · Ansicht Fensterbauer, Zustand ?von=pdf</text>
+<text x="40" y="6938" font-size="13" fill="#5f5f5f">Einstieg über den QR-Code im Aufmaßblatt: Hinweis ersetzt den Meldungsstapel</text>
+<g transform="translate(150,6964)">
+<rect x="0.0" y="0.0" width="1280.0" height="920.0" fill="#1c1c1c" />
+<rect x="120.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="208.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="297.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="386.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="474.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="563.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="652.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="740.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="829.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="918.0" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="1006.7" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<rect x="1095.3" y="0.0" width="64.7" height="920.0" fill="#ffffff" opacity="0.03" />
+<clipPath id="clipFoto3"><rect x="553" y="0" width="727" height="760"/></clipPath>
+<rect x="553.0" y="0.0" width="727.0" height="760.0" fill="#4b4b4b" />
+<rect x="553.0" y="0.0" width="727.0" height="760.0" fill="url(#hatch)" />
+<g clip-path="url(#clipFoto3)">
+<circle cx="1236" cy="248" r="270" fill="url(#licht)"/>
+<ellipse cx="1240" cy="248" rx="112" ry="172" fill="#6e6e6e" stroke="#c9c9c9" stroke-width="3"/>
+<ellipse cx="1240" cy="248" rx="112" ry="172" fill="url(#hatchL)"/>
+<path d="M842 713 C 820 560, 840 400, 900 330 C 940 300, 1040 300, 1120 250 L 1170 210 L 1196 330 L 1180 470 C 1220 520, 1264 600, 1264 713 Z" fill="#5a5a5a" stroke="#cfcfcf" stroke-width="1.5" stroke-dasharray="6 4"/>
+<circle cx="948" cy="268" r="50" fill="#666666" stroke="#cfcfcf" stroke-width="1.5" stroke-dasharray="6 4"/>
+<polygon points="769,128 851,141 792,157" fill="#d0d0d0"/>
+<rect x="764.0" y="280.0" width="44.0" height="58.0" rx="6" fill="#2a2a2a" stroke="#bdbdbd" stroke-width="1" />
+<line x1="797.0" y1="410.0" x2="861.0" y2="471.0" stroke="#d0d0d0" stroke-width="4" />
+<line x1="1262.0" y1="92.0" x2="1262.0" y2="404.0" stroke="#e0e0e0" stroke-width="1.5" />
+<line x1="1253.0" y1="92.0" x2="1271.0" y2="92.0" stroke="#e0e0e0" stroke-width="1.5" />
+<line x1="1253.0" y1="404.0" x2="1271.0" y2="404.0" stroke="#e0e0e0" stroke-width="1.5" />
+</g>
+<rect x="553.0" y="0.0" width="291.0" height="760.0" fill="url(#fadeL)" />
+<rect x="553.0" y="562.0" width="727.0" height="198.0" fill="url(#fadeB)" />
+<g transform="rotate(-90 1262 248)"><rect x="1222" y="237" width="80" height="22" rx="11" fill="#ffffff" fill-opacity="0.16" stroke="#4c8dff" stroke-width="1.5"/><text x="1262" y="252.5" font-size="13" font-weight="600" fill="#efefef" text-anchor="middle">1.200 mm</text></g>
+<rect x="0.0" y="0.0" width="1280.0" height="104.0" fill="url(#scrim)" />
+<rect x="120.0" y="175.0" width="377.0" height="86.0" rx="18" fill="#2b2b2b" stroke="#6a6a6a" stroke-width="2" />
+<text x="136.0" y="201.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Sie halten ein eeziframes-Aufmaß in der Hand?</text>
+<text x="136.0" y="221.0" font-size="13" font-weight="500" fill="#bdbdbd" text-anchor="start" >Das Blatt ist ein PDF, lesbar ohne Konto. …</text>
+<text x="136.0" y="248.4" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Aufmaß per Code übernehmen →</text>
+<line x1="136.0" y1="254.4" x2="384.0" y2="254.4" stroke="#949494" stroke-width="1" />
+<text x="120" y="321.0" font-size="13" font-weight="600" fill="#bdbdbd" letter-spacing="0.12em"><tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">FÜR FENSTERBAUER UND FENSTERHÄNDLER</tspan></text>
+<text x="120.0" y="372.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Ihr eigener Fenster-</text>
+<text x="120.0" y="414.4" font-size="40" font-weight="800" fill="#efefef" text-anchor="start">Konfigurator, unter Ihrer <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">Marke</tspan></text>
+<rect x="120.0" y="445.0" width="112.0" height="36.0" rx="18" fill="#363636" />
+<path d="M131.0 463.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="148.0" y="468.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Ihre Domain</text>
+<rect x="238.0" y="445.0" width="106.0" height="36.0" rx="18" fill="#363636" />
+<path d="M249.0 463.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="266.0" y="468.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >Ihre Marke</text>
+<rect x="350.0" y="445.0" width="121.0" height="36.0" rx="18" fill="#363636" />
+<path d="M361.0 463.1 l3.8 3.8 l7.2 -8.8" fill="none" stroke="#d0d0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="378.0" y="468.0" font-size="13" font-weight="700" fill="#efefef" text-anchor="start" >PDF per E-Mail</text>
+<text x="120.0" y="510.0" font-size="13" font-weight="400" text-anchor="start"><tspan fill="#efefef" font-weight="600">Ab 29 € im Monat</tspan><tspan fill="#949494" font-weight="600"> netto, plus Einrichtung · vorläufig</tspan></text>
+<rect x="120.0" y="538.0" width="212.0" height="52.0" rx="26.0" fill="#f08c2e" />
+<text x="142.0" y="570.1" font-size="17" font-weight="700" fill="#1a1a1a" text-anchor="start" >Pakete ansehen</text>
+<circle cx="304.0" cy="564.0" r="14" fill="#1a1a1a" opacity="0.85"/>
+<text x="304.0" y="569.0" font-size="15" font-weight="700" fill="#f08c2e" text-anchor="middle" >→</text>
+<rect x="344.0" y="538.0" width="212.0" height="52.0" rx="26" fill="none" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="4 4" />
+<text x="450.0" y="569.0" font-size="13" font-weight="600" fill="#949494" text-anchor="middle" >Ring ausgeblendet</text>
+<rect x="0.0" y="704.0" width="1280.0" height="176.0" fill="#1c1c1c" />
+<clipPath id="clipV2_4"><rect x="0" y="704" width="1280" height="176"/></clipPath>
+<g clip-path="url(#clipV2_4)">
+<ellipse cx="640" cy="704" rx="90" ry="184" transform="rotate(10 640 704)" fill="url(#licht)" opacity="0.8"/>
+<g opacity="0.28">
+<rect x="-48.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="-48.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.4">
+<rect x="80.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="80.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.55">
+<rect x="208.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="208.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.72">
+<rect x="336.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="336.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.9">
+<rect x="464.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="464.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.9">
+<rect x="720.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="720.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.72">
+<rect x="848.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="848.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.55">
+<rect x="976.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="976.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.4">
+<rect x="1104.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="1104.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<g opacity="0.28">
+<rect x="1232.0" y="732.0" width="96.0" height="96.0" rx="8" fill="#4b4b4b" />
+<rect x="1232.0" y="732.0" width="96.0" height="96.0" rx="8" fill="url(#hatch)" />
+</g>
+<rect x="580.0" y="720.0" width="120.0" height="120.0" rx="8" fill="#5d5d5d" />
+<rect x="580.0" y="720.0" width="120.0" height="120.0" rx="8" fill="url(#hatchL)" />
+<rect x="580.0" y="720.0" width="120.0" height="120.0" rx="8" fill="none" stroke="#d0d0d0" stroke-width="1.5" />
+<rect x="0.0" y="704.0" width="64.0" height="176.0" fill="url(#fadeL)" />
+<rect x="1216" y="704" width="64" height="176" fill="url(#fadeL)" transform="rotate(180 1248 792)"/>
+</g>
+<line x1="0.0" y1="704.5" x2="1280.0" y2="704.5" stroke="#5c5c5c" stroke-width="1" />
+<line x1="0.0" y1="879.5" x2="1280.0" y2="879.5" stroke="#5c5c5c" stroke-width="1" />
+<line x1="560.0" y1="705.0" x2="720.0" y2="705.0" stroke="#4c8dff" stroke-width="3" />
+<text x="640.0" y="866.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="middle" >Hebe-Schiebe-Tür</text>
+<polygon points="1237,377 1163,283 578,698 702,854" fill="url(#keil)" opacity="0.4" stroke="#4c8dff" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="0.0" y="0.0" width="1280.0" height="104.0" fill="url(#scrim)" />
+<rect x="0.5" y="0.5" width="1279.0" height="63.0" fill="none" stroke="#ffffff" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+<rect x="120.0" y="16.0" width="32.0" height="32.0" rx="8" fill="#d6d6d6" />
+<text x="162.0" y="38.0" font-size="17" font-weight="800" fill="#efefef" text-anchor="start" >eeziframes</text>
+<rect x="284.0" y="10.0" width="284.0" height="44.0" rx="22" fill="#2b2b2b" stroke="#7a7a7a" stroke-width="1" />
+<rect x="439.0" y="15.0" width="124.0" height="34.0" rx="17" fill="#3a3a3a" stroke="#efefef" stroke-width="2" />
+<text x="363.0" y="37.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="middle" >Hauseigentümer</text>
+<text x="501.0" y="37.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Fensterbauer</text>
+<text x="596.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >So funktioniert es</text>
+<text x="744.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >Ablauf</text>
+<text x="808.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >Fragen</text>
+<text x="915.0" y="37.0" font-size="15" font-weight="600" fill="#efefef" text-anchor="start" >Anmelden</text>
+<rect x="1011.0" y="11.0" width="148.0" height="42.0" rx="21.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-dasharray="6 4" />
+<text x="1085.0" y="37.4" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Pakete ansehen</text>
+<rect x="510.0" y="178.0" width="371.0" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="517.0" y="192.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >st-03 · Hauskarte opak ≈ 377 × 86 (st-03: 336), kein Glas</text>
+<rect x="510.0" y="202.0" width="320.3" height="20" rx="4" fill="#fff6c8" stroke="#111111" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="517.0" y="216.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >TE · AB Z-AB-1 (Hinweis im Startbild statt davor)</text>
+<rect x="832.1" y="640.0" width="439.9" height="20" rx="4" fill="#ffffff" stroke="#4c8dff" stroke-width="1"/>
+<text x="839.1" y="654.5" font-size="12" font-weight="700" fill="#0b3a99" text-anchor="start" >Foto ohne Meldungsstapel; Maßwert behält sein Glas (1 Glasfläche)</text>
+<rect x="570.0" y="548.0" width="231.3" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="577.0" y="562.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Ring ausgeblendet wie am Telefon</text>
+<line x1="120.0" y1="0.0" x2="120.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="184.7" y1="0.0" x2="184.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="208.7" y1="0.0" x2="208.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="273.3" y1="0.0" x2="273.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="297.3" y1="0.0" x2="297.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="362.0" y1="0.0" x2="362.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="386.0" y1="0.0" x2="386.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="450.7" y1="0.0" x2="450.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="474.7" y1="0.0" x2="474.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="539.3" y1="0.0" x2="539.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="563.3" y1="0.0" x2="563.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="628.0" y1="0.0" x2="628.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="652.0" y1="0.0" x2="652.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="716.7" y1="0.0" x2="716.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="740.7" y1="0.0" x2="740.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="805.3" y1="0.0" x2="805.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="829.3" y1="0.0" x2="829.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="894.0" y1="0.0" x2="894.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="918.0" y1="0.0" x2="918.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="982.7" y1="0.0" x2="982.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1006.7" y1="0.0" x2="1006.7" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1071.3" y1="0.0" x2="1071.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1095.3" y1="0.0" x2="1095.3" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1160.0" y1="0.0" x2="1160.0" y2="920.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<rect x="-150.0" y="0.0" width="150.0" height="920.0" fill="#f2f2f0" />
+<line x1="-12.0" y1="0.0" x2="0.0" y2="0.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="4.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >0</text>
+<line x1="-6.0" y1="100.0" x2="0.0" y2="100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="200.0" x2="0.0" y2="200.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="300.0" x2="0.0" y2="300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="400.0" x2="0.0" y2="400.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="404.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >400</text>
+<line x1="-6.0" y1="500.0" x2="0.0" y2="500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="600.0" x2="0.0" y2="600.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="700.0" x2="0.0" y2="700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="800.0" x2="0.0" y2="800.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="804.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >800</text>
+<line x1="-6.0" y1="900.0" x2="0.0" y2="900.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="0.0" y1="800.0" x2="1280.0" y2="800.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="819.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 2</text>
+<rect x="-146.0" y="26.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="41.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >R3</text>
+<rect x="1300.0" y="-4.0" width="444.0" height="304.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="-4.0" x2="1300.0" y2="300.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="21.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R3 · st-03-hinweis-von-pdf · Zustand ?von=pdf</text>
+<text x="1310.0" y="38.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Teil von V1 (Stufe 4) · Ansicht Fensterbauer, Einstieg über den</text>
+<text x="1310.0" y="54.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >QR-Code im Aufmaßblatt</text>
+<text x="1310.0" y="76.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="76.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="92.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="92.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="108.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="108.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Foto wie V1, ohne Stapel</text>
+<text x="1310.0" y="124.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="124.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Maßwert-Pille (1)</text>
+<text x="1310.0" y="140.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="140.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Erdlicht wie V1</text>
+<text x="1310.0" y="162.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Karte oben in der Textspalte, y ≈ 175–261: Titel 15 fett (wörtlich</text>
+<text x="1310.0" y="178.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   portal.js:849), Zeile 13 (Textentwurf), Link-Zeile „Aufmaß per Code</text>
+<text x="1310.0" y="194.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   übernehmen“ → Betriebsbereich; keine Cream (das Startbild behält</text>
+<text x="1310.0" y="210.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   seine).</text>
+<text x="1310.0" y="226.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Prüfpunkt: Der Titel misst in Inter 15/700 ≈ 345 px, st-03 rechnet mit</text>
+<text x="1310.0" y="242.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   304; gezeichnet ist die Karte daher 377 statt 336 breit.</text>
+<text x="1310.0" y="258.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Textblock rückt um 68 px: Kicker ≈ 309, h1 337–421, Chips</text>
+<text x="1310.0" y="274.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   445–481, Preiszeile 497–514, Cream 538–590.</text>
+<text x="1310.0" y="290.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 09/st-03 G (Schreibtisch); 08 8.3.3</text>
+<line x1="1282.0" y1="200.0" x2="1298.0" y2="10.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+</g>
+<text x="40" y="7956" font-size="20" font-weight="800" fill="#222222">Teil 2 · Ansicht Fensterbauer, Ende</text>
+<text x="40" y="7978" font-size="13" fill="#5f5f5f">Wechselkarte zu Hauseigentümer und Fuß; dazwischen alle Abschnitte wie auf der Seite für Fensterbauer</text>
+<g transform="translate(150,-1693)">
+<rect x="0.0" y="9697.0" width="1280.0" height="1150.0" fill="#1c1c1c" />
+<rect x="120.0" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="208.7" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="297.3" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="386.0" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="474.7" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="563.3" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="652.0" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="740.7" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="829.3" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="918.0" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="1006.7" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<rect x="1095.3" y="9697.0" width="64.7" height="1150.0" fill="#ffffff" opacity="0.03" />
+<path d="M0 9837 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14 l40 -14 l40 14" fill="none" stroke="#9a9a9a" stroke-width="1.5"/>
+<text x="640.0" y="9777.0" font-size="17" font-weight="700" fill="#bdbdbd" text-anchor="middle" >Auslassung: V2 bis A4 identisch mit desktop-fensterbauer.svg (eine Quelle)</text>
+<text x="640.0" y="9801.0" font-size="13" font-weight="500" fill="#949494" text-anchor="middle" >Abschluss A4 endet bei y ≈ 9.897 (Lagen der eigenen Seite; der Kopf ist gleich hoch)</text>
+<line x1="120.0" y1="9897.0" x2="1160.0" y2="9897.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="2 4" opacity="0.5" />
+<rect x="120.0" y="9903.0" width="137.6" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="127.0" y="9917.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Ende A4 Abschluss</text>
+<rect x="120.0" y="10025.0" width="419.0" height="189.0" rx="24" fill="#2b2b2b" stroke="#606060" stroke-width="2" />
+<text x="152.0" y="10070.0" font-size="13" font-weight="600" fill="#949494" text-anchor="start" letter-spacing="0.12em" >FÜR HAUSEIGENTÜMER</text>
+<text x="152.0" y="10100.0" font-size="17" font-weight="700" fill="#efefef" text-anchor="start">Ihre eigenen Fenster <tspan text-decoration="underline" style="text-decoration-thickness:2px;text-underline-offset:4px">ausmessen?</tspan></text>
+<rect x="153.0" y="10131.0" width="310.0" height="50.0" rx="25.0" fill="none" stroke="#f08c2e" stroke-width="2" />
+<text x="308.0" y="10162.1" font-size="17" font-weight="700" fill="#efefef" text-anchor="middle" >Zur Ansicht für Hauseigentümer</text>
+<rect x="563.0" y="10045.0" width="316.6" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="570.0" y="10059.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >st-04 · Richtung Fensterbauer → Hauseigentümer</text>
+<rect x="563.0" y="10069.0" width="233.0" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="570.0" y="10083.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Ring ohne Pfeilkreis; Sp. 6–12 leer</text>
+<line x1="120.0" y1="10342.0" x2="1160.0" y2="10342.0" stroke="#5c5c5c" stroke-width="1" />
+<text x="120.0" y="10390.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Für Fensterbauer</text>
+<text x="652.0" y="10390.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="start" >Für Hauseigentümer</text>
+<text x="120.0" y="10430.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Eigener Fenster-Konfigurator</text>
+<text x="120.0" y="10474.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Konfigurator-Pakete</text>
+<text x="120.0" y="10518.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Paketbedingungen</text>
+<text x="120.0" y="10562.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Anmelden</text>
+<text x="386.0" y="10430.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Erstaufmaß und Feinaufmaß</text>
+<text x="386.0" y="10474.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Falsches Aufmaß: Haftung</text>
+<text x="386.0" y="10518.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Aufmaß kostenpflichtig?</text>
+<text x="386.0" y="10562.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Geplatzter Aufmaßtermin</text>
+<text x="386.0" y="10606.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Fensterbau-Software</text>
+<text x="652.0" y="10430.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Fenster ausmessen</text>
+<text x="652.0" y="10474.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Führung starten</text>
+<text x="652.0" y="10518.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Gesichertes Aufmaß öffnen</text>
+<text x="918.0" y="10430.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Ratgeber</text>
+<text x="918.0" y="10474.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Anleitung Fenster ausmessen</text>
+<line x1="120.0" y1="10647.0" x2="1160.0" y2="10647.0" stroke="#5c5c5c" stroke-width="1" />
+<rect x="120.0" y="10681.0" width="24.0" height="24.0" rx="6" fill="#d6d6d6" />
+<text x="152.0" y="10699.0" font-size="17" font-weight="800" fill="#efefef" text-anchor="start" >eeziframes</text>
+<text x="386.0" y="10698.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >Impressum · AGB · Nutzungsbedingungen · Datenschutz · Cookies</text>
+<rect x="918.0" y="10671.0" width="170.0" height="44.0" rx="22" fill="none" stroke="#8a8a8a" stroke-width="2" />
+<text x="1003.0" y="10698.0" font-size="15" font-weight="700" fill="#efefef" text-anchor="middle" >Vertrag widerrufen</text>
+<text x="120.0" y="10742.0" font-size="15" font-weight="500" fill="#bdbdbd" text-anchor="start" >ask@eeziframes.com</text>
+<rect x="849.1" y="10350.0" width="310.9" height="20" rx="4" fill="#f4f4f4" stroke="#9a9a9a" stroke-width="1"/>
+<text x="856.1" y="10364.5" font-size="12" font-weight="700" fill="#111111" text-anchor="start" >Einbettung trägt keine Brotkrumen (rh-03 B.2/6)</text>
+<line x1="120.0" y1="9697.0" x2="120.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="184.7" y1="9697.0" x2="184.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="208.7" y1="9697.0" x2="208.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="273.3" y1="9697.0" x2="273.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="297.3" y1="9697.0" x2="297.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="362.0" y1="9697.0" x2="362.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="386.0" y1="9697.0" x2="386.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="450.7" y1="9697.0" x2="450.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="474.7" y1="9697.0" x2="474.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="539.3" y1="9697.0" x2="539.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="563.3" y1="9697.0" x2="563.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="628.0" y1="9697.0" x2="628.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="652.0" y1="9697.0" x2="652.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="716.7" y1="9697.0" x2="716.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="740.7" y1="9697.0" x2="740.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="805.3" y1="9697.0" x2="805.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="829.3" y1="9697.0" x2="829.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="894.0" y1="9697.0" x2="894.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="918.0" y1="9697.0" x2="918.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="982.7" y1="9697.0" x2="982.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1006.7" y1="9697.0" x2="1006.7" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1071.3" y1="9697.0" x2="1071.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1095.3" y1="9697.0" x2="1095.3" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<line x1="1160.0" y1="9697.0" x2="1160.0" y2="10847.0" stroke="#ffffff" stroke-width="1" opacity="0.1" />
+<rect x="-150.0" y="9697.0" width="150.0" height="1150.0" fill="#f2f2f0" />
+<line x1="-6.0" y1="9700.0" x2="0.0" y2="9700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="9800.0" x2="0.0" y2="9800.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="9900.0" x2="0.0" y2="9900.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="10000.0" x2="0.0" y2="10000.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="10004.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >10000</text>
+<line x1="-6.0" y1="10100.0" x2="0.0" y2="10100.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="10200.0" x2="0.0" y2="10200.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="10300.0" x2="0.0" y2="10300.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="10400.0" x2="0.0" y2="10400.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="10404.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="end" >10400</text>
+<line x1="-6.0" y1="10500.0" x2="0.0" y2="10500.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="10600.0" x2="0.0" y2="10600.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-6.0" y1="10700.0" x2="0.0" y2="10700.0" stroke="#9a9a9a" stroke-width="1" />
+<line x1="-12.0" y1="10800.0" x2="0.0" y2="10800.0" stroke="#9a9a9a" stroke-width="1" />
+<text x="-16.0" y="10804.0" font-size="12" font-weight="400" fill="#5f5f5f" text-anchor="end" >10800</text>
+<line x1="0.0" y1="10400.0" x2="1280.0" y2="10400.0" stroke="#ffffff" stroke-width="1" stroke-dasharray="10 6" opacity="0.45" />
+<text x="-16.0" y="10419.0" font-size="12" font-weight="600" fill="#222222" text-anchor="end" >Bildschirm 14</text>
+<rect x="-146.0" y="10027.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="10042.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >R5</text>
+<rect x="-146.0" y="10344.0" width="46.0" height="22.0" rx="4" fill="#222222" />
+<text x="-123.0" y="10359.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" >R6</text>
+<line x1="1222.0" y1="9899.0" x2="1222.0" y2="10023.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="9899.0" x2="1228.0" y2="9899.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="10023.0" x2="1228.0" y2="10023.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="9965.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<line x1="1222.0" y1="10216.0" x2="1222.0" y2="10340.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="10216.0" x2="1228.0" y2="10216.0" stroke="#cfcfcf" stroke-width="1" />
+<line x1="1216.0" y1="10340.0" x2="1228.0" y2="10340.0" stroke="#cfcfcf" stroke-width="1" />
+<text x="1230.0" y="10282.0" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="start" >128</text>
+<rect x="1300.0" y="10021.0" width="444.0" height="228.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="10021.0" x2="1300.0" y2="10249.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="10046.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R5 · st-04-wechselkarte · Wechsel zu</text>
+<text x="1310.0" y="10066.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >Hauseigentümer</text>
+<text x="1310.0" y="10083.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 2 · T11 · 189 px · nach A4 der eingebetteten Seite</text>
+<text x="1310.0" y="10105.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="10105.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="10121.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="10121.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="10137.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="10137.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >die Karte selbst</text>
+<text x="1310.0" y="10153.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="10153.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="10169.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="10169.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="10191.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Kicker „FÜR HAUSEIGENTÜMER“, Satz „Ihre eigenen Fenster</text>
+<text x="1310.0" y="10207.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   ausmessen?“ (grün „ausmessen?“), Ring „Zur Ansicht für</text>
+<text x="1310.0" y="10223.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   Hauseigentümer“; keine Cream neben A4.</text>
+<text x="1310.0" y="10239.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Quelle: 09/st-04 B, C</text>
+<line x1="1282.0" y1="10085.0" x2="1298.0" y2="10035.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+<rect x="1300.0" y="10338.0" width="444.0" height="176.0" rx="6" fill="#f7f7f5" stroke="#d6d6d2" stroke-width="1" />
+<line x1="1300.0" y1="10338.0" x2="1300.0" y2="10514.0" stroke="#222222" stroke-width="3" />
+<text x="1310.0" y="10363.0" font-size="15" font-weight="700" fill="#222222" text-anchor="start" >R6 · rh-03 · Fuß kurz, Kontext Fensterbauer</text>
+<text x="1310.0" y="10380.0" font-size="12" font-weight="600" fill="#5f5f5f" text-anchor="start" >Stufe 1 · T0 · ≈ 465 px · ohne Brotkrumen</text>
+<text x="1310.0" y="10402.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Hintergrund</text>
+<text x="1412.0" y="10402.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Grund</text>
+<text x="1310.0" y="10418.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Riesenschrift</text>
+<text x="1412.0" y="10418.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="10434.0" font-size="12" font-weight="700" fill="#5f5f5f" text-anchor="start" >Held</text>
+<text x="1412.0" y="10434.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="10450.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Glas</text>
+<text x="1412.0" y="10450.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="10466.0" font-size="12" font-weight="700" fill="#4c8dff" text-anchor="start" >Licht</text>
+<text x="1412.0" y="10466.0" font-size="12" font-weight="400" fill="#9a9a9a" text-anchor="start" >–</text>
+<text x="1310.0" y="10488.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >Gruppe Fensterbauer zuerst, dann Hauseigentümer; sonst wie der Fuß</text>
+<text x="1310.0" y="10504.0" font-size="12" font-weight="400" fill="#222222" text-anchor="start" >   der Seite für Fensterbauer.</text>
+<line x1="1282.0" y1="10382.0" x2="1298.0" y2="10352.0" stroke="#b0b0b0" stroke-width="1" stroke-dasharray="3 3" />
+</g>
+<text x="40" y="9220" font-size="12" fill="#5f5f5f">Lagen nach 09-abschnitte (Schreibtisch 1280); he-04 und fb-15 rechnen mit Spalte 57,3 / Rinne 32, die übrigen mit 64,67 / 24; gezeichnet ist das Raster 64,67 / 24, die Lagen stehen wie spezifiziert.</text>
+</svg>
