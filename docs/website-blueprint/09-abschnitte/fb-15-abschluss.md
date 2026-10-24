@@ -62,8 +62,8 @@ Abschnittsrahmen `.vk-teil` (VC:501-502); Paketvorwahl über `a[data-paket]` (VJ
 ## C. Exakte Layoutkomposition
 
 **C.1 Grundstruktur.** Satzbau Haarlinie → h2 → Lead → Spaltenköpfe → [Vorschau | Zeilenstapel] → Steuerzeile. Der Lead steht vor dem
-Held, weil er das Verb der Zeilen trägt (Abweichung von G2 wie in fb-03). Raster am Telefon: 4 Spalten; die Wahl teilt sich in eine feste
-Bildspalte 96 px und eine Handlungsspalte 250 px. Asymmetrisch: kleines, hohes Objekt an der Ordnungslinie x = 16, breite Handlungsmasse
+Held, weil er das Verb der Zeilen trägt (Abweichung von G2 wie in fb-03). Raster am Telefon: 4 Spalten à 77,5 px, Rinne 16 px (K-12);
+die Wahl bildet darin ein eigenes Komponentenraster aus fester Bildspalte 96 px, Fuge 12 px (`--a-nah`) und Handlungsspalte 250 px. Asymmetrisch: kleines, hohes Objekt an der Ordnungslinie x = 16, breite Handlungsmasse
 rechts; die Cream liegt rechts in der Mitte, so dass der Blick diagonal von der h2 (oben links) zur Handlung läuft.
 
 **C.2 Telefon 390 × 844, Lagen relativ zur Haarlinie**
@@ -71,16 +71,16 @@ rechts; die Cream liegt rechts in der Mitte, so dass der Blick diagonal von der 
 | y | Element | x · Breite | Maß |
 |---|---|---|---|
 | 0 | Haarlinie 1 px `--line`, ohne Nummer (Anhang, E-AB-10) | 16–374 | 96 px nach A3 |
-| 24–94 | h2 32/35, zwei Zeilen „Aus der Probe wird“ (287 px) / „Ihr Konfigurator.“ (246 px) | 16 | – |
-| 106–132 | Lead 17/26, eine Zeile (341 px; B 332 px) | 16 | Abstand 12 |
-| 156–173 | „BEISPIEL“ (68 px) links; „IM MONAT“ (80 px) rechtsbündig bis x 324 | 16 · 324 | Abstand 24 |
-| 181–373 | Vorschau 96 × 192 | 16–112 | Abstand 8 |
-| 181–237 · 249–305 · 317–373 | drei Zeilen 250 × 56, Abstand 12 (3 × 56 + 2 × 12 = 192) | 124–374 | – |
-| 389–425 | Steuerzeile 13/18, zwei Zeilen | 16–374 | Abstand 16 |
-| 425 | Ende: 0,50 BH; danach 96 px | – | – |
+| 24–92 | h2 32/34 (K-18), zwei Zeilen „Aus der Probe wird“ (287 px) / „Ihr Konfigurator.“ (246 px) | 16 | – |
+| 104–130 | Lead 17/26, eine Zeile (341 px; B 332 px) | 16 | Abstand 12 |
+| 154–170 | „BEISPIEL“ (68 px) links; „IM MONAT“ (80 px) rechtsbündig bis x 324; Technikstimme 13/16 | 16 · 324 | Abstand 24 |
+| 178–370 | Vorschau 96 × 192 | 16–112 | Abstand 8 |
+| 178–234 · 246–302 · 314–370 | drei Zeilen 250 × 56, Abstand 12 (3 × 56 + 2 × 12 = 192) | 124–374 | – |
+| 386–422 | Steuerzeile 13/18, zwei Zeilen | 16–374 | Abstand 16 |
+| 422 | Ende: 0,50 BH; danach 96 px | – | – |
 
-**Ruhestand:** Steht die Haarlinie bei y ≈ 300, liegen die Zeilen bei y 481–673, die Cream-Zeile (Plus) bei 549–605, also in der unteren
-Hälfte im Daumenbereich; unten schneidet die Brotkrumen-Haarlinie bzw. die Wechselkarte bei y ≈ 821 an. Bei 390 × 664 passt der ganze
+**Ruhestand:** Steht die Haarlinie bei y ≈ 300, liegen die Zeilen bei y 478–670, die Cream-Zeile (Plus) bei 546–602, also in der unteren
+Hälfte im Daumenbereich; unten schneidet die Brotkrumen-Haarlinie bzw. die Wechselkarte bei y ≈ 818 an. Bei 390 × 664 passt der ganze
 Abschnitt mit Haarlinie bei y ≈ 200.
 
 **C.3 Zeile (Festlegung I-1)**
@@ -89,25 +89,28 @@ Abschnitt mit Haarlinie bei y ≈ 200.
 |---|---|
 | Form | `.btn.big`-Pille 250 × 56, Radius voll; Innenabstand links 22, rechts 14 |
 | Raster | Spalten `minmax(0,1fr) auto 28px`, Abstand 8; Zeilen 20 + 16, Abstand 2, senkrecht mittig |
-| oben links | Kurzname 17/20, 700 („Essential Plus“ 116 px) |
+| oben links | Kurzname 17/20, 700 („Essential Plus“ 116 px); Bedientext, nicht 800 (K-21) |
 | oben rechts | Monatspreis 17/20, 700, `tabular-nums`, rechtsbündig (36 px) |
 | unten links | nur Plus: „Empfohlen“ 13/16, 700 (68 px); bleibt an Plus, auch wenn die Cream wandert (wie fb-06, J-AB-8) |
 | unten rechts | „99 € einmalig“ … „279 € einmalig“ 13/16, 500, rechtsbündig (≤ 92 px) |
-| rechts | Pfeilkreis 28 px nur an der Cream-Zeile (GEST:93); die Ring-Zeilen halten den Platz frei, damit die Preisspalte über alle drei fluchtet |
+| rechts | gefüllter Pfeilkreis 28 px (`.pf`) nur an der Cream-Zeile (K-31; GEST:93); die Ring-Zeilen tragen weder Pfeilkreis noch Chevron (Zeilenknopf der Ring-Familie nach 11.6.2, kein Listenziel) und halten den Platz frei, damit die Preisspalte über alle drei fluchtet |
 | Breitenbudget | 250 − 22 − 14 − 28 − 16 = 170 px für Name + Preis (152) bzw. Marke + Einrichtung (160) |
-| Cream | Fläche `--primary`, Schrift `--on-primary` (15,8 : 1), untere Zeile `rgba(22,22,22,.72)` = #535351 (6,8 : 1), `.pf` wie GC:74 |
-| Ring | transparent, Innenkontur 2 px `--muted` (5,8 : 1; DNA-B Regel 12, DG-E-10), Schrift `--text`, untere Zeile `--text2` (10,8 : 1) |
+| Cream | Fläche `--primary`, Schrift `--on-primary` (15,8 : 1), untere Zeile `rgba(22,22,22,.72)` = #535351 (6,8 : 1), `.pf` wie GC:74; Hover innere 2-px-Kontur `--on-primary` 24 %, Druck Füllung `--primary-druck` (K-2) |
+| Ring | transparent, Innenkontur 2 px `--muted` (5,8 : 1; K-1, DNA-B Regel 12, DG-E-10) als einzige Grenze, Hover → `--text`, Druck Füllung `--surface2`; Schrift `--text`, untere Zeile `--text2` (10,8 : 1) |
 
 Warum so: Mit „im Monat“ und „Einrichtung“ in der Zeile passen Name, Preise und „Empfohlen“ nicht in 170 px (gemessen ≈ 210–240 px).
 Spaltenkopf und „einmalig“ tragen dieselbe Information; die Steuerzeile nennt „Einrichtung“.
 
 **C.4 Vorschau (Bildschicht)**
 
-- **Körper:** 96 × 192 (1 : 2), Rand 3 px `--surface`, Radius 14 außen und 11 innen (Verhältnis wie das Gerät in 01: 44 auf 300 px; SG
-  10.5), Lichtkante 1 px oben `rgba(243,242,238,.24)`, seitlich `.14`, unten keine (fb-03 C.6); kein Schatten.
+- **Körper:** Gerätebaustein nach K-23 (fb-03 C.3), proportional verkleinert: 96 × 192 (1 : 2), Rand 3 px `--surface`, Radius 14 außen
+  und 11 innen (44/34 auf 300 px; SG 10.5); Lichtkante 1 px rundum `--kante-alpha` (.14), Ober- und rechte Kante `--kante-licht` (.24)
+  nach K-24 (wie fb-03 C.6); unten über 15 px in den Grund ausgeblendet (48 px × 96/300; Schreibtisch 26 px), die Lichtkante läuft mit der
+  Maske aus; kein Schatten.
 - **Bildschirm:** 90 × 186. Darin die Startansicht aus dem Gerät von 01 (fb-03 C.3, y 10–406) als Box 280 × 579, ergänzt um den Fuß bei
-  y 535–567, `transform: scale(.3214)`. Dieselbe Box dient am Schreibtisch mit `.5357`. Die Schrift darin ist Bildinhalt (≈ 4 px), lesbar
-  bleibt nur die Gestalt.
+  y 470–502 (über der Maske: im Körper y 154–164, am Schreibtisch 257–274), `transform: scale(.3214)`. Die Adresszeile der Miniatur steht
+  ohne „· Beispiel“, weil das Etikett „BEISPIEL“ darüber die Kennzeichnung trägt (K-36, je Material eine Form). Dieselbe Box dient am
+  Schreibtisch mit `.5357`. Die Schrift darin ist Bildinhalt (≈ 4 px), lesbar bleibt nur die Gestalt.
 - **Markenstufen (Festlegung I-4, I-5):**
 
 | Stelle | Essential | Essential Plus | Signature |
@@ -121,9 +124,9 @@ Spaltenkopf und „einmalig“ tragen dieselbe Information; die Steuerzeile nenn
   zeigte eine Gestaltung, die es nicht gibt, und wäre neben der Cream ein zweiter Hellwert. Eine Beispielfarbe, weil es einen
   Beispielbetrieb gibt (G7); fb-06 nutzt dieselbe.
 - **Anschlussstrich:** 12 × 1 px `--muted` von der Vorschau (x 112) zur Zeile, deren Stufe sie zeigt, auf halber Zeilenhöhe; ohne Wahl
-  bei y 277, der Mitte der Vorschau: Objekt und Handlung auf einer Achse.
+  bei y 274, der Mitte der Vorschau: Objekt und Handlung auf einer Achse.
 
-**C.5 Verhältnisse.** Im Abschnitt (358 × 425): Vorschau ≈ 12 %, Zeilen ≈ 28 %, Text ≈ 29 %, frei ≈ 31 %; im Ruhestand-Bildschirm frei
+**C.5 Verhältnisse.** Im Abschnitt (358 × 422): Vorschau ≈ 12 %, Zeilen ≈ 28 %, Text ≈ 29 %, frei ≈ 31 %; im Ruhestand-Bildschirm frei
 geschätzt ≥ 40 % (SG 10.1/3). Größenhierarchie: Vorschau 192 px gegen Versalhöhe der Bedienschrift (≈ 12,4 px bei 17 px) ≈ 15-fach, h2 32
 als einzige Zwischenstufe; drei Größen 32 · 17 · 13 (DNA-B Regel 6). Bildanteil am Bildschirm ≈ 5,6 %, unter dem Stufe-2-Richtwert 20–50 %:
 Die Stufe folgt hier aus dem Typ T11 und Dosierregel 1, das Objekt ist Maßstab, keine Bühne. Ansichtstyp nach DNA-B B.1: Arbeitsansicht mit
@@ -138,9 +141,9 @@ kleinem Fokusträger.
 |---|---|---|
 | Abschnittsabstand | 96 Telefon, 128 Schreibtisch | G6 |
 | Rahmen | `.vk-teil` mit `counter-increment: none`, `::before { content: none }`, `padding-top: 24px` | Anhang ohne Nummer (E-AB-10) |
-| h2 | 32/35 (ab 761 px 40/44), 800, −.03em, `text-wrap: balance` | SKILL:69; wie fb-03 |
+| h2 | 32/34 px (40/42 ab 1024 px), 800, −.03em, `text-wrap: balance` | SKILL:69; Zeilenhöhe K-18, Umbruch 1024 nach 11.2.1; wie fb-03 |
 | Lead | 17/26, 500, `--text2` | Lesestapel |
-| Technikstimme | 13/17, 600, Versalien, .12em, `--muted`, `aria-hidden` | wie Kapitelzeile VC:502, grau statt grün: ein grünes Wort |
+| Technikstimme | 13/16, 600, Versalien, +0,12 em, `--muted` (auf Fläche), `aria-hidden`; „BEISPIEL“ oben links an der Vorschau ist deren einzige Kennzeichnung | K-36 Form (a), 11.3.1; grau statt grün: ein grünes Wort |
 | Steuerzeile | 13/18, 500, `--muted` (5,8 : 1) | Nebengröße, kleiner als Preise (EA AB-4) |
 
 ## D. Anwendung der Design-DNA
@@ -150,12 +153,12 @@ Stufe 2 gedrosselt.
 
 | Eigenschaft | Ausgestaltung, Position | Intensität 0–4 | Wirkung, Beitrag zur Funktion |
 |---|---|---|---|
-| Tiefe, Z-Achse | drei Ebenen; Tiefe über Bildoptik im Gerät (Bildschirm im Rand, Lichtkante), keine Verdeckung | 1 | Ruhe am Ende, nichts konkurriert mit der Zeile |
+| Tiefe, Z-Achse | drei Ebenen; Tiefe über Bildoptik im Gerät (Bildschirm im Rand, Lichtkante oben rechts nach K-24, Auslauf unten nach K-23), keine Verdeckung | 1 | Ruhe am Ende, nichts konkurriert mit der Zeile |
 | Material, Transparenz | Gehäuse matt `--surface`; Material nur im Bildschirm (echtes Bild, echte Startansicht); kein Glas | 1 | Produkt als Beleg (SKILL:41) |
 | Licht, Schatten | Bildschirm ist der Lichtkern (st-04 D); keine CSS-Lichtfläche, kein Schatten (DNA Nr. 6; DG-AB-1) | 1 | Lichtbudget bleibt bei V1 und 02 |
 | Formen | Zeilen Vollrundung wie alle Knöpfe (DNA-B Regel 8; DG-AB-8); Gerät 14/11 als Motiv außerhalb der UI-Radien | 2 | eine Formfamilie; Pillen unterscheiden sich von den eckigen Aufklappzeilen in A2/A3 |
 | 3D-Objekte, Perspektive | keine; Gerät frontal wie in 01 | 0 | Leitobjekt bleibt dasselbe |
-| Bildintegration | HTML-Miniatur der Startansicht (H-E9), „Beispiel“ als Spaltenkopf | 2 | schließt den Bogen 01 → 04 → Ende |
+| Bildintegration | HTML-Miniatur der Startansicht (H-E9), „BEISPIEL“ als Etikett oben links (K-36 a), Adresszeile der Miniatur ohne „· Beispiel“ | 2 | schließt den Bogen 01 → 04 → Ende |
 | Oberflächendetails | Anschlussstrich, Technikstimme, rechtsbündige Ziffernspalte, Pfeilkreis (informierende Mikroschicht, DNA-B B.3.13) | 2 | „präzise wie ein Aufmaß“ |
 | Animation | keine außer Zustand; Überblendung der Vorschau nur nutzergeführt [H] | 1 | siehe F |
 | Typografie | Bühnenstimme h2 mit einem grünen Wort; Zeilen 17 fett; Technikstimme 13 | 2 | „Konfigurator“ ist das einzige Signal |
@@ -178,7 +181,7 @@ ist ein Fünfzehntel der Cream-Zeile. Rückfall bei zwei Flecken im Blinzeltest:
 4. Preisspalte 29 · 39 · 64 von oben nach unten, dann die Ring-Zeilen; zuletzt Steuerzeile und Kopf-Ring.
 
 **Kontraste:** Cream-Zeile 15,8 : 1, Zeile 2 darauf 6,8 : 1; Ring-Zeilen Schrift 16,2 : 1, Zeile 2 10,8 : 1; Köpfe und Steuerzeile 5,8 : 1;
-Ring-Kontur `--muted` 5,8 : 1 statt `--line2` 1,6 : 1 (Konturen 3 : 1, DNA-B Regel 12).
+Ring-Kontur `--muted` 5,8 : 1 statt `--line2` 1,6 : 1 (Konturen 3 : 1, DNA-B Regel 12; K-1).
 **Mögliche Ablenkungen:** Kopf-Ring „Paket anfragen“ mit verwandtem Ziel, als Ring zurückgenommen und ohne Paketvorwahl (rh-01 I, fb-09
 F); A3-Zeilen darüber (eckig mit „+“, keine Pille); in der Einbettung die Wechselkarte, dunkel mit Ring (st-04 Festlegung „helle Karte“);
 das Zeichen im Fuß (rh-03 E); die Mini-Cream im Gerät (Auslegung in D).
@@ -189,16 +192,16 @@ nach 96 px Grund die Brotkrumen-Haarlinie bzw. die Wechselkarte. Nichts sonst ze
 
 | Ereignis | Verhalten | Dauer, Kurve | Begründung |
 |---|---|---|---|
-| Scrollen, Erscheinen | kein Scrollbezug, kein Auftritt; `.vk-abschluss` kommt nicht in die Reveal-Liste (VJ:477) | – | E-13; DG-AB-2 |
+| Scrollen, Erscheinen | kein Scrollbezug, kein Auftritt, auch kein Deckkraft-Einblenden: die Bedienschicht steht ab dem ersten Bild; `.vk-abschluss` kommt nicht in die Reveal-Liste (VJ:477) | – | K-6; E-13; DG-AB-2 |
 | Wahl ändert sich: Kartenknopf, A4-Zeile, Gesprächsweg (= keine Wahl, fb-08 F), Paketfeld `change` | `abschlussSetzen()`: Cream-Klassen tauschen, `hidden` der Vorschau-Stufen, Anschlussstrich; ohne Wahl Cream an „Empfohlen“ | 0 ms (geschieht außerhalb des Bildes) | Festlegung I-2: eine Quelle |
-| Hover (`hover: hover`) | Cream → `--primary-hover`; Ring: Kontur `--muted` → `--text` | 150 ms `--e-out` | Zustand über Füllung und Kontur (G1) |
+| Hover (`hover: hover`) | Cream: innere 2-px-Kontur `--on-primary` 24 %, Füllung bleibt `--primary`; Ring: Kontur `--muted` → `--text` | 150 ms `--e-out` | Hover = Kontur (K-1, K-2; DG 2.4.1) |
 | Zeiger oder Fokus auf Zeile [H] | Vorschau zeigt deren Stufe (Deckkraft-Überblendung), Strich folgt; Verlassen der Liste: nach 150 ms zurück zur Cream-Zeile | 220 ms `--e-out` | Bildschicht, nutzergeführt (E-13) |
-| Fokus | 2-px-Kontur `--ink`, Abstand 2, folgt der Pille | sofort | SG 10.9 |
-| Drücken | Cream `#e2e1db`, Ring `--surface3`; keine Skalierung (`transform: none` gegen GC:65) | 150 ms | DNA-B B.3.7; wie fb-06 |
+| Fokus | `outline: 2px solid var(--text)`, Abstand 2 px, folgt der Pille (formfolgend), nie verdeckt | sofort | K-34; SG 10.9 |
+| Drücken | Cream Füllung `--primary-druck` (#e2e1db), Ring Füllung `--surface2`; keine Deckkraftänderung, keine Skalierung (`transform: none` gegen GC:65) | sofort, zurück 150 ms `--e-out` | K-2; DNA-B B.3.7 |
 | Tipp, Zustand A | Paket setzen, Sprung `behavior: 'auto'` zu `#frage`, Fokus auf die h3, Hinweis am Paketfeld (fb-09 F); eigenständig nativer Ankersprung, „Zurück“ führt in den Abschluss (Z 8.2.7) | sofort | ≈ 4 BH: weiches Scrollen ließe Ablauf-Marken und Anhänge vorbeiziehen |
 | Einbettung | `data-sprung="direkt"`, weil der Handler (portal.js:841) sonst `smooth` scrollt; Anker `#fensterbauer` bleibt | – | GEST:193 |
 | Tipp, Zustand B | Seitenwechsel `/partner/#bestellen/<paket>`; der Name aus 01 geht nicht mit (Z 8.3.2 d) | – | – |
-| Gesendet (A; `vk:gesendet`, Merker `vk-anfrage-gesendet`, fb-09) | Lead und Zeilen `hidden`, Dank-Satz 17 (VJ:65) sichtbar, Vorschau zeigt das gesendete Paket (Festlegung I-3) | 0 ms | keine zweite Aufforderung nach dem Senden |
+| Gesendet (A; `vk:gesendet`, Merker `vk-anfrage-gesendet`, fb-09) | Lead und Zeilen `hidden`, Dank-Satz 17 (VJ:65) sichtbar, Vorschau zeigt das gesendete Paket (Festlegung I-3) | 0 ms (der Wechsel geschieht außerhalb des Bildes, am Formular; das Einblenden 220 ms nach K-6 entfällt deshalb) | keine zweite Aufforderung nach dem Senden |
 | Neuaufbau (`o.still`) | Wahl aus dem Zustand je Wurzel, Merker aus `sessionStorage` (`try/catch`) | sofort | SKILL:63-64 |
 | weniger Bewegung | Überblendung wird Schnitt; sonst identisch | 0 ms | SG 10.7/7 |
 | ohne JavaScript | Cream an „Empfohlen“, Vorschau Plus; Zeilen springen zu `#frage`, Paketfeld bleibt „Noch offen“ | – | SKILL:62 |
@@ -211,25 +214,27 @@ Charakter: still. Tiefe und Physik (SKILL:43) tragen V1 bis 04; dies ist eine En
 (`@container`), Budget 168 px ≥ 160. **Unter 352 px:** Vorschau entfällt, Zeilen über die volle Breite (Festlegung I-7). **200 % Text:**
 Zeilen wachsen in der Höhe (`min-height` 56), Vorschau bleibt oben bündig. **390 × 664:** nur der Ausschnitt ändert sich.
 
-**640–1023 px:** Telefonkomposition, Block höchstens 560 px breit (Zeilen bis 452 px), h2 40 ab 761 px.
+**640–1023 px:** Telefonkomposition (Rinne 16 px, K-12), Block höchstens 560 px breit (Zeilen bis 452 px); h2 bleibt 32/34 und wird erst
+ab 1024 px 40/42 (K-18; 11.2.1).
 
-**Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 57,3 px, Abstand 32.
+**Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 64,67 px, Rinne 24 px (K-12).
 
 | y | Element | x · Breite |
 |---|---|---|
 | 0 | Haarlinie über 12 Spalten | 120–1160 |
-| 32–76 | h2 40/44 einzeilig (677 px), Spalte 1–9 (Festlegung I-6) | 120 |
-| 92–118 | Lead 17/26 | 120 |
-| 150–167 | „BEISPIEL“; „IM MONAT“ rechtsbündig bis x 838 | 120 · 838 |
-| 175–495 | Vorschau 160 × 320 (Rand 5, Radius 23/18, Box 280 × 579 mit `.5357`), Spalte 1–3 linksbündig | 120–280 |
-| 175–399 | drei Zeilen 504 × 64, Abstand 16, Innenabstand 0 18 0 28, Spalte 4–9 | 388–892 |
-| 415–451 | Steuerzeile, zwei Zeilen, Spalte 4–9 | 388–892 |
+| 32–74 | h2 40/42 einzeilig (677 px), Spalte 1–9 (Festlegung I-6) | 120 |
+| 90–116 | Lead 17/26 | 120 |
+| 148–164 | „BEISPIEL“; „IM MONAT“ rechtsbündig bis x 840 | 120 · 840 |
+| 172–492 | Vorschau 160 × 320 (Rand 5, Radius 23/18, Maske unten 26, Box 280 × 579 mit `.5357`), Spalte 1–3 linksbündig | 120–280 |
+| 172–396 | drei Zeilen 508 × 64, Abstand 16, Innenabstand 0 18 0 28, Spalte 4–9 | 386–894 |
+| 412–448 | Steuerzeile, zwei Zeilen, Spalte 4–9 | 386–894 |
 
-Die Vorschau ist höher als der Zeilenstapel (Maßstabssprung), die Steuerzeile steht neben ihrem unteren Teil. Anschlussstrich 108 px als
-Führungslinie wie in 03; Spalten 10–12 bleiben frei; Abschnitt 495 px (0,62 BH); Überblendung bei Zeiger [H] aktiv.
+Die Vorschau ist höher als der Zeilenstapel (Maßstabssprung), die Steuerzeile steht neben ihrem unteren Teil. Anschlussstrich 106 px als
+Führungslinie wie in 03 (halbe Zeilenbreite − 148 px = drei Spalten und drei Rinnen − 160 px Vorschau); Spalten 10–12 bleiben frei;
+Abschnitt 492 px (0,62 BH); Überblendung bei Zeiger [H] aktiv.
 
-**Schreibtisch 1024.** Inhalt x 32–992, Spalten à 58, Abstand 24. h2 einzeilig über Spalte 1–10; Vorschau 160 × 320 bei x 32; Zeilen
-Spalte 4–9 (x 278–770, 492 × 64); Strich 86 px.
+**Schreibtisch 1024.** Inhalt x 32–992, Spalten à 58, Rinne 24. h2 einzeilig über Spalte 1–10; Vorschau 160 × 320 bei x 32; Zeilen
+Spalte 4–9 (x 278–746, 468 × 64); Strich 86 px.
 
 ## H. Technische Umsetzung
 
@@ -239,7 +244,8 @@ Spalte 4–9 (x 278–770, 492 × 64); Strich 86 px.
 
 1. **Baustein `<!--pakete:abschluss-->`** in PS, Funktion `abschluss(o, v)`: Zeilen aus `P().LISTE`, `P().preis(p)`, Cream an
    `EMPFOHLEN`, Ziel und Verb nach `v.bestellen` (wie PS:113-115), Steuerzeile aus `steuerText(v)` und `v.vorlaeufig`; Vorschau je Stufe
-   aus dem Gerät-Baustein von fb-03 (`geraetSchirm(m, { mini: true })`) mit Fuß aus `kennzeichnung()`. Steht als letzter Abschnitt in
+   aus dem Gerät-Baustein von fb-03 (`geraetSchirm(m, { mini: true })`) mit Fuß aus `kennzeichnung()`; `mini` lässt „· Beispiel“ in der
+   Adresszeile weg (K-36) und setzt den Fuß bei y 470 über die Maske (K-23). Steht als letzter Abschnitt in
    `main.rg`, damit die Einbettung ihn übernimmt (portal.js:808-811). Danach `node scripts/bedingungen-pdf.mjs`.
 2. **VJ `abschluss(wurzel, o)`**, aus `Verkauf.auf`, Bindung je Element einmal (`__vkAn`): liest und schreibt den Zustand „gewählt“ je
    Wurzel (fb-06, fb-09); hört auf `click` `a[data-paket]`, `change` am Paketfeld, `vk:gesendet`; Überblendung nur bei `hover: hover`
@@ -284,16 +290,22 @@ Die Vorschau enthält keine `.btn`, keine IDs und kein `h1` (Knöpfe der Miniatu
 ```css
 .vk-abschluss { counter-increment: none; padding-top: 24px }
 .vk-abschluss::before { content: none }
-.vk-tech { margin: 0; font-size: 13px; line-height: 17px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.vk-tech { margin: 0; font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
 .vk-wahl { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 12px; row-gap: 8px; margin-top: 24px }
-.vk-mini { grid-area: 2 / 1; position: relative; width: 96px; height: 192px; border-radius: 14px; padding: 3px; background: var(--surface) }
+.vk-mini { grid-area: 2 / 1; position: relative; width: 96px; height: 192px; border-radius: 14px; padding: 3px; background: var(--surface);
+  mask-image: linear-gradient(#000 calc(100% - 15px), transparent) }
+.vk-mini::after { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1px solid var(--kante-alpha);
+  border-top-color: var(--kante-licht); border-right-color: var(--kante-licht); pointer-events: none }
 .vk-mini-stufe { position: absolute; inset: 3px; overflow: clip; border-radius: 11px; background: var(--ground); transition: opacity var(--t2) var(--e-out) }
 .vk-mini-box { width: 280px; height: 579px; transform: scale(.3214); transform-origin: 0 0; pointer-events: none }
 .vk-zeilen { grid-area: 2 / 2; display: grid; grid-template-rows: repeat(3, 56px); gap: 12px; margin: 0; padding: 0; list-style: none; container-type: inline-size }
 .vk-zeile { display: grid; grid-template: "n p f" 20px "m e f" 16px / minmax(0, 1fr) auto 28px; gap: 2px 8px; align-content: center;
   justify-content: stretch; width: 100%; padding: 0 14px 0 22px; text-align: left; outline: 2px solid transparent; outline-offset: -2px; transition: background-color var(--t1) var(--e-out), box-shadow var(--t1) var(--e-out) }
-.vk-zeile:active { transform: none } .vk-zeile.primary:active { background: #e2e1db } .vk-zeile.ghost:active { background: var(--surface3) }
-.vk-zeile:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px }
+@media (hover: hover) { .vk-zeile.primary:hover:not([disabled]) { background: var(--primary); box-shadow: inset 0 0 0 2px rgb(22 22 22 / .24) }
+  .vk-zeile.ghost:hover { box-shadow: inset 0 0 0 2px var(--text) } }
+.vk-zeile:active:not([disabled]) { transform: none; transition-duration: 0s }
+.vk-zeile.primary:active:not([disabled]) { background: var(--primary-druck) } .vk-zeile.ghost:active:not([disabled]) { background: var(--surface2) }
+.vk-zeile:focus-visible { outline: 2px solid var(--text); outline-offset: 2px }
 .vk-z-name { grid-area: n } .vk-z-preis { grid-area: p } .vk-z-marke { grid-area: m } .vk-z-einr { grid-area: e } .vk-zeile .pf, .vk-z-pf { grid-area: f; margin: 0 }
 .vk-z-preis, .vk-z-einr { justify-self: end } .vk-z-einr, .vk-z-marke { font-size: 13px; line-height: 16px }
 .vk-zeile.ghost { box-shadow: inset 0 0 0 2px var(--muted) }
@@ -304,17 +316,19 @@ Die Vorschau enthält keine `.btn`, keine IDs und kein `h1` (Knöpfe der Miniatu
 @container (max-width: 249px) { .vk-zeile { grid-template-columns: minmax(0, 1fr) auto 0 } .vk-zeile .pf { display: none } }
 @media (max-width: 351px) { .vk-mini, .vk-wahl-bsp { display: none } .vk-wahl { grid-template-columns: minmax(0, 1fr) } .vk-zeilen { grid-column: 1 } }
 @media (min-width: 1024px) {
-  .vk-wahl { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 8px; --strich: 86px }
-  .vk-mini { grid-area: 2 / 1 / 4 / 4; width: 160px; height: 320px; padding: 5px; border-radius: 23px } .vk-mini-stufe { inset: 5px; border-radius: 18px }
+  .vk-wahl { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 8px; --strich: calc(50% - 148px) }
+  .vk-mini { grid-area: 2 / 1 / 4 / 4; width: 160px; height: 320px; padding: 5px; border-radius: 23px;
+    mask-image: linear-gradient(#000 calc(100% - 26px), transparent) } .vk-mini-stufe { inset: 5px; border-radius: 18px }
   .vk-mini-box { transform: scale(.5357) } .vk-wahl-bsp { grid-column: 1 / 4 } .vk-wahl-monat, .vk-zeilen, .vk-abschluss-steuer { grid-column: 4 / 10 }
   .vk-zeilen { grid-template-rows: repeat(3, 64px); gap: 16px } .vk-zeile { padding: 0 18px 0 28px } .vk-wahl-monat { margin-right: 54px }
   .vk-abschluss-steuer { grid-row: 3; align-self: start } .vk-abschluss h2 { max-width: none } }
-@media (min-width: 1280px) { .vk-wahl { column-gap: 32px; --strich: 108px } }
 @media (prefers-reduced-motion: reduce) { .vk-mini-stufe { transition: none } }
 ```
 
-Die transparente Kontur (`outline`) macht die Cream-Zeile in erzwungenen Farben als Knopf sichtbar, ohne die Maße zu ändern; der Fokus
-überschreibt sie (die Regel steht nach GC:38 und braucht deshalb die eigene `:focus-visible`-Zeile).
+Die transparente Kontur (`outline`) macht die Cream-Zeile in erzwungenen Farben als Knopf sichtbar, ohne die Maße zu ändern, ebenso die
+Ring-Zeilen, deren Kontur als `box-shadow` dort entfällt; der Abstand −2 px gilt nur für diese Ruhekontur, der Fokus überschreibt sie mit
+Abstand 2 px nach K-34 (die Regel steht nach GC:38 und braucht deshalb die eigene `:focus-visible`-Zeile). `--strich` als
+`calc(50% - 148px)` bezieht sich auf die Zeilenbreite und ergibt 86 px bei 1024 und 106 px ab 1104 px, ohne eigene Stufe je Breite.
 
 **Assets**
 
@@ -329,7 +343,7 @@ Die transparente Kontur (`outline`) macht die Cream-Zeile in erzwungenen Farben 
 **Leistung:** weit unter dem ersten Bildschirm; ≈ 120 zusätzliche Knoten (drei Miniaturen), statische `transform` ohne Animation, Bilder
 `loading="lazy"`, feste Maße (keine Layoutverschiebung); keine fremden Server.
 **Barrierefreiheit:** `section` mit `aria-labelledby`; Liste aus drei Links mit vollständigem Namen; sichtbare Stufe als `role="img"`,
-verborgene über `hidden`; Ziele 56 px; Fokus 2 px; Lesefolge h2 → Lead → Zeilen → Steuerzeile; nichts nur über Farbe („Empfohlen“ als
+verborgene über `hidden`; Ziele 56 px; Fokus 2 px `--text`, Abstand 2 (K-34); Lesefolge h2 → Lead → Zeilen → Steuerzeile; nichts nur über Farbe („Empfohlen“ als
 Text).
 **Prüfpunkte:** Schriftgrößen 32/40 · 17 · 13 (in der Miniatur 13 · 15 · 24 berechnet); eine Cream je Bildschirm (Abstand zu „Frage
 senden“ ≈ 3 BH); kein Querscrollen bei 320–390 px; Einbettung, ohne JavaScript, weniger Bewegung; `farbanteil.py` bei 390 × 844.
@@ -364,13 +378,19 @@ stellen“ (Unentschlossene: Gesprächsweg in 04.3, Kopf-Ring). Ohne Empfehlung 
 
 - GEST:447 (Abschnittsfolge endet mit Wissen und Quellen): Die Seite endet mit dem Abschluss. **Abweichung von bestehender Regel – Freigabe
   durch den Inhaber nötig.** Begründung: Ende mit Handlung (EA H-D7; PA 1.9).
-- GEST:38-39 (Katalog 1, Blöcke erscheinen 8 px aufwärts): Der Abschluss erscheint ohne Auftritt. **Abweichung von bestehender Regel –
-  Freigabe durch den Inhaber nötig.** Begründung: keine Bewegung neben Preis und Knopf (DG-AB-2, E-13).
+- GEST:38-39 (Katalog 1, Blöcke erscheinen 8 px aufwärts): Der Abschluss erscheint ohne Auftritt, auch ohne Deckkraft-Einblenden (K-6;
+  DS-AB-8). **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig.** Begründung: keine Bewegung neben Preis und Knopf,
+  ein bewegter Träger je Ansicht, ohne JavaScript sichtbar (DG-AB-2, E-13).
 - GEST:452, :456 und DG T11 (Cream am empfohlenen Paket): Cream an der gewählten Zeile. **Abweichung von bestehender Regel – Freigabe durch
   den Inhaber nötig.** Begründung: wie fb-06 J-AB-8, Folge der Absicht (E-3).
-- GEST:93 (`ghost` mit 2-px-Rand, gebaut in `--line2`, GC:58): Ring-Zeilen mit Kontur `--muted`. **Abweichung von bestehender Regel –
-  Freigabe durch den Inhaber nötig.** Begründung: Konturen 3 : 1 (DNA-B Regel 12; DG-E-10); fb-06 nutzt noch `--line2`, beide gleich ziehen.
-- Ohne Freigabe, funktional begründet: Drücken ohne `scale(.98)` (SG 10.7/3, seitenweit wie fb-06); Ring-Zeilen ohne Pfeilkreis wie die
-  Ring-Knöpfe der Karten.
+- GEST:24 und GEST:93 (`--muted` nur für Labels und Nebenzeilen; `ghost` mit 2-px-Rand, gebaut in `--line2`, GC:58): Ring-Zeilen mit
+  innerer Kontur `--muted`, Hover `--text`, Druck `--surface2` (K-1; DS-AB-10). **Abweichung von bestehender Regel – Freigabe durch den
+  Inhaber nötig.** Begründung: Die Kontur ist die einzige Grenze des Knopfs und braucht 3 : 1 (WCAG 1.4.11; DNA-B Regel 12; DG-E-10); gilt
+  für jeden Ring der Website. Bis zur Freigabe bleibt `--line2` über das Token umschaltbar (11.10.1).
+- GC:15, :65, :66 (Cream hellt beim Überfahren auf Weiß `--primary-hover` auf; Druck `scale(.98)`): Hover als innere 2-px-Kontur
+  `--on-primary` 24 %, Druck Füllung `--primary-druck` (#e2e1db) sofort, keine Deckkraftänderung, keine Skalierung (K-2; DS-AB-3, neuer
+  Wert DS-AB-7). **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig.** Begründung: Hover ist überall Kontur (DG 2.4.1),
+  Weiß wäre ein Füllungswechsel und damit der Kanal von „aktiv“; Bedienschicht formstabil (SG 10.7/3). Rückfall `--primary-hover` (DS-H-3).
+- Ohne Freigabe: Ring-Zeilen ohne Pfeilkreis und ohne Chevron; der gefüllte Pfeilkreis 28 px bleibt das Zeichen der Cream (K-31).
 - Offen: DG-E-6 (13 oder 15 px für Zeile 2; bei 15 px passen „Empfohlen“ und Einrichtung nicht mehr in 170 px, dann gilt der Rückfall von
   A4-H3); Beispielfarbe `#0071e3` gemeinsam mit fb-06 bestätigen.

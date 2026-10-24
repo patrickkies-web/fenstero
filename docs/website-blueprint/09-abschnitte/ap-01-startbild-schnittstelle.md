@@ -5,7 +5,8 @@ Seite: App `/app/`, Startbild (Schnittstelle zur App) · Position: 1 von 1 (erst
 ID `ap-01-startbild-schnittstelle`. Phase I, Stand 24.10.2026; Planung, nichts gebaut. Kürzel wie in [08-zielarchitektur.md](../08-zielarchitektur.md).
 **[V]** verbindlich, **[H]** Hypothese mit Rückfall, **Textentwurf** = neuer Wortlaut zur Freigabe, **Festlegung I-n** = Entscheidung dieser
 Spezifikation, wo 08 offen ist. Alle Lagen sind geplant, nicht gemessen. Alle Konzepte A–D führen `/app/` „wie IA“ (KA:97, KB:105, KC:99,
-KD:123); maßgeblich sind deshalb IA 5.4.4 f, DG T14 (2.3.16) und 08, 8.3.10.
+KD:123); maßgeblich sind deshalb IA 5.4.4 f, DG T14 (2.3.16) und 08, 8.3.10. Angeglichen an [11-designsystem.md](../11-designsystem.md): wo
+diese Spezifikation früher anders plante, steht jetzt der Wert der **Festlegung K-n**; I-5 ist durch K-8 ersetzt.
 
 ## A. Abschnitt und Funktion
 
@@ -56,13 +57,13 @@ unter der Modellkarte (**Festlegung I-3**: Wortbudget; `scripts/pruefen.mjs:654`
 
 **B.5 Vorhandene Komponenten:** `.btn.primary` mit `.pf`, `.btn.ghost`, `.ulink`, `.eyebrow.kicker`, `.mk` (`web/assets/gemeinsam.css:44-76`);
 `FOTO_START` (`app.js:2767`); `SCREENS.home` (`:2768-2777`); `kontoBereit()`, `KS`; `Abrechnung.preise()`, `.einfuehrung()`
-(`modell.js:1118-1130`); `Logo.bewegen()` (`gemeinsam.js:127-136`).
+(`modell.js:1118-1130`); `Logo.bewegen()` (`gemeinsam.js:127-136`, hier nur bei Berührung, K-8).
 
 ## C. Exakte Layoutkomposition
 
 **C.1 Grundstruktur.** Eine Bühne als Rasterzelle (SG B.2): Foto und Lesestapel in `grid-area: 1 / 1`, der Stapel beginnt im Auslauf des
-Fotos (GEST:34). Telefon: 4 Spalten à 77,5 px, Rand und Abstand 16 px; Foto randlos über 390 px; Stapel und Knöpfe über Spalte 1–4 an der
-Ordnungslinie x = 16 (G5). Vertikal geschichtet und asymmetrisch: Motiv oben mit Schwerpunkt Mitte/rechts (mittlerer Waschbär, Fensterlicht),
+Fotos (GEST:34). Telefon: 4 Spalten à 77,5 px, Rand und Abstand 16 px; Foto randlos über 390 px; Stapel über Spalte 1–4, Knöpfe nach
+Inhalt (K-30), beide an der Ordnungslinie x = 16 (G5). Vertikal geschichtet und asymmetrisch: Motiv oben mit Schwerpunkt Mitte/rechts (mittlerer Waschbär, Fensterlicht),
 Handlung unten links bündig.
 
 **C.2 Telefon 390 × 844**
@@ -71,11 +72,11 @@ Handlung unten links bündig.
 |---|---|---|---|---|
 | App-Kopf (Bestand) | 40 | 0–390 | 0–52 | unverändert |
 | Foto | 20 | 0–390 | 52–412 | 360 px, `object-position: 50% 20%`; deckend y 76–262, Auslauf bis 412 |
-| Eyebrow | 30 | 16–≈ 250 | 343–361 | 13/600, Versalien 0,12 em, Zeilenhöhe 18 px, `--accent` |
+| Eyebrow | 30 | 16–≈ 250 | 343–361 | 13/600, Versalien +0,12 em (K-17), Zeilenhöhe 18 px, `--accent` |
 | h1 | 30 | 16–≈ 250 | 369–470 | 32/800, −0,03 em, Zeilenhöhe 1,05, drei Zeilen, „Wünschen.“ `--accent` |
 | Konditionsblock | 30 | 16–≈ 350 | 486–540 | `<ul>`, drei Zeilen 13/600, Zeilenhöhe 18 px, `tabular-nums`, `--text2`; Beträge 700 `--text` |
-| Cream | 30 | 16–374 | 548–600 | 358 × 52, Pfeil im Kreis 28 px |
-| Ring | 30 | 16–374 | 612–664 | 358 × 52, Kontur 2 px `--line2` |
+| Cream | 30 | 16–260 | 548–600 | ≈ 244 × 52, linksbündig; gleich breit wie der Ring nach dem längeren Text („Fenster ausmessen“ 17/700 ≈ 168 px, geschätzt, + 76 px Innenabstand 2 × 22 und Pfeilkreis, `gemeinsam.css:56`, `:75`), mindestens 212 px (K-30); Pfeil im Kreis 28 px, nur hier (K-31) |
+| Ring | 30 | 16–260 | 612–664 | ≈ 244 × 52, innere 2-px-Kontur `--muted` (K-1), kein Pfeilkreis |
 | Anmelde-Zeile | 30 | 16–≈ 290 | 676–720 | Zeile 44 px, Text 15/500 `--muted`, „Anmelden“ 15/800 `--text`, Unterstrich `--line2` |
 | Anschnitt Modellkarte | – | 16–374 | ab 772 | 72 px = 8,5 % (**Festlegung I-4**: 52 px Abstand statt 96 nach G6, sonst nur 3 % Anschnitt) |
 
@@ -87,7 +88,8 @@ Zollstock-Bild links x 57–99, y 148–221; rechter Waschbär x 265–328, y 19
 der Rücken des vorderen Waschbären (x 0–115, ab y 221) ist Repoussoir und läuft unter Eyebrow und h1 aus (Deckkraft dort ≤ 17 %).
 
 **C.4 Verhältnisse.** Foto 43 % der Höhe bei 844 (54 % bei 664), deckend 22 %; Stapel und Handlung 45 %; Überlappung y 343–412. Motiv
-(Figuren, Handys, Fenster) ≈ 390 × 160 px. Frei ≈ 45 % (Schätzung, ≥ ⅓ nach SG 10.1/3). Text als Begrenzungsrahmen ≈ 16 %, Prüfpunkt gegen
+(Figuren, Handys, Fenster) ≈ 390 × 160 px. Frei ≈ 49 % (Schätzung, mit Knöpfen nach K-30 rund 4 Punkte mehr als bei voller Breite;
+≥ ⅓ nach SG 10.1/3). Text als Begrenzungsrahmen ≈ 16 %, Prüfpunkt gegen
 15 %. Sprung Anker (mittlerer Waschbär ≈ 150 px) : Versalhöhe der Knopfschrift (≈ 12 px) ≈ 12-fach (≥ 3). Größenstufen: 32 und die
 Klein-Stufe 13 · 15 · 17 (DG 2.2.18) neben dem Foto.
 
@@ -102,7 +104,7 @@ Hintergrund: Raum, Lampe, Fenster, unscharf. Die Bedienschicht verdeckt nur den 
 | Fotohöhe | `--foto-h: clamp(296px, 92.3vw, 360px)`, unter 1024 px zusätzlich `min(…, 62svh)` | E-1 bei 664 und 360 px; Querformat |
 | Auslauf Telefon | `mask-image: linear-gradient(transparent 0, #000 24px, #000 210px, rgb(0 0 0/.5) 250px, rgb(0 0 0/.22) 280px, rgb(0 0 0/.07) 310px, transparent 360px)` (Stopps mit `--foto-h` skaliert) | Auslauf über das untere Drittel (DG 2.2.11); weicher Anschluss an die Kopflinie oben |
 | Stapelbeginn | `padding-top: calc(var(--foto-h) - 69px)` | Eyebrow im Auslauf (GEST:34) |
-| Eyebrow | 13/600, 0,12 em | DG 2.2.18; **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (GEST:26, `gemeinsam.css:44`: 800, 0,18 em); Grund: Technikstimme der Grammatik, wie `he-01`; Rückfall 0,18 em, passt einzeilig |
+| Eyebrow | 13/600, Sperrung +0,12 em; einziger Rückfall +0,08 em bei 360 px Breite, wenn die Zeile sonst umbricht (hier nicht nötig: ≈ 234 px) | **Festlegung K-17**; DG 2.2.18; **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (DS-AB-1; GEST:26, `gemeinsam.css:44`: 800, 0,18 em); Grund: Technikstimme, SG-Spanne 0,06–0,12 em; ohne Freigabe 800/0,18 em, passt einzeilig |
 | h1 | 32 px bis 1023 px, 40 px ab 1024 | DG T14; **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (GEST:27 „App: 40 Zahl/Hero“; heute `app.css:171` 40 px); Grund: E-1, 34 px Gewinn; Rückfall 40 px mit Foto 326 px |
 | Konditionsblock | `list-style: none; margin: 0; padding: 0`; Zeilen ohne Punkt; Platz für Zeile 3 und Anmelde-Zeile immer reserviert | Höhe stabil, bevor `/api/status` antwortet (`app.js:6804`; CLS) |
 
@@ -140,7 +142,7 @@ Erwartet aus Kontrast, Größe und Lage, nicht gemessen.
 - **Reihenfolge:** Figuren → h1 → Konditionsblock (die fetten Beträge als Ankerpunkte) → Cream → Ring → Anmelde-Zeile.
 - **Kontraste:** warmes, farbiges Foto oben gegen unbunten Grund unten; Diagonale vom Fensterlicht oben rechts zur Cream unten links; Grün
   ≤ 1 % (Eyebrow, „Wünschen.“).
-- **CTA:** Cream 358 × 52 = 5,6 % der Fläche, y 548–600 = 65–71 % der Höhe bei 844, 83–90 % bei 664; Daumenbereich.
+- **CTA:** Cream ≈ 244 × 52 = 3,9 % der Fläche (K-30), y 548–600 = 65–71 % der Höhe bei 844, 83–90 % bei 664; Daumenbereich.
 - **Ablenkungen:** leuchtendes Handy links (Abstand zur Eyebrow ≥ 120 px); „Begriffe“ im Kopf (Bestand); Anschnitt der hellen Modellkarte
   unten (deshalb nur 8,5 %, und unter der Anmelde-Zeile, nicht neben der Cream).
 - **Übergang:** Die Modellkarte mit Maßschild „1.370 mm“ schneidet bei 844 an und führt vom Foto zum Messen; bei 664 endet der Bildschirm am
@@ -150,16 +152,16 @@ Erwartet aus Kontrast, Größe und Lage, nicht gemessen.
 
 | Auslöser | Verhalten | Dauer, Kurve | „Weniger Bewegung“ | Begründung |
 |---|---|---|---|---|
-| Laden | Foto Deckkraft 0,35 → 1 (600 ms) und Maßstab 1,03 → 1 (900 ms), Ursprung 45 % 35 %: Die Kamera „setzt sich“ auf die Figuren; Text steht ab dem ersten Bild | `--kurve-ein` `cubic-bezier(.2, 0, 0, 1)` | Foto sofort voll | DG T14 (600 ms Deckkraft); Bestand `fotoin` (`app.css:183`, 1,6 s) verkürzt; Start bei 0,35 hält das Foto als LCP-Kandidat |
-| Foto spät dekodiert (> 1.000 ms nach Aufbau) | ohne Auftritt, nur Deckkraft 0 → 1 | 200 ms | Schnitt | kein verspätetes Theater |
-| ab Ende Foto | Licht im Logo des App-Kopfs einmal (`Logo.bewegen`) | 1,6 s, Bestand | ruhig (`gemeinsam.css:208`) | **Festlegung I-5:** nacheinander (SG 10.7/4; E-2), Ende ≈ 2,5 s |
-| erstes Scrollen oder Tippen im Auftritt | Endzustand | sofort | – | E-2 |
+| Laden | Foto Deckkraft 0,35 → 1 und Maßstab 1,03 → 1 gemeinsam, Ursprung am Anker (45 % 35 %, Kopf des mittleren Waschbären, C.3): Die Kamera „setzt sich“ auf die Figuren; Start nach `img.decode()`, nur wenn die Bühne beim Laden im Bild ist; Text steht ab dem ersten Bild | 900 ms (`--t-buehne`), `--e-out` | Foto sofort voll | **Festlegung K-7** (DG T14 nannte 600 ms Deckkraft); Bestand `fotoin` (`app.css:183`, 1,6 s) verkürzt; Start bei 0,35 hält das Foto als LCP-Kandidat |
+| Foto spät dekodiert (> 1.000 ms nach Aufbau) | ohne Auftritt, nur Deckkraft 0 → 1 | 220 ms (`--t2`), `--e-out` | Schnitt | kein verspätetes Theater; Dauer nach K-4 |
+| Logo-Licht | geht beim Laden nicht an, weil `/app/` einen Bühnen-Ladeauftritt hat; nur bei Berührung (`Logo.bewegen`, Bestand) | wie `rh-01` | ruhig (`gemeinsam.css:208`) | **Festlegung K-8** (ersetzt I-5): ein Auftritt im ersten Bildschirm (`rh-01`); **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (DS-AB-9; GEST:7) |
+| erste Eingabe im Auftritt (Scrollen > 4 px, Wischen, Rad, Taste) | Laufendes per Deckkraft in den Endzustand | 220 ms (`--t2`) | – | **Festlegung K-7**; E-2; nichts springt (SKILL:48) |
 | erster Aufbau der Seite | `.scr` gleitet nicht ein | – | – | **Festlegung I-6:** Bedienschicht ohne Versatz (G1); Wechsel aus anderen App-Bildschirmen zurück zur Startseite gleitet weiter (App-Regel GEST:39 Nr. 2) |
 | Neuaufbau durch `render()` | Foto im Endzustand, kein zweiter Auftritt | – | – | Auftritt einmal je Seitenaufruf |
-| `/api/status` beantwortet | Zeile 3 und Anmelde-Zeile blenden ein | 160 ms, `--kurve-ein` | sofort | Zustand, kein Träger |
+| `/api/status` beantwortet | Zeile 3 und Anmelde-Zeile blenden ein | 150 ms (`--t1`), `--e-out` | sofort | Zustand, kein Träger; Dauer nach K-4 |
 | Scrollen | keine Bewegung | – | – | Stufe 2 |
-| Hover (`hover: hover`) | Cream → `--primary-hover`; Ring-Kontur → `--text`; Unterstrich „Anmelden“ → `--text` | 160 ms | bleibt | SG 10.7/8 |
-| Drücken | Cream `color-mix(in srgb, var(--primary) 90%, #000)`, Ring Füllung `rgb(243 242 238/.08)`; keine Skalierung | 120 ms | bleibt | G1; SG 10.7/3 (heute `gemeinsam.css:65` `scale(.98)`, in der Bühne aufgehoben) |
+| Hover (`hover: hover`) | Cream: innere 2-px-Kontur `--on-primary` 24 %; Ring: Kontur `--muted` → `--text`; Unterstrich „Anmelden“ → `--text` | 150 ms (`--t1`), `--e-out` | bleibt | Hover = Kontur (K-2, K-1); Dauer K-4; SG 10.7/8 |
+| Drücken | Cream: Füllung `--primary-druck` (`#e2e1db`); Ring: Füllung `--surface2`; keine Deckkraftänderung, keine Skalierung | sofort, zurück 150 ms (`--t1`) | bleibt | **Festlegung K-2**; G1; SG 10.7/3 (heute `gemeinsam.css:65` `scale(.98)`, in der Bühne aufgehoben) |
 | Fokus | 2-px-Kontur `--text`, Abstand 2 px | sofort | bleibt | WCAG 2.4.7, 2.4.11 |
 | Klick Cream, Ring, Anmelden | App-Wechsel nach App-Regel | 320 ms | App-Regel | DG T14: App außerhalb |
 
@@ -175,25 +177,30 @@ die Textfassung `.vorab` (`web/app/index.html:41-85`), unverändert.
 - **360 px:** Foto 332 px, alles 28 px höher; Zeile 2 (≈ 323–336 px) bricht gegebenenfalls um, Cream-Unterkante dann ≤ 590.
 - **320 px:** Foto 296 px; Konditionsblock bis fünf Zeilen; E-1 nicht zugesichert; kein Querscrollen. Bei 200 % Text wächst die Bühne, keine
   festen Texthöhen.
-- **640–1023 px** (App-Spalte 640 px): Telefonkomposition; Foto 640 × 460 (`object-position: 50% 25%`), Stapel ≤ 560 px, Knöpfe 400 px
-  breit, linksbündig; h1 32 px. Querformat: Foto ≤ 62 svh.
+- **640–1023 px** (App-Spalte 640 px; `.app` ist bis 1023 px höchstens 640 px breit und schneidet ab, `app.css:9`): Telefonkomposition mit
+  Rand 24 px (Ordnungslinie 24 px vom Rand der App-Spalte, K-13); Foto 640 × 460 (`object-position: 50% 25%`), Stapel ≤ 560 px, Knöpfe nach
+  K-30 wie am Telefon (≈ 244 px, untereinander, linksbündig); h1 32 px (40 px erst ab 1024, K-11). Querformat: Foto ≤ 62 svh.
 
-**Schreibtisch 1280 × 800:** App-Kopf 48 px (`app.css:224`), Inhaltsspalte 752 px (x 264–1016, `app.css:227`), darin 12 Spalten à 48 px,
-Abstand 16. Split 6 : 6 plus Bildüberstand.
+**Schreibtisch 1280 × 800:** App-Kopf 48 px (`app.css:224`). Die Bühne verlässt die 752-px-Inhaltsspalte der App (x 264–1016,
+`app.css:227`) und liegt auf dem Raster der Website (11.1.7): Spalte 1040 px mittig (x 120–1160), 12 Spalten à 64,67 px, Rinne 24 (K-11,
+K-12). Split 5 : 7 (K1): Text über Spalte 1–5, Foto ab Spalte 6 bis an den Rand der App.
 
 | Element | Lage |
 |---|---|
-| Foto | x 648–1230 (bis an den Rand der App, `.app` max. 1180 px), y 52–692 (582 × 640), `object-position: 50% 30%`; Auslauf links 648–740, rechts 1166–1230, oben 52–92, unten 572–692; mittlerer Waschbär x 881–968, y 222–339 |
-| Eyebrow | x 264, y 196–213 |
+| Foto | x 563–1230 (ab Spalte 6 bis an den Rand der App, `.app` max. 1180 px), y 52–692 (667 × 640), `object-position: 50% 30%`; Auslauf links 563–655, rechts 1166–1230, oben 52–92, unten 572–692; mittlerer Waschbär x ≈ 830–930, y ≈ 219–353 (aus C.3 umgerechnet) |
+| Eyebrow | x 120, y 196–213 |
 | h1 | 40/800, drei Zeilen, y 225–351 |
 | Konditionsblock | y 371–425 (eine Zeile je Bedingung) |
-| Cream | x 264–632, y 437–489 |
-| Ring | x 264–632, y 501–553 |
+| Cream | x 120–364 (≈ 244 px, K-30), y 437–489 |
+| Ring | x 120–364, y 501–553 |
 | Anmelde-Zeile | y 561–605 |
 | Anschluss | Modellkarte ab y 712, Anschnitt 88 px = 11 % |
 
-Lesezone 368 px = 29 % der Breite (SG 25–42 %); Stapel neben dem Anker, nie darauf. **1024 × 768:** Spalte x 136–888; Text x 136–504; Foto
-x 520–1024 bis an den Bildschirmrand (504 × 600, kein Auslauf rechts); Eyebrow ab y 166, Cream 407–459; Modellkarte ab 672 (12,5 %).
+Lesezone Spalte 1–5, x 120–539 = 419 px = 33 % der Breite (SG 25–42 %); Stapel neben dem Anker, nie darauf. Die Modellkarte darunter
+bleibt App-Bestand in der Spalte x 264–1016; ihr Versatz zur Ordnungslinie der Bühne (x 120) folgt aus K-11/K-13 und ist Prüfpunkt im
+Schreibtisch-Video. **1024 × 768:** Rand 32, Spalte 960 (x 32–992), 12 Spalten à 58 px, Rinne 24 (K-13); Text über Spalte 1–5 (x 32–418),
+Cream und Ring x 32–276; Foto ab Spalte 6 x 442–1024 bis an den Bildschirmrand (582 × 600, links über 92 px ausgeblendet, kein Auslauf
+rechts); Eyebrow ab y 166, Cream 407–459; Modellkarte ab 672 (12,5 %, App-Spalte x 136–888).
 
 ## H. Technische Umsetzung
 
@@ -207,11 +214,15 @@ x 520–1024 bis an den Bildschirmrand (504 × 600, kein Auslauf rechts); Eyebro
 - `apKonditionen()` in `app.js`: liefert die drei Zeilen aus `Abrechnung.preise().aufmass`, `Abrechnung.einfuehrung()` (Datum aus
   `EINF.bis` als TT.MM.JJJJ), `kontoBereit()` und `KS`; keine fest geschriebenen Beträge.
 - CSS-Block `.ap-buehne` (≤ 2 KB): `display: grid; isolation: isolate; overflow: clip; margin-inline: -16px`; `.ap-foto { grid-area: 1/1;
-  height: var(--foto-h); z-index: 20 }`, `.ap-stapel { grid-area: 1/1; z-index: 30; padding: calc(var(--foto-h) - 69px) 16px 0 }`.
-  Ab 1024 px: `.scr` `position: relative`, Foto `position: absolute; right: calc((800px - min(100vw, 1180px)) / 2)`, Maske mit
+  height: var(--foto-h); z-index: 20 }`, `.ap-stapel { grid-area: 1/1; z-index: 30; padding: calc(var(--foto-h) - 69px) 16px 0 }`, von
+  640 bis 1023 px seitlich 24 px (K-13). Ab 1024 px tritt die Bühne aus der 800-px-Spalte von `.scr` auf das Website-Raster (K-11, K-13):
+  `margin-inline: calc((800px - min(100vw, 1180px)) / 2 - 24px)` (volle Breite der App), `--rand: max(32px, (min(100vw, 1180px) - 1040px)
+  / 2); padding-inline: var(--rand); grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px`; `.ap-stapel { grid-area:
+  1 / 1 / 2 / 6; padding: 0 }`, `.ap-foto { grid-area: 1 / 6 / 2 / -1; margin-right: calc(-1 * var(--rand)) }`, Maske mit
   `mask-composite: intersect` (wie heute `app.css:191`).
-- `startAuftritt(wurzel)` (≤ 1 KB): `img.decode()`, Zeitgrenze 1.000 ms, Klasse `.auftritt` nur unter `prefers-reduced-motion:
-  no-preference`; Abbruch bei `scroll` und `pointerdown`; danach `Logo.bewegen()`; Merker gegen Wiederholung nach `render()`; erster
+- `startAuftritt(wurzel)` (≤ 1 KB): `img.decode()`, Zeitgrenze 1.000 ms, Start nur, wenn die Bühne beim Laden im Bild ist; Klasse
+  `.auftritt` nur unter `prefers-reduced-motion: no-preference`; bei der ersten Eingabe (Scrollen > 4 px, Wischen, Rad, Taste) Laufendes in
+  220 ms per Deckkraft in den Endzustand (K-7); kein `Logo.bewegen()` beim Laden (K-8); Merker gegen Wiederholung nach `render()`; erster
   Aufbau mit `.erstaufbau` (ohne `scr-in`). IntersectionObserver für das Schwingen der Modellkarte (I-7).
 
 **H.3 Assets**
@@ -220,10 +231,10 @@ x 520–1024 bis an den Bildschirmrand (504 × 600, kein Auslauf rechts); Eyebro
 |---|---|---|
 | `app-start.webp` | Foto 1120 × 1400, 178 KB; Schreibtisch und Telefon mit Pixeldichte 3 | vorhanden |
 | `app-start-780.webp` | 780 × 975, ≤ 95 KB, für Telefon mit Pixeldichte 2 | vorhanden, lokal aus `app-start.webp` erzeugt (Weg nach docs/BILDER.md) |
-| optional `app-start-1600.webp` | 1600 × 2000, ≤ 300 KB, für Schreibtisch mit Pixeldichte 2 (582 px CSS-Breite braucht 1164 px) | **beim Inhaber anfragen** (Flux, gleiche Szene, kein Text, kein Wasserzeichen); bis dahin genügt 1120 |
+| optional `app-start-1600.webp` | 1600 × 2000, ≤ 300 KB, für Schreibtisch mit Pixeldichte 2 (667 px CSS-Breite braucht 1334 px) | **beim Inhaber anfragen** (Flux, gleiche Szene, kein Text, kein Wasserzeichen); bis dahin genügt 1120 |
 
 Kein Telefonzuschnitt nötig: Anders als in `he-01` liegt nichts über dem deckenden Foto, `object-position` reicht.
-`srcset="…-780.webp 780w, ….webp 1120w"`, `sizes="(min-width: 1024px) 582px, (min-width: 640px) 640px, 100vw"`, `width`/`height`,
+`srcset="…-780.webp 780w, ….webp 1120w"`, `sizes="(min-width: 1024px) min(667px, calc(100vw - 442px)), (min-width: 640px) 640px, 100vw"`, `width`/`height`,
 `fetchpriority="high"`; im Kopf von `web/app/index.html` `<link rel="preload" as="image" imagesrcset=… imagesizes=…>`.
 
 **H.4 Leistung:** Heute entsteht das Startbild erst nach den synchronen Skripten am Ende von `web/app/index.html:87-92`; das Vorladen holt das
@@ -232,7 +243,8 @@ Foto parallel (Ziel LCP ≤ 2,5 s, R11). Bilder im ersten Bildschirm ≤ 180 KB.
 in der HTML-Datei bleibt eine spätere Option (Konflikt mit der Textfassung `.vorab`, Prüfsuite `:1595`, `:1599`).
 
 **H.5 Barrierefreiheit:** DOM-Folge Eyebrow → h1 → Konditionsblock → Cream → Ring → Anmelde-Zeile → Foto (Lesefolge vor Stapelfolge, SG
-B.2); Kontrast gegen die ungünstigste Auslaufstelle (Eyebrow 4,5:1, h1 3:1; geschätzt > 7:1); `--muted` auf Grund 5,8:1; Ziele ≥ 44 px;
+B.2); Kontrast gegen die ungünstigste Auslaufstelle (Eyebrow 4,5:1, h1 3:1; geschätzt > 7:1); `--muted` auf Grund 5,8:1 (auch die
+Ring-Kontur als einzige Grenze des Knopfs, K-1); Ziele ≥ 44 px;
 `scroll-padding-top: 60px` unter dem App-Kopf; `forced-colors`: Konturen bleiben.
 
 **H.6 Prüfsuite** (`scripts/pruefen.mjs`): `:1595` von `a[href$="/#fensterbauer"]` auf `a[href$="/fuer-fensterbauer/"]`; `:227` („Erstes Fenster
@@ -264,4 +276,16 @@ Beträge nur aus `Abrechnung`; kein Countdown; keine fremden Server.
 
 **Freigaben:** **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig:** Einführungsband in der App entfällt, Preis statisch im
 Startbild (docs/ABRECHNUNG.md:11 „ganz oben ein schwarzes Band“; GEST:14 sinngemäß; Ausdehnung von IA-AB-6 auf `/app/`; Grund: R13 ohne
-Countdown, DG T14); Eyebrow-Sperrung und h1 32 px (C.6); dazu IA-AB-4 (08 8.4.5). Selbst entschieden: I-1 bis I-7.
+Countdown, DG T14); h1 32 px (C.6); dazu IA-AB-4 (08 8.4.5). Aus dem Designsystem (11.B), jeweils **Abweichung von bestehender Regel –
+Freigabe durch den Inhaber nötig**:
+
+- Eyebrow 600/+0,12 em statt 800/0,18 em (K-17, DS-AB-1; GEST:26, `gemeinsam.css:44`); Grund: Technikstimme, SG-Spanne.
+- Cream-Hover als innere Kontur statt `--primary-hover`, Druck `--primary-druck` statt `scale(.98)` (K-2, DS-AB-3 und DS-AB-7 für den
+  neuen Wert `#e2e1db`; `gemeinsam.css:15`, `:65`); Grund: Hover = Kontur, Bedienschicht formstabil.
+- Umbruchpunkte 640 und 1024, Telefonkomposition bis 1023 px statt „eine Spalte bis 760 px“ (K-11, DS-AB-6; GEST:462); Grund: prüfbare
+  Zahl von Kompositionen.
+- kein Logo-Licht beim Laden (K-8, DS-AB-9; GEST:7); Grund: ein Auftritt im ersten Bildschirm.
+- Ring-Kontur `--muted` statt `--line2` (K-1, DS-AB-10; GEST:24, `gemeinsam.css:58`); Grund: die Kontur ist die einzige Grenze des Knopfs
+  und braucht 3:1.
+
+Selbst entschieden: I-1 bis I-4, I-6, I-7; I-5 ist durch K-8 ersetzt.

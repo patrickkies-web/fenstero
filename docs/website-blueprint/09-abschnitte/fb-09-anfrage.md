@@ -64,7 +64,7 @@ Der Satz „gern auch am Telefon“ (PS:194) entfällt, weil keine Nummer genann
 entfernbar machen; E-Mail beim Verlassen prüfen [H]; Absenden mit Fehlern am Feld; Senden mit Wartezustand; Dank ersetzt das Formular;
 in B Aufklappen „Vorher eine Frage?“; ohne JavaScript normales Absenden auf die Dankesseite (PJ:577-582).
 
-**B.5 Vorhandene Komponenten:** Abschnittsrahmen `.vk-teil` mit Haarlinie (VC:501-502), `scroll-margin-top: 76px` (VC:8); Feldstil
+**B.5 Vorhandene Komponenten:** Abschnittsrahmen `.vk-teil` mit Haarlinie (VC:501-502), `scroll-margin-top: 76px` (VC:8, wird nach K-15 ersetzt, H.6); Feldstil
 `.vk-feld` (VC:127-136, wird ersetzt); `.btn.primary` mit `.pf`, `.btn.ghost`, `.link` (`web/assets/gemeinsam.css:56-74`); Formularlogik
 `formular(wurzel)` (VJ:19-90); Lottie-Zeichen `fertig` (`web/assets/lottie/fertig.json`, 6,9 KB) mit `Lottie.spielen` und Standbild
 `.lottie-still` (`web/assets/gemeinsam.js:194-256`); Route `POST /api/partner/frage` mit Bremse und Honigtopf (PJ:206-222).
@@ -81,10 +81,10 @@ der Beschriftungen. Schreibtisch: 12 Spalten, Hinweis links über 5, Formular re
 | y | Element | Maß |
 |---|---|---|
 | 0 | Haarlinie 1 px `--line`, x 16–374 | 96 px Abstand zu 04.3 |
-| 16–33 | Kapitelzeile 13 px | Abstand 16 |
-| 45–112 | h2 32 px, zwei Zeilen „Bestellen oder“ / „anfragen“ | Abstand 12 |
+| 16–32 | Kapitelzeile Technikstimme Versal 13/16, 600, +0,12 em, `tabular-nums`; „05“ `--accent`, Punkt und Wort `--muted` (K-16) | Abstand 16 (K-15) |
+| 44–112 | h2 32/34, zwei Zeilen „Bestellen oder“ / „anfragen“ | Abstand 12 (K-15) |
 | 124–201 | Lead 17 px, drei Zeilen, `max-width: 358px` | Abstand 12 |
-| 233–255 | h3 17 px (Ziel der Sprünge, landet bei y = 76 im Bildschirm) | Abstand 32 (Zonenwechsel) |
+| 233–255 | h3 17 px (Ziel der Sprünge, landet über `scroll-padding-top` bei y = 72 im Bildschirm, K-15) | Abstand 32 (Zonenwechsel) |
 | 271–380 | Paket: Beschriftung 20 · 8 · Feld 52 · 8 · Hinweis 21 (nur nach Kartenknopf) | Abstand 16 |
 | 396–476 | Ihr Name (20 · 8 · 52) | Abstand 16 |
 | 492–572 | Firma; vorbefüllt + 8 · Hinweiszeile 44 | Abstand 16 |
@@ -92,7 +92,7 @@ der Beschriftungen. Schreibtisch: 12 Spalten, Hinweis links über 5, Formular re
 | 684–764 | Telefon | Abstand 16 |
 | 780–928 | Frage: Beschriftung 20 · 8 · Feld 120 | Abstand 24 |
 | 952–994 | Datenschutzsatz 15 px, zwei Zeilen | Abstand 16 |
-| 1010–1062 | Cream „Frage senden“ 358 × 52 | Abstand 16 |
+| 1010–1062 | Cream „Frage senden“ 358 × 52 (volle Spaltenbreite, Formular K10, K-30) | Abstand 16 |
 | 1078–1120 | Anbieterzeile 15 px, zwei Zeilen | – |
 | 1120–1164 | E-Mail-Link, Zeile 44 px | 96 px zu 06.1 |
 
@@ -105,28 +105,30 @@ die Cream ist mit 358 × 52 px ≈ 5,7 % der Bildschirmfläche die größte hell
 | Teil | Wert | Begründung |
 |---|---|---|
 | Beschriftung | über dem Feld, 15/20 px, 700, `--text`; „(freiwillig)“ 500 `--muted` | GEST:455; Beschriftung bleibt bei Eingabe sichtbar |
-| Feld | Höhe 52, Innenabstand 0 16 (Textfeld 13 16), Schrift 17/24 500 `--text`, Grund transparent (= `--ground`), `border: 1px solid var(--muted)`, Radius 12 | 17 px verhindert Zoom auf iOS; `--muted` erreicht 5,8 : 1 gegen `#161616` (R10 ≥ 3 : 1; `--line2` nur 1,6 : 1, RE E18); `border` statt `box-shadow`, damit der Umriss in `forced-colors` bleibt |
+| Feld | Höhe 52, Innenabstand 0 16 (Textfeld 13 16), Schrift 17/24 500 `--text`, Fläche `--ground`, `border: 1px solid var(--muted)`, Radius 12 (K-35) | 17 px verhindert Zoom auf iOS; `--muted` erreicht 5,8 : 1 gegen `#161616` (R10 ≥ 3 : 1; `--line2` nur 1,6 : 1, RE E18); `border` statt `box-shadow`, damit der Umriss in `forced-colors` bleibt |
 | Auswahl „Paket“ | wie Feld, Chevron 24 px `--text2` rechts bei 16 px, `appearance: none` | VC:132 |
 | Textfeld | `min-height: 120px; resize: vertical`; mit `field-sizing: content` bis 320 px wachsend (wo unterstützt) | VC:133 |
-| Hinweis | 8 px unter dem Feld, 15/21 px 500 `--muted`; „entfernen“ als `.link` 15 px 700, Trefferfläche 44 × 44, Zeile 44 px hoch | DG-E-6: bedeutungstragend ⇒ 15 statt 13 |
-| Fehler | Rand 2 px `--bad` (Rand 1 px + `outline: 1px` ohne Abstand), darunter 8 px Abstand, Satz 15/21 px 700 `--bad` mit Punkt 8 px `--bad` davor (Einzug 16) | GEST:24 „Wort mit Punkt“; `#ff7b72` 7,2 : 1 |
-| Fokus | `outline: 2px solid var(--text); outline-offset: 2px; border-radius: 12px` | überschreibt den Radius 8 aus `gemeinsam.css:38`, sonst ändert das Feld beim Fokus seine Form |
+| Hinweis | 8 px unter dem Feld, 15/21 px 500 `--muted`; „entfernen“ als `.link` 15 px 700, Trefferfläche 44 × 44, Zeile 44 px hoch | K-20 (DG-E-6): Satz ⇒ 15 statt 13 [V nach Freigabe DS-AB-2, C.6/4] |
+| Fehler | Rand 2 px `--bad` als `border-width: 2px` (Innenabstand dabei 0 15, Textfeld 12 15, damit der Text nicht springt; bleibt in `forced-colors` und kollidiert nicht mit dem Fokusring, K-35), darunter 8 px Abstand, Satz 15/21 px 700 `--bad` mit Punkt 8 px `--bad` davor (Einzug 16) | GEST:24 „Wort mit Punkt“; `#ff7b72` 7,2 : 1 |
+| Fokus | `outline: 2px solid var(--text); outline-offset: 2px; border-radius: 12px` (formfolgend, K-34) | überschreibt den Radius 8 aus `gemeinsam.css:38`, sonst ändert das Feld beim Fokus seine Form |
 
-**C.4 Schreibtisch 1280 × 800.** Spalte 1040 px (x 120–1160), 12 Spalten à 57,3 px, Abstand 32. Haarlinie über alle 12 Spalten.
+**C.4 Schreibtisch 1280 × 800.** Spalte 1040 px (x 120–1160), 12 Spalten à 64,67 px, Rinne 24 (K-12). Haarlinie über alle 12 Spalten.
 
-| y | links, Spalten 1–5 (x 120–535) | rechts, Spalten 6–12 (x 567–1160) |
+| y | links, Spalten 1–5 (x 120–539) | rechts, Spalten 6–12 (x 563–1160) |
 |---|---|---|
-| 24–41 | Kapitelzeile | – |
-| 57–141 | h2 40 px, zwei Zeilen | h3 57–79 (oben bündig mit der h2) |
-| 153–230 | Lead 17 px, drei Zeilen | Paket über volle Breite 95–204 |
-| darunter | frei (≈ 415 × 500 px Negativraum) | Name · Firma nebeneinander (je 288,5 px, Abstand 16) 220–300; E-Mail · Telefon 316–396; Frage volle Breite 412–560; Datenschutz eine Zeile 584–605; Cream nach Inhalt (≈ 190 × 52) 621–673, linksbündig; Anbieterzeile mit Mail-Link in einer Zeile 689–733 |
+| 16–32 | Kapitelzeile (Haarlinie → 16, K-15) | – |
+| 44–128 | h2 40/42, zwei Zeilen (Kapitelzeile → 12) | h3 44–66 (oben bündig mit der h2) |
+| 140–218 | Lead 17/26, drei Zeilen | Paket über volle Breite 82–191 |
+| darunter | frei (≈ 419 × 500 px Negativraum) | Name · Firma nebeneinander (je 290 px, Abstand 16) 207–287; E-Mail · Telefon 303–383; Frage volle Breite 399–547; Datenschutz eine Zeile 571–592; Cream nach Inhalt (≈ 190 × 52) 608–660, linksbündig; Anbieterzeile mit Mail-Link in einer Zeile 676–720 |
 
-Nach dem Sprung auf `#frage` (h3 bei y = 76) steht alles bis zur Anbieterzeile in einem 800-px-Bildschirm (Unterkante ≈ 752).
+Nach dem Sprung auf `#frage` steht die h3 bei y = 124: Ab 1024 px trägt sie `scroll-margin-top: 124px` wie die h2, weil beide oben
+bündig sind; so steht die Haarlinie 16 px unter dem Kopf (K-15). Alles bis zur Anbieterzeile steht im 800-px-Bildschirm (Cream 688–740,
+Unterkante der Anbieterzeile 800, knapp).
 In einer Zeile richten sich Felder über `align-items: end` aus, falls eine Beschriftung umbricht.
 
 **C.5 Zustand B (Telefon):** Haarlinie, Kapitelzeile, h2 wie A; Lead 124–201; Liste ab 233: Zeile „Für die Bestellung brauchen Sie:“
 20 px, drei Punkte je 2 × 24 px mit Haken 20 px bei x 16–36, Text ab x 48, Abstand 8; Satz zu Logo und Fotos 2 Zeilen; Link 44 px;
-32 px Abstand; Zusammenfassung „Vorher eine Frage?“ als Ring 358 × 52. Eingeklappt ≈ 600 px (0,71 BH). Schreibtisch: Liste links, die
+32 px Abstand; Zusammenfassung „Vorher eine Frage?“ als Ring nach eigener Breite (≈ 205 × 52; einzelner Ring im Fluss, K-30). Eingeklappt ≈ 600 px (0,71 BH). Schreibtisch: Liste links, die
 eingeklappte Zeile rechts oben bündig mit der h2.
 
 **C.6 Festlegungen dieses Abschnitts (Abweichungen von Z mit Begründung)**
@@ -140,8 +142,10 @@ eingeklappte Zeile rechts oben bündig mit der h2.
    (IA-O-9).
 3. **Lead gekürzt:** Der Satz aus Z bräuchte am Telefon vier Zeilen; DR 3.2 erlaubt höchstens drei. „Sobald Sie bestellen können“ steht
    im Dank.
-4. **Hinweise 15 statt 13 px:** bedeutungstragend und mit Bedienelement (SG 10.9 Bedienschrift ≥ 14 px; DG-E-6). 15 ist eine Markengröße,
-   keine Abweichung von GEST.
+4. **Hinweise 15 statt 13 px** [V nach Freigabe]: bedeutungstragend und mit Bedienelement (SG 10.9 Bedienschrift ≥ 14 px; DG-E-6). Nach
+   K-20 stehen 13 px nur in der Technikstimme (hier die Kapitelzeile), jeder Satz in 15 px. Abweichung von bestehender Regel (GEST:26
+   „13 Label“) – Freigabe durch den Inhaber nötig (DS-AB-2); bis zur Freigabe von DG-E-6 bleibt 13 px zulässig, die Umstellung erfolgt
+   dann in einem Schritt für alle Abschnitte.
 5. **Gewicht ≈ 1,35–1,45 BH statt 1,10:** Sechs Felder à 80 px sind bei 52-px-Feldern mit Beschriftung darüber das Minimum. Pakete und
    Formularbeginn bleiben, wo Z sie plant; 06.1 rückt ≈ 0,3 BH nach unten.
 6. **Zustand B:** keine Bestellknöpfe in 05, bestellt wird am Kartenknopf (E-3, Z 8.3.2 d); das Formular ist eingeklappt, „Frage senden“
@@ -162,10 +166,10 @@ Der Abschnitt ist eine **Arbeitsansicht** (DNA-B B.1): Pflicht sind Regel 3 und 
 | Bildintegration | keine; das Foto `fb-frage.webp` mit Chips „Rückruf · Nachricht · Unverbindlich“ entfällt (IA-AB-8) | 0 | der Chip „Rückruf“ versprach etwas ohne Nummer (EA F-32) |
 | Oberflächendetails | Haarlinie oben; Kapitelzeile in der Technikstimme; 1-px-Feldumrisse; Fehlerpunkt; Pfeilkreis `.pf` in der Cream; grüne Haken in B | 1 | Präzision wie ein Formblatt, ohne Schmuck |
 | Animation | nur Zustände (150/220 ms) und einmal der Lottie-Haken im Dank (1,3 s) | 1 | Rückmeldung, kein Auftritt (E-13 [V]) |
-| Typografie | h2 32/40 800 mit einem grünen Wort; h3 17 800; Feldtext 17 500; Beschriftung 15 700; Nebentext 15 500 `--muted`; Kapitelzeile 13 600 Versal. Unter der h2 höchstens 17 : 15 = 1,13 (SG 10.9 ≤ 1,25) | 2 | Rang über Gewicht und Tonwert (DG-E-1 C) |
+| Typografie | h2 32/40 800 mit einem grünen Wort; h3 17 800; Feldtext 17 500; Beschriftung 15 700; Nebentext 15 500 `--muted`; Kapitelzeile 13/16 600 Versal +0,12 em, `tabular-nums`, nur die Nummer grün (K-16). Unter der h2 höchstens 17 : 15 = 1,13 (SG 10.9 ≤ 1,25) | 2 | Rang über Gewicht und Tonwert (DG-E-1 C) |
 | Überlagerungen | keine | 0 | – |
 | Perspektive | keine; alles frontal (Regel 3) | 0 | – |
-| interaktive Effekte | Hover = Kontur heller, Fokus = 2-px-Kontur, Fehler = Kontur rot mit Satz, gewählt = Wert sichtbar plus Hinweis; Drücken ohne Skalierung | 1 | jeder Zustand mit Form und Text, nie nur Farbe (B.3 Zustandsregeln) |
+| interaktive Effekte | Hover = Kontur heller, Fokus = 2-px-Kontur, Fehler = Kontur rot mit Satz, gewählt = Wert sichtbar plus Hinweis; Cream-Hover innere Kontur; Drücken = Füllung (Cream `--primary-druck`, Ring `--surface2`), ohne Deckkraftänderung und Skalierung (K-2) | 1 | jeder Zustand mit Form und Text, nie nur Farbe (B.3 Zustandsregeln) |
 
 **Bewusst weggelassen:** Foto, Lichtfleck, Glas, Kasten „Bestellung bald möglich“ (EA AB-4), Reveal beim Scrollen, Rütteln bei Fehlern,
 Konfetti, Platzhaltertexte in Feldern, Sterne für Pflichtfelder (markiert wird das Freiwillige, wie heute).
@@ -175,6 +179,8 @@ Konfetti, Platzhaltertexte in Feldern, Sterne für Pflichtfelder (markiert wird 
   Marke erreicht 3 : 1 (R10 [V]). Rückfall: eigenes Linien-Token ≥ 3 : 1, dann Abweichung von „keine weiteren Farben“.
 - Bereits in Z 8.4.5 gesammelt und hier angewendet: EA AB-4 (Satz statt Kasten), IA-AB-8 (Bildplatz entfällt), DG-AB-3 (kein Rütteln),
   DG-AB-2 mit E-13 (kein Erscheinen), E-AB-7 (Lage nach den Paketen), E-AB-10 (Kapitelzeile mit Wort).
+- Aus dem Designsystem (11, Anhang 11.B) angewendet: DS-AB-3 (Cream-Hover als innere Kontur statt `--primary-hover`, Druck ohne
+  `scale(.98)`), DS-AB-7 (`--primary-druck` `#e2e1db` als neuer Wert), DS-AB-2 (Sätze 15 statt 13 px, C.6/4).
 
 ## E. Visual Attention Architecture
 
@@ -183,13 +189,13 @@ Erwartete, nicht gemessene Aufmerksamkeit; keine Blickdaten im Repository.
 - **Primärer Fokus:** Cream „Frage senden“, die einzige Cream im Bildschirm (`#f1f0ea` auf `#161616` ≈ 16 : 1); der Kopf-Ring ist
   ausgeblendet, solange 05 mindestens 120 px über dem unteren Rand steht (rh-01 F).
 - **Sekundärer Fokus:** h2 mit grünem „anfragen“ (32 px, 10,5 : 1 für das Grün); nach einem Sprung das Paketfeld mit seinem Wert.
-- **Reihenfolge beim Scrollen:** grüne Kapitelzeile (erster Farbpunkt nach dem ruhigen Festblock) → h2 → Lead → h3 → Paket → Feldsäule an
+- **Reihenfolge beim Scrollen:** grüne Kapitelnummer „05“ (erster Farbpunkt nach dem ruhigen Festblock; Punkt und Wort `--muted`, K-16) → h2 → Lead → h3 → Paket → Feldsäule an
   der linken Kante → Datenschutzsatz → Cream → Anbieterzeile mit „Patrick Kies“ in `--text` 700 als kleinem Anker.
-- **Nach dem Sprung vom Kartenknopf:** h3 bei y = 76, darunter sofort „EEZI Signature“ mit „bei den Paketen gewählt“; die Cream liegt bei
+- **Nach dem Sprung vom Kartenknopf:** h3 bei y = 72, darunter sofort „EEZI Signature“ mit „bei den Paketen gewählt“; die Cream liegt bei
   844 px knapp unter der Kante und kommt beim Ausfüllen ins Bild.
 - **Kontraste:** `--text` ≈ 16 : 1 (Beschriftungen, Werte) > `--text2` (Lead) > `--muted` 5,8 : 1 (Nebentext, Umrisse) > `--line`
   (Haarlinie). Die Cream ist die einzige Fläche über 50 % Helligkeit.
-- **CTA:** volle Breite am Telefon, nach dem Datenschutzsatz (er wird vor dem Tipp gelesen), Anbieterzeile direkt darunter.
+- **CTA:** volle Spaltenbreite am Telefon (Formular K10, K-30), nach dem Datenschutzsatz (er wird vor dem Tipp gelesen), Anbieterzeile direkt darunter.
 - **Mögliche Ablenkungen:** Datenschutz-Link (in `--muted`, nicht heller als Lesetext); Mail-Link als gleichwertiger zweiter Weg (gewollt,
   ehrliche Alternative); im Dank der Ring zurück (erst nach dem Senden).
 - **Übergang:** Steht die Cream in Bildschirmmitte, zeigen sich am unteren Rand Haarlinie und Kapitelzeile von 06.1 (≈ 11 % der Höhe,
@@ -207,13 +213,14 @@ Erwartete, nicht gemessene Aufmerksamkeit; keine Blickdaten im Repository.
 | Name aus 01 (`vk:name`, beim Binden aus `sessionStorage`) | nur in ein leeres, unberührtes Feld „Firma“; Hinweiszeile an | 220 ms Deckkraft | sofort |
 | „entfernen“ | Feld leer, Hinweis weg, Fokus ins Feld; neu befüllt nur bei neuem Namen in 01 | sofort | – |
 | eigene Eingabe in vorbefülltes Feld | Hinweis verschwindet (der Wert gehört jetzt dem Besucher) | 150 ms | sofort |
-| Hover (`hover: hover`) | Umriss `--muted` → `--text2`; Cream → `--primary-hover`; Unterstreichung `--line2` → `--text` | 150 ms `--e-out` | bleibt |
-| Fokus | 2-px-Kontur sofort; `scroll-padding-top: 76px`, damit der Kopf kein Feld verdeckt | – | gleich |
+| Hover (`hover: hover`) | Umriss `--muted` → `--text2`; Cream: innere 2-px-Kontur `--on-primary` 24 % (K-2); Unterstreichung `--line2` → `--text` | 150 ms `--e-out` | bleibt |
+| Drücken | Cream: Füllung `--primary-druck` (`#e2e1db`); Ring und Textziel: Füllung `--surface2`; keine Deckkraftänderung, keine Skalierung (K-2) | sofort, zurück 150 ms `--e-out` | zurück sofort |
+| Fokus | `outline: 2px solid var(--text)`, Abstand 2 px, formfolgend (K-34), sofort; `scroll-padding-top` = Kopf + 16 = 72 px (Schreibtisch 80 px), damit der Kopf kein Feld verdeckt (K-15) | – | gleich |
 | E-Mail verlassen [H] | nicht leer und ungültig ⇒ Fehler; sonst nichts. Name und Frage nur beim Absenden | Satz 220 ms Deckkraft | sofort |
 | Tippen im fehlerhaften Feld | Fehler fällt weg, sobald die Regel erfüllt ist | 150 ms | sofort |
 | Absenden mit Fehlern | alle Fehler zugleich, Fokus auf das erste fehlerhafte Feld; kein Rütteln (DG-AB-3) | 220 ms | sofort |
 | Senden läuft | ab 300 ms `aria-busy`, Knopf `aria-disabled` (nicht `disabled`, damit der Fokus bleibt), im `.pf` dreht ein 2-px-Ring ruhig (1,2 s je Umdrehung, Katalog 8), Meldung „Wird gesendet …“ | – | Ring steht |
-| Erfolg | h3 und Formular blenden aus, die Seite springt so, dass der Dank bei y = 76 steht, Dank blendet ein, danach Haken einmal; Fokus auf den Dank; Ereignis `vk:gesendet` an der Wurzel (rh-01); Merker `vk-anfrage-gesendet` in `sessionStorage` | aus 165 ms `--e-io`, ein 220 ms `--e-out`, Haken 1,3 s | Schnitt, Endbild des Hakens |
+| Erfolg | h3 und Formular blenden aus, die Seite springt so, dass der Dank an der Stelle des Sprungziels `#frage` steht (Telefon y = 72, Schreibtisch y = 124), Dank blendet ein, danach Haken einmal; Fokus auf den Dank; Ereignis `vk:gesendet` an der Wurzel (rh-01); Merker `vk-anfrage-gesendet` in `sessionStorage` | aus 165 ms `--e-io`, ein 220 ms `--e-out`, Haken 1,3 s | Schnitt, Endbild des Hakens |
 | Server lehnt ab | Fehler am Feld (`felder`); 429 mit Satz des Servers; ab 500 nur der feste Satz aus B.2, nie der Text des Servers (Router 503 nennt Variablennamen, `functions/api/router.js:85-86`); Angaben bleiben | – | – |
 | B: „Vorher eine Frage?“ | `details` öffnet, Inhalt Deckkraft 0 → 1; ein Link auf `#frage` öffnet es per JS | 220 ms | sofort |
 | Neuaufbau der Einbettung | Werte aus einer Modulvariablen in VJ zurück (nicht gespeichert); mit Merker sofort der Dank ohne Haken-Lauf | – | – |
@@ -224,18 +231,19 @@ einzige größere Vorgang: Der Sprung geschieht, solange der Dank unsichtbar ist
 
 ## G. Responsive Design
 
-**Telefon 390 × 844 (Hauptansicht, zuerst).** Komposition C.2, eine Spalte, Felder und Cream über die volle Breite. Daumenzone: die
+**Telefon 390 × 844 (Hauptansicht, zuerst).** Komposition C.2, eine Spalte, Felder und Cream über die volle Spaltenbreite (Formular K10,
+K-30); einzelne Ringe (im Dank „Zurück zu den Paketen“, in B „Vorher eine Frage?“) nach eigener Breite, linksbündig. Daumenzone: die
 Cream liegt beim Ausfüllen in der unteren Hälfte. `enterkeyhint="next"` an den Feldern, `inputmode="email"` an der E-Mail; beim Fokus
 schiebt der Browser das Feld über die Tastatur (kein eigenes Scrollen). 360 px: Lead vier Zeilen zulässig, Beschriftungen einzeilig
 („Telefon für Rückruf (freiwillig)“ ≈ 262 px). Bei 664 px Höhe beginnt das Formular auf Bildschirm 9 wie geplant. Kein Querscrollen bis
 320 px; 200 % Text ohne Verlust.
 
 **Schreibtisch 1280.** Komposition C.4: Hinweis links über 5, Formular rechts über 7 Spalten; Felder zweispaltig; Cream nach Inhalt
-statt voller Breite (eine 593 px breite Pille wäre überdimensioniert, SKILL:28). Nichts klebt (E-8).
+statt voller Breite (eine 597 px breite Pille wäre überdimensioniert, SKILL:28). Nichts klebt (E-8).
 
-**Schreibtisch 1024.** Spalte 992 px (Rand 16), Spaltenabstand `clamp(24px, 2.5vw, 32px)` = 25,6 px; links 398 px, rechts 568 px,
-Felder je 276 px. h2 40 px bleibt zweizeilig, Lead drei Zeilen. **640–1023 px:** eine Spalte, Formular höchstens 600 px breit, Felder ab
-600 px zweispaltig.
+**Schreibtisch 1024.** Rand 32 px, Spalte 960 px, 12 Spalten à 58 px, Rinne 24 (K-12, K-13); links Spalten 1–5 = x 32–418 (386 px),
+rechts Spalten 6–12 = x 442–992 (550 px), Felder je 267 px. h2 40 px bleibt zweizeilig, Lead drei Zeilen. **640–1023 px:** Rand 24 px,
+Rinne 16 (K-13); eine Spalte, Formular höchstens 600 px breit, Felder ab 600 px zweispaltig.
 
 ## H. Technische Umsetzung
 
@@ -257,7 +265,9 @@ Felder je 276 px. h2 40 px bleibt zweizeilig, Lead drei Zeilen. **640–1023 px:
    `window.Lottie` da ist und keine ruhige Fassung gilt; `CustomEvent('vk:gesendet', { bubbles: true })`; alle `sessionStorage`-Zugriffe
    in `try/catch`, gespeichert wird nur der Merker, keine Angaben (E-10). Umfang ≈ 2,5 KB zusätzlich.
 6. **VC:** VC:120-148, :487-493 und die Zeilen zu `.vk-bestellen` in :634, :649 ersetzen; Raster `grid-template-columns: repeat(12,
-   minmax(0, 1fr))` ab 1024 px (links `1 / span 5`, rechts `6 / -1`), Felder `repeat(2, minmax(0, 1fr))` mit `gap: 16px`; Werte aus C.3;
+   minmax(0, 1fr))` mit `column-gap: 24px` ab 1024 px (links `1 / span 5`, rechts `6 / -1`; Rand 32 px bis 1103 px, K-12, K-13), Felder
+   `repeat(2, minmax(0, 1fr))` mit `gap: 16px`; `scroll-margin-top` am h2 `#bestellen` 116 px (Schreibtisch 124 px), an der h3 `#frage`
+   ab 1024 px 124 px, `scroll-padding-top` 72/80 px (K-15); Werte aus C.3;
    nur Deckkraft und Farbe in Übergängen; `@media (prefers-reduced-motion: reduce)` ohne Übergänge und Drehung.
 7. **Assets:** keine neuen. Vorhanden: `web/assets/lottie/fertig.json`, `web/vendor/lottie_light.min.js` (schon geladen, VK:44). Das Foto
    `web/bilder/foto/fb-frage.webp` wird hier nicht mehr verwendet (Datei bleibt; docs/BILDER.md nachziehen). Beim Inhaber ist nichts

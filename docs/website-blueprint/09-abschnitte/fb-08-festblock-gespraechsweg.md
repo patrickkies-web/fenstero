@@ -101,12 +101,13 @@ Zweitlinie (SG 10.1/1). Der Ring sitzt in den Spalten 1–3 (x 16–260).
 | Zeile 4 | wie oben | 240–262 | 15/22 |
 | Zeile 5 | wie oben | 270–292 | 15/22 |
 | Link | 16–≈ 262 | 308–352 | Ziel 44 px, Schrift 15/700, unterstrichen |
-| Standzeile | 16–374 | 352–368 | 13/16, 500, `--muted` |
+| Standzeile | 16–374 | 352–368 | 13/16, 500, `--muted`; ein Satz, daher nach Freigabe von DG-E-6 15/22 (K-20) |
 | Frage | 16–≈ 250 | 392–414 | 15/22, 700, `--text` |
-| Ring | 16–≈ 260 | 422–474 | 52 px, Schrift 17/700 (`.btn`), Rand 2 px `--muted` |
-| Rechtshinweis | 16–374 | 498–558 | 13/20, 500, `--muted`, drei Zeilen |
+| Ring | 16–≈ 260 | 422–474 | 52 px, Schrift 17/700 (`.btn`), innere Kontur 2 px `--muted` (K-1) |
+| Rechtshinweis | 16–374 | 498–558 | 13/20, 500, `--muted`, drei Zeilen; nach Freigabe von DG-E-6 15/22, drei Zeilen (K-20) |
 
-Höhe ≈ 558 px (0,66 BH; Z plant 0,55). Das Mehr von ≈ 94 px kommt aus dem 44-px-Linkziel, der Standzeile, dem Titel und der zweizeiligen
+Höhe ≈ 558 px (0,66 BH; Z plant 0,55). Nach der Umstellung auf 15 px (K-20) wächst der Block um ≈ 34 px (Standzeile in Zustand A
+zweizeilig, Rechtshinweis drei Zeilen à 22 px). Das Mehr von ≈ 94 px kommt aus dem 44-px-Linkziel, der Standzeile, dem Titel und der zweizeiligen
 Grenze und schiebt 05 entsprechend nach unten; ob das Formular bei 664 px in Bildschirm 9 bleibt, zeigt die Bildschirmzählung (EV X9).
 Rückfall: Titel nur für Vorleseprogramme (−32 px), dann „Ihr Kunde zahlt nichts.“ streichen (−20 px). Bei 664 px passt der ganze Block in
 die 608 px unter dem Kopf, Fakten, Grenze und Gesprächsweg stehen zusammen in einem Bildschirm (SKILL:86).
@@ -114,7 +115,8 @@ die 608 px unter dem Kopf, Fakten, Grenze und Gesprächsweg stehen zusammen in e
 **C.3 Verhältnisse und Hierarchie**
 
 - **Größen:** drei Stufen, 13 · 15 · 17. Ränge entstehen über Gewicht und Tonwert, nicht über Größe (DG-E-1 C): Fakten 500 `--text`, Grenze
-  500 `--text2`, Frage 700 `--text`, Ring 17/700 als größte Schrift, Titel und Kleingedrucktes 13 `--muted`.
+  500 `--text2`, Frage 700 `--text`, Ring 17/700 als größte Schrift, Titel 13 `--muted` (Technikstimme). Standzeile und Rechtshinweis
+  sind Sätze: 13 `--muted` nur bis zur Freigabe von DG-E-6, danach 15 (K-20).
 - **Flächen (Schätzung):** Text und Bedienelemente ≈ 50 %, Bild 0 %, Freiraum ≈ 50 % (Ziel ≥ 33 %, SG 10.1/3). Der Freiraum liegt rechts der
   kurzen Zeilen und in den Gruppenabständen.
 - **Abstände (G6, 1 : 3 : 6):** 8 px zwischen den Fakten (eine Gruppe), 4 px Fakt → Grenze, 16 px Liste → Link, 24 px zwischen den Gruppen,
@@ -129,10 +131,10 @@ die 608 px unter dem Kopf, Fakten, Grenze und Gesprächsweg stehen zusammen in e
 | Wert | Start | Begründung |
 |---|---|---|
 | Zeilenhöhe der Fakten | 22 px (≈ 1,47) | 4-px-Raster; die DNA nennt 1,5–1,6 für Fließtext. Listen mit kurzen Zeilen brauchen weniger, `.vk-liste` hat heute 1,4 |
-| Textbreite | Telefon 326 px ≈ 43 Zeichen; Schreibtisch 476 px ≈ 62 Zeichen | DNA: unter 640 px ≥ 35, sonst 45–75 Zeichen |
+| Textbreite | Telefon 326 px ≈ 43 Zeichen; Schreibtisch 476 px ≈ 62 Zeichen (bei 1024: 436 px ≈ 57 Zeichen) | DNA: unter 640 px ≥ 35, sonst 45–75 Zeichen |
 | Haken | 6 × 11 px, Strich 2,5 px `--accent`, gedreht um 45°, Mitte auf der ersten Zeile | Bestand `.vk-liste li::before` (`web/assets/verkauf.css:35`) |
-| Ring-Rand | 2 px `--muted` statt `--line2` | `--line2` erreicht ≈ 1,6 : 1 und verfehlt die 3 : 1 für die einzige Grenze des Knopfs (DG-E-10) |
-| Schrift 13 px bei Titel, Standzeile, Rechtshinweis | 13 | Abweichung von der DNA (Bedienschrift ≥ 14 px, B.5), funktional begründet: Markenskala und Prüfsuite lassen nur 13/15/17/24/40 (32) zu (SKILL:69); Kontrast ≥ 5,8 : 1. Den Sprung ≥ 3× verfehlt die Arbeitsansicht zulässig (DG-E-1 C) |
+| Ring-Kontur | innere Kontur 2 px `--muted` statt `--line2`, als echter `border` (bleibt in `forced-colors`); Hover → `--text`, Druck Füllung `--surface2` | K-1 (11.6.2): `--line2` erreicht ≈ 1,6 : 1 und verfehlt die 3 : 1 für die einzige Grenze des Knopfs (DG-E-10). Abweichung von bestehender Regel (GEST:24; `gemeinsam.css:58` Ghost-Rand `--line2`) – Freigabe durch den Inhaber nötig (DS-AB-10) |
+| Schrift 13 px | Titel 13 (Technikstimme, bleibt); Standzeile und Rechtshinweis 13 bis zur Freigabe von DG-E-6, danach 15/22 | K-20 (11.3.3): 13 px nur für die Technikstimme, jeder bedeutungstragende Satz 15 px; bis zur Freigabe gilt GEST (13 px zulässig), umgestellt wird in einem Schritt für alle Abschnitte. Abweichung von bestehender Regel (GEST:26, :452) – Freigabe durch den Inhaber nötig (DS-AB-2). Bis dahin: Abweichung von der DNA (Bedienschrift ≥ 14 px, B.5), Kontrast ≥ 5,8 : 1; Markenskala und Prüfsuite lassen nur 13/15/17/24/40 (32) zu (SKILL:69). Den Sprung ≥ 3× verfehlt die Arbeitsansicht zulässig (DG-E-1 C) |
 
 ## D. Anwendung der Design-DNA
 
@@ -148,7 +150,7 @@ Nr. 1, 3, 5, 6, 9, 10 und 11. Variable Mittel sind hier fast alle auf 0 gestellt
 | 3D-Objekte, Bildintegration | keine | 0 | DG-E-1: der Held fehlt bewusst; das Platzhalterbild alter Art kommt nicht zurück |
 | Oberflächendetails | Haken in Grün als einziges Signal; Unterstreichung 1,5 px mit 4 px Versatz (`.link`); Standzeile wie die Beschriftung eines Dokuments; ab 1024 die Paragrafenspalte in der Technikstimme [H] | 1 | Präzision wie bei einem Aufmaß: jede Zusage lässt sich in den Bedingungen finden |
 | Animation | keine (Z: „keine; kein Auftritt“) | 0 | Entscheidungsflächen ohne Auftritt (EV 7.5.4, B-AB-7) |
-| Typografie | 13 · 15 · 17; Gewicht und Tonwert tragen den Rang; Technikstimme nur im Titel | 1 | schnell zu überfliegen: Haken, erstes Wort, nächste Zeile |
+| Typografie | 13 · 15 · 17; Gewicht und Tonwert tragen den Rang; Technikstimme (13) im Titel und ab 1024 in der Paragrafenspalte, Sätze nach Freigabe von DG-E-6 in 15 (K-20) | 1 | schnell zu überfliegen: Haken, erstes Wort, nächste Zeile |
 | Überlagerungen | keine | 0 | Text liegt nie auf Bild (GEST) |
 | Perspektive | frontal | 0 | Nr. 1 |
 | Interaktive Effekte | Zustände über Kontur und Füllung, 220 ms | 1 | Rückmeldung ohne Versatz oder Skalierung (SG 10.7/1-3) |
@@ -174,7 +176,7 @@ Erwartete Aufmerksamkeit aus Gestaltungsregeln, nicht gemessen.
 | Grenze `--text2` auf Grund | ≈ 10,8 : 1 | lesbar und sichtbar leiser, nicht versteckt |
 | Haken `--accent` auf Grund | ≈ 10,5 : 1 | Signal |
 | Titel, Standzeile, Rechtshinweis `--muted` | ≈ 5,8 : 1 | Nebenzeilen, AA erfüllt |
-| Ring-Rand `--muted` | ≈ 5,8 : 1 | Grenze des Bedienelements ≥ 3 : 1 |
+| Ring-Kontur `--muted` (K-1) | ≈ 5,8 : 1 | einzige Grenze des Bedienelements ≥ 3 : 1 |
 
 - **CTA:** keine Cream im Block; sie gehört dem Knopf der empfohlenen Karte darüber und danach „Frage senden“ in 05. Der Ring ist der zweite
   Weg, nicht die Hauptaktion.
@@ -189,10 +191,10 @@ Erwartete Aufmerksamkeit aus Gestaltungsregeln, nicht gemessen.
 | Ereignis | Verhalten | Dauer, Kurve | Begründung |
 |---|---|---|---|
 | Scrollen | nichts bewegt sich, nichts erscheint; der Inhalt steht ab dem ersten Bild | – | Z; Dosierregel 1; SG 10.7/4 (Bedienschicht steht still) |
-| Hover Ring (nur `@media (hover: hover)`) | Rand `--muted` → `--text` | 220 ms `--e-out` (Tokens `--t2`, `--e-out`) | Zustand über Kontur (SG 10.7/8) |
+| Hover Ring (nur `@media (hover: hover)`) | Kontur `--muted` → `--text` (K-1) | 220 ms `--e-out` (Tokens `--t2`, `--e-out`) | Zustand über Kontur (SG 10.7/8) |
 | Hover Link | Unterstreichung `--line2` → `--text` | 220 ms (Bestand `.link`) | gleich |
 | Drücken Ring | Füllung transparent → `--surface2`, **ohne** `scale(.98)` | 220 ms | SG 10.7/3: keine Skalierung (wie fb-01) |
-| Fokus | Umriss 2 px `--text`, Abstand 2 px, folgt der Pillenform | sofort | WCAG 2.4.7, 1.4.11 |
+| Fokus (Ring und Link) | `outline` 2 px solid `--text`, Abstand 2 px, formfolgend (am Ring die Pille); kein −2 px, weil keines der beiden an eine Gruppen- oder Containerkante stößt; nie verdeckt | sofort | K-34 (11.9.1); WCAG 2.4.7, 2.4.11, 1.4.11 |
 | Tipp Ring | `select[name="paket"]` = „“ („Noch offen“) über den vorhandenen Zuhörer; dann Sprung zu `#frage` | eingebettet: weiches Scrollen über den Handler (`web/assets/portal.js:835-842`), bei „weniger Bewegung“ `auto`; eigenständig: nativer Sprung | Bestand, keine neue Bewegung; die Seite entscheidet weiches Scrollen einheitlich (rh-01, rh-02), nicht dieser Block |
 | Nach dem Sprung | Fokus auf h3 `#frage` (eingebettet schon so, `tabindex="-1"`); eigenständige Seite: `tabindex="-1"` am h3 in 05 setzen, damit Vorleseprogramme dort landen | – | Schnittstelle zu fb-09 |
 
@@ -210,7 +212,8 @@ unter den Kopf. **360:** Zeile 3 kann umbrechen (+22 px), der Ring bleibt 244 px
 4 und 5 bleiben einzeilig, der Ring passt (244 ≤ 288). **200 % Text:** Der Ring darf umbrechen (`white-space: normal`, Polster 13/22 px,
 `min-height: 52px`); `.btn` hat heute `nowrap` und liefe sonst über den Rand (WCAG 1.4.4, 1.4.10). Paragrafen sind ausgeblendet.
 
-**G.2 640–1023.** Gleicher Stapel, Textbreite höchstens 600 px (≈ 75 Zeichen), Rand wie die übrige Seite; keine Paragrafenspalte.
+**G.2 640–1023.** Gleicher Stapel, Textbreite höchstens 600 px (≈ 75 Zeichen), Seitenrand 24 px wie die übrige Seite (11.2.1, K-13):
+Haken auf x = 24, Text ab x = 56; keine Paragrafenspalte.
 
 **G.3 Schreibtisch 1280 × 800.** Spalte 1040 px (x 120–1160), 12 Spalten à 64,7 px, Abstand 24. Asymmetrie 6 + 1 : 1 : 4.
 
@@ -222,12 +225,13 @@ unter den Kopf. **360:** Zeile 3 kann umbrechen (+22 px), der Ring bleibt 244 px
 | Freiraum | 9–12 | – | 130–346 |
 | Rechtshinweis | 1–8, höchstens 72 Zeichen | 120–≈ 700 | 370–410 (2 Zeilen) |
 
-Höhe ≈ 410 px (0,51 BH bei 800). Der Gesprächsweg steht oben bündig mit dem Titel neben den Fakten: Das „oder“ ist auf einen Blick zu
+Höhe ≈ 410 px (0,51 BH bei 800; nach der Umstellung auf 15 px nach K-20 ≈ 420 px). Der Gesprächsweg steht oben bündig mit dem Titel neben den Fakten: Das „oder“ ist auf einen Blick zu
 sehen. Nichts wird vergrößert (SKILL:28); Schriften 13/15/17, Ring 52 px.
 
-**G.4 Schreibtisch 1024.** Inhalt 992 px (x 16–1008), Spalte 60,7 px, Abstand 24 (wie fb-03). Festblock in Spalten 1–6 (x 16–500, Text
-452 px), Paragrafen in Spalte 7 (x 524–585), Gesprächsweg in Spalten 9–12 (x 693–1008, Ring ≈ 244 von 315 px), Rechtshinweis in Spalten
-1–8. Zeile 2 bleibt zweizeilig, alles andere wie bei 1280.
+**G.4 Schreibtisch 1024.** Seitenrand 32 px, Spalte 960 px (x 32–992), 12 Spalten à 58 px, Rinne 24 (11.2.1, K-12, K-13; wie der Kopf
+in rh-01). Festblock in Spalten 1–6 (x 32–500; Haken auf x = 32, Text x 64–500 = 436 px), Paragrafen in Spalte 7 (x 524–582),
+Gesprächsweg in Spalten 9–12 (x 688–992, Ring ≈ 244 von 304 px), Rechtshinweis in Spalten 1–8 (x 32–664). Zeile 2 bleibt zweizeilig,
+alles andere wie bei 1280.
 
 ## H. Technische Umsetzung
 
@@ -283,10 +287,13 @@ auch in der Einbettung (`main.rg`).
 .vk-fest-bed { margin: 16px 0 0; display: flex; flex-direction: column; align-items: flex-start }
 .vk-fest-bed .link { font-size: 15px }
 .vk-fest-stand { font-size: 13px; line-height: 16px; color: var(--muted) }
+/* K-20, erst nach Freigabe von DG-E-6 und in einem Schritt mit allen Abschnitten: .vk-fest-stand und .rg .vk-recht auf 15px/22px */
 .vk-gespraech-frage { margin: 0 0 8px; font-size: 15px; line-height: 22px; font-weight: 700; color: var(--text) }
+/* K-1: innere Kontur 2px --muted als border (border-box, bleibt in forced-colors), Hover --text, Druck --surface2 */
 .vk-gespraech-knopf { border: 2px solid var(--muted); box-shadow: none; white-space: normal; padding: 13px 22px; line-height: 22px;
   transition: border-color var(--t2) var(--e-out), background var(--t2) var(--e-out) }
 .vk-gespraech-knopf:active { transform: none; background: var(--surface2) }
+/* K-34: 2px --text, Abstand 2px, formfolgend */
 .vk-gespraech-knopf:focus-visible { outline: 2px solid var(--text); outline-offset: 2px }
 @media (hover: hover) { .vk-gespraech-knopf:hover { box-shadow: none; border-color: var(--text) } }
 @media (min-width: 640px) and (max-width: 1023px) { .vk-festblock { max-width: 600px } }
@@ -316,13 +323,16 @@ gibt es schon.
 **H.6 Barrierefreiheit:** Die Überschrift h3 gliedert Kapitel 04 für Vorleseprogramme (Versalien nur per CSS). `role="list"`, weil Safari
 mit `list-style: none` die Listensemantik verwirft. Die Haken sind Pseudoelemente und werden nicht vorgelesen. Die Grenze liegt im selben
 `li` wie ihre Zusage. Der Ring hat den Namen „Rückruf oder Nachricht“ und die Beschreibung „Unsicher, welches Paket passt?“. Ziele sind 44 px
-(Link) und 52 px (Ring). Der Fokus ist nie verdeckt (`scroll-margin-top` 76 px ≥ Kopf 56 + 16). Der Ring hat einen echten 2-px-Rand statt des
+(Link) und 52 px (Ring). Der Fokus ist nie verdeckt (K-34: seitenweit `scroll-padding-top` 72/80 px = Kopf + 16). Der Ring trägt seine innere 2-px-Kontur (K-1) als echten Rand statt des
 Box-Schattens von `.btn.ghost`, weil `forced-colors: active` Box-Schatten entfernt; der Rand bleibt dort als Systemfarbe sichtbar. Umfließen bis 320 px und 200 % Text siehe G.1.
 
 **H.7 Einbettung und Prüfsuite:** Die Einbettung lädt denselben Server-HTML-Block; beim Neuaufbau ist nichts nachzubinden. Prüfsuite:
 Abschnitt 10 (nur 13/15/17; der Ring erbt 17 px über `.btn`), 27.1 („Angebot nur für Unternehmer“), 29.1 (kein Link auf `/#tour`,
-`/#fensterbauer`) sind erfüllt. Als `.btn.ghost` zählt der Ring in `kopfCta()` (`web/assets/portal.js:554`) nicht als Cream. **Neue Abweichungen von bestehenden Regeln (GEST, DR) bringt der Block nicht.** Er
-setzt DG-AB-2 (kein Versatz der Bedienschicht) und DG-E-10 (Ringrand) voraus und hält die Dosierregel 1.
+`/#fensterbauer`) sind erfüllt. Als `.btn.ghost` zählt der Ring in `kopfCta()` (`web/assets/portal.js:554`) nicht als Cream. **Abweichungen von bestehenden Regeln:**
+(1) Ring-Kontur `--muted` statt `--line2` (K-1; GEST:24, `gemeinsam.css:58`): Abweichung von bestehender Regel – Freigabe durch den
+Inhaber nötig (DS-AB-10, DG-E-10). (2) Standzeile und Rechtshinweis in 15 px (K-20; GEST:26, :452): Abweichung von bestehender Regel –
+Freigabe durch den Inhaber nötig (DS-AB-2, DG-E-6); bis dahin 13 px nach GEST. Der Block setzt außerdem DG-AB-2 (kein Versatz der
+Bedienschicht) voraus und hält die Dosierregel 1.
 
 ## I. Conversion-Begründung
 

@@ -6,7 +6,8 @@ Phase I des Website-Blueprints (MASTER-PROMPT V4), Stand 24.10.2026. Planungsdok
 [08-zielarchitektur.md](../08-zielarchitektur.md) (VK = `web/fuer-fensterbauer/index.html`; DG, EA, RE, EV, SG, DR, GEST, SKILL).
 **[V]** verbindlich, **[H]** Hypothese mit Rückfall, **Festlegung I** = Entscheidung dieser Spezifikation mit Begründung. Lagen sind
 geplant, nicht gemessen; **Textbreiten sind gemessen** (Inter-Datei des Projekts `web/fonts/inter-latin-wght-normal.woff2` in Chromium).
-`10-paketentscheidung.md` liegt nicht vor; der Preis kommt allein aus `web/assets/pakete.js`.
+`10-paketentscheidung.md` liegt nicht vor; der Preis kommt allein aus `web/assets/pakete.js`. Angeglichen an
+[11-designsystem.md](../11-designsystem.md): Wo diese Spezifikation früher anders plante, steht jetzt der Wert der **Festlegung K-n**.
 
 ## A. Abschnitt und Funktion
 
@@ -27,7 +28,7 @@ geplant, nicht gemessen; **Textbreiten sind gemessen** (Inter-Datei des Projekts
 |---|---|---|
 | Kicker | „Für Fensterbauer und Fensterhändler“ | wörtlich VK:56 |
 | h1 | „Ihr eigener Fenster-Konfigurator, unter Ihrer Marke“, „Marke“ grün (`<span class="ak">`) | wörtlich VK:57. Der Quelltext bleibt Zeichen für Zeichen gleich: Die Prüfsuite prüft ihn per Regex im HTML (`scripts/pruefen-instanzen/29.mjs:110`), also kein `<br>`, `<wbr>` oder Tag darin |
-| drei Haken-Chips | „Ihre Domain“ · „Ihre Marke“ · „PDF per E-Mail“ | „Ihre Domain“ und „PDF per E-Mail“ wörtlich VK:58; „Ihre Marke“ **Textentwurf**, gekürzt aus VK:58. **Festlegung I:** 08 plant „Anfrage als PDF“; damit misst die Reihe 359 px bei 358 px Platz, mit dem Bestandswort 351 px. Rückfall: „Anfrage als PDF“ mit 8 px Innenabstand der Chips |
+| drei Haken-Chips | „Ihre Domain“ · „Ihre Marke“ · „PDF per E-Mail“ | „Ihre Domain“ und „PDF per E-Mail“ wörtlich VK:58; „Ihre Marke“ **Textentwurf**, gekürzt aus VK:58. **Festlegung I:** 08 plant „Anfrage als PDF“; damit misst die Reihe 363 px bei 358 px Platz, mit dem Bestandswort 355 px (Abstand 8 nach K-32; gemessen mit Abstand 6: 359 bzw. 351 px). Rückfall: „Anfrage als PDF“ mit 8 px Innenabstand der Chips (wäre eine Ausnahme von K-32) |
 | Preiszeile | **Textentwurf** „Ab 29 € im Monat netto, plus Einrichtung · vorläufig“ | 29 € ist der kleinste Monatspreis (`web/assets/pakete.js:44`), serverseitig aus dieser Quelle gesetzt (neuer Baustein in `functions/pakete-seite.js`, damit Seite, JSON-LD und `llms.txt` eine Quelle behalten). „· vorläufig“ nur solange `VORLAEUFIG` (`pakete.js:17`). **Festlegung I:** 08 schreibt „… · vorläufige Preise“ (392 px, passt nicht in eine Zeile); gekürzt auf 336 px. Rückfall: zweizeilig, alle Lagen darunter + 17 px |
 | Cream | „Pakete ansehen“ mit Pfeil im Kreis → `#pakete` | wörtlich VK:63 |
 | Ring | **Textentwurf** „Selbst ausprobieren“ → `#die-idee` | E-AB-3 (I.4) |
@@ -41,7 +42,7 @@ planen selbst“ (SKILL:24), Brotkrumen über dem Bild (wandern über den Fuß, 
   wörtlich wie VK:55. Alles Übrige der Bildschicht ist `aria-hidden`.
 - **Erdlicht** aus dem Bullauge und **Lichtkeil** (Lichtübertrag) Richtung Leiste.
 - **Maßlinie** am Bullauge, Wert „1.200 mm“ (wie VK:55).
-- **Meldungsstapel** mit Kennzeichnung „BEISPIEL“ (G7). **Textentwurf** nach dem Paketweg (KD, E-AB-4), gegliedert nach dem Format der
+- **Meldungsstapel** mit Kennzeichnung „BEISPIEL“ (G7; Form a nach K-36: Etikett oben links am Material, die einzige Kennzeichnung). **Textentwurf** nach dem Paketweg (KD, E-AB-4), gegliedert nach dem Format der
   echten Dashboard-Meldung (`functions/api/eingang.js:217`: Titel, darunter Positionen):
   1. „Neue Anfrage“ / „Familie Weber · 4 Positionen“
   2. „Aufmaßblatt als PDF“ / „im Postfach“
@@ -53,7 +54,7 @@ planen selbst“ (SKILL:24), Brotkrumen über dem Bild (wandern über den Fuß, 
 ### B.3 Interaktionen
 
 Zwei Links, sonst nichts Bedienbares; Foto, Stapel, Licht und Maßlinie haben `pointer-events: none`. Der Kopf-Ring „Pakete ansehen“
-erscheint erst, wenn die Cream unter dem Kopf verschwunden ist (N4).
+erscheint erst, wenn die Cream unter dem Kopf verschwunden ist (N4; Verhalten weiter unten auf der Seite nach K-28, F.3).
 
 ### B.4 Nutzbare vorhandene Komponenten
 
@@ -81,21 +82,21 @@ schneidet unten an.
 | 20 | Foto | 0–390 | 0–420 | 50 % der Höhe bei 844, 63 % bei 664; ab y 315 (75 %) linear in den Grund; Kopfzone dunkel (DG-E-11) |
 | 20 | Erdlicht | Zentrum Ausblick | – | radial, Radius 1,5 × Bullauge, `--el` 16 % → 0, `mix-blend-mode: screen`, steht still |
 | 20 | Maßlinie | rechter Rand des Ausblicks | Ober- bis Unterkante der Öffnung | 1,5 px `--mo`, Endstriche 18 px, Wert mittig, −90° |
-| 25 | „BEISPIEL“ | 18 | 72–88 | 13 px, 600, Versalien, Sperrung 0,12 em, `--text2` |
+| 25 | „BEISPIEL“ | 18 | 72–88 | Technikstimme Versal 13/16, 600, Sperrung +0,12 em (K-17), `--text2` auf Bild (K-36 a) |
 | 25 | Glas-Stapel | 16–236 | vorn 94–158, Kanten bis ≈ 177 | Meldung 220 × 64, Radius 18; Spalte 1 bis Mitte 3 |
-| 28 | Scrim | 0–390 | 0–96 | `#161616` 60 % → 0 |
-| 30 | Kicker | 16–358 | 320–336 | 13 px, 600, Versalien 0,12 em, `--accent`; eine Zeile (342 px) |
-| 30 | h1 | 16–374 | 344–445 | 32 px, 800, Zeilenhöhe 1,05, −0,03 em, `text-wrap: balance`; drei Zeilen wie heute: „Ihr eigener Fenster-“ / „Konfigurator,“ / „unter Ihrer Marke“ |
-| 30 | Chips | 16–367 | 461–497 | 36 px, 13 px 700, Innenabstand 10, Haken 6 × 10, Abstand 6; flach `#262626` ohne Rand (kein Bild darunter) |
-| 30 | Preiszeile | 16–352 | 509–526 | 13 px 600, 0,02 em, `tabular-nums`; „Ab 29 € im Monat“ in `--text`, Rest `--muted` |
-| 30 | Cream | 16–228 | 541–593 | 52 px, 17 px 700, mindestens 212 px breit |
-| 30 | Ring | 16–228 | 605–657 | 52 px, Rand 2 px `--muted` (≈ 5,9 : 1, DG-E-10), gleich breit |
+| 28 | Scrim | 0–390 | 0–96 | `#161616`, Stopps 0 / 24 / 48 / 72 / 96 px mit 100 / 75 / 45 / 15 / 0 % der Startdeckkraft; Start 60 %, bis 75 %, wenn Logo oder Menüzeichen über hellem Fotorand sonst 4,5 : 1 bzw. 3 : 1 verfehlen (K-26) |
+| 30 | Kicker | 16–358 | 320–336 | 13/16, 600, Versalien +0,12 em (K-17), `--accent`; eine Zeile (342 px) |
+| 30 | h1 | 16–374 | 344–446 | 32/34 px (K-18), 800, −0,03 em, `text-wrap: balance`; drei Zeilen wie heute: „Ihr eigener Fenster-“ / „Konfigurator,“ / „unter Ihrer Marke“ |
+| 30 | Chips | 16–371 | 462–498 | Anzeige-Chip nach K-32: 36 px, 13/700 (nach Freigabe DG-E-6 15/700), Innenabstand 10 mit Haken 6 × 10, Abstand 8, Radius voll; `--surface2` ohne Rand (kein Bild darunter) |
+| 30 | Preiszeile | 16–352 | 510–527 | 13 px 600, 0,02 em, `tabular-nums`; „Ab 29 € im Monat“ in `--text`, Rest `--muted` |
+| 30 | Cream | 16–228 | 542–594 | 52 px, 17 px 700, mindestens 212 px breit (K-30) |
+| 30 | Ring | 16–228 | 606–658 | 52 px, innere Kontur 2 px `--muted` (≈ 5,8 : 1, K-1, DG-E-10), gleich breit, 12 px unter der Cream (K-30) |
 | – | Leiste V2 | 0–390 | 690–834 | Anschnitt 17 % (DG 2.3.17/2: 8–25 %) |
 | 40 | Kopf | 0–390 | 0–56 | Logo links, Menü rechts; Ring verborgen |
 
 **Verhältnisse.** Foto 50 % der Fläche; Figur samt Bullauge ≈ 210 × 300 px = 19 % bei 844, 24 % bei 664 (SG 10.1: 15–35 %; DG T1 nennt
 25–35 %, am Zuschnitt prüfen); Textfläche (Begrenzungsrahmen) ≈ 12 % (≤ 15 %); Cream 3,4 % (Akzent ≤ 5 %); frei ≈ 35–40 % mit den ruhigen
-Bildzonen (≥ 33 %, Schätzung, am Bildschirmfoto prüfen). Abstände 8 · 16 · 12 · 15 · 12 · 33 px (4-px-Raster, Gruppe : Zone ≈ 1 : 4).
+Bildzonen (≥ 33 %, Schätzung, am Bildschirmfoto prüfen). Abstände 8 · 16 · 12 · 15 · 12 · 32 px (4-px-Raster, Gruppe : Zone ≈ 1 : 4).
 Bei 664 stehen Preiszeile, Cream und Ring ganz im Bild (besser als „knapp“ in 08); die Leiste nicht, das Fortsetzungssignal trägt dort der
 Lichtkeil über der Unterkante. **Größenhierarchie** [V]: Figur ≈ 300 px hoch → h1 32 → Klein-UI 13–17; drei Stufen (32 · 17 · 13; der
 Meldungstitel 15 gehört zur Klein-Stufe, 15/13 = 1,15). Sprung Hauptelement zu Bedienschrift ≫ 3 (SG 10.1/4).
@@ -118,32 +119,32 @@ Gebraucht wird ein eigener Zuschnitt. Anforderungen in Koordinaten des Bildfelds
 **Platzhalter bis dahin** (SKILL 5): heutiges Foto, `object-position: 74% 0%`, Stapel wie geplant; die Verdeckung von Handy und Hinterkopf
 ist bekannt. Nur für Vorschau und Telefon-Video, nicht für `main`.
 
-### C.4 Schreibtisch 1280 × 800 (12 Spalten in 1040 px, x 120–1160, Rinne 32)
+### C.4 Schreibtisch 1280 × 800 (12 Spalten à 64,67 px in 1040 px, x 120–1160, Rinne 24, K-12)
 
 | Element | x | y | Regel |
 |---|---|---|---|
-| Foto (vorhandenes `fb-sessel.webp`) | 553 (Mitte Rinne 5/6) bis 1280, randlos | 0–760 | Zoom 1,1 (Bildbreite 800 px), rechts und oben verankert; Maske links 0 → 100 % über 40 % der Breite, unten ab 74 % aus; Bullauge x ≈ 1136–1280 |
+| Foto (vorhandenes `fb-sessel.webp`) | 563 (Anfang Spalte 6) bis 1280, randlos | 0–760 | Zoom 1,1 (Bildbreite 800 px), rechts und oben verankert; Maske links 0 → 100 % über 40 % der Breite, unten ab 74 % aus; Bullauge x ≈ 1136–1280 |
 | Stapel | ≈ 900–1120 (Spalten 10–12) | „BEISPIEL“ 76–92, vorn 98–162 | über der Stationsdecke rechts vom Papierflieger, über dem Kopf der Figur; Bildzone `STAPEL = {x0: 589, y0: 107, x1: 898, y1: 254}` im Original |
 | Kicker | 120 | 241–257 | Textblock senkrecht mittig zwischen Kopf und Leiste |
-| h1 40 px | 120–703 | 269–353 | zwei Zeilen „Ihr eigener Fenster-“ / „Konfigurator, unter Ihrer Marke“ (`max-width: 640px`, `balance`); die zweite Zeile liegt über der dunklen Wand im Fotoauslauf, 60 px links vom Handy |
-| Chips | 120–471 | 377–413 | eine Zeile |
+| h1 40/42 px (K-18) | 120–703 | 269–353 | zwei Zeilen „Ihr eigener Fenster-“ / „Konfigurator, unter Ihrer Marke“ (`max-width: 640px`, `balance`); die zweite Zeile liegt über der dunklen Wand im Fotoauslauf, 60 px links vom Handy |
+| Chips | 120–475 | 377–413 | eine Zeile (Abstand 8, K-32) |
 | Preiszeile | 120–456 | 429–446 | eine Zeile |
 | Cream · Ring | 120–332 · 344–556 | 470–522 | nebeneinander, Abstand 12 |
 | Leiste V2 | 0–1280 | ab ≈ 700 | Anschnitt 12,5 %; schiebt sich über den ausgeblendeten Fotofuß (DG 2.3.17/4) |
 
-Text 5 Spalten : Bild 7 Spalten plus Randanschnitt (≈ 43 : 57); Textfläche ≈ 11 %, Foto ≈ 54 %, frei ≈ 40 %. Nichts überdimensioniert:
+Text 5 Spalten (x 120–539) : Bild 7 Spalten plus Randanschnitt (ab x 563, ≈ 44 : 56; K-12); Textfläche ≈ 11 %, Foto ≈ 54 %, frei ≈ 40 %. Nichts überdimensioniert:
 h1 40 px, Knöpfe 52 px wie am Telefon (SKILL:28).
 
 ### C.5 Technische Startwerte
 
 | Wert | Start | Begründung |
 |---|---|---|
-| Glas | `rgba(31,31,31,.60)`, `backdrop-filter: blur(24px) saturate(100%)`, Radius 18, oben 1 px Weiß 10 %, rechts 1 px `--el` 24 %, kein Schatten | DG T1; DG-AB-17 (Sättigung), DG-AB-1 (Lichtkante statt `--float`); rechte Kante zeigt zur Quelle (DR Baustein 1) |
+| Glas | `rgba(31,31,31,.60)`, `backdrop-filter: blur(24px) saturate(100%)`, Radius 18; Lichtkante 1 px rundum `--kante-alpha` (14 %), Oberkante `--kante-licht` (24 %), rechte Kante `--kante-quelle` = `--el` 24 %; kein Schatten | DG T1; DG-AB-17 (Sättigung), DG-AB-1 (Lichtkante statt `--float`); Lichtkante nach K-24 (11.5.4): Licht von oben rechts, die rechte Kante zeigt zur farbigen Quelle (DR Baustein 1) |
 | hintere Meldungen | `translateY(10px) scale(.94)` Deckkraft .85; `translateY(19px) scale(.88)` .6; Füllung `rgba(31,31,31,.80)` ohne Weichzeichner, Text ausgeblendet | Bestand `verkauf.css:210–211`; nur die vordere mit Live-Unschärfe (≤ 2 Glasflächen am Telefon, SG 10.8) |
 | Meldung | Innenabstand 10/12, Punkt 8 px `--ok` mit 4-px-Ring `--ok-soft`, ohne Schein; Titel 15/800 `--text`, Zeile 13/500 `--text2` | Bestand ohne Leuchten (DR 5) |
 | Maßwert | Pille 13/600 `tabular-nums`, `rgba(22,22,22,.62)`, Weichzeichner 12 px, Ring 1 px `--mo` 50 % | Bestand `verkauf.css:232`; zweite Glasfläche |
-| Foto-Tiefe | Faktor 0,88, höchstens 32 px | DG-AB-15; Spanne SG 0,8–1,0 |
-| Fokus | `outline: 2px solid var(--text)`, Abstand 3 px | 3 : 1 auf Grund und neben Cream (SG 10.7/8) |
+| Foto-Tiefe | Faktor 0,88, höchstens 32 px | DG-AB-15; Spanne SG 0,8–1,0; nur Stufe 4 (K-9) |
+| Fokus | `outline: 2px solid var(--text)`, Abstand 2 px, formfolgend (Radius des Elements) | K-34; 3 : 1 auf Grund und neben Cream (SG 10.7/8) |
 
 ## D. Anwendung der Design-DNA
 
@@ -185,7 +186,7 @@ solange die Cream sichtbar ist). Im Blinzeltest sollen zwei Flecken bleiben, Erd
 
 | Zeit | Träger | Bewegung | Dauer, Kurve |
 |---|---|---|---|
-| 0–0,9 s | Foto | Deckkraft 0,2 → 1 (nicht ab 0, damit das LCP sofort zählt; prüfen), Zoom 1,04 → 1 am `img` | 900 ms, `--e-out` (großer Motiv-Auftritt) |
+| 0–0,9 s | Foto | Deckkraft 0,35 → 1 (nicht ab 0, damit das Foto als LCP-Kandidat sofort zählt) und Maßstab 1,03 → 1 gemeinsam am `img`, Ursprung am Anker (Mitte des Bullauges) | 900 ms (`--t-buehne`), `--e-out` (K-7) |
 | 0,15–0,9 s | Erdlicht, Keil | Deckkraft 0 → 1 | folgt dem Foto (Nebenbewegung) |
 | 0,9 / 1,6 / 2,3 s | Meldung 1, 2, 3 | fällt von −16 px, Zoom 1,02 → 1, Deckkraft 0 → 1; die vordere rückt nach hinten (Text 220 ms aus); blaue Kante 50 ms später | je 600 ms, `--e-out` hinein, `--e-io` nach hinten; kein Abprallen |
 | 0,9 s | „BEISPIEL“ | Deckkraft | 320 ms |
@@ -194,26 +195,36 @@ solange die Cream sichtbar ist). Im Blinzeltest sollen zwei Flecken bleiben, Erd
 
 Immer nur ein Träger zugleich. Start erst nach `img.decode()` und nur, wenn V1 beim Laden im Bild ist; wer per Anker (`#pakete`) oder mitten
 in der Seite einsteigt, sieht den Endzustand. **Erste Nutzereingabe** (Scrollen > 4 px, Wischen, Rad, Taste): Laufendes und Ausstehendes
-geht in 220 ms per Deckkraft in den Endzustand. Präzisierung von E-2 („springt“), damit nichts ruckt (SKILL:48).
+geht in 220 ms per Deckkraft in den Endzustand (K-7). Präzisierung von E-2 („springt“), damit nichts ruckt (SKILL:48).
 
 ### F.2 Scrollen
 
 - **Foto-Tiefe:** Die Bildgruppe (Foto, Erdlicht, Maßlinie, **auch der Stapel**) folgt mit 0,88; die Bedienschicht mit 1,0. Versatz =
   0,12 × Scrollweg, höchstens 32 px, `translate3d`, direkt am Scrollwert ohne Glättung. **Festlegung I:** DG T1 lässt das Glas mit 1,0
   laufen; am Telefon wäre das Glas über bewegtem Motiv (SG 10.8, Mobil). In der Gruppe ändert sich unter dem Glas nichts, und Text und Bild
-  trennen sich trotzdem in der Tiefe. Gilt an allen Breiten (ein Code-Weg).
+  trennen sich trotzdem in der Tiefe. Gilt an allen Breiten (ein Code-Weg). Tiefe der Bildebenen gibt es nur in Stufe 4, also nur hier
+  (K-9); die Bühne `he-01` (Stufe 3) hat keine.
 - **Ende der Tiefe:** sobald die Oberkante der Leiste die Bildschirmmitte erreicht (844: nach 268 px; 664: nach 358 px), über die letzten
   48 px weich auslaufend; danach bewegt sich nur die Leiste (Übergabe an V2, EV 7.5.3).
 - Kein Anheften, natives Scrollen, keine Scrollsteuerung.
 
 ### F.3 Hover, Klick, Fokus (Bedienschicht: nur Zustände) [V] G1
 
-- **Hover** nur mit `@media (hover: hover)`, 150 ms: Cream bekommt eine 2-px-Kontur `--text` im Abstand 2 px (DG 2.4.1: Hover = Kontur,
-  statt heute Weiß `--primary-hover`); Ring: Rand `--muted` → `--text`. Der Pfeil wandert nicht.
-- **Gedrückt:** Füllung (Cream Deckkraft .88, Ring Füllung `--surface2`), keine Skalierung.
-- **Fokus:** C.5, sofort; nie unter dem Kopf (`scroll-padding-top: 72px`).
-- **Klick:** Ankersprung zu `#pakete` bzw. `#die-idee`; `scroll-behavior: smooth` nur ohne „weniger Bewegung“. Fokusstart wandert ans Ziel.
-- **Kopf-Ring:** Deckkraft 0 → 1 in 220 ms, aus in 165 ms; im verborgenen Zustand `visibility: hidden` (nicht fokussierbar).
+- **Hover** nur mit `@media (hover: hover)`, 150 ms: Cream bekommt eine innere 2-px-Kontur `--on-primary` 24 % (K-2; DG 2.4.1: Hover =
+  Kontur, statt heute Weiß `--primary-hover`; eine äußere Kontur `--text` wäre vom Fokusring nicht zu unterscheiden); Ring: Kontur
+  `--muted` → `--text` (K-1). Der Pfeil wandert nicht.
+- **Gedrückt:** Füllung, sofort, zurück in 150 ms: Cream `--primary-druck` (`#e2e1db`), Ring `--surface2` (K-2); keine Deckkraftänderung,
+  keine Skalierung.
+- **Fokus:** C.5, sofort; nie unter dem Kopf (`scroll-padding-top` = Kopf + 16 px: 72 px Telefon, 80 px Schreibtisch, K-15).
+- **Klick:** Ankersprung zu `#pakete` bzw. `#die-idee` sofort (`behavior: 'auto'`, K-10), danach Fokus auf das Ziel-h2 (`tabindex="-1"`);
+  das Ziel-h2 trägt `scroll-margin-top` 116 px (Schreibtisch 124 px), weil beide Ziele nummerierte Abschnitte mit Kapitelzeile sind, so
+  steht die Haarlinie 16 px unter dem Kopf (K-15). Kein glattes Rollen: Zwischen V1 und den Zielen liegen scrollgekoppelte Szenen (Leiste,
+  zu `#pakete` auch Lichtraum und Explosionsansicht), die sonst nacheinander abliefen.
+- **Kopf-Ring** (44 px, nach K-28): erscheint, wenn die Cream unter dem Kopf verschwindet, Deckkraft 0 → 1 in 220 ms, aus in 165 ms; im
+  verborgenen Zustand `visibility: hidden` (nicht fokussierbar). Weiter unten auf der Seite ausgeblendet, solange Namensleiste oder
+  Kartenreihe der Pakete das Band unter dem Kopf bis 60 % der Bildhöhe schneidet (Zustand A und B); danach in Zustand A „Paket anfragen“
+  (Textwechsel 100 + 120 ms); ausgeblendet, solange 05 ≥ 120 px über dem unteren Rand steht. Kontur 2 px `--muted` → Hover `--text` (K-1),
+  Druck Füllung `--surface2` (K-2).
 
 ### F.4 Ruhige Fassungen
 
@@ -225,9 +236,10 @@ geht in 220 ms per Deckkraft in den Endzustand. Präzisierung von E-2 („spring
 
 ### F.5 Einbettung `/#fensterbauer`
 
-- Telefon: Der Glas-Umschalter 260 × 44 (x 16–276, y 68–112, `st-02`) liegt über dem Foto. **Festlegung I:** Das Bildfeld wächst dafür um
-  52 px nach oben und zeigt den Kopfraum des Zuschnitts; alles darunter rückt um 52 px (Stapel 124–229, Preiszeile 561–578, Cream 593–645,
-  Ring 657–709). E-1 hält bei 664. Grund: Die Komposition von Figur und Stapel bleibt identisch, statt den Stapel in die Figur zu schieben.
+- Telefon: Der Glas-Umschalter 284 × 44 (x 16–300, y 68–112; Maße und Zustände nach `st-02`, K-29, K-3; Schrift 15/20, 500/700) liegt
+  über dem Foto, die Glasfläche auf Z 25, Inhalt und Trefferfläche auf Z 30 (K-39). **Festlegung I:** Das Bildfeld wächst dafür um
+  52 px nach oben und zeigt den Kopfraum des Zuschnitts; alles darunter rückt um 52 px (Stapel 124–229, Preiszeile 562–579, Cream 594–646,
+  Ring 658–710). E-1 hält bei 664. Grund: Die Komposition von Figur und Stapel bleibt identisch, statt den Stapel in die Figur zu schieben.
 - Glasflächen dort: Umschalter und vordere Meldung = 2; die Maßwertpille verliert den Weichzeichner (Füllung .85).
 - `?von=pdf`: Der Hinweis `st-03` ersetzt den Stapel an seinem Ort (eigene Spezifikation).
 - Neuaufbau (`Verkauf.auf` mit `still`): kein zweiter Ladeauftritt; Zustand je Wurzel, Merker in `sessionStorage` mit `try/catch`;
@@ -237,18 +249,22 @@ geht in 220 ms per Deckkraft in den Endzustand. Präzisierung von E-2 („spring
 
 ### G.1 Telefon (zuerst)
 
-- **390 × 844 und 390 × 664:** C.2. Bis 760 px Breite gilt diese Komposition, das Bildfeld wächst nur in der Breite.
+- **390 × 844 und 390 × 664:** C.2. Bis 1023 px Breite gilt diese gestapelte Komposition (K-11), das Bildfeld wächst nur in der Breite; h1
+  bleibt 32/34 px. Von 640 bis 1023 px Zwischengröße: Seitenrand 24 px (Ordnungslinie x = 24), 8 Spalten, Rinne 16. Prüfpunkt: Dort wird
+  der Telefonzuschnitt (780 px Quelle) breiter gezeigt als geplant; Schärfe und Lage von Anker und Stapelzone bei 768 am Bildschirmfoto
+  prüfen.
 - **360 px:** Kicker mit Sperrung 0,08 em (passt in 328 px), Chips und Preiszeile dürfen umbrechen; dafür Bildfeld 380 px hoch, damit die
   Cream bei 360 × 640 im Bild bleibt (Prüfpunkt).
 - **320 px, 200 % Text:** alles bricht um, kein Querscrollen, Stapel 200 px breit, Meldungszeilen mit Auslassungspunkten.
 
-### G.2 Schreibtisch 1280 (≥ 1200 px)
+### G.2 Schreibtisch 1280 (≥ 1104 px, Spalte 1040 mittig)
 
-C.4. Split 5 : 7, h1 40 px zweizeilig bis 640 px Breite; Cream und Ring nebeneinander; Kopf-Ring wie am Telefon.
+C.4. Split 5 : 7, h1 40/42 px zweizeilig (`max-width: 640px`); Cream und Ring nebeneinander; Kopf-Ring wie am Telefon.
 
-### G.3 1024 (761–1199 px)
+### G.3 1024 (1024–1103 px)
 
-Bildfeld ab 44 % der Breite (GEST:447), bei 1024 x 450–1024, y 0–720, Zoom 1,25 rechts und oben verankert. h1 bleibt in der Textspalte
+Raster nach K-11 bis K-13: Rand 32, 12 Spalten à 58 px, Rinne 24. Bildfeld ab Spalte 6 (x 442–1024; GEST:447 nannte 44 % = 450), y 0–720,
+Zoom 1,25 rechts und oben verankert. h1 bleibt in der Textspalte
 (x 32–418, drei Zeilen), weil eine breitere zweite Zeile hier das Handy im Foto träfe. Stapel 220 px bei x ≈ 670–890, „BEISPIEL“ ab
 y 72, vorn 88–152 (Haaransatz bei ≈ 182). Knöpfe nebeneinander, der Ring endet über dem ausgeblendeten Fotorand.
 
@@ -258,24 +274,24 @@ y 72, vorn 88–152 (Haaransatz bei ≈ 182). Knöpfe nebeneinander, der Ring en
 
 | Datei | Änderung |
 |---|---|
-| VK:53–64 | Brotkrumen oben raus; `<picture>` mit Telefonquelle (`media="(max-width: 760px)"`); drei Chips als `<ul>`; Preiszeile `<p class="vk-preiszeile">` aus dem Baustein; Ring `#die-idee`; „Kurz gesagt“ raus; drei Meldungen in Endreihenfolge |
+| VK:53–64 | Brotkrumen oben raus; `<picture>` mit Telefonquelle (`media="(max-width: 1023px)"`, K-11); drei Chips als `<ul>`; Preiszeile `<p class="vk-preiszeile">` aus dem Baustein; Ring `#die-idee`; „Kurz gesagt“ raus; drei Meldungen in Endreihenfolge |
 | `verkauf.css:167–255` | Lagen nach C; Glaswerte nach C.5; `saturate(100%)`; Schatten unter Meldungen und h1-Textschatten raus; `.vk-staub` und `vk-atmen` raus; neue `.vk-keil` |
 | `verkauf.js:152–262` | `startbild()`: einmalige Folge statt `setInterval(…, 3400)`; Abbruch auf erste Eingabe; `bullauge()`: `ERDE_TEL` für den Zuschnitt, Zeichnen bei 2,9 s statt 1,7 s, ohne Staub; Stapel-Lage aus `STAPEL` über `punkt()`; Foto-Tiefe nach F.2; Keilwinkel aus Bullauge und Leistenmitte |
 | `functions/pakete-seite.js` | Baustein `ab-preis` aus `pakete.js` (kleinster Monatspreis, Zusatz bei `VORLAEUFIG`); danach `node scripts/bedingungen-pdf.mjs` (SKILL 8) |
-| `web/assets/portal.js:551` | `kopfCta()` richtet sich nach der Cream des Startbilds (N4), auch in der Einbettung |
+| `web/assets/portal.js:551` | `kopfCta()` richtet sich nach der Cream des Startbilds (N4) und weiter unten nach K-28, auch in der Einbettung |
 
 ### H.2 Neu
 
 - `.vk-keil` (Z 0, `aria-hidden`): Element mit linearem Verlauf `--el` 12 % → 6 % längs und weichen Rändern quer (`mask-image`), um den
   berechneten Winkel gedreht (Telefon ≈ 14° gegen die Senkrechte), ragt 72 px unten aus V1 (`overflow: visible`); V2 schneidet nicht ab.
   Zeigt der Verlauf Streifen: als WebP mit eingebackenem Dithering (± 1–2 Tonwerte, ≤ 8 KB).
-- Kennzeichnung „BEISPIEL“ als eigenes Element über dem Stapel.
+- Kennzeichnung „BEISPIEL“ als eigenes Element oben links über dem Stapel (K-36 a).
 
 ### H.3 Assets
 
 | Asset | Art, Maß | Freistellung | Quelle |
 |---|---|---|---|
-| `fb-sessel-telefon.webp` | Foto 780 × 944 px (2×: 390 × 420 Bildfeld + 52 px Kopfraum), WebP, ≤ 140 KB | keine, deckend | **beim Inhaber anzufragen** (Flux, aus `fb-sessel` erweitert); Vorgaben C.3; ohne Text, Wasserzeichen, Logos; Licht wie im Original: kühles Erdlicht von rechts oben, warmes Filmlicht im Gesicht |
+| `fb-sessel-telefon.webp` | Foto 780 × 944 px (2×: 390 × 420 Bildfeld + 52 px Kopfraum), WebP, ≤ 140 KB | keine, deckend | **beim Inhaber anzufragen** (Flux, aus `fb-sessel` erweitert); Vorgaben C.3; ohne Text, Wasserzeichen, Logos; Licht wie im Original: kühles Erdlicht von rechts oben (Haus-Richtung, K-24), warmes Filmlicht im Gesicht |
 | `fb-sessel.webp` | 1122 × 1402, 83 KB | – | vorhanden, Schreibtisch |
 | Keil | CSS, notfalls WebP ≤ 8 KB | Alpha | selbst |
 
@@ -298,7 +314,7 @@ das LCP auf `/` hängt daran, nicht an V1. Flüssigkeit entscheidet der Test am 
 
 Ein h1; Kicker als `<p>`; DOM-Folge Kicker, h1, Chips, Preiszeile, Cream, Ring. Foto mit `alt`, alles Übrige der Bildschicht
 `aria-hidden`. Kontraste: Text auf Glas ≥ 4,5 : 1 gegen die hellste Stelle der Stapelzone; `--muted` auf dem Keil ≥ 4,8 : 1 (an der
-Preiszeile ≤ 9 % Blau); Ring-Rand und Fokus ≥ 3 : 1. Ziele 52 px. Reflow bis 320 px, 200 % Text. Unter `forced-colors` behalten Knöpfe
+Preiszeile ≤ 9 % Blau); Ring-Kontur (`--muted`, K-1) und Fokus ≥ 3 : 1. Ziele 52 px. Reflow bis 320 px, 200 % Text. Unter `forced-colors` behalten Knöpfe
 eine Systemkontur. Keine automatische Bewegung über 5 s, daher kein Pausenknopf.
 
 ## I. Conversion-Begründung
@@ -337,7 +353,10 @@ Jede Zeile: **Abweichung von bestehender Regel – Freigabe durch den Inhaber n�
 | E-AB-4, DG-AB-5 | Meldungen „Neue Anfrage → Projekt angelegt → Bereit fürs Angebot“ alle 3,4 s (GEST:447) | Paketweg, einmal, Ende nach 2,9 s | SKILL:25; WCAG 2.2.2 |
 | E-AB-5 | „Kurz gesagt“ und vier Chips (GEST:447) | drei Chips, kein Kasten | Platz bei 664; SKILL:24 |
 | I-AB-1 (neu) | Zeile „Während Sie unterwegs sind · Beispiel“ ab 1200 px, Zeitangaben in den Meldungen (GEST:447) | nur „BEISPIEL“, ohne Zeiten | gemessene Breite; die lange Zeile läge am Schreibtisch über dem Bullauge |
-| I-AB-2 (neu) | Kicker gesperrt 0,18 em (GEST:26) | 0,12 em | DR 3.2; passt einzeilig in 358 px |
+| I-AB-2 = DS-AB-1 | Kicker gesperrt 0,18 em, 800 (GEST:26; `gemeinsam.css:44`) | jede Versalzeile (Kicker, „BEISPIEL“) 600, +0,12 em; einziger Rückfall +0,08 em bei 360 px (K-17) | DR 3.2; passt einzeilig in 358 px |
+| DS-AB-10 | `--muted` „nur für Labels und Nebenzeilen“ (GEST:24); Ghost-Rand `--line2` (`gemeinsam.css:58`) | Ring und Kopf-Ring mit innerer 2-px-Kontur `--muted` (K-1) | die Kontur ist die einzige Grenze des Knopfs und braucht 3 : 1 (WCAG 1.4.11; DG-E-10) |
+| DS-AB-3, DS-AB-7 | Cream hellt beim Überfahren auf Weiß auf (`--primary-hover`, `gemeinsam.css:15`); Druck `scale(.98)` (`:65`); keine neuen Farben (GEST:24) | Hover innere 2-px-Kontur `--on-primary` 24 %, Druck Füllung `--primary-druck` `#e2e1db`, keine Skalierung (K-2) | ein Kanal für Hover (DG 2.4.1); Bedienschicht formstabil (SG 10.7/3) |
+| DS-AB-6 | „eine Spalte bis 760 px“ (GEST:462); Schwellen 761/1199 in `verkauf.css` | Umbruchpunkte 640 und 1024 px, Spalte 1040 ab 1104 px (K-11) | prüfbare Zahl von Kompositionen; SG 10.9 |
 | DG-AB-1, -15, -17 | `--float` unter Glas; keine Parallaxe; Sättigung 140 % (GEST:32, :41; DR 3.1) | Lichtkante; Tiefe 0,88 der Bildgruppe; 100 % | DG 2.5.3 |
 
 Weitere offene Punkte: 13 px für die Preiszeile oder 15 px (DG-E-6); Nettopreise im ersten Bildschirm der Einbettung auf `/` rechtlich

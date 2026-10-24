@@ -54,8 +54,9 @@ Kicker. (2) Preiszeile zusätzlich zu „Satz und Knopf“ wegen R13 (A). (3) Ki
 **Entfällt:** der erste `.rg-cta` aller 28 Artikel samt Zweitknöpfen („Führung in zwei Minuten“, „Anleitung: Fenster ausmessen“,
 Sprünge wie `#bestimmen`, die das Inhaltsverzeichnis darunter abdeckt); in Fachartikeln auch die Zwischenknöpfe (ZA 8.4.3).
 
-**Nutzbar vorhanden:** `.btn`, `.btn.primary`, `.btn.ghost`, `.pf` (`web/assets/gemeinsam.css:56-76`), `.eyebrow.kicker` (`:44-46`),
-Tokens (`:9-32`), Generator `scripts/ratgeber-bausteine.mjs`, Stichtagslogik `functions/seo.js`.
+**Nutzbar vorhanden:** `.btn`, `.btn.primary`, `.btn.ghost`, `.pf` (`web/assets/gemeinsam.css:56-76`), `.eyebrow.kicker` (`:44-46`;
+heute 800/0,18 em, nach K-17 600/+0,12 em), Tokens (`:9-32`; neu `--primary-druck: #e2e1db` nach 11.4.1, DS-AB-7), Generator
+`scripts/ratgeber-bausteine.mjs`, Stichtagslogik `functions/seo.js`.
 
 ## C. Exakte Layoutkomposition
 
@@ -79,16 +80,18 @@ Lage im Artikel (Ratgeber „Fenster ausmessen“): „Kurz gesagt“ endet bei 
 Fachartikel „Erstaufmaß“: Haarlinie 861, Pille 996–1048. A-2 liegt am Übergang zum zweiten Bildschirm, gewollt: Antwort zuerst (ZA A-1).
 
 **Verhältnisse (R, 390, mit Rand).** Text 39 %, Pille 19 %, Bild 0 %, Freiraum 42 %. Hierarchie: Pille (Cream 358 × 52, ≈ 5,7 % des
-Bildschirms) > fetter Satzanfang (17/700 `--text`) > Satzrest (17/500 `--text2`) > Kicker (13/800 Versal, grün) > Preiszeile (13/500
+Bildschirms) > fetter Satzanfang (17/700 `--text`) > Satzrest (17/500 `--text2`) > Kicker (13/600 Versal, +0,12 em, grün; K-17) > Preiszeile (13/500
 `--muted`, Beträge 700 `--text`). Zwei Schriftgrößen, eine Formfamilie (Vollrundung plus radienlose Linie).
 
 **Ebenen [V].** Z 0 Grund `#161616` → Z 30 Bedienschicht (alle Elemente) → Z 40 Kopf (klebt, opak). Interaktiv ist nur die Pille; beim
 Lesen liegt sie im unteren Drittel, im Daumenbereich.
 
-**Schreibtisch 1280 × 800.** Artikelspalte 788 px (x 246–1034), 12 Spalten à 43,7 px, Fuge 24. Haarlinie über 12 Spalten; Kicker, Satz,
-Preiszeile über Spalte 1–8 (517 px ≈ 60 Zeichen); Pille in eigener Breite ab Spalte 1; Spalte 9–12 frei. Lagen R: Haarlinie 502, Satz
-544–595, Preis 603–639, Pille 663–715 (237 × 52), Inhaltsverzeichnis ab 755; A-2 steht im ersten Bildschirm. F: Pille 323 × 52, Block 169 px.
-Text : Pille : Freiraum ≈ 23 : 5 : 72.
+**Schreibtisch 1280 × 800 (Raster nach 11.2.1, K-12, K-13).** Spalte 1040 px (x 120–1160), 12 Spalten à 64,67 px, Fuge 24;
+Ordnungslinie x 120 wie Kopf (`rh-01`), Fuß (`rh-03`) und Artikelkopf (`ar-01` C.2). Haarlinie über Spalten 1–7 (x 120–717, 597 px,
+Lesespalte nach `ar-01`); Kicker, Satz, Preiszeile über Spalten 1–5 (x 120–539, 419 px ≈ 49 Zeichen); Pille in eigener Breite ab Spalte 1;
+Spalten 6–12 neben dem Text frei. Lagen R (Zeilenzahl bei 419 px wie bei 517 px, gemessen): Haarlinie 502, Satz 544–595, Preis 603–639,
+Pille 663–715 (237 × 52), Inhaltsverzeichnis ab 755; A-2 steht im ersten Bildschirm. F: Satz bei 419 px dreizeilig, Pille 323 × 52, Block
+194 px. Text : Pille : Freiraum ≈ 23 : 5 : 72.
 
 **Technische Startwerte**
 
@@ -96,10 +99,11 @@ Text : Pille : Freiraum ≈ 23 : 5 : 72.
 |---|---|---|
 | Außenabstand | 32 px, ab 1024 40 px (fällt mit den Rändern der Nachbarn zusammen) | wie h2 im Artikel (`ratgeber.css:21`, `:163`); DG G6 (96/128) würde die Handlung von ihrer Antwort lösen: **funktional begründete Abweichung von DG G6** |
 | Innen | Haarlinie → Kicker 16, Kicker → Satz → Preis 8/8, → Pille 16 (ab 1024: 24) | G2, G6 (1 : 3) |
-| Satz | 17/1,5, `max-width: 517px`, `text-wrap: pretty`; ≤ 3 Zeilen ab 328 px | G2; DNA-B B.3.6; gemessen |
+| Kicker | 13/600 Versal, +0,12 em, `--accent`; bleibt bis 320 px einzeilig (F 269,5 px bei 288 px Spalte), der Rückfall +0,08 em entfällt | **Festlegung K-17** (11.3.1); **Abweichung von bestehender Regel (GEST:26 „Sperrung .18em“, `gemeinsam.css:44` 800) – Freigabe durch den Inhaber nötig (DS-AB-1)** |
+| Satz | 17/1,5, `text-wrap: pretty`; Kicker, Satz und Preiszeile über Spalten 1–5: Telefon volle Breite, ab 640 px 5 von 8, ab 1024 px 5 von 12 Spalten (386 px bei 1024, 419 px bei 1280); ≤ 3 Zeilen ab 328 px | G2; DNA-B B.3.6; K-13; gemessen |
 | Preiszeile | 13 px, Zeilenhöhe 18, zwei Zeilen | wie H1/H7; bei 15 px bricht Zeile 2 schon bei 358 px um (DG-E-6) |
 | Pille | 52 px, Polster 10 × 22, Telefon 100 %, ab 640 eigene Breite, `white-space: normal` | bei 320 px liefe „Konfigurator für Fensterbauer“ 3 px über; bei 200 % Zoom zweizeilig statt abgeschnitten |
-| Ring (R-P) | Kontur 2 px `--muted` (5,8 : 1) statt `--line2` (1,6 : 1) | DG-E-10 |
+| Ring (R-P) | innere Kontur 2 px `--muted` (5,8 : 1) statt `--line2` (1,6 : 1), sie ist die einzige Grenze des Knopfs; Hover → `--text`, Druck Füllung `--surface2` | **Festlegung K-1** (11.6.2); DG-E-10; **Abweichung von bestehender Regel (GEST:24, `gemeinsam.css:58`) – Freigabe durch den Inhaber nötig (DS-AB-10)** |
 
 ## D. Anwendung der Design-DNA
 
@@ -115,8 +119,8 @@ auf Stufe 1. Es gibt keine Signature (ZA 8.3.11 „Ratgeber, Fachartikel: sonst 
 | 3-D, Bildintegration, Überlagerung, Perspektive | keine | 0 | Stufe 1 hat 0–20 % Bild; hier 0 |
 | Oberflächendetails | Haarlinie, Pfeil im Kreis auf der Cream (B.3.7), gleich breite Ziffern im Preis | 1 | Präzision statt Schmuck |
 | Typografie | Lesestimme 17 mit fettem Anfang in `--text` (DR 3.2), Kicker als einziges Signal | 2 | Satzanfang beantwortet die Nutzerfrage in drei bis fünf Wörtern |
-| Animation | keine (GEST:426) | 0 | siehe F |
-| interaktive Effekte | Zustände über Füllung und Kontur | 1 | Rückmeldung ohne Bewegung |
+| Animation | keine (GEST:426); Bedienschicht ohne Auftritt (K-6) | 0 | siehe F |
+| interaktive Effekte | Hover über Kontur, Druck über Füllung (K-1, K-2) | 1 | Rückmeldung ohne Bewegung |
 
 **Bewusst weggelassen:** Kartenfläche, Bild (Variante nur als H-AR2-6), Maßlinie, Glas, Licht, Auftritt beim Scrollen, Hover-Wanderpfeil,
 Skalieren beim Drücken (B.3.7 „zerstört durch“), zweiter Aufruf, Abschnittsnummer, h2 (der Kicker ist ein `p`, damit das generierte
@@ -132,7 +136,7 @@ Inhaltsverzeichnis keinen Eintrag bekommt).
 R-P: Der Ring nimmt Gewicht heraus, der fette Satzanfang wird Primärfokus; danach zieht der grüne Eintrag „Dein Weg: Schritt 1 von 6“ im
 Inhaltsverzeichnis zum Weg (gewollt, U5).
 
-**Ablenkungen und Gegenmittel.** Der Kopfknopf (Cream, gleiches Ziel) schaltet auf Ring, solange die Pille im Bild ist (`data-kopf-cream`,
+**Ablenkungen und Gegenmittel.** Der Kopfknopf (Cream, gleiches Ziel) schaltet auf Ring (44 px, Kontur 2 px `--muted` nach K-1), solange die Pille im Bild ist (`data-kopf-cream`,
 `rh-01`); im Fachartikel ist er immer Ring. „Kurz gesagt“ trennen 32 px Luft und die Haarlinie; das Inhaltsverzeichnis darunter liegt
 tonal unter der Pille. Am Ende steht die Cream-Kachel „Du bist hier“ des Wegs (`ratgeber.css:115`) nur 536 px (1280) bzw. 761 px
 (RAL-Montage, 390) über der Pille, also im selben Bildschirm: Bedingung an `ar-04` in H.
@@ -143,9 +147,9 @@ tonal unter der Pille. Am Ende steht die Cream-Kachel „Du bist hier“ des Weg
 
 | Ereignis | Verhalten | Dauer, Kurve | Begründung |
 |---|---|---|---|
-| Scrollen, Erscheinen | natives Scrollen, kein Auftritt, kein Scrollbezug | – | T13 „keine“; EV E-13; GEST:426 |
-| Hover (`hover: hover`) | Cream `--primary` → `--primary-hover`; Ring-Kontur `--muted` → `--text` | 150 ms (`--t1`), `--e-out` | Zustand über Füllung bzw. Kontur (G1) |
-| Drücken | Cream bleibt `--primary-hover`, Ring füllt `--surface2`; `transform: none` gegen `gemeinsam.css:65` | sofort | formstabile Bedienschicht (SG 10.7/3) |
+| Scrollen, Erscheinen | natives Scrollen; die Bedienschicht steht ab dem ersten Bild: kein Auftritt, auch kein Einblenden über Deckkraft, kein Scrollbezug | – | **Festlegung K-6** (11.7.2); T13 „keine“; EV E-13; GEST:426. Siteweit **Abweichung von bestehender Regel (GEST:39 Katalog 1) – Freigabe durch den Inhaber nötig (DS-AB-8)** |
+| Hover (`hover: hover`) | Cream: innere 2-px-Kontur `--on-primary` 24 %, Füllung bleibt `--primary`; Ring: Kontur `--muted` → `--text` | 150 ms (`--t1`), `--e-out` | Hover = Kontur (**Festlegung K-2**, K-1; DG 2.4.1; G1) |
+| Drücken | Cream: Füllung `--primary-druck` (`#e2e1db`); Ring: Füllung `--surface2`; keine Deckkraftänderung, keine Skalierung (`transform: none` gegen `gemeinsam.css:65`) | sofort, zurück 150 ms (`--t1`) | Druck = Füllung (**Festlegung K-2**); formstabile Bedienschicht (SG 10.7/3) |
 | Fokus | 2 px `--ink`, Abstand 2 px (`gemeinsam.css:38`) | sofort | ≥ 3 : 1 |
 | Klick | Seitenwechsel ohne Übergang; `#pakete` springt auf der Zielseite mit `scroll-padding-top` unter den Kopf | – | gleiche Herkunft |
 | angefangenes Aufmaß | Text und `href` werden vor dem ersten Zeichnen getauscht (Skript `defer`); am Telefon ändert sich keine Höhe | – | wie Kopf und H7 |
@@ -156,14 +160,18 @@ Zum Wunsch nach Tiefe und Physik (SKILL:43): Ratgeber sind Leseflächen der Stuf
 ## G. Responsive Design
 
 **Telefon 390 × 844 (zuerst).** Komposition nach C; bei 390 × 664 liegt A-2 ganz im zweiten Bildschirm. 360 px: Satz R 2, R-P 3 (Block
-230), F 3 Zeilen. 320 px: Kicker F und Pille F zweizeilig (63 px), Preiszeile dreizeilig; Block R 248, F 203; kein Querscrollen durch den
-Baustein (das heutige bei 320 px kommt vom Kopf, `rh-01`). 200 % Zoom: alles bricht um, nichts wird abgeschnitten.
+230), F 3 Zeilen. 320 px: Pille F zweizeilig (63 px), Preiszeile dreizeilig; der Kicker F bleibt mit 600/+0,12 em einzeilig (269,5 px bei
+288 px Spalte; mit 800/0,18 em wären es 293,7 px und zwei Zeilen), der Rückfall +0,08 em (K-17) ist nicht nötig; Block R 248, F 197 (gemessen);
+kein Querscrollen durch den Baustein (das heutige bei 320 px kommt vom Kopf, `rh-01`). 200 % Zoom: alles bricht um, nichts wird abgeschnitten.
 
-**640–1023 px.** Spalte wächst bis 788 px; ab 640 px eigene Pillenbreite, Satz endet bei 517 px.
+**640–1023 px.** Rand 24 px, 8 Spalten, Fuge 16 (K-13, 11.2.1); Haarlinie über alle 8 Spalten, Kicker, Satz und Preiszeile über
+Spalten 1–5 (364 px bei 640, 444 px bei 768; Satz F bei 640 dreizeilig, ab 768 zweizeilig); ab 640 px eigene Pillenbreite.
 
-**Schreibtisch 1280.** Wie C: Satz zweizeilig, Pille links, rechtes Drittel frei; Größen 17/13, nichts überdimensioniert.
+**Schreibtisch 1280.** Wie C: Satz R und R-P zweizeilig, F dreizeilig, Pille links, Spalten 8–12 frei; Größen 17/13, nichts überdimensioniert.
 
-**Schreibtisch 1024.** Spalte x 118–906, gemessen identisch mit 1280 (Zeilen, Höhen); Außenabstand 40 px.
+**Schreibtisch 1024 (K-13).** Rand 32 px, Spalte 960 (x 32–992), 12 Spalten à 58 px, Fuge 24, wie der Kopf (`rh-01`). Haarlinie über
+Spalten 1–7 (x 32–582); Kicker, Satz, Preiszeile über Spalten 1–5 (x 32–418, 386 px ≈ 45 Zeichen); Zeilen und Höhen gemessen identisch mit
+1280 (R 213, F 194 px); die Pille F endet bei x 355. Außenabstand 40 px.
 
 ## H. Technische Umsetzung
 
@@ -200,8 +208,8 @@ Landmark.
 
 ```css
 .rg-handlung { margin: 32px 0; padding-top: 16px; border-top: 1px solid var(--line) }
-.rg .rg-handlung p { margin: 0; max-width: 517px }
-.rg .rg-handlung .kicker { margin: 0 0 8px }
+.rg .rg-handlung p { margin: 0 }
+.rg .rg-handlung .kicker { margin: 0 0 8px; font-weight: 600; letter-spacing: .12em }
 .rg .rg-handlung .satz { font-size: 17px; line-height: 1.5; color: var(--text2); text-wrap: pretty }
 .rg .rg-handlung .satz b { color: var(--text); font-weight: 700 }
 .rg .rg-handlung .preis { margin-top: 8px; font-size: 13px; line-height: 18px; color: var(--muted) }
@@ -211,15 +219,23 @@ Landmark.
   text-decoration: none; transition: background var(--t1) var(--e-out), box-shadow var(--t1) var(--e-out) }
 .rg .rg-handlung .btn.primary { color: var(--on-primary) }
 .rg .rg-handlung .btn.ghost { color: var(--text); box-shadow: inset 0 0 0 2px var(--muted) }
-.rg .rg-handlung .btn:active { transform: none }
-.rg .rg-handlung .btn.primary:active { background: var(--primary-hover) }
+@media (hover: hover) { .rg .rg-handlung .btn.primary:hover { background: var(--primary); box-shadow: inset 0 0 0 2px rgb(22 22 22 / .24) }
+  .rg .rg-handlung .btn.ghost:hover { box-shadow: inset 0 0 0 2px var(--text) } }
+.rg .rg-handlung .btn:active { transform: none; transition-duration: 0s }
+.rg .rg-handlung .btn.primary:active { background: var(--primary-druck) }
 .rg .rg-handlung .btn.ghost:active { background: var(--surface2) }
-@media (hover: hover) { .rg .rg-handlung .btn.ghost:hover { box-shadow: inset 0 0 0 2px var(--text) } }
-@media (min-width: 640px) { .rg .rg-handlung .btn { width: auto } }
-@media (min-width: 1024px) { .rg-handlung { margin: 40px 0 } .rg .rg-handlung .btn { margin-top: 24px } }
+@media (min-width: 640px) { .rg .rg-handlung p { max-width: calc((5 * 100% - 3 * 16px) / 8) } .rg .rg-handlung .btn { width: auto } }
+@media (min-width: 1024px) { .rg-handlung { margin: 40px 0; max-width: calc((7 * 100% - 5 * 24px) / 12) }
+  .rg .rg-handlung p { max-width: calc((5 * 100% - 2 * 24px) / 7) } .rg .rg-handlung .btn { margin-top: 24px } }
 @media (forced-colors: active) { .rg-handlung .btn { border: 2px solid ButtonText } }
 @media print { .rg-handlung { display: none } }
 ```
+
+Die Breiten rechnen aus Spaltenzahl und Fuge (11.2.1), weil `main.rg` die 960/1040-px-Spalte mit dem Rand nach K-13 trägt (`ar-01` H):
+Haarlinie Spalten 1–7, Text Spalten 1–5. Die Hover-Kontur ist `--on-primary` (`#161616`) mit 24 %. Gewicht und Sperrung des Kickers stehen
+hier nur, bis `.eyebrow` in `gemeinsam.css:44` siteweit nach K-17 umgestellt ist; `--primary-druck` kommt nach 11.4.1 in `gemeinsam.css:15`.
+Hover steht vor `:active`, damit der Druck auch unter dem Zeiger die Füllung wechselt; `transition-duration: 0s` macht den Druck sofort,
+zurück gilt `--t1`.
 
 **Skript:** kein eigenes. `Kopf.auf` (`rh-01`, `web/assets/kopf.js`) beobachtet `[data-kopf-cream]` (IntersectionObserver) für Cream ↔
 Ring im Kopf und tauscht `[data-fortsetzen]` auf „Aufmaß fortsetzen“ → `/app/`, wenn `eigenesAufmass()` > 0 (nach `gemeinsam.js`
@@ -278,5 +294,9 @@ Einstieg über den Weg.
 
 - Kicker, geänderter Fachartikel-Satz und Preiszeile sind Textentwürfe gegen den Wortlaut von ZA/IA; sie brauchen die Freigabe des Inhabers.
 - `ar-04`, Cream-Kachel: **Abweichung von bestehender Gestaltung – Freigabe durch den Inhaber nötig** (siehe H).
-- Ohne Freigabe, funktional begründet: Außenabstand 32/40 statt DG G6; Drücken ohne `scale(.98)`; Ring-Kontur `--muted` (DG-E-10).
+- Ohne Freigabe, funktional begründet: Außenabstand 32/40 statt DG G6.
+- **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig** (gebündelt in Anhang 11.B des Designsystems): Ring-Kontur
+  `--muted` statt `--line2` (K-1, DS-AB-10; GEST:24, `gemeinsam.css:58`); Cream-Hover als innere Kontur statt `--primary-hover`, Druck
+  `--primary-druck` ohne `scale(.98)` (K-2, DS-AB-3, neuer Wert DS-AB-7; `gemeinsam.css:15`, `:65`); Kicker 600/+0,12 em statt 800/0,18 em
+  (K-17, DS-AB-1; GEST:26, `gemeinsam.css:44`); Bedienschicht ohne Auftritt (K-6, DS-AB-8; GEST:39 Katalog 1).
 - Offen: Preiszeile 13 oder 15 px (DG-E-6; bei 15 px bricht Zeile 2 bei 390 px um); Text „Aufmaß fortsetzen“ hängt an `rh-01` H.6.

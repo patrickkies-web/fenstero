@@ -4,7 +4,8 @@ Seite: Rahmen (alle Seiten außer App und Kundenkonto) · Position: 2 (`rh-02-me
 
 Phase I, Planungsdokument: Es wurde nichts gebaut. Grundlagen: Zielarchitektur (ZA) 8.2.1 (N5, N7, N8, N12), 8.2.3, 8.2.6, 8.2.8, 8.3.1;
 Architektur E (EV 7.5.2, 7.5.8); Design-Grammatik (DG) 2.3.2 T0, DG-AB-1, DG-AB-8, DG-E-12; Styleguide (SG) 10.7 einschließlich
-„Direkte Manipulation und Sheet“, 10.9, 10.10; DNA-B B.1 (Ansichtstyp „vorübergehender Zustand“); Kopf `09-abschnitte/rh-01-kopf.md` (KO).
+„Direkte Manipulation und Sheet“, 10.9, 10.10; DNA-B B.1 (Ansichtstyp „vorübergehender Zustand“); Kopf `09-abschnitte/rh-01-kopf.md` (KO);
+Designsystem `11-designsystem.md` (DS), abgeglichen mit den Festlegungen K-1, K-3, K-5, K-10, K-24 und K-34.
 `10-paketentscheidung.md` liegt nicht vor. Das Menü nennt deshalb weder Preise noch Pakete. Kennzeichnung wie in ZA: **[V]** verbindlich,
 **[H]** Hypothese mit Rückfall, **Textentwurf** für neuen Wortlaut. **Festlegung rh-02** markiert eine Entscheidung dieser Spezifikation an
 Stellen, die ZA offen lässt.
@@ -138,7 +139,7 @@ noch unter der Grenze von 717 px (85 %). Die y-Werte am Bildschirm gelten ohne S
 | Zone | Element | y im Blatt | y am Bildschirm | Maß |
 |---|---|---|---|---|
 | Scrim | gedimmte Seite und Kopf | – | 0–163 | 19 % der Höhe; Tippen schließt |
-| Blattkopf | Lichtkante | 0 | 163 | 1 px über die volle Breite |
+| Blattkopf | Lichtkante | 0 | 163 | 1 px über die volle Breite, `--kante-licht` 24 %; rundum `--kante-alpha` 14 % (K-24) |
 | | Griff | 8–12 | 171–175 | 36 × 4, x 177–213 |
 | | Segment-Gruppe | 20–72 | 183–235 | außen 298 × 52, innen 2 × 145 × 44 |
 | | Schließen | 24–68 | 187–231 | Kreis 44 × 44 |
@@ -152,7 +153,7 @@ noch unter der Grenze von 717 px (85 %). Die y-Werte am Bildschirm gelten ohne S
 
 ```
 y   0 ┌──────── gedimmte Seite (Scrim 60 %) ────────┐  Tippen = schließen
-  163 ╞══════════════ Lichtkante 24 % ══════════════╡  Radius 18
+  163 ╞════════════ Lichtkante 24/14 % ═════════════╡  Radius 18
       │                    ━━━━                     │  Griff
       │ (Hauseigentümer │▓Fensterbauer▓)        (×) │  Segment · Schließen
       │ AUF DIESER SEITE                            │  13 px Technikstimme
@@ -201,7 +202,7 @@ Bei 664 passt es ohne Scrollen. **Neutral:** 248 px (29 %), y 596–844, Blattko
 | Wert | Startwert | Begründung |
 |---|---|---|
 | Blatt | `--surface` `#1f1f1f`, opak | ZA 8.2.3; Glas nur über Bild (DG-AB-10) |
-| Lichtkante | `box-shadow: inset 0 1px 0 rgb(255 255 255 / .24)`, nur oben | lichtzugewandte Kante, SG-Token `--kante-licht` (Licht von oben rechts, DG 2.2.0) |
+| Lichtkante | 1 px rundum `--kante-alpha` (`rgb(243 242 238 / .14)`), Ober- und rechte Kante `--kante-licht` (`rgb(243 242 238 / .24)`): `border: 1px solid var(--kante-alpha); border-top-color: var(--kante-licht); border-right-color: var(--kante-licht)` (Rand statt zweier `box-shadow`, damit sich 14 und 24 % oben nicht addieren). Am Telefon liegt das Blatt seitlich und unten am Bildschirmrand; sichtbar sind Oberkante und Rundungen, ab 640 px auch die Seiten | DS 11.5.4, Festlegung K-24: Haus-Token `--licht-x: -0.6; --licht-y: 0.8` (Licht von oben rechts, DG 2.2.0); Menüblatt schwebt |
 | Radius | 18 oben, 0 unten | DG-AB-8 |
 | Scrim | `rgb(0 0 0 / .6)` als Token `--scrim-blatt` | Bestand (`portal.css:194`, `app.css:485`). Darunter wird Cream zu `#60605e`, es entsteht keine zweite Cream |
 | Höhe | `max-height: 85dvh` (Ersatz `85vh`) | ZA |
@@ -212,9 +213,9 @@ Bei 664 passt es ohne Scrollen. **Neutral:** 248 px (29 %), y 596–844, Blattko
 | Gruppenkopf, Nummer | 13 px, 600, Versalien mit 0,12 em bzw. `tabular-nums`, `--muted`; aktuelle Nummer `--accent` | Technikstimme (DR 3.2) |
 | Haarlinie | 1 px `--line2` | `--line` wäre auf `#1f1f1f` mit 1,16 : 1 unsichtbar; Trenner, keine Elementgrenze (SG 10.9) |
 | Gedrückt, Hover | `--surface2`, Radius 12, x 8–382 | `--muted` hält darauf 4,85 : 1, auf `--surface3` nur 4,36 : 1 |
-| Segment | Gruppe 52 hoch mit 1-px-Ring `--line2`, ohne Fläche. Gewählt: `--surface3` mit `--text` 700; nicht gewählt: `--text2` 500; nie Cream | GEST:32; ZA 8.2.4; mit `st-02` abgleichen |
+| Segment | Gruppe 52 hoch, Spur mit innerer 2-px-Kontur `--line2`, ohne Fläche; Segmente 44 hoch, 4 px Einzug. Gewählt: Füllung `--surface3` plus innere 2-px-Kontur `--text`, Schrift 700 `--text`; nicht gewählt: ohne Fläche, Schrift 500 `--text2`; Hover (nur `hover: hover`) am nicht gewählten Segment: Kontur `--line2`; nie Cream | DS 11.6.3, Festlegung K-3 (wie Umschalter `st-02`): Die Tinten-Kontur trägt die 3 : 1, `--surface3` allein läge darunter; ZA 8.2.4. Abweichung DS-AB-4, siehe D |
 | Schließen | Kreis 44, Fläche `--surface2`, Kreuz 16 px aus 2-px-Strichen in `--text2` | Kreis-Knopf (DG 2.2.5) |
-| Anmelden | Ring `.btn.ghost.small`, 44 px, 15 px, 700 | GEST:399, „alles andere mit Ring“ |
+| Anmelden | Ring 44 px (Pille), transparent, innere 2-px-Kontur `--muted` (5,3 : 1 auf `--surface`), Schrift 15/700 `--text`; Hover (nur `hover: hover`) Kontur → `--text`; Druck Füllung `--surface2`. Der Ghost-Rand `--line2` aus `.btn.ghost.small` (`gemeinsam.css:58`) wird nicht übernommen | GEST:399, „alles andere mit Ring“; DS 11.6.2, Festlegung K-1: Die Kontur ist die einzige Grenze des Knopfs, `--line2` (1,6 : 1) nie. Abweichung DS-AB-10, siehe D |
 
 Kontraste auf `#1f1f1f`: `--text` 14,7 : 1, `--text2` 9,8 : 1, `--muted` 5,3 : 1, `--accent` 9,6 : 1.
 
@@ -227,7 +228,7 @@ Das Blatt ist ein vorübergehender Zustand (DNA-B B.1). Pflicht sind Regel 3 (fl
 |---|---|---|---|
 | Tiefe, Z-Achse | drei Ebenen (Seite → Scrim → Blatt); Tiefe entsteht nur durch Verdeckung und das Helligkeitsgefälle `#090909` → `#1f1f1f` | 2 | Das Blatt liegt eindeutig vorn, die Seite bleibt als Ort erkennbar |
 | Material, Transparenz | opak und flach, kein Glas, keine Textur. Flache Füllung ist kein „opakes Eigenmaterial“ im Sinn der DNA (Metall, Relief, Glanz; DNA 5.6.2) | 1 | Lesbarkeit über jedem Seiteninhalt |
-| Licht, Schatten | 1-px-Lichtkante oben (24 %); kein `--float`, kein Schein | 1 | trennt Figur und Grund auf dunklem Grund über Licht (SG 10.4/7) |
+| Licht, Schatten | 1-px-Lichtkante rundum `--kante-alpha` 14 %, oben und rechts `--kante-licht` 24 % (K-24, Licht von oben rechts); kein `--float`, kein Schein | 1 | trennt Figur und Grund auf dunklem Grund über Licht (SG 10.4/7) |
 | Formen | Radius 18 oben, Pillen für Segment und Ring, Kreis für Schließen, rechteckige Zeilen mit Haarlinien als Gegenform | 2 | eine Formfamilie, präzise wie ein Aufmaß |
 | 3D-Objekte, Bild, Perspektive | keine; alles frontal | 0 | Navigation konkurriert nicht mit den Helden der Seite |
 | Oberflächendetails | gleich breite Ziffern, Haarlinien, Griff 36 × 4, die Haarlinie unter dem Blattkopf erscheint erst beim Scrollen der Liste (Zustand, 150 ms) | 1 | Mikrodetail statt Schmuck (SKILL:47) |
@@ -253,6 +254,11 @@ Das Blatt ist ein vorübergehender Zustand (DNA-B B.1). Pflicht sind Regel 3 (fl
 2. **DG-AB-1: Lichtkante statt `--float`** an Blättern (GEST:24, :32).
 3. **IA-AB-3: Umschalter im Menü** statt als Zeile des klebenden Kopfs (GEST:190).
 4. **IA-AB-10: „Gesichertes Aufmaß öffnen“** in der Ansicht Hauseigentümer (GEST:192 „Kein Anmelden“).
+5. **DS-AB-10 (K-1): Ring-Kontur `--muted`** am Ring „Anmelden“ statt Ghost-Rand `--line2` (GEST:24 „`--muted` nur für Labels und
+   Nebenzeilen“; `gemeinsam.css:58`). Begründung: Die Kontur ist die einzige Grenze des Knopfs und braucht 3 : 1 (WCAG 1.4.11). Rückfall:
+   `--line2`.
+6. **DS-AB-4 (K-3): gewähltes Segment `--surface3` mit 2-px-Kontur `--text`** statt Cream (GEST:24; `gemeinsam.css:82`, `:90`).
+   Begründung: eine Cream je Bildschirm (SKILL:71); die Kontur trägt die 3 : 1. Rückfall: Füllung `--muted`.
 
 ## E. Visual Attention Architecture (erwartet, nicht gemessen)
 
@@ -281,11 +287,12 @@ Das Blatt ist ein vorübergehender Zustand (DNA-B B.1). Pflicht sind Regel 3 (fl
 | Wischen nach unten | Start im Blattkopf oder in der Liste bei `scrollTop = 0`. Das Blatt folgt dem Finger 1:1 (`translateY`), Scrim-Deckkraft = 1 − Weg/Blatthöhe. Nach oben bewegt sich nichts | – | SG 10.7, direkte Manipulation |
 | Loslassen | Schließt bei mehr als 25 % der Blatthöhe oder mehr als 0,5 px/ms. Dann läuft das Blatt mit der Abwurfgeschwindigkeit weiter (Dauer = Restweg ÷ Tempo, 120–220 ms) und blendet aus. Sonst kehrt es ohne Überschwingen zurück | Rückkehr 165 ms `--e-out` | Trägheit statt Feder: SKILL:43 innerhalb von SG 10.7/2 |
 | Liste | nativ, `overscroll-behavior: contain` | – | SG 10.7 |
-| Tippen, Hover | Fläche `--surface2`; Hover nur bei `(hover: hover)`; keine Skalierung | 150 ms | DG-AB-16; SG 10.7/3 |
-| Fokus | Kontur 2 px `--text`, Versatz −2 px, Radius 12 | – | SG 10.9 |
-| Sprung | eigene Seite: `location.hash` setzen (Verlaufseintrag nach ZA 8.2.7, `hashchange` öffnet Zeilen im Hintergrund); Einbettung: `scrollIntoView` ohne Ankerwechsel (GEST:193). Beides sofort (`behavior: 'auto'`, wie KO) unter dem noch deckenden Blatt, dann Ausblenden; danach Fokus auf das Ziel-h2 (`tabindex="-1"`) | 165 ms | Festlegung rh-02: Ein weicher Lauf über acht Bildschirme würde alle scrollgekoppelten Szenen abspielen (V1, 03). Der Fokus folgt dem Sprung (WCAG 2.4.3); ZA nennt sonst die Rückkehr auf den Knopf |
+| Tippen, Hover | Zeilen: Fläche `--surface2`; Ring „Anmelden“: Hover Kontur `--muted` → `--text`, Druck Füllung `--surface2` (K-1); Segment nach C (K-3); Hover nur bei `(hover: hover)`; keine Skalierung | 150 ms | DG-AB-16; SG 10.7/3 |
+| Fokus | `outline: 2px solid var(--text)`, formfolgend. Zeilen und Unterzeilen (Menüzeilen) und Segmente (an der Gruppenkante): Abstand −2 px, Radius 12 auf der Druckfläche bzw. Pille. Schließen (Kreis), Ring „Anmelden“ (Pille) und E-Mail: Abstand 2 px. Nie verdeckt: Blattkopf und Blattfuß liegen neben der Liste, nicht über ihr; die Liste rollt die fokussierte Zeile nativ in Sicht | – | DS 11.9.1, Festlegung K-34; SG 10.9 |
+| Sprung | eigene Seite: `location.hash` setzen (Verlaufseintrag nach ZA 8.2.7, `hashchange` öffnet Zeilen im Hintergrund); Einbettung: `scrollIntoView` ohne Ankerwechsel (GEST:193). Beides sofort (`behavior: 'auto'`, wie KO) unter dem noch deckenden Blatt, dann Ausblenden; danach Fokus auf das Ziel-h2 (`tabindex="-1"`) | 165 ms | DS 11.7.6, Festlegung K-10: senkrechte Sprünge sofort, weil ein weicher Lauf über acht Bildschirme alle scrollgekoppelten Szenen abspielen würde (V1, 03). Der Fokus folgt dem Sprung (WCAG 2.4.3); ZA nennt sonst die Rückkehr auf den Knopf |
 | Schließen ohne Ziel | Fokus zurück auf `.kopf-menue` (bei `/` neu abfragen, weil `portal.js` den Kopf neu zeichnen kann) | – | ZA 8.2.3 |
-| Ansicht, Anmelden auf `/` | Blatt schließt, dann Aufruf von Umschalter bzw. Anmeldeblatt; immer nur ein Blatt offen | – | GEST:191, :399 |
+| Ansicht auf `/` | Das Segment wechselt den Zustand. Dann Neuaufbau über die Funktion des Umschalters (`portal.js:403-406`) und Sprung an den Anfang ohne Gleiten (`behavior: 'auto'`) unter dem noch deckenden Blatt. Danach blendet das Blatt aus, und die neue Ansicht blendet ein; anschließend läuft ihr eigener Foto-Auftritt (K-7). Kopf und Umschalter stehen | Segment 150 ms (`--t1`), Blatt aus 165 ms, Ansicht ein 220 ms (`--t2`), beide gleichzeitig | GEST:191; DS 11.7.6, Festlegung K-5: gleich für Umschalter, Wechselkarte und Menü |
+| Anmelden auf `/` | Blatt schließt, dann Aufruf des Anmeldeblatts; immer nur ein Blatt offen | – | GEST:399 |
 | Andere Seite | Navigation sofort; bei `pageshow` aus dem Zwischenspeicher wird das Blatt geschlossen | – | – |
 | Weniger Bewegung | Deckkraft bleibt (SG: „Farb- und Deckkraftwechsel bleiben“). Wischen folgt weiter dem Finger. Nach dem Loslassen nur Ausblenden, kein Weiterlaufen | – | SG 10.7; ZA „ohne Bewegung“ |
 | Ohne JavaScript | „Menü“ ist ein Link auf `#navigation`, der Browser springt zum Fuß | – | N7 [V] |

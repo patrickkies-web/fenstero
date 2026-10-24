@@ -41,7 +41,7 @@ Aufmerksamkeitsfolgen sind geplant bzw. erwartet, nicht gemessen.
 |---|---|---|
 | h2, 32/40 | „Live-Demos“ (VK:207), grün „Demos“ | gleich |
 | Satz 15 | **Textentwurf** „Demos je Paket folgen in Kürze. Bis dahin: die App für Hauseigentümer, mit Preisen. **Unter Ihrer Domain: Ihr Name, keine Preise.**“ (aus VK:209; R14; ZA A1) | **Textentwurf** „Je Paket ein erfundener Betrieb. Anfragen dort gehen an uns und verschwinden nach einem Tag.“ (gekürzt aus `pakete-seite.js:168`) |
-| Handlung | Ring **Textentwurf** „App für Hauseigentümer“ mit ↗ → `/app/`, neuer Tab | drei Zeilen: Paketname 17 wörtlich, Satz 13 **Textentwurf** aus Merkmalen: „eeziframes-Design mit Ihrem Namen“ · „Ihr Logo, Ihre Farbe, bis 6 Fotos“ · „Ihr Design, ohne eeziframes-Hinweis“ |
+| Handlung | Ring **Textentwurf** „App für Hauseigentümer“ mit ↗ → `/app/`, neuer Tab | drei Zeilen: Paketname 17/700 wörtlich (K-21), Satz 13 (nach Freigabe von DG-E-6 15, K-20) **Textentwurf** aus Merkmalen: „eeziframes-Design mit Ihrem Namen“ · „Ihr Logo, Ihre Farbe, bis 6 Fotos“ · „Ihr Design, ohne eeziframes-Hinweis“ |
 | nur für Vorleser | „ öffnen, neuer Tab“ | „, Demo, neuer Tab“ |
 
 - **Festlegung I-1 (grünes Wort):** „Demos“ in Grün, „Live-“ in `--text`. Ein grünes Wort je Überschrift (GEST:24); „Live“ grün zu setzen, während
@@ -63,8 +63,8 @@ JavaScript.
 ## C. Exakte Layoutkomposition
 
 **Grundstruktur:** Satzbau nach G2 ohne Held (DG 2.4.2 Stufe 1, Hauptelement Typografie nach DG-E-1 C): Haarlinie → h2 → Lesestapel →
-Handlung bzw. Zeilenliste. Ein senkrechter Stapel an der Ordnungslinie x = 16 (G5), asymmetrisch; rechts nur die Pfeilkreise als ruhige
-Senkrechte. Ansichtstyp „Arbeitsansicht“ (DNA-B B.1): Verdeckung, Anker und Maßstabssprung sind Ziel, nicht Pflicht.
+Handlung bzw. Zeilenliste. Ein senkrechter Stapel an der Ordnungslinie x = 16 (G5), asymmetrisch; rechts nur die Zeichen ↗ (16 px ohne
+Kreis, Festlegung K-31) als ruhige Senkrechte. Ansichtstyp „Arbeitsansicht“ (DNA-B B.1): Verdeckung, Anker und Maßstabssprung sind Ziel, nicht Pflicht.
 
 **Telefon 390 × 844** (4 Spalten, Rand 16, alles über 4 Spalten; y ab der Haarlinie)
 
@@ -74,36 +74,37 @@ Senkrechte. Ansichtstyp „Arbeitsansicht“ (DNA-B B.1): Verdeckung, Anker und 
 | Haarlinie `--line` | 16–374 | 0 | 358 × 1 | 30 |
 | h2 32/1,05, 800, −0,03 em | 16–≈ 186 | 24–58 | eine Zeile | 30 |
 | **Zustand A:** Satz 15/1,5, `--text2`, letzter Satz `--text` 700 | 16–374 | 74–142 | drei Zeilen, ≤ 46 ch | 30 |
-| Ring 52, Kontur 2 px `--muted`, Text 17/700, ↗ 16 px | 16–≈ 306 | 166–218 | ≈ 290 × 52 | 30 |
+| Ring 52, innere Kontur 2 px `--muted` (K-1), Text 17/700, ↗ 16 px | 16–≈ 306 | 166–218 | ≈ 290 × 52 | 30 |
 | **mit Demos:** Satz 15 | 16–374 | 74–119 | zwei Zeilen | 30 |
 | Zeilenliste, Haarlinie über jeder Zeile und unter der letzten | 16–374 | 143–315 | 3 × (1 + 56) | 30 |
 | je Zeile: Miniatur 48 × 36, Radius 12, 1-px-Kontur `--line2` | 16–64 | 10–46 in der Zeile | 4 : 3 | 20 |
-| je Zeile: Paketname 17/1,3 700 `--text`, darunter Satz 13/1,3 `--muted` | 76–330 | ≈ 8–49 | 254 breit | 30 |
-| je Zeile: Pfeilkreis 32, 1 px `--muted`, ↗ 16 px `--text2` | 342–374 | 12–44 | Kreis | 30 |
+| je Zeile: Paketname 17/22 700 `--text` (K-21), darunter Satz 13/1,3 `--muted` (nach Freigabe von DG-E-6: 15/22, K-20) | 76–338 | ≈ 8–49 (mit 15 px: 6–50) | 262 breit | 30 |
+| je Zeile: ↗ 16 px `--muted` ohne Kreis (K-31), im 24-px-Feld x 350–374 | 354–370 | 20–36 | 16 × 16 | 30 |
 | Abstand zu `fb-13` | – | +96 | G6 | – |
 
 Abschnittshöhe: Zustand A 218 px (0,26 BH, wie geplant); mit Demos 315 px (0,37 BH). **Festlegung I-4:** Die 0,12 BH Mehrlänge mit Demos
 werden hingenommen; die Zeilen sind dann selbst der Beweis, und der Abschnitt steht weiter ganz in einem Bildschirm (auch bei 664).
-Nach dem Sprung auf `#demos` liegt die Haarlinie bei y ≈ 72 unter dem 56-px-Kopf (`scroll-margin-top: 96px` am h2).
+Nach dem Sprung auf `#demos` liegt die Haarlinie bei y = 72, also 16 px unter dem 56-px-Kopf (Festlegung K-15: `scroll-margin-top` am h2
+ohne Kapitelzeile 96 px, ab 1024 px unter dem 64-px-Kopf 104 px; seitenweit `scroll-padding-top` = Kopf + 16 = 72/80 px).
 
 **Verhältnisse:** Abstände 8 (innerhalb einer Gruppe) : 16 (h2 → Satz) : 24 (zwischen Gruppen) : 96 (zwischen Abschnitten). Zustand A:
 Text ≈ 38 %, Ring ≈ 19 %, frei ≈ 43 % der Abschnittsfläche, Bild 0 %. Mit Demos: Text ≈ 47 %, Miniaturen ≈ 5 %, frei ≈ 45 %; Bildanteil am
-Bildschirm ≈ 1,6 % (Stufe 1: 0–20 %). **Größenhierarchie:** drei Stufen wie in PE 10.4 C: h2 32 · Lesestufe 17/15 · Mikrostufe 13.
-Maßstabssprung 32 : 13 = 2,46 < 3, zulässig nur unter DG-E-1 C.
+Bildschirm ≈ 1,6 % (Stufe 1: 0–20 %). **Größenhierarchie:** drei Stufen wie in PE 10.4 C: h2 32 · Lesestufe 17/15 · Mikrostufe 13
+(K-21; nach Freigabe von DG-E-6 entfällt die Mikrostufe in A1, weil der Zeilensatz 15 wird, K-20). Maßstabssprung 32 : 13 = 2,46 < 3, zulässig nur unter DG-E-1 C.
 
 **Ebenen:** 0 Grund `#161616`, ohne Licht und Raster → 20 Miniaturen (nur mit Demos, Bildschicht, `alt=""`) → 30 Haarlinien, Text, Ring,
-Zeilen, Pfeilkreise → 40 Kopf beim Durchscrollen. Keine Verdeckung (Arbeitsansicht).
+Zeilen, Zeichen ↗ → 40 Kopf beim Durchscrollen. Keine Verdeckung (Arbeitsansicht).
 
 **Schreibtisch 1280 × 800** (12 Spalten à 64,67 px, Abstand 24, Spalte 1040 ab x = 120)
 
 | Element | Spalten, x | y | Maß |
 |---|---|---|---|
 | Haarlinie | 1–12, 120–1160 | 0 | 1040 × 1 |
-| h2 40 | 1–5, 120–539 | 32–74 | eine Zeile |
-| Satz 15 | 1–5 | 94–162 (Zustand A, drei Zeilen) bzw. 94–139 (mit Demos) | ≤ 419 breit |
-| Ring (Zustand A) | 1–5, ab 120 | 186–238 | eigene Breite ≈ 290 |
+| h2 40 (Haarlinie → 24 → h2 wie am Telefon, K-15) | 1–5, 120–539 | 24–66 | eine Zeile |
+| Satz 15 | 1–5 | 86–154 (Zustand A, drei Zeilen) bzw. 86–131 (mit Demos) | ≤ 419 breit |
+| Ring (Zustand A) | 1–5, ab 120 | 178–230 | eigene Breite ≈ 290 |
 | Spalten 6–12 in Zustand A | leer, Negativraum | – | – |
-| Zeilenliste (mit Demos) | 6–12, 563–1160 | 32–227 | 3 × 64; Miniatur 64 × 48, Pfeilkreis 32, Text 469 breit |
+| Zeilenliste (mit Demos) | 6–12, 563–1160 | 24–220 | 3 × 64; Miniatur 64 × 48, ↗ 16 im 24-px-Feld (K-31), Text 477 breit |
 
 Abstand 128 oben und unten. **Festlegung I-5:** Split 5 : 7 nur mit Demos (ZA 8.3.2 c), weil dann rechts ein Gegenstück steht; in Zustand A
 bliebe ein einzelner Ring in sieben Spalten verloren, er steht unter dem Satz.
@@ -111,38 +112,48 @@ bliebe ein einzelner Ring in sieben Spalten verloren, er steht unter dem Satz.
 **Technische Startwerte** (nur vorhandene Tokens aus `web/assets/gemeinsam.css:9-31`)
 
 ```css
-.vk-anhang { margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--line); }   /* ohne Zähler, E-AB-10 */
+.vk-anhang { margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--line); }   /* ohne Zähler, E-AB-10; Haarlinie → 24 → h2 auf allen Breiten (K-15) */
 .vk-anhang > h2 { margin: 0 0 16px; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; scroll-margin-top: 96px; }
 .vk-demos-satz { margin: 0; max-width: 46ch; font-size: 15px; line-height: 1.5; color: var(--text2); }
 .vk-demos-satz strong { color: var(--text); font-weight: 700; }
-.vk-demos-app { margin-top: 24px; white-space: normal; box-shadow: inset 0 0 0 2px var(--muted); outline: 2px solid transparent; outline-offset: -2px; }
-.vk-demos-app:active { transform: none; background: var(--surface3); }
+.btn.ghost.vk-demos-app { margin-top: 24px; white-space: normal; box-shadow: inset 0 0 0 2px var(--muted); outline: 2px solid transparent; outline-offset: -2px; }   /* K-1 */
+@media (hover: hover) { .btn.ghost.vk-demos-app:hover { box-shadow: inset 0 0 0 2px var(--text); } }
+.btn.ghost.vk-demos-app:active { transform: none; background: var(--surface2); }   /* Druck = Füllung --surface2 (K-1) */
+.btn.ghost.vk-demos-app:focus-visible { outline-color: var(--text); outline-offset: 2px; }   /* K-34 */
 .vk-demo-liste { list-style: none; margin: 24px 0 0; padding: 0; max-width: 560px; border-bottom: 1px solid var(--line); }
 .vk-demo-liste li { border-top: 1px solid var(--line); }
-.vk-demo-zeile { display: grid; grid-template-columns: 48px minmax(0, 1fr) 32px; column-gap: 12px; align-items: center; min-height: 56px;
+.vk-demo-zeile { display: grid; grid-template-columns: 48px minmax(0, 1fr) 24px; column-gap: 12px; align-items: center; min-height: 56px;
   padding: 6px 0; font-size: 17px; color: var(--text); text-decoration: none; border-radius: var(--r2); transition: background var(--t1) var(--e-out); }
-.vk-demo-zeile.ohne-bild { grid-template-columns: minmax(0, 1fr) 32px; }
+.vk-demo-zeile.ohne-bild { grid-template-columns: minmax(0, 1fr) 24px; }
 .vk-demo-zeile img { width: 48px; height: 36px; object-fit: cover; object-position: top; border-radius: var(--r2); box-shadow: 0 0 0 1px var(--line2); }
-.vk-demo-text b { display: block; font-size: 17px; line-height: 1.3; }
-.vk-demo-text span { display: block; margin-top: 2px; font-size: 13px; line-height: 1.3; color: var(--muted); }
-.vk-demo-pfeil { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; color: var(--text2);
-  box-shadow: inset 0 0 0 1px var(--muted); transition: box-shadow var(--t1) var(--e-out), color var(--t1) var(--e-out); }
-@media (hover: hover) { .vk-demo-zeile:hover .vk-demo-pfeil { box-shadow: inset 0 0 0 1px var(--text); color: var(--text); } }
+.vk-demo-text b { display: block; font-size: 17px; line-height: 22px; font-weight: 700; }   /* K-21 */
+.vk-demo-text span { display: block; margin-top: 2px; font-size: 13px; line-height: 1.3; color: var(--muted); }   /* nach Freigabe DG-E-6: 15px/22px, margin-top 0 (K-20) */
+.vk-demo-pfeil { width: 24px; height: 24px; display: grid; place-items: center; color: var(--muted); transition: color var(--t1) var(--e-out); }   /* ↗ 16 px ohne Kreis (K-31) */
+@media (hover: hover) { .vk-demo-zeile:hover .vk-demo-pfeil { color: var(--text); } }
 .vk-demo-zeile:active { background: var(--surface); }
-.vk-demo-zeile:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
-@media (min-width: 761px) { .vk-anhang { margin-top: 128px; padding-top: 32px; }
-  .vk-anhang > h2 { font-size: 40px; margin-bottom: 20px; scroll-margin-top: 112px; } }
+.vk-demo-zeile:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }   /* Zeile über volle Listenbreite (K-34) */
+@media (min-width: 761px) { .vk-anhang { margin-top: 128px; }
+  .vk-anhang > h2 { font-size: 40px; margin-bottom: 20px; } }
 @media (min-width: 1024px) {
+  .vk-anhang > h2 { scroll-margin-top: 104px; }   /* Kopf 64 + 16 + 24 (K-15) */
   .vk-demos-teil { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; }
   .vk-demos-teil > h2, .vk-demos-satz, .vk-demos-app { grid-column: 1 / span 5; justify-self: start; }
   .vk-demo-liste { grid-column: 6 / span 7; grid-row: 1 / span 2; margin-top: 0; max-width: none; }
-  .vk-demo-zeile { grid-template-columns: 64px minmax(0, 1fr) 32px; column-gap: 16px; min-height: 64px; }
+  .vk-demo-zeile { grid-template-columns: 64px minmax(0, 1fr) 24px; column-gap: 16px; min-height: 64px; }
   .vk-demo-zeile img { width: 64px; height: 48px; } }
 ```
-Dazu `.vk-extern` (16 × 16, `stroke: currentColor`, 1,75 px, ohne Füllung) und `.vk-sr` als Kopie von `.p-sr`.
+Dazu `.vk-extern` (16 × 16, `stroke: currentColor`, 1,75 px, ohne Füllung; im Ring und in `.vk-demo-pfeil`) und `.vk-sr` als Kopie von `.p-sr`.
 
-Begründungen: Ringkontur `--muted` (≈ 5,8 : 1) statt `--line2` (≈ 1,6 : 1), weil sie die einzige Grenze des Knopfs ist (DG-E-10; SG 10.9).
-Radius 12 an der Miniatur ist der kleinste Website-Radius (DG-AB-8). Miniatur 48 × 36 statt 48 × 30 (**Festlegung I-6**): Das Beispielbild ist
+Begründungen: Ringkontur 2 px `--muted` (≈ 5,8 : 1) statt `--line2` (≈ 1,6 : 1), Hover → `--text`, Druck Füllung `--surface2`, weil die
+Kontur die einzige Grenze des Knopfs ist (Festlegung K-1; DG-E-10; SG 10.9; Abweichung 4 in D). Selektor `.btn.ghost.vk-demos-app`, weil
+sonst `.btn.ghost` (`gemeinsam.css:58`, höhere Spezifität) die Kontur auf `--line2` zurücksetzt, `.btn:active` (`:65`) skaliert und die
+transparente Ersatzkontur für `forced-colors` den Fokusring aus `:38` verdeckte; der Fokus steht deshalb ausdrücklich 2 px außen (K-34).
+Die Zeile behält −2 px, weil sie über die volle Listenbreite an die Haarlinien stößt (Ausnahme „Zeile über volle Breite“ in K-34).
+Radius 12 an der Miniatur ist der kleinste Website-Radius (DG-AB-8; Festlegung K-22: voll · 24 · 18 · 12 auf allen Breiten, 8 px bleibt
+der App). Zeilenzeichen ↗ 16 px ohne Kreis (Festlegung K-31): Der Pfeil im Kreis bleibt das Zeichen der Cream; ↗ in `--muted` wie das
+„+“ der Fragenzeilen in `fb-13`. Zeilensatz 13 px bleibt bis zur Freigabe von DG-E-6 zulässig; danach in einem Schritt mit allen
+Abschnitten 15/22 ohne Abstand darüber (Festlegung K-20), die Zeile bleibt 56 px (6 + 22 + 22 + 6), bricht ein Satz um, wächst sie über
+`min-height`. Miniatur 48 × 36 statt 48 × 30 (**Festlegung I-6**): Das Beispielbild ist
 4 : 3 (PE 10.4 C); ein 16 : 10-Ausschnitt schnitte Kopf und Namen der Startansicht ab. Zeilen 56 px wie in `fb-15` (Fragen: 52), weil zwei
 Textzeilen und die Miniatur hineinpassen müssen. `font-size: 17px` an der Zeile, damit der unsichtbare Text keine fremde Größe
 erbt (Prüfsuite misst alle Schriftgrößen, SKILL:70).
@@ -154,23 +165,24 @@ erbt (Prüfsuite misst alle Schriftgrößen, SKILL:70).
 | Tiefe, Z-Achsen | zwei bzw. drei Ebenen (Grund, Miniaturen, Bedienschicht) | 0–1 | Ruhe nach den Kacheln von `fb-11` (DNA-B B.1 Regel 1) |
 | Material, Transparenz | opak, matt; kein Glas (kein Bild dahinter, DR 5) | 0 | Bedienschicht ohne Eigenmaterial (B.1 Regel 3) |
 | Licht, Schatten | keines, keine Lichtkante (DG-AB-1) | 0 | Licht bleibt V1 und 02 vorbehalten (Dosierregel 3) |
-| Formen | Pille, Kreis, Radius 12 (Miniatur); Formfamilie Vollrundung | 1 | wie alle Knöpfe der Seite (B.1 Regel 8) |
+| Formen | Pille (Ring), Radius 12 (Miniatur, Druckfläche und Fokus der Zeile; K-22); kein Kreis (K-31); Formfamilie Vollrundung | 1 | wie alle Knöpfe der Seite (B.1 Regel 8) |
 | 3D-Objekte, Perspektive | keine, frontal | 0 | – |
 | Bildintegration | nur mit Demos: echte Startansichten als Miniatur, gleiche Bilder wie die Karten in 04 | 1 | Wiedererkennen der Markenstufe; echtes Material statt Symbol (SKILL:41) |
 | Oberflächendetails | Haarlinien 1 px `--line` als Zeilenordnung (DG-AB-19), Pfeil ↗ als Mikroschicht-Signal | 1 | präzise wie ein Aufmaß, ohne Fläche |
 | Animation | keine; nur Zustände 150 ms | 0 | Stufe 1; E-2 |
-| Typografie | Bühnenstimme nur im h2; Lesetext 15; Zeilennamen 17/700; Mikrostufe 13 | 1 | Hierarchie über Gewicht und Tonwert (DG-E-1 C) |
+| Typografie | Bühnenstimme nur im h2; Lesetext 15; Zeilennamen 17/700 (K-21); Mikrostufe 13, nach Freigabe von DG-E-6 Zeilensatz 15 (K-20) | 1 | Hierarchie über Gewicht und Tonwert (DG-E-1 C) |
 | Überlagerungen | keine; kein Rahmenbruch | 0 | der eine Rahmenbruch bleibt V1 → V2 |
-| Interaktive Effekte | Kontur und Füllung als Zustand, Fokus 2 px | 1 | Rang ohne Bewegung der Bedienschicht (SG 10.10 Nr. 14) |
+| Interaktive Effekte | Kontur (Ring) bzw. Farbe des ↗ (Zeile) als Hover, Füllung als Druck, Fokus 2 px (K-1, K-34) | 1 | Rang ohne Bewegung der Bedienschicht (SG 10.10 Nr. 14) |
 
-Signature-Effekte: keine, weder informierend noch inszenierend (ZA 8.3.11: `fb-11` bis `fb-15` ≤ 2, ohne Signature). Der Pfeil im Kreis ist
-der variable Baustein B.3.7 („Kreis-Button für Einzelaktionen, etwa ↗“), kein Effekt.
+Signature-Effekte: keine, weder informierend noch inszenierend (ZA 8.3.11: `fb-11` bis `fb-15` ≤ 2, ohne Signature). Den variablen
+Baustein B.3.7 („Kreis-Button für Einzelaktionen, etwa ↗“) nutzt A1 nicht: Nach Festlegung K-31 bleibt der Pfeil im Kreis das Zeichen der
+Cream, die Zeilen tragen ↗ 16 px ohne Kreis.
 
 **Bewusst weggelassen:** Karten in Paketfarbe mit grünem Akzentstrich (`web/assets/verkauf.css:482-484`); Auftritt beim Scrollen
 (**Festlegung I-7**: Wer über `#demos` aus Lesezeichen oder alten Links der Fachartikel springt, sähe sonst 320 ms eine leere Stelle);
 eingebettete Live-Vorschau (CSP `frame-ancestors 'none'`, dazu Ladelast einer ganzen App); Bildschirmaufnahme der App für Hauseigentümer
 (zeigte Preis und Paywall als Werbung für den falschen Weg); Messraster (nur V4/V5); Cream und Pfeilkreis `.pf` (gehören der einen
-Hauptaktion je Bildschirm, SKILL:71); Preise in den Zeilen.
+Hauptaktion je Bildschirm, SKILL:71), auch kein Kontur-Kreis um ↗ (K-31); Preise in den Zeilen.
 
 **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig:**
 1. GEST:447 „Demos als Karten in Paketfarbe (Essential dunkel, Plus und Signature mit Akzentstrich)“ → Zeilen mit Haarlinien ohne
@@ -179,6 +191,12 @@ Hauptaktion je Bildschirm, SKILL:71); Preise in den Zeilen.
 2. GEST:450 Nummern an jeder Haarlinie → Anhang ohne Nummer (E-AB-10).
 3. GEST:39 und :448 Erscheinen mit Versatz → kein Auftritt (DG-AB-2 und Festlegung I-7); Druck ohne `scale(.98)` (`gemeinsam.css:65`;
    DNA-B B.3.7 „Zerstört durch Skalieren beim Drücken“).
+4. GEST:24 („`--muted` nur für Labels und Nebenzeilen“) und `gemeinsam.css:58` (Ghost-Rand `--line2`) → Ring-Kontur 2 px `--muted`,
+   Hover `--text`, Druck `--surface2` (Festlegung K-1; DS-AB-10). Grund: Die Kontur ist die einzige Grenze des Knopfs und braucht 3 : 1
+   (WCAG 1.4.11); `--line2` erreicht ≈ 1,6 : 1.
+5. GEST:26 („nichts unter 13 px“), :449 („13 Label“) und :452 (Zusatzzeile in 13 px), die 13 px auch für Sätze zulassen → Satz der
+   Demo-Zeilen 15 px nach Freigabe von DG-E-6 (Festlegung K-20;
+   DS-AB-2). Grund: 13 px bleibt der Technikstimme; bis zur Freigabe gilt GEST, die Umstellung erfolgt in einem Schritt für alle Abschnitte.
 
 ## E. Visual Attention Architecture
 
@@ -187,9 +205,9 @@ Erwartete, nicht gemessene Aufmerksamkeit; Prüfung im Blinzeltest bei 390 × 84
 - **Bildschirm mit A1 in der Mitte (Haarlinie y ≈ 300):** oben das Ende der Kundenschutz-Kacheln mit grünen Haken, unten der Kopf von A2.
   Erwartete Folge Zustand A: (1) h2 als größte Schrift mit dem grünen „Demos“ → (2) der fette Satz „Unter Ihrer Domain: Ihr Name, keine
   Preise.“ als einziger heller Fettsatz → (3) Ring mit ↗ → (4) Kopf-Ring „Paket anfragen“ oben rechts. Mit Demos: (1) h2 → (2) die drei
-  Miniaturen als einzige Bildreize → (3) Paketnamen → (4) Pfeilkreise.
+  Miniaturen als einzige Bildreize → (3) Paketnamen → (4) Zeichen ↗.
 - **Primärer Fokus:** das h2; **sekundär:** Ring bzw. erste Zeile. Kein Held: A1 soll nicht stärker wirken als der Hauptweg.
-- **Kontraste:** h2 ≈ 16 : 1, Grün ≈ 10,5 : 1, Satz `--text2` ≈ 10,8 : 1, Zeilensatz `--muted` ≈ 5,8 : 1, Ringkontur ≈ 5,8 : 1, Haarlinie
+- **Kontraste:** h2 ≈ 16 : 1, Grün ≈ 10,5 : 1, Satz `--text2` ≈ 10,8 : 1, Zeilensatz `--muted` ≈ 5,8 : 1, Zeichen ↗ `--muted` ≈ 5,8 : 1, Ringkontur ≈ 5,8 : 1 (K-1), Haarlinie
   ≈ 1,3 : 1 (Ordnung, kein Bedienelement).
 - **Gewicht der Handlung:** Ring ≈ 290 × 52 ≈ 4,6 % des Bildschirms, ungefüllt; kein Cream im Abschnitt. Der Kopf-Ring (≈ 2 %) bleibt der
   dauerhafte Weg zur Anfrage (ZA N5).
@@ -204,9 +222,9 @@ Erwartete, nicht gemessene Aufmerksamkeit; Prüfung im Blinzeltest bei 390 × 84
 |---|---|---|---|---|
 | Scrollen | nativ, kein Auftritt, keine Kopplung | – | Stufe 1; Festlegung I-7 | gleich |
 | Sprung auf `#demos` (Lesezeichen, alter Link) | Haarlinie unter dem Kopf; in der Einbettung ohne Änderung von `#fensterbauer` (GEST:193) | wie die Sprungmarken in `rh-02` | ZA N12 | ohne weiches Scrollen |
-| Hover (`hover: hover`) | Ring: Kontur `--muted` → `--text`; Zeile: Pfeilkreis und ↗ → `--text` | 150 ms (`--t1`), `--e-out` | ein Kanal (DG 2.2.10); SG 10.9 Zustand 120–200 ms | gleich |
-| Druck | Füllung `--surface3` (Ring) bzw. `--surface` (Zeile), keine Skalierung | 150 ms | DNA-B B.3.7 | gleich |
-| Fokus (Tastatur) | 2-px-Kontur `--text`, am Ring außen 2 px, an der Zeile innen (−2 px), Radius 12 | sofort | SG 10.10 Nr. 17; Haarlinien bleiben sichtbar | gleich |
+| Hover (`hover: hover`) | Ring: Kontur `--muted` → `--text` (K-1); Zeile: ↗ `--muted` → `--text` (K-31) | 150 ms (`--t1`), `--e-out` | ein Kanal (DG 2.2.10); SG 10.9 Zustand 120–200 ms | gleich |
+| Druck | Füllung `--surface2` (Ring, K-1) bzw. `--surface` (Zeile), keine Skalierung | 150 ms | DNA-B B.3.7 | gleich |
+| Fokus (Tastatur) | `outline` 2 px `--text`; am Ring Abstand 2 px außen, formfolgend als Pille; an der Zeile −2 px innen, Radius 12, weil sie über die volle Listenbreite an die Haarlinien stößt (K-34) | sofort | SG 10.10 Nr. 17; Haarlinien bleiben sichtbar, Fokus nie verdeckt | gleich |
 | Klick, Enter | neuer Tab (`target="_blank" rel="noopener"`); die Seite bleibt unverändert an ihrer Stelle | – | „ohne den Weg zu verlieren“ (ZA 8.2.7) [H] | gleich |
 
 Keine räumliche Transformation, keine Richtung, keine Feder: Der Abschnitt ist bewusst die ruhige Stelle zwischen Kundenschutz und Abschluss.
@@ -216,15 +234,16 @@ Die von SKILL:43 verlangte Tiefe und Physik tragen V1, V2, 02 und 03.
 
 **Telefon 390 × 844 (zuerst):** wie in C; eine Spalte, Abschnitt ganz in einem Bildschirm, Ring und Zeilen im Daumenbereich der unteren
 Bildschirmhälfte, sobald die Haarlinie die Mitte passiert. **390 × 664:** passt (Abschnitt ≤ 315 von 608 px Inhaltshöhe).
-**360:** Satz drei bis vier Zeilen, nichts gekürzt; Zeilentext 228 px breit, der Signature-Satz darf zweizeilig werden, die Zeile wächst
-über 56 px (`min-height`). **320:** kein Querscrollen; Ringtext bricht um (`white-space: normal`). **640–1023:** Aufbau wie am Telefon,
-h2 ab 761 px 40; Satz ≤ 46 ch, Zeilenliste ≤ 560 px, damit Name und Pfeil nicht 700 px auseinanderliegen.
+**360:** Satz drei bis vier Zeilen, nichts gekürzt; Zeilentext 232 px breit, der Signature-Satz darf zweizeilig werden, die Zeile wächst
+über 56 px (`min-height`); mit 15 px nach K-20 kann das schon bei 390 geschehen (Zeile ≈ 78 px, Abschnitt ≈ 337 px, weiter in einem
+Bildschirm). **320:** kein Querscrollen; Ringtext bricht um (`white-space: normal`). **640–1023:** Aufbau wie am Telefon,
+Seitenrand 24 px (K-13), h2 ab 761 px 40; Satz ≤ 46 ch, Zeilenliste ≤ 560 px, damit Name und Pfeil nicht 700 px auseinanderliegen.
 
 **Schreibtisch 1280:** wie in C; Zustand A nur in den Spalten 1–5, mit Demos Split 5 : 7. Nichts wird vergrößert (SKILL:28): Schrift wie am
 Telefon außer h2 40, Miniatur 64 × 48.
 
-**Schreibtisch 1024:** Inhalt 992 px (x 16–1008), Spalte 60,7 px (wie `fb-03`). Spalten 1–5 = 399 px (x 16–415), Spalten 6–12 = 569 px
-(x 439–1008); Zeilentext 441 px, alle Sätze einzeilig. Zustand A: Satz drei Zeilen, Ring darunter.
+**Schreibtisch 1024:** Seitenrand 32 px, Inhalt 960 px (x 32–992), 12 Spalten à 58 px mit 24 px Rinne, wie der Kopf in `rh-01`
+(Festlegung K-13). Spalten 1–5 = 386 px (x 32–418), Spalten 6–12 = 550 px (x 442–992); Zeilentext 430 px, alle Sätze einzeilig. Zustand A: Satz drei Zeilen, Ring darunter.
 
 ## H. Technische Umsetzung
 
@@ -241,7 +260,8 @@ Telefon außer h2 40, Miniatur 64 × 48.
   `href="/app/" target="_blank" rel="noopener"`, darin Text, `svg.vk-extern` (`aria-hidden`, Pfad `M8 16 16 8M9 8h7v7`) und
   `span.vk-sr` „ öffnen, neuer Tab“. Ziel `/app/` (Startbild), nicht `#ausmessen`: Eine Messung beginnt erst, wenn der Besucher sie startet.
   Mit Demos: `ul.vk-demo-liste` mit drei `a.vk-demo-zeile` (`target="_blank" rel="noopener"`), je `img` (48 × 36, `alt=""`,
-  `loading="lazy"`), `span.vk-demo-text` mit `b` und `span`, `span.vk-demo-pfeil` (`aria-hidden`) und `span.vk-sr` „, Demo, neuer Tab“.
+  `loading="lazy"`), `span.vk-demo-text` mit `b` und `span`, `span.vk-demo-pfeil` (`aria-hidden`, 24-px-Feld ohne Kreis mit `svg.vk-extern` 16 × 16, K-31) und
+  `span.vk-sr` „, Demo, neuer Tab“.
 - **Assets:** nur mit Demos: drei Rasterbilder `web/bilder/demo-essential.webp`, `demo-plus.webp`, `demo-signature.webp`, je 192 × 144 px
   (4 : 3; reicht für 64 × 48 bei Pixeldichte 3), WebP, ≤ 8 KB, ohne Freistellung, ohne Text außer dem Bildinhalt. Quelle: per Skript
   verkleinert aus der Aufnahme des Beispielbilds je Markenstufe (PE 10.4 C, 1280 × 960; Playwright aus `/opt/node-tools`), oder aus der

@@ -73,32 +73,35 @@ mittige Motiv). Asymmetrisch: linksbündiger Text, zentriertes Objekt.
 
 | y | Element | Breite · x | Maß |
 |---|---|---|---|
-| 0 | Haarlinie 1 px `--line` | 358 · 16–374 | 96 px Abstand zu V2 davor |
-| 16–33 | Kapitelzeile 13 px | links | Abstand 16 |
-| 45–115 | h2 32 px, zwei Zeilen („Die Idee: der Fenster-“ / „Konfigurator Ihrer Wahl“) | 358 | Abstand 12; bei 360 px Breite drei Zeilen zulässig |
-| 127–178 | Lead 17 px, zwei Zeilen | 358 | Abstand 12 |
-| 202–622 | Gerät 300 × 420 | 45–345 (Achse) | Abstand 24; ≈ 38 % der Bildschirmfläche |
-| 630–674 | Textziel, Trefferfläche 358 × 44 | 16–374 | Abstand 8 |
-| 698–924 | drei Punkte, 90 + 68 + 68 px | 358 | Abstand 24 |
+| 0 | Haarlinie 1 px `--line` | 358 · 16–374 | 96 px Abstand zu V2 davor (K-14: vor jeder Haarlinie, die eine h2 eröffnet, auch nach dem Band; Rückfall [H] 48 px nach Telefon-Video, DS-H-4) |
+| 16–32 | Kapitelzeile 13/16 px | links | Abstand 16 |
+| 44–112 | h2 32/34 px, zwei Zeilen („Die Idee: der Fenster-“ / „Konfigurator Ihrer Wahl“) | 358 | Abstand 12; bei 360 px Breite drei Zeilen zulässig |
+| 124–175 | Lead 17 px, zwei Zeilen | 358 | Abstand 12 |
+| 199–619 | Gerät 300 × 420 | 45–345 (Achse) | Abstand 24; ≈ 38 % der Bildschirmfläche |
+| 627–671 | Textziel, Trefferfläche 358 × 44 | 16–374 | Abstand 8 |
+| 695–921 | drei Punkte, 90 + 68 + 68 px | 358 | Abstand 24 |
 
-Gesamthöhe ≈ 924 px (1,09 BH; Z plant 1,05, Differenz ≈ 30 px; die Pakete bleiben bei 844 px auf Bildschirm 5). Bei offenem Feld
-ersetzt die Feldgruppe (Beschriftung 20 + 8 + Feld 52 + 8 + Hinweis 18 = 106 px) das Textziel, die Punkte rücken um 62 px.
+Gesamthöhe ≈ 921 px (1,09 BH; Z plant 1,05, Differenz ≈ 35 px; die Pakete bleiben bei 844 px auf Bildschirm 5). Bei offenem Feld
+ersetzt die Feldgruppe (Beschriftung 20 + 8 + Feld 52 + 8 + Hinweis 18 = 106 px; nach Freigabe von DG-E-6 Hinweis 21, also 109 px) das
+Textziel, die Punkte rücken um 62 px (danach 65 px).
 
 **C.3 Das Gerät (Bildschicht, Z 20)**
 
 - **Körper:** 300 px breit, sichtbar 420 px hoch: der obere Teil eines Telefons, unten über 48 px in den Grund ausgeblendet
   (`mask-image`, gerichteter Auslauf nach SG 10.9). Rand 10 px `--surface`, Außenradius 44, Bildschirmradius 34 (Außen − Innenabstand,
   SG 10.5). Keine Kamera-Insel, keine Statusleiste: abstrahiert, damit die Startansicht trägt und kein Herstellergerät zitiert wird.
+  Dieser Gerätebaustein gilt für die ganze Website (K-23): 02 und der Abschluss setzen ihn proportional verkleinert ein; Lichtkante nach
+  K-24 (C.6), kein Schatten.
 - **Bildschirm** 280 × 410, Grund `--ground`, Inhalt mit 16 px Innenrand (Bildschirmkoordinaten):
 
 | y | Inhalt | Maß, Schrift |
 |---|---|---|
-| 10–38 | Adresszeile als Pille `--surface2`, Schloss 10 px, „ihr-name-fenster.de“ 13 px `--text2`, „ · Beispiel“ 13 px `--muted` | 248 × 28 |
-| 52–88 | Absender: Zeichen 32 × 32 (Radius 8, Cream, Initiale „B“ 15 px 800 `--on-primary`); daneben „Fensterplaner von“ 13 px 700 `--muted`, darunter „Fensterbau Brandt“ 15 px 800 `--text`, einzeilig mit Auslassungspunkten | Text ab x 58 |
+| 10–38 | Adresszeile als Pille `--surface2`, Schloss 10 px, „ihr-name-fenster.de“ 13 px `--text2`, „ · Beispiel“ 13 px `--muted`; einzige Kennzeichnung des Geräts (K-36 Form b), kein Etikett „BEISPIEL“ | 248 × 28 |
+| 52–88 | Absender: Zeichen 32 × 32 (Radius 8 als Bildinhalt, zählt nach K-22 nicht; Cream, Initiale „B“ 15 px 800 `--on-primary`); daneben „Fensterplaner von“ 13 px 700 `--muted`, darunter „Fensterbau Brandt“ 15 px 800 `--text`, einzeilig mit Auslassungspunkten | Text ab x 58 |
 | 100–240 | Standardbild `app-start` 16 : 9, Radius 12, unteres Drittel in den Grund verlaufend wie `.ein-bild` | 248 × 140 |
 | 254–310 | „Ihre neuen Fenster, Ihr Angebot.“ 24 px 800, grün „Angebot“, zwei Zeilen | 248 |
 | 324–360 | Pille Cream „Erstes Fenster ausmessen“ 15 px 700 mit Pfeilkreis | 248 × 36 |
-| 370–406 | Ring-Pille „So funktioniert es“, liegt im Auslauf | 248 × 36 |
+| 370–406 | Ring-Pille „So funktioniert es“, innere Kontur 2 px wie der Ghost-Knopf des Produkts: `--muted` nach K-1 (bis zur Freigabe von DS-AB-10 `--line2`, `gemeinsam.css:58`), liegt im Auslauf | 248 × 36 |
 
 Die Miniatur ist verdichtet: ohne Kicker, Begrüßungstext und Zeitzeile der echten Seite (H-E9). Ihre Knöpfe sind 36 px hoch und damit
 sichtbar kleiner als jedes echte Ziel (≥ 44 px). Sie tragen eigene Klassen, nie `.btn.primary`, weil `portal.js:554` jede sichtbare
@@ -115,15 +118,15 @@ kein Lichtraum, kein Überstand über die Kapitelkante. Die Bedienschicht berüh
 
 | Wert | Start | Begründung |
 |---|---|---|
-| Abschnittsabstand | 96 px Telefon, 128 px Schreibtisch | G6 |
-| Kapitelzeile | 13/17 px, 600, Laufweite .12em, Ziffern tabellarisch, `--accent`, `aria-hidden` | wie `.vk-teil::before`; SG Mikrolabel +0,06–0,12 em |
-| h2 | 32/35 px (40/44 ab 761 px), 800, −.03em, `--text`; Markup genau `<h2 id="die-idee">` ohne weitere Attribute | Regex der Prüfsuite (29.mjs) |
+| Abschnittsabstand | 96 px Telefon, 128 px Schreibtisch, auch nach dem Band V2 | G6; K-14 |
+| Kapitelzeile | Technikstimme Versal 13/16 px, 600, Laufweite +0,12 em, `tabular-nums`; Nummer „01“ `--accent`, Punkt und Wort `--muted`; `aria-hidden`, weil die Nummer im Menü steht | K-16 (Vorlage `.vk-teil::before`, dort heute ganz grün); Grün nur an der Nummer (GEST:24) |
+| h2 | 32/34 px (40/42 ab 1024 px), 800, −.03em, `--text`; Markup genau `<h2 id="die-idee">` ohne weitere Attribute | Regex der Prüfsuite (29.mjs); Zeilenhöhe K-18, Umbruch K-11 |
 | Lead | 17/25,5 px, 500, `--text2`, `max-width: 60ch` | Lesestapel ≤ 3 Zeilen (G2) |
 | Textziel | `<button>`, 17 px 700 `--text`, Unterstreichung 1 px `--muted`, Versatz 6 px, Höhe 44 | Ring wäre eine zweite Pille neben dem Gerät; Textziel bleibt leise (G2) |
-| Feld | 358 × 52, 17 px, Radius 12, Grund `--ground`, Kontur 2 px `--muted` | 3:1 als einzige Grenze (DG-E-10); 17 px verhindert Zoom unter iOS |
-| Hinweis | 13/18 px `--muted` (≈ 5,9 : 1) | Z; bei Freigabe von DG-E-6 15 px |
+| Feld | 358 × 52, Schrift 17/24 500, Innenabstand 0 16, Radius 12, Grund `--ground`, `border: 1px solid var(--muted)`; kein Fehlerzustand (jede Eingabe gilt, leer = „Fensterbau Brandt“) | K-35: `--muted` ≥ 3 : 1 als einzige Grenze (DG-E-10), `border` bleibt in `forced-colors`; 17 px verhindert Zoom unter iOS |
+| Hinweis | 13/18 px `--muted` (≈ 5,9 : 1) bis zur Freigabe von DG-E-6, danach 15/21 px | K-20: ein Satz, also 15 px; Umstellung in einem Schritt mit allen Abschnitten (DS-AB-2) |
 | Punkte | `ul`, je Zeile 12 px oben und unten, Haarlinie 1 px `--line` zwischen den Zeilen und darüber; 15/22 px, Anlauf 700 `--text`, Rest 500 `--text2` | Haarlinien statt Kacheln oder Haken: präzise wie ein Aufmaß, keine Baukasten-Karten (DG T3 „nicht“) |
-| Lichtkante Gerät | 1 px, oben `rgba(243,242,238,.24)`, seitlich `.14`, unten keine | SG `--kante-licht`/`--kante-alpha`; Licht von oben (DG-E-8) |
+| Lichtkante Gerät | 1 px rundum `--kante-alpha` (`rgb(243 242 238 / .14)`), Ober- und rechte Kante `--kante-licht` (`.24`); unten läuft sie mit der Maske aus | K-24: Haus-Token `--licht-x: -0.6; --licht-y: 0.8`, Licht von oben rechts (DG-E-8) |
 
 ## D. Anwendung der Design-DNA
 
@@ -131,7 +134,7 @@ kein Lichtraum, kein Überstand über die Kapitelkante. Die Bedienschicht berüh
 |---|---|---|---|
 | Tiefe, Z-Achse | drei Ebenen; Tiefe über den Auslauf des Geräts in den Grund (Bildoptik statt Verdeckung, DNA Nr. 2); am Schreibtisch Verdeckung Telefon vor Browser | 1 | Ruhe nach der Leiste |
 | Material, Transparenz | Gehäuse matt `--surface`; kein Glas (nur V1 und Umschalter) | 1 | Material liegt im Bildschirminhalt |
-| Licht, Schatten | 1-px-Lichtkante; Bildschirm als einzige Helligkeit; kein Lichthof, kein Schatten | 1 | Lichtbudget bleibt bei V1 und 02 |
+| Licht, Schatten | 1-px-Lichtkante nach K-24 (oben rechts); Bildschirm als einzige Helligkeit; kein Lichthof, kein Schatten | 1 | Lichtbudget bleibt bei V1 und 02 |
 | Formen | Gehäuse Radius 44/34 (Motiv, außerhalb der UI-Radien); UI Pillen und Radius 12 | – | ein Körper, eine Formfamilie |
 | 3D-Objekte, Perspektive | keine; frontal, ohne den −14°-Eintritt aus Konzept D | 0 | Domain lesbar; Gegensatz zur Fototiefe in V1 |
 | Bildintegration | echte Startansicht als HTML-Miniatur mit echtem Standardbild | 2 | das Produkt beweist (SKILL:41) |
@@ -151,8 +154,10 @@ Cream-Fläche. Rückfall, falls der Blinzeltest zwei Flecken zeigt: Bildschirmin
 
 **Abweichungen von bestehender Regel – Freigabe durch den Inhaber nötig:** E-AB-8 (Gerät und drei Punkte statt vier Karten, GEST:447,
 :450), E-AB-2 (Namensfeld, GEST:455), E-AB-10 (Kapitelzeile mit Kapitelwort statt Nummer), DG-AB-1 (Gerät ohne Schatten; DR Baustein 8
-sieht „weicher Bodenschatten“ vor), DG-AB-2 (Bedienschicht ohne 24-px-Auftritt), Puls-Ring am Miniaturknopf entfällt (GEST:448; Schleife
-über 5 s, DG-AB-5).
+sieht „weicher Bodenschatten“ vor), DG-AB-2 und DS-AB-8 (Bedienschicht ohne Auftritt, auch ohne Deckkraft-Einblenden; K-6), Puls-Ring am
+Miniaturknopf entfällt (GEST:448; Schleife über 5 s, DG-AB-5), DS-AB-10 (Kontur von Ring und Feld `--muted` statt `--line2`, auch am Ring
+der Miniatur; K-1, K-35), DS-AB-6 (eine Spalte bis 1023 statt bis 760 px, GEST:462; K-11), DS-AB-2 (Hinweis am Feld 15 statt 13 px,
+GEST:26; K-20).
 
 ## E. Visual Attention Architecture (erwartet, nicht gemessen)
 
@@ -161,19 +166,20 @@ sieht „weicher Bodenschatten“ vor), DG-AB-2 (Bedienschicht ohne 24-px-Auftri
 - **Sekundärer Fokus:** h2, danach die Adresszeile „ihr-name-fenster.de“.
 - **Erwartete Reihenfolge:** h2 → Bildschirm geht an → Adresszeile → Absender mit Namen → Textziel → Punkte. Nach dem Sprung aus V1
   steht die Haarlinie bei y ≈ 72 (`scroll-margin-top: 116px` am h2): bei 844 px Höhe sind Kopf, Gerät und Textziel im Bild, bei 664 px
-  Kopf und ≈ 93 % des Geräts.
+  Kopf und ≈ 94 % des Geräts.
 - **Kontraste:** Bildschirminhalt bis ≈ 16 : 1 (Cream auf Grund), Lesetext ≈ 11 : 1 (`--text2`), Gehäuse nur ≈ 1,1 : 1, damit der Rand
   nicht mit dem Inhalt konkurriert.
 - **CTA:** keine Hauptaktion; das Textziel ist leise, linksbündig im Daumenbereich. Der Kaufweg liegt im Kopf-Ring.
 - **Ablenkungen:** Der Miniaturknopf wirkt bedienbar (Gegenmittel: 36 statt 52 px, keine Trefferfläche); das Waschbären-Bild könnte als
   Motiv für Hauseigentümer gelesen werden (Gegenmittel: der Lead direkt darüber); das grüne „Angebot“ im Gerät (24 gegen 32 px).
-- **Übergang zu 02:** Nach 96 px folgt die Haarlinie von 02, dort dasselbe Gerät auf derselben Achse, oben angeschnitten: 01 zeigt das
+- **Übergang zu 02:** Nach 96 px folgt die Haarlinie von 02, dort dasselbe Gerät (Gerätebaustein K-23) auf derselben Achse, oben angeschnitten: 01 zeigt das
   obere Ende, 02 das untere. Die neue Kadrierung trägt die Fortsetzung.
 
 ## F. Interaktions- und Bewegungsverhalten
 
 | Ereignis | Verhalten | Dauer, Kurve | Begründung |
 |---|---|---|---|
+| Abschnitt kommt ins Bild | Bedienschicht (Kapitelzeile, h2, Lead, Textziel, Punkte) steht ab dem ersten Bild, kein Einblenden | – | K-6; Einblenden nur für Inhalt, der nach einer Eingabe neu erscheint (Feldgruppe, Name) |
 | Gerät erreicht ≥ 60 % Sichtbarkeit und V2 ruht | Bildschirminhalt Deckkraft 0 → 1 und Maßstab 1,015 → 1 (nur Inhalt, Bildschicht); einmal je Seitenaufruf | 600 ms, `--e-out` | Motiv-Auftritt (DG 2.4.1); Bildschicht darf skalieren |
 | V2 läuft noch aus | warten auf Ereignis `vk:leiste-ruht` an der Wurzel (von `fb-02` auszulösen), höchstens 1,2 s | – | ein bewegter Träger (E-2) |
 | Scrollen | keine Kopplung, keine Parallaxe, kein Anheften am Telefon | – | E-8, SG 10.7 Mobil |
@@ -181,7 +187,7 @@ sieht „weicher Bodenschatten“ vor), DG-AB-2 (Bedienschicht ohne 24-px-Auftri
 | Tippen im Feld | Miniatur ändert sich nicht | – | kein Flackern je Taste |
 | „Fertig“ (`enterkeyhint="done"`), Enter oder `change` | Name bereinigen (Leerraum, ≤ 60 Zeichen), Initiale nach EIN:136-139; liegt die Absenderzeile außerhalb des Bildes, scrollt die Seite nativ dorthin; dann alter Name aus, neuer ein; Statusmeldung `aria-live="polite"`; leeres Feld = „Fensterbau Brandt“ | aus 165 ms, ein 220 ms, `--e-out` | eine Rückmeldung, am Objekt |
 | Escape | letzter übernommener Wert, Feld verlassen | – | Tastatur |
-| Hover (nur `hover: hover`) | Textziel: Unterstreichung `--muted` → `--text`; Feld: Kontur `--line2` → `--text2` | 150 ms | Zustand über Kontur (G1) |
+| Hover (nur `hover: hover`) | Textziel: Unterstreichung `--muted` → `--text`; Feld: Umriss `--muted` → `--text2` | 150 ms | Zustand über Kontur (G1); K-35, `--line2` nie einzige Grenze (K-1) |
 | Fokus | 2-px-Kontur `--ink`, Versatz 2 (`gemeinsam.css`) | – | SG 10.9 Fokusanzeige |
 | weniger Bewegung | Bildschirm von Anfang an, Name ohne Überblendung, Feld ohne Einblenden, Scrollen ohne `smooth` | 0 | SG 10.7/7 |
 | ohne JavaScript | Textziel und Feldgruppe `hidden`, Bildschirm an, „Fensterbau Brandt“ | – | SKILL:62 |
@@ -193,28 +199,36 @@ Charakter: kurz, weich, ohne Überschwingen; keine räumliche Transformation der
 
 **Telefon 390 × 844 (Hauptansicht, zuerst).** Komposition C.2. Textziel und Feld liegen in der unteren Bildschirmhälfte, sobald das Gerät
 ganz zu sehen ist; bei offener Tastatur schiebt der Browser das Feld darüber (kein eigenes Scrollen beim Fokus). 360 px: Gerät unverändert
-(x 30–330), h2 drei Zeilen. Unter 332 px verkleinert `transform: scale()` das Gerät auf die Inhaltsbreite; bis 320 px kein Querscrollen.
-200 % Text: h2 bis vier Zeilen, das Gerät bleibt fest.
+(x 30–330), h2 drei Zeilen. Ist der Container schmaler als das Gerät (Containerabfrage `@container (max-width: 299px)`, also Fenster
+unter 332 px), verkleinert `transform: scale()` das Gerät auf die Inhaltsbreite; bis 320 px kein Querscrollen. 200 % Text: h2 bis vier
+Zeilen, das Gerät bleibt fest.
 
-**Schreibtisch 1280 × 800.** Spalte 1040 (x 120–1160), 12 Spalten à 57,3 px, Abstand 32 px; Kopf 64 px.
+**Zwischengröße 640–1023 px.** Telefonfassung gestapelt (K-11: kein Split unter 1024 px), Rand 24 px, Rinne 16 px; Text, Feld und Punkte
+links ab x 24 mit `max-width: 60ch`, Gerät 300 × 420 auf der Mittelachse, h2 32/34 px.
 
-- Kopfzone über die Spalten 1–8 (683 px): Haarlinie über alle 12, Kapitelzeile, h2 40 px in zwei Zeilen (`text-wrap: balance`).
-- Darunter, 32 px tiefer: links Spalten 1–5 (x 120–535) Lead, Textziel bzw. Feld (Feld 415 × 52), drei Punkte (je zwei bis drei Zeilen);
-  rechts Spalten 6–12 (x 567–1160) die Geräte-Bühne 593 × 660, Oberkante auf Höhe des Leads.
-- **Bühne:** Browserfenster 560 × 360 rechtsbündig (Bühnenkoordinaten x 33–593, y 0–360), Radius 12, Lichtkante wie das Gerät, Leiste
-  36 px mit drei Punkten 8 px `--line2` und Adresszeile „ihr-name-fenster.de · Beispiel“ 13 px. Darin die Startansicht als mittige Spalte
-  240 px im nicht überdeckten Teil (Seitenkoordinaten x 853–1093): Absender, Bild 240 × 132, Überschrift 24 px, Cream-Pille 36 px. Davor
-  das Telefon 220 × 450 ganz sichtbar (x 0–220, y 210–660; Rand 8, Radien 36/28), Adresszeile nur „ihr-name-fenster.de“ („Beispiel“
-  steht einmal für die Bühne im Browser), Überschrift 17 px, Knopftext 13 px. Überdeckung 187 × 150 px: ≈ 14 % des Browsers, ≈ 28 %
-  des Telefons. Beide tragen den Namen.
+**Schreibtisch 1280 × 800.** Split ab 1024 px, Spalte 1040 ab 1104 px mittig (bei 1280 x 120–1160), 12 Spalten à 64,67 px, Rinne 24 px
+(K-12); Kopf 64 px.
+
+- Kopfzone über die Spalten 1–8 (685 px): Haarlinie über alle 12, Kapitelzeile, h2 40 px in zwei Zeilen (`text-wrap: balance`).
+- Darunter, 32 px tiefer: links Spalten 1–5 (x 120–539) Lead, Textziel bzw. Feld (Feld 419 × 52), drei Punkte (je zwei bis drei Zeilen);
+  rechts Spalten 6–12 (x 563–1160) die Geräte-Bühne 597 × 660, Oberkante auf Höhe des Leads.
+- **Bühne:** Browserfenster 560 × 360 rechtsbündig (Bühnenkoordinaten x 37–597, y 0–360), Radius 12, Lichtkante wie das Gerät (K-24),
+  Leiste 24 px `--surface2` mit drei Punkten 8 px `--line2` und Adresspille 18 px hoch: Schloss 10 px, „ihr-name-fenster.de“ 13 px
+  `--text2`, „· Beispiel“ 13 px `--muted` (Browserfenster nach 11.5.2; K-36 Form b). Darin die Startansicht als mittige Spalte 240 px im
+  nicht überdeckten Teil (Seitenkoordinaten x 852–1092): Absender, Bild 240 × 132, Überschrift 24 px, Cream-Pille 36 px. Davor das
+  Telefon 220 × 450 ganz sichtbar (x 0–220, y 210–660; Gerätebaustein im Faktor 0,73: Rand 7, Radien 32/25, K-23), Adresszeile nur
+  „ihr-name-fenster.de“ („Beispiel“ steht einmal für die Bühne, die als ein Material gilt, K-36), Überschrift 17 px, Knopftext 13 px.
+  Überdeckung 183 × 150 px: ≈ 14 % des Browsers, ≈ 28 % des Telefons. Beide tragen den Namen.
 - **Festlegung (Abweichung von Z 8.3.2 c, begründet):** Bei 1280 × 800 ist die Textspalte (≈ 410 px) kürzer als die Bühne (660 px);
   ein Anheften hätte nichts zu halten. Grundfassung daher ohne wirksames Anheften. `position: sticky; top: 96px` bleibt als Sicherung für
   1024 px und 200 % Text, wo die Textspalte länger wird; die Strecke endet am Kapitelende und bleibt so unter 1,1 BH (E-8).
-- Abschnittshöhe ≈ 825 px (1,03 BH). Beide Bildschirme gehen gleichzeitig an (ein Träger).
+- Abschnittshöhe ≈ 820 px (1,03 BH). Beide Bildschirme gehen gleichzeitig an (ein Träger).
 
-**Schreibtisch 1024.** Inhalt 992 px (x 16–1008), Spaltenabstand 24, Spalte 60,7 px. Text Spalten 1–5 (x 16–415), Bühne Spalten 6–12
-(x 439–1008): Browser 520 × 334 rechtsbündig, Telefon 200 × 410 bei x 439, y 190; Überdeckung ≈ 12 % bzw. 26 %. h2 40 px über 8 Spalten,
-zwei Zeilen. Zwischen 761 und 1023 px skaliert die Bühne mit `aspect-ratio`; unter 761 px gilt die Telefonfassung.
+**Schreibtisch 1024.** Rand 32 px, Inhalt 960 px (x 32–992), Rinne 24, Spalte 58 px (K-13). Text Spalten 1–5 (x 32–418, Feld 386 × 52),
+Bühne Spalten 6–12 (x 442–992, 550 px): Browser 520 × 334 rechtsbündig (x 472–992), Telefon 200 × 410 bei x 442, y 190 (Faktor 0,67:
+Rand 7, Radien 29/22, K-23); Überdeckung 170 × 144 px, ≈ 14 % bzw. 30 %. h2 40/42 px über 8 Spalten (632 px), zwei Zeilen. Zwischen 1024
+und 1103 px wächst die Inhaltsbreite mit dem Fenster (Rand 32 px) und die Bühne skaliert mit `aspect-ratio`; unter 1024 px gilt die
+Zwischengröße bzw. die Telefonfassung (K-11).
 
 ## H. Technische Umsetzung
 
@@ -240,8 +254,9 @@ liefert Bausteine, neu erzeugt mit `node scripts/bedingungen-pdf.mjs` (SKILL:107
 4. **Prüfsuite:** Ausnahme in `scripts/pruefen.mjs:1789-1797` genau für `div.vk-name` (E-AB-2); Abgleich der Miniaturtexte mit
    `Einladung.html` (H-E9) und von `initiale()` mit EIN; Schriftgrößen im Gerät nur 13, 15, 17, 24.
 
-**CSS:** Telefon eine Spalte; ab 761 px `display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(24px, 2.5vw,
-32px)`; Gerät `width: 300px; height: 420px; mask-image: linear-gradient(#000 calc(100% - 48px), transparent)`; Lichtkante als
+**CSS:** Telefon und Zwischengröße eine Spalte (Rand 16 px, ab 640 px 24 px); ab 1024 px `display: grid; grid-template-columns:
+repeat(12, minmax(0, 1fr)); column-gap: 24px` (Rand 32 px, ab 1104 px Spalte 1040 mittig; K-11 bis K-13); Verkleinerung des Geräts nur
+per Containerabfrage; Gerät `width: 300px; height: 420px; mask-image: linear-gradient(#000 calc(100% - 48px), transparent)`; Lichtkante als
 `::before` mit 1-px-Rand und Verlaufsmaske; nur `opacity` und `transform` animiert; kein `backdrop-filter`.
 
 **Assets:**

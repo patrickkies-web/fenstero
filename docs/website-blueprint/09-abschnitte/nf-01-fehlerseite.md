@@ -85,15 +85,17 @@ verdeckt nichts und wird von nichts verdeckt.
 .nf-kicker { grid-column: 1 / 3; grid-row: 1; align-self: end; margin: 0; font-size: 13px; line-height: 17px;
   font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--accent); }
 .nf h1, .nf-satz, .nf-wege { grid-column: 1 / -1; }
-.nf h1 { margin: 8px 0 0; font-size: 32px; line-height: 34px; font-weight: 800; letter-spacing: -.03em;
+.nf h1 { margin: 8px 0 0; font-size: 32px; line-height: 34px; font-weight: 800; letter-spacing: -.03em;   /* K-18 */
   color: var(--text); text-wrap: balance; }
 .nf-satz { margin: 16px 0 0; font-size: 17px; line-height: 26px; font-weight: 500; color: var(--text2); }
 .nf-satz > span { display: block; }
 .nf-satz code { font: inherit; color: var(--text); white-space: nowrap; }  /* statt code 15 px, recht.css:71 */
 .nf-wege { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 12px; }
-.nf-weg { width: 100%; justify-content: space-between; padding: 0 20px; white-space: normal; text-align: left;
-  box-shadow: inset 0 0 0 2px var(--muted); transition: box-shadow 150ms var(--e-out), background-color 150ms var(--e-out); }
-.nf-weg svg { flex: none; width: 8px; height: 14px; color: var(--muted); transition: color 150ms var(--e-out); }
+.nf-wege .nf-weg { width: 100%; justify-content: space-between; padding: 0 20px; white-space: normal; text-align: left;
+  box-shadow: inset 0 0 0 2px var(--muted);              /* K-1; schlägt .btn.ghost (--line2), weil recht.css nach gemeinsam.css lädt */
+  transition: box-shadow var(--t1) var(--e-out), background-color var(--t1) var(--e-out); }
+.nf-wege .nf-weg:active { background-color: var(--surface2); transform: none; transition-duration: 0s; }  /* K-4: Druck sofort, zurück mit --t1 */
+.nf-weg svg { flex: none; width: 8px; height: 14px; color: var(--muted); transition: color var(--t1) var(--e-out); }   /* Chevron K-31 */
 .nf-figur { grid-column: 3 / 5; grid-row: 1; margin: 0; aspect-ratio: 4 / 5; pointer-events: none; }
 .nf-figur img { display: block; width: 100%; height: 100%; object-fit: contain; }
 @media (min-width: 1024px) {
@@ -108,8 +110,10 @@ verdeckt nichts und wird von nichts verdeckt.
 @media (min-width: 1024px) and (max-width: 1087px) { .nf { padding-inline: 32px; } }
 ```
 
-Begründungen: Zeilenhöhe 1,05 (Bühnenstimme, DG 2.2.18), Satz 1,55 (DNA-B). Ringkontur `--muted` (5,81 : 1) statt `--line2`
-(1,59 : 1), weil sie die einzige Grenze des Ziels ist (3 : 1; DG-E-10, wie `st-04`). Fester Abstand statt `8vh` (`recht.css:46`), damit
+Begründungen: Titel 32/34 und 40/42 px, also 1,05 auf ganze Pixel (Bühnenstimme, K-18; DG 2.2.18), Satz 1,55 (DNA-B). Kicker 600
+und +0,12 em wie jede Versalzeile (K-17); „FEHLER 404“ (94 px) bleibt auch bei 360 und 320 px einzeilig, der Rückfall +0,08 em wird nicht
+gebraucht. Ringkontur `--muted` (5,81 : 1) statt `--line2` (1,59 : 1), weil sie die einzige Grenze des Ziels ist (3 : 1; K-1, DG-E-10).
+Hover über `.btn.ghost:hover` (`gemeinsam.css:66`, Kontur → `--ink` = `--text`). Fester Abstand statt `8vh` (`recht.css:46`), damit
 die Lage auf jedem Telefon gleich ist. Zwei Blockzeilen, weil beide Sätze bei 390 px einzeln passen (287 und 323 px, gemessen mit Inter
 aus `web/fonts/`) und `…/app/#k-…` nie zerrissen wird.
 
@@ -119,11 +123,11 @@ aus `web/fonts/`) und `…/app/#k-…` nie zerrissen wird.
 |---|---|:-:|---|
 | Tiefe, Z-Achsen | A: Grund und Bedienschicht, flach. B: Figur als dritte Ebene neben dem Text, ohne Verdeckung (Arbeitsansicht: Verdeckung ist Ziel, nicht Pflicht) | 1 | Ruhe; nichts lenkt von den Wegen ab |
 | Material, Transparenz | Bedienschicht opak und matt, kein Glas (DG 2.4.1). B: einziges Material ist die fotorealistische Figur | 0 / 1 | echtes Material statt Symbol (SKILL:41) |
-| Licht, Schatten | A: keines. B: nur im Bild eingebacken; Quelle ist die Öffnung des freistehenden Rahmens, Richtung oben rechts → links unten (DG 2.2.0, DG-E-8); ein Lichtfleck am Boden statt Schlagschatten (DG-AB-1); kein CSS-Licht | 0 / 1 | zitiert das Zeichen: Licht fällt durch ein Fenster in einen dunklen Raum |
-| Formen | Pillen mit voller Rundung, 2-px-Kontur; keine Karte, kein Radius am Bild; eine Formfamilie | 1 | dieselben Ringe wie im Kopf und auf allen Seiten |
+| Licht, Schatten | A: keines. B: nur im Bild eingebacken; Quelle ist die Öffnung des freistehenden Rahmens, Richtung nach Haus-Token oben rechts → links unten (`--licht-x` −0,6, `--licht-y` 0,8; K-24, DG 2.2.0, DG-E-8); ein Lichtfleck am Boden statt Schlagschatten (DG-AB-1); kein CSS-Licht, keine Lichtkante, weil weder Figur noch Ringe schweben (K-24) | 0 / 1 | zitiert das Zeichen: Licht fällt durch ein Fenster in einen dunklen Raum |
+| Formen | Pillen mit voller Rundung, innere 2-px-Kontur `--muted` (K-1); keine Karte, kein Radius am Bild; eine Formfamilie | 1 | dieselben Ringe wie im Kopf und auf allen Seiten |
 | 3D-Objekte, Perspektive | keine, frontal (Nr. 1) | 0 | – |
 | Bildintegration | B: freigestellt, rahmenlos, läuft in den Grund; keine Fotokarte (DG-AB-9) | 0 / 1 | Ein Raum statt Bild in der Box (DNA-B Regel 7) |
-| Oberflächendetails | 8 × 14 px großer Chevron in `--muted` je Ring, `tabular-nums` im Kicker | 1 | Präzision als Feindetail |
+| Oberflächendetails | 8 × 14 px großer Chevron in `--muted` je Ring als Zeichen eines internen Ziels (K-31), `tabular-nums` im Kicker | 1 | Präzision als Feindetail |
 | Animation | nur Zustände; B: Figur blendet einmal über Deckkraft ein (F) | 1 | ein bewegter Träger je Ansicht (E-2) |
 | Typografie | Bühnenstimme h1, Technikstimme Kicker, Lesetext 17; ein grünes Wort | 1 | Hierarchie über Größe und Tonwert (DG-E-1 C) |
 | Überlagerungen | keine | 0 | – |
@@ -133,15 +137,15 @@ Signature-Effekte: keine, weder informierende noch inszenierende (08 8.3.11: 404
 
 **Bewusst weggelassen:** Cream (keine Zielhandlung, 08); Glas; Lichtraum; Messraster, Maßlinie; Riesenwort „404“ (nur Verkaufsflächen,
 Prüfsuite); Rahmenbruch (DG-AB-18); Video oder Schleife der Figur; Parallaxe; großes Zeichen als Ersatzheld (steht schon im Kopf); Liste
-„beliebte Seiten“ (steht im Fuß); Pfeilkreis `.pf` (gehört einer Hauptaktion).
+„beliebte Seiten“ (steht im Fuß); Pfeilkreis `.pf` (gefüllt, 28 px, nur an der Cream; K-31).
 
 **Abweichungen von bestehenden Regeln** – jede Zeile: **Abweichung von bestehender Regel – Freigabe durch den Inhaber nötig**
 
 | Nr. | bestehende Regel | hier | Begründung |
 |---|---|---|---|
 | NF-AB-1 | „Überall sonst steht das Foto in einer Fotokarte“ (GEST:34); heute `.foto-karte` (`recht.css:86-88`) | Figur freigestellt, ohne Karte | DG-AB-9; DNA Nr. 4 |
-| NF-AB-2 | `--muted` „nur für Labels und Nebenzeilen“ (GEST:24); Ghost-Rand `--line2` (GEST:93, `gemeinsam.css:58`) | Ringkontur `--muted` | 3 : 1 für die einzige Grenze (WCAG 1.4.11; DG-E-10) |
-| NF-AB-3 | Kicker 800 mit Sperrung .18em (GEST:26; `gemeinsam.css:44`) | Technikstimme 600 mit Sperrung .12em | DR 3.2; DG 2.2.18 |
+| NF-AB-2 | `--muted` „nur für Labels und Nebenzeilen“ (GEST:24); Ghost-Rand `--line2` (GEST:93, `gemeinsam.css:58`) | Ringkontur `--muted`, Hover `--text`, Druck `--surface2` (K-1) | 3 : 1 für die einzige Grenze (WCAG 1.4.11; DG-E-10); gebündelt als DS-AB-10 |
+| NF-AB-3 | Kicker 800 mit Sperrung .18em (GEST:26; `gemeinsam.css:44`) | Technikstimme 600 mit Sperrung .12em (K-17) | DR 3.2; DG 2.2.18; gebündelt als DS-AB-1 |
 
 ## E. Visual Attention Architecture
 
@@ -161,10 +165,10 @@ Die Angaben beschreiben die erwartete Aufmerksamkeit aus der Komposition. Gemess
 | Auslöser | Reaktion | Dauer, Kurve | Begründung | weniger Bewegung |
 |---|---|---|---|---|
 | Laden (A) | Text steht sofort, kein Auftritt. Das Zeichen im Kopf leuchtet einmal (1,6 s, GEST:7) | – | T12 „Bewegung keine“; Seite ohne Ladeauftritt (`rh-01` D) | Zeichen ruhig |
-| Laden (B) | Figur blendet nach `img.decode()` über Deckkraft ein; unter 100 ms sofort, nach 1,5 s spätestens ohne Animation. Das Zeichen leuchtet hier nur bei Berührung | 400 ms, `cubic-bezier(.2, 0, 0, 1)` (DNA-B `--dauer-abschnitt`, `--kurve-ein`) | ein Träger (E-2); nichts springt (SKILL:48); Stufe 1 ohne Versatz | sofort sichtbar |
+| Laden (B) | Figur blendet nach `img.decode()` über Deckkraft ein; unter 100 ms sofort, nach 1,5 s spätestens ohne Animation. Das Zeichen leuchtet hier nur bei Berührung | 320 ms `--t3`, `--e-out` (K-4; die SG-Werte 400 ms und `--kurve-ein` entfallen) | ein Träger (E-2); nichts springt (SKILL:48); Stufe 1 ohne Versatz | sofort sichtbar |
 | Scrollen | nativ, nichts gekoppelt | – | Stufe 1 | gleich |
-| Hover (`hover: hover`) | Kontur und Chevron `--muted` → `--text` | 150 ms, `--e-out` | ein Hover-Kanal (DNA-B B.3) | gleich |
-| Druck | Füllung `--surface2`, keine Skalierung (`gemeinsam.css:65` hier aufheben) | 150 ms | DNA-B B.3.7 | gleich |
+| Hover (`hover: hover`) | Kontur und Chevron `--muted` → `--text` (K-1) | `--t1` 150 ms, `--e-out` (K-4) | ein Hover-Kanal (DNA-B B.3) | gleich |
+| Druck | Füllung `--surface2`, keine Skalierung (`gemeinsam.css:65` hier aufheben; K-1, K-2) | sofort; zurück mit `--t1` 150 ms, `--e-out` (K-4) | DNA-B B.3.7 | gleich |
 | Fokus | 2-px-Kontur `--text`, Abstand 2 px, Radius bleibt Pille (gegen `:focus-visible { border-radius: var(--r1) }`, `gemeinsam.css:38`) | sofort | SG 10.10 Nr. 17 | gleich |
 | Klick | normaler Seitenwechsel; eine Überblendung zwischen Seiten entscheidet die ganze Website, nicht dieser Abschnitt | – | – | – |
 
@@ -214,7 +218,7 @@ Haarlinie des Fußes bei y 668, sichtbar sind 100 px (13 %).
 
 **Bestehend (Datei):** `web/404.html` (neues Markup; Titel, `lang`, Robots, Font-Preload bleiben); `web/assets/recht.css` (`.mitte`,
 `.foto-karte` entfallen, `.knopf` bleibt fürs Widerrufsformular); `web/assets/gemeinsam.css` (Tokens, `.btn.ghost`, `.ak`; künftig auch
-hier geladen, weil `rh-01` den Kopf dort ablegt); `scripts/ratgeber-bausteine.mjs` (Kopf und Fuß); `worker.js:33-41` unverändert.
+hier geladen, vor `recht.css`, weil `rh-01` den Kopf dort ablegt); `scripts/ratgeber-bausteine.mjs` (Kopf und Fuß); `worker.js:33-41` unverändert.
 
 **Markup (neu)**
 
@@ -239,7 +243,7 @@ hier geladen, weil `rh-01` den Kopf dort ablegt); `scripts/ratgeber-bausteine.mj
 
 Das DOM folgt der Lesefolge (DNA-B B.2); die Figur ist nicht fokussierbar.
 
-**CSS:** Startwerte aus C, dazu `@media (forced-colors: active) { .nf-weg { border: 2px solid ButtonText; box-shadow: none } }`, denn
+**CSS:** Startwerte aus C, dazu `@media (forced-colors: active) { .nf-wege .nf-weg { border: 2px solid ButtonText; box-shadow: none } }`, denn
 `box-shadow` verschwindet in diesem Modus. **Skript (nur Fassung B):** `web/assets/fehler.js`, etwa zehn Zeilen, im `<head>` ohne
 `defer`. Inline geht nicht, denn die CSP erlaubt nur `script-src 'self'` (`functions/seo.js:69`). Das Skript setzt `html.js`, ruft bei
 `DOMContentLoaded` `img.decode()` auf, setzt dann `.da` und hat einen Zeitgeber von 1,5 s.
@@ -251,7 +255,7 @@ beim Inhaber anzufragen (SKILL 7):
 |---|---|
 | Format | PNG mit Transparenz, ersatzweise einfarbig grüner Hintergrund zum Freistellen; 1.200 × 1.500 px (4:5). Figur und freistehender Fensterrahmen ganz im Bild, unten etwa 8 % Luft, nichts angeschnitten |
 | Motiv | Inhaber wählt: (a) Katze im freistehenden Fensterrahmen (`docs/BILDER.md:73`); (b) Astronaut (`docs/BILDER.md:23`; SKILL:120) |
-| Licht, Blick | eine warme Quelle von oben rechts, die durch die Rahmenöffnung als Lichtfleck nach links unten auf den Boden fällt; kein Schlagschatten; Blick der Figur nach links unten |
+| Licht, Blick | eine warme Quelle von oben rechts nach Haus-Token (`--licht-x` −0,6, `--licht-y` 0,8; K-24), die durch die Rahmenöffnung als Lichtfleck nach links unten auf den Boden fällt; kein Schlagschatten; Blick der Figur nach links unten |
 | Nicht drin | Text, „404“, Zahlen, Logos, Wasserzeichen, Wand, Wiese bis zum Rand, Hintergrund |
 | Prompt (Englisch, für [a]) | „A cat sitting calmly inside a single freestanding white window frame, no wall around it, isolated on a plain solid green background, warm late-afternoon light from the upper right falling through the frame onto the ground towards the lower left, the cat looking down to the left, photorealistic, highly detailed fur, subtle film grain, full figure and frame visible with empty space at the bottom, no text, no numbers, no logos, no watermark, aspect ratio 4:5“ |
 
