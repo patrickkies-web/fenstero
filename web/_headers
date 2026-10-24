@@ -34,3 +34,9 @@
 /bilder/*
   ! X-Robots-Tag
   Cache-Control: public, max-age=86400
+
+# Vorschauen zum Herumzeigen (z. B. Entwürfe für Seiten): nie in Suchmaschinen (X-Robots-Tag oben gilt hier immer, weil /vorschau/
+# nicht durch functions/seo.js läuft), nie zwischenspeichern; nicht in Sitemap, llms.txt und robots.txt, damit der Pfad nirgends steht
+/vorschau/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store
