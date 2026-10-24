@@ -245,7 +245,10 @@ Menüzeichens über dem Foto mindestens 4,5 : 1 bzw. 3 : 1 an der hellsten Stell
 | Bestehend | Neu | Begründung |
 |---|---|---|
 | Kopf „halbtransparent wie die App“, „kleiner schwarzer Knopf“ (GEST:428) | flächenlos auf Bühnen, sonst opak; Ring oder Cream | DG-AB-10; SG 10.3/6 |
-| Logo leuchtet beim Laden einmal (GEST:7) | auf Seiten mit Ladeauftritt (V1, H1) nur bei Berührung | ein bewegter Träger je Ansicht (E-2; SG 10.7/4) |
+| Logo leuchtet beim Laden einmal (GEST:7) | auf Seiten mit Bühnen-Ladeauftritt (V1, H1) nur bei Berührung | ein bewegter Träger je Ansicht (E-2; SG 10.7/4); K-8, DS-AB-9 |
+| `--muted` „nur für Labels und Nebenzeilen“ (GEST:24); Ghost-Rand `--line2` (`gemeinsam.css:58`) | Ring-Kontur innen 2 px `--muted`, Hover `--text`, Druck Füllung `--surface2` | die Kontur ist die einzige Grenze des Knopfs und braucht 3 : 1 (WCAG 1.4.11; DG-E-10); K-1, DS-AB-10. Rückfall: `--line2` |
+| Cream hellt beim Überfahren auf Weiß auf (`--primary-hover`, `gemeinsam.css:15`); Druck `scale(.98)` (`:65`) | Hover innere 2-px-Kontur `--on-primary` 24 %, Druck Füllung `--primary-druck` (`#e2e1db`, neuer Wert, DS-AB-7), keine Skalierung | ein Kanal für Hover (DG 2.4.1), Bedienschicht formstabil (SG 10.7/3); K-2, DS-AB-3. Rückfall: Weiß |
+| im Kopf der Seite ein Ring-Knopf (GEST:456) | ausgeblendet, solange Namensleiste oder Kartenreihe das Band bis 60 % der Bildhöhe schneidet (Zustand A und B) | eine Handlung je Bildschirm; K-28, J-AB-9. Rückfall: Ring bleibt sichtbar |
 | Kopfknopf „Fenster ausmessen“/„Aufmaß fortsetzen“ (GEST:192) | unter 390 px „Ausmessen“ | Platz; Vorbild „Starten“ (`portal.js:450`). Rückfall: volle Texte ab 375 px mit Polster 12 |
 | Kopf Fensterbauer „Preise“, „Anmelden“, „Kostenlos starten“ (GEST:193) | Ring, „Anmelden“ als Textlink | EA AB-2 |
 | Umschalter als Zeile der klebenden Kopfzeile (GEST:190; `pruefen.mjs:211-213`) | Glas im Foto, Kopf 56 px | IA-AB-3; Prüfsuite anpassen (IA-O-9) |
@@ -263,8 +266,9 @@ Menüzeichens über dem Foto mindestens 4,5 : 1 bzw. 3 : 1 an der hellsten Stell
 - **Zu testende Annahmen (Hypothesen, keine Wirkungsaussage):**
   - **H-K1:** Ein erst nach dem Startbild erscheinender Ring wird als Schnellweg verstanden (IA-H-12, N4). Prüfung: Gespräche, Telefon-Video.
     Rückfall: Ring von Anfang an sichtbar.
-  - **H-K2:** Der Wechsel an der Namensleiste wird bemerkt und nicht als Sprung empfunden. Prüfung: anonyme Zählung der Ring-Tipps je
-    Zustand, nur in der eigenen Statistik (7.5.7 Nr. 17). Rückfall: Wechsel erst nach der Kartenreihe (EV 7.5.2).
+  - **H-K2:** Das Ausblenden an Namensleiste und Kartenreihe nimmt Konkurrenz, ohne Orientierung zu kosten, und das Wiedererscheinen als
+    „Paket anfragen“ wird bemerkt und nicht als Sprung empfunden (J-H14). Prüfung: anonyme Zählung der Ring-Tipps je Zustand, nur in der
+    eigenen Statistik (7.5.7 Nr. 17). Rückfall: Ring bleibt an der Reihe sichtbar (J-AB-9), Wechsel erst nach der Kartenreihe (EV 7.5.2).
   - **H-K3:** Ein Ring oben rechts genügt am Telefon ohne untere Leiste (W9). Rückfall: Testvariante B′.
   - **H-K4:** Das Logo → `/fuer-fensterbauer/` hält Fensterbauer im Pfad (IA-H-5). Rückfall: Logo → `/`.
   - **H-K5:** Der opake Kopf wirkt ruhiger als der halbtransparente (DG-H-10). Prüfung: Sichtprüfung des Inhabers.
