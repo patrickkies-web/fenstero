@@ -1773,7 +1773,7 @@ if (teil(10)) {
     const t = (await roh(pf)).text, fragen = ldjson(t).flatMap((x) => (x && x['@graph']) || [x]).filter((x) => x && x['@type'] === 'FAQPage').flatMap((x) => x.mainEntity || []);
     /* Ratgeber: <summary>Frage</summary><div>Antwort</div>; Seite für Fensterbauer: <summary><span>Frage</span>…</summary><div class="frage-antwort">Antwort</div> */
     const vis = new Map(Array.from(t.matchAll(/<summary>([\s\S]*?)<\/summary><div>([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])])
-      .concat(Array.from(t.matchAll(/<summary><span>([\s\S]*?)<\/span>(?:(?!<\/summary>)[\s\S])*<\/summary><div class="frage-antwort">([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])])));
+      .concat(Array.from(t.matchAll(/<summary><span>((?:(?!<\/summary>)[\s\S])*?)<\/span>(?:(?!<\/summary>)[\s\S])*<\/summary><div class="frage-antwort">([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])])));
     faqZahl += fragen.length;
     for (const q of fragen) if (vis.get(q.name) !== (q.acceptedAnswer || {}).text) faqFehler.push(pf + ' „' + q.name + '“');
   }
