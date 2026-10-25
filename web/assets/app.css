@@ -1285,8 +1285,8 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 }
 
 /* ---------- Start: die Bühne (SCREENS.start in app.js) ----------
-   Oben die Stelle als Glasschalter, darunter schwebt das Element allein in 3-D auf der dunklen Bühne: Licht von oben, Schatten am Boden,
-   sein Name riesig als Umriss dahinter (bewegt sich beim Hüpfen langsamer, das gibt Tiefe). Neue Öffnung: grüner Ring am Boden.
+   Oben die Stelle als Glasschalter, darunter schwebt das Element allein in 3-D auf der dunklen Bühne: Licht von oben, Schatten am Boden.
+   Neue Öffnung: grüner Ring am Boden. Darunter Name und alle Elemente als kleine Vorschau, das gewählte markiert.
    Wechsel des Elements: es hüpft aus der Wischrichtung (--d: 1 von rechts, -1 von links) in 720 ms herein, der Schatten wird mit dem
    Sprung kleiner und wieder groß. Bei „weniger Bewegung“ steht alles sofort da. */
 .st-stelle { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 2px 0 0; border-radius: 22px; background: rgba(243, 242, 238, .04); box-shadow: inset 0 0 0 1px rgba(243, 242, 238, .08); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px) }
@@ -1297,30 +1297,18 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .qopt.st-seg .sb { font-size: 13px; color: var(--muted) }
 .qopt.st-seg[aria-pressed="true"] .lbl { color: var(--text) }
 .qopt.st-seg[aria-pressed="true"] .lbl::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 7px 2px 0; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent) }
-.st-buehne { position: relative; height: 300px; margin: 4px -16px 0; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+.st-buehne { position: relative; height: 262px; margin: 4px -16px 0; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none;
   background: radial-gradient(42% 70% at 50% -4%, rgba(243, 242, 238, .17), rgba(243, 242, 238, .05) 55%, rgba(243, 242, 238, 0) 78%), radial-gradient(60% 18% at 50% 86%, rgba(243, 242, 238, .05), rgba(243, 242, 238, 0) 70%) }
-.st-wort { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
-.st-wort text { fill: none; stroke: rgba(243, 242, 238, .13); stroke-width: 1.2; font-family: inherit }
-.st-boden { position: absolute; left: 50%; bottom: 46px; width: 250px; height: 36px; margin-left: -125px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .7), rgba(0, 0, 0, 0)); pointer-events: none }
+.st-boden { position: absolute; left: 50%; bottom: 18px; width: 250px; height: 36px; margin-left: -125px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .7), rgba(0, 0, 0, 0)); pointer-events: none }
 .st-buehne.is-neu .st-boden::after { content: ""; position: absolute; inset: -4px -14px; border-radius: 50%; border: 1.5px dashed var(--accent); opacity: .75; box-shadow: 0 0 18px rgba(143, 214, 148, .25) }
 .st-held { position: absolute; left: 0; right: 0; top: 0; z-index: 1 }
 .w3d-stage.st-schwebe { background: none; box-shadow: none; border-radius: 0 }
-.st-nb { position: absolute; z-index: 2; top: 90px; width: 52px; height: 84px; padding: 0; border: 0; background: none; color: rgba(243, 242, 238, .34); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: color var(--t2), transform var(--t2) }
-.st-nb-l { left: 6px } .st-nb-r { right: 6px }
-.st-nb:hover, .st-nb:focus-visible { color: rgba(243, 242, 238, .8) }
-.st-nb:active { transform: scale(.94) }
 .st-wahl { text-align: center; margin: 2px 0 0; position: relative; z-index: 2 }
 .st-name { margin: 0; font-size: 32px; font-weight: 800; line-height: 1.05; letter-spacing: -.03em; color: var(--text) }
 .st-sub { margin: 6px 0 0; font-size: 15px; line-height: 1.4; color: var(--muted) }
-.st-punkte { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; justify-content: center }
-.qopt.st-dot { width: 40px; min-height: 44px; height: 44px; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; justify-content: center; align-items: center }
-.qopt.st-dot span { width: 7px; height: 7px; border-radius: 4px; background: rgba(243, 242, 238, .3); transition: width 320ms var(--e-out), background 320ms }
-.qopt.st-dot[aria-pressed="true"] span { width: 22px; background: var(--accent) }
-.qopt.st-dot:focus-visible span { box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px var(--text) }
 .st-note { margin-top: 14px }
 .st-buehne.is-hop .st-held { animation: st-hop 720ms both }
 .st-buehne.is-hop .st-boden { animation: st-schatten 720ms both }
-.st-buehne.is-hop .st-wort { animation: st-wort 720ms var(--e-out) both }
 .st-wahl.is-hop .st-name { animation: st-name 520ms var(--e-out) 140ms both }
 @keyframes st-hop {
   0% { transform: translate(calc(var(--d) * 64%), 8px) scale(.78); opacity: 0; animation-timing-function: cubic-bezier(.2, .6, .4, 1) }
@@ -1331,12 +1319,29 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
   100% { transform: none; opacity: 1 }
 }
 @keyframes st-schatten { 0% { transform: translateX(calc(var(--d) * 40%)) scale(.5); opacity: 0 } 50% { transform: translateX(calc(var(--d) * 10%)) scale(.66); opacity: .45 } 76% { transform: scale(1.06); opacity: 1 } 89% { transform: scale(.94) } 100% { transform: none; opacity: 1 } }
-@keyframes st-wort { from { transform: translateX(calc(var(--d) * 14%)); opacity: 0 } to { transform: none; opacity: 1 } }
 @keyframes st-name { from { transform: translateY(8px); opacity: 0 } to { transform: none; opacity: 1 } }
-@media (prefers-reduced-motion: reduce) { .st-buehne.is-hop .st-held, .st-buehne.is-hop .st-boden, .st-buehne.is-hop .st-wort, .st-wahl.is-hop .st-name { animation: none } .st-stelle::before { transition: none } }
+@media (prefers-reduced-motion: reduce) { .st-buehne.is-hop .st-held, .st-buehne.is-hop .st-boden, .st-wahl.is-hop .st-name { animation: none } .st-stelle::before { transition: none } }
 @media (min-width: 1024px) {
   .st-buehne { height: 420px; margin: 8px 0 0; border-radius: var(--r4) }
   .st-held .w3d-stage { height: 376px !important }
-  .st-nb { top: 146px } .st-nb-l { left: 18px } .st-nb-r { right: 18px }
   .st-boden { width: 320px; margin-left: -160px; bottom: 54px }
 }
+/* Vorschau-Reihe: alle sechs Elemente klein, ohne Kästen; das gewählte hell mit grüner Linie darunter */
+.st-reihe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 4px; max-width: 520px; margin: 12px auto 0 }
+.qopt.st-mini { position: relative; min-height: 70px; padding: 6px 2px 10px; gap: 4px; border: 0; border-radius: var(--r2); background: none; box-shadow: none; justify-content: center; align-items: center; color: var(--muted) }
+.qopt.st-mini svg { opacity: .55; transition: opacity var(--t2), transform var(--t2) var(--e-out) }
+.qopt.st-mini .lbl { font-size: 13px; font-weight: 600; line-height: 1.2; white-space: nowrap; color: var(--muted); transition: color var(--t2) }
+.qopt.st-mini::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 0; height: 2px; margin-left: 0; border-radius: 1px; background: var(--accent); transition: width 320ms var(--e-out), margin-left 320ms var(--e-out) }
+.qopt.st-mini[aria-pressed="true"] svg { opacity: 1; transform: translateY(-2px) }
+.qopt.st-mini[aria-pressed="true"] .lbl { color: var(--text); font-weight: 700 }
+.qopt.st-mini[aria-pressed="true"]::after { width: 28px; margin-left: -14px }
+.qopt.st-mini:active svg { transform: scale(.94) }
+/* Weiter-Knopf im Inhalt statt am unteren Rand angeheftet (bar.inline), kleiner und mittig */
+.scroll.leiste-inline { padding-bottom: 8px }
+.bb.bb-inline { position: static; z-index: auto; justify-content: center; gap: 10px; margin: 22px 0 6px; padding: 0; background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none }
+.bb.bb-inline .btn { flex: 0 1 auto; min-height: 48px; padding: 0 26px; font-size: 15px }
+.bb.bb-inline .bb-zurueck { flex: 0 0 48px; width: 48px; padding: 0 }
+/* Fußzeile am Start klein: eine Zeile Verweise in 13 px, „Vertrag widerrufen“ als unterstrichener Verweis */
+.scr[data-screen="start"] .foot-links.recht { gap: 0 14px; padding: 8px 0 6px }
+.scr[data-screen="start"] .foot-links .link { font-size: 13px; font-weight: 500 }
+.scr[data-screen="start"] .foot-links .link.widerruf { padding: 0; box-shadow: none; color: var(--text2); text-decoration: underline; text-underline-offset: 3px }
