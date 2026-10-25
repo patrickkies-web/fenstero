@@ -2893,24 +2893,102 @@ function linkHomeInhaltAlt(I) {
   const html = E.html({ name: name, kunde: d.kunde, du: du, p: d.p, bis: d.bis, server: !!SERVER.daten }) + rechtLinks();
   return { html: html, bar: null };
 }
-/* ---------- Start: die Stelle und das Element ---------- */
-/* Vorschau fürs Startbild: ein typisches Element je Art mit plausiblen Maßen, in den Farben und Einstellungen des Kunden */
-const START_MASS = { fenster: [1230, 1410, 620], balkon: [1010, 2180, 0], fest: [1800, 1400, 620], hst: [2600, 2200, 0], psk: [2000, 2180, 0], fsw: [3600, 2200, 0] };
-function startWin(w) {
-  const m = START_MASS[w.art] || START_MASS.fenster;
-  const v = Object.assign(baseWin(), { w: m[0], h: m[1], mo: { hm: m[1] + 70, hl: m[1] + 70, hr: m[1] + 70, wm: m[0] + 140, wt: m[0] + 140, wb: m[0] + 140 }, el: { h: m[1], w: m[0] }, bru: m[2], laib: 140, fa: w.fa, fi: w.fi, offen: kopie(w.offen || {}), material: w.material, neu: w.neu, hst: w.hst, fsw: w.fsw, bt: w.bt, psk: w.psk });
-  artSetzen(v, w.art || 'fenster'); return v;
+/* ---------- Start: die Stelle und das Element ----------
+   Gestaltung „Das Fenster in Teilen“ (25.10.2026, Design-Entwurf „Schritt 1 neu gedacht“): Oben liegt das gewählte Element als
+   Explosionszeichnung auf der dunklen Bühne, Rahmen, Flügel, Glas und Griff schräg hintereinander und links beschriftet. Die Elementart
+   bestimmt die Teile (Festverglasung: nur Rahmen und Glas; Faltschiebewand: vier Faltflügel). Die hinterste Ebene zeigt die Stelle:
+   beim Ersetzen das alte Fenster grau gestrichelt, bei der neuen Öffnung grün gestrichelt. Ändern sich Stelle oder Element, fahren die
+   Teile nacheinander auseinander (80 ms versetzt, 700 ms), sonst steht die Zeichnung; bei „weniger Bewegung“ immer still (app.css). */
+const ST_TEILE = {
+  fenster: { w: 132, h: 162, n: 2, fluegel: 'Flügel', griff: true, kurz: 'Fenster', dein: 'Dein Fenster' },
+  balkon: { w: 92, h: 214, n: 1, fluegel: 'Flügel', griff: true, kurz: 'Balkontür', dein: 'Deine Balkon- oder Terrassentür' },
+  fest: { w: 160, h: 150, n: 1, fluegel: '', griff: false, kurz: 'Festverglasung', dein: 'Deine Festverglasung' },
+  hst: { w: 206, h: 160, n: 2, fluegel: 'Schiebeflügel', griff: true, kurz: 'Hebe-Schiebe', dein: 'Deine Hebe-Schiebe-Tür' },
+  psk: { w: 186, h: 160, n: 2, fluegel: 'PSK-Flügel', griff: true, kurz: 'PSK-Tür', dein: 'Deine PSK-Tür' },
+  fsw: { w: 216, h: 158, n: 4, fluegel: 'Faltflügel', griff: true, kurz: 'Faltschiebewand', dein: 'Deine Faltschiebewand' }
+};
+let stZuletzt = '';
+function startTeile(art, neu, bewegt) {
+  const e = ST_TEILE[art] || ST_TEILE.fenster, SW = 358, SH = 236;
+  const alt = art === 'fenster' ? 'Altes Fenster' : art === 'fest' ? 'Alte Verglasung' : 'Alte Tür';
+  const namen = [neu ? 'Neue Öffnung' : alt, 'Rahmen'].concat(e.fluegel ? [e.fluegel] : [], ['Glas'], e.griff ? ['Griff'] : []);
+  const L = namen.length, dx = 22, dy = 26, x0 = 126;
+  const f = Math.min(1, (SW - x0 - 8 - (L - 1) * dx) / e.w, (SH - 34 - (L - 1) * dy) / (e.h * 1.2));
+  const w = e.w * f, h = e.h * f, sk = w * 0.2, y0 = sk + (SH - 24 - (sk + h + (L - 1) * dy)) / 2 + 4, unten = y0 + (L - 1) * dy + h;
+  const r = (v) => Math.round(v * 10) / 10;
+  /* Punkt auf der Fläche einer Schicht (u, v von 0 bis 1), die rechte Kante zum Betrachter gedreht */
+  const P = (k, u, v) => [x0 + k * dx + u * w, y0 + k * dy + v * h - sk * u];
+  const quad = (k, u0, v0, u1, v1) => [P(k, u0, v0), P(k, u1, v0), P(k, u1, v1), P(k, u0, v1)].map((p, i) => (i ? 'L' : 'M') + r(p[0]) + ' ' + r(p[1])).join('') + 'Z';
+  const kante = (k, u0, v0, u1) => { const a = P(k, u0, v0), b = P(k, u1, v0); return 'M' + r(a[0]) + ' ' + r(a[1]) + 'L' + r(b[0]) + ' ' + r(b[1]); };
+  const iu = 9 / e.w, iv = 9 / e.h, idx = (n) => namen.indexOf(n); // Profilbreite wächst und schrumpft mit dem Element
+  const kR = idx('Rahmen'), kF = e.fluegel ? idx(e.fluegel) : -1, kG = idx('Glas'), kH = e.griff ? idx('Griff') : -1;
+  const feld = (j, n) => { const a = iu * 1.2, b = 1 - iu * 1.2, pw = (b - a) / n; return [a + j * pw + (j ? 0.004 : 0), a + (j + 1) * pw - (j < n - 1 ? 0.004 : 0)]; };
+  const ebene = (k, inhalt) => '<g class="st-l" style="--k: ' + k + '; --x: ' + r(-dx * k) + 'px; --y: ' + r(-dy * k) + 'px">' + inhalt + '</g>';
+  const lagen = [];
+  /* 0: die Stelle */
+  lagen.push(neu
+    ? '<path d="' + quad(0, 0, 0, 1, 1) + '" fill="#8fd694" fill-opacity=".06" stroke="#8fd694" stroke-width="1.8" stroke-dasharray="7 5"/>'
+    : '<path d="' + quad(0, 0, 0, 1, 1) + quad(0, iu, iv, 1 - iu, 1 - iv) + '" fill="none" stroke="#93928d" stroke-width="1.4" stroke-dasharray="5 4" opacity=".75"/>');
+  /* Rahmen */
+  lagen.push('<path d="' + quad(kR, 0, 0, 1, 1) + quad(kR, iu, iv, 1 - iu, 1 - iv) + '" fill="url(#st-profil)" fill-rule="evenodd" stroke="#f3f2ee" stroke-opacity=".55" stroke-width="1.2"/>' +
+    '<path d="' + kante(kR, 0, 0, 1) + '" fill="none" stroke="#f3f2ee" stroke-opacity=".9" stroke-width="1.6" stroke-linecap="round"/>');
+  /* Flügel: je Feld ein Ring */
+  if (kF >= 0) {
+    let d = '', k2 = '';
+    for (let j = 0; j < e.n; j++) { const q = feld(j, e.n); d += quad(kF, q[0], iv * 1.2, q[1], 1 - iv * 1.2) + quad(kF, q[0] + iu * 0.9, iv * 2.1, q[1] - iu * 0.9, 1 - iv * 2.1); k2 += kante(kF, q[0], iv * 1.2, q[1]); }
+    lagen.push('<path d="' + d + '" fill="url(#st-profil)" fill-rule="evenodd" stroke="#f3f2ee" stroke-opacity=".55" stroke-width="1.2"/><path d="' + k2 + '" fill="none" stroke="#f3f2ee" stroke-opacity=".85" stroke-width="1.4" stroke-linecap="round"/>');
+  }
+  /* Glas: je Feld eine Scheibe mit Glanzstreifen */
+  let glas = '', glanz = '';
+  const nG = e.fluegel ? e.n : 1;
+  for (let g = 0; g < nG; g++) {
+    const q = e.fluegel ? feld(g, e.n) : [iu, 1 - iu], u0 = q[0] + iu * 0.9, u1 = q[1] - iu * 0.9, v0 = e.fluegel ? iv * 2.1 : iv, v1 = 1 - v0, su = u1 - u0;
+    glas += quad(kG, u0, v0, u1, v1);
+    glanz += [P(kG, u0 + su * 0.18, v0), P(kG, u0 + su * 0.34, v0), P(kG, u0, v0 + (v1 - v0) * 0.42), P(kG, u0, v0 + (v1 - v0) * 0.22)].map((p, i) => (i ? 'L' : 'M') + r(p[0]) + ' ' + r(p[1])).join('') + 'Z';
+  }
+  lagen.push('<path d="' + glas + '" fill="url(#st-glas)" stroke="#f3f2ee" stroke-opacity=".45" stroke-width="1"/><path d="' + glanz + '" fill="#fff" fill-opacity=".22"/>');
+  /* Griff: am Flügel mit dem Griff, eine Ebene davor */
+  let gu = 0.5;
+  if (kH >= 0) {
+    gu = art === 'fenster' ? feld(0, 2)[1] - iu * 0.5 : art === 'balkon' ? 1 - iu * 2 : art === 'fsw' ? feld(3, 4)[1] - iu * 0.5 : feld(1, 2)[0] + iu * 0.5;
+    const gp = P(kH, gu, 0.5), gl = 20 * f + 8;
+    lagen.push('<path d="M' + r(gp[0]) + ' ' + r(gp[1] - 6) + 'L' + r(gp[0]) + ' ' + r(gp[1] + 6) + 'M' + r(gp[0]) + ' ' + r(gp[1]) + 'L' + r(gp[0]) + ' ' + r(gp[1] + gl) + '" fill="none" stroke="#f3f2ee" stroke-width="4" stroke-linecap="round"/>');
+  }
+  /* Beschriftung links, eine Linie zur oberen linken Ecke der Schicht (beim Griff zum Griff) */
+  const lab = namen.map((n, k) => {
+    const c = k === kH ? P(k, gu, 0.5) : P(k, 0, 0), ty = r(c[1]), tw = n.length * 7.3 + 14;
+    const farbe = k === 0 ? (neu ? '#8fd694' : '#93928d') : '#f3f2ee';
+    return '<g class="st-lab" style="--k: ' + k + '"><path d="M' + r(tw) + ' ' + r(ty - 4) + 'H' + r(c[0] - 12) + 'L' + r(c[0]) + ' ' + r(c[1]) + '" fill="none" stroke="#3a3a36" stroke-width="1"/>' +
+      '<circle cx="' + r(c[0]) + '" cy="' + r(c[1]) + '" r="2.4" fill="#f3f2ee"/><text x="0" y="' + ty + '" font-size="13" font-weight="700" fill="' + farbe + '">' + esc(n) + '</text></g>';
+  }).join('');
+  const teile = namen.slice(1).join(', ');
+  return '<figure class="st-buehne' + (bewegt ? ' is-auf' : '') + '"><svg viewBox="0 0 ' + SW + ' ' + r(Math.min(SH, unten + 16)) + '" role="img" aria-label="' + esc((OPT.art.find((x) => x.k === art) || OPT.art[0]).label + ' in Teilen: ' + teile + (neu ? ', für eine neue Öffnung' : ', ersetzt das alte Fenster')) + '">' +
+    '<defs>' +
+    '<linearGradient id="st-glas" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dfe8e6" stop-opacity=".55"/><stop offset=".5" stop-color="#9fb2b2" stop-opacity=".28"/><stop offset="1" stop-color="#6f8384" stop-opacity=".42"/></linearGradient>' +
+    '<linearGradient id="st-profil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a38"/><stop offset="1" stop-color="#232322"/></linearGradient>' +
+    '<radialGradient id="st-schatten" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>' +
+        '<ellipse cx="' + r(x0 + (L - 1) * dx / 2 + w / 2) + '" cy="' + r(Math.min(SH - 6, unten + 4)) + '" rx="' + r(w * 0.75 + L * 10) + '" ry="10" fill="url(#st-schatten)"/>' +
+    lagen.map((l, k) => ebene(k, l)).join('') + lab + '</svg></figure>';
+}
+/* Elementart als Band zum Wischen: kurze Namen, die gewählte Art unterstrichen; darunter Name, Kurzbeschreibung und Erklärung */
+function startBand(art) {
+  const o = OPT.art.find((x) => x.k === art) || OPT.art[0], g = optG('art', o);
+  return '<div class="st-band" role="group" aria-label="Das Element">' + OPT.art.map((x) => '<button type="button" class="qopt st-art" data-act="art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '">' + esc((ST_TEILE[x.k] || {}).kurz || x.label) + '</button>').join('') + '</div>' +
+    '<p class="st-art-sub"><span><b>' + esc(o.label) + '</b> · ' + esc(o.sub || '') + '</span>' + (g ? '<button type="button" class="qinfo st-info" aria-label="' + esc('Erklärung: ' + o.label) + '" data-act="gloss" data-k="' + g + '">' + ICON_I + '</button>' : '') + '</p>';
 }
 function startKarten(group, cur, act, cls) {
   return '<div class="qcards' + (cls ? ' ' + cls : '') + '" role="group">' + OPT[group].map((o) => '<div class="qo"><button type="button" class="qopt" data-act="' + act + '" data-v="' + o.k + '" aria-pressed="' + (o.k === cur) + '">' + svgIcon(ICO[group](o.k), 44) + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + '</span></button>' + (optG(group, o) ? '<button type="button" class="qinfo" aria-label="' + esc('Erklärung: ' + o.label) + '" data-act="gloss" data-k="' + optG(group, o) + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
 }
 SCREENS.start = () => {
-  const w = S.win, art = w.art || 'fenster', o = OPT.art.find((x) => x.k === art) || OPT.art[0];
-  const html = hd('Schritt 1 von 6 · Start', 'Was planst du?', 'Zwei Angaben, dann führt dich die App passend durch Fotos, Maße und Wünsche.', '', '', schrittTools('elementart')) +
-    '<div class="qgroup"><p class="eyebrow">Die Stelle</p>' + startKarten('situation', w.neu ? 'neu' : 'ersatz', 'situation') +
-    (w.neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung') : '') + '</div>' +
-    '<div class="qgroup"><p class="eyebrow">Das Element</p>' + startKarten('art', art, 'art', 'liste') + '</div>' +
-    model(startWin(w), { id: 'w3d', view: 'three', sway: true, stageH: 230, fitW: 0.76, fitH: 0.7, hint: o.label + (istTuer(w) ? ' · bodentief' : '') });
+  const w = S.win, art = w.art || 'fenster', neu = !!w.neu, e = ST_TEILE[art] || ST_TEILE.fenster;
+  const schluessel = art + '|' + neu, bewegt = schluessel !== stZuletzt; stZuletzt = schluessel;
+  const nTeile = 1 + (e.fluegel ? 1 : 0) + 1 + (e.griff ? 1 : 0);
+  const lead = art === 'fest' ? 'Eine Festverglasung hat nur Rahmen und Glas. Die App fragt beides ab.' : e.dein + ' hat ' + nTeile + ' Teile. Die App fragt jedes davon ab.';
+  const html = startTeile(art, neu, bewegt) +
+    hd('Schritt 1 von 6 · Start', 'Was planst du?', lead, '', '', schrittTools('elementart')) +
+    '<div class="qgroup"><p class="eyebrow">Die Stelle</p>' + startKarten('situation', neu ? 'neu' : 'ersatz', 'situation', 'stelle') +
+    (neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung') : '') + '</div>' +
+    '<div class="qgroup"><p class="eyebrow">Das Element</p>' + startBand(art) + '</div>';
   return { html: html, back: ['Aufmaß', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos', zurueck: true } };
 };
 /* ---------- Fotos ---------- */

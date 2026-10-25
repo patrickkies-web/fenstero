@@ -1283,3 +1283,27 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
   .hdr-inst:has(.ein-zeichen.logo) .hdr-name { font-size: 15px; line-height: 1.15; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2 }
   .hdr-row:has(.hdr-r.zwei) .hdr-inst:has(.ein-zeichen.logo) .hdr-name { display: none }
 }
+
+/* ---------- Start: das Fenster in Teilen (SCREENS.start in app.js) ----------
+   Bühne mit Explosionszeichnung, darunter Überschrift, die Stelle als zwei Karten und die Elementart als Band zum Wischen.
+   Die Teile fahren nur auseinander, wenn sich Stelle oder Element geändert haben (.is-auf), nacheinander 80 ms versetzt in 700 ms. */
+.st-buehne { margin: 0 -16px; padding: 0 16px; background: radial-gradient(55% 75% at 62% 22%, rgba(243, 242, 238, .10), rgba(243, 242, 238, 0) 72%) } /* Licht von oben rechts, läuft weich aus, ohne Kante */
+.st-buehne + .hd { margin-top: -6px; padding-top: 0 }
+.st-buehne svg { display: block; width: 100%; height: auto; max-width: 480px; margin: 0; overflow: visible; font-family: inherit }
+.st-buehne.is-auf .st-l { animation: st-auf 700ms var(--e-out) both; animation-delay: calc(var(--k) * 80ms) }
+.st-buehne.is-auf .st-lab { animation: st-lab 400ms ease-out both; animation-delay: calc(320ms + var(--k) * 80ms) }
+@keyframes st-auf { from { transform: translate(var(--x), var(--y)); opacity: .35 } to { transform: none; opacity: 1 } }
+@keyframes st-lab { from { opacity: 0 } to { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .st-buehne.is-auf .st-l, .st-buehne.is-auf .st-lab { animation: none } }
+.qcards.stelle .qopt { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 10px; min-height: 64px; padding: 8px 40px 8px 10px }
+.qcards.stelle .qopt svg { width: 36px; height: 36px }
+.qcards.stelle .qopt .tx { align-items: flex-start; gap: 2px }
+.qcards.stelle .qopt .lbl { font-size: 15px; white-space: normal }
+.qcards.stelle .qopt .sb { white-space: normal; line-height: 1.2 }
+.st-band { display: flex; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none; box-shadow: inset 0 -1px 0 var(--line) }
+.st-band::-webkit-scrollbar { display: none }
+.qopt.st-art { flex: 0 0 auto; width: auto; min-height: 48px; padding: 0 14px; border: 0; border-radius: 0; background: none; box-shadow: none; color: var(--muted); font-size: 15px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; justify-content: center; align-items: center }
+.qopt.st-art[aria-pressed="true"] { color: var(--text); font-weight: 800; box-shadow: inset 0 -3px 0 var(--accent) }
+.st-art-sub { margin: 8px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; line-height: 1.35; color: var(--muted) }
+.st-art-sub b { color: var(--text2); font-weight: 700 }
+.st-art-sub .qinfo.st-info { position: static; flex: 0 0 auto; padding: 0; align-items: center; justify-content: center }
