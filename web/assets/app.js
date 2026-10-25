@@ -1210,23 +1210,28 @@ function w3dHTML(w, o) {
   const faceEl = (role, cls, extra) => '<div class="w3d-f ' + cls + '" data-r="' + role + '"' + (extra || '') + '></div>';
   const G = w3dGeformt(w, o);
   let h = w3dHuelle(w, o) + (o.bg ? '<div class="w3d-bg" style="background-image: url(' + o.bg + ')"></div>' : '') + '<div class="w3d-cam"><div class="w3d-sway"><div class="w3d-world">';
+  /* o.frei: das Element schwebt allein (Start), ohne Wand, Laibung, Boden, Fensterbänke, Fuge und Abdeckleisten */
+  const frei = !!o.frei;
+  if (!frei) {
   h += faceEl('wall-in', 'w3d-wall-in'); h += faceEl('wall-out', 'w3d-wall-out', ' style="background: ' + facadeBg(w.fassade, fassadeTon(w)) + '"');
   if (G) { for (let k = 0; k < FORM_O + FORM_U + 2; k++) h += faceEl('rs-' + k, 'w3d-rev w3d-rs'); }
   else h += faceEl('rev-t', 'w3d-rev w3d-rev-t') + faceEl('rev-b', 'w3d-rev w3d-rev-b') + faceEl('rev-l', 'w3d-rev w3d-rev-l') + faceEl('rev-r', 'w3d-rev w3d-rev-r');
   /* Türen stehen auf dem Boden: Raumboden innen, Terrasse außen */
   if (V.tuer) h += faceEl('floor-in', 'w3d-floor w3d-floor-in') + faceEl('floor-out', 'w3d-floor w3d-floor-out');
-  const bi = bank(w.fbi, 'innen'), ba = bank(w.fba, 'aussen');
+  }
+  const bi = bank(w.fbi, 'innen'), ba = bank(w.fba, 'aussen'), Z = zubehoer(w);
+  if (!frei) {
   h += faceEl('sill-t', 'w3d-sill', ' style="background: ' + bi.oben + '"') + faceEl('sill-f', 'w3d-sill w3d-sill-f', ' style="background: ' + bi.stirn + '"') + faceEl('sill-l', 'w3d-sill w3d-sill-e', ' style="background: ' + bi.stirn + '"') + faceEl('sill-r', 'w3d-sill w3d-sill-e', ' style="background: ' + bi.stirn + '"');
   h += faceEl('sa-t1', 'w3d-sill', ' style="background: ' + ba.oben + '"') + faceEl('sa-t2', 'w3d-sill', ' style="background: ' + ba.oben + '"') + faceEl('sa-f', 'w3d-sill w3d-sill-f', ' style="background: ' + ba.stirn + '"');
   /* Endkappen der Fensterbank außen */
   h += faceEl('sa-l', 'w3d-sill w3d-sill-e', ' style="background: ' + ba.stirn + '"') + faceEl('sa-r', 'w3d-sill w3d-sill-e', ' style="background: ' + ba.stirn + '"');
-  const Z = zubehoer(w);
   /* Abdeckleisten an der Fuge zwischen Rahmen und Laibung, innen und/oder außen */
   if (Z.leiste === 'innen' || Z.leiste === 'beide') ['t', 'l', 'r'].forEach((k) => { h += faceEl('li-' + k, 'w3d-leiste'); });
   if (Z.leiste === 'aussen' || Z.leiste === 'beide') ['t', 'l', 'r'].forEach((k) => { h += faceEl('la-' + k, 'w3d-leiste'); });
+  }
   h += '<div class="w3d-el' + (V.showEl ? '' : ' is-hidden') + '" data-r="el">';
   h += faceEl('el-front', 'w3d-frame', ' style="background: ' + fin.bg + '"') + faceEl('el-back', 'w3d-frame w3d-back', ' style="background: ' + fout.bg + '"');
-  h += faceEl('fuge', 'w3d-fuge'); // Einbaufuge rundum, sonst sieht man zwischen Rahmen und Laibung ins Leere
+  if (!frei) h += faceEl('fuge', 'w3d-fuge'); // Einbaufuge rundum, sonst sieht man zwischen Rahmen und Laibung ins Leere
   if (!G) ['l', 'r', 't', 'b'].forEach((k) => { h += faceEl('el-side-' + k, 'w3d-frame w3d-side', ' style="background-color: ' + (k === 'l' || k === 'r' ? fout.solid : fin.solid) + '"'); });
   /* Auf dem Blendrahmen innen: elektrischer Fensteröffner (Kettenantrieb), aufgesetzter Schalldämmlüfter */
   if (Z.oeff) h += faceEl('oeff', 'w3d-band w3d-oeff');
@@ -1335,7 +1340,7 @@ function glasLupe(w) {
 const glasLupeKey = (w) => [w.glas, (w.glasfn || []).join(','), w.rc, dg(w, 'ahFarbe') ? w.ahFarbe : '', dg(w, 'dicht') ? w.dicht : ''].join('|');
 const glasText = (w) => (w.glas === '2' ? '2 Scheiben · Ug ≈ 1,1' : '3 Scheiben · Ug ≈ 0,5 bis 0,7');
 /* Struktur-Signatur: solange sie gleich bleibt, wird die Bühne weiterverwendet und alles morpht mit Übergängen */
-function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? w.sart : 0, innenAktiv(w) ? 1 : 0, zubehoerSig(w)].join('|'); }
+function w3dSig(w, o) { o = o || {}; const V = w3dCalc(w, o); return [o.id || 'w3d', w.art || 'fenster', o.frei ? 'frei' : '', w3dGeformt(w, o) ? 'g' : 'e', w.sashes.length, w.ol ? 1 : 0, w.roll === 'vorbau' || w.roll === 'aufsatz' ? 1 : 0, w.insekt && w.insekt !== 'keiner' ? 1 : 0, w.bars.map((b) => b.id).join(','), o.bg ? 1 : 0, V.tuer ? 't' : 'f', V.ulH ? 1 : 0, sonneAktiv(w) ? w.sart : 0, innenAktiv(w) ? 1 : 0, zubehoerSig(w)].join('|'); }
 /* Farben und Materialien auf die Flächen schreiben (mit Übergang, wenn sich etwas ändert) */
 function w3dPaint(stage, w) {
   /* Nur schreiben, was sich geändert hat (der Vergleich mit dem gelesenen Stil schlägt bei Verläufen immer fehl) */
@@ -2894,103 +2899,100 @@ function linkHomeInhaltAlt(I) {
   return { html: html, bar: null };
 }
 /* ---------- Start: die Stelle und das Element ----------
-   Gestaltung „Das Fenster in Teilen“ (25.10.2026, Design-Entwurf „Schritt 1 neu gedacht“): Oben liegt das gewählte Element als
-   Explosionszeichnung auf der dunklen Bühne, Rahmen, Flügel, Glas und Griff schräg hintereinander und links beschriftet. Die Elementart
-   bestimmt die Teile (Festverglasung: nur Rahmen und Glas; Faltschiebewand: vier Faltflügel). Die hinterste Ebene zeigt die Stelle:
-   beim Ersetzen das alte Fenster grau gestrichelt, bei der neuen Öffnung grün gestrichelt. Ändern sich Stelle oder Element, fahren die
-   Teile nacheinander auseinander (80 ms versetzt, 700 ms), sonst steht die Zeichnung; bei „weniger Bewegung“ immer still (app.css). */
-const ST_TEILE = {
-  fenster: { w: 132, h: 162, n: 2, fluegel: 'Flügel', griff: true, kurz: 'Fenster', dein: 'Dein Fenster' },
-  balkon: { w: 92, h: 214, n: 1, fluegel: 'Flügel', griff: true, kurz: 'Balkontür', dein: 'Deine Balkon- oder Terrassentür' },
-  fest: { w: 160, h: 150, n: 1, fluegel: '', griff: false, kurz: 'Festverglasung', dein: 'Deine Festverglasung' },
-  hst: { w: 206, h: 160, n: 2, fluegel: 'Schiebeflügel', griff: true, kurz: 'Hebe-Schiebe', dein: 'Deine Hebe-Schiebe-Tür' },
-  psk: { w: 186, h: 160, n: 2, fluegel: 'PSK-Flügel', griff: true, kurz: 'PSK-Tür', dein: 'Deine PSK-Tür' },
-  fsw: { w: 216, h: 158, n: 4, fluegel: 'Faltflügel', griff: true, kurz: 'Faltschiebewand', dein: 'Deine Faltschiebewand' }
-};
-let stZuletzt = '';
-function startTeile(art, neu, bewegt) {
-  const e = ST_TEILE[art] || ST_TEILE.fenster, SW = 358, SH = 236;
-  const alt = art === 'fenster' ? 'Altes Fenster' : art === 'fest' ? 'Alte Verglasung' : 'Alte Tür';
-  const namen = [neu ? 'Neue Öffnung' : alt, 'Rahmen'].concat(e.fluegel ? [e.fluegel] : [], ['Glas'], e.griff ? ['Griff'] : []);
-  const L = namen.length, dx = 22, dy = 26, x0 = 126;
-  const f = Math.min(1, (SW - x0 - 8 - (L - 1) * dx) / e.w, (SH - 34 - (L - 1) * dy) / (e.h * 1.2));
-  const w = e.w * f, h = e.h * f, sk = w * 0.2, y0 = sk + (SH - 24 - (sk + h + (L - 1) * dy)) / 2 + 4, unten = y0 + (L - 1) * dy + h;
-  const r = (v) => Math.round(v * 10) / 10;
-  /* Punkt auf der Fläche einer Schicht (u, v von 0 bis 1), die rechte Kante zum Betrachter gedreht */
-  const P = (k, u, v) => [x0 + k * dx + u * w, y0 + k * dy + v * h - sk * u];
-  const quad = (k, u0, v0, u1, v1) => [P(k, u0, v0), P(k, u1, v0), P(k, u1, v1), P(k, u0, v1)].map((p, i) => (i ? 'L' : 'M') + r(p[0]) + ' ' + r(p[1])).join('') + 'Z';
-  const kante = (k, u0, v0, u1) => { const a = P(k, u0, v0), b = P(k, u1, v0); return 'M' + r(a[0]) + ' ' + r(a[1]) + 'L' + r(b[0]) + ' ' + r(b[1]); };
-  const iu = 9 / e.w, iv = 9 / e.h, idx = (n) => namen.indexOf(n); // Profilbreite wächst und schrumpft mit dem Element
-  const kR = idx('Rahmen'), kF = e.fluegel ? idx(e.fluegel) : -1, kG = idx('Glas'), kH = e.griff ? idx('Griff') : -1;
-  const feld = (j, n) => { const a = iu * 1.2, b = 1 - iu * 1.2, pw = (b - a) / n; return [a + j * pw + (j ? 0.004 : 0), a + (j + 1) * pw - (j < n - 1 ? 0.004 : 0)]; };
-  const ebene = (k, inhalt) => '<g class="st-l" style="--k: ' + k + '; --x: ' + r(-dx * k) + 'px; --y: ' + r(-dy * k) + 'px">' + inhalt + '</g>';
-  const lagen = [];
-  /* 0: die Stelle */
-  lagen.push(neu
-    ? '<path d="' + quad(0, 0, 0, 1, 1) + '" fill="#8fd694" fill-opacity=".06" stroke="#8fd694" stroke-width="1.8" stroke-dasharray="7 5"/>'
-    : '<path d="' + quad(0, 0, 0, 1, 1) + quad(0, iu, iv, 1 - iu, 1 - iv) + '" fill="none" stroke="#93928d" stroke-width="1.4" stroke-dasharray="5 4" opacity=".75"/>');
-  /* Rahmen */
-  lagen.push('<path d="' + quad(kR, 0, 0, 1, 1) + quad(kR, iu, iv, 1 - iu, 1 - iv) + '" fill="url(#st-profil)" fill-rule="evenodd" stroke="#f3f2ee" stroke-opacity=".55" stroke-width="1.2"/>' +
-    '<path d="' + kante(kR, 0, 0, 1) + '" fill="none" stroke="#f3f2ee" stroke-opacity=".9" stroke-width="1.6" stroke-linecap="round"/>');
-  /* Flügel: je Feld ein Ring */
-  if (kF >= 0) {
-    let d = '', k2 = '';
-    for (let j = 0; j < e.n; j++) { const q = feld(j, e.n); d += quad(kF, q[0], iv * 1.2, q[1], 1 - iv * 1.2) + quad(kF, q[0] + iu * 0.9, iv * 2.1, q[1] - iu * 0.9, 1 - iv * 2.1); k2 += kante(kF, q[0], iv * 1.2, q[1]); }
-    lagen.push('<path d="' + d + '" fill="url(#st-profil)" fill-rule="evenodd" stroke="#f3f2ee" stroke-opacity=".55" stroke-width="1.2"/><path d="' + k2 + '" fill="none" stroke="#f3f2ee" stroke-opacity=".85" stroke-width="1.4" stroke-linecap="round"/>');
-  }
-  /* Glas: je Feld eine Scheibe mit Glanzstreifen */
-  let glas = '', glanz = '';
-  const nG = e.fluegel ? e.n : 1;
-  for (let g = 0; g < nG; g++) {
-    const q = e.fluegel ? feld(g, e.n) : [iu, 1 - iu], u0 = q[0] + iu * 0.9, u1 = q[1] - iu * 0.9, v0 = e.fluegel ? iv * 2.1 : iv, v1 = 1 - v0, su = u1 - u0;
-    glas += quad(kG, u0, v0, u1, v1);
-    glanz += [P(kG, u0 + su * 0.18, v0), P(kG, u0 + su * 0.34, v0), P(kG, u0, v0 + (v1 - v0) * 0.42), P(kG, u0, v0 + (v1 - v0) * 0.22)].map((p, i) => (i ? 'L' : 'M') + r(p[0]) + ' ' + r(p[1])).join('') + 'Z';
-  }
-  lagen.push('<path d="' + glas + '" fill="url(#st-glas)" stroke="#f3f2ee" stroke-opacity=".45" stroke-width="1"/><path d="' + glanz + '" fill="#fff" fill-opacity=".22"/>');
-  /* Griff: am Flügel mit dem Griff, eine Ebene davor */
-  let gu = 0.5;
-  if (kH >= 0) {
-    gu = art === 'fenster' ? feld(0, 2)[1] - iu * 0.5 : art === 'balkon' ? 1 - iu * 2 : art === 'fsw' ? feld(3, 4)[1] - iu * 0.5 : feld(1, 2)[0] + iu * 0.5;
-    const gp = P(kH, gu, 0.5), gl = 20 * f + 8;
-    lagen.push('<path d="M' + r(gp[0]) + ' ' + r(gp[1] - 6) + 'L' + r(gp[0]) + ' ' + r(gp[1] + 6) + 'M' + r(gp[0]) + ' ' + r(gp[1]) + 'L' + r(gp[0]) + ' ' + r(gp[1] + gl) + '" fill="none" stroke="#f3f2ee" stroke-width="4" stroke-linecap="round"/>');
-  }
-  /* Beschriftung links, eine Linie zur oberen linken Ecke der Schicht (beim Griff zum Griff) */
-  const lab = namen.map((n, k) => {
-    const c = k === kH ? P(k, gu, 0.5) : P(k, 0, 0), ty = r(c[1]), tw = n.length * 7.3 + 14;
-    const farbe = k === 0 ? (neu ? '#8fd694' : '#93928d') : '#f3f2ee';
-    return '<g class="st-lab" style="--k: ' + k + '"><path d="M' + r(tw) + ' ' + r(ty - 4) + 'H' + r(c[0] - 12) + 'L' + r(c[0]) + ' ' + r(c[1]) + '" fill="none" stroke="#3a3a36" stroke-width="1"/>' +
-      '<circle cx="' + r(c[0]) + '" cy="' + r(c[1]) + '" r="2.4" fill="#f3f2ee"/><text x="0" y="' + ty + '" font-size="13" font-weight="700" fill="' + farbe + '">' + esc(n) + '</text></g>';
-  }).join('');
-  const teile = namen.slice(1).join(', ');
-  return '<figure class="st-buehne' + (bewegt ? ' is-auf' : '') + '"><svg viewBox="0 0 ' + SW + ' ' + r(Math.min(SH, unten + 16)) + '" role="img" aria-label="' + esc((OPT.art.find((x) => x.k === art) || OPT.art[0]).label + ' in Teilen: ' + teile + (neu ? ', für eine neue Öffnung' : ', ersetzt das alte Fenster')) + '">' +
-    '<defs>' +
-    '<linearGradient id="st-glas" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dfe8e6" stop-opacity=".55"/><stop offset=".5" stop-color="#9fb2b2" stop-opacity=".28"/><stop offset="1" stop-color="#6f8384" stop-opacity=".42"/></linearGradient>' +
-    '<linearGradient id="st-profil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a38"/><stop offset="1" stop-color="#232322"/></linearGradient>' +
-    '<radialGradient id="st-schatten" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>' +
-        '<ellipse cx="' + r(x0 + (L - 1) * dx / 2 + w / 2) + '" cy="' + r(Math.min(SH - 6, unten + 4)) + '" rx="' + r(w * 0.75 + L * 10) + '" ry="10" fill="url(#st-schatten)"/>' +
-    lagen.map((l, k) => ebene(k, l)).join('') + lab + '</svg></figure>';
+   Gestaltung „Bühne“ (25.10.2026): Oben die Stelle als Glasschalter (Ersetzen oder Neue Öffnung). Darunter schwebt das gewählte Element
+   allein in 3-D auf einer dunklen Bühne (echtes Modell ohne Wand, o.frei), von oben angestrahlt, mit Schatten am Boden; hinter ihm steht
+   sein Name riesig als Umriss. Bei der neuen Öffnung markiert ein grüner Ring am Boden den Platz. Wechseln: nach links oder rechts
+   wischen (das Modell dreht sich mit dem Finger und hüpft beim Loslassen weiter), die Nachbarn am Rand oder die Punkte antippen. Das neue
+   Element hüpft aus der Wischrichtung ins Bild (720 ms); bei „weniger Bewegung“ steht es sofort da (app.css). */
+const START_MASS = { fenster: [1230, 1410, 620], balkon: [1010, 2180, 0], fest: [1800, 1400, 620], hst: [2600, 2200, 0], psk: [2000, 2180, 0], fsw: [3600, 2200, 0] };
+function startWin(w) {
+  const m = START_MASS[w.art] || START_MASS.fenster;
+  const v = Object.assign(baseWin(), { w: m[0], h: m[1], mo: { hm: m[1] + 70, hl: m[1] + 70, hr: m[1] + 70, wm: m[0] + 140, wt: m[0] + 140, wb: m[0] + 140 }, el: { h: m[1], w: m[0] }, bru: m[2], laib: 140, fa: w.fa, fi: w.fi, offen: kopie(w.offen || {}), material: w.material, neu: w.neu, hst: w.hst, fsw: w.fsw, bt: w.bt, psk: w.psk });
+  artSetzen(v, w.art || 'fenster'); return v;
 }
-/* Elementart als Band zum Wischen: kurze Namen, die gewählte Art unterstrichen; darunter Name, Kurzbeschreibung und Erklärung */
-function startBand(art) {
-  const o = OPT.art.find((x) => x.k === art) || OPT.art[0], g = optG('art', o);
-  return '<div class="st-band" role="group" aria-label="Das Element">' + OPT.art.map((x) => '<button type="button" class="qopt st-art" data-act="art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '">' + esc((ST_TEILE[x.k] || {}).kurz || x.label) + '</button>').join('') + '</div>' +
-    '<p class="st-art-sub"><span><b>' + esc(o.label) + '</b> · ' + esc(o.sub || '') + '</span>' + (g ? '<button type="button" class="qinfo st-info" aria-label="' + esc('Erklärung: ' + o.label) + '" data-act="gloss" data-k="' + g + '">' + ICON_I + '</button>' : '') + '</p>';
+/* Name groß unter der Bühne und das Wort als Umriss dahinter (kurz, damit es auf Deutsch nicht bricht) */
+const ST_NAME = { fenster: ['Fenster', 'Fenster'], balkon: ['Balkontür', 'Balkon'], fest: ['Festverglasung', 'Fest'], hst: ['Hebe-Schiebe-Tür', 'Schiebe'], psk: ['PSK-Tür', 'PSK'], fsw: ['Faltschiebewand', 'Falt'] };
+let stZuletzt = '', stRichtung = 0;
+const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
+const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
+/* Umriss eines Elements im Seitenverhältnis seiner Maße, für die Nachbarn am Rand */
+function stUmriss(k) {
+  const m = START_MASS[k] || START_MASS.fenster, f = Math.min(30 / m[0], 40 / m[1]), w = m[0] * f, h = m[1] * f, x = (36 - w) / 2, y = (44 - h) / 2;
+  const n = k === 'fsw' ? 4 : k === 'fenster' || k === 'hst' || k === 'psk' ? 2 : 1, r = (v) => Math.round(v * 10) / 10;
+  let d = '<rect x="' + r(x) + '" y="' + r(y) + '" width="' + r(w) + '" height="' + r(h) + '" rx="1.5"/>';
+  for (let j = 1; j < n; j++) d += '<path d="M' + r(x + w * j / n) + ' ' + r(y) + 'V' + r(y + h) + '"/>';
+  return '<svg width="36" height="44" viewBox="0 0 36 44" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">' + d + '</svg>';
 }
-function startKarten(group, cur, act, cls) {
-  return '<div class="qcards' + (cls ? ' ' + cls : '') + '" role="group">' + OPT[group].map((o) => '<div class="qo"><button type="button" class="qopt" data-act="' + act + '" data-v="' + o.k + '" aria-pressed="' + (o.k === cur) + '">' + svgIcon(ICO[group](o.k), 44) + '<span class="tx"><span class="lbl">' + esc(o.label) + '</span>' + (o.sub ? '<span class="sb">' + esc(o.sub) + '</span>' : '') + '</span></button>' + (optG(group, o) ? '<button type="button" class="qinfo" aria-label="' + esc('Erklärung: ' + o.label) + '" data-act="gloss" data-k="' + optG(group, o) + '">' + ICON_I + '</button>' : '') + '</div>').join('') + '</div>';
+/* Die Stelle als Glasschalter: zwei Hälften, das helle Glas gleitet zur gewählten */
+function startStelle(neu) {
+  return '<div class="st-stelle' + (neu ? ' is-neu' : '') + '" role="group" aria-label="Die Stelle">' + OPT.situation.map((o) =>
+    '<button type="button" class="qopt st-seg" data-act="situation" data-v="' + o.k + '" aria-pressed="' + ((o.k === 'neu') === neu) + '"><span class="lbl">' + esc(o.label) + '</span><span class="sb">' + esc(o.sub || '') + '</span></button>').join('') + '</div>';
+}
+function startBuehne(w, art, neu, hop) {
+  const vor = stNachbar(art, -1), nach = stNachbar(art, 1), lab = (k) => (OPT.art.find((x) => x.k === k) || OPT.art[0]).label;
+  const nb = (k, seite) => '<button type="button" class="st-nb st-nb-' + seite + '" data-act="art" data-v="' + k + '" data-r="' + (seite === 'l' ? -1 : 1) + '" aria-label="' + esc((seite === 'l' ? 'Vorheriges Element: ' : 'Nächstes Element: ') + lab(k)) + '">' + stUmriss(k) + '<svg class="st-nb-pfeil" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="' + (seite === 'l' ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5') + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+  return '<div class="st-buehne' + (neu ? ' is-neu' : '') + (hop ? ' is-hop' : '') + '" style="--d: ' + (hop < 0 ? -1 : 1) + '">' +
+    '<svg class="st-wort" viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><text x="195" y="160" text-anchor="middle" font-size="148" font-weight="800" letter-spacing="-6">' + esc(ST_NAME[art][1]) + '</text></svg>' +
+    '<div class="st-boden" aria-hidden="true"></div>' +
+    '<div class="st-held">' +
+    model(startWin(w), { id: 'w3d', view: 'three', sway: true, frei: true, noZoom: true, cls: 'st-schwebe ohne-erbe', stageH: 262, fitW: 0.62, fitH: 0.66 }) + '</div>' +
+    nb(vor, 'l') + nb(nach, 'r') +
+    '<div class="st-punkte" role="group" aria-label="Das Element">' + OPT.art.map((x) => '<button type="button" class="qopt st-dot" data-act="art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '" aria-label="' + esc(x.label) + '"><span></span></button>').join('') + '</div></div>';
 }
 SCREENS.start = () => {
-  const w = S.win, art = w.art || 'fenster', neu = !!w.neu, e = ST_TEILE[art] || ST_TEILE.fenster;
-  const schluessel = art + '|' + neu, bewegt = schluessel !== stZuletzt; stZuletzt = schluessel;
-  const nTeile = 1 + (e.fluegel ? 1 : 0) + 1 + (e.griff ? 1 : 0);
-  const lead = art === 'fest' ? 'Eine Festverglasung hat nur Rahmen und Glas. Die App fragt beides ab.' : e.dein + ' hat ' + nTeile + ' Teile. Die App fragt jedes davon ab.';
-  const html = startTeile(art, neu, bewegt) +
-    hd('Schritt 1 von 6 · Start', 'Was planst du?', lead, '', '', schrittTools('elementart')) +
-    '<div class="qgroup"><p class="eyebrow">Die Stelle</p>' + startKarten('situation', neu ? 'neu' : 'ersatz', 'situation', 'stelle') +
-    (neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung') : '') + '</div>' +
-    '<div class="qgroup"><p class="eyebrow">Das Element</p>' + startBand(art) + '</div>';
+  const w = S.win, art = w.art || 'fenster', neu = !!w.neu, o = OPT.art.find((x) => x.k === art) || OPT.art[0], g = optG('art', o);
+  /* Hüpfen nur, wenn sich das Element geändert hat: aus der Wischrichtung, sonst aus der Richtung in der Reihe */
+  const altArt = lastScreen === 'start' ? stZuletzt : '', hop = altArt && altArt !== art ? (stRichtung || (stIdx(art) > stIdx(altArt) ? 1 : -1)) : 0;
+  stZuletzt = art; stRichtung = 0;
+  const html = hd('Schritt 1 von 6 · Start', 'Was planst du?', '', '', '', schrittTools('elementart')) +
+    startStelle(neu) + startBuehne(w, art, neu, hop) +
+    '<div class="st-wahl' + (hop ? ' is-hop' : '') + '"><p class="st-name" aria-live="polite">' + esc(ST_NAME[art][0]) + '</p>' +
+    '<p class="st-sub">' + esc(o.sub || '') + (g ? ' <button type="button" class="ulink" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Erklärung: ' + o.label) + '">Was ist das?</button>' : '') + '</p></div>' +
+    (neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung', 'st-note') : '');
   return { html: html, back: ['Aufmaß', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos', zurueck: true } };
 };
+/* Wischen auf der Bühne: das Element folgt dem Finger (und dreht sich dabei, bindW3D), ab 56 px oder einem schnellen Wisch hüpft es
+   weiter; sonst federt es zurück. Ein Wisch löst danach keinen Tipp aus. */
+function startWischen() {
+  const b = document.querySelector('.scr[data-screen="start"] .st-buehne'), held = b && b.querySelector('.st-held');
+  if (!b || !held || b._wisch) return; b._wisch = true;
+  let g = null, gewischt = 0;
+  const weiter = (d) => {
+    stRichtung = d; gewischt = Date.now();
+    const ziel = document.querySelector('.st-dot[data-v="' + stNachbar(S.win.art || 'fenster', d) + '"]');
+    if (!ziel) return;
+    if (ruhig()) { ziel.click(); return; }
+    held.style.transition = 'transform 160ms cubic-bezier(.4, 0, 1, 1), opacity 160ms'; held.style.transform = 'translateX(' + (-d * 46) + '%) scale(.86)'; held.style.opacity = '0';
+    setTimeout(() => { if (document.body.contains(ziel)) ziel.click(); }, 150);
+  };
+  b.addEventListener('pointerdown', (e) => {
+    if (e.button != null && e.button > 0) return;
+    g = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, an: false, aus: false };
+    held.style.transition = 'none';
+  });
+  const move = (e) => {
+    if (!g || e.pointerId !== g.id || g.aus) return;
+    const dx = e.clientX - g.x, dy = e.clientY - g.y;
+    if (!g.an) { if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { g.aus = true; return; } if (Math.abs(dx) < 8) return; g.an = true; }
+    g.dx = dx; held.style.transform = 'translateX(' + (dx * 0.55).toFixed(1) + 'px)';
+  };
+  const up = (e) => {
+    if (!g || e.pointerId !== g.id) return;
+    const s = g; g = null;
+    if (!s.an || e.type === 'pointercancel' && Math.abs(s.dx) < 56) { held.style.transition = ''; held.style.transform = ''; return; }
+    const v = Math.abs(s.dx) / Math.max(1, performance.now() - s.t);
+    if (Math.abs(s.dx) >= 56 || v > 0.5 && Math.abs(s.dx) > 24) { weiter(s.dx < 0 ? 1 : -1); return; }
+    held.style.transition = 'transform 420ms cubic-bezier(.3, 1.5, .5, 1)'; held.style.transform = '';
+    const st = document.getElementById('w3d'), v0 = VIEWS.three; if (st) w3dView(st, v0);
+  };
+  document.addEventListener('pointermove', move); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
+  /* Aufräumen, sobald die Bühne nicht mehr im Dokument steht */
+  const weg = () => { if (!document.body.contains(b)) { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up); document.removeEventListener('pointerdown', weg, true); } };
+  document.addEventListener('pointerdown', weg, true);
+  b.addEventListener('click', (e) => { if (e.isTrusted && Date.now() - gewischt < 450) { e.stopPropagation(); e.preventDefault(); } }, true);
+  /* Pfeiltasten auf der Bühne und den Punkten */
+  b.parentNode.addEventListener('keydown', (e) => { if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && e.target.closest && e.target.closest('.st-punkte, .st-buehne')) { e.preventDefault(); stRichtung = e.key === 'ArrowRight' ? 1 : -1; const z = document.querySelector('.st-dot[data-v="' + stNachbar(S.win.art || 'fenster', stRichtung) + '"]'); if (z) { z.click(); const n = document.querySelector('.st-dot[aria-pressed="true"]'); if (n) n.focus(); } } });
+}
 /* ---------- Fotos ---------- */
 function photoTile(which) {
   const p = S.photos[which], a = S.ai[which], label = which === 'in' ? 'Von innen' : 'Von außen', demo = p && p.demo;
@@ -6372,6 +6374,7 @@ function bindAfterRender() {
     bindW3D(stage, () => { const r = W3DS[stage.id]; return r ? Object.assign({}, r.o, { onSash: r.o.selectable ? (i) => { if (S.screen === 'frage') onSashTap(i); else if (S.screen === 'tour') { S.selSash = i; S.openSash = i; render(); nachBild(() => { if (S.screen === 'tour') oeffnungZeigen(i); }, 60); } else { S.selSash = i; S.selBar = null; render(); } } : null }) : {}; });
   });
   document.querySelectorAll('.w3d-stage').forEach(bindRails);
+  if (S.screen === 'start') startWischen();
   bindZeichnen();
   bindFotoZoom();
   if (S.screen === 'tour') tourSperren();
