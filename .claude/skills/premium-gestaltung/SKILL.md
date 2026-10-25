@@ -62,7 +62,8 @@ Seine Messlatte: Ein Fensterbauer soll an der Seite merken, dass eeziframes Webd
 - **Flüssig auf einem mittleren Android-Telefon.** Schleifen laufen nur, solange das Element im Bild ist.
 - **Ruhige Fassung.** Jede Bewegung hat eine Fassung für „weniger Bewegung“; ohne JavaScript bleibt alles lesbar und bedienbar.
 - **Einbettung.** Die Verkaufsseite steht auch auf der Startseite in der Ansicht „Fensterbauer“ (/#fensterbauer, portal.js lädt sie nach
-  und ruft Verkauf.auf auf). Jedes Element muss dort genauso funktionieren, auch nach einem Neuaufbau.
+  nimmt den Rahmen .fb und ruft FbSeite.auf mit { eingebettet: true } auf; Gestaltung in web/assets/fensterbauer.css, Skripte in
+  web/assets/fensterbauer.js). Jedes Element muss dort genauso funktionieren, auch nach einem Neuaufbau.
 
 ## 4. Markenregeln in Kürze (verbindlich: docs/GESTALTUNG.md)
 

@@ -233,10 +233,10 @@ export default async (h) => {
     const start = await sH.evaluate(() => ({ wechsel: !!document.querySelector('.wechsel a[href="/fuer-fensterbauer/"]'), ansicht: !!document.querySelector('.wechsel [data-act="ansicht"][data-v="betrieb"]'), alt: /Projekte sind kostenlos/.test((document.querySelector('.wechsel') || {}).textContent || '') }));
     await sH.click('.top .ansicht [data-v="betrieb"]'); await sH.waitForTimeout(300);
     /* die Ansicht Fensterbauer bettet die Paket-Landingpage ein (portal.js, Einbettung der Verkaufsseite): auf die Einbettung warten */
-    await sH.waitForSelector('.vk-einbettung .vk-hero, .vk-einbettung .vk-rueckfall', { timeout: 8000 }).catch(() => null);
-    const karte = await sH.evaluate(() => ({ hero: !!document.querySelector('.vk-einbettung .vk-hero'), pakete: document.querySelectorAll('.vk-einbettung .vk-paket').length, h1: Array.from(document.querySelectorAll('h1')).map((e) => e.textContent.trim()) }));
+    await sH.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null);
+    const karte = await sH.evaluate(() => ({ hero: !!document.querySelector('.vk-einbettung .fb #hero'), pakete: document.querySelectorAll('.vk-einbettung .pk-karte').length, h1: Array.from(document.querySelectorAll('h1')).map((e) => e.textContent.trim()) }));
     const fb = await X.api('localhost', '/fuer-fensterbauer/');
-    ok(start.wechsel && start.ansicht && !start.alt && karte.hero && karte.pakete === 3 && karte.h1.length === 1 && /Fenster-Konfigurator/.test(karte.h1[0]) && fb.status === 200 && /id="paket-signature"/.test(fb.text), 'Startseite eeziframes.com: „Für Fensterbauer“ führt zu den Paketen (die Ansicht für Bestandsbetriebe bleibt erreichbar), die Ansicht für Fensterbauer bettet die Paket-Landingpage ein (Startbild, drei Paketkarten, ein h1: ' + karte.h1.join(' | ') + ')');
+    ok(start.wechsel && start.ansicht && !start.alt && karte.hero && karte.pakete === 3 && karte.h1.length === 1 && /Anfragen mit Aufmaß/.test(karte.h1[0]) && fb.status === 200 && /<article class="pk-karte[^"]*" data-paket="2">/.test(fb.text), 'Startseite eeziframes.com: „Für Fensterbauer“ führt zu den Paketen (die Ansicht für Bestandsbetriebe bleibt erreichbar), die Ansicht für Fensterbauer bettet die Paket-Landingpage ein (Startbild, drei Paketkarten, ein h1: ' + karte.h1.join(' | ') + ')');
     await sH.evaluate(() => { S.sheet = { k: 'login' }; render(); });
     await sH.waitForSelector('form[data-form="srvlogin"] #lg-mail');
     await sH.fill('#lg-mail', TEAM); await sH.click('form[data-form="srvlogin"] button[type="submit"]');

@@ -551,7 +551,7 @@ let ctaIo = null;
 function kopfCta() {
   if (ctaIo) { ctaIo.disconnect(); ctaIo = null; }
   const top = document.querySelector('.top'); if (!top || !top.querySelector('.kopf-cta')) return;
-  const ziele = Array.from(document.querySelectorAll('.scr .btn.primary, .sheet .btn.primary')), im = new Set();
+  const ziele = Array.from(document.querySelectorAll('.scr .btn.primary, .scr .fb .knopf-primaer, .sheet .btn.primary')), im = new Set();
   const setzen = () => top.classList.toggle('cta-still', im.size > 0 || !!S.sheet);
   const hoehe = top.getBoundingClientRect().bottom;
   ziele.forEach((z) => { const r = z.getBoundingClientRect(); if (r.width && r.bottom > hoehe && r.top < window.innerHeight) im.add(z); });
@@ -582,9 +582,9 @@ function afterRender(anim) {
     if (anim && io) { el.textContent = fmt === 'eur' ? eur(0) : '0'; const o = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { countUp(el, 0, to, fmt); o.disconnect(); } })); o.observe(el); return; }
     countUp(el, anim ? 0 : from, to, fmt);
   });
-  /* Ansicht Fensterbauer: die eingebettete Verkaufsseite füllen oder darauf verkauf.js starten (siehe „Einbettung der Verkaufsseite“) */
+  /* Ansicht Fensterbauer: die eingebettete Seite für Fensterbauer füllen oder darauf fensterbauer.js starten (siehe „Einbettung der Seite für Fensterbauer“) */
   const vk = scr.querySelector('.vk-einbettung');
-  if (vk) einbettungAuf(vk, anim);
+  if (vk) einbettungAuf(vk);
   const n = newNotif(), bell = document.querySelector('.top .ibtn:last-child');
   if (bell && n > lastNew) { bell.classList.add('ring'); const d = bell.querySelector('.dot'); if (d) d.classList.add('pop'); }
   lastNew = n;
@@ -789,15 +789,15 @@ const wechsel = (zu) => zu === 'betrieb'
      Bestandsbetriebe mit Anmeldung bleibt erreichbar, wird aber nicht mehr mit Freiprojekten beworben */
   ? '<section class="owner wechsel"><div><p class="eyebrow kicker">Für Fensterbauer</p><h2>' + akSatz('Ihr eigener Fensterkonfigurator.', 2) + '</h2><p>Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt.</p></div><div class="row"><a class="btn primary" href="/fuer-fensterbauer/">Pakete ansehen<span class="pf" aria-hidden="true"></span></a><button type="button" class="btn ghost" data-act="ansicht" data-v="betrieb">Zur Ansicht für Fensterbauer</button></div></section>'
   : '<section class="owner wechsel"><div><p class="eyebrow kicker">Für Hauseigentümer</p><h2>' + akSatz('Ihre eigenen Fenster ausmessen?', 2) + '</h2><p>Messen geht kostenlos in der App, ohne Konto und Schritt für Schritt erklärt. Das Aufmaßblatt geht an jeden Fensterbauer.</p></div><div class="row"><button type="button" class="btn ghost" data-act="ansicht" data-v="kunde">Zur Ansicht für Hauseigentümer<span class="pf" aria-hidden="true"></span></button></div></section>';
-/* ---------- Einbettung der Verkaufsseite (Ansicht Fensterbauer) ----------
-   Eine Quelle: Die Paket-Landingpage bleibt die statische Seite /fuer-fensterbauer/ (Suchmaschinen, verkauf.css, verkauf.js). Die
-   Startseite lädt ihren Inhalt einmal je Seitenaufruf (fetch, gleiche Herkunft), nimmt main.rg ohne die Brotkrumen und setzt ihn in den
-   Behälter .vk-einbettung; danach startet verkauf.js darauf (Formular, Reveal, Zahlen, Zeichen, Zeitleiste). Liegt der Inhalt schon im
-   Speicher, steht er beim nächsten Aufbau sofort im HTML (kein Flackern, die Scrollposition bleibt, etwa beim Öffnen des Anmeldeblatts).
-   Fällt das Laden aus, steht die Karte „Pakete ansehen“ mit dem Link zur Seite, nie eine leere Fläche; der nächste Aufbau versucht es
-   wieder. Sprungmarken der Seite (#pakete, #bestellen …) scrollen innerhalb der Einbettung, ohne die Adresse zu ändern, denn Hashes
-   steuern auf der Startseite die Ansicht (ankerLink); der Abstand zur klebenden Kopfzeile wird gemessen, weil sie am Telefon zwei
-   Zeilen hoch ist. */
+/* ---------- Einbettung der Seite für Fensterbauer (Ansicht Fensterbauer) ----------
+   Eine Quelle: Die Seite bleibt die statische Seite /fuer-fensterbauer/ (Suchmaschinen, fensterbauer.css, fensterbauer.js). Die
+   Startseite lädt sie einmal je Seitenaufruf (fetch, gleiche Herkunft), nimmt den Rahmen .fb (Gestaltung und Skripte gelten nur darin)
+   und setzt ihn in den Behälter .vk-einbettung; danach startet FbSeite.auf darauf mit { eingebettet: true } (ohne eigene Kopf- und
+   Fußzeile, die Startseite hat ihre). Liegt der Inhalt schon im Speicher, steht er beim nächsten Aufbau sofort im HTML (kein Flackern,
+   die Scrollposition bleibt, etwa beim Öffnen des Anmeldeblatts); ein neuer Start beendet den vorigen. Fällt das Laden aus, steht die
+   Karte „Pakete ansehen“ mit dem Link zur Seite, nie eine leere Fläche; der nächste Aufbau versucht es wieder. Sprungmarken der Seite
+   (#pakete, #bestellen …) scrollen innerhalb der Einbettung, ohne die Adresse zu ändern, denn Hashes steuern auf der Startseite die
+   Ansicht (ankerLink); der Abstand zur klebenden Kopfzeile wird gemessen, weil sie am Telefon zwei Zeilen hoch ist. */
 const VK_SEITE = '/fuer-fensterbauer/';
 let vkHtml = null, vkLauf = null;
 function vkLaden() {
@@ -805,33 +805,31 @@ function vkLaden() {
   vkLauf = fetch(VK_SEITE, { credentials: 'same-origin', headers: { accept: 'text/html' } })
     .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then((t) => {
-      const main = new DOMParser().parseFromString(t, 'text/html').querySelector('main.rg');
-      if (!main) throw new Error('kein main.rg');
-      main.querySelectorAll('.rg-pfad').forEach((p) => p.remove());
-      vkHtml = main.innerHTML;
+      const fb = new DOMParser().parseFromString(t, 'text/html').querySelector('.fb');
+      if (!fb) throw new Error('kein .fb');
+      vkHtml = fb.outerHTML;
       return vkHtml;
     })
     .catch(() => { vkLauf = null; return null; });
   return vkLauf;
 }
 /* Rückfall: die frühere Teaser-Karte mit dem Weg zur Seite */
-const vkRueckfall = () => '<div class="card pakete-karte"><div><p class="eyebrow kicker">Neu für Fensterbauer</p><h2>' + akSatz('Ihr eigener Fensterkonfigurator.', 2) + '</h2><p>Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt.</p></div><a class="btn primary" href="' + VK_SEITE + '">Pakete ansehen<span class="pf" aria-hidden="true"></span></a></div>';
-const einbettung = () => '<section class="vk-einbettung rg" aria-label="Konfigurator-Pakete für Fensterbauer"' + (vkHtml ? '>' + vkHtml : ' aria-busy="true">') + '</section>';
-/* nach dem Aufbau (afterRender): Inhalt aus dem Speicher ist schon drin, also nur verkauf.js starten (ohne Bewegung, wenn derselbe
-   Bildschirm neu aufgebaut wurde); sonst laden und den Behälter füllen, der dann gerade im Bild steht */
-function einbettungAuf(el, anim) {
-  if (!el.hasAttribute('aria-busy')) { vkStarten(el, !anim); return; }
+const vkRueckfall = () => '<div class="wrap"><div class="card pakete-karte"><div><p class="eyebrow kicker">Neu für Fensterbauer</p><h2>' + akSatz('Ihr eigener Fensterkonfigurator.', 2) + '</h2><p>Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt.</p></div><a class="btn primary" href="' + VK_SEITE + '">Pakete ansehen<span class="pf" aria-hidden="true"></span></a></div></div>';
+const einbettung = () => '<section class="vk-einbettung" aria-label="Konfigurator-Pakete für Fensterbauer"' + (vkHtml ? '>' + vkHtml : ' aria-busy="true">') + '</section>';
+/* nach dem Aufbau (afterRender): Inhalt aus dem Speicher ist schon drin, also nur starten; sonst laden und den Behälter füllen */
+function einbettungAuf(el) {
+  if (!el.hasAttribute('aria-busy')) { vkStarten(el); return; }
   vkLaden().then((html) => {
     const ziel = document.querySelector('.vk-einbettung[aria-busy="true"]'); if (!ziel) return;
     ziel.removeAttribute('aria-busy');
     if (!html) { ziel.classList.add('vk-rueckfall'); ziel.innerHTML = vkRueckfall(); return; }
-    ziel.innerHTML = html; vkStarten(ziel, false); kopfCta();
+    ziel.innerHTML = html; vkStarten(ziel); kopfCta();
   });
 }
-function vkStarten(el, still) {
-  /* verkauf.js lädt mit defer; kommt die Antwort früher, startet es beim DOMContentLoaded */
-  const starten = () => { if (window.Verkauf && document.body.contains(el)) window.Verkauf.auf(el, { still: still }); };
-  if (window.Verkauf || document.readyState !== 'loading') starten(); else document.addEventListener('DOMContentLoaded', starten, { once: true });
+function vkStarten(el) {
+  /* fensterbauer.js lädt mit defer; kommt die Antwort früher, startet es beim DOMContentLoaded */
+  const starten = () => { if (window.FbSeite && document.body.contains(el)) window.FbSeite.auf(el.querySelector('.fb'), { eingebettet: true }); };
+  if (window.FbSeite || document.readyState !== 'loading') starten(); else document.addEventListener('DOMContentLoaded', starten, { once: true });
   el.addEventListener('click', (e) => {
     const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a) return;
     const m = /^(?:\/fuer-fensterbauer\/)?#([A-Za-z][\w-]*)$/.exec(a.getAttribute('href') || ''); if (!m) return;
@@ -847,7 +845,7 @@ SCREENS.landing = () => {
      dieser Ansicht), am Ende der Weg zu den Hauseigentümern. Die frühere Werbung für Aufmaß-Links (Tour, Rechner, „Holen Sie es in Ihr
      Konto“) ist hier weg (Bauplan E28); Preise, Anmelden und „Kostenlos starten“ bleiben in der Kopfzeile für Bestandsbetriebe. */
   if (ansicht() === 'betrieb') return { title: 'eeziframes', html: '<div class="wrap">' + (vonPdf() ? '<div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div>' : '') +
-  einbettung() + wechsel('kunde') + '</div>' };
+  '</div>' + einbettung() + '<div class="wrap">' + wechsel('kunde') + '</div>' }; // die Seite für Fensterbauer volle Breite, außerhalb von .wrap
   return { title: 'eeziframes', html: '<div class="wrap">' +
   '<section class="hero b2c foto" data-ansicht="kunde"><div><p class="eyebrow kicker">In Minuten zum Aufmaß für jeden Fensterbauer</p><h1>' + worte('Fenster ausmessen. Selbst. eezi.') + '</h1><p class="lead">Zwei Fotos, vier Maße mit dem Zollstock, jeder Schritt erklärt. Aus Ihren Zahlen wächst Ihr Fenster als 3-D-Modell, dazu Ihre Wünsche zu Material, Farbe, Glas und Rollladen. Messen, Fotos und 3-D-Modell sind kostenlos. Am Ende Ihr vollständiges Aufmaßblatt als PDF für ' + eur2(P().aufmass) + ', für jeden Fensterbauer lesbar.</p><div class="cta"><a class="btn big primary" href="' + appEinstieg() + '">' + (eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt ausmessen') + '<span class="pf" aria-hidden="true"></span></a><a class="btn big ghost" href="' + APP_OPEN + '#fuehrung">Führung starten</a></div>' + (eigenesAufmass() ? '<p class="hint fortsetzen">Ihr Aufmaß ist angefangen: ' + nW(eigenesAufmass(), 'Fenster', 'Fenster') + ' erfasst, gespeichert in diesem Browser.</p>' : '') + '<p class="hint">Führung: ein Fenster in zwei Minuten, ohne eigene Maße · kein Konto zum Messen · keine App aus dem Store</p></div>' +
   heroFoto('start-hauseigentuemer', 1250, 1250, 'Ein Waschbär steht auf einem Tritt und misst mit dem Zollstock die Maueröffnung eines Fensters, in der anderen Pfote das Handy', ['Maße', 'Öffnungsart', 'Farbe', 'Glas']) + '</section>' +

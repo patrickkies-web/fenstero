@@ -271,12 +271,50 @@ const pdfs = () => paketPdfs().map((p, i) => '<a href="' + esc(p) + '">' + (i ? 
 
 const BLOECKE = { preiszeile: preiszeile, karten: karten, vergleich: vergleich, ablauf: ablauf, demos: demos, bestellen: bestellen, ld: ld, leistungen: leistungen, fristen: fristen, stand: stand, pdfs: pdfs };
 
+/* ---------- Bausteine der Seite für Fensterbauer (Gestaltung vom 24.10.2026, web/fuer-fensterbauer/index.html) ----------
+   Kleine Stellen im fertigen Markup statt ganzer Abschnitte, damit die Gestaltung in der Datei bleibt:
+     fb-ab                 günstigster Monatspreis („Ab 29 €“ im Startbild, im Abschluss, in der Leiste unten)
+     fb-monat-<paket>      Monatspreis, fb-einr-<paket> Einrichtung (Karten, Vergleich, Beispielrechnung)
+     fb-cta-<paket>        Knopf unter der Karte: ohne PAKETE_OFFEN „Paket anfragen“ (wählt das Paket im Formular vor), sonst „Bestellen“
+     fb-fuss               Zeile unter den Paketen (vorläufig, Bestellung bald, Steuer, Laufzeit)
+     fb-anfrage-titel      Überschrift und fb-anfrage-lede Einleitung des Abschnitts „Ihre Anfrage“
+     fb-faq-bestellen      Antwort auf „Kann ich schon bestellen?“ */
+function fbBaustein(name, o, v) {
+  const L = P().LISTE, m = /^fb-(monat|einr|cta)-([a-z]+)$/.exec(name);
+  if (m) {
+    const p = m[2]; if (!P().PAKETE[p]) return null;
+    if (m[1] === 'monat') return geld(P().preis(p).monat);
+    if (m[1] === 'einr') return geld(P().preis(p).einrichtung);
+    return v.bestellen
+      ? '<a class="pk-cta" href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + ' bestellen <span aria-hidden="true">→</span></a>'
+      : '<a class="pk-cta" href="#bestellen" data-paket-wahl="' + L.indexOf(p) + '">Paket anfragen <span aria-hidden="true">→</span></a>';
+  }
+  if (name === 'fb-ab') return geld(Math.min.apply(null, L.map((p) => P().preis(p).monat)));
+  if (name === 'fb-fuss') {
+    return (v.bestellen ? '' : 'Die Bestellung wird in Kürze freigeschaltet, bis dahin fragen Sie unverbindlich an. ') +
+      (v.vorlaeufig ? 'Vorläufige Preise; beim Bestellen wird Ihr Preis für den Vertrag festgeschrieben. ' : 'Der Preis beim Bestellen bleibt für Ihren Vertrag fest. ') +
+      'Alle Preise ' + (v.mwst ? 'netto' : 'ohne Ausweis der Umsatzsteuer (§ 19 UStG)') + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar, keine Gebühr für Anfragen Ihrer eigenen Kunden. Die Vorschau zeigt eine erfundene Firma.';
+  }
+  if (name === 'fb-anfrage-titel') return v.bestellen ? 'Vorher eine <span class="gruen">Frage?</span>' : 'Paket <span class="gruen">unverbindlich</span> anfragen.';
+  if (name === 'fb-anfrage-lede') {
+    return v.bestellen
+      ? 'Bestellen Sie Ihr Paket im Kundenkonto: ' + L.map((p) => '<a href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + '</a>').join(', ') + '. Fragen vorab beantworten wir gern.'
+      : 'Die Bestellung wird in Kürze freigeschaltet. Bis dahin beantworten wir Ihre Fragen und merken Ihr Paket vor.';
+  }
+  if (name === 'fb-faq-bestellen') {
+    return v.bestellen
+      ? 'Ja. Wählen Sie Ihr Paket und bestellen Sie im Kundenkonto; die Einrichtung zahlen Sie vorab per Karte oder SEPA-Lastschrift.'
+      : 'Die Bestellung wird in Kürze freigeschaltet. Bis dahin können Sie ein Paket unverbindlich anfragen. Antwort meist innerhalb eines Werktags.';
+  }
+  return null;
+}
+
 /* Alle Bausteine einer Seite einsetzen. o: { env, base } (base: Herkunft für absolute Adressen; '' in den Dateien) */
 export function bausteineEinsetzen(html, o) {
   o = o || {};
   const v = verkaufFuer(o.env);
   return html.replace(/<!--pakete:([a-zA-Z0-9-]+)-->[\s\S]*?<!--\/pakete:\1-->/g, (alles, name) => {
-    const neu = BLOECKE[name] ? BLOECKE[name](o, v) : /^f-/.test(name) ? frist(name) : null;
+    const neu = BLOECKE[name] ? BLOECKE[name](o, v) : /^fb-/.test(name) ? fbBaustein(name, o, v) : /^f-/.test(name) ? frist(name) : null;
     return neu === null ? alles : '<!--pakete:' + name + '-->' + neu + '<!--/pakete:' + name + '-->';
   });
 }

@@ -210,12 +210,14 @@ async function frageAnnehmen(ctx) {
   const f = {}, name = str(b.name, 80), firma = str(b.firma, 100), mail = mailNorm(b.mail).slice(0, 120), tel = str(b.tel, 40), text = String(b.text == null ? '' : b.text).replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim().slice(0, 2000), paket = P().gueltig(b.paket) ? b.paket : '';
   if (name.length < 2) f.name = 'Bitte Ihren Namen eingeben.';
   if (!mailOk(mail) || /\.invalid$/i.test(mail)) f.mail = 'Bitte eine gültige E-Mail-Adresse eingeben.';
-  if (text.length < 3) f.text = 'Bitte schreiben Sie kurz Ihre Frage.';
+  /* Die Frage ist auf der Seite für Fensterbauer freiwillig („Paket vormerken“): leer heißt Rückmeldung erbeten; ein, zwei Zeichen sind ein Versehen */
+  if (text && text.length < 3) f.text = 'Bitte schreiben Sie kurz Ihre Frage.';
+  const anliegen = text || (paket ? 'Bitte Paket vormerken und bei mir melden.' : 'Bitte melden Sie sich bei mir.');
   if (Object.keys(f).length) throw feldFehler(f);
   let gespeichert = false;
   /* nie von 'partner': Der Eintrag im Konto ist ein Hinweis des Systems, keine Nachricht des Partners (Zentrale: Badge „System“, Konto: „eeziframes (automatisch)“) */
-  try { const p = await ctx.sp.partnerNachMail(mail); if (p) { await ctx.sp.nachrichtAnlegen({ partner: p.id, von: 'system', art: 'frage', text: FRAGE_VORSATZ + text }); gespeichert = true; } } catch (e) { gespeichert = false; }
-  const r = await inhaberMail(ctx, 'Frage zu den Paketen: ' + (firma || name), zeilenTab([['Name', esc(name)], ['Firma', esc(firma || '–')], ['E-Mail', esc(mail)], ['Telefon', esc(tel || '–')], ['Paket', esc(paket ? P().PAKETE[paket].name : '–')]]) + absatz(esc(text).replace(/\n/g, '<br>')), mail);
+  try { const p = await ctx.sp.partnerNachMail(mail); if (p) { await ctx.sp.nachrichtAnlegen({ partner: p.id, von: 'system', art: 'frage', text: FRAGE_VORSATZ + anliegen }); gespeichert = true; } } catch (e) { gespeichert = false; }
+  const r = await inhaberMail(ctx, 'Frage zu den Paketen: ' + (firma || name), zeilenTab([['Name', esc(name)], ['Firma', esc(firma || '–')], ['E-Mail', esc(mail)], ['Telefon', esc(tel || '–')], ['Paket', esc(paket ? P().PAKETE[paket].name : '–')]]) + absatz(esc(anliegen).replace(/\n/g, '<br>')), mail);
   if (!(r && r.ok) && !gespeichert) throw new ApiFehler('Ihre Frage ließ sich gerade nicht übermitteln. Bitte schreiben Sie uns eine E-Mail (Adresse im Impressum).', 503);
   if (ctx.zaehlen) ctx.zaehlen('ereignis:paket_frage');
   return { ok: true };

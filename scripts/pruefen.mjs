@@ -160,19 +160,19 @@ if (teil(2)) {
   // Ansicht: Umschalter oben, Anker, Knöpfe nur für die gewählte Zielgruppe
   const ctxA = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const pa = await neueSeite(ctxA);
-  const zustand = () => pa.evaluate(() => ({ a: ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()), b2c: !!document.querySelector('.hero.b2c'), b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .vk-hero'), still: document.querySelector('.top').classList.contains('cta-still'), top: [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }));
+  const zustand = () => pa.evaluate(() => ({ a: ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()), b2c: !!document.querySelector('.hero.b2c'), b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: document.querySelector('.top').classList.contains('cta-still'), top: [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }));
   /* Ansicht Fensterbauer: portal.js lädt die Paket-Landingpage /fuer-fensterbauer/ nach und bettet sie ein; darauf warten */
-  const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .vk-hero, .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
+  const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
   await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   let z = await zustand();
   ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fenster ausmessen/.test(z.h1[0]) && z.top.includes('Fenster ausmessen') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Umschalter oben, nur Inhalte für Hauseigentümer, Knopf „Fenster ausmessen“, kein Anmelden oder Starten für Betriebe');
   ok(await pa.locator('.top a.btn.primary[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.wechsel [data-act="ansicht"][data-v="betrieb"]').count() === 1 && await pa.locator('a.tcard[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Fenster ausmessen“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
   await pa.click('.top .ansicht [data-v="betrieb"]'); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Ihr eigener Fenster-Konfigurator/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
+  ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
   ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
-  ok(await pa.locator('.vk-einbettung .vk-paket').count() === 3 && await pa.locator('.vk-einbettung form[data-vk-frage]').count() === 1 && await pa.locator('.vk-einbettung .vk-ablauf').count() === 1 && await pa.locator('.vk-einbettung .rg-pfad').count() === 0, 'Einbettung: drei Paketkarten, das Anfrageformular und der Ablauf sind da, die Brotkrumen der Seite nicht');
-  await pa.click('.vk-einbettung .rg-cta a[href="#pakete"]'); await pa.waitForTimeout(900);
+  ok(await pa.locator('.vk-einbettung .pk-karte').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/partner/frage"]').count() === 1 && await pa.locator('.vk-einbettung .livegang').count() === 1 && !(await pa.locator('.vk-einbettung .fb .nav').isVisible()) && !(await pa.locator('.vk-einbettung .fb .fuss').isVisible()), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, Kopf- und Fußzeile der Seite nicht');
+  await pa.click('.vk-einbettung .aktionen a[href="#pakete"]'); await pa.waitForTimeout(900);
   const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), t = document.querySelector('.top').getBoundingClientRect(), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, unterKopf: !!r && r.top >= t.bottom - 1 && r.top < t.bottom + 80 }; });
   ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
@@ -199,7 +199,7 @@ if (teil(2)) {
   const pf = await neueSeite(ctxA);
   await pf.route('**/fuer-fensterbauer/', (r) => r.fulfill({ status: 500, contentType: 'text/html', body: 'Störung' }));
   await pf.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await pf.waitForTimeout(500);
-  ok(await pf.locator('.vk-einbettung.vk-rueckfall a[href="/fuer-fensterbauer/"]').count() === 1 && await pf.locator('.vk-einbettung .vk-hero, .vk-einbettung[aria-busy]').count() === 0 && await pf.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1, 'Rückfall ohne Verkaufsseite: Karte „Pakete ansehen“ mit Link zur Seite statt leerer Fläche');
+  ok(await pf.locator('.vk-einbettung.vk-rueckfall a[href="/fuer-fensterbauer/"]').count() === 1 && await pf.locator('.vk-einbettung .fb, .vk-einbettung[aria-busy]').count() === 0 && await pf.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1, 'Rückfall ohne Verkaufsseite: Karte „Pakete ansehen“ mit Link zur Seite statt leerer Fläche');
   pf.probleme = pf.probleme.filter((p) => !/HTTP 500: .*\/fuer-fensterbauer\/$|status of 500/.test(p)); // die nachgestellte Störung selbst (Antwort und Konsolenzeile)
   sauber(pf, 'Rückfall ohne Fehler');
   await ctxA.close();
@@ -602,13 +602,13 @@ if (teil(6)) {
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
   const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Fenster-Konfigurator, unter Ihrer Marke/.test(start) && await page.locator('.hero.b2c a[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .vk-hero', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
+  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.hero.b2c a[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
+  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
-  ok(/Ihr eigener Fenster-Konfigurator, unter Ihrer Marke/.test(startB) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
+  ok(/Anfragen mit Aufmaß\. Unter Ihrer Marke\./.test(startB.replace(/\s+/g, ' ')) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start + startB), 'Kein Marktplatz mehr auf der Startseite');
   /* der Kundenschutz steht jetzt in der eingebetteten Verkaufsseite (Band „Ihre Kunden bleiben Ihre Kunden“, Zusagen der Paketbedingungen) */
-  ok(await page.locator('.vk-einbettung #kundenschutz').count() === 1 && await page.locator('.vk-einbettung a[href="/konfigurator-bedingungen/#kundenschutz"]').count() === 1 && /Ihre Kunden bleiben Ihre Kunden/.test(startB) && (startB.match(/Nur Ihr Betrieb:|Nur an Sie:|In Ihrem Auftrag:|Kein Weiterverkauf:/g) || []).length === 4, 'Startseite für Fensterbauer: Abschnitt Kundenschutz mit vier Zusagen und Verweis auf die Paketbedingungen');
+  ok(await page.locator('.vk-einbettung #kundenschutz').count() === 1 && await page.locator('.vk-einbettung a[href="/konfigurator-bedingungen/"]').count() >= 1 && /Ihre Kunden bleiben Ihre Kunden/.test(startB) && (startB.match(/Nur Ihr Betrieb\.|Nur an Sie\.|Kein Weiterverkauf\.|Im Auftrag, in Frankfurt\./g) || []).length === 4, 'Startseite für Fensterbauer: Abschnitt Kundenschutz mit vier Zusagen, Paketbedingungen verlinkt');
   await foto(page, 'portal-start');
   sauber(page, 'Logik und Übersichten ohne Fehler');
   await ctx.close();
@@ -1603,6 +1603,8 @@ if (teil(10)) {
   for (const [gname, opts] of [['Telefon', telefon], ['Desktop', { viewport: { width: 1280, height: 860 }, locale: 'de-DE' }]]) {
     const c = await browser.newContext(opts), sp = await neueSeite(c);
     for (const s of seo.SEITEN.filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x.pfad))) {
+      /* /fuer-fensterbauer/ selbst hat seit dem 25.10.2026 die Gestaltung der Vorschau (eigene Größen, docs/GESTALTUNG.md): dort nur Querscrollen und Marke */
+      const fbSeite = s.pfad === '/fuer-fensterbauer/';
       await sp.goto(BASE + s.pfad, { waitUntil: 'networkidle' });
       const m = await sp.evaluate(() => {
         const groessen = new Set(), klein = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n;
@@ -1610,8 +1612,9 @@ if (teil(10)) {
         document.querySelectorAll('.rg-kopf a, .rg-fuss a, .rg-cta a, .rg-karte, .rg-frage summary').forEach((a) => { const r = a.getBoundingClientRect(); if (r.width && r.height && (r.height < 44 || r.width < 44)) klein.push((a.textContent || '').trim().slice(0, 24) + ' ' + Math.round(r.width) + '×' + Math.round(r.height)); });
         /* Paketnamen (EEZI Essential, EEZI Signature) und das zitierte Zeichen „Powered by EEZIframes“ sind vorgegeben (Bauplan §2b, E27) */
         const t = document.body.innerText.replace(/EEZI (Essential|Signature)\b/g, '').replace(/Powered by EEZIframes/g, '');
-        return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm') };
+        return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm, .fb .nav .wortmarke') };
       });
+      if (fbSeite) { m.groessen = []; m.klein = []; }
       const erlaubt = gname === 'Telefon' ? [13, 15, 17, 24, 32] : [13, 15, 17, 24, 40];
       ok(m.groessen.every((g) => erlaubt.includes(g)) && !m.klein.length && !m.quer && m.marke, gname + ' ' + s.pfad + ': Schriftgrößen ' + m.groessen.join('/') + ', Ziele ab 44 px, Marke klein' + (m.klein.length ? ' (zu klein: ' + m.klein.join('; ') + ')' : '') + (m.quer ? ', Querscrollen!' : ''));
     }
@@ -1619,41 +1622,24 @@ if (teil(10)) {
     await c.close();
   }
 
-  /* c2) Seite für Fensterbauer, Abnahme der Einigung der Rollen (23.10.2026): Pille im ersten Bildschirm, Meldung über keinem Bilddetail,
-     Zahlen nach einem Sprung richtig, Halt-Knopf, kein Querscrollen bei 320 px, Fokus nicht unter der Kopfzeile */
+  /* c2) Seite für Fensterbauer (Gestaltung der Vorschau, seit 25.10.2026): Pille im ersten Bildschirm, Laufbänder lassen sich anhalten,
+     Kopfzeile mit echten Zielen, kein Querscrollen bei 320 px */
   {
     const c = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE', isMobile: true, hasTouch: true }), sp = await neueSeite(c);
-    await sp.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' }); await sp.waitForTimeout(2600);
+    await sp.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' }); await sp.waitForTimeout(1800);
     const kopf = await sp.evaluate(() => {
       const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
-      const img = r('.vk-hero-zoom img'), k = img.width / 1122, meldung = [...document.querySelectorAll('.vk-nachricht')].find((x) => x.getAttribute('data-pos') === '0');
-      /* Bilddetails des Fotos fb-sessel in Bildpunkten des Originals (verkauf.css, Kopfkommentar) */
-      const D = { Flieger: [400, 155, 530, 225], Handy: [395, 385, 485, 480], Gesicht: [555, 280, 760, 480], Zollstock: [860, 255, 1030, 600], Bullauge: [890, 60, 1122, 640] };
-      const m = meldung ? meldung.getBoundingClientRect() : null, kz = r('.vk-eingang-kopf');
-      const ueber = Object.keys(D).filter((n) => [m, kz].some((b) => b && b.left < img.left + D[n][2] * k && img.left + D[n][0] * k < b.right && b.top < img.top + D[n][3] * k && img.top + D[n][1] * k < b.bottom));
-      return { pille: r('.vk-hero .btn.primary').top, preis: r('.vk-preiszeile').bottom, ueber, halt: !!document.querySelector('.vk-hero .vk-halt:not([hidden])') };
+      const ziele = [...document.querySelectorAll('.fb .nav a')].map((a) => a.getAttribute('href'));
+      return { pille: (r('.fb .aktionen .knopf-primaer') || {}).bottom, ziele, leer: document.querySelectorAll('.fb a[href="#"]').length };
     });
-    ok(kopf.pille >= 460 && kopf.pille <= 600 && kopf.preis <= 700 && !kopf.ueber.length, 'Fensterbauer, Telefon 390 × 844: Pille im ersten Bildschirm (Oberkante ' + Math.round(kopf.pille) + ' px), Preiszeile endet bei ' + Math.round(kopf.preis) + ' px, die Meldung liegt über keinem Bilddetail' + (kopf.ueber.length ? ' (überdeckt: ' + kopf.ueber.join(', ') + ')' : ''));
-    /* Halt-Knopf: hält Leisten und Schleifen an, bleibt nach dem Neuladen gespeichert */
-    /* die Leiste läuft nur im Bild: erst hinscrollen, dann am Knopf im Startbild (noch im Bild) anhalten */
-    await sp.evaluate(() => window.scrollTo(0, 220)); await sp.waitForTimeout(700);
-    const vorher = await sp.evaluate(() => getComputedStyle(document.querySelector('.vk-leiste-a .vk-leiste-spur')).transform);
-    await sp.click('.vk-hero .vk-halt'); await sp.waitForTimeout(150);
-    const t1 = await sp.evaluate(() => getComputedStyle(document.querySelector('.vk-leiste-a .vk-leiste-spur')).transform); await sp.waitForTimeout(700);
-    const t2 = await sp.evaluate(() => getComputedStyle(document.querySelector('.vk-leiste-a .vk-leiste-spur')).transform);
-    await sp.reload({ waitUntil: 'networkidle' }); await sp.waitForTimeout(400);
-    const nachLaden = await sp.evaluate(() => document.documentElement.classList.contains('vk-angehalten') && [...document.querySelectorAll('button.vk-halt')].every((b) => b.getAttribute('aria-pressed') === 'true'));
-    await sp.click('.vk-hero .vk-halt'); await sp.waitForTimeout(150);
-    const wieder = await sp.evaluate(() => !document.documentElement.classList.contains('vk-angehalten') && !localStorage.getItem('vk.halt'));
-    ok(kopf.halt && vorher !== 'none' && t1 === t2 && nachLaden && wieder, 'Fensterbauer: Halt-Knopf im Startbild hält die Leisten an (Spur steht), die Wahl bleibt nach dem Neuladen (aria-pressed), ein zweiter Druck lässt alles weiterlaufen');
-    /* Zahlen: nach einem Sprung in den Abschnitt steht nach 1,3 s überall der Endwert */
-    await sp.goto(BASE + '/fuer-fensterbauer/#warum-kunden-selbst-planen', { waitUntil: 'networkidle' }); await sp.waitForTimeout(1300);
-    const zahlen = await sp.evaluate(() => [...document.querySelectorAll('[data-zahl]')].map((b) => { const r = b.getBoundingClientRect(), z = b.querySelector('.vk-ziffer > span'); return { soll: b.getAttribute('data-zahl'), ist: b.textContent, im: r.top < innerHeight && r.bottom > 0, steht: !b.classList.contains('vk-wartet') && (!z || getComputedStyle(z).transform === 'none' || /matrix\(1, 0, 0, 1, 0, 0\)/.test(getComputedStyle(z).transform)) }; }));
-    ok(zahlen.length === 4 && zahlen.every((z) => z.soll === z.ist) && zahlen.filter((z) => z.im).every((z) => z.steht), 'Fensterbauer: Zahlenkacheln zeigen nach einem Sprung den Endwert (' + zahlen.map((z) => z.ist).join(', ') + '), nichts zählt hoch, nichts steht halb');
-    /* Fokus: ein Ziel weiter oben, per Tastatur angesteuert, landet unter der Kopfzeile */
-    await sp.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)); await sp.waitForTimeout(300);
-    const fokus = await sp.evaluate(() => { const z = document.querySelector('#pakete'); const a = z.closest('section').querySelector('a, summary, button:not([hidden])'); a.focus(); const k = document.querySelector('.rg-kopf').getBoundingClientRect(); return { oben: a.getBoundingClientRect().top, kopf: k.bottom }; });
-    ok(fokus.oben >= fokus.kopf - 1, 'Fensterbauer: der Fokus landet nicht unter der klebenden Kopfzeile (Ziel bei ' + Math.round(fokus.oben) + ' px, Kopfzeile bis ' + Math.round(fokus.kopf) + ' px)');
+    ok(kopf.pille > 0 && kopf.pille <= 844 && !kopf.leer && ['/', '/ratgeber/', '/fuer-fensterbauer/', '/app/#ausmessen', '#bestellen'].every((z) => kopf.ziele.includes(z)), 'Fensterbauer, Telefon 390 × 844: „Pakete ansehen“ im ersten Bildschirm (unten bei ' + Math.round(kopf.pille) + ' px), Kopfzeile mit echten Zielen, kein leerer Link');
+    await sp.locator('.fb .band').scrollIntoViewIfNeeded(); await sp.waitForTimeout(900);
+    const lauf = () => sp.evaluate(() => getComputedStyle(document.querySelector('.fb .laufband .spur')).transform);
+    const vorher = await lauf();
+    await sp.click('.fb .band-pause'); await sp.waitForTimeout(1500);
+    const t1 = await lauf(); await sp.waitForTimeout(600); const t2 = await lauf();
+    const gedrueckt = await sp.evaluate(() => document.querySelector('.fb .band-pause').getAttribute('aria-pressed'));
+    ok(vorher !== 'none' && t1 === t2 && gedrueckt === 'true', 'Fensterbauer: der Knopf hält die Laufbänder an (Spur steht, aria-pressed)');
     sauber(sp, 'Fensterbauer: Abnahme ohne Fehler');
     await c.close();
     const c3 = await browser.newContext({ viewport: { width: 320, height: 640 }, locale: 'de-DE' }), s3 = await neueSeite(c3);
@@ -1834,7 +1820,7 @@ if (teil(10)) {
   const eingabeFehler = [];
   for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x))) {
     /* die Seite für Fensterbauer darf ihr Anfrageformular für die Pakete haben (POST /api/partner/frage), sonst nichts zum Ausfüllen */
-    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="vk-form" method="post" action="\/api\/partner\/frage" data-vk-frage>[\s\S]*?<\/form>/ : /^$/, '');
+    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="formular" id="anfrage-form" method="post" action="\/api\/partner\/frage" novalidate>[\s\S]*?<\/form>/ : /^$/, '');
     if (/<(form|input|select|textarea)\b|contenteditable|rg-leer|rechner\.js|<td><\/td>/i.test(t)) eingabeFehler.push(pf);
   }
   const ohneRechner = (await fetch(BASE + '/assets/rechner.js')).status === 404, bm = (await roh('/ratgeber/bestellmass-fenster/')).text, ab2 = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
