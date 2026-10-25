@@ -784,7 +784,7 @@ if (teil(6)) {
   await p5.click('[data-act="new"]'); await p5.waitForSelector('.scr[data-screen="start"]');
   await p5.click('.qopt[data-act="situation"][data-v="neu"]'); await p5.waitForTimeout(300);
   await p5.click('.qopt[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
-  const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.qgroup .note'), bar: document.querySelector('.bb .btn.primary').textContent }));
+  const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.scr[data-screen="start"] .note'), bar: document.querySelector('.bb .btn.primary').textContent }));
   await p5.click('.bb .btn.primary'); await p5.waitForTimeout(300);
   const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: Array.from(document.querySelectorAll('.bb .btn:not(.bb-zurueck)')).map((b) => b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
   await p5.evaluate(() => useDemo()); await p5.waitForTimeout(1800);
