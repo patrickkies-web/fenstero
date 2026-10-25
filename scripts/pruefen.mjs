@@ -3672,7 +3672,7 @@ if (teil(16)) {
   /* Die Ansicht Fensterbauer bettet seit dem 23.10.2026 die Paket-Landingpage ein (ihr 3-D-Modell gehört zur Planung des Kunden im
      Konfigurator); die frühere Werbung „Holen Sie es in Ihr Konto“ ist weg, was ankommt, nennt „So funktioniert es“ */
   const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html + '\n' + SCREENS.wie().html; S.ansicht = vorher; return h; });
-  ok(/class="vk-einbettung rg"/.test(land5) && !/3-D-Ansicht/.test(land5) && !/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && /Bestellmaß-Vorschlag je Position/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: die Ansicht Fensterbauer bettet die Paket-Landingpage ein, „So funktioniert es“ nennt das Aufmaßblatt mit Bestellmaß-Vorschlag je Position');
+  ok(/class="vk-einbettung"/.test(land5) && !/3-D-Ansicht/.test(land5) && !/Holen Sie es in Ihr (<span class="ak">)?Konto/.test(land5) && /Bestellmaß-Vorschlag je Position/.test(land5), 'Kein Versprechen einer 3-D-Ansicht für Betriebe mehr: die Ansicht Fensterbauer bettet die Paket-Landingpage ein, „So funktioniert es“ nennt das Aufmaßblatt mit Bestellmaß-Vorschlag je Position');
   /* Nacharbeit portal: Fußzeile des PDF bei 60 Zeichen Firmenname, Kontakt des Kunden im Kopf und im PDF, Zwischentitel, Fotos im Pilotbetrieb */
   const lang5 = await s5.evaluate(async () => {
     const c = BC(), alt = c.name, l = A().links.find((x) => x.id === 'l1'); c.name = 'Fensterbau und Glaserei Mustermann-Schmidt GmbH & Co. KG Köln';
