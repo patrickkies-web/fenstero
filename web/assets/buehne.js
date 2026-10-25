@@ -317,7 +317,7 @@ window.Buehne3D = (function () {
     alt.querySelectorAll('[data-r]').forEach((e) => karte.set(e.getAttribute('data-r'), e));
     B.cam = A.cam; B.schwing = A.schwing; B.zuletzt = A.zuletzt;
     /* weniger Bewegung: nichts verwandelt sich, das neue Modell steht sofort da */
-    if (ruhig() || stage.classList.contains('no-anim')) return;
+    if (ruhig() || stage.classList.contains('no-anim') || stage.classList.contains('ohne-erbe')) return; // ohne-erbe: der Start lässt das neue Element hereinhüpfen
     /* Maßlinien sind DOM über der Leinwand: erst nach der Verwandlung einblenden, sonst stehen sie schon am Ziel */
     stage.classList.add('gl-erbe'); clearTimeout(stage._erbeT); stage._erbeT = setTimeout(() => stage.classList.remove('gl-erbe'), 720);
     stage.querySelectorAll('.w3d-world [data-r]').forEach((e) => {

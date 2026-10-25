@@ -1284,26 +1284,59 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
   .hdr-row:has(.hdr-r.zwei) .hdr-inst:has(.ein-zeichen.logo) .hdr-name { display: none }
 }
 
-/* ---------- Start: das Fenster in Teilen (SCREENS.start in app.js) ----------
-   Bühne mit Explosionszeichnung, darunter Überschrift, die Stelle als zwei Karten und die Elementart als Band zum Wischen.
-   Die Teile fahren nur auseinander, wenn sich Stelle oder Element geändert haben (.is-auf), nacheinander 80 ms versetzt in 700 ms. */
-.st-buehne { margin: 0 -16px; padding: 0 16px; background: radial-gradient(55% 75% at 62% 22%, rgba(243, 242, 238, .10), rgba(243, 242, 238, 0) 72%) } /* Licht von oben rechts, läuft weich aus, ohne Kante */
-.st-buehne + .hd { margin-top: -6px; padding-top: 0 }
-.st-buehne svg { display: block; width: 100%; height: auto; max-width: 480px; margin: 0; overflow: visible; font-family: inherit }
-.st-buehne.is-auf .st-l { animation: st-auf 700ms var(--e-out) both; animation-delay: calc(var(--k) * 80ms) }
-.st-buehne.is-auf .st-lab { animation: st-lab 400ms ease-out both; animation-delay: calc(320ms + var(--k) * 80ms) }
-@keyframes st-auf { from { transform: translate(var(--x), var(--y)); opacity: .35 } to { transform: none; opacity: 1 } }
-@keyframes st-lab { from { opacity: 0 } to { opacity: 1 } }
-@media (prefers-reduced-motion: reduce) { .st-buehne.is-auf .st-l, .st-buehne.is-auf .st-lab { animation: none } }
-.qcards.stelle .qopt { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 10px; min-height: 64px; padding: 8px 40px 8px 10px }
-.qcards.stelle .qopt svg { width: 36px; height: 36px }
-.qcards.stelle .qopt .tx { align-items: flex-start; gap: 2px }
-.qcards.stelle .qopt .lbl { font-size: 15px; white-space: normal }
-.qcards.stelle .qopt .sb { white-space: normal; line-height: 1.2 }
-.st-band { display: flex; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none; box-shadow: inset 0 -1px 0 var(--line) }
-.st-band::-webkit-scrollbar { display: none }
-.qopt.st-art { flex: 0 0 auto; width: auto; min-height: 48px; padding: 0 14px; border: 0; border-radius: 0; background: none; box-shadow: none; color: var(--muted); font-size: 15px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; justify-content: center; align-items: center }
-.qopt.st-art[aria-pressed="true"] { color: var(--text); font-weight: 800; box-shadow: inset 0 -3px 0 var(--accent) }
-.st-art-sub { margin: 8px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; line-height: 1.35; color: var(--muted) }
-.st-art-sub b { color: var(--text2); font-weight: 700 }
-.st-art-sub .qinfo.st-info { position: static; flex: 0 0 auto; padding: 0; align-items: center; justify-content: center }
+/* ---------- Start: die Bühne (SCREENS.start in app.js) ----------
+   Oben die Stelle als Glasschalter, darunter schwebt das Element allein in 3-D auf der dunklen Bühne: Licht von oben, Schatten am Boden,
+   sein Name riesig als Umriss dahinter (bewegt sich beim Hüpfen langsamer, das gibt Tiefe). Neue Öffnung: grüner Ring am Boden.
+   Wechsel des Elements: es hüpft aus der Wischrichtung (--d: 1 von rechts, -1 von links) in 720 ms herein, der Schatten wird mit dem
+   Sprung kleiner und wieder groß. Bei „weniger Bewegung“ steht alles sofort da. */
+.st-stelle { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 2px 0 0; border-radius: 22px; background: rgba(243, 242, 238, .04); box-shadow: inset 0 0 0 1px rgba(243, 242, 238, .08); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px) }
+.st-stelle::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 18px; background: linear-gradient(180deg, rgba(243, 242, 238, .13), rgba(243, 242, 238, .05)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 8px 22px rgba(0, 0, 0, .4); transition: transform 420ms cubic-bezier(.3, 1.35, .5, 1) }
+.st-stelle.is-neu::before { transform: translateX(100%) }
+.qopt.st-seg { position: relative; z-index: 1; min-height: 58px; padding: 8px 10px; gap: 2px; border: 0; border-radius: 18px; background: none; box-shadow: none; justify-content: center }
+.qopt.st-seg .lbl { font-size: 15px; font-weight: 700; color: var(--muted); transition: color var(--t2) }
+.qopt.st-seg .sb { font-size: 13px; color: var(--muted) }
+.qopt.st-seg[aria-pressed="true"] .lbl { color: var(--text) }
+.qopt.st-seg[aria-pressed="true"] .lbl::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 7px 2px 0; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent) }
+.st-buehne { position: relative; height: 300px; margin: 4px -16px 0; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  background: radial-gradient(42% 70% at 50% -4%, rgba(243, 242, 238, .17), rgba(243, 242, 238, .05) 55%, rgba(243, 242, 238, 0) 78%), radial-gradient(60% 18% at 50% 86%, rgba(243, 242, 238, .05), rgba(243, 242, 238, 0) 70%) }
+.st-wort { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
+.st-wort text { fill: none; stroke: rgba(243, 242, 238, .13); stroke-width: 1.2; font-family: inherit }
+.st-boden { position: absolute; left: 50%; bottom: 46px; width: 250px; height: 36px; margin-left: -125px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .7), rgba(0, 0, 0, 0)); pointer-events: none }
+.st-buehne.is-neu .st-boden::after { content: ""; position: absolute; inset: -4px -14px; border-radius: 50%; border: 1.5px dashed var(--accent); opacity: .75; box-shadow: 0 0 18px rgba(143, 214, 148, .25) }
+.st-held { position: absolute; left: 0; right: 0; top: 0; z-index: 1 }
+.w3d-stage.st-schwebe { background: none; box-shadow: none; border-radius: 0 }
+.st-nb { position: absolute; z-index: 2; top: 90px; width: 52px; height: 84px; padding: 0; border: 0; background: none; color: rgba(243, 242, 238, .34); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: color var(--t2), transform var(--t2) }
+.st-nb-l { left: 6px } .st-nb-r { right: 6px }
+.st-nb:hover, .st-nb:focus-visible { color: rgba(243, 242, 238, .8) }
+.st-nb:active { transform: scale(.94) }
+.st-wahl { text-align: center; margin: 2px 0 0; position: relative; z-index: 2 }
+.st-name { margin: 0; font-size: 32px; font-weight: 800; line-height: 1.05; letter-spacing: -.03em; color: var(--text) }
+.st-sub { margin: 6px 0 0; font-size: 15px; line-height: 1.4; color: var(--muted) }
+.st-punkte { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; display: flex; justify-content: center }
+.qopt.st-dot { width: 40px; min-height: 44px; height: 44px; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; justify-content: center; align-items: center }
+.qopt.st-dot span { width: 7px; height: 7px; border-radius: 4px; background: rgba(243, 242, 238, .3); transition: width 320ms var(--e-out), background 320ms }
+.qopt.st-dot[aria-pressed="true"] span { width: 22px; background: var(--accent) }
+.qopt.st-dot:focus-visible span { box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px var(--text) }
+.st-note { margin-top: 14px }
+.st-buehne.is-hop .st-held { animation: st-hop 720ms both }
+.st-buehne.is-hop .st-boden { animation: st-schatten 720ms both }
+.st-buehne.is-hop .st-wort { animation: st-wort 720ms var(--e-out) both }
+.st-wahl.is-hop .st-name { animation: st-name 520ms var(--e-out) 140ms both }
+@keyframes st-hop {
+  0% { transform: translate(calc(var(--d) * 64%), 8px) scale(.78); opacity: 0; animation-timing-function: cubic-bezier(.2, .6, .4, 1) }
+  16% { opacity: 1 }
+  50% { transform: translate(calc(var(--d) * 15%), -30px) scale(.94); animation-timing-function: cubic-bezier(.5, 0, .8, .6) }
+  76% { transform: translate(0, 0) scale(1.03, .97); animation-timing-function: cubic-bezier(.2, .6, .4, 1) }
+  89% { transform: translate(0, -7px) scale(1) ; animation-timing-function: cubic-bezier(.5, 0, .8, .6) }
+  100% { transform: none; opacity: 1 }
+}
+@keyframes st-schatten { 0% { transform: translateX(calc(var(--d) * 40%)) scale(.5); opacity: 0 } 50% { transform: translateX(calc(var(--d) * 10%)) scale(.66); opacity: .45 } 76% { transform: scale(1.06); opacity: 1 } 89% { transform: scale(.94) } 100% { transform: none; opacity: 1 } }
+@keyframes st-wort { from { transform: translateX(calc(var(--d) * 14%)); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes st-name { from { transform: translateY(8px); opacity: 0 } to { transform: none; opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .st-buehne.is-hop .st-held, .st-buehne.is-hop .st-boden, .st-buehne.is-hop .st-wort, .st-wahl.is-hop .st-name { animation: none } .st-stelle::before { transition: none } }
+@media (min-width: 1024px) {
+  .st-buehne { height: 420px; margin: 8px 0 0; border-radius: var(--r4) }
+  .st-held .w3d-stage { height: 376px !important }
+  .st-nb { top: 146px } .st-nb-l { left: 18px } .st-nb-r { right: 18px }
+  .st-boden { width: 320px; margin-left: -160px; bottom: 54px }
+}
