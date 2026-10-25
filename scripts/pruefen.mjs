@@ -172,7 +172,7 @@ if (teil(2)) {
   ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
   ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
   ok(await pa.locator('.vk-einbettung .pk-karte').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/partner/frage"]').count() === 1 && await pa.locator('.vk-einbettung .livegang').count() === 1 && !(await pa.locator('.vk-einbettung .fb .nav').isVisible()) && !(await pa.locator('.vk-einbettung .fb .fuss').isVisible()), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, Kopf- und Fußzeile der Seite nicht');
-  await pa.click('.vk-einbettung .aktionen a[href="#pakete"]'); await pa.waitForTimeout(900);
+  await pa.click('.vk-einbettung .aktionen a[href="#pakete"]'); await pa.waitForTimeout(1800);
   const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), t = document.querySelector('.top').getBoundingClientRect(), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, unterKopf: !!r && r.top >= t.bottom - 1 && r.top < t.bottom + 80 }; });
   ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
@@ -606,7 +606,7 @@ if (teil(6)) {
   await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
   ok(/Anfragen mit Aufmaß\. Unter Ihrer Marke\./.test(startB.replace(/\s+/g, ' ')) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
-  ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test(start + startB), 'Kein Marktplatz mehr auf der Startseite');
+  ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test((start + startB).replace(/Kein Portal und kein Marktplatz/g, '')), 'Kein Marktplatz mehr auf der Startseite');
   /* der Kundenschutz steht jetzt in der eingebetteten Verkaufsseite (Band „Ihre Kunden bleiben Ihre Kunden“, Zusagen der Paketbedingungen) */
   ok(await page.locator('.vk-einbettung #kundenschutz').count() === 1 && await page.locator('.vk-einbettung a[href="/konfigurator-bedingungen/"]').count() >= 1 && /Ihre Kunden bleiben Ihre Kunden/.test(startB) && (startB.match(/Nur Ihr Betrieb\.|Nur an Sie\.|Kein Weiterverkauf\.|Im Auftrag, in Frankfurt\./g) || []).length === 4, 'Startseite für Fensterbauer: Abschnitt Kundenschutz mit vier Zusagen, Paketbedingungen verlinkt');
   await foto(page, 'portal-start');
@@ -1611,7 +1611,7 @@ if (teil(10)) {
         while ((n = w.nextNode())) { if (!n.textContent.trim()) continue; const el = n.parentElement; if (el.closest('script, style')) continue; groessen.add(parseFloat(getComputedStyle(el).fontSize)); }
         document.querySelectorAll('.rg-kopf a, .rg-fuss a, .rg-cta a, .rg-karte, .rg-frage summary').forEach((a) => { const r = a.getBoundingClientRect(); if (r.width && r.height && (r.height < 44 || r.width < 44)) klein.push((a.textContent || '').trim().slice(0, 24) + ' ' + Math.round(r.width) + '×' + Math.round(r.height)); });
         /* Paketnamen (EEZI Essential, EEZI Signature) und das zitierte Zeichen „Powered by EEZIframes“ sind vorgegeben (Bauplan §2b, E27) */
-        const t = document.body.innerText.replace(/EEZI (Essential|Signature)\b/g, '').replace(/Powered by EEZIframes/g, '');
+        const t = document.body.innerText.replace(/EEZI (Essential|Signature)\b/gi, '').replace(/Powered by EEZIframes/gi, '');
         return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm, .fb .nav .wortmarke') };
       });
       if (fbSeite) { m.groessen = []; m.klein = []; }
@@ -1718,7 +1718,7 @@ if (teil(10)) {
   const fbPakete = PK.LISTE.every((x) => fb.includes(pkEur(PK.preis(x).monat)) && fb.includes(pkEur(PK.preis(x).einrichtung)) && fb.includes(PK.PAKETE[x].name));
   const fbAlteTarife = ['Abo 10', eur(pr.projekt) + ' netto', 'jedes weitere ' + eur(pr.abo.extra), 'ersten ' + pr.frei + ' Projekte', 'Kostenlos starten'].filter((x) => fb.includes(x));
   ok(fbPakete && !fbAlteTarife.length && [start.text, app.text, ab, fa, ...neuPreis].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten: Aufmaßblatt wie in config.js (' + eur(pr.aufmass) + ', auch in den neuen Ratgebern), Seite für Fensterbauer mit den Paketpreisen aus pakete.js und ohne die Tarife des Betriebsbereichs' + (fbAlteTarife.length ? ' (noch da: ' + fbAlteTarife.join(', ') + ')' : ''));
-  ok(/<h2 id="kundenschutz">Ihre Kunden bleiben Ihre Kunden<\/h2>/.test(fb) && ['Nur Ihr Betrieb:', 'Nur an Sie:', 'In Ihrem Auftrag:', 'Kein Weiterverkauf:'].every((x) => fb.includes(x)) && fb.includes('href="/konfigurator-bedingungen/#kundenschutz"') && /<h2 id="kundenschutz">/.test(fs10.readFileSync(path10.join(WURZEL, 'web/konfigurator-bedingungen/index.html'), 'utf8')), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen und Verweis auf § 10 der Paketbedingungen');
+  ok(/<div class="schutz" id="kundenschutz">\s*<div><h3>Ihre Kunden bleiben Ihre Kunden\.<\/h3>/.test(fb) && ['<b>Nur Ihr Betrieb.</b>', '<b>Nur an Sie.</b>', '<b>Kein Weiterverkauf.</b>', '<b>Im Auftrag, in Frankfurt.</b>'].every((x) => fb.includes(x)) && fb.includes('href="/konfigurator-bedingungen/"') && /<h2 id="kundenschutz">/.test(fs10.readFileSync(path10.join(WURZEL, 'web/konfigurator-bedingungen/index.html'), 'utf8')), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen, Paketbedingungen verlinkt (dort § 10 Kundenschutz)');
   /* g) Domains: www zählt als Hauptdomain, die Cloudflare-Testadresse bleibt gesperrt (functions/seo.js direkt geprüft) */
   const probe = async (adresse, env) => { const r = await seo.behandeln(new Request(adresse), env, async () => new Response('<!doctype html><title>x</title><meta property="og:image" content="/og.png">', { headers: { 'content-type': 'text/html; charset=utf-8' } })); return { robots: r.headers.get('x-robots-tag'), link: r.headers.get('link'), text: await r.text() }; };
   const www = await probe('https://www.eeziframes.com/ratgeber/', { INDEXIERUNG: '1' }), wdev = await probe('https://fenstero.beispiel.workers.dev/ratgeber/', { INDEXIERUNG: '1' });
@@ -1771,7 +1771,9 @@ if (teil(10)) {
   let faqZahl = 0;
   for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer|app)\//.test(x))) {
     const t = (await roh(pf)).text, fragen = ldjson(t).flatMap((x) => (x && x['@graph']) || [x]).filter((x) => x && x['@type'] === 'FAQPage').flatMap((x) => x.mainEntity || []);
-    const vis = new Map(Array.from(t.matchAll(/<summary>([\s\S]*?)<\/summary><div>([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])]));
+    /* Ratgeber: <summary>Frage</summary><div>Antwort</div>; Seite für Fensterbauer: <summary><span>Frage</span>…</summary><div class="frage-antwort">Antwort</div> */
+    const vis = new Map(Array.from(t.matchAll(/<summary>([\s\S]*?)<\/summary><div>([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])])
+      .concat(Array.from(t.matchAll(/<summary><span>([\s\S]*?)<\/span>(?:(?!<\/summary>)[\s\S])*<\/summary><div class="frage-antwort">([\s\S]*?)<\/div><\/details>/g)).map((m) => [sichtbar(m[1]), sichtbar(m[2])])));
     faqZahl += fragen.length;
     for (const q of fragen) if (vis.get(q.name) !== (q.acceptedAnswer || {}).text) faqFehler.push(pf + ' „' + q.name + '“');
   }

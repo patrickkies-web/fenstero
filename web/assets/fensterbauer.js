@@ -314,7 +314,6 @@
         if (fehler) fehler.hidden = true;
         var d = {};
         new FormData(form).forEach(function (v, k) { d[k] = String(v); });
-        if (d.paket === 'offen') d.paket = '';
         if (!String(d.text || '').trim()) d.text = '';
         knopf.disabled = true; form.setAttribute('aria-busy', 'true');
         fetch(form.getAttribute('action'), { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(d), credentials: 'same-origin' })

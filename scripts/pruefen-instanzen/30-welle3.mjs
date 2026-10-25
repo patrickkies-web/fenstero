@@ -35,7 +35,8 @@ export default async (h) => {
     const ctxV = await kontext({ viewport: { width: 1280, height: 900 } }), sV = await h.neueSeite(ctxV, B);
     await sV.goto(B + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
     const ziele = await sV.$$eval('a[href^="/partner/#bestellen/"]', (as) => as.map((a) => a.getAttribute('href')));
-    await sV.click('#paket-signature a[href="/partner/#bestellen/signature"]');
+    await sV.locator('#pk-tab-2:visible, .pk-karte[data-paket="2"] .pk-wahl:visible').first().click(); await sV.waitForTimeout(400);
+    await sV.click('.pk-karte[data-paket="2"] a[href="/partner/#bestellen/signature"]');
     await sV.waitForURL(/\/partner\/#bestellen\/signature$/, { timeout: 8000 }).catch(() => null);
     await bis(sV, () => !!document.querySelector('.p-kopfblock .kicker'), 8000);
     const bf = await sV.evaluate(() => ({ url: location.pathname + location.hash, kicker: ((document.querySelector('.p-kopfblock .kicker') || {}).textContent || '').trim(), text: document.body.innerText }));

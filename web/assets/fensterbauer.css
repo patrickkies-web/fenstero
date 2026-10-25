@@ -286,6 +286,12 @@ html:has(.fb-seite), body.fb-seite { margin: 0; background: color-mix(in srgb, #
   margin-right: auto;
 }
 .fb .wortmarke b { font-weight: 900; }
+/* Zeichen vor der Wortmarke wie auf allen Seiten (Quelle: LOGO_INNEN in gemeinsam.js, scripts/logo-setzen.py) */
+.fb .wortmarke { display: inline-flex; align-items: center; gap: 8px; }
+.fb .wortmarke svg { width: 22px; height: 22px; flex: none; }
+.fb .nav-links a { white-space: nowrap; }
+/* Der Name bleibt immer klein, auch in den Versal-Überschriften der Fußzeile */
+.fb .fuss-spalte h3.marke-klein { text-transform: none; letter-spacing: 0; }
 .fb .nav-links { display: none; list-style: none; margin: 0 auto; padding: 0; gap: 4px; }
 .fb .nav-links a[aria-current] { color: var(--text); background: color-mix(in srgb, var(--text) 10%, transparent); }
 .fb .nav-links a {

@@ -114,7 +114,7 @@ export default async (h) => {
       await s.goto(HB + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
       const v = await s.evaluate(() => ({ text: document.body.innerText, kasse: document.querySelectorAll('a[href^="/partner/#bestellen/"]').length, quer: document.documentElement.scrollWidth > window.innerWidth + 1 }));
       await bild(s, '01-verkaufsseite-' + nm, { ganz: true });
-      ok(/Vorläufige Preise/i.test(v.text) && /Bestellung bald möglich/i.test(v.text) && v.kasse === 0 && !v.quer, 'Verkaufsseite ohne PAKETE_OFFEN (' + nm + '): „Vorläufige Preise“, „Bestellung bald möglich“, kein Weg in die Kasse, kein waagrechter Scroll');
+      ok(/Vorläufige Preise/i.test(v.text) && /Bestellung wird in Kürze freigeschaltet/i.test(v.text) && v.kasse === 0 && !v.quer, 'Verkaufsseite ohne PAKETE_OFFEN (' + nm + '): „Vorläufige Preise“, „Bestellung wird in Kürze freigeschaltet“, kein Weg in die Kasse, kein waagrechter Scroll');
       h.sauber(s, 'Verkaufsseite (' + nm + ') ohne Fehler');
     }
 
@@ -124,7 +124,10 @@ export default async (h) => {
       P.ctxK = ctx; P.sK = s;
       await s.goto(B + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
       if (P.p === 'plus') await bild(s, '02-verkaufsseite-offen-1280');
-      await s.click('#paket-' + P.p + ' a[href="/partner/#bestellen/' + P.p + '"]');
+      /* Seite für Fensterbauer: erst das Paket wählen (Tab am Telefon, Karte am Schreibtisch), dann „… bestellen“ unter der Karte */
+      const nr = Pk.LISTE.indexOf(P.p);
+      await s.locator('#pk-tab-' + nr + ':visible, .pk-karte[data-paket="' + nr + '"] .pk-wahl:visible').first().click(); await s.waitForTimeout(400);
+      await s.click('.pk-karte[data-paket="' + nr + '"] a[href="/partner/#bestellen/' + P.p + '"]');
       await s.waitForSelector('.p-paket[aria-pressed="true"]');
       const gewaehlt = await s.getAttribute('.p-paket[aria-pressed="true"]', 'data-v');
       await bild(s, '03-bestellformular-' + P.p + '-paket-' + P.geraet);
