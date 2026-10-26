@@ -2110,7 +2110,8 @@ function w3dZoomZeigen(stage) {
   if (k) { const b = (r) => k.querySelector('[data-w3d="' + r + '"]'); b('eins').hidden = !an; b('minus').disabled = !an; b('plus').disabled = zm.z >= ZOOM_MAX - 0.001; }
   /* Gezoomt verschiebt Ziehen, statt zu drehen: der Hinweis sagt es */
   const reg = W3DS[stage.id], hint = stage.querySelector('[data-r="hint"]'), h0 = reg && reg.o.hint ? reg.o.hint : '';
-  if (hint && /Drehen ziehen/.test(h0)) hint.textContent = an ? 'Zum Verschieben ziehen' : h0;
+  /* nur bei Änderung schreiben: ein neuer Textknoten in der Bühne kostet bei jeder Bewegung Arbeit */
+  if (hint && /Drehen ziehen/.test(h0)) { const t = an ? 'Zum Verschieben ziehen' : h0; if (hint.textContent !== t) hint.textContent = t; }
 }
 /* Grenzen der Verschiebung: bei 1:1 keine, gezoomt bis etwa an den Rand des ungezoomten Bildes */
 function w3dPanGrenze(stage, zm) {

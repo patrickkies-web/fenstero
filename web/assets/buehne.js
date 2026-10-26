@@ -356,9 +356,23 @@ window.Buehne3D = (function () {
       stage.insertBefore(L.cv, stage.querySelector('.w3d-cam'));
       stage.classList.add('gl');
       BUEHNEN.add(stage);
+      /* Neu gelesen wird nur, wenn sich das Modell ändert: Flächen in .w3d-world (ohne Maßlinien), die Bühne selbst (außer Kamera)
+         oder ein neues Modell. Knöpfe, Hinweis, Maßfeld und Schilder neben dem Modell lösten sonst bei jeder Bewegung ein volles
+         Neulesen samt Schattenkarte aus (Verschieben im Zoom, Drehen beim Messen) */
+      const modell = (n) => n.nodeType === 1 && (n.matches('.w3d-cam, .w3d-sway, .w3d-world') || !!n.querySelector('.w3d-world'));
       B.mo = new MutationObserver((rs) => {
         let neu = false;
-        for (const r of rs) { const t = r.target; if (t === B.camEl || t === B.swayEl || t === L.cv) continue; if (t === stage && r.type === 'attributes' && nurKamera(r, stage)) continue; neu = true; break; }
+        const welt = stage.querySelector('.w3d-world');
+        for (const r of rs) {
+          const t = r.target; if (t === B.camEl || t === B.swayEl || t === L.cv) continue;
+          if (t === stage) {
+            if (r.type === 'attributes') { if (nurKamera(r, stage)) continue; neu = true; break; }
+            if (Array.prototype.some.call(r.addedNodes, modell) || Array.prototype.some.call(r.removedNodes, modell)) { neu = true; break; }
+            continue;
+          }
+          if (!welt || !welt.contains(t) || (t.closest && t.closest('.w3d-dim'))) continue;
+          neu = true; break;
+        }
         if (neu) B.neu = true;
         if (!raf) raf = requestAnimationFrame(bild);
       });
@@ -1211,18 +1225,9 @@ window.Buehne3D = (function () {
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, d);
   }
   let MASSSTAB = 0.2;
-  const LA = new Float32Array(20), LB = new Float32Array(20), LC = new Float32Array(20), LM = new Float32Array(20), SC = new Float32Array(48 * 4), SP = new Float32Array(48), AO = new Float32Array(16);
-  function malen(gl, u, it, schnitt) {
-    if (!it.zahl) return;
-    const st = it.st, bg = st.bg, W = it.W, H = it.H;
-    gl.uniformMatrix4fv(u.uM, false, it.M);
-    const nz = ap(it.M, 0, 0, 1), n0 = ap(it.M, 0, 0, 0); gl.uniform3f(u.uN, nz[0] - n0[0], nz[1] - n0[1], nz[2] - n0[2]);
-    if (it.n2) gl.uniform3fv(u.uN2, it.n2); else gl.uniform3f(u.uN2, nz[0] - n0[0], nz[1] - n0[1], nz[2] - n0[2]);
-    if (it.n1) gl.uniform3fv(u.uN, it.n1);
-    gl.uniform1f(u.uNA, it.nAchse || 0);
-    gl.uniform1f(u.uDz, it.dz || 0); gl.uniform2f(u.uWH, W, H);
-    gl.uniform4fv(u.uBase, vormul(bg.basis));
-    /* Schichten auflösen */
+  /* Hintergrund-Schichten einer Fläche als Uniform-Daten (Verläufe, Wiederholung, Lage, Mittelwert feiner Muster) */
+  function schichten(bg, W, H) {
+    const LA = new Float32Array(20), LB = new Float32Array(20), LC = new Float32Array(20), LM = new Float32Array(20), SC = new Float32Array(48 * 4), SP = new Float32Array(48);
     let s = 0, nl = 0;
     for (let i = 0; i < bg.schichten.length && nl < 5; i++) {
       const Ls = bg.schichten[i]; let tw = 0, th = 0, px0 = 0, py0 = 0;
@@ -1241,8 +1246,23 @@ window.Buehne3D = (function () {
       LM.set(m, nl * 4);
       s += n; nl++;
     }
-    gl.uniform1i(u.uNL, nl);
-    if (nl) { gl.uniform4fv(u.uLA, LA); gl.uniform4fv(u.uLB, LB); gl.uniform4fv(u.uLC, LC); gl.uniform4fv(u.uLM, LM); gl.uniform4fv(u.uSC, SC); gl.uniform1fv(u.uSP, SP); }
+    return { nl: nl, LA: LA, LB: LB, LC: LC, LM: LM, SC: SC, SP: SP };
+  }
+  const AO = new Float32Array(16);
+  function malen(gl, u, it, schnitt) {
+    if (!it.zahl) return;
+    const st = it.st, bg = st.bg, W = it.W, H = it.H;
+    gl.uniformMatrix4fv(u.uM, false, it.M);
+    const nz = ap(it.M, 0, 0, 1), n0 = ap(it.M, 0, 0, 0); gl.uniform3f(u.uN, nz[0] - n0[0], nz[1] - n0[1], nz[2] - n0[2]);
+    if (it.n2) gl.uniform3fv(u.uN2, it.n2); else gl.uniform3f(u.uN2, nz[0] - n0[0], nz[1] - n0[1], nz[2] - n0[2]);
+    if (it.n1) gl.uniform3fv(u.uN, it.n1);
+    gl.uniform1f(u.uNA, it.nAchse || 0);
+    gl.uniform1f(u.uDz, it.dz || 0); gl.uniform2f(u.uWH, W, H);
+    gl.uniform4fv(u.uBase, vormul(bg.basis));
+    /* Schichten: einmal je gelesener Fläche aufgelöst, danach nur noch übergeben (beim Drehen ändert sich nur die Kamera) */
+    const sch = it._sch || (it._sch = schichten(bg, W, H));
+    gl.uniform1i(u.uNL, sch.nl);
+    if (sch.nl) { gl.uniform4fv(u.uLA, sch.LA); gl.uniform4fv(u.uLB, sch.LB); gl.uniform4fv(u.uLC, sch.LC); gl.uniform4fv(u.uLM, sch.LM); gl.uniform4fv(u.uSC, sch.SC); gl.uniform1fv(u.uSP, sch.SP); }
     /* Formen (Bogen, Kreis, Schräge): Kantenlinie und Rundung folgen dem Rechteck der Fläche, nicht dem Umriss; dort weglassen,
        sonst steht am Scheitel und am Fuß ein kurzer Strich */
     const fc = it.c !== undefined ? it.c : it.el && it.el._f && it.el._f.c, form = !!(fc && (fc.t === 'ring' || fc.t === 'poly')), kt = form ? null : st.kante;
