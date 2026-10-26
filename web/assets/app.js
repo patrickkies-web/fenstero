@@ -1864,8 +1864,10 @@ function w3dSonne(stage, w, o, V, s, q) {
   /* Raffstore: Schienen mit Abstand vor Fassade bzw. Rahmen (Distanzwinkel), damit die geneigten Lamellen frei drehen und nicht in
      die Wand ragen; der Vorbaukasten wird entsprechend tiefer */
   const LT = raff ? LAMELLE[lm] || LAMELLE.c80 : null, abst = LT ? Math.max(0, LT.h / 2 + 3 - rail[1] / 2) * s : 0, kD = Math.max(rd + 110 * s, abst + rd + 80 * s);
-  /* Kasten */
-  if (q('roll-f')) {
+  /* Kasten. Aufsatz ohne Sonnenschutz: kein Kasten in der Wand (aufsatzH 0, die Fassade ist dort geschlossen); die Flächen bleiben weg,
+     sonst schimmert die Blende knapp hinter der Fassade bei schrägem Blick als Streifen durch */
+  if (q('roll-f') && auf && !V.kastenH) ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => aus(q(r)));
+  else if (q('roll-f')) {
     ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => { const e = q(r); if (e) e.style.opacity = ''; });
     if (auf) {
       const dz = Math.max(1, T - d - fd), yb = yK + kH, schlitz = (Math.max(3, 16 * rd / 26) + 3 * s) / dz * 100, mitte = (3 * s + abst + rd / 2) / dz * 100;
