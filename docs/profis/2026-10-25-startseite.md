@@ -134,3 +134,19 @@ Umgesetzt (Version 3 des Artefakts):
 Gefunden beim Rendern: Bei Bogenformen (Rundbogen, Segmentbogen) zeichnet das 3-D-Modell der App oben ein einzelnes Beschlagteil außerhalb des Rahmens. Für die Bilder freigestellt; in der App noch zu beheben.
 
 Offen: Die Fakten auf /fuer-fensterbauer/ (1.280 Kombinationen, 14 Fensterarten, 36 Farben und Dekore, 5 Profilsysteme, 3 Verglasungen, < 5 Min.) haben keinen Beleg im Code und weichen von den gezählten Werten ab; dort stehen auch noch Bildplätze statt Renderings.
+
+## Nachtrag 26.10., dritter Wunsch: „So geht es“ animiert (ultimativ-webdesign und webdesign-wow, ohne Gremium)
+
+Rückmeldung: Bildschirmfotos im Ablauf sind „schwach“; gewünscht ist die Abfolge animiert, auf dem Niveau der Skills.
+
+Umgesetzt (Version 4 des Artefakts), Idee „Ein Fenster, vier Takte“ (Leitideen Bühne und Licht, ein Held, Bewegung mit Bedeutung, Beweis; Vorbilder V7 „Foto löst sich in Linienzeichnung“ und V1 „Aufbau in Takten“):
+- Bühne 1:1 (Telefon 358 px, Schreibtisch 560 px) mit einem einzigen Fenster, das durch alle Schritte reist; daneben bzw. darunter die vier Schritte mit Fortschrittsbalken, antippbar. Halt-Knopf; läuft nur, wenn die Bühne zu 45 % im Bild ist; bei „weniger Bewegung“ kein Ablauf, jeder Schritt zeigt sein Endbild (Grundzustand jedes Teils ist das Endbild).
+- Takt 1 Fotografieren (4,6 s): Fenster in der Wand von innen (3-D-Modell der App), Sucher schließt sich, Auslöser, das Bild fliegt als Vorschau „innen“ in die Ecke; dann außen (Anthrazit, Fassade), Vorschau „außen“; „Einbausituation erkannt“.
+- Takt 2 Messen (4,8 s): das Foto löst sich in eine technische Zeichnung auf (Linien zeichnen sich), dann die vier Maße in der Reihenfolge der App: Öffnung Höhe 1.409 (orange), Fenster Höhe 1.385 (blau), Öffnung Breite 1.789, Fenster Breite 1.760; Zähler „Maß 1 von 4 … Alle Maße in mm“. Die Werte sind Zeile 1 des echten Aufmaßblatts (Wohnzimmer).
+- Takt 3 Konfigurieren (5,0 s): aus der Zeichnung wächst das 3-D-Modell (weiß), der Ring springt auf Anthrazitgrau RAL 7016, das Fenster färbt sich um; der Schalter „Sprossen“ geht an, Wiener Sprossen erscheinen. Drei Renderings mit identischer Kamera (docs/profis/werkzeuge/startseite-so-renderings.mjs).
+- Takt 4 Aufmaßblatt (4,8 s): das Blatt steigt auf, das Fenster fliegt in Zeile 1, die vier Positionen leuchten nacheinander auf und haken sich ab; „Aufmaßblatt.pdf · für jeden Fensterbauer“, „einmal 7,99 €“.
+- Technik: CSS-Keyframes auf transform, opacity und stroke-dashoffset; der Fortschrittsbalken treibt per animationend den Wechsel; kein GSAP nötig. Bildfolge zur Prüfung: docs/profis/bilder/2026-10-26-startseite-so-ablauf.jpg.
+
+Gemessen: kein Querscrollen, Pille 592 px, nach dem Auftritt im ersten Bildschirm keine laufende Animation; Bühne pausiert vor dem Sichtbarwerden, beim Hochscrollen aus dem Bild und bei verstecktem Tab.
+
+Hinweis: Die Schritte bündeln die sechs Schritte der App (Start, Fotos, Einzeichnen, Maße, Ergebnis, Wünsche) zu vier.

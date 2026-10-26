@@ -9,7 +9,7 @@
 :root {
   --ground: #161616; --surface: #1f1f1f; --surface2: #262626; --surface3: #2e2e2e;
   --text: #f3f2ee; --text2: #c9c8c3; --muted: #93928d; --line: #2b2b2b; --line2: #3a3a36;
-  --accent: #8fd694; --accent-soft: rgba(143, 214, 148, .15); --cream: #f1f0ea; --on-cream: #161616; --mo: #ff8a5b;
+  --accent: #8fd694; --accent-soft: rgba(143, 214, 148, .15); --cream: #f1f0ea; --on-cream: #161616; --mo: #ff8a5b; --el: #7aa2ff;
   --font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --e-out: cubic-bezier(.2, .7, .2, 1); --e-io: cubic-bezier(.45, 0, .2, 1); --e-auf: cubic-bezier(.16, 1, .3, 1);
   --gutter-l: max(16px, env(safe-area-inset-left, 0px)); --gutter-r: max(16px, env(safe-area-inset-right, 0px));
@@ -115,19 +115,175 @@ h2 { margin: 8px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; lett
 .laufband.zahlen .spur { --spalt: 24px }
 .lauf-fuss { margin: 22px auto 0; font-size: 13px; color: var(--muted) }
 
-/* Ablauf in vier Schritten: Telefon als senkrechte Linie mit Nummern, ab 900 px vier Spalten mit waagerechter Linie */
-.schritte4 { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 34px }
-.s4 { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 14px; align-items: start }
-.s4-nr { grid-row: 1 / span 3; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--line2); background: var(--surface); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text) }
-.s4.konf .s4-nr { box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent) }
-.s4:not(:last-child)::after { content: ""; position: absolute; left: 19.5px; top: 48px; bottom: -26px; width: 1px; background: var(--line2) }
-.s4 h3 { grid-column: 2; margin: 8px 0 0; font-size: 17px; font-weight: 700; line-height: 1.25 }
-.s4 p { grid-column: 2; margin: 4px 0 0; font-size: 15px; color: var(--text2); max-width: 36ch; text-wrap: pretty }
-.s4-bild { grid-column: 2; margin: 14px 0 0; width: 100%; max-width: 240px; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line2), 0 16px 36px rgba(0, 0, 0, .4) }
-.s4-bild img { width: 100%; height: 100%; object-fit: cover }
-.s4-bild.papier { background: #fff }
-.ablauf-fuss { margin: 30px 0 0; font-size: 15px; color: var(--text2); max-width: 46ch }
+/* So geht es: eine Bühne, ein Fenster, vier Takte. Dasselbe Fenster wird fotografiert, löst sich in eine Maßzeichnung auf, wächst zum
+   3-D-Modell und landet im Aufmaßblatt (Zeile 1, Wohnzimmer, 1.789 × 1.409 mm). Daneben die vier Schritte mit Fortschritt; Antippen springt.
+   Läuft nur im Bild, Halt-Knopf, bei „weniger Bewegung“ zeigt jeder Schritt sein Endbild (Grundzustand jedes Teils = Endbild, die Keyframes
+   kommen von vorn). Nur transform und opacity werden animiert, außer stroke-dashoffset der Linien. */
+.so-grid { display: grid; gap: 22px; margin-top: 28px }
+.so-buehne { --t1: 4600ms; --t2: 4800ms; --t3: 5000ms; --t4: 4800ms; position: relative; width: 100%; aspect-ratio: 1; border-radius: 28px; overflow: hidden; isolation: isolate; background: radial-gradient(120% 80% at 28% 0%, rgba(241, 240, 234, .11), rgba(241, 240, 234, 0) 60%), #1b1b1b; box-shadow: inset 0 0 0 1px var(--line2), 0 30px 60px rgba(0, 0, 0, .45) }
+.sz { position: absolute; inset: 0; opacity: 0; transition: opacity 450ms var(--e-io); pointer-events: none }
+.so-buehne[data-s="1"] .sz1, .so-buehne[data-s="2"] .sz2, .so-buehne[data-s="3"] .sz3, .so-buehne[data-s="4"] .sz4 { opacity: 1 }
+.plakette { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(22, 22, 22, .82); color: var(--text); font-size: 13px; font-weight: 700; white-space: nowrap; box-shadow: inset 0 0 0 1px rgba(243, 242, 238, .12) }
+.plakette .pk { width: 8px; height: 8px; border-radius: 50%; background: var(--accent) }
+.plakette svg { width: 14px; height: 14px; color: var(--accent) }
+.stapel { position: absolute; display: grid } .stapel > * { grid-area: 1 / 1 }
+.so-halt { position: absolute; z-index: 5; top: 12px; right: 12px; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: rgba(22, 22, 22, .78); color: var(--text); box-shadow: inset 0 0 0 1px rgba(243, 242, 238, .14); cursor: pointer }
+.so-halt svg { width: 14px; height: 14px } .so-halt .i-weiter { display: none }
+.so-halt[aria-pressed="true"] .i-halt { display: none } .so-halt[aria-pressed="true"] .i-weiter { display: block }
+
+/* Takt 1 · Fotografieren: Sucher schließt sich, Auslöser, das Bild fliegt als Vorschau in die Ecke; erst innen, dann außen */
+.s1-bild { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover }
+.s1-innen { opacity: 0 }
+.sucher { position: absolute; inset: 13% }
+.sucher i { position: absolute; width: 15%; height: 15%; border: 4px solid #fff; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, .55)) drop-shadow(0 2px 6px rgba(0, 0, 0, .35)) }
+.sucher i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 12px }
+.sucher i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 12px }
+.sucher i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 12px }
+.sucher i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 12px }
+.blitz { position: absolute; inset: 0; background: #fff; opacity: 0 }
+.daumen { position: absolute; bottom: 5%; width: 22%; aspect-ratio: 1200 / 1186; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 2px var(--cream), 0 12px 26px rgba(0, 0, 0, .5) }
+.daumen img { width: 100%; height: 100%; object-fit: cover }
+.daumen b { position: absolute; left: 6%; bottom: 7%; padding: 1px 7px; border-radius: 999px; background: rgba(22, 22, 22, .82); color: var(--text); font-size: 13px; font-weight: 700; line-height: 1.5 }
+.d1 { left: 5% } .d2 { left: 30% }
+.s1-plak { top: 4%; left: 4% }
+.s1-plak .c1, .s1-plak .c2 { opacity: 0 }
+.so-buehne[data-s="1"] .s1-innen { animation: s1innen var(--t1) linear both }
+.so-buehne[data-s="1"] .s1-aussen { animation: s1aussen var(--t1) linear both }
+.so-buehne[data-s="1"] .sucher { animation: sucher var(--t1) var(--e-auf) both }
+.so-buehne[data-s="1"] .blitz { animation: blitz var(--t1) linear both }
+.so-buehne[data-s="1"] .d1 { animation: d1 var(--t1) var(--e-auf) both }
+.so-buehne[data-s="1"] .d2 { animation: d2 var(--t1) var(--e-auf) both }
+.so-buehne[data-s="1"] .s1-plak .c1 { animation: c1 var(--t1) linear both }
+.so-buehne[data-s="1"] .s1-plak .c2 { animation: c2 var(--t1) linear both }
+.so-buehne[data-s="1"] .s1-plak .c3 { animation: c3 var(--t1) linear both }
+@keyframes s1innen { 0% { opacity: 1; transform: scale(1.08) } 46% { opacity: 1; transform: scale(1) } 52%, 100% { opacity: 0; transform: scale(1) } }
+@keyframes s1aussen { 0%, 46% { opacity: 0; transform: scale(1.08) } 52% { opacity: 1 } 100% { opacity: 1; transform: scale(1) } }
+@keyframes sucher { 0% { opacity: 0; transform: scale(1.2) } 5% { opacity: 1 } 17% { transform: scale(1) } 45% { opacity: 1; transform: scale(1) } 48% { opacity: 0; transform: scale(1.2) } 53% { opacity: 1; transform: scale(1.2) } 63%, 100% { opacity: 1; transform: scale(1) } }
+@keyframes blitz { 0%, 25.5% { opacity: 0 } 26.5% { opacity: .75 } 31%, 60.5% { opacity: 0 } 61.5% { opacity: .75 } 66%, 100% { opacity: 0 } }
+@keyframes d1 { 0%, 26.5% { opacity: 0; transform: translate(154.5%, -154.5%) scale(4.545) } 27.5% { opacity: 1; transform: translate(154.5%, -154.5%) scale(4.545) } 40%, 100% { opacity: 1; transform: none } }
+@keyframes d2 { 0%, 61.5% { opacity: 0; transform: translate(40.9%, -154.5%) scale(4.545) } 62.5% { opacity: 1; transform: translate(40.9%, -154.5%) scale(4.545) } 75%, 100% { opacity: 1; transform: none } }
+@keyframes c1 { 0%, 3% { opacity: 0 } 7%, 44% { opacity: 1 } 48%, 100% { opacity: 0 } }
+@keyframes c2 { 0%, 49% { opacity: 0 } 53%, 80% { opacity: 1 } 84%, 100% { opacity: 0 } }
+@keyframes c3 { 0%, 84% { opacity: 0; transform: translateY(6px) } 90%, 100% { opacity: 1; transform: none } }
+
+/* Takt 2 · Messen: das Foto löst sich in die Maßzeichnung auf, die vier Maße zeichnen sich in der Reihenfolge der App */
+.zeichnung { position: absolute; inset: 0; width: 100%; height: 100% }
+.zeichnung .l { fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0 }
+.zeichnung .l.duenn { stroke-width: 1.2; stroke: rgba(243, 242, 238, .55) }
+.zeichnung .sym { fill: none; stroke: rgba(243, 242, 238, .32); stroke-width: 1.2; stroke-dasharray: 5 5 }
+.zeichnung .glas { fill: rgba(143, 180, 214, .07) }
+.zeichnung .mass .ml { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0 }
+.zeichnung .mass .hilf { fill: none; stroke-width: 1.4; stroke-linecap: round }
+.zeichnung .mo .ml, .zeichnung .mo .hilf { stroke: var(--mo) } .zeichnung .el .ml, .zeichnung .el .hilf { stroke: var(--el) }
+.zeichnung .hilf.gestr { stroke-dasharray: 4 4; opacity: .7 }
+.zeichnung .wert rect { fill: #161616; stroke-width: 1.5 }
+.zeichnung .mo .wert rect { stroke: rgba(255, 138, 91, .6) } .zeichnung .el .wert rect { stroke: rgba(122, 162, 255, .6) }
+.zeichnung .wert text { font: 800 22px var(--font); font-variant-numeric: tabular-nums; text-anchor: middle; dominant-baseline: central }
+.zeichnung .mo .wert text { fill: var(--mo) } .zeichnung .el .wert text { fill: var(--el) }
+.zeichnung .wert { transform-box: fill-box; transform-origin: center }
+.m1 { --t: 1000ms } .m2 { --t: 1800ms } .m3 { --t: 2600ms } .m4 { --t: 3400ms }
+.s2-legende { position: absolute; top: 4%; left: 4%; display: flex; gap: 6px }
+.s2-legende .o .pk { background: var(--mo) } .s2-legende .e .pk { background: var(--el) }
+.s2-zaehler { left: 4%; bottom: 4% }
+.s2-zaehler .z1, .s2-zaehler .z2, .s2-zaehler .z3, .s2-zaehler .z4 { opacity: 0 }
+.so-buehne[data-s="2"] .zeichnung .l { animation: zeichnen 900ms var(--e-io) both; animation-delay: calc(150ms + var(--i, 0) * 70ms) }
+.so-buehne[data-s="2"] .zeichnung .sym { animation: ein 600ms var(--e-auf) 900ms both }
+.so-buehne[data-s="2"] .zeichnung .wand, .so-buehne[data-s="2"] .zeichnung .glas, .so-buehne[data-s="2"] .s2-legende { animation: ein 600ms var(--e-auf) 500ms both }
+.so-buehne[data-s="2"] .mass .ml { animation: zeichnen 500ms var(--e-io) var(--t) both }
+.so-buehne[data-s="2"] .mass .hilf { animation: ein 300ms var(--e-out) calc(var(--t) - 150ms) both }
+.so-buehne[data-s="2"] .mass .wert { animation: plopp 360ms var(--e-auf) calc(var(--t) + 380ms) both }
+.so-buehne[data-s="2"] .s2-zaehler .z1 { animation: fenster 800ms linear 1000ms both }
+.so-buehne[data-s="2"] .s2-zaehler .z2 { animation: fenster 800ms linear 1800ms both }
+.so-buehne[data-s="2"] .s2-zaehler .z3 { animation: fenster 800ms linear 2600ms both }
+.so-buehne[data-s="2"] .s2-zaehler .z4 { animation: fenster 800ms linear 3400ms both }
+.so-buehne[data-s="2"] .s2-zaehler .zf { animation: ein 300ms var(--e-auf) 4200ms both }
+@keyframes zeichnen { from { stroke-dashoffset: 1 } }
+@keyframes ein { from { opacity: 0 } }
+@keyframes plopp { from { opacity: 0; transform: scale(.82) } }
+@keyframes fenster { 0% { opacity: 0 } 12%, 88% { opacity: 1 } 100% { opacity: 0 } }
+
+/* Takt 3 · Konfigurieren: aus den Zahlen wächst das 3-D-Modell; der Ring springt auf Anthrazit, das Fenster färbt sich um, dann kommen Sprossen dazu */
+.modell { position: absolute; left: 21%; top: 10%; width: 58%; aspect-ratio: 1398 / 1425 }
+.modell img { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .5)) }
+.modell .weiss, .modell .anthrazit { opacity: 0 }
+.s3-panel { position: absolute; left: 4%; right: 4%; bottom: 4%; display: grid; gap: 10px; padding: 12px 14px; border-radius: 18px; background: rgba(31, 31, 31, .94); box-shadow: inset 0 0 0 1px var(--line2) }
+.s3-zeile { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.s3-farbe { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: var(--muted) }
+.s3-farbe .stapel { position: static } .s3-farbe b { font-size: 15px; color: var(--text); white-space: nowrap }
+.s3-farbe .n1 { opacity: 0 }
+.punkte { position: relative; display: flex; gap: 10px }
+.punkte i { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35) }
+.punkte .ring { position: absolute; left: -4px; top: -4px; width: 34px; height: 34px; border-radius: 50%; box-shadow: 0 0 0 2px var(--cream); background: none; transform: translateX(36px) }
+.schalter { display: inline-grid }
+.schalter > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 12px 0 9px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap }
+.schalter .aus { box-shadow: inset 0 0 0 1.5px var(--line2); color: var(--text2); opacity: 0 }
+.schalter .an { background: var(--accent); color: var(--on-cream) }
+.schalter svg { width: 14px; height: 14px }
+.s3-fertig { top: 4%; left: 4% }
+.so-buehne[data-s="3"] .modell .weiss { animation: m3weiss var(--t3) linear both }
+.so-buehne[data-s="3"] .modell .anthrazit { animation: m3anth var(--t3) linear both }
+.so-buehne[data-s="3"] .modell .sprosse { animation: m3spr var(--t3) linear both }
+.so-buehne[data-s="3"] .s3-panel { animation: hoch 500ms var(--e-auf) 650ms both }
+.so-buehne[data-s="3"] .punkte .ring { animation: ring var(--t3) var(--e-io) both }
+.so-buehne[data-s="3"] .s3-farbe .n1 { animation: n1 var(--t3) linear both }
+.so-buehne[data-s="3"] .s3-farbe .n2 { animation: n2 var(--t3) linear both }
+.so-buehne[data-s="3"] .schalter .aus { animation: saus var(--t3) linear both }
+.so-buehne[data-s="3"] .schalter .an { animation: san var(--t3) var(--e-out) both }
+.so-buehne[data-s="3"] .s3-fertig { animation: hoch 450ms var(--e-auf) 450ms both }
+@keyframes m3weiss { 0% { opacity: 0; transform: scale(.9) translateY(4%) } 12% { opacity: 1; transform: none } 31% { opacity: 1 } 36%, 100% { opacity: 0 } }
+@keyframes m3anth { 0%, 31% { opacity: 0 } 36%, 56% { opacity: 1 } 61%, 100% { opacity: 0 } }
+@keyframes m3spr { 0%, 56% { opacity: 0 } 61%, 100% { opacity: 1 } }
+@keyframes hoch { from { opacity: 0; transform: translateY(14px) } }
+@keyframes ring { 0%, 28% { transform: translateX(0) } 34%, 100% { transform: translateX(36px) } }
+@keyframes n1 { 0%, 31% { opacity: 1 } 34%, 100% { opacity: 0 } }
+@keyframes n2 { 0%, 31% { opacity: 0 } 34%, 100% { opacity: 1 } }
+@keyframes saus { 0%, 53% { opacity: 1 } 56%, 100% { opacity: 0 } }
+@keyframes san { 0%, 53% { opacity: 0; transform: scale(.94) } 57%, 100% { opacity: 1; transform: none } }
+
+/* Takt 4 · Aufmaßblatt: das Modell fliegt in Zeile 1 des Blatts, die vier Positionen haken sich ab */
+.s4-blatt { position: absolute; left: 7%; top: 7%; width: 86%; aspect-ratio: 920 / 872; border-radius: 8px; overflow: hidden; background: #fff; transform: rotate(-1.5deg); box-shadow: 0 26px 50px rgba(0, 0, 0, .55) }
+.s4-blatt img { width: 100%; height: 100% }
+.s4-blatt .zeile { position: absolute; left: 6%; width: 87.5%; height: 6%; border-radius: 4px; background: rgba(143, 214, 148, .38); opacity: 0 }
+.s4-blatt .haken { position: absolute; right: 1.6%; width: 4.6%; aspect-ratio: 1; border-radius: 50%; background: #1f7a3d; display: grid; place-items: center }
+.s4-blatt .haken svg { width: 62%; height: 62%; color: #fff }
+.z1 { top: 69.2% } .z2 { top: 75.2% } .z3 { top: 81.2% } .z4 { top: 87.2% }
+.h1 { top: 69.9% } .h2 { top: 75.9% } .h3 { top: 81.9% } .h4 { top: 87.9% }
+.flug { --fx: -54.57%; --fy: 44.46%; --fs: .0757; position: absolute; left: 21%; top: 10%; width: 58%; aspect-ratio: 1398 / 1425; opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--fs)) }
+.flug img { width: 100%; height: 100%; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .5)) }
+.s4-plak { position: absolute; left: 4%; bottom: 4%; display: flex; flex-wrap: wrap; gap: 6px; max-width: 92% }
+.so-buehne[data-s="4"] .s4-blatt { animation: blatt 900ms var(--e-auf) 250ms both }
+.so-buehne[data-s="4"] .flug { animation: flug var(--t4) var(--e-io) both }
+.so-buehne[data-s="4"] .zeile { animation: fenster 700ms linear both }
+.so-buehne[data-s="4"] .haken { animation: plopp 320ms var(--e-auf) both }
+.so-buehne[data-s="4"] .z1 { animation-delay: 1500ms } .so-buehne[data-s="4"] .h1 { animation-delay: 1700ms }
+.so-buehne[data-s="4"] .z2 { animation-delay: 1800ms } .so-buehne[data-s="4"] .h2 { animation-delay: 2000ms }
+.so-buehne[data-s="4"] .z3 { animation-delay: 2100ms } .so-buehne[data-s="4"] .h3 { animation-delay: 2300ms }
+.so-buehne[data-s="4"] .z4 { animation-delay: 2400ms } .so-buehne[data-s="4"] .h4 { animation-delay: 2600ms }
+.so-buehne[data-s="4"] .s4-plak > * { animation: hoch 450ms var(--e-auf) both }
+.so-buehne[data-s="4"] .s4-plak > :nth-child(1) { animation-delay: 3000ms } .so-buehne[data-s="4"] .s4-plak > :nth-child(2) { animation-delay: 3250ms }
+@keyframes blatt { from { opacity: 0; transform: translateY(46%) rotate(3deg) } }
+@keyframes flug { 0% { opacity: 1; transform: none } 6% { opacity: 1; transform: none } 26% { opacity: 1; transform: translate(var(--fx), var(--fy)) scale(var(--fs)) } 31%, 100% { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--fs)) } }
+
+/* Die Schritte daneben: alle Sätze stehen (keine springende Höhe), der laufende ist hell und hat den Fortschritt */
+.so-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px }
+.so-s { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 10px; width: 100%; padding: 12px 4px 12px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 12px }
+.so-s .nr { grid-row: 1 / span 3; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--muted); padding-top: 3px }
+.so-s .t { font-size: 17px; font-weight: 700; color: var(--text2); line-height: 1.3 }
+.so-s .x { font-size: 15px; color: var(--muted); margin-top: 2px; line-height: 1.4; text-wrap: pretty }
+.so-s .balken { display: block; height: 2px; margin-top: 10px; border-radius: 2px; background: var(--line2); overflow: hidden }
+.so-s .balken i { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0) }
+.so-s[aria-current="step"] .t { color: var(--text) } .so-s[aria-current="step"] .x { color: var(--text2) } .so-s[aria-current="step"] .nr { color: var(--accent) }
+.so-s.konf .t::after { content: " · am 3-D-Modell"; font-weight: 600; color: var(--accent) }
+.so.laeuft .so-s[aria-current="step"] .balken i { animation: fortschritt var(--dauer, 4800ms) linear both }
+@keyframes fortschritt { to { transform: scaleX(1) } }
+.so.halt .so-buehne *, .so.aus .so-buehne *, .so.halt .balken i, .so.aus .balken i { animation-play-state: paused !important }
+@media (hover: hover) and (pointer: fine) { .so-s:hover .t { color: var(--text) } }
+.ablauf-fuss { margin: 26px 0 0; font-size: 15px; color: var(--text2); max-width: 46ch }
 .ablauf-fuss a { color: var(--text); font-weight: 700; text-underline-offset: 4px }
+@media (prefers-reduced-motion: reduce) {
+  .so-buehne *, .so-buehne { animation: none !important; transition: none !important }
+  .so-s .balken { display: none }
+}
 
 /* Aufmaßblatt und Liste */
 .schirm { position: relative; width: 100%; border-radius: 12px; border: 6px solid var(--surface2); overflow: hidden; box-shadow: 0 18px 40px rgba(0, 0, 0, .45) }
@@ -192,18 +348,18 @@ h2 { margin: 8px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; lett
 
 /* Abschnitte erscheinen einmal, wenn 15 % im Bild sind: 600 ms, 12 px */
 .rev .haar { transform: scaleX(0); transition: transform 600ms var(--e-auf) }
-.rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .s4, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 0; transform: translateY(12px); transition: opacity 600ms var(--e-auf), transform 600ms var(--e-auf) }
+.rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .so-buehne, .rev .so-liste > li, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 0; transform: translateY(12px); transition: opacity 600ms var(--e-auf), transform 600ms var(--e-auf) }
 .rev .kopfzeile > :nth-child(2), .rev .lauf-kopf > :nth-child(2) { transition-delay: 80ms }
 .rev .kopfzeile > :nth-child(3) { transition-delay: 160ms }
 .rev .laufband.bilder { transition-delay: 160ms } .rev .laufband.zahlen { transition-delay: 240ms }
-.rev .s4:nth-child(1) { transition-delay: 200ms } .rev .s4:nth-child(2) { transition-delay: 260ms } .rev .s4:nth-child(3) { transition-delay: 320ms } .rev .s4:nth-child(4) { transition-delay: 380ms }
+.rev .so-buehne { transition-delay: 160ms } .rev .so-liste > li:nth-child(1) { transition-delay: 240ms } .rev .so-liste > li:nth-child(2) { transition-delay: 300ms } .rev .so-liste > li:nth-child(3) { transition-delay: 360ms } .rev .so-liste > li:nth-child(4) { transition-delay: 420ms }
 .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt, .rev .ablauf-fuss { transition-delay: 240ms }
 .rev.in .haar { transform: none }
-.rev.in .kopfzeile > *, .rev.in .lauf-kopf > *, .rev.in .laufband, .rev.in .s4, .rev.in .ablauf-fuss, .rev.in .medien, .rev.in .liste, .rev.in .beispiel, .rev.in .linkzeile, .rev.in .preis, .rev.in .rat, .rev.in .fb-inhalt { opacity: 1; transform: none }
+.rev.in .kopfzeile > *, .rev.in .lauf-kopf > *, .rev.in .laufband, .rev.in .so-buehne, .rev.in .so-liste > li, .rev.in .ablauf-fuss, .rev.in .medien, .rev.in .liste, .rev.in .beispiel, .rev.in .linkzeile, .rev.in .preis, .rev.in .rat, .rev.in .fb-inhalt { opacity: 1; transform: none }
 
 @media (prefers-reduced-motion: reduce) {
   .an .foto img, .an h1 .zeile > span, .an .lead { animation: none }
-  .rev .haar, .rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .s4, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 1; transform: none; transition: none }
+  .rev .haar, .rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .so-buehne, .rev .so-liste > li, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 1; transform: none; transition: none }
   .pille, .geist, .pille .pf, .kopf, .karte-bild, .lauf-halt { transition: none }
   .spur [data-klon] { display: none }
 }
@@ -217,15 +373,10 @@ h2 { margin: 8px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; lett
   .spur { --spalt: 18px }
 }
 @media (min-width: 900px) {
-  /* Ablauf: vier Spalten, Nummern auf einer waagerechten Linie */
-  .schritte4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 40px }
-  .s4 { grid-template-columns: minmax(0, 1fr); row-gap: 0 }
-  .s4-nr { grid-row: auto }
-  .s4:not(:last-child)::after { left: 48px; right: -24px; top: 19.5px; bottom: auto; width: auto; height: 1px }
-  .s4-bild, .s4 h3, .s4 p { grid-column: 1 }
-  .s4-bild { order: 2; margin-top: 18px; max-width: none }
-  .s4 h3 { order: 3; margin-top: 16px }
-  .s4 p { order: 4 }
+  /* So geht es: Bühne links, Schritte rechts */
+  .so-grid { grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 56px; align-items: center; margin-top: 40px }
+  .so-s { padding: 16px 4px 16px 0 }
+  .so-s .x { font-size: 17px }
 }
 @media (min-width: 1024px) {
   .seg { width: 320px; margin: 0 auto }
@@ -276,14 +427,112 @@ h2 { margin: 8px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; lett
 </section>
 
 <div class="wrap">
-<section class="abschnitt rev" id="so">
-  <div class="kopfzeile"><p class="kicker">So geht es</p><h2>Vom Zollstock zum <span class="ak">Aufmaß.</span></h2><p class="sub">Die App führt dich Fenster für Fenster durch, wie beim Termin vor Ort. Ohne Konto, ohne App aus dem Store.</p></div>
-  <ol class="schritte4">
-    <li class="s4"><span class="s4-nr">01</span><figure class="s4-bild"><img src="bilder/ablauf/fotos.webp" width="600" height="800" alt="App, Schritt Fotos: Fotografiere das Fenster, einmal von innen, einmal von außen" loading="lazy"></figure><h3>Fotografieren</h3><p>Ein Foto von innen, eins von außen. Daraus liest die App die Einbausituation für deinen Fensterbauer.</p></li>
-    <li class="s4"><span class="s4-nr">02</span><figure class="s4-bild"><img src="bilder/ablauf/messen.webp" width="600" height="800" alt="App, Maß 1 von 4: Höhe in der Mitte, die orange Linie zeigt, wo der Zollstock anliegt" loading="lazy"></figure><h3>Messen</h3><p>Vier Maße mit dem Zollstock. Die App zeigt im Bild, wo du anlegst, und fragt nach, wenn etwas nicht passt.</p></li>
-    <li class="s4 konf"><span class="s4-nr">03</span><figure class="s4-bild"><img src="bilder/ablauf/farbe.webp" width="600" height="800" alt="App, Material und Farbe: das Fenster als 3-D-Modell in Anthrazitgrau, darunter die Farbfelder" loading="lazy"></figure><h3>Konfigurieren</h3><p>Öffnungsart, Material, Farbe, Glas, Rollladen: Du wählst, das 3-D-Modell zeigt es sofort. Unsicher? Dein Fensterbauer berät dich.</p></li>
-    <li class="s4"><span class="s4-nr">04</span><figure class="s4-bild papier"><img src="bilder/ablauf/blatt.webp" width="600" height="800" alt="Ausschnitt eines Aufmaßblatts: Familie Weber, Übersicht der Fenster mit Öffnung und Element" loading="lazy"></figure><h3>Aufmaßblatt</h3><p>Alles auf einem Blatt als PDF, das jeder Fensterbauer lesen kann. Einmal 7,99&nbsp;€ für alle Fenster.</p></li>
-  </ol>
+<section class="abschnitt so rev" id="so" aria-labelledby="so-titel">
+  <div class="kopfzeile"><p class="kicker">So geht es</p><h2 id="so-titel">Vom Zollstock zum <span class="ak">Aufmaß.</span></h2><p class="sub">Ein Fenster, vier Schritte. Ohne Konto, ohne App aus dem Store.</p></div>
+  <div class="so-grid">
+    <div class="so-buehne" id="so-buehne" data-s="1" role="img" aria-label="Animation: Ein Fenster wird von innen und außen fotografiert, als Zeichnung mit vier Maßen vermessen, als 3-D-Modell in Anthrazit mit Sprossen geplant und landet als erste Zeile im Aufmaßblatt.">
+      <div class="sz sz1" aria-hidden="true">
+        <img class="s1-bild s1-aussen" src="bilder/so/wand-aussen.webp" width="1200" height="1186" alt="" loading="lazy" decoding="async">
+        <img class="s1-bild s1-innen" src="bilder/so/wand-innen.webp" width="1200" height="1186" alt="" loading="lazy" decoding="async">
+        <div class="sucher"><i></i><i></i><i></i><i></i></div>
+        <div class="blitz"></div>
+        <div class="daumen d1"><img src="bilder/so/wand-innen.webp" alt="" loading="lazy"><b>innen</b></div>
+        <div class="daumen d2"><img src="bilder/so/wand-aussen.webp" alt="" loading="lazy"><b>außen</b></div>
+        <div class="stapel s1-plak">
+          <span class="plakette c1"><span class="pk"></span>Foto 1 von 2 · innen</span>
+          <span class="plakette c2"><span class="pk"></span>Foto 2 von 2 · außen</span>
+          <span class="plakette c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Einbausituation erkannt</span>
+        </div>
+      </div>
+      <div class="sz sz2" aria-hidden="true">
+        <svg class="zeichnung" viewBox="0 0 560 560">
+          <defs>
+            <pattern id="so-schraffur" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V9" stroke="rgba(243,242,238,.09)" stroke-width="1.2"/></pattern>
+            <mask id="so-wandmaske"><rect x="40" y="70" width="480" height="420" fill="#fff"/><rect x="130" y="150" width="300" height="236" fill="#000"/></mask>
+          </defs>
+          <rect class="wand" x="40" y="70" width="480" height="420" fill="url(#so-schraffur)" mask="url(#so-wandmaske)"/>
+          <rect class="glas" x="155" y="175" width="113" height="193"/><rect class="glas" x="292" y="175" width="113" height="193"/>
+          <path class="l" style="--i: 0" pathLength="1" d="M130 150H430V386H130Z"/>
+          <path class="l" style="--i: 1" pathLength="1" d="M116 386H444V397H116Z"/>
+          <path class="l" style="--i: 2" pathLength="1" d="M137 157H423V386H137Z"/>
+          <path class="l" style="--i: 3" pathLength="1" d="M145 165H278V378H145Z"/>
+          <path class="l" style="--i: 4" pathLength="1" d="M282 165H415V378H282Z"/>
+          <path class="l duenn" style="--i: 5" pathLength="1" d="M155 175H268V368H155Z"/>
+          <path class="l duenn" style="--i: 6" pathLength="1" d="M292 175H405V368H292Z"/>
+          <path class="l" style="--i: 7; stroke-width: 4" pathLength="1" d="M271 258V292"/>
+          <path class="l" style="--i: 7; stroke-width: 4" pathLength="1" d="M289 258V292"/>
+          <path class="sym" d="M268 175L155 271.5L268 368M155 175L211.5 368L268 175"/>
+          <path class="sym" d="M292 175L405 271.5L292 368M292 175L348.5 368L405 175"/>
+          <g class="mass mo m1">
+            <path class="hilf gestr" d="M126 150H76M126 386H76"/>
+            <path class="hilf" d="M80 156L92 144M80 392L92 380"/>
+            <path class="ml" pathLength="1" d="M86 150V386"/>
+            <g transform="translate(86 268)"><g class="wert"><rect x="-38" y="-17" width="76" height="34" rx="10"/><text>1.409</text></g></g>
+          </g>
+          <g class="mass el m2">
+            <path class="hilf gestr" d="M427 157H492M448 386H492"/>
+            <path class="hilf" d="M476 163L488 151M476 392L488 380"/>
+            <path class="ml" pathLength="1" d="M482 157V386"/>
+            <g transform="translate(482 272)"><g class="wert"><rect x="-38" y="-17" width="76" height="34" rx="10"/><text>1.385</text></g></g>
+          </g>
+          <g class="mass mo m3">
+            <path class="hilf gestr" d="M130 146V106M430 146V106"/>
+            <path class="hilf" d="M124 122L136 110M424 122L436 110"/>
+            <path class="ml" pathLength="1" d="M130 116H430"/>
+            <g transform="translate(280 116)"><g class="wert"><rect x="-38" y="-17" width="76" height="34" rx="10"/><text>1.789</text></g></g>
+          </g>
+          <g class="mass el m4">
+            <path class="hilf gestr" d="M137 401V446M423 401V446"/>
+            <path class="hilf" d="M131 442L143 430M417 442L429 430"/>
+            <path class="ml" pathLength="1" d="M137 436H423"/>
+            <g transform="translate(280 436)"><g class="wert"><rect x="-38" y="-17" width="76" height="34" rx="10"/><text>1.760</text></g></g>
+          </g>
+        </svg>
+        <div class="s2-legende"><span class="plakette o"><span class="pk"></span>Öffnung</span><span class="plakette e"><span class="pk"></span>Fenster</span></div>
+        <div class="stapel s2-zaehler">
+          <span class="plakette z1">Maß 1 von 4 · Höhe</span>
+          <span class="plakette z2">Maß 2 von 4 · Höhe</span>
+          <span class="plakette z3">Maß 3 von 4 · Breite</span>
+          <span class="plakette z4">Maß 4 von 4 · Breite</span>
+          <span class="plakette zf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Alle Maße in mm</span>
+        </div>
+      </div>
+      <div class="sz sz3" aria-hidden="true">
+        <div class="modell">
+          <img class="sprosse" src="bilder/so/modell-sprosse.webp" width="1398" height="1425" alt="" loading="lazy" decoding="async">
+          <img class="anthrazit" src="bilder/so/modell-anthrazit.webp" width="1398" height="1425" alt="" loading="lazy" decoding="async">
+          <img class="weiss" src="bilder/so/modell-weiss.webp" width="1398" height="1425" alt="" loading="lazy" decoding="async">
+        </div>
+        <div class="stapel s3-fertig"><span class="plakette"><span class="pk"></span>3-D-Modell aus deinen Maßen</span></div>
+        <div class="s3-panel">
+          <div class="s3-zeile"><span class="s3-farbe">Farbe <span class="stapel"><b class="n1">Verkehrsweiß · RAL 9016</b><b class="n2">Anthrazitgrau · RAL 7016</b></span></span></div>
+          <div class="s3-zeile">
+            <span class="punkte"><i style="background: #f1f0ea"></i><i style="background: #383e42"></i><i style="background: linear-gradient(135deg, #c9a46b, #b8935c 50%, #d6b47c)"></i><i style="background: #0e0e10"></i><span class="ring"></span></span>
+            <span class="schalter"><span class="aus">Sprossen</span><span class="an"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sprossen</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="sz sz4" aria-hidden="true">
+        <div class="s4-blatt">
+          <img src="bilder/blatt.webp" width="920" height="872" alt="" loading="lazy" decoding="async">
+          <i class="zeile z1"></i><i class="zeile z2"></i><i class="zeile z3"></i><i class="zeile z4"></i>
+          <span class="haken h1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <span class="haken h2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <span class="haken h3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <span class="haken h4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        </div>
+        <div class="flug"><img src="bilder/so/modell-sprosse.webp" alt="" loading="lazy" decoding="async"></div>
+        <div class="s4-plak"><span class="plakette"><span class="pk"></span>Aufmaßblatt.pdf · für jeden Fensterbauer</span><span class="plakette">einmal 7,99&nbsp;€</span></div>
+      </div>
+      <button class="so-halt" type="button" aria-pressed="false" aria-label="Ablauf anhalten" hidden><svg class="i-halt" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg><svg class="i-weiter" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9.5-5.5z"/></svg></button>
+    </div>
+    <ol class="so-liste">
+      <li><button type="button" class="so-s" data-s="1" aria-current="step" aria-controls="so-buehne"><span class="nr">01</span><span class="t">Fotografieren</span><span class="x">Ein Foto von innen, eins von außen. Daraus liest die App die Einbausituation für deinen Fensterbauer.</span><span class="balken"><i></i></span></button></li>
+      <li><button type="button" class="so-s" data-s="2" aria-current="false" aria-controls="so-buehne"><span class="nr">02</span><span class="t">Messen</span><span class="x">Vier Maße mit dem Zollstock: Öffnung und Fenster, je Höhe und Breite. Die App zeigt, wo du anlegst.</span><span class="balken"><i></i></span></button></li>
+      <li><button type="button" class="so-s konf" data-s="3" aria-current="false" aria-controls="so-buehne"><span class="nr">03</span><span class="t">Konfigurieren</span><span class="x">Farbe, Sprossen, Glas, Rollladen: Du wählst, das Fenster zeigt es sofort.</span><span class="balken"><i></i></span></button></li>
+      <li><button type="button" class="so-s" data-s="4" aria-current="false" aria-controls="so-buehne"><span class="nr">04</span><span class="t">Aufmaßblatt</span><span class="x">Alles auf einem Blatt als PDF, das jeder Fensterbauer lesen kann. Einmal 7,99&nbsp;€ für alle Fenster.</span><span class="balken"><i></i></span></button></li>
+    </ol>
+  </div>
   <p class="ablauf-fuss">Erst ansehen? Die <a href="#">Führung</a> zeigt alles in zwei Minuten, ohne eigene Maße.</p>
 </section>
 
@@ -408,6 +657,40 @@ h2 { margin: 8px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; lett
       });
       if (offen) requestAnimationFrame(tick); else laeuft = false;
     }
+  }
+
+  /* So geht es: vier Takte nacheinander, solange die Bühne im Bild ist; der Fortschrittsbalken des laufenden Schritts bestimmt den Wechsel.
+     Antippen springt, der Halt-Knopf hält alles an. Bei „weniger Bewegung“ zeigt jeder Schritt sein Endbild, ohne Ablauf. */
+  var so = document.getElementById('so'), buehne = document.getElementById('so-buehne'), schritte = Array.prototype.slice.call(so.querySelectorAll('.so-s')), soHalt = buehne.querySelector('.so-halt');
+  var DAUER = { 1: 4600, 2: 4800, 3: 5000, 4: 4800 }, akt = 1, gestartet = false;
+  function setze(n) {
+    akt = n;
+    buehne.setAttribute('data-s', '');
+    schritte.forEach(function (b) { b.setAttribute('aria-current', 'false'); });
+    void buehne.offsetWidth;
+    buehne.setAttribute('data-s', String(n));
+    schritte.forEach(function (b) { if (b.getAttribute('data-s') === String(n)) { b.setAttribute('aria-current', 'step'); b.style.setProperty('--dauer', DAUER[n] + 'ms'); } });
+  }
+  schritte.forEach(function (b) { b.addEventListener('click', function () { if (!ruhig && !gestartet) { gestartet = true; so.classList.add('laeuft'); } setze(Number(b.getAttribute('data-s'))); }); });
+  if (!ruhig) {
+    so.classList.add('aus');
+    soHalt.hidden = false;
+    soHalt.addEventListener('click', function () {
+      var an = !so.classList.contains('halt');
+      so.classList.toggle('halt', an);
+      soHalt.setAttribute('aria-pressed', String(an));
+      soHalt.setAttribute('aria-label', an ? 'Ablauf fortsetzen' : 'Ablauf anhalten');
+    });
+    so.querySelector('.so-liste').addEventListener('animationend', function (e) { if (e.animationName === 'fortschritt') setze(akt % 4 + 1); });
+    var imBild = false;
+    function sicht() { so.classList.toggle('aus', !imBild || document.hidden); }
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (e) {
+      imBild = e[0].isIntersecting;
+      if (imBild && !gestartet) { gestartet = true; so.classList.add('laeuft'); setze(1); }
+      sicht();
+    }, { threshold: 0.45 }).observe(buehne);
+    else { imBild = true; gestartet = true; so.classList.add('laeuft'); setze(1); sicht(); }
+    document.addEventListener('visibilitychange', sicht);
   }
 
   /* Kopfzeile: beim Lesen nach unten weg, nach 24 px Hochscrollen zurück (keine Fingerkorrektur lässt sie flackern) */
