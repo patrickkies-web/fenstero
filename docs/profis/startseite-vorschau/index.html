@@ -52,17 +52,11 @@ img { max-width: 100%; display: block }
 .seg a[aria-current]::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent) }
 .seg .chev { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round }
 
-/* Kopf der Seite: zwei Stimmen auf dem Foto, der Waschbär und die Maßlinie */
+/* Kopf der Seite: das Foto ist der Held und bleibt frei; unter dem Preissatz die Leiste „Dazu planst du“ mit den Symbolen aus dem Konfigurator */
 .hero { padding-top: 8px }
 .foto { position: relative; margin: 0 calc(-1 * var(--gutter-l)) 0 calc(-1 * var(--gutter-r)); height: 360px; overflow: hidden }
-.foto img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform: scale(1.06); transform-origin: 50% 40% }
+.foto img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform-origin: 50% 40% }
 .foto::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 190px; background: linear-gradient(0deg, var(--ground) 0%, var(--ground) 22%, rgba(22, 22, 22, .6) 55%, rgba(22, 22, 22, 0) 100%); pointer-events: none }
-.foto .mass { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible }
-.foto .mass line { stroke: var(--mo); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 2px rgba(22, 22, 22, .8)) }
-.foto .mass .zug { stroke-dasharray: 1; stroke-dashoffset: 0 }
-.mw { position: absolute; transform: translate(-100%, 0); padding: 6px 10px 7px; border-radius: 10px; background: rgba(22, 22, 22, .92); text-align: right; white-space: nowrap; box-shadow: 0 0 0 1.5px rgba(255, 138, 91, .5) }
-.mw b { display: block; color: var(--mo); font-size: 17px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.01em }
-.mw small { display: block; margin-top: 2px; color: var(--text2); font-size: 13px; line-height: 1.2; font-weight: 600 }
 .kicker { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--accent) }
 .hero .text { position: relative; z-index: 2; margin-top: -112px }
 h1 { margin: 6px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
@@ -72,8 +66,23 @@ h1 .ak { color: var(--accent) }
 .lead { margin: 8px 0 0; font-size: 17px; line-height: 1.45; color: var(--text2); max-width: 36ch; text-wrap: pretty }
 .lead b { color: var(--text); font-weight: 600 }
 .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 48px }
-.hero .cta { margin-top: 40px }
-.hint { margin: 10px 0 0; font-size: 13px; color: var(--muted); max-width: 46ch; text-wrap: pretty }
+.hero .cta { margin-top: 24px }
+.preiszeile { margin: 14px 0 0; font-size: 15px; line-height: 1.4; color: var(--text2); max-width: 40ch; text-wrap: pretty }
+.preiszeile b { color: var(--text); font-weight: 700 }
+/* Bausteine: was man in der App plant. Am Telefon eine wischbare Leiste bis an den Rand, rechts ausgeblendet (es kommt mehr); ab 720 px umbrochen. Keine Knöpfe: Schilder ohne Hover und ohne Pfeil. */
+.bausteine { list-style: none; display: flex; align-items: center; gap: 8px; margin: 14px calc(-1 * var(--gutter-r)) 0 calc(-1 * var(--gutter-l)); padding: 2px var(--gutter-r) 2px var(--gutter-l); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-left: var(--gutter-l); scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent) }
+.bausteine::-webkit-scrollbar { display: none }
+.bausteine.ende { -webkit-mask-image: none; mask-image: none }
+.bausteine li { flex: 0 0 auto; scroll-snap-align: start }
+.baustein { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 13px 0 7px; border-radius: 999px; background: rgba(243, 242, 238, .075); font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; cursor: default }
+.baustein svg { width: 24px; height: 24px; flex: 0 0 auto }
+@media (max-width: 719px) {
+  /* Telefon: so schmal, dass der vierte Baustein unter der Ausblendung sichtbar anschaut */
+  .bausteine { gap: 6px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent) }
+  .baustein { gap: 5px; padding: 0 11px 0 6px }
+  .baustein svg { width: 22px; height: 22px }
+}
+.hint { margin: 6px 0 0; font-size: 13px; color: var(--muted); max-width: 46ch; text-wrap: pretty }
 
 /* Messband: füllt sich mit dem Lesen */
 .band { position: relative; height: 26px; margin: 22px 0 0; overflow: hidden }
@@ -153,23 +162,19 @@ h2 .ak { color: var(--accent) }
 .fuss a { text-decoration: none; color: var(--muted); min-height: 32px; display: inline-flex; align-items: center }
 .fuss a:hover { color: var(--text) }
 
-/* Auftritt, vier Takte (ms): 0 Foto 1,06 → 1 (900) · 0 Kicker, 0/80 Zeilen der Überschrift aus der Maske (500, fertig bei 580), 160 Lead (500) · Pille und Hinweis stehen von Bild eins an · 800 Maßlinie zeichnet sich am Zollstock (900), 1700 der Wert landet (400). Nach 2,1 s Stille. */
+/* Auftritt, vier Takte (ms): 0 Foto 1,06 → 1 (900) · 0 Kicker, 0/80 Zeilen der Überschrift aus der Maske (500, fertig bei 580), 160 Lead (500) · 420 Bausteine gleiten von rechts in die Leiste, je 50 ms später (320; zeigt: da kommt mehr) · Pille und Hinweis stehen von Bild eins an. Nach 1,1 s Stille. */
 .an .foto img { animation: foto 900ms var(--e-auf) both }
 @keyframes foto { from { transform: scale(1.06) } to { transform: scale(1) } }
 .an .kicker.k1 { animation: auf 500ms var(--e-auf) both }
 .an h1 .zeile:nth-child(1) > span { animation: maske 500ms var(--e-auf) both }
 .an h1 .zeile:nth-child(2) > span { animation: maske 500ms var(--e-auf) 80ms both }
 .an .lead { animation: auf 500ms var(--e-auf) 160ms both }
-.an .mass .zug { animation: zug 900ms var(--e-auf) 800ms both }
-.an .mass .kappe { animation: ein 300ms var(--e-out) both } .an .mass .kappe.a { animation-delay: 800ms } .an .mass .kappe.b { animation-delay: 1500ms }
-.an .mw { animation: aufmw 400ms var(--e-auf) 1700ms both }
+.an .bausteine li { animation: rein 320ms var(--e-auf) both; animation-delay: calc(420ms + var(--i, 0) * 50ms) }
 @keyframes auf { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
 @keyframes maske { from { transform: translateY(110%) } to { transform: none } }
-@keyframes zug { from { stroke-dashoffset: 1 } to { stroke-dashoffset: 0 } }
-@keyframes ein { from { opacity: 0 } to { opacity: 1 } }
-@keyframes aufmw { from { opacity: 0; transform: translate(-100%, 10px) } to { opacity: 1; transform: translate(-100%, 0) } }
+@keyframes rein { from { opacity: 0; transform: translateX(16px) } to { opacity: 1; transform: none } }
 /* Bis die Schrift geladen ist, stehen die Takte auf ihrem ersten Bild (sonst springt die Maske beim Schriftwechsel) */
-.an.warte .foto img, .an.warte .kicker.k1, .an.warte h1 .zeile > span, .an.warte .lead, .an.warte .mass .zug, .an.warte .mass .kappe, .an.warte .mw { animation-play-state: paused }
+.an.warte .foto img, .an.warte .kicker.k1, .an.warte h1 .zeile > span, .an.warte .lead, .an.warte .bausteine li { animation-play-state: paused }
 
 /* Abschnitte erscheinen einmal, wenn 15 % im Bild sind: 600 ms, 12 px */
 .rev .haar { transform: scaleX(0); transition: transform 600ms var(--e-auf) }
@@ -180,7 +185,7 @@ h2 .ak { color: var(--accent) }
 .rev.in .kicker, .rev.in h2, .rev.in .sub, .rev.in .schritt, .rev.in .medien, .rev.in .liste, .rev.in .beispiel, .rev.in .linkzeile, .rev.in .arten, .rev.in .preis, .rev.in .rat, .rev.in .fb-inhalt { opacity: 1; transform: none }
 
 @media (prefers-reduced-motion: reduce) {
-  .an .foto img, .an .kicker.k1, .an h1 .zeile > span, .an .lead, .an .mass .zug, .an .mass .kappe, .an .mw { animation: none }
+  .an .foto img, .an .kicker.k1, .an h1 .zeile > span, .an .lead, .an .bausteine li { animation: none }
   .foto img { transform: none }
   .rev .haar, .rev .kicker, .rev h2, .rev .sub, .rev .schritt, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .arten, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 1; transform: none; transition: none }
   .band .fuell { transition: none }
@@ -192,6 +197,7 @@ h2 .ak { color: var(--accent) }
   .blattblock { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px }
   .liste { grid-template-columns: 1fr 1fr }
   .arten { grid-template-columns: repeat(6, 1fr); max-width: none }
+  .bausteine { flex-wrap: wrap; overflow: visible; margin-left: 0; margin-right: 0; padding: 0; max-width: 470px; -webkit-mask-image: none; mask-image: none }
 }
 @media (min-width: 1024px) {
   .seg { width: 320px; margin: 0 auto }
@@ -219,14 +225,14 @@ h2 .ak { color: var(--accent) }
 <section class="hero" id="kopf">
   <div class="fotohalter"><div class="foto">
     <img src="bilder/hero.webp" width="1250" height="1250" alt="Ein Waschbär steht auf einem Tritt und misst mit dem Zollstock die Maueröffnung eines Fensters, in der anderen Pfote das Handy" fetchpriority="high">
-    <svg class="mass" aria-hidden="true"><line class="kappe a" x1="0" y1="0" x2="0" y2="0"/><line class="zug" pathLength="1" x1="0" y1="0" x2="0" y2="0"/><line class="kappe b" x1="0" y1="0" x2="0" y2="0"/></svg>
-    <span class="mw" id="mw"><b>1.410 mm</b><small>abgelesen am Zollstock</small></span>
   </div></div>
   <div class="text">
     <p class="kicker k1">Aufmaß für jeden Fensterbauer</p>
     <h1><span class="zeile"><span>Fenster ausmessen.</span></span><span class="zeile"><span>Selbst. <span class="ak">eezi.</span></span></span></h1>
-    <p class="lead">Zwei Fotos, vier Maße mit dem Zollstock. <b>Messen ist kostenlos</b>, das Aufmaßblatt für alle Fenster kostet einmal 7,99&nbsp;€.</p>
+    <p class="lead">Zwei Fotos, vier Maße mit dem Zollstock. Dann planst du dein neues Fenster:</p>
+    <ul class="bausteine" id="bausteine" aria-label="Dazu planst du in der App"><li style="--i: 0"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M15.2 8h33.6a1.2 1.2 0 0 1 1.2 1.2v45.6a1.2 1.2 0 0 1 -1.2 1.2h-33.6a1.2 1.2 0 0 1 -1.2 -1.2v-45.6a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16.2 10.2h31.7v43.7h-31.7Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 13h26v38h-26Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 13L45 32L19 51" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 51L32 13L45 51" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>Öffnungsart</span></li><li style="--i: 1"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M25 10h20a3 3 0 0 1 3 3v38a3 3 0 0 1 -3 3h-20a3 3 0 0 1 -3 -3v-38a3 3 0 0 1 3 -3Z" fill="#d9b48a" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M27 16c5 10 5 22 0 34M36 14c4 8 4 22 0 34" fill="none" stroke="#a3763f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 8h5a2 2 0 0 1 2 2v44a2 2 0 0 1 -2 2h-5a2 2 0 0 1 -2 -2v-44a2 2 0 0 1 2 -2Z" fill="#c8cdd2" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>Material</span></li><li style="--i: 2"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M9 24a11 11 0 1 0 22 0a11 11 0 1 0 -22 0Z" fill="#383e42" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M29 24a11 11 0 1 0 22 0a11 11 0 1 0 -22 0Z" fill="#f1f0ea" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 42a11 11 0 1 0 22 0a11 11 0 1 0 -22 0Z" fill="#b5732f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>Farbe</span></li><li style="--i: 3"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M13.5 4h37a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1 -1.5 1.5h-37a1.5 1.5 0 0 1 -1.5 -1.5v-3a1.5 1.5 0 0 1 1.5 -1.5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.5 54h37a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1 -1.5 1.5h-37a1.5 1.5 0 0 1 -1.5 -1.5v-3a1.5 1.5 0 0 1 1.5 -1.5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 10L22 54" fill="none" stroke="#5b9bd5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 10L32 54" fill="none" stroke="#5b9bd5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M42 10L42 54" fill="none" stroke="#5b9bd5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>Glas</span></li><li style="--i: 4"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M15.2 8h33.6a1.2 1.2 0 0 1 1.2 1.2v45.6a1.2 1.2 0 0 1 -1.2 1.2h-33.6a1.2 1.2 0 0 1 -1.2 -1.2v-45.6a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 12h28v40h-28Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 12L32 52" fill="none" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 32L46 32" fill="none" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Sprossen</span></li><li style="--i: 5"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M31 6h2a5 5 0 0 1 5 5v14a5 5 0 0 1 -5 5h-2a5 5 0 0 1 -5 -5v-14a5 5 0 0 1 5 -5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 18h0a3 3 0 0 1 3 3v34a3 3 0 0 1 -3 3h0a3 3 0 0 1 -3 -3v-34a3 3 0 0 1 3 -3Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M29.6 12a2.4 2.4 0 1 0 4.8 0a2.4 2.4 0 1 0 -4.8 0Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 12L32 15.5" fill="none" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Griff</span></li><li style="--i: 6"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M32 5l20 8v15c0 13-8 23-20 31C20 51 12 41 12 28V13z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M27 28h10a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M28 28v-4a4 4 0 0 1 8 0v4" fill="none" stroke="#1d1d1f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>Sicherheit</span></li><li style="--i: 7"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M14 2h36v10h-36Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 54h36v8h-36Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 12h20v42h-20Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M24.5 14.5h15v37h-15Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19.5 10h25a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1 -1.5 1.5h-25a1.5 1.5 0 0 1 -1.5 -1.5v-4a1.5 1.5 0 0 1 1.5 -1.5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 19h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 22h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 25h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 28h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 31h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 34h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Rollladen</span></li><li style="--i: 8"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M14 6h36a2 2 0 0 1 2 2v48a2 2 0 0 1 -2 2h-36a2 2 0 0 1 -2 -2v-48a2 2 0 0 1 2 -2Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17 11h30v42h-30Z" fill="#eef1f4" stroke="#1d1d1f" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20 11L20 53M24 11L24 53M28 11L28 53M32 11L32 53M36 11L36 53M40 11L40 53M44 11L44 53M17 14L47 14M17 18L47 18M17 22L47 22M17 26L47 26M17 30L47 30M17 34L47 34M17 38L47 38M17 42L47 42M17 46L47 46M17 50L47 50" fill="none" stroke="#a1a1a6" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 16h1a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-1a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 41h1a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-1a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M52 58A40 40 0 0 0 52 18" fill="none" stroke="#a1a1a6" stroke-width="1" stroke-dasharray="2 2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Insektenschutz</span></li><li style="--i: 9"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M6 30h40v24h-40Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M30 8h8v22h-8Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M38 30L60 32L60 35L38 33Z" fill="#c8cdd2" stroke="#1d1d1f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Fensterbank</span></li></ul>
     <div class="cta"><a class="pille gross" href="#"><span>Jetzt ausmessen</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a><a class="geist" href="#">Führung starten</a></div>
+    <p class="preiszeile"><b>Messen ist kostenlos</b>, das Aufmaßblatt für alle Fenster kostet einmal 7,99&nbsp;€.</p>
     <p class="hint">Führung: zwei Minuten, ohne eigene Maße · kein Konto · keine App aus dem Store<br>Dein Aufmaß samt Fotos bleibt auf deinem Gerät, bis du es sicherst oder sendest.</p>
   </div>
 </section>
@@ -308,20 +314,14 @@ h2 .ak { color: var(--accent) }
 (function () {
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hero = document.getElementById('kopf');
-  /* Maßlinie auf dem Foto: entlang des Zollstocks an der rechten Laibung (Foto 1250 × 1250, Zollstock bei x 930, Oberkante bei y 60, Fensterbank bei y 840). Der Wert sitzt oben links neben der Linie, nicht über dem Handy. */
-  var foto = hero.querySelector('.foto'), img = foto.querySelector('img'), svg = foto.querySelector('.mass'), mw = document.getElementById('mw');
-  function linie() {
-    var W = foto.clientWidth, H = foto.clientHeight, s = Math.max(W / 1250, H / 1250), dw = 1250 * s, dh = 1250 * s;
-    var ox = (W - dw) * 0.5, oy = (H - dh) * (window.innerWidth >= 1024 ? 0.25 : 0.30);
-    var x = ox + 930 * s, y1 = Math.max(10, oy + 60 * s), y2 = oy + 840 * s;
-    var z = svg.querySelector('.zug'), a = svg.querySelector('.kappe.a'), b = svg.querySelector('.kappe.b');
-    z.setAttribute('x1', x); z.setAttribute('x2', x); z.setAttribute('y1', y1); z.setAttribute('y2', y2);
-    a.setAttribute('x1', x - 9); a.setAttribute('x2', x + 9); a.setAttribute('y1', y1); a.setAttribute('y2', y1);
-    b.setAttribute('x1', x - 9); b.setAttribute('x2', x + 9); b.setAttribute('y1', y2); b.setAttribute('y2', y2);
-    mw.style.left = (x - 12) + 'px'; mw.style.top = (y1 + 22) + 'px';
+  /* Bausteinleiste: rechts ausgeblendet, solange noch etwas kommt; wischbar nur, wenn sie überläuft (dann auch mit der Tastatur erreichbar) */
+  var leiste = document.getElementById('bausteine');
+  function leisteRand() {
+    var laeuft = leiste.scrollWidth > leiste.clientWidth + 1;
+    if (laeuft) { leiste.setAttribute('tabindex', '0'); } else { leiste.removeAttribute('tabindex'); }
+    leiste.classList.toggle('ende', !laeuft || leiste.scrollLeft + leiste.clientWidth >= leiste.scrollWidth - 8);
   }
-  linie(); window.addEventListener('resize', linie);
-  if (img.decode) img.decode().then(linie).catch(function () {});
+  leiste.addEventListener('scroll', leisteRand, { passive: true }); window.addEventListener('resize', leisteRand); leisteRand();
   /* Auftritt: nur beim ersten Aufruf in dieser Sitzung, nur mit Bewegung, erst wenn die Schrift da ist (sonst springt die Maske) */
   var schon = false; try { schon = sessionStorage.getItem('start-auftritt') === '1'; sessionStorage.setItem('start-auftritt', '1'); } catch (e) { /* ohne Speicher */ }
   if (!schon && !ruhig) {
@@ -329,6 +329,8 @@ h2 .ak { color: var(--accent) }
     var frei = function () { hero.classList.remove('warte'); };
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(frei);
     setTimeout(frei, 400);
+    /* Nach dem Auftritt die Klasse lösen: Endbild und Ruhezustand sind gleich, danach läuft und hängt keine Animation mehr */
+    setTimeout(function () { hero.classList.remove('an', 'warte'); }, 2400);
   }
   /* Abschnitte erscheinen einmal, wenn 15 % im Bild sind */
   var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.15 }) : null;

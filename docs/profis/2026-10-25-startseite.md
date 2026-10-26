@@ -107,3 +107,16 @@ Noch keine.
 ## Realitäts-Check
 
 Steht aus. Fragekarte: zwei bis drei echte Menschen (ideal über 65, ohne Technikgewohnheit, ein Fensterbauer), fünf Minuten, keine Hilfe: „Was würdest du jetzt tun?“ (wörtlich notieren), „Was kostet das?“, „Wie sicher bist du, dass du das hinbekommst, 1 bis 5?“
+
+## Nachtrag 26.10.: Wunsch des Inhabers zum Kopf (nur ultimativ-webdesign, ohne Gremium)
+
+Rückmeldung: Kopfzeile „super“; die Maßlinie im Foto „hässlich“; es fehlen Chips, die zeigen, was man alles machen kann, auch in Richtung Konfigurator.
+
+Umgesetzt (Version 2 des Artefakts):
+- Maßlinie und Plakette „1.410 mm · abgelesen am Zollstock“ entfernt; das Foto bleibt frei.
+- Lead endet mit Doppelpunkt: „Zwei Fotos, vier Maße mit dem Zollstock. Dann planst du dein neues Fenster:“, darunter die Bausteinleiste mit den echten Symbolen aus dem Glossar der App: Öffnungsart, Material, Farbe, Glas, Sprossen, Griff, Sicherheit, Rollladen, Insektenschutz, Fensterbank (Kapitel der Wünsche laut `KAPITEL` in app.js). Am Telefon eine wischbare Leiste bis an den Rand, rechts ausgeblendet, der vierte Baustein schaut an; ab 720 px umbrochen (4/4/2). Schilder ohne Rand, ohne Hover, ohne Pfeil, damit sie nicht wie Knöpfe wirken.
+- Preissatz direkt unter den Knöpfen („Messen ist kostenlos, das Aufmaßblatt für alle Fenster kostet einmal 7,99 €.“), damit die Pille unter 600 px bleibt.
+- Auftritt: Foto, Überschrift, Lead wie bisher; ab 420 ms gleiten die Bausteine je 50 ms später von rechts herein (zeigt: da kommt mehr), fertig nach 1,2 s; nach 2,4 s wird die Klasse gelöst, es hängt keine Animation mehr.
+- Verworfen: Chips als Glasplättchen auf dem Foto (verdecken den Waschbären), zwei Reihen (Pille rutscht über 600 px oder das Foto schrumpft auf 300 px).
+
+Gemessen: Pille 599 px (Schreibtisch 474), eine Cream-Pille, kein Querscrollen, Leiste am Telefon 1.190 px breit und per Tastatur erreichbar, am Schreibtisch ohne Tabstopp, bei „weniger Bewegung“ alles sofort.
