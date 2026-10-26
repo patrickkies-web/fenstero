@@ -58,6 +58,11 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Kürzere Entscheidungsfindung (Korrektur des Inhabers, 26.10.2026): Gremium eine Runde, danach nur die Muss-Punkte und Vetos umsetzen;
   Detail-Profis und Vorlagen-Abgleich entfallen, sofern er sie nicht nennt. Ihre Befunde bleiben als Kann-Liste im Protokoll. Die Vorlage
   beim Inhaber: Vorschau, drei Sätze je Gruppe, Muss-Liste, fertig.
+- Vorlagen der Pakete (Korrektur des Inhabers, 26.10.2026, „Ich meine sicherlich nicht das! Das ist kacke.“ auf ein Bild des alten
+  Dashboards): Eine „Vorlage für ein Paket“ ist die Landingpage, die der Betrieb unter seiner Domain bekommt, in der Design-DNA und als
+  Schwester der Vorlagen für Essential und Plus. Das Dashboard und seine alte Gestaltung (#161616, Inter, farbiges Wort, Bilder unter
+  web/bilder/beispiel/) sind weder Vorlage noch Material dafür; Merkmale eines Pakets erscheinen auf der Landingpage als Bausteine der
+  DNA (Signature: Einladungszustand, Link-Etikett, Innenkarte mit dem Fortschritt). Vorschau docs/profis/signature-vorschau/.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
