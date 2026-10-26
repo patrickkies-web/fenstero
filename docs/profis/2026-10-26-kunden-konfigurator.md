@@ -45,4 +45,24 @@ Aufmaß steht“ / „1 von 7“ / „32 Fragen“.
 
 ## Antwort des Inhabers
 
-(offen)
+„Änder erst mal alles das, was du gefunden hast.“ (14:24)
+
+## Umbau (Fassung 2 der Vorschau „Konfigurator in Violett“)
+
+- Rahmen: Überschrift mit dem entscheidenden Wort in Weiß, Rest Silbergrau; in den Wünschen bleibt das Band bei „Wünsche · 6 von 6“,
+  darunter „Lage · Kapitel 1 von 7 · Frage 1 von 2“; Schritt 4 heißt „Nachmessen“.
+- Start: Bühne 200 px, Element und Situation auf weißer Karte, „Fenster ersetzen / Neue Öffnung“ im ersten Bildschirm (weiter unter der
+  Elementauswahl), Kachelnamen Schwarz, Hinweis-Marke mit Abstand zum Fenster.
+- Fotos: Tipp „Handy gerade halten …“ oben auf der Bühne, „empfohlen“ (innen) und „freiwillig“ (außen) mit dem Satz „Ein Foto von innen
+  reicht. Von außen hilft bei Rollladen und Fassade.“, keine Linien durch Texte, Themen der KI als ruhige Zeile statt Knöpfen.
+- Messen: freier Streifen für die Hinweis-Marke, Etiketten an den Linienenden, Linie 2 px mit Endkappen, Leuchten nur um den Wertkasten,
+  „Außenkante Rahmen“ statt „Rahmen außen“, „Von innen gemessen“, „= 141 cm“ groß und weiß, Zifferntasten über der Leiste.
+- Nachmessen: Leitsatz „Dreimal messen, das kleinste zählt“, statt „Hier auch … gemessen?“ ohne Knopf „Mitte: 1.410 mm · 2 mm Unterschied“.
+- Ergebnis: „Dein neues Fenster plant dein Fensterbauer nach der Maueröffnung. Vor der Bestellung misst er selbst nach.“, Fenster-Kachel
+  „Heute eingebaut“, Etiketten mit Abstand zum Rand und neben den Linien, Zahl frei ohne Fleck und Schraffur, Beschriftungen in Schwarz.
+- Lage 1: Badge unten rechts, Geschosse weiß (gewähltes Violett), Raumvorschläge umbrochen, Plus/Minus mit Ring.
+- Lage 2: Punkte ohne Leuchten dahinter (Leuchten nur hinter den Zahlen, die jetzt weiß sind), Kreise 11 px, Zahl der Fragen im Schalter
+  („Kurz 17 · Üblich 32 · Alles 53“), Satz zum Preis.
+- Prüfung: keine überlappenden Texte in allen Folien und Unterschritten; Farbanteile im Mittel Schwarz 44,0 · Weiß 26,3 · Anthrazit 18,0
+  · Silbergrau 6,1 · Violett 2,7 · Koralle 1,0 · Indigo 2,0; je Telefonbildschirm 1,5 bis 7,7 % Farbe, Koralle nirgends größer als Violett.
+- Noch offen beim Inhaber: Eingabe in cm statt mm; „Vertrag widerrufen“ im Fuß (rechtlich nötig); Zeitangabe statt Fragenzahl (keine Daten).
