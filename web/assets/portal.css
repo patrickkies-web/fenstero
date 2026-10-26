@@ -837,4 +837,5 @@ details.fold[open] > summary::after { transform: rotate(-135deg) } details.fold 
 .pakete-karte { display: flex; gap: 14px 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 18px 20px; margin-bottom: 18px }
 .pakete-karte > div { flex: 1 1 320px; min-width: 0 } .pakete-karte h2 { margin: 4px 0 6px; font-size: 24px; line-height: 1.2 } .pakete-karte p:not(.eyebrow) { margin: 0; color: var(--ink2) }
 /* Startseite, Ansicht Hauseigentümer (Design-DNA): kein Pilotband oben, der Satz zur Pilotphase steht im Fuß der Seite (Entscheidung des Inhabers, 26.10.2026) */
-body:has(#startseite) > .fx-pilot { display: none }
+body:has(#startseite) > .fx-pilot, body:has(.vk-einbettung) > .fx-pilot { display: none }
+.main.kopflos { padding-bottom: 0 }
