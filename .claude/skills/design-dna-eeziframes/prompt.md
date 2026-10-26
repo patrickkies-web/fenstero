@@ -6,7 +6,7 @@
 Ändere den Bereich für Fensterbauer (/fuer-fensterbauer/).
 ```
 
-Ein Satz mit dem Bereich, dazu, was dich stört oder was du dir vorstellst, falls du etwas im Kopf hast. Den Rest übernehme ich: Bestand lesen, DNA und Begleit-Skill laden, Startseite und deine Vorlagen daneben legen, entscheiden, was für diesen Bereich Sinn ergibt (Richtung, Szenen, welche Bausteine der Startseite passen, welche Prinzipien aus den Vorlagen übersetzt werden, welches Bild die Bühne trägt), bauen, messen, Gremium eine Runde, Detail-Profis, Vorschau, Protokoll, Commit. Meine Wahl steht in drei Zeilen in der Lieferung; du korrigierst, was dir nicht gefällt. CLAUDE.md bindet die Skills schon; das Anhängsel unten brauchst du nur, wenn du in einem Chat ohne das Projekt sichergehen willst.
+Ein Satz mit dem Bereich, dazu, was dich stört oder was du dir vorstellst, falls du etwas im Kopf hast. Den Rest übernehme ich: Bestand lesen, DNA und Begleit-Skill laden, Startseite (als Untergrenze, nicht als Vorlage) und deine Vorlagen daneben legen, entscheiden, was für diesen Bereich Sinn ergibt (Richtung, Szenen, welche Bausteine der Startseite passen, welche Prinzipien aus den Vorlagen übersetzt werden, welches Bild die Bühne trägt), bauen, messen, Gremium eine Runde, Detail-Profis, Vorschau, Protokoll, Commit. Meine Wahl steht in drei Zeilen in der Lieferung; du korrigierst, was dir nicht gefällt. CLAUDE.md bindet die Skills schon; das Anhängsel unten brauchst du nur, wenn du in einem Chat ohne das Projekt sichergehen willst.
 
 ## Langform (wenn du steuern willst)
 
@@ -26,9 +26,10 @@ Gilt: Skill design-dna (Design-System https://claude.ai/artifact/7Sn3WTUMn15nyKv
 https://claude.ai/artifact/5CqFMQ5g8XJaKtQwjaUW97) und der Begleit-Skill design-dna-eeziframes
 (.claude/skills/design-dna-eeziframes/SKILL.md: Palette „Task-App dunkel“ als tokens.css, Ergänzungen G14/G15,
 meine Entscheidungen, Rezept, Messwerkzeuge). Nicht laden: premium-gestaltung, ultimativ-webdesign, webdesign-wow.
-Referenz der Qualität: die Startseite vom 26.10.2026 (https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i,
-Quelle docs/profis/startseite-dna-vorschau/, Protokoll docs/profis/2026-10-26-startseite-dna.md).
-Gleiche Hand, gleiche Tiefe; Bausteine übernehmen, wo sie passen, aus den Vorlagen übersetzen, wo sie nicht reichen.
+Untergrenze: die Startseite vom 26.10.2026 (https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i,
+Quelle docs/profis/startseite-dna-vorschau/, Protokoll docs/profis/2026-10-26-startseite-dna.md). Nicht flacher als sie,
+gern darüber hinaus; Bausteine übernehmen, wo sie passen, aus den Vorlagen übersetzen, wo sie nicht reichen, neu bauen,
+wo beides nicht genügt.
 Vorlagen: docs/profis/vorlagen/2026-10-26/ (Vorbild: Prinzip übernehmen, nie das Motiv).
 Ablauf: Rezept aus dem Begleit-Skill (bauen Telefon zuerst, messen, Gremium profis eine Runde, vier Detail-Profis,
 Abgleich mit den Vorlagen, Farbtabelle je Bildschirm, Vorschau als Artifact, Protokoll unter docs/profis/,

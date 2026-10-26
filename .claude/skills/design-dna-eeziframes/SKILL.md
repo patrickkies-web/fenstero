@@ -1,11 +1,11 @@
 ---
 name: design-dna-eeziframes
-description: Begleit-Skill zur Design-DNA des Inhabers für eeziframes. Immer zusammen mit design-dna laden, sobald im Projekt etwas gestaltet wird (Startseite, Verkaufsseite, App, Abschnitte, Bilder, Bewegung). Enthält die Palette „Task-App dunkel“ als fertige Token-Datei, die Ergänzungen der Formensprache vom 26.10.2026 (Tiefe wie die Startseite), die Entscheidungen des Inhabers, das Rezept je Seite mit Gremium und Detail-Profis, die Messwerkzeuge und die Prompt-Vorlage.
+description: Begleit-Skill zur Design-DNA des Inhabers für eeziframes. Immer zusammen mit design-dna laden, sobald im Projekt etwas gestaltet wird (Startseite, Verkaufsseite, App, Abschnitte, Bilder, Bewegung). Enthält die Palette „Task-App dunkel“ als fertige Token-Datei, die Ergänzungen der Formensprache vom 26.10.2026 (Untergrenze: die Startseite vom 26.10.2026, nach oben offen), die Entscheidungen des Inhabers, das Rezept je Seite mit Gremium und Detail-Profis, die Messwerkzeuge und die Prompt-Vorlage.
 ---
 
 # Design-DNA für eeziframes (Begleit-Skill)
 
-Die Design-DNA (`design-dna`, Skill des Inhabers) sagt, wie etwas aussieht: Gene, Formensprache, Bausteine, Musterseiten, Palette. Dieser Skill sagt, was im Projekt eeziframes dazukommt, damit jede neue Seite die Tiefe der Startseite vom 26.10.2026 erreicht. Rangfolge: die Worte des Inhabers im Auftrag, dann Marke und echte Inhalte, dann `design-dna`, dann dieser Skill, dann `emil-design-eng` und `impeccable` nur, wo sie nicht widersprechen. `premium-gestaltung`, `ultimativ-webdesign` und `webdesign-wow` werden für Gestaltung nicht geladen.
+Die Design-DNA (`design-dna`, Skill des Inhabers) sagt, wie etwas aussieht: Gene, Formensprache, Bausteine, Musterseiten, Palette. Dieser Skill sagt, was im Projekt eeziframes dazukommt, damit jede neue Seite mindestens die Tiefe der Startseite vom 26.10.2026 hat und darüber hinausgeht, wo das Material es hergibt. Die Startseite ist Untergrenze, nicht Ziel und nicht Vorlage; die Messlatte steigt mit jeder Seite und jeder neuen Vorlage des Inhabers. Rangfolge: die Worte des Inhabers im Auftrag, dann Marke und echte Inhalte, dann `design-dna`, dann dieser Skill, dann `emil-design-eng` und `impeccable` nur, wo sie nicht widersprechen. `premium-gestaltung`, `ultimativ-webdesign` und `webdesign-wow` werden für Gestaltung nicht geladen.
 
 ## 1. Quellen, immer zuerst
 
@@ -14,7 +14,7 @@ Die Design-DNA (`design-dna`, Skill des Inhabers) sagt, wie etwas aussieht: Gene
 | Design-System „Design-DNA“ | https://claude.ai/artifact/7Sn3WTUMn15nyKvyeQak4o (`project/README.md`, `bewegung.md`, `tokens.json`, `components/bundle.css`, `components/bundle.js`, READMEs der Bausteine) | Bausteine und Bewegungs-Rezepte; `bundle.css`/`bundle.js` unverändert einbinden, Abweichungen in eigenen Dateien mit Präfix `ez-` |
 | Musterseite Website | https://claude.ai/artifact/5CqFMQ5g8XJaKtQwjaUW97 | Familientest |
 | Musterseiten App | „Konfigurator in Violett“ https://claude.ai/artifact/1vVq72cTJCJMRBxkrchmJX, „Lage in Violett“ https://claude.ai/artifact/RrGJ6AtBUWhKJQo5APBPCq | App-Rahmen (DNA Abschnitt 9) |
-| **Referenz der Qualität** | Startseite Kunden, 26.10.2026: https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i; Quelle docs/profis/startseite-dna-vorschau/; Protokoll docs/profis/2026-10-26-startseite-dna.md; Bilder docs/profis/bilder/2026-10-26-startseite-dna-*.jpg | Jede neue Seite wird daneben gelegt: gleiche Hand, gleiche Tiefe. Ihre Bausteine werden übernommen, wo sie passen, und aus den Vorlagen übersetzt, wo sie nicht reichen; diese Wahl treffe ich aus dem Material, der Inhaber muss sie nicht vorgeben |
+| **Untergrenze der Qualität** | Startseite Kunden, 26.10.2026: https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i; Quelle docs/profis/startseite-dna-vorschau/; Protokoll docs/profis/2026-10-26-startseite-dna.md; Bilder docs/profis/bilder/2026-10-26-startseite-dna-*.jpg | Jede neue Seite wird daneben gelegt: gleiche Hand, mindestens diese Tiefe, gern mehr. Ihre Bausteine werden übernommen, wo sie passen, aus den Vorlagen übersetzt, wo sie nicht reichen, und neu gebaut, wo beides nicht genügt; diese Wahl treffe ich aus dem Material, der Inhaber muss sie nicht vorgeben. Wird eine neue Seite besser, ist sie die neue Untergrenze |
 | Vorlagen des Inhabers | docs/profis/vorlagen/2026-10-26/ (zwölf Bilder), Urteile in docs/profis/gremium/2026-10-26-startseite-dna-vorlagen-*.md; Beschreibung aller Vorlagen in `design-dna` Abschnitt 6 | Abgleich in Schritt 7 des Rezepts |
 | Palette | `tokens.css` neben dieser Datei | Einbinden statt neu schreiben (Abschnitt 2) |
 | Stand der DNA | `design-dna-stand-2026-10-26.md` und `design-dna-ergaenzungen-2026-10-26.diff` neben dieser Datei | Die DNA liegt synchronisiert außerhalb des Projekts; überschreibt die Synchronisation die Ergänzungen vom 26.10.2026, hier nachlesen und erneut einarbeiten |
@@ -57,7 +57,7 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
    - `node pruef.mjs`: ruhige Fassung, ohne JavaScript, Zielgrößen ab 44 px, Tab-Weg, Fokus.
    - `node leistung.mjs`: Layoutsprung (CLS 0), lange Aufgaben, `filter`-Ebenen (0), lazy-Bilder (0), Bildbytes, Ladezeit bei vierfach gedrosselter CPU.
    - `node bewegung.mjs <ausgabe>`: Zeitlupen-Einzelbilder (CDP, Faktor 0,1) und Zustände für die Detail-Profis.
-   Dazu die DNA-Prüfliste (Abschnitt 4) und der Familientest neben Musterseite und Startseite.
+   Dazu die DNA-Prüfliste (Abschnitt 4) und der Familientest neben Musterseite und Startseite: gleiche Familie, und an keiner Stelle flacher als die Startseite.
 5. **Gremium** (`profis`) eine Runde: drei Agenten blind X/Y (Gestalter, Kunden, Fensterbauer), Brief mit Bildern, Änderungsliste, Mehrheiten je Änderung; umsetzen, keine zweite Runde. Urteile unter docs/profis/gremium/.
 6. **Feinschliff:** vier Profis parallel, je etwa zehn Minuten, je höchstens zehn Befunde mit genauem Wie: Bewegung (Emil-Schule, mit `emil-design-eng`), Zeichen, UX-Details, Typografie. Material: Zeitlupen-Takte, Zustände, Quellen.
 7. **Abgleich mit den aktuellen Vorlagen** des Inhabers in drei Perspektiven (Material und Licht, Frontend und Leistung, Typografie), je fünf Hebel nach Wirkung, umsetzen.
