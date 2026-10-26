@@ -19,21 +19,21 @@ export default async (h) => {
   await imp('web/assets/pakete.js'); await imp('web/assets/instanzregeln.js');
   const Pk = globalThis.Pakete, RI = globalThis.Instanzregeln, F = RI.FRISTEN;
   const recht = await imp('functions/api/recht.js'), rechtI = await imp('functions/instanz/recht.js'), bpdf = await imp('scripts/bedingungen-pdf.mjs');
-  const eur = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')) + NB + '€';
+  const zahl = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',')), eur = (n) => zahl(n) + NB + '€';
   const lies = (rel) => fs.readFileSync(path.join(WZ, rel), 'utf8');
 
   /* ---------- 29.1 Preise ---------- */
   const vk = await h.api('localhost', '/fuer-fensterbauer/');
   const fb = vk.text, roh = lies('web/fuer-fensterbauer/index.html');
-  /* Gestaltung vom 24.10.2026: Karten .pk-karte (data-paket 0–2 in der Reihenfolge von Pakete.LISTE), Vergleichstabelle, Preise als Bausteine fb-… */
-  const kartenAus = (html) => [...html.matchAll(/<article class="pk-karte[^"]*" data-paket="(\d)">[\s\S]*?<\/article>/g)].map((m) => ({ p: Pk.LISTE[+m[1]], html: m[0] }));
+  /* Design-DNA (26.10.2026): Karten .ez-paket (id paket-<paket> in der Reihenfolge von Pakete.LISTE), Vergleichstabelle, Preise als Bausteine fb-… */
+  const kartenAus = (html) => [...html.matchAll(/<article class="ez-paket[^"]*" id="paket-([a-z]+)"[\s\S]*?<\/article>/g)].map((m) => ({ p: m[1], html: m[0] }));
   const ohneMarken = (t) => t.replace(/<!--\/?pakete:[\w-]+-->/g, '');
   const karten = kartenAus(ohneMarken(fb));
-  const karteOk = (k) => { const pr = Pk.preis(k.p); return k.html.includes('<b>' + eur(pr.monat) + '</b> im Monat') && k.html.includes(eur(pr.einrichtung) + ' Einrichtung · netto') && k.html.includes(Pk.PAKETE[k.p].name); };
-  ok(vk.status === 200 && karten.length === Pk.LISTE.length && karten.map((k) => k.p).join() === Pk.LISTE.join() && karten.every(karteOk) && /Alle Preise netto, nur für Unternehmer\./.test(fb), '29.1 Verkaufsseite: drei Paketkarten mit Monats- und Einrichtungspreis aus pakete.js (' + Pk.LISTE.map((p) => Pk.preis(p).monat + '/' + Pk.preis(p).einrichtung).join(', ') + ' €), netto, „nur für Unternehmer“');
-  const vgl = (/<details class="vergleich">[\s\S]*?<\/table>/.exec(fb) || [''])[0];
+  const karteOk = (k) => { const pr = Pk.preis(k.p); return k.html.includes('<span class="dna-zahl__wert">' + zahl(pr.monat) + '<span class="dna-zahl__einheit">€ im Monat</span>') && k.html.includes('dazu ' + eur(pr.einrichtung) + ' Einrichtung, einmalig vorab · netto') && k.html.includes(Pk.PAKETE[k.p].name); };
+  ok(vk.status === 200 && karten.length === Pk.LISTE.length && karten.map((k) => k.p).join() === Pk.LISTE.join() && karten.every(karteOk) && /Alle Preise netto zzgl\. MwSt\., nur für Unternehmer\./.test(fb), '29.1 Verkaufsseite: drei Paketkarten mit Monats- und Einrichtungspreis aus pakete.js (' + Pk.LISTE.map((p) => Pk.preis(p).monat + '/' + Pk.preis(p).einrichtung).join(', ') + ' €), netto, „nur für Unternehmer“');
+  const vgl = (/<details class="ez-vergleich-auf">[\s\S]*?<\/table>/.exec(fb) || [''])[0];
   const zeile = (t) => (new RegExp('<th scope="row">' + t + '</th>([\\s\\S]*?)</tr>').exec(vgl) || [])[1] || '';
-  ok(Pk.LISTE.every((p) => zeile('Monatlich').includes(eur(Pk.preis(p).monat)) && zeile('Einrichtung, einmalig').includes(eur(Pk.preis(p).einrichtung))) && /Zugänge zum Dashboard/.test(vgl) && zeile('Zugänge zum Dashboard').includes(String(Pk.merkmale('signature').zugaenge)), '29.1 Vergleich: Monats- und Einrichtungspreis je Paket aus pakete.js, Zugänge zum Dashboard wie pakete.js');
+  ok(Pk.LISTE.every((p) => zeile('Monatlich, netto').includes(eur(Pk.preis(p).monat)) && zeile('Einrichtung, einmalig vorab').includes(eur(Pk.preis(p).einrichtung))) && /Zugänge zum Dashboard/.test(vgl) && zeile('Zugänge zum Dashboard').includes(String(Pk.merkmale('signature').zugaenge)), '29.1 Vergleich: Monats- und Einrichtungspreis je Paket aus pakete.js, Zugänge zum Dashboard wie pakete.js');
   const ld = ldjson(fb).find((x) => x && x['@type'] === 'SoftwareApplication' && Array.isArray(x.offers));
   const ldOk = !!ld && ld.offers.length === 3 && Pk.LISTE.every((p, i) => {
     const o = ld.offers[i], pr = Pk.preis(p), spez = o.priceSpecification || [];
@@ -46,13 +46,13 @@ export default async (h) => {
   ok(kartenAus(ohneMarken(roh)).length === Pk.LISTE.length && kartenAus(ohneMarken(roh)).every(karteOk) && bpdf.pruefen().ok, '29.1 Auch ohne Worker und JavaScript: Die Datei in web/ trägt dieselben Preise (Bausteine von node scripts/bedingungen-pdf.mjs aktuell)' + (bpdf.pruefen().ok ? '' : ': ' + bpdf.pruefen().fehler.join('; ')));
 
   /* ohne PAKETE_OFFEN: vorläufig, Anfrage statt Bestellung */
-  const ohneBestellen = !/href="\/partner\/#bestellen\//.test(fb) && /Vorläufige Preise;/.test(fb) && /Die Bestellung wird in Kürze freigeschaltet/.test(fb) && Pk.LISTE.every((p, i) => new RegExp('<a class="pk-cta" href="#bestellen" data-paket-wahl="' + i + '">Paket anfragen').test(fb)) && /<form class="formular" id="anfrage-form" method="post" action="\/api\/partner\/frage"/.test(fb);
+  const ohneBestellen = !/href="\/partner\/#bestellen\//.test(fb) && /Vorläufige Preise;/.test(fb) && /Die Bestellung wird in Kürze freigeschaltet/.test(fb) && Pk.LISTE.every((p) => new RegExp('<a class="dna-pille(?: dna-pille--leise)?" href="#bestellen" data-paket="' + p + '">[^<]+ anfragen').test(fb)) && /<form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="\/api\/partner\/frage">/.test(fb);
   ok(ohneBestellen, '29.2 Ohne PAKETE_OFFEN: „Vorläufige Preise“, „Bestellung wird in Kürze freigeschaltet“, jede Karte führt zum Anfrageformular (kein Link in die Kasse)');
 
   /* ---------- 29.2 mit PAKETE_OFFEN, Frageformular ---------- */
   const s2 = await h.server({ PAKETE_OFFEN: '1', MAIL_KONTAKT: 'inhaber@pruefung29.example' });
   const fb2 = (await s2.api('localhost', '/fuer-fensterbauer/')).text;
-  const knoepfe = [...fb2.matchAll(/<a class="pk-cta" href="([^"]+)">[^<]+ bestellen /g)].concat([...fb2.matchAll(/<a href="(\/partner\/#bestellen\/[a-z]+)">/g)]);
+  const knoepfe = [...fb2.matchAll(/<a class="dna-pille(?: dna-pille--leise)?" href="([^"]+)" data-paket="[a-z]+">[^<]+ bestellen/g)].concat([...fb2.matchAll(/<a href="(\/partner\/#bestellen\/[a-z]+)">/g)]);
   const ziele = Pk.LISTE.map((p) => '/partner/#bestellen/' + p);
   const ld2 = ldjson(fb2).find((x) => x && Array.isArray(x.offers));
   ok(knoepfe.length >= 6 && knoepfe.every((k) => ziele.includes(k[1])) && ziele.every((z) => knoepfe.filter((k) => k[1] === z).length >= 2) && !/in Kürze freigeschaltet/.test(fb2) && /Vorläufige Preise;/.test(fb2) === Pk.VORLAEUFIG && /Ja\. Wählen Sie Ihr Paket und bestellen Sie im Kundenkonto/.test(fb2) && ld2 && ld2.offers.every((o) => o.availability === 'https://schema.org/InStock'),
@@ -91,23 +91,22 @@ export default async (h) => {
     const quer = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
     await page.locator('#pakete').scrollIntoViewIfNeeded(); await page.waitForTimeout(200);
     await h.foto(page, 'f-verkauf-pakete-' + (name === 'Telefon' ? 'telefon' : 'desktop'));
-    await page.locator('#pk-tab-2:visible, .pk-karte[data-paket="2"] .pk-wahl:visible').first().click(); await page.waitForTimeout(500);
-    await page.click('.pk-karte[data-paket="2"] a.pk-cta'); await page.waitForTimeout(400);
+    await page.click('#paket-signature a.dna-pille'); await page.waitForTimeout(900);
     const vor = await page.evaluate(() => (document.querySelector('#anfrage-form input[name="paket"]:checked') || {}).value);
     await page.fill('input[name="name"]', 'J'); await page.click('#anfrage-form button[type="submit"]'); await page.waitForTimeout(200);
-    const fehler = await page.evaluate(() => ({ n: document.querySelectorAll('#anfrage-form [aria-invalid="true"]').length, text: [...document.querySelectorAll('#anfrage-form .f-fehler:not([hidden])')].map((x) => x.textContent).join(' | '), fokus: document.activeElement && document.activeElement.name }));
+    const fehler = await page.evaluate(() => ({ n: document.querySelectorAll('#anfrage-form [aria-invalid="true"]').length, text: [...document.querySelectorAll('#anfrage-form .ez-feld__fehler.ist-da')].map((x) => x.textContent).join(' | '), fokus: document.activeElement && document.activeElement.name }));
     await page.fill('input[name="name"]', 'Jens Brandt'); await page.fill('input[name="mail"]', 'jens' + name.length + '@brandt.example'); await page.fill('textarea[name="text"]', 'Wann geht es los?');
     await h.foto(page, 'f-verkauf-frage-' + (name === 'Telefon' ? 'telefon' : 'desktop'));
-    await page.click('#anfrage-form button[type="submit"]'); await page.waitForSelector('#anfrage-form .f-danke:not([hidden])', { timeout: 8000 }).catch(() => null);
-    const dank = await page.evaluate(() => { const d = document.querySelector('#anfrage-form .f-danke'); return !!d && !d.hidden && document.activeElement === d && /Danke, Ihre Frage ist da/.test(d.textContent) && !document.querySelector('#anfrage-form input[name="name"]').offsetParent; });
-    const ziele = await page.evaluate(() => [...document.querySelectorAll('.fb .knopf, .fb .nav-knopf, #anfrage-form button')].filter((a) => a.offsetParent).map((a) => a.getBoundingClientRect()).every((r) => r.height >= 44));
+    await page.click('#anfrage-form button[type="submit"]'); await page.waitForSelector('#anfrage-form.ist-gesendet .ez-form__meldung', { timeout: 8000 }).catch(() => null);
+    const dank = await page.evaluate(() => { const d = document.querySelector('#anfrage-form .ez-form__meldung'); return !!d && document.activeElement === d && /Danke, Ihre Frage ist da/.test(d.textContent) && !document.querySelector('#anfrage-form input[name="name"]').offsetParent; });
+    const ziele = await page.evaluate(() => [...document.querySelectorAll('.fb .dna-pille, .fb .widerruf-knopf, #anfrage-form button')].filter((a) => a.offsetParent).map((a) => a.getBoundingClientRect()).every((r) => r.height >= 44));
     ok(!quer && vor === 'signature' && fehler.n === 2 && fehler.fokus === 'name' && /Namen/.test(fehler.text) && dank && ziele, '29.2 Im Browser (' + name + '): kein Querscrollen, „Paket anfragen“ unter Signature wählt das Paket vor, Fehler an Name und E-Mail mit Fokus, Dank ersetzt das Formular, Knöpfe ab 44 px');
     h.sauber(page, '29.2 Verkaufsseite im Browser (' + name + ') ohne Fehler, CSP-Verstöße und fremde Server');
     await c.close();
   }
   const nojs = await h.browser.newContext(Object.assign({}, h.telefon, { javaScriptEnabled: false })), np = await nojs.newPage();
   await np.goto(h.base('localhost') + '/fuer-fensterbauer/', { waitUntil: 'load' });
-  const nojsPreise = await np.evaluate(() => [...document.querySelectorAll('.pk-karte .pk-preis b')].map((b) => b.textContent));
+  const nojsPreise = await np.evaluate(() => [...document.querySelectorAll('.ez-paket .dna-zahl__wert')].map((b) => [...b.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim() + '\u202f€'));
   await np.fill('input[name="name"]', 'Ohne Skript'); await np.fill('input[name="mail"]', 'ohne@skript.example'); await np.fill('textarea[name="text"]', 'Frage ohne JavaScript');
   /* per Tastatur: Das sanfte Scrollen der Seite (scroll-behavior: smooth) lässt Playwrights Klick ohne JavaScript nie „stabil“ werden */
   await np.focus('#anfrage-form button[type="submit"]');
@@ -118,12 +117,12 @@ export default async (h) => {
 
   /* ---------- 29.3 Kopf der Verkaufsseite ---------- */
   const titelFb = (fb.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (fb.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
-  ok((fb.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titelFb) && titelFb.length <= 75 && beschr.length >= 70 && beschr.length <= 170 && /rel="canonical"/.test(vk.headers.link || '') && /<link rel="canonical" href="[^"]+\/fuer-fensterbauer\/">/.test(fb) && !/name="robots"/.test(fb) && ((h1) => h1.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() === 'Anfragen mit Aufmaß. Unter Ihrer Marke.' && (h1.match(/class="gruen"/g) || []).length === 1 && /class="gruen"[^>]*>Aufmaß\.</.test(h1))((/<h1 id="hero-titel">([\s\S]*?)<\/h1>/.exec(fb) || [])[1] || ''),
-    '29.3 Verkaufsseite: ein h1 mit einem grünen Wort, Titel mit Marke (' + titelFb.length + ' Zeichen), Beschreibung (' + beschr.length + ' Zeichen), Canonical, kein noindex der Vorschau');
-  const abschnitte = ['hero', 'fenster', 'die-idee', 'so-funktioniert-es', 'was-in-jeder-anfrage-steht', 'pakete', 'bestellen', 'ablauf', 'fragen'].filter((id) => !new RegExp('<section class="[^"]*" id="' + id + '"').test(fb));
-  const leiste = RI.bestellung.LEISTE.map((s) => s.titel), ablauf = (/<section class="livegang" id="ablauf"[\s\S]*?<\/section>/.exec(fb) || [''])[0];
+  ok((fb.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titelFb) && titelFb.length <= 75 && beschr.length >= 70 && beschr.length <= 170 && /rel="canonical"/.test(vk.headers.link || '') && /<link rel="canonical" href="[^"]+\/fuer-fensterbauer\/">/.test(fb) && !/name="robots"/.test(fb) && ((h1) => h1.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() === 'Anfragen mit Aufmaß. Unter Ihrer Marke.' && (h1.match(/class="ez-ak"/g) || []).length === 1 && /<em class="ez-ak">Unter Ihrer Marke\.<\/em>/.test(h1))((/<h1 class="dna-titel-xl" id="hero-titel"[^>]*>([\s\S]*?)<\/h1>/.exec(fb) || [])[1] || ''),
+    '29.3 Verkaufsseite: ein h1 mit zweiter Stimme in Grau, Titel mit Marke (' + titelFb.length + ' Zeichen), Beschreibung (' + beschr.length + ' Zeichen), Canonical, kein noindex der Vorschau');
+  const abschnitte = ['hero', 'die-idee', 'so', 'aufmass', 'pakete', 'bestellen', 'start', 'kundenschutz', 'fragen', 'hintergrund', 'naehe', 'ratgeber'].filter((id) => !new RegExp(' id="' + id + '"').test(fb));
+  const leiste = RI.bestellung.LEISTE.map((s) => s.titel), ablauf = (/<ol class="dna-schritte ez-livegang"[\s\S]*?<\/ol>/.exec(fb) || [''])[0];
   ok(!abschnitte.length && leiste.every((t, i) => ablauf.indexOf('<b>' + t + '</b>') >= 0 && (i === 0 || ablauf.indexOf('<b>' + t + '</b>') > ablauf.indexOf('<b>' + leiste[i - 1] + '</b>'))) && /3 bis 5 Werktage/.test(fb) && /Kundenschutz|Kunden bleiben Ihre Kunden/.test(fb),
-    '29.3 Inhalt: Bühne, Laufband, Idee, So funktioniert es, Anfrage, Pakete, Formular, Livegang in den sechs Schritten der Statusleiste (' + leiste.join(' → ') + '), FAQ' + (abschnitte.length ? '; fehlt: ' + abschnitte.join(', ') : ''));
+    '29.3 Inhalt: Bühne, Idee, Kunde, Postfach, Pakete, Formular, Start mit den sechs Schritten der Statusleiste (' + leiste.join(' → ') + '), Kundenschutz, FAQ, Hintergrund, Nähe, Wissen' + (abschnitte.length ? '; fehlt: ' + abschnitte.join(', ') : ''));
   const faq = ldjson(fb).find((x) => x && x['@graph']), fragen = faq ? faq['@graph'].find((x) => x['@type'] === 'FAQPage').mainEntity : [];
   const sichtbar = (t) => t.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
   ok(fragen.length >= 6 && fragen.every((q) => fb.includes('<summary><span>' + q.name + '</span>') && sichtbar(fb).includes(q.acceptedAnswer.text)) && ['Domain', 'kündigen', 'Datenschutz', 'Kunde', 'Website'].every((w) => fragen.some((q) => q.name.includes(w))), '29.3 FAQ (Domain, Kosten, Kündigung, Datenschutz, was der Kunde sieht, Website) auf der Seite und als FAQPage gleich');
@@ -144,7 +143,7 @@ export default async (h) => {
   ok(ph >= 3 && /Entwurf zur anwaltlichen Prüfung/.test(kb.text) && vertr.every((v) => v.entwurf) && !vs.bereit && vs.fehlt.some((x) => /Paketbedingungen/.test(x)) && !vs.fehlt.some((x) => /PDF fehlt/.test(x)) && RI.verkauf({ offen: true, live: true, bereit: vs.bereit }).kasse === false,
     '29.4 Entwurf: ' + ph + ' sichtbar markierte Platzhalter, „Entwurf zur anwaltlichen Prüfung“ auf der Seite und in den PDFs; solange sie da sind, hält paketVerkaufStand() die Live-Kasse zu (die PDFs sind da)');
   ok(!VORLAGE_SICHTBAR(rechtI) || vs.fehlt.some((x) => /Vorlage .*Instanzen anwaltlich prüfen/.test(x)), '29.4 Befund 5: solange die Rechtsvorlage der Instanzen ungeprüft ist (VORLAGE.geprueft false), nennt paketVerkaufStand() sie und hält die Live-Kasse zu');
-  const sigKarte = (/<article class="pk-karte[^"]*" data-paket="2">[\s\S]*?<\/article>/.exec(fb) || [''])[0], absZeile = (/<tr><td>Absender der E-Mails<\/td>[\s\S]*?<\/tr>/.exec(kb.text) || [''])[0];
+  const sigKarte = (/<article class="ez-paket[^"]*" id="paket-signature"[\s\S]*?<\/article>/.exec(fb) || [''])[0], absZeile = (/<tr><td>Absender der E-Mails<\/td>[\s\S]*?<\/tr>/.exec(kb.text) || [''])[0];
   ok(!!sigKarte && (/sobald eingerichtet/.test(sigKarte) || !/Absender|neutral/i.test(sigKarte)) && !/auch im PDF und in den E-Mails/.test(sigKarte) && /sobald eingerichtet/.test(absZeile) && !/>neutrales Postfach</.test(absZeile),
     '29.4 Befund 2: Verkaufsseite (Karte Signature) verspricht keinen neutralen Absender (oder nur „sobald eingerichtet“), Paketbedingungen (Zeile „Absender der E-Mails“) nur „sobald eingerichtet“');
   const leist = (/<!--pakete:leistungen-->([\s\S]*?)<!--\/pakete:leistungen-->/.exec(kb.text) || [])[1] || '';

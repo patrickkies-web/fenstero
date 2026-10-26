@@ -191,8 +191,8 @@ if (teil(2)) {
   z = await zustand();
   ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
   ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
-  ok(await pa.locator('.vk-einbettung .pk-karte').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/partner/frage"]').count() === 1 && await pa.locator('.vk-einbettung .livegang').count() === 1 && !(await pa.locator('.vk-einbettung .fb .nav').isVisible()) && !(await pa.locator('.vk-einbettung .fb .fuss').isVisible()), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, Kopf- und Fußzeile der Seite nicht');
-  await pa.click('.vk-einbettung .aktionen a[href="#pakete"]'); await pa.waitForTimeout(1800);
+  ok(await pa.locator('.vk-einbettung .ez-paket').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/partner/frage"]').count() === 1 && await pa.locator('.vk-einbettung .ez-livegang').count() === 1 && !(await pa.locator('.vk-einbettung .fb .ez-kopf').isVisible()) && !(await pa.locator('.vk-einbettung .fb .ez-fuss').isVisible()) && !(await pa.locator('.vk-einbettung .fb .ez-leiste').isVisible()), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, Kopf, Leiste und Fußzeile der Seite nicht');
+  await pa.click('.vk-einbettung .ez-aktionen a[href="#pakete"]'); await pa.waitForTimeout(1800);
   const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), t = document.querySelector('.top').getBoundingClientRect(), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, unterKopf: !!r && r.top >= t.bottom - 1 && r.top < t.bottom + 80 }; });
   ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
@@ -1627,7 +1627,7 @@ if (teil(10)) {
   for (const [gname, opts] of [['Telefon', telefon], ['Desktop', { viewport: { width: 1280, height: 860 }, locale: 'de-DE' }]]) {
     const c = await browser.newContext(opts), sp = await neueSeite(c);
     for (const s of seo.SEITEN.filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x.pfad))) {
-      /* /fuer-fensterbauer/ selbst hat seit dem 25.10.2026 die Gestaltung der Vorschau (eigene Größen, docs/GESTALTUNG.md): dort nur Querscrollen und Marke */
+      /* /fuer-fensterbauer/ selbst folgt seit dem 26.10.2026 der Design-DNA (eigene Schriftskala, docs/GESTALTUNG.md): dort nur Querscrollen und Marke */
       const fbSeite = s.pfad === '/fuer-fensterbauer/';
       await sp.goto(BASE + s.pfad, { waitUntil: 'networkidle' });
       const m = await sp.evaluate(() => {
@@ -1636,7 +1636,7 @@ if (teil(10)) {
         document.querySelectorAll('.rg-kopf a, .rg-fuss a, .rg-cta a, .rg-karte, .rg-frage summary').forEach((a) => { const r = a.getBoundingClientRect(); if (r.width && r.height && (r.height < 44 || r.width < 44)) klein.push((a.textContent || '').trim().slice(0, 24) + ' ' + Math.round(r.width) + '×' + Math.round(r.height)); });
         /* Paketnamen (EEZI Essential, EEZI Signature) und das zitierte Zeichen „Powered by EEZIframes“ sind vorgegeben (Bauplan §2b, E27) */
         const t = document.body.innerText.replace(/EEZI (Essential|Signature)\b/gi, '').replace(/Powered by EEZIframes/gi, '');
-        return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm, .fb .nav .wortmarke') };
+        return { groessen: [...groessen].sort((a, b) => a - b), klein, quer: document.documentElement.scrollWidth > innerWidth + 1, marke: !/EEZI/.test(t) && !/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(t) && !!document.querySelector('.rg-kopf .wm, .fb .ez-kopf .ez-wm') };
       });
       if (fbSeite) { m.groessen = []; m.klein = []; }
       const erlaubt = gname === 'Telefon' ? [13, 15, 17, 24, 32] : [13, 15, 17, 24, 40];
@@ -1646,24 +1646,23 @@ if (teil(10)) {
     await c.close();
   }
 
-  /* c2) Seite für Fensterbauer (Gestaltung der Vorschau, seit 25.10.2026): Pille im ersten Bildschirm, Laufbänder lassen sich anhalten,
-     Kopfzeile mit echten Zielen, kein Querscrollen bei 320 px */
+  /* c2) Seite für Fensterbauer (Design-DNA, seit 26.10.2026): Pille und Haken-Zeile mit dem Preis im ersten Bildschirm, genau eine volle
+     Pille je Bildschirm, Kopfzeile mit echten Zielen, die Leiste kommt erst beim Hochscrollen, kein Querscrollen bei 320 px */
   {
     const c = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE', isMobile: true, hasTouch: true }), sp = await neueSeite(c);
     await sp.goto(BASE + '/fuer-fensterbauer/', { waitUntil: 'networkidle' }); await sp.waitForTimeout(1800);
     const kopf = await sp.evaluate(() => {
       const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
-      const ziele = [...document.querySelectorAll('.fb .nav a')].map((a) => a.getAttribute('href'));
-      return { pille: (r('.fb .aktionen .knopf-primaer') || {}).bottom, ziele, leer: document.querySelectorAll('.fb a[href="#"]').length };
+      const ziele = [...document.querySelectorAll('.fb .ez-kopf a')].map((a) => a.getAttribute('href'));
+      const volle = [...document.querySelectorAll('.fb .dna-pille:not(.dna-pille--leise)')].filter((p) => { const b = p.getBoundingClientRect(); return b.width && b.top >= 0 && b.bottom <= innerHeight; }).length;
+      return { pille: (r('.fb .ez-hero .ez-aktionen .dna-pille') || {}).bottom, haken: (r('.fb .ez-hero .ez-chips') || {}).bottom, volle, ziele, leer: document.querySelectorAll('.fb a[href="#"]').length };
     });
-    ok(kopf.pille > 0 && kopf.pille <= 844 && !kopf.leer && ['/', '/ratgeber/', '/fuer-fensterbauer/', '/app/#ausmessen', '#bestellen'].every((z) => kopf.ziele.includes(z)), 'Fensterbauer, Telefon 390 × 844: „Pakete ansehen“ im ersten Bildschirm (unten bei ' + Math.round(kopf.pille) + ' px), Kopfzeile mit echten Zielen, kein leerer Link');
-    await sp.locator('.fb .band').scrollIntoViewIfNeeded(); await sp.waitForTimeout(900);
-    const lauf = () => sp.evaluate(() => getComputedStyle(document.querySelector('.fb .laufband .spur')).transform);
-    const vorher = await lauf();
-    await sp.click('.fb .band-pause'); await sp.waitForTimeout(1500);
-    const t1 = await lauf(); await sp.waitForTimeout(600); const t2 = await lauf();
-    const gedrueckt = await sp.evaluate(() => document.querySelector('.fb .band-pause').getAttribute('aria-pressed'));
-    ok(vorher !== 'none' && t1 === t2 && gedrueckt === 'true', 'Fensterbauer: der Knopf hält die Laufbänder an (Spur steht, aria-pressed)');
+    ok(kopf.pille > 0 && kopf.pille <= 844 && kopf.haken > 0 && kopf.haken <= 844 && kopf.volle === 1 && !kopf.leer && ['/', '/#hauseigentuemer', '/fuer-fensterbauer/', '#bestellen'].every((z) => kopf.ziele.includes(z)), 'Fensterbauer, Telefon 390 × 844: „Pakete ansehen“ und die Haken-Zeile mit dem Preis im ersten Bildschirm (Pille unten bei ' + Math.round(kopf.pille) + ' px), genau eine volle Pille, Kopfzeile mit echten Zielen, kein leerer Link');
+    await sp.evaluate(() => window.scrollTo(0, 2400)); await sp.waitForTimeout(400);
+    const leisteWeg = await sp.evaluate(() => !document.querySelector('.fb .ez-leiste').classList.contains('ist-da'));
+    await sp.evaluate(() => window.scrollTo(0, 2300)); await sp.waitForTimeout(500);
+    const leisteDa = await sp.evaluate(() => document.querySelector('.fb .ez-leiste').classList.contains('ist-da') && !!document.querySelector('.fb .ez-leiste .ez-ansicht a[aria-current]'));
+    ok(leisteWeg && leisteDa, 'Fensterbauer: die Leiste mit dem Umschalter kommt erst beim Hochscrollen zurück');
     sauber(sp, 'Fensterbauer: Abnahme ohne Fehler');
     await c.close();
     const c3 = await browser.newContext({ viewport: { width: 320, height: 640 }, locale: 'de-DE' }), s3 = await neueSeite(c3);
@@ -1742,7 +1741,7 @@ if (teil(10)) {
   const fbPakete = PK.LISTE.every((x) => fb.includes(pkEur(PK.preis(x).monat)) && fb.includes(pkEur(PK.preis(x).einrichtung)) && fb.includes(PK.PAKETE[x].name));
   const fbAlteTarife = ['Abo 10', eur(pr.projekt) + ' netto', 'jedes weitere ' + eur(pr.abo.extra), 'ersten ' + pr.frei + ' Projekte', 'Kostenlos starten'].filter((x) => fb.includes(x));
   ok(fbPakete && !fbAlteTarife.length && [start.text, app.text, ab, fa, ...neuPreis].every((t) => t.includes(eur(pr.aufmass))), 'Preise auf den statischen Seiten: Aufmaßblatt wie in config.js (' + eur(pr.aufmass) + ', auch in den neuen Ratgebern), Seite für Fensterbauer mit den Paketpreisen aus pakete.js und ohne die Tarife des Betriebsbereichs' + (fbAlteTarife.length ? ' (noch da: ' + fbAlteTarife.join(', ') + ')' : ''));
-  ok(/<div class="schutz" id="kundenschutz">\s*<div><h3>Ihre Kunden bleiben Ihre Kunden\.<\/h3>/.test(fb) && ['<b>Nur Ihr Betrieb.</b>', '<b>Nur an Sie.</b>', '<b>Kein Weiterverkauf.</b>', '<b>Im Auftrag, in Frankfurt.</b>'].every((x) => fb.includes(x)) && fb.includes('href="/konfigurator-bedingungen/"') && /<h2 id="kundenschutz">/.test(fs10.readFileSync(path10.join(WURZEL, 'web/konfigurator-bedingungen/index.html'), 'utf8')), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen, Paketbedingungen verlinkt (dort § 10 Kundenschutz)');
+  ok(/<section class="ez-schutz" data-theme="hell" id="kundenschutz"[^>]*>\s*<span class="dna-label">Kundenschutz<\/span>\s*<h3 class="dna-titel-s" id="schutz-titel">Ihre Kunden bleiben Ihre Kunden\.<\/h3>/.test(fb) && ['<b>Nur Ihr Betrieb.</b>', '<b>Nur an Sie.</b>', '<b>Kein Weiterverkauf.</b>', '<b>Im Auftrag, in Frankfurt.</b>'].every((x) => fb.includes(x)) && fb.includes('href="/konfigurator-bedingungen/"') && /<h2 id="kundenschutz">/.test(fs10.readFileSync(path10.join(WURZEL, 'web/konfigurator-bedingungen/index.html'), 'utf8')), 'Seite für Fensterbauer: Kundenschutz mit vier Zusagen, Paketbedingungen verlinkt (dort § 10 Kundenschutz)');
   /* g) Domains: www zählt als Hauptdomain, die Cloudflare-Testadresse bleibt gesperrt (functions/seo.js direkt geprüft) */
   const probe = async (adresse, env) => { const r = await seo.behandeln(new Request(adresse), env, async () => new Response('<!doctype html><title>x</title><meta property="og:image" content="/og.png">', { headers: { 'content-type': 'text/html; charset=utf-8' } })); return { robots: r.headers.get('x-robots-tag'), link: r.headers.get('link'), text: await r.text() }; };
   const www = await probe('https://www.eeziframes.com/ratgeber/', { INDEXIERUNG: '1' }), wdev = await probe('https://fenstero.beispiel.workers.dev/ratgeber/', { INDEXIERUNG: '1' });
@@ -1846,7 +1845,7 @@ if (teil(10)) {
   const eingabeFehler = [];
   for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x))) {
     /* die Seite für Fensterbauer darf ihr Anfrageformular für die Pakete haben (POST /api/partner/frage), sonst nichts zum Ausfüllen */
-    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="formular" id="anfrage-form" method="post" action="\/api\/partner\/frage" novalidate>[\s\S]*?<\/form>/ : /^$/, '');
+    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="\/api\/partner\/frage">[\s\S]*?<\/form>/ : /^$/, '');
     if (/<(form|input|select|textarea)\b|contenteditable|rg-leer|rechner\.js|<td><\/td>/i.test(t)) eingabeFehler.push(pf);
   }
   const ohneRechner = (await fetch(BASE + '/assets/rechner.js')).status === 404, bm = (await roh('/ratgeber/bestellmass-fenster/')).text, ab2 = (await roh('/ratgeber/aufmassblatt-fenster/')).text;

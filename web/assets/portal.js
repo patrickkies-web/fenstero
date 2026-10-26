@@ -561,7 +561,7 @@ let ctaIo = null;
 function kopfCta() {
   if (ctaIo) { ctaIo.disconnect(); ctaIo = null; }
   const top = document.querySelector('.top'); if (!top || !top.querySelector('.kopf-cta')) return;
-  const ziele = Array.from(document.querySelectorAll('.scr .btn.primary, .scr .fb .knopf-primaer, .sheet .btn.primary')), im = new Set();
+  const ziele = Array.from(document.querySelectorAll('.scr .btn.primary, .scr .fb .ez-hero .dna-pille:not(.dna-pille--leise), .sheet .btn.primary')), im = new Set();
   const setzen = () => top.classList.toggle('cta-still', im.size > 0 || !!S.sheet);
   const hoehe = top.getBoundingClientRect().bottom;
   ziele.forEach((z) => { const r = z.getBoundingClientRect(); if (r.width && r.bottom > hoehe && r.top < window.innerHeight) im.add(z); });
@@ -803,7 +803,7 @@ const wechsel = (zu) => zu === 'betrieb'
   ? '<section class="owner wechsel"><div><p class="eyebrow kicker">Für Fensterbauer</p><h2>' + akSatz('Ihr eigener Fensterkonfigurator.', 2) + '</h2><p>Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt.</p></div><div class="row"><a class="btn primary" href="/fuer-fensterbauer/">Pakete ansehen<span class="pf" aria-hidden="true"></span></a><button type="button" class="btn ghost" data-act="ansicht" data-v="betrieb">Zur Ansicht für Fensterbauer</button></div></section>'
   : '<section class="owner wechsel"><div><p class="eyebrow kicker">Für Hauseigentümer</p><h2>' + akSatz('Ihre eigenen Fenster ausmessen?', 2) + '</h2><p>Messen geht kostenlos in der App, ohne Konto und Schritt für Schritt erklärt. Das Aufmaßblatt geht an jeden Fensterbauer.</p></div><div class="row"><button type="button" class="btn ghost" data-act="ansicht" data-v="kunde">Zur Ansicht für Hauseigentümer<span class="pf" aria-hidden="true"></span></button></div></section>';
 /* ---------- Einbettung der Seite für Fensterbauer (Ansicht Fensterbauer) ----------
-   Eine Quelle: Die Seite bleibt die statische Seite /fuer-fensterbauer/ (Suchmaschinen, fensterbauer.css, fensterbauer.js). Die
+   Eine Quelle: Die Seite bleibt die statische Seite /fuer-fensterbauer/ (Suchmaschinen, fensterbauer-dna.css, fensterbauer-dna.js). Die
    Startseite lädt sie einmal je Seitenaufruf (fetch, gleiche Herkunft), nimmt den Rahmen .fb (Gestaltung und Skripte gelten nur darin)
    und setzt ihn in den Behälter .vk-einbettung; danach startet FbSeite.auf darauf mit { eingebettet: true } (ohne eigene Kopf- und
    Fußzeile, die Startseite hat ihre). Liegt der Inhalt schon im Speicher, steht er beim nächsten Aufbau sofort im HTML (kein Flackern,

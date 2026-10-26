@@ -45,6 +45,16 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Konzept und Abfolge der Startseite stehen; Änderungen daran nur auf Wunsch.
 - Seit 26.10.2026 ist die Seite die echte Startseite (Ansicht Hauseigentümer, web/index.html mit web/assets/startseite.js und startseite-dna.css). Änderungen an der Vorschau unter docs/profis/startseite-dna-vorschau/ gehen nicht von selbst online: start.css und Markup danach in die Dateien unter web/ übertragen (Protokoll, Abschnitt „Übernahme als Startseite“).
 - Offen (nur auf sein Wort): Renderings mit grauem Studioglas statt Himmelblau, lebendes Bento wieder an, Mieter-Ansicht, Test auf einem echten Mittelklasse-Android.
+- Seite für Fensterbauer (26.10.2026, abends): nach der DNA gebaut, vom Inhaber nach der ersten Vorschau als „sehr gut“ angenommen und auf
+  sein Wort online gestellt (web/fuer-fensterbauer/, eingebettet auch in der Ansicht Fensterbauer der Startseite). Übertragen mit
+  `node scripts/fensterbauer-uebertragen.mjs` aus docs/profis/fensterbauer-vorschau/, danach `node scripts/bedingungen-pdf.mjs`;
+  Änderungen gehören in die Vorschau. Protokoll docs/profis/2026-10-26-fensterbauer-dna.md.
+- Nur der genannte Bereich (Korrektur des Inhabers, 26.10.2026): Ein Auftrag „überarbeite die Seite für Fensterbauer“ meint genau diese
+  Landingpage. Nichts aus App, Portal oder Betriebsbereich wird mit hineingenommen; andere Seiten werden nur gelesen, nie geändert, und
+  die Lieferung sagt, welche Dateien berührt wurden.
+- Kürzere Entscheidungsfindung (Korrektur des Inhabers, 26.10.2026): Gremium eine Runde, danach nur die Muss-Punkte und Vetos umsetzen;
+  Detail-Profis und Vorlagen-Abgleich entfallen, sofern er sie nicht nennt. Ihre Befunde bleiben als Kann-Liste im Protokoll. Die Vorlage
+  beim Inhaber: Vorschau, drei Sätze je Gruppe, Muss-Liste, fertig.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
