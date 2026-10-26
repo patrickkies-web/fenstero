@@ -7,13 +7,13 @@
   /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite */
   var leiste = d.querySelector('.ez-leiste'), kopf = d.querySelector('.ez-kopf');
   if (leiste) {
-    var letzte = w.scrollY || 0, hoch = 0, geplant = false, grenze = 160;
+    var letzte = w.scrollY || 0, hoch = 0, runter = 0, geplant = false, grenze = 160;
     function messeGrenze() { if (kopf) grenze = kopf.getBoundingClientRect().bottom + (w.scrollY || 0); }
     messeGrenze(); w.addEventListener('resize', messeGrenze); w.addEventListener('load', messeGrenze);
     function pruefe() {
       geplant = false;
       var y = w.scrollY || 0;
-      if (y < letzte) hoch += letzte - y; else if (y > letzte) hoch = 0;
+      if (y < letzte) { hoch += letzte - y; runter = 0; } else if (y > letzte) { runter += y - letzte; if (runter > 24) hoch = 0; }
       leiste.classList.toggle('ist-da', y > grenze && hoch > 24);
       letzte = y;
     }
@@ -33,18 +33,25 @@
     stufen.forEach(function (s) { io.observe(s); });
   }
 
-  /* Hero-Choreografie: Bühne und Überschrift zuerst, nach 450 ms rollt die Zahl auf dem Gerät ein (DNA-Rezept 8), danach hängt sich das Etikett an den Zollstock (CSS-Verzögerung) */
+  /* Hero-Choreografie: Bühne und Überschrift zuerst, ab 250 ms rastet die Zahl auf dem Gerät von 1.000 auf 1.409 ein (DNA-Rezept 8, fertig bei 950 ms), danach hängt sich das Etikett an den Zollstock (CSS-Verzögerung 1000/1300 ms) */
   var zahl = d.querySelector('[data-ez-zahl]');
   if (zahl) {
     function zahlStart() { zahl.classList.add('ist-da'); zahl.setAttribute('data-dna', 'zahl'); if (w.DNA) w.DNA.start(zahl.parentNode); }
-    if (reduziert) zahlStart(); else setTimeout(zahlStart, 450);
+    if (reduziert) zahlStart(); else setTimeout(zahlStart, 250);
   }
 
-  /* Stationen anklickbar: springen zur Stufe */
+  /* Stationen sind Links; der Sprung gleitet (bei „weniger Bewegung“ sofort) */
   stationen.forEach(function (li, i) {
-    li.setAttribute('tabindex', '0'); li.setAttribute('role', 'link');
-    function geh() { if (stufen[i]) stufen[i].scrollIntoView({ behavior: reduziert ? 'auto' : 'smooth', block: 'center' }); }
-    li.addEventListener('click', geh);
-    li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); geh(); } });
+    var a = li.querySelector('a'); if (!a) return;
+    a.addEventListener('click', function (e) { if (stufen[i]) { e.preventDefault(); stufen[i].scrollIntoView({ behavior: (reduziert || e.detail === 0) ? 'auto' : 'smooth', block: 'center' }); } });
+  });
+
+  /* Fokus unter dem Vorhang: liegt das fokussierte Element verdeckt, in die Mitte holen (WCAG 2.4.11) */
+  d.addEventListener('focusin', function (e) {
+    var el = e.target; if (!el || !el.getBoundingClientRect) return;
+    var r = el.getBoundingClientRect(); if (!r.width) return;
+    var x = Math.min(Math.max(r.left + r.width / 2, 0), w.innerWidth - 1), y = Math.min(Math.max(r.top + r.height / 2, 0), w.innerHeight - 1);
+    var oben = d.elementFromPoint(x, y);
+    if (oben && !el.contains(oben) && !oben.contains(el)) el.scrollIntoView({ behavior: 'auto', block: 'center' });
   });
 })();

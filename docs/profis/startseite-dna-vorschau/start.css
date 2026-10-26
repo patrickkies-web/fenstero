@@ -12,34 +12,54 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez .dna-anker__etikett { transform: none; }
 .ez .dna-anker__etikett > .dna-etikett { transform: translate(-50%, -50%); }
 [data-theme="dunkel"] .dna-etikett { --glas: rgba(32,32,34,.88); }
-[data-theme="dunkel"] .dna-etikett__wert { color: var(--tinte); font-weight: 400; }
+[data-theme="dunkel"] .dna-etikett__punkt { background: rgba(255,255,255,.08); width: 24px; height: 24px; }
+[data-theme="dunkel"] .dna-etikett__wert { color: var(--tinte-2); font-weight: 400; }
 .ez a { -webkit-tap-highlight-color: transparent; }
 .ez-huelle { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 @media (min-width: 760px) { .ez-huelle { padding-left: max(48px, env(safe-area-inset-left, 0px)); padding-right: max(48px, env(safe-area-inset-right, 0px)); } }
 .ez-abschnitt { padding-block: var(--raum-8); display: grid; gap: var(--raum-6); }
-[data-theme="hell"].dna-szene > .ez-abschnitt { padding-block: 56px; }
+[data-theme="hell"].dna-szene > .ez-abschnitt { padding-block: var(--raum-7); }
+@media (min-width: 900px) { [data-theme="hell"].dna-szene > .ez-abschnitt { padding-block: var(--raum-8); } }
 @media (min-width: 900px) { .ez-abschnitt { padding-block: var(--raum-9); gap: var(--raum-7); } }
 .ez-kopfzeile { display: grid; gap: var(--raum-3); justify-items: start; }
-.ez-kopfzeile .dna-text { max-width: 44ch; }
+.ez-kopfzeile .dna-text { max-width: 36ch; margin-top: 4px; }
 .dna-titel em.ez-ak, .dna-titel-xl em.ez-ak { font-style: normal; color: var(--tinte-2); }
-.ez-klein { margin: 0; font: 400 13px/1.45 var(--font-sans); color: var(--tinte-2); max-width: 48ch; }
+.ez-klein { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); max-width: 36ch; }
 .ez-klein b { font-weight: 500; color: var(--tinte); }
-.ez-linkzeile { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--tinte); font: 500 15px/1.2 var(--font-sans); text-decoration: none; }
-.ez-linkzeile::after, .ez-ansicht a:not([aria-current])::after { content: ""; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ez-chevron) center / contain no-repeat; mask: var(--ez-chevron) center / contain no-repeat; }
+.ez-linkzeile { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--tinte); font: 500 16px/1.2 var(--font-sans); text-decoration: none; }
+.ez-linkzeile::after { content: ""; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ez-chevron) center / contain no-repeat; mask: var(--ez-chevron) center / contain no-repeat; }
 .ez-text { display: grid; gap: var(--raum-4); align-content: start; justify-items: start; min-width: 0; }
+.ez-text > .dna-titel { margin-top: -4px; }
 .ez-zwei { display: grid; gap: var(--raum-6); }
 .ez-zwei > * { min-width: 0; }
 @media (min-width: 900px) { .ez-zwei { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--raum-8); align-items: center; } }
 .ez-aktionen { display: flex; flex-wrap: wrap; gap: 10px; }
+.ez-hero__text .ez-aktionen, .ez-text > .dna-pille, .ez-fb .ez-aktionen { margin-top: 16px; }
+@media (min-width: 900px) { .ez-hero__text .ez-aktionen { margin-top: 8px; } }
 .ez .dna-pille__pfeil svg { transition: transform 220ms var(--dna-druck); }
+.ez .dna-pille--leise { transition: background-color 220ms ease, color 220ms ease, box-shadow 220ms ease, transform 220ms var(--dna-druck); }
+.ez .dna-pillen a { transition: background-color 320ms var(--dna-druck), color 220ms ease, transform 220ms var(--dna-druck); }
+.ez .dna-pillen a:active { transform: scale(.97); transition-duration: 0s; }
 .ez-schritte li { transition: color 320ms var(--dna-druck); }
-.ez-schritte li::before { transition: background-color 320ms var(--dna-druck), box-shadow 320ms var(--dna-druck), width 320ms var(--dna-druck), height 320ms var(--dna-druck); }
-.ez-schritte .dna-schritte__zustand { transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck); }
+.ez-schritte li a { color: inherit; text-decoration: none; display: block; min-height: 44px; display: flex; align-items: center; }
+.ez-skip { position: fixed; top: 12px; left: 12px; z-index: 60; transform: translateY(-200%); opacity: 0; }
+.ez-skip:focus-visible { transform: none; opacity: 1; }
+.ez-marke { min-height: 44px; margin-block: -7px; }
+.ez-ansicht.dna-pillen { overflow: visible; }
+.ez-ratgeber a:active .dna-rund-knopf { transform: scale(.94); transition-duration: 0s; }
+.ez-linkzeile::after { transition: transform 220ms var(--dna-druck); }
+.ez-schritte li::before { transition: background-color 320ms var(--dna-druck), box-shadow 320ms var(--dna-druck), transform 320ms var(--dna-druck); }
+.ez-schritte li[data-zustand="aktiv"]::before { width: 9px; height: 9px; transform: scale(1.45); box-shadow: 0 0 0 3.5px var(--flaeche-hoch); }
+.ez-schritte .dna-schritte__zustand { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck); }
 @media (hover: hover) and (pointer: fine) {
   .ez .dna-pille:hover .dna-pille__pfeil svg { transform: translateX(2px); }
   .ez .dna-pille--leise:hover { background: var(--indigo); color: var(--weiss); box-shadow: none; }
   .ez .dna-pillen a:not([aria-current]):hover { color: var(--tinte); }
-  .ez .dna-rund-knopf:hover { background: var(--indigo); color: var(--weiss); }
+  .ez .dna-rund-knopf:hover, .ez-ratgeber a:hover .dna-rund-knopf { background: var(--indigo); color: var(--weiss); }
+  .ez-ratgeber a:hover b { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .ez-schritte li a:hover { color: var(--tinte); }
+  .ez-linkzeile:hover::after { transform: translateX(2px); }
+  .ez-fuss ul a:hover { color: var(--tinte); }
 }
 
 /* ---------- Kopfzeile und Leiste ---------- */
@@ -58,7 +78,8 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-ansicht [aria-current]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); }
 
 .ez-leiste { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding-top: env(safe-area-inset-top, 0px); transform: translateY(-100%); transition: transform 320ms var(--dna-druck); background: var(--glas); -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%); box-shadow: 0 1px 0 var(--glas-rand); }
-.ez-leiste.ist-da { transform: none; }
+.ez-leiste { transition-duration: 220ms; }
+.ez-leiste.ist-da { transform: none; transition-duration: 320ms; }
 .ez-leiste .ez-huelle { display: flex; align-items: center; justify-content: space-between; gap: var(--raum-3); padding-block: 8px; }
 .ez-leiste .ez-ansicht { display: none; }
 @media (min-width: 900px) { .ez-leiste .ez-ansicht { display: inline-flex; } }
@@ -80,6 +101,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-schein { position: absolute; left: -16%; bottom: -44%; width: 80%; aspect-ratio: 1; border-radius: 50%; z-index: 2; pointer-events: none; background: radial-gradient(closest-side, var(--violett) 28%, var(--indigo) 56%, transparent 76%); filter: blur(22px); opacity: .9; }
 @media (min-width: 900px) { .ez-schein { left: -16%; bottom: -40%; width: 74%; } }
 .ez-nur-desk { display: none; }
+@media (min-width: 760px) { .ez-blatt .ez-nur-desk { display: block; } .ez-blatt .ez-nur-tel { display: none; } }
 @media (min-width: 900px) { .ez-nur-desk { display: block; } .ez-nur-tel { display: none; } }
 #hero-punkt { left: 79%; top: 40%; }
 #hero-etikett { left: 60%; top: 16%; }
@@ -89,12 +111,12 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 @media (min-width: 900px) { .ez-foto img { object-position: 50% 20%; } }
 .ez-foto::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); pointer-events: none; }
 .ez-anker { position: absolute; inset: 0; pointer-events: none; }
-.ez-anker .dna-etikett { font-size: 12px; }
+.ez .dna-etikett { font-size: 12px; }
 .ez-anker.ist-da .dna-anker__linien > *, .ez-anker.ist-da .dna-anker__punkt { transition-delay: 1000ms; }
 .ez-anker.ist-da .dna-anker__etikett { transition-delay: 1300ms; }
 .ez-js .ez-schirm__zahl > span:not(.ist-da) { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .ez-schirm__zahl > span { opacity: 1 !important; } .ez-anker.ist-da .dna-anker__linien > *, .ez-anker.ist-da .dna-anker__punkt, .ez-anker.ist-da .dna-anker__etikett { transition-delay: 0ms; } }
-@media (min-width: 900px) { .ez-anker .dna-etikett { font-size: 13px; } }
+@media (min-width: 900px) { .ez .dna-etikett { font-size: 13px; } }
 .ez-geraet { position: absolute; left: 2%; bottom: -8%; z-index: 3; --s: .56; }
 .ez-schirm__zeilen { display: none; }
 @media (min-width: 900px) { .ez-schirm__zeilen { display: grid; } }
@@ -108,7 +130,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-schirm__glut { position: relative; isolation: isolate; overflow: hidden; border-radius: calc(22px * var(--s)); padding: calc(18px * var(--s)) calc(12px * var(--s)) calc(14px * var(--s)); display: grid; justify-items: center; gap: calc(6px * var(--s)); background: var(--anthrazit); }
 .ez-schirm__glut::before { content: ""; position: absolute; inset: -30%; z-index: -1; background: radial-gradient(42% 42% at 72% 18%, var(--violett), transparent 70%), radial-gradient(40% 40% at 18% 100%, var(--indigo), transparent 70%); filter: blur(calc(24px * var(--s))); }
 .ez-schirm__label { font-size: calc(12px * var(--s)); color: var(--weiss); }
-.ez-schirm__zahl { font: 800 calc(46px * var(--s))/1 var(--font-punkt); color: var(--weiss); letter-spacing: .01em; }
+.ez-schirm__zahl { font: 800 calc(46px * var(--s))/1 var(--font-punkt); color: var(--weiss); letter-spacing: .01em; font-variant-numeric: tabular-nums; }
 .ez-schirm__zahl small { font: 400 calc(13px * var(--s))/1 var(--font-sans); color: var(--silbergrau); margin-left: .3em; }
 .ez-schirm__skala { width: 100%; height: calc(20px * var(--s)); position: relative; opacity: .75;
   background: repeating-linear-gradient(90deg, var(--silbergrau) 0 1px, transparent 1px calc(8px * var(--s))) 0 100% / 100% calc(9px * var(--s)) no-repeat,
@@ -133,16 +155,16 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fenster__bild { position: relative; min-height: 0; }
 .ez-fenster__bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .ez-fenster figcaption { display: grid; gap: 2px; min-width: 0; }
-.ez-fenster figcaption b { font: 500 14px/1.2 var(--font-sans); color: var(--tinte); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ez-fenster figcaption span { font: 400 12px/1.3 var(--font-sans); color: var(--tinte-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dna-bento__kachel--gross .ez-fenster figcaption b { font-size: 18px; }
+.ez-fenster figcaption { gap: 4px; }
+.ez-fenster figcaption b { font: 500 14px/1.2 var(--font-sans); color: var(--tinte); text-wrap: balance; }
+.ez-fenster figcaption span { font: 400 12px/1.3 var(--font-sans); color: var(--tinte-2); }
+.dna-bento__kachel--gross .ez-fenster figcaption b { font-size: 22px; line-height: 1.2; letter-spacing: -.01em; }
 .dna-bento__kachel--gross .ez-fenster figcaption span { font-size: 14px; }
 .ez-bento .dna-bento__kachel > .dna-leucht { min-height: 0; height: 100%; padding: var(--raum-4); }
 @media (min-width: 760px) { .ez-bento .dna-bento__kachel > .dna-leucht { padding: var(--raum-5); } }
 .ez-bento .dna-leucht { justify-content: space-between; --dna-glut-hell: 1; --dna-glut-satt: 1.15; --glut-x: 74%; --glut-y: 22%; }
 .ez-bento .dna-leucht::before { filter: blur(20px); background: radial-gradient(52% 70% at 76% 24%, var(--violett), transparent 72%), radial-gradient(40% 50% at 18% 100%, var(--indigo), transparent 72%); }
-.ez-bento .dna-zahl--klein .dna-zahl__wert { font-size: 44px; }
-@media (min-width: 760px) { .ez-bento .dna-zahl--klein .dna-zahl__wert { font-size: 52px; } }
+.ez-bento .dna-zahl--klein .dna-zahl__wert { font-size: 48px; font-weight: 250; }
 .ez-bento .dna-bento__innen { justify-content: space-between; }
 
 /* ---------- Szene 3: So geht es ---------- */
@@ -154,86 +176,95 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 }
 .ez-stufen { display: grid; gap: var(--raum-3); }
 .ez-stufe { display: grid; gap: var(--raum-4); border-radius: var(--rund-l); background: var(--flaeche); padding: var(--raum-4); }
+.ez-stufe[data-dna-auftritt] { transform: none; }
 @media (min-width: 760px) {
   .ez-stufe { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: var(--raum-5); align-items: center; gap: var(--raum-6); }
   .ez-stufe:nth-child(even) .ez-stufe__bild { order: 2; }
 }
-.ez-stufe__text { display: grid; gap: var(--raum-2); align-content: center; }
+.ez-stufe__text { display: grid; gap: var(--raum-3); align-content: center; }
+.ez-stufe__text .dna-text { margin-top: 4px; }
 .ez-stufe__text .dna-text { max-width: 36ch; }
 .ez-stufe__bild { position: relative; border-radius: var(--rund-m); overflow: hidden; aspect-ratio: 4 / 3; background: var(--schwarz); }
 .ez-stufe__bild > img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ez-stufe__bild--hell { background: var(--weiss); }
 .ez-stufe__bild--hell > img { object-fit: contain; padding: 6%; }
 .ez-stufe__bild .dna-anker { position: absolute; inset: 0; }
-.ez-stufe__bild .dna-etikett { font-size: 12px; }
 .ez-zeichnung { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.ez-zeichnung .wand { fill: none; stroke: var(--silbergrau); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; }
+.ez-zeichnung .wand { fill: none; stroke: var(--silbergrau); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; vector-effect: non-scaling-stroke; }
 .ez-zeichnung .schraffur { stroke: var(--silbergrau); stroke-width: 1; opacity: .35; }
-.ez-zeichnung .rahmen { fill: none; stroke: var(--weiss); stroke-width: 1.4; }
+.ez-zeichnung .rahmen { fill: none; stroke: var(--weiss); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
 .ez-zeichnung .glas { fill: var(--anthrazit); }
 .ez-zeichnung .mass-o { stroke: var(--violett); }
 .ez-zeichnung .mass-f { stroke: var(--koralle); }
-.ez-zeichnung .mass { fill: none; stroke-width: 1.2; }
+.ez-zeichnung .mass { fill: none; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
 .ez-punkt--koralle .dna-etikett__punkt::after { background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
-.ez-wahl { position: absolute; left: 12px; bottom: 12px; }
+.ez-wahl { position: absolute; left: 12px; right: 12px; bottom: 12px; justify-content: center; }
 .ez-wahl.dna-pillen { background: var(--glas); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--schatten-glas); border: 1px solid var(--glas-rand); }
-.ez-wahl.dna-pillen button { padding: 8px 12px; font-size: 12px; }
-.ez-wahl.dna-pillen [aria-pressed="true"] { background: var(--indigo); color: var(--weiss); }
+.ez-wahl { pointer-events: none; }
+.ez-wahl.dna-pillen span { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px 7px 8px; border-radius: var(--rund-pille); font: 500 12px/1 var(--font-sans); color: var(--tinte); }
+@media (min-width: 760px) { .ez-wahl.dna-pillen span { font-size: 13px; padding: 8px 12px 8px 9px; } }
+.ez-wahl.dna-pillen span::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--farbe); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+.ez-wahl.dna-pillen [aria-pressed="true"] { background: var(--handlung); color: var(--auf-handlung); }
 .ez-stufe--leucht { position: relative; isolation: isolate; overflow: hidden; }
 .ez-stufe--leucht::before { content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none; background: radial-gradient(50% 50% at 86% 12%, var(--violett), transparent 70%), radial-gradient(38% 38% at 12% 100%, var(--indigo), transparent 70%); filter: blur(20px); opacity: 1; }
-.ez-fuss-satz { max-width: 52ch; }
+.ez-fuss-satz { max-width: 36ch; }
 .ez-fuss-satz a { color: var(--tinte); text-decoration: underline; text-underline-offset: 3px; padding-block: 12px; margin-block: -12px; }
 
 /* ---------- Szene 4: Aufmaßblatt und Preis ---------- */
 .ez-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: 100%; }
-@media (min-width: 760px) { .ez-liste { grid-template-columns: 1fr 1fr; gap: 12px 24px; } }
-.ez-liste li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; font: 400 15px/1.45 var(--font-sans); color: var(--tinte-2); }
-.ez-liste li::before { content: ""; width: 8px; height: 8px; margin: 7px 0 0 1px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); }
+.ez-liste { max-width: 44ch; }
+.ez-liste li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; font: 400 16px/1.5 var(--font-sans); color: var(--tinte-2); text-wrap: pretty; }
+.ez-liste li::before { content: ""; width: 6px; height: 6px; margin: 9px 0 0 2px; border-radius: 50%; background: var(--linie); }
 .ez-liste b { font-weight: 500; color: var(--tinte); }
 .ez-aufmass { margin-top: var(--raum-5); }
 .ez-blattbuehne { display: grid; gap: var(--raum-4); justify-items: start; }
 .ez-blatt { position: relative; width: 100%; max-width: 560px; padding: 11% 10% 13%; justify-self: center; border-radius: var(--rund-l); background: var(--flaeche); }
-.ez-blatt { padding: 13% 10% 14%; }
+.ez-blatt { padding: 13% 10% 22%; }
+#blatt-oeffnung { left: 36%; top: 84%; }
+#blatt-bestellmass { left: 60%; top: 96%; }
+@media (min-width: 760px) { .ez-blatt { padding-bottom: 14%; } #blatt-oeffnung { left: 27%; top: 97%; } #blatt-bestellmass { left: 75%; top: 97%; } }
 .ez-blatt > img { width: 100%; height: auto; display: block; border-radius: 12px; transform: rotate(-3deg); box-shadow: var(--schatten-tief), 0 0 0 1px var(--silbergrau); }
-.ez-blatt .dna-etikett { font-size: 12px; }
+.ez-blatt .dna-anker__punkt, .ez-stufe__bild--hell .dna-anker__punkt, .ez-stufe__bild > img + .dna-anker .dna-anker__punkt { background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 0 0 4px rgba(255,255,255,.75); }
+.ez-blatt .dna-anker__linien, .ez-stufe__bild--hell .dna-anker__linien, .ez-stufe__bild > img + .dna-anker .dna-anker__linien { filter: drop-shadow(0 0 1px rgba(7,9,10,.8)); }
 .ez-frei { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
-.ez-frei li { display: inline-flex; align-items: center; gap: 8px; font: 500 15px/1 var(--font-sans); color: var(--tinte); }
-.ez-frei li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); margin-left: 3px; }
+.ez-frei li { display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1 var(--font-sans); color: var(--tinte); }
+.ez-frei li svg { width: 14px; height: 14px; color: var(--tinte); }
 .ez-preis.dna-leucht { min-height: 280px; --glut-x: 82%; --glut-y: 16%; box-shadow: var(--kachel-rand); padding: var(--raum-5); gap: var(--raum-5); }
 .ez-preis.dna-leucht::before { filter: blur(16px); background: radial-gradient(58% 62% at 84% 14%, var(--violett), transparent 72%), radial-gradient(36% 40% at 8% 100%, var(--indigo), transparent 72%); }
 .ez-preis .ez-raster { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, var(--silbergrau) 1px, transparent 1.4px) 7px 7px / 14px 14px; -webkit-mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); }
 @media (min-width: 900px) { .ez-preis.dna-leucht { min-height: 340px; padding: var(--raum-6); } }
-.ez-preis .dna-zahl__wert { font-size: clamp(72px, 18vw, 96px); font-weight: 250; }
-.ez-preis .dna-zahl__einheit { font-size: 24px; }
+.ez-preis .dna-zahl__wert { font-size: clamp(64px, 16vw, 88px); font-weight: 250; }
+.ez-preis .dna-zahl__einheit { font-size: 15px; margin-left: 4px; }
+.ez-preis .dna-leucht__kopf { align-items: center; }
 .ez-preis__fuss { display: grid; gap: 6px; }
 .ez-preis__fuss b { font: 500 16px/1.3 var(--font-sans); color: var(--tinte); }
 .ez-preis__fuss span { font: 400 14px/1.4 var(--font-sans); color: var(--tinte-2); }
 .ez-badge-indigo, .ez-badge-koralle { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--indigo); color: var(--weiss); font: 500 12px/1 var(--font-sans); white-space: nowrap; vertical-align: middle; }
 .ez-badge-koralle { background: var(--koralle); color: var(--schwarz); }
-.ez-fuss__pilot .ez-badge-indigo { margin-right: 6px; }
+.ez-fuss__pilot .ez-badge-indigo { margin-right: 6px; height: 20px; vertical-align: -5px; }
 
 /* ---------- Szene 5: Ratgeber, Schriftfenster, Fensterbauer, Fuß ---------- */
 .ez-ratgeber { list-style: none; margin: 0; padding: 0; display: grid; width: 100%; max-width: 840px; }
+[data-theme="dunkel"] { --linie-fein: color-mix(in srgb, var(--silbergrau) 30%, transparent); }
 .ez-ratgeber a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--raum-4); padding-block: var(--raum-4); border-top: 1px solid var(--linie-fein); text-decoration: none; color: var(--tinte); }
 .ez-ratgeber li:last-child a { border-bottom: 1px solid var(--linie-fein); }
-.ez-ratgeber b { display: block; font: 500 18px/1.25 var(--font-sans); margin-bottom: 4px; }
-.ez-ratgeber b::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); margin: 0 12px 0 3px; vertical-align: 2px; }
-.ez-ratgeber span { display: block; font: 400 15px/1.45 var(--font-sans); color: var(--tinte-2); max-width: 56ch; }
-.ez-ratgeber .dna-rund-knopf { width: 44px; height: 44px; box-shadow: inset 0 0 0 1px var(--linie); }
+.ez-ratgeber b { display: block; font: 500 22px/1.2 var(--font-sans); letter-spacing: -.01em; margin-bottom: 4px; }
+.ez-ratgeber span { display: block; font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); max-width: 44ch; text-wrap: pretty; }
+.ez-ratgeber .dna-rund-knopf { display: grid; width: 44px; height: 44px; color: var(--tinte); box-shadow: inset 0 0 0 1px var(--linie); transition: background-color 220ms ease, color 220ms ease, transform 220ms var(--dna-druck); }
 .ez-fb { border-radius: var(--rund-xl); background: var(--grund); color: var(--tinte); padding: var(--raum-6) var(--raum-5); display: grid; gap: var(--raum-4); justify-items: start; margin-top: var(--raum-6); }
 @media (min-width: 900px) { .ez-fb { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); padding: var(--raum-7); align-items: center; gap: var(--raum-3) var(--raum-8); } .ez-fb > .dna-label { grid-column: 1; } .ez-fb .ez-fb__text { grid-column: 1; } .ez-fb .ez-aktionen { grid-column: 2; grid-row: 1 / 4; justify-self: end; flex-direction: column; align-items: flex-end; } }
 .ez-fb__text { display: grid; gap: var(--raum-3); }
-.ez-fb .dna-text { max-width: 46ch; }
+.ez-fb .dna-text { max-width: 36ch; }
 .ez-fb .dna-text b { font-weight: 500; color: var(--tinte); }
 .ez-fuss { padding-block: var(--raum-6) var(--raum-6); margin-top: var(--raum-7); border-top: 1px solid var(--linie-fein); display: grid; gap: var(--raum-5); }
 .ez-fuss__spalten { display: grid; grid-template-columns: 1fr 1fr; gap: var(--raum-5) var(--raum-4); }
-.ez-fuss__spalten > .ez-marke { grid-column: 1 / -1; }
+.ez-fuss__spalten > .ez-marke { grid-column: 1 / -1; align-self: start; margin-top: -3px; }
 @media (min-width: 760px) { .ez-fuss__spalten { grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: var(--raum-7); } .ez-fuss__spalten > .ez-marke { grid-column: auto; } }
 .ez-fuss ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; justify-items: start; }
-.ez-fuss ul a { color: var(--tinte-2); text-decoration: none; font: 400 15px/1.3 var(--font-sans); min-height: 44px; display: inline-flex; align-items: center; }
+.ez-fuss ul a { color: var(--tinte-2); text-decoration: none; font: 400 14px/1.3 var(--font-sans); min-height: 44px; display: inline-flex; align-items: center; }
 .ez-fuss ul a.dna-pille { color: var(--tinte); margin-top: 4px; height: 44px; }
-.ez-fuss .dna-label { margin-bottom: 8px; display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--indigo); color: var(--weiss); letter-spacing: 0; }
-.ez-fuss__pilot { margin: 0; font: 400 13px/1.5 var(--font-sans); color: var(--tinte-2); max-width: 72ch; }
+.ez-fuss h3.dna-label { margin: 0 0 8px; }
+.ez-fuss__pilot { margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--tinte-2); max-width: 60ch; }
 .ez-fuss__pilot b { font-weight: 500; color: var(--tinte); }
 
 @media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }
