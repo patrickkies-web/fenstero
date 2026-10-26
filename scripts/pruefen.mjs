@@ -4504,6 +4504,16 @@ if (teil(20)) {
   const st20 = await g6.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), aus: Buehne3D.pruef.aus(st), zoom: st.classList.contains('is-zoom') }; });
   ok(st20.zoom && st20.gl && !st20.aus, 'Selbsttest nur bei 1:1: ein gezoomter erster Blick schaltet die WebGL-Bühne nicht ab');
   sauber(g6, 'Selbsttest im Zoom ohne Fehler'); await c20f.close();
+  /* Einstieg wie von der Website (#ausmessen): die erste Bühne ist das schwebende Element ohne Wand (Schritt 1). Der Selbsttest
+     wartet auf die erste Bühne mit Wand, statt WebGL für die ganze Sitzung abzuschalten (sonst zeigt jede Frage das CSS-Modell) */
+  const c20s = await browser.newContext(ctx20), g8 = await neueSeite(c20s), w20s = [];
+  g8.on('console', (m) => { if (/Selbsttest/.test(m.text())) w20s.push(m.text()); });
+  await g8.goto(BASE + '/app/?gl=voll#ausmessen', { waitUntil: 'networkidle' }); await g8.waitForTimeout(1500);
+  const sa20 = await g8.evaluate(() => { const st = document.querySelector('.w3d-stage'); return { screen: S.screen, gl: !!st && st.classList.contains('gl') }; });
+  await g8.evaluate(() => { const w = demoProject()[0]; S.win = w; S.q = 'material'; S.selSash = 0; S.screen = 'frage'; render(true); }); await g8.waitForTimeout(1200);
+  const sb20 = await g8.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), u: Buehne3D.unterstuetzt(), aus: Buehne3D.pruef.aus(st) }; });
+  ok(sa20.screen === 'start' && sa20.gl && sb20.gl && sb20.u && !sb20.aus && !w20s.length, 'Einstieg über #ausmessen: die schwebende Startbühne ohne Wand schaltet die WebGL-Bühne nicht ab, die Fragen zeichnen in WebGL (' + JSON.stringify([sa20, sb20, w20s]) + ')');
+  sauber(g8, 'Einstieg über #ausmessen ohne Fehler'); await c20s.close();
 }
 
 if (teil(21)) {

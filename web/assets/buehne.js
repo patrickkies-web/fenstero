@@ -1107,13 +1107,16 @@ window.Buehne3D = (function () {
     gl.depthMask(true); gl.depthFunc(gl.LESS);
     oben.forEach((it) => { if (it.einmal) malen(gl, u, it, 0); });
     gl.depthFunc(gl.LEQUAL);
-    /* Selbsttest beim ersten Bild: oben links ist immer Wand (hell, deckend). Ist dort nichts oder Schwarz, zeichnet der
+    /* Selbsttest beim ersten Bild mit Wand: oben links ist dann Wand (hell, deckend). Ist dort nichts oder Schwarz, zeichnet der
        Grafiktreiber falsch: dann lieber das CSS-Modell */
-    /* nur bei 1:1: gezoomt kann oben links Glas oder die Terrasse liegen */
-    if (!L.geprueft && B.items && B.items.length && !stage.classList.contains('is-zoom') && !stage.classList.contains('is-pinch')) {
+    /* nur bei 1:1: gezoomt kann oben links Glas oder die Terrasse liegen. Bühnen ohne Wand (das schwebende Element in Schritt 1,
+       o.frei) haben oben links nichts: dort nicht prüfen, sondern auf der nächsten Bühne mit Wand, sonst schaltete ein richtiges
+       Bild WebGL für die ganze Sitzung ab */
+    const raum = stage.classList.contains('raum-licht'), wand = raum || !!(B.items && B.items.some((x) => (x.role === 'wall-in' || x.role === 'wall-out') && x.op > 0.9));
+    if (!L.geprueft && wand && !stage.classList.contains('is-zoom') && !stage.classList.contains('is-pinch')) {
       L.geprueft = true;
       /* Im dunklen Raum (.raum-licht) reicht die Wand nicht bis in die Ecke: dort zählt die Mitte (Glas oder Rahmen, deckend und nicht schwarz) */
-      const raum = stage.classList.contains('raum-licht'), px = new Uint8Array(4);
+      const px = new Uint8Array(4);
       gl.readPixels(Math.round(pw * (raum ? 0.5 : 0.04)), Math.round(ph * (raum ? 0.5 : 0.96)), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
       if (px[3] < (raum ? 200 : 250) || px[0] + px[1] + px[2] < (raum ? 20 : 60)) { if (window.console) console.warn('3-D-Bühne: Selbsttest fehlgeschlagen, CSS-Modell', Array.from(px)); L.kaputt = true; OK = false; B.aus = true; zumCss(stage); return false; }
     }
