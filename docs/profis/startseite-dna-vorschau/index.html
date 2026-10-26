@@ -1,0 +1,251 @@
+<title>eeziframes Startseite</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>html,body{background:#07090a}</style>
+<link rel="preload" href="fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/doto.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add("ez-js");</script>
+<link rel="stylesheet" href="dna/tokens.css">
+<link rel="stylesheet" href="dna/bundle.css">
+<link rel="stylesheet" href="start.css">
+
+<main class="dna-wurzel ez" id="hauseigentuemer" lang="de">
+  <a class="ez-skip dna-pille" href="#konfigurator">Zum Inhalt springen</a>
+
+  <!-- Leiste: kommt beim Hochscrollen zurück, Pille immer Umriss -->
+  <div class="ez-leiste" data-theme="dunkel" aria-hidden="true">
+    <div class="ez-huelle">
+      <a class="ez-marke" href="/" tabindex="-1"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".14"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></a>
+      <nav class="dna-pillen ez-ansicht"><a href="#hauseigentuemer" aria-current="page" tabindex="-1">Hauseigentümer</a><a href="/#fensterbauer" tabindex="-1">Fensterbauer</a></nav>
+      <a class="dna-pille dna-pille--leise dna-pille--klein" href="/app/#ausmessen" tabindex="-1">Jetzt konfigurieren</a>
+    </div>
+  </div>
+
+  <!-- Szene 1 (dunkel): Kopf und Hero. Gene: G10 Foto als weiche Bühne hinter scharfer Oberfläche, G1 weich trifft präzise (Lichtkante, Haarlinien), G6 eine Pille, G7 echtes Material (das Haus) -->
+  <section class="dna-szene" data-theme="dunkel" aria-label="Start">
+    <div class="ez-huelle">
+      <header class="ez-kopf" role="banner">
+        <a class="ez-marke" href="/" aria-label="eeziframes, zur Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".14"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></a>
+        <nav class="dna-pillen ez-ansicht" aria-label="Ansicht wählen"><a href="#hauseigentuemer" aria-current="page">Hauseigentümer</a><a href="/#fensterbauer">Fensterbauer</a></nav>
+        <a class="dna-pille dna-pille--leise dna-pille--klein" href="/app/#ausmessen">Jetzt konfigurieren</a>
+      </header>
+
+      <div class="ez-hero">
+        <div class="ez-hero__buehne">
+          <div class="ez-buehne" data-dna-bezug data-dna-auftritt="still" style="--i:0">
+            <div class="ez-foto">
+              <img src="bilder/hero.webp" width="1456" height="1088" alt="Ein Einfamilienhaus mit Ziegeldach, Sprossenfenstern und grünen Fensterläden im Abendlicht, davor Garten und Kiesweg" fetchpriority="high" decoding="async">
+            </div>
+          </div>
+        </div>
+
+        <div class="ez-hero__text">
+          <h1 class="dna-titel-xl" data-dna-woerter="1">Fensterplanung ganz <em class="ez-ak">eezi.</em></h1>
+          <p class="dna-text" data-dna-auftritt="still" style="--i:6"><b>Planen und Messen kosten nichts.</b> Das Aufmaßblatt kostet einmal 7,99&nbsp;€.</p>
+          <div class="ez-aktionen" data-dna-auftritt="still" style="--i:7">
+            <a class="dna-pille" href="/app/#ausmessen">Jetzt konfigurieren <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+            <a class="dna-pille dna-pille--leise" href="#so">Mehr erfahren</a>
+          </div>
+          <div class="ez-chips" data-dna-auftritt="still" style="--i:8">
+            <span class="dna-label">Dann planst du dein Fenster:</span>
+            <ul aria-label="Was du im Konfigurator wählst">
+              <li class="dna-badge dna-badge--leise">Öffnungsart</li><li class="dna-badge dna-badge--leise">Material</li><li class="dna-badge dna-badge--leise">Farbe</li><li class="dna-badge dna-badge--leise">Glas</li><li class="dna-badge dna-badge--leise">Sprossen</li><li class="dna-badge dna-badge--leise">Griff</li><li class="dna-badge dna-badge--leise">Sicherheit</li><li class="dna-badge dna-badge--leise">Rollladen</li><li class="dna-badge dna-badge--leise">Insektenschutz</li><li class="dna-badge dna-badge--leise">Fensterbank</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 2 (hell): Konfigurator als Bento. Gene: G8 zerlegen und neu ordnen, G3 die Zahl als Held, G2 leuchtender Inhalt, G7 echtes Produkt -->
+  <section class="dna-szene" data-theme="hell" id="konfigurator" aria-labelledby="konf-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <div class="ez-kopfzeile">
+        <span class="dna-label">Aus dem Konfigurator</span>
+        <h2 class="dna-titel" id="konf-titel">Jedes Fenster. Bis ins <em class="ez-ak">Detail.</em></h2>
+        <p class="dna-text">Alle Fenster: Ansichten aus dem 3-D-Modell der App. Alle Zahlen: in der App gezählt, Stand Oktober 2026.</p>
+      </div>
+      <div class="dna-bento ez-bento" data-groesse="gross">
+        <div class="dna-bento__kachel dna-bento__kachel--gross" data-dna-wechsel><figure class="ez-fenster"><div class="ez-fenster__bild"><img src="bilder/reihe/fsw.webp" alt="3-D-Modell aus der App: Faltschiebewand aus Aluminium in Anthrazitgrau" loading="eager" fetchpriority="low" decoding="async"></div><figcaption><b>Faltschiebewand</b><span>Aluminium&nbsp;·&nbsp;Anthrazitgrau</span></figcaption></figure></div>
+        <div class="dna-bento__kachel"><figure class="ez-fenster"><div class="ez-fenster__bild"><img src="bilder/reihe/hst.webp" alt="3-D-Modell aus der App: Hebe-Schiebe-Tür aus Aluminium in Tiefschwarz" loading="eager" fetchpriority="low" decoding="async"></div><figcaption><b>Hebe-Schiebe-Tür</b><span>Aluminium&nbsp;·&nbsp;Tiefschwarz</span></figcaption></figure></div>
+        <div class="dna-bento__kachel"><figure class="ez-fenster"><div class="ez-fenster__bild"><img src="bilder/reihe/rundbogen.webp" alt="3-D-Modell aus der App: Rundbogenfenster aus Holz in Eiche hell" loading="eager" fetchpriority="low" decoding="async"></div><figcaption><b>Rundbogenfenster</b><span>Holz&nbsp;·&nbsp;Eiche hell</span></figcaption></figure></div>
+        <div class="dna-bento__kachel dna-bento__kachel--breit" data-theme="dunkel"><article class="dna-leucht"><span class="dna-label">RAL-Farben</span><div class="dna-zahl dna-zahl--klein"><span class="dna-zahl__wert">219<span class="dna-zahl__einheit">Töne</span></span></div></article></div>
+        <div class="dna-bento__kachel" data-dna-wechsel><figure class="ez-fenster"><div class="ez-fenster__bild"><img src="bilder/reihe/raffstore.webp" alt="3-D-Modell aus der App: Fenster von außen mit halb heruntergefahrenem Raffstore, Anthrazitgrau" loading="eager" fetchpriority="low" decoding="async"></div><figcaption><b>Mit Raffstore</b><span>Aluminium&nbsp;·&nbsp;Anthrazitgrau</span></figcaption></figure></div>
+        <div class="dna-bento__kachel" data-theme="dunkel"><div class="dna-bento__innen"><span class="dna-label">Holz</span><div class="dna-zahl dna-zahl--klein"><span class="dna-zahl__wert">15<span class="dna-zahl__einheit">Dekore</span></span></div></div></div>
+        <div class="dna-bento__kachel"><figure class="ez-fenster"><div class="ez-fenster__bild"><img src="bilder/reihe/rund.webp" alt="3-D-Modell aus der App: rundes Fenster aus Kunststoff in Anthrazitgrau" loading="eager" fetchpriority="low" decoding="async"></div><figcaption><b>Rundfenster</b><span>Kunststoff&nbsp;·&nbsp;Anthrazitgrau</span></figcaption></figure></div>
+        <div class="dna-bento__kachel"><figure class="ez-fenster"><div class="ez-fenster__bild"><img src="bilder/reihe/balkon.webp" alt="3-D-Modell aus der App: Balkontür aus Kunststoff in Verkehrsweiß mit Quersprosse" loading="eager" fetchpriority="low" decoding="async"></div><figcaption><b>Balkontür</b><span>Kunststoff&nbsp;·&nbsp;Verkehrsweiß</span></figcaption></figure></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 3 (dunkel): So geht es und was im Aufmaß steckt. Gene: G5 Strichmarken, G9 Werte an der Sache, G7 echtes Produkt, G4 das Blatt als Objekt, G2 Leuchten als Wert -->
+  <section class="dna-szene" data-theme="dunkel" id="so" aria-labelledby="so-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <div class="ez-kopfzeile">
+        <span class="dna-label">So geht es</span>
+        <h2 class="dna-titel" id="so-titel">Vom Zollstock zum <em class="ez-ak">Aufmaß.</em></h2>
+        <p class="dna-text">Ein Fenster, vier Schritte. Ohne Konto, ohne App aus dem Store.</p>
+      </div>
+      <div class="ez-ablauf">
+        <ol class="dna-schritte ez-schritte" aria-label="Die vier Schritte">
+          <li data-zustand="aktiv"><a href="#stufe-1">Fotografieren</a> <span class="dna-schritte__zustand">01</span></li>
+          <li data-zustand="offen"><a href="#stufe-2">Messen</a> <span class="dna-schritte__zustand">02</span></li>
+          <li data-zustand="offen"><a href="#stufe-3">Konfigurieren</a> <span class="dna-schritte__zustand">03</span></li>
+          <li data-zustand="offen"><a href="#stufe-4">Aufmaßblatt</a> <span class="dna-schritte__zustand">04</span></li>
+        </ol>
+        <div class="ez-stufen">
+          <article class="ez-stufe" id="stufe-1">
+            <div class="ez-stufe__bild">
+              <img src="bilder/so/wand-innen.webp" width="1200" height="1186" alt="Foto von innen: zweiflügliges Fenster in einer hellen Wand" loading="eager" fetchpriority="low" decoding="async">
+              <div class="dna-anker" data-dna="anker">
+                <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="18" y1="18" x2="28" y2="12" style="--i:0"/></svg>
+                <span class="dna-anker__punkt" style="left:18%;top:18%;--i:0"></span>
+                <span class="dna-anker__etikett" style="left:50%;top:12%;--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Foto 1 von 2</b> <span class="dna-etikett__wert">innen</span></span></span>
+              </div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 1 von 4</span><h3 class="dna-titel-s">Fotografieren</h3><p class="dna-text">Ein Foto von innen, eins von außen. Daraus liest die App die Einbausituation für deinen Fensterbauer.</p></div>
+          </article>
+          <article class="ez-stufe ez-stufe--leucht" id="stufe-2">
+            <div class="ez-stufe__bild">
+              <svg class="ez-zeichnung" viewBox="0 0 400 300" aria-hidden="true">
+                <defs><pattern id="ez-schraffur" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="schraffur" x1="0" y1="0" x2="0" y2="7"/></pattern><mask id="ez-wandmaske"><rect x="24" y="24" width="352" height="252" fill="#fff"/><rect x="84" y="54" width="232" height="176" fill="#000"/></mask></defs>
+                <rect class="wandflaeche" x="24" y="24" width="352" height="252" rx="2" fill="url(#ez-schraffur)" mask="url(#ez-wandmaske)"/>
+                <rect class="wand" x="24" y="24" width="352" height="252" rx="2"/>
+                <rect class="glas" x="96" y="66" width="208" height="150" rx="2"/>
+                <rect class="rahmen" x="92" y="62" width="216" height="158" rx="2"/>
+                <rect class="rahmen" x="102" y="72" width="94" height="138" rx="1"/>
+                <rect class="rahmen" x="204" y="72" width="94" height="138" rx="1"/>
+                <path class="mass mass-o" d="M70 54V230M66 54h8M66 230h8"/>
+                <path class="mass mass-f" d="M92 246H308M92 242v8M308 242v8"/>
+              </svg>
+              <div class="dna-anker" data-dna="anker">
+                <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="17.5" y1="47" x2="30" y2="30" style="--i:0"/><line x1="50" y1="82" x2="58" y2="70" style="--i:1"/></svg>
+                <span class="dna-anker__punkt" style="left:17.5%;top:47%;--i:0"></span>
+                <span class="dna-anker__punkt" style="left:50%;top:82%;--i:1"></span>
+                <span class="dna-anker__etikett" style="left:50%;top:30%;--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Öffnung · Höhe</b> <span class="dna-etikett__wert">1.409&nbsp;mm</span></span></span>
+                <span class="dna-anker__etikett ez-punkt--koralle" style="left:62%;top:70%;--i:1"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Fenster · Breite</b> <span class="dna-etikett__wert">1.760&nbsp;mm</span></span></span>
+              </div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 2 von 4</span><h3 class="dna-titel-s">Messen</h3><p class="dna-text">Vier Maße mit dem Zollstock: Öffnung und Fenster, je Höhe und Breite. Die App zeigt, wo du anlegst. Vor der Fertigung misst dein Fensterbauer einmal nach.</p></div>
+          </article>
+          <article class="ez-stufe" id="stufe-3">
+            <div class="ez-stufe__bild ez-stufe__bild--hell">
+              <img src="bilder/so/modell-anthrazit.webp" width="981" height="1000" alt="3-D-Modell aus deinen Maßen: zweiflügliges Fenster in Anthrazitgrau" loading="eager" fetchpriority="low" decoding="async">
+              <div class="dna-pillen ez-wahl" aria-hidden="true"><span style="--farbe:#f1f0ea">Verkehrsweiß</span><span aria-pressed="true" style="--farbe:#383e42">Anthrazitgrau</span><span style="--farbe:#b8793e">Golden Oak</span></div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 3 von 4</span><h3 class="dna-titel-s">Konfigurieren</h3><p class="dna-text">Farbe, Sprossen, Glas, Rollladen: Du wählst, das Fenster zeigt es sofort.</p></div>
+          </article>
+          <article class="ez-stufe" id="stufe-4">
+            <div class="ez-stufe__bild ez-stufe__bild--hell">
+              <img src="bilder/blatt.webp" width="920" height="872" alt="Aufmaßblatt als PDF: Übersicht mit vier Positionen, Öffnung, Element und Bestellmaß" loading="eager" fetchpriority="low" decoding="async">
+              <div class="dna-anker" data-dna="anker">
+                <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="44" y1="72" x2="52" y2="86" style="--i:0"/></svg>
+                <span class="dna-anker__punkt" style="left:44%;top:72%;--i:0"></span>
+                <span class="dna-anker__etikett" style="left:58%;top:86%;--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Aufmaßblatt.pdf</b> <span class="dna-etikett__wert">2 Seiten</span></span></span>
+              </div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 4 von 4</span><h3 class="dna-titel-s">Aufmaßblatt</h3><p class="dna-text">Alles auf einem Blatt als PDF, das jeder Fensterbauer lesen kann. Einmal 7,99&nbsp;€ für alle Fenster.</p></div>
+          </article>
+        </div>
+      </div>
+      <div class="ez-zwei ez-aufmass" id="aufmass">
+        <div class="ez-text">
+          <span class="dna-label">Fenster für Fenster</span>
+          <h2 class="dna-titel" id="blatt-titel">Was im <em class="ez-ak">Aufmaß</em> steckt.</h2>
+          <p class="dna-text">Alles, was der Fensterbauer für ein Angebot braucht, sauber sortiert.</p>
+          <ul class="ez-liste">
+            <li><span><b>Maueröffnung</b>&nbsp;·&nbsp;Breite oben, Mitte, unten; Höhe links, Mitte, rechts; die App nimmt das kleinste Maß</span></li>
+            <li><span><b>Fensterelement</b>&nbsp;·&nbsp;Breite und Höhe des alten Fensters mit Rahmen</span></li>
+            <li><span><b>Fotos innen und außen</b>&nbsp;·&nbsp;Einbausituation, Rollladenkasten, Fensterbänke</span></li>
+            <li><span><b>Teilung und Öffnung</b>&nbsp;·&nbsp;Flügel, Dreh, Kipp, DIN links oder rechts</span></li>
+            <li><span><b>Material und Farbe</b>&nbsp;·&nbsp;Kunststoff, Holz, Alu, innen und außen</span></li>
+            <li><span><b>Glas und Sprossen</b>&nbsp;·&nbsp;2- oder 3-fach, Schallschutz, Sicherheit</span></li>
+            <li><span><b>Rollladen und Insektenschutz</b>&nbsp;·&nbsp;Antrieb, Kasten, Führung</span></li>
+            <li><span><b>Montage und Klärungsliste</b>&nbsp;·&nbsp;Fensterbänke, Anschluss, offene Wünsche</span></li>
+          </ul>
+          <a class="ez-linkzeile" href="#fensterbauer">Fensterbauer? So kommt das Blatt zu Ihnen</a>
+        </div>
+        <div class="ez-blattbuehne">
+          <div class="ez-blatt dna-anker" data-dna="anker">
+            <img src="bilder/blatt.webp" width="920" height="872" alt="Beispiel-Aufmaßblatt: Familie Weber bei Fensterbau Brandt, vier Positionen mit Öffnung, Element und Bestellmaß" loading="eager" fetchpriority="low" decoding="async">
+            <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-nur-desk" x1="50" y1="66" x2="30" y2="96" style="--i:0"/><line class="ez-nur-tel" x1="50" y1="66" x2="38" y2="84" style="--i:0"/><line x1="36" y1="34" x2="28" y2="4" style="--i:1"/><line class="ez-nur-desk" x1="78" y1="66" x2="76" y2="96" style="--i:2"/><line class="ez-nur-tel" x1="78" y1="66" x2="64" y2="96" style="--i:2"/></svg>
+            <span class="dna-anker__punkt" style="left:50%;top:66%;--i:0"></span>
+            <span class="dna-anker__punkt" style="left:36%;top:34%;--i:1"></span>
+            <span class="dna-anker__punkt" style="left:78%;top:66%;--i:2"></span>
+            <span class="dna-anker__etikett" id="blatt-oeffnung" style="--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Öffnung</b> <span class="dna-etikett__wert">kleinstes Maß</span></span></span>
+            <span class="dna-anker__etikett" style="left:28%;top:4%;--i:1"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Fotos</b> <span class="dna-etikett__wert">innen und außen</span></span></span>
+            <span class="dna-anker__etikett ez-punkt--koralle" id="blatt-bestellmass" style="--i:2"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Bestellmaß</b> <span class="dna-etikett__wert">Feinaufmaß folgt</span></span></span>
+          </div>
+          <p class="ez-klein"><b>Das Blatt ist fürs Angebot; vor der Fertigung misst dein Fensterbauer einmal nach.</b> Beispiel: Aufmaß von Familie Weber bei Fensterbau Brandt, beide erfunden.</p>
+        </div>
+      </div>
+      <p class="dna-text ez-fuss-satz">Erst ansehen? Die <a href="/app/#fuehrung">Führung</a> zeigt alles in zwei Minuten, ohne eigene Maße.</p>
+    </div>
+  </section>
+
+  <!-- Szene 4 (hell): Preis. Gene: G3 die Zahl als Held, G2 Leuchten als Wert, G1 Punktraster gegen Leuchten, G6 eine Pille -->
+  <section class="dna-szene" data-theme="hell" id="preis-szene" aria-labelledby="preis-titel">
+    <div class="ez-huelle ez-abschnitt" id="preis">
+      <div class="ez-zwei">
+        <div class="ez-text">
+          <span class="dna-label">Preis</span>
+          <h2 class="dna-titel" id="preis-titel">Messen kostet <em class="ez-ak">nichts.</em></h2>
+          <div class="ez-frei-zeile"><span class="dna-label">Kostenlos</span>
+          <ul class="ez-frei" aria-label="Kostenlos"><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Messen</li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Fotos</li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>3-D-Modell</li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Wünsche</li></ul></div>
+          <p class="dna-text">Du zahlst erst, wenn alle Maße da sind: mit Karte, Apple Pay oder Google Pay, über Stripe. Wer über den Link seines Fensterbauers misst, zahlt nichts.</p>
+          <a class="dna-pille" href="/app/#ausmessen">Jetzt ausmessen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+        </div>
+        <article class="dna-leucht ez-preis">
+          <span class="ez-raster" aria-hidden="true"></span>
+          <header class="dna-leucht__kopf"><span class="dna-label">Aufmaßblatt als PDF</span><span class="ez-badge-koralle">Einführungspreis</span></header>
+          <div class="dna-zahl"><span class="dna-zahl__wert">7,99<span class="dna-zahl__einheit">€</span></span></div>
+          <div class="ez-preis__fuss"><b>einmal fürs Aufmaßblatt, alle Fenster</b><span>bis 17.&nbsp;November 2026, danach 12,99&nbsp;€</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 5 (dunkel): Ratgeber, Fensterbauer, Fuß. Gene: G6 eine Pille (schwarz auf der hellen Karte), G1 Haarlinien, helle Karte ragt in die dunkle Szene -->
+  <section class="dna-szene" data-theme="dunkel" id="ratgeber" aria-labelledby="ratgeber-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <div class="ez-kopfzeile">
+        <span class="dna-label">Ratgeber</span>
+        <h2 class="dna-titel" id="ratgeber-titel">Vor dem <em class="ez-ak">Messen</em> lesen.</h2>
+      </div>
+      <ul class="ez-ratgeber">
+        <li><a href="/ratgeber/fenster-ausmessen/"><span><b>Fenster ausmessen</b><span>Die Maueröffnung an drei Stellen messen, das kleinste Maß zählt. Mit Tipps für den Altbau.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+        <li><a href="/ratgeber/aufmassblatt-fenster/"><span><b>Aufmaßblatt für Fenster</b><span>Was ein Aufmaß umfasst und wie das Blatt in der App als PDF entsteht.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+        <li><a href="/ratgeber/fenster-austauschen/"><span><b>Fenster austauschen</b><span>Ablauf, Kosten pro Fenster, Förderung 2026 und was ins Angebot gehört.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+      </ul>
+      <a class="ez-linkzeile" href="/ratgeber/">Alle Ratgeber</a>
+    </div>
+
+    <div class="ez-huelle">
+      <section class="ez-fb" id="fensterbauer" data-theme="hell" aria-labelledby="fb-titel">
+        <span class="ez-badge-indigo">Für Fensterbauer</span>
+        <div class="ez-fb__text">
+          <h2 class="dna-titel" id="fb-titel">Ihr eigener <em class="ez-ak">Fensterkonfigurator.</em></h2>
+          <p class="dna-text">Unter Ihrer Domain und in Ihrer Marke: Ihre Kunden planen ihre Fenster selbst, Sie bekommen jede Anfrage mit Aufmaßblatt. <b>Ihre Kunden zahlen nichts.</b></p>
+          <p class="ez-klein">Drei Pakete mit Einrichtung und festem Monatspreis, ohne Gebühr je Anfrage. Pilotphase: Im Bereich für Betriebe wird nichts berechnet; Konto und Projekte bleiben in Ihrem Browser.</p>
+        </div>
+        <div class="ez-aktionen">
+          <a class="dna-pille" href="/fuer-fensterbauer/">Pakete ansehen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+          <a class="dna-pille dna-pille--leise" href="/#fensterbauer">Zur Ansicht für Fensterbauer</a>
+        </div>
+      </section>
+
+      <footer class="ez-fuss" role="contentinfo">
+        <div class="ez-fuss__spalten">
+          <a class="ez-marke" href="/" aria-label="eeziframes, zur Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".14"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></a>
+          <div><h3 class="dna-label">Hauseigentümer</h3><ul><li><a href="/app/">App</a></li><li><a href="/app/#fuehrung">Führung</a></li><li><a href="/ratgeber/">Ratgeber</a></li></ul></div>
+          <div><h3 class="dna-label">Für Fensterbauer</h3><ul><li><a href="/fuer-fensterbauer/">Konfigurator</a></li><li><a href="/fuer-fensterbauer/#pakete">Preise</a></li><li><a href="/#wie">So funktioniert es</a></li><li><a href="/#tour">Tour</a></li></ul></div>
+          <div><h3 class="dna-label">Rechtliches</h3><ul><li><a href="/agb/">AGB</a></li><li><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a></li><li><a href="/datenschutz/">Datenschutz</a></li><li><a href="/cookies/">Cookies</a></li><li><a href="/impressum/">Impressum</a></li><li><a class="dna-pille dna-pille--leise dna-pille--klein" href="/widerruf/">Vertrag widerrufen</a></li></ul></div>
+        </div>
+        <p class="ez-fuss__pilot"><span class="ez-badge-indigo">Pilotphase</span> Im Bereich für Betriebe wird nichts berechnet, Konto und Projekte bleiben in Ihrem Browser. Echt funktionieren schon Aufmaß-Links, Code-Eingang, Nachbesserung und PDF-Export. Zum Kennenlernen gibt es die Tour.</p>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script src="dna/bundle.js"></script>
+<script src="start.js"></script>

@@ -7,3 +7,5 @@ node_modules/
 *.log
 # Originale der Fotos (scripts/fotos.py erzeugt daraus web/bilder/foto/*.webp)
 fotos-roh/
+# Vorschau-Gerüst, erzeugt aus index.html (scratchpad huelle.sh)
+docs/profis/startseite-dna-vorschau/lokal.html

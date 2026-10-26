@@ -459,7 +459,7 @@ function render() {
   else h += '<button type="button" class="ibtn" aria-label="Nachrichten" data-act="nav" data-v="notif">' + ICONS.bell + (newNotif() ? '<span class="dot"></span>' : '') + '</button>';
   h += '</header>';
   if (view.kopflos) h = h.slice(0, h.lastIndexOf('<header class="top')); // Ansicht Hauseigentümer: Kopf kommt aus dem Baustein
-  h += '<div class="scr' + (anim ? ' anim' : '') + '" data-screen="' + S.screen + '">' + view.html + '</div>' + footer(!out) + '</div>';
+  h += '<div class="scr' + (anim ? ' anim' : '') + '" data-screen="' + S.screen + '">' + view.html + '</div>' + (view.fusslos ? '' : footer(!out)) + '</div>';
   if (!out) h += '<nav class="tabs" aria-label="Bereiche">' + navItems().map((n) => { const c = navCount(n[0]); return '<button type="button" data-act="nav" data-v="' + n[0] + '" aria-current="' + (activeNav(n[0]) ? 'page' : 'false') + '">' + ICONS[n[2]] + '<span>' + esc(n[1]) + '</span>' + (c ? '<span class="cnt">' + c + '</span>' : '') + '</button>'; }).join('') + '</nav>';
   if (S.sheet && SHEETS[S.sheet.k]) h += '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="sheet-close"></button><div class="sheet" role="dialog" aria-modal="true"><span class="grip"></span><button type="button" class="xclose" aria-label="Schließen" data-act="sheet-close">×</button>' + SHEETS[S.sheet.k](S.sheet) + '</div>';
   root.innerHTML = h;
@@ -859,9 +859,9 @@ SCREENS.landing = () => {
      Konto“) ist hier weg (Bauplan E28); Preise, Anmelden und „Kostenlos starten“ bleiben in der Kopfzeile für Bestandsbetriebe. */
   if (ansicht() === 'betrieb') return { title: 'eeziframes', html: '<div class="wrap">' + (vonPdf() ? '<div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div>' : '') +
   '</div>' + einbettung() + '<div class="wrap">' + wechsel('kunde') + '</div>' }; // die Seite für Fensterbauer volle Breite, außerhalb von .wrap
-  /* Ansicht Hauseigentümer (seit 26.10.2026): der Baustein aus der Vorschau „Startseite neu gedacht“ (startseite.js, startseite.css) mit
-     eigenem Kopf; portal.js zeichnet hier weder Kopfzeile noch Einführungsband (der Preis steht im Abschnitt „Preis“), nur die Fußzeile */
-  return { title: 'eeziframes', kopflos: true, html: '<div class="startseite-halter" id="startseite"></div>' };
+  /* Ansicht Hauseigentümer (seit 26.10.2026): die Startseite nach der Design-DNA (startseite.js, startseite-dna.css, Vorlage in
+     index.html) mit eigenem Kopf und eigener Fußzeile; portal.js zeichnet hier weder Kopfzeile noch Einführungsband noch Fußzeile */
+  return { title: 'eeziframes', kopflos: true, fusslos: true, html: '<div class="startseite-halter" id="startseite"></div>' };
 };
 /* Startbild für Hauseigentümer: ein Fenster mit den vier Maßen, wie in der App */
 function b2cVisual() {
@@ -1964,6 +1964,7 @@ const ankerLink = () => {
   /* Instanz: nur der Sprung zu einem Projekt (Link „Im Dashboard öffnen“ aus der Mail) */
   if (INST) { const pi = /^#projekt-([a-z0-9]{1,40})$/i.exec(h); if (!pi) return false; ankerProjekt = pi[1]; history.replaceState(history.state, '', location.pathname + location.search); if (!projektAnkerOeffnen()) render(); return true; }
   if (h === '#tour') { history.replaceState(null, '', location.pathname + location.search); tourStart(); return true; }
+  if (h === '#wie' && !S.role) { history.replaceState(null, '', location.pathname + location.search); ansichtMerken('betrieb'); S.hist = []; S.screen = 'wie'; S.sheet = null; render(); window.scrollTo(0, 0); return true; }
   const pm = /^#projekt-([a-z0-9]{1,40})$/i.exec(h);
   if (pm) { ankerProjekt = pm[1]; history.replaceState(history.state, '', location.pathname + location.search); if (!projektAnkerOeffnen()) render(); return true; }
   const a = h === '#fensterbauer' || h === '#betriebe' ? 'betrieb' : h === '#hauseigentuemer' ? 'kunde' : '';

@@ -1,13 +1,16 @@
 # eeziframes
 
 - Sprache: Deutsch, in Antworten, Commits und Doku.
-- Bevor etwas Sichtbares gebaut oder geändert wird (Website, Verkaufsseite für Fensterbauer, Startseite, App, Bilder, Animationen), den
-  Skill `premium-gestaltung` laden (.claude/skills/premium-gestaltung/SKILL.md). Er enthält die Vorstellungen und Mindestanforderungen des
-  Inhabers.
-- Für jeden Gestaltungswunsch des Inhabers (ein Bereich der App oder Website soll besser werden): erst `ultimativ-webdesign`
-  (.claude/skills/ultimativ-webdesign/SKILL.md, das vereinte Regelwerk aus webdesign-wow, Emil Kowalski, impeccable und GSAP) für
-  Befund, Richtung und Vorschau, dann `profis` (.claude/skills/profis/SKILL.md, das Gremium aus Gestaltern, Kunden und Fensterbauern)
-  für die Entscheidung je Änderung. Protokolle unter docs/profis/.
+- Gestaltung (Website, Startseite, Verkaufsseite, App, Bilder, Animationen) nur nach dem Skill `design-dna` (seit 26.10.2026, Wunsch des
+  Inhabers): Gene, Formensprache, Bausteine und Musterseite von dort, Farben nach seiner jeweils genannten Palette. Die Skills
+  `premium-gestaltung` und `ultimativ-webdesign` nicht mehr für die Gestaltung laden; sie gehören zur früheren Designrichtung und
+  kollidieren mit der DNA. Technik des Projekts (CSP, eigene Schriften in web/vendor, Prüfsuite) bleibt.
+  Dazu immer der Begleit-Skill `design-dna-eeziframes` (.claude/skills/design-dna-eeziframes/SKILL.md): Palette „Task-App dunkel“ als
+  tokens.css, Ergänzungen G14/G15, Entscheidungen des Inhabers, Rezept je Seite, Messwerkzeuge; Prompt-Vorlage mit Anhängsel und
+  den drei Richtungen in prompt.md, Master-Anhängsel für jeden Auftrag in master-anhaengsel.md. Untergrenze der Qualität: die Startseite vom 26.10.2026 (docs/profis/startseite-dna-vorschau/), nach oben offen.
+- `profis` (.claude/skills/profis/SKILL.md, das Gremium aus Gestaltern, Kunden und Fensterbauern) nur kurz: eine Runde, etwa zehn
+  Minuten je Seite, die drei Sprecher-Zusammenfassungen und die Änderungstabelle, keine zweite und dritte Runde. Protokolle unter
+  docs/profis/.
 - Bei Animationen, Übergängen und Bedienelementen zusätzlich den Skill `emil-design-eng` laden
   (.claude/skills/emil-design-eng/SKILL.md, von Emil Kowalski, MIT): Easing, Dauer, Druckfeedback, was nicht animiert wird.
   Die Markenregeln gehen vor.
@@ -16,4 +19,5 @@
   der App, auch wenn der Skill andere Schriften empfiehlt.
 - JavaScript-Animationen mit GSAP: Skills `gsap-core`, `gsap-timeline`, `gsap-scrolltrigger`, `gsap-plugins`, `gsap-utils`,
   `gsap-performance` (GreenSock, MIT). GSAP liegt noch nicht im Projekt; bei Einsatz nach web/vendor/ mit Lizenzdatei.
-- Gestaltungsregeln: docs/GESTALTUNG.md. Arbeiten auf dem Arbeitszweig einchecken; online (main) nur auf ausdrücklichen Wunsch.
+- Gestaltungsregeln für die App: docs/GESTALTUNG.md (für neue Gestaltung gilt `design-dna` vor). Arbeiten auf dem Arbeitszweig einchecken;
+  online (main) nur auf ausdrücklichen Wunsch.
