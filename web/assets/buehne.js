@@ -174,7 +174,7 @@ window.Buehne3D = (function () {
   const FS = (schnitt) => '#version 300 es\nprecision highp float;precision highp int;\n' + (schnitt ? '#define SCHNITT 1\n' : '') + 'in vec2 vP;in vec3 vW;' +
     'uniform vec2 uWH;uniform vec4 uBase;uniform int uNL;uniform vec4 uLA[5];uniform vec4 uLB[5];uniform vec4 uLC[5];uniform vec4 uLM[5];uniform vec4 uSC[48];uniform float uSP[48];' +
     'uniform vec4 uIn;uniform vec4 uFx;uniform float uOp;uniform vec3 uN;uniform vec3 uEye;uniform vec4 uLi;uniform float uSide;' +
-    'uniform vec3 uL1;uniform vec3 uC1;uniform vec3 uL2;uniform vec3 uC2;uniform vec3 uSky;uniform vec3 uGnd;uniform vec4 uAo[4];uniform vec2 uAoR;uniform vec4 uTint;uniform vec3 uN2;uniform vec2 uFade;uniform vec4 uArt;uniform vec3 uArtC;uniform vec4 uBand;uniform vec4 uBev;uniform vec4 uBevI;uniform vec3 uTx;uniform vec3 uTy;uniform float uNA;uniform vec2 uArtO;uniform vec4 uRelief;' +
+    'uniform vec3 uL1;uniform vec3 uC1;uniform vec3 uL2;uniform vec3 uC2;uniform vec3 uSky;uniform vec3 uGnd;uniform vec4 uAo[4];uniform vec2 uAoR;uniform vec4 uTint;uniform vec3 uN2;uniform vec2 uFade;uniform vec4 uArt;uniform vec3 uArtC;uniform vec4 uBand;uniform vec4 uBev;uniform vec4 uBevI;uniform vec3 uTx;uniform vec3 uTy;uniform float uNA;uniform vec2 uArtO;uniform vec4 uRelief;uniform vec4 uPr;uniform vec3 uPrC;' +
     'vec2 gFw;' +
     /* Gerundete Kanten: am Rand der Fläche (und am inneren Rechteck eines Rahmens) neigt sich die Normale nach außen, so fangen Profile Licht */
     'vec3 kante(vec2 P){vec3 t=vec3(0.0);if(uBev.x<=0.0)return t;float fw=max(length(gFw),1e-4);float w=max(uBev.x,1.5*fw);float st=uBev.y*smoothstep(0.5*fw,2.0*fw,uBev.x);' +
@@ -198,7 +198,7 @@ window.Buehne3D = (function () {
     'vec2 q=vec2(x-s*L,yy-r*C);vec2 dq=min(q,vec2(L,C)-q);vec2 aq=max(gFw*0.7,vec2(1e-4));' +
     /* Fuge je Achse: geglättetes Profil, bei Fugen schmaler als ein Bildpunkt nach ihrer Fläche gewichtet (sonst zu kräftig und flimmernd) */
     'vec2 ab=vec2(1.0)-smoothstep(vec2(0.5*j)-aq,vec2(0.5*j)+aq,dq);vec2 dk=clamp(vec2(j)/(2.0*aq),0.0,1.0);float m=max(ab.x*dk.x,ab.y*dk.y);' +
-    'float v=hash(vec2(s,r)*1.37+0.5),v2=hash(vec2(s,r)*2.71+3.3);vec3 ton=mix(vec3(0.95,1.0,1.05),vec3(1.05,0.99,0.93),v2)*(v2>0.94?0.74:1.0);' +
+    'float v=hash(vec2(s,r)*1.37+0.5),v2=hash(vec2(s,r)*2.71+3.3);vec3 ton=mix(vec3(0.95,1.0,1.05),vec3(1.05,0.99,0.93),v2)*(v2>0.965?0.8:1.0);' +
     'vec3 st=b*ton*mix(0.82,1.12,v)*(0.93+0.12*rausch(P/(9.0*k)));float e=min(dq.x,dq.y)-0.5*j;st*=mix(0.84,1.0,smoothstep(0.0,6.0*k,e));' +
     'float hell=smoothstep(0.55,0.72,(b.r+b.g+b.b)/3.0);vec3 fuge=mix(vec3(0.74,0.7,0.65),b*0.84,hell);vec3 mo=fuge*(0.92+0.1*rausch(P/(2.5*k)));vec3 c=mix(st,mo,m);vec3 mittel=mix(b*0.97,fuge,0.2);return mix(mittel,c,sicht(P,C));}' +
     /* Naturstein: feste Korngröße; Körner feiner als ein Bildpunkt gehen in einen etwas dunkleren Mittelton über, statt bei jeder
@@ -217,6 +217,26 @@ window.Buehne3D = (function () {
     'if(p.x<0.0||p.x>1.0||p.y<0.0||p.y>1.0||p.z>1.0)return 1.0;vec2 t=uSh.y/vec2(textureSize(uSM,0));float s=0.0;for(int i=0;i<12;i++)s+=textureLod(uSM,vec3(p.xy+PD[i]*t,p.z-0.0015),0.0);' +
     'float rd=min(min(p.x,1.0-p.x),min(p.y,1.0-p.y));return mix(1.0,s/12.0,smoothstep(0.0,0.1,rd));}' +
     'out vec4 o;' +
+    /* Profilstufen (uPr.x: 1 Flügel innen, 2 Flügel außen, 3 Blendrahmen innen, 4 Blendrahmen außen, 5 Glas, 6 Pfosten innen; uPr.y px je mm, uPr.z Stärke):
+       Dichtung, Glasleiste mit Fase, Fuge, Schattenfuge am Überschlag, Schlagschatten des Flügels auf dem Blendrahmen, Abstandhalter im Glasrand.
+       Linien unter einem Pixel werden über die Kantenglättung (aa) schwächer statt zu flimmern */
+    'vec3 gPN=vec3(0.0);float gPG=0.0;' +
+    'float bnd(float d,float a,float b,float aa){return smoothstep(a-aa,a+aa,d)*(1.0-smoothstep(b-aa,b+aa,d));}' +
+    'float schlag(float di,vec2 o,vec3 L,float s,float aa){vec2 l=vec2(dot(L,uTx),dot(L,uTy));float q=-dot(o,normalize(l+1e-5))*length(l);if(q<=0.0)return 0.0;float w=8.0*s*q/max(abs(dot(L,cross(uTx,uTy))),0.25);return 0.32*(1.0-smoothstep(0.0,max(w,aa),di));}' +
+    'vec4 profil(vec2 P,vec4 c){int m=int(uPr.x+0.5);if(m<=0)return c;float s=uPr.y;float aa=max(length(gFw)*0.7,1e-4);' +
+    'if(m==5){float d=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));float w=11.0*s;float k=1.0-smoothstep(w-aa,w+aa,d);float kd=1.0-smoothstep(2.8*s-aa,2.8*s+aa,d);float lk=bnd(d,w-1.4*s,w,aa);vec3 f=mix(uPrC*(1.0+0.6*lk),vec3(0.085,0.09,0.095),kd);vec4 a=vec4(f,1.0)*k*uPr.z;gPG=k;return a+c*(1.0-a.a);}' +
+    'if(m==6){float dl=P.x,dr=uWH.x-P.x;float di=min(dl,dr);vec2 o=dl<dr?vec2(1.0,0.0):vec2(-1.0,0.0);float f=1.0-0.5*(1.0-smoothstep(1.2*s-aa,1.2*s+aa,di));f*=1.0-schlag(di,o,uL1,s,aa);c.rgb*=f;return c;}' +
+    'vec4 r=uBevI;if(r.z<=r.x)return c;float dx=max(r.x-P.x,P.x-r.z),dy=max(r.y-P.y,P.y-r.w);float di=max(dx,dy);if(di<0.0)return c;' +
+    'float da=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));vec2 e=dx>dy?vec2(P.x<r.x?1.0:-1.0,0.0):vec2(0.0,P.y<r.y?1.0:-1.0);vec3 E=e.x*uTx+e.y*uTy;vec3 rgb=c.rgb;' +
+    'const vec3 DICHT=vec3(0.085,0.09,0.095);' +
+    'if(m==1){float gz=1.0-smoothstep(19.0*s-aa,19.0*s+aa,di);gPN+=E*0.5*gz*(1.0-smoothstep(2.0*s,19.0*s,di));rgb*=1.0-0.42*bnd(di,19.0*s,20.2*s,aa);' +
+    'rgb*=1.0-0.45*(1.0-smoothstep(1.0*s-aa,1.0*s+aa,da));}' +
+    'else if(m==2){gPN+=E*0.38*(1.0-smoothstep(13.0*s-aa,13.0*s+aa,di));rgb*=1.0-0.3*bnd(di,13.0*s,13.8*s,aa);rgb*=1.0-0.4*(1.0-smoothstep(1.0*s-aa,1.0*s+aa,da));}' +
+    'else if(m==3){rgb*=1.0-0.5*(1.0-smoothstep(1.3*s-aa,1.3*s+aa,di));rgb*=1.0-schlag(di,-e,uL1,s,aa);}' +
+    'else if(m==4){float kd=1.0-smoothstep(1.6*s-aa,1.6*s+aa,di);rgb=mix(rgb,DICHT*c.a,kd);rgb*=1.0-schlag(di,-e,uL2,s,aa);}' +
+    'c.rgb=rgb;return c;}' +
+    /* weiche Schulter: Weiß bleibt unter 242, nichts brennt aus (designrichtung 3.4) */
+    'vec3 tm(vec3 x){float l=dot(x,vec3(0.2126,0.7152,0.0722));if(l<=0.88)return x;float m=0.88+0.075*(1.0-exp(-(l-0.88)/0.075));return min(x*(m/l),vec3(0.985));}' +
     'vec4 verlauf(int s0,int n,float t,float aa){vec4 c=uSC[s0];for(int i=1;i<16;i++){if(i>=n)break;float a=uSP[s0+i-1],b=uSP[s0+i];float w=max(b-a,aa);float lo=(a+b)*0.5-w*0.5;c=mix(c,uSC[s0+i],clamp((t-lo)/w,0.0,1.0));}return c;}' +
     'vec4 lage(int i,vec2 P){vec4 A=uLA[i],B=uLB[i],C=uLC[i];int fl=int(A.x+0.5);bool rad=(fl&1)==1,rep=(fl&2)==2,einmal=(fl&4)==4;int s0=int(A.y+0.5),n=int(A.z+0.5);' +
     'vec2 Q=P-C.xy;vec2 box=uWH;if(C.z>0.0){box=C.zw;if(einmal){if(Q.x<0.0||Q.y<0.0||Q.x>box.x||Q.y>box.y)return vec4(0.0);}else Q=mod(Q,box);}' +
@@ -234,19 +254,24 @@ window.Buehne3D = (function () {
     'float aaP=max(length(gFw)*0.7,1e-3);' +
     'if(uFx.x>0.0){float d=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));vec4 k=uIn*clamp(uFx.x/max(2.0*aaP,1e-3),0.0,1.0)*(1.0-smoothstep(uFx.x-aaP,uFx.x+aaP,d));c=k+c*(1.0-k.a);}' +
     'if(uFx.y>0.0){vec2 h=uWH*0.5;vec2 q=abs(P-h)-(h-uFx.y);float sd=length(max(q,0.0))+min(max(q.x,q.y),0.0)-uFx.y;c*=1.0-smoothstep(-aaP,aaP,sd);}' +
-    'c=uTint*c.a+c*(1.0-uTint.a);' +
+    'c=profil(P,c);c=uTint*c.a+c*(1.0-uTint.a);' +
     /* Verschattung: je Kante ein Band (uAo, bis vier), oder (uAoR.y) rund um ein Rechteck (uAo[0] = Loch, uAo[1].x = Stärke): weich auch über die
        Ecken, keine Linie in Verlängerung der Lochkante (Kontaktschatten um die Maueröffnung und die Rahmenöffnung) */
-    'float ao=1.0;if(uAoR.y>0.5){vec4 rb=uAo[0];vec2 ce=(rb.xy+rb.zw)*0.5,hs=(rb.zw-rb.xy)*0.5;vec2 qq=abs(P-ce)-hs;float dd=length(max(qq,0.0));float f=1.0-clamp(dd/uAoR.x,0.0,1.0);ao*=1.0-uAo[1].x*f*f;}' +
+    'float ao=1.0;if(uAoR.y>0.5){vec4 rb=uAo[0];vec2 ce=(rb.xy+rb.zw)*0.5,hs=(rb.zw-rb.xy)*0.5;vec2 qq=abs(P-ce)-hs;float dd=length(max(qq,0.0));float f=1.0-clamp(dd/uAoR.x,0.0,1.0);ao*=1.0-uAo[1].x*f*f;if(uAo[1].y>0.0){float de=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));float g=1.0-clamp(de/uAo[1].z,0.0,1.0);ao*=1.0-uAo[1].y*g*g;}}' +
     'else{for(int i=0;i<4;i++){vec4 a=uAo[i];if(a.w<=0.0)continue;float q=a.x<0.5?P.x:P.y;float d=(q-a.y)*a.z;if(d<-1.0)continue;d=max(d,0.0);float r=uAoR.x;float f=1.0-clamp(d/r,0.0,1.0);ao*=1.0-a.w*f*f;}}' +
     'if(uFade.y>0.0)c*=1.0-smoothstep(uFade.x,uFade.y,P.y);' +
     'c*=uOp;\n#ifdef SCHNITT\nif(uFx.z>0.0){if(c.a<uFx.z)discard;}\n#endif\n' +
     /* Relief (uRelief: Teilung px, Neigung, Versatz): je Teilung eine gewölbte Lamelle des Rollladenpanzers, von außen (Rückseite der Fläche) konvex, oben zum Licht geneigt, unten weg, von innen konkav */
-    'if(uLi.x>0.5){if(fs<0.0)N=-N;N=normalize(N+kante(vP));if(uRelief.x>0.0){float ph=fract((vP.y+uRelief.z)/uRelief.x);N=normalize(N+uTy*uRelief.y*sicht(vP,uRelief.x)*(2.0*ph-1.0)*(fs<0.0?1.0:-1.0));}float d1=max(dot(N,uL1),0.0),d2=max(dot(N,uL2),0.0);vec3 amb=mix(uGnd,uSky,0.5-0.5*N.y);' +
+    'if(uLi.x>0.5){if(fs<0.0)N=-N;N=normalize(N+kante(vP)+gPN);if(uRelief.x>0.0){float ph=fract((vP.y+uRelief.z)/uRelief.x);N=normalize(N+uTy*uRelief.y*sicht(vP,uRelief.x)*(2.0*ph-1.0)*(fs<0.0?1.0:-1.0));}float d1=max(dot(N,uL1),0.0),d2=max(dot(N,uL2),0.0);vec3 amb=mix(uGnd,uSky,0.5-0.5*N.y);' +
     'if(uSh.x>1.5){if(d2>0.0)d2*=schatten(vW,N,uL2);}else if(d1>0.0)d1*=schatten(vW,N,uL1);' +
     'vec3 li=(amb+uC1*d1+uC2*d2)*ao;vec3 rgb=c.rgb*li;' +
     'if(uLi.y>0.0){vec3 H1=normalize(uL1+V),H2=normalize(uL2+V);float sp=pow(max(dot(N,H1),0.0),uLi.z)*step(0.0,dot(N,uL1))+pow(max(dot(N,H2),0.0),uLi.z)*step(0.0,dot(N,uL2));rgb+=vec3(uLi.y*sp)*c.a;}' +
-    'if(uLi.w>0.5){float f3=clamp(1.0-abs(fs),0.0,1.0),fr=f3*f3*f3;float sky=0.5-0.5*reflect(-V,N).y;vec3 env=mix(vec3(0.78,0.8,0.82),vec3(0.86,0.93,1.0),clamp(sky,0.0,1.0));float k=0.05+0.5*fr;rgb=rgb*(1.0-k)+env*k*max(c.a,0.4);c.a=max(c.a,k*0.9);}' +
+    'if(uLi.w>0.5){float cf=clamp(abs(fs),0.0,1.0),F=0.06+0.94*pow(1.0-cf,5.0);vec3 R=reflect(-V,N);float up=-R.y+0.9*(0.42-vP.y/max(uWH.y,1.0));' +
+    'vec3 sky=mix(vec3(0.9,0.93,0.96),vec3(0.55,0.67,0.84),smoothstep(0.0,0.6,up)),gnd=mix(vec3(0.56,0.56,0.53),vec3(0.3,0.29,0.27),smoothstep(0.0,0.3,-up));vec3 env=mix(gnd,sky,smoothstep(-0.1,0.12,up));' +
+    /* von außen: dahinter der dunkle Raum, das Glas spiegelt den Himmel; von innen bleibt der Blick hinaus hell */
+    'if(fs<0.0){float da=max(c.a,0.94);rgb=mix(rgb,vec3(0.11,0.12,0.13)*da,0.72);c.a=da;F=max(F,0.2);}' +
+    'else{rgb=mix(rgb,c.rgb*0.98,0.75*(1.0-gPG));}rgb=rgb*(1.0-F)+env*F*c.a;}' +
+    'if(c.a>0.0)rgb=tm(rgb/c.a)*c.a;' +
     'c.rgb=rgb;}else c.rgb*=ao;' +
     'o=c;}';
 
@@ -256,7 +281,7 @@ window.Buehne3D = (function () {
     const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
     const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs || VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs || FS(true))); gl.bindAttribLocation(p, 0, 'aP'); gl.linkProgram(p);
     if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-    const u = {}; (namen || ['uM', 'uVP', 'uDz', 'uWH', 'uBase', 'uNL', 'uLA', 'uLB', 'uLC', 'uLM', 'uSC', 'uSP', 'uIn', 'uFx', 'uOp', 'uN', 'uEye', 'uLi', 'uSide', 'uL1', 'uC1', 'uL2', 'uC2', 'uSky', 'uGnd', 'uAo', 'uAoR', 'uTint', 'uN2', 'uSM', 'uLVP', 'uSh', 'uFade', 'uArt', 'uArtC', 'uBand', 'uBev', 'uBevI', 'uTx', 'uTy', 'uNA', 'uArtO', 'uRelief']).forEach((k) => { u[k] = gl.getUniformLocation(p, k); });
+    const u = {}; (namen || ['uM', 'uVP', 'uDz', 'uWH', 'uBase', 'uNL', 'uLA', 'uLB', 'uLC', 'uLM', 'uSC', 'uSP', 'uIn', 'uFx', 'uOp', 'uN', 'uEye', 'uLi', 'uSide', 'uL1', 'uC1', 'uL2', 'uC2', 'uSky', 'uGnd', 'uAo', 'uAoR', 'uTint', 'uN2', 'uSM', 'uLVP', 'uSh', 'uFade', 'uArt', 'uArtC', 'uBand', 'uBev', 'uBevI', 'uTx', 'uTy', 'uNA', 'uArtO', 'uRelief', 'uPr', 'uPrC']).forEach((k) => { u[k] = gl.getUniformLocation(p, k); });
     return { p: p, u: u };
   }
 
@@ -698,7 +723,7 @@ window.Buehne3D = (function () {
   /* Putz als Grundfarbe; Licht und Verschattung machen die Tiefe (das CSS-Modell malte sie in Verläufe) */
   const PUTZ = 'linear-gradient(180deg, #ece7df, #e3ddd3)';
   const KLASSE = {
-    'w3d-wall-in': 'radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, .06) 100%), linear-gradient(180deg, #ece7df, #e2dcd2)',
+    'w3d-wall-in': 'radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, .06) 100%), linear-gradient(180deg, #e7dfd2, #ddd4c6)',
     'w3d-rev': PUTZ, 'w3d-rs': PUTZ,
     'w3d-fuge': 'linear-gradient(180deg, #8e8578, #7f7669)',
     'w3d-glass': 'linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .42) 34%, transparent 50%), linear-gradient(135deg, rgba(205, 225, 245, .62) 0%, rgba(160, 196, 230, .52) 48%, rgba(226, 238, 250, .68) 100%)',
@@ -734,7 +759,7 @@ window.Buehne3D = (function () {
     'w3d-lam': [1, 'rgba(0, 0, 0, .22)'], 'w3d-fs': [1, 'rgba(0, 0, 0, .24)'], 'w3d-aufzug': [0.5, 'rgba(0, 0, 0, .25)'], 'w3d-ros': [1, 'rgba(0, 0, 0, .3)'], 'w3d-olr': [0.5, 'rgba(0, 0, 0, .3)'], 'w3d-olh': [1, 'rgba(0, 0, 0, .3)'],
     'w3d-an-wickler': [1, 'rgba(0, 0, 0, .22)'], 'w3d-an-gurt': [0.5, 'rgba(0, 0, 0, .15)'], 'w3d-an-stange': [0.5, 'rgba(0, 0, 0, .35)'], 'w3d-an-kurbel': [0.5, 'rgba(0, 0, 0, .35)'], 'w3d-an-taster': [1, 'rgba(0, 0, 0, .25)'], 'w3d-an-wippe': [1, 'rgba(0, 0, 0, .18)'], 'w3d-an-funk': [0.8, 'rgba(255, 255, 255, 1)'],
     'w3d-hknopf': [1, 'rgba(0, 0, 0, .4)'], 'w3d-hschloss': [1, 'rgba(0, 0, 0, .4)'], 'w3d-stopfen': [0.5, 'rgba(0, 0, 0, .3)'] };
-  const GLANZ = { 'w3d-solar': [0.45, 60], 'w3d-band': [0.26, 24], alu: [0.22, 22], granit: [0.14, 30], 'w3d-glass': [0.55, 70], 'w3d-scheibe': [0.25, 70], 'w3d-handle': [0.32, 26], 'w3d-griffa': [0.32, 26], 'w3d-pilz': [0.4, 30], 'schloss': [0.4, 30], 'w3d-schw': [0.18, 18], 'w3d-schw-t': [0.18, 18], 'w3d-sill': [0.08, 16], 'w3d-roll': [0.1, 16], 'w3d-frame': [0.05, 12], 'w3d-side': [0.04, 12],
+  const GLANZ = { 'w3d-solar': [0.45, 60], 'w3d-band': [0.26, 24], alu: [0.22, 22], granit: [0.14, 30], 'w3d-glass': [0.55, 70], 'w3d-scheibe': [0.25, 70], 'w3d-handle': [0.32, 26], 'w3d-griffa': [0.32, 26], 'w3d-pilz': [0.4, 30], 'schloss': [0.4, 30], 'w3d-schw': [0.18, 18], 'w3d-schw-t': [0.18, 18], 'w3d-sill': [0.08, 16], 'w3d-roll': [0.1, 16], 'w3d-frame': [0.16, 40], 'w3d-side': [0.1, 30],
     /* Sonnenschutz: Aluminium der Lamellen, Schienen und Endschiene glänzt deutlicher, der Panzer matt */
     'w3d-lam': [0.3, 26], 'w3d-fs': [0.2, 22], 'w3d-behang-u': [0.2, 20], 'w3d-behang': [0.1, 16], 'w3d-aufzug': [0.03, 8], 'w3d-ros': [0.32, 26], 'w3d-olr': [0.3, 24], 'w3d-olh': [0.32, 26], 'w3d-an-stange': [0.3, 24], 'w3d-an-kurbel': [0.3, 24],
     'w3d-an-wickler': [0.08, 14], 'w3d-an-taster': [0.08, 14], 'w3d-an-wippe': [0.1, 16], 'w3d-hknopf': [0.4, 30], 'w3d-hschloss': [0.4, 30], 'w3d-stopfen': [0.1, 14] };
@@ -750,7 +775,7 @@ window.Buehne3D = (function () {
   const STOFF = new Map();
   /* Oberflächen: Code im Shader, Stärke; Holz, Klinker und Stein ersetzen das CSS-Muster durch eine eigene Struktur in dessen Mittelfarbe */
   /* alub: gebürstetes Aluminium auf dem eigenen Verlauf der Fläche (Lamellen, Schienen, Kasten des Sonnenschutzes), alu ersetzt den Verlauf durch die Mittelfarbe */
-  const ART = { putz: [1, 0.07], putzfein: [1, 0.045], klinker: [2, 1], granit: [3, 1], holz: [4, 1], alu: [5, 1], holzfassade: [6, 1], alub: [7, 1] };
+  const ART = { putz: [1, 0.07], putzwand: [1, 0.07], putzfein: [1, 0.045], klinker: [2, 1], granit: [3, 1], holz: [4, 1], alu: [5, 1], holzfassade: [6, 1], alub: [7, 1] };
   function mittelfarbe(b) {
     if (!b.schichten.length) return b.basis.slice(0, 3);
     const L = b.schichten[b.schichten.length - 1], f = [0, 0, 0]; L.stops.forEach((x) => { for (let q = 0; q < 3; q++) f[q] += x.c[q] / L.stops.length; });
@@ -797,7 +822,7 @@ window.Buehne3D = (function () {
     else if (el._bgc) bg = el._bgc;
     else { const k = ERSTE(el, KLASSEN_BG); bg = k ? (raum && RAUM[k]) || KLASSE[k] : 'transparent'; }
     const role = el.getAttribute('data-r') || '';
-    const art = el._art || (role === 'wall-in' || ist('w3d-rev') ? (ist('w3d-rs') && el._bgc === 'transparent' ? '' : 'putzfein') : '');
+    const art = el._art || (role === 'wall-in' ? 'putzwand' : ist('w3d-rev') ? (ist('w3d-rs') && el._bgc === 'transparent' ? '' : 'putzfein') : '');
     const kk = ERSTE(el, KLASSEN_KANTE), st = stoff(bg, kk, ERSTE(el, KLASSEN_GLANZ), art);
     const pf = kk === 'w3d-frame' ? stage._profil : '', of = kk === 'w3d-frame' || kk === 'w3d-side' ? el._oberfl || stage._oberfl : '';
     const ac = el._artC || '';
@@ -900,7 +925,7 @@ window.Buehne3D = (function () {
       const lage = role === 'floor-out' || role === 'wall-out' || role.indexOf('sa-') === 0 ? 2 : role === 'floor-in' || role.indexOf('sill-') === 0 ? 1 : 0;
       /* seite: nur von vorn sichtbar wie backface-visibility: hidden (Blende des Aufsatzkastens nur von außen) */
       const vorn = role === 'floor-in' || el.style.backfaceVisibility === 'hidden';
-      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 3, f.H * 15] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand || c.contains('w3d-rev') || c.contains('w3d-rs'), vor: vor, nachgeben: /^(el-side-|sfe-)/.test(role), ao: ao && ao.k, aoR: ao && ao.r, aoRect: !!(ao && ao.rect), relief: el._relief || null };
+      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 3, f.H * 15] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand ? 1 : c.contains('w3d-rev') || c.contains('w3d-rs') ? 2 : 0, vor: vor, nachgeben: /^(el-side-|sfe-)/.test(role), ao: ao && ao.k, aoR: ao && ao.r, aoRect: !!(ao && ao.rect), relief: el._relief || null };
       /* Lamellen mit C-Profil: die Normale neigt sich über die Höhe der Lamelle (_bieg Grad je Kante), so fängt die Wölbung Licht */
       if (el._bieg) { const nb = (g) => { const m = mul(Mf, RX(g)), a = ap(m, 0, 0, 1), z0 = ap(m, 0, 0, 0); return norm([a[0] - z0[0], a[1] - z0[1], a[2] - z0[2]]); }; it.n1 = nb(-el._bieg); it.n2 = nb(el._bieg); it.nAchse = 1; }
       items.push(it);
@@ -1054,7 +1079,7 @@ window.Buehne3D = (function () {
     /* Kontaktschatten (eine Stufe mehr Tiefe): der Falz des Flügels auf dem Glas (oben am stärksten), das Flügelprofil auf dem Blendrahmen
        rund um dessen Öffnung, die Laibung auf der Wand rund um die Maueröffnung; alles weich, nichts hyperrealistisch */
     else if (role.indexOf('glass-') === 0 || role === 'ol-glass' || role === 'ul-glass') { k = [[0, 0, 1, 0.26], [0, f.W, -1, 0.26], [1, 0, 1, 0.36], [1, f.H, -1, 0.16]]; rr = Math.max(3, 34 * s); }
-    else if (loch && (role === 'el-front' || role === 'el-back' || role === 'ol-front' || role === 'ol-back' || role === 'ul-front' || role === 'ul-back')) { k = [[loch[0], loch[1], loch[2], loch[3]], [0.16, 0, 0, 0]]; rr = Math.max(2, 24 * s); rect = true; }
+    else if (loch && (role === 'el-front' || role === 'el-back' || role === 'ol-front' || role === 'ol-back' || role === 'ul-front' || role === 'ul-back')) { k = [[loch[0], loch[1], loch[2], loch[3]], [0.16, /^el-/.test(role) ? 0.3 : 0, Math.max(2.5, 40 * s), 0]]; rr = Math.max(2, 24 * s); rect = true; }
     else if (loch && (role === 'wall-in' || role === 'wall-out')) { k = [[loch[0], loch[1], loch[2], loch[3]], [0.13, 0, 0, 0]]; rr = Math.max(4, 90 * s); rect = true; }
     return k ? { k: k, r: rr, rect: rect } : null;
   }
@@ -1064,7 +1089,7 @@ window.Buehne3D = (function () {
   /* Sonne innen von rechts oben vorn, außen von links oben; eine dem Betrachter zugewandte Wand kommt auf ihre Farbe,
      Fensterbänke etwas heller, der Sturz im Schatten, die Laibungen je Seite verschieden */
   const L1 = norm([0.45, -0.5, 0.74]), L2 = norm([-0.42, -0.52, -0.74]);
-  const C1 = [0.33, 0.32, 0.3], C2 = [0.33, 0.32, 0.3], SKY = [0.84, 0.855, 0.885], GND = [0.72, 0.7, 0.68];
+  const C1 = [0.6, 0.58, 0.55], C2 = [0.6, 0.58, 0.55], SKY = [0.57, 0.6, 0.66], GND = [0.52, 0.48, 0.44];
 
   /* ---------- Zeichnen ---------- */
   /* Kamera wie .w3d-cam in app.css: Verschiebung (--panx, --pany; Zoom) vor der Drehung (--rx, --ry). Sie gleitet wie dort: 0,9 s,
@@ -1136,6 +1161,7 @@ window.Buehne3D = (function () {
     gl.clearColor(0, 0, 0, 0); gl.clearDepth(1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     const pr = L.pr, u = pr.u; gl.bindVertexArray(L.vao);
     MASSSTAB = stage._v && stage._v.s ? stage._v.s : 0.2;
+    { const f = farbe(stage._ah || '#4d545c'); AH_FARBE = f ? f.slice(0, 3) : [0.3, 0.32, 0.34]; }
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, L.sm);
     gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.disable(gl.CULL_FACE);
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -1150,10 +1176,11 @@ window.Buehne3D = (function () {
     [false, true].forEach((cut) => {
       const pp = cut ? L.pr : L.pr0, uu = pp.u;
       gl.useProgram(pp.p); global(gl, uu, B, VP, eye, L, seite);
-      /* Versätze nur in festen Einheiten, nicht mit der Neigung der Fläche: sonst entscheidet der Blickwinkel, wer gewinnt (schräg wurde die
-         Laibung weit nach hinten geschoben, die Rahmenseiten schienen durch, und der Flügel schnitt den Griffkörper ab). Die Rahmenseiten
-         (el-side, nur durch die Fuge zu sehen) und die Flügelkanten geben bei gleicher Tiefe nach */
-      offen.forEach((it) => { if (it.schnitt !== cut) return; if (it.hinten) gl.polygonOffset(0, 4); else if (it.vor) gl.polygonOffset(0, -2 * it.vor); else if (it.nachgeben) gl.polygonOffset(1, 2); else gl.polygonOffset(0, 0); malen(gl, uu, it, 0.5); });
+      /* Versätze in festen Einheiten (Wand, Teile in der Rahmenöffnung): mit einem Faktor auf die Neigung entschied sonst der Blickwinkel,
+         wer gewinnt (der Flügel schnitt den Griffkörper ab, die Wand schob sich hinter die Kastenblende). Nur die Laibung, die man von oben
+         fast genau von der Kante sieht, gibt mit der Neigung nach, sonst blitzt ihre Vorderkante durch die Wand; die Rahmenseiten (el-side,
+         nur durch die Fuge zu sehen) und die Flügelkanten geben ebenso nach, damit sie nicht durch die Laibung scheinen */
+      offen.forEach((it) => { if (it.schnitt !== cut) return; if (it.hinten === 2) gl.polygonOffset(1, 6); else if (it.hinten) gl.polygonOffset(0, 3); else if (it.vor) gl.polygonOffset(0, -2 * it.vor); else if (it.nachgeben) gl.polygonOffset(1, 2); else gl.polygonOffset(0, 0); malen(gl, uu, it, 0.5); });
     });
     gl.polygonOffset(0, 0); gl.disable(gl.POLYGON_OFFSET_FILL);
     gl.useProgram(pr.p);
@@ -1249,7 +1276,7 @@ window.Buehne3D = (function () {
     if (n > B.L.cap) { B.L.cap = Math.ceil(n * 1.5); gl.bufferData(gl.ARRAY_BUFFER, B.L.cap * 4, gl.DYNAMIC_DRAW); }
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, d);
   }
-  let MASSSTAB = 0.2;
+  let MASSSTAB = 0.2, AH_FARBE = [0.3, 0.32, 0.34];
   /* Hintergrund-Schichten einer Fläche als Uniform-Daten (Verläufe, Wiederholung, Lage, Mittelwert feiner Muster) */
   function schichten(bg, W, H) {
     const LA = new Float32Array(20), LB = new Float32Array(20), LC = new Float32Array(20), LM = new Float32Array(20), SC = new Float32Array(48 * 4), SP = new Float32Array(48);
@@ -1316,6 +1343,10 @@ window.Buehne3D = (function () {
     AO.fill(0); if (it.ao) it.ao.forEach((a, i) => { if (i < 4) AO.set(a, i * 4); });
     gl.uniform4fv(u.uAo, AO); gl.uniform2f(u.uAoR, it.aoR || 1, it.aoRect ? 1 : 0);
     if (it.relief) gl.uniform4f(u.uRelief, it.relief[0], it.relief[1], it.relief[2] || 0, 0); else gl.uniform4f(u.uRelief, 0, 0, 0, 0);
+    /* Profilstufen (Prototyp): Flügel innen/außen, Blendrahmen innen/außen, Pfosten, Abstandhalter im Glasrand */
+    const ro = it.role || '', pm = form || it.unbeleuchtet ? 0 : /^sf-in-/.test(ro) ? 1 : /^sf-out-/.test(ro) ? 2 : /^(el|ol|ul)-front$/.test(ro) ? 3 : /^(el|ol|ul)-back$/.test(ro) ? 4 : it.glas && /^(glass-|ol-glass|ul-glass)/.test(ro) ? 5 : /^mul-/.test(ro) ? 6 : 0;
+    gl.uniform4f(u.uPr, pm, MASSSTAB, pm === 5 ? 0.92 : 1, 0);
+    if (pm === 5) { const ah = AH_FARBE; gl.uniform3f(u.uPrC, ah[0], ah[1], ah[2]); } else gl.uniform3f(u.uPrC, 0, 0, 0);
     gl.drawArrays(gl.TRIANGLES, it.erst, it.zahl);
   }
 

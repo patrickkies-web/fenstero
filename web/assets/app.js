@@ -1140,10 +1140,13 @@ function gitterBg(w, s) {
   return (w.gitter === 'zier' ? 'radial-gradient(circle, transparent 0 ' + px(Math.max(2, 34 * s)) + ', ' + c + ' ' + px(Math.max(2.5, 34 * s)) + ' ' + px(Math.max(3, 42 * s)) + ', transparent ' + px(Math.max(3.5, 42 * s)) + ') 0 0 / ' + t + ' ' + px(Math.max(8, 240 * s)) + ', ' : '') +
     'linear-gradient(180deg, ' + c + ' 0 2%, transparent 2% 14%, ' + c + ' 14% 16%, transparent 16% 84%, ' + c + ' 84% 86%, transparent 86% 98%, ' + c + ' 98%), repeating-linear-gradient(90deg, ' + c + ' 0 ' + b + ', transparent ' + b + ' ' + t + ')';
 }
-/* Insektenschutz: Gewebe (Standard, Klarsicht, Pollenschutz, reißfest) und Rahmenfarbe */
-function meshBg(w) {
-  const g = dg(w, 'insGewebe') ? w.insGewebe : 'standard', a = g === 'klar' ? 0.08 : g === 'pollen' ? 0.24 : g === 'tier' ? 0.26 : 0.16, st = g === 'pollen' ? 3 : 4, lw = g === 'tier' ? 1.5 : 1;
-  return 'repeating-linear-gradient(0deg, rgba(20, 20, 20, ' + a + ') 0 ' + lw + 'px, transparent ' + lw + 'px ' + st + 'px), repeating-linear-gradient(90deg, rgba(20, 20, 20, ' + a + ') 0 ' + lw + 'px, transparent ' + lw + 'px ' + st + 'px)';
+/* Insektenschutz: Gewebe (Standard, Klarsicht, Pollenschutz, reißfest) und Rahmenfarbe. Maschenweite in Millimetern (1,4 mm, Pollen 1 mm,
+   reißfest 2 mm, s = px je mm), nicht unter 1,2 px: aus der Nähe ein feines Gewebe, von weitem ein grauer Schleier wie in echt (die
+   WebGL-Bühne mittelt Muster feiner als ein Bildpunkt), statt eines groben Karos, das beim Drehen Moiré bildet */
+function meshBg(w, s) {
+  const g = dg(w, 'insGewebe') ? w.insGewebe : 'standard', a = g === 'klar' ? 0.1 : g === 'pollen' ? 0.3 : g === 'tier' ? 0.34 : 0.22;
+  const st = Math.max(1.2, (g === 'pollen' ? 1 : g === 'tier' ? 2 : 1.4) * (s || 0.16)), lw = st * (g === 'tier' ? 0.4 : 0.3), n = (v) => Math.round(v * 100) / 100 + 'px';
+  return 'repeating-linear-gradient(0deg, rgba(20, 20, 20, ' + a + ') 0 ' + n(lw) + ', transparent ' + n(lw) + ' ' + n(st) + '), repeating-linear-gradient(90deg, rgba(20, 20, 20, ' + a + ') 0 ' + n(lw) + ', transparent ' + n(lw) + ' ' + n(st) + ')';
 }
 const INS_FARBE = { weiss: '#f1f0ea', braun: '#4b3628', anthrazit: '#383e42' };
 const insRahmen = (w) => (dg(w, 'insFarbe') ? (w.insFarbe === 'rahmen' ? rahmenFarbe(w, 'aussen').solid : INS_FARBE[w.insFarbe] || (ralFarbe(w.insFarbe) || {}).hex) : '') || '#55585c';
@@ -1460,7 +1463,7 @@ function w3dPaint(stage, w) {
   });
   w.bars.forEach((b) => { const be = q('bar-' + b.id); if (be) { be._bi = barBg(w, fin, 'innen'); be._bo = barBg(w, fout, 'aussen'); be._art = holzig(fin) && w.spross !== 'szr' ? 'holz' : ''; be._arto = holzig(fout) && w.spross !== 'szr' ? 'holz' : ''; be.style.setProperty('--bi', be._bi); be.style.setProperty('--bo', be._bo); } });
   const ms = q('mesh'), mk = q('mesh-k'), ir = insRahmen(w);
-  if (ms) { ms._kante = ir; ms.style.boxShadow = 'inset 0 0 0 1.5px ' + ir; bg('mesh', meshBg(w)); }
+  if (ms) { ms._kante = ir; ms.style.boxShadow = 'inset 0 0 0 1.5px ' + ir; bg('mesh', meshBg(w, stage._v && stage._v.s)); }
   if (mk) bg('mesh-k', 'linear-gradient(180deg, ' + mischHex(ir, '#ffffff', 0.22) + ', ' + ir + ' 45%, ' + mischHex(ir, '#000000', 0.25) + ')');
   w3dOberflaeche(stage, w, fin, fout);
 }
