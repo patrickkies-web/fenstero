@@ -143,7 +143,7 @@ Messwerte nach dem Feinschliff: unverändert bestanden (eine volle Pille bei 774
 - „Holt mich irgendwie nicht ab. Wahrscheinlich weil die Farbpalette nicht passt.“ Befund: Folie zu 97 % neutral, Violett 0,4 %. Zwei Proben mit mehr Violett (Licht als Bühne, volle violette Kacheln): „in meinen Augen viel zu viel Violett“. Regel im Begleit-Skill: Violett nur als Akzent, nie als Fläche. Zwei helle Proben (Folie auf Weiß): „das Weiß muss woanders hin, nicht in die Kacheln, das sieht kacke aus“. Regel: Auswahl-Kacheln nie weiß, Weiß gehört in die Eingabe-Karte, in Text und die Pille.
 - Umgesetzt: die sechs Kacheln in Anthrazit mit tonalem Abfall (Zeichnungen Silbergrau, gewählt Weiß mit violettem Ring, Punkt und Licht); die Stelle auf einer weißen Karte (Radius 28, Schwebeschatten) mit dem Umschalter (gewählt Schwarz mit violettem Punkt) und dem Satz in Textgrau; Bühne 248 px, damit die Karte im ersten Bildschirm über dem Fuß endet (Karte unten 759 px, Fuß ab 760). Proben liegen nicht im Projekt (nur im Chat gezeigt).
 - Farbanteile danach (Telefon, erster Bildschirm): neutral 96,6 (S 38 · A 27 · G 10 · W 21), Violett 0,4, Indigo 0,7, Renderings 2,3; Folie gesamt S 41 · A 32 · G 10 · W 13, Farbe 3,1. Messwerte sonst unverändert bestanden.
-- Offen: Ob die Folie ihn jetzt „abholt“, entscheidet er; wenn nicht, braucht es eine von ihm genannte Farbwelt oder Vorlage, die sie trägt.
+- Antwort des Inhabers: „Find ich gut, jetzt nächster Schritt.“ Die Folie ist angenommen und die Untergrenze für die weiteren Folien; weiter mit Schritt 2 „Fotos“ (docs/profis/2026-10-26-konfigurator-fotos.md).
 
 ## Übernahme in die App (noch nicht geschehen)
 

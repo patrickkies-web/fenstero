@@ -41,7 +41,8 @@
                Boden als Zustand „gewählt“, G9 Name und Art als Etikett mit Anker an der Sache, G10 Glas-Chip und Glas-Etikett über dem
                Foto, G5 Fortschrittsring „Schritt 1 von 6“, G13 runde Knöpfe, G8 Bento der sechs Elemente wie auf der Startseite,
                G6 eine volle Pille, G14 Lichtkante und Vignette, Kontaktschatten, G1 gestrichelter Rahmen heißt „noch nicht da“ -->
-          <div class="ez-app" id="app" data-art="fenster" data-stelle="ersatz">
+          <div class="ez-app" id="app" data-art="fenster" data-stelle="ersatz" data-folie="start">
+            <section class="ez-folie" data-folie="start" aria-label="Schritt 1 von 6: Was planst du?">
 
             <header class="ez-kopf">
               <div class="ez-kopf__l">
@@ -122,6 +123,94 @@
               <button type="button" class="dna-pille ez-weiter" id="weiter">Weiter zu den Fotos <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
             </div>
 
+            </section>
+
+            <!-- Folie 2: Fotos. Gene: G10 Glas-Chips und Sucher über dem Foto (Vorlage 13, Muster-Seite „Foto 1 von 2“), G9 die Befunde der KI als
+                 Etiketten an der Sache, G5 Fortschrittsring 2 von 6 und die Wasserwaage als Kapsel (G11), G1 gestrichelte Plätze heißen „noch
+                 kein Foto“, G6 eine volle Pille, G14 Lichtkante und Vignette -->
+            <section class="ez-folie" data-folie="fotos" aria-label="Schritt 2 von 6: Fotografiere das Fenster" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück zum Start" data-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5-1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--foto" id="foto-buehne" data-stand="beispiel">
+                <img class="ez-buehne__foto" id="foto-bild" src="bilder/wand-innen.webp" width="1000" height="750" alt="Beispielfoto von innen: zweiflügliges Fenster mit etwas Wand rundum, Laibung und Fensterbank im Bild" decoding="async" draggable="false">
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-sucher" id="sucher" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:.3333" aria-hidden="true"></i>Schritt&nbsp;2 von&nbsp;6 · Fotos</span>
+                <span class="ez-glaschip ez-glaschip--unten" id="foto-chip"><b>Beispiel</b> · so sieht ein gutes Foto aus</span>
+                <div class="ez-anker dna-anker ez-ki" id="ki-anker" aria-hidden="true" hidden>
+                  <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="52" y1="6" x2="64" y2="21"/><line x1="27" y1="40" x2="16" y2="60"/><line x1="70" y1="88" x2="74" y2="76"/></svg>
+                  <span class="dna-anker__punkt ez-anker__punkt" style="left:52%;top:6%"></span>
+                  <span class="dna-anker__punkt ez-anker__punkt" style="left:27%;top:40%"></span>
+                  <span class="dna-anker__punkt ez-anker__punkt" style="left:70%;top:88%"></span>
+                  <span class="ez-ki__etikett" style="left:64%;top:21%"><span class="dna-etikett">Innen kein Rollladenkasten</span></span>
+                  <span class="ez-ki__etikett" style="left:16%;top:60%"><span class="dna-etikett">Laibung</span></span>
+                  <span class="ez-ki__etikett" style="left:74%;top:76%"><span class="dna-etikett">Fensterbank innen</span></span>
+                </div>
+                <span class="ez-waage" id="waage" aria-hidden="true"><i class="ez-waage__spur"><b class="ez-waage__blase"></b></i>gerade</span>
+                <figcaption class="ez-unsichtbar" id="foto-text">Schritt 2 von 6: Fotos von innen und außen aufnehmen.</figcaption>
+              </figure>
+              <p class="ez-hilfe ez-begriff ez-tipp" id="foto-tipp"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 10h16M10 7v6"/><circle cx="10" cy="10" r="2.6"/></svg><span>Handy <b>gerade</b> halten, das Fenster ganz im Bild, etwas Wand drumherum.</span></p>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1 id="foto-h1">Fotografiere <em>das Fenster.</em></h1><button type="button" class="ez-i" id="foto-i" aria-label="Was liest die KI aus deinen Fotos?" aria-expanded="false" aria-controls="ki-erkl"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <button type="button" class="dna-pille dna-pille--leise dna-pille--klein ez-notiz"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>Notiz</button>
+                </div>
+                <p class="ez-unterzeile" id="foto-unterzeile">Einmal von innen, einmal von außen. Du musst nichts eintippen.</p>
+              </div>
+
+              <div class="ez-karte" data-theme="hell">
+                <div class="ez-block__kopf"><span class="dna-label" id="fotos-l">Deine Fotos</span><span class="ez-block__wert ez-block__wert--hell" id="fotos-stand">0 von 2</span></div>
+                <div class="ez-slots" role="group" aria-labelledby="fotos-l">
+                  <label class="ez-slot" data-seite="in"><input type="file" accept="image/*" capture="environment" id="foto-in"><img alt="" hidden><span class="ez-slot__leer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.6l1.5-2.5h4.8L15.9 7h2.6A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg><b>Von innen</b><small>empfohlen</small></span><span class="ez-slot__chip" hidden></span><button type="button" class="ez-slot__weg" aria-label="Foto entfernen" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></label>
+                  <label class="ez-slot" data-seite="out"><input type="file" accept="image/*" capture="environment" id="foto-out"><img alt="" hidden><span class="ez-slot__leer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.6l1.5-2.5h4.8L15.9 7h2.6A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg><b>Von außen</b><small>empfohlen</small></span><span class="ez-slot__chip" hidden></span><button type="button" class="ez-slot__weg" aria-label="Foto entfernen" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></label>
+                </div>
+                <p class="ez-karte__text" id="foto-karte-text">Die KI liest daraus die Einbausituation für deinen Fensterbauer: Rollladenkasten, Laibung, Fensterbänke, Fassade.</p>
+                <p class="ez-karte__text ez-karte__text--leise"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg><span>Deine Fotos sieht dein Fensterbauer erst, wenn du sendest.</span></p>
+              </div>
+              <p class="ez-vorschau"><button type="button" class="ez-textknopf ez-textknopf--vorschau" id="beispiel-laden">Nur in dieser Vorschau: Beispielfotos einsetzen</button></p>
+
+              <div class="ez-bogen" id="ki-erkl" role="dialog" aria-modal="true" aria-labelledby="ki-titel" hidden>
+                <button type="button" class="ez-bogen__grund" aria-label="Schließen" data-schliessen></button>
+                <div class="ez-bogen__blatt">
+                  <div class="ez-bogen__kopf"><span class="ez-bogen__titel" id="ki-titel">Was liest die KI aus deinen Fotos?</span><button type="button" class="ez-rund ez-rund--zu" aria-label="Schließen" data-schliessen><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+                  <p>Aus dem Innen- und dem Außenfoto liest die KI die Einbausituation: Rollladenkasten, Anschlag, Laibung, Fensterbänke, Fassade und wie gut das Fenster von außen erreichbar ist. Das sind Dinge, die du nicht beurteilen musst.</p>
+                  <p>Die Auswertung geht an deinen Fensterbauer. So sieht er vor dem Termin, was ihn erwartet, und kann genauer anbieten. Die KI misst nichts; die Maße kommen nur von deinem Zollstock.</p>
+                  <p class="ez-bogen__tipp"><b>Tipp:</b> Fotografiere bei Tageslicht, das Handy gerade, mit etwas Wand rund um das Fenster. Innen ruhig Rollladenkasten und Fensterbank mit aufs Bild nehmen.</p>
+                  <button type="button" class="dna-pille dna-pille--leise ez-bogen__zu" data-schliessen>Alles klar</button>
+                </div>
+              </div>
+
+              <div class="ez-bogen" id="ohne-foto" role="dialog" aria-modal="true" aria-labelledby="ohne-titel" hidden>
+                <button type="button" class="ez-bogen__grund" aria-label="Schließen" data-schliessen></button>
+                <div class="ez-bogen__blatt">
+                  <div class="ez-bogen__kopf"><span class="ez-bogen__titel" id="ohne-titel">Mit Foto wird dein Aufmaß besser.</span><button type="button" class="ez-rund ez-rund--zu" aria-label="Schließen" data-schliessen><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+                  <ul class="ez-haken">
+                    <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Die KI liest Rollladenkasten, Laibung, Fensterbänke und Fassade.</li>
+                    <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Sie merkt, wenn Breite und Höhe vertauscht sind.</li>
+                    <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Dein Fensterbauer sieht die Stelle vor dem Termin.</li>
+                  </ul>
+                  <p>Es geht auch ohne: Dann nimmt dein Fensterbauer die Einbausituation vor Ort auf.</p>
+                  <div class="ez-bogen__knoepfe"><button type="button" class="dna-pille dna-pille--leise ez-bogen__zu" id="ohne-foto-machen">Foto machen</button><button type="button" class="dna-pille dna-pille--leise ez-bogen__zu" id="ohne-foto-weiter">Ohne Foto weiter</button></div>
+                </div>
+              </div>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück zum Start" data-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="foto-weiter">Weiter zum Messen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+              </div>
+            </section>
           </div>
         </div>
         <span class="ez-geraet__glanz" aria-hidden="true"></span>
@@ -130,6 +219,7 @@
 
     <!-- Notizspalte für den Inhaber (ab 760 px neben dem Gerät; am Telefon unter der Folie) -->
     <aside class="ez-notiz" aria-label="Zur Vorschau">
+      <div class="ez-notiz__folie" data-fuer="start">
       <span class="dna-label">Konfigurator · Schritt&nbsp;1 von&nbsp;6</span>
       <h2>Was planst du? <em>Das Element im Licht.</em></h2>
       <p class="dna-text">Die Folie ist aus den genannten Quellen gebaut, nicht aus anderen Folien: Bühne und Glas-Chip von der Seite „Konfigurator von Muster Fensterbau“, Etikett mit Anker, Bento und Umschalter von der Startseite, Gene und Palette aus der DNA. Tippen auf eine Kachel, Wischen auf der Bühne und Pfeiltasten wechseln das Element; „Weiter“ ist in der Vorschau ohne Ziel.</p>
@@ -142,6 +232,19 @@
         <li><span class="nr">06</span><span><b>Eine volle Pille</b> „Weiter zu den Fotos“ mit Pfeilkreis, am Telefon unten stehend, links der runde Rückweg. <span class="ez-gen">G6</span></span></li>
       </ul>
       <p class="ez-klein">Bewegung nur als Rückmeldung und Zustand: Element, Schatten, Punkt und Etikett wechseln zusammen in 220&nbsp;ms in Wischrichtung, nur das Licht gleitet 320&nbsp;ms nach, Kacheln und Umschalter 150&nbsp;ms, Druck 0,97; Tastatur ohne Übergang; bei „weniger Bewegung“ steht alles sofort.</p>
+      </div>
+      <div class="ez-notiz__folie" data-fuer="fotos">
+      <span class="dna-label">Konfigurator · Schritt&nbsp;2 von&nbsp;6</span>
+      <h2>Fotografiere das Fenster. <em>Erst das Beispiel, dann dein Foto.</em></h2>
+      <p class="dna-text">Die Bühne zeigt zuerst, wie ein gutes Foto aussieht, und wird mit dem ersten eigenen Foto zum Foto. Die Eingabe steht auf der weißen Karte, „Weiter zum Messen“ ist immer die eine volle Pille. Die Texte sind die der App; „Beispielfotos einsetzen“ gibt es nur in dieser Vorschau, nicht in der App.</p>
+      <ul class="ez-liste">
+        <li><span class="nr">01</span><span><b>Die Bühne zeigt, was ein gutes Foto ist:</b> Beispielfoto mit etwas Wand rundum, Sucher-Ecken mit Abstand zum Rahmen, Glas-Chip „Schritt 2 von 6“, oben rechts die kleine Wasserwaage; darunter der Satz der App „Handy gerade halten, das Fenster ganz im Bild, etwas Wand drumherum“. Antippen öffnet die Kamera. <span class="ez-gen">G10</span><span class="ez-gen">G11</span></span></li>
+        <li><span class="nr">02</span><span><b>Befunde der KI als Etiketten an der Sache,</b> nur an dem, was im Bild ist (im Beispiel: innen kein Rollladenkasten, Laibung, Fensterbank innen); sie erscheinen nacheinander, Punkt, Linie, Text. In der App kommen sie aus dem echten Befund, „KI fertig“ erst mit der Antwort. <span class="ez-gen">G9</span></span></li>
+        <li><span class="nr">03</span><span><b>Deine Fotos</b> auf der weißen Karte: zwei gestrichelte Plätze (noch kein Foto), Von innen und Von außen, je empfohlen; der Platz öffnet die Kamera, ein volles Foto hat „Entfernen“; darunter der Satz der App, wer die Fotos wann sieht. <span class="ez-gen">G1</span></span></li>
+        <li><span class="nr">04</span><span><b>„Weiter zum Messen“</b> bleibt die eine volle Pille; ohne Foto öffnet sie den Bogen „Mit Foto wird dein Aufmaß besser.“ mit den drei Punkten der App, „Foto machen“ und „Ohne Foto weiter“, beide im ersten Blick. <span class="ez-gen">G6</span></span></li>
+      </ul>
+      <p class="ez-klein">Bewegung nur als Rückmeldung und Zustand: Folienwechsel 260&nbsp;ms seitlich, Platz und Entfernen drücken auf 0,97, „KI liest“ wird „KI fertig“, die Etiketten erscheinen nacheinander in gut 500&nbsp;ms; nichts läuft von selbst; bei „weniger Bewegung“ steht alles sofort.</p>
+      </div>
     </aside>
   </div>
 </main>

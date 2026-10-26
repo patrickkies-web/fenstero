@@ -68,6 +68,10 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Kacheln nie weiß (Korrektur des Inhabers, 26.10.2026, Schritt 1): Weiße Auswahl-Kacheln auf Schwarz „sehen kacke aus“. Auswahl steht
   auf Anthrazit-Kacheln (G14, gewählt mit violettem Ring, Punkt und Licht); Weiß gehört in eine Karte für Eingaben (die Stelle, Felder),
   in Text und in die eine Pille, so wie der App-Rahmen (DNA Abschnitt 9) es sagt.
+- Schritt 1 „Was planst du?“ angenommen (Inhaber, 26.10.2026: „Find ich gut“): Betonboden im Fensterlicht als Bühne, Etikett mit Anker am
+  Objekt, Anthrazit-Kacheln mit den Strichzeichnungen der App, die Stelle auf weißer Karte, eine Pille unten. Diese Folie ist die
+  Untergrenze für die weiteren Folien des Konfigurators (docs/profis/konfigurator-start-vorschau/, Protokoll
+  docs/profis/2026-10-26-konfigurator-start.md). Weitere Folien folgen demselben Weg: Bestand, Quellen des Inhabers, Gremium eine Runde.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
