@@ -65,6 +65,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Violett nur als Akzent (Korrektur des Inhabers, 26.10.2026, Schritt 1): Proben mit violettem Lichtteich über der Bühne, voll violetten
   Kacheln und violettem Saum waren ihm „viel zu viel Violett“. Violett bleibt Punkt, Ring, Licht unter dem Objekt und gewählte Taste;
   nie eine Fläche, nie die Bühne. Hält eine Folie ihn nicht, liegt es nicht an zu wenig Violett.
+- Kacheln nie weiß (Korrektur des Inhabers, 26.10.2026, Schritt 1): Weiße Auswahl-Kacheln auf Schwarz „sehen kacke aus“. Auswahl steht
+  auf Anthrazit-Kacheln (G14, gewählt mit violettem Ring, Punkt und Licht); Weiß gehört in eine Karte für Eingaben (die Stelle, Felder),
+  in Text und in die eine Pille, so wie der App-Rahmen (DNA Abschnitt 9) es sagt.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

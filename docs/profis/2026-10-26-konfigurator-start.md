@@ -138,6 +138,13 @@ Alle vierzig Befunde sind umgesetzt, bis auf die drei unten genannten, die gegen
 
 Messwerte nach dem Feinschliff: unverändert bestanden (eine volle Pille bei 774 px, 0 Animationen nach 2,6 s, Layoutsprung 0, keine Konsolenfehler, Ziele ab 44 px, Laden 0,32 s gedrosselt); Farbtabelle oben ist die Endfassung. Bilder docs/profis/bilder/2026-10-26-konfigurator-start-{tel,tel-balkon,tel-neu,tel-hst,tel-erkl,tel-gross,desk}.jpg.
 
+## Korrekturen des Inhabers nach dem Feinschliff (26.10.2026)
+
+- „Holt mich irgendwie nicht ab. Wahrscheinlich weil die Farbpalette nicht passt.“ Befund: Folie zu 97 % neutral, Violett 0,4 %. Zwei Proben mit mehr Violett (Licht als Bühne, volle violette Kacheln): „in meinen Augen viel zu viel Violett“. Regel im Begleit-Skill: Violett nur als Akzent, nie als Fläche. Zwei helle Proben (Folie auf Weiß): „das Weiß muss woanders hin, nicht in die Kacheln, das sieht kacke aus“. Regel: Auswahl-Kacheln nie weiß, Weiß gehört in die Eingabe-Karte, in Text und die Pille.
+- Umgesetzt: die sechs Kacheln in Anthrazit mit tonalem Abfall (Zeichnungen Silbergrau, gewählt Weiß mit violettem Ring, Punkt und Licht); die Stelle auf einer weißen Karte (Radius 28, Schwebeschatten) mit dem Umschalter (gewählt Schwarz mit violettem Punkt) und dem Satz in Textgrau; Bühne 248 px, damit die Karte im ersten Bildschirm über dem Fuß endet (Karte unten 759 px, Fuß ab 760). Proben liegen nicht im Projekt (nur im Chat gezeigt).
+- Farbanteile danach (Telefon, erster Bildschirm): neutral 96,6 (S 38 · A 27 · G 10 · W 21), Violett 0,4, Indigo 0,7, Renderings 2,3; Folie gesamt S 41 · A 32 · G 10 · W 13, Farbe 3,1. Messwerte sonst unverändert bestanden.
+- Offen: Ob die Folie ihn jetzt „abholt“, entscheidet er; wenn nicht, braucht es eine von ihm genannte Farbwelt oder Vorlage, die sie trägt.
+
 ## Übernahme in die App (noch nicht geschehen)
 
 Die Vorschau ist nicht in web/app/. Für die Übernahme: `SCREENS.start` in web/assets/app.js baut den Rahmen `.scr.dna` (wie `lageDna`), die Bühne nimmt das Foto (web/bilder/…/buehne.webp, 1000 px) und das echte 3-D-Modell (`model(startWin(w), { frei: true })`) statt der Renderings, Wischen und Pfeiltasten bleiben (`startWischen`), die Kacheln nutzen `svgIcon(miniWin(v))` mit nicht skalierenden Strichen 1,8 / 1,2 / 1 px (Vorschlag für `miniWin`), die Stelle schreibt `w.neu`, der Fuß ist `.lg-fuss`; Regeln in app.css, Abschnitt „Design-DNA im Konfigurator“; Prüfsuite NUR=22 und NUR=16. Schriften lokal (web/fonts/outfit-latin-wght.woff), CSP unverändert; im Kundenlink einer Instanz steht deren Zeichen im Kopf. Am Schreibtisch braucht die echte App ein zweispaltiges Layout (Bühne links, Frage und Kacheln rechts); das Gerät mit Notizspalte ist nur die Vorschau.
