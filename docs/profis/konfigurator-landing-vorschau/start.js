@@ -22,7 +22,14 @@
   var leiste = d.querySelector('.ez-leiste'), kopf = d.querySelector('.ez-kopf');
   if (leiste) {
     var letzte = w.scrollY || 0, hoch = 0, runter = 0, geplant = false, grenze = 160;
-    var messeGrenze = function () { if (kopf) grenze = kopf.getBoundingClientRect().bottom + (w.scrollY || 0); };
+    /* Grenze: erst wenn der Kopf wirklich verdeckt ist. Die erste Szene klebt (Vorhang), ihr Kopf bleibt sichtbar, bis die zweite
+       Szene ihn überdeckt; ohne Kleben verschwindet er beim Scrollen */
+    var messeGrenze = function () {
+      var s1 = d.querySelector('.dna-szene'); if (!kopf || !s1) return;
+      var unten = kopf.getBoundingClientRect().bottom + (w.scrollY || 0) - (s1.getBoundingClientRect().top + (w.scrollY || 0));
+      var steht = Math.min(0, w.innerHeight - s1.offsetHeight);
+      grenze = unten <= -steht ? unten : s1.offsetHeight - steht - unten;
+    };
     messeGrenze(); w.addEventListener('resize', messeGrenze); w.addEventListener('load', messeGrenze);
     var pruefe = function () {
       geplant = false;
@@ -33,6 +40,17 @@
     };
     w.addEventListener('scroll', function () { if (!geplant) { geplant = true; w.requestAnimationFrame(pruefe); } }, { passive: true });
   }
+
+  /* Hero: Auftritt auch dann, wenn die Pille unter der Falz liegt (Safari-Leisten), statt erst beim Scrollen */
+  var heroAuftritt = function () {
+    w.requestAnimationFrame(function () { w.requestAnimationFrame(function () {
+      Array.prototype.forEach.call(d.querySelectorAll('.ez-hero [data-dna-auftritt]'), function (el) { el.classList.add('ist-da'); });
+    }); });
+  };
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', heroAuftritt); else heroAuftritt();
+
+  /* Safari auf iOS setzt :active (Druckfeedback) nur mit einem Lauscher für touchstart */
+  d.addEventListener('touchstart', function () {}, { passive: true });
 
   /* Knöpfe ohne Ziel (Vorlage): kein Sprung an den Seitenanfang */
   d.addEventListener('click', function (e) {

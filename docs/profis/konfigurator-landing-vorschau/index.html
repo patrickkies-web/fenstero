@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>html,body{background:#07090a}</style>
 <link rel="preload" href="fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-wm.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="bilder/buehne.webp" as="image" type="image/webp">
 <script>document.documentElement.classList.add("ez-js");</script>
 <link rel="stylesheet" href="dna/tokens.css">
@@ -22,7 +22,7 @@
 </style>
 
 <main class="dna-wurzel ez" id="start" lang="de">
-  <a class="ez-skip dna-pille" href="#so">Zum Inhalt springen</a>
+  <a class="ez-skip dna-pille" href="#inhalt" data-theme="dunkel">Zum Inhalt springen</a>
 
   <!-- Leiste: kommt beim Hochscrollen zurück; dieselben zwei Marken wie im Kopf, Pille immer Umriss -->
   <div class="ez-leiste" data-theme="dunkel" aria-hidden="true">
@@ -62,7 +62,7 @@
                   <div class="ez-app__buehne">
                     <svg class="ez-app__skala" viewBox="0 0 358 200" preserveAspectRatio="none"><line x1="14" y1="166" x2="344" y2="166"/><path d="M14 166v8M47 166v5M80 166v5M113 166v5M146 166v8M179 166v5M212 166v5M245 166v5M278 166v8M311 166v5M344 166v8"/></svg>
                     <span class="ez-app__glut"></span>
-                    <img class="ez-app__held" src="bilder/konfig/held.webp" width="517" height="440" alt="" decoding="async">
+                    <img class="ez-app__held" src="bilder/konfig/held.webp" width="280" height="238" alt="" decoding="async">
                     <span class="ez-app__strich"></span>
                     <span class="ez-app__etikett"><span class="ez-app__punkt"></span><span><b>Fenster</b><small>Dreh, Kipp, fest</small></span></span>
                     <span class="ez-app__tipp">Wischen zum Wechseln</span>
@@ -85,7 +85,7 @@
               </div>
             </div>
             <div class="ez-adresse dna-anker" data-dna="anker">
-              <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-nur-tel" x1="42" y1="12" x2="43" y2="21" style="--i:0"/><line class="ez-nur-desk" x1="44" y1="12" x2="47" y2="21" style="--i:0"/></svg>
+              <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-nur-tel" x1="42" y1="12" x2="43" y2="26" style="--i:0"/><line class="ez-nur-desk" x1="44" y1="12" x2="47" y2="26" style="--i:0"/></svg>
               <span class="dna-anker__punkt ez-adresse__punkt" style="--i:0"></span>
               <span class="dna-anker__etikett ez-adresse__etikett" style="--i:0"><span class="dna-etikett"><span class="ez-adresse__text" data-vorlage="firma.adresse"><b>muster-fensterbau</b>.eeziframes.com</span></span></span>
             </div>
@@ -93,18 +93,18 @@
           </figure>
         </div>
 
-        <div class="ez-hero__text">
-          <span class="dna-label ez-kicker" data-dna-auftritt="still" style="--i:1">Fenster planen und anfragen</span>
-          <h1 class="dna-titel-xl" data-dna-woerter="3">Ihre neuen Fenster, <em class="ez-ak">Ihr Angebot.</em></h1>
-          <div class="ez-brief" data-dna-auftritt="still" style="--i:8">
-            <p class="dna-text" data-vorlage="firma.begruessung"><b>Für Ihr Angebot brauchen wir die Maße Ihrer Fenster.</b> Hier messen Sie selbst, Schritt für Schritt erklärt. Danach melden wir uns mit dem Angebot bei Ihnen.</p>
+        <div class="ez-hero__text" id="inhalt" tabindex="-1">
+          <span class="dna-label ez-kicker" data-dna-auftritt="still" style="--i:6">Fenster planen und anfragen</span>
+          <h1 class="dna-titel-xl" data-dna-woerter="6">Ihre neuen Fenster, <em class="ez-ak">Ihr Angebot.</em></h1>
+          <div class="ez-brief" data-dna-auftritt="still" style="--i:10">
+            <p class="dna-text" data-vorlage="firma.begruessung"><b>Für Ihr Angebot brauchen wir die Maße Ihrer Fenster.</b> Messen Sie hier selbst, danach melden wir uns mit dem Angebot.</p>
             <p class="ez-unterschrift"><span class="ez-person" aria-hidden="true" data-vorlage="firma.ansprechpartner.bild">MM</span><span><b data-vorlage="firma.ansprechpartner">Maria Muster</b><span>Muster Fensterbau, Musterstadt</span></span></p>
           </div>
-          <div class="ez-aktionen" data-dna-auftritt="still" style="--i:9">
+          <div class="ez-aktionen" data-dna-auftritt="still" style="--i:12">
             <a class="dna-pille" href="#" data-vorlage="ziel.konfigurator">Fenster planen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
             <a class="dna-pille dna-pille--leise" href="#so">So geht es</a>
           </div>
-          <p class="ez-meta" data-dna-auftritt="still" style="--i:10"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8l5 2v3.6c0 3.2-2.1 5.8-5 6.8-2.9-1-5-3.6-5-6.8V3.8z"/><path d="M5.8 8l1.6 1.6 3-3.2"/></svg><span><b>Kostenlos und unverbindlich.</b> Ihre Anfrage geht nur an <span data-vorlage="firma.name">Muster Fensterbau</span>.</span></p>
+          <p class="ez-meta" data-dna-auftritt="still" style="--i:10"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg><span><b>Kostenlos und unverbindlich.</b> Ihre Anfrage geht nur an <span data-vorlage="firma.name">Muster Fensterbau</span>.</span></p>
         </div>
       </div>
     </div>
@@ -117,23 +117,21 @@
       <div class="ez-kopfzeile">
         <span class="dna-label">So geht es</span>
         <h2 class="dna-titel" id="so-titel">In vier Schritten zum <em class="ez-ak">Angebot.</em></h2>
-        <p class="dna-text">Etwa 5&nbsp;Minuten je Fenster, ohne Konto und ohne App aus dem Store. In den Messschritten sagt der Konfigurator kurz „du“, damit jede Anleitung knapp bleibt.</p>
+        <p class="dna-text">Etwa 5&nbsp;Minuten je Fenster, ohne Konto und ohne App aus dem Store. In den Messschritten spricht der Konfigurator Sie kurz mit „du“ an, damit jede Anleitung knapp bleibt.</p>
       </div>
 
       <ol class="ez-schritte4">
         <li class="ez-schritt" data-theme="dunkel">
           <div class="ez-schritt__bild ez-schritt__bild--foto">
-            <img src="bilder/so/wand-innen.webp" width="1200" height="1186" alt="Foto von innen: zweiflügliges Fenster in einer hellen Wand" decoding="async">
+            <img src="bilder/so/wand-innen.webp" width="640" height="633" alt="Foto von innen: zweiflügliges Fenster in einer hellen Wand" decoding="async">
             <span class="ez-sucher" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
             <span class="ez-glaschip" aria-hidden="true"><span class="ez-ring" style="--anteil:.5"></span>Foto 1 von 2</span>
           </div>
-          <div class="ez-schritt__text"><span class="dna-label">Schritt 1 von 4</span><h3 class="dna-titel-s">Fotos</h3><p>Ein Foto von innen, eins von außen. Sie ersparen Rückfragen.</p></div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;1 von&nbsp;4</span><h3 class="dna-titel-s">Fotos</h3><p>Eins von innen, eins von außen. Sie ersparen Rückfragen.</p></div>
         </li>
         <li class="ez-schritt" data-theme="dunkel">
           <div class="ez-schritt__bild ez-schritt__bild--dunkel" data-theme="dunkel">
             <svg class="ez-zeichnung" viewBox="0 0 300 300" aria-hidden="true">
-              <defs><pattern id="ez-schraffur" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="schraffur" x1="0" y1="0" x2="0" y2="7"/></pattern><mask id="ez-wandmaske"><rect x="10" y="10" width="280" height="280" fill="#fff"/><rect x="62" y="84" width="176" height="150" fill="#000"/></mask></defs>
-              <rect class="wandflaeche" x="10" y="10" width="280" height="280" fill="url(#ez-schraffur)" mask="url(#ez-wandmaske)"/>
               <rect class="oeffnung" x="62" y="84" width="176" height="150"/>
               <rect class="glas" x="80" y="100" width="140" height="102"/>
               <rect class="rahmen" x="74" y="94" width="152" height="114" rx="2"/>
@@ -145,23 +143,23 @@
             <span class="ez-mini ez-mini--oeffnung" aria-hidden="true">Öffnung · Breite</span>
             <span class="ez-mini ez-mini--fenster" aria-hidden="true">Fenster · Breite</span>
           </div>
-          <div class="ez-schritt__text"><span class="dna-label">Schritt 2 von 4</span><h3 class="dna-titel-s">Messen</h3><p>Breite und Höhe von Maueröffnung und Fenster, mit Zollstock oder Maßband. Jeder Messpunkt wird gezeigt. Vor der Fertigung misst <span data-vorlage="firma.name">Muster Fensterbau</span> einmal nach.</p></div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;2 von&nbsp;4</span><h3 class="dna-titel-s">Messen</h3><p>Breite und Höhe, Öffnung und Fenster. Vor der Fertigung wird nachgemessen.</p></div>
         </li>
         <li class="ez-schritt" data-theme="dunkel">
           <div class="ez-schritt__bild ez-schritt__bild--hell">
-            <img src="bilder/so/modell-anthrazit.webp" width="981" height="1000" alt="3-D-Modell aus den eigenen Maßen: zweiflügliges Fenster in Anthrazitgrau" decoding="async">
+            <img src="bilder/so/modell-anthrazit.webp" width="480" height="489" alt="3-D-Modell aus den eigenen Maßen: zweiflügliges Fenster in Anthrazitgrau" decoding="async">
             <span class="ez-farben" aria-hidden="true"><i style="--farbe:#f1f0ea"></i><i class="ist" style="--farbe:#383e42"></i><i style="--farbe:#b8793e"></i></span>
           </div>
-          <div class="ez-schritt__text"><span class="dna-label">Schritt 3 von 4</span><h3 class="dna-titel-s">Wünsche</h3><p>Material, Farbe, Glas, Sonnenschutz. Was Sie noch nicht wissen, lassen Sie offen.</p></div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;3 von&nbsp;4</span><h3 class="dna-titel-s">Wünsche</h3><p>Material, Farbe, Glas, Sonnenschutz. Offen lassen geht auch.</p></div>
         </li>
         <li class="ez-schritt" data-theme="dunkel">
           <div class="ez-schritt__bild ez-schritt__bild--dunkel ez-senden" data-theme="dunkel">
             <span class="ez-senden__schein" aria-hidden="true"></span>
             <span class="ez-firma__zeichen ez-firma__zeichen--gross" aria-hidden="true" data-vorlage="firma.zeichen">M</span>
             <span class="ez-senden__pdf" aria-hidden="true">PDF</span>
-            <span class="ez-gesendet" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5l3 3 6-6"/></svg>Gesendet</span>
+            <span class="ez-gesendet" aria-hidden="true">Gesendet</span>
           </div>
-          <div class="ez-schritt__text"><span class="dna-label">Schritt 4 von 4</span><h3 class="dna-titel-s">Senden</h3><p>Kurz prüfen und an <span data-vorlage="firma.name">Muster Fensterbau</span> senden. Sie sehen sofort eine Bestätigung und behalten Ihre Anfrage als PDF.</p></div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;4 von&nbsp;4</span><h3 class="dna-titel-s">Senden</h3><p>Prüfen und senden. Ihre Anfrage behalten Sie als PDF.</p></div>
         </li>
       </ol>
 
@@ -183,7 +181,7 @@
             <li class="ist"><b>Farbe</b> Anthrazitgrau</li>
             <li class="offen"><b>Rollladen</b> offen</li>
           </ul>
-          <p class="dna-text">Tippen Sie „Weiß ich noch nicht“. <span data-vorlage="firma.name">Muster Fensterbau</span> berät Sie dazu.</p>
+          <p class="ez-klein">Im Konfigurator tippen Sie dann „Weiß ich noch nicht“. <span data-vorlage="firma.name">Muster Fensterbau</span> berät Sie dazu.</p>
         </article>
       </div>
     </div>
@@ -196,8 +194,8 @@
       <div class="ez-zwei ez-weg">
         <div class="ez-text">
           <span class="dna-label">Ihre Daten</span>
-          <h2 class="dna-titel" id="weg-titel">Ihre Anfrage geht nur an <em class="ez-ak" data-vorlage="firma.name">Muster Fensterbau.</em></h2>
-          <p class="dna-text">Bevor Sie senden, sieht <span data-vorlage="firma.name">Muster Fensterbau</span> nichts davon. eeziframes übermittelt Ihr Aufmaß in dessen Auftrag und zeigt Ihnen keine anderen Anbieter und keine Werbung.</p>
+          <h2 class="dna-titel" id="weg-titel">Ihre Anfrage geht nur an <em class="ez-ak"><span data-vorlage="firma.name">Muster Fensterbau</span>.</em></h2>
+          <p class="dna-text">Bevor Sie senden, sieht <span data-vorlage="firma.name">Muster Fensterbau</span> nichts von Ihrer Planung. eeziframes übermittelt nur im Auftrag des Betriebs.</p>
           <ul class="ez-haken">
             <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Kostenlos und unverbindlich</li>
             <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Ohne Konto, ohne Werbung</li>
@@ -242,31 +240,31 @@
           <h2 class="dna-titel" id="bereit-titel">Das brauchen Sie.<br> <em class="ez-ak">Mehr nicht.</em></h2>
           <ul class="ez-dinge">
             <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5 15.5 3l5.5 5.5L8.5 21z"/><path d="M7 11.5l1.6 1.6M9.8 8.7l1.6 1.6M12.6 5.9l1.6 1.6M11.4 15.1l1.6 1.6M14.2 12.3l1.6 1.6"/></svg></span>Zollstock oder Maßband</li>
-            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18h3"/></svg></span><span>Ihr Handy<small class="ez-nur-desk">Am Computer? Öffnen Sie <b data-vorlage="firma.adresse">muster-fensterbau.eeziframes.com</b> am Handy.</small></span></li>
+            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18h3"/></svg></span>Ihr Handy</li>
             <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M4 12h16"/></svg></span>Freien Zugang zum Fenster</li>
             <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.6A4.5 4.5 0 0 1 21 19"/></svg></span>Für große Türen eine zweite Person</li>
           </ul>
+          <p class="ez-klein ez-nur-desk ez-handy">Am Computer? Öffnen Sie diese Seite auf Ihrem Handy.</p>
           <a class="dna-pille" href="#" data-vorlage="ziel.konfigurator">Fenster planen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
           <p class="ez-meta ez-meta--hell"><b>Kostenlos und unverbindlich.</b> Etwa 5&nbsp;Minuten je Fenster.</p>
         </div>
 
         <article class="ez-kontakt" data-theme="dunkel" aria-labelledby="kontakt-titel">
           <span class="ez-kontakt__schein" aria-hidden="true"></span>
-          <span class="dna-label" id="kontakt-titel">Fragen vorab?</span>
+          <h3 class="dna-label" id="kontakt-titel">Fragen vorab?</h3>
           <div class="ez-kontakt__betrieb">
             <span class="ez-firma__zeichen ez-firma__zeichen--gross" aria-hidden="true" data-vorlage="firma.zeichen">M</span>
             <span><b data-vorlage="firma.name">Muster Fensterbau</b><span data-vorlage="firma.ort">Fensterbau in Musterstadt</span></span>
           </div>
-          <p class="dna-text"><span data-vorlage="firma.name">Muster Fensterbau</span> meldet sich nach Ihrer Anfrage bei Ihnen. Vorher erreichen Sie den Betrieb direkt:</p>
-          <dl class="ez-kontakt__daten">
-            <div><dt>Telefon</dt><dd data-vorlage="firma.telefon">0123 456789</dd></div>
+                    <dl class="ez-kontakt__daten">
+            <div class="ez-kontakt__held"><dt>Telefon, vor Ihrer Anfrage</dt><dd data-vorlage="firma.telefon">0123&nbsp;456789</dd></div>
             <div><dt>E-Mail</dt><dd data-vorlage="firma.mail">info@muster-fensterbau.de</dd></div>
-            <div><dt>Anschrift</dt><dd data-vorlage="firma.anschrift">Musterstraße 1, 12345 Musterstadt</dd></div>
+            <div><dt>Anschrift</dt><dd data-vorlage="firma.anschrift">Musterstraße&nbsp;1<br>12345&nbsp;Musterstadt</dd></div>
           </dl>
           <ul class="ez-kontakt__wege">
             <li><a href="#" data-vorlage="firma.telefon"><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3h3l1.6 4-2 1.2a9 9 0 0 0 4.2 4.2l1.2-2 4 1.6v3a1.6 1.6 0 0 1-1.6 1.6A13.4 13.4 0 0 1 2.9 4.6 1.6 1.6 0 0 1 4.5 3z"/></svg></span>Anrufen</a></li>
             <li><a href="#" data-vorlage="firma.mail"><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M2.5 6.5 10 11l7.5-4.5"/></svg></span>E-Mail</a></li>
-            <li><a href="#" data-vorlage="firma.website"><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M2.5 10h15M10 2.5a11.5 11.5 0 0 1 0 15M10 2.5a11.5 11.5 0 0 0 0 15"/></svg></span>Website</a></li>
+            <li><a href="#" data-vorlage="firma.website"><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M2.5 10h15M10 2.5a11.5 11.5 0 0 1 0 15M10 2.5a11.5 11.5 0 0 0 0 15"/></svg></span>Website<span class="ez-unsichtbar"> von Muster Fensterbau</span></a></li>
           </ul>
         </article>
       </div>
@@ -277,9 +275,9 @@
       <footer class="ez-fuss" role="contentinfo">
         <div class="ez-fuss__marken">
           <span class="ez-firma"><span class="ez-firma__zeichen" data-vorlage="firma.zeichen">M</span><span class="ez-firma__name" data-vorlage="firma.name">Muster Fensterbau</span></span>
-          <span class="ez-gast ez-gast--fuss" role="img" aria-label="Powered by eeziframes"><span class="ez-gast__von" aria-hidden="true">Powered by</span><span class="ez-marke" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".14"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></span></span>
+          <span class="ez-gast ez-gast--fuss" role="img" aria-label="Powered by eeziframes" lang="en"><span class="ez-gast__von" aria-hidden="true" lang="en">Powered by</span><span class="ez-marke" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".14"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></span></span>
         </div>
-        <p class="ez-fuss__satz">Dieser Konfigurator von <span data-vorlage="firma.name">Muster Fensterbau</span> läuft bei eeziframes unter <span class="ez-fuss__adresse" data-vorlage="firma.adresse"><b>muster-fensterbau</b>.eeziframes.com</span>. Ihr Aufmaß geht nur an <span data-vorlage="firma.name">Muster Fensterbau</span>.</p>
+        <p class="ez-fuss__satz">Dieser Konfigurator von <span data-vorlage="firma.name">Muster Fensterbau</span> läuft bei eeziframes unter <span class="ez-fuss__adresse" data-vorlage="firma.adresse"><b>muster-fensterbau</b><wbr>.eeziframes.com</span>. Ihre Anfrage geht nur an <span data-vorlage="firma.name">Muster Fensterbau</span>.</p>
         <ul class="ez-fuss__recht">
           <li><a href="#" data-vorlage="recht.impressum">Impressum von <span data-vorlage="firma.name">Muster Fensterbau</span></a></li>
           <li><a href="#" data-vorlage="recht.datenschutz">Datenschutz</a></li>
