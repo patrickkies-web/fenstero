@@ -4,7 +4,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* Layout: eine Spalte am Telefon, Kopf zweispaltig ab 1024 px. Dunkle Bühne, das Tageslicht kommt durchs Foto. Eine Farbwelt: Grün als Signal, Orange nur fürs Maß, Cream nur für die eine Hauptaktion je Bildschirm. */
+/* Layout: eine Spalte am Telefon, Kopf zweispaltig ab 1024 px. Dunkle Bühne, das Tageslicht kommt durchs Foto. Eine Farbwelt: Grün als Signal, Orange nur fürs Maß, Cream nur für die eine Hauptaktion je Bildschirm.
+   Reihenfolge: Kopf (nur Held, Satz, Handlung) · Band aus dem Konfigurator (läuft, mit Fakten) · Ablauf in vier Schritten · Aufmaßblatt · Preis · Ratgeber · Für Fensterbauer. */
 :root {
   --ground: #161616; --surface: #1f1f1f; --surface2: #262626; --surface3: #2e2e2e;
   --text: #f3f2ee; --text2: #c9c8c3; --muted: #93928d; --line: #2b2b2b; --line2: #3a3a36;
@@ -24,6 +25,7 @@ a { color: inherit }
 img { max-width: 100%; display: block }
 .wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r) }
 .wm { font-weight: 500; letter-spacing: -.02em } .wm b { font-weight: 800 }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
 
 /* Kopfzeile: klebt oben, verschwindet beim Lesen nach unten und kommt nach 24 px Hochscrollen zurück. Ihre Pille ist immer ein Umriss: Die eine Cream-Pille je Bildschirm gehört dem Inhalt. */
 .kopf { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--ground); transition: transform 320ms var(--e-out) }
@@ -32,17 +34,19 @@ img { max-width: 100%; display: block }
 .kopf .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; padding-block: 8px }
 .marke { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 17px }
 .marke svg { width: 28px; height: 28px; flex: 0 0 auto }
-.pille { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 0 18px 0 20px; border-radius: 999px; background: var(--cream); color: var(--on-cream); font: inherit; font-size: 15px; font-weight: 700; text-decoration: none; border: 0; cursor: pointer; transition: transform 220ms var(--e-out), background 220ms, color 220ms, box-shadow 220ms }
+.pille { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 0 18px 0 20px; border-radius: 999px; background: var(--cream); color: var(--on-cream); font: inherit; font-size: 15px; font-weight: 700; text-decoration: none; border: 0; cursor: pointer; white-space: nowrap; transition: transform 220ms var(--e-out), background 220ms, color 220ms, box-shadow 220ms }
 .pille:active { transform: scale(.98) }
 .pille .pf { width: 26px; height: 26px; border-radius: 50%; background: var(--on-cream); color: var(--cream); display: inline-grid; place-items: center; transition: transform 220ms var(--e-out), background 220ms, color 220ms }
 .pille .pf svg { width: 14px; height: 14px; stroke: currentColor }
-.pille:hover .pf, .pille:active .pf { transform: translateX(4px) }
-.pille.gross { min-height: 52px; font-size: 17px; padding: 0 20px 0 24px }
+.pille.gross { min-height: 52px; font-size: 17px; padding: 0 14px 0 20px; gap: 8px }
 .kopf .pille { background: transparent; color: var(--text); box-shadow: inset 0 0 0 2px var(--line2) }
-.kopf .pille:hover { box-shadow: inset 0 0 0 2px var(--text2) }
 .kopf .pille .pf { background: var(--text); color: var(--ground) }
-.geist { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 20px; border-radius: 999px; color: var(--text); font: inherit; font-size: 17px; font-weight: 700; text-decoration: none; box-shadow: inset 0 0 0 2px var(--line2); background: none; cursor: pointer; transition: transform 220ms var(--e-out), box-shadow 220ms }
-.geist:hover { box-shadow: inset 0 0 0 2px var(--text2) } .geist:active { transform: scale(.98) }
+.geist { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 14px; border-radius: 999px; color: var(--text); font: inherit; font-size: 17px; font-weight: 700; text-decoration: none; white-space: nowrap; box-shadow: inset 0 0 0 2px var(--line2); background: none; cursor: pointer; transition: transform 220ms var(--e-out), box-shadow 220ms }
+.geist:active { transform: scale(.98) }
+@media (hover: hover) and (pointer: fine) {
+  .pille:hover .pf { transform: translateX(4px) }
+  .kopf .pille:hover, .geist:hover { box-shadow: inset 0 0 0 2px var(--text2) }
+}
 
 /* Ansicht: Hauseigentümer oder Fensterbauer. Tonal, kein Glas: die gewählte Seite liegt oben auf, die andere ist ein erkennbarer Weg mit Pfeil. */
 .seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 2px 0 0; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line) }
@@ -52,64 +56,83 @@ img { max-width: 100%; display: block }
 .seg a[aria-current]::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent) }
 .seg .chev { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round }
 
-/* Kopf der Seite: das Foto ist der Held und bleibt frei; unter dem Preissatz die Leiste „Dazu planst du“ mit den Symbolen aus dem Konfigurator */
+/* Kopf der Seite: nur drei Dinge. Der Held (Foto), ein Satz, die Handlung. */
 .hero { padding-top: 8px }
-.foto { position: relative; margin: 0 calc(-1 * var(--gutter-l)) 0 calc(-1 * var(--gutter-r)); height: 360px; overflow: hidden }
+.foto { position: relative; margin: 0 calc(-1 * var(--gutter-l)) 0 calc(-1 * var(--gutter-r)); height: 420px; overflow: hidden }
 .foto img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform-origin: 50% 40% }
-.foto::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 190px; background: linear-gradient(0deg, var(--ground) 0%, var(--ground) 22%, rgba(22, 22, 22, .6) 55%, rgba(22, 22, 22, 0) 100%); pointer-events: none }
-.kicker { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--accent) }
-.hero .text { position: relative; z-index: 2; margin-top: -112px }
-h1 { margin: 6px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
+.foto::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 170px; background: linear-gradient(0deg, var(--ground) 0%, var(--ground) 20%, rgba(22, 22, 22, .6) 55%, rgba(22, 22, 22, 0) 100%); pointer-events: none }
+.hero .text { position: relative; z-index: 2; margin-top: -100px }
+h1 { margin: 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
 h1 .zeile { display: block; overflow: clip }
 h1 .zeile > span { display: block }
-h1 .ak { color: var(--accent) }
-.lead { margin: 8px 0 0; font-size: 17px; line-height: 1.45; color: var(--text2); max-width: 36ch; text-wrap: pretty }
-.lead b { color: var(--text); font-weight: 600 }
-.cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 48px }
-.hero .cta { margin-top: 24px }
-.preiszeile { margin: 14px 0 0; font-size: 15px; line-height: 1.4; color: var(--text2); max-width: 40ch; text-wrap: pretty }
-.preiszeile b { color: var(--text); font-weight: 700 }
-/* Bausteine: was man in der App plant. Am Telefon eine wischbare Leiste bis an den Rand, rechts ausgeblendet (es kommt mehr); ab 720 px umbrochen. Keine Knöpfe: Schilder ohne Hover und ohne Pfeil. */
-.bausteine { list-style: none; display: flex; align-items: center; gap: 8px; margin: 14px calc(-1 * var(--gutter-r)) 0 calc(-1 * var(--gutter-l)); padding: 2px var(--gutter-r) 2px var(--gutter-l); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-left: var(--gutter-l); scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent) }
-.bausteine::-webkit-scrollbar { display: none }
-.bausteine.ende { -webkit-mask-image: none; mask-image: none }
-.bausteine li { flex: 0 0 auto; scroll-snap-align: start }
-.baustein { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 13px 0 7px; border-radius: 999px; background: rgba(243, 242, 238, .075); font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; cursor: default }
-.baustein svg { width: 24px; height: 24px; flex: 0 0 auto }
-@media (max-width: 719px) {
-  /* Telefon: so schmal, dass der vierte Baustein unter der Ausblendung sichtbar anschaut */
-  .bausteine { gap: 6px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent) }
-  .baustein { gap: 5px; padding: 0 11px 0 6px }
-  .baustein svg { width: 22px; height: 22px }
-}
-.hint { margin: 6px 0 0; font-size: 13px; color: var(--muted); max-width: 46ch; text-wrap: pretty }
-
-/* Messband: füllt sich mit dem Lesen */
-.band { position: relative; height: 26px; margin: 22px 0 0; overflow: hidden }
-.band svg { position: absolute; inset: 0; width: 100%; height: 100% }
-.band .fuell { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, rgba(143, 214, 148, .28), rgba(143, 214, 148, .12)); mix-blend-mode: screen }
+.ak { color: var(--accent) }
+.lead { margin: 10px 0 0; font-size: 17px; line-height: 1.45; color: var(--text2); max-width: 34ch; text-wrap: pretty }
+.lead b { color: var(--text); font-weight: 700 }
+.cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px }
 
 /* Abschnitte */
-.abschnitt { padding-block: 56px 0 }
-.abschnitt .kopfzeile { max-width: 40ch }
-h2 { margin: 6px 0 0; font-size: 24px; line-height: 1.1; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
-h2 .ak { color: var(--accent) }
-.sub { margin: 10px 0 0; font-size: 17px; color: var(--text2); max-width: 36ch; text-wrap: pretty }
+.abschnitt { padding-block: 72px 0 }
+.kopfzeile { max-width: 760px }
+.kicker { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--accent) }
+h2 { margin: 8px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
+.sub { margin: 12px 0 0; font-size: 17px; color: var(--text2); max-width: 38ch; text-wrap: pretty }
 .haar { height: 1px; background: var(--line); transform-origin: 0 50%; margin-bottom: 18px }
 
-/* Drei Schritte: Beschriftung über dem Bildschirm, die Bildschirme kleiner als die Abschnittsüberschrift */
-.schritte { display: grid; gap: 30px; margin-top: 26px }
-.schritt { display: grid; gap: 10px; align-content: start }
-.schritt .ks { display: flex; align-items: baseline; gap: 10px }
-.nr { font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); white-space: nowrap }
-.schritt h3 { margin: 0; font-size: 17px; font-weight: 700 }
-.schirm { position: relative; width: 100%; max-width: 280px; border-radius: 20px; border: 6px solid var(--surface2); background: var(--surface); overflow: hidden; aspect-ratio: 390 / 560; box-shadow: 0 18px 40px rgba(0, 0, 0, .45) }
-.schirm img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0 }
-.schirm.blatt { max-width: none; aspect-ratio: 920 / 872; border-radius: 12px; background: #fff }
-.schirm.blatt img { object-position: 50% 50% }
-.schritt p { margin: 0; font-size: 15px; color: var(--text2); max-width: 34ch }
+/* Band aus dem Konfigurator: eine Reihe echter Fenster aus dem 3-D-Modell der App, darunter die Fakten; beide laufen langsam und gegenläufig, nur im Bild.
+   Halt-Knopf (WCAG 2.2.2), Finger oder Maus darauf hält weich an. Bei „weniger Bewegung“ steht alles und lässt sich wischen. */
+.lauf { padding: 72px 0 8px; overflow: clip }
+.lauf-kopf { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 28px }
+.lauf-halt { flex: 0 0 auto; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 0; box-shadow: inset 0 0 0 1px var(--line2); background: rgba(243, 242, 238, .06); color: var(--text); cursor: pointer; transition: transform 220ms var(--e-out) }
+.lauf-halt:active { transform: scale(.96) }
+.lauf-halt svg { width: 14px; height: 14px }
+.lauf-halt .i-weiter { display: none }
+.lauf-halt[aria-pressed="true"] .i-halt { display: none }
+.lauf-halt[aria-pressed="true"] .i-weiter { display: block }
+.laufband { overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent) }
+.laufband::-webkit-scrollbar { display: none }
+.laufband.bereit { overflow: hidden }
+.spur { --spalt: 14px; display: flex; gap: var(--spalt); width: max-content; margin: 0; padding: 0 var(--spalt) 0 0; list-style: none }
+.laufband.bereit .spur { animation: lauf var(--dauer) linear infinite }
+.laufband.zahlen.bereit .spur { animation-direction: reverse }
+@keyframes lauf { to { transform: translateX(-50%) } }
+.laufband.bilder { padding: 6px 0 22px }
+.karte { position: relative; display: grid; gap: 3px; width: 220px; text-decoration: none; border-radius: 24px }
+.karte-bild { display: block; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; margin-bottom: 10px; background: radial-gradient(circle at 50% 40%, rgba(241, 240, 234, .10), rgba(241, 240, 234, 0) 64%), var(--surface); box-shadow: inset 0 0 0 1px var(--line2); transition: transform 260ms var(--e-out) }
+.karte-bild img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .45)) }
+.karte-titel { font-size: 15px; font-weight: 700; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.karte-was { font-size: 13px; color: var(--muted); padding: 0 4px; white-space: nowrap }
+.karte-pfeil { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(22, 22, 22, .7); box-shadow: inset 0 0 0 1px var(--line2); color: var(--text); transition: background 160ms, color 160ms }
+.karte-pfeil svg { width: 16px; height: 16px }
+.karte:active { transform: scale(.98) }
+@media (hover: hover) and (pointer: fine) {
+  .karte:hover .karte-bild { transform: translateY(-6px) }
+  .karte:hover .karte-pfeil { background: var(--cream); color: var(--ground) }
+}
+.zahl { display: flex; align-items: baseline; gap: 12px; white-space: nowrap }
+.zahl-wert { font-size: 32px; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums }
+.zahl-label { font-size: 15px; color: var(--text2) }
+.zahl-trenner { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin: 0 10px; align-self: center }
+.laufband.zahlen .spur { --spalt: 24px }
+.lauf-fuss { margin: 22px auto 0; font-size: 13px; color: var(--muted) }
+
+/* Ablauf in vier Schritten: Telefon als senkrechte Linie mit Nummern, ab 900 px vier Spalten mit waagerechter Linie */
+.schritte4 { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 34px }
+.s4 { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 14px; align-items: start }
+.s4-nr { grid-row: 1 / span 3; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--line2); background: var(--surface); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text) }
+.s4.konf .s4-nr { box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent) }
+.s4:not(:last-child)::after { content: ""; position: absolute; left: 19.5px; top: 48px; bottom: -26px; width: 1px; background: var(--line2) }
+.s4 h3 { grid-column: 2; margin: 8px 0 0; font-size: 17px; font-weight: 700; line-height: 1.25 }
+.s4 p { grid-column: 2; margin: 4px 0 0; font-size: 15px; color: var(--text2); max-width: 36ch; text-wrap: pretty }
+.s4-bild { grid-column: 2; margin: 14px 0 0; width: 100%; max-width: 240px; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line2), 0 16px 36px rgba(0, 0, 0, .4) }
+.s4-bild img { width: 100%; height: 100%; object-fit: cover }
+.s4-bild.papier { background: #fff }
+.ablauf-fuss { margin: 30px 0 0; font-size: 15px; color: var(--text2); max-width: 46ch }
+.ablauf-fuss a { color: var(--text); font-weight: 700; text-underline-offset: 4px }
 
 /* Aufmaßblatt und Liste */
+.schirm { position: relative; width: 100%; border-radius: 12px; border: 6px solid var(--surface2); overflow: hidden; box-shadow: 0 18px 40px rgba(0, 0, 0, .45) }
+.schirm img { width: 100%; height: 100%; object-fit: cover }
+.schirm.blatt { aspect-ratio: 920 / 872; background: #fff }
 .blattblock { display: grid; gap: 24px; margin-top: 24px; align-items: start }
 .medien { position: relative; margin: 8px 8px 0 }
 .medien .schirm { transform: rotate(-1.5deg) }
@@ -124,13 +147,6 @@ h2 .ak { color: var(--accent) }
 .beispiel b { color: var(--text2); font-weight: 600 }
 .linkzeile { display: inline-flex; align-items: center; min-height: 44px; margin-top: 4px; font-size: 15px; font-weight: 700; color: var(--text); text-decoration: underline; text-underline-offset: 4px }
 
-/* Elementarten: Symbole 56 px, Namen auf einer Linie (Subgrid) */
-.arten { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 8px; margin-top: 22px; max-width: 600px }
-.art { display: grid; grid-row: span 3; grid-template-rows: subgrid; justify-items: center; align-content: start; gap: 6px; text-align: center }
-.art svg { width: 56px; height: 56px }
-.art b { font-size: 13px; line-height: 1.2; font-weight: 700; color: var(--text); hyphens: manual }
-.art span { font-size: 13px; line-height: 1.2; color: var(--muted) }
-
 /* Preis */
 .preis { margin-top: 24px; display: grid; gap: 6px }
 .preis .zahl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 40px; line-height: 1; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums }
@@ -139,6 +155,7 @@ h2 .ak { color: var(--accent) }
 .preis .frei { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 15px; color: var(--text2) }
 .preis .frei span { display: inline-flex; align-items: center; gap: 6px }
 .preis .frei svg { width: 14px; height: 14px; color: var(--accent) }
+.preis .cta { margin-top: 28px }
 
 /* Ratgeber */
 .rat { list-style: none; margin: 18px 0 0; padding: 0; display: grid }
@@ -149,7 +166,8 @@ h2 .ak { color: var(--accent) }
 .rat svg { flex: 0 0 auto; width: 18px; height: 18px; color: var(--muted) }
 
 /* Für Fensterbauer */
-.fb { margin-top: 56px; padding: 28px 20px; border-radius: 22px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--line) }
+.fb { margin-top: 64px; padding: 28px 20px; border-radius: 22px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--line) }
+.fb h2 { font-size: 24px }
 .fb p { margin: 10px 0 0; font-size: 17px; color: var(--text2); max-width: 44ch; text-wrap: pretty }
 .fb p b { color: var(--text); font-weight: 600 }
 .fb .pilot { font-size: 15px; color: var(--text2); margin-top: 14px; max-width: 48ch }
@@ -162,55 +180,67 @@ h2 .ak { color: var(--accent) }
 .fuss a { text-decoration: none; color: var(--muted); min-height: 32px; display: inline-flex; align-items: center }
 .fuss a:hover { color: var(--text) }
 
-/* Auftritt, vier Takte (ms): 0 Foto 1,06 → 1 (900) · 0 Kicker, 0/80 Zeilen der Überschrift aus der Maske (500, fertig bei 580), 160 Lead (500) · 420 Bausteine gleiten von rechts in die Leiste, je 50 ms später (320; zeigt: da kommt mehr) · Pille und Hinweis stehen von Bild eins an. Nach 1,1 s Stille. */
+/* Auftritt, drei Takte (ms): 0 Foto 1,06 → 1 (900) · 0/80 Zeilen der Überschrift aus der Maske (500) · 160 Satz (500). Die Knöpfe stehen von Bild eins an. Nach 0,9 s Stille. */
 .an .foto img { animation: foto 900ms var(--e-auf) both }
 @keyframes foto { from { transform: scale(1.06) } to { transform: scale(1) } }
-.an .kicker.k1 { animation: auf 500ms var(--e-auf) both }
 .an h1 .zeile:nth-child(1) > span { animation: maske 500ms var(--e-auf) both }
 .an h1 .zeile:nth-child(2) > span { animation: maske 500ms var(--e-auf) 80ms both }
 .an .lead { animation: auf 500ms var(--e-auf) 160ms both }
-.an .bausteine li { animation: rein 320ms var(--e-auf) both; animation-delay: calc(420ms + var(--i, 0) * 50ms) }
 @keyframes auf { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
 @keyframes maske { from { transform: translateY(110%) } to { transform: none } }
-@keyframes rein { from { opacity: 0; transform: translateX(16px) } to { opacity: 1; transform: none } }
-/* Bis die Schrift geladen ist, stehen die Takte auf ihrem ersten Bild (sonst springt die Maske beim Schriftwechsel) */
-.an.warte .foto img, .an.warte .kicker.k1, .an.warte h1 .zeile > span, .an.warte .lead, .an.warte .bausteine li { animation-play-state: paused }
+.an.warte .foto img, .an.warte h1 .zeile > span, .an.warte .lead { animation-play-state: paused }
 
 /* Abschnitte erscheinen einmal, wenn 15 % im Bild sind: 600 ms, 12 px */
 .rev .haar { transform: scaleX(0); transition: transform 600ms var(--e-auf) }
-.rev .kicker, .rev h2, .rev .sub, .rev .schritt, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .arten, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 0; transform: translateY(12px); transition: opacity 600ms var(--e-auf), transform 600ms var(--e-auf) }
-.rev .kicker { transition-delay: 80ms } .rev h2 { transition-delay: 120ms } .rev .sub { transition-delay: 240ms }
-.rev .schritt, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .arten, .rev .preis, .rev .rat, .rev .fb-inhalt { transition-delay: 360ms }
+.rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .s4, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 0; transform: translateY(12px); transition: opacity 600ms var(--e-auf), transform 600ms var(--e-auf) }
+.rev .kopfzeile > :nth-child(2), .rev .lauf-kopf > :nth-child(2) { transition-delay: 80ms }
+.rev .kopfzeile > :nth-child(3) { transition-delay: 160ms }
+.rev .laufband.bilder { transition-delay: 160ms } .rev .laufband.zahlen { transition-delay: 240ms }
+.rev .s4:nth-child(1) { transition-delay: 200ms } .rev .s4:nth-child(2) { transition-delay: 260ms } .rev .s4:nth-child(3) { transition-delay: 320ms } .rev .s4:nth-child(4) { transition-delay: 380ms }
+.rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt, .rev .ablauf-fuss { transition-delay: 240ms }
 .rev.in .haar { transform: none }
-.rev.in .kicker, .rev.in h2, .rev.in .sub, .rev.in .schritt, .rev.in .medien, .rev.in .liste, .rev.in .beispiel, .rev.in .linkzeile, .rev.in .arten, .rev.in .preis, .rev.in .rat, .rev.in .fb-inhalt { opacity: 1; transform: none }
+.rev.in .kopfzeile > *, .rev.in .lauf-kopf > *, .rev.in .laufband, .rev.in .s4, .rev.in .ablauf-fuss, .rev.in .medien, .rev.in .liste, .rev.in .beispiel, .rev.in .linkzeile, .rev.in .preis, .rev.in .rat, .rev.in .fb-inhalt { opacity: 1; transform: none }
 
 @media (prefers-reduced-motion: reduce) {
-  .an .foto img, .an .kicker.k1, .an h1 .zeile > span, .an .lead, .an .bausteine li { animation: none }
-  .foto img { transform: none }
-  .rev .haar, .rev .kicker, .rev h2, .rev .sub, .rev .schritt, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .arten, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 1; transform: none; transition: none }
-  .band .fuell { transition: none }
-  .pille, .geist, .pille .pf, .kopf { transition: none }
+  .an .foto img, .an h1 .zeile > span, .an .lead { animation: none }
+  .rev .haar, .rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .s4, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 1; transform: none; transition: none }
+  .pille, .geist, .pille .pf, .kopf, .karte-bild, .lauf-halt { transition: none }
+  .spur [data-klon] { display: none }
 }
 
 @media (min-width: 720px) {
-  .schritte { grid-template-columns: repeat(3, 1fr); gap: 24px }
   .blattblock { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px }
   .liste { grid-template-columns: 1fr 1fr }
-  .arten { grid-template-columns: repeat(6, 1fr); max-width: none }
-  .bausteine { flex-wrap: wrap; overflow: visible; margin-left: 0; margin-right: 0; padding: 0; max-width: 470px; -webkit-mask-image: none; mask-image: none }
+  .karte { width: 260px }
+  .zahl-wert { font-size: 40px }
+  .zahl-label { font-size: 17px }
+  .spur { --spalt: 18px }
+}
+@media (min-width: 900px) {
+  /* Ablauf: vier Spalten, Nummern auf einer waagerechten Linie */
+  .schritte4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 40px }
+  .s4 { grid-template-columns: minmax(0, 1fr); row-gap: 0 }
+  .s4-nr { grid-row: auto }
+  .s4:not(:last-child)::after { left: 48px; right: -24px; top: 19.5px; bottom: auto; width: auto; height: 1px }
+  .s4-bild, .s4 h3, .s4 p { grid-column: 1 }
+  .s4-bild { order: 2; margin-top: 18px; max-width: none }
+  .s4 h3 { order: 3; margin-top: 16px }
+  .s4 p { order: 4 }
 }
 @media (min-width: 1024px) {
   .seg { width: 320px; margin: 0 auto }
-  .hero { display: grid; grid-template-columns: minmax(0, 1fr) 520px; gap: 48px; align-items: center; padding-top: 28px }
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) 540px; gap: 56px; align-items: center; padding-top: 28px }
   .hero .text { order: 1; margin-top: 0 }
   .hero .fotohalter { order: 2 }
-  .foto { margin: 0; height: 520px; border-radius: 24px }
-  .foto::after { height: 120px; background: linear-gradient(0deg, rgba(22, 22, 22, .7), rgba(22, 22, 22, 0)) }
+  .foto { margin: 0; height: 540px; border-radius: 24px }
+  .foto::after { display: none }
   h1 { font-size: 40px }
-  .lead { max-width: 44ch }
-  h2 { font-size: 32px }
-  .abschnitt { padding-top: 80px }
+  .lead { max-width: 36ch }
+  h2 { font-size: 40px }
+  .abschnitt { padding-top: 104px }
+  .lauf { padding-top: 104px }
   .fb { padding: 40px }
+  .fb h2 { font-size: 32px }
 }
 </style>
 
@@ -221,32 +251,40 @@ h2 .ak { color: var(--accent) }
 
 <div class="wrap"><nav class="seg" aria-label="Ansicht wählen"><a href="#" aria-current="page">Hauseigentümer</a><a href="#fensterbauer">Fensterbauer<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></a></nav></div>
 
-<main class="wrap">
+<main>
+<div class="wrap">
 <section class="hero" id="kopf">
   <div class="fotohalter"><div class="foto">
     <img src="bilder/hero.webp" width="1250" height="1250" alt="Ein Waschbär steht auf einem Tritt und misst mit dem Zollstock die Maueröffnung eines Fensters, in der anderen Pfote das Handy" fetchpriority="high">
   </div></div>
   <div class="text">
-    <p class="kicker k1">Aufmaß für jeden Fensterbauer</p>
     <h1><span class="zeile"><span>Fenster ausmessen.</span></span><span class="zeile"><span>Selbst. <span class="ak">eezi.</span></span></span></h1>
-    <p class="lead">Zwei Fotos, vier Maße mit dem Zollstock. Dann planst du dein neues Fenster:</p>
-    <ul class="bausteine" id="bausteine" aria-label="Dazu planst du in der App"><li style="--i: 0"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M15.2 8h33.6a1.2 1.2 0 0 1 1.2 1.2v45.6a1.2 1.2 0 0 1 -1.2 1.2h-33.6a1.2 1.2 0 0 1 -1.2 -1.2v-45.6a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16.2 10.2h31.7v43.7h-31.7Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 13h26v38h-26Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 13L45 32L19 51" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 51L32 13L45 51" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>Öffnungsart</span></li><li style="--i: 1"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M25 10h20a3 3 0 0 1 3 3v38a3 3 0 0 1 -3 3h-20a3 3 0 0 1 -3 -3v-38a3 3 0 0 1 3 -3Z" fill="#d9b48a" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M27 16c5 10 5 22 0 34M36 14c4 8 4 22 0 34" fill="none" stroke="#a3763f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 8h5a2 2 0 0 1 2 2v44a2 2 0 0 1 -2 2h-5a2 2 0 0 1 -2 -2v-44a2 2 0 0 1 2 -2Z" fill="#c8cdd2" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>Material</span></li><li style="--i: 2"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M9 24a11 11 0 1 0 22 0a11 11 0 1 0 -22 0Z" fill="#383e42" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M29 24a11 11 0 1 0 22 0a11 11 0 1 0 -22 0Z" fill="#f1f0ea" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 42a11 11 0 1 0 22 0a11 11 0 1 0 -22 0Z" fill="#b5732f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>Farbe</span></li><li style="--i: 3"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M13.5 4h37a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1 -1.5 1.5h-37a1.5 1.5 0 0 1 -1.5 -1.5v-3a1.5 1.5 0 0 1 1.5 -1.5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.5 54h37a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1 -1.5 1.5h-37a1.5 1.5 0 0 1 -1.5 -1.5v-3a1.5 1.5 0 0 1 1.5 -1.5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 10L22 54" fill="none" stroke="#5b9bd5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 10L32 54" fill="none" stroke="#5b9bd5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M42 10L42 54" fill="none" stroke="#5b9bd5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>Glas</span></li><li style="--i: 4"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M15.2 8h33.6a1.2 1.2 0 0 1 1.2 1.2v45.6a1.2 1.2 0 0 1 -1.2 1.2h-33.6a1.2 1.2 0 0 1 -1.2 -1.2v-45.6a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 12h28v40h-28Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 12L32 52" fill="none" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 32L46 32" fill="none" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Sprossen</span></li><li style="--i: 5"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M31 6h2a5 5 0 0 1 5 5v14a5 5 0 0 1 -5 5h-2a5 5 0 0 1 -5 -5v-14a5 5 0 0 1 5 -5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 18h0a3 3 0 0 1 3 3v34a3 3 0 0 1 -3 3h0a3 3 0 0 1 -3 -3v-34a3 3 0 0 1 3 -3Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M29.6 12a2.4 2.4 0 1 0 4.8 0a2.4 2.4 0 1 0 -4.8 0Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M32 12L32 15.5" fill="none" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Griff</span></li><li style="--i: 6"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M32 5l20 8v15c0 13-8 23-20 31C20 51 12 41 12 28V13z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M27 28h10a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M28 28v-4a4 4 0 0 1 8 0v4" fill="none" stroke="#1d1d1f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>Sicherheit</span></li><li style="--i: 7"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M14 2h36v10h-36Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 54h36v8h-36Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 12h20v42h-20Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M24.5 14.5h15v37h-15Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19.5 10h25a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1 -1.5 1.5h-25a1.5 1.5 0 0 1 -1.5 -1.5v-4a1.5 1.5 0 0 1 1.5 -1.5Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 19h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 22h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 25h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 28h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 31h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20.6 34h22.8a0.6 0.6 0 0 1 0.6 0.6v1.4a0.6 0.6 0 0 1 -0.6 0.6h-22.8a0.6 0.6 0 0 1 -0.6 -0.6v-1.4a0.6 0.6 0 0 1 0.6 -0.6Z" fill="#b9bdc2" stroke="#1d1d1f" stroke-width="0.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Rollladen</span></li><li style="--i: 8"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M14 6h36a2 2 0 0 1 2 2v48a2 2 0 0 1 -2 2h-36a2 2 0 0 1 -2 -2v-48a2 2 0 0 1 2 -2Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17 11h30v42h-30Z" fill="#eef1f4" stroke="#1d1d1f" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20 11L20 53M24 11L24 53M28 11L28 53M32 11L32 53M36 11L36 53M40 11L40 53M44 11L44 53M17 14L47 14M17 18L47 18M17 22L47 22M17 26L47 26M17 30L47 30M17 34L47 34M17 38L47 38M17 42L47 42M17 46L47 46M17 50L47 50" fill="none" stroke="#a1a1a6" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 16h1a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-1a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 41h1a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-1a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M52 58A40 40 0 0 0 52 18" fill="none" stroke="#a1a1a6" stroke-width="1" stroke-dasharray="2 2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Insektenschutz</span></li><li style="--i: 9"><span class="baustein"><svg aria-hidden="true" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M6 30h40v24h-40Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M30 8h8v22h-8Z" fill="#ffffff" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M38 30L60 32L60 35L38 33Z" fill="#c8cdd2" stroke="#1d1d1f" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Fensterbank</span></li></ul>
-    <div class="cta"><a class="pille gross" href="#"><span>Jetzt ausmessen</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a><a class="geist" href="#">Führung starten</a></div>
-    <p class="preiszeile"><b>Messen ist kostenlos</b>, das Aufmaßblatt für alle Fenster kostet einmal 7,99&nbsp;€.</p>
-    <p class="hint">Führung: zwei Minuten, ohne eigene Maße · kein Konto · keine App aus dem Store<br>Dein Aufmaß samt Fotos bleibt auf deinem Gerät, bis du es sicherst oder sendest.</p>
+    <p class="lead"><b>Messen kostet nichts.</b> Das Aufmaßblatt für jeden Fensterbauer kostet einmal 7,99&nbsp;€.</p>
+    <div class="cta"><a class="pille gross" href="#"><span>Jetzt ausmessen</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a><a class="geist" href="#">Erst ansehen</a></div>
   </div>
 </section>
+</div>
 
-<div class="band" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none"><defs><pattern id="mm" width="10" height="26" patternUnits="userSpaceOnUse"><path d="M0 26V18" stroke="#3a3a36" stroke-width="1"/></pattern><pattern id="cm" width="100" height="26" patternUnits="userSpaceOnUse"><path d="M0 26V6" stroke="#93928d" stroke-width="1.2"/><path d="M50 26V12" stroke="#5a5a56" stroke-width="1"/></pattern></defs><rect width="1000" height="26" fill="url(#mm)"/><rect width="1000" height="26" fill="url(#cm)"/><path d="M0 25.5H1000" stroke="#3a3a36"/></svg><div class="fuell" id="fuell"></div></div>
-
-<section class="abschnitt rev" id="so">
-  <div class="haar"></div>
-  <div class="kopfzeile"><p class="kicker">So geht es</p><h2>Wählen, messen, <span class="ak">fertig.</span></h2><p class="sub">Sechs kurze Schritte, Fenster für Fenster, wie beim Termin vor Ort. Drei davon:</p></div>
-  <div class="schritte">
-    <div class="schritt"><div class="ks"><span class="nr">Schritt 1</span><h3>Element wählen</h3></div><div class="schirm"><img src="bilder/app-schritt1.jpg" width="780" height="1688" alt="Schritt 1 der App: das Fenster schwebt auf der Bühne, darunter die Auswahl der Elementart" loading="lazy"></div><p>Fenster, Balkontür, Hebe-Schiebe-Tür oder Faltschiebewand: antippen, fertig.</p></div>
-    <div class="schritt"><div class="ks"><span class="nr">Schritt 4</span><h3>Vier Maße, dann die Ränder</h3></div><div class="schirm"><img src="bilder/app-messen.jpg" width="780" height="1688" alt="Maß 1 von 4 in der App: die Höhe der Öffnung, die Zahl erscheint direkt an der Maßlinie im Bild" loading="lazy"></div><p>Jedes Maß zeigt im Bild, wo du den Zollstock anlegst. Tippst du Zentimeter, fragt die App nach.</p></div>
-    <div class="schritt"><div class="ks"><span class="nr">Schritt 5</span><h3>Dein Aufmaß steht</h3></div><div class="schirm"><img src="bilder/app-ergebnis.jpg" width="780" height="1688" alt="Schritt 5 der App: Dein Aufmaß steht, das Fenster als 3-D-Modell mit allen vier Maßen" loading="lazy"></div><p>Alle Maße am 3-D-Modell, dann das Aufmaßblatt als PDF: Du gibst es jedem Fensterbauer deiner Wahl. Hat dich ein Fensterbauer per Link eingeladen, geht es direkt an ihn und kostet nichts.</p></div>
+<section class="lauf rev" id="fenster" aria-labelledby="lauf-titel">
+  <div class="wrap lauf-kopf">
+    <div><p class="kicker">Aus dem Konfigurator</p><h2 id="lauf-titel">Jedes Fenster. Bis ins <span class="ak">Detail.</span></h2></div>
+    <button class="lauf-halt" type="button" aria-pressed="false" aria-label="Laufbänder anhalten" hidden><svg class="i-halt" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg><svg class="i-weiter" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9.5-5.5z"/></svg></button>
   </div>
+  <div class="laufband bilder" style="--dauer: 60s"><ul class="spur"><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/dk2.webp" width="480" height="600" alt="3-D-Modell aus der App: zweiflügliges Dreh-Kipp-Fenster aus Kunststoff in Anthrazitgrau" loading="lazy" decoding="async"></span><span class="karte-titel">Dreh-Kipp, 2-flüglig</span><span class="karte-was">Kunststoff · Anthrazitgrau</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/rundbogen1.webp" width="480" height="600" alt="3-D-Modell aus der App: Rundbogenfenster aus Holz in Eiche hell" loading="lazy" decoding="async"></span><span class="karte-titel">Rundbogenfenster</span><span class="karte-was">Holz · Eiche hell</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/balkon.webp" width="480" height="600" alt="3-D-Modell aus der App: Balkontür aus Kunststoff in Verkehrsweiß" loading="lazy" decoding="async"></span><span class="karte-titel">Balkontür</span><span class="karte-was">Kunststoff · Verkehrsweiß</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/hst.webp" width="480" height="600" alt="3-D-Modell aus der App: Hebe-Schiebe-Tür aus Aluminium in Tiefschwarz" loading="lazy" decoding="async"></span><span class="karte-titel">Hebe-Schiebe-Tür</span><span class="karte-was">Aluminium · Tiefschwarz</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/sprossekreuz.webp" width="480" height="600" alt="3-D-Modell aus der App: Holzfenster in Cremeweiß mit glasteilenden Sprossen" loading="lazy" decoding="async"></span><span class="karte-titel">Glasteilende Sprossen</span><span class="karte-was">Holz · Cremeweiß</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/trapez.webp" width="480" height="600" alt="3-D-Modell aus der App: trapezförmige Festverglasung aus Aluminium in Anthrazitgrau" loading="lazy" decoding="async"></span><span class="karte-titel">Festverglasung, Trapez</span><span class="karte-was">Aluminium · Anthrazitgrau</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/dreifluegel.webp" width="480" height="600" alt="3-D-Modell aus der App: dreiflügliges Fenster aus Kunststoff im Holzdekor Golden Oak" loading="lazy" decoding="async"></span><span class="karte-titel">Dreh-Kipp, 3-flüglig</span><span class="karte-was">Kunststoff · Golden Oak</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/psk.webp" width="480" height="600" alt="3-D-Modell aus der App: Parallel-Schiebe-Kipp-Tür aus Kunststoff-Alu, innen weiß" loading="lazy" decoding="async"></span><span class="karte-titel">PSK-Tür</span><span class="karte-was">Kunststoff-Alu · innen weiß</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/fsw.webp" width="480" height="600" alt="3-D-Modell aus der App: Faltschiebewand aus Aluminium in DB 703" loading="lazy" decoding="async"></span><span class="karte-titel">Faltschiebewand</span><span class="karte-was">Aluminium · DB 703</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li><li><a class="karte" href="#"><span class="karte-bild"><img src="bilder/reihe/sprosse.webp" width="480" height="600" alt="3-D-Modell aus der App: zweiflügliges Kunststofffenster in Verkehrsweiß mit Wiener Sprossen" loading="lazy" decoding="async"></span><span class="karte-titel">Mit Wiener Sprosse</span><span class="karte-was">Kunststoff · Verkehrsweiß</span><span class="karte-pfeil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr">, in der App planen</span></a></li></ul></div>
+  <div class="laufband zahlen" style="--dauer: 70s"><ul class="spur"><li class="zahl"><span class="zahl-wert">6</span><span class="zahl-label">Elementarten</span><span class="zahl-trenner" aria-hidden="true"></span></li><li class="zahl"><span class="zahl-wert">7</span><span class="zahl-label">Fensterformen</span><span class="zahl-trenner" aria-hidden="true"></span></li><li class="zahl"><span class="zahl-wert">5</span><span class="zahl-label">Materialien</span><span class="zahl-trenner" aria-hidden="true"></span></li><li class="zahl"><span class="zahl-wert">239</span><span class="zahl-label">Farben und Dekore</span><span class="zahl-trenner" aria-hidden="true"></span></li><li class="zahl"><span class="zahl-wert">7</span><span class="zahl-label">Glas-Extras</span><span class="zahl-trenner" aria-hidden="true"></span></li><li class="zahl"><span class="zahl-wert">6</span><span class="zahl-label">Arten Insektenschutz</span><span class="zahl-trenner" aria-hidden="true"></span></li><li class="zahl"><span class="zahl-wert">124</span><span class="zahl-label">Begriffe erklärt</span><span class="zahl-trenner" aria-hidden="true"></span></li><li class="zahl"><span class="zahl-wert">0&nbsp;€</span><span class="zahl-label">fürs Messen</span><span class="zahl-trenner" aria-hidden="true"></span></li></ul></div>
+  <p class="wrap lauf-fuss">Alle Fenster: Ansichten aus dem 3-D-Modell der App. Alle Zahlen: Auswahl in der App, Stand Oktober 2026.</p>
+</section>
+
+<div class="wrap">
+<section class="abschnitt rev" id="so">
+  <div class="kopfzeile"><p class="kicker">So geht es</p><h2>Vom Zollstock zum <span class="ak">Aufmaß.</span></h2><p class="sub">Die App führt dich Fenster für Fenster durch, wie beim Termin vor Ort. Ohne Konto, ohne App aus dem Store.</p></div>
+  <ol class="schritte4">
+    <li class="s4"><span class="s4-nr">01</span><figure class="s4-bild"><img src="bilder/ablauf/fotos.webp" width="600" height="800" alt="App, Schritt Fotos: Fotografiere das Fenster, einmal von innen, einmal von außen" loading="lazy"></figure><h3>Fotografieren</h3><p>Ein Foto von innen, eins von außen. Daraus liest die App die Einbausituation für deinen Fensterbauer.</p></li>
+    <li class="s4"><span class="s4-nr">02</span><figure class="s4-bild"><img src="bilder/ablauf/messen.webp" width="600" height="800" alt="App, Maß 1 von 4: Höhe in der Mitte, die orange Linie zeigt, wo der Zollstock anliegt" loading="lazy"></figure><h3>Messen</h3><p>Vier Maße mit dem Zollstock. Die App zeigt im Bild, wo du anlegst, und fragt nach, wenn etwas nicht passt.</p></li>
+    <li class="s4 konf"><span class="s4-nr">03</span><figure class="s4-bild"><img src="bilder/ablauf/farbe.webp" width="600" height="800" alt="App, Material und Farbe: das Fenster als 3-D-Modell in Anthrazitgrau, darunter die Farbfelder" loading="lazy"></figure><h3>Konfigurieren</h3><p>Öffnungsart, Material, Farbe, Glas, Rollladen: Du wählst, das 3-D-Modell zeigt es sofort. Unsicher? Dein Fensterbauer berät dich.</p></li>
+    <li class="s4"><span class="s4-nr">04</span><figure class="s4-bild papier"><img src="bilder/ablauf/blatt.webp" width="600" height="800" alt="Ausschnitt eines Aufmaßblatts: Familie Weber, Übersicht der Fenster mit Öffnung und Element" loading="lazy"></figure><h3>Aufmaßblatt</h3><p>Alles auf einem Blatt als PDF, das jeder Fensterbauer lesen kann. Einmal 7,99&nbsp;€ für alle Fenster.</p></li>
+  </ol>
+  <p class="ablauf-fuss">Erst ansehen? Die <a href="#">Führung</a> zeigt alles in zwei Minuten, ohne eigene Maße.</p>
 </section>
 
 <section class="abschnitt rev" id="blatt">
@@ -269,12 +307,6 @@ h2 .ak { color: var(--accent) }
       <a class="linkzeile" href="#fensterbauer">Fensterbauer? So kommt das Blatt zu Ihnen ›</a>
     </div>
   </div>
-</section>
-
-<section class="abschnitt rev" id="gross">
-  <div class="haar"></div>
-  <div class="kopfzeile"><p class="kicker">Sechs Elementarten</p><h2>Auch ganz <span class="ak">groß.</span></h2><p class="sub">Jede Art hat in der App ihr eigenes Modell und ihre eigenen Fragen, bis zur Schwelle und zum Sonnenschutz.</p></div>
-  <div class="arten"><div class="art"><svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><path d="M11.4 7h41.2a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1 -1.2 1.2h-41.2a1.2 1.2 0 0 1 -1.2 -1.2v-47.6a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#383e42" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12.8 9.6h18.1v44.8h-18.1Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14.4 11.3h14.9v41.5h-14.9Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14.4 11.3L29.3 32L14.4 52.7" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14.4 52.7L21.9 11.3L29.3 52.7" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M33 9.6h18.1v44.8h-18.1Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M34.7 11.3h14.9v41.5h-14.9Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M49.6 11.3L34.7 32L49.6 52.7" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M34.7 52.7L42.1 11.3L49.6 52.7" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path></svg><b>Fenster</b><span>Dreh, Kipp, fest</span></div><div class="art"><svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><path d="M21.6 7h20.8a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1 -1.2 1.2h-20.8a1.2 1.2 0 0 1 -1.2 -1.2v-47.6a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#383e42" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22.4 9h19.2v46h-19.2Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M24.1 10.7h15.7v42.6h-15.7Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M24.1 10.7L39.9 32L24.1 53.3" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M24.1 53.3L32 10.7L39.9 53.3" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19.4 56.5h25.2v1.6h-25.2Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><b>Balkontür</b><span>geht auf wie ein Fenster</span></div><div class="art"><svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><path d="M8.2 12.6h47.6a1.2 1.2 0 0 1 1.2 1.2v36.5a1.2 1.2 0 0 1 -1.2 1.2h-47.6a1.2 1.2 0 0 1 -1.2 -1.2v-36.5a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#383e42" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 15.6h20.8v32.9h-20.8Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M33.2 15.6h20.8v32.9h-20.8Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path></svg><b>Festverglasung</b><span>großflächig, ohne Griff</span></div><div class="art"><svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><path d="M8.2 10.8h47.6a1.2 1.2 0 0 1 1.2 1.2v39.9a1.2 1.2 0 0 1 -1.2 1.2h-47.6a1.2 1.2 0 0 1 -1.2 -1.2v-39.9a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#383e42" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 13.8h20.8v36.3h-20.8Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M33.2 13.8h20.8v36.3h-20.8Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M35.1 15.7h17.1v32.6h-17.1Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M47.9 35.9L39.3 35.9" fill="none" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M41.3 33.9L39.3 35.9L41.3 37.9" fill="none" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M50.3 28.1h0a0.8 0.8 0 0 1 0.8 0.8v6.2a0.8 0.8 0 0 1 -0.8 0.8h0a0.8 0.8 0 0 1 -0.8 -0.8v-6.2a0.8 0.8 0 0 1 0.8 -0.8Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 52.7h52v1.6h-52Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><b>Hebe-Schiebe-Tür</b><span>bodentief, schiebt</span></div><div class="art"><svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><path d="M10.3 7h43.5a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1 -1.2 1.2h-43.5a1.2 1.2 0 0 1 -1.2 -1.2v-47.6a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#383e42" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11.8 9.8h19.1v44.5h-19.1Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M33.1 9.8h19.1v44.5h-19.1Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M34.8 11.5h15.6v41.1h-15.6Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M46.6 36.9L38.7 36.9" fill="none" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M40.7 34.9L38.7 36.9L40.7 38.9" fill="none" stroke="#1d1d1f" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M48.7 27.1h0a0.8 0.8 0 0 1 0.8 0.8v8.3a0.8 0.8 0 0 1 -0.8 0.8h0a0.8 0.8 0 0 1 -0.8 -0.8v-8.3a0.8 0.8 0 0 1 0.8 -0.8Z" fill="#1d1d1f" stroke="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M34.8 52.5L42.6 11.5L50.5 52.5" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8.1 56.5h47.9v1.6h-47.9Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><b>PSK-Tür</b><span>schiebt und kippt, meist günstiger</span></div><div class="art"><svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true"><path d="M8.2 16.7h47.6a1.2 1.2 0 0 1 1.2 1.2v28.2a1.2 1.2 0 0 1 -1.2 1.2h-47.6a1.2 1.2 0 0 1 -1.2 -1.2v-28.2a1.2 1.2 0 0 1 1.2 -1.2Z" fill="#383e42" stroke="#1d1d1f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 19.7h13.1v24.6h-13.1Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11.5 21.2h10.1v21.6h-10.1Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M25.5 19.7h13.1v24.6h-13.1Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M27 21.2h10.1v21.6h-10.1Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M40.9 19.7h13.1v24.6h-13.1Z" fill="#383e42" stroke="#1d1d1f" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M42.4 21.2h10.1v21.6h-10.1Z" fill="#d6e6f4" stroke="#1d1d1f" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M42.4 21.2L52.5 32L42.4 42.8" fill="none" stroke="#1d1d1f" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 46.8h52v1.6h-52Z" fill="#ddd6cb" stroke="#1d1d1f" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><b>Faltschiebewand</b><span>ganz zu öffnen</span></div></div>
 </section>
 
 <section class="abschnitt rev" id="preis">
@@ -306,6 +338,7 @@ h2 .ak { color: var(--accent) }
   <p class="pilot"><b>Pilotphase: noch kostenlos.</b> Danach sind die ersten drei Aufmaße frei, dann 9&nbsp;€ je Projekt oder ein Abo ab 49&nbsp;€ im Monat, netto. Konto und Projekte bleiben bis dahin in Ihrem Browser; jedes Aufmaß sichern Sie als PDF.</p>
   <div class="cta"><a class="pille gross" href="#"><span>Pakete ansehen</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a><a class="geist" href="#">Zur Ansicht für Fensterbauer</a></div></div>
 </section>
+</div>
 </main>
 
 <footer class="fuss"><div class="wrap"><a href="#">So funktioniert es</a><a href="#">Preise</a><a href="#">Preise für Betriebe</a><a href="#">Ratgeber</a><a href="#">Nutzungsbedingungen</a><a href="#">AGB</a><a href="#">Datenschutz</a><a href="#">Cookies</a><a href="#">Impressum</a></div></footer>
@@ -314,14 +347,6 @@ h2 .ak { color: var(--accent) }
 (function () {
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hero = document.getElementById('kopf');
-  /* Bausteinleiste: rechts ausgeblendet, solange noch etwas kommt; wischbar nur, wenn sie überläuft (dann auch mit der Tastatur erreichbar) */
-  var leiste = document.getElementById('bausteine');
-  function leisteRand() {
-    var laeuft = leiste.scrollWidth > leiste.clientWidth + 1;
-    if (laeuft) { leiste.setAttribute('tabindex', '0'); } else { leiste.removeAttribute('tabindex'); }
-    leiste.classList.toggle('ende', !laeuft || leiste.scrollLeft + leiste.clientWidth >= leiste.scrollWidth - 8);
-  }
-  leiste.addEventListener('scroll', leisteRand, { passive: true }); window.addEventListener('resize', leisteRand); leisteRand();
   /* Auftritt: nur beim ersten Aufruf in dieser Sitzung, nur mit Bewegung, erst wenn die Schrift da ist (sonst springt die Maske) */
   var schon = false; try { schon = sessionStorage.getItem('start-auftritt') === '1'; sessionStorage.setItem('start-auftritt', '1'); } catch (e) { /* ohne Speicher */ }
   if (!schon && !ruhig) {
@@ -329,21 +354,70 @@ h2 .ak { color: var(--accent) }
     var frei = function () { hero.classList.remove('warte'); };
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(frei);
     setTimeout(frei, 400);
-    /* Nach dem Auftritt die Klasse lösen: Endbild und Ruhezustand sind gleich, danach läuft und hängt keine Animation mehr */
-    setTimeout(function () { hero.classList.remove('an', 'warte'); }, 2400);
+    /* Danach die Klasse lösen: Endbild und Ruhezustand sind gleich, es hängt keine Animation mehr */
+    setTimeout(function () { hero.classList.remove('an', 'warte'); }, 2000);
   }
   /* Abschnitte erscheinen einmal, wenn 15 % im Bild sind */
   var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.15 }) : null;
   document.querySelectorAll('.rev').forEach(function (el) { if (io && !ruhig) io.observe(el); else el.classList.add('in'); });
-  /* Kopfzeile: beim Lesen nach unten weg, nach 24 px Hochscrollen zurück (keine Fingerkorrektur lässt sie flackern). Messband füllt sich mit dem Lesen. */
-  var kopf = document.getElementById('kopfzeile'), fuell = document.getElementById('fuell'), raf = 0, letztes = window.scrollY, hoch = 0;
+
+  /* Laufbänder: Inhalt verdoppeln (Klone für Vorleser und Tastatur unsichtbar), laufen nur im Bild, Halt-Knopf, Finger oder Maus darauf hält weich an */
+  var band = document.getElementById('fenster'), knopf = band.querySelector('.lauf-halt'), baender = band.querySelectorAll('.laufband');
+  baender.forEach(function (lb) {
+    var spur = lb.querySelector('.spur');
+    Array.prototype.slice.call(spur.children).forEach(function (li) {
+      var k = li.cloneNode(true); k.setAttribute('aria-hidden', 'true'); k.setAttribute('data-klon', '');
+      k.querySelectorAll('a, button').forEach(function (a) { a.setAttribute('tabindex', '-1'); });
+      spur.appendChild(k);
+    });
+  });
+  if (!ruhig && document.timeline) {
+    baender.forEach(function (lb) { lb.classList.add('bereit'); });
+    knopf.hidden = false;
+    var laeufe = [], sichtbar = false, laeuft = false;
+    baender.forEach(function (lb) {
+      var a = lb.querySelector('.spur').getAnimations()[0]; if (!a) return;
+      a.pause();
+      var l = { a: a, rate: 0, halt: false }; laeufe.push(l);
+      lb.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') { l.halt = true; los(); } });
+      lb.addEventListener('pointerleave', function () { l.halt = false; los(); });
+      lb.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') { l.halt = true; los(); } });
+      lb.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') setTimeout(function () { l.halt = false; los(); }, 1200); });
+      lb.addEventListener('focusin', function () { l.halt = true; los(); });
+      lb.addEventListener('focusout', function () { l.halt = false; los(); });
+    });
+    knopf.addEventListener('click', function () {
+      var an = !band.classList.contains('pausiert');
+      band.classList.toggle('pausiert', an);
+      knopf.setAttribute('aria-pressed', String(an));
+      knopf.setAttribute('aria-label', an ? 'Laufbänder fortsetzen' : 'Laufbänder anhalten');
+      los();
+    });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { sichtbar = e[0].isIntersecting; los(); }, { rootMargin: '0px 0px -30% 0px' }).observe(band.querySelector('.laufband.bilder')); else sichtbar = true;
+    document.addEventListener('visibilitychange', los);
+    /* Die Geschwindigkeit läuft weich auf ihr Ziel; steht sie, wird die Animation angehalten, damit außerhalb des Bildes nichts läuft */
+    function los() { if (!laeuft) { laeuft = true; requestAnimationFrame(tick); } }
+    function tick() {
+      var pause = band.classList.contains('pausiert') || !sichtbar || document.hidden, offen = false;
+      laeufe.forEach(function (l) {
+        var ziel = (pause || l.halt) ? 0 : 1;
+        if (ziel > 0 && l.a.playState === 'paused') { l.a.playbackRate = 0.001; l.a.play(); }
+        l.rate += (ziel - l.rate) * 0.08;
+        if (Math.abs(ziel - l.rate) < 0.002) l.rate = ziel; else offen = true;
+        if (l.rate === 0) { if (l.a.playState !== 'paused') l.a.pause(); } else l.a.playbackRate = l.rate;
+      });
+      if (offen) requestAnimationFrame(tick); else laeuft = false;
+    }
+  }
+
+  /* Kopfzeile: beim Lesen nach unten weg, nach 24 px Hochscrollen zurück (keine Fingerkorrektur lässt sie flackern) */
+  var kopf = document.getElementById('kopfzeile'), raf = 0, letztes = window.scrollY, hoch = 0;
   function lauf() {
     raf = 0; var y = window.scrollY, d = y - letztes;
     if (y < 80) { kopf.classList.remove('weg'); hoch = 0; }
     else if (d > 0) { kopf.classList.add('weg'); hoch = 0; }
     else if (d < 0) { hoch -= d; if (hoch >= 24) kopf.classList.remove('weg'); }
     letztes = y;
-    var max = document.documentElement.scrollHeight - window.innerHeight; var p = max > 0 ? Math.min(1, y / max) : 1; fuell.style.transform = 'scaleX(' + p.toFixed(3) + ')';
   }
   window.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(lauf); }, { passive: true }); lauf();
 })();

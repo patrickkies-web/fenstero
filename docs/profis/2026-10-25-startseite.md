@@ -120,3 +120,17 @@ Umgesetzt (Version 2 des Artefakts):
 - Verworfen: Chips als Glasplättchen auf dem Foto (verdecken den Waschbären), zwei Reihen (Pille rutscht über 600 px oder das Foto schrumpft auf 300 px).
 
 Gemessen: Pille 599 px (Schreibtisch 474), eine Cream-Pille, kein Querscrollen, Leiste am Telefon 1.190 px breit und per Tastatur erreichbar, am Schreibtisch ohne Tabstopp, bei „weniger Bewegung“ alles sofort.
+
+## Nachtrag 26.10., zweiter Wunsch: Kopf entschlacken, Band, Ablauf (ultimativ-webdesign und webdesign-wow, ohne Gremium)
+
+Rückmeldung zum Bildschirmfoto: Der Kopf ist „zu überlagert mit Informationen“, „zu viele kleine feinteilige Sachen“; gewünscht: das waagerechte Band wie auf der Seite für Fensterbauer (Elemente und Fakten zum Konfigurator), danach ein Ablauf samt Schritt Konfigurieren, dann das Aufmaßblatt.
+
+Umgesetzt (Version 3 des Artefakts):
+- Kopf: nur Foto (420 px), Überschrift, ein Satz („Messen kostet nichts. Das Aufmaßblatt für jeden Fensterbauer kostet einmal 7,99 €.“), „Jetzt ausmessen“ und „Erst ansehen“ nebeneinander. Gestrichen: Kicker, Bausteinleiste, Preiszeile, Hinweise, Messband. Pille bei 592 px.
+- Band „Aus dem Konfigurator · Jedes Fenster. Bis ins Detail.“ nach dem Muster von /fuer-fensterbauer/ (Laufband, gegenläufiges Faktenband, Halt-Knopf, weiches Anhalten bei Finger, Maus und Fokus). Statt Bildplätzen zehn echte, freigestellte Ansichten aus dem 3-D-Modell der App (gerendert mit docs/profis/werkzeuge/startseite-renderings.mjs über den Startbildschirm, `frei: true`). Fakten aus der App gezählt: 6 Elementarten (OPT.art), 7 Fensterformen (OPT.form), 5 Materialien, 239 Farben und Dekore (COLORS), 7 Glas-Extras (OPT.glasfn), 6 Arten Insektenschutz, 124 Begriffe erklärt (GLOSS), 0 € fürs Messen. Das Band läuft erst, wenn es zu 70 % im Bild ist; davor und außerhalb steht die Animation (gemessen: pausiert bei 0, im Bild läuft sie, nach Halt pausiert). Bei „weniger Bewegung“ steht es und lässt sich wischen, die Klone sind ausgeblendet.
+- Ablauf „So geht es · Vom Zollstock zum Aufmaß.“: 01 Fotografieren, 02 Messen, 03 Konfigurieren (grün markiert), 04 Aufmaßblatt, je mit echtem Bildschirm der App (Fotos, Maß 1 von 4, Farbe außen am 3-D-Modell, Ausschnitt des Blatts). Telefon senkrecht mit Linie, ab 900 px vier Spalten mit waagerechter Linie. Darunter die Führung in einem Satz.
+- Danach das Aufmaßblatt wie bisher; der Abschnitt „Sechs Elementarten“ entfällt (steckt jetzt im Band).
+
+Gefunden beim Rendern: Bei Bogenformen (Rundbogen, Segmentbogen) zeichnet das 3-D-Modell der App oben ein einzelnes Beschlagteil außerhalb des Rahmens. Für die Bilder freigestellt; in der App noch zu beheben.
+
+Offen: Die Fakten auf /fuer-fensterbauer/ (1.280 Kombinationen, 14 Fensterarten, 36 Farben und Dekore, 5 Profilsysteme, 3 Verglasungen, < 5 Min.) haben keinen Beleg im Code und weichen von den gezählten Werten ab; dort stehen auch noch Bildplätze statt Renderings.
