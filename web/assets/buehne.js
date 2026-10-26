@@ -1051,9 +1051,10 @@ window.Buehne3D = (function () {
     const live = sc.contains('is-live') && !sc.contains('is-zoom') && !sc.contains('is-pinch') && !ruhig() && B.stufe < 2 && !W.aus && !W.fertig, pause = drag || sc.contains('is-busy') || sc.contains('is-vorf') || sc.contains('is-demo');
     if (live && !pause) { W.t += dt; W.echt = (W.echt || 0) + (B.zuletzt ? Math.min(1000, now - B.zuletzt) : 0); if (W.t >= 18000 || W.echt >= 18000) W.fertig = true; }
     B.schwingt = live && !pause;
-    /* ein- und ausblenden statt springen */
-    const ziel = live ? 1 : 0;
-    if (B.sofort) W.k = ziel; else if (W.k !== ziel) { W.k = ziel > W.k ? Math.min(1, W.k + dt / 700) : Math.max(0, W.k - dt / (W.fertig ? 1400 : 500)); B.laeuft = true; }
+    /* ein- und ausblenden statt springen; angehalten (Ziehen, Vorführung) nur, solange sich die Kamera dabei bewegt: dann geht das
+       Auslaufen in der Bewegung unter, und ein stehendes Bild bleibt stehen */
+    const ziel = live ? 1 : 0, kamBewegt = !!B.kamAlt && zk.some((x, i) => x !== B.kamAlt[i]); B.kamAlt = zk;
+    if (B.sofort) W.k = ziel; else if (W.k !== ziel && (!pause || kamBewegt)) { W.k = ziel > W.k ? Math.min(1, W.k + dt / 700) : Math.max(0, W.k - dt / (W.fertig ? 1400 : 500)); B.laeuft = true; }
     const u = (W.t / 9000) % 2, p = E_SCHWING(u < 1 ? u : 2 - u), k = E_EASE(W.k);
     W.a = k * (-3 + 6 * p); W.b = k * (1 - 2 * p);
     return K;
