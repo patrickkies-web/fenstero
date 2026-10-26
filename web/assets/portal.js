@@ -400,6 +400,14 @@ function ansichtMerken(neu) {
   S.ansicht = neu === 'betrieb' ? 'betrieb' : 'kunde';
   try { if (location.hash !== '#' + ANKER[S.ansicht]) history.replaceState(history.state, '', location.pathname + location.search + '#' + ANKER[S.ansicht]); } catch (e) { /* ohne Verlauf */ }
 }
+/* Wechsel der Ansicht (Umschalter im Kopf, Karten am Ende, Baustein der Startseite) */
+function zurAnsicht(v) {
+  const neu = v === 'betrieb' ? 'betrieb' : 'kunde', gleich = S.screen === 'landing' && ansicht() === neu;
+  ansichtMerken(neu);
+  if (S.screen === 'tour') { clearTimeout(tourTimer); S.tour = null; }
+  if (gleich) { window.scrollTo(0, 0); return; }
+  S.animNext = true; window.scrollTo(0, 0); return nav('landing');
+}
 function umschalter() {
   const a = ansicht();
   return '<div class="seg ansicht" role="group" aria-label="Ansicht wählen"><button type="button" data-act="ansicht" data-v="kunde" aria-pressed="' + (a === 'kunde') + '">Hauseigentümer</button><button type="button" data-act="ansicht" data-v="betrieb" aria-pressed="' + (a === 'betrieb') + '">Fensterbauer</button></div>';
@@ -441,15 +449,17 @@ function render() {
   const logo = INST ? '<span class="logo-s b-logo">' + instZeichen() + WM() + '</span>' : '<button type="button" class="logo-s" data-act="nav" data-v="landing" aria-label="Zur Startseite"><span class="lm">' + LOGO(32) + '</span>' + WM() + '</button>';
   /* Einführungspreis: Banner ganz oben, für Besucher je nach Ansicht, angemeldet nur im Tarif Start (gemeinsam.js EinfBanner) */
   /* Einführungspreise der Aufmaß-Links: nicht über der eingebetteten Paket-Landingpage (Ansicht Fensterbauer auf der Startseite), dort gelten die Pakete; auf Preise und für Konten mit Tarif weiter */
-  const einfZeigen = !INST && S.screen !== 'tour' && (out || X.konto(A()) === 'service') && !(out && S.screen === 'landing' && ansicht() === 'betrieb'), einfArt = out ? ansicht() : 'betrieb';
-  h += '<div class="main">' + (einfZeigen ? window.EinfBanner(einfArt, einfArt === 'kunde' ? { href: appEinstieg() } : { act: 'go', v: 'preise' }) : '') + '<header class="top' + (out ? ' mit-ansicht' : '') + '">' + (canBack ? backBtn + (out ? logo.replace('class="logo-s"', 'class="logo-s neben-zurueck"') : '') : out ? logo : '') + (out && !INST ? umschalter() : '') + (out && S.screen === 'landing' ? '<div class="top-h"></div>' : '<h1>' + esc(view.title || TITLES[S.screen] || '') + '</h1>');
+  const einfZeigen = !INST && S.screen !== 'tour' && !view.kopflos && (out || X.konto(A()) === 'service') && !(out && S.screen === 'landing' && ansicht() === 'betrieb'), einfArt = out ? ansicht() : 'betrieb';
+  h += '<div class="main' + (view.kopflos ? ' kopflos' : '') + '">' + (einfZeigen ? window.EinfBanner(einfArt, einfArt === 'kunde' ? { href: appEinstieg() } : { act: 'go', v: 'preise' }) : '') + '<header class="top' + (out ? ' mit-ansicht' : '') + '">' + (canBack ? backBtn + (out ? logo.replace('class="logo-s"', 'class="logo-s neben-zurueck"') : '') : out ? logo : '') + (out && !INST ? umschalter() : '') + (out && S.screen === 'landing' ? '<div class="top-h"></div>' : '<h1>' + esc(view.title || TITLES[S.screen] || '') + '</h1>');
   /* Knöpfe nur für die gewählte Ansicht: Hauseigentümer messen in der App, Fensterbauer melden sich an oder starten ein Konto */
   if (out && INST) h += '';
   else if (out) h += ansicht() === 'kunde'
     ? '<a class="btn small ghost hide-s" href="/ratgeber/">Ratgeber</a><a class="btn small primary kopf-cta" href="' + appEinstieg() + '">' + (eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Fenster ausmessen') + '</a>'
     : (S.screen !== 'preise' ? '<button type="button" class="btn small ghost hide-s" data-act="go" data-v="preise">Preise</button>' : '') + '<button type="button" class="btn small ghost" data-act="sheet" data-v="login">Anmelden</button>' + (S.screen !== 'reg' ? '<button type="button" class="btn small primary kopf-cta" data-act="reg" data-v="betrieb"><span class="hide-s">Kostenlos starten</span><span class="only-xs">Starten</span></button>' : '');
   else h += '<button type="button" class="ibtn" aria-label="Nachrichten" data-act="nav" data-v="notif">' + ICONS.bell + (newNotif() ? '<span class="dot"></span>' : '') + '</button>';
-  h += '</header><div class="scr' + (anim ? ' anim' : '') + '" data-screen="' + S.screen + '">' + view.html + '</div>' + footer(!out) + '</div>';
+  h += '</header>';
+  if (view.kopflos) h = h.slice(0, h.lastIndexOf('<header class="top')); // Ansicht Hauseigentümer: Kopf kommt aus dem Baustein
+  h += '<div class="scr' + (anim ? ' anim' : '') + '" data-screen="' + S.screen + '">' + view.html + '</div>' + footer(!out) + '</div>';
   if (!out) h += '<nav class="tabs" aria-label="Bereiche">' + navItems().map((n) => { const c = navCount(n[0]); return '<button type="button" data-act="nav" data-v="' + n[0] + '" aria-current="' + (activeNav(n[0]) ? 'page' : 'false') + '">' + ICONS[n[2]] + '<span>' + esc(n[1]) + '</span>' + (c ? '<span class="cnt">' + c + '</span>' : '') + '</button>'; }).join('') + '</nav>';
   if (S.sheet && SHEETS[S.sheet.k]) h += '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="sheet-close"></button><div class="sheet" role="dialog" aria-modal="true"><span class="grip"></span><button type="button" class="xclose" aria-label="Schließen" data-act="sheet-close">×</button>' + SHEETS[S.sheet.k](S.sheet) + '</div>';
   root.innerHTML = h;
@@ -582,6 +592,9 @@ function afterRender(anim) {
     if (anim && io) { el.textContent = fmt === 'eur' ? eur(0) : '0'; const o = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { countUp(el, 0, to, fmt); o.disconnect(); } })); o.observe(el); return; }
     countUp(el, anim ? 0 : from, to, fmt);
   });
+  /* Ansicht Hauseigentümer: den Baustein der Startseite aufbauen (startseite.js), Preise und Einstieg von hier */
+  const sn = scr.querySelector('#startseite');
+  if (sn && window.Startseite) window.Startseite.auf(sn, { app: appEinstieg(), appLabel: eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt konfigurieren', weiter: eigenesAufmass() || 0, fuehrung: APP_OPEN + '#fuehrung', preis: eur2(P().aufmass), einf: X.einfText('aufmass'), zuBetrieb: () => zurAnsicht('betrieb') });
   /* Ansicht Fensterbauer: die eingebettete Seite für Fensterbauer füllen oder darauf fensterbauer.js starten (siehe „Einbettung der Seite für Fensterbauer“) */
   const vk = scr.querySelector('.vk-einbettung');
   if (vk) einbettungAuf(vk);
@@ -846,14 +859,9 @@ SCREENS.landing = () => {
      Konto“) ist hier weg (Bauplan E28); Preise, Anmelden und „Kostenlos starten“ bleiben in der Kopfzeile für Bestandsbetriebe. */
   if (ansicht() === 'betrieb') return { title: 'eeziframes', html: '<div class="wrap">' + (vonPdf() ? '<div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div>' : '') +
   '</div>' + einbettung() + '<div class="wrap">' + wechsel('kunde') + '</div>' }; // die Seite für Fensterbauer volle Breite, außerhalb von .wrap
-  return { title: 'eeziframes', html: '<div class="wrap">' +
-  '<section class="hero b2c foto" data-ansicht="kunde"><div><p class="eyebrow kicker">In Minuten zum Aufmaß für jeden Fensterbauer</p><h1>' + worte('Fenster ausmessen. Selbst. eezi.') + '</h1><p class="lead">Zwei Fotos, vier Maße mit dem Zollstock, jeder Schritt erklärt. Aus Ihren Zahlen wächst Ihr Fenster als 3-D-Modell, dazu Ihre Wünsche zu Material, Farbe, Glas und Rollladen. Messen, Fotos und 3-D-Modell sind kostenlos. Am Ende Ihr vollständiges Aufmaßblatt als PDF für ' + eur2(P().aufmass) + ', für jeden Fensterbauer lesbar.</p><div class="cta"><a class="btn big primary" href="' + appEinstieg() + '">' + (eigenesAufmass() ? 'Aufmaß fortsetzen' : 'Jetzt ausmessen') + '<span class="pf" aria-hidden="true"></span></a><a class="btn big ghost" href="' + APP_OPEN + '#fuehrung">Führung starten</a></div>' + (eigenesAufmass() ? '<p class="hint fortsetzen">Ihr Aufmaß ist angefangen: ' + nW(eigenesAufmass(), 'Fenster', 'Fenster') + ' erfasst, gespeichert in diesem Browser.</p>' : '') + '<p class="hint">Führung: ein Fenster in zwei Minuten, ohne eigene Maße · kein Konto zum Messen · keine App aus dem Store</p></div>' +
-  heroFoto('start-hauseigentuemer', 1250, 1250, 'Ein Waschbär steht auf einem Tritt und misst mit dem Zollstock die Maueröffnung eines Fensters, in der anderen Pfote das Handy', ['Maße', 'Öffnungsart', 'Farbe', 'Glas']) + '</section>' +
-  '<section class="strip"><div class="st"><b><span data-count="5" data-fmt="int">5</span><small> Min.</small></b><span>je Fenster, Fotos und Wünsche inklusive</span></div><div class="st"><b><span data-count="8" data-fmt="int">8</span><small> Maße</small></b><span>je Fenster von Hand, das kleinste zählt, Abweichungen werden markiert</span></div><div class="st"><b>' + eur2(P().aufmass) + '</b><span>für das fertige Aufmaßblatt als PDF. Messen, Fotos und 3-D-Modell sind kostenlos</span>' + (X.einfText('aufmass') ? '<span class="einf">' + esc(X.einfText('aufmass')) + '</span>' : '') + '</div></section>' +
-  aufmassInhalt(true) +
-  grossSection() +
-  '<section class="sec"><div class="sec-head"><h2>' + akSatz('Aus dem Ratgeber.') + '</h2><a class="linkbtn" href="/ratgeber/">Alle Ratgeber ›</a></div><div class="grid c3 trust">' + RATGEBER.map((r) => '<a class="tcard" href="' + r[0] + '"><b>' + r[1] + '</b><p>' + r[2] + '</p></a>').join('') + '</div></section>' +
-  wechsel('betrieb') + '</div>' };
+  /* Ansicht Hauseigentümer (seit 26.10.2026): der Baustein aus der Vorschau „Startseite neu gedacht“ (startseite.js, startseite.css) mit
+     eigenem Kopf; portal.js zeichnet hier weder Kopfzeile noch Einführungsband (der Preis steht im Abschnitt „Preis“), nur die Fußzeile */
+  return { title: 'eeziframes', kopflos: true, html: '<div class="startseite-halter" id="startseite"></div>' };
 };
 /* Startbild für Hauseigentümer: ein Fenster mit den vier Maßen, wie in der App */
 function b2cVisual() {
@@ -1770,13 +1778,7 @@ function act(name, el) {
     case 'tour-code': { if (S.tour) S.tour.code = true; return render(); }
     case 'tour-lauf': { if (!S.tour) return; clearTimeout(tourTimer); S.tour.lauf = 0; render(); return tourLauf(); }
     case 'tour-pdf': return tourPDF();
-    case 'ansicht': {
-      const neu = v === 'betrieb' ? 'betrieb' : 'kunde', gleich = S.screen === 'landing' && ansicht() === neu;
-      ansichtMerken(neu);
-      if (S.screen === 'tour') { clearTimeout(tourTimer); S.tour = null; }
-      if (gleich) { window.scrollTo(0, 0); return; }
-      S.animNext = true; return nav('landing');
-    }
+    case 'ansicht': return zurAnsicht(v);
     case 'go': return go(v, id !== null ? id : undefined);
     case 'nav': return nav(v);
     case 'back': return back();

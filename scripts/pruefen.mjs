@@ -145,8 +145,10 @@ if (teil(2)) {
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar');
-  ok(await page.locator('.einf-bar').first().isVisible() && /Einführungspreis bis 17\. November: Aufmaßblatt 7,99\s€/.test(await page.locator('.einf-bar').first().innerText()) && /Noch \d+ Tage|Nur noch heute/.test(await page.locator('.einf-bar .rest').first().innerText()), 'Startseite: Banner zum Einführungspreis ganz oben, mit Countdown');
-  ok(await page.locator('.hero .einf-chip').count() === 0 && (await page.locator('.hero.b2c .eyebrow').textContent()).trim() === 'In Minuten zum Aufmaß für jeden Fensterbauer' && (await page.locator('.strip .einf').innerText()).includes('danach 12,99 €'), 'Startseite: Einführungspreis nur im Band ganz oben und in der Preiskachel (danach 12,99 €), im Startbild direkt die Zeile „In Minuten zum Aufmaß für jeden Fensterbauer“');
+  /* Ansicht Hauseigentümer: der Baustein „Startseite neu gedacht“ im Schatten-DOM von #startseite (startseite.js), ohne Band oben */
+  const sn2 = await page.evaluate(() => { const r = document.getElementById('startseite'), s = r && r.shadowRoot; return s ? { text: s.textContent.replace(/\s+/g, ' '), h1: s.querySelector('h1').textContent.replace(/\s+/g, ' ').trim(), einf: document.querySelectorAll('.einf-bar').length, top: !!document.querySelector('.top'), stil: getComputedStyle(s.querySelector('.kopf')).position } : null; });
+  ok(!!sn2 && sn2.h1 === 'Fensterplanung ganz eezi.' && sn2.einf === 0 && !sn2.top && sn2.stil === 'sticky', 'Startseite (Hauseigentümer): Baustein mit eigenem Kopf, h1 „Fensterplanung ganz eezi.“, kein Einführungsband und keine Kopfzeile des Portals darüber');
+  ok(!!sn2 && /Einführungspreis bis 17\. November, danach 12,99 €/.test(sn2.text) && /Messen kostet nichts\. 7,99 €einmal fürs Aufmaßblatt/.test(sn2.text) && /Das Aufmaßblatt kostet einmal 7,99 €/.test(sn2.text), 'Startseite: Preis aus modell.js (7,99 €), Einführungspreis im Abschnitt „Preis“ (danach 12,99 €)');
   await foto(page, 'portal-desktop');
   await page.click('.fx-pilot button.zu');
   await page.reload({ waitUntil: 'networkidle' });
@@ -160,14 +162,15 @@ if (teil(2)) {
   // Ansicht: Umschalter oben, Anker, Knöpfe nur für die gewählte Zielgruppe
   const ctxA = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const pa = await neueSeite(ctxA);
-  const zustand = () => pa.evaluate(() => ({ a: ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].map((h) => h.textContent.trim()), b2c: !!document.querySelector('.hero.b2c'), b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: document.querySelector('.top').classList.contains('cta-still'), top: [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }));
+  /* Ansicht Hauseigentümer: Kopf und Ansicht stehen im Baustein (Schatten-DOM von #startseite), Fensterbauer: in der Kopfzeile des Portals */
+  const zustand = () => pa.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot || null, top = document.querySelector('.top'); return { a: sr ? ((sr.querySelector('nav.seg a[aria-current]') || {}).textContent || '').trim() : ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: sr ? sr.querySelectorAll('nav.seg a').length : document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].concat(sr ? [...sr.querySelectorAll('h1')] : []).map((h) => h.textContent.replace(/\s+/g, ' ').trim()), b2c: !!sr, b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: !!top && top.classList.contains('cta-still'), top: sr ? [...sr.querySelectorAll('.kopf a.pille')].map((b) => b.innerText.trim()) : [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }; });
   /* Ansicht Fensterbauer: portal.js lädt die Paket-Landingpage /fuer-fensterbauer/ nach und bettet sie ein; darauf warten */
   const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
   await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   let z = await zustand();
-  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fenster ausmessen/.test(z.h1[0]) && z.top.includes('Fenster ausmessen') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Umschalter oben, nur Inhalte für Hauseigentümer, Knopf „Fenster ausmessen“, kein Anmelden oder Starten für Betriebe');
-  ok(await pa.locator('.top a.btn.primary[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.wechsel [data-act="ansicht"][data-v="betrieb"]').count() === 1 && await pa.locator('a.tcard[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Fenster ausmessen“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
-  await pa.click('.top .ansicht [data-v="betrieb"]'); await einbettung();
+  ok(z.n === 2 && z.a === 'Hauseigentümer' && z.b2c && !z.b2b && !z.vk && z.h1.length === 1 && /Fensterplanung ganz eezi/.test(z.h1[0]) && z.top.includes('Jetzt konfigurieren') && !z.top.some((t) => /Anmelden|starten/i.test(t)), 'Ansicht Hauseigentümer (Standard): Ansicht oben im Baustein, nur Inhalte für Hauseigentümer, Knopf „Jetzt konfigurieren“, kein Anmelden oder Starten für Betriebe');
+  ok(await pa.locator('.kopf a.pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.hero a.pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.fb a[data-zu="betrieb"]').count() === 1 && await pa.locator('.rat a[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Jetzt konfigurieren“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
+  await pa.click('nav.seg a[data-zu="betrieb"]'); await einbettung();
   z = await zustand();
   ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
   ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
@@ -209,8 +212,12 @@ if (teil(2)) {
   await mp.goto(BASE + '/', { waitUntil: 'networkidle' });
   await mp.waitForTimeout(800);
   ok(await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'Portal: kein seitliches Scrollen bei 390 px');
-  const kopf = await mp.evaluate(() => { const t = document.querySelector('.top'), u = t.querySelector('.ansicht'), r = u.getBoundingClientRect(), k = [...u.querySelectorAll('button')]; return { breit: Math.round(r.width), zeile: r.top > t.querySelector('.logo-s').getBoundingClientRect().bottom - 2, voll: k.every((b) => b.scrollWidth <= b.clientWidth + 1 && b.getBoundingClientRect().height >= 44), passt: t.scrollWidth <= t.clientWidth + 1, hoehe: Math.round(t.getBoundingClientRect().height) }; });
-  ok(kopf.zeile && kopf.breit >= 340 && kopf.voll && kopf.passt && kopf.hoehe <= 124, 'Telefon: Umschalter als eigene Zeile der Kopfzeile, volle Breite, beide Wörter ganz lesbar, Ziele ab 44 px (Kopf ' + kopf.hoehe + ' px)');
+  const kopf = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, t = sr.querySelector('.kopf'), u = sr.querySelector('nav.seg'), r = u.getBoundingClientRect(), k = [...u.querySelectorAll('a')]; return { breit: Math.round(r.width), zeile: r.top >= t.getBoundingClientRect().bottom - 2, voll: k.every((b) => b.scrollWidth <= b.clientWidth + 1 && b.getBoundingClientRect().height >= 44), passt: t.scrollWidth <= t.clientWidth + 1, hoehe: Math.round(t.getBoundingClientRect().height + r.height) }; });
+  ok(kopf.zeile && kopf.breit >= 340 && kopf.voll && kopf.passt && kopf.hoehe <= 124, 'Telefon: Ansicht als eigene Zeile unter dem Kopf des Bausteins, volle Breite, beide Wörter ganz lesbar, Ziele ab 44 px (Kopf ' + kopf.hoehe + ' px)');
+  /* Bewegung der neuen Startseite: Band läuft nur im Bild, „Mehr erfahren“ springt zu „So geht es“ und startet den Ablauf, ohne die Adresse zu ändern */
+  await mp.evaluate(() => document.getElementById('startseite').shadowRoot.getElementById('mehr').click()); await mp.waitForTimeout(1500);
+  const so2 = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, so = sr.getElementById('so'), r = so.getBoundingClientRect(); return { oben: Math.round(r.top), laeuft: so.classList.contains('laeuft'), s: sr.getElementById('so-buehne').getAttribute('data-s'), hash: location.hash, screen: S.screen }; });
+  ok(so2.oben > -40 && so2.oben < 120 && so2.laeuft && so2.s === '1' && so2.hash === '' && so2.screen === 'landing', '„Mehr erfahren“ springt zur Bühne „So geht es“, der Ablauf läuft ab Schritt 1, Adresse und Ansicht bleiben (' + JSON.stringify(so2) + ')');
   await foto(mp, 'portal-telefon');
   sauber(mp, 'Portal (Telefon) ohne Fehler');
   await mob.close();
@@ -601,9 +608,9 @@ if (teil(6)) {
   // Startseite: beide Zielgruppen, kein Marktplatz
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
-  const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.hero.b2c a[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
+  const start = await page.evaluate(() => { const r = document.getElementById('startseite'); return (document.body.textContent + ' ' + (r && r.shadowRoot ? r.shadowRoot.textContent : '')).replace(/\s+/g, ' '); });
+  ok(/Fensterplanung ganz eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.hero a.pille[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.ablauf-fuss a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: konfigurieren (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
+  await page.click('nav.seg a[data-zu="betrieb"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
   ok(/Anfragen mit Aufmaß\. Unter Ihrer Marke\./.test(startB.replace(/\s+/g, ' ')) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test((start + startB).replace(/Kein Portal und kein Marktplatz/g, '')), 'Kein Marktplatz mehr auf der Startseite');
@@ -1138,7 +1145,7 @@ if (teil(8)) {
   const stempel = Date.now().toString(36), mail = 'test-' + stempel + '@beispiel.de', firma = 'Fensterbau Prüf ' + stempel, tel = '0221 ' + String(Date.now()).slice(-7);
   await page.goto(BASE2 + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
   ok(await page.locator('.fx-pilot').count() === 0 && await page.evaluate(() => Server.an && !Server.online() && !S.role), 'Portal im Servermodus: kein Pilot-Hinweis, noch nicht angemeldet');
-  ok(/7,99/.test(await page.evaluate(() => document.body.textContent)), 'Startseite nennt den Preis vom Server');
+  ok(/7,99/.test(await page.evaluate(() => { const r = document.getElementById('startseite'); return document.body.textContent + (r && r.shadowRoot ? r.shadowRoot.textContent : ''); })), 'Startseite nennt den Preis vom Server');
   // Registrierung: E-Mail → Code 123456 → Betrieb eintragen
   await tun('reg', 'betrieb'); await page.waitForSelector('#lg-mail');
   ok(/Konto für Ihren Betrieb/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('#lg-pw').count() === 0, 'Registrierung beginnt mit der E-Mail, ohne Passwort');
@@ -1424,8 +1431,8 @@ if (teil(9)) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
-  const fuehrungDa = await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1;
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForTimeout(300);
+  const fuehrungDa = await page.locator('.ablauf-fuss a[href$="/app/#fuehrung"]').count() === 1;
+  await page.click('nav.seg a[data-zu="betrieb"]'); await page.waitForTimeout(300);
   ok(fuehrungDa && await page.locator('.vk-einbettung').count() === 1 && await page.locator('.hero.b2b [data-act="tour"]').count() === 0, 'Startseite: „Führung starten“ in der Ansicht für Hauseigentümer; die Ansicht für Fensterbauer zeigt die Paket-Landingpage und wirbt nicht mehr für die Tour (sie bleibt über „Anmelden“ und /#tour erreichbar)');
   /* ohne die eingebettete Verkaufsseite: ihre „Live-Demos“ sind echte Konfigurator-Instanzen der Pakete, keine Demo-Konten */
   const ohneDemo = async (wo) => { const t = await page.evaluate(() => { const b = document.body.cloneNode(true); b.querySelectorAll('.vk-einbettung').forEach((e) => e.remove()); return b.textContent; }); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
@@ -1574,12 +1581,12 @@ if (teil(10)) {
 
   /* b) Startseite und App: Textfassung für Leser ohne JavaScript, mit JavaScript übernimmt die App */
   const start = await roh('/'), app = await roh('/app/');
-  ok(/<div class="vorab">/.test(start.text) && /<h1>Fenster ausmessen\. Selbst\. eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
+  ok(/<div class="vorab">/.test(start.text) && /<h1>Fensterplanung ganz eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
   ok(/<div class="vorab">/.test(app.text) && /<h1>Fenster ausmessen: kostenlose Aufmaß-App im Browser<\/h1>/.test(app.text), 'App ohne JavaScript: Textfassung mit h1');
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fenster ausmessen\. Selbst\. eezi\./.test(await page.locator('h1').first().textContent()), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero)');
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fensterplanung ganz eezi\./.test((await page.locator('h1').first().textContent()).replace(/\s+/g, ' ')), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero des Bausteins)');
   const fuss = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
   /* Die Seite für Fensterbauer verkauft die Konfigurator-Pakete (Bauplan E28); Tour und Registrierung des Betriebsbereichs bleiben
@@ -2706,8 +2713,8 @@ if (teil(14)) {
     ok(!/\d mm/.test(nachKauf) && /vollständig/i.test(nachKauf) && await page.locator('details.fold .kv').count() === 0 && await page.locator('.zu-karte').count() === 0 && !/Alle Angaben|\d mm/.test(await page.locator('.scr').textContent()), 'Auch nach dem Freischalten keine Gesamtübersicht: Liste und gespeichertes Fenster ohne Maße und ohne „Alle Angaben“ (die stehen in der PDF)');
     // Portal: angefangenes Aufmaß → „Aufmaß fortsetzen“
     await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-    const po = await page.evaluate(() => ({ top: (document.querySelector('.top a.btn.primary') || {}).textContent, hero: (document.querySelector('.hero.b2c a.btn.primary') || {}).textContent, hint: (document.querySelector('.hint.fortsetzen') || {}).textContent || '' }));
-    ok(po.top === 'Aufmaß fortsetzen' && po.hero === 'Aufmaß fortsetzen' && /3 Fenster erfasst/.test(po.hint), 'Startseite (Hauseigentümer) mit angefangenem Aufmaß: „Aufmaß fortsetzen“ statt „Jetzt ausmessen“');
+    const po = await page.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot; return { top: (sr.querySelector('.kopf a.pille') || {}).textContent, hero: (sr.querySelector('.hero a.pille') || {}).textContent, hint: (sr.querySelector('.weiter') || {}).textContent || '' }; });
+    ok(po.top === 'Aufmaß fortsetzen' && po.hero === 'Aufmaß fortsetzen' && /3 Fenster erfasst/.test(po.hint), 'Startseite (Hauseigentümer) mit angefangenem Aufmaß: „Aufmaß fortsetzen“ statt „Jetzt konfigurieren“, dazu wie viele Fenster erfasst sind');
     await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
     // Grenze: 50 angelegte Fenster, Löschen gibt keinen Platz zurück
     await page.evaluate(() => { S.angelegt = 49; persist(); render(); });

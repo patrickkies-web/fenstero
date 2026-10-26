@@ -1,0 +1,382 @@
+/* Startseite, Ansicht Hauseigentümer („Startseite neu gedacht“, docs/profis/2026-10-25-startseite.md, Fassung 5).
+   Gilt nur im Schatten-DOM des Bausteins (startseite.js): Die Namen der Klassen kollidieren so nicht mit portal.css, und portal.css
+   wirkt nicht hinein. Schrift Inter kommt aus /fonts/fonts.css der Seite. */
+/* Layout: eine Spalte am Telefon, Kopf zweispaltig ab 1024 px. Dunkle Bühne, das Tageslicht kommt durchs Foto. Eine Farbwelt: Grün als Signal, Orange nur fürs Maß, Cream nur für die eine Hauptaktion je Bildschirm.
+   Reihenfolge: Kopf (nur Held, Satz, Handlung) · Band aus dem Konfigurator (läuft, mit Fakten) · Ablauf in vier Schritten · Aufmaßblatt · Preis · Ratgeber · Für Fensterbauer. */
+:host {
+  display: block; position: relative; background: var(--ground); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.45; -webkit-font-smoothing: antialiased; text-align: left;
+  --ground: #161616; --surface: #1f1f1f; --surface2: #262626; --surface3: #2e2e2e;
+  --text: #f3f2ee; --text2: #c9c8c3; --muted: #93928d; --line: #2b2b2b; --line2: #3a3a36;
+  --accent: #8fd694; --accent-soft: rgba(143, 214, 148, .15); --cream: #f1f0ea; --on-cream: #161616; --mo: #ff8a5b; --el: #7aa2ff;
+  --font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --e-out: cubic-bezier(.2, .7, .2, 1); --e-io: cubic-bezier(.45, 0, .2, 1); --e-auf: cubic-bezier(.16, 1, .3, 1);
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px)); --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+a { color: inherit }
+::selection { background: rgba(143, 214, 148, .35); color: var(--text) }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px }
+img { max-width: 100%; display: block }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r) }
+.wm { font-weight: 500; letter-spacing: -.02em } .wm b { font-weight: 800 }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+
+/* Kopfzeile: klebt oben, verschwindet beim Lesen nach unten und kommt nach 24 px Hochscrollen zurück. Ihre Pille ist immer ein Umriss: Die eine Cream-Pille je Bildschirm gehört dem Inhalt. */
+.kopf { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--ground); transition: transform 320ms var(--e-out) }
+.kopf.weg { transform: translateY(calc(-100% - env(safe-area-inset-top, 0px))) }
+.kopf:focus-within { transform: none }
+.kopf .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; padding-block: 8px }
+.marke { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 17px }
+.marke svg { width: 28px; height: 28px; flex: 0 0 auto }
+.pille { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 0 18px 0 20px; border-radius: 999px; background: var(--cream); color: var(--on-cream); font: inherit; font-size: 15px; font-weight: 700; text-decoration: none; border: 0; cursor: pointer; white-space: nowrap; transition: transform 220ms var(--e-out), background 220ms, color 220ms, box-shadow 220ms }
+.pille:active { transform: scale(.98) }
+.pille .pf { width: 26px; height: 26px; border-radius: 50%; background: var(--on-cream); color: var(--cream); display: inline-grid; place-items: center; transition: transform 220ms var(--e-out), background 220ms, color 220ms }
+.pille .pf svg { width: 14px; height: 14px; stroke: currentColor }
+.pille.gross { min-height: 52px; font-size: 17px; padding: 0 14px 0 20px; gap: 8px }
+.kopf .pille { background: transparent; color: var(--text); box-shadow: inset 0 0 0 2px var(--line2) }
+.kopf .pille .pf { background: var(--text); color: var(--ground) }
+.geist { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 14px; border-radius: 999px; color: var(--text); font: inherit; font-size: 17px; font-weight: 700; text-decoration: none; white-space: nowrap; box-shadow: inset 0 0 0 2px var(--line2); background: none; cursor: pointer; transition: transform 220ms var(--e-out), box-shadow 220ms }
+.geist:active { transform: scale(.98) }
+@media (hover: hover) and (pointer: fine) {
+  .pille:hover .pf { transform: translateX(4px) }
+  .kopf .pille:hover, .geist:hover { box-shadow: inset 0 0 0 2px var(--text2) }
+}
+
+/* Ansicht: Hauseigentümer oder Fensterbauer. Tonal, kein Glas: die gewählte Seite liegt oben auf, die andere ist ein erkennbarer Weg mit Pfeil. */
+.seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 2px 0 0; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line) }
+.seg::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--surface3); box-shadow: inset 0 0 0 1px var(--line2), 0 4px 14px rgba(0, 0, 0, .35) }
+.seg a { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; font-size: 15px; font-weight: 700; color: var(--text2); text-decoration: none }
+.seg a[aria-current] { color: var(--text) }
+.seg a[aria-current]::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent) }
+.seg .chev { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round }
+
+/* Kopf der Seite: nur drei Dinge. Der Held (Foto), ein Satz, die Handlung. */
+.hero { padding-top: 8px }
+.foto { position: relative; margin: 0 calc(-1 * var(--gutter-l)) 0 calc(-1 * var(--gutter-r)); height: 420px; overflow: hidden }
+.foto img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform-origin: 50% 40% }
+.foto::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 170px; background: linear-gradient(0deg, var(--ground) 0%, var(--ground) 20%, rgba(22, 22, 22, .6) 55%, rgba(22, 22, 22, 0) 100%); pointer-events: none }
+.hero .text { position: relative; z-index: 2; margin-top: -100px }
+h1 { margin: 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
+h1 .zeile { display: block; overflow: clip }
+h1 .zeile > span { display: block }
+.ak { color: var(--accent) }
+.lead { margin: 10px 0 0; font-size: 17px; line-height: 1.45; color: var(--text2); max-width: 34ch; text-wrap: pretty }
+.lead b { color: var(--text); font-weight: 700 }
+.cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px }
+
+/* Abschnitte */
+.abschnitt { padding-block: 72px 0 }
+.kopfzeile { max-width: 760px }
+.kicker { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--accent) }
+h2 { margin: 8px 0 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; text-wrap: balance }
+.sub { margin: 12px 0 0; font-size: 17px; color: var(--text2); max-width: 38ch; text-wrap: pretty }
+.haar { height: 1px; background: var(--line); transform-origin: 0 50%; margin-bottom: 18px }
+
+/* Band aus dem Konfigurator: Fenster aus dem 3-D-Modell der App schweben frei (ohne Kasten) von links nach rechts, darunter die Fakten gegenläufig.
+   Läuft ohne Unterbrechung, nichts zum Anklicken (Wunsch des Inhabers); außerhalb des Bildes steht es still, bei „weniger Bewegung“ steht es und lässt sich wischen. */
+.lauf { padding: 72px 0 8px; overflow: clip }
+.lauf-kopf { padding-bottom: 20px }
+.laufband { overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent) }
+.laufband::-webkit-scrollbar { display: none }
+.laufband.bereit { overflow: hidden }
+.spur { --spalt: 26px; display: flex; align-items: flex-end; gap: var(--spalt); width: max-content; margin: 0; padding: 0 var(--spalt) 0 0; list-style: none }
+.laufband.bereit .spur { animation: lauf var(--dauer) linear infinite }
+.laufband.bilder.bereit .spur { animation-direction: reverse }
+@keyframes lauf { to { transform: translateX(-50%) } }
+.laufband.bilder { padding: 26px 0 18px }
+.el { display: grid; justify-items: center; gap: 2px; text-align: center; user-select: none; -webkit-user-select: none }
+.el-bild { position: relative; display: flex; align-items: flex-end; justify-content: center; height: var(--h); margin-bottom: 12px }
+.el-bild::before { content: ""; position: absolute; left: -18%; right: -18%; top: -12%; bottom: -4%; background: radial-gradient(closest-side, rgba(241, 240, 234, .10), rgba(241, 240, 234, 0)); pointer-events: none }
+.el-bild::after { content: ""; position: absolute; left: 8%; right: 8%; bottom: -10px; height: 14px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0)); pointer-events: none }
+.el-bild img { position: relative; z-index: 1; height: var(--h); width: auto; max-width: none; filter: drop-shadow(0 14px 16px rgba(0, 0, 0, .45)); -webkit-user-drag: none; animation: schweben 6.8s ease-in-out infinite alternate; animation-delay: calc(var(--i, 0) * -1.37s) }
+.lauf.steht .el-bild img { animation-play-state: paused }
+@keyframes schweben { from { transform: translateY(-4px) } to { transform: translateY(4px) } }
+.el.f { --h: 100px } .el.t { --h: 126px }
+.el-titel { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap }
+.el-was { font-size: 13px; color: var(--muted); white-space: nowrap }
+.zahl { display: flex; align-items: baseline; gap: 8px; white-space: nowrap }
+.zahl-wert { font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1; font-variant-numeric: tabular-nums }
+.zahl-label { font-size: 15px; color: var(--text2) }
+.zahl-trenner { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin: 0 4px 0 10px; align-self: center }
+.laufband.zahlen .spur { --spalt: 12px }
+.lauf-fuss { margin: 22px auto 0; font-size: 13px; color: var(--muted) }
+
+/* So geht es: eine Bühne, ein Fenster, vier Takte. Dasselbe Fenster wird fotografiert, löst sich in eine Maßzeichnung auf, wächst zum
+   3-D-Modell und landet im Aufmaßblatt (Zeile 1, Wohnzimmer, 1.789 × 1.409 mm). Daneben die vier Schritte mit Fortschritt; Antippen springt.
+   Läuft nur im Bild, Halt-Knopf, bei „weniger Bewegung“ zeigt jeder Schritt sein Endbild (Grundzustand jedes Teils = Endbild, die Keyframes
+   kommen von vorn). Nur transform und opacity werden animiert, außer stroke-dashoffset der Linien. */
+.so { scroll-margin-top: 12px }
+.so-grid { display: grid; gap: 22px; margin-top: 28px }
+.so-buehne { --t1: 4600ms; --t2: 4800ms; --t3: 5000ms; --t4: 4800ms; position: relative; width: 100%; aspect-ratio: 1; border-radius: 28px; overflow: hidden; isolation: isolate; background: radial-gradient(120% 80% at 28% 0%, rgba(241, 240, 234, .11), rgba(241, 240, 234, 0) 60%), #1b1b1b; box-shadow: inset 0 0 0 1px var(--line2), 0 30px 60px rgba(0, 0, 0, .45) }
+.sz { position: absolute; inset: 0; opacity: 0; transition: opacity 450ms var(--e-io); pointer-events: none }
+.so-buehne[data-s="1"] .sz1, .so-buehne[data-s="2"] .sz2, .so-buehne[data-s="3"] .sz3, .so-buehne[data-s="4"] .sz4 { opacity: 1 }
+.plakette { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(22, 22, 22, .82); color: var(--text); font-size: 13px; font-weight: 700; white-space: nowrap; box-shadow: inset 0 0 0 1px rgba(243, 242, 238, .12) }
+.plakette .pk { width: 8px; height: 8px; border-radius: 50%; background: var(--accent) }
+.plakette svg { width: 14px; height: 14px; color: var(--accent) }
+.stapel { position: absolute; display: grid } .stapel > * { grid-area: 1 / 1 }
+.so-halt { position: absolute; z-index: 5; top: 12px; right: 12px; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: rgba(22, 22, 22, .78); color: var(--text); box-shadow: inset 0 0 0 1px rgba(243, 242, 238, .14); cursor: pointer }
+.so-halt svg { width: 14px; height: 14px } .so-halt .i-weiter { display: none }
+.so-halt[aria-pressed="true"] .i-halt { display: none } .so-halt[aria-pressed="true"] .i-weiter { display: block }
+
+/* Takt 1 · Fotografieren: Sucher schließt sich, Auslöser, das Bild fliegt als Vorschau in die Ecke; erst innen, dann außen */
+.s1-bild { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover }
+.s1-innen { opacity: 0 }
+.sucher { position: absolute; inset: 13% }
+.sucher i { position: absolute; width: 15%; height: 15%; border: 4px solid #fff; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, .55)) drop-shadow(0 2px 6px rgba(0, 0, 0, .35)) }
+.sucher i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 12px }
+.sucher i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 12px }
+.sucher i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 12px }
+.sucher i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 12px }
+.blitz { position: absolute; inset: 0; background: #fff; opacity: 0 }
+.daumen { position: absolute; bottom: 5%; width: 22%; aspect-ratio: 1200 / 1186; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 2px var(--cream), 0 12px 26px rgba(0, 0, 0, .5) }
+.daumen img { width: 100%; height: 100%; object-fit: cover }
+.daumen b { position: absolute; left: 6%; bottom: 7%; padding: 1px 7px; border-radius: 999px; background: rgba(22, 22, 22, .82); color: var(--text); font-size: 13px; font-weight: 700; line-height: 1.5 }
+.d1 { left: 5% } .d2 { left: 30% }
+.s1-plak { top: 4%; left: 4% }
+.s1-plak .c1, .s1-plak .c2 { opacity: 0 }
+.so-buehne[data-s="1"] .s1-innen { animation: s1innen var(--t1) linear both }
+.so-buehne[data-s="1"] .s1-aussen { animation: s1aussen var(--t1) linear both }
+.so-buehne[data-s="1"] .sucher { animation: sucher var(--t1) var(--e-auf) both }
+.so-buehne[data-s="1"] .blitz { animation: blitz var(--t1) linear both }
+.so-buehne[data-s="1"] .d1 { animation: d1 var(--t1) var(--e-auf) both }
+.so-buehne[data-s="1"] .d2 { animation: d2 var(--t1) var(--e-auf) both }
+.so-buehne[data-s="1"] .s1-plak .c1 { animation: c1 var(--t1) linear both }
+.so-buehne[data-s="1"] .s1-plak .c2 { animation: c2 var(--t1) linear both }
+.so-buehne[data-s="1"] .s1-plak .c3 { animation: c3 var(--t1) linear both }
+@keyframes s1innen { 0% { opacity: 1; transform: scale(1.08) } 46% { opacity: 1; transform: scale(1) } 52%, 100% { opacity: 0; transform: scale(1) } }
+@keyframes s1aussen { 0%, 46% { opacity: 0; transform: scale(1.08) } 52% { opacity: 1 } 100% { opacity: 1; transform: scale(1) } }
+@keyframes sucher { 0% { opacity: 0; transform: scale(1.2) } 5% { opacity: 1 } 17% { transform: scale(1) } 45% { opacity: 1; transform: scale(1) } 48% { opacity: 0; transform: scale(1.2) } 53% { opacity: 1; transform: scale(1.2) } 63%, 100% { opacity: 1; transform: scale(1) } }
+@keyframes blitz { 0%, 25.5% { opacity: 0 } 26.5% { opacity: .75 } 31%, 60.5% { opacity: 0 } 61.5% { opacity: .75 } 66%, 100% { opacity: 0 } }
+@keyframes d1 { 0%, 26.5% { opacity: 0; transform: translate(154.5%, -154.5%) scale(4.545) } 27.5% { opacity: 1; transform: translate(154.5%, -154.5%) scale(4.545) } 40%, 100% { opacity: 1; transform: none } }
+@keyframes d2 { 0%, 61.5% { opacity: 0; transform: translate(40.9%, -154.5%) scale(4.545) } 62.5% { opacity: 1; transform: translate(40.9%, -154.5%) scale(4.545) } 75%, 100% { opacity: 1; transform: none } }
+@keyframes c1 { 0%, 3% { opacity: 0 } 7%, 44% { opacity: 1 } 48%, 100% { opacity: 0 } }
+@keyframes c2 { 0%, 49% { opacity: 0 } 53%, 80% { opacity: 1 } 84%, 100% { opacity: 0 } }
+@keyframes c3 { 0%, 84% { opacity: 0; transform: translateY(6px) } 90%, 100% { opacity: 1; transform: none } }
+
+/* Takt 2 · Messen: das Foto löst sich in die Maßzeichnung auf, die vier Maße zeichnen sich in der Reihenfolge der App */
+.zeichnung { position: absolute; inset: 0; width: 100%; height: 100% }
+.zeichnung .l { fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0 }
+.zeichnung .l.duenn { stroke-width: 1.2; stroke: rgba(243, 242, 238, .55) }
+.zeichnung .sym { fill: none; stroke: rgba(243, 242, 238, .32); stroke-width: 1.2; stroke-dasharray: 5 5 }
+.zeichnung .glas { fill: rgba(143, 180, 214, .07) }
+.zeichnung .mass .ml { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0 }
+.zeichnung .mass .hilf { fill: none; stroke-width: 1.4; stroke-linecap: round }
+.zeichnung .mo .ml, .zeichnung .mo .hilf { stroke: var(--mo) } .zeichnung .el .ml, .zeichnung .el .hilf { stroke: var(--el) }
+.zeichnung .hilf.gestr { stroke-dasharray: 4 4; opacity: .7 }
+.zeichnung .wert rect { fill: #161616; stroke-width: 1.5 }
+.zeichnung .mo .wert rect { stroke: rgba(255, 138, 91, .6) } .zeichnung .el .wert rect { stroke: rgba(122, 162, 255, .6) }
+.zeichnung .wert text { font: 800 22px var(--font); font-variant-numeric: tabular-nums; text-anchor: middle; dominant-baseline: central }
+.zeichnung .mo .wert text { fill: var(--mo) } .zeichnung .el .wert text { fill: var(--el) }
+.zeichnung .wert { transform-box: fill-box; transform-origin: center }
+.m1 { --t: 1000ms } .m2 { --t: 1800ms } .m3 { --t: 2600ms } .m4 { --t: 3400ms }
+.s2-legende { position: absolute; top: 4%; left: 4%; display: flex; gap: 6px }
+.s2-legende .o .pk { background: var(--mo) } .s2-legende .e .pk { background: var(--el) }
+.s2-zaehler { left: 4%; bottom: 4% }
+.s2-zaehler .z1, .s2-zaehler .z2, .s2-zaehler .z3, .s2-zaehler .z4 { opacity: 0 }
+.so-buehne[data-s="2"] .zeichnung .l { animation: zeichnen 900ms var(--e-io) both; animation-delay: calc(150ms + var(--i, 0) * 70ms) }
+.so-buehne[data-s="2"] .zeichnung .sym { animation: ein 600ms var(--e-auf) 900ms both }
+.so-buehne[data-s="2"] .zeichnung .wand, .so-buehne[data-s="2"] .zeichnung .glas, .so-buehne[data-s="2"] .s2-legende { animation: ein 600ms var(--e-auf) 500ms both }
+.so-buehne[data-s="2"] .mass .ml { animation: zeichnen 500ms var(--e-io) var(--t) both }
+.so-buehne[data-s="2"] .mass .hilf { animation: ein 300ms var(--e-out) calc(var(--t) - 150ms) both }
+.so-buehne[data-s="2"] .mass .wert { animation: plopp 360ms var(--e-auf) calc(var(--t) + 380ms) both }
+.so-buehne[data-s="2"] .s2-zaehler .z1 { animation: fenster 800ms linear 1000ms both }
+.so-buehne[data-s="2"] .s2-zaehler .z2 { animation: fenster 800ms linear 1800ms both }
+.so-buehne[data-s="2"] .s2-zaehler .z3 { animation: fenster 800ms linear 2600ms both }
+.so-buehne[data-s="2"] .s2-zaehler .z4 { animation: fenster 800ms linear 3400ms both }
+.so-buehne[data-s="2"] .s2-zaehler .zf { animation: ein 300ms var(--e-auf) 4200ms both }
+@keyframes zeichnen { from { stroke-dashoffset: 1 } }
+@keyframes ein { from { opacity: 0 } }
+@keyframes plopp { from { opacity: 0; transform: scale(.82) } }
+@keyframes fenster { 0% { opacity: 0 } 12%, 88% { opacity: 1 } 100% { opacity: 0 } }
+
+/* Takt 3 · Konfigurieren: aus den Zahlen wächst das 3-D-Modell; der Ring springt auf Anthrazit, das Fenster färbt sich um, dann kommen Sprossen dazu */
+.modell { position: absolute; left: 21%; top: 10%; width: 58%; aspect-ratio: 1398 / 1425 }
+.modell img { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .5)) }
+.modell .weiss, .modell .anthrazit { opacity: 0 }
+.s3-panel { position: absolute; left: 4%; right: 4%; bottom: 4%; display: grid; gap: 10px; padding: 12px 14px; border-radius: 18px; background: rgba(31, 31, 31, .94); box-shadow: inset 0 0 0 1px var(--line2) }
+.s3-zeile { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.s3-farbe { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: var(--muted) }
+.s3-farbe .stapel { position: static } .s3-farbe b { font-size: 15px; color: var(--text); white-space: nowrap }
+.s3-farbe .n1 { opacity: 0 }
+.punkte { position: relative; display: flex; gap: 10px }
+.punkte i { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35) }
+.punkte .ring { position: absolute; left: -4px; top: -4px; width: 34px; height: 34px; border-radius: 50%; box-shadow: 0 0 0 2px var(--cream); background: none; transform: translateX(36px) }
+.schalter { display: inline-grid }
+.schalter > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 12px 0 9px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap }
+.schalter .aus { box-shadow: inset 0 0 0 1.5px var(--line2); color: var(--text2); opacity: 0 }
+.schalter .an { background: var(--accent); color: var(--on-cream) }
+.schalter svg { width: 14px; height: 14px }
+.s3-fertig { top: 4%; left: 4% }
+.so-buehne[data-s="3"] .modell .weiss { animation: m3weiss var(--t3) linear both }
+.so-buehne[data-s="3"] .modell .anthrazit { animation: m3anth var(--t3) linear both }
+.so-buehne[data-s="3"] .modell .sprosse { animation: m3spr var(--t3) linear both }
+.so-buehne[data-s="3"] .s3-panel { animation: hoch 500ms var(--e-auf) 650ms both }
+.so-buehne[data-s="3"] .punkte .ring { animation: ring var(--t3) var(--e-io) both }
+.so-buehne[data-s="3"] .s3-farbe .n1 { animation: n1 var(--t3) linear both }
+.so-buehne[data-s="3"] .s3-farbe .n2 { animation: n2 var(--t3) linear both }
+.so-buehne[data-s="3"] .schalter .aus { animation: saus var(--t3) linear both }
+.so-buehne[data-s="3"] .schalter .an { animation: san var(--t3) var(--e-out) both }
+.so-buehne[data-s="3"] .s3-fertig { animation: hoch 450ms var(--e-auf) 450ms both }
+@keyframes m3weiss { 0% { opacity: 0; transform: scale(.9) translateY(4%) } 12% { opacity: 1; transform: none } 31% { opacity: 1 } 36%, 100% { opacity: 0 } }
+@keyframes m3anth { 0%, 31% { opacity: 0 } 36%, 56% { opacity: 1 } 61%, 100% { opacity: 0 } }
+@keyframes m3spr { 0%, 56% { opacity: 0 } 61%, 100% { opacity: 1 } }
+@keyframes hoch { from { opacity: 0; transform: translateY(14px) } }
+@keyframes ring { 0%, 28% { transform: translateX(0) } 34%, 100% { transform: translateX(36px) } }
+@keyframes n1 { 0%, 31% { opacity: 1 } 34%, 100% { opacity: 0 } }
+@keyframes n2 { 0%, 31% { opacity: 0 } 34%, 100% { opacity: 1 } }
+@keyframes saus { 0%, 53% { opacity: 1 } 56%, 100% { opacity: 0 } }
+@keyframes san { 0%, 53% { opacity: 0; transform: scale(.94) } 57%, 100% { opacity: 1; transform: none } }
+
+/* Takt 4 · Aufmaßblatt: das Modell fliegt in Zeile 1 des Blatts, die vier Positionen haken sich ab */
+.s4-blatt { position: absolute; left: 7%; top: 7%; width: 86%; aspect-ratio: 920 / 872; border-radius: 8px; overflow: hidden; background: #fff; transform: rotate(-1.5deg); box-shadow: 0 26px 50px rgba(0, 0, 0, .55) }
+.s4-blatt img { width: 100%; height: 100% }
+.s4-blatt .zeile { position: absolute; left: 6%; width: 87.5%; height: 6%; border-radius: 4px; background: rgba(143, 214, 148, .38); opacity: 0 }
+.s4-blatt .haken { position: absolute; right: 1.6%; width: 4.6%; aspect-ratio: 1; border-radius: 50%; background: #1f7a3d; display: grid; place-items: center }
+.s4-blatt .haken svg { width: 62%; height: 62%; color: #fff }
+.z1 { top: 69.2% } .z2 { top: 75.2% } .z3 { top: 81.2% } .z4 { top: 87.2% }
+.h1 { top: 69.9% } .h2 { top: 75.9% } .h3 { top: 81.9% } .h4 { top: 87.9% }
+.flug { --fx: -54.57%; --fy: 44.46%; --fs: .0757; position: absolute; left: 21%; top: 10%; width: 58%; aspect-ratio: 1398 / 1425; opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--fs)) }
+.flug img { width: 100%; height: 100%; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .5)) }
+.s4-plak { position: absolute; left: 4%; bottom: 4%; display: flex; flex-wrap: wrap; gap: 6px; max-width: 92% }
+.so-buehne[data-s="4"] .s4-blatt { animation: blatt 900ms var(--e-auf) 250ms both }
+.so-buehne[data-s="4"] .flug { animation: flug var(--t4) var(--e-io) both }
+.so-buehne[data-s="4"] .zeile { animation: fenster 700ms linear both }
+.so-buehne[data-s="4"] .haken { animation: plopp 320ms var(--e-auf) both }
+.so-buehne[data-s="4"] .z1 { animation-delay: 1500ms } .so-buehne[data-s="4"] .h1 { animation-delay: 1700ms }
+.so-buehne[data-s="4"] .z2 { animation-delay: 1800ms } .so-buehne[data-s="4"] .h2 { animation-delay: 2000ms }
+.so-buehne[data-s="4"] .z3 { animation-delay: 2100ms } .so-buehne[data-s="4"] .h3 { animation-delay: 2300ms }
+.so-buehne[data-s="4"] .z4 { animation-delay: 2400ms } .so-buehne[data-s="4"] .h4 { animation-delay: 2600ms }
+.so-buehne[data-s="4"] .s4-plak > * { animation: hoch 450ms var(--e-auf) both }
+.so-buehne[data-s="4"] .s4-plak > :nth-child(1) { animation-delay: 3000ms } .so-buehne[data-s="4"] .s4-plak > :nth-child(2) { animation-delay: 3250ms }
+@keyframes blatt { from { opacity: 0; transform: translateY(46%) rotate(3deg) } }
+@keyframes flug { 0% { opacity: 1; transform: none } 6% { opacity: 1; transform: none } 26% { opacity: 1; transform: translate(var(--fx), var(--fy)) scale(var(--fs)) } 31%, 100% { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--fs)) } }
+
+/* Die Schritte daneben: alle Sätze stehen (keine springende Höhe), der laufende ist hell und hat den Fortschritt */
+.so-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px }
+.so-s { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 10px; width: 100%; padding: 12px 4px 12px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 12px }
+.so-s .nr { grid-row: 1 / span 3; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--muted); padding-top: 3px }
+.so-s .t { font-size: 17px; font-weight: 700; color: var(--text2); line-height: 1.3 }
+.so-s .x { font-size: 15px; color: var(--muted); margin-top: 2px; line-height: 1.4; text-wrap: pretty }
+.so-s .balken { display: block; height: 2px; margin-top: 10px; border-radius: 2px; background: var(--line2); overflow: hidden }
+.so-s .balken i { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0) }
+.so-s[aria-current="step"] .t { color: var(--text) } .so-s[aria-current="step"] .x { color: var(--text2) } .so-s[aria-current="step"] .nr { color: var(--accent) }
+.so-s.konf .t::after { content: " · am 3-D-Modell"; font-weight: 600; color: var(--accent) }
+.so.laeuft .so-s[aria-current="step"] .balken i { animation: fortschritt var(--dauer, 4800ms) linear both }
+@keyframes fortschritt { to { transform: scaleX(1) } }
+.so.halt .so-buehne *, .so.aus .so-buehne *, .so.halt .balken i, .so.aus .balken i { animation-play-state: paused !important }
+@media (hover: hover) and (pointer: fine) { .so-s:hover .t { color: var(--text) } }
+.ablauf-fuss { margin: 26px 0 0; font-size: 15px; color: var(--text2); max-width: 46ch }
+.ablauf-fuss a { color: var(--text); font-weight: 700; text-underline-offset: 4px }
+@media (prefers-reduced-motion: reduce) {
+  .so-buehne *, .so-buehne { animation: none !important; transition: none !important }
+  .so-s .balken { display: none }
+}
+
+/* Aufmaßblatt und Liste */
+.schirm { position: relative; width: 100%; border-radius: 12px; border: 6px solid var(--surface2); overflow: hidden; box-shadow: 0 18px 40px rgba(0, 0, 0, .45) }
+.schirm img { width: 100%; height: 100%; object-fit: cover }
+.schirm.blatt { aspect-ratio: 920 / 872; background: #fff }
+.blattblock { display: grid; gap: 24px; margin-top: 24px; align-items: start }
+.medien { position: relative; margin: 8px 8px 0 }
+.medien .schirm { transform: rotate(-1.5deg) }
+.datei { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text2) }
+.datei svg { width: 16px; height: 16px; color: var(--muted) }
+.liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px 20px }
+.liste li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--text2); line-height: 1.35 }
+.liste li b { color: var(--text); font-weight: 700 }
+.liste .hk { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-soft); display: grid; place-items: center; margin-top: 1px }
+.liste .hk svg { width: 11px; height: 11px; color: var(--accent) }
+.beispiel { margin: 12px 0 0; font-size: 15px; color: var(--muted); max-width: 46ch; text-wrap: pretty }
+.beispiel b { color: var(--text2); font-weight: 600 }
+.linkzeile { display: inline-flex; align-items: center; min-height: 44px; margin-top: 4px; font-size: 15px; font-weight: 700; color: var(--text); text-decoration: underline; text-underline-offset: 4px }
+
+/* Preis */
+.preis { margin-top: 24px; display: grid; gap: 6px }
+.preis .zahl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 40px; line-height: 1; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums }
+.preis .zahl small { font-size: 17px; line-height: 1.3; font-weight: 600; color: var(--text2); letter-spacing: 0 }
+.preis p { margin: 0; font-size: 17px; color: var(--text2); max-width: 36ch; text-wrap: pretty }
+.preis .frei { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 15px; color: var(--text2) }
+.preis .frei span { display: inline-flex; align-items: center; gap: 6px }
+.preis .frei svg { width: 14px; height: 14px; color: var(--accent) }
+.preis .cta { margin-top: 28px }
+
+/* Ratgeber */
+.rat { list-style: none; margin: 18px 0 0; padding: 0; display: grid }
+.rat li { border-top: 1px solid var(--line) }
+.rat a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; text-decoration: none; min-height: 60px }
+.rat b { display: block; font-size: 17px; font-weight: 700 }
+.rat span { display: block; font-size: 15px; color: var(--text2); margin-top: 2px; max-width: 46ch }
+.rat svg { flex: 0 0 auto; width: 18px; height: 18px; color: var(--muted) }
+
+/* Für Fensterbauer */
+.fb { margin-top: 64px; padding: 28px 20px; border-radius: 22px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--line) }
+.fb h2 { font-size: 24px }
+.fb p { margin: 10px 0 0; font-size: 17px; color: var(--text2); max-width: 44ch; text-wrap: pretty }
+.fb p b { color: var(--text); font-weight: 600 }
+.fb .pilot { font-size: 15px; color: var(--text2); margin-top: 14px; max-width: 48ch }
+.fb .pilot b { color: var(--text) }
+.fb .cta { margin-top: 20px }
+
+
+/* Auftritt, drei Takte (ms): 0 Foto 1,06 → 1 (900) · 0/80 Zeilen der Überschrift aus der Maske (500) · 160 Satz (500). Die Knöpfe stehen von Bild eins an. Nach 0,9 s Stille. */
+.an .foto img { animation: foto 900ms var(--e-auf) both }
+@keyframes foto { from { transform: scale(1.06) } to { transform: scale(1) } }
+.an h1 .zeile:nth-child(1) > span { animation: maske 500ms var(--e-auf) both }
+.an h1 .zeile:nth-child(2) > span { animation: maske 500ms var(--e-auf) 80ms both }
+.an .lead { animation: auf 500ms var(--e-auf) 160ms both }
+@keyframes auf { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+@keyframes maske { from { transform: translateY(110%) } to { transform: none } }
+.an.warte .foto img, .an.warte h1 .zeile > span, .an.warte .lead { animation-play-state: paused }
+
+/* Abschnitte erscheinen einmal, wenn 15 % im Bild sind: 600 ms, 12 px */
+.rev .haar { transform: scaleX(0); transition: transform 600ms var(--e-auf) }
+.rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .so-buehne, .rev .so-liste > li, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 0; transform: translateY(12px); transition: opacity 600ms var(--e-auf), transform 600ms var(--e-auf) }
+.rev .kopfzeile > :nth-child(2), .rev .lauf-kopf > :nth-child(2) { transition-delay: 80ms }
+.rev .kopfzeile > :nth-child(3) { transition-delay: 160ms }
+.rev .laufband.bilder { transition-delay: 160ms } .rev .laufband.zahlen { transition-delay: 240ms }
+.rev .so-buehne { transition-delay: 160ms } .rev .so-liste > li:nth-child(1) { transition-delay: 240ms } .rev .so-liste > li:nth-child(2) { transition-delay: 300ms } .rev .so-liste > li:nth-child(3) { transition-delay: 360ms } .rev .so-liste > li:nth-child(4) { transition-delay: 420ms }
+.rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt, .rev .ablauf-fuss { transition-delay: 240ms }
+.rev.in .haar { transform: none }
+.rev.in .kopfzeile > *, .rev.in .lauf-kopf > *, .rev.in .laufband, .rev.in .so-buehne, .rev.in .so-liste > li, .rev.in .ablauf-fuss, .rev.in .medien, .rev.in .liste, .rev.in .beispiel, .rev.in .linkzeile, .rev.in .preis, .rev.in .rat, .rev.in .fb-inhalt { opacity: 1; transform: none }
+
+@media (prefers-reduced-motion: reduce) {
+  .an .foto img, .an h1 .zeile > span, .an .lead { animation: none }
+  .rev .haar, .rev .kopfzeile > *, .rev .lauf-kopf > *, .rev .laufband, .rev .so-buehne, .rev .so-liste > li, .rev .ablauf-fuss, .rev .medien, .rev .liste, .rev .beispiel, .rev .linkzeile, .rev .preis, .rev .rat, .rev .fb-inhalt { opacity: 1; transform: none; transition: none }
+  .pille, .geist, .pille .pf, .kopf { transition: none }
+  .el-bild img { animation: none }
+  .spur [data-klon] { display: none }
+}
+
+@media (min-width: 720px) {
+  .blattblock { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px }
+  .liste { grid-template-columns: 1fr 1fr }
+  .el.f { --h: 150px } .el.t { --h: 190px }
+  .spur { --spalt: 48px }
+  .zahl-wert { font-size: 32px }
+  .zahl-label { font-size: 17px }
+  .laufband.zahlen .spur { --spalt: 16px }
+}
+@media (min-width: 900px) {
+  /* So geht es: Bühne links, Schritte rechts */
+  .so-grid { grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 56px; align-items: center; margin-top: 40px }
+  .so-s { padding: 16px 4px 16px 0 }
+  .so-s .x { font-size: 17px }
+}
+@media (min-width: 1024px) {
+  .seg { width: 320px; margin: 0 auto }
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) 540px; gap: 56px; align-items: center; padding-top: 28px }
+  .hero .text { order: 1; margin-top: 0 }
+  .hero .fotohalter { order: 2 }
+  .foto { margin: 0; height: 540px; border-radius: 24px }
+  .foto::after { display: none }
+  h1 { font-size: 40px }
+  .lead { max-width: 36ch }
+  h2 { font-size: 40px }
+  .abschnitt { padding-top: 104px }
+  .lauf { padding-top: 104px }
+  .fb { padding: 40px }
+  .fb h2 { font-size: 32px }
+}
+.fb { margin-bottom: 56px }
+.weiter { margin: 14px 0 0; font-size: 15px; color: var(--text2) }
