@@ -16,4 +16,9 @@
   der App, auch wenn der Skill andere Schriften empfiehlt.
 - JavaScript-Animationen mit GSAP: Skills `gsap-core`, `gsap-timeline`, `gsap-scrolltrigger`, `gsap-plugins`, `gsap-utils`,
   `gsap-performance` (GreenSock, MIT). GSAP liegt noch nicht im Projekt; bei Einsatz nach web/vendor/ mit Lizenzdatei.
+- Konfigurator (App) ab 26.10.2026: Folie für Folie im Skill `design-dna` mit der Palette „Task-App dunkel“ (nur acht Farben) und
+  dem Rahmen der Lage-Folien (Kopf mit Logo, Stationen-Band, Fuß mit rundem Zurück und weißer Weiter-Pille, Knöpfe der Lage).
+  Musterseiten: „Lage in Violett“ (online) und „Konfigurator in Violett“ (Vorschau Start bis Lage); Abschnitt „Design-DNA im
+  Konfigurator“ in docs/GESTALTUNG.md. Dort gehen design-dna und Palette den alten Markenregeln (Inter, 13/15/17/24/32/40, grünes
+  Wort, Cream-Pille) vor; Farbanteile je Bildschirm messen. Beim Messen kein Zwischenschritt: Zifferntasten offen, „Weiter“ speichert.
 - Gestaltungsregeln: docs/GESTALTUNG.md. Arbeiten auf dem Arbeitszweig einchecken; online (main) nur auf ausdrücklichen Wunsch.
