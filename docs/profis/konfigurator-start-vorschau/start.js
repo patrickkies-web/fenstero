@@ -22,7 +22,7 @@
       was: 'Mehrere Flügel hängen in einer Laufschiene und falten sich wie eine Ziehharmonika zu einem Paket an der Seite. So öffnet sich die ganze Wand.' }
   };
   var STELLE = {
-    ersatz: '<b>Dort ist schon eins.</b> Das neue kommt in die bestehende Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.',
+    ersatz: '<b>Dort ist schon eins.</b> Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.',
     neu: '<span class="ez-punkt" aria-hidden="true"></span><b>Dort war noch keins, oder die Öffnung wird größer.</b> Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.'
   };
   var REIHE = ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'];
@@ -60,16 +60,14 @@
       bild.width = a.w; bild.height = a.h; bild.src = a.bild;
       requestAnimationFrame(function () { objekt.classList.remove('wechselt'); etText.classList.remove('wechselt'); });
     }
-    $('et-name').textContent = a.name; $('et-sub').textContent = a.sub; $('art-wert').textContent = a.name;
-    buehne.setAttribute('aria-label', 'Gewähltes Element: ' + a.name + '. Wischen, Pfeiltasten oder die runden Knöpfe wechseln das Element.');
+    $('et-name').textContent = a.name; $('et-sub').textContent = a.sub;
+    buehne.setAttribute('aria-label', 'Gewähltes Element: ' + a.name + '. Wischen oder Pfeiltasten wechseln das Element.');
     was.setAttribute('aria-label', 'Was ist das: ' + a.name + '?'); was.setAttribute('aria-expanded', 'false');
     wasText.hidden = true; wasText.textContent = a.was;
     setTimeout(lageSetzen, 30);
   }
   function nachbar(r) { setzeArt(REIHE[(REIHE.indexOf(art) + r + REIHE.length) % REIHE.length], r); }
   app.querySelectorAll('.ez-kachel').forEach(function (b) { b.addEventListener('click', function () { setzeArt(b.getAttribute('data-art')); }); });
-  $('naechstes-element').addEventListener('click', function () { nachbar(1); });
-  $('zurueck-element').addEventListener('click', function () { nachbar(-1); });
 
   /* Erklärungen: der i-Knopf am Etikett zeigt den Begriff unter den Kacheln, das i an der Frage die Übersicht; beides bleibt über dem Fuß */
   function sichtbarHalten(el) {
@@ -78,8 +76,16 @@
       if (r.bottom > oben - 12) { var ziel = app.scrollHeight > app.clientHeight ? app : window; ziel.scrollBy({ top: r.bottom - oben + 24, behavior: ruhig() ? 'auto' : 'smooth' }); }
     });
   }
-  was.addEventListener('click', function () { var auf = wasText.hidden; wasText.hidden = !auf; was.setAttribute('aria-expanded', String(auf)); if (auf) sichtbarHalten(wasText); });
-  $('erkl-knopf').addEventListener('click', function () { var e = $('erkl'), auf = e.hidden; e.hidden = !auf; this.setAttribute('aria-expanded', String(auf)); if (auf) sichtbarHalten(e); setTimeout(lageSetzen, 0); });
+  was.addEventListener('click', function () { var auf = wasText.hidden; wasText.hidden = !auf; was.setAttribute('aria-expanded', String(auf)); setTimeout(lageSetzen, 0); });
+  /* Erklärung der Frage als Bogen über dem Inhalt: Kacheln und Pille bleiben stehen; Esc, Grund und × schließen */
+  var bogen = $('erkl'), erklKnopf = $('erkl-knopf');
+  function bogenZeigen(auf) {
+    if (auf) { bogen.hidden = false; void bogen.offsetWidth; bogen.classList.add('ist-da'); erklKnopf.setAttribute('aria-expanded', 'true'); var z = bogen.querySelector('.ez-rund--zu'); if (z) z.focus({ preventScroll: true }); }
+    else { bogen.classList.remove('ist-da'); erklKnopf.setAttribute('aria-expanded', 'false'); var fertig = function () { bogen.hidden = true; }; if (ruhig()) fertig(); else setTimeout(fertig, 160); erklKnopf.focus({ preventScroll: true }); }
+  }
+  erklKnopf.addEventListener('click', function () { bogenZeigen(bogen.hidden); });
+  bogen.querySelectorAll('[data-schliessen]').forEach(function (b) { b.addEventListener('click', function () { bogenZeigen(false); }); });
+  d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !bogen.hidden) bogenZeigen(false); });
 
   /* Wischen auf der Bühne: ab 48 px oder einem schnellen Wisch zum Nachbarn, in Wischrichtung; senkrecht bleibt Scrollen */
   var w0 = null;
@@ -112,4 +118,5 @@
   });
 
   setzeArt('fenster');
+  window.addEventListener('load', function () { REIHE.forEach(function (k) { var i = new Image(); i.src = ART[k].bild; }); });
 })();

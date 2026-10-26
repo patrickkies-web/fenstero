@@ -69,28 +69,20 @@
               <div class="ez-etikett" id="etikett">
                 <span class="dna-etikett"><span class="ez-etikett__text" aria-live="polite"><b id="et-name">Fenster</b><small id="et-sub">Dreh, Kipp, fest</small></span><button type="button" class="ez-i ez-i--etikett" id="was" aria-label="Was ist das: Fenster?" aria-expanded="false" aria-controls="was-text"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></span>
               </div>
-              <div class="ez-wechsel">
-                <button type="button" class="ez-glasknopf" id="zurueck-element" aria-label="Voriges Element"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
-                <button type="button" class="ez-glasknopf" id="naechstes-element" aria-label="Nächstes Element"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
-              </div>
               <figcaption class="ez-unsichtbar" id="buehne-text">Das gewählte Element steht auf einem Betonboden im Fensterlicht.</figcaption>
             </figure>
+            <p class="ez-hilfe ez-begriff" id="was-text" hidden></p>
 
             <div class="ez-frage">
               <div class="ez-frage__kopf">
                 <h1>Was planst <em>du?</em><button type="button" class="ez-i" id="erkl-knopf" aria-label="Welches Element passt zu mir?" aria-expanded="false" aria-controls="erkl"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></h1>
                 <button type="button" class="dna-pille dna-pille--leise dna-pille--klein ez-notiz"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>Notiz</button>
               </div>
-              <p class="ez-unterzeile">Unsicher? Nimm, was heute eingebaut ist.</p>
-              <div class="ez-erkl" id="erkl" hidden>
-                <p>Ein Fenster geht auf wie gewohnt, mit Drehen und Kippen. Eine Balkon- oder Terrassentür ebenso, nur bodentief und mit Schwelle. Eine Festverglasung lässt sich nicht öffnen und bringt dafür viel Licht.</p>
-                <p>Für große Glasflächen zur Terrasse gibt es Schiebetüren: Die Hebe-Schiebe-Tür ist leichtgängig und dicht, die PSK-Tür schiebt und kippt und ist meist günstiger. Eine Faltschiebewand öffnet fast die ganze Breite.</p>
-                <p class="ez-erkl__tipp"><b>Tipp</b> Unsicher? Wähle, was heute eingebaut ist. Dein Fensterbauer zeigt dir im Angebot, welche Alternativen es gibt. Weitere Fenster nimmst du danach einzeln auf.</p>
-              </div>
+              <p class="ez-unterzeile">Unsicher? Nimm, was heute eingebaut ist. Weitere Fenster kommen danach einzeln dran.</p>
             </div>
 
             <div class="ez-block">
-              <div class="ez-block__kopf"><span class="dna-label" id="art-l">Element</span><span class="ez-block__wert" id="art-wert">Fenster</span></div>
+              <span class="ez-unsichtbar" id="art-l">Element</span>
               <div class="ez-bento" role="group" aria-labelledby="art-l">
                 <button type="button" class="ez-kachel" data-art="fenster" aria-pressed="true"><span class="ez-kachel__licht"></span><svg class="ez-zeichen" aria-hidden="true"><use href="#z-fenster"/></svg><span class="ez-kachel__name">Fenster</span></button>
                 <button type="button" class="ez-kachel" data-art="balkon" aria-pressed="false"><span class="ez-kachel__licht"></span><svg class="ez-zeichen" aria-hidden="true"><use href="#z-balkon"/></svg><span class="ez-kachel__name">Balkontür</span></button>
@@ -99,7 +91,6 @@
                 <button type="button" class="ez-kachel" data-art="psk" aria-pressed="false"><span class="ez-kachel__licht"></span><svg class="ez-zeichen" aria-hidden="true"><use href="#z-psk"/></svg><span class="ez-kachel__name">PSK-Tür</span></button>
                 <button type="button" class="ez-kachel" data-art="fsw" aria-pressed="false"><span class="ez-kachel__licht"></span><svg class="ez-zeichen" aria-hidden="true"><use href="#z-fsw"/></svg><span class="ez-kachel__name">Faltschiebewand</span></button>
               </div>
-              <p class="ez-hilfe" id="was-text" hidden></p>
             </div>
 
             <div class="ez-block">
@@ -108,7 +99,17 @@
                 <button type="button" data-stelle="ersatz" aria-pressed="true">Fenster ersetzen</button>
                 <button type="button" data-stelle="neu" aria-pressed="false">Neue Öffnung</button>
               </div>
-              <p class="ez-stelle__text" id="stelle-text"><b>Dort ist schon eins.</b> Das neue kommt in die bestehende Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.</p>
+              <p class="ez-stelle__text" id="stelle-text"><b>Dort ist schon eins.</b> Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.</p>
+            </div>
+
+            <div class="ez-bogen" id="erkl" role="dialog" aria-modal="true" aria-labelledby="erkl-titel" hidden>
+              <button type="button" class="ez-bogen__grund" aria-label="Schließen" data-schliessen></button>
+              <div class="ez-bogen__blatt">
+                <div class="ez-bogen__kopf"><span class="dna-label" id="erkl-titel">Welches Element passt zu mir?</span><button type="button" class="ez-rund ez-rund--zu" aria-label="Schließen" data-schliessen><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+                <p>Ein Fenster geht auf wie gewohnt, mit Drehen und Kippen. Eine Balkon- oder Terrassentür ebenso, nur bodentief und mit Schwelle. Eine Festverglasung lässt sich nicht öffnen und bringt dafür viel Licht.</p>
+                <p>Für große Glasflächen zur Terrasse gibt es Schiebetüren: Die Hebe-Schiebe-Tür ist leichtgängig und dicht, die PSK-Tür schiebt und kippt und ist meist günstiger. Eine Faltschiebewand öffnet fast die ganze Breite.</p>
+                <p class="ez-bogen__tipp"><b>Tipp</b> Unsicher? Wähle, was heute eingebaut ist. Dein Fensterbauer zeigt dir im Angebot, welche Alternativen es gibt.</p>
+              </div>
             </div>
 
             <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
@@ -128,11 +129,11 @@
     <aside class="ez-notiz" aria-label="Zur Vorschau">
       <span class="dna-label">Konfigurator · Schritt 1 von 6</span>
       <h2>Was planst du? <em>Das Element im Licht.</em></h2>
-      <p class="dna-text">Die Folie ist aus den genannten Quellen gebaut, nicht aus anderen Folien: Bühne und Glas-Chip von der Seite „Konfigurator von Muster Fensterbau“, Etikett mit Anker, Bento und Umschalter von der Startseite, Gene und Palette aus der DNA. Tippen, wischen, Pfeiltasten und die runden Knöpfe wechseln das Element; „Weiter“ ist in der Vorschau ohne Ziel.</p>
+      <p class="dna-text">Die Folie ist aus den genannten Quellen gebaut, nicht aus anderen Folien: Bühne und Glas-Chip von der Seite „Konfigurator von Muster Fensterbau“, Etikett mit Anker, Bento und Umschalter von der Startseite, Gene und Palette aus der DNA. Tippen auf eine Kachel, Wischen auf der Bühne und Pfeiltasten wechseln das Element; „Weiter“ ist in der Vorschau ohne Ziel.</p>
       <ul class="ez-liste">
         <li><span class="nr">01</span><span><b>Das Element steht im Fensterlicht.</b> Rendering aus dem 3-D-Modell der App auf dem Betonboden, mit Kontaktschatten; das violette Licht am Boden heißt „gewählt“ und wandert mit. <span class="ez-gen">G4</span><span class="ez-gen">G7</span><span class="ez-gen">G2</span></span></li>
-        <li><span class="nr">02</span><span><b>Name an der Sache.</b> Ankerpunkt am Element, gestrichelte Linie, Glas-Etikett mit Name und Kurzbeschreibung der App; der runde i-Knopf erklärt jedes Element mit dem Begriff der App. <span class="ez-gen">G9</span><span class="ez-gen">G10</span><span class="ez-gen">G13</span></span></li>
-        <li><span class="nr">03</span><span><b>Schritt 1 von 6</b> als Glas-Chip mit Fortschrittsring über dem Foto; zwei runde Glas-Knöpfe wechseln das Element, Wischen geht auch. <span class="ez-gen">G5</span><span class="ez-gen">G13</span></span></li>
+        <li><span class="nr">02</span><span><b>Name an der Sache.</b> Ankerpunkt am Element, gestrichelte Linie, Glas-Etikett mit Name und Kurzbeschreibung der App; der runde i-Ring erklärt jedes Element mit dem Begriff der App, offen wird er violett. <span class="ez-gen">G9</span><span class="ez-gen">G10</span><span class="ez-gen">G13</span></span></li>
+        <li><span class="nr">03</span><span><b>Schritt 1 von 6</b> als Glas-Chip mit Fortschrittsring über dem Foto; der Begriff zum Element erscheint direkt unter der Bühne, die Erklärung der Frage als Bogen über dem Inhalt. <span class="ez-gen">G5</span><span class="ez-gen">G10</span></span></li>
         <li><span class="nr">04</span><span><b>Bento der sechs Elemente</b> wie auf der Startseite: weiße Kacheln mit den Strichzeichnungen der App (Flügel, Griff, Öffnungsrichtung), das gewählte als dunkle Kachel mit violettem Licht und Punkt. <span class="ez-gen">G8</span><span class="ez-gen">G2</span></span></li>
         <li><span class="nr">05</span><span><b>Die Stelle</b> als Umschalter mit Punkt wie der Kopf der Startseite; darunter ein Satz aus den Begriffen der App, auch für den Fall, dass die Öffnung größer wird. Bei „Neue Öffnung“ ein gestrichelter Rahmen am Element: noch nicht da. <span class="ez-gen">G1</span></span></li>
         <li><span class="nr">06</span><span><b>Eine volle Pille</b> „Weiter zu den Fotos“ mit Pfeilkreis, am Telefon unten stehend, links der runde Rückweg. <span class="ez-gen">G6</span></span></li>

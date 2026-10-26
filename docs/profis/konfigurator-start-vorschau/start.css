@@ -69,50 +69,45 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 .ez-kopf__knopf--zeichen { width: 44px; padding: 0; justify-content: center; }
 
 /* ---------- Bühne: Betonboden im Fensterlicht (Foto), das Element steht darauf ---------- */
-.ez-buehne { position: relative; height: 250px; margin: 0 0 10px; border-radius: var(--rund-l); overflow: hidden; background: var(--anthrazit); isolation: isolate; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.ez-buehne { position: relative; height: 266px; margin: 0; border-radius: var(--rund-l); overflow: hidden; background: var(--anthrazit); isolation: isolate; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
 .ez-buehne:active { cursor: grabbing; }
 .ez-buehne:focus-visible { outline-offset: 2px; }
 .ez-buehne__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 42% 38%; display: block; }
 /* Lichtkante oben und Vignette unten wie auf der Startseite (G14) */
 .ez-buehne__kante { position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -90px 120px -60px rgba(7,9,10,.75); }
 /* Violettes Licht am Boden als Zustand „gewählt“, radial mit Indigo, ohne Weichzeichner; es folgt dem Element */
-.ez-buehne__licht { position: absolute; z-index: 1; left: 0; top: 150px; width: 240px; height: 110px; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, var(--violett) 16%, color-mix(in srgb, var(--violett) 70%, var(--indigo)) 32%, var(--indigo) 54%, color-mix(in srgb, var(--indigo) 40%, transparent) 70%, transparent 88%); transform: translateX(var(--licht-x, 6px)); transition: transform 320ms var(--dna-druck); }
+.ez-buehne__licht { position: absolute; z-index: 1; left: 0; top: 170px; width: 240px; height: 110px; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, var(--violett) 16%, color-mix(in srgb, var(--violett) 70%, var(--indigo)) 32%, var(--indigo) 54%, color-mix(in srgb, var(--indigo) 40%, transparent) 70%, transparent 88%); transform: translateX(var(--licht-x, 6px)); transition: transform 320ms var(--dna-druck); }
 /* Glas-Chip mit Fortschrittsring (Vorlage 13, Muster-Seite „Foto 1 von 2“) */
 .ez-glaschip { position: absolute; z-index: 4; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 6px; border-radius: var(--rund-pille); white-space: nowrap; background: var(--glas); color: var(--weiss); font: 500 13px/1 var(--font-sans); border: 1px solid var(--glas-rand); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); pointer-events: none; }
 .ez-ring { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(var(--violett) calc(var(--anteil) * 360deg), rgba(255,255,255,.22) 0); -webkit-mask: radial-gradient(circle, transparent 4.5px, #000 5px); mask: radial-gradient(circle, transparent 4.5px, #000 5px); }
 /* Das Objekt: Rendering auf dem Boden, Kontaktschatten darunter */
-.ez-objekt { position: absolute; z-index: 3; left: 22px; bottom: 16px; width: 176px; height: 196px; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
+.ez-objekt { position: absolute; z-index: 3; left: 20px; bottom: 18px; width: 164px; height: 206px; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
 .ez-objekt img { position: relative; z-index: 1; display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; transition: opacity 220ms var(--dna-druck), transform 220ms var(--dna-auftritt); }
 .ez-objekt.wechselt img { opacity: 0; transform: translateX(calc(var(--d, 1) * 14px)) scale(.97); transition-duration: 0s; }
-.ez-objekt__schatten { position: absolute; left: 6%; right: 6%; bottom: -10px; height: 26px; border-radius: 50%; background: radial-gradient(closest-side, rgba(7,9,10,.8), rgba(7,9,10,.4) 55%, transparent); transform: translateX(var(--schatten-x, 0px)); transition: transform 320ms var(--dna-druck); }
+.ez-objekt__schatten { position: absolute; left: 6%; right: 6%; bottom: -10px; height: 26px; border-radius: 50%; background: radial-gradient(closest-side, rgba(7,9,10,.8), rgba(7,9,10,.4) 55%, transparent); transform: translateX(var(--schatten-x, 0px)); transition: transform 220ms var(--dna-druck); }
 /* Neue Öffnung: gestrichelter Rahmen heißt „noch nicht da“ (G1) */
-.ez-neu-rahmen { position: absolute; z-index: 2; border: 1.5px dashed var(--violett); border-radius: 6px; opacity: 0; transition: opacity 320ms var(--dna-druck); }
-.ez-app[data-stelle="neu"] .ez-neu-rahmen { opacity: 1; }
+.ez-neu-rahmen { position: absolute; z-index: 2; border: 1.5px dashed var(--violett); border-radius: 6px; opacity: 0; transform: scale(.94); transform-origin: 50% 100%; transition: opacity 300ms var(--dna-druck), transform 300ms var(--dna-auftritt); }
+.ez-app[data-stelle="neu"] .ez-neu-rahmen { opacity: 1; transform: none; }
 /* Anker am Element (Startseite, Muster-Seite): weißer Punkt mit schwarzem Ring, gestrichelte Linie zum Etikett */
 .ez-anker { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
 .ez-anker .dna-anker__linien line { stroke: var(--weiss); stroke-dasharray: 3 4; }
 .ez-anker__punkt { left: var(--px, 54%); top: var(--py, 30%); background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 0 0 5px rgba(255,255,255,.28); transition: left 320ms var(--dna-druck), top 320ms var(--dna-druck); }
-.ez-etikett { position: absolute; z-index: 5; right: 12px; top: 44px; max-width: calc(100% - 180px); }
+.ez-etikett { position: absolute; z-index: 5; right: 12px; top: 46px; max-width: calc(100% - 190px); }
 .ez-etikett .dna-etikett { position: relative; height: auto; min-height: 44px; max-width: 100%; padding: 8px 24px 8px 12px; gap: 8px; border-radius: 20px; color: var(--weiss); white-space: normal; }
 .ez-etikett__text { display: grid; gap: 3px; min-width: 0; transition: opacity 150ms var(--dna-druck); }
-.ez-etikett__text b { font: 500 16px/1.1 var(--font-sans); letter-spacing: -.01em; hyphens: manual; }
-.ez-etikett__text small { font: 400 13px/1.25 var(--font-sans); color: var(--silbergrau); }
+.ez-etikett__text b { font: 500 17px/1.1 var(--font-sans); letter-spacing: -.01em; hyphens: manual; }
+.ez-etikett__text small { font: 400 14px/1.25 var(--font-sans); color: var(--silbergrau); }
 .ez-etikett__text.wechselt { opacity: 0; transition: none; }
 /* Runde Knöpfe: i-Ring (28 px, 44 px Trefferfläche), i als voller Kreis auf der Etikett-Ecke, Glas-Knöpfe zum Wechseln (G13) */
 .ez-i { width: 28px; height: 28px; flex: none; border: 0; padding: 0; border-radius: 50%; background: transparent; color: var(--silbergrau); box-shadow: inset 0 0 0 2px var(--silbergrau); display: inline-grid; place-items: center; cursor: pointer; position: relative; transition: transform 160ms var(--dna-druck), color 150ms ease, box-shadow 150ms ease, background-color 150ms ease; }
 .ez-i::after { content: ""; position: absolute; inset: -8px; }
 .ez-i svg { width: 14px; height: 14px; }
 .ez-i:active { transform: scale(.94); transition-duration: 0s; }
-.ez-i[aria-expanded="true"] { background: var(--weiss); color: var(--schwarz); box-shadow: none; }
-.ez-i--etikett { position: absolute; right: -8px; top: -8px; background: var(--weiss); color: var(--schwarz); box-shadow: 0 0 0 2px var(--schwarz); }
-.ez-i--etikett[aria-expanded="true"] { background: var(--violett); box-shadow: 0 0 0 2px var(--schwarz); }
-.ez-wechsel { position: absolute; z-index: 5; right: 12px; bottom: 12px; display: flex; gap: 8px; }
-.ez-glasknopf { width: 44px; height: 44px; border: 1px solid var(--glas-rand); padding: 0; border-radius: 50%; background: var(--glas); color: var(--weiss); display: grid; place-items: center; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
-.ez-glasknopf svg { width: 16px; height: 16px; }
-.ez-glasknopf:active { transform: scale(.94); transition-duration: 0s; }
-
+.ez-i[aria-expanded="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none; }
+.ez-i--etikett { position: absolute; right: -8px; top: -8px; background: var(--schwarz); color: var(--weiss); box-shadow: inset 0 0 0 2px var(--weiss); }
+.ez-i--etikett[aria-expanded="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none; }
 /* ---------- Frage: 30 px Gewicht 500, zweite Stimme „du?“, i-Ring, Notiz leise; Unterzeile 16 px ---------- */
-.ez-frage { padding: 6px 0 12px; }
+.ez-frage { padding: 6px 0 8px; }
 .ez-frage__kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .ez-frage h1 { margin: 0; flex: 1; min-width: 0; font: 500 30px/1.1 var(--font-sans); letter-spacing: -.02em; text-wrap: balance; }
 .ez-frage h1 em { font-style: normal; color: var(--silbergrau); }
@@ -120,26 +115,35 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 .ez-frage .dna-pille--leise { height: 44px; gap: 6px; padding: 0 14px; font-size: 14px; box-shadow: inset 0 0 0 2px var(--silbergrau); transition: transform 160ms var(--dna-druck), background-color 150ms ease, color 150ms ease; }
 .ez-frage .dna-pille--leise svg { width: 14px; height: 14px; }
 .ez-unterzeile { margin: 6px 0 0; font: 400 16px/1.5 var(--font-sans); color: var(--silbergrau); }
-.ez-erkl { display: grid; gap: 8px; margin-top: 10px; padding: 14px 16px; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
-.ez-erkl[hidden] { display: none; }
-.ez-erkl p { margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--silbergrau); }
-.ez-erkl__tipp { color: var(--weiss) !important; }
-.ez-erkl__tipp b { font-weight: 500; margin-right: 6px; }
+.ez-bogen { position: fixed; inset: 0; z-index: 20; display: grid; align-items: end; }
+.ez-bogen[hidden] { display: none; }
+.ez-schirm > .ez-app .ez-bogen { position: absolute; }
+.ez-bogen__grund { position: absolute; inset: 0; border: 0; padding: 0; background: rgba(7,9,10,.55); opacity: 0; transition: opacity 200ms ease; cursor: default; }
+.ez-bogen__blatt { position: relative; display: grid; gap: 10px; max-height: 80%; overflow: auto; padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); border-radius: var(--rund-l) var(--rund-l) 0 0; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045), 0 -24px 48px -16px rgba(0,0,0,.7); opacity: 0; transform: translateY(16px); transition: opacity 200ms var(--dna-druck), transform 200ms var(--dna-auftritt); }
+.ez-bogen.ist-da .ez-bogen__grund { opacity: 1; }
+.ez-bogen.ist-da .ez-bogen__blatt { opacity: 1; transform: none; }
+.ez-bogen__kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ez-bogen__kopf .dna-label { font: 500 13px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--weiss); }
+.ez-rund--zu { margin-right: -8px; box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+.ez-bogen p { margin: 0; font: 400 15px/1.5 var(--font-sans); color: var(--silbergrau); }
+.ez-bogen__tipp { color: var(--weiss) !important; }
+.ez-bogen__tipp b { font-weight: 500; margin-right: 6px; }
 
 /* ---------- Blöcke: Beschriftung 13 px, Wert rechts ---------- */
 .ez-block { display: grid; gap: 8px; }
-.ez-block + .ez-block { margin-top: 14px; }
+.ez-block + .ez-block { margin-top: 12px; }
 .ez-block__kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 18px; }
 .ez-block .dna-label { font: 400 13px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
 .ez-block__wert { font: 400 14px/1.3 var(--font-sans); color: var(--silbergrau); }
 .ez-hilfe { margin: 2px 0 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau); }
 .ez-hilfe[hidden] { display: none; }
+.ez-begriff { margin: 10px 0 0; padding: 12px 14px; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); color: var(--weiss); }
 
 /* ---------- Bento der sechs Elemente (Startseite: weiße Kacheln); gewählt: dunkle Kachel mit Licht und Punkt ---------- */
 .ez-bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.ez-kachel { position: relative; isolation: isolate; overflow: hidden; display: grid; justify-items: center; align-content: start; gap: 4px; min-height: 88px; padding: 8px 4px 8px; border: 0; border-radius: var(--rund-m); background: var(--weiss); color: var(--schwarz); cursor: pointer; font: 500 13px/1.15 var(--font-sans); text-align: center; transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-kachel { position: relative; isolation: isolate; overflow: hidden; display: grid; justify-items: center; align-content: start; gap: 3px; min-height: 80px; padding: 6px 4px 7px; border: 0; border-radius: var(--rund-m); background: var(--weiss); color: var(--schwarz); cursor: pointer; font: 500 13px/1.15 var(--font-sans); text-align: center; transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
 .ez-kachel__licht { position: absolute; z-index: -1; left: 50%; bottom: -34px; width: 120%; height: 70px; translate: -50% 0; border-radius: 50%; pointer-events: none; opacity: 0; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, color-mix(in srgb, var(--violett) 60%, var(--indigo)) 30%, var(--indigo) 58%, transparent 80%); transition: opacity 150ms var(--dna-druck); }
-.ez-zeichen { width: 52px; height: 52px; display: block; --z-rahmen: var(--weiss); --z-strich: var(--schwarz); --z-glas: color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); --z-boden: var(--silbergrau); }
+.ez-zeichen { width: 48px; height: 48px; display: block; --z-rahmen: var(--weiss); --z-strich: var(--schwarz); --z-glas: color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); --z-boden: var(--silbergrau); }
 .ez-kachel__name { display: block; max-width: 100%; }
 .ez-kachel__name::before { content: ""; display: inline-block; width: 0; height: 7px; margin-right: 0; border-radius: 50%; background: var(--violett); vertical-align: 1px; transition: width 150ms var(--dna-druck), margin 150ms var(--dna-druck); }
 .ez-kachel:active { transform: scale(.97); transition-duration: 0s; }
@@ -154,12 +158,12 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 .ez-stelle button:active { transform: scale(.97); transition-duration: 0s; }
 .ez-stelle button[aria-pressed="true"] { background: var(--schwarz); color: var(--weiss); }
 .ez-stelle button[aria-pressed="true"]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); flex: none; }
-.ez-stelle__text { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau); }
+.ez-stelle__text { margin: 0; min-height: 41px; font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau); }
 .ez-stelle__text b { font-weight: 500; color: var(--weiss); }
 .ez-stelle__text .ez-punkt { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px; }
 
 /* Rechtliches 13 px, „Vertrag widerrufen“ unterstrichen zuerst, Ziele 44 px */
-.ez-recht { margin: 12px 0 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 14px; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-recht { margin: 18px 0 6px; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 14px; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); }
 .ez-recht a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; }
 .ez-recht__widerruf { text-decoration: underline !important; text-underline-offset: 3px; }
 
@@ -171,16 +175,15 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 @media (hover: hover) and (pointer: fine) {
   .ez .dna-pille:hover .dna-pille__pfeil svg { transform: translateX(2px); }
   .ez .dna-pille--leise:hover, .ez-rund--fuss:hover, .ez-i:not([aria-expanded="true"]):not(.ez-i--etikett):hover { background: var(--indigo); color: var(--weiss); box-shadow: none; }
-  .ez-glasknopf:hover { background: var(--indigo); }
-  .ez-kachel:not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1.5px var(--schwarz); }
+    .ez-kachel:not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 1.5px var(--schwarz); }
   .ez-stelle button:not([aria-pressed="true"]):hover { color: var(--weiss); }
   .ez-rund--kopf:hover, .ez-kopf__knopf:hover { background: var(--anthrazit); }
 }
 
 /* Schmale Telefone */
 @media (max-width: 374px) {
-  .ez-objekt { width: 150px; height: 180px; }
-  .ez-etikett { max-width: calc(100% - 160px); }
+  .ez-objekt { width: 150px; height: 190px; }
+  .ez-etikett { max-width: calc(100% - 176px); }
   .ez-kopf__knopf span { display: none; }
   .ez-kopf__knopf { width: 44px; padding: 0; justify-content: center; }
   .ez-zeichen { width: 44px; height: 44px; }
@@ -188,5 +191,5 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 
 /* Weniger Bewegung: Zustände sofort */
 @media (prefers-reduced-motion: reduce) {
-  .ez-objekt img, .ez-objekt__schatten, .ez-buehne__licht, .ez-anker__punkt, .ez-etikett__text, .ez-kachel, .ez-kachel__licht, .ez-kachel__name::before, .ez-stelle button, .ez-neu-rahmen, .ez-i, .ez-rund, .ez-glasknopf, .ez-kopf__knopf, .ez .dna-pille, .ez .dna-pille__pfeil svg { transition: none !important; }
+  .ez-objekt img, .ez-objekt__schatten, .ez-buehne__licht, .ez-anker__punkt, .ez-etikett__text, .ez-kachel, .ez-kachel__licht, .ez-kachel__name::before, .ez-stelle button, .ez-neu-rahmen, .ez-i, .ez-rund, .ez-bogen__grund, .ez-bogen__blatt, .ez-kopf__knopf, .ez .dna-pille, .ez .dna-pille__pfeil svg { transition: none !important; }
 }

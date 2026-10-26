@@ -52,7 +52,7 @@ Sekunde 1: das Fenster im Fensterlicht auf dem Betonboden. Sekunde 2: das Etiket
 
 ## Messwerte (Vorschau, werkzeuge/ und eigenes Aufnahmeskript für die App-Folie)
 
-- Telefon 390 × 844: genau eine volle Pille im Bildschirm, Oberkante 774 px (unteres Drittel), 52 px hoch; 0 laufende Animationen nach 2,6 s; keine Konsolenfehler; kein Querscrollen; alle Ziele ab 44 × 44 px (i-Knöpfe 28 px mit 44 px Trefferfläche); Laden 0,31 s bei vierfach gedrosselter CPU; Layoutsprung 0; keine `filter`-Ebene auf Flächen (vier `backdrop-filter` nur auf Glas über dem Foto: Chip, Etikett, zwei Knöpfe); 0 lazy-Bilder; Bilder 124 KB.
+- Telefon 390 × 844: genau eine volle Pille im Bildschirm, Oberkante 774 px (unteres Drittel), 52 px hoch; 0 laufende Animationen nach 2,6 s; keine Konsolenfehler; kein Querscrollen; alle Ziele ab 44 × 44 px (i-Knöpfe 28 px mit 44 px Trefferfläche); Laden 0,23 s bei vierfach gedrosselter CPU; Layoutsprung 0; keine `filter`-Ebene auf Flächen (zwei `backdrop-filter` nur auf Glas über dem Foto: Chip und Etikett); 0 lazy-Bilder; Bilder 269 KB (Foto 100 KB, sechs Renderings vorgeladen).
 - Schreibtisch 1280 × 800: das Gerät wird bei flachen Bildschirmen kürzer, nie kleiner (Ziele bleiben 44 px); eine volle Pille im Bild, Oberkante 720 px.
 - Ruhige Fassung und ohne JavaScript: alles steht sofort (Anker, Etikett und Kacheln liegen fest im Markup; ohne JavaScript bleibt „Fenster“ gewählt).
 
@@ -62,27 +62,65 @@ Telefon 390 × 844:
 
 | Bildschirm | Neutral % | Violett | Koralle | Indigo | Foto | Farbe gesamt |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 Start | 97,0 (S 48 · A 19 · G 9 · W 20) | 0,4 | 0,0 | 0,5 | 2,1 | **3,0** |
-| 2 Neue Öffnung | 97,0 (S 50 · A 20 · G 9 · W 18) | 0,7 | 0,0 | 0,9 | 1,3 | **3,0** |
-| 3 Hebe-Schiebe, „Was ist das?“ | 94,7 (S 49 · A 17 · G 9 · W 19) | 0,8 | 0,0 | 0,6 | 3,9 | **5,3** |
-| 4 Erklärung offen | 95,4 (S 30 · A 41 · G 10 · W 14) | 0,5 | 0,0 | 0,2 | 3,9 | **4,6** |
-| **Folie** | 96,0 (S 44 · A 24 · G 10 · W 18) | 0,6 | 0,0 | 0,6 | 2,8 | **4,0** |
+| 1 Start | 96,7 (S 49 · A 20 · G 10 · W 19) | 0,3 | 0,0 | 0,6 | 2,4 | **3,3** |
+| 2 Neue Öffnung | 97,0 (S 48 · A 22 · G 10 · W 17) | 0,6 | 0,0 | 0,9 | 1,6 | **3,0** |
+| 3 Hebe-Schiebe, Begriff offen | 95,2 (S 40 · A 27 · G 10 · W 18) | 0,7 | 0,0 | 0,7 | 3,4 | **4,8** |
+| 4 Erklärung als Bogen | 98,9 (S 35 · A 42 · G 21 · W 0) | 0,0 | 0,0 | 0,5 | 0,6 | **1,1** |
+| **Folie** | 96,9 (S 43 · A 28 · G 13 · W 14) | 0,4 | 0,0 | 0,7 | 2,0 | **3,1** |
 
-Schreibtisch 1280 × 800: 99,1 neutral (S 75 · A 10 · G 7 · W 7), Violett 0,1, Koralle 0,0, Indigo 0,2, Foto 0,6, Farbe gesamt 0,9.
+Schreibtisch 1280 × 800: 99,0 neutral (S 75 · A 11 · G 7 · W 6), Violett 0,1, Koralle 0,0, Indigo 0,2, Foto 0,7, Farbe gesamt 1,0.
 
-Lesart: Die Folie ist ruhiger als die Website-Vorgabe (Violett 3,5, Farbe gesamt 7), weil Farbe hier nur Zustand ist: das Licht unter dem Element (auf dem hellen Boden zählt es als Grau), die gewählte Kachel, der Punkt im Umschalter und der Ring im Chip. Koralle nur als Hinweis-Punkt bei „Neue Öffnung“. Je Bildschirm unter 12 und keiner ohne Farbe; Koralle nie größer als Violett. Der Inhaber entscheidet wie bei der Startseite, ob Zählung oder Eindruck gilt.
+Lesart: Die Folie ist ruhiger als die Website-Vorgabe (Violett 3,5, Farbe gesamt 7), weil Farbe hier nur Zustand ist: das Licht unter dem Element (auf dem hellen Boden zählt es als Grau), die gewählte Kachel, der Punkt im Umschalter und der Ring im Chip. Koralle nur als Hinweis-Punkt bei „Neue Öffnung“. Je Bildschirm unter 12 und keiner ohne Farbe (Bildschirm 4 zeigt den Bogen über abgedunkeltem Inhalt); Koralle nie größer als Violett. Der Inhaber entscheidet wie bei der Startseite, ob Zählung oder Eindruck gilt.
 
 ## Gremium (eine Runde zur neuen Fassung, blind X = heute, Y = neu; Urteile unter docs/profis/gremium/2026-10-26-konfigurator-start-*.md)
 
-GREMIUM-ERGEBNIS
+| Gruppe | Gewinner | Aufgabe / Werte | Hände Y | Vetos, rote Punkte |
+| --- | --- | --- | --- | --- |
+| Kunden | Y, 6 zu 0 | gelöst: Y 5 von 6 (Kai als Gegenspieler schließt bei „Fotos“), X 3 von 6 (drei scheitern am unsichtbaren „Weiter“) | 3 · 4 · 4 · 3 · 3 · 2 (Median 3) | keins |
+| Gestalter | Y, 6 zu 0 | – | 4 · 3 · 4 · 3 · 4 · 4 (Median 4) | keins; Mara und Tobias würden X blockieren (Hauptaktion unsichtbar) |
+| Fensterbauer | Y, 6 zu 0 | kaufen Y 4 / X 2, zeigen Y 4 / X 3, seriös 4 / 3 | 4 · 5 · 4 · 4 · 4 · 4 (Median 4) | keins |
+
+Mehrheiten „ändern“ (alle übrigen Änderungen mit Mehrheit „behalten“, keine mit Mehrheit „zurück“): 4 Begriff dort, wo das i getippt wird, i-Knöpfe mit einer Zustandslogik (Gestalter 5:1, Fensterbauer 1); 5 die runden Glas-Knöpfe auf der Bühne weg oder leiser (Kunden 4:2, Gestalter 4:2; Fensterbauer behalten); 6 Erklärung der Frage ohne Verdrängen von Kacheln und Pille (Gestalter 4:2); 8 Satz zur Stelle vollständig über der Pille, feste Mindesthöhe (Fensterbauer 6:0, Gestalter 4:2); 10 Rechtsverweise frei von der Pille (Fensterbauer 4:2); 11 Schreibtisch der echten App zweispaltig, das Telefon im Rahmen nur als Vorschau (Fensterbauer 4:2, Kunden 4:2).
+
+Muss-Listen (Vereinigung): nichts unter dem klebenden Fuß, Satz zur Stelle sichtbar vor „Weiter“ · Begriff am Ort des Antippens, i-Knöpfe mit einer Logik · Erklärung ohne Verdrängen · Etikett nie über dem Element, Bühne hoch genug · Renderings mit festen Maßen, vorgeladen · Pfeilknöpfe von „Weiter“ unterscheidbar · Hinweis auf weitere Fenster im Bildschirm · Rechtsverweise nie angeschnitten, „Vertrag widerrufen“ nicht in Schritt 1 (Gisela) · Schildschrift im Bild so groß wie der Fließtext · Unterzeile „Unsicher? …“ bleibt · Schreibtisch für Kunden breit.
+
+Konsent nach dem Umbau (ohne zweite Abnahme, verkürztes Rezept): keine Faust, keine Mehrheit „zurück“, keine Vetos; Kunden lösen 5 von 6, Fensterbauer Median kaufen und zeigen 4, Gestalter Median 4. Offen bleibt Kai (2, Gegenspieler) und die Hand 3 von Lena, Tobias, Renate, Thomas und Gisela mit den unten genannten Punkten.
 
 ## Umbau nach dem Gremium (Muss-Punkte und Vetos)
 
-UMBAU
+- Nichts unter dem Fuß: Bühne 266 px, Frage enger, Kacheln 80 px, Satz zur Stelle gekürzt („Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.“) mit Mindesthöhe; im ersten Bildschirm stehen Bühne, Frage, Unterzeile, sechs Kacheln, Umschalter und der ganze Satz über der Pille (gemessen: Satz endet bei 756 px, Fuß ab 760).
+- Begriff am Ort des Antippens: der i-Ring am Etikett öffnet den Begriff direkt unter der Bühne (Anthrazit-Kachel), nicht mehr unter den Kacheln. Eine Zustandslogik für beide i: Umriss zu, Violett mit schwarzem i offen; nie voll weiß. Größe bleibt 28 px Ring mit 44 px Trefferfläche nach DNA Abschnitt 9 (Gestalter wollten 44 px sichtbar; die DNA des Inhabers geht vor).
+- Erklärung der Frage als Bogen über dem Inhalt (200 ms, Opazität und 16 px von unten), Kacheln und Pille bleiben stehen; schließen mit ×, Grund oder Esc.
+- Die zwei runden Glas-Knöpfe auf der Bühne entfallen (vier Kunden lasen sie als „Weiter/Zurück“); Element wechseln über Kacheln, Wischen mit Achsensperre und Pfeiltasten. Damit liegen nur noch zwei Glasflächen über dem Foto (Chip, Etikett).
+- Hinweis auf weitere Fenster in der Unterzeile: „Unsicher? Nimm, was heute eingebaut ist. Weitere Fenster kommen danach einzeln dran.“
+- Schildschrift am Etikett 17/14 px (vorher 16/13); Etikett schmaler als die Lücke zum Element, Objekt 164 px breit.
+- Renderings mit festen Maßen (width/height je Bild) und nach dem Laden vorgeholt; Kontaktschatten wechselt mit dem Element in 220 ms, nur das Licht gleitet 320 ms nach; der gestrichelte Rahmen bei „Neue Öffnung“ zeichnet sich einmal in 300 ms (Opazität und Maß).
+- Rechtsverweise mit 18 px Abstand über dem Fuß; „Vertrag widerrufen“ bleibt erster Verweis (Vorgabe docs/GESTALTUNG.md, § 356a BGB: der Knopf steht in jeder Fußzeile); nicht umgesetzt, Grund im Protokoll.
+- Zeilenkopf „Element — Fenster“ entfällt (Name stand viermal auf dem Bildschirm); die Gruppe hat eine unsichtbare Beschriftung für Screenreader.
+- Nicht umgesetzt (Kann oder gegen die DNA): „du?“ weiß (DNA: zweite Stimme in Silbergrau), Zweitzeile im Umschalter (Pille 44 px, der Satz darunter trägt sie), Lichtschatten mit Sprossen im Foto (Foto des Inhabers), anderer Boden (Renate allein), „Fenster ersetzen“ als „Bestehendes ersetzen“ (Text der App, Vorschlag an den Inhaber), Schreibtisch der echten App zweispaltig (gehört zur Übernahme, siehe unten).
 
 ## Änderungstabelle für den Inhaber
 
-TABELLE
+| Nr. | Änderung | Zweck | Urteil | Stand |
+| --- | --- | --- | --- | --- |
+| 1 | Palette „Task-App dunkel“, Outfit, Frage 30/500 mit zweiter Stimme „du?“ | Marke | behalten (G 5:1, K 4:2, F 6:0) | bleibt |
+| 2 | Kopf mit rundem Zurück, Marke, Übersicht, Begriffe; Schritt als Glas-Chip mit Ring | Blickführung | behalten (alle) | bleibt |
+| 3 | Bühne: Betonboden im Fensterlicht, Element steht darauf, Kontaktschatten, violettes Licht | Marke, Verständnis | behalten (G 4:2, K 5:1, F 6:0) | geändert: 266 px, Objekt 164 px |
+| 4 | Glas-Etikett mit Anker, i-Ring bei allen sechs | Verständnis | ändern (G 5:1): Begriff am Ort, eine Logik | geändert |
+| 5 | Runde Glas-Knöpfe zum Blättern | Bedienung | ändern (K 4:2, G 4:2): weg | zurückgenommen |
+| 6 | Unterzeile und Erklärung der Frage | Vertrauen | ändern (G 4:2): Bogen; K: Hinweis auf weitere Fenster | geändert |
+| 7 | Bento der sechs Kacheln mit Strichzeichnungen der App, gewählt dunkel mit Licht | Verständnis, Daten | behalten (alle) | geändert: 80 px, ohne Zeilenkopf |
+| 8 | Die Stelle als Umschalter mit Satz aus den Begriffen der App | Daten | ändern (F 6:0, G 4:2): Satz sichtbar, Mindesthöhe | geändert |
+| 9 | Fuß mit einer vollen Pille, am Telefon unten stehend | Blickführung | behalten (alle) | bleibt |
+| 10 | Rechtsverweise 13 px am Ende | Technik, Recht | behalten (K 4:2, G 5:1); F 4:2 ändern: frei von der Pille | geändert: 18 px Abstand; Reihenfolge bleibt (Vorgabe) |
+| 11 | Schreibtisch als Gerät mit Notizspalte (Vorschau) | Vorlage | ändern (F 4:2, K 4:2): App breit | bleibt in der Vorschau; Übernahme zweispaltig |
+| 12 | Bewegung nur als Zustand und Rückmeldung | Marke | behalten (alle); Noah: Schatten mit dem Element | geändert: Schatten 220 ms, Rahmen zeichnet sich |
+
+Blickprotokoll vorher und nachher: vorher (heutige App) Fenster, grünes „planst“, „Fenster“; „Weiter“ nicht im Bild, drei von sechs Kunden scheitern dort. Nachher: Fenster im Fensterlicht, Kacheln mit Namen, „Weiter zu den Fotos“; fünf von sechs Kunden lösen die Aufgabe ohne Scrollen.
+
+Selbst entschieden: Bühnenfoto von der Muster-Seite, Strichzeichnungen der App statt Renderings in den Kacheln, Unterzeile und Satz zu weiteren Fenstern, Bogen statt Kachel für die Erklärung, Pfeilknöpfe weg. Echtes Material, das fehlt: keins (Foto, Renderings und Texte sind die des Projekts). Stimmen: alle simuliert; Realitäts-Check unten.
+
+Kann-Liste (nur auf Wunsch): „Fenster ersetzen“ bei Türen als „Bestehendes ersetzen“ (Text der App) · „Fotos“ in der Pille erklären („Weiter zu den zwei Fotos“) · Wort unter Buch und Zurück-Pfeil · „Dreh, Kipp, fest“ so setzen, dass es nicht wie eine Wahl aussieht · Zweitzeile „Dort ist schon eins / Dort war noch keins“ im Umschalter · ein Name „Hebe-Schiebe-Tür“ auf Kachel und Etikett · Hinweis zu den Fotos vor Schritt 2 · „du?“ weiß (gegen die DNA) · Verweise in der Reihenfolge Impressum, Datenschutz, AGB, Widerruf (gegen die Vorgabe).
 
 ## Übernahme in die App (noch nicht geschehen)
 
