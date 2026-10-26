@@ -263,12 +263,28 @@ window.Buehne3D = (function () {
   let OK = null;
   /* ein verlorener Zusammenhang (Grafikchip zurückgesetzt, zu viele Leinwände) zeichnet nichts mehr: nie wiederverwenden */
   const lebt = (L) => !!L && !L.verloren && !L.kaputt && !L.gl.isContextLost();
-  /* Gerät zu langsam (Regler) oder Selbsttest fehlgeschlagen: für den Rest der Sitzung das CSS-Modell; Stufe gilt für alle Bühnen */
-  let ZU_LANGSAM = false, GSTUFE = 0;
+  /* Stufe der Bildqualität in Bewegung (Regler in bild()): gilt als Start für alle weiteren Bühnen, erholt sich aber wieder.
+     Ein fehlgeschlagener Selbsttest schaltet für die Sitzung aufs CSS-Modell, Langsamkeit nie */
+  let GSTUFE = 0;
+  /* Pixeldichte je Stufe in Bewegung: 0 scharf (bis 2), 1 etwas gröber, 2 gröber und ohne Schatten. Ein stehendes Bild wird einmal
+     in voller Pixeldichte des Geräts gezeichnet (bis 3, höchstens 1,3 Millionen Bildpunkte), mit Schatten */
+  const STUFE_DPR = [2, 1.5, 1.25], RUHE_DPR = 3, RUHE_PX = 1.3e6;
   function ausPool() { while (POOL.length) { const L = POOL.pop(); if (lebt(L)) return L; } return null; }
   /* Ohne Grafikchip (Software-WebGL) bleibt das CSS-Modell: dort dauert ein Bild Hunderte Millisekunden.
      ?gl=voll erzwingt WebGL trotzdem (Bildvergleiche und Prüfung der Bühne) */
   const VOLL = /[?&]gl=voll/.test(location.search);
+  /* ?gl=info: kleine Anzeige in der Bühne (Grafikchip, Tiefenpuffer, Kantenglättung, Pixeldichte, Stufe, Bildzeit), zum Nachsehen
+     am eigenen Telefon */
+  const INFO = /[?&]gl=info/.test(location.search);
+  function infoZeigen(stage, B, now) {
+    if (!INFO || now - (B.infoT || 0) < 400) return;
+    B.infoT = now;
+    let e = stage.querySelector('.w3d-glinfo');
+    if (!e) { e = document.createElement('div'); e.className = 'w3d-glinfo'; e.setAttribute('aria-hidden', 'true'); e.style.cssText = 'position:absolute;left:8px;bottom:8px;z-index:9;padding:6px 8px;border-radius:8px;background:rgba(22,22,22,.82);color:#f2efe8;font:13px/1.35 Inter,system-ui,sans-serif;pointer-events:none;white-space:pre'; stage.appendChild(e); }
+    const gl = B.L.gl, x = gl.getExtension('WEBGL_debug_renderer_info'), a = gl.getContextAttributes() || {};
+    if (!B.L.chip) B.L.chip = String(x ? gl.getParameter(x.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)).slice(0, 44);
+    e.textContent = B.L.chip + '\nTiefe ' + gl.getParameter(gl.DEPTH_BITS) + ' Bit · MSAA ' + gl.getParameter(gl.SAMPLES) + (a.antialias ? '' : ' (aus)') + '\nPixeldichte ' + (B.L.cv.width / Math.max(1, B.cw)).toFixed(2) + ' von ' + (window.devicePixelRatio || 1).toFixed(2) + ' · Stufe ' + B.stufe + (B.scharf ? ' (scharf)' : '') + '\nBild ' + Math.round(B.dt || 0) + ' ms · Leinwand ' + B.L.cv.width + '×' + B.L.cv.height;
+  }
   function software(gl) {
     try { const x = gl.getExtension('WEBGL_debug_renderer_info'), r = String(x ? gl.getParameter(x.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)); return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(r); } catch (e) { return false; }
   }
@@ -286,7 +302,7 @@ window.Buehne3D = (function () {
     cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); L.verloren = true; const st = cv.parentNode; if (st && st.classList) zumCss(st); });
     cv.addEventListener('webglcontextrestored', () => {
       try { einrichten(L); L.verloren = false; L.geprueft = false; } catch (e) { return; }
-      const st = cv.parentNode; if (st && st._b3 && !st._b3.aus && !ZU_LANGSAM) { st.classList.add('gl'); st._b3.schattenNeu = true; anstoss(st); }
+      const st = cv.parentNode; if (st && st._b3 && !st._b3.aus) { st.classList.add('gl'); st._b3.schattenNeu = true; anstoss(st); }
     });
     return L;
   }
@@ -309,7 +325,6 @@ window.Buehne3D = (function () {
     L.vao = gl.createVertexArray(); gl.bindVertexArray(L.vao); gl.bindBuffer(gl.ARRAY_BUFFER, L.buf); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
   }
   function unterstuetzt() {
-    if (ZU_LANGSAM && !VOLL) return false;
     if (OK !== null) return OK;
     const L = neueLeinwand(); OK = !!L;
     if (L && software(L.gl) && !VOLL) { OK = false; const x = L.gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); return OK; }
@@ -419,21 +434,26 @@ window.Buehne3D = (function () {
       if (document.hidden || !B.sicht) return;
       /* Nur das Schwingen läuft: halbe Bildrate genügt (auf langsamen Geräten weniger) */
       if (!B.neu && B.nurSchwingen && now - B.zuletzt < (B.stufe ? 50 : 30)) { weiter = true; return; }
-      /* Bilder dauern zu lange: erst die Auflösung senken, dann ohne Schatten und Schwingen, zuletzt zurück zum CSS-Modell.
-         Gezählt werden nur Bilder einer laufenden Bewegung, 25 langsame hintereinander; Pausen (Tab im Hintergrund) zählen nicht */
+      /* Regler: Bilder einer laufenden Bewegung (Ziehen, Zoomen, Übergang) dauern zu lange, 20 über 50 ms hintereinander: in Bewegung
+         eine Stufe gröber (Pixeldichte 1,5, dann 1,25 ohne Schatten). 90 schnelle Bilder (unter 30 ms) holen eine Stufe zurück.
+         Nur das Schwingen zählt nicht: ist es langsam, hört es auf. Pausen (Tab im Hintergrund) zählen nicht. Steht das Bild,
+         wird es einmal scharf gezeichnet (B.scharf), so wirkt eine grobe Stufe nur, solange sich etwas bewegt */
       if (B.fort && !B.neu && !VOLL) {
         const dt = now - B.zuletzt;
         if (dt < 2000) {
-          B.langsam = dt > 70 ? (B.langsam || 0) + 1 : 0;
-          if (B.langsam > 24) {
-            B.langsam = 0;
-            if (B.stufe < 2) { B.stufe++; GSTUFE = Math.max(GSTUFE, B.stufe); } else { B.aus = true; ZU_LANGSAM = true; zumCss(stage); return; }
+          if (B.nurSchwingen) { B.langsamS = dt > 70 ? (B.langsamS || 0) + 1 : 0; if (B.langsamS > 24) B.schwing.aus = true; }
+          else {
+            B.langsam = dt > 50 ? (B.langsam || 0) + 1 : 0; B.schnell = dt < 30 ? (B.schnell || 0) + 1 : 0;
+            if (B.langsam >= 20 && B.stufe < 2) { B.langsam = 0; B.stufe++; GSTUFE = B.stufe; }
+            if (B.schnell >= 90 && B.stufe > 0) { B.schnell = 0; B.stufe--; GSTUFE = B.stufe; }
           }
         }
       }
       const lauf = zeichnen(stage, B, now);
+      if (B.zuletzt && B.fort) B.dt = now - B.zuletzt;
       B.neu = false; B.zuletzt = now; B.fort = !!lauf;
-      if (lauf) weiter = true;
+      infoZeigen(stage, B, now);
+      if (lauf) { weiter = true; B.scharf = false; } else if (!B.scharf && (B.stufe > 0 || (window.devicePixelRatio || 1) > STUFE_DPR[0])) { B.scharf = true; weiter = true; }
     });
     if (weiter && !raf) raf = requestAnimationFrame(bild);
   }
@@ -1077,7 +1097,9 @@ window.Buehne3D = (function () {
     const L = B.L, gl = L.gl, cv = L.cv;
     B.laeuft = false; B.sofort = stage.classList.contains('no-anim') || ruhig() || !B.zuletzt;
     const cw = stage.clientWidth, ch = stage.clientHeight; if (!cw || !ch) return false;
-    const dpr = B.stufe > 0 ? 1 : Math.min(window.devicePixelRatio || 1, 2), pw = Math.round(cw * dpr), ph = Math.round(ch * dpr);
+    B.st = B.scharf ? 0 : B.stufe;
+    const geraet = window.devicePixelRatio || 1, dpr = B.scharf ? Math.min(geraet, RUHE_DPR, Math.max(STUFE_DPR[0], Math.sqrt(RUHE_PX / (cw * ch)))) : Math.min(geraet, STUFE_DPR[B.st]);
+    const pw = Math.round(cw * dpr), ph = Math.round(ch * dpr);
     if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
     const K = kamera(stage, B, now), camLauf = B.laeuft; B.laeuft = false;
     B.camEl = stage.querySelector('.w3d-cam'); B.swayEl = stage.querySelector('.w3d-sway');
@@ -1163,7 +1185,7 @@ window.Buehne3D = (function () {
   function global(gl, u, B, VP, eye, L, seite) {
     gl.uniform1i(u.uSM, 0);
     if (B.LVP) gl.uniformMatrix4fv(u.uLVP, false, B.LVP);
-    SH[0] = L.smOk && B.LVP && B.stufe < 2 && !DBG.ohneSchatten ? seite : 0; SH[1] = B.smWeich || 1; SH[2] = B.smVers || 0.6;
+    SH[0] = L.smOk && B.LVP && B.st < 2 && !DBG.ohneSchatten ? seite : 0; SH[1] = B.smWeich || 1; SH[2] = B.smVers || 0.6;
     gl.uniform3f(u.uSh, SH[0], SH[1], SH[2]);
     gl.uniformMatrix4fv(u.uVP, false, VP); gl.uniform3f(u.uEye, eye[0] / eye[3], eye[1] / eye[3], eye[2] / eye[3]);
     gl.uniform3fv(u.uL1, L1); gl.uniform3fv(u.uC1, C1); gl.uniform3fv(u.uL2, L2); gl.uniform3fv(u.uC2, C2); gl.uniform3fv(u.uSky, SKY); gl.uniform3fv(u.uGnd, GND);
