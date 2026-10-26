@@ -150,3 +150,17 @@ Umgesetzt (Version 4 des Artefakts), Idee „Ein Fenster, vier Takte“ (Leitide
 Gemessen: kein Querscrollen, Pille 592 px, nach dem Auftritt im ersten Bildschirm keine laufende Animation; Bühne pausiert vor dem Sichtbarwerden, beim Hochscrollen aus dem Bild und bei verstecktem Tab.
 
 Hinweis: Die Schritte bündeln die sechs Schritte der App (Start, Fotos, Einzeichnen, Maße, Ergebnis, Wünsche) zu vier.
+
+## Nachtrag 26.10., vierter Wunsch: Band und Kopf (ohne Gremium)
+
+Wünsche des Inhabers: Band von links nach rechts und minimal schneller; vorne Faltschiebewand, rundes Fenster, Fenster mit Sprossen und mit Raffstore (nicht alle mit Raffstore, aber schnell erkennbar); kein langweiliges Holzfenster vorne; keine Kästen, jedes Element schwebt für sich; Elemente etwas kleiner; Fakten selbst recherchieren und enger setzen; nichts anklickbar, kein Anhalten. Kopf: Überschrift „Fensterplanung ganz eezi“, weiße Pille „Jetzt konfigurieren“, darunter „Mehr erfahren“ direkt zur Animation.
+
+Umgesetzt (Version 5 des Artefakts):
+- Band: elf Elemente frei schwebend (Lichtschein und Bodenschatten statt Kasten, leichtes Schweben von 4 px), Reihenfolge Faltschiebewand, Rundfenster, Wiener Sprossen, Raffstore (Außenansicht, Lamellen halb unten), Hebe-Schiebe-Tür, Rundbogen, Rollladen (Außenansicht, halb unten), Trapez, Balkontür, PSK-Tür, Segmentbogen mit Sprossen. Höhe nach Art: Fenster 100 px, Türen 126 px am Telefon (150/190 am Schreibtisch). Läuft von links nach rechts mit rund 47 px/s (vorher 39), Fakten gegenläufig. Keine Links, kein Halt-Knopf, kein Anhalten bei Finger oder Maus; außerhalb des Bildes und im verdeckten Tab steht es still; bei „weniger Bewegung“ steht es und lässt sich wischen (Systemeinstellung, kein Bedienelement).
+- Renderings: docs/profis/werkzeuge/startseite-renderings.mjs (Startbühne der App, frei; Außenansicht über `view: 'outside'`, Behang über `W3D_BEHANG.stand = 0.55`).
+- Fakten, gezählt mit docs/profis/werkzeuge/startseite-fakten.mjs: 219 RAL-Farben, 15 Holzdekore, 7 Formen, 6 Elementarten, 5 Materialien, 4 Arten Sonnenschutz, 7 Glas-Extras, 4 Sprossenarten, 9 Griff-Farben, 5 Stufen Einbruchschutz, 6 Arten Insektenschutz, 8 Maße je Fenster, 124 Begriffe erklärt, 0 € fürs Messen. Zahlen 24 px (Schreibtisch 32), enger gesetzt.
+- Kopf: „Fensterplanung / ganz eezi.“, Satz „Planen und Messen kosten nichts. Das Aufmaßblatt kostet einmal 7,99 €.“ (App: Messen, Fotos, 3-D-Modell und Wünsche kostenlos), Pille „Jetzt konfigurieren“ (auch in der Kopfzeile, ein Name je Handlung), darunter „Mehr erfahren“: springt weich zu „So geht es“ und startet den Ablauf bei Schritt 1.
+
+Gemessen: Pille 592 px, eine Cream-Pille, kein Querscrollen, im ersten Bildschirm nach dem Auftritt keine laufende Animation, Band ohne anklickbare Elemente.
+
+Hinweis Barrierefreiheit: Ein Laufband ohne Halt-Knopf, das länger als 5 Sekunden läuft, verfehlt WCAG 2.2.2 (Pause, Stop, Hide). Abgefedert durch: läuft nur im Bild, steht bei „weniger Bewegung“. Entscheidung des Inhabers; im Regelwerk ultimativ-webdesign steht weiter der Halt-Knopf.
