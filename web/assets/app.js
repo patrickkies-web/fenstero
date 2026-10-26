@@ -1614,7 +1614,8 @@ function w3dLayout(stage, w, o, gr) {
   /* Überstand vor der Fassade: gewählt, aus der Ausladung (abzüglich der Außenlaibung) oder 50 mm */
   const ueber = dg(w, 'fbaUeber') ? num(w.fbaUeber) : dg(w, 'fbaTiefe') ? clamp(num(w.fbaTiefe) - W3D.OUTD, 15, 200) : 50;
   const OVA = ueber * s, SXA = 30 * s, LIP = (w.fba === 'alu' ? 40 : 30) * s, NG = 7 * Math.PI / 180, bwA = moW + 2 * SXA, bxA = -moW / 2 - SXA;
-  face(q('sa-t1'), moW, Math.max(0, T - d - fd), -moW / 2, yB, -d - fd, 'rotateX(-90deg)', '0 0');
+  /* der waagerechte Teil reicht einen Hauch über die Fassade in den geneigten hinein: an der Knickkante blitzte sonst der Hintergrund als Pünktchenreihe durch */
+  face(q('sa-t1'), moW, Math.max(0, T - d - fd) + 0.8, -moW / 2, yB, -d - fd, 'rotateX(-90deg)', '0 0');
   face(q('sa-t2'), bwA, OVA / Math.cos(NG), bxA, yB, -T, 'rotateX(' + n1(-90 + 7) + 'deg)', '0 0');
   face(q('sa-f'), bwA, LIP, bxA, yB + OVA * Math.tan(NG), -T - OVA, 'rotateY(180deg)', '50% 50%');
   face(q('sa-l'), OVA, LIP + OVA * Math.tan(NG), bxA, yB, -T, 'rotateY(90deg)', '0 0'); face(q('sa-r'), OVA, LIP + OVA * Math.tan(NG), bxA + bwA, yB, -T, 'rotateY(90deg)', '0 0');
