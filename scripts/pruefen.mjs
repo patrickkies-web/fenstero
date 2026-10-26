@@ -296,12 +296,12 @@ if (teil(3)) {
   // Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern; nach dem Tippen geht „Weiter“ gleich beim ersten Antippen
   await page.evaluate(() => { S.win.name = ''; S.q = 'lage'; S.screen = 'frage'; render(true); }); await page.waitForTimeout(300);
   await page.click('[data-act="qnext"]'); await page.waitForTimeout(300);
-  const n1 = await page.evaluate(() => ({ q: S.q, inv: document.getElementById('t-name').getAttribute('aria-invalid'), fokus: document.activeElement && document.activeElement.id, satz: (document.getElementById('t-name-f') || {}).textContent || '', pflicht: /Name des Fensters\s*Pflichtfeld/.test((document.querySelector('label[for="t-name"]') || {}).textContent || '') }));
+  const n1 = await page.evaluate(() => ({ q: S.q, inv: document.getElementById('t-name').getAttribute('aria-invalid'), fokus: document.activeElement && document.activeElement.id, satz: (document.getElementById('lg-grund') || {}).textContent || '', zeile: !(document.getElementById('lg-grund') || { hidden: true }).hidden, markiert: !!document.querySelector('.lg-name-feld.lg-markiert'), pflicht: /Raum\s*Pflicht/.test((document.querySelector('.lg-feld .lg-feldkopf') || {}).textContent || '') && document.getElementById('t-name').required }));
   await page.evaluate(() => saveWin()); await page.waitForTimeout(200);
   const n2 = await page.evaluate(() => ({ q: S.q, screen: S.screen, n: S.windows.length }));
   await page.fill('#t-name', 'Wohnzimmer'); await page.click('[data-act="qnext"]'); await page.waitForTimeout(300);
   const n3 = await page.evaluate(() => ({ q: S.q, name: S.win.name }));
-  ok(n1.q === 'lage' && n1.inv === 'true' && n1.fokus === 't-name' && /Bitte gib dem Fenster einen Namen/.test(n1.satz) && n1.pflicht && n2.q === 'lage' && n2.screen === 'frage' && n2.n === 0 && n3.q !== 'lage' && n3.name === 'Wohnzimmer', 'Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern, Hinweis am Feld mit Fokus; nach dem Tippen geht „Weiter“ beim ersten Antippen');
+  ok(n1.q === 'lage' && n1.inv === 'true' && n1.fokus === 't-name' && /Gib dem Raum einen Namen, dann geht es weiter/.test(n1.satz) && n1.zeile && n1.markiert && n1.pflicht && n2.q === 'lage' && n2.screen === 'frage' && n2.n === 0 && n3.q !== 'lage' && n3.name === 'Wohnzimmer', 'Name des Fensters ist Pflicht: ohne Namen kein Weiter und kein Speichern, Zeile über „Weiter“, Feld markiert, Fokus im Feld; nach dem Tippen geht „Weiter“ beim ersten Antippen');
   // Eigenes Aufmaß: speichern, dann die Paywall: Vorschau mit Preis, kein Code und keine Datei vor der Zahlung
   await page.evaluate(() => { S.win.name = 'Wohnzimmer'; saveWin(); S.screen = 'teilen'; render(true); }); await page.waitForTimeout(400); // der Name ist Pflicht (Frage „Wo ist das Fenster?“)
   let t3 = await page.evaluate(() => document.body.textContent);
@@ -2691,7 +2691,7 @@ if (teil(14)) {
   const messenApp = (seite) => seite.evaluate(() => {
     const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
     const groessen = new Set(), klein = [];
-    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.dna')) return; /* Design-DNA: eigene Schriftrollen */ if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
     /* Textlinks im Fließtext (WCAG 2.5.8, Ausnahme „inline“) zählen nicht als Zielfläche */
     document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.matches('.ulink') || el.closest('.sheet')) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
     return { groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
@@ -3199,7 +3199,7 @@ if (teil(15)) {
     const messen = (seite) => seite.evaluate(() => {
       const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
       const groessen = new Set(), klein = [];
-      document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+      document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.dna')) return; /* Design-DNA: eigene Schriftrollen */ if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
       document.querySelectorAll('#app a, #app button, #app input').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.matches('.ulink') || el.type === 'checkbox') return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px)'); });
       return { groessen: Array.from(groessen), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
     });
@@ -3284,7 +3284,7 @@ if (teil(16)) {
   await a16.click('.qpanel [data-act="absturz"][data-v="gelaender"]'); await a16.waitForTimeout(200);
   const ab1 = await a16.evaluate(() => ({ wert: S.win.absturz, zeile: (specRows(S.win).find((r) => r.k === 'Absturzsicherung') || {}).v, kl: AW.klaerung([S.win], S.proj).map((r) => r.v).join('|'), eg: (S.win.etage = 'eg', qList(S.win).some((q) => q.id === 'absturz')) }));
   await a16.evaluate(() => { S.win.etage = 'og'; S.win.bru = ''; S.q = 'lage'; render(true); }); await a16.waitForTimeout(200);
-  const lage = await a16.evaluate(() => !!document.querySelector('.qpanel #f-bru'));
+  const lage = await a16.evaluate(() => { const f = document.querySelector('.scr.dna #f-bru'); return !!f && f.getBoundingClientRect().height > 0; });
   ok(ab0.da && /Absturz/.test(ab0.titel) && ab0.karten === 4 && ab0.knopf === 'true' && /Absturzsicherung nötig \(OG, Brüstung 450 mm\): bitte beraten/.test(ab0.kl) && ab1.wert === 'gelaender' && /Geländer außen/.test(ab1.zeile) && /Geländer außen/.test(ab1.kl) && !ab1.eg && lage, 'Absturzsicherung: im OG bei 450 mm Brüstung von selbst gefragt (vier Wege oder „weiß ich noch nicht“), Wahl im Blatt und in der Klärungsliste; im EG keine Frage; im OG ohne Brüstung fragt die Lage nach ihr');
   await a16.evaluate(() => { S.win.bru = 900; S.win.etage = 'eg'; S.q = 'rc'; render(true); }); await a16.waitForTimeout(200);
   const rc0 = await a16.evaluate(() => ({ titel: document.querySelector('.hd h1').textContent, rc1: !!document.querySelector('.qpanel [data-v="rc1"]'), text: document.querySelector('.qpanel').textContent }));
@@ -3441,13 +3441,30 @@ if (teil(16)) {
   const keineExtras = await d16.evaluate(() => !S.win.offen.glasfn && S.win.glasfn.length === 0);
   ok(br.offen && br.breite === 18 && /offen, bitte beraten, 18 mm/.test(br.zeile) && radio.offen && radio.knopf === 'true' && !getippt && geloescht.offen && geloescht.wunsch === '' && /außen offen, bitte beraten/.test(geloescht.zeile) && !nachListe.offen && nachListe.fa === '9016' && keineExtras, 'Nichts entscheidet still: die Sprossenbreite lässt die Sprossenart offen; „Weiß ich noch nicht“ erneut antippen bleibt offen (nur Glas-Extras: aus heißt keine); eine getippte und wieder gelöschte Farbe ist wieder offen, nach einer Farbe aus der Liste nicht');
   await d16.evaluate((MO) => { const w = Object.assign(baseWin(), { name: 'Kind', etage: 'og', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(200);
-  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="10"]'); await d16.waitForTimeout(150);
-  const lage16 = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru') }));
-  await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.click('.qpanel [data-act="bump"][data-f="bru"][data-v="-10"]'); await d16.waitForTimeout(150);
-  const lage16b = await d16.evaluate(() => ({ bru: S.win.bru, feld: !!document.querySelector('.qpanel #f-bru'), frage: qList(S.win).some((q) => q.id === 'absturz') }));
+  await d16.fill('#f-bru', '86'); await d16.waitForTimeout(150);
+  const lage16 = await d16.evaluate(() => ({ bru: S.win.bru, mm: document.getElementById('lg-bru-mm').textContent, warn: !document.querySelector('.scr.dna .lg-warn').hidden }));
+  await d16.fill('#f-bru', '75'); await d16.waitForTimeout(150);
+  const lage16b = await d16.evaluate(() => ({ bru: S.win.bru, warn: !document.querySelector('.scr.dna .lg-warn').hidden, frage: qList(S.win).some((q) => q.id === 'absturz') }));
+  await d16.click('.scr.dna [data-act="lg-boden"]'); await d16.waitForTimeout(150);
+  const lage16c = await d16.evaluate(() => ({ bru: S.win.bru, tief: document.querySelector('[data-act="lg-boden"]').getAttribute('aria-pressed'), feld: document.getElementById('f-bru').value, mm: document.getElementById('lg-bru-mm').textContent }));
   await d16.evaluate(() => { S.win.bru = 0; S.q = 'absturz'; render(true); }); await d16.waitForTimeout(150);
   const sub0 = await d16.evaluate(() => document.querySelector('.hd').textContent);
-  ok(lage16.bru === 860 && lage16.feld && lage16b.bru === 840 && lage16b.feld && lage16b.frage && /Bodentief im OG: Unter 80 cm \(über 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: das Feld für die Brüstung bleibt beim Antippen stehen und beginnt bei einem üblichen Maß (850 mm); 0 mm heißt bodentief, nicht „laut Foto“; Regel 80 cm, ab 12 m 90 cm');
+  ok(lage16.bru === 860 && /= 860 mm/.test(lage16.mm) && !lage16.warn && lage16b.bru === 750 && lage16b.warn && lage16b.frage && lage16c.bru === 0 && lage16c.tief === 'true' && lage16c.feld === '' && /Bodentief/.test(lage16c.mm) && /Bodentief im OG: Unter 80 cm \(über 12 m Höhe 90 cm\)/.test(sub0) && !/laut Foto/i.test(sub0), 'Lage im OG: Brüstung in cm, gespeichert in mm („= 860 mm“), der Satz zur Absturzsicherung erst unter 80 cm, „bodentief“ heißt 0 mm und leert das Feld; Regel 80 cm, ab 12 m 90 cm');
+  // Lage im Look der Design-DNA: ein Kopf mit Logo, kein Querscrollen, OG-Nummer im Blatt, Brüstung im OG Pflicht, doppelte Namen
+  await d16.evaluate((MO) => { const k = Object.assign(baseWin(), { name: 'Küche', etage: 'eg', mo: MO, el: { w: 1230, h: 1410 } }); S.windows = [k]; const w = Object.assign(baseWin(), { name: '', etage: 'eg', bru: '', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 } }); S.win = w; S.editIdx = -1; S.q = 'lage'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
+  const dna0 = await d16.evaluate(() => ({ koepfe: document.querySelectorAll('header.hdr, .lg-kopf').length, logo: !!document.querySelector('.lg-kopf .lg-marke .fi-logo'), quer: document.querySelector('.scroll').scrollWidth > document.querySelector('.scroll').clientWidth + 1 || document.documentElement.scrollWidth > innerWidth + 1, schrift: getComputedStyle(document.querySelector('.lg-frage h1')).fontFamily, weiter: !document.querySelector('.lg-weiter').disabled }));
+  await d16.click('.lg-vorschlaege [data-v="Küche"]'); await d16.waitForTimeout(150);
+  const dna1 = await d16.evaluate(() => ({ name: S.win.name, doppelt: !document.querySelector('.lg-doppelt').hidden, wahl: Array.from(document.querySelectorAll('.lg-doppelt-wahl button')).map((b) => b.textContent).join('|'), etikett: document.querySelector('.lg-et-name').textContent }));
+  await d16.click('.lg-doppelt-wahl button'); await d16.click('.lg-stockwahl [data-v="og"]'); await d16.click('[data-act="lg-og"][data-v="2"]'); await d16.waitForTimeout(150);
+  await d16.click('.lg-weiter'); await d16.waitForTimeout(450);
+  const dna2 = await d16.evaluate(() => ({ q: S.q, name: S.win.name, og: S.win.ogNr, grund: document.getElementById('lg-grund').textContent, zeile: !document.getElementById('lg-grund').hidden, markiert: !!document.querySelector('.lg-bru-feld.lg-markiert'), fokus: document.activeElement && document.activeElement.id, haus: document.querySelector('.lg-haus text[data-t="og"]').textContent, text: document.querySelector('.lg-stocktext').textContent, blatt: (specRows(S.win).find((r) => r.k === 'Lage') || {}).v }));
+  await d16.click('.lg-vorschlaege [data-v="Bad"]'); await d16.waitForTimeout(100);
+  const dna3 = await d16.evaluate(() => S.win.name);
+  await d16.fill('#f-bru', '90'); await d16.waitForTimeout(150);
+  const dna4 = await d16.evaluate(() => ({ zeile: !document.getElementById('lg-grund').hidden, markiert: !!document.querySelector('.lg-markiert') }));
+  await d16.click('.lg-weiter'); await d16.waitForTimeout(300);
+  const dna5 = await d16.evaluate(() => S.q);
+  ok(dna0.koepfe === 1 && dna0.logo && !dna0.quer && /Outfit/.test(dna0.schrift) && dna0.weiter && dna1.name === 'Küche' && dna1.doppelt && dna1.wahl === 'Küche links|Küche rechts|Küche 2' && dna1.etikett === 'Küche' && dna2.q === 'lage' && dna2.name === 'Küche links' && dna2.og === 2 && /Brüstung/.test(dna2.grund) && dna2.zeile && dna2.markiert && dna2.fokus === 'f-bru' && dna2.haus === '2. OG' && dna2.text === '2. Obergeschoss' && /Küche links, 2\. OG/.test(dna2.blatt) && dna3 === 'Bad links' && !dna4.zeile && !dna4.markiert && dna5 !== 'lage', 'Lage (Design-DNA): ein Kopf mit Logo, Outfit, kein Querscrollen; Vorschlag ergänzt den Namen, doppelter Name mit Vorschlägen; im OG 1./2./3. OG („2. OG“ im Haus und im Blatt); ohne Brüstung kein Weiter (Zeile, Feld markiert, Fokus); danach geht es weiter');
   /* Gestaltung: nichts vorgewählt bei gleichen Vorgaben; „Doch neu gestalten“ nach dem Speichern nimmt keine gespeicherten Änderungen zurück */
   await d16.evaluate((MO) => { S.windows = []; S.editIdx = -1; S.angelegt = 0; const a = Object.assign(baseWin(), { name: 'Flur', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = a; saveWin(); const b = Object.assign(baseWin(), { name: 'Gast', w: 1230, h: 1410, mo: MO, el: { w: 1230, h: 1410 }, offen: { fa: true, fba: true } }); S.win = b; S.editIdx = -1; S.designVorher = null; S.q = 'design'; S.screen = 'frage'; render(true); }, MO(1230, 1410)); await d16.waitForTimeout(250);
   const vorgewaehlt = await d16.evaluate(() => ({ gedrueckt: document.querySelectorAll('.qpanel .qopt[aria-pressed="true"]').length, nav: Array.from(document.querySelectorAll('.qnav button')).map((b) => b.textContent.trim()).filter(Boolean).join() }));
@@ -3485,7 +3502,7 @@ if (teil(16)) {
   const messen16 = (seite) => seite.evaluate(() => {
     const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && r.bottom > 0 && r.top < innerHeight * 4; };
     const groessen = new Set(), klein = [];
-    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.w3d')) return; if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
+    document.querySelectorAll('#app *').forEach((el) => { if (el.closest('svg') || el.closest('.w3d') || el.closest('.dna')) return; /* Design-DNA: eigene Schriftrollen */ if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
     document.querySelectorAll('#app a, #app button, #app input, #app summary').forEach((el) => { if (!sichtbar(el) || el.closest('svg') || el.closest('.w3d') || el.matches('.ulink') || el.closest('.sheet')) return; const h = (el.matches('input') && el.closest('label') || el).getBoundingClientRect().height; /* ein Feld im Label: getippt wird das Label (Foto-Kachel) */ if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || '').trim().slice(0, 24) + ')'); });
     return { groessen: Array.from(groessen).sort((x, y) => x - y), klein: klein, quer: document.scrollingElement.scrollWidth > innerWidth + 1 };
   });
@@ -3530,7 +3547,7 @@ if (teil(16)) {
       const fehlt = [], ohneWo = [], ohnePfeil = []; let n = 0;
       S.windows = demoProject(); persist(); newWin(); Object.assign(S.win, { name: 'Küche', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } });
       /* Messen und Ränder (Messen im Raum): die Notiz steht im Info-Blatt, oben steht nur die Überschrift */
-      const pruef = (wo) => { n++; const raum = wo === 'messen' || wo === 'rest'; if (raum) { S.gloss = wo === 'messen' ? MESS[S.mess.step].g : 'raender'; render(); } if (!document.querySelector(raum ? '.sheet [data-act="notiz-auf"]' : '.hd .nz-knopf')) fehlt.push(wo); if (raum) { S.gloss = null; render(); } if (!document.querySelector('.hdr-wo')) ohneWo.push(wo); };
+      const pruef = (wo) => { n++; const raum = wo === 'messen' || wo === 'rest'; if (raum) { S.gloss = wo === 'messen' ? MESS[S.mess.step].g : 'raender'; render(); } if (!document.querySelector(raum ? '.sheet [data-act="notiz-auf"]' : '.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(wo); if (raum) { S.gloss = null; render(); } if (!document.querySelector('.hdr-wo, .scr.dna .lg-kopf [data-act="wohin"]')) ohneWo.push(wo); }; // Design-DNA (Lage): Notiz und Übersicht im eigenen Kopf
       ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
       ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
       S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
@@ -4525,7 +4542,8 @@ if (teil(21)) {
   const tw = await a21.evaluate(() => Array.from(document.querySelectorAll('[data-act="tiefe"]')).map((b) => b.getAttribute('data-v')).join(','));
   await a21.click('[data-act="tiefe"][data-v="kurz"]'); await a21.waitForTimeout(300);
   const tk = await a21.evaluate(() => ({ t: S.proj.tiefe, pille: !!document.querySelector('.qtiefe') }));
-  ok(tw === 'kurz,normal,genau' && tk.t === 'kurz', 'Tiefe wählen: drei Karten, „Das Wichtigste“ setzt die Tiefe (' + tw + ')');
+  const tk2 = await a21.evaluate(() => ({ n: document.querySelector('.scr.dna .lp-n').textContent, rest: document.querySelector('.scr.dna .lp-rest').textContent, ja: document.querySelectorAll('.scr.dna .lp-punkte i.ja').length, alle: document.querySelectorAll('.scr.dna .lp-punkte i').length, gedrueckt: (document.querySelector('.scr.dna [data-act="tiefe"][aria-pressed="true"]') || {}).textContent, zahl: qSichtbar(S.win).filter((q) => q.id !== 'tiefe').length, modell: !!document.querySelector('.scr.dna #w3d') }));
+  ok(tw === 'kurz,normal,genau' && tk.t === 'kurz' && tk2.gedrueckt === 'Kurz' && +tk2.n === tk2.ja && +tk2.n + +tk2.rest === tk2.alle && +tk2.n > 0 && +tk2.rest > 0 && !tk2.modell, 'Tiefe wählen (Design-DNA): Kurz · Üblich · Alles, „Kurz“ setzt die Tiefe; Punktraster je Kapitel, Zahl „wählst du“ und „plant dein Fensterbauer“ ergeben alle Fragen, kein 3-D-Modell (' + tw + '; ' + tk2.n + ' + ' + tk2.rest + ')');
   /* Standard des Fensterbauers in der Frage, Wahl und Zurücknehmen */
   await a21.evaluate(() => { S.proj.tiefe = 'genau'; S.q = 'gitter'; render(true); }); await a21.waitForTimeout(300);
   const st21 = await a21.evaluate(() => ({ std: !!document.querySelector('.qstd'), wahl: Array.from(document.querySelectorAll('[data-act="detail"]')).map((b) => b.getAttribute('data-v')).join(',') }));
@@ -4650,14 +4668,14 @@ if (teil(22)) {
   // Genau ein grünes Wort je Titel (Schritte und alle Fragen)
   const titel = [];
   for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
-  for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
+  for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); } // Design-DNA (Lage): zweite Stimme in Grau statt grünem Wort
   const ohneAk = titel.filter((x) => x[1] !== 1).map((x) => x[0]);
   ok(titel.length > 30 && !ohneAk.length, 'Jeder Schritt- und Fragentitel hat genau ein grünes Wort (' + titel.length + ' Titel' + (ohneAk.length ? ', ohne: ' + ohneAk.join(', ') : '') + ')');
   // Blätter: linksbündig, Kicker grün, ein grünes Wort; Fokus ins Blatt, Tab bleibt drin, zurück an den Auslöser; Textfeld der Notiz mit Namen
   const blatt = () => p.evaluate(() => { const sh = document.querySelector('.sheet[aria-modal="true"]'); if (!sh) return null; const h = sh.querySelector('h2'), e = sh.querySelector('.eyebrow'); return { links: getComputedStyle(h).textAlign === 'left', ak: h.querySelectorAll('.ak').length, kicker: e.classList.contains('kicker'), drin: sh.contains(document.activeElement) }; });
   const fokusAct = () => p.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-act'));
   const tabDrin = async (n) => { for (let i = 0; i < n; i++) { await p.keyboard.press(i % 5 === 2 ? 'Shift+Tab' : 'Tab'); if (!await p.evaluate(() => document.querySelector('.sheet[aria-modal="true"]').contains(document.activeElement))) return false; } return true; };
-  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Bad'; S.windows = [demoProject()[1]]; S.win = w; S.editIdx = -1; S.q = 'lage'; go('frage'); }); await p.waitForTimeout(300);
+  await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Bad'; S.windows = [demoProject()[1]]; S.win = w; S.editIdx = -1; S.q = 'material'; go('frage'); }); await p.waitForTimeout(300);
   await p.focus('.hd [data-act="notiz-auf"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
   const nz = await blatt(), nzName = await p.getAttribute('#nz-text', 'aria-label'); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const nzZu = await fokusAct();
   await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
@@ -4670,7 +4688,7 @@ if (teil(22)) {
   // Zurück nach „Wünsche ändern“: über die Fragen zur Fensterseite, dann zur Liste (nicht durch alle Messschritte)
   await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Wohnzimmer links'; S.windows = [w]; S.win = JSON.parse(JSON.stringify(w)); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
   await p.click('[data-act="wuensche"]'); await p.waitForTimeout(300);
-  for (let i = 0; i < 3; i++) { await p.click('.qnav .btn.primary'); await p.waitForTimeout(300); }
+  for (let i = 0; i < 3; i++) { await p.click('.qnav .btn.primary, .lg-weiter'); await p.waitForTimeout(300); }
   const spur = [];
   for (let i = 0; i < 20; i++) { await p.evaluate(() => history.back()); await p.waitForTimeout(500); const st = await p.evaluate(() => S.screen); spur.push(st); if (st === 'home') break; }
   await p.evaluate(() => { S.win = JSON.parse(JSON.stringify(S.windows[0])); S.editIdx = 0; go('fertig'); }); await p.waitForTimeout(300);
@@ -4692,7 +4710,7 @@ if (teil(22)) {
     'Ein Kapitelkonzept: Leiste mit den sieben Kapiteln, erledigte mit Haken, das aktuelle im Blick; Kicker „Kapitel · i von n“ mit Tiefe-Pille und Notiz daneben; Antippen springt auf die erste sichtbare Frage, die Übersicht zeigt dieselben Kapitel (' + kl.kicker + ' → ' + kl2.kicker + ')');
   // Tiefe-Pille: Wahl öffnen, Tiefe ändern, mit der Zurück-Taste des Browsers zurück zur Frage
   await p.click('.qdock .qtiefe'); await p.waitForTimeout(400);
-  const tp1 = await p.evaluate(() => ({ q: S.q, sub: (document.querySelector('.qdock .hd > p') || {}).textContent || '' }));
+  const tp1 = await p.evaluate(() => ({ q: S.q, sub: (document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p') || {}).textContent || '' })); // Design-DNA: Unterzeile der Frage
   await p.click('[data-act="tiefe"][data-v="genau"]'); await p.waitForTimeout(300);
   await p.evaluate(() => history.back()); await p.waitForTimeout(500);
   const tp2 = await p.evaluate(() => ({ q: S.q, tiefe: S.proj.tiefe, screen: S.screen }));
@@ -4711,7 +4729,7 @@ if (teil(22)) {
     const varianten = [['fenster', {}], ['fenster', { sart: 'raffstore', roll: 'vorbau', antrieb: 'motor', etage: 'og', bru: 500, absturz: 'gelaender', insekt: 'spann', glasfn: ['sicht'], material: 'holz', fba: 'alu', fbi: 'werzalit', bars: 1 }], ['fenster', { sart: 'rollladen', roll: 'vorbau', sfTeile: 'eigen' }], ['fenster', { sart: 'screen', roll: 'aufsatz' }], ['fenster', { sart: 'klappladen' }], ['fenster', { teilung: '2s', seiten: 'beide' }], ['balkon', { etage: 'og', absturz: 'glas' }], ['hst', {}], ['psk', {}], ['fsw', {}], ['fest', {}]];
     varianten.forEach(([art, set]) => {
       const w = baseWin(); artSetzen(w, art); Object.assign(w, set, { name: 'X', offen: {} }); if (set.bars) { w.bars = []; barCount(w, 'v', 1); } if (w.teilung === '2s') w.sashes = sashesFor('2s'); if (w.seiten) seitenAnwenden(w); S.win = w;
-      qSichtbar(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg'), k = b && b.getAttribute('data-k'); gesehen.add(q.id); if (!k || !GLOSS[k] || !/^Erklärung: /.test(b.getAttribute('aria-label') || '')) ohne.push(art + ':' + q.id); });
+      qSichtbar(w).forEach((q) => { S.q = q.id; render(true); const b = document.querySelector('.qdock .hd h1 .qg, .scr.dna .lg-frage h1 .lg-i'), k = b && b.getAttribute('data-k'); /* Design-DNA (Lage): i am Titel */ gesehen.add(q.id); if (!k || !GLOSS[k] || !(/^Erklärung: /.test(b.getAttribute('aria-label') || '') || (b.matches('.lg-i') && b.getAttribute('aria-label') === GLOSS[k].t))) ohne.push(art + ':' + q.id); });
     });
     return { ohne: ohne, fehlt: AW.DETAIL.map((d) => d.k).filter((k) => !gesehen.has(k)), n: gesehen.size, gloss: Object.keys(GLOSS).length, optG: [].concat.apply([], Object.keys(OPT_G).map((g) => Object.keys(OPT_G[g]).map((k) => OPT_G[g][k]))).filter((x) => !GLOSS[x]) };
   });
@@ -4760,8 +4778,8 @@ if (teil(22)) {
   ok(st0.kap === 'aufbau' && st0.s === 1 && /^Aufbau · /.test(st0.kicker) && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
     'Stulp mit Seitenteilen: „Welcher Flügel geht zuerst auf?“ im Kapitel Aufbau (Stufe 1), „Wie öffnet der zweite Flügel?“ danach; die Wahl lässt die Seitenteile außen, Sprossen in allen Feldern; „Gestaltung übernehmen“ nimmt Gehflügel und Wunschfarben mit (' + st1.folge + ', ' + st2 + ')');
   // Standard mit dem Namen des Betriebs im Kundenlink
-  const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'tiefe'; render(true); const sub = document.querySelector('.qdock .hd > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
-  ok(stdB.zeile === 'Standard von Fensterbau Brandt' && /^Den Rest macht Fensterbau Brandt nach seinem Standard/.test(stdB.sub) && stdB.eigen === 'Standard des Fensterbauers', 'Im Kundenlink heißt der Standard nach dem Betrieb („Standard von Fensterbau Brandt“), die Tiefe-Frage sagt, wer den Rest macht');
+  const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'tiefe'; render(true); const sub = document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
+  ok(stdB.zeile === 'Standard von Fensterbau Brandt' && /plant Fensterbau Brandt nach seinem Standard/.test(stdB.sub) && stdB.eigen === 'Standard des Fensterbauers', 'Im Kundenlink heißt der Standard nach dem Betrieb („Standard von Fensterbau Brandt“), die Tiefe-Frage sagt, wer den Rest macht');
   // Keine Gesamtübersicht: Detailangaben nur im bezahlten Blatt, nicht nach dem Speichern, im Ergebnis oder in der Liste
   const kgB = await p.evaluate(() => { const w = demoProject()[0]; Object.assign(w, { name: 'Bad', gitter: 'zier', profil: 'stil', oeffner: 'kette', dicht: 'beige', griffM: 'stil', leiste: 'beide' }); S.windows = [w]; S.win = kopie(w); S.editIdx = 0; const t = []; ['fertig', 'ergebnis', 'home'].forEach((sc) => { go(sc); t.push(document.querySelector('.scr').textContent); }); return { t: t.join(' '), blatt: specRows(w).some((r) => r.k === 'Fenstergitter') }; });
   ok(!/Ziergitter|Stilprofil|Kettenantrieb|Beige|Stilgriff|Abdeckleisten/.test(kgB.t) && kgB.blatt, 'Keine Gesamtübersicht: Detailangaben stehen weder nach dem Speichern noch im Ergebnis noch in der Liste, nur im Aufmaßblatt');
@@ -4773,7 +4791,7 @@ if (teil(22)) {
   await p.reload({ waitUntil: 'networkidle' }); await p.waitForTimeout(400);
   await p.click('[data-act="entwurf-weiter"]'); await p.waitForTimeout(400);
   const eM1 = await p.evaluate(() => ({ q: S.q, mehr: !!(MEHR.get(S.win) || {}).material, tiefe: S.proj.tiefe }));
-  await p.click('.qnav .btn.primary'); await p.waitForTimeout(400);
+  await p.click('.qnav .btn.primary, .lg-weiter'); await p.waitForTimeout(400);
   const eM2 = await p.evaluate(() => ({ q: S.q, sichtbar: qSichtbar(S.win).filter((q) => q.kap === 'material').length, alle: qList(S.win).filter((q) => q.kap === 'material').length }));
   ok(eM0.kap === 'material' && eM0.q !== 'fi' && eM1.q === 'tiefe' && eM1.mehr && eM1.tiefe === 'kurz' && eM2.q === eM0.q && eM2.sichtbar === eM2.alle, 'Entwurf: aufgeklappte Kapitel („Mehr zu …“) und der Rückweg von der Tiefe überstehen das Neuladen; Weiter führt zurück zur Frage (' + eM0.q + ')');
   /* Nacharbeit nach dem Merge von #46 (Prüfbefunde app): Zeilen und Chips mit i, „Mehr zu …“, Tiefe-Pille mitten in den Detailfragen,
@@ -4819,7 +4837,7 @@ if (teil(22)) {
   for (const [von, t0, t1, weg] of [['griffM', 'genau', 'kurz', 'weiter'], ['oberfl', 'genau', 'normal', 'browser'], ['griff', 'normal', 'kurz', 'zurueck']]) {
     await frageB(von, {}, t0); await p.click('.qdock .qtiefe'); await p.waitForTimeout(300);
     await p.click('[data-act="tiefe"][data-v="' + t1 + '"]'); await p.waitForTimeout(200);
-    if (weg === 'weiter') await p.click('.qnav .btn.primary'); else if (weg === 'zurueck') await p.click('.qnav [data-act="qprev"]'); else await p.evaluate(() => history.back());
+    if (weg === 'weiter') await p.click('.qnav .btn.primary, .lg-weiter'); else if (weg === 'zurueck') await p.click('.qnav [data-act="qprev"], .lg-zurueck'); else await p.evaluate(() => history.back());
     await p.waitForTimeout(450);
     tzW.push(await p.evaluate((v) => { const alle = qList(S.win).map((q) => q.id), sicht = qSichtbar(S.win).map((q) => q.id).filter((x) => x !== 'tiefe'), j = alle.indexOf(v); return { von: v, q: S.q, soll: sicht.find((x) => alle.indexOf(x) > j), screen: S.screen }; }, von));
   }
