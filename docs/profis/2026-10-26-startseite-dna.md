@@ -68,3 +68,90 @@ Drei Richtungen: naheliegend = Musterseite der DNA auf eeziframes übertragen (G
 ## Blickprotokoll der Gestaltungsleitung (Y, 390 × 844)
 
 Sekunde 1: Foto mit Handy und Etikett „1.409 mm“. Sekunde 2: „Fensterplanung ganz [Fenster] eezi.“. Sekunde 3: weiße Pille „Jetzt konfigurieren“ bei 555 px. Schieltest (Graustufen, 8 px): drei Formen (Bühne, Überschrift, Pille), die Pille der hellste kleine Punkt. Tab-Weg: Logo, Hauseigentümer, Fensterbauer, Jetzt konfigurieren (Kopf), Jetzt konfigurieren (Hero), Mehr erfahren. Eine volle Pille je Bildschirm (gemessen). Kontraste: Weiß/Schwarz 20:1, Silbergrau/Schwarz 8,1:1, Silbergrau/Anthrazit 6,6:1, Violett/Schwarz 6,1:1, Textgrau/Weiß 5,6:1, Weiß/Indigo 10,6:1, Violett/Weiß 3,3:1 (nur ab 30 px). Ziele ab 44 px. Kein Querscrollen (390 px). `impeccable detect`: Violett auf Weiß (Akzentwort ab 30 px, Regel des Inhabers), Schriftfenster als „Gradient text“ (DNA-Baustein), Rest Scheinbefunde.
+
+## Hinweis des Inhabers während des Durchlaufs
+
+Nach der ersten Fassung (Fassung Y, scratchpad `neu/r4`) sagte der Inhaber: Gestaltung nur nach `design-dna`, nicht nach `premium-gestaltung` und `ultimativ-webdesign`; `profis` nur kurz (eine Runde, etwa zehn Minuten je Seite). Aus den alten Skills waren eingeflossen und wurden entfernt: die Pillen-Regel 460–600 px (jetzt DNA: unteres Drittel, gemessen 597 px), das eine violette Wort je Überschrift (DNA: zweite Stimme in `tinte-2`, Leuchtfarben nie als Text), das Messband unter dem Hero (altes Markenzeichen), Licht- und Kameravorgaben im Bildprompt (jetzt nach den Genen G4, G7, G10). Die Befundliste oben ist entsprechend nur noch nach der DNA zu lesen; CLAUDE.md wurde auf dem Arbeitszweig angepasst. Das Gremium lief einmal; eine zweite und dritte Runde entfallen.
+
+## Runde 2: Gremium (Y = `neu/r4` gegen X = heute), eine Runde
+
+| Gruppe | Fassung | Hände für Y | Median | Vetos |
+| --- | --- | --- | --- | --- |
+| Gestalter | Y 6:0 | 4, 3, 4, 3, 4, 3 | 3,5 | keine |
+| Kunden | Y 4:2; verstehen (X/Y): was es ist 5/5, was es kostet 5/5, was sie tun 4/4; Abbruch Bildschirm eins: X Hofmann (und Demir fast, Pilotband), Y nur Hofmann | Faust, 2, 2, 3, 3, 4 | 2,5 | Hofmann (Gegenspieler): Handy widerspricht sich („Maß 1 von 4“ mit vier Werten), Mieter fehlen |
+| Fensterbauer | Y 5:1; Median X→Y: seriös 3→4, verständlich 4→4, zumuten 3→4, Weg 4→4, zeigen 3→4, kaufen 2→3 | Faust, 3, 3, 3, 4, 4 | 3 | Brandt: „219“ abgeschnitten, „1409“ ohne Punkt, Etiketten über dem Blatt |
+
+Mehrheiten je Änderung (alle 18): behalten 1, 2, 5, 7, 10, 11, 12, 13 (Bewegung, mit Auflage Bento ruhiger); ändern 3 (Handy widerspruchsfrei, 1.409, Etikett am Zollstock, Bildpille raus: Gestalter 4:2, drei Kunden lesen sie als „Kästchen“), 4 („219“ ganz, Raster gleitet seltener), 6 (Etiketten neben das Blatt, „15 mm Abzug“ erklären oder weg), 8 (Rundknöpfe sichtbar); zurück 9 (Schriftfenster: Kunden 5:1 zurück, Fensterbauer 3:3, Gestalter wollten es ändern).
+
+Weitere Forderungen mit Wirkung: Jahr an „17. November“ (Berger, Pohl); „über den Link des Fensterbauers kostenlos“ beim Preis (Pohl); Pilotphase-Satz im Fuß auf den Bereich für Betriebe eingrenzen (Berger, Pohl); Nachmess-Satz am Messen-Schritt (Kraus, Reuter); Karte für Fensterbauer mit Satz zu Paketen, Pilotphase und Daten (Yilmaz, Lindqvist); Preisziffern kräftiger (Hartwig, Keller, Roth); Wortmarke überall Inter (Roth); Schriften selbst hosten, Doto subsetten (Lenz); Chips nicht wie Knöpfe (Hartwig); Handy am Telefon größer, kleine Werte weg (Vogel, Hartwig, Veit).
+
+## Umbau (nach der einen Runde)
+
+Umgesetzt: Bildpille aus der Überschrift; Handy „Maß 1 von 4“ mit 1.409 mm, die drei weiteren Maße leer, am Telefon größer und ohne die kleinen Zeilen, die Zahl rollt einmal ein (DNA-Rezept 8); Etikett am Zollstock auch am Schreibtisch (Gerät links); „219 Töne“ ganz in der Kachel; Bento mit nur noch zwei Kandidaten (ein Gleiten); Etiketten in den Rändern der Blatt-Kachel, „Bestellmaß · Feinaufmaß folgt“; Nachmess-Satz am Messen-Schritt; Preis: Ziffern in 250 (obere Grenze der DNA), Punktraster nur rechts oben, Beschriftung „Kostenlos“ über den vier Punkten, Jahr, Fensterbauer-Link-Satz, Chip „Einführungspreis“ in Koralle (Hinweis); Rundknöpfe mit Ring, Punkte vor den Ratgeber-Titeln; Schriftfenster entfernt; Karte für Fensterbauer mit Satz zu Paketen, Pilotphase und Daten und Indigo-Chip; Fuß mit Chip „Pilotphase“ und dem genauen Wortlaut des Hinweises; Chips im Hero getönt statt Umriss; Auftritt ohne Unschärfe auf Lead, Pillen und Chips (nur die Überschrift kommt aus der Unschärfe); ohne JavaScript alles sichtbar; Ziele ab 44 px.
+
+Nicht übernommen, dem Inhaber vorgelegt: Waschbär als Platzhalter (das neue Foto kommt nach `hero-prompt.md`); „Jetzt konfigurieren“ gegen „Jetzt ausmessen“ (Vogel, Hofmann; Wortlaut des Inhabers); Ansicht „Mieter“ (Hofmann; Produkt); Maße auch in Zentimetern (Vogel; App); dünne graue Lesetexte (Vogel, Pohl; DNA-Lesetext 16 px in `tinte-2`); Kicker in Versalien (Roth; DNA-Label); „Mehr erfahren“ als Textlink (Keller; DNA-Pille leise); Unschärfe-Filter der Überschrift und Glas-Etiketten (Lenz; DNA-Rezepte; Prüfung auf einem Mittelklasse-Android steht aus); Betriebspreis auf der Karte (Lindqvist; Ansicht Fensterbauer); Blatt am Telefon antippbar groß (Brandt, Sonntag; in der echten Seite verlinkt das Blatt das PDF).
+
+## Prüfung nach der DNA-Prüfliste (Endfassung, scratchpad `neu/r9`, Bilder in docs/profis/bilder/2026-10-26-startseite-dna-*.jpg)
+
+- Familientest: Gerätebühne, Leuchtkacheln, Etiketten, Bento, Stationen, Szenen mit Vorhang wie auf der Musterseite; Palette des Inhabers statt der Musterfarben.
+- Grund farblos (Schwarz, Weiß); Farbe nur als Leuchten (Schein, 219, Messen-Kachel, Preis), Punkt, Chip; höchstens zwei Leuchtpaare je Bildschirm (Violett+Indigo, Koralle allein).
+- Vier Gene je Szene benannt (oben). Je Datenabschnitt eine Zahl als Held (1.409 mm, 219, 7,99 €), Einheit klein in `tinte-2`.
+- Feinzeichnung (gestrichelte Linien, Schraffur, Punktraster), Gerät im Raum, Werte an der Sache: vorhanden.
+- Genau eine volle Pille je Bildschirm (gemessen, Telefon und Schreibtisch); am Telefon Oberkante 597 px (unteres Drittel), 52 px hoch.
+- Kontraste: Weiß/Schwarz 20:1, Silbergrau/Schwarz 8,1:1, Silbergrau/Anthrazit 6,6:1, Textgrau/Weiß 5,6:1, Weiß/Indigo 10,6:1, Schwarz/Koralle 8,3:1; Fokusring 2 px; nichts nur über Farbe (Öffnung/Fenster auch im Text).
+- Telefon 390 px: kein Querscrollen, keine Überschrift bricht im Wort, Etiketten bleiben im Bild.
+- Bewegung: Hero steht nach 1,3 s, nach 2,6 s laufen 0 Animationen, nichts läuft von selbst, Bento gleitet einmal, bei „weniger Bewegung“ steht alles sofort, ohne JavaScript alles sichtbar. Ziele ab 44 px (Wortmarke 30 px hoch ist ein Link im Kopf).
+- „Nie“-Liste: kein linearer Verlauf, kein Neon, keine Emoji, keine Statistikreihe, keine erfundenen Zahlen, keine frontalen Bildschirmfotos, kein Hero mit Text links und Foto rechts ohne Bühne, kein Ladebildschirm; Inter nur für die Wortmarke (Marke vor DNA).
+
+## Farbanteile nach der Palette „Task-App dunkel“ (Endfassung, je Pixel der nächsten Farbe zugeordnet)
+
+Neutral = Schwarz (S), Anthrazit (A), Silbergrau mit Textgrau (G), Weiß (W). „Foto“ = andere Töne aus Foto und Renderings (zählen als Farbe, Regel 6). Vorgabe Seite: S 42, W 26, A 16, G 9 (±3), Violett 3,5, Koralle 2, Indigo 1,5 (±1), Farbe gesamt 7, je Bildschirm höchstens 12, kein Bildschirm ohne Farbe.
+
+Telefon 390 × 844:
+
+| Bildschirm | Neutral % | Violett | Koralle | Indigo | Foto | Farbe gesamt |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 Hero | 87,0 (S 61 · A 12 · G 7 · W 7) | 0,1 | 8,6 | 2,7 | 1,5 | 13,0 |
+| 2 Konfigurator | 87,4 (S 1 · A 13 · G 5 · W 69) | 2,0 | 0,3 | 3,2 | 7,2 | 12,6 |
+| 3 Konfigurator | 92,4 | 2,0 | 0,3 | 3,2 | 2,2 | 7,6 |
+| 4 So geht es | 93,8 | 0,7 | 0,0 | 0,8 | 4,7 | 6,2 |
+| 5 So geht es | 95,7 | 0,0 | 0,1 | 0,7 | 3,5 | 4,3 |
+| 6 Aufmaß | 99,5 | 0,2 | 0,0 | 0,3 | 0,0 | 0,5 |
+| 7 Aufmaß | 99,6 | 0,1 | 0,0 | 0,2 | 0,1 | 0,4 |
+| 8 Preis | 94,5 | 4,8 | 0,7 | 0,0 | 0,0 | 5,5 |
+| 9 Ratgeber | 99,3 | 0,1 | 0,0 | 0,7 | 0,0 | 0,7 |
+| 10 Fensterbauer | 98,4 | 0,0 | 0,0 | 1,6 | 0,0 | 1,6 |
+| 11 Fuß | 97,9 | 0,0 | 0,0 | 2,1 | 0,0 | 2,1 |
+| **Seite** | 95,0 (S 44 · A 16 · G 5 · W 30) | 0,9 | 0,9 | 1,4 | 1,8 | 5,0 |
+
+Schreibtisch 1280 × 800: Seite 95,9 (S 49 · A 12 · G 3 · W 32), Violett 0,7, Koralle 1,0, Indigo 0,8, Foto 1,6, Farbe gesamt 4,1; Bildschirm 1 11,1, Bildschirm 2 und 3 je 8,8, Rest unter 3,2.
+
+Abweichungen von der Vorgabe: Bildschirm 1 und 2 am Telefon liegen mit 13,0 und 12,6 über 12, getrieben vom Platzhalterfoto (Koralle 8,6 ist der Orangeton der Baustelle) und von Holz und Glas der Renderings; mit dem neuen Foto nach hero-prompt.md fällt Bildschirm 1 auf etwa 5. Über die Seite fehlen Violett (0,9 statt 3,5) und Farbe gesamt (5,0 statt 7): Die Leuchten sind weich und werden beim Zählen zu Indigo (dunkel) oder Weiß (hell); mehr satte violette Fläche hieße Leuchten ohne Wert, was die DNA verbietet. Weiß 30 und Silbergrau 5 liegen je einen Punkt außerhalb, Schwarz am Schreibtisch mit 49 vier Punkte darüber (breite dunkle Szenen). Der Inhaber entscheidet, ob die Vorgabe als Zählung je Pixel oder als Eindruck gilt.
+
+## Änderungstabelle für den Inhaber
+
+| Änderung | Zweck | Gremium | Stand |
+| --- | --- | --- | --- |
+| Hero: Foto als Bühne, gekipptes Handy mit echtem Messbildschirm (1.409 mm, Maß 1 von 4), Etikett am Zollstock, Schein, Pille im unteren Drittel | Blickführung, Beweis | alle drei Gruppen dafür; Handy widerspruchsfrei und lesbar gefordert | geändert |
+| Bildpille in der Überschrift | DNA-Baustein | Gestalter 4:2 dagegen, drei Kunden lesen „Kästchen“ | zurückgenommen |
+| Pilotphase-Band oben weg | Verständnis | Kunden 3:1:2, Fensterbauer 4:2 dafür; Satz im Fuß präzisiert, Zeile in der Karte | geändert; **Inhaber entscheidet** |
+| Konfigurator als Bento, 219 leuchtend, lebendes Raster | Beweis, DNA | alle dafür; „219“ ganz, Raster ruhiger | geändert (ein Gleiten) |
+| So geht es: vier Kacheln mit Etiketten, Stationen am Schreibtisch | Verständnis | 17 von 18 behalten | bleibt; Nachmess-Satz am Messen-Schritt |
+| Was im Aufmaß steckt in der dunklen Szene, Blatt mit drei Etiketten | Vertrauen | Etiketten neben das Blatt (G 4:2, F 4:2) | geändert |
+| Preis als Zahl-Held in Leuchtkachel | Verständnis | Kunden 3:3, Gestalter kräftigere Ziffern | geändert (250, Jahr, Fensterbauer-Satz, Koralle-Chip) |
+| Schriftfenster „eeziframes“ | DNA-Bewegungsgen | Kunden 5:1 zurück | zurückgenommen; **auf Wunsch zurück** |
+| Karte für Fensterbauer weiß auf dunkel, schwarze Pille | Weg für Fensterbauer | 15 von 18 behalten; Satz zu Paketen und Pilotphase | geändert |
+| Palette und Schrift (Outfit, Doto, Inter nur Wortmarke) | Marke | Gestalter 5:1, Kunden 3:2:1, Fensterbauer 5:1 | bleibt |
+| Bewegung (Auftritt, Vorhang, Etiketten, Leiste) | DNA | behalten; Unschärfe nur auf der Überschrift | geändert |
+
+Offen für den Inhaber: neues Hero-Foto (Prompt in hero-prompt.md; Waschbär oder ohne Figur), Pilotphase-Band oben, Schriftfenster, „Jetzt konfigurieren“ oder „Jetzt ausmessen“, Ansicht für Mieter, Maße in cm, Prüfung auf einem Mittelklasse-Android (Unschärfe, Glas, Vorhang). Für die Umsetzung in web/: Outfit und Doto nach web/vendor mit Lizenz, bundle.css und bundle.js als Dateien der Seite, Doto auf Ziffern subsetten.
+
+Vorschau: https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i (privat, nichts online). Quelle: docs/profis/startseite-dna-vorschau/.
+
+## Antwort des Inhabers
+
+Noch keine (zur Fassung nach dem Gremium).
+
+## Realitäts-Check
+
+Steht aus. Fragekarte: zwei bis drei echte Menschen (ideal über 65, ohne Technikgewohnheit, ein Fensterbauer), fünf Minuten, keine Hilfe: „Was würdest du jetzt tun?“ (wörtlich notieren), „Was kostet das?“, „Wie sicher bist du, dass du das hinbekommst, 1 bis 5?“
