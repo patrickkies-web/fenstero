@@ -5,6 +5,9 @@
   Inhabers): Gene, Formensprache, Bausteine und Musterseite von dort, Farben nach seiner jeweils genannten Palette. Die Skills
   `premium-gestaltung` und `ultimativ-webdesign` nicht mehr für die Gestaltung laden; sie gehören zur früheren Designrichtung und
   kollidieren mit der DNA. Technik des Projekts (CSP, eigene Schriften in web/vendor, Prüfsuite) bleibt.
+  Dazu immer der Begleit-Skill `design-dna-eeziframes` (.claude/skills/design-dna-eeziframes/SKILL.md): Palette „Task-App dunkel“ als
+  tokens.css, Ergänzungen G14/G15, Entscheidungen des Inhabers, Rezept je Seite, Messwerkzeuge; Prompt-Vorlage mit Anhängsel und
+  den drei Richtungen in prompt.md. Referenz der Qualität: die Startseite vom 26.10.2026 (docs/profis/startseite-dna-vorschau/).
 - `profis` (.claude/skills/profis/SKILL.md, das Gremium aus Gestaltern, Kunden und Fensterbauern) nur kurz: eine Runde, etwa zehn
   Minuten je Seite, die drei Sprecher-Zusammenfassungen und die Änderungstabelle, keine zweite und dritte Runde. Protokolle unter
   docs/profis/.
