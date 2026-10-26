@@ -9,17 +9,19 @@ Dieser Skill vereint vier Quellen zu einem Regelwerk: **webdesign-wow** (die Ide
 
 **Vorrang:** 1. die Worte des Inhabers im Auftrag · 2. die Projektregeln (`premium-gestaltung` mit `designrichtung.md`, `docs/GESTALTUNG.md`) · 3. dieser Skill · 4. die Vorbilder. Dieser Skill liefert das Handwerk und die Ideen, nicht die Marke.
 
+**Aufbau ist nicht Aussehen.** Sagt der Inhaber, was weg soll, was wohin kommt und welche Knöpfe es gibt, ist das die Vorgabe für den Aufbau. Wie es aussieht, schlägt die Gestaltungsleitung selbst vor, und zwar so hochwertig wie die Seite für Fensterbauer. Eine Aufbau-Anweisung wörtlich mit einfachen Mitteln umzusetzen ist der häufigste Grund für Entwürfe, die „wie aus Lego Duplo“ aussehen.
+
 **Zusammenspiel:** Dieser Skill analysiert und baut; das Gremium im Skill `profis` entscheidet, welche Änderungen bleiben. Beide zusammen sind der Weg für jeden Gestaltungswunsch des Inhabers.
 
 ## 0. Ablauf für einen Bereich
 
 1. **Verstehen.** Ein Satz: Worum geht es, für wen, was soll der Besucher tun, woran merkt man den Erfolg?
-2. **Modus bestimmen** (Abschnitt 1) und den Ist-Zustand festhalten: Bildschirmfotos bei 390 × 844 und 1280 × 800, dazu das Foto des Inhabers.
+2. **Modus bestimmen** (Abschnitt 1) und den Ist-Zustand festhalten: Bildschirmfotos bei 390 × 844 und 1280 × 800, dazu das Foto des Inhabers. **Referenz daneben legen:** Das feste Vorbild für jede Fläche (Website, App, Konfigurator, Betriebsbereich, Ratgeber) ist die Seite für Fensterbauer (`/fuer-fensterbauer/`); der Inhaber muss sie nie mitschicken. Nennt er zusätzlich eine andere Seite, kommt sie dazu. Zwei bis drei Bildschirmhöhen davon per Vorschau-Server bei 390 × 844 aufnehmen und neben das Ist legen. Daraus drei Wörter für die Anmutung (z. B. ruhig, präzise, lichtvoll) und die Merkmale, die übernommen werden: Liniendicken, Grauwert-Hierarchie, Licht, Abstände, Form der Knöpfe.
 3. **Befund:** Was kann sich ändern, und in welcher Art? Eine Liste mit höchstens zehn Punkten, jeder mit dem Grund aus diesem Regelwerk (Blickführung, Hierarchie, Schrift, Farbe, Bewegung, Zustände, Technik) und der Einstufung Muss oder Kann.
 4. **Fragen beantworten** (jede Antwort ist eine Idee): Held und Material · Licht und die eine Farbe · das Wort oder die Zahl, die zum Bild wird · was sich beim Antippen öffnet oder zerlegt · die Geschichte in drei Szenen · der Beweis, der einen Absatz ersetzt · die Pause.
-5. **Drei Richtungen:** naheliegend, mutig, überraschend. Je drei Sätze (welches Problem sie löst, der Held, die Bewegung) und ein Richtungsbogen mit drei groben Telefonskizzen als ein Bild. Bei klaren Aufträgen die stärkste bauen, die anderen in einer Zeile nennen. Kreativhebel: zwei Vorbilder kreuzen, ein Prinzip aufs eigene Thema übersetzen, einmal umdrehen (still statt bewegt, Bild statt Zahl).
-6. **Bauen** als Vorschau (Design-Canvas oder eigenständige HTML-Seite), Telefon zuerst, dann Schreibtisch. Echtes Material aus dem Projekt: Renderings des 3-D-Modells, echte Bildschirme der App, das Aufmaßblatt, die Fotos des Inhabers. Was fehlt, wird als Platzhalter benannt, nie erfunden.
-7. **Prüfen** (Abschnitt 11) und an `profis` übergeben. Online nur auf ausdrücklichen Wunsch des Inhabers.
+5. **Drei Richtungen, immer als Bild:** naheliegend, mutig, überraschend. Je drei Sätze (welches Problem sie löst, der Held, die Bewegung) und ein Richtungsbogen: drei Telefonskizzen bei 390 × 844 mit echter Schrift (Inter) als ein Bild, links daneben das Ist bzw. die bisherige Fassung. Das gilt auch, wenn der Inhaber den Aufbau genau vorgibt: Dann tragen alle drei Skizzen seinen Aufbau und unterscheiden sich im Aussehen. Gebaut wird erst nach seiner Wahl; nur reine Text- oder Fehlerkorrekturen ohne sichtbare Gestaltung werden direkt umgesetzt. Kreativhebel: zwei Vorbilder kreuzen, ein Prinzip aufs eigene Thema übersetzen, einmal umdrehen (still statt bewegt, Bild statt Zahl). Erste Quelle für Ideen sind die eigenen Zeichen der Marke (`designrichtung.md` 3.8 und 4): Licht durchs Fenster wie im Logo, Maßlinie als Haarlinie mit Endstrichen, Orange für die Öffnung und Blau für das Element, Messraster, Lupe.
+6. **Bauen** als Vorschau (Design-Canvas oder eigenständige HTML-Seite), Telefon zuerst, dann Schreibtisch. Echtes Material aus dem Projekt: Renderings des 3-D-Modells, echte Bildschirme der App, das Aufmaßblatt, die Fotos des Inhabers. Was fehlt, wird als Platzhalter benannt, nie erfunden. Eine selbst gezeichnete Ersatzszene steht in der Bildsprache der Marke (dunkler Raum, Licht mit Quelle, feine Linien, Wand #1f1f1f bis #262626 nach `designrichtung.md` 3.4), nie als flache, helle Clipart.
+7. **Prüfen** (Abschnitt 11) und an `profis` übergeben, immer mit allen drei Gruppen, nie nur mit Kunden. Befunde aus Kontrastmessung und Kundentest werden mit den Mitteln der Gestaltung gelöst (Wortwahl, Position, Hierarchie, Farbe als Code, Bild statt Text), nicht durch größer, dicker und mehr Text. Nach jeder Runde die Anmutungsprobe neben der Referenz (Abschnitt 11). Online nur auf ausdrücklichen Wunsch des Inhabers.
 
 ## 1. Modus der Fläche
 
@@ -74,7 +76,7 @@ Komposition ist Blickführung. Je Bildschirm wird sie schriftlich festgelegt und
 
 - **Inter ist die einzige Familie,** selbst gehostet aus `web/vendor`. Eigenständigkeit entsteht aus der festen Skala, Laufweite −0,02 em ab 32 px (Display −0,03 bis −0,04 em), Gewichtskontrast, Tabellenziffern (`tnum`) für alle Maße und Orange als einzigem Zahlensignal. Verkaufsflächen dürfen ab 32 px den Display-Schnitt (`opsz`) nutzen; eine zweite Familie gibt es nirgends. (impeccables Warnung vor Inter gilt dem Reflex, nicht der Entscheidung.)
 - **Skala** nach Projekt: App 13 · 15 · 17 · 24 · 32 · 40; Betriebsbereich 13 · 15 · 17 · 22 · 30 · 44 (Telefon 26 und 36); Ratgeber 13 · 15 · 17 · 24 · 40 (Telefon 32). Nichts unter 13 px, nichts über 40 in der App. Eine Displaygröße je Bildschirm, Überschrift höchstens sechs Wörter im Klartext, genau ein grünes Wort.
-- **Lesetext** 35 bis 60 Zeichen je Zeile (Prosa 45–75), höchstens drei Zeilen auf Verkaufsflächen, `text-wrap: pretty`; Überschriften `text-wrap: balance`, von Hand nur zwischen Sinneinheiten umbrochen und an jeder Breite geprüft. Kein einzelnes Wort in der letzten Zeile, kein Bruch in Komposita, Domains oder zwischen Zahl und Einheit (`&nbsp;`).
+- **Lesetext** 35 bis 60 Zeichen je Zeile (Prosa 45–75), höchstens drei Zeilen auf Verkaufsflächen, `text-wrap: pretty`; Überschriften `text-wrap: balance`, von Hand nur zwischen Sinneinheiten umbrochen und an jeder Breite geprüft. Kein einzelnes Wort in der letzten Zeile, kein Bruch in Komposita, Domains oder zwischen Zahl und Einheit (` `).
 - **Helle Schrift auf dunklem Grund** bekommt etwas mehr Zeilenabstand, einen Hauch mehr Laufweite und bei Bedarf eine Stufe mehr Gewicht. Headline in zwei Stimmen (gleiche Größe, zweite dünner oder grauer) ist erlaubt.
 - **Zahlen und Einheiten:** deutsche Schreibweise, Einheit immer sichtbar neben der Zahl, Tabellenziffern in Spalten, nie ambivalent (mm und cm sofort unterscheidbar).
 - Keine Versalien im Lesetext, keine leichten Titel, keine Mikrotexte in den Ecken, kein Englisch und kein Fachwort ohne Erklärung.
@@ -155,6 +157,7 @@ Jede Antwort mit Belegen (Bildschirmfoto, berechneter Wert, Konsolenprüfung), n
 - **Technik:** Telefon 390 ohne Querscrollen, Schreibtisch 1280 und 1024; Mittelklasse-Android flüssig; Ziele ab 44 px; CSP (nur eigene Herkunft); Bilder ohne Layoutsprung; `impeccable detect --json` über die geänderten Dateien, Befunde erklärt oder behoben (die Warnung zu Inter ist Markenregel).
 - **Ehrlichkeit:** jede Zahl belegt, jede Marke als Beispiel beschriftet, Preise mit Stand.
 - **Projekt:** Prüfsuite `scripts/pruefen.mjs` für den Bereich grün; Markenregeln eingehalten (eine Cream-Pille, ein grünes Wort, Schriftgrößen).
+- **Anmutung neben der Referenz:** Das neue Bildschirmfoto steht neben der Seite für Fensterbauer (Schritt 2). Sieht es aus wie von derselben Hand? Gezählt werden Pillen, Kästen und gefüllte Etiketten; Maßlinien sind Haarlinien (2 px) mit Endstrichen; Hierarchie entsteht über Grauwert und Größe, nicht über Flächen und Konturen. Ist eine Fassung seit der letzten Runde größer und lauter geworden, ohne schöner zu werden, geht sie zurück.
 - **Dann das Gremium:** Übergabe an `profis` mit Ist, Neu, Änderungsliste und Blickprotokoll. Vor einem Merge einer sichtbaren Änderung zusätzlich: Durchlauf mit „weniger Bewegung“, Graustufen-Schieltest und, wenn möglich, zwei echte Nutzer über 60 am Telefon im Gegenlicht.
 
 ## 12. Fallen
@@ -171,6 +174,8 @@ Jede Antwort mit Belegen (Bildschirmfoto, berechneter Wert, Konsolenprüfung), n
 10. Vorschau ungleich Umsetzung: Gebaut wird, was gezeigt wurde; weicht die Umsetzung ab, wird vorher gefragt.
 11. Endlos schleifen: Runden sind begrenzt; lieber offen sagen, was fehlt.
 12. Zu kleines Bild, zu viel Eingabe auf einmal: Ein Schritt zeigt erst, was zu tun ist, dann fragt er.
+13. Die Aufbau-Anweisung wörtlich bauen: Der Inhaber sagt, was wohin kommt; das Aussehen erfindet die Gestaltungsleitung auf dem Niveau der Seite für Fensterbauer, als Richtungsbogen, bevor gebaut wird.
+14. Vergröbern durch Prüfrunden: Jeder Kundeneinwand mit „größer, dicker, mehr Text“ gelöst ergibt nach drei Runden einen Duplo-Bildschirm. Erst die Richtung wählen lassen, dann prüfen; Feinschliff (Kontrast, Bewegung nach Emil) kommt zuletzt.
 
 ## 13. Werkzeuge
 

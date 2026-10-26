@@ -1400,3 +1400,119 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .keypad button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px }
 @media (max-height: 700px) { .keypad { gap: 6px } .keypad button { min-height: 40px; font-size: 24px } .keypad button.ok, .keypad .kp-zurueck { min-height: 44px } .keypad .kp-zurueck { flex-basis: 44px; width: 44px } .scr.fit .hd.mess-kopf h1 { font-size: 24px } .scr.fit .hd.mess-kopf p:not(.eyebrow) { font-size: 15px } }
 @media (prefers-reduced-motion: reduce) { .fd-caret { animation: none } .mess-zeile.fragt > * { animation: none } .w3d-feldlage, .keypad button, .mu-ja { transition: none } }
+
+/* ---------- Messen im Raum (26.10.2026, Wunsch des Inhabers; Richtung „Licht im Raum“) ----------
+   Dunkler Raum, Tageslicht kommt durchs Fenster: Wand und Laibung dunkel und zum Rahmen hin heller, das Glas hell, ein Lichtschein mit
+   Quelle (das Fenster). Das Modell steht unter der Überschrift über die ganze Breite bis zum Dock; die Bühne läuft an den Rändern in den
+   Grund aus, so gibt es keine Kante. Die Maßlinie ist eine Haarlinie mit Endstrichen und Schrägstrich wie in einer Bauzeichnung, die
+   Enden stehen als dunkle Schilder mit Farbpunkt. Unten das Dock (Zurück, „Maß eingeben“, Info); nach „Maß eingeben“ das Blatt mit
+   Feld, „Bestätigen“ und Zifferntasten. Bestätigt steht der Wert auf der Linie, ein Tipp darauf öffnet das Blatt wieder. */
+.scr.fit.im-raum { gap: 0 }
+.scr.fit .hd.mess-kopf.im-raum { position: relative; z-index: 2; padding: 6px 0 2px }
+.scr.fit .hd.mess-kopf.im-raum h1 { margin: 0 }
+.scr.fit.im-raum > .w3d-stage.raum-licht { flex: 1 1 auto; min-height: 200px; max-height: none; width: auto; max-width: none; margin: 0 -16px; border-radius: 0; box-shadow: none }
+.w3d-stage.raum-licht { --lw: 240px; --lh: 240px; background: radial-gradient(ellipse calc(var(--lw) * .82) calc(var(--lh) * .82) at calc(50% + var(--dimx, 0px)) calc(50% + var(--dimy, 0px)), #f2f1eb 0%, #e6e4dc 52%, #cfccc1 86%, #161616 100%), #161616 }
+/* Die Wand deckt alles bis auf die Öffnung: dahinter liegt Tageslicht (Größe der Öffnung aus app.js: --lw, --lh), außen bleibt es dunkel */
+/* Lichtschein mit Quelle: um das Fenster, nach außen auslaufend (screen hellt nur auf, färbt nichts) */
+.w3d-stage.raum-licht::after { content: ''; position: absolute; inset: 0; z-index: 4; pointer-events: none; background: radial-gradient(ellipse 58% 44% at 50% 50%, rgba(241, 240, 234, .11), rgba(241, 240, 234, .04) 55%, rgba(241, 240, 234, 0) 78%); mix-blend-mode: screen }
+.w3d-stage.raum-licht .w3d-bg { display: none }
+.w3d-stage.raum-licht .w3d-wall-in { background: linear-gradient(180deg, #161616, #181817 50%, #161616) }
+/* Laibung: an der Wand dunkel, zum Rahmen hin vom Tageslicht aufgehellt (je Seite anders, wie das Licht von rechts oben fällt) */
+.w3d-stage.raum-licht .w3d-rev-t { background: linear-gradient(180deg, #1f1f1e, #3a3936) }
+.w3d-stage.raum-licht .w3d-rev-l { background: linear-gradient(90deg, #222220, #4a4843) }
+.w3d-stage.raum-licht .w3d-rev-r { background: linear-gradient(90deg, #1f1f1e, #3c3b37) }
+.w3d-stage.raum-licht .w3d-fuge { background: linear-gradient(180deg, #4a4741, #3e3b36) }
+.w3d-stage.raum-licht .w3d-glass { background: linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .32) 34%, transparent 50%), linear-gradient(160deg, #eeede6 0%, #dddbd1 58%, #c7c4b8 100%) }
+.w3d-stage.raum-licht .w3d-floor-in { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 34px), linear-gradient(180deg, #2c2722, #221e1a) }
+/* Haarlinie statt Leuchtbalken: 2 px mit dunklem Saum gegen das helle Glas, kein Pulsieren */
+.w3d-stage.raum-licht .w3d-dim.is-active .w3d-dim-line { animation: none; box-shadow: 0 0 0 1px rgba(12, 12, 12, .5) }
+.w3d-stage.raum-licht .w3d-dim.is-active.mit-feld.v .w3d-dim-line { left: -1px; width: 2px }
+.w3d-stage.raum-licht .w3d-dim.is-active.mit-feld.h .w3d-dim-line { top: -1px; height: 2px }
+.w3d-stage.raum-licht .w3d-dim.is-active.mit-feld.v .w3d-dim-cap { left: -9px; width: 18px; height: 2px }
+.w3d-stage.raum-licht .w3d-dim.is-active.mit-feld.h .w3d-dim-cap { top: -9px; width: 2px; height: 18px }
+.w3d-stage.raum-licht .w3d-dim.is-active .w3d-dim-cap { box-shadow: 0 0 0 1px rgba(12, 12, 12, .5) }
+.w3d-stage.raum-licht .w3d-dim.is-active .w3d-dim-cap::after { content: ''; position: absolute; left: 50%; top: 50%; width: 14px; height: 2px; margin: -1px 0 0 -7px; border-radius: 1px; background: currentColor; transform: rotate(-45deg) }
+/* Enden: dunkle Schilder mit Farbpunkt statt farbiger Pillen (Kontrast auf hellem Glas und dunkler Wand gleich) */
+.w3d-stage.raum-licht .mu-ende { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px 6px 9px; border-radius: 10px; background: rgba(22, 22, 22, .9); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 4px 14px rgba(0, 0, 0, .4) }
+.w3d-stage.raum-licht .mu-ende::before { content: ''; flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: var(--dc) }
+.w3d-stage.raum-licht .mu-chip { left: 16px; top: 6px; padding: 0; background: none; color: var(--text2); font-weight: 600 }
+/* Der bestätigte Wert auf der Linie: ein Knopf, der das Blatt wieder öffnet */
+.w3d-feldlage.tipp .mu-feld { pointer-events: auto }
+.w3d-stage.raum-licht .mu-feld { padding: 0; border-radius: 16px; background: none; box-shadow: none }
+.mu-feld.aus { visibility: hidden }
+.fd-knopf { display: flex; align-items: baseline; gap: 6px; min-height: 44px; padding: 6px 12px 6px 14px; border: 0; border-radius: 14px; background: rgba(22, 22, 22, .92); color: var(--ink); font: inherit; box-shadow: inset 0 0 0 1.5px var(--dc), 0 8px 24px rgba(0, 0, 0, .45); cursor: pointer; transition: transform 160ms var(--e-out) }
+.fd-knopf:active { transform: scale(.97) }
+.fd-knopf:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.fd-knopf .fd-wert { font-size: 24px; line-height: 32px; letter-spacing: -.02em }
+.fd-aendern { align-self: center; display: inline-flex; margin-left: 2px; color: var(--text2) }
+.fd-aendern svg { width: 16px; height: 16px }
+/* Dock: Zurück, die eine Cream-Pille, Info */
+.mess-dock { position: relative; z-index: 3; flex: 0 0 auto; align-self: center; display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; padding: 8px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 0 0 2px var(--line2), 0 20px 50px rgba(0, 0, 0, .55) }
+.md-rund { flex: 0 0 48px; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 999px; background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line2); display: flex; align-items: center; justify-content: center; transition: transform 160ms var(--e-out), background 160ms ease }
+.md-rund:active { transform: scale(.96); background: var(--surface2) }
+.md-rund:focus-visible, .mp-ok:focus-visible, .mp-zweit:focus-visible, .mp-griff:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.md-info svg circle:first-child { fill: transparent }
+.mess-dock .md-haupt { flex: 0 0 auto; min-height: 48px; padding: 0 10px 0 20px; gap: 12px; font-size: 15px; white-space: nowrap }
+.btn .pf { position: relative; flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: #161616 }
+.btn .pf::after { content: ''; position: absolute; left: 9px; top: 10px; width: 6px; height: 6px; border: solid var(--cream); border-width: 2.4px 2.4px 0 0; border-radius: 1px; transform: rotate(45deg) }
+.bb.bb-inline .btn:has(.pf) { gap: 12px; padding: 0 10px 0 22px }
+/* Blatt mit den Zifferntasten: kommt beim Öffnen von unten (320 ms), beim Tippen steht es still */
+.mess-pad { --dc: var(--mo); position: relative; z-index: 3; flex: 0 0 auto; margin: 0 -16px calc(-10px - env(safe-area-inset-bottom, 0px)); padding: 0 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-radius: 24px 24px 0 0; background: var(--surface); box-shadow: 0 0 0 1px var(--line2), 0 -16px 40px rgba(0, 0, 0, .45) }
+.mess-pad.el { --dc: var(--el) }
+.mess-pad.kommt { animation: pad-auf 320ms var(--e-out) both }
+@keyframes pad-auf { from { transform: translateY(100%) } to { transform: none } }
+.mp-griff { display: flex; align-items: center; justify-content: center; width: 100%; height: 28px; padding: 0; border: 0; background: none; border-radius: 12px }
+.mp-griff span { width: 36px; height: 4px; border-radius: 2px; background: var(--line2) }
+.mp-reihe { display: flex; align-items: center; gap: 8px }
+.mp-feld { flex: 1 1 auto; min-width: 0; height: 56px; display: flex; align-items: baseline; gap: 6px; padding: 0 16px; border-radius: 16px; background: var(--ground); box-shadow: inset 0 0 0 2px var(--dc); line-height: 56px; white-space: nowrap; overflow: hidden }
+.mp-wert { font-size: 32px; font-weight: 800; letter-spacing: -.03em; color: var(--ink); font-variant-numeric: tabular-nums }
+.mp-ph { font-size: 24px; font-weight: 700; letter-spacing: -.02em; color: var(--muted); font-variant-numeric: tabular-nums }
+.mp-u { font-size: 15px; font-weight: 700; color: var(--dc) }
+.mp-knopf { flex: 0 0 auto; display: flex } .mp-knopf:empty { display: none }
+.mp-ok { min-height: 56px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--cream); color: #161616; font: inherit; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: transform 160ms var(--e-out), background 160ms ease }
+.mp-ok svg { width: 18px; height: 18px }
+.mp-ok:active { transform: scale(.97) }
+.mp-ok.aus { background: var(--surface2); color: var(--muted) } .mp-ok.aus:active { transform: none }
+.mp-knopf.kommt .mp-ok { animation: mp-kommt 220ms var(--e-out) both }
+@keyframes mp-kommt { from { opacity: 0; transform: scale(.92) } to { opacity: 1; transform: none } }
+.mp-zeile { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 8px }
+.mp-text { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 15px; line-height: 1.3; font-weight: 600; color: var(--text2) }
+.mp-text b { color: var(--ink) } .mp-text b.gross { font-size: 17px }
+.mp-text.warn { color: var(--warn) } .mp-text.bad { color: var(--bad) }
+.mp-zweit { flex: 0 0 auto; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line2); font: inherit; font-size: 15px; font-weight: 700; white-space: nowrap; transition: transform 160ms var(--e-out) }
+.mp-zweit:active { transform: scale(.97) }
+.mess-pad .keypad button { background: var(--surface2) }
+.mess-pad .keypad button:active { background: var(--surface3) }
+@media (max-height: 700px) { .mp-feld, .mp-ok { height: 48px; min-height: 48px; line-height: 48px } .mp-zeile { min-height: 44px; margin: 2px 0 6px } }
+/* ---------- „Passt.“ nach dem letzten Rand (26.10.2026): das Modell über die ganze Breite ohne Schilder, darunter das Maß als Held ---------- */
+.hd.passt-kopf h1 { font-size: 32px; letter-spacing: -.03em }
+.hd.passt-kopf p { margin-top: 4px; font-size: 17px; line-height: 1.4 }
+.scr.passt { gap: 16px }
+.scr.passt > .w3d-stage { width: auto; max-width: none; margin: 0 -16px; border-radius: 0; box-shadow: none }
+.w3d-stage.ohne-schilder .w3d-dim-lab { display: none }
+.passt-masse { display: flex; flex-direction: column }
+.ps-lab { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 700; color: var(--text2) }
+.ps-zahl { margin: 4px 0 0; display: flex; align-items: baseline; gap: 6px; white-space: nowrap }
+.ps-zahl b { font-size: 40px; line-height: 1.05; font-weight: 800; letter-spacing: -.035em; color: var(--mo); font-variant-numeric: tabular-nums }
+.ps-zahl span, .ps-el > span:last-child { font-size: 15px; font-weight: 700; color: var(--text2) }
+.ps-el { margin: 10px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px }
+.ps-el b { font-size: 17px; font-weight: 800; color: var(--el); font-variant-numeric: tabular-nums; white-space: nowrap }
+.ps-drei { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line) }
+.ps-drei h2 { margin: 0; font-size: 15px; line-height: 1.3; font-weight: 700; color: var(--ink) }
+.ps-spalten { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; margin-top: 10px }
+.ps-sp > .ps-lab { margin-bottom: 4px }
+.ps-reihe { margin: 0; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; height: 24px; font-size: 13px }
+.ps-reihe span { color: var(--text2); font-weight: 600 }
+.ps-reihe i { position: relative; display: block; width: var(--l); height: 2px; border-radius: 1px; background: var(--mo) }
+.ps-reihe.klein i::after { content: ''; position: absolute; right: -10px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent) }
+.ps-reihe b { text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums }
+.ps-fuss { margin: 8px 0 0; font-size: 13px; line-height: 1.4; color: var(--text2) }
+@media (min-width: 1024px) {
+  .scr.fit[data-screen="messen"] > .mess-dock, .scr.fit[data-screen="rest"] > .mess-dock, .scr.fit[data-screen="messen"] > .mess-pad, .scr.fit[data-screen="rest"] > .mess-pad { grid-area: eingabe }
+  .scr.fit.im-raum > .w3d-stage.raum-licht { grid-area: buehne; margin: 0; border-radius: var(--r4); min-height: 520px }
+  .scr.fit.im-raum > .mess-dock { justify-self: start; margin: 0 }
+  .scr.fit.im-raum > .mess-pad { margin: 0; padding: 0 16px 16px; border-radius: var(--r4); box-shadow: 0 0 0 2px var(--line2) }
+  .scr.passt { max-width: 760px; margin-inline: auto }
+  .scr.passt > .w3d-stage { margin: 0; border-radius: var(--r4); box-shadow: var(--ring) }
+}
+@media (prefers-reduced-motion: reduce) { .mess-pad.kommt, .mp-knopf.kommt .mp-ok { animation: none } .fd-knopf, .md-rund, .mp-ok, .mp-zweit { transition: none } }

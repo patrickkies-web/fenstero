@@ -667,6 +667,15 @@ window.Buehne3D = (function () {
     'schloss': 'radial-gradient(circle at 50% 50%, #e9ecef 0 22%, #3a3e43 26%)'
     /* Oberlichtöffner, Bedienung innen, Aufzugbänder, Stopfen, Druckknopf und Schließzylinder: Farbe inline aus app.js (_bg) */
   };
+  /* Messen im Raum (.raum-licht, app.css): dunkle Wand und Laibung, das Glas hell vom Tageslicht; die Tiefe macht das Licht */
+  const RAUM = {
+    'w3d-wall-in': 'linear-gradient(180deg, #141414, #161615 50%, #141414)', // so dunkel wie der Grund: die Bühne hat keine Kante
+    putz: 'linear-gradient(180deg, #3a3936, #2e2d2b)',
+    'w3d-fuge': 'linear-gradient(180deg, #4a4741, #3e3b36)',
+    glas: 'linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .3) 34%, transparent 50%), linear-gradient(160deg, rgba(238, 237, 230, .97) 0%, rgba(221, 219, 209, .96) 58%, rgba(199, 196, 184, .95) 100%)',
+    'glas-tuer': 'linear-gradient(104deg, transparent 18%, rgba(255, 255, 255, .26) 34%, transparent 50%), linear-gradient(160deg, rgba(238, 237, 230, .5) 0%, rgba(221, 219, 209, .44) 58%, rgba(199, 196, 184, .5) 100%)',
+    'w3d-floor-in': 'repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 34px), linear-gradient(180deg, #2c2722, #221e1a)'
+  };
   /* Kante innen wie box-shadow: inset 0 0 0 Bpx Farbe */
   const KANTE = { 'w3d-frame': [1, 'rgba(0, 0, 0, .16)'], 'w3d-side': [1, 'rgba(0, 0, 0, .14)'], 'w3d-glass': [1, 'rgba(0, 0, 0, .2)'], 'w3d-scheibe': [1.5, 'rgba(55, 62, 70, .42)'], 'w3d-sill': [1, 'rgba(0, 0, 0, .08)'], 'w3d-roll': [1, 'rgba(0, 0, 0, .2)'], 'w3d-behang': [1, 'rgba(0, 0, 0, .18)'], 'w3d-behang-u': [1, 'rgba(0, 0, 0, .25)'], 'w3d-innen': [1, 'rgba(0, 0, 0, .1)'], 'w3d-innen-k': [1, 'rgba(0, 0, 0, .18)'], 'w3d-paneel': [1, 'rgba(0, 0, 0, .18)'], 'w3d-schw': [1, 'rgba(0, 0, 0, .22)'], 'w3d-mesh': [1.5, 'rgba(85, 88, 92, 1)'], 'w3d-leiste': [1, 'rgba(0, 0, 0, .12)'], 'w3d-solar': [1, 'rgba(0, 0, 0, .45)'], 'w3d-klappladen': [1, 'rgba(0, 0, 0, .28)'], 'w3d-band': [1, 'rgba(0, 0, 0, .22)'], 'w3d-handle': [1, 'rgba(0, 0, 0, .2)'], 'w3d-griffa': [1, 'rgba(0, 0, 0, .2)'], 'w3d-pilz': [1, 'rgba(20, 20, 20, .45)'], 'schloss': [1, 'rgba(0, 0, 0, .4)'],
     /* Teile aus dem CSS-Modell (S3): Lamellen, Führungsschienen, Aufzugbänder, Rosette, Oberlichtöffner, Bedienung, Kleinteile am Griff */
@@ -725,15 +734,16 @@ window.Buehne3D = (function () {
   }
   /* Hintergrund einer Fläche: was app.js geschrieben hat (roh), sonst der Klassenwert */
   function flaecheStoff(el, stage) {
-    const ist = (k) => el.classList.contains(k);
+    const ist = (k) => el.classList.contains(k), raum = stage.classList.contains('raum-licht'), putz = raum ? RAUM.putz : PUTZ;
     let bg = '';
-    if (ist('w3d-glass')) { const sc = stage.classList; bg = sc.contains('glas-sicht') ? (stage._orn || KLASSE['w3d-glass']) : sc.contains('glas-sonne') ? KLASSE['glas-sonne'] : sc.contains('glas-vogel') ? KLASSE['glas-vogel'] : sc.contains('glas-klar') ? KLASSE['glas-klar'] : stage.querySelector('[data-r="floor-out"]') ? KLASSE['glas-tuer'] : KLASSE['w3d-glass']; }
+    if (ist('w3d-glass') && raum && !stage.classList.contains('glas-sicht') && !stage.classList.contains('glas-sonne')) bg = stage.querySelector('[data-r="floor-out"]') ? RAUM['glas-tuer'] : RAUM.glas;
+    else if (ist('w3d-glass')) { const sc = stage.classList; bg = sc.contains('glas-sicht') ? (stage._orn || KLASSE['w3d-glass']) : sc.contains('glas-sonne') ? KLASSE['glas-sonne'] : sc.contains('glas-vogel') ? KLASSE['glas-vogel'] : sc.contains('glas-klar') ? KLASSE['glas-klar'] : stage.querySelector('[data-r="floor-out"]') ? KLASSE['glas-tuer'] : KLASSE['w3d-glass']; }
     else if (ist('w3d-scheibe')) bg = stage.classList.contains('glas-sicht') ? KLASSE['scheibe-sicht'] : KLASSE['w3d-scheibe'];
-    else if (ist('w3d-rev') && !ist('w3d-rs')) bg = el._bg && el.getAttribute('data-r') === 'rev-b' ? el._bg : PUTZ;
-    else if (ist('w3d-rs')) bg = el._bgc === 'transparent' ? (el._bgi || 'transparent') : PUTZ;
+    else if (ist('w3d-rev') && !ist('w3d-rs')) bg = el._bg && el.getAttribute('data-r') === 'rev-b' ? el._bg : putz;
+    else if (ist('w3d-rs')) bg = el._bgc === 'transparent' ? (el._bgi || 'transparent') : putz;
     else if (el._bg) bg = el._bg;
     else if (el._bgc) bg = el._bgc;
-    else { const k = ERSTE(el, KLASSEN_BG); bg = k ? KLASSE[k] : 'transparent'; }
+    else { const k = ERSTE(el, KLASSEN_BG); bg = k ? (raum && RAUM[k]) || KLASSE[k] : 'transparent'; }
     const role = el.getAttribute('data-r') || '';
     const art = el._art || (role === 'wall-in' || ist('w3d-rev') ? (ist('w3d-rs') && el._bgc === 'transparent' ? '' : 'putzfein') : '');
     const kk = ERSTE(el, KLASSEN_KANTE), st = stoff(bg, kk, ERSTE(el, KLASSEN_GLANZ), art);
@@ -1102,8 +1112,10 @@ window.Buehne3D = (function () {
     /* nur bei 1:1: gezoomt kann oben links Glas oder die Terrasse liegen */
     if (!L.geprueft && B.items && B.items.length && !stage.classList.contains('is-zoom') && !stage.classList.contains('is-pinch')) {
       L.geprueft = true;
-      const px = new Uint8Array(4); gl.readPixels(Math.round(pw * 0.04), Math.round(ph * 0.96), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-      if (px[3] < 250 || px[0] + px[1] + px[2] < 60) { if (window.console) console.warn('3-D-Bühne: Selbsttest fehlgeschlagen, CSS-Modell', Array.from(px)); L.kaputt = true; OK = false; B.aus = true; zumCss(stage); return false; }
+      /* Im dunklen Raum (.raum-licht) reicht die Wand nicht bis in die Ecke: dort zählt die Mitte (Glas oder Rahmen, deckend und nicht schwarz) */
+      const raum = stage.classList.contains('raum-licht'), px = new Uint8Array(4);
+      gl.readPixels(Math.round(pw * (raum ? 0.5 : 0.04)), Math.round(ph * (raum ? 0.5 : 0.96)), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      if (px[3] < (raum ? 200 : 250) || px[0] + px[1] + px[2] < (raum ? 20 : 60)) { if (window.console) console.warn('3-D-Bühne: Selbsttest fehlgeschlagen, CSS-Modell', Array.from(px)); L.kaputt = true; OK = false; B.aus = true; zumCss(stage); return false; }
     }
     return lauf;
   }

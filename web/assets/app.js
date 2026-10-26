@@ -916,7 +916,7 @@ function w3dCalc(w, o) {
   /* Übersicht der Maße (dims-all): Das Schild der Höhe steht links außen neben der Öffnung (bei ungleichen Höhen auch rechts), das der
      Breite darüber (bei ungleichen Breiten auch unter der Bank). Alle müssen mit Abstand in die Bühne passen: Das Modell rückt dafür
      nach rechts bzw. unten (dimX, dimY), große Elemente werden kleiner. Schildbreite nach der Schrift (13 px, fett, Polster 8 px) */
-  if (!o.s && !o.active && o.cls && o.cls.indexOf('dims-all') >= 0) {
+  if (!o.s && !o.active && o.cls && o.cls.indexOf('dims-all') >= 0 && o.cls.indexOf('ohne-schilder') < 0) {
     const L = o.labels || {}, da = (ks) => ks.filter((k) => (o.dims || []).indexOf(k) >= 0), ungleich = (ks) => ks.length > 1 && !ks.every((k) => L[k] === L[ks[0]]);
     const hs = da(['hm', 'hl', 'hr']), ws = da(['wm', 'wt', 'wb']), off = (sk) => Math.max(10, 60 * sk), rand = 12, hoch = 24;
     if (hs.length) {
@@ -1304,8 +1304,9 @@ function feldLage(stage, o, an) {
   let L = stage.querySelector('.w3d-feldlage');
   const k = o.active, who = k[0] === 'e' ? 'el' : 'mo', fh = feldHTML(o.feld), en = o.enden || ['', ''];
   if (!L) { stage.insertAdjacentHTML('beforeend', '<div class="w3d-feldlage" aria-hidden="true"><div class="mu-feld"></div><span class="mu-ende a"></span><span class="mu-ende b"></span></div>'); L = stage.querySelector('.w3d-feldlage'); }
-  L.className = 'w3d-feldlage ' + who + ' an-' + an; L._k = k; L._an = an;
-  const f = L.querySelector('.mu-feld'); if (f._h !== fh) { f._h = fh; f.innerHTML = fh; f.classList.toggle('leer', !o.feld.v); }
+  L.className = 'w3d-feldlage ' + who + ' an-' + an + (o.feld.tipp ? ' tipp' : ''); L._k = k; L._an = an;
+  L.setAttribute('aria-hidden', o.feld.tipp ? 'false' : 'true');
+  const f = L.querySelector('.mu-feld'); if (f._h !== fh) { f._h = fh; f.innerHTML = fh; f.classList.toggle('leer', !o.feld.v); f.classList.toggle('aus', !!o.feld.aus); }
   L.querySelectorAll('.mu-ende').forEach((e, i) => { if (e.textContent !== en[i]) e.textContent = en[i]; });
   feldFolgen(stage);
 }
@@ -1356,6 +1357,9 @@ function feldSetzen(L, W, H, ax, ay, bx, by, vert) {
 /* Eingabefeld auf der aktiven Maßlinie (o.feld, Messen und Ränder): leer mit Beispiel, sonst der Wert groß in mm und darunter in cm */
 function feldHTML(f) {
   const v = num(f.v);
+  if (f.aus) return '';
+  /* Messen im Raum: der bestätigte Wert als Knopf, ein Tipp öffnet die Zifferntasten wieder */
+  if (f.tipp && v) return '<button type="button" class="fd-knopf" data-act="' + f.act + '" aria-label="' + esc('Maß ändern: ' + thousand(v) + ' Millimeter') + '"><span class="fd-wert">' + esc(thousand(v)) + '</span><span class="fd-u">mm</span><span class="fd-aendern" aria-hidden="true">' + STIFT + '</span></button>';
   if (!f.v) return '<span class="fd-zeile"><span class="fd-caret" aria-hidden="true"></span><span class="fd-ph">z. B. ' + esc(thousand(f.ph || 1250)) + '</span><span class="fd-u">mm</span></span>';
   return '<span class="fd-zeile"><span class="fd-wert">' + esc(thousand(v)) + '</span><span class="fd-u">mm</span></span><span class="fd-cm">' + (v >= 250 && v <= 6000 ? '= ' + String(Math.round(v) / 10).replace('.', ',') + ' cm' : '&nbsp;') + '</span>';
 }
@@ -1561,6 +1565,8 @@ function w3dLayout(stage, w, o, gr) {
   if (V.dimY) stage.style.setProperty('--dimy', px(V.dimY)); else stage.style.removeProperty('--dimy');
   stage.classList.toggle('is-niedrig', (gr ? gr[1] : stage.clientHeight || 360) < 200); // niedrige Bühne: Knöpfe am Modell in einer Reihe (app.css)
   const moW = V.moW * s, moH = V.moH * s, T = V.T * s, d = V.laib * s, fd = V.fd * s, sd = W3D.FD * s, wallW = V.wallW * s, wallH = V.wallH * s, tuer = V.tuer;
+  /* Größe der Öffnung für das Tageslicht dahinter (app.css, .raum-licht: durch die Öffnung sieht man hell nach draußen) */
+  stage.style.setProperty('--lw', px(moW)); stage.style.setProperty('--lh', px(moH));
   const gO = G ? formGeo(form, -moW / 2, -moH / 2, moW, moH) : null;
   /* ohne Übergang: erster Aufbau, weniger Bewegung und Zoomen mit zwei Fingern oder dem Rad (is-zooming), sonst liefe das Modell nach */
   W3D_SOFORT = stage.classList.contains('no-anim') || stage.classList.contains('is-zooming') || ruhig();
@@ -2234,7 +2240,7 @@ function bindW3D(stage, getOpts) {
     if (!rafId) rafId = requestAnimationFrame(() => { rafId = 0; const r = W3DS[stage.id]; stage.classList.add('is-zooming'); if (r) w3dLayout(stage, r.w, r.o); w3dZoomZeigen(stage); });
   };
   stage.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.rail, .w3d-ctl, .w3d-ueber button')) return;
+    if (e.target.closest('.rail, .w3d-ctl, .w3d-ueber button, .fd-knopf')) return;
     if (e.button != null && e.button > 0) return;
     const o = getOpts() || {}, view = VIEWS[stage.getAttribute('data-view') || 'inside'];
     ptr.set(e.pointerId, rel(e));
@@ -2679,7 +2685,7 @@ function go(screen, dir) {
   if (S.screen === 'fertig' && S.editIdx >= 0 && (screen === 'ergebnis' || screen === 'frage')) S.einstieg = { bei: screen, i: S.editIdx };
   else if (stepsFor(S.win).indexOf(screen) < 0) S.einstieg = null;
   S.dir = dir || 'fwd'; S.screen = screen; S.gloss = null; S.glossIndex = false; S.selBar = null; S.neuFrage = false; S.ohneFotoFrage = false; S.wohin = false; S.verlassen = null; S.fotoGross = null; S.notiz = null;
-  if (screen === 'rest') { const first = REST.findIndex((r) => !num(S.win.mo[r.k])); S.rest = { i: first < 0 ? 4 : first, cur: '', msg: null }; }
+  if (screen === 'rest') { const first = REST.findIndex((r) => !num(S.win.mo[r.k])); S.rest = { i: first < 0 ? 4 : first, cur: '', msg: null, pad: false }; }
   if (screen !== 'frage') S.openSash = -1;
   /* Flügelzahl nach der Breite vorschlagen: Fenster bis 1 m einflügelig, ab 2 m dreiteilig; Balkontür ab 1,3 m zwei Flügel (Stulp) */
   const vorschlag = (art, ew) => (art === 'balkon' ? (ew >= 1300 ? '2s' : '1') : ew && ew < 1000 ? '1' : ew >= 2000 ? '3' : '2p');
@@ -2701,6 +2707,7 @@ function render(fresh) {
   const title = wiz ? (S.editIdx >= 0 ? (S.win.name || artName(S.win)) : (istTuer(S.win) ? 'Neue Tür' : S.win.art === 'fest' ? 'Neue Verglasung' : 'Neues Fenster')) : ({ fertig: '', anfrage: 'Angaben', anfrage2: 'Angaben', anfrage3: 'Angaben', blatt: !S.betrieb ? 'Aufmaßblatt' : (S.sent ? (PILOT ? 'Senden' : 'Gesendet') : 'Prüfen'), gesendet: '', teilen: '', kasse: 'Kasse', konto: 'Kasse', sichern: 'Konto', meinkonto: 'Konto', linkanmelden: 'Konto', tour: 'Führung' }[S.screen] || '');
   const tourP = S.screen === 'tour' && S.tour ? (S.tour.i + 1) / TOUR.length : 0;
   const prevStage = root.querySelector('#w3d'), prevSig = prevStage ? prevStage.getAttribute('data-sig') : null, prevTop = prevStage ? prevStage.getBoundingClientRect().top : null;
+  const prevCam = prevStage && prevStage.querySelector('.w3d-cam'), prevCamY = prevCam ? prevCam.getBoundingClientRect().top : null;
   const backLabel = view.back ? view.back[0] : '';
   let h = '<header class="hdr"><div class="hdr-row">';
   /* Logo: im eigenen Aufmaß ein Link zur Startseite der Website; im Kundenlink steht der Betrieb vorn (Einladungsseite), eeziframes klein unten */
@@ -2740,6 +2747,9 @@ function render(fresh) {
   /* Steht die Bühne nach dem Wechsel höher oder tiefer (anderer Titel), gleitet sie dorthin statt zu springen */
   const neuStage = root.querySelector('#w3d');
   if (neuStage && prevTop != null && !ruhig() && neuStage.animate) { const d = prevTop - neuStage.getBoundingClientRect().top; if (Math.abs(d) > 0.5 && Math.abs(d) < 240) neuStage.animate([{ transform: 'translateY(' + d.toFixed(1) + 'px)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2, .7, .2, 1)' }); }
+  /* Messen im Raum: Öffnet oder schließt das Blatt mit den Zifferntasten, wird die Bühne niedriger bzw. höher. Das Modell gleitet dann in
+     die neue Mitte, statt mit ihr zu springen (es wird zugleich mit den Übergängen der Flächen kleiner bzw. größer) */
+  if (neuStage === prevStage && prevCamY != null && !ruhig()) { const cam = neuStage.querySelector('.w3d-cam'), d = cam ? prevCamY - cam.getBoundingClientRect().top : 0; if (Math.abs(d) > 1 && cam.animate) cam.animate([{ translate: '0 ' + d.toFixed(1) + 'px' }, { translate: '0 0' }], { duration: 520, easing: 'cubic-bezier(.3, .7, .2, 1)' }); }
   root.querySelectorAll('.qswatches, .qcards.reihe').forEach((r, i) => {
     if (!neu && reihenX[i] != null) { r.scrollLeft = reihenX[i]; return; }
     const on = r.querySelector('[aria-pressed="true"]'); if (!on) return;
@@ -2768,7 +2778,8 @@ function feiern(root) {
   const F = window.Feier, q = (sel) => root.querySelector(sel), qa = (sel) => Array.from(root.querySelectorAll(sel));
   if (window.Haptik && (art === 'masse' || art === 'fertig' || art === 'gesendet' || art === 'gekauft')) window.Haptik.ok();
   setTimeout(() => {
-    if (art === 'masse') { F.linien(q('.w3d-stage')); qa('.done-list b').forEach((b, i) => setTimeout(() => F.einrasten(b), 320 + i * 90)); }
+    if (art === 'masse') { F.linien(q('.w3d-stage')); qa('.ps-zahl b, .ps-el b').forEach((b, i) => setTimeout(() => F.einrasten(b), 320 + i * 90)); }
+    else if (art === 'wert') { const f = q('.w3d-feldlage .fd-knopf'); if (f) F.einrasten(f); }
     else if (art === 'fertig') { F.haken(q('.center .eyebrow svg')); F.einrasten(q('.center h1')); }
     else if (art === 'gesendet' || art === 'gekauft') { F.puls(q('.okmark, .center svg')); }
     else if (art === 'pdf') { F.markieren(q('.datei-card')); }
@@ -3257,13 +3268,11 @@ function messLabels(live) {
 const KEY_DEL = '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M9.5 6h11A1.5 1.5 0 0 1 22 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-11L3.5 13z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 10.5l5 5M17 10.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
 /* Zifferntasten: unten links „Zurück“ (Pfeil mit Wort: voriges Maß bzw. voriger Schritt), in der Mitte die 0, rechts Löschen; darunter „Weiter“ über die
    ganze Breite. Die Tasten sind bewusst kleiner als Knöpfe (42 px), damit das Modell mit der leuchtenden Messkante darüber groß bleibt */
-function keypad(okLabel, zurueck, aus) {
+function keypad(okLabel, zurueck, aus, ohneLeiste) {
   return '<div class="keypad" role="group" aria-label="Zifferntasten">' + ['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => '<button type="button" data-act="key" data-v="' + d + '">' + d + '</button>').join('') +
     '<span class="kp-leer" aria-hidden="true"></span><button type="button" data-act="key" data-v="0">0</button><button type="button" class="fn" data-act="key" data-v="del" aria-label="Letzte Ziffer löschen">' + KEY_DEL + '</button>' +
-    '<div class="kp-leiste"><button type="button" class="kp-zurueck" data-act="key" data-v="zurueck" aria-label="' + esc(zurueck || 'Zurück') + '">' + PFEIL_L + '</button><button type="button" class="ok' + (aus ? ' aus' : '') + '" data-act="key" data-v="ok"' + (aus ? ' aria-disabled="true"' : '') + '>' + esc(okLabel || 'Weiter') + '</button></div></div>';
+    (ohneLeiste ? '</div>' : '<div class="kp-leiste"><button type="button" class="kp-zurueck" data-act="key" data-v="zurueck" aria-label="' + esc(zurueck || 'Zurück') + '">' + PFEIL_L + '</button><button type="button" class="ok' + (aus ? ' aus' : '') + '" data-act="key" data-v="ok"' + (aus ? ' aria-disabled="true"' : '') + '>' + esc(okLabel || 'Weiter') + '</button></div></div>');
 }
-/* Weiter sieht gesperrt aus, solange kein Maß zwischen 250 und 6.000 mm dasteht; ein Tipp darauf sagt trotzdem, was fehlt */
-function okZustand(gut) { const b = document.querySelector('.keypad .ok'); if (!b) return; b.classList.toggle('aus', !gut); if (gut) b.removeAttribute('aria-disabled'); else b.setAttribute('aria-disabled', 'true'); }
 function numDisplay(cur, id) { return '<div class="num"><b id="' + id + '" class="' + (cur ? '' : 'empty') + '" aria-live="polite">' + (cur ? esc(thousand(cur)) : '0') + '</b><span class="cm" id="' + id + '-cm">' + cmTxt(cur) + '</span><span class="u">mm</span></div>'; }
 function setNum(id, cur) { const b = document.getElementById(id), cm = document.getElementById(id + '-cm'); if (b) { b.textContent = cur ? thousand(cur) : '0'; b.classList.toggle('empty', !cur); } if (cm) cm.textContent = cmTxt(cur); }
 /* Maße neu gedacht (docs/profis/2026-10-26-masse.md): Im Modell steht nur das Maß, das gerade dran ist, mit seinen beiden Enden und dem
@@ -3272,7 +3281,6 @@ function setNum(id, cur) { const b = document.getElementById(id), cm = document.
 const UEBLICH = { fenster: { v: [500, 2400, 1250], h: [400, 3000, 1100] }, balkon: { v: [1900, 2600, 2150], h: [700, 1400, 900] }, fest: { v: [300, 3000, 1250], h: [300, 4000, 1500] }, hst: { v: [2000, 2700, 2250], h: [2000, 6000, 3500] }, psk: { v: [1900, 2600, 2150], h: [1400, 3500, 2000] }, fsw: { v: [2000, 2700, 2250], h: [1800, 6000, 3500] } };
 const ueblich = (dir) => (UEBLICH[S.win.art] || UEBLICH.fenster)[dir];
 const endenVon = (st) => (istTuer(S.win) && st.endenTuer ? st.endenTuer : st.enden);
-const subVon = (st) => esc(istTuer(S.win) && st.subTuer ? st.subTuer : tuerText(st.sub));
 /* Überschrift sagt, was dran ist: „Höhe der Öffnung.“ bzw. „Breite des Fensters.“ (Tür, Element), grün das Ding */
 function messTitel(st) {
   const ding = st.who === 'mo' ? 'der Öffnung' : istTuer(S.win) ? 'der Tür' : S.win.art === 'fest' ? 'des Elements' : 'des Fensters', t = ding.split(' ');
@@ -3286,34 +3294,65 @@ const ICON_HAKEN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5
 function messUeber(chip) {
   return chip === 'nicht' ? '<span class="mu-chip">Nicht am Rahmen messen</span>' : chip === 'samt' ? '<span class="mu-chip">Rahmen außen, nicht Flügel</span>' : '';
 }
-/* Rückfrage am Platz der Zeile unter dem Modell (Gremium 26.10.: nicht über die Zeichnung): Zentimeter mit „Ja, … mm“, Warnung mit
-   „Stimmt so, weiter“, Fehler als Satz. Die Zentimeterfrage kommt erst nach einer Tipp-Pause (st.cmLive) oder nach „Weiter“ (st.msg). */
-function messFrage(st, cur, pre, dir) {
-  const v = num(cur), m = st.msg, cm = m && m.cm ? m.cm / 10 : !m && st.cmLive && cmFrage(v, dir) ? v : 0;
-  if (cm) return '<p class="mz-frage">Zollstock zeigt <b>' + esc(String(cm)) + '&nbsp;cm</b>?</p><button type="button" class="mu-ja" data-act="' + pre + '-cm" data-v="' + cm * 10 + '">Ja, ' + esc(thousand(cm * 10)) + '&nbsp;mm</button>';
-  if (m) return '<p class="mz-frage ' + m.cls + '" role="alert">' + esc(m.text) + '</p>' + (m.cls === 'warn' ? '<button type="button" class="mu-ja warn" data-act="' + pre + '-next" data-ack="1">Stimmt so, weiter</button>' : '');
-  return '';
-}
-/* Unter dem Modell: links der übliche Bereich (bei den Rändern „Hier auch … gemessen?“), rechts „Wo genau?“; zu groß oder zu klein steht links rot */
-function messHin(dir, cur) {
-  const v = num(cur), u = ueblich(dir);
-  if (v > 6000) return { bad: true, t: 'Höchstens 6.000 mm. Bitte in Millimetern.' };
-  return { bad: false, t: 'Üblich sind ' + thousand(u[0]) + ' bis ' + thousand(u[1]) + ' mm' };
-}
-function zeileInnen(links, g, frage) { return frage || links + '<button type="button" class="mz-wo" data-act="gloss" data-k="' + g + '">Wo genau?</button>'; }
-function messZeile(links, g, cur, frage) { return '<div class="mess-zeile' + (frage ? ' fragt' : '') + '" id="mess-zeile">' + zeileInnen(links, g, frage) + '</div><span class="nur-vorlesen" id="mz-wert" aria-live="polite">' + wertVorlesen(cur) + '</span>'; }
-function zeileSetzen(links, g, frage) { const z = document.getElementById('mess-zeile'); if (!z) return; const h = zeileInnen(links, g, frage); if (z._h !== h) { z._h = h; z.innerHTML = h; z.classList.toggle('fragt', !!frage); } }
 /* Das Feld auf der Linie ist für Screenreader verborgen; den getippten Wert sagt diese Zeile an */
 const wertVorlesen = (cur) => (num(cur) ? thousand(num(cur)) + ' Millimeter' : '');
 function wertSetzen(cur) { const e = document.getElementById('mz-wert'); if (e) e.textContent = wertVorlesen(cur); }
-function hinHTML(h) { return '<p class="mz-hin' + (h.bad ? ' bad' : '') + '" id="mz-hin" aria-live="polite">' + esc(h.t) + '</p>'; }
-function hinSetzen(h) { const e = document.getElementById('mz-hin'); if (e) { e.textContent = h.t; e.classList.toggle('bad', h.bad); } }
 /* Die Rückfrage nach Zentimetern kommt erst, wenn eine Weile nichts getippt wird: beim Tippen von 1.410 steht kurz 141 da */
 let cmTimer = 0;
 function cmSpaeter(st, v, dir, zeigen) { clearTimeout(cmTimer); st.cmLive = false; if (cmFrage(v, dir)) cmTimer = setTimeout(() => { st.cmLive = true; zeigen(); }, ruhig() ? 0 : 800); }
+/* ---------- Messen im Raum (26.10.2026, Wunsch des Inhabers, Richtung „Licht im Raum“) ----------
+   Das Modell steht über die ganze Höhe im dunklen Raum, Tageslicht fällt durchs Fenster (.raum-licht); über dem Modell steht nur die
+   Überschrift. Unten Zurück, „Maß eingeben“ und Info (der Begriff „Wo genau?“). Die Zifferntasten kommen erst auf „Maß eingeben“ als
+   Blatt von unten (.mess-pad): neben dem Feld „Bestätigen“, bei Zentimetern „Ja, … mm“, bei einer Warnung „Korrigieren“ und darunter
+   „Stimmt so“. Nach dem Bestätigen steht der Wert auf der Linie (antippen ändert ihn), der Knopf heißt „Weiter zu …“. */
+const messWert = (st) => num(st.who === 'mo' ? S.win.mo[st.k] : S.win.el[st.k]);
+const restWert = (rest) => num(S.win.mo[rest.k]);
+function messKopf(titel) { return '<div class="hd compact mess-kopf im-raum"><h1>' + akH(titel) + '</h1></div>'; }
+function messDock(label, act, zur, g) {
+  return '<div class="mess-dock">' +
+    '<button type="button" class="md-rund" data-act="key" data-v="zurueck" aria-label="' + esc(zur) + '">' + PFEIL_L + '</button>' +
+    '<button type="button" class="btn primary md-haupt" data-act="' + act + '">' + esc(label) + '<span class="pf" aria-hidden="true"></span></button>' +
+    (g && GLOSS[g] ? '<button type="button" class="md-rund md-info" data-act="gloss" data-k="' + g + '" aria-label="Wo genau messen?">' + ICON_I + '</button>' : '') + '</div>';
+}
+/* Kopf des Blatts in drei Teilen (Feld, Knopf, Zeile), damit beim Tippen nur der geänderte Teil neu gezeichnet wird */
+function padTeile(st, dir, pre, gleich) {
+  const v = num(st.cur), m = st.msg, cm = m && m.cm ? m.cm / 10 : !m && st.cmLive && cmFrage(v, dir) ? v : 0;
+  const bisher = pre === 'mess' ? messWert(MESS[S.mess.step]) : restWert(REST[S.rest.i]);
+  const feld = v ? '<span class="mp-wert">' + esc(thousand(v)) + '</span><span class="mp-u">mm</span>' : '<span class="mp-ph">z. B. ' + esc(thousand(ueblich(dir)[2])) + '</span><span class="mp-u">mm</span>';
+  let knopf = '', zeile = '';
+  if (m && m.cls === 'warn') {
+    knopf = '<button type="button" class="mp-ok" data-act="' + pre + '-neu">Korrigieren</button>';
+    zeile = '<p class="mp-text warn" role="alert">' + esc(m.text) + '</p><button type="button" class="mp-zweit" data-act="' + pre + '-next" data-ack="1">Stimmt so</button>';
+  } else if (cm) {
+    knopf = '<button type="button" class="mp-ok" data-act="' + pre + '-cm" data-v="' + cm * 10 + '">Ja, ' + esc(thousand(cm * 10)) + '&nbsp;mm</button>';
+    zeile = '<p class="mp-text"><b class="gross">Zollstock zeigt ' + esc(String(cm)) + '&nbsp;cm?</b><span>Bei ' + esc(String(cm)) + ',5&nbsp;cm: ' + esc(String(cm)) + '5 tippen</span></p>';
+  } else if (v) {
+    knopf = '<button type="button" class="mp-ok' + (massGut(v) ? '' : ' aus') + '" data-act="' + pre + '-next"' + (massGut(v) ? '' : ' aria-disabled="true"') + '>' + ICON_HAKEN + 'Bestätigen</button>';
+    zeile = m ? '<p class="mp-text bad" role="alert">' + esc(m.text) + '</p>' : v > 6000 ? '<p class="mp-text bad" role="alert">Höchstens 6.000&nbsp;mm. Bitte in Millimetern.</p>' : massGut(v) ? '<p class="mp-text">= ' + String(Math.round(v) / 10).replace('.', ',') + '&nbsp;cm</p>' : '';
+  } else if (bisher) zeile = '<p class="mp-text">Bisher: <b>' + esc(thousand(bisher)) + '&nbsp;mm</b></p><button type="button" class="mp-zweit" data-act="' + pre + '-zu">Behalten</button>';
+  else zeile = gleich || '<p class="mp-text">In Millimetern: 125&nbsp;cm = 1.250&nbsp;mm</p>';
+  return { feld: feld, knopf: knopf, zeile: zeile };
+}
+let PAD_NEU = false; // das Blatt kommt nur beim Öffnen von unten, nicht bei jedem Neuzeichnen
+function messPad(st, dir, pre, gleich, who) {
+  const t = padTeile(st, dir, pre, gleich), neu = PAD_NEU; PAD_NEU = false;
+  return '<div class="mess-pad ' + (who || 'mo') + (neu ? ' kommt' : '') + '" id="mess-pad" role="group" aria-label="Maß eingeben"><button type="button" class="mp-griff" data-act="' + pre + '-zu" aria-label="Zifferntasten schließen"><span></span></button>' +
+    '<div class="mp-reihe"><div class="mp-feld" id="mp-feld">' + t.feld + '</div><span class="mp-knopf' + (t.knopf ? ' kommt' : '') + '" id="mp-knopf">' + t.knopf + '</span></div>' +
+    '<div class="mp-zeile" id="mp-zeile">' + t.zeile + '</div>' + keypad('', '', false, true) +
+    '<span class="nur-vorlesen" id="mz-wert" aria-live="polite">' + wertVorlesen(st.cur) + '</span></div>';
+}
+/* Nur geänderte Teile neu zeichnen; der Knopf blendet nur ein, wenn er neu dazukommt (beim Tippen springt nichts) */
+function padSetzen(st, dir, pre, gleich) {
+  const t = padTeile(st, dir, pre, gleich);
+  ['feld', 'knopf', 'zeile'].forEach((k) => {
+    const e = document.getElementById('mp-' + k); if (!e) return;
+    const alt = e._h != null ? e._h : e.innerHTML;
+    if (alt !== t[k]) { e._h = t[k]; e.innerHTML = t[k]; if (k === 'knopf') { e.classList.remove('kommt'); if (!alt && t[k]) { void e.offsetWidth; e.classList.add('kommt'); } } }
+  });
+}
 function messOpts(step, cur) {
-  const k = dimKey(step);
-  return { id: 'w3d', view: 'three', sway: !cur, showEl: S.mess.step >= 1, dims: [k], active: k, labels: messLabels(), feld: { v: cur, ph: ueblich(step.dir)[2] }, enden: endenVon(step), fitW: 0.6, fitH: 0.6, noZoom: true, stageH: 'auto', bg: photoBg(), ueber: messUeber(step.chip) };
+  const k = dimKey(step), fertig = !S.mess.pad && !!messWert(step);
+  return { id: 'w3d', view: 'three', sway: !cur, showEl: S.mess.step >= 1, dims: [k], active: k, labels: messLabels(), feld: { v: fertig ? messWert(step) : '', ph: ueblich(step.dir)[2], aus: !fertig, tipp: fertig, act: 'mess-auf' }, enden: endenVon(step), fitW: step.dir === 'v' ? 0.72 : 0.64, fitH: 0.62, noZoom: true, stageH: 'auto', bg: photoBg(), ueber: messUeber(step.chip), cls: 'raum-licht' };
 }
 function liveWin(step, cur) {
   const w = JSON.parse(JSON.stringify(S.win)), v = num(cur);
@@ -3321,75 +3360,102 @@ function liveWin(step, cur) {
   return w;
 }
 SCREENS.messen = () => {
-  const m = S.mess, step = MESS[m.step];
-  const html = hd('Maß ' + (m.step + 1) + ' von 4 · ' + (step.who === 'mo' ? 'Öffnung' : artName(S.win)), messTitel(step), subVon(step), 'compact mess-kopf', step.who, schrittTools(step.g)) +
-    model(liveWin(step, m.cur), messOpts(step, m.cur)) +
-    messZeile(hinHTML(messHin(step.dir, m.cur)), step.g, m.cur, messFrage(m, m.cur, 'mess', step.dir)) +
-    keypad(m.step < 3 ? 'Weiter' : 'Zu den Rändern', m.step ? 'Voriges Maß' : 'Zurück zu den Fotos', !massGut(num(m.cur)));
-  return { html: html, back: [m.step ? 'Zurück' : 'Fotos', m.step ? 'mess-prev' : 'fotos'], fit: true };
+  const m = S.mess, step = MESS[m.step], fertig = !m.pad && !!messWert(step);
+  const html = messKopf(messTitel(step)) + model(liveWin(step, m.cur), messOpts(step, m.cur)) +
+    (m.pad ? messPad(m, step.dir, 'mess', '', step.who) : messDock(fertig ? (m.step < 3 ? 'Weiter zu Maß ' + (m.step + 2) : 'Weiter zu den Rändern') : 'Maß eingeben', fertig ? 'mess-weiter' : 'mess-auf', m.step ? 'Voriges Maß' : 'Zurück zu den Fotos', step.g));
+  return { html: html, back: [m.step ? 'Zurück' : 'Fotos', m.step ? 'mess-prev' : 'fotos'], fit: true, cls: 'im-raum' + (m.pad ? ' mit-tasten' : '') };
 };
 function messInput(v) {
   const m = S.mess; m.cur = String(v).replace(/[^\d]/g, '').slice(0, 5);
   const step = MESS[m.step], stage = document.getElementById('w3d'), n = num(m.cur);
   if (stage) { const o = messOpts(step, m.cur); W3DS.w3d = { w: liveWin(step, m.cur), o: o }; w3dLayout(stage, W3DS.w3d.w, o); stage.classList.toggle('is-live', o.sway); }
-  const zeile = () => zeileSetzen(hinHTML(messHin(step.dir, m.cur)), step.g, messFrage(m, m.cur, 'mess', step.dir));
-  zeile(); okZustand(massGut(n)); wertSetzen(m.cur);
-  cmSpaeter(m, n, step.dir, () => { if (S.screen === 'messen' && S.mess === m) zeile(); });
+  const kopf = () => padSetzen(m, step.dir, 'mess');
+  kopf(); wertSetzen(m.cur);
+  cmSpaeter(m, n, step.dir, () => { if (S.screen === 'messen' && S.mess === m) kopf(); });
 }
+/* Bestätigen: prüfen, speichern, Blatt zu; der Wert steht danach auf der Linie */
 function messNext(ack) {
   const m = S.mess, step = MESS[m.step], vals = { hm: S.win.mo.hm, wm: S.win.mo.wm }, chk = checkValue(m.cur, step, vals);
-  if (!chk.ok) { m.msg = { cls: 'bad', text: chk.msg, cm: chk.cm }; if (window.Haptik) window.Haptik.fehler(); render(); return; }
-  if (chk.warn && !ack) { m.msg = { cls: 'warn', text: chk.warn }; render(); return; }
+  if (!chk.ok) { m.pad = true; m.msg = { cls: 'bad', text: chk.msg, cm: chk.cm }; if (window.Haptik) window.Haptik.fehler(); render(); return; }
+  if (chk.warn && !ack) { m.pad = true; m.msg = { cls: 'warn', text: chk.warn }; render(); return; }
   const v = num(m.cur);
   if (step.who === 'mo') S.win.mo[step.k] = v; else { S.win.el[step.k] = v; S.win[step.k] = v; }
-  m.msg = null; m.cur = ''; m.cmLive = false; clearTimeout(cmTimer);
-  if (m.step < 3) { m.step++; render(true); }
+  m.msg = null; m.cur = String(v); m.cmLive = false; m.pad = false; clearTimeout(cmTimer); S._feier = 'wert';
+  render();
+}
+function messWeiter() {
+  const m = S.mess; m.pad = false; m.msg = null; m.cmLive = false; clearTimeout(cmTimer);
+  if (m.step < 3) { m.step++; m.cur = String(messWert(MESS[m.step]) || ''); render(true); }
   else go('rest');
 }
-function messPrev() { const m = S.mess; if (m.step > 0) { m.step--; const st = MESS[m.step]; m.cur = String(st.who === 'mo' ? S.win.mo[st.k] : S.win.el[st.k] || ''); m.msg = null; S.dir = 'back'; render(true); } else go('fotos', 'back'); }
+function messAuf() { const m = S.mess; PAD_NEU = !m.pad; m.pad = true; m.msg = null; m.cmLive = false; m.cur = ''; render(); }
+function messZu() { const m = S.mess; clearTimeout(cmTimer); m.pad = false; m.msg = null; m.cmLive = false; m.cur = String(messWert(MESS[m.step]) || ''); render(); }
+function messPrev() { const m = S.mess; if (m.pad) return messZu(); if (m.step > 0) { m.step--; const st = MESS[m.step]; m.cur = String(messWert(st) || ''); m.msg = null; S.dir = 'back'; render(true); } else go('fotos', 'back'); }
 /* ---------- Ränder: die vier übrigen Maße der Öffnung, am Modell ---------- */
 const restDir = (rest) => (rest.k[0] === 'h' ? 'v' : 'h');
 /* „Wie Mitte“ als leiser Verweis und als Frage: Ein Tipp sagt „hier auch so gemessen“, nicht „übernimm das“ (Gremium, Datenqualität) */
 const gleichHTML = (ref) => '<button type="button" class="mz-gleich" data-act="rest-same" data-v="' + num(ref) + '">Hier auch ' + thousand(ref) + '&nbsp;mm gemessen?</button>';
 function restOpts(rest, cur) {
-  if (!rest) return { id: 'w3d', view: 'three', sway: true, dims: ['hm', 'wm'].concat(REST.map((x) => x.k)), active: '', labels: messLabels(), stageH: 280, bg: photoBg(), cls: 'dims-all', hint: 'Alle Ränder gemessen' };
-  return { id: 'w3d', view: 'three', sway: !cur, dims: [rest.k], active: rest.k, labels: messLabels(), feld: { v: cur, ph: ueblich(restDir(rest))[2] }, enden: endenVon(rest), fitW: 0.6, fitH: 0.6, noZoom: true, stageH: 'auto', bg: photoBg(), ueber: messUeber('nicht') };
+  if (!rest) return { id: 'w3d', view: 'three', sway: true, dims: ['hm', 'wm'].concat(REST.map((x) => x.k)), active: '', labels: messLabels(), stageH: 300, fitW: 0.7, fitH: 0.7, noZoom: true, bg: photoBg(), cls: 'dims-all ohne-schilder passt-buehne' };
+  const fertig = !S.rest.pad && !!restWert(rest);
+  return { id: 'w3d', view: 'three', sway: !cur, dims: [rest.k], active: rest.k, labels: messLabels(), feld: { v: fertig ? restWert(rest) : '', ph: ueblich(restDir(rest))[2], aus: !fertig, tipp: fertig, act: 'rest-auf' }, enden: endenVon(rest), fitW: restDir(rest) === 'v' ? 0.72 : 0.64, fitH: 0.62, noZoom: true, stageH: 'auto', bg: photoBg(), ueber: messUeber('nicht'), cls: 'raum-licht' };
+}
+/* „Passt.“ nach dem letzten Rand (26.10.2026): das Modell über die ganze Breite ohne Schilder, darunter groß das Maß, das zählt
+   (Öffnung orange, Element blau), und je Richtung die drei Messungen; das kleinste trägt einen grünen Punkt */
+function passtMasse(w, d) {
+  const mo = w.mo, spalte = (titel, reihen) => {
+    const vs = reihen.map((x) => num(x[1])), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+    return '<div class="ps-sp"><p class="ps-lab">' + titel + '</p>' + reihen.map((x, i) => '<p class="ps-reihe' + (hi > lo && vs[i] === lo ? ' klein' : '') + '"><span>' + x[0] + '</span><i style="--l: ' + (hi > lo ? Math.round(56 + 44 * (vs[i] - lo) / (hi - lo)) : 100) + '%"></i><b>' + esc(thousand(vs[i])) + '</b></p>').join('') + '</div>';
+  };
+  const dev = Math.max(d.devW, d.devH);
+  return '<section class="passt-masse">' +
+    '<p class="ps-lab">Maueröffnung · Breite × Höhe</p><p class="ps-zahl"><b>' + esc(thousand(d.moW)) + ' × ' + esc(thousand(d.moH)) + '</b><span>mm</span></p>' +
+    '<p class="ps-el"><span class="ps-lab">' + esc(artName(w)) + ' mit Rahmen</span><b>' + esc(thousand(d.elW)) + ' × ' + esc(thousand(d.elH)) + '</b><span>mm</span></p>' +
+    '<div class="ps-drei"><h2>Dreimal gemessen, das kleinste zählt</h2><div class="ps-spalten">' + spalte('Breite', [['oben', mo.wt], ['Mitte', mo.wm], ['unten', mo.wb]]) + spalte('Höhe', [['links', mo.hl], ['Mitte', mo.hm], ['rechts', mo.hr]]) + '</div>' +
+    '<p class="ps-fuss">' + (dev ? 'Höchstens ' + dev + '&nbsp;mm Unterschied, überhöht gezeichnet.' : 'Alle drei Maße sind gleich.') + '</p></div></section>';
 }
 SCREENS.rest = () => {
-  const r = S.rest, d = derive(S.win), rest = r.i < 4 ? REST[r.i] : null;
-  const stage = model(S.win, restOpts(rest, r.cur));
-  let body;
-  if (rest) {
-    const ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm;
-    body = messZeile(gleichHTML(ref), 'raender', r.cur, messFrage(r, r.cur, 'rest', restDir(rest))) + keypad(r.i < 3 ? 'Weiter' : 'Fertig', r.i ? 'Voriger Rand' : 'Zurück zum Messen', !massGut(num(r.cur)));
-  } else {
-    body = '<div class="mess-in"><p class="eyebrow" style="color: var(--ok)">Alle Maße da</p><div class="done-list"><div><small>Öffnung Breite</small><b>' + thousand(d.moW) + ' mm</b></div><div><small>Öffnung Höhe</small><b>' + thousand(d.moH) + ' mm</b></div><div><small>' + esc(artName(S.win)) + ' Breite</small><b>' + thousand(d.elW) + ' mm</b></div><div><small>' + esc(artName(S.win)) + ' Höhe</small><b>' + thousand(d.elH) + ' mm</b></div></div>' + (d.devW > 10 || d.devH > 10 ? '<div class="msg warn">Die Öffnung ist bis zu ' + Math.max(d.devW, d.devH) + ' mm außer Winkel. Das kleinste Maß zählt, so wie es der Fensterbauer auch macht.</div>' : '<div class="msg ok">' + CHECK + '<span>Die Öffnung ist gerade, alle Maße liegen nah beieinander.</span></div>') + '</div>';
+  const r = S.rest, rest = r.i < 4 ? REST[r.i] : null;
+  if (!rest) {
+    const d = derive(S.win), dev = Math.max(d.devW, d.devH);
+    const html = '<div class="hd compact passt-kopf"><h1><span class="ak">Passt.</span></h1><p>' + (dev > 10 ? 'Bis ' + dev + '&nbsp;mm außer Winkel. Das kleinste Maß zählt.' : 'Deine Öffnung ist gerade.') + '</p></div>' + model(S.win, restOpts(null)) + passtMasse(S.win, d);
+    return { html: html, back: ['Zurück', 'rest-prev'], cls: 'passt', bar: { label: 'Weiter zum Ergebnis<span class="pf" aria-hidden="true"></span>', act: 'go', v: 'ergebnis', zurueck: true } };
   }
-  const html = hd(rest ? 'Rand ' + (r.i + 1) + ' von 4 · Öffnung' : 'Ränder · Maueröffnung', rest ? esc(rest.title) + '.' : 'Passt.', rest ? subVon(rest) : 'Alle sechs Maße der Öffnung und beide Maße des Elements sind drin.', 'compact' + (rest ? ' mess-kopf' : ''), rest ? 'mo' : '', schrittTools('raender')) + stage + body;
-  return { html: html, back: r.i ? ['Zurück', 'rest-prev'] : ['Messen', 'mess-back'], fit: !!rest, bar: rest ? null : { label: 'Maße ansehen', act: 'go', v: 'ergebnis', zurueck: true } };
+  const fertig = !r.pad && !!restWert(rest), ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm;
+  const html = messKopf(esc(rest.title) + '.') + model(S.win, restOpts(rest, r.cur)) +
+    (r.pad ? messPad(r, restDir(rest), 'rest', gleichHTML(ref), 'mo') : messDock(fertig ? (r.i < 3 ? 'Weiter zu Rand ' + (r.i + 2) : 'Fertig') : 'Maß eingeben', fertig ? 'rest-weiter' : 'rest-auf', r.i ? 'Voriger Rand' : 'Zurück zum Messen', 'raender'));
+  return { html: html, back: r.i ? ['Zurück', 'rest-prev'] : ['Messen', 'mess-back'], fit: true, cls: 'im-raum' + (r.pad ? ' mit-tasten' : '') };
 };
 /* Pfeil zurück bei den Rändern: voriger Rand mit seinem Wert, vom ersten Rand zurück zum letzten Maß */
 function restPrev() {
   const r = S.rest;
+  if (r.pad) return restZu();
   if (r.i > 0) { r.i--; r.cur = String(num(S.win.mo[REST[r.i].k]) || ''); r.msg = null; S.dir = 'back'; return render(true); }
-  S.mess.step = 3; S.mess.cur = String(S.win.el[MESS[3].k] || ''); S.mess.msg = null; return go('messen', 'back');
+  S.mess.step = 3; S.mess.pad = false; S.mess.cur = String(S.win.el[MESS[3].k] || ''); S.mess.msg = null; return go('messen', 'back');
 }
 function restInput(v) {
   const r = S.rest; r.cur = String(v).replace(/[^\d]/g, '').slice(0, 5);
   const rest = REST[r.i], stage = document.getElementById('w3d'), n = num(r.cur); if (!rest) return;
   if (stage) { const o = restOpts(rest, r.cur); W3DS.w3d = { w: S.win, o: o }; w3dLayout(stage, S.win, o); stage.classList.toggle('is-live', o.sway); }
-  const ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm, zeile = () => zeileSetzen(gleichHTML(ref), 'raender', messFrage(r, r.cur, 'rest', restDir(rest)));
-  zeile(); okZustand(massGut(n)); wertSetzen(r.cur);
-  cmSpaeter(r, n, restDir(rest), () => { if (S.screen === 'rest' && S.rest === r) zeile(); });
+  const ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm, kopf = () => padSetzen(r, restDir(rest), 'rest', gleichHTML(ref));
+  kopf(); wertSetzen(r.cur);
+  cmSpaeter(r, n, restDir(rest), () => { if (S.screen === 'rest' && S.rest === r) kopf(); });
 }
 function restNext(ack) {
   const r = S.rest, rest = REST[r.i], ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm, chk = checkRest(r.cur, ref);
-  if (!chk.ok) { r.msg = { cls: 'bad', text: chk.msg, cm: chk.cm }; if (window.Haptik) window.Haptik.fehler(); render(); return; }
-  if (chk.warn && !ack) { r.msg = { cls: 'warn', text: chk.warn }; render(); return; }
-  S.win.mo[rest.k] = num(r.cur); r.cur = ''; r.msg = null; r.cmLive = false; clearTimeout(cmTimer); r.i++;
-  if (r.i >= 4) S._feier = 'masse';
+  if (!chk.ok) { r.pad = true; r.msg = { cls: 'bad', text: chk.msg, cm: chk.cm }; if (window.Haptik) window.Haptik.fehler(); render(); return; }
+  if (chk.warn && !ack) { r.pad = true; r.msg = { cls: 'warn', text: chk.warn }; render(); return; }
+  S.win.mo[rest.k] = num(r.cur); r.cur = String(num(r.cur)); r.msg = null; r.cmLive = false; r.pad = false; clearTimeout(cmTimer); S._feier = 'wert';
   render();
 }
+function restWeiter() {
+  const r = S.rest; r.pad = false; r.msg = null; r.cmLive = false; clearTimeout(cmTimer); r.i++;
+  r.cur = r.i < 4 ? String(restWert(REST[r.i]) || '') : '';
+  if (r.i >= 4) S._feier = 'masse';
+  render(true);
+}
+function restAuf() { const r = S.rest; PAD_NEU = !r.pad; r.pad = true; r.msg = null; r.cmLive = false; r.cur = ''; render(); }
+function restZu() { const r = S.rest; clearTimeout(cmTimer); r.pad = false; r.msg = null; r.cmLive = false; r.cur = String(restWert(REST[r.i]) || ''); render(); }
 /* ---------- Ergebnis ---------- */
 SCREENS.ergebnis = () => {
   const w = S.win, d = derive(w), ki = S.win.ki, neu = !!w.neu, en = artName(w);
@@ -4886,7 +4952,13 @@ function glossBlatt() {
   const G = GLOSS[S.gloss];
   return '<button type="button" class="sheet-bg" aria-label="Schließen" data-act="gclose"></button><div class="sheet" role="dialog" aria-modal="true" aria-label="Begriffe: ' + esc(G.s) + '"><div class="grip"></div><div class="sheet-top"><button type="button" class="link" data-act="gindex">Alle Begriffe</button><button type="button" class="xbtn" aria-label="Schließen" data-act="gclose">' + XK + '</button></div><p class="eyebrow kicker" style="margin-top: 4px">Begriffe</p><h2 style="margin-top: 14px">' + akH(esc(G.t)) + '</h2><div class="ico' + (G.lottie ? ' ico-l' : '') + '"' + (G.lottie ? ' data-lottie="' + G.lottie + '" data-loop="1"' : '') + '><span class="lottie-still">' + svgIcon(G.ico(), 132) + '</span></div>' + G.x.map((x) => '<p class="x">' + esc(x) + '</p>').join('') +
     (G.tipp ? '<div class="g-tipp"><p class="eyebrow">Praxis-Tipp</p><p>' + esc(G.tipp) + '</p></div>' : '') +
-    (G.see.length ? '<div class="see"><span>Siehe auch:</span>' + G.see.filter((k) => GLOSS[k]).map((k) => '<button type="button" class="ulink" style="min-height: 44px" data-act="gloss" data-k="' + k + '">' + esc(SHORT[k]) + '</button>').join('') + '</div>' : '') + (GLOSS_RG[S.gloss] && !S.betrieb ? '<p class="see"><a class="ulink" style="min-height: 44px" href="' + GLOSS_RG[S.gloss] + '" target="_blank" rel="noopener">Ausführlich im Ratgeber</a></p>' : '') + rechtLinks() + '</div>';
+    (G.see.length ? '<div class="see"><span>Siehe auch:</span>' + G.see.filter((k) => GLOSS[k]).map((k) => '<button type="button" class="ulink" style="min-height: 44px" data-act="gloss" data-k="' + k + '">' + esc(SHORT[k]) + '</button>').join('') + '</div>' : '') + (GLOSS_RG[S.gloss] && !S.betrieb ? '<p class="see"><a class="ulink" style="min-height: 44px" href="' + GLOSS_RG[S.gloss] + '" target="_blank" rel="noopener">Ausführlich im Ratgeber</a></p>' : '') + glossNotiz() + rechtLinks() + '</div>';
+}
+/* Beim Messen gibt es oben keinen Notiz-Knopf mehr (26.10.2026, nur die Überschrift über dem Modell): die Notiz steht im Info-Blatt */
+function glossNotiz() {
+  const ort = (S.screen === 'messen' || S.screen === 'rest') ? notizOrt() : null; if (!ort) return '';
+  const da = !!notizText(ort);
+  return '<p class="see"><button type="button" class="ulink" style="min-height: 44px" data-act="notiz-auf" data-v="' + ort[0] + ':' + esc(ort[1]) + '">' + (da ? 'Deine Notiz an den Fensterbauer ansehen' : 'Notiz an den Fensterbauer') + '</button></p>';
 }
 function sheetsHTML() {
   if (S.fotoGross) return fotoBlatt();
@@ -4954,7 +5026,7 @@ function notizSetzen(ort, text) {
 function notizAuf(v) {
   const i = String(v || '').indexOf(':'), ort = i > 0 ? [v.slice(0, i), v.slice(i + 1)] : null;
   if (!ort || !notizDarf() || !linkOffen()) return;
-  S.notiz = { ort: ort, text: notizText(ort) }; render();
+  S.gloss = null; S.glossIndex = false; S.notiz = { ort: ort, text: notizText(ort) }; render();
   nachBild(() => { const t = document.getElementById('nz-text'); if (t) { t.focus(); try { t.setSelectionRange(t.value.length, t.value.length); } catch (e) { /* ok */ } } }, 30);
 }
 /* Schließen speichert mit (nichts geht verloren); „Löschen“ leert die Notiz */
@@ -5158,6 +5230,8 @@ function zurueckTaste() {
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; } // Zifferntasten in den Wünschen
+  if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen: erst das Blatt zu
+  if (S.screen === 'rest' && S.rest && S.rest.pad) { restZu(); return true; }
   if (S.screen === 'home' && !S.tour) return false;
   act('back', document.body);
   return true;
@@ -5184,6 +5258,8 @@ function escTaste() {
   if (S.wohin) { S.wohin = false; render(); return true; }
   if (S.ohneFotoFrage) { S.ohneFotoFrage = false; render(); return true; }
   if (S.qMass && S.screen === 'frage') { S.qMass = null; render(); return true; }
+  if (S.screen === 'messen' && S.mess && S.mess.pad) { messZu(); return true; } // Zifferntasten beim Messen
+  if (S.screen === 'rest' && S.rest && S.rest.pad) { restZu(); return true; }
   return false;
 }
 
@@ -6275,7 +6351,7 @@ function act(name, el) {
     case 'go': if (v === 'ergebnis' && S.screen === 'fertig' && (!darfAendern() || !linkOffen())) return; return go(v);
     /* Übersicht aller Fenster aus den Wünschen (Knopf oben links): bei ungespeicherten Änderungen erst das Blatt „Noch nicht gespeichert“ */
     case 'liste': { S.qMass = null; return verlassen({ art: 'home' }); }
-    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
+    case 'back': { if (S.qMass && S.screen === 'frage') { S.qMass = null; return render(); } if (einstiegHier()) return zumEinstieg(); const view = SCREENS[S.screen] ? SCREENS[S.screen]() : null, b = view && view.back ? view.back[1] : 'home'; if (b === 'tour-ende') return tourEnde(); if (b === 'mess-prev') return messPrev(); if (b === 'rest-prev') return restPrev(); if (b === 'qprev') return qStep(-1); if (b === 'mess-back') { S.mess.step = 3; S.mess.pad = false; S.mess.msg = null; const st = MESS[3]; S.mess.cur = String(w.el[st.k] || ''); return go('messen', 'back'); } if (b === 'home' && imAssistenten()) return verlassen({ art: 'home' }); return go(b, 'back'); }
     case 'copywin': { if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg()); const c = Object.assign(baseWin(), kopie(w), { name: (w.name || 'Fenster') + ' (Kopie)', fotos: 0, ki: w.ki, wid: neueWid(), t0: zeit(), aend: 0, ts: zeit() }); S.angelegt = angelegt() + 1; S.windows.push(kopie(c)); S.editIdx = S.windows.length - 1; S.win = kopie(c); S.designVorher = null; persist(); toast('Kopiert, Maße prüfen'); return go('ergebnis'); }
     case 'new': if (INST && S.betrieb && S.sent) return instanzWeitere(); if (S.betrieb && S.sent) return toast('Schon gesendet. Änderungen bitte direkt mit ' + (S.betrieb.name || 'deinem Fensterbauer') + ' klären.'); if (!linkOffen()) return; if (!neuMoeglich()) return toast(maxMsg());
       if (INST && S.instZu) return go('home');
@@ -6356,9 +6432,17 @@ function act(name, el) {
     case 'bump': { const leer = w[f] === '' || w[f] == null, cur = (leer && f === 'bru' ? 850 : num(w[f])) + n(v); w[f] = clamp(cur, f === 'anzahl' ? 1 : 0, 9999); if (f === 'laib') w.e_laib = true; return render(); }
     case 'bumpp': { S.proj.total = clamp(num(S.proj.total) + n(v), 1, 999); persist(); return render(); }
     case 'mess-next': return messNext(!!el.getAttribute('data-ack'));
-    case 'mess-cm': { messInput(v); S.mess.msg = null; return render(); }
+    case 'mess-cm': { S.mess.cur = String(num(v)); S.mess.msg = null; return messNext(false); }
+    case 'mess-auf': return messAuf();
+    case 'mess-zu': return messZu();
+    case 'mess-neu': { S.mess.msg = null; S.mess.cur = ''; return render(); }
+    case 'mess-weiter': return messWeiter();
+    case 'rest-auf': return restAuf();
+    case 'rest-zu': return restZu();
+    case 'rest-neu': { S.rest.msg = null; S.rest.cur = ''; return render(); }
+    case 'rest-weiter': return restWeiter();
     case 'rest-next': return restNext(!!el.getAttribute('data-ack'));
-    case 'rest-cm': { restInput(v); S.rest.msg = null; return render(); }
+    case 'rest-cm': { S.rest.cur = String(num(v)); S.rest.msg = null; return restNext(false); }
     case 'rest-same': { S.rest.cur = String(num(v) || ''); S.rest.msg = null; return restNext(true); }
     case 'key': return keyIn(v);
     case 'mass-tasten': return massTasten(f);
@@ -6438,8 +6522,16 @@ function tippen(name, el) { if (!window.Haptik) return; if (TIPPT.test(name) || 
 function keyIn(k) {
   if (S.qMass && S.screen === 'frage') return massKey(k);
   const rest = S.screen === 'rest', st = rest ? S.rest : S.mess;
-  if (k === 'ok') return rest ? restNext(false) : messNext(false);
+  if (rest && !REST[st.i]) return; // „Passt.“: keine Eingabe mehr
   if (k === 'zurueck') return rest ? restPrev() : messPrev();
+  /* Blatt zu: Enter heißt „Maß eingeben“ bzw. „Weiter“, eine Ziffer öffnet das Blatt und zählt schon */
+  if (!st.pad) {
+    if (k === 'del') return;
+    const fertig = rest ? !!restWert(REST[st.i]) : !!messWert(MESS[st.step]);
+    if (k === 'ok') return fertig ? (rest ? restWeiter() : messWeiter()) : (rest ? restAuf() : messAuf());
+    if (rest) restAuf(); else messAuf();
+  }
+  if (k === 'ok') return rest ? restNext(false) : messNext(false);
   let cur = st.cur || '';
   if (k === 'del') cur = cur.slice(0, -1); else if (/^\d$/.test(k)) { if (cur.length >= 5) return; cur += k; }
   if (st.msg) { st.msg = null; st.cur = cur; render(); }

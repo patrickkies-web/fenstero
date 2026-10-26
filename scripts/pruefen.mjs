@@ -52,6 +52,20 @@
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
+/* Messen im Raum (26.10.2026): „Maß eingeben“ öffnet das Blatt, Ziffern, „Bestätigen“ speichert, dann „Weiter“ im Dock */
+async function massTippen(pg, wert) {
+  await pg.waitForSelector('.mess-dock .md-haupt');
+  await pg.click('.mess-dock .md-haupt[data-act$="-auf"]');
+  await pg.waitForSelector('.mess-pad .keypad');
+  for (const z of wert) await pg.click('.mess-pad .keypad button[data-v="' + z + '"]');
+  await pg.click('.mp-ok'); await pg.waitForSelector('.mess-dock .md-haupt[data-act$="-weiter"]');
+  await pg.click('.mess-dock .md-haupt'); await pg.waitForTimeout(200);
+}
+async function randWieMitte(pg) {
+  await pg.waitForSelector('.mess-dock [data-act="rest-auf"]'); await pg.click('.mess-dock [data-act="rest-auf"]');
+  await pg.waitForSelector('[data-act="rest-same"]'); await pg.click('[data-act="rest-same"]');
+  await pg.waitForSelector('.mess-dock [data-act="rest-weiter"]'); await pg.click('.mess-dock [data-act="rest-weiter"]'); await pg.waitForTimeout(150);
+}
 
 const require = createRequire(process.env.PW_PFAD ? process.env.PW_PFAD.replace(/\/?$/, '/') + 'x.js' : import.meta.url);
 const { chromium } = require('playwright-core');
@@ -269,15 +283,10 @@ if (teil(3)) {
   ok(kiApi.wand.s === 200 && /^wand, out/.test(kiApi.wand.auftrag) && kiApi.alt.s === 200 && /^einbau, in/.test(kiApi.alt.auftrag) && kiApi.weg.s === 400, 'KI-Server: neue Öffnung mit Wand-Auftrag, alter Name „fakten“ gilt als Einbau, „struktur“ gibt es nicht mehr');
   await foto(page, 'app-fotos');
 
-  // vier Maße über die Zifferntasten, dann vier Ränder „wie Mitte“
+  // vier Maße über „Maß eingeben“, die Zifferntasten und „Bestätigen“, dann vier Ränder „Hier auch … gemessen?“
   await page.click('.bb .btn.primary');
-  for (const wert of ['1480', '1410', '1370', '1230']) {
-    await page.waitForSelector('.keypad');
-    for (const z of wert) await page.click('.keypad button[data-v="' + z + '"]');
-    await page.click('.keypad button[data-v="ok"]');
-    await page.waitForTimeout(250);
-  }
-  for (let i = 0; i < 4; i++) { await page.waitForSelector('[data-act="rest-same"]'); await page.click('[data-act="rest-same"]'); await page.waitForTimeout(200); }
+  for (const wert of ['1480', '1410', '1370', '1230']) await massTippen(page, wert);
+  for (let i = 0; i < 4; i++) await randWieMitte(page);
   await page.waitForSelector('.bb .btn.primary');
   await page.click('.bb .btn.primary');
   await page.waitForSelector('[data-screen="ergebnis"]');
@@ -643,9 +652,10 @@ if (teil(6)) {
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await p2.click('[data-act="new"]'); await p2.waitForTimeout(200);
   await p2.evaluate(() => { S.win.mo = { hm: 1480, wm: 1370, hl: '', hr: '', wt: '', wb: '' }; go('rest'); });
-  for (let i = 0; i < 4; i++) { await p2.waitForSelector('[data-act="rest-same"]'); await p2.click('[data-act="rest-same"]'); await p2.waitForTimeout(150); }
+  for (let i = 0; i < 4; i++) await randWieMitte(p2);
   await p2.waitForTimeout(400);
-  ok(/Alle Maße da/.test(await p2.evaluate(() => document.body.textContent)) && await p2.locator('.w3d-dim.is-drawing').count() >= 2, '„Alle Maße da“: Maßlinien zeichnen sich nacheinander');
+  const passt = await p2.evaluate(() => ({ t: document.querySelector('.scr').textContent, zahl: (document.querySelector('.ps-zahl b') || {}).textContent || '', reihen: document.querySelectorAll('.ps-reihe').length, schilder: Array.from(document.querySelectorAll('#w3d .w3d-dim-lab')).filter((e) => e.getBoundingClientRect().width > 0).length, zoom: !!document.querySelector('#w3d .w3d-zoom, #w3d [data-w3d="zoom-in"]'), cream: document.querySelectorAll('.scr .btn.primary').length }));
+  ok(/Passt\./.test(passt.t) && passt.zahl === '1.370 × 1.480' && passt.reihen === 6 && passt.schilder === 0 && passt.cream === 1 && await p2.locator('.w3d-dim.is-drawing').count() >= 2, '„Passt.“: Maßlinien zeichnen sich nacheinander, das Maß der Öffnung groß (' + passt.zahl + '), je Richtung drei Messungen, keine Schilder im Modell, eine Hauptaktion');
   await foto(p2, 'app-masse-da');
   // Bewegtbilder (Lottie) in Tokenfarben, Haptik, Scroll-Bindung
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
@@ -3519,8 +3529,9 @@ if (teil(16)) {
     const nzAlle = await sk.evaluate((MO) => {
       const fehlt = [], ohneWo = [], ohnePfeil = []; let n = 0;
       S.windows = demoProject(); persist(); newWin(); Object.assign(S.win, { name: 'Küche', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } });
-      const pruef = (wo) => { n++; if (!document.querySelector('.hd .nz-knopf')) fehlt.push(wo); if (!document.querySelector('.hdr-wo')) ohneWo.push(wo); };
-      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      /* Messen und Ränder (Messen im Raum): die Notiz steht im Info-Blatt, oben steht nur die Überschrift */
+      const pruef = (wo) => { n++; const raum = wo === 'messen' || wo === 'rest'; if (raum) { S.gloss = wo === 'messen' ? MESS[S.mess.step].g : 'raender'; render(); } if (!document.querySelector(raum ? '.sheet [data-act="notiz-auf"]' : '.hd .nz-knopf')) fehlt.push(wo); if (raum) { S.gloss = null; render(); } if (!document.querySelector('.hdr-wo')) ohneWo.push(wo); };
+      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
       ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
       S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
       ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
@@ -3545,20 +3556,32 @@ if (teil(16)) {
     /* Gespeichert: keine Gesamtübersicht */
     const fertigK = await sk.evaluate(() => ({ screen: S.screen, t: document.querySelector('.scr').textContent, cream: document.querySelectorAll('.btn.primary').length }));
     ok(fertigK.screen === 'fertig' && !/Alle Angaben|\d mm|Farbe wie|Aus deinen Fotos gelesen/.test(fertigK.t) && /Wie geht es weiter\?/.test(fertigK.t) && fertigK.cream === 1, 'Nach dem Speichern: keine Übersicht aller Angaben, keine Maße und keine Notiztexte, dafür „Wie geht es weiter?“ mit genau einer Hauptaktion');
-    /* Zifferntasten: Pfeil zurück unten links, „Weiter“ über die ganze Breite; Browser-Zurück bleibt in der App */
+    /* Messen im Raum: Dock mit Pfeil zurück, „Maß eingeben“ und Info; das Blatt mit den Zifferntasten kommt erst auf „Maß eingeben“,
+       „Bestätigen“ speichert und schließt es, der Wert steht auf der Linie; Browser-Zurück schließt erst das Blatt und bleibt in der App */
     await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(250);
     const adresse = sk.url();
-    for (const z of ['1', '3', '9', '0']) await sk.click('.keypad [data-v="' + z + '"]');
-    await sk.click('.keypad [data-v="ok"]'); await sk.waitForTimeout(250);
-    const tasten = await sk.evaluate(() => { const k = Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')), pad = document.querySelector('.keypad').getBoundingClientRect(), okb = document.querySelector('.keypad [data-v="ok"]').getBoundingClientRect(), zb = document.querySelector('.keypad [data-v="zurueck"]').getBoundingClientRect(), eins = document.querySelector('.keypad [data-v="1"]').getBoundingClientRect(); return { reihe: k.slice(9).join(','), voll: (() => { const lr = document.querySelector('.keypad .kp-leiste').getBoundingClientRect(), mitte = (zb.left + okb.right) / 2; return Math.abs(mitte - (pad.left + pad.width / 2)) < 2 && lr.width >= pad.width - 2 && okb.width < pad.width - 40 && okb.height >= 44; })(), gleich: Math.abs(zb.width - zb.height) < 1 && zb.height >= 44 && zb.right <= okb.left && eins.height >= 44, step: S.mess.step }; });
-    await sk.click('.keypad [data-v="zurueck"]'); await sk.waitForTimeout(200);
-    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur }));
+    const dock = await sk.evaluate(() => ({ teile: Array.from(document.querySelectorAll('.mess-dock button')).map((b) => b.getAttribute('data-act')).join(','), tasten: !!document.querySelector('.keypad'), feld: !!document.querySelector('.w3d-feldlage .fd-knopf, .w3d-feldlage .fd-ph'), kicker: !!document.querySelector('.scr .hd .eyebrow'), notiz: !!document.querySelector('.scr .nz-knopf'), cream: document.querySelectorAll('.scr .btn.primary, .scr .mp-ok').length, ziele: Array.from(document.querySelectorAll('.mess-dock button')).every((b) => b.getBoundingClientRect().height >= 44) }));
+    await sk.click('.mess-dock .md-haupt'); await sk.waitForSelector('.mess-pad .keypad');
+    await sk.goBack(); await sk.waitForTimeout(300);
+    const zuBlatt = await sk.evaluate(() => ({ pad: !!document.querySelector('.mess-pad'), screen: S.screen }));
+    await sk.click('.mess-dock .md-haupt'); await sk.waitForSelector('.mess-pad .keypad');
+    for (const z of ['1', '3', '9', '0']) await sk.click('.mess-pad .keypad [data-v="' + z + '"]');
+    const blatt = await sk.evaluate(() => ({ reihe: Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')).slice(9).join(','), wert: document.getElementById('mp-feld').textContent, ok: (document.querySelector('.mp-ok') || {}).textContent || '', okH: document.querySelector('.mp-ok').getBoundingClientRect().height, dock: !!document.querySelector('.mess-dock'), cream: document.querySelectorAll('.scr .btn.primary, .scr .mp-ok').length }));
+    await sk.click('.mp-ok'); await sk.waitForTimeout(250);
+    const best = await sk.evaluate(() => ({ hm: S.win.mo.hm, step: S.mess.step, pad: !!document.querySelector('.mess-pad'), linie: (document.querySelector('.w3d-feldlage .fd-knopf') || {}).textContent || '', haupt: document.querySelector('.mess-dock .md-haupt').textContent }));
+    await sk.click('.mess-dock .md-haupt'); await sk.waitForTimeout(250);
+    const tasten = await sk.evaluate(() => ({ step: S.mess.step }));
+    await sk.click('.mess-dock [data-v="zurueck"]'); await sk.waitForTimeout(200);
+    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur, linie: (document.querySelector('.w3d-feldlage .fd-knopf') || {}).textContent || '' }));
     await sk.goBack(); await sk.waitForTimeout(300);
     const zurueck2 = await sk.evaluate(() => ({ screen: S.screen, href: location.href }));
     await sk.click('[data-act="gindex"]'); await sk.waitForSelector('.g-index'); await sk.goBack(); await sk.waitForTimeout(250);
     const zurueck3 = await sk.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.g-index') }));
-    ok(tasten.reihe === '0,del,zurueck,ok' && tasten.voll && tasten.gleich && tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
-      'Zifferntasten: unten 0 und Löschen, darunter wie in den Leisten der App der runde Pfeil zurück links neben „Weiter“ (klein, mittig); der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers geht einen Schritt zurück (Adresse bleibt) und schließt zuerst ein offenes Blatt');
+    ok(dock.teile === 'key,mess-auf,gloss' && !dock.tasten && !dock.feld && !dock.kicker && !dock.notiz && dock.cream === 1 && dock.ziele && !zuBlatt.pad && zuBlatt.screen === 'messen' &&
+      blatt.reihe === '0,del' && /1\.390\s*mm/.test(blatt.wert) && /Bestätigen/.test(blatt.ok) && blatt.okH >= 44 && !blatt.dock && blatt.cream === 1 &&
+      best.hm === 1390 && best.step === 0 && !best.pad && /1\.390/.test(best.linie) && /Weiter zu Maß 2/.test(best.haupt) &&
+      tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && /1\.390/.test(zurueck1.linie) && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
+      'Messen im Raum: nur die Überschrift über dem Modell, kein Feld und keine Tasten; unten Pfeil zurück, „Maß eingeben“ und Info; das Blatt mit den Zifferntasten kommt erst auf „Maß eingeben“ (Browser-Zurück schließt es), neben dem Feld „Bestätigen“; danach steht der Wert auf der Linie und der Knopf heißt „Weiter zu Maß 2“; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers bleibt in der App (Adresse bleibt) und schließt zuerst ein offenes Blatt');
     /* Foto groß mit Zoom */
     await sk.evaluate(() => useDemo()); await sk.waitForFunction(() => S.photos.in && S.photos.out, null, { timeout: 8000 }); await sk.evaluate(() => render()); await sk.waitForTimeout(200);
     await sk.click('.tile[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
@@ -4840,7 +4863,9 @@ if (teil(22)) {
   /* Feinschliff am Modell (23.10.2026, docs/GESTALTUNG.md): Zifferntasten kleiner mit „Zurück“, Dock rollt nach, Kamera bleibt am Griff,
      Aufsatzkasten auf dem Rahmen samt Blende, Aufteilung am Regler, Haus am Zahnrad, Raffstore-Fahrt als Ganzes */
   await p.evaluate(() => { S.verlassen = null; S.wohin = false; S.notiz = null; S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await p.waitForTimeout(400);
-  const fs1 = await p.evaluate(() => { const k = document.querySelector('.keypad [data-v="5"]').getBoundingClientRect(), z = document.querySelector('.keypad .kp-zurueck'), st = document.getElementById('w3d').getBoundingClientRect(); return { key: Math.round(k.height), zur: z.getAttribute('aria-label') || '', zurH: Math.round(z.getBoundingClientRect().height), stage: Math.round(st.height), ok: Math.round(document.querySelector('.keypad .ok').getBoundingClientRect().height) }; });
+  const fs1d = await p.evaluate(() => { const z = document.querySelector('.mess-dock .md-rund'), h = document.querySelector('.mess-dock .md-haupt'), st = document.getElementById('w3d').getBoundingClientRect(); return { zur: z.getAttribute('aria-label') || '', zurH: Math.round(z.getBoundingClientRect().height), ok: Math.round(h.getBoundingClientRect().height), voll: Math.round(st.height), breit: Math.round(st.width) === innerWidth }; });
+  await p.click('.mess-dock .md-haupt'); await p.waitForSelector('.mess-pad .keypad');
+  const fs1 = Object.assign(fs1d, await p.evaluate(() => { const k = document.querySelector('.mess-pad .keypad [data-v="5"]').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { key: Math.round(k.height), stage: Math.round(st.height) }; }));
   await frageB('rc', { erreichbar: '' }, 'normal');
   const fs2a = await p.evaluate(() => document.querySelector('.qdock').scrollTop);
   await p.click('.qpanel [data-act="erreichbar"][data-v="ja"]'); await p.waitForTimeout(1200);
@@ -4881,7 +4906,7 @@ if (teil(22)) {
   const fs8b = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, neig: b._relief && b._relief[1], stops: (b.style.background.match(/rgb\(/g) || []).length, rep: /^repeating-linear-gradient\(/.test(b.style.background), lippe: /rgb\(42, 43, 45\)/.test(st.querySelector('[data-r="behang-u"]').style.background) }; });
   await frageB('schlitz', { sart: 'rollladen', roll: 'vorbau', schlitz: 'mit' }, 'genau'); await p.waitForTimeout(500);
   const fs8c = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, schlitz: /^radial-gradient\(/.test(b.style.background) && /repeating-linear-gradient\(/.test(b.style.background) }; });
-  ok(fs1.key >= 40 && fs1.key <= 46 && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.stage >= 220, 'Feinschliff, Zifferntasten beim Messen: Tasten ' + fs1.key + ' px, runder Pfeil zurück neben „Weiter“ ' + fs1.ok + ' px, das Modell ' + fs1.stage + ' px hoch');
+  ok(fs1.key >= 40 && fs1.key <= 46 && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.breit && fs1.voll >= 480 && fs1.stage >= 220, 'Messen im Raum: Modell über die ganze Breite ' + fs1.voll + ' px hoch, runder Pfeil zurück neben „Maß eingeben“ ' + fs1.ok + ' px; mit Zifferntasten (' + fs1.key + ' px) bleibt das Modell ' + fs1.stage + ' px hoch');
   ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
   ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
   ok(fs4.raff === 230 && fs4.kasten === 230 && fs4.roll === 200 && fs4.vorbau < 100 && fs4.blende, 'Feinschliff, Aufsatzkasten: das Element endet 230 mm (Raffstore) bzw. 200 mm (Rollladen) unter der Öffnung, beim Vorbau nicht; die Blende ist eine Detailangabe nur beim Aufsatzkasten');
