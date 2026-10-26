@@ -73,3 +73,13 @@ Mehrheiten je Änderung (1–9): 1 ändern (G 5 : 1, F 5 : 1), 2 ändern (G 4 : 
 - Typografie (Roth, zehn Befunde): Kicker „Einladung“; Hero ohne Doppelungen; Doppelaussagen zwischen Bausteinen gestrichen (Haken-Liste in Szene 4 weg, Labels neu); Gruß und Name ohne `&nbsp;`; aktive Sätze; Größen neben der Skala (Innenkarte 48/300, Telefonnummer 300, Zeit-Zahl bis 88 px); Halbgeviertstriche mit geschütztem Leerzeichen; Titel der Konfigurator-Kachel 600; Luft vor der Pille 32 px. Alle umgesetzt.
 - Material und Licht (Veit, fünf Hebel): Schein unter der Geräteecke, goldene Kante, Spiegelung, Flanke; Innenkarten mit Hub, Lichtkante, Schatten, Kapseln mit Oberfläche; Fenster bricht aus der Konfigurator-Kachel; Leuchten mit Kern und Punktraster; Glas statt Pille an beiden Etiketten; dazu das helle Bildfeld in Schritt 3 mit Abfall. Alle umgesetzt.
 - Typografie gegen die Vorlagen (Roth, fünf Hebel): Fakten als Chips statt eines Absatzes; Zustand als Indigo-Chip in der Innenkarte; Gruß als leiser Block über dem Namen; Wortmarke des Betriebs als einziges 700; Halbgeviertstriche, Werte in 500. Alle umgesetzt.
+- Frontend und Leistung (Lenz, fünf Hebel, Urteil 2026-10-26-signature-vorlage-vorlagen-frontend.md): Vorhang ordnet nach jeder
+  Höhenänderung neu (sonst war die Bereit-Pille nach „Einladung“ oder mit Etiketten unerreichbar); Telefonnummer und Kapselreihe an die
+  Breite gebunden; beim Wechsel blenden nur Überschrift, Kicker und Brief, die Pille steht. Umgesetzt. Offen für die echte Instanz:
+  genau ein Zustand je Auslieferung ohne Muster-Ebene, sauberer Kopf mit js-da.js, Fotos des Betriebs in zwei Breiten.
+
+## Weiter in den Paketstufen
+
+Die Vorlage gehört seit dem Abend zur Familie Essential, Plus, Signature mit gemeinsamer Muster-Leiste; Abstufung, Urteil der 15
+Fensterbauer, Messwerte und Farbtabelle stehen in docs/profis/2026-10-26-paketstufen.md. Veröffentlicht unter
+https://claude.ai/artifact/8GL1ypE8PwgWYSwY6Dgdms.

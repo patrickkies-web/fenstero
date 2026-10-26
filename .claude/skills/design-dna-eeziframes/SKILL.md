@@ -63,6 +63,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Schwester der Vorlagen für Essential und Plus. Das Dashboard und seine alte Gestaltung (#161616, Inter, farbiges Wort, Bilder unter
   web/bilder/beispiel/) sind weder Vorlage noch Material dafür; Merkmale eines Pakets erscheinen auf der Landingpage als Bausteine der
   DNA (Signature: Einladungszustand, Link-Etikett, Innenkarte mit dem Fortschritt). Vorschau docs/profis/signature-vorschau/.
+- Paketstufen (Wunsch des Inhabers, 26.10.2026, abends: „alle Pakete visuell sehr ansprechend, aber die Käufer der höherpreisigen
+  Pakete sollen schon auch was davon haben“): Jede Paket-Vorlage zeigt genau, was web/assets/pakete.js liefert, nicht mehr und nicht
+  weniger. Der Anreiz steht in den Etiketten der Muster-Ebene (grauer Punkt in allen Paketen, Koralle neu im Paket, Ring erst im
+  nächsten Paket), nie in einer absichtlich schwächeren Seite. Eine Familie je Betrieb mit einer Muster-Leiste (Paketwechsel an
+  derselben Stelle, Preis aus pakete.js), gebaut von docs/profis/werkzeuge/paketvorlagen.py; geändert wird in den drei Vorschau-Ordnern
+  (essential-, plus-, signature-vorschau), dann neu gebaut. Die Palette eines Betriebs gilt in Plus und Signature; Essential bleibt im
+  eeziframes-Violett, bis der Inhaber pakete.js ändert. Protokoll docs/profis/2026-10-26-paketstufen.md.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
