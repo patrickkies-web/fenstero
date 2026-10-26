@@ -235,6 +235,10 @@ if (teil(2)) {
   await mp.evaluate(() => document.getElementById('startseite').shadowRoot.querySelector('.ez-hero a[href="#so"]').click()); await mp.waitForTimeout(1500);
   const so2 = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot, so = sr.getElementById('so'), r = so.getBoundingClientRect(); return { oben: Math.round(r.top), hash: location.hash, screen: S.screen }; });
   ok(so2.oben > -40 && so2.oben < 120 && so2.hash === '' && so2.screen === 'landing', '„Mehr erfahren“ springt zu „So geht es“, Adresse und Ansicht bleiben (' + JSON.stringify(so2) + ')');
+  /* Vorhang im Schatten-DOM: Szenen höher als der Bildschirm kleben erst mit ihrem Ende (--dna-szene-oben), sonst bliebe ihr unterer Teil
+     unerreichbar (Fehler vom 26.10.2026: Schritt 3 und 4 von „So geht es“ und „Was im Aufmaß steckt“ waren am Telefon nie zu sehen) */
+  const vorhang = await mp.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot; return [...sr.querySelectorAll('.dna-szene')].map((s) => ({ soll: Math.min(0, window.innerHeight - s.offsetHeight), ist: parseFloat(s.style.getPropertyValue('--dna-szene-oben')) })); });
+  ok(vorhang.length === 5 && vorhang.every((v) => Math.abs(v.soll - v.ist) <= 1), 'Startseite (Telefon): jede Szene klebt erst mit ihrem Ende, alle Inhalte erreichbar (' + vorhang.map((v) => v.ist).join(', ') + ')');
   await foto(mp, 'portal-telefon');
   sauber(mp, 'Portal (Telefon) ohne Fehler');
   await mob.close();
