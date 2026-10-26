@@ -186,3 +186,16 @@ Umgesetzt:
 - Hero auf Wunsch des Inhabers: Gerät, Etikett und Schein aus dem Hero genommen, sein Hausfoto als Bühne (bilder/hero.webp). Folge für die Palette: Bildschirm 1 am Telefon trägt 17,7 % Farbe (Foto), die Seite 5,4 %; Seite 95 neutral (S 45 · A 14 · G 6 · W 30). Der Prompt in hero-prompt.md bleibt als Alternative.
 
 Nicht übernommen: Gerät mit Metallkante und Spiegelung (nach dem Hero-Wechsel ohne Gerät); neue Renderings mit grauem Studioglas (Werkzeug docs/profis/werkzeuge/startseite-renderings.mjs, eigener Auftrag); Alles inline in index.html (Dateien bleiben getrennt, der Grund wird sofort dunkel gesetzt); Vorhang früher kleben lassen (DNA-Verhalten); Hero-Etikett zweizeilig (entfällt). Vorschlag ans Design-System (Rückfluss): Display-Gewicht 600 statt 500, Labels 400, kleine Zahlen 300, Lichtkante und tonaler Verlauf als Teil der Formensprache, Leuchten ohne Filter.
+
+## Übernahme als Startseite (26.10., abends)
+
+Auftrag des Inhabers: die ausgestaltete Seite als Startseite übernehmen und online stellen.
+
+Umsetzung: Die Ansicht Hauseigentümer der echten Startseite ist jetzt diese Seite. Markup als `<template id="startseite-dna">` in web/index.html, Aufbau im Schatten-DOM von `#startseite` durch web/assets/startseite.js (einmal gebaut und über alle Aufbauten des Portals erhalten), Gestaltung web/assets/startseite-dna.css (tokens, bundle und start.css der Vorschau, `:root` und `body` als `:host`), Bausteine web/assets/dna-bundle.js, Schriften web/fonts/dna.css (eigene Datei, weil /fonts/* ein Jahr unveränderlich zwischengespeichert wird), Bilder web/bilder/start/. Die Ansicht Fensterbauer, die Anmeldung und der Bereich für Betriebe bleiben im Portal unverändert.
+
+- Preis und Einführungspreis kommen aus modell.js; in der Vorlage steht kein fester Preis, der nach dem Stichtag veralten würde.
+- Wer schon Fenster erfasst hat, sieht „Aufmaß fortsetzen“ und „Dein Aufmaß ist angefangen: N Fenster erfasst“.
+- Eigene Fußzeile der Seite statt der des Portals; kein Pilotband auf der Startseite (Entscheidung des Inhabers), in der Ansicht Fensterbauer weiter.
+- Sprungmarken im Schatten-DOM per Skript; /#fensterbauer wechselt die Ansicht, /#wie öffnet „So funktioniert es“ für Betriebe.
+- Prüfsuite: Prüfungen der alten Startseite auf die neue umgeschrieben, keine abgeschaltet; 1089 bestanden. Drei Fehlschläge bestehen auch auf main ohne diese Änderung (Verglasungs-Lupe in der App, „Vertrag widerrufen“ und „nur für Unternehmer“ auf der Seite für Fensterbauer).
+- Bereitstellung: Der erste Bau bei Cloudflare blieb über 20 Minuten in „Initializing“ hängen und wurde abgebrochen; der Code baut mit `npx wrangler deploy --dry-run` sauber (282 Dateien). Dieser Eintrag löst den Bau erneut aus.

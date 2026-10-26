@@ -43,6 +43,7 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Gremium `profis` nur eine Runde, etwa zehn Minuten je Seite; keine zweite und dritte Runde.
 - Startseite: kein Handy und keine Maßlinien im Hero, sein Hausfoto ist die Bühne. Bildpille in der Überschrift und Schriftfenster „eeziframes“ zurückgenommen (Kunden lasen „Kästchen“; 5:1 gegen das Schriftfenster); beide nur auf sein Wort. Pilotphase-Band oben weg, Satz im Fuß und in der Karte. Wortlaut „Jetzt konfigurieren“ bleibt.
 - Konzept und Abfolge der Startseite stehen; Änderungen daran nur auf Wunsch.
+- Seit 26.10.2026 ist die Seite die echte Startseite (Ansicht Hauseigentümer, web/index.html mit web/assets/startseite.js und startseite-dna.css). Änderungen an der Vorschau unter docs/profis/startseite-dna-vorschau/ gehen nicht von selbst online: start.css und Markup danach in die Dateien unter web/ übertragen (Protokoll, Abschnitt „Übernahme als Startseite“).
 - Offen (nur auf sein Wort): Renderings mit grauem Studioglas statt Himmelblau, lebendes Bento wieder an, Mieter-Ansicht, Test auf einem echten Mittelklasse-Android.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
