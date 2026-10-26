@@ -195,10 +195,12 @@ window.Buehne3D = (function () {
        Verband lesbar bleibt. Gerechnet ab der Fugenmitte: beide Kanten jeder Fuge sind geglättet, Stein und Reihe wechseln mitten in
        der Fuge (vorher sprang die Kante am Fugenanfang innerhalb eines Bildpunkts) */
     'vec3 klinker(vec2 P,vec3 b,float k){float C=81.0*k,L=250.0*k,j=10.0*k;float yy=P.y-0.5*j;float r=floor(yy/C);float x=P.x+mod(r,2.0)*L*0.5-0.5*j;float s=floor(x/L);' +
-    'vec2 q=vec2(x-s*L,yy-r*C);vec2 dq=min(q,vec2(L,C)-q);vec2 aq=max(gFw*0.7,vec2(1e-4));float m=1.0-min(smoothstep(0.5*j-aq.x,0.5*j+aq.x,dq.x),smoothstep(0.5*j-aq.y,0.5*j+aq.y,dq.y));' +
+    'vec2 q=vec2(x-s*L,yy-r*C);vec2 dq=min(q,vec2(L,C)-q);vec2 aq=max(gFw*0.7,vec2(1e-4));' +
+    /* Fuge je Achse: geglättetes Profil, bei Fugen schmaler als ein Bildpunkt nach ihrer Fläche gewichtet (sonst zu kräftig und flimmernd) */
+    'vec2 ab=vec2(1.0)-smoothstep(vec2(0.5*j)-aq,vec2(0.5*j)+aq,dq);vec2 dk=clamp(vec2(j)/(2.0*aq),0.0,1.0);float m=max(ab.x*dk.x,ab.y*dk.y);' +
     'float v=hash(vec2(s,r)*1.37+0.5),v2=hash(vec2(s,r)*2.71+3.3);vec3 ton=mix(vec3(0.95,1.0,1.05),vec3(1.05,0.99,0.93),v2)*(v2>0.94?0.74:1.0);' +
     'vec3 st=b*ton*mix(0.82,1.12,v)*(0.93+0.12*rausch(P/(9.0*k)));float e=min(dq.x,dq.y)-0.5*j;st*=mix(0.84,1.0,smoothstep(0.0,6.0*k,e));' +
-    'float hell=smoothstep(0.55,0.72,(b.r+b.g+b.b)/3.0);vec3 fuge=mix(vec3(0.74,0.7,0.65),b*0.84,hell);vec3 mo=fuge*(0.92+0.1*rausch(P/(2.5*k)));vec3 c=mix(st,mo,m);vec3 mittel=mix(b*0.97,fuge,0.2);return mix(mittel,c,sicht(P,C*0.5));}' +
+    'float hell=smoothstep(0.55,0.72,(b.r+b.g+b.b)/3.0);vec3 fuge=mix(vec3(0.74,0.7,0.65),b*0.84,hell);vec3 mo=fuge*(0.92+0.1*rausch(P/(2.5*k)));vec3 c=mix(st,mo,m);vec3 mittel=mix(b*0.97,fuge,0.2);return mix(mittel,c,sicht(P,C));}' +
     /* Naturstein: feste Korngröße; Körner feiner als ein Bildpunkt gehen in einen etwas dunkleren Mittelton über, statt bei jeder
        Bewegung neu zu würfeln */
     'vec3 granit(vec2 P,vec3 c,float k){float g=0.8*k;float a=sicht(P,2.0*g),a3=sicht(P,4.4*g);float n1=rausch(P/g),n2=rausch(P/(g*1.3)+17.0),n3=rausch(P/(g*2.2)+5.0),n4=rausch(P/(12.0*k)+3.0);' +
@@ -206,8 +208,8 @@ window.Buehne3D = (function () {
     'vec3 holz(vec2 P,vec3 c,float k,bool senk){vec2 q=senk?P.yx:P;float u=q.y/k;float wp=rausch(vec2(q.x/(90.0*k),u/9.0))*7.0+rausch(vec2(q.x/(22.0*k),u/3.0))*1.5;' +
     'float g=fract((u+wp)/6.5);float lin=smoothstep(0.0,0.22,g)*(1.0-smoothstep(0.45,1.0,g));float fein=rausch(vec2(q.x/(4.0*k),u*1.5));float streif=rausch(vec2(q.x/(160.0*k),u/14.0));' +
     'float sh=sicht(P,6.5*k);vec3 r=c*mix(0.9,1.1,streif)*mix(1.0,mix(0.76,1.06,lin)*(0.94+0.12*fein),sh);return r;}' +
-    'vec3 bretter(vec2 P,vec3 c,float k){float B=146.0*k,j=6.0*k;float xx=P.x-0.5*j;float b=floor(xx/B);float x=xx-b*B;float dx=min(x,B-x);float aa=max(gFw.x*0.7,1e-4);float fuge=1.0-smoothstep(0.5*j-aa,0.5*j+aa,dx);' +
-    'vec3 h=holz(vec2(P.x,P.y+hash(vec2(b,3.0))*900.0*k),c*(0.9+0.2*hash(vec2(b,1.0))),k,true);return mix(h,c*0.45,fuge*sicht(P,B*0.4));}' +
+    'vec3 bretter(vec2 P,vec3 c,float k){float B=146.0*k,j=6.0*k;float xx=P.x-0.5*j;float b=floor(xx/B);float x=xx-b*B;float dx=min(x,B-x);float aa=max(gFw.x*0.7,1e-4);float fuge=(1.0-smoothstep(0.5*j-aa,0.5*j+aa,dx))*clamp(j/(2.0*aa),0.0,1.0);' +
+    'vec3 h=holz(vec2(P.x,P.y+hash(vec2(b,3.0))*900.0*k),c*(0.9+0.2*hash(vec2(b,1.0))),k,true);return mix(h,c*0.45,fuge*sicht(P,B));}' +
     'vec3 alu(vec2 P,vec3 c,float k){float n=rausch(vec2(P.x/(40.0*k),P.y/(0.6*k)))*sicht(P,0.6*k);return c*(0.96+0.08*n);}' +
     'uniform highp sampler2DShadow uSM;uniform mat4 uLVP;uniform vec3 uSh;' +
     'const vec2 PD[12]=vec2[12](vec2(-0.326,-0.406),vec2(-0.840,-0.074),vec2(-0.696,0.457),vec2(-0.203,0.621),vec2(0.962,-0.195),vec2(0.473,-0.480),vec2(0.519,0.767),vec2(0.185,-0.893),vec2(0.507,0.064),vec2(0.896,0.412),vec2(-0.322,-0.933),vec2(-0.792,-0.598));' +
@@ -887,17 +889,18 @@ window.Buehne3D = (function () {
       /* Wand ohne Ende; Böden nur nach vorn (innen in den Raum, außen auf die Terrasse) und zur Seite */
       /* Laibung in die Ecken hinein verlängert (verdeckt von der Nachbarfläche), nie vor die Wandebenen */
       const ecke = role === 'rev-t' || role === 'rev-b' ? { x: HAUCH, o: 0, u: 0 } : role === 'rev-l' || role === 'rev-r' ? { x: 0, o: HAUCH, u: HAUCH } : 0;
-      /* Terrasse: begrenzt und zum Ende hin ausgeblendet, sonst wird der Blick durch die Tür dunkel */
+      /* Terrasse: begrenzt und zum Ende hin ausgeblendet, sonst wird der Blick durch die Tür dunkel; lang genug, dass sie auch
+         herausgezoomt (bis 0,5) erst weit vorn ausläuft und keine Fassade unter dem Boden zu sehen ist */
       const terrasse = role === 'floor-out';
       const vor = stufe(role);
-      const tri = role === 'fuge' ? abgerueckt(f.c, f.W, f.H).tri : vor ? dreiecke(aufgeweitet(f.c), f.W, f.H, HAUCH) : dreiecke(wand ? enger(f.c, stage._v && stage._v.bank) : f.c, f.W, f.H, wand ? WEIT : terrasse ? { x: WEIT, o: 0, u: f.H * 2 } : boden ? { x: WEIT, o: 0, u: WEIT } : ecke);
+      const tri = role === 'fuge' ? abgerueckt(f.c, f.W, f.H).tri : vor ? dreiecke(aufgeweitet(f.c), f.W, f.H, HAUCH) : dreiecke(wand ? enger(f.c, stage._v && stage._v.bank) : f.c, f.W, f.H, wand ? WEIT : terrasse ? { x: WEIT, o: 0, u: f.H * 14 } : boden ? { x: WEIT, o: 0, u: WEIT } : ecke);
       if (c.contains('w3d-band') && el._tief > 0.3) { koerper(el, Mf, f.W, f.H, flaecheStoff(el, stage), o, Math.min(f.W, f.H) * 0.3, -el._tief, 0); return; }
       const ao = aoFuer(role, f, stage);
       const glas = c.contains('w3d-glass') && !c.contains('w3d-paneel'), glasGel = c.contains('w3d-gel-glas'), luecke = !glasGel && (c.contains('w3d-gitter') || (c.contains('w3d-gel') && !c.contains('w3d-gel-h')));
       const lage = role === 'floor-out' || role === 'wall-out' || role.indexOf('sa-') === 0 ? 2 : role === 'floor-in' || role.indexOf('sill-') === 0 ? 1 : 0;
       /* seite: nur von vorn sichtbar wie backface-visibility: hidden (Blende des Aufsatzkastens nur von außen) */
       const vorn = role === 'floor-in' || el.style.backfaceVisibility === 'hidden';
-      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 1.2, f.H * 3] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand || c.contains('w3d-rev') || c.contains('w3d-rs'), vor: vor, nachgeben: /^(el-side-|sfe-)/.test(role), ao: ao && ao.k, aoR: ao && ao.r, aoRect: !!(ao && ao.rect), relief: el._relief || null };
+      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 3, f.H * 15] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand || c.contains('w3d-rev') || c.contains('w3d-rs'), vor: vor, nachgeben: /^(el-side-|sfe-)/.test(role), ao: ao && ao.k, aoR: ao && ao.r, aoRect: !!(ao && ao.rect), relief: el._relief || null };
       /* Lamellen mit C-Profil: die Normale neigt sich über die Höhe der Lamelle (_bieg Grad je Kante), so fängt die Wölbung Licht */
       if (el._bieg) { const nb = (g) => { const m = mul(Mf, RX(g)), a = ap(m, 0, 0, 1), z0 = ap(m, 0, 0, 0); return norm([a[0] - z0[0], a[1] - z0[1], a[2] - z0[2]]); }; it.n1 = nb(-el._bieg); it.n2 = nb(el._bieg); it.nAchse = 1; }
       items.push(it);
