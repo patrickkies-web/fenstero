@@ -1,6 +1,16 @@
 # Prompt-Vorlage für Gestaltungsaufträge bei eeziframes
 
-Vier Zeilen von dir, dann das Anhängsel. Alles Übrige steht in CLAUDE.md und in den Skills, du musst nichts wiederholen.
+## Kurzform (reicht im Normalfall)
+
+```
+Ändere den Bereich für Fensterbauer (/fuer-fensterbauer/).
+```
+
+Ein Satz mit dem Bereich, dazu, was dich stört oder was du dir vorstellst, falls du etwas im Kopf hast. Den Rest übernehme ich: Bestand lesen, DNA und Begleit-Skill laden, Startseite und deine Vorlagen daneben legen, entscheiden, was für diesen Bereich Sinn ergibt (Richtung, Szenen, welche Bausteine der Startseite passen, welche Prinzipien aus den Vorlagen übersetzt werden, welches Bild die Bühne trägt), bauen, messen, Gremium eine Runde, Detail-Profis, Vorschau, Protokoll, Commit. Meine Wahl steht in drei Zeilen in der Lieferung; du korrigierst, was dir nicht gefällt. CLAUDE.md bindet die Skills schon; das Anhängsel unten brauchst du nur, wenn du in einem Chat ohne das Projekt sichergehen willst.
+
+## Langform (wenn du steuern willst)
+
+Vier Zeilen, jede davon freiwillig. Was du nennst, gilt vor meiner Wahl.
 
 ```
 Bereich: <Seite oder Abschnitt, Pfad oder Link, Ansicht (Hauseigentümer, Mieter, Fensterbauer)>
@@ -18,7 +28,7 @@ https://claude.ai/artifact/5CqFMQ5g8XJaKtQwjaUW97) und der Begleit-Skill design-
 meine Entscheidungen, Rezept, Messwerkzeuge). Nicht laden: premium-gestaltung, ultimativ-webdesign, webdesign-wow.
 Referenz der Qualität: die Startseite vom 26.10.2026 (https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i,
 Quelle docs/profis/startseite-dna-vorschau/, Protokoll docs/profis/2026-10-26-startseite-dna.md).
-Gleiche Hand, gleiche Tiefe, nicht dieselben Elemente.
+Gleiche Hand, gleiche Tiefe; Bausteine übernehmen, wo sie passen, aus den Vorlagen übersetzen, wo sie nicht reichen.
 Vorlagen: docs/profis/vorlagen/2026-10-26/ (Vorbild: Prinzip übernehmen, nie das Motiv).
 Ablauf: Rezept aus dem Begleit-Skill (bauen Telefon zuerst, messen, Gremium profis eine Runde, vier Detail-Profis,
 Abgleich mit den Vorlagen, Farbtabelle je Bildschirm, Vorschau als Artifact, Protokoll unter docs/profis/,
@@ -27,7 +37,7 @@ Commit auf dem Arbeitszweig). Online nichts ohne mein Ja.
 
 ## Die drei Richtungen (aus `design-dna`, Abschnitt 3, Schritt 4)
 
-Jede Richtung bleibt in der DNA und in der Palette. Sie unterscheiden sich darin, wie weit die Idee von der Startseite wegrückt.
+Du musst keine Richtung nennen. Ohne Angabe wähle ich je Szene die, die zum Inhalt passt, und nenne die Wahl in der Lieferung. Die Beschreibung hier ist dafür da, dass du meine Wahl einordnen oder eine Richtung vorgeben kannst. Jede Richtung bleibt in der DNA und in der Palette; sie unterscheiden sich darin, wie weit die Idee von der Startseite wegrückt.
 
 ### Naheliegend: die Bausteine der Startseite neu zusammengesetzt
 
@@ -83,4 +93,4 @@ Material: keins, Renderings aus dem Projekt.
 - **Material** mit Rolle (Vorbild, Material, Gegenbeispiel) verhindert, dass ein Motiv kopiert wird.
 - **Grenzen** ausdrücklich („kein Handy im Hero“, „keine Riesenwörter“); sie landen in Abschnitt 4 des Begleit-Skills.
 - Wenn ich eine Regel aus einem alten Skill anwende: sagen. Ich nehme sie raus und schreibe die Korrektur ins Protokoll und in Abschnitt 4.
-- Nennst du keine Richtung, baue ich die stärkste und nenne die anderen beiden in je einer Zeile.
+- Nennst du keine Richtung, kein Material und keine Grenzen, entscheide ich alles aus dem Material und nenne die Wahl in drei Zeilen; das ist der Normalfall.
