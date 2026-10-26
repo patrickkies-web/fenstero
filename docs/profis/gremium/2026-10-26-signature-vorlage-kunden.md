@@ -7,11 +7,11 @@ Hinweis der Moderation: Der erste Telefonbildschirm ist im Website-Zustand in be
 ## Renate Vogel, 71
 
 ### Fassung Y
-Blick 1: ein schräges Handy im Fensterlicht, etwas Gelbes darauf – mein Fensterbauer? Blick 2: „Neue Fenster, gut geplant.“ – groß genug ohne Brille. Blick 3: der weiße Knopf „Fenster planen“, daneben „So geht es“ – da tippe ich zuerst.
-Was ist das? Die Seite von Fensterbau Brandt, ich messe selbst, dann kommt ein Angebot. Was kostet es? „Kostenlos und unverbindlich“, den Preis der Fenster sagt das Angebot. Weiter unten aber: „Was das Nachmessen kostet, steht im Angebot“ – also kostet es doch etwas, und keiner sagt, wie viel. Was tue ich? Zollstock holen, „Fenster planen“.
+Blick 1: ein schräges Handy im Fensterlicht – mein Fensterbauer? Blick 2: „Neue Fenster, gut geplant.“ – groß genug ohne Brille. Blick 3: der weiße Knopf „Fenster planen“, daneben „So geht es“ – da tippe ich zuerst.
+Was ist das? Die Seite von Fensterbau Brandt, ich messe selbst, dann kommt ein Angebot. Was kostet es? „Kostenlos und unverbindlich“, den Preis der Fenster sagt das Angebot. Unten aber: „Was das Nachmessen kostet, steht im Angebot“ – also kostet es doch etwas, und keiner sagt, wie viel. Was tue ich? „Fenster planen“.
 Abbruch: beinahe bei „spricht der Konfigurator Sie kurz mit ‚du‘ an“ – ein Programm duzt mich, mit 71?
 Einladung: wie ein Brief von Frau Brandt, mit der ich telefoniert habe; angesprochen, nicht beobachtet. Der Link ist mein Zugang, verstanden; „P-2026-001“ will ich mir nicht merken müssen.
-Innenkarte: beruhigend wie die Paketverfolgung. Nur „Ihr Berater“ – wer? Ich habe Frau Brandt.
+Innenkarte: beruhigend wie beim Paket. Nur „Ihr Berater“ – wer? Ich habe Frau Brandt.
 
 ### Fassung X
 Blick 1–3: dasselbe Bild wie Y – Handy, Überschrift, weißer Knopf; ich sehe keinen Unterschied. Was ist das, was kostet es, was tue ich: wie bei Y.
@@ -46,9 +46,9 @@ Abbruch: nein.
 ## Sabine Kraus, 44
 
 ### Fassung Y
-Blick 1: das dunkle Bild mit dem Handy, hübsch, aber ich suche Text. Blick 2: „Messen Sie in Ruhe selbst“ – da zieht sich mir der Magen zusammen. Blick 3: „Schritt für Schritt erklärt“ – Luft holen.
-Was ist das? Die Seite meines Fensterbauers; ich messe, er bietet an. Was kostet es? Nichts, steht da. Aber „Was das Nachmessen kostet, steht im Angebot“: Wenn ich falsch messe, zahle ich dann das Nachmessen? Was tue ich? Erst „So geht es“, dann vielleicht planen.
-Abbruch: fast bei Schritt 2 „Messen“, gerettet durch „Vor der Fertigung wird nachgemessen“ – das gehört in den ersten Bildschirm, nicht in den vierten.
+Blick 1: das dunkle Bild mit dem Handy, ich suche Text. Blick 2: „Messen Sie in Ruhe selbst“ – da zieht sich mir der Magen zusammen. Blick 3: „Schritt für Schritt erklärt“ – Luft holen.
+Was ist das? Die Seite meines Fensterbauers; ich messe, er bietet an. Was kostet es? Nichts, steht da. Aber „Was das Nachmessen kostet, steht im Angebot“: Wenn ich falsch messe, zahle ich dann das Nachmessen? Was tue ich? Erst „So geht es“.
+Abbruch: fast bei Schritt 2 „Messen“, gerettet durch „Vor der Fertigung wird nachgemessen“ – das gehört in den ersten Bildschirm.
 Einladung: „Für Ihr Angebot brauche ich die Maße Ihrer Fenster“ – Frau Brandt verlässt sich auf meine Maße. Angesprochen, ja, aber verantwortlich gemacht. Link verstanden.
 Innenkarte: beruhigend, „hilft, wenn Sie hängen“ – jemand ist da. „Maße und Fotos erst nach dem Senden“ verstehe ich nicht: Bekomme ich Hilfe erst nach dem Senden?
 
@@ -65,10 +65,10 @@ Abbruch: bei Schritt 2 wahrscheinlicher als bei Y, weil mir keiner hilft.
 ## Thomas Berger, 55
 
 ### Fassung Y
-Blick 1: Etikett „fensterbau-brandt .de“ mit Schloss – die Adresse stimmt. Blick 2: „Petra Brandt, Geschäftsführung“ – ein Name, der haftet. Blick 3: „Den Preis Ihrer Fenster nennt das Angebot“ – korrekt.
-Was ist das? Vorerfassung meiner Fenster für den Betrieb, Aufmaßblatt als PDF, dann Angebot. Kostet: die Planung nichts; das Nachmessen „steht im Angebot“, also möglicherweise etwas. Was tue ich? Alles lesen, dann planen.
-Abbruch: nein, aber Halt bei den Daten. „Durch einen technischen Dienstleister“ – wer? Kein Name. X nannte den Namen und eine Löschfrist; hier steht „liegen danach bei Fensterbau Brandt“ – wie lange? Oben „ohne Konto“, unten „Ihr Berater sieht, wie weit Sie sind“ – über die Website, ohne Konto, ohne Link: wie? Die Kapseln: eine weiß, eine gold, zwei schraffiert; die Zahl sagt „2 von 4“ – ist Fenster zwei fertig oder in Arbeit?
-Einladung: angesprochen; „P-2026-001“ ist eine Vorgangsnummer, nachvollziehbar. Link verstanden; offen: Sieht jeder, der den Link hat, meine Planung?
+Blick 1: Etikett „fensterbau-brandt .de“ mit Schloss – die Adresse stimmt. Blick 2: „Petra Brandt, Geschäftsführung“ – ein Name. Blick 3: „Den Preis Ihrer Fenster nennt das Angebot“.
+Was ist das? Vorerfassung meiner Fenster für den Betrieb, Aufmaßblatt als PDF, dann Angebot. Kostet: die Planung nichts; das Nachmessen „steht im Angebot“, also möglicherweise etwas. Was tue ich? Lesen, dann planen.
+Abbruch: nein, aber Halt bei den Daten. „Durch einen technischen Dienstleister“ – wer? X nannte den Namen und eine Löschfrist; hier steht „liegen danach bei Fensterbau Brandt“ – wie lange? Oben „ohne Konto“, unten „Ihr Berater sieht, wie weit Sie sind“ – über die Website ohne Link: wie? Kapseln: eine weiß, eine gold, zwei schraffiert; die Zahl sagt „2 von 4“ – ist Fenster zwei fertig oder in Arbeit?
+Einladung: angesprochen; „P-2026-001“ ist eine Vorgangsnummer. Link verstanden; offen: Sieht jeder, der den Link hat, meine Planung?
 Innenkarte: nicht unheimlich, unpräzise.
 
 ### Fassung X
@@ -84,11 +84,11 @@ Abbruch: nein.
 ## Gisela Pohl, 66
 
 ### Fassung Y
-Blick 1: ein Handy, schräg und dunkel – schick, sagt der Enkel. Blick 2: „Kostenlos und unverbindlich“ mit Häkchen – der Köder. Blick 3: „Petra Brandt, Geschäftsführung“ – immerhin ein Mensch.
-Was ist das? Ich mache dem Fensterbauer das Aufmaß, zu Hause, umsonst. Kostet: angeblich nichts. Der Haken: „Was das Nachmessen kostet, steht im Angebot“ – gefunden. Was tue ich? Der Enkel tippt „So geht es“.
-Abbruch: fast bei „Bevor Sie senden, sieht Fensterbau Brandt … nur, wie weit Sie sind“ – also sehen die doch etwas, bevor ich sende. Und im Fuß „Team-Zugang“ mit Schloss: welches Team liest da?
-Einladung: Das ist die Frau Brandt vom Telefon, „Guten Tag, Familie Weber“ – angesprochen. Aber „Ihr Link · P-2026-001“: ich bin eine Nummer; und „jederzeit zurück, auf jedem Gerät“ heißt, meine Sachen liegen im Internet, nicht auf meinem Handy.
-Innenkarte: unheimlich. „Ihr Berater sieht, wie weit Sie sind“ – ich werde beim Messen beobachtet. „Maße und Fotos erst nach dem Senden“ steht danach, zu klein.
+Blick 1: ein Handy, schräg und dunkel. Blick 2: „Kostenlos und unverbindlich“ mit Häkchen – der Köder. Blick 3: „Petra Brandt, Geschäftsführung“ – immerhin ein Mensch.
+Was ist das? Ich mache dem Fensterbauer das Aufmaß, zu Hause, umsonst. Kostet: angeblich nichts. Der Haken: „Was das Nachmessen kostet, steht im Angebot“. Was tue ich? Der Enkel tippt „So geht es“.
+Abbruch: fast bei „Bevor Sie senden, sieht Fensterbau Brandt … nur, wie weit Sie sind“ – also sehen die doch etwas, bevor ich sende. Im Fuß „Team-Zugang“: welches Team liest da?
+Einladung: Die Frau Brandt vom Telefon, „Guten Tag, Familie Weber“ – angesprochen. Aber „Ihr Link · P-2026-001“: ich bin eine Nummer; und „jederzeit zurück, auf jedem Gerät“ heißt, meine Sachen liegen im Internet.
+Innenkarte: unheimlich. „Ihr Berater sieht, wie weit Sie sind“ – ich werde beim Messen beobachtet. „Maße und Fotos erst nach dem Senden“ steht danach, klein.
 
 ### Fassung X
 Blick 1–3: dasselbe Bild, dasselbe Verständnis. Dann: „sieht Fensterbau Brandt nichts von Ihrer Planung“ und „löscht die Anfrage 30 Tage nach der Zustellung“ – Sätze, die ich glauben kann. Aber „eeziframes übermittelt“ – wer ist eeziframes? Fremde Firma, unten noch einmal „Konfigurator von eeziframes“: Nicht nur Fensterbau Brandt hat meine Fotos. Bei Y heißt derselbe Fremde „technischer Dienstleister“ – ohne Namen, noch weniger. Keiner von beiden sagt mir, wer das ist und wo.
@@ -104,7 +104,7 @@ Abbruch: beim Fuß, fremder Name; der Enkel googelt.
 
 ### Fassung Y
 Blick 1: ein Foto von einem Handy auf meinem Handy, Grund eins. Blick 2: „Messen Sie in Ruhe selbst“ – ich mache die Arbeit des Fensterbauers, Grund zwei. Blick 3: „Kostenlos“ – kostet es nichts, bin ich die Ware. Zu, Sekunde drei.
-Was ist das, in meinen Worten: ein Formular, mit dem der Betrieb den Aufmaßtermin spart und mir das Risiko lässt. „Was das Nachmessen kostet, steht im Angebot“: Messe ich falsch, zahle ich. Kostet: „kostenlos“ plus das. Was tue ich? „Fenster planen“ – plane ich oder bestelle ich? Steht nicht da. Mieter mit Erlaubnis: kein Wort.
+Was ist das: ein Formular, mit dem der Betrieb den Aufmaßtermin spart und mir das Risiko lässt. „Was das Nachmessen kostet, steht im Angebot“: Messe ich falsch, zahle ich. Kostet: „kostenlos“ plus das. Was tue ich? „Fenster planen“ – plane ich oder bestelle ich? Mieter mit Erlaubnis: kein Wort.
 Einladung: „Guten Tag, Familie Weber“ – ich bin keine Familie; „P-2026-001“ – Kunde Nummer eins, der Laden hat sonst keinen. „Ihr persönlicher Link“ – persönlich heißt: er sieht, wann ich klicke. Beobachtet.
 Innenkarte: unheimlich und widersprüchlich. Oben „ohne Konto“, unten „Ihr Berater sieht, wie weit Sie sind“ – einer der Sätze lügt. Dazu „Team-Zugang“: das Team liest mit.
 
