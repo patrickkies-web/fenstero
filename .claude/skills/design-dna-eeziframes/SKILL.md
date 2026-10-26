@@ -55,6 +55,13 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Kürzere Entscheidungsfindung (Korrektur des Inhabers, 26.10.2026): Gremium eine Runde, danach nur die Muss-Punkte und Vetos umsetzen;
   Detail-Profis und Vorlagen-Abgleich entfallen, sofern er sie nicht nennt. Ihre Befunde bleiben als Kann-Liste im Protokoll. Die Vorlage
   beim Inhaber: Vorschau, drei Sätze je Gruppe, Muss-Liste, fertig.
+- Jede Folie für sich (Korrektur des Inhabers, 26.10.2026, Schritt 1 „Was planst du?“): Eine Folie des Konfigurators wird nicht von
+  anderen Folien oder von der Musterseite „Konfigurator in Violett“ abgeschaut, auch nicht als „Musterfolie“ oder im Familientest.
+  Quellen sind allein die, die er im Auftrag nennt: die DNA (Gene, Formensprache, Bausteine, Palette, App-Rahmen), die Startseite vom
+  26.10.2026, seine Vorlagen unter docs/profis/vorlagen/, die Seite „Konfigurator von Muster Fensterbau“
+  (https://claude.ai/artifact/AeVzh8NgNvxEqcDTwdxhiM) und der Bestand der Folie selbst. Ideen kommen aus der Ideenmatrix zu diesen
+  Quellen, nicht aus dem Nachbau einer bestehenden Folie. Vorschlag für seine DNA: in Abschnitt 9 den Satz „Vorbild sind die Folien in
+  ‚Konfigurator in Violett‘“ durch „Jede Folie entsteht aus den Genen und Bausteinen für ihren Inhalt“ ersetzen.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
