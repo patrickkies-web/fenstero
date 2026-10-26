@@ -36,11 +36,15 @@
   })();
 
   function daten(root, d) {
+    /* Einstieg in die App: Ziel aus portal.js; mit angefangenem Aufmaß heißen alle Einstiege „Aufmaß fortsetzen“, sonst wie gestaltet */
     root.querySelectorAll('a[href="/app/#ausmessen"], a[data-ez-app]').forEach((a) => {
-      a.setAttribute('data-ez-app', ''); a.setAttribute('href', d.app);
       const t = Array.from(a.childNodes).find((n) => n.nodeType === 3 && n.textContent.trim());
-      if (t && /Jetzt konfigurieren|Aufmaß fortsetzen/.test(t.textContent)) t.textContent = t.textContent.replace(/Jetzt konfigurieren|Aufmaß fortsetzen/, d.appLabel);
+      if (!a.hasAttribute('data-ez-app')) a.setAttribute('data-ez-app', t ? t.textContent.trim() : '');
+      a.setAttribute('href', d.app);
+      if (t) t.textContent = (d.weiter ? d.appLabel : a.getAttribute('data-ez-app')) + (/\s$/.test(t.textContent) ? ' ' : '');
     });
+    const weiter = root.querySelector('[data-ez="weiter"]');
+    if (weiter) { weiter.hidden = !d.weiter; weiter.textContent = d.weiter ? 'Dein Aufmaß ist angefangen: ' + d.weiter + ' Fenster erfasst, gespeichert in diesem Browser.' : ''; }
     const preis = root.querySelector('[data-ez="preis"]'), zahl = root.querySelector('[data-ez="preiszahl"]');
     if (preis && d.preis) preis.textContent = d.preis.replace(' ', ' ');
     if (zahl && d.preis) zahl.textContent = d.preis.replace(/\s*€\s*$/, '');

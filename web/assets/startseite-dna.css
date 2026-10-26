@@ -476,3 +476,8 @@
 .ez-fuss__pilot b { font-weight: 500; color: var(--tinte); }
 
 @media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }
+
+/* Angefangenes Aufmaß: eine leise Zeile unter den Handlungen, der violette Punkt zeigt „aktiv“ */
+.ez-weiter { margin: 14px 0 0; display: flex; align-items: center; gap: 10px; font-size: 14px; line-height: 1.4; color: var(--tinte-2); max-width: 36ch; }
+.ez-weiter::before { content: ""; flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 4px color-mix(in srgb, var(--violett) 22%, transparent); }
+.ez-weiter[hidden] { display: none; }
