@@ -6,7 +6,7 @@ Blind: X = Signature (neue Vorlage, scratchpad r3/r3z), Y = Plus (scratchpad x).
 
 X, Blicke: 1 „Muster · Website | Einladung“ und rechts ein Kreis ohne Namen; 2 Telefon im Fensterlicht, „fensterbau-brandt.de“ mit Schloss; 3 „Neue Fenster, gut geplant.“, Pille im unteren Drittel.
 Y, Blicke: 1 Telefon; 2 Überschrift; 3 Pille, darunter schon der weiße Vorhang.
-Der Name: Zufall, meine Kunden glaubten es. Daten: „2 von 4 Fenstern“, die Kapseln zeigen eine weiße, eine goldene, zwei schraffierte – ist Fenster zwei fertig oder dran? „Was das Nachmessen kostet, steht im Angebot“: bei mir nichts, muss weg können (beide). Y löscht nach 30 Tagen, X sagt „dort bleibt es griffbereit“ – mein Kaufgrund, ohne Etikett. Bühne zeigt Festverglasung, die Reihe nicht (beide).
+Der Name: Zufall, meine Kunden glaubten es. Daten: „2 von 4 Fenstern“, die Kapseln zeigen eine weiße, eine goldene, zwei schraffierte – ist Fenster zwei fertig oder dran? „Was das Nachmessen kostet, steht im Angebot“: bei mir nichts, muss weg können (beide). Y löscht nach 30 Tagen, X sagt „dort bleibt es griffbereit“ – mein Kaufgrund, ohne Etikett.
 Fünf Sekunden: am Schreibtisch ja; am Telefon „Muster“ und ein Kreis. Einladung: ja, aber bei 14 Leuten nicht in Petras Namen – Absender ist, wer beim Kunden war.
 Noten X/Y: seriös 4/4 · verständlich 4/4 · zumuten 4/4 · Küchentisch 3/3 · kaufen 3/3.
 
@@ -16,8 +16,8 @@ Hand: 4. Muss: Zahl und Kapseln stimmen überein. Kann: Nachmessen-Satz abschalt
 ## Sarah Kranich, 34, Vertrieb und Marketing, 40 Mitarbeiter
 
 X, Blicke: 1 der Umschalter „Website | Einladung“ – ich tippe sofort; 2 Telefon im Streiflicht; 3 „Neue Fenster, gut geplant.“ Dann „Guten Tag, Familie Weber.“ mit Glas-Etikett – das Wow, aber erst nach dem Tippen.
-Y, Blicke: 1 Telefon; 2 Überschrift; 3 Pille und Vorhang. Sauber, und nichts, was ich dem Chef als Grund für 25 € zeigen könnte.
-X verkauft über den Einladungszustand: Name, Brief, „Ihr persönlicher Link“. Aber „P-2026-001“ sagt dem Kunden, er ist der Erste im Jahr – im Herbst peinlich. Der Kreis hat keinen Namen, am Telefon fehlt das Wort Signature. „Ihr Berater sieht, wie weit Sie sind, und hilft, wenn Sie hängen“ ist ein Versprechen, das mein Team halten muss – gut so. Fehlt mir: ein Foto des Beraters statt „PB“.
+Y, Blicke: 1 Telefon; 2 Überschrift; 3 Pille und Vorhang. Nichts, was ich dem Chef als Grund für 25 € zeigen könnte.
+X verkauft über den Einladungszustand: Name, Brief, „Ihr persönlicher Link“. Aber „P-2026-001“ sagt dem Kunden, er ist der Erste im Jahr – im Herbst peinlich. Der Kreis hat keinen Namen, am Telefon fehlt das Wort Signature. „Ihr Berater sieht, wie weit Sie sind, und hilft, wenn Sie hängen“ ist ein Versprechen an mein Team – gut so. Fehlt mir: ein Foto des Beraters statt „PB“.
 Fünf Sekunden: Schreibtisch ja, Telefon nein. Einladung: genau das würde ich verschicken.
 Noten X/Y: seriös 5/4 · verständlich 4/4 · zumuten 5/4 · Küchentisch 4/3 · kaufen 4/3.
 
@@ -26,9 +26,9 @@ Hand: 5. Muss: Nummer nicht als laufende Zählung beim Kunden. Kann: Foto des Be
 
 ## Deniz Yilmaz, 41, Inhaber, 3 Mann
 
-X, Blicke: 1 „Muster“ und ein Kreis – was ist der Kreis?; 2 Telefon; 3 Überschrift, Pille erst im unteren Drittel.
+X, Blicke: 1 „Muster“ und ein Kreis ohne Namen; 2 Telefon; 3 Überschrift.
 Y, Blicke: 1 Telefon; 2 Überschrift; 3 Pille. Für meinen Kunden sind X und Y dieselbe Seite.
-Was ich für 25 € mehr sehe: „Konfigurator von eeziframes“ im Fuß fehlt – liest keiner. Einladungslink – meine Kunden rufen an. Fünf Zugänge – wir sind drei. „Ihr Berater … hilft, wenn Sie hängen“: der Berater bin ich, das sind Anrufe. Im Website-Zustand steht „In Bearbeitung · 2 von 4 Fenstern“ – wer da plant, fragt der Besucher. „Technischer Dienstleister“ ohne Namen bringt die Rückfrage „wer?“; in Y steht wenigstens ein Name. Die Unterzeile zählt Logo, Farbe, 6 Fotos auf – das habe ich für 39 € auch; „nur Signature“ steht an vier Etiketten.
+Was ich für 25 € mehr sehe: „Konfigurator von eeziframes“ im Fuß fehlt – liest keiner. Einladungslink – meine Kunden rufen an. Fünf Zugänge – wir sind drei. „Ihr Berater … hilft, wenn Sie hängen“: der Berater bin ich, das sind Anrufe. Im Website-Zustand steht „In Bearbeitung · 2 von 4 Fenstern“ – wer da plant, fragt der Besucher. „Technischer Dienstleister“ ohne Namen bringt die Rückfrage „wer?“. Die Unterzeile zählt Logo, Farbe, 6 Fotos auf – habe ich für 39 € auch; „nur Signature“ steht an vier Etiketten.
 Fünf Sekunden: am Telefon nein. Einladung: praktisch nach dem Termin, aber keine 300 € im Jahr wert.
 Noten X/Y: seriös 4/4 · verständlich 3/4 · zumuten 3/4 · Küchentisch 3/3 · kaufen 2/4.
 
@@ -37,10 +37,10 @@ Hand: 3. Muss: Karte nur im Einladungszustand. Kann: Kreis beschriften. Korrektu
 
 ## Tobias Reuter, 29, Monteur fürs Feinaufmaß, 15 Mitarbeiter
 
-X, Blicke: 1 Telefon mit dem Konfigurator; 2 Domain-Etikett; 3 Überschrift. Die Leiste oben lese ich nicht, ich kaufe nicht.
+X, Blicke: 1 Telefon mit dem Konfigurator; 2 Domain-Etikett; 3 Überschrift. Die Leiste lese ich nicht.
 Y, Blicke: 1 Telefon; 2 Überschrift; 3 „Etwa 5 Minuten je Fenster“.
-Mein Satz steht in X: „Nachmessen vor Ort … mit Ihren Unterlagen aus dem Dashboard.“ In Y liegt das Blatt im Postfach vom Büro, ich kriege einen Ausdruck. „Maße und Fotos erst nach dem Senden“ – richtig. „Team-Zugang“ mit Schloss, fünf Zugänge für 15 Leute: ob das auf meinem Handy vor dem Fenster läuft, steht nirgends, davon hängt der Satz ab. „Breite und Höhe, Öffnung und Fenster“ stimmt (beide). Falsch verstehen: „In Bearbeitung · 2 von 4“ ohne Link liest ein Besucher als fremde Planung; „Nachmessen kostet“ – bei uns im Preis.
-Fünf Sekunden: zwei Etiketten betreffen mich, am Telefon erst nach dem Kreis. Einladung: nicht mein Werkzeug; „auf jedem Gerät weiter“ hilft, wenn der Kunde am Fenster steht und das Tablet drinnen liegt.
+Mein Satz steht in X: „Nachmessen vor Ort … mit Ihren Unterlagen aus dem Dashboard.“ In Y liegt das Blatt im Büro-Postfach, ich kriege einen Ausdruck. „Maße und Fotos erst nach dem Senden“ – richtig. „Team-Zugang“ mit Schloss, fünf Zugänge für 15 Leute: ob das am Handy vor dem Fenster läuft, steht nirgends. Falsch verstehen: „In Bearbeitung · 2 von 4“ ohne Link liest ein Besucher als fremde Planung; „Nachmessen kostet“ – bei uns im Preis.
+Fünf Sekunden: zwei Etiketten betreffen mich, am Telefon erst nach dem Kreis. Einladung: nicht mein Werkzeug; „auf jedem Gerät weiter“ hilft, wenn das Tablet drinnen liegt.
 Noten X/Y: seriös 4/4 · verständlich 4/4 · zumuten 4/4 · Küchentisch 3/3 · kaufen 4/3.
 
 Abstimmung: 1 behalten · 2 behalten · 3 ändern: „Fenster 2 von 4“, Karte nur mit Link · 4 behalten · 5 behalten · 6 ändern: das Team-Zugang-Etikett sagt, ob der Zugang am Handy vor Ort geht; wenn nicht, brauche ich ihn nicht · 7 behalten · 8 behalten · 9 behalten.
@@ -48,10 +48,10 @@ Hand: 4. Muss: Dashboard vor Ort am Handy, sonst ist „mit Ihren Unterlagen aus
 
 ## Michael Sonntag, 46, Vertrieb, 60 Mitarbeiter
 
-X, Blicke: 1 „Website | Einladung“ – ich tippe Einladung; 2 Telefon; 3 Überschrift. Dann „Guten Tag, Familie Weber.“ und „Für Familie Weber · Ihr Link“ – genau das.
-Y, Blicke: 1 Telefon; 2 Überschrift; 3 Pille. Ohne Link ist Y für mich ein Prospekt.
-Der Einladungszustand ist mein Werkzeug nach dem Küchentisch: Name, „Für Ihr Angebot brauche ich die Maße Ihrer Fenster“, „auf jedem Gerät weiter“, und „Oder Sie antworten einfach auf die Nachricht, mit der dieser Link kam“ – das ist WhatsApp, bester Satz der Seite. Aber der Brief kommt von „Petra Brandt, Geschäftsführung“; am Tisch saß ich, und die Kontakt-Karte zeigt die Zentrale. Die Innenkarte erkläre ich in fünf Sekunden: „Ich sehe, wo Sie hängen, und rufe an.“ „P-2026-001“ liest der Kunde als Nummer eins. Die letzte Zeile hängt an der Kante.
-Fünf Sekunden: ja – Einladung, Fortschritt, kein Fremdname. Datenqualität: nichts, was ein Kunde falsch liest; mir fehlt mein Name.
+X, Blicke: 1 „Website | Einladung“ – ich tippe Einladung; 2 Telefon; 3 Überschrift. Dann „Guten Tag, Familie Weber.“ – genau das.
+Y, Blicke: 1 Telefon; 2 Überschrift; 3 Pille. Ohne Link ist Y ein Prospekt.
+Der Einladungszustand ist mein Werkzeug nach dem Küchentisch: Name, „auf jedem Gerät weiter“ und „Oder Sie antworten einfach auf die Nachricht, mit der dieser Link kam“ – das ist WhatsApp, bester Satz der Seite. Aber der Brief kommt von „Petra Brandt, Geschäftsführung“; am Tisch saß ich, und die Kontakt-Karte zeigt die Zentrale. Die Innenkarte erkläre ich in fünf Sekunden: „Ich sehe, wo Sie hängen, und rufe an.“ „P-2026-001“ liest der Kunde als Nummer eins. Die letzte Zeile hängt an der Kante.
+Fünf Sekunden: ja – Einladung, Fortschritt, kein Fremdname. Datenqualität: nichts falsch zu lesen; mir fehlt mein Name.
 Noten X/Y: seriös 5/4 · verständlich 4/4 · zumuten 5/4 · Küchentisch 5/3 · kaufen 5/2.
 
 Abstimmung: 1 ändern: Kreis beschriften · 2 ändern: Absender ist der Berater, mit Namen im Brief und in der Kontakt-Karte · 3 behalten · 4 behalten · 5 behalten · 6 behalten · 7 behalten · 8 behalten · 9 behalten.
@@ -59,9 +59,9 @@ Hand: 5. Muss: Absender frei wählbar. Kann: Nummer kleiner. Korrektur: Kontakt-
 
 ## Petra Lindqvist, 50, Geschäftsführerin, 25 Mitarbeiter
 
-X, Blicke: 1 „Muster“ – gut, dass das in der Vorlage steht, nicht auf meiner Seite; 2 Domain-Etikett mit Schloss; 3 Überschrift.
+X, Blicke: 1 „Muster“ – gut, dass das nur in der Vorlage steht; 2 Domain-Etikett mit Schloss; 3 Überschrift.
 Y, Blicke: 1 Telefon; 2 Überschrift; 3 Haken-Zeile. Im Fuß „Konfigurator von eeziframes“ – genau das kaufe ich mit 25 € weg.
-X liefert: kein Fremdname, „Team-Zugang“ unter meiner Domain, Einladung in meinem Namen – bei 25 Leuten richtig. Hart: Szene 4 sagt in einem Absatz „durch einen technischen Dienstleister“ und „nicht bei Dritten“ – mein Datenschutzbeauftragter unterschreibt das nicht, der Kunde liest einen Widerspruch. Y sagt „löscht nach 30 Tagen“; X sagt nichts zur Dauer, mein Wettbewerber schreibt „Server in Deutschland“. „Ihr Berater sieht, wie weit Sie sind“ ist Beobachtung vor dem Senden; „Maße und Fotos erst nach dem Senden“ rettet es. Die Unterzeile mischt Plus und Signature. „P-2026-001“ ist eine Vorgangsnummer, seriös.
+X liefert: kein Fremdname, „Team-Zugang“ unter meiner Domain, Einladung in meinem Namen – bei 25 Leuten richtig. Hart: Szene 4 sagt in einem Absatz „durch einen technischen Dienstleister“ und „nicht bei Dritten“ – mein Datenschutzbeauftragter unterschreibt das nicht, der Kunde liest einen Widerspruch. Y sagt „löscht nach 30 Tagen“; X sagt nichts zur Dauer, mein Wettbewerber schreibt „Server in Deutschland“. „Ihr Berater sieht, wie weit Sie sind“ ist Beobachtung vor dem Senden; der Zusatz rettet es. Die Unterzeile mischt Plus und Signature. „P-2026-001“ ist eine Vorgangsnummer, seriös.
 Fünf Sekunden: Schreibtisch ja, Telefon nein. Einladung: ja.
 Noten X/Y: seriös 4/3 · verständlich 4/4 · zumuten 4/4 · Küchentisch 4/3 · kaufen 4/2.
 
