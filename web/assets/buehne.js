@@ -863,7 +863,7 @@ window.Buehne3D = (function () {
       const lage = role === 'floor-out' || role === 'wall-out' || role.indexOf('sa-') === 0 ? 2 : role === 'floor-in' || role.indexOf('sill-') === 0 ? 1 : 0;
       /* seite: nur von vorn sichtbar wie backface-visibility: hidden (Blende des Aufsatzkastens nur von außen) */
       const vorn = role === 'floor-in' || el.style.backfaceVisibility === 'hidden';
-      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 1.2, f.H * 3] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand || c.contains('w3d-rev') || c.contains('w3d-rs'), vor: vor, ao: ao && ao.k, aoR: ao && ao.r, aoRect: !!(ao && ao.rect), relief: el._relief || null };
+      const it = { el: el, role: role, c: f.c, lage: lage, seite: vorn ? 1 : role === 'floor-out' ? -1 : 0, M: Mf, W: f.W, H: f.H, tri: tri, st: flaecheStoff(el, stage), op: o, fade: terrasse ? [f.H * 1.2, f.H * 3] : null, wirftNicht: role === 'rev-b' || (role.indexOf('rs-') === 0 && el._bgc === 'transparent') || boden || luecke, rund: c.contains('w3d-pilz') ? Math.min(f.W, f.H) / 2 : el._rund ? Math.min(el._rund, f.W / 2, f.H / 2) : 0, glas: glas, durch: glas || terrasse || glasGel || c.contains('w3d-scheibe') || c.contains('w3d-mesh') || c.contains('w3d-sicht-u'), hinten: wand || c.contains('w3d-rev') || c.contains('w3d-rs'), vor: vor, nachgeben: /^(el-side-|sfe-)/.test(role), ao: ao && ao.k, aoR: ao && ao.r, aoRect: !!(ao && ao.rect), relief: el._relief || null };
       /* Lamellen mit C-Profil: die Normale neigt sich über die Höhe der Lamelle (_bieg Grad je Kante), so fängt die Wölbung Licht */
       if (el._bieg) { const nb = (g) => { const m = mul(Mf, RX(g)), a = ap(m, 0, 0, 1), z0 = ap(m, 0, 0, 0); return norm([a[0] - z0[0], a[1] - z0[1], a[2] - z0[2]]); }; it.n1 = nb(-el._bieg); it.n2 = nb(el._bieg); it.nAchse = 1; }
       items.push(it);
@@ -1107,7 +1107,10 @@ window.Buehne3D = (function () {
     [false, true].forEach((cut) => {
       const pp = cut ? L.pr : L.pr0, uu = pp.u;
       gl.useProgram(pp.p); global(gl, uu, B, VP, eye, L, seite);
-      offen.forEach((it) => { if (it.schnitt !== cut) return; if (it.hinten) gl.polygonOffset(1, 3); else if (it.vor) gl.polygonOffset(-it.vor, -2 * it.vor); else gl.polygonOffset(0, 0); malen(gl, uu, it, 0.5); });
+      /* Versätze nur in festen Einheiten, nicht mit der Neigung der Fläche: sonst entscheidet der Blickwinkel, wer gewinnt (schräg wurde die
+         Laibung weit nach hinten geschoben, die Rahmenseiten schienen durch, und der Flügel schnitt den Griffkörper ab). Die Rahmenseiten
+         (el-side, nur durch die Fuge zu sehen) und die Flügelkanten geben bei gleicher Tiefe nach */
+      offen.forEach((it) => { if (it.schnitt !== cut) return; if (it.hinten) gl.polygonOffset(0, 4); else if (it.vor) gl.polygonOffset(0, -2 * it.vor); else if (it.nachgeben) gl.polygonOffset(1, 2); else gl.polygonOffset(0, 0); malen(gl, uu, it, 0.5); });
     });
     gl.polygonOffset(0, 0); gl.disable(gl.POLYGON_OFFSET_FILL);
     gl.useProgram(pr.p);
