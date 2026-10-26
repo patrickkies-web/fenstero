@@ -36,7 +36,7 @@ const ziele = await page.evaluate(() => {
   const klein = [];
   document.querySelectorAll('a, button').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || el.closest('.ez-leiste') || el.closest('[aria-hidden="true"]')) return; if (r.height < 44 || r.width < 44) klein.push(el.textContent.trim().slice(0, 30) + ' ' + Math.round(r.width) + '×' + Math.round(r.height)); });
   const tab = [...document.querySelectorAll('a[href], button, [tabindex="0"]')].filter(el => !el.closest('.ez-leiste') && el.tabIndex >= 0 && !el.closest('[aria-hidden="true"]')).slice(0, 12).map(el => el.textContent.trim().slice(0, 24) || el.getAttribute('aria-label'));
-  return { klein, tab, chipsScrollbar: (() => { const u = document.querySelector('.ez-chips ul'); return u.scrollWidth > u.clientWidth; })() };
+  return { klein, tab, chipsScrollbar: (() => { const u = document.querySelector('.ez-chips ul'); return u ? u.scrollWidth > u.clientWidth : 'keine Chipreihe'; })() };
 });
 console.log(JSON.stringify({ ruhig, ohneJs, ziele }, null, 1));
 await ctx.close();
