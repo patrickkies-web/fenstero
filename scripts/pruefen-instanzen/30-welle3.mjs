@@ -231,8 +231,9 @@ export default async (h) => {
     /* ---------- Hauptdomain: Zugangsadresse → Weg ins Dashboard (E); Startseite → Pakete (E.7, F) ---------- */
     const ctxH = await kontext({ viewport: { width: 1280, height: 900 } }), sH = await h.neueSeite(ctxH, B);
     await sH.goto(B + '/', { waitUntil: 'networkidle' }); await sH.waitForTimeout(300);
-    const start = await sH.evaluate(() => ({ wechsel: !!document.querySelector('.wechsel a[href="/fuer-fensterbauer/"]'), ansicht: !!document.querySelector('.wechsel [data-act="ansicht"][data-v="betrieb"]'), alt: /Projekte sind kostenlos/.test((document.querySelector('.wechsel') || {}).textContent || '') }));
-    await sH.click('.top .ansicht [data-v="betrieb"]'); await sH.waitForTimeout(300);
+    /* Startseite nach der Design-DNA: Kopf und Wege stehen im Baustein (Schatten-DOM von #startseite) */
+    const start = await sH.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot; return { wechsel: !!(sr && sr.querySelector('a[href="/fuer-fensterbauer/"]')), ansicht: !!(sr && sr.querySelector('.ez-kopf nav.ez-ansicht a[href="/#fensterbauer"]')), alt: /Projekte sind kostenlos/.test(sr ? sr.textContent : '') }; });
+    await sH.click('.ez-kopf nav.ez-ansicht a[href="/#fensterbauer"]'); await sH.waitForTimeout(300);
     /* die Ansicht Fensterbauer bettet die Paket-Landingpage ein (portal.js, Einbettung der Verkaufsseite): auf die Einbettung warten */
     await sH.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null);
     const karte = await sH.evaluate(() => ({ hero: !!document.querySelector('.vk-einbettung .fb #hero'), pakete: document.querySelectorAll('.vk-einbettung .pk-karte').length, h1: Array.from(document.querySelectorAll('h1')).map((e) => e.textContent.trim()) }));

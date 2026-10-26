@@ -407,8 +407,8 @@ async function browserTeil(h, o) {
   const ctx = await h.browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const alt = await h.neueSeite(ctx, h.base('localhost'));
   await alt.goto(h.base('localhost') + '/', { waitUntil: 'networkidle' });
-  const altInfo = await alt.evaluate(() => ({ inst: typeof INST !== 'undefined' ? INST : 'x', app: APP_URL, nav: navItems().map((n) => n[1]).join(','), wm: !!document.querySelector('.wm') }));
-  ok(altInfo.inst === null && /\/app\/$/.test(altInfo.app) && /Abrechnung/.test(altInfo.nav) && altInfo.wm, '28.16 Hauptdomain: Betriebsbereich ohne Instanz-Modus, Links mit /app/, Reiter Abrechnung, Wortmarke eeziframes');
+  const altInfo = await alt.evaluate(() => ({ inst: typeof INST !== 'undefined' ? INST : 'x', app: APP_URL, nav: navItems().map((n) => n[1]).join(','), wm: !!(document.querySelector('.wm') || ((document.getElementById('startseite') || {}).shadowRoot || document).querySelector('.ez-kopf .wm')) }));
+  ok(altInfo.inst === null && /\/app\/$/.test(altInfo.app) && /Abrechnung/.test(altInfo.nav) && altInfo.wm, '28.16 Hauptdomain: Betriebsbereich ohne Instanz-Modus, Links mit /app/, Reiter Abrechnung, Wortmarke eeziframes (auf der Startseite im Kopf des Bausteins)');
   h.sauber(alt, '28.16 Hauptdomain: keine Fehler');
   await ctx.close();
 }
