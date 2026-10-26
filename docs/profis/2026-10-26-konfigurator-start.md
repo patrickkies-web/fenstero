@@ -1,6 +1,6 @@
 # Profis · Konfigurator, Schritt 1 „Was planst du?“ nach Design-DNA und Palette „Task-App dunkel“ · 26.10.2026
 
-Umfang: Standard (ein Bildschirm), nach dem verkürzten Rezept des Begleit-Skills (Abschnitt 4): Gremium eine Runde, Muss-Punkte und Vetos umgesetzt, keine zweite Runde; Detail-Profis und Vorlagen-Abgleich entfallen. Vorschau als Artifact, Quelle in docs/profis/konfigurator-start-vorschau/, nichts in der App und nichts online.
+Umfang: Standard (ein Bildschirm), nach dem verkürzten Rezept des Begleit-Skills (Abschnitt 4): Gremium eine Runde, Muss-Punkte und Vetos umgesetzt, keine zweite Runde; danach auf Wunsch des Inhabers („lass nochmal 4 ux profis drüberschauen“) die vier Detail-Profis, alles umgesetzt (Abschnitt „Feinschliff“). Vorschau als Artifact, Quelle in docs/profis/konfigurator-start-vorschau/, nichts in der App und nichts online.
 
 ## Auftrag
 
@@ -52,7 +52,7 @@ Sekunde 1: das Fenster im Fensterlicht auf dem Betonboden. Sekunde 2: das Etiket
 
 ## Messwerte (Vorschau, werkzeuge/ und eigenes Aufnahmeskript für die App-Folie)
 
-- Telefon 390 × 844: genau eine volle Pille im Bildschirm, Oberkante 774 px (unteres Drittel), 52 px hoch; 0 laufende Animationen nach 2,6 s; keine Konsolenfehler; kein Querscrollen; alle Ziele ab 44 × 44 px (i-Knöpfe 28 px mit 44 px Trefferfläche); Laden 0,23 s bei vierfach gedrosselter CPU; Layoutsprung 0; keine `filter`-Ebene auf Flächen (zwei `backdrop-filter` nur auf Glas über dem Foto: Chip und Etikett); 0 lazy-Bilder; Bilder 269 KB (Foto 100 KB, sechs Renderings vorgeladen).
+- Telefon 390 × 844: genau eine volle Pille im Bildschirm, Oberkante 774 px (unteres Drittel), 52 px hoch; 0 laufende Animationen nach 2,6 s; keine Konsolenfehler; kein Querscrollen; alle Ziele ab 44 × 44 px (i-Knöpfe 28 px mit 44 px Trefferfläche); Laden 0,32 s bei vierfach gedrosselter CPU; Layoutsprung 0; keine `filter`-Ebene auf Flächen (zwei `backdrop-filter` nur auf Glas über dem Foto: Chip und Etikett); 0 lazy-Bilder; Bilder 269 KB (Foto 100 KB, sechs Renderings vorgeladen); eine lange Aufgabe von 75 ms beim Laden (Schriften und Bild dekodieren). Mit Systemschrift 125 % (root 20 px) bleibt alles lesbar und bedienbar (Bild tel-gross).
 - Schreibtisch 1280 × 800: das Gerät wird bei flachen Bildschirmen kürzer, nie kleiner (Ziele bleiben 44 px); eine volle Pille im Bild, Oberkante 720 px.
 - Ruhige Fassung und ohne JavaScript: alles steht sofort (Anker, Etikett und Kacheln liegen fest im Markup; ohne JavaScript bleibt „Fenster“ gewählt).
 
@@ -62,11 +62,11 @@ Telefon 390 × 844:
 
 | Bildschirm | Neutral % | Violett | Koralle | Indigo | Foto | Farbe gesamt |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 Start | 96,7 (S 49 · A 20 · G 10 · W 19) | 0,3 | 0,0 | 0,6 | 2,4 | **3,3** |
-| 2 Neue Öffnung | 97,0 (S 48 · A 22 · G 10 · W 17) | 0,6 | 0,0 | 0,9 | 1,6 | **3,0** |
-| 3 Hebe-Schiebe, Begriff offen | 95,2 (S 40 · A 27 · G 10 · W 18) | 0,7 | 0,0 | 0,7 | 3,4 | **4,8** |
-| 4 Erklärung als Bogen | 98,9 (S 35 · A 42 · G 21 · W 0) | 0,0 | 0,0 | 0,5 | 0,6 | **1,1** |
-| **Folie** | 96,9 (S 43 · A 28 · G 13 · W 14) | 0,4 | 0,0 | 0,7 | 2,0 | **3,1** |
+| 1 Start | 96,6 (S 49 · A 20 · G 9 · W 19) | 0,3 | 0,0 | 0,7 | 2,4 | **3,4** |
+| 2 Neue Öffnung | 96,8 (S 49 · A 21 · G 10 · W 17) | 0,6 | 0,0 | 1,0 | 1,6 | **3,2** |
+| 3 Hebe-Schiebe, Begriff offen | 95,6 (S 39 · A 28 · G 11 · W 18) | 0,5 | 0,0 | 0,6 | 3,3 | **4,4** |
+| 4 Erklärung als Bogen | 98,8 (S 47 · A 32 · G 20 · W 0) | 0,0 | 0,0 | 0,7 | 0,6 | **1,2** |
+| **Folie** | 96,9 (S 46 · A 25 · G 12 · W 14) | 0,4 | 0,0 | 0,7 | 2,0 | **3,1** |
 
 Schreibtisch 1280 × 800: 99,0 neutral (S 75 · A 11 · G 7 · W 6), Violett 0,1, Koralle 0,0, Indigo 0,2, Foto 0,7, Farbe gesamt 1,0.
 
@@ -122,9 +122,25 @@ Selbst entschieden: Bühnenfoto von der Muster-Seite, Strichzeichnungen der App 
 
 Kann-Liste (nur auf Wunsch): „Fenster ersetzen“ bei Türen als „Bestehendes ersetzen“ (Text der App) · „Fotos“ in der Pille erklären („Weiter zu den zwei Fotos“) · Wort unter Buch und Zurück-Pfeil · „Dreh, Kipp, fest“ so setzen, dass es nicht wie eine Wahl aussieht · Zweitzeile „Dort ist schon eins / Dort war noch keins“ im Umschalter · ein Name „Hebe-Schiebe-Tür“ auf Kachel und Etikett · Hinweis zu den Fotos vor Schritt 2 · „du?“ weiß (gegen die DNA) · Verweise in der Reihenfolge Impressum, Datenschutz, AGB, Widerruf (gegen die Vorgabe).
 
+## Feinschliff: vier Detail-Profis (auf Wunsch des Inhabers, je etwa zehn Minuten, je zehn Befunde; Berichte unter docs/profis/gremium/2026-10-26-konfigurator-start-feinschliff-{ux,bewegung,zeichen,typografie}.md)
+
+Alle vierzig Befunde sind umgesetzt, bis auf die drei unten genannten, die gegen eine Vorgabe des Inhabers stehen.
+
+**UX-Details:** der Umschalter folgt dem Element („Fenster ersetzen“, bei Balkon-, Hebe-Schiebe- und PSK-Tür „Tür ersetzen“, bei der Faltschiebewand „Wand ersetzen“; Wortlaut zur Freigabe, der Satz darunter bleibt) · der Begriff am Etikett bleibt beim Vergleichen offen und wechselt den Text mit dem Element · die sechs Kacheln und die Stelle sind Radiogruppen (`role="radio"`, `aria-checked`, ein Tabstopp, Pfeiltasten, Ansage „2 von 6“) · hinter dem Bogen ist alles gesperrt (`inert`, Rückfall: Tab kreist im Bogen) · der Glas-Chip „Schritt 1 von 6“ wird vorgelesen, die Bühnenbeschreibung heißt „Schritt 1 von 6: Element und Stelle wählen.“ · der Satz zur Stelle ist eine Live-Region · der i-Knopf steht neben, nicht im h1 · „Alles klar“ als leise Pille schließt den Bogen · der Rückweg im Fuß heißt wie der im Kopf „Zurück zur Fensterliste“ · Bilder nicht ziehbar, Zeiger wird beim Wischen gefangen, Etikett 16 px vom Rand.
+
+**Bewegung (Emil-Schule):** Punkt und Linie wechseln ohne Weg zusammen mit dem Etikett (150 ms), keine Layout-Animation mehr · die Lage wird aus den bekannten Bildmaßen vor dem Aufdecken berechnet, Element, Schatten und Rahmen starten im selben Frame, nur das Licht gleitet 320 ms nach (Zeitlupe geprüft) · das neue Bild wird vor dem Aufdecken dekodiert (`decode()`, Laufnummer gegen Überholen) · Bogen öffnet 200 ms und schließt 150 ms (`transitionend`) · Tastatur und Vorlesen wechseln ohne Übergang (Pfeiltasten, Enter auf einer Kachel) · der Punkt in der Kachel erscheint über Opazität und Maß, der Name rutscht nicht · Rahmen „Neue Öffnung“ zeichnet sich 300 ms und geht 150 ms, beim Elementwechsel wechselt er mit · ein Finger, Pointer Capture, Achsensperre · je Objekt eine Kurve (`--dna-druck`) · Hover überall 150 ms `ease`.
+
+**Zeichen:** die sechs Strichzeichnungen mit nicht skalierenden Strichen 1,8 / 1,2 / 1 px (Blendrahmen, Öffnungslinien, Glaskante), Flügelrahmen nur als Fläche, Schwelle 1,8 px ohne Kontur · Hebe-Schiebe und PSK: Pfeil unter dem Griff mit 3 Einheiten Spitze, Griff 2,4 breit, Kipp-Dreieck frei vom Pfeil · Balkontür nur Dreh, Fenster links Dreh und rechts Dreh-Kipp (Stulp) · Faltschiebewand auf 38 Einheiten Höhe · gestrichelter Rahmen als SVG mit demselben Strichmuster 3 4 wie die Ankerlinie, um die ganze Standfläche · Rundknöpfe im Fuß und am Bogen mit Lichtverlauf und Ring · i-Ringe 1,5 px · Buch und Stift 1,8 px mit runden Enden, Stift 16 px · Kontaktschatten leichter (0,55), damit das violette Licht den Fuß des Elements erreicht · Fortschrittsring 2 px, Chip mit Glas-Schatten · Punkt „gewählt“ überall 8 px.
+
+**Typografie:** Lesegrößen in rem (Skala 13/14/15/16/17/30 px) mit `-webkit-text-size-adjust`, Umschalter und Kacheln dürfen umbrechen (Systemschrift 125 % geprüft) · „Falt‑schiebewand“ und „Fest‑verglasung“ mit weichem Trennstrich, Punkt löst den Namen nicht mehr aus · „Hebe-Schiebe‑Tür“ und „PSK‑Tür“ mit geschütztem Bindestrich (bricht nur nach „Hebe-“) · Bogen-Titel 17/500 statt Label · Umrisse 1,5 px, Notiz 13 px · i außerhalb der Überschrift · Glas 0,82 dicht (Silbergrau über dem hellen Lichtbalken 4,2:1) · Satz zur Stelle mit Mindesthöhe für drei Zeilen · geschützte Leerzeichen bei „Schritt 1 von 6“ und Millisekunden · „Tipp:“ mit Doppelpunkt.
+
+**Nicht umgesetzt (gegen Vorgaben):** i-Knöpfe sichtbar 44 px (DNA Abschnitt 9: 28-px-Ring, Trefferfläche 44 px) · „Vertrag widerrufen“ erst am Ende der Verweise (docs/GESTALTUNG.md, § 356a BGB) · Zweitzeile „Dort ist schon eins“ im Umschalter (Pille 44 px; der Satz darunter trägt sie). Offen zur Freigabe: der Wortlaut „Tür ersetzen“ / „Wand ersetzen“ im Umschalter (Text der App ist „Fenster ersetzen“), dazu „Hebe-Schiebe-Tür“ voll ausgeschrieben in der Kachel (Platz für zwei Zeilen ist jetzt da).
+
+Messwerte nach dem Feinschliff: unverändert bestanden (eine volle Pille bei 774 px, 0 Animationen nach 2,6 s, Layoutsprung 0, keine Konsolenfehler, Ziele ab 44 px, Laden 0,32 s gedrosselt); Farbtabelle oben ist die Endfassung. Bilder docs/profis/bilder/2026-10-26-konfigurator-start-{tel,tel-balkon,tel-neu,tel-hst,tel-erkl,tel-gross,desk}.jpg.
+
 ## Übernahme in die App (noch nicht geschehen)
 
-Die Vorschau ist nicht in web/app/. Für die Übernahme: `SCREENS.start` in web/assets/app.js baut den Rahmen `.scr.dna` (wie `lageDna`), die Bühne nimmt das Foto (web/bilder/…/buehne.webp, 1000 px) und das echte 3-D-Modell (`model(startWin(w), { frei: true })`) statt der Renderings, Wischen und Pfeiltasten bleiben (`startWischen`), die Kacheln nutzen `svgIcon(miniWin(v))`, die Stelle schreibt `w.neu`, der Fuß ist `.lg-fuss`; Regeln in app.css, Abschnitt „Design-DNA im Konfigurator“; Prüfsuite NUR=22 und NUR=16. Schriften lokal (web/fonts/outfit-latin-wght.woff), CSP unverändert; im Kundenlink einer Instanz steht deren Zeichen im Kopf. Am Schreibtisch braucht die echte App ein zweispaltiges Layout (Bühne links, Frage und Kacheln rechts); das Gerät mit Notizspalte ist nur die Vorschau.
+Die Vorschau ist nicht in web/app/. Für die Übernahme: `SCREENS.start` in web/assets/app.js baut den Rahmen `.scr.dna` (wie `lageDna`), die Bühne nimmt das Foto (web/bilder/…/buehne.webp, 1000 px) und das echte 3-D-Modell (`model(startWin(w), { frei: true })`) statt der Renderings, Wischen und Pfeiltasten bleiben (`startWischen`), die Kacheln nutzen `svgIcon(miniWin(v))` mit nicht skalierenden Strichen 1,8 / 1,2 / 1 px (Vorschlag für `miniWin`), die Stelle schreibt `w.neu`, der Fuß ist `.lg-fuss`; Regeln in app.css, Abschnitt „Design-DNA im Konfigurator“; Prüfsuite NUR=22 und NUR=16. Schriften lokal (web/fonts/outfit-latin-wght.woff), CSP unverändert; im Kundenlink einer Instanz steht deren Zeichen im Kopf. Am Schreibtisch braucht die echte App ein zweispaltiges Layout (Bühne links, Frage und Kacheln rechts); das Gerät mit Notizspalte ist nur die Vorschau.
 
 ## Offen
 
