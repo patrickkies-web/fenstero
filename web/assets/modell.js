@@ -111,6 +111,8 @@
     const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
     const tuerCfg = (w) => (w.art === 'hst' ? w.hst : w.art === 'fsw' ? w.fsw : w.art === 'psk' ? w.psk : w.art === 'balkon' ? w.bt : null) || {};
     const lab = (g, k) => (OPT[g] && OPT[g][k]) || '';
+    /* Geschoss als Text: im Obergeschoss mit Nummer, wenn der Kunde sie gewählt hat („2. OG“), sonst wie bisher */
+    const etageText = (w) => (w && w.etage === 'og' && w.ogNr > 0 ? w.ogNr + '. OG' : lab('etage', w && w.etage));
     /* Farben (S2): alle RAL-Classic-Töne, Holzdekore und Sonderfarben aus ral.js (im Browser globalThis.RAL, auf dem Server per require).
        col(k) → [Name, Code, Hex] für den gespeicherten Schlüssel; Unbekanntes bleibt sichtbar statt still Verkehrsweiß zu werden. */
     let ralCache, ralVersucht = false;
@@ -450,7 +452,7 @@
         ['Breiten', 'oben ' + th(mo.wt) + ' · Mitte ' + th(mo.wm) + ' · unten ' + th(mo.wb)],
         ['Höhen', 'links ' + th(mo.hl) + ' · Mitte ' + th(mo.hm) + ' · rechts ' + th(mo.hr)],
         [istTuer(w) ? 'Türelement' : 'Fensterelement', d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm mit Rahmen' + (w.neu ? ' (Wunschmaß)' : '') : 'nicht gemessen'],
-        ['Lage', (w.name || 'ohne Raum') + ', ' + (lab('etage', w.etage) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
+        ['Lage', (w.name || 'ohne Raum') + ', ' + (etageText(w) || 'EG') + (num(w.bru) ? ', Brüstung ' + th(w.bru) + ' mm' : '') + (num(w.laib) ? ', Laibung innen ' + th(w.laib) + ' mm' : '') + (num(w.wand) ? ', Wand ' + th(w.wand) + ' mm' : '')],
         ['Einbau', w.neu ? 'Neue Öffnung: ' + (ohneFotos(w) ? 'ohne Foto, Lage nicht eingezeichnet' : 'Lage vom Kunden auf dem Foto eingezeichnet') + ', Maße sind Wunschmaße. Sturz und Statik vor dem Durchbruch prüfen.' : 'Austausch' + (ohneFotos(w) ? ' ohne Fotos' : '') + ', Feinaufmaß vor Ort'],
         ['Element', lab('art', art) || 'Fenster'],
         ['Öffnung', opening(w) + (w.richtung === 'aussen' && !istTuer(w) && art !== 'fest' ? ', öffnet nach außen' : '')],
@@ -524,7 +526,7 @@
       /* Pflicht: Absturzsicherung, Lüftung, Statik, Denkmal, Rettungsweg */
       /* Geländer: Form und Farbe aus den Detailangaben gehören zur Absturzsicherung (Füllung und Höhe sind Pflicht, nicht Geschmack) */
       const gelText = (w) => [detailGilt(w, 'gelForm') && w.gelForm ? lab('gelForm', w.gelForm) : '', detailGilt(w, 'gelFarbe') && w.gelFarbe ? optName('gelFarbe', w.gelFarbe, String(w.gelFarbe)) : ''].filter(Boolean).join(', ');
-      wins.forEach((w, i) => { if (absturzFrage(w) && w.absturz !== 'balkon') dazu(pos(w, i), 'Absturzsicherung nötig (' + (lab('etage', w.etage) || 'OG') + bruText(w) + '): ' + (w.absturz ? lab('absturz', w.absturz) + (gelText(w) ? ', ' + gelText(w) : '') : 'bitte beraten'), 'pflicht', 'Absturzsicherung', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm; Türen ohne Balkon davor immer.'); });
+      wins.forEach((w, i) => { if (absturzFrage(w) && w.absturz !== 'balkon') dazu(pos(w, i), 'Absturzsicherung nötig (' + (etageText(w) || 'OG') + bruText(w) + '): ' + (w.absturz ? lab('absturz', w.absturz) + (gelText(w) ? ', ' + gelText(w) : '') : 'bitte beraten'), 'pflicht', 'Absturzsicherung', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm; Türen ohne Balkon davor immer.'); });
       const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), tot = num(p.total);
       const lu = []; wins.forEach((w, i) => { if (detailGilt(w, 'luefter') && w.luefter && w.luefter !== 'ohne') lu.push(i); });
       if (tot && nE > tot / 3) dazu('Lüftung', 'Lüftungskonzept nach DIN 1946-6 erforderlich: ' + nE + ' von ' + tot + ' Fenstern werden getauscht, mehr als ein Drittel.' + (lu.length ? ' Die gewünschten Lüfter (' + (lu.length === wins.length && wins.length > 1 ? 'alle Positionen' : 'Pos. ' + lu.map((i) => i + 1).join(', ')) + ') im Konzept nennen.' : ''), 'pflicht', 'Lüftungskonzept', null, 'lueftung', 'Dichte neue Fenster: ohne Konzept drohen Feuchte und Schimmel.');
@@ -565,7 +567,7 @@
       });
       wins.forEach((w, i) => {
         if (istTuer(w) || w.neu || bruDa(w) || absturzFrage(w) || (w.etage !== 'og' && w.etage !== 'dg')) return;
-        dazu(pos(w, i), 'Brüstungshöhe fehlt: im ' + lab('etage', w.etage) + ' nötig, um die Absturzsicherung zu beurteilen.', 'mass', 'Brüstung fehlt', i, 'bru-' + wk(w, i), 'Unter 80 cm (über 12 m Höhe 90 cm) braucht es eine Absturzsicherung.');
+        dazu(pos(w, i), 'Brüstungshöhe fehlt: im ' + etageText(w) + ' nötig, um die Absturzsicherung zu beurteilen.', 'mass', 'Brüstung fehlt', i, 'bru-' + wk(w, i), 'Unter 80 cm (über 12 m Höhe 90 cm) braucht es eine Absturzsicherung.');
       });
       wins.forEach((w, i) => { if (!w.neu && !istTuer(w) && w.form !== 'rund' && w.fbi && w.fbi !== 'behalten' && !istOffen(w, 'fbi') && !num(w.laib)) dazu(pos(w, i), 'Laibungstiefe innen fehlt: für die neue Fensterbank innen nötig.', 'mass', 'Laibung fehlt', i, 'laib-' + wk(w, i), 'Die Tiefe der Fensterbank hängt von der Laibung ab.'); });
       out.forEach((r) => { if (/^(unvoll|bru|laib)-/.test(r.id)) r.gruppe = 'kunde'; });
@@ -610,7 +612,7 @@
       wins.forEach((w, i) => {
         const f = (w.ki && w.ki.fach) || {}, d = derive(w), og = w.etage === 'og' || w.etage === 'dg';
         if (f.geruest === true) dazu(pos(w, i), 'Gerüst laut Foto nötig: einplanen und mit dem Kunden absprechen.', 'ki', 'Gerüst', i, 'geruest-' + wk(w, i), 'Von innen lässt sich hier nicht montieren.');
-        else if (og && f.geruest !== false && d.elW * d.elH >= 3e6) dazu(pos(w, i), 'Großes Element im ' + lab('etage', w.etage) + ' (' + th(d.elW) + ' × ' + th(d.elH) + ' mm): Transport, Gerüst oder Hebegerät prüfen.', 'ki', 'Transport und Montage', i, 'gross-' + wk(w, i), 'Ab etwa 3 m² ist das Element zu schwer, um es durchs Treppenhaus zu tragen.');
+        else if (og && f.geruest !== false && d.elW * d.elH >= 3e6) dazu(pos(w, i), 'Großes Element im ' + etageText(w) + ' (' + th(d.elW) + ' × ' + th(d.elH) + ' mm): Transport, Gerüst oder Hebegerät prüfen.', 'ki', 'Transport und Montage', i, 'gross-' + wk(w, i), 'Ab etwa 3 m² ist das Element zu schwer, um es durchs Treppenhaus zu tragen.');
       });
       wins.forEach((w, i) => {
         const k = w.ki || {};
@@ -993,7 +995,7 @@
       if (tuer) o += path(R(bx - 1, by + bh - 0.6, bw + 2, 1.6), '#ddd6cb', ink, 0.5);
       return '<svg viewBox="0 0 64 64" width="' + (size || 44) + '" height="' + (size || 44) + '" aria-hidden="true">' + o + '</svg>';
     }
-    return { OPT: OPT, TYP: TYP, lab: lab, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
+    return { OPT: OPT, TYP: TYP, lab: lab, etageText: etageText, col: col, farbe: farbe, farbZeile: farbZeile, griffName: griffName, num: num, th: th, mk: mk, derive: derive, rows: rows, kiRows: kiRows, kiChips: kiChips, svg: svg, opening: opening, sonne: sonne, innen: innen, istTuer: istTuer, tuerCfg: tuerCfg, sashesFor: sashesFor,
       DETAIL: DETAIL, detailGilt: detailGilt, detailText: detailText, detailRows: detailRows, RC_RANG: RC_RANG, rcAb: rcAb,
       OFFEN_TEXT: OFFEN_TEXT, OFFEN_NAME: OFFEN_NAME, offenName: offenName, istOffen: istOffen, offenGilt: offenGilt, offenListe: offenListe, griffText: griffText, montageText: montageText, fassadeText: fassadeText, teilungText: teilungText, teilFrei: teilFrei, anteileGueltig: anteileGueltig, rcText: rcText,
       nachTiefe: nachTiefe, tiefeVon: tiefeVon, tiefeKopf: tiefeKopf, FRAGE: FRAGE, FRAGE_STUFE: FRAGE_STUFE, STD_TEXT: STD_TEXT, istStd: istStd, TIEFE_NAME: TIEFE_NAME, tiefeText: tiefeText, fluegelZahl: fluegelZahl, oeffnungKurz: oeffnungKurz, absturzFrage: absturzFrage, absturzText: absturzText, ABSTURZ_MM: ABSTURZ_MM, bruDa: bruDa, foerdWeg: foerdWeg, uwZiel: uwZiel, uwText: uwText, massPruef: massPruef, massZeile: massZeile, ohneFotos: ohneFotos, verhText: verhText, fachZeile: fachZeile, motor: motor, klaerung: klaerung, klaerKurz: klaerKurz,
@@ -1069,7 +1071,7 @@
         .concat(w.neu ? [] : [['Breiten', 'oben ' + t('wt') + ' · Mitte ' + t('wm') + ' · unten ' + t('wb')], ['Höhen', 'links ' + t('hl') + ' · Mitte ' + t('hm') + ' · rechts ' + t('hr')]],
           !w.neu && dev > 5 ? [['Außer Winkel', 'bis ' + dev + ' mm, das kleinste Maß zählt']] : [],
           [[AW.istTuer(w) ? 'Türelement' : 'Element', d.elW && d.elH ? AW.th(d.elW) + ' × ' + AW.th(d.elH) + ' mm mit Rahmen' + (w.neu ? ', gerechnet' : '') : 'nicht gemessen'],
-            ['Lage', (AW.lab('etage', w.etage) || 'EG') + (AW.istTuer(w) ? ', bodentief' : AW.bruDa(w) ? (AW.num(w.bru) ? ', Brüstung ' + AW.th(w.bru) + ' mm' : ', bodentief') : ', Brüstung nicht gemessen') + (AW.num(w.laib) ? ', Laibung innen ' + AW.th(w.laib) + ' mm' : '') + (AW.num(w.wand) ? ', Wand ' + AW.th(w.wand) + ' mm' : '')],
+            ['Lage', (AW.etageText(w) || 'EG') + (AW.istTuer(w) ? ', bodentief' : AW.bruDa(w) ? (AW.num(w.bru) ? ', Brüstung ' + AW.th(w.bru) + ' mm' : ', bodentief') : ', Brüstung nicht gemessen') + (AW.num(w.laib) ? ', Laibung innen ' + AW.th(w.laib) + ' mm' : '') + (AW.num(w.wand) ? ', Wand ' + AW.th(w.wand) + ' mm' : '')],
             ['Einbau', w.neu ? 'neue Öffnung, Lage ' + (AW.ohneFotos(w) ? 'nicht eingezeichnet' : 'auf dem Foto eingezeichnet') : 'Austausch' + (AW.ohneFotos(w) ? ', ohne Fotos' : '')]]);
     }
     function aufmassText(l, o) {

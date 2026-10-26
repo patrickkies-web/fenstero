@@ -638,9 +638,6 @@ h2.sec-title { margin: 0; font-size: 24px; line-height: 1.15; font-weight: 800; 
 .qtiefe { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 44px; margin: -14px -6px -14px 0; padding: 0 6px; border: 0; background: none; font: inherit; color: var(--ink2) }
 .qtiefe span { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 10px; border-radius: 12px; background: var(--seg); font-size: 13px; font-weight: 700; line-height: 1 }
 .qtiefe:active span { background: var(--surface2) }
-.qtiefen > button { min-height: 64px; padding-top: 8px; padding-bottom: 8px }
-.qtiefen .tx { flex-direction: column; align-items: flex-start !important; gap: 2px }
-.qtiefen .tx b { font-size: 15px; line-height: 1.25 } .qtiefen .tx small { font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--muted) }
 .qmehr { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 4px 12px 4px 16px; border: 0; border-radius: var(--r3); background: var(--seg); font: inherit; color: var(--ink); text-align: left }
 .qmehr .tx { display: flex; flex-direction: column; min-width: 0 } .qmehr b { font-size: 15px; font-weight: 700; line-height: 1.25 } .qmehr small { font-size: 13px; line-height: 1.25; color: var(--muted) }
 .qmehr .plus { width: 24px; height: 24px; flex: 0 0 auto; border-radius: 50%; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; line-height: 1 }
@@ -1516,3 +1513,200 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
   .scr.passt > .w3d-stage { margin: 0; border-radius: var(--r4); box-shadow: var(--ring) }
 }
 @media (prefers-reduced-motion: reduce) { .mess-pad.kommt, .mp-knopf.kommt .mp-ok { animation: none } .fd-knopf, .md-rund, .mp-ok, .mp-zweit { transition: none } }
+
+/* ---------- Design-DNA im Konfigurator (ab 26.10.2026: Kapitel „Lage“, Fragen „Wo ist das Fenster?“ und „Wie genau planen?“) ----------
+   Der Inhaber geht Folie für Folie vor: Bildschirme mit .dna tragen den Look der Design-DNA in der Palette „Task-App dunkel“ (Fassung
+   „Lage in Violett“): nur acht Farben, Schwarz als Grund, Anthrazit für Bühnen und Kacheln, Weiß für Karten mit Feldern, Silbergrau für
+   Linien, Violett (mit Indigo dahinter) für den Zustand, Koralle als zweiter Wert und für Hinweise, Textgrau als Nebentext auf Weiß.
+   Schrift Outfit. Alles hier gilt nur unter .dna; die Markenregeln der übrigen App bleiben (docs/GESTALTUNG.md). */
+.dna { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66;
+  --grund: var(--schwarz); --flaeche: var(--anthrazit); --flaeche-hoch: var(--schwarz); --tinte: var(--weiss); --tinte-2: var(--silbergrau); --linie: var(--silbergrau); --linie-fein: var(--anthrazit);
+  --handlung: var(--weiss); --auf-handlung: var(--schwarz); --signal: var(--violett); --glas: var(--schwarz); --glas-rand: var(--anthrazit); --fokus: var(--violett);
+  --rund-l: 28px; --rund-pille: 999px; --font-sans: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --dna-auftritt: cubic-bezier(.16, 1, .3, 1); --dna-druck: cubic-bezier(.2, .7, .2, 1); --dna-feder: cubic-bezier(.34, 1.25, .64, 1) }
+/* Weiße Karten (Felder): Werte „hell“ */
+.dna .lg-hell { --grund: var(--weiss); --flaeche: var(--weiss); --flaeche-hoch: var(--weiss); --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: var(--silbergrau); --linie-fein: var(--silbergrau);
+  --handlung: var(--schwarz); --auf-handlung: var(--weiss); --glas: var(--weiss); --glas-rand: var(--silbergrau) }
+.scroll.dna-scroll { padding-bottom: 0; background: #07090a }
+.scr.dna { display: flex; flex-direction: column; gap: 0; min-height: 100%; background: var(--grund); color: var(--tinte); font-family: var(--font-sans); font-size: 16px; line-height: 1.45 }
+.dna :focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px }
+.dna button { font-family: var(--font-sans); -webkit-tap-highlight-color: transparent }
+
+/* Bausteine der Design-DNA (aus bundle.css, nur was die Lage braucht) */
+.dna .dna-label { font: 500 13px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2) }
+.dna .dna-zahl__einheit { font: 400 15px/1 var(--font-sans); color: var(--tinte-2); margin-left: .3em }
+.dna .dna-pille { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 52px; padding: 0 24px; border: 0; border-radius: var(--rund-pille); background: var(--handlung); color: var(--auf-handlung); font: 500 15px/1 var(--font-sans); text-decoration: none; cursor: pointer; white-space: nowrap; transition: transform 220ms var(--dna-druck), background-color 220ms ease }
+.dna .dna-pille:has(.dna-pille__pfeil) { padding: 0 6px 0 24px }
+.dna .dna-pille:active { transform: scale(.97); transition-duration: 0s }
+.dna .dna-pille__pfeil { width: 40px; height: 40px; border-radius: 50%; background: var(--auf-handlung); color: var(--handlung); display: grid; place-items: center }
+.dna .dna-pille__pfeil svg { width: 14px; height: 14px }
+.dna .dna-pille--leise { background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .dna-pille--klein { height: 36px; padding: 0 16px; font-size: 13px }
+.dna .dna-badge { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--signal); color: var(--weiss); font: 500 13px/1 var(--font-sans); letter-spacing: .02em; white-space: nowrap }
+.dna .dna-badge--leise { background: transparent; color: var(--tinte-2); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-feldkopf .dna-badge--leise::before { content: ""; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--koralle) }
+.dna .dna-eingabe { width: 100%; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: var(--rund-pille); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .dna-eingabe input { flex: 1; min-width: 0; width: 100%; height: 48px; padding: 0 16px; border: 0; background: transparent; color: var(--tinte); font: 400 17px/1 var(--font-sans); outline: none }
+.dna .dna-eingabe input::placeholder { color: var(--tinte-2) }
+.dna .dna-eingabe:focus-within { box-shadow: inset 0 0 0 2px var(--violett) }
+.dna .dna-etikett { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: var(--rund-pille); background: var(--schwarz); border: 1px solid var(--anthrazit); box-shadow: inset 0 0 0 1px var(--anthrazit); color: var(--weiss); font: 400 13px/1.2 var(--font-sans); white-space: nowrap; max-width: 132px; overflow: hidden }
+.dna .dna-etikett b { font-weight: 500; overflow: hidden; text-overflow: ellipsis }
+.dna .dna-etikett__punkt { width: 26px; height: 26px; border-radius: 50%; background: var(--schwarz); display: grid; place-items: center; flex: none }
+.dna .dna-etikett__punkt::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 35%, transparent) }
+
+/* Kopf: zurück als Zeichen, daneben die Marke, rechts Übersicht und Begriffe */
+.dna .lg-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 52px; padding: 0 8px 0 4px }
+.dna .lg-kopf button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 0; background: none; color: var(--tinte); font: 500 15px/1 var(--font-sans); border-radius: 999px; cursor: pointer }
+.dna .lg-kopf svg { width: 18px; height: 18px }
+.dna .lg-kopf-l, .dna .lg-kopf-r { display: flex; align-items: center; gap: 2px; min-width: 0 }
+.dna .lg-kopf .lg-kopf-zurueck, .dna .lg-kopf .lg-kopf-icon { width: 44px; padding: 0; justify-content: center }
+.dna .lg-marke { display: inline-flex; align-items: center; gap: 8px; font: 400 17px/1 var(--font-sans); letter-spacing: -.01em; color: var(--tinte); white-space: nowrap }
+.dna .lg-marke .fi-logo { width: 26px; height: 26px }
+.dna .lg-marke .wm b { font-weight: 700 }
+.dna .lg-marke .fi-rand { stroke: var(--anthrazit); stroke-opacity: 1 }
+.dna .lg-kopf .hdr-inst { padding-left: 0; max-width: none; color: var(--tinte) }
+.dna .lg-kopf .hdr-inst .hdr-name { font: 500 15px/1.15 var(--font-sans) }
+
+/* Kapitel als Stationen auf einem Band */
+.dna .lg-stationen { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; height: 44px; margin-bottom: 8px }
+.dna .lg-stationen b { font: 500 15px/1 var(--font-sans) }
+.dna .lg-stationen small { font: 500 13px/1 var(--font-sans); color: var(--tinte-2); font-variant-numeric: tabular-nums }
+.dna .lg-band { position: relative; height: 14px; display: flex; justify-content: space-between; align-items: center }
+.dna .lg-band::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1.5px dotted var(--silbergrau) }
+.dna .lg-band i { position: relative; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-band i.fertig { background: var(--silbergrau); box-shadow: none }
+.dna .lg-band i.ist { width: 12px; height: 12px; background: var(--violett); box-shadow: 0 0 0 4px var(--indigo) }
+
+/* Bühne (Anthrazit): das Haus im Schnitt; alles darin bezieht sich auf 358 × 250 px und wird auf schmalen Telefonen verkleinert (--lg-s) */
+.dna .lg-buehne { position: relative; flex: none; height: calc(250px * var(--lg-s, 1)); border-radius: var(--rund-l); overflow: hidden; background: var(--anthrazit); isolation: isolate; color: var(--tinte) }
+.dna .lg-buehne-in { position: absolute; left: 50%; top: 0; width: 358px; height: 250px; transform: translateX(-50%) scale(var(--lg-s, 1)); transform-origin: top center }
+.dna .lg-haus { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1 }
+.dna .lg-haus .wand { fill: none; stroke: var(--weiss); stroke-width: 1.4 }
+.dna .lg-haus .fein { fill: none; stroke: var(--silbergrau); stroke-width: 1.2; stroke-dasharray: 3 4 }
+.dna .lg-haus .boden { stroke: var(--silbergrau); stroke-width: 1.2 }
+.dna .lg-haus .strich { stroke: var(--silbergrau); stroke-width: 1.4 }
+.dna .lg-haus .strich.lang { stroke: var(--weiss) }
+.dna .lg-haus text { font: 600 13px/1 var(--font-sans); fill: var(--silbergrau); letter-spacing: .02em }
+.dna .lg-haus text.ist { fill: var(--weiss) }
+/* Schraffur der nicht gewählten Stockwerke; das gewählte ist frei */
+.dna .lg-haus .schnitt { transition: opacity 320ms var(--dna-druck) }
+.dna .lg-haus .schnitt.frei { opacity: 0 }
+.dna .lg-glut { position: absolute; top: 0; left: 40px; width: 320px; height: 132px; z-index: 0; pointer-events: none; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, var(--violett) 56%, var(--indigo) 74%, transparent 90%); filter: blur(8px); transition: transform 200ms var(--dna-druck) }
+.dna .lg-stock { position: absolute; z-index: 2; left: 48px; right: 12px; border: 0; background: none; padding: 0; cursor: pointer; border-radius: 12px }
+.dna .lg-stock:focus-visible { outline: 2px solid var(--fokus); outline-offset: -2px }
+.dna .lg-fenster { position: absolute; top: 0; z-index: 3; width: 56px; left: 228px; transition: transform 400ms var(--dna-auftritt), width 400ms var(--dna-auftritt); filter: drop-shadow(0 10px 10px rgba(7, 9, 10, .4)); pointer-events: none }
+.dna .lg-fenster::before { content: ""; position: absolute; inset: -30% -45%; z-index: -1; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 22%, transparent); filter: blur(7px) }
+.dna .lg-fenster img { position: relative; display: block; width: 100%; height: auto }
+.dna .lg-etikett { position: absolute; top: 0; z-index: 3; left: 70px; transition: transform 400ms var(--dna-auftritt); pointer-events: none }
+.dna .lg-etikett .leer { color: var(--silbergrau); font-weight: 400 }
+.dna .lg-strich { position: absolute; top: 0; z-index: 3; left: 206px; width: 22px; border-top: 1.2px dashed var(--weiss); transition: transform 400ms var(--dna-auftritt); pointer-events: none }
+.dna .lg-erkannt { position: absolute; z-index: 3; right: 14px; top: 12px; gap: 7px; height: 28px; background: var(--koralle); color: var(--schwarz) }
+.dna .lg-erkannt::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz) }
+.dna .lg-tippen { position: absolute; z-index: 3; left: 12px; top: 10px; padding: 5px 10px; border-radius: 999px; background: var(--schwarz); font: 500 13px/1 var(--font-sans); color: var(--weiss) }
+.dna.lg-still .lg-fenster, .dna.lg-still .lg-etikett, .dna.lg-still .lg-strich, .dna.lg-still .lg-glut, .dna.lg-still .schnitt, .dna.lg-still .lp-punkte i, .dna.lg-still .lp-glut, .dna.lg-still .lp-sonne { transition: none !important }
+
+/* Frage */
+.dna .lg-frage { padding: 20px 0 16px }
+.dna .lg-frage-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.dna .lg-notiz-knopf { height: 44px; gap: 6px; padding: 0 14px; font-size: 15px; flex: none }
+.dna .lg-notiz-knopf svg { width: 14px; height: 14px }
+.dna .lg-frage h1 { margin: 0; flex: 1; min-width: 0; font: 500 30px/1.1 var(--font-sans); letter-spacing: -.02em; text-wrap: balance; color: var(--tinte); outline: none }
+.dna .lg-frage h1 em { font-style: normal; color: var(--tinte-2) }
+.dna .lg-frage p { margin: 8px 0 0; font: 400 16px/1.5 var(--font-sans); color: var(--tinte-2) }
+/* Erklärung: sichtbar ein kleiner Kreis, Zielfläche 44 px */
+.dna .lg-i { position: relative; width: 44px; height: 44px; margin: -8px -8px -8px 0; padding: 0; border: 0; background: none; color: var(--silbergrau); display: inline-grid; place-items: center; vertical-align: -6px; cursor: pointer }
+.dna .lg-i::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--anthrazit); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-i svg { position: relative; width: 14px; height: 14px }
+
+/* Karten: Felder auf Weiß, Stockwerk als Kachel in Anthrazit, Anzahl als schwarze Kachel mit Kontur, Leuchten und Schraffur */
+.dna .lg-karte { border-radius: var(--rund-l); background: var(--flaeche); color: var(--tinte); padding: 6px 16px }
+.dna .lg-karte + .lg-karte { margin-top: 12px }
+.dna .lg-feld { padding: 16px 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px }
+.dna .lg-feld + .lg-feld { border-top: 1px solid var(--linie-fein) }
+.dna .lg-feldkopf { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.dna .lg-vorschlaege { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent) }
+.dna .lg-vorschlaege::-webkit-scrollbar { display: none }
+.dna .lg-vorschlaege button { flex: none; height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte-2); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: transform 220ms var(--dna-druck), color 220ms var(--dna-druck) }
+.dna .lg-vorschlaege button:active { transform: scale(.97); transition-duration: 0s }
+.dna .lg-doppelt { display: grid; gap: 8px }
+.dna .lg-doppelt[hidden] { display: none }
+.dna .lg-stockwahl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-kachel .lg-stockwahl { background: var(--schwarz); box-shadow: none }
+.dna .lg-stockwahl.lp-wahl { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.dna .lg-stockwahl button { height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte-2); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck) }
+.dna .lg-stockwahl button[aria-pressed="true"], .dna .lg-ogwahl button[aria-pressed="true"], .dna .lg-boden[aria-pressed="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none }
+.dna .lg-stocktext { font: 400 15px/1.4 var(--font-sans); color: var(--tinte-2) }
+.dna .lg-ogwahl { display: none; align-items: center; gap: 6px; flex-wrap: wrap }
+.dna[data-stock="og"] .lg-ogwahl { display: flex }
+.dna .lg-ogwahl button, .dna .lg-boden { height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte-2); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck) }
+.dna .lg-hilfe { margin: 0; font: 400 15px/1.45 var(--font-sans); color: var(--tinte-2) }
+.dna .lg-kachel { background: var(--anthrazit) }
+.dna .lg-bru-karte { display: none }
+.dna[data-oben] .lg-bru-karte { display: block }
+.dna .lg-bru-was { margin-top: -4px }
+.dna .lg-bru-zeile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center }
+.dna .lg-mm { display: flex; align-items: center; gap: 6px; padding: 6px 18px 6px 6px; border-radius: 999px; background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-mm input { flex: 1; min-width: 0; width: 100%; height: 44px; padding: 0 12px; border: 0; background: transparent; color: var(--tinte); font: 300 24px/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; outline: none }
+.dna .lg-mm input::placeholder { color: var(--tinte-2); font-size: 17px; font-weight: 400 }
+.dna .lg-mm span { font: 400 15px/1 var(--font-sans); color: var(--tinte-2) }
+.dna .lg-mm:focus-within { box-shadow: inset 0 0 0 2px var(--violett) }
+.dna .lg-warn, .dna .lg-grund { margin: 0; font: 500 15px/1.4 var(--font-sans); color: var(--tinte) }
+.dna .lg-warn::before, .dna .lg-grund::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px }
+.dna .lg-markiert { box-shadow: inset 0 0 0 2px var(--koralle) !important }
+.dna .lg-kontur { position: relative; overflow: hidden; isolation: isolate; background: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-kontur::before { content: ""; position: absolute; z-index: -1; left: -30px; top: 30px; width: 170px; height: 120px; background: radial-gradient(closest-side, var(--violett) 0, var(--violett) 40%, var(--indigo) 70%, transparent); filter: blur(10px); opacity: .95; pointer-events: none }
+.dna .lg-kontur::after { content: ""; position: absolute; z-index: -1; left: 46%; right: 0; top: 0; bottom: 40%; background: repeating-linear-gradient(-45deg, var(--silbergrau) 0 1.2px, transparent 1.2px 5px); -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%); mask-image: linear-gradient(90deg, transparent, #000 45%); pointer-events: none }
+.dna .lg-anzahl { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px }
+.dna .lg-zahl { display: flex; align-items: baseline; gap: 6px }
+.dna .lg-zahl output { font: 250 56px/1 var(--font-sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--weiss); display: inline-block; transition: transform 320ms var(--dna-feder) }
+.dna .lg-zahl output.rastet { transform: translateY(-4px) }
+.dna .lg-kontur .dna-zahl__einheit { color: var(--weiss) }
+.dna .lg-knoepfe { display: flex; gap: 8px }
+.dna .lg-knoepfe button { width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--anthrazit); color: var(--weiss); display: grid; place-items: center; cursor: pointer; transition: transform 220ms var(--dna-druck) }
+.dna .lg-knoepfe button:active { transform: scale(.94); transition-duration: 0s }
+.dna .lg-knoepfe button:disabled { color: var(--textgrau); cursor: default }
+.dna .lg-knoepfe svg { width: 16px; height: 16px }
+.dna .lg-reihe { display: flex; flex-wrap: wrap; gap: 6px; min-height: 18px }
+.dna .lg-reihe i { width: 14px; height: 18px; border-radius: 3px; box-shadow: inset 0 0 0 1.4px var(--silbergrau); position: relative }
+.dna .lg-reihe i::after { content: ""; position: absolute; left: 6px; top: 3px; bottom: 3px; border-left: 1.2px solid var(--silbergrau) }
+.dna .lg-reihe i.ist { box-shadow: inset 0 0 0 1.4px var(--weiss) }
+.dna .lg-reihe i.ist::after { border-color: var(--weiss) }
+
+/* Wie genau planen: Fragen als Punktraster je Kapitel, Violett für „wählst du“, Koralle für „plant dein Fensterbauer“ (Klassen lp-) */
+.dna .lp-buehne { height: auto; min-height: 250px }
+.dna .lp-in { position: relative; max-width: 358px; margin: 0 auto; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 10px }
+.dna .lp-glut { position: absolute; z-index: 1; left: 90px; top: 76px; width: 292px; height: 180px; transform-origin: 0 50%; background: radial-gradient(55% 55% at 45% 50%, var(--violett) 0, var(--violett) 42%, var(--indigo) 66%, transparent 84%); filter: blur(12px); pointer-events: none; transition: transform 320ms var(--dna-druck) }
+.dna .lp-sonne { position: absolute; z-index: 1; right: 6px; top: 90px; width: 210px; height: 165px; transform-origin: 100% 50%; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 60%, transparent); filter: blur(14px); pointer-events: none; transition: transform 320ms var(--dna-druck) }
+.dna .lp-kopf { position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px }
+.dna .lp-zahl { display: flex; align-items: baseline; gap: 8px }
+.dna .lp-zahl output { font: 200 56px/.9 var(--font-sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--violett); display: inline-block; transition: transform 320ms var(--dna-feder) }
+.dna .lp-zahl output.rastet { transform: translateY(-4px) }
+.dna .lp-zahl span { display: grid; gap: 4px; font: 400 15px/1 var(--font-sans); color: var(--silbergrau) }
+.dna .lp-zahl small, .dna .lp-zwei span { display: flex; align-items: center; gap: 7px; font: 500 13px/1 var(--font-sans); color: var(--silbergrau) }
+.dna .lp-zahl small i, .dna .lp-zwei span i { width: 9px; height: 9px; border-radius: 50%; flex: none }
+.dna .lp-zahl small i { background: var(--weiss) }
+.dna .lp-zwei span i { box-shadow: inset 0 0 0 1.6px var(--silbergrau) }
+.dna .lp-zwei { display: grid; justify-items: end; gap: 6px; padding-bottom: 2px }
+.dna .lp-zwei output { font: 300 32px/.9 var(--font-sans); letter-spacing: -.03em; color: var(--koralle); font-variant-numeric: tabular-nums }
+.dna .lp-raster { position: relative; z-index: 2; display: grid }
+.dna .lp-reihe { display: grid; grid-template-columns: 116px minmax(0, 1fr); align-items: center; height: 22px }
+.dna .lp-reihe > span:first-child { font: 500 13px/1 var(--font-sans); color: var(--silbergrau); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.dna .lp-reihe.ist > span:first-child { color: var(--weiss) }
+.dna .lp-punkte { display: grid; grid-template-columns: repeat(var(--lp-n, 12), minmax(0, 14px)); align-items: center }
+.dna .lp-punkte i { width: min(9px, 100%); aspect-ratio: 1; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.6px var(--silbergrau); transition: background-color 220ms var(--dna-druck), box-shadow 220ms var(--dna-druck); transition-delay: calc(var(--n, 0) * 14ms) }
+.dna .lp-punkte i.ja { background: var(--weiss); box-shadow: none }
+.dna .lp-satz { margin: 0; font: 400 15px/1.5 var(--font-sans); color: var(--tinte-2); min-height: 45px }
+.dna .lp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+
+/* Rechtliche Verweise am Ende des Inhalts, klein in Silbergrau */
+.dna .foot-links.recht { margin-top: 20px; padding: 0; gap: 0 12px }
+.dna .foot-links.recht .link { font: 400 13px/1.6 var(--font-sans); color: var(--silbergrau) }
+.dna .foot-links.recht .link.widerruf { color: var(--silbergrau); text-decoration: underline; text-underline-offset: 3px }
+
+/* Unten: zurück als Umriss, „Weiter“ weiß; bleibt beim Scrollen unten stehen */
+.dna .lg-fuss { position: sticky; bottom: 0; z-index: 4; margin: auto -16px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, transparent, var(--schwarz) 16px) }
+.dna .lg-fuss .dna-pille { flex: 0 1 260px }
+.dna .lg-zurueck { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau); display: grid; place-items: center; cursor: pointer }
+.dna .lg-zurueck svg { width: 16px; height: 16px }
+.dna .lg-grund { order: -1; flex: 0 0 100%; margin: 0 0 2px; text-align: center }
+@media (prefers-reduced-motion: reduce) { .dna .lg-fenster, .dna .lg-etikett, .dna .lg-strich, .dna .lg-glut, .dna .lg-haus .schnitt, .dna .lg-zahl output, .dna .lg-stockwahl button, .dna .dna-pille, .dna .lp-punkte i, .dna .lp-glut, .dna .lp-sonne, .dna .lp-zahl output { transition: none !important } }

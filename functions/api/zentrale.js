@@ -219,7 +219,7 @@ function zeile(row, zr) {
   };
 }
 const stripeLink = (k, art, id) => (k.stripe && id ? 'https://dashboard.stripe.com/' + (k.stripe.test ? 'test/' : '') + art + '/' + encodeURIComponent(id) : '');
-const fensterKurz = (w) => { const d = globalThis.AW.derive(w); return { name: w.name || '', etage: globalThis.AW.lab('etage', w.etage) || '', art: globalThis.AW.lab('art', w.art || 'fenster') || 'Fenster', anzahl: Number(w.anzahl) || 1, oeffnung: d.moW && d.moH ? d.moW + ' × ' + d.moH : '', element: d.elW && d.elH ? d.elW + ' × ' + d.elH : '' }; };
+const fensterKurz = (w) => { const d = globalThis.AW.derive(w); return { name: w.name || '', etage: globalThis.AW.etageText(w) || '', art: globalThis.AW.lab('art', w.art || 'fenster') || 'Fenster', anzahl: Number(w.anzahl) || 1, oeffnung: d.moW && d.moH ? d.moW + ' × ' + d.moH : '', element: d.elW && d.elH ? d.elW + ' × ' + d.elH : '' }; };
 /* Projekte ohne Daten der Endkunden; mit einblick zusätzlich Name, Kontakt, Objekt, Notizen und das Aufmaß in Kurzform */
 function projekte(a, einblick, zr) {
   return (a.links || []).filter((l) => !l.demo).map((l) => {
