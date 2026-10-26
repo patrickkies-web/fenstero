@@ -186,20 +186,27 @@ window.Buehne3D = (function () {
     /* Oberflächen: Rauschen aus ganzzahligem Hash (stabil, kein Flimmern), Putz, Klinker im Läuferverband, Naturstein, Holz, Alu */
     'float hash(vec2 p){uvec2 q=uvec2(ivec2(floor(p)));uint h=q.x*1597334677u^q.y*3812015801u;h=(h^(h>>16))*2246822519u;h^=h>>13;return float(h)*(1.0/4294967296.0);}' +
     'float rausch(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);}' +
-    'float sicht(vec2 P,float groesse){float w=length(gFw);return 1.0-smoothstep(groesse*0.35,groesse*0.9,w);}' +
+    /* Sichtbarkeit eines Musters der Periode groesse: ab einem Viertel der Periode je Bildpunkt ausblenden, bei der Hälfte weg
+       (Nyquist); später gezeichnete Muster würfeln bei jeder Bewegung neu und flimmern */
+    'float sicht(vec2 P,float groesse){float w=length(gFw);return 1.0-smoothstep(groesse*0.25,groesse*0.5,w);}' +
     'vec3 putz(vec2 P,vec3 c,float k,float st){float a=sicht(P,1.2*k),b=sicht(P,4.0*k);float n=(rausch(P/(1.2*k))-0.5)*a*0.55+(rausch(P/(4.0*k)+7.3)-0.5)*b+(rausch(P/(22.0*k)+3.1)-0.5)*0.6;return c*(1.0+st*n);}' +
-    /* Klinker im Grundton b (uArtC aus app.js, Farbwahl am Zahnrad): je Stein etwas heller oder dunkler, zum Rand hin dunkler; die Fuge
-       hellgrau, bei hellen Steinen etwas dunkler als der Stein, damit der Verband lesbar bleibt */
-    'vec3 klinker(vec2 P,vec3 b,float k){float C=81.0*k,L=250.0*k,j=10.0*k;float r=floor(P.y/C);float x=P.x+mod(r,2.0)*L*0.5;float s=floor(x/L);vec2 q=vec2(mod(x,L),mod(P.y,C));' +
-    'float aa=length(gFw)*0.7;float m=1.0-min(smoothstep(j-aa,j+aa,q.x),smoothstep(j-aa,j+aa,q.y));' +
-    'float v=hash(vec2(s,r)*1.37+0.5);vec3 st=b*mix(0.82,1.12,v)*(0.93+0.12*rausch(P/(9.0*k)));float e=min(q.x-j,q.y-j);st*=mix(0.84,1.0,smoothstep(0.0,6.0*k,e));' +
+    /* Klinker im Grundton b (uArtC aus app.js, Farbwahl am Zahnrad): je Stein etwas heller oder dunkler und etwas wärmer oder kühler,
+       vereinzelt dunkler gebrannt, zum Rand hin dunkler; die Fuge hellgrau, bei hellen Steinen etwas dunkler als der Stein, damit der
+       Verband lesbar bleibt. Gerechnet ab der Fugenmitte: beide Kanten jeder Fuge sind geglättet, Stein und Reihe wechseln mitten in
+       der Fuge (vorher sprang die Kante am Fugenanfang innerhalb eines Bildpunkts) */
+    'vec3 klinker(vec2 P,vec3 b,float k){float C=81.0*k,L=250.0*k,j=10.0*k;float yy=P.y-0.5*j;float r=floor(yy/C);float x=P.x+mod(r,2.0)*L*0.5-0.5*j;float s=floor(x/L);' +
+    'vec2 q=vec2(x-s*L,yy-r*C);vec2 dq=min(q,vec2(L,C)-q);vec2 aq=max(gFw*0.7,vec2(1e-4));float m=1.0-min(smoothstep(0.5*j-aq.x,0.5*j+aq.x,dq.x),smoothstep(0.5*j-aq.y,0.5*j+aq.y,dq.y));' +
+    'float v=hash(vec2(s,r)*1.37+0.5),v2=hash(vec2(s,r)*2.71+3.3);vec3 ton=mix(vec3(0.95,1.0,1.05),vec3(1.05,0.99,0.93),v2)*(v2>0.94?0.74:1.0);' +
+    'vec3 st=b*ton*mix(0.82,1.12,v)*(0.93+0.12*rausch(P/(9.0*k)));float e=min(dq.x,dq.y)-0.5*j;st*=mix(0.84,1.0,smoothstep(0.0,6.0*k,e));' +
     'float hell=smoothstep(0.55,0.72,(b.r+b.g+b.b)/3.0);vec3 fuge=mix(vec3(0.74,0.7,0.65),b*0.84,hell);vec3 mo=fuge*(0.92+0.1*rausch(P/(2.5*k)));vec3 c=mix(st,mo,m);vec3 mittel=mix(b*0.97,fuge,0.2);return mix(mittel,c,sicht(P,C*0.5));}' +
-    'vec3 granit(vec2 P,vec3 c,float k){float fw=length(gFw);float g=max(0.8*k,0.9*fw);float n1=rausch(P/g),n2=rausch(P/(g*1.3)+17.0),n3=rausch(P/(g*2.2)+5.0),n4=rausch(P/(12.0*k)+3.0);' +
-    'c*=0.93+0.12*n4;c=mix(c,c*0.78,smoothstep(0.55,0.75,n3)*0.5);c=mix(c,vec3(0.2,0.19,0.18),smoothstep(0.8,0.9,n1)*0.6);c=mix(c,vec3(0.96,0.95,0.94),smoothstep(0.8,0.9,n2)*0.5);return c;}' +
+    /* Naturstein: feste Korngröße; Körner feiner als ein Bildpunkt gehen in einen etwas dunkleren Mittelton über, statt bei jeder
+       Bewegung neu zu würfeln */
+    'vec3 granit(vec2 P,vec3 c,float k){float g=0.8*k;float a=sicht(P,2.0*g),a3=sicht(P,4.4*g);float n1=rausch(P/g),n2=rausch(P/(g*1.3)+17.0),n3=rausch(P/(g*2.2)+5.0),n4=rausch(P/(12.0*k)+3.0);' +
+    'c*=0.93+0.12*n4;c=mix(c,c*0.78,mix(0.1,smoothstep(0.55,0.75,n3),a3)*0.5);c=mix(c,vec3(0.2,0.19,0.18),mix(0.05,smoothstep(0.8,0.9,n1),a)*0.6);c=mix(c,vec3(0.96,0.95,0.94),mix(0.05,smoothstep(0.8,0.9,n2),a)*0.5);return c;}' +
     'vec3 holz(vec2 P,vec3 c,float k,bool senk){vec2 q=senk?P.yx:P;float u=q.y/k;float wp=rausch(vec2(q.x/(90.0*k),u/9.0))*7.0+rausch(vec2(q.x/(22.0*k),u/3.0))*1.5;' +
     'float g=fract((u+wp)/6.5);float lin=smoothstep(0.0,0.22,g)*(1.0-smoothstep(0.45,1.0,g));float fein=rausch(vec2(q.x/(4.0*k),u*1.5));float streif=rausch(vec2(q.x/(160.0*k),u/14.0));' +
     'float sh=sicht(P,6.5*k);vec3 r=c*mix(0.9,1.1,streif)*mix(1.0,mix(0.76,1.06,lin)*(0.94+0.12*fein),sh);return r;}' +
-    'vec3 bretter(vec2 P,vec3 c,float k){float B=146.0*k,j=6.0*k;float b=floor(P.x/B);float x=mod(P.x,B);float aa=gFw.x*0.7;float fuge=1.0-smoothstep(j-aa,j+aa,x);' +
+    'vec3 bretter(vec2 P,vec3 c,float k){float B=146.0*k,j=6.0*k;float xx=P.x-0.5*j;float b=floor(xx/B);float x=xx-b*B;float dx=min(x,B-x);float aa=max(gFw.x*0.7,1e-4);float fuge=1.0-smoothstep(0.5*j-aa,0.5*j+aa,dx);' +
     'vec3 h=holz(vec2(P.x,P.y+hash(vec2(b,3.0))*900.0*k),c*(0.9+0.2*hash(vec2(b,1.0))),k,true);return mix(h,c*0.45,fuge*sicht(P,B*0.4));}' +
     'vec3 alu(vec2 P,vec3 c,float k){float n=rausch(vec2(P.x/(40.0*k),P.y/(0.6*k)))*sicht(P,0.6*k);return c*(0.96+0.08*n);}' +
     'uniform highp sampler2DShadow uSM;uniform mat4 uLVP;uniform vec3 uSh;' +
@@ -223,7 +230,7 @@ window.Buehne3D = (function () {
     'else if(art==4){bool senk=uArt.z>1.5;if(uBand.z>uBand.x){float dt=P.y/max(uBand.y,1e-3),db=(uWH.y-P.y)/max(uWH.y-uBand.w,1e-3),dl=P.x/max(uBand.x,1e-3),dr=(uWH.x-P.x)/max(uWH.x-uBand.z,1e-3);senk=min(dl,dr)<min(dt,db);}r=holz(P,b,k,senk);}' +
     'c.rgb=r*c.a;}' +
     'float aaP=max(length(gFw)*0.7,1e-3);' +
-    'if(uFx.x>0.0){float d=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));vec4 k=uIn*(1.0-smoothstep(uFx.x-aaP,uFx.x+aaP,d));c=k+c*(1.0-k.a);}' +
+    'if(uFx.x>0.0){float d=min(min(P.x,P.y),min(uWH.x-P.x,uWH.y-P.y));vec4 k=uIn*clamp(uFx.x/max(2.0*aaP,1e-3),0.0,1.0)*(1.0-smoothstep(uFx.x-aaP,uFx.x+aaP,d));c=k+c*(1.0-k.a);}' +
     'if(uFx.y>0.0){vec2 h=uWH*0.5;vec2 q=abs(P-h)-(h-uFx.y);float sd=length(max(q,0.0))+min(max(q.x,q.y),0.0)-uFx.y;c*=1.0-smoothstep(-aaP,aaP,sd);}' +
     'c=uTint*c.a+c*(1.0-uTint.a);' +
     /* Verschattung: je Kante ein Band (uAo, bis vier), oder (uAoR.y) rund um ein Rechteck (uAo[0] = Loch, uAo[1].x = Stärke): weich auch über die
@@ -233,7 +240,7 @@ window.Buehne3D = (function () {
     'if(uFade.y>0.0)c*=1.0-smoothstep(uFade.x,uFade.y,P.y);' +
     'c*=uOp;\n#ifdef SCHNITT\nif(uFx.z>0.0){if(c.a<uFx.z)discard;}\n#endif\n' +
     /* Relief (uRelief: Teilung px, Neigung, Versatz): je Teilung eine gewölbte Lamelle des Rollladenpanzers, von außen (Rückseite der Fläche) konvex, oben zum Licht geneigt, unten weg, von innen konkav */
-    'if(uLi.x>0.5){if(fs<0.0)N=-N;N=normalize(N+kante(vP));if(uRelief.x>0.0){float ph=fract((vP.y+uRelief.z)/uRelief.x);N=normalize(N+uTy*uRelief.y*(2.0*ph-1.0)*(fs<0.0?1.0:-1.0));}float d1=max(dot(N,uL1),0.0),d2=max(dot(N,uL2),0.0);vec3 amb=mix(uGnd,uSky,0.5-0.5*N.y);' +
+    'if(uLi.x>0.5){if(fs<0.0)N=-N;N=normalize(N+kante(vP));if(uRelief.x>0.0){float ph=fract((vP.y+uRelief.z)/uRelief.x);N=normalize(N+uTy*uRelief.y*sicht(vP,uRelief.x)*(2.0*ph-1.0)*(fs<0.0?1.0:-1.0));}float d1=max(dot(N,uL1),0.0),d2=max(dot(N,uL2),0.0);vec3 amb=mix(uGnd,uSky,0.5-0.5*N.y);' +
     'if(uSh.x>1.5){if(d2>0.0)d2*=schatten(vW,N,uL2);}else if(d1>0.0)d1*=schatten(vW,N,uL1);' +
     'vec3 li=(amb+uC1*d1+uC2*d2)*ao;vec3 rgb=c.rgb*li;' +
     'if(uLi.y>0.0){vec3 H1=normalize(uL1+V),H2=normalize(uL2+V);float sp=pow(max(dot(N,H1),0.0),uLi.z)*step(0.0,dot(N,uL1))+pow(max(dot(N,H2),0.0),uLi.z)*step(0.0,dot(N,uL2));rgb+=vec3(uLi.y*sp)*c.a;}' +
