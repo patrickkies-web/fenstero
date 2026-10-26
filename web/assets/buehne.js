@@ -1043,14 +1043,17 @@ window.Buehne3D = (function () {
     K.rx = lerp(K.v[0], K.z[0], e); K.ry = lerp(K.v[1], K.z[1], e); K.px = lerp(K.v[2], K.z[2], e); K.py = lerp(K.v[3], K.z[3], e);
     if (f < 1) B.laeuft = true;
     /* Schwingen wie @keyframes w3dsway (9 s hin und zurück), angehalten statt zurückgesetzt; nicht bei weniger Bewegung,
-       nicht gezoomt (app.css: is-zoom, is-pinch) und nicht auf Geräten, die schon heruntergestuft sind */
-    const live = sc.contains('is-live') && !sc.contains('is-zoom') && !sc.contains('is-pinch') && !ruhig() && B.stufe < 2, pause = drag || sc.contains('is-busy') || sc.contains('is-vorf') || sc.contains('is-demo');
+       nicht gezoomt (app.css: is-zoom, is-pinch) und nicht auf Geräten, die schon heruntergestuft sind. Es zeigt nur, dass das
+       Modell räumlich ist: einmal hin und zurück (18 s), nach der ersten Berührung gar nicht mehr; dann steht das Bild still, ohne
+       dass Kanten und feine Muster dauernd kriechen. W.aus geht mit dem Schwingen auf die nächste Bühne über */
     const W = B.schwing, dt = B.zuletzt ? Math.min(100, now - B.zuletzt) : 0;
-    if (live && !pause) W.t += dt;
+    if (drag) W.aus = true;
+    const live = sc.contains('is-live') && !sc.contains('is-zoom') && !sc.contains('is-pinch') && !ruhig() && B.stufe < 2 && !W.aus && !W.fertig, pause = drag || sc.contains('is-busy') || sc.contains('is-vorf') || sc.contains('is-demo');
+    if (live && !pause) { W.t += dt; W.echt = (W.echt || 0) + (B.zuletzt ? Math.min(1000, now - B.zuletzt) : 0); if (W.t >= 18000 || W.echt >= 18000) W.fertig = true; }
     B.schwingt = live && !pause;
     /* ein- und ausblenden statt springen */
     const ziel = live ? 1 : 0;
-    if (B.sofort) W.k = ziel; else if (W.k !== ziel) { W.k = ziel > W.k ? Math.min(1, W.k + dt / 700) : Math.max(0, W.k - dt / 500); B.laeuft = true; }
+    if (B.sofort) W.k = ziel; else if (W.k !== ziel) { W.k = ziel > W.k ? Math.min(1, W.k + dt / 700) : Math.max(0, W.k - dt / (W.fertig ? 1400 : 500)); B.laeuft = true; }
     const u = (W.t / 9000) % 2, p = E_SCHWING(u < 1 ? u : 2 - u), k = E_EASE(W.k);
     W.a = k * (-3 + 6 * p); W.b = k * (1 - 2 * p);
     return K;
