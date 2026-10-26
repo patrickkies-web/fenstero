@@ -294,8 +294,9 @@ window.Buehne3D = (function () {
      Ein fehlgeschlagener Selbsttest schaltet für die Sitzung aufs CSS-Modell, Langsamkeit nie */
   let GSTUFE = 0;
   /* Pixeldichte je Stufe in Bewegung: 0 scharf (bis 2), 1 etwas gröber, 2 gröber und ohne Schatten. Ein stehendes Bild wird einmal
-     in voller Pixeldichte des Geräts gezeichnet (bis 3, höchstens 1,3 Millionen Bildpunkte), mit Schatten */
-  const STUFE_DPR = [2, 1.5, 1.25], RUHE_DPR = 3, RUHE_PX = 1.3e6;
+     in voller Pixeldichte des Geräts gezeichnet (bis 3, höchstens 1,3 Millionen Bildpunkte), mit Schatten; am Schreibtisch
+     (Pixeldichte bis 1,5) doppelt so fein, der Browser verkleinert es: Kanten und feine Linien sind dann vierfach überabgetastet */
+  const STUFE_DPR = [2, 1.5, 1.25], RUHE_DPR = 3, RUHE_PX = 1.3e6, RUHE_PX_TISCH = 2.6e6;
   function ausPool() { while (POOL.length) { const L = POOL.pop(); if (lebt(L)) return L; } return null; }
   /* Ohne Grafikchip (Software-WebGL) bleibt das CSS-Modell: dort dauert ein Bild Hunderte Millisekunden.
      ?gl=voll erzwingt WebGL trotzdem (Bildvergleiche und Prüfung der Bühne) */
@@ -480,7 +481,7 @@ window.Buehne3D = (function () {
       if (B.zuletzt && B.fort) B.dt = now - B.zuletzt;
       B.neu = false; B.zuletzt = now; B.fort = !!lauf;
       infoZeigen(stage, B, now);
-      if (lauf) { weiter = true; B.scharf = false; } else if (!B.scharf && (B.stufe > 0 || (window.devicePixelRatio || 1) > STUFE_DPR[0])) { B.scharf = true; weiter = true; }
+      if (lauf) { weiter = true; B.scharf = false; } else if (!B.scharf && (B.stufe > 0 || (window.devicePixelRatio || 1) > STUFE_DPR[0] || (window.devicePixelRatio || 1) <= 1.5)) { B.scharf = true; weiter = true; }
     });
     if (weiter && !raf) raf = requestAnimationFrame(bild);
   }
@@ -1126,7 +1127,8 @@ window.Buehne3D = (function () {
     B.laeuft = false; B.sofort = stage.classList.contains('no-anim') || ruhig() || !B.zuletzt;
     const cw = stage.clientWidth, ch = stage.clientHeight; if (!cw || !ch) return false;
     B.st = B.scharf ? 0 : B.stufe;
-    const geraet = window.devicePixelRatio || 1, dpr = B.scharf ? Math.min(geraet, RUHE_DPR, Math.max(STUFE_DPR[0], Math.sqrt(RUHE_PX / (cw * ch)))) : Math.min(geraet, STUFE_DPR[B.st]);
+    const geraet = window.devicePixelRatio || 1, tisch = geraet <= 1.5;
+    const dpr = B.scharf ? (tisch ? Math.max(geraet, Math.min(2, Math.sqrt(RUHE_PX_TISCH / (cw * ch)))) : Math.min(geraet, RUHE_DPR, Math.max(STUFE_DPR[0], Math.sqrt(RUHE_PX / (cw * ch))))) : Math.min(geraet, STUFE_DPR[B.st]);
     const pw = Math.round(cw * dpr), ph = Math.round(ch * dpr);
     if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
     const K = kamera(stage, B, now), camLauf = B.laeuft; B.laeuft = false;
@@ -1373,7 +1375,8 @@ window.Buehne3D = (function () {
     zeit(stage) { const B = stage && stage._b3; if (!B || B.aus) return; B.neu = true; zeichnen(stage, B, performance.now()); },
     pixel(stage) {
       const B = stage && stage._b3; if (!B || B.aus) return null;
-      B.neu = true; zeichnen(stage, B, performance.now()); B.neu = true;
+      /* gemessen wird im Bild der Bewegung (Pixeldichte wie beim Ziehen), nicht im überabgetasteten Standbild */
+      B.neu = true; B.scharf = false; zeichnen(stage, B, performance.now()); B.neu = true;
       const gl = B.L.gl, w = gl.drawingBufferWidth, h = gl.drawingBufferHeight, px = new Uint8Array(w * h * 4);
       gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
       return { w: w, h: h, px: px, k: w / B.cw };
