@@ -12,7 +12,7 @@ Umfang: Groß (ganze Seite): Gremium, Umbau, Abnahme. Drei Agenten je Runde, bli
 ## Ist und Neu
 
 - X (heute): Bildschirmfotos scratchpad `start/tel-*.png`, `start/desk-alle.png`.
-- Y (Runde 1): `start/preview/` Stand 23:23 Uhr; Y2 (Umbau): `start/preview/tel-0…6.png`, `desk-0…5.png`, `tel-hoch.png`, Montagen `tel-alle.png`, `desk-alle.png`, Schieltest `schiel.png`.
+- Y (Runde 1): scratchpad `start/preview/` Stand 23:23 Uhr; Y2 (Umbau und Abnahme): docs/profis/startseite-vorschau/ und docs/profis/bilder/2026-10-26-startseite-{bild1,tel,desk}.jpg.
 - Material: Foto des Inhabers (`web/bilder/foto/start-hauseigentuemer.webp`), Aufmaßblatt Weber (`web/bilder/fensterbauer/aufmassblatt-weber.webp`), Bildschirme der App (Schritt 1 live; Schritt 2 ist der Entwurf „Maße neu gedacht“, Runde 3 vom Designrat, noch nicht gebaut; Ergebnis live).
 
 ## Änderungsliste (Y gegen X)
@@ -54,9 +54,51 @@ Umgesetzt: siehe Änderungsliste (Umbau) und `start/abnahme-brief.md`. Gemessen 
 
 Nicht geändert, dem Inhaber vorgelegt: Name der Ansicht „Hauseigentümer“ (Mieter), „du“ für Hauseigentümer, Waschbär als Held (abschaltbar im Betriebskonfigurator wäre Produktwunsch), Datenschutz der Fotos nur über den Fußlink, Schreibtischfoto als Karte (Roth wollte randlos), Einführungsband oben.
 
-## Abnahme (Runde 3, Fassung Y2)
+## Abnahme (Runde 3, Fassung Y2, 26.10., 0 bis 6 Uhr)
 
-(wird nach der Abnahme ergänzt)
+| Gruppe | Hände | Median (Runde 2) | Aufgabe | Vetos |
+| --- | --- | --- | --- | --- |
+| Gestalter | 4, 4, 4, 4, 3, 4 | 4 (4) | Schieltest drei Formen, eine Cream-Pille, Hauptaktion auf der Achse, Bewegung zieht einmal | keine offen (Roth erledigt) |
+| Kunden | 4, 4, 4, 4, 4, 2 | 4 (3) | Was es ist: 6 von 6 · was es kostet, mit Einheit: 6 von 6 · was sie tun: 5 von 6 (Gegenspieler schließt) · Abbruch Bildschirm eins: nur der Gegenspieler | Kraus erledigt · Hofmann: Kamera erledigt, offen „Hauseigentümer“ ohne Mieter und Verbleib der Fotos (beide dem Inhaber vorgelegt) |
+| Fensterbauer | 4, 4, 3, 4, 4, 3 | 4 (3) | kaufen Median 3 (Runde 2: 3), zeigen 4 (3,5); Weg zu „Für Fensterbauer“ 6 von 6; fachlich stimmig 6 von 6 | keine offen (Brandt, Lindqvist erledigt) |
+
+Konsent: Gestalter ja. Kunden fast: eine Hand unter 3 (Gegenspieler, Gründe sind Produktentscheidungen). Fensterbauer: Hände und „zeigen“ ja, „kaufen“ bei 3; die Kaufhindernisse liegen außerhalb der Startseite (Teamkonto, AVV, Serverstandort, Referenzbetrieb, Marke sichtbar). Damit ist die Grenze von drei Runden erreicht; die Vorlage sagt offen, woran es hängt.
+
+Nach der Abnahme noch umgesetzt (jede Forderung mit Mehrheit oder ohne Gegenstimme, nur mit belegten Aussagen):
+- Kopfzeilen-Pille bleibt immer Umriss und heißt wie die Hauptaktion „Jetzt ausmessen“; Kopfzeile erscheint erst nach 24 px Hochscrollen (Keller, Hartwig, Lenz).
+- Preisabschnitt: „7,99 € einmal fürs Aufmaßblatt, alle Fenster“, dazu der Zahlweg „mit Karte, Apple Pay oder Google Pay, über Stripe“ (Keller, Pohl; Voreinstellung ZAHLARTEN=card in functions/api/umgebung.js).
+- Takte: Kicker 0, Zeilen 0/80 (500 ms, fertig bei 580), Lead 160, Linie ab 800, Wert bei 1700; Luft vor der Pille 40 px, Pille bei 584 px (Brandner, Veit).
+- „So geht es“ statt „Drei Schritte“, Beschriftung „Schritt 1 · 4 · 5“ wie das Zählwerk der App (Berger, Roth).
+- Hinweis unter der Pille: „Dein Aufmaß samt Fotos bleibt auf deinem Gerät, bis du es sicherst oder sendest.“ (Demir, Berger, Hofmann; Beleg: app.js `Fotos`, Gast bleibt auf dem Gerät).
+- Nachmess-Satz direkt unter dem Beispielblatt; Schritt 5 nennt den Weg ohne Einladung („Du gibst es jedem Fensterbauer deiner Wahl“) (Kraus, Vogel).
+- Maueröffnung konkret: „Breite oben, Mitte, unten; Höhe links, Mitte, rechts; die App nimmt das kleinste Maß“ (Reuter, Kraus).
+- Für Fensterbauer: Pilotphase und Preise in einem Satz, nicht mehr gedämpft: „Pilotphase: noch kostenlos. Danach sind die ersten drei Aufmaße frei, dann 9 € je Projekt oder ein Abo ab 49 € im Monat, netto. Konto und Projekte bleiben bis dahin in Ihrem Browser; jedes Aufmaß sichern Sie als PDF.“ (Yilmaz, Lindqvist, Sonntag, Hartwig).
+
+Nicht übernommen (Minderheit oder außerhalb der Seite): Foto über dem Kicker enden lassen und Foto-Zoom streichen (Veit, Brandner; Regelbeispiel erlaubt beides), Beispielblatt antippbar (Vogel; in der echten Seite verlinkt es das PDF), „Hebe-Schiebe-Tür“ bricht am Telefon am Bindestrich (Roth), Modell 1.790/1.410 gegen Blatt 1.789/1.409 und „8 Fotos ausgewertet“ auf dem Blatt (Brandt; Sache des Aufmaßblatts), „Ränder“ im Schrittnamen (App-Begriff), Fensterbank innen oder außen (App-Text), Bär-Schalter und „Sie“ im Betriebskonfigurator (Sonntag), Marke des Betriebs sichtbar, AVV und Serverstandort (Kranich, Lindqvist; Fensterbauer-Ansicht).
+
+Gemessen an der Endfassung (Playwright, Inter lokal): Pille oben 584 px (Schreibtisch 447), eine Cream-Pille auf Bildschirm eins, beim Hochscrollen keine zweite, kein Querscrollen, nach 3,2 s 0 Animationen, keine Konsolenfehler.
+
+## Änderungstabelle für den Inhaber
+
+| Änderung | Zweck | Gremium | Stand |
+| --- | --- | --- | --- |
+| Kopf: Foto groß, Waschbär und Maßlinie am Zollstock mit „1.410 mm · abgelesen am Zollstock“, Überschrift „Fenster ausmessen. Selbst. eezi.“, ein Preissatz mit Einheit, Pille unter 600 px | Blickführung, Verständnis | alle drei Gruppen dafür | bleibt |
+| Pilot-Balken, Einführungsband, Streichpreis, Countdown vom ersten Bildschirm entfernt; Einführungspreis im Preisabschnitt, Pilotphase bei den Fensterbauern | Verständnis, Vertrauen | Kunden fordern es, Gestalter dafür, Fensterbauer wollten den Hinweis nur ehrlich | geändert; **Inhaber entscheidet**, ob das Band oben wegbleibt |
+| Glas-Nachricht „Aufmaßblatt fertig“, Chips und Licht im Kopf | Blickführung | Mehrheit „ändern“ (vier Stimmen auf einem Foto) | zurückgenommen |
+| Kopfzeile verschwindet beim Lesen, kommt beim Hochscrollen zurück; ihre Pille immer Umriss, Name „Jetzt ausmessen“ | Handlung auf jedem Bildschirm, eine Cream-Pille | Gestalter | geändert |
+| Schalter Hauseigentümer / Fensterbauer tonal mit Pfeil | Weg für Fensterbauer | Gestalter, Fensterbauer 6 von 6 finden den Weg | geändert |
+| Messband statt Statistikreihe | Marke, Ehrlichkeit | Mehrheit behalten (Hartwig: Schmuck) | bleibt |
+| „So geht es“: drei echte App-Bildschirme (Schritt 1, 4, 5), Beschriftung darüber, 280 px | Beweis, Hierarchie | alle Gruppen | geändert; Schritt 4 zeigt den Entwurf „Maße neu gedacht“, noch nicht gebaut |
+| „Was im Aufmaß steckt“: Beispielblatt mit Liste, Nachmess-Satz, Zeile für Fensterbauer | Vertrauen | Kunden, Fensterbauer | geändert |
+| Sechs Elementarten als Symbole statt leerem Platzhalter | Beweis | alle | bleibt |
+| Preis: „7,99 € einmal fürs Aufmaßblatt, alle Fenster“, „danach 12,99 €“, Zahlweg | Verständnis, Ehrlichkeit | Kunden, Gestalter | geändert |
+| Ratgeber als drei Zeilen statt neun Kacheln | Hierarchie | alle | bleibt |
+| Für Fensterbauer: „Ihre Kunden zahlen nichts“, Link-Einbau, Pilotphase und Preise in einem Satz | Vertrauen, Kaufen | Fensterbauer | geändert |
+| Bewegung: vier Takte, Pille ab Bild eins, nach 2,1 s Stille, beim zweiten Aufruf nichts, bei „weniger Bewegung“ alles sofort | Bewegung zieht einmal | Gestalter, Kunden | geändert |
+
+Offen für den Inhaber: Name der Ansicht „Hauseigentümer“ (Mieter), „du“ gegenüber Kunden über 55, Band mit Einführungspreis ganz oben, Referenzbetrieb, Schalter für den Waschbären im Betriebskonfigurator, AVV und Serverstandort im Fuß, Angleichen von Blatt und Modell (1.789 gegen 1.790).
+
+Vorschau: Artefakt „Startseite neu gedacht“ (https://claude.ai/artifact/MvM53eefcKSNrcNeiM7Rsh), Quelle in docs/profis/startseite-vorschau/ (index.html ohne Dokumentgerüst, Bilder daneben), Montagen in docs/profis/bilder/2026-10-26-startseite-*.jpg. Nichts ist online.
 
 ## Antwort des Inhabers
 
