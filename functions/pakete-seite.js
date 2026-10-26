@@ -271,31 +271,42 @@ const pdfs = () => paketPdfs().map((p, i) => '<a href="' + esc(p) + '">' + (i ? 
 
 const BLOECKE = { preiszeile: preiszeile, karten: karten, vergleich: vergleich, ablauf: ablauf, demos: demos, bestellen: bestellen, ld: ld, leistungen: leistungen, fristen: fristen, stand: stand, pdfs: pdfs };
 
-/* ---------- Bausteine der Seite für Fensterbauer (Gestaltung vom 24.10.2026, web/fuer-fensterbauer/index.html) ----------
+/* ---------- Bausteine der Seite für Fensterbauer (Design-DNA vom 26.10.2026, web/fuer-fensterbauer/index.html aus docs/profis/fensterbauer-vorschau/) ----------
    Kleine Stellen im fertigen Markup statt ganzer Abschnitte, damit die Gestaltung in der Datei bleibt:
-     fb-ab                 günstigster Monatspreis („Ab 29 €“ im Startbild, im Abschluss, in der Leiste unten)
+     fb-ab                 günstigster Monatspreis („Ab 29 €“ in der Haken-Zeile des Startbilds und im Abschluss)
+     fb-zahl-<paket>       Monatspreis als Zahl ohne Einheit (die große Zahl der Karte, Einheit „€ im Monat“ steht daneben)
      fb-monat-<paket>      Monatspreis, fb-einr-<paket> Einrichtung (Karten, Vergleich, Beispielrechnung)
-     fb-cta-<paket>        Knopf unter der Karte: ohne PAKETE_OFFEN „Paket anfragen“ (wählt das Paket im Formular vor), sonst „Bestellen“
-     fb-fuss               Zeile unter den Paketen (vorläufig, Bestellung bald, Steuer, Laufzeit)
+     fb-cta-<paket>        Pille unter der Karte: ohne PAKETE_OFFEN „<Paket> anfragen“ (wählt das Paket im Formular vor), sonst „bestellen“;
+                           das empfohlene Paket als volle Pille mit Pfeilkreis, die anderen als Umriss
+     fb-hinweis            Zeile über den Karten (vorläufige Preise, bestellen bald möglich)
+     fb-fuss               Rechtszeile unter dem Vergleich (vorläufig, Bestellung bald, Steuer, Laufzeit, Storno)
      fb-anfrage-titel      Überschrift und fb-anfrage-lede Einleitung des Abschnitts „Ihre Anfrage“
      fb-faq-bestellen      Antwort auf „Kann ich schon bestellen?“ */
+const PFEILKREIS = ' <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span>';
 function fbBaustein(name, o, v) {
-  const L = P().LISTE, m = /^fb-(monat|einr|cta)-([a-z]+)$/.exec(name);
+  const L = P().LISTE, m = /^fb-(monat|einr|cta|zahl)-([a-z]+)$/.exec(name);
   if (m) {
     const p = m[2]; if (!P().PAKETE[p]) return null;
     if (m[1] === 'monat') return geld(P().preis(p).monat);
+    if (m[1] === 'zahl') return zahl(P().preis(p).monat);
     if (m[1] === 'einr') return geld(P().preis(p).einrichtung);
-    return v.bestellen
-      ? '<a class="pk-cta" href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + ' bestellen <span aria-hidden="true">→</span></a>'
-      : '<a class="pk-cta" href="#bestellen" data-paket-wahl="' + L.indexOf(p) + '">Paket anfragen <span aria-hidden="true">→</span></a>';
+    const emp = L.indexOf(p) === EMPFOHLEN;
+    return '<a class="dna-pille' + (emp ? '' : ' dna-pille--leise') + '" href="' + (v.bestellen ? '/partner/#bestellen/' + p : '#bestellen') + '" data-paket="' + p + '">' +
+      esc(kurzname(p)) + (v.bestellen ? ' bestellen' : ' anfragen') + (emp ? PFEILKREIS : '') + '</a>';
   }
   if (name === 'fb-ab') return geld(Math.min.apply(null, L.map((p) => P().preis(p).monat)));
+  if (name === 'fb-hinweis') {
+    if (!v.vorlaeufig && v.bestellen) return '';
+    return v.vorlaeufig
+      ? '<span class="ez-badge-koralle">Vorläufige Preise</span> Es gilt der Preis beim Bestellen, fest für Ihren Vertrag' + (v.bestellen ? '.' : '; bestellen bald möglich.')
+      : '<span class="ez-badge-koralle">Bestellung bald möglich</span> Fragen Sie schon jetzt unverbindlich an.';
+  }
   if (name === 'fb-fuss') {
     return (v.bestellen ? '' : 'Die Bestellung wird in Kürze freigeschaltet, bis dahin fragen Sie unverbindlich an. ') +
       (v.vorlaeufig ? 'Vorläufige Preise; beim Bestellen wird Ihr Preis für den Vertrag festgeschrieben. ' : 'Der Preis beim Bestellen bleibt für Ihren Vertrag fest. ') +
-      'Alle Preise ' + (v.mwst ? 'netto' : 'ohne Ausweis der Umsatzsteuer (§ 19 UStG)') + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar, keine Gebühr für Anfragen Ihrer eigenen Kunden. Die Vorschau zeigt eine erfundene Firma.';
+      'Alle Preise ' + steuerText(v) + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden. Die Vorschau zeigt einen erfundenen Betrieb.';
   }
-  if (name === 'fb-anfrage-titel') return v.bestellen ? 'Vorher eine <span class="gruen">Frage?</span>' : 'Paket <span class="gruen">unverbindlich</span> anfragen.';
+  if (name === 'fb-anfrage-titel') return v.bestellen ? 'Vorher eine <em class="ez-ak">Frage?</em>' : 'Paket unverbindlich <em class="ez-ak">anfragen.</em>';
   if (name === 'fb-anfrage-lede') {
     return v.bestellen
       ? 'Bestellen Sie Ihr Paket im Kundenkonto: ' + L.map((p) => '<a href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + '</a>').join(', ') + '. Fragen vorab beantworten wir gern.'

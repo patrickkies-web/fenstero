@@ -1,0 +1,16 @@
+# Feinschliff UX (Lena Hartwig): Seite für Fensterbauer
+
+Gesamteindruck: Der Lesepfad ist auch der Tab-Weg (Marke → Umschalter → kleine Pille → Hero-Pillen → Szenen in Folge), der Umschalter zeigt „aktiv“ mit Füllung und Punkt und trägt `aria-current`, die Leiste ist sauber aus dem Zugänglichkeitsbaum genommen, Stationen sind echte Links, Pillen im Formular sind echte Radios, die kleinen Ziele aus dem Brief sind inzwischen 44 px; was fehlt, sitzt fast ganz im Fehler- und Sendeweg des Formulars und bei drei Kontrast-/Kleindruck-Stellen, die Senioren am Telefon zuerst treffen.
+
+1. **Fehlerweg im Formular** (hoch): Sammelmeldung weit vom Feld, Fokus auf dem ungültigen Feld ohne Ring (Koralle-Ring überschreibt die Fokusregel). → je Pflichtfeld eine Zeile unter dem Feld (`.ez-feld__fehler`, `aria-describedby`), Sammelmeldung als `role="alert"` über dem ersten Feld, kombinierter Ring `inset 0 0 0 2px var(--koralle), 0 0 0 2px var(--schwarz)`.
+2. **Nach dem Senden** (hoch für Screenreader): `disabled` wirft den Fokus auf `body`, Erfolg ist eine 15-px-Zeile ganz unten. → `aria-busy` plus Klasse statt `disabled`, Doppelsenden über Flag; Meldung mit `tabindex="-1"` fokussieren, nach oben in die Karte mit Haken-Zeichen und 16 px, Formular danach ausblenden; bei Serverfehler Fokus auf die Fehlermeldung.
+3. **Ohne JavaScript und Honigtopf** (mittel): `novalidate` hart im Markup; Feld `fax` wird von Autofill als Telefon gefüllt, der Server verwirft still. → `novalidate` per Skript setzen; Honigtopf umbenennen (`name="feld-7"`, Label „Bitte leer lassen“), `inputmode="email"`.
+4. **Einstieg** (mittel): Skip-Link springt hinter h1 und Hauptpille; Screenreader hört Gerät und Etikett vor der h1. → `href="#inhalt"` auf den Hero-Text, Text im DOM vor der Bühne (order bleibt), Domain-Etikett `aria-hidden`, Domain im Gerät-Label.
+5. **Landmarken und ARIA** (mittel): banner/contentinfo im main; `aria-pressed` auf `label`; aktive Station ohne `aria-current`. → Kopf vor und Fuß nach `main`; Klasse `ist-wahl` statt `aria-pressed`; `aria-current="step"` in `setze()`.
+6. **Fokusring auf `summary`** (mittel): nicht in der Fokusregel des Bausteins. → `.ez summary:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; border-radius: 8px }` und Rundknopf im Hover-Zustand.
+7. **Kontrast und Kleindruck** (mittel): „freiwillig“ 3,6:1, Feldrand 2,5:1, Koralle-Ring 2,4:1, 11-px-Texte in Glaskarte und Tabelle, Feldbeschriftungen 12 px. → `opacity` weg, Feldrand Textgrau, Fehlerring Koralle 2 px plus Textgrau 1 px, 11 → 12 px, Feldbeschriftungen 13 px.
+8. **Radio-Pillen 40 px** (klein) → 44 px, `row-gap: 4px`.
+9. **Mini-Screenshots in den Paketkarten** (mittel): für Screenreader stumm, am Telefon 5–6 px Text. → `role="img"` mit `aria-label` je Karte; am Telefon Ausschnitt `aspect-ratio: 16/10; object-fit: cover; object-position: top`; Mini-Leiste 12 px.
+10. **Haken vor Verneinungen; Marke führt zur anderen Zielgruppe** (klein) → „Ohne Portal und Marktplatz“, „Ohne fremde Betriebe, ohne Werbung“, „Ohne Preisrechner“; Marke ehrlich beschriften („zur Startseite für Hauseigentümer“); Umschalter am Telefon auch in der Leiste.
+
+Die drei, die am meisten bringen: 1 (Fehlerweg je Feld, sichtbarer Fokus), 2 (Senden ohne Fokusverlust, sichtbarer Erfolg), 7 mit 8 (Kontrast, Kleindruck, 44-px-Pillen im Formular).

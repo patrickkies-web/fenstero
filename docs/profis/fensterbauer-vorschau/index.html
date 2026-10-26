@@ -1,0 +1,491 @@
+<title>eeziframes für Fensterbauer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>html,body{background:#07090a}</style>
+<link rel="preload" href="fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add("ez-js");</script>
+<link rel="stylesheet" href="dna/tokens.css">
+<link rel="stylesheet" href="dna/bundle.css">
+<link rel="stylesheet" href="start.css">
+
+<div class="fb dna-wurzel ez" lang="de">
+  <a class="ez-skip dna-pille" href="#die-idee">Zum Inhalt springen</a>
+
+  <!-- Leiste: kommt beim Hochscrollen zurück, Pille immer Umriss -->
+  <div class="ez-leiste" data-theme="dunkel" aria-hidden="true">
+    <div class="ez-huelle">
+      <a class="ez-marke" href="/" tabindex="-1"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></a>
+      <nav class="dna-pillen ez-ansicht"><a href="/#hauseigentuemer" tabindex="-1">Hauseigentümer</a><a href="/fuer-fensterbauer/" aria-current="page" tabindex="-1">Fensterbauer</a></nav>
+      <a class="dna-pille dna-pille--leise dna-pille--klein" href="#bestellen" tabindex="-1">Paket anfragen</a>
+    </div>
+  </div>
+
+<main class="ez-inhalt">
+  <!-- Szene 1 (dunkel): Kopf und Hero. Gene: G4 der Konfigurator als Gerät auf der Bühne, G9 die Domain als Etikett an der Sache, G12 die Anfrage-Karte bricht aus der Bühne, G10 Glas vor Gerät und Leuchten, G2 Leuchten als Zustand „neue Anfrage“, G6 eine Pille, G14 Lichtkante und Lichtteich -->
+  <section class="dna-szene" data-theme="dunkel" id="hero" aria-label="Start">
+    <div class="ez-huelle">
+      <header class="ez-kopf" role="banner">
+        <a class="ez-marke" href="/" aria-label="eeziframes, zur Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></a>
+        <nav class="dna-pillen ez-ansicht" aria-label="Ansicht wählen"><a href="/#hauseigentuemer">Hauseigentümer</a><a href="/fuer-fensterbauer/" aria-current="page">Fensterbauer</a></nav>
+        <a class="dna-pille dna-pille--leise dna-pille--klein" href="#bestellen">Paket anfragen</a>
+      </header>
+
+      <div class="ez-hero">
+        <div class="ez-hero__buehne">
+          <div class="ez-buehne dna-anker" data-dna="anker" data-dna-bezug data-dna-auftritt="still" style="--i:0">
+            <div class="ez-buehne__karte">
+              <div class="ez-geraet dna-geraet" role="img" aria-label="Telefon mit dem Konfigurator eines erfundenen Betriebs, Fensterbau Brandt in Köln: Foto, Überschrift „Neue Fenster, gut geplant.“ und der Knopf „Erstes Fenster ausmessen“">
+                <div class="dna-geraet__schirm"><img src="bilder/geraet.webp" width="600" height="1240" alt="" fetchpriority="high" decoding="async"></div>
+              </div>
+            </div>
+            <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-nur-tel" x1="73" y1="17" x2="64" y2="7" style="--i:0"/><line class="ez-nur-desk" x1="72" y1="15" x2="78" y2="6" style="--i:0"/></svg>
+            <span class="dna-anker__punkt ez-nur-tel" style="left:73%;top:17%;--i:0"></span>
+            <span class="dna-anker__punkt ez-nur-desk" style="left:72%;top:15%;--i:0"></span>
+            <span class="dna-anker__etikett ez-etikett-domain" style="--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>fensterbau-brandt.de</b> <span class="dna-etikett__wert">Ihre Domain</span></span></span>
+            <div class="ez-anfrage dna-buehne__teil" data-dna="heraustreten" data-x="-12" data-y="10" data-basis=".5" role="group" aria-label="Beispiel einer Anfrage im Postfach des Betriebs, erfunden">
+              <span class="dna-label">Neue Anfrage · Beispiel</span>
+              <b class="ez-anfrage__name">Familie Weber</b>
+              <div class="dna-zahl dna-zahl--klein"><span class="dna-zahl__wert">4<span class="dna-zahl__einheit">Positionen</span></span></div>
+              <span class="ez-anfrage__pdf">Aufmaßblatt_Weber.pdf</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ez-hero__text">
+          <span class="dna-label" data-dna-auftritt="still" style="--i:0">Für Fensterbauer und Fensterhändler</span>
+          <h1 class="dna-titel-xl" id="hero-titel" data-dna-woerter="1">Anfragen mit Aufmaß. <em class="ez-ak">Unter Ihrer Marke.</em></h1>
+          <p class="dna-text" data-dna-auftritt="still" style="--i:7"><b>Ihr Konfigurator, Ihre Domain.</b> Jede Anfrage als Aufmaßblatt-PDF fürs erste Angebot.</p>
+          <div class="ez-aktionen" data-dna-auftritt="still" style="--i:8">
+            <a class="dna-pille" href="#pakete">Pakete ansehen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+            <a class="dna-pille dna-pille--leise" href="/app/">Selbst ausprobieren</a>
+          </div>
+          <div class="ez-chips" data-dna-auftritt="still" style="--i:9">
+            <ul class="ez-frei" aria-label="Auf einen Blick"><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Ab <!--pakete:fb-ab-->29 €<!--/pakete:fb-ab--> im Monat, netto</li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Keine Mindestlaufzeit</li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Ihr Kunde zahlt nichts</li></ul>
+          </div>
+          <a class="ez-linkzeile ez-linkzeile--leise" href="/#hauseigentuemer" data-dna-auftritt="still" style="--i:10">Sie sind Hauseigentümer? Zur Ansicht für Hauseigentümer</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 2 (hell): Ihr Name. Gene: G9 Werte an der Sache (der Klick am Knopf), G7 echtes Produkt (Aufnahme der Beispiel-Instanz), G12 der Konfigurator ragt aus der Karte, G1 gestrichelte Linie gegen Lichtkante, G5 Stationen 01 bis 06 -->
+  <section class="dna-szene" data-theme="hell" id="die-idee" aria-labelledby="idee-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <div class="ez-zwei">
+        <div class="ez-text">
+          <span class="dna-label">01 · Ihr Name</span>
+          <h2 class="dna-titel" id="idee-titel">Ein Knopf auf Ihrer Website. <em class="ez-ak">Der Rest läuft unter Ihrem Namen.</em></h2>
+          <p class="dna-text">Zum Livegang bekommen Sie den Knopf „Fenster planen“ für Ihre Website. Dahinter läuft Ihr Konfigurator unter Ihrer eigenen Domain, z.&nbsp;B. ihr-name-fenster.de; wir sichern sie samt Zertifikat.</p>
+          <ul class="ez-liste">
+            <li><span><b>Zum Planen, nicht zum Rechnen</b>&nbsp;·&nbsp;Ihr Kunde plant und misst seine Fenster, er sieht keine Preise. Die Anfrage landet bei Ihnen, das Angebot kalkulieren Sie.</span></li>
+            <li><span><b>Keine Website? Auch gut</b>&nbsp;·&nbsp;Der Konfigurator ist selbst eine Seite, die Sie überall verlinken können.</span></li>
+          </ul>
+          <ul class="ez-frei" aria-label="Was es nicht ist"><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Kein Portal und kein Marktplatz</li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Keine anderen Betriebe, keine Werbung</li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Kein Preisrechner</li></ul>
+        </div>
+        <div class="ez-weg dna-anker" data-dna="anker" role="img" aria-label="Von der Website des Betriebs mit dem Knopf „Fenster planen“ führt ein Klick zum Konfigurator unter der eigenen Adresse fensterbau-brandt.de">
+          <div class="ez-weg__karte">
+            <div class="ez-mini ez-weg__site" aria-hidden="true">
+              <span class="ez-mini__leiste"><i></i><i></i><i></i><span>fensterbau-brandt.de</span></span>
+              <span class="ez-mini__inhalt"><b>Fensterbau Brandt</b><span class="ez-mini__titel">Fenster und Türen aus Meisterhand.</span><span class="ez-mini__zeile"></span><span class="ez-mini__zeile ez-mini__zeile--kurz"></span><span class="ez-mini__knopf">Fenster planen</span></span>
+            </div>
+            <div class="ez-mini ez-mini--dunkel ez-weg__konf" aria-hidden="true">
+              <span class="ez-mini__leiste"><i></i><i></i><i></i><span><svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="5.5" width="7" height="5" rx="1.2"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5"/></svg>fensterbau-brandt.de</span></span>
+              <img src="bilder/essential.webp" width="640" height="400" alt="" loading="eager" fetchpriority="low" decoding="async">
+            </div>
+          </div>
+          <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-nur-desk" x1="27" y1="38" x2="44" y2="40" style="--i:0"/><line class="ez-nur-tel" x1="36" y1="34" x2="54" y2="47" style="--i:0"/></svg>
+          <span class="dna-anker__punkt ez-nur-desk" style="left:27%;top:38%;--i:0"></span>
+          <span class="dna-anker__punkt ez-nur-tel" style="left:36%;top:34%;--i:0"></span>
+          <span class="dna-anker__etikett ez-weg__etikett" style="--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Ein Klick</b> <span class="dna-etikett__wert">zu Ihrem Konfigurator</span></span></span>
+        </div>
+      </div>
+      <div class="ez-idee">
+        <div class="ez-kopfzeile">
+          <span class="dna-label">Die Idee</span>
+          <h3 class="dna-titel-s">Ihr Konfigurator, ohne ihn bauen zu lassen.</h3>
+        </div>
+        <ul class="ez-vergleich" aria-label="Drei Wege zum eigenen Konfigurator">
+          <li><span><b>Eigene Entwicklung</b><span>Teuer und mit Programmieraufwand.</span></span></li>
+          <li><span><b>Konfigurator vom Hersteller</b><span>Zeigt die Marke des Herstellers, nicht Ihre.</span></span></li>
+          <li class="ist-wahl"><span><b>eeziframes</b><span>Fertig, unter Ihrer Domain und Ihrem Namen, zum festen Monatspreis.</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 3 (dunkel): Ihr Kunde und Ihr Postfach. Gene: G5 Stationen, G9 Werte am Modell und am Blatt, G4 das Blatt als Objekt, G2 Leuchten als Zustand „gesendet“, G8 dunkle Innenkarte mit der Klärungsliste, G7 echtes Aufmaßblatt -->
+  <section class="dna-szene" data-theme="dunkel" id="so" aria-labelledby="so-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <div class="ez-kopfzeile">
+        <span class="dna-label">02 · Ihr Kunde</span>
+        <h2 class="dna-titel" id="so-titel">Vom ersten Klick zum <em class="ez-ak">Aufmaß.</em></h2>
+        <p class="dna-text">Ihr Kunde plant zu Hause, Sie bekommen eine Anfrage, mit der Sie rechnen können. Ihr Kunde zahlt nichts.</p>
+      </div>
+      <div class="ez-ablauf">
+        <ol class="dna-schritte ez-schritte" aria-label="Die vier Schritte">
+          <li data-zustand="aktiv"><a href="#stufe-1">Klicken</a> <span class="dna-schritte__zustand">01</span></li>
+          <li data-zustand="offen"><a href="#stufe-2">Planen</a> <span class="dna-schritte__zustand">02</span></li>
+          <li data-zustand="offen"><a href="#stufe-3">Senden</a> <span class="dna-schritte__zustand">03</span></li>
+          <li data-zustand="offen"><a href="#stufe-4">Aufmaßblatt</a> <span class="dna-schritte__zustand">04</span></li>
+        </ol>
+        <div class="ez-stufen">
+          <article class="ez-stufe" id="stufe-1">
+            <div class="ez-stufe__bild ez-stufe__bild--knopf">
+              <div class="ez-mini ez-mini--knopf" aria-hidden="true">
+                <span class="ez-mini__leiste"><i></i><i></i><i></i><span>fensterbau-brandt.de</span></span>
+                <span class="ez-mini__inhalt"><b>Fensterbau Brandt</b><span class="ez-mini__titel">Fenster und Türen aus Meisterhand.</span><span class="ez-mini__zeile"></span><span class="ez-mini__zeile ez-mini__zeile--kurz"></span><span class="ez-mini__knopf">Fenster planen</span></span>
+              </div>
+              <div class="dna-anker" data-dna="anker">
+                <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="51" y1="74" x2="60" y2="86" style="--i:0"/></svg>
+                <span class="dna-anker__punkt" style="left:51%;top:74%;--i:0"></span>
+                <span class="dna-anker__etikett" style="left:68%;top:86%;--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Ihr Knopf</b> <span class="dna-etikett__wert">auf Ihrer Website</span></span></span>
+              </div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 1 von 4</span><h3 class="dna-titel-s">Ihr Kunde klickt auf Ihrer Website</h3><p class="dna-text">Über den Knopf „Fenster planen“, einen Link oder die Suche. Er landet bei Ihrem Konfigurator unter Ihrer Adresse und sieht nur Ihren Betrieb.</p></div>
+          </article>
+          <article class="ez-stufe ez-stufe--leucht" id="stufe-2">
+            <div class="ez-stufe__bild ez-stufe__bild--hell">
+              <img src="bilder/modell-anthrazit.webp" width="981" height="1000" alt="3-D-Modell aus den Maßen des Kunden: zweiflügliges Fenster in Anthrazitgrau" loading="eager" fetchpriority="low" decoding="async">
+              <div class="dna-anker" data-dna="anker">
+                <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="22" y1="48" x2="34" y2="22" style="--i:0"/><line x1="74" y1="66" x2="62" y2="84" style="--i:1"/></svg>
+                <span class="dna-anker__punkt" style="left:22%;top:48%;--i:0"></span>
+                <span class="dna-anker__punkt" style="left:74%;top:66%;--i:1"></span>
+                <span class="dna-anker__etikett" style="left:50%;top:22%;--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Öffnung · Höhe</b> <span class="dna-etikett__wert">1.409&nbsp;mm</span></span></span>
+                <span class="dna-anker__etikett ez-punkt--koralle" style="left:56%;top:84%;--i:1"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Wunsch</b> <span class="dna-etikett__wert">Anthrazitgrau</span></span></span>
+              </div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 2 von 4</span><h3 class="dna-titel-s">Er plant seine Fenster selbst</h3><p class="dna-text">Im Browser, ohne Konto: zwei Fotos je Fenster, die Maueröffnung dreimal in Breite und Höhe, das alte Fenster mit Rahmen, Wünsche am 3-D-Modell. Was er noch nicht weiß, lässt er offen.</p></div>
+          </article>
+          <article class="ez-stufe" id="stufe-3">
+            <div class="ez-stufe__bild ez-stufe__bild--gesendet">
+              <div class="ez-glaskarte" aria-hidden="true">
+                <span class="ez-glaskarte__haken"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5l3 3 6-6"/></svg></span>
+                <b>Anfrage gesendet</b>
+                <span>Bestätigung und PDF sind unterwegs.</span>
+              </div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 3 von 4</span><h3 class="dna-titel-s">Er sendet die Anfrage ab</h3><p class="dna-text">Er bekommt eine Bestätigung und seine Anfrage als PDF. Ihre Antwort auf die E-Mail geht direkt an ihn.</p></div>
+          </article>
+          <article class="ez-stufe" id="stufe-4">
+            <div class="ez-stufe__bild ez-stufe__bild--hell">
+              <img src="bilder/blatt.webp" width="920" height="872" alt="Aufmaßblatt als PDF: Familie Weber bei Fensterbau Brandt, vier Positionen mit Öffnung, Element und Bestellmaß" loading="eager" fetchpriority="low" decoding="async">
+              <div class="dna-anker" data-dna="anker">
+                <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="44" y1="64" x2="52" y2="78" style="--i:0"/></svg>
+                <span class="dna-anker__punkt" style="left:44%;top:64%;--i:0"></span>
+                <span class="dna-anker__etikett" style="left:58%;top:78%;--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Aufmaßblatt_Weber.pdf</b> <span class="dna-etikett__wert">per E-Mail</span></span></span>
+              </div>
+            </div>
+            <div class="ez-stufe__text"><span class="dna-label">Schritt 4 von 4</span><h3 class="dna-titel-s">Sie bekommen das Aufmaßblatt</h3><p class="dna-text">Als PDF per E-Mail, mit Maßen, Fotos, Einbausituation und Wünschen. Daraus kalkulieren Sie Ihr erstes Angebot. Das Feinaufmaß folgt, wenn der Auftrag kommt.</p></div>
+          </article>
+        </div>
+      </div>
+
+      <div class="ez-zwei ez-aufmass" id="aufmass">
+        <div class="ez-text">
+          <span class="dna-label">03 · Ihr Postfach</span>
+          <h2 class="dna-titel" id="blatt-titel">Was in jeder <em class="ez-ak">Anfrage</em> steht.</h2>
+          <p class="dna-text">Je Fenster eine Position mit Bestellmaß in Millimetern, dazu alles, was Sie fürs Angebot brauchen.</p>
+          <ul class="ez-liste">
+            <li><span><b>Maueröffnung</b>&nbsp;·&nbsp;drei Breiten und drei Höhen; das kleinste Maß zählt, Abweichungen sind markiert</span></li>
+            <li><span><b>Fensterelement</b>&nbsp;·&nbsp;Breite und Höhe des alten Fensters mit Rahmen, dazu Brüstungshöhe und Laibungstiefe</span></li>
+            <li><span><b>Fotos und Einbausituation</b>&nbsp;·&nbsp;innen und außen; mit Einwilligung des Kunden liest die KI Rollladenkasten, Anschlag, Laibung, Fassade und Schäden heraus</span></li>
+            <li><span><b>Teilung und Öffnung</b>&nbsp;·&nbsp;Flügel, Dreh, Kipp oder fest, DIN links oder rechts, Oberlicht, Sonderformen und Türen</span></li>
+            <li><span><b>Material, Farbe, Glas</b>&nbsp;·&nbsp;Kunststoff, Holz, Aluminium oder Verbund; Farbe innen und außen nach RAL oder Dekor, zwei- oder dreifach verglast, Sprossen</span></li>
+            <li><span><b>Sonnenschutz und Montage</b>&nbsp;·&nbsp;Rollladen, Raffstore und Insektenschutz, Fensterbänke, Ausbau, Entsorgung und RAL-Montage</span></li>
+            <li><span><b>Mit dem Kunden zu klären</b>&nbsp;·&nbsp;offene Punkte wie „Weiß ich noch nicht“, dazu Absturzsicherung, Lüftungskonzept und Förderweg mit Uw-Zielwert</span></li>
+          </ul>
+        </div>
+        <div class="ez-blattbuehne">
+          <div class="ez-blatt dna-anker" data-dna="anker">
+            <img src="bilder/blatt.webp" width="920" height="872" alt="Beispiel-Aufmaßblatt: Familie Weber bei Fensterbau Brandt, vier Positionen mit Öffnung, Element und Bestellmaß" loading="eager" fetchpriority="low" decoding="async">
+            <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-nur-desk" x1="52" y1="70" x2="30" y2="96" style="--i:0"/><line class="ez-nur-tel" x1="52" y1="65" x2="38" y2="84" style="--i:0"/><line class="ez-nur-desk" x1="42" y1="36" x2="28" y2="4" style="--i:1"/><line class="ez-nur-tel" x1="42" y1="34" x2="28" y2="4" style="--i:1"/><line class="ez-nur-desk" x1="72" y1="70" x2="74" y2="96" style="--i:2"/><line class="ez-nur-tel" x1="72" y1="65" x2="64" y2="96" style="--i:2"/></svg>
+            <span class="dna-anker__punkt ez-nur-desk" style="left:52%;top:70%;--i:0"></span>
+            <span class="dna-anker__punkt ez-nur-tel" style="left:52%;top:65%;--i:0"></span>
+            <span class="dna-anker__punkt ez-nur-desk" style="left:42%;top:36%;--i:1"></span>
+            <span class="dna-anker__punkt ez-nur-tel" style="left:42%;top:34%;--i:1"></span>
+            <span class="dna-anker__punkt ez-nur-desk" style="left:72%;top:70%;--i:2"></span>
+            <span class="dna-anker__punkt ez-nur-tel" style="left:72%;top:65%;--i:2"></span>
+            <span class="dna-anker__etikett" id="blatt-oeffnung" style="--i:0"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Öffnung</b> <span class="dna-etikett__wert">kleinstes Maß</span></span></span>
+            <span class="dna-anker__etikett" style="left:28%;top:4%;--i:1"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Fotos</b> <span class="dna-etikett__wert">innen und außen</span></span></span>
+            <span class="dna-anker__etikett ez-punkt--koralle" id="blatt-bestellmass" style="--i:2"><span class="dna-etikett"><span class="dna-etikett__punkt"></span><b>Bestellmaß · Pos.&nbsp;2</b> <span class="dna-etikett__wert">1.229&nbsp;×&nbsp;1.424&nbsp;mm</span></span></span>
+          </div>
+          <div class="ez-innenkarte" role="group" aria-label="Beispiel der Klärungsliste">
+            <span class="dna-label">Mit dem Kunden zu klären</span>
+            <ul class="ez-klaerung">
+              <li>Absturzsicherung am bodentiefen Fenster</li>
+              <li>Lüftungskonzept nach dem Tausch</li>
+              <li>Förderweg mit Uw-Zielwert 0,95</li>
+            </ul>
+          </div>
+          <p class="ez-klein"><b>Das Feinaufmaß folgt, wenn der Auftrag kommt.</b> Beispiel: Aufmaß von Familie Weber bei Fensterbau Brandt, beide erfunden.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 4 (hell): Pakete. Gene: G3 der Monatspreis als Held, G2 das empfohlene Paket leuchtet, G1 Punktraster gegen Leuchten, G7 echte Aufnahmen der Beispiel-Instanzen, G6 eine Pille je Bildschirm, G13 runde Knöpfe -->
+  <section class="dna-szene" data-theme="hell" id="pakete" aria-labelledby="pk-titel">
+    <div class="ez-huelle ez-abschnitt" id="preis">
+      <div class="ez-kopfzeile">
+        <span class="dna-label">04 · Ihre Marke</span>
+        <h2 class="dna-titel" id="pk-titel">Drei Pakete. Ihr <em class="ez-ak">Auftritt.</em></h2>
+        <p class="dna-text">Alle drei haben den vollen Konfigurator unter Ihrer Domain und jede Anfrage als PDF per E-Mail. Der Unterschied ist, wie sehr er Ihre Marke trägt.</p>
+        <p class="ez-hinweis"><!--pakete:fb-hinweis--><span class="ez-badge-koralle">Vorläufige Preise</span> Es gilt der Preis beim Bestellen, fest für Ihren Vertrag; bestellen bald möglich.<!--/pakete:fb-hinweis--></p>
+      </div>
+
+      <div class="ez-pakete">
+        <article class="ez-paket" id="paket-essential" aria-labelledby="paket-essential-name">
+          <div class="ez-paket__bild ez-mini ez-mini--dunkel" aria-hidden="true"><span class="ez-mini__leiste"><i></i><i></i><i></i><span><svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="5.5" width="7" height="5" rx="1.2"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5"/></svg>ihr-name-fenster.de</span></span><img src="bilder/essential.webp" width="640" height="400" alt="" loading="eager" fetchpriority="low" decoding="async"></div>
+          <header class="ez-paket__kopf"><h3 class="dna-label" id="paket-essential-name">EEZI Essential</h3></header>
+          <p class="ez-paket__satz">Der volle Konfigurator unter Ihrer Domain, im eeziframes-Design mit Ihrem Namen.</p>
+          <div class="dna-zahl dna-zahl--klein"><span class="dna-zahl__wert"><!--pakete:fb-zahl-essential-->29<!--/pakete:fb-zahl-essential--><span class="dna-zahl__einheit">€ im Monat</span></span></div>
+          <p class="ez-paket__einr">dazu <!--pakete:fb-einr-essential-->99 €<!--/pakete:fb-einr-essential--> Einrichtung, einmalig vorab · netto</p>
+          <ul class="ez-haken">
+            <li>Unter Ihrer eigenen Domain, z.&nbsp;B. ihr-name-fenster.de</li>
+            <li>Planung mit 3-D-Modell, KI-Auswertung der Fotos, Klärungsliste und Zeichnung</li>
+            <li>Jede Anfrage als Aufmaßblatt-PDF per E-Mail</li>
+            <li>eeziframes-Design mit Ihrem Namen</li>
+            <li>Hinweis auf eeziframes: „Powered by EEZIframes“</li>
+          </ul>
+          <!--pakete:fb-cta-essential--><a class="dna-pille dna-pille--leise" href="#bestellen" data-paket="essential">Essential anfragen</a><!--/pakete:fb-cta-essential-->
+        </article>
+
+        <article class="ez-paket ez-paket--leucht" id="paket-plus" data-theme="dunkel" aria-labelledby="paket-plus-name">
+          <span class="ez-raster" aria-hidden="true"></span>
+          <div class="ez-paket__bild ez-mini ez-mini--dunkel" aria-hidden="true"><span class="ez-mini__leiste"><i></i><i></i><i></i><span><svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="5.5" width="7" height="5" rx="1.2"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5"/></svg>ihr-name-fenster.de</span></span><img src="bilder/plus.webp" width="640" height="400" alt="" loading="eager" fetchpriority="low" decoding="async"></div>
+          <header class="ez-paket__kopf"><h3 class="dna-label" id="paket-plus-name">EEZI Essential Plus</h3><span class="ez-badge-indigo">Empfohlen</span></header>
+          <p class="ez-paket__satz">Ihr Konfigurator in Ihrem Design: Logo, Firmenfarbe, Fotos und eigene Startseite.</p>
+          <div class="dna-zahl"><span class="dna-zahl__wert"><!--pakete:fb-zahl-plus-->39<!--/pakete:fb-zahl-plus--><span class="dna-zahl__einheit">€ im Monat</span></span></div>
+          <p class="ez-paket__einr">dazu <!--pakete:fb-einr-plus-->199 €<!--/pakete:fb-einr-plus--> Einrichtung, einmalig vorab · netto</p>
+          <ul class="ez-haken">
+            <li class="ez-haken__dazu">Alles aus Essential, dazu:</li>
+            <li>In Ihrem Design: Ihr Logo, Ihre Firmenfarbe, bis zu 6 Fotos Ihres Betriebs, eigene Startseite</li>
+            <li>Hinweis auf eeziframes: kleiner Hinweis im Fuß</li>
+            <li>Startseite in Suchmaschinen</li>
+          </ul>
+          <!--pakete:fb-cta-plus--><a class="dna-pille" href="#bestellen" data-paket="plus">Essential Plus anfragen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a><!--/pakete:fb-cta-plus-->
+        </article>
+
+        <article class="ez-paket" id="paket-signature" aria-labelledby="paket-signature-name">
+          <div class="ez-paket__bild ez-mini ez-mini--dunkel" aria-hidden="true"><span class="ez-mini__leiste"><i></i><i></i><i></i><span><svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="5.5" width="7" height="5" rx="1.2"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5"/></svg>ihr-name-fenster.de/betrieb</span></span><img src="bilder/signature.webp" width="640" height="400" alt="" loading="eager" fetchpriority="low" decoding="async"></div>
+          <header class="ez-paket__kopf"><h3 class="dna-label" id="paket-signature-name">EEZI Signature</h3></header>
+          <p class="ez-paket__satz">Ganz Ihre Marke, dazu Ihr Dashboard mit persönlichen Einladungslinks und Fortschritt.</p>
+          <div class="dna-zahl dna-zahl--klein"><span class="dna-zahl__wert"><!--pakete:fb-zahl-signature-->64<!--/pakete:fb-zahl-signature--><span class="dna-zahl__einheit">€ im Monat</span></span></div>
+          <p class="ez-paket__einr">dazu <!--pakete:fb-einr-signature-->279 €<!--/pakete:fb-einr-signature--> Einrichtung, einmalig vorab · netto</p>
+          <ul class="ez-haken">
+            <li class="ez-haken__dazu">Alles aus Essential Plus, dazu:</li>
+            <li>Ohne Hinweis auf eeziframes für Ihre Kunden, auch im Aufmaßblatt; E-Mails an Sie von einem neutralen Absender, sobald eingerichtet</li>
+            <li>Dashboard unter Ihrer Domain mit 5 Zugängen</li>
+            <li>Persönliche Einladungslinks für Ihre Kunden</li>
+            <li>Fortschritt sehen: eingeladen, in Bearbeitung, eingereicht</li>
+            <li>Aufmaßblätter jederzeit im Dashboard</li>
+          </ul>
+          <!--pakete:fb-cta-signature--><a class="dna-pille dna-pille--leise" href="#bestellen" data-paket="signature">Signature anfragen</a><!--/pakete:fb-cta-signature-->
+        </article>
+      </div>
+
+      <details class="ez-vergleich-auf">
+        <summary><span>Alle Merkmale im Vergleich</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary>
+        <table class="ez-tabelle">
+          <thead><tr><th scope="col">Merkmal</th><th scope="col">Essential</th><th scope="col">Essential Plus</th><th scope="col">Signature</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Monatlich, netto</th><td data-k="Essential"><!--pakete:fb-monat-essential-->29 €<!--/pakete:fb-monat-essential--></td><td data-k="Essential Plus"><!--pakete:fb-monat-plus-->39 €<!--/pakete:fb-monat-plus--></td><td data-k="Signature"><!--pakete:fb-monat-signature-->64 €<!--/pakete:fb-monat-signature--></td></tr>
+            <tr><th scope="row">Einrichtung, einmalig vorab</th><td data-k="Essential"><!--pakete:fb-einr-essential-->99 €<!--/pakete:fb-einr-essential--></td><td data-k="Essential Plus"><!--pakete:fb-einr-plus-->199 €<!--/pakete:fb-einr-plus--></td><td data-k="Signature"><!--pakete:fb-einr-signature-->279 €<!--/pakete:fb-einr-signature--></td></tr>
+            <tr><th scope="row">Eigene Domain</th><td data-k="Essential">ja</td><td data-k="Essential Plus">ja</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Voller Konfigurator</th><td data-k="Essential">ja</td><td data-k="Essential Plus">ja</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Anfrage per E-Mail mit PDF</th><td data-k="Essential">ja</td><td data-k="Essential Plus">ja</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Gestaltung</th><td data-k="Essential">eeziframes-Design mit Ihrem Namen</td><td data-k="Essential Plus">in Ihrem Design</td><td data-k="Signature">in Ihrem Design</td></tr>
+            <tr><th scope="row">Ihr Logo</th><td data-k="Essential">nein</td><td data-k="Essential Plus">ja</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Ihre Firmenfarbe</th><td data-k="Essential">nein</td><td data-k="Essential Plus">ja</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Fotos Ihres Betriebs</th><td data-k="Essential">nein</td><td data-k="Essential Plus">6</td><td data-k="Signature">6</td></tr>
+            <tr><th scope="row">Eigene Startseite</th><td data-k="Essential">nein</td><td data-k="Essential Plus">ja</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Hinweis auf eeziframes in der App</th><td data-k="Essential">„Powered by EEZIframes“</td><td data-k="Essential Plus">kleiner Hinweis im Fuß</td><td data-k="Signature">keiner</td></tr>
+            <tr><th scope="row">In Suchmaschinen</th><td data-k="Essential">nein</td><td data-k="Essential Plus">Startseite</td><td data-k="Signature">Startseite</td></tr>
+            <tr><th scope="row">Aufbewahrung der Anfragen</th><td data-k="Essential">30 Tage nach Zustellung</td><td data-k="Essential Plus">30 Tage nach Zustellung</td><td data-k="Signature">für die Vertragsdauer</td></tr>
+            <tr><th scope="row">Dashboard unter Ihrer Domain</th><td data-k="Essential">nein</td><td data-k="Essential Plus">nein</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Persönliche Einladungslinks</th><td data-k="Essential">nein</td><td data-k="Essential Plus">nein</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Fortschritt sehen</th><td data-k="Essential">nein</td><td data-k="Essential Plus">nein</td><td data-k="Signature">ja</td></tr>
+            <tr><th scope="row">Zugänge zum Dashboard</th><td data-k="Essential">nein</td><td data-k="Essential Plus">nein</td><td data-k="Signature">5</td></tr>
+          </tbody>
+        </table>
+      </details>
+      <p class="ez-klein ez-klein--breit"><!--pakete:fb-fuss-->Die Bestellung wird in Kürze freigeschaltet, bis dahin fragen Sie unverbindlich an. Vorläufige Preise; beim Bestellen wird Ihr Preis für den Vertrag festgeschrieben. Alle Preise netto zzgl. MwSt., nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden. Die Vorschau zeigt einen erfundenen Betrieb.<!--/pakete:fb-fuss--> <a href="/konfigurator-bedingungen/">Paketbedingungen</a></p>
+
+    </div>
+  </section>
+
+  <!-- Szene 5 (dunkel): Anfrage (nie unter einem Vorhang), Start, Kundenschutz, Fragen, Hintergrund, Ausblick, Abschluss, Wissen, Fuß. Gene: G5 die sechs Stationen bis Live, G3 65,14 € als Held, G2 Leuchten am Wert, G6 schwarze Pille auf heller Karte und eine Pille im Abschluss, G13 Rundknöpfe, G1 Haarlinien -->
+  <section class="dna-szene" data-theme="dunkel" id="start" aria-labelledby="start-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <div class="ez-zwei ez-anfragen" id="bestellen">
+        <div class="ez-text">
+          <span class="dna-label">05 · Ihre Anfrage</span>
+          <h2 class="dna-titel" id="anfrage-titel"><!--pakete:fb-anfrage-titel-->Paket unverbindlich <em class="ez-ak">anfragen.</em><!--/pakete:fb-anfrage-titel--></h2>
+          <p class="dna-text"><!--pakete:fb-anfrage-lede-->Die Bestellung wird in Kürze freigeschaltet. Bis dahin beantworten wir Ihre Fragen und merken Ihr Paket vor.<!--/pakete:fb-anfrage-lede--></p>
+          <ol class="ez-danach">
+            <li><b>Sie fragen an</b><span>Paket wählen oder offen lassen.</span></li>
+            <li><b>Wir antworten</b><span>Meist innerhalb eines Werktags, gern auch am Telefon.</span></li>
+            <li><b>Sie entscheiden</b><span>Ohne Verpflichtung. Ihr Kunde zahlt nie etwas.</span></li>
+          </ol>
+        </div>
+        <form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="/api/partner/frage">
+          <p class="ez-form__meldung" role="status" aria-live="polite" tabindex="-1"></p>
+          <p class="ez-form__fuer">Für Fensterbauer und Fensterhändler. Hauseigentümer: <a href="/#hauseigentuemer">zur Ansicht für Hauseigentümer</a>.</p>
+          <fieldset class="ez-form__pakete">
+            <legend class="dna-label">Paket</legend>
+            <div class="dna-pillen ez-radios">
+              <label><input type="radio" name="paket" value="" checked><span>Noch offen</span></label>
+              <label><input type="radio" name="paket" value="essential"><span>Essential</span></label>
+              <label><input type="radio" name="paket" value="plus"><span>Essential Plus</span></label>
+              <label><input type="radio" name="paket" value="signature"><span>Signature</span></label>
+            </div>
+          </fieldset>
+          <div class="ez-form__reihe">
+            <label class="ez-feld"><span>Ihr Name</span><input id="f-name" name="name" type="text" autocomplete="name" required minlength="2" maxlength="80" aria-describedby="f-name-fehler"><span class="ez-feld__fehler" id="f-name-fehler"></span></label>
+            <label class="ez-feld"><span>Firma <i>freiwillig</i></span><input id="f-firma" name="firma" type="text" autocomplete="organization" maxlength="100"></label>
+          </div>
+          <div class="ez-form__reihe">
+            <label class="ez-feld"><span>E-Mail</span><input id="f-mail" name="mail" type="email" inputmode="email" autocomplete="email" required maxlength="120" aria-describedby="f-mail-fehler"><span class="ez-feld__fehler" id="f-mail-fehler"></span></label>
+            <label class="ez-feld"><span>Telefon <i>freiwillig</i></span><input id="f-tel" name="tel" type="tel" autocomplete="tel" maxlength="40"></label>
+          </div>
+          <label class="ez-feld"><span>Ihre Frage oder Ihr Wunsch <i>freiwillig</i></span><textarea id="f-text" name="text" rows="4" maxlength="2000"></textarea></label>
+          <div class="ez-form__fax" aria-hidden="true"><label>Fax <input name="fax" tabindex="-1" autocomplete="off"></label></div>
+          <div class="ez-form__fuss">
+            <button class="dna-pille" type="submit"><span class="ez-form__knopftext">Frage senden</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+            <p class="ez-form__fehler" role="alert" tabindex="-1" hidden>Bitte geben Sie Ihren Namen und eine gültige E-Mail-Adresse an.</p>
+            <p class="ez-klein">Wir nutzen Ihre Angaben nur, um Ihnen zu antworten. <a href="/datenschutz/#pakete">Datenschutz</a></p>
+          </div>
+        </form>
+      </div>
+      <div class="ez-zwei ez-start">
+        <div class="ez-text">
+          <span class="dna-label">06 · Ihr Start</span>
+          <h2 class="dna-titel" id="start-titel">In 3 bis 5 Werktagen <em class="ez-ak">online.</em></h2>
+          <p class="dna-text">Meist 3 bis 5 Werktage nach der Zahlung, abhängig vor allem von Domain und Ihrer Freigabe. Sie brauchen keine eigene Website.</p>
+          <section class="ez-schutz" data-theme="hell" id="kundenschutz" aria-labelledby="schutz-titel">
+            <span class="dna-label">Kundenschutz</span>
+            <h3 class="dna-titel-s" id="schutz-titel">Ihre Kunden bleiben Ihre Kunden.</h3>
+            <ul class="ez-haken">
+              <li><b>Nur Ihr Betrieb.</b> Keine anderen Anbieter, keine Werbung, keine Preise von eeziframes.</li>
+              <li><b>Nur an Sie.</b> Jede Anfrage geht an die E-Mail-Adressen, die Sie bestätigt haben.</li>
+              <li><b>Kein Weiterverkauf.</b> eeziframes spricht Ihre Kunden nicht an und gibt keine Daten weiter.</li>
+              <li><b>Im Auftrag, in Frankfurt.</b> Verarbeitung nach AV-Vertrag, Daten bei Supabase in Frankfurt.</li>
+            </ul>
+          </section>
+        </div>
+        <ol class="dna-schritte ez-livegang" aria-label="Von der Bestellung bis zum Livegang">
+          <li data-zustand="aktiv"><span class="ez-livegang__text"><b>Bestellt</b><span>Paket wählen, Firma, Wunsch-Domain und Adressen für Anfragen angeben.</span></span> <span class="dna-schritte__zustand">01</span></li>
+          <li data-zustand="offen"><span class="ez-livegang__text"><b>Bezahlt</b><span>Einrichtung vorab per Karte oder SEPA-Lastschrift.</span></span> <span class="dna-schritte__zustand">02</span></li>
+          <li data-zustand="offen"><span class="ez-livegang__text"><b>In Einrichtung</b><span>Ein Anruf zu Ihrer Wunschzeit. Wir legen Ihren Konfigurator an.</span></span> <span class="dna-schritte__zustand">03</span></li>
+          <li data-zustand="offen"><span class="ez-livegang__text"><b>Domain gesichert</b><span>Domain, Zertifikat und Schutz vor gefälschten E-Mails.</span></span> <span class="dna-schritte__zustand">04</span></li>
+          <li data-zustand="offen"><span class="ez-livegang__text"><b>Zur Freigabe</b><span>Sie testen über einen Vorschau-Link und geben frei.</span></span> <span class="dna-schritte__zustand">05</span></li>
+          <li data-zustand="offen"><span class="ez-livegang__text"><b>Live</b><span>Ihr Konfigurator ist öffentlich. Erst jetzt beginnt das Monatsabo.</span></span> <span class="dna-schritte__zustand">06</span></li>
+        </ol>
+      </div>
+
+      <div class="ez-fragen-block" id="fragen">
+        <div class="ez-kopfzeile">
+          <span class="dna-label">Häufige Fragen</span>
+          <h2 class="dna-titel" id="faq-titel">Noch Fragen? <em class="ez-ak">Kurz beantwortet.</em></h2>
+          <p class="dna-text">Ihre Frage ist nicht dabei? <a href="#bestellen">Schreiben Sie uns</a>, Antwort meist innerhalb eines Werktags.</p>
+        </div>
+        <div class="ez-fragen">
+          <details class="ez-frage" open><summary><span>Landen meine Kunden auf einem fremden Portal?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Nein. Ihre Kunden klicken auf Ihrer Website auf „Fenster planen“ und landen bei Ihrem Konfigurator unter Ihrer eigenen Adresse. Sie sehen nur Ihren Betrieb, keine anderen Anbieter, keine Werbung, keine Preise von eeziframes. Im Paket Essential steht unten ein kleiner Hinweis „Powered by EEZIframes“, ab Signature gar keiner.</p></div></details>
+          <details class="ez-frage"><summary><span>Gehen Anfragen meiner Kunden auch an andere Betriebe?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Nein. Was Ihre Kunden in Ihrem Konfigurator planen, geht nur an Sie. Weitergeleitet werden künftig nur Planungen aus der öffentlichen eeziframes-App, und nur, wenn der Hauseigentümer zustimmt.</p></div></details>
+          <details class="ez-frage"><summary><span>Rechnet der Konfigurator Preise aus?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Nein. Er ist zum Planen da: Ihr Kunde plant und misst seine Fenster perfekt, mit Fotos, Maßen und 3-D-Modell. Preise sieht er keine. Die Anfrage landet bei Ihnen, und Sie kalkulieren Ihr Angebot selbst.</p></div></details>
+          <details class="ez-frage"><summary><span>Gehört mir die Domain?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Wir sichern Ihre Wunschdomain, sofern sie frei ist, und verbinden sie samt Zertifikat. Wem sie gehört und was bei einer Kündigung passiert, regeln die <a href="/konfigurator-bedingungen/">Paketbedingungen</a>.</p></div></details>
+          <details class="ez-frage"><summary><span>Wie lange werden Anfragen gespeichert?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Bei Essential und Essential Plus 30 Tage nach Zustellung, bei Signature für die ganze Vertragsdauer im Dashboard. Das Aufmaßblatt haben Sie ohnehin per E-Mail.</p></div></details>
+          <details class="ez-frage"><summary><span>Was unterscheidet die drei Pakete?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Alle haben den vollen Konfigurator unter Ihrer Domain und Anfragen als PDF per E-Mail. Der Unterschied liegt im Auftritt: Essential im eeziframes-Design mit Ihrem Namen, Plus in Ihrem Design, Signature zusätzlich mit Dashboard und Einladungslinks, ohne eeziframes-Hinweis.</p></div></details>
+          <details class="ez-frage"><summary><span>Was kostet ein eigener Fenster-Konfigurator?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Eine einmalige Einrichtung vorab und ein fester Monatspreis je Paket. Für Anfragen Ihrer eigenen Kunden gibt es keine Gebühr. Nur für zusätzliche Anfragen aus der eeziframes-App ist künftig eine Gebühr je Anfrage geplant, wenn Sie dabei mitmachen. Alle Preise netto.</p></div></details>
+          <details class="ez-frage"><summary><span>Was sieht mein Kunde?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Ihren Konfigurator mit Ihrem Namen, je nach Paket auch mit Logo, Farbe und Fotos. Keine Preise, keine Werbung, keine anderen Betriebe. Er bekommt eine Bestätigung und seine Anfrage als PDF.</p></div></details>
+          <details class="ez-frage"><summary><span>Ist ein Kundenaufmaß genau genug fürs Angebot?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Für das erste Angebot ja: drei Breiten und drei Höhen je Fenster, das kleinste Maß zählt, Abweichungen werden markiert. Das Feinaufmaß vor der Fertigung bleibt bei Ihnen.</p></div></details>
+          <details class="ez-frage"><summary><span>Brauche ich eine eigene Website oder Domain?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Nein. Der Konfigurator ist selbst eine Seite unter Ihrer Domain. eeziframes sichert eine freie Wunschdomain und verbindet sie samt Zertifikat. Haben Sie eine Website, bekommen Sie zum Livegang einen Knopf „Fenster planen“.</p></div></details>
+          <details class="ez-frage"><summary><span>Wer ist für den Datenschutz verantwortlich?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Sie für die Kundenanfragen, eeziframes verarbeitet sie in Ihrem Auftrag. Der AV-Vertrag kommt mit der Bestellung zustande, die Daten liegen bei Supabase in Frankfurt.</p></div></details>
+          <details class="ez-frage"><summary><span>Kann ich kündigen oder das Paket wechseln?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Ja. Monatlich kündbar, ohne Mindestlaufzeit. Nach oben gegen die Differenz der Einrichtungsgebühr, nach unten zum Monatsende.</p></div></details>
+          <details class="ez-frage"><summary><span>Was zahlt mein Kunde?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Nichts. Wer über Ihren Konfigurator plant, zahlt nichts, auch nicht für das Aufmaßblatt. In der öffentlichen App für Hauseigentümer sehen Sie den Preis für Privatnutzer, der gilt für Ihre Kunden nicht.</p></div></details>
+          <details class="ez-frage"><summary><span>Kann ich schon bestellen?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p><!--pakete:fb-faq-bestellen-->Die Bestellung wird in Kürze freigeschaltet. Bis dahin können Sie ein Paket unverbindlich anfragen. Antwort meist innerhalb eines Werktags.<!--/pakete:fb-faq-bestellen--></p></div></details>
+          <details class="ez-frage"><summary><span>Ich nutze eeziframes schon mit Kundenlinks. Ändert sich etwas?</span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v9M2.5 7h9"/></svg></span></summary><div class="frage-antwort"><p>Nein. Konto, Kundenlinks und Abrechnung bleiben, wie sie sind. Ein Paket bestellen Sie zusätzlich, wie ein neuer Kunde.</p></div></details>
+        </div>
+      </div>
+
+      <div class="ez-zwei ez-hintergrund" id="hintergrund">
+        <div class="ez-text">
+          <span class="dna-label">Hintergrund</span>
+          <h2 class="dna-titel" id="hint-titel">Warum Kunden selbst <em class="ez-ak">planen.</em></h2>
+          <p class="dna-text">Das Erstaufmaß kostet Sie Fahrt und Zeit, bevor ein Auftrag da ist. Mit dem Konfigurator kommt das Erstaufmaß vom Kunden; Sie fahren erst zum Feinaufmaß.</p>
+          <ul class="ez-fakten">
+            <li><span class="ez-fakt"><span class="ez-fakt__zahl">0<span class="ez-fakt__einheit">€</span></span><span class="ez-fakt__text">bekommen Sie für einen Kostenanschlag im Zweifel. Die Anfahrt zum Erstaufmaß trägt der Betrieb.<span class="ez-fakt__quelle">§&nbsp;632 Abs.&nbsp;3 BGB</span></span></span></li>
+            <li><span class="ez-fakt"><span class="ez-fakt__zahl">9,9<span class="ez-fakt__einheit">Wochen</span></span><span class="ez-fakt__text">reichten die Aufträge im Ausbauhandwerk Anfang 2026 im Schnitt. Zeit ist knapp.<span class="ez-fakt__quelle">ZDH, Konjunkturbericht Q1 2026</span></span></span></li>
+          </ul>
+        </div>
+        <article class="dna-leucht ez-kachel-zahl">
+          <span class="ez-raster" aria-hidden="true"></span>
+          <header class="dna-leucht__kopf"><span class="dna-label">Meisterstunde, netto</span><span class="dna-label">Preisatlas Handwerk 2024</span></header>
+          <div class="dna-zahl"><span class="dna-zahl__wert">65,14<span class="dna-zahl__einheit">€</span></span></div>
+          <div class="ez-kachel-zahl__fuss"><b>Beispielrechnung: Spart Ihnen eine Anfrage im Monat eine Stunde für Fahrt und Erstaufmaß, sind das 65,14&nbsp;€. Essential Plus kostet <!--pakete:fb-monat-plus-->39 €<!--/pakete:fb-monat-plus--> im Monat.</b><span>Annahme: eine Meisterstunde je gesparter Fahrt. Ihre Werte können abweichen.</span></div>
+        </article>
+      </div>
+
+      <section class="ez-karte-dunkel ez-naehe" id="naehe" aria-labelledby="nah-titel">
+        <div class="ez-naehe__text">
+          <span class="ez-badge-koralle">Bald</span>
+          <h2 class="dna-titel-s" id="nah-titel">Mehr Anfragen aus Ihrer Nähe.</h2>
+          <p class="dna-text">Hauseigentümer planen ihre Fenster auch in der kostenlosen eeziframes-App. Wer in Ihrer Nähe plant, kann seine fertige Anfrage am Ende mit einem Klick an Sie schicken.</p>
+        </div>
+        <ul class="ez-liste">
+          <li><span><b>Fertig geplant</b>&nbsp;·&nbsp;Maße, Fotos und Wünsche, genau wie bei Anfragen Ihrer eigenen Kunden.</span></li>
+          <li><span><b>Freiwillig</b>&nbsp;·&nbsp;Sie entscheiden, ob Sie mitmachen. Der Hauseigentümer stimmt zu, bevor etwas an Sie geht.</span></li>
+          <li><span><b>Fair abgerechnet</b>&nbsp;·&nbsp;Eine Gebühr nur je weitergeleiteter Anfrage, Preis folgt. Anfragen Ihrer eigenen Kunden bleiben ohne Gebühr.</span></li>
+        </ul>
+        <a class="ez-linkzeile" href="#bestellen" data-vormerken>Interesse vormerken</a>
+      </section>
+
+      <div class="ez-abschluss" id="abschluss">
+        <div class="ez-kopfzeile">
+          <span class="dna-label">Zusammengefasst</span>
+          <h2 class="dna-titel" id="schluss-titel">Ihr Konfigurator. Ihre Marke. <em class="ez-ak">Ihre Anfragen.</em></h2>
+          <p class="dna-text">Drei Pakete ab <!--pakete:fb-ab-->29 €<!--/pakete:fb-ab--> im Monat, ohne Mindestlaufzeit. Ihr Kunde zahlt nichts.</p>
+        </div>
+        <div class="ez-aktionen">
+          <a class="dna-pille" href="#bestellen">Paket anfragen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+          <a class="dna-pille dna-pille--leise" href="/app/">Selbst ausprobieren</a>
+        </div>
+      </div>
+
+      <div class="ez-wissen" id="ratgeber">
+        <div class="ez-kopfzeile">
+          <span class="dna-label">Wissen für Fensterbauer</span>
+          <h2 class="dna-titel" id="wissen-titel">Vor dem <em class="ez-ak">Angebot</em> lesen.</h2>
+        </div>
+        <ul class="ez-ratgeber">
+          <li><a href="/fuer-fensterbauer/erstaufmass-feinaufmass/"><span><b>Erstaufmaß und Feinaufmaß</b><span>Wofür welches Aufmaß da ist, wer misst und wie genau.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+          <li><a href="/fuer-fensterbauer/falsches-aufmass-haftung/"><span><b>Falsches Aufmaß: Wer haftet?</b><span>Werkvertrag, Hinweispflicht, wie Betriebe vorbeugen.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+          <li><a href="/fuer-fensterbauer/aufmass-kostenpflichtig/"><span><b>Aufmaß kostenlos oder kostenpflichtig?</b><span>Kostenanschlag, Anfahrtspauschale, Absprache vorab.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+          <li><a href="/fuer-fensterbauer/geplatzter-aufmasstermin/"><span><b>Geplatzter Aufmaßtermin</b><span>Was eine Fahrt ohne Kunden kostet, mit Beispielrechnung.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+          <li><a href="/fuer-fensterbauer/fensterbau-software/"><span><b>Fensterbau-Software im Überblick</b><span>Aufmaß-Apps, Handwerkersoftware und ERP, nach Aufgabe geordnet.</span></span><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 10 4M5 4h5v5"/></svg></span></a></li>
+        </ul>
+        <a class="ez-linkzeile" href="/#hauseigentuemer">Sie sind Hauseigentümer? Zur Ansicht für Hauseigentümer</a>
+      </div>
+    </div>
+
+    <div class="ez-huelle">
+      <footer class="ez-fuss" role="contentinfo">
+        <div class="ez-fuss__spalten">
+          <a class="ez-marke" href="/" aria-label="eeziframes, zur Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="fi-kachel" width="64" height="64" rx="10" fill="#000"/><g class="fi-licht" fill="#fff"><path class="fi-decke" d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path class="fi-fenster" d="M45 22 57 17.6V41.9L45 39.8Z"/><path class="fi-strahl" d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect class="fi-rand" x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#000" stroke-opacity=".1"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></a>
+          <div><h3 class="dna-label">Für Fensterbauer</h3><ul><li><a href="#pakete">Pakete</a></li><li><a href="/konfigurator-bedingungen/">Paketbedingungen</a></li><li><a href="#bestellen">Anfragen</a></li><li><a href="#ratgeber">Wissen</a></li></ul></div>
+          <div><h3 class="dna-label">Hauseigentümer</h3><ul><li><a href="/#hauseigentuemer">Startseite</a></li><li><a href="/app/">App</a></li><li><a href="/ratgeber/">Ratgeber</a></li></ul></div>
+          <div><h3 class="dna-label">Rechtliches</h3><ul><li><a href="/impressum/">Impressum</a></li><li><a href="/datenschutz/">Datenschutz</a></li><li><a href="/cookies/">Cookies</a></li><li><a href="/agb/">AGB</a></li><li><a href="/nutzungsbedingungen/">Nutzungsbedingungen</a></li><li><a class="widerruf-knopf" href="/widerruf/">Vertrag widerrufen</a></li></ul></div>
+        </div>
+        <div class="ez-quellen">
+          <h3 class="dna-label">Quellen</h3>
+          <ol><li>§&nbsp;632 Abs.&nbsp;3 BGB, Vergütung</li><li>ZDH, Konjunkturbericht Q1 2026</li><li>Preisatlas Handwerk 2024 (OneQrew)</li></ol>
+        </div>
+        <p class="ez-fuss__pilot"><span class="ez-badge-indigo">Pilotphase</span> Die Konfigurator-Pakete bestellen Sie in Kürze im Kundenkonto; bis dahin fragen Sie unverbindlich an. Angebot nur für Unternehmer im Sinne von § 14 BGB.</p>
+      </footer>
+    </div>
+  </section>
+</main>
+</div>
+
+<script src="dna/bundle.js"></script>
+<script src="start.js"></script>
