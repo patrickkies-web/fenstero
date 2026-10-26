@@ -3543,7 +3543,7 @@ if (teil(16)) {
     const adresse = sk.url();
     for (const z of ['1', '3', '9', '0']) await sk.click('.keypad [data-v="' + z + '"]');
     await sk.click('.keypad [data-v="ok"]'); await sk.waitForTimeout(250);
-    const tasten = await sk.evaluate(() => { const k = Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')), pad = document.querySelector('.keypad').getBoundingClientRect(), okb = document.querySelector('.keypad [data-v="ok"]').getBoundingClientRect(), zb = document.querySelector('.keypad [data-v="zurueck"]').getBoundingClientRect(), eins = document.querySelector('.keypad [data-v="1"]').getBoundingClientRect(); return { reihe: k.slice(9).join(','), voll: okb.width > pad.width - 4, gleich: Math.abs(zb.height - eins.height) < 1 && Math.abs(zb.width - eins.width) < 1, step: S.mess.step }; });
+    const tasten = await sk.evaluate(() => { const k = Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')), pad = document.querySelector('.keypad').getBoundingClientRect(), okb = document.querySelector('.keypad [data-v="ok"]').getBoundingClientRect(), zb = document.querySelector('.keypad [data-v="zurueck"]').getBoundingClientRect(), eins = document.querySelector('.keypad [data-v="1"]').getBoundingClientRect(); return { reihe: k.slice(9).join(','), voll: Math.abs(okb.left + okb.width / 2 - (pad.left + pad.width / 2)) < 2 && okb.width < pad.width - 40 && okb.height >= 44, gleich: Math.abs(zb.height - eins.height) < 1 && Math.abs(zb.width - eins.width) < 1, step: S.mess.step }; });
     await sk.click('.keypad [data-v="zurueck"]'); await sk.waitForTimeout(200);
     const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur }));
     await sk.goBack(); await sk.waitForTimeout(300);
@@ -3551,7 +3551,7 @@ if (teil(16)) {
     await sk.click('[data-act="gindex"]'); await sk.waitForSelector('.g-index'); await sk.goBack(); await sk.waitForTimeout(250);
     const zurueck3 = await sk.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.g-index') }));
     ok(tasten.reihe === 'zurueck,0,del,ok' && tasten.voll && tasten.gleich && tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
-      'Zifferntasten: unten Pfeil zurück (gleich groß), 0, Löschen, darunter „Weiter“ über die ganze Breite; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers geht einen Schritt zurück (Adresse bleibt) und schließt zuerst ein offenes Blatt');
+      'Zifferntasten: unten „Zurück“ (gleich groß), 0, Löschen, darunter „Weiter“ klein und mittig wie die Leisten der App; „Zurück“ führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers geht einen Schritt zurück (Adresse bleibt) und schließt zuerst ein offenes Blatt');
     /* Foto groß mit Zoom */
     await sk.evaluate(() => useDemo()); await sk.waitForFunction(() => S.photos.in && S.photos.out, null, { timeout: 8000 }); await sk.evaluate(() => render()); await sk.waitForTimeout(200);
     await sk.click('.tile[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
@@ -4570,7 +4570,7 @@ if (teil(22)) {
   await p.tap('#p-w'); await p.fill('#p-w', ''); await p.keyboard.type('2100'); await p.tap('#p-h'); await p.waitForTimeout(300);
   const t3b = await p.evaluate(() => ({ fokus: document.activeElement && document.activeElement.id, wm: S.win.mo.wm }));
   ok(t1.screen === 'fertig' && /Termin/.test(t1.notiz || '') && t2.q !== 'fa' && t2.wunschA === 'wie Garagentor' && t3.screen === 'ergebnis' && t3.wm === 2000 && t3b.fokus === 'p-h' && t3b.wm === 2100,
-    'Erster Tipp zählt nach einem Textfeld: Fenster speichern, Weiter (eigene Farbe), Weiter zum Ergebnis; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
+    'Erster Tipp zählt nach einem Textfeld: Fenster speichern, Weiter (eigene Farbe), Maße ansehen; das nächste Feld behält den Fokus (' + JSON.stringify([t1.screen, t2.q, t3.screen, t3b.fokus]) + ')');
   // Maßschilder in der Bühne (mind. 8 px Rand), auch bei breiten Elementen; Zoom in der Übersicht unten rechts, nichts überdeckt sich
   const buehne = () => p.evaluate(() => {
     const st = document.getElementById('w3d'); if (!st) return { fehlt: 1 };
@@ -4874,7 +4874,7 @@ if (teil(22)) {
   const fs8b = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, neig: b._relief && b._relief[1], stops: (b.style.background.match(/rgb\(/g) || []).length, rep: /^repeating-linear-gradient\(/.test(b.style.background), lippe: /rgb\(42, 43, 45\)/.test(st.querySelector('[data-r="behang-u"]').style.background) }; });
   await frageB('schlitz', { sart: 'rollladen', roll: 'vorbau', schlitz: 'mit' }, 'genau'); await p.waitForTimeout(500);
   const fs8c = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, schlitz: /^radial-gradient\(/.test(b.style.background) && /repeating-linear-gradient\(/.test(b.style.background) }; });
-  ok(fs1.key >= 40 && fs1.key <= 44 && fs1.zur === 'Zurück' && fs1.zurH === fs1.key && fs1.ok >= 44 && fs1.stage >= 220, 'Feinschliff, Zifferntasten beim Messen: Tasten ' + fs1.key + ' px mit „Zurück“ als beschriftetem Knopf, „Weiter“ ' + fs1.ok + ' px, das Modell ' + fs1.stage + ' px hoch');
+  ok(fs1.key >= 40 && fs1.key <= 46 && fs1.zur === 'Zurück' && fs1.zurH === fs1.key && fs1.ok >= 44 && fs1.stage >= 220, 'Feinschliff, Zifferntasten beim Messen: Tasten ' + fs1.key + ' px mit „Zurück“ als beschriftetem Knopf, „Weiter“ ' + fs1.ok + ' px, das Modell ' + fs1.stage + ' px hoch');
   ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
   ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
   ok(fs4.raff === 230 && fs4.kasten === 230 && fs4.roll === 200 && fs4.vorbau < 100 && fs4.blende, 'Feinschliff, Aufsatzkasten: das Element endet 230 mm (Raffstore) bzw. 200 mm (Rollladen) unter der Öffnung, beim Vorbau nicht; die Blende ist eine Detailangabe nur beim Aufsatzkasten');
