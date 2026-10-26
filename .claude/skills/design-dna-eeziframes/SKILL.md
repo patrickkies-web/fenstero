@@ -66,4 +66,4 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 
 ## 6. Prompt
 
-Vorlage, Anhängsel und die drei Richtungen mit Beispielen in `prompt.md` neben dieser Datei.
+Vorlage, Gestaltungs-Anhängsel und die drei Richtungen mit Beispielen in `prompt.md`; das Master-Anhängsel für jeden Auftrag (Gestaltung, App, Texte, Server) in `master-anhaengsel.md`, beide neben dieser Datei.
