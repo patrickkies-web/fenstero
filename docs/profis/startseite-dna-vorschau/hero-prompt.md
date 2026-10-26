@@ -1,3 +1,5 @@
+> Stand 26.10., später am Tag: Der Inhaber hat ein eigenes Hausfoto für den Hero gewählt (bilder/hero.webp, warmes Abendlicht, Garten). Gerät und Etikett sind aus dem Hero genommen. Der Prompt unten bleibt als Alternative für ein ruhigeres, fast unbuntes Bild.
+
 # Bildprompt für den Hero der Startseite (Design-DNA)
 
 Was das Bild in der Seite tut: Es ist die weiche Bühne hinter dem Gerät (Gen G4 „Das Interface ist ein Objekt“, G10 „Scharf vor unscharf“, G7 „Ein besonderes Material“). Davor liegt als Oberfläche, nicht im Bild, das gekippte Handy mit dem Messbildschirm der App, und ein Glas-Etikett „Öffnung · Höhe 1.409 mm“ hängt mit gestrichelter Linie an der Stelle im Bild, zu der der Wert gehört (G9). Das Bild soll deshalb weich, ruhig und fast unbunt sein; die Schärfe und die Farbe kommen aus dem Interface davor.

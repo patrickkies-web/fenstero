@@ -7,11 +7,15 @@
 html { background: var(--schwarz); overflow-x: clip; --ez-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M5 3l4 4-4 4' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: var(--font-sans); overflow-x: clip; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 .ez *, .ez *::before, .ez *::after { box-sizing: border-box; }
+.ez .dna-wort[data-dna-auftritt]:not(.ist-da) { filter: blur(6px); }
+.ez .dna-wort { will-change: filter, transform; }
+.ez .dna-etikett { -webkit-backdrop-filter: blur(12px) saturate(140%); backdrop-filter: blur(12px) saturate(140%); }
 html:not(.ez-js) [data-dna-auftritt] { opacity: 1; transform: none; filter: none; transition: none; }
 html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-dna="anker"] .dna-anker__punkt, html:not(.ez-js) [data-dna="anker"] .dna-anker__linien > * { opacity: 1; translate: none; }
 .ez .dna-anker__etikett { transform: none; }
 .ez .dna-anker__etikett > .dna-etikett { transform: translate(-50%, -50%); }
-[data-theme="dunkel"] .dna-etikett { --glas: rgba(32,32,34,.88); }
+[data-theme="dunkel"] .dna-etikett { --glas: rgba(32,32,34,.72); border-color: rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), var(--schatten-glas); }
+.ez .dna-rund-knopf { background: radial-gradient(at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,.04) 70%), var(--flaeche-hoch); box-shadow: inset 0 1px 0 rgba(255,255,255,.22); }
 [data-theme="dunkel"] .dna-etikett__punkt { background: rgba(255,255,255,.08); width: 24px; height: 24px; }
 [data-theme="dunkel"] .dna-etikett__wert { color: var(--tinte-2); font-weight: 400; }
 .ez a { -webkit-tap-highlight-color: transparent; }
@@ -21,20 +25,26 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 [data-theme="hell"].dna-szene > .ez-abschnitt { padding-block: var(--raum-7); }
 @media (min-width: 900px) { [data-theme="hell"].dna-szene > .ez-abschnitt { padding-block: var(--raum-8); } }
 @media (min-width: 900px) { .ez-abschnitt { padding-block: var(--raum-9); gap: var(--raum-7); } }
+.ez .dna-titel-xl { font-weight: 600; font-size: clamp(44px, 9.5vw, 56px); line-height: .95; letter-spacing: -.035em; }
+.ez .dna-titel { font-weight: 600; font-size: clamp(30px, 6.5vw, 40px); line-height: 1.02; letter-spacing: -.025em; }
+.ez .dna-label { font-weight: 400; letter-spacing: .03em; }
+.ez .dna-zahl--klein .dna-zahl__wert { font-weight: 300; }
+.ez .dna-zahl--klein .dna-zahl__einheit { font-size: 14px; margin-left: .25em; }
 .ez-kopfzeile { display: grid; gap: var(--raum-3); justify-items: start; }
-.ez-kopfzeile .dna-text { max-width: 36ch; margin-top: 4px; }
+.ez-kopfzeile > .dna-label, .ez-text > .dna-label, .ez-stufe__text > .dna-label { margin-bottom: -6px; }
+.ez-kopfzeile .dna-text { max-width: 36ch; }
 .dna-titel em.ez-ak, .dna-titel-xl em.ez-ak { font-style: normal; color: var(--tinte-2); }
 .ez-klein { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); max-width: 36ch; }
 .ez-klein b { font-weight: 500; color: var(--tinte); }
 .ez-linkzeile { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--tinte); font: 500 16px/1.2 var(--font-sans); text-decoration: none; }
 .ez-linkzeile::after { content: ""; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ez-chevron) center / contain no-repeat; mask: var(--ez-chevron) center / contain no-repeat; }
 .ez-text { display: grid; gap: var(--raum-4); align-content: start; justify-items: start; min-width: 0; }
-.ez-text > .dna-titel { margin-top: -4px; }
+.ez-text { gap: var(--raum-3); }
 .ez-zwei { display: grid; gap: var(--raum-6); }
 .ez-zwei > * { min-width: 0; }
 @media (min-width: 900px) { .ez-zwei { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--raum-8); align-items: center; } }
 .ez-aktionen { display: flex; flex-wrap: wrap; gap: 10px; }
-.ez-hero__text .ez-aktionen, .ez-text > .dna-pille, .ez-fb .ez-aktionen { margin-top: 16px; }
+.ez-hero__text .ez-aktionen, .ez-text > .dna-pille, .ez-fb .ez-aktionen { margin-top: 20px; }
 @media (min-width: 900px) { .ez-hero__text .ez-aktionen { margin-top: 8px; } }
 .ez .dna-pille__pfeil svg { transition: transform 220ms var(--dna-druck); }
 .ez .dna-pille--leise { transition: background-color 220ms ease, color 220ms ease, box-shadow 220ms ease, transform 220ms var(--dna-druck); }
@@ -69,8 +79,8 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-kopf .ez-ansicht { grid-area: ansicht; justify-self: start; }
 @media (min-width: 900px) { .ez-kopf { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "marke ansicht pille"; padding-block: var(--raum-5) var(--raum-4); } .ez-kopf .ez-ansicht { justify-self: center; } }
 .ez-marke { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tinte); }
-.ez-marke svg { width: 30px; height: 30px; display: block; }
-.ez-wm { font: 500 20px/1 "Inter", var(--font-sans); letter-spacing: -.02em; white-space: nowrap; }
+.ez-marke svg { width: 26px; height: 26px; display: block; }
+.ez-wm { font: 500 18px/1 "Inter", var(--font-sans); letter-spacing: -.02em; white-space: nowrap; }
 .ez-wm b { font-weight: 900; }
 .ez-ansicht a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
 .ez-kopf > .dna-pille--klein, .ez-leiste .dna-pille--klein { height: 44px; padding: 0 18px; font-size: 14px; }
@@ -98,47 +108,17 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 }
 .ez-buehne { position: relative; aspect-ratio: 4 / 3; max-width: 100%; perspective: 1400px; }
 @media (min-width: 900px) { .ez-buehne { aspect-ratio: 4 / 3; } }
-.ez-schein { position: absolute; left: -16%; bottom: -44%; width: 80%; aspect-ratio: 1; border-radius: 50%; z-index: 2; pointer-events: none; background: radial-gradient(closest-side, var(--violett) 28%, var(--indigo) 56%, transparent 76%); filter: blur(22px); opacity: .9; }
-@media (min-width: 900px) { .ez-schein { left: -16%; bottom: -40%; width: 74%; } }
 .ez-nur-desk { display: none; }
 @media (min-width: 760px) { .ez-blatt .ez-nur-desk { display: block; } .ez-blatt .ez-nur-tel { display: none; } }
 @media (min-width: 900px) { .ez-nur-desk { display: block; } .ez-nur-tel { display: none; } }
-#hero-punkt { left: 79%; top: 40%; }
-#hero-etikett { left: 60%; top: 16%; }
-@media (min-width: 900px) { #hero-punkt { left: 75%; top: 24%; } #hero-etikett { left: 58%; top: 9%; } }
 .ez-foto { position: absolute; inset: 0; border-radius: var(--rund-xl); overflow: hidden; background: var(--anthrazit); }
 .ez-foto img { width: 100%; height: 100%; object-fit: cover; object-position: 56% 24%; display: block; }
 @media (min-width: 900px) { .ez-foto img { object-position: 50% 20%; } }
-.ez-foto::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); pointer-events: none; }
-.ez-anker { position: absolute; inset: 0; pointer-events: none; }
+.ez-foto::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -90px 120px -60px rgba(7,9,10,.75); pointer-events: none; }
 .ez .dna-etikett { font-size: 12px; }
-.ez-anker.ist-da .dna-anker__linien > *, .ez-anker.ist-da .dna-anker__punkt { transition-delay: 1000ms; }
-.ez-anker.ist-da .dna-anker__etikett { transition-delay: 1300ms; }
-.ez-js .ez-schirm__zahl > span:not(.ist-da) { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .ez-schirm__zahl > span { opacity: 1 !important; } .ez-anker.ist-da .dna-anker__linien > *, .ez-anker.ist-da .dna-anker__punkt, .ez-anker.ist-da .dna-anker__etikett { transition-delay: 0ms; } }
 @media (min-width: 900px) { .ez .dna-etikett { font-size: 13px; } }
-.ez-geraet { position: absolute; left: 2%; bottom: -8%; z-index: 3; --s: .56; }
-.ez-schirm__zeilen { display: none; }
-@media (min-width: 900px) { .ez-schirm__zeilen { display: grid; } }
-@media (min-width: 900px) { .ez-geraet { left: 3%; bottom: -10%; --s: .8; } }
-.ez-geraet.dna-geraet { width: calc(236px * var(--s)); padding: calc(9px * var(--s)); border-radius: calc(46px * var(--s)); --dna-kipp-x: 10deg; --dna-kipp-y: -13deg; --dna-kipp-z: 5deg; }
-.ez-geraet .dna-geraet__schirm { border-radius: calc(38px * var(--s)); background: var(--schwarz); color: var(--weiss); }
-.ez-geraet .dna-geraet__schirm::before { top: calc(9px * var(--s)); height: calc(22px * var(--s)); border-radius: calc(12px * var(--s)); }
-.ez-schirm { height: 100%; padding: calc(44px * var(--s)) calc(14px * var(--s)) calc(14px * var(--s)); display: grid; align-content: start; gap: calc(12px * var(--s)); font: 500 calc(13px * var(--s))/1.2 var(--font-sans); }
-.ez-schirm__kopf { display: flex; justify-content: space-between; align-items: center; gap: 6px; color: var(--silbergrau); }
+.ez-hero__buehne::before { content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none; background: radial-gradient(55% 45% at 68% 45%, #141517, transparent 72%); }
 .ez-chip { display: inline-flex; align-items: center; background: var(--indigo); color: var(--weiss); border-radius: var(--rund-pille); padding: calc(5px * var(--s)) calc(9px * var(--s)); font-size: calc(11px * var(--s)); white-space: nowrap; }
-.ez-schirm__glut { position: relative; isolation: isolate; overflow: hidden; border-radius: calc(22px * var(--s)); padding: calc(18px * var(--s)) calc(12px * var(--s)) calc(14px * var(--s)); display: grid; justify-items: center; gap: calc(6px * var(--s)); background: var(--anthrazit); }
-.ez-schirm__glut::before { content: ""; position: absolute; inset: -30%; z-index: -1; background: radial-gradient(42% 42% at 72% 18%, var(--violett), transparent 70%), radial-gradient(40% 40% at 18% 100%, var(--indigo), transparent 70%); filter: blur(calc(24px * var(--s))); }
-.ez-schirm__label { font-size: calc(12px * var(--s)); color: var(--weiss); }
-.ez-schirm__zahl { font: 800 calc(46px * var(--s))/1 var(--font-punkt); color: var(--weiss); letter-spacing: .01em; font-variant-numeric: tabular-nums; }
-.ez-schirm__zahl small { font: 400 calc(13px * var(--s))/1 var(--font-sans); color: var(--silbergrau); margin-left: .3em; }
-.ez-schirm__skala { width: 100%; height: calc(20px * var(--s)); position: relative; opacity: .75;
-  background: repeating-linear-gradient(90deg, var(--silbergrau) 0 1px, transparent 1px calc(8px * var(--s))) 0 100% / 100% calc(9px * var(--s)) no-repeat,
-              repeating-linear-gradient(90deg, var(--silbergrau) 0 1px, transparent 1px calc(40px * var(--s))) 0 100% / 100% calc(16px * var(--s)) no-repeat; }
-.ez-schirm__skala::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--violett); border-radius: 1px; }
-.ez-schirm__zeilen { gap: calc(3px * var(--s)); }
-.ez-schirm__zeilen div { display: flex; justify-content: space-between; gap: 6px; padding: calc(9px * var(--s)) calc(12px * var(--s)); border-radius: calc(14px * var(--s)); background: var(--anthrazit); font-weight: 400; }
-.ez-schirm__zeilen span:last-child { color: var(--silbergrau); font-variant-numeric: tabular-nums; }
 .ez-chips { display: grid; gap: var(--raum-2); width: 100%; min-width: 0; }
 .ez-chips ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); }
 .ez-chips ul::-webkit-scrollbar { display: none; }
@@ -153,7 +133,8 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fenster { height: 100%; margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 8px; padding: var(--raum-4); }
 @media (min-width: 760px) { .ez-fenster { padding: var(--raum-5); } }
 .ez-fenster__bild { position: relative; min-height: 0; }
-.ez-fenster__bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.ez-fenster__bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; z-index: 1; }
+.ez-fenster__bild::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 2%; height: 12%; border-radius: 50%; background: radial-gradient(closest-side, rgba(7,9,10,.22), transparent); }
 .ez-fenster figcaption { display: grid; gap: 2px; min-width: 0; }
 .ez-fenster figcaption { gap: 4px; }
 .ez-fenster figcaption b { font: 500 14px/1.2 var(--font-sans); color: var(--tinte); text-wrap: balance; }
@@ -163,7 +144,8 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-bento .dna-bento__kachel > .dna-leucht { min-height: 0; height: 100%; padding: var(--raum-4); }
 @media (min-width: 760px) { .ez-bento .dna-bento__kachel > .dna-leucht { padding: var(--raum-5); } }
 .ez-bento .dna-leucht { justify-content: space-between; --dna-glut-hell: 1; --dna-glut-satt: 1.15; --glut-x: 74%; --glut-y: 22%; }
-.ez-bento .dna-leucht::before { filter: blur(20px); background: radial-gradient(52% 70% at 76% 24%, var(--violett), transparent 72%), radial-gradient(40% 50% at 18% 100%, var(--indigo), transparent 72%); }
+.ez .dna-leucht::before { filter: none; inset: 0; background: radial-gradient(62% 72% at var(--glut-x) var(--glut-y), var(--glut-a), color-mix(in srgb, var(--glut-a) 42%, transparent) 34%, transparent 72%), radial-gradient(46% 52% at 18% 100%, var(--glut-b), transparent 72%); }
+.ez .dna-leucht::after { content: none; }
 .ez-bento .dna-zahl--klein .dna-zahl__wert { font-size: 48px; font-weight: 250; }
 .ez-bento .dna-bento__innen { justify-content: space-between; }
 
@@ -175,14 +157,16 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
   .ez-schritte { display: grid; position: sticky; top: 112px; }
 }
 .ez-stufen { display: grid; gap: var(--raum-3); }
-.ez-stufe { display: grid; gap: var(--raum-4); border-radius: var(--rund-l); background: var(--flaeche); padding: var(--raum-4); }
+.ez-karte-dunkel, .ez-stufe, .ez-bento [data-theme="dunkel"].dna-bento__kachel, .ez-blatt { background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-stufe { display: grid; gap: var(--raum-4); border-radius: var(--rund-l); padding: var(--raum-4); }
 .ez-stufe[data-dna-auftritt] { transform: none; }
 @media (min-width: 760px) {
   .ez-stufe { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: var(--raum-5); align-items: center; gap: var(--raum-6); }
   .ez-stufe:nth-child(even) .ez-stufe__bild { order: 2; }
 }
 .ez-stufe__text { display: grid; gap: var(--raum-3); align-content: center; }
-.ez-stufe__text .dna-text { margin-top: 4px; }
+.ez-stufe__text .dna-titel-s { font: 600 24px/1.1 var(--font-sans); letter-spacing: -.02em; }
+.ez-stufe__text .dna-text { font-size: 14px; line-height: 1.45; max-width: 30ch; }
 .ez-stufe__text .dna-text { max-width: 36ch; }
 .ez-stufe__bild { position: relative; border-radius: var(--rund-m); overflow: hidden; aspect-ratio: 4 / 3; background: var(--schwarz); }
 .ez-stufe__bild > img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -206,7 +190,9 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-wahl.dna-pillen span::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--farbe); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
 .ez-wahl.dna-pillen [aria-pressed="true"] { background: var(--handlung); color: var(--auf-handlung); }
 .ez-stufe--leucht { position: relative; isolation: isolate; overflow: hidden; }
-.ez-stufe--leucht::before { content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none; background: radial-gradient(50% 50% at 86% 12%, var(--violett), transparent 70%), radial-gradient(38% 38% at 12% 100%, var(--indigo), transparent 70%); filter: blur(20px); opacity: 1; }
+.ez-bento [data-theme="dunkel"] .dna-leucht { background: transparent; }
+.ez-bento [data-theme="dunkel"].dna-bento__kachel { position: relative; isolation: isolate; }
+.ez-stufe--leucht::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 60% at 88% 10%, var(--violett), color-mix(in srgb, var(--violett) 40%, transparent) 34%, transparent 72%), radial-gradient(45% 45% at 10% 102%, var(--indigo), transparent 70%); }
 .ez-fuss-satz { max-width: 36ch; }
 .ez-fuss-satz a { color: var(--tinte); text-decoration: underline; text-underline-offset: 3px; padding-block: 12px; margin-block: -12px; }
 
@@ -226,11 +212,12 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-blatt > img { width: 100%; height: auto; display: block; border-radius: 12px; transform: rotate(-3deg); box-shadow: var(--schatten-tief), 0 0 0 1px var(--silbergrau); }
 .ez-blatt .dna-anker__punkt, .ez-stufe__bild--hell .dna-anker__punkt, .ez-stufe__bild > img + .dna-anker .dna-anker__punkt { background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 0 0 4px rgba(255,255,255,.75); }
 .ez-blatt .dna-anker__linien, .ez-stufe__bild--hell .dna-anker__linien, .ez-stufe__bild > img + .dna-anker .dna-anker__linien { filter: drop-shadow(0 0 1px rgba(7,9,10,.8)); }
-.ez-frei { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.ez-frei-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: -4px; }
+.ez-frei { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 14px; }
 .ez-frei li { display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1 var(--font-sans); color: var(--tinte); }
 .ez-frei li svg { width: 14px; height: 14px; color: var(--tinte); }
 .ez-preis.dna-leucht { min-height: 280px; --glut-x: 82%; --glut-y: 16%; box-shadow: var(--kachel-rand); padding: var(--raum-5); gap: var(--raum-5); }
-.ez-preis.dna-leucht::before { filter: blur(16px); background: radial-gradient(58% 62% at 84% 14%, var(--violett), transparent 72%), radial-gradient(36% 40% at 8% 100%, var(--indigo), transparent 72%); }
+.ez-preis.dna-leucht::before { background: radial-gradient(60% 64% at 84% 12%, var(--violett), color-mix(in srgb, var(--violett) 40%, transparent) 34%, transparent 72%), radial-gradient(36% 40% at 6% 102%, color-mix(in srgb, var(--indigo) 60%, transparent), transparent 72%); }
 .ez-preis .ez-raster { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, var(--silbergrau) 1px, transparent 1.4px) 7px 7px / 14px 14px; -webkit-mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); }
 @media (min-width: 900px) { .ez-preis.dna-leucht { min-height: 340px; padding: var(--raum-6); } }
 .ez-preis .dna-zahl__wert { font-size: clamp(64px, 16vw, 88px); font-weight: 250; }

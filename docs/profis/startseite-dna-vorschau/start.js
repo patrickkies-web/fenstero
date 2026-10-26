@@ -4,6 +4,20 @@
   var w = window, d = document;
   var reduziert = !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
+  /* Vorhang ohne Sprung: Die Szenen rechnen mit der größten Bildschirmhöhe dieser Ausrichtung, damit die ein- und ausfahrende
+     Adressleiste des Browsers die klebende Kante nicht verschiebt (bundle.js liest innerHeight bei jedem resize) */
+  (function () {
+    var hoechste = w.innerHeight, breite = w.innerWidth, merker;
+    try { Object.defineProperty(w, 'innerHeight', { configurable: true, get: function () { return hoechste; } }); } catch (e) { return; }
+    w.addEventListener('resize', function () {
+      clearTimeout(merker);
+      merker = setTimeout(function () {
+        var h = w.document.documentElement.clientHeight, b = w.innerWidth;
+        if (b !== breite) { breite = b; hoechste = h; } else if (h > hoechste) { hoechste = h; }
+      }, 150);
+    });
+  })();
+
   /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite */
   var leiste = d.querySelector('.ez-leiste'), kopf = d.querySelector('.ez-kopf');
   if (leiste) {
@@ -31,13 +45,6 @@
       eintraege.forEach(function (e) { if (e.isIntersecting) setze(stufen.indexOf(e.target)); });
     }, { rootMargin: '-38% 0px -42% 0px', threshold: 0 });
     stufen.forEach(function (s) { io.observe(s); });
-  }
-
-  /* Hero-Choreografie: Bühne und Überschrift zuerst, ab 250 ms rastet die Zahl auf dem Gerät von 1.000 auf 1.409 ein (DNA-Rezept 8, fertig bei 950 ms), danach hängt sich das Etikett an den Zollstock (CSS-Verzögerung 1000/1300 ms) */
-  var zahl = d.querySelector('[data-ez-zahl]');
-  if (zahl) {
-    function zahlStart() { zahl.classList.add('ist-da'); zahl.setAttribute('data-dna', 'zahl'); if (w.DNA) w.DNA.start(zahl.parentNode); }
-    if (reduziert) zahlStart(); else setTimeout(zahlStart, 250);
   }
 
   /* Stationen sind Links; der Sprung gleitet (bei „weniger Bewegung“ sofort) */
