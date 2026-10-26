@@ -62,6 +62,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   (https://claude.ai/artifact/AeVzh8NgNvxEqcDTwdxhiM) und der Bestand der Folie selbst. Ideen kommen aus der Ideenmatrix zu diesen
   Quellen, nicht aus dem Nachbau einer bestehenden Folie. Vorschlag für seine DNA: in Abschnitt 9 den Satz „Vorbild sind die Folien in
   ‚Konfigurator in Violett‘“ durch „Jede Folie entsteht aus den Genen und Bausteinen für ihren Inhalt“ ersetzen.
+- Violett nur als Akzent (Korrektur des Inhabers, 26.10.2026, Schritt 1): Proben mit violettem Lichtteich über der Bühne, voll violetten
+  Kacheln und violettem Saum waren ihm „viel zu viel Violett“. Violett bleibt Punkt, Ring, Licht unter dem Objekt und gewählte Taste;
+  nie eine Fläche, nie die Bühne. Hält eine Folie ihn nicht, liegt es nicht an zu wenig Violett.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
