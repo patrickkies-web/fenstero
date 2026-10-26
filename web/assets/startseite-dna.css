@@ -1,0 +1,478 @@
+/* Startseite, Ansicht Hauseigentümer, nach der Design-DNA (Palette „Task-App dunkel“). Erzeugt aus docs/profis/startseite-dna-vorschau/
+   (dna/tokens.css, dna/bundle.css, start.css): :root, html und body gelten hier für :host, Schriften stehen in /fonts/fonts.css. */
+:host { display: block; position: relative; }
+/* ---- dna/tokens.css ---- */
+/* Design-DNA-Tokens für eeziframes, Farben nach „Task-App dunkel“ (Vorgabe des Inhabers, 26.10.2026).
+   Acht Farben, sonst nichts: grund = Schwarz, flaeche = Anthrazit, tinte = Weiß, tinte-2 = Silbergrau, signal = Violett;
+   alle Glut-Farben sind Violett, Indigo und Koralle. Themen wechseln nur an Szenengrenzen (data-theme). */
+:host { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66; color-scheme: dark; }
+:host, [data-theme="hell"] {
+  --grund: var(--weiss); --grund-tief: var(--weiss); --flaeche: var(--weiss); --flaeche-hoch: var(--weiss);
+  --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: var(--silbergrau); --linie-fein: var(--silbergrau);
+  --handlung: var(--schwarz); --auf-handlung: var(--weiss);
+  --glas: rgba(255,255,255,.8); --glas-rand: rgba(255,255,255,.95); --fokus: var(--schwarz);
+  --kachel-rand: inset 0 0 0 1px var(--silbergrau);
+  --schatten-schwebe: 0 24px 48px -16px rgba(7,9,10,.22), 0 2px 6px rgba(7,9,10,.06);
+  --schatten-tief: 0 60px 90px -30px rgba(7,9,10,.45), 0 18px 36px -18px rgba(7,9,10,.35);
+  --schatten-glas: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 30px -10px rgba(7,9,10,.25);
+}
+[data-theme="dunkel"] {
+  --grund: var(--schwarz); --grund-tief: var(--schwarz); --flaeche: var(--anthrazit); --flaeche-hoch: var(--anthrazit);
+  --tinte: var(--weiss); --tinte-2: var(--silbergrau); --linie: var(--silbergrau); --linie-fein: var(--anthrazit);
+  --handlung: var(--weiss); --auf-handlung: var(--schwarz);
+  --glas: rgba(32,32,34,.8); --glas-rand: rgba(255,255,255,.14); --fokus: var(--weiss);
+  --kachel-rand: none;
+  --schatten-schwebe: 0 24px 48px -16px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.4);
+  --schatten-tief: 0 60px 90px -30px rgba(0,0,0,.9), 0 18px 36px -18px rgba(0,0,0,.7);
+  --schatten-glas: inset 0 1px 0 rgba(255,255,255,.12), 0 10px 30px -10px rgba(0,0,0,.6);
+}
+:host {
+  --signal: var(--violett); --auf-signal: var(--schwarz);
+  --glut-orange: var(--violett); --glut-honig: var(--indigo); --glut-pink: var(--koralle); --glut-magenta: var(--indigo);
+  --glut-lila: var(--indigo); --glut-blau: var(--violett); --glut-gruen: var(--violett);
+  --raum-1: 4px; --raum-2: 8px; --raum-3: 12px; --raum-4: 16px; --raum-5: 24px; --raum-6: 32px; --raum-7: 48px; --raum-8: 72px; --raum-9: 120px;
+  --rund-s: 12px; --rund-m: 20px; --rund-l: 28px; --rund-xl: 40px; --rund-pille: 999px;
+  --font-sans: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-punkt: "Doto", ui-monospace, "SF Mono", monospace;
+}
+
+/* ---- dna/bundle.css ---- */
+/* Design-DNA – Bausteine. Farben, Schrift, Abstände, Rundungen und Schatten kommen aus tokens.json.
+   Hier stehen nur Komposition und Bewegung. Klassen beginnen mit dna-. */
+
+[data-theme="hell"], [data-theme="warm"] { --dna-glut-hell: 1; --dna-glut-satt: 1; }
+[data-theme="dunkel"] { --dna-glut-hell: .82; --dna-glut-satt: 1.35; }
+
+:host {
+  --dna-auftritt: cubic-bezier(.16, 1, .3, 1);
+  --dna-weg: cubic-bezier(.65, 0, .35, 1);
+  --dna-druck: cubic-bezier(.2, .7, .2, 1);
+  --dna-feder: cubic-bezier(.34, 1.25, .64, 1);
+  --dna-t-rueck: 220ms;
+  --dna-t-zustand: 320ms;
+  --dna-t-auftritt: 700ms;
+  --dna-t-szene: 900ms;
+}
+
+:host { margin: 0; font-family: var(--font-sans); background: var(--grund); color: var(--tinte); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+:where(.dna-wurzel) *, :where(.dna-wurzel) *::before, :where(.dna-wurzel) *::after { box-sizing: border-box; }
+:where(a, button, input, [tabindex]):focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
+::selection { background: var(--signal); color: var(--auf-signal); }
+
+/* ---------- Schrift ---------- */
+.dna-label { font: 500 12px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2); }
+.dna-text { font: 400 16px/1.5 var(--font-sans); color: var(--tinte-2); max-width: 36ch; text-wrap: pretty; margin: 0; }
+.dna-titel { font: 500 clamp(30px, 6vw, 36px)/1.05 var(--font-sans); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.dna-titel-xl { font: 500 clamp(40px, 8.5vw, 56px)/1 var(--font-sans); letter-spacing: -.03em; margin: 0; text-wrap: balance; }
+.dna-titel-s { font: 500 22px/1.2 var(--font-sans); letter-spacing: -.01em; margin: 0; }
+.dna-titel-xl em, .dna-titel em { font-style: normal; color: var(--tinte-2); }
+
+/* Bild im Satz: Bildpille und Zeichen mitten in der Überschrift */
+.dna-satz__bild { display: inline-block; width: 1.75em; height: .78em; border-radius: var(--rund-pille); vertical-align: -.04em; margin: 0 .06em; background: var(--bild, radial-gradient(60% 120% at 25% 40%, var(--glut-honig), transparent 70%), radial-gradient(70% 140% at 80% 60%, var(--glut-pink), transparent 70%), var(--glut-orange)); background-size: cover; background-position: center; }
+.dna-satz__zeichen { display: inline-block; width: .5em; height: .5em; vertical-align: .12em; margin: 0 .04em; color: var(--tinte); }
+.dna-satz__zeichen svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- Zahl als Held ---------- */
+.dna-zahl { display: grid; gap: var(--raum-2); justify-items: start; }
+.dna-zahl__wert { font: 200 clamp(64px, 16vw, 88px)/.95 var(--font-sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--tinte); white-space: nowrap; }
+.dna-zahl--klein .dna-zahl__wert { font-size: 48px; font-weight: 250; letter-spacing: -.03em; }
+.dna-zahl--punkt .dna-zahl__wert { font-family: var(--font-punkt); font-weight: 800; letter-spacing: 0; font-size: clamp(56px, 14vw, 72px); }
+.dna-zahl__einheit { font: 400 15px/1 var(--font-sans); letter-spacing: 0; color: var(--tinte-2); margin-left: .3em; }
+.dna-delta { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 4px; border-radius: var(--rund-pille); background: var(--flaeche-hoch); font: 500 12px/1 var(--font-sans); color: var(--tinte); }
+.dna-delta::before { content: ""; width: 20px; height: 20px; border-radius: 50%; background: var(--signal) no-repeat center / 10px 10px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 1v8M1.5 5.5 5 9l3.5-3.5' fill='none' stroke='%23111113' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.dna-delta--hoch::before { transform: rotate(180deg); }
+
+/* ---------- Leuchtkachel: neutrale Fläche, Farbe glüht aus dem Inhalt ---------- */
+.dna-leucht { --glut-a: var(--glut-orange); --glut-b: var(--glut-honig); --glut-c: var(--glut-blau); --glut-d: var(--glut-lila); --wert: 0; --glut-x: 72%; --glut-y: 30%;
+  position: relative; isolation: isolate; overflow: hidden; border-radius: var(--rund-l); padding: var(--raum-5); background: var(--flaeche); color: var(--tinte); min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; gap: var(--raum-4); }
+.dna-leucht::before, .dna-leucht::after { content: ""; position: absolute; inset: -25%; z-index: -1; pointer-events: none; filter: blur(28px) brightness(var(--dna-glut-hell, 1)) saturate(var(--dna-glut-satt, 1)); transition: opacity var(--dna-t-zustand) var(--dna-druck), transform var(--dna-t-szene) var(--dna-auftritt); }
+.dna-leucht::before { background: radial-gradient(45% 45% at var(--glut-x) var(--glut-y), var(--glut-a), transparent 72%), radial-gradient(40% 40% at 22% 96%, var(--glut-b), transparent 72%); opacity: calc(1 - var(--wert)); }
+.dna-leucht::after { background: radial-gradient(45% 45% at var(--glut-x) var(--glut-y), var(--glut-c), transparent 72%), radial-gradient(40% 40% at 22% 96%, var(--glut-d), transparent 72%); opacity: var(--wert); }
+.dna-leucht--rosa { --glut-a: var(--glut-pink); --glut-b: var(--glut-honig); }
+.dna-leucht--kuehl { --glut-a: var(--glut-blau); --glut-b: var(--glut-lila); }
+.dna-leucht--gruen { --glut-a: var(--glut-gruen); --glut-b: var(--glut-honig); }
+.dna-leucht--tief { background: var(--glut-magenta); color: #fff; --glut-a: var(--glut-pink); --glut-b: var(--glut-magenta); --glut-x: 85%; --glut-y: 10%; }
+
+.dna-leucht__kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--raum-3); }
+.dna-leucht .dna-label { color: var(--tinte); opacity: .78; }
+.dna-leucht.dna-leucht--tief .dna-label, .dna-leucht.dna-leucht--tief .dna-zahl__wert, .dna-leucht.dna-leucht--tief .dna-zahl__einheit { color: #fff; opacity: 1; }
+
+/* ---------- Pillen ---------- */
+.dna-pille { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 52px; padding: 0 24px; border: 0; border-radius: var(--rund-pille); background: var(--handlung); color: var(--auf-handlung); font: 500 15px/1 var(--font-sans); text-decoration: none; cursor: pointer; white-space: nowrap; transition: transform var(--dna-t-rueck) var(--dna-druck), background-color var(--dna-t-rueck) ease; -webkit-tap-highlight-color: transparent; }
+.dna-pille:has(.dna-pille__pfeil) { padding: 0 6px 0 24px; }
+.dna-pille:active { transform: scale(.97); transition-duration: 0s; }
+.dna-pille__pfeil { width: 40px; height: 40px; border-radius: 50%; background: var(--auf-handlung); color: var(--handlung); display: grid; place-items: center; }
+.dna-pille__pfeil svg, .dna-rund-knopf svg { width: 14px; height: 14px; }
+.dna-pille--leise { background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1px var(--linie); }
+.dna-pille--klein { height: 36px; padding: 0 16px; font-size: 13px; }
+.dna-rund-knopf { width: 36px; height: 36px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--flaeche-hoch); color: var(--tinte); border: 0; text-decoration: none; transition: transform var(--dna-t-rueck) var(--dna-druck); }
+.dna-rund-knopf:active { transform: scale(.94); transition-duration: 0s; }
+.dna-pillen { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--rund-pille); background: var(--flaeche); max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.dna-pillen a, .dna-pillen button { flex: none; padding: 10px 16px; border: 0; border-radius: var(--rund-pille); background: transparent; color: var(--tinte-2); font: 500 14px/1 var(--font-sans); text-decoration: none; cursor: pointer; transition: background-color var(--dna-t-zustand) var(--dna-druck), color var(--dna-t-zustand) var(--dna-druck); }
+.dna-pillen [aria-current], .dna-pillen [aria-pressed="true"] { background: var(--handlung); color: var(--auf-handlung); }
+.dna-badge { display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--signal); color: var(--auf-signal); font: 500 11px/1 var(--font-sans); letter-spacing: .02em; }
+.dna-badge--leise { background: transparent; color: var(--tinte-2); box-shadow: inset 0 0 0 1px var(--linie); }
+
+/* ---------- Eingabe in Pillenform ---------- */
+.dna-eingabe { width: 100%; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: var(--rund-pille); background: var(--flaeche-hoch); box-shadow: inset 0 0 0 1px var(--linie-fein); max-width: 440px; }
+.dna-eingabe input { flex: 1; min-width: 0; height: 44px; padding: 0 16px; border: 0; background: transparent; color: var(--tinte); font: 400 16px/1 var(--font-sans); outline: none; }
+.dna-eingabe input::placeholder { color: var(--tinte-2); }
+.dna-eingabe:focus-within { box-shadow: inset 0 0 0 2px var(--fokus); }
+
+/* ---------- Milchglas-Etikett und Anker an der Sache ---------- */
+.dna-etikett { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: var(--rund-pille); background: var(--glas); -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%); box-shadow: var(--schatten-glas); border: 1px solid var(--glas-rand); color: var(--tinte); font: 400 13px/1.2 var(--font-sans); white-space: nowrap; }
+.dna-etikett b { font-weight: 500; }
+.dna-etikett__wert { color: var(--tinte-2); font-variant-numeric: tabular-nums; }
+.dna-etikett__punkt { width: 26px; height: 26px; border-radius: 50%; background: var(--flaeche-hoch); display: grid; place-items: center; flex: none; }
+.dna-etikett__punkt::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 35%, transparent); }
+.dna-anker { position: relative; }
+.dna-anker__linien { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.dna-anker__linien line, .dna-anker__linien path { stroke: var(--tinte); stroke-width: 1.2; stroke-dasharray: 3 4; fill: none; vector-effect: non-scaling-stroke; }
+.dna-anker__punkt { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--flaeche-hoch); box-shadow: 0 0 0 1.5px var(--tinte), 0 0 0 6px color-mix(in srgb, var(--flaeche-hoch) 45%, transparent); }
+.dna-anker__etikett { position: absolute; transform: translate(-50%, -50%); }
+[data-dna="anker"] .dna-anker__linien > *, [data-dna="anker"] .dna-anker__punkt { opacity: 0; transition: opacity 400ms var(--dna-auftritt); }
+[data-dna="anker"].ist-da .dna-anker__punkt { opacity: 1; transition-delay: calc(var(--i, 0) * 140ms); }
+[data-dna="anker"] .dna-anker__etikett { opacity: 0; translate: 0 8px; transition: opacity var(--dna-t-auftritt) var(--dna-auftritt), translate var(--dna-t-auftritt) var(--dna-auftritt); transition-delay: calc(var(--i, 0) * 140ms + 300ms); }
+[data-dna="anker"].ist-da .dna-anker__linien > * { opacity: 1; transition-delay: calc(var(--i, 0) * 140ms); }
+[data-dna="anker"].ist-da .dna-anker__etikett { opacity: 1; translate: 0 0; }
+
+/* ---------- Feinzeichnung: Punktraster ---------- */
+.dna-punkte { display: flex; align-items: flex-end; gap: var(--dna-punkt-luft, 7px); --dna-punkt: 9px; }
+.dna-punkte__spalte { display: flex; flex-direction: column-reverse; gap: var(--dna-punkt-luft, 7px); }
+.dna-punkte__punkt { width: var(--dna-punkt); height: var(--dna-punkt); border-radius: 50%; box-shadow: inset 0 0 0 1.4px var(--linie); transition: background-color 260ms var(--dna-druck), box-shadow 260ms var(--dna-druck); }
+.dna-punkte__punkt.ist-voll { background: var(--tinte); box-shadow: none; }
+.dna-punkte__spalte.ist-markiert .dna-punkte__punkt.ist-voll { background: var(--glut-orange); }
+.dna-leucht--tief .dna-punkte__punkt.ist-voll { background: #fff; }
+.dna-leucht--tief .dna-punkte__punkt { box-shadow: inset 0 0 0 1.4px rgba(255,255,255,.45); }
+
+/* ---------- Feinzeichnung: Stufendiagramm mit Schraffur ---------- */
+.dna-stufen { width: 100%; }
+.dna-stufen svg { display: block; width: 100%; height: auto; overflow: visible; }
+.dna-stufen .stufen-linie { fill: none; stroke: var(--linie); stroke-width: 1.4; stroke-dasharray: 3 4; }
+.dna-stufen .stufen-kontur { fill: none; stroke: var(--tinte-2); stroke-width: 1; opacity: .5; }
+.dna-stufen .stufen-punkt { fill: var(--tinte); }
+.dna-stufen .stufen-schraffur-linie { stroke: var(--dna-schraffur, var(--glut-gruen)); stroke-width: 2.2; }
+.dna-stufen .stufen-achse { fill: var(--tinte-2); font: 400 11px/1 var(--font-sans); }
+.dna-stufen .stufen-zeichnung { stroke-dasharray: 1600; stroke-dashoffset: 1600; transition: stroke-dashoffset 1200ms var(--dna-weg); }
+.dna-stufen.ist-da .stufen-zeichnung { stroke-dashoffset: 0; }
+.dna-stufen .stufen-feld { opacity: 0; transition: opacity 500ms var(--dna-auftritt) 700ms; }
+.dna-stufen.ist-da .stufen-feld { opacity: 1; }
+
+/* ---------- Skala mit Strichmarken ---------- */
+.dna-skala { position: relative; display: grid; gap: var(--raum-4); justify-items: center; user-select: none; -webkit-user-select: none; }
+.dna-skala__fenster { position: relative; width: 100%; height: 56px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); touch-action: pan-y; }
+.dna-skala__band { position: absolute; top: 8px; left: 50%; height: 40px; width: var(--dna-skala-breite, 2000px);
+  background:
+    repeating-linear-gradient(90deg, var(--tinte-2) 0 1.5px, transparent 1.5px calc(var(--dna-schritt, 10px) * 10)) 0 0 / 100% 40px no-repeat,
+    repeating-linear-gradient(90deg, var(--linie) 0 1.2px, transparent 1.2px var(--dna-schritt, 10px)) 0 10px / 100% 20px no-repeat;
+  transition: transform var(--dna-t-zustand) var(--dna-feder); will-change: transform; }
+.dna-skala.ist-gezogen .dna-skala__band { transition: none; }
+.dna-skala__zeiger { position: absolute; left: 50%; top: 0; width: 2px; height: 56px; margin-left: -1px; border-radius: 2px; background: var(--tinte); }
+.dna-skala__fenster { cursor: ew-resize; }
+.dna-skala input[type="range"] { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.dna-skala__fenster:has(+ input:focus-visible) { outline: 2px solid var(--fokus); outline-offset: 4px; border-radius: 8px; }
+
+/* ---------- Gerät auf der Bühne ---------- */
+.dna-buehne { position: relative; perspective: 1600px; display: grid; place-items: center; padding: var(--raum-6) 0; }
+.dna-geraet { position: relative; width: min(260px, 64vw); aspect-ratio: 9 / 19.3; border-radius: 46px; padding: 9px; background: linear-gradient(145deg, #2b2c30, #0b0b0c 40%, #1d1e21); box-shadow: var(--schatten-tief), inset 0 0 0 1.5px rgba(255,255,255,.08); transform: rotateX(var(--dna-kipp-x, 14deg)) rotateY(var(--dna-kipp-y, -10deg)) rotateZ(var(--dna-kipp-z, 6deg)); transform-style: preserve-3d; }
+.dna-geraet__schirm { position: relative; height: 100%; border-radius: 38px; overflow: hidden; background: var(--flaeche-hoch); color: var(--tinte); }
+.dna-geraet__schirm::before { content: ""; position: absolute; top: 9px; left: 50%; width: 30%; height: 22px; margin-left: -15%; border-radius: 12px; background: #0b0b0c; z-index: 3; }
+.dna-buehne__teil { position: absolute; z-index: 2; box-shadow: var(--schatten-schwebe); will-change: transform; }
+
+/* ---------- Bento-Raster ---------- */
+.dna-bento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; grid-auto-flow: dense; gap: var(--raum-3); }
+@media (min-width: 760px) { .dna-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 180px; } }
+.dna-bento__kachel { position: relative; overflow: hidden; border-radius: var(--rund-l); background: var(--flaeche); min-width: 0; }
+.dna-bento__kachel > * { height: 100%; }
+.dna-bento__kachel--breit { grid-column: span 2; }
+.dna-bento__kachel--hoch { grid-row: span 2; }
+.dna-bento__kachel--gross { grid-column: span 2; grid-row: span 2; }
+.dna-bento__innen { height: 100%; padding: var(--raum-4); display: flex; flex-direction: column; justify-content: space-between; gap: var(--raum-2); }
+@media (min-width: 760px) { .dna-bento__innen { padding: var(--raum-5); } }
+.dna-bento__kachel.dna-leucht { padding: 0; min-height: 0; }
+
+/* ---------- Schrift als Fenster ---------- */
+.dna-maske { overflow: hidden; padding: .05em 0; }
+.dna-maske__wort { display: inline-block; white-space: nowrap; font: 600 clamp(110px, 30vw, 300px)/.86 var(--font-sans); letter-spacing: -.05em; color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: var(--bild, radial-gradient(30% 60% at 20% 50%, var(--glut-orange), transparent 70%), radial-gradient(30% 70% at 55% 40%, var(--glut-pink), transparent 70%), radial-gradient(35% 70% at 85% 60%, var(--glut-blau), transparent 70%), linear-gradient(var(--tinte), var(--tinte)));
+  background-size: 160% 100%; background-position: var(--dna-bild-x, 0%) 50%; transform: translate3d(var(--dna-fahrt, 0px), 0, 0); will-change: transform; }
+
+/* ---------- Prozess mit Stationen ---------- */
+.dna-schritte { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.dna-schritte li { position: relative; display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: var(--raum-3); min-height: 52px; color: var(--tinte-2); font: 400 16px/1.3 var(--font-sans); }
+.dna-schritte li::before { content: ""; grid-column: 1; justify-self: center; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--linie); background: var(--grund); z-index: 1; }
+.dna-schritte li:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 50%; height: 100%; border-left: 2px dotted var(--linie); }
+.dna-schritte li[data-zustand="fertig"]::before { background: var(--tinte-2); box-shadow: none; }
+.dna-schritte li[data-zustand="aktiv"] { color: var(--tinte); font-weight: 500; }
+.dna-schritte li[data-zustand="aktiv"]::before { width: 13px; height: 13px; background: var(--tinte); box-shadow: 0 0 0 5px var(--flaeche-hoch); }
+.dna-schritte__zustand { font: 500 12px/1 var(--font-sans); color: var(--tinte-2); }
+.dna-schritte li[data-zustand="aktiv"] .dna-schritte__zustand { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--handlung); color: var(--auf-handlung); }
+
+/* ---------- Szenen mit Vorhang ---------- */
+.dna-szene { position: sticky; top: var(--dna-szene-oben, 0px); background: var(--grund); color: var(--tinte); }
+.dna-szene + .dna-szene { border-radius: var(--rund-xl) var(--rund-xl) 0 0; box-shadow: 0 -24px 60px -30px rgba(0, 0, 0, .35); }
+
+/* ---------- Auftritt aus der Unschärfe ---------- */
+[data-dna-auftritt] { opacity: 0; transform: translate3d(0, 24px, 0) scale(.985); filter: blur(10px); transition: opacity var(--dna-t-auftritt) var(--dna-auftritt), transform var(--dna-t-auftritt) var(--dna-auftritt), filter var(--dna-t-auftritt) var(--dna-auftritt); transition-delay: calc(var(--i, 0) * 70ms); }
+[data-dna-auftritt].ist-da { opacity: 1; transform: none; filter: none; }
+[data-dna-auftritt="still"] { filter: none; }
+.dna-wort { display: inline-block; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-dna-auftritt], [data-dna="anker"] .dna-anker__etikett, [data-dna="anker"] .dna-anker__linien > *, [data-dna="anker"] .dna-anker__punkt, .dna-stufen .stufen-zeichnung, .dna-stufen .stufen-feld { opacity: 1 !important; transform: none !important; translate: none !important; filter: none !important; stroke-dashoffset: 0 !important; transition: none !important; }
+  .dna-pille, .dna-rund-knopf, .dna-skala__band, .dna-leucht::before, .dna-leucht::after, .dna-punkte__punkt { transition: none !important; }
+  .dna-maske__wort { transform: none !important; }
+}
+
+/* ---- start.css ---- */
+/* Startseite eeziframes, Ansicht Hauseigentümer, als Schnitt aus der Design-DNA. Eigene Klassen mit Präfix ez-, die dna-Klassen bleiben unverändert.
+   Aufbau: fünf Szenen mit Vorhang im Wechsel dunkel, hell, dunkel, hell, dunkel. Telefon zuerst (390 px), Schreibtisch ab 900 px. */
+:host { background: var(--schwarz); overflow-x: clip; --ez-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M5 3l4 4-4 4' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+:host { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: var(--font-sans); overflow-x: clip; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.ez *, .ez *::before, .ez *::after { box-sizing: border-box; }
+.ez .dna-wort[data-dna-auftritt]:not(.ist-da) { filter: blur(6px); }
+.ez .dna-wort { will-change: filter, transform; }
+.ez .dna-etikett { -webkit-backdrop-filter: blur(12px) saturate(140%); backdrop-filter: blur(12px) saturate(140%); }
+.ez .dna-anker__etikett { transform: none; }
+.ez .dna-anker__etikett > .dna-etikett { transform: translate(-50%, -50%); }
+[data-theme="dunkel"] .dna-etikett { --glas: rgba(32,32,34,.72); border-color: rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), var(--schatten-glas); }
+.ez .dna-rund-knopf { background: radial-gradient(at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,.04) 70%), var(--flaeche-hoch); box-shadow: inset 0 1px 0 rgba(255,255,255,.22); }
+[data-theme="dunkel"] .dna-etikett__punkt { background: rgba(255,255,255,.08); width: 24px; height: 24px; }
+[data-theme="dunkel"] .dna-etikett__wert { color: var(--tinte-2); font-weight: 400; }
+.ez a { -webkit-tap-highlight-color: transparent; }
+.ez-huelle { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 760px) { .ez-huelle { padding-left: max(48px, env(safe-area-inset-left, 0px)); padding-right: max(48px, env(safe-area-inset-right, 0px)); } }
+.ez-abschnitt { padding-block: var(--raum-8); display: grid; gap: var(--raum-6); }
+[data-theme="hell"].dna-szene > .ez-abschnitt { padding-block: var(--raum-7); }
+@media (min-width: 900px) { [data-theme="hell"].dna-szene > .ez-abschnitt { padding-block: var(--raum-8); } }
+@media (min-width: 900px) { .ez-abschnitt { padding-block: var(--raum-9); gap: var(--raum-7); } }
+.ez .dna-titel-xl { font-weight: 600; font-size: clamp(44px, 9.5vw, 56px); line-height: .95; letter-spacing: -.035em; }
+.ez .dna-titel { font-weight: 600; font-size: clamp(30px, 6.5vw, 40px); line-height: 1.02; letter-spacing: -.025em; }
+.ez .dna-label { font-weight: 400; letter-spacing: .03em; }
+.ez .dna-zahl--klein .dna-zahl__wert { font-weight: 300; }
+.ez .dna-zahl--klein .dna-zahl__einheit { font-size: 14px; margin-left: .25em; }
+.ez-kopfzeile { display: grid; gap: var(--raum-3); justify-items: start; }
+.ez-kopfzeile > .dna-label, .ez-text > .dna-label, .ez-stufe__text > .dna-label { margin-bottom: -6px; }
+.ez-kopfzeile .dna-text { max-width: 36ch; }
+.dna-titel em.ez-ak, .dna-titel-xl em.ez-ak { font-style: normal; color: var(--tinte-2); }
+.ez-klein { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); max-width: 36ch; }
+.ez-klein b { font-weight: 500; color: var(--tinte); }
+.ez-linkzeile { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--tinte); font: 500 16px/1.2 var(--font-sans); text-decoration: none; }
+.ez-linkzeile::after { content: ""; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ez-chevron) center / contain no-repeat; mask: var(--ez-chevron) center / contain no-repeat; }
+.ez-text { display: grid; gap: var(--raum-4); align-content: start; justify-items: start; min-width: 0; }
+.ez-text { gap: var(--raum-3); }
+.ez-zwei { display: grid; gap: var(--raum-6); }
+.ez-zwei > * { min-width: 0; }
+@media (min-width: 900px) { .ez-zwei { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--raum-8); align-items: center; } }
+.ez-aktionen { display: flex; flex-wrap: wrap; gap: 10px; }
+.ez-hero__text .ez-aktionen, .ez-text > .dna-pille, .ez-fb .ez-aktionen { margin-top: 20px; }
+@media (min-width: 900px) { .ez-hero__text .ez-aktionen { margin-top: 8px; } }
+.ez .dna-pille__pfeil svg { transition: transform 220ms var(--dna-druck); }
+.ez .dna-pille--leise { transition: background-color 220ms ease, color 220ms ease, box-shadow 220ms ease, transform 220ms var(--dna-druck); }
+.ez .dna-pillen a { transition: background-color 320ms var(--dna-druck), color 220ms ease, transform 220ms var(--dna-druck); }
+.ez .dna-pillen a:active { transform: scale(.97); transition-duration: 0s; }
+.ez-schritte li { transition: color 320ms var(--dna-druck); }
+.ez-schritte li a { color: inherit; text-decoration: none; display: block; min-height: 44px; display: flex; align-items: center; }
+.ez-skip { position: fixed; top: 12px; left: 12px; z-index: 60; transform: translateY(-200%); opacity: 0; }
+.ez-skip:focus-visible { transform: none; opacity: 1; }
+.ez-marke { min-height: 44px; margin-block: -7px; }
+.ez-ansicht.dna-pillen { overflow: visible; }
+.ez-ratgeber a:active .dna-rund-knopf { transform: scale(.94); transition-duration: 0s; }
+.ez-linkzeile::after { transition: transform 220ms var(--dna-druck); }
+.ez-schritte li::before { transition: background-color 320ms var(--dna-druck), box-shadow 320ms var(--dna-druck), transform 320ms var(--dna-druck); }
+.ez-schritte li[data-zustand="aktiv"]::before { width: 9px; height: 9px; transform: scale(1.45); box-shadow: 0 0 0 3.5px var(--flaeche-hoch); }
+.ez-schritte .dna-schritte__zustand { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck); }
+@media (hover: hover) and (pointer: fine) {
+  .ez .dna-pille:hover .dna-pille__pfeil svg { transform: translateX(2px); }
+  .ez .dna-pille--leise:hover { background: var(--indigo); color: var(--weiss); box-shadow: none; }
+  .ez .dna-pillen a:not([aria-current]):hover { color: var(--tinte); }
+  .ez .dna-rund-knopf:hover, .ez-ratgeber a:hover .dna-rund-knopf { background: var(--indigo); color: var(--weiss); }
+  .ez-ratgeber a:hover b { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .ez-schritte li a:hover { color: var(--tinte); }
+  .ez-linkzeile:hover::after { transform: translateX(2px); }
+  .ez-fuss ul a:hover { color: var(--tinte); }
+}
+
+/* ---------- Kopfzeile und Leiste ---------- */
+.ez-kopf { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "marke pille" "ansicht ansicht"; align-items: center; gap: var(--raum-3) var(--raum-4); padding-block: var(--raum-4) var(--raum-3); }
+.ez-kopf .ez-marke { grid-area: marke; }
+.ez-kopf > .dna-pille { grid-area: pille; justify-self: end; }
+.ez-kopf .ez-ansicht { grid-area: ansicht; justify-self: start; }
+@media (min-width: 900px) { .ez-kopf { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "marke ansicht pille"; padding-block: var(--raum-5) var(--raum-4); } .ez-kopf .ez-ansicht { justify-self: center; } }
+.ez-marke { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tinte); }
+.ez-marke svg { width: 26px; height: 26px; display: block; }
+.ez-wm { font: 500 18px/1 "Inter", var(--font-sans); letter-spacing: -.02em; white-space: nowrap; }
+.ez-wm b { font-weight: 900; }
+.ez-ansicht a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+.ez-kopf > .dna-pille--klein, .ez-leiste .dna-pille--klein { height: 44px; padding: 0 18px; font-size: 14px; }
+.ez-ansicht [aria-current] { background: var(--grund); color: var(--tinte); }
+.ez-ansicht [aria-current]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); }
+
+.ez-leiste { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding-top: env(safe-area-inset-top, 0px); transform: translateY(-100%); transition: transform 320ms var(--dna-druck); background: var(--glas); -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%); box-shadow: 0 1px 0 var(--glas-rand); }
+.ez-leiste { transition-duration: 220ms; }
+.ez-leiste.ist-da { transform: none; transition-duration: 320ms; }
+.ez-leiste .ez-huelle { display: flex; align-items: center; justify-content: space-between; gap: var(--raum-3); padding-block: 8px; }
+.ez-leiste .ez-ansicht { display: none; }
+@media (min-width: 900px) { .ez-leiste .ez-ansicht { display: inline-flex; } }
+
+/* ---------- Szene 1: Hero mit Foto, Gerät und Wert an der Sache ---------- */
+.ez-hero { display: grid; gap: var(--raum-5); padding-block: var(--raum-2) var(--raum-7); }
+.ez-hero__text { display: grid; gap: var(--raum-4); justify-items: start; min-width: 0; order: 2; }
+.ez-hero__text .dna-text { max-width: 36ch; }
+.ez-hero__text .dna-text b { font-weight: 500; color: var(--tinte); }
+.ez-hero__buehne { order: 1; min-width: 0; position: relative; z-index: 0; }
+.ez-hero__text { position: relative; z-index: 1; }
+@media (min-width: 900px) {
+  .ez-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); align-items: center; gap: var(--raum-8); padding-block: var(--raum-5) var(--raum-8); }
+  .ez-hero__text { order: 1; gap: var(--raum-5); }
+  .ez-hero__buehne { order: 2; }
+}
+.ez-buehne { position: relative; aspect-ratio: 4 / 3; max-width: 100%; perspective: 1400px; }
+@media (min-width: 900px) { .ez-buehne { aspect-ratio: 4 / 3; } }
+.ez-nur-desk { display: none; }
+@media (min-width: 760px) { .ez-blatt .ez-nur-desk { display: block; } .ez-blatt .ez-nur-tel { display: none; } }
+@media (min-width: 900px) { .ez-nur-desk { display: block; } .ez-nur-tel { display: none; } }
+.ez-foto { position: absolute; inset: 0; border-radius: var(--rund-xl); overflow: hidden; background: var(--anthrazit); }
+.ez-foto img { width: 100%; height: 100%; object-fit: cover; object-position: 56% 24%; display: block; }
+@media (min-width: 900px) { .ez-foto img { object-position: 50% 20%; } }
+.ez-foto::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -90px 120px -60px rgba(7,9,10,.75); pointer-events: none; }
+.ez .dna-etikett { font-size: 12px; }
+@media (min-width: 900px) { .ez .dna-etikett { font-size: 13px; } }
+.ez-hero__buehne::before { content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none; background: radial-gradient(55% 45% at 68% 45%, #141517, transparent 72%); }
+.ez-chip { display: inline-flex; align-items: center; background: var(--indigo); color: var(--weiss); border-radius: var(--rund-pille); padding: calc(5px * var(--s)) calc(9px * var(--s)); font-size: calc(11px * var(--s)); white-space: nowrap; }
+.ez-chips { display: grid; gap: var(--raum-2); width: 100%; min-width: 0; }
+.ez-chips ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); }
+.ez-chips ul::-webkit-scrollbar { display: none; }
+.ez-chips li { flex: none; }
+.ez-chips .dna-badge { height: 30px; padding: 0 12px; font-size: 13px; letter-spacing: 0; box-shadow: none; background: var(--flaeche); color: var(--tinte-2); }
+@media (min-width: 900px) { .ez-chips ul { flex-wrap: wrap; -webkit-mask-image: none; mask-image: none; } }
+
+/* ---------- Szene 2: Konfigurator als Bento ---------- */
+.ez-bento { grid-auto-rows: 140px; }
+@media (min-width: 760px) { .ez-bento { grid-auto-rows: 190px; } }
+.ez-bento .dna-bento__kachel { box-shadow: var(--kachel-rand); }
+.ez-fenster { height: 100%; margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 8px; padding: var(--raum-4); }
+@media (min-width: 760px) { .ez-fenster { padding: var(--raum-5); } }
+.ez-fenster__bild { position: relative; min-height: 0; }
+.ez-fenster__bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; z-index: 1; }
+.ez-fenster__bild::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 2%; height: 12%; border-radius: 50%; background: radial-gradient(closest-side, rgba(7,9,10,.22), transparent); }
+.ez-fenster figcaption { display: grid; gap: 2px; min-width: 0; }
+.ez-fenster figcaption { gap: 4px; }
+.ez-fenster figcaption b { font: 500 14px/1.2 var(--font-sans); color: var(--tinte); text-wrap: balance; }
+.ez-fenster figcaption span { font: 400 12px/1.3 var(--font-sans); color: var(--tinte-2); }
+.dna-bento__kachel--gross .ez-fenster figcaption b { font-size: 22px; line-height: 1.2; letter-spacing: -.01em; }
+.dna-bento__kachel--gross .ez-fenster figcaption span { font-size: 14px; }
+.ez-bento .dna-bento__kachel > .dna-leucht { min-height: 0; height: 100%; padding: var(--raum-4); }
+@media (min-width: 760px) { .ez-bento .dna-bento__kachel > .dna-leucht { padding: var(--raum-5); } }
+.ez-bento .dna-leucht { justify-content: space-between; --dna-glut-hell: 1; --dna-glut-satt: 1.15; --glut-x: 74%; --glut-y: 22%; }
+.ez .dna-leucht::before { filter: none; inset: 0; background: radial-gradient(62% 72% at var(--glut-x) var(--glut-y), var(--glut-a), color-mix(in srgb, var(--glut-a) 42%, transparent) 34%, transparent 72%), radial-gradient(46% 52% at 18% 100%, var(--glut-b), transparent 72%); }
+.ez .dna-leucht::after { content: none; }
+.ez-bento .dna-zahl--klein .dna-zahl__wert { font-size: 48px; font-weight: 250; }
+.ez-bento .dna-bento__innen { justify-content: space-between; }
+
+/* ---------- Szene 3: So geht es ---------- */
+.ez-ablauf { display: grid; gap: var(--raum-6); }
+.ez-schritte { display: none; }
+@media (min-width: 900px) {
+  .ez-ablauf { grid-template-columns: 280px minmax(0, 1fr); gap: var(--raum-8); align-items: start; }
+  .ez-schritte { display: grid; position: sticky; top: 112px; }
+}
+.ez-stufen { display: grid; gap: var(--raum-3); }
+.ez-karte-dunkel, .ez-stufe, .ez-bento [data-theme="dunkel"].dna-bento__kachel, .ez-blatt { background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-stufe { display: grid; gap: var(--raum-4); border-radius: var(--rund-l); padding: var(--raum-4); }
+.ez-stufe[data-dna-auftritt] { transform: none; }
+@media (min-width: 760px) {
+  .ez-stufe { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: var(--raum-5); align-items: center; gap: var(--raum-6); }
+  .ez-stufe:nth-child(even) .ez-stufe__bild { order: 2; }
+}
+.ez-stufe__text { display: grid; gap: var(--raum-3); align-content: center; }
+.ez-stufe__text .dna-titel-s { font: 600 24px/1.1 var(--font-sans); letter-spacing: -.02em; }
+.ez-stufe__text .dna-text { font-size: 14px; line-height: 1.45; max-width: 30ch; }
+.ez-stufe__text .dna-text { max-width: 36ch; }
+.ez-stufe__bild { position: relative; border-radius: var(--rund-m); overflow: hidden; aspect-ratio: 4 / 3; background: var(--schwarz); }
+.ez-stufe__bild > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ez-stufe__bild--hell { background: var(--weiss); }
+.ez-stufe__bild--hell > img { object-fit: contain; padding: 6%; }
+.ez-stufe__bild .dna-anker { position: absolute; inset: 0; }
+.ez-zeichnung { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ez-zeichnung .wand { fill: none; stroke: var(--silbergrau); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; vector-effect: non-scaling-stroke; }
+.ez-zeichnung .schraffur { stroke: var(--silbergrau); stroke-width: 1; opacity: .35; }
+.ez-zeichnung .rahmen { fill: none; stroke: var(--weiss); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+.ez-zeichnung .glas { fill: var(--anthrazit); }
+.ez-zeichnung .mass-o { stroke: var(--violett); }
+.ez-zeichnung .mass-f { stroke: var(--koralle); }
+.ez-zeichnung .mass { fill: none; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.ez-punkt--koralle .dna-etikett__punkt::after { background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+.ez-wahl { position: absolute; left: 12px; right: 12px; bottom: 12px; justify-content: center; }
+.ez-wahl.dna-pillen { background: var(--glas); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--schatten-glas); border: 1px solid var(--glas-rand); }
+.ez-wahl { pointer-events: none; }
+.ez-wahl.dna-pillen span { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px 7px 8px; border-radius: var(--rund-pille); font: 500 12px/1 var(--font-sans); color: var(--tinte); }
+@media (min-width: 760px) { .ez-wahl.dna-pillen span { font-size: 13px; padding: 8px 12px 8px 9px; } }
+.ez-wahl.dna-pillen span::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--farbe); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+.ez-wahl.dna-pillen [aria-pressed="true"] { background: var(--handlung); color: var(--auf-handlung); }
+.ez-stufe--leucht { position: relative; isolation: isolate; overflow: hidden; }
+.ez-bento [data-theme="dunkel"] .dna-leucht { background: transparent; }
+.ez-bento [data-theme="dunkel"].dna-bento__kachel { position: relative; isolation: isolate; }
+.ez-stufe--leucht::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 60% at 88% 10%, var(--violett), color-mix(in srgb, var(--violett) 40%, transparent) 34%, transparent 72%), radial-gradient(45% 45% at 10% 102%, var(--indigo), transparent 70%); }
+.ez-fuss-satz { max-width: 36ch; }
+.ez-fuss-satz a { color: var(--tinte); text-decoration: underline; text-underline-offset: 3px; padding-block: 12px; margin-block: -12px; }
+
+/* ---------- Szene 4: Aufmaßblatt und Preis ---------- */
+.ez-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: 100%; }
+.ez-liste { max-width: 44ch; }
+.ez-liste li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; font: 400 16px/1.5 var(--font-sans); color: var(--tinte-2); text-wrap: pretty; }
+.ez-liste li::before { content: ""; width: 6px; height: 6px; margin: 9px 0 0 2px; border-radius: 50%; background: var(--linie); }
+.ez-liste b { font-weight: 500; color: var(--tinte); }
+.ez-aufmass { margin-top: var(--raum-5); }
+.ez-blattbuehne { display: grid; gap: var(--raum-4); justify-items: start; }
+.ez-blatt { position: relative; width: 100%; max-width: 560px; padding: 11% 10% 13%; justify-self: center; border-radius: var(--rund-l); background: var(--flaeche); }
+.ez-blatt { padding: 13% 10% 22%; }
+#blatt-oeffnung { left: 36%; top: 84%; }
+#blatt-bestellmass { left: 60%; top: 96%; }
+@media (min-width: 760px) { .ez-blatt { padding-bottom: 14%; } #blatt-oeffnung { left: 27%; top: 97%; } #blatt-bestellmass { left: 75%; top: 97%; } }
+.ez-blatt > img { width: 100%; height: auto; display: block; border-radius: 12px; transform: rotate(-3deg); box-shadow: var(--schatten-tief), 0 0 0 1px var(--silbergrau); }
+.ez-blatt .dna-anker__punkt, .ez-stufe__bild--hell .dna-anker__punkt, .ez-stufe__bild > img + .dna-anker .dna-anker__punkt { background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 0 0 4px rgba(255,255,255,.75); }
+.ez-blatt .dna-anker__linien, .ez-stufe__bild--hell .dna-anker__linien, .ez-stufe__bild > img + .dna-anker .dna-anker__linien { filter: drop-shadow(0 0 1px rgba(7,9,10,.8)); }
+.ez-frei-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: -4px; }
+.ez-frei { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.ez-frei li { display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1 var(--font-sans); color: var(--tinte); }
+.ez-frei li svg { width: 14px; height: 14px; color: var(--tinte); }
+.ez-preis.dna-leucht { min-height: 280px; --glut-x: 82%; --glut-y: 16%; box-shadow: var(--kachel-rand); padding: var(--raum-5); gap: var(--raum-5); }
+.ez-preis.dna-leucht::before { background: radial-gradient(60% 64% at 84% 12%, var(--violett), color-mix(in srgb, var(--violett) 40%, transparent) 34%, transparent 72%), radial-gradient(36% 40% at 6% 102%, color-mix(in srgb, var(--indigo) 60%, transparent), transparent 72%); }
+.ez-preis .ez-raster { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, var(--silbergrau) 1px, transparent 1.4px) 7px 7px / 14px 14px; -webkit-mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); }
+@media (min-width: 900px) { .ez-preis.dna-leucht { min-height: 340px; padding: var(--raum-6); } }
+.ez-preis .dna-zahl__wert { font-size: clamp(64px, 16vw, 88px); font-weight: 250; }
+.ez-preis .dna-zahl__einheit { font-size: 15px; margin-left: 4px; }
+.ez-preis .dna-leucht__kopf { align-items: center; }
+.ez-preis__fuss { display: grid; gap: 6px; }
+.ez-preis__fuss b { font: 500 16px/1.3 var(--font-sans); color: var(--tinte); }
+.ez-preis__fuss span { font: 400 14px/1.4 var(--font-sans); color: var(--tinte-2); }
+.ez-badge-indigo, .ez-badge-koralle { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--indigo); color: var(--weiss); font: 500 12px/1 var(--font-sans); white-space: nowrap; vertical-align: middle; }
+.ez-badge-koralle { background: var(--koralle); color: var(--schwarz); }
+.ez-fuss__pilot .ez-badge-indigo { margin-right: 6px; height: 20px; vertical-align: -5px; }
+
+/* ---------- Szene 5: Ratgeber, Schriftfenster, Fensterbauer, Fuß ---------- */
+.ez-ratgeber { list-style: none; margin: 0; padding: 0; display: grid; width: 100%; max-width: 840px; }
+[data-theme="dunkel"] { --linie-fein: color-mix(in srgb, var(--silbergrau) 30%, transparent); }
+.ez-ratgeber a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--raum-4); padding-block: var(--raum-4); border-top: 1px solid var(--linie-fein); text-decoration: none; color: var(--tinte); }
+.ez-ratgeber li:last-child a { border-bottom: 1px solid var(--linie-fein); }
+.ez-ratgeber b { display: block; font: 500 22px/1.2 var(--font-sans); letter-spacing: -.01em; margin-bottom: 4px; }
+.ez-ratgeber span { display: block; font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); max-width: 44ch; text-wrap: pretty; }
+.ez-ratgeber .dna-rund-knopf { display: grid; width: 44px; height: 44px; color: var(--tinte); box-shadow: inset 0 0 0 1px var(--linie); transition: background-color 220ms ease, color 220ms ease, transform 220ms var(--dna-druck); }
+.ez-fb { border-radius: var(--rund-xl); background: var(--grund); color: var(--tinte); padding: var(--raum-6) var(--raum-5); display: grid; gap: var(--raum-4); justify-items: start; margin-top: var(--raum-6); }
+@media (min-width: 900px) { .ez-fb { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); padding: var(--raum-7); align-items: center; gap: var(--raum-3) var(--raum-8); } .ez-fb > .dna-label { grid-column: 1; } .ez-fb .ez-fb__text { grid-column: 1; } .ez-fb .ez-aktionen { grid-column: 2; grid-row: 1 / 4; justify-self: end; flex-direction: column; align-items: flex-end; } }
+.ez-fb__text { display: grid; gap: var(--raum-3); }
+.ez-fb .dna-text { max-width: 36ch; }
+.ez-fb .dna-text b { font-weight: 500; color: var(--tinte); }
+.ez-fuss { padding-block: var(--raum-6) var(--raum-6); margin-top: var(--raum-7); border-top: 1px solid var(--linie-fein); display: grid; gap: var(--raum-5); }
+.ez-fuss__spalten { display: grid; grid-template-columns: 1fr 1fr; gap: var(--raum-5) var(--raum-4); }
+.ez-fuss__spalten > .ez-marke { grid-column: 1 / -1; align-self: start; margin-top: -3px; }
+@media (min-width: 760px) { .ez-fuss__spalten { grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: var(--raum-7); } .ez-fuss__spalten > .ez-marke { grid-column: auto; } }
+.ez-fuss ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; justify-items: start; }
+.ez-fuss ul a { color: var(--tinte-2); text-decoration: none; font: 400 14px/1.3 var(--font-sans); min-height: 44px; display: inline-flex; align-items: center; }
+.ez-fuss ul a.dna-pille { color: var(--tinte); margin-top: 4px; height: 44px; }
+.ez-fuss h3.dna-label { margin: 0 0 8px; }
+.ez-fuss__pilot { margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--tinte-2); max-width: 60ch; }
+.ez-fuss__pilot b { font-weight: 500; color: var(--tinte); }
+
+@media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }

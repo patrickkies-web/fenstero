@@ -1,0 +1,4 @@
+/* Startseite (Design-DNA): Outfit (Rodrigo Fuenzalida) und Doto (Benny Richter, Daniel Grumer), SIL Open Font License 1.1, siehe OFL.txt.
+   Eigene Datei statt fonts.css, weil /fonts/* ein Jahr unveränderlich zwischengespeichert wird. */
+@font-face { font-family: 'Outfit'; font-style: normal; font-display: swap; font-weight: 200 700; src: url(outfit.woff2) format('woff2'); }
+@font-face { font-family: 'Doto'; font-style: normal; font-display: swap; font-weight: 400 900; src: url(doto.woff2) format('woff2'); }
