@@ -2105,7 +2105,7 @@ function w3dHausKnopf(stage, o) {
 function w3dZoomZeigen(stage) {
   const zm = w3dZoomZustand(stage), an = zm.z > 1.001;
   stage.style.setProperty('--panx', px(zm.x)); stage.style.setProperty('--pany', px(zm.y));
-  stage.classList.toggle('is-zoom', an);
+  stage.classList.toggle('is-zoom', an); stage.classList.toggle('mit-eins', Math.abs(zm.z - 1) > 0.001); // mit-eins: „1:1“ steht da, auch herausgezoomt (app.css rückt das Zahnrad)
   const k = stage.querySelector('[data-r="zoom"]');
   if (k) { const b = (r) => k.querySelector('[data-w3d="' + r + '"]'); b('eins').hidden = Math.abs(zm.z - 1) < 0.001; b('minus').disabled = zm.z <= ZOOM_MIN + 0.001; b('plus').disabled = zm.z >= ZOOM_MAX - 0.001; }
   /* Gezoomt verschiebt Ziehen, statt zu drehen: der Hinweis sagt es */

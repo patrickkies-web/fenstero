@@ -406,7 +406,7 @@ window.Buehne3D = (function () {
   /* zurück zum CSS-Modell: Klasse weg, Kamera und Schwingen wieder dem CSS überlassen */
   /* Änderung nur an der Kamera: Stil der Bühne ohne --rx/--ry gleich, Klassen ohne Ziehen, Leben und Beschäftigt gleich */
   const ohneKam = (v) => String(v || '').replace(/--(r[xy]|pan[xy])\s*:[^;]*;?/g, '').replace(/\s+/g, ' ').trim();
-  const NUR_KAM = { 'is-drag': 1, 'is-live': 1, 'is-busy': 1, 'is-zoom': 1, 'is-pinch': 1, 'is-zooming': 1, 'is-zoomanim': 1 };
+  const NUR_KAM = { 'is-drag': 1, 'is-live': 1, 'is-busy': 1, 'is-zoom': 1, 'mit-eins': 1, 'is-pinch': 1, 'is-zooming': 1, 'is-zoomanim': 1 };
   const ohneKl = (v) => String(v || '').split(/\s+/).filter((k) => k && !NUR_KAM[k]).sort().join(' ');
   function nurKamera(r, stage) {
     if (r.attributeName === 'style') return ohneKam(r.oldValue) === ohneKam(stage.getAttribute('style'));

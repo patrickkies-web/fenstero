@@ -872,6 +872,12 @@ if (teil(6)) {
   const zoom7 = await p7.evaluate(() => ({ z: W3DZ.w3d.z, cls: document.getElementById('w3d').classList.contains('is-zoom'), eins: document.querySelector('#w3d [data-w3d="eins"]').hidden, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
   await p7.click('#w3d [data-w3d="eins"]'); await p7.waitForTimeout(500);
   const zoom7b = await p7.evaluate(() => ({ z: W3DZ.w3d.z, s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }));
+  /* Herauszoomen bis 0,5: Minus zweimal, dann gesperrt; „1:1“ sichtbar, kein Verschieben; „1:1“ holt zurück */
+  await p7.click('#w3d [data-w3d="minus"]'); await p7.waitForTimeout(450); await p7.click('#w3d [data-w3d="minus"]'); await p7.waitForTimeout(500);
+  const zoom7c = await p7.evaluate(() => { const k = (r) => document.querySelector('#w3d [data-w3d="' + r + '"]'); return { z: W3DZ.w3d.z, minus: k('minus').disabled, eins: k('eins').hidden, cls: document.getElementById('w3d').classList.contains('is-zoom'), s: parseFloat(document.querySelector('#w3d [data-r="el-front"]').style.width) }; });
+  await p7.click('#w3d [data-w3d="eins"]'); await p7.waitForTimeout(500);
+  const zoom7d = await p7.evaluate(() => W3DZ.w3d.z);
+  ok(zoom7c.z === 0.5 && zoom7c.minus && !zoom7c.eins && !zoom7c.cls && Math.abs(zoom7c.s / zoomKn7.s - 0.5) < 0.02 && zoom7d === 1, 'Zoom im Modell: herauszoomen bis 0,5 (Minus zweimal, dann gesperrt), „1:1“ holt zurück (' + JSON.stringify(zoom7c) + ')');
   const cdp7 = await ctx7.newCDPSession(p7), bb7 = await (await p7.$('#w3d')).boundingBox(), cx7 = bb7.x + bb7.width / 2, cy7 = bb7.y + bb7.height / 2;
   const finger7 = (type, pts) => cdp7.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p, i) => ({ x: p[0], y: p[1], id: i })) });
   await finger7('touchStart', [[cx7 - 30, cy7], [cx7 + 30, cy7]]);
