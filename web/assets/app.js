@@ -1835,7 +1835,7 @@ function w3dLayout(stage, w, o, gr) {
     de.classList.toggle('mit-feld', mitFeld);
   });
   if (feld) feldLage(stage, o, FD_AN[V.active] || 'm');
-  stage._v = { d: d, fd: fd, T: T, s: s, moW: moW, moH: moH };
+  stage._v = { d: d, fd: fd, T: T, s: s, moW: moW, moH: moH, bank: !ohneBank };
   W3D_SOFORT = false;
   return V;
 }

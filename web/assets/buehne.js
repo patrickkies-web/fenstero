@@ -15,7 +15,10 @@
    Vorführungen (Öffnen, Schieben, Falten) laufen weiter als CSS-Animation; gelesen wird deren aktueller Stand.
    Ohne WebGL 2 bleibt alles beim CSS-Modell. */
 window.Buehne3D = (function () {
-  const PERSP = 1300, OY = 0.46, NAH = 4, FERN = 60000, WEIT = 24000;
+  /* Tiefenbereich: die nahe Ebene so weit vorn wie möglich, ohne etwas abzuschneiden (Böden liegen weit unter der Blickachse).
+     Bei NAH 4 löst ein 16-Bit-Tiefenpuffer (manche Telefone) im Abstand der Kamera nur gut 6 px auf: Rahmenseiten schienen dann
+     durch Laibung und Rahmen. Bei 200 sind es 0,13 px, mit 24 Bit 0,0005 px */
+  const PERSP = 1300, OY = 0.46, NAH = 200, FERN = 60000, WEIT = 24000;
   const DBG = {}; // Prüfung: DBG.ohne = /Rollen/ lässt Flächen beim Zeichnen weg
 
   /* ---------- Mathe: 4×4 spaltenweise wie matrix3d ---------- */
@@ -265,8 +268,9 @@ window.Buehne3D = (function () {
   function neueLeinwand() {
     const cv = document.createElement('canvas'); cv.className = 'w3d-gl'; cv.setAttribute('aria-hidden', 'true');
     /* ohne Grafikchip liefert der Browser mit failIfMajorPerformanceCaveat keinen Zusammenhang (zweites Merkmal neben dem Namen) */
+    /* stencil: true, obwohl ungenutzt: dann bekommt die Leinwand fast überall einen 24-Bit-Tiefenpuffer (gepackt mit der Schablone) statt 16 Bit */
     let gl = null;
-    try { gl = cv.getContext('webgl2', { antialias: true, alpha: true, premultipliedAlpha: true, depth: true, stencil: false, failIfMajorPerformanceCaveat: !VOLL }); } catch (e) { gl = null; }
+    try { gl = cv.getContext('webgl2', { antialias: true, alpha: true, premultipliedAlpha: true, depth: true, stencil: true, failIfMajorPerformanceCaveat: !VOLL }); } catch (e) { gl = null; }
     if (!gl) return null;
     if (!VOLL && software(gl)) { const x = gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); return null; }
     const L = { cv: cv, gl: gl, verloren: false };
@@ -575,12 +579,17 @@ window.Buehne3D = (function () {
     }
     return o;
   }
-  /* Wandöffnung um einen Hauch kleiner, Laibung um einen Hauch tiefer: so überlappen sich die Kanten statt zu stoßen */
+  /* Wandöffnung um einen Hauch kleiner, Laibung um einen Hauch tiefer: so überlappen sich die Kanten statt zu stoßen. Unten liegt
+     die Fensterbank genau auf der Lochkante: dort wird das Loch um den Hauch weiter, sonst steht ein Wandstreifen als Grat auf der
+     Bank (von oben ein flimmernder Strich) */
   const HAUCH = 0.6;
-  function enger(c) {
+  function enger(c, bank) {
     if (!c) return c;
-    if (c.t === 'hole') return { t: 'hole', r: [c.r[0] + HAUCH, c.r[1] + HAUCH, c.r[2] - HAUCH, c.r[3] - HAUCH] };
-    if (c.t === 'wand') { let cx = 0, cy = 0; c.p.forEach((q) => { cx += q[0]; cy += q[1]; }); cx /= c.p.length; cy /= c.p.length; return { t: 'wand', p: c.p.map((q) => { const dx = cx - q[0], dy = cy - q[1], l = Math.hypot(dx, dy) || 1; return [q[0] + dx / l * HAUCH, q[1] + dy / l * HAUCH]; }) }; }
+    if (c.t === 'hole') return { t: 'hole', r: [c.r[0] + HAUCH, c.r[1] + HAUCH, c.r[2] - HAUCH, c.r[3] + (bank ? HAUCH : -HAUCH)] };
+    if (c.t === 'wand') {
+      let cx = 0, cy = 0, yu = -Infinity; c.p.forEach((q) => { cx += q[0]; cy += q[1]; yu = Math.max(yu, q[1]); }); cx /= c.p.length; cy /= c.p.length;
+      return { t: 'wand', p: c.p.map((q) => { const dx = cx - q[0], dy = cy - q[1], l = Math.hypot(dx, dy) || 1; return bank && q[1] > yu - 0.01 ? [q[0] + dx / l * HAUCH, q[1] + HAUCH] : [q[0] + dx / l * HAUCH, q[1] + dy / l * HAUCH]; }) };
+    }
     return c;
   }
   /* Teile in der Rahmenöffnung liegen in einer Ebene mit ihren Nachbarn (Flügel neben Pfosten, Oberlicht am Blendrahmen).
@@ -840,7 +849,7 @@ window.Buehne3D = (function () {
       /* Terrasse: begrenzt und zum Ende hin ausgeblendet, sonst wird der Blick durch die Tür dunkel */
       const terrasse = role === 'floor-out';
       const vor = stufe(role);
-      const tri = role === 'fuge' ? abgerueckt(f.c, f.W, f.H).tri : vor ? dreiecke(aufgeweitet(f.c), f.W, f.H, HAUCH) : dreiecke(wand ? enger(f.c) : f.c, f.W, f.H, wand ? WEIT : terrasse ? { x: WEIT, o: 0, u: f.H * 2 } : boden ? { x: WEIT, o: 0, u: WEIT } : ecke);
+      const tri = role === 'fuge' ? abgerueckt(f.c, f.W, f.H).tri : vor ? dreiecke(aufgeweitet(f.c), f.W, f.H, HAUCH) : dreiecke(wand ? enger(f.c, stage._v && stage._v.bank) : f.c, f.W, f.H, wand ? WEIT : terrasse ? { x: WEIT, o: 0, u: f.H * 2 } : boden ? { x: WEIT, o: 0, u: WEIT } : ecke);
       if (c.contains('w3d-band') && el._tief > 0.3) { koerper(el, Mf, f.W, f.H, flaecheStoff(el, stage), o, Math.min(f.W, f.H) * 0.3, -el._tief, 0); return; }
       const ao = aoFuer(role, f, stage);
       const glas = c.contains('w3d-glass') && !c.contains('w3d-paneel'), glasGel = c.contains('w3d-gel-glas'), luecke = !glasGel && (c.contains('w3d-gitter') || (c.contains('w3d-gel') && !c.contains('w3d-gel-h')));
