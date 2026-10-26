@@ -53,8 +53,26 @@
     if (badge) badge.hidden = !d.einf;
   }
 
+  /* Vorhang: Eine Szene, die höher ist als der Bildschirm, klebt erst, wenn ihr Ende unten angekommen ist (--dna-szene-oben). dna-bundle.js
+     setzt das nur für Szenen im Dokument, nicht im Schatten-DOM; ohne den Versatz bliebe der untere Teil hoher Szenen unerreichbar. */
+  let ordneSzenen = () => {};
+  function vorhang(root) {
+    const szenen = Array.from(root.querySelectorAll('.dna-szene'));
+    if (!szenen.length) return;
+    ordneSzenen = () => {
+      if (!halterFest || !halterFest.isConnected) return;
+      const h = w.innerHeight || 0;
+      szenen.forEach((s) => s.style.setProperty('--dna-szene-oben', Math.min(0, h - s.offsetHeight) + 'px'));
+    };
+    ordneSzenen();
+    w.addEventListener('resize', ordneSzenen); w.addEventListener('load', ordneSzenen);
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(ordneSzenen);
+    if ('ResizeObserver' in w) { const ro = new ResizeObserver(ordneSzenen); szenen.forEach((s) => ro.observe(s)); }
+  }
+
   function beleben(root, d) {
     if (w.DNA && w.DNA.start) w.DNA.start(root);
+    vorhang(root);
 
     /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite */
     const leiste = root.querySelector('.ez-leiste'), kopf = root.querySelector('.ez-kopf');
@@ -109,7 +127,7 @@
   function auf(halter, d) {
     if (!halter) return;
     /* schon gebaut: den neuen leeren Halter durch den bestehenden ersetzen, nur die Daten nachziehen */
-    if (halterFest && halter !== halterFest) { halter.replaceWith(halterFest); daten(wurzel, d); return; }
+    if (halterFest && halter !== halterFest) { halter.replaceWith(halterFest); daten(wurzel, d); ordneSzenen(); return; }
     if (halter.shadowRoot) return;
     const vorlage = doc.getElementById('startseite-dna'); if (!vorlage) return;
     halterFest = halter;
