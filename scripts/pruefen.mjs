@@ -4586,14 +4586,15 @@ if (teil(21)) {
   /* c) 3-D: neue Bauarten und Teile haben Flächen mit Maß */
   const teile21 = await a21.evaluate(async () => {
     const warte = (ms) => new Promise((f) => setTimeout(f, ms)), out = {};
-    const zeige = async (set, art, rollen, psk) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set); if (psk) { w.psk.schema = psk; w.sashes = pskFluegel(psk, w.psk.richtung); } S.win = w; S.q = 'griff'; S.screen = 'frage'; render(true); await warte(250); const st = document.getElementById('w3d'); return rollen.map((r) => { const el = st.querySelector('[data-r="' + r + '"]'); return r + ':' + (el && ((el._f && el._f.W > 0.5 && el._f.H > 0.5) || (el._s && el._s.w > 0.5 && el._s.h > 0.5)) ? 1 : 0); }).join(' '); };
+    const zeige = async (set, art, rollen, psk, frage) => { const w = demoProject()[0]; if (art) artSetzen(w, art); Object.assign(w, set); if (psk) { w.psk.schema = psk; w.sashes = pskFluegel(psk, w.psk.richtung); } S.win = w; S.q = frage || 'griff'; S.screen = 'frage'; render(true); await warte(250); const st = document.getElementById('w3d'); return rollen.map((r) => { const el = st.querySelector('[data-r="' + r + '"]'); return r + ':' + (el && ((el._f && el._f.W > 0.5 && el._f.H > 0.5) || (el._s && el._s.w > 0.5 && el._s.h > 0.5)) ? 1 : 0); }).join(' '); };
     out.fenster = await zeige({ leiste: 'beide', oeffner: 'kette', luefter: 'schall', baender: 'sichtbar', gitter: 'stab', fba: 'alu', fbaKappe: 'kunststoff' }, '', ['li-t', 'la-l', 'oeff', 'luef', 'bd-o-0', 'gitter', 'sa-l', 'sa-r']);
     /* Sonnenschutz aus dem CSS-Modell (S3): Führungsschienen fs-*, beim Raffstore einzelne Lamellen und Aufzugbänder */
     out.sonne = await zeige({ sart: 'raffstore', roll: 'vorbau', antrieb: 'solar' }, '', ['fs-l', 'fs-r', 'solar', 'lam-0', 'band-l']);
     out.klapp = await zeige({ sart: 'klappladen', roll: 'keiner' }, '', ['kl-l', 'kl-r']);
     out.balkon = await zeige({ etage: 'og', absturz: 'gelaender', paneel: 'paneel' }, 'balkon', ['gel', 'gel-h', 'pan-i-0', 'riegel-i-0']);
     out.psk = await zeige({}, 'psk', ['sash-3'], 'C');
-    out.form = await zeige({ form: 'dreieck' }, '', ['rs-0', 'el-front']);
+    /* Festverglasung ohne Griff-Frage: die App spränge auf „Lage“ (Design-DNA, ohne Modell), deshalb die Glas-Frage */
+    out.form = await zeige({ form: 'dreieck' }, '', ['rs-0', 'el-front'], '', 'glas');
     out.pskT = S.win.sashes.map((x) => x.t).join();
     return out;
   });
