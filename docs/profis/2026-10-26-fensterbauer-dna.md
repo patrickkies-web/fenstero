@@ -90,6 +90,7 @@ Vier Detail-Profis (Bewegung, Zeichen, UX, Typografie) und drei Abgleiche (Mater
 - Prüfsuite: Abschnitte 2, 6, 10, 17 und 29 auf das neue Markup umgeschrieben, keine Prüfung abgeschaltet; neu geprüft werden Haken-Zeile und Leiste am Telefon, genau eine volle Pille im ersten Bildschirm. Bestanden: 1, 2, 5, 6, 9, 10, 17, 29; einziger Fehlschlag in 6 ist die Verglasungs-Lupe der App, die auch auf main fehlschlägt. Die beiden Fehlschläge der alten Seite („Vertrag widerrufen“ als Knopf, „nur für Unternehmer“) sind mit der neuen Seite behoben.
 - Aufruf der Suite im Container: `NODE_PATH=/opt/node-tools/node_modules NUR=2,6,10,17,29 node scripts/pruefen.mjs` gegen `KI_ATTRAPPE=1 node scripts/dev-server.mjs`.
 - Bereitstellung: Zusammenführung des Arbeitszweigs in main; Cloudflare baut main mit `npx wrangler deploy` (README, „Kurz: online stellen“).
+- Online gestellt am 26.10.2026 mit Commit 691200f auf main (zweiter Push zum Auslösen des Baus mit diesem Eintrag). Der Container erreicht eeziframes.com nicht, der Bau ist im Cloudflare-Dashboard zu prüfen (Workers & Pages → fenstero → Deployments; hängt er in „Initializing“, dort „Retry deployment“).
 
 ## Messwerte (Vorschau, werkzeuge/)
 
