@@ -9,7 +9,7 @@
 html { background: var(--schwarz); overflow-x: clip; }
 body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: var(--font-sans); overflow-x: clip; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 .ez *, .ez *::before, .ez *::after { box-sizing: border-box; }
-.ez { --glut-a: var(--firma-licht); --glut-b: var(--firma-tief); --ez-schraffur: repeating-linear-gradient(45deg, color-mix(in srgb, var(--silbergrau) 70%, transparent) 0 1.2px, transparent 1.2px 5px); --ez-kachel: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); --ez-kachel-kante: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez { --glut-a: var(--firma-licht); --glut-b: var(--firma-tief); --firma-kern: color-mix(in srgb, var(--firma) 45%, #fff); --ez-schraffur: repeating-linear-gradient(45deg, color-mix(in srgb, var(--silbergrau) 70%, transparent) 0 1.2px, transparent 1.2px 5px); --ez-kachel: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); --ez-kachel-kante: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
 .ez .dna-wort[data-dna-auftritt]:not(.ist-da) { filter: blur(6px); will-change: filter, transform; }
 /* Takt im Hero: 100–400 ms das Etikett, 420–1260 ms die Überschrift, Pille zuletzt (840–1320 ms) */
 .ez .ez-buehne[data-dna-auftritt] { transform: none; transition-duration: 400ms; }
@@ -32,7 +32,8 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 /* ---------- Schrift (G15: ein schweres Element je Bild) ---------- */
 .ez .dna-titel-xl { font-weight: 600; font-size: clamp(44px, 9.5vw, 56px); line-height: .95; letter-spacing: -.035em; }
 .ez .dna-titel { font-weight: 600; font-size: clamp(30px, 6.5vw, 40px); line-height: 1.02; letter-spacing: -.025em; }
-.ez .dna-titel-s { font: 600 24px/1.1 var(--font-sans); letter-spacing: -.02em; }
+.ez .dna-titel-s { font: 500 22px/1.1 var(--font-sans); letter-spacing: -.02em; }
+@media (min-width: 760px) { .ez .dna-titel-s { font-weight: 600; font-size: 24px; } }
 .ez .dna-label { font-weight: 400; letter-spacing: .03em; }
 .dna-titel em.ez-ak, .dna-titel-xl em.ez-ak, .dna-titel-s em.ez-ak { font-style: normal; color: var(--tinte-2); }
 .ez-kopfzeile { display: grid; gap: var(--raum-3); justify-items: start; position: relative; }
@@ -59,45 +60,51 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-rund:focus-visible, .ez-schalter:focus-visible, .ez-logo:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) {
   .ez .dna-pille:hover .dna-pille__pfeil svg { transform: translateX(2px); }
-  .ez .dna-pille--leise:hover { background: var(--firma-tief); color: var(--weiss); box-shadow: none; }
-  .ez-kontakt__wege a:hover .dna-rund-knopf, .ez-rund:hover { background-color: var(--firma-tief); box-shadow: inset 0 1px 0 rgba(255,255,255,.2); }
+  .ez .dna-pille--leise:hover { background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1.5px var(--tinte); }
+  [data-theme="hell"] .ez .dna-pille--leise:hover, .ez [data-theme="hell"] .dna-pille--leise:hover { background: rgba(7,9,10,.05); }
+  .ez-kontakt__wege a:hover .dna-rund-knopf, .ez-rund:hover { background-color: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px var(--tinte), inset 0 1px 0 rgba(255,255,255,.2); }
+  .ez-kontakt__held:hover .ez-kontakt__held-knopf { transform: scale(1.04); }
   .ez-fuss__recht a:hover { color: var(--tinte); }
   .ez-planen__knopf:hover { transform: scale(1.04); }
 }
 
 /* ---------- Die Marke des Betriebs: Logo (Zeichen + Wortmarke) statt Initiale; eeziframes kommt nicht mehr in den Kopf ---------- */
 .ez-logo { position: relative; display: inline-flex; align-items: center; gap: 10px; min-width: 0; min-height: 44px; color: var(--tinte); text-decoration: none; }
-.ez-logo__zeichen { flex: none; width: 36px; height: 36px; display: block; border-radius: 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 0 0 1px rgba(7,9,10,.12), 0 6px 14px -8px rgba(7,9,10,.8); }
-.ez-logo__wort { display: grid; gap: 2px; min-width: 0; }
-.ez-logo__wort b { font: 700 17px/1 var(--font-sans); letter-spacing: -.02em; white-space: nowrap; }
-.ez-logo__wort small { font: 400 11px/1 var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--tinte-2); white-space: nowrap; }
-.ez-logo--klein .ez-logo__zeichen { width: 30px; height: 30px; border-radius: 9px; }
-.ez-logo--klein .ez-logo__wort b { font-size: 15px; }
-.ez-logo__zeichen--gross { width: 52px; height: 52px; border-radius: 15px; }
-@media (min-width: 900px) { .ez-kopf .ez-logo__zeichen { width: 40px; height: 40px; border-radius: 11px; } .ez-kopf .ez-logo__wort b { font-size: 18px; } }
+.ez-logo__zeichen { flex: none; width: 36px; height: 36px; display: block; border-radius: 25%; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 0 0 1px rgba(7,9,10,.12), 0 6px 14px -8px rgba(7,9,10,.8); }
+/* Marke (Kopf, Leiste, Fuß, Kontakt): die drei Goldfelder ohne Kachel, damit es wie ein Zeichen und nicht wie ein App-Symbol liest */
+.ez-logo__zeichen--marke { border-radius: 0; box-shadow: none; filter: drop-shadow(0 4px 8px rgba(7,9,10,.6)); }
+.ez-logo__wort { display: grid; gap: 3px; min-width: 0; }
+.ez-logo__wort b { order: 2; font: 600 19px/1 var(--font-sans); letter-spacing: -.025em; white-space: nowrap; }
+.ez-logo__wort small { order: 1; font: 400 10px/1 var(--font-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--tinte-2); white-space: nowrap; }
+.ez-logo--klein .ez-logo__zeichen { width: 30px; height: 30px; }
+.ez-logo--klein .ez-logo__wort b { font-size: 16px; }
+.ez-logo--klein .ez-logo__wort small { font-size: 9px; }
+.ez-logo__zeichen--gross { width: 52px; height: 52px; }
+@media (min-width: 900px) { .ez-kopf .ez-logo__zeichen { width: 40px; height: 40px; } .ez-kopf .ez-logo__wort b { font-size: 21px; } }
 
 /* ---------- Muster-Ebene: Koralle-Etiketten zeigen Fensterbauern, was zum Paket gehört; beim echten Betrieb weg ---------- */
-/* Glas-Chip mit Koralle-Punkt (Hinweis), damit die Farbregel hält: Koralle nur als Punkt, nie als Fläche */
-.ez-muster { display: none; position: absolute; z-index: 5; align-items: center; gap: 7px; height: 26px; padding: 0 10px 0 9px; border-radius: var(--rund-pille); background: rgba(32,32,34,.72); color: var(--weiss); font: 500 12px/1 var(--font-sans); white-space: nowrap; pointer-events: none; border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), 0 6px 14px -8px rgba(7,9,10,.8); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+/* Chips mit Koralle-Punkt (Hinweis), damit die Farbregel hält: Koralle nur als Punkt, nie als Fläche. Ein- und Ausblenden nur über
+   opacity und transform (220 ms, Abgang 160 ms), nie über Platz: nichts springt. Kein Backdrop-Blur: dahinter liegt nichts Bewegtes */
+.ez-muster { position: absolute; z-index: 5; display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 10px 0 9px; border-radius: var(--rund-pille); background: rgba(32,32,34,.9); color: var(--weiss); font: 500 12px/1 var(--font-sans); white-space: nowrap; pointer-events: none; border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), 0 6px 14px -8px rgba(7,9,10,.8); opacity: 0; visibility: hidden; transform: scale(.96); transition: opacity 160ms ease, transform 160ms ease, visibility 0s linear 160ms; }
 .ez-muster::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--hinweis); box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--hinweis) 30%, transparent); }
-.ez.ist-muster .ez-muster { display: inline-flex; }
-.ez-muster--logo { left: 46px; bottom: -22px; }
-.ez.ist-muster .ez-kopf { padding-bottom: 28px; }
+.ez.ist-muster .ez-muster { opacity: 1; visibility: visible; transform: none; transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt), visibility 0s; }
+.ez-musterleiste { background: var(--anthrazit); box-shadow: inset 0 -1px 0 rgba(255,255,255,.06); }
+.ez-musterleiste .ez-huelle { display: flex; align-items: center; justify-content: space-between; gap: var(--raum-3); min-height: 52px; padding-block: 6px; }
+.ez-musterleiste__text { margin: 0; display: grid; gap: 2px; min-width: 0; font: 400 12px/1.25 var(--font-sans); color: var(--silbergrau); }
+.ez-musterleiste__text b { font-weight: 500; color: var(--weiss); }
+@media (max-width: 599px) { .ez-musterleiste__text span { display: none; } }
 .ez-muster--text { right: 0; top: -10px; }
 .ez-muster--domain { left: var(--ex, 62%); top: calc(var(--ey, 11%) + 7%); translate: -50% 0; }
 .ez-muster--geraet { left: 12px; bottom: 12px; }
 .ez-muster--buehne { right: 12px; bottom: 12px; }
-.ez-muster--fotos { left: 16px; top: -12px; }
-.ez-muster--kz { position: static; margin-right: 10px; vertical-align: middle; }
-.ez-kopf__rechts { display: flex; align-items: center; gap: 10px; flex: none; }
+.ez-muster--fotos { right: 12px; top: 12px; z-index: 6; }
+.ez-muster--kz { left: 0; top: -30px; }
 .ez-schalter { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px 0 12px; border: 0; border-radius: var(--rund-pille); background: transparent; color: var(--tinte); font: 500 13px/1 var(--font-sans); cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: box-shadow 220ms ease, background-color 220ms ease, transform 220ms var(--dna-druck); }
 .ez-schalter:active { transform: scale(.97); transition-duration: 0s; }
 .ez-schalter__punkt { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: background-color 220ms ease, box-shadow 220ms ease; }
 .ez-schalter[aria-pressed="true"] { background: var(--anthrazit); box-shadow: inset 0 0 0 1.5px var(--anthrazit), inset 0 1px 0 rgba(255,255,255,.1); }
 .ez-schalter[aria-pressed="true"] .ez-schalter__punkt { background: var(--hinweis); box-shadow: 0 0 0 3px color-mix(in srgb, var(--hinweis) 30%, transparent); }
-.ez-schalter__an, .ez-schalter__aus { display: none; }
-.ez-schalter[aria-pressed="true"] .ez-schalter__an { display: inline; }
-.ez-schalter:not([aria-pressed="true"]) .ez-schalter__aus { display: inline; }
+.ez-schalter { flex: none; }
 @media (max-width: 419px) { .ez-schalter { padding: 0 12px 0 10px; font-size: 12px; } }
 
 /* ---------- Kopf und Leiste ---------- */
@@ -139,10 +146,10 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-buehne__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; z-index: -2; transform: scale(var(--bz, 1)); transform-origin: var(--bo, 50% 50%); }
 .ez-buehne::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 4; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -90px 120px -60px rgba(7,9,10,.75); }
 /* Der Bildschirm wirft das Licht des Betriebs auf den Boden (Leuchten ohne Weichzeichner, G14) */
-.ez-buehne__schein { position: absolute; z-index: -1; left: var(--sx, 40%); top: var(--sy, 56%); width: 104%; height: 100%; translate: -50% -50%; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(50% 50% at 50% 50%, var(--firma-licht), color-mix(in srgb, var(--firma-licht) 60%, transparent) 28%, color-mix(in srgb, var(--firma-tief) 70%, transparent) 50%, transparent 74%); }
+.ez-buehne__schein { position: absolute; z-index: -1; left: var(--sx, 40%); top: var(--sy, 56%); width: 104%; height: 100%; translate: -50% -50%; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(38% 36% at 50% 50%, var(--firma-kern), var(--firma-licht) 10%, color-mix(in srgb, var(--firma) 55%, transparent) 30%, color-mix(in srgb, var(--firma-tief) 60%, transparent) 50%, transparent 70%); }
 
 /* Gerät: Telefon flach im Licht, Inhalt in echter App-Größe (390 × 844) und verkleinert */
-.ez-geraet { position: absolute; left: var(--gx, 12%); top: var(--gy, 15%); width: calc(390px * var(--gs) + 2 * var(--gr)); height: calc(844px * var(--gs) + 2 * var(--gr)); padding: var(--gr); border-radius: calc(54px * var(--gs) + var(--gr)); background: linear-gradient(145deg, #3a3b40, #0b0b0c 38%, #1d1e21 70%, #2c2d31); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 0 0 2.5px rgba(7,9,10,.7), inset 1.5px 1.5px 0 rgba(255,255,255,.38), 30px 40px 8px -2px rgba(7,9,10,.8), 3px 4px 4px rgba(7,9,10,.9); transform: scale(1, .81) rotate(var(--kz, -20deg)); transform-origin: 50% 40%; }
+.ez-geraet { position: absolute; left: var(--gx, 12%); top: var(--gy, 15%); width: calc(390px * var(--gs) + 2 * var(--gr)); height: calc(844px * var(--gs) + 2 * var(--gr)); padding: var(--gr); border-radius: calc(54px * var(--gs) + var(--gr)); background: linear-gradient(145deg, #3a3b40, #0b0b0c 38%, #1d1e21 70%, #2c2d31); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 0 0 2.5px rgba(7,9,10,.7), inset 1.5px 1.5px 0 rgba(255,255,255,.38), 30px 40px 8px -2px rgba(7,9,10,.8), 3px 4px 4px rgba(7,9,10,.9), 0 2px 0 rgba(7,9,10,.9), 0 26px 44px -18px rgba(7,9,10,.9); transform: scale(1, .81) rotate(var(--kz, -20deg)); transform-origin: 50% 40%; }
 .ez-geraet__schirm { position: relative; width: 100%; height: 100%; border-radius: calc(54px * var(--gs)); overflow: hidden; background: var(--schwarz); }
 .ez-geraet__glanz { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(118deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 34%, transparent 46%); }
 /* Licht über dem Gerät: dasselbe Fensterkreuz wie auf dem Boden, in den Geräteraum zurückgerechnet. --k1 Sprosse quer, --k2 Sprosse längs */
@@ -200,13 +207,16 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-adresse .dna-etikett { --glas: rgba(32,32,34,.72); padding: 6px 12px; gap: 8px; font-size: 12px; border-color: rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), var(--schatten-glas); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .ez-adresse__text { display: inline-flex; align-items: center; gap: 6px; color: var(--silbergrau); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .ez-adresse__text b { color: var(--weiss); font-weight: 500; }
-.ez-adresse__text svg { width: 12px; height: 12px; fill: none; stroke: var(--firma); stroke-width: 1.4; stroke-linecap: round; }
+.ez-adresse__text svg { width: 12px; height: 12px; fill: none; stroke: var(--silbergrau); stroke-width: 1.4; stroke-linecap: round; }
 .ez-nur-desk { display: none; }
 @media (min-width: 900px) { .ez-nur-desk { display: block; } .ez-nur-tel { display: none; } .ez-adresse .dna-etikett { font-size: 13px; padding: 8px 14px; } }
 
 /* ---------- Szene 2: Der Betrieb. Bento aus Fotoplätzen (G1: Schraffur heißt „Foto folgt“) und der Kachel des Konfigurators (G12) ---------- */
 .ez-kopfzeile--betrieb .dna-text { max-width: 44ch; }
-.ez-bento { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; gap: 12px; grid-template-areas: "g g" "g g" "p p" "p p" "f3 f4" "f5 f6"; }
+.ez-bento { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; gap: 12px; grid-template-areas: "p p" "p p"; }
+.ez.ist-muster .ez-bento { grid-template-areas: "p p" "p p" "g g" "g g" "f3 f4" "f5 f6"; }
+.ez-foto { display: none; }
+.ez.ist-muster .ez-foto { display: block; }
 .ez-bento > * { min-width: 0; }
 .ez-foto--gross { grid-area: g; }
 .ez-planen { grid-area: p; }
@@ -214,36 +224,48 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-foto[data-foto="4"] { grid-area: f4; }
 .ez-foto[data-foto="5"] { grid-area: f5; }
 .ez-foto[data-foto="6"] { grid-area: f6; }
-@media (min-width: 760px) { .ez-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 200px; grid-template-areas: "g g f3 p" "g g f4 p" "f5 f6 f6 p"; } }
-.ez-foto { position: relative; margin: 0; border-radius: var(--rund-l); overflow: hidden; isolation: isolate; background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante); color: var(--weiss); }
-.ez-foto__grund { position: absolute; inset: 0; z-index: -1; background: url(bilder/buehne.webp) var(--bx, 50%) var(--by, 50%) / calc(var(--bz, 1.5) * 100%) no-repeat; opacity: .55; mix-blend-mode: screen; }
-.ez-foto::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(70% 60% at 100% 0%, color-mix(in srgb, var(--firma-tief) 70%, transparent), transparent 70%); }
-.ez-foto__schraffur { position: absolute; left: 0; right: 0; bottom: 0; height: 46%; z-index: 1; background: var(--ez-schraffur); opacity: .32; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 45%, transparent); -webkit-mask: linear-gradient(#000 0, #000 55%, transparent); mask: linear-gradient(#000 0, #000 55%, transparent); }
-.ez-foto__text { position: absolute; left: 14px; right: 14px; bottom: 12px; z-index: 2; display: grid; gap: 2px; }
-.ez-foto__text b { font: 600 18px/1.1 var(--font-sans); letter-spacing: -.015em; }
-.ez-foto__text span { font: 400 12px/1.2 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
-.ez-foto--gross .ez-foto__text b { font-size: 24px; }
+@media (min-width: 760px) { .ez-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 280px; grid-template-areas: "p p p p"; } .ez.ist-muster .ez-bento { grid-auto-rows: 200px; grid-template-areas: "g g f3 p" "g g f4 p" "f5 f6 f6 p"; } }
+/* Fotoplatz ohne Foto (nur Muster-Ebene): ein Betonboden im Fensterlicht, von den Fugen zerschnitten, drei Helligkeiten, Schraffur = „noch nicht“ */
+.ez-foto { position: relative; margin: 0; border-radius: var(--rund-l); overflow: hidden; isolation: isolate; background: var(--ez-kachel); color: var(--weiss); }
+.ez-foto__grund { position: absolute; inset: 0; z-index: -1; background: url(bilder/buehne.webp) var(--bx, 50%) var(--by, 50%) / calc(var(--bz, 1.5) * 100%) no-repeat; opacity: var(--bo, .5); mix-blend-mode: screen; }
+.ez-foto::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.05), inset 0 -60px 80px -50px rgba(7,9,10,.7); }
+.ez-foto__schraffur { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; z-index: 1; background: var(--ez-schraffur); opacity: .3; border-top: 1px dashed color-mix(in srgb, var(--silbergrau) 55%, transparent); }
+.ez-foto__text { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 2; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.ez-foto__text b { font: 500 15px/1.1 var(--font-sans); letter-spacing: -.01em; }
+.ez-foto__text span { font: 400 13px/1.2 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); }
+.ez-foto--gross .ez-foto__text b { font-size: 17px; }
 .ez-foto--gross .ez-foto__text, .ez-foto--breit .ez-foto__text { left: 18px; bottom: 16px; }
 .ez-foto .ez-glaschip--foto { left: 12px; top: 12px; bottom: auto; translate: none; }
 .ez-foto--gross .ez-glaschip--foto { left: 16px; top: 16px; }
 .ez-planen { position: relative; display: grid; align-content: start; gap: var(--raum-3); padding: var(--raum-4); border-radius: var(--rund-l); color: var(--weiss); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante); isolation: isolate; }
-.ez-planen__schein { position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: radial-gradient(60% 50% at 100% 100%, var(--firma-licht), color-mix(in srgb, var(--firma-licht) 42%, transparent) 34%, transparent 72%), radial-gradient(40% 40% at 0% 0%, var(--firma-tief), transparent 72%); }
-.ez-planen__text { display: grid; gap: 10px; justify-items: start; max-width: 58%; }
-.ez-planen__text .dna-label { margin-bottom: -4px; }
+.ez-planen__schein { position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: radial-gradient(50% 46% at 84% 86%, var(--firma-kern), var(--firma-licht) 8%, color-mix(in srgb, var(--firma) 55%, transparent) 30%, color-mix(in srgb, var(--firma-tief) 60%, transparent) 50%, transparent 70%); }
+.ez-planen::after { content: ""; position: absolute; right: 6%; bottom: 4%; width: 44%; height: 6%; border-radius: 50%; background: radial-gradient(closest-side, rgba(7,9,10,.75), transparent); z-index: 0; }
+.ez-planen__text { display: grid; gap: 10px; justify-items: start; max-width: 52%; }
+.ez-planen__text .dna-label { margin-bottom: -6px; }
+.ez-planen__text .dna-titel-s { font-size: 22px; font-weight: 500; }
 .ez-planen__text .ez-klein { color: var(--silbergrau); }
-.ez-planen__bild { position: absolute; right: -7%; bottom: -5%; width: 54%; height: auto; z-index: 1; filter: drop-shadow(0 18px 24px rgba(7,9,10,.7)); }
+/* Das Rendering bricht aus der Kachel (G12): Lichtsaum, Kontaktschatten, kurzer Wurf */
+.ez-planen__bild { position: absolute; right: 3%; bottom: -2%; width: 46%; height: auto; z-index: 1; filter: drop-shadow(0 -1px 0 rgba(255,255,255,.22)) drop-shadow(2px 4px 3px rgba(7,9,10,.55)) drop-shadow(0 14px 14px rgba(7,9,10,.28)); }
+.ez.ist-muster .ez-planen__bild { right: -4%; width: 56%; }
 .ez-planen__knopf { position: absolute; left: var(--raum-4); bottom: var(--raum-4); z-index: 2; width: 52px; height: 52px; color: var(--schwarz); background: var(--weiss); box-shadow: 0 10px 24px -10px rgba(7,9,10,.9); transition: transform 220ms var(--dna-druck); }
-.ez-planen__knopf svg { width: 18px; height: 18px; }
+.ez-planen__knopf svg { width: 20px; height: 20px; }
+.ez-planen__knopf svg *, .ez-kontakt__held-knopf svg *, .ez-rund svg *, .ez-route__knoten svg * { stroke-width: 1.8px; vector-effect: non-scaling-stroke; }
 .ez-planen__knopf:active { transform: scale(.94); transition-duration: 0s; }
 @media (min-width: 760px) {
   .ez-planen { padding: var(--raum-5); }
-  .ez-planen__text { max-width: 100%; }
-  .ez-planen__bild { right: -22%; bottom: -3%; width: 118%; max-width: none; }
+  .ez-planen__text { max-width: 44%; }
+  .ez-planen__text .dna-titel-s { font-size: 24px; }
+  .ez-planen__bild { right: 5%; bottom: -10%; width: 23%; max-width: none; }
+  .ez-planen::after { right: 8%; width: 24%; }
+  .ez.ist-muster .ez-planen__text { max-width: 100%; }
+  .ez.ist-muster .ez-planen__bild { right: -18%; bottom: -3%; width: 110%; }
+  .ez.ist-muster .ez-planen::after { right: -6%; width: 80%; }
   .ez-planen__knopf { left: var(--raum-5); bottom: var(--raum-5); }
 }
 /* Reihe der Elemente: echte Renderings aus dem Konfigurator */
 .ez-reihe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.ez-reihe li { display: grid; justify-items: center; align-content: end; gap: 8px; min-height: 104px; padding: 10px 6px 10px; border-radius: var(--rund-m); background: var(--weiss); box-shadow: var(--kachel-rand); font: 500 12px/1.15 var(--font-sans); color: var(--tinte); text-align: center; }
+.ez-reihe li { display: grid; justify-items: center; align-content: end; gap: 8px; min-height: 104px; padding: 10px 6px 10px; border-radius: var(--rund-m); background: var(--weiss); box-shadow: var(--kachel-rand); font: 500 12px/1.15 var(--font-sans); color: var(--tinte); text-align: center; overflow-wrap: anywhere; hyphens: manual; }
+.ez-app__raster span { overflow-wrap: anywhere; hyphens: manual; }
 .ez-reihe img { height: 48px; width: auto; max-width: 100%; object-fit: contain; }
 @media (min-width: 760px) { .ez-reihe { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; } .ez-reihe li { min-height: 124px; font-size: 13px; padding: 12px 8px; } .ez-reihe img { height: 60px; } }
 
@@ -252,7 +274,6 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-schritt { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: var(--raum-4); align-items: center; padding: 12px; border-radius: var(--rund-l); color: var(--tinte); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante); }
 .ez-schritt__text { display: grid; gap: 12px; align-content: center; min-width: 0; padding-right: 4px; }
 .ez-schritt__text .dna-label { margin-bottom: -6px; }
-.ez-schritt__text h3 { font-size: 24px; }
 .ez-schritt__text p { margin: 0; font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); text-wrap: pretty; }
 .ez-schritt__bild { position: relative; aspect-ratio: 1 / 1; border-radius: var(--rund-m); overflow: hidden; isolation: isolate; }
 @media (min-width: 640px) and (max-width: 899px) { .ez-schritte4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -265,12 +286,14 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-schritt__bild--foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ez-schritt__bild--foto::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -60px 70px -50px rgba(7,9,10,.6); }
 .ez-sucher i { position: absolute; z-index: 1; width: 14px; height: 14px; border: 0 solid var(--weiss); }
-.ez-sucher i:nth-child(1) { left: 9px; top: 9px; border-left-width: 2px; border-top-width: 2px; border-top-left-radius: 5px; }
-.ez-sucher i:nth-child(2) { right: 9px; top: 9px; border-right-width: 2px; border-top-width: 2px; border-top-right-radius: 5px; }
-.ez-sucher i:nth-child(3) { right: 9px; bottom: 9px; border-right-width: 2px; border-bottom-width: 2px; border-bottom-right-radius: 5px; }
-.ez-sucher i:nth-child(4) { left: 9px; bottom: 9px; border-left-width: 2px; border-bottom-width: 2px; border-bottom-left-radius: 5px; }
-.ez-glaschip { position: absolute; z-index: 2; left: 50%; bottom: 12px; translate: -50% 0; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 5px; border-radius: var(--rund-pille); white-space: nowrap; background: rgba(32,32,34,.66); color: var(--weiss); font: 500 12px/1 var(--font-sans); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
-.ez-ring { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(var(--weiss) calc(var(--anteil) * 360deg), rgba(255,255,255,.22) 0); -webkit-mask: radial-gradient(circle, transparent 4.5px, #000 5px); mask: radial-gradient(circle, transparent 4.5px, #000 5px); }
+.ez-sucher i:nth-child(1) { left: 9px; top: 9px; border-left-width: 1.8px; border-top-width: 1.8px; border-top-left-radius: 5px; }
+.ez-sucher i:nth-child(2) { right: 9px; top: 9px; border-right-width: 1.8px; border-top-width: 1.8px; border-top-right-radius: 5px; }
+.ez-sucher i:nth-child(3) { right: 9px; bottom: 9px; border-right-width: 1.8px; border-bottom-width: 1.8px; border-bottom-right-radius: 5px; }
+.ez-sucher i:nth-child(4) { left: 9px; bottom: 9px; border-left-width: 1.8px; border-bottom-width: 1.8px; border-bottom-left-radius: 5px; }
+.ez-glaschip { position: absolute; z-index: 2; left: 50%; bottom: 12px; translate: -50% 0; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 5px; border-radius: var(--rund-pille); white-space: nowrap; background: rgba(32,32,34,.9); color: var(--weiss); font: 500 12px/1 var(--font-sans); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4); }
+.ez-schritt__bild--foto .ez-glaschip { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); background: rgba(32,32,34,.66); }
+.ez-glaschip--foto { padding-left: 10px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.ez-ring { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(var(--weiss) calc(var(--anteil) * 360deg), rgba(255,255,255,.22) 0); -webkit-mask: radial-gradient(circle, transparent 6.1px, #000 6.4px); mask: radial-gradient(circle, transparent 6.1px, #000 6.4px); }
 .ez-schritt__bild--dunkel { background: radial-gradient(120% 90% at 18% 0%, #2a2a2d, #121315 55%, var(--schwarz)); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.045); }
 .ez-zeichnung { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .ez-zeichnung .rahmen { fill: none; stroke: var(--weiss); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
@@ -278,7 +301,8 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-zeichnung .oeffnung { fill: #0d0e10; stroke: var(--silbergrau); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .ez-zeichnung .mass { fill: none; stroke-width: 1.8; vector-effect: non-scaling-stroke; stroke-linecap: round; }
 .ez-zeichnung .mass-fenster { stroke: var(--firma); }
-.ez-zeichnung .mass-oeffnung { stroke: var(--hinweis); stroke-dasharray: 4 3; }
+.ez-zeichnung .mass-oeffnung { stroke: var(--hinweis); stroke-dasharray: 0 6; }
+.ez-zeichnung .hilfe { fill: none; stroke: var(--silbergrau); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .ez-mini { position: absolute; z-index: 1; display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px 0 6px; border-radius: var(--rund-pille); background: var(--schwarz); color: var(--weiss); font: 500 12px/1 var(--font-sans); white-space: nowrap; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
 .ez-mini::before { content: ""; width: 6px; height: 6px; border-radius: 50%; }
 .ez-mini--oeffnung { left: 50%; top: 3px; translate: -50% 0; }
@@ -292,7 +316,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-farben i { width: 18px; height: 18px; border-radius: 50%; background: var(--farbe); box-shadow: inset 0 0 0 1px rgba(7,9,10,.2); }
 .ez-farben i.ist { box-shadow: inset 0 0 0 1px rgba(7,9,10,.2), 0 0 0 1.5px var(--weiss), 0 0 0 3px var(--schwarz); }
 .ez-senden { display: grid; place-items: center; }
-.ez-senden__schein { position: absolute; inset: 0; z-index: -1; background: radial-gradient(56% 56% at 50% 52%, var(--firma-licht), color-mix(in srgb, var(--firma-licht) 42%, transparent) 34%, transparent 72%), radial-gradient(40% 40% at 12% 100%, var(--firma-tief), transparent 72%); }
+.ez-senden__schein { position: absolute; inset: 0; z-index: -1; background: radial-gradient(50% 50% at 50% 50%, var(--firma-kern), var(--firma-licht) 8%, color-mix(in srgb, var(--firma) 45%, transparent) 30%, color-mix(in srgb, var(--firma-tief) 50%, transparent) 50%, transparent 70%); }
 .ez-senden .ez-logo__zeichen--gross { margin-top: -14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 14px 26px -10px rgba(7,9,10,.8); }
 .ez-senden__pdf { position: absolute; top: 10px; left: 10px; height: 22px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: var(--rund-pille); background: var(--schwarz); color: var(--weiss); font: 500 12px/1 var(--font-sans); letter-spacing: .03em; }
 .ez-gesendet { position: absolute; left: 50%; bottom: 10px; translate: -50% 0; display: inline-flex; align-items: center; height: 24px; padding: 0 12px; border-radius: var(--rund-pille); background: var(--firma-tief); color: var(--weiss); font: 500 12px/1 var(--font-sans); white-space: nowrap; box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
@@ -301,10 +325,11 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-paar { display: grid; gap: var(--raum-3); }
 @media (min-width: 760px) { .ez-paar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .ez-zeit.dna-leucht { min-height: 0; padding: var(--raum-5); gap: var(--raum-4); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante); --glut-x: 86%; --glut-y: 8%; }
-.ez .dna-leucht::before { filter: none; inset: 0; background: radial-gradient(60% 70% at var(--glut-x) var(--glut-y), var(--glut-a), color-mix(in srgb, var(--glut-a) 42%, transparent) 34%, transparent 72%), radial-gradient(40% 48% at 8% 100%, var(--glut-b), transparent 72%); }
+.ez .dna-leucht::before { filter: none; inset: 0; background: radial-gradient(60% 70% at var(--glut-x) var(--glut-y), var(--firma-kern), var(--glut-a) 8%, color-mix(in srgb, var(--firma) 55%, transparent) 30%, color-mix(in srgb, var(--glut-b) 60%, transparent) 50%, transparent 70%); }
 .ez .dna-leucht::after { content: none; }
 .ez .dna-leucht { --glut-a: var(--firma-licht); --glut-b: var(--firma-tief); }
-.ez-zeit .dna-zahl__wert { font-size: clamp(72px, 18vw, 88px); font-weight: 200; }
+.ez-zeit .dna-zahl__wert { font-size: clamp(76px, 20vw, 96px); font-weight: 250; letter-spacing: -.045em; }
+.ez-zeit .dna-zahl { margin-top: -6px; }
 .ez-zeit .dna-zahl__einheit { font-size: 15px; margin-left: 6px; }
 .ez-kapsel-block { display: grid; gap: var(--raum-3); }
 .ez-stationen { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: relative; }
@@ -317,13 +342,14 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 /* Weiße Karte ragt in die dunkle Szene */
 .ez-offen { display: grid; gap: var(--raum-3); align-content: start; padding: var(--raum-5); border-radius: var(--rund-l); background: var(--weiss); color: var(--tinte); box-shadow: var(--schatten-tief); }
 .ez-offen__kopf { display: flex; align-items: center; justify-content: space-between; gap: var(--raum-3); margin-bottom: -4px; }
-.ez-hinweis { display: inline-flex; align-items: center; gap: 6px; width: max-content; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--hinweis); color: var(--schwarz); font: 500 12px/1 var(--font-sans); white-space: nowrap; }
-.ez-hinweis::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--schwarz); }
-.ez-route__text > .ez-hinweis { margin-top: 6px; color: var(--schwarz); font: 500 12px/1 var(--font-sans); }
+/* Hinweis: schwarzer Chip mit Koralle-Punkt (Koralle nur als Punkt) */
+.ez-hinweis { display: inline-flex; align-items: center; gap: 7px; width: max-content; height: 24px; padding: 0 10px 0 8px; border-radius: var(--rund-pille); background: var(--schwarz); color: var(--weiss); font: 500 12px/1 var(--font-sans); white-space: nowrap; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+.ez-hinweis::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--hinweis); box-shadow: 0 0 0 3px color-mix(in srgb, var(--hinweis) 30%, transparent); }
+.ez-route__text > .ez-hinweis { margin-top: 6px; color: var(--weiss); font: 500 12px/1 var(--font-sans); }
 .ez-wahl-reihe { list-style: none; margin: 4px 0 4px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; max-width: 330px; }
 .ez-wahl-reihe li { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: var(--rund-pille); font: 400 14px/1 var(--font-sans); white-space: nowrap; }
 .ez-wahl-reihe li b { font-weight: 500; }
-.ez-wahl-reihe .ist { background: var(--firma-tief); color: var(--weiss); }
+.ez-wahl-reihe .ist { background: var(--schwarz); color: var(--weiss); }
 .ez-wahl-reihe .ist b { color: var(--weiss); }
 .ez-beispiel { font: 400 12px/1 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
 .ez-wahl-reihe .offen { color: var(--textgrau); background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--silbergrau) 32%, transparent) 0 1px, transparent 1px 4px), var(--weiss); outline: 1.2px dashed var(--silbergrau); outline-offset: -1.2px; }
@@ -332,8 +358,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 /* ---------- Szene 4: Weg der Anfrage (hell) und Bereit ---------- */
 .ez-haken { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 18px; }
 .ez-haken li { display: inline-flex; align-items: center; gap: 8px; font: 400 14px/1.3 var(--font-sans); color: var(--tinte-2); }
-.ez-haken svg { width: 14px; height: 14px; flex: none; color: var(--firma); }
-[data-theme="hell"] .ez-haken svg, .ez-meta--hell svg { color: color-mix(in srgb, var(--firma) 80%, var(--schwarz)); }
+.ez-haken svg { width: 14px; height: 14px; flex: none; color: var(--tinte); }
 .ez-weg .dna-text { max-width: 38ch; }
 .ez-route { list-style: none; margin: 0; padding: var(--raum-5) var(--raum-5) var(--raum-4); border-radius: var(--rund-l); position: relative; isolation: isolate; overflow: hidden; color: var(--tinte); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante), var(--schatten-schwebe); display: grid; }
 .ez-route__stelle { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: var(--raum-4); align-items: center; padding-block: 10px; }
@@ -346,7 +371,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-route__knoten--firma .ez-logo__zeichen { width: 44px; height: 44px; border-radius: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 0 0 5px var(--firma-tief); }
 .ez-route__knoten--punkt { width: 44px; height: 20px; position: relative; }
 .ez-route__knoten--punkt::before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); background: var(--schwarz); }
-.ez-route__stelle--ziel::before { content: ""; position: absolute; z-index: -1; left: -60px; top: 50%; width: 260px; height: 180px; translate: 0 -50%; pointer-events: none; background: radial-gradient(50% 50% at 30% 50%, color-mix(in srgb, var(--firma-licht) 55%, transparent), color-mix(in srgb, var(--firma-tief) 45%, transparent) 40%, transparent 72%); }
+.ez-route__stelle--ziel::before { content: ""; position: absolute; z-index: -1; left: -60px; top: 50%; width: 260px; height: 180px; translate: 0 -50%; pointer-events: none; background: radial-gradient(50% 50% at 30% 50%, color-mix(in srgb, var(--firma-licht) 50%, transparent), color-mix(in srgb, var(--firma) 30%, transparent) 30%, color-mix(in srgb, var(--firma-tief) 40%, transparent) 50%, transparent 70%); }
 .ez-route__text { display: grid; gap: 3px; min-width: 0; }
 .ez-route__text b { font: 500 18px/1.2 var(--font-sans); letter-spacing: -.01em; color: var(--weiss); }
 .ez-route__text > span { font: 400 14px/1.4 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
@@ -380,20 +405,29 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 /* ---------- Szene 5: Kontakt (dunkel) und Fuß ---------- */
 .ez-abschnitt--kontakt { padding-bottom: var(--raum-6); }
 .ez-kontakt { position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: start; gap: var(--raum-4); padding: var(--raum-5); border-radius: var(--rund-l); color: var(--tinte); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante); }
-@media (min-width: 900px) { .ez-kontakt { padding: var(--raum-6); } }
-.ez-kontakt__schein { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(52% 60% at 92% 0%, var(--firma-licht), color-mix(in srgb, var(--firma-licht) 42%, transparent) 34%, transparent 72%), radial-gradient(40% 46% at 0% 100%, var(--firma-tief), transparent 72%); }
+@media (min-width: 900px) { .ez-kontakt { padding: var(--raum-6); } .ez-kontakt__held-text b { font-size: 48px; } }
+.ez-kontakt__schein { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(52% 60% at 92% 0%, var(--firma-kern), var(--firma-licht) 8%, color-mix(in srgb, var(--firma) 55%, transparent) 30%, color-mix(in srgb, var(--firma-tief) 60%, transparent) 50%, transparent 70%); }
 .ez-kontakt__betrieb { display: flex; align-items: center; gap: 14px; }
 .ez-kontakt__betrieb > span:last-child { display: grid; gap: 4px; min-width: 0; }
-.ez-kontakt__betrieb b { font: 500 18px/1.15 var(--font-sans); letter-spacing: -.015em; overflow-wrap: anywhere; }
-.ez-kontakt__betrieb span span { font: 400 14px/1.3 var(--font-sans); color: var(--tinte-2); }
+.ez-kontakt__betrieb b { font: 500 16px/1.15 var(--font-sans); letter-spacing: -.01em; overflow-wrap: anywhere; }
+.ez-kontakt__betrieb span span { font: 400 13px/1.3 var(--font-sans); color: var(--tinte-2); }
+/* Innenkarte (G8): Schwarz, Radius 20, die Nummer als Held, der weiße Rundknopf ist die Aktion */
+.ez-kontakt__held { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: 14px 14px 14px 18px; border-radius: var(--rund-m); background: var(--schwarz); color: var(--tinte); text-decoration: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.04); transition: transform 220ms var(--dna-druck); }
+.ez-kontakt__held:active { transform: scale(.985); transition-duration: 0s; }
+.ez-kontakt__held:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
+.ez-kontakt__held-text { display: grid; gap: 6px; min-width: 0; }
+.ez-kontakt__held-text small { font: 400 12px/1 var(--font-sans); letter-spacing: .03em; color: var(--tinte-2); }
+.ez-kontakt__held-text b { font: 250 clamp(36px, 10vw, 44px)/1 var(--font-sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ez-kontakt__held-knopf { width: 44px; height: 44px; color: var(--schwarz); background: var(--weiss); transition: transform 220ms var(--dna-druck); }
+.ez-kontakt__held-knopf svg { width: 20px; height: 20px; }
 .ez-kontakt__daten { margin: 0; display: grid; gap: 8px; }
-.ez-kontakt__daten .ez-kontakt__held { grid-template-columns: minmax(0, 1fr); gap: 6px; margin-bottom: 6px; }
-.ez-kontakt__daten .ez-kontakt__held dd { font: 300 32px/1 var(--font-sans); letter-spacing: -.02em; color: var(--tinte); }
-.ez-kontakt__daten div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: baseline; }
-.ez-kontakt__daten dt { font: 400 12px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--tinte-2); }
-.ez-kontakt__daten dd { margin: 0; font: 400 14px/1.4 var(--font-sans); color: var(--tinte-2); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; user-select: text; }
+.ez-kontakt__daten div { display: flex; flex-wrap: wrap; gap: 0 6px; align-items: baseline; }
+.ez-kontakt__daten dt { font: 400 13px/1.4 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2); }
+.ez-kontakt__daten dt::after { content: " —"; }
+.ez-kontakt__daten dd { margin: 0; font: 400 15px/1.4 var(--font-sans); color: var(--tinte); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; user-select: text; }
+.ez-kontakt__daten dd a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; text-decoration-color: var(--silbergrau); display: inline-block; padding-block: 12px; margin-block: -12px; }
 .ez-kontakt__wege { list-style: none; margin: 4px 0 0; padding: 0; display: flex; gap: 22px; }
-.ez-kontakt__wege a { display: grid; justify-items: center; gap: 8px; min-width: 52px; color: var(--tinte); text-decoration: none; font: 500 13px/1 var(--font-sans); }
+.ez-kontakt__wege a { display: grid; justify-items: center; gap: 8px; min-width: 52px; color: var(--tinte-2); text-decoration: none; font: 400 12px/1 var(--font-sans); letter-spacing: .03em; }
 .ez-kontakt__wege .dna-rund-knopf { width: 52px; height: 52px; background: radial-gradient(at 30% 20%, rgba(255,255,255,.14), rgba(255,255,255,.03) 70%), transparent; box-shadow: inset 0 0 0 1.5px var(--silbergrau), inset 0 1px 0 rgba(255,255,255,.2); color: var(--weiss); transition: background-color 220ms ease, box-shadow 220ms ease, transform 220ms var(--dna-druck); }
 .ez-kontakt__wege .dna-rund-knopf svg { width: 20px; height: 20px; }
 .ez-kontakt__wege a:active .dna-rund-knopf { transform: scale(.94); transition-duration: 0s; }
@@ -404,7 +438,11 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fuss__satz { margin: 0; max-width: 56ch; font: 400 14px/1.55 var(--font-sans); color: var(--tinte-2); }
 .ez-fuss__recht { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px 24px; flex-wrap: wrap; }
 .ez-fuss__recht a { display: inline-block; padding-block: 15px; color: var(--tinte-2); font: 400 14px/1 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.ez-fuss__kz { margin: 0; font: 400 13px/1.5 var(--font-sans); color: var(--tinte-2); }
+.ez-fuss__kz { position: relative; margin: 20px 0 0; font: 400 13px/1.5 var(--font-sans); color: var(--tinte-2); }
+.dna-label .ez-label__wert { font-style: normal; color: var(--tinte); }
+/* Rückmeldung in der Vorlage: Knöpfe ohne Ziel sagen, dass das Ziel der Betrieb setzt */
+.ez-toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); z-index: 50; translate: -50% 0; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: var(--rund-pille); background: rgba(32,32,34,.94); color: var(--weiss); font: 500 13px/1.3 var(--font-sans); text-align: center; border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 10px 30px -10px rgba(0,0,0,.6); opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity 160ms ease, transform 160ms ease, visibility 0s linear 160ms; pointer-events: none; }
+.ez-toast.ist-da { opacity: 1; visibility: visible; transform: none; transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt), visibility 0s; }
 
 /* ---------- Ruhig ---------- */
-@media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .ez-leiste, .ez-muster, .ez-toast { transition: none; } }

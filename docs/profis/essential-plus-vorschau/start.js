@@ -52,7 +52,7 @@
   var schalter = d.getElementById('muster-schalter'), wurzel = d.querySelector('.ez');
   if (schalter && wurzel) {
     var setze = function (an) { wurzel.classList.toggle('ist-muster', an); schalter.setAttribute('aria-pressed', an ? 'true' : 'false'); };
-    try { if (w.localStorage.getItem('ez-muster') === 'aus') setze(false); } catch (e) {}
+    try { if (w.localStorage.getItem('ez-muster') === 'an') setze(true); } catch (e) {}
     schalter.addEventListener('click', function () {
       var an = schalter.getAttribute('aria-pressed') !== 'true';
       setze(an);
@@ -63,10 +63,16 @@
   /* Safari auf iOS setzt :active (Druckfeedback) nur mit einem Lauscher für touchstart */
   d.addEventListener('touchstart', function () {}, { passive: true });
 
-  /* Knöpfe ohne Ziel (Vorlage): kein Sprung an den Seitenanfang */
+  /* Knöpfe ohne Ziel (Vorlage): kein Sprung an den Seitenanfang, dafür eine kurze Rückmeldung (220 ms auf, 160 ms ab, 1,8 s) */
+  var toast = d.querySelector('.ez-toast'), toastUhr;
   d.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('a[href="#"]') : null;
-    if (a) e.preventDefault();
+    if (!a) return;
+    e.preventDefault();
+    if (!toast) return;
+    toast.textContent = 'Muster: Das Ziel setzt der Betrieb. Im echten Konfigurator geht es hier weiter.';
+    toast.classList.add('ist-da'); clearTimeout(toastUhr);
+    toastUhr = setTimeout(function () { toast.classList.remove('ist-da'); }, 1800);
   });
 
   /* Fokus unter dem Vorhang: liegt das fokussierte Element verdeckt, in die Mitte holen (WCAG 2.4.11) */

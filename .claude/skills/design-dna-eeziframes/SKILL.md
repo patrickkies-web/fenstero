@@ -58,6 +58,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Kürzere Entscheidungsfindung (Korrektur des Inhabers, 26.10.2026): Gremium eine Runde, danach nur die Muss-Punkte und Vetos umsetzen;
   Detail-Profis und Vorlagen-Abgleich entfallen, sofern er sie nicht nennt. Ihre Befunde bleiben als Kann-Liste im Protokoll. Die Vorlage
   beim Inhaber: Vorschau, drei Sätze je Gruppe, Muss-Liste, fertig.
+- Vorbilder sind nur die DNA-Seiten der Hauptseite (Korrektur des Inhabers, 26.10.2026, Essential Plus): „Startseite für Fensterbauer“
+  heißt die Seite für Fensterbauer auf eeziframes.com (/#fensterbauer, /fuer-fensterbauer/, Fassung vom 26.10.2026), nicht die alte
+  Demo-Instanz mit den Waschbären (web/bilder/beispiel/). Alte Instanz-Bilder liefern höchstens Fakten (Name, Farbe), nie Gestaltung.
+- Muster-Landingpages der Pakete (Essential, Essential Plus; 26.10.2026): eine Leiste über der Seite mit dem Schalter „Zeigen, was Ihres
+  ist“ (Standard aus) markiert für Fensterbauer, was zum Paket gehört; Kunden sehen weder Etiketten noch leere Fotoplätze. Beispielbetrieb
+  Fensterbau Brandt, Köln, Gold #d8ad55; nichts erfinden, Fotoplätze ohne Foto nur in der Muster-Ebene. Protokoll docs/profis/2026-10-26-essential-plus.md.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
