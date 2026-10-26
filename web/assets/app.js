@@ -438,7 +438,7 @@ const GLOSS = {
   'element-hoehe': { s: 'Element senkrecht', t: 'Wie messe ich das Fensterelement senkrecht?', x: ['Das Element ist dein bestehendes Fenster samt Rahmen. Senkrecht misst du es in der Mitte, von der Oberkante bis zur Unterkante des Rahmens, so weit du ihn siehst.', 'Bei einer Tür gilt dasselbe bis hinunter auf die Schwelle. Rollladenkasten, Fensterbank und Putz gehören nicht dazu.'], tipp: 'Verdeckt Putz oder eine Leiste einen Teil des Rahmens, miss bis zur sichtbaren Kante und schreib es in die Notiz. Den Rest klärt das Feinaufmaß.', ico: () => massIco('eh'), see: ['oeffnung-hoehe', 'blendrahmen', 'rahmenmass'] },
   'oeffnung-breite': { s: 'Öffnung waagerecht', t: 'Wie messe ich die Maueröffnung waagerecht?', x: ['Waagerecht misst du die Öffnung auf halber Höhe: von der linken Laibung bis zur rechten, also von Wand zu Wand.', 'Liegen dort Fliesen oder eine Verkleidung, zählt die fertige Oberfläche. Halte den Zollstock gerade, nicht schräg nach oben oder unten.'], tipp: 'Reicht der Zollstock nicht, miss das letzte Stück mit einem zweiten Zollstock oder einem Maßband und zähl beide Werte zusammen.', ico: () => massIco('ob'), see: ['element-breite', 'raender', 'laibung'] },
   'element-breite': { s: 'Element waagerecht', t: 'Wie messe ich das Fensterelement waagerecht?', x: ['Das Element misst du auf halber Höhe von der linken bis zur rechten sichtbaren Außenkante des Rahmens. Bei zwei oder drei Flügeln gehört alles dazu, auch die Pfosten dazwischen.', 'Das Maß ist meist ein paar Zentimeter kleiner als die Öffnung. Ist es größer, hast du die Öffnung wahrscheinlich am Rahmen statt an der Laibung gemessen.'], tipp: 'Die App warnt dich, wenn das Element größer ist als die Öffnung oder auffällig klein. Dann lohnt ein zweiter Blick mit dem Zollstock.', ico: () => massIco('eb'), see: ['oeffnung-breite', 'pfosten', 'rahmenmass'] },
-  raender: { s: 'Ränder', t: 'Warum messe ich auch die Ränder?', x: ['Kaum eine Öffnung ist ganz gerade. Darum misst du die Höhe zusätzlich dicht an der linken und an der rechten Laibung, die Breite dicht unter der Oberkante und dicht über der Fensterbank.', 'Von den drei Maßen je Richtung zählt das kleinste, so wie es der Fensterbauer auch macht. Weichen die Werte stark ab, ist die Öffnung außer Winkel, und er plant dafür etwas mehr Fuge ein.'], tipp: 'Sind die Ränder wie die Mitte, tippst du einfach auf „Wie Mitte“. Abweichungen ab etwa einem Zentimeter bitte genau eintragen.', ico: () => massIco('raender'), see: ['oeffnung-hoehe', 'oeffnung-breite', 'referenz'] },
+  raender: { s: 'Ränder', t: 'Warum messe ich auch die Ränder?', x: ['Kaum eine Öffnung ist ganz gerade. Darum misst du die Höhe zusätzlich dicht an der linken und an der rechten Laibung, die Breite dicht unter der Oberkante und dicht über der Fensterbank.', 'Von den drei Maßen je Richtung zählt das kleinste, so wie es der Fensterbauer auch macht. Weichen die Werte stark ab, ist die Öffnung außer Winkel, und er plant dafür etwas mehr Fuge ein.'], tipp: 'Miss jeden Rand wirklich. Zeigt der Zollstock dasselbe wie in der Mitte, tippst du auf „Hier auch … gemessen?“. Abweichungen ab einem Millimeter bitte genau eintragen, genau die braucht dein Fensterbauer.', ico: () => massIco('raender'), see: ['oeffnung-hoehe', 'oeffnung-breite', 'referenz'] },
   laibung: { s: 'Laibung', t: 'Was ist die Laibung?', x: ['Die Laibung ist die seitliche Wandfläche in der Fensteröffnung, also die Tiefe der Wand rund um das Fenster. Innen heißt sie Innenlaibung, außen Außenlaibung.', 'Ihre Tiefe misst du innen vom Fensterrahmen bis zur Wandoberfläche im Raum. Sie bestimmt zum Beispiel, wie tief die neue Fensterbank wird und wie viel nach dem Einbau verputzt werden muss.'], tipp: 'Kennst du die Tiefe nicht, lass das Feld leer. Die KI schätzt sie aus dem Innenfoto, und beim Feinaufmaß wird sie ohnehin gemessen.', ico: () => [...ICO.anschlag('ohne'), P(L([6, 56], [20, 56]), 'none', G_MO, 1.6), P(L([6, 53], [6, 59]), 'none', G_MO, 1.4), P(L([20, 53], [20, 59]), 'none', G_MO, 1.4)], see: ['anschlag', 'beiputz', 'fensterbank'] },
   anschlag: { s: 'Maueranschlag', t: 'Was ist ein Maueranschlag?', x: ['Bei manchen Häusern steht das Mauerwerk ein paar Zentimeter vor dem Fensterrahmen, innen oder außen. Dann ist der Rahmen größer als die Öffnung, die du siehst.', 'Ohne Anschlag ist die Laibung glatt und das Fenster sitzt einfach in der Öffnung. Für die Bestellung ist das ein wichtiger Unterschied.'], tipp: 'Ob ein Anschlag da ist, sieht dein Fensterbauer meist auf dem Außenfoto. Du musst ihn nicht selbst bestimmen.', ico: () => ICO.anschlag('aussen'), see: ['laibung', 'rahmenmass'] },
   bruestung: { s: 'Brüstungshöhe', t: 'Was ist die Brüstungshöhe?', x: ['Die Brüstungshöhe ist der Abstand vom fertigen Fußboden bis zur Unterkante der Fensteröffnung, also bis zur Fensterbank. Gemessen wird innen, vom Boden, auf dem du stehst.', 'Sie ist wichtig für die Sicherheit: Liegt die Brüstung im Obergeschoss unter 80 cm, braucht das Fenster meist eine Absturzsicherung. Bei bodentiefen Fenstern ist die Brüstung null.'], tipp: 'Kommt noch ein neuer Bodenbelag, wird die Brüstung um dessen Dicke niedriger. Schreib das in die Notiz.', ico: () => [P(R(4, 58, 56, 3), INK), P(R(16, 6, 28, 30, 1), FR, INK, 1.3), P(R(19, 9, 22, 24), GL, INK, 0.6), P(L([52, 37], [52, 57]), 'none', G_MO, 1.6), P(L([49, 37], [55, 37]), 'none', G_MO, 1.4), P(L([49, 57], [55, 57]), 'none', G_MO, 1.4)], see: ['absturz', 'rahmenmass'] },
@@ -831,16 +831,16 @@ const stepsFor = (w) => (w && w.neu ? STEPS_NEU : STEPS_ERSATZ);
 const STEPNAME = { start: 'Start', zeichnen: 'Einzeichnen', planmasse: 'Maße', fotos: 'Fotos', messen: 'Messen', rest: 'Ränder', ergebnis: 'Ergebnis', typ: 'Fenster', sprossen: 'Sprossen', farbe: 'Farbe & Glas', extras: 'Extras' };
 /* Die vier geführten Messungen, dann die vier restlichen am Foto */
 const MESS = [
-  { k: 'hm', g: 'oeffnung-hoehe', who: 'mo', dir: 'v', title: 'Maueröffnung senkrecht', short: 'Öffnung · Höhe Mitte', text: 'Miss die sichtbare Maueröffnung senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank. Den Zollstock an die Laibung halten, nicht an den Rahmen.' },
-  { k: 'h', g: 'element-hoehe', who: 'el', dir: 'v', title: 'Fensterelement senkrecht', short: 'Fenster · Höhe Mitte', text: 'Jetzt das Fenster selbst, senkrecht in der Mitte: alles, was vom Fenster samt Rahmen zu sehen ist, von Oberkante bis Unterkante.' },
-  { k: 'wm', g: 'oeffnung-breite', who: 'mo', dir: 'h', title: 'Maueröffnung waagerecht', short: 'Öffnung · Breite Mitte', text: 'Die Maueröffnung waagerecht in der Mitte: von Laibung zu Laibung, auf halber Höhe.' },
-  { k: 'w', g: 'element-breite', who: 'el', dir: 'h', title: 'Fensterelement waagerecht', short: 'Fenster · Breite Mitte', text: 'Das Fenster samt Rahmen waagerecht in der Mitte: von der linken bis zur rechten sichtbaren Rahmenkante.' }
+  { k: 'hm', g: 'oeffnung-hoehe', who: 'mo', dir: 'v', title: 'Maueröffnung senkrecht', short: 'Öffnung · Höhe Mitte', text: 'Miss die sichtbare Maueröffnung senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank. Den Zollstock an die Laibung halten, nicht an den Rahmen.', sub: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank.', subTuer: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zum fertigen Fußboden.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'], chip: 'nicht' },
+  { k: 'h', g: 'element-hoehe', who: 'el', dir: 'v', title: 'Fensterelement senkrecht', short: 'Fenster · Höhe Mitte', text: 'Jetzt das Fenster selbst, senkrecht in der Mitte: alles, was vom Fenster samt Rahmen zu sehen ist, von Oberkante bis Unterkante.', sub: 'Senkrecht in der Mitte: der feste Rahmen, von seiner Außenkante oben bis unten.', subTuer: 'Senkrecht in der Mitte: der feste Rahmen samt Schwelle, von Außenkante oben bis unten.', enden: ['Rahmen außen', 'Rahmen außen'], endenTuer: ['Rahmen außen', 'Unterkante Schwelle'], chip: 'samt' },
+  { k: 'wm', g: 'oeffnung-breite', who: 'mo', dir: 'h', title: 'Maueröffnung waagerecht', short: 'Öffnung · Breite Mitte', text: 'Die Maueröffnung waagerecht in der Mitte: von Laibung zu Laibung, auf halber Höhe.', sub: 'Von innen, waagerecht auf halber Höhe: von Mauer zu Mauer.', enden: ['Mauer', 'Mauer'], chip: 'nicht' },
+  { k: 'w', g: 'element-breite', who: 'el', dir: 'h', title: 'Fensterelement waagerecht', short: 'Fenster · Breite Mitte', text: 'Das Fenster samt Rahmen waagerecht in der Mitte: von der linken bis zur rechten sichtbaren Rahmenkante.', sub: 'Waagerecht auf halber Höhe: der feste Rahmen, von Außenkante zu Außenkante.', enden: ['Rahmen außen', 'Rahmen außen'], chip: 'samt' }
 ];
 const REST = [
-  { k: 'hl', edge: 'l', title: 'Höhe links', text: 'Maueröffnung senkrecht, dicht an der linken Laibung. Alte Häuser sind selten im Winkel, deshalb lohnt der Blick.' },
-  { k: 'hr', edge: 'r', title: 'Höhe rechts', text: 'Maueröffnung senkrecht, dicht an der rechten Laibung.' },
-  { k: 'wt', edge: 't', title: 'Breite oben', text: 'Maueröffnung waagerecht, dicht unter der Oberkante der Öffnung.' },
-  { k: 'wb', edge: 'b', title: 'Breite unten', text: 'Maueröffnung waagerecht, dicht über der Fensterbank.' }
+  { k: 'hl', edge: 'l', title: 'Höhe links', text: 'Maueröffnung senkrecht, dicht an der linken Laibung. Alte Häuser sind selten im Winkel, deshalb lohnt der Blick.', sub: 'Senkrecht, dicht an der linken Mauer. Alte Häuser sind selten im Winkel.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'] },
+  { k: 'hr', edge: 'r', title: 'Höhe rechts', text: 'Maueröffnung senkrecht, dicht an der rechten Laibung.', sub: 'Senkrecht, dicht an der rechten Mauer.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'] },
+  { k: 'wt', edge: 't', title: 'Breite oben', text: 'Maueröffnung waagerecht, dicht unter der Oberkante der Öffnung.', sub: 'Waagerecht, dicht unter der Oberkante der Öffnung.', enden: ['Mauer', 'Mauer'] },
+  { k: 'wb', edge: 'b', title: 'Breite unten', text: 'Maueröffnung waagerecht, dicht über der Fensterbank.', sub: 'Waagerecht, dicht über der Fensterbank.', enden: ['Mauer', 'Mauer'] }
 ];
 /* Prüfungen beim Eintippen */
 function checkValue(mm, step, vals) {
@@ -850,17 +850,17 @@ function checkValue(mm, step, vals) {
   if (v < 250 || v > 6000) return { ok: false, msg: 'Das passt nicht zu einem Fenster. Bitte in Millimetern messen, zum Beispiel 1.230.' };
   if (step && step.who === 'el') {
     const o = num(step.dir === 'v' ? vals.hm : vals.wm);
-    if (o && v > o + 30) return { ok: true, warn: 'Das Fensterelement ist größer als die Maueröffnung (' + thousand(o) + ' mm). Hast du die Öffnung vielleicht am Rahmen statt an der Laibung gemessen?' };
-    if (o && v < o * 0.6) return { ok: true, warn: 'Das Fenster wirkt sehr klein für diese Öffnung. Miss das Element bis zur äußeren sichtbaren Rahmenkante.' };
+    if (o && v > o + 30) return { ok: true, warn: 'Größer als die Öffnung (' + thousand(o) + ' mm). Die Öffnung an der Mauer messen, nicht am Rahmen.' };
+    if (o && v < o * 0.6) return { ok: true, warn: 'Sehr klein für diese Öffnung. Bis zur Außenkante des Rahmens messen.' };
   }
   return { ok: true };
 }
 function checkRest(mm, ref) {
   const v = num(mm), r = num(ref);
-  if (!v) return { ok: false, msg: 'Bitte das Maß eintragen oder „Wie Mitte“ wählen.' };
+  if (!v) return { ok: false, msg: 'Bitte das Maß eintragen oder „Hier auch … gemessen?“ antippen.' };
   if (v < 250 && v * 10 >= 250 && v * 10 <= 6000) return { ok: false, cm: v * 10, msg: 'Meintest du ' + v + ' cm? Das wären ' + thousand(v * 10) + ' mm.' };
   if (v < 250 || v > 6000) return { ok: false, msg: 'Das passt nicht zu einem Fenster. Bitte in Millimetern messen.' };
-  if (r && Math.abs(v - r) > 60) return { ok: true, warn: 'Das weicht ' + Math.abs(v - r) + ' mm vom Mittelmaß ab. Bei alten Häusern kommt das vor, bitte einmal nachmessen.' };
+  if (r && Math.abs(v - r) > 60) return { ok: true, warn: Math.abs(v - r) + ' mm anders als in der Mitte. Bitte einmal nachmessen.' };
   return { ok: true };
 }
 
@@ -1297,6 +1297,68 @@ function w3dHTML(w, o) {
   return h + '</div>';
 }
 const dimHTML = (k, active) => '<div class="w3d-dim ' + (k[0] === 'e' ? 'el' : 'mo') + (active ? ' is-active' : '') + '" data-r="dim-' + k + '" data-dim="' + k + '"><span class="w3d-dim-line"></span><span class="w3d-dim-cap a"></span><span class="w3d-dim-cap b"></span><span class="w3d-dim-lab" data-r="lab-' + k + '"></span></div>';
+/* Feld und Enden der aktiven Maßlinie liegen flach über dem Modell (.w3d-feldlage), nicht im Raum: so verdeckt sie keine Wand, kein Boden
+   und keine Laibung, und die Schrift bleibt scharf. Ihre Lage folgt Bild für Bild den Endkappen der Linie (Schwingen, Drehen, Wechsel
+   zum nächsten Maß). an: m mittig, l/r links/rechts neben einer senkrechten Linie, o/u über/unter einer waagerechten. */
+function feldLage(stage, o, an) {
+  let L = stage.querySelector('.w3d-feldlage');
+  const k = o.active, who = k[0] === 'e' ? 'el' : 'mo', fh = feldHTML(o.feld), en = o.enden || ['', ''];
+  if (!L) { stage.insertAdjacentHTML('beforeend', '<div class="w3d-feldlage" aria-hidden="true"><div class="mu-feld"></div><span class="mu-ende a"></span><span class="mu-ende b"></span></div>'); L = stage.querySelector('.w3d-feldlage'); }
+  L.className = 'w3d-feldlage ' + who + ' an-' + an; L._k = k; L._an = an;
+  const f = L.querySelector('.mu-feld'); if (f._h !== fh) { f._h = fh; f.innerHTML = fh; f.classList.toggle('leer', !o.feld.v); }
+  L.querySelectorAll('.mu-ende').forEach((e, i) => { if (e.textContent !== en[i]) e.textContent = en[i]; });
+  feldFolgen(stage);
+}
+function feldFolgen(stage) {
+  if (stage._folgt) return; stage._folgt = true;
+  let alt = '';
+  const schritt = () => {
+    const L = stage.querySelector('.w3d-feldlage');
+    if (!L || !document.body.contains(stage)) { stage._folgt = false; return; }
+    const d = stage.querySelector('[data-r="dim-' + L._k + '"]'), ca = d && d.querySelector('.w3d-dim-cap.a'), cb = d && d.querySelector('.w3d-dim-cap.b');
+    if (ca && cb) {
+      const r = stage.getBoundingClientRect(), A = ca.getBoundingClientRect(), B = cb.getBoundingClientRect();
+      const ax = A.left + A.width / 2 - r.left, ay = A.top + A.height / 2 - r.top, bx = B.left + B.width / 2 - r.left, by = B.top + B.height / 2 - r.top;
+      const sig = [ax, ay, bx, by, r.width, r.height].map(Math.round).join(',') + L._an + L.querySelector('.mu-feld')._h;
+      if (sig !== alt) { alt = sig; feldSetzen(L, r.width, r.height, ax, ay, bx, by, d.classList.contains('v')); }
+    }
+    requestAnimationFrame(schritt);
+  };
+  requestAnimationFrame(schritt);
+}
+function feldSetzen(L, W, H, ax, ay, bx, by, vert) {
+  const f = L.querySelector('.mu-feld'), ea = L.querySelector('.mu-ende.a'), eb = L.querySelector('.mu-ende.b'), an = L._an, rand = 8;
+  const fw = f.offsetWidth, fh = f.offsetHeight, wa = ea.offsetWidth, ha = ea.offsetHeight, wb = eb.offsetWidth, hb = eb.offsetHeight;
+  const mx = (ax + bx) / 2, my = (ay + by) / 2, lim = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const setz = (e, x, y, w, h) => { e.style.transform = 'translate(' + Math.round(lim(x, rand, W - w - rand)) + 'px, ' + Math.round(lim(y, rand, H - h - rand)) + 'px)'; };
+  if (vert) {
+    /* Feld mittig auf der Linie, bei den Rändern 8 px daneben zur Öffnung hin; Enden rechts neben den Endkappen (beim rechten Rand links) */
+    const fx = an === 'r' ? mx + 8 : an === 'l' ? mx - 8 - fw : mx - fw / 2;
+    setz(f, fx, my - fh / 2, fw, fh);
+    const links = an === 'l'; eb.style.visibility = '';
+    setz(ea, links ? ax - 16 - wa : ax + 16, ay - ha / 2, wa, ha); setz(eb, links ? bx - 16 - wb : bx + 16, by - hb / 2, wb, hb);
+  } else {
+    /* Feld über der Linie (beim Rand oben 24 px darunter, damit es den Rahmen nicht verdeckt); Enden außen vor den Endkappen auf
+       Linienhöhe, wenn dort Platz ist, sonst unter (beim Rand oben über) der Linie an den Enden */
+    setz(f, mx - fw / 2, an === 'u' ? my + 24 : my - 14 - fh, fw, fh);
+    const oben = an === 'u', aAus = ax - 10 - wa >= rand, bAus = bx + 10 + wb <= W - rand;
+    /* Passen beide nicht außen hin und stoßen an der Linie zusammen, steht das Etikett einmal mittig (die Enden heißen gleich) */
+    const eins = !aAus && !bAus && ax + wa + 8 > bx - wb && ea.textContent === eb.textContent;
+    eb.style.visibility = eins ? 'hidden' : '';
+    if (eins) setz(ea, mx - wa / 2, oben ? my - 16 - ha : my + 16, wa, ha);
+    else {
+      if (aAus) setz(ea, ax - 10 - wa, ay - ha / 2, wa, ha); else setz(ea, ax, oben ? ay - 16 - ha : ay + 16, wa, ha);
+      if (bAus) setz(eb, bx + 10, by - hb / 2, wb, hb); else setz(eb, bx - wb, oben ? by - 16 - hb : by + 16, wb, hb);
+    }
+  }
+  L.classList.add('steht');
+}
+/* Eingabefeld auf der aktiven Maßlinie (o.feld, Messen und Ränder): leer mit Beispiel, sonst der Wert groß in mm und darunter in cm */
+function feldHTML(f) {
+  const v = num(f.v);
+  if (!f.v) return '<span class="fd-zeile"><span class="fd-caret" aria-hidden="true"></span><span class="fd-ph">z. B. ' + esc(thousand(f.ph || 1250)) + '</span><span class="fd-u">mm</span></span>';
+  return '<span class="fd-zeile"><span class="fd-wert">' + esc(thousand(v)) + '</span><span class="fd-u">mm</span></span><span class="fd-cm">' + (v >= 250 && v <= 6000 ? '= ' + String(Math.round(v) / 10).replace('.', ',') + ' cm' : '&nbsp;') + '</span>';
+}
 function symPaths(w, x) {
   if (x.t === 'X') return '';
   if (x.t === 'PS') return symPaths(w, { t: 'S', din: x.din }) + symPaths(w, { t: 'K', din: x.din });
@@ -1439,6 +1501,11 @@ function w3dOberflaeche(stage, w, fin, fout) {
   const aluBl = aufsatz && dg(w, 'blende') && w.blende === 'alu';
   if (!(sonneAktiv(w) && w.roll === 'vorbau')) { setz('roll-f', aufsatz && !aluBl ? FASSADE_ART[w.fassade] || 'putz' : '', null, null, aufsatz && !aluBl ? fassadeArtC(w) : ''); setz('roll-b', aufsatz ? 'putzfein' : ''); } // der Vorbaukasten behält sein Aluminium
 }
+function w3dUeber(stage, html) {
+  let ueber = stage.querySelector('[data-r="ueber"]');
+  if (html) { if (!ueber) { stage.insertAdjacentHTML('beforeend', '<div class="w3d-ueber" data-r="ueber"></div>'); ueber = stage.querySelector('[data-r="ueber"]'); } if (ueber._h !== html) { ueber._h = html; ueber.innerHTML = html; } }
+  else if (ueber) ueber.remove();
+}
 /* Maßlinien nachziehen: fehlende anlegen, überzählige entfernen */
 function ensureDims(stage, o) {
   const world = stage.querySelector('.w3d-world'), want = o.dims || [];
@@ -1453,6 +1520,9 @@ function w3dApply(stage, w, o) {
   stage.classList.toggle('is-live', !!o.sway); stage.classList.toggle('show-sym', !!o.symbols); stage.classList.toggle('dims-all', !!(o.cls && o.cls.indexOf('dims-all') >= 0));
   stage.setAttribute('data-view', o.view || 'inside');
   const hint = stage.querySelector('[data-r="hint"]'); if (hint) { hint.textContent = o.hint || ''; hint.hidden = !o.hint; }
+  /* Ebene über dem Modell (o.ueber, beim Messen: Hinweis am Rand und Rückfrage); bleibt erhalten, wenn die Bühne wiederverwendet wird */
+  w3dUeber(stage, o.ueber);
+  if (!o.feld) { const fl = stage.querySelector('.w3d-feldlage'); if (fl) fl.remove(); }
   let lupe = stage.querySelector('[data-r="lupe"]');
   if (o.lupe) { const key = glasLupeKey(w); if (!lupe) { stage.insertAdjacentHTML('beforeend', '<div class="w3d-lupe" data-r="lupe"></div>'); lupe = stage.querySelector('[data-r="lupe"]'); } if (lupe.getAttribute('data-k') !== key) { lupe.innerHTML = glasLupe(w); lupe.setAttribute('data-k', key); if (window.Feier) window.Feier.einrasten(lupe); } }
   else if (lupe) lupe.remove();
@@ -1741,6 +1811,12 @@ function w3dLayout(stage, w, o, gr) {
     if (DIM.hm && !weg.hm && an.hm == null && an.hl) ohne.hm = 1;
     if (DIM.wm && !weg.wm && an.wm == null && an.wt) ohne.wm = 1;
   }
+  /* Messen mit Feld (o.feld): nur die aktive Linie steht im Modell, die Linien des Elements laufen durch seine Mitte; das Feld sitzt auf
+     senkrechten Linien mittig (an den Rändern zur Öffnung hin), auf waagerechten darüber wie die Maßzahl einer Zeichnung, die Enden
+     stehen als Etiketten daneben bzw. darunter */
+  const feld = o.feld && V.active ? o.feld : null;
+  if (feld) { DIM.eh = ['v', x0 + elW / 2, y0, elH, z0 + 6, 50]; DIM.ew = ['h', x0, y0 + elH / 2, elW, z0 + 6, 50]; }
+  const FD_AN = { hl: 'r', hr: 'l', wm: 'o', wt: 'u', wb: 'o', ew: 'o' };
   (V.dims || []).forEach((k) => {
     const D = DIM[k], de = q('dim-' + k); if (!D || !de) return;
     const vert = D[0] === 'v';
@@ -1748,8 +1824,11 @@ function w3dLayout(stage, w, o, gr) {
     de.style.transform = 'translate3d(' + px(D[1]) + ', ' + px(D[2]) + ', ' + px(D[4]) + ')';
     de.classList.toggle('v', vert); de.classList.toggle('h', !vert); de.classList.toggle('is-weg', !!weg[k]); de.classList.toggle('ohne-schild', !!ohne[k]);
     ['l', 'r', 'o', 'u'].forEach((a) => de.classList.toggle('an-' + a, an[k] === a));
-    const lab = q('lab-' + k); if (lab) { lab.textContent = (o.labels && o.labels[k]) || '?'; if (vert) { lab.style.top = D[5] + '%'; lab.style.left = '0'; } else { lab.style.left = D[5] + '%'; lab.style.top = '0'; } }
+    const lab = q('lab-' + k), mitFeld = !!feld && k === V.active;
+    if (lab) { lab.textContent = mitFeld ? '' : (o.labels && o.labels[k]) || '?'; lab.classList.toggle('feld', mitFeld); if (vert) { lab.style.top = D[5] + '%'; lab.style.left = '0'; } else { lab.style.left = D[5] + '%'; lab.style.top = '0'; } }
+    de.classList.toggle('mit-feld', mitFeld);
   });
+  if (feld) feldLage(stage, o, FD_AN[V.active] || 'm');
   stage._v = { d: d, fd: fd, T: T, s: s, moW: moW, moH: moH };
   W3D_SOFORT = false;
   return V;
@@ -2155,7 +2234,7 @@ function bindW3D(stage, getOpts) {
     if (!rafId) rafId = requestAnimationFrame(() => { rafId = 0; const r = W3DS[stage.id]; stage.classList.add('is-zooming'); if (r) w3dLayout(stage, r.w, r.o); w3dZoomZeigen(stage); });
   };
   stage.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.rail, .w3d-ctl')) return;
+    if (e.target.closest('.rail, .w3d-ctl, .w3d-ueber button')) return;
     if (e.button != null && e.button > 0) return;
     const o = getOpts() || {}, view = VIEWS[stage.getAttribute('data-view') || 'inside'];
     ptr.set(e.pointerId, rel(e));
@@ -2636,6 +2715,8 @@ function render(fresh) {
   h += '</header>';
   const recht = !view.fit && view.html.indexOf('foot-links recht') < 0 ? rechtLinks() : '';
   const band = INST && INST.vorschau && !view.fit ? '<div class="inst-vorschau" role="note"><b>Vorschau</b> – noch nicht öffentlich. Was hier gesendet wird, ist eine Testanfrage.</div>' : '';
+  /* Die Leiste steht überall wie am Start: klein und mittig am Ende des Inhalts, nicht als Band am unteren Rand (inline: false hebt das auf) */
+  if (view.bar && view.bar.inline !== false) view.bar.inline = true;
   const barH = !view.bar ? '' : '<div class="bb' + (view.bar.inline ? ' bb-inline' : '') + '">' + (view.bar.zurueck ? '<button type="button" class="btn ghost bb-zurueck" data-act="back" aria-label="' + esc('Zurück' + (backLabel ? ': ' + backLabel : '')) + '">' + PFEIL_L + '</button>' : '') + (view.bar.sec ? '<button type="button" class="btn ghost" data-act="' + view.bar.secAct + '">' + esc(view.bar.sec) + '</button>' : '') + '<button type="button" class="btn ' + (view.bar.ghost ? 'ghost' : 'primary') + '" data-act="' + view.bar.act + '"' + (view.bar.v ? ' data-v="' + view.bar.v + '"' : '') + (view.bar.dis ? ' disabled' : '') + '>' + view.bar.label + '</button></div>';
   h += '<div class="scroll' + (view.fit ? ' fit' : '') + (view.bar && view.bar.inline ? ' leiste-inline' : '') + '" style="padding-top: ' + (wiz || tourP ? 56 : 52) + 'px"><div class="scr' + (view.fit ? ' fit' : '') + (view.cls ? ' ' + view.cls : '') + (S.dir === 'back' ? ' is-back' : '') + '" data-screen="' + S.screen + '">' + band + view.html + (view.bar && view.bar.inline ? barH : '') + recht + '</div></div>';
   if (view.bar && !view.bar.inline) h += barH;
@@ -2940,10 +3021,10 @@ SCREENS.start = () => {
   const altArt = lastScreen === 'start' ? stZuletzt : '', hop = altArt && altArt !== art ? (stRichtung || (stIdx(art) > stIdx(altArt) ? 1 : -1)) : 0;
   stZuletzt = art; stRichtung = 0;
   const html = hd('Schritt 1 von 6 · Start', 'Was planst du?', '', '', '', schrittTools('elementart')) +
-    startStelle(neu) + startBuehne(w, art, neu, hop) +
+    startBuehne(w, art, neu, hop) +
     '<div class="st-wahl' + (hop ? ' is-hop' : '') + '"><p class="st-name" aria-live="polite">' + esc(ST_NAME[art][0]) + '</p>' +
     '<p class="st-sub">' + esc(o.sub || '') + (g ? ' <button type="button" class="ulink" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Erklärung: ' + o.label) + '">Was ist das?</button>' : '') + '</p></div>' +
-    startReihe(w, art) +
+    startReihe(w, art) + startStelle(neu) +
     (neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung', 'st-note') : '');
   return { html: html, back: ['Aufmaß', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos', zurueck: true, inline: true } };
 };
@@ -3007,8 +3088,7 @@ SCREENS.fotos = () => {
   if (tilt != null) level = '<div class="level"><span class="bubble"><span style="animation: none; left: ' + Math.round(25 + Math.max(-20, Math.min(20, tilt * 4))) + 'px"></span></span><span>' + (Math.abs(tilt) <= 2.5 ? 'Dein Foto ist mit ' + String(Math.abs(tilt)).replace('.', ',') + '° fast waagerecht. Passt.' : 'Dein Foto ist etwa ' + String(Math.abs(tilt)).replace('.', ',') + '° schräg. Es geht, gerader wäre besser.') + '</span></div>';
   const kiNote = S.aiOk === false ? noteBox('Die KI-Auswertung der Fotos ist hier gerade nicht eingeschaltet. Das Aufmaß funktioniert trotzdem komplett, nur die Zusatzinfos aus den Fotos fehlen.', null, 'warn') : '';
   const html = hd('Schritt 2 von 6 · Fotos', neu ? 'Fotografiere die Stelle.' : 'Fotografiere ' + ding + '.', (neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll, mit etwas Platz drumherum. Danach zeichnest du es auf dem Foto ein.' : 'Einmal von innen, einmal von außen. Die KI liest daraus die Einbausituation für deinen Fensterbauer: Rollladenkasten, Laibung, Fensterbänke, Fassade. Du musst nichts eintippen.') + (p || S.photos.out ? ' Tipp ein Foto an, um es groß anzusehen.' : ''), '', '', schrittTools('einbausituation')) +
-    '<div class="tiles">' + photoTile('in') + photoTile('out') + '</div>' + level + kiNote +
-    (!p && !S.photos.out && !S.betrieb ? '<button type="button" class="link" style="align-self: center" data-act="tour-start">Nur mal ansehen? Führung mit Beispielfotos</button>' : '');
+    '<div class="tiles">' + photoTile('in') + photoTile('out') + '</div>' + level + kiNote;
   /* ohne Foto steht unten nur „Ohne Foto weiter“ (zweitrangig); mit dem ersten Foto wird daraus der Weg zum nächsten Schritt */
   const keins = !p && !S.photos.out;
   return { html: html, back: ['Start', 'start'], bar: keins ? { label: 'Ohne Foto weiter', act: 'ohne-foto', ghost: true, zurueck: true } : { label: neu ? 'Weiter zum Einzeichnen' : 'Weiter zum Messen', act: 'go', v: neu ? 'zeichnen' : 'messen', zurueck: true } };
@@ -3161,7 +3241,7 @@ SCREENS.planmasse = () => {
     '<div class="card"><p class="eyebrow">Wunschmaß Rohbauöffnung</p><div class="rows">' + row('Breite', 'w', d.moW, 50, 'rohbau') + row('Höhe', 'h', d.moH, 50, 'rohbau') + (tuer ? '' : row('Brüstungshöhe', 'bru', w.bru, 50, 'bruestung', 'Boden bis Unterkante Öffnung')) + row('Wandstärke', 'wand', w.wand, 10, 'wandstaerke', 'falls bekannt') + '</div>' +
     '<p class="sub">Das Element wird ' + FUGE + ' mm je Seite kleiner als die Öffnung: ' + thousand(d.elW) + ' × ' + thousand(d.elH) + ' mm.</p></div>' + warn +
     noteBox('Neue Öffnung in der Wand: Bei tragenden Wänden entscheidet die Statik über Sturz und Größe. Der Fachbetrieb bricht die Öffnung, setzt den Sturz und baut ein.', 'neuoeffnung');
-  return { html: html, back: planFoto() ? ['Einzeichnen', 'zeichnen'] : ['Fotos', 'fotos'], bar: { label: 'Weiter zum Ergebnis', act: 'go', v: 'ergebnis', zurueck: true } };
+  return { html: html, back: planFoto() ? ['Einzeichnen', 'zeichnen'] : ['Fotos', 'fotos'], bar: { label: 'Maße ansehen', act: 'go', v: 'ergebnis', zurueck: true } };
 };
 /* ---------- Messen: vier geführte Maße, das Modell wächst mit ---------- */
 const dimKey = (st) => (st.who === 'el' ? 'e' + st.k : st.k);
@@ -3177,15 +3257,63 @@ function messLabels(live) {
 const KEY_DEL = '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M9.5 6h11A1.5 1.5 0 0 1 22 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-11L3.5 13z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 10.5l5 5M17 10.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
 /* Zifferntasten: unten links „Zurück“ (Pfeil mit Wort: voriges Maß bzw. voriger Schritt), in der Mitte die 0, rechts Löschen; darunter „Weiter“ über die
    ganze Breite. Die Tasten sind bewusst kleiner als Knöpfe (42 px), damit das Modell mit der leuchtenden Messkante darüber groß bleibt */
-function keypad(okLabel, zurueck) {
+function keypad(okLabel, zurueck, aus) {
   return '<div class="keypad" role="group" aria-label="Zifferntasten">' + ['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => '<button type="button" data-act="key" data-v="' + d + '">' + d + '</button>').join('') +
-    '<button type="button" class="fn zur" data-act="key" data-v="zurueck" aria-label="' + esc(zurueck || 'Zurück') + '">' + PFEIL_L + '<span>Zurück</span></button><button type="button" data-act="key" data-v="0">0</button><button type="button" class="fn" data-act="key" data-v="del" aria-label="Letzte Ziffer löschen">' + KEY_DEL + '</button><button type="button" class="ok" data-act="key" data-v="ok">' + esc(okLabel || 'Weiter') + '</button></div>';
+    '<span class="kp-leer" aria-hidden="true"></span><button type="button" data-act="key" data-v="0">0</button><button type="button" class="fn" data-act="key" data-v="del" aria-label="Letzte Ziffer löschen">' + KEY_DEL + '</button>' +
+    '<div class="kp-leiste"><button type="button" class="kp-zurueck" data-act="key" data-v="zurueck" aria-label="' + esc(zurueck || 'Zurück') + '">' + PFEIL_L + '</button><button type="button" class="ok' + (aus ? ' aus' : '') + '" data-act="key" data-v="ok"' + (aus ? ' aria-disabled="true"' : '') + '>' + esc(okLabel || 'Weiter') + '</button></div></div>';
 }
+/* Weiter sieht gesperrt aus, solange kein Maß zwischen 250 und 6.000 mm dasteht; ein Tipp darauf sagt trotzdem, was fehlt */
+function okZustand(gut) { const b = document.querySelector('.keypad .ok'); if (!b) return; b.classList.toggle('aus', !gut); if (gut) b.removeAttribute('aria-disabled'); else b.setAttribute('aria-disabled', 'true'); }
 function numDisplay(cur, id) { return '<div class="num"><b id="' + id + '" class="' + (cur ? '' : 'empty') + '" aria-live="polite">' + (cur ? esc(thousand(cur)) : '0') + '</b><span class="cm" id="' + id + '-cm">' + cmTxt(cur) + '</span><span class="u">mm</span></div>'; }
 function setNum(id, cur) { const b = document.getElementById(id), cm = document.getElementById(id + '-cm'); if (b) { b.textContent = cur ? thousand(cur) : '0'; b.classList.toggle('empty', !cur); } if (cm) cm.textContent = cmTxt(cur); }
+/* Maße neu gedacht (docs/profis/2026-10-26-masse.md): Im Modell steht nur das Maß, das gerade dran ist, mit seinen beiden Enden und dem
+   Eingabefeld auf der Linie; was schon gemessen ist, steht nicht mehr darüber. Übliche Maße je Element (Höhe v, Breite h, dazu ein Beispiel
+   fürs leere Feld): nur ein Anhalt, damit Zentimeter auffallen. */
+const UEBLICH = { fenster: { v: [500, 2400, 1250], h: [400, 3000, 1100] }, balkon: { v: [1900, 2600, 2150], h: [700, 1400, 900] }, fest: { v: [300, 3000, 1250], h: [300, 4000, 1500] }, hst: { v: [2000, 2700, 2250], h: [2000, 6000, 3500] }, psk: { v: [1900, 2600, 2150], h: [1400, 3500, 2000] }, fsw: { v: [2000, 2700, 2250], h: [1800, 6000, 3500] } };
+const ueblich = (dir) => (UEBLICH[S.win.art] || UEBLICH.fenster)[dir];
+const endenVon = (st) => (istTuer(S.win) && st.endenTuer ? st.endenTuer : st.enden);
+const subVon = (st) => esc(istTuer(S.win) && st.subTuer ? st.subTuer : tuerText(st.sub));
+/* Überschrift sagt, was dran ist: „Höhe der Öffnung.“ bzw. „Breite des Fensters.“ (Tür, Element), grün das Ding */
+function messTitel(st) {
+  const ding = st.who === 'mo' ? 'der Öffnung' : istTuer(S.win) ? 'der Tür' : S.win.art === 'fest' ? 'des Elements' : 'des Fensters', t = ding.split(' ');
+  return (st.dir === 'v' ? 'Höhe ' : 'Breite ') + t[0] + ' <span class="ak">' + t[1] + '.</span>';
+}
+const massGut = (v) => v >= 250 && v <= 6000;
+const cmFrage = (v, dir) => { const u = dir ? ueblich(dir) : null; return v > 0 && v * 10 <= 6000 && ((v < 250 && v * 10 >= 250) || (!!u && v < u[0] && v * 10 >= u[0])); };
+const ICON_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>';
+const ICON_HAKEN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+/* Über dem Modell: oben links der Hinweis zum Anlegen, unten die Rückfrage (Zentimeter, Warnung, Fehler) mit ihrer Antwort */
+function messUeber(chip) {
+  return chip === 'nicht' ? '<span class="mu-chip">Nicht am Rahmen messen</span>' : chip === 'samt' ? '<span class="mu-chip">Rahmen außen, nicht Flügel</span>' : '';
+}
+/* Rückfrage am Platz der Zeile unter dem Modell (Gremium 26.10.: nicht über die Zeichnung): Zentimeter mit „Ja, … mm“, Warnung mit
+   „Stimmt so, weiter“, Fehler als Satz. Die Zentimeterfrage kommt erst nach einer Tipp-Pause (st.cmLive) oder nach „Weiter“ (st.msg). */
+function messFrage(st, cur, pre, dir) {
+  const v = num(cur), m = st.msg, cm = m && m.cm ? m.cm / 10 : !m && st.cmLive && cmFrage(v, dir) ? v : 0;
+  if (cm) return '<p class="mz-frage">Zollstock zeigt <b>' + esc(String(cm)) + '&nbsp;cm</b>?</p><button type="button" class="mu-ja" data-act="' + pre + '-cm" data-v="' + cm * 10 + '">Ja, ' + esc(thousand(cm * 10)) + '&nbsp;mm</button>';
+  if (m) return '<p class="mz-frage ' + m.cls + '" role="alert">' + esc(m.text) + '</p>' + (m.cls === 'warn' ? '<button type="button" class="mu-ja warn" data-act="' + pre + '-next" data-ack="1">Stimmt so, weiter</button>' : '');
+  return '';
+}
+/* Unter dem Modell: links der übliche Bereich (bei den Rändern „Hier auch … gemessen?“), rechts „Wo genau?“; zu groß oder zu klein steht links rot */
+function messHin(dir, cur) {
+  const v = num(cur), u = ueblich(dir);
+  if (v > 6000) return { bad: true, t: 'Höchstens 6.000 mm. Bitte in Millimetern.' };
+  return { bad: false, t: 'Üblich sind ' + thousand(u[0]) + ' bis ' + thousand(u[1]) + ' mm' };
+}
+function zeileInnen(links, g, frage) { return frage || links + '<button type="button" class="mz-wo" data-act="gloss" data-k="' + g + '">Wo genau?</button>'; }
+function messZeile(links, g, cur, frage) { return '<div class="mess-zeile' + (frage ? ' fragt' : '') + '" id="mess-zeile">' + zeileInnen(links, g, frage) + '</div><span class="nur-vorlesen" id="mz-wert" aria-live="polite">' + wertVorlesen(cur) + '</span>'; }
+function zeileSetzen(links, g, frage) { const z = document.getElementById('mess-zeile'); if (!z) return; const h = zeileInnen(links, g, frage); if (z._h !== h) { z._h = h; z.innerHTML = h; z.classList.toggle('fragt', !!frage); } }
+/* Das Feld auf der Linie ist für Screenreader verborgen; den getippten Wert sagt diese Zeile an */
+const wertVorlesen = (cur) => (num(cur) ? thousand(num(cur)) + ' Millimeter' : '');
+function wertSetzen(cur) { const e = document.getElementById('mz-wert'); if (e) e.textContent = wertVorlesen(cur); }
+function hinHTML(h) { return '<p class="mz-hin' + (h.bad ? ' bad' : '') + '" id="mz-hin" aria-live="polite">' + esc(h.t) + '</p>'; }
+function hinSetzen(h) { const e = document.getElementById('mz-hin'); if (e) { e.textContent = h.t; e.classList.toggle('bad', h.bad); } }
+/* Die Rückfrage nach Zentimetern kommt erst, wenn eine Weile nichts getippt wird: beim Tippen von 1.410 steht kurz 141 da */
+let cmTimer = 0;
+function cmSpaeter(st, v, dir, zeigen) { clearTimeout(cmTimer); st.cmLive = false; if (cmFrage(v, dir)) cmTimer = setTimeout(() => { st.cmLive = true; zeigen(); }, ruhig() ? 0 : 800); }
 function messOpts(step, cur) {
-  const dims = MESS.slice(0, S.mess.step + 1).map(dimKey), k = dimKey(step), labels = messLabels({ [k]: num(cur) ? thousand(cur) + ' mm' : '?' });
-  return { id: 'w3d', view: 'three', sway: true, showEl: S.mess.step >= 1, dims: dims, active: k, labels: labels, stageH: 'auto', bg: photoBg(), hint: step.who === 'mo' ? 'Orange: Maueröffnung' : 'Blau: ' + elName() };
+  const k = dimKey(step);
+  return { id: 'w3d', view: 'three', sway: !cur, showEl: S.mess.step >= 1, dims: [k], active: k, labels: messLabels(), feld: { v: cur, ph: ueblich(step.dir)[2] }, enden: endenVon(step), fitW: 0.6, fitH: 0.6, noZoom: true, stageH: 'auto', bg: photoBg(), ueber: messUeber(step.chip) };
 }
 function liveWin(step, cur) {
   const w = JSON.parse(JSON.stringify(S.win)), v = num(cur);
@@ -3194,18 +3322,19 @@ function liveWin(step, cur) {
 }
 SCREENS.messen = () => {
   const m = S.mess, step = MESS[m.step];
-  const msg = m.msg ? '<div class="msg ' + m.msg.cls + '">' + esc(m.msg.text) + (m.msg.cm ? '<button type="button" class="pill" data-act="mess-cm" data-v="' + m.msg.cm + '">Ja, ' + thousand(m.msg.cm) + ' mm</button>' : '') + (m.msg.cls === 'warn' ? '<button type="button" class="pill" data-act="mess-next" data-ack="1">Stimmt so, weiter</button>' : '') + '</div>' : '';
-  const html = hd('Maß ' + (m.step + 1) + ' von 4 · ' + (step.who === 'mo' ? 'Öffnung' : elName()), esc(step.dir === 'v' ? 'Höhe in der Mitte.' : 'Breite in der Mitte.'), '', 'compact', step.who, schrittTools(step.g)) +
+  const html = hd('Maß ' + (m.step + 1) + ' von 4 · ' + (step.who === 'mo' ? 'Öffnung' : artName(S.win)), messTitel(step), subVon(step), 'compact mess-kopf', step.who, schrittTools(step.g)) +
     model(liveWin(step, m.cur), messOpts(step, m.cur)) +
-    '<div class="ask ' + step.who + '"><p class="q"><span>' + esc(tuerText(step.short)) + '</span><button type="button" class="pill" data-act="gloss" data-k="' + step.g + '">Wo genau?</button></p><p class="how">' + esc(tuerText(step.text)) + '</p>' + numDisplay(m.cur, 'mess-num') + msg + '</div>' +
-    keypad(m.step < 3 ? 'Weiter' : 'Zu den Rändern', m.step ? 'Voriges Maß' : 'Zurück zu den Fotos');
+    messZeile(hinHTML(messHin(step.dir, m.cur)), step.g, m.cur, messFrage(m, m.cur, 'mess', step.dir)) +
+    keypad(m.step < 3 ? 'Weiter' : 'Zu den Rändern', m.step ? 'Voriges Maß' : 'Zurück zu den Fotos', !massGut(num(m.cur)));
   return { html: html, back: [m.step ? 'Zurück' : 'Fotos', m.step ? 'mess-prev' : 'fotos'], fit: true };
 };
 function messInput(v) {
-  S.mess.cur = String(v).replace(/[^\d]/g, '').slice(0, 5);
-  setNum('mess-num', S.mess.cur);
-  const step = MESS[S.mess.step], stage = document.getElementById('w3d');
-  if (stage) { const o = messOpts(step, S.mess.cur); W3DS.w3d = { w: liveWin(step, S.mess.cur), o: o }; w3dLayout(stage, W3DS.w3d.w, o); }
+  const m = S.mess; m.cur = String(v).replace(/[^\d]/g, '').slice(0, 5);
+  const step = MESS[m.step], stage = document.getElementById('w3d'), n = num(m.cur);
+  if (stage) { const o = messOpts(step, m.cur); W3DS.w3d = { w: liveWin(step, m.cur), o: o }; w3dLayout(stage, W3DS.w3d.w, o); stage.classList.toggle('is-live', o.sway); }
+  const zeile = () => zeileSetzen(hinHTML(messHin(step.dir, m.cur)), step.g, messFrage(m, m.cur, 'mess', step.dir));
+  zeile(); okZustand(massGut(n)); wertSetzen(m.cur);
+  cmSpaeter(m, n, step.dir, () => { if (S.screen === 'messen' && S.mess === m) zeile(); });
 }
 function messNext(ack) {
   const m = S.mess, step = MESS[m.step], vals = { hm: S.win.mo.hm, wm: S.win.mo.wm }, chk = checkValue(m.cur, step, vals);
@@ -3213,27 +3342,31 @@ function messNext(ack) {
   if (chk.warn && !ack) { m.msg = { cls: 'warn', text: chk.warn }; render(); return; }
   const v = num(m.cur);
   if (step.who === 'mo') S.win.mo[step.k] = v; else { S.win.el[step.k] = v; S.win[step.k] = v; }
-  m.msg = null; m.cur = '';
+  m.msg = null; m.cur = ''; m.cmLive = false; clearTimeout(cmTimer);
   if (m.step < 3) { m.step++; render(true); }
   else go('rest');
 }
 function messPrev() { const m = S.mess; if (m.step > 0) { m.step--; const st = MESS[m.step]; m.cur = String(st.who === 'mo' ? S.win.mo[st.k] : S.win.el[st.k] || ''); m.msg = null; S.dir = 'back'; render(true); } else go('fotos', 'back'); }
 /* ---------- Ränder: die vier übrigen Maße der Öffnung, am Modell ---------- */
+const restDir = (rest) => (rest.k[0] === 'h' ? 'v' : 'h');
+/* „Wie Mitte“ als leiser Verweis und als Frage: Ein Tipp sagt „hier auch so gemessen“, nicht „übernimm das“ (Gremium, Datenqualität) */
+const gleichHTML = (ref) => '<button type="button" class="mz-gleich" data-act="rest-same" data-v="' + num(ref) + '">Hier auch ' + thousand(ref) + '&nbsp;mm gemessen?</button>';
+function restOpts(rest, cur) {
+  if (!rest) return { id: 'w3d', view: 'three', sway: true, dims: ['hm', 'wm'].concat(REST.map((x) => x.k)), active: '', labels: messLabels(), stageH: 280, bg: photoBg(), cls: 'dims-all', hint: 'Alle Ränder gemessen' };
+  return { id: 'w3d', view: 'three', sway: !cur, dims: [rest.k], active: rest.k, labels: messLabels(), feld: { v: cur, ph: ueblich(restDir(rest))[2] }, enden: endenVon(rest), fitW: 0.6, fitH: 0.6, noZoom: true, stageH: 'auto', bg: photoBg(), ueber: messUeber('nicht') };
+}
 SCREENS.rest = () => {
   const r = S.rest, d = derive(S.win), rest = r.i < 4 ? REST[r.i] : null;
-  const labels = messLabels(rest ? { [rest.k]: num(r.cur) ? thousand(r.cur) + ' mm' : '?' } : null);
-  const dims = ['hm', 'wm'].concat(REST.slice(0, Math.min(r.i + 1, 4)).map((x) => x.k));
-  const stage = model(S.win, { id: 'w3d', view: 'three', sway: true, dims: dims, active: rest ? rest.k : '', labels: labels, stageH: rest ? 'auto' : 280, bg: photoBg(), cls: rest ? '' : 'dims-all', hint: rest ? 'Die leuchtende Kante messen' : 'Alle Ränder gemessen' });
+  const stage = model(S.win, restOpts(rest, r.cur));
   let body;
   if (rest) {
     const ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm;
-    const msg = r.msg ? '<div class="msg ' + r.msg.cls + '">' + esc(r.msg.text) + (r.msg.cm ? '<button type="button" class="pill" data-act="rest-cm" data-v="' + r.msg.cm + '">Ja, ' + thousand(r.msg.cm) + ' mm</button>' : '') + (r.msg.cls === 'warn' ? '<button type="button" class="pill" data-act="rest-next" data-ack="1">Stimmt so, weiter</button>' : '') + '</div>' : '';
-    body = '<div class="ask mo"><p class="q"><span>' + esc(rest.title) + '</span><button type="button" class="pill mo" data-act="rest-same" data-v="' + num(ref) + '">Wie Mitte · ' + thousand(ref) + '</button></p><p class="how">' + esc(tuerText(rest.text)) + '</p>' + numDisplay(r.cur, 'rest-num') + msg + '</div>' + keypad(r.i < 3 ? 'Weiter' : 'Fertig', r.i ? 'Voriger Rand' : 'Zurück zum Messen');
+    body = messZeile(gleichHTML(ref), 'raender', r.cur, messFrage(r, r.cur, 'rest', restDir(rest))) + keypad(r.i < 3 ? 'Weiter' : 'Fertig', r.i ? 'Voriger Rand' : 'Zurück zum Messen', !massGut(num(r.cur)));
   } else {
     body = '<div class="mess-in"><p class="eyebrow" style="color: var(--ok)">Alle Maße da</p><div class="done-list"><div><small>Öffnung Breite</small><b>' + thousand(d.moW) + ' mm</b></div><div><small>Öffnung Höhe</small><b>' + thousand(d.moH) + ' mm</b></div><div><small>' + esc(artName(S.win)) + ' Breite</small><b>' + thousand(d.elW) + ' mm</b></div><div><small>' + esc(artName(S.win)) + ' Höhe</small><b>' + thousand(d.elH) + ' mm</b></div></div>' + (d.devW > 10 || d.devH > 10 ? '<div class="msg warn">Die Öffnung ist bis zu ' + Math.max(d.devW, d.devH) + ' mm außer Winkel. Das kleinste Maß zählt, so wie es der Fensterbauer auch macht.</div>' : '<div class="msg ok">' + CHECK + '<span>Die Öffnung ist gerade, alle Maße liegen nah beieinander.</span></div>') + '</div>';
   }
-  const html = hd(rest ? 'Rand ' + (r.i + 1) + ' von 4 · Öffnung' : 'Ränder · Maueröffnung', rest ? esc(rest.title) + '.' : 'Passt.', rest ? '' : 'Alle sechs Maße der Öffnung und beide Maße des Elements sind drin.', 'compact', rest ? 'mo' : '', schrittTools('raender')) + stage + body;
-  return { html: html, back: r.i ? ['Zurück', 'rest-prev'] : ['Messen', 'mess-back'], fit: !!rest, bar: rest ? null : { label: 'Weiter zum Ergebnis', act: 'go', v: 'ergebnis', zurueck: true } };
+  const html = hd(rest ? 'Rand ' + (r.i + 1) + ' von 4 · Öffnung' : 'Ränder · Maueröffnung', rest ? esc(rest.title) + '.' : 'Passt.', rest ? subVon(rest) : 'Alle sechs Maße der Öffnung und beide Maße des Elements sind drin.', 'compact' + (rest ? ' mess-kopf' : ''), rest ? 'mo' : '', schrittTools('raender')) + stage + body;
+  return { html: html, back: r.i ? ['Zurück', 'rest-prev'] : ['Messen', 'mess-back'], fit: !!rest, bar: rest ? null : { label: 'Maße ansehen', act: 'go', v: 'ergebnis', zurueck: true } };
 };
 /* Pfeil zurück bei den Rändern: voriger Rand mit seinem Wert, vom ersten Rand zurück zum letzten Maß */
 function restPrev() {
@@ -3242,15 +3375,18 @@ function restPrev() {
   S.mess.step = 3; S.mess.cur = String(S.win.el[MESS[3].k] || ''); S.mess.msg = null; return go('messen', 'back');
 }
 function restInput(v) {
-  S.rest.cur = String(v).replace(/[^\d]/g, '').slice(0, 5);
-  setNum('rest-num', S.rest.cur);
-  const rest = REST[S.rest.i], lab = rest ? document.querySelector('[data-r="lab-' + rest.k + '"]') : null; if (lab) lab.textContent = num(S.rest.cur) ? thousand(S.rest.cur) + ' mm' : '?';
+  const r = S.rest; r.cur = String(v).replace(/[^\d]/g, '').slice(0, 5);
+  const rest = REST[r.i], stage = document.getElementById('w3d'), n = num(r.cur); if (!rest) return;
+  if (stage) { const o = restOpts(rest, r.cur); W3DS.w3d = { w: S.win, o: o }; w3dLayout(stage, S.win, o); stage.classList.toggle('is-live', o.sway); }
+  const ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm, zeile = () => zeileSetzen(gleichHTML(ref), 'raender', messFrage(r, r.cur, 'rest', restDir(rest)));
+  zeile(); okZustand(massGut(n)); wertSetzen(r.cur);
+  cmSpaeter(r, n, restDir(rest), () => { if (S.screen === 'rest' && S.rest === r) zeile(); });
 }
 function restNext(ack) {
   const r = S.rest, rest = REST[r.i], ref = rest.k[0] === 'h' ? S.win.mo.hm : S.win.mo.wm, chk = checkRest(r.cur, ref);
   if (!chk.ok) { r.msg = { cls: 'bad', text: chk.msg, cm: chk.cm }; if (window.Haptik) window.Haptik.fehler(); render(); return; }
   if (chk.warn && !ack) { r.msg = { cls: 'warn', text: chk.warn }; render(); return; }
-  S.win.mo[rest.k] = num(r.cur); r.cur = ''; r.msg = null; r.i++;
+  S.win.mo[rest.k] = num(r.cur); r.cur = ''; r.msg = null; r.cmLive = false; clearTimeout(cmTimer); r.i++;
   if (r.i >= 4) S._feier = 'masse';
   render();
 }
@@ -6477,7 +6613,7 @@ function tourMessen() {
     const ziel = String(st.who === 'mo' ? num(S.win.mo[st.k]) : num(S.win.el[st.k]));
     if (m.cur.length < ziel.length) {
       m.cur = ziel.slice(0, m.cur.length + 1); setNum('tour-num', m.cur);
-      const lb = document.querySelector('#w3d [data-r="lab-' + dimKey(st) + '"]'); if (lb) lb.textContent = thousand(m.cur) + ' mm';
+      const r = W3DS.w3d, stg = document.getElementById('w3d'); if (r && r.o.feld && stg) { r.o.feld = { v: m.cur, ph: r.o.feld.ph }; w3dLayout(stg, r.w, r.o); }
       t.timer = setTimeout(schritt, 115); return;
     }
     t.timer = setTimeout(() => { m.k++; m.cur = ''; if (MESS[m.k]) render(); t.timer = setTimeout(schritt, 240); }, 620);
@@ -6566,9 +6702,8 @@ SCREENS.tour = () => {
         '<div class="qrow"><button type="button" class="chip" data-act="tour-nochmal">Nochmal zeigen</button></div>';
     } else {
       const st = MESS[m.k], k = dimKey(st), labels = messLabels();
-      labels[k] = num(m.cur) ? thousand(m.cur) + ' mm' : '?';
       html = kopf('Maß ' + (m.k + 1) + ' von 4 · ' + (st.who === 'mo' ? 'Maueröffnung' : elName()), 'Zollstock anlegen, Zahl eintippen, das Modell zieht die Maßlinie. Hier tippt sich das Maß selbst ein.') +
-        modell({ view: 'three', showEl: m.k >= 1, dims: MESS.slice(0, m.k + 1).map(dimKey), active: k, labels: labels, hint: st.who === 'mo' ? 'Orange: Maueröffnung' : 'Blau: ' + elName() }) +
+        modell({ view: 'three', showEl: m.k >= 1, dims: [k], active: k, labels: labels, feld: { v: m.cur, ph: ueblich(st.dir)[2] }, enden: endenVon(st), fitW: 0.6, fitH: 0.6, noZoom: true }) +
         '<div class="ask ' + st.who + '"><p class="q"><span>' + esc(tuerText(st.short)) + '</span><span class="badge">' + LOCK_S + 'vorgegeben</span></p><p class="how">' + esc(tuerText(st.text)) + '</p>' + numDisplay(m.cur, 'tour-num') + '</div>' +
         '<div class="tour-sperre">' + keypad('Weiter') + '<button type="button" class="ts-deckel" data-act="tour-schloss"><span>' + LOCK_S + 'Maße sind in der Führung vorgegeben</span></button></div>';
     }
