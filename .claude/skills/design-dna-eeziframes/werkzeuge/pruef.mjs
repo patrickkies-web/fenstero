@@ -1,6 +1,8 @@
 /* Ruhige Fassung, ohne JavaScript, Schieltest-Bild, Zielgrößen, Tab-Weg */
 import { chromium } from '/opt/node-tools/node_modules/playwright/index.mjs';
 const URL = process.env.URL || 'http://localhost:8790/lokal.html';
+const OUT = process.argv[2] || process.env.OUT || '.'; // Ordner für die zwei Bildschirmfotos (ruhige Fassung, ohne JavaScript)
+import { mkdirSync } from 'node:fs'; mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
 // 1. weniger Bewegung: steht alles sofort?
 let ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
@@ -12,7 +14,7 @@ const ruhig = await page.evaluate(() => {
   const o = el => getComputedStyle(el).opacity;
   return { h1Opacity: o(h1.querySelector('.dna-wort') || h1), pilleOpacity: o(p.closest('[data-dna-auftritt]') || p), animationen: document.getAnimations().length, etikett: (document.querySelector('#hero-etikett') ? o(document.querySelector('#hero-etikett')) : 'kein Etikett') };
 });
-await page.screenshot({ path: 'ruhig-tel-01.png' });
+await page.screenshot({ path: OUT + '/ruhig-tel-01.png' });
 await ctx.close();
 // 2. ohne JavaScript
 ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
@@ -23,7 +25,7 @@ const ohneJs = await page.evaluate(() => {
   const o = el => getComputedStyle(el).opacity;
   return { h1: o(document.querySelector('h1')), lead: o(document.querySelector('.ez-hero .dna-text')), pille: o(document.querySelector('.ez-aktionen')), buehne: o(document.querySelector('.ez-buehne')) };
 });
-await page.screenshot({ path: 'ohnejs-tel-01.png' });
+await page.screenshot({ path: OUT + '/ohnejs-tel-01.png' });
 await ctx.close();
 // 3. Zielgrößen und Tab-Weg
 ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });

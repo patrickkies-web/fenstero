@@ -6,7 +6,7 @@
 Ändere den Bereich für Fensterbauer (/fuer-fensterbauer/).
 ```
 
-Ein Satz mit dem Bereich, dazu, was dich stört oder was du dir vorstellst, falls du etwas im Kopf hast. Den Rest übernehme ich: Bestand lesen, DNA und Begleit-Skill laden, Startseite (als Untergrenze, nicht als Vorlage) und deine Vorlagen daneben legen, entscheiden, was für diesen Bereich Sinn ergibt (Richtung, Szenen, welche Bausteine der Startseite passen, welche Prinzipien aus den Vorlagen übersetzt werden, welches Bild die Bühne trägt), bauen, messen, Gremium eine Runde, Detail-Profis, Vorschau, Protokoll, Commit. Meine Wahl steht in drei Zeilen in der Lieferung; du korrigierst, was dir nicht gefällt. CLAUDE.md bindet die Skills schon; das Anhängsel unten brauchst du nur, wenn du in einem Chat ohne das Projekt sichergehen willst.
+Ein Satz mit dem Bereich, dazu, was dich stört oder was du dir vorstellst, falls du etwas im Kopf hast. Den Rest übernehme ich: Bestand lesen, DNA und Begleit-Skill laden, Startseite (als Untergrenze, nicht als Vorlage) und deine Vorlagen daneben legen, entscheiden, was für diesen Bereich Sinn ergibt (Richtung, Szenen, welche Bausteine der Startseite passen, welche Prinzipien aus den Vorlagen übersetzt werden, welches Bild die Bühne trägt), bauen, messen, Gremium eine Runde, Detail-Profis, Vorschau, Protokoll, Commit. Meine Wahl steht in drei Zeilen in der Lieferung; du korrigierst, was dir nicht gefällt. Das Anhängsel unten gehört unverändert unter jeden Gestaltungs-Prompt: Es belegt jede Datei und jede Quelle, nennt die Skills, die nicht geladen werden, und die Messwerte, die bestehen müssen, damit das Ergebnis mindestens das der Startseite ist.
 
 ## Langform (wenn du steuern willst)
 
@@ -19,21 +19,51 @@ Bleibt: <was unangetastet bleibt: Konzept, Texte, Abfolge, ein Element, das du m
 Material: <Fotos, Vorlagen, Renderings mit Rolle (Vorbild, Material, Gegenbeispiel); oder „Prompt für ein Foto schreiben“>
 ```
 
-## Anhängsel (unter jeden Gestaltungs-Prompt kopieren)
+## Anhängsel (unter jeden Gestaltungs-Prompt kopieren, unverändert)
 
 ```
-Gilt: Skill design-dna (Design-System https://claude.ai/artifact/7Sn3WTUMn15nyKvyeQak4o, Musterseite
-https://claude.ai/artifact/5CqFMQ5g8XJaKtQwjaUW97) und der Begleit-Skill design-dna-eeziframes
-(.claude/skills/design-dna-eeziframes/SKILL.md: Palette „Task-App dunkel“ als tokens.css, Ergänzungen G14/G15,
-meine Entscheidungen, Rezept, Messwerkzeuge). Nicht laden: premium-gestaltung, ultimativ-webdesign, webdesign-wow.
-Untergrenze: die Startseite vom 26.10.2026 (https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i,
-Quelle docs/profis/startseite-dna-vorschau/, Protokoll docs/profis/2026-10-26-startseite-dna.md). Nicht flacher als sie,
-gern darüber hinaus; Bausteine übernehmen, wo sie passen, aus den Vorlagen übersetzen, wo sie nicht reichen, neu bauen,
-wo beides nicht genügt.
-Vorlagen: docs/profis/vorlagen/2026-10-26/ (Vorbild: Prinzip übernehmen, nie das Motiv).
-Ablauf: Rezept aus dem Begleit-Skill (bauen Telefon zuerst, messen, Gremium profis eine Runde, vier Detail-Profis,
-Abgleich mit den Vorlagen, Farbtabelle je Bildschirm, Vorschau als Artifact, Protokoll unter docs/profis/,
-Commit auf dem Arbeitszweig). Online nichts ohne mein Ja.
+ANHÄNGSEL GESTALTUNG EEZIFRAMES (Stand 26.10.2026)
+
+1. Skills laden, in dieser Reihenfolge, vor dem ersten Entwurf:
+   - design-dna (mein synchronisierter Skill; Stand mit den Ergänzungen vom 26.10.2026 liegt auch unter
+     .claude/skills/design-dna-eeziframes/design-dna-stand-2026-10-26.md; fehlen dort G14/G15, diesen Stand nehmen)
+   - design-dna-eeziframes (.claude/skills/design-dna-eeziframes/SKILL.md), dazu tokens.css und prompt.md daneben
+   - profis (.claude/skills/profis/SKILL.md), nur eine Runde, etwa zehn Minuten je Seite
+   - emil-design-eng (.claude/skills/emil-design-eng/SKILL.md) für Bewegung, Übergänge, Bedienelemente
+2. Nicht laden, keine Regel daraus anwenden: premium-gestaltung, ultimativ-webdesign, webdesign-wow, eezi-designrat,
+   docs/GESTALTUNG.md (nur Technik der App). impeccable und gsap-* nur, wenn ich sie im Prompt nenne. Keine Pille im
+   Band 460–600 px, kein farbiges Wort je Überschrift, kein Messband-Hero, keine Figurenwelt, kein Riesenwort.
+3. Quellen lesen, bevor etwas gebaut wird:
+   - Design-System: https://claude.ai/artifact/7Sn3WTUMn15nyKvyeQak4o (project/README.md, bewegung.md, tokens.json,
+     components/bundle.css, components/bundle.js, README der Bausteine, die gebraucht werden)
+   - Musterseite: https://claude.ai/artifact/5CqFMQ5g8XJaKtQwjaUW97
+   - Untergrenze der Qualität, nach oben offen: Startseite vom 26.10.2026, https://claude.ai/artifact/WT1ceQezN8aauP1iTgen3i,
+     Quelle docs/profis/startseite-dna-vorschau/ (index.html, start.css, start.js, dna/tokens.css, dna/bundle.css,
+     dna/bundle.js, fonts/, bilder/), Bilder docs/profis/bilder/2026-10-26-startseite-dna-{tel,desk,bild1}.jpg
+   - Protokoll docs/profis/2026-10-26-startseite-dna.md und die Urteile docs/profis/gremium/2026-10-26-startseite-dna-*.md
+     (gestalter, kunden, fensterbauer, feinschliff-bewegung/-zeichen/-ux/-typografie, vorlagen-artdirection/-frontend/-typografie)
+   - Meine Vorlagen: docs/profis/vorlagen/2026-10-26/ mit README.md (Vorbild: Prinzip übernehmen, nie das Motiv)
+   - Bestand des Bereichs: alle Texte, Bilder, Zahlen, Rechtstexte; echte Inhalte bleiben, nichts erfinden
+4. Entscheiden: Du wählst aus diesem Material Richtung, Szenen, Bausteine und Bild selbst und nennst die Wahl in drei
+   Zeilen in der Lieferung. Keine Rückfrage, außer zwei Lesarten führen zu wesentlich verschiedener Arbeit.
+5. Bauen: eigenständige Vorschau unter docs/profis/<bereich>-vorschau/ (index.html ohne Dokumentgerüst, dna/tokens.css
+   aus dem Begleit-Skill, bundle.css und bundle.js unverändert, eigene start.css/start.js mit Präfix ez-, Schriften lokal
+   in fonts/ mit Lizenz, keine fremden Server). Telefon 390 px zuerst, dann 1280 px. Palette nur die acht Farben.
+6. Messen, bevor du etwas zeigst (.claude/skills/design-dna-eeziframes/werkzeuge/): huelle.sh, shot.mjs, farben.py,
+   pruef.mjs, leistung.mjs, bewegung.mjs. Muss bestehen: genau eine volle Pille je Bildschirm, am Telefon im unteren
+   Drittel; 0 Animationen nach 2,6 s; Layoutsprung 0; kein filter: blur auf Flächen; 0 lazy-Bilder in den ersten Szenen;
+   Ziele ab 44 px; ruhige Fassung und ohne JavaScript stehen sofort; keine Konsolenfehler; Laden unter 1 s; Farbtabelle je
+   Bildschirm (Bildschirm | Neutral % | Violett | Koralle | Indigo | Farbe gesamt) innerhalb der Toleranzen aus
+   design-dna Abschnitt 8, Abweichungen erst anpassen, dann zeigen. Familientest neben Musterseite und Startseite.
+7. Gremium profis eine Runde (drei Agenten blind, Änderungsliste, Mehrheiten), dann vier Detail-Profis parallel
+   (Bewegung, Zeichen, UX, Typografie, je etwa zehn Minuten, je höchstens zehn Befunde), dann Abgleich mit meinen Vorlagen
+   in drei Perspektiven (Material und Licht, Frontend und Leistung, Typografie). Alles umsetzen, keine zweite Runde.
+8. Liefern: Vorschau als privates Artifact (bei Nachbesserung dieselbe Adresse), Bilder Telefon und Schreibtisch im Chat,
+   Protokoll docs/profis/JJJJ-MM-TT-<bereich>.md (Auftrag, Wahl, Änderungstabelle, Farbtabelle, Messwerte), Urteile unter
+   docs/profis/gremium/, Bilder unter docs/profis/bilder/, Commit auf dem Arbeitszweig (Deutsch). Nichts online (main)
+   ohne mein Ja. Jede Korrektur von mir kommt in Abschnitt 4 des Begleit-Skills.
+9. Meine Entscheidungen gelten weiter: kein Handy und keine Maßlinien im Hero der Startseite, mein Hausfoto als Bühne;
+   keine Bildpille im Satz, kein Schriftfenster; „Jetzt konfigurieren“ bleibt; Konzept und Abfolge der Startseite stehen.
 ```
 
 ## Die drei Richtungen (aus `design-dna`, Abschnitt 3, Schritt 4)
