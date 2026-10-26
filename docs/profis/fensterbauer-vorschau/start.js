@@ -11,7 +11,7 @@
   function reduziert() { return !!(reduziertAbfrage && reduziertAbfrage.matches); }
   function breit() { return !!(w.matchMedia && w.matchMedia('(min-width: 900px)').matches); }
 
-  /* Vorhang ohne Sprung (nur auf der eigenen Seite): Die Szenen rechnen mit der größten Bildschirmhöhe dieser Ausrichtung, damit die ein- und
+  /* Vorhang ohne Sprung: Die Szenen rechnen mit der größten Bildschirmhöhe dieser Ausrichtung, damit die ein- und
      ausfahrende Adressleiste des Browsers die klebende Kante nicht verschiebt (bundle.js liest innerHeight bei jedem resize); gelesen wird
      der echte Getter, nicht clientHeight (den hält iOS Safari auf der kleinen Höhe) */
   function stabilisieren() {
@@ -41,10 +41,16 @@
     var beiEnde = function (fn) { if (ctl) ctl.signal.addEventListener('abort', fn, { once: true }); };
     var $ = function (s) { return rahmen.querySelector(s); }, $$ = function (s) { return Array.prototype.slice.call(rahmen.querySelectorAll(s)); };
     d.documentElement.classList.add('ez-js');
-    if (eingebettet) { rahmen.classList.add('eingebettet'); if (w.DNA && w.DNA.start) w.DNA.start(rahmen); } else stabilisieren();
+    stabilisieren();
+    if (eingebettet) {
+      /* im Portal: der Umschalter bleibt in der Ansicht (Hash), die Bausteine der DNA starten für den nachgeladenen Rahmen */
+      rahmen.classList.add('eingebettet');
+      $$('.ez-ansicht a[aria-current]').forEach(function (a) { a.setAttribute('href', '/#fensterbauer'); });
+      if (w.DNA && w.DNA.start) w.DNA.start(rahmen);
+    }
 
     /* Vorhang: ändert eine Szene ihre Höhe (Vergleichstabelle auf, Schriften geladen), rechnet bundle.js die klebende Kante neu (es hört auf resize) */
-    if (!eingebettet && 'ResizeObserver' in w) {
+    if ('ResizeObserver' in w) {
       var ro = new ResizeObserver(function () { if (lebt()) w.dispatchEvent(new Event('resize')); });
       $$('.dna-szene').forEach(function (s) { ro.observe(s); });
       beiEnde(function () { ro.disconnect(); });
@@ -53,7 +59,7 @@
     /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite. Die Grenze wird ohne den
        Versatz der klebenden Szene gemessen (Kopfunterkante relativ zur Szene plus Flusslage des Rahmens) */
     var leiste = $('.ez-leiste'), kopf = $('.ez-kopf'), szene1 = kopf ? kopf.closest('.dna-szene') : null;
-    if (leiste && !eingebettet) {
+    if (leiste) {
       var letzte = w.scrollY || 0, hoch = 0, runter = 0, geplant = false, grenze = 160;
       var messeGrenze = function () {
         if (!kopf) return;
@@ -120,16 +126,17 @@
         try { history.pushState(null, '', '#' + id); } catch (x) { /* ohne Adresse weiter */ }
         w.scrollTo({ top: y, behavior: reduziert() ? 'auto' : 'smooth' });
       }, sig);
-
-      /* Fokus unter dem Vorhang: liegt das fokussierte Element verdeckt, in die Mitte holen (WCAG 2.4.11) */
-      d.addEventListener('focusin', function (e) {
-        var el = e.target; if (!el || !el.getBoundingClientRect || !rahmen.contains(el)) return;
-        var r = el.getBoundingClientRect(); if (!r.width) return;
-        var x = Math.min(Math.max(r.left + r.width / 2, 0), w.innerWidth - 1), y = Math.min(Math.max(r.top + r.height / 2, 0), d.documentElement.clientHeight - 1);
-        var oben = d.elementFromPoint(x, y);
-        if (oben && !el.contains(oben) && !oben.contains(el)) el.scrollIntoView({ behavior: 'auto', block: 'center' });
-      }, sig);
     }
+
+    /* Fokus unter dem Vorhang: liegt ein bedienbares Element fokussiert und verdeckt, in die Mitte holen (WCAG 2.4.11); Sprungziele mit
+       tabindex -1 (ganze Abschnitte, die portal.js nach dem Sprung fokussiert) bleiben, wo der Sprung sie hingesetzt hat */
+    d.addEventListener('focusin', function (e) {
+      var el = e.target; if (!el || !el.getBoundingClientRect || !rahmen.contains(el) || !el.matches('a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])')) return;
+      var r = el.getBoundingClientRect(); if (!r.width) return;
+      var x = Math.min(Math.max(r.left + r.width / 2, 0), w.innerWidth - 1), y = Math.min(Math.max(r.top + r.height / 2, 0), d.documentElement.clientHeight - 1);
+      var oben = d.elementFromPoint(x, y);
+      if (oben && !el.contains(oben) && !oben.contains(el)) el.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }, sig);
 
     /* Anfrage: Paket aus den Karten vorwählen, Pflichtfelder je Feld prüfen, als JSON an /api/partner/frage
        (ohne JavaScript prüft der Browser und schickt das Formular selbst) */

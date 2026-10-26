@@ -49,6 +49,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   sein Wort online gestellt (web/fuer-fensterbauer/, eingebettet auch in der Ansicht Fensterbauer der Startseite). Übertragen mit
   `node scripts/fensterbauer-uebertragen.mjs` aus docs/profis/fensterbauer-vorschau/, danach `node scripts/bedingungen-pdf.mjs`;
   Änderungen gehören in die Vorschau. Protokoll docs/profis/2026-10-26-fensterbauer-dna.md.
+- Ein Kopfbereich für beide Ansichten der Startseite (Korrektur des Inhabers, 26.10.2026, „den Header anpassen an die Ansicht von den
+  Kunden“): Die Ansicht Fensterbauer zeigt den Kopf der eingebetteten DNA-Seite (Marke, Umschalter, Pille), nicht die alte Kopfzeile
+  des Portals; Pilotband, Portal-Kopf und Portal-Fuß bleiben dort aus. Wird eine weitere Seite eingebettet, gilt dasselbe.
 - Nur der genannte Bereich (Korrektur des Inhabers, 26.10.2026): Ein Auftrag „überarbeite die Seite für Fensterbauer“ meint genau diese
   Landingpage. Nichts aus App, Portal oder Betriebsbereich wird mit hineingenommen; andere Seiten werden nur gelesen, nie geändert, und
   die Lieferung sagt, welche Dateien berührt wurden.

@@ -622,6 +622,5 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fuss__pilot { margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--tinte-2); max-width: 60ch; }
 .ez-fuss__pilot .ez-badge-indigo { margin-right: 6px; height: 20px; vertical-align: -5px; }
 
-.fb.eingebettet .ez-kopf, .fb.eingebettet .ez-leiste, .fb.eingebettet .ez-fuss, .fb.eingebettet .ez-skip { display: none; }
-.fb.eingebettet .dna-szene { position: relative; top: 0; }
+/* Eingebettet in die Startseite (portal.js, .fb.eingebettet): Kopf, Leiste, Vorhang und Fuß wie auf der eigenen Seite, das Portal zeichnet dort keinen Kopf */
 @media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }

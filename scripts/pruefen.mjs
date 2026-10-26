@@ -166,10 +166,13 @@ if (teil(2)) {
   ok(!!sn2 && /Einführungspreis/.test(sn2.text) && /bis 17\. November, danach 12,99 €/.test(sn2.text) && /7,99 ?€ ?einmal fürs Aufmaßblatt/.test(sn2.text) && /Das Aufmaßblatt kostet einmal 7,99 €/.test(sn2.text), 'Startseite: Preis aus modell.js (7,99 €), Einführungspreis im Abschnitt „Preis“ (danach 12,99 €)');
   await foto(page, 'portal-desktop');
   await page.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' });
-  ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar (Ansicht Fensterbauer)');
+  ok(await page.locator('.fx-pilot').count() === 1 && !(await page.locator('.fx-pilot').isVisible()), 'Startseite (Fensterbauer): Pilotband ausgeblendet, der Satz zur Pilotphase steht im Fuß der eingebetteten Seite');
+  await page.goto(BASE + '/#wie', { waitUntil: 'networkidle' });
+  ok(await page.locator('.fx-pilot').isVisible(), 'Pilot-Hinweis sichtbar (So funktioniert es für Betriebe)');
   await page.click('.fx-pilot button.zu');
   await page.reload({ waitUntil: 'networkidle' });
   ok(await page.locator('.fx-pilot').count() === 0, 'Pilot-Hinweis bleibt nach Schließen weg');
+  await page.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null);
   const links = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(links.includes('/impressum/') && links.includes('/datenschutz/'), 'Fußzeile verlinkt Impressum und Datenschutz');
   ok(await page.evaluate(() => typeof unpack === 'function' && !!unpack('x') === false), 'Portal-Code geladen');
@@ -179,8 +182,8 @@ if (teil(2)) {
   // Ansicht: Umschalter oben, Anker, Knöpfe nur für die gewählte Zielgruppe
   const ctxA = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const pa = await neueSeite(ctxA);
-  /* Ansicht Hauseigentümer: Kopf und Ansicht stehen im Baustein (Schatten-DOM von #startseite), Fensterbauer: in der Kopfzeile des Portals */
-  const zustand = () => pa.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot || null, top = document.querySelector('.top'); return { a: sr ? ((sr.querySelector('.ez-kopf nav.ez-ansicht a[aria-current]') || {}).textContent || '').trim() : ((document.querySelector('.top .ansicht [aria-pressed="true"]') || {}).textContent || ''), n: sr ? sr.querySelectorAll('.ez-kopf nav.ez-ansicht a').length : document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].concat(sr ? [...sr.querySelectorAll('h1')] : []).map((h) => h.textContent.replace(/\s+/g, ' ').trim()), b2c: !!sr, b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: !!top && top.classList.contains('cta-still'), top: sr ? [...sr.querySelectorAll('.ez-kopf a.dna-pille')].map((b) => b.innerText.trim()) : [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), hash: location.hash, screen: S.screen }; });
+  /* Ansicht Hauseigentümer: Kopf und Ansicht stehen im Baustein (Schatten-DOM von #startseite), Fensterbauer: im Kopf der eingebetteten Seite (.vk-einbettung .ez-kopf); auf den übrigen Seiten für Betriebe in der Kopfzeile des Portals */
+  const zustand = () => pa.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot || null, top = document.querySelector('.top'), ek = document.querySelector('.vk-einbettung .ez-kopf'); return { a: ((sr ? sr.querySelector('.ez-kopf nav.ez-ansicht a[aria-current]') : ek ? ek.querySelector('nav.ez-ansicht a[aria-current]') : document.querySelector('.top .ansicht [aria-pressed="true"]')) || { textContent: '' }).textContent.trim(), n: sr ? sr.querySelectorAll('.ez-kopf nav.ez-ansicht a').length : ek ? ek.querySelectorAll('nav.ez-ansicht a').length : document.querySelectorAll('.top .ansicht button').length, h1: [...document.querySelectorAll('h1')].concat(sr ? [...sr.querySelectorAll('h1')] : []).map((h) => h.textContent.replace(/\s+/g, ' ').trim()), b2c: !!sr, b2b: !!document.querySelector('.hero.b2b'), vk: !!document.querySelector('.vk-einbettung .fb #hero'), still: !!top && top.classList.contains('cta-still'), top: sr ? [...sr.querySelectorAll('.ez-kopf a.dna-pille')].map((b) => b.innerText.trim()) : ek ? [...ek.querySelectorAll('a.dna-pille')].map((b) => b.innerText.trim()) : [...document.querySelectorAll('.top .btn')].filter((b) => b.offsetParent).map((b) => b.innerText.trim()), portalKopf: !!top, portalFuss: !!document.querySelector('footer.foot'), hash: location.hash, screen: S.screen }; });
   /* Ansicht Fensterbauer: portal.js lädt die Paket-Landingpage /fuer-fensterbauer/ nach und bettet sie ein; darauf warten */
   const einbettung = async () => { await pa.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null); await pa.waitForTimeout(300); };
   await pa.goto(BASE + '/', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
@@ -189,12 +192,12 @@ if (teil(2)) {
   ok(await pa.locator('.ez-kopf a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-hero a.dna-pille[href$="/app/#ausmessen"]').count() === 1 && await pa.locator('.ez-fb a[href="/#fensterbauer"]').count() === 1 && await pa.locator('.ez-ratgeber a[href="/ratgeber/fenster-ausmessen/"]').count() === 1, 'Hauseigentümer: „Jetzt konfigurieren“ führt in die App, gleich in den ersten Schritt (#ausmessen), Ratgeber verlinkt, am Ende der Weg zur Ansicht für Fensterbauer');
   await pa.click('.ez-kopf nav.ez-ansicht a[href="/#fensterbauer"]'); await einbettung();
   z = await zustand();
-  ok(z.a === 'Fensterbauer' && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Anmelden') && z.top.includes('Kostenlos starten') && !z.top.includes('Fenster ausmessen') && z.still, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit genau einem h1, keine Startbilder der Ansichten, „Anmelden“ und „Kostenlos starten“ (als Ring, solange „Pakete ansehen“ im Bild ist)');
-  ok(await pa.locator('.wechsel [data-act="ansicht"][data-v="kunde"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, am Ende der Weg zu den Hauseigentümern');
-  ok(await pa.locator('.vk-einbettung .ez-paket').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/partner/frage"]').count() === 1 && await pa.locator('.vk-einbettung .ez-livegang').count() === 1 && !(await pa.locator('.vk-einbettung .fb .ez-kopf').isVisible()) && !(await pa.locator('.vk-einbettung .fb .ez-fuss').isVisible()) && !(await pa.locator('.vk-einbettung .fb .ez-leiste').isVisible()), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, Kopf, Leiste und Fußzeile der Seite nicht');
+  ok(z.a === 'Fensterbauer' && z.n === 2 && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Paket anfragen') && !z.top.some((t) => /Anmelden|starten|ausmessen/i.test(t)) && !z.portalKopf && !z.portalFuss, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit ihrem eigenen Kopf (Umschalter, „Paket anfragen“), genau einem h1 und eigener Fußzeile; keine Kopf- oder Fußzeile des Portals, keine Startbilder der Ansichten');
+  ok(await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[href="/#hauseigentuemer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[aria-current][href="/#fensterbauer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-wissen a.ez-linkzeile[href="/#hauseigentuemer"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, oben der Umschalter (Fensterbauer bleibt in der Ansicht), am Ende der Weg zu den Hauseigentümern');
+  ok(await pa.locator('.vk-einbettung .ez-paket').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/partner/frage"]').count() === 1 && await pa.locator('.vk-einbettung .ez-livegang').count() === 1 && await pa.locator('.vk-einbettung .fb .ez-kopf').isVisible() && await pa.locator('.vk-einbettung .fb .ez-fuss .ez-fuss__pilot').count() === 1 && await pa.evaluate(() => getComputedStyle(document.querySelector('.vk-einbettung .fb .ez-leiste')).position === 'fixed' && getComputedStyle(document.querySelector('.vk-einbettung .fb .dna-szene')).position === 'sticky'), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, dazu Kopf, Leiste, Vorhang und Fußzeile der Seite wie auf /fuer-fensterbauer/');
   await pa.click('.vk-einbettung .ez-aktionen a[href="#pakete"]'); await pa.waitForTimeout(1800);
-  const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), t = document.querySelector('.top').getBoundingClientRect(), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, unterKopf: !!r && r.top >= t.bottom - 1 && r.top < t.bottom + 80 }; });
-  ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.unterKopf, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt unter die Kopfzeile; Ansicht und Anker #fensterbauer bleiben');
+  const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, oben: !!r && r.top >= -1 && r.top < 80 }; });
+  ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.oben, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt an den oberen Rand; Ansicht und Anker #fensterbauer bleiben');
   await pa.reload({ waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   ok((await zustand()).a === 'Fensterbauer', 'Gewählte Ansicht bleibt nach dem Neuladen');
   await pa.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
@@ -203,9 +206,10 @@ if (teil(2)) {
   await pa.goto(BASE + '/#betriebe', { waitUntil: 'networkidle' }); await einbettung();
   z = await zustand();
   ok(z.a === 'Fensterbauer' && z.vk && z.hash === '#fensterbauer', 'Früherer Anker /#betriebe öffnet die Ansicht für Fensterbauer');
+  await pa.goto(BASE + '/#wie', { waitUntil: 'networkidle' }); await pa.waitForTimeout(300);
   await pa.click('.top [data-act="go"][data-v="preise"]'); await pa.waitForTimeout(300);
   z = await zustand();
-  ok(z.screen === 'preise' && z.a === 'Fensterbauer', 'Preise gehören zur Ansicht Fensterbauer, der Umschalter zeigt es');
+  ok(z.screen === 'preise' && z.a === 'Fensterbauer' && z.portalKopf && z.top.includes('Anmelden'), 'Preise gehören zur Ansicht Fensterbauer; dort zeichnet das Portal die Kopfzeile mit Umschalter und „Anmelden“ für Bestandsbetriebe');
   await pa.click('.top .ansicht [data-v="kunde"]'); await pa.waitForTimeout(300);
   z = await zustand();
   ok(z.screen === 'landing' && z.a === 'Hauseigentümer' && z.b2c && z.hash === '#hauseigentuemer', 'Von den Preisen per Umschalter zur Startseite der Hauseigentümer');
@@ -1040,7 +1044,7 @@ if (teil(6)) {
   sauber(d6, 'Direktlink ins Projekt ohne Fehler'); await c6d.close();
   /* Nacharbeit portal, Telefon abgemeldet: das Logo neben „Zurück“ (Registrierung, ohne Schriftzug) und die Schrittknöpfe der Tour sind mindestens 44 px breit */
   const c6z = await browser.newContext(telefon), z6 = await neueSeite(c6z);
-  await z6.goto(BASE + '/#fensterbauer', { waitUntil: 'networkidle' }); await z6.waitForTimeout(300);
+  await z6.goto(BASE + '/#wie', { waitUntil: 'networkidle' }); await z6.waitForTimeout(300); // „So funktioniert es“: dort zeichnet das Portal die Kopfzeile mit „Kostenlos starten“ (die Ansicht Fensterbauer der Startseite hat den Kopf der eingebetteten Seite)
   await z6.click('.top [data-act="reg"]'); await z6.waitForTimeout(300);
   const masz6 = (sel) => z6.evaluate((sel) => Array.from(document.querySelectorAll(sel)).filter((e) => e.getClientRects().length).map((e) => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }), sel);
   const logo6 = await masz6('.top .logo-s.neben-zurueck');
@@ -1454,6 +1458,8 @@ if (teil(9)) {
   /* ohne die eingebettete Verkaufsseite: ihre „Live-Demos“ sind echte Konfigurator-Instanzen der Pakete, keine Demo-Konten */
   const ohneDemo = async (wo) => { const t = await page.evaluate(() => { const b = document.body.cloneNode(true); b.querySelectorAll('.vk-einbettung').forEach((e) => e.remove()); return b.textContent; }); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
   ok(await ohneDemo('Startseite') === true, 'Startseite ohne Demo-Konten und Beispiel-Registrierung');
+  /* „Anmelden“ und „Kostenlos starten“ stehen in der Kopfzeile des Portals auf „So funktioniert es“ und „Preise“; die Ansicht Fensterbauer der Startseite trägt den Kopf der eingebetteten Seite */
+  await page.goto(BASE + '/#wie', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
   await page.click('.top [data-act="sheet"][data-v="login"]'); await page.waitForTimeout(300);
   ok(await ohneDemo('Anmelden') === true && await page.locator('.sheet [data-act="tour"]').count() === 1, 'Anmelden: keine Demo-Zugänge mehr, dafür der Weg in die Tour');
   await page.evaluate(() => { S.sheet = null; render(); });

@@ -805,8 +805,10 @@ const wechsel = (zu) => zu === 'betrieb'
 /* ---------- Einbettung der Seite für Fensterbauer (Ansicht Fensterbauer) ----------
    Eine Quelle: Die Seite bleibt die statische Seite /fuer-fensterbauer/ (Suchmaschinen, fensterbauer-dna.css, fensterbauer-dna.js). Die
    Startseite lädt sie einmal je Seitenaufruf (fetch, gleiche Herkunft), nimmt den Rahmen .fb (Gestaltung und Skripte gelten nur darin)
-   und setzt ihn in den Behälter .vk-einbettung; danach startet FbSeite.auf darauf mit { eingebettet: true } (ohne eigene Kopf- und
-   Fußzeile, die Startseite hat ihre). Liegt der Inhalt schon im Speicher, steht er beim nächsten Aufbau sofort im HTML (kein Flackern,
+   und setzt ihn in den Behälter .vk-einbettung; danach startet FbSeite.auf darauf mit { eingebettet: true }. Seit dem 26.10.2026 bringt
+   die Seite Kopf (Marke, Umschalter, „Paket anfragen“), Leiste, Vorhang und Fußzeile selbst mit, wie die Ansicht Hauseigentümer; das
+   Portal zeichnet in dieser Ansicht weder Kopf- noch Fußzeile (kopflos, fusslos, Wunsch des Inhabers: ein Kopfbereich für beide
+   Ansichten). Liegt der Inhalt schon im Speicher, steht er beim nächsten Aufbau sofort im HTML (kein Flackern,
    die Scrollposition bleibt, etwa beim Öffnen des Anmeldeblatts); ein neuer Start beendet den vorigen. Fällt das Laden aus, steht die
    Karte „Pakete ansehen“ mit dem Link zur Seite, nie eine leere Fläche; der nächste Aufbau versucht es wieder. Sprungmarken der Seite
    (#pakete, #bestellen …) scrollen innerhalb der Einbettung, ohne die Adresse zu ändern, denn Hashes steuern auf der Startseite die
@@ -835,7 +837,7 @@ function einbettungAuf(el) {
   vkLaden().then((html) => {
     const ziel = document.querySelector('.vk-einbettung[aria-busy="true"]'); if (!ziel) return;
     ziel.removeAttribute('aria-busy');
-    if (!html) { ziel.classList.add('vk-rueckfall'); ziel.innerHTML = vkRueckfall(); return; }
+    if (!html) { ziel.classList.add('vk-rueckfall'); ziel.innerHTML = vkRueckfall() + '<div class="wrap">' + wechsel('kunde') + '</div>'; return; }
     ziel.innerHTML = html; vkStarten(ziel); kopfCta();
   });
 }
@@ -857,8 +859,8 @@ SCREENS.landing = () => {
   /* Ansicht Fensterbauer: Hinweis zum Code vom Aufmaßblatt (?von=pdf), dann die eingebettete Paket-Landingpage (ihr h1 ist das einzige
      dieser Ansicht), am Ende der Weg zu den Hauseigentümern. Die frühere Werbung für Aufmaß-Links (Tour, Rechner, „Holen Sie es in Ihr
      Konto“) ist hier weg (Bauplan E28); Preise, Anmelden und „Kostenlos starten“ bleiben in der Kopfzeile für Bestandsbetriebe. */
-  if (ansicht() === 'betrieb') return { title: 'eeziframes', html: '<div class="wrap">' + (vonPdf() ? '<div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div>' : '') +
-  '</div>' + einbettung() + '<div class="wrap">' + wechsel('kunde') + '</div>' }; // die Seite für Fensterbauer volle Breite, außerhalb von .wrap
+  if (ansicht() === 'betrieb') return { title: 'eeziframes', kopflos: true, fusslos: true, html: (vonPdf() ? '<div class="wrap"><div class="banner vonpdf"><span><b>Sie halten ein eeziframes-Aufmaß in der Hand?</b> So holen Sie es in Ihr Konto: kostenlos registrieren, dann „Code vom Kunden einfügen“ und den Code von der letzten Seite eintippen oder einfügen. Die ersten 3 Aufmaße sind frei.</span><span class="row"><button type="button" class="btn small ghost" data-act="reg" data-v="betrieb">Kostenlos registrieren</button><button type="button" class="btn small ghost" data-act="vonpdf-zu">Später</button></span></div></div>' : '') +
+  einbettung() }; // die Seite für Fensterbauer volle Breite, außerhalb von .wrap; den Weg zu den Hauseigentümern hat sie selbst (Umschalter, Zeile unter dem Hero, Fuß)
   /* Ansicht Hauseigentümer (seit 26.10.2026): die Startseite nach der Design-DNA (startseite.js, startseite-dna.css, Vorlage in
      index.html) mit eigenem Kopf und eigener Fußzeile; portal.js zeichnet hier weder Kopfzeile noch Einführungsband noch Fußzeile */
   return { title: 'eeziframes', kopflos: true, fusslos: true, html: '<div class="startseite-halter" id="startseite"></div>' };
