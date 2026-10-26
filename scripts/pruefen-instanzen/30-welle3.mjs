@@ -35,8 +35,7 @@ export default async (h) => {
     const ctxV = await kontext({ viewport: { width: 1280, height: 900 } }), sV = await h.neueSeite(ctxV, B);
     await sV.goto(B + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
     const ziele = await sV.$$eval('a[href^="/partner/#bestellen/"]', (as) => as.map((a) => a.getAttribute('href')));
-    await sV.locator('#pk-tab-2:visible, .pk-karte[data-paket="2"] .pk-wahl:visible').first().click(); await sV.waitForTimeout(400);
-    await sV.click('.pk-karte[data-paket="2"] a[href="/partner/#bestellen/signature"]');
+    await sV.click('#paket-signature a[href="/partner/#bestellen/signature"]');
     await sV.waitForURL(/\/partner\/#bestellen\/signature$/, { timeout: 8000 }).catch(() => null);
     await bis(sV, () => !!document.querySelector('.p-kopfblock .kicker'), 8000);
     const bf = await sV.evaluate(() => ({ url: location.pathname + location.hash, kicker: ((document.querySelector('.p-kopfblock .kicker') || {}).textContent || '').trim(), text: document.body.innerText }));
@@ -236,9 +235,9 @@ export default async (h) => {
     await sH.click('.ez-kopf nav.ez-ansicht a[href="/#fensterbauer"]'); await sH.waitForTimeout(300);
     /* die Ansicht Fensterbauer bettet die Paket-Landingpage ein (portal.js, Einbettung der Verkaufsseite): auf die Einbettung warten */
     await sH.waitForSelector('.vk-einbettung .fb[data-fb-an="1"], .vk-einbettung.vk-rueckfall', { timeout: 8000 }).catch(() => null);
-    const karte = await sH.evaluate(() => ({ hero: !!document.querySelector('.vk-einbettung .fb #hero'), pakete: document.querySelectorAll('.vk-einbettung .pk-karte').length, h1: Array.from(document.querySelectorAll('h1')).map((e) => e.textContent.trim()) }));
+    const karte = await sH.evaluate(() => ({ hero: !!document.querySelector('.vk-einbettung .fb #hero'), pakete: document.querySelectorAll('.vk-einbettung .ez-paket').length, h1: Array.from(document.querySelectorAll('h1')).map((e) => e.textContent.trim()) }));
     const fb = await X.api('localhost', '/fuer-fensterbauer/');
-    ok(start.wechsel && start.ansicht && !start.alt && karte.hero && karte.pakete === 3 && karte.h1.length === 1 && /Anfragen mit Aufmaß/.test(karte.h1[0]) && fb.status === 200 && /<article class="pk-karte[^"]*" data-paket="2">/.test(fb.text), 'Startseite eeziframes.com: „Für Fensterbauer“ führt zu den Paketen (die Ansicht für Bestandsbetriebe bleibt erreichbar), die Ansicht für Fensterbauer bettet die Paket-Landingpage ein (Startbild, drei Paketkarten, ein h1: ' + karte.h1.join(' | ') + ')');
+    ok(start.wechsel && start.ansicht && !start.alt && karte.hero && karte.pakete === 3 && karte.h1.length === 1 && /Anfragen mit Aufmaß/.test(karte.h1[0]) && fb.status === 200 && /<article class="ez-paket[^"]*" id="paket-signature"/.test(fb.text), 'Startseite eeziframes.com: „Für Fensterbauer“ führt zu den Paketen (die Ansicht für Bestandsbetriebe bleibt erreichbar), die Ansicht für Fensterbauer bettet die Paket-Landingpage ein (Startbild, drei Paketkarten, ein h1: ' + karte.h1.join(' | ') + ')');
     await sH.evaluate(() => { S.sheet = { k: 'login' }; render(); });
     await sH.waitForSelector('form[data-form="srvlogin"] #lg-mail');
     await sH.fill('#lg-mail', TEAM); await sH.click('form[data-form="srvlogin"] button[type="submit"]');

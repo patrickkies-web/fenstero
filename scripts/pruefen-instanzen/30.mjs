@@ -124,10 +124,8 @@ export default async (h) => {
       P.ctxK = ctx; P.sK = s;
       await s.goto(B + '/fuer-fensterbauer/', { waitUntil: 'networkidle' });
       if (P.p === 'plus') await bild(s, '02-verkaufsseite-offen-1280');
-      /* Seite für Fensterbauer: erst das Paket wählen (Tab am Telefon, Karte am Schreibtisch), dann „… bestellen“ unter der Karte */
-      const nr = Pk.LISTE.indexOf(P.p);
-      await s.locator('#pk-tab-' + nr + ':visible, .pk-karte[data-paket="' + nr + '"] .pk-wahl:visible').first().click(); await s.waitForTimeout(400);
-      await s.click('.pk-karte[data-paket="' + nr + '"] a[href="/partner/#bestellen/' + P.p + '"]');
+      /* Seite für Fensterbauer (Design-DNA): „… bestellen“ unten in der Karte des Pakets */
+      await s.click('#paket-' + P.p + ' a[href="/partner/#bestellen/' + P.p + '"]');
       await s.waitForSelector('.p-paket[aria-pressed="true"]');
       const gewaehlt = await s.getAttribute('.p-paket[aria-pressed="true"]', 'data-v');
       await bild(s, '03-bestellformular-' + P.p + '-paket-' + P.geraet);
