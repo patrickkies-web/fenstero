@@ -33,6 +33,13 @@
     stufen.forEach(function (s) { io.observe(s); });
   }
 
+  /* Hero-Choreografie: Bühne und Überschrift zuerst, nach 450 ms rollt die Zahl auf dem Gerät ein (DNA-Rezept 8), danach hängt sich das Etikett an den Zollstock (CSS-Verzögerung) */
+  var zahl = d.querySelector('[data-ez-zahl]');
+  if (zahl) {
+    function zahlStart() { zahl.classList.add('ist-da'); zahl.setAttribute('data-dna', 'zahl'); if (w.DNA) w.DNA.start(zahl.parentNode); }
+    if (reduziert) zahlStart(); else setTimeout(zahlStart, 450);
+  }
+
   /* Stationen anklickbar: springen zur Stufe */
   stationen.forEach(function (li, i) {
     li.setAttribute('tabindex', '0'); li.setAttribute('role', 'link');
