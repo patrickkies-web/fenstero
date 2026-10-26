@@ -349,3 +349,30 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 
 /* ---------- Ruhig ---------- */
 @media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }
+
+/* Eigene Domain auch in Essential (pakete.js): dasselbe Schloss wie in Plus und Signature */
+.ez-adresse__text { display: inline-flex; align-items: center; gap: 6px; }
+.ez-adresse__text b { color: var(--weiss); font-weight: 500; }
+.ez-adresse__text svg { width: 14px; height: 14px; flex: none; color: var(--silbergrau); }
+.ez-adresse__text svg * { vector-effect: non-scaling-stroke; }
+
+/* ---------- Paket-Stufen (15 Fensterbauer, 26.10.2026): Telefon im Kopf, Etiketten „ab Plus / ab Signature“ ---------- */
+.ez-kopf__rechts { display: inline-flex; align-items: center; gap: 12px; flex: none; }
+.ez-rund { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--tinte); background: radial-gradient(at 30% 20%, rgba(255,255,255,.14), rgba(255,255,255,.03) 70%); box-shadow: inset 0 0 0 1.5px var(--silbergrau), inset 0 1px 0 rgba(255,255,255,.2); transition: background-color 220ms ease, box-shadow 220ms ease, transform 220ms var(--dna-druck); -webkit-tap-highlight-color: transparent; }
+.ez-rund svg { width: 20px; height: 20px; }
+.ez-rund svg * { vector-effect: non-scaling-stroke; }
+.ez-rund:active { transform: scale(.94); transition-duration: 0s; }
+.ez-rund:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { .ez-rund:hover { background-color: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px var(--tinte), inset 0 1px 0 rgba(255,255,255,.2); } }
+@media (max-width: 420px) { .ez-kopf .ez-gast__von { display: none; } }
+.ez .ez-muster--domain { left: var(--ex, 40%); top: calc(var(--ey, 9%) + 7%); translate: -50% 0; }
+.ez .ez-muster--bühne { left: 12px; bottom: 12px; }
+.ez .ez-muster--zweizeilig { white-space: normal; max-width: 220px; }
+.ez .ez-muster--text { right: 0; top: -10px; }
+.ez .ez-muster--block { display: flex; width: fit-content; max-width: 100%; margin-top: 8px; }
+.ez-fuss__kz { margin: 0; min-height: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
+.ez-ab-fotos { display: none; position: relative; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 12px; border-radius: var(--rund-l); border: 1.5px dashed color-mix(in srgb, var(--koralle) 60%, transparent); }
+.ez.ist-muster .ez-ab-fotos { display: grid; }
+.ez .ez-ab-fotos .ez-muster { position: relative; left: auto; top: auto; grid-column: 1 / -1; justify-self: start; }
+.ez-ab-fotos i { display: block; height: 96px; border-radius: var(--rund-m); background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--silbergrau) 45%, transparent) 0 1.2px, transparent 1.2px 5px); }
+@media (min-width: 900px) { .ez-ab-fotos i { height: 140px; } .ez .ez-muster--bühne { left: 18px; bottom: 18px; } }

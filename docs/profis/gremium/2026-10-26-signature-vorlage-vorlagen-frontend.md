@@ -1,135 +1,198 @@
-# Abgleich Frontend und Leistung (Tobias Lenz): Vorlage EEZI Signature
+# Abgleich Frontend und Leistung (Tobias Lenz): Vorlage EEZI Signature, zweite Runde
 
-Stand 26.10.2026, Vorschau docs/profis/signature-vorschau/ (index.html, start.css, start.js, dna/bundle.*). Simulierte Stimme. Messwerte des Briefs übernommen (0,36 s bei vierfacher CPU-Drossel, Layoutsprung 0, 273 kB Bilder, 0 Animationen nach 2,6 s, keine Konsolenfehler); selbst gemessen: Bildmaße und WebP-Neukodierung (Pillow, im Scratchpad, nichts im Projekt angelegt), Pixelbreiten aus den Bildschirmfotos (r3, r3z, bew), Breiten bei 320/360/1920 px aus dem Code abgeleitet. Die dna-Bausteine (bundle.css, bundle.js) bleiben unverändert; was sie betrifft, steht als „Vorschlag ans Design-System“.
+Stand 26.10.2026, Vorschau docs/profis/signature-vorschau/ nach Gremium und Feinschliff (Commit 31ec201: Radios statt Knöpfe, Stapelung der zwei Hero-Zustände, Link-Etikett mit `@starting-style`). Simulierte Stimme, Messungen echt: Playwright (Chromium headless) gegen http://localhost:8790/lokal.html, Telefon 390 × 844 (dpr 2, Touch), Schreibtisch 1280 × 800, dazu 320, 360, 412 und 1920 px; Drosselung CPU 4× und für das LCP zusätzlich 1,6 Mbit/s bei 150 ms. Skripte und Probe-Korrekturen nur im Scratchpad (Anfragen abgefangen, nichts im Projekt geändert). Das erste Urteil dieser Datei (Stand vor dem Umbau) steht in Commit 31ec201.
 
-Gesamteindruck: Die Seite steht da, wo die Vorlagen des Inhabers stehen (Telefon auf Beton bei ui.vitali, Zahl als Held bei Heeal, Glas-Etikett auf dem Foto bei der Koch-App): nichts läuft nach dem Hero weiter, nichts rechnet beim Scrollen, Glas nur auf kleinen Chips, die Bühne wird einmal gerastert. Die Lücken liegen nicht in der Leistung, sondern an drei Stellen, die genau die Kaufmomente treffen: der Umschalter der Vorlage reagiert in der falschen Reihenfolge und lässt den Vorhang mit alter Höhe stehen; die zwei Zahlen-Helden (Telefonnummer, Dashboard-Karte) laufen bei 360 px (häufigste Android-Breite) über die Kante; und die Vorlage ist noch nicht so gebaut, dass die Instanz aus ihr sauber einen Zustand ohne Muster-Ebene schneiden kann.
+Während der Prüfung hat eine andere Sitzung ab 21:27 Uhr die Muster-Ebene umgebaut (muster.css, muster.js, neue Muster-Leiste `.ez-ml`, `.ez-dash`, Startzustand „Einladung“). Hebel 1 habe ich gegen diesen Arbeitsstand nachgemessen; er gilt dort stärker. Was nur den Arbeitsstand betrifft, steht am Ende gesondert.
+
+Gesamteindruck: Laufzeit und Bedienung sind jetzt auf dem Niveau der Vorlagen des Inhabers. Nach dem Laden läuft nichts mehr, Tippen antwortet in 48 bis 80 ms bei vierfach gedrosselter CPU, beim Scrollen wird nichts gerastert, und Glas liegt nur auf kleinen Flächen. Die Lücken sitzen an den Rändern: Der Vorhang kennt die Höhen nach dem Umschalten nicht, die Telefonnummer läuft am Mittelklasse-Android in den Anrufknopf, und für die Übernahme fehlt noch der Schnitt auf genau einen Zustand. Dazu fehlt ein Budget für die echten Fotos des Betriebs.
 
 ## Was schon gut ist (drei Zeilen)
 
-1. Ladeweg: Bühne per Preload und `fetchpriority="high"`, jedes Bild mit Maßen, Outfit (32 kB) preloaded, kein `filter: blur` auf Flächen (Leuchten ohne Weichzeichner, G14), 0,36 s gedrosselt, Layoutsprung 0, keine fremden Server, nichts außer der einen Inline-Zeile gegen die CSP.
-2. Bewegung endet: `will-change` nur bis `.ist-da`, Bühne und Gerät nur 2-D (`scale(1,.81) rotate(-20deg)`, keine 3-D-Ebene), Muster-Etiketten und Toast über `opacity`/`visibility` statt Platz, Druck mit `transition-duration: 0s` sofort, `touchstart`-Lauscher für `:active` auf iOS, nach 2,6 s steht alles.
-3. Robustheit: `overflow-x: clip` statt `hidden` (kein Scrollcontainer), `localStorage` in try/catch, Fokus unter dem Vorhang wird geholt, die Leistengrenze wird relativ zur Szene gemessen (der Sticky-Versatz-Fehler des Vorgängers ist weg), Doppelbilder (konfig/*) nur einmal geladen.
+1. Umschalter: echte Radios (gewählt im selben Bild, Pfeiltasten gemessen), Tausch über `transitionend` bei 171 ms, Rückfall-Uhr 240 ms, `tausche()` ist idempotent. Schneller Doppelwechsel (40 ms sowie 200/30 ms) endet immer auf dem letzten Klick, mit Deckkraft 1 und ohne hängendes `ist-wechsel`. Bei weniger Bewegung wird sofort getauscht.
+2. Stapelung: Die Pille steht in beiden Zuständen gleich (713 px am Telefon, 460 px am Schreibtisch), die Höhe des Hero-Texts ist gleich (485 bzw. 470 px), Layoutsprung 0. Die versteckte Fassung ist per `visibility: hidden` aus dem Baum der Vorleser.
+3. Laufzeit: Nach 2,24 s laufen 0 Animationen. Das Skript tut beim Scrollen nichts (ein rAF, keine Scroll-Bausteine). Kein Querscrollen bei 320 und 1920 px. Die Bilder wiegen 273 kB und haben alle Maße; das Desk-Modell lädt am Telefon nie, Inter ist ganz weg.
 
-## Abgleich mit dem Vorgänger-Urteil (fensterbauer-dna-vorlagen-frontend.md), nur was offen blieb
+## Abgleich: was aus Runde 1 und dem Fensterbauer-Urteil noch offen ist (nicht wiederholt, nur Stand)
 
-- Hebel 1 (Vorhang nach Höhenänderung, ResizeObserver, Original-Getter von `innerHeight`): nicht übernommen; `start.js` liest weiter `documentElement.clientHeight`. Auf dieser Seite gibt es kein `<details>`, dafür ändert der Umschalter die Höhe (siehe Hebel 1 unten).
-- Hebel 2b (Leiste mit `visibility: hidden`, Backdrop-Ebene weg solange sie oben liegt): nicht übernommen. Gilt weiter, ist aber klein.
-- Hebel 3 (Metrik-Ersatzschrift für Outfit, CLS bei Slow 4G messen): gilt weiter. Positiv: Inter ist weg, nur noch Outfit; Doto wird deklariert, aber von keinem Element verlangt und darum nicht geladen (0 Byte).
-- Hebel 4 (Glaskarte ohne `heraustreten`): übernommen, nichts auf der Seite ist scrollgebunden. Hebel 5 (CSP-Hash oder js-da.js): nicht übernommen, Inline-Skript steht noch im Kopf (Hebel 3 unten).
+- Runde 1, Hebel 1 (Umschalter): Reihenfolge, Doppelklick und Regel für weniger Bewegung sind erledigt. Das Neuordnen des Vorhangs nach dem Tausch fehlt weiter, siehe Hebel 1.
+- Runde 1, Hebel 2 (Zahlen-Helden bei 360 px): offen, neu gemessen, siehe Hebel 2.
+- Runde 1, Hebel 3 (Marker für Zustand und Muster-Ebene, js-da.js): offen, ergänzt in Hebel 3.
+- Runde 1, Hebel 4 (Bühne 720/1000): offen. Für die Vorlage ist das klein (1000 px passt zu 412 CSS-Pixeln × dpr 2,625). Entscheidend sind die Fotos der Instanz, siehe Hebel 4.
+- Runde 1, Hebel 5 (`color-mix()`): offen, inzwischen drei Hof-Variablen mehr. Die Wirkung bleibt klein.
+- Fensterbauer-Urteil: `innerHeight` liest weiter `documentElement.clientHeight`. Die Leiste behält ihr Backdrop, solange sie oben liegt, und es gibt keine Metrik-Ersatzschrift. Alle drei Punkte sind weiter offen und werden hier nicht neu begründet. Erledigt ist die Grenze der Leiste: Sie wird jetzt relativ zu Szene 1 gemessen.
 
 ## Hebel nach Wirkung
 
-### 1. Umschalter: Bedienfläche vor Inhalt, Doppelklick, Vorhang nach dem Tausch (hoch für den Verkaufsweg)
+### 1. Vorhang nach jeder Höhenänderung neu ordnen (hoch, trifft den Kaufknopf)
 
-Wo · `start.js`, Block „Zustand der Vorlage“ (`setzeModus`, `modusUhr`, 160 ms) und Block „Muster-Ebene“ (`schalter`); `start.css` `@media (prefers-reduced-motion: reduce)` und `.ez-link-etikett`.
+Wo · `start.js`, neuer Block nach dem `innerHeight`-Block. Ursache ist `dna/bundle.js vorhang()`: `ordne()` läuft nur bei `load` und `resize`.
 
-Was ist · (a) `aria-pressed` wird erst nach 160 ms in `setzeModus` gesetzt, dann läuft die Farbe 220 ms nach; in `bew/modus-mitte-1.png` steht der neue Hero-Text schon, während der Umschalter noch zwischen beiden Knöpfen hängt: die Bedienfläche reagiert nach dem Inhalt statt vor ihm (emil: der Knopf zuerst, der Inhalt folgt). (b) Doppelklick A→B→A innerhalb 160 ms: der zweite Klick vergleicht mit `data-modus`, das noch A ist, und wird verworfen; die Uhr setzt B, obwohl der letzte Klick A war. (c) Nach dem Tausch ändern sich die Höhen von Szene 1, 3, 4 und 5 (Pille 678 → 702 px am Telefon, Brief länger); `bundle.js ordne()` rechnet `--dna-szene-oben` nur bei `load`/`resize`, `messeGrenze` ebenso. Auf jedem Telefon, dessen Sichthöhe unter 834 px liegt (Pixel 7 mit Browserleisten ≈ 780, alle 360 × 800 mit Leisten ≈ 660), klebt Szene 1 danach 24 px zu hoch: die letzte Zeile des Hero („Etwa 5 Minuten je Fenster …“) wird von Szene 2 verdeckt, bevor sie je sichtbar war. Gleiches beim Schalter „Zeigen, was Ihres ist“ (Bento wächst um vier Reihen). (d) Bei „weniger Bewegung“ tauscht `setzeModus` sofort, aber `.ez-link-etikett` fährt per `@starting-style` trotzdem 320 ms ein und `.ez-hero__text` behält seine Transition; beide fehlen in der Ruhig-Regel. (e) Ohne JavaScript: Zustand „website“, Knöpfe tot, sonst nichts kaputt, aber die Muster-Leiste zeigt tote Bedienung.
+Was ist · Beide Schalter der Vorlage ändern Szenenhöhen, aber `--dna-szene-oben` bleibt auf dem alten Wert. Die Szene klebt dadurch zu früh, und die nächste deckt ihr Ende zu, bevor es je im Bild war. Gemessen wurde in einem Raster von 10 px über die ganze Seite. Gezählt sind Positionen, an denen das Element voll sichtbar und oberstes ist:
+- Telefon, Start „Website“, dann „Einladung“: Szene 4 wächst von 1722 auf 1962 px, der Wert bleibt −878 statt −1118. „Fenster planen“ in der Bereit-Karte ist danach an 0 statt 32 Positionen erreichbar, „Kostenlos und unverbindlich“ an 0 statt 22.
+- „Etiketten“ an: Szene 2 wächst um 648 px (Telefon) bzw. 344 px (Schreibtisch). Die Reihe der Elemente und Foto 6 kommen auf beiden Geräten nie ins Bild.
+- Im Arbeitsstand von 21:30 Uhr betrifft das jeden, der von Plus herüberwechselt (Start „Website“) und dann „Einladung“ wählt. Mit Etiketten liegt Szene 4 um 718 px (Telefon) bzw. 530 px (Schreibtisch) daneben, die Bereit-Pille ist auf beiden Geräten unerreichbar.
 
-Wie · `start.js`, Block ersetzen:
+Wie · In `start.js`:
 ```js
-var ziel = wurzel.getAttribute('data-modus'), ruhig = function () { return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches); };
-var neuOrdnen = function () { w.dispatchEvent(new Event('resize')); };   /* bundle.js ordne(), messeGrenze, plane */
-var markiere = function (m) { modusKnoepfe.forEach(function (k) { k.setAttribute('aria-pressed', k.getAttribute('data-modus') === m ? 'true' : 'false'); }); };
-try { if (w.localStorage.getItem('ez-modus') === 'einladung') { ziel = 'einladung'; wurzel.setAttribute('data-modus', ziel); markiere(ziel); } } catch (e) {}
-modusKnoepfe.forEach(function (k) {
-  k.addEventListener('click', function () {
-    var m = k.getAttribute('data-modus');
-    if (m === ziel) return;
-    ziel = m; markiere(m);                                   /* Bedienfläche sofort */
-    try { w.localStorage.setItem('ez-modus', m); } catch (e) {}
-    clearTimeout(modusUhr);
-    if (m === wurzel.getAttribute('data-modus')) { wurzel.classList.remove('ist-wechsel'); return; }   /* zurückgeklickt, bevor getauscht wurde */
-    if (ruhig()) { wurzel.setAttribute('data-modus', m); neuOrdnen(); return; }
-    wurzel.classList.add('ist-wechsel');
-    modusUhr = setTimeout(function () { wurzel.setAttribute('data-modus', ziel); wurzel.classList.remove('ist-wechsel'); neuOrdnen(); }, 160);
-  });
-});
+  /* Vorhang neu ordnen, sobald eine Szene ihre Höhe ändert (Umschalter, Etiketten, Schrift, Bilder); bundle.js ordnet nur bei load und resize */
+  if ('ResizeObserver' in w) {
+    var ordnen = false, hoehen = new ResizeObserver(function () {
+      if (ordnen) return; ordnen = true;
+      w.requestAnimationFrame(function () { ordnen = false; w.dispatchEvent(new Event('resize')); });
+    });
+    Array.prototype.forEach.call(d.querySelectorAll('.dna-szene'), function (s) { hoehen.observe(s); });
+  }
 ```
-Im Schalter-Block nach `setze(an)` ebenfalls `w.dispatchEvent(new Event('resize'))`. Der eigene Resize-Entpreller in start.js findet dabei keine Breitenänderung und bleibt still, keine Schleife. In `start.css`: `@media (prefers-reduced-motion: reduce) { .ez-leiste, .ez-muster, .ez-toast, .ez-hero__text, .ez-link-etikett { transition: none } }` und `html:not(.ez-js) .ez-modus, html:not(.ez-js) .ez-schalter { display: none }`.
+Eingespielt und gemessen: Die Bereit-Pille ist wieder an 32 Positionen erreichbar (Telefon, Einladung), die Reihe an 17 (Telefon) bzw. 26 (Schreibtisch), und nach dem Zurückschalten gilt wieder der Ausgangswert. Eine Schleife entsteht nicht: `ordne()` setzt nur eine Variable, die Höhe der Szene ändert sich dadurch nicht. Vorschlag ans Design-System: Derselbe Beobachter gehört in `vorhang()` und ruft `ordne` direkt auf. Dann braucht es kein künstliches `resize`, und jede Seite mit Vorhang ist geschützt.
 
-Warum · Der Umschalter ist das Erste, was ein Fensterbauer am Telefon antippt; wenn der Knopf nach dem Text reagiert und danach die letzte Hero-Zeile unter dem Vorhang fehlt, wirkt genau das Spitzenpaket unpräzise. Vier Zeilen, keine Bausteinänderung.
+Warum · Die Bereit-Karte ist der zweite Kaufknopf der Seite. Der Fensterbauer testet zuerst den Umschalter, scrollt dann nach unten und findet den Knopf nicht: Genau die neue Signature-Funktion lässt die Seite dann kaputt wirken. In der Instanz fängt der Beobachter zusätzlich den Schrifttausch und nachladende Bilder ab.
 
-### 2. Zahlen-Helden bei 360 px: Telefonnummer und Dashboard-Karte laufen über (hoch, trifft jede Instanz)
+### 2. Zahlen-Helden an der Kante: Telefonnummer im Anrufknopf, Dashboard-Karte abgeschnitten (hoch, trifft jede Instanz)
 
-Wo · `start.css` `.ez-kontakt__held-text b` (`font: 250 clamp(36px, 10vw, 44px)`, `white-space: nowrap`), `.ez-kontakt__held` (Grid `1fr 44px`, Lücke 12, Innenabstand 18/14); `.ez-stand__wert` (Flex, `space-between`), `.ez-stand__zahl` (nowrap), `.ez-kapseln`.
+Wo · `start.css`: `.ez-kontakt__held-text b` (`clamp(36px, 10vw, 44px)`, `white-space: nowrap`, ab 900 px 56 px), `.ez-kontakt__held` (Spalten `1fr 44px`, Lücke 12) sowie `.ez-stand__wert` (Flex ohne Umbruch).
 
-Was ist · Aus `bew/detail-kontakt.png` gemessen: „0221 123456“ braucht 254 px bei 48 px, also 0,48 em je Zeichen. Platz für die Nummer am Telefon: Breite − 32 (Hülle) − 48 (Karte) − 32 (Held) − 56 (Knopf + Lücke). Bei 390 px: 222 px Platz, 207 px Nummer (die Vorschau passt, 15 px Luft). Bei 360 px: 192 px Platz, 191 px Nummer, null Luft, und zwar mit der kürzesten denkbaren Nummer. Echte Nummern haben 12 bis 13 Zeichen (`0221 1234567`, `02203 123456`): 12 Zeichen laufen bei 390 px 4 px, bei 360 px 16 px über; 13 Zeichen 22 bzw. 34 px. `.ez-kontakt` schneidet mit `overflow: hidden` ab: die letzte Ziffer fehlt. Dashboard-Karte: „2“ (46 px) + „von 4 Fenstern“ + Kapselreihe (66 px) + Lücke = 207 px, Platz in `.ez-stand` bei 390 px 218, bei 360 px 188, bei 320 px 148: die Kapseln (das Signature-Merkmal) rutschen bei 360 px 19 px in den Rand der Route, bei 320 px werden sie abgeschnitten. In `r3/reihe-tel.jpg` sieht man beide Reihen bei 390 px schon an der Kante.
+Was ist · Gemessen wurde die Breite des Nummerntexts gegen die linke Kante des runden Knopfs. Positive Werte heißen, der Text liegt über dem Knopf:
 
-Wie · Nummer an die Container-Breite binden, die Zeichenzahl schreibt die Instanz (sie kennt die Nummer):
+| Breite | Nummer | heute | mit Korrektur |
+| --- | --- | --- | --- |
+| 320 | 0221 123456 | 44 px über dem Knopf | 26 px Schrift, 14 px Luft |
+| 360 | 0221 123456 | 4 px über dem Knopf | 31,7 px, 20 px Luft |
+| 360 | 02203 1234567 | 45 px über dem Knopf | 26,9 px, 19 px Luft |
+| 390 | 0221 123456 | passt knapp | 36,7 px, 22 px Luft |
+| 412 | 02203 1234567 | 28 px über dem Knopf | 34,1 px, 20 px Luft |
+| 1280 | 02203 1234567 | 7 px über dem Knopf | 50,9 px, 28 px Luft |
+
+Die Dashboard-Karte (`.ez-stand`, Einladungszustand) ragt bei 320 px 58 px über den Inhaltsrand der Route; 34 px davon schneidet `overflow: hidden` der Route ab. Bei 360 px ragt sie 18 px in den Innenabstand. Echte Nummern haben meist 12 oder 13 Zeichen.
+
+Wie · An das Ende von `start.css`, gemessen wie in der Tabelle:
 ```css
 .ez-kontakt__held { container-type: inline-size; }
-.ez-kontakt__held-text b { font-size: clamp(36px, 10vw, 44px); font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .5)), 44px); }
+.ez-kontakt__held-text b { font-size: clamp(36px, 10vw, 44px); font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 44px); }
+@media (min-width: 900px) { .ez-kontakt__held-text b { font-size: 56px; font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 56px); } }
+.ez-stand__wert { flex-wrap: wrap; gap: 8px 12px; }
 ```
-Die erste Deklaration bleibt als Fallback für Browser ohne `cqi` (Chrome < 105, Safari < 16). Im HTML `<a class="ez-kontakt__held" … style="--tel-zeichen: 11">`; der Worker setzt `String(tel).length`. Ergebnis: 390 px → 40 px, 12 Zeichen 37 px, 13 Zeichen 34 px; bei 360 px 35/32/30 px, nie abgeschnitten, die Zahl bleibt der Held. Dashboard-Karte: `.ez-stand__wert { flex-wrap: wrap; gap: 8px 12px; }`, die Kapseln fallen unter 400 px unter die Zahl statt über die Kante.
+Die erste Angabe ist jeweils der Rückfall für Browser ohne `cqi`. Die Instanz setzt `style="--tel-zeichen: 13"` an `<a class="ez-kontakt__held">` (`String(tel).length`; Inline-Stil ist durch `style-src 'unsafe-inline'` gedeckt). 0,55 em je Zeichen ist gemessen: Outfit 250/300 braucht 0,525 bis 0,532 em, der Rest ist Luft.
 
-Warum · 360 CSS-Pixel ist die Breite der Samsung-A-Reihe und der meisten Mittelklasse-Androiden, also des Kunden, den der Brief meint. Die Telefonnummer ist der Held der Kontaktkarte und die Kapselreihe das eine Element, das Signature im Hauptteil zeigt; beide dürfen nicht die ersten sein, die brechen.
+Warum · 360 bis 412 CSS-Pixel sind die Breiten der Mittelklasse-Androiden, an denen die Vorlage gemessen wird. Die Nummer ist der Held der Kontaktkarte und die Kapselreihe das Signature-Merkmal im Hauptteil; keins von beiden darf als Erstes brechen.
 
-### 3. Übernahme in die Instanz: ein Zustand, Muster-Ebene schneidbar, CSP (hoch für die Übertragung, sonst nichts)
+### 3. Genau ein Zustand je Auslieferung, sauberer Kopf, keine Muster-Reste (hoch für die Übernahme)
 
-Wo · `index.html` (Muster-Leiste, 11 `.ez-muster`-Spans, fünf `.ez-foto`-Platzhalter, `.ez-toast`, beide `h1`, alle `.ez-nur-web`/`.ez-nur-einladung`, `<script>document.documentElement.classList.add("ez-js")</script>`, `meta claude:viewport-fit-sides`); `start.css` (Regel `.ez[data-modus="website"] .ez-nur-einladung, … { display: none !important }`, Abschnitte „Muster-Ebene“, „Muster-Leiste“, `.ez.ist-muster .ez-bento`, `.ez.ist-muster .ez-foto`); `start.js` (Modus, Schalter, Toast); `functions/instanz/seiten.js` (`kopf()`, Ersetzungen mit Funktion nach K1.11).
+Wo · `index.html` (alle `.ez-nur-web`/`.ez-nur-einladung`, Muster-Leiste, `.ez-muster`, `.ez-toast`, Kopf), `start.css` (Block „Zwei Zustände“ ab `.ez[data-modus="website"] .ez-nur-einladung:not(…) { display: none !important }`, `.ez.ist-geschaltet`, Muster-Abschnitte), `start.js` (Umschalter, `ZIELE` mit dem Toast), `functions/instanz/seiten.js` (`kopf()` setzt `theme-color` auf `#161616`).
 
-Was ist · Der Worker ersetzt Zeichenketten, er parst kein HTML. Nach heutigem Stand bekäme die Instanz die Seite mit beiden `h1` (das zweite per `display: none`, bundle.js zerlegt trotzdem beide in Wörter), mit Muster-Leiste, Etiketten und Toast im DOM, und könnte sie nur über Klassen verstecken. Das `!important` ist dabei überflüssig: der Selektor hat (0,3,0) und schlägt `.ez-nur-desk { display: block }` (0,1,0) ohnehin; es verhindert nur, dass die Instanz je etwas anders zeigt. Schärfer: das Bento-Layout mit Fotos hängt an `.ez.ist-muster`, nicht an „Fotos vorhanden“. Eine Instanz mit echten Fotos 2–6 müsste die Muster-Klasse setzen, um sie zu zeigen; für 1 bis 4 Fotos gibt es kein Layout (nur 0 und 5 Kacheln). Das Inline-Skript wird von `script-src 'self'` blockiert, dann fehlt `ez-js`; `web/assets/js-da.js` gibt es genau dafür schon. Und ohne JavaScript (Lesemodus, Skriptfehler) ist die Aussage des Briefs „alles sichtbar“ falsch: ohne `--dna-szene-oben` kleben alle Szenen bei `top: 0`, Szene 3 (1545 px am Telefon) zeigt nur ihre ersten 844 px, der Rest liegt für immer unter Szene 4.
+Was ist · Die Vorlage trägt beide Zustände im DOM: zwei `h1`, zwei Kicker, zwei Fakten-Listen und so weiter. Würde der Server nur `data-modus` setzen, stünde im indexierten Website-Zustand „Guten Tag, Familie Weber.“ als versteckte zweite `h1` im HTML. Sechs der 15 Auftritt-Elemente im Hero (vier davon Wörter mit Weichzeichner) laufen dann auf unsichtbaren Knoten. Für die Pille kostet die Stapelung fast nichts: Am Telefon hebt sie sich in der Ein-Zustands-Fassung um 0 px, am Schreibtisch im Einladungszustand um 24 px. Der Grund für den Schnitt sind also DOM, Suchmaschine und die Klarheit des Codes. Das `!important` ist ohnehin überflüssig, weil der Selektor mit (0,4,0) jede andere `display`-Regel der Seite schlägt.
 
-Wie · Marker statt Klassen für alles, was die Instanz wegschneidet oder wählt, je eine Regex im Worker:
-```html
-<!--vorlage--> … Muster-Leiste, jedes <span class="ez-muster">, Platzhalter-Innenleben der .ez-foto, .ez-toast … <!--/vorlage-->
-<!--nur:web--> <h1 class="dna-titel-xl ez-nur-web" …>…</h1> <!--/nur:web-->   <!--nur:einladung--> … <!--/nur:einladung-->
-```
+Das größte Risiko ist der Toast: `start.js` fängt jedes `a[href="#"]` ab und zeigt „Muster: Hier öffnet sich die Anfahrt zu Ihrem Betrieb.“. Bleibt bei einem Betrieb ohne Website oder ohne Kartenlink ein `href="#"` stehen, sieht ein echter Kunde diesen Satz.
+
+Zum Kopf: `index.html` ist ein Fragment (kein doctype, kein charset, kein viewport, `lang` an `<main>`). Das Inline-Skript blockiert online `script-src 'self'`; die Instanzen erben das über `SICHERHEIT` aus seo.js. `kopf()` würde `theme-color` auf die alte Farbe `#161616` setzen. Ohne Angabe zeigt Android-Chrome im hellen Modus eine weiße Adressleiste über `#07090a`, und die Seite wirkt dann nicht wie eine App.
+
+Wie · Marker in der Vorlage (wie in Runde 1 benannt): `<!--vorlage-->…<!--/vorlage-->` um Muster-Leiste, jedes `.ez-muster`, `.ez-toast` und die Platzhalter der Fotos; `<!--nur:web-->…<!--/nur:web-->` und `<!--nur:einladung-->…<!--/nur:einladung-->` um jedes zustandsgebundene Element. Im Worker, mit Funktion ersetzt nach K1.11:
 ```js
-const NUR = { website: /<!--nur:einladung-->[\s\S]*?<!--\/nur:einladung-->/g, einladung: /<!--nur:web-->[\s\S]*?<!--\/nur:web-->/g };
-html = html.replace(/<!--vorlage-->[\s\S]*?<!--\/vorlage-->/g, '').replace(NUR[zustand], '').replace('data-modus="website"', () => 'data-modus="' + zustand + '"');
+/* Landingpage der Instanz: genau ein Zustand, keine Muster-Ebene */
+export function landingZustand(html, zustand) {
+  const weg = zustand === 'einladung' ? 'web' : 'einladung';
+  return String(html)
+    .replace(/<!--vorlage-->[\s\S]*?<!--\/vorlage-->\n?/g, () => '')
+    .replace(new RegExp('<!--nur:' + weg + '-->[\\s\\S]*?<!--\\/nur:' + weg + '-->\\n?', 'g'), () => '')
+    .replace(/<!--\/?nur:(web|einladung)-->/g, () => '')
+    .replace(/data-modus="(website|einladung)"/, () => 'data-modus="' + (zustand === 'einladung' ? 'einladung' : 'website') + '"');
+}
 ```
-Die Klassen bleiben für den Umschalter der Vorlage; in `start.css` das `!important` streichen. Muster-CSS (beide Muster-Abschnitte, `.ez-toast`, alle `.ez.ist-muster`-Regeln) nach `vorlage.css`, Modus/Schalter/Toast nach `vorlage.js`; die Instanz lädt beides nicht. Fotos entkoppeln: `.ez.ist-muster .ez-bento, .ez-bento[data-fotos="5"] { … }` und `.ez.ist-muster .ez-foto, .ez-foto.ist-belegt { display: block }`; die Layouts für `data-fotos="1"` bis `"4"` muss die Vorlage noch liefern (Gremium). Kopf: `<script src="/assets/js-da.js"></script>` statt der Inline-Zeile, `claude:viewport-fit-sides` streichen, `lokal.html` nicht mitnehmen (Hülle nur für die Vorschau), Pfade absolut (`/fonts/dna.css` statt eigener `@font-face`, `/assets/dna-bundle.js`). Schutz ohne Skript: `html:not(.ez-js) .dna-szene { position: static }` in `start.css`. Prüfsuite: Instanz-Antwort darf weder `ez-muster`, `ez-toast`, `data-vorlage=` noch ein zweites `<h1` enthalten.
+In der Instanz entfallen in `start.css` der Block „Zwei Zustände“ bis einschließlich `.ez.ist-wechsel .ez-hero__text`, alle Regeln mit `.ez.ist-geschaltet`, `.ez[data-modus="website"] .ez-link-etikett` und die Muster-Abschnitte. `data-modus` bleibt als Haken für `.ez-route__stelle--stand`, `@starting-style` am Etikett ebenfalls (Erscheinen nach der Überschrift). In der Vorlage `!important` streichen. In `start.js` laufen in der Instanz der Radio-Block und der `ZIELE`/Toast-Block nicht mit. Der Server entfernt jedes Ziel ohne Wert samt `<li>` (Website, Anfahrt), statt `href="#"` stehen zu lassen.
 
-Warum · Die Instanz liefert je Betrieb genau einen Zustand; was sie nicht wegschneiden kann, bleibt im DOM aller Kundenseiten. Mit den Markern ist das drei Regex-Zeilen, die Vorlage behält ihren Umschalter, und die Prüfsuite kann es messen.
-
-### 4. Bilder: Bühne in zwei Breiten, Rendering kleiner (mittel, trifft die schwächsten Geräte)
-
-Wo · `index.html` (`<link rel="preload" href="bilder/buehne.webp">`, `<img class="ez-buehne__foto" … width="1000">`, `<img class="ez-planen__bild" src="bilder/so/modell-sprosse.webp" width="800">`); `start.css` `.ez-planen__bild { width: 46% }` (Telefon) / `23%` (Schreibtisch).
-
-Was ist · `buehne.webp` ist 1000 × 750 bei 102 kB, nahe Qualität 85 (gemessen: q80 97 kB, q75 86 kB, Neukodieren bringt kaum etwas). Gezeigt wird sie am Telefon 358 px breit, am Schreibtisch 541 px (Hülle 1104, Spalte 1,1/2,1). Für 3×-Telefone (1074 px) passt 1000; 2×-Telefone (716 px) laden 62 kB mehr als nötig, und das sind genau die 720p-Androiden (A0x/A1x, Redmi A, Moto E). Gemessen: 720 px bei q80 = 35 kB. `modell-sprosse.webp` (800 px, 53 kB) wird 165 px (Telefon, 3× → 494) bzw. 254 px (Schreibtisch, 2× → 508) breit gezeigt; 520 px reichen, gemessen 32 kB.
-
-Wie · Zwei Dateien (`buehne-720.webp`, `buehne.webp`), im HTML:
+Kopf:
 ```html
-<link rel="preload" as="image" imagesrcset="bilder/buehne-720.webp 720w, bilder/buehne.webp 1000w" imagesizes="(min-width: 900px) 541px, (min-width: 760px) calc(100vw - 96px), calc(100vw - 32px)">
-<img class="ez-buehne__foto" src="bilder/buehne.webp" srcset="bilder/buehne-720.webp 720w, bilder/buehne.webp 1000w" sizes="(min-width: 900px) 541px, (min-width: 760px) calc(100vw - 96px), calc(100vw - 32px)" width="1000" height="750" alt="" fetchpriority="high" decoding="async">
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090a">
+<style>html,body{background:#07090a}</style>
+<script src="/assets/js-da.js"></script>
 ```
-`modell-sprosse.webp` auf 520 × 530 neu schneiden, `width="520" height="530"`. Für die Fotos des Betriebs (Foto 1 wird die Bühne) muss `verkleinern()` in `web/assets/einladung.js` zwei Breiten ablegen (720, 1000), sonst gilt der Gewinn nur für die Vorlage.
+`js-da.js` liegt bereit und ist auf /fuer-fensterbauer/ schon eingebunden. `claude:viewport-fit-sides` streichen. In `kopf()` die Farbe für diese Seite übergeben (`o.themeFarbe || '#161616'`). Der Einladungszustand bekommt nie `o.index`; `no-store` gilt dort ohnehin. Prüfsuite für die Instanz: genau ein `<h1`, kein `href="#"`, kein `ez-muster`, `ez-ml`, `data-vorlage=` oder `Muster:`.
 
-Warum · Die Bühne ist das LCP-Element. Auf einem 720p-Android am 4G-Rand sind 62 kB rund 0,2 s bis zum ersten vollen Bild, das die Messung mit vierfacher CPU-Drossel nicht zeigt (sie misst Rechenzeit, nicht Leitung). Bilanz: 273 → 211 kB auf 2×-Telefonen, 252 kB überall.
+Warum · Der Inhaber will je Betrieb genau einen Zustand. Was der Worker nicht wegschneidet, landet bei jedem Kunden im DOM, und ein Muster-Satz vor einem echten Kunden kostet mehr Vertrauen als jeder Layoutfehler.
 
-### 5. Firmenfarbe ohne `color-mix()` (mittel: Robustheit auf älteren Androiden, null Kosten)
+### 4. Fotos des Betriebs: Budget, Breiten, Maße (hoch für echte Betriebe, null für die Vorlage)
 
-Wo · `index.html` `<style>` (Block „VORLAGE: Firmenfarbe“: `--firma-kern: color-mix(in srgb, var(--firma) 45%, #fff)`); `start.css`, 19 Stellen `color-mix(… var(--firma|--firma-tief|--firma-licht|--hinweis|--silbergrau) … transparent)` in `.ez-buehne__schein`, `.ez-planen__schein`, `.ez-senden__schein`, `.ez-kontakt__schein`, `.ez .dna-leucht::before`, `.ez-route__stelle--ziel::before`, `--ez-schraffur`, `.ez-person`, `.ez-dinge__zeichen`, `.ez-kapseln i`, `.ez-fuss`, `.ez-muster::before`, `.ez-schalter`, `.ez-modus`, `.ez-hinweis::before`, `.ez-foto__schraffur`, `.ez-wahl-reihe .offen`.
+Wo · `web/assets/zentrale.js` (Zuschnitt der Startfotos: 16:9, `Math.min(1600, …)`, JPEG 0,8), `functions/instanz/verwalten.js` (`BILD_NAME`, `bildAblegen` bis 2 MB, keine Maße), im Markup die Bühne `img.ez-buehne__foto` (data-foto="1"), das Bento (data-foto="2…6"), das Logo (`data-vorlage="firma.logo"`, heute ein SVG im Markup) und der Preload im Kopf.
 
-Was ist · Ohne `color-mix()` (Chrome < 111, Samsung Internet < 21, Safari < 16.2, WebView auf nicht aktualisierten Geräten) wird jede Deklaration, die `var(--firma-kern)` oder einen `color-mix`-Stopp enthält, zur Rechenzeit ungültig und fällt weg: alle Scheine (Bühne, Kachel, Senden, Kontakt, Zeit-Karte, Route), die Schraffur der Kapseln und Fotoplätze, der Ring um die Person, die Zeichenkreise, der Fußstrich. Die Seite steht dann flach schwarz-weiß, die Firmenfarbe nur noch im Logo, und der Fensterbauer sieht sein Paket ohne Licht. Der Anteil ist klein (einstellig), aber es sind genau die alten Mittelklasse-Geräte, und der Worker rechnet die Farben ohnehin schon aus (`--firma-tief` steht als Hex im Block).
+Was ist · Die Vorlage misst 273 kB; das LCP-Element ist das Bühnenfoto (100 kB WebP, im gedrosselten Profil bei 2,47 s, FCP 2,14 s). Ein echter Betrieb bekommt `start-1…6` als JPEG mit 1600 × 900 px, je nach Motiv etwa 200 bis 400 kB. Foto 1 ersetzt die Bühne, die Fotos 2 bis 6 würden nach Punkt 9 des Briefs sofort laden; im Arbeitsstand steht das Foto-Bento auch ohne Etiketten. Am Telefon werden höchstens 380 CSS-Pixel gezeigt (rund 1000 Gerätepixel bei dpr 2,625), am Schreibtisch 540. Sechs Fotos zu etwa 300 kB machen rund 1,8 MB statt 273 kB: bei 10 Mbit/s etwa 1,2 s Leitung mehr, im gemessenen 1,6-Mbit-Profil eher 8 s. Das Logo als `<img>` ohne Maße verschiebt Kopf und Leiste, sobald es lädt; heute ist der Layoutsprung 0, weil das Logo ein Inline-SVG ist.
 
-Wie · Der Worker schreibt Tripel und Hex statt Mischungen:
+Wie ·
+- In zentrale.js den Zuschnitt auf 1200 px begrenzen und zusätzlich eine Fassung mit 720 px ablegen (Name `start-N-720.jpg`; `BILD_NAME` um `start-[1-6](?:-720)?` erweitern, die Startliste ignoriert `-720`). WebP, wo der Browser es kodiert, sonst JPEG 0,78 (`blob.type === 'image/webp'` prüfen).
+- Budget in `bildAblegen`, vor `ab.ablegen(…)`: `if (/^start-\d$/.test(name.replace(/\.[a-z]+$/, '')) && u.length > (name.startsWith('start-1.') ? 200000 : 140000)) throw new ApiFehler('Startfoto zu groß für die Startseite (Foto 1 höchstens 200 kB, die übrigen 140 kB).', 413);`
+- Bühne (alle Startfotos sind 16:9, die Maße stehen damit fest):
+```html
+<link rel="preload" as="image" href="/marke/7/start-1.jpg" imagesrcset="/marke/7/start-1-720.jpg 720w, /marke/7/start-1.jpg 1200w" imagesizes="(min-width: 900px) min(540px, 43vw), (min-width: 760px) calc(100vw - 96px), calc(100vw - 32px)" fetchpriority="high">
+<img class="ez-buehne__foto" src="/marke/7/start-1.jpg" srcset="/marke/7/start-1-720.jpg 720w, /marke/7/start-1.jpg 1200w" sizes="(min-width: 900px) min(540px, 43vw), (min-width: 760px) calc(100vw - 96px), calc(100vw - 32px)" width="1200" height="675" alt="" fetchpriority="high" decoding="async">
+```
+- Bento: dieselben zwei Breiten, `width="1200" height="675" loading="eager" fetchpriority="low" decoding="async"`. Kleine Kacheln mit `sizes="(min-width: 760px) min(270px, 23vw), calc(50vw - 22px)"`, große mit `sizes="(min-width: 760px) min(540px, 46vw), calc(100vw - 32px)"`.
+- Logo: Die Zentrale macht daraus ein PNG mit bis zu 600 px. Die Maße liest man beim Ablegen aus dem IHDR: `const pngMass = (u) => (u.length > 24 && u[0] === 0x89 && u[1] === 0x50) ? [((u[16] << 24) | (u[17] << 16) | (u[18] << 8) | u[19]) >>> 0, ((u[20] << 24) | (u[21] << 16) | (u[22] << 8) | u[23]) >>> 0] : null;`. Im Entwurf neben `bilder` ablegen, im Markup `<img class="ez-logo__bild" src="/marke/7/logo.png" width="W" height="H" alt="">` und in CSS `.ez-logo__bild { height: 36px; width: auto; }`.
+
+Warum · Mit Platzhaltern ist die Vorlage schnell; mit echten Fotos würde sie es nicht bleiben. Die Bühne ist das LCP-Bild, und am Mittelklasse-Android im Mobilnetz entscheidet sie, ob sich die Seite wie die Vorlagen-Apps anfühlt.
+
+### 5. Beim Umschalten nur tauschen, was sich ändert (mittel, Vorlage)
+
+Wo · `start.css` Zeile 502/503 (`.ez-hero__text { transition … }`, `.ez.ist-wechsel .ez-hero__text { opacity: 0; … }`), dazu `start.js` der `transitionend`-Lauscher am Hero-Text.
+
+Was ist · Beim Wechsel geht der ganze Hero-Text aus, also auch „Fenster planen“, „So geht es“ und die Unterschrift. Gemessen: Deckkraft 0,19 bei 55 ms, 0 bei 155 ms, 0,4 bei 205 ms, voll erst bei etwa 350 ms. Die Pille blinkt, obwohl sie dank Stapelung an derselben Stelle steht und sich nicht ändert. In den Vorlagen (Segment-Schalter in Apps) bleibt die Aktion stehen und nur der Inhalt wechselt. Die Regel aus emil-design-eng lautet: Was sich nicht ändert, wird nicht animiert.
+
+Wie · Die zwei Regeln in Zeile 502/503 streichen und dafür einsetzen:
 ```css
-.ez { --firma: #d8ad55; --firma-rgb: 216 173 85; --firma-tief: #5b4a26; --firma-tief-rgb: 91 74 38; --firma-licht: #e2bb66; --firma-licht-rgb: 226 187 102; --firma-kern: #eddab2; --hinweis: var(--koralle); --hinweis-rgb: 248 137 98; --auf-firma: #07090a; }
+/* Wechsel: nur, was sich ändert, geht 160 ms aus (6 px tiefer) und kommt 220 ms wieder; Pille, Unterschrift und Bühne stehen */
+.ez.ist-geschaltet :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt); }
+.ez.ist-wechsel :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { opacity: 0; transform: translate3d(0, 6px, 0); transition-duration: 160ms; transition-timing-function: var(--dna-druck); }
 ```
-In `start.css` jedes `color-mix(in srgb, var(--firma) 55%, transparent)` → `rgb(var(--firma-rgb) / .55)`, entsprechend `--firma-tief-rgb`/`--firma-licht-rgb`/`--hinweis-rgb`; `color-mix(in srgb, var(--firma) 16%, var(--weiss))` → `rgb(var(--firma-rgb) / .16)` (auf Weiß dasselbe Ergebnis); Silbergrau-Mischungen fest: `rgba(168,164,169,.7)` (Schraffur), `.45`, `.55`, `.32`, `.3`. `rgb(r g b / a)` kann jeder Browser seit 2018. Vorschlag ans Design-System: `bundle.css` nutzt `color-mix` nur für die Ringe von `.dna-etikett__punkt::after` und `.dna-anker__punkt`; dort wäre `rgb(var(--signal-rgb) / .35)` mit einem Token `--signal-rgb` in tokens.css derselbe Schritt.
+In den Block für weniger Bewegung: `.ez.ist-geschaltet :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { transition: none; }`. In `start.js`:
+```js
+    heroText.addEventListener('transitionend', function (e) { if (e.propertyName === 'opacity' && e.target.tagName === 'H1') tausche(); });
+```
+Die Spezifität (0,4,0) schlägt die Auftritts-Übergänge (Verzögerung `--i` × 70 ms), daher kein Nachlauf. Eingespielt und gemessen: Der Hero-Text-Container bleibt bei 1, die `h1` geht von 1 auf 0 (157 ms) und wieder auf 1, getauscht wird bei 174 ms über `transitionend` der `h1`. Die Pille hat weder Bewegung noch Ausblenden, der Doppelwechsel endet sauber.
 
-Warum · Das Leuchten in der Firmenfarbe ist das Gen, das Signature vom Rest unterscheidet (G2). Es darf nicht an einer CSS-Funktion hängen, die der Worker in einer Zeile ersetzen kann.
+Warum · Der Umschalter ist das Erste, was der Fensterbauer antippt. Wenn dabei der Kaufknopf mitblinkt, wirkt der Wechsel wie ein Neuladen statt wie ein Zustandswechsel.
 
 ## Die Prüfpunkte im Einzelnen
 
-- Umschalter (`setTimeout` 160 ms, Klassen): siehe Hebel 1. Die Choreografie selbst stimmt (Abgang 160 ms ease, Auftritt 220 ms mit der Auftrittskurve; `.ez-hero__text` wechselt nur `opacity`/`transform`, eine Ebene für 380 ms, danach weg). Die versteckte `h1` bekommt ihre `.ist-da` über `heroAuftritt` (querySelectorAll findet `display: none`), darum erscheint der Einladungstitel beim Tausch ohne Unschärfe: richtig gelöst.
-- Zwei `h1` und `!important`: in der Vorlage harmlos (Barrierefreiheitsbaum enthält nur die sichtbare), für die Instanz nicht sauber; Hebel 3.
-- `@starting-style` am Link-Etikett: ohne Unterstützung (Safari < 17.5, Firefox < 129) wird der At-Block verworfen, das Etikett steht sofort da; die Transition bleibt gültig. Richtige Verwendung (Übergang aus `display: none`, ohne `allow-discrete`, weil `display` selbst nicht animiert wird). Einzige Lücke: fehlt in der Ruhig-Regel (Hebel 1d).
-- `localStorage`: beide Zugriffe in try/catch, Lesen synchron vor dem ersten Bild, Schlüssel `ez-modus`/`ez-muster` kollidieren mit keiner anderen Vorschau (geprüft gegen web/assets und fensterbauer-vorschau). Nur eine Vorliebe, kein Einwilligungsfall. In der Instanz entfällt der Code mit `vorlage.js`.
-- Muster-Leiste trennen: heute nur über Klassen; Hebel 3. Dazu zwei kleine Folgen der Leiste: `messeGrenze` rechnet relativ zu Szene 1 und vergisst die 64 px der Muster-Leiste darüber, die Leiste kommt in der Vorlage 64 px zu früh (zwei Logos übereinander, zwischen y 730 und 794 am Telefon); in der Instanz ohne Muster-Leiste stimmt es. Bei 320 px läuft die Muster-Leiste selbst 18 px über (Text 40 + Segment 206 + Schalter 44 + Lücken 16 > 288), weil `.ez-modus.dna-pillen { flex: none; overflow: visible }` das Schrumpfen des Bausteins aufhebt; `flex: 0 1 auto` und das Wort „Muster“ unter 360 px ausblenden.
-- Backdrop-Filter (10 gezählt): im Stylesheet stehen fünf Regeln in je zwei Schreibweisen (`.ez-leiste`, `.ez-adresse .dna-etikett`, `.ez-link-etikett`, `.ez-schritt__bild--foto .ez-glaschip`, `.dna-etikett` für das Bereit-Etikett am Schreibtisch); die Glas-Chips der Fotoplätze haben keinen. Je Bildschirm sind im Betrieb höchstens zwei bis drei Chips von rund 200 × 36 px aktiv, plus die Leiste (390 × 60) nur solange sie sichtbar ist. Das trägt ein Mittelklasse-Telefon ohne Einbuße; die einzige nennenswerte Fläche ist die Leiste, dafür die `visibility`-Schaltung des Vorgängers (Hebel 2b dort).
-- Bühne (zwei Verläufe mit `mix-blend-mode: screen`, Maske am Gerätelicht): `.ez-buehne` ist `isolation: isolate`, nichts darin animiert nach den ersten 400 ms, keine 3-D-Transform, kein `will-change`. Chrome rastert die Mischung damit einmal in die Kacheln; je Scrollbild kostet die Bühne nichts. Teuerster Moment ist die 400-ms-Einblendung beim Laden (die Bühne wird dafür kurz zur eigenen Ebene, mitsamt Mischungen und den zwei Backdrop-Chips), und der ist in den 0,36 s enthalten. Nicht anfassen: keine scrollgebundene Bewegung, kein `will-change` auf der Bühne.
-- `vector-effect: non-scaling-stroke` und Masken: auf den 20-px-Zeichen wirkungslos außer dass `1.8px` zu Bildschirm-Pixeln wird; auf der Zeichnung (viewBox 300 in 128 px) und den Ankerlinien (`preserveAspectRatio="none"`) nötig, sonst 0,8 px dünne oder verzerrte Striche. Kosten: Strichbreite im Geräteraum, einmal beim Rastern. SVG-`<mask>` gibt es nicht; die zwei CSS-Masken (`.ez-ring` 16 px, `.ez-geraet__licht`) sind statisch. Einzige Unschärfe: die Skala im Gerät (`.ez-app__skala`, Strich 1,2 × 0,42 = 0,5 px) wirkt am Schreibtisch bei 1× grau; im Mockup hinnehmbar.
-- Bildgrößen und Formate: Hebel 4. Übrige Bilder passen: `modell-anthrazit` 480 px für 97–188 px Anzeige, `wand-innen` 640 px (7 kB), `modell-weiss` nur am Schreibtisch und `loading="lazy"` wie im Brief, `held.webp` 280 px für 69 px im Gerät, alle sechs Konfig-Bilder einmal geladen trotz zweier Verwendungen.
-- Schriften: Outfit 32 kB ist der Latein-Teil mit 200–700, preloaded, richtig. Doto wird in `start.css` deklariert, aber kein Element verlangt `--font-punkt` (nur `.dna-zahl--punkt` in bundle.css, hier nicht benutzt); Browser laden Schriften erst bei Gebrauch, also 0 Byte. In der Instanz die Deklarationen aus `/fonts/dna.css` nehmen, nicht doppelt. Metrik-Ersatz: Vorgänger Hebel 3, offen.
-- Inline-Skript gegen die CSP: Hebel 3 (`/assets/js-da.js` liegt bereit, es fehlt nur der Verweis).
-- 320 px (aus dem Code): Hülle 288 px. Hero-Titel `clamp(44px, 9.5vw, 56px)` = 44 px; „Familie Weber.“ misst bei 390 px 272 px (r3z/tel-oben-einladung-muster.png), passt also auch in 288, die beiden Wörter sind durch `&nbsp;` unzertrennbar (bundle.js zerlegt bei `\s`, hält aber den Knoten dazwischen). Reihe der Elemente: 4 Spalten zu 66 px, „Faltschiebewand“ (12 px) bricht per `overflow-wrap: anywhere` mitten im Wort; unter 360 px drei Spalten (`grid-template-columns: repeat(3, 1fr)`) wären sauberer. Schritte: 128 px Bild + 120 px Text bei 14 px, eng, aber kein Überlauf. Kontaktnummer und Dashboard-Karte: Hebel 2 (bei 320 px 39 bzw. 59 px über). Muster-Leiste: 18 px über, siehe oben. Kein Querscrollen durch `overflow-x: clip`, aber was über ist, wird abgeschnitten statt gescrollt.
-- 1920 px (aus dem Code): Hülle bleibt 1200, alle Schriften enden in ihrem `clamp`-Maximum, Bento 4 × 280, Reihe 8 × 129 px, Bühne 541 × 406; nichts wächst unkontrolliert. Zu bedenken für das Gremium, nicht für mich: der Hero ist bei 1920 × 1080 rund 650 px hoch (64 Muster-Leiste + 88 Kopf + 494), die weiße Szene 2 steht schon im ersten Bild (bei 1280 × 800 sind es 143 px, bei 1080 Höhe rund 430). Die Vorlagen des Inhabers füllen den ersten Bildschirm (05-switch-web, 08-crypto-dashboard). Wenn gewollt: `.ez-hero { min-height: calc(100svh - 152px); align-content: center }`, kostet nichts.
+- **Umschalter mit Radios:** siehe „Was schon gut ist“, Zeile 1. Ohne JavaScript zeigt der Commit den Website-Zustand, wie im Brief verlangt. Das Radio „Einladung“ lässt sich aber anwählen und erscheint per `:has()` als gewählt, während die Seite bleibt, wie sie ist. Ein Satz CSS behebt das: `html:not(.ez-js) .ez-modus, html:not(.ez-js) .ez-schalter { display: none; }`.
+- **Stapelung in einer Grid-Zeile:** Sie hält, Layoutsprung 0, Pille in beiden Zuständen gleich. `:not()` mit Liste und komplexem Argument läuft ab Chrome 88, Safari 9 und Firefox 84. `visibility: hidden` nimmt die zweite Fassung auch aus dem Baum der Vorleser. `!important` ist unnötig. Für die Instanz siehe Hebel 3.
+- **`transition: display … allow-discrete` und `@starting-style`:** Chrome ab 117, Safari 17.4 (`transition-behavior`) bzw. 17.5 (`@starting-style`), Firefox ab 129. Ohne Unterstützung fällt die ganze `transition`-Kurzschrift weg, weil das Schlüsselwort unbekannt ist. Das Etikett erscheint und verschwindet dann hart, ohne Fehler und ohne Sprung (absolut gesetzt); in Safari 17.4 erscheint es ohne Einblenden. Beides ist hinnehmbar.
+- **Puls:** einmal 700 ms. Laufende Animationen: 47 bei 283 ms, 0 ab 2,24 s. Nach einem Wechsel bleibt `ez-puls` als „finished“ in `getAnimations()`, weil `both` die Endwerte festhält. Anfangs- und Endbild gleichen dem Grundwert, also `animation: ez-puls 700ms var(--dna-auftritt) 1320ms 1 backwards;`, dann verschwindet sie ganz. Der Puls auf `box-shadow` zeichnet 42 Bilder auf 28 px in der eigenen Backdrop-Ebene des Etiketts, das ist vernachlässigbar.
+- **`:has()` an den Radios:** Chrome 105, Safari 15.4, Firefox 121. Ohne `:has()` zeigt das Segment gar keine Wahl, weil das Input auf `opacity: 0` steht. Rückfall (nicht gemessen, kein solcher Browser greifbar): `@supports not selector(:has(*)) { .ez-modus input { position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--hinweis); } .ez-modus label::before { content: none; } }`. Das betrifft nur die Vorlage.
+- **backdrop-filter:** fünf Regeln. Die Leiste hat 12 px, Domain- und Link-Etikett 14 px mit `saturate(160%)`, der Glas-Chip in Szene 3 12 px, das Bereit-Etikett 16 px (nur am Schreibtisch sichtbar). Gleichzeitig sind höchstens drei aktiv (Hero im Einladungszustand plus die Leiste beim Hochscrollen). Bei 412 CSS-Pixeln und dpr 2,625 sind das rund 260 000 Gerätepixel, knapp zwei Drittel davon in der Leiste. Die Muster-Etiketten haben zu Recht kein Glas. Für ein Mittelklasse-Telefon ist das tragbar. Offen bleibt nur die Leiste, solange sie oben liegt (Fensterbauer-Urteil).
+- **`mix-blend-mode`:** zwei Stellen im Hero (Schein und Lichtkreuz) und fünf in den Platzhaltern des Bento. Alle liegen in statischen Ebenen ohne eigenes Compositing und werden einmal gerastert. Die Scrollgeste über die ganze Seite bei vierfacher Drossel ergab 398 Bilder, Median 16,7 ms, 0 über 33 ms, mit und ohne Glas gleich. Die Messung ist headless mit Software-Compositing, also nur grob, aber ohne Ausreißer. Daraus folgt eine Regel: In der Bühne nichts animieren, was keine eigene Ebene hat; das Etikett mit Backdrop ist eine.
+- **Punktraster mit Maske:** zwei Stellen (Zeit-Kachel, Kontakt), beide statisch und einmal gerastert, mit einer wiederholten Kachel von 9 px. Kein Hebel.
+- **Layoutsprung:** Beim Laden 0, lokal wie im gedrosselten Profil. Beim Umschalten springt der Hero um 0 px. Der Rest der Seite ändert seine Höhe außerhalb des Bilds, das betrifft den Vorhang (Hebel 1).
+- **Reaktionszeit:** Bei vierfacher Drossel antwortet der Umschalter in 48 ms, „Etiketten“ in 80 ms (Event Timing). Beim Laden gibt es zwei lange Aufgaben (63 und 68 ms), Stil 191 ms, Layout 79 ms, Skript 20 ms.
+- **Bilder:** 15 Dateien, 273 kB, alle mit Maßen. `modell-sprosse` hat 800 px für höchstens 190 CSS-Pixel am Telefon; mit 560 px wären es 36 statt 54 kB (klein). Lazy ist nur `modell-weiss`; es steckt am Telefon in `display: none` und lädt dort nie. Für echte Fotos siehe Hebel 4.
+- **Inline-Skript gegen die CSP:** wird online blockiert; `/assets/js-da.js`, siehe Hebel 3. Die zwei Inline-`<style>` und die `style="--i"`-Attribute deckt `'unsafe-inline'`.
+- **320 px:** kein Querscrollen. Die Pille liegt im Commit bei 669 px, also bei 640 px Höhe unter der Falz; das liegt nur an der Muster-Leiste (128 px), ohne sie wären es 541 px. Nummer und Dashboard-Karte siehe Hebel 2.
+- **Etiketten bei 320 px:** „Ihr Logo“ liegt über dem Anrufknopf und „Ihr Text“ über dem Kicker.
+- **Etiketten ab 760 px:** „Ihr Logo, Ihre Farbe, Ihr Zeichen“ bricht in drei Zeilen aus dem Chip (26 px Chip, 41 px Inhalt; zu sehen in r5z/desk-oben-einladung-muster.png). Ursache ist `.ez-ab-desk { white-space: normal }` im absolut gesetzten Chip ohne verfügbare Breite. Gemessene Korrektur: einzeilig, keine Überdeckung bei 320; „Ihr Logo“ berührt dort das Domain-Etikett um etwa 4 px.
+```css
+@media (min-width: 760px) { .ez-ab-desk { white-space: inherit; } }
+.ez .ez-muster { width: max-content; gap: 0; }
+.ez .ez-muster::before { margin-right: 7px; }
+@media (max-width: 419px) { .ez .ez-muster--geraet { left: 46px; top: calc(100% - 4px); translate: none; } .ez .ez-muster--text { top: auto; bottom: -34px; right: 0; } }
+```
+- **1920 px:** kein Querscrollen, die Hülle hat 1104 von 1200 px, die Pille liegt bei 460 px, nichts wächst ungebremst. Dass Szene 2 ab 706 px im ersten Bild steht, ist eine Frage ans Gremium aus Runde 1 und wird hier nicht wiederholt.
+
+## Arbeitsstand während der Prüfung (21:27 bis 21:45 Uhr, andere Sitzung)
+
+- **Messwerkzeug:** `lokal.html` (21:03) hinkt `index.html` (21:27) hinterher. Wer mit ihr misst, bekommt altes Markup mit neuem start.js; der Schalter „Etiketten“ tut dort nichts mehr, weil seine Logik nach muster.js gewandert ist. `lokal.html` muss neu erzeugt werden, bevor gemessen wird.
+- **Ohne JavaScript:** Das Markup startet jetzt mit `data-modus="einladung"`. Ohne JavaScript zeigt die Vorlage damit den Einladungszustand; der Brief verlangt dafür den Website-Zustand.
+- **Vorhang:** `.ez-dash` (nur mit Etiketten) verlängert Szene 4 zusätzlich, Hebel 1 wird damit dringender.
+- **Muster-Leiste (Stand 21:30):** Sie war am Telefon 226 px hoch, die Pille lag bei 811 bis 863 px und ragte bei 844 px Höhe über den Rand. Ihre zwei Zustandszeilen sind verschieden lang, deshalb sprang die ganze Seite beim Umschalten um 16 px. Dieselbe Stapelung wie im Hero hält sie konstant (gemessen mit der gleichwertigen Fassung über eine angehängte Regel: 246 → 246 px statt 244 → 228 px): in den vier vorhandenen `:is(.ez-hero__text, .ez-brief)` `.ez-ml__text` ergänzen, dazu `.ez-ml__text > * { grid-column: 1; } .ez-ml__text > .ez-ml__zeile { grid-row: 3; } .ez-ml__text > .ez-ml__legende { grid-row: 4; }`.
+- **Muster-Leiste (Stand 21:45):** Die Zeile ist am Telefon ausgeblendet. Richtwert für das Telefon: Muster-Leiste höchstens 150 px, damit die Pille im ersten Bild bleibt.
+
+## Vorschläge ans Design-System (bundle.js, nicht selbst geändert)
+
+- **`vorhang()`:** `ResizeObserver` auf jede `.dna-szene`, Rückruf `requestAnimationFrame(ordne)`. Das ist die Wurzel von Hebel 1.
+- **`woerter()`:** vor dem Zerlegen `el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim())` und an jedes `span.dna-wort` `aria-hidden="true"`, wie es SplitText (GSAP) von sich aus tut. Inline-Block-Wörter liest VoiceOver sonst teils Wort für Wort als eigene Elemente. Nur für Überschriften (`h1` bis `h3`); an einem `<p>` ist `aria-label` nicht erlaubt.
 
 ## Die drei, die am meisten bringen
 
-1. Umschalter in der richtigen Reihenfolge und `resize` nach dem Tausch (Hebel 1): sonst reagiert der Knopf nach dem Text und die letzte Hero-Zeile verschwindet auf fast jedem Android unter dem Vorhang, genau beim ersten Antippen des Fensterbauers.
-2. Telefonnummer und Kapselreihe an die Breite binden (Hebel 2): sonst fehlt bei 360 px und 12 Zeichen die letzte Ziffer der Nummer, und die Kapseln, die Signature zeigen, hängen über der Kante.
-3. Marker für Zustand und Muster-Ebene plus js-da.js (Hebel 3): sonst trägt jede Kundenseite zwei `h1`, die Muster-Leiste und den Toast im DOM, läuft online ohne Auftritt und bricht ohne Skript beim Vorhang.
+1. Vorhang nach Höhenänderung neu ordnen (Hebel 1). Sonst ist „Fenster planen“ in der Bereit-Karte nach „Einladung“ oder „Etiketten“ an keiner Scrollposition erreichbar, und das genau beim Fensterbauer, der Signature ausprobiert.
+2. Telefonnummer und Dashboard-Karte an die Breite binden (Hebel 2). Sonst liegt bei 360 bis 412 px und einer 13-stelligen Nummer die Zahl 28 bis 45 px im Anrufknopf, und die Kapselreihe wird bei 320 px abgeschnitten.
+3. Ein Zustand je Auslieferung samt Kopf und ohne Toast (Hebel 3), danach das Foto-Budget (Hebel 4). Sonst sieht ein echter Kunde „Muster: …“, Suchmaschinen sehen eine versteckte zweite `h1`, und die echten Fotos machen aus 273 kB rund 1,8 MB.

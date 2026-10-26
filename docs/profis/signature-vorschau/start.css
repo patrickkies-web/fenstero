@@ -445,7 +445,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 /* ---------- Muster-Leiste: zwei Sorten Merkmale, Umschalter der zwei Wege des Kunden, Schalter „Etiketten“ ----------
    Beim echten Betrieb fehlt die Leiste im Markup (eigener Block), sie wird nicht per CSS versteckt. */
 .ez-ab-desk { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-@media (min-width: 760px) { .ez-ab-desk { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip-path: none; white-space: normal; } }
+@media (min-width: 760px) { .ez-ab-desk { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip-path: none; white-space: inherit; } }
 .ez-musterleiste__text { flex: 1 1 auto; margin-right: auto; font-size: 12px; }
 .ez-musterleiste__text b { font-size: 13px; }
 .ez-musterleiste__text .ez-musterleiste__tel { display: none; }
@@ -478,8 +478,8 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-muster::before { width: 8px; height: 8px; flex: none; box-shadow: 0 0 0 3px var(--hinweis-hof); }
 .ez-muster--plus::before { background: var(--silbergrau); box-shadow: 0 0 0 3px var(--plus-hof); }
 .ez-muster--geraet { left: calc(100% + 12px); top: 50%; bottom: auto; translate: 0 -50%; }
-.ez-muster--ablage { display: none; }
-@media (min-width: 900px) { .ez-muster--ablage { display: inline-flex; right: 0; top: calc(100% - 4px); } }
+.ez .ez-muster.ez-muster--ablage { display: none; }
+@media (min-width: 900px) { .ez .ez-muster.ez-muster--ablage { display: inline-flex; right: 0; top: calc(100% - 4px); } }
 /* Der Hinweis zum Einladungslink hängt außen am Etikett und nimmt keinen Platz */
 .ez-muster--innen { right: -1px; bottom: calc(100% + 8px); height: 22px; padding: 0 9px 0 8px; font-size: 12px; }
 
@@ -499,8 +499,11 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez[data-modus="website"] :is(.ez-hero__text, .ez-brief) > .ez-nur-einladung,
 .ez[data-modus="einladung"] :is(.ez-hero__text, .ez-brief) > .ez-nur-web { visibility: hidden; }
 /* Wechsel: Hero-Text 160 ms aus auf der Druckkurve, Tausch beim Ende, 220 ms ein */
-.ez-hero__text { transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt); }
-.ez.ist-wechsel .ez-hero__text { opacity: 0; transform: translate3d(0, 6px, 0); transition-duration: 160ms; transition-timing-function: var(--dna-druck); }
+/* Nur was sich ändert, geht aus (Überschrift, Kicker, Brief, Fakten); Pille, Unterschrift und Bühne stehen (Frontend-Abgleich, Hebel 5) */
+.ez.ist-geschaltet :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt); }
+.ez.ist-wechsel :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { opacity: 0; transform: translate3d(0, 6px, 0); transition-duration: 160ms; transition-timing-function: var(--dna-druck); }
+/* Ohne JavaScript gibt es keinen Wechsel und keine Etiketten: Wahl und Schalter fehlen dann */
+html:not(.ez-js) .ez-modus, html:not(.ez-js) .ez-ml .ez-schalter { display: none; }
 /* Takt: Kicker eine Stufe vor der Überschrift, die Fakten im Takt der Pille (840–1320 ms) */
 .ez-hero__text > .ez-fakten[data-dna-auftritt] { transition-duration: 480ms; }
 .ez .ez-kicker { font-size: 13px; }
@@ -641,14 +644,61 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 
 /* ---------- Weniger Bewegung: kein Ortswechsel, Opazität bleibt zum Verstehen ---------- */
 @media (prefers-reduced-motion: reduce) {
+  .ez.ist-geschaltet :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { transition: none; }
   .ez-leiste { transform: none; opacity: 0; visibility: hidden; transition: opacity 160ms ease, visibility 0s linear 160ms; }
   .ez-leiste.ist-da { opacity: 1; visibility: visible; transition: opacity 220ms ease, visibility 0s; }
   .ez-muster, .ez-toast { transform: none; transition: opacity 160ms ease, visibility 0s linear 160ms; }
   .ez.ist-muster .ez-muster, .ez-toast.ist-da { transition: opacity 220ms ease, visibility 0s; }
-  .ez-link-etikett { transition: opacity 160ms ease; }
+  .ez-link-etikett { transition: none; }
   .ez[data-modus="website"] .ez-link-etikett { transform: none; }
   @starting-style { .ez-link-etikett { transform: none; } }
   .ez-link-etikett__punkt::after { animation: none; }
   .ez-hero__text, .ez.ist-wechsel .ez-hero__text { transition: none; transform: none; }
   .ez-rund, .ez-schalter, .ez-modus label, .ez-planen__knopf, .ez-kontakt__held, .ez-kontakt__held-knopf, .ez-kontakt__wege .dna-rund-knopf, .ez .dna-pille__pfeil svg, .ez .dna-pille--leise { transition-duration: 0s; }
 }
+
+/* ---------- Paket-Stufen (15 Fensterbauer, 26.10.2026): Fotos des Betriebs sichtbar, Dashboard in der Muster-Ebene ---------- */
+/* Das Foto-Bento gehört zum Paket (bis 6 Fotos) und steht deshalb auch ohne Etiketten da; Schraffur, „Foto folgt“ und Zähler nur mit Etiketten */
+.ez .ez-bento { grid-template-areas: "p p" "p p" "g g" "g g" "f3 f4" "f5 f6"; }
+.ez .ez-foto { display: block; }
+.ez .ez-foto__schraffur, .ez .ez-foto__text span, .ez .ez-glaschip--foto { display: none; }
+.ez.ist-muster .ez-foto__schraffur, .ez.ist-muster .ez-foto__text span { display: block; }
+.ez.ist-muster .ez-glaschip--foto { display: inline-flex; }
+.ez .ez-planen__bild { right: -4%; width: 56%; }
+@media (min-width: 760px) {
+  .ez .ez-bento { grid-auto-rows: 200px; grid-template-areas: "g g f3 p" "g g f4 p" "f5 f6 f6 p"; }
+  .ez .ez-planen__text { max-width: 100%; }
+  .ez .ez-planen__bild { right: -18%; bottom: -3%; width: 110%; }
+  .ez .ez-planen::after { right: -6%; width: 80%; }
+}
+/* Dashboard in der Muster-Ebene (nur Signature): nimmt Platz, aber nur, wenn der Fensterbauer die Etiketten einschaltet */
+.ez-dash { display: none; margin-top: var(--raum-5); padding: var(--raum-5); border-radius: var(--rund-l); color: var(--weiss); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante), var(--schatten-schwebe); gap: var(--raum-4); }
+.ez.ist-muster .ez-dash { display: grid; }
+.ez-dash__kopf { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.ez-dash__adresse { display: inline-flex; align-items: center; gap: 6px; font: 400 13px/1.2 var(--font-sans); color: var(--silbergrau); }
+.ez-dash__adresse b { color: var(--weiss); font-weight: 500; }
+.ez-dash__adresse svg { width: 14px; height: 14px; }
+.ez-dash__adresse svg * { vector-effect: non-scaling-stroke; }
+.ez-dash__zugaenge { margin-left: auto; font: 400 13px/1.2 var(--font-sans); color: var(--silbergrau); }
+.ez-dash__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ez-dash__liste li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 14px; padding: 12px 14px 12px 16px; border-radius: var(--rund-m); background: radial-gradient(140% 90% at 50% -10%, color-mix(in srgb, var(--anthrazit) 55%, var(--schwarz)), var(--schwarz) 60%); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), inset 0 0 0 1px rgba(255,255,255,.04); }
+.ez-dash__name { display: grid; gap: 3px; min-width: 0; }
+.ez-dash__name b { font: 500 16px/1.2 var(--font-sans); }
+.ez-dash__name small { font: 400 12px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); font-variant-numeric: tabular-nums; }
+.ez-dash__wert { grid-column: 1 / -1; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-dash__chip { display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: var(--rund-pille); font: 500 12px/1 var(--font-sans); letter-spacing: .02em; color: var(--weiss); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 55%, transparent); white-space: nowrap; }
+.ez-dash__chip--fertig { background: var(--weiss); color: var(--schwarz); box-shadow: none; }
+@media (min-width: 900px) { .ez-dash__liste li { grid-template-columns: minmax(0, 1fr) 180px auto; } .ez-dash__wert { grid-column: auto; text-align: right; } }
+.ez-ml .ez-ml__zeile { display: block; }
+/* Plus: eeziframes als eine Zeile im Fuß (Kennzeichnung „dezent“); Etiketten „erst in Signature“ stehen im Fluss oder am Gerät */
+.ez-fuss__zeile { font: 400 13px/1.5 var(--font-sans); color: var(--tinte-2); }
+.ez .ez-muster--block { display: flex; width: fit-content; max-width: 100%; margin-top: 8px; }
+.ez .ez-muster--link { right: 14px; bottom: 14px; }
+@media (min-width: 900px) { .ez .ez-muster--link { right: 18px; bottom: 18px; } }
+/* Telefonnummer als Held: Schrift an die Kartenbreite gebunden, damit 12 bis 13 Zeichen auch bei 320 bis 412 px neben dem Knopf
+   stehen (0,55 em je Zeichen gemessen, Outfit 300); die Instanz setzt --tel-zeichen auf die Länge der Nummer. Erste Angabe =
+   Rückfall ohne Containermaß. Kapselreihe der Innenkarte darf umbrechen statt über die Kante zu ragen. */
+.ez-kontakt__held { container-type: inline-size; }
+.ez-kontakt__held-text b { font-size: clamp(36px, 10vw, 44px); font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 44px); }
+@media (min-width: 900px) { .ez-kontakt__held-text b { font-size: 48px; font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 48px); } }
+.ez-stand__wert { flex-wrap: wrap; gap: 8px 12px; }

@@ -1,7 +1,8 @@
-/* Landingpage eines Konfigurators im Paket EEZI Essential Plus, unter der eigenen Domain des Betriebs, als Schnitt aus der Design-DNA.
-   Gegenüber Essential gehört hier auch die Oberfläche dem Betrieb: Logo, Firmenfarbe (--firma), Fotos, eigene Startseite, eigenes
-   Zeichen in der App; eeziframes steht nur als Zeile im Fuß. Eigene Klassen mit Präfix ez-, die dna-Klassen bleiben unverändert.
-   Aufbau: fünf Szenen mit Vorhang, dunkel, hell, dunkel, hell, dunkel. Telefon zuerst (390 px), Schreibtisch ab 900 px.
+/* Landingpage eines Konfigurators im Paket EEZI Signature, unter der eigenen Domain des Betriebs, als Schnitt aus der Design-DNA.
+   Grundlage ist die Gestaltung der Vorlage Essential Plus (gleiche Hand, gleiche Bausteine); Signature kommt am Ende dazu: Muster-Leiste
+   mit dem Umschalter Website / Einladungslink, der persönliche Link als Glas-Etikett am Gerät, die dunkle Innenkarte mit dem Fortschritt
+   aus dem Dashboard (Kapselreihe, G11), der Fuß ohne eeziframes mit dem Team-Zugang. Eigene Klassen mit Präfix ez-, die dna-Klassen
+   bleiben unverändert. Aufbau: fünf Szenen mit Vorhang, dunkel, hell, dunkel, hell, dunkel. Telefon zuerst (390 px), Schreibtisch ab 900 px.
    Grundsatz: Die Form bleibt die der DNA (Bühne, Schrift, Pillen, Feinzeichnung), die Farbe gehört dem Betrieb. */
 @font-face { font-family: "Outfit"; font-weight: 200 700; font-display: swap; src: url(fonts/outfit.woff2) format("woff2"); }
 @font-face { font-family: "Doto"; font-weight: 400 900; font-display: swap; src: url(fonts/doto.woff2) format("woff2"); }
@@ -96,9 +97,9 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-muster--text { right: 0; top: -10px; }
 .ez-muster--domain { left: var(--ex, 62%); top: calc(var(--ey, 11%) + 7%); translate: -50% 0; }
 .ez-muster--geraet { left: 12px; bottom: 12px; }
-.ez-muster--buehne { right: 12px; bottom: 12px; }
+.ez-muster--buehne { right: 12px; top: 12px; }
 .ez-muster--fotos { right: 12px; top: 12px; z-index: 6; }
-.ez-muster--kz { left: 0; top: -30px; }
+.ez-muster--kz { position: relative; left: 0; top: 0; height: auto; min-height: 26px; padding-block: 5px; white-space: normal; line-height: 1.3; max-width: 100%; }
 .ez-schalter { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px 0 12px; border: 0; border-radius: var(--rund-pille); background: transparent; color: var(--tinte); font: 500 13px/1 var(--font-sans); cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: box-shadow 220ms ease, background-color 220ms ease, transform 220ms var(--dna-druck); }
 .ez-schalter:active { transform: scale(.97); transition-duration: 0s; }
 .ez-schalter__punkt { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: background-color 220ms ease, box-shadow 220ms ease; }
@@ -285,15 +286,9 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-schritt__bild--foto { background: var(--schwarz); }
 .ez-schritt__bild--foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ez-schritt__bild--foto::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -60px 70px -50px rgba(7,9,10,.6); }
-.ez-sucher i { position: absolute; z-index: 1; width: 14px; height: 14px; border: 0 solid var(--weiss); }
-.ez-sucher i:nth-child(1) { left: 9px; top: 9px; border-left-width: 1.8px; border-top-width: 1.8px; border-top-left-radius: 5px; }
-.ez-sucher i:nth-child(2) { right: 9px; top: 9px; border-right-width: 1.8px; border-top-width: 1.8px; border-top-right-radius: 5px; }
-.ez-sucher i:nth-child(3) { right: 9px; bottom: 9px; border-right-width: 1.8px; border-bottom-width: 1.8px; border-bottom-right-radius: 5px; }
-.ez-sucher i:nth-child(4) { left: 9px; bottom: 9px; border-left-width: 1.8px; border-bottom-width: 1.8px; border-bottom-left-radius: 5px; }
 .ez-glaschip { position: absolute; z-index: 2; left: 50%; bottom: 12px; translate: -50% 0; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 5px; border-radius: var(--rund-pille); white-space: nowrap; background: rgba(32,32,34,.9); color: var(--weiss); font: 500 12px/1 var(--font-sans); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4); }
 .ez-schritt__bild--foto .ez-glaschip { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); background: rgba(32,32,34,.66); }
 .ez-glaschip--foto { padding-left: 10px; font-weight: 400; font-variant-numeric: tabular-nums; }
-.ez-ring { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(var(--weiss) calc(var(--anteil) * 360deg), rgba(255,255,255,.22) 0); -webkit-mask: radial-gradient(circle, transparent 6.1px, #000 6.4px); mask: radial-gradient(circle, transparent 6.1px, #000 6.4px); }
 .ez-schritt__bild--dunkel { background: radial-gradient(120% 90% at 18% 0%, #2a2a2d, #121315 55%, var(--schwarz)); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.045); }
 .ez-zeichnung { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .ez-zeichnung .rahmen { fill: none; stroke: var(--weiss); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
@@ -407,10 +402,6 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-kontakt { position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: start; gap: var(--raum-4); padding: var(--raum-5); border-radius: var(--rund-l); color: var(--tinte); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante); }
 @media (min-width: 900px) { .ez-kontakt { padding: var(--raum-6); } .ez-kontakt__held-text b { font-size: 48px; } }
 .ez-kontakt__schein { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(52% 60% at 92% 0%, var(--firma-kern), var(--firma-licht) 8%, color-mix(in srgb, var(--firma) 55%, transparent) 30%, color-mix(in srgb, var(--firma-tief) 60%, transparent) 50%, transparent 70%); }
-.ez-kontakt__betrieb { display: flex; align-items: center; gap: 14px; }
-.ez-kontakt__betrieb > span:last-child { display: grid; gap: 4px; min-width: 0; }
-.ez-kontakt__betrieb b { font: 500 16px/1.15 var(--font-sans); letter-spacing: -.01em; overflow-wrap: anywhere; }
-.ez-kontakt__betrieb span span { font: 400 13px/1.3 var(--font-sans); color: var(--tinte-2); }
 /* Innenkarte (G8): Schwarz, Radius 20, die Nummer als Held, der weiße Rundknopf ist die Aktion */
 .ez-kontakt__held { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: 14px 14px 14px 18px; border-radius: var(--rund-m); background: var(--schwarz); color: var(--tinte); text-decoration: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.04); transition: transform 220ms var(--dna-druck); }
 .ez-kontakt__held:active { transform: scale(.985); transition-duration: 0s; }
@@ -438,11 +429,276 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fuss__satz { margin: 0; max-width: 56ch; font: 400 14px/1.55 var(--font-sans); color: var(--tinte-2); }
 .ez-fuss__recht { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px 24px; flex-wrap: wrap; }
 .ez-fuss__recht a { display: inline-block; padding-block: 15px; color: var(--tinte-2); font: 400 14px/1 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.ez-fuss__kz { position: relative; margin: 20px 0 0; font: 400 13px/1.5 var(--font-sans); color: var(--tinte-2); }
+.ez-fuss__kz { margin: 0; min-height: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
 .dna-label .ez-label__wert { font-style: normal; color: var(--tinte); }
 /* Rückmeldung in der Vorlage: Knöpfe ohne Ziel sagen, dass das Ziel der Betrieb setzt */
 .ez-toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); z-index: 50; translate: -50% 0; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: var(--rund-pille); background: rgba(32,32,34,.94); color: var(--weiss); font: 500 13px/1.3 var(--font-sans); text-align: center; border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 10px 30px -10px rgba(0,0,0,.6); opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity 160ms ease, transform 160ms ease, visibility 0s linear 160ms; pointer-events: none; }
 .ez-toast.ist-da { opacity: 1; visibility: visible; transform: none; transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt), visibility 0s; }
 
-/* ---------- Ruhig ---------- */
-@media (prefers-reduced-motion: reduce) { .ez-leiste, .ez-muster, .ez-toast { transition: none; } }
+/* =====================================================================================================================================
+   Signature. Alles ab hier gehört zur Vorlage des Pakets Signature (Gremium und Profis vom 26.10.2026 eingearbeitet, Urteile unter
+   docs/profis/gremium/2026-10-26-signature-vorlage-*.md). Vorher steht die Gestaltung, die Signature mit Essential Plus teilt.
+   ===================================================================================================================================== */
+.ez { --firma-hof: color-mix(in srgb, var(--firma) 30%, transparent); --hinweis-hof: color-mix(in srgb, var(--hinweis) 30%, transparent); --plus-hof: color-mix(in srgb, var(--silbergrau) 30%, transparent); }
+.ez a, .ez button, .ez label { -webkit-tap-highlight-color: transparent; }
+
+/* ---------- Muster-Leiste: zwei Sorten Merkmale, Umschalter der zwei Wege des Kunden, Schalter „Etiketten“ ----------
+   Beim echten Betrieb fehlt die Leiste im Markup (eigener Block), sie wird nicht per CSS versteckt. */
+.ez-ab-desk { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (min-width: 760px) { .ez-ab-desk { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip-path: none; white-space: inherit; } }
+.ez-musterleiste__text { flex: 1 1 auto; margin-right: auto; font-size: 12px; }
+.ez-musterleiste__text b { font-size: 13px; }
+.ez-musterleiste__text .ez-musterleiste__tel { display: none; }
+.ez-legende { display: inline-block; width: 8px; height: 8px; margin: 0 6px 0 2px; border-radius: 50%; background: var(--hinweis); box-shadow: 0 0 0 3px var(--hinweis-hof); vertical-align: 0; }
+.ez-legende--plus { margin-left: 3px; background: var(--silbergrau); box-shadow: 0 0 0 3px var(--plus-hof); }
+@media (max-width: 759px) {
+  .ez-musterleiste .ez-huelle { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "text schalter" "modus modus"; gap: 8px 12px; padding-block: 10px; }
+  .ez-musterleiste__text { grid-area: text; }
+  .ez-musterleiste__text .ez-musterleiste__desk { display: none; }
+  .ez-musterleiste__text .ez-musterleiste__tel { display: block; }
+  .ez-schalter { grid-area: schalter; align-self: start; }
+  .ez-modus.dna-pillen { grid-area: modus; display: grid; grid-template-columns: 1fr 1fr; }
+  .ez-modus label { justify-content: center; }
+}
+.ez-modus.dna-pillen { flex: none; margin: 0; border: 0; min-width: 0; overflow: visible; padding: 4px; background: var(--schwarz); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.04); }
+.ez-modus label { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 14px; border-radius: var(--rund-pille); color: var(--silbergrau); font: 500 14px/1 var(--font-sans); cursor: pointer; white-space: nowrap; transition: background-color 220ms var(--dna-druck), color 220ms var(--dna-druck), box-shadow 220ms var(--dna-druck), transform 220ms var(--dna-druck); }
+.ez-modus input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.ez-modus label::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: background-color 220ms ease, box-shadow 220ms ease; }
+/* gewählt: Anthrazit mit Koralle-Punkt, keine zweite volle Pille neben „Fenster planen“ */
+.ez-modus label:has(:checked) { background: var(--anthrazit); color: var(--weiss); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.1); }
+.ez-modus label:has(:checked)::before { background: var(--hinweis); box-shadow: 0 0 0 3px var(--hinweis-hof); }
+.ez-modus label:active { transform: scale(.97); transition-duration: 0s; }
+.ez-modus label:has(:focus-visible) { outline: 2px solid var(--fokus); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .ez-modus label:not(:has(:checked)):hover { color: var(--weiss); } }
+.ez-schalter { font-size: 14px; padding: 0 16px 0 14px; }
+.ez-schalter__punkt { width: 8px; height: 8px; }
+.ez-schalter[aria-pressed="true"] { background: var(--schwarz); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.1); }
+
+/* ---------- Muster-Etiketten: ein Punkt-Rezept (8 px, Hof 3 px zu 30 %); grau = wie Plus, Koralle = nur Signature ---------- */
+.ez-muster::before { width: 8px; height: 8px; flex: none; box-shadow: 0 0 0 3px var(--hinweis-hof); }
+.ez-muster--plus::before { background: var(--silbergrau); box-shadow: 0 0 0 3px var(--plus-hof); }
+.ez-muster--geraet { left: calc(100% + 12px); top: 50%; bottom: auto; translate: 0 -50%; }
+.ez .ez-muster.ez-muster--ablage { display: none; }
+@media (min-width: 900px) { .ez .ez-muster.ez-muster--ablage { display: inline-flex; right: 0; top: calc(100% - 4px); } }
+/* Der Hinweis zum Einladungslink hängt außen am Etikett und nimmt keinen Platz */
+.ez-muster--innen { right: -1px; bottom: calc(100% + 8px); height: 22px; padding: 0 9px 0 8px; font-size: 12px; }
+
+/* ---------- Zwei Zustände der Seite: Website-Besucher und persönlicher Einladungslink ----------
+   Im Hero teilen sich beide Fassungen dieselbe Zeile (die höhere gibt die Höhe vor), damit beim Wechsel nichts springt und die Pille
+   in beiden Zuständen gleich hoch steht. Überall sonst tauscht der Inhalt hart; er liegt beim Schalten nie im Bild. */
+.ez[data-modus="website"] .ez-nur-einladung:not(.ez-link-etikett, :is(.ez-hero__text, .ez-brief) > *),
+.ez[data-modus="einladung"] .ez-nur-web:not(:is(.ez-hero__text, .ez-brief) > *) { display: none !important; }
+.ez-hero__text > *, .ez-brief > * { grid-column: 1; }
+.ez-hero__text > .ez-kicker { grid-row: 1; }
+.ez-hero__text > h1 { grid-row: 2; }
+.ez-hero__text > .ez-brief { grid-row: 3; }
+.ez-hero__text > .ez-aktionen { grid-row: 4; }
+.ez-hero__text > .ez-fakten { grid-row: 5; }
+.ez-brief > .dna-text { grid-row: 1; }
+.ez-brief > .ez-unterschrift { grid-row: 2; }
+.ez[data-modus="website"] :is(.ez-hero__text, .ez-brief) > .ez-nur-einladung,
+.ez[data-modus="einladung"] :is(.ez-hero__text, .ez-brief) > .ez-nur-web { visibility: hidden; }
+/* Wechsel: Hero-Text 160 ms aus auf der Druckkurve, Tausch beim Ende, 220 ms ein */
+/* Nur was sich ändert, geht aus (Überschrift, Kicker, Brief, Fakten); Pille, Unterschrift und Bühne stehen (Frontend-Abgleich, Hebel 5) */
+.ez.ist-geschaltet :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt); }
+.ez.ist-wechsel :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { opacity: 0; transform: translate3d(0, 6px, 0); transition-duration: 160ms; transition-timing-function: var(--dna-druck); }
+/* Ohne JavaScript gibt es keinen Wechsel und keine Etiketten: Wahl und Schalter fehlen dann */
+html:not(.ez-js) .ez-modus, html:not(.ez-js) .ez-ml .ez-schalter { display: none; }
+/* Takt: Kicker eine Stufe vor der Überschrift, die Fakten im Takt der Pille (840–1320 ms) */
+.ez-hero__text > .ez-fakten[data-dna-auftritt] { transition-duration: 480ms; }
+.ez .ez-kicker { font-size: 13px; }
+
+/* Die Anrede: der Gruß leise darüber, der Name das eine schwere Element (G15) */
+.ez .ez-gruss em.ez-ak { display: block; font-weight: 400; letter-spacing: -.02em; color: var(--silbergrau); }
+
+/* Fakten als Chips (Vorlage 02) statt eines Absatzes unter der Pille */
+.ez-fakten { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ez-fakten li { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; padding: 4px 12px 4px 4px; border-radius: var(--rund-pille); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante); font: 400 13px/1.25 var(--font-sans); color: var(--weiss); }
+.ez-fakten__zeichen { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 55%, transparent); }
+.ez-fakten__zeichen svg { width: 12px; height: 12px; }
+.ez-fakten__zeichen svg * { vector-effect: non-scaling-stroke; }
+
+/* ---------- Der persönliche Link als Glas am Gerät (G9, G10): die eine inszenierte Stelle ----------
+   Auftritt 320 ms aus 12 px von rechts, beim ersten Laden nach der Überschrift; der Punkt pulst einmal; Abgang 160 ms */
+.ez-link-etikett { position: absolute; z-index: 3; right: 14px; bottom: 14px; pointer-events: none; padding: 5px 14px 5px 5px; gap: 10px; font-size: 13px;
+  background: linear-gradient(180deg, rgba(32,32,34,.46), rgba(7,9,10,.64)); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); border-color: rgba(255,255,255,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -1px 0 rgba(7,9,10,.55), 0 14px 30px -12px rgba(0,0,0,.75), 0 1px 2px rgba(0,0,0,.4);
+  transition: opacity 320ms var(--dna-auftritt) 1000ms, transform 320ms var(--dna-auftritt) 1000ms, display 320ms allow-discrete; }
+.ez.ist-geschaltet .ez-link-etikett { transition-delay: 0s; }
+@starting-style { .ez-link-etikett { opacity: 0; transform: translate3d(12px, 0, 0); } }
+.ez[data-modus="website"] .ez-link-etikett { display: none; opacity: 0; transform: translate3d(12px, 0, 0); transition-duration: 160ms; transition-delay: 0s; transition-timing-function: var(--dna-druck); }
+.ez-link-etikett > span:nth-child(2) { display: grid; gap: 3px; }
+.ez-link-etikett b { font-weight: 500; color: var(--weiss); line-height: 1.1; }
+.ez-link-etikett small { font: 400 12px/1.1 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); }
+.ez-link-etikett__punkt { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex: none; background: radial-gradient(circle at 50% 30%, #3a3b40, var(--anthrazit) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 0 0 1px rgba(7,9,10,.5); }
+.ez-link-etikett__punkt::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--firma); box-shadow: 0 0 0 3px var(--firma-hof); animation: ez-puls 700ms var(--dna-auftritt) 1320ms 1 both; }
+.ez.ist-geschaltet .ez-link-etikett__punkt::after { animation-delay: 320ms; }
+@keyframes ez-puls { 0%, 100% { box-shadow: 0 0 0 3px var(--firma-hof); } 45% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--firma) 0%, transparent); } }
+@media (min-width: 900px) { .ez-link-etikett { right: 18px; bottom: 18px; padding: 6px 16px 6px 6px; } }
+/* Domain-Etikett: dasselbe Glas */
+.ez-adresse .dna-etikett { background: linear-gradient(180deg, rgba(32,32,34,.46), rgba(7,9,10,.64)); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); border-color: rgba(255,255,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.34), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -1px 0 rgba(7,9,10,.55), 0 14px 30px -12px rgba(0,0,0,.75), 0 1px 2px rgba(0,0,0,.4); }
+
+/* ---------- Bühne: das Gerät liegt im eigenen Licht (Vorlage 09, 08); am Telefon flacher, damit die Pille höher steht ---------- */
+.ez .ez-buehne { --sx: 20%; --sy: 82%; }
+@media (max-width: 899px) { .ez .ez-buehne { aspect-ratio: 16 / 10; } .ez-hero { gap: var(--raum-3); } }
+.ez-buehne__schein { width: 86%; height: 74%; background: radial-gradient(40% 40% at 50% 50%, var(--firma-licht), color-mix(in srgb, var(--firma) 62%, transparent) 18%, color-mix(in srgb, var(--firma-tief) 70%, transparent) 42%, transparent 70%); }
+.ez-geraet { box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 0 0 2.5px rgba(7,9,10,.7), inset 0 1.5px 0 rgba(255,255,255,.38), inset 1.5px -1.5px 0 color-mix(in srgb, var(--firma) 55%, transparent), 0 3px 0 color-mix(in srgb, var(--silbergrau) 35%, var(--anthrazit)), 0 4px 0 rgba(7,9,10,.95), 30px 40px 8px -2px rgba(7,9,10,.8), 3px 5px 5px rgba(7,9,10,.9), 0 26px 44px -18px rgba(7,9,10,.9); }
+.ez-geraet__glanz { background: linear-gradient(118deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 34%, transparent 46%), radial-gradient(70% 46% at 0% 100%, color-mix(in srgb, var(--firma) 26%, transparent), transparent 62%); }
+@media (min-width: 900px) {
+  .ez .ez-buehne { --sx: 74%; --sy: 84%; }
+  .ez-geraet { box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 0 0 2.5px rgba(7,9,10,.7), inset 1.5px 1.5px 0 rgba(255,255,255,.38), inset -1.5px -1.5px 0 color-mix(in srgb, var(--firma) 55%, transparent), 0 3px 0 color-mix(in srgb, var(--silbergrau) 35%, var(--anthrazit)), 0 4px 0 rgba(7,9,10,.95), 30px 40px 8px -2px rgba(7,9,10,.8), 3px 5px 5px rgba(7,9,10,.9), 0 26px 44px -18px rgba(7,9,10,.9); }
+  .ez-geraet__glanz { background: linear-gradient(118deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 34%, transparent 46%), radial-gradient(70% 46% at 100% 100%, color-mix(in srgb, var(--firma) 26%, transparent), transparent 62%); }
+}
+.ez-app__punkt::after { box-shadow: 0 0 0 3px var(--firma-hof); }
+.ez-app__band i.ist { box-shadow: 0 0 0 calc(3px / var(--gs)) var(--firma-hof); }
+
+/* ---------- Wortmarke des Betriebs: die Marke ist das einzige 700 der Seite (Vorlage 05) ---------- */
+.ez .ez-logo__wort { gap: 3px; }
+.ez .ez-logo__wort b { font-weight: 700; font-size: 20px; letter-spacing: -.03em; }
+.ez .ez-logo__wort small { font-size: 10px; letter-spacing: .18em; }
+.ez .ez-logo--klein .ez-logo__wort b { font-size: 16px; }
+.ez .ez-logo--klein .ez-logo__wort small { font-size: 10px; }
+.ez .ez-logo--app .ez-logo__wort b { font: 400 17px/1 var(--font-sans); letter-spacing: 0; }
+@media (min-width: 900px) { .ez .ez-kopf .ez-logo__wort b { font-size: 22px; } .ez .ez-kopf .ez-logo__wort small { font-size: 11px; } }
+.ez-logo--gross { gap: 14px; }
+.ez .ez-logo--gross .ez-logo__wort b { font-size: 24px; }
+.ez .ez-logo--gross .ez-logo__wort small { font-size: 11px; }
+
+/* ---------- Szene 2: das Fenster bricht aus der Konfigurator-Kachel (Vorlage 03) ---------- */
+.ez-planen__schein { background: radial-gradient(48% 42% at 80% 102%, var(--firma-kern), var(--firma-licht) 7%, color-mix(in srgb, var(--firma) 62%, transparent) 26%, color-mix(in srgb, var(--firma-tief) 66%, transparent) 48%, transparent 70%); }
+.ez-planen__bild { right: -2%; bottom: -7%; width: 50%; filter: drop-shadow(0 -1px 0 rgba(255,255,255,.22)) drop-shadow(0 1px 0 color-mix(in srgb, var(--firma-licht) 60%, transparent)) drop-shadow(3px 6px 4px rgba(7,9,10,.6)) drop-shadow(0 18px 18px rgba(7,9,10,.3)); }
+.ez-planen::after { right: 2%; bottom: 2%; width: 48%; height: 7%; background: radial-gradient(closest-side, rgba(7,9,10,.8), transparent); }
+@media (min-width: 760px) { .ez-planen__bild { right: 2%; bottom: -16%; width: 25%; } .ez-planen::after { right: 5%; bottom: 3%; width: 25%; } .ez-planen__text .dna-titel-s { font-weight: 600; } }
+
+/* ---------- Szene 3: Zeichen und Licht ---------- */
+.ez-sucher svg { position: absolute; z-index: 1; width: 14px; height: 14px; color: var(--weiss); filter: drop-shadow(0 0 1.5px rgba(7,9,10,.55)); }
+.ez-sucher svg * { vector-effect: non-scaling-stroke; }
+.ez-sucher svg:nth-child(1) { left: 9px; top: 9px; }
+.ez-sucher svg:nth-child(2) { right: 9px; top: 9px; transform: rotate(90deg); }
+.ez-sucher svg:nth-child(3) { right: 9px; bottom: 9px; transform: rotate(180deg); }
+.ez-sucher svg:nth-child(4) { left: 9px; bottom: 9px; transform: rotate(270deg); }
+.ez-ring { width: 16px; height: 16px; flex: none; color: var(--weiss); }
+.ez-ring * { vector-effect: non-scaling-stroke; }
+.ez-zeichnung .mass { stroke-width: 1.4; }
+.ez-zeichnung .mass-oeffnung { stroke-dasharray: 4 5; }
+.ez-schritt__bild--hell { background: radial-gradient(90% 70% at 50% 0%, var(--weiss), color-mix(in srgb, var(--silbergrau) 14%, var(--weiss))); }
+.ez-stationen li.ist::before { width: 8px; height: 8px; margin-top: 2px; box-shadow: 0 0 0 3px var(--firma-hof); }
+.ez-wahl-reihe .offen { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--silbergrau) 45%, transparent) 0 1.2px, transparent 1.2px 5px), var(--weiss); }
+.ez-zeit .dna-zahl__wert { font-size: clamp(76px, 20vw, 88px); }
+/* Leuchten mit Kern und Korn (Vorlage 10, 12): enger, heißer, darüber ein Punktraster, das mit dem Licht ausläuft */
+.ez .ez-zeit.dna-leucht { --glut-x: 90%; --glut-y: 2%; }
+.ez .ez-zeit.dna-leucht::before { background: radial-gradient(36% 48% at var(--glut-x) var(--glut-y), var(--firma-kern), var(--firma-licht) 6%, color-mix(in srgb, var(--firma) 62%, transparent) 22%, color-mix(in srgb, var(--firma-tief) 58%, transparent) 44%, transparent 66%); }
+.ez .ez-zeit.dna-leucht::after, .ez-kontakt__schein::after { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 1; filter: none; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,.14) .7px, transparent 1.3px) 0 0 / 9px 9px; -webkit-mask: radial-gradient(44% 56% at var(--glut-x, 90%) var(--glut-y, 16%), #000 8%, transparent 72%); mask: radial-gradient(44% 56% at var(--glut-x, 90%) var(--glut-y, 16%), #000 8%, transparent 72%); }
+
+/* ---------- Szene 4: Daten, Fortschritt (nur mit Link), Station des Betriebs ---------- */
+.ez-weg .dna-text { max-width: 40ch; }
+.ez-route__stelle--stand:not(:last-child)::after { top: 54px; bottom: -32px; }
+.ez[data-modus="website"] .ez-route__stelle--stand { align-items: center; }
+.ez[data-modus="website"] .ez-route__stelle--stand:not(:last-child)::after { top: calc(50% + 26px); bottom: calc(-50% + 26px); }
+.ez[data-modus="einladung"] .ez-route__stelle--stand { align-items: start; }
+/* Dunkle Innenkarte (G8) liegt auf der Karte: tonaler Hub, Lichtkante, Schatten (Vorlage 07, 08) */
+.ez-stand, .ez-kontakt__held { position: relative; background: radial-gradient(140% 90% at 50% -10%, color-mix(in srgb, var(--anthrazit) 55%, var(--schwarz)), var(--schwarz) 60%); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 1px 0 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05), inset 0 -1px 0 rgba(7,9,10,.9), 0 1px 0 rgba(255,255,255,.05), 0 18px 32px -18px rgba(0,0,0,.95), 0 2px 4px rgba(0,0,0,.5); }
+.ez-stand { display: grid; gap: 14px; margin-top: 14px; padding: 14px 16px 16px; border-radius: var(--rund-m); color: var(--weiss); }
+.ez-stand__kopf { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.ez-stand__kopf small { font: 400 13px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); }
+.ez-stand .ez-beispiel { display: inline-flex; align-items: center; height: 20px; margin-right: 6px; padding: 0 8px; border-radius: var(--rund-pille); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 50%, transparent); font: 400 12px/1 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); vertical-align: 1px; }
+/* Zustand als Indigo-Chip (Vorlage 10): Zustand und Zahl reden nicht mehr um die Wette */
+.ez-zustand { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 11px 0 9px; border-radius: var(--rund-pille); background: var(--indigo); color: var(--weiss); font: 500 12px/1 var(--font-sans); letter-spacing: .02em; white-space: nowrap; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+.ez-zustand i { width: 8px; height: 8px; border-radius: 50%; background: var(--firma); box-shadow: 0 0 0 3px var(--firma-hof); }
+.ez-stand__wert { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.ez-stand__zahl { font: 300 48px/1 var(--font-sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--weiss); }
+.ez-stand__zahl small { font: 400 14px/1 var(--font-sans); letter-spacing: 0; color: var(--silbergrau); margin-left: 6px; }
+.ez-stand__zahl small:first-child { margin: 0 8px 0 0; }
+/* Kapselreihe (G11): erreicht weiß, laufend in der Firmenfarbe, offen schraffiert; Fenster 2 von 4 */
+.ez-kapseln { display: inline-flex; align-items: end; gap: 8px; padding-bottom: 4px; }
+.ez-kapseln i { width: 12px; height: 30px; border-radius: var(--rund-pille); background: var(--ez-schraffur), color-mix(in srgb, var(--anthrazit) 55%, var(--schwarz)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 40%, transparent), inset 0 1px 0 rgba(255,255,255,.06); }
+.ez-kapseln i.voll { background: linear-gradient(180deg, var(--weiss), color-mix(in srgb, var(--silbergrau) 38%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.3), 0 1px 2px rgba(0,0,0,.6); }
+.ez-kapseln i.ist { background: linear-gradient(180deg, var(--firma-licht), var(--firma) 65%); box-shadow: 0 0 0 3px var(--firma-hof), inset 0 1px 0 rgba(255,255,255,.4), 0 1px 2px rgba(0,0,0,.6); }
+.ez-stand__fuss { font: 400 14px/1.45 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
+.ez-muster--stand { right: 10px; top: -13px; }
+.ez-bereit__punkt { box-shadow: 0 0 0 3px var(--firma-hof); }
+.ez-bereit__karte > .dna-pille { margin-top: 16px; }
+.ez-dinge { margin: 8px 0 4px; }
+
+/* ---------- Szene 5: Kontakt ---------- */
+.ez-kontakt__betrieb { display: flex; }
+.ez-kontakt__schein { background: radial-gradient(54% 60% at 90% 16%, var(--firma-kern), var(--firma-licht) 7%, color-mix(in srgb, var(--firma) 58%, transparent) 26%, color-mix(in srgb, var(--firma-tief) 60%, transparent) 48%, transparent 70%); }
+.ez-kontakt__held::before { content: ""; position: absolute; left: 30%; right: 0; top: 0; height: 1px; border-radius: inherit; pointer-events: none; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--firma-licht) 75%, transparent)); }
+.ez-kontakt__held-text b { font-weight: 300; }
+.ez-kontakt__held-text small { font-size: 13px; }
+@media (min-width: 900px) { .ez-kontakt__held-text b { font-size: 56px; font-weight: 250; letter-spacing: -.035em; } }
+.ez-kontakt__held:active .ez-kontakt__held-knopf { transform: scale(.96); transition-duration: 0s; }
+.ez-kontakt__wege a { font-size: 13px; }
+.ez-kontakt__daten dt::after { content: "\00a0–"; }
+.ez-kontakt__daten dd { font-weight: 500; }
+.dna-label .ez-label__wert { font-weight: 500; }
+@media (max-width: 759px) { .ez-reihe li { font-size: 13px; } }
+
+/* ---------- Fuß: kein eeziframes, Anmeldung für Mitarbeiter (Dashboard unter der Domain) ---------- */
+.ez-fuss__nav { min-width: 0; }
+.ez-fuss__team a { display: inline-flex; align-items: center; gap: 6px; }
+.ez-adresse__text svg, .ez-fuss__team svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.ez-adresse__text svg { color: var(--silbergrau); }
+.ez-adresse__text svg *, .ez-fuss__team svg * { vector-effect: non-scaling-stroke; }
+.ez-toast { font-size: 14px; }
+
+/* ---------- Weniger Bewegung: kein Ortswechsel, Opazität bleibt zum Verstehen ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ez.ist-geschaltet :is(.ez-hero__text, .ez-brief) > :is(.ez-nur-web, .ez-nur-einladung) { transition: none; }
+  .ez-leiste { transform: none; opacity: 0; visibility: hidden; transition: opacity 160ms ease, visibility 0s linear 160ms; }
+  .ez-leiste.ist-da { opacity: 1; visibility: visible; transition: opacity 220ms ease, visibility 0s; }
+  .ez-muster, .ez-toast { transform: none; transition: opacity 160ms ease, visibility 0s linear 160ms; }
+  .ez.ist-muster .ez-muster, .ez-toast.ist-da { transition: opacity 220ms ease, visibility 0s; }
+  .ez-link-etikett { transition: none; }
+  .ez[data-modus="website"] .ez-link-etikett { transform: none; }
+  @starting-style { .ez-link-etikett { transform: none; } }
+  .ez-link-etikett__punkt::after { animation: none; }
+  .ez-hero__text, .ez.ist-wechsel .ez-hero__text { transition: none; transform: none; }
+  .ez-rund, .ez-schalter, .ez-modus label, .ez-planen__knopf, .ez-kontakt__held, .ez-kontakt__held-knopf, .ez-kontakt__wege .dna-rund-knopf, .ez .dna-pille__pfeil svg, .ez .dna-pille--leise { transition-duration: 0s; }
+}
+
+/* ---------- Paket-Stufen (15 Fensterbauer, 26.10.2026): Fotos des Betriebs sichtbar, Dashboard in der Muster-Ebene ---------- */
+/* Das Foto-Bento gehört zum Paket (bis 6 Fotos) und steht deshalb auch ohne Etiketten da; Schraffur, „Foto folgt“ und Zähler nur mit Etiketten */
+.ez .ez-bento { grid-template-areas: "p p" "p p" "g g" "g g" "f3 f4" "f5 f6"; }
+.ez .ez-foto { display: block; }
+.ez .ez-foto__schraffur, .ez .ez-foto__text span, .ez .ez-glaschip--foto { display: none; }
+.ez.ist-muster .ez-foto__schraffur, .ez.ist-muster .ez-foto__text span { display: block; }
+.ez.ist-muster .ez-glaschip--foto { display: inline-flex; }
+.ez .ez-planen__bild { right: -4%; width: 56%; }
+@media (min-width: 760px) {
+  .ez .ez-bento { grid-auto-rows: 200px; grid-template-areas: "g g f3 p" "g g f4 p" "f5 f6 f6 p"; }
+  .ez .ez-planen__text { max-width: 100%; }
+  .ez .ez-planen__bild { right: -18%; bottom: -3%; width: 110%; }
+  .ez .ez-planen::after { right: -6%; width: 80%; }
+}
+/* Dashboard in der Muster-Ebene (nur Signature): nimmt Platz, aber nur, wenn der Fensterbauer die Etiketten einschaltet */
+.ez-dash { display: none; margin-top: var(--raum-5); padding: var(--raum-5); border-radius: var(--rund-l); color: var(--weiss); background: var(--ez-kachel); box-shadow: var(--ez-kachel-kante), var(--schatten-schwebe); gap: var(--raum-4); }
+.ez.ist-muster .ez-dash { display: grid; }
+.ez-dash__kopf { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.ez-dash__adresse { display: inline-flex; align-items: center; gap: 6px; font: 400 13px/1.2 var(--font-sans); color: var(--silbergrau); }
+.ez-dash__adresse b { color: var(--weiss); font-weight: 500; }
+.ez-dash__adresse svg { width: 14px; height: 14px; }
+.ez-dash__adresse svg * { vector-effect: non-scaling-stroke; }
+.ez-dash__zugaenge { margin-left: auto; font: 400 13px/1.2 var(--font-sans); color: var(--silbergrau); }
+.ez-dash__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ez-dash__liste li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 14px; padding: 12px 14px 12px 16px; border-radius: var(--rund-m); background: radial-gradient(140% 90% at 50% -10%, color-mix(in srgb, var(--anthrazit) 55%, var(--schwarz)), var(--schwarz) 60%); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), inset 0 0 0 1px rgba(255,255,255,.04); }
+.ez-dash__name { display: grid; gap: 3px; min-width: 0; }
+.ez-dash__name b { font: 500 16px/1.2 var(--font-sans); }
+.ez-dash__name small { font: 400 12px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); font-variant-numeric: tabular-nums; }
+.ez-dash__wert { grid-column: 1 / -1; font: 400 13px/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-dash__chip { display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: var(--rund-pille); font: 500 12px/1 var(--font-sans); letter-spacing: .02em; color: var(--weiss); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 55%, transparent); white-space: nowrap; }
+.ez-dash__chip--fertig { background: var(--weiss); color: var(--schwarz); box-shadow: none; }
+@media (min-width: 900px) { .ez-dash__liste li { grid-template-columns: minmax(0, 1fr) 180px auto; } .ez-dash__wert { grid-column: auto; text-align: right; } }
+.ez-ml .ez-ml__zeile { display: block; }
+/* Plus: eeziframes als eine Zeile im Fuß (Kennzeichnung „dezent“); Etiketten „erst in Signature“ stehen im Fluss oder am Gerät */
+.ez-fuss__zeile { font: 400 13px/1.5 var(--font-sans); color: var(--tinte-2); }
+.ez .ez-muster--block { display: flex; width: fit-content; max-width: 100%; margin-top: 8px; }
+.ez .ez-muster--link { right: 14px; bottom: 14px; }
+@media (min-width: 900px) { .ez .ez-muster--link { right: 18px; bottom: 18px; } }
+/* Telefonnummer als Held: Schrift an die Kartenbreite gebunden, damit 12 bis 13 Zeichen auch bei 320 bis 412 px neben dem Knopf
+   stehen (0,55 em je Zeichen gemessen, Outfit 300); die Instanz setzt --tel-zeichen auf die Länge der Nummer. Erste Angabe =
+   Rückfall ohne Containermaß. Kapselreihe der Innenkarte darf umbrechen statt über die Kante zu ragen. */
+.ez-kontakt__held { container-type: inline-size; }
+.ez-kontakt__held-text b { font-size: clamp(36px, 10vw, 44px); font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 44px); }
+@media (min-width: 900px) { .ez-kontakt__held-text b { font-size: 48px; font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 48px); } }
+.ez-stand__wert { flex-wrap: wrap; gap: 8px 12px; }

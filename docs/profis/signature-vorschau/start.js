@@ -19,6 +19,16 @@
     });
   })();
 
+  /* Vorhang neu ordnen, sobald eine Szene ihre Höhe ändert (Zustand, Etiketten, Schrift, Bilder); bundle.js ordnet nur bei load
+     und resize. Ohne das klebt eine gewachsene Szene zu früh, und ihr Ende (z. B. die Pille der Bereit-Karte) kommt nie ins Bild. */
+  if ('ResizeObserver' in w) {
+    var ordnen = false, hoehen = new w.ResizeObserver(function () {
+      if (ordnen) return; ordnen = true;
+      w.requestAnimationFrame(function () { ordnen = false; w.dispatchEvent(new Event('resize')); });
+    });
+    Array.prototype.forEach.call(d.querySelectorAll('.dna-szene'), function (s) { hoehen.observe(s); });
+  }
+
   /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite */
   var leiste = d.querySelector('.ez-leiste'), kopf = d.querySelector('.ez-kopf');
   if (leiste) {
@@ -28,6 +38,7 @@
       var unten = kopf.getBoundingClientRect().bottom + (w.scrollY || 0) - (s1.getBoundingClientRect().top + (w.scrollY || 0));
       var steht = Math.min(0, w.innerHeight - s1.offsetHeight);
       grenze = unten <= -steht ? unten : s1.offsetHeight - steht - unten;
+      var ml = d.querySelector('.ez-ml'); if (ml) grenze += ml.offsetHeight; /* Muster-Leiste der Vorlage liegt darüber */
     };
     messeGrenze(); w.addEventListener('resize', messeGrenze); w.addEventListener('load', messeGrenze);
     var pruefe = function () {
@@ -62,8 +73,13 @@
       if (!wurzel.classList.contains('ist-wechsel')) return;
       wurzel.setAttribute('data-modus', ziel); wurzel.classList.remove('ist-wechsel');
     };
-    heroText.addEventListener('transitionend', function (e) { if (e.target === heroText && e.propertyName === 'opacity') tausche(); });
-    try { if (w.localStorage.getItem('ez-modus') === 'einladung') { ziel = 'einladung'; wurzel.setAttribute('data-modus', ziel); markiere(ziel); } } catch (e) {}
+    heroText.addEventListener('transitionend', function (e) { if (e.propertyName === 'opacity' && e.target.tagName === 'H1') tausche(); });
+    /* Start: aus einem anderen Paket kommend die Website (gleicher Vergleich), sonst die eigene Wahl, sonst der Einladungslink */
+    var von = '', gewaehlt = '';
+    try { von = w.sessionStorage.getItem('ez-von') || ''; w.sessionStorage.removeItem('ez-von'); } catch (e) {}
+    try { gewaehlt = w.localStorage.getItem('ez-modus') || ''; } catch (e) {}
+    ziel = von && von !== 'signature' ? 'website' : (gewaehlt === 'website' || gewaehlt === 'einladung' ? gewaehlt : 'einladung');
+    wurzel.setAttribute('data-modus', ziel); markiere(ziel);
     radios.forEach(function (r) {
       r.addEventListener('change', function () {
         if (!r.checked || r.value === ziel) return;
@@ -75,18 +91,6 @@
         wurzel.classList.add('ist-wechsel');
         modusUhr = setTimeout(tausche, 240);
       });
-    });
-  }
-
-  /* Muster-Ebene: Etiketten an allem, was im Paket dem Betrieb gehört; der Zustand bleibt auf diesem Gerät (nur eine Vorliebe) */
-  var schalter = d.getElementById('muster-schalter');
-  if (schalter && wurzel) {
-    var setze = function (an) { wurzel.classList.toggle('ist-muster', an); schalter.setAttribute('aria-pressed', an ? 'true' : 'false'); };
-    try { if (w.localStorage.getItem('ez-muster') === 'an') setze(true); } catch (e) {}
-    schalter.addEventListener('click', function () {
-      var an = schalter.getAttribute('aria-pressed') !== 'true';
-      setze(an);
-      try { w.localStorage.setItem('ez-muster', an ? 'an' : 'aus'); } catch (e) {}
     });
   }
 

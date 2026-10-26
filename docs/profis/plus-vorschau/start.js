@@ -1,6 +1,6 @@
-/* Landingpage eines Konfigurators, Paket Essential Plus (Vorschau Design-DNA): Vorhang ohne Sprung, Leiste beim Hochscrollen, Fokus
-   unter dem Vorhang, Schalter der Muster-Ebene. Die Bausteine selbst startet dna/bundle.js. Keine Funktion für Besucher: Ziele der
-   Knöpfe setzt erst die Instanz. */
+/* Landingpage eines Konfigurators, Paket Signature (Vorschau Design-DNA): Vorhang ohne Sprung, Leiste beim Hochscrollen, Fokus
+   unter dem Vorhang, Schalter der Muster-Ebene, Umschalter der zwei Zustände (Website-Besucher, persönlicher Einladungslink).
+   Die Bausteine selbst startet dna/bundle.js. Keine Funktion für Besucher: Ziele der Knöpfe setzt erst die Instanz. */
 (function () {
   'use strict';
   var w = window, d = document;
@@ -19,6 +19,16 @@
     });
   })();
 
+  /* Vorhang neu ordnen, sobald eine Szene ihre Höhe ändert (Zustand, Etiketten, Schrift, Bilder); bundle.js ordnet nur bei load
+     und resize. Ohne das klebt eine gewachsene Szene zu früh, und ihr Ende (z. B. die Pille der Bereit-Karte) kommt nie ins Bild. */
+  if ('ResizeObserver' in w) {
+    var ordnen = false, hoehen = new w.ResizeObserver(function () {
+      if (ordnen) return; ordnen = true;
+      w.requestAnimationFrame(function () { ordnen = false; w.dispatchEvent(new Event('resize')); });
+    });
+    Array.prototype.forEach.call(d.querySelectorAll('.dna-szene'), function (s) { hoehen.observe(s); });
+  }
+
   /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite */
   var leiste = d.querySelector('.ez-leiste'), kopf = d.querySelector('.ez-kopf');
   if (leiste) {
@@ -28,6 +38,7 @@
       var unten = kopf.getBoundingClientRect().bottom + (w.scrollY || 0) - (s1.getBoundingClientRect().top + (w.scrollY || 0));
       var steht = Math.min(0, w.innerHeight - s1.offsetHeight);
       grenze = unten <= -steht ? unten : s1.offsetHeight - steht - unten;
+      var ml = d.querySelector('.ez-ml'); if (ml) grenze += ml.offsetHeight; /* Muster-Leiste der Vorlage liegt darüber */
     };
     messeGrenze(); w.addEventListener('resize', messeGrenze); w.addEventListener('load', messeGrenze);
     var pruefe = function () {
@@ -48,31 +59,63 @@
   };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', heroAuftritt); else heroAuftritt();
 
-  /* Muster-Ebene: Etiketten an allem, was im Paket dem Betrieb gehört; der Zustand bleibt auf diesem Gerät (nur eine Vorliebe) */
-  var schalter = d.getElementById('muster-schalter'), wurzel = d.querySelector('.ez');
-  if (schalter && wurzel) {
-    var setze = function (an) { wurzel.classList.toggle('ist-muster', an); schalter.setAttribute('aria-pressed', an ? 'true' : 'false'); };
-    try { if (w.localStorage.getItem('ez-muster') === 'an') setze(true); } catch (e) {}
-    schalter.addEventListener('click', function () {
-      var an = schalter.getAttribute('aria-pressed') !== 'true';
-      setze(an);
-      try { w.localStorage.setItem('ez-muster', an ? 'an' : 'aus'); } catch (e) {}
+  /* Zustand der Vorlage (nur Signature): Website-Besucher oder persönlicher Einladungslink, als echte Radios in der Muster-Leiste.
+     Beim echten Betrieb liefert der Server genau einen Zustand und die Leiste fehlt. Die Wahl antwortet sofort (Radio gewählt),
+     der Hero-Text geht in 160 ms aus und tauscht beim Ende des Ausblendens (Rückfall-Uhr 240 ms), dann 220 ms ein; bei „weniger
+     Bewegung“ sofort. Der Zustand bleibt auf diesem Gerät (nur eine Vorliebe) */
+  var wurzel = d.querySelector('.ez'), heroText = d.querySelector('.ez-hero__text');
+  var radios = Array.prototype.slice.call(d.querySelectorAll('.ez-modus input[name="ez-modus"]'));
+  if (wurzel && heroText && radios.length) {
+    var modusUhr = null, ziel = wurzel.getAttribute('data-modus');
+    var markiere = function (m) { radios.forEach(function (r) { r.checked = r.value === m; }); };
+    var tausche = function () {
+      clearTimeout(modusUhr); modusUhr = null;
+      if (!wurzel.classList.contains('ist-wechsel')) return;
+      wurzel.setAttribute('data-modus', ziel); wurzel.classList.remove('ist-wechsel');
+    };
+    heroText.addEventListener('transitionend', function (e) { if (e.target === heroText && e.propertyName === 'opacity') tausche(); });
+    /* Start: aus einem anderen Paket kommend die Website (gleicher Vergleich), sonst die eigene Wahl, sonst der Einladungslink */
+    var von = '', gewaehlt = '';
+    try { von = w.sessionStorage.getItem('ez-von') || ''; w.sessionStorage.removeItem('ez-von'); } catch (e) {}
+    try { gewaehlt = w.localStorage.getItem('ez-modus') || ''; } catch (e) {}
+    ziel = von && von !== 'signature' ? 'website' : (gewaehlt === 'website' || gewaehlt === 'einladung' ? gewaehlt : 'einladung');
+    wurzel.setAttribute('data-modus', ziel); markiere(ziel);
+    radios.forEach(function (r) {
+      r.addEventListener('change', function () {
+        if (!r.checked || r.value === ziel) return;
+        ziel = r.value;
+        wurzel.classList.add('ist-geschaltet');
+        try { w.localStorage.setItem('ez-modus', ziel); } catch (e) {}
+        if (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches) { wurzel.setAttribute('data-modus', ziel); return; }
+        clearTimeout(modusUhr);
+        wurzel.classList.add('ist-wechsel');
+        modusUhr = setTimeout(tausche, 240);
+      });
     });
   }
 
   /* Safari auf iOS setzt :active (Druckfeedback) nur mit einem Lauscher für touchstart */
   d.addEventListener('touchstart', function () {}, { passive: true });
 
-  /* Knöpfe ohne Ziel (Vorlage): kein Sprung an den Seitenanfang, dafür eine kurze Rückmeldung (220 ms auf, 160 ms ab, 1,8 s) */
+  /* Knöpfe ohne Ziel (Vorlage): kein Sprung an den Seitenanfang, dafür eine Rückmeldung je Ziel (220 ms auf, 160 ms ab, 4 s) */
+  var ZIELE = {
+    'ziel.konfigurator': 'Muster: Hier startet der Konfigurator unter Ihrer Domain.',
+    'ziel.dashboard': 'Muster: Hier melden sich Ihre Mitarbeiter im Dashboard unter Ihrer Domain an.',
+    'firma.telefon': 'Muster: Hier wählt das Telefon Ihre Nummer.',
+    'firma.karte': 'Muster: Hier öffnet sich die Anfahrt zu Ihrem Betrieb.',
+    'firma.website': 'Muster: Hier geht es zu Ihrer Website.',
+    'recht.impressum': 'Muster: Hier steht Ihr Impressum, aus Ihren Angaben erstellt.',
+    'recht.datenschutz': 'Muster: Hier steht die Datenschutzerklärung Ihres Konfigurators.'
+  };
   var toast = d.querySelector('.ez-toast'), toastUhr;
   d.addEventListener('click', function (e) {
     var a = e.target && e.target.closest ? e.target.closest('a[href="#"]') : null;
     if (!a) return;
     e.preventDefault();
     if (!toast) return;
-    toast.textContent = 'Muster: Das Ziel setzt der Betrieb. Im echten Konfigurator geht es hier weiter.';
+    toast.textContent = ZIELE[a.getAttribute('data-vorlage')] || 'Muster: Dieses Ziel setzen Sie beim Einrichten.';
     toast.classList.add('ist-da'); clearTimeout(toastUhr);
-    toastUhr = setTimeout(function () { toast.classList.remove('ist-da'); }, 1800);
+    toastUhr = setTimeout(function () { toast.classList.remove('ist-da'); }, 4000);
   });
 
   /* Fokus unter dem Vorhang: liegt das fokussierte Element verdeckt, in die Mitte holen (WCAG 2.4.11) */

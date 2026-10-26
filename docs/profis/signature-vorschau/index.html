@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="dna/tokens.css">
 <link rel="stylesheet" href="dna/bundle.css">
 <link rel="stylesheet" href="start.css">
+<link rel="stylesheet" href="muster.css">
 <!--
   VORLAGE: Landingpage eines Konfigurators im Paket EEZI Signature unter der eigenen Domain des Betriebs (web/assets/pakete.js).
   Gegenüber Essential Plus: eeziframes erscheint nirgends (nicht auf der Seite, nicht im Aufmaßblatt, nicht in E-Mails; im Datenschutz
@@ -33,20 +34,21 @@
   .ez { --firma: #d8ad55; --firma-tief: #5b4a26; --auf-firma: #07090a; --firma-licht: #e2bb66; --hinweis: var(--koralle); }
 </style>
 
-<main class="dna-wurzel ez" id="start" lang="de" data-modus="website">
+<main class="dna-wurzel ez" id="start" lang="de" data-paket="signature" data-modus="einladung">
   <a class="ez-skip dna-pille" href="#inhalt" data-theme="dunkel">Zum Inhalt springen</a>
 
-  <!-- Muster-Leiste (nur in der Vorlage für Fensterbauer, beim echten Betrieb weg): sagt, was im Paket zum Betrieb gehört, schaltet
-       zwischen den zwei Wegen des Kunden um (Website, persönlicher Link) und blendet die Etiketten ein -->
-  <div class="ez-musterleiste" data-theme="dunkel">
+  <!-- Muster-Leiste (nur in der Vorlage für Fensterbauer, beim echten Betrieb weg): Paketwechsel mit Preis, Legende der Etiketten,
+       Schalter „Etiketten“; dazu die zwei Wege des Kunden (Website, persönlicher Link). Quelle: docs/profis/werkzeuge/muster-leiste.css und .js -->
+  <div class="ez-ml" data-theme="dunkel">
     <div class="ez-huelle">
-      <p class="ez-musterleiste__text"><b>Muster · Signature</b><span class="ez-musterleiste__desk"><i class="ez-legende ez-legende--plus" aria-hidden="true"></i>Wie Plus: Ihr Logo, Ihre Farbe, Ihre Texte, 6&nbsp;Fotos <i class="ez-legende" aria-hidden="true"></i>Nur Signature: Einladungslinks, Dashboard mit Fortschritt, Anmeldung für Ihr Team, kein Hinweis auf eeziframes</span><span class="ez-musterleiste__tel">Einladungslinks · Dashboard mit Fortschritt · kein eeziframes</span></p>
+      <p class="ez-ml__text"><b>Muster · Signature</b><span class="ez-ml__preis"><!--preiszeile:signature-->64 € im Monat · 279 € einmalig · im ersten Jahr 1.047 € · netto, vorläufig<!--/preiszeile:signature--></span><span class="ez-ml__zeile ez-nur-einladung">So sieht es, wer Ihren persönlichen Link bekommt.</span><span class="ez-ml__zeile ez-nur-web">So sieht es, wer über Ihre Website kommt.</span><span class="ez-ml__legende"><span><i class="ez-ml__punkt ez-ml__punkt--alle" aria-hidden="true"></i>wie Plus</span><span><i class="ez-ml__punkt ez-ml__punkt--neu" aria-hidden="true"></i>nur in Signature</span></span></p>
+      <nav class="ez-ml__pakete" aria-label="Paket der Vorlage"><a href="essential.html" aria-label="Essential, 29 € im Monat netto"><span>Essential</span><small><!--preis:essential-->29 €<!--/preis:essential--></small></a><a href="plus.html" aria-label="Plus, 39 € im Monat netto"><span>Plus</span><small><!--preis:plus-->39 €<!--/preis:plus--></small></a><a href="signature.html" aria-current="page" aria-label="Signature, 64 € im Monat netto"><span>Signature</span><small><!--preis:signature-->64 €<!--/preis:signature--></small></a></nav>
       <fieldset class="dna-pillen ez-modus">
         <legend class="ez-unsichtbar">So kommt Ihr Kunde auf diese Seite</legend>
-        <label><input type="radio" name="ez-modus" value="website" checked><span class="ez-modus__text"><span class="ez-ab-desk">Über die </span>Website</span></label>
-        <label><input type="radio" name="ez-modus" value="einladung"><span class="ez-modus__text"><span class="ez-ab-desk">Mit </span>Einladung<span class="ez-ab-desk">slink</span></span></label>
+        <label><input type="radio" name="ez-modus" value="website"><span class="ez-modus__text"><span class="ez-ab-desk">Über die </span>Website</span></label>
+        <label><input type="radio" name="ez-modus" value="einladung" checked><span class="ez-modus__text"><span class="ez-ab-desk">Mit </span>Einladung<span class="ez-ab-desk">slink</span></span></label>
       </fieldset>
-      <button class="ez-schalter" type="button" aria-pressed="false" id="muster-schalter"><span class="ez-schalter__punkt" aria-hidden="true"></span><span class="ez-schalter__text">Etiketten<span class="ez-unsichtbar">: zeigen, was Ihres ist. Ihre Kunden sehen sie nicht.</span></span></button>
+      <button class="ez-schalter" type="button" aria-pressed="false" id="muster-schalter"><span class="ez-schalter__punkt" aria-hidden="true"></span><span class="ez-schalter__text">Etiketten<span class="ez-unsichtbar">: zeigen, was zu welchem Paket gehört. Ihre Kunden sehen sie nicht.</span></span></button>
     </div>
   </div>
 
@@ -71,7 +73,7 @@
         <a class="ez-logo" href="#start" aria-label="Fensterbau Brandt, zum Seitenanfang" data-vorlage="firma.logo">
           <svg class="ez-logo__zeichen ez-logo__zeichen--marke" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="24" height="56" rx="5" fill="var(--firma)"/><rect x="36" y="4" width="24" height="24" rx="5" fill="var(--firma)"/><rect x="36" y="36" width="24" height="24" rx="5" fill="var(--firma)"/></svg>
           <span class="ez-logo__wort" aria-hidden="true"><b>Brandt</b><small>Fensterbau · Köln</small></span>
-          <span class="ez-muster ez-muster--geraet ez-muster--plus" aria-hidden="true">Ihr Logo<span class="ez-ab-desk">, Ihre Farbe, Ihr Zeichen</span></span>
+          <span class="ez-muster ez-muster--geraet ez-muster--plus" aria-hidden="true"><span>Ihr Logo<span class="ez-ab-desk">, Ihre Farbe, Ihr Zeichen</span></span></span>
         </a>
         <a class="ez-rund" href="#" data-vorlage="firma.telefon" aria-label="Fensterbau Brandt anrufen"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 3h3l1.6 4-2 1.2a9 9 0 0 0 4.2 4.2l1.2-2 4 1.6v3a1.6 1.6 0 0 1-1.6 1.6A13.4 13.4 0 0 1 2.9 4.6 1.6 1.6 0 0 1 4.5 3z"/></svg></a>
       </header>
@@ -136,7 +138,7 @@
                       <span><img src="bilder/konfig/fest.webp" width="175" height="150" alt="" decoding="async">Festverglasung</span>
                       <span><img src="bilder/konfig/hst.webp" width="173" height="150" alt="" decoding="async">Hebe-Schiebe</span>
                       <span><img src="bilder/konfig/psk.webp" width="174" height="150" alt="" decoding="async">PSK-Tür</span>
-                      <span><img src="bilder/konfig/fsw.webp" width="183" height="150" alt="" decoding="async">Faltschiebe&shy;wand</span>
+                      <span><img src="bilder/konfig/fsw.webp" width="183" height="150" alt="" decoding="async">Falt&shy;schiebe&shy;wand</span>
                     </div>
                   </div>
                 </div>
@@ -219,7 +221,7 @@
         <li><img src="bilder/konfig/fenster.webp" width="176" height="150" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Fenster</span></li>
         <li><img src="bilder/konfig/balkon.webp" width="176" height="150" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Balkontür</span></li>
         <li><img src="bilder/konfig/hst.webp" width="173" height="150" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Hebe-Schiebe</span></li>
-        <li><img src="bilder/konfig/fsw.webp" width="183" height="150" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Faltschiebe&shy;wand</span></li>
+        <li><img src="bilder/konfig/fsw.webp" width="183" height="150" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Falt&shy;schiebe&shy;wand</span></li>
         <li><img src="bilder/reihe/rundbogen.webp" width="144" height="201" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Rundbogen</span></li>
         <li><img src="bilder/reihe/sprosse.webp" width="144" height="204" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Sprossen</span></li>
         <li><img src="bilder/reihe/rollladen.webp" width="144" height="179" alt="" loading="eager" fetchpriority="low" decoding="async"><span>Rollladen</span></li>
@@ -317,8 +319,8 @@
         <div class="ez-text">
           <span class="dna-label">Ihre Daten<i class="ez-label__wert">&nbsp;– vor und nach dem Senden</i></span>
           <h2 class="dna-titel" id="weg-titel">Ihre Anfrage geht nur an <em class="ez-ak"><span data-vorlage="firma.name">Fensterbau Brandt</span>.</em></h2>
-          <p class="dna-text ez-nur-web">Bevor Sie senden, sieht <span data-vorlage="firma.name">Fensterbau Brandt</span> nichts von Ihrer Planung. Ihre Anfrage übermittelt ein technischer Dienstleister, der nur im Auftrag des Betriebs arbeitet, ohne Werbung und ohne andere Anbieter. Danach liegen Ihre Unterlagen bei <span data-vorlage="firma.name">Fensterbau Brandt</span>, solange der Betrieb diesen Konfigurator nutzt, die Originalfotos ein Jahr. Mehr im Datenschutz.</p>
-          <p class="dna-text ez-nur-einladung">Bevor Sie senden, sieht <span data-vorlage="firma.ansprechpartner">Petra Brandt</span> über Ihren Link nur, wie weit Sie sind: keine Maße, keine Fotos. Ihre Anfrage übermittelt ein technischer Dienstleister, der nur im Auftrag des Betriebs arbeitet, ohne Werbung und ohne andere Anbieter. Danach liegen Ihre Unterlagen bei <span data-vorlage="firma.name">Fensterbau Brandt</span>, solange der Betrieb diesen Konfigurator nutzt, die Originalfotos ein Jahr. Mehr im Datenschutz.</p>
+          <p class="dna-text ez-nur-web">Bevor Sie senden, sieht <span data-vorlage="firma.name">Fensterbau Brandt</span> nichts von Ihrer Planung. Ihre Anfrage übermittelt ein technischer Dienstleister, der nur im Auftrag des Betriebs arbeitet, ohne Werbung und ohne andere Anbieter. Ihre Anfrage und das Aufmaßblatt bleiben danach bei <span data-vorlage="firma.name">Fensterbau Brandt</span> für die Dauer seines Vertrags abrufbar, die Originalfotos ein Jahr. Mehr im Datenschutz.</p>
+          <p class="dna-text ez-nur-einladung">Bevor Sie senden, sieht <span data-vorlage="firma.ansprechpartner">Petra Brandt</span> über Ihren Link nur, wie weit Sie sind: keine Maße, keine Fotos. Ihre Anfrage übermittelt ein technischer Dienstleister, der nur im Auftrag des Betriebs arbeitet, ohne Werbung und ohne andere Anbieter. Ihre Anfrage und das Aufmaßblatt bleiben danach bei <span data-vorlage="firma.name">Fensterbau Brandt</span> für die Dauer seines Vertrags abrufbar, die Originalfotos ein Jahr. Mehr im Datenschutz.</p>
         </div>
         <ol class="ez-route" data-theme="dunkel" aria-label="Der Weg Ihrer Anfrage">
           <li class="ez-route__stelle ez-route__stelle--stand">
@@ -356,6 +358,17 @@
             <span class="ez-route__text"><b>Einbau</b><span>Termin nach Absprache.</span></span>
           </li>
         </ol>
+      </div>
+
+      <!-- Muster-Ebene (nur Signature, nur mit „Etiketten“): so sieht das Team die Anfragen im Dashboard unter der eigenen Domain.
+           Zustände wie im Dashboard (web/assets/portal.js): eingeladen, in Bearbeitung, eingereicht; Beispielkunden erfunden -->
+      <div class="ez-dash" data-theme="dunkel" aria-hidden="true">
+        <div class="ez-dash__kopf"><span class="ez-muster ez-muster--fluss">Ihr Dashboard · nur Signature</span><span class="ez-dash__adresse"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="9" height="6" rx="1.6"/><path d="M4.5 6.5V5a2.5 2.5 0 0 1 5 0v1.5"/></svg><b>fensterbau-brandt</b>.de/betrieb</span><span class="ez-dash__zugaenge">bis zu 5 Zugänge für Ihr Team</span></div>
+        <ul class="ez-dash__liste">
+          <li><span class="ez-dash__name"><b>Familie Weber</b><small>P-2026-001 · eingeladen von Petra Brandt</small></span><span class="ez-zustand"><i></i>In Bearbeitung</span><span class="ez-dash__wert">Fenster 2 von 4</span></li>
+          <li><span class="ez-dash__name"><b>Herr Yıldız</b><small>P-2026-003 · Link verschickt</small></span><span class="ez-dash__chip">Eingeladen</span><span class="ez-dash__wert">noch nicht angefangen</span></li>
+          <li><span class="ez-dash__name"><b>Familie Schröder</b><small>P-2026-002 · über die Website</small></span><span class="ez-dash__chip ez-dash__chip--fertig">Eingereicht</span><span class="ez-dash__wert">Aufmaßblatt im Dashboard</span></li>
+        </ul>
       </div>
 
       <div class="ez-bereit" id="bereit">
@@ -435,7 +448,7 @@
           </ul></nav>
         </div>
         <p class="ez-fuss__satz"><span data-vorlage="firma.name">Fensterbau Brandt GmbH</span>, <span data-vorlage="firma.anschrift">Musterstraße&nbsp;12, 50667&nbsp;Köln</span>. Ihre Anfrage geht nur an <span data-vorlage="firma.name">Fensterbau Brandt</span>.</p>
-        <p class="ez-fuss__kz"><span class="ez-muster ez-muster--kz" aria-hidden="true">Kein Hinweis auf eeziframes, auch nicht im Aufmaßblatt und in E-Mails&nbsp;·&nbsp;nur Signature</span><span class="ez-muster ez-muster--kz" aria-hidden="true">Anmeldung für Ihr Team: Dashboard unter Ihrer Domain, bis zu 5&nbsp;Zugänge&nbsp;·&nbsp;nur Signature</span></p>
+        <p class="ez-fuss__kz"><span class="ez-muster ez-muster--kz ez-muster--fluss" aria-hidden="true">Kein Hinweis auf eeziframes, auch nicht im Aufmaßblatt und in E-Mails&nbsp;·&nbsp;nur Signature</span><span class="ez-muster ez-muster--kz ez-muster--fluss" aria-hidden="true">Anmeldung für Ihr Team: Dashboard unter Ihrer Domain, bis zu 5&nbsp;Zugänge&nbsp;·&nbsp;nur Signature</span></p>
       </footer>
     </div>
   </section>
@@ -444,3 +457,4 @@
 
 <script src="dna/bundle.js"></script>
 <script src="start.js"></script>
+<script src="muster.js"></script>

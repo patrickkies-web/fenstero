@@ -33,7 +33,7 @@ BETRIEBE = {
         'marke': '<path d="M8 60V30a24 24 0 0 1 48 0v30z" fill="var(--firma)"/><rect x="30" y="6" width="4" height="56" fill="#07090a"/><rect x="6" y="34" width="52" height="4" fill="#07090a"/>',
         'app': '<path d="M17 52V31a15 15 0 0 1 30 0v21z" fill="#07090a"/><rect x="30.6" y="14" width="2.8" height="40" fill="var(--firma)"/><rect x="15" y="34.6" width="34" height="2.8" fill="var(--firma)"/>',
         'ersetzen': [
-            ('Neue Fenster, <em class="ez-ak">gut geplant.</em>', 'Fenster für Bremen, <em class="ez-ak">in Ruhe geplant.</em>'),
+            ('Neue Fenster, <em class="ez-ak">gut geplant.</em>', 'Moin, <em class="ez-ak">neue Fenster?</em>'),
             ('Fenster, Türen und Montage <em class="ez-ak">aus einer Hand.</em>', 'Fenster und Haustüren, <em class="ez-ak">vom Aufmaß bis zum Einbau.</em>'),
             ('Fensterbau Brandt GmbH', 'Fenster Ostermann GmbH'),
             ('Petra Brandt', 'Jonas Ostermann'),
@@ -44,6 +44,7 @@ BETRIEBE = {
             ('fensterbau-brandt', 'ostermann-fenster'),
             ('Musterstraße&nbsp;12, 50667&nbsp;Köln', 'Am Deich&nbsp;7, 28199&nbsp;Bremen'),
             ('Musterstraße 12, 50667 Köln', 'Am Deich 7, 28199 Bremen'),
+            ('Musterstraße&nbsp;12<br>50667&nbsp;Köln', 'Am Deich&nbsp;7<br>28199&nbsp;Bremen'),
             ('0221&nbsp;123456', '0421&nbsp;456789'), ('0221 123456', '0421 456789'),
             ('Köln und Umgebung', 'Bremen und umzu'),
             ('Köln', 'Bremen'),
@@ -56,11 +57,19 @@ BETRIEBE = {
 }
 
 
+def eur(n):
+    return '{:,}'.format(n).replace(',', '.') + '\u00a0€'
+
+
 def preise():
     js = "const P=require(process.argv[1]);process.stdout.write(JSON.stringify({l:P.liste(),v:P.VORLAEUFIG}))"
     out = subprocess.run(['node', '-e', js, str(ROOT / 'web' / 'assets' / 'pakete.js')], capture_output=True, text=True, check=True).stdout
     d = json.loads(out)
-    return {x['paket']: (str(x['preis']['monat']) + ' €') for x in d['l']}, d['v']
+    monat = {x['paket']: eur(x['preis']['monat']) for x in d['l']}
+    zeile = {x['paket']: '%s im Monat · %s einmalig · im ersten Jahr %s · netto%s' % (
+        eur(x['preis']['monat']), eur(x['preis']['einrichtung']), eur(12 * x['preis']['monat'] + x['preis']['einrichtung']),
+        ', vorläufig' if d['v'] else '') for x in d['l']}
+    return monat, zeile, d['v']
 
 
 def main():
@@ -70,7 +79,7 @@ def main():
     if ziel.exists():
         shutil.rmtree(ziel)
     ziel.mkdir(parents=True)
-    pr, vorlaeufig = preise()
+    pr, zeilen, vorlaeufig = preise()
     for p in PAKETE:
         q = QUELLE[p]
         for ordner in ('dna', 'fonts', 'bilder'):
@@ -80,6 +89,7 @@ def main():
         js = (q / 'start.js').read_text(encoding='utf-8')
         for k, v in pr.items():
             html = re.sub(r'<!--preis:%s-->.*?<!--/preis:%s-->' % (k, k), '<!--preis:%s-->%s<!--/preis:%s-->' % (k, v, k), html)
+            html = re.sub(r'<!--preiszeile:%s-->.*?<!--/preiszeile:%s-->' % (k, k), '<!--preiszeile:%s-->%s<!--/preiszeile:%s-->' % (k, zeilen[k], k), html)
         if vorlaeufig:
             html = html.replace('data-preise="fest"', 'data-preise="vorlaeufig"')
         if p != 'essential':
@@ -97,6 +107,7 @@ def main():
         (ziel / f'index-{p}.html').write_text(html, encoding='utf-8')
         (ziel / f'{p}.html').write_text(HUELLE + html + '</body></html>', encoding='utf-8')
     shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'muster-leiste.css', ziel / 'muster.css')
+    shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'muster-leiste.js', ziel / 'muster.js')
     print('gebaut:', ziel.relative_to(ROOT), '·', ', '.join('%s %s' % (k, v) for k, v in pr.items()))
 
 

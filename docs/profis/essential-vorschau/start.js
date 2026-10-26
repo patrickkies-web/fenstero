@@ -18,6 +18,16 @@
     });
   })();
 
+  /* Vorhang neu ordnen, sobald eine Szene ihre Höhe ändert (Zustand, Etiketten, Schrift, Bilder); bundle.js ordnet nur bei load
+     und resize. Ohne das klebt eine gewachsene Szene zu früh, und ihr Ende (z. B. die Pille der Bereit-Karte) kommt nie ins Bild. */
+  if ('ResizeObserver' in w) {
+    var ordnen = false, hoehen = new w.ResizeObserver(function () {
+      if (ordnen) return; ordnen = true;
+      w.requestAnimationFrame(function () { ordnen = false; w.dispatchEvent(new Event('resize')); });
+    });
+    Array.prototype.forEach.call(d.querySelectorAll('.dna-szene'), function (s) { hoehen.observe(s); });
+  }
+
   /* Leiste: verschwindet beim Lesen, kommt nach 24 px Hochscrollen zurück, nie über dem Kopf der Seite */
   var leiste = d.querySelector('.ez-leiste'), kopf = d.querySelector('.ez-kopf');
   if (leiste) {
@@ -29,6 +39,7 @@
       var unten = kopf.getBoundingClientRect().bottom + (w.scrollY || 0) - (s1.getBoundingClientRect().top + (w.scrollY || 0));
       var steht = Math.min(0, w.innerHeight - s1.offsetHeight);
       grenze = unten <= -steht ? unten : s1.offsetHeight - steht - unten;
+      var ml = d.querySelector('.ez-ml'); if (ml) grenze += ml.offsetHeight; /* Muster-Leiste der Vorlage liegt darüber */
     };
     messeGrenze(); w.addEventListener('resize', messeGrenze); w.addEventListener('load', messeGrenze);
     var pruefe = function () {
