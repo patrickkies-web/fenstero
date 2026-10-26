@@ -22,8 +22,8 @@ außer beim Porträt. Kein Text im Bild, kein Wasserzeichen.
 | Foto 6, breit | `bilder/foto-6-referenz.webp` | 3 : 1, 2400 × 800 | fertiges Haus von außen | Glas-Chip oben links |
 | Porträt Ansprechpartner | `bilder/person.webp` | 1 : 1, 768 × 768 | Inhaber, Brustbild | rund beschnitten, 36 bis 52 px |
 
-Alle Motive mittig halten; oben links und unten bleibt ruhiger Raum für Chip und Text. Nach dem Erzeugen auf höchstens 1600 px Breite
-(Bühne 1000 px wie heute) als WebP mit Qualität 82 speichern; die Vorlagen tauschen dann `bilder/buehne.webp` und die
+Alle Motive mittig halten; oben links und unten bleibt ruhiger Raum für Chip und Text. Nach dem Erzeugen in zwei Breiten speichern,
+1200 px und 720 px (Bühne 1000 px wie heute), als WebP mit Qualität 82, je Datei höchstens 200 kB (Frontend-Abgleich, Hebel 4); die Vorlagen tauschen dann `bilder/buehne.webp` und die
 Platzhalter der Fotokacheln aus.
 
 ## Gemeinsamer Stil (an jeden Prompt anhängen)
