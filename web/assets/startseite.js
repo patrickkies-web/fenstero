@@ -3,7 +3,8 @@
    daten). Der Inhalt steht im Schatten-DOM des Halters: Die Klassen der Vorschau (hero, wrap, seg, foto …) kollidieren so nicht mit
    portal.css, und portal.css wirkt nicht hinein. Gestaltung in startseite.css (einmal geladen, als gemeinsames Stylesheet für jeden
    neuen Aufbau). Kopf- und Fußzeile: Kopf mit Marke, „Jetzt konfigurieren“ und Ansicht kommt von hier, die Fußzeile mit den Rechtslinks
-   von portal.js. Daten: app (Einstieg in die App), fuehrung, preis (Aufmaßblatt), einf (Satz zum Einführungspreis oder leer),
+   von portal.js. Daten: app (Einstieg in die App), appLabel („Jetzt konfigurieren“ bzw. „Aufmaß fortsetzen“), weiter (Zahl der Fenster eines
+   angefangenen Aufmaßes oder 0), fuehrung, preis (Aufmaßblatt), einf (Satz zum Einführungspreis oder leer),
    zuBetrieb (Wechsel zur Ansicht Fensterbauer). */
 (function () {
   'use strict';
@@ -26,7 +27,7 @@
   const FAKTEN = () => ZAHLEN.map(([z, l]) => '<li class="zahl"><span class="zahl-wert">' + z + '</span><span class="zahl-label">' + l + '</span><span class="zahl-trenner" aria-hidden="true"></span></li>').join('');
   const html = (d) => `<header class="kopf" id="kopfzeile"><div class="wrap">
   <a class="marke" href="/" aria-label="eeziframes, zur Startseite"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#000"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".12"/></svg><span class="wm" translate="no"><b>eezi</b>frames</span></a>
-  <a class="pille" href="${d.app}"><span>Jetzt konfigurieren</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+  <a class="pille" href="${d.app}"><span>${d.appLabel}</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
 </div></header>
 
 <div class="wrap"><nav class="seg" aria-label="Ansicht wählen"><a href="/#hauseigentuemer" aria-current="page">Hauseigentümer</a><a href="/#fensterbauer" data-zu="betrieb">Fensterbauer<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></a></nav></div>
@@ -40,7 +41,7 @@
   <div class="text">
     <h1><span class="zeile"><span>Fensterplanung </span></span><span class="zeile"><span>ganz <span class="ak">eezi.</span></span></span></h1>
     <p class="lead"><b>Planen und Messen kosten nichts.</b> Das Aufmaßblatt kostet einmal ${d.preis}.</p>
-    <div class="cta"><a class="pille gross" href="${d.app}"><span>Jetzt konfigurieren</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a><a class="geist" href="#so" id="mehr">Mehr erfahren</a></div>
+    <div class="cta"><a class="pille gross" href="${d.app}"><span>${d.appLabel}</span><span class="pf" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a><a class="geist" href="#so" id="mehr">Mehr erfahren</a></div>${d.weiter ? '<p class="weiter">Dein Aufmaß ist angefangen: ' + d.weiter + ' Fenster erfasst, gespeichert in diesem Browser.</p>' : ''}
   </div>
 </section>
 </div>
@@ -241,13 +242,14 @@
     const $ = (id) => root.getElementById(id);
     const hero = $('kopf');
     /* Auftritt: nur beim ersten Aufruf in dieser Sitzung, nur mit Bewegung, erst wenn die Schrift da ist (sonst springt die Maske) */
-    let schon = false; try { schon = sessionStorage.getItem('start-auftritt') === '1'; sessionStorage.setItem('start-auftritt', '1'); } catch (e) { /* ohne Speicher */ }
+    /* Gemerkt wird erst nach dem Auftritt: portal.js baut beim Laden kurz nacheinander zweimal auf, der zweite Aufbau zeigt ihn dann noch */
+    let schon = false; try { schon = sessionStorage.getItem('start-auftritt') === '1'; } catch (e) { /* ohne Speicher */ }
     if (!schon && !ruhig && hero) {
       hero.classList.add('an', 'warte');
       const frei = () => hero.classList.remove('warte');
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(frei);
       setTimeout(frei, 400);
-      setTimeout(() => hero.classList.remove('an', 'warte'), 2000);
+      setTimeout(() => { hero.classList.remove('an', 'warte'); if (hero.isConnected) { try { sessionStorage.setItem('start-auftritt', '1'); } catch (e) { /* ohne Speicher */ } } }, 2000);
     }
     /* Abschnitte erscheinen einmal, wenn 15 % im Bild sind */
     const beob = [];

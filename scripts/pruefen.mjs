@@ -608,9 +608,9 @@ if (teil(6)) {
   // Startseite: beide Zielgruppen, kein Marktplatz
   await tun('logout'); await page.waitForTimeout(300);
   await page.goto(BASE + '/#hauseigentuemer', { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
-  const start = await page.evaluate(() => document.body.textContent);
-  ok(/Fenster ausmessen\. Selbst\. eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.hero.b2c a[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: ausmessen (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
+  const start = await page.evaluate(() => { const r = document.getElementById('startseite'); return (document.body.textContent + ' ' + (r && r.shadowRoot ? r.shadowRoot.textContent : '')).replace(/\s+/g, ' '); });
+  ok(/Fensterplanung ganz eezi\./.test(start) && !/Anfragen mit Aufmaß/.test(start) && await page.locator('.hero a.pille[href$="/app/#ausmessen"]').count() === 1 && await page.locator('.ablauf-fuss a[href$="/app/#fuehrung"]').count() === 1, 'Startseite, Ansicht Hauseigentümer: konfigurieren (gleich in den ersten Schritt der App, #ausmessen) oder Führung, nichts für Betriebe');
+  await page.click('nav.seg a[data-zu="betrieb"]'); await page.waitForSelector('.vk-einbettung .fb[data-fb-an="1"]', { timeout: 8000 }).catch(() => null); await page.waitForTimeout(300);
   const startB = await page.evaluate(() => document.body.textContent);
   ok(/Anfragen mit Aufmaß\. Unter Ihrer Marke\./.test(startB.replace(/\s+/g, ' ')) && !/Aufmaß ohne Anfahrt/.test(startB) && !/Fenster ausmessen\. Selbst/.test(startB) && await page.locator('.hero.b2c, .hero.b2b').count() === 0, 'Startseite, Ansicht Fensterbauer: die Paket-Landingpage eingebettet, nichts für Hauseigentümer, keine Werbung mehr für Aufmaß-Links');
   ok(!/anklopf|Anklopf|Marktplatz|Portal-Zusatz|Vergleichsangebot/.test((start + startB).replace(/Kein Portal und kein Marktplatz/g, '')), 'Kein Marktplatz mehr auf der Startseite');
@@ -1145,7 +1145,7 @@ if (teil(8)) {
   const stempel = Date.now().toString(36), mail = 'test-' + stempel + '@beispiel.de', firma = 'Fensterbau Prüf ' + stempel, tel = '0221 ' + String(Date.now()).slice(-7);
   await page.goto(BASE2 + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
   ok(await page.locator('.fx-pilot').count() === 0 && await page.evaluate(() => Server.an && !Server.online() && !S.role), 'Portal im Servermodus: kein Pilot-Hinweis, noch nicht angemeldet');
-  ok(/7,99/.test(await page.evaluate(() => document.body.textContent)), 'Startseite nennt den Preis vom Server');
+  ok(/7,99/.test(await page.evaluate(() => { const r = document.getElementById('startseite'); return document.body.textContent + (r && r.shadowRoot ? r.shadowRoot.textContent : ''); })), 'Startseite nennt den Preis vom Server');
   // Registrierung: E-Mail → Code 123456 → Betrieb eintragen
   await tun('reg', 'betrieb'); await page.waitForSelector('#lg-mail');
   ok(/Konto für Ihren Betrieb/.test(await page.evaluate(() => document.body.textContent)) && await page.locator('#lg-pw').count() === 0, 'Registrierung beginnt mit der E-Mail, ohne Passwort');
@@ -1431,8 +1431,8 @@ if (teil(9)) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(400);
-  const fuehrungDa = await page.locator('.hero.b2c a[href$="/app/#fuehrung"]').count() === 1;
-  await page.click('.top .ansicht [data-v="betrieb"]'); await page.waitForTimeout(300);
+  const fuehrungDa = await page.locator('.ablauf-fuss a[href$="/app/#fuehrung"]').count() === 1;
+  await page.click('nav.seg a[data-zu="betrieb"]'); await page.waitForTimeout(300);
   ok(fuehrungDa && await page.locator('.vk-einbettung').count() === 1 && await page.locator('.hero.b2b [data-act="tour"]').count() === 0, 'Startseite: „Führung starten“ in der Ansicht für Hauseigentümer; die Ansicht für Fensterbauer zeigt die Paket-Landingpage und wirbt nicht mehr für die Tour (sie bleibt über „Anmelden“ und /#tour erreichbar)');
   /* ohne die eingebettete Verkaufsseite: ihre „Live-Demos“ sind echte Konfigurator-Instanzen der Pakete, keine Demo-Konten */
   const ohneDemo = async (wo) => { const t = await page.evaluate(() => { const b = document.body.cloneNode(true); b.querySelectorAll('.vk-einbettung').forEach((e) => e.remove()); return b.textContent; }); return !/\bDemo\b|Demo-Zugang|Beispieldaten|Beispiel-IBAN|Demo-Ansicht/.test(t) && await page.locator('[data-act="demo-as"], [data-act="reg-fill"], [data-act="pay-fill"], [data-act="l-sim"], [data-act="demo-project"], [data-act="demo"]').count() === 0 ? true : wo; };
@@ -1581,12 +1581,12 @@ if (teil(10)) {
 
   /* b) Startseite und App: Textfassung für Leser ohne JavaScript, mit JavaScript übernimmt die App */
   const start = await roh('/'), app = await roh('/app/');
-  ok(/<div class="vorab">/.test(start.text) && /<h1>Fenster ausmessen\. Selbst\. eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
+  ok(/<div class="vorab">/.test(start.text) && /<h1>Fensterplanung ganz eezi\.<\/h1>/.test(start.text) && /Aufmaß-App für Fenster/.test(start.text) && /auf einen Blick/.test(start.text), 'Startseite ohne JavaScript: Textfassung mit h1, Erklärung und Fakten');
   ok(/<div class="vorab">/.test(app.text) && /<h1>Fenster ausmessen: kostenlose Aufmaß-App im Browser<\/h1>/.test(app.text), 'App ohne JavaScript: Textfassung mit h1');
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' });
   const page = await neueSeite(ctx);
   await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fenster ausmessen\. Selbst\. eezi\./.test(await page.locator('h1').first().textContent()), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero)');
+  ok(await page.locator('.vorab').count() === 0 && await page.locator('h1').count() === 1 && /Fensterplanung ganz eezi\./.test((await page.locator('h1').first().textContent()).replace(/\s+/g, ' ')), 'Startseite mit JavaScript: App statt Textfassung, genau ein h1 (im Hero des Bausteins)');
   const fuss = await page.$$eval('footer a', (as) => as.map((a) => a.getAttribute('href')));
   ok(fuss.includes('/ratgeber/') && fuss.includes('/fuer-fensterbauer/'), 'Fußzeile der Startseite verlinkt Ratgeber und die Seite für Fensterbauer');
   /* Die Seite für Fensterbauer verkauft die Konfigurator-Pakete (Bauplan E28); Tour und Registrierung des Betriebsbereichs bleiben
@@ -2713,8 +2713,8 @@ if (teil(14)) {
     ok(!/\d mm/.test(nachKauf) && /vollständig/i.test(nachKauf) && await page.locator('details.fold .kv').count() === 0 && await page.locator('.zu-karte').count() === 0 && !/Alle Angaben|\d mm/.test(await page.locator('.scr').textContent()), 'Auch nach dem Freischalten keine Gesamtübersicht: Liste und gespeichertes Fenster ohne Maße und ohne „Alle Angaben“ (die stehen in der PDF)');
     // Portal: angefangenes Aufmaß → „Aufmaß fortsetzen“
     await page.goto(BASE + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
-    const po = await page.evaluate(() => ({ top: (document.querySelector('.top a.btn.primary') || {}).textContent, hero: (document.querySelector('.hero.b2c a.btn.primary') || {}).textContent, hint: (document.querySelector('.hint.fortsetzen') || {}).textContent || '' }));
-    ok(po.top === 'Aufmaß fortsetzen' && po.hero === 'Aufmaß fortsetzen' && /3 Fenster erfasst/.test(po.hint), 'Startseite (Hauseigentümer) mit angefangenem Aufmaß: „Aufmaß fortsetzen“ statt „Jetzt ausmessen“');
+    const po = await page.evaluate(() => { const sr = document.getElementById('startseite').shadowRoot; return { top: (sr.querySelector('.kopf a.pille') || {}).textContent, hero: (sr.querySelector('.hero a.pille') || {}).textContent, hint: (sr.querySelector('.weiter') || {}).textContent || '' }; });
+    ok(po.top === 'Aufmaß fortsetzen' && po.hero === 'Aufmaß fortsetzen' && /3 Fenster erfasst/.test(po.hint), 'Startseite (Hauseigentümer) mit angefangenem Aufmaß: „Aufmaß fortsetzen“ statt „Jetzt konfigurieren“, dazu wie viele Fenster erfasst sind');
     await page.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await page.waitForTimeout(300);
     // Grenze: 50 angelegte Fenster, Löschen gibt keinen Platz zurück
     await page.evaluate(() => { S.angelegt = 49; persist(); render(); });
