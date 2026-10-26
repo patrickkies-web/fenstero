@@ -1,9 +1,10 @@
-/* Seite für Fensterbauer (Vorschau Design-DNA): Leiste beim Hochscrollen, Stationen folgen den Stufen, Paket aus den Karten vorwählen,
-   Anfrage an /api/partner/frage. Die Bausteine selbst startet dna/bundle.js. */
+/* Seite für Fensterbauer (Vorschau Design-DNA): Leiste beim Hochscrollen, Stationen folgen den Stufen, Vergleich am Schreibtisch offen,
+   Paket aus den Karten vorwählen, Anfrage an /api/partner/frage mit Fehlern je Feld. Die Bausteine selbst startet dna/bundle.js. */
 (function () {
   'use strict';
   var w = window, d = document;
-  var reduziert = !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var reduziertAbfrage = w.matchMedia ? w.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  function reduziert() { return !!(reduziertAbfrage && reduziertAbfrage.matches); }
 
   /* Vorhang ohne Sprung: Die Szenen rechnen mit der größten Bildschirmhöhe dieser Ausrichtung, damit die ein- und ausfahrende
      Adressleiste des Browsers die klebende Kante nicht verschiebt (bundle.js liest innerHeight bei jedem resize) */
@@ -35,11 +36,17 @@
     w.addEventListener('scroll', function () { if (!geplant) { geplant = true; w.requestAnimationFrame(pruefe); } }, { passive: true });
   }
 
+  /* Wortebenen nach dem Auftritt freigeben */
+  d.addEventListener('transitionend', function (e) { if (e.target.classList && e.target.classList.contains('dna-wort')) e.target.style.willChange = 'auto'; });
+
   /* Stationen: die Stufe in der Bildschirmmitte ist „aktiv“, davor „fertig“, danach „offen“ */
   var stufen = Array.prototype.slice.call(d.querySelectorAll('.ez-stufe'));
   var stationen = Array.prototype.slice.call(d.querySelectorAll('.ez-schritte li'));
   function setze(aktiv) {
-    stationen.forEach(function (li, i) { li.setAttribute('data-zustand', i < aktiv ? 'fertig' : i === aktiv ? 'aktiv' : 'offen'); });
+    stationen.forEach(function (li, i) {
+      li.setAttribute('data-zustand', i < aktiv ? 'fertig' : i === aktiv ? 'aktiv' : 'offen');
+      if (i === aktiv) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
   }
   if (stufen.length && stationen.length && 'IntersectionObserver' in w) {
     var io = new IntersectionObserver(function (eintraege) {
@@ -49,8 +56,12 @@
   }
   stationen.forEach(function (li, i) {
     var a = li.querySelector('a'); if (!a) return;
-    a.addEventListener('click', function (e) { if (stufen[i]) { e.preventDefault(); stufen[i].scrollIntoView({ behavior: (reduziert || e.detail === 0) ? 'auto' : 'smooth', block: 'center' }); } });
+    a.addEventListener('click', function (e) { if (stufen[i]) { e.preventDefault(); stufen[i].scrollIntoView({ behavior: (reduziert() || e.detail === 0) ? 'auto' : 'smooth', block: 'center' }); } });
   });
+
+  /* Vergleich der Merkmale: am Schreibtisch offen, am Telefon zum Aufklappen */
+  var vergleich = d.querySelector('#vergleich');
+  if (vergleich && w.matchMedia && w.matchMedia('(min-width: 900px)').matches) vergleich.open = true;
 
   /* Fokus unter dem Vorhang: liegt das fokussierte Element verdeckt, in die Mitte holen (WCAG 2.4.11) */
   d.addEventListener('focusin', function (e) {
@@ -61,11 +72,13 @@
     if (oben && !el.contains(oben) && !oben.contains(el)) el.scrollIntoView({ behavior: 'auto', block: 'center' });
   });
 
-  /* Anfrage: Paket aus den Karten vorwählen, Pflichtfelder prüfen, als JSON an /api/partner/frage (ohne JavaScript schickt der Browser das Formular) */
+  /* Anfrage: Paket aus den Karten vorwählen, Pflichtfelder je Feld prüfen, als JSON an /api/partner/frage
+     (ohne JavaScript prüft der Browser und schickt das Formular selbst) */
   var form = d.querySelector('#anfrage-form');
   if (form) {
+    form.setAttribute('novalidate', '');
     var radios = Array.prototype.slice.call(form.querySelectorAll('.ez-radios input'));
-    function zeigeWahl() { radios.forEach(function (r) { r.parentNode.setAttribute('aria-pressed', r.checked ? 'true' : 'false'); }); }
+    function zeigeWahl() { radios.forEach(function (r) { r.parentNode.classList.toggle('ist-wahl', r.checked); }); }
     radios.forEach(function (r) { r.addEventListener('change', zeigeWahl); });
     zeigeWahl();
     Array.prototype.slice.call(d.querySelectorAll('[data-paket]')).forEach(function (a) {
@@ -78,35 +91,48 @@
     var vormerken = d.querySelector('[data-vormerken]'), text = form.querySelector('#f-text');
     if (vormerken && text) vormerken.addEventListener('click', function () { if (!text.value.trim()) text.value = 'Ich interessiere mich für zusätzliche Anfragen aus meiner Nähe.'; });
 
-    var fehler = form.querySelector('.ez-form__fehler'), meldung = form.querySelector('.ez-form__meldung'), knopf = form.querySelector('button[type="submit"]');
-    var FEHLER_TEXT = fehler ? fehler.textContent : '';
-    function sagFehler(t) { if (!fehler) return; fehler.textContent = t || FEHLER_TEXT; fehler.hidden = false; }
+    var fehler = form.querySelector('.ez-form__fehler'), meldung = form.querySelector('.ez-form__meldung'), knopf = form.querySelector('button[type="submit"]'), knopftext = form.querySelector('.ez-form__knopftext');
+    var FEHLER_TEXT = fehler ? fehler.textContent : '', laeuft = false;
+    var TEXTE = { 'f-name': 'Bitte Ihren Namen angeben.', 'f-mail': 'Bitte eine gültige E-Mail-Adresse angeben, z. B. name@betrieb.de.' };
+    function feldFehler(f, text) {
+      var ziel = d.getElementById(f.id + '-fehler');
+      f.setAttribute('aria-invalid', text ? 'true' : 'false');
+      if (ziel) { ziel.textContent = text || ''; ziel.classList.toggle('ist-da', !!text); }
+    }
+    function sagFehler(t, fokus) { if (!fehler) return; fehler.textContent = t || FEHLER_TEXT; fehler.hidden = false; if (fokus) fehler.focus(); }
+    Array.prototype.slice.call(form.querySelectorAll('input[required], textarea[required]')).forEach(function (f) {
+      f.addEventListener('input', function () { if (f.getAttribute('aria-invalid') === 'true' && f.checkValidity()) feldFehler(f, ''); });
+    });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (laeuft) return;
       var erste = null;
       Array.prototype.slice.call(form.querySelectorAll('input[required], textarea[required]')).forEach(function (f) {
         var ok = f.checkValidity();
-        f.setAttribute('aria-invalid', ok ? 'false' : 'true');
+        feldFehler(f, ok ? '' : (TEXTE[f.id] || 'Bitte prüfen Sie diese Angabe.'));
         if (!ok && !erste) erste = f;
       });
-      if (erste) { sagFehler(FEHLER_TEXT); erste.focus(); return; }
+      if (erste) { sagFehler(FEHLER_TEXT, false); erste.focus(); return; }
       if (fehler) fehler.hidden = true;
       var daten = {};
       new FormData(form).forEach(function (v, k) { daten[k] = String(v); });
-      if (knopf) { knopf.disabled = true; knopf.setAttribute('aria-busy', 'true'); }
+      laeuft = true; form.classList.add('ist-busy');
+      if (knopf) knopf.setAttribute('aria-busy', 'true');
+      if (knopftext) knopftext.textContent = 'Wird gesendet …';
       fetch(form.getAttribute('action'), { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(daten), credentials: 'same-origin' })
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: r.ok, j: null }; }); })
         .then(function (x) {
           if (x.ok) {
             form.reset(); zeigeWahl();
-            if (meldung) meldung.textContent = 'Danke, Ihre Frage ist da. Wir melden uns in der Regel innerhalb eines Werktags bei Ihnen.';
+            form.classList.add('ist-gesendet');
+            if (meldung) { meldung.textContent = 'Danke, Ihre Anfrage ist da. Wir melden uns in der Regel innerhalb eines Werktags bei Ihnen.'; meldung.focus(); }
           } else {
             var felder = x.j && x.j.felder;
-            sagFehler(felder ? Object.keys(felder).map(function (n) { return felder[n]; }).join(' ') : (x.j && x.j.fehler) || 'Ihre Frage ließ sich gerade nicht senden. Bitte versuchen Sie es gleich noch einmal.');
+            sagFehler(felder ? Object.keys(felder).map(function (n) { return felder[n]; }).join(' ') : (x.j && x.j.fehler) || 'Ihre Anfrage ließ sich gerade nicht senden. Bitte versuchen Sie es gleich noch einmal.', true);
           }
         })
-        .catch(function () { sagFehler('Keine Verbindung. Bitte versuchen Sie es gleich noch einmal.'); })
-        .then(function () { if (knopf) { knopf.disabled = false; knopf.removeAttribute('aria-busy'); } });
+        .catch(function () { sagFehler('Keine Verbindung. Bitte versuchen Sie es gleich noch einmal.', true); })
+        .then(function () { laeuft = false; form.classList.remove('ist-busy'); if (knopf) knopf.removeAttribute('aria-busy'); if (knopftext) knopftext.textContent = 'Anfrage senden'; });
     });
   }
 })();
