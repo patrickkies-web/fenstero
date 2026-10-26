@@ -1583,7 +1583,7 @@ if (teil(10)) {
     const r = await roh(s.pfad);
     const titel = (r.text.match(/<title>([^<]*)<\/title>/) || [])[1] || '', beschr = (r.text.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
     const rechts = ['/impressum/', '/datenschutz/', '/agb/', '/nutzungsbedingungen/', '/cookies/', '/widerruf/', '/konfigurator-bedingungen/'].includes(s.pfad), ld = ldjson(r.text);
-    ok(r.status === 200 && (r.text.match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
+    ok(r.status === 200 && (r.text.replace(/<template[\s\S]*?<\/template>/g, '').match(/<h1[\s>]/g) || []).length === 1 && /eeziframes/.test(titel) && titel.length <= 75 && (rechts || (beschr.length >= 70 && beschr.length <= 170)), s.pfad + ': ohne JavaScript genau ein h1, Titel mit Marke (' + titel.length + ' Zeichen)' + (rechts ? '' : ', Beschreibung (' + beschr.length + ' Zeichen)'));
     ok(!/<meta name="robots"/.test(r.text) && r.h.get('x-robots-tag') === seo.SPERRE && !!r.h.get('content-security-policy') && r.h.get('link') === '<' + BASE + s.pfad + '>; rel="canonical"', s.pfad + ': Pilotphase per Kopfzeile noindex (kein Meta-Tag), CSP und Canonical vom Worker');
     if (!rechts) ok(ld.length > 0 && ld.every((x) => x && x['@context'] === 'https://schema.org') && !/"(url|@id|item|mainEntityOfPage|logo)":"\//.test(r.text) && (r.text.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] === BASE + '/og.png', s.pfad + ': strukturierte Daten (JSON-LD) lesbar, Adressen darin und im Vorschaubild absolut');
     for (const m of r.text.matchAll(/href="(\/[^"#]*)/g)) intern.add(m[1]);
@@ -3890,7 +3890,8 @@ if (teil(17)) {
   await s17a.goto(BASE + '/app/', { waitUntil: 'networkidle' }); await s17a.waitForTimeout(300);
   const app17 = await s17a.evaluate(() => { const a = document.querySelector('.foot-links.recht a.widerruf[href="/widerruf/"]'), r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!document.querySelector('.foot-links.recht a[href="/agb/"]') && !!document.querySelector('.foot-links.recht a[href="/cookies/"]'); });
   await s17a.goto(BASE + '/', { waitUntil: 'networkidle' }); await s17a.waitForTimeout(300);
-  const portal17 = await s17a.evaluate(() => { const a = document.querySelector('.foot a.foot-widerruf[href="/widerruf/"]'), r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!document.querySelector('.foot a[href="/nutzungsbedingungen/"]') && !!document.querySelector('.foot a[href="/agb/"]'); });
+  /* Startseite (Ansicht Hauseigentümer): eigene Fußzeile im Schatten-DOM von #startseite, „Vertrag widerrufen“ als Pille */
+  const portal17 = await s17a.evaluate(() => { const sr = (document.getElementById('startseite') || {}).shadowRoot, f = sr ? sr.querySelector('footer.ez-fuss') : document.querySelector('.foot'), a = f ? f.querySelector('a.widerruf-knopf[href="/widerruf/"], a.foot-widerruf[href="/widerruf/"]') : null, r = a ? a.getBoundingClientRect() : null; return !!r && r.height >= 44 && !!f.querySelector('a[href="/nutzungsbedingungen/"]') && !!f.querySelector('a[href="/agb/"]'); });
   ok(app17 && portal17, 'App und Startseite: „Vertrag widerrufen“ als Knopf ab 44 px, dazu AGB, Cookies und Nutzungsbedingungen');
   sauber(s17a, 'App und Startseite mit den neuen Rechtslinks ohne Fehler'); await c17a.close();
   /* c) Ohne Mailversand und ohne Datenbank (Pilot) nimmt der Server keinen Widerruf an, statt ihn zu verlieren */

@@ -45,8 +45,8 @@
     });
     const weiter = root.querySelector('[data-ez="weiter"]');
     if (weiter) { weiter.hidden = !d.weiter; weiter.textContent = d.weiter ? 'Dein Aufmaß ist angefangen: ' + d.weiter + ' Fenster erfasst, gespeichert in diesem Browser.' : ''; }
-    const preis = root.querySelector('[data-ez="preis"]'), zahl = root.querySelector('[data-ez="preiszahl"]');
-    if (preis && d.preis) preis.textContent = d.preis.replace(' ', ' ');
+    const zahl = root.querySelector('[data-ez="preiszahl"]');
+    if (d.preis) root.querySelectorAll('[data-ez="preis"]').forEach((p) => { p.textContent = d.preis.replace(' ', '\u00a0'); });
     if (zahl && d.preis) zahl.textContent = d.preis.replace(/\s*€\s*$/, '');
     const einf = root.querySelector('[data-ez="einf"]'), badge = root.querySelector('[data-ez="einf-badge"]');
     if (einf) { einf.hidden = !d.einf; if (d.einf) einf.textContent = d.einf.replace(/^Einführungspreis\s*/, '').replace(/ (€|\d{4})/g, ' $1'); }
