@@ -1,6 +1,6 @@
 // eeziframes · Prüfabschnitt 29: Verkaufsseite, Rechtstexte, Doku (Strang F, Bauplan §3 F; docs/INSTANZEN.md)
 // 29.1 Preise der Pakete in HTML und JSON-LD wie pakete.js, ohne JavaScript, „nur für Unternehmer“, keine alten Tarife ·
-// 29.2 Bestellknöpfe (mit PAKETE_OFFEN) auf /partner/#bestellen/<paket>, Frageformular mit und ohne JavaScript, Honigtopf, Bremse, Mail an
+// 29.2 Paketknöpfe auf die Bestellung /bestellen/#<paket> (ohne PAKETE_OFFEN „anfragen“, mit „bestellen“), Frageformular (POST /api/auftrag/frage) mit und ohne JavaScript, Honigtopf, Bremse, Mail an
 // MAIL_KONTAKT · 29.3 Kopf der Verkaufsseite (h1, Titel, Beschreibung, Canonical; Abschnitt 10 prüft alle Seiten) · 29.4 Paketbedingungen
 // mit Stand, Platzhaltern und beiden PDFs · 29.5 Impressum und Datenschutz je Paket · 29.6 Datenschutz und Cookies auf eeziframes.com ·
 // 29.7 llms.txt · 29.8 Doku-Links. Dazu Bildschirmfotos der Verkaufsseite (Telefon und Schreibtisch, mit BILDER=…).
@@ -29,8 +29,8 @@ export default async (h) => {
   const kartenAus = (html) => [...html.matchAll(/<article class="ez-paket[^"]*" id="paket-([a-z]+)"[\s\S]*?<\/article>/g)].map((m) => ({ p: m[1], html: m[0] }));
   const ohneMarken = (t) => t.replace(/<!--\/?pakete:[\w-]+-->/g, '');
   const karten = kartenAus(ohneMarken(fb));
-  const karteOk = (k) => { const pr = Pk.preis(k.p); return k.html.includes('<span class="dna-zahl__wert">' + zahl(pr.monat) + '<span class="dna-zahl__einheit">€ im Monat</span>') && k.html.includes('dazu ' + eur(pr.einrichtung) + ' Einrichtung, einmalig vorab · netto') && k.html.includes(Pk.PAKETE[k.p].name); };
-  ok(vk.status === 200 && karten.length === Pk.LISTE.length && karten.map((k) => k.p).join() === Pk.LISTE.join() && karten.every(karteOk) && /Alle Preise netto zzgl\. MwSt\., nur für Unternehmer\./.test(fb), '29.1 Verkaufsseite: drei Paketkarten mit Monats- und Einrichtungspreis aus pakete.js (' + Pk.LISTE.map((p) => Pk.preis(p).monat + '/' + Pk.preis(p).einrichtung).join(', ') + ' €), netto, „nur für Unternehmer“');
+  const karteOk = (k) => { const pr = Pk.preis(k.p); return k.html.includes('<span class="dna-zahl__wert">' + zahl(pr.monat) + '<span class="dna-zahl__einheit">€ im Monat, netto</span>') && k.html.includes('dazu ' + eur(pr.einrichtung) + ' Einrichtung, einmalig vorab · netto') && k.html.includes(Pk.tausend(Pk.PAKETE[k.p].kiMonat) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + eur(pr.ki)) && k.html.includes(Pk.PAKETE[k.p].name); };
+  ok(vk.status === 200 && karten.length === Pk.LISTE.length && karten.map((k) => k.p).join() === Pk.LISTE.join() && karten.every(karteOk) && /Alle Preise netto zzgl\. MwSt\., nur für Unternehmer\./.test(fb), '29.1 Verkaufsseite: drei Paketkarten mit Monats- und Einrichtungspreis aus pakete.js (' + Pk.LISTE.map((p) => Pk.preis(p).monat + '/' + Pk.preis(p).einrichtung).join(', ') + ' €), netto, KI-Kontingent und Preis jeder weiteren Auswertung, „nur für Unternehmer“');
   const vgl = (/<details class="ez-vergleich-auf">[\s\S]*?<\/table>/.exec(fb) || [''])[0];
   const zeile = (t) => (new RegExp('<th scope="row">' + t + '</th>([\\s\\S]*?)</tr>').exec(vgl) || [])[1] || '';
   ok(Pk.LISTE.every((p) => zeile('Monatlich, netto').includes(eur(Pk.preis(p).monat)) && zeile('Einrichtung, einmalig vorab').includes(eur(Pk.preis(p).einrichtung))) && /Zugänge zum Dashboard/.test(vgl) && zeile('Zugänge zum Dashboard').includes(String(Pk.merkmale('signature').zugaenge)), '29.1 Vergleich: Monats- und Einrichtungspreis je Paket aus pakete.js, Zugänge zum Dashboard wie pakete.js');
@@ -46,42 +46,42 @@ export default async (h) => {
   ok(kartenAus(ohneMarken(roh)).length === Pk.LISTE.length && kartenAus(ohneMarken(roh)).every(karteOk) && bpdf.pruefen().ok, '29.1 Auch ohne Worker und JavaScript: Die Datei in web/ trägt dieselben Preise (Bausteine von node scripts/bedingungen-pdf.mjs aktuell)' + (bpdf.pruefen().ok ? '' : ': ' + bpdf.pruefen().fehler.join('; ')));
 
   /* ohne PAKETE_OFFEN: vorläufig, Anfrage statt Bestellung */
-  const ohneBestellen = !/href="\/partner\/#bestellen\//.test(fb) && /Vorläufige Preise;/.test(fb) && /Die Bestellung wird in Kürze freigeschaltet/.test(fb) && Pk.LISTE.every((p) => new RegExp('<a class="dna-pille(?: dna-pille--leise)?" href="#bestellen" data-paket="' + p + '">[^<]+ anfragen').test(fb)) && /<form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="\/api\/partner\/frage">/.test(fb);
-  ok(ohneBestellen, '29.2 Ohne PAKETE_OFFEN: „Vorläufige Preise“, „Bestellung wird in Kürze freigeschaltet“, jede Karte führt zum Anfrageformular (kein Link in die Kasse)');
+  const ohneBestellen = !/\/partner\//.test(fb) && /Vorläufige Preise;/.test(fb) === Pk.VORLAEUFIG && /Die Bestellung wird in Kürze freigeschaltet/.test(fb) && Pk.LISTE.every((p) => new RegExp('<a class="dna-pille(?: dna-pille--leise)?" href="/bestellen/#' + p + '" data-paket="' + p + '">[^<]+ anfragen').test(fb)) && /<form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="\/api\/auftrag\/frage">/.test(fb);
+  ok(ohneBestellen, '29.2 Ohne PAKETE_OFFEN: „Vorläufige Preise“ nur, solange pakete.js sie vorläufig nennt (seit 27.10.2026 nicht mehr), „Bestellung wird in Kürze freigeschaltet“, jede Karte führt als „… anfragen“ in die Bestellung ihres Pakets (die ohne offene Kasse unverbindlich anfragt)');
 
   /* ---------- 29.2 mit PAKETE_OFFEN, Frageformular ---------- */
   const s2 = await h.server({ PAKETE_OFFEN: '1', MAIL_KONTAKT: 'inhaber@pruefung29.example' });
   const fb2 = (await s2.api('localhost', '/fuer-fensterbauer/')).text;
-  const knoepfe = [...fb2.matchAll(/<a class="dna-pille(?: dna-pille--leise)?" href="([^"]+)" data-paket="[a-z]+">[^<]+ bestellen/g)].concat([...fb2.matchAll(/<a href="(\/partner\/#bestellen\/[a-z]+)">/g)]);
-  const ziele = Pk.LISTE.map((p) => '/partner/#bestellen/' + p);
+  const knoepfe = [...fb2.matchAll(/<a class="dna-pille(?: dna-pille--leise)?" href="([^"]+)" data-paket="[a-z]+">[^<]+ bestellen/g)].concat([...fb2.matchAll(/<a href="(\/bestellen\/#[a-z]+)">/g)]);
+  const ziele = Pk.LISTE.map((p) => '/bestellen/#' + p);
   const ld2 = ldjson(fb2).find((x) => x && Array.isArray(x.offers));
-  ok(knoepfe.length >= 6 && knoepfe.every((k) => ziele.includes(k[1])) && ziele.every((z) => knoepfe.filter((k) => k[1] === z).length >= 2) && !/in Kürze freigeschaltet/.test(fb2) && /Vorläufige Preise;/.test(fb2) === Pk.VORLAEUFIG && /Ja\. Wählen Sie Ihr Paket und bestellen Sie im Kundenkonto/.test(fb2) && ld2 && ld2.offers.every((o) => o.availability === 'https://schema.org/InStock'),
-    '29.2 Mit PAKETE_OFFEN=1: Knopf jeder Karte und Abschnitt „Ihre Anfrage“ führen auf /partner/#bestellen/<paket>, nichts mehr „in Kürze freigeschaltet“, FAQ „Ja“, JSON-LD „InStock“' + (Pk.VORLAEUFIG ? ', Preise weiter als vorläufig markiert (Pakete.VORLAEUFIG)' : ''));
-  const partnerSeite = await s2.api('localhost', '/partner/');
-  ok(partnerSeite.status === 200 && /partner\.js/.test(partnerSeite.text), '29.2 Ziel der Knöpfe: /partner/ liefert das Kundenkonto');
+  ok(knoepfe.length >= 6 && knoepfe.every((k) => ziele.includes(k[1])) && ziele.every((z) => knoepfe.filter((k) => k[1] === z).length >= 2) && !/in Kürze freigeschaltet/.test(fb2) && /Vorläufige Preise;/.test(fb2) === Pk.VORLAEUFIG && /Ja\. Wählen Sie Ihr Paket und bestellen Sie online/.test(fb2) && ld2 && ld2.offers.every((o) => o.availability === 'https://schema.org/InStock'),
+    '29.2 Mit PAKETE_OFFEN=1: Knopf jeder Karte und Abschnitt „Ihre Anfrage“ führen auf /bestellen/#<paket>, nichts mehr „in Kürze freigeschaltet“, FAQ „Ja“, JSON-LD „InStock“' + (Pk.VORLAEUFIG ? ', Preise weiter als vorläufig markiert (Pakete.VORLAEUFIG)' : ''));
+  const bestellSeite = await s2.api('localhost', '/bestellen/'), altSeite = await s2.api('localhost', '/partner/');
+  ok(bestellSeite.status === 200 && /bestellen\.js/.test(bestellSeite.text) && altSeite.status === 404, '29.2 Ziel der Knöpfe: /bestellen/ liefert die Bestellung; das alte Kundenkonto /partner/ gibt es nicht mehr (404)');
 
   const vorPost = (await s2.post()).length;
-  const ohneJs = await s2.api('localhost', '/api/partner/frage', { body: formular({ name: 'Jens Brandt', firma: 'Brandt <Fenster>', mail: 'jens@brandt.example', tel: '0221 1', paket: 'plus', text: 'Geht auch eine .de-Domain?', fax: '' }), headers: { 'content-type': 'application/x-www-form-urlencoded', 'x-forwarded-for': '10.29.1.1' } });
+  const ohneJs = await s2.api('localhost', '/api/auftrag/frage', { body: formular({ name: 'Jens Brandt', firma: 'Brandt <Fenster>', mail: 'jens@brandt.example', tel: '0221 1', paket: 'plus', text: 'Geht auch eine .de-Domain?', fax: '' }), headers: { 'content-type': 'application/x-www-form-urlencoded', 'x-forwarded-for': '10.29.1.1' } });
   const mails1 = (await s2.post()).slice(vorPost);
   const fm = mails1.find((m) => /Frage zu den Paketen/.test(m.betreff));
   ok(ohneJs.status === 200 && /text\/html/.test(ohneJs.headers['content-type'] || '') && /Danke, Ihre Frage ist da\./.test(ohneJs.text) && /href="\/fuer-fensterbauer\/"/.test(ohneJs.text) && !!fm && fm.an === 'inhaber@pruefung29.example' && fm.antwortAn === 'jens@brandt.example' && /EEZI Essential Plus/.test(fm.html) && /Brandt &lt;Fenster&gt;/.test(fm.html) && !/Brandt <Fenster>/.test(fm.html),
     '29.2 Frage ohne JavaScript (Formular): Dankesseite mit Weg zurück, Mail an MAIL_KONTAKT mit Antwortadresse des Fragenden, Paket und escapter Firma');
-  const falsch = await s2.api('localhost', '/api/partner/frage', { body: formular({ name: 'J', mail: 'kaputt', text: '' }), headers: { 'content-type': 'application/x-www-form-urlencoded', 'x-forwarded-for': '10.29.1.2' } });
-  const falschJs = await s2.api('localhost', '/api/partner/frage', { body: { name: 'J', mail: 'kaputt', text: '' }, headers: { 'x-forwarded-for': '10.29.1.3' } });
-  const kurz = await s2.api('localhost', '/api/partner/frage', { body: { name: 'Jens', mail: 'jens@kurz.example', text: 'ab' }, headers: { 'x-forwarded-for': '10.29.1.5' } });
+  const falsch = await s2.api('localhost', '/api/auftrag/frage', { body: formular({ name: 'J', mail: 'kaputt', text: '' }), headers: { 'content-type': 'application/x-www-form-urlencoded', 'x-forwarded-for': '10.29.1.2' } });
+  const falschJs = await s2.api('localhost', '/api/auftrag/frage', { body: { name: 'J', mail: 'kaputt', text: '' }, headers: { 'x-forwarded-for': '10.29.1.3' } });
+  const kurz = await s2.api('localhost', '/api/auftrag/frage', { body: { name: 'Jens', mail: 'jens@kurz.example', text: 'ab' }, headers: { 'x-forwarded-for': '10.29.1.5' } });
   ok(falsch.status === 400 && /Das hat noch nicht geklappt/.test(falsch.text) && /role="alert"/.test(falsch.text) && falschJs.status === 400 && falschJs.json && falschJs.json.felder && falschJs.json.felder.name && falschJs.json.felder.mail && !falschJs.json.felder.text && kurz.status === 400 && kurz.json.felder.text, '29.2 Fehler: ohne JavaScript eine Seite mit den Hinweisen, mit JavaScript die Felder (name, mail) als JSON; die Frage ist freiwillig, nur ein, zwei Zeichen sind ein Fehler');
   const vorLeer = (await s2.post()).length;
-  const leer = await s2.api('localhost', '/api/partner/frage', { body: { name: 'Ohne Frage', mail: 'ohne@frage.example', paket: 'signature', text: '' }, headers: { 'x-forwarded-for': '10.29.1.6' } });
+  const leer = await s2.api('localhost', '/api/auftrag/frage', { body: { name: 'Ohne Frage', mail: 'ohne@frage.example', paket: 'signature', text: '' }, headers: { 'x-forwarded-for': '10.29.1.6' } });
   const leerMail = (await s2.post()).slice(vorLeer).find((m) => /Frage zu den Paketen/.test(m.betreff));
   ok(leer.status === 200 && !!leerMail && /Bitte Paket vormerken/.test(leerMail.html) && /EEZI Signature/.test(leerMail.html), '29.2 Ohne Frage („Paket vormerken“): Anfrage geht durch, die Mail sagt, was gewünscht ist');
   const vorHonig = (await s2.post()).length;
-  const honig = await s2.api('localhost', '/api/partner/frage', { body: { name: 'Bot', mail: 'bot@spam.example', text: 'Kaufen Sie jetzt', fax: '0800 1' }, headers: { 'x-forwarded-for': '10.29.1.4' } });
+  const honig = await s2.api('localhost', '/api/auftrag/frage', { body: { name: 'Bot', mail: 'bot@spam.example', text: 'Kaufen Sie jetzt', fax: '0800 1' }, headers: { 'x-forwarded-for': '10.29.1.4' } });
   ok(honig.status === 200 && honig.json && honig.json.ok && (await s2.post()).length === vorHonig, '29.2 Honigtopf: Ein ausgefülltes Feld „fax“ bekommt ein freundliches OK, es geht aber keine Mail raus');
   const stati = [];
-  for (let i = 0; i < 7; i++) stati.push((await s2.api('localhost', '/api/partner/frage', { body: { name: 'Viel Frager', mail: 'viel@frager.example', text: 'Frage ' + i }, headers: { 'x-forwarded-for': '10.29.2.9' } })).status);
-  const anderer = await s2.api('localhost', '/api/partner/frage', { body: { name: 'Anderer', mail: 'anderer@frager.example', text: 'Andere Frage' }, headers: { 'x-forwarded-for': '10.29.3.9' } });
+  for (let i = 0; i < 7; i++) stati.push((await s2.api('localhost', '/api/auftrag/frage', { body: { name: 'Viel Frager', mail: 'viel@frager.example', text: 'Frage ' + i }, headers: { 'x-forwarded-for': '10.29.2.9' } })).status);
+  const anderer = await s2.api('localhost', '/api/auftrag/frage', { body: { name: 'Anderer', mail: 'anderer@frager.example', text: 'Andere Frage' }, headers: { 'x-forwarded-for': '10.29.3.9' } });
   ok(stati.slice(0, 5).every((x) => x === 200) && stati.slice(5).every((x) => x === 429) && anderer.status === 200, '29.2 Bremse: je Anschluss 5 Fragen in der Minute, danach 429; ein anderer Anschluss fragt weiter (' + stati.join(' ') + ')');
-  const instFrage = await s2.api('essential.localhost', '/api/partner/frage', { body: { name: 'Jens', mail: 'jens@brandt.example', text: 'Hallo' }, headers: { 'x-forwarded-for': '10.29.4.1' } });
+  const instFrage = await s2.api('essential.localhost', '/api/auftrag/frage', { body: { name: 'Jens', mail: 'jens@brandt.example', text: 'Hallo' }, headers: { 'x-forwarded-for': '10.29.4.1' } });
   ok(instFrage.status >= 400, '29.2 Das Frageformular gibt es nur auf eeziframes.com, nicht auf einer Instanz (' + instFrage.status + ')');
 
   /* im Browser: Karte wählt das Paket vor, Fehler am Feld, Dank ersetzt das Formular; Telefon und Schreibtisch ohne Querscrollen */
@@ -91,8 +91,9 @@ export default async (h) => {
     const quer = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
     await page.locator('#pakete').scrollIntoViewIfNeeded(); await page.waitForTimeout(200);
     await h.foto(page, 'f-verkauf-pakete-' + (name === 'Telefon' ? 'telefon' : 'desktop'));
-    await page.click('#paket-signature a.dna-pille'); await page.waitForTimeout(900);
-    const vor = await page.evaluate(() => (document.querySelector('#anfrage-form input[name="paket"]:checked') || {}).value);
+    const ziel = await page.getAttribute('#paket-signature a.dna-pille', 'href');
+    await page.locator('#bestellen').scrollIntoViewIfNeeded(); await page.locator('#anfrage-form input[name="paket"][value="signature"]').check({ force: true }); await page.waitForTimeout(200);
+    const vor = ziel === '/bestellen/#signature' ? await page.evaluate(() => (document.querySelector('#anfrage-form input[name="paket"]:checked') || {}).value) : 'Ziel ' + ziel;
     await page.fill('input[name="name"]', 'J'); await page.click('#anfrage-form button[type="submit"]'); await page.waitForTimeout(200);
     const fehler = await page.evaluate(() => ({ n: document.querySelectorAll('#anfrage-form [aria-invalid="true"]').length, text: [...document.querySelectorAll('#anfrage-form .ez-feld__fehler.ist-da')].map((x) => x.textContent).join(' | '), fokus: document.activeElement && document.activeElement.name }));
     await page.fill('input[name="name"]', 'Jens Brandt'); await page.fill('input[name="mail"]', 'jens' + name.length + '@brandt.example'); await page.fill('textarea[name="text"]', 'Wann geht es los?');
@@ -100,7 +101,7 @@ export default async (h) => {
     await page.click('#anfrage-form button[type="submit"]'); await page.waitForSelector('#anfrage-form.ist-gesendet .ez-form__meldung', { timeout: 8000 }).catch(() => null);
     const dank = await page.evaluate(() => { const d = document.querySelector('#anfrage-form .ez-form__meldung'); return !!d && document.activeElement === d && /Danke, Ihre Frage ist da/.test(d.textContent) && !document.querySelector('#anfrage-form input[name="name"]').offsetParent; });
     const ziele = await page.evaluate(() => [...document.querySelectorAll('.fb .dna-pille, .fb .widerruf-knopf, #anfrage-form button')].filter((a) => a.offsetParent).map((a) => a.getBoundingClientRect()).every((r) => r.height >= 44));
-    ok(!quer && vor === 'signature' && fehler.n === 2 && fehler.fokus === 'name' && /Namen/.test(fehler.text) && dank && ziele, '29.2 Im Browser (' + name + '): kein Querscrollen, „Paket anfragen“ unter Signature wählt das Paket vor, Fehler an Name und E-Mail mit Fokus, Dank ersetzt das Formular, Knöpfe ab 44 px');
+    ok(!quer && vor === 'signature' && fehler.n === 2 && fehler.fokus === 'name' && /Namen/.test(fehler.text) && dank && ziele, '29.2 Im Browser (' + name + '): kein Querscrollen, Knopf unter Signature führt in die Bestellung von Signature, Paketwahl im Formular, Fehler an Name und E-Mail mit Fokus, Dank ersetzt das Formular, Knöpfe ab 44 px');
     h.sauber(page, '29.2 Verkaufsseite im Browser (' + name + ') ohne Fehler, CSP-Verstöße und fremde Server');
     await c.close();
   }
@@ -111,7 +112,7 @@ export default async (h) => {
   /* per Tastatur: Das sanfte Scrollen der Seite (scroll-behavior: smooth) lässt Playwrights Klick ohne JavaScript nie „stabil“ werden */
   await np.focus('#anfrage-form button[type="submit"]');
   await Promise.all([np.waitForNavigation({ waitUntil: 'load' }).catch(() => null), np.keyboard.press('Enter')]);
-  const nojsDank = await np.evaluate(() => /Danke, Ihre Frage ist da/.test(document.body.innerText) && location.pathname === '/api/partner/frage');
+  const nojsDank = await np.evaluate(() => /Danke, Ihre Frage ist da/.test(document.body.innerText) && location.pathname === '/api/auftrag/frage');
   ok(nojsPreise.join() === Pk.LISTE.map((p) => eur(Pk.preis(p).monat)).join() && nojsDank, '29.1/29.2 Ohne JavaScript (Telefon): Preise sichtbar (' + nojsPreise.join(', ') + '), Frage geht als Formular ab und endet auf der Dankesseite');
   await nojs.close();
 
@@ -149,8 +150,11 @@ export default async (h) => {
   const leist = (/<!--pakete:leistungen-->([\s\S]*?)<!--\/pakete:leistungen-->/.exec(kb.text) || [])[1] || '';
   const fristTab = (/<!--pakete:fristen-->([\s\S]*?)<!--\/pakete:fristen-->/.exec(kb.text) || [])[1] || '';
   const zellen = (s) => s.replace(/<[^>]+>/g, ' ');
+  /* Originalfotos: mit der Anfrage gelöscht; nur ein Paket mit Aufbewahrung bis Vertragsende hätte eine eigene Fotofrist
+     (fotosSignatureTage). Seit 27.10.2026 hat keines das (Entscheidung des Inhabers, docs/INSTANZEN.md) */
+  const fotoZeile = Pk.LISTE.some((p) => Pk.merkmale(p).aufbewahrung === 'vertrag') ? F.fotosSignatureTage + ' Tage nach dem Eingang' : 'Originalfotos der Anfragen ' + Pk.LISTE.map(() => 'mit der Anfrage').join(' ');
   ok(Object.keys(Pk.MERKMALE).filter((s) => s !== 'name' && s !== 'preis').every((s) => leist.includes(Pk.MERKMALE[s].titel)) && Pk.LISTE.every((p) => leist.includes('<th>' + Pk.PAKETE[p].name + '</th>')) &&
-    zellen(fristTab).includes(Pk.merkmale('essential').aufbewahrung + ' Tage nach bestätigter Zustellung') && zellen(fristTab).includes(F.fotosSignatureTage + ' Tage nach dem Eingang') && zellen(fristTab).includes(F.loeschenNachEndeTage + ' Tage nach dem Ende') &&
+    zellen(fristTab).includes(Pk.merkmale('essential').aufbewahrung + ' Tage nach bestätigter Zustellung') && zellen(fristTab).replace(/\s+/g, ' ').includes(fotoZeile) && zellen(fristTab).includes(F.loeschenNachEndeTage + ' Tage nach dem Ende') &&
     kb.text.includes('<!--pakete:f-kulanzTage-->' + F.kulanzTage + '<') && kb.text.includes('<!--pakete:f-pauseMaxTage-->' + F.pauseMaxTage + '<') && ['Cloudflare', 'Supabase', 'Resend', 'Anthropic'].every((u) => kb.text.includes(u)) && /C-154\/21/.test(kb.text),
     '29.4 Inhalt aus pakete.js und instanzregeln.js: Leistungen je Paket (alle Merkmale), Fristen je Paket, Kulanz ' + F.kulanzTage + ' und Pause ' + F.pauseMaxTage + ' Tage; AV-Vertrag mit Unterauftragnehmern und Nennungspflicht (EuGH C-154/21)');
 
@@ -201,10 +205,10 @@ export default async (h) => {
   /* ---------- 29.6 Datenschutz und Cookies auf eeziframes.com ---------- */
   const dsE = (await h.api('localhost', '/datenschutz/')).text, ckE = (await h.api('localhost', '/cookies/')).text;
   const p6 = (/<h2 id="pakete">[\s\S]*?(?=<h2)/.exec(dsE) || [''])[0];
-  ok(/<h2 id="pakete">9\. Konfigurator-Pakete für Fensteranbieter<\/h2>/.test(dsE) && /__Host-partner/.test(p6) && /Art\. 6 Abs\. 1 lit\. b DSGVO/.test(p6) && /Stripe/.test(p6) && /Resend/.test(p6) && /Supabase/.test(p6) && /Art\. 28 DSGVO/.test(p6) && /Auftragsverarbeiter/.test(p6) &&
+  ok(/<h2 id="pakete">9\. Konfigurator-Pakete für Fensteranbieter<\/h2>/.test(dsE) && /__Host-kunde/.test(p6) && !/__Host-partner|\/partner\//.test(p6) && /Art\. 6 Abs\. 1 lit\. b DSGVO/.test(p6) && /Stripe/.test(p6) && /Resend/.test(p6) && /Supabase/.test(p6) && /Art\. 28 DSGVO/.test(p6) && /Auftragsverarbeiter/.test(p6) &&
     p6.includes('<!--pakete:f-bestellEntwurfTage-->' + F.bestellEntwurfTage + '<') && p6.includes('<!--pakete:f-loeschenNachEndeTage-->' + F.loeschenNachEndeTage + '<') && p6.includes('<!--pakete:f-sitzungTage-->' + F.sitzungTage + '<') &&
-    /<h2 id="widerruf">11\. Widerruf/.test(dsE) && /<h2>12\. Ihre Rechte<\/h2>/.test(dsE) && /__Host-partner/.test(ckE) && /href="\/datenschutz\/#pakete"/.test(ckE),
-    '29.6 Datenschutz eeziframes.com: Abschnitt 9 zu den Konfigurator-Paketen (Frage, Kundenkonto mit Cookie, Bestellung, Stripe, Resend, Supabase, Fristen aus instanzregeln.js, eeziframes als Auftragsverarbeiter der Instanzen), Nummern danach verschoben; Cookies nennt __Host-partner');
+    /<h2 id="widerruf">11\. Widerruf/.test(dsE) && /<h2>12\. Ihre Rechte<\/h2>/.test(dsE) && /__Host-kunde/.test(ckE) && /__Host-inhaber/.test(ckE) && !/__Host-partner/.test(ckE) && /href="\/datenschutz\/#pakete"/.test(ckE),
+    '29.6 Datenschutz eeziframes.com: Abschnitt 9 zu den Konfigurator-Paketen (Frage, Kundenkonto mit Cookie, Bestellung, Stripe, Resend, Supabase, Fristen aus instanzregeln.js, eeziframes als Auftragsverarbeiter der Instanzen), Nummern danach verschoben; Cookies nennt __Host-kunde und __Host-inhaber');
 
   /* ---------- 29.7 llms.txt ---------- */
   const ll = (await h.api('localhost', '/llms.txt')).text;

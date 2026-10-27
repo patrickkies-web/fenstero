@@ -49,6 +49,9 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   sein Wort online gestellt (web/fuer-fensterbauer/, eingebettet auch in der Ansicht Fensterbauer der Startseite). Übertragen mit
   `node scripts/fensterbauer-uebertragen.mjs` aus docs/profis/fensterbauer-vorschau/, danach `node scripts/bedingungen-pdf.mjs`;
   Änderungen gehören in die Vorschau. Protokoll docs/profis/2026-10-26-fensterbauer-dna.md.
+- Ein Kopfbereich für beide Ansichten der Startseite (Korrektur des Inhabers, 26.10.2026, „den Header anpassen an die Ansicht von den
+  Kunden“): Die Ansicht Fensterbauer zeigt den Kopf der eingebetteten DNA-Seite (Marke, Umschalter, Pille), nicht die alte Kopfzeile
+  des Portals; Pilotband, Portal-Kopf und Portal-Fuß bleiben dort aus. Wird eine weitere Seite eingebettet, gilt dasselbe.
 - Nur der genannte Bereich (Korrektur des Inhabers, 26.10.2026): Ein Auftrag „überarbeite die Seite für Fensterbauer“ meint genau diese
   Landingpage. Nichts aus App, Portal oder Betriebsbereich wird mit hineingenommen; andere Seiten werden nur gelesen, nie geändert, und
   die Lieferung sagt, welche Dateien berührt wurden.
@@ -105,6 +108,60 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   wird bei der Übernahme in die App dort nie durch Standbilder ersetzt. Die Vorschau muss es nicht über die Wünsche hinaus vorführen;
   es geht um die App. Vorschlag für seine DNA, Abschnitt 9: „Beim Messen eine feste Ansicht je Element, in den Wünschen das
   lebende Modell.“
+- Vorlagen der Pakete (Korrektur des Inhabers, 26.10.2026, „Ich meine sicherlich nicht das! Das ist kacke.“ auf ein Bild des alten
+  Dashboards): Eine „Vorlage für ein Paket“ ist die Landingpage, die der Betrieb unter seiner Domain bekommt, in der Design-DNA und als
+  Schwester der Vorlagen für Essential und Plus. Das Dashboard und seine alte Gestaltung (#161616, Inter, farbiges Wort, Bilder unter
+  web/bilder/beispiel/) sind weder Vorlage noch Material dafür; Merkmale eines Pakets erscheinen auf der Landingpage als Bausteine der
+  DNA (Signature: Einladungszustand, Link-Etikett, Innenkarte mit dem Fortschritt). Vorschau docs/profis/signature-vorschau/.
+- Paketstufen (Wunsch des Inhabers, 26.10.2026, abends: „alle Pakete visuell sehr ansprechend, aber die Käufer der höherpreisigen
+  Pakete sollen schon auch was davon haben“): Jede Paket-Vorlage zeigt genau, was web/assets/pakete.js liefert, nicht mehr und nicht
+  weniger. Der Anreiz steht in den Etiketten der Muster-Ebene (grauer Punkt in allen Paketen, Koralle neu im Paket, Ring erst im
+  nächsten Paket), nie in einer absichtlich schwächeren Seite. Eine Familie je Betrieb mit einer Muster-Leiste (Paketwechsel an
+  derselben Stelle, Preis aus pakete.js), gebaut von docs/profis/werkzeuge/paketvorlagen.py; geändert wird in den drei Vorschau-Ordnern
+  (essential-, plus-, signature-vorschau), dann neu gebaut. Die Palette eines Betriebs gilt nach Stufen (siehe „Palette eines Betriebs“
+  unten); Essential bleibt im eeziframes-Violett, bis der Inhaber pakete.js ändert. Protokoll docs/profis/2026-10-26-paketstufen.md.
+- Paket-Vorlagen, Korrekturen des Inhabers (27.10.2026): Essential läuft immer unter firmenname.eeziframes.com, nie unter einer eigenen
+  Domain; die eigene Domain ist dort ein Etikett „Ab Plus“. Im Daten-Abschnitt steht kein ausdrücklicher Satz, dass der Betrieb vor dem
+  Senden nichts sieht; es steht nur, dass mit dem Konfigurator von eeziframes geplant wird (Signature: „von <Betrieb>“, ohne den Namen
+  eeziframes) und dass der Betrieb die Anfrage bekommt, sobald gesendet wird. Unterlagen für die Vertragsdauer und eine Ablage im
+  Dashboard über die Vertragsdauer kommen in keinem Paket vor, weder im Text noch in Etiketten (auch nicht in pakete.js: Aufbewahrung
+  überall 30 Tage; Signature zeigt die Aufmaßblätter im Dashboard nur, solange die Anfrage gespeichert ist). Statt der Kachel „Für große Türen eine zweite Person“ steht
+  „Ihre Wünsche zu Farbe und Glas“. Jedes Etikett passt in seine Pille, einzeilig oder im Fluss umbrechend, geprüft bei 390 und 1280 px.
+- Palette eines Betriebs (Vorgabe des Inhabers, 27.10.2026, Beispiel Fensterbau Brandt: Reinweiß 40 %, Eisblau 25 %, Schieferblau 15 %,
+  Tiefes Petrol 10 %, Aquatürkis 7 %, Frisches Mint 3 %): Signature folgt auf der ganzen Seite der Palette und ihren Anteilen, auch im
+  Grund (gegen DNA Abschnitt 0, „Markenfarbe nie im Grund“: Vorschlag für die DNA). Plus geht zur Hälfte in die Palette (Karten, helle
+  Szene, Akzente), der Grund der dunklen Szenen, Silbergrau und Koralle bleiben von eeziframes. Essential bleibt eeziframes. Muster-Leiste
+  und Etiketten bleiben in allen Stufen eeziframes. Umsetzung als Farbdatei je Betrieb (docs/profis/werkzeuge/farben-<betrieb>.css,
+  `data-farbe="voll"`/`"halb"` am main, im Generator unter BETRIEBE). Gemessen wird die Kundenansicht ohne Bilder mit
+  werkzeuge/palette.mjs und palette.py, am Telefon und am Schreibtisch; Toleranz wie DNA Abschnitt 8 (neutral ±3, Farbe ±2 Punkte).
+- Kein Abschnitt über den Weg der Daten (Inhaber, 27.10.2026: „Das ist etwas, was den Kunden so überhaupt nicht interessiert.“): Auf
+  der Landingpage steht nirgends, dass Daten erst beim Senden zum Betrieb gehen oder wer sie übermittelt. Die Szene heißt „So geht es
+  weiter“ und zeigt den Weg von der Planung bis zum Einbau; Datenschutz steht im Datenschutz.
+- Schmale Leiste (Wunsch des Inhabers, 27.10.2026, Paket-Vorlagen): Die Leiste verschwindet beim Herunterscrollen nicht mehr, sondern
+  zieht sich auf ihren Knopf „Fenster planen“ zusammen (Zuschnitt `clip-path` auf das gemessene Rechteck der Pille, runde Enden,
+  280 ms ease-in-out; Logo blendet in 160 ms aus); beim Hochscrollen kommt sie ganz zurück (320 ms), über dem Kopf der Seite ist sie
+  weg. Der Zuschnitt begrenzt auch die Treffer, daneben bleibt die Seite bedienbar. Ruhige Fassung: nur Überblenden. Vorschlag für die
+  DNA und für weitere Seiten mit Leiste.
+- Beispiel-Betrieb und Paketbereich (Wunsch des Inhabers, 27.10.2026, „Ich brauch jetzt nur noch den Betrieb Brandt, der dient mir
+  als Beispiel“): Fensterbau Brandt ist der einzige Beispiel-Betrieb; Ostermann wird nicht mehr gepflegt (Generator und Artifact
+  bleiben, nichts gelöscht). Im Paketbereich der Seite für Fensterbauer zeigt jede Karte ein Bild der Brandt-Seite ihres Pakets, und
+  die drei Bilder unterscheiden sich, bevor man liest (Gremium 27.10.2026): Essential den dunklen ersten Bildschirm im eeziframes-Look,
+  Plus die Szene mit den Fotos des Betriebs, Signature die helle persönliche Begrüßung. Aufgenommen bei 1024 × 640 mit Szenen ohne
+  Vorhang, Ausschnitt genau 16:10 innerhalb der Szene (nichts aus der nächsten Szene im Bild), als 960 × 600 WebP
+  bilder/paket-<paket>.webp. In der Browserleiste des Bilds die Adresse des Pakets in 13 px, der unterscheidende Teil hell und
+  halbfett (fensterbau-brandt.eeziframes.com, fensterbau-brandt.de). Das Bild ist ein Link mit Glas-Etikett „Beispiel ansehen“; direkt
+  unter den Karten steht die Zeile „Alle drei Pakete am Beispiel ansehen“ (voller Rundknopf 44 px), darunter der Vergleich. Ziel sind
+  die Beispielseiten unter web/vorschau/paket-beispiel/ (noindex, nicht in der Sitemap), gebaut mit
+  `python3 docs/profis/werkzeuge/paketvorlagen.py brandt --web`; dort trägt die Muster-Leiste vorn einen Umriss-Rundknopf zurück zu
+  den Paketen. Danach die Kartenbilder neu aufnehmen. Die Merkmale im Vergleich kommen aus pakete.js; Farben als Treppe „Farben von
+  eeziframes / zur Hälfte in Ihren Farben / ganz in Ihren Farben“ (nie „Karten und Akzente“, nie „Firmenfarbe“ ohne Einschränkung),
+  Fristen als Zahl („30 Tage nach Zustellung“), Domains brechen nie um. Vorschau und pakete.js ändern sich zusammen.
+- Altes Geschäftsmodell weg, alles neu (Korrektur des Inhabers, 27.10.2026: „keine Rücksicht auf bisherige Plattformen oder Layouts …
+  keine Überschneidungen zwischen dem damaligen Design und dem neuen Design oder irgendwelchen Funktionen“): Kundenkonto `/partner/`,
+  alte Paket-Bestellung und Oberfläche der alten Zentrale sind gelöscht. Bestellung (`/bestellen/`), Kundenbereich (`/konto/`) und
+  Zentrale (`/zentrale/`) sind neu im App-Rahmen der DNA (`web/assets/auftrag.css`, Präfix `a-`) gebaut und bauen nur auf den aktuellen
+  Paketen und den Landingpages von Fensterbau Brandt auf. Wer daran weiterbaut, liest nur docs/BESTELLUNG.md und docs/ZENTRALE.md, nicht
+  den früheren Stand; alte Muster (Statusleiste mit sechs Balken, Seitenleiste der alten Zentrale, Papier-Optik) kommen nicht zurück.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

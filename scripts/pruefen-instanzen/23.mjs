@@ -53,7 +53,7 @@ export default async (h) => {
     const hier = await h.api('localhost', p), dort = await holeBase(p), ohneHost = (t) => t.split(h.base('localhost')).join('ADRESSE').split(h.BASE.replace(/\/$/, '')).join('ADRESSE');
     ok(hier.status === 200 && ohneHost(hier.text) === ohneHost(dort.text) && /eeziframes/.test(hier.text), '23.1 Hauptdomain: ' + p + ' gleich wie auf dem Server der übrigen Suite (kein Instanz-Kopf)');
   }
-  for (const p of ['/zentrale/', '/partner/', '/betrieb/']) {
+  for (const p of ['/zentrale/', '/bestellen/', '/konto/', '/betrieb/']) {
     const r = await h.api('localhost', p), csp = kopf(r, 'content-security-policy');
     ok(/frame-ancestors 'none'/.test(csp) && /script-src 'self'/.test(csp) && kopf(r, 'x-frame-options') === 'DENY' && /no-store/.test(kopf(r, 'cache-control')) && /noindex/.test(kopf(r, 'x-robots-tag')), '23.1 Hauptdomain ' + p + ': volle CSP, X-Frame-Options DENY, no-store, noindex (' + r.status + ')');
   }
@@ -83,7 +83,7 @@ export default async (h) => {
     if (p === 'signature' ? btr.status !== 301 : btr.status !== 404) falsch.push('/betrieb ' + btr.status);
     if (p !== 'signature' && btr2.status !== 404) falsch.push('/betrieb/ ' + btr2.status);
     /* /api/konto… gehört auf Signature-Hosts dem Dashboard (Strang E); hier nur: nie offen ohne Anmeldung */
-    for (const a of ['/api/test/post', '/api/zentrale/status', '/api/partner/anmelden', '/api/konto', '/api/kunde/aufmaesse', '/api/zahlung/status', '/api/widerruf', '/api/post/webhook', '/api/gibts-nicht']) { const r = await h.api(host, a, a === '/api/partner/anmelden' || a === '/api/widerruf' || a === '/api/post/webhook' ? { body: {}, origin: true } : {}); if (p === 'signature' && a === '/api/konto' ? r.status < 400 : r.status !== 404) falsch.push(a + ' ' + r.status); }
+    for (const a of ['/api/test/post', '/api/zentrale/status', '/api/auftrag/anmelden', '/api/inhaber/anmelden', '/api/konto', '/api/kunde/aufmaesse', '/api/zahlung/status', '/api/widerruf', '/api/post/webhook', '/api/gibts-nicht']) { const r = await h.api(host, a, a === '/api/auftrag/anmelden' || a === '/api/inhaber/anmelden' || a === '/api/widerruf' || a === '/api/post/webhook' ? { body: {}, origin: true } : {}); if (p === 'signature' && a === '/api/konto' ? r.status < 400 : r.status !== 404) falsch.push(a + ' ' + r.status); }
     ok(!falsch.length, '23.3 ' + p + ': Routing-Matrix (Seiten, Dateien, zufällige Pfade, Positivliste der API)' + (falsch.length ? ': ' + falsch.join(', ') : ''));
   }
   const alias = await h.api('plus-alias.localhost', '/x?y=1'), www = await h.api('www.plus.localhost', '/impressum/'), aliasPost = await h.api('plus-alias.localhost', '/api/aufmass', { body: {} });
@@ -201,8 +201,8 @@ export default async (h) => {
   await h.instanz('kiprobe', { abweichung: { kiMonat: 2 } });
   const kiStati = [];
   for (let i = 0; i < 5; i++) { const c = (await T.start(kiI.host)).json.code; kiStati.push((await ki(kiI.host, c)).status); }
-  const kiAlarm = await T.warteMail((m) => /Richtwert erreicht bei KI-Probe Fenster/.test(m.betreff || ''), 3000);
-  ok(kiStati.join() === '200,200,200,200,429' && kiAlarm.length === 1, '23.9 KI je Instanz und Monat: Alarm-Mail genau einmal beim Richtwert, 429 erst beim Doppelten (' + kiStati.join(',') + ')');
+  const kiAlarm = await T.warteMail((m) => /Kontingent erreicht bei KI-Probe Fenster/.test(m.betreff || ''), 3000);
+  ok(kiStati.join() === '200,200,200,200,429' && kiAlarm.length === 1, '23.9 KI je Instanz und Monat: Alarm-Mail genau einmal beim Kontingent, ohne verknüpften Auftrag 429 erst beim Doppelten (' + kiStati.join(',') + ')');
   const s2 = await h.server({ KI_TAG_MAX: '3' });
   const tagStati = [];
   for (let i = 0; i < 4; i++) tagStati.push((await s2.api('localhost', '/api/ki?aufgabe=einbau&seite=in', { body: kiBild, origin: true, headers: Object.assign({ 'content-type': 'text/plain' }, T.ip()) })).status);

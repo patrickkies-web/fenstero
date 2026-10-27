@@ -14,7 +14,7 @@
                               Einstellungen → Zweiter Faktor); dann braucht die Anmeldung zusätzlich den sechsstelligen Code
      MAIL_API_KEY             E-Mails des Servers über Resend (post.js, Schlüssel re_…): Vertragsbestätigung nach dem Kauf,
                               Eingangsbestätigung eines Widerrufs
-     SITZUNG_GEHEIMNIS        langer Zufallstext (mindestens 32 Zeichen), unterschreibt die Sitzungen im Kundenkonto /partner/ und im
+     SITZUNG_GEHEIMNIS        langer Zufallstext (mindestens 32 Zeichen), unterschreibt die Sitzungen im Kundenbereich /konto/ (auch /bestellen/), in der Zentrale /zentrale/ und im
                               Dashboard der Instanzen sowie Bestätigungs- und Vorschau-Links (sitzung.js); ohne ihn gibt es keine Sitzungen.
                               Nie ändern, sonst sind alle abgemeldet und alle verschickten Links ungültig
 

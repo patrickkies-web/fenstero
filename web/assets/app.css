@@ -961,11 +961,11 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
    (Zoom in der unteren Reihe) allein oben rechts; die Beschriftung der Ansicht weicht ihm aus */
 .w3d-haus { top: 10px; right: 110px }
 .w3d-knopf.haus svg { width: 20px; height: 20px }
-.w3d-stage.is-zoom .w3d-haus { right: 160px }
+.w3d-stage.is-zoom .w3d-haus, .w3d-stage.mit-eins .w3d-haus { right: 160px }
 .w3d-stage.ohne-zoom .w3d-haus, .w3d-stage.is-niedrig.mit-sonne .w3d-haus { right: 10px }
 .w3d-stage.dims-all .w3d-haus { top: auto; right: 10px; bottom: 10px }
 .w3d-stage.mit-haus.mit-sonne .w3d-hint { max-width: calc(100% - 190px) }
-.w3d-stage.mit-haus.mit-sonne.is-zoom .w3d-hint { max-width: calc(100% - 240px) }
+.w3d-stage.mit-haus.mit-sonne.is-zoom .w3d-hint, .w3d-stage.mit-haus.mit-sonne.mit-eins .w3d-hint { max-width: calc(100% - 240px) }
 .w3d-stage.is-niedrig.mit-haus.mit-sonne .w3d-hint, .w3d-stage.dims-all.mit-haus .w3d-hint { max-width: calc(100% - 74px) }
 /* Blatt „Haus“: Aufbau wie das Farbblatt (das Modell bleibt darüber sichtbar), Art als Chips, Farbton als Felder mit dem Muster der Fassade */
 .fb-haus .hs-kopf { display: block; min-width: 0 }
@@ -980,7 +980,7 @@ details.fold > .fold-body .kv { box-shadow: none; border: 1px solid var(--line) 
    die ganze Breite. In der Übersicht der Maße (dims-all) steht der Zoom oben links: oben in der Mitte steht das Schild der Breite,
    unten das der unteren Breite und die Beschriftung, links in halber Höhe das Schild der Höhe */
 .w3d-stage.mit-sonne .w3d-hint { top: 10px; bottom: auto; max-width: calc(100% - 136px); line-height: 1.3 }
-.w3d-stage.mit-sonne.is-zoom .w3d-hint { max-width: calc(100% - 186px) }
+.w3d-stage.mit-sonne.is-zoom .w3d-hint, .w3d-stage.mit-sonne.mit-eins .w3d-hint { max-width: calc(100% - 186px) }
 .scr.fit .w3d-stage.mit-sonne { min-height: 220px }
 .w3d-stage.is-niedrig .w3d-sonne .w3d-knopf { width: 44px; padding: 0 }
 .w3d-stage.is-niedrig .w3d-sonne .w3d-knopf span { display: none }

@@ -11,3 +11,9 @@ fotos-roh/
 docs/profis/startseite-dna-vorschau/lokal.html
 docs/profis/fensterbauer-vorschau/lokal.html
 docs/profis/konfigurator-start-vorschau/lokal.html
+docs/profis/signature-vorschau/lokal.html
+docs/profis/essential-vorschau/lokal.html
+docs/profis/plus-vorschau/lokal.html
+
+# Hilfsdateien der Prüfsuite (z. B. Abschnitt 26)
+.pruef-*

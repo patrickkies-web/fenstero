@@ -10,9 +10,10 @@
      node scripts/bedingungen-pdf.mjs      schreibt die Bausteine in die Seiten und die PDFs der Paketbedingungen
    scripts/pruefen-instanzen/29.mjs prüft, dass Seiten und PDFs so gebaut sind.
 
-   Verkauf: ohne PAKETE_OFFEN=1 zeigt die Seite „Vorläufige Preise“ und statt der Bestellknöpfe „Bestellung bald möglich“ mit dem
-   Anfrageformular (POST /api/partner/frage, auch ohne JavaScript); die Paket-Kasse selbst sperrt partner.js. Mit PAKETE_OFFEN=1 führt
-   jeder Bestellknopf auf /partner/#bestellen/<paket>. Live-Demos: mit PAKETE_DEMOS=1 Links auf https://demo-<paket>.eeziframes.com/
+   Verkauf: ohne PAKETE_OFFEN=1 zeigt die Seite statt der Bestellknöpfe „Bestellung bald möglich“ mit dem
+   Anfrageformular (POST /api/auftrag/frage, auch ohne JavaScript). Jeder Paketknopf führt in die Bestellung dieses Pakets
+   (/bestellen/#<paket>, functions/auftrag/); solange die Kasse zu ist, endet sie mit „Unverbindlich anfragen“, mit PAKETE_OFFEN=1 und
+   vollständigen Rechtstexten mit der Zahlung. Live-Demos: mit PAKETE_DEMOS=1 Links auf https://demo-<paket>.eeziframes.com/
    (Demo-Instanzen, docs/INSTANZEN.md Teil 2), sonst der Weg in die App.
    Preise stehen mit schmalem geschütztem Leerzeichen (U+202F) vor „€“: Die Ersetzungen nach dem Einführungspreis der Hauseigentümer
    (seo.js, nachEinfuehrung) greifen nur bei Leerzeichen und &nbsp; und lassen die Paketpreise in Ruhe. */
@@ -36,10 +37,11 @@ const EMPFOHLEN = 1;
 const LOKAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i;
 export const basisVon = (env, url) => (!url ? '' : env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : (LOKAL.test(url.hostname) ? url.protocol : 'https:') + '//' + url.host.replace(/^www\./i, ''));
 
-/* Verkauf in dieser Umgebung: { offen, bestellen, vorlaeufig, mwst, demos } (bestellen nur mit PAKETE_OFFEN=1) */
+/* Verkauf in dieser Umgebung: { offen, bestellen, vorlaeufig, mwst, demos } (bestellen nur mit PAKETE_OFFEN=1). „vorläufig“ hängt seit
+   27.10.2026 nur an pakete.js (VORLAEUFIG): Die Preise hat der Inhaber festgelegt, auch solange die Bestellung noch nicht offen ist */
 export function verkaufFuer(env) {
   const e = env || {}, k = konfig(e), v = R().verkauf({ offen: k.paketeOffen, live: live(k) });
-  return { offen: !!v.offen, bestellen: !!v.bestellen, vorlaeufig: !!(v.vorlaeufig || P().VORLAEUFIG), mwst: k.preise.mwst !== false, demos: String(e.PAKETE_DEMOS || '').trim() === '1' };
+  return { offen: !!v.offen, bestellen: !!v.bestellen, vorlaeufig: !!P().VORLAEUFIG, mwst: k.preise.mwst !== false, demos: String(e.PAKETE_DEMOS || '').trim() === '1' };
 }
 const steuerText = (v) => (v.mwst ? 'netto zzgl. MwSt.' : 'ohne Ausweis der Umsatzsteuer (§ 19 UStG)');
 
@@ -47,37 +49,40 @@ const steuerText = (v) => (v.mwst ? 'netto zzgl. MwSt.' : 'ohne Ausweis der Umsa
 export function wertText(schluessel, m) {
   const d = P().MERKMALE[schluessel], v = m[schluessel];
   if (!d) return String(v);
-  if (d.art === 'janein') return v ? 'ja' : 'nein';
+  if (d.art === 'janein') return v ? 'ja' : (d.nein || 'nein');
   if (d.art === 'zahl') return v ? String(v) : 'nein';
   if (d.art === 'tage') return v ? v + ' Tage' : 'nein';
   if (d.art === 'wahl') return (d.werte && d.werte[v]) || String(v);
   if (d.art === 'aufbewahrung') return v === 'vertrag' ? 'für die Vertragsdauer' : v + ' Tage nach Zustellung';
   if (d.art === 'preis') return geld(v.monat) + ' im Monat, ' + geld(v.einrichtung) + ' Einrichtung';
+  if (d.art === 'ki') return P().tausend(v) + ', jede weitere ' + geld(m.preis.ki);
   return String(v);
 }
 /* Satz unter dem Paketnamen, aus den Merkmalen (nie aus dem Namen des Pakets) */
 function kurzText(m) {
-  if (m.dashboard) return 'Ganz Ihre Marke, dazu Ihr Dashboard mit persönlichen Einladungslinks und Fortschritt.';
-  if (m.gestaltung === 'eigen') return 'Ihr Konfigurator in Ihrem Design: Logo, Firmenfarbe, Fotos und eigene Startseite.';
-  return 'Der volle Konfigurator unter Ihrer Domain, im eeziframes-Design mit Ihrem Namen.';
+  if (m.dashboard) return 'Ganz Ihre Marke und Ihre Farben, dazu Ihr Dashboard mit persönlichen Einladungslinks und Fortschritt.';
+  if (m.gestaltung === 'eigen') return 'Ihr Konfigurator unter Ihrer Domain: Ihr Logo, Ihre Fotos, eigene Startseite und die Seite zur Hälfte in Ihren Farben.';
+  return 'Der volle Konfigurator im eeziframes-Design mit Ihrem Namen, unter ihr-name.eeziframes.com.';
 }
 /* Die wichtigsten Punkte eines Pakets für die Karte */
 function punkte(m) {
   const M = P().MERKMALE, out = [];
-  if (m.domain) out.push('Unter Ihrer eigenen Domain, z. B. ihr-name-fenster.de');
+  out.push(m.domain ? 'Unter Ihrer eigenen Domain, z. B. ihr-name-fenster.de' : 'Unter Ihrem Namen bei eeziframes, z. B. ihr-name.eeziframes.com');
   if (m.konfigurator) out.push(M.konfigurator.text);
   if (m.eingangMail) out.push('Jede Anfrage als Aufmaßblatt-PDF per E-Mail');
   if (m.gestaltung === 'eigen') {
-    const teile = [m.logo ? 'Ihr Logo' : '', m.farbe ? 'Ihre Firmenfarbe' : '', m.fotos ? 'bis zu ' + m.fotos + ' Fotos Ihres Betriebs' : '', m.startansicht ? 'eigene Startseite' : ''].filter(Boolean);
+    /* die Farben stehen in einer eigenen Zeile (Farbwelt), damit „Firmenfarbe“ nicht ohne Einschränkung dasteht */
+    const teile = [m.logo ? 'Ihr Logo' : '', m.farbe && !m.farbwelt ? 'Ihre Firmenfarbe' : '', m.fotos ? 'bis zu ' + m.fotos + ' Fotos Ihres Betriebs' : '', m.startansicht ? 'eigene Startseite' : ''].filter(Boolean);
     out.push('In Ihrem Design: ' + teile.join(', '));
   } else out.push(M.gestaltung.werte[m.gestaltung]);
+  if (m.farbwelt && m.farbwelt !== 'eezi') out.push(m.farbwelt === 'voll' ? 'Die ganze Seite in Ihren Farben' : 'Die Seite zur Hälfte in Ihren Farben');
   /* Der neutrale Absender ist nach Bauplan §4 optional (zweite Domain): ehrlich „sobald eingerichtet“, bis dahin kommt die Mail vom Konfigurator-Postfach */
   out.push(m.kennzeichnung === 'keine' ? 'Ohne Hinweis auf eeziframes für Ihre Kunden, auch im Aufmaßblatt' + (m.absender === 'neutral' ? '; E-Mails an Sie von einem neutralen Absender, sobald eingerichtet' : '') : 'Hinweis auf eeziframes: ' + M.kennzeichnung.werte[m.kennzeichnung]);
   if (m.indexierung === 'start') out.push('Startseite in Suchmaschinen');
   if (m.dashboard) out.push('Dashboard unter Ihrer Domain mit ' + m.zugaenge + ' Zugängen');
   if (m.einladungslinks) out.push('Persönliche Einladungslinks für Ihre Kunden');
   if (m.fortschritt) out.push('Fortschritt sehen: eingeladen, in Bearbeitung, eingereicht');
-  if (m.pdfAblage) out.push('Aufmaßblätter jederzeit im Dashboard');
+  if (m.pdfAblage) out.push('Aufmaßblätter im Dashboard' + (typeof m.aufbewahrung === 'number' ? ', ' + m.aufbewahrung + ' Tage nach Zustellung' : '') + '; das PDF bleibt in Ihrem Postfach');
   return out;
 }
 
@@ -131,9 +136,7 @@ function karten(o, v) {
   const liste = P().LISTE;
   const karte = (p, i) => {
     const m = P().merkmale(p), pr = P().preis(p), emp = i === EMPFOHLEN;
-    const knopf = v.bestellen
-      ? '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + ' bestellen</a>'
-      : '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="#bestellen" data-paket="' + p + '">' + esc(kurzname(p)) + ' anfragen</a>';
+    const knopf = '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="/bestellen/#' + p + '" data-paket="' + p + '">' + esc(kurzname(p)) + (v.bestellen ? ' bestellen' : ' anfragen') + '</a>';
     return '\n    <article class="vk-paket' + (emp ? ' vk-empfohlen' : '') + '" id="paket-' + p + '" aria-labelledby="paket-' + p + '-name">' +
       (emp ? '<p class="vk-marke">Empfohlen</p>' : '') +
       '<h3 class="vk-name" id="paket-' + p + '-name">' + esc(P().PAKETE[p].name) + '</h3>' +
@@ -195,7 +198,7 @@ function demos(o, v) {
 }
 function formular() {
   const optionen = '<option value="">Noch offen</option>' + P().LISTE.map((p) => '<option value="' + p + '">' + esc(P().PAKETE[p].name) + '</option>').join('');
-  return '\n  <form class="vk-form" method="post" action="/api/partner/frage" data-vk-frage>' +
+  return '\n  <form class="vk-form" method="post" action="/api/auftrag/frage" data-vk-frage>' +
     '\n    <div class="vk-felder">' +
     '<label class="vk-feld vk-breit"><span>Paket</span><select name="paket">' + optionen + '</select></label>' +
     '<label class="vk-feld"><span>Ihr Name</span><input name="name" autocomplete="name" required minlength="2" maxlength="80"></label>' +
@@ -212,9 +215,9 @@ function formular() {
 }
 function bestellen(o, v) {
   if (v.bestellen) {
-    return '\n  <p>Wählen Sie Ihr Paket. Im Kundenkonto stimmen Sie den <a href="/konfigurator-bedingungen/">Paketbedingungen</a> zu und zahlen die Einrichtung bei Stripe.</p>\n  <div class="vk-knoepfe">' +
-      P().LISTE.map((p, i) => '<a class="btn ' + (i === EMPFOHLEN ? 'primary' : 'ghost') + '" href="/partner/#bestellen/' + p + '">' + esc(P().PAKETE[p].name) + ' bestellen</a>').join('') +
-      '</div>\n  <p class="rg-klein">Schon bestellt? <a href="/partner/">Zum Kundenkonto</a></p>\n  <h3 id="frage">Vorher eine Frage?</h3>\n  <p>Schreiben Sie uns; wir antworten in der Regel innerhalb eines Werktags, gern auch am Telefon.</p>' + formular() + '\n  ';
+    return '\n  <p>Wählen Sie Ihr Paket. In der Bestellung stimmen Sie den <a href="/konfigurator-bedingungen/">Paketbedingungen</a> zu und zahlen die Einrichtung bei Stripe.</p>\n  <div class="vk-knoepfe">' +
+      P().LISTE.map((p, i) => '<a class="btn ' + (i === EMPFOHLEN ? 'primary' : 'ghost') + '" href="/bestellen/#' + p + '">' + esc(P().PAKETE[p].name) + ' bestellen</a>').join('') +
+      '</div>\n  <p class="rg-klein">Schon bestellt? <a href="/konto/">Zum Kundenbereich</a></p>\n  <h3 id="frage">Vorher eine Frage?</h3>\n  <p>Schreiben Sie uns; wir antworten in der Regel innerhalb eines Werktags, gern auch am Telefon.</p>' + formular() + '\n  ';
   }
   return '\n  <div class="vk-bald"><p class="eyebrow">Bestellung bald möglich</p><p>Die Bestellung schalten wir in Kürze frei. Fragen Sie unverbindlich an; wir antworten meist innerhalb eines Werktags.</p></div>\n  <h3 id="frage">Paket unverbindlich anfragen</h3>' + formular() + '\n  ';
 }
@@ -271,11 +274,22 @@ const pdfs = () => paketPdfs().map((p, i) => '<a href="' + esc(p) + '">' + (i ? 
 
 const BLOECKE = { preiszeile: preiszeile, karten: karten, vergleich: vergleich, ablauf: ablauf, demos: demos, bestellen: bestellen, ld: ld, leistungen: leistungen, fristen: fristen, stand: stand, pdfs: pdfs };
 
+/* Preis je weiterer KI-Auswertung: ein Betrag, wenn er in allen Paketen gleich ist, sonst je Paket */
+function kiPreise() {
+  const L = P().LISTE, b = L.map((p) => P().preis(p).ki);
+  return b.every((x) => x === b[0]) ? geld(b[0]) + ' netto' : L.map((p, i) => esc(kurzname(p)) + ' ' + geld(b[i])).join(', ') + ' netto';
+}
+
 /* ---------- Bausteine der Seite für Fensterbauer (Design-DNA vom 26.10.2026, web/fuer-fensterbauer/index.html aus docs/profis/fensterbauer-vorschau/) ----------
    Kleine Stellen im fertigen Markup statt ganzer Abschnitte, damit die Gestaltung in der Datei bleibt:
      fb-ab                 günstigster Monatspreis („Ab 29 €“ in der Haken-Zeile des Startbilds und im Abschluss)
      fb-zahl-<paket>       Monatspreis als Zahl ohne Einheit (die große Zahl der Karte, Einheit „€ im Monat“ steht daneben)
      fb-monat-<paket>      Monatspreis, fb-einr-<paket> Einrichtung (Karten, Vergleich, Beispielrechnung)
+     fb-ki-<paket>         Zeile der Karte: KI-Auswertungen inklusive und Preis jeder weiteren; fb-kimonat-<paket> und fb-kipreis-<paket>
+                           die beiden Werte einzeln (Vergleich)
+     fb-jahr-<paket>       Preiszeile der Beispielseiten (/vorschau/paket-beispiel/): Monat, Einrichtung, erstes Jahr, KI
+     fb-kijecode           höchstens so viele KI-Auswertungen je Anfrage (Instanzregeln.GRENZEN.kiJeCode, Paketbedingungen § 2)
+     fb-faq-kosten, fb-faq-ki   Antworten „Was kostet …?“ und „Was ist eine KI-Auswertung …?“ (Zahlen aus pakete.js)
      fb-cta-<paket>        Pille unter der Karte: ohne PAKETE_OFFEN „<Paket> anfragen“ (wählt das Paket im Formular vor), sonst „bestellen“;
                            das empfohlene Paket als volle Pille mit Pfeilkreis, die anderen als Umriss
      fb-hinweis            Zeile über den Karten (vorläufige Preise, bestellen bald möglich)
@@ -284,17 +298,35 @@ const BLOECKE = { preiszeile: preiszeile, karten: karten, vergleich: vergleich, 
      fb-faq-bestellen      Antwort auf „Kann ich schon bestellen?“ */
 const PFEILKREIS = ' <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span>';
 function fbBaustein(name, o, v) {
-  const L = P().LISTE, m = /^fb-(monat|einr|cta|zahl)-([a-z]+)$/.exec(name);
+  const L = P().LISTE, m = /^fb-(monat|einr|cta|zahl|ki|kimonat|kipreis|jahr)-([a-z]+)$/.exec(name);
   if (m) {
     const p = m[2]; if (!P().PAKETE[p]) return null;
-    if (m[1] === 'monat') return geld(P().preis(p).monat);
-    if (m[1] === 'zahl') return zahl(P().preis(p).monat);
-    if (m[1] === 'einr') return geld(P().preis(p).einrichtung);
+    const pr = P().preis(p), mm = P().merkmale(p);
+    if (m[1] === 'monat') return geld(pr.monat);
+    if (m[1] === 'zahl') return zahl(pr.monat);
+    if (m[1] === 'einr') return geld(pr.einrichtung);
+    if (m[1] === 'ki') return esc(P().tausend(mm.kiMonat)) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + geld(pr.ki);
+    if (m[1] === 'kimonat') return esc(P().tausend(mm.kiMonat));
+    if (m[1] === 'kipreis') return geld(pr.ki);
+    if (m[1] === 'jahr') return geld(pr.monat) + ' im Monat · ' + geld(pr.einrichtung) + ' einmalig · im ersten Jahr ' + P().tausend(pr.monat * 12 + pr.einrichtung) + NB + '€ · ' + esc(P().tausend(mm.kiMonat)) + ' KI-Auswertungen im Monat inklusive · ' + (v.mwst ? 'netto' : 'ohne USt.') + (v.vorlaeufig ? ', vorläufig' : '');
     const emp = L.indexOf(p) === EMPFOHLEN;
-    return '<a class="dna-pille' + (emp ? '' : ' dna-pille--leise') + '" href="' + (v.bestellen ? '/partner/#bestellen/' + p : '#bestellen') + '" data-paket="' + p + '">' +
+    return '<a class="dna-pille' + (emp ? '' : ' dna-pille--leise') + '" href="/bestellen/#' + p + '" data-paket="' + p + '">' +
       esc(kurzname(p)) + (v.bestellen ? ' bestellen' : ' anfragen') + (emp ? PFEILKREIS : '') + '</a>';
   }
   if (name === 'fb-ab') return geld(Math.min.apply(null, L.map((p) => P().preis(p).monat)));
+  if (name === 'fb-kijecode') return esc(R().GRENZEN.kiJeCode);
+  if (name === 'fb-faq-kosten') {
+    return 'Eine einmalige Einrichtung vorab und ein fester Monatspreis je Paket, ab ' + geld(Math.min.apply(null, L.map((p) => P().preis(p).monat))) + ' im Monat. Darin steckt ein Kontingent an KI-Auswertungen der Fotos; wer mehr braucht, schaltet weitere frei, jede kostet ' + kiPreise() +
+      '. Für Anfragen Ihrer eigenen Kunden gibt es keine Gebühr. Nur für zusätzliche Anfragen aus der eeziframes-App ist künftig eine Gebühr je Anfrage geplant, wenn Sie dabei mitmachen. Alle Preise ' + steuerText(v).replace(/\.$/, '') + '.';
+  }
+  if (name === 'fb-faq-ki') {
+    const G = R().GRENZEN, ms = L.map((p) => P().merkmale(p)), und = (a) => a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1];
+    return 'Eine KI-Auswertung ist ein Foto, das die KI für Sie liest; je Fenster meist zwei, innen und außen. Im Monat enthalten sind bei ' +
+      und(L.map((p, i) => esc(kurzname(p)) + ' ' + P().tausend(ms[i].kiMonat))) + ', genug für etwa ' + und(ms.map((x) => String(Math.round(x.kiMonat / P().KI_JE_ANFRAGE)))) +
+      ' Kundenanfragen mit je ' + P().KI_JE_ANFRAGE / 2 + ' Fenstern. Wie viel genutzt ist, sehen Sie im Kundenbereich in Prozent; bei 80 und 100 % bekommen Sie eine E-Mail. Ist das Kontingent aufgebraucht, pausiert die KI bis zum Monatsende, Ihre Kunden planen und senden weiter, nur ohne KI-Befund. Brauchen Sie mehr, schalten Sie im Kundenbereich weitere Auswertungen frei: Jede kostet ' + kiPreise() +
+      ' und kommt am Monatsende auf die nächste Monatsrechnung, höchstens bis zum Doppelten Ihres Kontingents. So kommen im Monat nie mehr als ' +
+      und(L.map((p, i) => geld(Math.round(ms[i].kiMonat * P().preis(p).ki * 100) / 100) + ' (' + esc(kurzname(p)) + ')')) + ' dazu. Zum Schutz vor Missbrauch liest die KI nur Fotos aus einer Planung bei Ihnen, höchstens ' + G.kiJeCode + ' je Anfrage, mit einer Bremse gegen Massenanfragen.';
+  }
   if (name === 'fb-hinweis') {
     if (!v.vorlaeufig && v.bestellen) return '';
     return v.vorlaeufig
@@ -304,17 +336,17 @@ function fbBaustein(name, o, v) {
   if (name === 'fb-fuss') {
     return (v.bestellen ? '' : 'Die Bestellung wird in Kürze freigeschaltet, bis dahin fragen Sie unverbindlich an. ') +
       (v.vorlaeufig ? 'Vorläufige Preise; beim Bestellen wird Ihr Preis für den Vertrag festgeschrieben. ' : 'Der Preis beim Bestellen bleibt für Ihren Vertrag fest. ') +
-      'Alle Preise ' + steuerText(v) + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden. Die Vorschau zeigt einen erfundenen Betrieb.';
+      'Alle Preise ' + steuerText(v) + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden; weitere KI-Auswertungen über dem Kontingent nur, wenn Sie sie freischalten, je ' + kiPreise() + '. Die Vorschau zeigt einen erfundenen Betrieb.';
   }
   if (name === 'fb-anfrage-titel') return v.bestellen ? 'Vorher eine <em class="ez-ak">Frage?</em>' : 'Paket unverbindlich <em class="ez-ak">anfragen.</em>';
   if (name === 'fb-anfrage-lede') {
     return v.bestellen
-      ? 'Bestellen Sie Ihr Paket im Kundenkonto: ' + L.map((p) => '<a href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + '</a>').join(', ') + '. Fragen vorab beantworten wir gern.'
+      ? 'Bestellen Sie Ihr Paket online: ' + L.map((p) => '<a href="/bestellen/#' + p + '">' + esc(kurzname(p)) + '</a>').join(', ') + '. Fragen vorab beantworten wir gern.'
       : 'Die Bestellung wird in Kürze freigeschaltet. Bis dahin beantworten wir Ihre Fragen und merken Ihr Paket vor.';
   }
   if (name === 'fb-faq-bestellen') {
     return v.bestellen
-      ? 'Ja. Wählen Sie Ihr Paket und bestellen Sie im Kundenkonto; die Einrichtung zahlen Sie vorab per Karte oder SEPA-Lastschrift.'
+      ? 'Ja. Wählen Sie Ihr Paket und bestellen Sie online; die Einrichtung zahlen Sie vorab per Karte oder SEPA-Lastschrift. Den Stand sehen Sie danach im Kundenbereich.'
       : 'Die Bestellung wird in Kürze freigeschaltet. Bis dahin können Sie ein Paket unverbindlich anfragen. Antwort meist innerhalb eines Werktags.';
   }
   return null;
@@ -344,7 +376,7 @@ export function paketeSeite(html, url, env) {
 export function paketeLlms(origin, env) {
   const v = verkaufFuer(env), liste = P().LISTE, u = (pfad) => origin + pfad;
   const eur = (n) => zahl(n) + ' €';
-  const zeile = (p) => { const m = P().merkmale(p), pr = P().preis(p); return P().PAKETE[p].name + ': ' + eur(pr.monat) + ' im Monat, dazu ' + eur(pr.einrichtung) + ' Einrichtung (' + kurzText(m).replace(/\.$/, '') + ')'; };
+  const zeile = (p) => { const m = P().merkmale(p), pr = P().preis(p); return P().PAKETE[p].name + ': ' + eur(pr.monat) + ' im Monat, dazu ' + eur(pr.einrichtung) + ' Einrichtung, ' + P().tausend(m.kiMonat) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + eur(pr.ki) + ' (' + kurzText(m).replace(/\.$/, '') + ')'; };
   return [
     '## Konfigurator-Pakete für Fensteranbieter',
     '',

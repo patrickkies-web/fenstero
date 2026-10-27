@@ -476,7 +476,12 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 @media (min-width: 900px) { .ez-pakete { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; } }
 .ez-paket { position: relative; isolation: isolate; overflow: hidden; display: grid; gap: var(--raum-3); justify-items: start; align-content: start; padding: var(--raum-5); border-radius: var(--rund-l); background: var(--weiss); color: var(--tinte); box-shadow: var(--kachel-rand); }
 .ez-paket__bild { width: calc(100% + var(--raum-5) * 2); margin: calc(var(--raum-5) * -1) calc(var(--raum-5) * -1) var(--raum-2); border-radius: 0; box-shadow: inset 0 -1px 0 rgba(255,255,255,.08); }
-.ez-paket__bild .ez-mini__leiste { padding: 10px 14px; }
+.ez-paket__bild .ez-mini__leiste { padding: 10px 14px; font-size: 13px; }
+/* Adresse in der Browserleiste der Kartenbilder: der Teil, der die Pakete unterscheidet (.eeziframes.com oder .de), hell und halbfett */
+.ez-paket__bild .ez-mini__leiste .ez-mini__adr { display: inline; margin: 0; }
+.ez-paket__bild .ez-mini__leiste b { font-weight: 500; color: var(--weiss); }
+/* Adressen im Text brechen nie um (geschützte Bindestriche im Markup) */
+.ez-adresse { white-space: nowrap; }
 .ez-paket__kopf { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ez-paket__kopf .dna-label { margin: 0; font-size: 13px; color: var(--tinte); font-weight: 500; }
 .ez-paket__satz { margin: 0; font: 400 15px/1.45 var(--font-sans); color: var(--tinte-2); text-wrap: pretty; }
@@ -484,6 +489,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-paket .dna-zahl--klein .dna-zahl__wert { font-size: 44px; }
 .ez-paket .dna-zahl__einheit { font-size: 14px; }
 .ez-paket__einr { margin: -6px 0 0; font: 400 13px/1.4 var(--font-sans); color: var(--tinte-2); }
+.ez-paket__einr + .ez-paket__ki { margin-top: -8px; }
 .ez-paket .ez-haken { margin-top: var(--raum-2); }
 .ez-paket > .dna-pille { margin-top: var(--raum-4); }
 .ez-paket.ez-paket--leucht { color: var(--weiss); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
@@ -514,7 +520,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
   .ez-tabelle, .ez-tabelle tbody { display: block; }
   .ez-tabelle tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; padding: 12px 0; border-bottom: 1px solid var(--linie-fein); }
   .ez-tabelle tbody th { grid-column: 1 / -1; width: auto; border: 0; padding: 0 0 2px; }
-  .ez-tabelle td { display: grid; gap: 2px; padding: 0; border: 0; font-size: 13px; }
+  .ez-tabelle td { display: grid; align-content: start; gap: 2px; padding: 0; border: 0; font-size: 13px; overflow-wrap: anywhere; }
   .ez-tabelle td::before { content: attr(data-k); font: 400 11px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--tinte-2); }
   .ez-tabelle tbody tr:last-child { border-bottom: 0; }
 }
@@ -622,6 +628,32 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-fuss__pilot { margin: 0; font: 400 14px/1.5 var(--font-sans); color: var(--tinte-2); max-width: 60ch; }
 .ez-fuss__pilot .ez-badge-indigo { margin-right: 6px; height: 20px; vertical-align: -5px; }
 
-.fb.eingebettet .ez-kopf, .fb.eingebettet .ez-leiste, .fb.eingebettet .ez-fuss, .fb.eingebettet .ez-skip { display: none; }
-.fb.eingebettet .dna-szene { position: relative; top: 0; }
+/* Eingebettet in die Startseite (portal.js, .fb.eingebettet): Kopf, Leiste, Vorhang und Fuß wie auf der eigenen Seite, das Portal zeichnet dort keinen Kopf */
 @media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }
+
+/* Paketkarten: das Bild führt ins Beispiel (Fensterbau Brandt, web/vorschau/paket-beispiel/); Etikett als Glas über dem Bild (G10) */
+a.ez-paket__bild { position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+a.ez-paket__bild:focus-visible { outline: 2px solid var(--fokus); outline-offset: -3px; }
+.ez-paket__ansehen { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px 0 14px;
+  border-radius: var(--rund-pille); background: rgba(32,32,34,.72); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--weiss);
+  font: 500 13px/1 var(--font-sans); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4);
+  transition: transform 220ms var(--dna-druck); }
+.ez-paket__ansehen::after { content: ""; width: 12px; height: 12px; background: currentColor; -webkit-mask: var(--ez-chevron) center / contain no-repeat; mask: var(--ez-chevron) center / contain no-repeat; }
+a.ez-paket__bild:active .ez-paket__ansehen { transform: scale(.97); transition-duration: 0s; }
+.ez-paket__ansehen::after { transition: transform 220ms var(--dna-druck); }
+@media (hover: hover) and (pointer: fine) { a.ez-paket__bild:hover .ez-paket__ansehen::after { transform: translateX(2px); } }
+/* Zeile unter dem Vergleich: alle drei Pakete am Beispiel (wie die Zeile „Alle Merkmale im Vergleich“, mit Pfeil statt Plus) */
+/* Zeile und Vergleich bilden eine Liste unter den Karten (ein Kind im Raster des Abschnitts, ohne dessen großen Abstand) */
+.ez-pakete-mehr { display: grid; }
+.ez-beispiel-zeile { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; gap: var(--raum-4); min-height: 56px; padding-block: 14px;
+  color: var(--tinte); text-decoration: none; border-top: 1px solid var(--linie-fein); -webkit-tap-highlight-color: transparent; }
+.ez-beispiel-zeile > span:first-child { display: grid; gap: 4px; }
+.ez-beispiel-zeile b { font: 500 17px/1.3 var(--font-sans); }
+.ez-beispiel-zeile > span:first-child > span { font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); }
+/* Aktion an der Sache als voller Kreis (G13), keine zweite Pille; 44 px */
+.ez-beispiel-zeile .dna-rund-knopf { width: 44px; height: 44px; display: grid; background: var(--schwarz); color: var(--weiss); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); transition: background-color 220ms ease, transform 160ms var(--dna-druck); }
+.ez-beispiel-zeile .dna-rund-knopf svg { width: 14px; height: 14px; }
+.ez-beispiel-zeile:active .dna-rund-knopf { transform: scale(.94); transition-duration: 0s; }
+.ez-beispiel-zeile:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { .ez-beispiel-zeile:hover .dna-rund-knopf { background: var(--indigo); } }
+@media (prefers-reduced-motion: reduce) { .ez-paket__ansehen, .ez-paket__ansehen::after, .ez-beispiel-zeile .dna-rund-knopf { transition: none; } a.ez-paket__bild:hover .ez-paket__ansehen::after { transform: none; } }

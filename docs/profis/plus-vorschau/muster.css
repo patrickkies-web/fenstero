@@ -1,0 +1,64 @@
+/* Muster-Leiste der Paket-Vorlagen (Essential, Plus, Signature), eine Datei für alle drei Seiten.
+   Nur in den Vorlagen für Fensterbauer: Beim echten Betrieb fehlt die Leiste im Markup, und die Etiketten (.ez-muster) entfallen.
+   Paketwechsel in einem Klick, Legende, Schalter „Etiketten“. Etiketten in drei Sorten: grauer Punkt = in allen Paketen,
+   Koralle-Punkt = neu in diesem Paket, Ring = erst im nächsten Paket (Anreiz, der Text sagt es ausdrücklich). Farben nur aus der
+   Palette (Koralle als Hinweis, nie als Fläche). Quelle: docs/profis/werkzeuge/muster-leiste.css, kopiert in jede Vorlage. */
+.ez-ml { position: relative; z-index: 45; background: var(--anthrazit); color: var(--weiss); box-shadow: inset 0 -1px 0 rgba(255,255,255,.06); font-family: var(--font-sans); }
+.ez-ml .ez-huelle { display: flex; align-items: center; gap: 12px; min-height: 60px; padding-block: 8px; }
+.ez-ml__text { flex: 1 1 auto; min-width: 0; margin: 0 auto 0 0; display: grid; gap: 4px; font: 400 12px/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-ml__text b { font: 500 13px/1.2 var(--font-sans); color: var(--weiss); }
+.ez-ml__legende { display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.ez-ml__legende > span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.ez-ml__punkt, .ez .ez-muster::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 30%, transparent); }
+.ez-ml__punkt--alle, .ez .ez-muster--alle::before, .ez .ez-muster--plus::before { background: var(--silbergrau); box-shadow: 0 0 0 3px color-mix(in srgb, var(--silbergrau) 30%, transparent); }
+.ez-ml__punkt--ab, .ez .ez-muster--ab::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--koralle); }
+/* Paketwechsel: drei Seiten desselben Betriebs, das gezeigte Paket gefüllt */
+.ez-ml__pakete { flex: none; display: inline-flex; gap: 4px; margin: 0; padding: 4px; border-radius: var(--rund-pille); background: var(--schwarz); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.04); }
+.ez-ml__pakete a { display: grid; justify-items: center; align-content: center; gap: 3px; min-width: 92px; min-height: 44px; padding: 4px 14px; border-radius: var(--rund-pille); color: var(--silbergrau); text-decoration: none; font: 500 14px/1.05 var(--font-sans); transition: background-color 220ms var(--dna-druck), color 220ms var(--dna-druck), transform 220ms var(--dna-druck); -webkit-tap-highlight-color: transparent; }
+.ez-ml__pakete a small { font: 400 12px/1 var(--font-sans); letter-spacing: .02em; color: inherit; opacity: .85; font-variant-numeric: tabular-nums; }
+.ez-ml__pakete a[aria-current="page"] { background: var(--anthrazit); color: var(--weiss); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.1); }
+.ez-ml__pakete a:active { transform: scale(.97); transition-duration: 0s; }
+.ez-ml__pakete a:focus-visible { outline: 2px solid var(--fokus); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .ez-ml__pakete a:not([aria-current]):hover { color: var(--weiss); } }
+/* Schalter „Etiketten“ */
+.ez-ml .ez-schalter { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 14px; border: 0; border-radius: var(--rund-pille); background: transparent; color: var(--weiss); font: 500 14px/1 var(--font-sans); cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: box-shadow 220ms ease, background-color 220ms ease, transform 220ms var(--dna-druck); -webkit-tap-highlight-color: transparent; }
+.ez-ml .ez-schalter:active { transform: scale(.97); transition-duration: 0s; }
+.ez-ml .ez-schalter:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
+.ez-ml .ez-schalter__punkt { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: background-color 220ms ease, box-shadow 220ms ease; }
+.ez-ml .ez-schalter[aria-pressed="true"] { background: var(--schwarz); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.1); }
+.ez-ml .ez-schalter[aria-pressed="true"] .ez-schalter__punkt { background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 30%, transparent); }
+.ez-ml .ez-modus.dna-pillen { flex: none; }
+/* Telefon: oben Text und Schalter, darunter die drei Pakete, darunter (nur Signature) der Weg des Kunden */
+@media (max-width: 899px) {
+  .ez-ml .ez-huelle { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "text schalter" "pakete pakete" "modus modus"; gap: 8px 12px; padding-block: 10px; }
+  .ez-ml__text { grid-area: text; }
+  .ez-ml .ez-schalter { grid-area: schalter; align-self: start; }
+  .ez-ml__pakete { grid-area: pakete; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ez-ml__pakete a { min-width: 0; }
+  .ez-ml .ez-modus.dna-pillen { grid-area: modus; display: grid; grid-template-columns: 1fr 1fr; }
+  .ez-ml .ez-modus label { justify-content: center; }
+}
+
+
+/* Etiketten der Muster-Ebene (Grundform wie in der Plus-Vorlage): ein- und ausblenden nur über Deckkraft und Lage, nie über Platz */
+.ez .ez-muster { position: absolute; z-index: 5; display: inline-flex; align-items: center; gap: 7px; min-height: 26px; padding: 4px 10px 4px 9px; border-radius: var(--rund-pille); background: rgba(32,32,34,.92); color: var(--weiss); font: 500 12px/1.2 var(--font-sans); white-space: nowrap; pointer-events: none; border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), 0 6px 14px -8px rgba(7,9,10,.8); opacity: 0; visibility: hidden; transform: scale(.96); transition: opacity 160ms ease, transform 160ms ease, visibility 0s linear 160ms; }
+.ez.ist-muster .ez-muster { opacity: 1; visibility: visible; transform: none; transition: opacity 220ms var(--dna-auftritt), transform 220ms var(--dna-auftritt), visibility 0s; }
+.ez .ez-muster--ab { border-style: dashed; border-color: color-mix(in srgb, var(--koralle) 70%, transparent); }
+.ez .ez-muster--fluss { position: relative; white-space: normal; max-width: 100%; }
+@media (prefers-reduced-motion: reduce) { .ez .ez-muster { transform: none; transition: opacity 160ms ease, visibility 0s linear 160ms; } .ez-ml__pakete a, .ez-ml .ez-schalter { transition-duration: 0s; } }
+/* Preiszeile des gezeigten Pakets und Satz zum Zustand (Signature) */
+.ez-ml__preis { color: var(--weiss); font-variant-numeric: tabular-nums; }
+.ez-ml__zeile { color: var(--silbergrau); }
+@media (max-width: 899px) { .ez-ml__legende { display: none; } .ez.ist-muster .ez-ml__legende { display: flex; } }
+/* Telefon: die Leiste darf die Pille nicht aus dem ersten Bildschirm schieben. Titel und Preis neben dem Schalter, die Legende
+   (nur mit Etiketten) als eigene Zeile über den Paketen, der Satz zum Zustand entfällt (die Wahl Website/Einladung sagt es). */
+@media (max-width: 599px) {
+  .ez-ml .ez-huelle { grid-template-areas: "titel schalter" "preis schalter" "legende legende" "pakete pakete" "modus modus"; gap: 4px 12px; padding-block: 6px; }
+  .ez-ml__pakete, .ez-ml .ez-modus.dna-pillen { padding: 3px; }
+  .ez-ml__text { display: contents; }
+  .ez-ml__text b { grid-area: titel; align-self: end; }
+  .ez-ml__preis { grid-area: preis; align-self: start; font-size: 12px; line-height: 1.3; }
+  .ez-ml .ez-ml__zeile { display: none; }
+  .ez-ml__legende { grid-area: legende; font-size: 12px; color: var(--silbergrau); }
+  .ez-ml .ez-schalter { align-self: center; }
+}

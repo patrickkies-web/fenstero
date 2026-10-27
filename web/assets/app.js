@@ -933,7 +933,7 @@ function w3dCalc(w, o) {
       dimY = frei < oben(s0) ? oben(s0) - frei : frei < ab(s0) ? frei - ab(s0) : 0; // nach unten bzw. oben rücken
     }
   }
-  const zoom = Math.max(1, o.zoom || 1), s = s0 * zoom;
+  const zoom = Math.max(ZOOM_MIN, o.zoom || 1), s = s0 * zoom;
   const n = Math.max(1, w.sashes.length), pf = schmal ? 52 : W3D.PF, sf = schmal ? 38 : W3D.SF, mul = tuer && art !== 'balkon' ? 0 : w.teilung === '2s' ? 8 : schmal ? 60 : W3D.MUL;
   const innerW = elW - 2 * pf, innerH = elH - pf - pfB, olH = w.ol ? Math.round(Math.min(innerH * 0.6, Math.max(innerH * 0.26, formSenke(w.form, innerW, innerH)))) : 0;
   const ulH = w.ul && art === 'fenster' && !festForm(w.form) ? Math.round(clamp(num(w.ulH) || 400, 200, Math.max(200, (innerH - olH) * 0.55))) : 0;
@@ -1140,10 +1140,13 @@ function gitterBg(w, s) {
   return (w.gitter === 'zier' ? 'radial-gradient(circle, transparent 0 ' + px(Math.max(2, 34 * s)) + ', ' + c + ' ' + px(Math.max(2.5, 34 * s)) + ' ' + px(Math.max(3, 42 * s)) + ', transparent ' + px(Math.max(3.5, 42 * s)) + ') 0 0 / ' + t + ' ' + px(Math.max(8, 240 * s)) + ', ' : '') +
     'linear-gradient(180deg, ' + c + ' 0 2%, transparent 2% 14%, ' + c + ' 14% 16%, transparent 16% 84%, ' + c + ' 84% 86%, transparent 86% 98%, ' + c + ' 98%), repeating-linear-gradient(90deg, ' + c + ' 0 ' + b + ', transparent ' + b + ' ' + t + ')';
 }
-/* Insektenschutz: Gewebe (Standard, Klarsicht, Pollenschutz, reißfest) und Rahmenfarbe */
-function meshBg(w) {
-  const g = dg(w, 'insGewebe') ? w.insGewebe : 'standard', a = g === 'klar' ? 0.08 : g === 'pollen' ? 0.24 : g === 'tier' ? 0.26 : 0.16, st = g === 'pollen' ? 3 : 4, lw = g === 'tier' ? 1.5 : 1;
-  return 'repeating-linear-gradient(0deg, rgba(20, 20, 20, ' + a + ') 0 ' + lw + 'px, transparent ' + lw + 'px ' + st + 'px), repeating-linear-gradient(90deg, rgba(20, 20, 20, ' + a + ') 0 ' + lw + 'px, transparent ' + lw + 'px ' + st + 'px)';
+/* Insektenschutz: Gewebe (Standard, Klarsicht, Pollenschutz, reißfest) und Rahmenfarbe. Maschenweite in Millimetern (1,4 mm, Pollen 1 mm,
+   reißfest 2 mm, s = px je mm), nicht unter 1,2 px: aus der Nähe ein feines Gewebe, von weitem ein grauer Schleier wie in echt (die
+   WebGL-Bühne mittelt Muster feiner als ein Bildpunkt), statt eines groben Karos, das beim Drehen Moiré bildet */
+function meshBg(w, s) {
+  const g = dg(w, 'insGewebe') ? w.insGewebe : 'standard', a = g === 'klar' ? 0.1 : g === 'pollen' ? 0.3 : g === 'tier' ? 0.34 : 0.22;
+  const st = Math.max(1.2, (g === 'pollen' ? 1 : g === 'tier' ? 2 : 1.4) * (s || 0.16)), lw = st * (g === 'tier' ? 0.4 : 0.3), n = (v) => Math.round(v * 100) / 100 + 'px';
+  return 'repeating-linear-gradient(0deg, rgba(20, 20, 20, ' + a + ') 0 ' + n(lw) + ', transparent ' + n(lw) + ' ' + n(st) + '), repeating-linear-gradient(90deg, rgba(20, 20, 20, ' + a + ') 0 ' + n(lw) + ', transparent ' + n(lw) + ' ' + n(st) + ')';
 }
 const INS_FARBE = { weiss: '#f1f0ea', braun: '#4b3628', anthrazit: '#383e42' };
 const insRahmen = (w) => (dg(w, 'insFarbe') ? (w.insFarbe === 'rahmen' ? rahmenFarbe(w, 'aussen').solid : INS_FARBE[w.insFarbe] || (ralFarbe(w.insFarbe) || {}).hex) : '') || '#55585c';
@@ -1460,7 +1463,7 @@ function w3dPaint(stage, w) {
   });
   w.bars.forEach((b) => { const be = q('bar-' + b.id); if (be) { be._bi = barBg(w, fin, 'innen'); be._bo = barBg(w, fout, 'aussen'); be._art = holzig(fin) && w.spross !== 'szr' ? 'holz' : ''; be._arto = holzig(fout) && w.spross !== 'szr' ? 'holz' : ''; be.style.setProperty('--bi', be._bi); be.style.setProperty('--bo', be._bo); } });
   const ms = q('mesh'), mk = q('mesh-k'), ir = insRahmen(w);
-  if (ms) { ms._kante = ir; ms.style.boxShadow = 'inset 0 0 0 1.5px ' + ir; bg('mesh', meshBg(w)); }
+  if (ms) { ms._kante = ir; ms.style.boxShadow = 'inset 0 0 0 1.5px ' + ir; bg('mesh', meshBg(w, stage._v && stage._v.s)); }
   if (mk) bg('mesh-k', 'linear-gradient(180deg, ' + mischHex(ir, '#ffffff', 0.22) + ', ' + ir + ' 45%, ' + mischHex(ir, '#000000', 0.25) + ')');
   w3dOberflaeche(stage, w, fin, fout);
 }
@@ -1611,7 +1614,8 @@ function w3dLayout(stage, w, o, gr) {
   /* Überstand vor der Fassade: gewählt, aus der Ausladung (abzüglich der Außenlaibung) oder 50 mm */
   const ueber = dg(w, 'fbaUeber') ? num(w.fbaUeber) : dg(w, 'fbaTiefe') ? clamp(num(w.fbaTiefe) - W3D.OUTD, 15, 200) : 50;
   const OVA = ueber * s, SXA = 30 * s, LIP = (w.fba === 'alu' ? 40 : 30) * s, NG = 7 * Math.PI / 180, bwA = moW + 2 * SXA, bxA = -moW / 2 - SXA;
-  face(q('sa-t1'), moW, Math.max(0, T - d - fd), -moW / 2, yB, -d - fd, 'rotateX(-90deg)', '0 0');
+  /* der waagerechte Teil reicht einen Hauch über die Fassade in den geneigten hinein: an der Knickkante blitzte sonst der Hintergrund als Pünktchenreihe durch */
+  face(q('sa-t1'), moW, Math.max(0, T - d - fd) + 0.8, -moW / 2, yB, -d - fd, 'rotateX(-90deg)', '0 0');
   face(q('sa-t2'), bwA, OVA / Math.cos(NG), bxA, yB, -T, 'rotateX(' + n1(-90 + 7) + 'deg)', '0 0');
   face(q('sa-f'), bwA, LIP, bxA, yB + OVA * Math.tan(NG), -T - OVA, 'rotateY(180deg)', '50% 50%');
   face(q('sa-l'), OVA, LIP + OVA * Math.tan(NG), bxA, yB, -T, 'rotateY(90deg)', '0 0'); face(q('sa-r'), OVA, LIP + OVA * Math.tan(NG), bxA + bwA, yB, -T, 'rotateY(90deg)', '0 0');
@@ -1835,7 +1839,7 @@ function w3dLayout(stage, w, o, gr) {
     de.classList.toggle('mit-feld', mitFeld);
   });
   if (feld) feldLage(stage, o, FD_AN[V.active] || 'm');
-  stage._v = { d: d, fd: fd, T: T, s: s, moW: moW, moH: moH };
+  stage._v = { d: d, fd: fd, T: T, s: s, moW: moW, moH: moH, bank: !ohneBank };
   W3D_SOFORT = false;
   return V;
 }
@@ -1864,8 +1868,10 @@ function w3dSonne(stage, w, o, V, s, q) {
   /* Raffstore: Schienen mit Abstand vor Fassade bzw. Rahmen (Distanzwinkel), damit die geneigten Lamellen frei drehen und nicht in
      die Wand ragen; der Vorbaukasten wird entsprechend tiefer */
   const LT = raff ? LAMELLE[lm] || LAMELLE.c80 : null, abst = LT ? Math.max(0, LT.h / 2 + 3 - rail[1] / 2) * s : 0, kD = Math.max(rd + 110 * s, abst + rd + 80 * s);
-  /* Kasten */
-  if (q('roll-f')) {
+  /* Kasten. Aufsatz ohne Sonnenschutz: kein Kasten in der Wand (aufsatzH 0, die Fassade ist dort geschlossen); die Flächen bleiben weg,
+     sonst schimmert die Blende knapp hinter der Fassade bei schrägem Blick als Streifen durch */
+  if (q('roll-f') && auf && !V.kastenH) ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => aus(q(r)));
+  else if (q('roll-f')) {
     ['roll-f', 'roll-sl', 'roll-b', 'roll-t', 'roll-l', 'roll-r'].forEach((r) => { const e = q(r); if (e) e.style.opacity = ''; });
     if (auf) {
       const dz = Math.max(1, T - d - fd), yb = yK + kH, schlitz = (Math.max(3, 16 * rd / 26) + 3 * s) / dz * 100, mitte = (3 * s + abst + rd / 2) / dz * 100;
@@ -2076,11 +2082,11 @@ function layoutRails(stage, w, o, gr) {
   rv.innerHTML = hv;
 }
 /* ---------- Zoom im Modell ----------
-   Je Bühne ein Faktor 1 bis 4 und eine Verschiebung (W3DZ, über render() hinweg; key = Bildschirm und Frage, ein neuer key setzt
+   Je Bühne ein Faktor 0,5 bis 4 und eine Verschiebung (W3DZ, über render() hinweg; key = Bildschirm und Frage, ein neuer key setzt
    zurück). Gezoomt wird über den Maßstab (w3dCalc), verschoben über --panx/--pany an der Kamera. Zwei Finger zoomen und schieben,
    ein Finger schiebt (gezoomt) oder dreht (1:1), Strg/Cmd + Mausrad bzw. Trackpad zoomt, Doppeltipp schaltet 1 ↔ 2,5 an der Stelle,
    dazu die Knöpfe + und − und „1:1“. In der Sprossenfrage (o.rails) ist der Zoom aus, weil die Regler neben dem Modell rechnen. */
-const W3DZ = {}, ZOOM_MAX = 4;
+const W3DZ = {}, ZOOM_MAX = 4, ZOOM_MIN = 0.5; // unter 1: zurücktreten, die Wand reicht weit genug, die Szene bleibt
 const w3dZoomZustand = (stage) => W3DZ[stage.id || 'w3d'] || (W3DZ[stage.id || 'w3d'] = { z: 1, x: 0, y: 0, key: null });
 const w3dZ = (stage, o) => (!stage || (o && o.rails) || (o && o.noZoom) ? 1 : w3dZoomZustand(stage).z);
 const HAUS_ICO = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8z" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M19.3 13.4l1.9 1.5-1.8 3.1-2.3-.8a7.6 7.6 0 0 1-1.7 1l-.4 2.4h-3.6l-.4-2.4a7.6 7.6 0 0 1-1.7-1l-2.3.8-1.8-3.1 1.9-1.5a7.6 7.6 0 0 1 0-2.8L4.9 9.1l1.8-3.1 2.3.8a7.6 7.6 0 0 1 1.7-1l.4-2.4h3.6l.4 2.4a7.6 7.6 0 0 1 1.7 1l2.3-.8 1.8 3.1-1.9 1.5a7.6 7.6 0 0 1 0 2.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>';
@@ -2103,12 +2109,13 @@ function w3dHausKnopf(stage, o) {
 function w3dZoomZeigen(stage) {
   const zm = w3dZoomZustand(stage), an = zm.z > 1.001;
   stage.style.setProperty('--panx', px(zm.x)); stage.style.setProperty('--pany', px(zm.y));
-  stage.classList.toggle('is-zoom', an);
+  stage.classList.toggle('is-zoom', an); stage.classList.toggle('mit-eins', Math.abs(zm.z - 1) > 0.001); // mit-eins: „1:1“ steht da, auch herausgezoomt (app.css rückt das Zahnrad)
   const k = stage.querySelector('[data-r="zoom"]');
-  if (k) { const b = (r) => k.querySelector('[data-w3d="' + r + '"]'); b('eins').hidden = !an; b('minus').disabled = !an; b('plus').disabled = zm.z >= ZOOM_MAX - 0.001; }
+  if (k) { const b = (r) => k.querySelector('[data-w3d="' + r + '"]'); b('eins').hidden = Math.abs(zm.z - 1) < 0.001; b('minus').disabled = zm.z <= ZOOM_MIN + 0.001; b('plus').disabled = zm.z >= ZOOM_MAX - 0.001; }
   /* Gezoomt verschiebt Ziehen, statt zu drehen: der Hinweis sagt es */
   const reg = W3DS[stage.id], hint = stage.querySelector('[data-r="hint"]'), h0 = reg && reg.o.hint ? reg.o.hint : '';
-  if (hint && /Drehen ziehen/.test(h0)) hint.textContent = an ? 'Zum Verschieben ziehen' : h0;
+  /* nur bei Änderung schreiben: ein neuer Textknoten in der Bühne kostet bei jeder Bewegung Arbeit */
+  if (hint && /Drehen ziehen/.test(h0)) { const t = an ? 'Zum Verschieben ziehen' : h0; if (hint.textContent !== t) hint.textContent = t; }
 }
 /* Grenzen der Verschiebung: bei 1:1 keine, gezoomt bis etwa an den Rand des ungezoomten Bildes */
 function w3dPanGrenze(stage, zm) {
@@ -2118,7 +2125,7 @@ function w3dPanGrenze(stage, zm) {
 /* Zoomen um einen Ankerpunkt (ax, ay relativ zur Bühnenmitte): der Punkt darunter bleibt stehen. sanft = kurzer Übergang */
 function w3dZoomSetzen(stage, z, ax, ay, sanft) {
   const reg = W3DS[stage.id]; if (!reg || reg.o.rails || reg.o.noZoom) return;
-  const zm = w3dZoomZustand(stage), z1 = clamp(z, 1, ZOOM_MAX), k = z1 / zm.z;
+  const zm = w3dZoomZustand(stage), z1 = clamp(z, ZOOM_MIN, ZOOM_MAX), k = z1 / zm.z;
   zm.x = (ax || 0) - ((ax || 0) - zm.x) * k; zm.y = (ay || 0) - ((ay || 0) - zm.y) * k; zm.z = z1;
   w3dPanGrenze(stage, zm);
   w3dZoomAnim(stage, sanft);
@@ -2235,7 +2242,7 @@ function bindW3D(stage, getOpts) {
   const pinchMove = () => {
     const p = Array.from(ptr.values()); if (p.length < 2 || !geste || geste.art !== 'pinch') return;
     const d = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]), m = [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2], zm = w3dZoomZustand(stage);
-    const z = clamp(geste.z0 * d / geste.d0, 1, ZOOM_MAX), k = z / geste.z0;
+    const z = clamp(geste.z0 * d / geste.d0, ZOOM_MIN, ZOOM_MAX), k = z / geste.z0;
     zm.z = z; zm.x = m[0] - (geste.m0[0] - geste.x0) * k; zm.y = m[1] - (geste.m0[1] - geste.y0) * k; w3dPanGrenze(stage, zm);
     if (!rafId) rafId = requestAnimationFrame(() => { rafId = 0; const r = W3DS[stage.id]; stage.classList.add('is-zooming'); if (r) w3dLayout(stage, r.w, r.o); w3dZoomZeigen(stage); });
   };
@@ -2273,7 +2280,7 @@ function bindW3D(stage, getOpts) {
       if (ev.type === 'pointercancel' || !war || war.moved || war !== g) { tipp = null; return; }
       /* Doppeltipp: zweiter Tipp innerhalb von 320 ms nahe am ersten schaltet zwischen 1:1 und 2,5-fach */
       const jetzt = Date.now(), pos = rel(ev);
-      if (!zoomAus() && tipp && jetzt - tipp.t < 320 && Math.hypot(pos[0] - tipp.p[0], pos[1] - tipp.p[1]) < 30) { tipp = null; const zz = w3dZoomZustand(stage); w3dZoomSetzen(stage, zz.z > 1.001 ? 1 : 2.5, pos[0], pos[1], true); return; }
+      if (!zoomAus() && tipp && jetzt - tipp.t < 320 && Math.hypot(pos[0] - tipp.p[0], pos[1] - tipp.p[1]) < 30) { tipp = null; const zz = w3dZoomZustand(stage); w3dZoomSetzen(stage, Math.abs(zz.z - 1) > 0.001 ? 1 : 2.5, pos[0], pos[1], true); return; }
       tipp = { t: jetzt, p: pos };
       if (o.onSash && (hit || g.glHit >= 0)) o.onSash(hit ? +hit.getAttribute('data-sash') : g.glHit);
     };
@@ -2292,7 +2299,7 @@ function bindW3D(stage, getOpts) {
     e.preventDefault(); e.stopPropagation();
     const was = b.getAttribute('data-w3d'), zm = w3dZoomZustand(stage);
     if (was === 'plus') w3dZoomSetzen(stage, Math.min(ZOOM_MAX, zm.z * 1.6), 0, 0, true);
-    else if (was === 'minus') w3dZoomSetzen(stage, zm.z / 1.6 < 1.15 ? 1 : zm.z / 1.6, 0, 0, true);
+    else if (was === 'minus') w3dZoomSetzen(stage, zm.z > 1.001 && zm.z / 1.6 < 1.15 ? 1 : Math.max(ZOOM_MIN, zm.z / 1.6), 0, 0, true); // erst zurück auf 1:1, dann weiter heraus
     else if (was === 'eins') w3dZoomSetzen(stage, 1, 0, 0, true);
     else if (was === 'fahren' || was === 'wenden') w3dSonneFahren(stage, was);
     else if (was === 'haus') hausAuf(stage);

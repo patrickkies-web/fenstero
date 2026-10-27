@@ -160,7 +160,7 @@ export function schluesselFuer(request, env) {
   if (request.method !== 'GET') return [];
   if (h.get('sec-gpc') === '1' || h.get('dnt') === '1') return [];
   if (/prefetch|prerender/i.test(h.get('sec-purpose') || h.get('purpose') || h.get('x-moz') || '')) return [];
-  if (/(^|;\s*)__Host-zentrale=/.test(h.get('cookie') || '')) return []; // der Inhaber selbst
+  if (/(^|;\s*)__Host-(zentrale|inhaber)=/.test(h.get('cookie') || '')) return []; // der Inhaber selbst (Verwaltung der App oder Zentrale)
   if (['/robots.txt', '/llms.txt', '/sitemap.xml'].includes(url.pathname)) return ['datei:' + url.pathname];
   if (!istSeite(url.pathname)) return [];
   const pfad = seitePfad(url.pathname); if (!pfad) return [];

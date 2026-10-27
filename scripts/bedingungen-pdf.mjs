@@ -28,7 +28,8 @@ const { bauen } = await import(pathToFileURL(path.join(WURZEL, 'functions/pakete
 const { PAKET_STAND, paketPdfs, standText } = await import(pathToFileURL(path.join(WURZEL, 'functions/api/recht.js')).href);
 
 /* Seiten mit Bausteinen (Pfad in web/) */
-export const SEITEN = ['fuer-fensterbauer/index.html', 'konfigurator-bedingungen/index.html', 'datenschutz/index.html'];
+export const SEITEN = ['fuer-fensterbauer/index.html', 'konfigurator-bedingungen/index.html', 'datenschutz/index.html',
+  'vorschau/paket-beispiel/essential.html', 'vorschau/paket-beispiel/plus.html', 'vorschau/paket-beispiel/signature.html'];
 const BEDINGUNGEN = 'konfigurator-bedingungen/index.html';
 const datei = (rel) => path.join(WURZEL, 'web', rel);
 

@@ -1,27 +1,38 @@
 /* eeziframes · Pakete der Konfigurator-Instanzen (Essential, Plus, Signature): die einzige Stelle für Merkmale, Preise und Fristen je Paket
-   Läuft im Browser (window.Pakete: Verkaufsseite, Kundenkonto /partner/, Zentrale) und auf dem Server (globalThis.Pakete, wie modell.js;
-   Import in functions/api/router.js). Ein Merkmal in ein anderes Paket zu schieben heißt, eine Zelle in PAKETE zu ändern.
+   Läuft im Browser (window.Pakete: Verkaufsseite, Bestellung /bestellen/, Kundenbereich /konto/, Zentrale) und auf dem Server
+   (globalThis.Pakete, wie modell.js; Import in functions/api/router.js). Ein Merkmal in ein anderes Paket zu schieben heißt, eine Zelle in PAKETE zu ändern.
    Regeln (docs/INSTANZEN.md):
    - Nirgends sonst wird ein Paketname verglichen; Code fragt Merkmale ab (m.dashboard, m.logo …), nie den Schlüssel des Pakets.
    - Ein Paket setzt nie den Tarif eines Kontos (konto); Instanzkonten haben konto: 'instanz'.
-   - Preise sind netto zzgl. MwSt. und vorläufig (VORLAEUFIG), bis der Inhaber sie bestätigt; der Preisstand einer Bestellung wird bei
-     der Bestellung festgehalten (bestellungen.preise) und ändert sich danach nicht mehr.
+   - Preise sind netto zzgl. MwSt.; der Preisstand eines Auftrags wird bei der Bestellung festgehalten (auftraege.preise, mit dem Preis
+     je weiterer KI-Auswertung) und ändert sich danach nicht mehr.
+   - KI-Auswertungen: kiMonat je Monat inklusive (eine Auswertung je Foto); bei 100 % pausiert die KI, außer der Fensterbauer hat im
+     Kundenbereich weitere freigeschaltet: dann jede zu preis.ki, höchstens bis zum Doppelten (functions/api/ki.js), abgerechnet am
+     Monatsende (functions/auftrag/index.js, kiAbrechnen). Kalkulation von preis.ki nur intern: docs/KI-KOSTEN.md.
    API: PAKETE, MERKMALE, LISTE, liste(), gueltig(p), merkmale(paket, abweichung) → eingefrorenes Objekt, oeffentlich(m),
-        preis(paket) → { monat, einrichtung }, preisText(paket, art, mwst), preisStand(paket, mwst) → für bestellungen.preise */
+        preis(paket) → { monat, einrichtung, ki }, preisText(paket, art, mwst), preisStand(paket, mwst) → für auftraege.preise,
+        kiText(paket, o) → Kontingent und Preis je weiterer Auswertung, tausend(n) → „1.000“ */
 (function (root) {
   'use strict';
 
-  /* Stand der Preise (bestellungen.preise.stand); ändert sich ein Preis, ändert sich der Stand */
-  const PREIS_STAND = '2026-10-22';
-  /* Preise noch nicht vom Inhaber bestätigt: Verkaufsseite und Bestellformular sagen „vorläufige Preise“ */
-  const VORLAEUFIG = true;
+  /* Stand der Preise (auftraege.preise.stand); ändert sich ein Preis, ändert sich der Stand. 27.10.2026: Preise des Inhabers */
+  const PREIS_STAND = '2026-10-27';
+  /* true nur, solange Preise nicht vom Inhaber bestätigt sind: Verkaufsseite und Bestellung sagen dann „vorläufige Preise“ */
+  const VORLAEUFIG = false;
+  /* Rechengröße des Inhabers für die Verkaufsseite: 1.000 KI-Auswertungen sind etwa 20 Kundenanfragen mit je 25 Fenstern (innen und
+     außen fotografiert, also 50 Fotos je Anfrage); nur für den erklärenden Satz, keine Grenze */
+  const KI_JE_ANFRAGE = 50;
+  /* Jahrespreis einer Domain, die im Paket enthalten ist (netto, Paketbedingungen § 6 Abs. 1) */
+  const DOMAIN_JAHR = 25;
   const LISTE = ['essential', 'plus', 'signature'];
 
   /* Merkmal × Paket (Bauplan §2b). Werte:
-     preis              { monat, einrichtung } in Euro netto
-     domain, konfigurator, eingangMail   eigene Domain, voller Konfigurator, jede Anfrage per Mail mit PDF
+     preis              { monat, einrichtung, ki } in Euro netto; ki = jede KI-Auswertung über kiMonat
+     domain, konfigurator, eingangMail   eigene Domain (sonst ihr-name.eeziframes.com), voller Konfigurator, jede Anfrage per Mail mit PDF
      gestaltung         'standard' (eeziframes-Design, Name als Text) | 'eigen'
      logo, farbe        Logo in Kopf, Startansicht, PDF, Mail; Firmenfarbe als --accent
+     farbwelt           Farben der Landingpage: 'eezi' (Palette von eeziframes) | 'akzent' (Palette des Betriebs auf Karten, heller Szene und
+                        Akzenten, Grund von eeziframes) | 'voll' (ganze Seite in der Palette des Betriebs); Entscheidung des Inhabers 27.10.2026
      fotos              Anzahl Unternehmensfotos in der Startansicht
      startansicht       eigener Titel, Kicker, Text, Begrüßung
      icons              'eezi' | 'betrieb'
@@ -33,35 +44,36 @@
      indexierung        'nein' (noindex, kein Disallow) | 'start' (nur / in Suchmaschinen)
      kopieKunde         „Meine Anfrage als PDF“ nach dem Senden
      fotoLinkTage       Link auf die Originalfotos in der Mail, Gültigkeit in Tagen (0 = kein Link)
-     aufbewahrung       Tage nach Zustellung, nach denen die Anfrage gelöscht wird, oder 'vertrag' (bis Vertragsende)
+     aufbewahrung       Tage nach Zustellung, nach denen die Anfrage gelöscht wird, oder 'vertrag' (bis Vertragsende; seit 27.10.2026 in keinem
+                        Paket, nur noch als Abweichung möglich)
      pdfAblage          PDF beim Eingang ablegen (Bucket blatt)
      dashboard, einladungslinks, fortschritt   Signature-Dashboard unter /betrieb/, persönliche Links, laufende Planungen
      zugaenge           Anzahl Dashboard-Zugänge
-     kiMonat            Alarmgrenze KI-Auswertungen je Monat (hart = 2×)
+     kiMonat            KI-Auswertungen je Monat inklusive; Pause bei 100 %, mit Freischaltung beim Doppelten; Mails bei 80 und 100 %
      anfragenTag        Alarmgrenze Anfragen je Tag (hart = 4×) */
   const PAKETE = {
     essential: {
-      name: 'EEZI Essential', preis: { monat: 29, einrichtung: 99 },
-      domain: true, konfigurator: true, eingangMail: true,
-      gestaltung: 'standard', logo: false, farbe: false, fotos: 0, startansicht: false, icons: 'eezi',
+      name: 'EEZI Essential', preis: { monat: 39, einrichtung: 99, ki: 0.08 },
+      domain: false, konfigurator: true, eingangMail: true,
+      gestaltung: 'standard', logo: false, farbe: false, farbwelt: 'eezi', fotos: 0, startansicht: false, icons: 'eezi',
       kennzeichnung: 'deutlich', pdfKennzeichnung: 'deutlich', mailKennzeichnung: 'deutlich', absender: 'instanz', rechtNennung: 'name',
       indexierung: 'nein', kopieKunde: true, fotoLinkTage: 14, aufbewahrung: 30, pdfAblage: false,
-      dashboard: false, einladungslinks: false, fortschritt: false, zugaenge: 0, kiMonat: 600, anfragenTag: 50
-    },
-    plus: {
-      name: 'EEZI Essential Plus', preis: { monat: 39, einrichtung: 199 },
-      domain: true, konfigurator: true, eingangMail: true,
-      gestaltung: 'eigen', logo: true, farbe: true, fotos: 6, startansicht: true, icons: 'betrieb',
-      kennzeichnung: 'dezent', pdfKennzeichnung: 'dezent', mailKennzeichnung: 'dezent', absender: 'instanz', rechtNennung: 'name',
-      indexierung: 'start', kopieKunde: true, fotoLinkTage: 14, aufbewahrung: 30, pdfAblage: false,
       dashboard: false, einladungslinks: false, fortschritt: false, zugaenge: 0, kiMonat: 1000, anfragenTag: 50
     },
-    signature: {
-      name: 'EEZI Signature', preis: { monat: 64, einrichtung: 279 },
+    plus: {
+      name: 'EEZI Essential Plus', preis: { monat: 69, einrichtung: 50, ki: 0.08 },
       domain: true, konfigurator: true, eingangMail: true,
-      gestaltung: 'eigen', logo: true, farbe: true, fotos: 6, startansicht: true, icons: 'betrieb',
+      gestaltung: 'eigen', logo: true, farbe: true, farbwelt: 'akzent', fotos: 6, startansicht: true, icons: 'betrieb',
+      kennzeichnung: 'dezent', pdfKennzeichnung: 'dezent', mailKennzeichnung: 'dezent', absender: 'instanz', rechtNennung: 'name',
+      indexierung: 'start', kopieKunde: true, fotoLinkTage: 14, aufbewahrung: 30, pdfAblage: false,
+      dashboard: false, einladungslinks: false, fortschritt: false, zugaenge: 0, kiMonat: 1500, anfragenTag: 50
+    },
+    signature: {
+      name: 'EEZI Signature', preis: { monat: 99, einrichtung: 239, ki: 0.08 },
+      domain: true, konfigurator: true, eingangMail: true,
+      gestaltung: 'eigen', logo: true, farbe: true, farbwelt: 'voll', fotos: 6, startansicht: true, icons: 'betrieb',
       kennzeichnung: 'keine', pdfKennzeichnung: 'keine', mailKennzeichnung: 'keine', absender: 'neutral', rechtNennung: 'kategorie',
-      indexierung: 'start', kopieKunde: true, fotoLinkTage: 0, aufbewahrung: 'vertrag', pdfAblage: true,
+      indexierung: 'start', kopieKunde: true, fotoLinkTage: 0, aufbewahrung: 30, pdfAblage: true,
       dashboard: true, einladungslinks: true, fortschritt: true, zugaenge: 5, kiMonat: 2000, anfragenTag: 100
     }
   };
@@ -71,12 +83,13 @@
   const MERKMALE = {
     preis: { titel: 'Preis', art: 'preis', vergleich: true },
     name: { titel: 'Paket', art: 'text' },
-    domain: { titel: 'Eigene Domain', text: 'Ihr Konfigurator unter Ihrer eigenen Adresse, z. B. ihr-name-fenster.de', art: 'janein', vergleich: true },
+    domain: { titel: 'Eigene Domain', text: 'Ihr Konfigurator unter Ihrer eigenen Adresse, z. B. ihr-name-fenster.de; ohne eigene Domain unter ihr-name.eeziframes.com', art: 'janein', nein: 'nein, Adresse bei eeziframes', vergleich: true },
     konfigurator: { titel: 'Voller Konfigurator', text: 'Planung mit 3-D-Modell, KI-Auswertung der Fotos, Klärungsliste und Zeichnung', art: 'janein', vergleich: true },
     eingangMail: { titel: 'Anfrage per E-Mail mit PDF', text: 'Jede Anfrage kommt mit dem fertigen Aufmaßblatt als PDF in Ihr Postfach', art: 'janein', vergleich: true },
-    gestaltung: { titel: 'Gestaltung', art: 'wahl', werte: { standard: 'eeziframes-Design mit Ihrem Namen', eigen: 'in Ihrem Design' }, vergleich: true },
+    gestaltung: { titel: 'Gestaltung', art: 'wahl', werte: { standard: 'eeziframes-Design mit Ihrem Namen', eigen: 'in Ihrem Design' } },
     logo: { titel: 'Ihr Logo', text: 'in der App, im Aufmaßblatt und in der E-Mail', art: 'janein', vergleich: true },
-    farbe: { titel: 'Ihre Firmenfarbe', art: 'janein', vergleich: true },
+    farbe: { titel: 'Ihre Firmenfarbe', art: 'janein' },
+    farbwelt: { titel: 'Farben der Seite', art: 'wahl', werte: { eezi: 'Farben von eeziframes', akzent: 'zur Hälfte in Ihren Farben', voll: 'ganz in Ihren Farben' }, vergleich: true },
     fotos: { titel: 'Fotos Ihres Betriebs', text: 'auf der Startseite', art: 'zahl', vergleich: true },
     startansicht: { titel: 'Eigene Startseite', text: 'Titel, Begrüßung und Text', art: 'janein', vergleich: true },
     icons: { titel: 'App-Symbol', art: 'wahl', werte: { eezi: 'eeziframes', betrieb: 'Ihr Zeichen' } },
@@ -89,12 +102,12 @@
     kopieKunde: { titel: 'PDF-Kopie für Ihre Kunden', art: 'janein' },
     fotoLinkTage: { titel: 'Originalfotos per Link', art: 'tage' },
     aufbewahrung: { titel: 'Aufbewahrung der Anfragen', art: 'aufbewahrung', vergleich: true },
-    pdfAblage: { titel: 'Unterlagen jederzeit abrufbar', art: 'janein' },
+    pdfAblage: { titel: 'Aufmaßblätter im Dashboard', text: 'so lange wie die Anfrage (Aufbewahrung der Anfragen); das PDF aus der E-Mail bleibt in Ihrem Postfach', art: 'janein', vergleich: true },
     dashboard: { titel: 'Dashboard unter Ihrer Domain', text: 'geschützter Zugang für Ihr Team', art: 'janein', vergleich: true },
     einladungslinks: { titel: 'Persönliche Einladungslinks', text: 'Kunden gezielt einladen, auf Ihrer Domain', art: 'janein', vergleich: true },
     fortschritt: { titel: 'Fortschritt sehen', text: 'eingeladen, in Bearbeitung, eingereicht', art: 'janein', vergleich: true },
     zugaenge: { titel: 'Zugänge zum Dashboard', art: 'zahl', vergleich: true },
-    kiMonat: { titel: 'KI-Auswertungen im Monat (Richtwert)', art: 'zahl' },
+    kiMonat: { titel: 'KI-Auswertungen im Monat inklusive', text: 'eine je Foto, meist zwei je Fenster; bei 100 % pausiert die KI bis Monatsende, außer Sie schalten weitere frei (je zum Preis des Pakets, höchstens das Doppelte im Monat)', art: 'ki', vergleich: true },
     anfragenTag: { titel: 'Anfragen am Tag (Richtwert)', art: 'zahl' }
   };
 
@@ -135,9 +148,20 @@
     OEFFENTLICH.forEach((k) => { if (Object.prototype.hasOwnProperty.call(m, k)) out[k] = m[k]; });
     return out;
   }
-  const preis = (paket) => (gueltig(paket) ? { monat: PAKETE[paket].preis.monat, einrichtung: PAKETE[paket].preis.einrichtung } : null);
+  const preis = (paket) => (gueltig(paket) ? { monat: PAKETE[paket].preis.monat, einrichtung: PAKETE[paket].preis.einrichtung, ki: PAKETE[paket].preis.ki } : null);
   /* 29 → „29 €“, 99.5 → „99,50 €“ (mit geschütztem Leerzeichen) */
   const euro = (n) => (Number.isInteger(n) ? String(n) : Number(n).toFixed(2).replace('.', ',')) + ' €';
+  /* 1000 → „1.000“ */
+  const tausend = (n) => String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  /* „1.000 KI-Auswertungen im Monat inklusive, jede weitere 0,08 €“. o.m: Merkmale (sonst die des Pakets), o.netto: „netto“ an den Preis,
+     o.anfragen: die Rechengröße dazu („reicht für etwa 20 Kundenanfragen mit je 25 Fenstern“) */
+  function kiText(paket, o) {
+    o = o || {};
+    const m = o.m || (gueltig(paket) ? PAKETE[paket] : null), p = preis(paket); if (!m || !p) return '';
+    const n = Number(m.kiMonat) || 0;
+    return tausend(n) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + euro(p.ki) + (o.netto ? ' netto' : '') +
+      (o.anfragen ? ' (reicht für etwa ' + Math.round(n / KI_JE_ANFRAGE) + ' Kundenanfragen mit je ' + KI_JE_ANFRAGE / 2 + ' Fenstern)' : '');
+  }
   /* art: 'monat' | 'einrichtung'; mwst: false bei Kleinunternehmerregelung (MWST=0), sonst zzgl. 19 % */
   function preisText(paket, art, mwst) {
     const p = preis(paket); if (!p) return '';
@@ -145,15 +169,16 @@
     const zusatz = mwst === false ? ' (kein Ausweis der Umsatzsteuer nach § 19 UStG)' : ' zzgl. MwSt.';
     return euro(betrag) + (art === 'einrichtung' ? ' einmalig' : ' im Monat') + ' netto' + zusatz;
   }
-  /* Preisstand für bestellungen.preise: { monat, einrichtung, mwst, name, stand } */
+  /* Preisstand für auftraege.preise: { monat, einrichtung, ki, mwst, name, stand } */
   function preisStand(paket, mwst) {
     const p = preis(paket); if (!p) return null;
-    return { monat: p.monat, einrichtung: p.einrichtung, mwst: mwst === false ? 0 : 19, name: PAKETE[paket].name, stand: PREIS_STAND };
+    return { monat: p.monat, einrichtung: p.einrichtung, ki: p.ki, mwst: mwst === false ? 0 : 19, name: PAKETE[paket].name, stand: PREIS_STAND };
   }
   const liste = () => LISTE.map((p) => ({ paket: p, name: PAKETE[p].name, preis: preis(p) }));
 
-  const P = { PAKETE: PAKETE, MERKMALE: MERKMALE, LISTE: LISTE, OEFFENTLICH: OEFFENTLICH, PREIS_STAND: PREIS_STAND, VORLAEUFIG: VORLAEUFIG,
-    liste: liste, gueltig: gueltig, merkmale: merkmale, oeffentlich: oeffentlich, preis: preis, preisText: preisText, preisStand: preisStand, euro: euro };
+  const P = { PAKETE: PAKETE, MERKMALE: MERKMALE, LISTE: LISTE, OEFFENTLICH: OEFFENTLICH, PREIS_STAND: PREIS_STAND, VORLAEUFIG: VORLAEUFIG, KI_JE_ANFRAGE: KI_JE_ANFRAGE, DOMAIN_JAHR: DOMAIN_JAHR,
+    liste: liste, gueltig: gueltig, merkmale: merkmale, oeffentlich: oeffentlich, preis: preis, preisText: preisText, preisStand: preisStand, euro: euro,
+    tausend: tausend, kiText: kiText };
   root.Pakete = P;
   if (typeof module === 'object' && module.exports) module.exports = P;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

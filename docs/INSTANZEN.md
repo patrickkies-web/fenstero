@@ -2,6 +2,8 @@
 
 Jeder Fensteranbieter bekommt seinen eigenen Fenster-Konfigurator auf seiner eigenen Domain (z. B. `brandt-fenster.app`), in einem von drei Paketen: **Essential**, **Plus**, **Signature**. Alle Domains hängen am selben Worker wie eeziframes.com; je Kunde steht alles in der Datenbank und wird in der Zentrale gepflegt, nie im Code. eeziframes.com bleibt für das Aufmaß der Hauseigentümer, wie es ist, verkauft die Pakete und führt das Kundenkonto der Fensteranbieter (`/partner/`). Bestehende Betriebskonten und Kundenlinks laufen unverändert weiter.
 
+> **Stand 27.10.2026:** Kundenkonto `/partner/`, die alte Paket-Bestellung und die alte Zentrale (Oberfläche, Verwaltung der Instanzen) sind entfernt; bestellt wird jetzt über `/bestellen/`, verwaltet in der neuen Zentrale ([BESTELLUNG.md](BESTELLUNG.md), [ZENTRALE.md](ZENTRALE.md)). Die Laufzeit der Instanzen unten (Mandant, Eingang, App, Dashboard, Rechtsseiten) gilt weiter; eine Instanz beim Live-Schalten aus dem Auftrag anzulegen ist der nächste Schritt. Abschnitte, die Kundenkonto, Bestellung oder Zentrale beschreiben, zeigen den früheren Stand.
+
 Diese Datei ist der Vertrag zwischen den Bausträngen (Teil 1, vom Fundament S0) und beschreibt den Betrieb (Teil 2: Einrichtung je Kunde, Zustände, Fristen, Rechtstexte der Instanzen, Fehlerbilder). Bestellung und Geld: [BESTELLUNG.md](BESTELLUNG.md). Grundlage ist der Bauplan vom 22.10.2026 (Entscheidungen E1–E30).
 
 ## Teil 1: Verträge
@@ -11,7 +13,7 @@ Diese Datei ist der Vertrag zwischen den Bausträngen (Teil 1, vom Fundament S0)
 - **Altbestand ist heilig.** `scripts/pruefen.mjs` Abschnitte 1–22 bleiben in jedem Strang grün; eeziframes.com (B2C-Aufmaß, Kauf des Aufmaßblatts, Bestandsbetriebe mit Kundenlinks) verhält sich unverändert. Jeder Instanz-Zweig im Server hängt an `ctx.instanz` bzw. `daten.instanz`, jeder Zweig in App und Portal an `KONFIG.instanz`.
 - **Eine Stelle je Wahrheit.** Merkmale, Preise und Fristen je Paket nur in `web/assets/pakete.js`; Zustände, Übergänge, globale Fristen und Grenzen, Feldregeln der Bestellung nur in `web/assets/instanzregeln.js`. Kein Vergleich mit einem Paketnamen (`paket === …`) außerhalb von `pakete.js` (Prüfung 23); Code fragt Merkmale ab (`m.dashboard`, `m.logo`, …). Ein Paket setzt nie den Tarif eines Kontos: Instanzkonten haben `konto: 'instanz'`.
 - **Gefahrlos mergebar.** Alles Neue darf in `main`, bevor Preise, Rechtstexte und Cloudflare/Stripe/Resend eingerichtet sind:
-  - Ohne Variable `PAKETE_OFFEN=1` zeigt die Verkaufsseite die Pakete mit „vorläufige Preise“ und statt „Paket bestellen“ ein Anfrageformular („Bestellung bald möglich“); die Paket-Kasse bleibt im Live-Modus von Stripe zu. Im Test- und Attrappenmodus ist sie offen, damit sich alles prüfen lässt. Die einzige Abfrage dafür ist `Instanzregeln.verkauf({ offen: k.paketeOffen, live: live(k), bereit })` → `{ offen, vorlaeufig, bestellen, kasse }` (`bereit`: Paketbedingungen ohne Platzhalter, `paketVerkaufStand()` in `functions/api/recht.js`).
+  - Ohne Variable `PAKETE_OFFEN=1` zeigt die Verkaufsseite statt „Paket bestellen“ ein Anfrageformular (bis 27.10.2026 auch „vorläufige Preise“; seitdem hängt das nur an `VORLAEUFIG` in `pakete.js`, die Preise hat der Inhaber festgelegt) („Bestellung bald möglich“); die Paket-Kasse bleibt im Live-Modus von Stripe zu. Im Test- und Attrappenmodus ist sie offen, damit sich alles prüfen lässt. Die einzige Abfrage dafür ist `Instanzregeln.verkauf({ offen: k.paketeOffen, live: live(k), bereit })` → `{ offen, vorlaeufig, bestellen, kasse }` (`bereit`: Paketbedingungen ohne Platzhalter, `paketVerkaufStand()` in `functions/api/recht.js`).
   - `wrangler.jsonc` hat nur Bindungen, die ohne Vorbereitung im Dashboard deployen (Rate Limiting); KV `INSTANZEN` und Queue `EINGANG` kommen erst nach der Einrichtung mit einem eigenen Commit, der Code läuft ohne sie. **Nie `routes` oder `custom_domain` in `wrangler.jsonc`** (die Custom Domains der Instanzen würden überschrieben).
   - Keine echten Secrets im Repo.
 - **Uhr.** Fristen immer mit `jetztAus(env)` bzw. `k.jetzt` (functions/api/umgebung.js) rechnen, nicht mit `Date.now()`: Die Prüfung stellt die Uhr über `JETZT` vor (`h.uhr(tage)`).
@@ -24,12 +26,12 @@ Diese Datei ist der Vertrag zwischen den Bausträngen (Teil 1, vom Fundament S0)
 |---|---|---|
 | 0 | **S0 Fundament** | `supabase/schema.sql` (Block Instanzen), `web/assets/pakete.js`, `web/assets/instanzregeln.js`, `functions/api/speicher.js` (Instanz-Funktionen), `functions/api/sitzung.js`, `functions/api/bremse.js`, `functions/api/post.js`, `functions/api/fotos.js` (`ablage`, `FOTO_ID`), `functions/api/router.js`, `functions/seo.js` (Haken), `functions/api/umgebung.js` (`paketeOffen`, `sitzung`, `jetzt`), `wrangler.jsonc`, `scripts/dev-server.mjs`, `scripts/pruefen.mjs` (Lader), `scripts/pruefen-instanzen/hilfe.mjs`, `scripts/pruefen-instanzen/23-fundament.mjs`, `docs/INSTANZEN.md` (Teil 1) |
 | Welle 1 | **A Server-Kern** | `worker.js`; `functions/instanz/mandant.js`, `seiten.js`, `adapter.js`, `verwalten.js`; `functions/api/eingang.js`, `instanz-api.js`, `blatt-server.js`; `functions/api/konten.js` (nur `GET /api/link/:code`, `POST …/fortschritt`, `POST /api/aufmass`, `abrechnungslauf`); `functions/api/entwurf.js`; `functions/api/fotos.js` (Link-Route); `functions/api/ki.js`; `functions/api/benachrichtigung.js`; `functions/api/statistik.js`; `functions/api/umgebung.js`; `web/assets/modell.js` (nur Abrechnung und `aufmassText`); `web/assets/blatt.js`, `blatt-schrift.js`; `scripts/pruefen-instanzen/23.mjs`, `24.mjs` |
-| Welle 1 | **D Kundenkonto, Bestellung, Stripe** | `functions/api/partner.js`, `bestellung.js`; `functions/api/stripe.js` (Paketfunktionen anhängen); `functions/api/zahlung.js` (Weiche vor dem B2C-Zweig); `functions/api/recht.js` (`PAKET_STAND`, `paketVerkaufStand`); `web/partner/index.html`, `web/assets/partner.js`, `partner.css`; `web/_headers` (`/partner/*` no-store); `scripts/stripe-attrappe.mjs`; `scripts/pruefen-instanzen/27.mjs` |
+| Welle 1 | **D Kundenkonto, Bestellung, Stripe** | entfernt am 27.10.2026: Kundenkonto `/partner/`, Paket-Bestellung, Paketfunktionen in `functions/api/stripe.js`; ersetzt durch `functions/auftrag/` ([BESTELLUNG.md](BESTELLUNG.md)) |
 | Welle 2 | **B Konfigurator-App** | `web/assets/app.js`, `app.css`, `web/app/index.html` (nur neutrale Haken), `web/assets/einladung.js`, `einladung.css`, `gemeinsam.js`, `gemeinsam.css`; `scripts/pruefen-instanzen/25.mjs` |
-| Welle 2 | **C Zentrale** | `functions/api/zentrale-instanzen.js`, `zentrale-bestellungen.js`, `cloudflare.js`; `functions/api/zentrale.js` (Exporte und genannte Stellen); `web/assets/zentrale.js`, `zentrale.css`, `web/zentrale/index.html`; `scripts/cloudflare-attrappe.mjs`; `scripts/pruefen-instanzen/26.mjs` |
+| Welle 2 | **C Zentrale** | entfernt am 27.10.2026: Oberfläche der Zentrale, Verwaltung der Instanzen und Bestellungen; geblieben `functions/api/cloudflare.js` und `functions/api/zentrale.js` (App); neue Zentrale der Aufträge in `web/assets/inhaber.js` ([ZENTRALE.md](ZENTRALE.md)) |
 | Welle 3 | **E Signature-Dashboard** | `functions/api/dashboard.js`; `functions/api/auth.js` (`admin` mit Body, `codeErzeugen`, `nutzerAnlegen`); `functions/api/konten.js` (Haken für Instanz-Hosts); `functions/api/fotos.js` (nur `GET /api/konto/foto`); `web/betrieb/index.html`; `web/assets/portal.js`, `portal.css`; `scripts/pruefen-instanzen/28.mjs` |
 | Welle 3 | **F Verkaufsseite, Recht, Doku** | `web/fuer-fensterbauer/index.html`; `functions/pakete-seite.js`; `web/konfigurator-bedingungen/index.html` und PDFs; `scripts/bedingungen-pdf.mjs`; `web/datenschutz/index.html` (Abschnitt Kundenkonto); `functions/instanz/recht.js`; `scripts/pruefen.mjs` (nur Abschnitt 10); README.md; `docs/INSTANZEN.md` (Teil 2), `docs/BESTELLUNG.md`, `ONLINE-STELLEN.md`, `ZENTRALE.md`, `GESTALTUNG.md`, `SEO.md`; `scripts/pruefen-instanzen/29.mjs` |
-| Schluss | **I Integrator** | Abschnitt 30 (`scripts/pruefen-instanzen/30.mjs`), Vollsuite 1–30, Bildschirmfotos |
+| Schluss | **I Integrator** | Abschnitt 30 (Ende zu Ende über die alte Bestellung), entfernt am 27.10.2026; die Aufträge prüft `scripts/pruefen-instanzen/26.mjs` |
 
 Muss ein Strang eine fremde Datei ändern, liefert er die Änderung als Vorgabe an den Besitzer. Ausnahme aus S0: `worker.js` liefert schon die Fehlerseite selbst (weil `not_found_handling` entfällt) und setzt auf `/zentrale*`, `/partner*`, `/betrieb*` Sicherheitskopfzeilen, `noindex` und `no-store`; Strang A baut darauf die Host-Weiche.
 
@@ -166,7 +168,7 @@ Abläufe zwischen den Strängen (vom Integrator im Prozess über `worker.fetch` 
 
 ### Stand nach Welle 2 (B und C zusammengeführt)
 
-Verträge, die E und F nutzen dürfen (vom Integrator im echten Ablauf geprüft: `scripts/pruefen-instanzen/30-welle2.mjs`, Chromium auf `*.localhost`, API mit Kopfzeile `Host`: Bestellung → Zentrale → Gestaltung mit Vorschau im Telefonrahmen → Vorschau-Link mit Testanfrage → live → Anfrage im Browser mit Mail und PDF → Versandliste → Pause bei offener App → Fortsetzen → Paketwechsel):
+Verträge, die E und F nutzen dürfen (damals vom Integrator im echten Ablauf geprüft, Abschnitt 30, entfernt am 27.10.2026: Chromium auf `*.localhost`, API mit Kopfzeile `Host`: Bestellung → Zentrale → Gestaltung mit Vorschau im Telefonrahmen → Vorschau-Link mit Testanfrage → live → Anfrage im Browser mit Mail und PDF → Versandliste → Pause bei offener App → Fortsetzen → Paketwechsel):
 
 - **Startseite einer Instanz (einladung.js, B):** `Einladung.html({ name, du, p, instanz, vorschau })` mit `instanz = { kz: m.kennzeichnung, website, kopie: m.kopieKunde, start: { kicker, ueberschrift, text }, bilder: ['/marke/<v>/start-N.jpg'], standardBild, ohneKopf }`; `p` ist das Profil (`Einladung.profil`) mit `logoUrl` (`/marke/<v>/logo.png`) und `col` (Firmenfarbe, jede Hex-Farbe). Ohne `ohneKopf` steht der Absender oben („Fensterplaner von“ für Website-Besucher, sonst „Persönliche Anfrage von“). Mit `vorschau: true` ist nichts bedienbar, und `bilder` darf auch `blob:`-Adressen der Seite enthalten. `Einladung.kennzeichnung(kz)` liefert den Hinweis je Paket. Die App baut `instanz` in `instOpt()`, die Zentrale in `vorschau()` genauso; das Dashboard (E) zeigt die Einladungsseite ebenso.
 - **Merkmale im Browser:** `Pakete.oeffentlich(m)` enthält auch `pdfKennzeichnung` (PDF-Kopie der App, Aufmaßblätter im Dashboard).
@@ -179,7 +181,7 @@ Verträge, die E und F nutzen dürfen (vom Integrator im echten Ablauf geprüft:
 
 ### Stand nach Welle 3 (E und F zusammengeführt)
 
-Verträge, vom Integrator im echten Ablauf geprüft (`scripts/pruefen-instanzen/30-welle3.mjs`, eigener Testserver mit `PAKETE_OFFEN=1`, Chromium auf `*.localhost`, API mit Kopfzeile `Host`): Verkaufsseite → Bestellformular mit dem Paket → Signature-Bestellung mit Dashboard-Zugang → Zentrale übernimmt den Zugang in die Instanz → Bestätigungslink → Anmeldung im Dashboard in der Vorbereitung → live → Einladung im Dashboard → Kunde plant und sendet in der App → Mail mit PDF und Knopf ins Dashboard → Nachbesserung und zweite Runde → Impressum und Datenschutz aus den Angaben der Bestellung → Zugang aus und an → Paketwechsel Signature → Plus → Signature → Hauptdomain mit Umzug ins Dashboard.
+Verträge, damals vom Integrator im echten Ablauf geprüft (Abschnitt 30, entfernt am 27.10.2026; eigener Testserver mit `PAKETE_OFFEN=1`, Chromium auf `*.localhost`, API mit Kopfzeile `Host`): Verkaufsseite → Bestellformular mit dem Paket → Signature-Bestellung mit Dashboard-Zugang → Zentrale übernimmt den Zugang in die Instanz → Bestätigungslink → Anmeldung im Dashboard in der Vorbereitung → live → Einladung im Dashboard → Kunde plant und sendet in der App → Mail mit PDF und Knopf ins Dashboard → Nachbesserung und zweite Runde → Impressum und Datenschutz aus den Angaben der Bestellung → Zugang aus und an → Paketwechsel Signature → Plus → Signature → Hauptdomain mit Umzug ins Dashboard.
 
 **Dashboard (E)** auf dem Haupthost einer Instanz mit `m.dashboard` (sonst 404 wie eine unbekannte Route):
 
@@ -283,14 +285,23 @@ Für den Inhaber: wie ein Kunde zu seinem Konfigurator kommt, was in welchem Zus
 
 | | Essential | Plus | Signature |
 |---|---|---|---|
-| Konfigurator unter eigener Domain, Anfrage per Mail mit Aufmaßblatt-PDF | ja | ja | ja |
+| Adresse des Konfigurators | `ihr-name.eeziframes.com` (Entscheidung des Inhabers 27.10.2026, siehe unten) | eigene Domain | eigene Domain |
+| Anfrage per Mail mit Aufmaßblatt-PDF | ja | ja | ja |
 | Gestaltung | eeziframes-Design, Name als Text | Logo, Firmenfarbe, bis 6 Fotos, eigene Startseite | wie Plus |
+| Farben der Landingpage (`farbwelt`) | Palette von eeziframes | Palette des Betriebs auf Karten, heller Szene und Akzenten, Grund von eeziframes | die ganze Seite in der Palette des Betriebs |
 | Hinweis auf eeziframes | „Powered by EEZIframes“ (verlinkt) | „Konfigurator von eeziframes“ im Fuß | keiner, auch nicht in PDF, Mails, Titel, Icons, Rechtstexten |
 | Suchmaschinen | noindex (ohne Disallow) | nur die Startseite | nur die Startseite |
-| Aufbewahrung der Anfragen auf dem Server | 30 Tage nach Zustellung | 30 Tage nach Zustellung | Vertragsdauer, Originalfotos 365 Tage |
+| Aufbewahrung der Anfragen auf dem Server | 30 Tage nach Zustellung | 30 Tage nach Zustellung | 30 Tage nach Zustellung, bis dahin auch im Dashboard |
 | Dashboard `/betrieb/` mit Einladungslinks und Fortschritt | nein | nein | ja, 5 Zugänge |
 
-Verbindlich ist `web/assets/pakete.js`; die Tabelle oben ist ein Auszug. Abweichungen für einzelne Kunden (Kulanz) stehen in `instanzen.abweichung` und gelten nur für bekannte Merkmale, nie für Paket, Name oder Preis.
+Verbindlich ist `web/assets/pakete.js`; die Tabelle oben ist ein Auszug.
+
+**Stand 27.10.2026, Entscheidungen des Inhabers:** Kein Paket bewahrt Anfragen bis zum Vertragsende auf (`aufbewahrung` überall 30 Tage;
+`'vertrag'` nur noch als Abweichung). Essential läuft unter `ihr-name.eeziframes.com` (`domain: false`). **Offen:** Der Server kann das
+noch nicht. `istHaupt` in `functions/instanz/mandant.js` behandelt jede Adresse unter `eeziframes.com` außer `demo-*` als Hauptdomain,
+Bestellung und Einrichtung fragen auch bei Essential nach einer Wunsch-Domain, und es fehlt die Route `*.eeziframes.com` am Worker.
+Bis das gebaut ist, bekommt ein Essential-Kunde wie bisher eine eigene Domain. Die Farbstufen (`farbwelt`) sind in den Vorlagen gebaut
+(docs/profis/paketvorlagen/, Farbdatei je Betrieb); die Instanzen setzen heute nur die Firmenfarbe als Akzent. Abweichungen für einzelne Kunden (Kulanz) stehen in `instanzen.abweichung` und gelten nur für bekannte Merkmale, nie für Paket, Name oder Preis.
 
 ### Einrichtung je Kunde (Weg 1: Domain im eigenen Cloudflare-Konto)
 
@@ -326,8 +337,8 @@ Impressum und Datenschutz sind in jedem Zustand erreichbar. Eine laufende Planun
 |---|---|---|
 | Website-Entwurf ohne Fenster | `entwurfLeerStunden` (24 Stunden) | `anfragenAufraeumen` (täglich) |
 | Website-Entwurf mit Fenster, nicht gesendet | `entwurfStillTage` (30 Tage ohne Änderung), samt Fotos | `anfragenAufraeumen` |
-| Anfrage Essential/Plus | `aufbewahrung` (30 Tage) nach bestätigter Zustellung, höchstens `unzustellbarTage` (60) ohne Zustellung | Resend-Webhook setzt `loeschen_ab`; `anfragenAufraeumen` |
-| Anfrage Signature | bis Vertragsende; Originalfotos `fotosSignatureTage` (365) | `anfragenAufraeumen` |
+| Anfrage (alle Pakete) | `aufbewahrung` (30 Tage) nach bestätigter Zustellung, höchstens `unzustellbarTage` (60) ohne Zustellung | Resend-Webhook setzt `loeschen_ab`; `anfragenAufraeumen` |
+| Anfrage Signature | wie Essential und Plus (seit 27.10.2026); nur mit Abweichung `aufbewahrung: 'vertrag'` bis Vertragsende, Originalfotos dann `fotosSignatureTage` (365) | `anfragenAufraeumen` |
 | Fotolink in der Mail (Essential/Plus) | `fotoLinkTage` (14), nur auf dem Haupthost, Abruf protokolliert | `functions/api/instanz-api.js` |
 | Test- und Demo-Anfragen | `testTage` (1 Tag) | `anfragenAufraeumen` |
 | Vorschau-Link | `vorschauTage` (30) | Token `vorschau` |

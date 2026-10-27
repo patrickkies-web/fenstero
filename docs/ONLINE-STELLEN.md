@@ -208,7 +208,7 @@ Die Sammelrechnungen laufen als Cron am 1. und 15. jeden Monats (steht in `wrang
 
 ### Zentrale (dein Verwaltungsbereich)
 
-Unter `https://eeziframes.com/zentrale/` siehst du alle Betriebe mit ihren Zahlen, kannst sperren, löschen und Daten exportieren, siehst die Käufe, eine eigene Statistik ohne Cookies und ein Protokoll. Einrichten: `ZENTRALE_PASSWORT` als Secret bei Cloudflare (C), `supabase/schema.sql` noch einmal ausführen (A2), anmelden, unter **Einstellungen** den zweiten Faktor einrichten. Alles Weitere: [docs/ZENTRALE.md](ZENTRALE.md).
+Unter `https://eeziframes.com/zentrale/` kommen alle Bestellungen der Landingpages an: Eingang, je Auftrag Prompt, Material, Nachrichten und die Schritte bis Live. Einrichten: `ZENTRALE_PASSWORT` und `SITZUNG_GEHEIMNIS` als Secrets bei Cloudflare (C), `supabase/schema.sql` noch einmal ausführen (A2), anmelden; den zweiten Faktor (`ZENTRALE_2FA`) beschreibt [docs/ZENTRALE.md](ZENTRALE.md).
 
 ### E. Echtes Geld
 
@@ -234,27 +234,27 @@ Erstattungen, Kündigungen und Rechnungen siehst und erledigst du im Stripe-Dash
 | Protokoll der Zentrale (Anmeldungen mit gekürzter IP, Eingriffe, Löschnachweise, Widerrufe) | Supabase, Tabelle `protokoll`; Anmeldungen 90 Tage, Eingriffe 3 Jahre, Widerrufe bis Ende des dritten Jahres nach dem Eingang |
 | Eigene Statistik | Supabase, Tabelle `statistik`: nur Tagessummen, keine IP-Adressen, keine Kennungen |
 | Vermerke der Zentrale an einem Konto (Sperre, interne Notiz) | im Dokument des Betriebs (`daten.verwaltung`), verlässt den Server nur im Datenexport |
-| Konfigurator-Pakete: Fensteranbieter, Bestellungen, Nachrichten | Supabase, Tabellen `partner`, `bestellungen`, `partner_nachrichten`; Uploads im Bucket `bestellungen` |
+| Aufträge: Kunden (Fensterbauer), Anmeldecodes, Aufträge mit Angaben, Zahlung, Abo, Verlauf, Nachrichten | Supabase, Tabellen `kunden`, `anmeldecodes`, `auftraege`, `auftrag_nachrichten`; Logo, Porträt, Fotos im Bucket `auftraege` (privat). Die früheren Tabellen `partner`, `bestellungen`, `partner_nachrichten` und der Bucket `bestellungen` sind ungenutzt |
 | Konfigurator-Instanzen: Einstellungen, Domains, Anfragen der Endkunden | Supabase, Tabellen `instanzen`, `instanz_hosts`, `anfragen`; Logo und Bilder im Bucket `marke`, Aufmaßblätter (Signature) im Bucket `blatt`, Fotos wie oben unter `link/<code>/…`; Fristen in [INSTANZEN.md](INSTANZEN.md) |
 
 ## Stufe 3: Konfigurator-Pakete für Fensteranbieter
 
-Jeder Fensteranbieter bekommt seinen eigenen Fenster-Konfigurator auf einer eigenen Domain (Essential, Plus, Signature). Alle Domains hängen am selben Worker; je Kunde steht alles in der Datenbank und wird in der Zentrale gepflegt, nie im Code. Was wo steht: [INSTANZEN.md](INSTANZEN.md) (Betrieb, Teil 2), [BESTELLUNG.md](BESTELLUNG.md) (Bestellung, Stripe, Rechtstexte), [ZENTRALE.md](ZENTRALE.md) (Bedienung).
+Jeder Fensterbauer bestellt seine Landingpage mit Konfigurator unter `/bestellen/` (Essential, Plus, Signature), sieht den Stand im Kundenbereich `/konto/`, und du baust die Seite aus der Vorlage des Pakets mit dem Prompt aus der Zentrale. Was wo steht: [BESTELLUNG.md](BESTELLUNG.md) (Bestellung, Stripe, Rechtstexte), [ZENTRALE.md](ZENTRALE.md) (Bedienung), [INSTANZEN.md](INSTANZEN.md) (Laufzeit der Konfiguratoren auf den Domains der Kunden).
 
 ### Einmalig, bevor der erste Kunde bestellt
 
 1. **Cloudflare, Tarif:** Workers & Pages → Plans → **Workers Paid** buchen (5 $ im Monat). Ohne reicht die Rechenzeit für das Aufmaßblatt-PDF im Worker nicht (die Mail kommt dann mit Text und Link; mit `PDF_IM_WORKER=0` wird es gar nicht erst versucht).
 2. **Cloudflare, Speicher und Warteschlange (später):** Workers & Pages → KV → Namensraum `eezi-instanzen` anlegen; Queues → Warteschlange `eezi-eingang` anlegen. Beide Kennungen an Claude geben; dann kommt ein kleiner Commit mit den Bindungen `INSTANZEN` und `EINGANG` in `wrangler.jsonc` (die Vorlage steht dort als Kommentar). Bis dahin läuft alles, nur ohne diesen Puffer.
-3. **Cloudflare, Schlüssel für Domains:** My Profile → API Tokens → Create Token (eigene Vorlage): Konto „Workers Scripts: Edit“, „Zone: Edit“, „Registrar: Domains: Read“; Zonen „Zone: Read“, „DNS: Edit“, „Workers Routes: Edit“, **für alle Zonen des Kontos außer `eeziframes.com`**. Bei fenstero als Secret `CF_API_TOKEN`, dazu Variable `CF_ACCOUNT_ID` (steht rechts auf der Kontoübersicht). Ohne Token zeigt die Zentrale eine Klick-Anleitung.
-4. **Geheimnis für Sitzungen:** Secret `SITZUNG_GEHEIMNIS` = langer Zufallstext (mindestens 32 Zeichen) aus dem Passwort-Manager. Nie ändern, sonst sind alle Kundenkonten und Dashboards abgemeldet.
-5. **Supabase:** `supabase/schema.sql` im SQL-Editor erneut komplett ausführen (legt `instanzen`, `instanz_hosts`, `anfragen`, `partner`, `bestellungen`, `partner_nachrichten` an). Tarif **Pro** (Sicherungen, sieben Tage).
+3. **Cloudflare, Schlüssel für Domains** (für die Verwaltung der Instanzen, die nach dem Umbau vom 27.10.2026 noch keine Oberfläche hat): My Profile → API Tokens → Create Token (eigene Vorlage): Konto „Workers Scripts: Edit“, „Zone: Edit“, „Registrar: Domains: Read“; Zonen „Zone: Read“, „DNS: Edit“, „Workers Routes: Edit“, **für alle Zonen des Kontos außer `eeziframes.com`**. Bei fenstero als Secret `CF_API_TOKEN`, dazu Variable `CF_ACCOUNT_ID` (steht rechts auf der Kontoübersicht). Ohne Token zeigt die Zentrale eine Klick-Anleitung.
+4. **Geheimnis für Sitzungen:** Secret `SITZUNG_GEHEIMNIS` = langer Zufallstext (mindestens 32 Zeichen) aus dem Passwort-Manager. Nie ändern, sonst sind Kundenbereich, Zentrale und Dashboards abgemeldet.
+5. **Supabase:** `supabase/schema.sql` im SQL-Editor erneut komplett ausführen (legt unter anderem `kunden`, `anmeldecodes`, `auftraege`, `auftrag_nachrichten` und die Instanz-Tabellen an; den Bucket `auftraege` legt der Server beim ersten Upload selbst an). Tarif **Pro** (Sicherungen, sieben Tage).
 6. **Resend:** Tarif **Pro** (der freie Tarif schafft nur 100 Mails am Tag für alles). Domains → Add Domain → `post.eeziframes.com`, Region Ireland, „Sign in to Cloudflare“ trägt DKIM und SPF selbst ein. Variable `MAIL_ABSENDER_INSTANZ` = `anfragen@post.eeziframes.com`. Webhooks → Add Endpoint → `https://eeziframes.com/api/post/webhook`, Ereignisse `email.delivered`, `email.bounced`, `email.complained`, `email.delivery_delayed` → Signing Secret als Secret `RESEND_WEBHOOK_SECRET`. Ohne Webhook zählt „gesendet“ als zugestellt (die Zentrale sagt es dazu).
 7. **Optional für Signature:** eine neutrale Absender-Domain (z. B. `fensterplaner-post.de`) kaufen, bei Resend bestätigen, Variable `MAIL_ABSENDER_NEUTRAL`. Ohne sie kommen Signature-Mails an den Betrieb von `post.eeziframes.com` (Endkunden sehen das nie).
-8. **Stripe:** Workbench → Webhooks → dein Ziel → Ereignisse ergänzen: `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `customer.subscription.updated`, `charge.dispute.created` (Test- und Live-Modus; die übrigen aus Stufe 2 bleiben). Einstellungen → Billing → Kundenportal einmal öffnen und speichern. **Wiederholungsversuche NICHT ändern:** „Abo kündigen“ bleibt (sonst stuft der Server Altbestands-Abos nicht mehr zurück; die Kulanz der Pakete führt der Server). E-Mails → Rechnungen an Kunden senden: an.
+8. **Stripe:** Workbench → Webhooks → dein Ziel → Ereignisse ergänzen: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted` (Test- und Live-Modus; die übrigen aus Stufe 2 bleiben). Das Kundenportal für die Aufträge (Rechnungen, Zahlungsmittel, Kündigung zum Monatsende) legt der Server selbst an. **Wiederholungsversuche NICHT ändern:** „Abo kündigen“ bleibt (sonst stuft der Server Altbestands-Abos nicht mehr zurück; die Kulanz der Pakete führt der Server). E-Mails → Rechnungen an Kunden senden: an.
 9. **Preise:** in `web/assets/pakete.js` bestätigen oder ändern lassen, dann `VORLAEUFIG = false` (siehe [BESTELLUNG.md](BESTELLUNG.md), „Preise ändern“).
 10. **Rechtstexte:** Paketbedingungen mit AV-Vertrag (`/konfigurator-bedingungen/`, sechs markierte Platzhalter) und die Vorlagen für Impressum und Datenschutz der Instanzen (`functions/instanz/recht.js`) anwaltlich prüfen lassen, dann neue Fassung nach [BESTELLUNG.md](BESTELLUNG.md). Solange Platzhalter da sind, bleibt die Paket-Kasse im Live-Modus zu.
-11. **Demo-Instanzen:** am Worker die Custom Domains `demo-essential.eeziframes.com`, `demo-plus.eeziframes.com`, `demo-signature.eeziframes.com` hinzufügen; in der Zentrale je eine Instanz mit Schalter „Demo“ anlegen; dann Variable `PAKETE_DEMOS=1` (die Verkaufsseite verlinkt die Demos).
-12. **Verkauf öffnen:** Variable `PAKETE_OFFEN=1`. Die Übersicht der Zentrale („Konfigurator-Pakete“) zeigt, was noch fehlt; im Live-Modus öffnet die Kasse erst, wenn Mailversand, `MWST`, Datenbank, `SITZUNG_GEHEIMNIS`, die Paketbedingungen ohne Platzhalter und ihre PDFs da sind.
+11. **Demo-Instanzen:** später, sobald die neue Zentrale Instanzen anlegt (bis dahin verlinkt die Verkaufsseite die Beispielseiten von Fensterbau Brandt).
+12. **Verkauf öffnen:** Variable `PAKETE_OFFEN=1`. Bis dahin endet die Bestellung mit „Unverbindlich anfragen“ (die Anfrage liegt mit allen Angaben in der Zentrale); im Live-Modus öffnet die Kasse erst, wenn Mailversand, `MWST`, Datenbank, `SITZUNG_GEHEIMNIS`, die Paketbedingungen ohne Platzhalter und ihre PDFs da sind (`GET /api/auftrag/stand`).
 
 **Regel:** In `wrangler.jsonc` stehen nie `routes` oder `custom_domain`. Die Domains der Kunden hängen als Custom Domains am Worker (Zentrale oder Dashboard); ein Deployment mit `routes` würde sie überschreiben.
 
@@ -262,17 +262,18 @@ Jeder Fensteranbieter bekommt seinen eigenen Fenster-Konfigurator auf einer eige
 
 | Name | Art | Wofür |
 |---|---|---|
-| `SITZUNG_GEHEIMNIS` | Secret | Sitzungen im Kundenkonto (`__Host-partner`) und im Dashboard (`__Host-betrieb`), Vorschau- und Bestätigungslinks |
+| `SITZUNG_GEHEIMNIS` | Secret | Sitzungen im Kundenbereich (`__Host-kunde`), in der Zentrale (`__Host-inhaber`) und im Dashboard (`__Host-betrieb`), Anmeldecodes, Vorschau- und Bestätigungslinks |
 | `CF_API_TOKEN`, `CF_ACCOUNT_ID` | Secret, Variable | Domains der Kunden über die Cloudflare-API (ohne: Klick-Anleitung) |
 | `MAIL_ABSENDER_INSTANZ`, `MAIL_ABSENDER_NEUTRAL` | Variablen | Absender der Anfragen an die Betriebe |
 | `RESEND_WEBHOOK_SECRET` | Secret | Zustellung, Bounce und Beschwerde der Mails verfolgen |
-| `PAKETE_OFFEN` | Variable | `1` = Pakete werden verkauft (Bestellknöpfe, Kasse im Live-Modus) |
+| `PAKETE_OFFEN` | Variable | `1` = Pakete werden verkauft (Kasse im Live-Modus; ohne: die Bestellung endet mit einer unverbindlichen Anfrage) |
+| `ZENTRALE_PASSWORT`, `ZENTRALE_2FA`, `MAIL_KONTAKT` | Secrets, Variable | Anmeldung in der Zentrale (ab 12 Zeichen, zweiter Faktor optional) und deine Adresse für neue Bestellungen, Nachrichten und Fragen |
 | `PAKETE_DEMOS` | Variable | `1` = Verkaufsseite verlinkt die Demo-Instanzen |
 | `PDF_IM_WORKER`, `KI_TAG_MAX`, `INSTANZ_CACHE_MS`, `HAUPT_HOSTS` | Variablen | Feinsteuerung, Beschreibung in `functions/api/umgebung.js` |
 
 ### Je Kunde
 
-Die Schritte von „Einrichtung beginnen“ bis „Live schalten“ stehen in [INSTANZEN.md](INSTANZEN.md) („Einrichtung je Kunde“). Die Zentrale führt mit einem Hauptknopf je Bestellung durch und zeigt vor dem Livegang eine Ampel.
+Neue Bestellung in der Zentrale öffnen → **Seite beginnen** (Anruf zur Wunschzeit, Domain sichern) → **Prompt kopieren** und die Seite aus der Vorlage des Pakets mit Claude bauen → Link als **Vorschau** eintragen → der Kunde gibt im Kundenbereich frei → **Live schalten** mit der Adresse der fertigen Seite (das Monatsabo startet). Den Konfigurator der Instanz richtest du bis zum nächsten Umbau noch von Hand ein ([INSTANZEN.md](INSTANZEN.md), Teil 2).
 
 ## Sicherheit
 
