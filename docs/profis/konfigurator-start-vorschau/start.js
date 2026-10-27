@@ -259,7 +259,7 @@
      Ablauf, Texte und Prüfungen aus der App (MESS, checkValue, cmFrage, UEBLICH in web/assets/app.js); Gestaltung nach der DNA:
      kein Zwischenschritt, die Tasten stehen offen, „Weiter“ prüft, speichert und geht zum nächsten Maß. Die Linienlagen kommen aus dem
      3-D-Modell der App (Enden der aktiven Maßlinie je Element und Maß, in Prozent der Bühne). */
-  var MESS_LAGE = {"fenster":[[56.0,13.0,56.0,87.0],[58.38,15.52,58.38,85.74],[38.59,47.15,74.41,53.82],[41.89,47.88,75.77,54.26]],"balkon":[[56.0,13.0,56.0,87.0],[57.43,14.02,57.43,86.22],[47.64,48.82,64.54,52.0],[49.48,48.99,65.59,52.03]],"fest":[[56.0,13.0,56.0,87.0],[58.7,14.65,58.7,85.54],[32.43,45.98,81.47,55.13],[36.05,46.23,83.15,54.99]],"hst":[[56.0,13.0,56.0,87.0],[57.36,13.97,57.36,86.27],[25.77,44.72,89.47,56.66],[27.7,44.94,90.12,56.64]],"psk":[[56.0,13.0,56.0,87.0],[57.43,14.02,57.43,86.22],[37.61,46.93,75.52,54.02],[39.54,47.17,76.41,54.04]],"fsw":[[56.0,13.0,56.0,87.0],[57.36,13.97,57.36,86.27],[25.77,44.72,89.47,56.66],[27.7,44.94,90.12,56.64]]};
+  var MESS_LAGE = {"fenster":[[56.0,13.0,56.0,85.09],[58.38,14.99,58.38,85.0],[38.59,47.15,74.41,53.82],[41.89,47.88,75.77,54.26]],"balkon":[[56.0,13.0,56.0,85.09],[57.43,13.49,57.43,85.48],[47.64,48.82,64.54,52.0],[49.48,48.99,65.59,52.03]],"fest":[[56.0,13.0,56.0,85.09],[58.7,14.12,58.7,84.8],[32.43,45.98,81.47,55.13],[36.05,46.23,83.15,54.99]],"hst":[[56.0,13.0,56.0,85.09],[57.36,13.44,57.36,85.53],[25.77,44.72,89.47,56.66],[27.7,44.94,90.12,56.64]],"psk":[[56.0,13.0,56.0,85.09],[57.43,13.49,57.43,85.48],[37.61,46.93,75.52,54.02],[39.54,47.17,76.41,54.04]],"fsw":[[56.0,13.0,56.0,85.09],[57.36,13.44,57.36,85.53],[25.77,44.72,89.47,56.66],[27.7,44.94,90.12,56.64]]};
   var MESS = [
     { k: 'hm', g: 'oeffnung-hoehe', wer: 'mo', r: 'v', sub: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank.', subTuer: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zum fertigen Fußboden.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'], chip: 'nicht' },
     { k: 'h', g: 'element-hoehe', wer: 'el', r: 'v', sub: 'Senkrecht in der Mitte: der feste Rahmen, von seiner Außenkante oben bis unten.', subTuer: 'Senkrecht in der Mitte: der feste Rahmen samt Schwelle, von Außenkante oben bis unten.', enden: ['Rahmen außen', 'Rahmen außen'], endenTuer: ['Rahmen außen', 'Unterkante Schwelle'], chip: 'samt' },
@@ -273,7 +273,7 @@
     'oeffnung-breite': { t: 'Wie messe ich die Maueröffnung waagerecht?', x: ['Waagerecht misst du die Öffnung auf halber Höhe: von der linken Laibung bis zur rechten, also von Wand zu Wand.', 'Liegen dort Fliesen oder eine Verkleidung, zählt die fertige Oberfläche. Halte den Zollstock gerade, nicht schräg nach oben oder unten.'], tipp: 'Reicht der Zollstock nicht, miss das letzte Stück mit einem zweiten Zollstock oder einem Maßband und zähl beide Werte zusammen.' },
     'element-breite': { t: 'Wie messe ich das Fensterelement waagerecht?', x: ['Das Element misst du auf halber Höhe von der linken bis zur rechten sichtbaren Außenkante des Rahmens. Bei zwei oder drei Flügeln gehört alles dazu, auch die Pfosten dazwischen.', 'Das Maß ist meist ein paar Zentimeter kleiner als die Öffnung. Ist es größer, hast du die Öffnung wahrscheinlich am Rahmen statt an der Laibung gemessen.'], tipp: 'Die App warnt dich, wenn das Element größer ist als die Öffnung oder auffällig klein. Dann lohnt ein zweiter Blick mit dem Zollstock.' }
   };
-  var mess = { i: 0, cur: '', werte: {}, msg: null, cmLive: false, ack: false, ersetzen: false, fertig: false }, cmTimer = 0;
+  var mess = { i: 0, cur: '', werte: {}, msg: null, cmLive: false, ack: false, ersetzen: false, fertig: false, gespeichert: 0, sperre: false, mmOk: 0 }, cmTimer = 0;
   var messBuehne = $('mess-buehne'), messBild = $('mess-bild'), messFeld = $('mess-feld'), messZahl = $('mess-zahl'), messZeile = $('mess-zeile'), messWeiterKnopf = $('mess-weiter');
   var tausend = function (v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
   var num = function (t) { return parseInt(String(t || '').replace(/[^\d]/g, ''), 10) || 0; };
@@ -297,117 +297,143 @@
     }
     return { ok: true };
   }
-  var cmFrage = function (v, r) { var u = ueblich(r); return v > 0 && v * 10 <= 6000 && ((v < 250 && v * 10 >= 250) || (v < u[0] && v * 10 >= u[0])); };
+  var NB = ' ';
+  /* Zentimeter-Verdacht wie in der App; ein bestätigtes Millimetermaß („Nein, 400 mm“) fragt nicht noch einmal */
+  var cmFrage = function (v, r) { var u = ueblich(r); if (mess.mmOk && mess.mmOk === v) return false; return v > 0 && v * 10 <= 6000 && ((v < 250 && v * 10 >= 250) || (v < u[0] && v * 10 >= u[0])); };
   /* Bühne: Höhe nach dem Bildschirm (alle Tasten über dem Fuß), Bild des Modells, Linie, Strichmarken, Enden und Feld.
-     Das Bild ist das 3-D-Modell der Wünsche (WebGL, gleiche Materialien und gleiches Licht), nur Kamera und Ausschnitt des Messens;
+     Das Bild ist das 3-D-Modell der Wünsche (WebGL, gleiche Materialien und gleiches Licht), je Element eines für alle vier Maße;
      die Linienlagen stehen in Prozent des Bildes. Feld und Etiketten suchen sich eine Lage, die kein Ende und keinen Chip verdeckt. */
-  var BILD_R = 716 / 470, messSvg = $('mess-linie'), messChip = folien.messen.querySelector('.ez-buehne--mess .ez-glaschip');
+  var BILD_R = 716 / 470, messSvg = $('mess-linie'), messChip = folien.messen.querySelector('.ez-buehne--mess .ez-glaschip'), messBreite = 0;
+  var hoeheProbe = d.createElement('div'); hoeheProbe.setAttribute('aria-hidden', 'true'); hoeheProbe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
+  d.body.appendChild(hoeheProbe);
+  function messPlatzReservieren() {
+    /* Titel und Unterzeile aller vier Maße einmal messen und die größte Höhe festhalten: zwischen den Maßen springt nichts */
+    var h1 = $('mess-h1'), uz = $('mess-unterzeile'), alt = mess.i, mh = 0, mu = 0;
+    h1.style.minHeight = ''; uz.style.minHeight = '';
+    for (var n = 0; n < 4; n++) { mess.i = n; var st = MESS[n]; h1.innerHTML = messTitel(st); uz.textContent = tuer() && st.subTuer ? st.subTuer : st.sub; mh = Math.max(mh, h1.offsetHeight); mu = Math.max(mu, uz.offsetHeight); }
+    mess.i = alt; h1.style.minHeight = mh + 'px'; uz.style.minHeight = mu + 'px';
+  }
   function messHoeheSetzen() {
-    var appR = app.getBoundingClientRect(), H = Math.min(window.innerHeight, app.clientHeight || window.innerHeight);
+    var appR = app.getBoundingClientRect(), H = Math.min(hoeheProbe.offsetHeight || window.innerHeight, app.clientHeight || window.innerHeight);
     var bR = messBuehne.getBoundingClientRect(), kR = folien.messen.querySelector('.ez-karte--tasten').getBoundingClientRect(), fH = folien.messen.querySelector('.ez-fuss').offsetHeight;
     var oben = bR.top - appR.top + (app.scrollHeight > app.clientHeight + 2 ? app.scrollTop : 0), rest = kR.bottom - bR.bottom;
-    var S = Math.max(150, Math.min(235, Math.floor(H - oben - rest - fH - 6)));
-    messBuehne.style.height = S + 'px';
+    var S = Math.max(112, Math.min(235, Math.floor(H - oben - rest - fH - 6)));
+    messBuehne.style.height = S + 'px'; messBuehne.classList.toggle('ist-klein', S < 200);
   }
   function schneidet(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+  function endeText(t) { var i = t.indexOf(' '); return i < 0 ? '<b>' + t + '</b>' : '<b>' + t.slice(0, i) + '</b>' + t.slice(i); }
   function messBuehneSetzen(zieht) {
     var st = schritt(), l = MESS_LAGE[art][mess.i];
     messBuehne.setAttribute('data-wer', st.wer); messBuehne.setAttribute('data-r', st.r);
-    var src = 'bilder/mess/' + art + '-' + (mess.i + 1) + '.webp';
-    if (messBild.getAttribute('src') !== src) {
-      /* erst dekodieren, dann tauschen: das Modell ist je Element in allen vier Bildern dasselbe, es blendet nicht ab */
-      var neu = new Image(); neu.src = src; var nr = (messBild._nr = (messBild._nr || 0) + 1);
-      (neu.decode ? neu.decode() : Promise.resolve()).catch(function () {}).then(function () { if (messBild._nr === nr) messBild.src = src; });
-    }
+    var src = 'bilder/mess/' + art + '.webp';
+    if (messBild.getAttribute('src') !== src) messBild.src = src;
     var W = messBuehne.clientWidth || 358, S = messBuehne.clientHeight || 235, rand = 8;
     var iw = Math.min(W, S * BILD_R), ih = iw / BILD_R, il = (W - iw) / 2, it = (S - ih) / 2;
     [messBild, messSvg].forEach(function (e) { e.style.left = il + 'px'; e.style.top = it + 'px'; e.style.width = iw + 'px'; e.style.height = ih + 'px'; });
     messBild.classList.toggle('ist-schmal', iw < W - 1);
     var P = function (px, py) { return [il + px / 100 * iw, it + py / 100 * ih]; }, A = P(l[0], l[1]), B = P(l[2], l[3]);
     Array.prototype.forEach.call(messSvg.querySelectorAll('line'), function (ln) { ln.setAttribute('x1', l[0]); ln.setAttribute('y1', l[1]); ln.setAttribute('x2', l[2]); ln.setAttribute('y2', l[3]); });
+    /* Strichelung passend zur Länge: an beiden Strichmarken ein voller Strich */
+    var lang = Math.hypot(B[0] - A[0], B[1] - A[1]), nStr = Math.max(2, Math.round((lang + 4) / 10)), strich = (lang - (nStr - 1) * 4) / nStr;
+    messSvg.style.setProperty('--strich', strich.toFixed(2) + 'px');
+    messSvg.style.setProperty('--a', (st.r === 'v' ? l[1] : l[0]) + '%'); messSvg.style.setProperty('--b', (st.r === 'v' ? l[3] : l[2]) + '%');
     var ka = $('mess-kappe-a'), kb = $('mess-kappe-b'); ka.style.left = A[0] + 'px'; ka.style.top = A[1] + 'px'; kb.style.left = B[0] + 'px'; kb.style.top = B[1] + 'px';
     var en = tuer() && st.endenTuer ? st.endenTuer : st.enden, ea = $('mess-ende-a'), eb = $('mess-ende-b');
-    ea.firstChild.textContent = en[0]; eb.firstChild.textContent = en[1];
-    /* Hindernisse: der Schritt-Chip und ein Rand um jedes Linienende */
-    var cR = messChip.getBoundingClientRect(), sR = messBuehne.getBoundingClientRect();
-    var hin = [{ x: cR.left - sR.left - 4, y: cR.top - sR.top - 4, w: cR.width + 8, h: cR.height + 8 }, { x: A[0] - 9, y: A[1] - 9, w: 18, h: 18 }, { x: B[0] - 9, y: B[1] - 9, w: 18, h: 18 }];
-    function legen(el, kand) {
-      var w = el.offsetWidth, h = el.offsetHeight, wahl = null;
+    ea.firstChild.innerHTML = endeText(en[0]); eb.firstChild.innerHTML = endeText(en[1]);
+    /* Schritt-Chip: berührt er ein Linienende, fällt „· Messen“ weg */
+    var sR = messBuehne.getBoundingClientRect(), endKast = function (p) { return { x: p[0] - 9, y: p[1] - 9, w: 18, h: 18 }; };
+    messChip.classList.remove('ist-kurz');
+    var chipR = function () { var c = messChip.getBoundingClientRect(); return { x: c.left - sR.left - 4, y: c.top - sR.top - 4, w: c.width + 8, h: c.height + 8 }; };
+    if (schneidet(chipR(), endKast(A)) || schneidet(chipR(), endKast(B))) messChip.classList.add('ist-kurz');
+    var hin = [chipR(), endKast(A), endKast(B)];
+    function legen(el, kand, breite) {
+      var w = Math.max(el.offsetWidth, breite || 0), h = el.offsetHeight, wahl = null;
       for (var i = 0; i < kand.length; i++) {
-        var r = { x: Math.max(rand, Math.min(W - rand - w, kand[i][0](w))), y: Math.max(rand, Math.min(S - rand - h, kand[i][1](h))), w: w, h: h };
-        if (!wahl) wahl = r;
-        if (!hin.some(function (o) { return schneidet(r, o); })) { wahl = r; break; }
+        var k = kand[i], x = k.x(w), r = { x: Math.max(rand, Math.min(W - rand - w, x)), y: Math.max(rand, Math.min(S - rand - h, k.y(h))), w: w, h: h };
+        if (!wahl) wahl = { r: r, k: k };
+        if (!hin.some(function (o) { return schneidet(r, o); })) { wahl = { r: r, k: k }; break; }
       }
-      el.style.left = Math.round(wahl.x) + 'px'; el.style.top = Math.round(wahl.y) + 'px'; hin.push(wahl);
+      hin.push(wahl.r); return wahl;
     }
-    var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2;
-    if (st.r === 'v') {
-      /* senkrecht: das Feld links an der Linie auf halber Höhe, die Etiketten rechts genau auf Höhe der Enden */
-      legen(messFeld, [[function (w) { return mx - 12 - w; }, function (h) { return my - h / 2; }], [function () { return mx + 12; }, function (h) { return my - h / 2; }]]);
-      [[ea, A], [eb, B]].forEach(function (p) {
-        var x = p[1][0], y = p[1][1];
-        legen(p[0], [[function () { return x + 12; }, function (h) { return y - h / 2; }], [function (w) { return x - 12 - w; }, function (h) { return y - h / 2; }],
-          [function () { return x + 12; }, function (h) { return p[0] === ea ? y + 10 : y - 10 - h; }]]);
-      });
-    } else {
-      /* waagerecht: das Feld unter der Linie in der Mitte, die Etiketten über den Enden */
-      legen(messFeld, [[function (w) { return mx - w / 2; }, function () { return my + 16; }], [function (w) { return mx - w / 2; }, function (h) { return my - 16 - h; }]]);
-      [[ea, A, -1], [eb, B, 1]].forEach(function (p) {
-        var x = p[1][0], y = p[1][1];
-        legen(p[0], [[function (w) { return x - w / 2; }, function (h) { return y - 14 - h; }], [function (w) { return p[2] < 0 ? x - 12 - w : x + 12; }, function (h) { return y - h / 2; }],
-          [function (w) { return x - w / 2; }, function () { return y + 14; }]]);
-      });
-    }
+    var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, FB = messBuehne.classList.contains('ist-klein') ? 140 : 190;
+    /* Feld an der Linienseite verankern (--fx), geprüft mit der größten Breite (fünf Ziffern, „mm“, Haken) */
+    var f = st.r === 'v'
+      ? legen(messFeld, [{ x: function (w) { return mx - 12 - w; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx - 12, '-100%']; } },
+          { x: function (w) { return mx - 12 - w; }, y: function () { return hin[0].y + hin[0].h + 2; }, anker: function () { return [mx - 12, '-100%']; } },
+          { x: function (w) { return mx - 12 - w; }, y: function (h) { return S - rand - h; }, anker: function () { return [mx - 12, '-100%']; } },
+          { x: function () { return mx + 12; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx + 12, '0']; } }], FB)
+      : legen(messFeld, [{ x: function (w) { return mx - w / 2; }, y: function () { return my + 24; }, anker: function () { return [mx, '-50%']; } },
+          { x: function (w) { return mx - w / 2; }, y: function (h) { return my - 24 - h; }, anker: function () { return [mx, '-50%']; } }], FB);
+    /* Anker an der Linie, solange die volle Breite (FB) in die Bühne passt; sonst am Rand begrenzt, die Zahl wächst dann zur Linie hin */
+    var an = f.k.anker(), links = an[1] === '-100%' ? an[0] - FB : an[1] === '-50%' ? an[0] - FB / 2 : an[0];
+    if (links < rand || links + FB > W - rand) an = [f.r.x, '0'];
+    messFeld.style.left = Math.round(an[0]) + 'px'; messFeld.style.top = Math.round(f.r.y) + 'px'; messFeld.style.setProperty('--fx', an[1]);
+    [[ea, A, -1], [eb, B, 1]].forEach(function (p) {
+      var x = p[1][0], y = p[1][1], kand = st.r === 'v'
+        ? [{ x: function () { return x + 12; }, y: function (h) { return y - h / 2; } }, { x: function (w) { return x - 12 - w; }, y: function (h) { return y - h / 2; } },
+           { x: function () { return x + 12; }, y: function (h) { return p[2] < 0 ? y + 10 : y - 10 - h; } }]
+        : [{ x: function (w) { return x - w / 2; }, y: function (h) { return y - 14 - h; } }, { x: function (w) { return p[2] < 0 ? x - 12 - w : x + 12; }, y: function (h) { return y - h / 2; } },
+           { x: function (w) { return x - w / 2; }, y: function () { return y + 14; } }];
+      var g = legen(p[0], kand); p[0].style.left = Math.round(g.r.x) + 'px'; p[0].style.top = Math.round(g.r.y) + 'px';
+    });
     $('mess-bildtext').textContent = 'Modell: ' + (st.wer === 'mo' ? 'Maueröffnung' : ART[art].name.replace('‑', '-')) + ', gemessen wird ' + (st.r === 'v' ? 'senkrecht' : 'waagerecht') + ' von „' + en[0] + '“ bis „' + en[1] + '“.';
     if (zieht && !ruhig()) { messBuehne.classList.remove('zieht'); void messBuehne.offsetWidth; messBuehne.classList.add('zieht'); }
+    else messBuehne.classList.remove('zieht');
   }
   function messFeldSetzen() {
     var st = schritt(), v = num(mess.cur), leer = !mess.cur;
-    messZahl.textContent = leer ? 'z. B. ' + tausend(ueblich(st.r)[2]) : tausend(v);
+    messZahl.textContent = tausend(leer ? ueblich(st.r)[2] : v);
     messFeld.classList.toggle('is-leer', leer);
-    messFeld.classList.toggle('is-fehler', !!(mess.msg && mess.msg.cls === 'fehler'));
-    $('mess-wert').textContent = v ? tausend(v) + ' Millimeter' : '';
+    messFeld.classList.toggle('is-fehler', !!(mess.msg && (mess.msg.cls === 'fehler' || mess.msg.cls === 'warn')) || v > 6000);
+    $('mess-wert').textContent = v ? 'Im Feld: ' + tausend(v) + ' Millimeter' : 'Feld leer';
   }
+  /* Kopfsatz einer Meldung fett, der Rest leise; die Texte selbst sind die der App */
+  function zweiStufen(t) { var m = t.match(/^(.+?[.)]\.?)\s+(.+)$/); return m ? '<b>' + m[1] + '</b>' + m[2] : '<b>' + t + '</b>'; }
   /* Die Zeile über den Tasten (feste Höhe, die Tasten springen nicht): oben der Hinweis zum Anlegen, darunter Umrechnung oder das
      zuletzt gespeicherte Maß; an ihrer Stelle die Rückfrage, die Warnung („Stimmt so“ klein) oder der Fehler. Die Pille trägt dann die
-     sichere Antwort: „Ja, 1.410 mm“ bei Zentimetern, „Korrigieren“ bei einer Warnung. */
-  var pilleArt = 'weiter', pilleSperre = 0;
+     sichere Antwort: „Ja, 1.410 mm“ bei Zentimetern, „Korrigieren“ bei einer Warnung. Vorgelesen wird über status(), nicht die Zeile. */
+  var pilleArt = 'weiter', pilleSperre = 0, halteT = 0;
   function cmJetzt() { var st = schritt(), v = num(mess.cur), m = mess.msg; return m && m.cm ? m.cm / 10 : (!m && mess.cmLive && cmFrage(v, st.r) ? v : 0); }
   function messZeileSetzen() {
     var st = schritt(), v = num(mess.cur), m = mess.msg, cm = cmJetzt(), html, hinweis = false, warn = false;
     var tipp = '<b class="ez-zeile__hinweis">' + (st.chip === 'nicht' ? 'Nicht am Rahmen messen' : 'Rahmen außen, nicht Flügel') + '</b>';
     var bsp = ueblich(st.r)[2], vorher = mess.i ? mess.werte[MESS[mess.i - 1].k] : 0;
-    if (mess.gespeichert) html = '<p class="ez-zeile__text"><b>Gespeichert: ' + tausend(mess.gespeichert) + ' mm</b>Weiter zu Maß ' + (mess.i + 2) + '.</p>';
+    if (mess.gespeichert) html = '<p class="ez-zeile__text"><b>Gespeichert: ' + tausend(mess.gespeichert) + NB + 'mm</b>Weiter zu Maß' + NB + (mess.i + 2) + '.</p>';
     else if (mess.fertig) html = '<p class="ez-zeile__text"><b>Alle vier Maße stehen.</b>In der App folgen jetzt die Ränder.</p>';
-    else if (m && m.cls === 'warn') { hinweis = warn = true; html = '<p class="ez-zeile__text">' + m.text + '</p><button type="button" class="ez-zeile__knopf" id="mess-stimmt">Stimmt so</button>'; }
-    else if (cm) html = '<p class="ez-zeile__text"><b>Zollstock zeigt ' + cm + ' cm?</b>Bei ' + cm + ',5 cm: ' + cm + '5 tippen</p>';
-    else if (m && m.cls === 'fehler') { hinweis = true; html = '<p class="ez-zeile__text">' + m.text + '</p>'; }
-    else if (v > 6000) { hinweis = true; html = '<p class="ez-zeile__text">Höchstens 6.000 mm. Bitte in Millimetern.</p>'; }
-    else if (v && mess.ersetzen) html = '<p class="ez-zeile__text">' + tipp + 'Bisher: ' + tausend(v) + ' mm. Tippen ersetzt das Maß.</p>';
-    else if (v >= 250) html = '<p class="ez-zeile__text">' + tipp + '= ' + String(Math.round(v) / 10).replace('.', ',') + ' cm</p>';
-    else if (vorher) html = '<p class="ez-zeile__text">' + tipp + 'Maß ' + mess.i + ' gespeichert: ' + tausend(vorher) + ' mm</p>';
-    else html = '<p class="ez-zeile__text">' + tipp + 'In Millimetern: ' + String(bsp / 10).replace('.', ',') + ' cm = ' + tausend(bsp) + ' mm</p>';
+    else if (m && m.cls === 'warn') { hinweis = warn = true; html = '<p class="ez-zeile__text">' + zweiStufen(m.text) + '</p><button type="button" class="ez-zeile__knopf" id="mess-stimmt">Stimmt so</button>'; }
+    else if (cm) html = '<p class="ez-zeile__text"><b>Zollstock zeigt ' + cm + NB + 'cm?</b>Bei ' + cm + ',5' + NB + 'cm: ' + cm + '5 tippen</p>' + (cm >= 250 ? '<button type="button" class="ez-zeile__knopf" id="mess-nein">Nein, ' + tausend(cm) + NB + 'mm</button>' : '');
+    else if (m && m.cls === 'fehler') { hinweis = true; html = '<p class="ez-zeile__text">' + zweiStufen(m.text) + '</p>'; }
+    else if (v > 6000) { hinweis = true; html = '<p class="ez-zeile__text"><b>Höchstens 6.000' + NB + 'mm.</b>Bitte in Millimetern.</p>'; }
+    else if (v && mess.ersetzen) html = '<p class="ez-zeile__text">' + tipp + 'Bisher: ' + tausend(v) + NB + 'mm. Tippen ersetzt das Maß.</p>';
+    else if (v >= 250) html = '<p class="ez-zeile__text">' + tipp + '=' + NB + String(Math.round(v) / 10).replace('.', ',') + NB + 'cm</p>';
+    else if (vorher) html = '<p class="ez-zeile__text">' + tipp + 'Maß' + NB + mess.i + ' gespeichert: ' + tausend(vorher) + NB + 'mm</p>';
+    else html = '<p class="ez-zeile__text">' + tipp + 'In Millimetern: ' + String(bsp / 10).replace('.', ',') + NB + 'cm = ' + tausend(bsp) + NB + 'mm</p>';
     if (messZeile._h !== html) { messZeile._h = html; messZeile.innerHTML = html; }
     messZeile.classList.toggle('ist-hinweis', hinweis); messZeile.classList.toggle('ist-warnung', warn);
-    var stimmt = $('mess-stimmt'); if (stimmt) stimmt.addEventListener('click', function () { mess.ack = true; messWeiter(); });
     pilleSetzen(cm ? 'ja' : warn ? 'korr' : 'weiter', cm);
   }
+  /* Knöpfe der Zeile einmal per Delegation gebunden (kein doppelter Aufruf) */
+  messZeile.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('button'); if (!t || mess.sperre) return;
+    if (t.id === 'mess-stimmt') { messWeiterKnopf.focus({ preventScroll: true }); mess.ack = true; messWeiter(); }
+    else if (t.id === 'mess-nein') { messWeiterKnopf.focus({ preventScroll: true }); mess.mmOk = num(mess.cur); mess.cmLive = false; mess.msg = null; messWeiter(); }
+  });
   function pilleSetzen(artNeu, cm) {
-    var label = artNeu === 'ja' ? 'Ja, ' + tausend(cm * 10) + ' mm' : artNeu === 'korr' ? 'Korrigieren' : mess.i < 3 ? 'Weiter zu Maß ' + (mess.i + 2) : 'Weiter zu den Rändern';
-    pilleArt = artNeu; messWeiterKnopf.setAttribute('data-cm', cm ? cm * 10 : '');
+    var label = artNeu === 'ja' ? 'Ja, ' + tausend(cm * 10) + NB + 'mm' : artNeu === 'korr' ? 'Korrigieren' : mess.i < 3 ? 'Weiter zu Maß' + NB + (mess.i + 2) : 'Weiter zu den Rändern';
+    pilleArt = artNeu; messWeiterKnopf.setAttribute('data-cm', cm ? cm * 10 : ''); messWeiterKnopf.setAttribute('data-art', artNeu);
     if (messWeiterKnopf.firstChild.textContent !== label + ' ') messWeiterKnopf.firstChild.textContent = label + ' ';
   }
-  function pilleTippen() {
+  function pilleTippen(ausTastatur) {
     if (Date.now() < pilleSperre || mess.sperre) return;
-    if (pilleArt === 'ja') { mess.cur = messWeiterKnopf.getAttribute('data-cm'); mess.msg = null; mess.cmLive = false; return messWeiter(); }
-    if (pilleArt === 'korr') { mess.cur = ''; mess.msg = null; mess.ack = false; messFeldSetzen(); messZeileSetzen(); status('Feld geleert. Bitte neu messen und eintippen.'); return; }
-    messWeiter();
+    if (pilleArt === 'ja') { mess.cur = messWeiterKnopf.getAttribute('data-cm'); mess.msg = null; mess.cmLive = false; return messWeiter(ausTastatur); }
+    if (pilleArt === 'korr') { mess.cur = ''; mess.msg = null; mess.ack = false; pilleSperre = Date.now() + 450; messFeldSetzen(); messZeileSetzen(); status('Feld geleert. Bitte neu messen und eintippen.'); return; }
+    messWeiter(ausTastatur);
   }
   function messFussSetzen() {
     var st = schritt();
     var zur = mess.i ? 'Voriges Maß' : 'Zurück zu den Fotos';
     $('mess-zurueck').setAttribute('aria-label', zur); folien.messen.querySelector('[data-mess-zurueck]').setAttribute('aria-label', zur);
-    $('mess-l').textContent = 'Maß ' + (mess.i + 1) + ' von 4';
+    $('mess-l').textContent = 'Maß' + NB + (mess.i + 1) + NB + 'von' + NB + '4';
     Array.prototype.forEach.call($('mess-kapseln').children, function (k, n) { k.className = n < mess.i || (mess.fertig && n === 3) ? 'ist-fertig' : n === mess.i ? 'ist-dran' : ''; });
     $('mess-h1').innerHTML = messTitel(st);
     $('mess-unterzeile').textContent = tuer() && st.subTuer ? st.subTuer : st.sub;
@@ -415,57 +441,81 @@
     $('mess-erkl-text').innerHTML = gl.x.map(function (t) { return '<p>' + t + '</p>'; }).join('') + '<p class="ez-bogen__tipp"><b>Tipp:</b> ' + gl.tipp + '</p>';
   }
   function messAlles(zieht) { messFussSetzen(); messBuehneSetzen(zieht); messFeldSetzen(); messZeileSetzen(); }
+  var messTitelText = function () { return (MESS[mess.i].r === 'v' ? 'Höhe ' : 'Breite ') + $('mess-h1').textContent.replace(/^(Höhe|Breite)\s*/, ''); };
   function messZeigen() {
-    MESS.forEach(function (st, n) { var i = new Image(); i.src = 'bilder/mess/' + art + '-' + (n + 1) + '.webp'; });
-    requestAnimationFrame(function () { messFussSetzen(); messHoeheSetzen(); messAlles(false); });
+    var i = new Image(); i.src = 'bilder/mess/' + art + '.webp';
+    requestAnimationFrame(function () { messPlatzReservieren(); messFussSetzen(); messHoeheSetzen(); messBreite = messBuehne.clientWidth; messAlles(false); });
   }
-  /* Tippen: die Ziffer steht sofort im Feld; nach einer Pause von 0,8 s fragt die Zeile nach Zentimetern (wie in der App) */
-  function messTaste(t) {
-    if (mess.sperre) return;
+  /* Halten nach dem Speichern beenden und zum nächsten Maß (auch wenn schon die nächste Ziffer kommt) */
+  function naechstes(ausTastatur) {
+    clearTimeout(halteT); if (!mess.sperre) return;
+    mess.gespeichert = 0; mess.sperre = false; messFeld.classList.remove('ist-gespeichert');
+    mess.i++; var w = mess.werte[schritt().k]; mess.cur = w ? String(w) : ''; mess.ersetzen = !!w; mess.mmOk = 0;
+    messAlles(!ausTastatur);
+    status('Maß ' + (mess.i + 1) + ' von 4: ' + messTitelText());
+  }
+  /* Tippen: die Ziffer steht sofort im Feld; nach einer Pause von 0,8 s fragt die Zeile nach Zentimetern (wie in der App, auch in der ruhigen Fassung) */
+  function messTaste(t, ausTastatur) {
+    if (mess.sperre) naechstes(ausTastatur);
     if (mess.fertig) { mess.fertig = false; }
     if (t === 'del') { if (mess.ersetzen) { mess.cur = ''; mess.ersetzen = false; } else mess.cur = mess.cur.slice(0, -1); }
     else { if (mess.ersetzen) { mess.cur = ''; mess.ersetzen = false; } if (mess.cur.length < 5 && !(mess.cur === '' && t === '0')) mess.cur += t; }
-    mess.msg = null; mess.ack = false; mess.cmLive = false; clearTimeout(cmTimer);
-    var v = num(mess.cur); if (cmFrage(v, schritt().r)) cmTimer = setTimeout(function () { mess.cmLive = true; messZeileSetzen(); }, ruhig() ? 0 : 800);
+    /* Eine neue Ziffer ist eine bewusste Eingabe: die Sperre gegen den Doppeltipp fällt */
+    mess.msg = null; mess.ack = false; mess.cmLive = false; clearTimeout(cmTimer); pilleSperre = 0;
+    var v = num(mess.cur);
+    if (cmFrage(v, schritt().r)) cmTimer = setTimeout(function () { mess.cmLive = true; pilleSperre = Date.now() + 450; messZeileSetzen(); status('Zollstock zeigt ' + v + ' Zentimeter? Dann Ja, ' + tausend(v * 10) + ' Millimeter.'); }, 800);
     messFeldSetzen(); messZeileSetzen();
   }
-  /* Weiter: prüfen, speichern, die gespeicherte Zahl kurz zeigen (0,35 s), dann das nächste Maß; eine Warnung braucht „Stimmt so“ */
-  function messWeiter() {
+  /* Weiter: prüfen, speichern, die gespeicherte Zahl kurz zeigen (0,35 s, auch in der ruhigen Fassung), dann das nächste Maß */
+  function messWeiter(ausTastatur) {
+    if (mess.sperre) return;
     var st = schritt(), v = num(mess.cur), chk = pruefe(v, st);
     if (mess.fertig) return status('In der App geht es jetzt zu den Rändern.');
+    if (mess.mmOk && mess.mmOk === v && chk.cm) chk = { ok: true };
     /* Rückfrage oder Warnung nach „Weiter“: die Pille bekommt eine neue Bedeutung und ist 0,45 s taub, damit ein Doppeltipp sie nicht auslöst */
-    if (!chk.ok) { mess.msg = chk.cm ? { cm: chk.cm } : { cls: 'fehler', text: chk.msg }; pilleSperre = Date.now() + 450; messFeldSetzen(); messZeileSetzen(); status(chk.cm ? 'Zollstock zeigt ' + chk.cm / 10 + ' Zentimeter?' : chk.msg); return; }
-    if (chk.warn && !mess.ack) { mess.msg = { cls: 'warn', text: chk.warn }; pilleSperre = Date.now() + 450; messFeldSetzen(); messZeileSetzen(); status(chk.warn); return; }
+    if (!chk.ok) { mess.msg = chk.cm ? { cm: chk.cm } : { cls: 'fehler', text: chk.msg }; pilleSperre = Date.now() + 450; messFeldSetzen(); messZeileSetzen(); status(chk.cm ? 'Zollstock zeigt ' + chk.cm / 10 + ' Zentimeter? Dann Ja, ' + tausend(chk.cm) + ' Millimeter.' : chk.msg); return; }
+    if (chk.warn && !mess.ack) { mess.msg = { cls: 'warn', text: chk.warn }; pilleSperre = Date.now() + 450; messFeldSetzen(); messZeileSetzen(); status(chk.warn + ' Korrigieren oder Stimmt so.'); return; }
     mess.werte[st.k] = v; mess.msg = null; mess.ack = false; mess.cmLive = false; clearTimeout(cmTimer);
-    if (mess.i === 3) { mess.fertig = true; mess.cur = String(v); messFeldSetzen(); messZeileSetzen(); messFussSetzen(); status('Alle vier Maße stehen. In der App folgen jetzt die Ränder.'); return; }
+    $('mess-kapseln').children[mess.i].className = 'ist-fertig';
+    if (mess.i === 3) { mess.fertig = true; mess.cur = String(v); messFeldSetzen(); messZeileSetzen(); messFussSetzen(); status('Gespeichert: ' + tausend(v) + ' Millimeter. Alle vier Maße stehen. In der App folgen jetzt die Ränder.'); return; }
     mess.cur = String(v); mess.gespeichert = v; mess.sperre = true; messFeld.classList.add('ist-gespeichert'); messFeldSetzen(); messZeileSetzen();
     status('Gespeichert: ' + tausend(v) + ' Millimeter.');
-    setTimeout(function () {
-      mess.gespeichert = 0; mess.sperre = false; messFeld.classList.remove('ist-gespeichert');
-      mess.i++; var w = mess.werte[schritt().k]; mess.cur = w ? String(w) : ''; mess.ersetzen = !!w; messAlles(true); status('Maß ' + (mess.i + 1) + ' von 4.');
-    }, ruhig() ? 0 : 350);
+    halteT = setTimeout(function () { naechstes(ausTastatur); }, 350);
   }
   function messZurueck() {
-    if (mess.sperre) return;
+    if (mess.sperre) naechstes(true);
     clearTimeout(cmTimer); mess.msg = null; mess.ack = false; mess.cmLive = false;
     if (mess.fertig) mess.fertig = false;
     if (mess.i === 0) return zeigeFolie('fotos', -1);
-    mess.i--; var w = mess.werte[schritt().k]; mess.cur = w ? String(w) : ''; mess.ersetzen = !!w; messAlles(true);
+    mess.i--; var w = mess.werte[schritt().k]; mess.cur = w ? String(w) : ''; mess.ersetzen = !!w; mess.mmOk = 0; messAlles(true);
+    status('Maß ' + (mess.i + 1) + ' von 4: ' + messTitelText() + (w ? ' Bisher ' + tausend(w) + ' Millimeter, Tippen ersetzt das Maß.' : ''));
   }
+  /* Tasten: Druck sichtbar per Klasse (Touch zeigt :active unzuverlässig), keine Fokusübernahme bei Mausklick (Enter heißt am Rechner „Weiter“) */
+  var tastenFeld = folien.messen.querySelector('.ez-tasten'), gedrueckt = null;
+  function loslassen() { if (gedrueckt) { gedrueckt.classList.remove('ist-gedrueckt'); gedrueckt = null; } }
+  tastenFeld.addEventListener('pointerdown', function (e) { var k = e.target.closest('.ez-taste[data-taste]'); tastenFeld.classList.remove('ist-tastatur'); loslassen(); if (k) { gedrueckt = k; k.classList.add('ist-gedrueckt'); } });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { tastenFeld.addEventListener(n, loslassen); });
+  tastenFeld.addEventListener('mousedown', function (e) { if (e.target.closest('.ez-taste')) e.preventDefault(); });
   folien.messen.querySelectorAll('.ez-taste[data-taste]').forEach(function (b) { b.addEventListener('click', function () { messTaste(b.getAttribute('data-taste')); }); });
-  messWeiterKnopf.addEventListener('click', pilleTippen);
+  messWeiterKnopf.addEventListener('click', function () { pilleTippen(false); });
   $('mess-zurueck').addEventListener('click', messZurueck);
   folien.messen.querySelector('[data-mess-zurueck]').addEventListener('click', messZurueck);
   bogenBinden($('mess-erkl'), $('mess-i'));
-  /* Tastatur am Rechner: Ziffern, Rücktaste, Eingabe (wie die Pille); ohne Übergang, nur solange die Folie offen und kein Bogen da ist */
+  /* Tastatur am Rechner: Ziffern, Rücktaste, Eingabe (wie die Pille); die passende Taste drückt sichtbar mit, ohne Übergang */
   d.addEventListener('keydown', function (e) {
     if (folien.messen.hidden || offenerBogen || e.altKey || e.ctrlKey || e.metaKey) return;
     var t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
-    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); messTaste(e.key); }
-    else if (e.key === 'Backspace') { e.preventDefault(); messTaste('del'); }
-    else if (e.key === 'Enter' && (!t || !t.closest || !t.closest('button, a'))) { e.preventDefault(); pilleTippen(); }
+    var taste = /^[0-9]$/.test(e.key) ? e.key : e.key === 'Backspace' ? 'del' : null;
+    if (taste) { e.preventDefault(); tastenFeld.classList.add('ist-tastatur'); loslassen(); gedrueckt = tastenFeld.querySelector('[data-taste="' + taste + '"]'); if (gedrueckt) gedrueckt.classList.add('ist-gedrueckt'); messTaste(taste, true); }
+    else if (e.key === 'Enter' && (!t || !t.closest || !t.closest('button, a'))) { e.preventDefault(); pilleTippen(true); }
   });
-  window.addEventListener('resize', function () { if (!folien.messen.hidden) { messHoeheSetzen(); messBuehneSetzen(false); } });
+  d.addEventListener('keyup', function () { if (tastenFeld.classList.contains('ist-tastatur')) loslassen(); });
+  /* Größe: gebündelt, und nur bei geänderter Breite neu rechnen (die Adressleiste verschiebt sonst die Bühne) */
+  var groesseRaf = 0;
+  window.addEventListener('resize', function () {
+    if (folien.messen.hidden || groesseRaf) return;
+    groesseRaf = requestAnimationFrame(function () { groesseRaf = 0; var b = messBuehne.clientWidth; if (b === messBreite) return; messBreite = b; messPlatzReservieren(); messFussSetzen(); messHoeheSetzen(); messBuehneSetzen(false); });
+  });
 
   setzeArt('fenster');
   if (bild.complete) lageSetzen(); else bild.addEventListener('load', function () { lageSetzen(); }, { once: true });

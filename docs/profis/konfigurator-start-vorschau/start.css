@@ -307,75 +307,114 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 .ez-notiz__folie > .ez-klein { margin-top: 20px; }
 
 /* ---------- Schritt 3: Messen (27.10.2026) ----------
-   Bühne = die Wand (G14), darin das Modell der App mit der Laibung als Vertiefung; nur das aktuelle Maß: Öffnung Koralle gestrichelt,
-   Element Violett durchgezogen, Strichmarken an den Enden, Etiketten an der Sache, das weiße Feld auf der Linie (G3, G9, G5).
-   Zifferntasten offen auf der weißen Karte, Rückfragen am Platz der Zeile, kein Zwischenschritt (DNA, Abschnitt 9). */
-.ez-buehne--mess { height: 235px; cursor: default; touch-action: auto; background: radial-gradient(120% 100% at 26% 8%, #f3eee6, #e9e2d7 58%, #dcd4c7); }
-.ez-buehne--mess .ez-buehne__kante { z-index: 2; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 0 1px rgba(7,9,10,.08), inset 0 -70px 90px -70px rgba(7,9,10,.22); }
-/* Modell der Wünsche als Bild; ist die Bühne flacher als das Bild, steht es eingepasst und läuft an den Seiten in die Wand aus */
+   Bühne = das 3-D-Modell der Wünsche (WebGL, Putzwand, Laibung, Glas) als Bild, Licht und Rand drumherum frei; nur das aktuelle Maß:
+   Öffnung Koralle gestrichelt, Element Violett durchgezogen, Strichmarken an den Enden, Etiketten auf Höhe der Enden, das weiße Feld
+   an der Linie mit der Zahl als Held (G3, G9, G5). Zifferntasten offen auf der weißen Karte, Rückfragen am Platz der Zeile, die
+   eine Pille trägt die sichere Antwort, kein Zwischenschritt (DNA, Abschnitt 9). Bewegung nur transform und opacity. */
+.ez-folie[data-folie="messen"] { position: relative; isolation: isolate; }
+.ez-folie[data-folie="messen"]::before { content: ""; position: absolute; inset: 0 -16px; z-index: -1; pointer-events: none; background: radial-gradient(60% 18% at 50% 22%, #141517, transparent 72%), radial-gradient(70% 24% at 50% 70%, #141517, transparent 72%); }
+.ez-buehne--mess { height: 235px; cursor: default; touch-action: auto; background: radial-gradient(120% 100% at 26% 8%, #f3eee6, #e9e2d7 58%, #dcd4c7); box-shadow: 0 0 0 2px var(--anthrazit), 0 0 0 3px rgba(255,255,255,.06), 0 34px 60px -26px rgba(0,0,0,.9); }
+/* Licht mit Abfall: hell auf der Mitte des Modells, zum Rand warm dunkler; einmal gemalt, ohne Filter */
+.ez-buehne--mess .ez-buehne__kante { z-index: 2; background: linear-gradient(160deg, rgba(255,251,244,.14) 0%, rgba(255,251,244,0) 36%), radial-gradient(72% 90% at 55% 44%, rgba(58,46,34,0) 50%, rgba(58,46,34,.14) 76%, rgba(26,20,14,.4) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(7,9,10,.10); }
+.ez-buehne--mess .ez-glaschip.ist-kurz .ez-glaschip__zusatz { display: none; }
 .ez-mess__bild { position: absolute; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
 .ez-mess__bild.ist-schmal { -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+/* Linie: stumpfe Enden, die Strichelung passt sich der Länge an (start.js), damit an beiden Marken ein voller Strich steht */
 .ez-mass { position: absolute; z-index: 3; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.ez-mass__linie { stroke: var(--koralle); stroke-width: 1.8; stroke-linecap: round; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
-.ez-mass__halo { stroke: rgba(7,9,10,.6); stroke-width: 4.2; stroke-linecap: round; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
-[data-wer="el"] .ez-mass__halo { stroke-dasharray: none; }
-[data-wer="el"] .ez-mass__linie { stroke: var(--violett); stroke-dasharray: none; }
-.ez-mass__kappe { position: absolute; z-index: 3; width: 14px; height: 1.8px; margin: -.9px 0 0 -7px; border-radius: 1px; background: var(--koralle); box-shadow: 0 0 0 1px rgba(7,9,10,.45); pointer-events: none; }
-[data-r="h"] .ez-mass__kappe { width: 1.8px; height: 14px; margin: -7px 0 0 -.9px; }
+.ez-mass__linie { stroke: var(--koralle); stroke-width: 2; stroke-linecap: butt; stroke-dasharray: var(--strich, 6px) 4px; vector-effect: non-scaling-stroke; }
+.ez-mass__halo { stroke: rgba(7,9,10,.42); stroke-width: 3.8; stroke-linecap: butt; stroke-dasharray: var(--strich, 6px) 4px; vector-effect: non-scaling-stroke; }
+[data-wer="el"] .ez-mass__halo, [data-wer="el"] .ez-mass__linie { stroke-dasharray: none; }
+[data-wer="el"] .ez-mass__linie { stroke: var(--violett); }
+.ez-mass__kappe { position: absolute; z-index: 3; width: 14px; height: 2px; margin: -1px 0 0 -7px; background: var(--koralle); box-shadow: 0 0 0 .9px rgba(7,9,10,.42); pointer-events: none; }
+[data-r="h"] .ez-mass__kappe { width: 2px; height: 14px; margin: -7px 0 0 -1px; }
 [data-wer="el"] .ez-mass__kappe { background: var(--violett); }
-.ez-mass__ende { position: absolute; z-index: 4; pointer-events: none; transition: opacity 150ms var(--dna-druck); }
-.ez-mass__ende .dna-etikett { display: block; max-width: 118px; padding: 6px 10px; border-radius: 12px; background: rgba(32,32,34,.92); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 16px -6px rgba(7,9,10,.55); font: 500 .8125rem/1.2 var(--font-sans); color: var(--weiss); white-space: normal; text-wrap: balance; }
-.ez-mass__feld { position: absolute; z-index: 5; display: inline-flex; align-items: center; gap: 5px; height: 46px; padding: 0 16px; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); box-shadow: 0 0 0 1.5px var(--violett), 0 12px 28px -10px rgba(0,0,0,.75), 0 2px 6px rgba(0,0,0,.35); white-space: nowrap; pointer-events: none; transition: opacity 150ms var(--dna-druck), box-shadow 150ms var(--dna-druck); }
-.ez-mass__feld b { font: 400 1.75rem/1 var(--font-sans); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
-.ez-mass__feld.is-leer b { font-size: 1rem; color: var(--textgrau); letter-spacing: 0; }
-.ez-mass__haken { display: none; width: 16px; height: 16px; margin-left: 2px; color: var(--weiss); background: var(--schwarz); border-radius: 50%; padding: 2px; box-sizing: content-box; }
-.ez-mass__feld.ist-gespeichert { box-shadow: 0 0 0 1.5px var(--schwarz), 0 12px 28px -10px rgba(0,0,0,.6); }
-.ez-mass__feld.ist-gespeichert .ez-mass__marke { display: none; }
-.ez-mass__feld.ist-gespeichert .ez-mass__haken { display: block; }
-.ez-mass__feld small { margin-top: 7px; font: 400 .875rem/1 var(--font-sans); color: var(--textgrau); }
-.ez-mass__feld.is-leer small { margin-top: 3px; }
-.ez-mass__marke { align-self: center; width: 2px; height: 22px; margin-left: 1px; border-radius: 1px; background: var(--violett); }
-.ez-mass__feld.is-leer .ez-mass__marke { order: -1; margin: 0 4px 0 -4px; }
-.ez-mass__feld.is-fehler { box-shadow: 0 0 0 2px var(--koralle), 0 12px 28px -10px rgba(0,0,0,.75), 0 2px 6px rgba(0,0,0,.35); }
+/* Etiketten wie in Schritt 1: dunkel, Radius 20, das Ding hell, der Zusatz Silbergrau; ohne Weichzeichner */
+.ez-mass__ende { position: absolute; z-index: 4; pointer-events: none; }
+.ez-mass__ende .dna-etikett { display: block; max-width: 132px; padding: 6px 12px; border-radius: 20px; background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 1px 8px 16px -8px rgba(40,30,20,.65); font: 400 .8125rem/1.25 var(--font-sans); color: var(--silbergrau); white-space: normal; text-wrap: balance; }
+.ez-mass__ende .dna-etikett b { font-weight: 500; color: var(--weiss); }
+.ez-buehne--mess.ist-klein .ez-mass__ende .dna-etikett { font-size: .75rem; max-width: 112px; padding: 5px 10px; }
+/* Kleine Bühne (Telefone mit wenig Höhe): Feld kleiner, damit es neben der Linie Platz hat und kein Etikett verdeckt */
+.ez-buehne--mess.ist-klein .ez-mass__feld { height: 44px; padding: 0 14px; }
+.ez-buehne--mess.ist-klein .ez-mass__feld b { font-size: 1.75rem; }
+.ez-buehne--mess.ist-klein .ez-mass__marke { height: 20px; }
+.ez-buehne--mess.ist-klein .ez-mass__feld.is-leer .ez-mass__zb { display: none; }
+.ez-buehne--mess.ist-klein .ez-mass__haken { right: 12px; }
+/* Feld an der Linie: an der Linienseite verankert, die Zahl wächst von der Linie weg; Zahl 40/300 mit Proportionalziffern, Einheit auf der Grundlinie */
+.ez-mass__feld { position: absolute; z-index: 5; display: inline-flex; align-items: baseline; gap: 0; height: 56px; padding: 0 18px; border-radius: var(--rund-pille); background: linear-gradient(180deg, #fff, #f6f3ee); color: var(--schwarz); translate: var(--fx, 0) 0; box-shadow: 0 0 0 1.5px var(--violett), inset 0 -2px 0 rgba(58,46,34,.07), 0 1px 2px rgba(58,46,34,.30), 2px 12px 22px -10px rgba(58,46,34,.60); white-space: nowrap; pointer-events: none; }
+.ez-mass__zb { display: none; }
+.ez-mass__feld b { align-self: center; font: 300 2.5rem/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: normal; }
+.ez-mass__feld small { margin: 0 0 0 .3em; font: 400 .875rem/1 var(--font-sans); color: var(--textgrau); transition: opacity 150ms var(--dna-druck); }
+.ez-mass__marke { align-self: center; width: 2px; height: 28px; margin: 0 -3px 0 2px; border-radius: 1px; background: var(--violett); transition: opacity 150ms var(--dna-druck); }
+.ez-mass__feld.is-leer .ez-mass__zb { display: block; align-self: center; margin-right: 8px; font: 500 .8125rem/1 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
+.ez-mass__feld.is-leer b { color: var(--silbergrau); }
+.ez-mass__feld.is-leer .ez-mass__marke { order: -1; margin: 0 6px 0 -6px; }
+.ez-mass__haken { position: absolute; right: 16px; top: 50%; width: 16px; height: 16px; margin-top: -10px; padding: 2px; box-sizing: content-box; border-radius: 50%; color: var(--weiss); background: var(--schwarz); opacity: 0; transform: scale(.6); transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck); }
+.ez-mass__feld.ist-gespeichert { box-shadow: 0 0 0 1.5px var(--schwarz), inset 0 -2px 0 rgba(58,46,34,.07), 0 1px 2px rgba(58,46,34,.30), 2px 12px 22px -10px rgba(58,46,34,.60); }
+.ez-mass__feld.ist-gespeichert small, .ez-mass__feld.ist-gespeichert .ez-mass__marke { opacity: 0; }
+.ez-mass__feld.ist-gespeichert .ez-mass__haken { opacity: 1; transform: none; }
+.ez-mass__feld.is-fehler { box-shadow: 0 0 0 2px var(--koralle), inset 0 -2px 0 rgba(58,46,34,.07), 0 1px 2px rgba(58,46,34,.30), 2px 12px 22px -10px rgba(58,46,34,.60); }
 .ez-mass__feld.is-fehler .ez-mass__marke { background: var(--koralle); }
-/* Nächstes Maß: Modell blendet über, die Linie zieht sich von Ende zu Ende, Enden und Feld folgen */
-.ez-buehne--mess.zieht .ez-mass { animation: ez-zieht-v 320ms var(--dna-auftritt) both; }
+/* Nächstes Maß: die Linie läuft in 320 ms von Kappe zu Kappe (Clip über ihre eigene Strecke), Kappe A sofort, Enden und Feld folgen */
+.ez-buehne--mess.zieht .ez-mass { animation: ez-zieht-v 320ms var(--dna-druck) both; }
 .ez-buehne--mess.zieht[data-r="h"] .ez-mass { animation-name: ez-zieht-h; }
-@keyframes ez-zieht-v { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
-@keyframes ez-zieht-h { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-.ez-buehne--mess.zieht .ez-mass__kappe, .ez-buehne--mess.zieht .ez-mass__ende, .ez-buehne--mess.zieht .ez-mass__feld { animation: ez-folgt 200ms var(--dna-druck) 160ms both; }
+@keyframes ez-zieht-v { from { clip-path: inset(0 0 calc(100% - var(--a, 0%)) 0); } to { clip-path: inset(0 0 calc(100% - var(--b, 100%) - 4px) 0); } }
+@keyframes ez-zieht-h { from { clip-path: inset(0 calc(100% - var(--a, 0%)) 0 0); } to { clip-path: inset(0 calc(100% - var(--b, 100%) - 4px) 0 0); } }
+.ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht .ez-mass__ende { animation: ez-folgt 200ms var(--dna-druck) 160ms both; }
+.ez-buehne--mess.zieht .ez-mass__feld { animation: ez-folgt 150ms var(--dna-druck) both; }
 @keyframes ez-folgt { from { opacity: 0; } }
-/* Karte mit den Zifferntasten */
-.ez-karte--tasten { gap: 8px; padding: 12px 16px 16px; }
+/* Karte mit den Zifferntasten (G14: tonaler Abfall, Kanten) */
+.ez-karte--tasten { gap: 8px; padding: 12px 16px 16px; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 9%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
 .ez-kapseln { display: inline-flex; gap: 5px; }
-.ez-kapseln i { width: 20px; height: 8px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 38%, var(--weiss)); transition: background-color 220ms var(--dna-druck); }
-.ez-kapseln i.ist-fertig { background: var(--schwarz); }
-.ez-kapseln i.ist-dran { background: var(--violett); }
+.ez-kapseln i { position: relative; overflow: hidden; width: 20px; height: 8px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 38%, var(--weiss)); }
+.ez-kapseln i::before, .ez-kapseln i::after { content: ""; position: absolute; inset: 0; border-radius: inherit; opacity: 0; transition: opacity 220ms var(--dna-druck); }
+.ez-kapseln i::before { background: var(--violett); }
+.ez-kapseln i::after { background: var(--schwarz); }
+.ez-kapseln i.ist-dran::before, .ez-kapseln i.ist-fertig::after { opacity: 1; }
+/* Zeile: eine linke Kante für alle Zustände, der Punkt hängt davor */
 .ez-zeile { display: flex; align-items: center; gap: 10px; height: 60px; }
-.ez-zeile__text { flex: 1; min-width: 0; margin: 0; font: 400 .875rem/1.35 var(--font-sans); color: var(--textgrau); text-wrap: pretty; }
+.ez-zeile__text { position: relative; flex: 1; min-width: 0; margin: 0; padding-left: 16px; font: 400 .875rem/1.35 var(--font-sans); color: var(--textgrau); text-wrap: pretty; }
 .ez-zeile__text b { display: block; font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
-.ez-zeile__text b.inline { display: inline; }
-.ez-zeile__hinweis { position: relative; display: block; padding-left: 14px; font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
-.ez-zeile__hinweis::before { content: ""; position: absolute; left: 0; top: .5em; width: 7px; height: 7px; border-radius: 50%; background: var(--koralle); }
-.ez-zeile.ist-hinweis .ez-zeile__text { position: relative; padding-left: 15px; color: var(--schwarz); }
+.ez-zeile__hinweis { position: relative; display: block; font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
+.ez-zeile__hinweis::before, .ez-zeile.ist-hinweis .ez-zeile__text::before { content: ""; position: absolute; left: -16px; top: calc(.65em - 4px); width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+.ez-zeile.ist-hinweis .ez-zeile__text::before { left: 0; }
 .ez-zeile.ist-warnung .ez-zeile__text { font-size: .8125rem; line-height: 1.3; }
-.ez-zeile.ist-hinweis .ez-zeile__text::before { content: ""; position: absolute; left: 0; top: .45em; width: 7px; height: 7px; border-radius: 50%; background: var(--koralle); }
-.ez-zeile__knopf { flex: none; height: 44px; padding: 0 14px; border: 0; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 .875rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; white-space: nowrap; transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
+.ez-zeile.ist-warnung .ez-zeile__text b { font-size: .875rem; line-height: 1.25; }
+.ez-zeile__knopf { flex: none; height: 44px; padding: 0 14px; border: 0; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 .875rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; white-space: nowrap; transition: transform 160ms var(--dna-druck); }
 .ez-zeile__knopf:active { transform: scale(.97); transition-duration: 0s; }
 .ez-zeile__knopf:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+/* Tasten: getönt, nie weiß, mit Lichtkante; der Druck kommt als Ebene (opacity) und als Skalierung, beides in 140 ms zurück */
 .ez-tasten { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.ez-taste { height: 48px; border: 0; padding: 0; border-radius: 16px; background: color-mix(in srgb, var(--silbergrau) 17%, var(--weiss)); color: var(--schwarz); font: 400 1.5rem/1 var(--font-sans); font-variant-numeric: tabular-nums; display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform 140ms var(--dna-druck), background-color 120ms ease; }
-.ez-taste:active, .ez-taste.ist-gedrueckt { transform: scale(.97); background: color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); transition-duration: 0s; }
+.ez-taste { position: relative; isolation: isolate; height: 48px; border: 0; padding: 0; border-radius: 16px; background: linear-gradient(180deg, color-mix(in srgb, var(--silbergrau) 8%, var(--weiss)), color-mix(in srgb, var(--silbergrau) 22%, var(--weiss))); box-shadow: inset 0 1px 0 var(--weiss), inset 0 0 0 1px rgba(7,9,10,.035), 0 1px 0 rgba(7,9,10,.09), 0 8px 14px -10px rgba(7,9,10,.28); color: var(--schwarz); font: 400 1.5rem/1 var(--font-sans); font-variant-numeric: tabular-nums; display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform 140ms var(--dna-druck); }
+.ez-taste::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); box-shadow: inset 0 1px 3px rgba(7,9,10,.16); opacity: 0; transition: opacity 140ms var(--dna-druck); }
+.ez-taste:active, .ez-taste.ist-gedrueckt { transform: scale(.97); transition-duration: 0s; }
+.ez-taste:active::after, .ez-taste.ist-gedrueckt::after { opacity: 1; transition-duration: 0s; }
+.ez-tasten.ist-tastatur .ez-taste, .ez-tasten.ist-tastatur .ez-taste::after { transition: none; }
 .ez-taste:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
 .ez-taste svg { width: 26px; height: 26px; }
-.ez-taste--fn { background: transparent; }
-.ez-taste--leer { background: none; pointer-events: none; }
-@media (hover: hover) and (pointer: fine) { .ez-taste:not(.ez-taste--leer):hover { background: color-mix(in srgb, var(--silbergrau) 26%, var(--weiss)); } .ez-zeile__knopf:hover { background: var(--schwarz); color: var(--weiss); } }
+.ez-taste--fn, .ez-taste--leer { background: transparent; box-shadow: none; }
+.ez-taste--leer { pointer-events: none; }
+.ez-taste--leer::after { content: none; }
+@media (hover: hover) and (pointer: fine) { .ez-taste:not(.ez-taste--leer):not(.ez-taste--fn):hover { background: linear-gradient(180deg, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)), color-mix(in srgb, var(--silbergrau) 26%, var(--weiss))); } .ez-zeile__knopf:hover { background: var(--schwarz); color: var(--weiss); } }
+/* Pille: bei „Korrigieren“ ohne Vorwärtspfeil */
+#mess-weiter[data-art="korr"] .dna-pille__pfeil { display: none; }
 #mess-erkl-text p { margin: 0 0 10px; }
-@media (max-height: 700px) and (max-width: 759px) { .ez-taste { height: 46px; } }
-@media (prefers-reduced-motion: reduce) { .ez-mess__bild, .ez-mass__ende, .ez-mass__feld, .ez-kapseln i, .ez-taste, .ez-zeile__knopf { transition: none !important; } .ez-buehne--mess.zieht .ez-mass, .ez-buehne--mess.zieht .ez-mass__kappe, .ez-buehne--mess.zieht .ez-mass__ende, .ez-buehne--mess.zieht .ez-mass__feld { animation: none !important; } }
+/* Titel einzeilig halten; sehr schmale Telefone: die zwei Stimmen auf zwei festen Zeilen */
+.ez-folie[data-folie="messen"] .ez-frage h1 { letter-spacing: -.025em; }
+@media (max-width: 374px) { .ez-folie[data-folie="messen"] .ez-frage h1 em { display: block; } }
+/* Kurze Telefone (375 × 667, Android mit Adressleiste): Titel, Tasten, Zeile und Fuß dichter, die Bühne darf bis 112 px */
+@media (max-height: 700px) and (max-width: 759px) {
+  .ez-folie[data-folie="messen"] .ez-frage h1 { font-size: 1.625rem; }
+  .ez-folie[data-folie="messen"] .ez-taste { height: 44px; }
+  .ez-folie[data-folie="messen"] .ez-tasten { gap: 5px; }
+  .ez-folie[data-folie="messen"] .ez-zeile { height: 54px; }
+  .ez-folie[data-folie="messen"] .ez-karte--tasten { padding: 10px 16px 12px; }
+  .ez-folie[data-folie="messen"] .ez-fuss { padding-top: 10px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .ez-folie[data-folie="messen"] .ez-fuss .dna-pille { height: 48px; }
+  .ez-folie[data-folie="messen"] .ez-fuss .ez-rund--fuss { width: 48px; height: 48px; }
+}
+@media (prefers-reduced-motion: reduce) { .ez-mass__ende, .ez-mass__feld, .ez-mass__feld small, .ez-mass__marke, .ez-mass__haken, .ez-kapseln i::before, .ez-kapseln i::after, .ez-taste, .ez-taste::after, .ez-zeile__knopf { transition: none !important; } .ez-buehne--mess.zieht .ez-mass, .ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht .ez-mass__ende, .ez-buehne--mess.zieht .ez-mass__feld { animation: none !important; } }
 /* Überschrift bekommt beim Folienwechsel den Fokus (Vorlesen); kein Rahmen, sie ist kein Bedienelement */
 .ez-folie h1[tabindex="-1"]:focus { outline: none; }
 
-/* Rechtliche Verweise der Messfolie erst unter dem Fuß, nie halb verdeckt im Verlauf */
-.ez-folie[data-folie="messen"] .ez-recht { margin-top: 34px; }
+/* Rechtliche Verweise der Messfolie stehen hinter dem Fuß (Tab-Weg: Tasten, Zurück, Weiter, dann Recht) */
+.ez-folie[data-folie="messen"] .ez-recht { margin-top: 18px; }
