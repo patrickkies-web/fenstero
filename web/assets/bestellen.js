@@ -282,6 +282,10 @@
       S.ich = await U.api('GET', '/api/auftrag/ich');
       const id = hashLesen().id, alt = id && (S.ich.auftraege || []).find((a) => a.id === id);
       if (alt && !vorZahlung(alt)) { location.href = '/konto/#auftrag/' + alt.id; return; }
+      /* Angemeldet ohne Auftrag in der Adresse, aber mit angefangenen Bestellungen (etwa auf einem zweiten Gerät): erst die Paketwahl mit
+         „Angefangene Bestellungen“ zeigen, statt still einen zweiten leeren Entwurf anzulegen; „Weiter mit …“ legt dort einen neuen an */
+      const offen = (S.ich.auftraege || []).filter(vorZahlung);
+      if (!alt && offen.length) { U.warten(knopf, false); zeigen('paket', true); U.toast(offen.length === 1 ? 'Sie haben schon eine angefangene Bestellung' : 'Sie haben schon angefangene Bestellungen'); return; }
       if (alt) laden(alt); else await neuAnlegen();
       zeigen(alt ? ersteOffene() : 'betrieb', true);
     } catch (e) {

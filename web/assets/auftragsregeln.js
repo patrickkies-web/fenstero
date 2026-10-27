@@ -230,7 +230,7 @@
     { k: 'domain', titel: 'Eigene Domain', text: 'z. B. fenster-mustermann.de statt …eeziframes.com', hat: (m) => !!m.domain },
     { k: 'logo', titel: 'Ihr Logo', text: 'im Kopf der Seite und im Aufmaßblatt', hat: (m) => !!m.logo },
     { k: 'farben', titel: 'Ihre Farben', text: (m) => (m.farbwelt === 'voll' ? 'die ganze Seite in Ihren Farben' : 'zur Hälfte in Ihren Farben'), hat: (m) => !!m.farbe },
-    { k: 'fotos', titel: 'Fotos Ihres Betriebs', text: (m) => 'Bühne und ' + Math.max(0, (Number(m.fotos) || 6) - 1) + ' Kacheln', hat: (m) => (Number(m.fotos) || 0) > 0 },
+    { k: 'fotos', titel: 'Fotos Ihres Betriebs', text: (m) => 'ein großes Bild oben, ' + Math.max(0, (Number(m.fotos) || 6) - 1) + ' kleinere darunter', hat: (m) => (Number(m.fotos) || 0) > 0 },
     { k: 'portrait', titel: 'Porträt der Ansprechperson', text: 'statt der Initialen', hat: (m) => !!m.startansicht },
     { k: 'texte', titel: 'Ihre Texte', text: 'Überschrift, Einleitung, Leistungen', hat: (m) => !!m.startansicht },
     { k: 'suche', titel: 'In Suchmaschinen', text: 'Ihre Startseite wird gefunden', hat: (m) => m.indexierung === 'start' },

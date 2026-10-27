@@ -372,5 +372,25 @@ export default async function (h) {
     h.sauber(page, '26.B Bestellung und Kundenbereich (' + name + ') ohne Fehler und CSP-Verstöße');
     await c.close();
   }
+  /* 26.B Zweites Gerät: Anmelden in der Bestellung mit einer schon angefangenen Bestellung legt keinen stillen zweiten Entwurf an,
+     sondern zeigt die Paketwahl mit „Angefangene Bestellungen“; „Weiter mit …“ legt bewusst einen neuen an */
+  try {
+    const mail2 = 'zweitgeraet-' + stempel + '@pruef-fenster.de';
+    await h.api('localhost', '/api/auftrag/code', { body: { mail: mail2 }, origin: true, headers: { 'x-forwarded-for': '10.26.9.1' } });
+    const K2 = keks(await h.api('localhost', '/api/auftrag/anmelden', { body: { mail: mail2, code: '123456' }, origin: true, headers: { 'x-forwarded-for': '10.26.9.1' } }));
+    await h.api('localhost', '/api/auftrag/neu', { body: { paket: 'plus', weg: 'ausfuehrlich' }, cookie: K2, origin: true, headers: { 'x-forwarded-for': '10.26.9.1' } });
+    const entwuerfe = async () => ((await h.api('localhost', '/api/auftrag/ich', { method: 'GET', cookie: K2, headers: { 'x-forwarded-for': '10.26.9.1' } })).json.auftraege || []).filter((a) => a.stand === 'entwurf').length;
+    const c2 = await h.browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), p2 = await h.neueSeite(c2, h.base());
+    await p2.goto(h.base() + '/bestellen/#plus', { waitUntil: 'networkidle' });
+    await p2.click('.a-fuss .a-pille'); await p2.fill('[data-k="mail"] input', mail2); await p2.click('.a-fuss .a-pille');
+    await p2.waitForSelector('[data-k="code"] input'); await p2.fill('[data-k="code"] input', '123456'); await p2.click('.a-fuss .a-pille');
+    await p2.waitForSelector('.a-offen-zeile', { timeout: 8000 });
+    const nachAnmelden = { hash: await p2.evaluate(() => location.hash), n: await entwuerfe() };
+    await p2.click('.a-fuss .a-pille'); await p2.waitForSelector('[data-k="firma"] input', { timeout: 8000 });
+    const nachWeiter = await entwuerfe();
+    ok(nachAnmelden.hash === '#plus' && nachAnmelden.n === 1 && nachWeiter === 2, '26.B Zweites Gerät: Anmelden zeigt „Angefangene Bestellungen“ statt still einen zweiten Entwurf anzulegen (' + nachAnmelden.n + ' → ' + nachWeiter + ' nach „Weiter mit …“)');
+    h.sauber(p2, '26.B Zweites Gerät ohne Fehler und CSP-Verstöße');
+    await c2.close();
+  } catch (e) { ok(false, '26.B Zweites Gerät läuft durch: ' + String(e && e.message || e).split('\n')[0]); }
   try { fs.unlinkSync(tmp); } catch (e) { /* weg */ }
 }
