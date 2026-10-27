@@ -677,6 +677,7 @@
     const klText = (r) => {
       if (!ANF) return r.v;
       const id = String((r.ids || [r.id])[0] || ''), w = typeof r.pos === 'number' ? wins[r.pos] : null, ihr = sie ? 'Ihnen' : 'dir';
+      if (/^absturz-/.test(id) && w && r.gruppe !== 'pflicht') return 'Absturzhöhe prüfen' + (AW.etageText(w) ? ' (' + AW.etageText(w) + ')' : '') + ': Liegt das Fenster mehr als 12 m über dem Boden draußen, verlangt die Bauordnung eine höhere Brüstung. ' + bnK + ' prüft das vor Ort; das ist kein Messfehler.';
       if (/^absturz-/.test(id) && w) return 'Absturzsicherung nötig' + (AW.etageText(w) ? ' (' + AW.etageText(w) + ')' : '') + ': ' + (w.absturz ? AW.lab('absturz', w.absturz) || 'gewählt' : 'bitte beraten') + '. ' + (istTuer(w) ? 'Vor einer Tür ohne Balkon verlangt die Bauordnung eine Sicherung.' : 'Die Brüstung ist niedriger, als die Bauordnung hier verlangt.') + ' Das ist kein Messfehler; ' + bnK + ' plant die Sicherung mit ' + ihr + '.';
       if (/^gross-/.test(id)) return 'Großes Element: Transport, Gerüst oder Hebegerät plant ' + bnK + ' ein.';
       if (MASS_ID.test(id)) return (r.kurz || 'Maße') + ': prüft ' + bnK + ' beim Feinaufmaß bei ' + ihr + ' vor Ort. Das ist üblich und kein Fehler von ' + ihr + '.';

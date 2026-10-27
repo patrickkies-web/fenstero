@@ -105,9 +105,7 @@ Papier bleibt weiß (Druck, Toner); die Anteile der Website-Palette gelten hier 
 
 ## Offen
 
-- **Absturzsicherung ab 90 cm** (Modell, `ABSTURZ_MM = 900`): meldet auch bei 80 bis 89 cm Brüstung, obwohl die Begründung „mindestens 80 cm, über 12 m Absturzhöhe 90 cm“ nennt. Vorschlag: unter 80 cm Pflicht, 80 bis 89 cm „Absturzhöhe prüfen (über 12 m: 90 cm)“. Nur auf Wort des Inhabers (C2).
-- **„Unten fest“ ohne Unterlicht:** Wählt der Kunde als Absturzsicherung „Unten fest“, zeichnet das Modell kein festes Unterteil. Vorschlag: Unterlicht dann automatisch setzen. Modell, nur auf Wort.
-- **„Kostenlos und unverbindlich“** im Hinweis der Durchschrift nur, wenn der Betrieb es in seinem Konto einstellt (Feld fehlt).
+- **„Kostenlos und unverbindlich“** im Hinweis der Durchschrift nur, wenn der Betrieb es in seinem Konto einstellt (Feld fehlt). Entschieden (Ermessen, 27.10.2026): vorerst nicht, eine Zusage gibt nur der Betrieb.
 - Realitäts-Check mit echten Menschen.
 
 ## Auf der Website (Wunsch des Inhabers, 27.10.2026)
@@ -131,4 +129,8 @@ Zwei Fensterbauer und ein Hauseigentümer über 65, je fünf Minuten, ohne Hilfe
 
 ## Antwort des Inhabers
 
-(steht aus)
+27.10.2026: „Ja, kannst du alles online stellen nach deinem Ermessen.“ Online gestellt (main). Nach Ermessen entschieden und umgesetzt:
+
+- **Brüstung 80 bis 89 cm** (`modell.js`, Klärungsliste): statt „Absturzsicherung nötig“ (Pflicht) jetzt „Absturzhöhe prüfen … bis 12 m Absturzhöhe genügen 80 cm Brüstung, darüber sind 90 cm nötig“ unter „Vor Ort prüfen“; unter 80 cm, bei Türen und bodentief bleibt es Pflicht. Die Frage in der App bleibt (vorsichtig ab 90 cm). Durchschrift: Grund in einfachen Worten.
+- **„Unten fest“** (`app.js`): setzt ein festes Unterlicht aus Glas bis etwa 90 cm über dem Boden (300 bis 600 mm), damit Modell und Zeichnung es zeigen; wechselt die Wahl oder bleibt sie offen, fällt das so gesetzte Unterlicht wieder weg.
+- **„Kostenlos und unverbindlich“:** nicht übernommen (siehe Offen).

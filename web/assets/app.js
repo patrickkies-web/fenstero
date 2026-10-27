@@ -6456,7 +6456,7 @@ const OFFEN_NEUTRAL = {
   antrieb: () => ({ antrieb: 'gurt' }), insekt: () => ({ insekt: 'keiner' }), iart: () => ({ iart: 'keiner', wunschIf: '' }), fbi: (w) => ({ fbi: w.neu ? 'werzalit' : 'behalten' }), fba: () => ({ fba: 'alu' })
 };
 function offenSetzen(w, k, an) {
-  if (k === 'absturz') { if (an) w.absturz = ''; return; }
+  if (k === 'absturz') { if (an) { w.absturz = ''; if (w.ulAuto) { w.ul = false; delete w.ulAuto; } } return; }
   const o = Object.assign({}, w.offen || {});
   if (an) { o[k] = true; Object.assign(w, OFFEN_NEUTRAL[k] ? OFFEN_NEUTRAL[k](w) : {}); if (k === 'griffA') w.bt = Object.assign({}, w.bt, { griffA: 'keiner' }); }
   else delete o[k];
@@ -6530,7 +6530,14 @@ function act(name, el) {
       w[f] = clamp((num(w[f]) || m.std) + n(v), m.min, m.max); return render();
     }
     case 'erreichbar': { w.erreichbar = v; return render(); }
-    case 'absturz': { w.absturz = v; return render(); }
+    case 'absturz': {
+      /* „Unten fest“ heißt ein festes Unterlicht aus Glas bis etwa 90 cm über dem Boden: gleich mit setzen, damit Modell und Zeichnung es
+         zeigen (nur, wenn noch keins gewählt ist); wechselt die Wahl, fällt das so gesetzte Unterlicht wieder weg */
+      const vorher = w.absturz; w.absturz = v;
+      if (v === 'fest' && (w.art || 'fenster') === 'fenster' && !w.ul) { w.ul = true; w.ulA = 'glas'; w.ulH = clamp(900 - (num(w.bru) || 500), 300, 600); w.ulAuto = true; }
+      else if (vorher === 'fest' && v !== 'fest' && w.ulAuto) { w.ul = false; delete w.ulAuto; }
+      return render();
+    }
     case 'design': { const src = S.windows[+v]; if (!src) return; if (!S.designVorher) S.designVorher = designAnwenden(kopie(w), w); designAnwenden(w, src); S.selBar = null; render(); if (window.Haptik) window.Haptik.ok(); return; }
     case 'design-weg': { if (S.designVorher) designAnwenden(w, S.designVorher); S.designVorher = null; return render(); }
     case 'mass-tausch': { masseTauschen(w); w.massOk = false; toast('Breite und Höhe getauscht'); return render(); }
