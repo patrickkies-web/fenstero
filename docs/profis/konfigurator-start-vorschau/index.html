@@ -229,9 +229,11 @@
                 <img class="ez-mess__bild ist-an" id="mess-bild" width="2148" height="1400" alt="" decoding="async" draggable="false">
                 <img class="ez-mess__bild" id="mess-bild-front" width="2148" height="1400" alt="" decoding="async" draggable="false">
                 <span class="ez-buehne__kante" aria-hidden="true"></span>
-                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:.5" aria-hidden="true"></i>Schritt&nbsp;3 von&nbsp;6</span>
+                <span class="ez-glaschip"><i class="ez-ring" id="mess-chip-ring" style="--anteil:.5" aria-hidden="true"></i><span id="mess-chip-text">Schritt&nbsp;3 von&nbsp;6</span></span>
                 <svg class="ez-mass" id="mess-linie" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true"><line class="ez-mass__halo" x1="164" y1="28" x2="164" y2="252"/><line class="ez-mass__linie" x1="164" y1="28" x2="164" y2="252"/></svg>
                 <svg class="ez-mass-neben" id="mess-neben" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true"><g class="ez-geist" id="mess-geist"><line class="ez-geist__halo"/><line class="ez-geist__linie"/><line class="ez-geist__halo"/><line class="ez-geist__kappe"/><line class="ez-geist__halo"/><line class="ez-geist__kappe"/></g><line class="ez-mass__fuehrung-halo" id="mess-fuehrung-a-halo"/><line class="ez-mass__fuehrung" id="mess-fuehrung-a"/><line class="ez-mass__fuehrung-halo" id="mess-fuehrung-b-halo"/><line class="ez-mass__fuehrung" id="mess-fuehrung-b"/></svg>
+                <svg class="ez-passt-linien" id="mess-passt" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true"><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/></g></svg>
+                <span class="ez-passt__schild" id="passt-schild-b" aria-hidden="true"><b>1.236</b><small>mm</small></span><span class="ez-passt__schild" id="passt-schild-h" aria-hidden="true"><b>1.405</b><small>mm</small></span>
                 <span class="ez-mass__kappe" id="mess-kappe-a" aria-hidden="true"></span><span class="ez-mass__kappe" id="mess-kappe-b" aria-hidden="true"></span>
                 <span class="ez-mass__ende" id="mess-ende-a" aria-hidden="true"><span class="ez-lupe"><i class="ez-lupe__bild"></i><svg class="ez-lupe__marke" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="ez-lupe__halo"/><line class="ez-lupe__halo"/><line class="ez-lupe__linie"/><line class="ez-lupe__kappe"/></svg></span><span class="ez-mass__text"><b>Oberkante</b> der Öffnung</span></span>
                 <span class="ez-mass__ende" id="mess-ende-b" aria-hidden="true"><span class="ez-lupe"><i class="ez-lupe__bild"></i><svg class="ez-lupe__marke" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="ez-lupe__halo"/><line class="ez-lupe__halo"/><line class="ez-lupe__linie"/><line class="ez-lupe__kappe"/></svg></span><span class="ez-mass__text"><b>Fensterbank</b> innen</span></span>
@@ -253,6 +255,18 @@
                 <div class="ez-zeile" id="mess-zeile"><p class="ez-zeile__text"><b class="ez-zeile__hinweis">Nicht am Rahmen messen</b>In Millimetern: 125&nbsp;cm = 1.250&nbsp;mm</p></div>
                 <div class="ez-tasten" role="group" aria-label="Zifferntasten"><button type="button" class="ez-taste" data-taste="1">1</button><button type="button" class="ez-taste" data-taste="2">2</button><button type="button" class="ez-taste" data-taste="3">3</button><button type="button" class="ez-taste" data-taste="4">4</button><button type="button" class="ez-taste" data-taste="5">5</button><button type="button" class="ez-taste" data-taste="6">6</button><button type="button" class="ez-taste" data-taste="7">7</button><button type="button" class="ez-taste" data-taste="8">8</button><button type="button" class="ez-taste" data-taste="9">9</button><span class="ez-taste ez-taste--leer" aria-hidden="true"></span><button type="button" class="ez-taste" data-taste="0">0</button><button type="button" class="ez-taste ez-taste--fn" data-taste="del" aria-label="Letzte Ziffer löschen"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 6h11A1.5 1.5 0 0 1 22 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-11L3.5 13z"/><path d="M12 10.5l5 5M17 10.5l-5 5"/></svg></button></div>
                 <span class="ez-unsichtbar" id="mess-wert" aria-live="polite"></span>
+              </div>
+
+              <div class="ez-karte ez-karte--passt" data-theme="hell">
+                <div class="ez-block__kopf"><span class="dna-label">Maueröffnung · Breite × Höhe</span><span class="ez-passt__haken" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span></div>
+                <p class="ez-passt__zahl"><b id="passt-zahl">1.236 × 1.405</b><small>mm</small></p>
+                <p class="ez-passt__el"><span id="passt-el-name">Fenster mit Rahmen</span><b id="passt-el">1.180 × 1.350</b><small>mm</small></p>
+                <h2 class="ez-passt__titel">Dreimal gemessen, das kleinste zählt</h2>
+                <div class="ez-passt__spalten">
+                  <div class="ez-passt__sp"><p class="ez-passt__lab">Breite</p><div id="passt-breite"></div></div>
+                  <div class="ez-passt__sp"><p class="ez-passt__lab">Höhe</p><div id="passt-hoehe"></div></div>
+                </div>
+                <p class="ez-passt__fuss" id="passt-fuss">Höchstens 5&nbsp;mm Unterschied, überhöht gezeichnet.</p>
               </div>
 
               <div class="ez-bogen" id="mess-erkl" role="dialog" aria-modal="true" aria-labelledby="mess-erkl-titel" hidden>
@@ -280,6 +294,81 @@
                 <div class="ez-gross__fuss"><button type="button" class="dna-pille" data-gross-zu>Zurück zum Eintippen</button></div>
                 <p class="ez-unsichtbar" role="status" id="mess-gross-live"></p>
               </dialog>
+            </section>
+            <section class="ez-folie" data-folie="ergebnis" aria-label="Schritt 5 von 6: Ergebnis" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück zu den Rändern" data-erg-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5-1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--erg" id="erg-buehne">
+                <img class="ez-erg__bild" id="erg-bild" width="2148" height="1800" alt="" decoding="async" draggable="false">
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:.833" aria-hidden="true"></i>Schritt&nbsp;5 von&nbsp;6</span>
+                <svg class="ez-erg__linien" id="erg-linien" viewBox="0 0 390 260" preserveAspectRatio="none" aria-hidden="true"><g data-k="hm"><line class="ez-erg__halo"/><line class="ez-erg__linie"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/></g><g data-k="wm"><line class="ez-erg__halo"/><line class="ez-erg__linie"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/></g><g data-k="eh"><line class="ez-erg__halo"/><line class="ez-erg__linie"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/></g><g data-k="ew"><line class="ez-erg__halo"/><line class="ez-erg__linie"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/><line class="ez-erg__kappe-halo"/><line class="ez-erg__kappe"/></g></svg>
+                <span class="ez-erg__wert" data-k="hm" data-wer="mo" aria-hidden="true"><i></i><b>1.236</b><small>mm</small></span><span class="ez-erg__wert" data-k="wm" data-wer="mo" aria-hidden="true"><i></i><b>1.236</b><small>mm</small></span><span class="ez-erg__wert" data-k="eh" data-wer="el" aria-hidden="true"><i></i><b>1.236</b><small>mm</small></span><span class="ez-erg__wert" data-k="ew" data-wer="el" aria-hidden="true"><i></i><b>1.236</b><small>mm</small></span>
+                <figcaption class="ez-unsichtbar" id="erg-bildtext">Modell mit den vier Maßen.</figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1 id="erg-h1">Dein Aufmaß <em>steht.</em></h1><button type="button" class="ez-i" id="erg-i" data-gloss="rahmenmass" aria-label="Maueröffnung oder Fensterelement?" aria-expanded="false" aria-controls="erg-erkl"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <button type="button" class="dna-pille dna-pille--leise dna-pille--klein ez-notizknopf"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>Notiz</button>
+                </div>
+                <p class="ez-unterzeile" id="erg-unterzeile">Maueröffnung und Fensterelement, so wie der Fensterbauer sie fürs Angebot braucht.</p>
+              </div>
+
+              <div class="ez-erg__werte" role="group" aria-labelledby="erg-werte-titel">
+                <h2 class="ez-unsichtbar" id="erg-werte-titel">Ergebnis</h2>
+                <div class="ez-erg__kachel" data-wer="mo"><span class="ez-erg__lab"><i aria-hidden="true"></i><span data-lab="moW">Maueröffnung Breite</span></span><p class="ez-erg__zahl"><b data-zahl="moW">1.236</b><small>mm</small></p><span class="ez-erg__tag">kleinstes von 3</span></div>
+                <div class="ez-erg__kachel" data-wer="mo"><span class="ez-erg__lab"><i aria-hidden="true"></i><span data-lab="moH">Maueröffnung Höhe</span></span><p class="ez-erg__zahl"><b data-zahl="moH">1.236</b><small>mm</small></p><span class="ez-erg__tag">kleinstes von 3</span></div>
+                <div class="ez-erg__kachel" data-wer="el"><span class="ez-erg__lab"><i aria-hidden="true"></i><span data-lab="elW">Fenster Breite</span></span><p class="ez-erg__zahl"><b data-zahl="elW">1.236</b><small>mm</small></p><span class="ez-erg__tag">sichtbar mit Rahmen</span></div>
+                <div class="ez-erg__kachel" data-wer="el"><span class="ez-erg__lab"><i aria-hidden="true"></i><span data-lab="elH">Fenster Höhe</span></span><p class="ez-erg__zahl"><b data-zahl="elH">1.236</b><small>mm</small></p><span class="ez-erg__tag">sichtbar mit Rahmen</span></div>
+                <p class="ez-erg__winkel" id="erg-winkel" hidden></p>
+              </div>
+
+              <div class="ez-erg__pruef" id="erg-pruef" role="status" hidden>
+                <p class="ez-erg__pruef-text" id="erg-pruef-text">Das Foto wirkt anders proportioniert als deine Maße. Bitte miss noch einmal nach.</p>
+                <div class="ez-erg__pruef-knoepfe"><button type="button" class="ez-zeile__knopf ez-zeile__knopf--dunkel" id="erg-nach">Nachmessen</button><button type="button" class="ez-zeile__knopf ez-zeile__knopf--dunkel" id="erg-ok">Stimmt so</button></div>
+              </div>
+
+              <p class="ez-erg__ki" id="erg-ki" hidden><span class="ez-erg__ki-lab">Aus deinen Fotos</span><span class="ez-erg__ki-text"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg><span id="erg-ki-text">3 Angaben stehen in deinem Aufmaßblatt.</span></span></p>
+
+              <details class="ez-karte ez-erg__hand" data-theme="hell" id="erg-hand">
+                <summary><span class="ez-erg__hand-titel">Falls zur Hand<small>Brüstungshöhe und Laibungstiefe, sonst beim Feinaufmaß</small></span><i class="ez-erg__chevron" aria-hidden="true"></i></summary>
+                <div class="ez-erg__hand-body">
+                    <div class="ez-erg__reihe">
+                      <div class="ez-erg__reihe-kopf"><label for="erg-bru">Brüstungshöhe</label><button type="button" class="ez-i ez-i--hell" data-gloss="bruestung" aria-label="Erklärung: Brüstungshöhe" aria-expanded="false" aria-controls="erg-erkl"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                      <div class="ez-erg__stepper"><button type="button" class="ez-erg__rund" data-bump="bru" data-v="-10" aria-label="Brüstungshöhe weniger">−</button><span class="ez-erg__eingabe"><input type="text" inputmode="numeric" id="erg-bru" autocomplete="off" enterkeyhint="done"><span>mm</span></span><button type="button" class="ez-erg__rund" data-bump="bru" data-v="10" aria-label="Brüstungshöhe mehr">+</button></div>
+                    </div>
+                    <div class="ez-erg__reihe">
+                      <div class="ez-erg__reihe-kopf"><label for="erg-laib">Laibungstiefe innen</label><button type="button" class="ez-i ez-i--hell" data-gloss="laibung" aria-label="Erklärung: Laibungstiefe innen" aria-expanded="false" aria-controls="erg-erkl"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                      <div class="ez-erg__stepper"><button type="button" class="ez-erg__rund" data-bump="laib" data-v="-5" aria-label="Laibungstiefe innen weniger">−</button><span class="ez-erg__eingabe"><input type="text" inputmode="numeric" id="erg-laib" autocomplete="off" enterkeyhint="done"><span>mm</span></span><button type="button" class="ez-erg__rund" data-bump="laib" data-v="5" aria-label="Laibungstiefe innen mehr">+</button></div>
+                    </div>
+                </div>
+              </details>
+
+              <div class="ez-bogen" id="erg-erkl" role="dialog" aria-modal="true" aria-labelledby="erg-erkl-titel" hidden>
+                <button type="button" class="ez-bogen__grund" aria-label="Schließen" data-schliessen></button>
+                <div class="ez-bogen__blatt">
+                  <div class="ez-bogen__kopf"><span class="ez-bogen__titel" id="erg-erkl-titel">Maueröffnung oder Fensterelement?</span><button type="button" class="ez-rund ez-rund--zu" aria-label="Schließen" data-schliessen><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+                  <div id="erg-erkl-text"></div>
+                  <button type="button" class="dna-pille dna-pille--leise ez-bogen__zu" data-schliessen>Alles klar</button>
+                </div>
+              </div>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" id="erg-zurueck" aria-label="Zurück zu den Rändern"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="erg-weiter"><span class="ez-weiter__wort" id="erg-weiter-wort">Weiter: Wünsche</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+              </div>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
             </section>
           </div>
         </div>
@@ -327,6 +416,18 @@
         <li><span class="nr">05</span><span><b>Die eine Pille trägt die sichere Antwort:</b> „Weiter zu Maß&nbsp;2“, bei Zentimetern „Ja, 1.410&nbsp;mm“, bei einer Warnung „Korrigieren“ („Stimmt so“ klein in der Zeile). Maß&nbsp;1 von&nbsp;4 als Kapselreihe. <span class="ez-gen">G6</span><span class="ez-gen">G11</span></span></li>
       </ul>
       <p class="ez-klein">Bewegung nur als Rückmeldung: Taste drückt auf 0,97, die Ziffer steht sofort; die gespeicherte Zahl steht 0,35&nbsp;s mit Haken, dann zieht sich die nächste Linie in 320&nbsp;ms von Ende zu Ende; beim Wechsel zwischen Höhe und Breite blendet das Modell in 220&nbsp;ms über. Tastatur am Rechner ohne Übergang; bei „weniger Bewegung“ steht alles sofort.</p>
+      </div>
+      <div class="ez-notiz__folie" data-fuer="raender" hidden>
+      <span class="dna-label">Konfigurator · Schritt&nbsp;4 von&nbsp;6</span>
+      <h2>Ränder. <em>Dreimal gemessen, das kleinste zählt.</em></h2>
+      <p class="dna-text">Die Ränder gehen auf derselben Folie weiter wie die Maße: gleiche Bühne, gleiche Lupen, gleiche Tasten, nur der Chip zählt auf Schritt&nbsp;4. Höhe links und rechts stehen schräg wie in den Wünschen, Breite oben und unten von vorn; das Maß der Mitte steht blass daneben. Texte, Prüfung (mehr als 60&nbsp;mm anders als die Mitte) und Reihenfolge sind die der App.</p>
+      <ul class="ez-liste">
+        <li><span class="nr">01</span><span><b>Die Linie am Rand, die Mitte blass daneben:</b> beide Koralle gestrichelt (Öffnung), die Mitte dünn ohne Lupen; so sieht man, dass dasselbe noch einmal gemessen wird, nur weiter außen. <span class="ez-gen">G1</span><span class="ez-gen">G9</span></span></li>
+        <li><span class="nr">02</span><span><b>„Hier auch 1.410&nbsp;mm gemessen?“</b> steht im leeren Feld über den Tasten, wie in der App als einziger Satz; ein Tipp speichert das Maß der Mitte für diesen Rand und geht weiter. <span class="ez-gen">G13</span></span></li>
+        <li><span class="nr">03</span><span><b>„Passt.“</b> zeigt das Modell von vorn mit allen sechs Maßen; die kleinsten je Richtung kräftig mit Wert, die übrigen blass. Auf der weißen Karte groß das Maß, das zählt, darunter je Richtung die drei Messungen als Kapselreihe, das kleinste mit violettem Punkt. <span class="ez-gen">G3</span><span class="ez-gen">G11</span><span class="ez-gen">G5</span></span></li>
+        <li><span class="nr">04</span><span><b>Eine Pille:</b> „Weiter zu Rand&nbsp;2“, nach dem vierten Rand „Fertig“, bei „Passt.“ „Weiter zum Ergebnis“. <span class="ez-gen">G6</span></span></li>
+      </ul>
+      <p class="ez-klein">Bewegung nur als Rückmeldung: wie beim Messen; bei „Passt.“ erscheinen die sechs Linien nacheinander (50&nbsp;ms Versatz) und die Kapseln füllen sich von links (20&nbsp;ms Versatz), fertig nach gut 0,5&nbsp;s. Bei „weniger Bewegung“ steht alles sofort.</p>
       </div>
     </aside>
   </div>

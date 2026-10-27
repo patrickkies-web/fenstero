@@ -501,3 +501,131 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 
 /* Rechtliche Verweise der Messfolie stehen hinter dem Fuß (Tab-Weg: Tasten, Zurück, Weiter, dann Recht) */
 .ez-folie[data-folie="messen"] .ez-recht { margin-top: 18px; }
+
+/* ---------- Schritt 4 „Ränder“ und „Passt.“ (dieselbe Folie wie „Messen“) ---------- */
+/* „Hier auch … gemessen?“: im leeren Feld der einzige Satz über den Tasten (wie die App), Umriss-Pille über die ganze Zeile; das
+   gestrichelte Linienstück davor ist die Legende der Mitte (blass auf der Bühne) */
+.ez-zeile__gleich { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 44px; border: 0; padding: 0 16px; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 .9375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-zeile__gleich i { flex: none; width: 14px; height: 1.2px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); box-shadow: 0 0 0 .6px rgba(7,9,10,.18); }
+.ez-zeile__gleich:active { transform: scale(.97); transition-duration: 0s; }
+.ez-zeile__gleich:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .ez-zeile__gleich:hover { background: color-mix(in srgb, var(--silbergrau) 14%, var(--weiss)); } }
+/* „Passt.“: sechs Linien der Öffnung; die kleinsten je Richtung kräftig (1,8 px mit Halo), die übrigen blass (1,2 px) */
+.ez-passt-linien, .ez-passt__schild { display: none; }
+.ez-folie.ist-passt .ez-passt-linien { display: block; position: absolute; z-index: 3; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.ez-folie.ist-passt .ez-passt__schild { display: inline-flex; }
+.ez-folie.ist-passt #mess-linie, .ez-folie.ist-passt #mess-neben, .ez-folie.ist-passt .ez-mass__kappe, .ez-folie.ist-passt .ez-mass__ende, .ez-folie.ist-passt .ez-mass__feld, .ez-folie.ist-passt .ez-gross-auf, .ez-folie.ist-passt .ez-karte--tasten { display: none; }
+.ez-folie.ist-passt .ez-buehne--mess { cursor: default; }
+.ez-passt-linien line { vector-effect: non-scaling-stroke; stroke-linecap: butt; }
+.ez-passt__halo { stroke: rgba(7,9,10,.26); stroke-width: 3; stroke-dasharray: 4px 4px; }
+.ez-passt__linie { stroke: var(--koralle); stroke-width: 1.2; stroke-dasharray: 4px 4px; opacity: .85; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; stroke-dasharray: 6px 4px; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__linie { stroke-width: 1.8; stroke-dasharray: 6px 4px; opacity: 1; }
+.ez-passt-linien.zieht g { animation: ez-folgt 220ms var(--dna-druck) calc(var(--n, 0) * 50ms) both; }
+/* Wert am Maß, das zählt: kleine dunkle Kapsel wie die Lupen-Etiketten, Zahl hell, „mm“ Silbergrau */
+.ez-passt__schild { position: absolute; z-index: 4; align-items: baseline; gap: 4px; height: 30px; padding: 0 12px; border-radius: var(--rund-pille); line-height: 30px; background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), var(--putz-schatten); pointer-events: none; white-space: nowrap; }
+.ez-passt__schild b { font: 500 .9375rem/30px var(--font-sans); color: var(--weiss); letter-spacing: -.01em; }
+.ez-passt__schild small { font: 400 .75rem/30px var(--font-sans); color: var(--silbergrau); }
+.ez-passt-linien.zieht ~ .ez-passt__schild { animation: ez-folgt 220ms var(--dna-druck) 300ms both; }
+/* Karte „Passt.“: das Maß, das zählt, als Zahl (G3), das Element darunter, je Richtung drei Kapseln (G11) */
+.ez-karte--passt { display: none; gap: 0; padding: 12px 16px 14px; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
+.ez-folie.ist-passt .ez-karte--passt { display: grid; }
+.ez-karte--passt.kommt { animation: ez-folgt 220ms var(--dna-druck) both; }
+.ez-passt__haken { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--schwarz); color: var(--weiss); }
+.ez-passt__haken svg { width: 14px; height: 14px; }
+.ez-passt__zahl { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 0; }
+.ez-passt__zahl b { font: 300 3rem/1.02 var(--font-sans); letter-spacing: -.03em; color: var(--schwarz); white-space: nowrap; }
+.ez-passt__zahl small, .ez-passt__el small { font: 400 .875rem/1 var(--font-sans); color: var(--textgrau); }
+.ez-passt__el { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 0; font: 400 .8125rem/1.3 var(--font-sans); color: var(--textgrau); }
+.ez-passt__el span { margin-right: 4px; }
+.ez-passt__el b { font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
+.ez-passt__titel { margin: 12px 0 0; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); font: 500 .9375rem/1.3 var(--font-sans); letter-spacing: -.005em; color: var(--schwarz); }
+.ez-passt__spalten { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; margin-top: 8px; }
+.ez-passt__lab { margin: 0 0 2px; font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
+.ez-passt__reihe { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 8px; height: 24px; margin: 0; font: 400 .8125rem/1 var(--font-sans); color: var(--textgrau); }
+.ez-passt__reihe i { position: relative; height: 6px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 26%, var(--weiss)); }
+.ez-passt__reihe i::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--l, 100%); border-radius: inherit; background: color-mix(in srgb, var(--koralle) 78%, var(--weiss)); transform-origin: left center; }
+.ez-passt__reihe b { min-width: 3.4em; text-align: right; font: 400 .9375rem/1 var(--font-sans); color: var(--schwarz); font-variant-numeric: tabular-nums; }
+.ez-passt__reihe.ist-klein { color: var(--schwarz); }
+.ez-passt__reihe.ist-klein i::before { background: var(--koralle); }
+.ez-passt__reihe.ist-klein i::after { content: ""; position: absolute; top: 50%; left: var(--l, 100%); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); }
+.ez-passt__reihe.ist-klein b { font-weight: 600; }
+.ez-karte--passt.kommt .ez-passt__reihe i::before { animation: ez-kapsel 320ms var(--dna-druck) calc(80ms + var(--n, 0) * 20ms) both; }
+@keyframes ez-kapsel { from { transform: scaleX(.12); } }
+.ez-passt__fuss { margin: 10px 0 0; font: 400 .8125rem/1.35 var(--font-sans); color: var(--textgrau); }
+@media (prefers-reduced-motion: reduce) { .ez-zeile__gleich { transition: none; } .ez-passt-linien.zieht g, .ez-passt-linien.zieht ~ .ez-passt__schild, .ez-karte--passt.kommt, .ez-karte--passt.kommt .ez-passt__reihe i::before { animation: none; } }
+
+/* ---------- Schritt 5 „Ergebnis“ ---------- */
+.ez-folie[data-folie="ergebnis"] { position: relative; isolation: isolate; --fokus: var(--weiss); }
+.ez-buehne--erg { --putz-schatten: 0 1px 1px rgba(7,9,10,.28), 0 2px 4px -1px rgba(7,9,10,.22), 4px 12px 20px -10px rgba(7,9,10,.50); height: 280px; margin: 0 -16px; border-radius: 0 0 var(--rund-l) var(--rund-l); cursor: default; touch-action: auto; background: radial-gradient(120% 100% at 26% 8%, #f3eee6, #e9e2d7 58%, #dcd4c7); box-shadow: none; }
+.ez-buehne--erg .ez-buehne__kante { z-index: 2; background: linear-gradient(160deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 36%), radial-gradient(72% 90% at 55% 44%, rgba(7,9,10,0) 50%, rgba(7,9,10,.10) 76%, rgba(7,9,10,.30) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(7,9,10,.30); }
+.ez-buehne--erg .ez-glaschip { background: linear-gradient(180deg, color-mix(in srgb, var(--anthrazit) 86%, var(--silbergrau)), color-mix(in srgb, var(--anthrazit) 80%, var(--schwarz))); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: rgba(255,255,255,.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), var(--putz-schatten); }
+.ez-erg__bild { position: absolute; z-index: 0; left: 0; top: 0; width: 100%; height: auto; max-width: none; display: block; }
+.ez-erg__linien { position: absolute; z-index: 3; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.ez-erg__linien line { vector-effect: non-scaling-stroke; stroke-linecap: butt; }
+.ez-erg__halo, .ez-erg__kappe-halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; }
+.ez-erg__linie, .ez-erg__kappe { stroke: var(--koralle); stroke-width: 1.8; }
+.ez-erg__halo, .ez-erg__linie { stroke-dasharray: 6px 4px; }
+.ez-erg__linien g[data-k="eh"] line, .ez-erg__linien g[data-k="ew"] line { stroke-dasharray: none; }
+.ez-erg__linien g[data-k="eh"] .ez-erg__linie, .ez-erg__linien g[data-k="eh"] .ez-erg__kappe, .ez-erg__linien g[data-k="ew"] .ez-erg__linie, .ez-erg__linien g[data-k="ew"] .ez-erg__kappe { stroke: var(--violett); }
+/* Wert an seiner Linie: dunkle Kapsel wie die Lupen-Etiketten, davor ein Stück der Linie als Legende */
+.ez-erg__wert { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px 0 10px; border-radius: var(--rund-pille); background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), var(--putz-schatten); white-space: nowrap; pointer-events: none; }
+.ez-erg__wert i { width: 12px; height: 1.8px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); }
+.ez-erg__wert[data-wer="el"] i { background: var(--violett); }
+.ez-erg__wert b { font: 500 .9375rem/1 var(--font-sans); letter-spacing: -.01em; color: var(--weiss); }
+.ez-erg__wert small { margin-left: -2px; font: 400 .75rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-folie[data-folie="ergebnis"] .ez-frage { position: relative; padding: 8px 0 2px; }
+.ez-folie[data-folie="ergebnis"] .ez-frage::before { content: ""; position: absolute; z-index: -1; left: -16px; right: -16px; top: -8px; height: 88px; pointer-events: none; background: radial-gradient(56% 100% at 50% 0, var(--anthrazit), color-mix(in srgb, var(--anthrazit) 40%, transparent) 40%, transparent 74%); }
+.ez-folie[data-folie="ergebnis"] .ez-frage h1 { font-size: 1.75rem; letter-spacing: -.025em; }
+.ez-folie[data-folie="ergebnis"] .ez-unterzeile { margin-top: 2px; font-size: .875rem; line-height: 1.4; }
+/* Vier Werte als Anthrazit-Kacheln (G14), je mit Legende, Zahl (G3) und Hinweis als Indigo-Chip (Zustand) */
+.ez-erg__werte { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ez-erg__kachel { position: relative; display: grid; align-content: start; gap: 4px; padding: 12px 14px 13px; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-erg__lab { display: flex; align-items: center; gap: 7px; font: 400 .75rem/1.25 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-erg__lab i { flex: none; width: 12px; height: 1.8px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); }
+.ez-erg__kachel[data-wer="el"] .ez-erg__lab i { background: var(--violett); }
+.ez-erg__zahl { display: flex; align-items: baseline; gap: 5px; margin: 2px 0 0; }
+.ez-erg__zahl b { font: 300 2rem/1.05 var(--font-sans); letter-spacing: -.025em; color: var(--weiss); }
+.ez-erg__zahl small { font: 400 .875rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-erg__tag { justify-self: start; margin-top: 4px; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); font: 500 .75rem/24px var(--font-sans); color: var(--weiss); background: var(--indigo); box-shadow: inset 0 1px 0 rgba(255,255,255,.10); white-space: nowrap; }
+.ez-erg__winkel { grid-column: 1 / -1; margin: 2px 2px 0; font: 400 .8125rem/1.4 var(--font-sans); color: var(--silbergrau); }
+/* Maße gegen das Foto: Hinweis mit Koralle-Punkt (jetzt handeln), zwei Umriss-Knöpfe */
+.ez-erg__pruef { margin-top: 12px; padding: 14px 16px; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px color-mix(in srgb, var(--koralle) 40%, transparent); }
+.ez-erg__pruef-text { position: relative; margin: 0; padding-left: 18px; font: 400 .875rem/1.45 var(--font-sans); color: var(--weiss); }
+.ez-erg__pruef-text::before { content: ""; position: absolute; left: 0; top: calc(.72em - 4px); width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+.ez-erg__pruef-knoepfe { display: flex; gap: 8px; margin-top: 12px; padding-left: 18px; }
+.ez-zeile__knopf--dunkel { background: transparent; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+.ez-zeile__knopf--dunkel:focus-visible { outline-color: var(--weiss); }
+@media (hover: hover) and (pointer: fine) { .ez-zeile__knopf--dunkel:hover { background: var(--weiss); color: var(--schwarz); } }
+/* Aus deinen Fotos: nur die Zahl, Haken für „liegt bei“ */
+.ez-erg__ki { display: grid; gap: 4px; margin: 14px 2px 0; }
+.ez-erg__ki-lab { font: 400 .75rem/1.25 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-erg__ki-text { display: flex; align-items: center; gap: 8px; font: 400 .9375rem/1.4 var(--font-sans); color: var(--weiss); }
+.ez-erg__ki-text svg { flex: none; width: 14px; height: 14px; padding: 3px; box-sizing: content-box; border-radius: 50%; background: var(--violett); color: var(--schwarz); }
+/* Falls zur Hand: weiße Karte, die Eingabe auf Weiß; zu ist sie eine Zeile mit Chevron */
+.ez-erg__hand { margin-top: 14px; padding: 0; gap: 0; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); }
+.ez-erg__hand summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 10px 16px; list-style: none; cursor: pointer; border-radius: var(--rund-l); }
+.ez-erg__hand summary::-webkit-details-marker { display: none; }
+.ez-erg__hand summary:focus-visible { outline: 2px solid var(--schwarz); outline-offset: -4px; }
+.ez-erg__hand-titel { display: grid; gap: 3px; font: 500 1rem/1.25 var(--font-sans); color: var(--schwarz); }
+.ez-erg__hand-titel small { font: 400 .8125rem/1.35 var(--font-sans); color: var(--textgrau); }
+.ez-erg__chevron { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 60%, var(--weiss)); }
+.ez-erg__chevron::before { content: ""; position: absolute; inset: 0; margin: auto; width: 14px; height: 14px; background: var(--schwarz); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 5.25 7 8.75l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 5.25 7 8.75l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transition: transform 220ms var(--dna-druck); }
+.ez-erg__hand[open] .ez-erg__chevron::before { transform: rotate(180deg); }
+.ez-erg__hand-body { display: grid; gap: 14px; padding: 2px 16px 16px; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 30%, var(--weiss)); padding-top: 14px; }
+.ez-erg__reihe { display: grid; gap: 8px; }
+.ez-erg__reihe-kopf { display: flex; align-items: center; gap: 8px; }
+.ez-erg__reihe-kopf label { font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
+.ez-i--hell { color: var(--textgrau); box-shadow: inset 0 0 0 1.5px var(--textgrau); }
+.ez-erg__stepper { display: grid; grid-template-columns: 44px 1fr 44px; gap: 8px; align-items: center; }
+.ez-erg__rund { width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; background: var(--weiss); color: var(--schwarz); font: 400 1.375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-erg__rund:active { transform: scale(.94); transition-duration: 0s; }
+.ez-erg__rund:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+.ez-erg__eingabe { display: flex; align-items: baseline; justify-content: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 40%, var(--weiss)); }
+.ez-erg__eingabe:focus-within { box-shadow: inset 0 0 0 1.8px var(--violett); }
+.ez-erg__eingabe input { width: 100%; min-width: 0; height: 44px; border: 0; padding: 0; background: transparent; text-align: right; font: 400 1.25rem/44px var(--font-sans); color: var(--schwarz); outline: none; }
+.ez-erg__eingabe span { font: 400 .875rem/44px var(--font-sans); color: var(--textgrau); }
+.ez-folie[data-folie="ergebnis"] .ez-recht { margin-top: 18px; }
+@media (prefers-reduced-motion: reduce) { .ez-erg__chevron::before, .ez-erg__rund { transition: none; } }
+/* Liegt die Linie tief (Breite unten), steht „Groß ansehen“ oben rechts */
+.ez-buehne--mess.knopf-oben .ez-gross-auf { top: 10px; bottom: auto; left: auto; right: 10px; }
