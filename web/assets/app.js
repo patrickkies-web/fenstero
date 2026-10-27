@@ -3098,28 +3098,46 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('resize', () => { if (S.screen === 'start') stZeigen(); });
 SCREENS.start = startDna;
 /* ---------- Fotos ---------- */
-function photoTile(which) {
-  const p = S.photos[which], a = S.ai[which], label = which === 'in' ? 'Von innen' : 'Von außen', demo = p && p.demo;
-  let inner;
-  if (!p) inner = '<span class="empty"><svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><path d="M8 15.5c0-1.9 1.6-3.5 3.5-3.5h4.2l2.4-4h7.8l2.4 4h4.2c1.9 0 3.5 1.6 3.5 3.5v16c0 1.9-1.6 3.5-3.5 3.5h-21C9.6 35 8 33.4 8 31.5z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"></path><circle cx="22" cy="23" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"></circle></svg>' + label + '<br><small style="font-weight: 600; color: var(--muted)">' + 'empfohlen' + '</small></span>';
-  else inner = '<img src="' + p.url + '" alt="' + label + '">';
-  const ai = p ? (a && a.status === 'running' ? '<span class="ai-scan" data-lottie="fotos" data-loop="1" aria-hidden="true"></span><span class="ai"><span class="spin"></span>KI liest</span>' : a && a.status === 'done' ? '<span class="ai">' + '<svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>KI fertig</span>' : a && a.status === 'error' ? '<span class="ai">ohne KI</span>' : '') : '';
-  /* Liegt ein Foto in der Kachel, öffnet Antippen die Großansicht (Zoom, neu aufnehmen, löschen); nur die leere Kachel startet die Kamera */
-  if (p) return '<button type="button" class="tile" data-act="foto-gross" data-v="' + which + '" aria-label="' + esc(label + ': Foto groß ansehen') + '">' + inner + ai + '<span class="tag">' + CHECK + esc(label) + (demo ? ' · Beispiel' : '') + '</span><span class="tile-lupe" aria-hidden="true">' + LUPE_S + '</span></button>';
-  return '<label class="tile"><input type="file" accept="image/*" capture="environment" data-in="photo" data-f="' + which + '">' + inner + ai + '</label>';
+/* ---------- Fotos im Look der Design-DNA (27.10.2026) ----------
+   Folie „Fotografiere das Fenster.“ (Vorschau docs/profis/konfigurator-start-vorschau/): Bühne mit einem Beispielfoto und Sucherecken
+   (antippen öffnet die Kamera für innen), mit Foto zeigt sie das Foto und den Stand der KI; darunter Tipp, Frage, die Fotoplätze auf
+   weißer Karte (leer gestrichelt, voll mit Foto, Stand der KI und Entfernen) und eine Pille. Aktionen wie bisher: photo, foto-gross
+   (Großansicht mit Zoom, neu aufnehmen, löschen), ohne-foto (Bogen „Mit Foto wird dein Aufmaß besser.“), go messen oder zeichnen. */
+const FT_KAMERA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.6l1.5-2.5h4.8L15.9 7h2.6A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg>';
+const ftKi = (seite) => { const a = S.ai[seite]; return !a ? '' : a.status === 'running' ? 'KI liest' : a.status === 'done' ? 'KI fertig' : a.status === 'error' ? 'ohne KI' : ''; };
+function ftPlatz(seite) {
+  const p = S.photos[seite], label = seite === 'in' ? 'Von innen' : 'Von außen', ki = ftKi(seite);
+  if (!p) return '<label class="ft-platz"><input type="file" accept="image/*" capture="environment" data-in="photo" data-f="' + seite + '"><span class="ft-leer">' + FT_KAMERA + '<b>' + label + '</b><small>empfohlen</small></span></label>';
+  return '<div class="ft-platz ist-voll"><button type="button" class="ft-bild" data-act="foto-gross" data-v="' + seite + '" aria-label="' + esc(label + (p.demo ? ', Beispiel' : '') + ': Foto groß ansehen') + '"><img src="' + p.url + '" alt="">' +
+    (ki ? '<span class="ft-ki' + (ki === 'KI fertig' ? ' ist-fertig' : '') + '">' + ki + '</span>' : '') + '</button>' +
+    '<button type="button" class="ft-weg" data-act="foto-weg-platz" data-v="' + seite + '" aria-label="' + esc(label + ': Foto entfernen') + '"><span aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></span></button></div>';
 }
-SCREENS.fotos = () => {
-  const p = S.photos.in, tilt = p && S.ai.in && S.ai.in.befund && S.ai.in.befund.tilt != null ? S.ai.in.befund.tilt : null;
-  const neu = !!S.win.neu, tuer = istTuer(S.win), ding = tuer ? 'die Tür' : S.win.art === 'fest' ? 'die Verglasung' : 'das Fenster';
-  let level = '<div class="level"><span class="bubble"><span></span></span><span>Handy <b>gerade</b> halten, ' + (neu ? 'die ganze Stelle' : ding + ' ganz') + ' im Bild, etwas Wand drumherum.</span></div>';
-  if (tilt != null) level = '<div class="level"><span class="bubble"><span style="animation: none; left: ' + Math.round(25 + Math.max(-20, Math.min(20, tilt * 4))) + 'px"></span></span><span>' + (Math.abs(tilt) <= 2.5 ? 'Dein Foto ist mit ' + String(Math.abs(tilt)).replace('.', ',') + '° fast waagerecht. Passt.' : 'Dein Foto ist etwa ' + String(Math.abs(tilt)).replace('.', ',') + '° schräg. Es geht, gerader wäre besser.') + '</span></div>';
-  const kiNote = S.aiOk === false ? noteBox('Die KI-Auswertung der Fotos ist hier gerade nicht eingeschaltet. Das Aufmaß funktioniert trotzdem komplett, nur die Zusatzinfos aus den Fotos fehlen.', null, 'warn') : '';
-  const html = hd('Schritt 2 von 6 · Fotos', neu ? 'Fotografiere die Stelle.' : 'Fotografiere ' + ding + '.', (neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll, mit etwas Platz drumherum. Danach zeichnest du es auf dem Foto ein.' : 'Einmal von innen, einmal von außen. Die KI liest daraus die Einbausituation für deinen Fensterbauer: Rollladenkasten, Laibung, Fensterbänke, Fassade. Du musst nichts eintippen.') + (p || S.photos.out ? ' Tipp ein Foto an, um es groß anzusehen.' : ''), '', '', schrittTools('einbausituation')) +
-    '<div class="tiles">' + photoTile('in') + photoTile('out') + '</div>' + level + kiNote;
-  /* ohne Foto steht unten nur „Ohne Foto weiter“ (zweitrangig); mit dem ersten Foto wird daraus der Weg zum nächsten Schritt */
-  const keins = !p && !S.photos.out;
-  return { html: html, back: ['Start', 'start'], bar: keins ? { label: 'Ohne Foto weiter', act: 'ohne-foto', ghost: true, zurueck: true } : { label: neu ? 'Weiter zum Einzeichnen' : 'Weiter zum Messen', act: 'go', v: neu ? 'zeichnen' : 'messen', zurueck: true } };
-};
+function fotosDna() {
+  const w = S.win, neu = !!w.neu, tuer = istTuer(w), ding = tuer ? 'die Tür' : w.art === 'fest' ? 'die Verglasung' : 'das Fenster';
+  const seite = S.photos.in ? 'in' : S.photos.out ? 'out' : '', p = seite ? S.photos[seite] : null, n = (S.photos.in ? 1 : 0) + (S.photos.out ? 1 : 0);
+  const tilt = S.photos.in && S.ai.in && S.ai.in.befund && S.ai.in.befund.tilt != null ? S.ai.in.befund.tilt : null;
+  const steps = stepsFor(w), nr = steps.indexOf('fotos') + 1;
+  const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
+  const chipUnten = p ? '<b>' + (seite === 'in' ? 'Von innen' : 'Von außen') + '</b>' + (p.demo ? ' · Beispiel' : '') + (ftKi(seite) ? ' · ' + ftKi(seite) : '') : '<b>Beispiel</b> · so sieht ein gutes Foto aus';
+  const buehne = '<button type="button" class="ft-buehne" data-stand="' + (p ? 'foto' : 'beispiel') + '" data-act="' + (p ? 'foto-gross' : 'foto-auf') + '" data-v="' + (seite || 'in') + '" aria-label="' + esc(p ? (seite === 'in' ? 'Von innen' : 'Von außen') + ': Foto groß ansehen' : 'Beispielfoto. Antippen öffnet die Kamera für das Foto von innen.') + '">' +
+    '<img class="ft-foto" src="' + (p ? p.url : '/bilder/konfigurator/beispiel-innen.webp') + '" width="1000" height="750" alt="" decoding="async" draggable="false">' +
+    '<span class="ft-kante" aria-hidden="true"></span>' + (p ? '' : '<span class="ft-sucher" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ft-waage" aria-hidden="true"><i class="ft-spur"><b></b></i><span class="ft-wort">gerade</span></span>') +
+    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Fotos</span>' +
+    '<span class="ft-chip" aria-hidden="true">' + chipUnten + '</span></button>';
+  const tipp = '<p class="ft-tipp"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 10h16M10 7v6"/><circle cx="10" cy="10" r="2.6"/></svg><span>' +
+    (tilt != null ? (Math.abs(tilt) <= 2.5 ? 'Dein Foto ist mit ' + String(Math.abs(tilt)).replace('.', ',') + '° fast waagerecht. Passt.' : 'Dein Foto ist etwa ' + String(Math.abs(tilt)).replace('.', ',') + '° schräg. Es geht, gerader wäre besser.')
+      : 'Handy <b>gerade</b> halten, ' + (neu ? 'die ganze Stelle' : ding + ' ganz') + ' im Bild, etwas Wand drumherum.') + '</span></p>';
+  const frage = lgFrage(neu ? 'Fotografiere <em>die Stelle.</em>' : 'Fotografiere <em>' + ding + '.</em>', 'einbausituation', neu ? 'Einmal von innen, einmal von außen: die ganze Wand, an die das neue Element soll.' : 'Einmal von innen, einmal von außen. Du musst nichts eintippen.');
+  const karte = '<div class="lg-karte lg-hell ft-karte"><div class="ft-kopf"><span class="dna-label" id="ft-l">Deine Fotos</span><span class="ft-stand">' + n + ' von 2</span></div>' +
+    '<div class="ft-plaetze" role="group" aria-labelledby="ft-l">' + ftPlatz('in') + ftPlatz('out') + '</div>' +
+    '<p class="ft-text">' + (neu ? 'Danach zeichnest du das Element auf dem Foto ein. Die KI liest Wand, Leitungen und Fassade.' : 'Die KI liest daraus die Einbausituation für deinen Fensterbauer: Rollladenkasten, Laibung, Fensterbänke, Fassade.') + (n ? ' Tipp ein Foto an, um es groß anzusehen.' : '') + '</p>' +
+    (S.aiOk === false ? '<p class="ft-text ft-hinweis">Die KI-Auswertung der Fotos ist hier gerade nicht eingeschaltet. Das Aufmaß funktioniert trotzdem komplett, nur die Zusatzinfos aus den Fotos fehlen.</p>' : '') +
+    '<p class="ft-text ft-leise"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg><span>Deine Fotos sieht dein Fensterbauer erst, wenn du sendest.</span></p></div>';
+  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Start">' + LG_PFEIL_L + '</button>' +
+    '<button type="button" class="dna-pille lg-weiter" data-act="' + (n ? 'go' : 'ohne-foto') + '"' + (n ? ' data-v="' + (neu ? 'zeichnen' : 'messen') + '"' : '') + '>' + (neu ? 'Weiter zum Einzeichnen' : 'Weiter zum Messen') + pfeil + '</button></div>';
+  return { html: lgKopf(['back', 'Zurück: Start']) + buehne + tipp + frage + karte + fuss, back: ['Start', 'start'], dna: true, cls: 'dna ft' };
+}
+SCREENS.fotos = () => fotosDna();
 /* Ohne Foto weiter: einmal ein Hinweis, warum ein Foto besser ist (abschaltbar, aufmass.ohnefoto.zu). Das Fenster merkt sich die Wahl
    (w.ohneFoto), damit der Fensterbauer in der Klärungsliste liest, dass er die Einbausituation vor Ort aufnehmen muss. Die neue
    Öffnung überspringt das Einzeichnen. */
@@ -6702,6 +6720,8 @@ function act(name, el) {
     case 'foto-zu': { S.fotoGross = null; return render(); }
     case 'foto-zoom': return fotoZoomKnopf(n(v));
     case 'foto-weg': { fotoWeg(); return render(); }
+    case 'foto-weg-platz': { if (!S.photos[v]) return; S.fotoGross = { seite: v }; fotoWeg(); render(); const i = document.querySelector('.ft-platz input[data-f="' + v + '"]'); if (i) i.focus({ preventScroll: true }); return; }
+    case 'foto-auf': { const i = document.querySelector('.ft-platz input[data-f="' + (v === 'out' ? 'out' : 'in') + '"]'); if (i) i.click(); return; }
     case 'foto-notiz': { S.fotoGross = null; return notizAuf('w:fotos'); }
     case 'foto-lage': { S.fotoGross = null; return go('zeichnen'); }
     case 'ohne-foto': { if (ohneFotoZu()) return ohneFotoWeiter(); S.ohneFotoFrage = true; return render(); }

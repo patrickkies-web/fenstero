@@ -274,4 +274,20 @@ seiner Regel gibt es beim Messen kein 3-D, sondern eine feste Ansicht je Element
 
 Bild: docs/profis/bilder/2026-10-27-app-start-dna-tel.jpg.
 
-Offen: Fotos, Messen, Ränder, Ergebnis und Abschluss folgen in derselben Weise.
+Prüfsuite: Abschnitte 1 bis 22 grün; „Lamellen wenden“ (WebGL) einmal wiederholt, dann grün. Online seit main d9adb06.
+
+## Übernahme in die App: Schritt 2 „Fotos“ (27.10.2026, abends)
+
+- app.js: `fotosDna` mit `ftPlatz`; Aktionen wie bisher (Foto aufnehmen, `foto-gross` mit Zoom, Neu aufnehmen und Löschen, `ohne-foto`
+  mit dem Bogen und „Nicht mehr anzeigen“, `go`); neu nur `foto-auf` (Bühne mit Beispiel öffnet die Kamera für innen) und
+  `foto-weg-platz` (Entfernen am Platz, wie in der Vorschau). Die alte Kachel (`photoTile`) ist entfernt.
+- app.css: Abschnitt „Fotos im Look der Design-DNA“; Bild `web/bilder/konfigurator/beispiel-innen.webp`.
+- Wortlaut wie in der Vorschau: unten immer „Weiter zum Messen“ (neue Öffnung: „Weiter zum Einzeichnen“); ohne Foto kommt erst der
+  Bogen. Die Neigung aus der KI steht im Tipp („Dein Foto ist mit 0,8° fast waagerecht. Passt.“).
+- Prüfsuite angepasst (Abschnitte 3, 6, 16, 18, 19: 299 von 299).
+- Offen: Der Bogen „Mit Foto wird dein Aufmaß besser.“ und die übrigen Bögen tragen noch den alten Look (grünes Wort, Cream-Pille); sie
+  folgen als eigener Schritt für alle DNA-Bildschirme.
+
+Bild: docs/profis/bilder/2026-10-27-app-fotos-dna-tel.jpg.
+
+Offen: Messen, Ränder, Ergebnis, Bögen und Abschluss folgen in derselben Weise.

@@ -468,13 +468,13 @@ Drei Oberflächen kamen mit den Paketen dazu; sie folgen denselben Regeln wie ob
 
 **Paketbedingungen `/konfigurator-bedingungen/`:** wie die übrigen Rechtsseiten (`recht.css`); offene Stellen als markierte Platzhalter (`mark.ph`), Tabellen aus `pakete.js`. Die PDFs (`scripts/bedingungen-pdf.mjs`) setzen Inter wie das Aufmaßblatt: Titel 20, Abschnitte 13, Text 9,8 pt, Tabellen mit Haarlinien, Kopfzeile „Entwurf zur anwaltlichen Prüfung · Fassung vom …“ in Warnfarbe, solange Platzhalter da sind.
 
-## Design-DNA im Konfigurator (ab 26.10.2026: Lage; ab 27.10.2026: alle Wünsche und Schritt 1 „Start“)
+## Design-DNA im Konfigurator (ab 26.10.2026: Lage; ab 27.10.2026: alle Wünsche, Schritt 1 „Start“ und Schritt 2 „Fotos“)
 
 Der Inhaber stellt den Konfigurator Folie für Folie auf seine Design-DNA um (Vorschauen „Lage neu gedacht“ und „Lage in Violett“,
 Protokoll docs/profis/2026-10-26-lage.md; Folien bis zum Teilen: docs/profis/konfigurator-start-vorschau/, Protokolle
 docs/profis/2026-10-26-konfigurator-start.md und 2026-10-27-konfigurator-raender-bis-ende.md). Bisher umgestellt: das Kapitel „Lage“
 mit „Wo ist das Fenster?“ (`lageDna`) und „Wie genau möchtest du planen?“ (`tiefeDna`), seit dem 27.10.2026 alle übrigen Fragen der
-Wünsche (`frageDna`) und Schritt 1 „Was planst du?“ (`startDna`) in app.js.
+Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2 „Fotos“ (`fotosDna`) in app.js.
 
 - **Gültigkeit:** nur Bildschirme mit `.scr.dna`; Regeln in app.css, Abschnitt „Design-DNA im Konfigurator“, Klassen `lg-`, `lp-`, `dna-`.
   Alle übrigen Bildschirme behalten Inter, die Schriftrollen 13/15/17/24/32/40, das grüne Wort und die Cream-Pille.
@@ -508,6 +508,11 @@ Wünsche (`frageDna`) und Schritt 1 „Was planst du?“ (`startDna`) in app.js.
     Pfeiltasten), die Stelle als Umschalter auf weißer Karte mit einem Satz darunter (bei „Neue Öffnung“ mit Koralle-Punkt und
     gestricheltem Rahmen um das Element), unten zurück und „Weiter zu den Fotos“. Wischen auf der Bühne wechselt das Element; Element,
     Anker und Etikett blenden in 220 ms aus der Wischrichtung, das Licht gleitet nach, Tastatur ohne Übergang.
+  - Fotos (`fotosDna`, app.css Abschnitt „Fotos im Look der Design-DNA“): Bühne mit Beispielfoto (`beispiel-innen.webp`), Sucherecken
+    und Waage, antippen öffnet die Kamera für innen; mit Foto zeigt die Bühne das Foto mit „Von innen · KI liest/KI fertig“ (antippen:
+    Großansicht). Darunter der Tipp (mit Foto die Neigung), die Frage mit i („Was liest die KI …“) und Notiz, die Fotoplätze auf weißer
+    Karte (leer gestrichelt, voll mit Foto, Stand der KI und Entfernen), unten zurück und „Weiter zum Messen“ (neue Öffnung: „Weiter zum
+    Einzeichnen“); ohne Foto zeigt die Pille erst den Bogen „Mit Foto wird dein Aufmaß besser.“.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung
