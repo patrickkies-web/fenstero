@@ -424,6 +424,9 @@ alter table public.auftraege add column if not exists wechsel jsonb;
 alter table public.auftraege add column if not exists instanz jsonb;
 alter table public.auftraege add column if not exists ki jsonb not null default '{}'::jsonb;
 create index if not exists auftraege_instanz on public.auftraege ((instanz->>'id'));
+-- Pause (27.10.2026, Paketbedingungen § 8): sperre 'zahlung' (Tageslauf, endet nach FRISTEN.pauseMaxTage) oder 'inhaber' (Zentrale), pause_seit
+alter table public.auftraege add column if not exists sperre text;
+alter table public.auftraege add column if not exists pause_seit timestamptz;
 create index if not exists auftraege_kunde on public.auftraege (kunde);
 create index if not exists auftraege_session on public.auftraege ((zahlung->>'session'));
 create unique index if not exists auftraege_adresse on public.auftraege (adresse) where adresse is not null and stand in ('angefragt', 'bezahlt', 'in_arbeit', 'vorschau', 'live', 'pausiert');

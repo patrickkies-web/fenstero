@@ -143,7 +143,7 @@ if (teil(1)) {
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
     const ohneWorker = pfad === '/zentrale/' ? text.replace(/\bfenstero\b/g, '') : text; // die Zentrale nennt dem Inhaber den internen Worker-Namen bei Cloudflare
     ok(!/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(ohneWorker) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
-    ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
+    ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm, .a-wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
     ok(await page.locator('svg .fi-kachel').count() > 0 && await page.locator('svg .fi-strahl').count() > 0 && await page.locator('svg .fi-fluegel').count() === 0, pfad + ': Logo (Licht fällt durch ein Fenster) da, auch auf der Fehlerseite');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');
@@ -355,14 +355,14 @@ if (teil(3)) {
   const dl3Pfad = await dl3.path(), pdfBytes = fs.readFileSync(dl3Pfad);
   ok(pdfBytes.subarray(0, 5).toString() === '%PDF-', 'Datei ist ein echtes PDF');
   const roh3 = pdfBytes.toString('latin1'), txt3 = pdfText(await dl3.path());
-  ok(/InterExtraBold/.test(roh3) && /InterMedium/.test(roh3) && !/Maven/.test(roh3), 'PDF trägt die Schrift der Website (Inter, eingebettet)');
+  ok(/OutfitSemiBold/.test(roh3) && /OutfitRegular/.test(roh3) && /InterBlack/.test(roh3) && !/Maven/.test(roh3), 'PDF trägt die Schrift der Website (Outfit, Wortmarke in Inter, eingebettet)');
   ok(/Code vom Kunden/.test(txt3) && /Scannen: Anmeldung/.test(txt3) && roh3.includes('/URI (' + BASE + '/?von=pdf)') && /AM1\./.test(txt3) && /Aufmaß digital übernehmen/.test(txt3), 'PDF an den Fensterbauer: Anleitung mit QR-Link und Aufmaß-Code');
   /* Aufbau (Strang S5): Seite 1 mit Weg, Box für den Fensterbauer und Klärungsliste; je Position eine Seite; am Ende Code und eeziframes für eigene Kunden; Kennung auf jeder Seite */
   const seiteTxt = (n) => { try { return cp.execFileSync('pdftotext', ['-layout', '-f', String(n), '-l', String(n), dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } };
   const s1 = seiteTxt(1), s2 = seiteTxt(2), info3 = (() => { try { return cp.execFileSync('pdfinfo', [dl3Pfad]).toString('utf8'); } catch (e) { return ''; } })();
   const kenn = (/AM-[A-Z2-9]{6}/.exec(s1) || [''])[0], nSeiten = +((/Pages:\s+(\d+)/.exec(info3) || [0, 0])[1]);
   ok(/4 von 5 Schritten erledigt/i.test(s1) && /Ihr Schritt: Angebot/.test(s1) && /FÜR SIE ALS FENSTERBAUER/.test(s1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /MAUERÖFFNUNG/.test(s2) && /WÜNSCHE DES KUNDEN/.test(s2) && /Ansicht von innen/.test(s2), 'Aufmaßblatt Seite 1: der Weg (4 von 5 erledigt), Box für den Fensterbauer, Klärungsliste; Position 1 auf ihrer eigenen Seite mit Zeichnung und Wünschen');
-  ok(/AUFMASSE IHRER EIGENEN KUNDEN/.test(seiteTxt(nSeiten)) && /Ihre Kunden messen selbst/.test(seiteTxt(nSeiten)) && /Scannen: Projekt anlegen/.test(seiteTxt(nSeiten)) && /3 Projekte kostenlos/.test(seiteTxt(nSeiten)) && /Aufmaß digital übernehmen/.test(seiteTxt(nSeiten)), 'Aufmaßblatt, letzte Seite: Aufmaß-Code und eeziframes für die eigenen Kunden des Fensterbauers');
+  ok(/AUFMA(?:SS|ẞ)E IHRER EIGENEN KUNDEN/.test(seiteTxt(nSeiten)) && /Ihre Kunden messen selbst/.test(seiteTxt(nSeiten)) && /Scannen: Projekt anlegen/.test(seiteTxt(nSeiten)) && /3 Projekte kostenlos/.test(seiteTxt(nSeiten)) && /Aufmaß digital übernehmen/.test(seiteTxt(nSeiten)), 'Aufmaßblatt, letzte Seite: Aufmaß-Code und eeziframes für die eigenen Kunden des Fensterbauers');
   ok(!!kenn && nSeiten >= 3 && seiteTxt(nSeiten).includes(kenn) && seiteTxt(2).includes(kenn) && /Seite 1 von/.test(s1) && /Title:\s+Aufmaßblatt/.test(info3), 'Kennung ' + kenn + ', Datum und „Seite x von y“ auf jeder Seite, Dokumenttitel gesetzt');
   const seite3 = (() => { try { return cp.execFileSync('pdftotext', ['-f', '3', '-l', '3', dl3Pfad, '-']).toString('utf8'); } catch (e) { return ''; } })();
   ok(/Für Fensterbauer: Aufmaß per Code/.test(seite3) && /eeziframes/.test(seite3) && !/EEZI/.test(txt3), 'Senkrechter Markenstreifen steht auch auf einer Positionsseite; Marke im PDF überall klein');
@@ -375,7 +375,7 @@ if (teil(3)) {
   const [dl4] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('.share-way [data-act="k-dl"]')]);
   ok(/\.pdf$/.test(dl4.suggestedFilename()), 'Eigen-Kunde lädt seine freigeschaltete PDF: ' + dl4.suggestedFilename());
   const txt4 = pdfText(await dl4.path());
-  ok(/DEIN FENSTER-AUFMASS/.test(txt4) && /DEIN WEG ZU NEUEN FENSTERN/.test(txt4) && /FÜR DEINEN FENSTERBAUER/.test(txt4) && /Jetzt senden/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache, der nächste Schritt ist das Senden');
+  ok(/DEIN FENSTER-AUFMA(?:SS|ẞ)/.test(txt4) && /DEIN WEG ZU NEUEN FENSTERN/.test(txt4) && /FÜR DEINEN FENSTERBAUER/.test(txt4) && /Jetzt senden/.test(txt4), 'Ausgabe für den Kunden: Du-Ansprache, der nächste Schritt ist das Senden');
   await foto(page, 'app-zwei-wege');
   sauber(page, 'Messablauf ohne Fehler');
 
@@ -478,7 +478,7 @@ if (teil(4)) {
     const [d2] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), pdfKnopf.click()]);
     ok(/\.pdf$/.test(d2.suggestedFilename()), 'Portal-PDF: ' + d2.suggestedFilename());
     let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await d2.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
-    ok(/BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
+    ok(/BESTELLMA(?:SS|ẞ)-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB) && /Übersicht/.test(txtB) && !/eeziframes-Konto\./.test(txtB), 'Portal-PDF in den Farben des Betriebs: Bestellmaß, keine Werbeseite');
   } else ok(false, 'Portal-PDF-Knopf gefunden');
   sauber(page, 'Portal-PDF ohne Fehler');
   // Einladungsseite (Strang S4), Pilotbetrieb: der Betrieb vorn, eeziframes klein als Übermittler, nichts überlappt, Anrede und
@@ -1505,7 +1505,7 @@ if (teil(9)) {
   ok(tourBild.fingerabdruck(tourDaten) === tourInfo.stand, 'Tour-Ausschnitt passt zum aktuellen Aufmaßblatt (sonst neu erzeugen: PW_PFAD=/opt/node-tools node scripts/tour-bild.mjs)');
   const [dlB] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }), page.click('[data-act="tour-pdf"]')]);
   let txtB = ''; try { txtB = (await import('node:child_process')).execFileSync('pdftotext', ['-layout', await dlB.path(), '-']).toString('utf8'); } catch (e) { txtB = ''; }
-  ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /BESTELLMASS-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Bestellmaß, gekennzeichnet als Beispiel');
+  ok(/Beispiel/.test(dlB.suggestedFilename()) && /AM-BEISPIEL/.test(txtB) && /BESTELLMA(?:SS|ẞ)-VORSCHLAG/.test(txtB) && /Fensterbau Brandt/.test(txtB), 'Beispiel-PDF für Betriebe: mit Bestellmaß, gekennzeichnet als Beispiel');
   await page.click('.tour-schritte [data-v="5"]'); await page.click('[data-act="tour-nb"]'); await page.waitForTimeout(200);
   await page.click('.tour-schritte [data-v="6"]'); await page.click('[data-act="tour-code"]'); await page.waitForTimeout(200);
   ok(await page.locator('.tour-ergebnis').count() === 1, 'Code übernehmen zeigt das neue Projekt');
@@ -1578,7 +1578,7 @@ if (teil(9)) {
   const pVoll = await blattDatei('voll', { notiz: 'Rollladen im Bad klemmt.', tel: '0171 2345678', mail: 'weber@beispiel.de', erreich: 'ab', baujahr: '1965' }, false);
   ok(zeichnungUeberFuss(pVoll) && !/vollständig nach Pos/.test(alleT(pVoll)), 'Aufmaßblatt mit allen Kontaktdaten und kurzer Nachricht: Seite 1 passt, Nachricht ungekürzt');
   const pZwei = await blattDatei('zwei', {}, false);
-  const badS = [2, 3, 4, 5].find((n) => /MAUERÖFFNUNG/.test(seiteT(pZwei, n)) && /Bad/.test(seiteT(pZwei, n).split('\n').slice(0, 8).join(' ')));
+  const badS = [2, 3, 4, 5, 6, 7, 8].find((n) => /MAUERÖFFNUNG/.test(seiteT(pZwei, n)) && /Bad/.test(seiteT(pZwei, n).split('\n').slice(0, 8).join(' ')));
   ok(!!badS && !/Bad, Fortsetzung/.test(alleT(pZwei)) && /EINBAUSITUATION AUS DEN FOTOS/.test(seiteT(pZwei, badS)) && /Vor Ort prüfen/.test(seiteT(pZwei, badS)) && /WÜNSCHE DES KUNDEN|DEINE WÜNSCHE/.test(seiteT(pZwei, badS)), 'Aufmaßblatt: Position 2 steht samt Wünschen und Fotoauswertung auf einer Seite (Zeichnung kleiner statt Rest auf neuer Seite)');
   sauber(bp, 'Aufmaßblatt-Prüfung ohne Fehler');
   await ctx3.close();
@@ -3297,8 +3297,15 @@ if (teil(16)) {
   const pdf16 = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung.pdf'); fs16.writeFileSync(pdf16, Buffer.from(b64, 'base64'));
   const pt = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf16, '-'])).toString('utf8'); } catch (e) { return ''; } };
   /* Neues Vorgehen (Strang S5): Seite 1 Übersicht mit der Klärungsliste (Pflicht zuerst), danach je Position eine Seite, am Ende die Übersicht */
-  const s1 = pt(1), alle16 = pt(0), nS16 = (() => { try { return +((/Pages:\s+(\d+)/.exec(cp16.execFileSync('pdfinfo', [pdf16]).toString('utf8')) || [0, 0])[1]); } catch (e) { return 0; } })(), posSeite = [2, 3].find((n) => /MAUERÖFFNUNG/.test(pt(n)) && /WÜNSCHE DES KUNDEN/.test(pt(n)));
-  ok(/MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /PFLICHT/.test(s1) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(s1) && /Bauordnung/.test(s1) && posSeite && /Übersicht\./.test(pt(nS16 - 1) + pt(nS16)) && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(alle16) && /Förderwert\s+Uw höchstens 0,95/.test(alle16) && /offen, bitte beraten/.test(alle16) && /Absturz-\s/.test(alle16) && !/Absturzsicheru\s/.test(alle16) && /Auf einen Blick/.test(alle16) && /Kasten: Einbaukasten innen im Sturz/.test(alle16), 'PDF: Seite 1 zeigt die Klärungsliste mit Grund je Punkt, Pflicht zuerst; danach je Position eine Seite mit Maueröffnung, Wünschen, Zielwert, „offen“ (Beschriftung an der Wortfuge getrennt) und KI-Fachangaben; am Ende die Übersicht');
+  const s1 = pt(1), alle16 = pt(0), nS16 = (() => { try { return +((/Pages:\s+(\d+)/.exec(cp16.execFileSync('pdfinfo', [pdf16]).toString('utf8')) || [0, 0])[1]); } catch (e) { return 0; } })(), posSeite = [2, 3, 4, 5, 6].find((n) => /MAUERÖFFNUNG/.test(pt(n)) && /WÜNSCHE DES KUNDEN/.test(pt(n)));
+  ok(/MIT DEM KUNDEN ZU KLÄREN/.test(s1) && /PFLICHT/.test(s1) && /Absturzsicherung nötig \(OG, Brüstung 600 mm\)/.test(s1) && /Bauordnung/.test(s1) && posSeite && [1, 2, 3, 4, 5].some((n) => n < posSeite && /Übersicht\./.test(pt(n))) && /Aufstellung\./.test(alle16) && nS16 > posSeite && /Lüftungskonzept nach DIN 1946-6 erforderlich/.test(alle16) && /Förder(?:wert|ziel)\s+Uw höchstens 0,95/.test(alle16) && /offen, bitte beraten/.test(alle16) && (/Absturz-\s/.test(alle16) || /Absturzsicherung\s/.test(alle16)) && !/Absturzsicheru\s/.test(alle16) && /Auf einen Blick/.test(alle16) && /Kasten: Einbaukasten innen im Sturz/.test(alle16), 'PDF: Seite 1 zeigt die Klärungsliste mit Grund je Punkt, Pflicht zuerst; danach je Position eine Seite mit Maueröffnung, Wünschen, Zielwert, „offen“ (Beschriftung an der Wortfuge getrennt) und KI-Fachangaben; vor den Positionen die Übersicht nach Geschoss und die Aufstellung nach Gewerk');
+  /* Durchschrift für den Kunden (Variante anfrage): kein Maß des Projekts, keine Angabe in mm, Hinweis auf das vollständige Blatt beim
+     Betrieb, Telefonnummer in einer Zeile, keine Aufstellung */
+  const ds16 = await a16.evaluate(async () => { const b = window.Blatt.pdf({ variante: 'anfrage', sie: true, marke: { name: 'Fensterbau Test', tel: '0221 123 456 0', mail: 'anfrage@fensterbau-test.de', host: 'fensterbau-test.de' }, nr: 'A-2026-0001', fenster: S.windows, projekt: S.proj, kunde: { name: 'Familie Weber' }, ausgabe: 'bytes' }); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); const werte = []; S.windows.forEach((w) => { const d = AW.derive(w); [d.moW, d.moH, d.elW, d.elH, w.bru].concat(Object.values(w.mo || {})).forEach((v) => { if (Number(v) >= 300) werte.push(Number(v)); }); }); return { b64: btoa(s), werte: werte }; });
+  const ds16p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-durchschrift.pdf'); fs16.writeFileSync(ds16p, Buffer.from(ds16.b64, 'base64'));
+  const dsT = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', ds16p, '-']).toString('utf8'); } catch (e) { return ''; } })();
+  const th16 = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.'), leck16 = ds16.werte.filter((v) => new RegExp('(^|[^\\d.,])(' + v + '|' + th16(v).replace('.', '\\.') + ')(?![\\d.,]\\d)').test(dsT));
+  ok(dsT.length > 200 && !leck16.length && !/\d\s*mm\b/.test(dsT) && /DURCHSCHRIFT · OHNE MA(?:SS|ẞ)E/.test(dsT) && /Das vollständige Aufmaßblatt mit Maßen schickt Fensterbau Test/.test(dsT) && /Telefon 0221 123 456 0/.test(dsT) && !/Aufstellung\./.test(dsT) && /Ihre Positionen\./.test(dsT), 'Durchschrift für den Kunden: kein Maß des Projekts (' + ds16.werte.length + ' Werte geprüft' + (leck16.length ? ', gefunden: ' + leck16.join(', ') : '') + '), Hinweis auf das vollständige Blatt beim Betrieb, Telefonnummer in einer Zeile, keine Aufstellung');
   const rund = await a16.evaluate(() => { const w = Object.assign(baseWin(), { name: 'Terrasse', offen: { fa: true }, absturz: 'gelaender', erreichbar: 'ja', massOk: true }); artSetzen(w, 'balkon'); w.bt.griffA = 'abschliessbar'; const o = unpackProject(packProject([w], Object.assign({}, PROJ0, { foerdweg: 'steuer' }), null)); const alt = unpackProject(packProject([baseWin()], PROJ0, null)); return { offen: o.w[0].offen, absturz: o.w[0].absturz, erreichbar: o.w[0].erreichbar, ok: o.w[0].massOk, bt: o.w[0].bt, fw: o.p.foerdweg, altOffen: JSON.stringify(alt.w[0].offen) }; });
   ok(rund.offen.fa && rund.absturz === 'gelaender' && rund.erreichbar === 'ja' && rund.ok === true && rund.bt.griffA === 'abschliessbar' && rund.fw === 'steuer' && rund.altOffen === '{}', 'Aufmaß-Code trägt offene Punkte, Absturzsicherung, Erreichbarkeit, Balkontür und Förderweg; ohne Angaben bleibt nichts offen');
   sauber(a16, 'Erstaufmaß in der App ohne Fehler');
@@ -3377,14 +3384,14 @@ if (teil(16)) {
   ok(/3 Wünsche offen/.test(karten16.win) && /3 Wünsche offen/.test(karten16.check) && !/Glas|Material/.test(karten16.win + karten16.check) && karten16.proj === '' && !anfr.note && anfr.feld === '' && /z\. B\. 12/.test(anfr.ph), 'Karten zählen offene Wünsche (Glas, Material, Insektenschutz), ohne sie zu nennen; die Zahl der Fenster im Haus hat keine Vorgabe mehr, ohne sie kein Hinweis aufs Lüftungskonzept');
   /* PDF: eine lange Klärungsliste wird über die Seiten geteilt, nichts fällt weg; offene Angaben in der Übersicht */
   const b64L = await d16.evaluate(async () => {
-    const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
+    const a = []; for (let i = 0; i < 20; i++) { const w = Object.assign(baseWin(), { name: 'Zimmer ' + (i + 1), etage: 'og', bru: 500 + i, erreichbar: 'ja', sart: 'rollladen', roll: 'aufsatz', antrieb: 'motor', w: 1000, h: 1200, mo: { hm: 1260, hl: 1260, hr: 1260, wm: 1060, wt: 1060, wb: 1060 }, el: { w: 1000, h: 1200 }, offen: { fa: true, glas: true, insekt: true }, wid: 'z' + i, t0: zeit() }); a.push(w); }
     S.windows = a; S.proj = Object.assign({}, PROJ0, { name: 'Familie Lang', total: 24, foerdweg: 'offen' }); S.kauf = { paid: true, mail: 'test@beispiel.de' };
     await blattSchrift(); const blob = await blattPDF('fensterbauer'); const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s);
   });
   const pdfL = path16.join(os16.tmpdir(), 'eeziframes-pruefung-klaerung-lang.pdf'); fs16.writeFileSync(pdfL, Buffer.from(b64L, 'base64'));
   const txtL = (() => { try { return cp16.execFileSync('pdftotext', ['-layout', pdfL, '-']).toString('utf8'); } catch (e) { return ''; } })();
-  const zaehle = (re) => (txtL.match(re) || []).length, absturzZeilen = zaehle(/Absturzsicherung nötig \(OG, Brüstung 500 mm\)/g), rcZeilen = zaehle(/Die Polizei empfiehlt RC2\./g), stromZeilen = zaehle(/Elektrischer Antrieb gewünscht/g);
-  ok(absturzZeilen === 20 && rcZeilen === 20 && stromZeilen === 20 && /Alle Positionen\s+[^\n]*Insektenschutz: offen, bitte beraten/.test(txtL) && /MIT DEM KUNDEN ZU KLÄREN, FORTSETZUNG/.test(txtL) && /Insektenschutz\s+offen/.test(txtL), 'PDF mit 20 Positionen: die lange Klärungsliste geht mit „Fortsetzung“ über die Seiten, alle Absturz-, RC2- und Strom-Zeilen und die offenen Wünsche stehen darin; die Übersicht zeigt offene Angaben als offen (' + absturzZeilen + ' / ' + rcZeilen + ' / ' + stromZeilen + ')');
+  const zaehle = (re) => (txtL.match(re) || []).length, absturzZeilen = zaehle(/Absturzsicherung nötig \(OG, Brüstung 5\d\d mm\)/g), rcZeilen = zaehle(/Die Polizei empfiehlt RC2\./g), stromZeilen = zaehle(/Elektrischer Antrieb gewünscht/g);
+  ok(absturzZeilen === 40 && rcZeilen === 21 && stromZeilen === 21 && /Alle Positionen\s+[^\n]*Die Polizei empfiehlt RC2/.test(txtL) && /Alle Positionen\s+[^\n]*Insektenschutz: offen, bitte beraten/.test(txtL) && /MIT DEM KUNDEN ZU KLÄREN, FORTSETZUNG/.test(txtL) && /Insektenschutz\s+offen/.test(txtL), 'PDF mit 20 Positionen: die lange Klärungsliste geht mit „Fortsetzung“ über die Seiten; je Position eine Absturz-Zeile, gleiche Punkte (RC2, Strom) in einer Zeile „Alle Positionen“, dazu jeder Punkt ausgeschrieben auf seiner Positionsseite; die Übersicht zeigt offene Angaben als offen (' + absturzZeilen + ' / ' + rcZeilen + ' / ' + stromZeilen + ')');
   sauber(d16, 'Nachbesserungen aus der Durchsicht ohne Fehler');
   await ctxD.close();
   const ctxQ = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'de-DE' }), q16 = await neueSeite(ctxQ);
@@ -3610,7 +3617,7 @@ if (teil(16)) {
   const pdf5p = path16.join(os16.tmpdir(), 'eeziframes-pruefung-s5.pdf'); fs16.writeFileSync(pdf5p, Buffer.from(pdf5.b64, 'base64'));
   const pt5 = (n) => { try { return cp16.execFileSync('pdftotext', ['-layout'].concat(n ? ['-f', String(n), '-l', String(n)] : []).concat([pdf5p, '-'])).toString('utf8'); } catch (e) { return ''; } };
   const raw5 = fs16.readFileSync(pdf5p).toString('latin1'), s5t1 = pt5(1), s5all = pt5(0);
-  ok(pdf5.logo && pdf5.mit > pdf5.ohne && /InterExtraBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5t1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /BESTELLMASS-VORSCHLAG/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Inter, Seite 1 mit Übersicht und Klärungsliste samt Stand, Notiz des Kunden an der Stelle, Bestellmaß mit Abzug unten');
+  ok(pdf5.logo && pdf5.mit > pdf5.ohne && /OutfitSemiBold/.test(raw5) && !/Maven/.test(raw5) && /Familie Weber\./.test(s5t1) && /Übersicht\./.test(s5t1) && /MIT DEM KUNDEN ZU KLÄREN/.test(s5t1) && /1 von \d+ geklärt/.test(s5all) && /geklärt, /.test(s5all) && /1\.759 × 1\.364/.test(s5all) && /NOTIZ DES KUNDEN ZU/.test(s5all) && /WÜNSCHE DES KUNDEN/.test(s5all) && /BESTELLMA(?:SS|ẞ)-VORSCHLAG/.test(s5all) && !/3-D-Ansicht/.test(s5all), 'PDF des Betriebs: Logo im Kopf, Outfit, Seite 1 mit Übersicht und Klärungsliste samt Stand, Notiz des Kunden an der Stelle, Bestellmaß mit Abzug unten');
   /* Die Ansicht Fensterbauer bettet seit dem 23.10.2026 die Paket-Landingpage ein (ihr 3-D-Modell gehört zur Planung des Kunden im
      Konfigurator); die frühere Werbung „Holen Sie es in Ihr Konto“ ist weg, was ankommt, nennt „So funktioniert es“ */
   const land5 = await s5.evaluate(() => { const vorher = S.ansicht; S.ansicht = 'betrieb'; const h = SCREENS.landing().html + '\n' + SCREENS.wie().html; S.ansicht = vorher; return h; });

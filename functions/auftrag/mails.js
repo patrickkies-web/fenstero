@@ -68,6 +68,18 @@ export function frageMail(f) {
 }
 
 
+/* Zahlungsausfall (Paketbedingungen § 8, Tageslauf auftraegeLauf): Abbuchung fehlgeschlagen, Pause nach o.kulanz Tagen, wieder live,
+   Ende nach o.pauseMax Tagen Pause. o: { konto (Link), kulanz, pauseMax, loeschen (Tage nach dem Ende) } */
+export function zahlungMail(stufe, a, o) {
+  const T = {
+    offen: ['Ihre Abbuchung ist fehlgeschlagen', 'Die Abbuchung Ihres Monatsbeitrags hat nicht geklappt. Bitte prüfen Sie Ihr Zahlungsmittel im Kundenbereich unter „Rechnungen und Zahlungsmittel“; wir versuchen es in den nächsten Tagen erneut. Ist die Zahlung nach ' + o.kulanz + ' Tagen nicht da, pausieren wir Ihren Konfigurator (Paketbedingungen § 8).'],
+    pausiert: ['Ihr Konfigurator ist pausiert', 'Ihr Monatsbeitrag ist seit ' + o.kulanz + ' Tagen offen. Deshalb haben wir Ihren Konfigurator pausiert: Ihre Kunden sehen Ihren Namen und Ihre Kontaktdaten, Anfragen nimmt er nicht an. Sobald die Zahlung da ist, schalten wir ihn wieder frei. Dauert die Pause ' + o.pauseMax + ' Tage, endet der Vertrag; offene Beträge bleiben fällig.'],
+    wieder: ['Ihr Konfigurator ist wieder online', 'Danke, Ihre Zahlung ist da. Ihr Konfigurator nimmt wieder Anfragen an.'],
+    beendet: ['Ihr Vertrag ist beendet', 'Ihr Konfigurator war ' + o.pauseMax + ' Tage pausiert, weil der Monatsbeitrag offen war. Damit ist Ihr Vertrag beendet (Paketbedingungen § 8). Offene Beträge bleiben fällig. Die Daten Ihres Konfigurators löschen wir ' + o.loeschen + ' Tage nach dem Ende.']
+  }, t = T[stufe]; if (!t) return null;
+  return { betreff: t[0] + ' (' + a.nr + ')', html: rahmen(t[0], absatz(esc(t[1])) + '<p style="margin:8px 0 0">' + pille(o.konto, 'Zum Kundenbereich') + '</p>') };
+}
+
 /* KI-Kontingent (functions/api/ki.js): Hinweis an den Fensterbauer bei 80 %, bei 100 % und an der Obergrenze; o: { genutzt, kontingent,
    preis (Text), obergrenze, konto (Link zum Kundenbereich), monat (Text), frei } */
 export function kiMail(stufe, a, o) {

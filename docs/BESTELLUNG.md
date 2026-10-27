@@ -44,7 +44,7 @@ Gespeichert wird nach jeder Eingabe (kurz verzögert, beim Verlassen der Seite n
 | `in_arbeit` | du | „Seite beginnen“: Anruf, Domain sichern, Seite bauen |
 | `vorschau` | du | Link zur Vorschau eintragen; Mail mit Link; im Kundenbereich ist „Vorschau öffnen“ die Pille, „Freigeben“ und „Änderungen wünschen“ stehen daneben; fehlen Logo, Fotos oder Porträt, nennt die Freigabe das vorher („Trotzdem freigeben“). Der Kunde gibt frei oder schreibt, was zu ändern ist (dann zurück nach `in_arbeit`) |
 | `live` | du | nach Freigabe: Adresse der fertigen Seite eintragen; das Monatsabo startet bei Stripe, Mail mit Link; der Kundenbereich zeigt den Knopf „Fenster planen“ als HTML für die eigene Website |
-| `pausiert`, `beendet`, `storniert` | du (oder Stripe) | Pause, Ende (Abo zum Monatsende oder sofort), Storno mit Erstattung |
+| `pausiert`, `beendet`, `storniert` | du (oder Stripe, Tageslauf) | Pause, Ende (Abo zum Monatsende oder sofort), Storno mit Erstattung. Pause und Ende schalten den verknüpften Konfigurator mit (Pause: nur Name und Kontakt, Ende: vom Netz; bei „zum Monatsende“ erst nach dem bezahlten Monat). Ablauf bei Nichtzahlung unten |
 
 Übergänge stehen in `Auftrag.UEBERGAENGE` (wer darf was); der Server prüft jeden Schritt. Nach der Zahlung bleibt alles änderbar (Stationen der Bestellung mit „Speichern“), aber nur vollständig; jede Änderung erscheint in der Zentrale als „geändert“. Ein Paketwechsel nach der Zahlung ist eine Anfrage (Differenz der Einrichtung, neuer Monatspreis ab Wechsel, § 7 Abs. 3).
 
@@ -77,6 +77,19 @@ Konfiguratoren ohne Auftrag (Demos, von Hand angelegt) laufen wie freigeschaltet
 - **Kundenportal:** eigene Konfiguration (Metadaten `auftrag-v1`): Rechnungen, Zahlungsmittel, Rechnungsangaben, Kündigung zum Monatsende.
 - **Webhook** (`/api/zahlung/webhook`, Ereignisse mit `metadata.art = auftrag`): `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`. Rückkehr aus der Kasse und Webhook schreiben beide „bezahlt“; Mails gehen nur beim ersten Mal.
 - **Attrappe** (`ZAHLUNG_ATTRAPPE=1` ohne Schlüssel): Kassen mit `test_`-Kennung gelten als bezahlt, Abo und Erstattung ohne Stripe.
+
+### Nichtzahlung (Paketbedingungen § 8)
+
+Läuft von selbst; du siehst jeden Schritt im Verlauf des Auftrags und bekommst eine Mail.
+
+1. **Abbuchung fehlgeschlagen** (`invoice.payment_failed`): Abo `zahlung_offen`, `abo.offen_seit`; Mail an den Betrieb (nur beim ersten Fehlschlag, Stripe versucht es mehrfach) und an dich. Der Kundenbereich zeigt oben „Ihr Monatsbeitrag ist offen“ mit der Pille „Zahlungsmittel prüfen“ (Kundenportal von Stripe).
+2. **Nach `FRISTEN.kulanzTage` (14) Tagen** pausiert der Tageslauf Auftrag und Konfigurator (`sperre = 'zahlung'`, `pause_seit`); Mails an Betrieb und dich.
+3. **Zahlung kommt** (`invoice.paid`): wieder live, Konfigurator nimmt wieder an, Mail an den Betrieb.
+4. **Nach `FRISTEN.pauseMaxTage` (60) Tagen Pause** beendet der Tageslauf den Vertrag: Abo sofort beenden, Konfigurator vom Netz, Mails. Offene Beträge bleiben fällig (§ 4 Abs. 6); die Domain bleibt bei dir, bis alles bezahlt ist (§ 6 Abs. 2).
+5. **Stripe bricht das Abo selbst ab** (`customer.subscription.deleted` mit `cancellation_details.reason` `payment_failed`, Einstellung „Abo kündigen“ für die Altkonten): Der Vertrag endet nicht sofort, es geht nach 2 und 4 weiter. Zahlt der Betrieb danach, bleibt der Konfigurator pausiert, bis du in der Zentrale „Wieder live schalten“ wählst; das startet ein neues Abo.
+6. **Kündigung durch den Betrieb** (Kundenportal, Abo endet zum Monatsende, `customer.subscription.deleted` ohne Zahlungsgrund): Vertrag beendet, Konfigurator vom Netz, Mail.
+
+Von Hand in der Zentrale: „Pausieren“ (`sperre = 'inhaber'`, endet nie von selbst), „Wieder live schalten“, „Vertrag beenden“ (sofort oder zum Monatsende). Prüfung 26.15.
 
 ## Mails
 

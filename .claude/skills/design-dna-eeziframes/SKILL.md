@@ -162,6 +162,10 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Zentrale (`/zentrale/`) sind neu im App-Rahmen der DNA (`web/assets/auftrag.css`, Präfix `a-`) gebaut und bauen nur auf den aktuellen
   Paketen und den Landingpages von Fensterbau Brandt auf. Wer daran weiterbaut, liest nur docs/BESTELLUNG.md und docs/ZENTRALE.md, nicht
   den früheren Stand; alte Muster (Statusleiste mit sechs Balken, Seitenleiste der alten Zentrale, Papier-Optik) kommen nicht zurück.
+- Aufmaßblatt (27.10.2026, Wunsch des Inhabers): Das Beispiel „Fensterbau Brandt / Familie Mustermann“ (13 Positionen, Systematik
+  nach Geschoss) steht an allen Stellen, die ein Aufmaßblatt zeigen oder darauf verweisen: Startseite, Seite für Fensterbauer (über
+  die Vorschau), Bestellung (Muster-Aufmaßblatt), Ratgeber Aufmaßblatt; die PDFs liegen unter web/beispiele/. Ändert sich blatt.js,
+  `node scripts/blatt-beispiel.mjs --web` und die Anker an den Bildern prüfen (Protokoll docs/profis/2026-10-27-aufmassblatt.md).
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

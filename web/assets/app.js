@@ -3586,7 +3586,7 @@ SCREENS.blatt = () => {
     entwurfWarnung() +
     '<div style="display: flex; flex-direction: column; gap: 10px">' + S.windows.map((x, i) => checkCard(x, i)).join('') + '</div>' +
     (kiLaeuftFuer() ? kiLaeuftKarte('Die Auswertung der Fotos kommt gleich dazu. Wer jetzt sendet, wartet kurz, damit sie mitgeht.') : '') +
-    (INST ? '<p class="sub" style="padding: 0 6px">Nach dem Senden bekommst du sofort eine Bestätigung' + (INST_M.kopieKunde ? ' und deine Anfrage als PDF' : '') + '. Ändern kannst du danach nur noch direkt mit ' + esc(bn) + '.</p>'
+    (INST ? '<p class="sub" style="padding: 0 6px">Nach dem Senden bekommst du sofort eine Bestätigung' + (INST_M.kopieKunde ? ' und eine Durchschrift deiner Anfrage als PDF' : '') + '. Ändern kannst du danach nur noch direkt mit ' + esc(bn) + '.</p>'
       : '<p class="sub" style="padding: 0 6px">Nach dem Absenden ist der Link erledigt. Ändern kannst du danach nur noch über ' + esc(bn) + '.</p>');
   return { html: html, back: ['Zurück', instWebsite() ? 'anfrage3' : 'anfrage2'], bar: { zurueck: true, label: S.kiWartet === 'senden' ? S.warteText || 'Einen Moment …' : (S.nb ? 'Erneut an ' : 'An ') + esc(bn) + ' senden', act: 'send', dis: !voll || S.kiWartet === 'senden' } };
 };
@@ -3634,7 +3634,7 @@ const anzahlFenster = () => S.windows.reduce((a, x) => a + (num(x.anzahl) || 1),
 /* Karte für Startseite und Gesendet-Seite */
 function dateiCard() {
   const n = S.windows.length;
-  if (INST && S.betrieb) return INST_M.kopieKunde ? '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich</p><b>Deine Anfrage als PDF</b><small>Direkt nach dem Senden, mit allen Fenstern, Maßen, Wünschen und Fotos.</small></div></div></div>' : '';
+  if (INST && S.betrieb) return INST_M.kopieKunde ? '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich</p><b>Deine Anfrage als PDF</b><small>Direkt nach dem Senden, als Durchschrift mit deinen Fenstern, der Ausstattung und deinen Wünschen.</small></div></div></div>' : '';
   if (S.betrieb) { const bn = S.betrieb.name || 'dein Fensterbauer'; return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Eine Kopie für dich?</p><b>Frag ' + esc(bn) + '</b><small>Dein Aufmaß gehört zu diesem Auftrag. ' + esc(bn) + ' hat das komplette Aufmaßblatt als PDF und gibt es dir gern mit dem Angebot.</small></div></div></div>'; }
   if (FREI()) return '<div class="card datei-card bought"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">' + (KUNDE_FREI() ? 'Für dich · kostenlos' : 'Freigeschaltet') + '</p><b>Dein Aufmaßblatt als PDF</b><small>' + n + (n === 1 ? ' Fenster' : ' Fenster') + ', alle Maße, Fotoauswertung und Wünsche, mit Code für den Fensterbauer.</small></div></div><span class="row" style="display: flex; gap: 8px; flex: 0 0 auto"><button type="button" class="btn ghost" data-act="teil-pdf">Teilen</button><button type="button" class="btn ghost" data-act="k-dl">Herunterladen</button></span></div>';
   return '<div class="card datei-card"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">Dein Aufmaßblatt · ' + euro(PREIS()) + '</p><b>Fertig gemessen? Dann freischalten.</b><small>Alle Maße, die Auswertung der Fotos und deine Wünsche als PDF, mit Code für jeden Fensterbauer. Einmal zahlen, für dieses Projekt.</small></div></div><button type="button" class="btn ghost" style="flex: 0 0 auto" data-act="go" data-v="teilen">Ansehen</button></div>';
@@ -7252,7 +7252,7 @@ function instGesendet() {
   const html = '<section class="inst-danke"><div class="ein-start-in">' + ok + '<p class="eyebrow kicker">' + (test ? 'Testanfrage ' : 'Anfrage ') + '<span class="inst-nr-wert">' + esc(S.sent.nr || '') + '</span></p><h1>Danke, <span class="ak">gesendet</span>.</h1>' +
       '<p class="ein-lead">' + esc(name) + T(' hat jetzt Ihre Maße, Fotos und Wünsche und meldet sich bei Ihnen.', ' hat jetzt deine Maße, Fotos und Wünsche und meldet sich bei dir.') + '</p></div></section>' +
     (test ? noteBox('Vorschau: Das war eine Testanfrage. Sie geht mit „[Test]“ im Betreff an den Betrieb, zählt nicht mit und ist nach einem Tag gelöscht.', null, 'warn') : '') +
-    (INST_M.kopieKunde ? '<section class="card inst-pdf"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">' + T('Für Ihre Unterlagen', 'Für deine Unterlagen') + '</p><b>' + T('Ihre Anfrage als PDF', 'Deine Anfrage als PDF') + '</b><small>' + T('Alle Fenster mit Maßen, Wünschen und Fotos, dazu Ihre Angaben. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.', 'Alle Fenster mit Maßen, Wünschen und Fotos, dazu deine Angaben. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.') + '</small></div></div><div class="pill-row"><button type="button" class="btn primary" data-act="inst-pdf"' + (S.pdfLaeuft ? ' disabled' : '') + '>' + (S.pdfLaeuft ? 'PDF entsteht …' : 'Meine Anfrage als PDF') + '</button></div></section>' : '') +
+    (INST_M.kopieKunde ? '<section class="card inst-pdf"><div class="dc-row"><span class="dc-ic">' + FILE_IC + '</span><div><p class="eyebrow">' + T('Für Ihre Unterlagen', 'Für deine Unterlagen') + '</p><b>' + T('Ihre Anfrage als PDF', 'Deine Anfrage als PDF') + '</b><small>' + T('Durchschrift mit Ihren Fenstern, der Ausstattung und Ihren Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' Ihnen gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.', 'Durchschrift mit deinen Fenstern, der Ausstattung und deinen Wünschen, ohne Maße. Das vollständige Aufmaßblatt schickt ' + esc(name) + ' dir gern auf Anfrage. Nur jetzt: Danach löschen wir die Planung von diesem Gerät.') + '</small></div></div><div class="pill-row"><button type="button" class="btn primary" data-act="inst-pdf"' + (S.pdfLaeuft ? ' disabled' : '') + '>' + (S.pdfLaeuft ? 'PDF entsteht …' : 'Meine Anfrage als PDF') + '</button></div></section>' : '') +
     '<div class="card" style="gap: 12px"><p class="eyebrow">So geht\'s weiter</p><div class="steps mini"><div class="step"><span class="n">1</span><div><b>Angebot</b><p>von ' + esc(name) + '</p></div></div><div class="step"><span class="n">2</span><div><b>Feinaufmaß</b><p>ein Termin vor Ort</p></div></div><div class="step"><span class="n">3</span><div><b>Fertigung und Einbau</b><p>Termin nach Absprache</p></div></div></div></div>' +
     (E ? E.kontakt({ name: name, p: d.p, du: du, instanz: instOpt({ website: web }) }) : '') +
     '<section class="card inst-geraet-karte"><p class="eyebrow">Auf diesem Gerät</p><p>' + T('Sobald Sie diese Seite verlassen, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum Ihrer Anfrage.', 'Sobald du diese Seite verlässt, löschen wir Maße, Fotos und Kontaktdaten von diesem Gerät. Es bleiben nur Nummer und Datum deiner Anfrage.') + '</p><div class="pill-row"><button type="button" class="pill" data-act="inst-weitere">Weitere Anfrage starten</button><button type="button" class="pill" data-act="inst-vergessen">Auf diesem Gerät vergessen</button></div></section>';
@@ -7268,17 +7268,18 @@ async function logoFuerBlatt(url) {
     return g && g.w > 0 ? { data: data, w: g.w, h: g.h, grund: (lkDaten().p || {}).grund === 'dunkel' ? 'dunkel' : 'hell' } : null;
   } catch (e) { return null; }
 }
-/* „Meine Anfrage als PDF“: Blatt.pdf in der Variante anfrage (Marke der Instanz, ohne Bestellmaß und Werbung), Kennzeichnung nach Paket */
+/* „Meine Anfrage als PDF“: Blatt.pdf in der Variante anfrage, die Durchschrift für den Kunden (Marke der Instanz, ohne Maße, Zeichnung,
+   Fotos und Bestellmaß, mit dem Hinweis auf die vollständige PDF beim Betrieb samt Telefon und Mail), Kennzeichnung nach Paket */
 async function anfragePdf() {
   if (!INST || !S.sent || S.sent.kurz || !INST_M.kopieKunde) return toast('Die Kopie gibt es nur direkt nach dem Senden.');
   if (S.pdfLaeuft) return;
   S.pdfLaeuft = true; render();
   try {
     await blattSchrift();
-    const d = lkDaten(), pr = S.proj, fotos = await fotosFuerBlatt(S.windows), logo = INST_M.logo && INST.logo ? await logoFuerBlatt(INST.logo) : null;
-    const marke = { name: d.name, host: location.host || INST.host || '' }; if (logo) marke.logo = logo; if (INST_M.farbe && INST.farbe) marke.farbe = INST.farbe;
+    const d = lkDaten(), pr = S.proj, logo = INST_M.logo && INST.logo ? await logoFuerBlatt(INST.logo) : null, kt = INST.kontakt || {};
+    const pp = d.p || {}, marke = { name: d.name, host: location.host || INST.host || '', ap: pp.ap || '', tel: pp.tel || kt.tel || '', mail: pp.mail || kt.mail || '' }; if (logo) marke.logo = logo; if (INST_M.farbe && INST.farbe) marke.farbe = INST.farbe;
     const kunde = { name: pr.name || '', kontakt: pr.tel || pr.mail || '', adresse: pr.ort || '', mehr: AW.kundeKontakt({ kontakt: pr.tel || pr.mail || '', aufmass: { proj: pr } }) };
-    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'anfrage', kennzeichnung: INST_M.pdfKennzeichnung || INST_M.kennzeichnung, marke: marke, nr: S.sent.nr || '', sie: !d.du, fenster: S.windows, projekt: pr, kunde: kunde, fotos: fotos, h: BLATT_H }) : null;
+    const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'anfrage', kennzeichnung: INST_M.pdfKennzeichnung || INST_M.kennzeichnung, marke: marke, nr: S.sent.nr || '', sie: !d.du, fenster: S.windows, projekt: pr, kunde: kunde, fotos: {}, h: BLATT_H }) : null;
     if (!pdf) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); return; }
     await dateiSpeichern(pdf, 'Anfrage-' + (String(S.sent.nr || '').replace(/[^A-Za-z0-9-]/g, '') || 'Fenster') + '.pdf');
   } catch (e) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); }
