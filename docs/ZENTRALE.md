@@ -25,6 +25,7 @@ Code: `web/zentrale/index.html`, `web/assets/inhaber.js`, Stil `web/assets/auftr
 | **Betrieb, Adresse** | Impressum und Kontakt, Domain (neu oder vorhanden), weitere Wünsche, Empfänger der Anfragen, Dashboard-Team |
 | **Nachrichten** | Verlauf mit dem Kunden, Antwort geht auch per Mail |
 | **Interne Notiz** | nur für dich |
+| **KI-Auswertungen** | verknüpfter Konfigurator (beim Live-Schalten über die Adresse, sonst hier von Hand), genutzt im Monat in Prozent, ob der Kunde weitere freigeschaltet hat, bisher weitere mit Betrag, Abrechnungen der Vormonate mit Stripe-Posten |
 | **Zahlung und Abo, Kunde, Verlauf** | Einrichtung und Abo mit Stripe-Kennungen, Zustimmung mit Fassung und Zeitpunkt, Konto des Kunden, jeder Schritt mit Zeit und Urheber |
 | **Weitere Schritte** | je Stand die erlaubten Übergänge: zurück in Arbeit, zurück in den Entwurf, pausieren, beenden (zum Monatsende oder sofort), stornieren (mit Erstattung) |
 

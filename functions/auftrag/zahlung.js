@@ -6,7 +6,8 @@
    - Kundenportal (Rechnungen, Zahlungsmittel, Kündigung), Erstattung der Einrichtung beim Storno.
    API: kasse(ctx, a, kunde, o) → { id, url } · kassePruefen(ctx, session) → { bezahlt, laeuft, kunde, betragCent, intent }
         aboStarten(ctx, a, kunde) → { id, status, bis } · aboBeenden(ctx, a, sofort) · portal(ctx, kunde, zurueck) → url ·
-        erstatten(ctx, a) → { ok } · mitStripe(k) */
+        erstatten(ctx, a) → { ok } · kiPosten(ctx, a, { monat, text, mehr, cent }) → { id } (Rechnungsposten der KI-Auswertungen über dem
+        Kontingent auf der nächsten Rechnung des Abos, einmal je Monat) · mitStripe(k) */
 import { ApiFehler, zufall } from '../api/umgebung.js';
 import { stripe } from '../api/stripe.js';
 
@@ -114,4 +115,15 @@ export async function erstatten(ctx, a) {
   if (!z.intent) throw new ApiFehler('Zur Zahlung fehlt die Kennung bei Stripe; bitte im Stripe-Dashboard erstatten.', 409);
   const r = await stripe(ctx.k).post('/refunds', { payment_intent: z.intent, metadata: { art: 'auftrag', auftrag: a.id } }, { idem: 'auftrag-erstattung-' + a.id });
   return { ok: true, cent: r.amount || 0 };
+}
+
+/* KI-Auswertungen über dem Kontingent des Vormonats: ein Posten (netto zzgl. Steuersatz) auf der nächsten Rechnung des Abos */
+export async function kiPosten(ctx, a, o) {
+  pruefe(ctx.k);
+  if (attrappe(ctx.k)) return { id: 'test_ii_' + zufall(10) };
+  const s = stripe(ctx.k), steuer = await steuersatz(ctx, s), z = a.zahlung || {}, ab = a.abo || {};
+  if (!z.kunde || !ab.id) throw new ApiFehler('Kein Abo bei Stripe für diesen Auftrag.', 409);
+  const r = await s.post('/invoiceitems', { customer: z.kunde, subscription: ab.id, amount: o.cent, currency: 'eur', description: 'KI-Auswertungen ' + o.text + ': ' + o.mehr + ' über dem Kontingent',
+    tax_rates: steuer ? [steuer] : undefined, metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr, ki_monat: o.monat } }, { idem: 'auftrag-ki-' + a.id + '-' + o.monat });
+  return { id: r.id };
 }

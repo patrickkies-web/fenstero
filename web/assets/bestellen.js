@@ -217,7 +217,7 @@
         h('div', { class: 'a-offen-zeile' }, h('span', null, h('b', { text: a.paketName }), ' · ' + (a.angaben.betrieb && a.angaben.betrieb.firma || a.nr) + ' · ' + U.datum(a.updated_at)), U.ring('Weiter', { class: 'klein', on: { click: () => { laden(a); zeigen(ersteOffene()); } } }))))));
     }
     inhalt.push(h('p', { class: 'a-fusszeile' }, U.aenderbar('Paket und Angaben lassen sich bis zur Zahlung jederzeit ändern. Alle Preise netto' + (S.stand && S.stand.mwst === false ? '.' : ' zzgl. 19 % USt.') + (P.VORLAEUFIG ? ' Vorläufige Preise.' : '') +
-      ' Eine KI-Auswertung ist ein Foto, meist zwei je Fenster. Zum Schutz vor Missbrauch wertet die KI im Monat höchstens das Doppelte des Kontingents aus, danach geht es ohne KI-Befund weiter.')));
+      ' Eine KI-Auswertung ist ein Foto, meist zwei je Fenster. Bei 100 % pausiert die KI bis Monatsende; weitere schalten Sie im Kundenbereich frei, sie kommen dann mit der nächsten Monatsrechnung.')));
     return { frage: U.frage('Welches Paket *passt zu Ihnen?*', 'Drei Stufen, ein Konfigurator. Wählen Sie, wie viel von Ihrer Marke auf der Seite steht.', wahl), inhalt: inhalt, fuss: fuss('Weiter mit ' + kurz(S.paket) + ' · ' + U.euro(P.preis(S.paket).monat), (k) => paketWeiter(k)) };
   };
   const wegText = (w) => w === 'schnell' ? 'Sie nennen nur das Nötigste und Ihr Logo. Texte, Farben und Bilder übernehmen wir von Ihrer Website oder klären sie im Telefonat.' : 'Sie geben Logo, Farben, Fotos und Texte selbst vor. Was noch fehlt, reichen Sie später im Kundenbereich nach.';
@@ -527,7 +527,7 @@
       h('div', { class: 'a-summe' }, h('span', { class: 'gross' }, String(pr.einrichtung), h('small', { text: '€ Einrichtung, netto' })), h('span', { style: grau, text: kasse ? 'heute, einmalig' : 'einmalig' })),
       mwst ? h('p', { class: 'a-heute' }, h('b', { text: (kasse ? 'Heute bei Stripe: ' : 'Mit Umsatzsteuer: ') + brutto(pr.einrichtung) }), ' inkl. 19 % USt.') : h('p', { style: grau, text: 'Kein Ausweis der Umsatzsteuer nach § 19 UStG.' }),
       h('p', { text: 'Danach ' + U.euro(pr.monat) + ' netto im Monat' + (mwst ? ' (' + brutto(pr.monat) + ' inkl. USt.)' : '') + ', erst ab dem Tag, an dem Ihre Seite live geht. Ohne Mindestlaufzeit, kündbar zum Monatsende.' }),
-      h('p', { style: grau, text: P.kiText(S.paket) + ' netto, mit der Monatsrechnung.' }),
+      h('p', { style: grau, text: P.kiText(S.paket) + ' netto, nur wenn Sie weitere im Kundenbereich freischalten.' }),
       h('p', { style: grau, text: 'Bis wir mit der Einrichtung beginnen, stornieren Sie im Kundenbereich kostenlos; die Einrichtung erstatten wir dann vollständig.' })], 'leucht'));
     /* Zustimmung direkt unter dem Preis, je Haken ein Satz in Alltagsdeutsch; die Zeile über der Pille zählt, was fehlt */
     const zu = S.auftrag && S.auftrag.zustimmung || {};

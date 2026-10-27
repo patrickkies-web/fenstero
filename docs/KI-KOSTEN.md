@@ -46,10 +46,10 @@ Kosten des Kontingents für dich, falls ein Betrieb es ganz ausschöpft (0,044 �
 - Die KI wertet auf einem Konfigurator nur Fotos aus einer Planung mit gültigem Code dieses Betriebs aus (`kiInstanz`).
 - Je Anfrage höchstens 2 × Fenster + 6 Auswertungen, nie mehr als 60 (`Instanzregeln.GRENZEN.kiJeCode`).
 - Bremse je Anschluss: 40 Anfragen in 10 Minuten (IPv6 je /64), dazu die Bremse der Datenbank.
-- Je Konfigurator und Monat: Mail an dich beim Kontingent, Schluss beim Doppelten; danach nimmt der Konfigurator weiter Anfragen an, nur ohne KI-Befund.
+- Je Konfigurator und Monat: Pause bei 100 %, außer der Betrieb hat weitere freigeschaltet, dann Schluss beim Doppelten; Mails an den Betrieb bei 80 und 100 %, an dich bei 100 %. Danach nimmt der Konfigurator weiter Anfragen an, nur ohne KI-Befund.
 - Über alle Konfiguratoren: höchstens `KI_TAG_MAX` Auswertungen am Tag (Standard 3.000), Mail an dich bei 80 %.
 
 ## Offen
 
-- **Abrechnung der weiteren Auswertungen:** Der Zähler je Konfigurator und Monat läuft (`budget`, Schlüssel `inst:<id>:ki`), die Rechnung an den Betrieb aber noch nicht von selbst. Sobald die Instanz beim Live-Schalten aus dem Auftrag angelegt wird (docs/BESTELLUNG.md, „Offen“), kann der monatliche Lauf die Auswertungen über dem Kontingent als Rechnungsposten an das Stripe-Abo hängen. Bis dahin: Zahl aus dem Zähler lesen (`functions/api/bremse.js`, `budget`) und von Hand berechnen; die neue Zentrale zeigt sie noch nicht.
+- **Abrechnung der weiteren Auswertungen** läuft seit 27.10.2026 von selbst: Der Fensterbauer schaltet sie im Kundenbereich frei, der Tageslauf hängt am Monatsanfang einen Posten an sein Stripe-Abo (docs/BESTELLUNG.md, „So läuft das Kontingent“). Voraussetzung: Der Konfigurator ist mit dem Auftrag verknüpft (beim Live-Schalten über die Adresse, sonst in der Zentrale von Hand).
 - Die Token-Zahlen oben sind geschätzt, nicht gemessen; die Console liefert die echten.

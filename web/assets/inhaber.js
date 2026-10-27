@@ -101,7 +101,7 @@
   /* ---------- Ein Auftrag ---------- */
   async function auftragLaden(id) {
     const r = await U.api('GET', '/api/inhaber/auftraege/' + id);
-    S.auftrag = Object.assign(r.auftrag, { prompt: r.prompt, nachrichten: r.nachrichten, paketStand: r.stand });
+    S.auftrag = Object.assign(r.auftrag, { prompt: r.prompt, nachrichten: r.nachrichten, paketStand: r.stand, kiStand: r.ki || null });
     if (r.auftrag.geaendert && r.auftrag.geaendert > (r.auftrag.gesehen || '')) U.api('POST', '/api/inhaber/auftraege/' + id + '/gesehen', {}).catch(() => null);
     const e = (S.liste || []).find((x) => x.id === id); if (e) { e.ungelesen = 0; e.geaendert = false; }
     return S.auftrag;
@@ -137,8 +137,8 @@
       if (link && !A.webAdresse(link.eingabe.value)) { U.fehlerSetzen(link, 'Bitte einen Link wie https://… eintragen.'); link.eingabe.focus(); return; }
       U.warten(ja, true);
       try {
-        await U.api('POST', '/api/inhaber/auftraege/' + a.id + '/stand', { stand: s.nach, link: link ? link.eingabe.value.trim() : '', text: text.eingabe.value, mail: mail.eingabe.checked, sofort: sofort ? sofort.eingabe.checked : false });
-        zu(); U.toast(A.STAND_TITEL[s.nach]); await eingangLaden(); zeigen(await auftragLaden(a.id), { stehen: true });
+        const x = await U.api('POST', '/api/inhaber/auftraege/' + a.id + '/stand', { stand: s.nach, link: link ? link.eingabe.value.trim() : '', text: text.eingabe.value, mail: mail.eingabe.checked, sofort: sofort ? sofort.eingabe.checked : false });
+        zu(); U.toast(x.hinweis || A.STAND_TITEL[s.nach]); await eingangLaden(); zeigen(await auftragLaden(a.id), { stehen: true });
       } catch (e) { U.warten(ja, false); if (link && e.daten && e.daten.felder && e.daten.felder.link) U.fehlerSetzen(link, e.daten.felder.link); else U.toast(e.message); }
     });
   }
@@ -185,10 +185,26 @@
     const notiz = h('textarea', { rows: '4', maxlength: '4000', 'aria-label': 'Interne Notiz', placeholder: 'Nur für Sie: Telefonat, Absprachen, Domain gekauft am …' }); notiz.value = a.notiz || '';
     inhalt.push(U.karte('Interne Notiz', 'sieht der Kunde nicht', [h('div', { class: 'a-flaeche' }, notiz), h('div', { class: 'a-knoepfe', style: 'padding:10px 0 16px' }, U.ring('Notiz speichern', { class: 'klein', on: { click: async () => { try { await U.api('POST', '/api/inhaber/auftraege/' + a.id + '/notiz', { text: notiz.value }); a.notiz = notiz.value; U.toast('Notiz gespeichert'); } catch (e) { U.toast(e.message); } } } }))]));
 
+    /* KI-Kontingent: Verbrauch des Monats, Freischaltung des Kunden, Abrechnungen; Konfigurator von Hand verknüpfen */
+    const ks = a.kiStand;
+    if (ks && !['entwurf', 'angefragt', 'storniert'].includes(a.stand)) {
+      const host = U.feld({ k: 'host', label: ks.verknuepft ? 'Anderer Konfigurator' : 'Konfigurator verknüpfen', platzhalter: 'fensterbau-brandt.de', optional: ks.verknuepft, hilfe: 'Adresse des Konfigurators; beim Live-Schalten geschieht das über die Adresse der Seite.' });
+      const verknuepfen = U.ring('Verknüpfen', { class: 'klein', on: { click: async () => {
+        try { await U.api('POST', '/api/inhaber/auftraege/' + a.id + '/instanz', { host: host.eingabe.value.trim() }); U.toast('Verknüpft'); zeigen(await auftragLaden(a.id), { stehen: true }); }
+        catch (e) { U.fehlerSetzen(host, (e.daten && e.daten.felder && e.daten.felder.host) || e.message); } } } });
+      inhalt.push(U.karte('KI-Auswertungen', ks.monat, [kv([
+        ['Konfigurator', ks.verknuepft ? ks.host : 'nicht verknüpft (Zähler und Abrechnung fehlen)'],
+        ks.verknuepft ? ['Genutzt', (ks.mehr ? P.tausend(ks.kontingent) + ' von ' + P.tausend(ks.kontingent) + ' + ' + P.tausend(ks.mehr) + ' weitere' : P.tausend(ks.genutzt) + ' von ' + P.tausend(ks.kontingent)) + ' (' + ks.prozent + '\u00a0%)'] : null,
+        ['Weitere', ks.frei ? 'freigeschaltet seit ' + U.datum(ks.frei_seit) + ' bis zum Beenden; im Monat ' + P.tausend(ks.kontingent) + '\u00a0+\u00a0' + P.tausend(ks.obergrenze - ks.kontingent) + ' weitere' : 'nicht freigeschaltet: Pause bei 100 %'],
+        ks.mehr ? ['Bisher weitere', P.tausend(ks.mehr) + ' · ' + U.euro(ks.mehrCent / 100) + ' netto'] : null,
+        ['Abgerechnet', (ks.abgerechnet || []).filter((x) => x.mehr).map((x) => x.text + ': ' + P.tausend(x.mehr) + ' weitere, ' + U.euro(x.cent / 100) + (x.offen ? ' (von Hand abrechnen)' : ' (Stripe ' + (x.posten || '–') + ')')).join(' · ') || 'noch nichts']]),
+        host, h('div', { class: 'a-knoepfe', style: 'padding:0 0 16px' }, verknuepfen)]));
+    }
+
     /* Zahlung, Kunde, Verlauf */
     const ZI = a.zahlungIntern || {};
     inhalt.push(U.karte('Zahlung und Abo', null, kv([['Einrichtung', z.status === 'bezahlt' ? U.euro((z.betrag_cent || 0) / 100) + ' brutto, bezahlt am ' + U.datum(z.bezahlt_am) + (z.erstattet ? ', erstattet' : '') : (z.status || 'offen')], ['Preise', U.euro((a.preise || {}).einrichtung || 0) + ' Einrichtung, ' + U.euro((a.preise || {}).monat || 0) + ' im Monat, netto (Preisstand ' + ((a.preise || {}).stand ? U.datum((a.preise || {}).stand) : '–') + ')'],
-      ['KI-Auswertungen', P.tausend((P.merkmale(a.paket) || {}).kiMonat) + ' im Monat inklusive, jede weitere ' + U.euro((a.preise || {}).ki != null ? a.preise.ki : P.preis(a.paket).ki) + ' netto; abrechnen von Hand, solange die Instanz nicht verknüpft ist (docs/KI-KOSTEN.md)'],
+      ['KI-Auswertungen', P.tausend((P.merkmale(a.paket) || {}).kiMonat) + ' im Monat inklusive, jede weitere ' + U.euro((a.preise || {}).ki != null ? a.preise.ki : P.preis(a.paket).ki) + ' netto, nur mit Freischaltung des Kunden; abgerechnet am Monatsanfang als Posten im Stripe-Abo (Karte „KI-Auswertungen“)'],
       ['Monatsabo', ab.status ? ab.status + (ab.seit ? ' seit ' + U.datum(ab.seit) : '') + (ab.bis ? ', bezahlt bis ' + U.datum(ab.bis) : '') : 'startet mit „Live schalten“'], ['Stripe', [ZI.kunde, ZI.intent, ab.id].filter(Boolean).join(' · ')],
       ['Zustimmung', a.zustimmung ? 'Unternehmer, Paketbedingungen vom ' + U.datum(a.zustimmung.agb) + ', AV-Vertrag, am ' + U.zeit(a.zustimmung.zeit) : '']])));
     const k = a.kunde || {};

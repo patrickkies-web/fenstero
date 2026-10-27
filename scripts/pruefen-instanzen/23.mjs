@@ -201,8 +201,8 @@ export default async (h) => {
   await h.instanz('kiprobe', { abweichung: { kiMonat: 2 } });
   const kiStati = [];
   for (let i = 0; i < 5; i++) { const c = (await T.start(kiI.host)).json.code; kiStati.push((await ki(kiI.host, c)).status); }
-  const kiAlarm = await T.warteMail((m) => /Richtwert erreicht bei KI-Probe Fenster/.test(m.betreff || ''), 3000);
-  ok(kiStati.join() === '200,200,200,200,429' && kiAlarm.length === 1, '23.9 KI je Instanz und Monat: Alarm-Mail genau einmal beim Richtwert, 429 erst beim Doppelten (' + kiStati.join(',') + ')');
+  const kiAlarm = await T.warteMail((m) => /Kontingent erreicht bei KI-Probe Fenster/.test(m.betreff || ''), 3000);
+  ok(kiStati.join() === '200,200,200,200,429' && kiAlarm.length === 1, '23.9 KI je Instanz und Monat: Alarm-Mail genau einmal beim Kontingent, ohne verknüpften Auftrag 429 erst beim Doppelten (' + kiStati.join(',') + ')');
   const s2 = await h.server({ KI_TAG_MAX: '3' });
   const tagStati = [];
   for (let i = 0; i < 4; i++) tagStati.push((await s2.api('localhost', '/api/ki?aufgabe=einbau&seite=in', { body: kiBild, origin: true, headers: Object.assign({ 'content-type': 'text/plain' }, T.ip()) })).status);

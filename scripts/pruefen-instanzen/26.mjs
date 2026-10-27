@@ -7,7 +7,8 @@
 //   Station, Zustimmung, Kasse, Eingangsbestätigung mit beiden PDFs, Zahlung, Mails an Kunde und Inhaber) · 26.7 fremde Aufträge 404,
 //   Zentrale nur angemeldet · 26.8 Zentrale: Eingang, Prompt, Stände bis Live mit Abo, Änderungswunsch, falsche Übergänge
 //   · 26.9 Nachrichten in beide Richtungen · 26.10 Storno bis Arbeitsbeginn mit Erstattung · 26.11 Paketwechsel nach der Zahlung nur als
-//   Anfrage · 26.12 Tageslauf (Fristen: Entwürfe, Konten ohne Auftrag) · 26.13 nicht auf dem Host einer Instanz
+//   Anfrage · 26.12 Tageslauf (Fristen: Entwürfe, Konten ohne Auftrag) · 26.13 nicht auf dem Host einer Instanz · 26.14 KI-Kontingent
+//   (Verknüpfung beim Live-Schalten, Pause bei 100 %, Freischaltung bis 200 %, Mails, Monatsabrechnung)
 // Teil B im Browser (Telefon und Schreibtisch): die ganze Bestellung Plus von der Paketwahl bis zur Kasse, je Station genau eine volle
 //   Pille, Ziele ab 44 px, kein Querscrollen, Fehler am Feld; Kundenbereich nach der Kasse; Zentrale mit „Seite beginnen“.
 import fs from 'node:fs';
@@ -185,6 +186,62 @@ export default async function (h) {
   /* ---------- 26.13 Nicht auf dem Host einer Instanz ---------- */
   const inst = await h.api('essential.localhost', '/api/auftrag/stand'), instZ = await h.api('plus.localhost', '/api/inhaber/stand');
   ok(inst.status === 404 && instZ.status === 404, '26.13 Bestellung und Zentrale gibt es nur auf der Hauptdomain, nicht auf dem Host einer Instanz');
+
+  /* ---------- 26.14 KI-Kontingent (eigener Testserver: die Monatsabrechnung braucht die vorgestellte Uhr) ----------
+     Plus mit Kontingent 5 (Abweichung am Konfigurator): ohne Freischaltung Pause bei 100 %, mit Freischaltung beim Doppelten, Mails bei
+     80 und 100 % und an der Obergrenze, im Kundenbereich der Stand, am Monatsanfang ein Rechnungsposten genau einmal */
+  const s4 = await h.server({});
+  const s4api = (cookie, pfad, init, ip) => s4.api('localhost', pfad, Object.assign({ cookie: cookie, origin: true }, init || {}, { headers: { 'x-forwarded-for': ip || '10.26.4.1' } }));
+  const mailK = 'ki-' + stempel + '@pruef-fenster.de';
+  await s4api('', '/api/auftrag/code', { body: { mail: mailK } });
+  const KK = keks(await s4api('', '/api/auftrag/anmelden', { body: { mail: mailK, code: '123456' } }));
+  const ak = (await s4api(KK, '/api/auftrag/neu', { body: { paket: 'plus', weg: 'ausfuehrlich' } })).json.auftrag;
+  await s4api(KK, '/api/auftrag/' + ak.id, { method: 'PATCH', body: { angaben: { betrieb: BETRIEB, adresse: { art: 'neu', domains: ['ki-' + stempel + '.de'], eingang: [mailK] }, auftritt: { farben: ['#1f6f78'] } } } });
+  const kb = await s4api(KK, '/api/auftrag/' + ak.id + '/bestellen', { body: { zustimmung: zu } });
+  await s4api(KK, '/api/auftrag/' + ak.id + '/kasse?session=' + encodeURIComponent((/kasse=([^&#]+)/.exec(kb.json.url || '') || [])[1] || ''), { method: 'GET' });
+  const kiHost = 'ki-' + stempel + '.de';
+  await s4.saat({ instanzen: [{ slug: 'ki-' + stempel, host: kiHost, paket: 'plus', name: 'KI-Kontingent Prüf', plz: '50667' }] });
+  await s4.instanz(kiHost, { abweichung: { kiMonat: 5 } });
+  const ZK = keks(await s4api('', '/api/inhaber/anmelden', { body: { passwort: h.PASSWORT } }, '10.26.4.9'));
+  const vorBezahlt = await s4api(KK, '/api/auftrag/' + ak.id + '/ki', { method: 'GET' });
+  await s4api(ZK, '/api/inhaber/auftraege/' + ak.id + '/stand', { body: { stand: 'in_arbeit', mail: false } });
+  await s4api(ZK, '/api/inhaber/auftraege/' + ak.id + '/stand', { body: { stand: 'vorschau', link: 'https://claude.ai/artifact/ki-' + stempel, mail: false } });
+  await s4api(KK, '/api/auftrag/' + ak.id + '/freigabe', { body: { aktion: 'freigeben' } });
+  const kLive = await s4api(ZK, '/api/inhaber/auftraege/' + ak.id + '/stand', { body: { stand: 'live', link: 'https://' + kiHost + '/', mail: false } });
+  const kiBild = '/9j/' + 'A'.repeat(400);
+  let ipN = 0;
+  const kiRuf = async () => {
+    const ip = '10.26.5.' + (++ipN), c = (await s4.api(kiHost, '/api/instanz/start', { body: {}, origin: true, headers: { 'x-forwarded-for': ip } })).json.code;
+    return (await s4.api(kiHost, '/api/ki?aufgabe=einbau&seite=in&code=' + c, { body: kiBild, origin: true, headers: { 'content-type': 'text/plain', 'x-forwarded-for': ip } })).status;
+  };
+  const vorKi = new Set((await s4.post()).map((m) => m.id)), runde1 = [];
+  for (let i = 0; i < 6; i++) runde1.push(await kiRuf());
+  await new Promise((r) => setTimeout(r, 300));
+  const stand1 = (await s4api(KK, '/api/auftrag/' + ak.id + '/ki', { method: 'GET' })).json.ki;
+  const mailsKi1 = (await s4.post()).filter((m) => !vorKi.has(m.id));
+  ok(vorBezahlt.json.ki.verknuepft === false && kLive.json.auftrag.instanz && kLive.json.auftrag.instanz.host === kiHost && !kLive.json.hinweis && runde1.join() === '200,200,200,200,200,429' &&
+    stand1.verknuepft && stand1.kontingent === 5 && stand1.genutzt === 5 && stand1.prozent === 100 && !stand1.frei &&
+    mailsKi1.some((m) => m.an === mailK && /80 % genutzt/.test(m.betreff)) && mailsKi1.some((m) => m.an === mailK && /Kontingent erreicht/.test(m.betreff) && /pausiert die KI/.test(m.html)) && mailsKi1.some((m) => m.an !== mailK && /Kontingent erreicht bei KI-Kontingent Prüf/.test(m.betreff)),
+    '26.14 Live verknüpft den Konfigurator über seine Adresse; ohne Freischaltung pausiert die KI bei 100 % (' + runde1.join(',') + '), Mails an den Betrieb bei 80 und 100 %, an den Inhaber bei 100 %, Stand im Kundenbereich');
+  const fremdFrei = await s4api('', '/api/auftrag/' + ak.id + '/ki', { body: { frei: true } });
+  const frei1 = await s4api(KK, '/api/auftrag/' + ak.id + '/ki', { body: { frei: true } }), runde2 = [];
+  for (let i = 0; i < 6; i++) runde2.push(await kiRuf());
+  await new Promise((r) => setTimeout(r, 300));
+  const stand2 = (await s4api(KK, '/api/auftrag/' + ak.id + '/ki', { method: 'GET' })).json.ki, mailsKi2 = (await s4.post()).filter((m) => !vorKi.has(m.id));
+  ok(fremdFrei.status === 401 && frei1.json.ki.frei === true && runde2.join() === '200,200,200,200,200,429' && stand2.genutzt === 10 && stand2.mehr === 5 && stand2.mehrCent === 40 && stand2.hoechstCent === 40 &&
+    mailsKi2.some((m) => m.an === mailK && /Obergrenze erreicht/.test(m.betreff)),
+    '26.14 Weitere Auswertungen freigeschaltet: die KI läuft bis zum Doppelten weiter (' + runde2.join(',') + '), danach Pause und Mail; im Kundenbereich 5 weitere, 0,40 € netto');
+  const jetzt14 = new Date(), tage14 = Math.ceil((Date.UTC(jetzt14.getUTCFullYear(), jetzt14.getUTCMonth() + 1, 2, 12) - jetzt14.getTime()) / 864e5);
+  await s4.uhr(tage14);
+  const lauf14 = await s4.geplant('17 4 * * *'), lauf14b = await s4.geplant('17 4 * * *');
+  await s4.uhr(null);
+  const det14 = (await s4api(ZK, '/api/inhaber/auftraege/' + ak.id, { method: 'GET' })).json;
+  const monat14 = jetzt14.toISOString().slice(0, 7), abg = ((det14.ki || {}).abgerechnet || []).find((x) => x.monat === monat14) || {};
+  ok(lauf14.nachholen.auftraege.ki >= 1 && abg.mehr === 5 && abg.cent === 40 && /^test_ii_/.test(abg.posten || '') && !abg.offen && lauf14b.nachholen.auftraege.ki === 0 &&
+    (det14.auftrag.verlauf || []).filter((v) => /^KI-Auswertungen .*: \d+ über dem Kontingent/.test(v.text)).length === 1,
+    '26.14 Monatsanfang: die weiteren Auswertungen des Vormonats als ein Posten auf die nächste Rechnung des Abos (Attrappe), genau einmal (' + JSON.stringify(abg) + ')');
+  const zu14 = await s4api(KK, '/api/auftrag/' + ak.id + '/ki', { body: { frei: false } });
+  ok(zu14.json.ki.frei === false && /Freischaltung weiterer KI-Auswertungen beendet/.test(JSON.stringify((await s4api(KK, '/api/auftrag/ich', { method: 'GET' })).json)), '26.14 Freischaltung lässt sich im Kundenbereich jederzeit beenden (steht im Verlauf)');
 
   /* ---------- Teil B: im Browser ---------- */
   const bild = fs.readFileSync(path.join(h.WURZEL, 'web/bilder/fensterbauer-dna/modell-anthrazit.webp'));

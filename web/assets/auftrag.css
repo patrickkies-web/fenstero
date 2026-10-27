@@ -454,3 +454,37 @@ a.a-platz-wahl { text-decoration: none; color: inherit; }
 .a-blatt-bild img { display: block; width: 100%; height: auto; }
 .a-blatt-muster .a-link { gap: 6px; font-size: 14px; }
 .a-blatt-muster .a-link svg { width: 12px; height: 12px; }
+
+/* ---------- KI-Kontingent im Kundenbereich: Zahl als Held, Kapselreihe (DNA G11: gefüllt = genutzt, schraffiert = Rest) ---------- */
+.a-ki-zahl { display: grid; gap: 4px; margin: 14px 0 12px; }
+.a-ki-zahl b { font: 250 72px/.95 var(--font-sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--weiss); }
+.a-ki-zahl b small { margin-left: 4px; font: 400 15px/1 var(--font-sans); letter-spacing: 0; color: var(--silbergrau); }
+.a-ki-zahl span { font: 400 15px/1.4 var(--font-sans); color: var(--silbergrau); }
+.a-ki-reihe { margin: 0 0 12px; }
+.a-ki-weitere { display: grid; gap: 8px; margin: -2px 0 12px; }
+.a-ki-weitere .a-ki-reihe { margin: 0; }
+/* Stäbchen fest 12 × 22 px, Reihe 2 als flache Kapseln 12 × 6 px; der Abstand füllt die Breite, höchstens 440 px (Gremium 27.10.2026) */
+.a-kapseln { display: flex; justify-content: space-between; max-width: 440px; }
+.a-kapseln i { flex: 0 0 12px; width: 12px; height: 22px; border-radius: var(--rund-pille); background: repeating-linear-gradient(-45deg, rgba(168,164,169,.62) 0 1.2px, transparent 1.2px 5px); box-shadow: inset 0 0 0 1px rgba(168,164,169,.4); }
+.a-kapseln i.an { background: var(--violett); box-shadow: none; }
+.a-kapseln.mehr i { height: 6px; background: rgba(168,164,169,.3); box-shadow: none; }
+.a-kapseln.mehr i.an { background: var(--koralle); }
+/* nach dem Freischalten wächst die Korallreihe einmal auf; bei reduzierter Bewegung steht sie sofort */
+.a-ki-reihe.neu .a-kapseln i { animation: a-ki-auf 240ms cubic-bezier(.23,1,.32,1) both; animation-delay: calc(var(--i, 0) * 12ms); transform-origin: left center; }
+@keyframes a-ki-auf { from { opacity: 0; transform: scaleX(.3); } }
+.a-ki-mehr { margin: 0; font: 400 14px/1.4 var(--font-sans); color: var(--silbergrau); }
+.a-ki-mehr b { font-weight: 500; color: var(--weiss); }
+.a-ki-satz { margin: 4px 0 0; max-width: 52ch; font: 400 15px/1.5 var(--font-sans); color: var(--silbergrau); }
+.a-ki-satz b { display: block; margin-bottom: 2px; font-weight: 500; color: var(--weiss); }
+.a-ki-handlung { display: grid; justify-items: start; gap: 8px; margin-top: 16px; }
+.a-ki-handlung p { margin: 0; max-width: 52ch; font: 400 13px/1.45 var(--font-sans); color: var(--silbergrau); }
+/* Leuchten hinter der Zahl statt über dem schraffierten Rest */
+.a-ki.leucht::before { right: auto; left: -28%; top: -24%; width: 80%; height: 70%; opacity: .45; }
+/* Blatt „freischalten“: der Preis als Zahl */
+.a-ki-preis { display: grid; gap: 6px; margin: 4px 0 14px; }
+.a-ki-preis b { font: 300 48px/1 var(--font-sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--weiss); }
+.a-ki-preis b small { margin-left: 4px; font: 400 14px/1 var(--font-sans); letter-spacing: 0; color: var(--silbergrau); }
+.a-ki-preis span { font: 400 15px/1.45 var(--font-sans); color: var(--silbergrau); }
+.a-blatt p.a-ki-kern { color: var(--weiss); font-weight: 500; }
+.a-ki-liste { margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid rgba(255,255,255,.08); list-style: none; display: grid; gap: 6px; font: 400 14px/1.4 var(--font-sans); color: var(--silbergrau); }
+.a-ki-liste b { font-weight: 500; color: var(--weiss); }

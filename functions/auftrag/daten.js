@@ -6,6 +6,7 @@
    API: daten(k) → { art, kundeNachMail, kundeHolen, kundeAnlegen, kundeAendern, kundenAlle, kundeLoeschen, codeSetzen, codeHolen, codeLoeschen,
         codeFehler, codesAufraeumen,
         auftragAnlegen, auftragHolen, auftraegeVonKunde, auftraegeAlle, auftragAendern, auftragNachSession, auftragLoeschen, adresseBelegt,
+        auftragZuInstanz (der laufende Auftrag eines Konfigurators: instanz.id, Stand live oder pausiert),
         nachrichtAnlegen, nachrichtenVon, nachrichtenGelesen, ungelesen } | null */
 import { ApiFehler, sbNeu } from '../api/umgebung.js';
 
@@ -15,6 +16,8 @@ const jetzt = () => new Date().toISOString();
 const nrText = (n) => 'A-' + new Date().getUTCFullYear() + '-' + String(n).padStart(4, '0');
 /* Stände, in denen die Adresse (Essential: Name unter eeziframes.com) einem Auftrag gehört */
 const HAELT = ['angefragt', 'bezahlt', 'in_arbeit', 'vorschau', 'live', 'pausiert'];
+/* Stände, in denen ein Auftrag seinen Konfigurator betreibt (KI-Kontingent, functions/api/ki.js) */
+const LAEUFT = ['live', 'pausiert'];
 
 export function daten(k) {
   if (k.supabase) return supabase(k);
@@ -54,6 +57,7 @@ function attrappe() {
     },
     auftragLoeschen: async (id) => { Au.delete(id); A.nachrichten = A.nachrichten.filter((n) => n.auftrag !== id); return true; },
     adresseBelegt: async (name, ausser) => Array.from(Au.values()).some((r) => r.id !== ausser && r.adresse === name && HAELT.indexOf(r.stand) >= 0),
+    auftragZuInstanz: async (id) => Array.from(Au.values()).filter((r) => r.instanz && r.instanz.id === id && LAEUFT.indexOf(r.stand) >= 0).sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1)).map(kopie)[0] || null,
     nachrichtAnlegen: async (row) => { const r = Object.assign({ id: uuid(), gelesen: false, created_at: jetzt() }, kopie(row)); A.nachrichten.push(r); return kopie(r); },
     nachrichtenVon: async (auftrag) => A.nachrichten.filter((n) => n.auftrag === auftrag).map(kopie),
     nachrichtenGelesen: async (auftrag, von) => { A.nachrichten.forEach((n) => { if (n.auftrag === auftrag && n.von === von) n.gelesen = true; }); return true; },
@@ -108,7 +112,7 @@ function supabase(k) {
       for (let i = 0; i < 4; i++) {
         const r = eins(await sb('auftraege?id=eq.' + q(id) + '&select=*')); if (!r) throw new ApiFehler('Auftrag nicht gefunden.', 404);
         const z = kopie(r), out = await fn(z); if (out === false) return false;
-        const felder = {}; ['paket', 'weg', 'stand', 'angaben', 'dateien', 'preise', 'zahlung', 'abo', 'vorschau', 'zustimmung', 'verlauf', 'notiz', 'adresse', 'angaben_geaendert', 'gesehen', 'wechsel'].forEach((s) => { if (JSON.stringify(z[s]) !== JSON.stringify(r[s])) felder[s] = z[s] === undefined ? null : z[s]; });
+        const felder = {}; ['paket', 'weg', 'stand', 'angaben', 'dateien', 'preise', 'zahlung', 'abo', 'vorschau', 'zustimmung', 'verlauf', 'notiz', 'adresse', 'angaben_geaendert', 'gesehen', 'wechsel', 'instanz', 'ki'].forEach((s) => { if (JSON.stringify(z[s]) !== JSON.stringify(r[s])) felder[s] = z[s] === undefined ? null : z[s]; });
         felder.version = (r.version || 0) + 1; felder.updated_at = jetzt();
         const neu = eins(await schreiben('auftraege?id=eq.' + q(id) + '&version=eq.' + (r.version || 0), 'PATCH', felder));
         if (neu) return neu;
@@ -117,6 +121,7 @@ function supabase(k) {
     },
     auftragLoeschen: async (id) => { await sb('auftraege?id=eq.' + q(id), { method: 'DELETE' }); return true; },
     adresseBelegt: async (name, ausser) => { const l = (await sb('auftraege?adresse=eq.' + q(name) + '&stand=in.(' + HAELT.join(',') + ')&select=id')) || []; return l.some((r) => r.id !== ausser); },
+    auftragZuInstanz: async (id) => eins(await sb('auftraege?instanz->>id=eq.' + q(id) + '&stand=in.(' + LAEUFT.join(',') + ')&select=*&order=updated_at.desc&limit=1')),
     nachrichtAnlegen: async (row) => eins(await schreiben('auftrag_nachrichten', 'POST', row)),
     nachrichtenVon: async (auftrag) => (await sb('auftrag_nachrichten?auftrag=eq.' + q(auftrag) + '&select=*&order=created_at.asc')) || [],
     nachrichtenGelesen: async (auftrag, von) => { await sb('auftrag_nachrichten?auftrag=eq.' + q(auftrag) + '&von=eq.' + q(von) + '&gelesen=eq.false', { method: 'PATCH', body: { gelesen: true } }); return true; },

@@ -18,13 +18,20 @@
    Kosten deckeln (Bauplan E12, K1.2, K2.13):
    - Tagesbudget über alle Domains (KI_TAG_MAX, Vorgabe 3000, dauerhaft gezählt in statistik): Mail an MAIL_KONTAKT bei 80 %, darüber 429.
    - Auf den Domains der Konfigurator-Instanzen (kiInstanz, worker.js → functions/instanz/seiten.js) nur mit ?code=<10 Zeichen> eines
-     Links dieser Instanz; je Code höchstens min(60, 2 × Fenster + 6) Auswertungen (Zähler im Zwischenstand, meta.ki), je Instanz und
-     Monat eine Alarmgrenze aus pakete.js (kiMonat, Mail an MAIL_KONTAKT), 429 erst beim Doppelten. Die App macht ohne Auswertung weiter. */
+     Links dieser Instanz; je Code höchstens min(60, 2 × Fenster + 6) Auswertungen (Zähler im Zwischenstand, meta.ki). Je Instanz und
+     Monat das KI-Kontingent aus pakete.js (kiMonat), gezählt werden gelungene Auswertungen (inst:<id8>:kiok): Ist ein Auftrag mit der
+     Instanz verknüpft (auftraege.instanz), pausiert die KI bei 100 %, außer der Fensterbauer hat im Kundenbereich weitere Auswertungen
+     freigeschaltet (auftraege.ki.frei); dann bei 200 %, abgerechnet am Monatsende (auftraegeLauf). Ohne Auftrag (Demo, von Hand angelegt)
+     wie freigeschaltet. Mails an den Betrieb bei 80 % und 100 % (und an der Obergrenze), an MAIL_KONTAKT bei 100 %. Versuche zählen
+     getrennt als Bremse (inst:<id8>:ki, dreifaches Kontingent). Die App macht ohne Auswertung weiter. */
 
 import '../../web/assets/instanzregeln.js';
 import { erlaubt as bremse, quelle, konfig } from './umgebung.js';
 import { speicher } from './speicher.js';
-import { budget, bremse as rlBremse } from './bremse.js';
+import { budget, budgetStand, bremse as rlBremse } from './bremse.js';
+import { daten as auftragDaten } from '../auftrag/daten.js';
+import { kiMail } from '../auftrag/mails.js';
+import { HAUPTADRESSE } from '../seo.js';
 import { postDienst, mailRahmen, esc } from './post.js';
 import { linkAufloesen } from '../instanz/adapter.js';
 import { instanzZaehlen } from './statistik.js';
@@ -205,15 +212,40 @@ export async function kiInstanz({ request, env, instanz, waitUntil }) {
     r.meta = Object.assign({}, mt, { ki: schon + 1 }); frei = true; return true;
   });
   if (!frei) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'code' }, 429);
-  /* je Instanz und Monat: Alarm beim Richtwert aus pakete.js, Schluss beim Doppelten */
-  const m = instanz.m || {}, richt = Math.max(1, Number(m.kiMonat) || 600);
-  const mb = await budget(ctx, 'inst:' + instanz.id8 + ':ki', richt * 2, { alarm: richt, monat: true });
-  if (mb.alarm) { const p = alarmMail(ctx.k, 'KI-Auswertungen: Richtwert erreicht bei ' + instanz.name, instanz.name + ' (' + (instanz.haupthost || '') + ') hat in diesem Monat ' + mb.stand + ' KI-Auswertungen, Richtwert ' + richt + '. Beim Doppelten antwortet die KI dort bis Monatsende nicht mehr.'); if (waitUntil) waitUntil(p); else await p; }
-  if (!mb.ok) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'monat' }, 429);
+  /* je Instanz und Monat: Kontingent aus pakete.js, ohne Freischaltung Schluss bei 100 %, mit Freischaltung (oder ohne Auftrag) beim Doppelten */
+  const m = instanz.m || {}, richt = Math.max(1, Number(m.kiMonat) || 600), auf = await kiAuftrag(ctx, instanz);
+  const mehrFrei = !auf || !!(auf.ki || {}).frei, grenze = mehrFrei ? richt * 2 : richt, okKey = 'inst:' + instanz.id8 + ':kiok';
+  const versuch = await budget(ctx, 'inst:' + instanz.id8 + ':ki', richt * 3, { monat: true });
+  if (!versuch.ok || (await budgetStand(ctx, okKey, { monat: true })) >= grenze) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'monat' }, 429);
   if (!(await tagesBudget(ctx))) return antwort({ ok: false, fehler: 'rate_limited', grenze: 'tag' }, 429);
   const r = await auswerten(request, env, url);
-  if (r.status === 200) instanzZaehlen(ctx, instanz, 'ki');
+  if (r.status === 200) {
+    instanzZaehlen(ctx, instanz, 'ki');
+    const n = (await budget(ctx, okKey, Infinity, { monat: true })).stand, p = kiStufe(ctx, instanz, auf, n, richt, mehrFrei);
+    if (p) { if (waitUntil) waitUntil(p); else await p; }
+  }
   return r;
+}
+
+/* Der laufende Auftrag eines Konfigurators (KI-Kontingent); null ohne Auftrag oder ohne Datenbank */
+async function kiAuftrag(ctx, instanz) {
+  try { const d = auftragDaten(ctx.k); return d && d.auftragZuInstanz && instanz.id ? await d.auftragZuInstanz(instanz.id) : null; } catch (e) { return null; }
+}
+/* Genau einmal je Schwelle (der Zähler steigt um eins): 80 % und 100 % an den Betrieb, 100 % an den Inhaber, die Obergrenze an den Betrieb */
+function kiStufe(ctx, instanz, a, n, richt, frei) {
+  const stufe = n === richt ? 100 : n === Math.ceil(richt * 0.8) && n < richt ? 80 : frei && n === richt * 2 ? 200 : 0;
+  if (!stufe) return null;
+  const aufgaben = [];
+  if (stufe === 100) aufgaben.push(alarmMail(ctx.k, 'KI-Auswertungen: Kontingent erreicht bei ' + instanz.name, instanz.name + ' (' + (instanz.haupthost || '') + ') hat in diesem Monat ' + n + ' KI-Auswertungen, Kontingent ' + richt + '. ' + (!a ? 'Kein Auftrag verknüpft: Die KI läuft bis zum Doppelten weiter.' : frei ? 'Weitere Auswertungen sind freigeschaltet; sie werden am Monatsende abgerechnet, höchstens bis zum Doppelten.' : 'Nicht freigeschaltet: Die KI pausiert dort bis zum Monatsende.')));
+  if (a) aufgaben.push((async () => {
+    const pd = postDienst(ctx.k), d = auftragDaten(ctx.k); if (!pd || !d) return false;
+    const kunde = await d.kundeHolen(a.kunde); if (!kunde || !kunde.mail) return false;
+    const P = globalThis.Pakete, pr = a.preise && a.preise.ki != null ? a.preise.ki : P.preis(a.paket).ki;
+    const monat = new Date(ctx.k.jetzt || Date.now()).toLocaleDateString('de-DE', { month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' });
+    const mail = kiMail(stufe, a, { genutzt: n, kontingent: richt, obergrenze: richt * 2, frei: frei, monat: monat, preis: P.euro(pr) + ' netto', konto: String((ctx.env && ctx.env.KANONISCH) || HAUPTADRESSE).replace(/\/+$/, '') + '/konto/#auftrag/' + a.id });
+    return (await pd.senden({ an: kunde.mail, betreff: mail.betreff, html: mail.html, antwortAn: pd.kontakt })).ok;
+  })().catch(() => false));
+  return Promise.all(aufgaben);
 }
 
 async function auswerten(request, env, url) {

@@ -67,3 +67,19 @@ export function frageMail(f) {
     '<div style="margin:0 0 6px;padding:14px 16px;border-radius:16px;background:#f2f2f4;font:400 15px/1.55 ' + SCHRIFT + ';color:#07090a;white-space:pre-wrap">' + esc(f.text) + '</div>', 'Nur für den Inhaber von eeziframes. Antworten Sie direkt auf diese E-Mail.') };
 }
 
+
+/* KI-Kontingent (functions/api/ki.js): Hinweis an den Fensterbauer bei 80 %, bei 100 % und an der Obergrenze; o: { genutzt, kontingent,
+   preis (Text), obergrenze, konto (Link zum Kundenbereich), monat (Text), frei } */
+export function kiMail(stufe, a, o) {
+  const k = o.kontingent, zahl = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const titel = stufe === 80 ? 'Ihre KI-Auswertungen: 80 % genutzt' : stufe === 100 ? 'Ihre KI-Auswertungen: Kontingent erreicht' : 'Ihre KI-Auswertungen: Obergrenze erreicht';
+  let text;
+  if (stufe === 80) text = 'Ihr Konfigurator hat im ' + esc(o.monat) + ' schon ' + zahl(o.genutzt) + ' von ' + zahl(k) + ' KI-Auswertungen genutzt. ' + (o.frei
+    ? 'Weitere Auswertungen sind freigeschaltet: Darüber kostet jede ' + esc(o.preis) + ', abgerechnet mit der nächsten Monatsrechnung.'
+    : 'Ist das Kontingent aufgebraucht, pausiert die KI bis zum Monatsende; Ihre Kunden können weiter planen und senden, nur ohne KI-Befund. Wenn Sie mehr brauchen, schalten Sie im Kundenbereich weitere Auswertungen frei.');
+  else if (stufe === 100) text = o.frei
+    ? 'Ihr Konfigurator hat das Kontingent von ' + zahl(k) + ' KI-Auswertungen im ' + esc(o.monat) + ' erreicht. Weitere Auswertungen sind freigeschaltet: Jede weitere kostet ' + esc(o.preis) + ', höchstens ' + zahl(o.obergrenze - k) + ' weitere im Monat; abgerechnet wird mit der nächsten Monatsrechnung. Die Freischaltung gilt, bis Sie sie im Kundenbereich beenden.'
+    : 'Ihr Konfigurator hat das Kontingent von ' + zahl(k) + ' KI-Auswertungen im ' + esc(o.monat) + ' erreicht. Bis zum Monatsende pausiert die KI; Ihre Kunden können weiter planen und senden, nur ohne KI-Befund. Im Kundenbereich können Sie weitere Auswertungen freischalten (je ' + esc(o.preis) + ').';
+  else text = 'Ihr Konfigurator hat im ' + esc(o.monat) + ' die Obergrenze erreicht: ' + zahl(k) + ' KI-Auswertungen im Kontingent und ' + zahl(o.obergrenze - k) + ' weitere. Zum Schutz vor Missbrauch pausiert die KI bis zum Monatsende; Ihre Kunden können weiter planen und senden. Schreiben Sie uns, wenn Sie dauerhaft mehr brauchen.';
+  return { betreff: titel + ' (' + a.nr + ')', html: rahmen(titel, absatz(text) + '<p style="margin:8px 0 0">' + pille(o.konto, 'Zum Kundenbereich') + '</p>') };
+}

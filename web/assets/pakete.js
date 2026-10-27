@@ -6,8 +6,9 @@
    - Ein Paket setzt nie den Tarif eines Kontos (konto); Instanzkonten haben konto: 'instanz'.
    - Preise sind netto zzgl. MwSt.; der Preisstand eines Auftrags wird bei der Bestellung festgehalten (auftraege.preise, mit dem Preis
      je weiterer KI-Auswertung) und ändert sich danach nicht mehr.
-   - KI-Auswertungen: kiMonat je Monat inklusive (eine Auswertung je Foto), jede weitere zu preis.ki; zum Schutz vor Missbrauch wertet die
-     KI höchstens das Doppelte von kiMonat im Monat aus (functions/api/ki.js). Kalkulation von preis.ki nur intern: docs/KI-KOSTEN.md.
+   - KI-Auswertungen: kiMonat je Monat inklusive (eine Auswertung je Foto); bei 100 % pausiert die KI, außer der Fensterbauer hat im
+     Kundenbereich weitere freigeschaltet: dann jede zu preis.ki, höchstens bis zum Doppelten (functions/api/ki.js), abgerechnet am
+     Monatsende (functions/auftrag/index.js, kiAbrechnen). Kalkulation von preis.ki nur intern: docs/KI-KOSTEN.md.
    API: PAKETE, MERKMALE, LISTE, liste(), gueltig(p), merkmale(paket, abweichung) → eingefrorenes Objekt, oeffentlich(m),
         preis(paket) → { monat, einrichtung, ki }, preisText(paket, art, mwst), preisStand(paket, mwst) → für auftraege.preise,
         kiText(paket, o) → Kontingent und Preis je weiterer Auswertung, tausend(n) → „1.000“ */
@@ -48,7 +49,7 @@
      pdfAblage          PDF beim Eingang ablegen (Bucket blatt)
      dashboard, einladungslinks, fortschritt   Signature-Dashboard unter /betrieb/, persönliche Links, laufende Planungen
      zugaenge           Anzahl Dashboard-Zugänge
-     kiMonat            KI-Auswertungen je Monat inklusive; Alarm an den Inhaber bei kiMonat, Schluss beim Doppelten (Schutz vor Missbrauch)
+     kiMonat            KI-Auswertungen je Monat inklusive; Pause bei 100 %, mit Freischaltung beim Doppelten; Mails bei 80 und 100 %
      anfragenTag        Alarmgrenze Anfragen je Tag (hart = 4×) */
   const PAKETE = {
     essential: {
@@ -106,7 +107,7 @@
     einladungslinks: { titel: 'Persönliche Einladungslinks', text: 'Kunden gezielt einladen, auf Ihrer Domain', art: 'janein', vergleich: true },
     fortschritt: { titel: 'Fortschritt sehen', text: 'eingeladen, in Bearbeitung, eingereicht', art: 'janein', vergleich: true },
     zugaenge: { titel: 'Zugänge zum Dashboard', art: 'zahl', vergleich: true },
-    kiMonat: { titel: 'KI-Auswertungen im Monat inklusive', text: 'eine je Foto, meist zwei je Fenster; jede weitere zum Preis des Pakets, zum Schutz vor Missbrauch höchstens das Doppelte im Monat', art: 'ki', vergleich: true },
+    kiMonat: { titel: 'KI-Auswertungen im Monat inklusive', text: 'eine je Foto, meist zwei je Fenster; bei 100 % pausiert die KI bis Monatsende, außer Sie schalten weitere frei (je zum Preis des Pakets, höchstens das Doppelte im Monat)', art: 'ki', vergleich: true },
     anfragenTag: { titel: 'Anfragen am Tag (Richtwert)', art: 'zahl' }
   };
 

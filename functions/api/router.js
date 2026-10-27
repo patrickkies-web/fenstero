@@ -135,7 +135,7 @@ export async function geplant(env, cron) {
   if (taeglich) { nach = {}; try { nach.vertrag = await bestaetigungenNachholen(k, sp, env); } catch (e) { nach.vertrag = { ok: false }; } try { nach.widerruf = await widerrufeNachholen(k, sp); } catch (e) { nach.widerruf = { ok: false }; } try { nach.erinnerung = await erinnerungenSenden(k, sp, env); } catch (e) { nach.erinnerung = { ok: false }; } } // Erinnerung an offene Links (benachrichtigung.js)
   /* Konfigurator-Instanzen: täglich Aufbewahrung, Bestellungen und Abos, Domains, Erinnerungen; Versand (sonst alle 10 Minuten) bei einem Aufruf ohne cron mit */
   let inst = null;
-  if (taeglich) (nach = nach || {}).auftraege = await versucht(() => auftraegeLauf(k));
+  if (taeglich) (nach = nach || {}).auftraege = await versucht(() => auftraegeLauf(k, sp, env));
   if (taeglich && sp) inst = { anfragen: await versucht(() => anfragenAufraeumen(k, sp)), domains: await versucht(() => instanzenPruefen(k, sp, env)), einladungen: await versucht(() => einladungenErinnern(k, sp, env)) };
   if (zehn && sp) (inst = inst || {}).versand = await versucht(() => versandNachholen(k, sp));
   /* täglicher Lauf: nach einer Veröffentlichung die geänderten Seiten per IndexNow melden (functions/seo.js, nur mit Freigabe) */

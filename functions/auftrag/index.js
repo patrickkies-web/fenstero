@@ -26,7 +26,9 @@
      GET  /api/inhaber/stand · POST /api/inhaber/anmelden { passwort, code } · POST /api/inhaber/abmelden
      GET  /api/inhaber/auftraege · GET /api/inhaber/auftraege/:id · GET /api/inhaber/auftraege/:id/datei/:did
      POST /api/inhaber/auftraege/:id/stand { stand, link?, text? } · …/nachricht { text } · …/notiz { text } · …/gesehen
-   Webhook (über /api/zahlung/webhook): istAuftragEreignis(ev), auftragEreignis(ctx, ev). Tageslauf: auftraegeLauf(k). */
+   Webhook (über /api/zahlung/webhook): istAuftragEreignis(ev), auftragEreignis(ctx, ev). Tageslauf: auftraegeLauf(k, sp, env) mit der Monatsabrechnung der KI-Auswertungen über dem Kontingent.
+   KI-Kontingent: GET/POST /api/auftrag/:id/ki (Stand, weitere freischalten), POST /api/inhaber/auftraege/:id/instanz (Konfigurator
+   verknüpfen; beim Live-Schalten geschieht das über die Adresse der Seite). */
 import '../../web/assets/pakete.js';
 import '../../web/assets/auftragsregeln.js';
 import '../../web/assets/instanzregeln.js';
@@ -38,7 +40,10 @@ import { PAKET_STAND, paketVerkaufStand, standText, paketPdfs } from '../api/rec
 import { daten } from './daten.js';
 import { codeMail, bestelltMail, inhaberNeuMail, standMail, nachrichtMail, frageMail, rahmen } from './mails.js';
 import { SICHERHEIT, SPERRE } from '../seo.js';
-import { kasse, kassePruefen, aboStarten, aboBeenden, portal, erstatten, mwst } from './zahlung.js';
+import { kasse, kassePruefen, aboStarten, aboBeenden, portal, erstatten, mwst, kiPosten } from './zahlung.js';
+import { budgetStand, monatsPeriode } from '../api/bremse.js';
+import { instanzVon } from '../instanz/mandant.js';
+import { speicher } from '../api/speicher.js';
 
 const P = () => globalThis.Pakete;
 const AU = () => globalThis.Auftrag;
@@ -72,11 +77,37 @@ function sicht(a, o) {
     abo: { status: (a.abo || {}).status || '', bis: (a.abo || {}).bis || '', seit: (a.abo || {}).seit || '' },
     vorschau: { link: v.link || '', seit: v.seit || '', freigabe: v.freigabe || null, aenderung: v.aenderung || null, live: v.live || '' },
     verlauf: (a.verlauf || []).map((x) => ({ zeit: x.zeit, stand: x.stand || '', von: x.von, text: x.text })), created_at: a.created_at, updated_at: a.updated_at,
-    geaendert: a.angaben_geaendert || ''
+    geaendert: a.angaben_geaendert || '', ki: { frei: !!(a.ki || {}).frei, frei_seit: (a.ki || {}).frei_seit || '' }, verknuepft: !!a.instanz
   };
-  if (o.inhaber) Object.assign(s, { kunde: o.kunde || null, notiz: a.notiz || '', gesehen: a.gesehen || '', zahlungIntern: { session: z.session || '', intent: z.intent || '', kunde: z.kunde || '' }, abo: Object.assign({}, a.abo || {}) });
+  if (o.inhaber) Object.assign(s, { instanz: a.instanz || null, kunde: o.kunde || null, notiz: a.notiz || '', gesehen: a.gesehen || '', zahlungIntern: { session: z.session || '', intent: z.intent || '', kunde: z.kunde || '' }, abo: Object.assign({}, a.abo || {}) });
   return s;
 }
+/* ---------- KI-Kontingent (docs/BESTELLUNG.md, „Preise und KI-Auswertungen“) ----------
+   Gezählt werden gelungene Auswertungen des verknüpften Konfigurators je Monat (inst:<id8>:kiok, functions/api/ki.js). */
+const monatText = (ms) => new Date(ms).toLocaleDateString('de-DE', { month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' });
+const kiPreis = (a) => (a.preise && a.preise.ki != null ? Number(a.preise.ki) : P().preis(a.paket).ki);
+/* Kontingent: aus den Merkmalen des verknüpften Konfigurators (mit Abweichung, Kulanz), sonst aus dem Paket */
+async function kiKontingent(ctx, a) {
+  const inst = a.instanz && a.instanz.host ? await instanzVon(a.instanz.host, ctx.env, ctx).catch(() => null) : null;
+  return Number(((inst && inst.id === a.instanz.id && inst.m) || P().merkmale(a.paket) || {}).kiMonat) || 0;
+}
+async function kiStand(ctx, a) {
+  const richt = await kiKontingent(ctx, a), ki = a.ki || {}, inst = a.instanz || null, preis = kiPreis(a);
+  const genutzt = inst && inst.id8 ? await budgetStand(ctx, 'inst:' + inst.id8 + ':kiok', { monat: true }) : 0, mehr = Math.max(0, Math.min(genutzt, richt * 2) - richt);
+  const abgerechnet = Object.keys(ki.abgerechnet || {}).sort().reverse().slice(0, 6).map((monat) => Object.assign({ monat: monat, text: monatText(Date.parse(monat + '-15T12:00:00Z')) }, ki.abgerechnet[monat]));
+  const jetzt = ctx.k.jetzt || Date.now(), bis = new Date(Date.parse(monatsPeriode(jetzt, 1) + 'T12:00:00Z') - 864e5).toISOString().slice(0, 10);
+  const ust = a.preise && a.preise.mwst != null ? Number(a.preise.mwst) || 0 : mwst(ctx) ? 19 : 0, hoechstCent = Math.round(richt * preis * 100);
+  return { verknuepft: !!inst, host: inst ? inst.host || '' : '', monat: monatText(jetzt), bis: bis, kontingent: richt, genutzt: genutzt, prozent: richt ? Math.round((genutzt / richt) * 100) : 0,
+    frei: !!ki.frei, frei_seit: ki.frei_seit || '', obergrenze: richt * 2, preis: preis, mehr: mehr, mehrCent: Math.round(mehr * preis * 100), hoechstCent: hoechstCent,
+    hoechstBruttoCent: ust ? Math.round(hoechstCent * (1 + ust / 100)) : 0, abgerechnet: abgerechnet };
+}
+/* Konfigurator zum Auftrag über den Host seiner Adresse (beim Live-Schalten oder von Hand in der Zentrale) */
+async function instanzZuHost(ctx, adresse) {
+  let host = ''; try { host = new URL(/^https?:\/\//i.test(adresse) ? adresse : 'https://' + adresse).hostname.toLowerCase().replace(/^www\./, ''); } catch (e) { return null; }
+  const inst = await instanzVon(host, ctx.env, ctx).catch(() => null);
+  return inst && inst.id && !inst.stoerung ? { id: inst.id, id8: inst.id8, host: inst.haupthost || host, seit: ZEIT() } : null;
+}
+
 const verlauf = (z, eintrag) => { (z.verlauf = z.verlauf || []).push(Object.assign({ zeit: ZEIT() }, eintrag)); if (z.verlauf.length > 200) z.verlauf = z.verlauf.slice(-200); };
 
 /* ---------- Anmeldung des Kunden per Code ----------
@@ -420,6 +451,21 @@ const KUNDE = {
     const post = pd(ctx); if (post) { const m = nachrichtMail(a, text, { anInhaber: true, link: basis(ctx) + '/zentrale/#auftrag/' + a.id }); ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: kunde.mail }).catch(() => false)); }
     return { ok: true };
   },
+  /* KI-Kontingent: Stand des Monats; weitere Auswertungen freischalten oder zurücknehmen (Paketbedingungen § 2 Abs. 2, § 4 Abs. 4) */
+  'GET /api/auftrag/:id/ki': async (ctx) => {
+    const kunde = await kundeVon(ctx), a = await eigener(ctx, kunde);
+    return { ok: true, ki: await kiStand(ctx, a) };
+  },
+  'POST /api/auftrag/:id/ki': async (ctx) => {
+    const kunde = await kundeVon(ctx), a = await eigener(ctx, kunde), frei = (ctx.body || {}).frei === true;
+    if (['bezahlt', 'in_arbeit', 'vorschau', 'live', 'pausiert'].indexOf(a.stand) < 0) throw new ApiFehler('Weitere KI-Auswertungen lassen sich freischalten, sobald Ihre Bestellung bezahlt ist.', 409);
+    const z2 = await db(ctx).auftragAendern(a.id, (z) => {
+      const ki = Object.assign({}, z.ki); if (!!ki.frei === frei) return false;
+      ki.frei = frei; if (frei) ki.frei_seit = ZEIT(); else ki.frei_bis = ZEIT(); z.ki = ki;
+      verlauf(z, { von: 'kunde', text: frei ? 'Weitere KI-Auswertungen freigeschaltet (je ' + euro(kiPreis(z)) + ' netto über dem Kontingent)' : 'Freischaltung weiterer KI-Auswertungen beendet' });
+    });
+    return { ok: true, ki: await kiStand(ctx, z2 || a) };
+  },
   /* Storno durch den Kunden, solange wir noch nicht begonnen haben (Paketbedingungen § 7 Abs. 2): Einrichtung voll zurück */
   'POST /api/auftrag/:id/stornieren': async (ctx) => {
     const kunde = await kundeVon(ctx), a = await eigener(ctx, kunde), d = db(ctx);
@@ -495,7 +541,16 @@ const INHABER = {
     await inhaberPflicht(ctx);
     const d = db(ctx), a = await auftragFuerInhaber(ctx), kunde = await d.kundeHolen(a.kunde), l = await d.nachrichtenVon(a.id);
     await d.nachrichtenGelesen(a.id, 'kunde').catch(() => null);
-    return { ok: true, auftrag: Object.assign(sicht(a, { inhaber: true, kunde: kunde ? { mail: kunde.mail, seit: kunde.created_at, angemeldet_am: kunde.angemeldet_am || '' } : null }), { naechster: naechster(a), wechsel: a.wechsel || null }), nachrichten: l.map((n) => ({ id: n.id, von: n.von, text: n.text, zeit: n.created_at })), prompt: promptFuer(a, kunde), stand: PAKET_STAND };
+    return { ok: true, auftrag: Object.assign(sicht(a, { inhaber: true, kunde: kunde ? { mail: kunde.mail, seit: kunde.created_at, angemeldet_am: kunde.angemeldet_am || '' } : null }), { naechster: naechster(a), wechsel: a.wechsel || null }), nachrichten: l.map((n) => ({ id: n.id, von: n.von, text: n.text, zeit: n.created_at })), prompt: promptFuer(a, kunde), stand: PAKET_STAND, ki: await kiStand(ctx, a) };
+  },
+  /* Konfigurator von Hand verknüpfen (Adresse oder Host), falls er beim Live-Schalten nicht gefunden wurde; leer = lösen */
+  'POST /api/inhaber/auftraege/:id/instanz': async (ctx) => {
+    await inhaberPflicht(ctx);
+    const a = await auftragFuerInhaber(ctx), adresse = String((ctx.body || {}).host || '').trim();
+    const inst = adresse ? await instanzZuHost(ctx, adresse) : null;
+    if (adresse && !inst) throw new ApiFehler('Unter dieser Adresse gibt es keinen Konfigurator.', 404, { felder: { host: 'Kein Konfigurator unter dieser Adresse.' } });
+    const z2 = await db(ctx).auftragAendern(a.id, (z) => { z.instanz = inst; verlauf(z, { von: 'inhaber', text: inst ? 'Konfigurator verknüpft: ' + inst.host : 'Konfigurator gelöst' }); });
+    return { ok: true, auftrag: sicht(z2, { inhaber: true }), ki: await kiStand(ctx, z2) };
   },
   'GET /api/inhaber/auftraege/:id/datei/:did': async (ctx) => {
     await inhaberPflicht(ctx);
@@ -518,20 +573,22 @@ const INHABER = {
     if (nach === 'live' && !AU().webAdresse(link)) throw new ApiFehler('Bitte die Adresse der fertigen Seite eintragen.', 400, { felder: { link: 'Bitte die Adresse wie https://… eintragen.' } });
     let abo = null, erstattung = null;
     if (nach === 'live' && !((a.abo || {}).id)) { const kunde = await d.kundeHolen(a.kunde); abo = await aboStarten(ctx, a, kunde || {}); }
+    /* Live: den Konfigurator unter dieser Adresse mit dem Auftrag verknüpfen (KI-Kontingent, Abrechnung); fehlt er, bleibt es offen */
+    const inst = nach === 'live' && !a.instanz ? await instanzZuHost(ctx, AU().webAdresse(link)) : null;
     if (nach === 'storniert') erstattung = await erstatten(ctx, a);
     if (nach === 'beendet') await aboBeenden(ctx, a, !!b.sofort);
     const z2 = await d.auftragAendern(a.id, (z) => {
       if (!AU().uebergang(z.stand, nach, 'inhaber')) return false;
       z.stand = nach;
       if (nach === 'vorschau') z.vorschau = Object.assign({}, z.vorschau, { link: AU().webAdresse(link), seit: ZEIT(), freigabe: null, aenderung: null });
-      if (nach === 'live') { z.vorschau = Object.assign({}, z.vorschau, { live: AU().webAdresse(link) }); if (abo) z.abo = Object.assign({}, z.abo, { id: abo.id, status: abo.status, bis: abo.bis, seit: ZEIT() }); }
+      if (nach === 'live') { z.vorschau = Object.assign({}, z.vorschau, { live: AU().webAdresse(link) }); if (abo) z.abo = Object.assign({}, z.abo, { id: abo.id, status: abo.status, bis: abo.bis, seit: ZEIT() }); if (inst) z.instanz = inst; }
       if (nach === 'storniert' && erstattung && !erstattung.ohne) z.zahlung = Object.assign({}, z.zahlung, { erstattet: true, erstattet_cent: erstattung.cent || 0 });
       if (nach === 'beendet') z.abo = Object.assign({}, z.abo, { status: 'beendet', ende: ZEIT() });
       verlauf(z, { stand: nach, von: 'inhaber', text: AU().STAND_TITEL[nach] + (text ? ': ' + text : '') });
     });
     if (z2 === false) throw new ApiFehler('Gerade gleichzeitig geändert. Bitte neu laden.', 409);
     if (b.mail !== false) ctx.waitUntil(kundeMelden(ctx, z2, nach, { vorschau: (z2.vorschau || {}).link, live: (z2.vorschau || {}).live, text: text }).catch(() => false));
-    return { ok: true, auftrag: sicht(z2, { inhaber: true }) };
+    return { ok: true, auftrag: sicht(z2, { inhaber: true }), hinweis: nach === 'live' && !z2.instanz ? 'Unter dieser Adresse wurde kein Konfigurator gefunden; das KI-Kontingent ist nicht verknüpft. Verknüpfen unter „KI-Auswertungen“.' : '' };
   },
   'POST /api/inhaber/auftraege/:id/nachricht': async (ctx) => {
     await inhaberPflicht(ctx);
@@ -579,15 +636,38 @@ export async function auftragEreignis(ctx, ev) {
   return { ok: true };
 }
 
+async function kiAbrechnen(k, sp, env, d, jetzt) {
+  if (!sp) return 0;
+  const vor = monatsPeriode(jetzt, -1), monat = vor.slice(0, 7), text = monatText(Date.parse(vor + 'T12:00:00Z')), ctx = { k: k, sp: sp, env: env };
+  let n = 0;
+  for (const a of await d.auftraegeAlle()) {
+    if (n >= 50) break;
+    if (!a.instanz || !a.instanz.id8 || ['live', 'pausiert', 'beendet'].indexOf(a.stand) < 0 || ((a.ki || {}).abgerechnet || {})[monat]) continue;
+    const richt = await kiKontingent(ctx, a), preis = kiPreis(a);
+    const genutzt = await budgetStand(ctx, 'inst:' + a.instanz.id8 + ':kiok', { periode: vor }), mehr = Math.max(0, Math.min(genutzt, richt * 2) - richt), cent = Math.round(mehr * preis * 100);
+    let posten = '', offen = false;
+    if (cent > 0) { try { posten = (await kiPosten(ctx, a, { monat: monat, text: text, mehr: mehr, cent: cent })).id || ''; } catch (e) { offen = true; } }
+    await d.auftragAendern(a.id, (z) => {
+      const ki = Object.assign({}, z.ki); if ((ki.abgerechnet || {})[monat]) return false;
+      ki.abgerechnet = Object.assign({}, ki.abgerechnet, { [monat]: { genutzt: genutzt, kontingent: richt, mehr: mehr, cent: cent, posten: posten, offen: offen, zeit: ZEIT() } }); z.ki = ki;
+      if (mehr) verlauf(z, { von: 'system', text: 'KI-Auswertungen ' + text + ': ' + mehr + ' über dem Kontingent, ' + euro(cent / 100) + ' netto ' + (offen ? 'noch von Hand abzurechnen' : 'auf der nächsten Monatsrechnung') });
+    }).catch(() => null);
+    n++;
+  }
+  return n;
+}
+
 /* ---------- Tageslauf: Fristen der Datenschutzerklärung (Abschnitt 9) aus Instanzregeln.FRISTEN, höchstens 50 Aufträge je Lauf ----------
    - nicht bezahlte Bestellungen (Entwurf, Anfrage) bestellEntwurfTage nach der letzten Änderung, samt Dateien
    - nach dem Vertragsende (beendet, storniert) die Dateien nach loeschenNachEndeTage, den Auftrag mit Nachrichten nach dem Ende des
      nachrichtenJahre. Jahres (Verjährung, §§ 195, 199 BGB; Rechnungen bewahrt Stripe auf)
    - Konten ohne Auftrag bestellEntwurfTage nach der letzten Anmeldung, abgelaufene Anmeldecodes nach einem Tag */
-export async function auftraegeLauf(k) {
+export async function auftraegeLauf(k, sp, env) {
   const d = daten(k); if (!d) return { ok: true, ohneDaten: true };
   const F = globalThis.Instanzregeln.FRISTEN, jetzt = k.jetzt || Date.now(), TAG = 864e5, ab = ablage(k, 'auftraege'); // k.jetzt: Uhr des Servers (JETZT im Testserver)
-  const out = { ok: true, entwuerfe: 0, dateien: 0, auftraege: 0, kunden: 0, codes: false };
+  const out = { ok: true, entwuerfe: 0, dateien: 0, auftraege: 0, kunden: 0, codes: false, ki: 0 };
+  /* KI-Auswertungen über dem Kontingent: einmal je Monat für den Vormonat, als Posten auf die nächste Rechnung des Abos (zahlung.js) */
+  try { out.ki = await kiAbrechnen(k, sp || (k.daten ? speicher(k) : null), env || {}, d, jetzt); } catch (e) { out.ki = 'Fehler: ' + String(e && e.message || e).slice(0, 120); }
   const ordnerWeg = async (a) => { if (ab) await ab.ordnerLoeschen('auftrag/' + a.id).catch(() => false); };
   const endeVon = (a) => { const e = (a.verlauf || []).filter((v) => v.stand === a.stand).pop(); return Date.parse((e && e.zeit) || a.updated_at) || jetzt; };
   const alle = await d.auftraegeAlle();

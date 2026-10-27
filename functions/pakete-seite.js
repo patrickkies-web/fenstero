@@ -316,16 +316,16 @@ function fbBaustein(name, o, v) {
   if (name === 'fb-ab') return geld(Math.min.apply(null, L.map((p) => P().preis(p).monat)));
   if (name === 'fb-kijecode') return esc(R().GRENZEN.kiJeCode);
   if (name === 'fb-faq-kosten') {
-    return 'Eine einmalige Einrichtung vorab und ein fester Monatspreis je Paket, ab ' + geld(Math.min.apply(null, L.map((p) => P().preis(p).monat))) + ' im Monat. Darin steckt ein Kontingent an KI-Auswertungen der Fotos; jede weitere kostet ' + kiPreise() +
+    return 'Eine einmalige Einrichtung vorab und ein fester Monatspreis je Paket, ab ' + geld(Math.min.apply(null, L.map((p) => P().preis(p).monat))) + ' im Monat. Darin steckt ein Kontingent an KI-Auswertungen der Fotos; wer mehr braucht, schaltet weitere frei, jede kostet ' + kiPreise() +
       '. Für Anfragen Ihrer eigenen Kunden gibt es keine Gebühr. Nur für zusätzliche Anfragen aus der eeziframes-App ist künftig eine Gebühr je Anfrage geplant, wenn Sie dabei mitmachen. Alle Preise ' + steuerText(v).replace(/\.$/, '') + '.';
   }
   if (name === 'fb-faq-ki') {
     const G = R().GRENZEN, ms = L.map((p) => P().merkmale(p)), und = (a) => a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1];
     return 'Eine KI-Auswertung ist ein Foto, das die KI für Sie liest; je Fenster meist zwei, innen und außen. Im Monat enthalten sind bei ' +
       und(L.map((p, i) => esc(kurzname(p)) + ' ' + P().tausend(ms[i].kiMonat))) + ', genug für etwa ' + und(ms.map((x) => String(Math.round(x.kiMonat / P().KI_JE_ANFRAGE)))) +
-      ' Kundenanfragen mit je ' + P().KI_JE_ANFRAGE / 2 + ' Fenstern. Jede weitere Auswertung kostet ' + kiPreise() + ' und steht auf der nächsten Monatsrechnung. Zum Schutz vor Missbrauch liest die KI nur Fotos aus einer Planung bei Ihnen, höchstens ' +
-      G.kiJeCode + ' je Anfrage, mit einer Bremse gegen Massenanfragen; im Monat höchstens das Doppelte Ihres Kontingents, danach geht es bis Monatsende ohne KI-Befund weiter. So kommen im Monat nie mehr als ' +
-      und(L.map((p, i) => geld(Math.round(ms[i].kiMonat * P().preis(p).ki * 100) / 100) + ' (' + esc(kurzname(p)) + ')')) + ' dazu.';
+      ' Kundenanfragen mit je ' + P().KI_JE_ANFRAGE / 2 + ' Fenstern. Wie viel genutzt ist, sehen Sie im Kundenbereich in Prozent; bei 80 und 100 % bekommen Sie eine E-Mail. Ist das Kontingent aufgebraucht, pausiert die KI bis zum Monatsende, Ihre Kunden planen und senden weiter, nur ohne KI-Befund. Brauchen Sie mehr, schalten Sie im Kundenbereich weitere Auswertungen frei: Jede kostet ' + kiPreise() +
+      ' und kommt am Monatsende auf die nächste Monatsrechnung, höchstens bis zum Doppelten Ihres Kontingents. So kommen im Monat nie mehr als ' +
+      und(L.map((p, i) => geld(Math.round(ms[i].kiMonat * P().preis(p).ki * 100) / 100) + ' (' + esc(kurzname(p)) + ')')) + ' dazu. Zum Schutz vor Missbrauch liest die KI nur Fotos aus einer Planung bei Ihnen, höchstens ' + G.kiJeCode + ' je Anfrage, mit einer Bremse gegen Massenanfragen.';
   }
   if (name === 'fb-hinweis') {
     if (!v.vorlaeufig && v.bestellen) return '';
@@ -336,7 +336,7 @@ function fbBaustein(name, o, v) {
   if (name === 'fb-fuss') {
     return (v.bestellen ? '' : 'Die Bestellung wird in Kürze freigeschaltet, bis dahin fragen Sie unverbindlich an. ') +
       (v.vorlaeufig ? 'Vorläufige Preise; beim Bestellen wird Ihr Preis für den Vertrag festgeschrieben. ' : 'Der Preis beim Bestellen bleibt für Ihren Vertrag fest. ') +
-      'Alle Preise ' + steuerText(v) + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden; KI-Auswertungen über dem Kontingent je ' + kiPreise() + '. Die Vorschau zeigt einen erfundenen Betrieb.';
+      'Alle Preise ' + steuerText(v) + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden; weitere KI-Auswertungen über dem Kontingent nur, wenn Sie sie freischalten, je ' + kiPreise() + '. Die Vorschau zeigt einen erfundenen Betrieb.';
   }
   if (name === 'fb-anfrage-titel') return v.bestellen ? 'Vorher eine <em class="ez-ak">Frage?</em>' : 'Paket unverbindlich <em class="ez-ak">anfragen.</em>';
   if (name === 'fb-anfrage-lede') {

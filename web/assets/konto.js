@@ -137,6 +137,7 @@
     if (a.stand === 'live' && v.live) inhalt.push(knopfKarte(a));
     if (!zuEnde(a)) inhalt.push(angabenKarte(a));
     inhalt.push(paketKachel(a));
+    if (!vorZahlung(a) && !zuEnde(a)) inhalt.push(kiKarte(a));
     if (!vorZahlung(a) || a.stand === 'angefragt') inhalt.push(nachrichtenKachel(a));
     if (!vorZahlung(a)) inhalt.push(zahlungKarte(a));
     inhalt.push(verlaufKarte(a));
@@ -159,13 +160,72 @@
       vorZahlung(a) ? null : h('p', { class: 'a-hilfe', style: 'padding:0 0 14px', text: 'Jede Änderung sehen wir sofort; wir melden uns, sobald sie auf Ihrer Seite ist.' })]);
   }
 
+  /* KI-Auswertungen: wie viel vom Kontingent dieses Monats genutzt ist (Kapselreihe, 20 Stäbchen je 5 %), weitere freischalten oder
+     beenden (Paketbedingungen § 2 Abs. 2, § 4 Abs. 4). Lädt nach; bis dahin steht die Karte mit dem Kontingent. */
+  const tausend = (n) => P.tausend(n);
+  function kapseln(anteil, art) {
+    const voll = Math.max(0, Math.min(20, Math.round(anteil * 20)));
+    return h('div', { class: 'a-kapseln' + (art ? ' ' + art : ''), 'aria-hidden': 'true' }, Array.from({ length: 20 }, (_, i) => h('i', { class: i < voll ? 'an' : '', style: '--i:' + i })));
+  }
+  const reihe = (k, wert, max, text, art, mehr) => h('div', { class: 'a-ki-reihe' + (mehr ? ' ' + mehr : ''), role: 'meter', 'aria-label': art ? 'Weitere KI-Auswertungen' : 'KI-Auswertungen im Kontingent', 'aria-valuemin': '0', 'aria-valuemax': String(max), 'aria-valuenow': String(Math.min(wert, max)), 'aria-valuetext': text }, kapseln(wert / max, art));
+  const bisText = (k) => U.datum(k.bis + 'T12:00:00Z');
+  const deckel = (k) => 'höchstens ' + tausend(k.kontingent) + ' weitere, also höchstens ' + U.euro(k.hoechstCent / 100) + ' netto im Monat' + (k.hoechstBruttoCent ? ' (' + U.euro(k.hoechstBruttoCent / 100) + ' mit MwSt.)' : '');
+  function kiKarte(a) {
+    const karte = U.kachel([h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'KI-Auswertungen' })), h('p', { class: 'a-neben', text: 'Wird geladen …' })], 'a-ki');
+    U.api('GET', '/api/auftrag/' + a.id + '/ki').then((r) => karte.replaceWith(kiInhalt(a, r.ki))).catch(() => { const p = karte.querySelector('.a-neben'); if (p) p.textContent = 'Der Stand lässt sich gerade nicht laden.'; });
+    return karte;
+  }
+  /* Zahl höchstens 100 %: Was darüber liegt, zeigt die zweite Reihe als „weitere“ (Gremium 27.10.2026: „130 %“ las sich wie ein überzogenes Konto) */
+  function kiInhalt(a, k, neu) {
+    const pause = !k.frei && k.genutzt >= k.kontingent, oben = k.frei && k.genutzt >= k.obergrenze, bis = bisText(k);
+    const teile = [h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'KI-Auswertungen' }), U.chip(k.monat, 'aktiv'))];
+    if (k.verknuepft) {
+      const inkl = Math.min(k.genutzt, k.kontingent);
+      teile.push(h('div', { class: 'a-ki-zahl' }, h('b', null, String(Math.min(100, k.prozent)), h('small', { text: '%' })),
+        h('span', { text: tausend(inkl) + ' von ' + tausend(k.kontingent) + ' Fotos ausgewertet · ' + (k.mehr ? tausend(k.mehr) + '\u00a0weitere' : 'je\u00a0Fenster\u00a0meist\u00a0zwei') })));
+      teile.push(reihe(k, k.genutzt, k.kontingent, tausend(inkl) + ' von ' + tausend(k.kontingent) + ' Fotos ausgewertet'));
+      if (k.frei || k.mehr) teile.push(h('div', { class: 'a-ki-weitere' }, reihe(k, k.mehr, k.kontingent, tausend(k.mehr) + ' von höchstens ' + tausend(k.kontingent) + ' weiteren', 'mehr', neu ? 'neu' : ''),
+        h('p', { class: 'a-ki-mehr' }, h('b', { text: '+' + tausend(k.mehr) + ' weitere' }), ' · bisher ' + U.euro(k.mehrCent / 100) + ' netto, höchstens\u00a0' + U.euro(k.hoechstCent / 100) + '\u00a0netto')));
+    } else teile.push(h('p', { class: 'a-ki-satz', text: tausend(k.kontingent) + ' KI-Auswertungen im Monat sind inklusive, eine je Foto, je Fenster meist zwei. Der Zähler startet, sobald Ihre Seite live ist.' }));
+    const kern = k.frei ? 'Freigeschaltet' + (k.frei_seit ? ' seit ' + U.datum(k.frei_seit) : '') + ', gilt jeden Monat, bis Sie es beenden.'
+      : pause ? 'Die KI pausiert bis ' + bis + '. Ihr Konfigurator läuft weiter.' : 'Bei 100 % pausiert nur die KI bis ' + bis + '. Ihr Konfigurator läuft weiter.';
+    const rest = k.frei ? (oben ? 'Die ' + tausend(k.kontingent) + ' weiteren sind erreicht; die KI pausiert bis ' + bis + ', Ihr Konfigurator läuft weiter.'
+      : 'Über ' + tausend(k.kontingent) + ' hinaus kostet jedes Foto ' + U.euro(k.preis) + ' netto, mit der nächsten Monatsrechnung; Sie zahlen nur, was genutzt wird. Nach ' + tausend(k.kontingent) + ' weiteren pausiert die KI bis zum Monatsende.')
+      : 'Ihre Kunden planen und senden weiter, nur ohne KI-Befund. Bei 80 und 100 % bekommen Sie eine E-Mail.';
+    if (k.verknuepft || k.frei) teile.push(h('p', { class: 'a-ki-satz' }, h('b', { text: kern }), ' ' + rest));
+    teile.push(h('div', { class: 'a-ki-handlung' }, U.ring(k.frei ? 'Weitere Auswertungen beenden' : 'Weitere Auswertungen freischalten', { on: { click: () => kiUmschalten(a, k) } }),
+      h('p', { text: k.frei ? 'Ihr Konfigurator bleibt an; danach entstehen keine weiteren Kosten.' : U.euro(k.preis) + ' je weiteres Foto, netto · ' + deckel(k) })));
+    if ((k.abgerechnet || []).some((x) => x.mehr)) teile.push(h('ul', { class: 'a-ki-liste' }, k.abgerechnet.filter((x) => x.mehr).map((x) => h('li', null, h('b', { text: x.text }), ' ' + tausend(x.mehr) + ' weitere, ' + U.euro(x.cent / 100) + ' netto' + (x.offen ? ' (folgt)' : '')))));
+    return U.kachel(teile, 'a-ki leucht');
+  }
+  /* Bestätigung: Preis als Zahl, Deckel, Dauer der Freischaltung, beim Beenden die Folgen (Gremium 27.10.2026, Vetos G, K, F) */
+  function kiUmschalten(a, k) {
+    const an = !k.frei, ja = U.pille(an ? 'Freischalten' : 'Beenden'), nein = U.ring('Abbrechen');
+    const preis = U.euro(k.preis), zahl = preis.replace(/[\s\u00a0\u202f]*€$/, '');
+    const inhalt = an ? [
+      h('div', { class: 'a-ki-preis' }, h('b', null, zahl, h('small', { text: '€' })), h('span', { text: 'je weiteres Foto, netto · ' + deckel(k) })),
+      h('p', { text: 'Über das Kontingent von ' + tausend(k.kontingent) + ' Fotos hinaus läuft die KI weiter. Sie zahlen nur, was genutzt wird, mit der nächsten Monatsrechnung. Nach ' + tausend(k.kontingent) + ' weiteren pausiert die KI bis zum Monatsende.' }),
+      h('p', { class: 'a-ki-kern', text: 'Gilt ab sofort, auch in den nächsten Monaten, bis Sie es auf dieser Karte beenden.' })]
+      : [h('p', { text: 'Ab sofort entstehen keine weiteren Kosten. Die KI pausiert, sobald das Kontingent von ' + tausend(k.kontingent) + ' erreicht ist' + (k.genutzt >= k.kontingent ? ', in diesem Monat also gleich' : '') + '. Ihr Konfigurator bleibt an.' + (k.mehr ? ' Die ' + tausend(k.mehr) + ' weiteren dieses Monats (' + U.euro(k.mehrCent / 100) + ' netto) kommen mit der nächsten Rechnung.' : '') })];
+    const zu = U.blatt({ titel: an ? 'Weitere Auswertungen freischalten?' : 'Weitere Auswertungen beenden?', inhalt: inhalt, knoepfe: [ja, nein] });
+    nein.addEventListener('click', zu);
+    ja.addEventListener('click', async () => {
+      if (ja.dataset.wartet) return; ja.dataset.wartet = '1';
+      try {
+        const r = await U.api('POST', '/api/auftrag/' + a.id + '/ki', { frei: an });
+        const alt = wurzel.querySelector('.a-ki'); if (alt) alt.replaceWith(kiInhalt(a, r.ki, an));
+        zu(); U.toast(an ? 'Weitere Auswertungen freigeschaltet' : 'Weitere Auswertungen beendet');
+      } catch (e) { delete ja.dataset.wartet; U.toast(e.message); }
+    });
+  }
+
   /* Paket: was frei ist, was mit dem nächsten Paket dazukommt, Wechsel anfragen */
   function paketKachel(a) {
     const pr = a.preise || P.preis(a.paket), n = A.naechstes(a.paket), w = a.wechsel;
     const liste = h('ul', { class: 'a-punkte a-anpassbar' }, A.anpassbar(a.paket).map((x) => h('li', { class: x.frei ? '' : 'zu' }, h('span', null, h('b', { text: x.titel }), ' ', h('span', { class: 'a-neben', text: x.text })), x.frei ? null : U.chip('ab ' + kurz(x.ab), 'leise'))));
     const teile = [h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Ihr Paket' }), U.chip(P.PAKETE[a.paket].name, 'aktiv')),
       h('p', null, U.euro(pr.monat) + ' netto im Monat' + (a.stand === 'live' ? '' : ' ab Livegang') + ', Einrichtung ' + U.euro(pr.einrichtung) + ' netto.'),
-      h('p', { class: 'a-neben', style: 'margin-top:4px' }, P.tausend((P.merkmale(a.paket) || {}).kiMonat) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + U.euro(pr.ki != null ? pr.ki : P.preis(a.paket).ki) + ' netto. Eine Auswertung ist ein Foto; zum Schutz vor Missbrauch wertet die KI im Monat höchstens das Doppelte des Kontingents aus.'), liste];
+      h('p', { class: 'a-neben', style: 'margin-top:4px' }, P.tausend((P.merkmale(a.paket) || {}).kiMonat) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + U.euro(pr.ki != null ? pr.ki : P.preis(a.paket).ki) + ' netto. Eine Auswertung ist ein Foto; den Stand sehen Sie unten.'), liste];
     if (n && !zuEnde(a)) {
       if (vorZahlung(a)) teile.push(h('div', { class: 'a-knoepfe', style: 'margin-top:14px' }, U.ring('Paket wechseln', { href: '/bestellen/#' + a.paket + '/' + a.id + '/paket' })));
       else if (w && w.paket) teile.push(h('p', { class: 'a-hinweis', style: 'margin-top:14px', text: 'Wechsel zu ' + P.PAKETE[w.paket].name + ' angefragt am ' + U.datum(w.zeit) + '. Wir melden uns.' }));

@@ -3,7 +3,7 @@
 ## Auftrag
 
 - **Bereich:** Bestellung `/bestellen/`, Kundenbereich `/konto/`, Zentrale `/zentrale/`, neu gebaut in der Design-DNA ohne das alte Kundenkonto.
-- **Wunsch des Inhabers:** je Paket ein eigenes Bestellformular, alles online und automatisch, Kundenbereich je Betrieb, Zentrale mit allen Bestellungen; danach die neuen Preise mit KI-Kontingent und Preis je weiterer Auswertung.
+- **Wunsch des Inhabers:** je Paket ein eigenes Bestellformular, alles online und automatisch, Kundenbereich je Betrieb, Zentrale mit allen Bestellungen; danach die neuen Preise mit KI-Kontingent und Preis je weiterer Auswertung; danach der Stand des Kontingents in Prozent, Freischalten weiterer und Abrechnung am Monatsende.
 - **Was der Nutzer tun soll:** Paket wählen, Angaben machen, kostenpflichtig bestellen; später Vorschau ansehen und freigeben.
 - **Erfolg:** Der Fensterbauer versteht Paket, Preis (netto und heute brutto) und Bindung, bevor er zahlt; der Inhaber hat alles für die Landingpage an einer Stelle.
 
@@ -53,6 +53,45 @@ Gut angekommen: „Monatsabo erst ab Livegang, ohne Mindestlaufzeit“, das Frei
 
 Alle netto. Eine KI-Auswertung ist ein Foto; „20 Kundenanfragen bzw. 1.000 KI-Anfragen“ ist als Rechengröße umgesetzt (1.000 Auswertungen reichen für etwa 20 Anfragen mit je 25 Fenstern), nicht als Grenze für Anfragen. Kalkulation des Preises je weiterer Auswertung nur intern in [docs/KI-KOSTEN.md](../KI-KOSTEN.md); öffentlich stehen Kontingent, Preis und der Schutz vor Missbrauch (Verkaufsseite mit Karten, Vergleich und Frage „Was ist eine KI-Auswertung …?“, Bestellung, Kundenbereich, Bestellbestätigung, Paketbedingungen § 2 Abs. 2, § 4 Abs. 1 und 4, § 7 Abs. 3, llms.txt). Beispielrechnung der Verkaufsseite auf zwei gesparte Stunden umgestellt (65,14 € lagen unter 69 €).
 
+## KI-Kontingent: Stand, Freischalten, Abrechnung (Wunsch des Inhabers, 27.10.2026)
+
+Wunsch: Der Fensterbauer sieht, wie viel Prozent der KI-Auswertungen des Monats genutzt sind; geht es auf 100 % zu, kann er weitere freischalten; die weiteren kommen am Monatsende als Posten auf seine Rechnung.
+
+So ist es umgesetzt (Einzelheiten in [docs/BESTELLUNG.md](../BESTELLUNG.md), „So läuft das Kontingent“):
+- Gezählt wird je Konfigurator und Kalendermonat die KI-Auswertung (ein Foto). Der Konfigurator wird beim Live-Schalten über die Adresse mit dem Auftrag verknüpft, sonst in der Zentrale von Hand.
+- Ohne Freischaltung pausiert bei 100 % nur die KI bis zum Monatsende; Kunden planen und senden weiter, ohne KI-Befund. Mails an den Betrieb bei 80 und 100 %, an den Inhaber bei 100 %.
+- Mit Freischaltung läuft die KI bis zum Doppelten weiter, jede weitere zum Preis des Pakets (0,08 € netto). Die Freischaltung gilt, bis der Betrieb sie beendet.
+- Am Monatsanfang hängt der Tageslauf die weiteren des Vormonats als Posten an das Stripe-Abo (einmal je Monat, Verlauf im Auftrag).
+
+Bilder: `390-ki1-65.jpg` (65 %), `390-ki2-blatt.jpg` (Freischalten), `390-ki3-mehr.jpg` und `1280-ki3-mehr.jpg` (freigeschaltet, 6 weitere), `390-ki5-beenden.jpg` (Beenden), `390-ki4-zentrale.jpg` (Zentrale). Kontingent auf den Bildern zum Testen 20.
+
+### Gremium (eine Runde, getrennte Agenten, nur Urteil, Stand vor dem Umbau)
+
+| Gruppe | Hand je Person | Median | Verständnis | Vetos |
+| --- | --- | --- | --- | --- |
+| Gestalter (G) | Veit 3 · Hartwig 3 · Brandner 4 · Lenz 3 · Keller 3 · Roth Faust | 3 | | Roth: Dauer der Freischaltung fehlt |
+| Kunden (K) | Vogel 3 · Demir 3 · Kraus 3 · Berger 4 · Pohl Faust · Hofmann 1 | 3 | 4 von 6 lösen alle vier Fragen, Kosten alle 6 | Pohl: Dauer der Freischaltung fehlt |
+| Fensterbauer (F) | Brandt 2 · Kranich 5 · Yilmaz 3 · Reuter 4 · Sonntag 4 · Lindqvist Faust | 3,5 | 5 von 6; 4 würden freischalten | Lindqvist: Laufzeit unklar, Kostenfalle |
+
+Urteile: [Gestalter](gremium/2026-10-27-ki-kontingent-gestalter.md), [Kunden](gremium/2026-10-27-ki-kontingent-kunden.md), [Fensterbauer](gremium/2026-10-27-ki-kontingent-fensterbauer.md).
+
+### Änderungstabelle (Muss-Punkte und Vetos, umgesetzt)
+
+| Änderung | Zweck | Urteil | Stand |
+| --- | --- | --- | --- |
+| Dauer genannt: im Blatt „Gilt ab sofort, auch in den nächsten Monaten, bis Sie es auf dieser Karte beenden.“, auf der Karte „Freigeschaltet seit …, gilt jeden Monat, bis Sie es beenden.“; ebenso in Mail und Paketbedingungen § 4 Abs. 4 | Vertrauen | Veto G, K, F | geändert |
+| Große Zahl höchstens 100 %; darüber „20 von 20 Fotos ausgewertet · 6 weitere“ und die Korallreihe | Verständnis | Muss G, K, F | geändert |
+| Einheit genannt: „13 von 20 Fotos ausgewertet · je Fenster meist zwei“ | Verständnis | Muss G, F | geändert |
+| Pausensatz zuerst und weiß: „Bei 100 % pausiert nur die KI bis 31.10.2026. Ihr Konfigurator läuft weiter.“ | Verständnis | Muss K | geändert |
+| Preis als Zahl im Blatt (0,08 €, 48 px), Deckel ausgeschrieben „höchstens 20 weitere, also höchstens 1,60 € netto im Monat (1,90 € mit MwSt.)“, „Sie zahlen nur, was genutzt wird“, „Nach 20 weiteren pausiert die KI bis zum Monatsende“; dieselbe Preiszeile unter dem Ring | Vertrauen | Muss G, K, F | geändert |
+| Knopf „Weitere Auswertungen beenden“ mit „Ihr Konfigurator bleibt an; danach entstehen keine weiteren Kosten.“; eigenes Blatt mit den Folgen (keine weiteren Kosten, KI pausiert, bisherige weitere kommen mit der Rechnung) | Verständnis, Vertrauen | Muss K, F | geändert |
+| Stäbchen fest 12 × 22 px, Reihe 2 als Kapseln 12 × 6 px, höchstens 440 px breit; `role="meter"` mit Werttext; Schraffur-Strich kräftiger (etwa 3:1) | Technik, Bedienung | Muss G | geändert |
+| Leuchten hinter der Zahl statt über dem Rest; Monatschip immer Violett, Koralle nur für die weiteren | Marke | Muss G, K | geändert |
+| Korallreihe wächst nach dem Freischalten einmal auf (240 ms, je Stäbchen 12 ms versetzt), bei reduzierter Bewegung sofort | Bewegung | Muss G | neu |
+| Zentrale: „20 von 20 + 6 weitere (130 %)“, „6 · 0,48 € netto“, „im Monat 20 + 20 weitere“ statt „bis 40“ | Ehrlichkeit | Befund G | geändert |
+
+Kann (nicht umgesetzt): Ring „freischalten“ erst ab 80 % zeigen (Demir: „wirkt wie Verkauf“); Kundenzahl statt Fotozahl („wie viele Kunden sind das?“, Kranich).
+
 ## Farben (fünf Telefon-Bildschirme, `werkzeuge/farben.py`)
 
 | Bildschirm | Neutral (S · A · G · W) | Violett | Koralle | Indigo | Foto |
@@ -78,7 +117,8 @@ Ziel der DNA: 42 · 16 · 9 · 26, Violett 3,5, Koralle 2, Indigo 1,5. Weiß lie
 
 ## Offen (braucht den Inhaber oder den nächsten Schritt)
 
-- Instanz beim Live-Schalten aus dem Auftrag anlegen; danach die Abrechnung der weiteren KI-Auswertungen als Posten auf der Monatsrechnung.
+- Instanz beim Live-Schalten aus dem Auftrag anlegen (heute: Konfigurator von Hand anlegen, Verknüpfung über die Adresse geschieht von selbst).
+- Signature: Das Dashboard für das Team zeigt den KI-Stand noch nicht, nur der Kundenbereich.
 - Wildcard für Essential unter `<name>.eeziframes.com`.
 - Alte Zentrale-Funktionen ohne Oberfläche (Statistik, Anzeigen, Betriebe, 2FA per QR), alte Tabellen.
 - Anwaltliche Prüfung der Paketbedingungen (sechs Platzhalter).
@@ -90,6 +130,7 @@ Zwei bis drei echte Menschen, davon ein Fensterbauer, fünf Minuten, ohne Hilfe,
 1. „Was würdest du jetzt tun?“ (wörtlich notieren)
 2. „Was zahlst du heute, was jeden Monat?“
 3. „Was passiert, wenn deine Kunden sehr viele Fotos auswerten lassen?“
+   Dazu im Kundenbereich (Fensterbauer): „Was passiert bei 100 %, und was kostet es, wenn du weitere freischaltest? Bis wann gilt das?“
 4. „Wie sicher bist du, dass du das richtig bestellst, 1 bis 5?“
 
 Alle Stimmen oben sind simuliert (Gremium), keine echten.

@@ -420,6 +420,10 @@ create table if not exists public.auftraege (
 alter table public.auftraege add column if not exists angaben_geaendert timestamptz;
 alter table public.auftraege add column if not exists gesehen timestamptz;
 alter table public.auftraege add column if not exists wechsel jsonb;
+-- KI-Kontingent (27.10.2026): verknüpfter Konfigurator { id, id8, host, seit } und { frei, frei_seit, abgerechnet: { 'JJJJ-MM': {…} } }
+alter table public.auftraege add column if not exists instanz jsonb;
+alter table public.auftraege add column if not exists ki jsonb not null default '{}'::jsonb;
+create index if not exists auftraege_instanz on public.auftraege ((instanz->>'id'));
 create index if not exists auftraege_kunde on public.auftraege (kunde);
 create index if not exists auftraege_session on public.auftraege ((zahlung->>'session'));
 create unique index if not exists auftraege_adresse on public.auftraege (adresse) where adresse is not null and stand in ('angefragt', 'bezahlt', 'in_arbeit', 'vorschau', 'live', 'pausiert');

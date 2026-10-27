@@ -58,7 +58,17 @@ Preise des Inhabers vom 27.10.2026, alle netto, einzige Stelle `web/assets/paket
 | Essential Plus | 50 € | 69 € | 1.500 | 0,08 € |
 | Signature | 239 € | 99 € | 2.000 | 0,08 € |
 
-Eine KI-Auswertung ist ein Foto (je Fenster meist zwei). Der Preis jeder weiteren steht im Preisstand des Auftrags (`auftraege.preise.ki`) und gilt für diesen Vertrag. Schutz vor Missbrauch (`functions/api/ki.js`): nur Fotos aus einer Planung mit Code des Betriebs, höchstens 60 je Anfrage, Bremse je Anschluss, je Konfigurator und Monat Mail an den Inhaber beim Kontingent und Schluss beim Doppelten (danach weiter ohne KI-Befund), Tagesbudget über alle. Die Kalkulation des Preises steht nur intern in [KI-KOSTEN.md](KI-KOSTEN.md). Ist die Einrichtung des größeren Pakets günstiger (Essential zu Plus), kostet der Wechsel keine Einrichtung; erstattet wird nichts (Paketbedingungen § 7 Abs. 3).
+Eine KI-Auswertung ist ein Foto (je Fenster meist zwei). Der Preis jeder weiteren steht im Preisstand des Auftrags (`auftraege.preise.ki`) und gilt für diesen Vertrag.
+
+**So läuft das Kontingent (Wunsch des Inhabers, 27.10.2026):**
+
+1. **Verknüpfen:** Beim Live-Schalten sucht der Server den Konfigurator unter der Adresse der fertigen Seite und hängt ihn an den Auftrag (`auftraege.instanz`: id, id8, host). Findet er keinen, sagt die Zentrale das; verknüpft wird dann in der Karte „KI-Auswertungen“ des Auftrags von Hand.
+2. **Zählen:** je Konfigurator und Kalendermonat nur gelungene Auswertungen (`budget:inst:<id8>:kiok` in der Tabelle `statistik`); Versuche zählen getrennt als Bremse (dreifaches Kontingent).
+3. **Sehen:** Im Kundenbereich zeigt die Karte „KI-Auswertungen“ den Monat in Prozent (große Zahl bis 100 % und Kapselreihe, „13 von 20 Fotos ausgewertet“), bei Freischaltung eine zweite Reihe für die weiteren mit dem bisherigen Betrag und dem Höchstbetrag netto und mit MwSt. Mails an den Betrieb bei 80 %, bei 100 % und an der Obergrenze; an den Inhaber bei 100 %.
+4. **Pause oder freischalten:** Ohne Freischaltung pausiert die KI bei 100 % bis Monatsende; der Konfigurator nimmt weiter Anfragen an, nur ohne KI-Befund. Mit „Weitere Auswertungen freischalten“ (`auftraege.ki.frei`) läuft sie bis zum Doppelten weiter. Die Freischaltung gilt auch in den folgenden Monaten, bis der Betrieb sie mit „Weitere Auswertungen beenden“ zurücknimmt; danach entstehen keine weiteren Kosten, schon genutzte weitere des Monats werden abgerechnet. Karte und Blätter sagen das wörtlich (Vetos des Gremiums, docs/profis/2026-10-27-bestellung.md).
+5. **Abrechnen:** Der Tageslauf rechnet am Monatsanfang den Vormonat ab: weitere = genutzt − Kontingent (höchstens das Kontingent), mal Preis; ein Rechnungsposten (`/v1/invoiceitems`, netto mit Steuersatz) am Stripe-Abo, der mit der nächsten Monatsrechnung abgebucht wird. Genau einmal je Monat (`auftraege.ki.abgerechnet['JJJJ-MM']`), mit Eintrag im Verlauf. Geht der Posten nicht (kein Abo), steht „von Hand abrechnen“ in der Zentrale.
+
+Konfiguratoren ohne Auftrag (Demos, von Hand angelegt) laufen wie freigeschaltet bis zum Doppelten, ohne Abrechnung. Weitere Bremsen: nur Fotos aus einer Planung mit Code des Betriebs, höchstens 60 je Anfrage, Bremse je Anschluss, Tagesbudget über alle (`KI_TAG_MAX`). Die Kalkulation des Preises steht nur intern in [KI-KOSTEN.md](KI-KOSTEN.md). Ist die Einrichtung des größeren Pakets günstiger (Essential zu Plus), kostet der Wechsel keine Einrichtung; erstattet wird nichts (Paketbedingungen § 7 Abs. 3).
 
 ## Geld (Stripe)
 
@@ -92,5 +102,5 @@ Bestellung `http://localhost:8789/bestellen/#plus`, Code `123456`, Mails unter `
 
 - **Konfigurator beim Live-Schalten anlegen:** Die Instanz (Host, Merkmale, Empfänger, Rechtsangaben, Zugänge) entsteht noch nicht aus dem Auftrag; die alte Instanz-Verwaltung gehörte zur gelöschten Zentrale. Die Bausteine darunter (`functions/instanz/`, `verwalten.js`) bleiben und sind der nächste Schritt.
 - **Essential unter `<name>.eeziframes.com`:** Wildcard-Eintrag und Zuordnung im Worker (`functions/instanz/mandant.js` behandelt `*.eeziframes.com` noch als Hauptdomain).
-- **KI-Auswertungen über dem Kontingent abrechnen:** Der Zähler je Konfigurator und Monat läuft; als Posten auf die Monatsrechnung (Stripe) kommt er erst, wenn die Instanz beim Live-Schalten mit dem Auftrag verknüpft ist. Bis dahin von Hand (KI-KOSTEN.md).
+- **KI-Kontingent im Dashboard von Signature:** Der Stand steht im Kundenbereich auf eeziframes.com; im Dashboard unter der Domain des Betriebs noch nicht.
 - **Alte Tabellen** `partner`, `bestellungen`, `partner_nachrichten` und ihre Funktionen in `speicher.js`: ungenutzt; löschen nur auf Wunsch des Inhabers.
