@@ -53,19 +53,16 @@
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
-/* Messen im Raum (26.10.2026): „Maß eingeben“ öffnet das Blatt, Ziffern, „Bestätigen“ speichert, dann „Weiter“ im Dock */
+/* Messen (Folie der Vorschau, 27.10.2026): die Zifferntasten stehen offen, „Weiter“ prüft, speichert und geht zum nächsten Maß */
 async function massTippen(pg, wert) {
-  await pg.waitForSelector('.mess-dock .md-haupt');
-  await pg.click('.mess-dock .md-haupt[data-act$="-auf"]');
-  await pg.waitForSelector('.mess-pad .keypad');
-  for (const z of wert) await pg.click('.mess-pad .keypad button[data-v="' + z + '"]');
-  await pg.click('.mp-ok'); await pg.waitForSelector('.mess-dock .md-haupt[data-act$="-weiter"]');
-  await pg.click('.mess-dock .md-haupt'); await pg.waitForTimeout(200);
+  await pg.waitForSelector('#mess-weiter');
+  for (const z of wert) await pg.click('.ez-taste[data-taste="' + z + '"]');
+  await pg.click('#mess-weiter'); await pg.waitForTimeout(550);
 }
+/* Rand wie die Mitte: „Hier auch … gemessen?“; sind alle vier gleich, fragt die Folie einmal nach („Stimmt so“) */
 async function randWieMitte(pg) {
-  await pg.waitForSelector('.mess-dock [data-act="rest-auf"]'); await pg.click('.mess-dock [data-act="rest-auf"]');
-  await pg.waitForSelector('[data-act="rest-same"]'); await pg.click('[data-act="rest-same"]');
-  await pg.waitForSelector('.mess-dock [data-act="rest-weiter"]'); await pg.click('.mess-dock [data-act="rest-weiter"]'); await pg.waitForTimeout(150);
+  await pg.waitForSelector('#mess-gleich'); await pg.waitForTimeout(600); await pg.click('#mess-gleich'); await pg.waitForTimeout(550);
+  if (await pg.locator('#mess-stimmt').count()) { await pg.click('#mess-stimmt'); await pg.waitForTimeout(550); }
 }
 
 const require = createRequire(process.env.PW_PFAD ? process.env.PW_PFAD.replace(/\/?$/, '/') + 'x.js' : import.meta.url);
@@ -299,8 +296,8 @@ if (teil(3)) {
   await page.click('.lg-weiter');
   for (const wert of ['1480', '1410', '1370', '1230']) await massTippen(page, wert);
   for (let i = 0; i < 4; i++) await randWieMitte(page);
-  await page.waitForSelector('.bb .btn.primary');
-  await page.click('.bb .btn.primary');
+  await page.waitForSelector('.ez-folie.ist-passt #mess-weiter');
+  await page.click('#mess-weiter');
   await page.waitForSelector('[data-screen="ergebnis"]');
   const erg = await page.evaluate(() => { const d = derive(S.win); return [d.moW, d.moH, d.elW, d.elH].join('×'); });
   ok(erg === '1370×1480×1230×1410', 'Ergebnis stimmt: ' + erg);
@@ -666,8 +663,8 @@ if (teil(6)) {
   await p2.evaluate(() => { S.win.mo = { hm: 1480, wm: 1370, hl: '', hr: '', wt: '', wb: '' }; go('rest'); });
   for (let i = 0; i < 4; i++) await randWieMitte(p2);
   await p2.waitForTimeout(400);
-  const passt = await p2.evaluate(() => ({ t: document.querySelector('.scr').textContent, zahl: (document.querySelector('.ps-zahl b') || {}).textContent || '', reihen: document.querySelectorAll('.ps-reihe').length, schilder: Array.from(document.querySelectorAll('#w3d .w3d-dim-lab')).filter((e) => e.getBoundingClientRect().width > 0).length, zoom: !!document.querySelector('#w3d .w3d-zoom, #w3d [data-w3d="zoom-in"]'), cream: document.querySelectorAll('.scr .btn.primary').length }));
-  ok(/Passt\./.test(passt.t) && passt.zahl === '1.370 × 1.480' && passt.reihen === 6 && passt.schilder === 0 && passt.cream === 1 && await p2.locator('.w3d-dim.is-drawing').count() >= 2, '„Passt.“: Maßlinien zeichnen sich nacheinander, das Maß der Öffnung groß (' + passt.zahl + '), je Richtung drei Messungen, keine Schilder im Modell, eine Hauptaktion');
+  const passt = await p2.evaluate(() => ({ t: document.querySelector('.scr').textContent, zahl: (document.getElementById('passt-zahl') || {}).textContent || '', reihen: document.querySelectorAll('.ez-passt__reihe').length, linien: document.querySelectorAll('#mess-passt g').length, zaehlt: document.querySelectorAll('#mess-passt g.ist-zaehlt').length, schilder: Array.from(document.querySelectorAll('.ez-passt__schild')).filter((e) => e.getBoundingClientRect().width > 0).map((e) => e.textContent).join('|'), pillen: document.querySelectorAll('.scr .lg-fuss .dna-pille').length, w3d: !!document.querySelector('.w3d-stage'), rest: S.rest.i }));
+  ok(/Passt\./.test(passt.t) && passt.zahl === '1.370 × 1.480' && passt.reihen === 6 && passt.linien === 6 && passt.zaehlt === 6 && passt.schilder === '1.370mm|1.480mm' && passt.pillen === 1 && !passt.w3d && passt.rest === 4, '„Passt.“: die Öffnung von vorn mit allen sechs Maßen (die kleinsten kräftig, ihr Wert am Modell), das Maß der Öffnung groß (' + passt.zahl + '), je Richtung drei Messungen, eine Hauptaktion, kein 3-D');
   await foto(p2, 'app-masse-da');
   // Bewegtbilder (Lottie) in Tokenfarben, Haptik, Scroll-Bindung
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
@@ -3484,32 +3481,26 @@ if (teil(16)) {
     /* Gespeichert: keine Gesamtübersicht */
     const fertigK = await sk.evaluate(() => ({ screen: S.screen, t: document.querySelector('.scr').textContent, cream: document.querySelectorAll('.btn.primary').length }));
     ok(fertigK.screen === 'fertig' && !/Alle Angaben|\d mm|Farbe wie|Aus deinen Fotos gelesen/.test(fertigK.t) && /Wie geht es weiter\?/.test(fertigK.t) && fertigK.cream === 1, 'Nach dem Speichern: keine Übersicht aller Angaben, keine Maße und keine Notiztexte, dafür „Wie geht es weiter?“ mit genau einer Hauptaktion');
-    /* Messen im Raum: Dock mit Pfeil zurück, „Maß eingeben“ und Info; das Blatt mit den Zifferntasten kommt erst auf „Maß eingeben“,
-       „Bestätigen“ speichert und schließt es, der Wert steht auf der Linie; Browser-Zurück schließt erst das Blatt und bleibt in der App */
-    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(250);
+    /* Messen (Folie der Vorschau, 27.10.2026): feste Ansicht je Element statt 3-D, Zahl auf der Linie, Zifferntasten offen, eine Pille;
+       „Weiter“ prüft, speichert und geht zum nächsten Maß; der Pfeil führt zum vorigen Maß mit seinem Wert; Browser-Zurück bleibt in der App */
+    await sk.evaluate(() => { S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await sk.waitForTimeout(500);
     const adresse = sk.url();
-    const dock = await sk.evaluate(() => ({ teile: Array.from(document.querySelectorAll('.mess-dock button')).map((b) => b.getAttribute('data-act')).join(','), tasten: !!document.querySelector('.keypad'), feld: !!document.querySelector('.w3d-feldlage .fd-knopf, .w3d-feldlage .fd-ph'), kicker: !!document.querySelector('.scr .hd .eyebrow'), notiz: !!document.querySelector('.scr .nz-knopf'), cream: document.querySelectorAll('.scr .btn.primary, .scr .mp-ok').length, ziele: Array.from(document.querySelectorAll('.mess-dock button')).every((b) => b.getBoundingClientRect().height >= 44) }));
-    await sk.click('.mess-dock .md-haupt'); await sk.waitForSelector('.mess-pad .keypad');
-    await sk.goBack(); await sk.waitForTimeout(300);
-    const zuBlatt = await sk.evaluate(() => ({ pad: !!document.querySelector('.mess-pad'), screen: S.screen }));
-    await sk.click('.mess-dock .md-haupt'); await sk.waitForSelector('.mess-pad .keypad');
-    for (const z of ['1', '3', '9', '0']) await sk.click('.mess-pad .keypad [data-v="' + z + '"]');
-    const blatt = await sk.evaluate(() => ({ reihe: Array.from(document.querySelectorAll('.keypad button')).map((b) => b.getAttribute('data-v')).slice(9).join(','), wert: document.getElementById('mp-feld').textContent, ok: (document.querySelector('.mp-ok') || {}).textContent || '', okH: document.querySelector('.mp-ok').getBoundingClientRect().height, dock: !!document.querySelector('.mess-dock'), cream: document.querySelectorAll('.scr .btn.primary, .scr .mp-ok').length }));
-    await sk.click('.mp-ok'); await sk.waitForTimeout(250);
-    const best = await sk.evaluate(() => ({ hm: S.win.mo.hm, step: S.mess.step, pad: !!document.querySelector('.mess-pad'), linie: (document.querySelector('.w3d-feldlage .fd-knopf') || {}).textContent || '', haupt: document.querySelector('.mess-dock .md-haupt').textContent }));
-    await sk.click('.mess-dock .md-haupt'); await sk.waitForTimeout(250);
-    const tasten = await sk.evaluate(() => ({ step: S.mess.step }));
-    await sk.click('.mess-dock [data-v="zurueck"]'); await sk.waitForTimeout(200);
-    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, cur: S.mess.cur, linie: (document.querySelector('.w3d-feldlage .fd-knopf') || {}).textContent || '' }));
+    const dock = await sk.evaluate(() => ({ tasten: document.querySelectorAll('.ez-tasten .ez-taste[data-taste]').length, feld: !!document.getElementById('mess-feld'), bild: /\/bilder\/konfigurator\/mess\/fenster\.webp$/.test(document.getElementById('mess-bild').src), w3d: !!document.querySelector('.w3d-stage'), h1: document.getElementById('mess-h1').textContent, notiz: !!document.querySelector('.scr .lg-notiz-knopf'), i: document.getElementById('mess-i').getAttribute('data-k'), pillen: document.querySelectorAll('.scr .lg-fuss .dna-pille').length, pille: document.getElementById('mess-weiter').textContent, ziele: Array.from(document.querySelectorAll('.ez-taste[data-taste], #mess-weiter, #mess-zurueck')).every((b) => b.getBoundingClientRect().height >= 44) }));
+    for (const z of ['1', '3', '9', '0']) await sk.click('.ez-taste[data-taste="' + z + '"]');
+    const getippt = await sk.evaluate(() => ({ zahl: document.getElementById('mess-zahl').textContent, zeile: document.getElementById('mess-zeile').textContent }));
+    await sk.click('#mess-weiter'); await sk.waitForTimeout(650);
+    const best = await sk.evaluate(() => ({ hm: S.win.mo.hm, step: S.mess.step, h1: document.getElementById('mess-h1').textContent, pille: document.getElementById('mess-weiter').textContent, zeile: document.getElementById('mess-zeile').textContent }));
+    await sk.click('#mess-zurueck'); await sk.waitForTimeout(300);
+    const zurueck1 = await sk.evaluate(() => ({ step: S.mess.step, zahl: document.getElementById('mess-zahl').textContent, h1: document.getElementById('mess-h1').textContent }));
     await sk.goBack(); await sk.waitForTimeout(300);
     const zurueck2 = await sk.evaluate(() => ({ screen: S.screen, href: location.href }));
     await sk.click('[data-act="gindex"]'); await sk.waitForSelector('.g-index'); await sk.goBack(); await sk.waitForTimeout(250);
     const zurueck3 = await sk.evaluate(() => ({ screen: S.screen, blatt: !!document.querySelector('.g-index') }));
-    ok(dock.teile === 'key,mess-auf,gloss' && !dock.tasten && !dock.feld && !dock.kicker && !dock.notiz && dock.cream === 1 && dock.ziele && !zuBlatt.pad && zuBlatt.screen === 'messen' &&
-      blatt.reihe === '0,del' && /1\.390\s*mm/.test(blatt.wert) && /Bestätigen/.test(blatt.ok) && blatt.okH >= 44 && !blatt.dock && blatt.cream === 1 &&
-      best.hm === 1390 && best.step === 0 && !best.pad && /1\.390/.test(best.linie) && /Weiter zu Maß 2/.test(best.haupt) &&
-      tasten.step === 1 && zurueck1.step === 0 && zurueck1.cur === '1390' && /1\.390/.test(zurueck1.linie) && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
-      'Messen im Raum: nur die Überschrift über dem Modell, kein Feld und keine Tasten; unten Pfeil zurück, „Maß eingeben“ und Info; das Blatt mit den Zifferntasten kommt erst auf „Maß eingeben“ (Browser-Zurück schließt es), neben dem Feld „Bestätigen“; danach steht der Wert auf der Linie und der Knopf heißt „Weiter zu Maß 2“; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers bleibt in der App (Adresse bleibt) und schließt zuerst ein offenes Blatt');
+    ok(dock.tasten === 11 && dock.feld && dock.bild && !dock.w3d && dock.h1 === 'Höhe der Öffnung.' && dock.notiz && dock.i === 'oeffnung-hoehe' && dock.pillen === 1 && /Weiter zu Maß\s2/.test(dock.pille) && dock.ziele &&
+      getippt.zahl === '1.390' && /139\s*cm/.test(getippt.zeile) &&
+      best.hm === 1390 && best.step === 1 && best.h1 === 'Höhe des Fensters.' && /Weiter zu Maß\s3/.test(best.pille) && /Maß\s1 gespeichert: 1\.390/.test(best.zeile) &&
+      zurueck1.step === 0 && zurueck1.zahl === '1.390' && zurueck1.h1 === 'Höhe der Öffnung.' && zurueck2.screen === 'fotos' && zurueck2.href === adresse && zurueck3.screen === 'fotos' && !zurueck3.blatt,
+      'Messen (Folie der Vorschau): feste Ansicht je Element statt 3-D, Zahl auf der Linie, Zifferntasten offen, eine Pille; „Weiter“ prüft, speichert und geht zu Maß 2; der Pfeil führt zum vorigen Maß mit seinem Wert; die Zurück-Taste des Browsers bleibt in der App (Adresse bleibt)' + (dock.tasten === 11 ? '' : ' ' + JSON.stringify([dock, getippt, best, zurueck1, zurueck2, zurueck3])));
     /* Foto groß mit Zoom */
     await sk.evaluate(() => useDemo()); await sk.waitForFunction(() => S.photos.in && S.photos.out, null, { timeout: 8000 }); await sk.evaluate(() => render()); await sk.waitForTimeout(200);
     await sk.click('.ft-bild[data-act="foto-gross"][data-v="in"]'); await sk.waitForSelector('.fz');
@@ -4559,10 +4550,32 @@ if (teil(22)) {
     await p.evaluate(([art, W, H, neu, scr]) => { const w = demoProject()[0]; Object.assign(w, { art: art, neu: neu }); planMasse(w, 'w', W); planMasse(w, 'h', H); S.win = w; S.editIdx = -1; go(scr); if (scr === 'planmasse') { planMasse(S.win, 'w', W); planMasse(S.win, 'h', H); render(); } }, [art, W, H, neu, scr]);
     await p.waitForTimeout(1500); const m = await buehne(); if (m.fehler.length) schilder.push(art + ' ' + W + ' ' + scr + ': ' + m.fehler.join(', '));
   }
+  /* Messen und Ränder (Folie der Vorschau): Lupen, Zahl, Chip, „Groß ansehen“ und die Werte von „Passt.“ in der Bühne, nichts überdeckt sich */
+  const buehneMd = () => p.evaluate(() => {
+    const st = document.getElementById('mess-buehne'); if (!st) return { fehler: ['keine Bühne'] };
+    const b = st.getBoundingClientRect(), sicht = (e) => { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    const t = [];
+    st.querySelectorAll('.ez-passt__schild, .ez-mass__ende, #mess-feld, .ez-gross-auf, .ez-glaschip').forEach((e) => { if (sicht(e)) t.push([(e.id || e.className.split(' ')[0]) + ' ' + e.textContent.trim().slice(0, 14), e.getBoundingClientRect()]); });
+    const fehler = [];
+    t.forEach(([n, a], i) => { if (a.left < b.left + 4 || a.right > b.right - 4 || a.top < b.top + 2 || a.bottom > b.bottom - 2) fehler.push(n + ' am Rand'); t.slice(i + 1).forEach(([m, c]) => { if (Math.min(a.right, c.right) - Math.max(a.left, c.left) > 1 && Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top) > 1) fehler.push(n + ' über ' + m); }); });
+    return { fehler: fehler };
+  });
   for (const gleich of [false, true]) { // Übersicht nach den Rändern: gleiche Maße einmal, ungleiche an den äußeren Linien
-    await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; go('rest'); S.rest.i = 4; render(); }, gleich);
-    await p.waitForTimeout(1800); const m = await buehne(); if (m.fehler.length) schilder.push('Ränder ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
+    await p.evaluate((g) => { const w = demoProject()[0]; if (g) { const m = w.mo; m.hl = m.hr = m.hm; m.wt = m.wb = m.wm; } S.win = w; S.editIdx = -1; S.rest.i = 4; go('rest'); }, gleich);
+    await p.waitForTimeout(900); const m = await buehneMd(); if (m.fehler.length) schilder.push('Passt ' + (gleich ? 'gleich' : 'ungleich') + ': ' + m.fehler.join(', '));
   }
+  /* alle vier Maße und vier Ränder je Element: Lupen, Zahl und Knöpfe frei, die Karte mit den Tasten über dem Fuß (390 × 844 und 320 × 640) */
+  for (const [W, H] of [[390, 844], [320, 640]]) {
+    await p.setViewportSize({ width: W, height: H });
+    for (const art of ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw']) for (let n = 0; n < 8; n++) {
+      await p.evaluate(([art, n]) => { const w = demoProject()[0]; artSetzen(w, art); S.win = w; S.editIdx = -1; if (n < 4) { S.mess.step = n; S.mess.cur = ''; go('messen'); render(true); } else { S.rest.i = n - 4; S.rest.cur = ''; go('rest'); render(true); } }, [art, n]);
+      await p.waitForTimeout(260); const m = await buehneMd();
+      const unter = await p.evaluate(() => { const k = document.querySelector('.ez-karte--tasten').getBoundingClientRect(), f = document.querySelector('.lg-fuss').getBoundingClientRect(); return Math.round(k.bottom - f.top); });
+      if (unter > 1) m.fehler.push('Tasten ' + unter + ' px unter dem Fuß');
+      if (m.fehler.length) schilder.push(W + ' ' + art + ' ' + (n < 4 ? 'Maß ' + (n + 1) : 'Rand ' + (n - 3)) + ': ' + m.fehler.join(', '));
+    }
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
   ok(!schilder.length, 'Maße am Modell: alle Schilder mit Abstand in der Bühne, auch bei 4,20 m breiten Elementen und nach den Rändern, nichts überdeckt sich' + (schilder.length ? ' (' + schilder.join(' | ') + ')' : ''));
   // Sonnenschutz: Knöpfe unten rechts in einer Reihe, Beschriftung oben links, Bühne mindestens 220 px, keine Überdeckung (auch klein)
   const sonne = [];
@@ -4808,9 +4821,7 @@ if (teil(22)) {
   /* Feinschliff am Modell (23.10.2026, docs/GESTALTUNG.md): Zifferntasten kleiner mit „Zurück“, Dock rollt nach, Kamera bleibt am Griff,
      Aufsatzkasten auf dem Rahmen samt Blende, Aufteilung am Regler, Haus am Zahnrad, Raffstore-Fahrt als Ganzes */
   await p.evaluate(() => { S.verlassen = null; S.wohin = false; S.notiz = null; S.win = baseWin(); S.editIdx = -1; S.win.name = 'Flur'; S.mess = { step: 0, cur: '', msg: null, ack: false }; go('fotos'); go('messen'); }); await p.waitForTimeout(400);
-  const fs1d = await p.evaluate(() => { const z = document.querySelector('.mess-dock .md-rund'), h = document.querySelector('.mess-dock .md-haupt'), st = document.getElementById('w3d').getBoundingClientRect(); return { zur: z.getAttribute('aria-label') || '', zurH: Math.round(z.getBoundingClientRect().height), ok: Math.round(h.getBoundingClientRect().height), voll: Math.round(st.height), breit: Math.round(st.width) === innerWidth }; });
-  await p.click('.mess-dock .md-haupt'); await p.waitForSelector('.mess-pad .keypad');
-  const fs1 = Object.assign(fs1d, await p.evaluate(() => { const k = document.querySelector('.mess-pad .keypad [data-v="5"]').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { key: Math.round(k.height), stage: Math.round(st.height) }; }));
+  const fs1 = await p.evaluate(() => { const z = document.getElementById('mess-zurueck'), h = document.getElementById('mess-weiter'), st = document.getElementById('mess-buehne').getBoundingClientRect(), k = document.querySelector('.ez-taste[data-taste="5"]').getBoundingClientRect(), f = document.querySelector('.lg-fuss').getBoundingClientRect(), karte = document.querySelector('.ez-karte--tasten').getBoundingClientRect(); return { zur: z.getAttribute('aria-label') || '', zurH: Math.round(z.getBoundingClientRect().height), ok: Math.round(h.getBoundingClientRect().height), stage: Math.round(st.height), breit: Math.round(st.width) === innerWidth, key: Math.round(k.height), frei: karte.bottom <= f.top + 1 }; });
   await frageB('rc', { erreichbar: '' }, 'normal');
   const fs2a = await p.evaluate(() => document.querySelector('.scroll').scrollTop);
   await p.click('.qpanel [data-act="erreichbar"][data-v="ja"]'); await p.waitForTimeout(1200);
@@ -4851,7 +4862,7 @@ if (teil(22)) {
   const fs8b = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, neig: b._relief && b._relief[1], stops: (b.style.background.match(/rgb\(/g) || []).length, rep: /^repeating-linear-gradient\(/.test(b.style.background), lippe: /rgb\(42, 43, 45\)/.test(st.querySelector('[data-r="behang-u"]').style.background) }; });
   await frageB('schlitz', { sart: 'rollladen', roll: 'vorbau', schlitz: 'mit' }, 'genau'); await p.waitForTimeout(500);
   const fs8c = await p.evaluate(() => { const st = document.getElementById('w3d'), b = st.querySelector('[data-r="behang"]'), s = st._sonne && st._sonne.s; return { art: b._art, relief: b._relief && s ? Math.round(b._relief[0] / s) : 0, schlitz: /^radial-gradient\(/.test(b.style.background) && /repeating-linear-gradient\(/.test(b.style.background) }; });
-  ok(fs1.key >= 40 && fs1.key <= 46 && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.breit && fs1.voll >= 480 && fs1.stage >= 220, 'Messen im Raum: Modell über die ganze Breite ' + fs1.voll + ' px hoch, runder Pfeil zurück neben „Maß eingeben“ ' + fs1.ok + ' px; mit Zifferntasten (' + fs1.key + ' px) bleibt das Modell ' + fs1.stage + ' px hoch');
+  ok(fs1.key >= 44 && /^Zurück/.test(fs1.zur) && fs1.zurH >= 44 && fs1.ok >= 44 && fs1.breit && fs1.stage >= 220 && fs1.frei, 'Messen: die Bühne über die ganze Breite (' + fs1.stage + ' px hoch), runder Pfeil zurück neben der Pille (' + fs1.ok + ' px), Zifferntasten offen (' + fs1.key + ' px), alles über dem Fuß (' + JSON.stringify(fs1) + ')');
   ok(fs2a === 0 && fs2.top > 40 && fs2.sicht, 'Feinschliff, Dock rollt nach der Wahl „Ja, leicht“ nach: Empfehlung und Einbruchschutz-Stufen stehen im Blick (' + fs2.top + ' px)');
   ok(fs3a.z > 2.4 && fs3b.q === 'gf' && fs3b.z === fs3a.z && fs3b.x === fs3a.x && fs3b.y === fs3a.y && fs3c.z > 2.4, 'Feinschliff, Kamera bleibt am Griff: von „Griff“ zur Griff-Farbe kein Zoom auf 1:1 und zurück (' + JSON.stringify([fs3a, fs3b, fs3c]) + ')');
   ok(fs4.raff === 230 && fs4.kasten === 230 && fs4.roll === 200 && fs4.vorbau < 100 && fs4.blende, 'Feinschliff, Aufsatzkasten: das Element endet 230 mm (Raffstore) bzw. 200 mm (Rollladen) unter der Öffnung, beim Vorbau nicht; die Blende ist eine Detailangabe nur beim Aufsatzkasten');
