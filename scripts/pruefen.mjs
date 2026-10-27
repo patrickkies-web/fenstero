@@ -143,7 +143,7 @@ if (teil(1)) {
     ok((pfad === '/gibtsnicht' ? r.status() === 404 : r.status() === 200) && (await page.title()).includes(titel), pfad + ' lädt (' + r.status() + ', „' + (await page.title()) + '“)');
     const ohneWorker = pfad === '/zentrale/' ? text.replace(/\bfenstero\b/g, '') : text; // die Zentrale nennt dem Inhaber den internen Worker-Namen bei Cloudflare
     ok(!/Lichtma|Fenstero|Zamma|Klopfan|Fensterino/i.test(ohneWorker) && !/claude\.ai/i.test(text), pfad + ': keine alten Namen, kein claude.ai');
-    ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
+    ok(!/EEZI/.test(text) && (pfad === '/gibtsnicht' || await page.locator('.wm, .a-wm').count() > 0), pfad + ': Marke eeziframes klein, auch in Versalzeilen' + (pfad === '/gibtsnicht' ? '' : ', mit Wortmarke'));
     ok(await page.locator('svg .fi-kachel').count() > 0 && await page.locator('svg .fi-strahl').count() > 0 && await page.locator('svg .fi-fluegel').count() === 0, pfad + ': Logo (Licht fällt durch ein Fenster) da, auch auf der Fehlerseite');
     ok(!text.includes('wa zamm'), pfad + ': kein Spruch mehr');
     sauber(page, pfad + ': keine Fehler, keine CSP-Verstöße, keine fremden Server');

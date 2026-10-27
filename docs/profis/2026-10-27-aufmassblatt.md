@@ -19,6 +19,8 @@ Gestaltung nach `design-dna` und `design-dna-eeziframes` (Palette „Task-App du
 | Kundenkopie, Seite 1 | [bilder/2026-10-27-aufmassblatt-ist-durchschrift-01.webp](bilder/2026-10-27-aufmassblatt-ist-durchschrift-01.webp) (alle Maße, 17 Seiten) | [bilder/2026-10-27-aufmassblatt-durchschrift-1.webp](bilder/2026-10-27-aufmassblatt-durchschrift-1.webp) (ohne Maße, 8 Seiten) |
 | Karten der Durchschrift | | [-5](bilder/2026-10-27-aufmassblatt-durchschrift-5.webp) |
 
+Vorschau zum Durchblättern (privates Artifact): https://claude.ai/artifact/JXnnG8PSZZv2RFpXZhZL92
+
 Vollständige Beispiele mit allen Seiten: [aufmassblatt-vorschau/aufmassblatt-brandt.pdf](aufmassblatt-vorschau/aufmassblatt-brandt.pdf) (18 Seiten) und [aufmassblatt-vorschau/durchschrift-mustermann.pdf](aufmassblatt-vorschau/durchschrift-mustermann.pdf) (8 Seiten), erzeugt mit `node scripts/blatt-beispiel.mjs`. Musterprojekt: Fensterbau Brandt GmbH, Familie Mustermann, Musterweg 12, Köln, 13 Positionen in Keller, Erdgeschoss, 1. Obergeschoss und Dachgeschoss.
 
 ## Die Systematik
@@ -106,8 +108,22 @@ Papier bleibt weiß (Druck, Toner); die Anteile der Website-Palette gelten hier 
 - **Absturzsicherung ab 90 cm** (Modell, `ABSTURZ_MM = 900`): meldet auch bei 80 bis 89 cm Brüstung, obwohl die Begründung „mindestens 80 cm, über 12 m Absturzhöhe 90 cm“ nennt. Vorschlag: unter 80 cm Pflicht, 80 bis 89 cm „Absturzhöhe prüfen (über 12 m: 90 cm)“. Nur auf Wort des Inhabers (C2).
 - **„Unten fest“ ohne Unterlicht:** Wählt der Kunde als Absturzsicherung „Unten fest“, zeichnet das Modell kein festes Unterteil. Vorschlag: Unterlicht dann automatisch setzen. Modell, nur auf Wort.
 - **„Kostenlos und unverbindlich“** im Hinweis der Durchschrift nur, wenn der Betrieb es in seinem Konto einstellt (Feld fehlt).
-- **Bilder des Blatts auf der Website** (Startseite, Seite für Fensterbauer, Muster-Aufmaßblatt in der Bestellung) zeigen noch das alte Blatt; nur auf Wort neu (andere Bereiche).
 - Realitäts-Check mit echten Menschen.
+
+## Auf der Website (Wunsch des Inhabers, 27.10.2026)
+
+„Wenn du mit dem Aufmaßblatt fertig bist und ein Beispielblatt erstellt hast, dann kannst du es den ganzen Stellen hinzufügen, wo derzeit darauf verwiesen wird.“ Umgesetzt mit `node scripts/blatt-beispiel.mjs --web`:
+
+| Wo | Was |
+| --- | --- |
+| `web/beispiele/` | `aufmassblatt-fensterbau-brandt.pdf` (18 Seiten) und `durchschrift-familie-mustermann.pdf` (8 Seiten) |
+| Startseite (`web/index.html`, Vorschau `docs/profis/startseite-dna-vorschau/`) | Schritt 4 und Abschnitt „Was im Aufmaß steckt“: neuer Ausschnitt von Seite 1 (920 × 903), Anker neu vermessen (Öffnung und Bestellmaß EG-01, „Auf einen Blick 13 Fenster“), Etikett „je Fenster eine Seite“, Link „Ganzes Beispiel ansehen (PDF, 18 Seiten)“, Alt-Texte |
+| Seite für Fensterbauer (Vorschau `docs/profis/fensterbauer-vorschau/`, übertragen) | Anfrage im Kopf „Familie Mustermann · 13 Positionen · Aufmaßblatt_Mustermann.pdf“, Schritt 3 und FAQ „Durchschrift seiner Anfrage als PDF, ohne Maße“, Schritt 4 und Abschnitt „Was in jeder Anfrage steht“ mit neuem Ausschnitt, Ankern, „Bestellmaß · EG-01 1.980 × 1.365 mm“, Klärungskarte aus dem Beispiel, Links auf beide PDFs |
+| Bestellung (`web/assets/bestellen.js`) | Muster-Aufmaßblatt: Bild neu, Bild und Link öffnen das PDF, dazu „Durchschrift (PDF)“ |
+| Ratgeber Aufmaßblatt (`web/ratgeber/aufmassblatt-fenster/`) | Link „Beispiel-Aufmaßblatt als PDF“ im Abschnitt „Das Aufmaßblatt aus der App“ |
+| Tour der Fensterbauer (`portal.js`) | unverändert: Ausschnitt und „Ganzes Beispiel-PDF ansehen“ entstehen aus `blatt.js`, tragen also schon das neue Blatt (Tour-Bild neu erzeugt) |
+
+Nicht geändert: die alte Vorschau `web/vorschau/fensterbauer-79b44cf9f8/` (nirgends verlinkt) und das schematische Bild `/bilder/aufmassblatt.svg` im Ratgeber (Skizze, kein Blatt).
 
 ## Fragekarte für den Realitäts-Check
 

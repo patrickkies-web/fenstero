@@ -42,7 +42,7 @@
      Violett, Koralle, Indigo. Koralle als Text nur im dunklen Ton (#b4502f, 5:1 auf Weiß), Violett als Text nur ab 9 pt fett */
   const SCHWARZ = '#07090a', ANTH = '#202022', SILBER = '#a8a4a9', VIOLETT = '#897efc', KORALLE = '#f88962', INDIGO = '#3c3a66';
   const INK = SCHWARZ, INK2 = ANTH, GREY = '#6b676c', LINE = '#dcdadc', LINE_F = '#ecebec', BUEHNE = SCHWARZ, HELL = '#ffffff', HELL2 = SILBER, GRUEN = VIOLETT, GRUEN_T = INDIGO,
-    WARN = '#b4502f', WARN_P = KORALLE, MO_T = ANTH, EL_T = INDIGO, MO = ANTH, EL = VIOLETT, GLASS = '#eceef1', CHIP = '#ecebf3', VIOLETT_H = '#f1efff';
+    WARN = '#b4502f', MO_T = ANTH, EL_T = INDIGO, MO = ANTH, EL = VIOLETT, GLASS = '#eceef1', CHIP = '#ecebf3';
   /* Farben der Zeichnung (modell.js, ZF) auf die Palette der DNA abbilden; Farben der Fenster selbst (RAL) bleiben */
   const PLANF = { '#161616': SCHWARZ, '#5f5f64': GREY, '#f3f2ee': '#f4f3f4', '#e4e1d9': '#e7e6e7', '#d6e6f4': GLASS, '#d3cec4': '#d9d7d9', '#c9c9c6': '#cecccf', '#8a8984': SILBER,
     '#ff8a5b': ANTH, '#b3401e': MO_T, '#7aa2ff': VIOLETT, '#3d63c9': INDIGO, '#4a4a4f': ANTH };
@@ -449,7 +449,6 @@
     /* Kleines Fenster für Tabellen: nur das Element, in den Rahmen s × s eingepasst */
     function mini(w, x, y0, s) { const pl = AW.plan(w, { nurElement: true, b: s, h: s, fs: 1.4 }); planZeichnen(pl, x, y0 + (s - pl.h) / 2); }
     const offen = (w, k) => AW.istOffen(w, k);
-    const OT = AW.OFFEN_TEXT;
 
     /* ---------- Seite 1: Übersicht ---------- */
     const FS = 8.4;
@@ -907,7 +906,8 @@
       const zeileG = (g) => { const zz = g.zeilen.filter((z) => !(g.id === 'fenster' && z.k === 'Element')); return [g.titel, zz.map((z) => ((zz.length > 1 || z.k !== g.titel) && String(z.t).toLowerCase().indexOf(String(z.k).toLowerCase()) !== 0 ? kName(z.k) + ' ' : '') + zText(z)).join(' · '), zz.some((z) => z.offen) ? { offen: true } : null]; };
       const gH = (g) => zeilenH([zeileG(g)], sp, oG);
       BEREICHE.forEach((bb) => {
-        const kopfB = () => { fill(LINE_F); doc.rect(M, y, CW, 6.4, 'F'); font('extra', 8.6, INK); txt(bb.name, M + 2, y + 4.4); font('normal', 7.2, GREY); txt(bb.idx.length + (bb.idx.length === 1 ? ' Position' : ' Positionen'), XR - 2, y + 4.4, { align: 'right' }); y += 9; };
+        let schonB = false;
+        const kopfB = () => { fill(LINE_F); doc.rect(M, y, CW, 6.4, 'F'); font('extra', 8.6, INK); txt(bb.name + (schonB ? ', Fortsetzung' : ''), M + 2, y + 4.4); schonB = true; font('normal', 7.2, GREY); txt(bb.idx.length + (bb.idx.length === 1 ? ' Position' : ' Positionen'), XR - 2, y + 4.4, { align: 'right' }); y += 9; };
         let ersteB = true;
         bb.idx.forEach((i) => {
           const w = wins[i], Wn = AW.wuensche(w, pr), n = num(w.anzahl) || 1, G = Wn.gruppen.filter((g) => g.zeilen.length);

@@ -5,6 +5,10 @@
 // und Oberlicht. Erzeugt die Fassung für den Betrieb (wie die Mail einer Anfrage) und die Durchschrift für den Kunden.
 //
 //   node scripts/blatt-beispiel.mjs [ausgabeordner]      Vorgabe: docs/profis/aufmassblatt-vorschau/
+//   node scripts/blatt-beispiel.mjs --web                dazu die Beispiele der Website: web/beispiele/*.pdf (verlinkt auf Startseite,
+//                                                        Seite für Fensterbauer, Bestellung, Ratgeber) und der Ausschnitt von Seite 1
+//                                                        (920 × 903, oben 69,4 % der Seite) als blatt.webp für Startseite und Seite für
+//                                                        Fensterbauer samt ihren Vorschauen (Anker auf dem Bild: siehe docs/GESTALTUNG.md)
 //
 // Schreibt aufmassblatt-brandt.pdf, durchschrift-mustermann.pdf und je Seite ein Bild (pdftoppm, 110 dpi, als WebP mit Pillow, sonst
 // PNG) in den Ordner. Prüft danach, dass die Durchschrift kein Maß des Projekts enthält (Abbruch mit Fehlercode sonst).
@@ -14,7 +18,8 @@ import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const AUS = path.resolve(process.argv[2] || path.join(WURZEL, 'docs/profis/aufmassblatt-vorschau'));
+const WEB = process.argv.includes('--web'), ARGS = process.argv.slice(2).filter((a) => a !== '--web');
+const AUS = path.resolve(ARGS[0] || path.join(WURZEL, 'docs/profis/aufmassblatt-vorschau'));
 const imp = (f) => import(pathToFileURL(path.join(WURZEL, f)).href);
 
 await imp('web/assets/ral.js');
@@ -104,4 +109,18 @@ for (const f of dateien) {
   try { cp.execFileSync('python3', ['-I', '-c', 'import sys\nfrom PIL import Image\nfor p in sys.argv[1:]:\n    Image.open(p).save(p[:-4] + ".webp", quality=82, method=6)'].concat(pngs)); pngs.forEach((x) => fs.unlinkSync(x)); } catch (e) { /* ohne Pillow bleiben die PNG */ }
   const seiten = fs.readdirSync(AUS).filter((x) => x.startsWith(path.basename(stamm) + '-') && /\.(png|webp)$/.test(x)).length;
   console.log(path.relative(WURZEL, f) + ': ' + Math.round(fs.statSync(f).size / 1024) + ' KB, ' + seiten + ' Seiten');
+}
+
+/* Beispiele der Website: die beiden PDFs und der Ausschnitt von Seite 1 */
+if (WEB) {
+  const ZIEL = path.join(WURZEL, 'web/beispiele');
+  fs.mkdirSync(ZIEL, { recursive: true });
+  fs.copyFileSync(dateien[0], path.join(ZIEL, 'aufmassblatt-fensterbau-brandt.pdf'));
+  fs.copyFileSync(dateien[1], path.join(ZIEL, 'durchschrift-familie-mustermann.pdf'));
+  const tmp = path.join(AUS, '.seite1');
+  cp.execFileSync('pdftoppm', ['-r', '240', '-f', '1', '-l', '1', '-singlefile', '-png', dateien[0], tmp], { stdio: ['ignore', 'ignore', 'ignore'] });
+  const bilder = ['web/bilder/start/blatt.webp', 'web/bilder/fensterbauer-dna/blatt.webp', 'docs/profis/startseite-dna-vorschau/bilder/blatt.webp', 'docs/profis/fensterbauer-vorschau/bilder/blatt.webp'].map((x) => path.join(WURZEL, x));
+  cp.execFileSync('python3', ['-I', '-c', 'import sys\nfrom PIL import Image\nim = Image.open(sys.argv[1]).convert("RGB")\nw, h = im.size\nc = im.crop((0, 0, w, round(h * 0.694)))\nc = c.resize((920, round(c.size[1] * 920 / w)), Image.LANCZOS)\nfor z in sys.argv[2:]:\n    c.save(z, quality=82, method=6)\nprint(c.size)', tmp + '.png'].concat(bilder), { stdio: 'inherit' });
+  fs.unlinkSync(tmp + '.png');
+  console.log('Website: web/beispiele/ und ' + bilder.length + ' × blatt.webp geschrieben');
 }

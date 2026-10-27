@@ -203,9 +203,9 @@
     });
     /* Was beim Betrieb ankommt, vor dem Kauf ansehen (Gremium der Fensterbauer: Musteraufmaßblatt und Mess-Schritt zeigen) */
     const blatt = U.karte('So kommt eine Anfrage bei Ihnen an', 'Aufmaßblatt als PDF per E-Mail', h('div', { class: 'a-blatt-muster' },
-      h('a', { class: 'a-blatt-bild', href: '/bilder/fensterbauer-dna/blatt.webp', target: '_blank', rel: 'noopener', 'aria-label': 'Muster-Aufmaßblatt groß ansehen' }, h('img', { src: '/bilder/fensterbauer-dna/blatt.webp', alt: 'Muster-Aufmaßblatt: Familie Weber bei Fensterbau Brandt, vier Positionen mit Öffnung, Element und Bestellmaß', width: '920', height: '872', loading: 'lazy', decoding: 'async' })),
+      h('a', { class: 'a-blatt-bild', href: '/beispiele/aufmassblatt-fensterbau-brandt.pdf', target: '_blank', rel: 'noopener', 'aria-label': 'Muster-Aufmaßblatt als PDF ansehen (18 Seiten)' }, h('img', { src: '/bilder/fensterbauer-dna/blatt.webp', alt: 'Muster-Aufmaßblatt: Familie Mustermann bei Fensterbau Brandt, 13 Positionen nach Geschoss mit Code, Öffnung, Element und Bestellmaß', width: '920', height: '903', loading: 'lazy', decoding: 'async' })),
       h('div', null, h('p', { text: 'Mit Maßen, Fotos, Einbausituation und Wünschen. Die Maße nimmt Ihr Kunde selbst (Kundenmaß); das Feinaufmaß machen Sie vor Ort, bevor Sie bestellen.' }),
-        h('div', { class: 'a-knoepfe', style: 'margin-top:8px' }, h('a', { class: 'a-link', href: '/fuer-fensterbauer/#stufe-2', target: '_blank', rel: 'noopener' }, 'So misst Ihr Kunde', U.icon('aussen')), h('a', { class: 'a-link', href: '/bilder/fensterbauer-dna/blatt.webp', target: '_blank', rel: 'noopener' }, 'Muster-Aufmaßblatt', U.icon('aussen'))))));
+        h('div', { class: 'a-knoepfe', style: 'margin-top:8px' }, h('a', { class: 'a-link', href: '/fuer-fensterbauer/#stufe-2', target: '_blank', rel: 'noopener' }, 'So misst Ihr Kunde', U.icon('aussen')), h('a', { class: 'a-link', href: '/beispiele/aufmassblatt-fensterbau-brandt.pdf', target: '_blank', rel: 'noopener' }, 'Muster-Aufmaßblatt (PDF)', U.icon('aussen')), h('a', { class: 'a-link', href: '/beispiele/durchschrift-familie-mustermann.pdf', target: '_blank', rel: 'noopener' }, 'Durchschrift (PDF)', U.icon('aussen'))))));
     const inhalt = [karten, blatt];
     if (A.gestaltet(m())) {
       const text = h('p', { text: wegText(S.weg) });
