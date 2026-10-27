@@ -101,7 +101,7 @@
   function sperren(bogen, auf) { var folie = bogen.parentNode; Array.prototype.forEach.call(folie.children, function (el) { if (el !== bogen) { if ('inert' in el) el.inert = auf; else if (auf) el.setAttribute('aria-hidden', 'true'); else el.removeAttribute('aria-hidden'); } }); }
   function bogenZeigen(bogen, knopf, auf) {
     var blatt = bogen.querySelector('.ez-bogen__blatt');
-    if (auf) { offenerBogen = { bogen: bogen, knopf: knopf }; bogen.hidden = false; sperren(bogen, true); void bogen.offsetWidth; bogen.classList.add('ist-da'); if (knopf) knopf.setAttribute('aria-expanded', 'true'); bogen.querySelector('.ez-rund--zu').focus({ preventScroll: true }); }
+    if (auf) { offenerBogen = { bogen: bogen, knopf: knopf }; bogen._knopf = knopf; bogen.hidden = false; sperren(bogen, true); void bogen.offsetWidth; bogen.classList.add('ist-da'); if (knopf) knopf.setAttribute('aria-expanded', 'true'); bogen.querySelector('.ez-rund--zu').focus({ preventScroll: true }); }
     else {
       offenerBogen = null; bogen.classList.remove('ist-da'); if (knopf) knopf.setAttribute('aria-expanded', 'false'); sperren(bogen, false);
       var fertig = function () { bogen.hidden = true; blatt.removeEventListener('transitionend', fertig); clearTimeout(t); };
@@ -111,7 +111,7 @@
   }
   function bogenBinden(bogen, knopf) {
     if (knopf) knopf.addEventListener('click', function () { bogenZeigen(bogen, knopf, bogen.hidden); });
-    bogen.querySelectorAll('[data-schliessen]').forEach(function (b) { b.addEventListener('click', function () { bogenZeigen(bogen, knopf, false); }); });
+    bogen.querySelectorAll('[data-schliessen]').forEach(function (b) { b.addEventListener('click', function () { bogenZeigen(bogen, bogen._knopf || knopf, false); }); });
     bogen.addEventListener('keydown', function (e) {
       if (e.key !== 'Tab') return;
       var z = bogen.querySelectorAll('button'), erstes = z[0], letztes = z[z.length - 1];
@@ -173,6 +173,7 @@
   function zeigeFolie(name, richtung) {
     Object.keys(folien).forEach(function (k) { var s = folien[k]; s.hidden = k !== name; s.classList.remove('kommt', 'zurueck'); });
     var s = folien[name]; app.setAttribute('data-folie', name); wechselBis = Date.now() + 450;
+    if (name === 'ergebnis') ergLiveAn(); else ergLiveWeg();
     /* Wer in der Vorschau direkt zu einer späteren Folie springt (ezVorschau.zeigeFolie), bekommt Beispielmaße statt „NaN“ (Zeichen, nebenbei) */
     if (['start', 'fotos', 'messen'].indexOf(name) < 0 && !(mess.werte.hm > 0 && mess.werte.wb > 0)) beispielMasse();
     app.scrollTop = 0; window.scrollTo(0, 0);
@@ -967,7 +968,29 @@
   $('erg-haus').addEventListener('click', function () { status('In der App wählst du hier Fassade und Farbe der Hauswand.'); });
   var dreh = null;
   ergBuehne.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; dreh = e.clientX; });
-  ergBuehne.addEventListener('pointerup', function (e) { if (dreh != null && Math.abs(e.clientX - dreh) > 12) { $('erg-drehen').hidden = true; status('In der App dreht sich das Modell mit dem Finger; die Vorschau zeigt ein Standbild.'); } dreh = null; });
+  ergBuehne.addEventListener('pointerup', function (e) { if (dreh != null && Math.abs(e.clientX - dreh) > 12 && !ergLive) { $('erg-drehen').hidden = true; status('Das 3-D-Modell lädt noch; gleich dreht es sich mit dem Finger.'); } dreh = null; });
+  /* Ergebnis mit der echten Bühne der App (Korrektur des Inhabers, 27.10.2026): Ansicht „result“ mit Drehen, Zoom, Haus und den Maßlinien
+     der App. Am Modell steht das Maß, das zählt (das kleinste von drei, wie in den Kacheln; Vorschlag für die App). Die Wahl aus den
+     Wünschen kommt mit (ezVorschau.fenster.appWin). Beim Verlassen der Folie wird das Fenster wieder entfernt (Speicher). Bis es bereit
+     ist, steht das Bild mit den Linien der Vorschau. */
+  var ergRahmen = null, ergLive = false;
+  function ergLiveAn() {
+    if (ergRahmen) return;
+    ergRahmen = d.createElement('iframe'); ergRahmen.className = 'ez-erg__app'; ergRahmen.title = '3-D-Modell mit den vier Maßen: mit dem Finger drehen, Knöpfe für Zoom und Haus';
+    ergRahmen.addEventListener('load', function () {
+      var w = ergRahmen && ergRahmen.contentWindow; if (!w) return;
+      try { void w.document; } catch (e) { return; } /* Fehlerseite: das Bild des Ergebnisses bleibt */
+      var los = function () {
+        if (!ergRahmen || !w.ezBuehne) return; var v = ergWerte(), m = mess.werte, F = window.ezVorschau ? window.ezVorschau.fenster : {};
+        w.ezBuehne.setze({ art: art, name: (F && F.name) || '', win: F && F.appWin ? F.appWin : null, mo: { hm: m.hm, hl: m.hl, hr: m.hr, wm: m.wm, wt: m.wt, wb: m.wb }, el: { h: m.h, w: m.w }, screen: 'ergebnis' });
+        w.ezBuehne.beschrifte({ hm: tausend(v.moH) + NB + 'mm', wm: tausend(v.moW) + NB + 'mm' });
+        ergLive = true; ergBuehne.classList.add('ist-live');
+      };
+      if (w.ezBuehne) los(); else w.addEventListener('ez-buehne-bereit', los);
+    });
+    ergRahmen.src = 'app/buehne.html'; ergBuehne.insertBefore(ergRahmen, ergBuehne.firstChild);
+  }
+  function ergLiveWeg() { if (!ergRahmen) return; ergRahmen.remove(); ergRahmen = null; ergLive = false; ergBuehne.classList.remove('ist-live'); }
   /* Zurück führt dorthin, woher man kam: von „Gespeichert“ (Maße ändern) wieder dorthin, sonst zu den Rändern (wie einstiegHier der App) */
   function ergZurueck() { var api = window.ezVorschau || {}, von = api.ergVon; api.ergVon = ''; if (von && folien[von]) zeigeFolie(von, -1); else zeigeFolie('messen', -1); }
   $('erg-zurueck').addEventListener('click', ergZurueck); folien.ergebnis.querySelector('[data-erg-zurueck]').addEventListener('click', ergZurueck);

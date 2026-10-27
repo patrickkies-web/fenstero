@@ -9,7 +9,8 @@
   };
   window.addEventListener('DOMContentLoaded', function () { if (window.KONFIG) window.KONFIG.ki = ''; });
   /* Bilder der App stehen mit absolutem Pfad im Markup (/bilder/…); im Bühnenfenster liegen sie unter app/bilder/. Die Pfade werden
-     beim Einsetzen umgeschrieben, die App selbst bleibt unverändert. */
+     beim Einsetzen umgeschrieben, die App selbst bleibt unverändert. Das Startfoto der App (179 KB) ist hier nie zu sehen und wird nicht
+     geladen (Vorlagen-Abgleich, FE 3). */
   var ih = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-  if (ih && ih.set) Object.defineProperty(Element.prototype, 'innerHTML', { configurable: true, get: ih.get, set: function (v) { ih.set.call(this, typeof v === 'string' ? v.replace(/(["'(=])\/(bilder|assets)\//g, '$1$2/') : v); } });
+  if (ih && ih.set) Object.defineProperty(Element.prototype, 'innerHTML', { configurable: true, get: ih.get, set: function (v) { ih.set.call(this, typeof v === 'string' ? v.replace(/(["'(=])\/?bilder\/foto\/app-start\.webp/g, '$1data:,').replace(/(["'(=])\/(bilder|assets)\//g, '$1$2/') : v); } });
 })();

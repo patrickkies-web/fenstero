@@ -15,8 +15,12 @@
   var F = V.fenster; F.name = F.name || ''; F.etage = F.etage || 'eg'; F.ogNr = F.ogNr || 0; F.anzahl = F.anzahl || 1; F.bru = F.bru == null ? '' : F.bru; F.tiefe = F.tiefe || 'normal'; F.wahl = F.wahl || {}; F.notizen = F.notizen || {};
   var stand = { schritt: 'lage', i: 0 }, NB = ' ';
   var weiterWort = $('wz-weiter-wort'), grund = $('wz-grund');
-  var ESC = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  /* Geschützte Leerzeichen (Typografie 7): Zahl und Einheit, „≈ 0,5“, „z. B.“, „RAL 7016“, „RC2 N“ bleiben zusammen */
+  var NBT = function (t) { return String(t == null ? '' : t).replace(/(\d) (?=(mm|cm|dB|%|€|weitere)(?![\wäöüß]))/g, '$1\u00a0').replace(/≈ /g, '≈\u00a0').replace(/z\. B\./g, 'z.\u00a0B.').replace(/\b(RAL|RC\d) (?=[\dN])/g, '$1\u00a0'); };
+  var ESC = function (t) { return NBT(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var I_SVG = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg>';
+  /* Einfachwahl in Listen: Punkt (aktiv); Haken nur für Mehrfachwahl und An/Aus (Zeichen 1) */
+  var PUNKT = '<span class="ez-wz-punkt" aria-hidden="true"></span>';
   var HAKEN = '<span class="ez-wz-haken" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span>';
 
   /* ---------- Kapitelband: das laufende Kapitel benannt, die übrigen als Punkte; Tippen öffnet „Direkt zu einem Thema“ ---------- */
@@ -32,7 +36,7 @@
   V.bogenBinden(kapBogen, null);
   $('wz-band').addEventListener('click', function () {
     var ki = kapVon();
-    $('wz-kapitel-liste').innerHTML = KAP.map(function (k, n) { return '<button type="button" data-kap="' + n + '"' + (n === ki ? ' aria-current="step"' : '') + '>' + ESC(k.n) + '<small>' + (n < ki ? 'erledigt' : n === ki ? 'jetzt' : '') + '</small></button>'; }).join('');
+    $('wz-kapitel-liste').innerHTML = KAP.map(function (k, n) { return '<button type="button" data-kap="' + n + '"' + (n === ki ? ' aria-current="step"' : '') + '><i class="' + (n < ki ? 'fertig' : n === ki ? 'ist' : '') + '" aria-hidden="true"></i>' + ESC(k.n) + '<small>' + (n < ki ? 'erledigt' : n === ki ? 'jetzt' : '') + '</small></button>'; }).join('');
     V.bogenZeigen(kapBogen, $('wz-band'), true);
   });
   $('wz-kapitel-liste').addEventListener('click', function (e) {
@@ -144,15 +148,26 @@
     if (rahmen) return;
     rahmen = d.createElement('iframe'); rahmen.className = 'ez-wz-app'; rahmen.id = 'wz-app'; rahmen.title = '3-D-Modell deines Fensters: mit dem Finger drehen, Knöpfe für Zoom und Ansicht';
     rahmen.addEventListener('load', function () {
+      /* Lädt das Bühnenfenster nicht (Fehlerseite, fremder Ursprung), bleiben die Bilder der Fragen stehen */
       var w = rahmen.contentWindow, los = function () { if (B || !w.ezBuehne) return; B = w.ezBuehne; anfangen(); };
-      if (w.ezBuehne) los(); else w.addEventListener('ez-buehne-bereit', los);
+      try { if (w.ezBuehne) los(); else w.addEventListener('ez-buehne-bereit', los); } catch (e) { /* ohne Bühnenfenster weiter */ }
     });
     rahmen.src = 'app/buehne.html'; buehne.insertBefore(rahmen, buehne.firstChild);
   }
   function masse() { var m = V.masse ? V.masse() : {}; return { mo: { hm: m.hm, hl: m.hl, hr: m.hr, wm: m.wm, wt: m.wt, wb: m.wb }, el: { h: m.h, w: m.w } }; }
+  /* Stand, mit dem das Bühnenfenster gesetzt wurde: ändern sich Art oder Maße danach (zurück zu Schritt 1 bis 4), wird neu gesetzt,
+     bei gleicher Art mit den Wünschen von vorher */
+  var gesetzt = null;
+  function standJetzt() { return JSON.stringify([V.art(), masse()]); }
+  function nachsetzen() {
+    if (!B || gesetzt === standJetzt()) return;
+    var m = masse(), gleich = gesetzt && JSON.parse(gesetzt)[0] === V.art();
+    B.setze({ art: V.art(), name: F.name, etage: F.etage, bru: F.bru, mo: m.mo, el: m.el, tiefe: F.tiefe, win: gleich && F.appWin ? F.appWin : null, q: stand.schritt === 'frage' && LQ ? LQ.id : null });
+    gesetzt = standJetzt(); LQ = null;
+  }
   function anfangen() {
     var m = masse(), sq = stand.schritt === 'frage' ? (D.fragen[stand.i] || {}).id : null;
-    B.setze({ art: V.art(), name: F.name, etage: F.etage, bru: F.bru, mo: m.mo, el: m.el, tiefe: F.tiefe, q: sq });
+    B.setze({ art: V.art(), name: F.name, etage: F.etage, bru: F.bru, mo: m.mo, el: m.el, tiefe: F.tiefe, q: sq }); gesetzt = standJetzt();
     B.beiAenderung(liveNeu);
     buehne.classList.add('ist-live');
     if (stand.schritt === 'frage') liveNeu();
@@ -171,6 +186,8 @@
     var q; try { q = B.frage(); } catch (e) { return; }
     if (!q || !q.id || q.id === 'lage' || q.id === 'tiefe') return;
     var neu = !LQ || LQ.id !== q.id; LQ = q;
+    /* Die Wahl geht mit ins Ergebnis (dort lädt ein eigenes Bühnenfenster) */
+    try { F.appWin = B.stand().win; } catch (e) { /* weiter */ }
     if (neu) { frageZeigen(richtungNext); if (richtungNext) { var app = d.getElementById('app'); if (app) app.scrollTop = 0; window.scrollTo(0, 0); } folgeSchritt(richtungNext); } else antwortSetzen(q);
     richtungNext = 0; bandSetzen();
   }
@@ -191,44 +208,65 @@
     if (!src) return;
     var an = bildA.classList.contains('ist-an') ? bildA : bildB, aus = an === bildA ? bildB : bildA;
     if (an.getAttribute('src') === src.src) return;
+    if (blendT) { clearTimeout(blendT); blendT = 0; an.classList.remove('blendet'); aus.classList.remove('blendet', 'ist-an'); void aus.offsetWidth; }
     if (!blenden || V.ruhig()) { an.src = src.src; return; }
-    clearTimeout(blendT); aus.src = src.src;
-    var los = function () { aus.classList.add('blendet', 'ist-an'); an.classList.add('blendet'); an.classList.remove('ist-an'); blendT = setTimeout(function () { aus.classList.remove('blendet'); an.classList.remove('blendet'); }, 240); };
+    aus.src = src.src;
+    var los = function () { aus.classList.add('blendet', 'ist-an'); an.classList.add('blendet'); an.classList.remove('ist-an'); blendT = setTimeout(function () { blendT = 0; aus.classList.remove('blendet'); an.classList.remove('blendet'); }, 240); };
     if (aus.decode) aus.decode().then(los, los); else los();
   }
-  function ico(o) { return o.ico ? '<span class="ez-wz-kachel__ico" aria-hidden="true">' + o.ico + '</span>' : ''; }
+  /* Zeichnungen ohne Hauptstrich (Sonnenschutz: Keiner, Bestehender, Rollladen, Screen, Klappläden): Kasten und Rahmen, die ersten drei
+     Striche, in 1,8 wie in allen anderen Gruppen (Zeichen 4) */
+  function hauptstrich(svg) {
+    if (!svg || /stroke-width="1\.8"/.test(svg)) return svg;
+    var n = 0; return svg.replace(/stroke-width="1\.2"/g, function (m) { return ++n <= 3 ? 'stroke-width="1.8"' : m; });
+  }
+  function ico(o) { return o.ico ? '<span class="ez-wz-kachel__ico" aria-hidden="true">' + hauptstrich(o.ico) + '</span>' : ''; }
   function tupf(o) { return o.farbe ? '<span class="ez-wz-tupf ez-wz-tupf--klein" style="background:' + ESC(o.farbe) + '" aria-hidden="true"></span>' : ''; }
   function infoKnopf(o) { return o.info && o.info.k ? '<button type="button" class="ez-wz-info" data-gloss="' + ESC(o.info.k) + '" aria-label="' + ESC(o.info.label || 'Erklärung') + '">' + I_SVG + '</button>' : ''; }
+  /* Vorlesen (UX 4): Einfachwahl als Radiogruppe mit dem Titel als Namen, Mehrfachwahl als Kästchen; die gewählte Option (sonst die erste)
+     ist der Tab-Halt, Pfeiltasten wählen die Nachbarn */
+  function radios(opts, an) { var erste = opts.findIndex(an); if (erste < 0) erste = 0; return function (o, j) { var ist = an(o); return ' role="radio" aria-checked="' + ist + '" tabindex="' + (j === erste ? 0 : -1) + '"'; }; }
+  function gruppe(rolle) { return ' role="' + rolle + '" aria-labelledby="wz-h1"'; }
   /* Gewählt: live der Stand der App; ohne Bühnenfenster die Wahl der Vorschau */
   function istAn(q, n, o) {
     if (B && LQ && q === LQ) return !!o.an;
     var w = F.wahl[q.id + ':' + n]; return w ? (Array.isArray(w.v) ? w.v.indexOf(o.v) >= 0 : w.v === o.v) : !!o.an;
+  }
+  /* „1.180 mm“: Zahl groß, Einheit klein daneben (G3) */
+  function zahlKlein(t) { var m = String(t || '').match(/^(.*?\d)\s*(mm|cm|%)$/); return m ? ESC(m[1]) + '<span class="ez-wz-einheit">' + NB + m[2] + '</span>' : ESC(t); }
+  /* i direkt hinter dem letzten Wort (Zeichen 2, Typografie 4): letztes Wort und i brechen nicht auseinander */
+  function mitI(html, knopf) {
+    if (!knopf) return html;
+    var m = html.match(/^([\s\S]*\s)(\S+)$/); return (m ? m[1] : '') + '<span class="ez-wz-nb">' + (m ? m[2] : html) + knopf + '</span>';
   }
   function blockHtml(q, b, n) {
     var w = F.wahl[q.id + ':' + n], live = !!(B && LQ && q === LQ);
     var an = function (o) { return istAn(q, n, o); };
     if (b.typ === 'karten') {
       var lang = b.opts.some(function (o) { return o.lbl.length > 9 || (o.info && !o.ico && o.lbl.length > 6); }), spalten = b.opts.length === 2 || b.opts.length === 4 || lang ? 2 : 3;
-      return '<div class="ez-wz-kacheln" role="group" data-spalten="' + spalten + '" data-block="' + n + '">' + b.opts.map(function (o, j) {
-        return '<div class="ez-wz-opt"><button type="button" class="ez-wz-kachel' + (o.info ? ' ez-wz-kachel--info' : '') + (o.ico ? ' ez-wz-kachel--ico' : '') + '" data-o="' + j + '" aria-pressed="' + an(o) + '">' + ico(o) + '<span class="ez-wz-kachel__lbl">' + ESC(o.lbl.replace(/(\d) /g, '$1 ')) + '</span>' + (o.sb ? '<span class="ez-wz-kachel__sb">' + ESC(o.sb) + '</span>' : '') + (o.pr ? '<span class="ez-wz-kachel__pr">' + ESC(o.pr) + '</span>' : '') + '</button>' + infoKnopf(o) + '</div>';
+      var rk = radios(b.opts, an);
+      return '<div class="ez-wz-kacheln"' + gruppe('radiogroup') + ' data-spalten="' + spalten + '" data-block="' + n + '">' + b.opts.map(function (o, j) {
+        return '<div class="ez-wz-opt"><button type="button" class="ez-wz-kachel' + (o.info ? ' ez-wz-kachel--info' : '') + (o.ico ? ' ez-wz-kachel--ico' : '') + '" data-o="' + j + '"' + rk(o, j) + '>' + ico(o) + '<span class="ez-wz-kachel__lbl">' + ESC(o.lbl.replace(/(\d) /g, '$1 ')) + '</span>' + (o.sb ? '<span class="ez-wz-kachel__sb">' + ESC(o.sb) + '</span>' : '') + (o.pr ? '<span class="ez-wz-kachel__pr">' + ESC(o.pr) + '</span>' : '') + '</button>' + infoKnopf(o) + '</div>';
       }).join('') + '</div>';
     }
     if (b.typ === 'segment' || b.typ === 'chips') {
       var gitter = b.opts.length > 3 || b.opts.some(function (o) { return o.lbl.length > 14; });
-      return '<div class="ez-wz-karte"><div class="ez-wz-umschalter' + (gitter ? ' ez-wz-umschalter--gitter' : '') + '" role="group" data-block="' + n + '">' + b.opts.map(function (o, j) {
-        return '<span class="ez-wz-zelle' + (o.info ? ' mit-info' : '') + (an(o) ? ' ist-an' : '') + '"><button type="button" data-o="' + j + '" aria-pressed="' + an(o) + '">' + tupf(o) + ESC(o.lbl) + '</button>' + infoKnopf(o) + '</span>';
+      var ru = radios(b.opts, an);
+      return '<div class="ez-wz-karte"><div class="ez-wz-umschalter' + (gitter ? ' ez-wz-umschalter--gitter' : '') + '"' + gruppe('radiogroup') + ' data-block="' + n + '">' + b.opts.map(function (o, j) {
+        return '<span class="ez-wz-zelle' + (o.info ? ' mit-info' : '') + (an(o) ? ' ist-an' : '') + '"><button type="button" data-o="' + j + '"' + ru(o, j) + '>' + tupf(o) + ESC(o.lbl) + '</button>' + infoKnopf(o) + '</span>';
       }).join('') + '</div></div>';
     }
     if (b.typ === 'liste') {
-      return '<div class="ez-wz-karte"><div class="ez-wz-liste" role="group" data-block="' + n + '" data-multi="' + (b.multi ? 1 : 0) + '">' + b.opts.map(function (o, j) {
-        return '<div class="ez-wz-reihe"><button type="button" class="ez-wz-wahl" data-o="' + j + '" aria-pressed="' + an(o) + '"><span>' + tupf(o) + ESC(o.lbl) + '</span>' + HAKEN + '</button>' + infoKnopf(o) + '</div>';
+      var rl = b.multi ? function (o) { return ' role="checkbox" aria-checked="' + an(o) + '"'; } : radios(b.opts, an);
+      return '<div class="ez-wz-karte"><div class="ez-wz-liste"' + gruppe(b.multi ? 'group' : 'radiogroup') + ' data-block="' + n + '" data-multi="' + (b.multi ? 1 : 0) + '">' + b.opts.map(function (o, j) {
+        return '<div class="ez-wz-reihe ez-wz-reihe--wahl"><button type="button" class="ez-wz-wahl" data-o="' + j + '"' + rl(o, j) + '><span>' + tupf(o) + ESC(o.lbl) + '</span></button>' + infoKnopf(o) + (b.multi ? HAKEN : PUNKT) + '</div>';
       }).join('') + '</div></div>';
     }
     if (b.typ === 'tupfen') {
-      var cur = live ? b.opts.find(function (o) { return o.an; }) : w ? b.opts.find(function (o) { return o.v === w.v; }) : b.opts.find(function (o) { return o.an; });
+      var rt = radios(b.opts, an), cur = live ? b.opts.find(function (o) { return o.an; }) : w ? b.opts.find(function (o) { return o.v === w.v; }) : b.opts.find(function (o) { return o.an; });
       return '<div class="ez-wz-farben" data-block="' + n + '"><div class="ez-wz-jetzt" aria-live="polite">' + (cur ? '<span class="ez-wz-tupf" style="background:' + ESC(cur.farbe) + '"></span><span><b>' + ESC(cur.name.replace(/^RAL \d+ /, '')) + '</b><small>' + ESC(cur.name.match(/^RAL \d+/) ? cur.name.match(/^RAL \d+/)[0] : '') + '</small></span>' : '<span class="ez-wz-tupf ez-wz-tupf--offen"></span><span><b>' + ESC(q._jetzt ? q._jetzt.b : 'Noch offen') + '</b><small>' + ESC(q._jetzt ? q._jetzt.small : '') + '</small></span>') + '</div>' +
-        '<div class="ez-wz-tupfen" role="group" aria-label="' + ESC(b.label || 'Farben') + '">' + b.opts.map(function (o, j) {
-          return '<button type="button" data-o="' + j + '" aria-pressed="' + an(o) + '" aria-label="' + ESC(o.name) + '"><span class="ez-wz-tupf" style="background:' + ESC(o.farbe) + '"></span>' + ESC(o.v) + '</button>';
+        '<div class="ez-wz-tupfen" role="radiogroup" aria-label="' + ESC(b.label || 'Farben') + '">' + b.opts.map(function (o, j) {
+          return '<button type="button" data-o="' + j + '"' + rt(o, j) + ' aria-label="' + ESC(o.name) + '"><span class="ez-wz-tupf" style="background:' + ESC(o.farbe) + '"></span>' + ESC(/^RAL \d+/.test(o.name) ? o.v : o.name) + '</button>';
         }).join('') + '</div></div>';
     }
     if (b.typ === 'zaehler') {
@@ -239,35 +277,70 @@
     }
     if (b.typ === 'zeilen') {
       return '<div class="ez-wz-karte"><div class="ez-wz-liste" data-block="' + n + '">' + b.opts.map(function (o, j) {
-        if (o.art === 'schalter') { var ein = !live && w && w.s ? w.s[j] : o.an; return '<div class="ez-wz-reihe"><span class="ez-wz-wahl" style="flex:1"><span><b>' + ESC(o.b) + '</b>' + (o.small ? '<small>' + ESC(o.small) + '</small>' : '') + '</span></span>' + infoKnopf(o) + '<button type="button" class="ez-wz-schalter" role="switch" data-s="' + j + '" aria-checked="' + !!ein + '" aria-label="' + ESC(o.b) + '"></button></div>'; }
+        if (o.art === 'schalter') { var ein = !live && w && w.s ? w.s[j] : o.an; return '<div class="ez-wz-reihe"><span class="ez-wz-wahl" style="flex:1"><span><b>' + mitI(ESC(o.b), infoKnopf(o)) + '</b>' + (o.small ? '<small>' + ESC(o.small) + '</small>' : '') + '</span></span><button type="button" class="ez-wz-schalter" role="switch" data-s="' + j + '" aria-checked="' + !!ein + '" aria-label="' + ESC(o.b) + '"></button></div>'; }
         if (o.art === 'text') return '<label class="dna-label" for="wz-text-' + j + '">' + ESC(o.label) + '</label><textarea class="ez-wz-text" id="wz-text-' + j + '" rows="3" data-t="' + j + '" placeholder="' + ESC(o.ph || '') + '">' + ESC(live ? (o.wert || '') : w && w.t ? w.t : '') + '</textarea>';
         return '<p class="ez-wz-hinweis">' + ESC(o.text) + '</p>';
       }).join('') + '</div></div>';
     }
     if (b.typ === 'aufteilung') {
       var p = !live && w && w.p ? w.p : (b.p || 50);
-      return '<div class="ez-wz-karte ez-wz-teile" data-block="' + n + '"><p class="dna-label">' + ESC(b.titel) + '</p><div class="ez-wz-teile__werte">' + b.werte.map(function (x) { return '<button type="button" aria-label="' + ESC(x.label) + '"><b>' + ESC(x.b) + '</b><small>' + ESC(x.small) + '</small></button>'; }).join('') + '</div><input type="range" class="ez-wz-regler" min="' + (b.min || 30.5) + '" max="' + (b.max || 69.5) + '" step="' + (b.step || 0.5) + '" value="' + p + '" style="--p:' + ((p - (b.min || 30.5)) / ((b.max || 69.5) - (b.min || 30.5)) * 100).toFixed(1) + '%" aria-label="' + ESC(b.regler || 'Breite verschieben') + '"><p class="ez-wz-hinweis">' + ESC(b.hinweis) + '</p></div>';
+      return '<div class="ez-wz-karte ez-wz-teile" data-block="' + n + '"><p class="dna-label">' + ESC(b.titel) + '</p><div class="ez-wz-teile__werte">' + b.werte.map(function (x, j) { return '<button type="button" data-breite="' + j + '" aria-label="' + ESC(x.label) + '"><b>' + zahlKlein(x.b) + '</b><small>' + ESC(x.small) + '</small></button>'; }).join('') + '</div><input type="range" class="ez-wz-regler" min="' + (b.min || 30.5) + '" max="' + (b.max || 69.5) + '" step="' + (b.step || 0.5) + '" value="' + p + '" style="--p:' + ((p - (b.min || 30.5)) / ((b.max || 69.5) - (b.min || 30.5)) * 100).toFixed(1) + '%" aria-label="' + ESC(b.regler || 'Breite verschieben') + '"><p class="ez-wz-hinweis">' + ESC(b.hinweis) + '</p></div>';
     }
     if (b.typ === 'offen') { var off = live ? !!b.an : w ? !!w.an : b.an; return '<button type="button" class="ez-wz-leise ez-wz-offen" data-block="' + n + '" data-offen="1" aria-pressed="' + off + '"><span><b>' + ESC(b.b) + '</b><small>' + ESC(b.small) + '</small></span>' + HAKEN + '</button>'; }
     if (b.typ === 'mehr') return '<button type="button" class="ez-wz-leise" data-block="' + n + '" data-mehr="' + ESC(b.v) + '"><span><b>' + ESC(b.b) + '</b><small>' + ESC(b.small) + '</small></span><span class="ez-wz-plus" aria-hidden="true">+</span></button>';
     if (b.typ === 'knoepfe') return '<div class="ez-wz-knoepfe">' + b.opts.map(function (o) { return '<button type="button" class="ez-wz-umriss" data-alle="' + ESC(o.lbl) + '">' + ESC(o.lbl) + '</button>'; }).join('') + '</div>';
-    if (b.typ === 'label') return '<p class="ez-wz-hinweis" style="margin-top:4px;color:var(--weiss);font-weight:500">' + ESC(b.text) + '</p>';
+    if (b.typ === 'label') return '<p class="dna-label ez-wz-zwischen">' + ESC(b.text) + '</p>';
     if (b.typ === 'hinweis') return '<p class="ez-wz-hinweis">' + ESC(b.text) + '</p>';
     if (b.typ === 'hinweise') return b.texts.map(function (t) { return '<p class="ez-wz-hinweis">' + ESC(t) + '</p>'; }).join('');
     if (b.typ === 'aktuell') { q._jetzt = b; return q.bloecke.some(function (x) { return x.typ === 'tupfen'; }) ? '' : '<p class="ez-wz-hinweis"><b style="color:var(--weiss);font-weight:500">' + ESC(b.b) + '</b>' + (b.small ? ' · ' + ESC(b.small) : '') + '</p>'; }
     return '';
   }
-  /* Titel: das gefragte Wort weiß, der Rest grau; „innen“ und „außen“ immer weiß (Gremium K und F) */
+  /* Titel: das gefragte Wort weiß, der Rest grau; „innen“ und „außen“ immer weiß (Gremium K und F). Je Titel ein weißer Abschnitt:
+     steht „innen“ oder „außen“ im Titel, reicht er vom ersten bis zum letzten dieser Wörter, mit dem Wort der App, wenn es direkt davor
+     steht („Welche Farbe außen?“, „Öffnet nach innen oder außen?“); das Satzzeichen gehört dazu (Typografie 2 und 3) */
   function titelHtml(h1) {
+    h1 = NBT(h1);
     var rein = h1.replace(/<em>.*?<\/em>/g, '').replace(/[\s?.!]/g, ''); if (!rein) return h1.replace(/<\/?em>/g, '');
-    return h1.replace(/(^|[\s>])(innen|außen)(?=[\s?.!<]|$)/g, '$1<em>$2</em>').replace(/<\/em>(\s*)<em>/g, '$1');
+    var t = h1.replace(/(^|\s)(innen|außen)(?=[\s?.!<]|$)/g, '$1<em>$2</em>').replace(/<\/em>(\s+)<em>/g, '$1');
+    var sek = [], m, r = /<em>([\s\S]*?)<\/em>/g; while ((m = r.exec(t))) if (/(^|\s)(innen|außen)/.test(m[1])) sek.push({ a: m.index, z: r.lastIndex });
+    if (sek.length) { var A = sek[0].a, Z = sek[sek.length - 1].z, ohne = function (x) { return x.replace(/<\/?em>/g, ''); }; t = ohne(t.slice(0, A)) + '<em>' + ohne(t.slice(A, Z)) + '</em>' + ohne(t.slice(Z)); }
+    return t.replace(/<\/em>\s(\d+)/g, '\u00a0$1</em>').replace(/<\/em>([?.!])/g, '$1</em>');
+  }
+  /* Das i hängt am letzten Wort des Titels (wie .lg-i in der Lage der App) */
+  function titelMitI(h1El, q) {
+    if (!(q.gloss && q.gloss.k)) return;
+    var knopf = d.createElement('button'); knopf.type = 'button'; knopf.className = 'ez-i ez-wz-i'; knopf.id = 'wz-i';
+    knopf.setAttribute('data-gloss', q.gloss.k); knopf.setAttribute('aria-label', q.gloss.label || 'Erklärung'); knopf.setAttribute('aria-expanded', 'false'); knopf.setAttribute('aria-controls', 'wz-erkl'); knopf.innerHTML = I_SVG;
+    var w = d.createTreeWalker(h1El, NodeFilter.SHOW_TEXT), letzt = null; while (w.nextNode()) if (w.currentNode.nodeValue.trim()) letzt = w.currentNode;
+    if (!letzt) return h1El.appendChild(knopf);
+    var v = letzt.nodeValue.replace(/\s+$/, ''), k = Math.max(v.lastIndexOf(' '), -1), wort = d.createElement('span'); wort.className = 'ez-wz-nb';
+    var rest = letzt.splitText(k + 1); letzt.parentNode.insertBefore(wort, rest); wort.appendChild(rest); wort.appendChild(knopf);
+  }
+  /* Gleiche Frage: Elemente bleiben, nur Attribute, Texte und Werte gleichen sich an; so laufen Ring, Licht und Rückfedern weiter */
+  function angleichen(alt, neu) {
+    var ak = alt.childNodes, nk = Array.prototype.slice.call(neu.childNodes), i;
+    if (ak.length !== nk.length) { alt.replaceChildren.apply(alt, nk); return; }
+    for (i = 0; i < nk.length; i++) {
+      var a = ak[i], b = nk[i];
+      if (a.nodeType !== b.nodeType || a.nodeName !== b.nodeName) { alt.replaceChild(b, a); continue; }
+      if (a.nodeType === 3) { if (a.nodeValue !== b.nodeValue) a.nodeValue = b.nodeValue; continue; }
+      if (a.nodeType !== 1) continue;
+      var j, at; for (j = a.attributes.length - 1; j >= 0; j--) { at = a.attributes[j].name; if (!b.hasAttribute(at)) a.removeAttribute(at); }
+      for (j = 0; j < b.attributes.length; j++) { at = b.attributes[j]; if (a.getAttribute(at.name) !== at.value) a.setAttribute(at.name, at.value); }
+      if (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT') { var wert = a.tagName === 'TEXTAREA' ? b.value : b.getAttribute('value'); if (d.activeElement !== a && wert != null && a.value !== wert) a.value = wert; continue; }
+      if (a.tagName === 'svg') { if (a.innerHTML !== b.innerHTML) alt.replaceChild(b, a); continue; }
+      angleichen(a, b);
+    }
   }
   /* Antworten neu zeichnen, den Fokus behalten (live nach jedem Tipp) */
   function antwortSetzen(q) {
     var f = d.activeElement, merk = f && antwort.contains(f) ? { b: f.closest('[data-block]') ? f.closest('[data-block]').getAttribute('data-block') : null, o: f.getAttribute('data-o'), z: f.getAttribute('data-z'), dd: f.getAttribute('data-d'), s: f.getAttribute('data-s'), t: f.tagName === 'TEXTAREA' || f.type === 'range' } : null;
     if (merk && merk.t) return; /* beim Tippen in ein Feld nicht neu zeichnen */
     q._jetzt = null; q.bloecke.forEach(function (b) { if (b.typ === 'aktuell') q._jetzt = b; });
-    antwort.innerHTML = q.bloecke.map(function (b, n) { return blockHtml(q, b, n); }).join('');
+    var html = q.bloecke.map(function (b, n) { return blockHtml(q, b, n); }).join('');
+    if (antwort._q === q.id && antwort.firstChild) { var t = d.createElement('div'); t.innerHTML = html; angleichen(antwort, t); }
+    else antwort.innerHTML = html;
+    antwort._q = q.id;
     if (merk && merk.b != null) {
       var sel = '[data-block="' + merk.b + '"]', z = antwort.querySelector(sel); if (!z) return;
       var ziel = merk.o != null ? z.querySelector('[data-o="' + merk.o + '"]') : merk.z != null ? z.querySelector('[data-z="' + merk.z + '"][data-d="' + merk.dd + '"]') : merk.s != null ? z.querySelector('[data-s="' + merk.s + '"]') : z.matches('button') ? z : null;
@@ -277,8 +350,7 @@
   function frageZeigen(richtung) {
     var q = aktuelle(); if (!q) return;
     $('wz-pos').textContent = stelle(q);
-    var h1El = $('wz-h1'); h1El.innerHTML = titelHtml(q.h1); h1El.classList.toggle('ez-wz-lang', h1El.textContent.length > 30); $('wz-sub').textContent = q.sub || '';
-    var ik = $('wz-i'); ik.hidden = !(q.gloss && q.gloss.k); if (q.gloss) { ik.setAttribute('data-gloss', q.gloss.k); ik.setAttribute('aria-label', q.gloss.label || 'Erklärung'); }
+    var h1El = $('wz-h1'); h1El.innerHTML = titelHtml(q.h1); titelMitI(h1El, q); $('wz-sub').textContent = NBT(q.sub || '');
     /* Auf der Notizfrage ist das Feld schon die Notiz (Gremium G und K) */
     var nz = $('wz-notiz'); nz.hidden = q.id === 'notiz'; nz.setAttribute('aria-label', q.notiz || 'Notiz');
     /* Hinweis der Bühne: live zeigt ihn die App selbst; sonst der ausgelesene */
@@ -287,11 +359,15 @@
     var L = B && LQ ? null : liste(), pos = B && LQ ? q.pos : L.indexOf(stand.i), an = B && LQ ? q.anzahl : L.length;
     var ring = buehne.querySelector('.ez-glaschip .ez-ring'); if (ring) ring.style.setProperty('--anteil', Math.max(0.04, (pos + 1) / Math.max(1, an)).toFixed(3));
     antwortSetzen(q);
-    if (!B) bildZeigen(gewaehltesBild(q) || q.bild, false);
+    if (!B) { bildZeigen(gewaehltesBild(q) || q.bild, false); optBilderLaden(q); }
     $('wz-bildtext').textContent = (B ? '3-D-Modell deines Fensters aus der App, drehbar' : 'Modell deines Fensters') + ', zur Frage: ' + $('wz-h1').textContent;
     var letzt = B && LQ ? q.letzte : L[L.length - 1] === stand.i;
     weiterWort.textContent = letzt ? (V.istTuer() ? 'Tür speichern' : V.art() === 'fest' ? 'Verglasung speichern' : 'Fenster speichern') : 'Weiter';
-    if (richtung && !V.ruhig() && !tastatur()) { antwort.classList.remove('ez-wz-kommt'); void antwort.offsetWidth; antwort.classList.add('ez-wz-kommt'); }
+  }
+  /* Ohne Bühnenfenster: die Bilder der Optionen im Leerlauf laden, damit die Überblendung beim Tipp sofort beginnt (Vorlagen FE 4) */
+  function optBilderLaden(q) {
+    var los = function () { (q.bloecke || []).forEach(function (b) { (b.opts || []).forEach(function (o) { if (!o.bild || optBilderLaden[o.bild.src]) return; var im = new Image(); im.decoding = 'async'; im.src = o.bild.src; optBilderLaden[o.bild.src] = im; if (im.decode) im.decode().catch(function () {}); }); }); };
+    if (window.requestIdleCallback) requestIdleCallback(los, { timeout: 1200 }); else setTimeout(los, 300);
   }
   function gewaehltesBild(q) {
     var src = null;
@@ -302,10 +378,22 @@
     });
     return src;
   }
+  /* Nach jedem Wechsel sind die Antworten 450 ms taub für Zeigerklicks: ein Doppeltipp auf Weiter oder Zurück wählt nichts (UX 2) */
+  antwort.addEventListener('click', function (e) { if (e.detail !== 0 && Date.now() < schrittBis) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  function wahlSetzen(el, an) { el.setAttribute(el.hasAttribute('aria-checked') ? 'aria-checked' : 'aria-pressed', String(an)); if (el.getAttribute('role') === 'radio') el.tabIndex = an ? 0 : -1; }
+  /* Pfeiltasten in einer Radiogruppe wählen die Nachbarn, wie bei Schritt 1 */
+  antwort.addEventListener('keydown', function (e) {
+    var r = e.target.closest && e.target.closest('[role="radio"]'); if (!r) return;
+    var dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0; if (!dir) return;
+    e.preventDefault();
+    var alle = Array.prototype.slice.call(r.closest('[role="radiogroup"]').querySelectorAll('[role="radio"]')), nb = alle[(alle.indexOf(r) + dir + alle.length) % alle.length];
+    nb.focus({ preventScroll: false }); nb.click();
+  });
   antwort.addEventListener('click', function (e) {
     var q = aktuelle(), t = e.target, live = !!(B && LQ && q === LQ);
     var gl = t.closest('[data-gloss]'); if (gl) return erklaeren(gl.getAttribute('data-gloss'), gl);
     var al = t.closest('[data-alle]'); if (al) return V.status('In der App öffnet „' + al.getAttribute('data-alle') + '“ die ganze Farbkarte.');
+    if (t.closest('[data-breite]')) return V.status('In der App öffnet sich hier die Eingabe der Breite.');
     var blockEl = t.closest('[data-block]'); if (!blockEl) return;
     var n = +blockEl.getAttribute('data-block'), b = q.bloecke[n], id = q.id + ':' + n;
     if (live) {
@@ -315,7 +403,10 @@
       var lz = t.closest('[data-z]'); if (lz) return B.bedien(n, 'stufe', +lz.getAttribute('data-z'), +lz.getAttribute('data-d'));
       var ls = t.closest('[data-s]'); if (ls) return B.bedien(n, 'schalter', +ls.getAttribute('data-s'));
       var lo = t.closest('[data-o]'); if (!lo) return;
-      var oo = b.opts[+lo.getAttribute('data-o')]; B.bedien(n, 'opt', +lo.getAttribute('data-o')); V.status(oo.lbl || oo.name || ''); return;
+      /* Der Ring steht im nächsten Bild, die App rechnet erst danach (Vorlagen FE 2) */
+      if (lo.getAttribute('role') === 'radio') { blockEl.querySelectorAll('[data-o]').forEach(function (x) { wahlSetzen(x, x === lo); }); blockEl.querySelectorAll('.ez-wz-zelle').forEach(function (zz) { zz.classList.toggle('ist-an', zz.contains(lo)); }); }
+      else wahlSetzen(lo, (lo.getAttribute('aria-checked') || lo.getAttribute('aria-pressed')) !== 'true');
+      var jo = +lo.getAttribute('data-o'); requestAnimationFrame(function () { setTimeout(function () { B.bedien(n, 'opt', jo); }, 0); }); return;
     }
     var m = t.closest('[data-mehr]'); if (m) return V.status('In der App kommen hier die Detailfragen dazu: ' + m.querySelector('small').textContent + '.');
     if (blockEl.hasAttribute('data-offen')) { var an = blockEl.getAttribute('aria-pressed') !== 'true'; F.wahl[id] = { an: an }; blockEl.setAttribute('aria-pressed', String(an)); return; }
@@ -330,15 +421,14 @@
     var o = b.opts[+ob.getAttribute('data-o')];
     if (b.typ === 'liste' && b.multi) {
       var mv = F.wahl[id] || { v: b.opts.filter(function (x) { return x.an; }).map(function (x) { return x.v; }) }, pos = mv.v.indexOf(o.v);
-      if (pos >= 0) mv.v.splice(pos, 1); else mv.v.push(o.v); F.wahl[id] = mv; ob.setAttribute('aria-pressed', String(pos < 0)); return;
+      if (pos >= 0) mv.v.splice(pos, 1); else mv.v.push(o.v); F.wahl[id] = mv; wahlSetzen(ob, pos < 0); return;
     }
     F.wahl[id] = { v: o.v }; if (q.id === 'teilung') F.wahl.teilung = { v: o.v };
-    blockEl.querySelectorAll('[data-o]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === ob)); });
+    blockEl.querySelectorAll('[data-o]').forEach(function (x) { wahlSetzen(x, x === ob); });
     blockEl.querySelectorAll('.ez-wz-zelle').forEach(function (zz) { zz.classList.toggle('ist-an', zz.contains(ob)); });
     var offen = antwort.querySelector('[data-offen]'); if (offen && offen.getAttribute('aria-pressed') === 'true') { offen.setAttribute('aria-pressed', 'false'); F.wahl[q.id + ':' + offen.getAttribute('data-block')] = { an: false }; }
     if (b.typ === 'tupfen') { var jt = blockEl.querySelector('.ez-wz-jetzt'); jt.innerHTML = '<span class="ez-wz-tupf" style="background:' + ESC(o.farbe) + '"></span><span><b>' + ESC(o.name.replace(/^RAL \d+ /, '')) + '</b><small>' + ESC((o.name.match(/^RAL \d+/) || [''])[0]) + '</small></span>'; }
     if (o.bild) bildZeigen(o.bild, true);
-    V.status(o.lbl || o.name || '');
   });
   antwort.addEventListener('input', function (e) {
     var t = e.target, q = aktuelle(), blockEl = t.closest('[data-block]'); if (!blockEl) return;
@@ -347,13 +437,13 @@
       t.style.setProperty('--p', ((+t.value - +t.min) / (+t.max - +t.min) * 100).toFixed(1) + '%');
       if (live) return B.bedien(n, 'regler', t.value);
       var p = +t.value; F.wahl[id] = { p: p }; var br = V.werte().elW || 0, frei = br - 2 * 98, w1 = Math.round(frei * p / 100), w2 = Math.round(frei - w1), vs = blockEl.querySelectorAll('.ez-wz-teile__werte button');
-      if (frei > 0 && vs.length === 2) { vs[0].querySelector('b').textContent = V.tausend(w1) + NB + 'mm'; vs[0].querySelector('small').textContent = 'Flügel 1 · ' + Math.round(p) + ' %'; vs[1].querySelector('b').textContent = V.tausend(w2) + NB + 'mm'; vs[1].querySelector('small').textContent = 'Flügel 2 · ' + Math.round(100 - p) + ' %'; }
+      if (frei > 0 && vs.length === 2) { vs[0].querySelector('b').innerHTML = zahlKlein(V.tausend(w1) + NB + 'mm'); vs[0].querySelector('small').textContent = 'Flügel 1 · ' + Math.round(p) + ' %'; vs[1].querySelector('b').innerHTML = zahlKlein(V.tausend(w2) + NB + 'mm'); vs[1].querySelector('small').textContent = 'Flügel 2 · ' + Math.round(100 - p) + ' %'; }
     }
     if (t.classList.contains('ez-wz-text')) { if (live) B.bedien(n, 'text', t.value); else F.wahl[id] = { t: t.value }; }
   });
   /* Nach dem Ziehen am Regler oder dem Verlassen des Felds den Stand der App übernehmen (Werte in mm) */
   antwort.addEventListener('change', function () { if (B && LQ) { var f = d.activeElement; if (f && f.blur && (f.type === 'range')) f.blur(); liveNeu(); } });
-  $('wz-i').addEventListener('click', function () { erklaeren(this.getAttribute('data-gloss'), this); });
+  $('wz-h1').addEventListener('click', function (e) { var k = e.target.closest('#wz-i'); if (k) erklaeren(k.getAttribute('data-gloss'), k); });
   $('wz-notiz').addEventListener('click', function () { V.status('In der App öffnet sich hier die Notiz zu dieser Frage.'); });
   $('wz-tiefe').addEventListener('click', function () { zeigeSchritt('tiefe', -1); });
 
@@ -378,8 +468,7 @@
   function folgeSchritt(richtung) {
     var name = stand.schritt, fr = name === 'frage';
     var h = (fr ? schritte.frage : schritte[name]).querySelector('h1'); if (h && richtung) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-    if (richtung && !V.ruhig() && !tastatur()) { var ziel = fr ? schritte.frage : schritte[name]; ziel.classList.remove('ez-wz-kommt'); void ziel.offsetWidth; ziel.classList.add('ez-wz-kommt'); }
-    if (fr && richtung) V.status(stelle(aktuelle()) + ': ' + $('wz-h1').textContent);
+    if (richtung && !V.ruhig() && !tastatur()) (fr ? [schritte.frage.querySelector('.ez-frage'), antwort] : [schritte[name]]).forEach(function (el) { if (el.animate) el.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 160, easing: 'cubic-bezier(.16,1,.3,1)' }); });
   }
   /* Ohne Bühnenfenster: Bilder der nächsten Frage im Leerlauf laden */
   function vorladen() { if (B) return; var L = liste(), k = stand.schritt === 'frage' ? L.indexOf(stand.i) : -1, n = L[k + 1]; if (n == null) return; var q = D.fragen[n]; if (q.bild) { var im = new Image(); im.decoding = 'async'; im.src = q.bild.src; vorladen.im = im; if (im.decode) im.decode().catch(function () {}); } }
@@ -402,14 +491,15 @@
   function zurueck() {
     if (stand.schritt === 'lage') return V.zeigeFolie('ergebnis', -1);
     if (stand.schritt === 'tiefe') return zeigeSchritt('lage', -1);
-    if (B && LQ) { richtungNext = -1; if (!B.zurueck()) { richtungNext = 0; zeigeSchritt('tiefe', -1); } return; }
+    if (B && LQ) { schrittBis = Date.now() + 450; richtungNext = -1; if (!B.zurueck()) { richtungNext = 0; zeigeSchritt('tiefe', -1); } return; }
     var L = liste(), k = L.indexOf(stand.i);
     if (k > 0) { stand.i = L[k - 1]; return zeigeSchritt('frage', -1); }
     zeigeSchritt('tiefe', -1);
   }
   $('wz-weiter').addEventListener('click', function (e) { if (e.detail !== 0 && Date.now() < schrittBis) return; weiter(); });
-  $('wz-zurueck').addEventListener('click', zurueck);
-  folie.querySelector('[data-wz-zurueck]').addEventListener('click', zurueck);
+  var zurueckKlick = function (e) { if (e.detail !== 0 && Date.now() < schrittBis) return; zurueck(); };
+  $('wz-zurueck').addEventListener('click', zurueckKlick);
+  folie.querySelector('[data-wz-zurueck]').addEventListener('click', zurueckKlick);
   /* Enter am Rechner wie „Weiter“ (nicht in Feldern und nicht auf Knöpfen) */
   d.addEventListener('keydown', function (e) {
     if (folie.hidden || e.altKey || e.ctrlKey || e.metaKey || e.key !== 'Enter') return;
@@ -419,8 +509,14 @@
   });
   window.addEventListener('resize', function () { if (!folie.hidden && stand.schritt === 'lage') lgMass(); });
   /* Sprung aus „Gespeichert“ (Direkt zu einem Thema): Kapitel der App, z. B. „aufbau“ */
+  /* Das Bühnenfenster lädt schon im Leerlauf des Ergebnisses, damit die Wünsche ohne Warten beginnen (Vorlagen FE 3) */
+  var ergF = d.querySelector('.ez-folie[data-folie="ergebnis"]');
+  if (ergF && window.MutationObserver) new MutationObserver(function () {
+    if (ergF.hidden || rahmen) return;
+    if (window.requestIdleCallback) requestIdleCallback(function () { if (!ergF.hidden) appLaden(); }, { timeout: 4000 }); else setTimeout(function () { if (!ergF.hidden) appLaden(); }, 2000);
+  }).observe(ergF, { attributes: true, attributeFilter: ['hidden'] });
   V.anmelden('wuensche', function (richtung) {
-    appLaden();
+    appLaden(); nachsetzen();
     var sp = F.sprung; F.sprung = null;
     if (sp) { var k = KAP.find(function (x) { return x.k === sp; }); if (k && k.v === 'lage') stand.schritt = 'lage'; else if (k) { if (B) { B.zu(k.v); stand.schritt = 'frage'; } else { var i = D.fragen.findIndex(function (q) { return q.id === k.v; }); if (i >= 0) { stand.i = i; stand.schritt = 'frage'; } } } }
     zeigeSchritt(stand.schritt, richtung || 0);
