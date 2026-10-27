@@ -36,12 +36,12 @@ export function bestelltMail(a, o) {
 export function inhaberNeuMail(a, o) {
   const b = (a.angaben || {}).betrieb || {};
   return { betreff: (o.angefragt ? 'Neue Anfrage ' : 'Neue Bestellung ') + a.nr + ': ' + (b.firma || '') + ' · ' + o.paketName, html: rahmen(o.angefragt ? 'Neue Anfrage' : 'Neue Bestellung',
-    zeilen([['Auftrag', a.nr], ['Paket', o.paketName], o.gestaltet === false ? null : ['Weg', a.weg === 'schnell' ? 'Schnell (Sie übernehmen Texte und Bilder)' : 'Ausführlich'], ['Unternehmen', b.firma], ['Ansprechperson', b.ap], ['Telefon', b.tel], ['Website', b.web], ['Adresse', o.adresse], ['Zahlung', o.angefragt ? 'Kasse noch zu, unverbindlich angefragt' : 'Einrichtung bezahlt']]) +
+    zeilen([['Auftrag', a.nr], ['Paket', o.paketName], o.gestaltet === false ? null : ['Seite', a.weg === 'schnell' ? 'Seite vorschlagen (Sie übernehmen Texte und Bilder)' : 'Selbst angeben (der Kunde gibt Logo, Farben, Fotos und Texte nach der Zahlung vor)'], ['Unternehmen', b.firma], ['Ansprechperson', b.ap], ['Telefon', b.tel], ['Website', b.web], ['Adresse', o.adresse], ['Zahlung', o.angefragt ? 'Kasse noch zu, unverbindlich angefragt' : 'Einrichtung bezahlt']]) +
     '<p style="margin:8px 0 0">' + pille(o.zentrale, 'In der Zentrale öffnen') + '</p>', 'Nur für den Inhaber von eeziframes.') };
 }
 
 const STAND_TEXT = {
-  bezahlt: ['Ihre Zahlung ist da', 'Danke, die Einrichtung ist bezahlt. Damit ist Ihr Vertrag geschlossen. Wir rufen Sie zu Ihrer Wunschzeit an und beginnen mit Ihrer Seite. Bis wir beginnen, können Sie die Bestellung im Kundenbereich kostenlos stornieren.'],
+  bezahlt: ['Ihre Zahlung ist da', 'Danke, die Einrichtung ist bezahlt. Damit ist Ihr Vertrag geschlossen. Im Kundenbereich richten Sie jetzt Ihre Seite ein: die Angaben für Ihr Impressum und, je nach Paket, Logo, Farben, Fotos und Texte. Wir rufen Sie zu Ihrer Wunschzeit an und beginnen mit Ihrer Seite. Bis wir beginnen, können Sie die Bestellung im Kundenbereich kostenlos stornieren.'],
   in_arbeit: ['Wir bauen Ihre Seite', 'Ihre Bestellung ist bezahlt, wir haben mit Ihrer Seite begonnen. Sobald es eine Vorschau gibt, melden wir uns.'],
   vorschau: ['Ihre Vorschau ist fertig', 'Ihre Seite ist fertig zum Ansehen. Bitte geben Sie sie im Kundenbereich frei oder schreiben Sie uns, was wir ändern sollen.'],
   live: ['Ihre Seite ist live', 'Ihre Seite und Ihr Konfigurator sind online. Ab heute läuft Ihr Monatsabo. Den Knopf „Fenster planen“ für Ihre Website finden Sie im Kundenbereich.'],

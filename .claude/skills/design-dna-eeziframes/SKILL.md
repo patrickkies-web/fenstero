@@ -166,6 +166,11 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   nach Geschoss) steht an allen Stellen, die ein Aufmaßblatt zeigen oder darauf verweisen: Startseite, Seite für Fensterbauer (über
   die Vorschau), Bestellung (Muster-Aufmaßblatt), Ratgeber Aufmaßblatt; die PDFs liegen unter web/beispiele/. Ändert sich blatt.js,
   `node scripts/blatt-beispiel.mjs --web` und die Anker an den Bildern prüfen (Protokoll docs/profis/2026-10-27-aufmassblatt.md).
+- Bestellung (Korrektur des Inhabers, 27.10.2026): Vor der Kasse nur das Nötigste (Betrieb, Wunsch-Adresse, wohin die Anfragen gehen),
+  alles Weitere (Impressum, Team, Logo, Farben, Fotos, Texte) nach der Zahlung im Kundenbereich („Seite einrichten“). Die eine Handlung
+  steht unter dem, was man ausfüllt, nie darüber. Vor dem Bezahlen die Frage nach dem nächstgrößeren Paket mit den wenigen wichtigsten
+  Unterschieden. Wahl „Seite vorschlagen“ (wir füllen alles aus) neben „Selbst angeben“. Vorschauen zeigen die echte Seite, nie die
+  persönliche Einladung. Springt eine Meldung „es fehlt noch“ zu einer Maske, sind die Felder dort rot markiert und stehen auch dort.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

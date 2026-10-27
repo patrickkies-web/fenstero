@@ -92,10 +92,22 @@
     return h('div', { class: 'a-buehne' }, h('div', { class: 'a-buehne-in' }, v.el, h('div', { class: 'a-buehne-zeile' }, h('span', null, h('b', { style: 'color:var(--weiss);font-weight:500', text: kurz(a.paket) }), ' · ' + a.nr), U.chip(A.STAND_TITEL[a.stand], a.stand === 'live' ? 'aktiv' : 'leise'))));
   }
   function offeneStation(a) {
-    const m = P.merkmale(a.paket) || {};
-    if (A.pruefen(a.angaben, m).ok) return 'bestellen';
-    return A.offen(a.angaben, m) || (A.gestaltet(m) ? 'auftritt' : 'bestellen');
+    return A.offen(a.angaben, P.merkmale(a.paket) || {}, a.weg) || 'bestellen';
   }
+  /* Nach der Zahlung: was beim Einrichten der Seite noch fehlt (Wunsch des Inhabers, 27.10.2026: vor der Kasse nur das Nötigste, alles
+     Weitere hier), je mit der Station, die es zeigt: Impressum; bei „Selbst angeben“ Logo, Fotos und Texte; bei Signature das Team */
+  function einrichten(a) {
+    const m = P.merkmale(a.paket) || {}, g = a.angaben || {}, t = g.auftritt || {}, ad = g.adresse || {}, out = [];
+    if (!A.betrieb(g.betrieb, m, a.weg).ok) out.push({ station: 'betrieb', text: 'die Angaben für Ihr Impressum' });
+    if (A.gestaltet(m) && a.weg !== 'schnell') {
+      if (m.logo && !datei(a, 'logo')) out.push({ station: 'auftritt', text: 'Ihr Logo' });
+      if (m.fotos && !A.FOTO_PLAETZE.some((f) => datei(a, f.k))) out.push({ station: 'auftritt', text: 'Fotos Ihres Betriebs' });
+      if (!t.ueberschrift && !t.einleitung) out.push({ station: 'auftritt', text: 'Ihre Texte' });
+    }
+    if (m.dashboard && !(ad.team || []).some(Boolean)) out.push({ station: 'adresse', text: 'die Zugänge für Ihr Team' });
+    return out;
+  }
+  const aufzaehlen = (l) => (l.length > 1 ? l.slice(0, -1).join(', ') + ' und ' + l[l.length - 1] : l[0] || '');
   /* Frage, Satz und die eine Handlung je Stand */
   function lage(a) {
     const z = a.zahlung || {}, v = a.vorschau || {}, b = (a.angaben || {}).betrieb || {}, kasse = !!(S.stand && S.stand.verkauf && S.stand.verkauf.kasse);
@@ -107,10 +119,17 @@
       case 'angefragt':
         return kasse ? { t: 'Die Kasse ist offen. *Jetzt verbindlich bestellen?*', p: 'Ihre Angaben sind gespeichert. Prüfen Sie sie kurz und bezahlen Sie die Einrichtung.', pille: U.pille('Zur Bestellung', { href: '/bestellen/#' + a.paket + '/' + a.id + '/bestellen' }) }
           : { t: 'Ihre Anfrage *ist bei uns.*', p: 'Unsere Kasse öffnet in Kürze. Wir melden uns per E-Mail, sobald Sie bezahlen können; bis dahin ist nichts verbindlich.' };
-      case 'bezahlt':
-        return { t: 'Danke. *Wir beginnen mit Ihrer Seite.*', p: 'Wir rufen Sie ' + (b.rueckruf ? '„' + b.rueckruf + '“' : 'zu Ihrer Wunschzeit') + ' an und sichern Ihre Adresse. Bis wir beginnen, können Sie kostenlos stornieren.' };
-      case 'in_arbeit':
-        return v.aenderung ? { t: 'Wir arbeiten *Ihre Änderungen ein.*', p: 'Danach bekommen Sie einen neuen Link zur Vorschau.' } : { t: 'Wir bauen *Ihre Seite.*', p: 'Sobald es eine Vorschau gibt, schicken wir Ihnen den Link per E-Mail. Fotos und Texte können Sie bis dahin unten ergänzen.' };
+      case 'bezahlt': {
+        const e = einrichten(a), anruf = 'Wir rufen Sie ' + (b.rueckruf ? '„' + b.rueckruf + '“' : 'zu Ihrer Wunschzeit') + ' an und sichern Ihre Adresse. Bis wir beginnen, können Sie kostenlos stornieren.';
+        if (e.length) return { t: 'Danke. *Jetzt richten Sie Ihre Seite ein.*', p: 'Es fehlen noch ' + aufzaehlen(e.map((x) => x.text)) + '. ' + anruf, pille: U.pille('Seite einrichten', { href: '/bestellen/#' + a.paket + '/' + a.id + '/' + e[0].station }) };
+        return { t: 'Danke. *Wir beginnen mit Ihrer Seite.*', p: anruf };
+      }
+      case 'in_arbeit': {
+        if (v.aenderung) return { t: 'Wir arbeiten *Ihre Änderungen ein.*', p: 'Danach bekommen Sie einen neuen Link zur Vorschau.' };
+        const e = einrichten(a);
+        return { t: 'Wir bauen *Ihre Seite.*', p: 'Sobald es eine Vorschau gibt, schicken wir Ihnen den Link per E-Mail.' + (e.length ? ' Bis dahin fehlen uns noch ' + aufzaehlen(e.map((x) => x.text)) + '.' : ' Fotos und Texte können Sie bis dahin unten ergänzen.'),
+          pille: e.length ? U.pille('Seite einrichten', { href: '/bestellen/#' + a.paket + '/' + a.id + '/' + e[0].station }) : null };
+      }
       case 'vorschau':
         if (v.freigabe) return { t: 'Freigegeben. *Wir schalten Ihre Seite live.*', p: 'Danke für Ihre Freigabe. Sobald die Seite online ist, bekommen Sie eine E-Mail.' };
         /* erst ansehen, dann freigeben: die Pille öffnet die Vorschau, Freigeben steht als Ring daneben (Gremium 27.10.2026) */
@@ -153,12 +172,15 @@
   /* Angaben: drei Zeilen mit „Ändern“ (Stationen der Bestellung) */
   function angabenKarte(a) {
     const g = a.angaben || {}, b = g.betrieb || {}, ad = g.adresse || {}, t = g.auftritt || {}, m = P.merkmale(a.paket) || {};
+    /* nach der Zahlung: „Ergänzen“, wo beim Einrichten noch etwas fehlt; vor der Zahlung gibt es nur Betrieb und Adresse */
+    const vor = vorZahlung(a), e = vor ? [] : einrichten(a), fehlt = (st) => e.some((x) => x.station === st);
     const zeile = (titel, text, station) => h('div', { class: 'a-offen-zeile' }, h('span', null, h('b', { text: titel }), h('br'), h('span', { style: 'color:var(--textgrau)', text: text || '–' })),
-      U.ring('Ändern', { class: 'klein', href: '/bestellen/#' + a.paket + '/' + a.id + '/' + station, 'aria-label': titel + ' ändern' }));
+      U.ring(fehlt(station) ? 'Ergänzen' : 'Ändern', { class: 'klein', href: '/bestellen/#' + a.paket + '/' + a.id + '/' + station, 'aria-label': titel + (fehlt(station) ? ' ergänzen' : ' ändern') }));
     const fotos = A.FOTO_PLAETZE.filter((f) => datei(a, f.k)).length;
-    const zeilen = [zeile('Ihr Betrieb', [b.name || b.firma, b.ort, b.ap].filter(Boolean).join(' · '), 'betrieb'),
-      zeile('Adresse und Anfragen', [a.adresse || (ad.vorschlaege ? 'Vorschläge von uns' : ''), (ad.eingang || []).filter(Boolean).join(', ')].filter(Boolean).join(' · '), 'adresse')];
-    if (A.gestaltet(m)) zeilen.push(zeile('Auftritt', [datei(a, 'logo') ? 'Logo da' : 'Logo fehlt', fotos + ' von 6 Fotos', (t.farben || []).some(A.farbe) ? 'Farben da' : (t.farbenWebsite ? 'Farben von der Website' : 'Farben folgen'), t.ueberschrift ? 'Texte da' : 'Texte schreiben wir'].join(' · '), 'auftritt'));
+    const zeilen = [zeile('Ihr Betrieb', [b.name || b.firma, b.ort, b.ap].filter(Boolean).join(' · ') + (vor ? '' : fehlt('betrieb') ? ' · Impressum fehlt noch' : ' · Impressum vollständig'), 'betrieb'),
+      zeile('Adresse und Anfragen', [a.adresse || (ad.vorschlaege ? 'Vorschläge von uns' : ''), (ad.eingang || []).filter(Boolean).join(', '), !vor && m.dashboard ? ((ad.team || []).filter(Boolean).length ? (ad.team || []).filter(Boolean).length + ' im Team' : 'Team fehlt noch') : ''].filter(Boolean).join(' · '), 'adresse')];
+    if (A.gestaltet(m) && !vor && a.weg === 'schnell') zeilen.push(zeile('Auftritt', ['Wir schlagen Ihre Seite vor', datei(a, 'logo') ? 'Logo da' : 'Logo gern nachreichen'].join(' · '), 'auftritt'));
+    else if (A.gestaltet(m) && !vor) zeilen.push(zeile('Auftritt', [datei(a, 'logo') ? 'Logo da' : 'Logo fehlt', fotos + ' von 6 Fotos', (t.farben || []).some(A.farbe) ? 'Farben da' : (t.farbenWebsite ? 'Farben von der Website' : 'Farben folgen'), t.ueberschrift ? 'Texte da' : 'Texte schreiben wir'].join(' · '), 'auftritt'));
     return U.karte('Ihre Angaben', a.geaendert ? 'Geändert am ' + U.datum(a.geaendert) : null, [h('div', { class: 'a-offen' }, zeilen),
       vorZahlung(a) ? null : h('p', { class: 'a-hilfe', style: 'padding:0 0 14px', text: 'Jede Änderung sehen wir sofort; wir melden uns, sobald sie auf Ihrer Seite ist.' })]);
   }
