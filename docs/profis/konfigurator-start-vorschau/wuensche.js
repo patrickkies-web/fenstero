@@ -221,7 +221,9 @@
     var h1El = $('wz-h1'); h1El.innerHTML = h1; h1El.classList.toggle('ez-wz-lang', h1El.textContent.length > 30); $('wz-sub').textContent = q.sub || '';
     var ik = $('wz-i'); ik.hidden = !(q.gloss && q.gloss.k); if (q.gloss) { ik.setAttribute('data-gloss', q.gloss.k); ik.setAttribute('aria-label', q.gloss.label || 'Erklärung'); }
     $('wz-notiz').setAttribute('aria-label', q.notiz || 'Notiz');
-    var hint = $('wz-hint'), ht = q.hint && !/drehen/i.test(q.hint) ? q.hint : ''; hint.hidden = !ht; hint.textContent = ht;
+    /* Die Vorschau hat die Wünsche der App für das Fenster; bei einem anderen Element sagt der Chip das offen */
+    var hint = $('wz-hint'), ht = q.hint && !/drehen/i.test(q.hint) ? q.hint : ''; if (V.art() !== 'fenster') ht = 'Vorschau am Fenster' + (ht ? ' · ' + ht : '');
+    hint.hidden = !ht; hint.textContent = ht;
     q._jetzt = null; q.bloecke.forEach(function (b) { if (b.typ === 'aktuell') q._jetzt = b; });
     antwort.innerHTML = q.bloecke.map(function (b, n) { return blockHtml(q, b, n); }).join('');
     /* Bild: das der gewählten Option, sonst das der Frage */
