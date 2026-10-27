@@ -37,18 +37,19 @@ html.au-html, html.au-html body { background: #07090a; }
 .a-wer { max-width: 34vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 13px/1 var(--font-sans); color: var(--tinte-2); }
 @media (max-width: 520px) { .a-wer, .a-marke small { display: none; } }
 /* Raster der Strecke: Telefon Band, Bühne, Frage, Inhalt, Fuß untereinander (App-Rahmen); Schreibtisch die Bühne rechts und klebend */
-.a-raster { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "band" "buehne" "frage" "inhalt" "fuss"; }
-.a-r-band { grid-area: band; } .a-r-buehne { grid-area: buehne; } .a-r-frage { grid-area: frage; } .a-r-inhalt { grid-area: inhalt; min-width: 0; } .a-r-fuss { grid-area: fuss; }
+.a-raster { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "band" "buehne" "frage" "inhalt" "fuss" "nach"; }
+.a-r-band { grid-area: band; } .a-r-buehne { grid-area: buehne; } .a-r-frage { grid-area: frage; } .a-r-inhalt { grid-area: inhalt; min-width: 0; } .a-r-fuss { grid-area: fuss; } .a-r-nach { grid-area: nach; min-width: 0; }
 .a-r-buehne { margin-top: 6px; }
 .a-raster.eins .a-r-buehne { display: none; }
 @media (max-width: 959px) { .a-raster.telefon-ohne .a-r-buehne { display: none; } }
 @media (min-width: 960px) {
-  .a-raster.zwei { grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: auto auto 1fr auto; grid-template-areas: "band buehne" "frage buehne" "inhalt buehne" "fuss buehne"; column-gap: 56px; }
+  .a-raster.zwei { grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: auto auto auto auto 1fr; grid-template-areas: "band buehne" "frage buehne" "inhalt buehne" "fuss buehne" "nach buehne"; column-gap: 56px; }
   .a-raster.zwei > .a-r-buehne { align-self: start; position: sticky; top: 72px; margin-top: 10px; }
   .a-raster.eins { max-width: 1120px; }
   /* Kundenbereich und Zentrale: die eine Handlung gleich unter der Frage, nicht am Ende der Seite */
-  .a-raster.zwei.aktion-oben { grid-template-rows: auto auto auto 1fr; grid-template-areas: "band buehne" "frage buehne" "fuss buehne" "inhalt buehne"; }
-  .a-raster.eins.aktion-oben { grid-template-areas: "band" "buehne" "frage" "fuss" "inhalt"; }
+  .a-raster.zwei.aktion-oben { grid-template-rows: auto auto auto auto 1fr; grid-template-areas: "band buehne" "frage buehne" "fuss buehne" "inhalt buehne" "nach buehne"; }
+  .a-raster.eins.aktion-oben { grid-template-areas: "band" "buehne" "frage" "fuss" "inhalt" "nach"; }
+  .a-r-nach { margin-top: 12px; }
   .a-raster.aktion-oben > .a-r-fuss { margin: 0 0 24px; }
 }
 
@@ -295,7 +296,7 @@ html.au-html, html.au-html body { background: #07090a; }
 .a-platz.voll .a-platz-wahl b { background: rgba(32,32,34,.72); color: #fff; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(255,255,255,.12); }
 .a-platz-wahl:focus-within { outline: 2px solid var(--schwarz); outline-offset: -4px; border-radius: 16px; }
 .a-platz .a-weg { position: absolute; right: 6px; top: 6px; z-index: 2; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; display: grid; place-items: center; cursor: pointer; }
-.a-platz .a-weg::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: rgba(7,9,10,.62); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+.a-platz .a-weg::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: rgba(7,9,10,.62); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
 .a-platz .a-weg svg { position: relative; width: 12px; height: 12px; color: #fff; }
 .a-platz-pdf { position: absolute; inset: 0; display: grid; place-items: center; font: 600 15px/1 var(--font-sans); color: var(--schwarz); background: #fff; }
 .a-platz.laedt::after { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,.6); }
@@ -344,8 +345,13 @@ html.au-html, html.au-html body { background: #07090a; }
 .a-leiste li small { font: 400 13px/1 var(--font-sans); color: var(--silbergrau); font-variant-numeric: tabular-nums; }
 
 /* ---------- Rückmeldung und Dialog ---------- */
-.a-toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 60; transform: translate(-50%, 12px); opacity: 0; pointer-events: none; padding: 12px 18px; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 15px/1 var(--font-sans); box-shadow: 0 18px 40px -16px rgba(0,0,0,.8); transition: opacity 220ms ease, transform 220ms var(--dna-auftritt); }
-.a-toast.an { opacity: 1; transform: translate(-50%, 0); }
+/* Meldung im Fuß-Stapel über der Pille (kommt von unten, 200 ms ease-out, geht schneller); ohne Fuß oben unter dem Kopf */
+.a-meldung { order: -2; flex: 0 0 100%; margin: 0 0 4px; padding: 10px 16px; border-radius: 16px; background: var(--weiss); color: var(--schwarz); font: 500 15px/1.35 var(--font-sans); text-align: center; box-shadow: 0 12px 30px -16px rgba(0,0,0,.8); transition: opacity 140ms ease-in, transform 140ms ease-in; }
+@starting-style { .a-meldung { opacity: 0; transform: translateY(8px); } }
+.a-meldung { transition: opacity 200ms cubic-bezier(.23,1,.32,1), transform 200ms cubic-bezier(.23,1,.32,1); }
+.a-meldung.weg { opacity: 0; transform: translateY(6px); transition-duration: 140ms; }
+.a-meldung.oben { position: fixed; left: 16px; right: 16px; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 60; margin: 0 auto; max-width: 480px; }
+@media (min-width: 960px) { .a-fuss .a-meldung { flex: 0 1 auto; text-align: left; } }
 .a-blatt-bg { position: fixed; inset: 0; z-index: 70; background: rgba(7,9,10,.72); }
 .a-blatt { position: fixed; z-index: 71; left: 0; right: 0; bottom: 0; max-height: 92vh; overflow: auto; padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: var(--anthrazit); box-shadow: 0 -20px 60px -20px rgba(0,0,0,.9); }
 @media (min-width: 640px) { .a-blatt { left: 50%; right: auto; bottom: auto; top: 50%; width: min(560px, 92vw); transform: translate(-50%, -50%); border-radius: 28px; padding: 24px; } }
@@ -426,3 +432,25 @@ html.au-html, html.au-html body { background: #07090a; }
 .a-farbwert i { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(7,9,10,.15); }
 a.a-platz-wahl { text-decoration: none; color: inherit; }
 .a-platz:not(.voll) > .a-platz-wahl { cursor: default; }
+
+/* ---------- Muss-Punkte des Gremiums vom 27.10.2026 ---------- */
+/* Paketwahl: Umschalter mit Preis unter der Frage; am Telefon nur die gewählte Karte */
+.a-frage .a-paketwahl { margin-top: 16px; max-width: 560px; }
+.a-paketwahl button { display: grid; gap: 2px; align-content: center; min-height: 56px; padding: 6px 8px; }
+.a-paketwahl button small { font: 400 13px/1.2 var(--font-sans); color: inherit; opacity: .78; }
+@media (max-width: 759px) { .a-pakete .a-paket:not(.an) { display: none; } }
+/* Preis heute brutto, Haken mit einem Satz, Zeile über der Pille nur bei Fehlendem in Koralle */
+.a-heute { margin: 4px 0 0; font: 400 15px/1.45 var(--font-sans); color: var(--silbergrau); }
+.a-heute b { color: var(--weiss); font-weight: 500; }
+.a-haken-satz { display: block; margin-top: 2px; font: 400 13px/1.45 var(--font-sans); color: var(--textgrau); }
+.a-fuss .a-grund { color: var(--silbergrau); font-size: 14px; }
+.a-fuss .a-grund::before { background: var(--silbergrau); }
+.a-fuss .a-grund.offen { color: var(--weiss); }
+.a-fuss .a-grund.offen::before { background: var(--koralle); }
+/* Muster-Aufmaßblatt auf der Station Paket */
+.a-blatt-muster { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px; align-items: start; padding: 4px 0 16px; }
+.a-blatt-muster p { margin: 0; font: 400 15px/1.5 var(--font-sans); color: var(--textgrau); }
+.a-blatt-bild { display: block; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px rgba(7,9,10,.1), 0 10px 24px -14px rgba(7,9,10,.5); }
+.a-blatt-bild img { display: block; width: 100%; height: auto; }
+.a-blatt-muster .a-link { gap: 6px; font-size: 14px; }
+.a-blatt-muster .a-link svg { width: 12px; height: 12px; }

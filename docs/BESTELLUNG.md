@@ -23,12 +23,14 @@ Jede Karte auf der Seite für Fensterbauer führt in die Bestellung ihres Pakets
 
 | Station | Was gefragt wird |
 |---|---|
-| **Paket** | drei Karten mit den Seiten von Fensterbau Brandt als Bild, Preis im Monat und Einrichtung, was dazukommt; bei Plus und Signature der **Weg**: *Schnell* (nur das Nötigste und das Logo, Texte, Farben und Bilder übernimmst du von der Website oder klärst sie im Telefonat) oder *Ausführlich* (Logo, Farben, sechs Fotos, Porträt, Texte selbst) |
+| **Paket** | Umschalter Essential, Plus, Signature mit Monatspreis gleich unter der Frage (am Telefon steht nur die gewählte Karte, die Pille nennt Paket und Preis); Karten mit den Seiten von Fensterbau Brandt als Bild, Preis im Monat und Einrichtung (je mit „netto“), KI-Kontingent und Preis jeder weiteren Auswertung, was dazukommt, Hinweis auf eeziframes offen genannt; das Muster-Aufmaßblatt und der Mess-Schritt zum Ansehen; bei Plus und Signature der **Weg**: *Schnell* (nur das Nötigste und das Logo, Texte, Farben und Bilder übernimmst du von der Website oder klärst sie im Telefonat) oder *Ausführlich* (Logo, Farben, sechs Fotos, Porträt, Texte selbst) |
 | **Konto** | E-Mail-Adresse, Code per Mail (zugleich die Registrierung, kein Passwort); danach liegt der Auftrag als Entwurf auf dem Server |
-| **Ihr Betrieb** | was auf der Seite steht (Unternehmen, Name auf der Seite, Einzugsgebiet, Ansprechperson, Rolle, Telefon, E-Mail, Erreichbarkeit, bisherige Website) und Impressum und Rechnung (Anschrift, Bundesland, Rechtsform, Vertretung; Register, USt-IdNr., Kammer, Beruf aufklappbar). Name und Rechtsform füllen sich aus dem Unternehmen |
+| **Ihr Betrieb** | was auf der Seite steht (Unternehmen, Name auf der Seite, Einzugsgebiet, Ansprechperson, Rolle, Telefon, E-Mail, Erreichbarkeit, bisherige Website) und Impressum und Rechnung (Anschrift, Bundesland, Rechtsform, Vertretung; Register, USt-IdNr., Kammer, Beruf aufklappbar). Name und Rechtsform füllen sich aus dem Unternehmen. Im Weg *Schnell* sind Bundesland, Rechtsform und Vertretung freiwillig (klären wir im Telefonat). Alle Platzhalter beginnen mit „z. B.“ |
 | **Adresse** | Essential: Name unter eeziframes.com mit Prüfung „frei/vergeben“ und Anreiz zu Plus (eigene Domain). Plus und Signature: *Neue Domain* (bis drei Wünsche oder „Schlagen Sie mir Namen vor“; bis 25 € netto im Jahr im Paket, Paketbedingungen § 6) oder *Meine Domain* (eine Domain, die schon gehört, nach Absprache, § 6 Abs. 3; Hinweis, dass die bisherige Website bleibt). Dazu die Adressen für die Anfragen (bis drei), bei Signature die Zugänge zum Dashboard (bis fünf) |
 | **Auftritt** | nur mit eigener Gestaltung (Plus, Signature). Schnell: Logo, „von meiner Website übernehmen“, Hinweise. Ausführlich: Logo, bis drei Farben (oder aus Logo/Website), Fotos für Bühne, Werkstatt, Montage, Team, Ausstellung, Referenz (leere Plätze schraffiert), Porträt, Überschrift, Einleitung, Leistungen, bei Signature der Einladungstext, Hinweise. Plus zeigt den Anreiz zu Signature |
-| **Bestellen** | Lücken mit Sprung zur Station, Einrichtung als Zahl (netto, mit USt. darunter), Monatspreis ab Livegang, Zusammenfassung mit „Ändern“ je Teil, die vier Schritte bis Live, die Wunschzeit für den Anruf, drei Häkchen (Unternehmer § 14 BGB, Paketbedingungen in der Fassung `PAKET_STAND`, AV-Vertrag), dann „Kostenpflichtig bestellen“ (Stripe) oder, solange die Kasse zu ist, „Unverbindlich anfragen“ |
+| **Bestellen** | Lücken mit Sprung zur Station; Preiskachel: Einrichtung als Zahl (netto), „Heute bei Stripe: … inkl. 19 % USt.“, Monatspreis netto und brutto ab Livegang, KI-Kontingent, kostenloses Storno bis Arbeitsbeginn; direkt darunter drei Häkchen mit je einem Satz Alltagsdeutsch (Unternehmer § 14 BGB, Paketbedingungen in der Fassung `PAKET_STAND`, AV-Vertrag) und die Zeile über der Pille („Noch 2 Häkchen setzen“, Koralle nur, solange etwas fehlt); dann „Kostenpflichtig bestellen“ (Stripe) oder, solange die Kasse zu ist, „Unverbindlich anfragen“. Unter der Pille: die vier Schritte bis Live mit der Wunschzeit für den Anruf und „Ihre Angaben“ mit „Ändern“ je Teil |
+
+Meldungen („Code ist unterwegs“, „Gespeichert“) stehen im Fuß über der Pille, nie über einem Knopf oder Feld, und verschwinden mit der Station oder nach vier Sekunden.
 
 Gespeichert wird nach jeder Eingabe (kurz verzögert, beim Verlassen der Seite noch einmal); ein Entwurf darf Lücken haben, geprüft wird beim Weitergehen und beim Bestellen (Browser und Server mit denselben Regeln). Fotos werden im Browser verkleinert (Fotos bis 2400 px, Porträt 900 px). Paket und Weg lassen sich bis zur Zahlung wechseln.
 
@@ -40,11 +42,23 @@ Gespeichert wird nach jeder Eingabe (kurz verzögert, beim Verlassen der Seite n
 | `angefragt` | Kunde | unverbindlich angefragt, solange die Kasse zu ist (ohne `PAKETE_OFFEN` im Live-Modus); Mail an dich; Löschfrist wie Entwurf |
 | `bezahlt` | Stripe | Einrichtung bezahlt = Vertrag geschlossen (§ 3 Abs. 2); Mails an Kunde („Ihre Zahlung ist da“) und dich; Kunde kann bis Arbeitsbeginn im Kundenbereich stornieren (§ 7 Abs. 2, volle Erstattung, frische Anmeldung nötig) |
 | `in_arbeit` | du | „Seite beginnen“: Anruf, Domain sichern, Seite bauen |
-| `vorschau` | du | Link zur Vorschau eintragen; Mail mit Link; der Kunde gibt frei oder schreibt, was zu ändern ist (dann zurück nach `in_arbeit`) |
+| `vorschau` | du | Link zur Vorschau eintragen; Mail mit Link; im Kundenbereich ist „Vorschau öffnen“ die Pille, „Freigeben“ und „Änderungen wünschen“ stehen daneben; fehlen Logo, Fotos oder Porträt, nennt die Freigabe das vorher („Trotzdem freigeben“). Der Kunde gibt frei oder schreibt, was zu ändern ist (dann zurück nach `in_arbeit`) |
 | `live` | du | nach Freigabe: Adresse der fertigen Seite eintragen; das Monatsabo startet bei Stripe, Mail mit Link; der Kundenbereich zeigt den Knopf „Fenster planen“ als HTML für die eigene Website |
 | `pausiert`, `beendet`, `storniert` | du (oder Stripe) | Pause, Ende (Abo zum Monatsende oder sofort), Storno mit Erstattung |
 
 Übergänge stehen in `Auftrag.UEBERGAENGE` (wer darf was); der Server prüft jeden Schritt. Nach der Zahlung bleibt alles änderbar (Stationen der Bestellung mit „Speichern“), aber nur vollständig; jede Änderung erscheint in der Zentrale als „geändert“. Ein Paketwechsel nach der Zahlung ist eine Anfrage (Differenz der Einrichtung, neuer Monatspreis ab Wechsel, § 7 Abs. 3).
+
+## Preise und KI-Auswertungen
+
+Preise des Inhabers vom 27.10.2026, alle netto, einzige Stelle `web/assets/pakete.js` (`preis`, `kiMonat`, `PREIS_STAND`):
+
+| Paket | Einrichtung | Monat | KI-Auswertungen im Monat inklusive | jede weitere |
+|---|---|---|---|---|
+| Essential | 99 € | 39 € | 1.000 (etwa 20 Kundenanfragen mit je 25 Fenstern) | 0,08 € |
+| Essential Plus | 50 € | 69 € | 1.500 | 0,08 € |
+| Signature | 239 € | 99 € | 2.000 | 0,08 € |
+
+Eine KI-Auswertung ist ein Foto (je Fenster meist zwei). Der Preis jeder weiteren steht im Preisstand des Auftrags (`auftraege.preise.ki`) und gilt für diesen Vertrag. Schutz vor Missbrauch (`functions/api/ki.js`): nur Fotos aus einer Planung mit Code des Betriebs, höchstens 60 je Anfrage, Bremse je Anschluss, je Konfigurator und Monat Mail an den Inhaber beim Kontingent und Schluss beim Doppelten (danach weiter ohne KI-Befund), Tagesbudget über alle. Die Kalkulation des Preises steht nur intern in [KI-KOSTEN.md](KI-KOSTEN.md). Ist die Einrichtung des größeren Pakets günstiger (Essential zu Plus), kostet der Wechsel keine Einrichtung; erstattet wird nichts (Paketbedingungen § 7 Abs. 3).
 
 ## Geld (Stripe)
 
@@ -78,4 +92,5 @@ Bestellung `http://localhost:8789/bestellen/#plus`, Code `123456`, Mails unter `
 
 - **Konfigurator beim Live-Schalten anlegen:** Die Instanz (Host, Merkmale, Empfänger, Rechtsangaben, Zugänge) entsteht noch nicht aus dem Auftrag; die alte Instanz-Verwaltung gehörte zur gelöschten Zentrale. Die Bausteine darunter (`functions/instanz/`, `verwalten.js`) bleiben und sind der nächste Schritt.
 - **Essential unter `<name>.eeziframes.com`:** Wildcard-Eintrag und Zuordnung im Worker (`functions/instanz/mandant.js` behandelt `*.eeziframes.com` noch als Hauptdomain).
+- **KI-Auswertungen über dem Kontingent abrechnen:** Der Zähler je Konfigurator und Monat läuft; als Posten auf die Monatsrechnung (Stripe) kommt er erst, wenn die Instanz beim Live-Schalten mit dem Auftrag verknüpft ist. Bis dahin von Hand (KI-KOSTEN.md).
 - **Alte Tabellen** `partner`, `bestellungen`, `partner_nachrichten` und ihre Funktionen in `speicher.js`: ungenutzt; löschen nur auf Wunsch des Inhabers.

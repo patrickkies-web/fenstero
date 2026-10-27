@@ -79,9 +79,10 @@
     const teil = STATIONEN[S.station]();
     const buehne = h('aside', { class: 'a-r-buehne', 'aria-label': 'So sieht Ihre Seite aus' });
     if (mitBuehne) buehne.appendChild(buehneBauen());
-    const main = h('main', { class: 'a-raster ' + (mitBuehne ? 'zwei' : 'eins') + (S.station === 'konto' ? ' telefon-ohne' : ''), id: 'inhalt' },
+    const main = h('main', { class: 'a-raster ' + (mitBuehne ? 'zwei' : 'eins') + (S.station === 'konto' ? ' telefon-ohne' : '') + (S.station === 'paket' ? ' aktion-oben' : ''), id: 'inhalt' },
       h('div', { class: 'a-r-band' }, U.stationen(l, i)), buehne,
-      h('div', { class: 'a-r-frage' }, teil.frage), h('div', { class: 'a-r-inhalt' }, teil.inhalt), h('div', { class: 'a-r-fuss a-fuss' }, teil.fuss));
+      h('div', { class: 'a-r-frage' }, teil.frage), h('div', { class: 'a-r-inhalt' }, teil.inhalt), h('div', { class: 'a-r-fuss a-fuss' }, teil.fuss),
+      teil.nach ? h('div', { class: 'a-r-nach' }, teil.nach) : null);
     wurzel.appendChild(main);
     wurzel.appendChild(h('p', { class: 'a-recht' }, h('a', { href: '/impressum/', text: 'Impressum' }), h('a', { href: '/datenschutz/', text: 'Datenschutz' }), h('a', { href: '/konfigurator-bedingungen/', text: 'Paketbedingungen' })));
     vorschauSetzen();
@@ -148,7 +149,7 @@
     return U.kachel([h('p', { class: 'a-label-klein', style: 'margin:0' }, U.chip('Mit ' + kurz(n.paket))),
       h('h3', { text: 'Für ' + U.euro(n.monat) + ' mehr im Monat' }),
       h('ul', null, l.map((a) => h('li', { text: a.titel + (a.k === 'farben' || a.k === 'fotos' ? ': ' + a.text : '') }))),
-      h('p', { class: 'a-preis-dazu' }, h('b', { text: '+' + U.euro(n.monat) }), 'im Monat, ' + U.euro(n.einrichtung) + ' mehr Einrichtung'),
+      h('p', { class: 'a-preis-dazu' }, h('b', { text: '+' + U.euro(n.monat) }), 'netto im Monat, ' + (n.einrichtung > 0 ? U.euro(n.einrichtung) + ' mehr Einrichtung' : 'Einrichtung nicht teurer')),
       U.rund('pfeil', 'Zu ' + kurz(n.paket) + ' wechseln', { class: 'voll gross', on: { click: (e) => paketWechseln(n.paket, e.currentTarget) } })], 'leucht a-anreiz');
   }
   const vorZahlungAuftrag = () => !S.auftrag || vorZahlung(S.auftrag);
@@ -168,30 +169,44 @@
   const STATIONEN = {};
 
   /* Paket */
+  /* Hinweis auf eeziframes offen nennen (Gremium der Fensterbauer, 27.10.2026) */
+  const hinweis = (p) => { const k = (P.merkmale(p) || {}).kennzeichnung; return k === 'keine' ? 'Ohne Hinweis auf eeziframes' : 'Mit Hinweis auf eeziframes: ' + P.MERKMALE.kennzeichnung.werte[k]; };
   function punkte(p) {
     const i = P.LISTE.indexOf(p);
-    if (i === 0) return ['Ihre Adresse: ihr-name.eeziframes.com', 'Konfigurator mit Ihrem Namen, Ort und Ansprechperson', 'Jede Anfrage als Aufmaßblatt-PDF per E-Mail'];
+    if (i === 0) return ['Ihre Adresse: ihr-name.eeziframes.com', 'Konfigurator mit Ihrem Namen, Ort und Ansprechperson', 'Jede Anfrage als Aufmaßblatt-PDF per E-Mail', hinweis(p)];
     const out = ['Alles aus ' + kurz(P.LISTE[i - 1]) + ', dazu:']; let gruppe = false;
     A.naechstes(P.LISTE[i - 1]).dazu.forEach((a) => {
+      if (a.k === 'ohneHinweis') return;
       if (['logo', 'fotos', 'portrait', 'texte'].indexOf(a.k) >= 0) { if (!gruppe) { out.push('Ihr Logo, Ihre Fotos und Texte'); gruppe = true; } }
-      else out.push(a.k === 'domain' ? 'Ihre eigene Domain' : a.k === 'farben' ? a.text.charAt(0).toUpperCase() + a.text.slice(1) : a.titel);
+      else out.push(a.k === 'domain' ? 'Ihre eigene Domain, bis ' + P.DOMAIN_JAHR + ' € netto im Jahr inklusive' : a.k === 'farben' ? a.text.charAt(0).toUpperCase() + a.text.slice(1) : a.titel);
     });
+    out.push(hinweis(p));
     return out;
   }
   STATIONEN.paket = function () {
-    const karten = h('div', { class: 'a-pakete', role: 'group', 'aria-label': 'Paket wählen' });
+    /* Das gewählte Paket steht immer im ersten Bildschirm: Umschalter mit Preis unter der Frage, am Telefon nur die gewählte Karte
+       (Gremium 27.10.2026: „Weiter mit Plus“ bei sichtbarer, nicht gewählter Essential-Karte war eine versteckte Vorauswahl) */
+    const wahl = U.segment(P.LISTE.map((p) => ({ w: p, t: [h('span', { text: kurz(p) }), h('small', { text: U.euro(P.preis(p).monat) + ' im Monat' })] })), S.paket, (p) => paketWaehlen(p), 'Paket wählen');
+    wahl.classList.add('a-paketwahl');
+    const karten = h('div', { class: 'a-pakete' });
     P.LISTE.forEach((p) => {
       const pr = P.preis(p), an = p === S.paket;
       const wahl = h('button', { type: 'button', class: 'a-paket-wahl', 'aria-pressed': String(an), on: { click: () => paketWaehlen(p) } }, h('span', { class: 'a-paket-name', text: P.PAKETE[p].name }), h('span', { class: 'a-paket-punkt', 'aria-hidden': 'true' }));
       karten.appendChild(h('div', { class: 'a-paket' + (an ? ' an' : ''), 'data-paket': p },
         h('div', { class: 'a-paket-bild' }, h('img', { src: '/bilder/fensterbauer-dna/paket-' + p + '.webp', alt: '', width: '960', height: '600', decoding: 'async' }), U.chip('Beispiel: Fensterbau Brandt')),
         h('div', { class: 'a-paket-text' }, h('div', { class: 'a-paket-kopf' }, wahl),
-          h('p', { class: 'a-preis' }, h('b', { text: String(pr.monat) }), h('span', { text: '€ im Monat' })),
-          h('p', { class: 'a-paket-neben', text: '+ ' + U.euro(pr.einrichtung) + ' Einrichtung einmalig' }),
+          h('p', { class: 'a-preis' }, h('b', { text: String(pr.monat) }), h('span', { text: '€ im Monat, netto' })),
+          h('p', { class: 'a-paket-neben', text: '+ ' + U.euro(pr.einrichtung) + ' Einrichtung einmalig, netto' }),
+          h('p', { class: 'a-paket-neben', text: P.kiText(p) + ' netto' }),
           h('ul', { class: 'a-punkte' }, punkte(p).map((t, j) => h('li', { class: j === 0 && p !== 'essential' ? 'kopf' : '', text: t }))),
           h('a', { class: 'a-link a-paket-beispiel', href: '/vorschau/paket-beispiel/' + p + '.html', target: '_blank', rel: 'noopener' }, 'Beispielseite ansehen', U.icon('aussen')))));
     });
-    const inhalt = [karten];
+    /* Was beim Betrieb ankommt, vor dem Kauf ansehen (Gremium der Fensterbauer: Musteraufmaßblatt und Mess-Schritt zeigen) */
+    const blatt = U.karte('So kommt eine Anfrage bei Ihnen an', 'Aufmaßblatt als PDF per E-Mail', h('div', { class: 'a-blatt-muster' },
+      h('a', { class: 'a-blatt-bild', href: '/bilder/fensterbauer-dna/blatt.webp', target: '_blank', rel: 'noopener', 'aria-label': 'Muster-Aufmaßblatt groß ansehen' }, h('img', { src: '/bilder/fensterbauer-dna/blatt.webp', alt: 'Muster-Aufmaßblatt: Familie Weber bei Fensterbau Brandt, vier Positionen mit Öffnung, Element und Bestellmaß', width: '920', height: '872', loading: 'lazy', decoding: 'async' })),
+      h('div', null, h('p', { text: 'Mit Maßen, Fotos, Einbausituation und Wünschen. Die Maße nimmt Ihr Kunde selbst (Kundenmaß); das Feinaufmaß machen Sie vor Ort, bevor Sie bestellen.' }),
+        h('div', { class: 'a-knoepfe', style: 'margin-top:8px' }, h('a', { class: 'a-link', href: '/fuer-fensterbauer/#stufe-2', target: '_blank', rel: 'noopener' }, 'So misst Ihr Kunde', U.icon('aussen')), h('a', { class: 'a-link', href: '/bilder/fensterbauer-dna/blatt.webp', target: '_blank', rel: 'noopener' }, 'Muster-Aufmaßblatt', U.icon('aussen'))))));
+    const inhalt = [karten, blatt];
     if (A.gestaltet(m())) {
       const text = h('p', { text: wegText(S.weg) });
       inhalt.push(U.kachel([h('h2', { text: 'Wie viel möchten Sie selbst angeben?' }), h('div', { style: 'margin-top:14px' }, U.segment([{ w: 'schnell', t: 'Schnell' }, { w: 'ausfuehrlich', t: 'Ausführlich' }], S.weg, (w) => { S.weg = w; text.textContent = wegText(w); wegSpeichern(); }, 'Weg wählen')), text], 'a-wegkachel'));
@@ -201,8 +216,9 @@
       if (offen.length) inhalt.push(U.karte('Angefangene Bestellungen', 'Machen Sie dort weiter, wo Sie aufgehört haben', h('div', { class: 'a-offen' }, offen.map((a) =>
         h('div', { class: 'a-offen-zeile' }, h('span', null, h('b', { text: a.paketName }), ' · ' + (a.angaben.betrieb && a.angaben.betrieb.firma || a.nr) + ' · ' + U.datum(a.updated_at)), U.ring('Weiter', { class: 'klein', on: { click: () => { laden(a); zeigen(ersteOffene()); } } }))))));
     }
-    inhalt.push(h('p', { class: 'a-fusszeile' }, U.aenderbar('Paket und Angaben lassen sich bis zur Zahlung jederzeit ändern. Alle Preise netto' + (S.stand && S.stand.mwst === false ? '.' : ' zzgl. 19 % USt.') + (P.VORLAEUFIG ? ' Vorläufige Preise.' : ''))));
-    return { frage: U.frage('Welches Paket *passt zu Ihnen?*', 'Drei Stufen, ein Konfigurator. Wählen Sie, wie viel von Ihrer Marke auf der Seite steht.'), inhalt: inhalt, fuss: fuss('Weiter mit ' + kurz(S.paket), (k) => paketWeiter(k)) };
+    inhalt.push(h('p', { class: 'a-fusszeile' }, U.aenderbar('Paket und Angaben lassen sich bis zur Zahlung jederzeit ändern. Alle Preise netto' + (S.stand && S.stand.mwst === false ? '.' : ' zzgl. 19 % USt.') + (P.VORLAEUFIG ? ' Vorläufige Preise.' : '') +
+      ' Eine KI-Auswertung ist ein Foto, meist zwei je Fenster. Zum Schutz vor Missbrauch wertet die KI im Monat höchstens das Doppelte des Kontingents aus, danach geht es ohne KI-Befund weiter.')));
+    return { frage: U.frage('Welches Paket *passt zu Ihnen?*', 'Drei Stufen, ein Konfigurator. Wählen Sie, wie viel von Ihrer Marke auf der Seite steht.', wahl), inhalt: inhalt, fuss: fuss('Weiter mit ' + kurz(S.paket) + ' · ' + U.euro(P.preis(S.paket).monat), (k) => paketWeiter(k)) };
   };
   const wegText = (w) => w === 'schnell' ? 'Sie nennen nur das Nötigste und Ihr Logo. Texte, Farben und Bilder übernehmen wir von Ihrer Website oder klären sie im Telefonat.' : 'Sie geben Logo, Farben, Fotos und Texte selbst vor. Was noch fehlt, reichen Sie später im Kundenbereich nach.';
   function paketWaehlen(p) {
@@ -228,7 +244,7 @@
     (S.ich.auftraege = S.ich.auftraege || []).unshift(r.auftrag);
   }
   function ersteOffene() {
-    const t = A.offen(S.angaben, m());
+    const t = A.offen(S.angaben, m(), S.weg);
     return t || (A.gestaltet(m()) ? 'auftritt' : 'bestellen');
   }
 
@@ -239,7 +255,7 @@
     let code = null;
     if (S.codeGeschickt) {
       mail.eingabe.readOnly = true;
-      code = U.feld({ k: 'code', label: 'Code aus der E-Mail', modus: 'numeric', auto: 'one-time-code', max: 7, platzhalter: '123 456', hilfe: 'Wir haben den Code an ' + S.mail + ' geschickt. Er gilt 15 Minuten. Keine Mail? Bitte auch im Spam-Ordner nachsehen.' });
+      code = U.feld({ k: 'code', label: 'Code aus der E-Mail', modus: 'numeric', auto: 'one-time-code', max: 7, roh: true, platzhalter: '123 456', hilfe: 'Wir haben den Code an ' + S.mail + ' geschickt. Er gilt 15 Minuten. Keine Mail? Bitte auch im Spam-Ordner nachsehen.' });
       teile.push(code, h('div', { class: 'a-knoepfe', style: 'padding:4px 0 14px' }, U.ring('Neuen Code schicken', { class: 'klein', on: { click: (e) => codeSchicken(e.currentTarget) } }), U.ring('Andere Adresse', { class: 'klein', on: { click: () => { S.codeGeschickt = false; render({ stehen: true }); } } })));
     }
     const k = U.karte(null, null, formular(teile, () => kontoWeiter(knopf)));
@@ -284,7 +300,8 @@
   }
   STATIONEN.betrieb = function () {
     const b = S.angaben.betrieb;
-    const firma = betriebFeld({ k: 'firma', label: 'Unternehmen, wie im Handelsregister', platzhalter: 'Fensterbau Brandt GmbH', auto: 'organization',
+    const schnell = S.weg === 'schnell' && A.gestaltet(m()), spaeter = schnell ? 'klären wir im Telefonat, falls offen' : '';
+    const firma = betriebFeld({ k: 'firma', label: 'Unternehmen, wie auf Ihren Rechnungen', platzhalter: 'Fensterbau Brandt GmbH', auto: 'organization',
       onBlur: (v) => {
         const nameF = wurzel.querySelector('[data-k="name"]'), formF = wurzel.querySelector('[data-k="rechtsform"]'), form = FORM_RE.exec(v);
         if (!b.name && v.trim()) { b.name = v.replace(FORM_RE, '').trim(); nameF.eingabe.value = b.name; geaendert('betrieb'); }
@@ -311,17 +328,17 @@
     const impressum = U.karte('Impressum und Rechnung', 'Pflichtangaben für Ihre Seite', [
       betriebFeld({ k: 'strasse', label: 'Straße und Hausnummer', auto: 'street-address', platzhalter: 'Werkstattweg 12' }),
       h('div', { class: 'a-plz' }, betriebFeld({ k: 'plz', label: 'PLZ', modus: 'numeric', auto: 'postal-code', platzhalter: '50667', max: 5 }), betriebFeld({ k: 'ort', label: 'Ort', auto: 'address-level2', platzhalter: 'Köln' })),
-      betriebFeld({ k: 'bundesland', label: 'Bundesland', optionen: Object.keys(A.BUNDESLAENDER).map((k) => [k, A.BUNDESLAENDER[k]]) }),
+      betriebFeld({ k: 'bundesland', label: 'Bundesland', optional: schnell, hilfe: spaeter, optionen: Object.keys(A.BUNDESLAENDER).map((k) => [k, A.BUNDESLAENDER[k]]) }),
       h('div', { class: 'a-zwei' },
-        betriebFeld({ k: 'rechtsform', label: 'Rechtsform', vorschlaege: RECHTSFORMEN, platzhalter: 'GmbH' }),
-        betriebFeld({ k: 'vertretung', label: 'Vertreten durch', platzhalter: 'Petra Brandt, Geschäftsführerin' })),
+        betriebFeld({ k: 'rechtsform', label: 'Rechtsform', optional: schnell, vorschlaege: RECHTSFORMEN, platzhalter: 'GmbH' }),
+        betriebFeld({ k: 'vertretung', label: 'Vertreten durch', optional: schnell, hilfe: spaeter, platzhalter: 'Petra Brandt, Geschäftsführerin' })),
       mehr
     ]);
     return { frage: U.frage('Ihr Betrieb, *so wie er auf der Seite steht.*', null, U.aenderbar()), inhalt: formular([seite, impressum], () => teilWeiter('betrieb')), fuss: fuss('Weiter', () => teilWeiter('betrieb')) };
   };
   /* Nach der Zahlung: Teil vollständig prüfen, speichern, zurück in den Kundenbereich */
   async function aenderungSpeichern(teil, knopf) {
-    const r = A[teil](S.angaben[teil], m());
+    const r = A[teil](S.angaben[teil], m(), S.weg);
     const erstes = U.fehlerZeigen(wurzel.querySelector('.a-r-inhalt'), r.fehler);
     if (erstes) { const d = erstes.closest('details'); if (d) d.open = true; U.zuFeld(erstes); return; }
     U.warten(knopf, true);
@@ -334,7 +351,7 @@
 
   /* Teil prüfen, speichern, weiter; bei Fehlern das erste Feld zeigen */
   async function teilWeiter(teil, knopf) {
-    const r = A[teil](S.angaben[teil], m());
+    const r = A[teil](S.angaben[teil], m(), S.weg);
     const erstes = U.fehlerZeigen(wurzel.querySelector('.a-r-inhalt'), r.fehler);
     if (erstes) { const d = erstes.closest('details'); if (d) d.open = true; U.zuFeld(erstes); U.toast(Object.keys(r.fehler).length === 1 ? 'Eine Angabe fehlt noch' : Object.keys(r.fehler).length + ' Angaben fehlen noch'); return; }
     if (teil === 'adresse' && !m().domain && S.adresse && S.adresse.name === A.unteradresse(S.angaben.adresse.name).name && !S.adresse.frei) { const f = wurzel.querySelector('[data-k="name"]'); U.fehlerSetzen(f, S.adresse.text); U.zuFeld(f); return; }
@@ -380,7 +397,7 @@
           const v = A.vorschlag(S.angaben.betrieb.name || S.angaben.betrieb.firma);
           felder.appendChild(mehrfach({ feld: 'domains', max: A.GRENZEN.domains, titel: (i) => (i === 0 ? 'Wunsch-Domain' : (i + 1) + '. Wahl'), optional: (i) => i > 0, platzhalter: (i) => (i === 0 ? (v || 'fensterbau-brandt') + '.de' : ''), modus: 'url', weitere: 'Weitere Wunsch-Domain' }));
           felder.appendChild(U.haken({ text: 'Schlagen Sie mir passende Namen vor', an: ad.vorschlaege, onChange: (x) => { ad.vorschlaege = x; geaendert('adresse'); } }));
-          felder.appendChild(h('p', { class: 'a-hilfe', style: 'padding:0 0 14px', text: 'Wir registrieren die Domain für Sie, sobald sie frei ist. Eine Domain bis 25 € netto im Jahr ist im Paket enthalten (Paketbedingungen § 6).' }));
+          felder.appendChild(h('p', { class: 'a-hilfe', style: 'padding:0 0 14px', text: 'Wir registrieren die Domain für Sie, sobald sie frei ist. Eine Domain bis ' + P.DOMAIN_JAHR + ' € netto im Jahr ist im Paket enthalten (Paketbedingungen § 6).' }));
         } else {
           felder.appendChild(U.feld({ k: 'domains.0', label: 'Ihre Domain oder Unteradresse', wert: ad.domains[0], platzhalter: 'fenster.ihr-betrieb.de', modus: 'url', auto: 'off', hilfe: 'Eine Domain, die Ihnen schon gehört, binden wir nach Absprache an (Paketbedingungen § 6 Abs. 3). Am einfachsten ist eine Unteradresse wie fenster.ihr-betrieb.de; den Eintrag bei Ihrem Anbieter erklären wir Ihnen.',
             onInput: (x) => { ad.domains[0] = x; U.fehlerSetzen(wurzel.querySelector('[data-k="domains.0"]'), ''); geaendert('adresse'); } }));
@@ -479,7 +496,7 @@
     } else {
       inhalt.push(U.karte('Logo und Farben', null, [h('div', { class: 'a-datei-zeile', style: 'padding:6px 0 10px' }, platz('logo', 'Logo', 'a-logo-platz'), h('p', { class: 'a-hilfe', text: 'Am besten als SVG oder PNG mit transparentem Hintergrund.' })), farben(),
         h('p', { class: 'a-hilfe', style: 'padding:0 0 14px', text: mm.farbwelt === 'voll' ? 'Mit ' + kurz(S.paket) + ' steht die ganze Seite in Ihren Farben.' : 'Mit ' + kurz(S.paket) + ' steht die Seite zur Hälfte in Ihren Farben: Knöpfe, Akzente und eine Kachel.' })]));
-      inhalt.push(U.karte('Fotos Ihres Betriebs', 'Bühne und fünf Kacheln', [h('div', { class: 'a-fotos' }, A.FOTO_PLAETZE.map((f) => platz(f.k, f.titel))),
+      inhalt.push(U.karte('Fotos Ihres Betriebs', 'ein großes Bild oben, fünf kleinere darunter', [h('div', { class: 'a-fotos' }, A.FOTO_PLAETZE.map((f) => platz(f.k, f.titel))),
         h('p', { class: 'a-hilfe', style: 'padding:0 0 14px', text: 'Querformat, gern mit Tageslicht. Leere Plätze füllen wir mit passenden Bildern, bis Sie eigene nachreichen.' })]));
       inhalt.push(U.karte('Porträt', b.ap ? 'Foto von ' + b.ap : 'Foto der Ansprechperson', h('div', { class: 'a-datei-zeile', style: 'padding:6px 0 16px' }, platz('portrait', 'Porträt', 'a-portrait-platz'), h('p', { class: 'a-hilfe', text: 'Steht neben Ihrem Namen, statt der Initialen. Ein freundliches Foto mit ruhigem Hintergrund.' }))));
       const texte = [auftrittFeld({ k: 'ueberschrift', label: 'Überschrift', platzhalter: 'Fenster, Türen und Montage aus einer Hand.' }),
@@ -499,46 +516,61 @@
   STATIONEN.bestellen = function () {
     const mm = m(), pr = P.preis(S.paket), b = S.angaben.betrieb, ad = S.angaben.adresse, t = S.angaben.auftritt, st = S.stand || {};
     const mwst = st.mwst !== false, kasse = !!(st.verkauf && st.verkauf.kasse);
-    const p = A.pruefen(S.angaben, mm), inhalt = [];
+    const p = A.pruefen(S.angaben, mm, null, S.weg), inhalt = [];
     if (!p.ok) {
       const je = {}; Object.keys(p.fehler).forEach((k) => { const s = k.split('.')[0]; je[s] = (je[s] || 0) + 1; });
-      inhalt.push(U.kachel([h('h2', { text: 'Es fehlen noch Angaben' }), h('div', { class: 'a-luecken' }, Object.keys(je).map((s) => h('div', { class: 'a-offen-zeile' }, h('span', null, h('b', { text: (liste().find((x) => x.k === s) || {}).t || s }), ': ' + (je[s] === 1 ? 'eine Angabe' : je[s] + ' Angaben')), U.ring('Ergänzen', { class: 'klein', on: { click: () => { zeigen(s); setTimeout(() => { const f = U.fehlerZeigen(wurzel.querySelector('.a-r-inhalt'), A[s](S.angaben[s], mm).fehler); U.zuFeld(f); }, 60); } } }))))], 'a-luecke'));
+      inhalt.push(U.kachel([h('h2', { text: 'Es fehlen noch Angaben' }), h('div', { class: 'a-luecken' }, Object.keys(je).map((s) => h('div', { class: 'a-offen-zeile' }, h('span', null, h('b', { text: (liste().find((x) => x.k === s) || {}).t || s }), ': ' + (je[s] === 1 ? 'eine Angabe' : je[s] + ' Angaben')), U.ring('Ergänzen', { class: 'klein', on: { click: () => { zeigen(s); setTimeout(() => { const f = U.fehlerZeigen(wurzel.querySelector('.a-r-inhalt'), A[s](S.angaben[s], mm, S.weg).fehler); U.zuFeld(f); }, 60); } } }))))], 'a-luecke'));
     }
-    const brutto = (n) => U.euro(Math.round(n * 119) / 100);
+    const brutto = (n) => U.euro(Math.round(n * 119) / 100), grau = 'color:var(--silbergrau);font-size:14px';
+    /* Preis mit allem, was Thomas und Petra vermisst haben: netto, heute brutto, Monat, KI, Storno (Gremium 27.10.2026) */
     inhalt.push(U.kachel([h('p', { class: 'a-label-klein', style: 'margin:0 0 10px' }, U.chip(P.PAKETE[S.paket].name, 'aktiv')),
-      h('div', { class: 'a-summe' }, h('span', { class: 'gross' }, String(pr.einrichtung), h('small', { text: '€ Einrichtung' })), h('span', { style: 'color:var(--silbergrau);font-size:14px', text: 'heute, einmalig' })),
-      h('p', { text: 'Danach ' + U.euro(pr.monat) + ' im Monat ab dem Tag, an dem Ihre Seite live geht. Ohne Mindestlaufzeit, kündbar zum Monatsende.' }),
-      h('p', { style: 'font-size:13px', text: mwst ? 'Preise netto zzgl. 19 % USt.: ' + brutto(pr.einrichtung) + ' Einrichtung, ' + brutto(pr.monat) + ' im Monat.' + (P.VORLAEUFIG ? ' Vorläufige Preise.' : '') : 'Kein Ausweis der Umsatzsteuer nach § 19 UStG.' })], 'leucht'));
-    const abschnitt = (titel, station, zeilen) => h('div', { class: 'a-abschnitt' }, h('div', { class: 'a-karte-kopf' }, h('h3', { text: titel }), U.ring('Ändern', { class: 'klein', on: { click: () => zeigen(station) } })),
-      h('dl', { class: 'a-kv' }, zeilen.filter(Boolean).map((z) => [h('dt', { text: z[0] }), h('dd', null, z[1] || '–')])));
-    const ab = [abschnitt('Ihr Betrieb', 'betrieb', [['Unternehmen', b.rechtsform && b.firma.toLowerCase().replace(/[\s.]/g, '').indexOf(b.rechtsform.toLowerCase().replace(/[\s.]/g, '')) < 0 ? b.firma + ', ' + b.rechtsform : b.firma], ['Auf der Seite', b.name], ['Ansprechperson', [b.ap, b.rolle].filter(Boolean).join(', ')], ['Kontakt', [b.tel, b.mail].filter(Boolean).join(' · ')], ['Anschrift', [b.strasse, [b.plz, b.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ')], b.web ? ['Website', b.web] : null]),
-      abschnitt('Adresse', 'adresse', [['Ihre Seite', adresseText() || (ad.vorschlaege ? 'Vorschläge von uns' : '')], mm.domain ? ['Domain', ad.art === 'eigene' ? 'Ihre Domain, Anbindung nach Absprache' : 'Neu, wir registrieren sie'] : null, ['Anfragen an', ad.eingang.filter(Boolean).join(', ')], mm.dashboard ? ['Team', ad.team.filter(Boolean).join(', ') || 'später'] : null])];
-    if (A.gestaltet(mm)) {
-      const fotos = A.FOTO_PLAETZE.filter((f) => datei(f.k)).length, sw = h('span', { class: 'a-swatches' }, t.farben.map(A.farbe).filter(Boolean).map((c) => h('i', { style: 'background:' + c })));
-      ab.push(abschnitt('Auftritt', 'auftritt', [['Weg', S.weg === 'schnell' ? 'Schnell, Sie übernehmen den Rest' : 'Ausführlich'], ['Logo', datei('logo') ? 'hochgeladen' : 'folgt'], S.weg === 'schnell' ? ['Website', t.ausWebsite ? 'Texte, Farben und Bilder übernehmen' : '–'] : ['Farben', t.farben.some(A.farbe) ? sw : (t.farbenWebsite ? 'aus Logo oder Website' : 'folgen')], S.weg === 'schnell' ? null : ['Fotos', fotos + ' von 6'], S.weg === 'schnell' ? null : ['Texte', [t.ueberschrift, t.einleitung, t.leistungTitel, t.leistungText].filter(Boolean).length + ' von 4' + (t.ueberschrift ? '' : ', den Rest schreiben wir')]]));
-    }
-    inhalt.push(U.karte('Zusammenfassung', null, ab));
-    const rueck = U.feld({ k: 'rueckruf', label: 'Wann dürfen wir Sie anrufen?', optional: true, wert: b.rueckruf, max: A.GRENZEN.rueckruf, platzhalter: 'z. B. werktags ab 16 Uhr', onInput: (v) => { b.rueckruf = v; geaendert('betrieb'); } });
-    inhalt.push(U.karte('So geht es weiter', null, [h('ol', { class: 'a-schritte' },
-      h('li', null, h('b', { text: kasse ? 'Einrichtung bezahlen' : 'Unverbindlich anfragen' }), kasse ? 'per Karte oder SEPA-Lastschrift bei Stripe. Ihr Zahlungsmittel bleibt für das Monatsabo hinterlegt.' : 'Unsere Kasse öffnet in Kürze. Wir melden uns, sobald Sie bezahlen können.'),
+      h('div', { class: 'a-summe' }, h('span', { class: 'gross' }, String(pr.einrichtung), h('small', { text: '€ Einrichtung, netto' })), h('span', { style: grau, text: kasse ? 'heute, einmalig' : 'einmalig' })),
+      mwst ? h('p', { class: 'a-heute' }, h('b', { text: (kasse ? 'Heute bei Stripe: ' : 'Mit Umsatzsteuer: ') + brutto(pr.einrichtung) }), ' inkl. 19 % USt.') : h('p', { style: grau, text: 'Kein Ausweis der Umsatzsteuer nach § 19 UStG.' }),
+      h('p', { text: 'Danach ' + U.euro(pr.monat) + ' netto im Monat' + (mwst ? ' (' + brutto(pr.monat) + ' inkl. USt.)' : '') + ', erst ab dem Tag, an dem Ihre Seite live geht. Ohne Mindestlaufzeit, kündbar zum Monatsende.' }),
+      h('p', { style: grau, text: P.kiText(S.paket) + ' netto, mit der Monatsrechnung.' }),
+      h('p', { style: grau, text: 'Bis wir mit der Einrichtung beginnen, stornieren Sie im Kundenbereich kostenlos; die Einrichtung erstatten wir dann vollständig.' })], 'leucht'));
+    /* Zustimmung direkt unter dem Preis, je Haken ein Satz in Alltagsdeutsch; die Zeile über der Pille zählt, was fehlt */
+    const zu = S.auftrag && S.auftrag.zustimmung || {};
+    const stand = st.standText || st.stand || '';
+    const zaehlen = () => {
+      const g = wurzel.querySelector('.a-fuss .a-grund'); if (!g) return;
+      const n = ['unternehmer', 'agb', 'avv'].filter((k) => { const e = wurzel.querySelector('[data-k="' + k + '"] input'); return !(e && e.checked); }).length;
+      g.textContent = n ? (n === 1 ? 'Noch ein Häkchen setzen' : 'Noch ' + n + ' Häkchen setzen') : (kasse ? 'Weiter zur Zahlung bei Stripe' : 'Unverbindlich, ohne Zahlung');
+      g.classList.toggle('offen', !!n);
+    };
+    const satz = (t) => h('small', { class: 'a-haken-satz', text: t });
+    inhalt.push(U.karte('Ihre Zustimmung', null, h('div', { style: 'padding:2px 0 8px' },
+      U.haken({ k: 'unternehmer', an: zu.unternehmer, onChange: zaehlen, text: ['Ich bestelle als Unternehmer (§ 14 BGB), nicht als Verbraucher.', satz('Also für einen Betrieb, nicht privat. Ein Widerrufsrecht wie beim Kauf als Privatperson gibt es deshalb nicht.')] }),
+      U.haken({ k: 'agb', an: zu.agb && zu.agb === st.stand, onChange: zaehlen, text: ['Ich stimme den ', h('a', { href: '/konfigurator-bedingungen/', target: '_blank', rel: 'noopener', text: 'Paketbedingungen' }), stand ? ' (Fassung vom ' + stand + ')' : '', ' zu.', satz('Darin stehen Preise, Laufzeit, Storno und Kündigung.')] }),
+      U.haken({ k: 'avv', an: zu.avv, onChange: zaehlen, text: ['Ich schließe den ', h('a', { href: '/konfigurator-bedingungen/#avv', target: '_blank', rel: 'noopener', text: 'Vertrag zur Auftragsverarbeitung' }), ' ab.', satz('Er regelt, wie wir die Daten Ihrer Kunden in Ihrem Auftrag verarbeiten.')] }))));
+    if (!S.stand) inhalt.push(h('p', { class: 'a-hinweis', text: 'Die Bestellung ist gerade nicht erreichbar. Bitte laden Sie die Seite gleich noch einmal.' }));
+    /* Nach der Pille: wie es weitergeht und die Zusammenfassung zum Prüfen */
+    const nach = [];
+    const rueck = U.feld({ k: 'rueckruf', label: 'Wann dürfen wir Sie anrufen?', optional: true, wert: b.rueckruf, max: A.GRENZEN.rueckruf, platzhalter: 'werktags ab 16 Uhr', onInput: (v) => { b.rueckruf = v; geaendert('betrieb'); } });
+    nach.push(U.karte('So geht es weiter', null, [h('ol', { class: 'a-schritte' },
+      h('li', null, h('b', { text: kasse ? 'Einrichtung bezahlen' : 'Unverbindlich anfragen' }), kasse ? 'bei Stripe, unserem Zahlungsdienst, per Karte oder SEPA-Lastschrift. Ihr Zahlungsmittel bleibt für das Monatsabo hinterlegt; abgebucht wird es erst ab dem Livegang.' : 'Unsere Kasse öffnet in Kürze. Wir melden uns, sobald Sie bezahlen können.'),
       h('li', null, h('b', { text: 'Wir rufen Sie an' }), 'zu Ihrer Wunschzeit, sichern die Domain und bauen Ihre Seite.'),
       h('li', null, h('b', { text: 'Vorschau ansehen' }), 'Sie bekommen einen Link, geben frei oder nennen uns Ihre Änderungen.'),
       h('li', null, h('b', { text: 'Live' }), 'Ihre Seite geht online, ab dann läuft das Monatsabo.')), rueck]));
-    const zu = S.auftrag && S.auftrag.zustimmung || {};
-    const stand = st.standText || st.stand || '';
-    inhalt.push(U.karte('Ihre Zustimmung', null, h('div', { style: 'padding:2px 0 8px' },
-      U.haken({ k: 'unternehmer', an: zu.unternehmer, text: 'Ich bestelle als Unternehmer (§ 14 BGB), nicht als Verbraucher.' }),
-      U.haken({ k: 'agb', an: zu.agb && zu.agb === st.stand, text: ['Ich stimme den ', h('a', { href: '/konfigurator-bedingungen/', target: '_blank', rel: 'noopener', text: 'Paketbedingungen' }), stand ? ' (Fassung vom ' + stand + ')' : '', ' zu.'] }),
-      U.haken({ k: 'avv', an: zu.avv, text: ['Ich schließe den ', h('a', { href: '/konfigurator-bedingungen/#avv', target: '_blank', rel: 'noopener', text: 'Vertrag zur Auftragsverarbeitung' }), ' ab.'] }))));
-    if (!S.stand) inhalt.push(h('p', { class: 'a-hinweis', text: 'Die Bestellung ist gerade nicht erreichbar. Bitte laden Sie die Seite gleich noch einmal.' }));
-    return { frage: U.frage('Alles da? *Dann bestellen Sie.*', null), inhalt: inhalt, fuss: fuss(kasse ? 'Kostenpflichtig bestellen' : 'Unverbindlich anfragen', (k) => bestellen(k), { grund: kasse ? 'Weiter zur Zahlung bei Stripe' : '' }) };
+    const abschnitt = (titel, station, zeilen) => h('div', { class: 'a-abschnitt' }, h('div', { class: 'a-karte-kopf' }, h('h3', { text: titel }), U.ring('Ändern', { class: 'klein', on: { click: () => zeigen(station) } })),
+      h('dl', { class: 'a-kv' }, zeilen.filter(Boolean).map((z) => [h('dt', { text: z[0] }), h('dd', null, z[1] || '–')])));
+    const neueDomain = mm.domain && ad.art !== 'eigene';
+    const ab = [abschnitt('Ihr Betrieb', 'betrieb', [['Unternehmen', b.rechtsform && b.firma.toLowerCase().replace(/[\s.]/g, '').indexOf(b.rechtsform.toLowerCase().replace(/[\s.]/g, '')) < 0 ? b.firma + ', ' + b.rechtsform : b.firma], ['Auf der Seite', b.name], ['Ansprechperson', [b.ap, b.rolle].filter(Boolean).join(', ')], ['Kontakt', [b.tel, b.mail].filter(Boolean).join(' · ')], ['Anschrift', [b.strasse, [b.plz, b.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ')], b.web ? ['Bisherige Website', b.web.replace(/^https?:\/\//, '').replace(/\/$/, '') + ', bleibt, wie sie ist'] : null]),
+      abschnitt('Adresse', 'adresse', [[neueDomain ? 'Neue Domain' : 'Ihre Seite', (adresseText() || (ad.vorschlaege ? 'Vorschläge von uns' : '')) + (neueDomain ? ', wir registrieren sie (bis ' + P.DOMAIN_JAHR + ' € netto im Jahr inklusive)' : mm.domain ? ', Ihre Domain, Anbindung nach Absprache' : '')], ['Anfragen an', ad.eingang.filter(Boolean).join(', ')], mm.dashboard ? ['Team', ad.team.filter(Boolean).join(', ') || 'später'] : null])];
+    if (A.gestaltet(mm)) {
+      const fotos = A.FOTO_PLAETZE.filter((f) => datei(f.k)).length, sw = h('span', { class: 'a-swatches' }, t.farben.map(A.farbe).filter(Boolean).map((c) => h('i', { style: 'background:' + c })));
+      ab.push(abschnitt('Auftritt', 'auftritt', [['Angaben', S.weg === 'schnell' ? 'Das Nötigste, den Rest übernehmen wir' : 'Ausführlich, Sie geben alles selbst vor'], ['Logo', datei('logo') ? 'hochgeladen' : 'reichen Sie später nach'], S.weg === 'schnell' ? ['Website', t.ausWebsite ? 'Texte, Farben und Bilder übernehmen' : '–'] : ['Farben', t.farben.some(A.farbe) ? sw : (t.farbenWebsite ? 'aus Logo oder Website' : 'wählen wir mit Ihnen')], S.weg === 'schnell' ? null : ['Fotos', fotos + ' von 6' + (fotos < 6 ? ', den Rest füllen wir mit passenden Bildern' : '')], S.weg === 'schnell' ? null : ['Texte', [t.ueberschrift, t.einleitung, t.leistungTitel, t.leistungText].filter(Boolean).length + ' von 4' + (t.ueberschrift ? '' : ', den Rest schreiben wir')]]));
+    }
+    nach.push(U.karte('Ihre Angaben', 'zum Prüfen', ab));
+    setTimeout(zaehlen, 0);
+    return { frage: U.frage('Alles da? *Dann bestellen Sie.*', null), inhalt: inhalt, fuss: fuss(kasse ? 'Kostenpflichtig bestellen' : 'Unverbindlich anfragen', (k) => bestellen(k), { grund: kasse ? 'Weiter zur Zahlung bei Stripe' : 'Unverbindlich, ohne Zahlung' }), nach: nach };
   };
   async function bestellen(knopf) {
     if (!S.stand) { U.toast('Bitte die Seite neu laden.'); return; }
     const box = wurzel.querySelector('.a-r-inhalt'), wert = (k) => { const e = box.querySelector('[data-k="' + k + '"] input'); return !!(e && e.checked); };
     const z = { unternehmer: wert('unternehmer'), agb: wert('agb') ? S.stand.stand : '', avv: wert('avv') };
-    const p = A.pruefen(S.angaben, m());
-    if (!p.ok) { const s = Object.keys(p.fehler)[0].split('.')[0]; zeigen(s); setTimeout(() => U.zuFeld(U.fehlerZeigen(wurzel.querySelector('.a-r-inhalt'), A[s](S.angaben[s], m()).fehler)), 60); U.toast('Es fehlen noch Angaben'); return; }
+    const p = A.pruefen(S.angaben, m(), null, S.weg);
+    if (!p.ok) { const s = Object.keys(p.fehler)[0].split('.')[0]; zeigen(s); setTimeout(() => U.zuFeld(U.fehlerZeigen(wurzel.querySelector('.a-r-inhalt'), A[s](S.angaben[s], m(), S.weg).fehler)), 60); U.toast('Es fehlen noch Angaben'); return; }
     const r = A.zustimmung(z, S.stand.stand);
     const erstes = U.fehlerZeigen(box, r.fehler);
     if (erstes) { U.zuFeld(erstes); return; }

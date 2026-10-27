@@ -99,14 +99,14 @@ export default async (h) => {
   const k5 = await api(HOST, '/api/konto', { cookie });
   const acc = (k5.json && k5.json.konto && k5.json.konto.acc) || {}, ai = acc.instanz || {};
   ok(k5.status === 200 && ai.basis === h.base(HOST) + '/' && ai.m && ai.m.dashboard === true && ai.m.einladungslinks === true && ai.m.pdfKennzeichnung === 'keine' && Array.isArray(ai.zugang) && ai.zugang.length && ai.zugang.every((z) => !('uid' in z)) && ai.zugang.some((z) => z.ich && z.mail === TEAM), '28.5 Sicht: acc.instanz mit basis, Merkmalen und Zugängen ohne uid');
-  ok(['book', 'rechnungen', 'pay', 'freeUsed', 'freeQuota', 'verwaltung', 'konto', 'plan', 'aboSitzung'].every((f) => !(f in acc)) && k5.json.konto.stripe === null && !eezi.test(k5.text.split(ai.kundenkonto || '§').join('')) && /\/partner\/$/.test(ai.kundenkonto || ''), '28.5 Sicht ohne Abrechnungsfelder (book, rechnungen, pay, freeUsed, Tarif, verwaltung), stripe null; eeziframes nur in der Adresse des Kundenkontos (Vertrag, Rechnungen, Support)');
+  ok(['book', 'rechnungen', 'pay', 'freeUsed', 'freeQuota', 'verwaltung', 'konto', 'plan', 'aboSitzung'].every((f) => !(f in acc)) && k5.json.konto.stripe === null && !eezi.test(k5.text.split(ai.kundenkonto || '§').join('')) && /\/konto\/$/.test(ai.kundenkonto || ''), '28.5 Sicht ohne Abrechnungsfelder (book, rechnungen, pay, freeUsed, Tarif, verwaltung), stripe null; eeziframes nur in der Adresse des Kundenkontos (Vertrag, Rechnungen, Support)');
   const stand = k5.json.konto.stand, v0 = [(await betriebVon(D.betrieb)).version, (await zeileVon('dash')).version];
   const k5b = await api(HOST, '/api/konto?stand=' + encodeURIComponent(stand), { cookie }), k5c = await api(HOST, '/api/konto', { cookie });
   const v1 = [(await betriebVon(D.betrieb)).version, (await zeileVon('dash')).version];
   ok(k5b.status === 200 && k5b.json.gleich === true && !k5b.json.konto && k5c.json.konto && v0.join() === v1.join(), '28.5 ?stand= unverändert → { gleich: true }; zwei Abrufe ändern weder Betriebszeile noch Instanz (Version ' + v0.join('/') + ')');
 
   /* ---------- 28.6 Trennung ---------- */
-  const t1 = await api(HOST2, '/api/konto', { cookie }), t2 = await api('localhost', '/api/partner/nachrichten', { cookie: cookie.replace('__Host-betrieb', '__Host-partner') }), t3 = await api('localhost', '/api/partner/nachrichten', { cookie });
+  const t1 = await api(HOST2, '/api/konto', { cookie }), t2 = await api('localhost', '/api/auftrag/x0000000/nachrichten', { cookie: cookie.replace('__Host-betrieb', '__Host-kunde') }), t3 = await api('localhost', '/api/auftrag/x0000000/nachrichten', { cookie });
   ok([401, 403].includes(t1.status) && t2.status === 401 && t3.status === 401, '28.6 Sitzung von ' + HOST + ' gilt nicht auf ' + HOST2 + ' (' + t1.status + ') und nicht im Kundenkonto auf der Hauptdomain (401)');
   const umzug = await (async () => { await api('localhost', '/api/konto/anmelden', { body: { mail: TEAM }, origin: true }); return api('localhost', '/api/konto/bestaetigen', { body: { mail: TEAM, code: '123456' }, origin: true }); })();
   ok(umzug.status === 409 && umzug.json.umzug === h.base(HOST) + '/betrieb/', '28.6 Hauptdomain: Anmeldung mit einer Zugangsadresse ohne Betriebskonto → 409 mit Umzug auf ' + (umzug.json && umzug.json.umzug));

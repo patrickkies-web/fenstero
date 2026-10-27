@@ -3773,7 +3773,7 @@ if (teil(17)) {
   const code17 = ['app.js', 'portal.js', 'gemeinsam.js'].map((f) => fs17.readFileSync(path17.join(W17, 'web/assets', f), 'utf8')).join('\n');
   const schl17 = Array.from(new Set((code17.match(/'aufmass\.[a-z0-9.]+'/g) || []).map((x) => x.slice(1, -1).replace(/\.$/, '.…'))));
   const fehlt17 = schl17.filter((x) => !t17['/cookies/'].includes('<code>' + x + '</code>'));
-  ok(schl17.length >= 12 && !fehlt17.length && /__Host-zentrale/.test(t17['/cookies/']) && !/document\.cookie/.test(code17), 'Cookies-Seite nennt jeden Speicher-Eintrag aus dem Code (' + schl17.length + ') und das Sitzungs-Cookie der Zentrale; die Website setzt selbst keine Cookies' + (fehlt17.length ? ': es fehlen ' + fehlt17.join(', ') : ''));
+  ok(schl17.length >= 12 && !fehlt17.length && ['__Host-kunde', '__Host-inhaber', '__Host-zentrale'].every((c) => t17['/cookies/'].includes('<code>' + c + '</code>')) && !/document\.cookie/.test(code17), 'Cookies-Seite nennt jeden Speicher-Eintrag aus dem Code (' + schl17.length + ') und die Sitzungs-Cookies von Kundenbereich, Zentrale und Verwaltung der App; die Website setzt selbst keine Cookies' + (fehlt17.length ? ': es fehlen ' + fehlt17.join(', ') : ''));
   /* b) „Vertrag widerrufen“ auf jeder Seite, hervorgehoben */
   const ohne17 = [];
   for (const sx of seo17.SEITEN.concat([{ pfad: '/gibtsnicht' }])) { const t = (await holen17(BASE, sx.pfad)).text; if (!/class="(rg-widerruf|widerruf-knopf)" href="\/widerruf\/">Vertrag widerrufen</.test(t)) ohne17.push(sx.pfad); }

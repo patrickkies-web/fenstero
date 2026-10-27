@@ -265,6 +265,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez-paket .dna-zahl--klein .dna-zahl__wert { font-size: 44px; }
 .ez-paket .dna-zahl__einheit { font-size: 14px; }
 .ez-paket__einr { margin: -6px 0 0; font: 400 13px/1.4 var(--font-sans); color: var(--tinte-2); }
+.ez-paket__einr + .ez-paket__ki { margin-top: -8px; }
 .ez-paket .ez-haken { margin-top: var(--raum-2); }
 .ez-paket > .dna-pille { margin-top: var(--raum-4); }
 .ez-paket.ez-paket--leucht { color: var(--weiss); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }

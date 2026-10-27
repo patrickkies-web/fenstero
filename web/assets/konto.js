@@ -37,7 +37,7 @@
     const teile = [mail]; let code = null;
     if (S.codeGeschickt) {
       mail.eingabe.readOnly = true;
-      code = U.feld({ k: 'code', label: 'Code aus der E-Mail', modus: 'numeric', auto: 'one-time-code', max: 7, platzhalter: '123 456', hilfe: 'Wir haben den Code an ' + S.mail + ' geschickt. Er gilt 15 Minuten.' });
+      code = U.feld({ k: 'code', label: 'Code aus der E-Mail', modus: 'numeric', auto: 'one-time-code', max: 7, roh: true, platzhalter: '123 456', hilfe: 'Wir haben den Code an ' + S.mail + ' geschickt. Er gilt 15 Minuten.' });
       teile.push(code, h('div', { class: 'a-knoepfe', style: 'padding:4px 0 14px' }, U.ring('Neuen Code schicken', { class: 'klein', on: { click: (e) => codeSchicken(e.currentTarget) } }), U.ring('Andere Adresse', { class: 'klein', on: { click: () => { S.codeGeschickt = false; anmeldung(); } } })));
     }
     const knopf = U.pille(S.codeGeschickt ? 'Anmelden' : 'Code schicken', { on: { click: () => weiter() } });
@@ -87,7 +87,7 @@
   const datei = (a, platz) => (a.dateien || []).filter((d) => d.platz === platz).pop() || null;
   function buehne(a) {
     const v = U.vorschau(), g = a.angaben || {}, b = g.betrieb || {}, t = g.auftritt || {};
-    v.setzen({ paket: a.paket, adresse: a.adresse, name: b.name || b.firma, ort: b.ort, region: b.region, ap: b.ap, rolle: b.rolle, ueberschrift: t.ueberschrift, einleitung: t.einleitung, einladung: t.einladung,
+    v.setzen({ paket: a.paket, adresse: a.adresse, live: ['live', 'pausiert'].indexOf(a.stand) >= 0, name: b.name || b.firma, ort: b.ort, region: b.region, ap: b.ap, rolle: b.rolle, ueberschrift: t.ueberschrift, einleitung: t.einleitung, einladung: t.einladung,
       farbe: A.farbe((t.farben || [])[0]), logo: dateiUrl(a, datei(a, 'logo')), portrait: dateiUrl(a, datei(a, 'portrait')), buehne: dateiUrl(a, datei(a, 'buehne')) });
     return h('div', { class: 'a-buehne' }, h('div', { class: 'a-buehne-in' }, v.el, h('div', { class: 'a-buehne-zeile' }, h('span', null, h('b', { style: 'color:var(--weiss);font-weight:500', text: kurz(a.paket) }), ' · ' + a.nr), U.chip(A.STAND_TITEL[a.stand], a.stand === 'live' ? 'aktiv' : 'leise'))));
   }
@@ -113,7 +113,8 @@
         return v.aenderung ? { t: 'Wir arbeiten *Ihre Änderungen ein.*', p: 'Danach bekommen Sie einen neuen Link zur Vorschau.' } : { t: 'Wir bauen *Ihre Seite.*', p: 'Sobald es eine Vorschau gibt, schicken wir Ihnen den Link per E-Mail. Fotos und Texte können Sie bis dahin unten ergänzen.' };
       case 'vorschau':
         if (v.freigabe) return { t: 'Freigegeben. *Wir schalten Ihre Seite live.*', p: 'Danke für Ihre Freigabe. Sobald die Seite online ist, bekommen Sie eine E-Mail.' };
-        return { t: 'Ihre Vorschau *ist fertig.*', p: 'Sehen Sie sich Ihre Seite in Ruhe an. Passt alles, geben Sie sie frei; sonst schreiben Sie uns, was wir ändern sollen.', pille: U.pille('Freigeben', { on: { click: (e) => freigeben(a, e.currentTarget) } }) };
+        /* erst ansehen, dann freigeben: die Pille öffnet die Vorschau, Freigeben steht als Ring daneben (Gremium 27.10.2026) */
+        return { t: 'Ihre Vorschau *ist fertig.*', p: 'Sehen Sie sich Ihre Seite in Ruhe an. Passt alles, geben Sie sie frei; sonst schreiben Sie uns, was wir ändern sollen.', pille: v.link ? U.pille('Vorschau öffnen', { href: v.link, target: '_blank', rel: 'noopener' }) : U.pille('Freigeben', { on: { click: (e) => freigeben(a, e.currentTarget) } }) };
       case 'live':
         return { t: 'Ihre Seite *ist live.*', p: 'Ihre Kunden planen jetzt unter ' + (a.adresse || 'Ihrer Adresse') + '. Jede Anfrage kommt als Aufmaßblatt-PDF per E-Mail.', pille: v.live ? U.pille('Seite öffnen', { href: v.live, target: '_blank', rel: 'noopener' }) : null };
       case 'pausiert': return { t: 'Ihre Seite *ist pausiert.*', p: 'Ihre Kunden sehen in dieser Zeit Ihre Kontaktdaten. Schreiben Sie uns, wenn Sie Fragen haben.' };
@@ -131,8 +132,8 @@
     const l = lage(a), inhalt = [];
     const v = a.vorschau || {};
 
-    if (a.stand === 'vorschau' && !v.freigabe) inhalt.push(U.kachel([h('h2', { text: 'Ihre Vorschau' }), h('p', { text: 'Der Link zeigt Ihre Seite genau so, wie sie online gehen soll.' }),
-      h('div', { class: 'a-knoepfe', style: 'margin-top:16px' }, v.link ? U.ring(['Vorschau öffnen ', U.icon('aussen')], { href: v.link, target: '_blank', rel: 'noopener' }) : null, U.ring('Änderungen wünschen', { on: { click: () => aendernWuenschen(a) } }))], 'leucht'));
+    if (a.stand === 'vorschau' && !v.freigabe) inhalt.push(U.kachel([h('h2', { text: 'Ihre Vorschau' }), h('p', { text: 'Der Link zeigt Ihre Seite genau so, wie sie online gehen soll. Danach geben Sie frei oder schreiben uns Ihre Änderungen.' }),
+      h('div', { class: 'a-knoepfe', style: 'margin-top:16px' }, v.link ? U.ring('Freigeben', { on: { click: (e) => freigeben(a, e.currentTarget) } }) : null, U.ring('Änderungen wünschen', { on: { click: () => aendernWuenschen(a) } }))], 'leucht'));
     if (a.stand === 'live' && v.live) inhalt.push(knopfKarte(a));
     if (!zuEnde(a)) inhalt.push(angabenKarte(a));
     inhalt.push(paketKachel(a));
@@ -163,12 +164,13 @@
     const pr = a.preise || P.preis(a.paket), n = A.naechstes(a.paket), w = a.wechsel;
     const liste = h('ul', { class: 'a-punkte a-anpassbar' }, A.anpassbar(a.paket).map((x) => h('li', { class: x.frei ? '' : 'zu' }, h('span', null, h('b', { text: x.titel }), ' ', h('span', { class: 'a-neben', text: x.text })), x.frei ? null : U.chip('ab ' + kurz(x.ab), 'leise'))));
     const teile = [h('div', { class: 'a-karte-kopf' }, h('h2', { text: 'Ihr Paket' }), U.chip(P.PAKETE[a.paket].name, 'aktiv')),
-      h('p', null, U.euro(pr.monat) + ' im Monat' + (a.stand === 'live' ? '' : ' ab Livegang') + ', Einrichtung ' + U.euro(pr.einrichtung) + ' (netto).'), liste];
+      h('p', null, U.euro(pr.monat) + ' netto im Monat' + (a.stand === 'live' ? '' : ' ab Livegang') + ', Einrichtung ' + U.euro(pr.einrichtung) + ' netto.'),
+      h('p', { class: 'a-neben', style: 'margin-top:4px' }, P.tausend((P.merkmale(a.paket) || {}).kiMonat) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + U.euro(pr.ki != null ? pr.ki : P.preis(a.paket).ki) + ' netto. Eine Auswertung ist ein Foto; zum Schutz vor Missbrauch wertet die KI im Monat höchstens das Doppelte des Kontingents aus.'), liste];
     if (n && !zuEnde(a)) {
       if (vorZahlung(a)) teile.push(h('div', { class: 'a-knoepfe', style: 'margin-top:14px' }, U.ring('Paket wechseln', { href: '/bestellen/#' + a.paket + '/' + a.id + '/paket' })));
       else if (w && w.paket) teile.push(h('p', { class: 'a-hinweis', style: 'margin-top:14px', text: 'Wechsel zu ' + P.PAKETE[w.paket].name + ' angefragt am ' + U.datum(w.zeit) + '. Wir melden uns.' }));
       else teile.push(h('div', { class: 'a-innen a-anreiz' }, h('p', { class: 'a-label-klein', style: 'margin:0' }, U.chip('Mit ' + kurz(n.paket))), h('h3', { text: 'Für ' + U.euro(n.monat) + ' mehr im Monat' }),
-        h('ul', null, n.dazu.slice(0, 4).map((x) => h('li', { text: x.titel }))), h('p', { class: 'a-preis-dazu' }, 'Einmalig ' + U.euro(n.einrichtung) + ' Differenz der Einrichtung'),
+        h('ul', null, n.dazu.slice(0, 4).map((x) => h('li', { text: x.titel }))), h('p', { class: 'a-preis-dazu' }, n.einrichtung > 0 ? 'Einmalig ' + U.euro(n.einrichtung) + ' netto Differenz der Einrichtung' : 'Ohne weitere Einrichtungsgebühr'),
         U.rund('pfeil', 'Wechsel zu ' + kurz(n.paket) + ' anfragen', { class: 'voll gross', on: { click: (e) => wechselAnfragen(a, n, e.currentTarget) } })));
     }
     return U.kachel(teile, 'a-paket-kachel');
@@ -221,7 +223,8 @@
   function zahlungKarte(a) {
     const z = a.zahlung || {}, ab = a.abo || {};
     const ABO = { aktiv: 'aktiv', zahlung_offen: 'Abbuchung offen', beendet: 'beendet' };
-    const zeilen = [['Einrichtung', z.status === 'bezahlt' ? U.euro((z.betrag_cent || 0) / 100) + ' bezahlt am ' + U.datum(z.bezahlt_am) + (z.erstattet ? ', erstattet' : '') : (z.status === 'laeuft' ? 'Lastschrift unterwegs' : 'offen')],
+    const netto = (a.preise || P.preis(a.paket) || {}).einrichtung;
+    const zeilen = [['Einrichtung', z.status === 'bezahlt' ? U.euro((z.betrag_cent || 0) / 100) + ' inkl. USt. (' + U.euro(netto) + ' netto), bezahlt am ' + U.datum(z.bezahlt_am) + (z.erstattet ? ', erstattet' : '') : (z.status === 'laeuft' ? 'Lastschrift unterwegs' : 'offen')],
       ['Monatsabo', ab.status ? (ABO[ab.status] || ab.status) + (ab.seit ? ' seit ' + U.datum(ab.seit) : '') : 'beginnt mit dem Livegang'], ab.bis && ab.status === 'aktiv' ? ['Nächste Abbuchung', U.datum(ab.bis)] : null].filter(Boolean);
     return U.karte('Zahlung und Rechnungen', null, [h('dl', { class: 'a-kv' }, zeilen.map((x) => [h('dt', { text: x[0] }), h('dd', { text: x[1] })])),
       h('div', { class: 'a-knoepfe', style: 'padding:6px 0 16px' }, U.ring('Rechnungen und Zahlungsmittel', { class: 'klein', on: { click: (e) => portal(e.currentTarget) } }))]);
@@ -281,8 +284,20 @@
       await U.api('POST', '/api/auftrag/' + a.id + '/verwerfen', {}); S.ich.auftraege = S.ich.auftraege.filter((x) => x.id !== a.id); location.hash = ''; route(); U.toast('Verworfen');
     }, true);
   }
+  /* Was dem Kunden vor der Freigabe noch fehlt (Logo, Fotos, Porträt je Paket); leer, wenn alles da ist */
+  function fehltNoch(a) {
+    const m = P.merkmale(a.paket) || {}, out = [];
+    if (m.logo && !datei(a, 'logo')) out.push('Ihr Logo');
+    const fotos = m.fotos ? A.FOTO_PLAETZE.filter((f) => !datei(a, f.k)).length : 0;
+    if (fotos) out.push(fotos === 1 ? 'ein Foto Ihres Betriebs' : fotos + ' Fotos Ihres Betriebs');
+    if (m.startansicht && !datei(a, 'portrait')) out.push('Ihr Porträt');
+    return out;
+  }
   function freigeben(a, knopf) {
-    bestaetigen('Vorschau freigeben?', 'Danach schalten wir Ihre Seite live; ab dem Livegang läuft Ihr Monatsabo. Kleinigkeiten können Sie auch danach noch ändern.', 'Freigeben', async () => {
+    const fehlt = fehltNoch(a);
+    const text = (fehlt.length ? 'Es fehlen noch ' + fehlt.join(', ').replace(/, ([^,]*)$/, ' und $1') + '. An diesen Stellen zeigt Ihre Seite dann unsere Platzhalter-Bilder, bis Sie nachreichen. ' : '') +
+      'Danach schalten wir Ihre Seite live; ab dem Livegang läuft Ihr Monatsabo. Kleinigkeiten können Sie auch danach noch ändern.';
+    bestaetigen('Vorschau freigeben?', text, fehlt.length ? 'Trotzdem freigeben' : 'Freigeben', async () => {
       const r = await U.api('POST', '/api/auftrag/' + a.id + '/freigabe', { aktion: 'freigeben' }); ersetzen(r.auftrag); zeigen(r.auftrag); U.toast('Freigegeben');
     });
   }
@@ -297,7 +312,7 @@
     });
   }
   function wechselAnfragen(a, n) {
-    bestaetigen('Zu ' + P.PAKETE[n.paket].name + ' wechseln?', 'Fällig wird die Differenz der Einrichtung (' + U.euro(n.einrichtung) + ' netto), der neue Monatspreis gilt ab dem Wechsel (Paketbedingungen § 7 Abs. 3). Wir melden uns und richten alles ein.', 'Wechsel anfragen', async () => {
+    bestaetigen('Zu ' + P.PAKETE[n.paket].name + ' wechseln?', (n.einrichtung > 0 ? 'Fällig wird die Differenz der Einrichtung (' + U.euro(n.einrichtung) + ' netto)' : 'Eine weitere Einrichtungsgebühr fällt nicht an') + ', der neue Monatspreis (' + U.euro(P.preis(n.paket).monat) + ' netto) gilt ab dem Wechsel (Paketbedingungen § 7 Abs. 3). Wir melden uns und richten alles ein.', 'Wechsel anfragen', async () => {
       await U.api('POST', '/api/auftrag/' + a.id + '/wechsel', { paket: n.paket }); a.wechsel = { paket: n.paket, zeit: new Date().toISOString() }; zeigen(a, { stehen: true }); U.toast('Angefragt');
     });
   }

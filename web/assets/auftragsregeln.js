@@ -6,8 +6,8 @@
    Was veränderbar ist, folgt den Vorlagen der Pakete (docs/profis/{essential,plus,signature}-vorschau/, Beispiel Fensterbau Brandt):
    alle Pakete Name, Ort, Ansprechperson, Kontakt und Anschrift; ab eigener Gestaltung Logo, Farben, Porträt, Überschrift, Einleitung,
    Leistungen, sechs Fotos (Bühne und fünf Kacheln); mit Einladungslinks der Einladungstext, mit Dashboard die Zugänge des Teams.
-   API: STAND, STAND_TITEL, LEISTE, uebergang(von, nach), stationen(paket), FOTO_PLAETZE, PLAETZE, GRENZEN, leer(), betrieb(d),
-        adresse(d, m), auftritt(d, m), zustimmung(d, stand), pruefen(angaben, m, weg), offen(angaben, m, weg), unteradresse(s),
+   API: STAND, STAND_TITEL, LEISTE, uebergang(von, nach), stationen(paket), FOTO_PLAETZE, PLAETZE, GRENZEN, leer(), betrieb(d, m, weg),
+        adresse(d, m), auftritt(d, m), zustimmung(d, stand), pruefen(angaben, m, teile, weg), offen(angaben, m, weg), unteradresse(s),
         unteradresseVon(host), vorschlag(firma), domain(s), farbe(s), anpassbar(paket), naechstes(paket), verkauf({ offen, live, bereit }),
         mailOk(s), telOk(s) */
 (function (root) {
@@ -126,8 +126,10 @@
   });
 
   /* ---------- Prüfung je Teil: (daten) → { ok, wert (bereinigt), fehler: { feld: 'Satz' } } ---------- */
-  function betrieb(d) {
+  /* weg 'schnell': Rechtsform, Vertretung und Bundesland klären wir im Telefonat (Gremium der Fensterbauer, 27.10.2026) */
+  function betrieb(d, m, weg) {
     d = d && typeof d === 'object' ? d : {};
+    const schnell = weg === 'schnell';
     const w = {
       firma: kurz(d.firma, GRENZEN.firma), name: kurz(d.name, GRENZEN.name), ort: kurz(d.ort, GRENZEN.ort), region: kurz(d.region, GRENZEN.region),
       strasse: kurz(d.strasse, GRENZEN.strasse), plz: String(d.plz || '').replace(/\s/g, '').slice(0, 5), bundesland: Object.prototype.hasOwnProperty.call(BUNDESLAENDER, d.bundesland) ? d.bundesland : '',
@@ -137,18 +139,18 @@
       rueckruf: kurz(d.rueckruf, GRENZEN.rueckruf)
     };
     const f = {};
-    if (w.firma.length < 2) f.firma = 'Bitte den Namen des Unternehmens eingeben, wie er im Handelsregister oder auf der Rechnung steht.';
+    if (w.firma.length < 2) f.firma = 'Bitte den Namen des Unternehmens eingeben, wie er auf Ihren Rechnungen steht.';
     if (w.name.length < 2) f.name = 'Bitte den Namen nennen, der auf Ihrer Seite stehen soll.';
     if (w.ort.length < 2) f.ort = 'Bitte den Ort nennen, für den Sie werben.';
     if (w.strasse.length < 3) f.strasse = 'Bitte Straße und Hausnummer eingeben.';
     if (!/^\d{5}$/.test(w.plz)) f.plz = 'Bitte eine fünfstellige Postleitzahl eingeben.';
-    if (!w.bundesland) f.bundesland = 'Bitte das Bundesland wählen.';
+    if (!w.bundesland && !schnell) f.bundesland = 'Bitte das Bundesland wählen.';
     if (!telOk(w.tel)) f.tel = 'Bitte eine Telefonnummer mit mindestens 6 Ziffern eingeben.';
     if (!mailOk(w.mail)) f.mail = 'Bitte die E-Mail-Adresse nennen, unter der Ihre Kunden Sie erreichen.';
     if (w.web === null) { f.web = 'Diese Adresse lässt sich nicht öffnen.'; w.web = ''; }
     if (w.ap.length < 2) f.ap = 'Bitte die Ansprechperson nennen, die auf der Seite steht.';
-    if (!w.rechtsform) f.rechtsform = 'Bitte die Rechtsform angeben (z. B. GmbH, Einzelunternehmen).';
-    if (w.vertretung.length < 2) f.vertretung = 'Bitte angeben, wer das Unternehmen vertritt.';
+    if (!w.rechtsform && !schnell) f.rechtsform = 'Bitte die Rechtsform angeben (z. B. GmbH, Einzelunternehmen).';
+    if (w.vertretung.length < 2 && !schnell) f.vertretung = 'Bitte angeben, wer das Unternehmen vertritt.';
     if (w.ust && !/^DE\d{9}$/.test(w.ust)) f.ust = 'Die USt-IdNr. beginnt mit DE und hat 9 Ziffern.';
     ['firma', 'name', 'ort', 'region', 'erreichbar', 'vertretung'].forEach((k) => zuLang(d, k, f));
     return ergebnis(w, f);
@@ -205,18 +207,18 @@
     l.push({ k: 'bestellen', t: 'Bestellen' });
     return l;
   }
-  /* Ganze Angaben prüfen; teile: nur diese Teile (sonst alle, die das Paket hat) */
-  function pruefen(angaben, m, teile) {
+  /* Ganze Angaben prüfen; teile: nur diese Teile (sonst alle, die das Paket hat); weg: 'schnell' fragt im Betrieb weniger (betrieb) */
+  function pruefen(angaben, m, teile, weg) {
     angaben = angaben || {};
     const t = teile || ['betrieb', 'adresse'].concat(gestaltet(m) ? ['auftritt'] : []);
     const fn = { betrieb: betrieb, adresse: adresse, auftritt: auftritt }, fehler = {}, wert = {};
-    t.forEach((k) => { const r = fn[k](angaben[k], m); wert[k] = r.wert; Object.keys(r.fehler).forEach((x) => { fehler[k + '.' + x] = r.fehler[x]; }); });
+    t.forEach((k) => { const r = fn[k](angaben[k], m, k === 'betrieb' ? weg : undefined); wert[k] = r.wert; Object.keys(r.fehler).forEach((x) => { fehler[k + '.' + x] = r.fehler[x]; }); });
     return ergebnis(wert, fehler);
   }
   /* Erster Teil mit Lücken ('' wenn alles da ist) */
-  function offen(angaben, m) {
+  function offen(angaben, m, weg) {
     const t = ['betrieb', 'adresse'];
-    for (let i = 0; i < t.length; i++) if (!pruefen(angaben, m, [t[i]]).ok) return t[i];
+    for (let i = 0; i < t.length; i++) if (!pruefen(angaben, m, [t[i]], weg).ok) return t[i];
     return '';
   }
 
@@ -245,11 +247,12 @@
       return { k: a.k, titel: a.titel, text: typeof a.text === 'function' ? a.text(mt) : a.text, frei: frei, ab: ab };
     });
   }
-  /* Nächstes Paket über diesem und was es dazubringt (für den Anreiz) */
+  /* Nächstes Paket über diesem und was es dazubringt (für den Anreiz). einrichtung: was beim Wechsel einmalig dazukommt, nie weniger als 0
+     (ist die Einrichtung des größeren Pakets günstiger, erstatten wir nichts, Paketbedingungen § 7 Abs. 3) */
   function naechstes(paket) {
     const l = P().LISTE, i = l.indexOf(paket); if (i < 0 || i >= l.length - 1) return null;
     const p = l[i + 1], vorher = anpassbar(paket), dazu = anpassbar(p).filter((a) => { const v = vorher.find((x) => x.k === a.k) || {}; return a.frei && (!v.frei || v.text !== a.text); });
-    return { paket: p, name: P().PAKETE[p].name, monat: P().preis(p).monat - P().preis(paket).monat, einrichtung: P().preis(p).einrichtung - P().preis(paket).einrichtung, dazu: dazu };
+    return { paket: p, name: P().PAKETE[p].name, monat: P().preis(p).monat - P().preis(paket).monat, einrichtung: Math.max(0, P().preis(p).einrichtung - P().preis(paket).einrichtung), dazu: dazu };
   }
 
   /* ---------- Verkauf: Kasse offen? ----------

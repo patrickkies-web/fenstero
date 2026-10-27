@@ -10,7 +10,7 @@
      node scripts/bedingungen-pdf.mjs      schreibt die Bausteine in die Seiten und die PDFs der Paketbedingungen
    scripts/pruefen-instanzen/29.mjs prüft, dass Seiten und PDFs so gebaut sind.
 
-   Verkauf: ohne PAKETE_OFFEN=1 zeigt die Seite „Vorläufige Preise“ und statt der Bestellknöpfe „Bestellung bald möglich“ mit dem
+   Verkauf: ohne PAKETE_OFFEN=1 zeigt die Seite statt der Bestellknöpfe „Bestellung bald möglich“ mit dem
    Anfrageformular (POST /api/auftrag/frage, auch ohne JavaScript). Jeder Paketknopf führt in die Bestellung dieses Pakets
    (/bestellen/#<paket>, functions/auftrag/); solange die Kasse zu ist, endet sie mit „Unverbindlich anfragen“, mit PAKETE_OFFEN=1 und
    vollständigen Rechtstexten mit der Zahlung. Live-Demos: mit PAKETE_DEMOS=1 Links auf https://demo-<paket>.eeziframes.com/
@@ -37,10 +37,11 @@ const EMPFOHLEN = 1;
 const LOKAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\])$/i;
 export const basisVon = (env, url) => (!url ? '' : env && env.KANONISCH ? String(env.KANONISCH).replace(/\/+$/, '') : (LOKAL.test(url.hostname) ? url.protocol : 'https:') + '//' + url.host.replace(/^www\./i, ''));
 
-/* Verkauf in dieser Umgebung: { offen, bestellen, vorlaeufig, mwst, demos } (bestellen nur mit PAKETE_OFFEN=1) */
+/* Verkauf in dieser Umgebung: { offen, bestellen, vorlaeufig, mwst, demos } (bestellen nur mit PAKETE_OFFEN=1). „vorläufig“ hängt seit
+   27.10.2026 nur an pakete.js (VORLAEUFIG): Die Preise hat der Inhaber festgelegt, auch solange die Bestellung noch nicht offen ist */
 export function verkaufFuer(env) {
   const e = env || {}, k = konfig(e), v = R().verkauf({ offen: k.paketeOffen, live: live(k) });
-  return { offen: !!v.offen, bestellen: !!v.bestellen, vorlaeufig: !!(v.vorlaeufig || P().VORLAEUFIG), mwst: k.preise.mwst !== false, demos: String(e.PAKETE_DEMOS || '').trim() === '1' };
+  return { offen: !!v.offen, bestellen: !!v.bestellen, vorlaeufig: !!P().VORLAEUFIG, mwst: k.preise.mwst !== false, demos: String(e.PAKETE_DEMOS || '').trim() === '1' };
 }
 const steuerText = (v) => (v.mwst ? 'netto zzgl. MwSt.' : 'ohne Ausweis der Umsatzsteuer (§ 19 UStG)');
 
@@ -54,6 +55,7 @@ export function wertText(schluessel, m) {
   if (d.art === 'wahl') return (d.werte && d.werte[v]) || String(v);
   if (d.art === 'aufbewahrung') return v === 'vertrag' ? 'für die Vertragsdauer' : v + ' Tage nach Zustellung';
   if (d.art === 'preis') return geld(v.monat) + ' im Monat, ' + geld(v.einrichtung) + ' Einrichtung';
+  if (d.art === 'ki') return P().tausend(v) + ', jede weitere ' + geld(m.preis.ki);
   return String(v);
 }
 /* Satz unter dem Paketnamen, aus den Merkmalen (nie aus dem Namen des Pakets) */
@@ -272,11 +274,22 @@ const pdfs = () => paketPdfs().map((p, i) => '<a href="' + esc(p) + '">' + (i ? 
 
 const BLOECKE = { preiszeile: preiszeile, karten: karten, vergleich: vergleich, ablauf: ablauf, demos: demos, bestellen: bestellen, ld: ld, leistungen: leistungen, fristen: fristen, stand: stand, pdfs: pdfs };
 
+/* Preis je weiterer KI-Auswertung: ein Betrag, wenn er in allen Paketen gleich ist, sonst je Paket */
+function kiPreise() {
+  const L = P().LISTE, b = L.map((p) => P().preis(p).ki);
+  return b.every((x) => x === b[0]) ? geld(b[0]) + ' netto' : L.map((p, i) => esc(kurzname(p)) + ' ' + geld(b[i])).join(', ') + ' netto';
+}
+
 /* ---------- Bausteine der Seite für Fensterbauer (Design-DNA vom 26.10.2026, web/fuer-fensterbauer/index.html aus docs/profis/fensterbauer-vorschau/) ----------
    Kleine Stellen im fertigen Markup statt ganzer Abschnitte, damit die Gestaltung in der Datei bleibt:
      fb-ab                 günstigster Monatspreis („Ab 29 €“ in der Haken-Zeile des Startbilds und im Abschluss)
      fb-zahl-<paket>       Monatspreis als Zahl ohne Einheit (die große Zahl der Karte, Einheit „€ im Monat“ steht daneben)
      fb-monat-<paket>      Monatspreis, fb-einr-<paket> Einrichtung (Karten, Vergleich, Beispielrechnung)
+     fb-ki-<paket>         Zeile der Karte: KI-Auswertungen inklusive und Preis jeder weiteren; fb-kimonat-<paket> und fb-kipreis-<paket>
+                           die beiden Werte einzeln (Vergleich)
+     fb-jahr-<paket>       Preiszeile der Beispielseiten (/vorschau/paket-beispiel/): Monat, Einrichtung, erstes Jahr, KI
+     fb-kijecode           höchstens so viele KI-Auswertungen je Anfrage (Instanzregeln.GRENZEN.kiJeCode, Paketbedingungen § 2)
+     fb-faq-kosten, fb-faq-ki   Antworten „Was kostet …?“ und „Was ist eine KI-Auswertung …?“ (Zahlen aus pakete.js)
      fb-cta-<paket>        Pille unter der Karte: ohne PAKETE_OFFEN „<Paket> anfragen“ (wählt das Paket im Formular vor), sonst „bestellen“;
                            das empfohlene Paket als volle Pille mit Pfeilkreis, die anderen als Umriss
      fb-hinweis            Zeile über den Karten (vorläufige Preise, bestellen bald möglich)
@@ -285,17 +298,35 @@ const BLOECKE = { preiszeile: preiszeile, karten: karten, vergleich: vergleich, 
      fb-faq-bestellen      Antwort auf „Kann ich schon bestellen?“ */
 const PFEILKREIS = ' <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span>';
 function fbBaustein(name, o, v) {
-  const L = P().LISTE, m = /^fb-(monat|einr|cta|zahl)-([a-z]+)$/.exec(name);
+  const L = P().LISTE, m = /^fb-(monat|einr|cta|zahl|ki|kimonat|kipreis|jahr)-([a-z]+)$/.exec(name);
   if (m) {
     const p = m[2]; if (!P().PAKETE[p]) return null;
-    if (m[1] === 'monat') return geld(P().preis(p).monat);
-    if (m[1] === 'zahl') return zahl(P().preis(p).monat);
-    if (m[1] === 'einr') return geld(P().preis(p).einrichtung);
+    const pr = P().preis(p), mm = P().merkmale(p);
+    if (m[1] === 'monat') return geld(pr.monat);
+    if (m[1] === 'zahl') return zahl(pr.monat);
+    if (m[1] === 'einr') return geld(pr.einrichtung);
+    if (m[1] === 'ki') return esc(P().tausend(mm.kiMonat)) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + geld(pr.ki);
+    if (m[1] === 'kimonat') return esc(P().tausend(mm.kiMonat));
+    if (m[1] === 'kipreis') return geld(pr.ki);
+    if (m[1] === 'jahr') return geld(pr.monat) + ' im Monat · ' + geld(pr.einrichtung) + ' einmalig · im ersten Jahr ' + P().tausend(pr.monat * 12 + pr.einrichtung) + NB + '€ · ' + esc(P().tausend(mm.kiMonat)) + ' KI-Auswertungen im Monat inklusive · ' + (v.mwst ? 'netto' : 'ohne USt.') + (v.vorlaeufig ? ', vorläufig' : '');
     const emp = L.indexOf(p) === EMPFOHLEN;
     return '<a class="dna-pille' + (emp ? '' : ' dna-pille--leise') + '" href="/bestellen/#' + p + '" data-paket="' + p + '">' +
       esc(kurzname(p)) + (v.bestellen ? ' bestellen' : ' anfragen') + (emp ? PFEILKREIS : '') + '</a>';
   }
   if (name === 'fb-ab') return geld(Math.min.apply(null, L.map((p) => P().preis(p).monat)));
+  if (name === 'fb-kijecode') return esc(R().GRENZEN.kiJeCode);
+  if (name === 'fb-faq-kosten') {
+    return 'Eine einmalige Einrichtung vorab und ein fester Monatspreis je Paket, ab ' + geld(Math.min.apply(null, L.map((p) => P().preis(p).monat))) + ' im Monat. Darin steckt ein Kontingent an KI-Auswertungen der Fotos; jede weitere kostet ' + kiPreise() +
+      '. Für Anfragen Ihrer eigenen Kunden gibt es keine Gebühr. Nur für zusätzliche Anfragen aus der eeziframes-App ist künftig eine Gebühr je Anfrage geplant, wenn Sie dabei mitmachen. Alle Preise ' + steuerText(v).replace(/\.$/, '') + '.';
+  }
+  if (name === 'fb-faq-ki') {
+    const G = R().GRENZEN, ms = L.map((p) => P().merkmale(p)), und = (a) => a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1];
+    return 'Eine KI-Auswertung ist ein Foto, das die KI für Sie liest; je Fenster meist zwei, innen und außen. Im Monat enthalten sind bei ' +
+      und(L.map((p, i) => esc(kurzname(p)) + ' ' + P().tausend(ms[i].kiMonat))) + ', genug für etwa ' + und(ms.map((x) => String(Math.round(x.kiMonat / P().KI_JE_ANFRAGE)))) +
+      ' Kundenanfragen mit je ' + P().KI_JE_ANFRAGE / 2 + ' Fenstern. Jede weitere Auswertung kostet ' + kiPreise() + ' und steht auf der nächsten Monatsrechnung. Zum Schutz vor Missbrauch liest die KI nur Fotos aus einer Planung bei Ihnen, höchstens ' +
+      G.kiJeCode + ' je Anfrage, mit einer Bremse gegen Massenanfragen; im Monat höchstens das Doppelte Ihres Kontingents, danach geht es bis Monatsende ohne KI-Befund weiter. So kommen im Monat nie mehr als ' +
+      und(L.map((p, i) => geld(Math.round(ms[i].kiMonat * P().preis(p).ki * 100) / 100) + ' (' + esc(kurzname(p)) + ')')) + ' dazu.';
+  }
   if (name === 'fb-hinweis') {
     if (!v.vorlaeufig && v.bestellen) return '';
     return v.vorlaeufig
@@ -305,7 +336,7 @@ function fbBaustein(name, o, v) {
   if (name === 'fb-fuss') {
     return (v.bestellen ? '' : 'Die Bestellung wird in Kürze freigeschaltet, bis dahin fragen Sie unverbindlich an. ') +
       (v.vorlaeufig ? 'Vorläufige Preise; beim Bestellen wird Ihr Preis für den Vertrag festgeschrieben. ' : 'Der Preis beim Bestellen bleibt für Ihren Vertrag fest. ') +
-      'Alle Preise ' + steuerText(v) + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden. Die Vorschau zeigt einen erfundenen Betrieb.';
+      'Alle Preise ' + steuerText(v) + ', nur für Unternehmer. Keine Mindestlaufzeit, monatlich kündbar; bis zum Beginn der Einrichtung stornierbar, die Einrichtung erstatten wir dann vollständig. Keine Gebühr für Anfragen Ihrer eigenen Kunden; KI-Auswertungen über dem Kontingent je ' + kiPreise() + '. Die Vorschau zeigt einen erfundenen Betrieb.';
   }
   if (name === 'fb-anfrage-titel') return v.bestellen ? 'Vorher eine <em class="ez-ak">Frage?</em>' : 'Paket unverbindlich <em class="ez-ak">anfragen.</em>';
   if (name === 'fb-anfrage-lede') {
@@ -345,7 +376,7 @@ export function paketeSeite(html, url, env) {
 export function paketeLlms(origin, env) {
   const v = verkaufFuer(env), liste = P().LISTE, u = (pfad) => origin + pfad;
   const eur = (n) => zahl(n) + ' €';
-  const zeile = (p) => { const m = P().merkmale(p), pr = P().preis(p); return P().PAKETE[p].name + ': ' + eur(pr.monat) + ' im Monat, dazu ' + eur(pr.einrichtung) + ' Einrichtung (' + kurzText(m).replace(/\.$/, '') + ')'; };
+  const zeile = (p) => { const m = P().merkmale(p), pr = P().preis(p); return P().PAKETE[p].name + ': ' + eur(pr.monat) + ' im Monat, dazu ' + eur(pr.einrichtung) + ' Einrichtung, ' + P().tausend(m.kiMonat) + ' KI-Auswertungen im Monat inklusive, jede weitere ' + eur(pr.ki) + ' (' + kurzText(m).replace(/\.$/, '') + ')'; };
   return [
     '## Konfigurator-Pakete für Fensteranbieter',
     '',

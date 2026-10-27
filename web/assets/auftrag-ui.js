@@ -98,9 +98,11 @@
   const kachel = (inhalt, cls) => h('section', { class: 'a-kachel' + (cls ? ' ' + cls : '') }, inhalt);
 
   /* ---------- Felder ----------
-     o: { k, label, wert, typ, platzhalter, pflicht, hilfe, max, endung, vorschlaege, auto, modus, zeilen, optionen, onInput }
-     Rückgabe: Element .a-feld mit .eingabe (input/select/textarea) */
+     o: { k, label, wert, typ, platzhalter, roh, pflicht, hilfe, max, endung, vorschlaege, auto, modus, zeilen, optionen, onInput }
+     Rückgabe: Element .a-feld mit .eingabe (input/select/textarea). Platzhalter beginnen mit „z. B.“, damit niemand ein Beispiel für
+     eine Eingabe hält (Gremium 27.10.2026); roh: true lässt ihn, wie er ist (Formate wie „123 456“) */
   let feldNr = 0;
+  const bsp = (o) => (!o.platzhalter ? '' : o.roh || /^z\.\s?B\./.test(o.platzhalter) ? o.platzhalter : 'z. B. ' + o.platzhalter);
   function feld(o) {
     const id = 'f' + (++feldNr), hilfeId = id + '-h', fehlerId = id + '-e';
     const f = h('div', { class: 'a-feld', 'data-k': o.k });
@@ -108,7 +110,7 @@
     f.appendChild(h('label', { for: id }, h('span', { text: o.label }), o.optional ? h('span', { class: 'a-optional', text: 'optional' }) : null));
     let e;
     if (o.zeilen) {
-      e = h('textarea', { id: id, rows: String(o.zeilen), placeholder: o.platzhalter || '', maxlength: o.max ? String(o.max) : null, 'aria-describedby': hilfeId + ' ' + fehlerId });
+      e = h('textarea', { id: id, rows: String(o.zeilen), placeholder: bsp(o), maxlength: o.max ? String(o.max) : null, 'aria-describedby': hilfeId + ' ' + fehlerId });
       e.value = o.wert || '';
       f.appendChild(h('div', { class: 'a-flaeche' }, e));
     } else if (o.optionen) {
@@ -120,7 +122,7 @@
     } else {
       let liste = null;
       if (o.vorschlaege) { liste = h('datalist', { id: id + '-l' }); o.vorschlaege.forEach((x) => liste.appendChild(h('option', { value: x }))); }
-      e = h('input', { id: id, type: o.typ || 'text', placeholder: o.platzhalter || '', maxlength: o.max ? String(o.max) : null, autocomplete: o.auto || 'off', inputmode: o.modus || null, list: liste ? id + '-l' : null, spellcheck: o.typ === 'email' || o.modus ? 'false' : null, autocapitalize: o.typ === 'email' || o.typ === 'url' ? 'off' : null, 'aria-describedby': hilfeId + ' ' + fehlerId });
+      e = h('input', { id: id, type: o.typ || 'text', placeholder: bsp(o), maxlength: o.max ? String(o.max) : null, autocomplete: o.auto || 'off', inputmode: o.modus || null, list: liste ? id + '-l' : null, spellcheck: o.typ === 'email' || o.modus ? 'false' : null, autocapitalize: o.typ === 'email' || o.typ === 'url' ? 'off' : null, 'aria-describedby': hilfeId + ' ' + fehlerId });
       e.value = o.wert || '';
       f.appendChild(h('div', { class: 'a-eingabe' }, e, o.endung ? h('span', { class: 'a-endung', text: o.endung }) : null, liste));
     }
@@ -174,9 +176,16 @@
 
   /* ---------- Rückmeldung ---------- */
   let toastEl = null, toastT = 0;
+  /* Meldung: im Fuß über der Pille (gehört zur Station, verschwindet mit ihr oder nach 4 s); ohne Fuß oben unter dem Kopf, nie über
+     einem Knopf oder Feld (Gremium 27.10.2026) */
   function toast(text) {
-    if (!toastEl) { toastEl = h('div', { class: 'a-toast', role: 'status', 'aria-live': 'polite' }); document.body.appendChild(toastEl); }
-    toastEl.textContent = text; toastEl.classList.add('an'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('an'), 2600);
+    const fuss = document.querySelector('.a-blatt') ? null : document.querySelector('.a-r-fuss');
+    if (toastEl && toastEl.parentNode) toastEl.remove();
+    clearTimeout(toastT);
+    toastEl = h('p', { class: 'a-meldung' + (fuss ? '' : ' oben'), role: 'status', 'aria-live': 'polite', text: text });
+    if (fuss) fuss.insertBefore(toastEl, fuss.firstChild); else document.body.appendChild(toastEl);
+    const el = toastEl;
+    toastT = setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 160); }, 4000);
   }
   /* Blatt (Dialog): { titel, text, inhalt, knoepfe: [Element] } → schliessen() */
   function blatt(o) {
@@ -225,7 +234,8 @@
         const bild = await createImageBitmap(datei);
         const f = Math.min(1, max / Math.max(bild.width, bild.height)), c = document.createElement('canvas');
         c.width = Math.round(bild.width * f); c.height = Math.round(bild.height * f);
-        const g = c.getContext('2d'); if (platz === 'logo') g.clearRect(0, 0, c.width, c.height); g.drawImage(bild, 0, 0, c.width, c.height);
+        /* JPEG kennt keine Transparenz: Fotos mit durchsichtigen Stellen auf Weiß legen, sonst werden sie schwarz (Zentrale, 27.10.2026) */
+        const g = c.getContext('2d'); if (platz === 'logo') g.clearRect(0, 0, c.width, c.height); else { g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); } g.drawImage(bild, 0, 0, c.width, c.height);
         const typ = platz === 'logo' ? 'image/png' : 'image/jpeg';
         const blob = await new Promise((ok) => c.toBlob(ok, typ, 0.86));
         if (blob && blob.size < datei.size) return { daten: await lesen(blob), name: datei.name.replace(/\.[a-z0-9]+$/i, '') + (typ === 'image/png' ? '.png' : '.jpg'), bytes: blob.size };
@@ -267,7 +277,7 @@
       if (eigen && d.logo) zeichen.appendChild(h('img', { src: d.logo, alt: '' })); else zeichen.textContent = initialen(firma).slice(0, 1);
       seite.appendChild(h('div', { class: 'a-vs-kopf' }, zeichen, h('span', { class: 'a-vs-name' }, sig ? h('small', { text: 'Fensterbau · ' + ort }) : null, firma)));
       let titel, kicker, text;
-      if (sig) { kicker = 'Persönliche Einladung von ' + firma; titel = [h('span', { style: 'color:var(--a-firma)', text: 'Guten Tag, ' }), h('br'), 'Familie Muster.']; text = d.einladung || 'Für Ihr Angebot brauche ich die Maße Ihrer Fenster. Messen Sie in Ruhe selbst, danach melde ich mich.'; }
+      if (sig) { kicker = 'Beispiel einer persönlichen Einladung von ' + firma; titel = [h('span', { style: 'color:var(--a-firma)', text: 'Guten Tag, ' }), h('br'), 'Familie Muster.']; text = d.einladung || 'Für Ihr Angebot brauche ich die Maße Ihrer Fenster. Messen Sie in Ruhe selbst, danach melde ich mich.'; }
       else if (eigen) { kicker = firma + ' – ' + ort; const z = zerlegen(d.ueberschrift) || ['Neue Fenster, ', 'gut geplant.']; titel = [z[0], h('em', { text: z[1] })]; text = d.einleitung || 'Beratung, Aufmaß und Einbau in ' + ort + '. Mit dem Konfigurator beginnen Sie zu Hause.'; }
       else { kicker = 'Fenster planen und anfragen'; titel = ['Ihre neuen Fenster, ', h('em', { text: 'Ihr Angebot.' })]; text = 'Für Ihr Angebot brauchen wir die Maße Ihrer Fenster. Messen Sie hier selbst, danach melden wir uns.'; }
       seite.appendChild(h('p', { class: 'a-vs-kicker', text: kicker }));
@@ -276,7 +286,8 @@
       const person = h('span', { class: 'a-vs-person' }, h('span', null, eigen && d.portrait ? h('img', { src: d.portrait, alt: '' }) : initialen(d.ap || firma)), h('span', null, h('b', { text: d.ap || 'Ansprechperson' }), d.rolle || (firma + ', ' + (d.ort || 'Ort'))));
       seite.appendChild(h('div', { class: 'a-vs-zeile' }, h('span', { class: 'a-vs-pille' }, 'Fenster planen', h('i')), sig ? null : person));
       if (sig) seite.appendChild(h('div', { class: 'a-vs-zeile', style: 'margin-top:10px' }, person));
-      if (eigen && !sig) {
+      /* Schraffur heißt „fehlt noch“; eine Seite, die live ist, zeigt statt einer schraffierten Kachel keine (Gremium 27.10.2026) */
+      if (eigen && !sig && (d.buehne || !d.live)) {
         const b = h('div', { class: 'a-vs-bild' + (d.buehne ? '' : ' leer') }); if (d.buehne) b.appendChild(h('img', { src: d.buehne, alt: '' }));
         seite.appendChild(h('div', { class: 'a-vs-raster' }, b, h('div', { class: 'a-vs-kachel' }, h('small', { text: 'Im Konfigurator' }), h('b', { text: 'Alles, was Sie planen.' }))));
       }

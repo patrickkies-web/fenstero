@@ -17,6 +17,8 @@ export const titel = 'Aufträge: Bestellung, Kundenbereich, Zentrale';
 const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8ffff3f0005fe02fea7d6a5f40000000049454e44ae426082', 'hex');
 const SVG = Buffer.from('<?xml version="1.0"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script><rect width="10" height="10"/></svg>');
 
+/* Neue Mails über ihre Kennung finden, nicht über die Position: Die Mail-Attrappe behält nur die letzten 50 (functions/api/post.js), nach
+   anderen Abschnitten auf demselben Server verschieben sich die Positionen */
 export default async function (h) {
   const { ok } = h, stempel = Date.now().toString(36);
   const kopf = (r, k) => String((r.headers || {})[k] || '');
@@ -43,9 +45,9 @@ export default async function (h) {
 
   /* ---------- 26.2 Anmeldung per Code ---------- */
   const falschMail = await h.api('localhost', '/api/auftrag/code', { body: { mail: 'kaputt' }, origin: true });
-  const mailA = 'kunde-a-' + stempel + '@pruef-fenster.de', vorPost = (await h.post()).length;
+  const mailA = 'kunde-a-' + stempel + '@pruef-fenster.de', vorPost = new Set((await h.post()).map((m) => m.id));
   await h.api('localhost', '/api/auftrag/code', { body: { mail: mailA }, origin: true, headers: { 'x-forwarded-for': '10.26.0.1' } });
-  const codeMail = (await h.post()).slice(vorPost).find((m) => m.an === mailA);
+  const codeMail = (await h.post()).filter((m) => !vorPost.has(m.id)).find((m) => m.an === mailA);
   const falsch = await h.api('localhost', '/api/auftrag/anmelden', { body: { mail: mailA, code: '000000' }, origin: true, headers: { 'x-forwarded-for': '10.26.0.1' } });
   const A = await kunde(mailA, '10.26.0.1');
   const setz = (A.anmeldung.cookies || []).join(' ');
@@ -60,7 +62,7 @@ export default async function (h) {
   /* ---------- 26.3 Entwurf ---------- */
   const neu = await A.api('/api/auftrag/neu', { body: { paket: 'plus', weg: 'ausfuehrlich' } }), a1 = neu.json.auftrag;
   const luecke = await A.api('/api/auftrag/' + a1.id, { method: 'PATCH', body: { angaben: { betrieb: { firma: 'Fensterbau Prüf GmbH' } } } });
-  ok(neu.status === 200 && /^A-\d{4}-\d{4}$/.test(a1.nr) && a1.stand === 'entwurf' && a1.angaben.adresse.eingang[0] === mailA && a1.preise.monat === 39 && luecke.status === 200 && luecke.json.auftrag.angaben.betrieb.firma === 'Fensterbau Prüf GmbH' && !!luecke.json.fehler['betrieb.ort'],
+  ok(neu.status === 200 && /^A-\d{4}-\d{4}$/.test(a1.nr) && a1.stand === 'entwurf' && a1.angaben.adresse.eingang[0] === mailA && a1.preise.monat === globalThis.Pakete.preis('plus').monat && a1.preise.ki === globalThis.Pakete.preis('plus').ki && luecke.status === 200 && luecke.json.auftrag.angaben.betrieb.firma === 'Fensterbau Prüf GmbH' && !!luecke.json.fehler['betrieb.ort'],
     '26.3 Entwurf: Nummer A-JJJJ-NNNN, Preis aus pakete.js festgehalten, Anfragen-Adresse vorbelegt; Speichern mit Lücken geht (Fehler kommen mit)');
   const b2 = await A.api('/api/auftrag/neu', { body: { paket: 'essential' } }), b3 = await A.api('/api/auftrag/neu', { body: { paket: 'signature' } }), b4 = await A.api('/api/auftrag/neu', { body: { paket: 'plus' } });
   ok(b2.status === 200 && b3.status === 200 && b4.status === 409, '26.3 Höchstens drei offene Entwürfe je Kunde (der vierte: 409)');
@@ -88,20 +90,20 @@ export default async function (h) {
   const alteFassung = await A.api('/api/auftrag/' + a1.id + '/bestellen', { body: { zustimmung: Object.assign({}, zu, { agb: '2026-10-22' }) } });
   ok(ohne.status === 400 && ohne.json.station === 'betrieb' && !!ohne.json.felder['betrieb.ort'] && ohneHaken.status === 400 && !!ohneHaken.json.felder['zustimmung.avv'] && alteFassung.status === 409 && alteFassung.json.neuLaden === true,
     '26.6 Bestellen: Lücken nennen die Station, fehlende Zustimmung am Haken, eine alte Fassung der Paketbedingungen verlangt neues Laden');
-  const vorBest = (await h.post()).length;
+  const vorBest = new Set((await h.post()).map((m) => m.id));
   const best = await A.api('/api/auftrag/' + a1.id + '/bestellen', { body: { zustimmung: zu } });
   await new Promise((r) => setTimeout(r, 400));
   const sess = best.json && best.json.url ? new URL(best.json.url, h.base()).searchParams.get('kasse') : '';
-  const mails1 = (await h.post({ anhaenge: true })).slice(vorBest), bestaetigt = mails1.find((m) => m.an === mailA && /Ihre Bestellung/.test(m.betreff));
+  const mails1 = (await h.post({ anhaenge: true })).filter((m) => !vorBest.has(m.id)), bestaetigt = mails1.find((m) => m.an === mailA && /Ihre Bestellung/.test(m.betreff));
   ok(best.status === 200 && /^\/konto\/\?kasse=test_|\/konto\/\?kasse=test_/.test(best.json.url) && !!bestaetigt && (bestaetigt.anhaenge || []).length === 2 && (bestaetigt.anhaenge || []).every((x) => /\.pdf$/.test(x.name) && x.name.includes(st.json.stand) && x.bytes > 10000),
     '26.6 Kostenpflichtig bestellt: Kasse (Attrappe), Eingangsbestätigung an den Kunden mit Paketbedingungen und AV-Vertrag als PDF der Fassung ' + st.json.stand);
-  const vorZahl = (await h.post()).length;
+  const vorZahl = new Set((await h.post()).map((m) => m.id));
   const kasse = await A.api('/api/auftrag/' + a1.id + '/kasse?session=' + encodeURIComponent(sess), { method: 'GET' });
   const fremdeKasse = await A.api('/api/auftrag/' + a1.id + '/kasse?session=test_fremd', { method: 'GET' });
   await new Promise((r) => setTimeout(r, 300));
-  const mails2 = (await h.post()).slice(vorZahl);
-  ok(kasse.status === 200 && kasse.json.bezahlt === true && kasse.json.auftrag.stand === 'bezahlt' && kasse.json.auftrag.zahlung.betrag_cent === Math.round(199 * 119) && fremdeKasse.json.bezahlt === true && mails2.some((m) => m.an === mailA && /Ihre Zahlung ist da/.test(m.betreff)) && mails2.some((m) => m.an !== mailA && /Neue Bestellung/.test(m.betreff)),
-    '26.6 Rückkehr aus der Kasse: bezahlt (199 € zzgl. 19 %), danach nur noch „bezahlt“ zurück; Mail „Ihre Zahlung ist da“ an den Kunden und „Neue Bestellung“ an den Inhaber');
+  const mails2 = (await h.post()).filter((m) => !vorZahl.has(m.id));
+  ok(kasse.status === 200 && kasse.json.bezahlt === true && kasse.json.auftrag.stand === 'bezahlt' && kasse.json.auftrag.zahlung.betrag_cent === Math.round(globalThis.Pakete.preis('plus').einrichtung * 119) && fremdeKasse.json.bezahlt === true && mails2.some((m) => m.an === mailA && /Ihre Zahlung ist da/.test(m.betreff)) && mails2.some((m) => m.an !== mailA && /Neue Bestellung/.test(m.betreff)),
+    '26.6 Rückkehr aus der Kasse: bezahlt (Einrichtung Plus zzgl. 19 %), danach nur noch „bezahlt“ zurück; Mail „Ihre Zahlung ist da“ an den Kunden und „Neue Bestellung“ an den Inhaber');
 
   /* ---------- 26.7 Fremde Aufträge, Zentrale nur angemeldet ---------- */
   const B = await kunde('kunde-b-' + stempel + '@pruef-fenster.de', '10.26.0.2');
@@ -120,10 +122,10 @@ export default async function (h) {
     '26.8 Zentrale: falsches Passwort 401, Sitzung __Host-inhaber für 8 Stunden; der Eingang zeigt den bezahlten Auftrag mit „Seite beginnen“, der Prompt fasst Betrieb, Vorlage, Anruf und Hinweise zusammen');
   const s1 = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'in_arbeit' } });
   const ohneLink = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'vorschau' } });
-  const vorV = (await h.post()).length;
+  const vorV = new Set((await h.post()).map((m) => m.id));
   const s2 = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'vorschau', link: 'https://claude.ai/artifact/beispiel-' + stempel } });
   await new Promise((r) => setTimeout(r, 300));
-  const vMail = (await h.post()).slice(vorV).find((m) => m.an === mailA && /Vorschau ist fertig/.test(m.betreff));
+  const vMail = (await h.post()).filter((m) => !vorV.has(m.id)).find((m) => m.an === mailA && /Vorschau ist fertig/.test(m.betreff));
   const aend = await A.api('/api/auftrag/' + a1.id + '/freigabe', { body: { aktion: 'aendern', text: 'Bitte das Foto oben tauschen.' } });
   const sprung = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'live', link: 'https://fensterbau-pruef.de/' } });
   await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'vorschau', link: 'https://claude.ai/artifact/beispiel-2-' + stempel } });
@@ -136,10 +138,10 @@ export default async function (h) {
   /* ---------- 26.9 Nachrichten ---------- */
   await A.api('/api/auftrag/' + a1.id + '/nachrichten', { body: { text: 'Wann rufen Sie an?' } });
   const ung = ((await zapi('/api/inhaber/auftraege')).json.auftraege || []).find((x) => x.id === a1.id).ungelesen;
-  const vorN = (await h.post()).length;
+  const vorN = new Set((await h.post()).map((m) => m.id));
   await zapi('/api/inhaber/auftraege/' + a1.id + '/nachricht', { body: { text: 'Morgen um 16 Uhr.' } });
   await new Promise((r) => setTimeout(r, 300));
-  const nMail = (await h.post()).slice(vorN).find((m) => m.an === mailA);
+  const nMail = (await h.post()).filter((m) => !vorN.has(m.id)).find((m) => m.an === mailA);
   const verlauf = await A.api('/api/auftrag/' + a1.id + '/nachrichten', { method: 'GET' });
   ok(ung >= 1 && !!nMail && /Morgen um 16 Uhr/.test(nMail.html) && verlauf.json.nachrichten.some((n) => n.von === 'inhaber' && n.text === 'Morgen um 16 Uhr.') && verlauf.json.nachrichten.some((n) => n.von === 'kunde'), '26.9 Nachrichten: der Inhaber sieht ungelesene im Eingang, seine Antwort geht per Mail an den Kunden und steht im Kundenbereich');
 

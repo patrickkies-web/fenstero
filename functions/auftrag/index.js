@@ -158,7 +158,8 @@ async function bezahltFesthalten(ctx, a, r) {
 async function bestaetigen(ctx, a, kunde) {
   const post = pd(ctx); if (!post) return false;
   const pr = a.preise || P().preis(a.paket), steuer = mwst(ctx) ? ' netto zzgl. 19 % USt.' : ' (ohne Umsatzsteuer)';
-  const m = bestelltMail(a, { paketName: (P().PAKETE[a.paket] || {}).name, adresse: adresseText(a), einrichtung: euro(pr.einrichtung) + steuer, monat: euro(pr.monat) + steuer, stand: standText(PAKET_STAND), konto: basis(ctx) + '/konto/#auftrag/' + a.id });
+  const m = bestelltMail(a, { paketName: (P().PAKETE[a.paket] || {}).name, adresse: adresseText(a), einrichtung: euro(pr.einrichtung) + steuer, monat: euro(pr.monat) + steuer,
+    ki: P().tausend((P().merkmale(a.paket) || {}).kiMonat) + ' im Monat inklusive, jede weitere ' + euro(pr.ki != null ? pr.ki : P().preis(a.paket).ki) + steuer, stand: standText(PAKET_STAND), konto: basis(ctx) + '/konto/#auftrag/' + a.id });
   const anhaenge = [];
   for (const p of paketPdfs()) { try { const r = await ctx.env.ASSETS.fetch(new Request(basis(ctx) + p)); if (r.status === 200) { const b = new Uint8Array(await r.arrayBuffer()); let t = ''; for (let i = 0; i < b.length; i += 8192) t += String.fromCharCode.apply(null, b.subarray(i, i + 8192)); anhaenge.push({ filename: p.split('/').pop(), content: btoa(t), content_type: 'application/pdf' }); } } catch (e) { /* ohne Anhang */ } }
   return post.senden({ an: kunde.mail, betreff: m.betreff, html: m.html, anhaenge: anhaenge, idempotenz: 'auftrag-bestellt-' + a.id });
@@ -282,7 +283,7 @@ const KUNDE = {
     ['betrieb', 'adresse', 'auftritt'].forEach((t) => {
       if (!g[t]) return;
       if (t === 'auftritt' && !AU().gestaltet(m)) return;
-      const r = AU()[t](g[t], m); Object.keys(r.fehler).forEach((x) => { fehler[t + '.' + x] = r.fehler[x]; }); neu[t] = r.wert;
+      const r = AU()[t](g[t], m, t === 'betrieb' ? (b.weg === 'schnell' || b.weg === 'ausfuehrlich' ? b.weg : a.weg) : undefined); Object.keys(r.fehler).forEach((x) => { fehler[t + '.' + x] = r.fehler[x]; }); neu[t] = r.wert;
     });
     /* Essential: Name unter eeziframes.com darf nicht schon einem anderen Auftrag gehören */
     if (neu.adresse && !m.domain && neu.adresse.name && (await d.adresseBelegt(neu.adresse.name, a.id))) fehler['adresse.name'] = neu.adresse.name + '.eeziframes.com ist schon vergeben. Bitte einen anderen Namen wählen.';
@@ -349,7 +350,7 @@ const KUNDE = {
     const kunde = await kundeVon(ctx), a = await eigener(ctx, kunde), d = db(ctx), m = P().merkmale(a.paket);
     if (VOR_ZAHLUNG.indexOf(a.stand) < 0) throw new ApiFehler('Dieser Auftrag ist schon bestellt.', 409);
     if ((a.zahlung || {}).status === 'laeuft') throw new ApiFehler('Ihre Lastschrift ist unterwegs. Wir melden uns, sobald sie da ist.', 409);
-    const r = AU().pruefen(a.angaben, m);
+    const r = AU().pruefen(a.angaben, m, null, a.weg);
     if (!r.ok) { const erster = Object.keys(r.fehler)[0].split('.')[0]; throw new ApiFehler('Es fehlen noch Angaben.', 400, { felder: r.fehler, station: erster }); }
     if (!m.domain && (await d.adresseBelegt(r.wert.adresse.name, a.id))) throw new ApiFehler(r.wert.adresse.name + '.eeziframes.com ist inzwischen vergeben. Bitte einen anderen Namen wählen.', 409, { felder: { 'adresse.name': 'Schon vergeben.' }, station: 'adresse' });
     const z = AU().zustimmung((ctx.body || {}).zustimmung, PAKET_STAND);
@@ -364,7 +365,7 @@ const KUNDE = {
       return { ok: true, angefragt: true, auftrag: sicht(z2) };
     }
     const k2 = await kasse(ctx, a, kunde, { zurueck: basis(ctx) + '/konto/?kasse={SESSION}#auftrag/' + a.id, abbruch: basis(ctx) + '/bestellen/#' + a.paket + '/' + a.id + '/bestellen' });
-    const z2 = await d.auftragAendern(a.id, (x) => { x.zustimmung = zust; x.adresse = !m.domain ? r.wert.adresse.name : null; x.zahlung = Object.assign({}, x.zahlung, { status: 'kasse', session: k2.id, kunde: k2.kunde || (x.zahlung || {}).kunde || '' }); verlauf(x, { von: 'kunde', text: 'Kostenpflichtig bestellt (Paketbedingungen und AV-Vertrag, Stand ' + PAKET_STAND + ')' }); });
+    const z2 = await d.auftragAendern(a.id, (x) => { x.zustimmung = zust; x.adresse = !m.domain ? r.wert.adresse.name : null; x.zahlung = Object.assign({}, x.zahlung, { status: 'kasse', session: k2.id, kunde: k2.kunde || (x.zahlung || {}).kunde || '' }); verlauf(x, { von: 'kunde', text: 'Kostenpflichtig bestellt (Paketbedingungen und AV-Vertrag, Fassung vom ' + standText(PAKET_STAND) + ')' }); });
     if (kunde && k2.kunde && !kunde.stripe) await d.kundeAendern(kunde.id, { stripe: k2.kunde }).catch(() => null);
     ctx.waitUntil(bestaetigen(ctx, z2, kunde).catch(() => false));
     return { ok: true, url: k2.url };

@@ -187,9 +187,10 @@
 
     /* Zahlung, Kunde, Verlauf */
     const ZI = a.zahlungIntern || {};
-    inhalt.push(U.karte('Zahlung und Abo', null, kv([['Einrichtung', z.status === 'bezahlt' ? U.euro((z.betrag_cent || 0) / 100) + ' brutto, bezahlt am ' + U.datum(z.bezahlt_am) + (z.erstattet ? ', erstattet' : '') : (z.status || 'offen')], ['Preise', U.euro((a.preise || {}).einrichtung || 0) + ' Einrichtung, ' + U.euro((a.preise || {}).monat || 0) + ' im Monat, netto (Stand ' + ((a.preise || {}).stand || '–') + ')'],
+    inhalt.push(U.karte('Zahlung und Abo', null, kv([['Einrichtung', z.status === 'bezahlt' ? U.euro((z.betrag_cent || 0) / 100) + ' brutto, bezahlt am ' + U.datum(z.bezahlt_am) + (z.erstattet ? ', erstattet' : '') : (z.status || 'offen')], ['Preise', U.euro((a.preise || {}).einrichtung || 0) + ' Einrichtung, ' + U.euro((a.preise || {}).monat || 0) + ' im Monat, netto (Preisstand ' + ((a.preise || {}).stand ? U.datum((a.preise || {}).stand) : '–') + ')'],
+      ['KI-Auswertungen', P.tausend((P.merkmale(a.paket) || {}).kiMonat) + ' im Monat inklusive, jede weitere ' + U.euro((a.preise || {}).ki != null ? a.preise.ki : P.preis(a.paket).ki) + ' netto; abrechnen von Hand, solange die Instanz nicht verknüpft ist (docs/KI-KOSTEN.md)'],
       ['Monatsabo', ab.status ? ab.status + (ab.seit ? ' seit ' + U.datum(ab.seit) : '') + (ab.bis ? ', bezahlt bis ' + U.datum(ab.bis) : '') : 'startet mit „Live schalten“'], ['Stripe', [ZI.kunde, ZI.intent, ab.id].filter(Boolean).join(' · ')],
-      ['Zustimmung', a.zustimmung ? 'Unternehmer, Paketbedingungen ' + a.zustimmung.agb + ', AV-Vertrag, am ' + U.zeit(a.zustimmung.zeit) : '']])));
+      ['Zustimmung', a.zustimmung ? 'Unternehmer, Paketbedingungen vom ' + U.datum(a.zustimmung.agb) + ', AV-Vertrag, am ' + U.zeit(a.zustimmung.zeit) : '']])));
     const k = a.kunde || {};
     inhalt.push(U.karte('Kunde', null, kv([['E-Mail', k.mail ? h('a', { href: 'mailto:' + k.mail, text: k.mail }) : ''], ['Konto seit', U.datum(k.seit)], ['Zuletzt angemeldet', k.angemeldet_am ? U.zeit(k.angemeldet_am) : '']])));
     const vl = h('ol', { class: 'a-verlauf' }, (a.verlauf || []).slice().reverse().map((x) => h('li', null, h('small', { text: U.zeit(x.zeit) + ' · ' + ({ kunde: 'Kunde', inhaber: 'Sie', system: 'System' }[x.von] || x.von) }), x.text)));

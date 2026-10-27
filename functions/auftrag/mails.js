@@ -29,7 +29,7 @@ export function codeMail(code) {
 export function bestelltMail(a, o) {
   const b = (a.angaben || {}).betrieb || {}, pr = a.preise || {};
   return { betreff: 'Ihre Bestellung ' + a.nr + ': ' + o.paketName, html: rahmen('Danke für Ihre Bestellung', absatz('Wir haben Ihre Bestellung erhalten und beginnen mit Ihrer Seite, sobald die Einrichtung bezahlt ist. Den Stand sehen Sie jederzeit in Ihrem Kundenbereich.') +
-    zeilen([['Bestellung', a.nr], ['Paket', o.paketName], ['Unternehmen', b.firma], ['Adresse', o.adresse], ['Einrichtung', o.einrichtung], ['Monatlich ab Livegang', o.monat], ['Paketbedingungen', 'Fassung vom ' + o.stand]]) +
+    zeilen([['Bestellung', a.nr], ['Paket', o.paketName], ['Unternehmen', b.firma], ['Adresse', o.adresse], ['Einrichtung', o.einrichtung], ['Monatlich ab Livegang', o.monat], o.ki ? ['KI-Auswertungen', o.ki] : null, ['Paketbedingungen', 'Fassung vom ' + o.stand]].filter(Boolean)) +
     absatz('Die Paketbedingungen und den Vertrag zur Auftragsverarbeitung finden Sie als PDF im Anhang.') + '<p style="margin:8px 0 0">' + pille(o.konto, 'Zum Kundenbereich') + '</p>') };
 }
 
