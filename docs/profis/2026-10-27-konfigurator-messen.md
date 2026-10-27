@@ -212,18 +212,101 @@ Mehrheiten: 1 behalten (18 von 18); 2 ändern (14), behalten (2), zurück (2); 3
 - **Öffnung blass beim Rahmenmaß** (Fensterbauer): Bei Maß 2 und 4 steht die Linie der Öffnung blass gestrichelt daneben.
 - **Lupen genau am Ende** (Veto Reuter): Fehler gefunden und behoben; die Lupe zeigte die Stelle unter dem Kreis statt am Linienende. Jetzt 2,6-fach genau um das Ende, in Bühne und Großansicht gleich; geprüft: Maß 1 oben an der Putzkante über dem grauen Sturz, Maß 3 an der Laibungskante, Maß 4 an der Außenkante des Rahmens.
 - **„Groß ansehen“** als Wort am Knopf (vier Kunden, Gestalter, Fensterbauer); ein Tipp auf die Zahl öffnet nichts mehr (Mara Keller).
-- **Folge nach „Weiter“ unter 0,8 s** (Noah Brandner): keine Kamerafahrt mehr; innerhalb eines Paares 0,35 s Haken, dann 0,32 s Linie; beim Wechsel der Ansicht beginnt die Linie 120 ms nach der Überblendung.
+- **Folge nach „Weiter“ unter 0,8 s** (Noah Brandner): keine Kamerafahrt mehr; innerhalb eines Paares 0,35 s Haken, dann 0,32 s Linie; beim Wechsel der Ansicht beginnt die Linie 60 ms nach dem Beginn der Überblendung.
 - **Kleine Telefone**: die ganze Öffnung mit beiden Enden in der Bühne, „z. B.“ wieder im Platzhalter.
-- **Warnung nennt das zu prüfende Maß** (Kunden, beide Fassungen): „Größer als die Öffnung (Maß 1: 1.410 mm). Maß 1 prüfen: an der Mauer messen, nicht am Rahmen.“ Abweichung vom Wortlaut der App, als Vorschlag für die Übernahme.
+- **Warnung nennt beide Wege** (Kunden, beide Fassungen): „Größer als die Öffnung. Rahmen außen messen oder Maß 1 (1.410 mm) prüfen.“ Abweichung vom Wortlaut der App, als Vorschlag für die Übernahme; „Korrigieren“ (Feld leeren) bleibt als Funktion der App.
 - **Platz zwischen Bild und Karte** (Mara Keller): Frage enger, Unterzeile 14 px.
 - Nicht übernommen, mit Grund: Etikett mit Werkstoff („Mauer · Putzkante“) ändert Begriffe der App, steht unter „Offen“; Großansicht am Schreibtisch über den ganzen Bildschirm (sie liegt bewusst auf dem Gerät, wie in der App); interne Kürzel (G4 …) in der Notizspalte am Schreibtisch, sie sind die Erklärung für den Inhaber und gehen nicht in die App.
 
-VARIANTE_PROFIS
+## Detail-Profis (vier, parallel; Berichte unter docs/profis/gremium/2026-10-27-konfigurator-messen-variante-profi-*.md)
 
-VARIANTE_VORLAGEN
+| Profi | Befund | Stand |
+| --- | --- | --- |
+| Bewegung | Folge Maß 2 → 3 über 0,8 s; Etikett A kam erst mit B | umgesetzt: Verzug 60 ms, Ende A mit dem Anfang der Linie, Ende B nach 120 ms; gemessen Linie fertig nach etwa 0,76 s |
+| Bewegung | Überblendung hellt in der Mitte auf | umgesetzt: neue Ansicht oben, die alte bleibt voll, bis die neue deckt |
+| Bewegung | blasse Öffnungslinie wurde mitgezogen und angeschnitten | umgesetzt: eigenes SVG ohne Clip, steht sofort |
+| Bewegung | Großansicht: Grund sprang, Folie dahinter rutschte | umgesetzt: Grund blendet mit, Platzhalter, Auftritt erst nach dem Rechnen |
+| Bewegung | ruhige Fassung schneidet hart | nicht umgesetzt: Regel der DNA „bei weniger Bewegung steht jedes Endbild sofort“ |
+| Bewegung | Tastatur löste Übergänge aus, gehaltenes Enter tippte erneut | umgesetzt: Tastatur am Klick erkannt, `e.repeat` abgefangen |
+| Bewegung | Pille wechselt Bedeutung stumm, „Korrigieren“ 9 px aus der Mitte | umgesetzt: Wort blendet 160 ms ein, taub ohne sichtbaren Druck, mittig |
+| UX | Doppeltipp öffnete und schloss die Großansicht sofort | umgesetzt: ein Tipp aufs Bild schließt nicht mehr (nur ×, Esc, Pille) |
+| UX | Warnung nennt Maß 1, „Korrigieren“ leert Maß 2 | teilweise: Text nennt beide Wege („Rahmen außen messen oder Maß 1 (1.410 mm) prüfen.“), „Korrigieren“ (Funktion der App) bleibt; Pille „Maß 1 prüfen“ steht unter „Offen“ |
+| UX | Feld verdeckte bei Maß 3 und 4 auf kleinen Telefonen die Enden | umgesetzt: Lage unter der Linie, sonst rechts neben „Groß ansehen“; geprüft auf sechs Größen und sechs Elementen ohne Überdeckung |
+| UX | nach Maß 4 hängte eine Ziffer an; Fokus nach dem Schließen; Ansagen im Dialog; Entwurf ging bei „Zurück“ verloren | umgesetzt |
+| Typografie | „mm“ hochgestellt | umgesetzt: Grundlinie |
+| Typografie | Warnung vierzeilig | umgesetzt: Kopf einzeilig, drei Zeilen |
+| Typografie | Notiz-Knopf zerdrückt (Regel der Notizspalte griff) | umgesetzt auf dieser Folie; Schritt 1 und 2 haben denselben Fehler (offen) |
+| Typografie | Titel bei 360 px zweizeilig | umgesetzt: 26 px statt Umbruch |
+| Typografie | Unterzeilen brechen in Wortgruppen; Großansicht-Titel 600; „1415“ ohne Punkt | umgesetzt |
+| Typografie | Kartenlabel 13 statt 12 px | offen (alle Folien gemeinsam) |
+| Zeichen | Zahl verdeckte bei Maß 3 und 4 Linie und Kappen | umgesetzt: Zahl unter der Linie |
+| Zeichen | blasse Öffnungslinie nicht eindeutig | umgesetzt: Kontur, Kappen, waagerecht 9 px darüber, bei Warnung kräftiger |
+| Zeichen | Strichmarken 3 bis 7 Bildpixel neben der Kante, Kanten geneigt | umgesetzt: Lagen nach Helligkeitsprofil korrigiert, Kappen und Marken gedreht (4,4° oben, 9,2° unten bei Fenstern) |
+| Zeichen | Schreibmarke wie eine Ziffer; Führungslinien wie Modellkanten; Strichstärken; Knopf wie Etikett; Punkt der Zeile; violetter Fokus | umgesetzt (Marke 38 px mit Luft; Führung weiß über Kontur und nur bei Versatz; 1,8 / 1,2 / 1; Knopf mit Ring wie die Rundknöpfe; Rückfrage mit Punkt, Tipp mit Linienstück; Fokus weiß) |
 
-VARIANTE_MESSWERTE
+## Abgleich mit den Vorlagen (drei Perspektiven; Berichte unter docs/profis/gremium/2026-10-27-konfigurator-messen-variante-vorlagen-*.md)
 
-VARIANTE_TABELLE
+- **Material und Licht:** Lupe als Linse mit Metallfassung und Glanz (umgesetzt); grauer Ring und Schatten unter der Bühne weg, dafür Lichtkante und ein Lichtteich unter der Bühne (umgesetzt); ein Schattenrezept für alles auf der Wand, nur Palettenfarben, Chip deckend ohne Weichzeichner (umgesetzt); Großansicht läuft oben und unten ins Dunkel aus (umgesetzt); Tasten als erhabene Kappen (umgesetzt).
+- **Frontend und Leistung:** fehlende Frontbilder (gerendert, alle sechs); `close` der Großansicht (umgesetzt); Höhenänderung, Scrollen hinter dem Dialog, Dialog am Schreibtisch (umgesetzt); Messbilder erst ab Schritt 2 (umgesetzt); Lagen über `translate` und Linie über den Compositor, Bilder auf den sichtbaren Ausschnitt beschneiden (nicht umgesetzt: für die Übernahme in die App notiert); Erzeuger und Lagedaten ins Repo (umgesetzt: werkzeuge/ und bilder/mess/lage.json).
+- **Typografie:** Einheit auf der Grundlinie (umgesetzt); „Groß ansehen“ unterscheidbar vom Etikett (umgesetzt mit dem Ring der Rundknöpfe); Etiketten mit zwei Größen, Ding 15/500, Zusatz 13/400 (umgesetzt); Titel „Höhe *der* Öffnung.“ mit beiden unterscheidenden Wörtern hell (umgesetzt); Warnung in drei Zeilen (umgesetzt); Schritt-Chip auf dieser Folie immer kurz (umgesetzt). Tabellenziffern nicht übernommen: die frühere Typografie-Prüfung hatte die Lücke nach der „1“ bemängelt.
 
-VARIANTE_OFFEN
+## Messwerte der Variante (lokal.html, Chromium ohne Grafikchip)
+
+| Prüfung | Wert |
+| --- | --- |
+| Volle Pillen je Bildschirm | 1; Telefon im unteren Drittel |
+| Laufende Animationen nach 2,6 s | 0 |
+| Layoutsprung (CLS) | 0 |
+| `filter` und Glas auf Flächen | 0 und 0 |
+| lazy-Bilder | 0 |
+| Ziele unter 44 px | 0 |
+| Laden bei vierfach gedrosselter CPU | 438 ms |
+| Konsolenfehler | 0, alle sechs Elemente, Telefon und Schreibtisch |
+| Bildgewicht | je Element zwei WebP 2148 × 1400: schräg 30 bis 41 KB, frontal 20 bis 38 KB; geladen erst ab Schritt 2 |
+| Zeitfolge nach „Weiter“ | im Paar: Haken 0,35 s, Linie bis 0,67 s; Wechsel Höhe → Breite: Überblendung ab 0,36 s, Linie fertig nach etwa 0,76 s, Etiketten bei 0,6 s |
+| Überdeckungen | keine (Feld, Etiketten, Chip, Knopf, Kappen) in allen vier Maßen, leer und mit „13.501“, bei 390 × 844, 375 × 667, 360 × 680, 375 × 812, 414 × 736, 412 × 915, für alle sechs Elemente |
+| Großansicht | Fokus auf ×, Tab bleibt im Dialog, Esc und Pille schließen, Fokus danach auf „Weiter“; Doppeltipp lässt sie offen; Schließen durch das System bringt die Bühne zurück |
+| Ruhige Fassung | 0 Animationen; nach „Weiter“ steht Maß 2 ohne Übergang |
+| Ohne JavaScript | Messfolie verborgen, Schritt 1 vollständig |
+| Tastatur | „1410“ und Eingabe → Maß 2, ohne Übergang |
+
+Bildgröße des Modells (Fenster, 390 × 844): Bühne 390 × 272 statt 358 × 235; Fenster samt Öffnung rund 215 statt 169 px hoch; Lupen 2,6-fach an beiden Enden; Großansicht 390 × 654.
+
+Farbanteile (Prozent; S Schwarz, A Anthrazit, G Silbergrau, W Weiß):
+
+| Bildschirm | Neutral (S · A · G · W) | Violett | Koralle | Indigo | Foto | Farbe gesamt |
+| --- | --- | --- | --- | --- | --- | --- |
+| Maß 1 leer | 99,2 (27 · 7 · 15 · 50) | 0,3 | 0,2 | 0,0 | 0,3 | 0,8 |
+| Zentimeter | 99,0 (27 · 7 · 15 · 50) | 0,3 | 0,2 | 0,0 | 0,5 | 1,0 |
+| Warnung | 99,1 (26 · 6 · 16 · 51) | 0,2 | 0,4 | 0,0 | 0,3 | 0,9 |
+| Maß 3 | 98,8 (27 · 6 · 17 · 48) | 0,3 | 0,2 | 0,0 | 0,7 | 1,2 |
+| Maß 4 | 98,7 (27 · 6 · 17 · 48) | 0,6 | 0,1 | 0,0 | 0,6 | 1,3 |
+| **Telefon, Mittel** | 99,0 (27 · 7 · 16 · 49) | 0,4 | 0,2 | 0,0 | 0,5 | 1,0 |
+| Großansicht | 95,9 (15 · 6 · 42 · 32) | 0,3 | 0,3 | 0,0 | 3,5 | 4,1 |
+| Schreibtisch | 99,9 (71 · 7 · 7 · 15) | 0,1 | 0,0 | 0,0 | 0,0 | 0,1 |
+
+Weiß und Silbergrau liegen über der Palette, weil Putzwand und Glas des Modells mehr Fläche bekommen (Wunsch des Inhabers); Violett bleibt Akzent.
+
+Bilder: `docs/profis/bilder/2026-10-27-konfigurator-messen-variante-tel.jpg`, `tel-zentimeter.jpg`, `tel-gespeichert.jpg`, `tel-mass2.jpg` (Öffnung blass daneben), `tel-warnung.jpg`, `tel-mass3.jpg`, `tel-mass4.jpg`, `tel-gross.jpg`, `tel-klein.jpg`, `tel-klein-voll.jpg`, `tel-klein-360.jpg`, `desk.jpg`, `desk-gross.jpg`, `alle-elemente.jpg` (sechs Elemente × vier Maße), `tel-hst-mass3.jpg`, `tel-balkon-mass1.jpg`; erste Fassung vor dem Gremium: `erste-fassung-tel.jpg`, `erste-fassung-mass3.jpg`.
+
+## Änderungstabelle der Variante für den Inhaber
+
+| Änderung | Zweck | Urteil des Gremiums | Stand |
+| --- | --- | --- | --- |
+| Bühne von Rand zu Rand, höher (272 statt 235 px), Frage enger | Bildfläche | behalten 18 von 18 | bleibt |
+| Kamera je Maß (nahe) | Bildgröße | ändern (Vetos Brandt, Kai): Mauer und Rahmen nicht zu unterscheiden | geändert: feste Ansicht je Paar mit der ganzen Öffnung; Breiten von vorn |
+| Lupen-Etiketten an beiden Enden | Anfang und Ende sehen | behalten, Fensterbauer: Marke genau auf die Kante (Veto Reuter) | geändert: Lupe genau am Ende, Kanten korrigiert und geneigt, Linse mit Fassung |
+| Zahl auf der Linie | wissen, was man einträgt | behalten | geändert: senkrecht mittig, waagerecht darunter; „mm“ auf der Grundlinie |
+| Großansicht | vergrößern können | behalten, Wort am Knopf | geändert: „Groß ansehen“; schließt nicht durch Tippen aufs Bild |
+| kleine Telefone | Lesbarkeit | behalten, ganze Linie zeigen | geändert: ganze Öffnung mit beiden Enden, „z. B.“ bleibt |
+| neu: Öffnung blass beim Rahmenmaß | Mauer gegen Rahmen | Vorschlag der Fensterbauer | neu |
+| neu: Warnung nennt beide Wege | Fehlerweg | Kunden und UX | geändert (Text) |
+
+## Offen (Variante)
+
+- „Maß 1 prüfen“ als Pille bei der Warnung, die direkt zu Maß 1 führt (UX, Fensterbauer): ersetzt „Korrigieren“ (Funktion der App), deshalb nur auf das Wort des Inhabers.
+- Notiz-Knopf in Schritt 1 und 2 hat denselben Fehler wie hier behoben (Regel der Notizspalte greift am Knopf); Änderung an angenommenen Folien nur auf sein Wort.
+- Kartenlabel „Maß 1 von 4“ 12 statt 13 px, nur für alle Folien gemeinsam.
+- Etikett mit Werkstoff („Mauer · Putzkante“): Begriffe der App.
+- Übernahme in die App: Großansicht in `zurueckTaste()` und `escTaste()`; Bühne als Modul mit Lage aus `bilder/mess/lage.json`; Linie über den Compositor, Lagen über `translate`; Bilder auf den sichtbaren Ausschnitt beschneiden (rund 29 Prozent weniger Speicher); Abweichungen (Warntext, Zentimeter-Rückfrage bei weniger Bewegung) vor der Übernahme entscheiden.
+- Realitäts-Check mit zwei bis drei echten Menschen, einer über 65: „Wo legst du den Zollstock an?“ mit und ohne Großansicht.
