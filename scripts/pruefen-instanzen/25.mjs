@@ -65,7 +65,7 @@ export default async (h) => {
   const gesehen = [];
   const merken = async (s, wo) => { gesehen.push({ wo: wo, html: await html(s), text: await text(s), quer: await waagrecht(s) }); };
   const fotosMachen = async (s) => {
-    await s.click('.bb .btn.primary');
+    await s.click('.lg-weiter'); // Start (Design-DNA): „Weiter zu den Fotos“
     await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
     await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(bild.fotos[0], 'base64') });
     if (await s.waitForSelector('.fx-dialog', { timeout: 3000 }).then(() => true, () => false)) { await merken(s, 'KI-Einwilligung'); await s.click('.fx-ja'); }
