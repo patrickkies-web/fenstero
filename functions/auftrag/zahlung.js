@@ -41,6 +41,8 @@ async function stripeKunde(ctx, s, a, kunde) {
   return c.id;
 }
 
+/* Stripe lehnt eine Zahlungsart ab, die im Konto nicht eingeschaltet ist (z. B. SEPA-Lastschrift) */
+export const ohneSepa = (e) => /sepa_debit|payment method type/i.test(String((e && e.message) || ''));
 export async function kasse(ctx, a, kunde, o) {
   pruefe(ctx.k);
   const pr = a.preise || P().preis(a.paket), name = (P().PAKETE[a.paket] || {}).name || a.paket;
@@ -48,13 +50,18 @@ export async function kasse(ctx, a, kunde, o) {
   const s = stripe(ctx.k), [kid, steuer] = await Promise.all([stripeKunde(ctx, s, a, kunde), steuersatz(ctx, s)]);
   const posten = { quantity: 1, price_data: { currency: 'eur', unit_amount: cent(pr.einrichtung), product_data: { name: 'Einrichtung ' + name, description: 'Landingpage mit Konfigurator, einmalig (Auftrag ' + a.nr + ')' } } };
   if (steuer) posten.tax_rates = [steuer];
-  const sess = await s.post('/checkout/sessions', {
-    mode: 'payment', locale: 'de', customer: kid, line_items: [posten], payment_method_types: ['card', 'sepa_debit'],
+  /* Karte und SEPA-Lastschrift; ist SEPA im Stripe-Konto nicht eingeschaltet, lehnt Stripe die Kasse ab („sepa_debit is invalid“),
+     dann öffnet sie nur mit Karte (Befund des Inhabers, 27.10.2026) */
+  const kasseMit = (arten, zusatz) => s.post('/checkout/sessions', {
+    mode: 'payment', locale: 'de', customer: kid, line_items: [posten], payment_method_types: arten,
     payment_intent_data: { setup_future_usage: 'off_session', metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr } },
     invoice_creation: { enabled: true, invoice_data: { description: 'Einrichtung ' + name + ' · Auftrag ' + a.nr, metadata: { art: 'auftrag', auftrag: a.id } } },
     customer_update: { address: 'auto', name: 'auto' }, success_url: o.zurueck.replace('{SESSION}', '{CHECKOUT_SESSION_ID}'), cancel_url: o.abbruch,
     metadata: { art: 'auftrag', auftrag: a.id, nr: a.nr, paket: a.paket, agb: (a.zustimmung || {}).agb || '' }, client_reference_id: a.id
-  }, { idem: 'auftrag-kasse-' + a.id + '-' + (a.version || 0) });
+  }, { idem: 'auftrag-kasse-' + a.id + '-' + (a.version || 0) + zusatz });
+  let sess;
+  try { sess = await kasseMit(['card', 'sepa_debit'], ''); }
+  catch (e) { if (!ohneSepa(e)) throw e; sess = await kasseMit(['card'], '-karte'); }
   return { id: sess.id, url: sess.url, kunde: kid };
 }
 
