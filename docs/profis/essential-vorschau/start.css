@@ -376,3 +376,18 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 .ez .ez-ab-fotos .ez-muster { position: relative; left: auto; top: auto; grid-column: 1 / -1; justify-self: start; }
 .ez-ab-fotos i { display: block; height: 96px; border-radius: var(--rund-m); background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--silbergrau) 45%, transparent) 0 1.2px, transparent 1.2px 5px); }
 @media (min-width: 900px) { .ez-ab-fotos i { height: 140px; } .ez .ez-muster--bühne { left: 18px; bottom: 18px; } }
+
+/* Schmale Leiste (Wunsch des Inhabers, 27.10.2026): Beim Herunterscrollen zieht sich die Leiste auf ihren Knopf zusammen, statt ganz zu
+   verschwinden; beim Hochscrollen kommt sie ganz zurück. Der Zuschnitt (clip-path, vom Skript auf das Rechteck der Pille gemessen) trägt
+   die Bewegung: auf dem Bildschirm verformt, darum ease-in-out, 280 ms. Er begrenzt auch Glas und Treffer, darunter bleibt alles bedienbar.
+   Das Logo blendet aus (160 ms) und wieder ein (220 ms, 60 ms später). Ruhige Fassung: nur Überblenden, der Zuschnitt springt. */
+.ez-leiste { clip-path: var(--schmal, inset(0 round 0)); transition: transform 220ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste.ist-schmal { transform: none; transition: transform 320ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste.ist-da { clip-path: inset(0 round 0); transition: transform 320ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste .ez-huelle > :not(.dna-pille) { transition: opacity 160ms ease; }
+.ez-leiste:not(.ist-da) .ez-huelle > :not(.dna-pille) { opacity: 0; }
+.ez-leiste.ist-da .ez-huelle > :not(.dna-pille) { transition: opacity 220ms ease 60ms; }
+@media (prefers-reduced-motion: reduce) {
+  .ez-leiste, .ez-leiste.ist-da, .ez-leiste.ist-schmal { transition: none; }
+  .ez-leiste .ez-huelle > :not(.dna-pille), .ez-leiste.ist-da .ez-huelle > :not(.dna-pille) { transition: none; }
+}

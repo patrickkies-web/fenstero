@@ -41,12 +41,25 @@
       grenze = unten <= -steht ? unten : s1.offsetHeight - steht - unten;
       var ml = d.querySelector('.ez-ml'); if (ml) grenze += ml.offsetHeight; /* Muster-Leiste der Vorlage liegt darüber */
     };
-    messeGrenze(); w.addEventListener('resize', messeGrenze); w.addEventListener('load', messeGrenze);
+    /* Schmale Leiste (Wunsch des Inhabers, 27.10.2026): Statt ganz zu verschwinden, zieht sich die Leiste beim Herunterscrollen auf
+       ihren Knopf zusammen. Gemessen wird das Rechteck der Pille in der Leiste; der Zuschnitt liegt als Variable an der Leiste selbst. */
+    var knopf = leiste.querySelector('.dna-pille');
+    var messeKnopf = function () {
+      if (!knopf) return;
+      var l = leiste.getBoundingClientRect(), k = knopf.getBoundingClientRect();
+      leiste.style.setProperty('--schmal', 'inset(' + Math.round(k.top - l.top) + 'px ' + Math.round(l.right - k.right) + 'px ' +
+        Math.round(l.bottom - k.bottom) + 'px ' + Math.round(k.left - l.left) + 'px round 999px)');
+    };
+    var messe = function () { messeGrenze(); messeKnopf(); };
+    messe(); w.addEventListener('resize', messe); w.addEventListener('load', messe);
+    if (d.fonts && d.fonts.ready) d.fonts.ready.then(messeKnopf);
     var pruefe = function () {
       geplant = false;
       var y = w.scrollY || 0;
       if (y < letzte) { hoch += letzte - y; runter = 0; } else if (y > letzte) { runter += y - letzte; if (runter > 24) hoch = 0; }
-      leiste.classList.toggle('ist-da', y > grenze && hoch > 24);
+      var unten = y > grenze, ganz = unten && hoch > 24;
+      leiste.classList.toggle('ist-da', ganz);
+      leiste.classList.toggle('ist-schmal', unten && !ganz);
       letzte = y;
     };
     w.addEventListener('scroll', function () { if (!geplant) { geplant = true; w.requestAnimationFrame(pruefe); } }, { passive: true });

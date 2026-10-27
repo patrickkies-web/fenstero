@@ -246,3 +246,15 @@ Animation, ohne JavaScript alles sichtbar, keine Ziele unter 44 px. Laden bei vi
 der fast unveränderten Essential-Seite; die Umgebung war gestern schneller (0,3 bis 0,5 s).
 
 Bilder: docs/profis/bilder/2026-10-27-brandt-palette-stufen-tel.jpg, -signature-tel.jpg, -signature-desk.jpg, -plus-tel.jpg.
+
+## Schmale Leiste, 27.10.2026
+
+Wortlaut des Inhabers: „Ich hätte gerne, dass der Header ab dem Zeitpunkt, wo er sich jetzt entfernt, sich einfach nur verschmälert.
+D.h. dass der Header nicht zu sehen ist, bis auf diesen Knopf jetzt planen.“
+
+Umsetzung in allen drei Vorlagen und beiden Betrieben: dritter Zustand der Leiste `ist-schmal`. Beim Herunterscrollen jenseits des
+Seitenkopfs zieht sich die Leiste über einen Zuschnitt auf die Pille „Fenster planen“ zusammen, das Logo blendet aus; beim Hochscrollen
+kommt sie ganz zurück, am Seitenanfang ist sie weg. Die Pille bleibt eine leise Pille auf Glas, damit je Bildschirm genau eine volle
+Pille bleibt. Bei Brandt (Plus und Signature) ist das Glas Schieferblau. Geprüft: Zustände beim Herunter- und Hochscrollen, Zeitlupe
+(docs/profis/bilder/2026-10-27-leiste-schmal.png), Treffer neben dem Knopf gehen an die Seite, ruhige Fassung ohne Bewegung, keine
+laufende Animation nach dem Laden, Layoutsprung 0, keine Konsolenfehler.

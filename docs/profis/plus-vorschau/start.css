@@ -702,3 +702,19 @@ html:not(.ez-js) .ez-modus, html:not(.ez-js) .ez-ml .ez-schalter { display: none
 .ez-kontakt__held-text b { font-size: clamp(36px, 10vw, 44px); font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 44px); }
 @media (min-width: 900px) { .ez-kontakt__held-text b { font-size: 48px; font-size: clamp(26px, calc((100cqi - 56px) / (var(--tel-zeichen, 11) * .55)), 48px); } }
 .ez-stand__wert { flex-wrap: wrap; gap: 8px 12px; }
+
+/* Schmale Leiste (Wunsch des Inhabers, 27.10.2026): Beim Herunterscrollen zieht sich die Leiste auf ihren Knopf zusammen, statt ganz zu
+   verschwinden; beim Hochscrollen kommt sie ganz zurück. Der Zuschnitt (clip-path, vom Skript auf das Rechteck der Pille gemessen) trägt
+   die Bewegung: auf dem Bildschirm verformt, darum ease-in-out, 280 ms. Er begrenzt auch Glas und Treffer, darunter bleibt alles bedienbar.
+   Das Logo blendet aus (160 ms) und wieder ein (220 ms, 60 ms später). Ruhige Fassung: nur Überblenden, der Zuschnitt springt. */
+.ez-leiste { clip-path: var(--schmal, inset(0 round 0)); transition: transform 220ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste.ist-schmal { transform: none; transition: transform 320ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste.ist-da { clip-path: inset(0 round 0); transition: transform 320ms var(--dna-druck), clip-path 280ms cubic-bezier(.77, 0, .175, 1); }
+.ez-leiste .ez-huelle > :not(.dna-pille) { transition: opacity 160ms ease; }
+.ez-leiste:not(.ist-da) .ez-huelle > :not(.dna-pille) { opacity: 0; }
+.ez-leiste.ist-da .ez-huelle > :not(.dna-pille) { transition: opacity 220ms ease 60ms; }
+@media (prefers-reduced-motion: reduce) {
+  .ez-leiste { transition: opacity 160ms ease, visibility 0s linear 160ms; }
+  .ez-leiste.ist-da, .ez-leiste.ist-schmal { opacity: 1; visibility: visible; transition: opacity 220ms ease, visibility 0s; }
+  .ez-leiste .ez-huelle > :not(.dna-pille), .ez-leiste.ist-da .ez-huelle > :not(.dna-pille) { transition: none; }
+}

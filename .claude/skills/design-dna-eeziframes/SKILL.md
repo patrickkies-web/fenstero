@@ -86,6 +86,11 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Kein Abschnitt über den Weg der Daten (Inhaber, 27.10.2026: „Das ist etwas, was den Kunden so überhaupt nicht interessiert.“): Auf
   der Landingpage steht nirgends, dass Daten erst beim Senden zum Betrieb gehen oder wer sie übermittelt. Die Szene heißt „So geht es
   weiter“ und zeigt den Weg von der Planung bis zum Einbau; Datenschutz steht im Datenschutz.
+- Schmale Leiste (Wunsch des Inhabers, 27.10.2026, Paket-Vorlagen): Die Leiste verschwindet beim Herunterscrollen nicht mehr, sondern
+  zieht sich auf ihren Knopf „Fenster planen“ zusammen (Zuschnitt `clip-path` auf das gemessene Rechteck der Pille, runde Enden,
+  280 ms ease-in-out; Logo blendet in 160 ms aus); beim Hochscrollen kommt sie ganz zurück (320 ms), über dem Kopf der Seite ist sie
+  weg. Der Zuschnitt begrenzt auch die Treffer, daneben bleibt die Seite bedienbar. Ruhige Fassung: nur Überblenden. Vorschlag für die
+  DNA und für weitere Seiten mit Leiste.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

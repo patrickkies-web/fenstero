@@ -94,3 +94,6 @@ body:has(.ez[data-farbe="voll"]), html:has(.ez[data-farbe="voll"]) { background:
   .ez[data-farbe="voll"] .ez-route__text b { color: var(--tinte); }
   .ez[data-farbe="voll"] .ez-route .ez-stand { --tinte: #fff; --tinte-2: #a9c3cc; --silbergrau: #a9c3cc; --firma: var(--b-aqua); --firma-licht: var(--b-aqua-licht); }
 }
+
+/* Leiste: Glas in Schieferblau statt Anthrazit (ganz und als schmaler Knopf) */
+.ez[data-farbe] .ez-leiste { --glas: rgba(35,61,72,.82); --glas-rand: rgba(255,255,255,.16); }
