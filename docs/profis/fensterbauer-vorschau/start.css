@@ -290,7 +290,7 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
   .ez-tabelle, .ez-tabelle tbody { display: block; }
   .ez-tabelle tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; padding: 12px 0; border-bottom: 1px solid var(--linie-fein); }
   .ez-tabelle tbody th { grid-column: 1 / -1; width: auto; border: 0; padding: 0 0 2px; }
-  .ez-tabelle td { display: grid; gap: 2px; padding: 0; border: 0; font-size: 13px; }
+  .ez-tabelle td { display: grid; align-content: start; gap: 2px; padding: 0; border: 0; font-size: 13px; overflow-wrap: anywhere; }
   .ez-tabelle td::before { content: attr(data-k); font: 400 11px/1.3 var(--font-sans); letter-spacing: .03em; color: var(--tinte-2); }
   .ez-tabelle tbody tr:last-child { border-bottom: 0; }
 }
@@ -400,3 +400,26 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 
 /* Eingebettet in die Startseite (portal.js, .fb.eingebettet): Kopf, Leiste, Vorhang und Fuß wie auf der eigenen Seite, das Portal zeichnet dort keinen Kopf */
 @media (prefers-reduced-motion: reduce) { .ez-leiste { transition: none; } }
+
+/* Paketkarten: das Bild führt ins Beispiel (Fensterbau Brandt, web/vorschau/paket-beispiel/); Etikett als Glas über dem Bild (G10) */
+a.ez-paket__bild { position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+a.ez-paket__bild:focus-visible { outline: 2px solid var(--fokus); outline-offset: -3px; }
+.ez-paket__ansehen { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px 0 14px;
+  border-radius: var(--rund-pille); background: rgba(32,32,34,.72); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--weiss);
+  font: 500 13px/1 var(--font-sans); border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4);
+  transition: transform 220ms var(--dna-druck); }
+.ez-paket__ansehen::after { content: ""; width: 12px; height: 12px; background: currentColor; -webkit-mask: var(--ez-chevron) center / contain no-repeat; mask: var(--ez-chevron) center / contain no-repeat; }
+a.ez-paket__bild:active .ez-paket__ansehen { transform: scale(.97); transition-duration: 0s; }
+@media (hover: hover) and (pointer: fine) { a.ez-paket__bild:hover .ez-paket__ansehen { transform: translateX(-2px); } }
+/* Zeile unter dem Vergleich: alle drei Pakete am Beispiel (wie die Zeile „Alle Merkmale im Vergleich“, mit Pfeil statt Plus) */
+.ez-beispiel-zeile { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 36px; align-items: center; gap: var(--raum-4); min-height: 56px; padding-block: 12px;
+  color: var(--tinte); text-decoration: none; border-bottom: 1px solid var(--linie-fein); -webkit-tap-highlight-color: transparent; }
+.ez-beispiel-zeile > span:first-child { display: grid; gap: 4px; }
+.ez-beispiel-zeile b { font: 500 17px/1.3 var(--font-sans); }
+.ez-beispiel-zeile > span:first-child > span { font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); }
+.ez-beispiel-zeile .dna-rund-knopf { width: 36px; height: 36px; display: grid; color: var(--tinte); box-shadow: inset 0 0 0 1px var(--linie); transition: background-color 220ms ease, color 220ms ease, transform 220ms var(--dna-druck); }
+.ez-beispiel-zeile .dna-rund-knopf svg { width: 14px; height: 14px; }
+.ez-beispiel-zeile:active .dna-rund-knopf { transform: scale(.97); transition-duration: 0s; }
+.ez-beispiel-zeile:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { .ez-beispiel-zeile:hover .dna-rund-knopf { background: var(--indigo); color: var(--weiss); } }
+@media (prefers-reduced-motion: reduce) { .ez-paket__ansehen, .ez-beispiel-zeile .dna-rund-knopf { transition: none; } }

@@ -1,0 +1,310 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box}body{margin:0;padding:0;background:#07090a}img{max-width:100%}[hidden]{display:none!important}</style></head><body><!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Beispiel EEZI Essential: Fensterbau Brandt, ein erfundener Betrieb · eeziframes</title>
+<style>html,body{background:#07090a}</style>
+<link rel="preload" href="fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-wm.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="bilder/buehne.webp" as="image" type="image/webp">
+<script src="/assets/js-da.js"></script>
+<link rel="stylesheet" href="dna/tokens.css">
+<link rel="stylesheet" href="dna/bundle.css">
+<link rel="stylesheet" href="essential.css">
+<link rel="stylesheet" href="muster.css">
+<!--
+  VORLAGE: Landingpage eines Konfigurators (EEZI Essential) unter der eigenen Domain des Betriebs (pakete.js: domain auch in Essential).
+  Was je Betrieb getauscht wird, steht in VORLAGE.md (Name, Zeichen oder Logo, Firmenfarbe, Adresse, Ort, Kontakt, Anrede).
+  Im Markup tragen diese Stellen data-vorlage="…". Die Farbe des Betriebs steht nur im Block darunter.
+-->
+<style>
+  /* VORLAGE: Firmenfarbe. Ohne eigene Farbe gilt Violett mit Indigo aus der Palette (wie hier). Eigene Farbe (VORLAGE.md, „Farbe prüfen“):
+     --firma: <hex>; --firma-tief: color-mix(in srgb, <hex> 40%, #07090a); --auf-firma: #07090a oder #fff (was ab 4,5:1 hat);
+     --firma-licht: <hex>, bei sehr dunkler Farbe aufgehellt (color-mix(in srgb, <hex> 55%, #fff)), damit das Leuchten auf Schwarz sichtbar bleibt;
+     --hinweis: Koralle, bei roter oder oranger Firmenfarbe Silbergrau (#a8a4a9), damit Hinweis und Betrieb nicht verschwimmen. */
+  .ez { --firma: var(--violett); --firma-tief: var(--indigo); --auf-firma: var(--schwarz); --firma-licht: var(--firma); --hinweis: var(--koralle); }
+</style>
+
+<main class="dna-wurzel ez" id="start" lang="de" data-paket="essential">
+  <a class="ez-skip dna-pille" href="#inhalt" data-theme="dunkel">Zum Inhalt springen</a>
+
+  <!-- Muster-Leiste (nur in der Vorlage für Fensterbauer, beim echten Betrieb weg): Paketwechsel mit Preis, Legende der Etiketten,
+       Schalter „Etiketten“. Quelle: docs/profis/werkzeuge/muster-leiste.css und .js -->
+  <div class="ez-ml" data-theme="dunkel">
+    <div class="ez-huelle">
+      <p class="ez-ml__text"><b>Muster · Essential</b><span class="ez-ml__preis"><!--preiszeile:essential-->29 € im Monat · 99 € einmalig · im ersten Jahr 447 € · netto, vorläufig<!--/preiszeile:essential--></span><span class="ez-ml__legende"><span><i class="ez-ml__punkt ez-ml__punkt--ab" aria-hidden="true"></i>erst ab Plus oder Signature</span></span></p>
+      <nav class="ez-ml__pakete" aria-label="Paket der Vorlage"><a href="essential.html" aria-current="page" aria-label="Essential, 29 € im Monat netto"><span>Essential</span><small><!--preis:essential-->29 €<!--/preis:essential--></small></a><a href="plus.html" aria-label="Plus, 39 € im Monat netto"><span>Plus</span><small><!--preis:plus-->39 €<!--/preis:plus--></small></a><a href="signature.html" aria-label="Signature, 64 € im Monat netto"><span>Signature</span><small><!--preis:signature-->64 €<!--/preis:signature--></small></a></nav>
+      <button class="ez-schalter" type="button" aria-pressed="false" id="muster-schalter"><span class="ez-schalter__punkt" aria-hidden="true"></span><span class="ez-schalter__text">Etiketten<span class="ez-unsichtbar">: zeigen, was zu welchem Paket gehört. Ihre Kunden sehen sie nicht.</span></span></button>
+    </div>
+  </div>
+
+  <!-- Leiste: kommt beim Hochscrollen zurück; dieselben zwei Marken wie im Kopf, Pille immer Umriss -->
+  <div class="ez-leiste" data-theme="dunkel" aria-hidden="true">
+    <div class="ez-huelle">
+      <span class="ez-firma"><span class="ez-firma__zeichen" data-vorlage="firma.zeichen">B</span><span class="ez-firma__name" data-vorlage="firma.name">Fensterbau Brandt</span></span>
+      <a class="dna-pille dna-pille--leise dna-pille--klein" href="#" tabindex="-1" data-vorlage="ziel.konfigurator">Fenster planen</a>
+    </div>
+  </div>
+
+  <!-- Szene 1 (dunkel): Empfang. Gene: G4 das Interface als Objekt (der Konfigurator des Betriebs liegt im Licht), G7 Material (Beton im
+       harten Fensterlicht), G9 Daten an der Sache (die Adresse hängt am Gerät), G10 scharf vor unscharf, G6 eine Pille, G2 Leuchten in
+       der Farbe des Betriebs. Die Bühne gehört eeziframes (Licht durchs Fenster, wie das Zeichen), das Gerät dem Betrieb. -->
+  <section class="dna-szene" data-theme="dunkel" aria-label="Willkommen">
+    <div class="ez-huelle">
+      <header class="ez-kopf">
+        <span class="ez-firma ez-firma--kopf"><span class="ez-firma__zeichen" data-vorlage="firma.zeichen">B</span><span class="ez-firma__name" data-vorlage="firma.name">Fensterbau Brandt</span></span>
+        <span class="ez-kopf__rechts">
+        <span class="ez-gast" role="img" aria-label="Konfigurator von eeziframes">
+          <span class="ez-gast__von" aria-hidden="true">Konfigurator von</span>
+          <span class="ez-marke" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".14"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></span>
+        </span>
+        <a class="ez-rund" href="#" data-vorlage="firma.telefon" aria-label="Fensterbau Brandt anrufen"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 3h3l1.6 4-2 1.2a9 9 0 0 0 4.2 4.2l1.2-2 4 1.6v3a1.6 1.6 0 0 1-1.6 1.6A13.4 13.4 0 0 1 2.9 4.6 1.6 1.6 0 0 1 4.5 3z"/></svg></a>
+        </span>
+      </header>
+
+      <div class="ez-hero">
+        <div class="ez-hero__buehne">
+          <figure class="ez-buehne" data-dna-auftritt="still" style="--i:0">
+            <img class="ez-buehne__foto" src="bilder/buehne.webp" width="1000" height="750" alt="" fetchpriority="high" decoding="async">
+            <span class="ez-buehne__schein" aria-hidden="true"></span>
+            <div class="ez-geraet" aria-hidden="true">
+              <div class="ez-geraet__schirm">
+                <div class="ez-app">
+                  <div class="ez-app__kopf">
+                    <span class="ez-app__rund"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg></span>
+                    <span class="ez-firma ez-firma--app"><span class="ez-firma__zeichen" data-vorlage="firma.zeichen">B</span><span class="ez-firma__name" data-vorlage="firma.name">Fensterbau Brandt</span></span>
+                    <span class="ez-app__rechts"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5h12M3 9h12M3 13h12"/></svg><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5-1.5h5z"/></svg></span>
+                  </div>
+                  <div class="ez-app__stationen"><b>Start</b><span class="ez-app__band"><i class="ist"></i><i></i><i></i><i></i><i></i><i></i></span><small>1 von 6</small></div>
+                  <div class="ez-app__buehne">
+                    <svg class="ez-app__skala" viewBox="0 0 358 200" preserveAspectRatio="none"><line x1="14" y1="166" x2="344" y2="166"/><path d="M14 166v8M47 166v5M80 166v5M113 166v5M146 166v8M179 166v5M212 166v5M245 166v5M278 166v8M311 166v5M344 166v8"/></svg>
+                    <span class="ez-app__glut"></span>
+                    <img class="ez-app__held" src="bilder/konfig/held.webp" width="280" height="238" alt="" decoding="async">
+                    <span class="ez-app__strich"></span>
+                    <span class="ez-app__etikett"><span class="ez-app__punkt"></span><span><b>Fenster</b><small>Dreh, Kipp, fest</small></span></span>
+                    <span class="ez-app__tipp">Wischen zum Wechseln</span>
+                  </div>
+                  <div class="ez-app__frage"><b>Was <em>planen</em> Sie?</b><span class="ez-app__i">i</span><span class="ez-app__notiz">Notiz</span></div>
+                  <div class="ez-app__karte">
+                    <div class="ez-app__feldkopf"><span>Element antippen</span><span>Fenster</span></div>
+                    <div class="ez-app__raster">
+                      <span class="ist"><img src="bilder/konfig/fenster.webp" width="176" height="150" alt="" decoding="async">Fenster</span>
+                      <span><img src="bilder/konfig/balkon.webp" width="176" height="150" alt="" decoding="async">Balkontür</span>
+                      <span><img src="bilder/konfig/fest.webp" width="175" height="150" alt="" decoding="async">Festverglasung</span>
+                      <span><img src="bilder/konfig/hst.webp" width="173" height="150" alt="" decoding="async">Hebe-Schiebe</span>
+                      <span><img src="bilder/konfig/psk.webp" width="174" height="150" alt="" decoding="async">PSK-Tür</span>
+                      <span><img src="bilder/konfig/fsw.webp" width="183" height="150" alt="" decoding="async">Falt&shy;schiebe&shy;wand</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="ez-geraet__glanz"></span>
+                <span class="ez-geraet__licht"></span>
+              </div>
+            </div>
+            <div class="ez-adresse dna-anker" data-dna="anker">
+              <svg class="dna-anker__linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-nur-tel" x1="42" y1="12" x2="43" y2="26" style="--i:0"/><line class="ez-nur-desk" x1="44" y1="12" x2="47" y2="26" style="--i:0"/></svg>
+              <span class="dna-anker__punkt ez-adresse__punkt" style="--i:0"></span>
+              <span class="dna-anker__etikett ez-adresse__etikett" style="--i:0"><span class="dna-etikett"><span class="ez-adresse__text" data-vorlage="firma.domain"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="9" height="6" rx="1.6"/><path d="M4.5 6.5V5a2.5 2.5 0 0 1 5 0v1.5"/></svg><b>fensterbau-brandt</b>.eeziframes.com</span></span></span>
+            </div>
+            <span class="ez-muster ez-muster--ab ez-muster--domain">Ab Plus: Ihre eigene Domain</span>
+            <span class="ez-muster ez-muster--ab ez-muster--bühne">Ab Plus: Ihr Foto, Ihr Logo, Ihre Farbe</span>
+            <figcaption class="ez-unsichtbar">Der Konfigurator von Fensterbau Brandt auf einem Telefon, das im Fensterlicht auf einem Betonboden liegt; die Adresse lautet fensterbau-brandt.de.</figcaption>
+          </figure>
+        </div>
+
+        <div class="ez-hero__text" id="inhalt" tabindex="-1">
+          <span class="ez-muster ez-muster--ab ez-muster--text">Ab Plus: Ihre eigenen Texte</span>
+          <span class="dna-label ez-kicker" data-dna-auftritt="still" style="--i:6">Fenster planen und anfragen</span>
+          <h1 class="dna-titel-xl" data-dna-woerter="6">Ihre neuen Fenster, <em class="ez-ak">Ihr Angebot.</em></h1>
+          <div class="ez-brief" data-dna-auftritt="still" style="--i:10">
+            <p class="dna-text" data-vorlage="firma.begruessung"><b>Für Ihr Angebot brauchen wir die Maße Ihrer Fenster.</b> Messen Sie hier selbst, danach melden wir uns mit dem Angebot.</p>
+            <p class="ez-unterschrift"><span class="ez-person" aria-hidden="true" data-vorlage="firma.ansprechpartner.bild">PB</span><span><b data-vorlage="firma.ansprechpartner">Petra Brandt</b><span>Fensterbau Brandt, Köln</span></span></p>
+          </div>
+          <div class="ez-aktionen" data-dna-auftritt="still" style="--i:12">
+            <a class="dna-pille" href="#" data-vorlage="ziel.konfigurator">Fenster planen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+            <a class="dna-pille dna-pille--leise" href="#so">So geht es</a>
+          </div>
+          <p class="ez-meta" data-dna-auftritt="still" style="--i:10"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg><span><b>Kostenlos und unverbindlich.</b> Ihre Anfrage geht nur an <span data-vorlage="firma.name">Fensterbau Brandt</span>.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 2 (hell): So geht es. Gene: G5 Stationen (Schritt 1 von 4), G8 dunkle Innenkarte mit dem Wert, G3 die Zahl als Held (5 Minuten),
+       G5 Stationen wie im Konfigurator, G1 Schraffur heißt „noch offen“ (Weiß ich noch nicht), G10 Glas über Foto -->
+  <section class="dna-szene" data-theme="hell" id="so" aria-labelledby="so-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <!-- Muster-Ebene (nur mit „Etiketten“): hier stünden ab Plus die Fotos des Betriebs -->
+      <div class="ez-ab-fotos" aria-hidden="true"><span class="ez-muster ez-muster--ab ez-muster--fluss">Ab Plus: bis zu 6 Fotos Ihres Betriebs, Ihre Startseite in Suchmaschinen</span><i></i><i></i><i></i></div>
+      <div class="ez-kopfzeile">
+        <span class="dna-label">So geht es</span>
+        <h2 class="dna-titel" id="so-titel">In vier Schritten zum <em class="ez-ak">Angebot.</em></h2>
+        <p class="dna-text">Etwa 5&nbsp;Minuten je Fenster, ohne Konto und ohne App aus dem Store. In den Messschritten spricht der Konfigurator Sie kurz mit „du“ an, damit jede Anleitung knapp bleibt.</p>
+      </div>
+
+      <ol class="ez-schritte4">
+        <li class="ez-schritt" data-theme="dunkel">
+          <div class="ez-schritt__bild ez-schritt__bild--foto">
+            <img src="bilder/so/wand-innen.webp" width="640" height="633" alt="Foto von innen: zweiflügliges Fenster in einer hellen Wand" decoding="async">
+            <span class="ez-sucher" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="ez-glaschip" aria-hidden="true"><span class="ez-ring" style="--anteil:.5"></span>Foto 1 von 2</span>
+          </div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;1 von&nbsp;4</span><h3 class="dna-titel-s">Fotos</h3><p>Eins von innen, eins von außen. Sie ersparen Rückfragen.</p></div>
+        </li>
+        <li class="ez-schritt" data-theme="dunkel">
+          <div class="ez-schritt__bild ez-schritt__bild--dunkel" data-theme="dunkel">
+            <svg class="ez-zeichnung" viewBox="0 0 300 300" aria-hidden="true">
+              <rect class="oeffnung" x="62" y="84" width="176" height="150"/>
+              <rect class="glas" x="80" y="100" width="140" height="102"/>
+              <rect class="rahmen" x="74" y="94" width="152" height="114" rx="2"/>
+              <rect class="rahmen" x="82" y="102" width="64" height="98" rx="1"/>
+              <rect class="rahmen" x="154" y="102" width="64" height="98" rx="1"/>
+              <path class="mass mass-oeffnung" d="M62 70H238M62 63v14M238 63v14"/>
+              <path class="mass mass-fenster" d="M74 222H226M74 215v14M226 215v14"/>
+            </svg>
+            <span class="ez-mini ez-mini--oeffnung" aria-hidden="true">Öffnung · Breite</span>
+            <span class="ez-mini ez-mini--fenster" aria-hidden="true">Fenster · Breite</span>
+          </div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;2 von&nbsp;4</span><h3 class="dna-titel-s">Messen</h3><p>Breite und Höhe, Öffnung und Fenster. Vor der Fertigung wird nachgemessen.</p></div>
+        </li>
+        <li class="ez-schritt" data-theme="dunkel">
+          <div class="ez-schritt__bild ez-schritt__bild--hell">
+            <img src="bilder/so/modell-anthrazit.webp" width="480" height="489" alt="3-D-Modell aus den eigenen Maßen: zweiflügliges Fenster in Anthrazitgrau" decoding="async">
+            <span class="ez-farben" aria-hidden="true"><i style="--farbe:#f1f0ea"></i><i class="ist" style="--farbe:#383e42"></i><i style="--farbe:#b8793e"></i></span>
+          </div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;3 von&nbsp;4</span><h3 class="dna-titel-s">Wünsche</h3><p>Material, Farbe, Glas, Sonnenschutz. Offen lassen geht auch.</p></div>
+        </li>
+        <li class="ez-schritt" data-theme="dunkel">
+          <div class="ez-schritt__bild ez-schritt__bild--dunkel ez-senden" data-theme="dunkel">
+            <span class="ez-senden__schein" aria-hidden="true"></span>
+            <span class="ez-firma__zeichen ez-firma__zeichen--gross" aria-hidden="true" data-vorlage="firma.zeichen">B</span>
+            <span class="ez-senden__pdf" aria-hidden="true">PDF</span>
+            <span class="ez-gesendet" aria-hidden="true">Gesendet</span>
+          </div>
+          <div class="ez-schritt__text"><span class="dna-label">Schritt&nbsp;4 von&nbsp;4</span><h3 class="dna-titel-s">Senden</h3><p>Prüfen und senden. Ihre Anfrage behalten Sie als PDF.</p></div>
+        </li>
+      </ol>
+
+      <div class="ez-paar">
+        <article class="ez-zeit dna-leucht" data-theme="dunkel" aria-labelledby="zeit-titel">
+          <div class="dna-leucht__kopf"><span class="dna-label" id="zeit-titel">Je Fenster etwa</span></div>
+          <div class="dna-zahl"><span class="dna-zahl__wert">5<span class="dna-zahl__einheit">Minuten</span></span></div>
+          <div class="ez-kapsel-block">
+            <ol class="ez-stationen" aria-label="Die vier Schritte"><li class="ist">Fotos</li><li>Messen</li><li>Wünsche</li><li>Senden</li></ol>
+            <p class="ez-klein">Pausieren, wann Sie wollen: Ihre Planung bleibt auf diesem Gerät gespeichert.</p>
+          </div>
+        </article>
+        <article class="ez-offen" aria-labelledby="offen-titel">
+          <div class="ez-offen__kopf"><span class="dna-label">Weiß ich noch nicht</span><span class="ez-beispiel">Beispiel</span></div>
+          <h3 class="dna-titel-s" id="offen-titel">Unsicher? <em class="ez-ak">Lassen Sie es offen.</em></h3>
+          <ul class="ez-wahl-reihe" aria-label="Beispiel: zwei Wünsche gewählt, zwei offen">
+            <li class="ist"><b>Material</b> Kunststoff</li>
+            <li class="offen"><b>Glas</b> offen</li>
+            <li class="ist"><b>Farbe</b> Anthrazitgrau</li>
+            <li class="offen"><b>Rollladen</b> offen</li>
+          </ul>
+          <p class="ez-klein">Im Konfigurator tippen Sie dann „Weiß ich noch nicht“. <span data-vorlage="firma.name">Fensterbau Brandt</span> berät Sie dazu.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Szene 3 (dunkel): Der Weg der Anfrage, Bereit, Fuß. Gene: G5 Stationen von Ihnen bis zum Einbau, G9 jede Rolle steht an ihrer Station,
+       G2 Leuchten nur beim Betrieb (dort kommt die Anfrage an), G1 gepunktete Linie gegen Leuchten, G14 Karte mit Lichtkante -->
+  <section class="dna-szene" data-theme="dunkel" id="weg" aria-labelledby="weg-titel">
+    <div class="ez-huelle ez-abschnitt">
+      <div class="ez-zwei ez-weg">
+        <div class="ez-text">
+          <span class="dna-label">So geht es weiter</span>
+          <h2 class="dna-titel" id="weg-titel">Von Ihrer Planung <em class="ez-ak">bis zum Einbau.</em></h2>
+          <p class="dna-text">Mit Ihrem Aufmaßblatt kann <span data-vorlage="firma.name">Fensterbau Brandt</span> gleich rechnen. Danach sind es drei Schritte bis zu Ihren neuen Fenstern.</p>
+          <ul class="ez-haken">
+            <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Kostenlos und unverbindlich</li>
+            <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Ohne Konto, ohne Werbung</li>
+            <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Ihre Anfrage als PDF für Sie</li>
+            <li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6"/></svg>Vor der Fertigung wird nachgemessen</li>
+          </ul>
+        </div>
+        <ol class="ez-route" aria-label="Der Weg Ihrer Anfrage">
+          <li class="ez-route__stelle">
+            <span class="ez-route__knoten ez-route__knoten--sie" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="2.5" width="9" height="15" rx="2"/><path d="M9 14.5h2"/></svg></span>
+            <span class="ez-route__text"><b>Sie planen</b><span>auf Ihrem Gerät, in Ruhe und mit Pausen</span></span>
+          </li>
+          <li class="ez-route__stelle ez-route__stelle--ziel">
+            <span class="ez-route__knoten ez-firma__zeichen" aria-hidden="true" data-vorlage="firma.zeichen">B</span>
+            <span class="ez-route__text"><b data-vorlage="firma.name">Fensterbau Brandt</b><span>bekommt Maße, Fotos und Wünsche auf einem Blatt (Aufmaßblatt)</span><span class="ez-hinweis">Offenes klärt der Betrieb mit Ihnen</span></span>
+          </li>
+          <li class="ez-route__trenner" aria-hidden="true"><span class="dna-label">Danach</span></li>
+          <li class="ez-route__stelle ez-route__stelle--klein">
+            <span class="ez-route__knoten ez-route__knoten--punkt" aria-hidden="true"></span>
+            <span class="ez-route__text"><b>Angebot</b><span><span data-vorlage="firma.name">Fensterbau Brandt</span> meldet sich mit einem Angebot bei Ihnen.</span></span>
+          </li>
+          <li class="ez-route__stelle ez-route__stelle--klein">
+            <span class="ez-route__knoten ez-route__knoten--punkt" aria-hidden="true"></span>
+            <span class="ez-route__text"><b>Nachmessen vor Ort</b><span>Vor der Fertigung misst <span data-vorlage="firma.name">Fensterbau Brandt</span> einmal nach. <span data-vorlage="firma.feinaufmass">Bei einem Auftrag ist das inklusive.</span></span></span>
+          </li>
+          <li class="ez-route__stelle ez-route__stelle--klein">
+            <span class="ez-route__knoten ez-route__knoten--punkt" aria-hidden="true"></span>
+            <span class="ez-route__text"><b>Einbau</b><span>Termin nach Absprache.</span></span>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Bereit: helle Karte ragt in die dunkle Szene. Gene: G6 eine Pille (Schwarz auf Weiß), G13 runde Knöpfe an der Kontaktkarte,
+           G8 dunkle Karte mit dem Betrieb, G14 keine Fläche ist flach -->
+      <div class="ez-bereit" id="bereit">
+        <div class="ez-bereit__karte ez-text" data-theme="hell">
+          <span class="dna-label">Bevor Sie starten</span>
+          <h2 class="dna-titel" id="bereit-titel">Das brauchen Sie.<br> <em class="ez-ak">Mehr nicht.</em></h2>
+          <ul class="ez-dinge">
+            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5 15.5 3l5.5 5.5L8.5 21z"/><path d="M7 11.5l1.6 1.6M9.8 8.7l1.6 1.6M12.6 5.9l1.6 1.6M11.4 15.1l1.6 1.6M14.2 12.3l1.6 1.6"/></svg></span>Zollstock oder Maßband</li>
+            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18h3"/></svg></span>Ihr Handy</li>
+            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M4 12h16"/></svg></span>Freien Zugang zum Fenster</li>
+            <li><span class="ez-dinge__zeichen" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11.5" r=".9"/><circle cx="10" cy="7.5" r=".9"/><circle cx="14.5" cy="7.5" r=".9"/></svg></span>Ihre Wünsche zu Farbe und Glas</li>
+          </ul>
+          <p class="ez-klein ez-nur-desk ez-handy">Am Computer? Öffnen Sie diese Seite auf Ihrem Handy.</p>
+          <a class="dna-pille" href="#" data-vorlage="ziel.konfigurator">Fenster planen <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></a>
+          <p class="ez-meta ez-meta--hell"><b>Kostenlos und unverbindlich.</b> Etwa 5&nbsp;Minuten je Fenster.</p>
+        </div>
+
+        <article class="ez-kontakt" data-theme="dunkel" aria-labelledby="kontakt-titel">
+          <span class="ez-kontakt__schein" aria-hidden="true"></span>
+          <h3 class="dna-label" id="kontakt-titel">Fragen vorab?</h3>
+          <div class="ez-kontakt__betrieb">
+            <span class="ez-firma__zeichen ez-firma__zeichen--gross" aria-hidden="true" data-vorlage="firma.zeichen">B</span>
+            <span><b data-vorlage="firma.name">Fensterbau Brandt</b><span data-vorlage="firma.ort">Fensterbau in Köln</span></span>
+          </div>
+                    <dl class="ez-kontakt__daten">
+            <div class="ez-kontakt__held"><dt>Telefon, vor Ihrer Anfrage</dt><dd data-vorlage="firma.telefon">0221&nbsp;123456</dd></div>
+            <div><dt>E-Mail</dt><dd data-vorlage="firma.mail">info@fensterbau-brandt.de</dd></div>
+            <div><dt>Anschrift</dt><dd data-vorlage="firma.anschrift">Musterstraße&nbsp;12<br>50667&nbsp;Köln</dd></div>
+          </dl>
+          <ul class="ez-kontakt__wege">
+            <li><a href="#" data-vorlage="firma.telefon"><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3h3l1.6 4-2 1.2a9 9 0 0 0 4.2 4.2l1.2-2 4 1.6v3a1.6 1.6 0 0 1-1.6 1.6A13.4 13.4 0 0 1 2.9 4.6 1.6 1.6 0 0 1 4.5 3z"/></svg></span>Anrufen</a></li>
+            <li><a href="#" data-vorlage="firma.mail"><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M2.5 6.5 10 11l7.5-4.5"/></svg></span>E-Mail</a></li>
+            <li><a href="#" data-vorlage="firma.website"><span class="dna-rund-knopf" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M2.5 10h15M10 2.5a11.5 11.5 0 0 1 0 15M10 2.5a11.5 11.5 0 0 0 0 15"/></svg></span>Website<span class="ez-unsichtbar"> von Fensterbau Brandt</span></a></li>
+          </ul>
+        </article>
+      </div>
+    </div>
+
+    <!-- Fuß: beide Marken nebeneinander, die Adresse als Beleg, wer den Konfigurator betreibt; Rechtliches des Betriebs -->
+    <div class="ez-huelle">
+      <footer class="ez-fuss" role="contentinfo">
+        <div class="ez-fuss__marken">
+          <span class="ez-firma"><span class="ez-firma__zeichen" data-vorlage="firma.zeichen">B</span><span class="ez-firma__name" data-vorlage="firma.name">Fensterbau Brandt</span></span>
+          <span class="ez-gast ez-gast--fuss" role="img" aria-label="Powered by eeziframes" lang="en"><span class="ez-gast__von" aria-hidden="true" lang="en">Powered by</span><span class="ez-marke" aria-hidden="true"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".14"/></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span></span></span>
+        </div>
+        <p class="ez-fuss__kz"><span class="ez-muster ez-muster--ab ez-muster--fluss">Ab Plus: Ihre Domain, eeziframes nur klein im Fuß · ab Signature: kein Hinweis auf eeziframes, auch nicht im Aufmaßblatt und in E-Mails</span></p>
+        <p class="ez-fuss__satz">Dieser Konfigurator von <span data-vorlage="firma.name">Fensterbau Brandt</span> läuft bei eeziframes unter <span class="ez-fuss__adresse" data-vorlage="firma.domain"><b>fensterbau-brandt</b>.eeziframes.com</span>. Ihre Anfrage geht nur an <span data-vorlage="firma.name">Fensterbau Brandt</span>.</p>
+        <ul class="ez-fuss__recht">
+          <li><a href="#" data-vorlage="recht.impressum">Impressum von <span data-vorlage="firma.name">Fensterbau Brandt</span></a></li>
+          <li><a href="#" data-vorlage="recht.datenschutz">Datenschutz</a></li>
+        </ul>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script src="dna/bundle.js"></script>
+<script src="essential.js"></script>
+<script src="muster.js"></script>
+
+</body></html></body></html>

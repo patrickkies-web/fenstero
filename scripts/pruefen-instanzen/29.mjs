@@ -149,8 +149,11 @@ export default async (h) => {
   const leist = (/<!--pakete:leistungen-->([\s\S]*?)<!--\/pakete:leistungen-->/.exec(kb.text) || [])[1] || '';
   const fristTab = (/<!--pakete:fristen-->([\s\S]*?)<!--\/pakete:fristen-->/.exec(kb.text) || [])[1] || '';
   const zellen = (s) => s.replace(/<[^>]+>/g, ' ');
+  /* Originalfotos: mit der Anfrage gelöscht; nur ein Paket mit Aufbewahrung bis Vertragsende hätte eine eigene Fotofrist
+     (fotosSignatureTage). Seit 27.10.2026 hat keines das (Entscheidung des Inhabers, docs/INSTANZEN.md) */
+  const fotoZeile = Pk.LISTE.some((p) => Pk.merkmale(p).aufbewahrung === 'vertrag') ? F.fotosSignatureTage + ' Tage nach dem Eingang' : 'Originalfotos der Anfragen ' + Pk.LISTE.map(() => 'mit der Anfrage').join(' ');
   ok(Object.keys(Pk.MERKMALE).filter((s) => s !== 'name' && s !== 'preis').every((s) => leist.includes(Pk.MERKMALE[s].titel)) && Pk.LISTE.every((p) => leist.includes('<th>' + Pk.PAKETE[p].name + '</th>')) &&
-    zellen(fristTab).includes(Pk.merkmale('essential').aufbewahrung + ' Tage nach bestätigter Zustellung') && zellen(fristTab).includes(F.fotosSignatureTage + ' Tage nach dem Eingang') && zellen(fristTab).includes(F.loeschenNachEndeTage + ' Tage nach dem Ende') &&
+    zellen(fristTab).includes(Pk.merkmale('essential').aufbewahrung + ' Tage nach bestätigter Zustellung') && zellen(fristTab).replace(/\s+/g, ' ').includes(fotoZeile) && zellen(fristTab).includes(F.loeschenNachEndeTage + ' Tage nach dem Ende') &&
     kb.text.includes('<!--pakete:f-kulanzTage-->' + F.kulanzTage + '<') && kb.text.includes('<!--pakete:f-pauseMaxTage-->' + F.pauseMaxTage + '<') && ['Cloudflare', 'Supabase', 'Resend', 'Anthropic'].every((u) => kb.text.includes(u)) && /C-154\/21/.test(kb.text),
     '29.4 Inhalt aus pakete.js und instanzregeln.js: Leistungen je Paket (alle Merkmale), Fristen je Paket, Kulanz ' + F.kulanzTage + ' und Pause ' + F.pauseMaxTage + ' Tage; AV-Vertrag mit Unterauftragnehmern und Nennungspflicht (EuGH C-154/21)');
 

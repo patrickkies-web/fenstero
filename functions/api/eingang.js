@@ -284,7 +284,7 @@ export async function anfragenAufraeumen(k, sp) {
     try {
       const m = await mVon(z.instanz), v = z.versand || {};
       if (m && m.aufbewahrung === 'vertrag' && z.art !== 'test' && z.art !== 'demo') {
-        /* Signature: nach fotosSignatureTage nur die Fotos; Aufmaß und Blatt bleiben bis zum Vertragsende */
+        /* Aufbewahrung 'vertrag' (seit 27.10.2026 in keinem Paket, nur als Abweichung): nach fotosSignatureTage nur die Fotos; Aufmaß und Blatt bleiben bis zum Vertragsende */
         await fotosLinkLoeschen(k, z.code);
         await sp.anfrageAendern(z.code, (x) => { x.loeschen_ab = null; x.daten = Object.assign({}, x.daten || {}, { fotosGeloescht: jetzt }); });
         out.fotos++; continue;

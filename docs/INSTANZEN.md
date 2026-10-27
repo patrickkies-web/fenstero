@@ -283,14 +283,23 @@ Für den Inhaber: wie ein Kunde zu seinem Konfigurator kommt, was in welchem Zus
 
 | | Essential | Plus | Signature |
 |---|---|---|---|
-| Konfigurator unter eigener Domain, Anfrage per Mail mit Aufmaßblatt-PDF | ja | ja | ja |
+| Adresse des Konfigurators | `ihr-name.eeziframes.com` (Entscheidung des Inhabers 27.10.2026, siehe unten) | eigene Domain | eigene Domain |
+| Anfrage per Mail mit Aufmaßblatt-PDF | ja | ja | ja |
 | Gestaltung | eeziframes-Design, Name als Text | Logo, Firmenfarbe, bis 6 Fotos, eigene Startseite | wie Plus |
+| Farben der Landingpage (`farbwelt`) | Palette von eeziframes | Palette des Betriebs auf Karten, heller Szene und Akzenten, Grund von eeziframes | die ganze Seite in der Palette des Betriebs |
 | Hinweis auf eeziframes | „Powered by EEZIframes“ (verlinkt) | „Konfigurator von eeziframes“ im Fuß | keiner, auch nicht in PDF, Mails, Titel, Icons, Rechtstexten |
 | Suchmaschinen | noindex (ohne Disallow) | nur die Startseite | nur die Startseite |
-| Aufbewahrung der Anfragen auf dem Server | 30 Tage nach Zustellung | 30 Tage nach Zustellung | Vertragsdauer, Originalfotos 365 Tage |
+| Aufbewahrung der Anfragen auf dem Server | 30 Tage nach Zustellung | 30 Tage nach Zustellung | 30 Tage nach Zustellung, bis dahin auch im Dashboard |
 | Dashboard `/betrieb/` mit Einladungslinks und Fortschritt | nein | nein | ja, 5 Zugänge |
 
-Verbindlich ist `web/assets/pakete.js`; die Tabelle oben ist ein Auszug. Abweichungen für einzelne Kunden (Kulanz) stehen in `instanzen.abweichung` und gelten nur für bekannte Merkmale, nie für Paket, Name oder Preis.
+Verbindlich ist `web/assets/pakete.js`; die Tabelle oben ist ein Auszug.
+
+**Stand 27.10.2026, Entscheidungen des Inhabers:** Kein Paket bewahrt Anfragen bis zum Vertragsende auf (`aufbewahrung` überall 30 Tage;
+`'vertrag'` nur noch als Abweichung). Essential läuft unter `ihr-name.eeziframes.com` (`domain: false`). **Offen:** Der Server kann das
+noch nicht. `istHaupt` in `functions/instanz/mandant.js` behandelt jede Adresse unter `eeziframes.com` außer `demo-*` als Hauptdomain,
+Bestellung und Einrichtung fragen auch bei Essential nach einer Wunsch-Domain, und es fehlt die Route `*.eeziframes.com` am Worker.
+Bis das gebaut ist, bekommt ein Essential-Kunde wie bisher eine eigene Domain. Die Farbstufen (`farbwelt`) sind in den Vorlagen gebaut
+(docs/profis/paketvorlagen/, Farbdatei je Betrieb); die Instanzen setzen heute nur die Firmenfarbe als Akzent. Abweichungen für einzelne Kunden (Kulanz) stehen in `instanzen.abweichung` und gelten nur für bekannte Merkmale, nie für Paket, Name oder Preis.
 
 ### Einrichtung je Kunde (Weg 1: Domain im eigenen Cloudflare-Konto)
 
@@ -326,8 +335,8 @@ Impressum und Datenschutz sind in jedem Zustand erreichbar. Eine laufende Planun
 |---|---|---|
 | Website-Entwurf ohne Fenster | `entwurfLeerStunden` (24 Stunden) | `anfragenAufraeumen` (täglich) |
 | Website-Entwurf mit Fenster, nicht gesendet | `entwurfStillTage` (30 Tage ohne Änderung), samt Fotos | `anfragenAufraeumen` |
-| Anfrage Essential/Plus | `aufbewahrung` (30 Tage) nach bestätigter Zustellung, höchstens `unzustellbarTage` (60) ohne Zustellung | Resend-Webhook setzt `loeschen_ab`; `anfragenAufraeumen` |
-| Anfrage Signature | bis Vertragsende; Originalfotos `fotosSignatureTage` (365) | `anfragenAufraeumen` |
+| Anfrage (alle Pakete) | `aufbewahrung` (30 Tage) nach bestätigter Zustellung, höchstens `unzustellbarTage` (60) ohne Zustellung | Resend-Webhook setzt `loeschen_ab`; `anfragenAufraeumen` |
+| Anfrage Signature | wie Essential und Plus (seit 27.10.2026); nur mit Abweichung `aufbewahrung: 'vertrag'` bis Vertragsende, Originalfotos dann `fotosSignatureTage` (365) | `anfragenAufraeumen` |
 | Fotolink in der Mail (Essential/Plus) | `fotoLinkTage` (14), nur auf dem Haupthost, Abruf protokolliert | `functions/api/instanz-api.js` |
 | Test- und Demo-Anfragen | `testTage` (1 Tag) | `anfragenAufraeumen` |
 | Vorschau-Link | `vorschauTage` (30) | Token `vorschau` |

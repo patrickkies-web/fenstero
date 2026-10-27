@@ -47,7 +47,7 @@ const steuerText = (v) => (v.mwst ? 'netto zzgl. MwSt.' : 'ohne Ausweis der Umsa
 export function wertText(schluessel, m) {
   const d = P().MERKMALE[schluessel], v = m[schluessel];
   if (!d) return String(v);
-  if (d.art === 'janein') return v ? 'ja' : 'nein';
+  if (d.art === 'janein') return v ? 'ja' : (d.nein || 'nein');
   if (d.art === 'zahl') return v ? String(v) : 'nein';
   if (d.art === 'tage') return v ? v + ' Tage' : 'nein';
   if (d.art === 'wahl') return (d.werte && d.werte[v]) || String(v);
@@ -57,27 +57,28 @@ export function wertText(schluessel, m) {
 }
 /* Satz unter dem Paketnamen, aus den Merkmalen (nie aus dem Namen des Pakets) */
 function kurzText(m) {
-  if (m.dashboard) return 'Ganz Ihre Marke, dazu Ihr Dashboard mit persönlichen Einladungslinks und Fortschritt.';
-  if (m.gestaltung === 'eigen') return 'Ihr Konfigurator in Ihrem Design: Logo, Firmenfarbe, Fotos und eigene Startseite.';
-  return 'Der volle Konfigurator unter Ihrer Domain, im eeziframes-Design mit Ihrem Namen.';
+  if (m.dashboard) return 'Ganz Ihre Marke und Ihre Farbwelt, dazu Ihr Dashboard mit persönlichen Einladungslinks und Fortschritt.';
+  if (m.gestaltung === 'eigen') return 'Ihr Konfigurator unter Ihrer Domain und in Ihrem Design: Logo, Firmenfarbe, Fotos und eigene Startseite.';
+  return 'Der volle Konfigurator im eeziframes-Design mit Ihrem Namen, unter ihr-name.eeziframes.com.';
 }
 /* Die wichtigsten Punkte eines Pakets für die Karte */
 function punkte(m) {
   const M = P().MERKMALE, out = [];
-  if (m.domain) out.push('Unter Ihrer eigenen Domain, z. B. ihr-name-fenster.de');
+  out.push(m.domain ? 'Unter Ihrer eigenen Domain, z. B. ihr-name-fenster.de' : 'Unter Ihrem Namen bei eeziframes, z. B. ihr-name.eeziframes.com');
   if (m.konfigurator) out.push(M.konfigurator.text);
   if (m.eingangMail) out.push('Jede Anfrage als Aufmaßblatt-PDF per E-Mail');
   if (m.gestaltung === 'eigen') {
     const teile = [m.logo ? 'Ihr Logo' : '', m.farbe ? 'Ihre Firmenfarbe' : '', m.fotos ? 'bis zu ' + m.fotos + ' Fotos Ihres Betriebs' : '', m.startansicht ? 'eigene Startseite' : ''].filter(Boolean);
     out.push('In Ihrem Design: ' + teile.join(', '));
   } else out.push(M.gestaltung.werte[m.gestaltung]);
+  if (m.farbwelt && m.farbwelt !== 'eezi') out.push(m.farbwelt === 'voll' ? 'Die ganze Seite in Ihrer Farbwelt' : 'Ihre Farben auf Karten und Akzenten');
   /* Der neutrale Absender ist nach Bauplan §4 optional (zweite Domain): ehrlich „sobald eingerichtet“, bis dahin kommt die Mail vom Konfigurator-Postfach */
   out.push(m.kennzeichnung === 'keine' ? 'Ohne Hinweis auf eeziframes für Ihre Kunden, auch im Aufmaßblatt' + (m.absender === 'neutral' ? '; E-Mails an Sie von einem neutralen Absender, sobald eingerichtet' : '') : 'Hinweis auf eeziframes: ' + M.kennzeichnung.werte[m.kennzeichnung]);
   if (m.indexierung === 'start') out.push('Startseite in Suchmaschinen');
   if (m.dashboard) out.push('Dashboard unter Ihrer Domain mit ' + m.zugaenge + ' Zugängen');
   if (m.einladungslinks) out.push('Persönliche Einladungslinks für Ihre Kunden');
   if (m.fortschritt) out.push('Fortschritt sehen: eingeladen, in Bearbeitung, eingereicht');
-  if (m.pdfAblage) out.push('Aufmaßblätter jederzeit im Dashboard');
+  if (m.pdfAblage) out.push('Aufmaßblätter im Dashboard');
   return out;
 }
 

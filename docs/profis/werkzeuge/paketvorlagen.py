@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Baut aus den drei Paket-Vorlagen (docs/profis/{essential,plus,signature}-vorschau) eine Familie je Beispielbetrieb.
 
-Aufruf:  python3 docs/profis/werkzeuge/paketvorlagen.py brandt      (Fensterbau Brandt, Gold, wie die Vorlagen)
-         python3 docs/profis/werkzeuge/paketvorlagen.py ostermann   (Fenster Ostermann, Bremen, eigene Palette)
+Aufruf:  python3 docs/profis/werkzeuge/paketvorlagen.py brandt      (Fensterbau Brandt, Köln, Palette des Betriebs nach Stufen)
+         python3 docs/profis/werkzeuge/paketvorlagen.py ostermann   (Fenster Ostermann, Bremen, eigene Palette; seit 27.10.2026 nicht gepflegt)
+         python3 docs/profis/werkzeuge/paketvorlagen.py brandt --web
+                  schreibt die drei Seiten für die Website nach web/vorschau/paket-beispiel/ (verlinkt aus dem Paketvergleich der Seite für
+                  Fensterbauer): ohne Inline-Skript (CSP, /assets/js-da.js), mit noindex, Titel je Paket, index.html leitet auf Plus.
 Ergebnis: docs/profis/paketvorlagen/<betrieb>/ mit essential.html, plus.html, signature.html (volle Seiten, verlinken sich über
 die Muster-Leiste), index-<paket>.html (dieselbe Seite ohne Dokumentgerüst, als Hauptseite eines Artifacts), <paket>.css/.js,
 muster.css, dna/, fonts/, bilder/.
@@ -75,10 +78,26 @@ def preise():
     return monat, zeile, d['v']
 
 
+TITEL_WEB = {'essential': 'EEZI Essential', 'plus': 'EEZI Essential Plus', 'signature': 'EEZI Signature'}
+
+
+def fuer_web(html, p):
+    """Seite für web/vorschau/paket-beispiel/: CSP der Website (kein Inline-Skript), noindex, eigener Titel; sonst wie die Vorlage."""
+    alt = '<script>document.documentElement.classList.add("ez-js");</script>'
+    assert html.count(alt) == 1, p
+    html = html.replace(alt, '<script src="/assets/js-da.js"></script>')
+    html = html.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', '')
+    html = re.sub(r'<title>[^<]*</title>', '<title>Beispiel %s: Fensterbau Brandt, ein erfundener Betrieb · eeziframes</title>' % TITEL_WEB[p], html, count=1)
+    html = html.replace('<meta charset="utf-8">', '<meta charset="utf-8"><meta name="robots" content="noindex, nofollow">', 1)
+    assert '<script>' not in html and 'noindex' in html, p
+    return html
+
+
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else 'brandt'
+    web = '--web' in sys.argv
     b = BETRIEBE[name]
-    ziel = ROOT / 'docs' / 'profis' / 'paketvorlagen' / name
+    ziel = (ROOT / 'web' / 'vorschau' / 'paket-beispiel') if web else (ROOT / 'docs' / 'profis' / 'paketvorlagen' / name)
     if ziel.exists():
         shutil.rmtree(ziel)
     ziel.mkdir(parents=True)
@@ -117,12 +136,20 @@ def main():
         html = html.replace('href="start.css"', 'href="%s.css"' % p).replace('src="start.js"', 'src="%s.js"' % p)
         (ziel / f'{p}.css').write_text(css, encoding='utf-8')
         (ziel / f'{p}.js').write_text(js, encoding='utf-8')
-        (ziel / f'index-{p}.html').write_text(html, encoding='utf-8')
-        (ziel / f'{p}.html').write_text(HUELLE + html + '</body></html>', encoding='utf-8')
+        if web:
+            (ziel / f'{p}.html').write_text(fuer_web(HUELLE + html + '</body></html>', p), encoding='utf-8')
+        else:
+            (ziel / f'index-{p}.html').write_text(html, encoding='utf-8')
+            (ziel / f'{p}.html').write_text(HUELLE + html + '</body></html>', encoding='utf-8')
     shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'muster-leiste.css', ziel / 'muster.css')
     shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'muster-leiste.js', ziel / 'muster.js')
     if b.get('farben'):
         shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / b['farben']['datei'], ziel / 'farben.css')
+    if web:
+        (ziel / 'index.html').write_text('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0; url=plus.html">'
+            '<title>Beispiel: Fensterbau Brandt in drei Paketen · eeziframes</title><style>html,body{background:#07090a;color:#fff;font-family:system-ui,sans-serif}</style></head>'
+            '<body><p><a href="plus.html" style="color:#fff">Zum Beispiel Fensterbau Brandt</a></p></body></html>\n', encoding='utf-8')
     print('gebaut:', ziel.relative_to(ROOT), '·', ', '.join('%s %s' % (k, v) for k, v in pr.items()))
 
 

@@ -727,3 +727,6 @@ html:not(.ez-js) .ez-modus, html:not(.ez-js) .ez-ml .ez-schalter { display: none
 .ez-foto--echt::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 58%; z-index: 1; pointer-events: none;
   background: linear-gradient(to top, color-mix(in srgb, var(--schwarz) 82%, transparent), color-mix(in srgb, var(--schwarz) 40%, transparent) 45%, transparent); }
 .ez-foto--echt .ez-foto__text b { color: #fff; text-shadow: 0 1px 2px rgba(7,9,10,.45); }
+
+/* Porträt der Ansprechperson (Plus und Signature, Foto des Betriebs) statt der Initialen: feiner Ring in der Firmenfarbe */
+.ez-person:has(img) { background: none; box-shadow: none; outline: 1.5px solid color-mix(in srgb, var(--firma) 70%, transparent); outline-offset: 1.5px; }

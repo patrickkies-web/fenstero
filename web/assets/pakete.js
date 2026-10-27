@@ -19,9 +19,11 @@
 
   /* Merkmal × Paket (Bauplan §2b). Werte:
      preis              { monat, einrichtung } in Euro netto
-     domain, konfigurator, eingangMail   eigene Domain, voller Konfigurator, jede Anfrage per Mail mit PDF
+     domain, konfigurator, eingangMail   eigene Domain (sonst ihr-name.eeziframes.com), voller Konfigurator, jede Anfrage per Mail mit PDF
      gestaltung         'standard' (eeziframes-Design, Name als Text) | 'eigen'
      logo, farbe        Logo in Kopf, Startansicht, PDF, Mail; Firmenfarbe als --accent
+     farbwelt           Farben der Landingpage: 'eezi' (Palette von eeziframes) | 'akzent' (Palette des Betriebs auf Karten, heller Szene und
+                        Akzenten, Grund von eeziframes) | 'voll' (ganze Seite in der Palette des Betriebs); Entscheidung des Inhabers 27.10.2026
      fotos              Anzahl Unternehmensfotos in der Startansicht
      startansicht       eigener Titel, Kicker, Text, Begrüßung
      icons              'eezi' | 'betrieb'
@@ -33,7 +35,8 @@
      indexierung        'nein' (noindex, kein Disallow) | 'start' (nur / in Suchmaschinen)
      kopieKunde         „Meine Anfrage als PDF“ nach dem Senden
      fotoLinkTage       Link auf die Originalfotos in der Mail, Gültigkeit in Tagen (0 = kein Link)
-     aufbewahrung       Tage nach Zustellung, nach denen die Anfrage gelöscht wird, oder 'vertrag' (bis Vertragsende)
+     aufbewahrung       Tage nach Zustellung, nach denen die Anfrage gelöscht wird, oder 'vertrag' (bis Vertragsende; seit 27.10.2026 in keinem
+                        Paket, nur noch als Abweichung möglich)
      pdfAblage          PDF beim Eingang ablegen (Bucket blatt)
      dashboard, einladungslinks, fortschritt   Signature-Dashboard unter /betrieb/, persönliche Links, laufende Planungen
      zugaenge           Anzahl Dashboard-Zugänge
@@ -42,8 +45,8 @@
   const PAKETE = {
     essential: {
       name: 'EEZI Essential', preis: { monat: 29, einrichtung: 99 },
-      domain: true, konfigurator: true, eingangMail: true,
-      gestaltung: 'standard', logo: false, farbe: false, fotos: 0, startansicht: false, icons: 'eezi',
+      domain: false, konfigurator: true, eingangMail: true,
+      gestaltung: 'standard', logo: false, farbe: false, farbwelt: 'eezi', fotos: 0, startansicht: false, icons: 'eezi',
       kennzeichnung: 'deutlich', pdfKennzeichnung: 'deutlich', mailKennzeichnung: 'deutlich', absender: 'instanz', rechtNennung: 'name',
       indexierung: 'nein', kopieKunde: true, fotoLinkTage: 14, aufbewahrung: 30, pdfAblage: false,
       dashboard: false, einladungslinks: false, fortschritt: false, zugaenge: 0, kiMonat: 600, anfragenTag: 50
@@ -51,7 +54,7 @@
     plus: {
       name: 'EEZI Essential Plus', preis: { monat: 39, einrichtung: 199 },
       domain: true, konfigurator: true, eingangMail: true,
-      gestaltung: 'eigen', logo: true, farbe: true, fotos: 6, startansicht: true, icons: 'betrieb',
+      gestaltung: 'eigen', logo: true, farbe: true, farbwelt: 'akzent', fotos: 6, startansicht: true, icons: 'betrieb',
       kennzeichnung: 'dezent', pdfKennzeichnung: 'dezent', mailKennzeichnung: 'dezent', absender: 'instanz', rechtNennung: 'name',
       indexierung: 'start', kopieKunde: true, fotoLinkTage: 14, aufbewahrung: 30, pdfAblage: false,
       dashboard: false, einladungslinks: false, fortschritt: false, zugaenge: 0, kiMonat: 1000, anfragenTag: 50
@@ -59,9 +62,9 @@
     signature: {
       name: 'EEZI Signature', preis: { monat: 64, einrichtung: 279 },
       domain: true, konfigurator: true, eingangMail: true,
-      gestaltung: 'eigen', logo: true, farbe: true, fotos: 6, startansicht: true, icons: 'betrieb',
+      gestaltung: 'eigen', logo: true, farbe: true, farbwelt: 'voll', fotos: 6, startansicht: true, icons: 'betrieb',
       kennzeichnung: 'keine', pdfKennzeichnung: 'keine', mailKennzeichnung: 'keine', absender: 'neutral', rechtNennung: 'kategorie',
-      indexierung: 'start', kopieKunde: true, fotoLinkTage: 0, aufbewahrung: 'vertrag', pdfAblage: true,
+      indexierung: 'start', kopieKunde: true, fotoLinkTage: 0, aufbewahrung: 30, pdfAblage: true,
       dashboard: true, einladungslinks: true, fortschritt: true, zugaenge: 5, kiMonat: 2000, anfragenTag: 100
     }
   };
@@ -71,12 +74,13 @@
   const MERKMALE = {
     preis: { titel: 'Preis', art: 'preis', vergleich: true },
     name: { titel: 'Paket', art: 'text' },
-    domain: { titel: 'Eigene Domain', text: 'Ihr Konfigurator unter Ihrer eigenen Adresse, z. B. ihr-name-fenster.de', art: 'janein', vergleich: true },
+    domain: { titel: 'Eigene Domain', text: 'Ihr Konfigurator unter Ihrer eigenen Adresse, z. B. ihr-name-fenster.de; ohne eigene Domain unter ihr-name.eeziframes.com', art: 'janein', nein: 'nein, unter ihr-name.eeziframes.com', vergleich: true },
     konfigurator: { titel: 'Voller Konfigurator', text: 'Planung mit 3-D-Modell, KI-Auswertung der Fotos, Klärungsliste und Zeichnung', art: 'janein', vergleich: true },
     eingangMail: { titel: 'Anfrage per E-Mail mit PDF', text: 'Jede Anfrage kommt mit dem fertigen Aufmaßblatt als PDF in Ihr Postfach', art: 'janein', vergleich: true },
     gestaltung: { titel: 'Gestaltung', art: 'wahl', werte: { standard: 'eeziframes-Design mit Ihrem Namen', eigen: 'in Ihrem Design' }, vergleich: true },
     logo: { titel: 'Ihr Logo', text: 'in der App, im Aufmaßblatt und in der E-Mail', art: 'janein', vergleich: true },
-    farbe: { titel: 'Ihre Firmenfarbe', art: 'janein', vergleich: true },
+    farbe: { titel: 'Ihre Firmenfarbe', art: 'janein' },
+    farbwelt: { titel: 'Farben der Seite', art: 'wahl', werte: { eezi: 'Farben von eeziframes', akzent: 'Ihre Farben auf Karten und Akzenten', voll: 'die ganze Seite in Ihrer Farbwelt' }, vergleich: true },
     fotos: { titel: 'Fotos Ihres Betriebs', text: 'auf der Startseite', art: 'zahl', vergleich: true },
     startansicht: { titel: 'Eigene Startseite', text: 'Titel, Begrüßung und Text', art: 'janein', vergleich: true },
     icons: { titel: 'App-Symbol', art: 'wahl', werte: { eezi: 'eeziframes', betrieb: 'Ihr Zeichen' } },
@@ -89,7 +93,7 @@
     kopieKunde: { titel: 'PDF-Kopie für Ihre Kunden', art: 'janein' },
     fotoLinkTage: { titel: 'Originalfotos per Link', art: 'tage' },
     aufbewahrung: { titel: 'Aufbewahrung der Anfragen', art: 'aufbewahrung', vergleich: true },
-    pdfAblage: { titel: 'Unterlagen jederzeit abrufbar', art: 'janein' },
+    pdfAblage: { titel: 'Aufmaßblätter im Dashboard', text: 'solange die Anfrage gespeichert ist', art: 'janein' },
     dashboard: { titel: 'Dashboard unter Ihrer Domain', text: 'geschützter Zugang für Ihr Team', art: 'janein', vergleich: true },
     einladungslinks: { titel: 'Persönliche Einladungslinks', text: 'Kunden gezielt einladen, auf Ihrer Domain', art: 'janein', vergleich: true },
     fortschritt: { titel: 'Fortschritt sehen', text: 'eingeladen, in Bearbeitung, eingereicht', art: 'janein', vergleich: true },

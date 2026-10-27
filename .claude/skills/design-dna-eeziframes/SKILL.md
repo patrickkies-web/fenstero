@@ -74,7 +74,8 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Domain; die eigene Domain ist dort ein Etikett „Ab Plus“. Im Daten-Abschnitt steht kein ausdrücklicher Satz, dass der Betrieb vor dem
   Senden nichts sieht; es steht nur, dass mit dem Konfigurator von eeziframes geplant wird (Signature: „von <Betrieb>“, ohne den Namen
   eeziframes) und dass der Betrieb die Anfrage bekommt, sobald gesendet wird. Unterlagen für die Vertragsdauer und eine Ablage im
-  Dashboard kommen in keinem Paket vor, weder im Text noch in Etiketten. Statt der Kachel „Für große Türen eine zweite Person“ steht
+  Dashboard über die Vertragsdauer kommen in keinem Paket vor, weder im Text noch in Etiketten (auch nicht in pakete.js: Aufbewahrung
+  überall 30 Tage; Signature zeigt die Aufmaßblätter im Dashboard nur, solange die Anfrage gespeichert ist). Statt der Kachel „Für große Türen eine zweite Person“ steht
   „Ihre Wünsche zu Farbe und Glas“. Jedes Etikett passt in seine Pille, einzeilig oder im Fluss umbrechend, geprüft bei 390 und 1280 px.
 - Palette eines Betriebs (Vorgabe des Inhabers, 27.10.2026, Beispiel Fensterbau Brandt: Reinweiß 40 %, Eisblau 25 %, Schieferblau 15 %,
   Tiefes Petrol 10 %, Aquatürkis 7 %, Frisches Mint 3 %): Signature folgt auf der ganzen Seite der Palette und ihren Anteilen, auch im
@@ -91,6 +92,15 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   280 ms ease-in-out; Logo blendet in 160 ms aus); beim Hochscrollen kommt sie ganz zurück (320 ms), über dem Kopf der Seite ist sie
   weg. Der Zuschnitt begrenzt auch die Treffer, daneben bleibt die Seite bedienbar. Ruhige Fassung: nur Überblenden. Vorschlag für die
   DNA und für weitere Seiten mit Leiste.
+- Beispiel-Betrieb und Paketbereich (Wunsch des Inhabers, 27.10.2026, „Ich brauch jetzt nur noch den Betrieb Brandt, der dient mir
+  als Beispiel“): Fensterbau Brandt ist der einzige Beispiel-Betrieb; Ostermann wird nicht mehr gepflegt (Generator und Artifact
+  bleiben, nichts gelöscht). Im Paketbereich der Seite für Fensterbauer zeigt jede Karte den ersten Bildschirm der Brandt-Seite ihres
+  Pakets (aufgenommen bei 1024 × 640, damit nur der erste Bildschirm im Bild ist, als 960 × 600 WebP bilder/paket-<paket>.webp), mit
+  der Adresse des Pakets in der Browserleiste (Essential fensterbau-brandt.eeziframes.com, sonst fensterbau-brandt.de). Das Bild ist
+  ein Link mit Glas-Etikett „Beispiel ansehen“; unter dem Vergleich steht die Zeile „Alle drei Pakete am Beispiel ansehen“. Ziel sind
+  die Beispielseiten unter web/vorschau/paket-beispiel/ (noindex, nicht in der Sitemap), gebaut mit
+  `python3 docs/profis/werkzeuge/paketvorlagen.py brandt --web`; danach die Kartenbilder neu aufnehmen. Die Merkmale im Vergleich kommen
+  aus pakete.js (Farben der Seite, Adresse, Aufbewahrung, Aufmaßblätter im Dashboard); Vorschau und pakete.js ändern sich zusammen.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
