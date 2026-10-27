@@ -1,0 +1,636 @@
+<!-- Abschluss-Folien des Konfigurators (nach Schritt 6 „Wünsche“): Gespeichert, Fürs Angebot 1–3, Aufmaßblatt, Kasse, Freigeschaltet, Teilen.
+     Inhalte, Texte und Prüfungen aus web/assets/app.js (SCREENS.fertig, anfrage, anfrage2, anfrage3, teilen, konto, kasse, gekauft); Weg ohne Betrieb
+     in der Pilotphase. Erzeugt mit dem Bauskript der Arbeitssitzung; Logik in abschluss.js, Gestaltung in abschluss.css. -->
+            <!-- Gespeichert (SCREENS.fertig): das Modell der Wünsche (Ansicht „result“), Chip „Gespeichert · Position 1“, Name als Titel, Stand.
+                 Gene: G4 Modell als Objekt im Licht, G10 Chip über dem Bild, G8 Aktionen als Anthrazit-Kacheln, G13 runde Knöpfe, G6 eine volle Pille,
+                 G14 Lichtkante und Vignette. Keine Maße auf diesem Bildschirm (Entscheidung des Inhabers in app.js: nichts zum Abfotografieren). -->
+            <section class="ez-folie ez-ab" data-folie="fertig" aria-label="Gespeichert" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück: Fenster" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--modell">
+                <img class="ez-ab-modell" id="ab-modell" src="bilder/ergebnis/fenster.webp" width="2148" height="1800" alt="" decoding="async" draggable="false">
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip ez-glaschip--fest"><span class="ez-ab-chiphaken" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Gespeichert · Position&nbsp;<span data-ab="pos">1</span></span></span>
+                <figcaption class="ez-unsichtbar" id="ab-modell-text">Das Modell deines Fensters, gespeichert.</figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1 id="ab-fertig-h1"><span data-ab="name">Fenster</span></h1></div>
+                </div>
+                <p class="ez-unterzeile"><span data-ab="stand">Fenster · Vollständig</span></p>
+              </div>
+
+              <div class="ez-ab-karte ez-ab-weiter-karte">
+                <span class="dna-label">Wie geht es weiter?</span>
+                <p class="ez-ab-karte__text">Noch ein Fenster? Dann tipp auf „Weiteres Fenster“. Alles erfasst? Dann weiter zu deinem Aufmaßblatt.</p>
+                <p class="ez-ab-karte__leise">Maße, Wünsche und die Auswertung der Fotos stehen in deinem Aufmaßblatt.</p>
+                <button type="button" class="dna-pille dna-pille--leise ez-ab-leise" id="ab-neu"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Weiteres Fenster</button>
+              </div>
+              <p class="ez-ab-hilfe" id="ab-aend">Bis zum <span data-ab="bis">03.11.2026</span> kannst du dieses Fenster beliebig ändern, danach noch viermal.</p>
+
+              <div class="ez-ab-kacheln" role="group" aria-label="Dieses Fenster">
+                <button type="button" class="ez-ab-kachel" data-ab-akt="masse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 16.5 16.5 3l4.5 4.5L7.5 21z"/><path d="M7.5 12l2 2M10.5 9l2 2M13.5 6l2 2"/></svg><span>Maße ändern</span></button>
+                <button type="button" class="ez-ab-kachel" data-ab-akt="wuensche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>Wünsche ändern</span></button>
+                <button type="button" class="ez-ab-kachel" data-ab-akt="kopie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></svg><span>Kopieren</span></button>
+                <button type="button" class="ez-ab-kachel ez-ab-kachel--weg" data-ab-akt="weg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10.5 11v5.5M13.5 11v5.5"/></svg><span>Löschen</span></button>
+              </div>
+
+              <div class="ez-ab-sprung">
+                <span class="dna-label" id="ab-sprung-l">Direkt zu einem Thema</span>
+                <div class="ez-ab-sprung__chips" role="group" aria-labelledby="ab-sprung-l"><button type="button" data-ab-kapitel="aufbau">Aufbau</button><button type="button" data-ab-kapitel="material">Material &amp; Farbe</button><button type="button" data-ab-kapitel="glas">Glas &amp; Sprossen</button><button type="button" data-ab-kapitel="bedienung">Griff &amp; Schutz</button><button type="button" data-ab-kapitel="sonne">Sonnenschutz</button><button type="button" data-ab-kapitel="bank">Einbau</button></div>
+              </div>
+              <button type="button" class="ez-ab-zeile" id="ab-alle"><span>Alle Fenster ansehen (<span data-ab="anzahl-fenster">1</span>)</span><i aria-hidden="true"></i></button>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück: Fenster" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-fertig-weiter"><span class="ez-weiter__wort">Zum Aufmaßblatt</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Fürs Angebot · 1 von 3 (SCREENS.anfrage): Bühne mit den Fenstern im ganzen Haus als Kapselreihe (G11), getauschte violett, ab
+                 einem Drittel die Marke für das Lüftungskonzept (DIN 1946-6, Regel der App); Gebäude und Baujahr als Chips an der Reihe (G9).
+                 Eingaben auf der weißen Karte, alles freiwillig. Gene: G11, G5, G3, G1 (Schraffur = noch offen), G6, G14 -->
+            <section class="ez-folie ez-ab" data-folie="anfrage" aria-label="Fürs Angebot, 1 von 3: Haus" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück: Aufmaß" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--zaehler">
+                <span class="ez-ab-teich" aria-hidden="true"></span>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:.3333" aria-hidden="true"></i><span>Fürs Angebot · 1 von&nbsp;3</span></span>
+                <div class="ez-ab-zaehler" aria-hidden="true">
+                  <span class="dna-label">Fenster im ganzen Haus</span>
+                  <p class="ez-ab-zaehler__zahl"><b data-ab="getauscht">1</b><span data-ab="von">getauscht</span></p>
+                  <div class="ez-ab-kapselreihe" id="ab-kapseln"></div>
+                  <p class="ez-ab-zaehler__satz" data-ab="satz">Du tauschst 1 davon.</p>
+                </div>
+                <div class="ez-ab-hauschips" aria-hidden="true"><span data-ab="geb">Einfamilienhaus</span><span data-ab="bj" hidden></span></div>
+                <figcaption class="ez-unsichtbar" data-ab="bildtext-haus">Du tauschst 1 Fenster.</figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Noch kurz zum <em>Haus.</em></h1><button type="button" class="ez-i" data-ab-gloss="angaben" aria-label="Wozu die Angaben zum Haus?" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <button type="button" class="dna-pille dna-pille--leise dna-pille--klein ez-notizknopf"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>Notiz</button>
+                </div>
+                <p class="ez-unterzeile">Damit der Fensterbauer gut planen kann. Alles freiwillig.</p>
+              </div>
+
+              <div class="ez-karte ez-ab-form" data-theme="hell">
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><span class="dna-label" id="ab-gebaeude-l">Gebäude</span><button type="button" class="ez-i ez-i--hell" data-ab-gloss="gebaeude" aria-label="Was heißt das? Gebäude" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <div class="ez-ab-wahl ez-ab-wahl--2" role="group" aria-labelledby="ab-gebaeude-l" data-ab-wahl="gebaeude"><button type="button" data-v="efh" aria-pressed="false">Einfamilienhaus</button><button type="button" data-v="dh" aria-pressed="false">Doppelhaushälfte</button><button type="button" data-v="rh" aria-pressed="false">Reihenhaus</button><button type="button" data-v="mfh" aria-pressed="false">Mehrfamilienhaus</button><button type="button" data-v="etw" aria-pressed="false">Eigentumswohnung</button><button type="button" data-v="denkmal" aria-pressed="false">Denkmalschutz</button></div>
+                  <p class="ez-ab-hinweis" id="ab-denkmal" hidden>Bei Denkmalschutz brauchst du meist eine Genehmigung. Material und Sprossen können vorgeschrieben sein. <button type="button" class="ez-ab-mehr" data-ab-gloss="echt">Mehr erfahren</button></p>
+                </div>
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><span class="dna-label" id="ab-baujahr-l">Baujahr des Hauses</span><button type="button" class="ez-i ez-i--hell" data-ab-gloss="baujahr" aria-label="Was heißt das? Baujahr des Hauses" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <div class="ez-ab-wahl ez-ab-wahl--2" role="group" aria-labelledby="ab-baujahr-l" data-ab-wahl="baujahr"><button type="button" data-v="vor 1978" aria-pressed="false">vor 1978</button><button type="button" data-v="1978 bis 1995" aria-pressed="false">1978 bis 1995</button><button type="button" data-v="1995 bis 2010" aria-pressed="false">1995 bis 2010</button><button type="button" data-v="nach 2010" aria-pressed="false">nach 2010</button><button type="button" data-v="" aria-pressed="false">Weiß ich nicht</button></div>
+                </div>
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><label class="dna-label" for="ab-total">Fenster im ganzen Haus</label><button type="button" class="ez-i ez-i--hell" data-ab-gloss="lueftung" aria-label="Was heißt das? Lüftungskonzept" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <div class="ez-ab-stepper"><button type="button" class="ez-ab-rund" data-ab-bump="-1" aria-label="Weniger">−</button><span class="ez-ab-eingabe"><input type="text" inputmode="numeric" id="ab-total" autocomplete="off" placeholder="z. B. 12" maxlength="3" aria-describedby="ab-tausch"><span>Stück</span></span><button type="button" class="ez-ab-rund" data-ab-bump="1" aria-label="Mehr">+</button></div>
+                  <p class="ez-ab-klein" id="ab-tausch">Du tauschst 1 davon.</p>
+                  <p class="ez-ab-hinweis" id="ab-lueftung" hidden></p>
+                </div>
+              </div>
+
+              <div class="ez-bogen" id="ab-anfrage-erkl" role="dialog" aria-modal="true" aria-labelledby="ab-anfrage-erkl-titel" hidden>
+                <button type="button" class="ez-bogen__grund" aria-label="Schließen" data-schliessen></button>
+                <div class="ez-bogen__blatt">
+                  <div class="ez-bogen__kopf"><span class="ez-bogen__titel" id="ab-anfrage-erkl-titel"></span><button type="button" class="ez-rund ez-rund--zu" aria-label="Schließen" data-schliessen><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+                  <div class="ez-ab-erkl-text"></div>
+                  <button type="button" class="dna-pille dna-pille--leise ez-bogen__zu" data-schliessen>Alles klar</button>
+                </div>
+              </div>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück: Aufmaß" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-anfrage-weiter"><span class="ez-weiter__wort">Weiter</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Fürs Angebot · 2 von 3 (SCREENS.anfrage2): Bühne als Skala mit vier Stationen (G5), die gewählte mit violettem Punkt (Farbe und
+                 Skalierung), daneben der Förderweg als Zahl (G3: 15 % BAFA-Zuschuss, 20 % Steuerbonus, Werte aus FOERD_HINWEIS), das Budget als
+                 Kapselreihe (G11, schraffiert = noch offen). Gene: G5, G3, G11, G1, G6, G14 -->
+            <section class="ez-folie ez-ab" data-folie="anfrage2" aria-label="Fürs Angebot, 2 von 3: Zeit und Budget" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück: Haus" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--zeit">
+                <span class="ez-ab-teich" aria-hidden="true"></span>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:.6667" aria-hidden="true"></i><span>Fürs Angebot · 2 von&nbsp;3</span></span>
+                <div class="ez-ab-foerd" data-ab="foerd" aria-hidden="true" hidden><p><b data-ab="foerd-zahl">15</b><small>%</small></p><span data-ab="foerd-text">Zuschuss vom BAFA</span></div>
+                <div class="ez-ab-skala" aria-hidden="true">
+                  <span class="dna-label">Wann soll es losgehen?</span>
+                  <div class="ez-ab-skala__band"><i class="ez-ab-skala__marken"></i><span class="ez-ab-station" data-v="asap"><i></i><b>So bald wie möglich</b></span><span class="ez-ab-station" data-v="3m"><i></i><b>In 1 bis 3 Monaten</b></span><span class="ez-ab-station" data-v="6m"><i></i><b>In 3 bis 6 Monaten</b></span><span class="ez-ab-station" data-v="12m"><i></i><b>Später, erst Angebote</b></span></div>
+                </div>
+                <div class="ez-ab-budget" aria-hidden="true"><span class="dna-label">Budget</span><span class="ez-ab-budget__reihe"><i data-v="b1"></i><i data-v="b2"></i><i data-v="b3"></i><i data-v="b4"></i></span><b data-ab="budget-text">Weiß ich noch nicht</b></div>
+                <figcaption class="ez-unsichtbar" data-ab="bildtext-zeit"></figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Zeit und <em>Budget.</em></h1><button type="button" class="ez-i" data-ab-gloss="zeitraum" aria-label="Wann soll es losgehen?" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <button type="button" class="dna-pille dna-pille--leise dna-pille--klein ez-notizknopf"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>Notiz</button>
+                </div>
+                <p class="ez-unterzeile">Freiwillig, hilft beim Angebot.</p>
+              </div>
+
+              <div class="ez-karte ez-ab-form" data-theme="hell">
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><span class="dna-label" id="ab-zeit-l">Wann soll es losgehen?</span><button type="button" class="ez-i ez-i--hell" data-ab-gloss="zeitraum" aria-label="Was heißt das? Wann soll es losgehen?" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <div class="ez-ab-wahl ez-ab-wahl--1" role="group" aria-labelledby="ab-zeit-l" data-ab-wahl="zeit"><button type="button" data-v="asap" aria-pressed="false">So bald wie möglich</button><button type="button" data-v="3m" aria-pressed="false">In 1 bis 3 Monaten</button><button type="button" data-v="6m" aria-pressed="false">In 3 bis 6 Monaten</button><button type="button" data-v="12m" aria-pressed="false">Später, erst Angebote</button></div>
+                </div>
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><span class="dna-label" id="ab-budget-l">Budget</span><button type="button" class="ez-i ez-i--hell" data-ab-gloss="budget" aria-label="Was heißt das? Budget" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <div class="ez-ab-wahl ez-ab-wahl--1" role="group" aria-labelledby="ab-budget-l" data-ab-wahl="budget"><button type="button" data-v="b1" aria-pressed="false">bis 5.000 €</button><button type="button" data-v="b2" aria-pressed="false">5.000 bis 10.000 €</button><button type="button" data-v="b3" aria-pressed="false">10.000 bis 20.000 €</button><button type="button" data-v="b4" aria-pressed="false">über 20.000 €</button><button type="button" data-v="b0" aria-pressed="false">Weiß ich noch nicht</button></div>
+                </div>
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><span class="dna-label" id="ab-foerdweg-l">Förderung</span><button type="button" class="ez-i ez-i--hell" data-ab-gloss="foerderung" aria-label="Was heißt das? Förderung" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <div class="ez-ab-wahl ez-ab-wahl--2" role="group" aria-labelledby="ab-foerdweg-l" data-ab-wahl="foerdweg"><button type="button" data-v="bafa" aria-pressed="false">BAFA-Zuschuss</button><button type="button" data-v="steuer" aria-pressed="false">Steuerbonus</button><button type="button" data-v="keine" aria-pressed="false">Keine</button><button type="button" data-v="offen" aria-pressed="false">Noch offen</button></div>
+                  <p class="ez-ab-klein ez-ab-foerdtext" id="ab-foerd-hinweis" hidden></p>
+                </div>
+              </div>
+
+              <div class="ez-bogen" id="ab-anfrage2-erkl" role="dialog" aria-modal="true" aria-labelledby="ab-anfrage2-erkl-titel" hidden>
+                <button type="button" class="ez-bogen__grund" aria-label="Schließen" data-schliessen></button>
+                <div class="ez-bogen__blatt">
+                  <div class="ez-bogen__kopf"><span class="ez-bogen__titel" id="ab-anfrage2-erkl-titel"></span><button type="button" class="ez-rund ez-rund--zu" aria-label="Schließen" data-schliessen><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+                  <div class="ez-ab-erkl-text"></div>
+                  <button type="button" class="dna-pille dna-pille--leise ez-bogen__zu" data-schliessen>Alles klar</button>
+                </div>
+              </div>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück: Haus" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-anfrage2-weiter"><span class="ez-weiter__wort">Weiter</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Fürs Angebot · 3 von 3 (SCREENS.anfrage3): das Aufmaßblatt liegt als Objekt im Fensterlicht auf dem Boden (G4, G7); was getippt
+                 wird, steht sofort oben auf dem Blatt (G9), Leeres ist schraffiert (G1, noch nicht). Gene: G4, G7, G9, G1, G6, G14 -->
+            <section class="ez-folie ez-ab" data-folie="anfrage3" aria-label="Fürs Angebot, 3 von 3: Kontakt" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--blatt">
+                <img class="ez-buehne__foto ez-ab-boden" src="bilder/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">
+                <div class="ez-ab-papier" aria-hidden="true">
+                  <div class="ez-ab-papier__band"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span><span class="ez-ab-papier__art">Aufmaßblatt</span></div>
+                  <div class="ez-ab-papier__in">
+                    <p class="ez-ab-papier__h" data-p="name">Dein Aufmaß</p>
+                    <p class="ez-ab-papier__kontakt" data-p="kontakt"><i class="ez-ab-leer" style="--b:38%"></i><i class="ez-ab-leer" style="--b:30%"></i></p>
+                    <p class="ez-ab-papier__s" data-p="meta">1 Position · 1 Element · Einfamilienhaus</p>
+                    <table class="ez-ab-papier__tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr><tr><td><b>1</b></td><td data-p="raum">Fenster</td><td data-p="mo">•.••• × •.•••</td><td data-p="el">•.••• × •.•••</td></tr></table>
+                    <div class="ez-ab-papier__zeichnung"><span class="ez-ab-papier__oeffnung"><span class="ez-ab-papier__element"></span></span><span class="ez-ab-papier__mass ez-ab-papier__mass--b" data-p="mob">•.•••</span><span class="ez-ab-papier__mass ez-ab-papier__mass--h" data-p="moh">•.•••</span></div>
+                    <div class="ez-ab-papier__zeilen"><i></i><i class="k"></i><i></i><i class="k"></i></div>
+                  </div>
+                  <span class="ez-ab-papier__schloss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+                </div>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:1" aria-hidden="true"></i><span>Fürs Angebot · 3 von&nbsp;3</span></span>
+                <figcaption class="ez-unsichtbar">Dein Aufmaßblatt: Was du hier einträgst, steht oben auf dem Blatt.</figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Wie erreicht dich <em>dein Fensterbauer?</em></h1><button type="button" class="ez-i" data-ab-gloss="kontakt" aria-label="Wozu die Kontaktdaten?" aria-expanded="false"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>
+                  <button type="button" class="dna-pille dna-pille--leise dna-pille--klein ez-notizknopf"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>Notiz</button>
+                </div>
+                <p class="ez-unterzeile">Steht auf dem Aufmaßblatt, damit er sich mit dem Angebot melden kann. Alles freiwillig; das Blatt bekommt nur, wem du es gibst.</p>
+              </div>
+
+              <div class="ez-karte ez-ab-form" data-theme="hell">
+                <div class="ez-ab-feld">
+                  <label class="dna-label" for="ab-name">Name</label>
+                  <span class="ez-ab-eingabe ez-ab-eingabe--text"><input type="text" inputmode="text" id="ab-name" data-ab-p="name" placeholder="Vor- und Nachname" autocomplete="name"></span>
+                </div>
+                <div class="ez-ab-feld">
+                  <label class="dna-label" for="ab-ort">PLZ und Ort</label>
+                  <span class="ez-ab-eingabe ez-ab-eingabe--text"><input type="text" inputmode="text" id="ab-ort" data-ab-p="ort" placeholder="z. B. 50667 Köln" autocomplete="address-level2"></span>
+                </div>
+                <div class="ez-ab-feld">
+                  <label class="dna-label" for="ab-tel">Telefon</label>
+                  <span class="ez-ab-eingabe ez-ab-eingabe--text"><input type="tel" inputmode="tel" id="ab-tel" data-ab-p="tel" placeholder="Für Rückfragen" autocomplete="tel"></span>
+                </div>
+                <div class="ez-ab-feld">
+                  <label class="dna-label" for="ab-mail">E-Mail</label>
+                  <span class="ez-ab-eingabe ez-ab-eingabe--text"><input type="email" inputmode="email" id="ab-mail" data-ab-p="mail" placeholder="name@beispiel.de" autocomplete="email"></span>
+                </div>
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><span class="dna-label" id="ab-erreich-l">Am besten erreichbar</span></div>
+                  <div class="ez-ab-wahl ez-ab-wahl--3" role="group" aria-labelledby="ab-erreich-l" data-ab-wahl="erreich"><button type="button" data-v="vm" aria-pressed="false">Vormittags</button><button type="button" data-v="nm" aria-pressed="false">Nachmittags</button><button type="button" data-v="ab" aria-pressed="false">Abends</button></div>
+                </div>
+              </div>
+
+              <div class="ez-bogen" id="ab-anfrage3-erkl" role="dialog" aria-modal="true" aria-labelledby="ab-anfrage3-erkl-titel" hidden>
+                <button type="button" class="ez-bogen__grund" aria-label="Schließen" data-schliessen></button>
+                <div class="ez-bogen__blatt">
+                  <div class="ez-bogen__kopf"><span class="ez-bogen__titel" id="ab-anfrage3-erkl-titel"></span><button type="button" class="ez-rund ez-rund--zu" aria-label="Schließen" data-schliessen><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+                  <div class="ez-ab-erkl-text"></div>
+                  <button type="button" class="dna-pille dna-pille--leise ez-bogen__zu" data-schliessen>Alles klar</button>
+                </div>
+              </div>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-anfrage3-weiter"><span class="ez-weiter__wort">Zum Aufmaßblatt</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Fertig gemessen (SCREENS.teilen vor dem Freischalten): das Blatt im Licht, Kopf echt, die Maße als Punkte und der Rest schraffiert
+                 (G1 statt Weichzeichner: noch nicht frei), Schloss als runder Knopf auf der Ecke (G13, G12); darunter, was dazugehört (Haken), und der
+                 Preis als Zahl (G3). Preis 7,99 € und Einführungspreis aus web/config.js (preise.aufmass, einfuehrung), Text über modell.js einfText.
+                 Gene: G4, G7, G1, G3, G12, G13, G6, G14 -->
+            <section class="ez-folie ez-ab" data-folie="blatt" aria-label="Fertig gemessen: Dein Aufmaßblatt" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--blatt ist-zu">
+                <img class="ez-buehne__foto ez-ab-boden" src="bilder/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">
+                <div class="ez-ab-papier" aria-hidden="true">
+                  <div class="ez-ab-papier__band"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span><span class="ez-ab-papier__art">Aufmaßblatt</span></div>
+                  <div class="ez-ab-papier__in">
+                    <p class="ez-ab-papier__h" data-p="name">Dein Aufmaß</p>
+                    <p class="ez-ab-papier__kontakt" data-p="kontakt"><i class="ez-ab-leer" style="--b:38%"></i><i class="ez-ab-leer" style="--b:30%"></i></p>
+                    <p class="ez-ab-papier__s" data-p="meta">1 Position · 1 Element · Einfamilienhaus</p>
+                    <table class="ez-ab-papier__tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr><tr><td><b>1</b></td><td data-p="raum">Fenster</td><td data-p="mo">•.••• × •.•••</td><td data-p="el">•.••• × •.•••</td></tr></table>
+                    <div class="ez-ab-papier__zeichnung"><span class="ez-ab-papier__oeffnung"><span class="ez-ab-papier__element"></span></span><span class="ez-ab-papier__mass ez-ab-papier__mass--b" data-p="mob">•.•••</span><span class="ez-ab-papier__mass ez-ab-papier__mass--h" data-p="moh">•.•••</span></div>
+                    <div class="ez-ab-papier__zeilen"><i></i><i class="k"></i><i></i><i class="k"></i></div>
+                  </div>
+                  <span class="ez-ab-papier__schloss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+                </div>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><span class="ez-ab-chiphaken" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Fertig gemessen</span></span>
+                <figcaption class="ez-unsichtbar">Vorschau deines Aufmaßblatts. Die Maße stehen erst nach dem Freischalten darauf.</figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Dein Aufmaßblatt <em>ist fertig.</em></h1></div>
+                </div>
+                <p class="ez-unterzeile"><span data-ab="blatt-satz">1 Fenster, alle acht Handmaße, die Auswertung der Fotos, deine Wünsche.</span> Einmal freischalten, dann gehört es dir.</p>
+              </div>
+
+              <div class="ez-ab-karte ez-ab-preis">
+                <ul class="ez-ab-inkl"><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg><span>Technische Zeichnung mit allen Maßen je Fenster</span></li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg><span>Auswertung der Fotos und deine Wünsche</span></li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg><span>Als PDF teilen, so oft du willst, an jeden Fensterbauer</span></li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg><span>Mit Code: Dein Fensterbauer übernimmt alles mit einem Klick</span></li><li><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg><span>Gilt für dieses Projekt, auch wenn du später Fenster ergänzt (bis 50 je Aufmaß)</span></li></ul>
+                <div class="ez-ab-preis__zeile">
+                  <p class="ez-ab-preis__zahl"><b data-ab="preis">7,99</b><small>€</small></p>
+                  <p class="ez-ab-preis__text"><span data-ab="preis-mwst">einmalig, inkl. MwSt.</span><span class="ez-ab-preis__einf" data-ab="einf">Einführungspreis bis 17. November, danach 12,99 €</span></p>
+                </div>
+                <p class="ez-ab-karte__leise">Messen, Fotos und 3-D-Modell bleiben kostenlos</p>
+              </div>
+              <p class="ez-ab-hilfe">Du kannst weitere Fenster messen, das Blatt wächst mit. Jedes Fenster kannst du eine Woche lang beliebig ändern; ab dem Freischalten zählt jede Änderung, viermal je Fenster.</p>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-freischalten"><span class="ez-weiter__wort" id="ab-freischalten-wort">Freischalten · 7,99&nbsp;€</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Kasse, Schritt 1 von 2 (SCREENS.konto, Pilot ohne Konten): nur die E-Mail für Rechnung und Nachweis; die Adresse erscheint als
+                 Etikett am Blatt (G9). Prüfung wie k-next der App. Gene: G4, G9, G10, G5, G6, G14 -->
+            <section class="ez-folie ez-ab" data-folie="konto" aria-label="Schritt 1 von 2: Wohin soll die Rechnung?" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--blatt ez-buehne--form ist-zu">
+                <img class="ez-buehne__foto ez-ab-boden" src="bilder/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">
+                <div class="ez-ab-papier" aria-hidden="true">
+                  <div class="ez-ab-papier__band"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span><span class="ez-ab-papier__art">Aufmaßblatt</span></div>
+                  <div class="ez-ab-papier__in">
+                    <p class="ez-ab-papier__h" data-p="name">Dein Aufmaß</p>
+                    <p class="ez-ab-papier__kontakt" data-p="kontakt"><i class="ez-ab-leer" style="--b:38%"></i><i class="ez-ab-leer" style="--b:30%"></i></p>
+                    <p class="ez-ab-papier__s" data-p="meta">1 Position · 1 Element · Einfamilienhaus</p>
+                    <table class="ez-ab-papier__tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr><tr><td><b>1</b></td><td data-p="raum">Fenster</td><td data-p="mo">•.••• × •.•••</td><td data-p="el">•.••• × •.•••</td></tr></table>
+                    <div class="ez-ab-papier__zeichnung"><span class="ez-ab-papier__oeffnung"><span class="ez-ab-papier__element"></span></span><span class="ez-ab-papier__mass ez-ab-papier__mass--b" data-p="mob">•.•••</span><span class="ez-ab-papier__mass ez-ab-papier__mass--h" data-p="moh">•.•••</span></div>
+                    <div class="ez-ab-papier__zeilen"><i></i><i class="k"></i><i></i><i class="k"></i></div>
+                  </div>
+                  <span class="ez-ab-papier__schloss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+                </div>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:.5" aria-hidden="true"></i><span>Schritt&nbsp;1 von&nbsp;2</span></span>
+                <span class="ez-ab-etikett" data-ab="mail-etikett" aria-hidden="true"><span class="dna-etikett"><span class="ez-ab-etikett__punkt"></span><span><small>Rechnung an</small><b data-ab="mail-text">name@beispiel.de</b></span></span></span>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Wohin soll <em>die Rechnung?</em></h1></div>
+                </div>
+                <p class="ez-unterzeile">Kein Konto, kein Passwort. An diese Adresse gehen Rechnung und Nachweis, dein Blatt bleibt auf diesem Gerät.</p>
+              </div>
+
+              <div class="ez-karte ez-ab-form" data-theme="hell">
+                <div class="ez-ab-feld" id="ab-k-mail-feld">
+                  <label class="dna-label" for="ab-k-mail">E-Mail</label>
+                  <span class="ez-ab-eingabe ez-ab-eingabe--text"><input type="email" inputmode="email" id="ab-k-mail" placeholder="name@beispiel.de" autocomplete="email" aria-describedby="ab-k-mail-fehler"></span>
+                  <p class="ez-ab-fehler" id="ab-k-mail-fehler" hidden></p>
+                </div>
+              </div>
+              <p class="ez-ab-hilfe">Kein Newsletter, keine Weitergabe. Dein Aufmaß bleibt auf deinem Gerät. Den AGB stimmst du im nächsten Schritt zu.</p>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-konto-weiter"><span class="ez-weiter__wort">Weiter zur Zahlung</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Kasse, Schritt 2 von 2 (SCREENS.kasse, Pilot: Testkauf): der Betrag als Held am Blatt (G3, G9), Bestellung als Anthrazit-Kachel,
+                 Zahlungsart und Zustimmungen auf Weiß. Zustimmung mit dem Stand der AGB (functions/api/recht.js AGB_STAND 2026-10-18) und dem
+                 Wortlaut aus RECHT(); die Haken sind beim Betreten leer (kasseOeffnen). Gene: G3, G9, G4, G5, G6, G14 -->
+            <section class="ez-folie ez-ab" data-folie="kasse" aria-label="Schritt 2 von 2: Bezahlen" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--blatt ez-buehne--form ist-zu">
+                <img class="ez-buehne__foto ez-ab-boden" src="bilder/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">
+                <div class="ez-ab-papier" aria-hidden="true">
+                  <div class="ez-ab-papier__band"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span><span class="ez-ab-papier__art">Aufmaßblatt</span></div>
+                  <div class="ez-ab-papier__in">
+                    <p class="ez-ab-papier__h" data-p="name">Dein Aufmaß</p>
+                    <p class="ez-ab-papier__kontakt" data-p="kontakt"><i class="ez-ab-leer" style="--b:38%"></i><i class="ez-ab-leer" style="--b:30%"></i></p>
+                    <p class="ez-ab-papier__s" data-p="meta">1 Position · 1 Element · Einfamilienhaus</p>
+                    <table class="ez-ab-papier__tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr><tr><td><b>1</b></td><td data-p="raum">Fenster</td><td data-p="mo">•.••• × •.•••</td><td data-p="el">•.••• × •.•••</td></tr></table>
+                    <div class="ez-ab-papier__zeichnung"><span class="ez-ab-papier__oeffnung"><span class="ez-ab-papier__element"></span></span><span class="ez-ab-papier__mass ez-ab-papier__mass--b" data-p="mob">•.•••</span><span class="ez-ab-papier__mass ez-ab-papier__mass--h" data-p="moh">•.•••</span></div>
+                    <div class="ez-ab-papier__zeilen"><i></i><i class="k"></i><i></i><i class="k"></i></div>
+                  </div>
+                  <span class="ez-ab-papier__schloss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+                </div>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><i class="ez-ring" style="--anteil:1" aria-hidden="true"></i><span>Schritt&nbsp;2 von&nbsp;2</span></span>
+                <div class="ez-ab-betrag" aria-hidden="true"><b data-ab="preis">7,99</b><small>€</small><span>Aufmaßblatt als PDF</span></div>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Bezahlen.</h1></div>
+                </div>
+                <p class="ez-unterzeile">Rechnung an <span data-ab="mail-text">name@beispiel.de</span></p>
+              </div>
+
+              <div class="ez-ab-karte ez-ab-bestellung">
+                <div class="ez-ab-bestellung__zeile"><span><b>Aufmaßblatt als PDF</b><small><span data-ab="anzahl-text">1 Fenster</span>, einmalig, für dieses Projekt</small><small class="ez-ab-preis__einf" data-ab="einf">Einführungspreis bis 17. November, danach 12,99 €</small></span><b><span data-ab="preis">7,99</span>&nbsp;€</b></div>
+                <div class="ez-ab-bestellung__zeile ez-ab-bestellung__zeile--summe"><span>darin 19&nbsp;% MwSt.</span><span data-ab="mwst">1,28&nbsp;€</span></div>
+              </div>
+
+              <div class="ez-karte ez-ab-form" data-theme="hell">
+                <div class="ez-ab-abschnitt">
+                  <div class="ez-block__kopf"><span class="dna-label" id="ab-pay-l">Zahlungsart</span></div>
+                  <div class="ez-ab-wahl ez-ab-wahl--2" role="group" aria-labelledby="ab-pay-l" data-ab-wahl="pay"><button type="button" data-v="PayPal" aria-pressed="false">PayPal</button><button type="button" data-v="Kreditkarte" aria-pressed="false">Kreditkarte</button><button type="button" data-v="Apple Pay" aria-pressed="false">Apple Pay</button><button type="button" data-v="Google Pay" aria-pressed="false">Google Pay</button></div>
+                  <p class="ez-ab-fehler" id="ab-pay-fehler" hidden></p>
+                </div>
+                <div class="ez-ab-abschnitt ez-ab-recht">
+                  <label class="ez-ab-haken"><input type="checkbox" id="ab-agb" aria-describedby="ab-agb-fehler"><span class="ez-ab-haken__kasten" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Ich akzeptiere die <a href="#" class="ez-ab-link">AGB</a> (Stand: 18. Oktober 2026).</span></label>
+                  <p class="ez-ab-fehler" id="ab-agb-fehler" hidden></p>
+                  <label class="ez-ab-haken"><input type="checkbox" id="ab-widerruf" aria-describedby="ab-widerruf-fehler"><span class="ez-ab-haken__kasten" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Ich stimme ausdrücklich zu, dass eeziframes (Patrick Kies) vor Ablauf der Widerrufsfrist mit der Bereitstellung des Aufmaßblatts beginnt. Mir ist bekannt, dass ich durch diese Zustimmung mit Beginn der Bereitstellung mein Widerrufsrecht verliere.</span></label>
+                  <p class="ez-ab-fehler" id="ab-widerruf-fehler" hidden></p>
+                  <p class="ez-ab-klein">Dein Widerrufsrecht: <a href="#" class="ez-ab-link">Widerrufsbelehrung</a> und <a href="#" class="ez-ab-link">Muster-Widerrufsformular</a>. Wie wir deine Daten verarbeiten, steht in der <a href="#" class="ez-ab-link">Datenschutzerklärung</a>.</p>
+                </div>
+              </div>
+              <p class="ez-ab-hilfe"><b>Pilotphase: Testkauf.</b> Es wird nichts abgebucht, du bekommst das Blatt trotzdem.</p>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-kaufen"><span class="ez-weiter__wort">Testkauf abschließen</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Freigeschaltet (SCREENS.gekauft): der seltene Moment, einmal inszeniert: der Haken zeichnet sich, die Schraffur geht, die Maße
+                 rasten aufs Blatt (G3, G1 umgedreht). Darunter die Datei (dateiCard). Kein Rückweg, wie in der App. Gene: G4, G7, G3, G1, G2, G6 -->
+            <section class="ez-folie ez-ab" data-folie="gekauft" aria-label="Freigeschaltet" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück: Fenster" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--blatt">
+                <img class="ez-buehne__foto ez-ab-boden" src="bilder/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">
+                <div class="ez-ab-papier" aria-hidden="true">
+                  <div class="ez-ab-papier__band"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span><span class="ez-ab-papier__art">Aufmaßblatt</span></div>
+                  <div class="ez-ab-papier__in">
+                    <p class="ez-ab-papier__h" data-p="name">Dein Aufmaß</p>
+                    <p class="ez-ab-papier__kontakt" data-p="kontakt"><i class="ez-ab-leer" style="--b:38%"></i><i class="ez-ab-leer" style="--b:30%"></i></p>
+                    <p class="ez-ab-papier__s" data-p="meta">1 Position · 1 Element · Einfamilienhaus</p>
+                    <table class="ez-ab-papier__tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr><tr><td><b>1</b></td><td data-p="raum">Fenster</td><td data-p="mo">•.••• × •.•••</td><td data-p="el">•.••• × •.•••</td></tr></table>
+                    <div class="ez-ab-papier__zeichnung"><span class="ez-ab-papier__oeffnung"><span class="ez-ab-papier__element"></span></span><span class="ez-ab-papier__mass ez-ab-papier__mass--b" data-p="mob">•.•••</span><span class="ez-ab-papier__mass ez-ab-papier__mass--h" data-p="moh">•.•••</span></div>
+                    <div class="ez-ab-papier__zeilen"><i></i><i class="k"></i><i></i><i class="k"></i></div>
+                  </div>
+                  <span class="ez-ab-papier__schloss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+                </div>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><span class="ez-ab-chiphaken" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Freigeschaltet</span></span>
+                <span class="ez-ab-okmark" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><path d="M20 33l8.5 8.5L45 24"/></svg></span>
+                <figcaption class="ez-unsichtbar">Dein Aufmaßblatt ist freigeschaltet, mit allen Maßen.</figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Freigeschaltet.</h1></div>
+                </div>
+                <p class="ez-unterzeile">Dein Aufmaßblatt gehört dir.<span data-ab="rechnung-satz"></span></p>
+              </div>
+
+              <div class="ez-ab-karte ez-ab-datei">
+                <div class="ez-ab-datei__kopf"><span class="ez-ab-datei__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 15.5h6M9 9h2"/></svg></span><span><span class="dna-label">Freigeschaltet</span><b>Dein Aufmaßblatt als PDF</b><small><span data-ab="anzahl-text">1 Fenster</span>, alle Maße, Fotoauswertung und Wünsche, mit Code für den Fensterbauer.</small></span></div>
+                <div class="ez-ab-knoepfe"><button type="button" class="dna-pille dna-pille--leise ez-ab-leise" data-ab-akt="pdf">Teilen</button><button type="button" class="dna-pille dna-pille--leise ez-ab-leise" data-ab-akt="laden">Herunterladen</button></div>
+              </div>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="dna-pille ez-weiter" id="ab-gekauft-weiter"><span class="ez-weiter__wort">Weiter: Blatt teilen</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+
+            <!-- Dein Aufmaß, dein Blatt (SCREENS.teilen nach dem Freischalten): das Blatt mit den Maßen im Licht, der Weg zum Fensterbauer als
+                 Stationen (Schritt 1, erledigt mit Haken), die eine Pille „PDF schicken“ (in der App die Cream-Taste dieses Bildschirms), Code für
+                 den Fensterbauer im Format der App (AM1., packProject). Gene: G4, G7, G5, G13, G6, G14 -->
+            <section class="ez-folie ez-ab" data-folie="teilen" aria-label="Dein Aufmaß, dein Blatt" hidden>
+              <header class="ez-kopf">
+                <div class="ez-kopf__l">
+                  <button type="button" class="ez-rund ez-rund--kopf" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                  <span class="ez-marke" role="img" aria-label="eeziframes"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g><rect x=".5" y=".5" width="63" height="63" rx="9.5" fill="none" stroke="#fff" stroke-opacity=".16"/></svg><span class="ez-wm" translate="no" aria-hidden="true"><b>eezi</b>frames</span></span>
+                </div>
+                <div class="ez-kopf__r">
+                  <button type="button" class="ez-kopf__knopf"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button>
+                  <button type="button" class="ez-kopf__knopf ez-kopf__knopf--zeichen" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5 1.5h5z"/></svg></button>
+                </div>
+              </header>
+
+              <figure class="ez-buehne ez-buehne--ab ez-buehne--blatt">
+                <img class="ez-buehne__foto ez-ab-boden" src="bilder/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">
+                <div class="ez-ab-papier" aria-hidden="true">
+                  <div class="ez-ab-papier__band"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#07090a"/><g fill="#fff"><path d="M26.4 12.2 44.4 19.7 56.3 15.3 42 6.6Z"/><path d="M45 22 57 17.6V41.9L45 39.8Z"/><path d="M44.2 41 55.9 43.3 11.7 64H10A10 10 0 0 1 0 54Z"/></g></svg><span class="ez-wm" translate="no"><b>eezi</b>frames</span><span class="ez-ab-papier__art">Aufmaßblatt</span></div>
+                  <div class="ez-ab-papier__in">
+                    <p class="ez-ab-papier__h" data-p="name">Dein Aufmaß</p>
+                    <p class="ez-ab-papier__kontakt" data-p="kontakt"><i class="ez-ab-leer" style="--b:38%"></i><i class="ez-ab-leer" style="--b:30%"></i></p>
+                    <p class="ez-ab-papier__s" data-p="meta">1 Position · 1 Element · Einfamilienhaus</p>
+                    <table class="ez-ab-papier__tab"><tr><th>Pos.</th><th>Raum</th><th>Öffnung</th><th>Element</th></tr><tr><td><b>1</b></td><td data-p="raum">Fenster</td><td data-p="mo">•.••• × •.•••</td><td data-p="el">•.••• × •.•••</td></tr></table>
+                    <div class="ez-ab-papier__zeichnung"><span class="ez-ab-papier__oeffnung"><span class="ez-ab-papier__element"></span></span><span class="ez-ab-papier__mass ez-ab-papier__mass--b" data-p="mob">•.•••</span><span class="ez-ab-papier__mass ez-ab-papier__mass--h" data-p="moh">•.•••</span></div>
+                    <div class="ez-ab-papier__zeilen"><i></i><i class="k"></i><i></i><i class="k"></i></div>
+                  </div>
+                  <span class="ez-ab-papier__schloss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+                </div>
+                <span class="ez-buehne__kante" aria-hidden="true"></span>
+                <span class="ez-glaschip"><span class="ez-ab-chiphaken" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span>Freigeschaltet</span></span>
+                <figcaption class="ez-unsichtbar">Dein Aufmaßblatt mit allen Maßen.</figcaption>
+              </figure>
+
+              <div class="ez-frage">
+                <div class="ez-frage__kopf">
+                  <div class="ez-frage__titel"><h1>Dein Aufmaß, <em>dein Blatt.</em></h1></div>
+                </div>
+                <p class="ez-unterzeile"><span data-ab="teil-stand">Freigeschaltet, für dieses Projekt. Gib es dem Fensterbauer, von dem du ein Angebot möchtest, gern auch mehreren.</span></p>
+              </div>
+
+              <div class="ez-ab-karte ez-ab-weg" id="ab-weg">
+                <div class="ez-ab-weg__kopf"><span class="ez-ab-weg__tick" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span><span><span class="dna-label" data-ab="weg-label">Schritt 1</span><b>An deinen Fensterbauer</b></span></div>
+                <p class="ez-ab-karte__text">Schick ihm das Aufmaßblatt als PDF: Zeichnungen, alle Maße, die Auswertung der Fotos, deine Wünsche. Dafür braucht er kein eeziframes; auf Seite 2 steht, wie er es trotzdem mit einem Klick übernimmt.</p>
+                <p class="ez-ab-karte__leise">Oder nur den Code, falls er eeziframes schon nutzt:</p>
+                <div class="ez-ab-knoepfe"><a class="dna-pille dna-pille--leise ez-ab-leise" id="ab-wa" href="#" target="_blank" rel="noopener">WhatsApp ›</a><a class="dna-pille dna-pille--leise ez-ab-leise" id="ab-em" href="#">E-Mail</a><button type="button" class="dna-pille dna-pille--leise ez-ab-leise" data-ab-akt="copy">Code kopieren</button></div>
+              </div>
+              <div class="ez-ab-karte ez-ab-weg">
+                <span class="dna-label">Für dich</span>
+                <b class="ez-ab-weg__titel">Als Datei behalten</b>
+                <p class="ez-ab-karte__text">Dein komplettes Aufmaßblatt als PDF, für deine Unterlagen.<span data-ab="rechnung-unterwegs"></span></p>
+                <div class="ez-ab-knoepfe"><button type="button" class="dna-pille dna-pille--leise ez-ab-leise" data-ab-akt="laden">Herunterladen</button></div>
+              </div>
+              <div class="ez-ab-code">
+                <label class="dna-label" for="ab-code">Dein Aufmaß-Code</label>
+                <p class="ez-ab-klein">Steht auch auf Seite 2 der PDF. Falls Kopieren nicht klappt: Text markieren und kopieren.</p>
+                <textarea class="ez-ab-code__box" id="ab-code" readonly rows="3" aria-label="Aufmaß-Code"></textarea>
+              </div>
+              <button type="button" class="ez-ab-zeile" id="ab-projekt"><span>Zurück zum Projekt</span><i aria-hidden="true"></i></button>
+
+              <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <div class="ez-fuss">
+                <button type="button" class="ez-rund ez-rund--fuss" aria-label="Zurück" data-ab-zurueck><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
+                <button type="button" class="dna-pille ez-weiter" id="ab-pdf"><span class="ez-weiter__wort">PDF schicken</span> <span class="dna-pille__pfeil"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span></button>
+                <p class="ez-ab-toast" role="status" aria-live="polite" hidden></p>
+              </div>
+            </section>
+<!-- NOTIZEN -->
+      <div class="ez-notiz__folie" data-fuer="fertig" hidden>
+      <span class="dna-label">Konfigurator · nach Schritt&nbsp;6</span>
+      <h2>Gespeichert. <em>Das Modell, ein Name, der Stand.</em></h2>
+      <p class="dna-text">Nach dem Speichern zeigt die App nur, was gespeichert ist, und wie es weitergeht (Entscheidung des Inhabers: keine Gesamtübersicht, nichts zum Abfotografieren). Die Bühne zeigt dasselbe Modell wie die Wünsche, der Name kommt aus der Lage. Alle Funktionen der App bleiben: Weiteres Fenster, Maße ändern, Wünsche ändern, Kopieren, Löschen, Direkt zu einem Thema, Alle Fenster ansehen.</p>
+      <ul class="ez-liste">
+        <li><span class="nr">01</span><span><b>Das Modell im Licht,</b> Chip „Gespeichert · Position 1“ mit Haken über dem Bild. <span class="ez-gen">G4</span><span class="ez-gen">G10</span></span></li>
+        <li><span class="nr">02</span><span><b>Wie geht es weiter?</b> als Anthrazit-Karte, „Weiteres Fenster“ steht genau dort, wo der Satz es nennt; darunter, bis wann das Fenster frei änderbar ist. <span class="ez-gen">G14</span></span></li>
+        <li><span class="nr">03</span><span><b>Vier Aktionen als Kacheln</b> mit Zeichen, Löschen in Koralle; die Kapitel als Umriss-Chips. <span class="ez-gen">G8</span><span class="ez-gen">G13</span></span></li>
+        <li><span class="nr">04</span><span><b>Eine Pille:</b> „Zum Aufmaßblatt“. <span class="ez-gen">G6</span></span></li>
+      </ul>
+      <p class="ez-klein">Bewegung nur als Rückmeldung: Druck 0,97, Folienwechsel 260&nbsp;ms. Was in der Vorschau kein Ziel hat (Liste der Fenster, Löschen, Kopieren), sagt es in einer kurzen Zeile über der Pille.</p>
+      </div>
+      <div class="ez-notiz__folie" data-fuer="anfrage" hidden>
+      <span class="dna-label">Konfigurator · Fürs Angebot, drei kurze Seiten</span>
+      <h2>Haus, Zeit, Kontakt. <em>Alles freiwillig.</em></h2>
+      <p class="dna-text">Die drei Seiten der App vor dem Aufmaßblatt, mit allen Feldern, Hinweisen und Erklärungen. Jede Bühne zeigt die Angabe an einer Sache: die Fenster des Hauses als Kapselreihe, den Zeitraum auf einer Skala mit dem Förderweg als Zahl, den Kontakt oben auf dem Blatt.</p>
+      <ul class="ez-liste">
+        <li><span class="nr">01</span><span><b>Haus:</b> getauschte Fenster violett in der Reihe aller Fenster; ab einem Drittel ist die Marke der Norm Koralle, darunter der Satz der App zum Lüftungskonzept. Gebäude und Baujahr hängen als Chips an der Reihe. <span class="ez-gen">G11</span><span class="ez-gen">G9</span><span class="ez-gen">G1</span></span></li>
+        <li><span class="nr">02</span><span><b>Zeit und Budget:</b> vier Stationen, die gewählte mit violettem Punkt; BAFA zeigt 15&nbsp;%, Steuerbonus 20&nbsp;% als Zahl, das Budget als Kapselreihe (schraffiert: noch offen). <span class="ez-gen">G5</span><span class="ez-gen">G3</span><span class="ez-gen">G11</span></span></li>
+        <li><span class="nr">03</span><span><b>Kontakt:</b> das Blatt liegt im Fensterlicht; Name, Ort, Telefon und E-Mail stehen sofort oben darauf, Leeres ist schraffiert. <span class="ez-gen">G4</span><span class="ez-gen">G7</span><span class="ez-gen">G9</span></span></li>
+        <li><span class="nr">04</span><span><b>Eingaben auf Weiß,</b> gewählte Chips schwarz mit violettem Punkt; eine Pille „Weiter“ bzw. „Zum Aufmaßblatt“. <span class="ez-gen">G6</span></span></li>
+      </ul>
+      <p class="ez-klein">Bewegung nur als Zustand: Kapseln füllen sich von links (16&nbsp;ms Versatz), die Station wechselt über Farbe und Größe in 220&nbsp;ms; bei „weniger Bewegung“ steht alles sofort.</p>
+      </div>
+      <div class="ez-notiz__folie" data-fuer="blatt" hidden>
+      <span class="dna-label">Konfigurator · Aufmaßblatt</span>
+      <h2>Dein Blatt. <em>Freischalten, bezahlen, teilen.</em></h2>
+      <p class="dna-text">Der Weg der App ohne Betrieb in der Pilotphase: Aufmaßblatt, E-Mail für die Rechnung, Bezahlen (Testkauf), Freigeschaltet, Teilen. Das Blatt ist durchgehend das Objekt auf der Bühne: vorher mit Punkten statt Ziffern und Schraffur, nachher mit den Maßen. Preis und Einführungspreis wie in web/config.js, Wortlaut der Zustimmung und AGB-Stand wie in der App.</p>
+      <ul class="ez-liste">
+        <li><span class="nr">01</span><span><b>Vor dem Freischalten:</b> Kopf echt, Maße als •.•••, der Rest schraffiert (statt Weichzeichner), Schloss auf der Ecke; Preis 7,99&nbsp;€ als Zahl, darunter der Einführungspreis. <span class="ez-gen">G1</span><span class="ez-gen">G3</span><span class="ez-gen">G12</span></span></li>
+        <li><span class="nr">02</span><span><b>Kasse in zwei Schritten:</b> die E-Mail hängt als Etikett am Blatt, beim Bezahlen steht der Betrag als Held; Prüfungen und Fehlertexte wie in der App, Haken beim Betreten leer. <span class="ez-gen">G9</span><span class="ez-gen">G5</span></span></li>
+        <li><span class="nr">03</span><span><b>Freigeschaltet:</b> der eine inszenierte Moment, der Haken zeichnet sich, die Maße rasten aufs Blatt. <span class="ez-gen">G2</span><span class="ez-gen">G3</span></span></li>
+        <li><span class="nr">04</span><span><b>Teilen:</b> „PDF schicken“ ist die Pille, WhatsApp, E-Mail und Code als Umriss; der Code im Format der App (AM1.). <span class="ez-gen">G6</span><span class="ez-gen">G13</span></span></li>
+      </ul>
+      <p class="ez-klein">Bewegung: Freigeschaltet einmal, fertig nach knapp 0,6&nbsp;s (Kreis 420&nbsp;ms, Haken 260&nbsp;ms, die Maße erscheinen 220&nbsp;ms), sonst nur Druck und Folienwechsel. In der Vorschau entsteht keine PDF und nichts wird bezahlt; die Zeile über der Pille sagt, was die App an dieser Stelle tut.</p>
+      </div>

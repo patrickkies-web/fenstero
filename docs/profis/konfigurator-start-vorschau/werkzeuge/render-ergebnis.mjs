@@ -45,7 +45,10 @@ for (const art of Object.keys(WERTE)) {
   await page.evaluate((css) => { const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); }, STIL);
   await page.waitForTimeout(4000);
   const info = await page.evaluate(() => { const st = document.getElementById('w3d'), cv = st.querySelector('canvas'); return { gl: st.classList.contains('gl'), css: [st.clientWidth, st.clientHeight], cv: cv ? [cv.width, cv.height] : null }; });
-  await page.locator('#w3d').screenshot({ path: `${OUT}/${art}.png`, timeout: 240000, animations: 'disabled' });
+  /* Rechteck statt Element-Aufnahme: unter Last wartet Playwright sonst auf „stabil“ (die Bühne schwingt leicht) */
+  const r = await page.evaluate(() => { const st = document.getElementById('w3d'); st.scrollIntoView({ block: 'center' }); const b = st.getBoundingClientRect(); return { x: b.left, y: b.top, width: b.width, height: b.height }; });
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${OUT}/${art}.png`, clip: r, timeout: 240000, animations: 'disabled' });
   writeFileSync(`${OUT}/lage-${art}.json`, JSON.stringify(lage, null, 1));
   console.log(art, JSON.stringify(info), Object.keys(lage.dims).join(','));
   await ctx.close();

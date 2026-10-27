@@ -22,3 +22,12 @@ Die Pfade der Skripte sind die der Arbeitssitzung (Ordner `mess-render/`); vor d
 - `render-ergebnis.mjs`: das Modell in der Ansicht „result“ der App (Bühne 358 × 300) mit den Lagen der vier Maße des Ergebnisses;
   `DPR=6` (oder 4, dann von `ergebnis-daten.py` auf 2148 × 1800 gebracht).
 - `ergebnis-daten.py`: WebP nach bilder/ergebnis/ und `ERG_LAGE` in start.js.
+
+## Wünsche und Abschluss (27.10.2026)
+
+- `wunsch-render.mjs`: geht die Wünsche der App durch (Fenster, „Üblich“), liest je Frage Texte, Optionen und Erklärungsschlüssel aus dem
+  DOM und nimmt das Modell der Bühne auf, bei Auswahlfragen je Option (`DPR=4`; `OHNE_OPT=1` nur Inhalte und ein Bild je Frage).
+- `wunsch-gloss.mjs`: die Erklärungen (GLOSS der App) zu allen genannten Schlüsseln.
+- `wuensche-daten.py`: Bilder nach bilder/wuensche/ (WebP, 1074 px), Zeichnungen der App als Strichzeichnung, schreibt wuensche-daten.js.
+- `abschluss-html.py`: baut abschluss.html (Gespeichert, Fürs Angebot 1–3, Aufmaßblatt, E-Mail, Kasse, Freigeschaltet, Teilen).
+- Die Pfade sind die der Arbeitssitzung (Scratchpad); vor dem nächsten Lauf anpassen.

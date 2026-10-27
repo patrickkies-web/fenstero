@@ -1,0 +1,366 @@
+/* Schritt 6 „Wünsche“ der Vorschau.
+   Teil 1: Kapitel „Lage“ („Wo ist das Fenster?“, „Wie genau möchtest du planen?“) unverändert aus web/assets/app.css, Abschnitt
+   „Design-DNA im Konfigurator“ (Fassung „Lage in Violett“, vom Inhaber angenommen und online; Knöpfe und Richtung sind fix). Alles gilt
+   nur unter .dna; Kopf, Band-Hülle und Fuß kommen aus der Vorschau, damit die Menüführung über alle Schritte gleich bleibt.
+   Teil 2 (am Ende): die Fragen der Kapitel Aufbau bis Einbau, neu nach der DNA (Präfix ez-wz-). */
+/* ---------- Design-DNA im Konfigurator (ab 26.10.2026: Kapitel „Lage“, Fragen „Wo ist das Fenster?“ und „Wie genau planen?“) ----------
+   Der Inhaber geht Folie für Folie vor: Bildschirme mit .dna tragen den Look der Design-DNA in der Palette „Task-App dunkel“ (Fassung
+   „Lage in Violett“): nur acht Farben, Schwarz als Grund, Anthrazit für Bühnen und Kacheln, Weiß für Karten mit Feldern, Silbergrau für
+   Linien, Violett (mit Indigo dahinter) für den Zustand, Koralle als zweiter Wert und für Hinweise, Textgrau als Nebentext auf Weiß.
+   Schrift Outfit. Alles hier gilt nur unter .dna; die Markenregeln der übrigen App bleiben (docs/GESTALTUNG.md). */
+.dna { --schwarz: #07090a; --anthrazit: #202022; --weiss: #ffffff; --silbergrau: #a8a4a9; --textgrau: #6b676c; --violett: #897efc; --koralle: #f88962; --indigo: #3c3a66;
+  --grund: var(--schwarz); --flaeche: var(--anthrazit); --flaeche-hoch: var(--schwarz); --tinte: var(--weiss); --tinte-2: var(--silbergrau); --linie: var(--silbergrau); --linie-fein: var(--anthrazit);
+  --handlung: var(--weiss); --auf-handlung: var(--schwarz); --signal: var(--violett); --glas: var(--schwarz); --glas-rand: var(--anthrazit); --fokus: var(--violett);
+  --rund-l: 28px; --rund-pille: 999px; --font-sans: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --dna-auftritt: cubic-bezier(.16, 1, .3, 1); --dna-druck: cubic-bezier(.2, .7, .2, 1); --dna-feder: cubic-bezier(.34, 1.25, .64, 1) }
+/* Weiße Karten (Felder): Werte „hell“ */
+.dna .lg-hell { --grund: var(--weiss); --flaeche: var(--weiss); --flaeche-hoch: var(--weiss); --tinte: var(--schwarz); --tinte-2: var(--textgrau); --linie: var(--silbergrau); --linie-fein: var(--silbergrau);
+  --handlung: var(--schwarz); --auf-handlung: var(--weiss); --glas: var(--weiss); --glas-rand: var(--silbergrau) }
+.scroll.dna-scroll { padding-bottom: 0; background: #07090a }
+.scr.dna { display: flex; flex-direction: column; gap: 0; min-height: 100%; background: var(--grund); color: var(--tinte); font-family: var(--font-sans); font-size: 16px; line-height: 1.45 }
+.dna :focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px }
+.dna button { font-family: var(--font-sans); -webkit-tap-highlight-color: transparent }
+
+/* Bausteine der Design-DNA (aus bundle.css, nur was die Lage braucht) */
+.dna .dna-label { font: 500 13px/1.3 var(--font-sans); letter-spacing: .02em; color: var(--tinte-2) }
+.dna .dna-zahl__einheit { font: 400 15px/1 var(--font-sans); color: var(--tinte-2); margin-left: .3em }
+.dna .dna-pille { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 52px; padding: 0 24px; border: 0; border-radius: var(--rund-pille); background: var(--handlung); color: var(--auf-handlung); font: 500 15px/1 var(--font-sans); text-decoration: none; cursor: pointer; white-space: nowrap; transition: transform 220ms var(--dna-druck), background-color 220ms ease }
+.dna .dna-pille:has(.dna-pille__pfeil) { padding: 0 6px 0 24px }
+.dna .dna-pille:active { transform: scale(.97); transition-duration: 0s }
+.dna .dna-pille__pfeil { width: 40px; height: 40px; border-radius: 50%; background: var(--auf-handlung); color: var(--handlung); display: grid; place-items: center }
+.dna .dna-pille__pfeil svg { width: 14px; height: 14px }
+.dna .dna-pille--leise { background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .dna-pille--klein { height: 36px; padding: 0 16px; font-size: 13px }
+.dna .dna-badge { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--signal); color: var(--weiss); font: 500 13px/1 var(--font-sans); letter-spacing: .02em; white-space: nowrap }
+.dna .dna-badge--leise { background: transparent; color: var(--tinte-2); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-feldkopf .dna-badge--leise::before { content: ""; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--koralle) }
+.dna .dna-eingabe { width: 100%; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: var(--rund-pille); background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .dna-eingabe input { flex: 1; min-width: 0; width: 100%; height: 48px; padding: 0 16px; border: 0; background: transparent; color: var(--tinte); font: 400 17px/1 var(--font-sans); outline: none }
+.dna .dna-eingabe input::placeholder { color: var(--tinte-2) }
+.dna .dna-eingabe:focus-within { box-shadow: inset 0 0 0 2px var(--violett) }
+.dna .dna-etikett { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: var(--rund-pille); background: var(--schwarz); border: 1px solid var(--anthrazit); box-shadow: inset 0 0 0 1px var(--anthrazit); color: var(--weiss); font: 400 13px/1.2 var(--font-sans); white-space: nowrap; max-width: 132px; overflow: hidden }
+.dna .dna-etikett b { font-weight: 500; overflow: hidden; text-overflow: ellipsis }
+.dna .dna-etikett__punkt { width: 26px; height: 26px; border-radius: 50%; background: var(--schwarz); display: grid; place-items: center; flex: none }
+.dna .dna-etikett__punkt::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 35%, transparent) }
+
+/* Kopf: zurück als Zeichen, daneben die Marke, rechts Übersicht und Begriffe */
+.dna .lg-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 52px; padding: 0 8px 0 4px }
+.dna .lg-kopf button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 0; background: none; color: var(--tinte); font: 500 15px/1 var(--font-sans); border-radius: 999px; cursor: pointer }
+.dna .lg-kopf svg { width: 18px; height: 18px }
+.dna .lg-kopf-l, .dna .lg-kopf-r { display: flex; align-items: center; gap: 2px; min-width: 0 }
+.dna .lg-kopf .lg-kopf-zurueck, .dna .lg-kopf .lg-kopf-icon { width: 44px; padding: 0; justify-content: center }
+.dna .lg-marke { display: inline-flex; align-items: center; gap: 8px; font: 400 17px/1 var(--font-sans); letter-spacing: -.01em; color: var(--tinte); white-space: nowrap }
+.dna .lg-marke .fi-logo { width: 26px; height: 26px }
+.dna .lg-marke .wm b { font-weight: 700 }
+.dna .lg-marke .fi-rand { stroke: var(--anthrazit); stroke-opacity: 1 }
+.dna .lg-kopf .hdr-inst { padding-left: 0; max-width: none; color: var(--tinte) }
+.dna .lg-kopf .hdr-inst .hdr-name { font: 500 15px/1.15 var(--font-sans) }
+
+/* Kapitel als Stationen auf einem Band */
+.dna .lg-stationen { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; height: 44px; margin-bottom: 8px }
+.dna .lg-stationen b { font: 500 15px/1 var(--font-sans) }
+.dna .lg-stationen small { font: 500 13px/1 var(--font-sans); color: var(--tinte-2); font-variant-numeric: tabular-nums }
+.dna .lg-band { position: relative; height: 14px; display: flex; justify-content: space-between; align-items: center }
+.dna .lg-band::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1.5px dotted var(--silbergrau) }
+.dna .lg-band i { position: relative; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-band i.fertig { background: var(--silbergrau); box-shadow: none }
+.dna .lg-band i.ist { width: 12px; height: 12px; background: var(--violett); box-shadow: 0 0 0 4px var(--indigo) }
+
+/* Bühne (Anthrazit): das Haus im Schnitt; alles darin bezieht sich auf 358 × 250 px und wird auf schmalen Telefonen verkleinert (--lg-s) */
+.dna .lg-buehne { position: relative; flex: none; height: calc(250px * var(--lg-s, 1)); border-radius: var(--rund-l); overflow: hidden; background: var(--anthrazit); isolation: isolate; color: var(--tinte) }
+.dna .lg-buehne-in { position: absolute; left: 50%; top: 0; width: 358px; height: 250px; transform: translateX(-50%) scale(var(--lg-s, 1)); transform-origin: top center }
+.dna .lg-haus { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1 }
+.dna .lg-haus .wand { fill: none; stroke: var(--weiss); stroke-width: 1.4 }
+.dna .lg-haus .fein { fill: none; stroke: var(--silbergrau); stroke-width: 1.2; stroke-dasharray: 3 4 }
+.dna .lg-haus .boden { stroke: var(--silbergrau); stroke-width: 1.2 }
+.dna .lg-haus .strich { stroke: var(--silbergrau); stroke-width: 1.4 }
+.dna .lg-haus .strich.lang { stroke: var(--weiss) }
+.dna .lg-haus text { font: 600 13px/1 var(--font-sans); fill: var(--silbergrau); letter-spacing: .02em }
+.dna .lg-haus text.ist { fill: var(--weiss) }
+/* Schraffur der nicht gewählten Stockwerke; das gewählte ist frei */
+.dna .lg-haus .schnitt { transition: opacity 320ms var(--dna-druck) }
+.dna .lg-haus .schnitt.frei { opacity: 0 }
+.dna .lg-glut { position: absolute; top: 0; left: 40px; width: 320px; height: 132px; z-index: 0; pointer-events: none; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, var(--violett) 56%, var(--indigo) 74%, transparent 90%); filter: blur(8px); transition: transform 200ms var(--dna-druck) }
+.dna .lg-stock { position: absolute; z-index: 2; left: 48px; right: 12px; border: 0; background: none; padding: 0; cursor: pointer; border-radius: 12px }
+.dna .lg-stock:focus-visible { outline: 2px solid var(--fokus); outline-offset: -2px }
+.dna .lg-fenster { position: absolute; top: 0; z-index: 3; width: 56px; left: 228px; transition: transform 400ms var(--dna-auftritt), width 400ms var(--dna-auftritt); filter: drop-shadow(0 10px 10px rgba(7, 9, 10, .4)); pointer-events: none }
+.dna .lg-fenster::before { content: ""; position: absolute; inset: -30% -45%; z-index: -1; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 22%, transparent); filter: blur(7px) }
+.dna .lg-fenster img { position: relative; display: block; width: 100%; height: auto }
+.dna .lg-etikett { position: absolute; top: 0; z-index: 3; left: 70px; transition: transform 400ms var(--dna-auftritt); pointer-events: none }
+.dna .lg-etikett .leer { color: var(--silbergrau); font-weight: 400 }
+.dna .lg-strich { position: absolute; top: 0; z-index: 3; left: 206px; width: 22px; border-top: 1.2px dashed var(--weiss); transition: transform 400ms var(--dna-auftritt); pointer-events: none }
+.dna .lg-erkannt { position: absolute; z-index: 3; right: 14px; top: 12px; gap: 7px; height: 28px; background: var(--koralle); color: var(--schwarz) }
+.dna .lg-erkannt::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--schwarz) }
+.dna .lg-tippen { position: absolute; z-index: 3; left: 12px; top: 10px; padding: 5px 10px; border-radius: 999px; background: var(--schwarz); font: 500 13px/1 var(--font-sans); color: var(--weiss) }
+.dna.lg-still .lg-fenster, .dna.lg-still .lg-etikett, .dna.lg-still .lg-strich, .dna.lg-still .lg-glut, .dna.lg-still .schnitt, .dna.lg-still .lp-punkte i, .dna.lg-still .lp-glut, .dna.lg-still .lp-sonne { transition: none !important }
+
+/* Frage */
+.dna .lg-frage { padding: 20px 0 16px }
+.dna .lg-frage-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.dna .lg-notiz-knopf { height: 44px; gap: 6px; padding: 0 14px; font-size: 15px; flex: none }
+.dna .lg-notiz-knopf svg { width: 14px; height: 14px }
+.dna .lg-frage h1 { margin: 0; flex: 1; min-width: 0; font: 500 30px/1.1 var(--font-sans); letter-spacing: -.02em; text-wrap: balance; color: var(--tinte); outline: none }
+.dna .lg-frage h1 em { font-style: normal; color: var(--tinte-2) }
+.dna .lg-frage p { margin: 8px 0 0; font: 400 16px/1.5 var(--font-sans); color: var(--tinte-2) }
+/* Erklärung: sichtbar ein kleiner Kreis, Zielfläche 44 px */
+.dna .lg-i { position: relative; width: 44px; height: 44px; margin: -8px -8px -8px 0; padding: 0; border: 0; background: none; color: var(--silbergrau); display: inline-grid; place-items: center; vertical-align: -6px; cursor: pointer }
+.dna .lg-i::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--anthrazit); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-i svg { position: relative; width: 14px; height: 14px }
+
+/* Karten: Felder auf Weiß, Stockwerk als Kachel in Anthrazit, Anzahl als schwarze Kachel mit Kontur, Leuchten und Schraffur */
+.dna .lg-karte { border-radius: var(--rund-l); background: var(--flaeche); color: var(--tinte); padding: 6px 16px }
+.dna .lg-karte + .lg-karte { margin-top: 12px }
+.dna .lg-feld { padding: 16px 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px }
+.dna .lg-feld + .lg-feld { border-top: 1px solid var(--linie-fein) }
+.dna .lg-feldkopf { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.dna .lg-vorschlaege { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent) }
+.dna .lg-vorschlaege::-webkit-scrollbar { display: none }
+.dna .lg-vorschlaege button { flex: none; height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte-2); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: transform 220ms var(--dna-druck), color 220ms var(--dna-druck) }
+.dna .lg-vorschlaege button:active { transform: scale(.97); transition-duration: 0s }
+.dna .lg-doppelt { display: grid; gap: 8px }
+.dna .lg-doppelt[hidden] { display: none }
+.dna .lg-stockwahl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-kachel .lg-stockwahl { background: var(--schwarz); box-shadow: none }
+.dna .lg-stockwahl.lp-wahl { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+.dna .lg-stockwahl button { height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte-2); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck) }
+.dna .lg-stockwahl button[aria-pressed="true"], .dna .lg-ogwahl button[aria-pressed="true"], .dna .lg-boden[aria-pressed="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none }
+.dna .lg-stocktext { font: 400 15px/1.4 var(--font-sans); color: var(--tinte-2) }
+.dna .lg-ogwahl { display: none; align-items: center; gap: 6px; flex-wrap: wrap }
+.dna[data-stock="og"] .lg-ogwahl { display: flex }
+.dna .lg-ogwahl button, .dna .lg-boden { height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--tinte-2); box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 500 15px/1 var(--font-sans); cursor: pointer; transition: background-color 320ms var(--dna-druck), color 320ms var(--dna-druck) }
+.dna .lg-hilfe { margin: 0; font: 400 15px/1.45 var(--font-sans); color: var(--tinte-2) }
+.dna .lg-kachel { background: var(--anthrazit) }
+.dna .lg-bru-karte { display: none }
+.dna[data-oben] .lg-bru-karte { display: block }
+.dna .lg-bru-was { margin-top: -4px }
+.dna .lg-bru-zeile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center }
+.dna .lg-mm { display: flex; align-items: center; gap: 6px; padding: 6px 18px 6px 6px; border-radius: 999px; background: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-mm input { flex: 1; min-width: 0; width: 100%; height: 44px; padding: 0 12px; border: 0; background: transparent; color: var(--tinte); font: 300 24px/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; outline: none }
+.dna .lg-mm input::placeholder { color: var(--tinte-2); font-size: 17px; font-weight: 400 }
+.dna .lg-mm span { font: 400 15px/1 var(--font-sans); color: var(--tinte-2) }
+.dna .lg-mm:focus-within { box-shadow: inset 0 0 0 2px var(--violett) }
+.dna .lg-warn, .dna .lg-grund { margin: 0; font: 500 15px/1.4 var(--font-sans); color: var(--tinte) }
+.dna .lg-warn::before, .dna .lg-grund::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px }
+.dna .lg-markiert { box-shadow: inset 0 0 0 2px var(--koralle) !important }
+.dna .lg-kontur { position: relative; overflow: hidden; isolation: isolate; background: var(--schwarz); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
+.dna .lg-kontur::before { content: ""; position: absolute; z-index: -1; left: -30px; top: 30px; width: 170px; height: 120px; background: radial-gradient(closest-side, var(--violett) 0, var(--violett) 40%, var(--indigo) 70%, transparent); filter: blur(10px); opacity: .95; pointer-events: none }
+.dna .lg-kontur::after { content: ""; position: absolute; z-index: -1; left: 46%; right: 0; top: 0; bottom: 40%; background: repeating-linear-gradient(-45deg, var(--silbergrau) 0 1.2px, transparent 1.2px 5px); -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%); mask-image: linear-gradient(90deg, transparent, #000 45%); pointer-events: none }
+.dna .lg-anzahl { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px }
+.dna .lg-zahl { display: flex; align-items: baseline; gap: 6px }
+.dna .lg-zahl output { font: 250 56px/1 var(--font-sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--weiss); display: inline-block; transition: transform 320ms var(--dna-feder) }
+.dna .lg-zahl output.rastet { transform: translateY(-4px) }
+.dna .lg-kontur .dna-zahl__einheit { color: var(--weiss) }
+.dna .lg-knoepfe { display: flex; gap: 8px }
+.dna .lg-knoepfe button { width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--anthrazit); color: var(--weiss); display: grid; place-items: center; cursor: pointer; transition: transform 220ms var(--dna-druck) }
+.dna .lg-knoepfe button:active { transform: scale(.94); transition-duration: 0s }
+.dna .lg-knoepfe button:disabled { color: var(--textgrau); cursor: default }
+.dna .lg-knoepfe svg { width: 16px; height: 16px }
+.dna .lg-reihe { display: flex; flex-wrap: wrap; gap: 6px; min-height: 18px }
+.dna .lg-reihe i { width: 14px; height: 18px; border-radius: 3px; box-shadow: inset 0 0 0 1.4px var(--silbergrau); position: relative }
+.dna .lg-reihe i::after { content: ""; position: absolute; left: 6px; top: 3px; bottom: 3px; border-left: 1.2px solid var(--silbergrau) }
+.dna .lg-reihe i.ist { box-shadow: inset 0 0 0 1.4px var(--weiss) }
+.dna .lg-reihe i.ist::after { border-color: var(--weiss) }
+
+/* Wie genau planen: Fragen als Punktraster je Kapitel, Violett für „wählst du“, Koralle für „plant dein Fensterbauer“ (Klassen lp-) */
+.dna .lp-buehne { height: auto; min-height: 250px }
+.dna .lp-in { position: relative; max-width: 358px; margin: 0 auto; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 10px }
+.dna .lp-glut { position: absolute; z-index: 1; left: 90px; top: 76px; width: 292px; height: 180px; transform-origin: 0 50%; background: radial-gradient(55% 55% at 45% 50%, var(--violett) 0, var(--violett) 42%, var(--indigo) 66%, transparent 84%); filter: blur(12px); pointer-events: none; transition: transform 320ms var(--dna-druck) }
+.dna .lp-sonne { position: absolute; z-index: 1; right: 6px; top: 90px; width: 210px; height: 165px; transform-origin: 100% 50%; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 60%, transparent); filter: blur(14px); pointer-events: none; transition: transform 320ms var(--dna-druck) }
+.dna .lp-kopf { position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px }
+.dna .lp-zahl { display: flex; align-items: baseline; gap: 8px }
+.dna .lp-zahl output { font: 200 56px/.9 var(--font-sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--violett); display: inline-block; transition: transform 320ms var(--dna-feder) }
+.dna .lp-zahl output.rastet { transform: translateY(-4px) }
+.dna .lp-zahl span { display: grid; gap: 4px; font: 400 15px/1 var(--font-sans); color: var(--silbergrau) }
+.dna .lp-zahl small, .dna .lp-zwei span { display: flex; align-items: center; gap: 7px; font: 500 13px/1 var(--font-sans); color: var(--silbergrau) }
+.dna .lp-zahl small i, .dna .lp-zwei span i { width: 9px; height: 9px; border-radius: 50%; flex: none }
+.dna .lp-zahl small i { background: var(--weiss) }
+.dna .lp-zwei span i { box-shadow: inset 0 0 0 1.6px var(--silbergrau) }
+.dna .lp-zwei { display: grid; justify-items: end; gap: 6px; padding-bottom: 2px }
+.dna .lp-zwei output { font: 300 32px/.9 var(--font-sans); letter-spacing: -.03em; color: var(--koralle); font-variant-numeric: tabular-nums }
+.dna .lp-raster { position: relative; z-index: 2; display: grid }
+.dna .lp-reihe { display: grid; grid-template-columns: 116px minmax(0, 1fr); align-items: center; height: 22px }
+.dna .lp-reihe > span:first-child { font: 500 13px/1 var(--font-sans); color: var(--silbergrau); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.dna .lp-reihe.ist > span:first-child { color: var(--weiss) }
+.dna .lp-punkte { display: grid; grid-template-columns: repeat(var(--lp-n, 12), minmax(0, 14px)); align-items: center }
+.dna .lp-punkte i { width: min(9px, 100%); aspect-ratio: 1; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.6px var(--silbergrau); transition: background-color 220ms var(--dna-druck), box-shadow 220ms var(--dna-druck); transition-delay: calc(var(--n, 0) * 14ms) }
+.dna .lp-punkte i.ja { background: var(--weiss); box-shadow: none }
+.dna .lp-satz { margin: 0; font: 400 15px/1.5 var(--font-sans); color: var(--tinte-2); min-height: 45px }
+.dna .lp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+
+/* Rechtliche Verweise am Ende des Inhalts, klein in Silbergrau */
+.dna .foot-links.recht { margin-top: 20px; padding: 0; gap: 0 12px }
+.dna .foot-links.recht .link { font: 400 13px/1.6 var(--font-sans); color: var(--silbergrau) }
+.dna .foot-links.recht .link.widerruf { color: var(--silbergrau); text-decoration: underline; text-underline-offset: 3px }
+
+/* Unten: zurück als Umriss, „Weiter“ weiß; bleibt beim Scrollen unten stehen */
+.dna .lg-fuss { position: sticky; bottom: 0; z-index: 4; margin: auto -16px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, transparent, var(--schwarz) 16px) }
+.dna .lg-fuss .dna-pille { flex: 0 1 260px }
+.dna .lg-zurueck { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau); display: grid; place-items: center; cursor: pointer }
+.dna .lg-zurueck svg { width: 16px; height: 16px }
+.dna .lg-grund { order: -1; flex: 0 0 100%; margin: 0 0 2px; text-align: center }
+@media (prefers-reduced-motion: reduce) { .dna .lg-fenster, .dna .lg-etikett, .dna .lg-strich, .dna .lg-glut, .dna .lg-haus .schnitt, .dna .lg-zahl output, .dna .lg-stockwahl button, .dna .dna-pille, .dna .lp-punkte i, .dna .lp-glut, .dna .lp-sonne, .dna .lp-zahl output { transition: none !important } }
+
+/* ---------- Teil 2: Schritt 6 in der Hülle der Vorschau ---------- */
+.ez-folie[data-folie="wuensche"] { position: relative; isolation: isolate; --fokus: var(--weiss); }
+/* Die Lage-Inhalte stehen in .dna; die Hülle gibt ihnen die Breite der Folie und keinen eigenen Grund */
+.ez-wz-dna { display: flex; flex-direction: column; background: transparent; color: var(--weiss); font-family: var(--font-sans); font-size: 16px; line-height: 1.45; }
+.ez-wz-dna .lg-stationen { margin: 2px 0 10px; }
+/* Das Kapitelband ist ein Knopf: Tippen öffnet die Kapitel (in der App die Leiste „Direkt zu einem Thema“) */
+.ez-wz-band { width: 100%; min-height: 44px; border: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; font: inherit; }
+.ez-wz-band:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; border-radius: 12px; }
+.ez-wz-schritt[hidden] { display: none !important; }
+.ez-wz-dna .ez-wz-schritt { display: flex; flex-direction: column; }
+/* Grundzeile über „Weiter“ (Lage): was noch fehlt, mit Koralle-Punkt */
+.ez-wz-grund { position: absolute; left: 16px; right: 16px; bottom: calc(100% + 2px); margin: 0; padding: 8px 12px 8px 30px; border-radius: 14px; background: var(--anthrazit); font: 400 .875rem/1.35 var(--font-sans); color: var(--weiss); box-shadow: inset 0 1px 0 rgba(255,255,255,.10); }
+.ez-wz-grund::before { content: ""; position: absolute; left: 12px; top: calc(8px + .675em - 4px); width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+.ez-folie[data-folie="wuensche"] .ez-fuss { position: sticky; }
+/* Bühne der Fragen: das Modell der App in der Ansicht der Frage, von Rand zu Rand wie beim Messen */
+.ez-buehne--wz { --putz-schatten: 0 1px 1px rgba(7,9,10,.28), 0 2px 4px -1px rgba(7,9,10,.22), 4px 12px 20px -10px rgba(7,9,10,.50); height: 272px; margin: 0 -16px; border-radius: 0 0 var(--rund-l) var(--rund-l); cursor: default; touch-action: auto; background: radial-gradient(120% 100% at 26% 8%, #f3eee6, #e9e2d7 58%, #dcd4c7); box-shadow: none; }
+.ez-buehne--wz .ez-buehne__kante { z-index: 2; background: linear-gradient(160deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 36%), radial-gradient(72% 90% at 55% 44%, rgba(7,9,10,0) 50%, rgba(7,9,10,.10) 76%, rgba(7,9,10,.30) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(7,9,10,.30); }
+.ez-buehne--wz .ez-glaschip { background: linear-gradient(180deg, color-mix(in srgb, var(--anthrazit) 86%, var(--silbergrau)), color-mix(in srgb, var(--anthrazit) 80%, var(--schwarz))); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: rgba(255,255,255,.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), var(--putz-schatten); }
+.ez-buehne--wz .ez-glaschip--unten { z-index: 4; height: 30px; padding: 0 12px; line-height: 30px; font-size: .8125rem; color: var(--weiss); }
+.ez-wz__bild { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; opacity: 0; }
+.ez-wz__bild.ist-an { z-index: 1; opacity: 1; }
+.ez-wz__bild.blendet.ist-an { transition: opacity 220ms var(--dna-druck); }
+.ez-wz__bild.blendet:not(.ist-an) { transition: opacity 0s linear 220ms; }
+.ez-folie[data-folie="wuensche"] .ez-frage { position: relative; padding: 8px 0 2px; }
+.ez-folie[data-folie="wuensche"] .ez-frage::before { content: ""; position: absolute; z-index: -1; left: -16px; right: -16px; top: -8px; height: 88px; pointer-events: none; background: radial-gradient(56% 100% at 50% 0, var(--anthrazit), color-mix(in srgb, var(--anthrazit) 40%, transparent) 40%, transparent 74%); }
+.ez-folie[data-folie="wuensche"] .ez-frage h1 { font-size: 1.75rem; letter-spacing: -.025em; }
+.ez-folie[data-folie="wuensche"] .ez-unterzeile { margin-top: 2px; font-size: .875rem; line-height: 1.4; }
+.ez-folie[data-folie="wuensche"] .ez-unterzeile:empty { display: none; }
+/* Etikett über der Frage: Kapitel und Stelle, rechts die Planungstiefe als Chip (öffnet „Wie genau planen?“) */
+.ez-wz-zeile { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 32px; margin-bottom: 0; }
+.ez-wz-zeile .dna-label { font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-wz-tiefe { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 28px; border: 0; padding: 0 10px 0 12px; border-radius: var(--rund-pille); background: var(--indigo); color: var(--weiss); font: 500 .75rem/1 var(--font-sans); cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.10); }
+.ez-wz-tiefe::after { content: ""; position: absolute; inset: -8px -4px; }
+.ez-wz-tiefe i { width: 10px; height: 10px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5 5 6.5l3-3' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5 5 6.5l3-3' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+.ez-wz-tiefe:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+/* Antworten */
+.ez-wz-antwort { display: grid; gap: 10px; margin-top: 12px; }
+/* Auswahl als Anthrazit-Kacheln (G14), gewählt mit violettem Ring, Punkt und Licht; je nach Zahl zwei oder drei Spalten */
+.ez-wz-kacheln { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ez-wz-kacheln[data-spalten="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ez-wz-kachel { position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: start; gap: 3px; width: 100%; height: 100%; min-height: 76px; padding: 12px 12px 12px 14px; border: 0; border-radius: var(--rund-m); text-align: left; color: var(--weiss); cursor: pointer; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); transition: box-shadow 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-wz-kachel::before { content: ""; position: absolute; z-index: -1; left: 10%; right: 10%; bottom: -40%; height: 70%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--violett) 34%, transparent), transparent); opacity: 0; transition: opacity 220ms var(--dna-druck); }
+.ez-wz-kachel:active { transform: scale(.97); transition-duration: 0s; }
+.ez-wz-kachel[aria-pressed="true"] { box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1.8px var(--violett); }
+.ez-wz-kachel[aria-pressed="true"]::before { opacity: 1; }
+.ez-wz-kachel[aria-pressed="true"] .ez-wz-kachel__lbl::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); vertical-align: 1px; }
+.ez-wz-kachel:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+.ez-wz-kachel__ico { display: block; width: 40px; height: 40px; margin: 0 0 4px -2px; color: var(--silbergrau); }
+.ez-wz-kachel__ico svg { width: 100%; height: 100%; }
+.ez-wz-kachel[aria-pressed="true"] .ez-wz-kachel__ico { color: var(--weiss); }
+.ez-wz-kachel__lbl { font: 500 .9375rem/1.2 var(--font-sans); letter-spacing: -.005em; hyphens: auto; }
+.ez-wz-kachel__sb { font: 400 .75rem/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-wz-kachel__pr { position: absolute; right: 12px; bottom: 10px; font: 500 .75rem/1 var(--font-sans); letter-spacing: .04em; color: var(--silbergrau); }
+.ez-wz-kachel--info:not(.ez-wz-kachel--ico) { padding-right: 38px; }
+/* i-Ring an der Kachel (G13): sichtbar 24 px, Ziel 44 px */
+.ez-wz-info { position: absolute; z-index: 2; right: 6px; top: 6px; width: 32px; height: 32px; border: 0; padding: 0; background: transparent; color: var(--silbergrau); cursor: pointer; display: grid; place-items: center; }
+.ez-wz-info::before { content: ""; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.4px currentColor; grid-area: 1 / 1; }
+.ez-wz-info::after { content: ""; position: absolute; inset: -6px; }
+.ez-wz-info svg { grid-area: 1 / 1; width: 12px; height: 12px; }
+.ez-wz-info:focus-visible { outline: 2px solid var(--weiss); outline-offset: 0; border-radius: 50%; }
+.ez-wz-opt { position: relative; }
+/* Eingaben auf Weiß: Umschalter, Liste, Zähler, Schalter, Text */
+.ez-wz-karte { display: grid; gap: 10px; padding: 12px 14px 14px; border-radius: var(--rund-l); background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); color: var(--schwarz); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
+.ez-wz-karte .dna-label { font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
+.ez-wz-umschalter { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; padding: 4px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 22%, var(--weiss)); }
+.ez-wz-umschalter--gitter { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 24px; }
+.ez-wz-umschalter button[data-o] { width: 100%; position: relative; min-height: 44px; border: 0; padding: 8px 10px; border-radius: var(--rund-pille); background: transparent; color: var(--textgrau); font: 500 .9375rem/1.2 var(--font-sans); display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-wz-umschalter button[data-o]:active { transform: scale(.97); transition-duration: 0s; }
+.ez-wz-umschalter button[data-o][aria-pressed="true"] { background: var(--schwarz); color: var(--weiss); }
+.ez-wz-umschalter button[data-o][aria-pressed="true"]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); flex: none; }
+.ez-wz-umschalter button[data-o]:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+.ez-wz-zelle { position: relative; display: grid; }
+.ez-wz-zelle.mit-info button[data-o] { padding-right: 34px; }
+.ez-wz-karte .ez-wz-zelle .ez-wz-info { position: absolute; right: 6px; top: 50%; translate: 0 -50%; width: 28px; height: 28px; color: var(--textgrau); }
+.ez-wz-zelle .ez-wz-info::before { width: 20px; height: 20px; }
+.ez-wz-karte .ez-wz-zelle.ist-an .ez-wz-info, .ez-wz-karte .ez-wz-zelle:has([aria-pressed="true"]) .ez-wz-info { color: var(--weiss); }
+.ez-folie[data-folie="wuensche"] .ez-frage h1.ez-wz-lang { font-size: 1.5rem; line-height: 1.12; }
+.ez-wz-liste { display: grid; }
+.ez-wz-reihe { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 0; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 26%, var(--weiss)); }
+.ez-wz-reihe:first-child { border-top: 0; }
+.ez-wz-reihe > button.ez-wz-wahl { flex: 1; min-height: 44px; display: flex; align-items: center; gap: 12px; border: 0; padding: 0; background: transparent; color: var(--schwarz); font: 400 .9375rem/1.3 var(--font-sans); text-align: left; cursor: pointer; }
+.ez-wz-wahl b { display: block; font-weight: 500; }
+.ez-wz-wahl small { display: block; font: 400 .8125rem/1.35 var(--font-sans); color: var(--textgrau); }
+.ez-wz-haken { flex: none; margin-left: auto; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 70%, var(--weiss)); display: grid; place-items: center; color: var(--weiss); transition: background-color 150ms var(--dna-druck), box-shadow 150ms var(--dna-druck); }
+.ez-wz-haken svg { width: 14px; height: 14px; opacity: 0; transition: opacity 150ms var(--dna-druck); }
+[aria-pressed="true"] > .ez-wz-haken, [aria-checked="true"] > .ez-wz-haken { background: var(--schwarz); box-shadow: none; }
+[aria-pressed="true"] > .ez-wz-haken svg, [aria-checked="true"] > .ez-wz-haken svg { opacity: 1; }
+.ez-wz-wahl:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; border-radius: 10px; }
+.ez-wz-karte .ez-wz-info { position: static; color: var(--textgrau); flex: none; width: 36px; height: 36px; }
+.ez-wz-stepper { display: flex; align-items: center; gap: 10px; flex: none; }
+.ez-wz-stepper button { width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; background: var(--weiss); color: var(--schwarz); font: 400 1.375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-wz-stepper button:disabled { color: color-mix(in srgb, var(--silbergrau) 80%, var(--weiss)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 60%, var(--weiss)); cursor: default; }
+.ez-wz-stepper button:not(:disabled):active { transform: scale(.94); transition-duration: 0s; }
+.ez-wz-stepper output { min-width: 1.6em; text-align: center; font: 300 1.75rem/1 var(--font-sans); }
+.ez-wz-schalter { flex: none; position: relative; width: 52px; height: 32px; border: 0; padding: 0; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 40%, var(--weiss)); cursor: pointer; transition: background-color 180ms var(--dna-druck); }
+.ez-wz-schalter::before { content: ""; position: absolute; left: 3px; top: 3px; width: 26px; height: 26px; border-radius: 50%; background: var(--weiss); box-shadow: 0 1px 3px rgba(7,9,10,.3); transition: transform 180ms var(--dna-druck); }
+.ez-wz-schalter::after { content: ""; position: absolute; inset: -6px; }
+.ez-wz-schalter[aria-checked="true"] { background: var(--schwarz); }
+.ez-wz-schalter[aria-checked="true"]::before { transform: translateX(20px); box-shadow: 0 1px 3px rgba(7,9,10,.3), inset 0 0 0 9px var(--weiss), inset 0 0 0 13px var(--violett); }
+.ez-wz-schalter:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 3px; }
+.ez-wz-text { width: 100%; min-height: 96px; box-sizing: border-box; border: 0; padding: 12px 14px; border-radius: 18px; background: color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 40%, var(--weiss)); font: 400 1rem/1.45 var(--font-sans); color: var(--schwarz); resize: vertical; outline: none; }
+.ez-wz-text:focus { box-shadow: inset 0 0 0 1.8px var(--violett); }
+.ez-wz-text::placeholder { color: var(--textgrau); }
+/* Farben: Tupfen auf Anthrazit, gewählt mit violettem Ring; oben die aktuelle Farbe */
+.ez-wz-farben { display: grid; gap: 12px; padding: 14px; border-radius: var(--rund-l); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-wz-jetzt { display: flex; align-items: center; gap: 12px; }
+.ez-wz-jetzt b { display: block; font: 500 .9375rem/1.25 var(--font-sans); }
+.ez-wz-jetzt small { display: block; font: 400 .8125rem/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-wz-tupf { flex: none; width: 36px; height: 36px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), inset 0 2px 4px rgba(255,255,255,.18), inset 0 -3px 6px rgba(7,9,10,.35); }
+.ez-wz-tupf--offen { background: repeating-linear-gradient(135deg, transparent 0 4px, rgba(168,164,169,.55) 4px 5.4px); box-shadow: inset 0 0 0 1.4px var(--silbergrau); }
+.ez-wz-tupfen { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 6px; }
+.ez-wz-tupfen button { display: grid; justify-items: center; gap: 5px; min-height: 64px; border: 0; padding: 4px 0; background: transparent; color: var(--silbergrau); font: 400 .75rem/1 var(--font-sans); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-wz-tupfen button:active { transform: scale(.94); transition-duration: 0s; }
+.ez-wz-tupfen button .ez-wz-tupf { width: 38px; height: 38px; }
+.ez-wz-tupfen button[aria-pressed="true"] { color: var(--weiss); }
+.ez-wz-tupfen button[aria-pressed="true"] .ez-wz-tupf { box-shadow: 0 0 0 2px var(--anthrazit), 0 0 0 3.8px var(--violett), inset 0 2px 4px rgba(255,255,255,.18), inset 0 -3px 6px rgba(7,9,10,.35); }
+.ez-wz-tupfen button:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; border-radius: 12px; }
+.ez-wz-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; }
+.ez-wz-umriss { min-height: 44px; border: 0; padding: 0 16px; border-radius: var(--rund-pille); background: transparent; color: var(--weiss); font: 500 .875rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--silbergrau); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-wz-umriss:active { transform: scale(.97); transition-duration: 0s; }
+.ez-wz-umriss:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+.ez-wz-hinweis { margin: 0 2px; font: 400 .8125rem/1.4 var(--font-sans); color: var(--silbergrau); }
+.ez-wz-karte .ez-wz-hinweis { margin: 0; color: var(--textgrau); }
+/* „Weiß ich noch nicht“ und „Mehr zu …“: leise Zeilen auf Schwarz, Haken bzw. Plus im Ring */
+.ez-wz-leise { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; border: 0; padding: 8px 14px 8px 16px; border-radius: 20px; background: transparent; color: var(--weiss); text-align: left; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 34%, transparent); cursor: pointer; transition: box-shadow 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-wz-leise:active { transform: scale(.98); transition-duration: 0s; }
+.ez-wz-leise b { display: block; font: 500 .9375rem/1.25 var(--font-sans); }
+.ez-wz-leise small { display: block; font: 400 .8125rem/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-wz-leise[aria-pressed="true"] { box-shadow: inset 0 0 0 1.8px var(--violett); }
+.ez-wz-leise .ez-wz-haken { box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+.ez-wz-leise[aria-pressed="true"] > .ez-wz-haken { background: var(--violett); color: var(--schwarz); }
+.ez-wz-plus { flex: none; margin-left: auto; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--silbergrau); font: 400 1.125rem/1 var(--font-sans); color: var(--weiss); }
+.ez-wz-leise:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+/* Aufteilung der Flügel: zwei Werte und ein Regler als Kapsel mit Knopf (G11) */
+.ez-wz-teile { display: grid; gap: 10px; }
+.ez-wz-teile__werte { display: flex; justify-content: space-between; gap: 10px; }
+.ez-wz-teile__werte button { display: grid; gap: 2px; min-height: 44px; border: 0; padding: 0; background: transparent; color: var(--schwarz); text-align: left; cursor: pointer; }
+.ez-wz-teile__werte button:last-child { text-align: right; }
+.ez-wz-teile__werte b { font: 300 1.5rem/1.05 var(--font-sans); letter-spacing: -.02em; }
+.ez-wz-teile__werte small { font: 400 .75rem/1.2 var(--font-sans); letter-spacing: .02em; color: var(--textgrau); }
+.ez-wz-regler { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin: 0; background: transparent; cursor: pointer; }
+.ez-wz-regler::-webkit-slider-runnable-track { height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--schwarz) 0 var(--p, 50%), color-mix(in srgb, var(--silbergrau) 40%, var(--weiss)) var(--p, 50%) 100%); }
+.ez-wz-regler::-moz-range-track { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--silbergrau) 40%, var(--weiss)); }
+.ez-wz-regler::-moz-range-progress { height: 10px; border-radius: 999px; background: var(--schwarz); }
+.ez-wz-regler::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -9px; border-radius: 50%; background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 2px 6px rgba(7,9,10,.3), inset 0 0 0 8px var(--weiss), inset 0 0 0 14px var(--violett); }
+.ez-wz-regler::-moz-range-thumb { width: 28px; height: 28px; border: 0; border-radius: 50%; background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 2px 6px rgba(7,9,10,.3), inset 0 0 0 8px var(--weiss), inset 0 0 0 14px var(--violett); }
+.ez-wz-regler:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; border-radius: 12px; }
+/* Kapitel-Bogen: sieben Kapitel als Reihen, das laufende mit Punkt, fertige mit Haken */
+.ez-wz-kapitel { display: grid; gap: 6px; margin: 4px 0 12px; }
+.ez-wz-kapitel button { display: flex; align-items: center; gap: 12px; min-height: 52px; border: 0; padding: 0 14px; border-radius: 18px; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); color: var(--weiss); font: 500 .9375rem/1.2 var(--font-sans); text-align: left; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.10); }
+.ez-wz-kapitel button small { margin-left: auto; font: 400 .8125rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-wz-kapitel button[aria-current="step"] { box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1.8px var(--violett); }
+.ez-wz-kapitel button[aria-current="step"]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); }
+.ez-wz-kapitel button:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+.ez-wz-kommt { animation: ez-folgt 220ms var(--dna-druck) both; }
+@media (prefers-reduced-motion: reduce) { .ez-wz-kachel, .ez-wz-kachel::before, .ez-wz-umschalter button, .ez-wz-haken, .ez-wz-haken svg, .ez-wz-stepper button, .ez-wz-schalter, .ez-wz-schalter::before, .ez-wz-tupfen button, .ez-wz-umriss, .ez-wz-leise, .ez-wz__bild.blendet.ist-an { transition: none !important; } .ez-wz-kommt { animation: none; } }
+@media (max-width: 374px) { .ez-wz-kacheln[data-spalten="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ez-wz-tupfen { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* Leuchten der Lage ohne Weichzeichner (Prüfung B5, G14 „Leuchten ohne Weichzeichner“): dieselben Verläufe mit längerem Auslauf statt
+   filter: blur; Lage, Größe und Bewegung wie in der App, die App selbst bleibt unverändert */
+.ez-wz-dna .lg-glut { filter: none; background: radial-gradient(52% 54% at 50% 50%, var(--violett) 0, var(--violett) 50%, color-mix(in srgb, var(--violett) 55%, var(--indigo)) 62%, var(--indigo) 72%, color-mix(in srgb, var(--indigo) 45%, transparent) 84%, transparent 96%); }
+.ez-wz-dna .lg-fenster::before { filter: none; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 18%, color-mix(in srgb, var(--koralle) 55%, transparent) 46%, color-mix(in srgb, var(--koralle) 18%, transparent) 74%, transparent); }
+.ez-wz-dna .lg-kontur::before { filter: none; background: radial-gradient(closest-side, var(--violett) 0, var(--violett) 34%, color-mix(in srgb, var(--violett) 50%, var(--indigo)) 56%, color-mix(in srgb, var(--indigo) 60%, transparent) 78%, transparent); }
+.ez-wz-dna .lp-glut { filter: none; background: radial-gradient(58% 58% at 45% 50%, var(--violett) 0, var(--violett) 36%, color-mix(in srgb, var(--violett) 55%, var(--indigo)) 52%, var(--indigo) 64%, color-mix(in srgb, var(--indigo) 45%, transparent) 80%, transparent 94%); }
+.ez-wz-dna .lp-sonne { filter: none; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 50%, color-mix(in srgb, var(--koralle) 55%, transparent) 72%, color-mix(in srgb, var(--koralle) 18%, transparent) 88%, transparent); }

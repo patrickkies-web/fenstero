@@ -774,7 +774,7 @@
      die vier Maße stehen wie dort als Linien am Modell: Öffnung Koralle gestrichelt links und oben außen, Element Violett innen; der Wert
      hängt an seiner Linie (G9). Darunter je Wert eine Anthrazit-Kachel mit ihrem Hinweis („kleinstes von 3“, „sichtbar mit Rahmen“), dann
      „Maße gegen Foto“ (nur mit KI-Befund), „Aus deinen Fotos“ und „Falls zur Hand“ auf Weiß. Die Lagen erzeugt werkzeuge/render-ergebnis.mjs. */
-  var ERG_LAGE = {"fenster":{"hm":[716.7,331.5,716.7,1358.4],"wm":[759.9,276.3,1566.0,334.5],"eh":[1399.8,414.3,1399.8,1442.4],"ew":[836.4,1157.4,1586.1,1269.0]}};
+  var ERG_LAGE = {"fenster":{"hm":[716.7,331.5,716.7,1358.4],"wm":[759.9,276.3,1566.0,334.5],"eh":[1399.8,414.3,1399.8,1442.4],"ew":[836.4,1157.4,1586.1,1269.0]},"hst":{"hm":[740.7,471.6,740.7,1200.3],"wm":[784.2,417.9,1813.5,504.6],"eh":[1560.0,552.0,1560.0,1314.6],"ew":[816.6,1060.2,1810.8,1199.4]},"psk":{"hm":[722.1,329.7,722.1,1354.8],"wm":[764.7,274.2,1620.0,336.3],"eh":[1424.7,394.5,1424.7,1453.2],"ew":[813.0,1155.0,1628.1,1275.6]}};
   var ERG_BILD = { w: 2148, h: 1800 }, ergBuehne = $('erg-buehne'), ergBild = $('erg-bild'), ergLinien = $('erg-linien'), ergBreite = 0, massOk = false;
   var artNameVon = function () { return tuer() ? 'Tür' : art === 'fest' ? 'Festverglasung' : 'Fenster'; };
   var elNameVon = function () { return tuer() ? 'Türelement' : art === 'fest' ? 'Element' : 'Fensterelement'; };
@@ -783,8 +783,10 @@
   function ergKamera(W, S, L) {
     var xs = [], ys = []; Object.keys(L).forEach(function (k) { xs.push(L[k][0], L[k][2]); ys.push(L[k][1], L[k][3]); });
     var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), bw = x1 - x0, bh = y1 - y0;
-    var k = Math.min(0.74 * S / bh, 0.66 * W / bw), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    /* links neben der Höhe der Öffnung braucht ihr Wert etwa 100 px: breite Elemente werden dafür etwas kleiner und rücken nach rechts */
+    var k = Math.min(0.74 * S / bh, 0.66 * W / bw, (W - 116) / bw), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     var tx = W * 0.54 - cx * k, ty = S * 0.53 - cy * k, iw = ERG_BILD.w * k, ih = ERG_BILD.h * k;
+    if (x0 * k + tx < 104) tx = 104 - x0 * k;
     tx = iw >= W ? Math.min(0, Math.max(W - iw, tx)) : (W - iw) / 2; ty = ih >= S ? Math.min(0, Math.max(S - ih, ty)) : (S - ih) / 2;
     return { k: k, tx: tx, ty: ty };
   }
@@ -795,18 +797,35 @@
     var b = ergBild.style; b.left = K.tx.toFixed(1) + 'px'; b.top = K.ty.toFixed(1) + 'px'; b.width = (ERG_BILD.w * K.k).toFixed(1) + 'px'; b.height = (ERG_BILD.h * K.k).toFixed(1) + 'px';
     ergLinien.setAttribute('viewBox', '0 0 ' + W + ' ' + S); ergLinien.style.width = W + 'px'; ergLinien.style.height = S + 'px';
     var P = function (x, y) { return [x * K.k + K.tx, y * K.k + K.ty]; }, chip = ergBuehne.querySelector('.ez-glaschip'), cR = { x: chip.offsetLeft - 4, y: chip.offsetTop - 4, w: chip.offsetWidth + 8, h: chip.offsetHeight + 8 };
+    /* Werte ohne Überdeckung: je Wert Lagen der Reihe nach, die erste freie gilt (frei von Chip, anderen Werten und Linienenden) */
+    var belegt = [cR], enden = [];
+    var lagen = {};
     ['hm', 'wm', 'eh', 'ew'].forEach(function (k) {
       var l = L[k], A = P(l[0], l[1]), B = P(l[2], l[3]), senk = Math.abs(B[1] - A[1]) > Math.abs(B[0] - A[0]), g = ergLinien.querySelector('g[data-k="' + k + '"]'), ln = g.querySelectorAll('line');
       linieSetzen(ln[0], A, B); linieSetzen(ln[1], A, B);
       var kap = function (q) { return senk ? [[q[0] - 6, q[1]], [q[0] + 6, q[1]]] : [[q[0], q[1] - 6], [q[0], q[1] + 6]]; }, ka = kap(A), kb = kap(B);
       linieSetzen(ln[2], ka[0], ka[1]); linieSetzen(ln[3], ka[0], ka[1]); linieSetzen(ln[4], kb[0], kb[1]); linieSetzen(ln[5], kb[0], kb[1]);
+      enden.push({ x: A[0] - 8, y: A[1] - 8, w: 16, h: 16 }, { x: B[0] - 8, y: B[1] - 8, w: 16, h: 16 });
+      lagen[k] = { A: A, B: B };
+    });
+    ['hm', 'wm', 'eh', 'ew'].forEach(function (k) {
       var el = ergBuehne.querySelector('.ez-erg__wert[data-k="' + k + '"]'); el.querySelector('b').textContent = tausend(v[k]);
-      var w = el.offsetWidth, h = el.offsetHeight, mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, x, y;
-      if (k === 'hm') { x = A[0] - 10 - w; y = my - h / 2; if (x < 8) x = A[0] + 10; }
-      else if (k === 'eh') { x = A[0] + 10; y = my - h / 2; if (x + w > W - 8) x = A[0] - 10 - w; }
-      else if (k === 'wm') { x = mx - w / 2; y = A[1] - 10 - h; if (y < 8 || (y < cR.y + cR.h && x < cR.x + cR.w)) y = A[1] + 10; }
-      else { x = mx - w / 2; y = A[1] + 10; if (y + h > S - 8) y = A[1] - 10 - h; }
-      el.style.left = Math.round(Math.max(8, Math.min(W - 8 - w, x))) + 'px'; el.style.top = Math.round(Math.max(8, Math.min(S - 8 - h, y))) + 'px';
+      var A = lagen[k].A, B = lagen[k].B, w = el.offsetWidth, h = el.offsetHeight, mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, oben = Math.min(A[1], B[1]), unten = Math.max(A[1], B[1]);
+      var kand = k === 'hm' ? [[A[0] - 10 - w, my - h / 2], [A[0] - 10 - w, oben + (unten - oben) * 0.3 - h / 2], [A[0] + 10, my - h / 2], [A[0] + 10, oben + (unten - oben) * 0.3 - h / 2]]
+        : k === 'eh' ? [[A[0] + 10, my - h / 2], [A[0] + 10, oben + (unten - oben) * 0.3 - h / 2], [A[0] - 10 - w, my - h / 2], [A[0] - 10 - w, oben + (unten - oben) * 0.3 - h / 2]]
+        : k === 'wm' ? [[mx - w / 2, oben - 10 - h], [mx - w / 2, unten + 10], [mx + 10, unten + 10]]
+        : [[mx - w / 2, unten + 10], [mx - w / 2, oben - 10 - h], [mx - w - 10, unten + 10], [mx + 10, oben - 10 - h]];
+      var wahl = null;
+      kand.forEach(function (c) {
+        if (wahl) return;
+        var r = { x: c[0], y: c[1], w: w, h: h };
+        if (r.x < 8 || r.y < 8 || r.x + w > W - 8 || r.y + h > S - 8) return;
+        if (belegt.concat(enden).some(function (o) { return schneidet(r, o); })) return;
+        wahl = r;
+      });
+      if (!wahl) wahl = { x: Math.max(8, Math.min(W - 8 - w, kand[0][0])), y: Math.max(8, Math.min(S - 8 - h, kand[0][1])), w: w, h: h };
+      belegt.push({ x: wahl.x - 4, y: wahl.y - 4, w: w + 8, h: h + 8 });
+      el.style.left = Math.round(wahl.x) + 'px'; el.style.top = Math.round(wahl.y) + 'px';
     });
     $('erg-bildtext').textContent = 'Modell mit den vier Maßen: Maueröffnung ' + tausend(v.moW) + ' mal ' + tausend(v.moH) + ' Millimeter, ' + elNameVon() + ' ' + tausend(v.elW) + ' mal ' + tausend(v.elH) + ' Millimeter.';
   }
