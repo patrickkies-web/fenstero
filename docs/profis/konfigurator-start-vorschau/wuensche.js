@@ -186,7 +186,7 @@
     var q; try { q = B.frage(); } catch (e) { return; }
     if (!q || !q.id || q.id === 'lage' || q.id === 'tiefe') return;
     var neu = !LQ || LQ.id !== q.id; LQ = q;
-    /* Die Wahl geht mit ins Ergebnis (dort lädt ein eigenes Bühnenfenster) */
+    /* Stand der Wahl merken: ändern sich danach die Maße, setzt nachsetzen() das Fenster mit dieser Wahl neu */
     try { F.appWin = B.stand().win; } catch (e) { /* weiter */ }
     if (neu) { frageZeigen(richtungNext); if (richtungNext) { var app = d.getElementById('app'); if (app) app.scrollTop = 0; window.scrollTo(0, 0); } folgeSchritt(richtungNext); } else antwortSetzen(q);
     richtungNext = 0; bandSetzen();

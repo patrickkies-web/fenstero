@@ -93,11 +93,18 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   ein Tipp aufs Bild öffnet eine Großansicht. Vorschlag für seine DNA, Abschnitt 9: „Die Bühne zeigt die Sache so groß, dass Anfang und
   Ende ohne Brille erkennbar sind; Vergrößern ist immer möglich.“
 - Echte 3-D-Bühne statt Standbilder (Korrektur des Inhabers, 27.10.2026, Wünsche): In der Vorschau fehlten Detailtiefe, Bewegung,
-  das Blatt der Einstellungen und Wahlen wie „Klinke ja oder nein“, weil sie Standbilder aus der App zeigte. Regel: Wo die App ein
-  lebendes Modell hat, zeigt auch die Vorschau die App selbst (app/buehne.html lädt app.js, buehne.js und modell.js unverändert,
-  sichtbar ist nur die Bühne; Fragen und Stand liest die Folie live, jeder Tipp geht an die App). Standbilder nur als Platzhalter,
-  bis die Bühne geladen ist, und nur, wo die App selbst kein lebendes Modell zeigt. Eine Vereinfachung der Vorschau gegenüber der App
-  wird vor dem Zeigen ausdrücklich genannt, nicht nur unter „Offen“.
+  das Blatt der Einstellungen und Wahlen wie „Klinke ja oder nein“, weil sie Standbilder aus der App zeigte. Regel: In den Wünschen
+  zeigt die Vorschau die App selbst (app/buehne.html lädt app.js, buehne.js und modell.js unverändert, sichtbar ist nur die Bühne;
+  Fragen und Stand liest die Folie live, jeder Tipp geht an die App). Standbilder dort nur als Platzhalter, bis die Bühne geladen ist.
+  Eine Vereinfachung der Vorschau gegenüber der App wird vor dem Zeigen ausdrücklich genannt, nicht nur unter „Offen“.
+- Beim Messen kein 3-D, in den Wünschen das ausgearbeitete 3-D (Klarstellung des Inhabers, 27.10.2026, nach dem Ergebnis mit der
+  App-Bühne): Die Kunden sollen „am Anfang“, wo sie ihre Maße eingeben, keine 3-D-Ansicht haben, „weil das einfach nur Unruhe
+  stiftet“, sondern eine vorgegebene Ansicht auf das jeweilige Element; „nachher“ in den Wünschen „auf jeden Fall“ die sehr stark
+  herausgearbeitete 3-D-Fassung. Regel: Messen, Ränder und Ergebnis (Maße eingeben und bestätigen) zeigen eine feste Ansicht je
+  Element, ohne Drehen; Vergrößern bleibt. Das 3-D-Modell der App mit Detailtiefe, Bewegung und jeder Wahl gehört in die Wünsche und
+  wird bei der Übernahme in die App dort nie durch Standbilder ersetzt. Die Vorschau muss es nicht über die Wünsche hinaus vorführen;
+  es geht um die App. Vorschlag für seine DNA, Abschnitt 9: „Beim Messen eine feste Ansicht je Element, in den Wünschen das
+  lebende Modell.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

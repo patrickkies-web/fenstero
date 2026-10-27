@@ -647,8 +647,6 @@ html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
 .ez-erg__rundknopf:active:not(:disabled) { transform: scale(.94); transition-duration: 0s; }
 .ez-erg__rundknopf:disabled { color: var(--silbergrau); opacity: .55; cursor: default; }
 .ez-erg__rundknopf:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
-.ez-erg__drehen { left: 12px; bottom: 16px; }
-.ez-buehne--erg { cursor: grab; }
 /* „Falls zur Hand“ geschlossen als Anthrazit-Zeile (G14), erst offen weiß: kein weißer Block direkt über der Pille */
 .ez-erg__hand:not([open]) { background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
 .ez-erg__hand:not([open]) .ez-erg__hand-titel { color: var(--weiss); }
@@ -722,10 +720,3 @@ html { scroll-padding-bottom: 120px; }
 .ez-karte--passt.kommt { animation-duration: 180ms; }
 /* Ergebnis: die Bühne wächst auf 320 px, das Modell steht zwischen Chip und Knopfleiste in derselben Größe wie vorher (Bildfläche vor Dichte) */
 .ez-buehne--erg { height: 320px; }
-/* Ergebnis mit der echten Bühne der App: das Fenster füllt die Bühne; Bild, Linien, Werte und Knöpfe der Vorschau treten zurück,
-   die App bringt ihre eigenen (Drehen, Zoom, Haus, Maßlinien) */
-.ez-erg__app { position: absolute; inset: 0; z-index: 2; display: block; width: 100%; height: 100%; border: 0; background: transparent; opacity: 0; transition: opacity 220ms var(--dna-druck); }
-.ez-buehne--erg.ist-live .ez-erg__app { opacity: 1; }
-.ez-buehne--erg.ist-live #erg-bild, .ez-buehne--erg.ist-live .ez-erg__linien, .ez-buehne--erg.ist-live .ez-erg__wert, .ez-buehne--erg.ist-live .ez-erg__knoepfe, .ez-buehne--erg.ist-live .ez-erg__drehen { visibility: hidden; transition: visibility 0s 240ms; }
-.ez-buehne--erg .ez-glaschip { z-index: 4; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .ez-erg__app { transition: none; } }

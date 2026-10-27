@@ -95,7 +95,7 @@ Die Tiefe-Folie ist die der App (fix); Violett liegt dort im Kapitelraster und i
 |---|---|---|---|
 | Ränder auf der Maß-Folie, „Hier auch … gemessen?“ mit cm, Rückfrage bei viermal gleich | Verständnis, Datenqualität | behalten / ändern (umgesetzt) | bleibt |
 | „Passt.“ mit allen sechs Maßen am Modell, Karte mit Kapselreihen | Blickführung, Vertrauen | ändern (Werte an ihre Linie, umgesetzt) | bleibt |
-| Ergebnis: Modell mit vier Maßen an den Kanten, Drehen/Zoom/Zahnrad, Öffnung als Leuchtkachel | Verständnis, Funktionen der App | ändern (umgesetzt) | bleibt |
+| Ergebnis: feste Ansicht je Element mit vier Maßen an den Kanten, Zoom/Zahnrad, Öffnung als Leuchtkachel | Verständnis, Ruhe | ändern (umgesetzt); Drehen auf Wort des Inhabers wieder heraus | bleibt |
 | Wünsche: Lage und Tiefe der App, Fragen mit der echten 3-D-Bühne der App | Marke, Verständnis, Funktionen der App | Y gewinnt 4:2 / 5:1 / 5:1, ändern (umgesetzt, siehe Nachtrag) | bleibt |
 | Gespeichert: „Speichern kostet nichts“, Karte in drei Ebenen | Vertrauen | behalten / ändern (umgesetzt) | bleibt |
 | Fürs Angebot 1–3: „Überspringen“, Förderung nur mit Bedingung, Boden im Licht | Vertrauen, Abbruch vermeiden | ändern (umgesetzt) | bleibt |
@@ -108,8 +108,8 @@ genau wie die Mitte? Das ist selten. Bitte einmal nachmessen.“, „bis zu 15 %
 
 - Ränder und „Passt.“ der fünf übrigen Elemente sind nicht im Bild nachgemessen (nur das Fenster); Rand-Unterzeilen für Türen und die
   Brüstung bei Türen wie in der App.
-- Wünsche und Ergebnis laufen seit dem Nachtrag mit der App selbst; offen sind dort nur „Notiz“, „Alle Farben“ und das Eintippen einer
-  Flügelbreite (die Vorschau sagt, was die App öffnet).
+- Die Wünsche laufen seit dem Nachtrag mit der App selbst; offen sind dort nur „Notiz“, „Alle Farben“ und das Eintippen einer
+  Flügelbreite (die Vorschau sagt, was die App öffnet; der Inhaber braucht sie in der Vorschau nicht).
 - Kasse ist ein Testkauf; live gilt § 312j BGB („Zahlungspflichtig bestellen · 7,99 €“). blatt.js (PDF) unberührt.
 - Budget ist wie in der App vorausgewählt („Weiß ich noch nicht“); Gremium K wünschte keine Vorauswahl – Entscheidung des Inhabers.
 - Frühere Commits dieses Zweigs (z. B. f70002e) tragen noch eine Zeile mit Modellnamen; die Geschichte wird nicht umgeschrieben.
@@ -125,8 +125,16 @@ die Vorschau hatte Standbilder aus der App gezeigt. Regel dazu im Begleit-Skill,
 **Was jetzt läuft.** app/buehne.html lädt die Dateien der App unverändert (app.js, buehne.js, modell.js, ral.js, gemeinsam.js, einladung.js,
 app.css) und zeigt nur ihre Bühne; ez-vorab.js lenkt /api/ und Bildpfade um, ez-bruecke.js liest Frage, Optionen und Stand und tippt in der
 App, ez-buehne.css färbt die Bühne nach der DNA. Die Folie „Wünsche“ zeichnet Frage und Antworten aus dem Stand der App, jeder Tipp geht an
-die App (Planungstiefe, „Mehr zu …“, Folgefragen bei drei Flügeln, Regler, Zähler, Schalter, Notizfeld inklusive). Das Ergebnis zeigt die
-Ansicht „result“ der App mit den Wünschen von vorher. Lädt das Bühnenfenster nicht, stehen die Bilder je Frage und Option da.
+die App (Planungstiefe, „Mehr zu …“, Folgefragen bei drei Flügeln, Regler, Zähler, Schalter, Notizfeld inklusive). Lädt das
+Bühnenfenster nicht, stehen die Bilder je Frage und Option da.
+
+**Klarstellung des Inhabers (danach):** „Nein ich brauch das jetzt nicht für die Vorschau. Es geht mir einfach nur darum, dass die Kunden
+natürlich am Anfang nicht eine 3-D Ansicht haben, wo die ihre Maße eingeben sollen, weil das einfach nur Unruhe stiftet, sondern es war
+eine vorgegebene Ansicht auf die jeweiligen Elemente geben aber es geht mir darum, dass sie dann nachher in der [den Wünschen] auf jeden
+Fall sehr stark herausgearbeitete Fassung haben.“ Folge: Das Ergebnis, das kurz die Ansicht „result“ der App zum Drehen zeigte, steht
+wieder als feste Ansicht je Element mit den vier Maßen an den Kanten (ohne „Zum Drehen ziehen“; −, + und Zahnrad bleiben). Messen und
+Ränder hatten schon feste Ansichten. Die Wünsche behalten die Bühne der App. Regel im Begleit-Skill, Abschnitt 4 („Beim Messen kein
+3-D, in den Wünschen das ausgearbeitete 3-D“).
 
 ### Gremium Wünsche (eine Runde, blind; X = App heute, Y = Vorschlag)
 
@@ -197,7 +205,7 @@ Doppelte Ersatzbilder zusammenlegen und neu rendern (Frontend 4) nicht gemacht: 
 | Was soll der Fensterbauer übernehmen? | 96,9 | 0,1 | 0,0 | 0,9 | 2,1 | 3,1 |
 
 Bilder: docs/profis/bilder/2026-10-27-konfigurator-wuensche-live-tel.jpg (acht Fragen), -live-desk.jpg, -klein-tel.jpg (375 × 667),
--zustaende-tel.jpg (Ergebnis live, „Weiß ich noch nicht“ gewählt, Kapitel-Bogen).
+-zustaende-tel.jpg (Ergebnis mit fester Ansicht, „Weiß ich noch nicht“ gewählt, Kapitel-Bogen).
 
 ### Änderungstabelle Wünsche
 
@@ -214,7 +222,7 @@ Neue Wortlaute zur Freigabe: „Schritt 6 · Wünsche“ (Chip ohne Endzahl), �
 
 ### Offen (Wünsche)
 
-- Das Schwingen des Modells läuft endlos (App); anhalten nach einem Durchlauf nur auf das Wort des Inhabers.
+- Das Schwingen des Modells in den Wünschen läuft endlos (App); der Inhaber braucht dazu in der Vorschau nichts.
 - Etikett mit Anker am markierten Flügel: Vorschlag für buehne.js (App), nicht in der Vorschau.
 - `<em>` heißt in den Wünschen „laut“ (gefragtes Wort weiß), in Messen und Ergebnis „leise“ (zweite Stimme grau, „Höhe <em>links.</em>“);
   einmal entscheiden.

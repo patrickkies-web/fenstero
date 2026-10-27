@@ -83,20 +83,14 @@
   }
   function block(n) { var p = d.querySelector('.qpanel'); return p ? p.children[n] : null; }
   function ersteFrage() { var c = qCurrent(), e = c.list.find(function (x) { return x.id !== 'lage' && x.id !== 'tiefe'; }); return e ? e.id : null; }
-  var hoerer = [], t = 0, beschriftung = null;
-  function beschriften() {
-    if (!beschriftung) return;
-    Object.keys(beschriftung).forEach(function (k) { var lab = d.querySelector('#w3d .w3d-dim[data-dim="' + k + '"] .w3d-dim-lab'); if (lab && lab.textContent !== beschriftung[k]) lab.textContent = beschriftung[k]; });
-  }
-  function melden() { beschriften(); clearTimeout(t); t = setTimeout(function () { hoerer.forEach(function (f) { try { f(); } catch (e) { /* weiter */ } }); }, 40); }
+  var hoerer = [], t = 0;
+  function melden() { clearTimeout(t); t = setTimeout(function () { hoerer.forEach(function (f) { try { f(); } catch (e) { /* weiter */ } }); }, 40); }
   window.ezBuehne = {
     /* Fenster aus der Vorschau: Art, Lage, Maße; dann die Frage (Standard: die erste nach Lage und Tiefe) */
     setze: function (o) {
       var w = o.win ? JSON.parse(JSON.stringify(o.win)) : baseWin(); if (!o.win) artSetzen(w, o.art || 'fenster');
       w.name = o.name || w.name || ''; w.etage = o.etage || w.etage || 'eg'; if (o.bru != null) w.bru = o.bru; w.mo = Object.assign(w.mo || {}, o.mo || {}); w.el = Object.assign(w.el || {}, o.el || {});
       S.win = w; S.editIdx = -1; S.proj.tiefe = o.tiefe || S.proj.tiefe || 'normal'; S.openSash = -1; S.selSash = 0;
-      /* Ergebnis: die Ansicht „result“ der App mit ihren Maßlinien */
-      if (o.screen === 'ergebnis') { go('ergebnis'); return; }
       S.q = o.q || null; go('frage');
       if (!o.q) { var e = ersteFrage(); if (e) { S.q = e; render(true); } }
     },
@@ -122,8 +116,6 @@
     eingabe: function (sel, wert) { var el = d.querySelector(sel); if (!el) return false; el.value = wert; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); return true; },
     gloss: function (k) { var g = (typeof GLOSS !== 'undefined' && GLOSS[k]) || null; return g ? { t: g.t, x: g.x, tipp: g.tipp, s: g.s } : null; },
     beiAenderung: function (f) { hoerer.push(f); },
-    /* Vorschlag der Vorschau: am Modell steht das Maß, das zählt (das kleinste von drei), wie in den Kacheln darunter */
-    beschrifte: function (o) { beschriftung = o || null; beschriften(); },
     /* Blätter der App (Haus: Fassade und Farbe, Farbkarte) hängen am body; offen heißt: das Bühnenfenster braucht den ganzen Schirm */
     blattOffen: function () { return !!d.querySelector('body > .fb'); },
     stand: function () { return { screen: S.screen, q: S.q, tiefe: S.proj.tiefe, win: JSON.parse(JSON.stringify(S.win)) }; }
