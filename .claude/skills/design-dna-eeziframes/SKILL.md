@@ -58,6 +58,56 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
 - Kürzere Entscheidungsfindung (Korrektur des Inhabers, 26.10.2026): Gremium eine Runde, danach nur die Muss-Punkte und Vetos umsetzen;
   Detail-Profis und Vorlagen-Abgleich entfallen, sofern er sie nicht nennt. Ihre Befunde bleiben als Kann-Liste im Protokoll. Die Vorlage
   beim Inhaber: Vorschau, drei Sätze je Gruppe, Muss-Liste, fertig.
+- Jede Folie für sich (Korrektur des Inhabers, 26.10.2026, Schritt 1 „Was planst du?“): Eine Folie des Konfigurators wird nicht von
+  anderen Folien oder von der Musterseite „Konfigurator in Violett“ abgeschaut, auch nicht als „Musterfolie“ oder im Familientest.
+  Quellen sind allein die, die er im Auftrag nennt: die DNA (Gene, Formensprache, Bausteine, Palette, App-Rahmen), die Startseite vom
+  26.10.2026, seine Vorlagen unter docs/profis/vorlagen/, die Seite „Konfigurator von Muster Fensterbau“
+  (https://claude.ai/artifact/AeVzh8NgNvxEqcDTwdxhiM) und der Bestand der Folie selbst. Ideen kommen aus der Ideenmatrix zu diesen
+  Quellen, nicht aus dem Nachbau einer bestehenden Folie. Vorschlag für seine DNA: in Abschnitt 9 den Satz „Vorbild sind die Folien in
+  ‚Konfigurator in Violett‘“ durch „Jede Folie entsteht aus den Genen und Bausteinen für ihren Inhalt“ ersetzen.
+- Violett nur als Akzent (Korrektur des Inhabers, 26.10.2026, Schritt 1): Proben mit violettem Lichtteich über der Bühne, voll violetten
+  Kacheln und violettem Saum waren ihm „viel zu viel Violett“. Violett bleibt Punkt, Ring, Licht unter dem Objekt und gewählte Taste;
+  nie eine Fläche, nie die Bühne. Hält eine Folie ihn nicht, liegt es nicht an zu wenig Violett.
+- Kacheln nie weiß (Korrektur des Inhabers, 26.10.2026, Schritt 1): Weiße Auswahl-Kacheln auf Schwarz „sehen kacke aus“. Auswahl steht
+  auf Anthrazit-Kacheln (G14, gewählt mit violettem Ring, Punkt und Licht); Weiß gehört in eine Karte für Eingaben (die Stelle, Felder),
+  in Text und in die eine Pille, so wie der App-Rahmen (DNA Abschnitt 9) es sagt.
+- Schritt 1 „Was planst du?“ angenommen (Inhaber, 26.10.2026: „Find ich gut“): Betonboden im Fensterlicht als Bühne, Etikett mit Anker am
+  Objekt, Anthrazit-Kacheln mit den Strichzeichnungen der App, die Stelle auf weißer Karte, eine Pille unten. Diese Folie ist die
+  Untergrenze für die weiteren Folien des Konfigurators (docs/profis/konfigurator-start-vorschau/, Protokoll
+  docs/profis/2026-10-26-konfigurator-start.md). Weitere Folien folgen demselben Weg: Bestand, Quellen des Inhabers, Gremium eine Runde.
+- Noch nicht überarbeitete Folien sind keine Vorlage (Inhaber, 27.10.2026, beim Übergang zu Schritt 3): Die Folien des Konfigurators
+  werden nach und nach alle überarbeitet; die bisherigen sind deshalb ausdrücklich keine Gestaltungsvorlage, auch wenn sie nicht hässlich
+  sind. Aus ihnen kommen nur Bestand und Ablauf (Texte, Begriffe, Zustände, Prüfungen, Reihenfolge, Funktionen der App), nie Farbe, Form,
+  Anordnung oder Bewegung. Gestaltet wird allein nach seinen Skills: design-dna, dieser Begleit-Skill, profis, emil-design-eng.
+- Funktionen der App bleiben (Korrektur des Inhabers, 27.10.2026, Schritt 2 „Fotos“): Das Gremium hatte das Häkchen „Diesen Hinweis
+  nicht mehr anzeigen“ im Bogen „Mit Foto wird dein Aufmaß besser.“ für unnötig gehalten, die Vorschau ließ es weg; der Inhaber will es
+  „auf jeden Fall“. Regel: Was die App dem Kunden heute an Bedienung bietet (Häkchen, Entfernen, Neu aufnehmen, Rückwege, Hinweise),
+  bleibt in der neuen Folie erhalten und bekommt eine Form nach der DNA. Streichen nur mit seinem Ja, auch wenn das Gremium es empfiehlt.
+- Ein Modell, überall das der Wünsche (Korrektur des Inhabers, 27.10.2026, Schritt 3 „Messen“): Das 3-D-Modell in den Wünschen ist
+  „extrem hoch“ in der Qualität, beim Messen war es „deutlich schlechter“ (dunkles Raum-Licht, leere Öffnung; in den Vorschauen dazu das
+  CSS-Ersatzmodell, weil der Testbrowser ohne Grafikchip nicht in WebGL zeichnet). Regel: Jede Folie zeigt das Element mit demselben
+  Programm, denselben Materialien und demselben Licht wie die Wünsche (web/assets/buehne.js, WebGL, ohne `raum-licht`). Frei sind nur
+  Größe, Ausschnitt, Kamera und die Farbnuancen drumherum. Renderings für Vorschauen entstehen mit `?gl=voll` und den Chromium-Schaltern
+  `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`; ein Bild aus dem CSS-Modell ist kein Rendering.
+- Bildfläche vor Dichte (Korrektur des Inhabers, 27.10.2026, Schritt 3 „Messen“): Ein Bild „mickrig klein“, das man nicht vergrößern
+  kann, reicht für Erstnutzer und Ältere nicht, auch wenn es gut aussieht; Platz zwischen Bild und Karte gehört dem Bild. Regel: Wo ein
+  Kunde am Bild handeln muss (anlegen, messen, zuordnen), füllt die Sache die Bühne (Bühne von Rand zu Rand, Kamera auf das, worum es
+  gerade geht), die entscheidenden Stellen stehen vergrößert daneben (Lupe mit Marke), die Zahl verdeckt so wenig wie möglich, und
+  ein Tipp aufs Bild öffnet eine Großansicht. Vorschlag für seine DNA, Abschnitt 9: „Die Bühne zeigt die Sache so groß, dass Anfang und
+  Ende ohne Brille erkennbar sind; Vergrößern ist immer möglich.“
+- Echte 3-D-Bühne statt Standbilder (Korrektur des Inhabers, 27.10.2026, Wünsche): In der Vorschau fehlten Detailtiefe, Bewegung,
+  das Blatt der Einstellungen und Wahlen wie „Klinke ja oder nein“, weil sie Standbilder aus der App zeigte. Regel: In den Wünschen
+  zeigt die Vorschau die App selbst (app/buehne.html lädt app.js, buehne.js und modell.js unverändert, sichtbar ist nur die Bühne;
+  Fragen und Stand liest die Folie live, jeder Tipp geht an die App). Standbilder dort nur als Platzhalter, bis die Bühne geladen ist.
+  Eine Vereinfachung der Vorschau gegenüber der App wird vor dem Zeigen ausdrücklich genannt, nicht nur unter „Offen“.
+- Beim Messen kein 3-D, in den Wünschen das ausgearbeitete 3-D (Klarstellung des Inhabers, 27.10.2026, nach dem Ergebnis mit der
+  App-Bühne): Die Kunden sollen „am Anfang“, wo sie ihre Maße eingeben, keine 3-D-Ansicht haben, „weil das einfach nur Unruhe
+  stiftet“, sondern eine vorgegebene Ansicht auf das jeweilige Element; „nachher“ in den Wünschen „auf jeden Fall“ die sehr stark
+  herausgearbeitete 3-D-Fassung. Regel: Messen, Ränder und Ergebnis (Maße eingeben und bestätigen) zeigen eine feste Ansicht je
+  Element, ohne Drehen; Vergrößern bleibt. Das 3-D-Modell der App mit Detailtiefe, Bewegung und jeder Wahl gehört in die Wünsche und
+  wird bei der Übernahme in die App dort nie durch Standbilder ersetzt. Die Vorschau muss es nicht über die Wünsche hinaus vorführen;
+  es geht um die App. Vorschlag für seine DNA, Abschnitt 9: „Beim Messen eine feste Ansicht je Element, in den Wünschen das
+  lebende Modell.“
 - Vorlagen der Pakete (Korrektur des Inhabers, 26.10.2026, „Ich meine sicherlich nicht das! Das ist kacke.“ auf ein Bild des alten
   Dashboards): Eine „Vorlage für ein Paket“ ist die Landingpage, die der Betrieb unter seiner Domain bekommt, in der Design-DNA und als
   Schwester der Vorlagen für Essential und Plus. Das Dashboard und seine alte Gestaltung (#161616, Inter, farbiges Wort, Bilder unter

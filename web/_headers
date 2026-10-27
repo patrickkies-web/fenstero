@@ -41,3 +41,11 @@
 /vorschau/*
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: no-store
+
+# Vorschau des Konfigurators (scripts/konfigurator-vorschau-uebertragen.mjs): die Wünsche betten ihr Bühnenfenster (app/buehne.html, die
+# App aus /assets/) selbst ein; nur dieses Fenster darf vom eigenen Ursprung eingebettet werden, sonst gilt die CSP von oben
+/vorschau/konfigurator-5269b7215a/app/*
+  ! X-Frame-Options
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN

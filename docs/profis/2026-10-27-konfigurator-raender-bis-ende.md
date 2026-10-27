@@ -1,0 +1,234 @@
+# Konfigurator, Schritt 4 bis zum letzten Schritt (27.10.2026)
+
+Vorschau: docs/profis/konfigurator-start-vorschau/ (Artifact „Konfigurator“, dieselbe Adresse wie Schritt 1 bis 3). Bilder:
+docs/profis/bilder/2026-10-27-konfigurator-raender-bis-ende-tel.jpg und -desk.jpg. Urteile und Berichte:
+docs/profis/gremium/2026-10-27-konfigurator-raender-bis-ende-*.md.
+
+## Auftrag
+
+- Bereich: alle Folien nach „Messen“: Ränder mit „Passt.“, Ergebnis, Wünsche (Lage, Tiefe, Fragen), Gespeichert, Fürs Angebot 1 bis 3,
+  Aufmaßblatt, E-Mail, Kasse, Freigeschaltet, Teilen.
+- Wunsch des Inhabers: „Überarbeite so bitte den Konfigurator bis zum letzten Schritt weiter durch.“ Die Menüführung der bisherigen Folien
+  (Kopf, Bühne, Frage mit i und Notiz, weiße Karte, Fuß mit rundem Zurück und einer Pille) ist gesetzt; Anpassungen und Bewegung erlaubt.
+- Der Nutzer soll: die vier Ränder messen, sein Aufmaß lesen, Wünsche wählen und das Aufmaßblatt freischalten und teilen.
+- Erfolg: jede Folie in der Familie von Schritt 1 bis 3, eine Pille im unteren Drittel, keine Funktion der App verloren.
+
+## Wahl (drei Zeilen)
+
+1. Ränder auf derselben Folie wie die Maße (gleiche Bühne, Lupen, Tasten); „Passt.“ zeigt alle sechs Maße der Öffnung am Modell.
+2. Ergebnis als Modell mit den vier Maßen an den Kanten, darunter die Öffnung als Leuchtkachel; Wünsche mit den Lage- und Tiefe-Folien der
+   App (fix) und einem Fragenrahmen nach der DNA, je Option ein Modellbild aus der App.
+3. Abschluss mit dem Aufmaßblatt als durchgehendem Objekt im Fensterlicht (vorher gesperrt, nachher offen); Preis 7,99 € als Zahl.
+
+## Gremium (eine Runde, blind; X = Vorschlag, Y = App heute)
+
+| Gruppe | Gewinner | Hände | Vetos |
+|---|---|---|---|
+| Kunden | X in allen vier Bereichen | 2, 3, 3, 4, 4, 4 (Median 3,5) | Thomas: „15 % Zuschuss vom BAFA“ ohne Bedingung |
+| Gestalter | X | Median 3,5, keine Faust | Lena: Werte und Linien nicht an den Kanten („Passt.“, Ergebnis); Tobias: Drehen, Zoom, Zahnrad fehlten im Ergebnis |
+| Fensterbauer | X 6:0 in allen vier Bereichen; kaufen/zeigen 4/4 (Abschluss 3,5/4) | 3, 5, 4, 3, 4, 3 (Median 3,5) | Petra: 15 % ohne Bedingung |
+
+Keine Änderung mit Mehrheit „zurück“. Alle Vetos sind umgesetzt (Förderung nur mit „bis zu … nur unter Bedingungen“, Linien an den Kanten,
+Rundknöpfe −, +, Zahnrad und „Zum Drehen ziehen“ im Ergebnis). Muss-Punkte umgesetzt: „Überspringen“ auf allen drei Seiten „Fürs Angebot“,
+„Speichern kostet nichts, das Blatt kostet einmalig 7,99 €“ auf „Gespeichert“, Rückfrage „Alle vier genau wie die Mitte?“ bei viermal
+„Hier auch …“, Ränder mit zweiter Stimme („Höhe <em>links.</em>“), cm-Wert in „Hier auch … gemessen?“.
+
+## Detail-Profis und Vorlagen-Abgleich (umgesetzt)
+
+| Herkunft | Befund | Umsetzung |
+|---|---|---|
+| Zeichen 1 | Ergebnis: alle vier Linien neben den Kanten (Kamera beim Auslesen noch in Fahrt) | Lagen neu ausgelesen (Kamera steht), Öffnung an den im Bild abgelesenen Ecken, Element an den Rahmenkanten; alle sechs Elemente |
+| Zeichen 2, UX 3 | Rand 3: Feld über den Lupen | neue Lage unter den Lupen links vom Knopf; passt keine, die mit der kleinsten Überdeckung (Enden zählen sechsfach) |
+| Zeichen 3–5 | „Passt.“ und Ränder: Enden 2–31 px neben der Mauerkante | Fenster nachgemessen: Breiten 667 → 1.480, Höhen an der Mauer, Rand 1/2 oben auf der Kante, Höhe rechts an der Raumecke |
+| Zeichen 6, 7 | Schilder auf Linien, keine Kappen, Strichelung endet in einer Lücke | Schild nie auf einer Linie der anderen Richtung; Kappen 14 × 1,8 (blass 10 × 1,2); Strichelung passend zur Länge; Legenden 6/4 und 4/4 |
+| Zeichen 8–10 | Haken, Zustände, Kleinzeichen | Haken auf Violett schwarz, Ring 1,8; „Fürs Angebot 3“ zeigt das Blatt gesperrt; Einführungspreis mit Listenpunkt; Papier 1,2 mit 4/4; „WhatsApp“ ohne „›“ |
+| Bewegung 1–3 | Mitte doppelt belichtet, Bild springt zwischen Rändern, alter Haken im neuen Feld | Mitte blendet mit dem Bild; Kamerawechsel gleiten 200 ms nur über transform; Haken geht sofort |
+| Bewegung 4 | Tastatur löst Gleiten aus | zentral in zeigeFolie und in den Wünschen: nach Tastendruck kein Einfahren; Kassenfehler per Tastatur ohne weiches Scrollen |
+| Bewegung 5–10 | Welle bei jedem Tipp, Haken schnappt, Punkt eilt voraus, Druck uneinheitlich, Hinweis springt, Zustand läuft nach | Welle nur beim Hinkommen, sonst nur die neue Kapsel; Haken ab 12 Uhr nach dem Folienwechsel; Punkt nach dem Balken; überall 0,97; Hinweis mit @starting-style; Zustand vor dem Einfahren |
+| UX 1, 2 | Doppeltipp überspringt Folien, „Hier auch …“ speichert den nächsten Rand | Fuß und Kacheln 450 ms nach jedem Wechsel taub für Zeigerklicks (Tastatur geht durch); „Hier auch …“ im nächsten Rand 700 ms taub und blendet erst dann ein. Nachgestellt: kein Sprung mehr |
+| UX 4–10 | Beispielzahl im leeren Rand-Feld, AGB-Link im Haken, tote Kopfknöpfe, Rückwege, Vorlesen, „Mehr erfahren“, E-Mail doppelt | Ränder ohne Beispiel; AGB unter den Haken; Kopfknöpfe sagen, was die App tut; Ergebnis zurück zu „Gespeichert“, „Zurück: Fenster“, Freigeschaltet ohne Kopf-Zurück; Hinweis nur einmal vorgelesen, Zahlungsart mit Fehlerbezug, „Gespeichert: “ vor dem Namen; 44 px; E-Mail aus „Fürs Angebot 3“ vorbelegt |
+| Typografie 1–10 | Leerzeichen, Datum, Umbrüche, zwei Stimmen, Etiketten, Notiz 12 px, Platzhalter 2,5:1, Absätze in Karten, Kassenzahl | geschützte Leerzeichen bei Preis, Datum, Spannen; „Bis zum 3. November“; „Hier auch …“ unter 390 px einzeilig; Unterzeile 14/1,4 überall; Etiketten 12 px; Notiz 13 px; Platzhalter 3,6:1; Karten in drei Ebenen; Kasse 48/300 mit Einheit 14 |
+| Frontend 1 | Ergebnis: Modell kommt nach der Folie, Bild 3,7-mal zu groß, Faltschiebewand ohne Bild | Bild wird vor dem Wechsel geladen und dekodiert (höchstens 150 ms); Standard 1.320 × 1.106, die 2.148-px-Fassung erst beim Zoom; Faltschiebewand mit Bild und Lagen |
+| Frontend 2, 4–6 | „Passt.“ in vier Lagen, bleibende Ebenen, Höhe nach dem Drehen, Wünsche unscharf | „Passt.“ als ein Zustand (180 ms, nur die Kapselreihe füllt sich); `backwards` statt `both`; Höhe ohne alte Bühne; Wünsche-Bilder 1.170 px, erste Frage vorgeladen |
+| Material 1–4 | Fürs Angebot ohne Objekt, Werte ohne Licht, Preis schwach, Blatt flach | Boden aus Seite 3 unter Schleier, Kapseln und Stationen mit Lichtkante; Leuchtkachel im Ergebnis, Licht und Raster auf „Passt.“; Preis zuerst und mit Licht; Blatt mit hartem Schatten |
+| Typografie (Vorlagen) 1–5 | Heldenzahlen in sieben Stimmen, Luft | Öffnung 300/48 als Kachel über die volle Breite, Element 400/20; Preis 200/64; Titel → Text 12 px, Text → Karte 24–32 px |
+| eigene Prüfung | „Welche Form?“ und „Öffnet nach innen oder außen?“ ohne Antworten (Auslese aus der App leer) | Auslese repariert (werkzeuge/wunsch-render.mjs), je Form und Richtung ein Modellbild |
+| eigene Prüfung | Ergebnis: unterer Wert unter den Rundknöpfen | Bühne 320 px, Modell zwischen Chip und Knopfleiste in gleicher Größe |
+
+Nicht umgesetzt, mit Grund: Blickwechsel Rand 2 → 3 hart schneiden (Frontend 2) – der Bewegungs-Profi bestätigt die Überblendung „neu über
+alt“, die Mitte blendet jetzt mit; Stil- und Layoutlesungen bündeln und Bühnenmaße zwischenspeichern (Frontend 3) und Folien ab Schritt 6
+nachladen (Frontend 7) – Umbau der Vorschau-Seite ohne sichtbaren Gewinn, gehört in die Übernahme in die App (dynamischer Import je
+Schritt); Material 5 Schreibtisch-Licht nur auf das Wort des Inhabers.
+
+## Messwerte (390 × 844 und 1280 × 800)
+
+- Ablauf Start bis Teilen mit Fenster: keine Konsolenfehler, Layoutsprung 0 (mit echten Klicks und Tipps; mit Skriptklicks ohne Eingabe
+  zählt Chromium die Lagewechsel der Bühne nach 350 ms Halten mit).
+- Je Folie genau eine volle Pille, im unteren Drittel, 52 px hoch; keine Animation nach 2,6 s; kein `filter: blur` auf Flächen; 0 lazy-Bilder;
+  alle Ziele ab 44 px.
+- Doppeltipp (Touch, 150 ms): „Passt.“ → Ergebnis, „Gespeichert“ → Fürs Angebot 1; „Hier auch …“ zweimal in 450 ms speichert nur einen Rand.
+- Bildbytes: Ergebnis 17–27 KB (Zoom 32–56 KB), Wünsche 2,0 MB für 109 Bilder, je Frage 10–25 KB.
+
+| Bildschirm (Telefon) | Neutral % | Violett | Koralle | Indigo | Foto/Modell | Farbe gesamt |
+|---|---|---|---|---|---|---|
+| Passt. | 98,1 | 1,5 | 0,3 | 0,0 | 0,0 | 1,9 |
+| Ergebnis | 95,1 | 0,9 | 0,3 | 3,1 | 0,6 | 4,9 |
+| Lage | 95,8 | 2,2 | 0,1 | 1,6 | 0,3 | 4,2 |
+| Tiefe | 90,3 | 5,2 | 1,4 | 3,0 | 0,2 | 9,7 |
+| Gespeichert | 99,0 | 0,1 | 0,0 | 0,0 | 0,9 | 1,0 |
+| Fürs Angebot 1 | 98,6 | 0,5 | 0,0 | 0,8 | 0,0 | 1,4 |
+| Fürs Angebot 2 | 99,9 | 0,1 | 0,0 | 0,0 | 0,0 | 0,1 |
+| Fürs Angebot 3 | 100,0 | 0,0 | 0,0 | 0,0 | 0,0 | 0,0 |
+| Aufmaßblatt | 96,3 | 1,4 | 0,0 | 2,2 | 0,0 | 3,7 |
+| E-Mail | 99,9 | 0,0 | 0,0 | 0,0 | 0,0 | 0,1 |
+| Kasse | 100,0 | 0,0 | 0,0 | 0,0 | 0,0 | 0,0 |
+| Freigeschaltet | 98,9 | 0,3 | 0,1 | 0,7 | 0,0 | 1,1 |
+| Teilen | 99,8 | 0,2 | 0,1 | 0,0 | 0,0 | 0,2 |
+| **Mittel Start bis Teilen** | 97,7 | 0,9 | 0,1 | 0,8 | 0,5 | 2,3 |
+
+Die Tiefe-Folie ist die der App (fix); Violett liegt dort im Kapitelraster und im Licht. Abschlussfolien bleiben bewusst fast farblos
+(Violett nur als Akzent, Regel des Inhabers); der Vorlagen-Abgleich hatte 3–7 % je Bildschirm empfohlen.
+
+## Änderungstabelle für den Inhaber
+
+| Änderung | Zweck | Gremium | Stand |
+|---|---|---|---|
+| Ränder auf der Maß-Folie, „Hier auch … gemessen?“ mit cm, Rückfrage bei viermal gleich | Verständnis, Datenqualität | behalten / ändern (umgesetzt) | bleibt |
+| „Passt.“ mit allen sechs Maßen am Modell, Karte mit Kapselreihen | Blickführung, Vertrauen | ändern (Werte an ihre Linie, umgesetzt) | bleibt |
+| Ergebnis: feste Ansicht je Element mit vier Maßen an den Kanten, Zoom/Zahnrad, Öffnung als Leuchtkachel | Verständnis, Ruhe | ändern (umgesetzt); Drehen auf Wort des Inhabers wieder heraus | bleibt |
+| Wünsche: Lage und Tiefe der App, Fragen mit der echten 3-D-Bühne der App | Marke, Verständnis, Funktionen der App | Y gewinnt 4:2 / 5:1 / 5:1, ändern (umgesetzt, siehe Nachtrag) | bleibt |
+| Gespeichert: „Speichern kostet nichts“, Karte in drei Ebenen | Vertrauen | behalten / ändern (umgesetzt) | bleibt |
+| Fürs Angebot 1–3: „Überspringen“, Förderung nur mit Bedingung, Boden im Licht | Vertrauen, Abbruch vermeiden | ändern (umgesetzt) | bleibt |
+| Aufmaßblatt bis Teilen: Blatt als Objekt, Preis zuerst, AGB unter den Haken | Vertrauen, Recht | behalten / ändern (umgesetzt) | bleibt |
+
+Neue Wortlaute zur Freigabe: „Speichern kostet nichts. Das Aufmaßblatt als PDF kostet einmalig 7,99 €.“, „Überspringen“, „Alle vier
+genau wie die Mitte? Das ist selten. Bitte einmal nachmessen.“, „bis zu 15 % · Zuschuss vom BAFA, nur unter Bedingungen“.
+
+## Offen
+
+- Ränder und „Passt.“ der fünf übrigen Elemente sind nicht im Bild nachgemessen (nur das Fenster); Rand-Unterzeilen für Türen und die
+  Brüstung bei Türen wie in der App.
+- Die Wünsche laufen seit dem Nachtrag mit der App selbst; offen sind dort nur „Notiz“, „Alle Farben“ und das Eintippen einer
+  Flügelbreite (die Vorschau sagt, was die App öffnet; der Inhaber braucht sie in der Vorschau nicht).
+- Kasse ist ein Testkauf; live gilt § 312j BGB („Zahlungspflichtig bestellen · 7,99 €“). blatt.js (PDF) unberührt.
+- Budget ist wie in der App vorausgewählt („Weiß ich noch nicht“); Gremium K wünschte keine Vorauswahl – Entscheidung des Inhabers.
+- Frühere Commits dieses Zweigs (z. B. f70002e) tragen noch eine Zeile mit Modellnamen; die Geschichte wird nicht umgeschrieben.
+
+## Nachtrag: Wünsche und Ergebnis mit der echten 3-D-Bühne (27.10.2026, Nachmittag)
+
+**Anlass.** Der Inhaber: „Was aber in der Vorschau in dem Artefakt von dir nicht funktioniert hat, ist die Detailtiefe und die Bewegung und
+die Einstellung des Blattes beziehungsweise die Auswahl ob man Klinke hat oder nicht also die komplette 3-D Ansicht in der Detailtiefe wie
+ich sie eigentlich in den Konfigurator eingestellt habe. Hast du gegebenenfalls an der Qualität jetzt gespart beziehungsweise da durch deine
+Folien etwas über gespeichert was ich nicht haben wollte?“ Antwort: In web/ ist nichts überschrieben (geprüft, `git diff HEAD -- web/` leer);
+die Vorschau hatte Standbilder aus der App gezeigt. Regel dazu im Begleit-Skill, Abschnitt 4 („Echte 3-D-Bühne statt Standbilder“).
+
+**Was jetzt läuft.** app/buehne.html lädt die Dateien der App unverändert (app.js, buehne.js, modell.js, ral.js, gemeinsam.js, einladung.js,
+app.css) und zeigt nur ihre Bühne; ez-vorab.js lenkt /api/ und Bildpfade um, ez-bruecke.js liest Frage, Optionen und Stand und tippt in der
+App, ez-buehne.css färbt die Bühne nach der DNA. Die Folie „Wünsche“ zeichnet Frage und Antworten aus dem Stand der App, jeder Tipp geht an
+die App (Planungstiefe, „Mehr zu …“, Folgefragen bei drei Flügeln, Regler, Zähler, Schalter, Notizfeld inklusive). Lädt das
+Bühnenfenster nicht, stehen die Bilder je Frage und Option da.
+
+**Klarstellung des Inhabers (danach):** „Nein ich brauch das jetzt nicht für die Vorschau. Es geht mir einfach nur darum, dass die Kunden
+natürlich am Anfang nicht eine 3-D Ansicht haben, wo die ihre Maße eingeben sollen, weil das einfach nur Unruhe stiftet, sondern es war
+eine vorgegebene Ansicht auf die jeweiligen Elemente geben aber es geht mir darum, dass sie dann nachher in der [den Wünschen] auf jeden
+Fall sehr stark herausgearbeitete Fassung haben.“ Folge: Das Ergebnis, das kurz die Ansicht „result“ der App zum Drehen zeigte, steht
+wieder als feste Ansicht je Element mit den vier Maßen an den Kanten (ohne „Zum Drehen ziehen“; −, + und Zahnrad bleiben). Messen und
+Ränder hatten schon feste Ansichten. Die Wünsche behalten die Bühne der App. Regel im Begleit-Skill, Abschnitt 4 („Beim Messen kein
+3-D, in den Wünschen das ausgearbeitete 3-D“).
+
+### Gremium Wünsche (eine Runde, blind; X = App heute, Y = Vorschlag)
+
+| Gruppe | Gewinner | Hände | Vetos und Fäuste | Stand |
+|---|---|---|---|---|
+| Kunden | Y 4:2 | 3, 4, 3, 2, 3, Faust (Median 3) | Kai (Faust): „Schritt 6 von 6“ liest sich wie fertig; Thomas: Regler der App fehlen | Chip „Schritt 6 · Wünsche“ mit Anteilsring; Bühne ist die App mit allen Reglern |
+| Gestalter | Y 5:1 | 2, 3, 4, 4, 4, 4 (Median 4) | Tobias: Werkzeuge und Sprossen-Regler fehlen | Werkzeuge als Glasleiste rechts, Regler der App auf der Bühne |
+| Fensterbauer | Y 5:1; seriös, verständlich, zeigen, kaufen je 4 (zumuten 3) | 3, 4, 2, 3, 3, 3 (Median 3) | Deniz: „Weiß ich noch nicht“ verdeckt; Tobias: Sprossenfrage ohne Sprossen; Petra: drei Zähler | klebt über dem Fuß (ab 740 px Höhe); Live-Modell; ein Zähler je Ebene („Frage 1 von 11“) |
+
+Keine Änderung mit Mehrheit „zurück“. Muss-Punkte umgesetzt: Pille auf jeder Frage an derselben Stelle (774 px), Rechtslinks am Ende des
+Inhalts mit 48 px Abstand, „Fragen: Üblich ▾“ öffnet die drei Stufen der App, gefragtes Wort weiß und „innen“/„außen“ immer weiß, Notiz
+auf der Notizfrage weg, Materialtupfen bei der Fensterbank, markierter Flügel violett. Konsent ist nach der Regel des Inhabers (eine Runde)
+nicht erneut geprüft; die Hände steigen erst mit dem Realitäts-Check.
+
+Nicht umgesetzt, mit Grund: niedrigere Kacheln mit dem Zeichen links (G K4, F 1) – die Strichzeichnung über dem Namen ist die Form aus
+Schritt 1, die der Inhaber angenommen hat, und der Grund (verdeckter Ausweg) ist mit der klebenden Zeile behoben; zweite Stimme immer am
+Satzende („Welche Farbe | außen?“, G K5) – widerspricht „innen/außen immer weiß“ von Kunden und Fensterbauern, Vorrang Kunde.
+
+### Detail-Profis und Vorlagen-Abgleich Wünsche (umgesetzt)
+
+Berichte: docs/profis/gremium/2026-10-27-konfigurator-wuensche-profis.md und -vorlagen.md.
+
+| Herkunft | Befund | Umsetzung |
+|---|---|---|
+| Bewegung 1, 2; Frontend 1 | Bühne bei jedem Weiter 200–500 ms schwarz, Antworten doppelt eingeblendet | nur Frage und Antworten blenden ein, ab Deckkraft 0,4 in 160 ms (WAAPI); die Bühne bleibt bei 1,00 |
+| Bewegung 3; Frontend 2 | Jeder Tipp zeichnet alle Antworten neu, Ring und Licht laufen nicht | gleiche Frage: Elemente bleiben, nur Attribute, Texte und Werte gleichen sich an; Ring sofort, die App rechnet nach dem nächsten Bild |
+| Bewegung 4; Typografie (Vorlagen) 1 | Punkt schiebt den Namen 15 px | Punkt absolut hinter dem Namen, Punkt, Ring und Licht 150 ms |
+| Bewegung 5 | kein Druckgefühl an Liste, „Üblich“, Band, i, Kapitel, Breiten | scale(.97) in 0 s, zurück in 160 ms; Listenzeilen tönen sich beim Drücken |
+| Bewegung 7 | Ersatzbild bricht bei schnellen Tipps ab | laufende Überblendung wird sauber beendet |
+| Zeichen 1, 2 | vier Zeichen für „gewählt“, zwei Ringe nebeneinander | Einfachwahl Punkt, Mehrfachwahl Haken; i direkt hinter dem Wort, Wahlzeichen allein am Rand |
+| Zeichen 3, 4, 6 | i-Ringe in drei Stärken, Sonnenschutz ohne Hauptstrich, Plus-Ring größer | alle i 1,5 px (28/22 px); Kasten und Rahmen 1,8; „Mehr zu …“ 24 px |
+| Zeichen 5 | Kapitel-Bogen ohne die Punkte des Bands | dieselben drei Punkte (fertig, jetzt, offen) |
+| UX 1 | 375 × 667: Antworten unsichtbar | Bühne `clamp(184px, 100svh − 470px, 272px)`, „Weiß ich noch nicht“ klebt erst ab 740 px Höhe, `scroll-padding-bottom` 168 px |
+| UX 2 | Doppeltipp auf Zurück springt zwei Fragen | Zurück 450 ms gesperrt, Zeigerklicks in den Antworten 450 ms nach jedem Wechsel verworfen |
+| UX 3 | Fokus geht nach „Alles klar“ verloren | der Bogen merkt sich den Knopf, der ihn geöffnet hat; `aria-expanded` stimmt |
+| UX 4 | Vorlesen: Gruppen ohne Namen, doppelte Ansage | Radiogruppen mit dem Titel als Namen, Pfeiltasten wählen; h1 mit `aria-describedby` auf die Stelle, keine zweite Ansage |
+| UX 5, 6 | Zellen-i 40 px, Breiten ohne Funktion | Zellen-i 44 px Ziel; Breiten bleiben Knöpfe wie in der App („Antippen zum Eintippen“) und sagen in der Vorschau, was die App öffnet |
+| Typografie 1–4; Vorlagen Typo 2 | graue Titel, graues „?“, Zebra-Titel, Titel zu schmal, 24-px-Stufe | ein weißer Abschnitt je Titel, Satzzeichen und „1“ gehören dazu; Notiz als Rundknopf in der Etikettenzeile, i am letzten Wort; überall 28 px |
+| Typografie 5–8; Vorlagen Typo 3–5 | Abstände, Rohwerte unter Tupfen, Leerzeichen, Zwischenetikett | Etikett 6 px über dem Titel, Unterzeile 6 px, Antworten 20 px; „Weiß, Silber …“; geschützte Leerzeichen; Etikett 12/400; Meta 13 px, Zeilen 15 px; „492 mm“ mit kleiner Einheit |
+| Material 1–4 | Werkzeuge verdecken den Rahmen, harte Kante, „noch nicht“ in Violett, schwaches Licht | Werkzeuge als senkrechte Glasleiste rechts; dunkle Kante unten; „Weiß ich noch nicht“ gewählt schraffiert (G1); Licht und getöntes Glas wie Schritt 1 |
+| Frontend 3, 4; Stationen | 1,67 MB beim Eintritt, Startfoto unsichtbar geladen, Optionsbilder nicht vorgeladen, Stationen wachsen | Bühnenfenster lädt im Leerlauf des Ergebnisses, Startfoto der App nicht mehr; Optionsbilder im Leerlauf; aktive Station über `scale` |
+| eigene Prüfung | Maße nach dem Laden geändert (zurück zu Schritt 4) | Bühnenfenster wird mit neuen Maßen neu gesetzt, bei gleicher Art mit den Wünschen von vorher; Fehlerseite im Bühnenfenster bricht nichts |
+
+Selbst entschieden, mit Grund: Das sanfte Schwingen des Modells (`w3dsway`, 9 s) läuft wie in der App weiter, weil der Inhaber ausdrücklich
+die Bewegung des Konfigurators sehen will (Bewegung 6 schlug vor, es nach einem Durchlauf anzuhalten). Etikett mit Anker am Flügel
+(Material 5) nicht gebaut: Das Modell dreht sich, das Etikett müsste jedem Bild folgen; das gehört in buehne.js und damit in die App.
+Doppelte Ersatzbilder zusammenlegen und neu rendern (Frontend 4) nicht gemacht: Sie sind nur noch Rückfall.
+
+### Messwerte Wünsche (live, 390 × 844, 375 × 667, 1280 × 800)
+
+- Alle 28 Fragen live durchgetippt bis „Fenster speichern“ → „Gespeichert“: keine Konsolenfehler, Pille auf jeder Frage bei 774 px (667: 597).
+- Ablauf Start bis Teilen: keine Fehler, Layoutsprung 0.
+- Bühne beim Weiter: Deckkraft 1,00 in allen zwölf Proben (vorher bis 0,00).
+- Tipp bei vierfach gedrosselter CPU: Ring sichtbar nach 26–59 ms (vorher 107–207 ms); danach rechnet die App 93–123 ms.
+- Getippte Kachel bleibt dasselbe Element, Übergänge laufen (9 je Tipp); Pfeiltaste wählt die Nachbarkachel.
+- Doppeltipp auf Zurück (250 ms): eine Frage zurück. Fokus nach „Alles klar“: am i, `aria-expanded="false"`.
+- Startfoto der App: 0 Anfragen; Bühnenfenster beim Eintritt in die Wünsche schon geladen.
+- Nach 2,6 s: außen 0 laufende Animationen, im Bühnenfenster 1 (`w3dsway`, die App).
+- Rückfall ohne Bühnenfenster: alle 28 Fragen mit Bildern, keine Fehler.
+
+| Bildschirm (Telefon, live) | Neutral % | Violett | Koralle | Indigo | Modell | Farbe gesamt |
+|---|---|---|---|---|---|---|
+| Welche Form? | 95,7 | 0,6 | 0,0 | 1,5 | 2,2 | 4,3 |
+| Welches Material? | 95,8 | 0,6 | 0,0 | 1,4 | 2,2 | 4,2 |
+| Welche Farbe außen? | 96,5 | 0,1 | 0,1 | 0,9 | 2,4 | 3,5 |
+| Extras fürs Glas? | 96,5 | 0,1 | 0,0 | 0,9 | 2,6 | 3,5 |
+| Sonnenschutz außen? | 96,0 | 0,6 | 0,1 | 1,5 | 1,8 | 4,0 |
+| Was soll der Fensterbauer übernehmen? | 96,9 | 0,1 | 0,0 | 0,9 | 2,1 | 3,1 |
+
+Bilder: docs/profis/bilder/2026-10-27-konfigurator-wuensche-live-tel.jpg (acht Fragen), -live-desk.jpg, -klein-tel.jpg (375 × 667),
+-zustaende-tel.jpg (Ergebnis mit fester Ansicht, „Weiß ich noch nicht“ gewählt, Kapitel-Bogen).
+
+### Änderungstabelle Wünsche
+
+| Änderung | Zweck | Gremium | Stand |
+|---|---|---|---|
+| Bühne ist die App selbst (Modell, Drehen, Zoom, Haus, Regler, Hinweise) | Funktionen der App, Verständnis | ändern 6:0 / 6:0 / 5:1 (Werkzeuge und Regler zurück) | umgesetzt |
+| Kapitelband mit Stationen, Bogen „Direkt zu einem Thema“ | Blickführung | behalten 4:2 / 5:1 / 5:1 | bleibt, Bogen mit denselben Punkten |
+| Frage: „Frage 1 von 11“, „Fragen: Üblich ▾“, Notiz-Rundknopf, Titel mit weißem Wort, i am Wort | Verständnis, Marke | ändern 4 / 4 / 4 | umgesetzt |
+| Antworten: Anthrazit-Kacheln, Weiß für Eingaben, Punkt/Haken, „Weiß ich noch nicht“ schraffiert und sichtbar | Verständnis, Datenqualität | ändern 4 / 4 / 4 | umgesetzt |
+| Fuß fest an derselben Stelle | Blickführung, Abbruch vermeiden | ändern 5:1 / 4 / 5:1 | umgesetzt |
+| Antippen zeigt die Wahl am Modell | Verständnis | behalten 4:2 / 6:0 / 5:1 | bleibt, jetzt live |
+
+Neue Wortlaute zur Freigabe: „Schritt 6 · Wünsche“ (Chip ohne Endzahl), „Frage 1 von 11“, „Fragen: Üblich“.
+
+### Offen (Wünsche)
+
+- Das Schwingen des Modells in den Wünschen läuft endlos (App); der Inhaber braucht dazu in der Vorschau nichts.
+- Etikett mit Anker am markierten Flügel: Vorschlag für buehne.js (App), nicht in der Vorschau.
+- `<em>` heißt in den Wünschen „laut“ (gefragtes Wort weiß), in Messen und Ergebnis „leise“ (zweite Stimme grau, „Höhe <em>links.</em>“);
+  einmal entscheiden.
+- Farbanteile: Der warme Putz des Modells zählt teils als Koralle (Vorlagen-Abgleich: 9 % auf „Farbe außen“ im alten Stand); ob Pixel oder
+  Eindruck zählen, entscheidet der Inhaber.
+- Ersatzbilder (nur Rückfall): 21 doppelte Dateien, Markierung dort noch grün.
+- Für den Verkauf an Betriebe (Fensterbauer, außerhalb der Liste): Logo des Betriebs im Kopf, in der Anfrage „gewählt“ und „Standard“
+  unterscheiden.
+

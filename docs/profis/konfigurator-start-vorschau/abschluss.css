@@ -1,0 +1,362 @@
+/* Abschluss-Folien des Konfigurators (nach Schritt 6 „Wünsche“): Gespeichert, Fürs Angebot 1–3, Aufmaßblatt, Kasse, Freigeschaltet, Teilen.
+   Gleiche Menüführung wie Messen, Ränder und Ergebnis (Kopf, Bühne voll breit mit Glas-Chip, Frage, Karten, Fuß mit einer Pille), nur
+   die acht Farben der Palette „Task-App dunkel“ (dna/tokens.css), Flächen nach G14, Weiß nur für Eingaben, Text und die Pille, keine
+   Weichzeichner auf Flächen. Präfix ez-ab-; die Klassen aus start.css (ez-kopf, ez-frage, ez-karte, ez-fuss …) bleiben unverändert. */
+
+.ez-folie.ez-ab { position: relative; isolation: isolate; --fokus: var(--weiss); }
+.ez-folie.ez-ab .ez-frage { position: relative; padding: 10px 0 2px; }
+.ez-folie.ez-ab .ez-frage::before { content: ""; position: absolute; z-index: -1; left: -16px; right: -16px; top: -8px; height: 88px; pointer-events: none; background: radial-gradient(56% 100% at 50% 0, var(--anthrazit), color-mix(in srgb, var(--anthrazit) 40%, transparent) 40%, transparent 74%); }
+.ez-folie.ez-ab .ez-frage h1 { font-size: 1.75rem; letter-spacing: -.025em; }
+.ez-folie.ez-ab .ez-unterzeile { margin-top: 4px; font-size: .9375rem; line-height: 1.45; }
+.ez-folie.ez-ab .ez-recht { margin-top: 18px; }
+@media (max-width: 374px) { .ez-folie.ez-ab .ez-frage h1 { font-size: 1.625rem; } }
+
+/* ---------- Bühne: voll breit wie beim Messen, unten gerundet ---------- */
+.ez-buehne--ab { --putz-schatten: 0 1px 1px rgba(7,9,10,.28), 0 2px 4px -1px rgba(7,9,10,.22), 4px 12px 20px -10px rgba(7,9,10,.50); height: 264px; margin: 0 -16px; border-radius: 0 0 var(--rund-l) var(--rund-l); cursor: default; touch-action: auto; background: radial-gradient(120% 90% at 18% 0%, #2a2a2c, var(--anthrazit) 55%, #1a1a1c); }
+.ez-buehne--ab.ez-buehne--form { height: 216px; }
+.ez-ab-chiphaken { display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--violett); color: var(--schwarz); }
+.ez-ab-chiphaken svg { width: 11px; height: 11px; }
+/* Auf hellem Putz deckend ohne Weichzeichner, im selben Licht wie die Etiketten (wie beim Messen) */
+.ez-glaschip--fest { background: linear-gradient(180deg, color-mix(in srgb, var(--anthrazit) 86%, var(--silbergrau)), color-mix(in srgb, var(--anthrazit) 80%, var(--schwarz))); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: rgba(255,255,255,.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), var(--putz-schatten); }
+/* Lichtteich hinter dem Inhalt der dunklen Bühnen (G14), ohne Filter */
+.ez-ab-teich { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(55% 60% at 62% 58%, #2e2e31, transparent 72%), radial-gradient(40% 36% at 24% 92%, color-mix(in srgb, var(--indigo) 46%, transparent), transparent 70%); }
+
+/* Gespeichert: das Modell der Wünsche auf Putz (Ansicht „result“), Lichtabfall wie beim Messen */
+.ez-buehne--modell { background: radial-gradient(120% 100% at 26% 8%, #f3eee6, #e9e2d7 58%, #dcd4c7); }
+.ez-buehne--modell .ez-buehne__kante { z-index: 2; background: linear-gradient(160deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 36%), radial-gradient(72% 90% at 55% 44%, rgba(7,9,10,0) 50%, rgba(7,9,10,.10) 76%, rgba(7,9,10,.30) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(7,9,10,.30); }
+.ez-ab-modell { position: absolute; z-index: 0; left: 50%; top: 50%; width: 112%; max-width: none; height: auto; transform: translate(-50%, -50%); display: block; }
+
+/* ---------- Haus: Fenster im ganzen Haus als Kapselreihe (G11) ---------- */
+.ez-ab-zaehler { position: absolute; z-index: 3; left: 16px; right: 16px; bottom: 20px; display: grid; gap: 8px; }
+.ez-ab-zaehler .dna-label { font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-ab-zaehler__zahl { display: flex; align-items: baseline; gap: 8px; margin: 0; }
+.ez-ab-zaehler__zahl b { font: 200 4rem/.95 var(--font-sans); letter-spacing: -.04em; color: var(--weiss); font-variant-numeric: tabular-nums; }
+.ez-ab-zaehler__zahl span { font: 400 .9375rem/1.2 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-zaehler__satz { margin: 0; font: 400 .875rem/1.4 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-zaehler__satz b { font-weight: 500; color: var(--weiss); }
+.ez-ab-kapselreihe { position: relative; display: flex; gap: 5px; height: 40px; align-items: stretch; }
+.ez-ab-kapselreihe i { flex: 1 1 0; min-width: 4px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 30%, var(--anthrazit)); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); transform-origin: 50% 100%; }
+.ez-ab-kapselreihe i.ist-getauscht { background: linear-gradient(180deg, color-mix(in srgb, var(--violett) 82%, var(--weiss)), var(--violett)); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+/* Schraffur heißt „noch offen“ (G1): solange die Zahl aller Fenster fehlt */
+.ez-ab-kapselreihe i.ist-offen { flex: 6 1 0; background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--silbergrau) 40%, transparent) 0 1.3px, transparent 1.3px 6px), color-mix(in srgb, var(--anthrazit) 70%, var(--schwarz)); box-shadow: inset 0 0 0 1px rgba(168,164,169,.28); }
+.ez-ab-kapselreihe.fuellt i { animation: ez-ab-kapsel 260ms var(--dna-druck) calc(var(--n, 0) * 16ms) backwards; }
+@keyframes ez-ab-kapsel { from { transform: scaleY(.35); opacity: .3; } }
+/* Marke ein Drittel: ab hier verlangt die Norm ein Lüftungskonzept (Regel der App, DIN 1946-6) */
+.ez-ab-drittel { position: absolute; top: -18px; bottom: -4px; width: 0; border-left: 1.2px dashed var(--silbergrau); pointer-events: none; }
+.ez-ab-drittel span { position: absolute; left: 6px; top: -2px; font: 500 .6875rem/1 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); white-space: nowrap; }
+.ez-ab-kapselreihe.ist-ueber .ez-ab-drittel { border-left-color: var(--koralle); }
+.ez-ab-kapselreihe.ist-ueber .ez-ab-drittel span { color: var(--koralle); }
+.ez-ab-hauschips { position: absolute; z-index: 3; right: 12px; top: 12px; display: flex; gap: 6px; }
+.ez-ab-hauschips span { height: 28px; padding: 0 11px; border-radius: var(--rund-pille); font: 500 .8125rem/28px var(--font-sans); color: var(--weiss); background: var(--indigo); box-shadow: inset 0 1px 0 rgba(255,255,255,.12); white-space: nowrap; }
+.ez-ab-hauschips span[hidden] { display: none; }
+
+/* ---------- Zeit: Skala mit Stationen (G5), Förderweg als Zahl (G3), Budget als Kapselreihe (G11) ---------- */
+.ez-ab-skala { position: absolute; z-index: 3; left: 16px; right: 16px; top: 92px; display: grid; gap: 14px; }
+.ez-ab-skala .dna-label, .ez-ab-budget .dna-label { font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-ab-skala__band { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding-top: 18px; }
+.ez-ab-skala__marken { position: absolute; left: 12.5%; right: 12.5%; top: 6px; height: 12px; background: linear-gradient(var(--silbergrau), var(--silbergrau)) 0 5.4px / 100% 1.2px no-repeat, repeating-linear-gradient(90deg, rgba(168,164,169,.5) 0 1px, transparent 1px 8px) 0 2px / 100% 9px no-repeat; }
+.ez-ab-station { position: relative; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.ez-ab-station i { position: relative; z-index: 1; margin-top: -18px; width: 12px; height: 12px; border-radius: 50%; background: var(--anthrazit); box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: transform 220ms var(--dna-druck), background-color 220ms var(--dna-druck), box-shadow 220ms var(--dna-druck); }
+.ez-ab-station b { max-width: 82px; font: 400 .75rem/1.25 var(--font-sans); color: var(--silbergrau); transition: color 220ms var(--dna-druck); text-wrap: balance; }
+.ez-ab-station.ist-dran i { background: var(--violett); box-shadow: 0 0 0 4px color-mix(in srgb, var(--violett) 30%, transparent); transform: scale(1.45); }
+.ez-ab-station.ist-dran b { color: var(--weiss); font-weight: 500; }
+.ez-ab-foerd { position: absolute; z-index: 3; right: 16px; top: 12px; display: grid; justify-items: end; text-align: right; }
+.ez-ab-foerd p { display: flex; align-items: baseline; gap: 3px; margin: 0; }
+.ez-ab-foerd[hidden] { display: none; }
+.ez-ab-foerd b { font: 200 3.25rem/.95 var(--font-sans); letter-spacing: -.04em; color: var(--weiss); }
+.ez-ab-foerd small { font: 400 .9375rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-foerd span { margin-top: 4px; font: 400 .75rem/1.25 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); }
+.ez-ab-budget { position: absolute; z-index: 3; left: 16px; right: 16px; bottom: 18px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.ez-ab-budget__reihe { display: flex; gap: 4px; height: 10px; }
+.ez-ab-budget__reihe i { flex: 1 1 0; border-radius: var(--rund-pille); background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--silbergrau) 38%, transparent) 0 1.2px, transparent 1.2px 5px), color-mix(in srgb, var(--anthrazit) 70%, var(--schwarz)); box-shadow: inset 0 0 0 1px rgba(168,164,169,.25); transition: background 220ms var(--dna-druck); }
+.ez-ab-budget__reihe i.ist-voll { background: color-mix(in srgb, var(--silbergrau) 34%, var(--anthrazit)); box-shadow: none; }
+.ez-ab-budget__reihe i.ist-dran { background: var(--violett); box-shadow: none; }
+.ez-ab-budget b { font: 500 .8125rem/1.2 var(--font-sans); color: var(--weiss); white-space: nowrap; }
+
+/* ---------- Das Aufmaßblatt als Objekt im Fensterlicht (G4, G7) ---------- */
+.ez-buehne--blatt .ez-ab-boden { object-position: 46% 60%; filter: none; }
+.ez-ab-papier { position: absolute; z-index: 1; left: 50%; top: 40px; width: 214px; aspect-ratio: 1 / 1.414; margin-left: -96px; border-radius: 3px; overflow: hidden; color: var(--schwarz); background: linear-gradient(115deg, #ffffff 0%, #ffffff 38%, color-mix(in srgb, var(--silbergrau) 14%, var(--weiss)) 62%, color-mix(in srgb, var(--silbergrau) 26%, var(--weiss)) 100%); transform: perspective(900px) rotateX(24deg) rotateZ(-7deg); transform-origin: 50% 30%; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 2px 2px rgba(7,9,10,.45), 14px 30px 34px -12px rgba(7,9,10,.8); }
+.ez-buehne--form .ez-ab-papier { top: 34px; width: 196px; margin-left: -54px; }
+/* hartes Fensterlicht über dem Blatt: ein heller Streifen mit Schattenkante (Vorlage 04) */
+.ez-ab-papier::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(118deg, rgba(7,9,10,0) 0 46%, rgba(7,9,10,.10) 46.4%, rgba(7,9,10,.10) 58%, rgba(7,9,10,0) 58.4%); }
+.ez-ab-papier__band { display: flex; align-items: center; gap: 4px; height: 20px; padding: 0 9px; background: var(--schwarz); color: var(--weiss); }
+.ez-ab-papier__band svg { width: 10px; height: 10px; }
+.ez-ab-papier__band .ez-wm { font: 500 7.5px/1 Inter, var(--font-sans); letter-spacing: -.01em; }
+.ez-ab-papier__band .ez-wm b { font-weight: 900; }
+.ez-ab-papier__art { margin-left: auto; font: 500 6.5px/1 var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--silbergrau); }
+.ez-ab-papier__in { display: grid; gap: 4px; padding: 10px 11px; }
+.ez-ab-papier__h { margin: 0; font: 600 13px/1.1 var(--font-sans); letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ez-ab-papier__kontakt { display: flex; flex-wrap: wrap; gap: 3px 4px; align-items: center; min-height: 9px; margin: 0; font: 400 6.5px/1.25 var(--font-sans); color: var(--textgrau); }
+.ez-ab-papier__s { margin: 0; font: 400 6.5px/1.25 var(--font-sans); color: var(--textgrau); }
+.ez-ab-leer { display: inline-block; width: var(--b, 30%); height: 6px; border-radius: 2px; background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--silbergrau) 70%, var(--weiss)) 0 1px, transparent 1px 3px); }
+.ez-ab-papier__tab { width: 100%; border-collapse: collapse; margin-top: 2px; font: 400 6.5px/1.3 var(--font-sans); }
+.ez-ab-papier__tab th { padding: 0 0 2px; text-align: left; font-weight: 500; color: var(--textgrau); border-bottom: .6px solid color-mix(in srgb, var(--silbergrau) 50%, var(--weiss)); }
+.ez-ab-papier__tab td { padding: 3px 0 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ez-ab-papier__zeichnung { position: relative; height: 62px; margin-top: 6px; border-radius: 2px; background: color-mix(in srgb, var(--silbergrau) 10%, var(--weiss)); }
+.ez-ab-papier__oeffnung { position: absolute; left: 28%; top: 14%; width: 40%; height: 72%; border: .9px dashed var(--koralle); }
+.ez-ab-papier__element { position: absolute; inset: 9% 8%; border: .9px solid var(--violett); background: linear-gradient(90deg, transparent 48.5%, color-mix(in srgb, var(--violett) 60%, transparent) 48.5% 51.5%, transparent 51.5%); }
+.ez-ab-papier__mass { position: absolute; font: 500 6px/1 var(--font-sans); color: var(--schwarz); font-variant-numeric: tabular-nums; }
+.ez-ab-papier__mass--b { left: 28%; width: 40%; top: 3px; text-align: center; }
+.ez-ab-papier__mass--h { left: 70%; top: 46%; }
+.ez-ab-papier__zeilen { display: grid; gap: 4px; margin-top: 6px; }
+.ez-ab-papier__zeilen i { height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); }
+.ez-ab-papier__zeilen i.k { width: 62%; }
+/* Gesperrt: Maße als Punkte, Zeichnung und Zeilen schraffiert (G1: noch nicht), Schloss als runder Knopf auf der Ecke (G12, G13) */
+.ez-ab-papier__schloss { display: none; }
+.ist-zu .ez-ab-papier__zeichnung, .ist-zu .ez-ab-papier__zeilen i { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--silbergrau) 58%, var(--weiss)) 0 1px, transparent 1px 4px), color-mix(in srgb, var(--silbergrau) 8%, var(--weiss)); }
+.ist-zu .ez-ab-papier__oeffnung, .ist-zu .ez-ab-papier__mass { opacity: 0; }
+.ist-zu .ez-ab-papier__schloss { position: absolute; right: 9px; top: 28px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--weiss); background: radial-gradient(at 30% 20%, rgba(255,255,255,.18), rgba(255,255,255,.04) 70%), var(--schwarz); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 3px 6px rgba(7,9,10,.4); }
+.ist-zu .ez-ab-papier__schloss svg { width: 16px; height: 16px; }
+.ez-buehne--blatt .ez-buehne__kante { box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -70px 90px -50px rgba(7,9,10,.8); }
+
+/* Etikett mit Anker am Blatt: die E-Mail für die Rechnung (G9) */
+.ez-ab-etikett { position: absolute; z-index: 4; left: 12px; bottom: 16px; max-width: 46%; }
+.ez-ab-etikett .dna-etikett { position: relative; height: auto; min-height: 44px; max-width: 100%; padding: 7px 14px 7px 10px; gap: 8px; border-radius: 18px; color: var(--weiss); white-space: normal; }
+.ez-ab-etikett__punkt { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); }
+.ez-ab-etikett small { display: block; font: 400 .75rem/1.2 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-etikett b { display: block; font: 500 .875rem/1.2 var(--font-sans); overflow-wrap: anywhere; }
+.ez-ab-etikett.ist-leer b { color: var(--silbergrau); font-weight: 400; }
+/* Der Betrag als Held am Blatt (G3) */
+.ez-ab-betrag { position: absolute; z-index: 4; left: 16px; bottom: 16px; display: grid; grid-template-columns: auto auto; align-items: baseline; column-gap: 4px; padding: 10px 16px 12px 14px; border-radius: 20px; background: linear-gradient(180deg, rgba(52,52,55,.92), rgba(26,26,28,.92)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 10px 24px -10px rgba(0,0,0,.7); }
+.ez-ab-betrag b { font: 200 3rem/.95 var(--font-sans); letter-spacing: -.035em; color: var(--weiss); }
+.ez-ab-betrag small { font: 400 .9375rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-betrag span { grid-column: 1 / -1; margin-top: 4px; font: 400 .75rem/1.2 var(--font-sans); letter-spacing: .02em; color: var(--silbergrau); }
+/* Freigeschaltet: violetter Haken im Kreis, zeichnet sich einmal (seltener Moment, G2) */
+.ez-ab-okmark { position: absolute; z-index: 4; left: 18px; bottom: 18px; width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--violett) 38%, var(--anthrazit)), var(--anthrazit) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 24px -10px rgba(0,0,0,.7); }
+.ez-ab-okmark svg { width: 100%; height: 100%; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ez-ab-okmark circle { stroke: var(--violett); stroke-width: 2; stroke-dasharray: 176; }
+.ez-ab-okmark path { stroke: var(--weiss); stroke-width: 3.2; stroke-dasharray: 40; }
+.ez-ab-okmark.zeichnet circle { animation: ez-ab-strich 420ms var(--dna-druck) backwards; }
+.ez-ab-okmark.zeichnet path { animation: ez-ab-haken 260ms var(--dna-druck) 300ms backwards; }
+@keyframes ez-ab-strich { from { stroke-dashoffset: 176; } }
+@keyframes ez-ab-haken { from { stroke-dashoffset: 40; } }
+.ez-buehne--blatt.oeffnet .ez-ab-papier__mass, .ez-buehne--blatt.oeffnet .ez-ab-papier__oeffnung, .ez-buehne--blatt.oeffnet [data-p="mo"], .ez-buehne--blatt.oeffnet [data-p="el"] { animation: ez-ab-rastet 220ms var(--dna-druck) 360ms backwards; }
+@keyframes ez-ab-rastet { from { opacity: 0; } }
+
+/* ---------- Karten auf Schwarz: Anthrazit (G14), nie weiß ---------- */
+.ez-ab-karte { display: grid; gap: 8px; margin-top: 12px; padding: 14px 16px 16px; border-radius: var(--rund-l); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-ab-karte .dna-label { font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-ab-karte__text { margin: 0; font: 400 .9375rem/1.45 var(--font-sans); color: var(--weiss); text-wrap: pretty; }
+.ez-ab-karte__leise { margin: 0; font: 400 .8125rem/1.4 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
+.ez-ab-leise { justify-self: start; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; font-size: .9375rem; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: transform 160ms var(--dna-druck), background-color 150ms ease, color 150ms ease; text-decoration: none; }
+.ez-ab-leise svg { width: 15px; height: 15px; }
+.ez-ab-leise:active { transform: scale(.97); transition-duration: 0s; }
+.ez-ab-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.ez-ab-hilfe { margin: 10px 2px 0; font: 400 .8125rem/1.45 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
+.ez-ab-hilfe b { font-weight: 500; color: var(--weiss); }
+
+/* Gespeichert: Aktionen als Kacheln (G8), Kapitel als Umriss-Chips, eine Zeile zur Liste */
+.ez-ab-kacheln { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.ez-ab-kachel { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 14px; border: 0; border-radius: var(--rund-m); text-align: left; color: var(--weiss); font: 500 .9375rem/1.2 var(--font-sans); cursor: pointer; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); transition: transform 160ms var(--dna-druck), box-shadow 150ms var(--dna-druck); }
+.ez-ab-kachel svg { flex: none; width: 20px; height: 20px; color: var(--silbergrau); }
+.ez-ab-kachel:active { transform: scale(.97); transition-duration: 0s; }
+.ez-ab-kachel--weg { color: var(--koralle); }
+.ez-ab-kachel--weg svg { color: var(--koralle); }
+.ez-ab-sprung { display: grid; gap: 8px; margin-top: 16px; }
+.ez-ab-sprung .dna-label { font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-ab-sprung__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ez-ab-sprung__chips button { min-height: 44px; padding: 0 14px; border: 0; border-radius: var(--rund-pille); background: transparent; color: var(--weiss); font: 500 .875rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 60%, var(--anthrazit)); cursor: pointer; transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
+.ez-ab-sprung__chips button:active { transform: scale(.97); transition-duration: 0s; }
+.ez-ab-zeile { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 52px; margin-top: 14px; padding: 0 4px 0 2px; border: 0; border-top: 1px solid rgba(168,164,169,.22); background: none; color: var(--weiss); font: 500 .9375rem/1.2 var(--font-sans); text-align: left; cursor: pointer; }
+.ez-ab-zeile i { width: 16px; height: 16px; background: var(--silbergrau); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 3l5 5-5 5' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 3l5 5-5 5' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* ---------- Eingaben auf der weißen Karte ---------- */
+.ez-ab-form { gap: 0; padding: 4px 16px 16px; background: linear-gradient(180deg, var(--weiss) 0 70%, color-mix(in srgb, var(--silbergrau) 10%, var(--weiss))); }
+.ez-ab-abschnitt { display: grid; gap: 10px; padding-top: 14px; }
+.ez-ab-abschnitt + .ez-ab-abschnitt, .ez-ab-feld + .ez-ab-abschnitt { margin-top: 14px; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 30%, var(--weiss)); }
+.ez-ab-form .dna-label { font: 400 .8125rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
+.ez-ab-form .ez-block__kopf { min-height: 28px; }
+/* Auswahl: hell getönt, gewählt schwarz mit violettem Punkt (wie die Stelle in Schritt 1) */
+.ez-ab-wahl { display: grid; gap: 6px; }
+.ez-ab-wahl--1 { grid-template-columns: minmax(0, 1fr); }
+.ez-ab-wahl--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ez-ab-wahl--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ez-ab-wahl button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 8px 12px; border: 0; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 16%, var(--weiss)); color: var(--schwarz); font: 400 .9375rem/1.2 var(--font-sans); text-align: center; cursor: pointer; transition: transform 160ms var(--dna-druck), background-color 150ms var(--dna-druck), color 150ms var(--dna-druck); }
+.ez-ab-wahl--1 button { justify-content: flex-start; padding: 8px 18px; }
+.ez-ab-wahl button:active { transform: scale(.97); transition-duration: 0s; }
+.ez-ab-wahl button[aria-pressed="true"] { background: var(--schwarz); color: var(--weiss); font-weight: 500; }
+.ez-ab-wahl button[aria-pressed="true"]::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); }
+.ez-ab-wahl button:focus-visible, .ez-ab-form :where(button, a):focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+.ez-ab-eingabe input:focus-visible { outline: none; }
+.ez-ab-wahl.ist-fehler button { box-shadow: inset 0 0 0 1.5px var(--koralle); }
+@media (hover: hover) and (pointer: fine) { .ez-ab-wahl button:not([aria-pressed="true"]):hover { background: color-mix(in srgb, var(--silbergrau) 30%, var(--weiss)); } .ez-ab-sprung__chips button:hover, .ez-ab-kachel:hover { background: var(--indigo); } .ez-ab-zeile:hover { color: var(--silbergrau); } }
+.ez-ab-form .ez-i--hell { color: var(--textgrau); box-shadow: inset 0 0 0 1.5px var(--textgrau); }
+.ez-ab-form .ez-i--hell[aria-expanded="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none; }
+/* Felder: Pille mit Ring, Fokus violett, Fehler Koralle */
+.ez-ab-feld { display: grid; gap: 6px; padding-top: 14px; }
+.ez-ab-eingabe { display: flex; align-items: baseline; gap: 6px; min-height: 48px; padding: 0 18px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 44%, var(--weiss)); }
+.ez-ab-eingabe:focus-within { box-shadow: inset 0 0 0 1.8px var(--violett); }
+.ez-ab-eingabe input { flex: 1; width: 100%; min-width: 0; height: 48px; border: 0; padding: 0; background: transparent; color: var(--schwarz); font: 400 1.0625rem/48px var(--font-sans); outline: none; }
+.ez-ab-eingabe input::placeholder { color: var(--textgrau); opacity: 1; }
+.ez-ab-eingabe span { font: 400 .875rem/48px var(--font-sans); color: var(--textgrau); }
+.ez-ab-feld.ist-fehler .ez-ab-eingabe { box-shadow: inset 0 0 0 1.8px var(--koralle); }
+.ez-ab-fehler { position: relative; margin: 2px 0 0; padding-left: 16px; font: 500 .8125rem/1.35 var(--font-sans); color: var(--schwarz); }
+.ez-ab-fehler::before, .ez-ab-hinweis::before { content: ""; position: absolute; left: 0; top: calc(.68em - 4px); width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+.ez-ab-fehler[hidden], .ez-ab-hinweis[hidden] { display: none; }
+.ez-ab-hinweis { position: relative; margin: 4px 0 0; padding-left: 18px; font: 400 .875rem/1.45 var(--font-sans); color: var(--schwarz); text-wrap: pretty; }
+.ez-ab-klein { margin: 0; font: 400 .8125rem/1.45 var(--font-sans); color: var(--textgrau); text-wrap: pretty; }
+.ez-ab-foerdtext { margin-top: 2px; }
+.ez-ab-mehr, .ez-ab-link { display: inline; padding: 0; border: 0; background: none; color: var(--schwarz); font: inherit; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* Anzahl: runde Knöpfe und Feld (G13) */
+.ez-ab-stepper { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 8px; align-items: center; }
+.ez-ab-stepper .ez-ab-eingabe { justify-content: center; }
+.ez-ab-stepper .ez-ab-eingabe input { text-align: right; font-size: 1.25rem; }
+.ez-ab-rund { width: 48px; height: 48px; border: 0; padding: 0; border-radius: 50%; background: var(--weiss); color: var(--schwarz); font: 400 1.375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-ab-rund:active { transform: scale(.94); transition-duration: 0s; }
+/* Haken auf Weiß (Zustimmung an der Kasse) */
+.ez-ab-recht { gap: 6px; }
+.ez-ab-haken { position: relative; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px 0; cursor: pointer; font: 400 .875rem/1.45 var(--font-sans); color: var(--schwarz); -webkit-tap-highlight-color: transparent; }
+.ez-ab-haken input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ez-ab-haken__kasten { display: grid; place-items: center; width: 24px; height: 24px; margin-top: -1px; border-radius: 7px; box-shadow: inset 0 0 0 1.5px var(--textgrau); color: var(--weiss); transition: background-color 150ms var(--dna-druck), box-shadow 150ms var(--dna-druck); }
+.ez-ab-haken__kasten svg { width: 14px; height: 14px; opacity: 0; transform: scale(.6); transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck); }
+.ez-ab-haken input:checked + .ez-ab-haken__kasten { background: var(--violett); box-shadow: inset 0 0 0 1.5px var(--violett); }
+.ez-ab-haken input:checked + .ez-ab-haken__kasten svg { opacity: 1; transform: none; }
+.ez-ab-haken input:focus-visible + .ez-ab-haken__kasten { outline: 2px solid var(--schwarz); outline-offset: 3px; }
+.ez-ab-haken.ist-fehler .ez-ab-haken__kasten { box-shadow: inset 0 0 0 1.8px var(--koralle); }
+
+/* ---------- Aufmaßblatt: was dazugehört, Preis (G3) ---------- */
+.ez-ab-inkl { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ez-ab-inkl li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; align-items: start; font: 400 .9375rem/1.4 var(--font-sans); color: var(--weiss); }
+.ez-ab-inkl svg { width: 20px; height: 20px; padding: 3px; border-radius: 50%; color: var(--schwarz); background: var(--violett); }
+.ez-ab-preis__zeile { display: flex; align-items: flex-end; gap: 14px; margin-top: 10px; padding-top: 12px; border-top: 1px solid rgba(168,164,169,.22); }
+.ez-ab-preis__zahl { display: flex; align-items: baseline; gap: 3px; margin: 0; }
+.ez-ab-preis__zahl b { font: 200 3.5rem/.9 var(--font-sans); letter-spacing: -.04em; color: var(--weiss); }
+.ez-ab-preis__zahl small { font: 400 .9375rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-preis__text { display: grid; gap: 3px; margin: 0 0 3px; font: 400 .8125rem/1.35 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-preis__einf { position: relative; padding-left: 14px; color: var(--weiss); }
+.ez-ab-preis__einf::before { content: ""; position: absolute; left: 0; top: calc(.68em - 3px); width: 6px; height: 6px; border-radius: 50%; background: var(--koralle); }
+.ez-ab-preis__einf:empty { display: none; }
+
+/* ---------- Kasse: Bestellung ---------- */
+.ez-ab-bestellung { gap: 0; padding-block: 6px; }
+.ez-ab-bestellung__zeile { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; font: 400 .9375rem/1.35 var(--font-sans); color: var(--weiss); }
+.ez-ab-bestellung__zeile > span { display: grid; gap: 3px; }
+.ez-ab-bestellung__zeile b { font-weight: 500; white-space: nowrap; }
+.ez-ab-bestellung__zeile small { font: 400 .8125rem/1.35 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-bestellung__zeile--summe { border-top: 1px solid rgba(168,164,169,.22); font-size: .8125rem; color: var(--silbergrau); }
+
+/* ---------- Freigeschaltet und Teilen ---------- */
+.ez-ab-datei__kopf { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: start; }
+.ez-ab-datei__kopf > span:last-child { display: grid; gap: 3px; }
+.ez-ab-datei__kopf b { font: 500 1.0625rem/1.25 var(--font-sans); color: var(--weiss); }
+.ez-ab-datei__kopf small { font: 400 .8125rem/1.4 var(--font-sans); color: var(--silbergrau); }
+.ez-ab-datei__ic { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; color: var(--weiss); background: color-mix(in srgb, var(--violett) 26%, var(--anthrazit)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--violett) 50%, transparent); }
+.ez-ab-datei__ic svg { width: 22px; height: 22px; }
+.ez-ab-weg__kopf { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: center; }
+.ez-ab-weg__kopf > span:last-child { display: grid; gap: 2px; }
+.ez-ab-weg__kopf b, .ez-ab-weg__titel { font: 500 1.0625rem/1.25 var(--font-sans); color: var(--weiss); }
+.ez-ab-weg__tick { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: transparent; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: background-color 220ms var(--dna-druck), color 220ms var(--dna-druck), box-shadow 220ms var(--dna-druck); }
+.ez-ab-weg__tick svg { width: 15px; height: 15px; }
+.ez-ab-weg.ist-erledigt .ez-ab-weg__tick { color: var(--schwarz); background: var(--violett); box-shadow: none; }
+.ez-ab-code { display: grid; gap: 6px; margin-top: 16px; }
+.ez-ab-code .dna-label { font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-ab-code .ez-ab-klein { color: var(--silbergrau); }
+.ez-ab-code__box { width: 100%; min-height: 84px; padding: 12px 14px; border: 0; border-radius: var(--rund-m); resize: none; color: var(--silbergrau); font: 400 .75rem/1.45 ui-monospace, Menlo, monospace; word-break: break-all; background: color-mix(in srgb, var(--anthrazit) 70%, var(--schwarz)); box-shadow: inset 0 0 0 1px rgba(168,164,169,.24); }
+.ez-ab-code__box:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+
+/* Zeile über der Pille: was die App an dieser Stelle tut, wenn die Vorschau kein Ziel hat (kurz, 2,4 s) */
+.ez-ab-toast { position: absolute; left: 50%; bottom: calc(100% + 6px); z-index: 2; max-width: calc(100% - 32px); margin: 0; padding: 10px 16px; border-radius: 18px; transform: translateX(-50%); font: 400 .875rem/1.35 var(--font-sans); color: var(--weiss); text-align: center; background: linear-gradient(180deg, rgba(52,52,55,.97), rgba(26,26,28,.97)); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 24px -10px rgba(0,0,0,.8); pointer-events: none; transition: opacity 160ms var(--dna-druck); }
+.ez-ab-toast[hidden] { display: none; }
+.ez-ab-toast.geht { opacity: 0; }
+.ez-fuss .dna-pille.ez-weiter:only-of-type { flex-basis: 300px; }
+
+@media (max-width: 374px) {
+  .ez-ab-wahl--3 { grid-template-columns: minmax(0, 1fr); }
+  .ez-ab-papier { width: 190px; margin-left: -86px; }
+  .ez-ab-zaehler__zahl b { font-size: 3.5rem; }
+}
+@media (max-height: 700px) and (max-width: 759px) {
+  .ez-buehne--ab { height: 220px; }
+  .ez-buehne--ab.ez-buehne--form { height: 184px; }
+  .ez-ab-papier { top: 30px; }
+  .ez-ab-skala { top: 70px; }
+  .ez-ab-zaehler { bottom: 14px; gap: 6px; }
+  .ez-ab-zaehler__zahl b { font-size: 3.25rem; }
+  .ez-ab-kapselreihe { height: 32px; }
+}
+/* Weniger Bewegung: alle Zustände sofort */
+@media (prefers-reduced-motion: reduce) {
+  .ez-ab-kapselreihe.fuellt i, .ez-ab-okmark.zeichnet circle, .ez-ab-okmark.zeichnet path, .ez-buehne--blatt.oeffnet .ez-ab-papier__mass, .ez-buehne--blatt.oeffnet .ez-ab-papier__oeffnung, .ez-buehne--blatt.oeffnet [data-p="mo"], .ez-buehne--blatt.oeffnet [data-p="el"] { animation: none; }
+  .ez-ab-station i, .ez-ab-station b, .ez-ab-budget__reihe i, .ez-ab-leise, .ez-ab-kachel, .ez-ab-sprung__chips button, .ez-ab-wahl button, .ez-ab-rund, .ez-ab-haken__kasten, .ez-ab-haken__kasten svg, .ez-ab-weg__tick, .ez-ab-toast { transition: none; }
+}
+/* Rückfall, solange das Modell der Wünsche für dieses Element fehlt: das Rendering aus Schritt 1, ganz im Bild */
+.ez-ab-modell.ist-objekt { width: auto; height: 78%; top: 54%; transform: translate(-50%, -50%); }
+/* Telefon: kurze Folien (E-Mail, Freigeschaltet) füllen den Bildschirm, die Pille steht unten wie überall */
+@media (max-width: 759px) { .ez-folie.ez-ab { min-height: 100svh; } }
+
+/* „bis zu“ vor der Förderzahl: klein wie die Einheit (Veto im Gremium gegen eine Zusage ohne Bedingung) */
+.ez-ab-bis { margin-right: 4px; }
+/* „Überspringen“ als Textknopf in der Unterzeile (keine zweite Pille), Ziel 44 px über ::after */
+.ez-ab-ueberspringen { position: relative; border: 0; padding: 0; background: transparent; color: var(--weiss); font: 500 .875rem/1.4 var(--font-sans); text-decoration: underline; text-decoration-color: var(--silbergrau); text-underline-offset: 3px; cursor: pointer; }
+.ez-ab-ueberspringen::after { content: ""; position: absolute; left: -8px; right: -8px; top: -12px; bottom: -12px; }
+.ez-ab-ueberspringen:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; border-radius: 4px; }
+.ez-ab-kosten b { font-weight: 500; color: inherit; }
+
+/* ---------- Umsetzung Gremium und Vorlagen (27.10.2026) ---------- */
+/* Fürs Angebot 1 und 2: derselbe Boden im Fensterlicht wie Seite 3, darüber ein Schleier; Kapseln und Stationen als Gegenstände mit
+   Lichtkante und Kontaktschatten, Licht unter dem Gewählten (Material Hebel 1) */
+.ez-buehne--zaehler .ez-ab-boden, .ez-buehne--zeit .ez-ab-boden { opacity: .42; object-position: 20% 30%; }
+.ez-buehne--zaehler .ez-ab-teich, .ez-buehne--zeit .ez-ab-teich { background: linear-gradient(180deg, rgba(7,9,10,.18) 0, rgba(7,9,10,.52) 44%, rgba(7,9,10,.84) 100%), radial-gradient(40% 36% at 24% 92%, color-mix(in srgb, var(--indigo) 46%, transparent), transparent 70%); }
+.ez-ab-kapselreihe i { background: linear-gradient(180deg, #3a3a3d, #2a2a2c 45%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 0 1px 0 rgba(7,9,10,.9), 0 10px 12px -8px rgba(7,9,10,.95); }
+.ez-ab-kapselreihe i.ist-getauscht { position: relative; background: linear-gradient(180deg, color-mix(in srgb, var(--violett) 62%, var(--weiss)), var(--violett) 48%, color-mix(in srgb, var(--violett) 72%, var(--indigo))); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 1px 0 rgba(7,9,10,.9), 0 10px 12px -8px rgba(7,9,10,.95); }
+.ez-ab-station i { background: radial-gradient(at 30% 25%, #4a4a4d, var(--anthrazit) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1.5px var(--silbergrau), 0 3px 4px -1px rgba(7,9,10,.9); }
+.ez-ab-station.ist-dran i { background: radial-gradient(at 30% 25%, color-mix(in srgb, var(--violett) 55%, var(--weiss)), var(--violett) 60%); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 3px 4px -1px rgba(7,9,10,.9); }
+/* Förderung nicht als Heldenziffer (Veto F, Gremium G): klein, mit „bis zu“ und der Bedingung */
+.ez-ab-foerd b { font: 300 2rem/1 var(--font-sans); letter-spacing: -.02em; }
+.ez-ab-foerd span { font-size: .8125rem; }
+/* Aufmaßblatt: der Preis steht zuerst in der Karte und bekommt das Licht (Material Hebel 3, Typografie Hebel 2) */
+.ez-ab-preis { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; }
+.ez-ab-preis .ez-ab-preis__zeile { order: -1; margin: 0 0 14px; padding: 0 0 14px; border-top: 0; border-bottom: 1px solid rgba(168,164,169,.22); }
+.ez-ab-preis .ez-ab-preis__zahl b { font: 200 4rem/.9 var(--font-sans); letter-spacing: -.04em; }
+.ez-ab-preis__licht { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 44% at 90% 0%, var(--violett), color-mix(in srgb, var(--violett) 40%, transparent) 34%, transparent 72%); }
+/* Kasse: das € klebt an der Zahl */
+.ez-ab-betrag { grid-template-columns: auto 1fr; }
+/* Blatt als Gegenstand: harter Schlagschatten zur Lichtrichtung, Kontaktlinie, leichtere Schraffur (Material Hebel 4) */
+.ez-ab-papier { box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(168,164,169,.7), 0 0 0 .5px rgba(168,164,169,.5), 0 1px 1px rgba(7,9,10,.7), 9px 12px 4px -3px rgba(7,9,10,.72); }
+.ist-zu .ez-ab-papier__zeichnung, .ist-zu .ez-ab-papier__zeilen i { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--silbergrau) 46%, var(--weiss)) 0 1px, transparent 1px 5px), var(--weiss); }
+
+/* ---------- Detail-Profis Bewegung, Zeichen und UX (27.10.2026) ---------- */
+/* Bewegung 5: die Welle läuft nur beim Hinkommen und beginnt bei 60 Prozent; bei +/− bewegt sich nur die neue Kapsel */
+@keyframes ez-ab-kapsel { from { transform: scaleY(.6); opacity: .3; } }
+.ez-ab-kapselreihe i.ist-neu { animation: ez-ab-kapsel 160ms var(--dna-druck) backwards; }
+/* Bewegung 6: der Haken zeichnet sich auf der stehenden Folie, von 12 Uhr an; Zeichen 8: Ring und Haken 1,8 */
+.ez-ab-okmark circle { stroke-width: 1.8; transform-box: fill-box; transform-origin: center; transform: rotate(-90deg); }
+.ez-ab-okmark path { stroke-width: 1.8; }
+.ez-ab-okmark.zeichnet circle { animation: ez-ab-strich 480ms cubic-bezier(.65,0,.35,1) 220ms backwards; }
+.ez-ab-okmark.zeichnet path { animation: ez-ab-haken 240ms var(--dna-druck) 620ms backwards; }
+/* Bewegung 8: Rundknöpfe 0,97, Zeilen drücken mit */
+.ez-ab-rund:active { transform: scale(.97); }
+.ez-ab-zeile { transition: transform 160ms var(--dna-druck); }
+.ez-ab-zeile:active { transform: scale(.97); transition-duration: 0s; }
+/* Bewegung 9: der Hinweis kommt von der Pille (180 ms) und geht schneller, nur über die Deckkraft (140 ms) */
+.ez-ab-toast { transition: opacity 180ms var(--dna-auftritt), transform 180ms var(--dna-auftritt); }
+@starting-style { .ez-ab-toast { opacity: 0; transform: translate(-50%, 4px); } }
+.ez-ab-toast.geht { transition: opacity 140ms var(--dna-druck); }
+/* Zeichen 8: Haken auf Violett immer Schwarz */
+.ez-ab-haken input:checked + .ez-ab-haken__kasten { color: var(--schwarz); }
+/* Zeichen 10: Einführungspreis ist eine Auskunft, kein „jetzt handeln“: Listenpunkt 6 px in Silbergrau; Papier-Zeichnung 1,2 mit 4/4 */
+.ez-ab-preis__einf::before { background: var(--silbergrau); }
+.ez-ab-papier__oeffnung { border: 0; background: linear-gradient(90deg, var(--koralle) 50%, transparent 0) 0 0 / 8px 1.2px repeat-x, linear-gradient(90deg, var(--koralle) 50%, transparent 0) 0 100% / 8px 1.2px repeat-x, linear-gradient(180deg, var(--koralle) 50%, transparent 0) 0 0 / 1.2px 8px repeat-y, linear-gradient(180deg, var(--koralle) 50%, transparent 0) 100% 0 / 1.2px 8px repeat-y; }
+.ez-ab-papier__element { border-width: 1.2px; }
+/* UX 9: „Mehr erfahren“ mit Trefferfläche 44 px */
+.ez-ab-mehr { position: relative; }
+.ez-ab-mehr::after { content: ""; position: absolute; inset: -12px -4px; }
+/* UX 5: die Links zum Nachlesen stehen unter den Haken, mit Luft nach oben */
+.ez-ab-recht .ez-ab-klein { margin-top: 10px; line-height: 1.9; }
+@media (prefers-reduced-motion: reduce) { .ez-ab-kapselreihe i.ist-neu, .ez-ab-okmark.zeichnet circle, .ez-ab-okmark.zeichnet path { animation: none; } .ez-ab-zeile, .ez-ab-toast { transition: none; } }
+/* Typografie (Detail-Profi, 27.10.2026) */
+/* 4: die Unterzeile spricht von Schritt 4 bis Teilen mit einer Stimme (14/1,4) */
+.ez-folie.ez-ab .ez-unterzeile { font-size: .875rem; line-height: 1.4; }
+/* 5: Formular-Etiketten 12 px wie alle Etiketten (G15) */
+.ez-ab-form .dna-label { font-size: .75rem; }
+/* 8: vier gleiche Kacheln, kein Umbruch in „Wünsche ändern“ */
+.ez-ab-kachel { gap: 8px; padding: 10px 12px; }
+.ez-ab-kachel span { white-space: nowrap; }
+/* 9: Karten in drei Ebenen (Label, Titel, Meta oder Pille), die Sätze stehen darunter */
+.ez-ab-weiter-karte .ez-ab-weg__titel { display: block; margin: 6px 0 14px; }
+.ez-ab-karte__meta { margin: 8px 0 0; font: 400 .875rem/1.4 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
+.ez-ab-hilfe + .ez-ab-hilfe { margin-top: 6px; }
+.ez-ab-hilfe--weg { margin: 10px 2px 14px; }
+/* 10: 48 px ist eine kleine Zahl: Gewicht 300, Einheit 14 */
+.ez-ab-betrag b { font-weight: 300; }
+.ez-ab-betrag small { font-size: .875rem; }

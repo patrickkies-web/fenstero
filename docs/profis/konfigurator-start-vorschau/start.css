@@ -1,0 +1,722 @@
+/* Konfigurator, Schritt 1 „Was planst du?“ aus der Design-DNA (Gene, Bausteine, Palette „Task-App dunkel“, App-Rahmen Abschnitt 9),
+   der Startseite vom 26.10.2026 und der Seite „Konfigurator von Muster Fensterbau“. Eigene Klassen mit Präfix ez-, die dna-Klassen
+   bleiben unverändert. Telefon zuerst (390 px); ab 760 px liegt die Folie als Gerät auf der Bühne, daneben die Notizspalte.
+   Werte für Tiefe (G14) und Gewicht (G15) wie auf der Startseite. Lesegrößen in rem (Skala 13/14/15/16/17/30 px), damit die
+   Systemschrift mitwächst; Bewegung: je Objekt eine Kurve (--dna-druck), nur transform und opacity. */
+@font-face { font-family: "Outfit"; font-weight: 200 700; font-display: swap; src: url(fonts/outfit.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 100 900; font-display: swap; src: url(fonts/inter.woff2) format("woff2"); }
+
+html { background: var(--schwarz); overflow-x: clip; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: var(--font-sans); overflow-x: clip; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.ez *, .ez *::before, .ez *::after { box-sizing: border-box; }
+.ez button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.ez-unsichtbar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Token-Block der DNA für App-Folien (Abschnitt 8) */
+.ez[data-theme="dunkel"] { --flaeche: var(--anthrazit); --flaeche-hoch: var(--schwarz); --glas: rgba(32,32,34,.82); --glas-rand: rgba(255,255,255,.18); --fokus: var(--violett); }
+.ez :where(a, button, [tabindex]):focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
+/* Glas nur über Foto und Objekt: Bruchkante wie auf der Startseite */
+.ez .dna-etikett { -webkit-backdrop-filter: blur(12px) saturate(140%); backdrop-filter: blur(12px) saturate(140%); border-color: rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), 0 10px 30px -10px rgba(0,0,0,.6); }
+/* Rundknöpfe mit Lichtverlauf und Ring (Startseite) */
+.ez-rund--fuss, .ez-rund--zu { background: radial-gradient(at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,.04) 70%), var(--schwarz); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px var(--silbergrau); }
+
+/* ---------- Seite: Telefon als Folie, Schreibtisch als Gerät mit Notizspalte ---------- */
+.ez-seite { display: grid; gap: 40px; }
+.ez-buehne-geraet { position: relative; display: grid; justify-items: center; }
+.ez-geraet { position: relative; width: 100%; }
+.ez-schirm { position: relative; }
+.ez-geraet__glanz { display: none; }
+.ez-notiz { display: grid; gap: 14px; align-content: start; padding-block: 32px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.ez-notiz > .dna-label { font-weight: 400; letter-spacing: .03em; margin-bottom: -6px; }
+.ez-notiz h2 { margin: 0; font: 600 1.875rem/1.05 var(--font-sans); letter-spacing: -.025em; text-wrap: balance; }
+.ez-notiz h2 em { font-style: normal; color: var(--tinte-2); }
+.ez-notiz .dna-text { color: var(--silbergrau); }
+.ez-liste { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 14px; }
+.ez-liste li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font: 400 .9375rem/1.45 var(--font-sans); color: var(--silbergrau); }
+.ez-liste li b { color: var(--weiss); font-weight: 500; }
+.ez-liste .nr { font: 500 .75rem/22px var(--font-sans); color: var(--silbergrau); font-variant-numeric: tabular-nums; }
+.ez-gen { display: inline-flex; margin-left: 6px; height: 20px; align-items: center; padding: 0 8px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--silbergrau); font: 500 11px/1 var(--font-sans); color: var(--silbergrau); vertical-align: 1px; }
+.ez-klein { margin: 0; font: 400 .875rem/1.45 var(--font-sans); color: var(--silbergrau); max-width: 40ch; }
+
+@media (min-width: 760px) {
+  .ez-seite { grid-template-columns: 450px minmax(0, 1fr); align-items: start; gap: 48px; max-width: 1140px; margin: 0 auto; padding-block: 24px 48px; padding-left: max(48px, env(safe-area-inset-left, 0px)); padding-right: max(48px, env(safe-area-inset-right, 0px)); }
+  .ez-buehne-geraet { padding: 20px; }
+  /* Lichtteich hinter dem Gerät, dazu violettes Licht als Zustand, ohne Weichzeichner (G14) */
+  .ez-buehne-geraet::before { content: ""; position: absolute; inset: -6% -24% 2%; z-index: 0; pointer-events: none; background: radial-gradient(50% 42% at 50% 44%, #141517, transparent 72%); }
+  .ez-buehne-geraet::after { content: ""; position: absolute; left: 4%; right: 4%; top: 30%; height: 50%; z-index: 0; pointer-events: none; background: radial-gradient(45% 48% at 50% 50%, color-mix(in srgb, var(--indigo) 70%, var(--schwarz)), color-mix(in srgb, var(--indigo) 28%, transparent) 46%, transparent 74%); }
+  .ez-geraet { z-index: 1; width: 410px; height: min(864px, calc(100vh - 44px)); min-height: 640px; padding: 0; border-radius: 54px; background: linear-gradient(145deg, #3a3b40, #0b0b0c 38%, #1d1e21 70%, #2c2d31); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 0 0 2.5px rgba(7,9,10,.7), inset 1.5px 1.5px 0 rgba(255,255,255,.38), 0 60px 90px -30px rgba(0,0,0,.9), 0 18px 36px -18px rgba(0,0,0,.7); }
+  .ez-schirm { position: absolute; inset: 10px; border-radius: 44px; overflow: hidden; background: var(--schwarz); }
+  .ez-geraet__glanz { display: block; position: absolute; inset: 0; border-radius: 54px; pointer-events: none; background: linear-gradient(118deg, rgba(255,255,255,.14), rgba(255,255,255,.03) 34%, transparent 46%); }
+  .ez-schirm > .ez-app { position: absolute; inset: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+  .ez-schirm > .ez-app::-webkit-scrollbar { display: none; }
+  .ez-notiz { padding: 36px 0 0; }
+}
+
+/* ---------- Die Folie ---------- */
+.ez-app { position: relative; display: flex; flex-direction: column; min-height: 100%; padding-block: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--schwarz); color: var(--weiss); }
+.ez-app > * { flex: none; }
+
+/* Kopf 52 px (App-Rahmen): runder Zurück, Marke (Zeichen 26, Wortmarke Inter 18), Übersicht, Begriffe */
+.ez-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 52px; margin: 0 -8px 0 -6px; }
+.ez-kopf__l, .ez-kopf__r { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.ez-rund { width: 44px; height: 44px; flex: none; border: 0; padding: 0; border-radius: 50%; background: transparent; color: var(--weiss); display: grid; place-items: center; cursor: pointer; transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
+.ez-rund svg { width: 16px; height: 16px; }
+.ez-rund:active { transform: scale(.94); transition-duration: 0s; }
+.ez-marke { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--weiss); white-space: nowrap; }
+.ez-marke svg { width: 26px; height: 26px; display: block; }
+.ez-wm { font: 500 18px/1 "Inter", var(--font-sans); letter-spacing: -.02em; }
+.ez-wm b { font-weight: 900; }
+.ez-kopf__knopf { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 0; border-radius: 999px; background: none; color: var(--weiss); font: 500 .9375rem/1 var(--font-sans); cursor: pointer; transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
+.ez-kopf__knopf svg { width: 18px; height: 18px; }
+.ez-kopf__knopf:active { transform: scale(.96); transition-duration: 0s; }
+.ez-kopf__knopf--zeichen { width: 44px; padding: 0; justify-content: center; }
+
+/* ---------- Bühne: Betonboden im Fensterlicht (Foto), das Element steht darauf ---------- */
+.ez-buehne { position: relative; height: 248px; margin: 0; border-radius: var(--rund-l); overflow: hidden; background: var(--anthrazit); isolation: isolate; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.ez-buehne:active { cursor: grabbing; }
+.ez-buehne:focus-visible { outline-offset: 2px; }
+.ez-buehne__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 42% 38%; display: block; }
+/* Lichtkante oben und Vignette unten wie auf der Startseite (G14) */
+.ez-buehne__kante { position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -90px 120px -60px rgba(7,9,10,.75); }
+/* Violettes Licht am Boden als Zustand „gewählt“, radial mit Indigo, ohne Weichzeichner; es folgt dem Element */
+.ez-buehne__licht { position: absolute; z-index: 1; left: 0; top: 152px; width: 240px; height: 110px; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, var(--violett) 16%, color-mix(in srgb, var(--violett) 70%, var(--indigo)) 32%, var(--indigo) 54%, color-mix(in srgb, var(--indigo) 40%, transparent) 70%, transparent 88%); transform: translateX(var(--licht-x, 6px)); transition: transform 320ms var(--dna-druck); }
+/* Glas-Chip mit Fortschrittsring (Vorlage 13, Muster-Seite „Foto 1 von 2“) */
+.ez-glaschip { position: absolute; z-index: 4; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 6px; border-radius: var(--rund-pille); white-space: nowrap; background: var(--glas); color: var(--weiss); font: 500 .8125rem/1 var(--font-sans); border: 1px solid var(--glas-rand); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), 0 10px 30px -10px rgba(0,0,0,.6); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); pointer-events: none; }
+.ez-ring { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(var(--violett) calc(var(--anteil) * 360deg), rgba(255,255,255,.22) 0); -webkit-mask: radial-gradient(circle, transparent 5.5px, #000 6px); mask: radial-gradient(circle, transparent 5.5px, #000 6px); }
+/* Das Objekt: Rendering auf dem Boden, Kontaktschatten darunter (wechselt mit dem Element) */
+.ez-objekt { position: absolute; z-index: 3; left: 18px; bottom: 16px; width: 160px; height: 194px; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
+.ez-objekt img { position: relative; z-index: 1; display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; transition: opacity 220ms var(--dna-druck), transform 220ms var(--dna-druck); }
+.ez-objekt.wechselt img { opacity: 0; transform: translateX(calc(var(--d, 1) * 14px)) scale(.97); transition-duration: 0s; }
+.ez-objekt__schatten { position: absolute; left: 6%; right: 6%; bottom: -7px; height: 20px; border-radius: 50%; background: radial-gradient(closest-side, rgba(7,9,10,.55), rgba(7,9,10,.25) 55%, transparent); transform: translateX(var(--schatten-x, 0px)); transition: transform 220ms var(--dna-druck); }
+/* Neue Öffnung: gestrichelter Rahmen heißt „noch nicht da“ (G1), Strichmuster wie die Ankerlinie; zeichnet sich einmal 300 ms, geht 150 ms */
+.ez-neu-rahmen { position: absolute; z-index: 2; display: block; opacity: 0; transform: scale(.98); transform-origin: 50% 100%; transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck); }
+.ez-neu-rahmen rect { fill: none; stroke: var(--violett); stroke-width: 1.5; stroke-dasharray: 3 4; stroke-linecap: round; }
+.ez-app[data-stelle="neu"] .ez-neu-rahmen { opacity: 1; transform: none; transition-duration: 300ms; }
+.ez-objekt.wechselt .ez-neu-rahmen { opacity: 0; transition-duration: 0s; }
+/* Anker am Element (Startseite, Muster-Seite): weißer Punkt mit schwarzem Ring, gestrichelte Linie zum Etikett; wechselt mit dem Etikett, kein Weg */
+.ez-anker { position: absolute; inset: 0; z-index: 4; pointer-events: none; transition: opacity 150ms var(--dna-druck); }
+.ez-anker.wechselt { opacity: 0; transition: none; }
+.ez-anker .dna-anker__linien line { stroke: var(--weiss); stroke-dasharray: 3 4; }
+.ez-anker__punkt { left: var(--px, 52%); top: var(--py, 26%); background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 0 0 5px rgba(255,255,255,.28); transition: none; }
+.ez-etikett { position: absolute; z-index: 5; right: 16px; top: 46px; max-width: calc(100% - 206px); }
+.ez-etikett .dna-etikett { position: relative; height: auto; min-height: 44px; max-width: 100%; padding: 8px 24px 8px 12px; gap: 8px; border-radius: 20px; color: var(--weiss); white-space: normal; }
+.ez-etikett__text { display: grid; gap: 3px; min-width: 0; transition: opacity 150ms var(--dna-druck); }
+.ez-etikett__text b { font: 500 1.0625rem/1.1 var(--font-sans); letter-spacing: -.01em; hyphens: manual; text-wrap: balance; }
+.ez-etikett__text small { font: 400 .875rem/1.25 var(--font-sans); color: var(--silbergrau); }
+.ez-etikett__text.wechselt { opacity: 0; transition: none; }
+/* Runde Knöpfe: i-Ring (28 px, 44 px Trefferfläche), eine Zustandslogik: Umriss zu, Violett offen (G13) */
+.ez-i { width: 28px; height: 28px; flex: none; border: 0; padding: 0; border-radius: 50%; background: transparent; color: var(--silbergrau); box-shadow: inset 0 0 0 1.5px var(--silbergrau); display: inline-grid; place-items: center; cursor: pointer; position: relative; transition: transform 160ms var(--dna-druck), color 150ms ease, box-shadow 150ms ease, background-color 150ms ease; }
+.ez-i::after { content: ""; position: absolute; inset: -8px; }
+.ez-i svg { width: 14px; height: 14px; }
+.ez-i:active { transform: scale(.94); transition-duration: 0s; }
+.ez-i[aria-expanded="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none; }
+.ez-i--etikett { position: absolute; right: -8px; top: -8px; background: var(--schwarz); color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--weiss); }
+.ez-i--etikett[aria-expanded="true"] { background: var(--violett); color: var(--schwarz); box-shadow: none; }
+
+/* ---------- Frage: 30 px Gewicht 500, zweite Stimme „du?“, i-Ring neben der Überschrift, Notiz leise; Unterzeile 16 px ---------- */
+.ez-frage { padding: 6px 0 8px; }
+.ez-frage__kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ez-frage__titel { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.ez-frage h1 { margin: 0; min-width: 0; font: 500 1.875rem/1.1 var(--font-sans); letter-spacing: -.02em; text-wrap: balance; }
+.ez-frage h1 em { font-style: normal; color: var(--silbergrau); }
+.ez-frage .dna-pille--leise { height: 44px; gap: 6px; padding: 0 14px; font-size: .8125rem; box-shadow: inset 0 0 0 1.5px var(--silbergrau); transition: transform 160ms var(--dna-druck), background-color 150ms ease, color 150ms ease, box-shadow 150ms ease; }
+.ez-frage .dna-pille--leise svg { width: 16px; height: 16px; }
+.ez-unterzeile { margin: 6px 0 0; font: 400 1rem/1.5 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
+
+/* Bogen über dem Inhalt: Öffnen 200 ms, Schließen 150 ms; dahinter ist alles gesperrt */
+.ez-bogen { position: fixed; inset: 0; z-index: 20; display: grid; align-items: end; }
+.ez-bogen[hidden] { display: none; }
+@media (min-width: 760px) { .ez-schirm > .ez-app .ez-bogen { position: absolute; } }
+.ez-bogen__grund { position: absolute; inset: 0; border: 0; padding: 0; background: rgba(7,9,10,.55); opacity: 0; transition: opacity 150ms ease; cursor: default; }
+.ez-bogen__blatt { position: relative; display: grid; gap: 10px; max-height: 80%; overflow: auto; padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); border-radius: var(--rund-l) var(--rund-l) 0 0; background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045), 0 -24px 48px -16px rgba(0,0,0,.7); opacity: 0; transform: translateY(8px); transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck); }
+.ez-bogen.ist-da .ez-bogen__grund { opacity: 1; transition-duration: 200ms; }
+.ez-bogen.ist-da .ez-bogen__blatt { opacity: 1; transform: none; transition-duration: 200ms; }
+.ez-bogen__kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ez-bogen__titel { font: 500 1.0625rem/1.2 var(--font-sans); letter-spacing: -.01em; color: var(--weiss); }
+.ez-rund--zu { margin-right: -8px; }
+.ez-bogen p { margin: 0; font: 400 .9375rem/1.5 var(--font-sans); color: var(--silbergrau); }
+.ez-bogen__tipp { color: var(--weiss) !important; }
+.ez-bogen__tipp b { font-weight: 500; margin-right: 4px; }
+.ez-bogen__zu { justify-self: start; height: 44px; margin-top: 4px; box-shadow: inset 0 0 0 1.5px var(--silbergrau); font-size: .9375rem; }
+
+/* ---------- Blöcke: Beschriftung 13 px ---------- */
+.ez-block { display: grid; gap: 8px; }
+.ez-block + .ez-block { margin-top: 12px; }
+.ez-block__kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 18px; }
+.ez-block .dna-label { font: 400 .8125rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-hilfe { margin: 2px 0 0; font: 400 .875rem/1.45 var(--font-sans); color: var(--silbergrau); }
+.ez-hilfe[hidden] { display: none; }
+.ez-begriff { margin: 10px 0 0; padding: 12px 14px; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); color: var(--weiss); }
+
+/* ---------- Bento der sechs Elemente (Startseite: weiße Kacheln); gewählt: dunkle Kachel mit Licht und Punkt ---------- */
+.ez-bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ez-kachel { position: relative; isolation: isolate; overflow: hidden; display: grid; justify-items: center; align-content: start; gap: 3px; min-height: 80px; padding: 6px 2px 7px; border: 0; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); color: var(--weiss); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); cursor: pointer; font: 500 .8125rem/1.15 var(--font-sans); text-align: center; transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-kachel__licht { position: absolute; z-index: -1; left: 50%; bottom: -34px; width: 120%; height: 70px; translate: -50% 0; border-radius: 50%; pointer-events: none; opacity: 0; background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, color-mix(in srgb, var(--violett) 60%, var(--indigo)) 30%, var(--indigo) 58%, transparent 80%); transition: opacity 150ms var(--dna-druck); }
+.ez-zeichen { width: 48px; height: 48px; display: block; --z-rahmen: var(--anthrazit); --z-strich: var(--silbergrau); --z-glas: color-mix(in srgb, var(--silbergrau) 28%, var(--anthrazit)); --z-boden: var(--silbergrau); }
+.ez-kachel__name { position: relative; display: block; max-width: 100%; padding: 0 2px; hyphens: manual; overflow-wrap: anywhere; text-wrap: balance; }
+/* Punkt „gewählt“ (8 px) neben dem Namen, ohne den Text zu verschieben */
+.ez-kachel__name::before { content: ""; position: absolute; left: -11px; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); opacity: 0; transform: translateY(-50%) scale(.6); transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck); }
+.ez-kachel:active { transform: scale(.97); transition-duration: 0s; }
+.ez-kachel { color: var(--silbergrau); transition: box-shadow 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-kachel[aria-checked="true"] { color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--violett), inset 0 1px 0 rgba(255,255,255,.10); }
+.ez-kachel[aria-checked="true"] .ez-kachel__licht { opacity: 1; }
+.ez-kachel[aria-checked="true"] .ez-kachel__name { padding-left: 10px; }
+.ez-kachel[aria-checked="true"] .ez-kachel__name::before { opacity: 1; transform: translateY(-50%); }
+.ez-kachel[aria-checked="true"] .ez-zeichen { --z-rahmen: var(--anthrazit); --z-strich: var(--weiss); --z-glas: color-mix(in srgb, var(--violett) 36%, var(--anthrazit)); --z-boden: var(--silbergrau); }
+
+/* ---------- Die Stelle auf weißer Karte (Eingabe auf Weiß): Umschalter mit Füllung und Punkt, ein Satz aus den Begriffen der App ---------- */
+.ez-karte { margin-top: 10px; padding: 10px 16px 12px; border-radius: var(--rund-l); background: var(--weiss); color: var(--schwarz); display: grid; gap: 8px; box-shadow: 0 24px 48px -16px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.4); }
+.ez-karte .dna-label { font: 400 .8125rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
+.ez-stelle.dna-pillen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; background: color-mix(in srgb, var(--silbergrau) 22%, var(--weiss)); }
+.ez-stelle button { min-height: 44px; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: .9375rem; line-height: 1.2; white-space: normal; color: var(--textgrau); transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-stelle button:active { transform: scale(.97); transition-duration: 0s; }
+.ez-stelle button[aria-checked="true"] { background: var(--schwarz); color: var(--weiss); }
+.ez-stelle button[aria-checked="true"]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); flex: none; }
+.ez-stelle__text { margin: 0; min-height: 61px; font: 400 .875rem/1.45 var(--font-sans); color: var(--textgrau); text-wrap: pretty; }
+.ez-stelle__text b { font-weight: 500; color: var(--schwarz); }
+.ez-stelle__text .ez-punkt { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px; }
+
+/* Rechtliches 13 px, „Vertrag widerrufen“ unterstrichen zuerst, Ziele 44 px */
+.ez-recht { margin: 18px 0 6px; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 14px; font: 400 .8125rem/1.3 var(--font-sans); color: var(--silbergrau); }
+.ez-recht a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; }
+.ez-recht__widerruf { text-decoration: underline !important; text-underline-offset: 3px; }
+
+/* Fuß: runder Rückweg (52) und die eine volle weiße Pille mit schwarzem Pfeilkreis; am Telefon klebt er unten */
+.ez-fuss { position: sticky; bottom: 0; z-index: 10; margin: auto calc(-1 * max(16px, env(safe-area-inset-right, 0px))) 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); display: flex; gap: 10px; align-items: center; justify-content: center; padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: linear-gradient(180deg, transparent, var(--schwarz) 16px); }
+.ez-rund--fuss { width: 52px; height: 52px; }
+.ez-fuss .dna-pille { flex: 0 1 260px; height: 52px; font-size: .9375rem; box-shadow: inset 0 -1px 0 rgba(7,9,10,.08); }
+.ez .dna-pille__pfeil svg { transition: transform 150ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .ez .dna-pille:hover .dna-pille__pfeil svg { transform: translateX(2px); }
+  .ez .dna-pille--leise:hover, .ez-rund--fuss:hover, .ez-rund--zu:hover, .ez-i:not([aria-expanded="true"]):not(.ez-i--etikett):hover { background: var(--indigo); color: var(--weiss); box-shadow: none; }
+  .ez-kachel:not([aria-checked="true"]):hover { color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+  .ez-stelle button:not([aria-checked="true"]):hover { color: var(--schwarz); }
+  .ez-rund--kopf:hover, .ez-kopf__knopf:hover { background: var(--anthrazit); }
+}
+
+/* Schmale Telefone */
+@media (max-width: 374px) {
+  .ez-objekt { width: 150px; height: 190px; }
+  .ez-etikett { max-width: calc(100% - 180px); }
+  .ez-kopf__knopf span { display: none; }
+  .ez-kopf__knopf { width: 44px; padding: 0; justify-content: center; }
+  .ez-zeichen { width: 44px; height: 44px; }
+}
+
+/* Weniger Bewegung: Zustände sofort */
+@media (prefers-reduced-motion: reduce) {
+  .ez-objekt img, .ez-objekt__schatten, .ez-buehne__licht, .ez-anker, .ez-etikett__text, .ez-kachel, .ez-kachel__licht, .ez-kachel__name::before, .ez-stelle button, .ez-neu-rahmen, .ez-i, .ez-rund, .ez-bogen__grund, .ez-bogen__blatt, .ez-kopf__knopf, .ez .dna-pille, .ez .dna-pille__pfeil svg { transition: none !important; }
+}
+
+/* ---------- Folien: Start und Fotos; Wechsel als Zustand, 260 ms seitlich 14 px ---------- */
+.ez-folie { display: flex; flex-direction: column; flex: 1 0 auto; min-height: 100%; }
+.ez-folie[hidden] { display: none; }
+.ez-folie > * { flex: none; }
+.ez-folie.kommt { animation: ez-kommt 260ms var(--dna-druck) backwards; }
+.ez-folie.kommt.zurueck { animation-name: ez-kommt-z; }
+@keyframes ez-kommt { from { opacity: 0; transform: translateX(14px); } }
+@keyframes ez-kommt-z { from { opacity: 0; transform: translateX(-14px); } }
+
+/* ---------- Folie 2: Fotos ---------- */
+.ez-buehne--foto { cursor: default; height: 250px; }
+.ez-buehne--foto .ez-buehne__foto { object-position: 50% 50%; transition: opacity 220ms var(--dna-druck); }
+.ez-buehne--foto[data-stand="beispiel"] .ez-buehne__foto { opacity: 1; }
+.ez-buehne--foto[data-stand="beispiel"] { cursor: pointer; }
+/* Sucher-Ecken wie auf der Muster-Seite (G10): vier weiße Winkel, 2 px, runde Ecke */
+.ez-sucher { position: absolute; inset: 7%; z-index: 3; pointer-events: none; }
+.ez-sucher i { position: absolute; width: 18px; height: 18px; border: 0 solid var(--weiss); opacity: .9; }
+.ez-sucher i:nth-child(1) { left: 0; top: 0; border-left-width: 2px; border-top-width: 2px; border-top-left-radius: 6px; }
+.ez-sucher i:nth-child(2) { right: 0; top: 0; border-right-width: 2px; border-top-width: 2px; border-top-right-radius: 6px; }
+.ez-sucher i:nth-child(3) { right: 0; bottom: 0; border-right-width: 2px; border-bottom-width: 2px; border-bottom-right-radius: 6px; }
+.ez-sucher i:nth-child(4) { left: 0; bottom: 0; border-left-width: 2px; border-bottom-width: 2px; border-bottom-left-radius: 6px; }
+.ez-buehne--foto[data-stand="foto"] .ez-sucher { display: none; }
+.ez-glaschip--unten { top: auto; bottom: 12px; left: 12px; display: inline-block; height: 30px; padding: 0 12px; color: var(--weiss); font-size: .875rem; line-height: 28px; }
+.ez-glaschip--unten b { color: var(--weiss); font-weight: 600; }
+/* Wasserwaage als Kapsel (G11): Spur mit Blase, steht mittig = gerade */
+.ez-waage { position: absolute; z-index: 4; right: 12px; top: 12px; display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px 0 9px; border-radius: var(--rund-pille); background: var(--glas); color: var(--weiss); font: 500 .8125rem/1 var(--font-sans); border: 1px solid var(--glas-rand); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(7,9,10,.4), 0 10px 30px -10px rgba(0,0,0,.6); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); pointer-events: none; }
+.ez-waage__spur { position: relative; width: 34px; height: 12px; }
+.ez-waage__spur::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px; background: rgba(255,255,255,.6); }
+.ez-waage__spur::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; margin-left: -.5px; background: rgba(255,255,255,.6); }
+.ez-waage__blase { position: absolute; top: 1px; left: calc(50% - 5px + var(--neigung, 0px)); width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--weiss); background: rgba(7,9,10,.35); transition: left 320ms var(--dna-druck); }
+.ez-buehne--foto[data-stand="foto"] .ez-waage { display: none; }
+/* Befunde der KI als Etiketten an der Sache (G9): nur beim Beispielfoto, nach „KI fertig“ */
+.ez-ki[hidden] { display: none; }
+.ez-ki .dna-anker__linien line { stroke: var(--weiss); stroke-dasharray: 3 4; }
+.ez-ki__etikett { position: absolute; transform: translate(-50%, -50%); }
+.ez-ki .dna-anker__punkt, .ez-ki .dna-anker__linien line, .ez-ki__etikett { opacity: 0; transition: opacity 200ms var(--dna-druck); }
+.ez-ki.ist-da .dna-anker__punkt, .ez-ki.ist-da .dna-anker__linien line, .ez-ki.ist-da .ez-ki__etikett { opacity: 1; }
+.ez-ki.ist-da .dna-anker__punkt:nth-of-type(2), .ez-ki.ist-da line:nth-of-type(2), .ez-ki.ist-da .ez-ki__etikett:nth-of-type(5) { transition-delay: 100ms; }
+.ez-ki.ist-da .dna-anker__punkt:nth-of-type(3), .ez-ki.ist-da line:nth-of-type(3), .ez-ki.ist-da .ez-ki__etikett:nth-of-type(6) { transition-delay: 200ms; }
+.ez-ki.ist-da .dna-anker__linien line { transition-delay: 60ms; }
+.ez-ki.ist-da line:nth-of-type(2) { transition-delay: 160ms; }
+.ez-ki.ist-da line:nth-of-type(3) { transition-delay: 260ms; }
+.ez-ki.ist-da .ez-ki__etikett { transition-delay: 120ms; }
+.ez-ki.ist-da .ez-ki__etikett:nth-of-type(5) { transition-delay: 220ms; }
+.ez-ki.ist-da .ez-ki__etikett:nth-of-type(6) { transition-delay: 320ms; }
+.ez-ki__etikett .dna-etikett { padding: 6px 12px; font: 500 .8125rem/1 var(--font-sans); color: var(--weiss); white-space: nowrap; }
+/* Fotoplätze auf der weißen Karte: gestrichelt = noch kein Foto (G1) */
+.ez-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ez-slot { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--rund-m); overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)); transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
+.ez-slot:active { transform: scale(.97); transition-duration: 0s; }
+.ez-slot input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ez-slot:has(input:focus-visible) { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+.ez-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.ez-slot img[hidden] { display: none; }
+.ez-slot__leer { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 1.5px dashed var(--silbergrau); border-radius: var(--rund-m); color: var(--schwarz); text-align: center; }
+.ez-slot__leer svg { width: 26px; height: 26px; margin-bottom: 3px; color: var(--textgrau); }
+.ez-slot__leer b { font: 500 .9375rem/1.15 var(--font-sans); }
+.ez-slot__leer small { font: 400 .8125rem/1.2 var(--font-sans); color: color-mix(in srgb, var(--textgrau) 80%, var(--schwarz)); }
+.ez-slot.ist-voll .ez-slot__leer { display: none; }
+.ez-slot__chip { position: absolute; left: 8px; bottom: 8px; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: var(--rund-pille); background: var(--schwarz); color: var(--weiss); font: 500 .75rem/1 var(--font-sans); white-space: nowrap; }
+.ez-slot__chip[hidden] { display: none; }
+.ez-slot__chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--violett); }
+.ez-slot__chip.ist-fertig::before { background: var(--weiss); }
+.ez-slot__weg { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; padding: 0; border-radius: 50%; background: rgba(7,9,10,.8); color: var(--weiss); display: grid; place-items: center; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
+.ez-slot__weg::after { content: ""; position: absolute; inset: -8px; }
+.ez-slot__weg[hidden] { display: none; }
+.ez-slot__weg svg { width: 12px; height: 12px; }
+.ez-slot__weg:active { transform: scale(.94); transition-duration: 0s; }
+.ez-slot__weg:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+.ez-karte__text { margin: 0; font: 400 .875rem/1.45 var(--font-sans); color: var(--textgrau); text-wrap: pretty; }
+.ez-karte__text--leise { display: flex; gap: 7px; align-items: flex-start; margin-top: -4px; font-size: .8125rem; color: var(--textgrau); }
+.ez-karte__text--leise svg { flex: none; width: 15px; height: 15px; margin-top: 2px; }
+.ez-vorschau { margin: 10px 0 0; text-align: center; }
+.ez-textknopf--vorschau { margin: 0; color: var(--silbergrau); }
+.ez-tipp { display: flex; gap: 10px; align-items: flex-start; margin-top: 8px; padding: 9px 12px; }
+.ez-tipp svg { flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--silbergrau); }
+.ez-tipp b { font-weight: 500; }
+.ez-notiz__folie[hidden] { display: none; }
+.ez-block__wert--hell { color: var(--textgrau); font: 400 .875rem/1.3 var(--font-sans); font-variant-numeric: tabular-nums; }
+.ez-textknopf { justify-self: start; min-height: 44px; margin: -6px 0 -8px; padding: 0; border: 0; background: none; color: var(--textgrau); font: 400 .8125rem/1.3 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ez-haken { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ez-haken li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; align-items: start; font: 400 .9375rem/1.45 var(--font-sans); color: var(--weiss); }
+.ez-haken svg { width: 14px; height: 14px; margin-top: 4px; color: var(--weiss); }
+/* Häkchen „Diesen Hinweis nicht mehr anzeigen“ (Wunsch des Inhabers, 27.10.2026): Kasten 22 px, Zeile 44 px hoch; angehakt mit violettem Punkt-Grund (gewählt) */
+.ez-haekchen { display: flex; align-items: center; gap: 12px; min-height: 44px; margin: -2px 0 -4px; cursor: pointer; font: 400 .9375rem/1.3 var(--font-sans); color: var(--weiss); -webkit-tap-highlight-color: transparent; }
+.ez-haekchen input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ez-haekchen__kasten { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; box-shadow: inset 0 0 0 1.5px var(--silbergrau); color: var(--weiss); transition: background-color 150ms var(--dna-druck), box-shadow 150ms var(--dna-druck), transform 160ms var(--dna-druck); }
+.ez-haekchen__kasten svg { width: 14px; height: 14px; opacity: 0; transform: scale(.6); transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck); }
+.ez-haekchen input:checked + .ez-haekchen__kasten { background: var(--violett); box-shadow: inset 0 0 0 1.5px var(--violett); }
+.ez-haekchen input:checked + .ez-haekchen__kasten svg { opacity: 1; transform: none; }
+.ez-haekchen:active .ez-haekchen__kasten { transform: scale(.94); transition-duration: 0s; }
+.ez-haekchen input:focus-visible + .ez-haekchen__kasten { outline: 2px solid var(--weiss); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .ez-haekchen__kasten, .ez-haekchen__kasten svg { transition: none !important; } }
+.ez-bogen__knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.ez-bogen__knoepfe .ez-bogen__zu { margin-top: 0; }
+@media (prefers-reduced-motion: reduce) { .ez-folie.kommt { animation: none; } .ez-slot, .ez-slot__weg, .ez-waage__blase, .ez-buehne--foto .ez-buehne__foto, .ez-ki .dna-anker__punkt, .ez-ki .dna-anker__linien line, .ez-ki__etikett { transition: none !important; } }
+.ez-notiz__folie > .ez-klein { margin-top: 20px; }
+
+/* ---------- Schritt 3: Messen (27.10.2026) ----------
+   Bühne = das 3-D-Modell der Wünsche (WebGL, Putzwand, Laibung, Glas) als Bild, Licht und Rand drumherum frei; nur das aktuelle Maß:
+   Öffnung Koralle gestrichelt, Element Violett durchgezogen, Strichmarken an den Enden, Etiketten auf Höhe der Enden, das weiße Feld
+   an der Linie mit der Zahl als Held (G3, G9, G5). Zifferntasten offen auf der weißen Karte, Rückfragen am Platz der Zeile, die
+   eine Pille trägt die sichere Antwort, kein Zwischenschritt (DNA, Abschnitt 9). Bewegung nur transform und opacity. */
+.ez-folie[data-folie="messen"] { position: relative; isolation: isolate; }
+.ez-folie[data-folie="messen"] .ez-frage { position: relative; }
+.ez-folie[data-folie="messen"] .ez-frage::before { content: ""; position: absolute; z-index: -1; left: -16px; right: -16px; top: -8px; height: 88px; pointer-events: none; background: radial-gradient(56% 100% at 50% 0, var(--anthrazit), color-mix(in srgb, var(--anthrazit) 40%, transparent) 40%, transparent 74%); }
+/* Ein Licht von oben links für alles, was auf der Wand liegt: neutral dunkle Schatten, kein Braun */
+.ez-buehne--mess { --putz-schatten: 0 1px 1px rgba(7,9,10,.28), 0 2px 4px -1px rgba(7,9,10,.22), 4px 12px 20px -10px rgba(7,9,10,.50); }
+/* Große Bühne: von Rand zu Rand, unten gerundet; ein Tipp aufs Bild öffnet die Großansicht */
+.ez-buehne--mess { height: 280px; margin: 0 -16px; border-radius: 0 0 var(--rund-l) var(--rund-l); cursor: zoom-in; touch-action: auto; background: radial-gradient(120% 100% at 26% 8%, #f3eee6, #e9e2d7 58%, #dcd4c7); box-shadow: none; }
+/* Licht mit Abfall: hell auf der Mitte des Modells, zum Rand warm dunkler; einmal gemalt, ohne Filter */
+.ez-buehne--mess .ez-buehne__kante { z-index: 2; background: linear-gradient(160deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 36%), radial-gradient(72% 90% at 55% 44%, rgba(7,9,10,0) 50%, rgba(7,9,10,.10) 76%, rgba(7,9,10,.30) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(7,9,10,.30); }
+/* Großansicht: der Putz läuft oben und unten ins Dunkel aus */
+.ez-gross .ez-buehne--mess .ez-buehne__kante { box-shadow: none; background: linear-gradient(180deg, rgba(7,9,10,.50) 0, rgba(7,9,10,0) 56px, rgba(7,9,10,0) calc(100% - 72px), rgba(7,9,10,.55) 100%), linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 36%), radial-gradient(120% 64% at 50% 46%, rgba(7,9,10,0) 60%, rgba(7,9,10,.20) 100%); }
+/* Der Schritt-Chip auf dieser Bühne deckend ohne Weichzeichner, im selben Licht wie die Etiketten */
+.ez-buehne--mess .ez-glaschip { background: linear-gradient(180deg, color-mix(in srgb, var(--anthrazit) 86%, var(--silbergrau)), color-mix(in srgb, var(--anthrazit) 80%, var(--schwarz))); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: rgba(255,255,255,.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), var(--putz-schatten); }
+.ez-buehne--mess .ez-glaschip.ist-kurz .ez-glaschip__zusatz { display: none; }
+.ez-mess__bild { position: absolute; z-index: 0; left: 0; top: 0; width: 100%; height: auto; max-width: none; display: block; opacity: 0; }
+.ez-mess__bild.ist-an { z-index: 1; opacity: 1; }
+.ez-mess__bild.blendet.ist-an { transition: opacity 220ms var(--dna-druck); }
+.ez-mess__bild.blendet:not(.ist-an) { transition: opacity 0s linear 220ms; }
+.ez-mess__bild.ist-schmal { -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+/* Beim Rahmenmaß die Öffnung desselben Paares blass: Koralle gestrichelt, dünn */
+.ez-mass-neben { position: absolute; z-index: 3; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.ez-geist { opacity: .8; }
+.ez-geist line { vector-effect: non-scaling-stroke; stroke-linecap: butt; }
+.ez-geist__halo { stroke: rgba(7,9,10,.30); stroke-width: 3; }
+.ez-geist__halo:first-child, .ez-geist__linie { stroke-dasharray: 4px 4px; }
+.ez-geist__linie, .ez-geist__kappe { stroke: var(--koralle); stroke-width: 1.2; }
+.ez-buehne--mess.ist-warn .ez-geist { opacity: 1; }
+.ez-buehne--mess.ist-warn .ez-geist__linie, .ez-buehne--mess.ist-warn .ez-geist__kappe { stroke-width: 1.8; }
+/* Linie: stumpfe Enden, die Strichelung passt sich der Länge an (start.js), damit an beiden Marken ein voller Strich steht */
+.ez-mass { position: absolute; z-index: 3; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ez-mass__linie { stroke: var(--koralle); stroke-width: 1.8; stroke-linecap: butt; stroke-dasharray: var(--strich, 6px) 4px; vector-effect: non-scaling-stroke; }
+.ez-mass__halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; stroke-linecap: butt; stroke-dasharray: var(--strich, 6px) 4px; vector-effect: non-scaling-stroke; }
+[data-wer="el"] .ez-mass__halo, [data-wer="el"] .ez-mass__linie { stroke-dasharray: none; }
+[data-wer="el"] .ez-mass__linie { stroke: var(--violett); }
+.ez-mass__kappe { position: absolute; z-index: 3; width: 14px; height: 1.8px; margin: -.9px 0 0 -7px; background: var(--koralle); box-shadow: 0 0 0 .9px rgba(7,9,10,.42); pointer-events: none; }
+[data-r="h"] .ez-mass__kappe { width: 1.8px; height: 14px; margin: -7px 0 0 -.9px; }
+[data-wer="el"] .ez-mass__kappe { background: var(--violett); }
+/* Lupen-Etikett an jedem Ende: dunkle Pille ohne Weichzeichner, links die Lupe (dasselbe Bild vergrößert, darin Strichmarke und das
+   Stück Linie nach innen, weißer Ring wie ein Glas), rechts das Ding hell und der Zusatz Silbergrau; gespiegelt, wenn sie links steht */
+.ez-mass__ende { position: absolute; z-index: 4; display: flex; align-items: center; gap: 10px; padding: 4px 14px 4px 4px; border-radius: var(--rund-pille); background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), var(--putz-schatten); pointer-events: none; }
+.ez-mass__ende.ist-gespiegelt { flex-direction: row-reverse; padding: 4px 4px 4px 14px; text-align: right; }
+.ez-lupe { position: relative; flex: none; width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: linear-gradient(150deg, var(--weiss) 0%, color-mix(in srgb, var(--silbergrau) 75%, var(--weiss)) 40%, var(--textgrau) 100%); box-shadow: 0 0 0 1px rgba(7,9,10,.55), 0 2px 3px rgba(7,9,10,.40); }
+.ez-lupe::after { content: ""; position: absolute; inset: 2.5px; z-index: 1; border-radius: 50%; pointer-events: none; background: radial-gradient(46% 30% at 34% 14%, rgba(255,255,255,.32), rgba(255,255,255,0) 70%); }
+.ez-lupe__bild { position: absolute; inset: 2.5px; border-radius: 50%; background-color: #e9e2d7; background-repeat: no-repeat; box-shadow: inset 0 0 0 1px rgba(7,9,10,.22), inset 0 2px 5px rgba(7,9,10,.26), inset -2px -3px 6px rgba(7,9,10,.18); }
+.ez-lupe__marke { position: absolute; inset: 2.5px; z-index: 2; width: calc(100% - 5px); height: calc(100% - 5px); overflow: visible; }
+.ez-lupe__linie, .ez-lupe__kappe { stroke: var(--koralle); stroke-width: 1.8; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.ez-lupe__linie { stroke-dasharray: 6px 4px; }
+.ez-lupe__halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.ez-lupe__halo:first-child { stroke-dasharray: 6px 4px; }
+[data-wer="el"] .ez-lupe__linie, [data-wer="el"] .ez-lupe__kappe { stroke: var(--violett); }
+[data-wer="el"] .ez-lupe__linie, [data-wer="el"] .ez-lupe__halo:first-child { stroke-dasharray: none; }
+.ez-mass__text { max-width: 120px; font: 400 .8125rem/1.2 var(--font-sans); color: var(--silbergrau); white-space: normal; text-wrap: balance; }
+.ez-mass__text b { display: block; margin-bottom: 1px; font: 500 .9375rem/1.15 var(--font-sans); letter-spacing: -.01em; color: var(--weiss); }
+.ez-mass__fuehrung { stroke: var(--weiss); stroke-width: 1; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.ez-mass__fuehrung-halo { stroke: rgba(7,9,10,.45); stroke-width: 2.6; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.ez-buehne--mess.ist-klein .ez-mass__ende { gap: 8px; padding: 3px 11px 3px 3px; }
+.ez-buehne--mess.ist-klein .ez-mass__ende.ist-gespiegelt { padding: 3px 3px 3px 11px; }
+.ez-buehne--mess.ist-klein .ez-lupe { width: 40px; height: 40px; }
+.ez-buehne--mess.ist-klein .ez-glaschip { display: none; }
+.ez-buehne--mess.ist-klein .ez-mass__text { max-width: 96px; font-size: .75rem; }
+.ez-buehne--mess.ist-klein .ez-mass__text b { font-size: .875rem; }
+.ez-buehne--mess.ist-klein .ez-lupe__bild, .ez-buehne--mess.ist-klein .ez-lupe::after, .ez-buehne--mess.ist-klein .ez-lupe__marke { inset: 2px; }
+/* Knopf „Groß ansehen“ (G13 mit Wort, das Pfeilsymbol allein verstehen Ältere nicht), unten links, wo weder Linie noch Etikett liegt */
+.ez-gross-auf { position: absolute; z-index: 4; left: 10px; bottom: 10px; height: 44px; border: 0; padding: 0 16px 0 13px; border-radius: var(--rund-pille); display: inline-flex; align-items: center; gap: 8px; font: 500 .8125rem/1 var(--font-sans); white-space: nowrap; color: var(--weiss); background: radial-gradient(at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,.04) 70%), var(--schwarz); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px var(--silbergrau), var(--putz-schatten); cursor: zoom-in; transition: transform 160ms var(--dna-druck); }
+.ez-gross-auf svg { width: 18px; height: 18px; flex: none; }
+.ez-gross-auf:active { transform: scale(.97); transition-duration: 0s; }
+.ez-gross-auf:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+.ez-buehne--mess.ist-gross .ez-gross-auf, .ez-buehne--mess.ist-gross .ez-glaschip { display: none; }
+
+/* Kleine Bühne (Telefone mit wenig Höhe): Feld kleiner, damit es neben der Linie Platz hat und kein Etikett verdeckt */
+.ez-buehne--mess.ist-klein .ez-mass__feld { height: 44px; padding: 8px 14px; }
+.ez-buehne--mess.ist-klein .ez-mass__feld b { font-size: 1.75rem; }
+.ez-buehne--mess.ist-klein .ez-mass__marke { height: 30px; }
+.ez-buehne--mess.ist-klein .ez-mass__feld.is-leer .ez-mass__zb { margin-right: 6px; font-size: .75rem; }
+.ez-buehne--mess.ist-klein .ez-mass__haken { right: 12px; }
+/* Großansicht: die Bühne füllt den Platz zwischen Frage und Pille; Zahl und Lupen größer */
+.ez-gross { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; overflow: hidden; background: var(--schwarz); color: var(--weiss); }
+.ez-gross[open] { display: flex; flex-direction: column; }
+.ez-gross.kommt[open] { animation: ez-gross-auf 240ms var(--dna-auftritt) backwards; }
+.ez-gross.kommt[open]::backdrop { animation: ez-folgt 240ms var(--dna-auftritt) backwards; }
+html:has(.ez-gross[open]) { overflow: hidden; overscroll-behavior: none; }
+.ez-gross, .ez-folie[data-folie="messen"] { --fokus: var(--weiss); }
+.ez-gross::backdrop { background: rgba(7,9,10,.88); }
+@keyframes ez-gross-auf { from { opacity: 0; transform: scale(.97); } }
+.ez-gross__kopf { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px 14px; }
+.ez-gross__titel { margin: 0; font: 500 1.75rem/1.1 var(--font-sans); letter-spacing: -.025em; }
+.ez-gross__titel em { font-style: normal; color: var(--silbergrau); }
+.ez-gross__unter { margin: 6px 0 0; font: 400 .9375rem/1.45 var(--font-sans); color: var(--silbergrau); text-wrap: pretty; }
+.ez-gross__platz { position: relative; flex: 1; min-height: 0; }
+.ez-gross .ez-buehne--mess { position: absolute; inset: 0; height: auto !important; margin: 0; border-radius: 0; cursor: default; box-shadow: none; }
+.ez-gross__fuss { display: flex; justify-content: center; padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+.ez-gross__fuss .dna-pille { width: 100%; max-width: 360px; justify-content: center; }
+.ez-buehne--mess.ist-gross .ez-mass__feld { height: 60px; padding: 8px 20px; }
+.ez-buehne--mess.ist-gross .ez-mass__marke { height: 46px; }
+.ez-buehne--mess.ist-gross .ez-mass__feld small { font-size: .9375rem; }
+.ez-buehne--mess.ist-gross .ez-mass__feld b { font-size: 2.75rem; }
+.ez-buehne--mess.ist-gross .ez-lupe { width: 76px; height: 76px; }
+.ez-buehne--mess.ist-gross .ez-mass__text { max-width: 140px; font-size: .875rem; }
+.ez-buehne--mess.ist-gross .ez-mass__text b { font-size: 1.0625rem; }
+.ez-buehne--mess.ist-gross .ez-lupe__bild, .ez-buehne--mess.ist-gross .ez-lupe::after, .ez-buehne--mess.ist-gross .ez-lupe__marke { inset: 3px; }
+@media (prefers-reduced-motion: reduce) { .ez-gross.kommt[open], .ez-gross.kommt[open]::backdrop { animation: none; } }
+/* Feld an der Linie: an der Linienseite verankert, die Zahl wächst von der Linie weg; Zahl 40/300 mit Proportionalziffern, Einheit auf der Grundlinie */
+.ez-mass__feld { position: absolute; z-index: 5; display: inline-flex; align-items: baseline; gap: 0; height: 52px; padding: 8px 18px; border-radius: var(--rund-pille); background: linear-gradient(180deg, var(--weiss) 0 50%, color-mix(in srgb, var(--silbergrau) 10%, var(--weiss))); color: var(--schwarz); translate: var(--fx, 0) 0; box-shadow: 0 0 0 1.8px var(--violett), inset 0 -2px 0 rgba(7,9,10,.06), var(--putz-schatten); white-space: nowrap; pointer-events: auto; cursor: default; }
+.ez-mass__zb { display: none; }
+.ez-mass__feld b { align-self: baseline; font: 300 2.25rem/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: normal; }
+.ez-mass__feld small { margin: 0 0 0 .3em; font: 400 .875rem/1 var(--font-sans); color: var(--textgrau); transition: opacity 150ms var(--dna-druck); }
+.ez-mass__marke { align-self: center; width: 1.8px; height: 38px; margin: 0 2px 0 6px; border-radius: 1px; background: var(--violett); transition: opacity 150ms var(--dna-druck); }
+.ez-mass__feld.is-leer .ez-mass__zb { display: block; align-self: center; margin-right: 8px; font: 500 .8125rem/1 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
+.ez-mass__feld.is-leer b { color: var(--silbergrau); }
+.ez-mass__feld.is-leer .ez-mass__marke { order: -1; margin: 0 6px 0 -6px; height: 30px; }
+.ez-mass__haken { position: absolute; right: 16px; top: 50%; width: 16px; height: 16px; margin-top: -10px; padding: 2px; box-sizing: content-box; border-radius: 50%; color: var(--weiss); background: var(--schwarz); opacity: 0; transform: scale(.6); transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck); }
+.ez-mass__feld.ist-gespeichert { box-shadow: 0 0 0 1.8px var(--schwarz), inset 0 -2px 0 rgba(7,9,10,.06), var(--putz-schatten); }
+.ez-mass__feld.ist-gespeichert small, .ez-mass__feld.ist-gespeichert .ez-mass__marke { opacity: 0; }
+.ez-mass__feld.ist-gespeichert .ez-mass__haken { opacity: 1; transform: none; }
+.ez-mass__feld.is-fehler { box-shadow: 0 0 0 1.8px var(--koralle), inset 0 -2px 0 rgba(7,9,10,.06), var(--putz-schatten); }
+.ez-mass__feld.is-fehler .ez-mass__marke { background: var(--koralle); }
+/* Nächstes Maß: die Linie läuft in 320 ms von Kappe zu Kappe (Clip über ihre eigene Strecke), Kappe A sofort, Enden und Feld folgen */
+.ez-buehne--mess.zieht .ez-mass { animation: ez-zieht-v 320ms var(--dna-druck) var(--verz, 0ms) backwards; }
+.ez-buehne--mess.zieht[data-r="h"] .ez-mass { animation-name: ez-zieht-h; }
+@keyframes ez-zieht-v { from { clip-path: inset(0 0 calc(100% - var(--a, 0%)) 0); } to { clip-path: inset(0 0 calc(100% - var(--b, 100%) - 4px) 0); } }
+@keyframes ez-zieht-h { from { clip-path: inset(0 calc(100% - var(--a, 0%)) 0 0); } to { clip-path: inset(0 calc(100% - var(--b, 100%) - 4px) 0 0); } }
+.ez-buehne--mess.zieht #mess-kappe-a, .ez-buehne--mess.zieht #mess-ende-a, .ez-buehne--mess.zieht #mess-fuehrung-a, .ez-buehne--mess.zieht #mess-fuehrung-a-halo { animation: ez-folgt 160ms var(--dna-druck) var(--verz, 0ms) backwards; }
+.ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht #mess-ende-b, .ez-buehne--mess.zieht #mess-fuehrung-b, .ez-buehne--mess.zieht #mess-fuehrung-b-halo { animation: ez-folgt 160ms var(--dna-druck) calc(120ms + var(--verz, 0ms)) backwards; }
+.ez-buehne--mess.zieht .ez-mass__feld { animation: ez-folgt 150ms var(--dna-druck) backwards; }
+@keyframes ez-folgt { from { opacity: 0; } }
+/* Karte mit den Zifferntasten (G14: tonaler Abfall, Kanten) */
+.ez-karte--tasten { gap: 8px; padding: 12px 16px 16px; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
+.ez-kapseln { display: inline-flex; gap: 5px; }
+.ez-kapseln i { position: relative; overflow: hidden; width: 20px; height: 8px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 38%, var(--weiss)); }
+.ez-kapseln i::before, .ez-kapseln i::after { content: ""; position: absolute; inset: 0; border-radius: inherit; opacity: 0; transition: opacity 220ms var(--dna-druck); }
+.ez-kapseln i::before { background: var(--violett); }
+.ez-kapseln i::after { background: var(--schwarz); }
+.ez-kapseln i.ist-dran::before, .ez-kapseln i.ist-fertig::after { opacity: 1; }
+/* Zeile: eine linke Kante für alle Zustände, der Punkt hängt davor */
+.ez-zeile { display: flex; align-items: center; gap: 10px; height: 60px; }
+.ez-zeile__text { position: relative; flex: 1; min-width: 0; margin: 0; padding-left: 16px; font: 400 .875rem/1.35 var(--font-sans); color: var(--textgrau); text-wrap: pretty; }
+.ez-zeile__text b { display: block; font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
+.ez-zeile__hinweis { position: relative; display: block; font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
+.ez-zeile__hinweis::before, .ez-zeile.ist-hinweis .ez-zeile__text::before { content: ""; position: absolute; left: -16px; top: calc(.65em - 4px); width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+.ez-folie[data-folie="messen"] .ez-zeile__hinweis::before { left: -18px; top: calc(.65em - .9px); width: 12px; height: 1.8px; border-radius: 0; box-shadow: none; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); }
+.ez-folie[data-folie="messen"] .ez-zeile[data-wer="el"] .ez-zeile__hinweis::before { background: var(--violett); }
+.ez-zeile.ist-hinweis .ez-zeile__text::before { left: 0; }
+.ez-zeile.ist-warnung .ez-zeile__text { font-size: .8125rem; line-height: 1.3; }
+.ez-zeile.ist-warnung .ez-zeile__text b { font-size: .875rem; line-height: 1.25; }
+.ez-zeile__knopf { flex: none; height: 44px; padding: 0 14px; border: 0; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 .875rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; white-space: nowrap; transition: transform 160ms var(--dna-druck); }
+.ez-zeile__knopf:active { transform: scale(.97); transition-duration: 0s; }
+.ez-zeile__knopf:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+/* Tasten: getönt, nie weiß, mit Lichtkante; der Druck kommt als Ebene (opacity) und als Skalierung, beides in 140 ms zurück */
+.ez-tasten { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.ez-taste { position: relative; isolation: isolate; height: 48px; border: 0; padding: 0; border-radius: 16px; background: linear-gradient(180deg, var(--weiss) 0 55%, color-mix(in srgb, var(--silbergrau) 10%, var(--weiss))); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)), inset 0 -2.5px 0 color-mix(in srgb, var(--silbergrau) 30%, var(--weiss)), 0 1px 1px rgba(7,9,10,.14), 0 6px 12px -8px rgba(7,9,10,.30); color: var(--schwarz); font: 400 1.5rem/1 var(--font-sans); font-variant-numeric: tabular-nums; display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform 140ms var(--dna-druck); }
+.ez-taste::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); box-shadow: inset 0 1px 3px rgba(7,9,10,.16); opacity: 0; transition: opacity 140ms var(--dna-druck); }
+.ez-taste:active, .ez-taste.ist-gedrueckt { transform: scale(.97); transition-duration: 0s; }
+.ez-taste:active::after, .ez-taste.ist-gedrueckt::after { opacity: 1; transition-duration: 0s; }
+.ez-tasten.ist-tastatur .ez-taste, .ez-tasten.ist-tastatur .ez-taste::after { transition: none; }
+.ez-taste:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+.ez-taste svg { width: 26px; height: 26px; }
+.ez-taste--fn, .ez-taste--leer { background: transparent; box-shadow: none; }
+.ez-taste--leer { pointer-events: none; }
+.ez-taste--leer::after { content: none; }
+@media (hover: hover) and (pointer: fine) { .ez-taste:not(.ez-taste--leer):not(.ez-taste--fn):hover { background: linear-gradient(180deg, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)), color-mix(in srgb, var(--silbergrau) 26%, var(--weiss))); } .ez-zeile__knopf:hover { background: var(--schwarz); color: var(--weiss); } }
+/* Pille: bei „Korrigieren“ ohne Vorwärtspfeil */
+#mess-weiter[data-art="korr"] .dna-pille__pfeil { display: none; }
+#mess-weiter[data-art="korr"] { padding: 0 24px; justify-content: center; }
+#mess-weiter.ist-taub:active { transform: none; }
+.ez-folie[data-folie="messen"] .ez-fuss .dna-pille { transition: transform 160ms var(--dna-druck), background-color 150ms ease; }
+#mess-erkl-text p { margin: 0 0 10px; }
+/* Titel einzeilig halten; sehr schmale Telefone: die zwei Stimmen auf zwei festen Zeilen */
+.ez-folie[data-folie="messen"] .ez-frage h1 { font-size: 1.75rem; letter-spacing: -.025em; }
+.ez-folie[data-folie="messen"] .ez-frage { padding: 8px 0 2px; }
+.ez-folie[data-folie="messen"] .ez-unterzeile { margin-top: 2px; font-size: .875rem; line-height: 1.4; }
+.ez-folie[data-folie="messen"] .ez-zeile { height: 52px; }
+@media (max-width: 374px) { .ez-folie[data-folie="messen"] .ez-frage h1 { font-size: 1.625rem; } }
+.ez-frage .dna-pille.ez-notizknopf { display: grid; justify-items: center; align-content: center; gap: 2px; height: 44px; min-width: 52px; padding: 0 10px; font-size: .75rem; line-height: 1; }
+/* Kurze Telefone (375 × 667, Android mit Adressleiste): Titel, Tasten, Zeile und Fuß dichter, die Bühne darf bis 112 px */
+@media (max-height: 700px) and (max-width: 759px) {
+  .ez-folie[data-folie="messen"] .ez-frage h1 { font-size: 1.625rem; }
+  .ez-folie[data-folie="messen"] .ez-taste { height: 44px; }
+  .ez-folie[data-folie="messen"] .ez-tasten { gap: 5px; }
+  .ez-folie[data-folie="messen"] .ez-zeile { height: 54px; }
+  .ez-folie[data-folie="messen"] .ez-karte--tasten { padding: 10px 16px 12px; }
+  .ez-folie[data-folie="messen"] .ez-fuss { padding-top: 10px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .ez-folie[data-folie="messen"] .ez-fuss .dna-pille { height: 48px; }
+  .ez-folie[data-folie="messen"] .ez-fuss .ez-rund--fuss { width: 48px; height: 48px; }
+}
+@media (prefers-reduced-motion: reduce) { .ez-gross-auf, .ez-mass__ende, .ez-mass__feld, .ez-mass__feld small, .ez-mass__marke, .ez-mass__haken, .ez-kapseln i::before, .ez-kapseln i::after, .ez-taste, .ez-taste::after, .ez-zeile__knopf { transition: none !important; } .ez-buehne--mess.zieht .ez-mass, .ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht .ez-mass__ende, .ez-buehne--mess.zieht .ez-mass__feld { animation: none !important; } }
+/* Überschrift bekommt beim Folienwechsel den Fokus (Vorlesen); kein Rahmen, sie ist kein Bedienelement */
+.ez-folie h1[tabindex="-1"]:focus { outline: none; }
+
+/* Rechtliche Verweise der Messfolie stehen hinter dem Fuß (Tab-Weg: Tasten, Zurück, Weiter, dann Recht) */
+.ez-folie[data-folie="messen"] .ez-recht { margin-top: 18px; }
+
+/* ---------- Schritt 4 „Ränder“ und „Passt.“ (dieselbe Folie wie „Messen“) ---------- */
+/* „Hier auch … gemessen?“: im leeren Feld der einzige Satz über den Tasten (wie die App), Umriss-Pille über die ganze Zeile; das
+   gestrichelte Linienstück davor ist die Legende der Mitte (blass auf der Bühne) */
+.ez-zeile__gleich { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 48px; border: 0; padding: 0 16px; border-radius: var(--rund-pille); background: var(--weiss); color: var(--schwarz); font: 500 .9375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-zeile__gleich i { flex: none; width: 14px; height: 1.2px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); box-shadow: 0 0 0 .6px rgba(7,9,10,.18); }
+.ez-zeile__gleich:active { transform: scale(.97); transition-duration: 0s; }
+.ez-zeile__gleich:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .ez-zeile__gleich:hover { background: color-mix(in srgb, var(--silbergrau) 14%, var(--weiss)); } }
+/* „Passt.“: sechs Linien der Öffnung; die kleinsten je Richtung kräftig (1,8 px mit Halo), die übrigen blass (1,2 px) */
+.ez-passt-linien, .ez-passt__schild { display: none; }
+.ez-folie.ist-passt .ez-passt-linien { display: block; position: absolute; z-index: 3; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.ez-folie.ist-passt .ez-passt__schild { display: inline-flex; }
+.ez-folie.ist-passt #mess-linie, .ez-folie.ist-passt #mess-neben, .ez-folie.ist-passt .ez-mass__kappe, .ez-folie.ist-passt .ez-mass__ende, .ez-folie.ist-passt .ez-mass__feld, .ez-folie.ist-passt .ez-gross-auf, .ez-folie.ist-passt .ez-karte--tasten { display: none; }
+.ez-folie.ist-passt .ez-buehne--mess { cursor: default; }
+.ez-passt-linien line { vector-effect: non-scaling-stroke; stroke-linecap: butt; }
+.ez-passt__halo { stroke: rgba(7,9,10,.14); stroke-width: 2.6; stroke-dasharray: var(--strich, 4px) 4px; }
+.ez-passt__linie { stroke: var(--koralle); stroke-width: 1.2; stroke-dasharray: var(--strich, 4px) 4px; opacity: .45; }
+.ez-passt__kappe-halo { stroke: rgba(7,9,10,.14); stroke-width: 2.6; }
+.ez-passt__kappe { stroke: var(--koralle); stroke-width: 1.2; opacity: .45; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__linie { stroke-width: 1.8; opacity: 1; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__kappe-halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; }
+.ez-passt-linien g.ist-zaehlt .ez-passt__kappe { stroke-width: 1.8; opacity: 1; }
+.ez-passt-linien.zieht g { animation: ez-folgt 220ms var(--dna-druck) calc(var(--n, 0) * 50ms) backwards; }
+/* Wert am Maß, das zählt: kleine dunkle Kapsel wie die Lupen-Etiketten, Zahl hell, „mm“ Silbergrau */
+.ez-passt__schild { position: absolute; z-index: 4; align-items: baseline; gap: 4px; height: 30px; padding: 0 12px; border-radius: var(--rund-pille); line-height: 30px; background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), var(--putz-schatten); pointer-events: none; white-space: nowrap; }
+.ez-passt__schild b { font: 500 .9375rem/30px var(--font-sans); color: var(--weiss); letter-spacing: -.01em; }
+.ez-passt__schild small { font: 400 .75rem/30px var(--font-sans); color: var(--silbergrau); }
+.ez-passt-linien.zieht ~ .ez-passt__schild { animation: ez-folgt 220ms var(--dna-druck) 300ms backwards; }
+/* Karte „Passt.“: das Maß, das zählt, als Zahl (G3), das Element darunter, je Richtung drei Kapseln (G11) */
+.ez-karte--passt { display: none; gap: 0; padding: 12px 16px 14px; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
+.ez-folie.ist-passt .ez-karte--passt { display: grid; }
+.ez-karte--passt.kommt { animation: ez-folgt 220ms var(--dna-druck) backwards; }
+.ez-passt__haken { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--schwarz); color: var(--weiss); }
+.ez-passt__haken svg { width: 14px; height: 14px; }
+.ez-passt__zahl { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 0; }
+.ez-passt__zahl b { font: 300 3rem/1.02 var(--font-sans); letter-spacing: -.03em; color: var(--schwarz); white-space: nowrap; }
+.ez-passt__zahl small, .ez-passt__el small { font: 400 .875rem/1 var(--font-sans); color: var(--textgrau); }
+.ez-passt__el { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 0; font: 400 .8125rem/1.3 var(--font-sans); color: var(--textgrau); }
+.ez-passt__el span { margin-right: 4px; }
+.ez-passt__el b { font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
+.ez-passt__titel { margin: 12px 0 0; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 34%, var(--weiss)); font: 500 .9375rem/1.3 var(--font-sans); letter-spacing: -.005em; color: var(--schwarz); }
+.ez-passt__spalten { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; margin-top: 8px; }
+.ez-passt__lab { margin: 0 0 2px; font: 400 .75rem/1.3 var(--font-sans); letter-spacing: .03em; color: var(--textgrau); }
+.ez-passt__reihe { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 8px; height: 24px; margin: 0; font: 400 .8125rem/1 var(--font-sans); color: var(--textgrau); }
+.ez-passt__reihe i { position: relative; height: 6px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 26%, var(--weiss)); }
+.ez-passt__reihe i::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--l, 100%); border-radius: inherit; background: color-mix(in srgb, var(--koralle) 78%, var(--weiss)); transform-origin: left center; }
+.ez-passt__reihe b { min-width: 3.4em; text-align: right; font: 400 .9375rem/1 var(--font-sans); color: var(--schwarz); font-variant-numeric: tabular-nums; }
+.ez-passt__reihe.ist-klein { color: var(--schwarz); }
+.ez-passt__reihe.ist-klein i::before { background: var(--koralle); }
+.ez-passt__reihe.ist-klein i::after { content: ""; position: absolute; top: 50%; left: var(--l, 100%); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--violett); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violett) 30%, transparent); }
+.ez-passt__reihe.ist-klein b { font-weight: 600; }
+.ez-karte--passt.kommt .ez-passt__reihe i::before { animation: ez-kapsel 320ms var(--dna-druck) calc(80ms + var(--n, 0) * 20ms) backwards; }
+@keyframes ez-kapsel { from { transform: scaleX(.12); } }
+.ez-passt__fuss { margin: 10px 0 0; font: 400 .8125rem/1.35 var(--font-sans); color: var(--textgrau); }
+@media (prefers-reduced-motion: reduce) { .ez-zeile__gleich { transition: none; } .ez-passt-linien.zieht g, .ez-passt-linien.zieht ~ .ez-passt__schild, .ez-karte--passt.kommt, .ez-karte--passt.kommt .ez-passt__reihe i::before { animation: none; } }
+
+/* ---------- Schritt 5 „Ergebnis“ ---------- */
+.ez-folie[data-folie="ergebnis"] { position: relative; isolation: isolate; --fokus: var(--weiss); }
+.ez-buehne--erg { --putz-schatten: 0 1px 1px rgba(7,9,10,.28), 0 2px 4px -1px rgba(7,9,10,.22), 4px 12px 20px -10px rgba(7,9,10,.50); height: 280px; margin: 0 -16px; border-radius: 0 0 var(--rund-l) var(--rund-l); cursor: default; touch-action: auto; background: radial-gradient(120% 100% at 26% 8%, #f3eee6, #e9e2d7 58%, #dcd4c7); box-shadow: none; }
+.ez-buehne--erg .ez-buehne__kante { z-index: 2; background: linear-gradient(160deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 36%), radial-gradient(72% 90% at 55% 44%, rgba(7,9,10,0) 50%, rgba(7,9,10,.10) 76%, rgba(7,9,10,.30) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(7,9,10,.30); }
+.ez-buehne--erg .ez-glaschip { background: linear-gradient(180deg, color-mix(in srgb, var(--anthrazit) 86%, var(--silbergrau)), color-mix(in srgb, var(--anthrazit) 80%, var(--schwarz))); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: rgba(255,255,255,.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), var(--putz-schatten); }
+.ez-erg__bild { position: absolute; z-index: 0; left: 0; top: 0; width: 100%; height: auto; max-width: none; display: block; }
+.ez-erg__linien { position: absolute; z-index: 3; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.ez-erg__linien line { vector-effect: non-scaling-stroke; stroke-linecap: butt; }
+.ez-erg__halo, .ez-erg__kappe-halo { stroke: rgba(7,9,10,.42); stroke-width: 3.6; }
+.ez-erg__linie, .ez-erg__kappe { stroke: var(--koralle); stroke-width: 1.8; }
+.ez-erg__halo, .ez-erg__linie { stroke-dasharray: 6px 4px; }
+.ez-erg__linien g[data-k="eh"] line, .ez-erg__linien g[data-k="ew"] line { stroke-dasharray: none; }
+.ez-erg__linien g[data-k="eh"] .ez-erg__linie, .ez-erg__linien g[data-k="eh"] .ez-erg__kappe, .ez-erg__linien g[data-k="ew"] .ez-erg__linie, .ez-erg__linien g[data-k="ew"] .ez-erg__kappe { stroke: var(--violett); }
+/* Wert an seiner Linie: dunkle Kapsel wie die Lupen-Etiketten, davor ein Stück der Linie als Legende */
+.ez-erg__wert { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px 0 10px; border-radius: var(--rund-pille); background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), var(--putz-schatten); white-space: nowrap; pointer-events: none; }
+.ez-erg__wert i { width: 12px; height: 1.8px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); }
+.ez-erg__wert[data-wer="el"] i { background: var(--violett); }
+.ez-erg__wert b { font: 500 .9375rem/1 var(--font-sans); letter-spacing: -.01em; color: var(--weiss); }
+.ez-erg__wert small { margin-left: -2px; font: 400 .75rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-folie[data-folie="ergebnis"] .ez-frage { position: relative; padding: 8px 0 2px; }
+.ez-folie[data-folie="ergebnis"] .ez-frage::before { content: ""; position: absolute; z-index: -1; left: -16px; right: -16px; top: -8px; height: 88px; pointer-events: none; background: radial-gradient(56% 100% at 50% 0, var(--anthrazit), color-mix(in srgb, var(--anthrazit) 40%, transparent) 40%, transparent 74%); }
+.ez-folie[data-folie="ergebnis"] .ez-frage h1 { font-size: 1.75rem; letter-spacing: -.025em; }
+.ez-folie[data-folie="ergebnis"] .ez-unterzeile { margin-top: 2px; font-size: .875rem; line-height: 1.4; }
+/* Vier Werte als Anthrazit-Kacheln (G14), je mit Legende, Zahl (G3) und Hinweis als Indigo-Chip (Zustand) */
+.ez-erg__werte { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ez-erg__kachel { position: relative; display: grid; align-content: start; gap: 4px; padding: 12px 14px 13px; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-erg__lab { display: flex; align-items: center; gap: 7px; font: 400 .75rem/1.25 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-erg__lab i { flex: none; width: 12px; height: 1.8px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); }
+.ez-erg__kachel[data-wer="el"] .ez-erg__lab i { background: var(--violett); }
+.ez-erg__zahl { display: flex; align-items: baseline; gap: 5px; margin: 2px 0 0; }
+.ez-erg__zahl b { font: 300 2rem/1.05 var(--font-sans); letter-spacing: -.025em; color: var(--weiss); }
+.ez-erg__zahl small { font: 400 .875rem/1 var(--font-sans); color: var(--silbergrau); }
+.ez-erg__tag { justify-self: start; margin-top: 4px; height: 24px; padding: 0 10px; border-radius: var(--rund-pille); font: 500 .75rem/24px var(--font-sans); color: var(--weiss); background: var(--indigo); box-shadow: inset 0 1px 0 rgba(255,255,255,.10); white-space: nowrap; }
+.ez-erg__winkel { grid-column: 1 / -1; margin: 2px 2px 0; font: 400 .8125rem/1.4 var(--font-sans); color: var(--silbergrau); }
+/* Maße gegen das Foto: Hinweis mit Koralle-Punkt (jetzt handeln), zwei Umriss-Knöpfe */
+.ez-erg__pruef { margin-top: 12px; padding: 14px 16px; border-radius: var(--rund-m); background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px color-mix(in srgb, var(--koralle) 40%, transparent); }
+.ez-erg__pruef-text { position: relative; margin: 0; padding-left: 18px; font: 400 .875rem/1.45 var(--font-sans); color: var(--weiss); }
+.ez-erg__pruef-text::before { content: ""; position: absolute; left: 0; top: calc(.72em - 4px); width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 35%, transparent); }
+.ez-erg__pruef-knoepfe { display: flex; gap: 8px; margin-top: 12px; padding-left: 18px; }
+.ez-zeile__knopf--dunkel { background: transparent; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+.ez-zeile__knopf--dunkel:focus-visible { outline-color: var(--weiss); }
+@media (hover: hover) and (pointer: fine) { .ez-zeile__knopf--dunkel:hover { background: var(--weiss); color: var(--schwarz); } }
+/* Aus deinen Fotos: nur die Zahl, Haken für „liegt bei“ */
+.ez-erg__ki { display: grid; gap: 4px; margin: 14px 2px 0; }
+.ez-erg__ki-lab { font: 400 .75rem/1.25 var(--font-sans); letter-spacing: .03em; color: var(--silbergrau); }
+.ez-erg__ki-text { display: flex; align-items: center; gap: 8px; font: 400 .9375rem/1.4 var(--font-sans); color: var(--weiss); }
+.ez-erg__ki-text svg { flex: none; width: 14px; height: 14px; padding: 3px; box-sizing: content-box; border-radius: 50%; background: var(--violett); color: var(--schwarz); }
+/* Falls zur Hand: weiße Karte, die Eingabe auf Weiß; zu ist sie eine Zeile mit Chevron */
+.ez-erg__hand { margin-top: 14px; padding: 0; gap: 0; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 12%, var(--weiss))); }
+.ez-erg__hand summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 10px 16px; list-style: none; cursor: pointer; border-radius: var(--rund-l); }
+.ez-erg__hand summary::-webkit-details-marker { display: none; }
+.ez-erg__hand summary:focus-visible { outline: 2px solid var(--schwarz); outline-offset: -4px; }
+.ez-erg__hand-titel { display: grid; gap: 3px; font: 500 1rem/1.25 var(--font-sans); color: var(--schwarz); }
+.ez-erg__hand-titel small { font: 400 .8125rem/1.35 var(--font-sans); color: var(--textgrau); }
+.ez-erg__chevron { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 60%, var(--weiss)); }
+.ez-erg__chevron::before { content: ""; position: absolute; inset: 0; margin: auto; width: 14px; height: 14px; background: var(--schwarz); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 5.25 7 8.75l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 5.25 7 8.75l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transition: transform 220ms var(--dna-druck); }
+.ez-erg__hand[open] .ez-erg__chevron::before { transform: rotate(180deg); }
+.ez-erg__hand-body { display: grid; gap: 14px; padding: 2px 16px 16px; border-top: 1px solid color-mix(in srgb, var(--silbergrau) 30%, var(--weiss)); padding-top: 14px; }
+.ez-erg__reihe { display: grid; gap: 8px; }
+.ez-erg__reihe-kopf { display: flex; align-items: center; gap: 8px; }
+.ez-erg__reihe-kopf label { font: 500 .9375rem/1.3 var(--font-sans); color: var(--schwarz); }
+.ez-i--hell { color: var(--textgrau); box-shadow: inset 0 0 0 1.5px var(--textgrau); }
+.ez-erg__stepper { display: grid; grid-template-columns: 44px 1fr 44px; gap: 8px; align-items: center; }
+.ez-erg__rund { width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; background: var(--weiss); color: var(--schwarz); font: 400 1.375rem/1 var(--font-sans); box-shadow: inset 0 0 0 1.5px var(--schwarz); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-erg__rund:active { transform: scale(.94); transition-duration: 0s; }
+.ez-erg__rund:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
+.ez-erg__eingabe { display: flex; align-items: baseline; justify-content: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: var(--rund-pille); background: color-mix(in srgb, var(--silbergrau) 12%, var(--weiss)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--silbergrau) 40%, var(--weiss)); }
+.ez-erg__eingabe:focus-within { box-shadow: inset 0 0 0 1.8px var(--violett); }
+.ez-erg__eingabe input { width: 100%; min-width: 0; height: 44px; border: 0; padding: 0; background: transparent; text-align: right; font: 400 1.25rem/44px var(--font-sans); color: var(--schwarz); outline: none; }
+.ez-erg__eingabe span { font: 400 .875rem/44px var(--font-sans); color: var(--textgrau); }
+.ez-folie[data-folie="ergebnis"] .ez-recht { margin-top: 18px; }
+@media (prefers-reduced-motion: reduce) { .ez-erg__chevron::before, .ez-erg__rund { transition: none; } }
+/* Liegt die Linie tief (Breite unten), steht „Groß ansehen“ oben rechts */
+.ez-buehne--mess.knopf-oben .ez-gross-auf { top: 10px; bottom: auto; left: auto; right: 10px; }
+/* Gremium K: „Hier auch …“ mit Zentimetern; getippt steht die Umrechnung oben, der Hinweis leise darunter mit seiner Legende */
+.ez-zeile__gleich small { margin-left: 6px; font: 400 .8125rem/1 var(--font-sans); color: var(--textgrau); }
+.ez-zeile__text--wert b { font-weight: 500; }
+.ez-zeile__leise { position: relative; display: block; padding-left: 0; font: 400 .8125rem/1.3 var(--font-sans); color: var(--textgrau); }
+.ez-folie[data-folie="messen"] .ez-zeile__text--wert .ez-zeile__leise::before { content: ""; position: absolute; left: -18px; top: calc(.65em - .9px); width: 12px; height: 1.8px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 6px); }
+.ez-folie[data-folie="messen"] .ez-zeile[data-wer="el"] .ez-zeile__text--wert .ez-zeile__leise::before { background: var(--violett); }
+.ez-folie[data-folie="messen"] .ez-zeile__knopf { height: 48px; }
+/* Ergebnis: Ansicht wie in der App (Gremium G, Veto: Funktionen bleiben): drei Rundknöpfe unten rechts (G13), „Zum Drehen ziehen“ unten links */
+.ez-erg__knoepfe { position: absolute; z-index: 5; right: 10px; bottom: 10px; display: flex; gap: 8px; }
+.ez-erg__rundknopf { display: grid; place-items: center; width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; color: var(--weiss); background: radial-gradient(at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,.04) 70%), var(--schwarz); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--silbergrau) 55%, transparent), var(--putz-schatten); cursor: pointer; transition: transform 160ms var(--dna-druck); }
+.ez-erg__rundknopf svg { width: 18px; height: 18px; }
+.ez-erg__rundknopf:active:not(:disabled) { transform: scale(.94); transition-duration: 0s; }
+.ez-erg__rundknopf:disabled { color: var(--silbergrau); opacity: .55; cursor: default; }
+.ez-erg__rundknopf:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px; }
+/* „Falls zur Hand“ geschlossen als Anthrazit-Zeile (G14), erst offen weiß: kein weißer Block direkt über der Pille */
+.ez-erg__hand:not([open]) { background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.045); }
+.ez-erg__hand:not([open]) .ez-erg__hand-titel { color: var(--weiss); }
+.ez-erg__hand:not([open]) .ez-erg__hand-titel small { color: var(--silbergrau); }
+.ez-erg__hand:not([open]) .ez-erg__chevron { box-shadow: inset 0 0 0 1.5px var(--silbergrau); }
+.ez-erg__hand:not([open]) .ez-erg__chevron::before { background: var(--weiss); }
+.ez-erg__hand:not([open]) summary:focus-visible { outline-color: var(--weiss); }
+/* Felder nie unter dem Fuß (Gremium G) */
+html { scroll-padding-bottom: 120px; }
+#app { scroll-padding-bottom: 120px; }
+@media (prefers-reduced-motion: reduce) { .ez-erg__rundknopf { transition: none; } }
+
+/* ---------- Umsetzung Gremium, Detail-Profis und Vorlagen (27.10.2026, Schritte 4 bis Ende) ---------- */
+/* Ergebnis: die Öffnung ist die eine schwere Sache (Typografie Hebel 1, Material Hebel 2): Leuchtkachel über die volle Breite, die Zahl in
+   der Stimme von „Passt.“; das Element als zweite Kachel ohne Heldenzahl */
+.ez-erg__kachel--held, .ez-erg__kachel--zwei { grid-column: 1 / -1; }
+.ez-erg__kachel--held { isolation: isolate; overflow: hidden; padding: 14px 16px 16px; border-radius: var(--rund-l); }
+.ez-erg__kachel--held::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 78% at 92% 0%, var(--violett), color-mix(in srgb, var(--violett) 42%, transparent) 34%, transparent 72%), radial-gradient(44% 56% at 4% 100%, var(--indigo), transparent 72%); }
+.ez-erg__kachel--held::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, var(--silbergrau) 1px, transparent 1.4px) 7px 7px / 14px 14px; -webkit-mask-image: radial-gradient(56% 70% at 100% 0%, #000 26%, transparent 72%); mask-image: radial-gradient(56% 70% at 100% 0%, #000 26%, transparent 72%); opacity: .55; }
+.ez-erg__kachel--held .ez-erg__zahl { margin-top: 2px; gap: 4px; }
+.ez-erg__kachel--held .ez-erg__zahl b { font: 300 3rem/.95 var(--font-sans); letter-spacing: -.03em; white-space: nowrap; }
+.ez-erg__kachel--zwei .ez-erg__zahl b { font: 400 1.25rem/1.2 var(--font-sans); letter-spacing: -.01em; }
+.ez-erg__kachel--held .ez-erg__tag { margin-top: 8px; }
+@media (max-width: 374px) { .ez-erg__kachel--held .ez-erg__zahl b { font-size: 2.625rem; } }
+.ez-erg__wert { align-items: baseline; }
+.ez-erg__wert i { align-self: center; }
+/* „Passt.“: Licht oben rechts und Punktraster wie die Preis-Kachel der Startseite (Material Hebel 2); Etikett → Zahl 6 px */
+.ez-karte--passt { position: relative; isolation: isolate; overflow: hidden; }
+.ez-karte--passt::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(52% 58% at 96% 0%, color-mix(in srgb, var(--violett) 70%, var(--weiss)), color-mix(in srgb, var(--violett) 26%, transparent) 34%, transparent 72%); }
+.ez-karte--passt::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, var(--silbergrau) 1px, transparent 1.4px) 7px 7px / 14px 14px; -webkit-mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); mask-image: radial-gradient(60% 70% at 100% 0%, #000 30%, transparent 72%); }
+.ez-passt__zahl { margin-top: -2px; }
+.ez-passt__zahl b { line-height: .95; }
+/* Luft nach Hierarchie (Typografie Hebel 3) auf Ergebnis und den Folien danach: Titel → Text 12 px, Text → erste Karte 24 bis 32 px */
+.ez-folie[data-folie="ergebnis"] .ez-unterzeile { margin-top: 10px; }
+.ez-folie[data-folie="ergebnis"] .ez-erg__werte { margin-top: 24px; }
+.ez-folie.ez-ab .ez-frage .ez-unterzeile { margin-top: 12px; }
+.ez-folie.ez-ab .ez-frage + * { margin-top: 28px; }
+/* Etiketten auf weißen Karten 12 px wie auf Anthrazit (eine Stimme je Rolle) */
+.ez-karte .dna-label, .ez-karte--tasten .dna-label { font-size: .75rem; letter-spacing: .03em; }
+
+/* ---------- Detail-Profis Bewegung, Zeichen und UX (27.10.2026, Schritte 4 bis Ende) ---------- */
+/* Bewegung 3: der Haken geht sofort, wenn das Feld ein neues Maß zeigt; er kommt weiter in 150 ms */
+.ez-mass__feld:not(.ist-gespeichert) .ez-mass__haken { transition-duration: 0s; }
+/* UX 4: bei den Rändern kein Beispiel im leeren Feld, nur Schreibmarke und Einheit */
+.ez-mass__feld.ist-ohne .ez-mass__zb { display: none; }
+.ez-mass__feld.ist-ohne .ez-mass__marke { margin-left: 0; }
+/* UX 2: nach „Hier auch …“ blendet derselbe Knopf im nächsten Rand erst nach einer Pause ein (taub bis dahin) */
+.ez-zeile__gleich.ist-spaet { animation: ez-folgt 160ms var(--dna-druck) 540ms backwards; }
+/* Zeichen 7: eine Legende je Bedeutung; Öffnung 6/4 bei 1,8, Mitte blass 4/4 bei 1,2 */
+.ez-zeile__gleich i { width: 16px; background: repeating-linear-gradient(90deg, var(--koralle) 0 4px, transparent 4px 8px); }
+.ez-erg__wert i { width: 16px; background: repeating-linear-gradient(90deg, var(--koralle) 0 6px, transparent 6px 10px); }
+/* Bewegung 7: der violette Punkt markiert das kleinste Maß erst, wenn der Balken angekommen ist */
+.ez-karte--passt.kommt .ez-passt__reihe.ist-klein i::after { animation: ez-folgt 160ms var(--dna-druck) calc(340ms + var(--n, 0) * 20ms) backwards; }
+/* Bewegung 8: alle neuen Bedienelemente drücken gleich (0,97) */
+.ez-erg__rund:active, .ez-erg__rundknopf:active:not(:disabled) { transform: scale(.97); }
+.ez-erg__hand summary { transition: transform 160ms var(--dna-druck); }
+.ez-erg__hand summary:active { transform: scale(.97); transition-duration: 0s; }
+@media (prefers-reduced-motion: reduce) { .ez-zeile__gleich.ist-spaet, .ez-karte--passt.kommt .ez-passt__reihe.ist-klein i::after { animation: none; } .ez-erg__hand summary { transition: none; } }
+/* Frontend 2 (Vorlagen-Abgleich): „Passt.“ als ein Zustand: Linien, Schilder am Modell und Karte kommen gemeinsam in 180 ms; nur die
+   Kapselreihe füllt sich von links (G11), der Punkt folgt, wenn der Balken angekommen ist */
+.ez-passt-linien.zieht g, .ez-passt-linien.zieht ~ .ez-passt__schild { animation: ez-folgt 180ms var(--dna-druck) backwards; }
+.ez-karte--passt.kommt .ez-passt__reihe i::before { animation: ez-kapsel 320ms var(--dna-druck) calc(var(--n, 0) * 20ms) backwards; }
+.ez-karte--passt.kommt .ez-passt__reihe.ist-klein i::after { animation: ez-folgt 160ms var(--dna-druck) calc(300ms + var(--n, 0) * 20ms) backwards; }
+/* Typografie (Detail-Profi, 27.10.2026) */
+/* 3: „Hier auch … gemessen?“ bleibt unter 390 px einzeilig */
+@media (max-width: 389px) { .ez-zeile__gleich { gap: 8px; padding: 0 12px; font-size: .875rem; white-space: nowrap; } .ez-zeile__gleich small { margin-left: 2px; font-size: .75rem; } }
+/* 6: das Handlungswort im Notiz-Knopf 13 px */
+.ez-frage .dna-pille.ez-notizknopf { font-size: .8125rem; }
+/* 7: Platzhalter im Messfeld mit 3,6:1 (groß, 36/300), klar heller als ein getipptes Maß */
+.ez-mass__feld.is-leer b { color: color-mix(in srgb, var(--silbergrau) 50%, var(--textgrau)); }
+.ez-karte--passt.kommt { animation-duration: 180ms; }
+/* Ergebnis: die Bühne wächst auf 320 px, das Modell steht zwischen Chip und Knopfleiste in derselben Größe wie vorher (Bildfläche vor Dichte) */
+.ez-buehne--erg { height: 320px; }
