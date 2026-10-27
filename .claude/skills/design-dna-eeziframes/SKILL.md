@@ -171,6 +171,14 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   steht unter dem, was man ausfüllt, nie darüber. Vor dem Bezahlen die Frage nach dem nächstgrößeren Paket mit den wenigen wichtigsten
   Unterschieden. Wahl „Seite vorschlagen“ (wir füllen alles aus) neben „Selbst angeben“. Vorschauen zeigen die echte Seite, nie die
   persönliche Einladung. Springt eine Meldung „es fehlt noch“ zu einer Maske, sind die Felder dort rot markiert und stehen auch dort.
+- Folie für Folie, erst im Bild (Inhaber, 27.10.2026, spät, nach der ersten Übernahme der DNA-Folien in die App): Er war mit dem
+  Ergebnis in der App „überhaupt nicht zufrieden“ (Bühne am Laptop winzig, graue Streifen, Knöpfe zu groß, alte und neue Folien
+  durcheinander). Regel: Jede Folie gehen wir einzeln durch. Er beschreibt, ich zeige ein Bild für Telefon und Laptop, ohne etwas zu
+  programmieren; erst nach seinem Ja wird genau das in der App gebaut, mit allen Knöpfen der Folie, und auf sein Wort online gestellt.
+  Am 3-D-Modell und seiner Anzeige ändere ich nichts, was er nicht verlangt. Für Schritt 1 „Was planst du?“ gilt seitdem: kein Violett
+  in den Kacheln und kein violettes Licht, kein schwarzer Rand und keine Abdunklung um die Bühne, der Hintergrund läuft ohne Container
+  hinter den Kacheln weiter und verliert sich an der weißen Karte, das Element schwebt groß in der Mitte (seine eigenen Bilder der sechs
+  Elemente), am Laptop füllt die Folie den Bildschirm. Vorschlag für seine DNA (Abschnitt 9): „Erst das Bild, dann der Bau“.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

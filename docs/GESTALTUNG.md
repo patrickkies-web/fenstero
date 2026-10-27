@@ -501,18 +501,32 @@ Wünsche (`frageDna`), Schritt 1 „Was planst du?“ (`startDna`) und Schritt 2
     (Umschalter und Einfachwahl mit Punkt, Mehrfachwahl mit Haken, Zähler, Schalter, Aufteilung mit Regler), Farben als Tupfen auf
     Anthrazit (44 px), „Weiß ich noch nicht“ als leise Zeile, gewählt schraffiert, ab 740 px Bildschirmhöhe über dem Fuß klebend. Die
     Zifferntasten stehen im selben Rahmen unter dem Modell. Nach einer Wahl rollt die Seite nur so weit, dass der nächste Block zu sehen ist.
-  - Start (`startDna`, `stZeigen`, app.css Abschnitt „Start im Look der Design-DNA“): Bühne aus Betonboden im Fensterlicht
-    (`web/bilder/konfigurator/buehne.webp`) mit dem gewählten Element als feste Ansicht (sechs Renderings aus dem Modell, je ein WebP),
-    Kontaktschatten, violettes Licht am Boden, Anker an der Ecke des Elements mit gestrichelter Linie zum Etikett (Name, Kurzbeschreibung,
-    i), Chip „Schritt 1 von 6 · Start“; darunter die Frage, die sechs Elemente als Anthrazit-Kacheln mit Strichzeichnung (Radiogruppe,
-    Pfeiltasten), die Stelle als Umschalter auf weißer Karte mit einem Satz darunter (bei „Neue Öffnung“ mit Koralle-Punkt und
-    gestricheltem Rahmen um das Element), unten zurück und „Weiter zu den Fotos“. Wischen auf der Bühne wechselt das Element; Element,
-    Anker und Etikett blenden in 220 ms aus der Wischrichtung, das Licht gleitet nach, Tastatur ohne Übergang.
+  - Start (`startDna`, `stZeigen`, app.css Abschnitt „Start im Look der Design-DNA“; seit 27.10.2026 spät so, wie der Inhaber die
+    Folie im Bild angenommen hat): Der Betonboden im Fensterlicht (`web/bilder/konfigurator/buehne.webp`, gespiegelt) ist der
+    Hintergrund der Folie, ohne Rahmen, ohne Abdunklung und ohne schwarzen Rand; er läuft hinter den Kacheln weiter und verliert sich an
+    der weißen Karte. Darauf Chip „Schritt 1 von 6 · Start“ (Ring weiß), Frage mit i und Notiz (Text mit weichem Schatten), in der Mitte
+    schwebend das gewählte Element groß (Bilder des Inhabers in `web/bilder/konfigurator/element/`, nach Seitenverhältnis in ein Feld
+    von höchstens 342 × 290 px eingepasst, am Laptop bis 720 px breit und 64 % der Bildschirmhöhe), darunter Name, Kurzbeschreibung und
+    i. Sechs kleine Glas-Kacheln (64 px hoch, Zeichnung 24 px, Name 12 px) ohne Violett, gewählt mit weißem Ring; die Stelle als
+    Umschalter auf weißer Karte (gewählt schwarz mit weißem Punkt; bei „Neue Öffnung“ Koralle-Punkt im Satz und gestrichelter Rahmen um
+    das Element), unten zurück und „Weiter zu den Fotos“. Am Laptop füllt die Folie den ganzen Bildschirm (`view.voll`, Klasse
+    `dna-voll` an html): Bühne links, rechts eine Spalte von 380 px mit Kacheln, Stelle und Pille. Wischen auf der Bühne und Pfeiltasten
+    wechseln das Element; es blendet in 220 ms aus der Wischrichtung ein, Tastatur und „weniger Bewegung“ ohne Übergang.
   - Fotos (`fotosDna`, app.css Abschnitt „Fotos im Look der Design-DNA“): Bühne mit Beispielfoto (`beispiel-innen.webp`), Sucherecken
     und Waage, antippen öffnet die Kamera für innen; mit Foto zeigt die Bühne das Foto mit „Von innen · KI liest/KI fertig“ (antippen:
     Großansicht). Darunter der Tipp (mit Foto die Neigung), die Frage mit i („Was liest die KI …“) und Notiz, die Fotoplätze auf weißer
     Karte (leer gestrichelt, voll mit Foto, Stand der KI und Entfernen), unten zurück und „Weiter zum Messen“ (neue Öffnung: „Weiter zum
-    Einzeichnen“); ohne Foto zeigt die Pille erst den Bogen „Mit Foto wird dein Aufmaß besser.“.
+    Einzeichnen“); ohne Foto zeigt die Pille erst den Bogen „Mit Foto wird dein Aufmaß besser.“. Überschrift wie im Artefakt des Inhabers:
+    das i neben der zweizeiligen Überschrift, die Notiz rund mit dem Zeichen über dem Wort (`lgFrage(…, true)`).
+  - Messen, Schritt 3 (`messenDna` in app.js, Modul web/assets/messen-dna.js und messen-dna.css; Fassung des Inhabers vom 27.10.2026,
+    nachts): Die Bühne ist so groß wie auf Folie 1 (`--bh`, 560 px auf dem Telefon, am Laptop der ganze Bildschirm links), die feste
+    Ansicht je Element mit Linien und Lupen wie bisher; die Überschrift („Höhe der Öffnung.“) mit i steht oben in der Bühne, Schwarz auf
+    der Wand. Unter dem Element der Wert-Chip: ein echtes Eingabefeld (`inputmode="numeric"`), Antippen holt die Systemtastatur, keine
+    Zifferntasten. Unterzeile und Notiz stehen unter der Bühne, darunter „Maß 1 von 4“ mit dem Hinweis und den Rückfragen der App
+    (Zentimeter, Warnungen). Die Pille „Weiter zu Maß 2“ erscheint erst mit einem Wert; „Weiter“ prüft, speichert und zeigt das nächste
+    Maß auf derselben Folie mit leerem Feld (die Tastatur geht zu und kommt mit dem nächsten Antippen wieder). Ist die Tastatur offen,
+    steht die Pille direkt über ihr (`visualViewport`). Die Ränder (Schritt 4) bleiben bis zur Durchsicht durch den Inhaber wie bisher
+    (`SCREENS.restAlt`).
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung

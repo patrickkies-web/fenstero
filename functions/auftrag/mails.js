@@ -55,6 +55,11 @@ export function standMail(a, stand, o) {
   return { betreff: t[0] + ' (' + a.nr + ')', html: rahmen(t[0], absatz(esc(t[1])) + (o.text ? absatz(esc(o.text)) : '') + link + absatz('<a href="' + esc(o.konto) + '" style="color:#07090a">Zum Kundenbereich</a>')) };
 }
 
+/* Kasse offen: an Kunden, die unverbindlich angefragt haben (Zentrale „Zur Zahlung einladen“) */
+export function kasseOffenMail(a, o) {
+  return { betreff: 'Ihre Bestellung ' + a.nr + ': Sie können jetzt bezahlen', html: rahmen('Unsere Kasse ist offen', absatz(esc('Sie haben ' + (o.paketName || 'ein Paket') + ' unverbindlich angefragt. Jetzt können Sie die Einrichtung bezahlen; Ihre Angaben sind gespeichert. Bitte prüfen Sie sie kurz und bestellen Sie dann verbindlich.')) +
+    (o.text ? absatz(esc(o.text)) : '') + '<p style="margin:0 0 14px">' + pille(o.link, 'Jetzt bestellen') + '</p>' + absatz('<a href="' + esc(o.konto) + '" style="color:#07090a">Zum Kundenbereich</a>')) };
+}
 export function nachrichtMail(a, text, o) {
   /* o.titel: Ereignis im Betreff an den Inhaber (Freigabe, Änderungswunsch, Paketwechsel, Storno), damit es im Postfach nicht wie eine Nachricht aussieht */
   const firma = ((a.angaben || {}).betrieb || {}).firma || 'einem Kunden';

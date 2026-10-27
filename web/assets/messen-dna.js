@@ -20,6 +20,8 @@
   d.addEventListener('keydown', function (e) { if (aktuell) aktuell.taste(e); });
   d.addEventListener('keyup', function (e) { if (aktuell) aktuell.tasteHoch(e); });
   window.addEventListener('resize', function () { if (aktuell) aktuell.groesse(); });
+  /* Systemtastatur: der sichtbare Bereich wird kleiner; die Pille steht dann über der Tastatur (Telefone) */
+  if (window.visualViewport) ['resize', 'scroll'].forEach(function (n) { window.visualViewport.addEventListener(n, function () { if (aktuell && aktuell.tastatur) aktuell.tastatur(); }); });
 
   var PFEIL_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>';
   /* Hülle: Kopf, Notiz und Rechtliches kommen aus der App (o.kopf, o.notiz, o.recht) */
@@ -30,6 +32,7 @@
       '<img class="ez-mess__bild" id="mess-bild-front" width="2148" height="1400" alt="" decoding="async" draggable="false">' +
       '<span class="ez-buehne__kante" aria-hidden="true"></span>' +
       '<span class="ez-glaschip"><i class="ez-ring" id="mess-chip-ring" style="--anteil:.5" aria-hidden="true"></i><span id="mess-chip-text">Schritt&nbsp;3 von&nbsp;6</span></span>' +
+      '<div class="md-titel"><h1 id="mess-h1" tabindex="-1"></h1><button type="button" class="ez-i" id="mess-i" data-act="gloss" data-k="' + o.g + '" aria-label="Wo genau messen?"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>' +
       '<svg class="ez-mass" id="mess-linie" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true"><line class="ez-mass__halo" x1="164" y1="28" x2="164" y2="252"/><line class="ez-mass__linie" x1="164" y1="28" x2="164" y2="252"/></svg>' +
       '<svg class="ez-mass-neben" id="mess-neben" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true"><g class="ez-geist" id="mess-geist"><line class="ez-geist__halo"/><line class="ez-geist__linie"/><line class="ez-geist__halo"/><line class="ez-geist__kappe"/><line class="ez-geist__halo"/><line class="ez-geist__kappe"/></g><line class="ez-mass__fuehrung-halo" id="mess-fuehrung-a-halo"/><line class="ez-mass__fuehrung" id="mess-fuehrung-a"/><line class="ez-mass__fuehrung-halo" id="mess-fuehrung-b-halo"/><line class="ez-mass__fuehrung" id="mess-fuehrung-b"/></svg>' +
       '<svg class="ez-passt-linien" id="mess-passt" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true"><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe"/><line class="ez-passt__kappe"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe"/><line class="ez-passt__kappe"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe"/><line class="ez-passt__kappe"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe"/><line class="ez-passt__kappe"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe"/><line class="ez-passt__kappe"/></g><g><line class="ez-passt__halo"/><line class="ez-passt__linie"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe-halo"/><line class="ez-passt__kappe"/><line class="ez-passt__kappe"/></g></svg>' +
@@ -38,15 +41,13 @@
       '<span class="ez-mass__ende" id="mess-ende-a" aria-hidden="true"><span class="ez-lupe"><i class="ez-lupe__bild"></i><svg class="ez-lupe__marke" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="ez-lupe__halo"/><line class="ez-lupe__halo"/><line class="ez-lupe__linie"/><line class="ez-lupe__kappe"/></svg></span><span class="ez-mass__text"><b>Oberkante</b> der Öffnung</span></span>' +
       '<span class="ez-mass__ende" id="mess-ende-b" aria-hidden="true"><span class="ez-lupe"><i class="ez-lupe__bild"></i><svg class="ez-lupe__marke" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="ez-lupe__halo"/><line class="ez-lupe__halo"/><line class="ez-lupe__linie"/><line class="ez-lupe__kappe"/></svg></span><span class="ez-mass__text"><b>Fensterbank</b> innen</span></span>' +
       '<button type="button" class="ez-gross-auf" id="mess-gross-auf" aria-haspopup="dialog"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3h4v4M7 15H3v-4M15 3l-5 5M3 15l5-5"/></svg>Groß ansehen</button>' +
-      '<span class="ez-mass__feld is-leer" id="mess-feld" aria-hidden="true"><span class="ez-mass__zb">z.&nbsp;B.</span><b id="mess-zahl">1.250</b><i class="ez-mass__marke"></i><small>mm</small><svg class="ez-mass__haken" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span>' +
+      '<label class="md-wert is-leer" id="mess-feld"><i class="ez-mass__marke" aria-hidden="true"></i><span class="md-wert__zb" aria-hidden="true">z.&nbsp;B.</span><input class="md-wert__eingabe" id="mess-eingabe" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next" maxlength="6" aria-labelledby="mess-h1" aria-describedby="mess-unterzeile mess-wert"><small aria-hidden="true">mm</small><svg aria-hidden="true" class="ez-mass__haken" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></label>' +
       '<figcaption class="ez-unsichtbar" id="mess-bildtext">Modell: Maueröffnung, gemessen wird senkrecht in der Mitte von der Oberkante der Öffnung bis zur Fensterbank innen.</figcaption>' +
       '</figure>' +
-      '<div class="ez-frage"><div class="ez-frage__kopf"><div class="ez-frage__titel"><h1 id="mess-h1" tabindex="-1"></h1><button type="button" class="ez-i" id="mess-i" data-act="gloss" data-k="' + o.g + '" aria-label="Wo genau messen?"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg></button></div>' + o.notiz + '</div>' +
-      '<p class="ez-unterzeile" id="mess-unterzeile"></p></div>' +
+      '<div class="md-unter"><p class="ez-unterzeile" id="mess-unterzeile"></p>' + o.notiz + '</div>' +
       '<div class="ez-karte ez-karte--tasten" data-theme="hell">' +
       '<div class="ez-block__kopf"><span class="dna-label" id="mess-l">Maß&nbsp;1&nbsp;von&nbsp;4</span><span class="ez-kapseln" id="mess-kapseln" aria-hidden="true"><i class="ist-dran"></i><i></i><i></i><i></i></span></div>' +
       '<div class="ez-zeile" id="mess-zeile"><p class="ez-zeile__text"><b class="ez-zeile__hinweis">Nicht am Rahmen messen</b>In Millimetern: 125&nbsp;cm = 1.250&nbsp;mm</p></div>' +
-      '<div class="ez-tasten" role="group" aria-label="Zifferntasten"><button type="button" class="ez-taste" data-taste="1">1</button><button type="button" class="ez-taste" data-taste="2">2</button><button type="button" class="ez-taste" data-taste="3">3</button><button type="button" class="ez-taste" data-taste="4">4</button><button type="button" class="ez-taste" data-taste="5">5</button><button type="button" class="ez-taste" data-taste="6">6</button><button type="button" class="ez-taste" data-taste="7">7</button><button type="button" class="ez-taste" data-taste="8">8</button><button type="button" class="ez-taste" data-taste="9">9</button><span class="ez-taste ez-taste--leer" aria-hidden="true"></span><button type="button" class="ez-taste" data-taste="0">0</button><button type="button" class="ez-taste ez-taste--fn" data-taste="del" aria-label="Letzte Ziffer löschen"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 6h11A1.5 1.5 0 0 1 22 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-11L3.5 13z"/><path d="M12 10.5l5 5M17 10.5l-5 5"/></svg></button></div>' +
       '<span class="ez-unsichtbar" id="mess-wert" aria-live="polite"></span>' +
       '</div>' +
       '<div class="ez-karte ez-karte--passt" data-theme="hell">' +
@@ -122,7 +123,8 @@
   var UEBLICH = { fenster: { v: [500, 2400, 1250], h: [400, 3000, 1100] }, balkon: { v: [1900, 2600, 2150], h: [700, 1400, 900] }, fest: { v: [300, 3000, 1250], h: [300, 4000, 1500] }, hst: { v: [2000, 2700, 2250], h: [2000, 6000, 3500] }, psk: { v: [1900, 2600, 2150], h: [1400, 3500, 2000] }, fsw: { v: [2000, 2700, 2250], h: [1800, 6000, 3500] } };
   /* satz 0: die vier Maße (Schritt 3), satz 1: die vier Ränder (Schritt 4); passt: Übersicht „Passt.“ nach dem letzten Rand */
   var mess = zustand, cmTimer = 0;
-  var messBuehne = $('mess-buehne'), messBild = $('mess-bild'), messFeld = $('mess-feld'), messZahl = $('mess-zahl'), messZeile = $('mess-zeile'), messWeiterKnopf = $('mess-weiter');
+  var da = function () { return d.body.contains(folien.messen); };
+  var messBuehne = $('mess-buehne'), messBild = $('mess-bild'), messFeld = $('mess-feld'), eingabe = $('mess-eingabe'), messZeile = $('mess-zeile'), messWeiterKnopf = $('mess-weiter');
   var tausend = function (v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
   var num = function (t) { return parseInt(String(t || '').replace(/[^\d]/g, ''), 10) || 0; };
   var tuer = function () { return !!o.tuer; };
@@ -178,13 +180,14 @@
     MESS.concat(RAND).forEach(function (st) { h1.innerHTML = messTitel(st); uz.textContent = tuer() && st.subTuer ? st.subTuer : st.sub; mh = Math.max(mh, h1.offsetHeight); mu = Math.max(mu, uz.offsetHeight); });
     mess.i = alt; h1.style.minHeight = mh + 'px'; uz.style.minHeight = mu + 'px';
   }
-  function messHoeheSetzen() {
-    if (grossOffen) return;
-    var appR = app.getBoundingClientRect(), H = window.innerWidth >= 760 ? Math.min(hoeheProbe.offsetHeight || window.innerHeight, app.clientHeight || window.innerHeight) : (hoeheProbe.offsetHeight || window.innerHeight);
-    var bR = messBuehne.getBoundingClientRect(), kR = folien.messen.querySelector(mess.passt ? '.ez-karte--passt' : '.ez-karte--tasten').getBoundingClientRect(), fH = folien.messen.querySelector('.lg-fuss').offsetHeight;
-    var oben = bR.top - appR.top + (app.scrollHeight > app.clientHeight + 2 ? app.scrollTop : 0), rest = kR.bottom - bR.bottom;
-    var S = Math.max(112, Math.min(380, Math.floor(H - oben - rest - fH - 6)));
-    messBuehne.style.height = S + 'px';
+  /* Die Höhe der Bühne steht im CSS (wie Folie 1, Wunsch des Inhabers 27.10.2026); eine alte Höhe aus dem Stil fällt weg */
+  function messHoeheSetzen() { if (!grossOffen) messBuehne.style.height = ''; }
+  /* Platz, den Überschrift (oben) und Wert-Chip (unten) in der Bühne belegen; die Öffnung steht dazwischen */
+  function reserve(S) {
+    var sR = messBuehne.getBoundingClientRect(), t = messBuehne.querySelector('.md-titel'), o = 12, u = 12;
+    if (t && t.offsetParent && !grossOffen) o = Math.max(o, t.getBoundingClientRect().bottom - sR.top + 10);
+    if (messFeld && messFeld.offsetParent) u = Math.max(u, sR.bottom - messFeld.getBoundingClientRect().top + 12);
+    return { o: Math.min(o, S * 0.4), u: Math.min(u, S * 0.3) };
   }
   function schneidet(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
   function endeText(t) { var i = t.indexOf(' '); return i < 0 ? '<b>' + t + '</b>' : '<b>' + t.slice(0, i) + '</b>' + t.slice(i); }
@@ -194,9 +197,9 @@
      (Großansicht 84 und 90); senkrecht steht sie etwas links der Mitte (rechts die Etiketten), waagerecht etwas unter der Mitte (oben die
      Etiketten). Ist die Bühne flacher als das Bild, bleibt die Öffnung ganz, und das Bild läuft an den Seiten in die Wand aus. */
   function kamera(W, S, box, p, gross) {
-    var klein = !gross && S < 200;
-    var bw = box[2] - box[0], bh = box[3] - box[1], k = Math.min((gross ? 0.84 : 0.8) * S / bh, (gross ? 0.9 : 0.86) * W / bw);
-    var cx = (box[0] + box[2]) / 2, cy = (box[1] + box[3]) / 2, zx = p || klein ? W * 0.5 : W * 0.44, zy = S * 0.5;
+    var R = reserve(S), H = S - R.o - R.u, klein = !gross && H < 200;
+    var bw = box[2] - box[0], bh = box[3] - box[1], k = Math.min((gross ? 0.9 : 0.88) * H / bh, (gross ? 0.9 : 0.86) * W / bw);
+    var cx = (box[0] + box[2]) / 2, cy = (box[1] + box[3]) / 2, zx = p || klein ? W * 0.5 : W * 0.44, zy = R.o + H / 2;
     var iw = BILD.w * k, ih = BILD.h * k, tx = zx - cx * k, ty = zy - cy * k;
     if (iw >= W) tx = Math.min(0, Math.max(W - iw, tx)); else tx = (W - iw) / 2 + Math.max(-(W - iw) / 2, Math.min((W - iw) / 2, tx - (W - iw) / 2));
     if (ih >= S) ty = Math.min(0, Math.max(S - ih, ty));
@@ -205,8 +208,8 @@
   /* Ränder senkrecht (Höhe links und rechts): die Kamera stellt die Linie selbst auf 45 Prozent der Breite (Großansicht Mitte), die Öffnung
      läuft zur einen Seite weiter. So stehen die Lupen rechts der Linie frei von Chip und „Groß ansehen“, auch an der linken Laibung. */
   function kameraRand(W, S, box, l, gross) {
-    var bh = box[3] - box[1], k = (gross ? 0.8 : 0.74) * S / bh, lx = (l[0] + l[2]) / 2, cy = (box[1] + box[3]) / 2;
-    var tx = W * (gross ? 0.5 : 0.45) - lx * k, ty = S * 0.5 - cy * k, iw = BILD.w * k, ih = BILD.h * k;
+    var R = reserve(S), H = S - R.o - R.u, bh = box[3] - box[1], k = (gross ? 0.86 : 0.8) * H / bh, lx = (l[0] + l[2]) / 2, cy = (box[1] + box[3]) / 2;
+    var tx = W * (gross ? 0.5 : 0.45) - lx * k, ty = R.o + H / 2 - cy * k, iw = BILD.w * k, ih = BILD.h * k;
     if (iw >= W) tx = Math.min(0, Math.max(W - iw, tx));
     if (ih >= S) ty = Math.min(0, Math.max(S - ih, ty));
     return { k: k, tx: tx, ty: ty };
@@ -326,7 +329,7 @@
     var lagen, versuch;
     for (versuch = 0; versuch < 2; versuch++) {
       messChip.classList.toggle('ist-kurz', versuch > 0);
-      hin = [kastVon(messChip), endKast(A), endKast(B)]; if (!gross) hin.push(kastVon(messGrossKnopf));
+      hin = [kastVon(messChip), endKast(A), endKast(B), kastVon(messFeld)]; if (!gross) { hin.push(kastVon(messGrossKnopf)); hin.push(kastVon(messBuehne.querySelector('.md-titel'))); }
       lagen = endenLegen();
       if (!lagen.some(function (q) { return q.g.n > 0; }) && !schneidet(kastVon(messChip), endKast(A)) && !schneidet(kastVon(messChip), endKast(B))) break;
     }
@@ -341,22 +344,6 @@
         else f.style.display = 'none';
       });
     });
-    /* Die Zahl auf der Linie, mittig wie die Maßzahl einer Zeichnung; Anker an der Linie, damit sie beim Tippen zur Seite wächst und nicht
-       wandert. Geprüft mit der größten Breite (fünf Ziffern, „mm“, Haken); ist kein Platz, links neben der Linie oder unter ihr. */
-    var FB = Math.max(gross ? 210 : S < 200 ? 160 : 176, messFeld.offsetWidth), unten = Math.max(A[1], B[1]), oben = Math.min(A[1], B[1]), knopfOben = gross ? S : S - 54;
-    var f = st.r === 'v'
-      ? legen(messFeld, [{ x: function (w) { return mx - w / 2; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx, '-50%']; } },
-          { x: function (w) { return mx - 14 - w; }, y: function (h) { return Math.min(my - h / 2, knopfOben - 4 - h); }, anker: function () { return [mx - 14, '-100%']; } },
-          { x: function () { return mx + 14; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx + 14, '0']; } }], FB)
-      : legen(messFeld, [{ x: function (w) { return mx - w / 2; }, y: function () { return unten + 10; }, anker: function () { return [mx, '-50%']; } },
-          { x: function (w) { var kn = gross ? null : kastVon(messGrossKnopf); return kn ? Math.max(mx - w / 2, kn.x + kn.w + 4) : mx - w / 2; }, y: function () { return unten + 10; }, anker: function (r) { return [r.x, '0']; } },
-          { x: function (w) { return mx - w / 2; }, y: function () { return Math.max.apply(null, lagen.map(function (q) { return q.g.r.y + q.g.r.h; })) + 12; }, anker: function () { return [mx, '-50%']; } },
-          { x: function (w) { var kn = gross ? null : kastVon(messGrossKnopf); return kn && kn.w ? Math.min(mx - w / 2, kn.x - 4 - w) : null; }, y: function () { return Math.max.apply(null, lagen.map(function (q) { return q.g.r.y + q.g.r.h; })) + 8; }, anker: function (r) { return [r.x, '0']; } },
-          { x: function (w) { return mx - w / 2; }, y: function (h) { return oben - 14 - h; }, anker: function () { return [mx, '-50%']; } },
-          { x: function (w) { return mx - w / 2; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx, '-50%']; } }], FB);
-    var an = f.k.anker(f.r), links = an[1] === '-100%' ? an[0] - FB : an[1] === '-50%' ? an[0] - FB / 2 : an[0];
-    if (links < rand || links + FB > W - rand) an = [f.r.x, '0'];
-    messFeld.style.left = Math.round(an[0]) + 'px'; messFeld.style.top = Math.round(f.r.y) + 'px'; messFeld.style.setProperty('--fx', an[1]);
     $('mess-bildtext').textContent = 'Modell: ' + (st.wer === 'mo' ? 'Maueröffnung' : o.artName) + (p ? ', von vorn' : '') + ', gemessen wird ' + (st.r === 'v' ? 'senkrecht' : 'waagerecht') + ' von „' + en[0] + '“ bis „' + en[1] + '“. Lupen zeigen beide Enden vergrößert.';
     /* Die Linie zieht sich von Ende zu Ende (nach einem Wechsel der Ansicht 120 ms später) */
     messBuehne.classList.remove('zieht');
@@ -364,8 +351,11 @@
   }
   function messFeldSetzen() {
     var st = schritt(), v = num(mess.cur), leer = !mess.cur, ohne = leer && !!mess.satz;
-    messZahl.textContent = ohne ? '' : tausend(leer ? ueblich(st.r)[2] : v);
-    messFeld.classList.toggle('is-leer', leer); messFeld.classList.toggle('ist-ohne', ohne);
+    var anzeige = leer ? '' : tausend(v), bisher = d.activeElement === eingabe && mess.ersetzen && !leer;
+    if (bisher) { eingabe.placeholder = anzeige; anzeige = ''; }
+    else eingabe.placeholder = ohne ? '' : tausend(ueblich(st.r)[2]);
+    if (eingabe.value !== anzeige) { eingabe.value = anzeige; if (d.activeElement === eingabe) try { eingabe.setSelectionRange(anzeige.length, anzeige.length); } catch (e) {} }
+    messFeld.classList.toggle('is-leer', leer && !bisher); messFeld.classList.toggle('ist-ohne', ohne);
     messFeld.classList.toggle('is-fehler', !!(mess.msg && (mess.msg.cls === 'fehler' || mess.msg.cls === 'warn')) || v > 6000);
     $('mess-wert').textContent = v ? 'Im Feld: ' + tausend(v) + ' Millimeter' : 'Feld leer';
   }
@@ -410,6 +400,8 @@
     var wort = messWeiterKnopf.querySelector('.ez-weiter__wort'), neu = artNeu !== pilleArt;
     pilleArt = artNeu; messWeiterKnopf.setAttribute('data-cm', cm ? cm * 10 : ''); messWeiterKnopf.setAttribute('data-art', artNeu);
     if (wort.textContent !== label) wort.textContent = label;
+    /* Die Pille erscheint erst, wenn ein Wert im Feld steht (Wunsch des Inhabers, 27.10.2026); Rückfragen und „Passt.“ tragen sie immer */
+    messWeiterKnopf.classList.toggle('ist-weg', !(mess.passt || artNeu !== 'weiter' || !!mess.cur || mess.sperre));
     /* Neue Bedeutung sichtbar machen: das Wort blendet in 160 ms ein (nicht bei weniger Bewegung) */
     if (neu && !ruhig() && wort.animate) wort.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'cubic-bezier(.2,.7,.2,1)' });
   }
@@ -442,11 +434,11 @@
   function messZeigen() {
     /* beide Ansichten vorab laden und dekodieren, damit der Wechsel zu Maß 3 nicht auf das Bild wartet */
     [messBild, messBildFront].forEach(function (img, p) { if (img.getAttribute('src') !== bildSrc(p)) img.src = bildSrc(p); if (img.decode) img.decode().catch(function () {}); });
-    requestAnimationFrame(function () { messPlatzReservieren(); messFussSetzen(); messHoeheSetzen(); messBreite = app.clientWidth; messHoehe = hoeheProbe.offsetHeight; messAlles(false); });
+    requestAnimationFrame(function () { if (!da()) return; messPlatzReservieren(); messFussSetzen(); messHoeheSetzen(); messBreite = app.clientWidth; messHoehe = hoeheProbe.offsetHeight; messAlles(false); });
   }
   /* Halten nach dem Speichern beenden und zum nächsten Maß (auch wenn schon die nächste Ziffer kommt) */
   function naechstes(ausTastatur) {
-    clearTimeout(halteT); if (!mess.sperre) return;
+    clearTimeout(halteT); if (!mess.sperre || !da()) return;
     mess.gespeichert = 0; mess.sperre = false; messFeld.classList.remove('ist-gespeichert');
     if (mess.i === 3 && mess.satz) return passtZeigen(ausTastatur);
     /* nach Maß 4 geht es ohne Halt zu den Rändern (Schritt 4), wie in der App mit „Weiter zu den Rändern“ */
@@ -463,10 +455,21 @@
     if (mess.satz) mess.gleich[schritt().k] = false;
     if (t === 'del') { if (mess.ersetzen) { mess.cur = ''; mess.ersetzen = false; } else mess.cur = mess.cur.slice(0, -1); }
     else { if (mess.ersetzen) { mess.cur = ''; mess.ersetzen = false; } if (mess.cur.length < 5 && !(mess.cur === '' && t === '0')) mess.cur += t; }
+    neueEingabe();
+  }
+  /* Das Feld unter dem Element ist ein echtes Eingabefeld: Antippen holt die Systemtastatur, nur Ziffern zählen (höchstens fünf) */
+  function feldGetippt() {
+    if (mess.sperre) naechstes(true);
+    if (mess.passt) return;
+    if (mess.satz) mess.gleich[schritt().k] = false;
+    mess.ersetzen = false; mess.cur = eingabe.value.replace(/[^\d]/g, '').replace(/^0+/, '').slice(0, 5);
+    neueEingabe();
+  }
+  function neueEingabe() {
     /* Eine neue Ziffer ist eine bewusste Eingabe: die Sperre gegen den Doppeltipp fällt */
     mess.msg = null; mess.ack = false; mess.cmLive = false; clearTimeout(cmTimer); taub(0); o.sync(mess);
     var v = num(mess.cur);
-    if (cmFrage(v, schritt().r)) cmTimer = setTimeout(function () { mess.cmLive = true; taub(450); messZeileSetzen(); status('Zollstock zeigt ' + v + ' Zentimeter? Dann Ja, ' + tausend(v * 10) + ' Millimeter.'); }, 800);
+    if (cmFrage(v, schritt().r)) cmTimer = setTimeout(function () { if (!da()) return; mess.cmLive = true; taub(450); messZeileSetzen(); status('Zollstock zeigt ' + v + ' Zentimeter? Dann Ja, ' + tausend(v * 10) + ' Millimeter.'); }, 800);
     messFeldSetzen(); messZeileSetzen();
   }
   /* Weiter: prüfen, speichern, die gespeicherte Zahl kurz zeigen (0,35 s, auch in der ruhigen Fassung), dann das nächste Maß */
@@ -485,6 +488,7 @@
     $('mess-kapseln').children[mess.i].className = 'ist-fertig';
     mess.cur = String(v); mess.gespeichert = v; mess.sperre = true; messFeld.classList.add('ist-gespeichert'); messFeldSetzen(); messZeileSetzen();
     status('Gespeichert: ' + tausend(v) + ' Millimeter.');
+    if (d.activeElement === eingabe && grob()) eingabe.blur();
     halteT = setTimeout(function () { naechstes(ausTastatur); }, 350);
   }
   function messZurueck(e) {
@@ -595,19 +599,31 @@
     buehneHeim.insertBefore(messBuehne, platzhalter); if (platzhalter.parentNode) platzhalter.parentNode.removeChild(platzhalter);
     messBuehne.classList.remove('ist-gross');
     messHoeheSetzen(); messBuehneSetzen(false);
-    messWeiterKnopf.focus({ preventScroll: true });
+    if (!mess.passt) eingabe.focus({ preventScroll: true }); else messWeiterKnopf.focus({ preventScroll: true });
   }
   messBuehne.addEventListener('click', function (e) { if (grossOffen || mess.passt || (e.target.closest && e.target.closest('#mess-feld'))) return; grossAuf(e.detail === 0); });
   gross.addEventListener('cancel', function (e) { e.preventDefault(); grossZu(); });
   gross.addEventListener('close', grossZu);
   gross.querySelectorAll('[data-gross-zu]').forEach(function (b) { b.addEventListener('click', grossZu); });
-  /* Tasten: Druck sichtbar per Klasse (Touch zeigt :active unzuverlässig), keine Fokusübernahme bei Mausklick (Enter heißt am Rechner „Weiter“) */
-  var tastenFeld = folien.messen.querySelector('.ez-tasten'), gedrueckt = null;
-  function loslassen() { if (gedrueckt) { gedrueckt.classList.remove('ist-gedrueckt'); gedrueckt = null; } }
-  tastenFeld.addEventListener('pointerdown', function (e) { var k = e.target.closest('.ez-taste[data-taste]'); tastenFeld.classList.remove('ist-tastatur'); loslassen(); if (k) { gedrueckt = k; k.classList.add('ist-gedrueckt'); } });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { tastenFeld.addEventListener(n, loslassen); });
-  tastenFeld.addEventListener('mousedown', function (e) { if (e.target.closest('.ez-taste')) e.preventDefault(); });
-  folien.messen.querySelectorAll('.ez-taste[data-taste]').forEach(function (b) { b.addEventListener('click', function () { messTaste(b.getAttribute('data-taste')); }); });
+  /* Feld: Systemtastatur mit Ziffern; Eingabe (Android „Weiter“, am Rechner Enter) wie die Pille; ein gespeichertes Maß ist beim
+     Antippen markiert, Tippen ersetzt es */
+  var grob = function () { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); };
+  eingabe.addEventListener('input', feldGetippt);
+  eingabe.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); if (!e.repeat) pilleTippen(true); } });
+  eingabe.addEventListener('focus', function () { messFeld.classList.add('ist-aktiv'); if (mess.ersetzen && mess.cur) messFeldSetzen(); });
+  eingabe.addEventListener('blur', function () { messFeld.classList.remove('ist-aktiv'); if (mess.ersetzen) messFeldSetzen(); tastaturLage(); });
+  /* Offene Systemtastatur (Telefon): die Pille steht direkt über ihr, das Feld bleibt darüber sichtbar */
+  var fussEl = folien.messen.querySelector('.lg-fuss');
+  function tastaturLage() {
+    var vv = window.visualViewport; if (!fussEl) return;
+    var offen = !!vv && d.activeElement === eingabe && window.innerHeight - vv.height > 120;
+    folien.messen.classList.toggle('tastatur-offen', offen); fussEl.style.transform = '';
+    if (!offen) return;
+    var r = fussEl.getBoundingClientRect(), dy = vv.offsetTop + vv.height - r.bottom;
+    if (dy < -1) fussEl.style.transform = 'translateY(' + Math.round(dy) + 'px)';
+    var fr = fussEl.getBoundingClientRect(), ir = messFeld.getBoundingClientRect(), platz = fr.top - 10 - ir.bottom;
+    if (platz < 0) app.scrollTop += Math.ceil(-platz);
+  }
   messWeiterKnopf.addEventListener('click', function (e) { pilleTippen(e.detail === 0); });
   $('mess-zurueck').addEventListener('click', messZurueck);
   /* Tastatur am Rechner: Ziffern, Rücktaste, Eingabe (wie die Pille); die passende Taste drückt sichtbar mit, ohne Übergang */
@@ -615,10 +631,10 @@
     if (!d.body.contains(folien.messen) || d.querySelector('.sheet[aria-modal="true"], .sheet-bg') || grossOffen || e.altKey || e.ctrlKey || e.metaKey) return;
     var t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
     var taste = /^[0-9]$/.test(e.key) ? e.key : e.key === 'Backspace' ? 'del' : null;
-    if (taste) { e.preventDefault(); tastenFeld.classList.add('ist-tastatur'); loslassen(); gedrueckt = tastenFeld.querySelector('[data-taste="' + taste + '"]'); if (gedrueckt) gedrueckt.classList.add('ist-gedrueckt'); messTaste(taste, true); }
+    if (taste) { e.preventDefault(); messTaste(taste, true); eingabe.focus({ preventScroll: true }); }
     else if (e.key === 'Enter' && (!t || !t.closest || !t.closest('button, a'))) { e.preventDefault(); if (!e.repeat) pilleTippen(true); }
   };
-  var aufTasteHoch = function () { if (tastenFeld.classList.contains('ist-tastatur')) loslassen(); };
+  var aufTasteHoch = function () {};
   /* Größe: gebündelt; neu gerechnet wird bei anderer Breite oder anderer kleiner Bildschirmhöhe (100svh, die Adressleiste ändert sie
      nicht), in der Großansicht auch deren Rechteck am Schreibtisch */
   var groesseRaf = 0, messHoehe = 0;
@@ -637,10 +653,10 @@
     if (mess.passt) {
       folien.messen.classList.add('ist-passt'); passtKarteSetzen();
       [messBild, messBildFront].forEach(function (img, p) { if (img.getAttribute('src') !== bildSrc(p)) img.src = bildSrc(p); });
-      requestAnimationFrame(function () { messFussSetzen(); messHoeheSetzen(); messBreite = app.clientWidth; messHoehe = hoeheProbe.offsetHeight; messBuehneSetzen(false); pilleSetzen('weiter'); });
+      requestAnimationFrame(function () { if (!da()) return; messFussSetzen(); messHoeheSetzen(); messBreite = app.clientWidth; messHoehe = hoeheProbe.offsetHeight; messBuehneSetzen(false); pilleSetzen('weiter'); });
     } else messZeigen();
     return {
-      taste: aufTaste, tasteHoch: aufTasteHoch, groesse: aufGroesse,
+      taste: aufTaste, tasteHoch: aufTasteHoch, groesse: aufGroesse, tastatur: tastaturLage,
       zurueck: function (tastatur) { messZurueck(tastatur ? { detail: 0 } : null); }
     };
   }

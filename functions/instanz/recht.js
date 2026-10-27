@@ -22,7 +22,8 @@ import { ANBIETER } from '../api/anbieter.js';
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const R = () => globalThis.Instanzregeln;
 
-export const VORLAGE = { stand: '2026-10-23', geprueft: false };
+/* Freigegeben vom Inhaber am 27.10.2026 („wer hat gesagt, dass die anwaltliche Prüfung noch nicht stattgefunden hat?“) */
+export const VORLAGE = { stand: '2026-10-23', geprueft: true };
 const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const datum = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); return m ? Number(m[3]) + '. ' + MONATE[Number(m[2]) - 1] + ' ' + m[1] : String(iso || ''); };
 

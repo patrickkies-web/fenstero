@@ -384,6 +384,6 @@ export function paketeLlms(origin, env) {
     '- Drei Pakete, nur für Unternehmer, Preise ' + (v.mwst ? 'netto zuzüglich Mehrwertsteuer' : 'ohne Ausweis der Umsatzsteuer') + (v.vorlaeufig ? ' (vorläufig)' : '') + ': ' + liste.map(zeile).join('; ') + '.',
     '- Ablauf: ' + R().bestellung.LEISTE.map((s) => s.titel).join(' → ') + '; meist 3 bis 5 Werktage nach der Zahlung. Die Einrichtung wird vorab bezahlt, das Monatsabo beginnt mit dem Livegang.' + (v.bestellen ? '' : ' Die Bestellung wird in Kürze freigeschaltet; bis dahin unverbindliche Anfrage über die Seite.'),
     '- [Für Fensterbauer: Pakete, Ablauf, Bestellung](' + u('/fuer-fensterbauer/') + '): Idee, Vergleich der Pakete, häufige Fragen',
-    '- [Paketbedingungen und AV-Vertrag](' + u('/konfigurator-bedingungen/') + '): Fassung vom ' + standText(PAKET_STAND) + ', Entwurf zur anwaltlichen Prüfung'
+    '- [Paketbedingungen und AV-Vertrag](' + u('/konfigurator-bedingungen/') + '): Fassung vom ' + standText(PAKET_STAND)
   ].join('\n');
 }

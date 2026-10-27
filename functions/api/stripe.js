@@ -144,7 +144,11 @@ export function zahlungsdienst(k) {
     /* Zahlungsart hinterlegen (SEPA oder Karte) auf der Stripe-Seite; Rückkehr nach /?zahlungsart=<session> */
     async zahlungsartKasse(o) {
       if (!s) return { url: o.zurueck + '?zahlungsart=' + testId('test') };
-      const sess = await s.post('/checkout/sessions', { mode: 'setup', locale: 'de', customer: o.customer, payment_method_types: ['sepa_debit', 'card'], success_url: o.zurueck + '?zahlungsart={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, metadata: { art: 'zahlungsart', betrieb: o.id } });
+      /* ohne eingeschaltete SEPA-Lastschrift im Stripe-Konto nur mit Karte */
+      const mit = (arten) => s.post('/checkout/sessions', { mode: 'setup', locale: 'de', customer: o.customer, payment_method_types: arten, success_url: o.zurueck + '?zahlungsart={CHECKOUT_SESSION_ID}', cancel_url: o.zurueck, metadata: { art: 'zahlungsart', betrieb: o.id } });
+      let sess;
+      try { sess = await mit(['sepa_debit', 'card']); }
+      catch (e) { if (!/sepa_debit|payment method type/i.test(String((e && e.message) || ''))) throw e; sess = await mit(['card']); }
       return { url: sess.url };
     },
     /* Nach der Rückkehr oder per Webhook: die hinterlegte Zahlungsart lesen (schreibt nichts). betrieb: aus den Metadaten der Kasse,
