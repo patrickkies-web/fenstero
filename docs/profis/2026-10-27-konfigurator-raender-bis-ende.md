@@ -291,3 +291,28 @@ Prüfsuite: Abschnitte 1 bis 22 grün; „Lamellen wenden“ (WebGL) einmal wied
 Bild: docs/profis/bilder/2026-10-27-app-fotos-dna-tel.jpg.
 
 Offen: Messen, Ränder, Ergebnis, Bögen und Abschluss folgen in derselben Weise.
+
+## Schritt 1 neu, Folie für Folie mit dem Inhaber (27.10.2026, spät)
+
+Nach der ersten Übernahme in die App war der Inhaber „überhaupt nicht zufrieden“ (Bühne am Laptop winzig, graue Streifen links und
+rechts, Knöpfe zu groß, alte und neue Folien durcheinander). Seitdem gehen wir jede Folie einzeln durch: Er beschreibt, ich zeige ein
+Bild ohne Programmierung, erst nach seinem Ja wird gebaut (Regel in .claude/skills/design-dna-eeziframes/SKILL.md, Abschnitt 4).
+
+Seine Wünsche zu Schritt 1, in der Reihenfolge: Kopfzeile, Chip und Hintergrund bleiben; das Element mittig und schwebend, deutlich
+größer, zweimal noch größer; „Was planst du?“ in derselben Schrift unter dem Chip; Kacheln kleiner, ohne Lila, minimalistisch; kein
+schwarzer Rand („Warum sind die Ränder schwarz?“); der Hintergrund nicht in einem Container, sondern hinter den Kacheln weiter bis in
+die weiße Karte. Dazu seine Bilder der sechs Elemente (Fenster, Balkontür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür,
+Faltschiebewand); freigestellt und als WebP unter web/bilder/konfigurator/element/ (die früheren Renderings sind entfernt).
+
+Sein Ja: „Wenn du dann soweit bist stelle das online im aktuellen konfigurator mit allen links auf der folie die passen im echten
+konfigurator“. Gebaut genau wie das Bild; was die App dort an Bedienung hat, bleibt: zurück im Kopf, Übersicht, Begriffe, i an der Frage
+(„Welches Element passt zu mir?“), Notiz, i am Namen je Element, Kacheln (auch mit Pfeiltasten und Wischen auf der Bühne), die Stelle
+mit „Mehr erfahren“ bei „Neue Öffnung“, rechtliche Verweise, zurück und „Weiter zu den Fotos“. Alle einmal angetippt, Telefon und Laptop.
+
+Abweichungen vom Bild, mit Grund: Unter dem Element steht bei der Balkon- oder Terrassentür „Balkontür“ (sonst passen Name, Zusatz und
+i nicht in eine Zeile); auf Telefonen unter 375 px fällt der Zusatz weg und die Frage ist 26 px groß.
+
+Am Laptop füllt nur diese Folie den ganzen Bildschirm (`voll` an der Ansicht, Klasse `dna-voll` an html); die übrigen Folien sind
+unverändert und kommen einzeln dran.
+
+Bilder: docs/profis/bilder/2026-10-27-app-start-neu-tel.jpg, docs/profis/bilder/2026-10-27-app-start-neu-laptop.jpg.

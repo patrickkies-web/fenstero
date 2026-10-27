@@ -2706,6 +2706,7 @@ function render(fresh) {
   if (INST && S.sent && !S.sent.kurz && S.screen !== 'gesendet') instanzKuerzen(); // Bestätigung verlassen: nur Nummer und Datum bleiben
   const root = $app(), scroller = root.querySelector('.scroll'), keep = !fresh && scroller ? scroller.scrollTop : 0, fokus = fresh ? null : fokusMerken(root);
   const view = SCREENS[S.screen] ? SCREENS[S.screen]() : SCREENS.home();
+  document.documentElement.classList.toggle('dna-voll', !!view.voll); // Folie füllt am Laptop den Bildschirm (Start), Grund schwarz
   /* Angefangenes Fenster: „Fortsetzen“ auf der Startseite, über der Liste */
   /* Auf der Einladungsseite (Kundenlink, noch keine Liste) steht der Betrieb vorn: die Karte kommt direkt unter den Absender */
   if (S.screen === 'home' && view.html) { const ek = entwurfKarte(); if (ek) { const li = view.html.indexOf('<section class="sec liste"'), ki = view.html.indexOf('<p class="eyebrow kicker">'), ein = view.html.indexOf('ein-start-in'); view.html = li >= 0 ? view.html.slice(0, li) + ek + view.html.slice(li) : ein >= 0 && ki > ein ? view.html.slice(0, ki) + ek + view.html.slice(ki) : ek + view.html; } }
@@ -3003,20 +3004,23 @@ function linkHomeInhaltAlt(I) {
   const html = E.html({ name: name, kunde: d.kunde, du: du, p: d.p, bis: d.bis, server: !!SERVER.daten }) + rechtLinks();
   return { html: html, bar: null };
 }
-/* ---------- Start im Look der Design-DNA (27.10.2026) ----------
-   Folie „Was planst du?“ (vom Inhaber angenommen, 26.10.2026; Vorschau docs/profis/konfigurator-start-vorschau/): Betonboden im
-   Fensterlicht als Bühne, das gewählte Element als feste Ansicht (Regel des Inhabers: beim Messen kein 3-D) mit Etikett und Anker, die
-   Frage, die sechs Elemente als Anthrazit-Kacheln mit Strichzeichnung, die Stelle auf weißer Karte, unten zurück und eine Pille.
-   Aktionen wie bisher (art, situation, gloss, notiz, go fotos); Wischen auf der Bühne und Pfeiltasten wechseln das Element. Beim Wechsel
-   blenden Element, Anker und Etikett im selben Frame (220 ms, aus der Wischrichtung), nur das Licht gleitet nach; Tastatur ohne Übergang. */
-const ST_NAME = { fenster: ['Fenster', 'Fenster'], balkon: ['Balkontür', 'Balkontür'], fest: ['Festverglasung', 'Festverglasung'], hst: ['Hebe-Schiebe-Tür', 'Hebe-Schiebe'], psk: ['PSK-Tür', 'PSK-Tür'], fsw: ['Faltschiebewand', 'Faltschiebewand'] };
-let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false, stLichtAlt = null;
+/* ---------- Start im Look der Design-DNA (27.10.2026, mit dem Inhaber Folie für Folie neu gefasst) ----------
+   Folie „Was planst du?“ genau wie die vom Inhaber angenommene Vorschau: Der Boden im Fensterlicht ist der Hintergrund der Folie, ohne
+   Rahmen und ohne Abdunklung von Rand zu Rand; er läuft hinter den Kacheln weiter und verliert sich an der weißen Karte. Oben Chip, Frage
+   mit Erklärung und Notiz; in der Mitte schwebt das gewählte Element groß (Bilder des Inhabers, nach Seitenverhältnis in ein festes Feld
+   eingepasst), darunter sein Name. Sechs kleine Glas-Kacheln ohne Violett (gewählt: weißer Ring), die Stelle auf weißer Karte, unten
+   zurück und eine Pille. Am Laptop füllt die Folie den Bildschirm: Bühne links, rechts eine Spalte mit Kacheln, Stelle und Pille.
+   Aktionen wie bisher (art, situation, gloss, notiz-auf, wohin, gindex, back, go fotos); Wischen auf der Bühne und Pfeiltasten wechseln
+   das Element. Beim Wechsel blendet das neue Element aus der Wischrichtung ein (220 ms), der Name im selben Frame; Tastatur und
+   „weniger Bewegung“ ohne Übergang. */
+let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false;
 const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
 const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
-const ST_BILD = { fenster: [379, 536], balkon: [208, 525], fest: [552, 557], hst: [526, 564], psk: [404, 549], fsw: [595, 492] };
+/* Bilder des Inhabers (web/bilder/konfigurator/element/), Breite und Höhe in px */
+const ST_BILD = { fenster: [879, 1057], balkon: [536, 1200], fest: [1179, 996], hst: [1188, 993], psk: [908, 1079], fsw: [1200, 754] };
+/* Name unter dem Element; die Balkon- oder Terrassentür kurz, damit Name, Zusatz und Erklärung auf einer Zeile bleiben */
+const ST_NAME = { balkon: 'Balkontür' };
 const ST_KURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Fest&shy;verglasung', hst: 'Hebe-Schiebe', psk: 'PSK-Tür', fsw: 'Falt&shy;schiebewand' };
-/* Name am Etikett mit Trennstellen, damit er auf schmalen Telefonen umbricht statt abgeschnitten zu werden */
-const ST_ET = { fenster: 'Fenster', balkon: 'Balkon&shy;tür', fest: 'Fest&shy;verglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Falt&shy;schiebe&shy;wand' };
 const ST_STELLE = {
   ersatz: '<b>Dort ist schon eins.</b> Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.',
   neu: '<span class="st-punkt" aria-hidden="true"></span><b>Dort war noch keins, oder die Öffnung wird größer.</b> Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.'
@@ -3030,49 +3034,28 @@ function startDna() {
   /* Wechsel auf demselben Bildschirm: aus der Wischrichtung, sonst aus der Richtung in der Reihe */
   const gleich = lastScreen === 'start', still = stSofort || ruhig(), wechsel = gleich && !still && stZuletzt && stZuletzt !== art, kommt = gleich && !still && neu && !stNeuZuletzt;
   const d = stRichtung || (stIdx(art) > stIdx(stZuletzt) ? 1 : -1);
-  if (!gleich) stLichtAlt = null;
   stZuletzt = art; stNeuZuletzt = neu; stRichtung = 0; stSofort = false;
   const wl = wechsel ? ' wechselt' : '';
   const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
-  const buehne = '<figure class="st-buehne-dna" role="group" aria-roledescription="Bühne" aria-label="' + esc('Gewähltes Element: ' + ST_NAME[art][0] + '. Wischen wechselt das Element.') + '">' +
-    '<img class="st-boden" src="/bilder/konfigurator/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">' +
-    '<span class="st-licht" aria-hidden="true"></span><span class="st-kante" aria-hidden="true"></span>' +
-    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Start</span>' +
-    '<div class="st-objekt' + wl + '" style="--d: ' + d + '" aria-hidden="true"><span class="st-schatten"></span><img src="/bilder/konfigurator/' + art + '.webp" width="' + b[0] + '" height="' + b[1] + '" alt="" decoding="async" draggable="false">' +
-    (neu ? '<svg class="st-rahmen' + (kommt ? ' kommt' : '') + '" aria-hidden="true"><rect x=".75" y=".75" rx="6"/></svg>' : '') + '</div>' +
-    '<svg class="st-linie' + wl + '" aria-hidden="true"><line/></svg><span class="st-anker' + wl + '" aria-hidden="true"></span>' +
-    '<div class="st-etikett"><span class="dna-etikett"><span class="st-et' + wl + '"><b>' + ST_ET[art] + '</b><small>' + esc(o.sub || '') + '</small></span>' +
-    (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</span></div></figure>';
-  const frage = lgFrage('Was planst <em>du?</em>', 'elementart', 'Unsicher? Nimm, was heute eingebaut ist. Weitere Fenster kommen danach einzeln dran.');
-  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><span class="st-kachel-licht" aria-hidden="true"></span><svg class="st-zeichen" viewBox="0 0 64 64" aria-hidden="true"><use href="#z-' + x.k + '"/></svg><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
+  const buehne = '<div class="st-buehne-dna">' +
+    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Start</span>' +
+    lgFrage('Was planst <em>du?</em>', 'elementart', 'Unsicher? Nimm, was heute eingebaut ist.') +
+    '<div class="st-objekt' + wl + '" style="--d: ' + d + '; --asp: ' + (b[0] / b[1]).toFixed(3) + '" aria-hidden="true"><span class="st-schatten"></span><img src="/bilder/konfigurator/element/' + art + '.webp" width="' + b[0] + '" height="' + b[1] + '" alt="" decoding="async" draggable="false">' +
+    (neu ? '<span class="st-rahmen' + (kommt ? ' kommt' : '') + '"></span>' : '') + '</div>' +
+    '<p class="st-name' + wl + '"><b>' + esc(ST_NAME[art] || o.label) + '</b><small>' + esc(o.sub || '') + '</small>' +
+    (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</p></div>';
+  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><svg class="st-zeichen" viewBox="0 0 64 64" aria-hidden="true"><use href="#z-' + x.k + '"/></svg><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
   const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
     OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
     '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
-  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Aufmaß">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
-  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + buehne + frage + bento + stelle + fuss, back: ['Aufmaß', 'home'], dna: true, cls: 'dna st' };
+  const fuss = '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Aufmaß">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
+  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + '<div class="st-tisch">' + buehne + '<div class="st-rechts">' + bento + stelle + rechtLinks() + fuss + '</div></div>', back: ['Aufmaß', 'home'], dna: true, cls: 'dna st', voll: true };
 }
-/* Nach dem Zeichnen: Anker an die rechte obere Ecke des Elements, Linie zum Etikett, Licht und Schatten mittig, Rahmen der neuen Öffnung
-   um die Standfläche; aus den bekannten Maßen des Bilds, ohne auf das Laden zu warten */
+/* Nach dem Zeichnen: Wechsel erst einblenden, wenn das neue Bild bereit ist; Wischen an die Bühne binden */
 function stZeigen() {
   const f = document.querySelector('.st-buehne-dna'); if (!f) return;
-  const art = ST_BILD[S.win.art] ? S.win.art : 'fenster', b = ST_BILD[art], ob = f.querySelector('.st-objekt'), s = f.getBoundingClientRect(), o = ob.getBoundingClientRect();
-  if (!s.width || !o.width) return;
-  const sc = Math.min(o.width / b[0], o.height / b[1]), bw = b[0] * sc, bh = b[1] * sc, bl = o.left + (o.width - bw) / 2, bt = o.bottom - bh;
-  const px = bl + bw * 0.9 - s.left, py = bt + bh * 0.14 - s.top, et = f.querySelector('.dna-etikett').getBoundingClientRect();
-  const anker = f.querySelector('.st-anker'); anker.style.left = px.toFixed(1) + 'px'; anker.style.top = py.toFixed(1) + 'px';
-  const svg = f.querySelector('.st-linie'), ln = svg.querySelector('line');
-  svg.setAttribute('viewBox', '0 0 ' + Math.round(s.width) + ' ' + Math.round(s.height));
-  [['x1', px], ['y1', py], ['x2', et.left - s.left + 2], ['y2', et.top - s.top + et.height / 2]].forEach(([k, v]) => ln.setAttribute(k, v.toFixed(1)));
-  /* Licht: vom alten Element zum neuen gleiten, beim ersten Zeichnen sofort dort */
-  const l = f.querySelector('.st-licht'), lx = bl + bw / 2 - s.left - 120;
-  l.style.transition = 'none'; f.style.setProperty('--licht-x', (stLichtAlt != null && !ruhig() ? stLichtAlt : lx).toFixed(1) + 'px'); void l.offsetWidth;
-  l.style.transition = ''; f.style.setProperty('--licht-x', lx.toFixed(1) + 'px'); stLichtAlt = lx;
-  ob.style.setProperty('--schatten-x', (bl + bw / 2 - (o.left + o.width / 2)).toFixed(1) + 'px');
-  const r = f.querySelector('.st-rahmen');
-  if (r) { const rw = Math.round(bw + 12), rh = Math.round(bh + 12), rr = r.querySelector('rect'); r.style.left = (bl - o.left - 6).toFixed(1) + 'px'; r.style.top = (bt - o.top - 6).toFixed(1) + 'px'; r.setAttribute('width', rw); r.setAttribute('height', rh); r.setAttribute('viewBox', '0 0 ' + rw + ' ' + rh); rr.setAttribute('width', rw - 1.5); rr.setAttribute('height', rh - 1.5); }
-  /* Wechsel: erst wenn das neue Bild bereit ist, blenden Element, Anker, Linie, Etikett und Rahmen ein */
-  const img = ob.querySelector('img'), auf = () => requestAnimationFrame(() => f.querySelectorAll('.wechselt, .kommt').forEach((el) => el.classList.remove('wechselt', 'kommt')));
-  if (f.querySelector('.wechselt, .kommt')) { if (img.decode) img.decode().then(auf, auf); else auf(); }
+  const img = f.querySelector('.st-objekt img'), auf = () => requestAnimationFrame(() => f.querySelectorAll('.wechselt, .kommt').forEach((el) => el.classList.remove('wechselt', 'kommt')));
+  if (f.querySelector('.wechselt, .kommt')) { if (img && img.decode) img.decode().then(auf, auf); else auf(); }
   stWischen(f);
 }
 /* Wischen auf der Bühne wechselt das Element (ab 56 px oder einem schnellen Wisch); Pfeiltasten in den Radiogruppen wählen den Nachbarn */
@@ -3095,7 +3078,6 @@ document.addEventListener('keydown', (e) => {
   const k = z.getAttribute('data-v'), grp = z.getAttribute('data-act'); stSofort = true; z.click();
   const neu = document.querySelector('[data-act="' + grp + '"][data-v="' + k + '"]'); if (neu) neu.focus({ preventScroll: true });
 });
-window.addEventListener('resize', () => { if (S.screen === 'start') stZeigen(); });
 SCREENS.start = startDna;
 /* ---------- Fotos ---------- */
 /* ---------- Fotos im Look der Design-DNA (27.10.2026) ----------
