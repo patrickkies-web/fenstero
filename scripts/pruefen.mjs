@@ -267,8 +267,8 @@ if (teil(3)) {
 
   await page.click('[data-act="new"]');
   await page.waitForSelector('.scr[data-screen="start"]');
-  ok(await page.locator('.qopt[data-act="situation"]').count() === 2 && await page.locator('.qopt[data-act="art"]').count() === 6 && /Schritt 1 von 6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
-  await page.click('.bb .btn.primary');
+  ok(await page.locator('.st-stelle [role="radio"][data-act="situation"]').count() === 2 && await page.locator('.st-bento [role="radio"][data-act="art"]').count() === 6 && /Schritt\s1\svon\s6/.test(await page.evaluate(() => document.body.textContent)), 'Start: die Stelle (ersetzen oder neu) und das Element (Fenster, Balkon- oder Terrassentür, Festverglasung, Hebe-Schiebe-Tür, PSK-Tür, Faltschiebewand) zur Wahl');
+  await page.click('.lg-weiter');
   await page.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   const kiPosts = [], kiUrls = [];
   page.on('response', (r) => { if (r.url().includes('/api/ki?') && r.request().method() === 'POST') { kiPosts.push(r.status()); kiUrls.push(r.url()); } });
@@ -385,7 +385,7 @@ if (teil(3)) {
   await p2.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const posts2 = [];
   p2.on('request', (r) => { if (r.url().includes('/api/ki?')) posts2.push(r.url()); });
-  await p2.click('[data-act="new"]'); await p2.waitForSelector('.scr[data-screen="start"]'); await p2.click('.bb .btn.primary');
+  await p2.click('[data-act="new"]'); await p2.waitForSelector('.scr[data-screen="start"]'); await p2.click('.lg-weiter');
   await p2.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpeg });
   await p2.waitForSelector('.fx-dialog');
   await p2.click('.fx-nein');
@@ -689,8 +689,8 @@ if (teil(6)) {
   await p4.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const frage = async (id, set) => { await p4.evaluate(([id, set]) => { const w = demoProject()[0]; Object.assign(w, set || {}); S.win = w; S.q = id; S.selSash = 0; S.screen = 'frage'; render(true); }, [id, set || {}]); await p4.waitForTimeout(500); };
   await frage('form');
-  const kacheln = await p4.evaluate(() => { const k = Array.from(document.querySelectorAll('.qformen .qf')), r = k.map((e) => e.getBoundingClientRect()), pan = document.querySelector('.qpanel').getBoundingClientRect(); return { n: k.length, eineReihe: r.every((x) => Math.abs(x.top - r[0].top) < 1), gleich: r.every((x) => Math.abs(x.width - r[0].width) < 1 && Math.abs(x.height - r[0].height) < 1), drin: r.every((x) => x.left >= pan.left - 1 && x.right <= pan.right + 1), name: (document.querySelector('.qformen + .qcur') || {}).textContent }; });
-  ok(kacheln.n === 5 && kacheln.eineReihe && kacheln.gleich && kacheln.drin && /Rechteck/.test(kacheln.name), 'Formen: fünf gleich große Kacheln in einer Reihe, alle sichtbar, Name der gewählten darunter');
+  const kacheln = await p4.evaluate(() => { const k = Array.from(document.querySelectorAll('.qformen .qf')), r = k.map((e) => e.getBoundingClientRect()), pan = document.querySelector('.qpanel').getBoundingClientRect(); return { n: k.length, zweiSpalten: Math.abs(r[0].top - r[1].top) < 1 && r[2].top > r[0].top + 20 && Math.abs(r[0].left - r[2].left) < 1, gleich: r.every((x) => Math.abs(x.width - r[0].width) < 1 && Math.abs(x.height - r[0].height) < 1), drin: r.every((x) => x.left >= pan.left - 1 && x.right <= pan.right + 1), namen: k.map((e) => getComputedStyle(e, '::after').content).join('|'), name: (document.querySelector('.qformen + .qcur') || {}).textContent }; });
+  ok(kacheln.n === 5 && kacheln.zweiSpalten && kacheln.gleich && kacheln.drin && /Rechteck/.test(kacheln.namen) && /Rechteck/.test(kacheln.name), 'Formen: fünf gleich große Kacheln mit Zeichnung und Namen in zwei Spalten (Design-DNA), alle sichtbar, Name der gewählten darunter');
   const loch = () => p4.evaluate(() => { const st = document.getElementById('w3d'), wand = st.querySelector('[data-r="wall-in"]'), pts = (wand.style.clipPath.match(/px/g) || []).length / 2; return { struct: st.getAttribute('data-struct'), pts: pts, clip: wand.style.clipPath, glas: (st.querySelector('[data-r="glass-0"]').style.clipPath || '').slice(0, 12), streifen: st.querySelectorAll('.w3d-rs').length }; });
   const l0 = await loch();
   await p4.click('.qformen [data-v="rundbogen"]'); await p4.waitForTimeout(800);
@@ -811,10 +811,10 @@ if (teil(6)) {
   // Neue Öffnung: Start → Fotos → Einzeichnen (Ecke ziehen, Lupe) → Maße → Ergebnis mit Lage
   await p5.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   await p5.click('[data-act="new"]'); await p5.waitForSelector('.scr[data-screen="start"]');
-  await p5.click('.qopt[data-act="situation"][data-v="neu"]'); await p5.waitForTimeout(300);
-  await p5.click('.qopt[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
-  const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.scr[data-screen="start"] .note'), bar: document.querySelector('.bb .btn.primary').textContent }));
-  await p5.click('.bb .btn.primary'); await p5.waitForTimeout(300);
+  await p5.click('[data-act="situation"][data-v="neu"]'); await p5.waitForTimeout(300);
+  await p5.click('[data-act="art"][data-v="fenster"]'); await p5.waitForTimeout(200);
+  const startNeu = await p5.evaluate(() => ({ neu: S.win.neu, note: !!document.querySelector('.scr[data-screen="start"] .st-stelle-text .st-punkt') && !!document.querySelector('.st-rahmen'), bar: document.querySelector('.lg-weiter').textContent }));
+  await p5.click('.lg-weiter'); await p5.waitForTimeout(300);
   const fotosNeu = await p5.evaluate(() => ({ h1: document.querySelector('.hd h1').textContent, bar: Array.from(document.querySelectorAll('.bb .btn:not(.bb-zurueck)')).map((b) => b.textContent).join('|'), steps: stepsFor(S.win).join(',') }));
   await p5.evaluate(() => useDemo()); await p5.waitForTimeout(1800);
   fotosNeu.weiter = await p5.evaluate(() => document.querySelector('.bb .btn.primary').textContent);
@@ -898,7 +898,7 @@ if (teil(6)) {
   const pinch7 = await p7.evaluate(() => W3DZ.w3d.z);
   await frage7('sprossen', { teilung: '2p' });
   const spross7 = await p7.evaluate(() => !document.querySelector('#w3d [data-r="zoom"]') && W3DZ.w3d.z === 1);
-  ok(zoomKn7.netz > 20 && zoomKn7.da && zoomKn7.eins && zoomKn7.touch === 'none' && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
+  ok(zoomKn7.netz > 20 && zoomKn7.da && zoomKn7.eins && /^(none|pan-y)$/.test(zoomKn7.touch) && zoom7.z > 1.5 && zoom7.cls && !zoom7.eins && zoom7.s > zoomKn7.s * 1.4 && zoom7b.z === 1 && pinch7 > 2 && spross7, 'Zoom im Modell: Knöpfe + und −, „1:1“ setzt zurück, zwei Finger zoomen, neu gelegt statt skaliert; in der Sprossenfrage aus');
   const erg7 = await p7.evaluate(() => {
     /* Bühne wie im Ergebnis (alle acht Maße, gleiche Werte je Richtung), außerhalb eines festen Bildschirms */
     const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:16px;top:80px;width:358px;z-index:99'; document.body.appendChild(box);
@@ -3459,7 +3459,7 @@ if (teil(16)) {
       S.windows = demoProject(); persist(); newWin(); Object.assign(S.win, { name: 'Küche', mo: Object.assign({}, MO), el: { w: 1230, h: 1360 } });
       /* Messen und Ränder (Messen im Raum): die Notiz steht im Info-Blatt, oben steht nur die Überschrift */
       const pruef = (wo) => { n++; const raum = wo === 'messen' || wo === 'rest'; if (raum) { S.gloss = wo === 'messen' ? MESS[S.mess.step].g : 'raender'; render(); } if (!document.querySelector(raum ? '.sheet [data-act="notiz-auf"]' : '.hd .nz-knopf, .scr.dna .lg-notiz-knopf')) fehlt.push(wo); if (raum) { S.gloss = null; render(); } if (!document.querySelector('.hdr-wo, .scr.dna .lg-kopf [data-act="wohin"]')) ohneWo.push(wo); }; // Design-DNA (Lage): Notiz und Übersicht im eigenen Kopf
-      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
+      ['start', 'fotos', 'messen', 'rest', 'ergebnis'].forEach((sc) => { go(sc); if (sc === 'rest') { S.rest.i = 0; render(); } pruef(sc); if (sc !== 'messen' && sc !== 'rest' && !document.querySelector('.bb .bb-zurueck, .scr.dna .lg-fuss .lg-zurueck')) ohnePfeil.push(sc); });
       ['fenster', 'balkon', 'fest', 'hst', 'psk', 'fsw'].forEach((art) => { artSetzen(S.win, art); S.win.sart = 'rollladen'; S.win.iart = 'rollo'; qList(S.win).forEach((q) => { if (q.id === 'notiz') return; S.q = q.id; go('frage'); pruef(art + ':' + q.id); }); });
       S.win.neu = true; go('planmasse'); pruef('planmasse'); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push('planmasse'); S.win.neu = false; artSetzen(S.win, 'fenster');
       ['anfrage', 'anfrage2', 'anfrage3'].forEach((sc) => { go(sc); if (!document.querySelector('.hd .nz-knopf')) fehlt.push(sc); if (!document.querySelector('.bb .bb-zurueck')) ohnePfeil.push(sc); });
@@ -3526,7 +3526,7 @@ if (teil(16)) {
     const ent = await sk.evaluate(() => ({ screen: S.screen, karte: (document.querySelector('.entwurf-karte') || {}).textContent || '' }));
     await sk.click('[data-act="entwurf-weiter"]'); await sk.waitForTimeout(400);
     const ent2 = await sk.evaluate(() => ({ screen: S.screen, q: S.q, name: S.win.name, hm: S.win.mo.hm, fotos: !!S.photos.in }));
-    await sk.click('.hdr-wo'); await sk.waitForSelector('.sheet.wohin');
+    await sk.click('.hdr-wo, .lg-kopf [data-act="wohin"]'); await sk.waitForSelector('.sheet.wohin');
     const wo = await sk.evaluate(() => ({ schritte: document.querySelectorAll('.wo-schritt').length, fenster: document.querySelectorAll('.wo-fenster button').length, angaben: /\d mm|Kunststoff|Weiß/.test(document.querySelector('.wo-fenster').textContent) }));
     await sk.click('[data-act="wohin-liste"]'); await sk.waitForSelector('.sheet.verlassen');
     const vl = await sk.evaluate(() => Array.from(document.querySelectorAll('.sheet.verlassen button')).map((b) => b.textContent).join('|'));
@@ -3967,7 +3967,7 @@ if (teil(18)) {
   try {
     const fotosMachen = async (s) => {
       const jpg = Buffer.from(await s.evaluate(() => { const c = document.createElement('canvas'); c.width = 900; c.height = 1200; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 900, 1200); g.fillStyle = '#fff'; g.fillRect(220, 200, 460, 760); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.bb .btn.primary');
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.lg-weiter');
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 3000 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -4130,7 +4130,7 @@ if (teil(19)) {
     const bis = async (s, fn, ms, arg) => { const ende = Date.now() + (ms || 10000); while (Date.now() < ende) { if (await s.evaluate(fn, arg)) return true; await new Promise((r) => setTimeout(r, 200)); } return false; };
     const jpg = Buffer.from(jpegs[0], 'base64');
     const fotosMachen = async (s) => {
-      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.bb .btn.primary');
+      await s.click('[data-act="new"]'); await s.waitForSelector('.scr[data-screen="start"]'); await s.click('.lg-weiter');
       await s.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
       await s.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpg });
       if (await s.waitForSelector('.fx-dialog', { timeout: 2500 }).then(() => true, () => false)) await s.click('.fx-ja');
@@ -4416,15 +4416,15 @@ if (teil(20)) {
   const st20 = await g6.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), aus: Buehne3D.pruef.aus(st), zoom: st.classList.contains('is-zoom') }; });
   ok(st20.zoom && st20.gl && !st20.aus, 'Selbsttest nur bei 1:1: ein gezoomter erster Blick schaltet die WebGL-Bühne nicht ab');
   sauber(g6, 'Selbsttest im Zoom ohne Fehler'); await c20f.close();
-  /* Einstieg wie von der Website (#ausmessen): die erste Bühne ist das schwebende Element ohne Wand (Schritt 1). Der Selbsttest
-     wartet auf die erste Bühne mit Wand, statt WebGL für die ganze Sitzung abzuschalten (sonst zeigt jede Frage das CSS-Modell) */
+  /* Einstieg wie von der Website (#ausmessen): Schritt 1 zeigt das Element als feste Ansicht (Regel des Inhabers: beim Messen kein 3-D).
+     Die erste Bühne kommt in den Fragen; der Selbsttest schaltet WebGL dort nicht ab (sonst zeigt jede Frage das CSS-Modell) */
   const c20s = await browser.newContext(ctx20), g8 = await neueSeite(c20s), w20s = [];
   g8.on('console', (m) => { if (/Selbsttest/.test(m.text())) w20s.push(m.text()); });
   await g8.goto(BASE + '/app/?gl=voll#ausmessen', { waitUntil: 'networkidle' }); await g8.waitForTimeout(1500);
-  const sa20 = await g8.evaluate(() => { const st = document.querySelector('.w3d-stage'); return { screen: S.screen, gl: !!st && st.classList.contains('gl') }; });
+  const sa20 = await g8.evaluate(() => ({ screen: S.screen, fest: !!document.querySelector('.st-buehne-dna .st-objekt img') && !document.querySelector('.w3d-stage') }));
   await g8.evaluate(() => { const w = demoProject()[0]; S.win = w; S.q = 'material'; S.selSash = 0; S.screen = 'frage'; render(true); }); await g8.waitForTimeout(1200);
   const sb20 = await g8.evaluate(() => { const st = document.getElementById('w3d'); return { gl: st.classList.contains('gl'), u: Buehne3D.unterstuetzt(), aus: Buehne3D.pruef.aus(st) }; });
-  ok(sa20.screen === 'start' && sa20.gl && sb20.gl && sb20.u && !sb20.aus && !w20s.length, 'Einstieg über #ausmessen: die schwebende Startbühne ohne Wand schaltet die WebGL-Bühne nicht ab, die Fragen zeichnen in WebGL (' + JSON.stringify([sa20, sb20, w20s]) + ')');
+  ok(sa20.screen === 'start' && sa20.fest && sb20.gl && sb20.u && !sb20.aus && !w20s.length, 'Einstieg über #ausmessen: Schritt 1 zeigt das Element als feste Ansicht (beim Messen kein 3-D), die Fragen zeichnen danach in WebGL (' + JSON.stringify([sa20, sb20, w20s]) + ')');
   sauber(g8, 'Einstieg über #ausmessen ohne Fehler'); await c20s.close();
 }
 
@@ -4590,7 +4590,7 @@ if (teil(22)) {
   ok(!eyeUeber.length, 'Bei 320 px Breite läuft die Eyebrow nicht unter die Knöpfe i und Notiz' + (eyeUeber.length ? ' (' + eyeUeber.join(', ') + ')' : ''));
   // Genau ein grünes Wort je Titel (Schritte und alle Fragen)
   const titel = [];
-  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => document.querySelectorAll('.hd h1 .ak').length)]); }
+  for (const scr of ['start', 'fotos', 'messen', 'rest', 'ergebnis', 'anfrage', 'anfrage2', 'anfrage3']) { await p.evaluate((scr) => { const w = demoProject()[0]; S.win = w; S.editIdx = -1; S.windows = [w]; go(scr); }, scr); await p.waitForTimeout(150); titel.push([scr, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); }
   for (const q of await p.evaluate(() => qList(demoProject()[0]).map((x) => x.id))) { await frage20(q); titel.push([q, await p.evaluate(() => (document.querySelector('.scr.dna h1 em') ? 1 : document.querySelectorAll('.hd h1 .ak').length))]); } // Design-DNA (Lage): zweite Stimme in Grau statt grünem Wort
   const ohneAk = titel.filter((x) => x[1] !== 1).map((x) => x[0]);
   ok(titel.length > 30 && !ohneAk.length, 'Jeder Schritt- und Fragentitel hat genau ein grünes Wort (' + titel.length + ' Titel' + (ohneAk.length ? ', ohne: ' + ohneAk.join(', ') : '') + ')');
@@ -4601,11 +4601,11 @@ if (teil(22)) {
   await p.evaluate(() => { const w = demoProject()[0]; w.name = 'Bad'; S.windows = [demoProject()[1]]; S.win = w; S.editIdx = -1; S.q = 'material'; go('frage'); }); await p.waitForTimeout(300);
   await p.focus('.hd [data-act="notiz-auf"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
   const nz = await blatt(), nzName = await p.getAttribute('#nz-text', 'aria-label'); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const nzZu = await fokusAct();
-  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
+  await p.focus('.hdr-wo, .lg-kopf [data-act="wohin"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
   const wo = await blatt(), woTab = await tabDrin(25); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const woZu = await fokusAct();
-  await p.focus('.hdr-wo'); await p.keyboard.press('Enter'); await p.waitForTimeout(300); await p.click('.sheet [data-act="wohin-liste"]'); await p.waitForTimeout(300);
+  await p.focus('.hdr-wo, .lg-kopf [data-act="wohin"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(300); await p.click('.sheet [data-act="wohin-liste"]'); await p.waitForTimeout(300);
   const vl = await blatt(), vlTab = await tabDrin(20); await p.keyboard.press('Escape'); await p.waitForTimeout(300); const vlZu = await fokusAct();
-  await p.click('.hdr-gl'); await p.waitForTimeout(300); const gi = await blatt(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+  await p.click('.hdr-gl, .lg-kopf [data-act="gindex"]'); await p.waitForTimeout(300); const gi = await blatt(); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   ok([nz, wo, vl, gi].every((b) => b && b.links && b.ak === 1 && b.kicker && b.drin), 'Blätter (Notiz, Übersicht, Verlassen, Begriffe): linksbündig, Kicker grün, ein grünes Wort, Fokus im Blatt');
   ok(/^Deine Notiz zu /.test(nzName || '') && nzZu === 'notiz-auf' && woTab && woZu === 'wohin' && vlTab && vlZu === 'wohin', 'Notiz-Textfeld hat einen Namen; Tab bleibt in Übersicht und Verlassen-Blatt; Esc gibt den Fokus an den Auslöser zurück (' + [nzZu, woZu, vlZu].join(', ') + ')');
   // Zurück nach „Wünsche ändern“: über die Fragen zur Fensterseite, dann zur Liste (nicht durch alle Messschritte)
@@ -4623,14 +4623,17 @@ if (teil(22)) {
   const frageB = async (id, set, tiefe) => { await p.evaluate(([id, set, tiefe]) => { S.verlassen = null; S.wohin = false; S.notiz = null; S.gloss = null; S.glossIndex = false; const w = demoProject()[0]; Object.assign(w, set || {}); if (w.seiten) seitenAnwenden(w); S.proj.tiefe = tiefe || 'normal'; S.win = w; S.editIdx = -1; S.q = id; S.selSash = 0; S.qMass = null; S.screen = 'frage'; render(true); }, [id, set || {}, tiefe || '']); await p.waitForTimeout(450); };
   const leisteZeigt = () => p.evaluate(() => { const l = document.querySelector('.qleiste'), a = l && l.querySelector('[aria-current]'); if (!a) return false; const r = l.getBoundingClientRect(), b = a.getBoundingClientRect(); return b.left >= r.left - 1 && b.right <= r.right + 1; });
   await frageB('material', {}, 'normal');
-  const kl = await p.evaluate(() => { const l = document.querySelector('.qleiste'), b = Array.from(l.querySelectorAll('.ql')); return { label: l.getAttribute('aria-label'), namen: b.map((x) => x.textContent).join('|'), jetzt: b.filter((x) => x.getAttribute('aria-current') === 'step').map((x) => x.textContent).join(), haken: b.filter((x) => x.classList.contains('fertig')).length, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, tools: Array.from(document.querySelectorAll('.qdock .hd-tools > *')).map((x) => x.className.split(' ')[0]).join(',') }; });
-  const kl0 = await leisteZeigt();
-  await p.click('.qleiste .ql[data-kap="sonne"]'); await p.waitForTimeout(500);
-  const kl2 = await p.evaluate(() => { const c = qCurrent(), kicker = document.querySelector('.qdock .hd .eyebrow').textContent, jetzt = document.querySelector('.qleiste [aria-current]').textContent; S.wohin = true; render(); const wo = Array.from(document.querySelectorAll('.wo-abschnitte .chip')).map((x) => x.textContent).join('|'); S.wohin = false; render(); return { q: S.q, erste: c.list.find((q) => q.kap === 'sonne').id, kicker: kicker, jetzt: jetzt, wohin: wo }; });
-  const kl3 = await leisteZeigt();
-  ok(kl.label === 'Kapitel der Wünsche' && kl.namen === 'Lage|Aufbau|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Einbau' && kl.jetzt === 'Material & Farbe' && kl.haken === 2 && /^Material & Farbe · 1 von \d+$/.test(kl.kicker) && kl.tools === 'qtiefe,nz-knopf' && kl0 &&
-    kl2.q === kl2.erste && /^Sonnenschutz · 1 von \d+$/.test(kl2.kicker) && kl2.jetzt === 'Sonnenschutz' && kl3 && kl2.wohin === kl.namen,
-    'Ein Kapitelkonzept: Leiste mit den sieben Kapiteln, erledigte mit Haken, das aktuelle im Blick; Kicker „Kapitel · i von n“ mit Tiefe-Pille und Notiz daneben; Antippen springt auf die erste sichtbare Frage, die Übersicht zeigt dieselben Kapitel (' + kl.kicker + ' → ' + kl2.kicker + ')');
+  /* Wünsche im Look der Design-DNA (27.10.2026): das Kapitel steht im Band (Name, Stationen, „3 von 7“), Antippen öffnet „Direkt zu einem
+     Thema“ mit allen sieben Kapiteln; über der Frage nur noch „Frage i von n“ */
+  const kl = await p.evaluate(() => { const band = document.querySelector('.wz-band'); return { label: band.getAttribute('aria-label'), jetzt: band.querySelector('b').textContent, stationen: band.querySelectorAll('.lg-band i').length, haken: band.querySelectorAll('.lg-band i.fertig').length, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, tools: Array.from(document.querySelectorAll('.qdock .hd-tools > *')).map((x) => x.className.split(' ')[0]).join(',') }; });
+  await p.click('.wz-band'); await p.waitForSelector('.wz-bogen');
+  const kb = await p.evaluate(() => { const b = Array.from(document.querySelectorAll('.wz-kapitel .ql')); return { namen: b.map((x) => x.childNodes[1].textContent).join('|'), jetzt: b.filter((x) => x.getAttribute('aria-current') === 'step').map((x) => x.childNodes[1].textContent).join(), fokus: document.activeElement.classList.contains('wz-rund') }; });
+  await p.click('.wz-kapitel .ql[data-kap="sonne"]'); await p.waitForTimeout(500);
+  const kl2 = await p.evaluate(() => { const c = qCurrent(), kicker = document.querySelector('.qdock .hd .eyebrow').textContent, jetzt = document.querySelector('.wz-band b').textContent, bogen = !!document.querySelector('.wz-bogen'); S.wohin = true; render(); const wo = Array.from(document.querySelectorAll('.wo-abschnitte .chip')).map((x) => x.textContent).join('|'); S.wohin = false; render(); return { q: S.q, erste: c.list.find((q) => q.kap === 'sonne').id, kicker: kicker, jetzt: jetzt, bogen: bogen, wohin: wo }; });
+  ok(/^Kapitel 3 von 7: Material und Farbe\. Direkt zu einem Thema$/.test(kl.label) && kl.jetzt === 'Material & Farbe' && kl.stationen === 7 && kl.haken === 2 && /^Frage 1 von \d+$/.test(kl.kicker) && kl.tools === 'qtiefe,nz-knopf' &&
+    kb.namen === 'Lage|Aufbau|Material & Farbe|Glas & Sprossen|Griff & Schutz|Sonnenschutz|Einbau' && kb.jetzt === 'Material & Farbe' && kb.fokus &&
+    kl2.q === kl2.erste && /^Frage 1 von \d+$/.test(kl2.kicker) && kl2.jetzt === 'Sonnenschutz' && !kl2.bogen && kl2.wohin === kb.namen,
+    'Ein Kapitelkonzept (Design-DNA): Band mit sieben Stationen, erledigte gefüllt, das laufende benannt; Antippen öffnet „Direkt zu einem Thema“ mit denselben Kapiteln und springt auf die erste sichtbare Frage; Kicker „Frage i von n“ mit Tiefe und Notiz daneben (' + kl.kicker + ' → ' + kl2.kicker + ')');
   // Tiefe-Pille: Wahl öffnen, Tiefe ändern, mit der Zurück-Taste des Browsers zurück zur Frage
   await p.click('.qdock .qtiefe'); await p.waitForTimeout(400);
   const tp1 = await p.evaluate(() => ({ q: S.q, sub: (document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p') || {}).textContent || '' })); // Design-DNA: Unterzeile der Frage
@@ -4694,11 +4697,11 @@ if (teil(22)) {
     'Zifferntasten für die neuen Maße: Tipp auf den Wert im Stufenregler (− und + bleiben 44 px), unten Pfeil zurück, 0, Löschen, „Übernehmen“; das Modell bleibt an seinem Platz; außerhalb von 80 bis 400 mm ein Hinweis; Pfeil und Zurück-Taste schließen ohne Änderung; ebenso bei Seitenteilen, Paneel und Unterlicht (' + zt6 + ')');
   // Stulp mit Seitenteilen: Kapitel, Stufe, Aktion lässt die Seitenteile außen; „Gestaltung übernehmen“ nimmt den Gehflügel und die Wunschfarben mit
   await p.evaluate(() => { S.proj.tiefe = 'genau'; const w = baseWin(); Object.assign(w, { name: 'Wohnen', offen: {}, teilung: '2s', sashes: sashesFor('2s'), seiten: 'beide', seitenB: 400 }); seitenAnwenden(w); barCount(w, 'v', 1); S.win = w; S.editIdx = -1; S.q = 'stulp'; S.screen = 'frage'; render(true); }); await p.waitForTimeout(300);
-  const st0 = await p.evaluate(() => { const c = qCurrent(), ids = c.alle.map((q) => q.id); return { kap: c.q.kap, s: c.q.s, kicker: document.querySelector('.qdock .hd .eyebrow').textContent, bed: ids.indexOf('stulpBed') > ids.indexOf('stulp') }; });
+  const st0 = await p.evaluate(() => { const c = qCurrent(), ids = c.alle.map((q) => q.id); return { kap: c.q.kap, s: c.q.s, kicker: document.querySelector('.wz-band b').textContent, bed: ids.indexOf('stulpBed') > ids.indexOf('stulp') }; });
   await p.click('[data-act="stulp"][data-v="L"]'); await p.waitForTimeout(400);
   const st1 = await p.evaluate(() => { const w = S.win; return { folge: w.sashes.map((x) => (x.st ? 'S' : x.steh ? 'H' : x.t)).join(''), geh: gehFluegel(w), steh: w.sashes.map((x, i) => (stehFluegel(w, i) ? i : -1)).filter((i) => i >= 0).join(), felder: new Set(w.bars.map((b) => b.s)).size }; });
   const st2 = await p.evaluate(() => { const src = kopie(S.win); src.wunschGf = 'Messing matt'; src.wunschSf = 'DB 703'; const w = baseWin(); Object.assign(w, { teilung: '2s', sashes: sashesFor('2s') }); designAnwenden(w, src); return w.sashes.map((x) => (x.steh ? 'H' : x.t)).join('') + '|' + w.wunschGf + '|' + w.wunschSf; });
-  ok(st0.kap === 'aufbau' && st0.s === 1 && /^Aufbau · /.test(st0.kicker) && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
+  ok(st0.kap === 'aufbau' && st0.s === 1 && st0.kicker === 'Aufbau' && st0.bed && st1.folge === 'SDKHS' && st1.geh === 1 && st1.steh === '2' && st1.felder === 4 && st2 === 'DKH|Messing matt|DB 703',
     'Stulp mit Seitenteilen: „Welcher Flügel geht zuerst auf?“ im Kapitel Aufbau (Stufe 1), „Wie öffnet der zweite Flügel?“ danach; die Wahl lässt die Seitenteile außen, Sprossen in allen Feldern; „Gestaltung übernehmen“ nimmt Gehflügel und Wunschfarben mit (' + st1.folge + ', ' + st2 + ')');
   // Standard mit dem Namen des Betriebs im Kundenlink
   const stdB = await p.evaluate(() => { const alt = S.betrieb; S.betrieb = { name: 'Fensterbau Brandt' }; S.proj.tiefe = 'genau'; const w = baseWin(); w.name = 'X'; S.win = w; S.q = 'griffM'; S.screen = 'frage'; render(true); const zeile = document.querySelector('.qpanel .qstd b').textContent; S.q = 'tiefe'; render(true); const sub = document.querySelector('.qdock .hd > p, .scr.dna .lg-frage > p').textContent; S.betrieb = alt; S.q = 'griffM'; render(true); return { zeile: zeile, sub: sub, eigen: document.querySelector('.qpanel .qstd b').textContent }; });
@@ -4739,7 +4742,8 @@ if (teil(22)) {
         const kreis = i && i.querySelector('svg > circle'), gedrueckt = c.querySelector('.chip').getAttribute('aria-pressed') === 'true';
         if (lb.scrollWidth > lb.clientWidth + 1) return lb.textContent + ' abgeschnitten';
         if (i && rechts > i.getBoundingClientRect().left + 13) return lb.textContent + ' unter dem i';
-        if (i && gedrueckt && getComputedStyle(kreis).fill !== 'rgb(241, 240, 234)') return lb.textContent + ' i unlesbar';
+        /* lesbar: heller Kreis mit dunklem Zeichen (bisher) oder, in den Wünschen der Design-DNA, weißer Ring und weißes Zeichen auf Schwarz */
+        if (i && gedrueckt && getComputedStyle(kreis).fill !== 'rgb(241, 240, 234)' && !(i.closest('.dna') && getComputedStyle(i).color === 'rgb(255, 255, 255)')) return lb.textContent + ' i unlesbar';
         return '';
       }).filter(Boolean));
       r.forEach((x) => chipsI.push(breite + ' ' + q + ': ' + x));
@@ -4793,7 +4797,7 @@ if (teil(22)) {
   const ctxK = await browser.newContext(telefon), pK = await neueSeite(ctxK);
   await pK.goto(BASE + '/app/', { waitUntil: 'networkidle' });
   const jpegK = Buffer.from(await pK.evaluate(() => { const c = document.createElement('canvas'); c.width = 600; c.height = 800; const g = c.getContext('2d'); g.fillStyle = '#e9e3da'; g.fillRect(0, 0, 600, 800); g.fillStyle = '#a9c8e8'; g.fillRect(150, 150, 300, 500); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; }), 'base64');
-  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await pK.click('.bb .btn.primary');
+  await pK.click('[data-act="new"]'); await pK.waitForSelector('.scr[data-screen="start"]'); await pK.click('.lg-weiter');
   await pK.waitForSelector('input[data-in="photo"][data-f="in"]', { state: 'attached' });
   await pK.setInputFiles('input[data-in="photo"][data-f="in"]', { name: 'innen.jpg', mimeType: 'image/jpeg', buffer: jpegK });
   const kiOffen = await pK.waitForSelector('.fx-dialog', { timeout: 5000 }).then(() => true, () => false);
@@ -4808,9 +4812,9 @@ if (teil(22)) {
   await p.click('.mess-dock .md-haupt'); await p.waitForSelector('.mess-pad .keypad');
   const fs1 = Object.assign(fs1d, await p.evaluate(() => { const k = document.querySelector('.mess-pad .keypad [data-v="5"]').getBoundingClientRect(), st = document.getElementById('w3d').getBoundingClientRect(); return { key: Math.round(k.height), stage: Math.round(st.height) }; }));
   await frageB('rc', { erreichbar: '' }, 'normal');
-  const fs2a = await p.evaluate(() => document.querySelector('.qdock').scrollTop);
+  const fs2a = await p.evaluate(() => document.querySelector('.scroll').scrollTop);
   await p.click('.qpanel [data-act="erreichbar"][data-v="ja"]'); await p.waitForTimeout(1200);
-  const fs2 = await p.evaluate(() => { const d = document.querySelector('.qdock'), b = document.querySelector('.qpanel .qlabel'); return { top: Math.round(d.scrollTop), sicht: !!b && b.getBoundingClientRect().top < d.getBoundingClientRect().bottom - 20 }; });
+  const fs2 = await p.evaluate(() => { const d = document.querySelector('.scroll'), b = document.querySelector('.qpanel .qlabel'), f = document.querySelector('.lg-fuss'); return { top: Math.round(d.scrollTop), sicht: !!b && b.getBoundingClientRect().top < (f ? f.getBoundingClientRect().top : innerHeight) - 20 }; });
   await frageB('griff', { griff: 'standard', teilung: '2p', sashes: [{ t: 'DK', din: 'L' }, { t: 'DK', din: 'R' }] }, 'normal'); await p.waitForTimeout(1300);
   const fs3a = await p.evaluate(() => ({ z: W3DZ.w3d.z, x: Math.round(W3DZ.w3d.x), y: Math.round(W3DZ.w3d.y) }));
   await p.click('.qnav [data-act="qnext"]'); await p.waitForTimeout(150);
