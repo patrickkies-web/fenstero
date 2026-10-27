@@ -318,7 +318,12 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 /* Licht mit Abfall: hell auf der Mitte des Modells, zum Rand warm dunkler; einmal gemalt, ohne Filter */
 .ez-buehne--mess .ez-buehne__kante { z-index: 2; background: linear-gradient(160deg, rgba(255,251,244,.14) 0%, rgba(255,251,244,0) 36%), radial-gradient(72% 90% at 55% 44%, rgba(58,46,34,0) 50%, rgba(58,46,34,.14) 76%, rgba(26,20,14,.4) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(7,9,10,.10); }
 .ez-buehne--mess .ez-glaschip.ist-kurz .ez-glaschip__zusatz { display: none; }
-.ez-mess__bild { position: absolute; z-index: 1; left: 0; top: 0; width: 100%; height: auto; max-width: none; display: block; transform-origin: 0 0; }
+.ez-mess__bild { position: absolute; z-index: 1; left: 0; top: 0; width: 100%; height: auto; max-width: none; display: block; opacity: 0; }
+.ez-mess__bild.ist-an { opacity: 1; }
+.ez-mess__bild.blendet { transition: opacity 220ms var(--dna-druck); }
+.ez-mess__bild.ist-schmal { -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+/* Beim Rahmenmaß die Öffnung desselben Paares blass: Koralle gestrichelt, dünn */
+.ez-mass__geist { stroke: var(--koralle); stroke-width: 1.5; stroke-dasharray: 4px 4px; opacity: .55; vector-effect: non-scaling-stroke; }
 /* Linie: stumpfe Enden, die Strichelung passt sich der Länge an (start.js), damit an beiden Marken ein voller Strich steht */
 .ez-mass { position: absolute; z-index: 3; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .ez-mass__linie { stroke: var(--koralle); stroke-width: 2; stroke-linecap: butt; stroke-dasharray: var(--strich, 6px) 4px; vector-effect: non-scaling-stroke; }
@@ -332,7 +337,7 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
    Stück Linie nach innen, weißer Ring wie ein Glas), rechts das Ding hell und der Zusatz Silbergrau; gespiegelt, wenn sie links steht */
 .ez-mass__ende { position: absolute; z-index: 4; display: flex; align-items: center; gap: 10px; padding: 4px 14px 4px 4px; border-radius: var(--rund-pille); background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 1px 10px 18px -8px rgba(40,30,20,.65); pointer-events: none; }
 .ez-mass__ende.ist-gespiegelt { flex-direction: row-reverse; padding: 4px 4px 4px 14px; text-align: right; }
-.ez-lupe { position: relative; flex: none; width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: #e9e2d7; box-shadow: 0 0 0 2px rgba(255,255,255,.92), 0 2px 6px rgba(7,9,10,.45); }
+.ez-lupe { position: relative; flex: none; width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: #e9e2d7; box-shadow: 0 0 0 2px color-mix(in srgb, var(--silbergrau) 80%, var(--weiss)), 0 2px 6px rgba(7,9,10,.45); }
 .ez-lupe__bild { position: absolute; inset: 0; border-radius: inherit; background-repeat: no-repeat; box-shadow: inset 0 0 0 1px rgba(7,9,10,.18), inset 0 2px 7px rgba(7,9,10,.28); }
 .ez-lupe__marke { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .ez-lupe__linie, .ez-lupe__kappe { stroke: var(--koralle); stroke-width: 2.2; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
@@ -349,20 +354,18 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 .ez-buehne--mess.ist-klein .ez-lupe { width: 40px; height: 40px; }
 .ez-buehne--mess.ist-klein .ez-glaschip { display: none; }
 .ez-buehne--mess.ist-klein .ez-mass__text { max-width: 96px; font-size: .75rem; }
-/* Runder Knopf für die Großansicht (G13), unten links, wo weder Linie noch Etikett liegt */
-.ez-gross-auf { position: absolute; z-index: 4; left: 10px; bottom: 10px; width: 44px; height: 44px; border: 0; padding: 0; border-radius: 50%; display: grid; place-items: center; color: var(--weiss); background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 1px 8px 16px -8px rgba(40,30,20,.65); cursor: zoom-in; transition: transform 160ms var(--dna-druck); }
-.ez-gross-auf svg { width: 18px; height: 18px; }
+/* Knopf „Groß ansehen“ (G13 mit Wort, das Pfeilsymbol allein verstehen Ältere nicht), unten links, wo weder Linie noch Etikett liegt */
+.ez-gross-auf { position: absolute; z-index: 4; left: 10px; bottom: 10px; height: 44px; border: 0; padding: 0 14px 0 12px; border-radius: var(--rund-pille); display: inline-flex; align-items: center; gap: 7px; font: 500 .8125rem/1 var(--font-sans); white-space: nowrap; color: var(--weiss); background: linear-gradient(180deg, rgba(52,52,55,.95), rgba(26,26,28,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.05), 1px 8px 16px -8px rgba(40,30,20,.65); cursor: zoom-in; transition: transform 160ms var(--dna-druck); }
+.ez-gross-auf svg { width: 16px; height: 16px; flex: none; }
 .ez-gross-auf:active { transform: scale(.97); }
 .ez-gross-auf:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px; }
 .ez-buehne--mess.ist-gross .ez-gross-auf, .ez-buehne--mess.ist-gross .ez-glaschip { display: none; }
-/* Kamerafahrt zum nächsten Maß: Linie und Enden sind sofort aus (sie fahren nicht mit) und kommen danach mit der Linie; die Zahl steht
-   schon an ihrem neuen Platz, damit sofort getippt werden kann */
-.ez-buehne--mess.faehrt .ez-mass, .ez-buehne--mess.faehrt .ez-mass__kappe, .ez-buehne--mess.faehrt .ez-mass__ende { opacity: 0; }
+
 /* Kleine Bühne (Telefone mit wenig Höhe): Feld kleiner, damit es neben der Linie Platz hat und kein Etikett verdeckt */
 .ez-buehne--mess.ist-klein .ez-mass__feld { height: 44px; padding: 0 14px; }
 .ez-buehne--mess.ist-klein .ez-mass__feld b { font-size: 1.75rem; }
 .ez-buehne--mess.ist-klein .ez-mass__marke { height: 20px; }
-.ez-buehne--mess.ist-klein .ez-mass__feld.is-leer .ez-mass__zb { display: none; }
+.ez-buehne--mess.ist-klein .ez-mass__feld.is-leer .ez-mass__zb { margin-right: 6px; font-size: .75rem; }
 .ez-buehne--mess.ist-klein .ez-mass__haken { right: 12px; }
 /* Großansicht: die Bühne füllt den Platz zwischen Frage und Pille; Zahl und Lupen größer */
 .ez-gross { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; overflow: hidden; background: var(--schwarz); color: var(--weiss); }
@@ -383,7 +386,7 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 .ez-buehne--mess.ist-gross .ez-mass__text { max-width: 132px; font-size: .9375rem; }
 @media (prefers-reduced-motion: reduce) { .ez-gross[open] { animation: none; } }
 /* Feld an der Linie: an der Linienseite verankert, die Zahl wächst von der Linie weg; Zahl 40/300 mit Proportionalziffern, Einheit auf der Grundlinie */
-.ez-mass__feld { position: absolute; z-index: 5; display: inline-flex; align-items: baseline; gap: 0; height: 52px; padding: 0 18px; border-radius: var(--rund-pille); background: linear-gradient(180deg, #fff, #f6f3ee); color: var(--schwarz); translate: var(--fx, 0) 0; box-shadow: 0 0 0 1.5px var(--violett), inset 0 -2px 0 rgba(58,46,34,.07), 0 1px 2px rgba(58,46,34,.30), 2px 12px 22px -10px rgba(58,46,34,.60); white-space: nowrap; pointer-events: none; }
+.ez-mass__feld { position: absolute; z-index: 5; display: inline-flex; align-items: baseline; gap: 0; height: 52px; padding: 0 18px; border-radius: var(--rund-pille); background: linear-gradient(180deg, #fff, #f6f3ee); color: var(--schwarz); translate: var(--fx, 0) 0; box-shadow: 0 0 0 1.5px var(--violett), inset 0 -2px 0 rgba(58,46,34,.07), 0 1px 2px rgba(58,46,34,.30), 2px 12px 22px -10px rgba(58,46,34,.60); white-space: nowrap; pointer-events: auto; cursor: default; }
 .ez-mass__zb { display: none; }
 .ez-mass__feld b { align-self: center; font: 300 2.25rem/1 var(--font-sans); letter-spacing: -.02em; font-variant-numeric: normal; }
 .ez-mass__feld small { margin: 0 0 0 .3em; font: 400 .875rem/1 var(--font-sans); color: var(--textgrau); transition: opacity 150ms var(--dna-druck); }
@@ -398,12 +401,12 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 .ez-mass__feld.is-fehler { box-shadow: 0 0 0 2px var(--koralle), inset 0 -2px 0 rgba(58,46,34,.07), 0 1px 2px rgba(58,46,34,.30), 2px 12px 22px -10px rgba(58,46,34,.60); }
 .ez-mass__feld.is-fehler .ez-mass__marke { background: var(--koralle); }
 /* Nächstes Maß: die Linie läuft in 320 ms von Kappe zu Kappe (Clip über ihre eigene Strecke), Kappe A sofort, Enden und Feld folgen */
-.ez-buehne--mess.zieht .ez-mass { animation: ez-zieht-v 320ms var(--dna-druck) both; }
+.ez-buehne--mess.zieht .ez-mass { animation: ez-zieht-v 320ms var(--dna-druck) var(--verz, 0ms) both; }
 .ez-buehne--mess.zieht[data-r="h"] .ez-mass { animation-name: ez-zieht-h; }
 @keyframes ez-zieht-v { from { clip-path: inset(0 0 calc(100% - var(--a, 0%)) 0); } to { clip-path: inset(0 0 calc(100% - var(--b, 100%) - 4px) 0); } }
 @keyframes ez-zieht-h { from { clip-path: inset(0 calc(100% - var(--a, 0%)) 0 0); } to { clip-path: inset(0 calc(100% - var(--b, 100%) - 4px) 0 0); } }
-.ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht .ez-mass__ende { animation: ez-folgt 200ms var(--dna-druck) 160ms both; }
-.ez-buehne--mess.zieht:not(.nach-fahrt) .ez-mass__feld { animation: ez-folgt 150ms var(--dna-druck) both; }
+.ez-buehne--mess.zieht #mess-kappe-b, .ez-buehne--mess.zieht .ez-mass__ende { animation: ez-folgt 200ms var(--dna-druck) calc(160ms + var(--verz, 0ms)) both; }
+.ez-buehne--mess.zieht .ez-mass__feld { animation: ez-folgt 150ms var(--dna-druck) both; }
 @keyframes ez-folgt { from { opacity: 0; } }
 /* Karte mit den Zifferntasten (G14: tonaler Abfall, Kanten) */
 .ez-karte--tasten { gap: 8px; padding: 12px 16px 16px; background: linear-gradient(180deg, var(--weiss) 0 58%, color-mix(in srgb, var(--silbergrau) 9%, var(--weiss))); box-shadow: inset 0 -1px 0 rgba(7,9,10,.06), 0 30px 56px -22px rgba(0,0,0,.85), 0 2px 6px rgba(0,0,0,.4); }
@@ -443,8 +446,8 @@ body { margin: 0; background: var(--schwarz); color: var(--weiss); font-family: 
 #mess-erkl-text p { margin: 0 0 10px; }
 /* Titel einzeilig halten; sehr schmale Telefone: die zwei Stimmen auf zwei festen Zeilen */
 .ez-folie[data-folie="messen"] .ez-frage h1 { font-size: 1.75rem; letter-spacing: -.025em; }
-.ez-folie[data-folie="messen"] .ez-frage { padding: 10px 0 4px; }
-.ez-folie[data-folie="messen"] .ez-unterzeile { margin-top: 4px; font-size: .9375rem; line-height: 1.45; }
+.ez-folie[data-folie="messen"] .ez-frage { padding: 8px 0 2px; }
+.ez-folie[data-folie="messen"] .ez-unterzeile { margin-top: 2px; font-size: .875rem; line-height: 1.4; }
 .ez-folie[data-folie="messen"] .ez-zeile { height: 52px; }
 @media (max-width: 374px) { .ez-folie[data-folie="messen"] .ez-frage h1 em { display: block; } }
 /* Kurze Telefone (375 × 667, Android mit Adressleiste): Titel, Tasten, Zeile und Fuß dichter, die Bühne darf bis 112 px */

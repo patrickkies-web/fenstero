@@ -174,3 +174,56 @@ Erst nach dem Ja des Inhabers, auf dem Arbeitszweig, mit Prüfsuite:
 - Weiß 48 Prozent durch Putz und Tastenkarte: Pixelzählung oder Eindruck.
 - Realitäts-Check mit der Fragekarte: zwei bis drei echte Menschen (einer über 65, ein Fensterbauer), fünf Minuten ohne Hilfe: „Wo legst du den Zollstock an?“, „Was tippst du bei 141 cm?“, „Wie sicher bist du, 1 bis 5?“
 - Test auf einem echten Mittelklasse-Android.
+
+---
+
+# Nachtrag: Variante „große Bühne“ (Wunsch des Inhabers, 27.10.2026, nachmittags)
+
+## Auftrag
+
+- Wunsch des Inhabers: „Grundsätzlich sieht das schon sehr geil aus, aber wenn jemand das zum ersten Mal macht und dieses Bild nur so mickrig klein sieht, gerade bei älteren Menschen, frage ich mich, ob das funktioniert. Es besteht auch nicht die Möglichkeit, das Bild oben zu vergrößern, und zwischen dem weißen Feld und dem Bild ist recht viel Platz. Ich hätte gerne eine Variante, dass man weiß, was man einträgt, aber auch sieht, was man eintragen soll, also wo es anfängt und aufhört. Mir ist das zu wenig Bildfläche. Unter Berücksichtigung der gestalterischen Punkte und der bisherigen Skills.“ (Lesart: „Platz zwischen Bild und weißer Tastenkarte“, „wo die Enden anfangen und aufhören“.)
+- Was der Nutzer tun soll: wie bisher vier Maße; dazu ohne Hilfe erkennen, wo er anlegt und bis wohin er misst.
+- Erfolg: Ein Erstnutzer über 65 erkennt Anfang und Ende, sieht seine Zahl und kann das Bild vergrößern.
+
+## Wahl (drei Zeilen)
+
+1. Quellen: Bestand der Folie (Texte, Prüfungen, Ablauf), Gene G4, G9, G12, G13, G1, G3, die Vorlagen 01/02 (Glas-Karte mit Objekt über dem Rand, Detail groß), 13/14 (Foto vollflächig), Montageanleitungen als Prinzip „Detailkreis“; das 3-D-Modell der Wünsche in höherer Auflösung (Faktor 6 statt 2, gleiche Kamera, buehne.js nur im Testbrowser umgeschrieben).
+2. Gebaut „mutig“: Bühne von Rand zu Rand, Lupen-Etiketten an beiden Enden, Zahl auf der Linie, Großansicht. Nicht gebaut: „naheliegend“ (nur die Bühne höher, Etiketten wie bisher) und „überraschend“ (Titel auf die Wand, Karte als Blatt über der Bühne; verwischt die dunkle App und verdeckt das Modell).
+3. Regel im Begleit-Skill: „Bildfläche vor Dichte“ (Abschnitt 4).
+
+## Erste Fassung und Gremium (eine Runde, blind; X = Variante, Y = Fassung vom Vormittag)
+
+Urteile unter docs/profis/gremium/2026-10-27-konfigurator-messen-variante-{gestalter,kunden,fensterbauer}.md.
+
+Änderungsliste: 1 Bühne von Rand zu Rand, höher · 2 Kamera je Maß (das Maß füllt 80 bzw. 74 Prozent), Fahrt 0,4 s · 3 Lupen-Etiketten · 4 Zahl auf der Linie · 5 Großansicht mit rundem Knopf und Tipp aufs Bild · 6 kleine Telefone ohne Chip.
+
+| Gruppe | Gewinner | Hände | Kernbefund | Vetos |
+| --- | --- | --- | --- | --- |
+| Gestalter | X 6:0 | 4 · 3 · 4 · 4 · 4 · 3 (Median 4) | randlose Bühne ist „endlich ein Held“, Lupen und Maßzahl „Handwerk statt Vorlage“; bei Maß 3 und 4 klebt die Kamera am Glas | keine |
+| Kunden | X 5:1 | 3 · 4 · 3 · 3 · 3 · 2 (Median 3); Sicherheit X 3, Y 2,5 | Lupen „wie die Detailkreise in der IKEA-Anleitung“; bei Maß 3 und 4 keine Mauer zu sehen, Linie schräg; Pfeilknopf nicht verstanden | Kai (Gegenspieler) gegen Kamera je Maß |
+| Fensterbauer | X 5:1 | 2 · 4 · 3 · 2 · 4 · 3 (Median 3) | Öffnung und Rahmen enden in X auf denselben Bildpunkten; Lupe der Oberkante zeigte den Rahmen | Brandt gegen Kamera je Maß, Reuter gegen Lupen in dieser Form |
+
+Mehrheiten: 1 behalten (18 von 18); 2 ändern (14), behalten (2), zurück (2); 3 behalten (12), ändern (6); 4 behalten (16); 5 behalten oder ändern (Wort am Knopf), niemand zurück; 6 behalten (14), ändern (4).
+
+## Umbau nach dem Gremium
+
+- **Feste Kamera je Paar statt je Maß** (Muss aller Gruppen, Vetos Brandt und Kai): Maß 1 und 2 teilen eine Ansicht, Maß 3 und 4 eine zweite; immer die ganze Öffnung mit Sturz, beiden Laibungen und Bank (80 Prozent der Höhe oder 86 Prozent der Breite). Öffnung und Rahmen bleiben im selben Maßstab, der Rahmen liegt sichtbar innen.
+- **Waagerecht frontal**: Für Maß 3 und 4 eine zweite Aufnahme desselben Modells in der Ansicht „front“ der App (--rx 0, --ry 0; Linie wirklich waagerecht, graue Laibung links, rechts und oben sichtbar). Maß 1 und 2 bleiben schräg wie in den Wünschen. Beim Wechsel blendet die neue Ansicht in 220 ms über.
+- **Öffnung blass beim Rahmenmaß** (Fensterbauer): Bei Maß 2 und 4 steht die Linie der Öffnung blass gestrichelt daneben.
+- **Lupen genau am Ende** (Veto Reuter): Fehler gefunden und behoben; die Lupe zeigte die Stelle unter dem Kreis statt am Linienende. Jetzt 2,6-fach genau um das Ende, in Bühne und Großansicht gleich; geprüft: Maß 1 oben an der Putzkante über dem grauen Sturz, Maß 3 an der Laibungskante, Maß 4 an der Außenkante des Rahmens.
+- **„Groß ansehen“** als Wort am Knopf (vier Kunden, Gestalter, Fensterbauer); ein Tipp auf die Zahl öffnet nichts mehr (Mara Keller).
+- **Folge nach „Weiter“ unter 0,8 s** (Noah Brandner): keine Kamerafahrt mehr; innerhalb eines Paares 0,35 s Haken, dann 0,32 s Linie; beim Wechsel der Ansicht beginnt die Linie 120 ms nach der Überblendung.
+- **Kleine Telefone**: die ganze Öffnung mit beiden Enden in der Bühne, „z. B.“ wieder im Platzhalter.
+- **Warnung nennt das zu prüfende Maß** (Kunden, beide Fassungen): „Größer als die Öffnung (Maß 1: 1.410 mm). Maß 1 prüfen: an der Mauer messen, nicht am Rahmen.“ Abweichung vom Wortlaut der App, als Vorschlag für die Übernahme.
+- **Platz zwischen Bild und Karte** (Mara Keller): Frage enger, Unterzeile 14 px.
+- Nicht übernommen, mit Grund: Etikett mit Werkstoff („Mauer · Putzkante“) ändert Begriffe der App, steht unter „Offen“; Großansicht am Schreibtisch über den ganzen Bildschirm (sie liegt bewusst auf dem Gerät, wie in der App); interne Kürzel (G4 …) in der Notizspalte am Schreibtisch, sie sind die Erklärung für den Inhaber und gehen nicht in die App.
+
+VARIANTE_PROFIS
+
+VARIANTE_VORLAGEN
+
+VARIANTE_MESSWERTE
+
+VARIANTE_TABELLE
+
+VARIANTE_OFFEN
