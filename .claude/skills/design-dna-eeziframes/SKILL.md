@@ -72,6 +72,14 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Objekt, Anthrazit-Kacheln mit den Strichzeichnungen der App, die Stelle auf weißer Karte, eine Pille unten. Diese Folie ist die
   Untergrenze für die weiteren Folien des Konfigurators (docs/profis/konfigurator-start-vorschau/, Protokoll
   docs/profis/2026-10-26-konfigurator-start.md). Weitere Folien folgen demselben Weg: Bestand, Quellen des Inhabers, Gremium eine Runde.
+- Noch nicht überarbeitete Folien sind keine Vorlage (Inhaber, 27.10.2026, beim Übergang zu Schritt 3): Die Folien des Konfigurators
+  werden nach und nach alle überarbeitet; die bisherigen sind deshalb ausdrücklich keine Gestaltungsvorlage, auch wenn sie nicht hässlich
+  sind. Aus ihnen kommen nur Bestand und Ablauf (Texte, Begriffe, Zustände, Prüfungen, Reihenfolge, Funktionen der App), nie Farbe, Form,
+  Anordnung oder Bewegung. Gestaltet wird allein nach seinen Skills: design-dna, dieser Begleit-Skill, profis, emil-design-eng.
+- Funktionen der App bleiben (Korrektur des Inhabers, 27.10.2026, Schritt 2 „Fotos“): Das Gremium hatte das Häkchen „Diesen Hinweis
+  nicht mehr anzeigen“ im Bogen „Mit Foto wird dein Aufmaß besser.“ für unnötig gehalten, die Vorschau ließ es weg; der Inhaber will es
+  „auf jeden Fall“. Regel: Was die App dem Kunden heute an Bedienung bietet (Häkchen, Entfernen, Neu aufnehmen, Rückwege, Hinweise),
+  bleibt in der neuen Folie erhalten und bekommt eine Form nach der DNA. Streichen nur mit seinem Ja, auch wenn das Gremium es empfiehlt.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

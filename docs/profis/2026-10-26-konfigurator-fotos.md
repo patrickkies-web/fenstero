@@ -127,7 +127,6 @@ Nicht übernommen (Kann-Liste, auf Wunsch): Plätze hochkant, dritter Platz „s
 
 ## Offen
 
-- Häkchen „Diesen Hinweis nicht mehr anzeigen“ (heute in der App): in der Vorschau weggelassen. Die Kunden wollten es zurück, Gestalterin Mara Keller und Fensterbauer Deniz Yilmaz halten es für unnötig. Entscheidung des Inhabers.
 - Marke des Betriebs statt eeziframes im Kopf (zwei Fensterbauer, Muss): Das ist Sache des Kundenlinks in der App, nicht dieser Folie.
 - Wie lange die Fotos gespeichert bleiben (Petra Lindqvist): steht heute in der Datenschutzerklärung, nicht auf der Folie.
 - Ein echtes Beispielfoto innen mit Rollladenkasten, sobald der Bilddienst wieder Guthaben hat.
@@ -136,3 +135,9 @@ Nicht übernommen (Kann-Liste, auf Wunsch): Plätze hochkant, dritter Platz „s
 ## Realitäts-Check
 
 Die Folie ist eine Vorschau: Kamera und Datei öffnen sich echt, die KI liest nichts, „KI fertig“ kommt nach 1,2 s, die Etiketten gibt es nur beim Beispiel. Nichts in der App, nichts online.
+
+## Korrektur des Inhabers (27.10.2026)
+
+- „Bei der Folie zwei wünsche ich mir auf jeden Fall dieses Kästchen, Meldung nicht mehr anzeigen.“ Umgesetzt: Im Bogen „Mit Foto wird dein Aufmaß besser.“ steht über den Knöpfen „Diesen Hinweis nicht mehr anzeigen“ (Kasten 22 px mit Silbergrau-Rand, angehakt Violett mit weißem Haken, Zeile 44 px hoch). Angehakt geht „Weiter zum Messen“ ohne Foto direkt weiter. Die App merkt sich das im Gerät (`aufmass.ohnefoto.zu`), die Vorschau nur bis zum Neuladen. Beide Knöpfe bleiben im ersten Blick (390 × 844 bis 824 px, 375 × 667 bis 647 px).
+- Regel im Begleit-Skill, Abschnitt 4: „Funktionen der App bleiben“; dazu „Noch nicht überarbeitete Folien sind keine Vorlage“.
+- Bild: docs/profis/bilder/2026-10-26-konfigurator-fotos-tel-ohne-foto-haekchen.jpg.
