@@ -92,6 +92,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   gerade geht), die entscheidenden Stellen stehen vergrößert daneben (Lupe mit Marke), die Zahl verdeckt so wenig wie möglich, und
   ein Tipp aufs Bild öffnet eine Großansicht. Vorschlag für seine DNA, Abschnitt 9: „Die Bühne zeigt die Sache so groß, dass Anfang und
   Ende ohne Brille erkennbar sind; Vergrößern ist immer möglich.“
+- Echte 3-D-Bühne statt Standbilder (Korrektur des Inhabers, 27.10.2026, Wünsche): In der Vorschau fehlten Detailtiefe, Bewegung,
+  das Blatt der Einstellungen und Wahlen wie „Klinke ja oder nein“, weil sie Standbilder aus der App zeigte. Regel: Wo die App ein
+  lebendes Modell hat, zeigt auch die Vorschau die App selbst (app/buehne.html lädt app.js, buehne.js und modell.js unverändert,
+  sichtbar ist nur die Bühne; Fragen und Stand liest die Folie live, jeder Tipp geht an die App). Standbilder nur als Platzhalter,
+  bis die Bühne geladen ist, und nur, wo die App selbst kein lebendes Modell zeigt. Eine Vereinfachung der Vorschau gegenüber der App
+  wird vor dem Zeigen ausdrücklich genannt, nicht nur unter „Offen“.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

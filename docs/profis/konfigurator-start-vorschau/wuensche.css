@@ -364,3 +364,27 @@
 .ez-wz-dna .lg-kontur::before { filter: none; background: radial-gradient(closest-side, var(--violett) 0, var(--violett) 34%, color-mix(in srgb, var(--violett) 50%, var(--indigo)) 56%, color-mix(in srgb, var(--indigo) 60%, transparent) 78%, transparent); }
 .ez-wz-dna .lp-glut { filter: none; background: radial-gradient(58% 58% at 45% 50%, var(--violett) 0, var(--violett) 36%, color-mix(in srgb, var(--violett) 55%, var(--indigo)) 52%, var(--indigo) 64%, color-mix(in srgb, var(--indigo) 45%, transparent) 80%, transparent 94%); }
 .ez-wz-dna .lp-sonne { filter: none; background: radial-gradient(closest-side, var(--koralle) 0, var(--koralle) 50%, color-mix(in srgb, var(--koralle) 55%, transparent) 72%, color-mix(in srgb, var(--koralle) 18%, transparent) 88%, transparent); }
+
+/* ---------- Bühne: die echte App (Korrektur des Inhabers, 27.10.2026) ----------
+   Das Bühnenfenster füllt die Bühne; bis es bereit ist, steht das Bild der Frage darunter und blendet dann aus. */
+.ez-wz-app { position: absolute; inset: 0; z-index: 1; display: block; width: 100%; height: 100%; border: 0; background: transparent; opacity: 0; transition: opacity 220ms var(--dna-druck); }
+.ez-buehne--wz.ist-live .ez-wz-app { opacity: 1; }
+.ez-buehne--wz.ist-live .ez-wz__bild { visibility: hidden; transition: visibility 0s 240ms; }
+.ez-buehne--wz .ez-buehne__kante { pointer-events: none; }
+.ez-buehne--wz .ez-glaschip { z-index: 3; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .ez-wz-app { transition: none; } }
+/* Titel der Fragen: das gefragte Wort weiß, der Rest grau (Gremium K und F) */
+#wz-h1 { color: var(--silbergrau); }
+#wz-h1 em { color: var(--weiss); font-style: normal; }
+/* Materialtupfen in Umschaltern und Listen */
+.ez-wz-tupf--klein { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(7,9,10,.18); }
+/* Gremium (K, F, G): die Pille steht auf jeder Frage an derselben Stelle unten, die Rechtslinks am Ende des Inhalts darüber;
+   „Weiß ich noch nicht“ bleibt sichtbar, auch wenn viele Kacheln darüber stehen (klebt über dem Fuß) */
+.ez-folie[data-folie="wuensche"] > .ez-recht { margin-bottom: 48px; }
+.ez-wz-offen { position: sticky; bottom: 92px; z-index: 5; background: linear-gradient(180deg, #2c2c2f, var(--anthrazit) 60%, #1c1c1e); box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.06), 0 -12px 18px -6px rgba(7,9,10,.85); }
+/* Am Telefon reicht die Folie immer bis zum unteren Rand: die Pille steht auf kurzen Fragen an derselben Stelle wie auf langen */
+@media (max-width: 759px) { .ez-folie[data-folie="wuensche"] { min-height: 100svh; } }
+.ez-wz-app.ist-gross { position: fixed; z-index: 300; opacity: 1; }
+/* Solange ein Blatt der App offen ist, zeigt der Schirm nur das Bühnenfenster (Modell und Blatt), die Folie wartet unsichtbar dahinter */
+.ez-folie[data-folie="wuensche"].ist-blatt * { visibility: hidden; }
+.ez-folie[data-folie="wuensche"].ist-blatt .ez-wz-app { visibility: visible; }

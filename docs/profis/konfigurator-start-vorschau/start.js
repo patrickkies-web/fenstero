@@ -982,6 +982,7 @@
     art: function () { return art; }, artName: function () { return artNameVon(); }, elName: function () { return elNameVon(); }, istTuer: function () { return tuer(); },
     elementName: function () { return ART[art].name; },
     werte: function () { return ergWerte(); },
+    masse: function () { return Object.assign({}, mess.werte); },
     fotos: function () { return { in: !!fotos.in, out: !!fotos.out, beispiel: !!(fotos.in && fotos.in.beispiel), kiFertig: kiFertig() }; },
     fenster: {}
   };
