@@ -80,6 +80,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   nicht mehr anzeigen“ im Bogen „Mit Foto wird dein Aufmaß besser.“ für unnötig gehalten, die Vorschau ließ es weg; der Inhaber will es
   „auf jeden Fall“. Regel: Was die App dem Kunden heute an Bedienung bietet (Häkchen, Entfernen, Neu aufnehmen, Rückwege, Hinweise),
   bleibt in der neuen Folie erhalten und bekommt eine Form nach der DNA. Streichen nur mit seinem Ja, auch wenn das Gremium es empfiehlt.
+- Ein Modell, überall das der Wünsche (Korrektur des Inhabers, 27.10.2026, Schritt 3 „Messen“): Das 3-D-Modell in den Wünschen ist
+  „extrem hoch“ in der Qualität, beim Messen war es „deutlich schlechter“ (dunkles Raum-Licht, leere Öffnung; in den Vorschauen dazu das
+  CSS-Ersatzmodell, weil der Testbrowser ohne Grafikchip nicht in WebGL zeichnet). Regel: Jede Folie zeigt das Element mit demselben
+  Programm, denselben Materialien und demselben Licht wie die Wünsche (web/assets/buehne.js, WebGL, ohne `raum-licht`). Frei sind nur
+  Größe, Ausschnitt, Kamera und die Farbnuancen drumherum. Renderings für Vorschauen entstehen mit `?gl=voll` und den Chromium-Schaltern
+  `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`; ein Bild aus dem CSS-Modell ist kein Rendering.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)
