@@ -356,7 +356,7 @@ Die Zahlen sind Vorschläge bis zur Antwort des Inhabers (Bauplan §5.3) und ste
 
 - **Verantwortlich** ist der Betrieb, der technische Dienstleister sein Auftragsverarbeiter: bei Essential und Plus „eeziframes (Patrick Kies, …)“, bei Signature nur „unser technischer Dienstleister“. Die Unterauftragnehmer (Cloudflare, Supabase, Resend, Anthropic) stehen in jedem Paket mit Namen da.
 - Fristen aus `pakete.js`/`instanzregeln.js` je Paket, Speicher im Browser und die Cookies `__Host-vorschau` und (Signature) `__Host-betrieb`, KI nur mit Einwilligung, Rechte, Aufsichtsbehörde nach dem Bundesland des Betriebs (Tabelle `AUFSICHT` der 16 Landesbehörden; Anschriften vor dem Start einmal prüfen).
-- **Vorlage:** `VORLAGE = { stand, geprueft }`. Solange `geprueft: false`, steht unter beiden Seiten sichtbar „Vorlage vom …, anwaltliche Prüfung ausstehend“. Nach der Prüfung `geprueft: true` und den Stand setzen.
+- **Vorlage:** `VORLAGE = { stand, geprueft }`. Solange `geprueft: false`, steht unter beiden Seiten sichtbar „Vorlage vom …, anwaltliche Prüfung ausstehend“. Seit 27.10.2026 `geprueft: true` (Freigabe durch den Inhaber).
 
 ### Fehlerbilder
 
