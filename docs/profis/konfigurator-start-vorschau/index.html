@@ -226,13 +226,14 @@
               </header>
 
               <figure class="ez-buehne ez-buehne--mess" id="mess-buehne" data-wer="mo" data-r="v">
-                <img class="ez-mess__bild" id="mess-bild" src="bilder/mess/fenster.webp" width="716" height="470" alt="" decoding="async" draggable="false">
+                <img class="ez-mess__bild" id="mess-bild" src="bilder/mess/fenster.webp" width="2148" height="1400" alt="" decoding="async" draggable="false">
                 <span class="ez-buehne__kante" aria-hidden="true"></span>
                 <span class="ez-glaschip"><i class="ez-ring" style="--anteil:.5" aria-hidden="true"></i>Schritt&nbsp;3 von&nbsp;6<span class="ez-glaschip__zusatz">&nbsp;· Messen</span></span>
-                <svg class="ez-mass" id="mess-linie" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="ez-mass__halo" x1="49.42" y1="19.36" x2="49.42" y2="80.52"/><line class="ez-mass__linie" x1="49.42" y1="19.36" x2="49.42" y2="80.52"/></svg>
+                <svg class="ez-mass" id="mess-linie" viewBox="0 0 390 280" preserveAspectRatio="none" aria-hidden="true"><line class="ez-mass__fuehrung" id="mess-fuehrung-a"/><line class="ez-mass__fuehrung" id="mess-fuehrung-b"/><line class="ez-mass__halo" x1="164" y1="28" x2="164" y2="252"/><line class="ez-mass__linie" x1="164" y1="28" x2="164" y2="252"/></svg>
                 <span class="ez-mass__kappe" id="mess-kappe-a" aria-hidden="true"></span><span class="ez-mass__kappe" id="mess-kappe-b" aria-hidden="true"></span>
-                <span class="ez-mass__ende" id="mess-ende-a" aria-hidden="true"><span class="dna-etikett">Oberkante der Öffnung</span></span>
-                <span class="ez-mass__ende" id="mess-ende-b" aria-hidden="true"><span class="dna-etikett">Fensterbank innen</span></span>
+                <span class="ez-mass__ende" id="mess-ende-a" aria-hidden="true"><span class="ez-lupe"><i class="ez-lupe__bild"></i><svg class="ez-lupe__marke" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="ez-lupe__halo"/><line class="ez-lupe__halo"/><line class="ez-lupe__linie"/><line class="ez-lupe__kappe"/></svg></span><span class="ez-mass__text"><b>Oberkante</b> der Öffnung</span></span>
+                <span class="ez-mass__ende" id="mess-ende-b" aria-hidden="true"><span class="ez-lupe"><i class="ez-lupe__bild"></i><svg class="ez-lupe__marke" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="ez-lupe__halo"/><line class="ez-lupe__halo"/><line class="ez-lupe__linie"/><line class="ez-lupe__kappe"/></svg></span><span class="ez-mass__text"><b>Fensterbank</b> innen</span></span>
+                <button type="button" class="ez-gross-auf" id="mess-gross-auf" aria-label="Bild groß ansehen" aria-haspopup="dialog"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3h4v4M7 15H3v-4M15 3l-5 5M3 15l5-5"/></svg></button>
                 <span class="ez-mass__feld is-leer" id="mess-feld" aria-hidden="true"><span class="ez-mass__zb">z.&nbsp;B.</span><b id="mess-zahl">1.250</b><i class="ez-mass__marke"></i><small>mm</small><svg class="ez-mass__haken" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l2.6 2.6L11 4.6"/></svg></span>
                 <figcaption class="ez-unsichtbar" id="mess-bildtext">Modell: Maueröffnung, gemessen wird senkrecht in der Mitte von der Oberkante der Öffnung bis zur Fensterbank innen.</figcaption>
               </figure>
@@ -267,6 +268,15 @@
               </div>
 
               <p class="ez-recht"><a href="#" class="ez-recht__widerruf">Vertrag widerrufen</a><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></p>
+
+              <dialog class="ez-gross" id="mess-gross" aria-labelledby="mess-gross-titel" aria-describedby="mess-gross-unter">
+                <div class="ez-gross__kopf">
+                  <div><p class="ez-gross__titel" id="mess-gross-titel"><em>Höhe der</em> Öffnung.</p><p class="ez-gross__unter" id="mess-gross-unter">Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank.</p></div>
+                  <button type="button" class="ez-rund ez-rund--zu" aria-label="Großansicht schließen" data-gross-zu><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+                </div>
+                <div class="ez-gross__platz" id="mess-gross-platz"></div>
+                <div class="ez-gross__fuss"><button type="button" class="dna-pille" data-gross-zu>Zurück zum Eintippen</button></div>
+              </dialog>
             </section>
           </div>
         </div>
@@ -304,15 +314,16 @@
       </div>
       <div class="ez-notiz__folie" data-fuer="messen" hidden>
       <span class="dna-label">Konfigurator · Schritt&nbsp;3 von&nbsp;6</span>
-      <h2>Messen. <em>Tippen, und die Zahl steht an der Linie.</em></h2>
-      <p class="dna-text">Kein Zwischenschritt: Die Zifferntasten stehen offen auf der weißen Karte, das Feld an der Linie zeigt live, was getippt wird, „Weiter zu Maß&nbsp;2“ prüft, speichert und geht zum nächsten Maß. Das Modell ist dasselbe wie in den Wünschen. Texte, Prüfungen und Reihenfolge sind die der App.</p>
+      <h2>Messen. <em>Groß sehen, wo es anfängt und aufhört.</em></h2>
+      <p class="dna-text">Kein Zwischenschritt: Die Zifferntasten stehen offen auf der weißen Karte, die Zahl auf der Linie zeigt live, was getippt wird, „Weiter zu Maß&nbsp;2“ prüft, speichert und geht zum nächsten Maß. Das Modell ist dasselbe wie in den Wünschen, nur näher. Texte, Prüfungen und Reihenfolge sind die der App.</p>
       <ul class="ez-liste">
-        <li><span class="nr">01</span><span><b>Das Modell der Wünsche auf der Bühne:</b> dasselbe 3-D-Programm, dieselben Materialien und dasselbe Licht (Putzwand, Laibung, Fensterbank, Glas mit Spiegelung), nur Kamera und Ausschnitt des Messens. Nur das aktuelle Maß: Öffnung Koralle gestrichelt bis Sturz und Bank, Fenster Violett durchgezogen bis zum Rahmen, Strichmarken; die Etiketten stehen genau auf Höhe der Enden. <span class="ez-gen">G4</span><span class="ez-gen">G9</span><span class="ez-gen">G5</span></span></li>
-        <li><span class="nr">02</span><span><b>Die Zahl ist der Held:</b> das weiße Feld an der Linie, groß die Ziffern, klein „mm“; nach dem Speichern steht die Zahl kurz mit Haken, bevor das nächste Maß kommt. <span class="ez-gen">G3</span><span class="ez-gen">G1</span></span></li>
-        <li><span class="nr">03</span><span><b>Maß 1 von 4</b> als Kapselreihe; darunter die Zeile mit dem Hinweis „Nicht am Rahmen messen“ (Koralle-Punkt), der Umrechnung passend zum Element und dem zuletzt gespeicherten Maß. <span class="ez-gen">G11</span></span></li>
-        <li><span class="nr">04</span><span><b>Die eine Pille trägt die sichere Antwort:</b> „Weiter zu Maß&nbsp;2“, bei Zentimetern „Ja, 1.410&nbsp;mm“, bei einer Warnung „Korrigieren“ („Stimmt so“ klein in der Zeile); nach einer Rückfrage ist sie kurz taub gegen den Doppeltipp. Links der runde Rückweg. <span class="ez-gen">G6</span><span class="ez-gen">G13</span></span></li>
+        <li><span class="nr">01</span><span><b>Große Bühne, eine Kamera je Maß:</b> das Modell der Wünsche (dasselbe 3-D-Programm, Putzwand, Laibung, Fensterbank, Glas mit Spiegelung) von Rand zu Rand; das aktuelle Maß füllt die Bühne, senkrecht etwa 80, waagerecht etwa 74 Prozent. Öffnung Koralle gestrichelt, Fenster Violett durchgezogen, Strichmarken. <span class="ez-gen">G4</span><span class="ez-gen">G5</span></span></li>
+        <li><span class="nr">02</span><span><b>Lupen an beiden Enden:</b> runde Lupe mit der Stelle 2,4-fach vergrößert und der Strichmarke, daneben das Ende in Worten („Oberkante der Öffnung“, „Fensterbank innen“, „Mauer“, „Rahmen außen“). <span class="ez-gen">G9</span><span class="ez-gen">G1</span><span class="ez-gen">G12</span></span></li>
+        <li><span class="nr">03</span><span><b>Die Zahl auf der Linie</b> wie die Maßzahl einer Zeichnung, groß die Ziffern, klein „mm“; nach dem Speichern kurz mit Haken. <span class="ez-gen">G3</span></span></li>
+        <li><span class="nr">04</span><span><b>Großansicht:</b> runder Knopf unten links oder ein Tipp aufs Bild; Frage, Anleitung, Modell und Lupen bildschirmfüllend, zurück mit ×, Esc oder „Zurück zum Eintippen“. <span class="ez-gen">G13</span></span></li>
+        <li><span class="nr">05</span><span><b>Die eine Pille trägt die sichere Antwort:</b> „Weiter zu Maß&nbsp;2“, bei Zentimetern „Ja, 1.410&nbsp;mm“, bei einer Warnung „Korrigieren“ („Stimmt so“ klein in der Zeile). Maß&nbsp;1 von&nbsp;4 als Kapselreihe. <span class="ez-gen">G6</span><span class="ez-gen">G11</span></span></li>
       </ul>
-      <p class="ez-klein">Bewegung nur als Rückmeldung: Taste drückt auf 0,97, die Ziffer steht sofort; die gespeicherte Zahl steht 0,35&nbsp;s mit Haken, dann zieht sich die nächste Linie in 320&nbsp;ms von Ende zu Ende, Enden und Feld folgen, die Kapsel wird Violett. Tastatur am Rechner ohne Übergang; bei „weniger Bewegung“ steht alles sofort.</p>
+      <p class="ez-klein">Bewegung nur als Rückmeldung: Taste drückt auf 0,97, die Ziffer steht sofort; die gespeicherte Zahl steht 0,35&nbsp;s mit Haken, dann gleitet die Ansicht in 400&nbsp;ms zum nächsten Maß und die Linie zieht sich in 320&nbsp;ms von Ende zu Ende. Tastatur am Rechner ohne Übergang; bei „weniger Bewegung“ steht alles sofort.</p>
       </div>
     </aside>
   </div>

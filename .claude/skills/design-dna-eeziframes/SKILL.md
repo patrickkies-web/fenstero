@@ -86,6 +86,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   Programm, denselben Materialien und demselben Licht wie die Wünsche (web/assets/buehne.js, WebGL, ohne `raum-licht`). Frei sind nur
   Größe, Ausschnitt, Kamera und die Farbnuancen drumherum. Renderings für Vorschauen entstehen mit `?gl=voll` und den Chromium-Schaltern
   `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`; ein Bild aus dem CSS-Modell ist kein Rendering.
+- Bildfläche vor Dichte (Korrektur des Inhabers, 27.10.2026, Schritt 3 „Messen“): Ein Bild „mickrig klein“, das man nicht vergrößern
+  kann, reicht für Erstnutzer und Ältere nicht, auch wenn es gut aussieht; Platz zwischen Bild und Karte gehört dem Bild. Regel: Wo ein
+  Kunde am Bild handeln muss (anlegen, messen, zuordnen), füllt die Sache die Bühne (Bühne von Rand zu Rand, Kamera auf das, worum es
+  gerade geht), die entscheidenden Stellen stehen vergrößert daneben (Lupe mit Marke), die Zahl verdeckt so wenig wie möglich, und
+  ein Tipp aufs Bild öffnet eine Großansicht. Vorschlag für seine DNA, Abschnitt 9: „Die Bühne zeigt die Sache so groß, dass Anfang und
+  Ende ohne Brille erkennbar sind; Vergrößern ist immer möglich.“
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

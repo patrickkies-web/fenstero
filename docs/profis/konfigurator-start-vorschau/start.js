@@ -258,8 +258,8 @@
   /* ---------- Folie 3: Messen ----------
      Ablauf, Texte und Prüfungen aus der App (MESS, checkValue, cmFrage, UEBLICH in web/assets/app.js); Gestaltung nach der DNA:
      kein Zwischenschritt, die Tasten stehen offen, „Weiter“ prüft, speichert und geht zum nächsten Maß. Die Linienlagen kommen aus dem
-     3-D-Modell der App (Enden der aktiven Maßlinie je Element und Maß, in Prozent der Bühne). */
-  var MESS_LAGE = {"fenster":[[56.0,13.0,56.0,85.09],[58.38,14.99,58.38,85.0],[38.59,47.15,74.41,53.82],[41.89,47.88,75.77,54.26]],"balkon":[[56.0,13.0,56.0,85.09],[57.43,13.49,57.43,85.48],[47.64,48.82,64.54,52.0],[49.48,48.99,65.59,52.03]],"fest":[[56.0,13.0,56.0,85.09],[58.7,14.12,58.7,84.8],[32.43,45.98,81.47,55.13],[36.05,46.23,83.15,54.99]],"hst":[[56.0,13.0,56.0,85.09],[57.36,13.44,57.36,85.53],[25.77,44.72,89.47,56.66],[27.7,44.94,90.12,56.64]],"psk":[[56.0,13.0,56.0,85.09],[57.43,13.49,57.43,85.48],[37.61,46.93,75.52,54.02],[39.54,47.17,76.41,54.04]],"fsw":[[56.0,13.0,56.0,85.09],[57.36,13.44,57.36,85.53],[25.77,44.72,89.47,56.66],[27.7,44.94,90.12,56.64]]};
+     3-D-Modell der App (Enden der aktiven Maßlinie je Element und Maß, in Pixeln des Bildes, 2148 × 1400). */
+  var MESS_LAGE = {"fenster":[[1060.8,243.6,1060.8,1134.7],[1105.8,268.2,1105.8,1133.6],[731.7,665.7,1408.8,748.2],[794.1,674.7,1434.5,753.6]],"balkon":[[1060.8,243.6,1060.8,1134.7],[1087.8,249.7,1087.8,1139.5],[902.8,686.4,1222.2,725.7],[937.6,688.5,1242.1,726.0]],"fest":[[1060.8,243.6,1060.8,1134.7],[1111.8,257.4,1111.8,1131.1],[615.3,651.3,1542.3,764.4],[683.7,654.3,1574.0,762.6]],"hst":[[1060.8,243.6,1060.8,1134.7],[1086.5,249.0,1086.5,1140.1],[489.4,635.7,1693.5,783.3],[525.8,638.4,1705.8,783.0]],"psk":[[1060.8,243.6,1060.8,1134.7],[1087.8,249.7,1087.8,1139.5],[713.2,663.0,1429.8,750.6],[749.7,666.0,1446.6,750.9]],"fsw":[[1060.8,243.6,1060.8,1134.7],[1086.5,249.0,1086.5,1140.1],[489.4,635.7,1693.5,783.3],[525.8,638.4,1705.8,783.0]]};
   var MESS = [
     { k: 'hm', g: 'oeffnung-hoehe', wer: 'mo', r: 'v', sub: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zur Fensterbank.', subTuer: 'Von innen, senkrecht in der Mitte: von der Oberkante der Öffnung bis zum fertigen Fußboden.', enden: ['Oberkante der Öffnung', 'Fensterbank innen'], endenTuer: ['Oberkante der Öffnung', 'Fußboden innen'], chip: 'nicht' },
     { k: 'h', g: 'element-hoehe', wer: 'el', r: 'v', sub: 'Senkrecht in der Mitte: der feste Rahmen, von seiner Außenkante oben bis unten.', subTuer: 'Senkrecht in der Mitte: der feste Rahmen samt Schwelle, von Außenkante oben bis unten.', enden: ['Rahmen außen', 'Rahmen außen'], endenTuer: ['Rahmen außen', 'Unterkante Schwelle'], chip: 'samt' },
@@ -300,10 +300,13 @@
   var NB = ' ';
   /* Zentimeter-Verdacht wie in der App; ein bestätigtes Millimetermaß („Nein, 400 mm“) fragt nicht noch einmal */
   var cmFrage = function (v, r) { var u = ueblich(r); if (mess.mmOk && mess.mmOk === v) return false; return v > 0 && v * 10 <= 6000 && ((v < 250 && v * 10 >= 250) || (v < u[0] && v * 10 >= u[0])); };
-  /* Bühne: Höhe nach dem Bildschirm (alle Tasten über dem Fuß), Bild des Modells, Linie, Strichmarken, Enden und Feld.
-     Das Bild ist das 3-D-Modell der Wünsche (WebGL, gleiche Materialien und gleiches Licht), je Element eines für alle vier Maße;
-     die Linienlagen stehen in Prozent des Bildes. Feld und Etiketten suchen sich eine Lage, die kein Ende und keinen Chip verdeckt. */
-  var BILD_R = 716 / 470, messSvg = $('mess-linie'), messChip = folien.messen.querySelector('.ez-buehne--mess .ez-glaschip'), messBreite = 0;
+  /* Bühne, Fassung „große Bühne“ (Wunsch des Inhabers, 27.10.2026: mehr Bildfläche, Anfang und Ende deutlich, auch beim ersten Mal und
+     für Ältere). Das Bild ist das 3-D-Modell der Wünsche (WebGL, gleiche Materialien und gleiches Licht) in hoher Auflösung, je Element
+     eines für alle vier Maße; die Linienlagen stehen in Pixeln dieses Bildes. Eine Kamera je Maß rückt das aktuelle Maß groß ins Bild,
+     an beiden Enden zeigt ein Lupen-Etikett die Stelle vergrößert, die Zahl steht auf der Linie, ein Tipp aufs Bild öffnet die
+     Großansicht. Feld und Etiketten suchen sich eine Lage, die kein Ende, keinen Chip und keinen Knopf verdeckt. */
+  var BILD = { w: 2148, h: 1400 }, messSvg = $('mess-linie'), messChip = folien.messen.querySelector('.ez-buehne--mess .ez-glaschip'), messBreite = 0;
+  var messGrossKnopf = $('mess-gross-auf'), grossOffen = false, kameraJetzt = null, fahrT = 0;
   var hoeheProbe = d.createElement('div'); hoeheProbe.setAttribute('aria-hidden', 'true'); hoeheProbe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
   d.body.appendChild(hoeheProbe);
   function messPlatzReservieren() {
@@ -314,71 +317,130 @@
     mess.i = alt; h1.style.minHeight = mh + 'px'; uz.style.minHeight = mu + 'px';
   }
   function messHoeheSetzen() {
+    if (grossOffen) return;
     var appR = app.getBoundingClientRect(), H = Math.min(hoeheProbe.offsetHeight || window.innerHeight, app.clientHeight || window.innerHeight);
     var bR = messBuehne.getBoundingClientRect(), kR = folien.messen.querySelector('.ez-karte--tasten').getBoundingClientRect(), fH = folien.messen.querySelector('.ez-fuss').offsetHeight;
     var oben = bR.top - appR.top + (app.scrollHeight > app.clientHeight + 2 ? app.scrollTop : 0), rest = kR.bottom - bR.bottom;
-    var S = Math.max(112, Math.min(235, Math.floor(H - oben - rest - fH - 6)));
-    messBuehne.style.height = S + 'px'; messBuehne.classList.toggle('ist-klein', S < 200);
+    var S = Math.max(112, Math.min(380, Math.floor(H - oben - rest - fH - 6)));
+    messBuehne.style.height = S + 'px';
   }
   function schneidet(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
   function endeText(t) { var i = t.indexOf(' '); return i < 0 ? '<b>' + t + '</b>' : '<b>' + t.slice(0, i) + '</b>' + t.slice(i); }
+  /* Kamera je Maß: senkrecht füllt das Maß 80 Prozent der Höhe, waagerecht 74 Prozent der Breite (Großansicht 84 und 80);
+     höchstens 2,4-fach näher als „ganzes Bild“, und das Bild deckt die Bühne immer ganz */
+  function kamera(W, S, l, r, gross) {
+    var kVoll = Math.max(W / BILD.w, S / BILD.h), k = r === 'v' ? (gross ? 0.84 : 0.8) * S / Math.abs(l[3] - l[1]) : (gross ? 0.8 : 0.74) * W / Math.abs(l[2] - l[0]);
+    k = Math.max(kVoll, Math.min(k, kVoll * (gross ? 3.4 : 2.4)));
+    var mx = (l[0] + l[2]) / 2, my = (l[1] + l[3]) / 2, zx = r === 'v' ? W * 0.42 : W * 0.5, zy = r === 'v' ? S * 0.5 : S * 0.56;
+    return { k: k, tx: Math.min(0, Math.max(W - BILD.w * k, zx - mx * k)), ty: Math.min(0, Math.max(S - BILD.h * k, zy - my * k)) };
+  }
+  /* Das Bild steht in seiner Ruhelage immer in echter Größe (scharf); beim Wechsel des Maßes gleitet es 400 ms vom alten Ausschnitt in
+     den neuen (nur transform, umgekehrt gerechnet). Kleine Wege (unter 3 Prozent und 12 px) stehen sofort. */
+  function weltSetzen(K, fahren) {
+    var alt = kameraJetzt, b = messBild.style; kameraJetzt = K;
+    b.left = K.tx.toFixed(1) + 'px'; b.top = K.ty.toFixed(1) + 'px'; b.width = (BILD.w * K.k).toFixed(1) + 'px'; b.height = (BILD.h * K.k).toFixed(1) + 'px';
+    var s = alt ? alt.k / K.k : 1, dx = alt ? alt.tx - K.tx : 0, dy = alt ? alt.ty - K.ty : 0;
+    b.transition = 'none'; b.transform = 'none';
+    if (!fahren || !alt || (Math.abs(s - 1) < 0.03 && Math.abs(dx) < 12 && Math.abs(dy) < 12)) return false;
+    b.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + s.toFixed(4) + ')';
+    void messBild.offsetWidth;
+    b.transition = 'transform 400ms cubic-bezier(.65,0,.35,1)'; b.transform = 'none';
+    return true;
+  }
+  /* Lupe: dasselbe Bild 2,4-fach (Großansicht 2,2-fach) um das Linienende, darin die Strichmarke und das Stück Linie nach innen */
+  function lupeSetzen(ende, p, nachInnen, K, r, src) {
+    var lupe = ende.querySelector('.ez-lupe__bild'), D = lupe.offsetWidth || 52, kL = K.k * (grossOffen ? 2.2 : 2.4);
+    var ix = (p[0] - K.tx) / K.k, iy = (p[1] - K.ty) / K.k;
+    lupe.style.backgroundImage = 'url("' + src + '")';
+    lupe.style.backgroundSize = (BILD.w * kL).toFixed(1) + 'px ' + (BILD.h * kL).toFixed(1) + 'px';
+    lupe.style.backgroundPosition = (D / 2 - ix * kL).toFixed(1) + 'px ' + (D / 2 - iy * kL).toFixed(1) + 'px';
+    var z = ende.querySelectorAll('.ez-lupe__marke line'), e = r === 'v' ? [50, nachInnen > 0 ? 100 : 0] : [nachInnen > 0 ? 100 : 0, 50], q = r === 'v' ? [30, 50, 70, 50] : [50, 30, 50, 70];
+    [z[0], z[2]].forEach(function (ln) { ln.setAttribute('x1', 50); ln.setAttribute('y1', 50); ln.setAttribute('x2', e[0]); ln.setAttribute('y2', e[1]); });
+    [z[1], z[3]].forEach(function (ln) { ln.setAttribute('x1', q[0]); ln.setAttribute('y1', q[1]); ln.setAttribute('x2', q[2]); ln.setAttribute('y2', q[3]); });
+  }
   function messBuehneSetzen(zieht) {
-    var st = schritt(), l = MESS_LAGE[art][mess.i];
+    var st = schritt(), l = MESS_LAGE[art][mess.i], gross = grossOffen;
     messBuehne.setAttribute('data-wer', st.wer); messBuehne.setAttribute('data-r', st.r);
     var src = 'bilder/mess/' + art + '.webp';
     if (messBild.getAttribute('src') !== src) messBild.src = src;
-    var W = messBuehne.clientWidth || 358, S = messBuehne.clientHeight || 235, rand = 8;
-    var iw = Math.min(W, S * BILD_R), ih = iw / BILD_R, il = (W - iw) / 2, it = (S - ih) / 2;
-    [messBild, messSvg].forEach(function (e) { e.style.left = il + 'px'; e.style.top = it + 'px'; e.style.width = iw + 'px'; e.style.height = ih + 'px'; });
-    messBild.classList.toggle('ist-schmal', iw < W - 1);
-    var P = function (px, py) { return [il + px / 100 * iw, it + py / 100 * ih]; }, A = P(l[0], l[1]), B = P(l[2], l[3]);
-    Array.prototype.forEach.call(messSvg.querySelectorAll('line'), function (ln) { ln.setAttribute('x1', l[0]); ln.setAttribute('y1', l[1]); ln.setAttribute('x2', l[2]); ln.setAttribute('y2', l[3]); });
+    var W = messBuehne.clientWidth || 390, S = messBuehne.clientHeight || 280, rand = 8;
+    messBuehne.classList.toggle('ist-klein', !gross && S < 200);
+    var K = kamera(W, S, l, st.r, gross), faehrt = weltSetzen(K, zieht && !ruhig());
+    var P = function (x, y) { return [x * K.k + K.tx, y * K.k + K.ty]; }, A = P(l[0], l[1]), B = P(l[2], l[3]);
+    messSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + S);
+    Array.prototype.forEach.call(messSvg.querySelectorAll('.ez-mass__halo, .ez-mass__linie'), function (ln) { ln.setAttribute('x1', A[0].toFixed(1)); ln.setAttribute('y1', A[1].toFixed(1)); ln.setAttribute('x2', B[0].toFixed(1)); ln.setAttribute('y2', B[1].toFixed(1)); });
     /* Strichelung passend zur Länge: an beiden Strichmarken ein voller Strich */
     var lang = Math.hypot(B[0] - A[0], B[1] - A[1]), nStr = Math.max(2, Math.round((lang + 4) / 10)), strich = (lang - (nStr - 1) * 4) / nStr;
     messSvg.style.setProperty('--strich', strich.toFixed(2) + 'px');
-    messSvg.style.setProperty('--a', (st.r === 'v' ? l[1] : l[0]) + '%'); messSvg.style.setProperty('--b', (st.r === 'v' ? l[3] : l[2]) + '%');
+    messSvg.style.setProperty('--a', (st.r === 'v' ? A[1] / S : A[0] / W) * 100 + '%'); messSvg.style.setProperty('--b', (st.r === 'v' ? B[1] / S : B[0] / W) * 100 + '%');
     var ka = $('mess-kappe-a'), kb = $('mess-kappe-b'); ka.style.left = A[0] + 'px'; ka.style.top = A[1] + 'px'; kb.style.left = B[0] + 'px'; kb.style.top = B[1] + 'px';
     var en = tuer() && st.endenTuer ? st.endenTuer : st.enden, ea = $('mess-ende-a'), eb = $('mess-ende-b');
-    ea.firstChild.innerHTML = endeText(en[0]); eb.firstChild.innerHTML = endeText(en[1]);
-    /* Schritt-Chip: berührt er ein Linienende, fällt „· Messen“ weg */
+    ea.querySelector('.ez-mass__text').innerHTML = endeText(en[0]); eb.querySelector('.ez-mass__text').innerHTML = endeText(en[1]);
     var sR = messBuehne.getBoundingClientRect(), endKast = function (p) { return { x: p[0] - 9, y: p[1] - 9, w: 18, h: 18 }; };
-    messChip.classList.remove('ist-kurz');
-    var chipR = function () { var c = messChip.getBoundingClientRect(); return { x: c.left - sR.left - 4, y: c.top - sR.top - 4, w: c.width + 8, h: c.height + 8 }; };
-    if (schneidet(chipR(), endKast(A)) || schneidet(chipR(), endKast(B))) messChip.classList.add('ist-kurz');
-    var hin = [chipR(), endKast(A), endKast(B)];
+    var kastVon = function (el) { var c = el.getBoundingClientRect(); return { x: c.left - sR.left - 4, y: c.top - sR.top - 4, w: c.width + 8, h: c.height + 8 }; };
+    var hin;
     function legen(el, kand, breite) {
       var w = Math.max(el.offsetWidth, breite || 0), h = el.offsetHeight, wahl = null;
       for (var i = 0; i < kand.length; i++) {
         var k = kand[i], x = k.x(w), r = { x: Math.max(rand, Math.min(W - rand - w, x)), y: Math.max(rand, Math.min(S - rand - h, k.y(h))), w: w, h: h };
-        if (!wahl) wahl = { r: r, k: k };
-        if (!hin.some(function (o) { return schneidet(r, o); })) { wahl = { r: r, k: k }; break; }
+        if (!wahl) wahl = { r: r, k: k, n: i };
+        if (!hin.some(function (o) { return schneidet(r, o); })) { wahl = { r: r, k: k, n: i }; break; }
       }
       hin.push(wahl.r); return wahl;
     }
-    var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, FB = messBuehne.classList.contains('ist-klein') ? 140 : 190;
-    /* Feld an der Linienseite verankern (--fx), geprüft mit der größten Breite (fünf Ziffern, „mm“, Haken) */
+    /* Lupen-Etiketten: senkrecht rechts der Linie auf Höhe der Enden (sonst links, gespiegelt), waagerecht über den Enden, die Lupe
+       genau über dem Ende; geht es nur mit kurzem Schritt-Chip, fällt „· Messen“ weg */
+    var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, R = 0;
+    function endenLegen() {
+      var lagen = [];
+      [[ea, A, 1], [eb, B, -1]].forEach(function (p) {
+        var el = p[0], x = p[1][0], y = p[1][1], innen = st.r === 'v' ? (p[1] === A ? (B[1] > A[1] ? 1 : -1) : (A[1] > B[1] ? 1 : -1)) : (p[1] === A ? (B[0] > A[0] ? 1 : -1) : (A[0] > B[0] ? 1 : -1));
+        var lu = el.querySelector('.ez-lupe'), pad = 4; R = (lu.offsetWidth || 52) / 2;
+        var kand = st.r === 'v'
+          ? [{ x: function () { return x + 16; }, y: function (h) { return y - h / 2; }, sp: false }, { x: function (w) { return x - 16 - w; }, y: function (h) { return y - h / 2; }, sp: true },
+             { x: function () { return x + 16; }, y: function (h) { return innen > 0 ? y + 6 : y - 6 - h; }, sp: false }]
+          : (innen > 0
+            ? [{ x: function () { return x - pad - R; }, y: function (h) { return y - 16 - h; }, sp: false }, { x: function () { return hin[0].x + hin[0].w + 4; }, y: function (h) { return y - 16 - h; }, sp: false },
+               { x: function () { return x - pad - R; }, y: function () { return y + 16; }, sp: false }]
+            : [{ x: function (w) { return x + pad + R - w; }, y: function (h) { return y - 16 - h; }, sp: true }, { x: function (w) { return x + pad + R - w; }, y: function () { return y + 16; }, sp: true }]);
+        var g = legen(el, kand); lagen.push({ el: el, g: g, p: p[1], innen: innen });
+      });
+      return lagen;
+    }
+    var lagen, versuch;
+    for (versuch = 0; versuch < 2; versuch++) {
+      messChip.classList.toggle('ist-kurz', versuch > 0);
+      hin = [kastVon(messChip), endKast(A), endKast(B)]; if (!gross) hin.push(kastVon(messGrossKnopf));
+      lagen = endenLegen();
+      if (!lagen.some(function (q) { return q.g.n > 0; }) && !schneidet(kastVon(messChip), endKast(A)) && !schneidet(kastVon(messChip), endKast(B))) break;
+    }
+    lagen.forEach(function (q, n) {
+      var r = q.g.r; q.el.style.left = Math.round(r.x) + 'px'; q.el.style.top = Math.round(r.y) + 'px'; q.el.classList.toggle('ist-gespiegelt', q.g.k.sp);
+      /* Lupe und Ende verbinden, wenn sie nicht direkt am Ende sitzt */
+      var lr = q.el.querySelector('.ez-lupe').getBoundingClientRect(), cx = lr.left - sR.left + lr.width / 2, cy = lr.top - sR.top + lr.height / 2, ab = Math.hypot(q.p[0] - cx, q.p[1] - cy), f = $(n ? 'mess-fuehrung-b' : 'mess-fuehrung-a');
+      lupeSetzen(q.el, [cx, cy], q.innen, K, st.r, src);
+      if (ab > R + 8) { var ex = cx + (q.p[0] - cx) / ab * (R + 2), ey = cy + (q.p[1] - cy) / ab * (R + 2); f.setAttribute('x1', (q.p[0] + (cx - q.p[0]) / ab * 6).toFixed(1)); f.setAttribute('y1', (q.p[1] + (cy - q.p[1]) / ab * 6).toFixed(1)); f.setAttribute('x2', ex.toFixed(1)); f.setAttribute('y2', ey.toFixed(1)); f.style.display = ''; }
+      else f.style.display = 'none';
+    });
+    /* Die Zahl auf der Linie: senkrecht mitten auf der Linie (wie die Maßzahl einer Zeichnung), waagerecht darunter; Anker an der Linie,
+       damit sie beim Tippen zur Seite wächst und nicht wandert. Geprüft mit der größten Breite (fünf Ziffern, „mm“, Haken). */
+    var FB = gross ? 210 : S < 200 ? 140 : 176, unten = Math.max(A[1], B[1]), oben = Math.min(A[1], B[1]), knopfOben = gross ? S : S - 54;
     var f = st.r === 'v'
-      ? legen(messFeld, [{ x: function (w) { return mx - 12 - w; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx - 12, '-100%']; } },
-          { x: function (w) { return mx - 12 - w; }, y: function () { return hin[0].y + hin[0].h + 2; }, anker: function () { return [mx - 12, '-100%']; } },
-          { x: function (w) { return mx - 12 - w; }, y: function (h) { return S - rand - h; }, anker: function () { return [mx - 12, '-100%']; } },
-          { x: function () { return mx + 12; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx + 12, '0']; } }], FB)
-      : legen(messFeld, [{ x: function (w) { return mx - w / 2; }, y: function () { return my + 24; }, anker: function () { return [mx, '-50%']; } },
-          { x: function (w) { return mx - w / 2; }, y: function (h) { return my - 24 - h; }, anker: function () { return [mx, '-50%']; } }], FB);
-    /* Anker an der Linie, solange die volle Breite (FB) in die Bühne passt; sonst am Rand begrenzt, die Zahl wächst dann zur Linie hin */
+      ? legen(messFeld, [{ x: function (w) { return mx - w / 2; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx, '-50%']; } },
+          { x: function (w) { return mx - 14 - w; }, y: function (h) { return Math.min(my - h / 2, knopfOben - 4 - h); }, anker: function () { return [mx - 14, '-100%']; } },
+          { x: function () { return mx + 14; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx + 14, '0']; } }], FB)
+      : legen(messFeld, [{ x: function (w) { return mx - w / 2; }, y: function () { return unten + 14; }, anker: function () { return [mx, '-50%']; } },
+          { x: function (w) { return mx - w / 2; }, y: function (h) { return oben - 14 - h; }, anker: function () { return [mx, '-50%']; } },
+          { x: function (w) { return mx - w / 2; }, y: function (h) { return my - h / 2; }, anker: function () { return [mx, '-50%']; } }], FB);
     var an = f.k.anker(), links = an[1] === '-100%' ? an[0] - FB : an[1] === '-50%' ? an[0] - FB / 2 : an[0];
     if (links < rand || links + FB > W - rand) an = [f.r.x, '0'];
     messFeld.style.left = Math.round(an[0]) + 'px'; messFeld.style.top = Math.round(f.r.y) + 'px'; messFeld.style.setProperty('--fx', an[1]);
-    [[ea, A, -1], [eb, B, 1]].forEach(function (p) {
-      var x = p[1][0], y = p[1][1], kand = st.r === 'v'
-        ? [{ x: function () { return x + 12; }, y: function (h) { return y - h / 2; } }, { x: function (w) { return x - 12 - w; }, y: function (h) { return y - h / 2; } },
-           { x: function () { return x + 12; }, y: function (h) { return p[2] < 0 ? y + 10 : y - 10 - h; } }]
-        : [{ x: function (w) { return x - w / 2; }, y: function (h) { return y - 14 - h; } }, { x: function (w) { return p[2] < 0 ? x - 12 - w : x + 12; }, y: function (h) { return y - h / 2; } },
-           { x: function (w) { return x - w / 2; }, y: function () { return y + 14; } }];
-      var g = legen(p[0], kand); p[0].style.left = Math.round(g.r.x) + 'px'; p[0].style.top = Math.round(g.r.y) + 'px';
-    });
-    $('mess-bildtext').textContent = 'Modell: ' + (st.wer === 'mo' ? 'Maueröffnung' : ART[art].name.replace('‑', '-')) + ', gemessen wird ' + (st.r === 'v' ? 'senkrecht' : 'waagerecht') + ' von „' + en[0] + '“ bis „' + en[1] + '“.';
-    if (zieht && !ruhig()) { messBuehne.classList.remove('zieht'); void messBuehne.offsetWidth; messBuehne.classList.add('zieht'); }
-    else messBuehne.classList.remove('zieht');
+    $('mess-bildtext').textContent = 'Modell: ' + (st.wer === 'mo' ? 'Maueröffnung' : ART[art].name.replace('‑', '-')) + ', gemessen wird ' + (st.r === 'v' ? 'senkrecht' : 'waagerecht') + ' von „' + en[0] + '“ bis „' + en[1] + '“. Lupen zeigen beide Enden vergrößert.';
+    /* Erst gleitet die Kamera (Linie, Enden und Zahl sind solange aus), dann zieht sich die Linie von Ende zu Ende */
+    clearTimeout(fahrT); messBuehne.classList.remove('zieht', 'nach-fahrt');
+    var ziehen = function () { void messBuehne.offsetWidth; messBuehne.classList.add('zieht'); };
+    if (faehrt) { messBuehne.classList.add('faehrt'); fahrT = setTimeout(function () { messBuehne.classList.remove('faehrt'); messBuehne.classList.add('nach-fahrt'); ziehen(); }, 400); }
+    else { messBuehne.classList.remove('faehrt'); if (zieht && !ruhig()) ziehen(); }
   }
   function messFeldSetzen() {
     var st = schritt(), v = num(mess.cur), leer = !mess.cur;
@@ -490,6 +552,29 @@
     mess.i--; var w = mess.werte[schritt().k]; mess.cur = w ? String(w) : ''; mess.ersetzen = !!w; mess.mmOk = 0; messAlles(true);
     status('Maß ' + (mess.i + 1) + ' von 4: ' + messTitelText() + (w ? ' Bisher ' + tausend(w) + ' Millimeter, Tippen ersetzt das Maß.' : ''));
   }
+  /* Großansicht: ein Tipp aufs Bild (oder der runde Knopf) zeigt dieselbe Bühne bildschirmfüllend, mit Frage und Anleitung; × , Esc,
+     ein Tipp aufs Bild und „Zurück zum Eintippen“ schließen. Am Schreibtisch liegt sie genau auf dem Bildschirm des Geräts. */
+  var gross = $('mess-gross'), grossPlatz = $('mess-gross-platz'), buehneHeim = messBuehne.parentNode, buehneVor = messBuehne.nextElementSibling;
+  function grossAuf() {
+    if (grossOffen || !gross.showModal) return;
+    grossOffen = true; clearTimeout(fahrT);
+    $('mess-gross-titel').innerHTML = messTitel(schritt()); $('mess-gross-unter').textContent = $('mess-unterzeile').textContent;
+    var aR = app.getBoundingClientRect(), aufGeraet = aR.width < window.innerWidth - 40;
+    gross.style.cssText = aufGeraet ? 'left:' + aR.left + 'px;top:' + aR.top + 'px;width:' + aR.width + 'px;height:' + aR.height + 'px;border-radius:' + getComputedStyle(app).borderTopLeftRadius : '';
+    grossPlatz.appendChild(messBuehne); messBuehne.classList.add('ist-gross'); messBuehne.classList.remove('faehrt', 'zieht');
+    gross.showModal(); kameraJetzt = null; messBuehneSetzen(false);
+    status('Großansicht: ' + messTitelText() + ' Schließen mit Escape oder „Zurück zum Eintippen“.');
+  }
+  function grossZu() {
+    if (!grossOffen) return;
+    grossOffen = false; if (gross.open) gross.close();
+    buehneHeim.insertBefore(messBuehne, buehneVor); messBuehne.classList.remove('ist-gross');
+    kameraJetzt = null; messHoeheSetzen(); messBuehneSetzen(false);
+    messGrossKnopf.focus({ preventScroll: true });
+  }
+  messBuehne.addEventListener('click', function () { if (grossOffen) grossZu(); else if (!folien.messen.hidden) grossAuf(); });
+  gross.addEventListener('cancel', function (e) { e.preventDefault(); grossZu(); });
+  gross.querySelectorAll('[data-gross-zu]').forEach(function (b) { b.addEventListener('click', grossZu); });
   /* Tasten: Druck sichtbar per Klasse (Touch zeigt :active unzuverlässig), keine Fokusübernahme bei Mausklick (Enter heißt am Rechner „Weiter“) */
   var tastenFeld = folien.messen.querySelector('.ez-tasten'), gedrueckt = null;
   function loslassen() { if (gedrueckt) { gedrueckt.classList.remove('ist-gedrueckt'); gedrueckt = null; } }
@@ -503,7 +588,7 @@
   bogenBinden($('mess-erkl'), $('mess-i'));
   /* Tastatur am Rechner: Ziffern, Rücktaste, Eingabe (wie die Pille); die passende Taste drückt sichtbar mit, ohne Übergang */
   d.addEventListener('keydown', function (e) {
-    if (folien.messen.hidden || offenerBogen || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (folien.messen.hidden || offenerBogen || grossOffen || e.altKey || e.ctrlKey || e.metaKey) return;
     var t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
     var taste = /^[0-9]$/.test(e.key) ? e.key : e.key === 'Backspace' ? 'del' : null;
     if (taste) { e.preventDefault(); tastenFeld.classList.add('ist-tastatur'); loslassen(); gedrueckt = tastenFeld.querySelector('[data-taste="' + taste + '"]'); if (gedrueckt) gedrueckt.classList.add('ist-gedrueckt'); messTaste(taste, true); }
@@ -514,7 +599,7 @@
   var groesseRaf = 0;
   window.addEventListener('resize', function () {
     if (folien.messen.hidden || groesseRaf) return;
-    groesseRaf = requestAnimationFrame(function () { groesseRaf = 0; var b = messBuehne.clientWidth; if (b === messBreite) return; messBreite = b; messPlatzReservieren(); messFussSetzen(); messHoeheSetzen(); messBuehneSetzen(false); });
+    groesseRaf = requestAnimationFrame(function () { groesseRaf = 0; var b = messBuehne.clientWidth; if (b === messBreite) return; messBreite = b; if (!grossOffen) { messPlatzReservieren(); messFussSetzen(); messHoeheSetzen(); } kameraJetzt = null; messBuehneSetzen(false); });
   });
 
   setzeArt('fenster');
