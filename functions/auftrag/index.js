@@ -107,7 +107,14 @@ async function kiStand(ctx, a) {
 async function instanzZuHost(ctx, adresse) {
   let host = ''; try { host = new URL(/^https?:\/\//i.test(adresse) ? adresse : 'https://' + adresse).hostname.toLowerCase().replace(/^www\./, ''); } catch (e) { return null; }
   const inst = await instanzVon(host, ctx.env, ctx).catch(() => null);
-  return inst && inst.id && !inst.stoerung ? { id: inst.id, id8: inst.id8, host: inst.haupthost || host, seit: ZEIT() } : null;
+  return inst && inst.id && !inst.stoerung ? { id: inst.id, id8: inst.id8, host: inst.haupthost || host, paket: inst.paket || '', seit: ZEIT() } : null;
+}
+/* Ein Konfigurator gehört zu genau einem laufenden Auftrag und hat dessen Paket (sonst stimmen KI-Kontingent, Kennzeichnung und Abrechnung
+   nicht überein); Paketwechsel nur über „Wechsel“ (paketWechseln) */
+async function instanzPasst(ctx, a, inst) {
+  if (inst.paket && inst.paket !== a.paket) throw new ApiFehler('Der Konfigurator unter ' + inst.host + ' hat das Paket „' + ((P().PAKETE[inst.paket] || {}).name || inst.paket) + '“, der Auftrag „' + ((P().PAKETE[a.paket] || {}).name || a.paket) + '“.', 409, { felder: { host: 'Anderes Paket als der Auftrag.' } });
+  const andere = ((await db(ctx).auftraegeAlle().catch(() => [])) || []).find((x) => x.id !== a.id && x.instanz && x.instanz.id === inst.id && !x.instanz.aus && ['beendet', 'storniert'].indexOf(x.stand) < 0);
+  if (andere) throw new ApiFehler('Der Konfigurator unter ' + inst.host + ' gehört schon zu Auftrag ' + (andere.nr || andere.id) + '.', 409, { felder: { host: 'Schon mit einem anderen Auftrag verknüpft.' } });
 }
 
 /* Den verknüpften Konfigurator mit dem Stand des Auftrags schalten (Paketbedingungen § 8): Pause zeigt nur Name und Kontakt, Ende nimmt ihn
@@ -219,7 +226,7 @@ async function bestaetigen(ctx, a, kunde) {
 }
 async function inhaberMelden(ctx, a, angefragt) {
   const post = pd(ctx); if (!post) return false;
-  const m = inhaberNeuMail(a, { paketName: (P().PAKETE[a.paket] || {}).name, adresse: adresseText(a), angefragt: angefragt, zentrale: basis(ctx) + '/zentrale/#auftrag/' + a.id });
+  const m = inhaberNeuMail(a, { paketName: (P().PAKETE[a.paket] || {}).name, gestaltet: AU().gestaltet(P().merkmale(a.paket) || {}), adresse: adresseText(a), angefragt: angefragt, zentrale: basis(ctx) + '/zentrale/#auftrag/' + a.id });
   return post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, idempotenz: 'auftrag-neu-' + a.id + (angefragt ? '-a' : '') });
 }
 async function kundeMelden(ctx, a, stand, o) {
@@ -244,7 +251,7 @@ export function promptFuer(a, kunde) {
   z.push('Adresse: ' + (m.domain ? (ad.art === 'eigene' ? 'Domain des Kunden, nach Absprache anbinden (Paketbedingungen § 6 Abs. 3): ' : 'neu registrieren (bis 25 € netto im Jahr): ') + ((ad.domains || []).join(', ') || 'Domain vorschlagen') + (ad.vorschlaege ? ' (Kunde wünscht Vorschläge)' : '') : (ad.name ? ad.name + '.eeziframes.com' : '–')));
   if (b.rueckruf) z.push('Anruf nach der Zahlung (Paketbedingungen § 5): „' + b.rueckruf + '“');
   if (b.web) z.push('Website des Kunden: ' + b.web + (a.weg === 'schnell' || t.ausWebsite ? ' — Texte, Bilder und Farben von dort übernehmen, wo unten etwas fehlt' : ''));
-  z.push('Weg: ' + (a.weg === 'schnell' ? 'Schnell (der Kunde hat nur das Nötigste angegeben; Texte und Bildauswahl übernehme ich)' : 'Ausführlich'));
+  if (AU().gestaltet(m)) z.push('Weg: ' + (a.weg === 'schnell' ? 'Schnell (der Kunde hat nur das Nötigste angegeben; Texte und Bildauswahl übernehme ich)' : 'Ausführlich'));
   if (AU().gestaltet(m)) {
     z.push('Farben: ' + ((t.farben || []).join(', ') || 'keine angegeben') + (t.farbenWebsite ? ' (von der Website übernehmen)' : '') + ' · Stufe: ' + (m.farbwelt === 'voll' ? 'ganze Seite in der Palette des Betriebs' : 'zur Hälfte in der Palette des Betriebs') + ' (Muster docs/profis/werkzeuge/farben-brandt.css)');
     z.push('Texte: Überschrift „' + (t.ueberschrift || '–') + '“; Einleitung „' + (t.einleitung || '–') + '“; Leistungen „' + (t.leistungTitel || '–') + '“ / „' + (t.leistungText || '–') + '“' + (m.einladungslinks ? '; Einladungstext „' + (t.einladung || '–') + '“' : ''));
@@ -253,7 +260,7 @@ export function promptFuer(a, kunde) {
   if (m.dashboard) z.push('Team für das Dashboard: ' + ((ad.team || []).join(', ') || '–'));
   z.push('Anfragen gehen an: ' + ((ad.eingang || []).join(', ') || '–'));
   if (t.notiz) z.push('Hinweise des Kunden: ' + t.notiz);
-  z.push('Impressum: ' + [b.firma, b.rechtsform, 'vertreten durch ' + (b.vertretung || '–'), b.register, b.ust ? 'USt-IdNr. ' + b.ust : '', b.kammer, b.beruf].filter(Boolean).join(' · ') + ' · Bundesland ' + (AU().BUNDESLAENDER[b.bundesland] || '–'));
+  z.push('Impressum: ' + [b.firma, b.rechtsform && String(b.firma || '').toLowerCase().replace(/[\s.]/g, '').indexOf(b.rechtsform.toLowerCase().replace(/[\s.]/g, '')) < 0 ? b.rechtsform : '', 'vertreten durch ' + (b.vertretung || '–'), b.register, b.ust ? 'USt-IdNr. ' + b.ust : '', b.kammer, b.beruf].filter(Boolean).join(' · ') + ' · Bundesland ' + (AU().BUNDESLAENDER[b.bundesland] || '–'));
   z.push('Kunde: ' + ((kunde && kunde.mail) || '–') + ' · Auftrag in der Zentrale: /zentrale/#auftrag/' + a.id);
   z.push('');
   z.push('Danach: Vorschau als Artifact, Link in der Zentrale unter „Vorschau“ eintragen. MASTER-ANHÄNGSEL anhängen.');
@@ -447,7 +454,7 @@ const KUNDE = {
     if (z2 === false) throw new ApiFehler('Gerade gibt es keine Vorschau zum Freigeben.', 409);
     const nt = b.aktion === 'freigeben' ? 'Ich gebe die Vorschau frei.' : 'Bitte ändern: ' + text;
     await d.nachrichtAnlegen({ auftrag: a.id, von: 'kunde', text: nt });
-    const post = pd(ctx); if (post) { const m = nachrichtMail(z2, nt, { anInhaber: true, link: basis(ctx) + '/zentrale/#auftrag/' + a.id }); ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: kunde.mail }).catch(() => false)); }
+    const post = pd(ctx); if (post) { const m = nachrichtMail(z2, nt, { anInhaber: true, titel: b.aktion === 'freigeben' ? 'Vorschau freigegeben' : 'Änderungswunsch', link: basis(ctx) + '/zentrale/#auftrag/' + a.id }); ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: kunde.mail }).catch(() => false)); }
     return { ok: true, auftrag: sicht(z2) };
   },
   'GET /api/auftrag/:id/nachrichten': async (ctx) => {
@@ -470,7 +477,7 @@ const KUNDE = {
     const text = 'Ich möchte zu ' + P().PAKETE[p].name + ' wechseln.' + ((ctx.body || {}).text ? ' ' + kurz(ctx.body.text, 500) : '');
     await db(ctx).nachrichtAnlegen({ auftrag: a.id, von: 'kunde', text: text });
     await db(ctx).auftragAendern(a.id, (z) => { z.wechsel = { paket: p, zeit: ZEIT() }; verlauf(z, { von: 'kunde', text: 'Paketwechsel angefragt: ' + P().PAKETE[p].name }); });
-    const post = pd(ctx); if (post) { const m = nachrichtMail(a, text, { anInhaber: true, link: basis(ctx) + '/zentrale/#auftrag/' + a.id }); ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: kunde.mail }).catch(() => false)); }
+    const post = pd(ctx); if (post) { const m = nachrichtMail(a, text, { anInhaber: true, titel: 'Paketwechsel angefragt', link: basis(ctx) + '/zentrale/#auftrag/' + a.id }); ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: kunde.mail }).catch(() => false)); }
     return { ok: true };
   },
   /* KI-Kontingent: Stand des Monats; weitere Auswertungen freischalten oder zurücknehmen (Paketbedingungen § 2 Abs. 2, § 4 Abs. 4) */
@@ -501,7 +508,7 @@ const KUNDE = {
     });
     if (z2 === false) throw new ApiFehler('Wir haben mit Ihrer Seite gerade begonnen. Schreiben Sie uns bitte.', 409);
     ctx.waitUntil(kundeMelden(ctx, z2, 'storniert', {}).catch(() => false));
-    const post = pd(ctx); if (post) { const m = nachrichtMail(z2, 'Ich storniere meine Bestellung.', { anInhaber: true, link: basis(ctx) + '/zentrale/#auftrag/' + a.id }); ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: kunde.mail }).catch(() => false)); }
+    const post = pd(ctx); if (post) { const m = nachrichtMail(z2, 'Ich storniere meine Bestellung.', { anInhaber: true, titel: 'Storno', link: basis(ctx) + '/zentrale/#auftrag/' + a.id }); ctx.waitUntil(post.senden({ an: post.kontakt, betreff: m.betreff, html: m.html, antwortAn: kunde.mail }).catch(() => false)); }
     return { ok: true, auftrag: sicht(z2) };
   },
   'POST /api/auftrag/:id/verwerfen': async (ctx) => {
@@ -571,6 +578,7 @@ const INHABER = {
     const a = await auftragFuerInhaber(ctx), adresse = String((ctx.body || {}).host || '').trim();
     const inst = adresse ? await instanzZuHost(ctx, adresse) : null;
     if (adresse && !inst) throw new ApiFehler('Unter dieser Adresse gibt es keinen Konfigurator.', 404, { felder: { host: 'Kein Konfigurator unter dieser Adresse.' } });
+    if (inst) await instanzPasst(ctx, a, inst);
     const z2 = await db(ctx).auftragAendern(a.id, (z) => { z.instanz = inst; verlauf(z, { von: 'inhaber', text: inst ? 'Konfigurator verknüpft: ' + inst.host : 'Konfigurator gelöst' }); });
     return { ok: true, auftrag: sicht(z2, { inhaber: true }), ki: await kiStand(ctx, z2) };
   },
@@ -593,10 +601,13 @@ const INHABER = {
     const link = String(b.link || '').trim(), text = kurz(b.text, 600);
     if (nach === 'vorschau' && !AU().webAdresse(link)) throw new ApiFehler('Bitte den Link zur Vorschau eintragen.', 400, { felder: { link: 'Bitte einen Link wie https://… eintragen.' } });
     if (nach === 'live' && !AU().webAdresse(link)) throw new ApiFehler('Bitte die Adresse der fertigen Seite eintragen.', 400, { felder: { link: 'Bitte die Adresse wie https://… eintragen.' } });
+    /* Live nur mit Konfigurator: schon verknüpft oder unter der Adresse erreichbar und passend (sonst liefe das Abo, und der Kunde bekäme
+       „Ihre Seite ist live“, ohne dass etwas online ist) */
+    const inst = nach === 'live' && !(a.instanz && a.instanz.id && !a.instanz.aus) ? await instanzZuHost(ctx, AU().webAdresse(link)) : null;
+    if (nach === 'live' && !(a.instanz && a.instanz.id && !a.instanz.aus) && !inst) throw new ApiFehler('Unter dieser Adresse läuft noch kein Konfigurator. Erst den Konfigurator einrichten, dann live schalten; Abo und Mail an den Kunden starten erst dann.', 409, { felder: { link: 'Unter dieser Adresse läuft noch kein Konfigurator.' } });
+    if (inst) await instanzPasst(ctx, a, inst);
     let abo = null, erstattung = null;
     if (nach === 'live' && (!((a.abo || {}).id) || (a.abo || {}).geloescht)) { const kunde = await d.kundeHolen(a.kunde); abo = await aboStarten(ctx, a, kunde || {}); }
-    /* Live: den Konfigurator unter dieser Adresse mit dem Auftrag verknüpfen (KI-Kontingent, Abrechnung); fehlt er, bleibt es offen */
-    const inst = nach === 'live' && !a.instanz ? await instanzZuHost(ctx, AU().webAdresse(link)) : null;
     if (nach === 'storniert') erstattung = await erstatten(ctx, a);
     if (nach === 'beendet') await aboBeenden(ctx, a, !!b.sofort);
     const z2 = await d.auftragAendern(a.id, (z) => {
@@ -617,7 +628,7 @@ const INHABER = {
     const schalt = bisEnde ? '' : await konfiguratorSchalten(ctx, z2, nach, 'Zentrale: ' + AU().STAND_TITEL[nach] + (text ? ', ' + text : ''));
     if (!bisEnde && z2.instanz && ['beendet', 'storniert'].indexOf(nach) >= 0 && !schalt) await d.auftragAendern(z2.id, (z) => { z.instanz = Object.assign({}, z.instanz, { aus: ZEIT() }); }).catch(() => null);
     if (b.mail !== false) ctx.waitUntil(kundeMelden(ctx, z2, nach, { vorschau: (z2.vorschau || {}).link, live: (z2.vorschau || {}).live, text: text }).catch(() => false));
-    return { ok: true, auftrag: sicht(z2, { inhaber: true }), hinweis: schalt || (nach === 'live' && !z2.instanz ? 'Unter dieser Adresse wurde kein Konfigurator gefunden; das KI-Kontingent ist nicht verknüpft. Verknüpfen unter „KI-Auswertungen“.' : '') };
+    return { ok: true, auftrag: sicht(z2, { inhaber: true }), hinweis: schalt || '' };
   },
   'POST /api/inhaber/auftraege/:id/nachricht': async (ctx) => {
     await inhaberPflicht(ctx);

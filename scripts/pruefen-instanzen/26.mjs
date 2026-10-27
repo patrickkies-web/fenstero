@@ -131,10 +131,16 @@ export default async function (h) {
   const sprung = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'live', link: 'https://fensterbau-pruef.de/' } });
   await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'vorschau', link: 'https://claude.ai/artifact/beispiel-2-' + stempel } });
   const frei2 = await A.api('/api/auftrag/' + a1.id + '/freigabe', { body: { aktion: 'freigeben' } });
+  /* Live nur mit Konfigurator unter der Adresse: ohne ihn 409, kein Abo, keine Mail; danach mit Konfigurator im selben Paket */
+  const vorOhne = new Set((await h.post()).map((m) => m.id));
+  const ohneKonf = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'live', link: 'https://fensterbau-pruef-' + stempel + '.de/' } });
+  await new Promise((r) => setTimeout(r, 300));
+  const ohneMail = (await h.post()).filter((m) => !vorOhne.has(m.id)).some((m) => m.an === mailA && /live/i.test(m.betreff));
+  await h.saat({ instanzen: [{ slug: 'fensterbau-pruef-' + stempel, host: 'fensterbau-pruef-' + stempel + '.de', paket: 'plus', name: 'Fensterbau Prüf', plz: '50667' }] });
   const live = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'live', link: 'https://fensterbau-pruef-' + stempel + '.de/' } });
   const zurueck = await zapi('/api/inhaber/auftraege/' + a1.id + '/stand', { body: { stand: 'vorschau', link: 'https://x.example/' } });
-  ok(s1.json.auftrag.stand === 'in_arbeit' && ohneLink.status === 400 && s2.json.auftrag.stand === 'vorschau' && !!vMail && vMail.html.includes('beispiel-' + stempel) && aend.json.auftrag.stand === 'in_arbeit' && aend.json.auftrag.vorschau.aenderung.text === 'Bitte das Foto oben tauschen.' && sprung.status === 409 && frei2.json.auftrag.vorschau.freigabe && live.json.auftrag.stand === 'live' && live.json.auftrag.abo.status === 'aktiv' && zurueck.status === 409,
-    '26.8 Stände: In Arbeit → Vorschau nur mit Link (Mail mit Link an den Kunden) → Änderungswunsch zurück in Arbeit → neue Vorschau → Freigabe → Live mit laufendem Abo; ein Sprung oder ein Schritt zurück aus Live: 409');
+  ok(ohneKonf.status === 409 && ohneKonf.json.felder && /kein Konfigurator/.test(ohneKonf.json.felder.link) && !ohneMail && s1.json.auftrag.stand === 'in_arbeit' && ohneLink.status === 400 && s2.json.auftrag.stand === 'vorschau' && !!vMail && vMail.html.includes('beispiel-' + stempel) && aend.json.auftrag.stand === 'in_arbeit' && aend.json.auftrag.vorschau.aenderung.text === 'Bitte das Foto oben tauschen.' && sprung.status === 409 && frei2.json.auftrag.vorschau.freigabe && live.json.auftrag.stand === 'live' && live.json.auftrag.abo.status === 'aktiv' && zurueck.status === 409,
+    '26.8 Stände: In Arbeit → Vorschau nur mit Link (Mail mit Link an den Kunden) → Änderungswunsch zurück in Arbeit → neue Vorschau → Freigabe → Live nur mit Konfigurator unter der Adresse (ohne: 409, kein Abo, keine Mail), dann mit laufendem Abo; ein Sprung oder ein Schritt zurück aus Live: 409');
 
   /* ---------- 26.9 Nachrichten ---------- */
   await A.api('/api/auftrag/' + a1.id + '/nachrichten', { body: { text: 'Wann rufen Sie an?' } });

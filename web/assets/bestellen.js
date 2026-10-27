@@ -308,8 +308,8 @@
     const firma = betriebFeld({ k: 'firma', label: 'Unternehmen, wie auf Ihren Rechnungen', platzhalter: 'Fensterbau Brandt GmbH', auto: 'organization',
       onBlur: (v) => {
         const nameF = wurzel.querySelector('[data-k="name"]'), formF = wurzel.querySelector('[data-k="rechtsform"]'), form = FORM_RE.exec(v);
-        if (!b.name && v.trim()) { b.name = v.replace(FORM_RE, '').trim(); nameF.eingabe.value = b.name; geaendert('betrieb'); }
-        if (!b.rechtsform && form) { const t = RECHTSFORMEN.find((r) => r.replace(/[\s.]/g, '').toLowerCase() === form[1].replace(/[\s.]/g, '').toLowerCase()); if (t) { b.rechtsform = t; formF.eingabe.value = t; geaendert('betrieb'); } }
+        if (!b.name && v.trim()) { b.name = v.replace(FORM_RE, '').trim(); nameF.eingabe.value = b.name; U.fehlerSetzen(nameF, ''); geaendert('betrieb'); }
+        if (!b.rechtsform && form) { const t = RECHTSFORMEN.find((r) => r.replace(/[\s.]/g, '').toLowerCase() === form[1].replace(/[\s.]/g, '').toLowerCase()); if (t) { b.rechtsform = t; formF.eingabe.value = t; U.fehlerSetzen(formF, ''); geaendert('betrieb'); } }
       } });
     const seite = U.karte('Auf Ihrer Seite', 'Das sehen Ihre Kunden', [
       firma,

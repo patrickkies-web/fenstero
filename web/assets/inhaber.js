@@ -217,7 +217,7 @@
     if (weitere.length) inhalt.push(h('div', { class: 'a-knoepfe a-gefahr' }, weitere.map((n) => U.ring(WEITERE[n].titel, { class: 'klein' + (WEITERE[n].gefahr ? ' gefahr' : ''), on: { click: () => standBlatt(a, Object.assign({ nach: n }, WEITERE[n])) } }))));
 
     const titel = (b.name || b.firma || 'Ohne Namen') + (a.naechster ? '. *' + a.naechster + '.*' : '');
-    seite({ band: h('p', { class: 'a-band-text', text: a.nr + ' · ' + P.PAKETE[a.paket].name + ' · ' + (a.weg === 'schnell' ? 'Schnell' : 'Ausführlich') + ' · bestellt ' + (z.bezahlt_am ? U.datum(z.bezahlt_am) : 'noch nicht') }), buehne: buehne(a),
+    seite({ band: h('p', { class: 'a-band-text', text: a.nr + ' · ' + P.PAKETE[a.paket].name + (A.gestaltet(P.merkmale(a.paket) || {}) ? ' · ' + (a.weg === 'schnell' ? 'Schnell' : 'Ausführlich') : '') + ' · bestellt ' + (z.bezahlt_am ? U.datum(z.bezahlt_am) : 'noch nicht') }), buehne: buehne(a),
       frage: U.frage(titel, null), inhalt: inhalt, fuss: s ? [U.pille(s.titel, { on: { click: () => standBlatt(a, s) } })] : null, stehen: o.stehen });
     const liste = wurzel.querySelector('.a-nachrichten'); if (liste) liste.scrollTop = liste.scrollHeight;
   }
@@ -232,7 +232,7 @@
     };
     const weitere = (a.dateien || []).filter((d) => d.platz === 'weitere');
     const farben = (t.farben || []).map(A.farbe).filter(Boolean);
-    return U.karte('Material', a.weg === 'schnell' ? 'Weg Schnell: Texte und Bilder übernehmen Sie' : 'Weg Ausführlich', [
+    return U.karte('Material', !A.gestaltet(P.merkmale(a.paket) || {}) ? 'Dateien aus der Bestellung' : a.weg === 'schnell' ? 'Weg Schnell: Texte und Bilder übernehmen Sie' : 'Weg Ausführlich', [
       h('div', { class: 'a-datei-zeile', style: 'padding:8px 0 4px;gap:10px' }, platz('logo', 'Logo', 'a-logo-platz'), platz('portrait', 'Porträt', 'a-portrait-platz')),
       h('div', { class: 'a-fotos' }, A.FOTO_PLAETZE.map((f) => platz(f.k, f.titel))),
       weitere.length ? h('ul', { class: 'a-dateiliste' }, weitere.map((d) => h('li', null, h('a', { href: dateiUrl(a, d, true), download: d.name, text: d.name })))) : null,

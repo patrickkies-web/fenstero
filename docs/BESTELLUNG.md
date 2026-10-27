@@ -73,6 +73,7 @@ Konfiguratoren ohne Auftrag (Demos, von Hand angelegt) laufen wie freigeschaltet
 ## Geld (Stripe)
 
 - **Einrichtung:** Checkout im Modus `payment` (Karte oder SEPA-Lastschrift), Betrag aus `pakete.js` netto mit Steuersatz 19 % (Metadaten `eeziframes: auftrag-mwst19`, legt der Server an; `MWST=0` ohne), Rechnung von Stripe, Zahlungsmittel bleibt für das Abo hinterlegt. Metadaten `art: auftrag`, `auftrag: <id>`.
+- **Live nur mit Konfigurator (27.10.2026):** „Live schalten“ verlangt einen Konfigurator, der schon verknüpft ist oder unter der eingetragenen Adresse läuft, im Paket des Auftrags und mit keinem anderen laufenden Auftrag verknüpft. Sonst antwortet der Server 409: kein Abo, keine Mail „Ihre Seite ist live“. Dieselbe Prüfung gilt beim Verknüpfen von Hand.
 - **Monatsabo ab Live:** Preis über `lookup_key` `eezi-auftrag-<paket>-<cent>` (eine Preisänderung legt einen neuen Preis an, laufende Abos behalten ihren).
 - **Kundenportal:** eigene Konfiguration (Metadaten `auftrag-v1`): Rechnungen, Zahlungsmittel, Rechnungsangaben, Kündigung zum Monatsende.
 - **Webhook** (`/api/zahlung/webhook`, Ereignisse mit `metadata.art = auftrag`): `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`. Rückkehr aus der Kasse und Webhook schreiben beide „bezahlt“; Mails gehen nur beim ersten Mal.
@@ -113,7 +114,9 @@ Bestellung `http://localhost:8789/bestellen/#plus`, Code `123456`, Mails unter `
 
 ## Offen
 
-- **Konfigurator beim Live-Schalten anlegen:** Die Instanz (Host, Merkmale, Empfänger, Rechtsangaben, Zugänge) entsteht noch nicht aus dem Auftrag; die alte Instanz-Verwaltung gehörte zur gelöschten Zentrale. Die Bausteine darunter (`functions/instanz/`, `verwalten.js`) bleiben und sind der nächste Schritt.
+- **Konfigurator aus dem Auftrag anlegen (blockiert den Livegang):** Die Instanz (Host, Merkmale, Kennzeichnung, Logo, Farbe, Fotos, Startansicht, Suchmaschinen, Empfänger mit Bestätigungslink, Dashboard-Zugänge, Rechtsangaben) entsteht noch nicht aus dem Auftrag; in der Zentrale gibt es dafür keine Karte, `verwalten.js` ruft nur die Testroute auf. Bis dahin lässt sich ein Auftrag nicht live schalten (siehe oben). Prüfung der Abläufe vom 27.10.2026: docs/profis/2026-10-27-ablaeufe.md.
+- **Paketwechsel nach der Zahlung ausführen:** Der Kunde kann ihn anfragen, die Zentrale zeigt den Hinweis; ein Weg zum Ausführen (Differenz, Preisstand, Abo, `paketSetzen`) fehlt.
+- **Farbwelt im Konfigurator:** `farbwelt` (Plus halb, Signature voll) erreicht nur die Landingpage; der Konfigurator nimmt nur die Akzentfarbe. Klären, ob das so bleiben soll.
 - **Essential unter `<name>.eeziframes.com`:** Wildcard-Eintrag und Zuordnung im Worker (`functions/instanz/mandant.js` behandelt `*.eeziframes.com` noch als Hauptdomain).
 - **KI-Kontingent im Dashboard von Signature:** Der Stand steht im Kundenbereich auf eeziframes.com; im Dashboard unter der Domain des Betriebs noch nicht.
 - **Alte Tabellen** `partner`, `bestellungen`, `partner_nachrichten` und ihre Funktionen in `speicher.js`: ungenutzt; löschen nur auf Wunsch des Inhabers.

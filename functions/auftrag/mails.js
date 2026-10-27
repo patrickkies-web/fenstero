@@ -36,7 +36,7 @@ export function bestelltMail(a, o) {
 export function inhaberNeuMail(a, o) {
   const b = (a.angaben || {}).betrieb || {};
   return { betreff: (o.angefragt ? 'Neue Anfrage ' : 'Neue Bestellung ') + a.nr + ': ' + (b.firma || '') + ' · ' + o.paketName, html: rahmen(o.angefragt ? 'Neue Anfrage' : 'Neue Bestellung',
-    zeilen([['Auftrag', a.nr], ['Paket', o.paketName], ['Weg', a.weg === 'schnell' ? 'Schnell (Sie übernehmen Texte und Bilder)' : 'Ausführlich'], ['Unternehmen', b.firma], ['Ansprechperson', b.ap], ['Telefon', b.tel], ['Website', b.web], ['Adresse', o.adresse], ['Zahlung', o.angefragt ? 'Kasse noch zu, unverbindlich angefragt' : 'Einrichtung bezahlt']]) +
+    zeilen([['Auftrag', a.nr], ['Paket', o.paketName], o.gestaltet === false ? null : ['Weg', a.weg === 'schnell' ? 'Schnell (Sie übernehmen Texte und Bilder)' : 'Ausführlich'], ['Unternehmen', b.firma], ['Ansprechperson', b.ap], ['Telefon', b.tel], ['Website', b.web], ['Adresse', o.adresse], ['Zahlung', o.angefragt ? 'Kasse noch zu, unverbindlich angefragt' : 'Einrichtung bezahlt']]) +
     '<p style="margin:8px 0 0">' + pille(o.zentrale, 'In der Zentrale öffnen') + '</p>', 'Nur für den Inhaber von eeziframes.') };
 }
 
@@ -56,8 +56,10 @@ export function standMail(a, stand, o) {
 }
 
 export function nachrichtMail(a, text, o) {
-  return { betreff: (o.anInhaber ? 'Nachricht von ' + (((a.angaben || {}).betrieb || {}).firma || 'einem Kunden') : 'Neue Nachricht von eeziframes') + ' (' + a.nr + ')',
-    html: rahmen(o.anInhaber ? 'Neue Nachricht' : 'Neue Nachricht von eeziframes', '<div style="margin:0 0 18px;padding:14px 16px;border-radius:16px;background:#f2f2f4;font:400 15px/1.55 ' + SCHRIFT + ';color:#07090a;white-space:pre-wrap">' + esc(text) + '</div>' +
+  /* o.titel: Ereignis im Betreff an den Inhaber (Freigabe, Änderungswunsch, Paketwechsel, Storno), damit es im Postfach nicht wie eine Nachricht aussieht */
+  const firma = ((a.angaben || {}).betrieb || {}).firma || 'einem Kunden';
+  return { betreff: (o.anInhaber ? (o.titel ? o.titel + ': ' + firma : 'Nachricht von ' + firma) : 'Neue Nachricht von eeziframes') + ' (' + a.nr + ')',
+    html: rahmen(o.anInhaber ? o.titel || 'Neue Nachricht' : 'Neue Nachricht von eeziframes', '<div style="margin:0 0 18px;padding:14px 16px;border-radius:16px;background:#f2f2f4;font:400 15px/1.55 ' + SCHRIFT + ';color:#07090a;white-space:pre-wrap">' + esc(text) + '</div>' +
       '<p style="margin:0">' + pille(o.link, o.anInhaber ? 'In der Zentrale antworten' : 'Im Kundenbereich antworten') + '</p>', o.anInhaber ? 'Nur für den Inhaber von eeziframes.' : '') };
 }
 
