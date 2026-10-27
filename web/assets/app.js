@@ -7277,7 +7277,7 @@ async function anfragePdf() {
   try {
     await blattSchrift();
     const d = lkDaten(), pr = S.proj, logo = INST_M.logo && INST.logo ? await logoFuerBlatt(INST.logo) : null, kt = INST.kontakt || {};
-    const marke = { name: d.name, host: location.host || INST.host || '', tel: kt.tel || '', mail: kt.mail || '' }; if (logo) marke.logo = logo; if (INST_M.farbe && INST.farbe) marke.farbe = INST.farbe;
+    const pp = d.p || {}, marke = { name: d.name, host: location.host || INST.host || '', ap: pp.ap || '', tel: pp.tel || kt.tel || '', mail: pp.mail || kt.mail || '' }; if (logo) marke.logo = logo; if (INST_M.farbe && INST.farbe) marke.farbe = INST.farbe;
     const kunde = { name: pr.name || '', kontakt: pr.tel || pr.mail || '', adresse: pr.ort || '', mehr: AW.kundeKontakt({ kontakt: pr.tel || pr.mail || '', aufmass: { proj: pr } }) };
     const pdf = window.Blatt ? window.Blatt.pdf({ variante: 'anfrage', kennzeichnung: INST_M.pdfKennzeichnung || INST_M.kennzeichnung, marke: marke, nr: S.sent.nr || '', sie: !d.du, fenster: S.windows, projekt: pr, kunde: kunde, fotos: {}, h: BLATT_H }) : null;
     if (!pdf) { toast('Die PDF lässt sich hier gerade nicht erzeugen.'); return; }

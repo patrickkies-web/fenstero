@@ -140,7 +140,8 @@ export async function blattFuerEingang(k, inst, z, o) { return (await blattBauen
 export async function blattAnfrage(k, inst, z) {
   const B = await blattLaden();
   const e = eingabe(inst, z, 'anfrage'), l = (z && z.daten) || {};
-  e.marke = { name: e.betrieb.name, host: inst.haupthost || inst.host || '', tel: (inst.kontakt || {}).tel || '', mail: (inst.kontakt || {}).mail || '' };
+  const pf = inst.profil || {}, kt = inst.kontakt || {};
+  e.marke = { name: e.betrieb.name, host: inst.haupthost || inst.host || '', ap: pf.ap || '', tel: pf.tel || kt.tel || '', mail: pf.mail || kt.mail || '' };
   const logo = await logoLaden(k, inst); if (logo) e.marke.logo = { data: logo.data, w: logo.w, h: logo.h, grund: logo.grund };
   e.betrieb = { name: e.betrieb.name, nr: l.nr || '' };
   e.sie = !inst.du;

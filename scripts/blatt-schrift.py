@@ -12,17 +12,42 @@ import base64, io, os, sys
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 from fontTools import subset
+from fontTools.pens.ttGlyphPen import TTGlyphPen
+from fontTools.pens.transformPen import TransformPen
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTS = os.path.join(WURZEL, 'web', 'fonts')
 ZIEL = os.path.join(WURZEL, 'web', 'assets', 'blatt-schrift.js')
 
-ZEICHEN = ''.join(chr(c) for c in list(range(0x20, 0x7f)) + list(range(0xa0, 0x100))) + '–—‚‘’„“”•…€−‹›'
+ZEICHEN = ''.join(chr(c) for c in list(range(0x20, 0x7f)) + list(range(0xa0, 0x100))) + '–—‚‘’„“”•…€−‹›ẞ'
+
+
+def eszett(f, gewicht):
+    """Versal-Eszett (U+1E9E) für Outfit, das ihn nicht hat: aus Inter im selben Gewicht, auf die Versalhöhe von Outfit skaliert.
+    So steht in Versalzeilen „MAẞE“ statt „MASSE“ (Gremium 27.10.2026)."""
+    if 0x1E9E in f.getBestCmap():
+        return
+    q = instancer.instantiateVariableFont(TTFont(os.path.join(FONTS, 'inter-latin-ext-wght-normal.woff2')), {'wght': gewicht}, updateFontNames=False)
+    quelle = q.getBestCmap()[0x1E9E]
+    k = f['OS/2'].sCapHeight / q['OS/2'].sCapHeight
+    stift = TTGlyphPen(None)
+    q.getGlyphSet()[quelle].draw(TransformPen(stift, (k, 0, 0, k, 0, 0)))
+    g = stift.glyph()
+    name = 'uni1E9E'
+    f['glyf'][name] = g
+    g.recalcBounds(f['glyf'])
+    f['hmtx'][name] = (round(q['hmtx'][quelle][0] * k), getattr(g, 'xMin', 0))
+    f.setGlyphOrder(f.getGlyphOrder() + [name] if name not in f.getGlyphOrder() else f.getGlyphOrder())
+    for t in f['cmap'].tables:
+        if t.isUnicode():
+            t.cmap[0x1E9E] = name
 
 
 def schnitt(datei, gewicht, zeichen):
     f = TTFont(os.path.join(FONTS, datei))
     f = instancer.instantiateVariableFont(f, {'wght': gewicht}, updateFontNames=False)
+    if 'outfit' in datei:
+        eszett(f, gewicht)
     # eigene Namen je Schnitt, sonst heißen alle wie die Standardinstanz und ein PDF-Programm könnte sie verwechseln
     familie = (f['name'].getDebugName(16) or f['name'].getDebugName(1) or 'Schrift').replace(' Thin', '').strip()
     stil = {300: 'Light', 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 800: 'ExtraBold', 900: 'Black'}.get(gewicht, str(gewicht))

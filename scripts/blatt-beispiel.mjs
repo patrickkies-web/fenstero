@@ -6,7 +6,8 @@
 //
 //   node scripts/blatt-beispiel.mjs [ausgabeordner]      Vorgabe: docs/profis/aufmassblatt-vorschau/
 //
-// Schreibt aufmassblatt-brandt.pdf, durchschrift-mustermann.pdf und je Seite ein PNG (pdftoppm, 110 dpi) in den Ordner.
+// Schreibt aufmassblatt-brandt.pdf, durchschrift-mustermann.pdf und je Seite ein Bild (pdftoppm, 110 dpi, als WebP mit Pillow, sonst
+// PNG) in den Ordner. Prüft danach, dass die Durchschrift kein Maß des Projekts enthält (Abbruch mit Fehlercode sonst).
 import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
@@ -37,13 +38,13 @@ const F = (o) => AW.mk(o);
 const fenster = [
   F({ name: 'Wohnen links', etage: 'eg', teilung: '3', mo: mo(2010, 1410), el: { w: 1980, h: 1385 }, bru: 600, laib: 150, wand: 365, fa: '7016', fi: '9016', glas: '3', glasfn: ['schall'], rc: 'rc2',
     sart: 'raffstore', roll: 'vorbau', sfarbe: 'anthrazit', antrieb: 'smart', insekt: 'spann', fotos: 2,
-    ki: ki([['Auf einen Blick', 'Dreiteiliges Fenster, alter Rollladenkasten innen'], ['Rollladen', 'Einbaukasten innen im Sturz, Gurt links'], ['Anschlag', 'Innenanschlag, Blendrahmen etwa 2 cm hinter der Innenkante'], ['Fassade', 'Putz auf Mauerwerk'], ['Vor Ort prüfen', 'Sturzhöhe für den Raffstore-Kasten']], ['Rollladenkasten innen', 'Putzfassade'], ['Für den Raffstore-Kasten die Sturzhöhe vor Ort prüfen.'], { rollladen: 'einbau', anschlagI: 'innen', fassade: 'putz', strom: true }) }),
-  F({ name: 'Wohnen Terrasse', etage: 'eg', art: 'hst', hst: { schema: 'A', richtung: 'R', schwelle: 'null' }, mo: mo(3020, 2260), el: { w: 2990, h: 2240 }, laib: 150, wand: 365, fa: '7016', fi: '9016', glas: '3', glasfn: ['vsg'],
+    ki: ki([['Rollladen', 'Einbaukasten innen im Sturz, Gurt links'], ['Anschlag', 'Innenanschlag, Blendrahmen etwa 2 cm hinter der Innenkante'], ['Fassade', 'Putz auf Mauerwerk'], ['Vor Ort prüfen', 'Sturzhöhe für den Raffstore-Kasten']], ['Rollladenkasten innen', 'Putzfassade'], ['Für den Raffstore-Kasten die Sturzhöhe vor Ort prüfen.'], { rollladen: 'einbau', anschlagI: 'innen', fassade: 'putz', strom: true }) }),
+  F({ name: 'Wohnen Terrasse', etage: 'eg', art: 'hst', hst: { schema: 'A', richtung: 'R', schwelle: 'null' }, teilung: '2', sashes: [{ t: 'F', din: 'R' }, { t: 'S', din: 'R' }], griff: 'standard', mo: mo(3020, 2260), el: { w: 2990, h: 2240 }, laib: 150, wand: 365, fa: '7016', fi: '9016', glas: '3', glasfn: ['vsg'],
     sart: 'raffstore', roll: 'vorbau', sfarbe: 'anthrazit', antrieb: 'smart', insekt: 'schiebe', fotos: 2,
-    ki: ki([['Auf einen Blick', 'Terrassentür mit Seitenteil, ebenerdige Terrasse'], ['Boden', 'Fliesen innen, Terrasse auf gleicher Höhe'], ['Vor Ort prüfen', 'Entwässerung der Schwelle']], ['Terrasse ebenerdig'], ['Barrierefreie Schwelle: Entwässerungsrinne außen einplanen.']) }),
+    ki: ki([['Auf einen Blick', 'Terrassentür mit Seitenteil, ebenerdige Terrasse'], ['Boden', 'Fliesen innen, Terrasse auf gleicher Höhe'], ['Vor Ort prüfen', 'Entwässerung der Schwelle']], ['Terrasse ebenerdig'], ['Terrasse aus Holz auf Stelzlagern: Anschluss an die Schwelle vor Ort abstimmen.']) }),
   F({ name: 'Küche', etage: 'eg', teilung: '2p', mo: mo(1260, 1210), el: { w: 1230, h: 1185 }, bru: 950, laib: 140, fa: '7016', fi: '9016',
     sart: 'rollladen', roll: 'aufsatz', sfarbe: 'anthrazit', antrieb: 'motor', insekt: 'dreh', fotos: 2,
-    ki: ki([['Auf einen Blick', 'Zweiflügliges Fenster über der Arbeitsplatte'], ['Fensterbank innen', 'Arbeitsplatte reicht bis an den Rahmen'], ['Strom', 'Steckdose in der Nähe']], ['über Arbeitsplatte'], [], { strom: true }) }),
+    ki: ki([['Fensterbank innen', 'Arbeitsplatte reicht bis an den Rahmen'], ['Strom', 'Steckdose in der Nähe']], ['über Arbeitsplatte'], [], { strom: true }) }),
   F({ name: 'Essen', etage: 'eg', art: 'balkon', teilung: '1', mo: mo(910, 2190), el: { w: 885, h: 2170 }, laib: 140, fa: '7016', fi: '9016', bt: { schwelle: 'flach', griffA: 'ziehgriff', boden: 'bleibt' },
     sart: 'rollladen', roll: 'aufsatz', sfarbe: 'anthrazit', antrieb: 'motor', insekt: 'pendel', fotos: 1,
     ki: ki([['Auf einen Blick', 'Balkontür mit Rollladenkasten innen'], ['Boden', 'Parkett innen, Balkon eine Stufe tiefer'], ['Anschlag', 'Innenanschlag']], ['Balkon eine Stufe tiefer'], [], { anschlagI: 'innen' }) }),
@@ -51,10 +52,10 @@ const fenster = [
     sashes: [{ t: 'K', din: 'L' }], ki: ki([['Auf einen Blick', 'Kleines Kippfenster, Ornamentglas'], ['Laibung', 'Gefliest bis zur Hälfte']], ['Fliesenlaibung']) }),
   F({ name: 'Flur neben der Haustür', etage: 'eg', art: 'fest', mo: mo(420, 2120), el: { w: 400, h: 2100 }, laib: 130, fa: '7016', fi: '9016', glasfn: ['vsg', 'sicht'], orn: 'master', fotos: 1,
     ki: ki([['Auf einen Blick', 'Schmales festes Seitenfenster neben der Haustür'], ['Fassade', 'Putz auf Mauerwerk']], ['neben der Haustür']) }),
-  F({ name: 'Schlafen', etage: 'og', ogNr: 1, teilung: '2p', mo: mo(1510, 1260), el: { w: 1480, h: 1235 }, bru: 880, laib: 140, fa: '7016', fi: '9016', glasfn: ['schall'],
+  F({ name: 'Schlafen', etage: 'og', ogNr: 1, teilung: '2p', mo: mo(1510, 1260), el: { w: 1480, h: 1235 }, bru: 950, laib: 140, fa: '7016', fi: '9016', glasfn: ['schall'],
     sart: 'rollladen', roll: 'vorbau', sfarbe: 'anthrazit', antrieb: 'smart', insekt: 'spann', iart: 'plissee', ifarbe: 'grau', fotos: 2,
-    ki: ki([['Auf einen Blick', 'Zweiflügliges Fenster, Rollladenkasten innen'], ['Rollladen', 'Einbaukasten innen, Gurt rechts'], ['Strom', 'keine Steckdose in der Nähe']], ['Rollladenkasten innen'], ['Für den Smart-Home-Antrieb fehlt Strom am Fenster.']) }),
-  F({ name: 'Kind 1', etage: 'og', ogNr: 1, teilung: '1', mo: mo(1010, 1260), el: { w: 985, h: 1235 }, bru: 780, laib: 140, fa: '7016', fi: '9016', absturz: 'fest',
+    ki: ki([['Auf einen Blick', 'Zweiflügliges Fenster, Rollladenkasten innen'], ['Rollladen', 'Einbaukasten innen, Gurt rechts'], ['Strom', 'keine Steckdose in der Nähe']], ['Rollladenkasten innen'], ['Heizkörper direkt unter dem Fenster: Fensterbank innen nicht tiefer als 20 cm.']) }),
+  F({ name: 'Kind 1', etage: 'og', ogNr: 1, teilung: '1', ul: true, ulA: 'glas', ulH: 400, mo: mo(1010, 1260), el: { w: 985, h: 1235 }, bru: 780, laib: 140, fa: '7016', fi: '9016', absturz: 'fest',
     sart: 'rollladen', roll: 'aufsatz', sfarbe: 'anthrazit', antrieb: 'solar', insekt: 'spann', fotos: 2,
     ki: ki([['Auf einen Blick', 'Einflügliges Fenster, niedrige Brüstung'], ['Fassade', 'Putz, Südseite']], ['Südseite']) }),
   F({ name: 'Kind 2', etage: 'og', ogNr: 1, teilung: '2p', mo: mo(1260, 1260), el: { w: 1230, h: 1235 }, bru: 900, laib: 140, fa: '7016', fi: '9016',
@@ -75,16 +76,32 @@ const projekt = { name: 'Familie Mustermann', ort: '50667 Köln', tel: '0221 555
   zeit: '3m', budget: 'b4', foerd: true, foerdweg: 'bafa', notiz: 'Bitte vorher anrufen, unser Hund ist freundlich.' };
 const kunde = { name: 'Familie Mustermann', kontakt: '0221 555 01 23 · familie.mustermann@beispiel.de', adresse: 'Musterweg 12, 50667 Köln', mehr: [['Erreichbar', 'nachmittags']] };
 const betrieb = { name: 'Fensterbau Brandt GmbH', logo: logo, abzug: { seite: 15, oben: 15, unten: 30, untenT: 0 }, nr: 'A-2026-0142', eingegangen: '27. Oktober 2026' };
-const marke = { name: 'Fensterbau Brandt GmbH', logo: logo, host: 'fensterbau-brandt.de', tel: '0221 987 654 0', mail: 'aufmass@fensterbau-brandt.de' };
+const marke = { name: 'Fensterbau Brandt GmbH', logo: logo, host: 'fensterbau-brandt.de', ap: 'Petra Brandt', tel: '0221 987 654 0', mail: 'aufmass@fensterbau-brandt.de' };
 
 fs.mkdirSync(AUS, { recursive: true });
 const schreiben = (name, bytes) => { const f = path.join(AUS, name); fs.writeFileSync(f, Buffer.from(bytes)); return f; };
 const fb = Blatt.pdf({ variante: 'betrieb', kennzeichnung: 'dezent', fenster: fenster, projekt: projekt, kunde: kunde, betrieb: betrieb, portalKurz: 'eeziframes.com', ausgabe: 'bytes' });
 const ds = Blatt.pdf({ variante: 'anfrage', kennzeichnung: 'dezent', sie: true, marke: marke, nr: 'A-2026-0142', fenster: fenster, projekt: projekt, kunde: kunde, portalKurz: 'eeziframes.com', ausgabe: 'bytes' });
 const dateien = [schreiben('aufmassblatt-brandt.pdf', fb), schreiben('durchschrift-mustermann.pdf', ds)];
+/* Prüfung der Durchschrift: kein Maß des Projekts im Text (Maueröffnung, Element, Brüstung, Wand, Unterlicht, Bestellmaß) */
+const massWerte = new Set();
+fenster.forEach((w) => {
+  const d = AW.derive(w), b = AW.bestellmass(w, AW.abzugVon(betrieb.abzug));
+  [d.moW, d.moH, d.elW, d.elH, w.bru, w.wand, w.ulH, b && b.b, b && b.h].concat(Object.values(w.mo || {})).forEach((v) => { if (Number(v) >= 300) massWerte.add(Number(v)); });
+});
+const dsText = (() => { try { return cp.execFileSync('pdftotext', ['-layout', dateien[1], '-'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString('utf8'); } catch (e) { return null; } })();
+if (dsText == null) console.error('pdftotext fehlt: Durchschrift nicht auf Maße geprüft');
+else {
+  const lecks = [...massWerte].filter((v) => new RegExp('(^|[^\\d.,])(' + v + '|' + AW.th(v).replace('.', '\\.') + ')(?![\\d.,]\\d)').test(dsText));
+  if (lecks.length || /\d\s*mm\b/.test(dsText)) { console.error('Durchschrift enthält Maße: ' + lecks.join(', ') + (/\d\s*mm\b/.test(dsText) ? ' (und eine Angabe in mm)' : '')); process.exitCode = 1; }
+  else console.log('Durchschrift ohne Maße: ' + massWerte.size + ' Werte geprüft, keiner im Text');
+}
 for (const f of dateien) {
   const stamm = f.replace(/\.pdf$/, '');
-  try { cp.execFileSync('pdftoppm', ['-r', '110', '-png', f, stamm]); } catch (e) { console.error('pdftoppm fehlt oder scheiterte:', e.message); }
-  const seiten = fs.readdirSync(AUS).filter((x) => x.startsWith(path.basename(stamm) + '-') && x.endsWith('.png')).length;
+  fs.readdirSync(AUS).filter((x) => x.startsWith(path.basename(stamm) + '-') && /\.(png|webp)$/.test(x)).forEach((x) => fs.unlinkSync(path.join(AUS, x)));
+  try { cp.execFileSync('pdftoppm', ['-r', '110', '-png', f, stamm], { stdio: ['ignore', 'ignore', 'ignore'] }); } catch (e) { console.error('pdftoppm fehlt oder scheiterte:', e.message); }
+  const pngs = fs.readdirSync(AUS).filter((x) => x.startsWith(path.basename(stamm) + '-') && x.endsWith('.png')).map((x) => path.join(AUS, x));
+  try { cp.execFileSync('python3', ['-I', '-c', 'import sys\nfrom PIL import Image\nfor p in sys.argv[1:]:\n    Image.open(p).save(p[:-4] + ".webp", quality=82, method=6)'].concat(pngs)); pngs.forEach((x) => fs.unlinkSync(x)); } catch (e) { /* ohne Pillow bleiben die PNG */ }
+  const seiten = fs.readdirSync(AUS).filter((x) => x.startsWith(path.basename(stamm) + '-') && /\.(png|webp)$/.test(x)).length;
   console.log(path.relative(WURZEL, f) + ': ' + Math.round(fs.statSync(f).size / 1024) + ' KB, ' + seiten + ' Seiten');
 }

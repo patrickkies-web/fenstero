@@ -42,14 +42,14 @@
      Violett, Koralle, Indigo. Koralle als Text nur im dunklen Ton (#b4502f, 5:1 auf Weiß), Violett als Text nur ab 9 pt fett */
   const SCHWARZ = '#07090a', ANTH = '#202022', SILBER = '#a8a4a9', VIOLETT = '#897efc', KORALLE = '#f88962', INDIGO = '#3c3a66';
   const INK = SCHWARZ, INK2 = ANTH, GREY = '#6b676c', LINE = '#dcdadc', LINE_F = '#ecebec', BUEHNE = SCHWARZ, HELL = '#ffffff', HELL2 = SILBER, GRUEN = VIOLETT, GRUEN_T = INDIGO,
-    WARN = '#b4502f', WARN_P = KORALLE, MO_T = '#b4502f', EL_T = INDIGO, MO = KORALLE, EL = VIOLETT, GLASS = '#e9e7fe', CHIP = '#ecebf3', VIOLETT_H = '#f1efff';
+    WARN = '#b4502f', WARN_P = KORALLE, MO_T = ANTH, EL_T = INDIGO, MO = ANTH, EL = VIOLETT, GLASS = '#eceef1', CHIP = '#ecebf3', VIOLETT_H = '#f1efff';
   /* Farben der Zeichnung (modell.js, ZF) auf die Palette der DNA abbilden; Farben der Fenster selbst (RAL) bleiben */
   const PLANF = { '#161616': SCHWARZ, '#5f5f64': GREY, '#f3f2ee': '#f4f3f4', '#e4e1d9': '#e7e6e7', '#d6e6f4': GLASS, '#d3cec4': '#d9d7d9', '#c9c9c6': '#cecccf', '#8a8984': SILBER,
-    '#ff8a5b': KORALLE, '#b3401e': MO_T, '#7aa2ff': VIOLETT, '#3d63c9': INDIGO, '#4a4a4f': ANTH };
+    '#ff8a5b': ANTH, '#b3401e': MO_T, '#7aa2ff': VIOLETT, '#3d63c9': INDIGO, '#4a4a4f': ANTH };
   const pf = (c) => (c && PLANF[String(c).toLowerCase()]) || c;
   const rgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16, (n >> 8) & 255, n & 255]; };
   /* Zeichen, die Outfit im eingebetteten Ausschnitt nicht hat, werden ersetzt */
-  const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[    ]/g, ' ').replace(/[‐‑‒]/g, '-').replace(/­/g, '').replace(/≥/g, 'ab ').replace(/≤/g, 'bis ').replace(/≈/g, 'ca. ').replace(/[←-↓]/g, '-').replace(/✓/g, ''));
+  const t = (s) => (Array.isArray(s) ? s.map(t) : String(s == null ? '' : s).replace(/[    ]/g, ' ').replace(/[‐‑‒]/g, '-').replace(/­/g, '').replace(/≥/g, 'ab ').replace(/≤/g, 'bis ').replace(/≈/g, 'ca. ').replace(/\(([^()]+) \(([^()]+)\)\)/g, '($1, $2)').replace(/[←-↓]/g, '-').replace(/✓/g, ''));
   const istTuer = (w) => w.art === 'hst' || w.art === 'fsw' || w.art === 'balkon' || w.art === 'psk';
   const ARTNAME = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Festverglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Faltschiebewand' };
   const A = () => G.AW || null;
@@ -121,7 +121,7 @@
     const txt = (s, x, y0, o) => doc.text(t(s), x, y0, o);
     const bild = function () { if (!probe) doc.addImage.apply(doc, arguments); };
     /* Marke: immer klein, auch in Versalzeilen; Wortmarke „eezi“ in ExtraBold, „frames“ in Medium */
-    const VERSAL = (s) => String(s).split(/(eeziframes|eezi)/).map((x, i) => (i % 2 ? x : x.toUpperCase())).join('');
+    const VERSAL = (s) => String(s).split(/(eeziframes|eezi)/).map((x, i) => (i % 2 ? x : x.replace(/ß/g, 'ẞ').toUpperCase())).join(''); // „MAẞE“, nicht „MASSE“
     const wortmarke = (x, y0, size, col) => { font('markeA', size, col); txt('eezi', x, y0); const w1 = tw('eezi'); font('markeB', size, col); txt('frames', x + w1, y0); return w1 + tw('frames'); };
     const alpha = (a) => { try { doc.setGState(new doc.GState({ opacity: a })); } catch (err) { /* ohne Transparenz */ } };
     const rr = (x, y0, w, h2, r, mode) => doc.roundedRect(x, y0, w, h2, r, r, mode || 'F');
@@ -130,7 +130,7 @@
     const nE = wins.reduce((a, x) => a + (num(x.anzahl) || 1), 0), nF = wins.reduce((a, x) => a + (num(x.fotos) || 0), 0);
     /* „ausgewertet“ nur, wo die Auswertung auch im Blatt steht (Befund oder Fachangaben); sonst ehrlich nur die Zahl der Fotos */
     const nA = wins.reduce((a, x) => a + (x.ki && ((x.ki.rows || []).length || (x.ki.fach && Object.keys(x.ki.fach).length)) ? num(x.fotos) || 0 : 0), 0);
-    const fotoText = !nF ? 'ohne Fotos' : nA === nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' ausgewertet' : nA ? nA + ' von ' + nF + ' Fotos ausgewertet' : nF + (nF === 1 ? ' Foto' : ' Fotos');
+    const fotoText = ANF ? (nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' übermittelt' : 'ohne Fotos') : !nF ? 'ohne Fotos' : nA === nF ? nF + (nF === 1 ? ' Foto' : ' Fotos') + ' ausgewertet' : nA ? nA + ' von ' + nF + ' Fotos ausgewertet' : nF + (nF === 1 ? ' Foto' : ' Fotos');
     const komplett = wins.length > 0 && wins.every((x) => !AW.massLuecken(x).length);
     const heute = (() => { try { return new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' }); } catch (err) { return ''; } })();
     const titelName = BKOPF ? (kd.name || pr.name || 'Kunde') : (pr.name || '');
@@ -141,7 +141,20 @@
     /* Autor und Ersteller: bei kennzeichnung 'keine' nur der Betrieb, nie eeziframes */
     const ohneEezi = BKOPF && KZ === 'keine';
     try { doc.setDocumentProperties({ title: laufTitel, subject: 'Fenster-Aufmaß ' + kennung + (titelName ? ' · ' + titelName : ''), author: BKOPF ? (bt.name || (ohneEezi ? '' : 'eeziframes')) : 'eeziframes', keywords: 'Aufmaß, Fenster, Maße in mm, ' + kennung, creator: ohneEezi ? (bt.name || '') : 'eeziframes' }); doc.setLanguage('de-DE'); if (doc.viewerPreferences) doc.viewerPreferences({ DisplayDocTitle: true }); } catch (err) { /* ohne Eigenschaften weiter */ }
-    const kl = Array.isArray(e.klaerung) ? e.klaerung : AW.klaerung(wins, pr), stand = e.klaerStand || {}, geklaert = (r) => !!(stand[r.id] && stand[r.id].ok);
+    const bnK = bt.name || (sie ? 'Ihr Fensterbauer' : 'dein Fensterbauer');
+    const stand = e.klaerStand || {}, geklaert = (r) => (r.ids || [r.id]).every((id) => !!(stand[id] && stand[id].ok));
+    /* Gleiche Punkte an mehreren Positionen (z. B. „Strom am Fenster klären“) stehen in einer Zeile mit allen Codes; doppelte fallen weg */
+    const kl = (() => {
+      const roh = Array.isArray(e.klaerung) ? e.klaerung : AW.klaerung(wins, pr), out = [];
+      const liste = (r) => (typeof r.pos === 'number' ? [r.pos] : Array.isArray(r.pos) ? r.pos.slice() : null);
+      roh.forEach((r) => {
+        const pl = liste(r), da = pl && out.find((x) => x._pl && x.gruppe === r.gruppe && x.v === r.v);
+        if (da) { pl.forEach((q) => { if (da._pl.indexOf(q) < 0) da._pl.push(q); }); if (da.ids.indexOf(r.id) < 0) da.ids.push(r.id); }
+        else out.push(Object.assign({}, r, { ids: [r.id], _pl: pl }));
+      });
+      out.forEach((r) => { if (r._pl && r._pl.length > 1) r.pos = r._pl.slice().sort((a, b) => a - b); });
+      return out;
+    })();
 
     /* ---------- Systematik: Geschoss, Code, Reihenfolge ----------
        Positionen nach Geschoss (Keller, Erdgeschoss, Obergeschosse, Dachgeschoss), im Geschoss in der Reihenfolge der Erfassung; Code aus
@@ -179,6 +192,14 @@
     }
     const AUS = {}; wins.forEach((w, i) => { AUS[i] = ausstattungVon(w); });
     const nSonne = wins.filter((w, i) => AUS[i].some((a) => a.k === 'aussen' && a.z !== 'offen')).length, nKomplett = wins.filter((w) => !AW.massLuecken(w).length).length;
+    const ZEICHEN_A = [['rollladen', 'RL', 'Rollladen'], ['raffstore', 'RS', 'Raffstore'], ['screen', 'SC', 'Screen'], ['klappladen', 'KL', 'Klappläden'], ['insekt', 'IS', 'Insektenschutz'], ['innen', 'IN', 'innen']];
+    const KUERZEL = {}; ZEICHEN_A.forEach((z) => { KUERZEL[z[0]] = z[1]; });
+    /* Maß „B × H“ am Zeichen „ד ausgerichtet, damit die Spalte ruhig steht; gibt das rechte Ende zurück */
+    const massZelle = (a, b, x, yy) => {
+      const xm = x + 9.6;
+      if (!a || !b) { txt('–', xm, yy, { align: 'center' }); return xm + 1; }
+      txt(th(a), xm - 1.4, yy, { align: 'right' }); txt('×', xm, yy, { align: 'center' }); txt(th(b), xm + 1.4, yy); return xm + 1.4 + tw(th(b));
+    };
 
     /* ---------- Seitenrahmen ---------- */
     let y = 0;
@@ -272,7 +293,7 @@
     /* Beispiel aus der Führung: schräg „Beispiel“ über jeder Seite, damit es nicht als echtes Aufmaß durchgeht */
     const wasserzeichen = (wort) => {
       const a = 34 * Math.PI / 180, s = wort || 'BEISPIEL';
-      font('extra', wort ? 78 : 96, wort ? SILBER : WARN); alpha(wort ? 0.13 : 0.07);
+      font('extra', wort ? 78 : 96, wort ? SILBER : WARN); alpha(wort ? 0.08 : 0.07);
       const l = tw(s), cxw = W / 2, cyw = H / 2 + 12;
       txt(s, cxw - Math.cos(a) * l / 2, cyw + Math.sin(a) * l / 2, { angle: 34 });
       alpha(1);
@@ -329,7 +350,12 @@
     const kicker = (s, x, y0, color, o) => { o = o || {}; let x2 = x; if (o.punkt) { fill(VIOLETT); doc.circle(x + 0.9, y0 - 0.95, 0.9, 'F'); x2 = x + 3.2; } font('bold', o.size || 7.2, color || GRUEN_T); txt(VERSAL(s), x2, y0, Object.assign({ charSpace: 0.55 }, o.align ? { align: o.align } : {})); };
     /* Haken: violetter Kreis mit weißem Haken (erreicht, inklusive) */
     const haken = (cx, cy, r) => { fill(VIOLETT); doc.circle(cx, cy, r, 'F'); stroke('#ffffff'); doc.setLineWidth(Math.max(0.25, r * 0.28)); doc.lines([[r * 0.38, r * 0.4], [r * 0.72, -r * 0.82]], cx - r * 0.5, cy + r * 0.02, [1, 1], 'S', false); };
-    const punkt = (cx, cy, r, c) => { fill(c || WARN_P); doc.circle(cx, cy, r, 'F'); };
+    const punkt = (cx, cy, r, c) => {
+      const f = doc.getFont(), fs = doc.getFontSize(), tc = doc.getTextColor(), R = r * 1.3, col = c || WARN;
+      fill('#ffffff'); stroke(col); doc.setLineWidth(Math.max(0.18, R * 0.2)); doc.circle(cx, cy, R, 'FD');
+      font('extra', R * 4.4, col); txt('!', cx, cy + R * 0.56, { align: 'center' });
+      doc.setFont(f.fontName, f.fontStyle); doc.setFontSize(fs); doc.setTextColor(tc);
+    };
     /* Chip: Pille im Ton von Indigo ohne Rand (Zustand), Hinweise im Ton der Koralle; art 'ok' mit Haken, 'warn' mit Punkt, sonst ein
        Zeichen der Ausstattung (zeichen()) */
     const chip = (s, x, y0, art, size) => {
@@ -344,7 +370,7 @@
       s = s || 4.2; const r = s * 0.2, lw = Math.max(0.2, s * 0.06);
       stroke(INK2); doc.setLineWidth(lw);
       if (art === 'innen') { const n = 4, dx = s / n, pts = []; for (let k = 0; k <= n; k++) pts.push([x + k * dx, y0 + (k % 2 ? s * 0.78 : s * 0.22)]); doc.lines(pts.slice(1).map((q, k) => [q[0] - pts[k][0], q[1] - pts[k][1]]), pts[0][0], pts[0][1], [1, 1], 'S', false); return; }
-      if (art === 'offen') { fill(KORALLE); doc.circle(x + s / 2, y0 + s / 2, s * 0.22, 'F'); return; }
+      if (art === 'offen') { punkt(x + s / 2, y0 + s / 2, s * 0.3); return; }
       fill('#ffffff'); rr(x, y0, s, s, r, 'FD');
       if (art === 'rollladen') { for (let k = 1; k <= 3; k++) doc.line(x + s * 0.16, y0 + k * s / 4, x + s * 0.84, y0 + k * s / 4); }
       else if (art === 'raffstore') { for (let k = 1; k <= 3; k++) doc.line(x + s * 0.18, y0 + k * s / 4 + s * 0.09, x + s * 0.82, y0 + k * s / 4 - s * 0.09); }
@@ -378,7 +404,7 @@
       const lw = o.lw || 26, fs = o.fs || 8; let yy = y0;
       rows.forEach((r) => {
         const x2 = r[2] || {};
-        font('normal', fs - 0.6, GREY); const kl2 = wrapK(r[0], lw - 2); txt(kl2, x, yy + 3);
+        font('normal', o.lfs || fs - 0.6, o.lc || GREY); const kl2 = wrapK(r[0], lw - 2); txt(kl2, x, yy + 3);
         let vx = x + lw;
         if (x2.swatch) { swatch(x2.swatch, vx + 1.7, yy + 2, 1.6); vx += 4.5; } else if (x2.offen) { punkt(vx + 1.2, yy + 2, 0.95); vx += 4.5; }
         font(x2.bold || x2.offen ? 'bold' : 'normal', fs, x2.col || (x2.offen ? WARN : INK)); const v = wrap(r[1], w - (vx - x)); txt(v, vx, yy + 3);
@@ -394,7 +420,7 @@
       font('normal', 8, INK); txt(wrap('„' + n[1] + '“', w - 5), x + 3, y0 + 5.8); return hh;
     }
     /* Überschrift eines Abschnitts: Kicker, Überschrift mit Punkt, Linie */
-    function sektion(k, titel, rechts) { platz(18); kicker(k, M, y, GREY, { punkt: true }); y += 7; font('extra', 16, INK); txt(titel, M, y); if (rechts) { font('normal', 8.4, GREY); txt(rechts, XR, y, { align: 'right' }); } stroke(INK); doc.setLineWidth(0.4); doc.line(M, y + 2.6, XR, y + 2.6); y += 8; }
+    function sektion(k, titel, rechts) { platz(18); kicker(k, M, y, GREY); y += 7; font('extra', 16, INK); txt(titel, M, y); if (rechts) { font('normal', 8.4, GREY); txt(rechts, XR, y, { align: 'right' }); } stroke(INK); doc.setLineWidth(0.4); doc.line(M, y + 2.6, XR, y + 2.6); y += 8; }
 
     /* ---------- Zeichnung aus modell.js (AW.plan): dieselben Teile wie im Betriebsbereich, hier mit jsPDF ---------- */
     function planZeichnen(pl, x0, y0) {
@@ -438,27 +464,42 @@
       font('extra', 24, INK); txt(wrap(V === 'kunde' ? (pr.name ? pr.name + '.' : 'Dein Aufmaß.') : (pr.name || 'Aufmaß für Ihr Angebot') + '.', CW)[0], M, y); y += 7;
       font('normal', 10, INK2); txt(wrap([pr.ort, gebText].filter(Boolean).join(' · ') || 'Selbst gemessen, Schritt für Schritt geführt', CW)[0], M, y); y += 6;
     }
-    /* Kennzahlen (ab zwei Positionen): die Zahl als Held (dünn, Einheit klein), rechts die Vollständigkeit der Maße als Kapselreihe */
-    if (wins.length > 1) {
-      const zahlenK = [[nE, nE === 1 ? 'Element' : 'Elemente'], [wins.length, wins.length === 1 ? 'Position' : 'Positionen'], [BEREICHE.length, BEREICHE.length === 1 ? 'Geschoss' : 'Geschosse'], [nSonne, 'mit Sonnenschutz']];
-      const zw = 27; let zx = M;
-      zahlenK.forEach((z) => { font('duenn', 26, INK); txt(String(z[0]), zx, y + 8.6); font('normal', 7.6, GREY); txt(z[1], zx, y + 13.2); zx += zw; });
-      const kx = M + 4 * zw + 4, kb = XR - kx;
-      kicker(ANF ? 'Maße erfasst' : 'Maße vollständig', kx, y + 2.6, GREY, { punkt: true }); font('extra', 9, INK); txt(nKomplett + ' von ' + wins.length, XR, y + 2.6, { align: 'right' });
-      kapseln(nKomplett, wins.length, kx, y + 5.2, kb, 4.4);
-      font('normal', 7.4, GREY); txt(wrap([fotoText, ANF ? '' : 'alle Maße in mm'].filter(Boolean).join(' · '), kb)[0], kx, y + 13.2);
-      y += 20;
-    }
-    /* Durchschrift: oben der Hinweis, was fehlt und wo es das vollständige Blatt gibt */
+    /* Durchschrift: der Hinweis steht oben, vor allem anderen (was sie zeigt, wo die Maße liegen, wie man das vollständige Blatt
+       bekommt); die Kontaktzeile bricht nur zwischen den Angaben um, nie in einer Telefonnummer */
     if (ANF) {
-      const bn = bt.name || (sie ? 'Ihrem Fensterbauer' : 'deinem Fensterbauer'), kontakt = [bt.tel, bt.mail, bt.host].filter(Boolean).join(' · ');
-      const s1 = sie ? 'Diese Durchschrift zeigt, was Sie geplant haben: Ihre Positionen, die Ausstattung und Ihre Wünsche. Maße, Zeichnungen und die Auswertung Ihrer Fotos stehen im vollständigen Aufmaßblatt bei ' + bn + '.'
-        : 'Diese Durchschrift zeigt, was du geplant hast: deine Positionen, die Ausstattung und deine Wünsche. Maße, Zeichnungen und die Auswertung deiner Fotos stehen im vollständigen Aufmaßblatt bei ' + bn + '.';
-      const s2 = (sie ? 'Eine Durchschrift des vollständigen Aufmaßblatts als PDF schickt ' + bn + ' Ihnen gern auf Anfrage' : 'Eine Durchschrift des vollständigen Aufmaßblatts als PDF schickt ' + bn + ' dir gern auf Anfrage') + (kontakt ? ': ' + kontakt : '.');
-      font('normal', 8.4); const l1 = wrap(s1, CW - 10); font('bold', 8.4); const l2 = wrap(s2, CW - 10), hh = 10 + (l1.length + l2.length) * 3.7 + 3;
-      karteRand(M, y, CW, hh, { fuell: '#fff7f3', rand: '#f6d6c9' }); punkt(M + 5.6, y + 5.1, 0.9); kicker(sie ? 'Ihre Durchschrift' : 'Deine Durchschrift', M + 8, y + 6, WARN);
-      font('normal', 8.4, INK2); txt(l1, M + 5, y + 11.2, { lineHeightFactor: 1.3 }); font('bold', 8.4, INK); txt(l2, M + 5, y + 11.2 + l1.length * 3.7 + 0.6, { lineHeightFactor: 1.3 });
+      const nr = bt.nr || '';
+      const s1 = sie ? 'Diese Durchschrift zeigt Ihre Fenster, die Ausstattung und Ihre Wünsche, ohne Maße. Maße, Zeichnungen und die Auswertung Ihrer Fotos liegen bei ' + bnK + '; vor der Fertigung misst ' + bnK + ' ohnehin bei Ihnen vor Ort nach.'
+        : 'Diese Durchschrift zeigt deine Fenster, die Ausstattung und deine Wünsche, ohne Maße. Maße, Zeichnungen und die Auswertung deiner Fotos liegen bei ' + bnK + '; vor der Fertigung misst ' + bnK + ' ohnehin bei dir vor Ort nach.';
+      const s2 = sie ? 'Das vollständige Aufmaßblatt mit Maßen schickt ' + bnK + ' Ihnen auf Anfrage als PDF' + (nr ? '; bitte nennen Sie dabei die Nummer ' + nr : '') + '.'
+        : 'Das vollständige Aufmaßblatt mit Maßen schickt ' + bnK + ' dir auf Anfrage als PDF' + (nr ? '; nenn dabei die Nummer ' + nr : '') + '.';
+      const angaben = [bt.ap ? 'Ansprechperson: ' + bt.ap : '', bt.tel ? 'Telefon ' + bt.tel : '', bt.mail || '', bt.host || ''].filter(Boolean);
+      font('bold', 8.4); const kz = []; angaben.forEach((a) => { const z = kz.length ? kz[kz.length - 1] + '  ·  ' + a : a; if (kz.length && tw(z) <= CW - 10) kz[kz.length - 1] = z; else kz.push(a); });
+      font('normal', 8.4); const l1 = wrap(s1, CW - 10); font('bold', 8.4); const l2 = wrap(s2, CW - 10), hh = 10 + (l1.length + l2.length) * 3.7 + (kz.length ? 1.6 + kz.length * 3.9 : 0) + 3;
+      karteRand(M, y, CW, hh, { fuell: '#fff7f3', rand: '#f6d6c9' }); kicker(sie ? 'Ihre Durchschrift · ohne Maße' : 'Deine Durchschrift · ohne Maße', M + 5, y + 6, WARN);
+      let by = y + 11.2;
+      font('normal', 8.4, INK2); txt(l1, M + 5, by, { lineHeightFactor: 1.3 }); by += l1.length * 3.7 + 0.6;
+      font('bold', 8.4, INK); txt(l2, M + 5, by, { lineHeightFactor: 1.3 }); by += l2.length * 3.7 + 1.6;
+      font('normal', 8.4, INK); kz.forEach((z) => { txt(z, M + 5, by); by += 3.9; });
       y += hh + 7;
+    }
+    /* Kennzahlen (ab zwei Positionen): Fenster und Türen, Geschosse, Sonnenschutz, offene Punkte (Koralle mit Prüfzeichen, führt zur
+       Klärungsliste); rechts die Vollständigkeit der Maße als Kapselreihe */
+    const klOffen = kl.filter((r) => !geklaert(r)), nPflicht = klOffen.filter((r) => r.gruppe === 'pflicht').length;
+    if (wins.length > 1) {
+      const zahlenK = [[nE, nE === wins.length ? 'Fenster und Türen' : 'Elemente in ' + wins.length + ' Positionen'], [BEREICHE.length, BEREICHE.length === 1 ? 'Geschoss' : 'Geschosse'], [nSonne, 'mit Sonnenschutz außen'], [klOffen.length, 'zu klären' + (nPflicht ? ', davon ' + nPflicht + ' Pflicht' : ''), true]];
+      const zw = 27; let zx = M;
+      zahlenK.forEach((z) => {
+        const warn = z[2] && z[0] > 0;
+        font('normal', 26, warn ? WARN : INK); txt(String(z[0]), zx, y + 8.6); if (warn) punkt(zx + tw(String(z[0])) + 2.6, y + 2.2, 1.05);
+        font('normal', 7.4, GREY); txt(wrap(z[1], zw - 3).slice(0, 2), zx, y + 13.2, { lineHeightFactor: 1.15 });
+        if (z[2]) verweis(zx, y - 1, zw - 2, 19, seiteVon('abschnitt', 'klaerung'));
+        zx += zw;
+      });
+      const kx = M + 4 * zw + 4, kb = XR - kx;
+      kicker(ANF ? 'Maße erfasst' : 'Maße vom Kunden', kx, y + 2.6, GREY); font('extra', 8.4, INK); txt(nKomplett + ' von ' + wins.length + (ANF ? '' : ' vollständig'), XR, y + 2.6, { align: 'right' });
+      kapseln(nKomplett, wins.length, kx, y + 5.2, kb, 4.4);
+      font('normal', 7.4, GREY); txt(wrap((ANF ? 'Maße bei ' + bnK + ' · ' : '8 Maße je Fenster · Feinaufmaß folgt · ') + fotoText, kb).slice(0, 2), kx, y + 13.2, { lineHeightFactor: 1.15 });
+      y += 22;
     }
     const fw = AW.foerdWeg(pr), tot = num(pr.total);
     /* Wie genau geplant wurde (Detailtiefe): beim Kunden „Deine Planung“, sonst „Geplant“ mit „nach Ihrem Standard“ */
@@ -517,21 +558,24 @@
       platz(42);
       SEITEN.abschnitt.uebersicht = seiteNr();
       sektion(wins.length + (wins.length === 1 ? ' Position' : ' Positionen') + ' · ' + nE + (nE === 1 ? ' Element' : ' Elemente') + ' · nach Geschoss' + (BEST ? ' · mit Bestellmaß' : ''), 'Übersicht.', ANF ? 'Maße beim Fensterbauer' : 'Maße in mm · Breite × Höhe');
-      /* Legende: Code und Zeichen, mit Wort (nie nur das Zeichen) */
-      font('normal', 7.2, GREY); const leg = 'Code aus Geschoss und Nummer, z. B. ' + (CODE[ORDER[0]] || 'EG-01') + '.';
-      txt(leg, M, y); let lx = M + tw(leg) + 3;
-      [['rollladen', 'Rollladen'], ['raffstore', 'Raffstore'], ['screen', 'Screen'], ['klappladen', 'Klappläden'], ['insekt', 'Insektenschutz'], ['innen', 'innen']].forEach((z) => { zeichen(z[0], lx, y - 2.8, 3.3); font('normal', 7.2, GREY); txt(z[1], lx + 4.3, y); lx += 4.3 + tw(z[1]) + 3; });
-      y += 5;
-      const MASS = !ANF, cB = 18, cM = 11, cS = 8, cA = ANF ? 68 : 19, mB = MASS ? 23 : 0, bB = BEST ? 26 : 0;
+      /* Legende der Zeichen mit Kürzel und Wort (nie nur das Zeichen), auf jeder Seite der Übersicht */
+      const legende = () => {
+        font('normal', 7, GREY); txt('Zeichen:', M, y); let lx = M + tw('Zeichen:') + 2.5;
+        ZEICHEN_A.forEach((z) => { zeichen(z[0], lx, y - 2.8, 3.3); font('bold', 6.4, INK2); txt(z[1], lx + 4.1, y); const kx = lx + 4.1 + tw(z[1]) + 1; font('normal', 7, GREY); txt(z[2], kx, y); lx = kx + tw(z[2]) + 3.2; });
+        punkt(lx + 1.3, y - 1.1, 0.95); font('normal', 7, GREY); txt('vor Ort prüfen', lx + 3.6, y);
+        y += 5;
+      };
+      legende();
+      const MASS = !ANF, cB = 18, cM = 11, cS = 10, cA = ANF ? 68 : 19, mB = MASS ? 23 : 0, bB = BEST ? 26 : 0;
       const cP = CW - cB - cM - cS - cA - 2 * mB - bB;
-      const cols = [['Code', cB], ['', cM], ['Position', cP]].concat(MASS ? [['Öffnung', mB], ['Element', mB]] : [], BEST ? [['Bestellmaß', bB]] : [], [['Ausstattung', cA], ['S.', cS]]);
+      const cols = [['Code', cB], ['', cM], ['Position', cP]].concat(MASS ? [['Öffnung', mB], ['Element', mB]] : [], BEST ? [['Bestellmaß', bB]] : [], [['Ausstattung', cA], ['Seite', cS]]);
       const cX = []; let ax = M; cols.forEach((c) => { cX.push(ax); ax += c[1]; });
-      const kopf = () => { font('bold', 6.4, GREY); cols.forEach((c, k) => { if (c[0]) txt(VERSAL(c[0]), cX[k] + (k === cols.length - 1 ? c[1] : 0), y, { align: k === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 }); }); y += 1.8; stroke(INK); doc.setLineWidth(0.35); doc.line(M, y, XR, y); y += 0.4; };
+      const kopf = () => { font('bold', 6.4, GREY); cols.forEach((c, k) => { if (c[0]) txt(VERSAL(c[0]), cX[k] + (k === cols.length - 1 ? c[1] - 1.2 : 0), y, { align: k === cols.length - 1 ? 'right' : 'left', charSpace: 0.3 }); }); y += 1.8; stroke(INK); doc.setLineWidth(0.35); doc.line(M, y, XR, y); y += 0.4; };
       kopf();
       BEREICHE.forEach((b) => {
         const nEb = b.idx.reduce((a, i) => a + (num(wins[i].anzahl) || 1), 0);
         const band = (fort) => { fill(LINE_F); doc.rect(M, y, CW, 6.4, 'F'); font('extra', 8.6, INK); txt(b.name + (fort ? ', Fortsetzung' : ''), M + 2, y + 4.4); font('normal', 7.2, GREY); txt(b.idx.length + (b.idx.length === 1 ? ' Position' : ' Positionen') + ' · ' + nEb + (nEb === 1 ? ' Element' : ' Elemente'), XR - 2, y + 4.4, { align: 'right' }); y += 6.4; };
-        if (y + 6.4 + 12.5 > unten()) { neueSeite(); kopf(); }
+        if (y + 6.4 + 12.5 > unten()) { neueSeite(); legende(); kopf(); }
         band(false);
         b.idx.forEach((i) => {
           const w = wins[i], d = AW.derive(w), bm = BEST ? AW.bestellmass(w, ab) : null, aus = AUS[i], n = num(w.anzahl) || 1;
@@ -539,26 +583,26 @@
           const zeile2 = [ARTNAME[w.art] || 'Fenster', fl, n > 1 ? n + ' Stück' : ''].filter(Boolean).join(' · ');
           let ausZ = []; if (ANF) { font('normal', 7.2); ausZ = wrap(aus.length ? aus.map((a) => a.t).join(' · ') : 'ohne Sonnen- und Insektenschutz', cA - 2).slice(0, 3); }
           const rh = Math.max(12.5, ausZ.length * 3.1 + 5);
-          if (y + rh > unten()) { neueSeite(); kopf(); band(true); }
+          if (y + rh > unten()) { neueSeite(); legende(); kopf(); band(true); }
           const ty = y + rh / 2 + 1.2, ziel = seiteVon('pos', i);
           codeTag(CODE[i], cX[0], y + rh / 2 - 2.8);
           mini(w, cX[1], y + (rh - 9) / 2, 9);
           font('extra', 8.8, INK); txt(wrap(posName(i), cP - 3)[0], cX[2], ty - 1.6);
           font('normal', 7.2, INK2); txt(wrap(zeile2, cP - 3)[0], cX[2], ty + 2.4);
           let k = 3;
-          if (MASS) { font('normal', 8.2, INK2); txt(d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) : '–', cX[k], ty); txt(d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) : '–', cX[k + 1], ty); k += 2; }
-          if (BEST) { font('extra', 8.6, INK); const bt2 = bm ? th(bm.b) + ' × ' + th(bm.h) : '–'; txt(bt2, cX[k], ty); if (bm && bm.warn.length) punkt(cX[k] + tw(bt2) + 1.8, ty - 1.1, 0.9); k += 1; }
+          if (MASS) { font('normal', 8.2, INK2); massZelle(d.moW, d.moH, cX[k], ty); massZelle(d.elW, d.elH, cX[k + 1], ty); k += 2; }
+          if (BEST) { font('extra', 8.6, INK); const rx2 = massZelle(bm && bm.b, bm && bm.h, cX[k], ty); if (bm && bm.warn.length) punkt(rx2 + 2.4, ty - 1.1, 0.9); k += 1; }
           if (ANF) { font('normal', 7.2, INK2); txt(ausZ, cX[k], y + rh / 2 - (ausZ.length - 1) * 1.55 + 1.1, { lineHeightFactor: 1.2 }); }
-          else { let zx = cX[k]; aus.slice(0, 3).forEach((a) => { zeichen(a.z, zx, ty - 3, 3.9); zx += 5; }); if (aus.length > 3) { font('bold', 7, GREY); txt('+' + (aus.length - 3), zx, ty); } }
+          else { let zx = cX[k]; aus.slice(0, 3).forEach((a) => { zeichen(a.z, zx, ty - 3.6, 3.9); const ku = KUERZEL[a.z]; if (ku) { font('bold', 5.4, INK2); txt(ku, zx + 1.95, ty + 3.1, { align: 'center' }); } zx += 5; }); if (aus.length > 3) { font('bold', 7, GREY); txt('+' + (aus.length - 3), zx, ty); } }
           font('extra', 8.2, ziel ? INDIGO : GREY); txt(String(ziel || '–'), XR, ty, { align: 'right' });
           verweis(M, y, CW, rh, ziel);
           y += rh; stroke(LINE); doc.setLineWidth(0.2); doc.line(M, y, XR, y);
         });
       });
       font('normal', 7.2, GREY);
-      const lg = ANF ? wrap('Maße, Zeichnungen und die Auswertung ' + (sie ? 'Ihrer' : 'deiner') + ' Fotos stehen im vollständigen Aufmaßblatt bei ' + (bt.name || 'dem Fensterbauer') + '. S.: Seite in dieser Durchschrift.', CW)
-        : !BEST ? wrap('Maueröffnung: das kleinste von drei Maßen. Element: das sichtbare Fenster mit Rahmen. S.: Seite der Position, jede Zeile führt dorthin. Vor der Fertigung misst ' + (bt.name || 'der Fensterbauer') + ' vor Ort nach.', CW)
-        : wrap('Bestellmaß: Ihr Abzug von der Maueröffnung (' + ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten bei Fenstern' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten bei Türen' : '') + '). Punkt: vor Ort prüfen, Hinweis bei der Position. S.: Seite der Position, jede Zeile führt dorthin. Verbindlich bleibt Ihr Feinaufmaß.', CW);
+      const lg = ANF ? wrap('Code aus Geschoss und Nummer, z. B. ' + (CODE[ORDER[0]] || 'EG-01') + '. ' + 'Maße, Zeichnungen und die Auswertung ' + (sie ? 'Ihrer' : 'deiner') + ' Fotos stehen im vollständigen Aufmaßblatt bei ' + (bt.name || 'dem Fensterbauer') + '. Seite: Seite in dieser Durchschrift.', CW)
+        : !BEST ? wrap('Code aus Geschoss und Nummer, z. B. ' + (CODE[ORDER[0]] || 'EG-01') + '. Maueröffnung: das kleinste von drei Maßen. Element: das sichtbare Fenster mit Rahmen. Seite: jede Zeile führt zur Position. Vor der Fertigung misst ' + (bt.name || 'der Fensterbauer') + ' vor Ort nach.', CW)
+        : wrap('Bestellmaß: Ihr Abzug von der Maueröffnung (' + ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten bei Fenstern' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten bei Türen' : '') + '). Ring mit Ausrufezeichen: vor Ort prüfen, Hinweis bei der Position. Code aus Geschoss und Nummer; jede Zeile führt zur Seite der Position. Verbindlich bleibt Ihr Feinaufmaß.', CW);
       txt(lg, M, y + 4, { lineHeightFactor: 1.25 }); y += 4 + lg.length * 3.1 + 6;
     }
 
@@ -576,21 +620,31 @@
         (w.glasfn || []).forEach((g) => dazu('Glas', (AW.lab('glasfn', g) || g) + (g === 'sicht' && w.orn ? ' (' + (AW.lab('orn', w.orn) || w.orn) + ')' : ''), i, n));
         if (w.rc && w.rc !== 'basis' && !AW.istOffen(w, 'rc')) dazu('Sicherheit', 'Einbruchschutz ' + (AW.lab('rc', w.rc) || w.rc), i, n);
         if (w.absturz && w.absturz !== 'balkon') dazu('Sicherheit', 'Absturzsicherung: ' + (AW.lab('absturz', w.absturz) || w.absturz), i, n);
-        if (AUS[i].some((a) => a.strom)) dazu('Strom und Antrieb', 'Stromanschluss für den Antrieb des Sonnenschutzes', i, n);
+        if (AUS[i].some((a) => a.strom)) dazu('Strom und Antrieb', w.ki && w.ki.fach && w.ki.fach.strom === true ? 'Strom am Fenster laut Foto vorhanden' : 'Strom für den Antrieb klären, gegebenenfalls Elektriker', i, n);
         if (AUS[i].some((a) => a.solar)) dazu('Strom und Antrieb', 'Solarantrieb, ohne Stromanschluss', i, n);
         if (w.griff === 'motor') dazu('Strom und Antrieb', 'Elektrischer Antrieb am Flügel', i, n);
         const mt = AW.montageText ? AW.montageText(w) : ''; if (mt) dazu('Montage', mt, i, n);
       });
       const FOLGE = ['Fenster und Türen', 'Sonnenschutz außen', 'Sicht- und Blendschutz innen', 'Insektenschutz', 'Glas', 'Sicherheit', 'Strom und Antrieb', 'Montage'];
       gruppen.sort((a, b) => FOLGE.indexOf(a.titel) - FOLGE.indexOf(b.titel));
+      /* Sonnenschutz außen nach Art, mit Summe je Art („Raffstore 3 · Rollladen 5“) */
+      const ARTEN = ['Rollladen', 'Raffstore', 'Screen', 'Klappläden'], artVon = (l) => { const k = ARTEN.findIndex((x) => l.indexOf(x) === 0); return k < 0 ? 9 : k; };
+      gruppen.forEach((g) => {
+        if (g.titel !== 'Sonnenschutz außen') return;
+        g.zeilen.sort((a, b) => artVon(a.label) - artVon(b.label));
+        const sum = {}; g.zeilen.forEach((z) => { const a = ARTEN[artVon(z.label)] || 'Weitere'; sum[a] = (sum[a] || 0) + z.stk; });
+        g.summe = Object.keys(sum).map((a) => a + ' ' + sum[a]).join(' · ');
+      });
+      const ghVon = (g) => 6.6 + (g.summe ? 5 : 0) + g.zeilen.reduce((a, z) => { font('normal', 8.2); return a + Math.max(wrap(z.label, Math.round(CW * 0.5) - 2).length * 3.6, 5.4 * Math.ceil(z.pos.length / 5)) + 2.2; }, 0);
       platz(36);
       SEITEN.abschnitt.aufstellung = seiteNr();
       sektion('Nach Gewerk, mit den Positionen', 'Aufstellung.', 'Stück · Positionen');
       const cL = Math.round(CW * 0.5), cN = 12, cPx = M + cL + cN + 5, cPw = XR - cPx;
       gruppen.forEach((g) => {
-        if (y + 6.6 + 12 > unten()) neueSeite(); // Titel nie allein am Seitenende
+        if (y + 6.6 + 12 > unten() || (y + ghVon(g) > unten() && 30 + ghVon(g) < unten())) neueSeite(); // ein Gewerk nicht über den Umbruch, wenn es auf eine Seite passt
         const titelG = (fort) => { font('bold', 6.8, GREY); txt(VERSAL(g.titel + (fort ? ', Fortsetzung' : '')), M, y + 3.2, { charSpace: 0.4 }); stroke(LINE); doc.setLineWidth(0.25); doc.line(M, y + 4.6, XR, y + 4.6); y += 6.6; };
         titelG(false);
+        if (g.summe) { font('bold', 8, INK); txt(g.summe, M, y + 2.4); y += 5; }
         g.zeilen.forEach((z) => {
           font('normal', 8.2); const ll = wrap(z.label, cL - 2);
           font('bold', 7.4); let px = 0, zc = 1; z.pos.forEach((i) => { const cw = tw(CODE[i]) + 4; if (px + cw > cPw && px > 0) { zc++; px = 0; } px += cw + 1.4; });
@@ -611,16 +665,27 @@
     const klTitel = V === 'kunde' ? 'Noch zu klären, dein Fensterbauer berät dich' : ANF ? (sie ? 'Noch zu klären, wir beraten Sie gern' : 'Noch zu klären, wir beraten dich gern') : 'Mit dem Kunden zu klären';
     /* Ein Punkt als Tabellenzeile: Kästchen (geklärt: grüner Haken), links die Position, rechts was zu klären ist und warum */
     const KL_K = 38;
-    const klLabel = (r) => (typeof r.pos === 'number' && CODE[r.pos] ? posLabel(r.pos) : Array.isArray(r.pos) && r.pos.length && r.pos.length < wins.length && r.pos.every((q) => CODE[q]) ? r.pos.map((q) => CODE[q]).join(', ') : r.k);
-    /* Durchschrift: Maße aus dem Text eines Punkts nehmen („(2.010 × 1.410 mm)“, „Brüstung 780 mm“, „bis 12 mm“); die Begründungen
-       (Regeln wie „ab 10 mm“) bleiben */
+    const klLabel = (r) => (typeof r.pos === 'number' && CODE[r.pos] ? posLabel(r.pos) : Array.isArray(r.pos) && r.pos.length && r.pos.every((q) => CODE[q]) ? (r.pos.length === wins.length && wins.length > 1 ? 'Alle Positionen' : r.pos.slice().sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)).map((q) => CODE[q]).join(', ')) : r.k);
+    const klRang = (r) => (typeof r.pos === 'number' ? ORDER.indexOf(r.pos) : Array.isArray(r.pos) && r.pos.length ? Math.min.apply(null, r.pos.map((q) => ORDER.indexOf(q))) : -1);
+    /* Durchschrift: Punkte mit Maßen werden aus den Feldern neu gesagt (Absturzsicherung, Maßprüfungen, großes Element), ohne Zahl;
+       in allen übrigen Texten fallen nur Angaben in mm weg (Normwerte wie „0,90 × 1,20 m“ bleiben). Die Prüfung
+       scripts/blatt-beispiel.mjs sucht danach jedes Maß des Projekts im Text der Durchschrift. */
     const ohneMass = (x) => (!ANF || !x ? x : String(x)
-      .replace(/\s*\(?\d[\d.]*\s*×\s*\d[\d.]*(?:\s*zu\s*\d[\d.]*\s*×\s*\d[\d.]*)?(?:\s*mm)?\)?/g, '')
-      .replace(/,?\s*(?:Brüstung|Wand|bis|über)?\s*\d[\d.]*\s*mm\b/g, '')
-      .replace(/\(\s*,\s*/g, '(').replace(/\(\s*\)/g, '').replace(/\s+([),:.;])/g, '$1').replace(/\s{2,}/g, ' ').trim());
+      .replace(/\s*\([^()]*\d[\d.]*\s*(?:×\s*\d[\d.]*\s*)?mm[^()]*\)/g, '')
+      .replace(/,?\s*(?:Brüstung\s+|bis\s+|über\s+)?\d{1,3}(?:\.\d{3})*(?:\s*×\s*\d{1,3}(?:\.\d{3})*)?\s*mm\b/g, '')
+      .replace(/\s+([),:.;])/g, '$1').replace(/\s{2,}/g, ' ').trim());
+    const MASS_ID = /^(winkel|groesser|kleiner|massfoto|unvoll|bru|laib)-/;
+    const klText = (r) => {
+      if (!ANF) return r.v;
+      const id = String((r.ids || [r.id])[0] || ''), w = typeof r.pos === 'number' ? wins[r.pos] : null, ihr = sie ? 'Ihnen' : 'dir';
+      if (/^absturz-/.test(id) && w) return 'Absturzsicherung nötig' + (AW.etageText(w) ? ' (' + AW.etageText(w) + ')' : '') + ': ' + (w.absturz ? AW.lab('absturz', w.absturz) || 'gewählt' : 'bitte beraten') + '. ' + (istTuer(w) ? 'Vor einer Tür ohne Balkon verlangt die Bauordnung eine Sicherung.' : 'Die Brüstung ist niedriger, als die Bauordnung hier verlangt.') + ' Das ist kein Messfehler; ' + bnK + ' plant die Sicherung mit ' + ihr + '.';
+      if (/^gross-/.test(id)) return 'Großes Element: Transport, Gerüst oder Hebegerät plant ' + bnK + ' ein.';
+      if (MASS_ID.test(id)) return (r.kurz || 'Maße') + ': prüft ' + bnK + ' beim Feinaufmaß bei ' + ihr + ' vor Ort. Das ist üblich und kein Fehler von ' + ihr + '.';
+      return ohneMass(r.v);
+    };
     function klaerPunktH(r, w) {
       const vw = w - KL_K - 8;
-      font('bold', 7.6); const k = wrap(klLabel(r), KL_K - 2).length; font(r.gruppe === 'pflicht' ? 'bold' : 'normal', 8.4); const v = wrap(ohneMass(r.v), vw).length; font('normal', 7.2); const g = r.warum ? wrap(r.warum, vw).length : 0;
+      font('bold', 7.6); const k = wrap(klLabel(r), KL_K - 2).length; font(r.gruppe === 'pflicht' ? 'bold' : 'normal', 8.4); const v = wrap(klText(r), vw).length; font('normal', 7.2); const g = r.warum ? wrap(r.warum, vw).length : 0;
       const nz = stand[r.id] && stand[r.id].notiz ? (font('normal', 7.6), wrap('Ihre Notiz: ' + stand[r.id].notiz, vw).length) : 0;
       return 1.2 + Math.max(k * 3.2, v * 3.65 + g * 3.05 + nz * 3.3 + (geklaert(r) ? 3.2 : 0)) + 2;
     }
@@ -629,7 +694,7 @@
       if (ok) haken(x + 2, y0 + 3.1, 2); else { stroke(INK2); doc.setLineWidth(0.35); fill('#ffffff'); rr(x, y0 + 1.1, 4, 4, 0.8, 'FD'); }
       font('bold', 7.6, INK2); const kz = wrap(klLabel(r), KL_K - 2); txt(kz, x + 7, y0 + 4, { lineHeightFactor: 1.15 }); if (typeof r.pos === 'number') verweis(x + 6, y0, KL_K, kz.length * 3.6 + 1.5, seiteVon('pos', r.pos));
       let yy = y0 + 4;
-      font(r.gruppe === 'pflicht' ? 'bold' : 'normal', 8.4, ok ? GREY : INK); const v = wrap(ohneMass(r.v), vw); txt(v, vx, yy, { lineHeightFactor: 1.25 }); yy += v.length * 3.65;
+      font(r.gruppe === 'pflicht' ? 'bold' : 'normal', 8.4, ok ? GREY : INK); const v = wrap(klText(r), vw); txt(v, vx, yy, { lineHeightFactor: 1.25 }); yy += v.length * 3.65;
       if (r.warum) { font('normal', 7.2, GREY); const g = wrap(r.warum, vw); txt(g, vx, yy - 0.4, { lineHeightFactor: 1.2 }); yy += g.length * 3.05; }
       if (ok) { font('bold', 7.2, GRUEN_T); txt('geklärt' + (stand[r.id].wann ? ', ' + stand[r.id].wann : ''), vx, yy - 0.2); yy += 3.2; }
       if (stand[r.id] && stand[r.id].notiz) { font('normal', 7.6, INK2); txt(wrap('Ihre Notiz: ' + stand[r.id].notiz, vw), vx, yy - 0.2); }
@@ -638,7 +703,9 @@
       if (!kl.length) {
         platz(22); SEITEN.abschnitt.klaerung = seiteNr(); kicker(klTitel, M, y); y += 4; karteRand(M, y, CW, 12); haken(M + 6, y + 6, 2.2); font('normal', 8.6, INK2); txt('Nichts offen: keine Pflichtthemen, keine offenen Wünsche, keine Hinweise aus den Fotos.', M + 11, y + 7.2); y += 18; return;
       }
-      const iw = CW - 18, gruppen = AW.klaerGruppen(kl), n = kl.filter(geklaert).length;
+      /* je Gruppe in der Reihenfolge der Codes, allgemeine Punkte zuerst; in Durchschrift und Kundenblatt „Mit Ihnen“ statt „Mit dem Kunden“ */
+      const gruppen = AW.klaerGruppen(kl).map((g) => Object.assign({}, g, { titel: (ANF || V === 'kunde') && /^Mit dem Kunden/.test(g.titel) ? (sie ? 'Mit Ihnen' : 'Mit dir') : g.titel, punkte: g.punkte.slice().sort((a, b) => klRang(a) - klRang(b)) }));
+      const iw = CW - 18, n = kl.filter(geklaert).length;
       let titel = klTitel, start = null;
       const kopf = (fort) => { kicker(fort ? titel + ', Fortsetzung' : titel, M, y, WARN); font('normal', 8, GREY); txt(V === 'betrieb' ? n + ' von ' + kl.length + ' geklärt' : kl.length + (kl.length === 1 ? ' Punkt' : ' Punkte'), XR, y, { align: 'right' }); y += 3.5; start = y; y += 3; };
       const schliessen = () => { karteRand(M, start, CW, y - start + 1, { fuell: '#fffaf8', rand: '#f3d9ce' }); };
@@ -662,7 +729,7 @@
     }
     klaerListe();
     if (EIGENE && wins.length > 1) uebersicht();
-    if (wins.length > 1) aufstellung();
+    if (wins.length > 1 && !ANF) aufstellung(); // die Durchschrift bekommt keine Aufstellung (kein Leistungsverzeichnis für Dritte)
 
     /* ---------- Je Position eine Seite: Kopf, Zeichnung mit Maßen, Maße, Wünsche in Gruppen, Einbausituation, Fotos ---------- */
     function masseZeilen(w) {
@@ -691,22 +758,25 @@
       let datenZ = '';
       [ARTNAME[w.art] || 'Fenster', AW.oeffnungKurz(w), n + ' Stück', w.fotos ? w.fotos + (w.fotos === 1 ? ' Foto' : ' Fotos') : 'ohne Fotos'].forEach((teil) => { const z = datenZ ? datenZ + ' · ' + teil : teil; if (tw(z) <= tB) datenZ = z; }); // passt ein Teil nicht (lange Öffnung einer Tür), fehlt nur er
       txt(datenZ, tx0, y + 12);
-      fill(BUEHNE); rr(XR - boxW, y - 2, boxW, 15.5, 2.6);
-      if (BEST) { kicker('Bestellmaß-Vorschlag', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(b ? b.text : '–', XR - boxW + 4, y + 8.4); font('normal', 6.4, HELL2); txt(wrap(b ? b.formel : 'ohne Maueröffnung kein Vorschlag', boxW - 8)[0], XR - boxW + 4, y + 11.8); }
+      fill(BUEHNE); rr(XR - boxW, y - 2, boxW, 17.5, 2.6);
+      if (BEST) { kicker('Bestellmaß-Vorschlag', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(b ? b.text : '–', XR - boxW + 4, y + 8.4); font('normal', 6.2, HELL2); txt(wrap(b ? b.formel : 'ohne Maueröffnung kein Vorschlag', boxW - 8).slice(0, 2), XR - boxW + 4, y + 11.6, { lineHeightFactor: 1.15 }); }
       else { kicker(w.neu ? 'Rohbauöffnung' : 'Maueröffnung', XR - boxW + 4, y + 2.4, GRUEN, { size: 6.6 }); font('extra', 12.5, '#ffffff'); txt(d.moW && d.moH ? th(d.moW) + ' × ' + th(d.moH) + ' mm' : 'nicht gemessen', XR - boxW + 4, y + 8.4); font('normal', 6.6, HELL2); txt('Element ' + (d.elW && d.elH ? th(d.elW) + ' × ' + th(d.elH) + ' mm' : 'nicht gemessen'), XR - boxW + 4, y + 11.8); }
-      y += 18.5;
+      y += 20;
       /* Ausstattung als Chips mit Zeichen (wie in der Übersicht), Offenes im Ton der Koralle */
       if (AUS[i].length) {
         let cx = M;
         AUS[i].forEach((a) => { font('bold', 7.4); const cwA = tw(a.t) + 10; if (cx + cwA > XR && cx > M) { cx = M; y += 7.2; } cx += chip(a.t, cx, y - 1, a.z === 'offen' ? 'warn' : a.z, 7.4) + 2; });
-        y += 9;
+        y += 10.5;
       }
-      /* Was bei dieser Position zu klären ist: in einer Zeile, Einzelheiten in der Liste vorn */
+      /* Was bei dieser Position zu klären ist, ausgeschrieben (draußen hat der Monteur nur diese Seite in der Hand) */
       const hier = kl.filter((r) => r.pos === i || (Array.isArray(r.pos) && r.pos.indexOf(i) >= 0)).filter((r) => !geklaert(r));
       if (hier.length) {
-        const namen = hier.map((r) => r.kurz || 'offene Wünsche').filter((x, k, a) => a.indexOf(x) === k);
-        font('bold', 8, WARN); const z = wrap('Zu klären: ' + namen.join(', ') + ' (Einzelheiten in der Liste vorn)', CW - 5);
-        punkt(M + 1.2, y - 1, 1); txt(z, M + 4, y); y += z.length * 3.6 + 2.5;
+        kicker('Zu klären bei dieser Position · ' + hier.length, M, y, WARN); y += 4.4;
+        hier.slice().sort((a, b) => (a.gruppe === 'pflicht' ? 0 : 1) - (b.gruppe === 'pflicht' ? 0 : 1)).forEach((r) => {
+          font(r.gruppe === 'pflicht' ? 'bold' : 'normal', 8.2, INK); const z = wrap(r.v, CW - 6);
+          punkt(M + 1.6, y + 0.4, 1); txt(z, M + 5, y + 1.6, { lineHeightFactor: 1.2 }); y += z.length * 3.5 + 1.4;
+        });
+        y += 3;
       }
       /* Erst messen, was nach der Zeichnung kommt (Wünsche, Gruppen, Einbausituation, Fotos), damit die Position auf ihre Seite passt:
          die Zeichnung wird so hoch, wie Platz bleibt (72 bis 118 mm); reicht auch das nicht, geht der Rest auf die nächste Seite */
@@ -718,7 +788,7 @@
       const sp = (CW - 6) / 2, oG = { lw: 23, fs: 8 };
       /* Standard des Fensterbauers: Zeilen, die nicht gefragt wurden, grau; je Gruppe eine Zeile mit den Angaben nach Standard */
       const stdT = (t) => (sie ? String(t).replace(AW.STD_TEXT, 'nach Ihrem Standard') : t);
-      const gRows = (g) => g.zeilen.map((z) => [z.k, stdT(z.t), z.offen ? { offen: true } : z.std ? { col: GREY } : z.hex ? { swatch: z.hex } : null]);
+      const gRows = (g) => g.zeilen.map((z) => [kName(z.k), stdT(z.t), z.offen ? { offen: true } : z.std ? { col: GREY } : z.hex ? { swatch: z.hex } : null]);
       const stdText = (g) => (g.standard && g.standard.length ? (sie ? 'Nach Ihrem Standard: ' : 'Nach Standard des Fensterbauers: ') + g.standard.join(', ') : '');
       const stdH = (g, w2) => (stdText(g) ? (font('normal', 7.2), wrap(stdText(g), w2).length * 3.1 + 1.6) : 0);
       const gH = (g) => 6 + zeilenH(gRows(g), sp, oG) + stdH(g, sp) + g.notizen.reduce((s2, x) => s2 + notizH(x, sp) + 1, 0) + 2.4;
@@ -826,13 +896,15 @@
 
     /* ---------- Durchschrift: je Position eine Karte mit Code, Ausstattung und Wünschen, ohne Maße, Zeichnung mit Maßen, Fotos und
        Auswertung; nach Geschoss wie in der Übersicht ---------- */
+    /* „Förderwert“ ist das Ziel für die Förderung, kein Wert des Fensters */
+    const kName = (k) => (k === 'Förderwert' ? 'Förderziel' : k);
     function kopieKarten() {
       platz(60);
       sektion('Je Position · Ausstattung und Wünsche · ohne Maße', sie ? 'Ihre Positionen.' : 'Deine Positionen.', bt.name ? 'Maße bei ' + bt.name : '');
-      const P = 5, iw = CW - 2 * P, sp = (iw - 6) / 2, oG = { lw: 25, fs: 7.8 };
+      const P = 5, iw = CW - 2 * P, sp = (iw - 6) / 2, oG = { lw: 25, fs: 8, lfs: 7.8, lc: INK2 };
       const zText = (z) => ohneMass(sie ? String(z.t).replace(AW.STD_TEXT, 'nach Standard des Fensterbauers') : z.t);
       /* je Gruppe eine Zeile: „außen Anthrazitgrau · innen Verkehrsweiß“; offen in Koralle */
-      const zeileG = (g) => { const zz = g.zeilen.filter((z) => !(g.id === 'fenster' && z.k === 'Element')); return [g.titel, zz.map((z) => (zz.length > 1 || z.k !== g.titel ? z.k + ' ' : '') + zText(z)).join(' · '), zz.some((z) => z.offen) ? { offen: true } : null]; };
+      const zeileG = (g) => { const zz = g.zeilen.filter((z) => !(g.id === 'fenster' && z.k === 'Element')); return [g.titel, zz.map((z) => ((zz.length > 1 || z.k !== g.titel) && String(z.t).toLowerCase().indexOf(String(z.k).toLowerCase()) !== 0 ? kName(z.k) + ' ' : '') + zText(z)).join(' · '), zz.some((z) => z.offen) ? { offen: true } : null]; };
       const gH = (g) => zeilenH([zeileG(g)], sp, oG);
       BEREICHE.forEach((bb) => {
         const kopfB = () => { fill(LINE_F); doc.rect(M, y, CW, 6.4, 'F'); font('extra', 8.6, INK); txt(bb.name, M + 2, y + 4.4); font('normal', 7.2, GREY); txt(bb.idx.length + (bb.idx.length === 1 ? ' Position' : ' Positionen'), XR - 2, y + 4.4, { align: 'right' }); y += 9; };
@@ -867,17 +939,16 @@
 
     /* ---------- Ende (ab zwei Positionen): Ausstattung, Zahlen, alle Elemente im selben Maßstab ---------- */
     function ausstattung() {
-      const halb = (CW - 5) / 2;
-      const gleich = (fn, sonst) => { const v = wins.map(fn); return v.length && v.every((x) => x === v[0]) ? v[0] : (sonst || 'unterschiedlich, siehe Positionen'); };
       const flaeche = wins.reduce((a, x) => { const d = AW.derive(x); return a + (d.elW && d.elH ? d.elW * d.elH / 1e6 * (num(x.anzahl) || 1) : 0); }, 0);
-      const groesste = wins.reduce((best, x) => { const d = AW.derive(x); return !best || d.elW * d.elH > best.a ? { a: d.elW * d.elH, n: x.name || 'Fenster', d: d } : best; }, null);
-      const etagen = wins.map((x) => AW.etageText(x) || 'EG').filter((v, k, a) => a.indexOf(v) === k).join(', ');
-      const ausst = [['Material', gleich((x) => (offen(x, 'material') ? 'offen' : AW.lab('material', x.material) || 'Kunststoff'))], ['Farbe außen', gleich((x) => (AW.istOffen(x, 'fa') ? 'offen' : AW.farbe(x, 'aussen')[0]))], ['Farbe innen', gleich((x) => AW.farbe(x, 'innen')[0])], ['Glas', gleich((x) => (offen(x, 'glas') ? 'offen' : AW.lab('glas', x.glas) || '3-fach') + (offen(x, 'glasfn') ? ', Extras offen' : (x.glasfn || []).length ? ', ' + x.glasfn.map((g) => AW.lab('glasfn', g)).join(', ') : ''))], ['Sprossen', gleich((x) => ((x.bars || []).length ? (offen(x, 'spross') ? 'Art offen' : AW.lab('spross', x.spross)) : 'keine'))], ['Sonnenschutz außen', gleich((x) => (offen(x, 'sart') ? 'offen' : AW.sonne(x)))], ['Sonnenschutz innen', gleich((x) => (offen(x, 'iart') ? 'offen' : AW.innen(x)))], ['Insektenschutz', gleich((x) => (offen(x, 'insekt') ? 'offen' : AW.lab('insekt', x.insekt) || 'keiner'))], ['Montage', gleich((x) => AW.montageText(x))]];
-      const zahlen = [['Positionen', String(wins.length)], ['Elemente', String(nE)]].concat(ANF ? [] : [['Fensterfläche', flaeche ? 'etwa ' + flaeche.toFixed(1).replace('.', ',') + ' m² (Element, alle Stück)' : '–'], ['Größtes Element', groesste && groesste.d.elW ? groesste.n + ', ' + th(groesste.d.elW) + ' × ' + th(groesste.d.elH) + ' mm' : '–']], [['Geschosse', etagen || '–'], ['Fotos', nF ? nF + (nA ? ', von der KI ausgewertet' : '') : 'keine'], ['Maße', komplett ? 'alle 8 Handmaße je Fenster' : wins.filter((x) => AW.massLuecken(x).length).length + ' Position(en) mit Lücken', komplett ? null : { offen: true }]], V === 'betrieb' ? [['Ihr Abzug', ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten (Fenster)' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten (Türen)' : '')]] : []);
-      const oA = { lw: 27, fs: FS }, oZ = { lw: 28, fs: FS }, ha = 11 + zeilenH(ausst, halb - 8, oA) + 3, hz = 11 + zeilenH(zahlen, halb - 8, oZ) + 3, hh = Math.max(ha, hz);
+      const groesste = ORDER.reduce((best, i) => { const d = AW.derive(wins[i]); return !best || d.elW * d.elH > best.a ? { a: d.elW * d.elH, n: posLabel(i), d: d } : best; }, null);
+      const zahlen = [['Positionen', String(wins.length)], ['Elemente', String(nE)], ['Geschosse', BEREICHE.map((b) => b.name).join(', ')]]
+        .concat(ANF ? [] : [['Fensterfläche', flaeche ? 'etwa ' + flaeche.toFixed(1).replace('.', ',') + ' m² (Element, alle Stück)' : '–'], ['Größtes Element', groesste && groesste.d.elW ? groesste.n + ', ' + th(groesste.d.elW) + ' × ' + th(groesste.d.elH) + ' mm' : '–']],
+          [['Fotos', ANF ? (nF ? nF + ' übermittelt, Auswertung bei ' + bnK : 'keine') : nF ? nF + (nA ? (nA === nF ? ', alle' : ', davon ' + nA) + ' von der KI ausgewertet' : '') : 'keine'], ['Maße', komplett ? 'alle 8 Handmaße je Fenster' + (ANF ? ', bei ' + bnK : '') : wins.filter((x) => AW.massLuecken(x).length).length + ' Position(en) mit Lücken', komplett ? null : { offen: true }]],
+          V === 'betrieb' ? [['Ihr Abzug', ab.seite + ' mm je Seite, ' + ab.oben + ' mm oben' + (ab.unten ? ', ' + ab.unten + ' mm unten (Fenster)' : '') + (ab.untenT ? ', ' + ab.untenT + ' mm unten (Türen)' : '')]] : []);
+      const sp = (CW - 14) / 2, oZ = { lw: 30, fs: FS }, half = Math.ceil(zahlen.length / 2), hh = 11 + Math.max(zeilenH(zahlen.slice(0, half), sp, oZ), zeilenH(zahlen.slice(half), sp, oZ)) + 3;
       platz(hh);
-      karteRand(M, y, halb, hh); kicker('Ausstattung im Überblick', M + 4, y + 6, GREY); zeilen(ausst, M + 4, y + 9, halb - 8, oA);
-      karteRand(M + halb + 5, y, halb, hh); kicker('Zahlen', M + halb + 9, y + 6, GREY); zeilen(zahlen, M + halb + 9, y + 9, halb - 8, oZ);
+      karteRand(M, y, CW, hh); kicker('Zahlen zum Projekt', M + 4, y + 6, GREY);
+      zeilen(zahlen.slice(0, half), M + 4, y + 9, sp, oZ); zeilen(zahlen.slice(half), M + 10 + sp, y + 9, sp, oZ);
       y += hh + 7;
     }
     /* Alle Elemente im selben Maßstab */
