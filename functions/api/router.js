@@ -6,12 +6,12 @@
    /api/link/:code/entwurf          Zwischenstand eines Kundenlinks mit Zählern gegen Mehrfachnutzung (entwurf.js)
    /api/kunde/…                     Konten der Hauseigentümer: Anmelden per Code, Aufmaße sichern und abgleichen (eigene.js)
    …/foto/:id                       Fotos der Fenster: Kunde legt ab (Link, eigenes Aufmaß), Betrieb und Besitzer lesen (fotos.js)
-   /api/zentrale/…                  Zentrale des Inhabers (zentrale.js), eigene Statistik (statistik.js)
+   /api/auftrag/…, /api/inhaber/…   Bestellung, Kundenbereich und Zentrale der Aufträge (functions/auftrag/)
+   /api/zentrale/…                  Verwaltung der Betriebe der App (zentrale.js, ohne eigene Oberfläche), eigene Statistik (statistik.js)
    POST /api/widerruf               Widerrufsfunktion nach § 356a BGB mit Eingangsbestätigung per E-Mail (widerruf.js, post.js), als JSON
                                     oder ohne JavaScript als Formular (dann antwortet der Server mit einer Seite)
-   Konfigurator-Instanzen (docs/INSTANZEN.md): /api/instanz/… (instanz-api.js), /api/partner/… (Kundenkonto, partner.js),
-   POST /api/post/webhook (Resend, eingang.js), /api/zentrale/instanzen|bestellungen/… (Zentrale); auf einem Instanz-Host übergibt
-   worker.js die Instanz als viertes Argument (ctx.instanz), sonst ist ctx.instanz null */
+   Konfigurator-Instanzen (docs/INSTANZEN.md): /api/instanz/… (instanz-api.js), POST /api/post/webhook (Resend, eingang.js); auf einem
+   Instanz-Host übergibt worker.js die Instanz als viertes Argument (ctx.instanz), sonst ist ctx.instanz null */
 import { konfig, json, ApiFehler } from './umgebung.js';
 import { AGB_STAND, NB_STAND, ZUSTIMMUNG, verkaufStand } from './recht.js';
 import { bestaetigungenNachholen } from './bestaetigung.js';
@@ -28,12 +28,9 @@ import { erinnerungenSenden } from './benachrichtigung.js';
 import { FOTOS } from './fotos.js';
 import { INSTANZ_API } from './instanz-api.js';
 import { EINGANG, versandNachholen, anfragenAufraeumen } from './eingang.js';
-import { PARTNER } from './partner.js';
-import { bestellungenLauf } from './bestellung.js';
 import { DASHBOARD, einladungenErinnern } from './dashboard.js';
-import { ZENTRALE_INSTANZEN } from './zentrale-instanzen.js';
-import { ZENTRALE_BESTELLUNGEN } from './zentrale-bestellungen.js';
 import { instanzenPruefen } from './cloudflare.js';
+import { AUFTRAG, GROSS, auftraegeLauf } from '../auftrag/index.js';
 import { attrappePost, attrappeAus } from './post.js';
 import { zaehlen, mitWerbung, werbungAus } from './statistik.js';
 import '../../web/assets/ral.js'; // Farben (RAL, Holzdekore) für modell.js auch im Worker-Bundle, siehe ral.js
@@ -43,8 +40,8 @@ import '../../web/assets/instanzregeln.js'; // Zustände, Fristen, Grenzen der I
 import { indexnow } from '../seo.js';
 
 /* Die bestehenden Routen stehen zuletzt und haben damit Vorrang, falls ein neues Modul dieselbe Adresse nennt (Altbestand bleibt) */
-const ROUTEN = Object.assign({}, INSTANZ_API, EINGANG, PARTNER, DASHBOARD, ZENTRALE_INSTANZEN, ZENTRALE_BESTELLUNGEN, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
-const MAX_BODY = 1500000;
+const ROUTEN = Object.assign({}, AUFTRAG, INSTANZ_API, EINGANG, DASHBOARD, ZAHLUNG, KONTO, ENTWURF, EIGENE, ZENTRALE, WIDERRUF, FOTOS);
+const MAX_BODY = 1500000, MAX_DATEI = 6000000; // Dateien der Aufträge (Fotos für die Landingpage) als Base64
 
 function finde(method, pfad) {
   const direkt = ROUTEN[method + ' ' + pfad]; if (direkt) return { fn: direkt, params: {} };
@@ -82,15 +79,16 @@ export async function api(request, env, ctx0, inst) {
     const treffer = finde(request.method, pfad);
     if (!treffer) return json({ ok: false, fehler: 'not_found' }, 404);
     const sp = speicher(k), zd = zahlungsdienst(k);
-    const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad.startsWith('/api/kunde') || pfad === '/api/aufmass' || pfad.startsWith('/api/partner') || pfad.startsWith('/api/instanz');
+    const brauchtDaten = pfad.startsWith('/api/konto') || pfad.startsWith('/api/link') || pfad.startsWith('/api/kunde') || pfad === '/api/aufmass' || pfad.startsWith('/api/instanz');
     if (brauchtDaten && !sp) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Die Datenbank fehlt (SUPABASE_URL, SUPABASE_SECRET_KEY).' }, 503);
     if (pfad.startsWith('/api/zahlung') && !zd) return json({ ok: false, fehler: 'Noch nicht eingerichtet: Zahlungen fehlen (STRIPE_SECRET_KEY).' }, 503);
     let body = null, roh = '';
     /* Nur die Widerrufsfunktion und die Frage ohne Konto (Verkaufsseite) nehmen auch ein gewöhnliches Formular an (Browser ohne JavaScript) */
-    const formular = (pfad === '/api/widerruf' || pfad === '/api/partner/frage') && /^application\/x-www-form-urlencoded/i.test(request.headers.get('content-type') || '');
+    const formular = (pfad === '/api/widerruf' || pfad === '/api/auftrag/frage') && /^application\/x-www-form-urlencoded/i.test(request.headers.get('content-type') || '');
     if (request.method === 'POST' || request.method === 'PATCH') {
-      if (Number(request.headers.get('content-length') || 0) > MAX_BODY) return json({ ok: false, fehler: 'Zu groß.' }, 413);
-      roh = await request.text(); if (roh.length > MAX_BODY) return json({ ok: false, fehler: 'Zu groß.' }, 413);
+      const max = GROSS.test(pfad) ? MAX_DATEI : MAX_BODY;
+      if (Number(request.headers.get('content-length') || 0) > max) return json({ ok: false, fehler: 'Zu groß.' }, 413);
+      roh = await request.text(); if (roh.length > max) return json({ ok: false, fehler: 'Zu groß.' }, 413);
       if (roh && formular) body = Object.fromEntries(new URLSearchParams(roh));
       else if (roh) { try { body = JSON.parse(roh); } catch (e) { if (pfad !== '/api/zahlung/webhook') return json({ ok: false, fehler: 'Kein JSON.' }, 400); } }
       if (pfad !== '/api/zahlung/webhook' && request.headers.get('origin') && request.headers.get('origin') !== url.origin) return json({ ok: false, fehler: 'forbidden' }, 403);
@@ -137,7 +135,8 @@ export async function geplant(env, cron) {
   if (taeglich) { nach = {}; try { nach.vertrag = await bestaetigungenNachholen(k, sp, env); } catch (e) { nach.vertrag = { ok: false }; } try { nach.widerruf = await widerrufeNachholen(k, sp); } catch (e) { nach.widerruf = { ok: false }; } try { nach.erinnerung = await erinnerungenSenden(k, sp, env); } catch (e) { nach.erinnerung = { ok: false }; } } // Erinnerung an offene Links (benachrichtigung.js)
   /* Konfigurator-Instanzen: täglich Aufbewahrung, Bestellungen und Abos, Domains, Erinnerungen; Versand (sonst alle 10 Minuten) bei einem Aufruf ohne cron mit */
   let inst = null;
-  if (taeglich && sp) inst = { anfragen: await versucht(() => anfragenAufraeumen(k, sp)), bestellungen: await versucht(() => bestellungenLauf(k, sp, zahlungsdienst(k), env)), domains: await versucht(() => instanzenPruefen(k, sp, env)), einladungen: await versucht(() => einladungenErinnern(k, sp, env)) };
+  if (taeglich) (nach = nach || {}).auftraege = await versucht(() => auftraegeLauf(k));
+  if (taeglich && sp) inst = { anfragen: await versucht(() => anfragenAufraeumen(k, sp)), domains: await versucht(() => instanzenPruefen(k, sp, env)), einladungen: await versucht(() => einladungenErinnern(k, sp, env)) };
   if (zehn && sp) (inst = inst || {}).versand = await versucht(() => versandNachholen(k, sp));
   /* täglicher Lauf: nach einer Veröffentlichung die geänderten Seiten per IndexNow melden (functions/seo.js, nur mit Freigabe) */
   let suche = null; if (cron && cron !== CRON_ABRECHNUNG) { try { suche = await indexnow(env); } catch (e) { suche = { ok: false }; } }

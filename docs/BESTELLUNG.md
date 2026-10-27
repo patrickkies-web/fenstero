@@ -1,75 +1,81 @@
-# Bestellung der Konfigurator-Pakete: von „Paket wählen“ bis „Live“
+# Bestellung, Kundenbereich und Zentrale der Aufträge
 
-Ein Fensteranbieter bestellt auf eeziframes.com einen eigenen Fenster-Konfigurator unter seiner Domain, in einem von drei Paketen (**EEZI Essential**, **EEZI Essential Plus**, **EEZI Signature**). Diese Datei beschreibt den Weg der Bestellung, das Geld (Stripe) und die Rechtstexte dazu. Wie eine Instanz danach betrieben wird, steht in [INSTANZEN.md](INSTANZEN.md) (Teil 2), was du einmalig einrichtest, in [ONLINE-STELLEN.md](ONLINE-STELLEN.md) („Stufe 3“).
+Ein Fensterbauer bestellt auf eeziframes.com seine Landingpage mit Fenster-Konfigurator in einem der drei Pakete (**EEZI Essential**, **EEZI Essential Plus**, **EEZI Signature**). Die Seite baust du danach von Hand aus der Vorlage des Pakets, mit einem Prompt, den die Zentrale aus allen Angaben zusammenstellt. Neu gebaut am 27.10.2026; das alte Kundenkonto `/partner/`, die alte Paket-Bestellung und die alte Zentrale-Oberfläche sind gelöscht (Wunsch des Inhabers: „alles von neu aufbauen“).
 
 ## Wo was steht
 
 | Was | Stelle |
 |---|---|
-| Merkmale, Preise, Fristen je Paket | `web/assets/pakete.js` (eine Zelle je Merkmal; `VORLAEUFIG`, `PREIS_STAND`) |
-| Statusleiste, Übergänge, Abo-Zustände, Feldregeln des Formulars, globale Fristen | `web/assets/instanzregeln.js` |
-| Verkaufsseite `/fuer-fensterbauer/`, `llms.txt`-Absatz | `functions/pakete-seite.js` (Bausteine in `web/fuer-fensterbauer/index.html`) |
-| Paketbedingungen mit AV-Vertrag `/konfigurator-bedingungen/` und ihre PDFs | `web/konfigurator-bedingungen/`, `scripts/bedingungen-pdf.mjs`, Fassung `PAKET_STAND` in `functions/api/recht.js` |
-| Kundenkonto `/partner/` (Bestellformular, Statusleiste, Nachrichten, Rückruf, Freigabe, Rechnungen) | `web/partner/index.html`, `web/assets/partner.js`, `functions/api/partner.js` |
-| Statusmaschine, Zahlung, Abo, Paketwechsel, Tageslauf, Mails | `functions/api/bestellung.js`; Stripe-Teil in `functions/api/stripe.js` (Paketfunktionen) |
-| Bestellungen in der Zentrale | `functions/api/zentrale-bestellungen.js`, [ZENTRALE.md](ZENTRALE.md) |
+| Merkmale und Preise je Paket | `web/assets/pakete.js` (einzige Stelle für Preise; `VORLAEUFIG`, `PREIS_STAND`) |
+| Regeln der Aufträge: Stationen je Paket, Felder mit Grenzen und Prüfung, Plätze für Dateien, Stände und Übergänge, was ein Paket veränderbar macht, Anreiz zum nächsten Paket | `web/assets/auftragsregeln.js` (Browser `window.Auftrag`, Server `globalThis.Auftrag`) |
+| Bestellung `/bestellen/` | `web/bestellen/index.html`, `web/assets/bestellen.js` |
+| Kundenbereich `/konto/` | `web/konto/index.html`, `web/assets/konto.js` |
+| Zentrale `/zentrale/` | `web/zentrale/index.html`, `web/assets/inhaber.js`, [ZENTRALE.md](ZENTRALE.md) |
+| Gemeinsame Bausteine und Stil (Design-DNA, Palette „Task-App dunkel“, App-Rahmen) | `web/assets/auftrag-ui.js`, `web/assets/auftrag.css` (Präfix `a-`) |
+| Server: Routen, Mails, Stripe, Daten | `functions/auftrag/index.js`, `mails.js`, `zahlung.js`, `daten.js` |
+| Tabellen | `supabase/schema.sql`, Abschnitt „Aufträge“: `kunden`, `anmeldecodes`, `auftraege`, `auftrag_nachrichten`; Dateien im Bucket `auftraege` (privat, legt der Server selbst an) |
+| Paketbedingungen mit AV-Vertrag und ihre PDFs | `web/konfigurator-bedingungen/`, `scripts/bedingungen-pdf.mjs`, Fassung `PAKET_STAND` in `functions/api/recht.js` (seit 27.10.2026: `2026-10-27`) |
+| Prüfung | `scripts/pruefen-instanzen/26.mjs` (`NUR=26`), dazu 23 und 29 |
 
-## Ablauf
+## Die Bestellung
 
-Die Statusleiste im Kundenkonto und der Abschnitt „Von der Bestellung bis zum Livegang“ auf der Verkaufsseite nennen dieselben sechs Schritte (`Instanzregeln.bestellung.LEISTE`):
+Jede Karte auf der Seite für Fensterbauer führt in die Bestellung ihres Pakets (`/bestellen/#essential`, `#plus`, `#signature`). Rahmen nach der Design-DNA: Kopf, Stationen-Band, Bühne mit der Vorschau der eigenen Seite (kleiner Browser mit der künftigen Adresse, Name, Überschrift, Farbe, Porträt, Foto), Frage, weiße Karten, Fuß mit genau einer Pille.
 
-| Schritt | Status | Wer schaltet weiter | Was passiert |
-|---|---|---|---|
-| **Bestellt** | `offen` | Stripe (Zahlung) | Formular unter `/partner/#bestellen/<paket>` in Schritten (Paket, E-Mail mit Code, Unternehmen, Konfigurator, Gestaltung nur bei Paketen mit eigener Gestaltung, Prüfen und bestellen); Zwischenstand bleibt gespeichert. Mit „Kostenpflichtig bestellen“ (Häkchen: Unternehmer, Paketbedingungen in der Fassung `PAKET_STAND`, AV-Vertrag) geht sofort die Eingangsbestätigung mit beiden PDFs raus, dann die Kasse von Stripe. |
-| **Bezahlt** | `bezahlt` | Inhaber | Nur `einrichtungUebernehmen` setzt das, gebunden an Bestellung, Partner und Stripe-Kunden (eine Zahlung zählt nie für zwei Bestellungen). SEPA: „Lastschrift unterwegs“, bis Stripe den Eingang meldet. Mail an Partner und Inhaber. |
-| **In Einrichtung** | `einrichtung` | Inhaber | Rückruf zur Wunschzeit, Instanz anlegen (übernimmt alles aus der Bestellung), Bestätigungslinks an die Empfänger der Anfragen. |
-| **Domain gesichert** | `domain` | Inhaber | Domain gekauft, verbunden und in der Zentrale grün geprüft. |
-| **Zur Freigabe** | `freigabe` | Partner (Freigabe) und Inhaber | Vorschau-Link (`FRISTEN.vorschauTage` Tage), Testanfrage; der Partner gibt im Kundenkonto genau diese Fassung frei oder wünscht Änderungen (dann zurück nach „In Einrichtung“ oder „Domain gesichert“, mit Vermerk). Erinnerungen nach `FRISTEN.freigabeErinnerung` Tagen. |
-| **Live** | `live` | Inhaber | Nur mit grüner Ampel (bezahlt, Domain, Rechtsangaben, bestätigte Eingangsadresse, Gestaltung veröffentlicht, Testanfrage zugestellt, Freigabe oder Vermerk, Zahlungsmittel, bei Signature ein bestätigter Zugang). Das Monatsabo startet von selbst, der Partner bekommt den Knopf „Fenster planen“ als HTML-Schnipsel für seine Website (`schnipsel(host, { farbe })`, Firmenfarbe, 44 px hoch). Beim ersten Livegang gibt der Server bei Plus und Signature die Startseite für Suchmaschinen frei (`instanzen.indexierung`); der Schalter unter „Betrieb“ bleibt zum Abschalten, nach einer Pause setzt ihn niemand neu. |
+| Station | Was gefragt wird |
+|---|---|
+| **Paket** | drei Karten mit den Seiten von Fensterbau Brandt als Bild, Preis im Monat und Einrichtung, was dazukommt; bei Plus und Signature der **Weg**: *Schnell* (nur das Nötigste und das Logo, Texte, Farben und Bilder übernimmst du von der Website oder klärst sie im Telefonat) oder *Ausführlich* (Logo, Farben, sechs Fotos, Porträt, Texte selbst) |
+| **Konto** | E-Mail-Adresse, Code per Mail (zugleich die Registrierung, kein Passwort); danach liegt der Auftrag als Entwurf auf dem Server |
+| **Ihr Betrieb** | was auf der Seite steht (Unternehmen, Name auf der Seite, Einzugsgebiet, Ansprechperson, Rolle, Telefon, E-Mail, Erreichbarkeit, bisherige Website) und Impressum und Rechnung (Anschrift, Bundesland, Rechtsform, Vertretung; Register, USt-IdNr., Kammer, Beruf aufklappbar). Name und Rechtsform füllen sich aus dem Unternehmen |
+| **Adresse** | Essential: Name unter eeziframes.com mit Prüfung „frei/vergeben“ und Anreiz zu Plus (eigene Domain). Plus und Signature: *Neue Domain* (bis drei Wünsche oder „Schlagen Sie mir Namen vor“; bis 25 € netto im Jahr im Paket, Paketbedingungen § 6) oder *Meine Domain* (eine Domain, die schon gehört, nach Absprache, § 6 Abs. 3; Hinweis, dass die bisherige Website bleibt). Dazu die Adressen für die Anfragen (bis drei), bei Signature die Zugänge zum Dashboard (bis fünf) |
+| **Auftritt** | nur mit eigener Gestaltung (Plus, Signature). Schnell: Logo, „von meiner Website übernehmen“, Hinweise. Ausführlich: Logo, bis drei Farben (oder aus Logo/Website), Fotos für Bühne, Werkstatt, Montage, Team, Ausstellung, Referenz (leere Plätze schraffiert), Porträt, Überschrift, Einleitung, Leistungen, bei Signature der Einladungstext, Hinweise. Plus zeigt den Anreiz zu Signature |
+| **Bestellen** | Lücken mit Sprung zur Station, Einrichtung als Zahl (netto, mit USt. darunter), Monatspreis ab Livegang, Zusammenfassung mit „Ändern“ je Teil, die vier Schritte bis Live, die Wunschzeit für den Anruf, drei Häkchen (Unternehmer § 14 BGB, Paketbedingungen in der Fassung `PAKET_STAND`, AV-Vertrag), dann „Kostenpflichtig bestellen“ (Stripe) oder, solange die Kasse zu ist, „Unverbindlich anfragen“ |
 
-Danach ersetzt eine Abo-Karte die Leiste: **Aktiv · Zahlung offen (Kulanz bis …) · Gekündigt zum … · Pausiert · Beendet**. Abseits der Leiste gibt es `pausiert`, `beendet` und `storniert` (Übergänge in `UEBERGAENGE`). Dauer bis Live: meist 3 bis 5 Werktage nach der Zahlung (so steht es auf der Verkaufsseite).
+Gespeichert wird nach jeder Eingabe (kurz verzögert, beim Verlassen der Seite noch einmal); ein Entwurf darf Lücken haben, geprüft wird beim Weitergehen und beim Bestellen (Browser und Server mit denselben Regeln). Fotos werden im Browser verkleinert (Fotos bis 2400 px, Porträt 900 px). Paket und Weg lassen sich bis zur Zahlung wechseln.
 
-Unbezahlte Entwürfe erinnern nach 3 Tagen einmal und werden nach `FRISTEN.bestellEntwurfTage` Tagen ohne Änderung samt Dateien gelöscht; verwirft der Partner einen unbezahlten Entwurf selbst, löscht `uebergang(…, 'storniert')` die Dateien sofort. Bei einem Storno nach der Zahlung (Erstattung) bleiben die Dateien noch `FRISTEN.loeschenNachEndeTage` Tage, dann löscht sie der Tageslauf (Vermerk `geloescht`). Höchstens drei offene Bestellungen je Partner.
+## Stände eines Auftrags
 
-**Aufbewahrung:** Ist der Vertrag beendet oder storniert, bleiben Partnerzeile, Bestellungen und Nachrichten bis zum Ende des 3. Jahres nach dem Jahr des Vertragsendes (`FRISTEN.nachrichtenJahre`; Ende am 5.3.2026 → gelöscht ab 1.1.2030), ein Partner ohne jede Bestellung ebenso lange ab dem Anlegen. Danach löscht `partnerAufraeumen` (am Ende von `bestellungenLauf`, höchstens 20 je Lauf, Protokoll `loeschen`) Nachrichten, Bestellungen, Partnerzeile und die Supabase-Anmeldung, sofern an ihr kein Betrieb, kein eigenes Aufmaß und kein Dashboard-Zugang hängt. Rechnungsbelege liegen bei Stripe.
+| Stand | Wer | Was passiert |
+|---|---|---|
+| `entwurf` | Kunde | füllt aus; nach 30 Tagen ohne Änderung samt Dateien gelöscht |
+| `angefragt` | Kunde | unverbindlich angefragt, solange die Kasse zu ist (ohne `PAKETE_OFFEN` im Live-Modus); Mail an dich; Löschfrist wie Entwurf |
+| `bezahlt` | Stripe | Einrichtung bezahlt = Vertrag geschlossen (§ 3 Abs. 2); Mails an Kunde („Ihre Zahlung ist da“) und dich; Kunde kann bis Arbeitsbeginn im Kundenbereich stornieren (§ 7 Abs. 2, volle Erstattung, frische Anmeldung nötig) |
+| `in_arbeit` | du | „Seite beginnen“: Anruf, Domain sichern, Seite bauen |
+| `vorschau` | du | Link zur Vorschau eintragen; Mail mit Link; der Kunde gibt frei oder schreibt, was zu ändern ist (dann zurück nach `in_arbeit`) |
+| `live` | du | nach Freigabe: Adresse der fertigen Seite eintragen; das Monatsabo startet bei Stripe, Mail mit Link; der Kundenbereich zeigt den Knopf „Fenster planen“ als HTML für die eigene Website |
+| `pausiert`, `beendet`, `storniert` | du (oder Stripe) | Pause, Ende (Abo zum Monatsende oder sofort), Storno mit Erstattung |
+
+Übergänge stehen in `Auftrag.UEBERGAENGE` (wer darf was); der Server prüft jeden Schritt. Nach der Zahlung bleibt alles änderbar (Stationen der Bestellung mit „Speichern“), aber nur vollständig; jede Änderung erscheint in der Zentrale als „geändert“. Ein Paketwechsel nach der Zahlung ist eine Anfrage (Differenz der Einrichtung, neuer Monatspreis ab Wechsel, § 7 Abs. 3).
 
 ## Geld (Stripe)
 
-- **Einrichtung vorab:** Stripe Checkout mit dem Betrag aus dem Preisstand der Bestellung (`bestellungen.preise`, aus `pakete.js` beim Anlegen festgehalten, danach unveränderlich), Karte oder SEPA-Lastschrift, Zahlungsmittel wird für das Abo gespeichert. Metadaten `art: 'einrichtung'`, nie `betrieb` (so bleibt der Altbestand unberührt).
-- **Abo ab Livegang:** `aboStarten` legt das Monatsabo an (ein Abo je Bestellung); der Monatspreis kommt über einen `lookup_key` mit Betrag, eine Preisänderung in `pakete.js` legt also einen neuen Preis an, bestehende Abos behalten ihren.
-- **Kulanz, Pause, Ende:** erste fehlgeschlagene Abbuchung → `zahlung_offen`, Kulanz `FRISTEN.kulanzTage` Tage; danach pausiert der Tageslauf die Instanz (Seite 503 mit Name und Kontakt des Betriebs). Pause länger als `FRISTEN.pauseMaxTage` Tage → Abo beendet, Status `beendet`; `FRISTEN.loeschenNachEndeTage` Tage nach dem Ende löscht der Lauf alle Instanzdaten und die Dateien der Bestellung. Die Stripe-Einstellung „nach den Wiederholungsversuchen Abo kündigen“ bleibt (sonst stuft der Server Altbestands-Abos nicht mehr zurück); `customer.subscription.deleted` pausiert die Instanz, „Abo neu starten“ in der Zentrale.
-- **Paketwechsel:** nur `paketWechseln` (ändert `instanzen.paket` und den Preis des Abos zusammen). Nach oben sofort: Abo anteilig (`create_prorations`), auf Wunsch die Differenz der Einrichtungsgebühr als Posten auf der nächsten Rechnung. Nach unten mit laufendem Abo und Instanz erst zum Periodenende: Der laufende Monat ist zum alten Preis bezahlt, also behält die Instanz bis `abo.bis` das alte Paket (bei Signature bleibt das Dashboard offen); bei Stripe wechselt der Preis sofort ohne Ausgleich (`proration_behavior: none`), die nächste Rechnung kommt zum kleineren Preis. Die Bestellung trägt `abo.wechsel = { paket, von, ab }` (ISO-Zeit) und `abo.paket` = Ziel; Kundenkonto und Zentrale zeigen „Paketwechsel nach … wirkt ab …“. Wirksam macht ihn der Tageslauf oder `invoice.paid` der neuen Periode (`paketSetzen`, Verlauf, kurze Mail); der wöchentliche Abgleich lässt einen vorgemerkten Wechsel stehen. Ein späterer Wechsel nach oben wirkt sofort und ersetzt die Vormerkung (Stripe erst zurück auf den bezahlten Preis, dann anteilig nach oben); zurück zum laufenden Paket hebt sie nur auf. Fehlt `abo.bis`, wirkt auch der Wechsel nach unten sofort (Hinweis im Verlauf). Ohne laufendes Abo oder ohne Instanz: sofort. Der Partner fragt im Kundenkonto an, der Inhaber führt in der Zentrale aus.
-- **Abo neu starten** (`aboSteuern 'neu'`, Zentrale): nur bei `live` oder `pausiert` (nach `incomplete_expired` oder einem bei Stripe beendeten Abo); vor dem Livegang antwortet der Server 409, das Abo startet allein über `uebergang(…, 'live')`.
-- **Rechnungen, Zahlungsmittel, Kündigung:** Kundenportal von Stripe (Knopf im Kundenkonto, nur mit frischer Anmeldung); das Kundenkonto zeigt die Rechnungen nur lesend.
-- **Erstatten:** in der Zentrale ganz oder teilweise; Storno durch den Partner bis zum Beginn der Einrichtung mit voller Erstattung.
-- **Webhook-Ereignisse** (Workbench → Webhooks, Test- und Live-Modus): `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `invoice.paid`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`, `charge.dispute.created`. `zahlung.js` leitet Paket-Ereignisse über `paketObjekt`/`istPaketEreignis` an `bestellung.js`, alles andere läuft wie bisher.
-- **Abgleich:** Der tägliche Lauf holt Kassen der letzten drei Tage nach, deren Ergebnis fehlt (verlorener Webhook, Browser geschlossen), und gleicht laufende Abos einmal je Woche mit Stripe ab.
+- **Einrichtung:** Checkout im Modus `payment` (Karte oder SEPA-Lastschrift), Betrag aus `pakete.js` netto mit Steuersatz 19 % (Metadaten `eeziframes: auftrag-mwst19`, legt der Server an; `MWST=0` ohne), Rechnung von Stripe, Zahlungsmittel bleibt für das Abo hinterlegt. Metadaten `art: auftrag`, `auftrag: <id>`.
+- **Monatsabo ab Live:** Preis über `lookup_key` `eezi-auftrag-<paket>-<cent>` (eine Preisänderung legt einen neuen Preis an, laufende Abos behalten ihren).
+- **Kundenportal:** eigene Konfiguration (Metadaten `auftrag-v1`): Rechnungen, Zahlungsmittel, Rechnungsangaben, Kündigung zum Monatsende.
+- **Webhook** (`/api/zahlung/webhook`, Ereignisse mit `metadata.art = auftrag`): `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`. Rückkehr aus der Kasse und Webhook schreiben beide „bezahlt“; Mails gehen nur beim ersten Mal.
+- **Attrappe** (`ZAHLUNG_ATTRAPPE=1` ohne Schlüssel): Kassen mit `test_`-Kennung gelten als bezahlt, Abo und Erstattung ohne Stripe.
 
-## Verkauf an- und ausschalten
+## Mails
 
-| | ohne `PAKETE_OFFEN` | mit `PAKETE_OFFEN=1` |
-|---|---|---|
-| Verkaufsseite | Pakete mit „Vorläufige Preise“, Karten führen zum Anfrageformular, Abschnitt „Bestellung bald möglich“ | Knöpfe „… bestellen“ auf `/partner/#bestellen/<paket>`, Frageformular darunter |
-| JSON-LD der Angebote | `availability: PreOrder` | `InStock` |
-| Paket-Kasse, Stripe-Testmodus oder Attrappe | offen (alles prüfbar) | offen |
-| Paket-Kasse, Stripe-Live-Modus | zu: „Bestellung bald möglich“ (503), Angaben bleiben gespeichert, „unverbindlich anfragen“ | offen, sobald `paketVerkaufStand()` nichts mehr vermisst |
+Anmeldecode · Eingangsbestätigung mit Paketbedingungen und AV-Vertrag als PDF (Fassung `PAKET_STAND`) · Zahlung da · Vorschau · Live · Pause, Ende, Storno · Nachrichten in beide Richtungen · an dich: neue Bestellung oder Anfrage, Nachrichten, Freigabe, Änderungswunsch, Paketwechsel, Storno, Frage vom Formular der Seite für Fensterbauer (`POST /api/auftrag/frage`, auch ohne JavaScript). Weiße Karte, Systemschrift, eine schwarze Pille, kein Tracking (`functions/auftrag/mails.js`).
 
-Die einzige Abfrage ist `Instanzregeln.verkauf({ offen, live, bereit })`. `paketVerkaufStand()` (`functions/api/recht.js`) vermisst im Live-Modus: Mailversand, `MWST`, Datenbank, `SITZUNG_GEHEIMNIS`, Platzhalter (`<mark class="ph">`) in Paketbedingungen, Impressum oder Datenschutz und die beiden PDFs der Fassung `PAKET_STAND`. Die Zentrale zeigt den Stand in der Übersicht („Konfigurator-Pakete“). „Vorläufige Preise“ steht zusätzlich, solange `Pakete.VORLAEUFIG` gilt, auch mit `PAKETE_OFFEN=1`.
+## Fristen (Datenschutzerklärung Abschnitt 9, Werte aus `Instanzregeln.FRISTEN`)
 
-Die **Frage ohne Konto** (`POST /api/partner/frage`, Formular auf der Verkaufsseite, auch ohne JavaScript) geht als Mail an `MAIL_KONTAKT` (Antwortadresse: der Fragende) und, wenn es zur Adresse schon ein Kundenkonto gibt, als Nachricht dorthin. Bremse `RL_FORM` (5 je Minute und Anschluss), Honigtopf `fax`, nur auf eeziframes.com.
+Täglicher Lauf `auftraegeLauf`: nicht bezahlte Bestellungen 30 Tage nach der letzten Änderung samt Dateien; nach dem Vertragsende die Dateien nach 30 Tagen, der Auftrag mit Nachrichten nach dem Ende des dritten Jahres; Konten ohne Auftrag 30 Tage nach der letzten Anmeldung; abgelaufene Anmeldecodes nach einem Tag.
 
-## Paketbedingungen und AV-Vertrag
+## Sicherheit
 
-- Seite `/konfigurator-bedingungen/`: § 1–15 Paketbedingungen, dann die Anlage „Vertrag zur Auftragsverarbeitung“ (§ 1–13). **Entwurf zur anwaltlichen Prüfung**: offene Stellen sind als `<mark class="ph">[…]</mark>` markiert (Freigabe, Pauschale für die Domain-Übertragung, Verfügbarkeit, Haftungshöchstbetrag, Gerichtsstand, Meldefrist); solange es sie gibt, bleibt die Live-Kasse zu.
-- Tabellen und Fristen kommen aus `pakete.js` und `instanzregeln.js` (Bausteine `<!--pakete:leistungen-->`, `fristen`, `f-kulanzTage` …), der Stand aus `PAKET_STAND`.
-- PDFs: `node scripts/bedingungen-pdf.mjs` schreibt die Bausteine in die Seiten (Verkaufsseite, Paketbedingungen, Datenschutz) und erzeugt `paketbedingungen-<STAND>.pdf` und `av-vertrag-<STAND>.pdf` (jsPDF, Inter; „Entwurf zur anwaltlichen Prüfung“ im Kopf jeder Seite, solange Platzhalter da sind). Die Keywords jedes PDFs tragen die Prüfsumme seines Textes; `node scripts/bedingungen-pdf.mjs --pruefen` und Prüfabschnitt 29 melden, wenn Seite und PDF auseinanderlaufen.
-- **Neue Fassung:** Text ändern → `PAKET_STAND` in `functions/api/recht.js` und `<meta name="stand">` der Seite auf das neue Datum → `node scripts/bedingungen-pdf.mjs` → die PDFs der alten Fassung liegen lassen (frühere Bestellungen verweisen darauf). Der Server nimmt nur Bestellungen mit genau dem aktuellen Stand an und speichert ihn an der Bestellung und in den Metadaten der Kasse.
-- Nach der anwaltlichen Prüfung: Platzhalter durch die Werte ersetzen, den Hinweis „Entwurf zur anwaltlichen Prüfung“ im Kasten oben entfernen, neue Fassung wie oben. Ebenso `VORLAGE` in `functions/instanz/recht.js` (Impressum und Datenschutz der Instanzen) auf `geprueft: true` mit neuem Stand setzen.
+Anmeldung per Code (6 Ziffern, 15 Minuten, nur als HMAC gespeichert, höchstens fünf Versuche; Bremsen je Adresse und Anschluss), Sitzung `__Host-kunde` (14 Tage) bzw. `__Host-inhaber` (8 Stunden), signiert mit `SITZUNG_GEHEIMNIS`; POST nur mit eigener Herkunft. Jeder Auftrag gehört einem Kunden, fremde antworten 404. Dateityp aus den ersten Bytes, SVG und PDF nur als Anhang mit Sandbox. Bestellung und Zentrale gibt es nur auf der Hauptdomain, nicht auf dem Host einer Instanz.
 
-## Preise ändern
+## Lokal ausprobieren
 
-Nur in `web/assets/pakete.js` (`preis: { monat, einrichtung }` je Paket, netto) und dort `PREIS_STAND` auf das Datum setzen; wenn die Preise feststehen, `VORLAEUFIG = false`. Danach `node scripts/bedingungen-pdf.mjs` (Verkaufsseite und Leistungstabelle). Laufende Bestellungen behalten ihren Preisstand, laufende Abos ihren Stripe-Preis.
+```
+KI_ATTRAPPE=1 DATEN_ATTRAPPE=1 ZAHLUNG_ATTRAPPE=1 MAIL_ATTRAPPE=1 ZENTRALE_PASSWORT=lokal-zentrale-2026 PORT=8789 node scripts/dev-server.mjs
+```
 
-## Prüfung
+Bestellung `http://localhost:8789/bestellen/#plus`, Code `123456`, Mails unter `/api/test/post`, Zentrale mit dem Passwort oben.
 
-`NUR=27` (Kundenkonto, Bestellung, Stripe gegen die Attrappe), `NUR=26` (Zentrale), `NUR=29` (Verkaufsseite, Rechtstexte, PDFs, Doku), `NUR=30` (Ende zu Ende), jeweils über `node scripts/mit-server.mjs <port> env PW_PFAD=/opt/node-tools NUR=… node scripts/pruefen.mjs`.
+## Offen
+
+- **Konfigurator beim Live-Schalten anlegen:** Die Instanz (Host, Merkmale, Empfänger, Rechtsangaben, Zugänge) entsteht noch nicht aus dem Auftrag; die alte Instanz-Verwaltung gehörte zur gelöschten Zentrale. Die Bausteine darunter (`functions/instanz/`, `verwalten.js`) bleiben und sind der nächste Schritt.
+- **Essential unter `<name>.eeziframes.com`:** Wildcard-Eintrag und Zuordnung im Worker (`functions/instanz/mandant.js` behandelt `*.eeziframes.com` noch als Hauptdomain).
+- **Alte Tabellen** `partner`, `bestellungen`, `partner_nachrichten` und ihre Funktionen in `speicher.js`: ungenutzt; löschen nur auf Wunsch des Inhabers.

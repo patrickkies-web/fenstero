@@ -374,3 +374,71 @@ drop trigger if exists partner_touch on public.partner;           create trigger
 drop trigger if exists bestellungen_touch on public.bestellungen; create trigger bestellungen_touch before update on public.bestellungen for each row execute function public.eeziframes_touch();
 drop trigger if exists instanzen_touch on public.instanzen;       create trigger instanzen_touch before update on public.instanzen for each row execute function public.eeziframes_touch();
 drop trigger if exists anfragen_touch on public.anfragen;         create trigger anfragen_touch before update on public.anfragen for each row execute function public.eeziframes_touch();
+
+-- ========== Aufträge (seit 27.10.2026): Bestellung einer Landingpage mit Konfigurator, Kundenbereich /konto/, Zentrale /zentrale/ ==========
+-- functions/auftrag/daten.js. Kunden melden sich per Code an (anmeldecodes, nur HMAC des Codes). Ein Auftrag ist ein Dokument; adresse hält
+-- bei Essential den Namen unter eeziframes.com (eindeutig, solange der Auftrag läuft). Erneut ausführen schadet nicht.
+create table if not exists public.kunden (
+  id uuid primary key default gen_random_uuid(),
+  mail text not null unique,
+  stripe text not null default '',
+  angemeldet_am timestamptz,
+  created_at timestamptz not null default now()
+);
+create table if not exists public.anmeldecodes (
+  mail text primary key,
+  hash text not null,
+  bis timestamptz not null,
+  fehl integer not null default 0,
+  created_at timestamptz not null default now()
+);
+create sequence if not exists public.auftrag_nr;
+create table if not exists public.auftraege (
+  id uuid primary key default gen_random_uuid(),
+  nr text not null unique,
+  kunde uuid not null references public.kunden(id) on delete cascade,
+  paket text not null,
+  weg text not null default 'ausfuehrlich',
+  stand text not null default 'entwurf',
+  angaben jsonb not null default '{}'::jsonb,
+  dateien jsonb not null default '[]'::jsonb,
+  preise jsonb,
+  zahlung jsonb not null default '{}'::jsonb,
+  abo jsonb not null default '{}'::jsonb,
+  vorschau jsonb not null default '{}'::jsonb,
+  zustimmung jsonb,
+  verlauf jsonb not null default '[]'::jsonb,
+  notiz text not null default '',
+  adresse text,
+  angaben_geaendert timestamptz,
+  gesehen timestamptz,
+  wechsel jsonb,
+  version integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.auftraege add column if not exists angaben_geaendert timestamptz;
+alter table public.auftraege add column if not exists gesehen timestamptz;
+alter table public.auftraege add column if not exists wechsel jsonb;
+create index if not exists auftraege_kunde on public.auftraege (kunde);
+create index if not exists auftraege_session on public.auftraege ((zahlung->>'session'));
+create unique index if not exists auftraege_adresse on public.auftraege (adresse) where adresse is not null and stand in ('angefragt', 'bezahlt', 'in_arbeit', 'vorschau', 'live', 'pausiert');
+create table if not exists public.auftrag_nachrichten (
+  id uuid primary key default gen_random_uuid(),
+  auftrag uuid not null references public.auftraege(id) on delete cascade,
+  von text not null check (von in ('kunde', 'inhaber', 'system')),
+  text text not null,
+  gelesen boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists auftrag_nachrichten_auftrag on public.auftrag_nachrichten (auftrag, created_at);
+create or replace function public.naechste_auftrag_nr() returns bigint language sql security invoker set search_path = '' as $$ select nextval('public.auftrag_nr') $$;
+alter table public.kunden              enable row level security;
+alter table public.anmeldecodes        enable row level security;
+alter table public.auftraege           enable row level security;
+alter table public.auftrag_nachrichten enable row level security;
+revoke all on public.kunden, public.anmeldecodes, public.auftraege, public.auftrag_nachrichten from anon, authenticated;
+revoke all on function public.naechste_auftrag_nr() from public, anon, authenticated;
+grant select, insert, update, delete on public.kunden, public.anmeldecodes, public.auftraege, public.auftrag_nachrichten to service_role;
+grant usage, select on sequence public.auftrag_nr to service_role;
+grant execute on function public.naechste_auftrag_nr() to service_role;

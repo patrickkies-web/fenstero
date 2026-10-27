@@ -147,7 +147,7 @@ export async function dashboardSicht(ctx, o) {
   acc.website = { laufend: web.length, fenster: web.reduce((s, e) => s + fensterZahl(e.meta), 0), zuletzt: web.reduce((x, e) => (String(e.updated_at || '') > x ? String(e.updated_at || '') : x), '') };
   acc.instanz = {
     name: inst.name, host: haupthost, basis: basis + '/', status: zeile.status, pauseBis: zeile.pause_bis || null, endeAm: zeile.ende_am || null, du: !!inst.du,
-    kundenkonto: String((ctx.env && ctx.env.KANONISCH) || HAUPTADRESSE).replace(/\/+$/, '') + '/partner/',
+    kundenkonto: String((ctx.env && ctx.env.KANONISCH) || HAUPTADRESSE).replace(/\/+$/, '') + '/konto/',
     m: { dashboard: !!m.dashboard, einladungslinks: !!m.einladungslinks, fortschritt: !!m.fortschritt, pdfKennzeichnung: m.pdfKennzeichnung || 'keine' },
     darf: { lesen: R().darf(zeile.status, 'dashboardLesen'), schreiben: R().felder(zeile.status, 'dashboardSchreiben'), einladen: R().darf(zeile.status, 'einladen') && !!m.einladungslinks, export: R().darf(zeile.status, 'export') },
     zugang: (Array.isArray(zeile.zugang) ? zeile.zugang : []).filter((z) => z && !z.aus).map((z) => ({ mail: z.mail, name: z.name || '', rolle: z.rolle === 'inhaber' ? 'inhaber' : 'team', ich: !!(ctx.nutzer && z.uid === ctx.nutzer.id) })),

@@ -2,7 +2,7 @@
    auf der Startseite (Ansicht Fensterbauer: portal.js nimmt den Rahmen .fb und ruft FbSeite.auf(rahmen, { eingebettet: true })).
    Auf der eigenen Seite startet die Datei selbst; ein neuer Start beendet den vorigen (AbortController). Die Bausteine der DNA
    (Auftritt, Anker, Vorhang) startet dna/bundle.js von selbst, eingebettet ruft auf() DNA.start(rahmen) nach.
-   Das Anfrageformular schickt als JSON an POST /api/partner/frage (Felder wie functions/api/partner.js: name, firma, mail, tel, paket,
+   Das Anfrageformular schickt als JSON an POST /api/auftrag/frage (Felder wie functions/auftrag/index.js: name, firma, mail, tel, paket,
    text, Honigtopf fax); ohne JavaScript geht es als normales Formular ab und endet auf der Dankesseite des Servers. */
 (function () {
   'use strict';
@@ -138,7 +138,7 @@
       if (oben && !el.contains(oben) && !oben.contains(el)) el.scrollIntoView({ behavior: 'auto', block: 'center' });
     }, sig);
 
-    /* Anfrage: Paket aus den Karten vorwählen, Pflichtfelder je Feld prüfen, als JSON an /api/partner/frage
+    /* Anfrage: Paket aus den Karten vorwählen, Pflichtfelder je Feld prüfen, als JSON an /api/auftrag/frage
        (ohne JavaScript prüft der Browser und schickt das Formular selbst) */
     var form = $('#anfrage-form');
     if (form) {

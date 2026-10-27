@@ -95,8 +95,8 @@ Die Seiten für Fensterbauer (Verkaufsseite, Bestellformular, Kundenkonto) sind 
 jeder längere Abschnitt eine Bildkarte in derselben Bildsprache wie oben (ein Tier tut etwas Menschliches rund ums Fenster oder
 um den Betrieb). Die Bilder liefert der Inhaber nach den Prompts unten; bis dahin stehen Platzhalter. Einbau danach in drei
 Schritten: Platz in `scripts/fotos.py` (PLAETZE) eintragen, `python3 scripts/fotos.py` laufen lassen, `<figure class="foto-karte">`
-an der genannten Stelle (Verkaufsseite in `web/fuer-fensterbauer/index.html`, Kundenkonto in `web/assets/partner.js` beim Zeichnen der
-Seite). Die Zentrale bleibt ohne Bilder (Arbeitswerkzeug). Auf den Instanzen der Betriebe (Plus, Signature) stehen nur die eigenen
+an der genannten Stelle (Verkaufsseite in `web/fuer-fensterbauer/index.html`). Bestellung, Kundenbereich und Zentrale (seit 27.10.2026,
+`web/assets/auftrag-ui.js`) zeigen die Seiten von Fensterbau Brandt und die Vorschau der eigenen Seite, keine weiteren Bilder. Auf den Instanzen der Betriebe (Plus, Signature) stehen nur die eigenen
 Fotos des Betriebs, nie Bilder von eeziframes; Essential nutzt das eeziframes-Design und darf `app-start` wiederverwenden.
 
 | Name | Format | Wo genau | Chips auf dem Foto | Priorität |
@@ -107,9 +107,6 @@ Fotos des Betriebs, nie Bilder von eeziframes; Essential nutzt das eeziframes-De
 | `fb-pakete` | 1600 × 1000 | Verkaufsseite, direkt über den drei Paketkarten (`#pakete`) | Ihr Name · Ihre Farbe · Ihr Logo | 1 |
 | `fb-ablauf` | 1600 × 1000 | Verkaufsseite, Abschnitt „Von der Bestellung bis zum Livegang“, vor der Schrittliste | Bestellen · Einrichten · Freigeben · Live | 2 |
 | `fb-frage` | 1600 × 1000 | Verkaufsseite, Abschnitt „Bestellen oder anfragen“, neben dem Frageformular (1280 links vom Formular, Telefon darüber). Seit dem 23.10.2026 nicht auf der Seite, bis das Bild da ist; besser noch ein echtes Porträt des Inhabers (4:5, Fensterlicht von rechts oben) | Rückruf · Nachricht · Unverbindlich | 2 |
-| `partner-start` | 1200 × 1500 | Kundenkonto `/partner/`, Anmeldeseite vor der Code-Eingabe, rechts neben dem Text (1280), am Telefon oben | Essential · Plus · Signature | 1 |
-| `partner-gestaltung` | 1600 × 1000 | Bestellformular, Schritt „Gestaltung“ (Plus, Signature), über den Feldern | Logo · Farbe · Fotos · Text | 2 |
-| `partner-warten` | 1600 × 1000 | Kundenkonto, Hauptkarte in den Ständen „Bezahlt“, „In Einrichtung“, „Domain gesichert“, über dem Text | Wir richten ein · Vorschau · Freigabe | 2 |
 | `partner-live` | 1600 × 1000 | Kundenkonto, Hauptkarte im Stand „Live“, über dem Text | Live · Link für Ihre Website | 2 |
 | `instanz-danke` | 1600 × 1000 | Essential-Instanz, Bestätigung nach dem Senden (Plus und Signature zeigen hier ein eigenes Foto des Betriebs, falls vorhanden, sonst nichts) | Gesendet · PDF für dich · Der Betrieb meldet sich | 3 |
 
@@ -139,9 +136,6 @@ plain light grey studio background, photorealistic, no text.*
 | `fb-pakete` | Drei Stufen, die dritte glänzt: Fenster wie bei einer Autopremiere. | A dark showroom with three white window frames presented like sports cars at a launch, each on its own podium under a spotlight; the first plain, the second with a warm brand-coloured frame, the third in brand colour with a golden crest and a velvet rope, visitors' silhouettes in the foreground |
 | `fb-ablauf` | In Tagen statt Monaten: Mit Kreide gezeichnet, und es wird echt. | The master window maker drawing a window with white chalk on a bare plastered wall; the chalk lines are turning into a real white window with glass and a garden view behind it, halfway finished, dust in the light, hopeful |
 | `fb-frage` | Rufen Sie an: Das alte Telefon springt vom Tisch. | An old red rotary telephone on a workbench ringing so hard it jumps into the air, sawdust and a folding rule flying up around it, the master window maker reaching for it from the side, bright workshop light, playful |
-| `partner-start` | Ihr eigener Laden: Der Schlüssel ist ein Fenster. | The master window maker holding up an oversized golden key whose bow is shaped like a window frame, standing in front of a glowing shop front at dusk, proud, warm light spilling onto the pavement |
-| `partner-gestaltung` | Ihre Farbe, nur dort, wo sie hingehört: Der Eimer färbt genau die Rahmen. | A painter pouring a bucket of bright brand-coloured paint over the facade of a house; the paint runs down and colours only the window frames perfectly while the wall stays white, the master window maker watching with crossed arms, afternoon light |
-| `partner-warten` | Wir richten ein, Sie schlafen: Wichtel bauen nachts das Fenster. | The master window maker asleep in a hammock in his workshop at night; a dozen tiny elves in work clothes assemble a white window frame on the bench by lamplight, carrying screws and a tiny spirit level, cosy and funny |
 | `partner-live` | Eröffnung: Das rote Band fällt. | The master window maker cutting a red ribbon stretched across a giant freestanding window frame on a town square, confetti in the air, a small crowd clapping, morning sun, celebratory |
 | `instanz-danke` | Gesendet: Der Flieger fliegt zum Betrieb. | A paper airplane leaving a living room through the open window toward the city at sunset, a relaxed homeowner on the sofa behind it with the phone face-down, the plane already far over the rooftops, warm light |
 

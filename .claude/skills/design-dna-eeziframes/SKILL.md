@@ -106,6 +106,12 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   den Paketen. Danach die Kartenbilder neu aufnehmen. Die Merkmale im Vergleich kommen aus pakete.js; Farben als Treppe „Farben von
   eeziframes / zur Hälfte in Ihren Farben / ganz in Ihren Farben“ (nie „Karten und Akzente“, nie „Firmenfarbe“ ohne Einschränkung),
   Fristen als Zahl („30 Tage nach Zustellung“), Domains brechen nie um. Vorschau und pakete.js ändern sich zusammen.
+- Altes Geschäftsmodell weg, alles neu (Korrektur des Inhabers, 27.10.2026: „keine Rücksicht auf bisherige Plattformen oder Layouts …
+  keine Überschneidungen zwischen dem damaligen Design und dem neuen Design oder irgendwelchen Funktionen“): Kundenkonto `/partner/`,
+  alte Paket-Bestellung und Oberfläche der alten Zentrale sind gelöscht. Bestellung (`/bestellen/`), Kundenbereich (`/konto/`) und
+  Zentrale (`/zentrale/`) sind neu im App-Rahmen der DNA (`web/assets/auftrag.css`, Präfix `a-`) gebaut und bauen nur auf den aktuellen
+  Paketen und den Landingpages von Fensterbau Brandt auf. Wer daran weiterbaut, liest nur docs/BESTELLUNG.md und docs/ZENTRALE.md, nicht
+  den früheren Stand; alte Muster (Statusleiste mit sechs Balken, Seitenleiste der alten Zentrale, Papier-Optik) kommen nicht zurück.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

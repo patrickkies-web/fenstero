@@ -11,8 +11,9 @@
    scripts/pruefen-instanzen/29.mjs prüft, dass Seiten und PDFs so gebaut sind.
 
    Verkauf: ohne PAKETE_OFFEN=1 zeigt die Seite „Vorläufige Preise“ und statt der Bestellknöpfe „Bestellung bald möglich“ mit dem
-   Anfrageformular (POST /api/partner/frage, auch ohne JavaScript); die Paket-Kasse selbst sperrt partner.js. Mit PAKETE_OFFEN=1 führt
-   jeder Bestellknopf auf /partner/#bestellen/<paket>. Live-Demos: mit PAKETE_DEMOS=1 Links auf https://demo-<paket>.eeziframes.com/
+   Anfrageformular (POST /api/auftrag/frage, auch ohne JavaScript). Jeder Paketknopf führt in die Bestellung dieses Pakets
+   (/bestellen/#<paket>, functions/auftrag/); solange die Kasse zu ist, endet sie mit „Unverbindlich anfragen“, mit PAKETE_OFFEN=1 und
+   vollständigen Rechtstexten mit der Zahlung. Live-Demos: mit PAKETE_DEMOS=1 Links auf https://demo-<paket>.eeziframes.com/
    (Demo-Instanzen, docs/INSTANZEN.md Teil 2), sonst der Weg in die App.
    Preise stehen mit schmalem geschütztem Leerzeichen (U+202F) vor „€“: Die Ersetzungen nach dem Einführungspreis der Hauseigentümer
    (seo.js, nachEinfuehrung) greifen nur bei Leerzeichen und &nbsp; und lassen die Paketpreise in Ruhe. */
@@ -133,9 +134,7 @@ function karten(o, v) {
   const liste = P().LISTE;
   const karte = (p, i) => {
     const m = P().merkmale(p), pr = P().preis(p), emp = i === EMPFOHLEN;
-    const knopf = v.bestellen
-      ? '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + ' bestellen</a>'
-      : '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="#bestellen" data-paket="' + p + '">' + esc(kurzname(p)) + ' anfragen</a>';
+    const knopf = '<a class="btn ' + (emp ? 'primary' : 'ghost') + '" href="/bestellen/#' + p + '" data-paket="' + p + '">' + esc(kurzname(p)) + (v.bestellen ? ' bestellen' : ' anfragen') + '</a>';
     return '\n    <article class="vk-paket' + (emp ? ' vk-empfohlen' : '') + '" id="paket-' + p + '" aria-labelledby="paket-' + p + '-name">' +
       (emp ? '<p class="vk-marke">Empfohlen</p>' : '') +
       '<h3 class="vk-name" id="paket-' + p + '-name">' + esc(P().PAKETE[p].name) + '</h3>' +
@@ -197,7 +196,7 @@ function demos(o, v) {
 }
 function formular() {
   const optionen = '<option value="">Noch offen</option>' + P().LISTE.map((p) => '<option value="' + p + '">' + esc(P().PAKETE[p].name) + '</option>').join('');
-  return '\n  <form class="vk-form" method="post" action="/api/partner/frage" data-vk-frage>' +
+  return '\n  <form class="vk-form" method="post" action="/api/auftrag/frage" data-vk-frage>' +
     '\n    <div class="vk-felder">' +
     '<label class="vk-feld vk-breit"><span>Paket</span><select name="paket">' + optionen + '</select></label>' +
     '<label class="vk-feld"><span>Ihr Name</span><input name="name" autocomplete="name" required minlength="2" maxlength="80"></label>' +
@@ -214,9 +213,9 @@ function formular() {
 }
 function bestellen(o, v) {
   if (v.bestellen) {
-    return '\n  <p>Wählen Sie Ihr Paket. Im Kundenkonto stimmen Sie den <a href="/konfigurator-bedingungen/">Paketbedingungen</a> zu und zahlen die Einrichtung bei Stripe.</p>\n  <div class="vk-knoepfe">' +
-      P().LISTE.map((p, i) => '<a class="btn ' + (i === EMPFOHLEN ? 'primary' : 'ghost') + '" href="/partner/#bestellen/' + p + '">' + esc(P().PAKETE[p].name) + ' bestellen</a>').join('') +
-      '</div>\n  <p class="rg-klein">Schon bestellt? <a href="/partner/">Zum Kundenkonto</a></p>\n  <h3 id="frage">Vorher eine Frage?</h3>\n  <p>Schreiben Sie uns; wir antworten in der Regel innerhalb eines Werktags, gern auch am Telefon.</p>' + formular() + '\n  ';
+    return '\n  <p>Wählen Sie Ihr Paket. In der Bestellung stimmen Sie den <a href="/konfigurator-bedingungen/">Paketbedingungen</a> zu und zahlen die Einrichtung bei Stripe.</p>\n  <div class="vk-knoepfe">' +
+      P().LISTE.map((p, i) => '<a class="btn ' + (i === EMPFOHLEN ? 'primary' : 'ghost') + '" href="/bestellen/#' + p + '">' + esc(P().PAKETE[p].name) + ' bestellen</a>').join('') +
+      '</div>\n  <p class="rg-klein">Schon bestellt? <a href="/konto/">Zum Kundenbereich</a></p>\n  <h3 id="frage">Vorher eine Frage?</h3>\n  <p>Schreiben Sie uns; wir antworten in der Regel innerhalb eines Werktags, gern auch am Telefon.</p>' + formular() + '\n  ';
   }
   return '\n  <div class="vk-bald"><p class="eyebrow">Bestellung bald möglich</p><p>Die Bestellung schalten wir in Kürze frei. Fragen Sie unverbindlich an; wir antworten meist innerhalb eines Werktags.</p></div>\n  <h3 id="frage">Paket unverbindlich anfragen</h3>' + formular() + '\n  ';
 }
@@ -293,7 +292,7 @@ function fbBaustein(name, o, v) {
     if (m[1] === 'zahl') return zahl(P().preis(p).monat);
     if (m[1] === 'einr') return geld(P().preis(p).einrichtung);
     const emp = L.indexOf(p) === EMPFOHLEN;
-    return '<a class="dna-pille' + (emp ? '' : ' dna-pille--leise') + '" href="' + (v.bestellen ? '/partner/#bestellen/' + p : '#bestellen') + '" data-paket="' + p + '">' +
+    return '<a class="dna-pille' + (emp ? '' : ' dna-pille--leise') + '" href="/bestellen/#' + p + '" data-paket="' + p + '">' +
       esc(kurzname(p)) + (v.bestellen ? ' bestellen' : ' anfragen') + (emp ? PFEILKREIS : '') + '</a>';
   }
   if (name === 'fb-ab') return geld(Math.min.apply(null, L.map((p) => P().preis(p).monat)));
@@ -311,12 +310,12 @@ function fbBaustein(name, o, v) {
   if (name === 'fb-anfrage-titel') return v.bestellen ? 'Vorher eine <em class="ez-ak">Frage?</em>' : 'Paket unverbindlich <em class="ez-ak">anfragen.</em>';
   if (name === 'fb-anfrage-lede') {
     return v.bestellen
-      ? 'Bestellen Sie Ihr Paket im Kundenkonto: ' + L.map((p) => '<a href="/partner/#bestellen/' + p + '">' + esc(kurzname(p)) + '</a>').join(', ') + '. Fragen vorab beantworten wir gern.'
+      ? 'Bestellen Sie Ihr Paket online: ' + L.map((p) => '<a href="/bestellen/#' + p + '">' + esc(kurzname(p)) + '</a>').join(', ') + '. Fragen vorab beantworten wir gern.'
       : 'Die Bestellung wird in Kürze freigeschaltet. Bis dahin beantworten wir Ihre Fragen und merken Ihr Paket vor.';
   }
   if (name === 'fb-faq-bestellen') {
     return v.bestellen
-      ? 'Ja. Wählen Sie Ihr Paket und bestellen Sie im Kundenkonto; die Einrichtung zahlen Sie vorab per Karte oder SEPA-Lastschrift.'
+      ? 'Ja. Wählen Sie Ihr Paket und bestellen Sie online; die Einrichtung zahlen Sie vorab per Karte oder SEPA-Lastschrift. Den Stand sehen Sie danach im Kundenbereich.'
       : 'Die Bestellung wird in Kürze freigeschaltet. Bis dahin können Sie ein Paket unverbindlich anfragen. Antwort meist innerhalb eines Werktags.';
   }
   return null;

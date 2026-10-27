@@ -45,10 +45,11 @@
 // dazu der Angleich an die Detailtiefe: ein Kapitelkonzept (Leiste, Kicker, Übersicht), Tiefe-Pille neben „Notiz“ mit Browser-Zurück,
 // Notiz und i an jeder Detailfrage, RAL-Farbwahl bei den Detailfarben, Zifferntasten für die neuen Maße, Stulp mit Seitenteilen,
 // Standard mit dem Namen des Betriebs, keine Gesamtübersicht und ein Entwurf, der „Mehr zu …“ und die Tiefe behält.
-// Abschnitte 23 bis 30 prüfen die Konfigurator-Instanzen in drei Paketen (docs/INSTANZEN.md); sie stehen je in einem Modul unter
+// Abschnitte 23 bis 29 prüfen die Konfigurator-Instanzen in drei Paketen (docs/INSTANZEN.md) und die Aufträge; sie stehen je in einem Modul unter
 // scripts/pruefen-instanzen/ und laufen gegen einen eigenen Testserver mit Attrappen (Hilfsobjekt h, scripts/pruefen-instanzen/hilfe.mjs).
 // 23 Mandant, Routing, Schutz (vorneweg 23-fundament.mjs: Pakete, Regeln, Speicher, Sitzungen, Post, Bremsen, Testserver) · 24 Eingang ·
-// 25 App im Instanz-Modus · 26 Zentrale · 27 Kundenkonto und Bestellung · 28 Signature-Dashboard · 29 Verkaufsseite, Recht · 30 Ende zu Ende.
+// 25 App im Instanz-Modus · 26 Aufträge: Bestellung, Kundenbereich, Zentrale (docs/BESTELLUNG.md) · 28 Signature-Dashboard · 29 Verkaufsseite,
+// Recht. Die früheren Abschnitte 27 (Kundenkonto /partner/) und 30 (Ende zu Ende über die alte Bestellung) sind mit diesen Teilen entfallen.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -194,7 +195,7 @@ if (teil(2)) {
   z = await zustand();
   ok(z.a === 'Fensterbauer' && z.n === 2 && z.vk && !z.b2b && !z.b2c && z.h1.length === 1 && /Anfragen mit Aufmaß/.test(z.h1[0]) && z.hash === '#fensterbauer' && z.top.includes('Paket anfragen') && !z.top.some((t) => /Anmelden|starten|ausmessen/i.test(t)) && !z.portalKopf && !z.portalFuss, 'Ansicht Fensterbauer: Anker #fensterbauer, die Paket-Landingpage eingebettet mit ihrem eigenen Kopf (Umschalter, „Paket anfragen“), genau einem h1 und eigener Fußzeile; keine Kopf- oder Fußzeile des Portals, keine Startbilder der Ansichten');
   ok(await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[href="/#hauseigentuemer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-kopf nav.ez-ansicht a[aria-current][href="/#fensterbauer"]').count() === 1 && await pa.locator('.vk-einbettung .ez-wissen a.ez-linkzeile[href="/#hauseigentuemer"]').count() === 1 && await pa.evaluate(() => window.scrollY) === 0, 'Fensterbauer: Sprung an den Anfang der Ansicht, oben der Umschalter (Fensterbauer bleibt in der Ansicht), am Ende der Weg zu den Hauseigentümern');
-  ok(await pa.locator('.vk-einbettung .ez-paket').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/partner/frage"]').count() === 1 && await pa.locator('.vk-einbettung .ez-livegang').count() === 1 && await pa.locator('.vk-einbettung .fb .ez-kopf').isVisible() && await pa.locator('.vk-einbettung .fb .ez-fuss .ez-fuss__pilot').count() === 1 && await pa.evaluate(() => getComputedStyle(document.querySelector('.vk-einbettung .fb .ez-leiste')).position === 'fixed' && getComputedStyle(document.querySelector('.vk-einbettung .fb .dna-szene')).position === 'sticky'), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, dazu Kopf, Leiste, Vorhang und Fußzeile der Seite wie auf /fuer-fensterbauer/');
+  ok(await pa.locator('.vk-einbettung .ez-paket').count() === 3 && await pa.locator('.vk-einbettung form#anfrage-form[action="/api/auftrag/frage"]').count() === 1 && await pa.locator('.vk-einbettung .ez-livegang').count() === 1 && await pa.locator('.vk-einbettung .fb .ez-kopf').isVisible() && await pa.locator('.vk-einbettung .fb .ez-fuss .ez-fuss__pilot').count() === 1 && await pa.evaluate(() => getComputedStyle(document.querySelector('.vk-einbettung .fb .ez-leiste')).position === 'fixed' && getComputedStyle(document.querySelector('.vk-einbettung .fb .dna-szene')).position === 'sticky'), 'Einbettung: drei Paketkarten, das Anfrageformular und der Livegang sind da, dazu Kopf, Leiste, Vorhang und Fußzeile der Seite wie auf /fuer-fensterbauer/');
   await pa.click('.vk-einbettung .ez-aktionen a[href="#pakete"]'); await pa.waitForTimeout(1800);
   const sprung = await pa.evaluate(() => { const h = document.getElementById('pakete'), r = h ? h.getBoundingClientRect() : null; return { screen: S.screen, hash: location.hash, oben: !!r && r.top >= -1 && r.top < 80 }; });
   ok(sprung.screen === 'landing' && sprung.hash === '#fensterbauer' && sprung.oben, 'Knopf „Pakete ansehen“ im Startbild scrollt den Abschnitt an den oberen Rand; Ansicht und Anker #fensterbauer bleiben');
@@ -1721,10 +1722,10 @@ if (teil(10)) {
   ok(ausDatei['X-Robots-Tag'] === seo.SPERRE && Object.entries(seo.SICHERHEIT).every(([k, v]) => ausDatei[k] === v) && Object.keys(ausDatei).every((k) => k === 'X-Robots-Tag' || k in seo.SICHERHEIT), 'Kopfzeilen in functions/seo.js und web/_headers stimmen überein');
   const dateien = [], such = (d, rel) => { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) such(path10.join(d, e.name), rel + e.name + '/'); else if (e.name === 'index.html') dateien.push(rel); } };
   such(path10.join(WURZEL, 'web'), '/');
-  const oeffentlich = dateien.filter((p) => p !== '/zentrale/' && p !== '/partner/' && p !== '/betrieb/' && !p.startsWith('/vorschau/')); // nicht öffentlich: Zentrale, Kundenkonto der Fensteranbieter, Dashboard der Instanzen (nur auf deren Domains), Vorschauen zum Herumzeigen (noindex)
+  const oeffentlich = dateien.filter((p) => p !== '/zentrale/' && p !== '/bestellen/' && p !== '/konto/' && p !== '/betrieb/' && !p.startsWith('/vorschau/')); // nicht öffentlich: Zentrale, Bestellung und Kundenbereich der Fensteranbieter, Dashboard der Instanzen (nur auf deren Domains), Vorschauen zum Herumzeigen (noindex)
   ok(oeffentlich.length === seo.SEITEN.length && oeffentlich.every((p) => seo.SEITEN.some((s) => s.pfad === p)), 'Sitemap kennt jede öffentliche Seite in web/ (' + oeffentlich.length + ')');
   ok(dateien.includes('/zentrale/') && !seo.SEITEN.some((s) => s.pfad.startsWith('/zentrale')) && !seo.istSeite('/zentrale/') && !seo.llms('https://eeziframes.com', {}).includes('zentrale'), 'Zentrale des Inhabers: nicht in Sitemap und llms.txt, keine Seite für Suchmaschinen');
-  ok(dateien.includes('/partner/') && !seo.SEITEN.some((s) => s.pfad.startsWith('/partner')) && !seo.istSeite('/partner/') && /Disallow: \/partner\//.test(seo.robots('https://eeziframes.com', true)), 'Kundenkonto der Fensteranbieter (/partner/): nicht in der Sitemap, keine Seite für Suchmaschinen, in robots.txt gesperrt');
+  ok(['/bestellen/', '/konto/'].every((p) => dateien.includes(p) && !seo.SEITEN.some((s) => s.pfad.startsWith(p)) && !seo.istSeite(p) && seo.robots('https://eeziframes.com', true).includes('Disallow: ' + p)) && !dateien.includes('/partner/'), 'Bestellung und Kundenbereich der Fensteranbieter (/bestellen/, /konto/): nicht in der Sitemap, keine Seite für Suchmaschinen, in robots.txt gesperrt; das alte Kundenkonto /partner/ gibt es nicht mehr');
   const routen = JSON.parse((fs10.readFileSync(path10.join(WURZEL, 'wrangler.jsonc'), 'utf8').match(/"run_worker_first":\s*(\[[^\]]*\])/) || [])[1] || '[]');
   const passt = (r, p) => (r.endsWith('*') ? p.startsWith(r.slice(0, -1)) : p === r);
   ok(seo.SEITEN.every((s) => seo.istSeite(s.pfad) && routen.some((r) => passt(r, s.pfad))) && ['/robots.txt', '/sitemap.xml', '/llms.txt'].every((p) => routen.includes(p)), 'Worker übernimmt alle Seiten, robots.txt, sitemap.xml und llms.txt (run_worker_first in wrangler.jsonc)');
@@ -1740,7 +1741,7 @@ if (teil(10)) {
   (function such10(d) { for (const e of fs10.readdirSync(d, { withFileTypes: true })) { const f = path10.join(d, e.name); if (e.isDirectory()) such10(f); else if (e.name.endsWith('.html') && !f.includes(path10.sep + 'zentrale' + path10.sep) && !f.includes(path10.sep + 'betrieb' + path10.sep) && !f.includes(path10.sep + 'vorschau' + path10.sep) && !seo.BESTAETIGUNG['/' + e.name]) seiten10.push(f); } })(path10.join(WURZEL, 'web')); // Dashboard der Instanzen: Marke des Betriebs, ohne eeziframes
   const ohneZeichen10 = seiten10.filter((f) => !fs10.readFileSync(f, 'utf8').includes(statisch10)).map((f) => path10.relative(WURZEL, f));
   const lies10 = (f) => fs10.readFileSync(path10.join(WURZEL, f), 'utf8'), bl10 = lies10('web/assets/blatt.js');
-  ok(/fi-strahl/.test(innen10) && seiten10.length >= 19 && !ohneZeichen10.length && lies10('web/favicon.svg').includes(innen10) && lies10('web/assets/zentrale.js').includes(innen10) && ['[26.4, 12.2]', '[57, 17.6]', '[44.2, 41]', '[11.7, 64]'].every((s) => bl10.includes(s)) && !/fi-fluegel|rx="16" fill="#000"/.test(seiten10.map((f) => fs10.readFileSync(f, 'utf8')).join('') + gem10) && /ZEICHEN_PNG = 'iVBOR/.test(lies10('functions/api/marke.js')), 'Das neue Zeichen steht überall gleich: ' + seiten10.length + ' Seiten, Favicon, Zentrale, App und Betriebsbereich, im PDF mit denselben Punkten, als Bild für die E-Mails' + (ohneZeichen10.length ? '; fehlt in ' + ohneZeichen10.join(', ') : ''));
+  ok(/fi-strahl/.test(innen10) && seiten10.length >= 19 && !ohneZeichen10.length && lies10('web/favicon.svg').includes(innen10) && lies10('web/assets/auftrag-ui.js').includes(innen10) && ['[26.4, 12.2]', '[57, 17.6]', '[44.2, 41]', '[11.7, 64]'].every((s) => bl10.includes(s)) && !/fi-fluegel|rx="16" fill="#000"/.test(seiten10.map((f) => fs10.readFileSync(f, 'utf8')).join('') + gem10) && /ZEICHEN_PNG = 'iVBOR/.test(lies10('functions/api/marke.js')), 'Das neue Zeichen steht überall gleich: ' + seiten10.length + ' Seiten, Favicon, Zentrale, App und Betriebsbereich, im PDF mit denselben Punkten, als Bild für die E-Mails' + (ohneZeichen10.length ? '; fehlt in ' + ohneZeichen10.join(', ') : ''));
   const apple10 = fs10.readFileSync(path10.join(WURZEL, 'web/apple-touch-icon.png'));
   ok(apple10.readUInt32BE(16) === 180 && apple10.readUInt32BE(20) === 180, 'Apple-Icon 180 × 180 mit dem neuen Zeichen (scripts/marke-bilder.mjs)');
   const konf = {}; new Function('window', fs10.readFileSync(path10.join(WURZEL, 'web/config.js'), 'utf8'))(konf);
@@ -1856,8 +1857,8 @@ if (teil(10)) {
   /* Ratgeber ohne Eingaben: keine Formulare, keine leeren Tabellen zum Ausfüllen, keine Vorlage zum Ausdrucken, kein Rechner (das Aufmaß entsteht in der App) */
   const eingabeFehler = [];
   for (const pf of seo.SEITEN.map((x) => x.pfad).filter((x) => /^\/(ratgeber|fuer-fensterbauer)\//.test(x))) {
-    /* die Seite für Fensterbauer darf ihr Anfrageformular für die Pakete haben (POST /api/partner/frage), sonst nichts zum Ausfüllen */
-    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="\/api\/partner\/frage">[\s\S]*?<\/form>/ : /^$/, '');
+    /* die Seite für Fensterbauer darf ihr Anfrageformular für die Pakete haben (POST /api/auftrag/frage), sonst nichts zum Ausfüllen */
+    const t = (await roh(pf)).text.replace(pf === '/fuer-fensterbauer/' ? /<form class="ez-form" id="anfrage-form" data-theme="hell" method="post" action="\/api\/auftrag\/frage">[\s\S]*?<\/form>/ : /^$/, '');
     if (/<(form|input|select|textarea)\b|contenteditable|rg-leer|rechner\.js|<td><\/td>/i.test(t)) eingabeFehler.push(pf);
   }
   const ohneRechner = (await fetch(BASE + '/assets/rechner.js')).status === 404, bm = (await roh('/ratgeber/bestellmass-fenster/')).text, ab2 = (await roh('/ratgeber/aufmassblatt-fenster/')).text;
@@ -2403,131 +2404,7 @@ if (teil(13)) {
     ok(false, 'Zentrale ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
   }
 
-  // p) Oberfläche im Browser, auf einem eigenen Testserver mit Zentrale
-  const cp = await import('node:child_process'), pfad = await import('node:path'), urlM = await import('node:url');
-  const port = await freierPort(), B4 = 'http://localhost:' + port;
-  const kind = cp.spawn(process.execPath, [pfad.join(pfad.dirname(urlM.fileURLToPath(import.meta.url)), 'dev-server.mjs')], { env: Object.assign({}, process.env, { PORT: String(port), KI_ATTRAPPE: '1', DATEN_ATTRAPPE: '1', ZAHLUNG_ATTRAPPE: '1', ZENTRALE_PASSWORT: PW }), stdio: ['ignore', 'ignore', 'pipe'] });
-  kind.stderr.on('data', (dd) => process.stderr.write('  [Server 4] ' + dd));
-  const aus4 = () => { try { kind.kill(); } catch (e) { /* schon weg */ } }; process.on('exit', aus4);
-  try {
-    let bereit = false; for (let i = 0; i < 60 && !bereit; i++) { await new Promise((r) => setTimeout(r, 200)); try { bereit = (await fetch(B4 + '/api/zentrale/status').then((r) => r.json())).eingerichtet === true; } catch (e) { /* noch nicht */ } }
-    ok(bereit, 'Testserver mit Zentrale läuft: ' + B4);
-    const http = async (p, body, token) => { const r = await fetch(B4 + p, { method: body ? 'POST' : 'GET', headers: Object.assign({ accept: 'application/json', origin: B4 }, body ? { 'content-type': 'application/json' } : {}, token ? { authorization: 'Bearer ' + token } : {}), body: body ? JSON.stringify(body) : undefined }); return Object.assign({ _status: r.status }, await r.json().catch(() => ({}))); };
-    const mailU = 'ui-' + stempel + '@beispiel.de', TU = tok(mailU);
-    await http('/api/konto/registrieren', { firma: 'Fensterbau Oberfläche', ap: 'Uwe Ober', tel: '0221 6' + String(Date.now()).slice(-6), plz: '50667', agb: RECHT.NB_STAND, unternehmer: true }, TU);
-    const pr = await http('/api/konto/projekte', { kunde: 'Familie Unsichtbar', kontakt: '0171 1111111', plan: ['Fenster'], days: 14 }, TU), codeU = pr.konto.acc.links.find((l) => l.id === pr.id).code;
-    await http('/api/aufmass', { v: 1, b: codeU, w: fenster, p: { name: 'Familie Unsichtbar' }, t: Date.now() });
-    const MENSCH = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36'; // Headless-Chromium meldet sich als HeadlessChrome und zählt deshalb als Bot
-    const zctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE', acceptDownloads: true, userAgent: MENSCH }), zp = await neueSeite(zctx, B4);
-    const r0 = await zp.goto(B4 + '/zentrale/', { waitUntil: 'networkidle' });
-    ok(r0.headers()['x-robots-tag'] === seoSperre && r0.headers()['cache-control'] === 'no-store' && /Zentrale/.test(await zp.title()) && await zp.locator('#z-pw').count() === 1 && await zp.locator('svg .fi-kachel').count() === 1, '/zentrale/: Anmeldung mit Logo, noindex, nicht zwischengespeichert');
-    await zp.fill('#z-pw', 'falsch-falsch-falsch'); await zp.click('form[data-form="anmelden"] button[type="submit"]'); await zp.waitForSelector('.z-login .err');
-    ok(/stimmt nicht/.test(await zp.locator('.z-login .err').textContent()) && await zp.locator('.z-stats').count() === 0, 'Falsches Passwort: Hinweis, keine Zentrale');
-    zp.probleme = zp.probleme.filter((x) => !/401/.test(x));
-    await zp.fill('#z-pw', PW); await zp.click('form[data-form="anmelden"] button[type="submit"]'); await zp.waitForSelector('.z-stats');
-    const ck = (await zctx.cookies()).find((c) => c.name === '__Host-zentrale');
-    ok(!!ck && ck.httpOnly && ck.secure && ck.sameSite === 'Strict' && !(await zp.evaluate(() => document.cookie)).includes('zentrale') && await zp.evaluate(() => !Object.keys(localStorage).length && !Object.keys(sessionStorage).length), 'Sitzung als Cookie, das kein Skript lesen kann; nichts im Speicher des Browsers');
-    ok(/Zweiter Faktor fehlt/.test(await zp.evaluate(() => document.body.innerText)) && await zp.locator('.z-chart svg').count() >= 3, 'Übersicht: Kennzahlen, Diagramme, Hinweis auf den zweiten Faktor');
-    await foto(zp, 'zentrale-uebersicht');
-    // Zeitraum: Voreinstellung, eigener Zeitraum (gilt auf allen Seiten), „Gesamt“; gezeigt wird nur, was darin passiert ist
-    const zrSteht = (re) => zp.waitForFunction((q) => new RegExp(q).test((document.querySelector('.z-zr-text') || {}).textContent || ''), re.source);
-    const aufmZahl = () => zp.evaluate(() => { const s = Array.from(document.querySelectorAll('.stat')).find((x) => /Aufmaße eingegangen/.test(x.textContent)); return s ? +s.querySelector('b').textContent : NaN; });
-    await zp.click('.z-zr-seg [data-v="7"]'); await zrSteht(/\(7 Tage\)/); const a7 = await aufmZahl();
-    await zp.click('.z-zr-seg [data-v="frei"]'); await zp.waitForSelector('#z-von'); const fokusVon = await zp.evaluate(() => document.activeElement && document.activeElement.id);
-    await zp.fill('#z-von', '2020-01-31'); await zp.fill('#z-bis', '2020-01-01'); await zp.click('form[data-form="zeitraum"] button[type="submit"]'); await zrSteht(/01\.01\.2020 bis 31\.01\.2020 \(31 Tage\)/);
-    const altText = await zp.evaluate(() => document.body.innerText), aAlt = await aufmZahl();
-    await zp.fill('#z-von', '2020-01-01'); await zp.fill('#z-von-zeit', '08:30'); await zp.fill('#z-bis', '2020-01-01'); await zp.fill('#z-bis-zeit', '17:00'); await zp.click('form[data-form="zeitraum"] button[type="submit"]');
-    await zrSteht(/01\.01\.2020, 08:30 Uhr bis 01\.01\.2020, 17:00 Uhr \(9 Stunden\)/); const uhrText = await zp.evaluate(() => document.body.innerText);
-    await zp.goto(B4 + '/zentrale/#kaeufe'); await zrSteht(/2020/); const kaeufeAlt = await zp.evaluate(() => document.body.innerText);
-    await zp.goto(B4 + '/zentrale/#uebersicht'); await zrSteht(/2020/); await zp.click('.z-zr-seg [data-v="anfang"]'); await zrSteht(/^Ausgewertet: (?!01\.01\.2020)/); const aAnf = await aufmZahl();
-    ok(a7 >= 1 && fokusVon === 'z-von' && aAlt === 0 && /keine neuen im Zeitraum/.test(altText) && /Im Zeitraum ist nichts passiert/.test(altText) && /Im Zeitraum kein Aufmaßblatt verkauft/.test(kaeufeAlt) && /, ganze Tage/.test(uhrText) && aAnf >= a7, 'Zeitraum in der Zentrale: 7 Tage, eigener Zeitraum mit Tagen und Uhrzeit (vertauschte Tage werden getauscht, gilt auf allen Seiten), Gesamt; gezeigt wird nur, was darin passiert ist');
-    await foto(zp, 'zentrale-zeitraum');
-    await zp.click('.z-zr-seg [data-v="30"]'); await zrSteht(/\(30 Tage\)/);
-    // Anzeigen: Seite mit Vergleich und Verlauf, Link für die Anzeige mit bereinigtem Kampagnennamen
-    await zp.goto(B4 + '/zentrale/#anzeigen'); await zp.waitForSelector('#z-l-url'); await zp.selectOption('#z-l-ziel', 'fensterbauer'); await zp.selectOption('#z-l-netz', 'facebook'); await zp.fill('#z-l-kamp', 'Kunde nicht da!');
-    const anzUI = await zp.evaluate(() => ({ link: document.getElementById('z-l-url').value, fokus: document.activeElement && document.activeElement.id, text: document.body.innerText, nav: !!document.querySelector('.z-nav a[href="#anzeigen"][aria-current="page"]') }));
-    ok(anzUI.link === B4 + '/?utm_source=facebook&utm_medium=paid&utm_campaign=kunde-nicht-da#fensterbauer' && anzUI.fokus === 'z-l-kamp' && anzUI.nav && /Vergleich mit vorher/.test(anzUI.text) && /Besuche je Stunde/.test(anzUI.text) && /utm_source=\{\{site_source_name\}\}/.test(await zp.inputValue('#z-l-meta')), 'Anzeigen im Browser: Vergleich, Verlauf je Stunde, Link für die Anzeige (Ziel, Netz, Kampagne) und URL-Parameter für Meta');
-    await foto(zp, 'zentrale-anzeigen');
-    await zp.goto(B4 + '/zentrale/#betriebe'); await zp.waitForSelector('.z-tab');
-    await zp.fill('#z-suche', 'Oberfläche'); await zp.waitForTimeout(150);
-    ok(await zp.locator('.z-tab tbody tr').count() === 1 && (await zp.inputValue('#z-suche')) === 'Oberfläche', 'Suche filtert beim Tippen, das Feld behält den Fokus und den Text');
-    await zp.click('.z-tab tbody tr td:nth-child(3)'); await zp.waitForSelector('.z-aktionen');
-    const det = await zp.evaluate(() => document.body.innerText);
-    ok(/Fensterbau Oberfläche/.test(det) && /P-\d{4}-001/.test(det) && !/Unsichtbar|1111111/.test(det), 'Klick auf die Zeile öffnet den Betrieb; Kunden nur als Projektnummer');
-    await foto(zp, 'zentrale-betrieb');
-    await zp.click('[data-act="dlg"][data-v="sperren"]'); await zp.waitForSelector('#d-grund');
-    ok(await zp.evaluate(() => document.activeElement && document.activeElement.id === 'd-grund'), 'Dialog „Sperren“: Fokus im Feld für die Begründung');
-    await zp.fill('#d-grund', 'Prüfung der Sperre'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForSelector('.z-hinweis.bad');
-    ok(/Prüfung der Sperre/.test(await zp.locator('.z-hinweis.bad').textContent()), 'Gesperrt: Hinweis mit Begründung am Betrieb');
-    const pctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' }), pp = await neueSeite(pctx, B4);
-    await pp.goto(B4 + '/', { waitUntil: 'networkidle' });
-    await pp.evaluate((s) => localStorage.setItem('aufmass.sitzung', JSON.stringify(s)), { token: TU, refresh: 'test-refresh', mail: mailU });
-    await pp.reload({ waitUntil: 'networkidle' }); await pp.waitForTimeout(500);
-    const gesp = await pp.evaluate(() => ({ online: Server.online(), sitzung: localStorage.getItem('aufmass.sitzung'), toast: (document.getElementById('toast') || {}).textContent || '' }));
-    pp.probleme = pp.probleme.filter((x) => !/403/.test(x));
-    ok(!gesp.online && !gesp.sitzung && /gesperrt/.test(gesp.toast) && /Prüfung der Sperre/.test(gesp.toast), 'Betriebsbereich: gesperrter Betrieb wird abgemeldet und sieht die Begründung');
-    const lk = await http('/api/link/' + codeU);
-    ok(lk._status === 404 && /nicht aktiv/.test(lk.fehler || ''), 'Kundenlink eines gesperrten Betriebs ruht');
-    await zp.click('[data-act="dlg"][data-v="entsperren"]'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForFunction(() => !document.querySelector('.z-hinweis.bad'));
-    await pp.evaluate((s) => localStorage.setItem('aufmass.sitzung', JSON.stringify(s)), { token: TU, refresh: 'test-refresh', mail: mailU });
-    await pp.reload({ waitUntil: 'networkidle' }); await pp.waitForTimeout(500);
-    ok(await pp.evaluate(() => Server.online()), 'Entsperrt: der Betrieb kommt wieder in sein Konto');
-    sauber(pp, 'Betriebsbereich mit Sperre ohne Fehler'); await pctx.close();
-    await zp.click('[data-act="dlg"][data-v="export"]'); await zp.waitForSelector('.z-dialog #d-grund');
-    const warnt = /zweite Faktor eingerichtet sein/.test(await zp.locator('.z-dialog').textContent());
-    await zp.fill('#d-grund', 'Auskunftsersuchen zur Prüfung'); await zp.click('.z-dialog button[type="submit"]'); await zp.waitForSelector('.z-dialog .err');
-    ok(warnt && /zweiten Faktor/.test(await zp.locator('.z-dialog .err').textContent()), 'Export ohne zweiten Faktor: Dialog warnt, der Server lehnt ab');
-    zp.probleme = zp.probleme.filter((x) => !/403/.test(x));
-    await zp.click('.z-dialog [data-act="dlg-zu"]');
-    // Eigene Aufrufe zählen nicht, fremde schon
-    const summe = () => zp.evaluate(async () => (await (await fetch('/api/zentrale/statistik?tage=7', { headers: { 'x-zentrale': '1' } })).json()).summe.aufrufe);
-    const vorA = await summe();
-    await zp.goto(B4 + '/', { waitUntil: 'networkidle' });
-    const fctx = await browser.newContext({ locale: 'de-DE', userAgent: MENSCH }), fp = await fctx.newPage(); await fp.goto(B4 + '/ratgeber/fenster-ausmessen/', { waitUntil: 'networkidle' }); await fctx.close();
-    await zp.goto(B4 + '/zentrale/#statistik'); await zp.waitForSelector('.z-chart svg'); await zp.waitForTimeout(200);
-    ok((await summe()) === vorA + 1, 'Statistik im Browser: Aufrufe des angemeldeten Inhabers zählen nicht, fremde schon');
-    await foto(zp, 'zentrale-statistik');
-    await zp.goto(B4 + '/zentrale/#einstellungen'); await zp.waitForSelector('[data-act="2fa-neu"]'); await zp.click('[data-act="2fa-neu"]'); await zp.waitForSelector('.z-qr');
-    const geheimUI = await zp.inputValue('#z-geheim');
-    await zp.fill('#z-probe', '000000'); await zp.click('form[data-form="2fa-probe"] button[type="submit"]'); await zp.waitForTimeout(150);
-    const falschUI = await zp.locator('#z-2fa .err').count();
-    await zp.fill('#z-probe', await ze.totpCode(geheimUI, Math.floor(Date.now() / 30000))); await zp.click('form[data-form="2fa-probe"] button[type="submit"]'); await zp.waitForSelector('#z-2fa .z-hinweis.ok');
-    ok(/^[A-Z2-7]{32}$/.test(geheimUI) && falschUI === 1 && /ZENTRALE_2FA/.test(await zp.locator('#z-2fa .z-hinweis.ok').textContent()), 'Zweiter Faktor einrichten: Schlüssel und QR-Code im Browser, falscher Code abgewiesen, richtiger bestätigt, Anleitung für Cloudflare');
-    await foto(zp, 'zentrale-zweiter-faktor');
-    sauber(zp, 'Zentrale ohne Fehler, ohne CSP-Verstöße, ohne fremde Server');
-    // Gestaltung: erlaubte Schriftgrößen, Ziele ab 44 px, kein Querscrollen, am Schreibtisch und am Telefon, hell und dunkel
-    const messen = (seite) => seite.evaluate(() => {
-      const sichtbar = (el) => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
-      const groessen = new Set(), klein = [];
-      document.querySelectorAll('body *').forEach((el) => { if (sichtbar(el) && Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim())) groessen.add(parseFloat(getComputedStyle(el).fontSize)); });
-      document.querySelectorAll('a, button, input, select, textarea, summary').forEach((el) => { if (!sichtbar(el)) return; const h = el.getBoundingClientRect().height; if (h < 43.5) klein.push(el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' (' + Math.round(h) + ' px: ' + (el.textContent || el.value || '').trim().slice(0, 24) + ')'); });
-      return { groessen: Array.from(groessen).sort((a, b) => a - b), klein: klein, quer: document.scrollingElement.scrollWidth > window.innerWidth + 1 };
-    });
-    const seiten = ['#uebersicht', '#betriebe', '#kaeufe', '#statistik', '#anzeigen', '#protokoll', '#einstellungen'];
-    const pruefeGestaltung = async (ctxOpt, erlaubt, name) => {
-      const c = await browser.newContext(Object.assign({ locale: 'de-DE' }, ctxOpt));
-      const s = await neueSeite(c, B4), befund = [];
-      await s.goto(B4 + '/zentrale/#betriebe', { waitUntil: 'networkidle' }); await s.fill('#z-pw', PW); await s.click('form[data-form="anmelden"] button[type="submit"]'); await s.waitForSelector('.z-tab'); const idDetail = await s.evaluate(() => (document.querySelector('.z-zeile') || {}).getAttribute('href'));
-      for (const h of seiten.concat([idDetail])) {
-        await s.goto(B4 + '/zentrale/' + h, { waitUntil: 'networkidle' }); await s.waitForTimeout(250);
-        const m = await messen(s), fremd = m.groessen.filter((g) => !erlaubt.includes(g));
-        if (fremd.length || m.klein.length || m.quer) befund.push(h + ': ' + (fremd.length ? 'Größen ' + fremd.join(', ') + ' ' : '') + (m.klein.length ? 'klein ' + m.klein.slice(0, 4).join('; ') + ' ' : '') + (m.quer ? 'Querscrollen' : ''));
-      }
-      const animiert = ctxOpt.reducedMotion ? await s.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length) : 0;
-      ok(!befund.length && !animiert, 'Gestaltung ' + name + ': nur Schriftgrößen ' + erlaubt.join(' · ') + ', Ziele ab 44 px, kein Querscrollen' + (ctxOpt.reducedMotion ? ', bei „weniger Bewegung“ keine Animation' : '') + (befund.length ? '\n      ' + befund.join('\n      ') : '') + (animiert ? ' (' + animiert + ' laufend)' : ''));
-      if (name === 'Telefon, dunkel') { await s.goto(B4 + '/zentrale/#uebersicht', { waitUntil: 'networkidle' }); await s.waitForTimeout(200); ok((await s.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(22, 22, 22)', 'Dunkle Bühne: Grund aus den Tokens'); await foto(s, 'zentrale-telefon-dunkel'); }
-      sauber(s, 'Gestaltung ' + name + ' ohne Fehler'); await c.close();
-    };
-    await pruefeGestaltung({ viewport: { width: 1280, height: 900 } }, [13, 15, 17, 22, 30], 'Schreibtisch');
-    await pruefeGestaltung({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, colorScheme: 'dark', reducedMotion: 'reduce' }, [13, 15, 17, 22, 26], 'Telefon, dunkel');
-    await zp.click('[data-act="abmelden"]'); await zp.waitForSelector('#z-pw');
-    const nachAb = await zp.evaluate(async () => (await fetch('/api/zentrale/uebersicht', { headers: { 'x-zentrale': '1' } })).status);
-    zp.probleme = zp.probleme.filter((x) => !/401/.test(x));
-    ok(nachAb === 401, 'Abmelden: zurück zur Anmeldung, Daten nicht mehr erreichbar');
-    await zctx.close();
-  } catch (e) {
-    ok(false, 'Zentrale im Browser ohne Ausnahme: ' + (e && e.stack ? e.stack : e));
-  } finally { aus4(); }
+  /* Die Oberfläche der alten Zentrale ist ersetzt (27.10.2026): Die neue Zentrale (/zentrale/, Aufträge) prüft Abschnitt 26 im Browser. */
 }
 
 /* ---------- 14. Fortsetzen, keine Gesamtansicht vor dem Freischalten, Grenzen gegen Mehrfachnutzung, Zwischenstand beim Kundenlink ---------- */
@@ -4969,11 +4846,11 @@ if (teil(22)) {
   await ctx.close();
 }
 
-/* ---------- 23–30. Konfigurator-Instanzen (docs/INSTANZEN.md) ----------
+/* ---------- 23–29. Konfigurator-Instanzen (docs/INSTANZEN.md) und Aufträge (26, docs/BESTELLUNG.md) ----------
    Je Abschnitt ein Modul scripts/pruefen-instanzen/<n>.mjs (dazu <n>-<name>.mjs, die vorher laufen): export default async (h) => {}.
    h (scripts/pruefen-instanzen/hilfe.mjs) bringt einen eigenen Testserver mit Attrappen und den Instanzen essential.localhost,
    plus.localhost, signature.localhost und signature2.localhost mit. Ein Fehler im Modul zählt als fehlgeschlagene Prüfung. */
-const INSTANZ_TEILE = [23, 24, 25, 26, 27, 28, 29, 30].filter((n) => teil(n));
+const INSTANZ_TEILE = [23, 24, 25, 26, 28, 29].filter((n) => teil(n));
 if (INSTANZ_TEILE.length) {
   const inst = await import('./pruefen-instanzen/hilfe.mjs');
   let h = null;

@@ -5,9 +5,9 @@
    sich alle Abfragen auf die Wurzel, Zuhörer werden je Element nur einmal gebunden und Beobachter je Aufruf neu angelegt. o.still = true
    beim Neuaufbau desselben Bildschirms: Was im Bild steht, erscheint und läuft nicht noch einmal; was unterhalb wartet, bewegt sich beim
    Scrollen wie beim ersten Mal.
-   Ohne JavaScript schickt das Formular ganz normal ab (POST /api/partner/frage als Formular; der Server antwortet mit einer eigenen
+   Ohne JavaScript schickt das Formular ganz normal ab (POST /api/auftrag/frage als Formular; der Server antwortet mit einer eigenen
    Seite). Mit JavaScript dieselbe Route als JSON: Fehler stehen am Feld (aria-invalid, Text darunter), der Dank ersetzt das Formular.
-   Felder und Regeln wie functions/api/partner.js (frageAnnehmen): Name ab 2 Zeichen, gültige E-Mail, Frage ab 3 Zeichen; „fax“ ist
+   Felder und Regeln wie functions/auftrag/index.js (frageAnnehmen): Name ab 2 Zeichen, gültige E-Mail, Frage ab 3 Zeichen; „fax“ ist
    der Honigtopf. */
 (function () {
   'use strict';

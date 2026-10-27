@@ -19,9 +19,10 @@
 /zentrale/*
   Cache-Control: no-store
 
-# Kundenkonto der Fensteranbieter (Konfigurator-Pakete): wie die Zentrale nie zwischenspeichern, nie in Suchmaschinen (worker.js setzt
-# beides zusätzlich, weil /partner* durch den Worker läuft)
-/partner/*
+# Bestellung und Kundenbereich der Aufträge (functions/auftrag/): ebenso nie zwischenspeichern, nie in Suchmaschinen
+/bestellen/*
+  Cache-Control: no-store
+/konto/*
   Cache-Control: no-store
 
 # Logo und Icon dürfen in Suchmaschinen (Logo in den strukturierten Daten); in der Pilotphase sperrt robots.txt ohnehin alles
