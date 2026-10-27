@@ -389,7 +389,9 @@
       const f = w.ki && w.ki.fach;
       return !!(f && (f.bruestung === 'bodentief' || f.bruestung === 'niedrig'));
     }
-    const absturzText = (w) => (w.absturz ? lab('absturz', w.absturz) : OFFEN_TEXT);
+    /* Brüstung 800 bis 899 mm (Fenster, gemessen): reicht bis 12 m Absturzhöhe; ob mehr nötig ist, klärt der Betrieb vor Ort (Klärung „Absturzhöhe prüfen“), kein offener Wunsch */
+    const absturzGrenz = (w) => !istTuer(w) && bruDa(w) && num(w.bru) >= 800;
+    const absturzText = (w) => (w.absturz ? lab('absturz', w.absturz) : absturzGrenz(w) ? 'nur über 12 m Absturzhöhe nötig, vor Ort prüfen' : OFFEN_TEXT);
     /* ---------- Förderung ----------
        Zielwerte nach den technischen Mindestanforderungen der BEG EM und der ESanMV (Steuerbonus, Anlage 4), beide gleich: Fenster, Balkon-
        und Terrassentüren Uw ≤ 0,95; barrierearm oder einbruchhemmend und mit Sonderverglasung (z. B. Schallschutz ab Rw 40 dB) ≤ 1,1;
@@ -529,7 +531,7 @@
       /* Brüstung 80 bis 89 cm: Pflicht nur bei mehr als 12 m Absturzhöhe, also „vor Ort prüfen“ statt Pflicht (Gremium F, 27.10.2026) */
       wins.forEach((w, i) => {
         if (!absturzFrage(w) || w.absturz === 'balkon') return;
-        const wahl = w.absturz ? lab('absturz', w.absturz) + (gelText(w) ? ', ' + gelText(w) : '') : '', grenz = !istTuer(w) && bruDa(w) && num(w.bru) >= 800;
+        const wahl = w.absturz ? lab('absturz', w.absturz) + (gelText(w) ? ', ' + gelText(w) : '') : '', grenz = absturzGrenz(w);
         if (grenz) dazu(pos(w, i), 'Absturzhöhe prüfen (' + (etageText(w) || 'OG') + bruText(w) + '): bis 12 m Absturzhöhe genügen 80 cm Brüstung, darüber sind 90 cm nötig. ' + (wahl ? 'Gewählt: ' + wahl + '.' : 'Über 12 m eine Absturzsicherung einplanen.'), 'pruefen', 'Absturzhöhe', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm.');
         else dazu(pos(w, i), 'Absturzsicherung nötig (' + (etageText(w) || 'OG') + bruText(w) + '): ' + (wahl || 'bitte beraten'), 'pflicht', 'Absturzsicherung', i, 'absturz-' + wk(w, i), 'Bauordnung (§ 38 MBO): Brüstung mindestens 80 cm, über 12 m Absturzhöhe 90 cm; Türen ohne Balkon davor immer.');
       });
