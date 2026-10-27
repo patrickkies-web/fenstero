@@ -468,13 +468,13 @@ Drei Oberflächen kamen mit den Paketen dazu; sie folgen denselben Regeln wie ob
 
 **Paketbedingungen `/konfigurator-bedingungen/`:** wie die übrigen Rechtsseiten (`recht.css`); offene Stellen als markierte Platzhalter (`mark.ph`), Tabellen aus `pakete.js`. Die PDFs (`scripts/bedingungen-pdf.mjs`) setzen Inter wie das Aufmaßblatt: Titel 20, Abschnitte 13, Text 9,8 pt, Tabellen mit Haarlinien, Kopfzeile „Entwurf zur anwaltlichen Prüfung · Fassung vom …“ in Warnfarbe, solange Platzhalter da sind.
 
-## Design-DNA im Konfigurator (ab 26.10.2026: Lage; ab 27.10.2026: alle Wünsche)
+## Design-DNA im Konfigurator (ab 26.10.2026: Lage; ab 27.10.2026: alle Wünsche und Schritt 1 „Start“)
 
 Der Inhaber stellt den Konfigurator Folie für Folie auf seine Design-DNA um (Vorschauen „Lage neu gedacht“ und „Lage in Violett“,
 Protokoll docs/profis/2026-10-26-lage.md; Folien bis zum Teilen: docs/profis/konfigurator-start-vorschau/, Protokolle
 docs/profis/2026-10-26-konfigurator-start.md und 2026-10-27-konfigurator-raender-bis-ende.md). Bisher umgestellt: das Kapitel „Lage“
-mit „Wo ist das Fenster?“ (`lageDna`) und „Wie genau möchtest du planen?“ (`tiefeDna`) und seit dem 27.10.2026 alle übrigen Fragen der
-Wünsche (`frageDna`) in app.js.
+mit „Wo ist das Fenster?“ (`lageDna`) und „Wie genau möchtest du planen?“ (`tiefeDna`), seit dem 27.10.2026 alle übrigen Fragen der
+Wünsche (`frageDna`) und Schritt 1 „Was planst du?“ (`startDna`) in app.js.
 
 - **Gültigkeit:** nur Bildschirme mit `.scr.dna`; Regeln in app.css, Abschnitt „Design-DNA im Konfigurator“, Klassen `lg-`, `lp-`, `dna-`.
   Alle übrigen Bildschirme behalten Inter, die Schriftrollen 13/15/17/24/32/40, das grüne Wort und die Cream-Pille.
@@ -501,6 +501,13 @@ Wünsche (`frageDna`) in app.js.
     (Umschalter und Einfachwahl mit Punkt, Mehrfachwahl mit Haken, Zähler, Schalter, Aufteilung mit Regler), Farben als Tupfen auf
     Anthrazit (44 px), „Weiß ich noch nicht“ als leise Zeile, gewählt schraffiert, ab 740 px Bildschirmhöhe über dem Fuß klebend. Die
     Zifferntasten stehen im selben Rahmen unter dem Modell. Nach einer Wahl rollt die Seite nur so weit, dass der nächste Block zu sehen ist.
+  - Start (`startDna`, `stZeigen`, app.css Abschnitt „Start im Look der Design-DNA“): Bühne aus Betonboden im Fensterlicht
+    (`web/bilder/konfigurator/buehne.webp`) mit dem gewählten Element als feste Ansicht (sechs Renderings aus dem Modell, je ein WebP),
+    Kontaktschatten, violettes Licht am Boden, Anker an der Ecke des Elements mit gestrichelter Linie zum Etikett (Name, Kurzbeschreibung,
+    i), Chip „Schritt 1 von 6 · Start“; darunter die Frage, die sechs Elemente als Anthrazit-Kacheln mit Strichzeichnung (Radiogruppe,
+    Pfeiltasten), die Stelle als Umschalter auf weißer Karte mit einem Satz darunter (bei „Neue Öffnung“ mit Koralle-Punkt und
+    gestricheltem Rahmen um das Element), unten zurück und „Weiter zu den Fotos“. Wischen auf der Bühne wechselt das Element; Element,
+    Anker und Etikett blenden in 220 ms aus der Wischrichtung, das Licht gleitet nach, Tastatur ohne Übergang.
   - Regel des Inhabers (27.10.2026): Beim Messen eine feste Ansicht je Element, in den Wünschen das ausgearbeitete 3-D-Modell; die
     Wünsche werden nie durch Standbilder ersetzt.
 - **Weiter ist immer weiß.** Fehlt etwas, steht eine Zeile mit Koralle-Punkt darüber („Gib dem Raum einen Namen …“, „Trag die Brüstung
@@ -511,6 +518,7 @@ Wünsche (`frageDna`) in app.js.
 - **Daten:** Raumvorschläge ergänzen den Namen; doppelte Namen werden gemeldet („Küche links / rechts / 2“). Im OG die Nummer
   (`w.ogNr`, „2. OG“ in Blatt, PDF, Klärungsliste und Zentrale über `AW.etageText`). Brüstung im OG und DG Pflicht, in cm getippt, in
   mm gespeichert; „bodentief“ ist 0 mm; der Satz zur Absturzsicherung erscheint unter 80 cm.
+- **Schmale Telefone (320 px):** „Übersicht“ im Kopf nur als Zeichen, Zurück und Pille bleiben in einer Zeile; jedes Ziel 44 px.
 - **Prüfsuite:** die Prüfungen der Schriftrollen nehmen `.dna` aus; Lage und Tiefe haben eigene Prüfungen (Abschnitte 3, 16 und 22).
 
 ## Entscheidungen

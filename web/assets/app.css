@@ -1281,60 +1281,6 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
   .hdr-row:has(.hdr-r.zwei) .hdr-inst:has(.ein-zeichen.logo) .hdr-name { display: none }
 }
 
-/* ---------- Start: die Bühne (SCREENS.start in app.js) ----------
-   Oben die Stelle als Glasschalter, darunter schwebt das Element allein in 3-D auf der dunklen Bühne: Licht von oben, Schatten am Boden.
-   Neue Öffnung: grüner Ring am Boden. Darunter Name und alle Elemente als kleine Vorschau, das gewählte markiert.
-   Wechsel des Elements: es hüpft aus der Wischrichtung (--d: 1 von rechts, -1 von links) in 720 ms herein, der Schatten wird mit dem
-   Sprung kleiner und wieder groß. Bei „weniger Bewegung“ steht alles sofort da. */
-.st-stelle { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 2px 0 0; border-radius: 22px; background: rgba(243, 242, 238, .04); box-shadow: inset 0 0 0 1px rgba(243, 242, 238, .08); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px) }
-.st-stelle::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 18px; background: linear-gradient(180deg, rgba(243, 242, 238, .13), rgba(243, 242, 238, .05)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 8px 22px rgba(0, 0, 0, .4); transition: transform 420ms cubic-bezier(.3, 1.35, .5, 1) }
-.st-stelle.is-neu::before { transform: translateX(100%) }
-.qopt.st-seg { position: relative; z-index: 1; min-height: 58px; padding: 8px 10px; gap: 2px; border: 0; border-radius: 18px; background: none; box-shadow: none; justify-content: center }
-.qopt.st-seg .lbl { font-size: 15px; font-weight: 700; color: var(--muted); transition: color var(--t2) }
-.qopt.st-seg .sb { font-size: 13px; color: var(--muted) }
-.qopt.st-seg[aria-pressed="true"] .lbl { color: var(--text) }
-.qopt.st-seg[aria-pressed="true"] .lbl::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 7px 2px 0; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent) }
-.st-buehne { position: relative; height: 262px; margin: 4px -16px 0; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none;
-  background: radial-gradient(42% 70% at 50% -4%, rgba(243, 242, 238, .17), rgba(243, 242, 238, .05) 55%, rgba(243, 242, 238, 0) 78%), radial-gradient(60% 18% at 50% 86%, rgba(243, 242, 238, .05), rgba(243, 242, 238, 0) 70%) }
-.st-boden { position: absolute; left: 50%; bottom: 18px; width: 250px; height: 36px; margin-left: -125px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .7), rgba(0, 0, 0, 0)); pointer-events: none }
-.st-buehne.is-neu .st-boden::after { content: ""; position: absolute; inset: -4px -14px; border-radius: 50%; border: 1.5px dashed var(--accent); opacity: .75; box-shadow: 0 0 18px rgba(143, 214, 148, .25) }
-.st-held { position: absolute; left: 0; right: 0; top: 0; z-index: 1 }
-.w3d-stage.st-schwebe { background: none; box-shadow: none; border-radius: 0 }
-.st-wahl { text-align: center; margin: 2px 0 0; position: relative; z-index: 2 }
-.st-name { margin: 0; font-size: 32px; font-weight: 800; line-height: 1.05; letter-spacing: -.03em; color: var(--text) }
-.st-sub { margin: 6px 0 0; font-size: 15px; line-height: 1.4; color: var(--muted) }
-.st-note { margin-top: 14px }
-/* Die Stelle (ersetzen oder neu) steht unter der Elementauswahl, direkt über „Weiter zu den Fotos“ */
-.st-reihe + .st-stelle { max-width: 520px; margin: 14px auto 0 }
-.st-buehne.is-hop .st-held { animation: st-hop 720ms both }
-.st-buehne.is-hop .st-boden { animation: st-schatten 720ms both }
-.st-wahl.is-hop .st-name { animation: st-name 520ms var(--e-out) 140ms both }
-@keyframes st-hop {
-  0% { transform: translate(calc(var(--d) * 64%), 8px) scale(.78); opacity: 0; animation-timing-function: cubic-bezier(.2, .6, .4, 1) }
-  16% { opacity: 1 }
-  50% { transform: translate(calc(var(--d) * 15%), -30px) scale(.94); animation-timing-function: cubic-bezier(.5, 0, .8, .6) }
-  76% { transform: translate(0, 0) scale(1.03, .97); animation-timing-function: cubic-bezier(.2, .6, .4, 1) }
-  89% { transform: translate(0, -7px) scale(1) ; animation-timing-function: cubic-bezier(.5, 0, .8, .6) }
-  100% { transform: none; opacity: 1 }
-}
-@keyframes st-schatten { 0% { transform: translateX(calc(var(--d) * 40%)) scale(.5); opacity: 0 } 50% { transform: translateX(calc(var(--d) * 10%)) scale(.66); opacity: .45 } 76% { transform: scale(1.06); opacity: 1 } 89% { transform: scale(.94) } 100% { transform: none; opacity: 1 } }
-@keyframes st-name { from { transform: translateY(8px); opacity: 0 } to { transform: none; opacity: 1 } }
-@media (prefers-reduced-motion: reduce) { .st-buehne.is-hop .st-held, .st-buehne.is-hop .st-boden, .st-wahl.is-hop .st-name { animation: none } .st-stelle::before { transition: none } }
-@media (min-width: 1024px) {
-  .st-buehne { height: 420px; margin: 8px 0 0; border-radius: var(--r4) }
-  .st-held .w3d-stage { height: 376px !important }
-  .st-boden { width: 320px; margin-left: -160px; bottom: 54px }
-}
-/* Vorschau-Reihe: alle sechs Elemente klein, ohne Kästen; das gewählte hell mit grüner Linie darunter */
-.st-reihe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 4px; max-width: 520px; margin: 12px auto 0 }
-.qopt.st-mini { position: relative; min-height: 70px; padding: 6px 2px 10px; gap: 4px; border: 0; border-radius: var(--r2); background: none; box-shadow: none; justify-content: center; align-items: center; color: var(--muted) }
-.qopt.st-mini svg { opacity: .55; transition: opacity var(--t2), transform var(--t2) var(--e-out) }
-.qopt.st-mini .lbl { font-size: 13px; font-weight: 600; line-height: 1.2; white-space: nowrap; color: var(--muted); transition: color var(--t2) }
-.qopt.st-mini::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 0; height: 2px; margin-left: 0; border-radius: 1px; background: var(--accent); transition: width 320ms var(--e-out), margin-left 320ms var(--e-out) }
-.qopt.st-mini[aria-pressed="true"] svg { opacity: 1; transform: translateY(-2px) }
-.qopt.st-mini[aria-pressed="true"] .lbl { color: var(--text); font-weight: 700 }
-.qopt.st-mini[aria-pressed="true"]::after { width: 28px; margin-left: -14px }
-.qopt.st-mini:active svg { transform: scale(.94) }
 /* Weiter-Knopf im Inhalt statt am unteren Rand angeheftet (bar.inline), kleiner und mittig */
 .scroll.leiste-inline { padding-bottom: 8px }
 .bb.bb-inline { position: static; z-index: auto; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 22px 0 6px; padding: 0; background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none }
@@ -1559,7 +1505,9 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna .lg-kopf button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 0; background: none; color: var(--tinte); font: 500 15px/1 var(--font-sans); border-radius: 999px; cursor: pointer }
 .dna .lg-kopf svg { width: 18px; height: 18px }
 .dna .lg-kopf-l, .dna .lg-kopf-r { display: flex; align-items: center; gap: 2px; min-width: 0 }
-.dna .lg-kopf .lg-kopf-zurueck, .dna .lg-kopf .lg-kopf-icon { width: 44px; padding: 0; justify-content: center }
+.dna .lg-kopf .lg-kopf-zurueck, .dna .lg-kopf .lg-kopf-icon { flex: none; width: 44px; padding: 0; justify-content: center }
+/* 320 px: „Übersicht“ nur als Zeichen (Name bleibt für Vorleser), damit jeder Knopf 44 px breit bleibt */
+@media (max-width: 359px) { .dna .lg-kopf [data-act="wohin"] { flex: none; width: 44px; padding: 0; justify-content: center } .dna .lg-kopf [data-act="wohin"] span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
 .dna .lg-marke { display: inline-flex; align-items: center; gap: 8px; font: 400 17px/1 var(--font-sans); letter-spacing: -.01em; color: var(--tinte); white-space: nowrap }
 .dna .lg-marke .fi-logo { width: 26px; height: 26px }
 .dna .lg-marke .wm b { font-weight: 700 }
@@ -1706,6 +1654,7 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 /* Unten: zurück als Umriss, „Weiter“ weiß; bleibt beim Scrollen unten stehen */
 .dna .lg-fuss { position: sticky; bottom: 0; z-index: 4; margin: auto -16px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, transparent, var(--schwarz) 16px) }
 .dna .lg-fuss .dna-pille { flex: 0 1 260px }
+@media (max-width: 359px) { .dna .lg-fuss .dna-pille { flex-basis: 200px } } /* 320 px: Zurück und Pille in einer Zeile */
 .dna .lg-zurueck { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: transparent; color: var(--tinte); box-shadow: inset 0 0 0 1.5px var(--silbergrau); display: grid; place-items: center; cursor: pointer }
 .dna .lg-zurueck svg { width: 16px; height: 16px }
 .dna .lg-grund { order: -1; flex: 0 0 100%; margin: 0 0 2px; text-align: center }
@@ -2027,3 +1976,77 @@ button.tile { border: 0; padding: 0; font: inherit; color: inherit; width: 100% 
 .dna.wz-tasten .keypad .ok { height: 52px; border: 0; border-radius: 999px; background: var(--weiss); color: var(--schwarz); font: 500 15px/1 var(--font-sans) }
 .dna.wz-tasten .keypad .kp-zurueck { width: 52px; height: 52px; border: 0; border-radius: 50%; background: transparent; color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--silbergrau) }
 .dna.wz-tasten .keypad button:active { transform: scale(.97) }
+
+
+/* ---------- Start im Look der Design-DNA (27.10.2026; Vorschau docs/profis/konfigurator-start-vorschau/, Folie „Was planst du?“) ----------
+   Bühne: Betonboden im Fensterlicht, das Element als feste Ansicht mit Kontaktschatten, violettes Licht am Boden, Anker und Etikett;
+   darunter die Frage, sechs Anthrazit-Kacheln (gewählt: Ring, Punkt neben dem Namen, Licht) und die Stelle auf weißer Karte. */
+.scr.dna.st { padding-bottom: 0 }
+.dna .st-sprite { position: absolute; width: 0; height: 0; overflow: hidden }
+.stz-r { fill: var(--z-rahmen); stroke: var(--z-strich); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke }
+.stz-f { fill: var(--z-rahmen) }
+.stz-g { fill: var(--z-glas); stroke: var(--z-strich); stroke-width: 1; vector-effect: non-scaling-stroke }
+.stz-l { fill: none; stroke: var(--z-strich); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke }
+.stz-l.stz-dick { stroke-width: 1.8 }
+.stz-k { fill: var(--z-strich) }
+.stz-b { fill: var(--z-boden) }
+.dna .st-buehne-dna { position: relative; flex: none; height: 248px; margin: 0; border-radius: var(--rund-l); overflow: hidden; background: var(--anthrazit); isolation: isolate; touch-action: pan-y; user-select: none; -webkit-user-select: none }
+.dna .st-boden { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 42% 38%; display: block }
+.dna .st-kante { position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 0 0 1px rgba(255, 255, 255, .06), inset 0 -90px 120px -60px rgba(7, 9, 10, .75) }
+.dna .st-licht { position: absolute; z-index: 1; left: 0; top: 152px; width: 240px; height: 110px; pointer-events: none; mix-blend-mode: screen; transform: translateX(var(--licht-x, 6px)); transition: transform 320ms var(--dna-druck);
+  background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, var(--violett) 16%, color-mix(in srgb, var(--violett) 70%, var(--indigo)) 32%, var(--indigo) 54%, color-mix(in srgb, var(--indigo) 40%, transparent) 70%, transparent 88%) }
+.dna .st-buehne-dna .wz-chip { z-index: 6; background: var(--schwarz); border-color: var(--anthrazit); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 10px 30px -10px rgba(0, 0, 0, .6) }
+.dna .st-objekt { position: absolute; z-index: 3; left: 18px; bottom: 16px; width: 160px; height: 194px; display: flex; align-items: flex-end; justify-content: center; pointer-events: none }
+.dna .st-objekt img { position: relative; z-index: 1; display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; transition: opacity 220ms var(--dna-druck), transform 220ms var(--dna-druck) }
+/* Wechsel des Elements: Element aus der Wischrichtung (--d), Anker, Linie und Etikett blenden, der Rahmen der neuen Öffnung zeichnet sich */
+.dna .st-objekt.wechselt img { opacity: 0; transform: translateX(calc(var(--d, 1) * 14px)) scale(.97); transition-duration: 0s }
+.dna .st-et, .dna .st-anker, .dna .st-linie { transition: opacity 150ms var(--dna-druck) }
+.dna .st-et.wechselt, .dna .st-anker.wechselt, .dna .st-linie.wechselt { opacity: 0; transition: none }
+.dna .st-schatten { position: absolute; left: 6%; right: 6%; bottom: -7px; height: 20px; border-radius: 50%; background: radial-gradient(closest-side, rgba(7, 9, 10, .55), rgba(7, 9, 10, .25) 55%, transparent); transform: translateX(var(--schatten-x, 0px)) }
+.dna .st-rahmen { position: absolute; z-index: 2; display: block; overflow: visible; transform-origin: 50% 100%; transition: opacity 300ms var(--dna-druck), transform 300ms var(--dna-druck) }
+.dna .st-rahmen.kommt, .dna .st-objekt.wechselt .st-rahmen { opacity: 0; transform: scale(.98); transition-duration: 0s }
+.dna .st-rahmen rect { fill: none; stroke: var(--violett); stroke-width: 1.5; stroke-dasharray: 3 4; stroke-linecap: round }
+.dna .st-linie { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; overflow: visible }
+.dna .st-linie line { stroke: var(--weiss); stroke-width: 1.2; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke }
+.dna .st-anker { position: absolute; z-index: 4; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--weiss); box-shadow: 0 0 0 1.5px var(--schwarz), 0 0 0 5px rgba(255, 255, 255, .28); pointer-events: none }
+.dna .st-etikett { position: absolute; z-index: 5; right: 16px; top: 46px; max-width: calc(100% - 206px) }
+.dna .st-etikett .dna-etikett { position: relative; height: auto; min-height: 44px; max-width: 100%; padding: 8px 6px 8px 12px; gap: 6px; border-radius: 20px; white-space: normal; align-items: center }
+.dna .st-et { display: grid; gap: 3px; min-width: 0 }
+.dna .st-et b { font: 500 17px/1.1 var(--font-sans); letter-spacing: -.01em; text-wrap: balance; overflow: visible; text-overflow: clip; hyphens: manual }
+.dna .st-et small { font: 400 14px/1.25 var(--font-sans); color: var(--silbergrau) }
+.dna .st-etikett .lg-i { flex: none; margin: -8px -6px -8px -8px }
+/* sechs Elemente: Anthrazit-Kacheln mit Strichzeichnung, gewählt mit violettem Ring, Punkt neben dem Namen und Licht */
+.dna .st-bento { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+.dna .st-kachel { position: relative; isolation: isolate; overflow: hidden; display: grid; justify-items: center; align-content: start; gap: 3px; min-height: 80px; padding: 6px 2px 7px; border: 0; border-radius: 20px; cursor: pointer; text-align: center;
+  background: radial-gradient(120% 90% at 18% 0%, #363638, var(--anthrazit) 55%, #1c1c1e); color: var(--silbergrau); font: 500 13px/1.15 var(--font-sans); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 0 0 1px rgba(255, 255, 255, .045);
+  transition: box-shadow 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck) }
+.dna .st-kachel:active { transform: scale(.97); transition-duration: 0s }
+.dna .st-kachel-licht { position: absolute; z-index: -1; left: 50%; bottom: -34px; width: 120%; height: 70px; translate: -50% 0; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity 150ms var(--dna-druck);
+  background: radial-gradient(50% 50% at 50% 50%, var(--violett) 0, color-mix(in srgb, var(--violett) 60%, var(--indigo)) 30%, var(--indigo) 58%, transparent 80%) }
+.dna .st-zeichen { width: 48px; height: 48px; display: block; --z-rahmen: var(--anthrazit); --z-strich: var(--silbergrau); --z-glas: color-mix(in srgb, var(--silbergrau) 28%, var(--anthrazit)); --z-boden: var(--silbergrau) }
+.dna .st-kachel-name { position: relative; display: block; max-width: 100%; padding: 0 2px; hyphens: manual; overflow-wrap: anywhere; text-wrap: balance }
+.dna .st-kachel-name::before { content: ""; position: absolute; left: -9px; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); opacity: 0; transform: translateY(-50%) scale(.6); transition: opacity 150ms var(--dna-druck), transform 150ms var(--dna-druck) }
+.dna .st-kachel[aria-checked="true"] { color: var(--weiss); box-shadow: inset 0 0 0 1.5px var(--violett), inset 0 1px 0 rgba(255, 255, 255, .10) }
+.dna .st-kachel[aria-checked="true"] .st-kachel-licht { opacity: 1 }
+.dna .st-kachel[aria-checked="true"] .st-kachel-name::before { opacity: 1; transform: translateY(-50%) }
+.dna .st-kachel[aria-checked="true"] .st-zeichen { --z-strich: var(--weiss); --z-glas: color-mix(in srgb, var(--violett) 36%, var(--anthrazit)) }
+.dna .st-kachel:focus-visible { outline: 2px solid var(--weiss); outline-offset: 2px }
+/* die Stelle auf weißer Karte: Umschalter mit Füllung und Punkt, darunter ein Satz */
+.dna .st-stelle-karte { margin-top: 12px }
+.dna .st-stelle-karte .lg-feld { padding: 12px 0 14px; gap: 8px }
+.dna .st-stelle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--silbergrau) 22%, var(--weiss)) }
+.dna .st-stelle button { min-height: 44px; padding: 8px 12px; border: 0; border-radius: 999px; background: transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 500 15px/1.2 var(--font-sans); color: var(--textgrau); cursor: pointer;
+  transition: background-color 150ms var(--dna-druck), color 150ms var(--dna-druck), transform 160ms var(--dna-druck) }
+.dna .st-stelle button:active { transform: scale(.97); transition-duration: 0s }
+.dna .st-stelle button[aria-checked="true"] { background: var(--schwarz); color: var(--weiss) }
+.dna .st-stelle button[aria-checked="true"]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violett); flex: none }
+.dna .st-stelle button:focus-visible { outline: 2px solid var(--schwarz); outline-offset: 2px }
+.dna .st-stelle-text { margin: 0; min-height: 61px; font: 400 14px/1.45 var(--font-sans); color: var(--textgrau); text-wrap: pretty }
+.dna .st-stelle-text b { font-weight: 500; color: var(--schwarz) }
+.dna .st-stelle-text .ulink { min-height: 44px; color: var(--schwarz); font-weight: 500 }
+.dna .st-punkt { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--koralle); vertical-align: 1px }
+.dna.st .lg-frage { padding: 18px 0 14px }
+.dna.st .foot-links.recht { margin: 24px 0 48px }
+/* schmale Telefone: Element etwas kleiner, Etikett breiter (Name bricht an den Trennstellen) */
+@media (max-width: 374px) { .dna .st-zeichen { width: 44px; height: 44px } .dna .st-objekt { left: 14px; width: 132px; height: 176px } .dna .st-etikett { right: 10px; max-width: calc(100% - 158px) } }
+@media (prefers-reduced-motion: reduce) { .dna .st-licht, .dna .st-kachel, .dna .st-kachel-licht, .dna .st-kachel-name::before, .dna .st-stelle button, .dna .st-objekt img, .dna .st-et, .dna .st-anker, .dna .st-linie, .dna .st-rahmen { transition: none !important } }

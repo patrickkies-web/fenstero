@@ -3003,96 +3003,100 @@ function linkHomeInhaltAlt(I) {
   const html = E.html({ name: name, kunde: d.kunde, du: du, p: d.p, bis: d.bis, server: !!SERVER.daten }) + rechtLinks();
   return { html: html, bar: null };
 }
-/* ---------- Start: die Stelle und das Element ----------
-   Gestaltung „Bühne“ (25.10.2026): Oben die Stelle als Glasschalter (Ersetzen oder Neue Öffnung). Darunter schwebt das gewählte Element
-   allein in 3-D auf einer dunklen Bühne (echtes Modell ohne Wand, o.frei), von oben angestrahlt, mit Schatten am Boden; bei der neuen
-   Öffnung markiert ein grüner Ring am Boden den Platz. Darunter Name und Kurzbeschreibung, dann alle sechs Elemente als kleine Vorschau
-   (das gewählte hell mit grüner Linie). Wechseln: Vorschau antippen oder auf der Bühne nach links oder rechts wischen (das Modell dreht
-   sich mit dem Finger und hüpft beim Loslassen weiter). Das neue Element hüpft aus der Wischrichtung ins Bild (720 ms); bei „weniger
-   Bewegung“ steht es sofort da (app.css). Der Weiter-Knopf steht im Inhalt, nicht am unteren Rand (bar.inline). */
-const START_MASS = { fenster: [1230, 1410, 620], balkon: [1010, 2180, 0], fest: [1800, 1400, 620], hst: [2600, 2200, 0], psk: [2000, 2180, 0], fsw: [3600, 2200, 0] };
-function startWin(w) {
-  const m = START_MASS[w.art] || START_MASS.fenster;
-  const v = Object.assign(baseWin(), { w: m[0], h: m[1], mo: { hm: m[1] + 70, hl: m[1] + 70, hr: m[1] + 70, wm: m[0] + 140, wt: m[0] + 140, wb: m[0] + 140 }, el: { h: m[1], w: m[0] }, bru: m[2], laib: 140, fa: w.fa, fi: w.fi, offen: kopie(w.offen || {}), material: w.material, neu: w.neu, hst: w.hst, fsw: w.fsw, bt: w.bt, psk: w.psk });
-  artSetzen(v, w.art || 'fenster'); return v;
-}
-/* Kurze Namen: groß unter der Bühne, ganz kurz in der Vorschau-Reihe */
+/* ---------- Start im Look der Design-DNA (27.10.2026) ----------
+   Folie „Was planst du?“ (vom Inhaber angenommen, 26.10.2026; Vorschau docs/profis/konfigurator-start-vorschau/): Betonboden im
+   Fensterlicht als Bühne, das gewählte Element als feste Ansicht (Regel des Inhabers: beim Messen kein 3-D) mit Etikett und Anker, die
+   Frage, die sechs Elemente als Anthrazit-Kacheln mit Strichzeichnung, die Stelle auf weißer Karte, unten zurück und eine Pille.
+   Aktionen wie bisher (art, situation, gloss, notiz, go fotos); Wischen auf der Bühne und Pfeiltasten wechseln das Element. Beim Wechsel
+   blenden Element, Anker und Etikett im selben Frame (220 ms, aus der Wischrichtung), nur das Licht gleitet nach; Tastatur ohne Übergang. */
 const ST_NAME = { fenster: ['Fenster', 'Fenster'], balkon: ['Balkontür', 'Balkontür'], fest: ['Festverglasung', 'Festverglasung'], hst: ['Hebe-Schiebe-Tür', 'Hebe-Schiebe'], psk: ['PSK-Tür', 'PSK-Tür'], fsw: ['Faltschiebewand', 'Faltschiebewand'] };
-let stZuletzt = '', stRichtung = 0;
+let stZuletzt = '', stNeuZuletzt = false, stRichtung = 0, stSofort = false, stLichtAlt = null;
 const stIdx = (k) => Math.max(0, OPT.art.findIndex((x) => x.k === k));
 const stNachbar = (k, d) => OPT.art[(stIdx(k) + d + OPT.art.length) % OPT.art.length].k;
-/* Die Stelle als Glasschalter: zwei Hälften, das helle Glas gleitet zur gewählten */
-function startStelle(neu) {
-  return '<div class="st-stelle' + (neu ? ' is-neu' : '') + '" role="group" aria-label="Die Stelle">' + OPT.situation.map((o) =>
-    '<button type="button" class="qopt st-seg" data-act="situation" data-v="' + o.k + '" aria-pressed="' + ((o.k === 'neu') === neu) + '"><span class="lbl">' + esc(o.label) + '</span><span class="sb">' + esc(o.sub || '') + '</span></button>').join('') + '</div>';
-}
-function startBuehne(w, art, neu, hop) {
-  return '<div class="st-buehne' + (neu ? ' is-neu' : '') + (hop ? ' is-hop' : '') + '" style="--d: ' + (hop < 0 ? -1 : 1) + '">' +
-    '<div class="st-boden" aria-hidden="true"></div>' +
-    '<div class="st-held">' + model(startWin(w), { id: 'w3d', view: 'three', sway: true, frei: true, noZoom: true, cls: 'st-schwebe ohne-erbe', stageH: 250, fitW: 0.62, fitH: 0.7 }) + '</div></div>';
-}
-/* Alle Elemente als kleine Vorschau unten, das gewählte markiert (grüne Linie, volle Helligkeit) */
-function startReihe(w, art) {
-  return '<div class="st-reihe" role="group" aria-label="Das Element">' + OPT.art.map((x) => {
-    const v = startWin(Object.assign({}, w, { art: x.k }));
-    return '<button type="button" class="qopt st-mini" data-act="art" data-v="' + x.k + '" aria-pressed="' + (x.k === art) + '" aria-label="' + esc(x.label) + '">' + svgIcon(miniWin(v), 48) + '<span class="lbl">' + esc(ST_NAME[x.k][1]) + '</span></button>';
-  }).join('') + '</div>';
-}
-SCREENS.start = () => {
-  const w = S.win, art = w.art || 'fenster', neu = !!w.neu, o = OPT.art.find((x) => x.k === art) || OPT.art[0], g = optG('art', o);
-  /* Hüpfen nur, wenn sich das Element geändert hat: aus der Wischrichtung, sonst aus der Richtung in der Reihe */
-  const altArt = lastScreen === 'start' ? stZuletzt : '', hop = altArt && altArt !== art ? (stRichtung || (stIdx(art) > stIdx(altArt) ? 1 : -1)) : 0;
-  stZuletzt = art; stRichtung = 0;
-  const html = hd('Schritt 1 von 6 · Start', 'Was planst du?', '', '', '', schrittTools('elementart')) +
-    startBuehne(w, art, neu, hop) +
-    '<div class="st-wahl' + (hop ? ' is-hop' : '') + '"><p class="st-name" aria-live="polite">' + esc(ST_NAME[art][0]) + '</p>' +
-    '<p class="st-sub">' + esc(o.sub || '') + (g ? ' <button type="button" class="ulink" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Erklärung: ' + o.label) + '">Was ist das?</button>' : '') + '</p></div>' +
-    startReihe(w, art) + startStelle(neu) +
-    (neu ? noteBox('Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.', 'neuoeffnung', 'st-note') : '');
-  return { html: html, back: ['Aufmaß', 'home'], bar: { label: 'Weiter zu den Fotos', act: 'go', v: 'fotos', zurueck: true, inline: true } };
+const ST_BILD = { fenster: [379, 536], balkon: [208, 525], fest: [552, 557], hst: [526, 564], psk: [404, 549], fsw: [595, 492] };
+const ST_KURZ = { fenster: 'Fenster', balkon: 'Balkontür', fest: 'Fest&shy;verglasung', hst: 'Hebe-Schiebe', psk: 'PSK-Tür', fsw: 'Falt&shy;schiebewand' };
+/* Name am Etikett mit Trennstellen, damit er auf schmalen Telefonen umbricht statt abgeschnitten zu werden */
+const ST_ET = { fenster: 'Fenster', balkon: 'Balkon&shy;tür', fest: 'Fest&shy;verglasung', hst: 'Hebe-Schiebe-Tür', psk: 'PSK-Tür', fsw: 'Falt&shy;schiebe&shy;wand' };
+const ST_STELLE = {
+  ersatz: '<b>Dort ist schon eins.</b> Das neue kommt in dieselbe Öffnung. Soll sie größer werden, etwa für eine Tür, wähle „Neue Öffnung“.',
+  neu: '<span class="st-punkt" aria-hidden="true"></span><b>Dort war noch keins, oder die Öffnung wird größer.</b> Du fotografierst die Wand und ziehst das neue Element auf dem Foto an seinen Platz. Die Maße sind Wunschmaße; Sturz und Statik prüft der Fachbetrieb vor dem Durchbruch.'
 };
-/* Wischen auf der Bühne: das Element folgt dem Finger (und dreht sich dabei, bindW3D), ab 56 px oder einem schnellen Wisch hüpft es
-   weiter; sonst federt es zurück. Ein Wisch löst danach keinen Tipp aus. */
-function startWischen() {
-  const b = document.querySelector('.scr[data-screen="start"] .st-buehne'), held = b && b.querySelector('.st-held');
-  if (!b || !held || b._wisch) return; b._wisch = true;
-  let g = null, gewischt = 0;
-  const weiter = (d) => {
-    stRichtung = d; gewischt = Date.now();
-    const ziel = document.querySelector('.st-mini[data-v="' + stNachbar(S.win.art || 'fenster', d) + '"]');
-    if (!ziel) return;
-    if (ruhig()) { ziel.click(); return; }
-    held.style.transition = 'transform 160ms cubic-bezier(.4, 0, 1, 1), opacity 160ms'; held.style.transform = 'translateX(' + (-d * 46) + '%) scale(.86)'; held.style.opacity = '0';
-    setTimeout(() => { if (document.body.contains(ziel)) ziel.click(); }, 150);
-  };
-  b.addEventListener('pointerdown', (e) => {
-    if (e.button != null && e.button > 0) return;
-    g = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, an: false, aus: false };
-    held.style.transition = 'none';
-  });
-  const move = (e) => {
-    if (!g || e.pointerId !== g.id || g.aus) return;
-    const dx = e.clientX - g.x, dy = e.clientY - g.y;
-    if (!g.an) { if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { g.aus = true; return; } if (Math.abs(dx) < 8) return; g.an = true; }
-    g.dx = dx; held.style.transform = 'translateX(' + (dx * 0.55).toFixed(1) + 'px)';
-  };
-  const up = (e) => {
-    if (!g || e.pointerId !== g.id) return;
-    const s = g; g = null;
-    if (!s.an || e.type === 'pointercancel' && Math.abs(s.dx) < 56) { held.style.transition = ''; held.style.transform = ''; return; }
-    const v = Math.abs(s.dx) / Math.max(1, performance.now() - s.t);
-    if (Math.abs(s.dx) >= 56 || v > 0.5 && Math.abs(s.dx) > 24) { weiter(s.dx < 0 ? 1 : -1); return; }
-    held.style.transition = 'transform 420ms cubic-bezier(.3, 1.5, .5, 1)'; held.style.transform = '';
-    const st = document.getElementById('w3d'), v0 = VIEWS.three; if (st) w3dView(st, v0);
-  };
-  document.addEventListener('pointermove', move); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
-  /* Aufräumen, sobald die Bühne nicht mehr im Dokument steht */
-  const weg = () => { if (!document.body.contains(b)) { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up); document.removeEventListener('pointerdown', weg, true); } };
-  document.addEventListener('pointerdown', weg, true);
-  b.addEventListener('click', (e) => { if (e.isTrusted && Date.now() - gewischt < 450) { e.stopPropagation(); e.preventDefault(); } }, true);
-  /* Pfeiltasten auf der Bühne und den Punkten */
-  b.parentNode.addEventListener('keydown', (e) => { if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && e.target.closest && e.target.closest('.st-reihe, .st-buehne')) { e.preventDefault(); stRichtung = e.key === 'ArrowRight' ? 1 : -1; const z = document.querySelector('.st-mini[data-v="' + stNachbar(S.win.art || 'fenster', stRichtung) + '"]'); if (z) { z.click(); const n = document.querySelector('.st-mini[aria-pressed="true"]'); if (n) n.focus(); } } });
+/* Strichzeichnungen der sechs Elemente (aus der App abgeleitet, Vorschau „Was planst du?“); Farben über --z-* aus app.css (Klassen stz-*
+   ohne Vorfahren, weil die Regeln im Klon von <use> nur dort greifen) */
+const ST_ZEICHEN = '<symbol id="z-fenster" viewBox="0 0 64 64"><path class="stz-r" d="M11.4 7h41.2a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1-1.2 1.2H11.4a1.2 1.2 0 0 1-1.2-1.2V8.2a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-f" d="M12.8 9.6h18.1v44.8H12.8Z"/><path class="stz-g" d="M14.4 11.3h14.9v41.5H14.4Z"/><path class="stz-l" d="M14.4 11.3 29.3 32 14.4 52.7"/><path class="stz-f" d="M33 9.6h18.1v44.8H33Z"/><path class="stz-g" d="M34.7 11.3h14.9v41.5H34.7Z"/><path class="stz-l" d="M49.6 11.3 34.7 32l14.9 20.7"/><path class="stz-l" d="M34.7 52.7 42.1 11.3l7.5 41.4"/></symbol><symbol id="z-balkon" viewBox="0 0 64 64"><path class="stz-r" d="M21.6 7h20.8a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1-1.2 1.2H21.6a1.2 1.2 0 0 1-1.2-1.2V8.2a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-f" d="M22.4 9h19.2v46H22.4Z"/><path class="stz-g" d="M24.1 10.7h15.7v42.6H24.1Z"/><path class="stz-l" d="M24.1 10.7 39.9 32 24.1 53.3"/><path class="stz-b" d="M19.4 56.5h25.2v2.4H19.4Z"/></symbol><symbol id="z-fest" viewBox="0 0 64 64"><path class="stz-r" d="M8.2 12.6h47.6a1.2 1.2 0 0 1 1.2 1.2v36.5a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 50.3V13.8a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-g" d="M10 15.6h20.8v32.9H10Z"/><path class="stz-g" d="M33.2 15.6H54v32.9H33.2Z"/></symbol><symbol id="z-hst" viewBox="0 0 64 64"><path class="stz-r" d="M8.2 10.8h47.6a1.2 1.2 0 0 1 1.2 1.2v39.9a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 51.9V12a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-g" d="M10 13.8h20.8v36.3H10Z"/><path class="stz-f" d="M33.2 13.8H54v36.3H33.2Z"/><path class="stz-g" d="M35.1 15.7h17.1v32.6H35.1Z"/><path class="stz-l stz-dick" d="M47 41h-10"/><path class="stz-l stz-dick" d="m40 38.5-3 2.5 3 2.5"/><path class="stz-k" d="M50.3 25.5a1.2 1.2 0 0 1 1.2 1.2v7.8a1.2 1.2 0 0 1-2.4 0v-7.8a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-b" d="M6 52.7h52v2.4H6Z"/></symbol><symbol id="z-psk" viewBox="0 0 64 64"><path class="stz-r" d="M10.3 7h43.5a1.2 1.2 0 0 1 1.2 1.2v47.6a1.2 1.2 0 0 1-1.2 1.2H10.3a1.2 1.2 0 0 1-1.2-1.2V8.2A1.2 1.2 0 0 1 10.3 7Z"/><path class="stz-g" d="M11.8 9.8h19.1v44.5H11.8Z"/><path class="stz-f" d="M33.1 9.8h19.1v44.5H33.1Z"/><path class="stz-g" d="M34.8 11.5h15.6v41.1H34.8Z"/><path class="stz-l" d="M36.5 44 42.6 13l6.1 31"/><path class="stz-l stz-dick" d="M46 49.5h-8"/><path class="stz-l stz-dick" d="m38 47-2.5 2.5 2.5 2.5"/><path class="stz-k" d="M48.7 26a1.2 1.2 0 0 1 1.2 1.2V34a1.2 1.2 0 0 1-2.4 0v-6.8a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-b" d="M8.1 56.5H56v2.4H8.1Z"/></symbol><symbol id="z-fsw" viewBox="0 0 64 64"><path class="stz-r" d="M8.2 13h47.6a1.2 1.2 0 0 1 1.2 1.2v38a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 52.2V14.2a1.2 1.2 0 0 1 1.2-1.2Z"/><path class="stz-f" d="M10 16h13.1v32H10Z"/><path class="stz-g" d="M11.5 17.5h10.1v29H11.5Z"/><path class="stz-f" d="M25.5 16h13.1v32H25.5Z"/><path class="stz-g" d="M27 17.5h10.1v29H27Z"/><path class="stz-f" d="M40.9 16H54v32H40.9Z"/><path class="stz-g" d="M42.4 17.5h10.1v29H42.4Z"/><path class="stz-l" d="M42.4 17.5 52.5 32 42.4 46.5"/><path class="stz-b" d="M6 51.5h52v2.4H6Z"/></symbol>';
+function startDna() {
+  const w = S.win, art = ST_BILD[w.art] ? w.art : 'fenster', neu = !!w.neu, o = OPT.art.find((x) => x.k === art) || OPT.art[0], g = optG('art', o), b = ST_BILD[art];
+  const steps = stepsFor(w), nr = steps.indexOf('start') + 1;
+  /* Wechsel auf demselben Bildschirm: aus der Wischrichtung, sonst aus der Richtung in der Reihe */
+  const gleich = lastScreen === 'start', still = stSofort || ruhig(), wechsel = gleich && !still && stZuletzt && stZuletzt !== art, kommt = gleich && !still && neu && !stNeuZuletzt;
+  const d = stRichtung || (stIdx(art) > stIdx(stZuletzt) ? 1 : -1);
+  if (!gleich) stLichtAlt = null;
+  stZuletzt = art; stNeuZuletzt = neu; stRichtung = 0; stSofort = false;
+  const wl = wechsel ? ' wechselt' : '';
+  const pfeil = '<span class="dna-pille__pfeil" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
+  const buehne = '<figure class="st-buehne-dna" role="group" aria-roledescription="Bühne" aria-label="' + esc('Gewähltes Element: ' + ST_NAME[art][0] + '. Wischen wechselt das Element.') + '">' +
+    '<img class="st-boden" src="/bilder/konfigurator/buehne.webp" width="1000" height="750" alt="" decoding="async" draggable="false">' +
+    '<span class="st-licht" aria-hidden="true"></span><span class="st-kante" aria-hidden="true"></span>' +
+    '<span class="wz-chip" aria-hidden="true"><i class="wz-ring" style="--anteil: ' + (nr / steps.length).toFixed(4) + '"></i>Schritt ' + nr + ' von ' + steps.length + ' · Start</span>' +
+    '<div class="st-objekt' + wl + '" style="--d: ' + d + '" aria-hidden="true"><span class="st-schatten"></span><img src="/bilder/konfigurator/' + art + '.webp" width="' + b[0] + '" height="' + b[1] + '" alt="" decoding="async" draggable="false">' +
+    (neu ? '<svg class="st-rahmen' + (kommt ? ' kommt' : '') + '" aria-hidden="true"><rect x=".75" y=".75" rx="6"/></svg>' : '') + '</div>' +
+    '<svg class="st-linie' + wl + '" aria-hidden="true"><line/></svg><span class="st-anker' + wl + '" aria-hidden="true"></span>' +
+    '<div class="st-etikett"><span class="dna-etikett"><span class="st-et' + wl + '"><b>' + ST_ET[art] + '</b><small>' + esc(o.sub || '') + '</small></span>' +
+    (g ? '<button type="button" class="lg-i" data-act="gloss" data-k="' + g + '" aria-label="' + esc('Was ist das: ' + o.label + '?') + '">' + LG_I + '</button>' : '') + '</span></div></figure>';
+  const frage = lgFrage('Was planst <em>du?</em>', 'elementart', 'Unsicher? Nimm, was heute eingebaut ist. Weitere Fenster kommen danach einzeln dran.');
+  const bento = '<div class="st-bento" role="radiogroup" aria-label="Element">' + OPT.art.map((x) => { const an = x.k === art; return '<button type="button" class="st-kachel" role="radio" data-act="art" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '" aria-label="' + esc(x.label) + '"><span class="st-kachel-licht" aria-hidden="true"></span><svg class="st-zeichen" viewBox="0 0 64 64" aria-hidden="true"><use href="#z-' + x.k + '"/></svg><span class="st-kachel-name" aria-hidden="true">' + ST_KURZ[x.k] + '</span></button>'; }).join('') + '</div>';
+  const stelle = '<div class="lg-karte lg-hell st-stelle-karte"><div class="lg-feld"><span class="dna-label" id="st-stelle-l">Die Stelle</span><div class="st-stelle" role="radiogroup" aria-labelledby="st-stelle-l">' +
+    OPT.situation.map((x) => { const an = (x.k === 'neu') === neu; return '<button type="button" role="radio" data-act="situation" data-v="' + x.k + '" aria-checked="' + an + '" tabindex="' + (an ? 0 : -1) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>' +
+    '<p class="st-stelle-text" aria-live="polite">' + ST_STELLE[neu ? 'neu' : 'ersatz'] + (neu ? ' <button type="button" class="ulink" data-act="gloss" data-k="neuoeffnung">Mehr erfahren</button>' : '') + '</p></div></div>';
+  const fuss = rechtLinks() + '<div class="lg-fuss"><button type="button" class="lg-zurueck" data-act="back" aria-label="Zurück: Aufmaß">' + LG_PFEIL_L + '</button><button type="button" class="dna-pille lg-weiter" data-act="go" data-v="fotos">Weiter zu den Fotos' + pfeil + '</button></div>';
+  return { html: '<svg class="st-sprite" width="0" height="0" aria-hidden="true" focusable="false">' + ST_ZEICHEN + '</svg>' + lgKopf(['back', 'Zurück: Aufmaß']) + buehne + frage + bento + stelle + fuss, back: ['Aufmaß', 'home'], dna: true, cls: 'dna st' };
 }
+/* Nach dem Zeichnen: Anker an die rechte obere Ecke des Elements, Linie zum Etikett, Licht und Schatten mittig, Rahmen der neuen Öffnung
+   um die Standfläche; aus den bekannten Maßen des Bilds, ohne auf das Laden zu warten */
+function stZeigen() {
+  const f = document.querySelector('.st-buehne-dna'); if (!f) return;
+  const art = ST_BILD[S.win.art] ? S.win.art : 'fenster', b = ST_BILD[art], ob = f.querySelector('.st-objekt'), s = f.getBoundingClientRect(), o = ob.getBoundingClientRect();
+  if (!s.width || !o.width) return;
+  const sc = Math.min(o.width / b[0], o.height / b[1]), bw = b[0] * sc, bh = b[1] * sc, bl = o.left + (o.width - bw) / 2, bt = o.bottom - bh;
+  const px = bl + bw * 0.9 - s.left, py = bt + bh * 0.14 - s.top, et = f.querySelector('.dna-etikett').getBoundingClientRect();
+  const anker = f.querySelector('.st-anker'); anker.style.left = px.toFixed(1) + 'px'; anker.style.top = py.toFixed(1) + 'px';
+  const svg = f.querySelector('.st-linie'), ln = svg.querySelector('line');
+  svg.setAttribute('viewBox', '0 0 ' + Math.round(s.width) + ' ' + Math.round(s.height));
+  [['x1', px], ['y1', py], ['x2', et.left - s.left + 2], ['y2', et.top - s.top + et.height / 2]].forEach(([k, v]) => ln.setAttribute(k, v.toFixed(1)));
+  /* Licht: vom alten Element zum neuen gleiten, beim ersten Zeichnen sofort dort */
+  const l = f.querySelector('.st-licht'), lx = bl + bw / 2 - s.left - 120;
+  l.style.transition = 'none'; f.style.setProperty('--licht-x', (stLichtAlt != null && !ruhig() ? stLichtAlt : lx).toFixed(1) + 'px'); void l.offsetWidth;
+  l.style.transition = ''; f.style.setProperty('--licht-x', lx.toFixed(1) + 'px'); stLichtAlt = lx;
+  ob.style.setProperty('--schatten-x', (bl + bw / 2 - (o.left + o.width / 2)).toFixed(1) + 'px');
+  const r = f.querySelector('.st-rahmen');
+  if (r) { const rw = Math.round(bw + 12), rh = Math.round(bh + 12), rr = r.querySelector('rect'); r.style.left = (bl - o.left - 6).toFixed(1) + 'px'; r.style.top = (bt - o.top - 6).toFixed(1) + 'px'; r.setAttribute('width', rw); r.setAttribute('height', rh); r.setAttribute('viewBox', '0 0 ' + rw + ' ' + rh); rr.setAttribute('width', rw - 1.5); rr.setAttribute('height', rh - 1.5); }
+  /* Wechsel: erst wenn das neue Bild bereit ist, blenden Element, Anker, Linie, Etikett und Rahmen ein */
+  const img = ob.querySelector('img'), auf = () => requestAnimationFrame(() => f.querySelectorAll('.wechselt, .kommt').forEach((el) => el.classList.remove('wechselt', 'kommt')));
+  if (f.querySelector('.wechselt, .kommt')) { if (img.decode) img.decode().then(auf, auf); else auf(); }
+  stWischen(f);
+}
+/* Wischen auf der Bühne wechselt das Element (ab 56 px oder einem schnellen Wisch); Pfeiltasten in den Radiogruppen wählen den Nachbarn */
+function stWischen(f) {
+  if (f._wisch) return; f._wisch = true;
+  let g = null;
+  f.addEventListener('pointerdown', (e) => { if (e.button > 0 || e.target.closest('button')) return; g = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  f.addEventListener('pointerup', (e) => {
+    if (!g) return; const dx = e.clientX - g.x, dy = e.clientY - g.y, v = Math.abs(dx) / Math.max(1, performance.now() - g.t); g = null;
+    if (Math.abs(dy) > Math.abs(dx) || !(Math.abs(dx) >= 56 || (v > 0.5 && Math.abs(dx) > 24))) return;
+    const z = document.querySelector('.st-kachel[data-v="' + stNachbar(S.win.art || 'fenster', dx < 0 ? 1 : -1) + '"]'); if (z) { stRichtung = dx < 0 ? 1 : -1; z.click(); }
+  });
+  f.addEventListener('pointercancel', () => { g = null; });
+}
+document.addEventListener('keydown', (e) => {
+  const r = e.target && e.target.closest && e.target.closest('.st-bento [role="radio"], .st-stelle [role="radio"]'); if (!r) return;
+  const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0; if (!d) return;
+  e.preventDefault();
+  const alle = Array.from(r.closest('[role="radiogroup"]').querySelectorAll('[role="radio"]')), z = alle[(alle.indexOf(r) + d + alle.length) % alle.length];
+  const k = z.getAttribute('data-v'), grp = z.getAttribute('data-act'); stSofort = true; z.click();
+  const neu = document.querySelector('[data-act="' + grp + '"][data-v="' + k + '"]'); if (neu) neu.focus({ preventScroll: true });
+});
+window.addEventListener('resize', () => { if (S.screen === 'start') stZeigen(); });
+SCREENS.start = startDna;
 /* ---------- Fotos ---------- */
 function photoTile(which) {
   const p = S.photos[which], a = S.ai[which], label = which === 'in' ? 'Von innen' : 'Von außen', demo = p && p.demo;
@@ -4705,9 +4709,10 @@ function lgDoppelt(w) {
 const LG_PFEIL_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>';
 const LG_I = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="4" r="1.3"/><rect x="7" y="6.5" width="2" height="6.5" rx="1"/></svg>';
 /* Kopf: zurück zur Liste der Fenster, die Marke (im Kundenlink einer Instanz deren Zeichen), Übersicht und Begriffe */
-function lgKopf() {
+function lgKopf(zurueck) {
+  const z = zurueck || ['liste', 'Zurück: Fenster'];
   const marke = S.betrieb ? (INST ? instKopf() : '') : '<span class="lg-marke" role="img" aria-label="eeziframes">' + LOGO(26) + WM() + '</span>';
-  return '<div class="lg-kopf"><span class="lg-kopf-l"><button type="button" class="lg-kopf-zurueck" data-act="liste" aria-label="Zurück: Fenster">' + LG_PFEIL_L + '</button>' + marke + '</span>' +
+  return '<div class="lg-kopf"><span class="lg-kopf-l"><button type="button" class="lg-kopf-zurueck" data-act="' + z[0] + '" aria-label="' + z[1] + '">' + LG_PFEIL_L + '</button>' + marke + '</span>' +
     '<span class="lg-kopf-r"><button type="button" data-act="wohin" aria-label="Übersicht: Schritte, Fenster und Startseite"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Übersicht</span></button><button type="button" class="lg-kopf-icon" data-act="gindex" aria-label="Begriffe"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 0-1.5-1.5h-5zM15.5 3.5h-5A1.5 1.5 0 0 0 9 5v10a1.5 1.5 0 0 1 1.5-1.5h5z"/></svg></button></span></div>';
 }
 /* Kapitel als Stationen auf einem Band: das laufende benannt, die übrigen als Punkte */
@@ -4811,6 +4816,7 @@ function lgGrund() {
 /* Nach dem Zeichnen: Bühne auf die Breite bringen, Zustand ohne Gleiten setzen */
 function lgAuf() {
   const scr = document.querySelector('.scr.dna'); if (!scr) return;
+  if (scr.classList.contains('st')) return stZeigen();
   lgMass(); scr.classList.add('lg-still'); lgZeigen(); void scr.offsetWidth; requestAnimationFrame(() => scr.classList.remove('lg-still'));
 }
 function lgMass() { const b = document.querySelector('.scr.dna .lg-buehne:not(.lp-buehne)'); if (b && b.clientWidth) b.style.setProperty('--lg-s', Math.min(1, b.clientWidth / LG_B).toFixed(4)); }
@@ -6877,7 +6883,6 @@ function bindAfterRender() {
     bindW3D(stage, () => { const r = W3DS[stage.id]; return r ? Object.assign({}, r.o, { onSash: r.o.selectable ? (i) => { if (S.screen === 'frage') onSashTap(i); else if (S.screen === 'tour') { S.selSash = i; S.openSash = i; render(); nachBild(() => { if (S.screen === 'tour') oeffnungZeigen(i); }, 60); } else { S.selSash = i; S.selBar = null; render(); } } : null }) : {}; });
   });
   document.querySelectorAll('.w3d-stage').forEach(bindRails);
-  if (S.screen === 'start') startWischen();
   bindZeichnen();
   bindFotoZoom();
   if (S.screen === 'tour') tourSperren();

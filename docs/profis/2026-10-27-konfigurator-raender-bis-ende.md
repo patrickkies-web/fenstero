@@ -253,7 +253,25 @@ App, jeder Abschnitt online, sobald die Prüfsuite grün ist. Erster Abschnitt: 
 Bild: docs/profis/bilder/2026-10-27-app-wuensche-dna-tel.jpg (acht Fragen der echten App, 390 × 844). Alle 46 Fragen in DNA, Pille bei
 774 px, kein Querscrollen, keine Konsolenfehler.
 
-Prüfsuite: Abschnitte 20 und 22 (Wünsche, Sonnenschutz) 63 von 63; ganze Suite vor dem Online-Stellen. Bekannt und nicht von diesem
-Abschnitt: „Lamellen wenden“ (WebGL in SwiftShader) schwankt.
+Prüfsuite: Abschnitte 20 und 22 (Wünsche, Sonnenschutz) 63 von 63, danach die ganze Suite auf dem mit main zusammengeführten Stand
+1.459 von 1.459. Online seit main 1dc67b9. Bekannt und nicht von diesem Abschnitt: „Lamellen wenden“ (WebGL in SwiftShader) schwankt.
 
-Offen: Start, Fotos, Messen, Ränder, Ergebnis und Abschluss folgen in derselben Weise.
+## Übernahme in die App: Schritt 1 „Was planst du?“ (27.10.2026, abends)
+
+Die vom Inhaber angenommene Folie (26.10.2026, „Find ich gut“) ersetzt die bisherige Startbühne mit dem schwebenden 3-D-Element; nach
+seiner Regel gibt es beim Messen kein 3-D, sondern eine feste Ansicht je Element.
+
+- app.js: `startDna` (Bühne, Frage, Kacheln, Stelle, Fuß), `stZeigen` (Anker, Linie, Licht, Schatten und Rahmen aus den Maßen des
+  Bilds), Wischen und Pfeiltasten; die alte Startbühne (`startBuehne`, `startReihe`, `startStelle`, `startWischen`, `START_MASS`) ist
+  entfernt, weil sie nirgends mehr gebraucht wird. Aktionen wie bisher: `art`, `situation`, `gloss`, Notiz, `go fotos`.
+- app.css: Abschnitt „Start im Look der Design-DNA“; die Regeln der alten Startbühne sind entfernt.
+- Bilder: web/bilder/konfigurator/ (Betonbühne und die sechs Renderings als WebP, zusammen etwa 240 KB).
+- Wechsel des Elements wie in der Vorschau: Element aus der Wischrichtung, Anker und Etikett blenden (220 und 150 ms), das Licht
+  gleitet nach, Tastatur und „weniger Bewegung“ ohne Übergang.
+- 320 px: Name am Etikett mit Trennstellen und etwas kleinerem Element; im Kopf „Übersicht“ nur als Zeichen, Zurück und Pille in einer
+  Zeile (gilt für alle DNA-Bildschirme, auch Lage und Wünsche).
+- Prüfsuite: Start-Prüfungen auf Radiokacheln, Pille und feste Ansicht umgestellt (Abschnitte 3, 6, 16, 20, 22), keine gestrichen.
+
+Bild: docs/profis/bilder/2026-10-27-app-start-dna-tel.jpg.
+
+Offen: Fotos, Messen, Ränder, Ergebnis und Abschluss folgen in derselben Weise.
