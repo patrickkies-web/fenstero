@@ -10,7 +10,7 @@
 .ez-ml__legende { display: flex; flex-wrap: wrap; gap: 2px 14px; }
 .ez-ml__legende > span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 .ez-ml__punkt, .ez .ez-muster::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--koralle); box-shadow: 0 0 0 3px color-mix(in srgb, var(--koralle) 30%, transparent); }
-.ez-ml__punkt--alle, .ez .ez-muster--alle::before { background: var(--silbergrau); box-shadow: 0 0 0 3px color-mix(in srgb, var(--silbergrau) 30%, transparent); }
+.ez-ml__punkt--alle, .ez .ez-muster--alle::before, .ez .ez-muster--plus::before { background: var(--silbergrau); box-shadow: 0 0 0 3px color-mix(in srgb, var(--silbergrau) 30%, transparent); }
 .ez-ml__punkt--ab, .ez .ez-muster--ab::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--koralle); }
 /* Paketwechsel: drei Seiten desselben Betriebs, das gezeigte Paket gefüllt */
 .ez-ml__pakete { flex: none; display: inline-flex; gap: 4px; margin: 0; padding: 4px; border-radius: var(--rund-pille); background: var(--schwarz); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.04); }

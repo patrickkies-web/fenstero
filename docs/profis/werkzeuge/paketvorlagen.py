@@ -24,7 +24,9 @@ BRANDT_MARKE = '<rect x="4" y="4" width="24" height="56" rx="5" fill="var(--firm
 APP = re.compile(r'(<rect width="64" height="64" rx="16" fill="var\(--firma\)"/>)(<rect x="14" y="14"[^>]*/><rect [^>]*/><rect [^>]*/>)')
 
 BETRIEBE = {
-    'brandt': {'ersetzen': [], 'palette': None, 'marke': None, 'app': None},
+    'brandt': {'ersetzen': [], 'palette': None, 'marke': None, 'app': None,
+               # Palette des Betriebs (Vorgabe des Inhabers, 27.10.2026): Signature ganz, Plus zur Hälfte, Essential bleibt eeziframes
+               'farben': {'datei': 'farben-brandt.css', 'stufen': {'plus': 'halb', 'signature': 'voll'}}},
     'ostermann': {
         # Palette des Betriebs: Petrol als Hauptfarbe, Tiefsee als Schatten, Gischt als Licht, Leuchtturmrot als Hinweis.
         # Der Grund bleibt Schwarz und Weiß (DNA: eine Markenfarbe ersetzt Leuchten und Signal, nie den Grund).
@@ -102,6 +104,16 @@ def main():
                 html = APP.sub(lambda m: m.group(1) + b['app'], html)
         for alt, neu in b['ersetzen']:
             html = html.replace(alt, neu)
+        stufe = (b.get('farben') or {}).get('stufen', {}).get(p)
+        if stufe:
+            html = html.replace('<main class="dna-wurzel ez" ', '<main class="dna-wurzel ez" data-farbe="%s" ' % stufe, 1)
+            html = html.replace('<link rel="stylesheet" href="muster.css">', '<link rel="stylesheet" href="muster.css">\n<link rel="stylesheet" href="farben.css">', 1)
+            assert 'data-farbe=' in html and 'href="farben.css"' in html, p
+            if stufe == 'voll':
+                # ganze Seite in der Palette: Hero und „So geht es“ werden helle Szenen (Eisblau), dunkel bleiben Kontakt und Fuß
+                n0 = html.count('data-theme="hell"')
+                html = re.sub(r'<section class="dna-szene" data-theme="dunkel"( aria-label="Willkommen| id="so")', r'<section class="dna-szene" data-theme="hell"\1', html)
+                assert html.count('data-theme="hell"') == n0 + 2, p
         html = html.replace('href="start.css"', 'href="%s.css"' % p).replace('src="start.js"', 'src="%s.js"' % p)
         (ziel / f'{p}.css').write_text(css, encoding='utf-8')
         (ziel / f'{p}.js').write_text(js, encoding='utf-8')
@@ -109,6 +121,8 @@ def main():
         (ziel / f'{p}.html').write_text(HUELLE + html + '</body></html>', encoding='utf-8')
     shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'muster-leiste.css', ziel / 'muster.css')
     shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / 'muster-leiste.js', ziel / 'muster.js')
+    if b.get('farben'):
+        shutil.copy(ROOT / 'docs' / 'profis' / 'werkzeuge' / b['farben']['datei'], ziel / 'farben.css')
     print('gebaut:', ziel.relative_to(ROOT), '·', ', '.join('%s %s' % (k, v) for k, v in pr.items()))
 
 

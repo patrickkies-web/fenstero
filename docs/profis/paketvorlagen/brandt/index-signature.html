@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="dna/bundle.css">
 <link rel="stylesheet" href="signature.css">
 <link rel="stylesheet" href="muster.css">
+<link rel="stylesheet" href="farben.css">
 <!--
   VORLAGE: Landingpage eines Konfigurators im Paket EEZI Signature unter der eigenen Domain des Betriebs (web/assets/pakete.js).
   Gegenüber Essential Plus: eeziframes erscheint nirgends (nicht auf der Seite, nicht im Aufmaßblatt, nicht in E-Mails; im Datenschutz
@@ -34,7 +35,7 @@
   .ez { --firma: #d8ad55; --firma-tief: #5b4a26; --auf-firma: #07090a; --firma-licht: #e2bb66; --hinweis: var(--koralle); }
 </style>
 
-<main class="dna-wurzel ez" id="start" lang="de" data-paket="signature" data-modus="einladung">
+<main class="dna-wurzel ez" data-farbe="voll" id="start" lang="de" data-paket="signature" data-modus="einladung">
   <a class="ez-skip dna-pille" href="#inhalt" data-theme="dunkel">Zum Inhalt springen</a>
 
   <!-- Muster-Leiste (nur in der Vorlage für Fensterbauer, beim echten Betrieb weg): Paketwechsel mit Preis, Legende der Etiketten,
@@ -67,7 +68,7 @@
        Bühne (Foto 1 des Betriebs, sobald es da ist), G9 die Domain hängt am Gerät, im Einladungszustand dazu der persönliche Link als
        Glas-Etikett (G10), G2 das Leuchten trägt die Firmenfarbe, G6 eine Pille, G13 runder Knopf „Anrufen“, G14 Lichtkante und Vignette,
        G15 ein schweres Element: die Überschrift, im Einladungszustand der Name des Kunden. -->
-  <section class="dna-szene" data-theme="dunkel" aria-label="Willkommen bei Fensterbau Brandt">
+  <section class="dna-szene" data-theme="hell" aria-label="Willkommen bei Fensterbau Brandt">
     <div class="ez-huelle">
       <header class="ez-kopf">
         <a class="ez-logo" href="#start" aria-label="Fensterbau Brandt, zum Seitenanfang" data-vorlage="firma.logo">
@@ -232,7 +233,7 @@
 
   <!-- Szene 3 (dunkel): So geht es. Gene: G5 Stationen (Schritt 1 von 4), G3 die Zahl als Held (5 Minuten), G1 Schraffur heißt
        „noch offen“ (Weiß ich noch nicht), G10 Glas-Chip über dem Foto, G9 Maße an der Zeichnung, G14 keine Fläche ist flach. -->
-  <section class="dna-szene" data-theme="dunkel" id="so" aria-labelledby="so-titel">
+  <section class="dna-szene" data-theme="hell" id="so" aria-labelledby="so-titel">
     <div class="ez-huelle ez-abschnitt">
       <div class="ez-kopfzeile">
         <span class="dna-label">So geht es<i class="ez-label__wert">&nbsp;– zu Hause, am Handy</i></span>
@@ -317,16 +318,16 @@
     <div class="ez-huelle ez-abschnitt">
       <div class="ez-zwei ez-weg">
         <div class="ez-text">
-          <span class="dna-label">Ihre Daten<i class="ez-label__wert">&nbsp;– vor und nach dem Senden</i></span>
-          <h2 class="dna-titel" id="weg-titel">Ihre Anfrage geht nur an <em class="ez-ak"><span data-vorlage="firma.name">Fensterbau Brandt</span>.</em></h2>
-          <p class="dna-text ez-nur-web">Sie planen mit dem Konfigurator von <span data-vorlage="firma.name">Fensterbau Brandt</span>. Sobald Sie senden, bekommt <span data-vorlage="firma.name">Fensterbau Brandt</span> Ihre Anfrage mit dem Aufmaßblatt als PDF. Übermittelt wird über einen technischen Dienstleister, nur im Auftrag des Betriebs, ohne Werbung und ohne andere Anbieter. Mehr im Datenschutz.</p>
-          <p class="dna-text ez-nur-einladung">Sie planen über Ihren persönlichen Link mit dem Konfigurator von <span data-vorlage="firma.name">Fensterbau Brandt</span>. Sobald Sie senden, bekommt <span data-vorlage="firma.ansprechpartner">Petra Brandt</span> Ihre Anfrage mit dem Aufmaßblatt als PDF. Übermittelt wird über einen technischen Dienstleister, nur im Auftrag des Betriebs, ohne Werbung und ohne andere Anbieter. Mehr im Datenschutz.</p>
+          <span class="dna-label">So geht es weiter</span>
+          <h2 class="dna-titel" id="weg-titel">Von Ihrer Planung <em class="ez-ak">bis zum Einbau.</em></h2>
+          <p class="dna-text ez-nur-web">Mit Ihrem Aufmaßblatt kann <span data-vorlage="firma.name">Fensterbau Brandt</span> gleich rechnen. Danach sind es drei Schritte bis zu Ihren neuen Fenstern.</p>
+          <p class="dna-text ez-nur-einladung">Mit Ihrem Aufmaßblatt kann <span data-vorlage="firma.ansprechpartner">Petra Brandt</span> gleich rechnen. Danach sind es drei Schritte bis zu Ihren neuen Fenstern.</p>
         </div>
         <ol class="ez-route" data-theme="dunkel" aria-label="Der Weg Ihrer Anfrage">
           <li class="ez-route__stelle ez-route__stelle--stand">
             <span class="ez-route__knoten ez-route__knoten--sie" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18h3"/></svg></span>
             <span class="ez-route__text"><b>Sie planen</b><span>auf Ihrem Gerät, in Ruhe und mit Pausen</span>
-              <!-- Dunkle Innenkarte (G8), nur mit Einladungslink: der eine Wert, den der Betrieb vor dem Senden sieht, als Kapselreihe (G11) -->
+              <!-- Dunkle Innenkarte (G8), nur mit Einladungslink: der eine Wert, den der Betrieb vom Stand der Planung sieht, als Kapselreihe (G11) -->
               <span class="ez-stand ez-nur-einladung" role="group" aria-label="Beispiel: Was Petra Brandt über Ihren Link sieht">
                 <span class="ez-muster ez-muster--stand" aria-hidden="true">Fortschritt im Dashboard · nur Signature</span>
                 <span class="ez-stand__kopf"><small><span class="ez-beispiel">Beispiel</span> Was <span data-vorlage="firma.ansprechpartner">Petra Brandt</span> sieht</small><span class="ez-zustand"><i aria-hidden="true"></i>In Bearbeitung</span></span>
@@ -341,7 +342,7 @@
           </li>
           <li class="ez-route__stelle ez-route__stelle--ziel">
             <span class="ez-route__knoten ez-route__knoten--firma" aria-hidden="true"><svg class="ez-logo__zeichen" viewBox="0 0 64 64" data-vorlage="firma.zeichen"><rect width="64" height="64" rx="16" fill="var(--firma)"/><rect x="14" y="14" width="15.4" height="36" rx="3.2" fill="#07090a"/><rect x="34.6" y="14" width="15.4" height="15.4" rx="3.2" fill="#07090a"/><rect x="34.6" y="34.6" width="15.4" height="15.4" rx="3.2" fill="#07090a"/></svg></span>
-            <span class="ez-route__text"><b data-vorlage="firma.name">Fensterbau Brandt</b><span>bekommt das Aufmaßblatt als PDF in sein Postfach, sobald Sie senden</span><span class="ez-hinweis">Offenes klärt der Betrieb mit Ihnen</span></span>
+            <span class="ez-route__text"><b data-vorlage="firma.name">Fensterbau Brandt</b><span>bekommt das Aufmaßblatt als PDF in sein Postfach</span><span class="ez-hinweis">Offenes klärt der Betrieb mit Ihnen</span></span>
           </li>
           <li class="ez-route__trenner" aria-hidden="true"><span class="dna-label">Danach</span></li>
           <li class="ez-route__stelle ez-route__stelle--klein">

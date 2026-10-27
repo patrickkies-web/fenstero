@@ -68,14 +68,24 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   weniger. Der Anreiz steht in den Etiketten der Muster-Ebene (grauer Punkt in allen Paketen, Koralle neu im Paket, Ring erst im
   nächsten Paket), nie in einer absichtlich schwächeren Seite. Eine Familie je Betrieb mit einer Muster-Leiste (Paketwechsel an
   derselben Stelle, Preis aus pakete.js), gebaut von docs/profis/werkzeuge/paketvorlagen.py; geändert wird in den drei Vorschau-Ordnern
-  (essential-, plus-, signature-vorschau), dann neu gebaut. Die Palette eines Betriebs gilt in Plus und Signature; Essential bleibt im
-  eeziframes-Violett, bis der Inhaber pakete.js ändert. Protokoll docs/profis/2026-10-26-paketstufen.md.
+  (essential-, plus-, signature-vorschau), dann neu gebaut. Die Palette eines Betriebs gilt nach Stufen (siehe „Palette eines Betriebs“
+  unten); Essential bleibt im eeziframes-Violett, bis der Inhaber pakete.js ändert. Protokoll docs/profis/2026-10-26-paketstufen.md.
 - Paket-Vorlagen, Korrekturen des Inhabers (27.10.2026): Essential läuft immer unter firmenname.eeziframes.com, nie unter einer eigenen
   Domain; die eigene Domain ist dort ein Etikett „Ab Plus“. Im Daten-Abschnitt steht kein ausdrücklicher Satz, dass der Betrieb vor dem
   Senden nichts sieht; es steht nur, dass mit dem Konfigurator von eeziframes geplant wird (Signature: „von <Betrieb>“, ohne den Namen
   eeziframes) und dass der Betrieb die Anfrage bekommt, sobald gesendet wird. Unterlagen für die Vertragsdauer und eine Ablage im
   Dashboard kommen in keinem Paket vor, weder im Text noch in Etiketten. Statt der Kachel „Für große Türen eine zweite Person“ steht
   „Ihre Wünsche zu Farbe und Glas“. Jedes Etikett passt in seine Pille, einzeilig oder im Fluss umbrechend, geprüft bei 390 und 1280 px.
+- Palette eines Betriebs (Vorgabe des Inhabers, 27.10.2026, Beispiel Fensterbau Brandt: Reinweiß 40 %, Eisblau 25 %, Schieferblau 15 %,
+  Tiefes Petrol 10 %, Aquatürkis 7 %, Frisches Mint 3 %): Signature folgt auf der ganzen Seite der Palette und ihren Anteilen, auch im
+  Grund (gegen DNA Abschnitt 0, „Markenfarbe nie im Grund“: Vorschlag für die DNA). Plus geht zur Hälfte in die Palette (Karten, helle
+  Szene, Akzente), der Grund der dunklen Szenen, Silbergrau und Koralle bleiben von eeziframes. Essential bleibt eeziframes. Muster-Leiste
+  und Etiketten bleiben in allen Stufen eeziframes. Umsetzung als Farbdatei je Betrieb (docs/profis/werkzeuge/farben-<betrieb>.css,
+  `data-farbe="voll"`/`"halb"` am main, im Generator unter BETRIEBE). Gemessen wird die Kundenansicht ohne Bilder mit
+  werkzeuge/palette.mjs und palette.py, am Telefon und am Schreibtisch; Toleranz wie DNA Abschnitt 8 (neutral ±3, Farbe ±2 Punkte).
+- Kein Abschnitt über den Weg der Daten (Inhaber, 27.10.2026: „Das ist etwas, was den Kunden so überhaupt nicht interessiert.“): Auf
+  der Landingpage steht nirgends, dass Daten erst beim Senden zum Betrieb gehen oder wer sie übermittelt. Die Szene heißt „So geht es
+  weiter“ und zeigt den Weg von der Planung bis zum Einbau; Datenschutz steht im Datenschutz.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

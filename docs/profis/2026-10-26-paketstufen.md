@@ -198,3 +198,51 @@ Offen, Entscheidung des Inhabers: web/assets/pakete.js sagt weiter, dass Essenti
 zum Vertragsende aufbewahrt (`domain: true`, `aufbewahrung: 'vertrag'`, `pdfAblage: true`). Danach richten sich die Pakettabelle der
 Website, die Datenschutztexte der Instanzen (functions/instanz/recht.js), der Löschlauf (functions/api/eingang.js) und die Prüfsuite.
 Geändert habe ich nur die Vorlagen (Regel „nur der genannte Bereich“).
+
+## Palette Fensterbau Brandt und Daten-Abschnitt, 27.10.2026
+
+Wortlaut des Inhabers: „Richte bitte für Fensterbau Brand diese farbpalette ein: Reinweiß #FFFFFF 40 %, Eisblau #EEF7F9 25 %,
+Schieferblau #233D48 15 %, Tiefes Petrol #0A6774 10 %, Aquatürkis #2AB4BD 7 %, Frisches Mint #D8F1EB 3 %. Bei der teuersten Variante soll
+die gesamte seite diesen regeln entsprechen bei essential 50% also es soll sehr in die richtung gehen aber auch was über bleiben von der
+farbpalette von eeziframes und bei dem günstigen soll das so bleiben von eeziframes. Ich möchte bei keinem der Pakete diesen Abschnitt
+haben, dass die Daten erst noch gar nicht an den Fensterbauer gehen.“
+
+Lesart: Signature ganz in der Palette, Plus zur Hälfte, Essential bleibt eeziframes. „Bei essential 50 %“ ist als Plus gelesen, weil
+das günstigste Paket (Essential) bleiben soll, wie es ist.
+
+**Umsetzung.** Farbdatei docs/profis/werkzeuge/farben-brandt.css, vom Generator als farben.css eingebunden. Signature: Hero und „So geht
+es“ hell in Eisblau, Betrieb und Weg in Reinweiß, Schrift und dunkle Bausteine in Schieferblau, Karten für Konfigurator, Zeit, Kontakt
+und das Fensterbild in Petrol, Kontaktszene in Aquatürkis mit Fuß in Schieferblau, Chips in Mint, Kacheln „Das brauchen Sie“ in Eisblau.
+Der Weg der Anfrage ist am Telefon eine helle Karte, am Schreibtisch Schieferblau; nur so treffen beide Breiten die Anteile. Plus:
+Karten und Flächen in Schieferblau, Konfigurator und Kontakt in Petrol, Szene „Betrieb“ in Eisblau, Leuchten in Aquatürkis; schwarzer
+Grund, Silbergrau und Koralle bleiben von eeziframes. Essential unverändert.
+
+**Farbanteile** (Kundenansicht ohne Bilder und Schriftkanten, gemessen mit palette.mjs und palette.py):
+
+| Farbe | Ziel | Signature Telefon | Signature Schreibtisch | Plus Telefon | Plus Schreibtisch |
+| --- | --- | --- | --- | --- | --- |
+| Reinweiß | 40 | 41,5 | 40,2 | 20,2 | 28,3 |
+| Eisblau | 25 | 23,3 | 26,5 | 12,5 | 15,2 |
+| Schieferblau | 15 | 12,4 | 13,2 | 21,8 | 10,9 |
+| Tiefes Petrol | 10 | 11,6 | 8,8 | 8,2 | 4,4 |
+| Aquatürkis | 7 | 7,1 | 8,7 | 0,7 | 0,4 |
+| Frisches Mint | 3 | 2,6 | 1,3 | 0,4 | 0,3 |
+| eeziframes (Rest) | 0 in Signature | 1,5 | 1,4 | 36,2 | 40,5 |
+
+Signature liegt in allen Farben innerhalb der Toleranz der DNA; der Rest von 1,5 % sind Schriftkanten. Plus ohne Weiß gerechnet:
+Betriebspalette zu eeziframes 55 : 45 am Telefon und 44 : 56 am Schreibtisch, im Mittel halb und halb.
+
+**Daten-Abschnitt.** In allen drei Paketen heißt die Szene jetzt „So geht es weiter“ mit dem Titel „Von Ihrer Planung bis zum Einbau.“
+und dem Satz „Mit Ihrem Aufmaßblatt kann <Betrieb> gleich rechnen. Danach sind es drei Schritte bis zu Ihren neuen Fenstern.“ Gestrichen:
+„Ihre Daten – vor und nach dem Senden“, „Ihre Anfrage geht nur an …“ als Titel, der Satz zum Senden und Übermitteln, in Essential die
+Station „eeziframes übermittelt“, in Signature „sobald Sie senden“. Der Satz „Ihre Anfrage geht nur an …“ steht in Essential weiter unter
+der Pille und in allen Paketen im Fuß.
+
+**Nebenbei behoben.** In Signature trugen die Etiketten „Ihr Logo“, „Ihre Domain“, „Ihr Foto 1“ und „Ihr Text“ den Punkt „nur in
+Signature“, obwohl sie schon in Plus stecken; jetzt grau („wie Plus“).
+
+**Messwerte.** Pille am Telefon im ersten Bildschirm in allen sechs Seiten, Layoutsprung 0, jedes Ziel erreichbar, ruhige Fassung ohne
+Animation, ohne JavaScript alles sichtbar, keine Ziele unter 44 px. Laden bei vierfach gedrosselter CPU heute 0,6 bis 1,2 s, auch bei
+der fast unveränderten Essential-Seite; die Umgebung war gestern schneller (0,3 bis 0,5 s).
+
+Bilder: docs/profis/bilder/2026-10-27-brandt-palette-stufen-tel.jpg, -signature-tel.jpg, -signature-desk.jpg, -plus-tel.jpg.
