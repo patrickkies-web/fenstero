@@ -31,8 +31,9 @@
 
   <!-- Muster-Leiste (nur in der Vorlage für Fensterbauer, beim echten Betrieb weg): Paketwechsel mit Preis, Legende der Etiketten,
        Schalter „Etiketten“. Quelle: docs/profis/werkzeuge/muster-leiste.css und .js -->
-  <div class="ez-ml" data-theme="dunkel">
+  <div class="ez-ml ez-ml--zurueck" data-theme="dunkel">
     <div class="ez-huelle">
+      <a class="ez-ml__zurueck" href="/fuer-fensterbauer/#pakete" aria-label="Zurück zu den Paketen" title="Zurück zu den Paketen"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 3 4.5 7l4 4"/></svg></a>
       <p class="ez-ml__text"><b>Muster · Plus</b><span class="ez-ml__preis"><!--preiszeile:plus-->39 € im Monat · 199 € einmalig · im ersten Jahr 667 € · netto, vorläufig<!--/preiszeile:plus--></span><span class="ez-ml__legende"><span><i class="ez-ml__punkt ez-ml__punkt--alle" aria-hidden="true"></i>wie Essential</span><span><i class="ez-ml__punkt ez-ml__punkt--neu" aria-hidden="true"></i>neu in Plus</span><span><i class="ez-ml__punkt ez-ml__punkt--ab" aria-hidden="true"></i>erst in Signature</span></span></p>
       <nav class="ez-ml__pakete" aria-label="Paket der Vorlage"><a href="essential.html" aria-label="Essential, 29 € im Monat netto"><span>Essential</span><small><!--preis:essential-->29 €<!--/preis:essential--></small></a><a href="plus.html" aria-current="page" aria-label="Plus, 39 € im Monat netto"><span>Plus</span><small><!--preis:plus-->39 €<!--/preis:plus--></small></a><a href="signature.html" aria-label="Signature, 64 € im Monat netto"><span>Signature</span><small><!--preis:signature-->64 €<!--/preis:signature--></small></a></nav>
       <button class="ez-schalter" type="button" aria-pressed="false" id="muster-schalter"><span class="ez-schalter__punkt" aria-hidden="true"></span><span class="ez-schalter__text">Etiketten<span class="ez-unsichtbar">: zeigen, was zu welchem Paket gehört. Ihre Kunden sehen sie nicht.</span></span></button>

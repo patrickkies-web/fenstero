@@ -268,3 +268,47 @@ zusammen 630 kB. Beschriftungen auf den Fotos liegen auf einem Verlauf in der du
 lesbar). Es fehlen noch Foto 5 Ausstellung und die Porträts; Prompts in docs/profis/2026-10-26-paketvorlagen-bildprompts.md.
 Messwerte: Layoutsprung 0, eine volle Pille je Bildschirm, keine laufende Animation, keine Konsolenfehler, Laden 0,8 bis 1,0 s bei
 vierfach gedrosselter CPU. Bild: docs/profis/bilder/2026-10-27-fotos-eingebaut.jpg.
+
+## Paketbereich mit Beispielseiten, 27.10.2026
+
+Wortlaut des Inhabers: „Ich brauch jetzt nur noch den Betrieb Brandt, der dient mir als Beispiel. Jetzt möchte ich, dass du im
+Bereich der Pakete entsprechend die Bilder der Seiten als Beispiele einbindest. […] Außerdem überarbeitest du bitte noch mal die
+Merkmale, die im Vergleich stehen […]. Und natürlich möchte ich, dass du irgendwie eine Möglichkeit anbietest, das, was wir gerade
+erstellt haben, also diesen Vergleich, online zu stellen, irgendwo in dem Bereich, wo man die Pakete vergleicht.“
+
+Wahl: Die drei Brandt-Seiten liegen als Beispielseiten auf der Website unter /vorschau/paket-beispiel/ (noindex, nicht in der
+Sitemap, gebaut mit `paketvorlagen.py brandt --web`). Im Paketbereich führen die Kartenbilder und eine Zeile direkt unter den Karten
+dorthin; zurück geht es über einen Rundknopf in der Muster-Leiste. Ostermann wird nicht mehr gepflegt.
+
+| Änderung | Zweck | Gremium | Stand |
+| --- | --- | --- | --- |
+| Kartenbilder aus den Brandt-Seiten (Essential erster Bildschirm, Plus Szene mit den Betriebsfotos, Signature Begrüßung) | Verständnis, Vertrauen | X gewinnt 6:0 / 6:0 / 5:1; Muss „verschieden, bevor man liest“ | geändert nach Gremium |
+| Bild als Link mit Glas-Etikett „Beispiel ansehen“, Adresse 13 px mit hervorgehobener Endung | Blickführung | behalten | bleibt |
+| Zeile „Alle drei Pakete am Beispiel ansehen“ mit vollem Rundknopf 44 px | Blickführung | ändern: nach oben | unter die Karten verschoben |
+| Rückweg in der Muster-Leiste der Beispielseiten | Bedienung | Muss (Mara Keller) | neu |
+| Essential unter ihr-name.eeziframes.com, Tabelle „nein, Adresse bei eeziframes“ | Ehrlichkeit | behalten; Domain nie umbrechen | geändert |
+| Farben als Treppe: Farben von eeziframes / zur Hälfte in Ihren Farben / ganz in Ihren Farben | Verständnis | Muss (Deniz Yilmaz, Daniel Roth) | geändert (pakete.js) |
+| Zeile „Gestaltung“ aus dem Vergleich | Verständnis | Muss (Daniel Roth) | entfernt (bleibt in den Paketbedingungen) |
+| Signature-Aufbewahrung 30 Tage, Aufmaßblätter „30 Tage nach Zustellung; das PDF bleibt in Ihrem Postfach“ | Ehrlichkeit, Datenschutz | Muss (Klaus Brandt, Tobias Reuter, Petra Lindqvist) | geändert |
+| Porträt Petra Brandt in Plus und Signature | Vertrauen | – | neu |
+
+Urteile, Muss-Punkte, Ablehnungen mit Grund und Kann-Liste: docs/profis/gremium/2026-10-27-paketbereich.md.
+
+**Messwerte** (Vorschau der Seite für Fensterbauer): Layoutsprung 0, keine Konsolen- oder CSP-Fehler, genau eine volle Pille im
+ersten Bildschirm, keine laufende Animation nach 2,6 s, alle Ziele ab 44 px, ohne JavaScript alles da, Laden 0,9 s bei vierfach
+gedrosselter CPU (gestern 1,1 s), Bilder 330 kB (vorher 316 kB), drei Glas-Etiketten mehr (backdrop-filter, nur über Bild).
+Beispielseiten: Status 200 mit CSP und noindex, Pille am Telefon im ersten Bildschirm (Signature unten bei 827 von 844 px),
+Paketwechsel und Rückweg gehen.
+
+**Prüfsuite:** Abschnitte 10, 23, 24 und 29 grün (385). Gesamtlauf: 1.701 bestanden, 3 rot. 29.1 lag am Zwischenstand während des
+Laufs (pakete.js geändert, Seite noch nicht neu gebaut) und ist danach grün. Zwei Prüfungen der App schwanken unabhängig von diesem
+Zweig (der App-Code ist mit main gleich): „Verglasung“ war auf dem Zweig zweimal rot und einmal grün, auf main einmal grün und einmal
+rot; „Lage (Design-DNA)“ war auf dem Zweig einmal rot und einmal grün, auf main rot. Keine Prüfung abgeschaltet. Angepasst an die neue
+Regel (keine Aufbewahrung bis Vertragsende): 24.9 und 29.4.
+
+**Offen:** Essential-Unteradressen kann der Server noch nicht (docs/INSTANZEN.md), die Bestellung fragt weiter nach einer Domain;
+die Farbstufen gibt es nur in den Vorlagen, die Instanzen setzen die Firmenfarbe als Akzent; Stand der Paketbedingungen bleibt
+23.10.2026 (Entwurf, Bestellung noch zu), vor dem Freischalten neu datieren; prüfen, ob fensterbau-brandt.de einem echten Betrieb
+gehört, bevor die Beispielseiten online gehen; online nur auf das Ja des Inhabers.
+
+Bilder: docs/profis/bilder/2026-10-27-paketbereich-tel.jpg, -desk.jpg.

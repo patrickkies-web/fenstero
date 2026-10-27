@@ -252,7 +252,12 @@ html:not(.ez-js) [data-dna="anker"] .dna-anker__etikett, html:not(.ez-js) [data-
 @media (min-width: 900px) { .ez-pakete { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; } }
 .ez-paket { position: relative; isolation: isolate; overflow: hidden; display: grid; gap: var(--raum-3); justify-items: start; align-content: start; padding: var(--raum-5); border-radius: var(--rund-l); background: var(--weiss); color: var(--tinte); box-shadow: var(--kachel-rand); }
 .ez-paket__bild { width: calc(100% + var(--raum-5) * 2); margin: calc(var(--raum-5) * -1) calc(var(--raum-5) * -1) var(--raum-2); border-radius: 0; box-shadow: inset 0 -1px 0 rgba(255,255,255,.08); }
-.ez-paket__bild .ez-mini__leiste { padding: 10px 14px; }
+.ez-paket__bild .ez-mini__leiste { padding: 10px 14px; font-size: 13px; }
+/* Adresse in der Browserleiste der Kartenbilder: der Teil, der die Pakete unterscheidet (.eeziframes.com oder .de), hell und halbfett */
+.ez-paket__bild .ez-mini__leiste .ez-mini__adr { display: inline; margin: 0; }
+.ez-paket__bild .ez-mini__leiste b { font-weight: 500; color: var(--weiss); }
+/* Adressen im Text brechen nie um (geschützte Bindestriche im Markup) */
+.ez-adresse { white-space: nowrap; }
 .ez-paket__kopf { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ez-paket__kopf .dna-label { margin: 0; font-size: 13px; color: var(--tinte); font-weight: 500; }
 .ez-paket__satz { margin: 0; font: 400 15px/1.45 var(--font-sans); color: var(--tinte-2); text-wrap: pretty; }
@@ -410,16 +415,20 @@ a.ez-paket__bild:focus-visible { outline: 2px solid var(--fokus); outline-offset
   transition: transform 220ms var(--dna-druck); }
 .ez-paket__ansehen::after { content: ""; width: 12px; height: 12px; background: currentColor; -webkit-mask: var(--ez-chevron) center / contain no-repeat; mask: var(--ez-chevron) center / contain no-repeat; }
 a.ez-paket__bild:active .ez-paket__ansehen { transform: scale(.97); transition-duration: 0s; }
-@media (hover: hover) and (pointer: fine) { a.ez-paket__bild:hover .ez-paket__ansehen { transform: translateX(-2px); } }
+.ez-paket__ansehen::after { transition: transform 220ms var(--dna-druck); }
+@media (hover: hover) and (pointer: fine) { a.ez-paket__bild:hover .ez-paket__ansehen::after { transform: translateX(2px); } }
 /* Zeile unter dem Vergleich: alle drei Pakete am Beispiel (wie die Zeile „Alle Merkmale im Vergleich“, mit Pfeil statt Plus) */
-.ez-beispiel-zeile { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 36px; align-items: center; gap: var(--raum-4); min-height: 56px; padding-block: 12px;
-  color: var(--tinte); text-decoration: none; border-bottom: 1px solid var(--linie-fein); -webkit-tap-highlight-color: transparent; }
+/* Zeile und Vergleich bilden eine Liste unter den Karten (ein Kind im Raster des Abschnitts, ohne dessen großen Abstand) */
+.ez-pakete-mehr { display: grid; }
+.ez-beispiel-zeile { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; gap: var(--raum-4); min-height: 56px; padding-block: 14px;
+  color: var(--tinte); text-decoration: none; border-top: 1px solid var(--linie-fein); -webkit-tap-highlight-color: transparent; }
 .ez-beispiel-zeile > span:first-child { display: grid; gap: 4px; }
 .ez-beispiel-zeile b { font: 500 17px/1.3 var(--font-sans); }
 .ez-beispiel-zeile > span:first-child > span { font: 400 14px/1.45 var(--font-sans); color: var(--tinte-2); }
-.ez-beispiel-zeile .dna-rund-knopf { width: 36px; height: 36px; display: grid; color: var(--tinte); box-shadow: inset 0 0 0 1px var(--linie); transition: background-color 220ms ease, color 220ms ease, transform 220ms var(--dna-druck); }
+/* Aktion an der Sache als voller Kreis (G13), keine zweite Pille; 44 px */
+.ez-beispiel-zeile .dna-rund-knopf { width: 44px; height: 44px; display: grid; background: var(--schwarz); color: var(--weiss); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); transition: background-color 220ms ease, transform 160ms var(--dna-druck); }
 .ez-beispiel-zeile .dna-rund-knopf svg { width: 14px; height: 14px; }
-.ez-beispiel-zeile:active .dna-rund-knopf { transform: scale(.97); transition-duration: 0s; }
+.ez-beispiel-zeile:active .dna-rund-knopf { transform: scale(.94); transition-duration: 0s; }
 .ez-beispiel-zeile:focus-visible { outline: 2px solid var(--fokus); outline-offset: 3px; }
-@media (hover: hover) and (pointer: fine) { .ez-beispiel-zeile:hover .dna-rund-knopf { background: var(--indigo); color: var(--weiss); } }
-@media (prefers-reduced-motion: reduce) { .ez-paket__ansehen, .ez-beispiel-zeile .dna-rund-knopf { transition: none; } }
+@media (hover: hover) and (pointer: fine) { .ez-beispiel-zeile:hover .dna-rund-knopf { background: var(--indigo); } }
+@media (prefers-reduced-motion: reduce) { .ez-paket__ansehen, .ez-paket__ansehen::after, .ez-beispiel-zeile .dna-rund-knopf { transition: none; } a.ez-paket__bild:hover .ez-paket__ansehen::after { transform: none; } }

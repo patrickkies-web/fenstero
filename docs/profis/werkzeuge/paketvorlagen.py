@@ -89,6 +89,11 @@ def fuer_web(html, p):
     html = html.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', '')
     html = re.sub(r'<title>[^<]*</title>', '<title>Beispiel %s: Fensterbau Brandt, ein erfundener Betrieb · eeziframes</title>' % TITEL_WEB[p], html, count=1)
     html = html.replace('<meta charset="utf-8">', '<meta charset="utf-8"><meta name="robots" content="noindex, nofollow">', 1)
+    # Rückweg zu den Paketen der Seite für Fensterbauer, als Umriss-Rundknopf vorn in der Muster-Leiste (Gremium 27.10.2026)
+    leiste = '<div class="ez-ml" data-theme="dunkel">\n    <div class="ez-huelle">'
+    assert html.count(leiste) == 1, p
+    html = html.replace(leiste, '<div class="ez-ml ez-ml--zurueck" data-theme="dunkel">\n    <div class="ez-huelle">\n      <a class="ez-ml__zurueck" href="/fuer-fensterbauer/#pakete" aria-label="Zurück zu den Paketen" title="Zurück zu den Paketen">'
+                        '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 3 4.5 7l4 4"/></svg></a>')
     assert '<script>' not in html and 'noindex' in html, p
     return html
 

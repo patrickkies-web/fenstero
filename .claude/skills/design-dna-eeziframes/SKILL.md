@@ -94,13 +94,18 @@ Diese Werte haben die Tiefe gebracht, die der Inhaber an seinen Vorlagen schätz
   DNA und für weitere Seiten mit Leiste.
 - Beispiel-Betrieb und Paketbereich (Wunsch des Inhabers, 27.10.2026, „Ich brauch jetzt nur noch den Betrieb Brandt, der dient mir
   als Beispiel“): Fensterbau Brandt ist der einzige Beispiel-Betrieb; Ostermann wird nicht mehr gepflegt (Generator und Artifact
-  bleiben, nichts gelöscht). Im Paketbereich der Seite für Fensterbauer zeigt jede Karte den ersten Bildschirm der Brandt-Seite ihres
-  Pakets (aufgenommen bei 1024 × 640, damit nur der erste Bildschirm im Bild ist, als 960 × 600 WebP bilder/paket-<paket>.webp), mit
-  der Adresse des Pakets in der Browserleiste (Essential fensterbau-brandt.eeziframes.com, sonst fensterbau-brandt.de). Das Bild ist
-  ein Link mit Glas-Etikett „Beispiel ansehen“; unter dem Vergleich steht die Zeile „Alle drei Pakete am Beispiel ansehen“. Ziel sind
+  bleiben, nichts gelöscht). Im Paketbereich der Seite für Fensterbauer zeigt jede Karte ein Bild der Brandt-Seite ihres Pakets, und
+  die drei Bilder unterscheiden sich, bevor man liest (Gremium 27.10.2026): Essential den dunklen ersten Bildschirm im eeziframes-Look,
+  Plus die Szene mit den Fotos des Betriebs, Signature die helle persönliche Begrüßung. Aufgenommen bei 1024 × 640 mit Szenen ohne
+  Vorhang, Ausschnitt genau 16:10 innerhalb der Szene (nichts aus der nächsten Szene im Bild), als 960 × 600 WebP
+  bilder/paket-<paket>.webp. In der Browserleiste des Bilds die Adresse des Pakets in 13 px, der unterscheidende Teil hell und
+  halbfett (fensterbau-brandt.eeziframes.com, fensterbau-brandt.de). Das Bild ist ein Link mit Glas-Etikett „Beispiel ansehen“; direkt
+  unter den Karten steht die Zeile „Alle drei Pakete am Beispiel ansehen“ (voller Rundknopf 44 px), darunter der Vergleich. Ziel sind
   die Beispielseiten unter web/vorschau/paket-beispiel/ (noindex, nicht in der Sitemap), gebaut mit
-  `python3 docs/profis/werkzeuge/paketvorlagen.py brandt --web`; danach die Kartenbilder neu aufnehmen. Die Merkmale im Vergleich kommen
-  aus pakete.js (Farben der Seite, Adresse, Aufbewahrung, Aufmaßblätter im Dashboard); Vorschau und pakete.js ändern sich zusammen.
+  `python3 docs/profis/werkzeuge/paketvorlagen.py brandt --web`; dort trägt die Muster-Leiste vorn einen Umriss-Rundknopf zurück zu
+  den Paketen. Danach die Kartenbilder neu aufnehmen. Die Merkmale im Vergleich kommen aus pakete.js; Farben als Treppe „Farben von
+  eeziframes / zur Hälfte in Ihren Farben / ganz in Ihren Farben“ (nie „Karten und Akzente“, nie „Firmenfarbe“ ohne Einschränkung),
+  Fristen als Zahl („30 Tage nach Zustellung“), Domains brechen nie um. Vorschau und pakete.js ändern sich zusammen.
 - Jede weitere Korrektur des Inhabers wird hier eingetragen und als Vorschlag für seine DNA genannt (Abschnitt 7 der DNA).
 
 ## 5. Rezept je Seite (so entstand die Startseite, etwa drei Stunden)

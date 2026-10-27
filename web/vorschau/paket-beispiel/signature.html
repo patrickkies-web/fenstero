@@ -39,8 +39,9 @@
 
   <!-- Muster-Leiste (nur in der Vorlage für Fensterbauer, beim echten Betrieb weg): Paketwechsel mit Preis, Legende der Etiketten,
        Schalter „Etiketten“; dazu die zwei Wege des Kunden (Website, persönlicher Link). Quelle: docs/profis/werkzeuge/muster-leiste.css und .js -->
-  <div class="ez-ml" data-theme="dunkel">
+  <div class="ez-ml ez-ml--zurueck" data-theme="dunkel">
     <div class="ez-huelle">
+      <a class="ez-ml__zurueck" href="/fuer-fensterbauer/#pakete" aria-label="Zurück zu den Paketen" title="Zurück zu den Paketen"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 3 4.5 7l4 4"/></svg></a>
       <p class="ez-ml__text"><b>Muster · Signature</b><span class="ez-ml__preis"><!--preiszeile:signature-->64 € im Monat · 279 € einmalig · im ersten Jahr 1.047 € · netto, vorläufig<!--/preiszeile:signature--></span><span class="ez-ml__zeile ez-nur-einladung">So sieht es, wer Ihren persönlichen Link bekommt.</span><span class="ez-ml__zeile ez-nur-web">So sieht es, wer über Ihre Website kommt.</span><span class="ez-ml__legende"><span><i class="ez-ml__punkt ez-ml__punkt--alle" aria-hidden="true"></i>wie Plus</span><span><i class="ez-ml__punkt ez-ml__punkt--neu" aria-hidden="true"></i>nur in Signature</span></span></p>
       <nav class="ez-ml__pakete" aria-label="Paket der Vorlage"><a href="essential.html" aria-label="Essential, 29 € im Monat netto"><span>Essential</span><small><!--preis:essential-->29 €<!--/preis:essential--></small></a><a href="plus.html" aria-label="Plus, 39 € im Monat netto"><span>Plus</span><small><!--preis:plus-->39 €<!--/preis:plus--></small></a><a href="signature.html" aria-current="page" aria-label="Signature, 64 € im Monat netto"><span>Signature</span><small><!--preis:signature-->64 €<!--/preis:signature--></small></a></nav>
       <fieldset class="dna-pillen ez-modus">
